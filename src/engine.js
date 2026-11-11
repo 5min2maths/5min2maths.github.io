@@ -63,7 +63,7 @@ function eloLabel(profile, r) {
 const Engine = {
   newState(profile) {
     const h = harmos(profile.system, profile.grade);
-    const start = 700 + (h - 8) * 150 + 100 + ({ CT: -80, LC: 0, LS: 60 }[profile.section] || 0);
+    const start = 700 + (h - 8) * 150 + 100;
     return { v: 1, profile, notions: {}, streak: { count: 0, last: null }, history: [], created: day(), elo: { r: Math.round(start), n: 0, log: [] } };
   },
 

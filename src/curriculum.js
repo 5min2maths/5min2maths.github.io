@@ -37,14 +37,14 @@ const NOTIONS = [
 
 // Niveaux proposés à l'élève : clé interne (système + année) et libellé.
 const SYSTEMS = {
-  CH: { label: "Suisse romande", grades: [[9, "9e"], [10, "10e"], [11, "11e"]], sections: ["CT", "LC", "LS"] },
-  FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"]], sections: [] },
+  CH: { label: "Suisse romande", grades: [[9, "9e"], [10, "10e"], [11, "11e"]] },
+  FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"]] },
 };
 
-// Difficulté maximale selon le profil (1 = bases, 3 = approfondi).
+// Difficulté maximale (1 = bases, 3 = approfondi) : on ne demande pas la section à l'élève ;
+// c'est le Mathélo qui situe son niveau. Seules les petites classes (6e, 5e) plafonnent à 2.
 function difficultyCap(profile) {
-  if (profile.system === "CH") return { CT: 2, LC: 3, LS: 3 }[profile.section] || 3;
-  return profile.grade <= 7 ? 2 : 3;
+  return profile.system === "FR" && profile.grade <= 7 ? 2 : 3;
 }
 
 // Mois de l'année scolaire (0 = septembre ; août compte comme septembre).

@@ -65,7 +65,7 @@ for (const id of Object.keys(GEN)) for (const d of [1, 2, 3]) for (let i = 0; i 
 }
 
 // 3. Moteur : parcours complet
-const prof = { system: "CH", grade: 11, section: "LS", minutes: 5 };
+const prof = { system: "CH", grade: 11, minutes: 5 };
 const st = Engine.newState(prof);
 const cat = Engine.catalog(prof, new Date("2026-11-11"));
 Engine.initNotions(st, Object.fromEntries(cat.map((c) => [c.id, c.defaultStatus])));
