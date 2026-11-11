@@ -182,6 +182,23 @@ function screenPrep() {
   if (del) del.onclick = () => { state.prep = null; save(); screenHome(); };
 }
 
+// ---------------- Mini-leçons ----------------
+function lessonBody(id) {
+  const L = LESSONS[id];
+  if (!L) return "";
+  return `<p>${L.intro}</p><div class="rule"><b>À retenir</b> · ${L.regle}</div>
+  <div class="ex-list">${L.exemple.map((e) => `<div>${e}</div>`).join("")}</div>
+  <div class="trap"><b>Piège</b> · ${L.piege}</div>`;
+}
+const lessonDetails = (id) => (LESSONS[id] ? `<details class="lesson"><summary>📖 Rappel de cours</summary><div class="stack">${lessonBody(id)}</div></details>` : "");
+function screenLesson(id, cont) {
+  const L = LESSONS[id];
+  h(`${brand}<div class="eyebrow">Nouvelle notion · 30 secondes de cours</div>
+  <div class="card pop lesson-card"><h2>${L.titre}</h2>${lessonBody(id)}</div>
+  <button class="btn-primary btn-big" id="go">J'ai compris, à moi !</button>`);
+  document.getElementById("go").onclick = cont;
+}
+
 // ---------------- Séance ----------------
 let session = null;
 function startSession() {
@@ -193,6 +210,12 @@ function nextQuestion(redo) {
   // Le temps est un repère, jamais une limite : la séance finit quand les questions prévues sont faites.
   if (!redo && session.i >= session.plan.length) return screenSummary();
   const raw = redo ? redo.id : session.plan[session.i], forceProb = String(raw).startsWith("PROB:"), id = forceProb ? raw.slice(5) : raw;
+  const ns = state.notions[id];
+  // Écran de leçon : seulement la première fois, et pour une notion en cours en classe ou encore fragile.
+  if (!redo && LESSONS[id] && ns && !ns.lessonSeen && (ns.status === "encours" || ns.m < 0.4)) {
+    state.notions[id].lessonSeen = true; save();
+    return screenLesson(id, () => { session.lessonShown = id; nextQuestion(); });
+  }
   const q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : undefined);
   renderQuestion(q, {
     eyebrow: (session.weekly ? "Problème de la semaine" : session.prep ? "Révision du test · " + (session.i + 1) + " sur " + session.plan.length : session.i === 0 && !redo ? "Question du jour" : "Question " + (session.i + 1) + " sur " + session.plan.length) + (redo ? " · nouvelles valeurs" : ""),
@@ -242,6 +265,7 @@ function renderProblem(q, opt) {
   h(`<div class="spread">${brand}</div><div class="eyebrow">${opt.eyebrow}</div>
   <div class="card pop"><div class="qmeta"><span class="chip">Problème · ${notion.label}</span><span class="dots" title="difficulté"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
   <div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
+  ${lessonDetails(q.id)}
   ${q.parts.map((p, i) => `<div class="answer part" data-i="${i}"><label for="p${i}"><b>${p.label}</b> <span class="mk" id="mk${i}"></span></label>
     <input id="p${i}" class="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…"><div class="preview" id="pv${i}"></div></div>`).join("")}
   ${keypadHtml()}
@@ -307,6 +331,7 @@ function renderQuestion(q, opt) {
   <div class="eyebrow">${opt.eyebrow}</div>
   <div class="card pop"><div class="qmeta"><span class="chip">${notion.label}</span><span class="dots" title="difficulté">${[1, 2, 3].map((k) => `<i class="${k <= q.d ? "on" : ""}"></i>`).join("")}</span></div>
   <div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
+  ${opt.single ? "" : lessonDetails(q.id)}
   <div class="answer"><input id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="none" placeholder="Ta réponse…" aria-label="Ta réponse">
   <div class="preview" id="prev"><span class="err">L'aperçu de ta réponse s'affiche ici.</span></div>
   <div class="keypad" id="kp">${["7", "8", "9", "/", "(", ")", "4", "5", "6", "*", "^", "√", "1", "2", "3", "-", "x", "π", "0", ",", "+", ";", "⌫", "⌨"].map((k) => `<button type="button" class="${/[\d,]/.test(k) ? "" : "k-op"}" data-k="${k}">${k === "*" ? "×" : k}</button>`).join("")}</div>

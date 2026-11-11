@@ -4,6 +4,7 @@
 <script src="../src/expr.js"></script>
 <script src="../src/figures.js"></script>
 <script src="../src/generators.js"></script>
+<script src="../src/lessons.js"></script>
 <script src="../src/engine.js"></script>
 <script>
 const log = [];
@@ -96,6 +97,13 @@ for (const id of Object.keys(GEN)) for (const d of [1, 2, 3, 4]) {
   if (d === 4 && !PROB[id]) continue;
   const q1 = Engine.build(id, d), q2 = Engine.fromCode(q1.code);
   if (!q2 || q2.q !== q1.q || q2.sol !== q1.sol) fail("code non reproductible " + q1.code);
+}
+
+// 2 quater. Une mini-leçon par notion
+for (const n of NOTIONS) {
+  const L = LESSONS[n.id];
+  if (!L) { fail("leçon manquante : " + n.id); continue; }
+  if (!L.titre || !L.intro || !L.regle || !L.exemple.length || !L.piege) fail("leçon incomplète : " + n.id);
 }
 
 // 3. Moteur : parcours complet
