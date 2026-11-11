@@ -1,0 +1,15 @@
+{
+  "name": "5 minutes de maths par jour",
+  "short_name": "5 min maths",
+  "description": "Chaque jour, quelques minutes de maths, à ton niveau.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fbfcfe",
+  "theme_color": "#2457d6",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

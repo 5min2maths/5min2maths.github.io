@@ -91,6 +91,13 @@ for (const id of Object.keys(PROB)) for (let i = 0; i < 300; i++) {
   });
 }
 
+// 2 ter. Codes reproductibles
+for (const id of Object.keys(GEN)) for (const d of [1, 2, 3, 4]) {
+  if (d === 4 && !PROB[id]) continue;
+  const q1 = Engine.build(id, d), q2 = Engine.fromCode(q1.code);
+  if (!q2 || q2.q !== q1.q || q2.sol !== q1.sol) fail("code non reproductible " + q1.code);
+}
+
 // 3. Moteur : parcours complet
 const prof = { system: "CH", grade: 11, minutes: 5 };
 for (const p of [{ system: "CH", grade: 12, track: "college" }, { system: "CH", grade: 12, track: "mp" }, { system: "CH", grade: 13, track: "college" }, { system: "CH", grade: 13, track: "mp" }, { system: "FR", grade: 11 }]) log.push(p.system + p.grade + (p.track || "") + " : " + Engine.catalog(p, new Date("2027-03-01")).length + " notions — " + Engine.catalog(p, new Date("2027-03-01")).filter((c) => c.current).map((c) => c.id).join(" "));

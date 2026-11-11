@@ -30,7 +30,15 @@ body = '<main id="app" aria-live="polite"></main>\n<script>\n' + "\n".join((SRC 
     '<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n'
     '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
     + head + "</head>\n<body>\n" + body + "</body>\n</html>\n")
+# Version GitHub Pages : application installable (manifeste, icônes, cache hors ligne)
+import hashlib, shutil
+pwa_head = ('<link rel="manifest" href="manifest.webmanifest">\n<meta name="theme-color" content="#2457d6">\n'
+            '<link rel="apple-touch-icon" href="icon-192.png">\n<meta name="apple-mobile-web-app-capable" content="yes">\n')
 (ROOT / "docs").mkdir(exist_ok=True)
-(ROOT / "docs" / "index.html").write_text((ROOT / "dist" / "index.html").read_text())
+(ROOT / "docs" / "index.html").write_text((ROOT / "dist" / "index.html").read_text().replace("<title>", pwa_head + "<title>", 1))
+version = hashlib.sha1((head + body).encode()).hexdigest()[:10]
+(ROOT / "docs" / "sw.js").write_text((SRC / "pwa" / "sw.js").read_text().replace("__VERSION__", version))
+for f in ("manifest.webmanifest", "icon-192.png", "icon-512.png"):
+    shutil.copy(SRC / "pwa" / f, ROOT / "docs" / f)
 (ROOT / "docs" / ".nojekyll").write_text("")
 print("dist/5min2maths.html, dist/index.html et docs/index.html (GitHub Pages) :", round(len(head + body) / 1024), "Ko")

@@ -137,11 +137,24 @@ const Engine = {
     return delta;
   },
 
-  make(state, id, d) {
+  make(state, id, d, seed) {
     const level = d || this.difficulty(state, id);
-    if (level === 4 && PROB[id]) { const p = PROB[id](); return { ...p, id, d: 4, spec: { kind: "multi" }, hint: p.hints[0] }; }
+    return this.build(id, level, seed);
+  },
+  // Question reproductible : même notion, niveau et graine → même question.
+  build(id, level, seed) {
+    seed = seed || Math.floor(Math.random() * 46655) + 1;
+    R.seed(seed * 7919 + level * 104729 + [...id].reduce((a, c) => a + c.charCodeAt(0), 0));
+    const code = id + "-" + level + "-" + seed.toString(36);
+    if (level === 4 && PROB[id]) { const p = PROB[id](); return { ...p, id, d: 4, seed, code, spec: { kind: "multi" }, hint: p.hints[0] }; }
     const q = GEN[id](level);
-    return { ...q, id, d: level, hint: q.hint || HINTS[id] };
+    return { ...q, id, d: level, seed, code, hint: q.hint || HINTS[id] };
+  },
+  // Lecture d'un code « eq2disc-2-k3f » → question exacte (ou null).
+  fromCode(code) {
+    const m = /^([a-z0-9]+)-([1-4])-([a-z0-9]+)$/.exec(String(code).trim().toLowerCase());
+    if (!m || !GEN[m[1]] || (m[2] === "4" && !PROB[m[1]])) return null;
+    return this.build(m[1], +m[2], parseInt(m[3], 36));
   },
 
   // Positionnement : premier repère rapide (5 notions vues ou en cours) ; le niveau se précise ensuite au fil des séances, en variant les thèmes, notions récentes d'abord.
@@ -178,7 +191,8 @@ const Engine = {
       const s = state.notions[id];
       const overdue = Math.max(0, (new Date(today) - new Date(s.due)) / 864e5);
       const due = s.due <= today ? 1 : 0;
-      return { id, score: due * 3 + overdue * 0.5 + (1 - s.m) * 3 + (s.status === "encours" ? 1.5 : 0) + Math.random() * 0.8 };
+      const prep = this.prepActive(state) && state.prep.ids.includes(id) ? 2.5 : 0;
+      return { id, score: due * 3 + overdue * 0.5 + (1 - s.m) * 3 + (s.status === "encours" ? 1.5 : 0) + prep + Math.random() * 0.8 };
     }).sort((a, b) => b.score - a.score);
     const plan = [];
     let i = 0;
@@ -226,6 +240,19 @@ const Engine = {
       if (h) { h.n += answered; h.score += score; } else state.history.push({ date: today, n: answered, score });
       state.history = state.history.slice(-120);
     }
+  },
+
+  // « Je prépare mon test » : notions choisies, actif jusqu'au jour du test inclus.
+  prepActive(state) { return !!(state.prep && state.prep.ids.length && state.prep.date >= day()); },
+  planPrep(state) {
+    const ids = state.prep.ids.filter((id) => state.notions[id]);
+    const n = Math.max(5, QUESTIONS_FOR[state.profile.minutes] || 7);
+    const order = [...ids].sort((a, b) => state.notions[a].m - state.notions[b].m);
+    const plan = [];
+    for (let i = 0; plan.length < n - 1; i++) plan.push(order[i % order.length]);
+    const withProb = order.filter((id) => PROB[id]);
+    plan.push(withProb.length ? "PROB:" + withProb[0] : order[0]);
+    return plan;
   },
 
   // Problème de la semaine : une notion « à problème » parmi celles vues, fixée par la semaine.

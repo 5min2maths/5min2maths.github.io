@@ -3,11 +3,16 @@
 // réponse pour checkAnswer(), corrigé court. Les nombres sont tirés au hasard ; les réponses sont
 // calculées, jamais saisies à la main.
 
+// Hasard reproductible : chaque question a une graine (notée dans son code), pour retrouver
+// exactement la question qu'un élève a vue (mulberry32).
 const R = {
-  int: (a, b) => a + Math.floor(Math.random() * (b - a + 1)),
+  _s: 1,
+  seed(n) { R._s = (n >>> 0) || 1; },
+  rand() { let t = (R._s = (R._s + 0x6d2b79f5) >>> 0); t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; },
+  int: (a, b) => a + Math.floor(R.rand() * (b - a + 1)),
   nz: (a, b) => { let v; do v = R.int(a, b); while (v === 0); return v; },
-  pick: (arr) => arr[Math.floor(Math.random() * arr.length)],
-  sign: () => (Math.random() < 0.5 ? -1 : 1),
+  pick: (arr) => arr[Math.floor(R.rand() * arr.length)],
+  sign: () => (R.rand() < 0.5 ? -1 : 1),
 };
 const gcd = (a, b) => (b ? gcd(b, a % b) : Math.abs(a));
 const M = (t) => "\\(" + t + "\\)";
@@ -101,7 +106,7 @@ const GEN = {
       return { fig: FIG.percentBar(p, n), q: "Calcule " + M(p + "\\,\\%") + " de " + M(n) + ".", spec: { kind: "value", value: (p * n) / 100 }, sol: M("\\frac{" + p + "}{100} \\cdot " + n + " = " + dec((p * n) / 100)) };
     }
     if (d === 2) {
-      const p = R.pick([10, 20, 25, 30, 40]), n = 10 * R.int(3, 20), up = Math.random() < 0.5;
+      const p = R.pick([10, 20, 25, 30, 40]), n = 10 * R.int(3, 20), up = R.rand() < 0.5;
       const v = n * (1 + (up ? p : -p) / 100);
       return { fig: FIG.percentBar(p, n, " CHF"), q: "Un article coûte " + M(n) + " CHF. Son prix " + (up ? "augmente" : "baisse") + " de " + M(p + "\\,\\%") + ". Quel est le nouveau prix ?", spec: { kind: "value", value: v }, sol: M(n + " \\cdot " + dec(1 + (up ? p : -p) / 100) + " = " + dec(v)) + " CHF." };
     }
@@ -198,7 +203,7 @@ const GEN = {
     const a = R.int(1, 9);
     if (d === 1) return { fig: FIG.tiles(120, 120, "x + " + a, "x + " + a), q: "Développe : " + M("(x + " + a + ")^2"), spec: { kind: "expr", expr: "(x+" + a + ")^2", form: "expanded" }, sol: M("x^2 + 2 \\cdot " + a + "x + " + a + "^2 = " + poly([1, 2 * a, a * a])) };
     if (d === 2) {
-      if (Math.random() < 0.5) return { q: "Développe : " + M("(x - " + a + ")^2"), spec: { kind: "expr", expr: "(x-" + a + ")^2", form: "expanded" }, sol: M(poly([1, -2 * a, a * a])) + " (n'oublie pas le double produit)." };
+      if (R.rand() < 0.5) return { q: "Développe : " + M("(x - " + a + ")^2"), spec: { kind: "expr", expr: "(x-" + a + ")^2", form: "expanded" }, sol: M(poly([1, -2 * a, a * a])) + " (n'oublie pas le double produit)." };
       return { q: "Développe : " + M("(x + " + a + ")(x - " + a + ")"), spec: { kind: "expr", expr: "x^2-" + a * a, form: "expanded" }, sol: M("x^2 - " + a * a) };
     }
     const k = R.int(2, 5), b = R.int(1, 7);
@@ -216,7 +221,7 @@ const GEN = {
       const t = (k === 1 ? "" : k * k) + "x^2 - " + a * a;
       return { q: "Factorise : " + M(t), spec: { kind: "expr", expr: "(" + k + "x-" + a + ")(" + k + "x+" + a + ")", form: "product" }, sol: M("(" + (k === 1 ? "" : k) + "x - " + a + ")(" + (k === 1 ? "" : k) + "x + " + a + ")") + " : identité " + M("a^2 - b^2") + "." };
     }
-    if (Math.random() < 0.5) {
+    if (R.rand() < 0.5) {
       const a = R.nz(-9, 9);
       return { q: "Factorise : " + M(poly([1, 2 * a, a * a])), spec: { kind: "expr", expr: "(x+(" + a + "))^2", form: "product" }, sol: M("(" + poly([1, a]) + ")^2") };
     }
@@ -376,7 +381,7 @@ Object.assign(GEN, {
       return { fig: FIG.balance(poly([1, b, c]).replace(/\^2/g, "²"), "0"), q: "Résous : " + M(poly([1, b, c]) + " = 0") + ".", spec: { kind: "set", values: [...new Set([p, q])] }, sol: M("\\Delta = " + par(b) + "^2 - 4 \\cdot " + par(c) + " = " + (b * b - 4 * c)) + " ; " + M("x = \\frac{" + -b + " \\pm " + Math.abs(p - q) + "}{2}") + " : " + M("S = \\{" + [...new Set([p, q])].sort((u, v) => u - v).join(" ; ") + "\\}") };
     }
     if (d === 2) {
-      if (Math.random() < 0.3) {
+      if (R.rand() < 0.3) {
         const a = R.int(1, 3), b = R.int(-3, 3), c = R.int(Math.ceil((b * b) / (4 * a)) + 1, 9);
         return { fig: FIG.balance(poly([a, b, c]).replace(/\^2/g, "²"), "0"), q: "Résous : " + M(poly([a, b, c]) + " = 0") + ". (S'il n'y a pas de solution, écris « aucune ».)", spec: { kind: "set", values: [] }, sol: M("\\Delta = " + (b * b - 4 * a * c) + " < 0") + " : aucune solution réelle, la parabole ne coupe pas l'axe des x." };
       }

@@ -194,3 +194,8 @@ h1 { font-size: clamp(2rem, 7vw, 2.6rem); }
 .part label { display: flex; justify-content: space-between; gap: 8px; font-size: 0.98rem; }
 .part .mk { font-family: var(--font-display); font-weight: 800; }
 .part input:disabled { border-color: var(--ok); background: var(--ok-soft); }
+.checks { display: flex; flex-direction: column; gap: 4px; }
+.check { display: flex; gap: 10px; align-items: center; padding: 8px 4px; border-bottom: 1px dashed var(--line); cursor: pointer; }
+.check:last-child { border-bottom: none; }
+.check input { width: 20px; height: 20px; accent-color: var(--blue); flex: none; }
+.datein { font: inherit; padding: 10px 12px; border-radius: 12px; border: 2px solid var(--line); background: var(--paper); color: var(--ink); max-width: 100%; }

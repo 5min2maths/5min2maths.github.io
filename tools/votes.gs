@@ -29,7 +29,7 @@ function doPost(e) {
     const code = String(d.code || "").slice(0, 40);
     const vote = d.vote === "up" ? "up" : d.vote === "down" ? "down" : "";
     if (!code || !vote) return out_({ ok: false });
-    const [notion, diff] = code.split("·");
+    const [notion, diff] = code.split(/[·-]/);
     sheet_().appendRow([new Date(), code, notion || "", diff || "", vote, String(d.date || "").slice(0, 10)]);
     return out_({ ok: true });
   } catch (err) {

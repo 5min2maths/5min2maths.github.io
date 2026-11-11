@@ -136,20 +136,50 @@ function screenHome() {
   <div class="card">${eloBlock()}</div>
   <div class="card flat stack"><h3>Temps aujourd'hui</h3><div class="timepick" id="time">${[1, 2, 5, 10].map((m) => `<button aria-pressed="${m === state.profile.minutes}" data-v="${m}"><b>${m}</b><small>min · ${QUESTIONS_FOR[m]} q.</small></button>`).join("")}</div>
   <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "Ma question du jour"}</button></div>
+  ${Engine.prepActive(state) ? (() => { const left = Math.round((new Date(state.prep.date) - new Date(today)) / 864e5); return `<div class="card flat stack"><div class="eyebrow">Je prépare mon test</div><h3>${left === 0 ? "Test aujourd'hui" : left === 1 ? "Test demain" : "Test dans " + left + " jours"} · ${state.prep.ids.length} notion${state.prep.ids.length > 1 ? "s" : ""}</h3><p class="small muted">${state.prep.ids.map((id) => NOTIONS.find((n) => n.id === id).label).join(" · ")}</p><div class="row"><button class="btn-primary" id="prepgo">Séance de révision</button><button class="btn-ghost" id="prepedit">Modifier</button></div></div>`; })() : ""}
   ${wp ? `<div class="card flat stack"><div class="eyebrow">Problème de la semaine</div><h3>${NOTIONS.find((n) => n.id === wp).label}</h3><p class="small muted">Un problème en plusieurs étapes, avec indices. Facultatif, et il rapporte gros.</p><button id="wp">Relever le défi</button></div>` : ""}
   <div class="card flat"><h3>Mes thèmes</h3><div class="bars">${themeBars(Engine.themeLevels(state))}</div></div>
-  <div class="stack"><button id="notions">J'ai vu une nouvelle notion en classe</button><button id="level">Changer de classe ou d'école</button>
+  <div class="stack">${Engine.prepActive(state) ? "" : '<button id="prep">Je prépare un test</button>'}<button id="notions">J'ai vu une nouvelle notion en classe</button><button id="level">Changer de classe ou d'école</button>
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div></div>`);
   app.querySelectorAll("#time button").forEach((b) => (b.onclick = () => { state.profile.minutes = +b.dataset.v; save(); screenHome(); }));
   document.getElementById("go").onclick = startSession;
   if (wp) document.getElementById("wp").onclick = () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), limit: 600, weekly: true }; nextQuestion(); };
   document.getElementById("notions").onclick = () => screenNotions(true);
+  const byId = (x) => document.getElementById(x);
+  if (byId("prep")) byId("prep").onclick = screenPrep;
+  if (byId("prepedit")) byId("prepedit").onclick = screenPrep;
+  if (byId("prepgo")) byId("prepgo").onclick = () => { session = { plan: Engine.planPrep(state), i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), limit: state.profile.minutes * 60, prep: true }; nextQuestion(); };
   document.getElementById("level").onclick = () => { draft = { ...state.profile }; screenLevel(); };
   document.getElementById("r1").onclick = () => {
     document.getElementById("reset").innerHTML = '<span class="small">Effacer ta progression et ton Mathélo ?</span><button id="r2">Oui, effacer</button><button class="btn-ghost" id="r3">Non</button>';
     document.getElementById("r2").onclick = () => { Store.clear(); state = null; screenWelcome(); };
     document.getElementById("r3").onclick = screenHome;
   };
+}
+
+// ---------------- Je prépare mon test ----------------
+function screenPrep() {
+  const cat = Engine.catalog(state.profile).filter((c) => state.notions[c.id] && state.notions[c.id].status !== "nonvu");
+  const chosen = new Set(state.prep && Engine.prepActive(state) ? state.prep.ids : []);
+  const groups = {};
+  cat.forEach((c) => (groups[c.theme] = groups[c.theme] || []).push(c));
+  const date = state.prep && Engine.prepActive(state) ? state.prep.date : addDays(day(), 7);
+  h(`${brand}<h2>Je prépare <span class="mark">un test</span></h2>
+  <p class="muted">Choisis les notions de ton test et sa date. Jusqu'à ce jour-là, tes séances porteront surtout sur elles, avec un problème pour finir.</p>
+  <div class="card flat stack"><label for="pdate"><h3>Date du test</h3></label><input type="date" id="pdate" value="${date}" min="${day()}" class="datein"></div>
+  ${Object.entries(groups).map(([th, list]) => `<div class="card flat"><h3>${THEMES[th]}</h3><div class="checks">${list.map((c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${c.label}</span></label>`).join("")}</div></div>`).join("")}
+  <p class="small muted" id="perr"></p>
+  <button class="btn-primary btn-big" id="save">Enregistrer mon test</button>
+  <div class="row"><button class="btn-ghost" id="back">Annuler</button>${chosen.size ? '<button class="btn-ghost" id="del">Supprimer ce test</button>' : ""}</div>`);
+  document.getElementById("save").onclick = () => {
+    const ids = [...app.querySelectorAll(".check input:checked")].map((i) => i.value), dt = document.getElementById("pdate").value;
+    if (!ids.length) { document.getElementById("perr").textContent = "Coche au moins une notion."; return; }
+    if (!dt || dt < day()) { document.getElementById("perr").textContent = "Choisis une date à partir d'aujourd'hui."; return; }
+    state.prep = { ids, date: dt }; save(); screenHome();
+  };
+  document.getElementById("back").onclick = screenHome;
+  const del = document.getElementById("del");
+  if (del) del.onclick = () => { state.prep = null; save(); screenHome(); };
 }
 
 // ---------------- Séance ----------------
@@ -162,10 +192,10 @@ function startSession() {
 function nextQuestion(redo) {
   // Le temps est un repère, jamais une limite : la séance finit quand les questions prévues sont faites.
   if (!redo && session.i >= session.plan.length) return screenSummary();
-  const id = redo ? redo.id : session.plan[session.i];
-  const q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly ? 4 : undefined);
+  const raw = redo ? redo.id : session.plan[session.i], forceProb = String(raw).startsWith("PROB:"), id = forceProb ? raw.slice(5) : raw;
+  const q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : undefined);
   renderQuestion(q, {
-    eyebrow: (session.weekly ? "Problème de la semaine" : session.i === 0 && !redo ? "Question du jour" : "Question " + (session.i + 1) + " sur " + session.plan.length) + (redo ? " · nouvelles valeurs" : ""),
+    eyebrow: (session.weekly ? "Problème de la semaine" : session.prep ? "Révision du test · " + (session.i + 1) + " sur " + session.plan.length : session.i === 0 && !redo ? "Question du jour" : "Question " + (session.i + 1) + " sur " + session.plan.length) + (redo ? " · nouvelles valeurs" : ""),
     onDone: (res) => {
       const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
       res.delta = Engine.updateElo(state, id, q.d, sc);
@@ -206,7 +236,7 @@ function bindKeypad(getInput, after) {
 // Problème en plusieurs parties : 3 essais, indices progressifs (outil, puis calcul), score partiel.
 function renderProblem(q, opt) {
   const notion = NOTIONS.find((n) => n.id === q.id);
-  const code = q.id + "·4·" + hash(q.q);
+  const code = q.code;
   let tries = 0, finished = false, active = null;
   const ok = q.parts.map(() => false);
   h(`<div class="spread">${brand}</div><div class="eyebrow">${opt.eyebrow}</div>
@@ -270,7 +300,7 @@ function renderProblem(q, opt) {
 function renderQuestion(q, opt) {
   if (q.parts) return renderProblem(q, opt);
   const notion = NOTIONS.find((n) => n.id === q.id);
-  const code = q.id + "·" + q.d + "·" + hash(q.q);
+  const code = q.code;
   let tries = 0, finished = false, inputMode = "none";
   h(`<div class="spread">${brand}${session && !opt.single ? '<span class="timer small muted" id="timer"></span>' : ""}</div>
   ${session && !opt.single && session.answered > 0 ? '<div class="spread"><span></span><button class="btn-ghost small" id="stop">Terminer ici</button></div>' : ""}
@@ -404,5 +434,20 @@ function screenSummary() {
   document.getElementById("home").onclick = screenHome;
 }
 
+// Consultation d'une question par son code : adresse …/#q-eq2disc-2-k3f (rien n'est enregistré).
+function showCode() {
+  const m = /^#q-(.+)$/.exec(location.hash);
+  if (!m) return false;
+  const q = Engine.fromCode(m[1]);
+  if (!q) { h(`${brand}<div class="card flat"><h3>Code inconnu</h3><p class="muted">« ${esc(m[1])} » ne correspond à aucune question.</p></div>`); return true; }
+  const back = () => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); };
+  renderQuestion(q, { eyebrow: "Question " + q.code + " (consultation)", onDone: () => 0, onNext: back });
+  return true;
+}
+window.addEventListener("hashchange", showCode);
+
+// Application installable (hors claude.ai) : cache hors ligne.
+if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude/.test(location.hostname)) navigator.serviceWorker.register("sw.js").catch(() => {});
+
 // Démarrage
-if (state && state.placed) screenHome(); else { state = null; screenWelcome(); }
+if (!showCode()) { if (state && state.placed) screenHome(); else { state = null; screenWelcome(); } }
