@@ -106,7 +106,7 @@ const Engine = {
   updateElo(state, id, d, score) {
     const e = state.elo, q = itemRating(state.profile, id, d);
     const expected = 1 / (1 + Math.pow(10, (q - e.r) / 400));
-    const K = e.n < 15 ? 48 : e.n < 60 ? 32 : 20;
+    const K = e.n < 20 ? 48 : e.n < 60 ? 32 : 20; // calibrage progressif : provisoire tant que n < 20
     const delta = Math.round(K * (score - expected));
     e.r = Math.max(400, e.r + delta);
     e.n++;
@@ -122,7 +122,7 @@ const Engine = {
     return { ...q, id, d: level, hint: q.hint || HINTS[id] };
   },
 
-  // Positionnement : jusqu'à 8 notions vues ou en cours, en variant les thèmes, notions récentes d'abord.
+  // Positionnement : premier repère rapide (5 notions vues ou en cours) ; le niveau se précise ensuite au fil des séances, en variant les thèmes, notions récentes d'abord.
   placementPlan(state) {
     const ids = this.eligible(state);
     const byTheme = {};
@@ -132,8 +132,8 @@ const Engine = {
     }
     Object.values(byTheme).forEach((arr) => arr.sort((a, b) => b[state.profile.system][0] - a[state.profile.system][0] || b[state.profile.system][1] - a[state.profile.system][1]));
     const plan = [];
-    while (plan.length < 8 && Object.values(byTheme).some((a) => a.length)) {
-      for (const arr of Object.values(byTheme)) if (arr.length && plan.length < 8) plan.push(arr.shift().id);
+    while (plan.length < 5 && Object.values(byTheme).some((a) => a.length)) {
+      for (const arr of Object.values(byTheme)) if (arr.length && plan.length < 5) plan.push(arr.shift().id);
     }
     return plan;
   },
@@ -197,6 +197,8 @@ const Engine = {
       state.history = state.history.slice(-120);
     }
   },
+
+  isProvisional(state) { return state.elo.n < 20; },
 
   themeLevels(state) {
     const out = {};

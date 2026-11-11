@@ -70,7 +70,7 @@ const st = Engine.newState(prof);
 const cat = Engine.catalog(prof, new Date("2026-11-11"));
 Engine.initNotions(st, Object.fromEntries(cat.map((c) => [c.id, c.defaultStatus])));
 const plan = Engine.placementPlan(st);
-if (plan.length < 5) fail("positionnement trop court " + plan.length);
+if (plan.length !== 5) fail("positionnement : " + plan.length + " questions");
 plan.forEach((id, i) => Engine.placementResult(st, id, i % 3 === 0 ? false : i % 3 === 1 ? true : null));
 const sess = Engine.planSession(st);
 if (sess.length !== 7) fail("séance " + sess.length + " questions");
