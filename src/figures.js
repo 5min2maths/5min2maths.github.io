@@ -64,10 +64,10 @@ const FIG = (() => {
 
   // Triangle rectangle coté (Pythagore) ; labels : [cathète horizontale, cathète verticale, hypoténuse].
   function rightTriangle(lab) {
-    const A = [40, 130], B = [260, 130], C = [40, 30];
-    let b = P([A, B, C], "f-shape") + '<rect x="40" y="118" width="12" height="12" class="f-line" fill="none"/>';
-    b += t(150, 150, lab[0]) + t(24, 84, lab[1], "f-txt", "end") + t(162, 72, lab[2], "f-accent f-txt", "start");
-    return svg(300, 160, b, "triangle rectangle");
+    const A = [80, 130], B = [290, 130], C = [80, 30];
+    let b = P([A, B, C], "f-shape") + '<rect x="80" y="118" width="12" height="12" class="f-line" fill="none"/>';
+    b += t(185, 150, lab[0]) + t(72, 84, lab[1], "f-txt", "end") + t(196, 72, lab[2], "f-accent f-txt", "start");
+    return svg(320, 160, b, "triangle rectangle");
   }
 
   // Configuration de Thalès.
