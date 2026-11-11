@@ -51,6 +51,16 @@ for (const id of Object.keys(GEN)) for (const d of [1, 2, 3]) for (let i = 0; i 
   if (q.fig && !/^<svg/.test(q.fig)) fail(id + " figure invalide");
   if (q.fig && /NaN|undefined/.test(q.fig)) fail(id + " d" + d + " figure NaN");
   const s = q.spec;
+  // La figure ne doit pas donner la réponse : aucune étiquette égale à la réponse, sauf si ce nombre est dans l'énoncé.
+  if (q.fig) {
+    const labels = [...q.fig.matchAll(/<text(?![^>]*f-tick)[^>]*>([^<]*)<\/text>/g)].map((m) => m[1].replace(",", ".").replace(/\s|cm|m|°|km|h|CHF/g, ""));
+    const answers = s.kind === "value" ? [s.value] : s.kind === "set" || s.kind === "pair" ? s.values : [];
+    const qtxt = q.q.replace(/\{,\}/g, ".");
+    for (const a of answers) {
+      const str = String(+(+a).toFixed(4));
+      if (labels.includes(str) && !new RegExp("(^|[^0-9.])" + str.replace(".", "\\.") + "([^0-9]|$)").test(qtxt)) fail(id + " d" + d + " la figure révèle la réponse " + str);
+    }
+  }
   if (s.kind === "value" && !isFinite(s.value)) { fail(id + " d" + d + " valeur " + s.value); continue; }
   if (s.kind === "value" && s.round) {
     const r = checkAnswer(s, s.value.toFixed(2));

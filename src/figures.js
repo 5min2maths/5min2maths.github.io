@@ -21,7 +21,7 @@ const FIG = (() => {
     const step = hi - lo > 20 ? 5 : hi - lo > 10 ? 2 : 1;
     for (let v = Math.ceil(lo); v <= hi; v++) {
       b += L(X(v), 64, X(v), 76, v === 0 ? "f-accent" : "f-line");
-      if (v % step === 0) b += t(X(v), 94, v, v === 0 ? "f-accent f-txt" : "f-txt", "middle", 12);
+      if (v % step === 0) b += t(X(v), 94, v, v === 0 ? "f-accent f-txt f-tick" : "f-txt f-tick", "middle", 12);
     }
     vals.slice(0, -1).forEach((v, i) => {
       const a = X(v), c = X(vals[i + 1]), mid = (a + c) / 2, up = 62 - 14 * (i % 2);
@@ -156,7 +156,7 @@ const FIG = (() => {
     let b = L(16, 50, 324, 50);
     for (let e = -6; e <= 8; e++) {
       const x = 16 + (e + 6) * 22;
-      b += L(x, 44, x, 56, e === exp ? "f-accent" : "f-line") + (e % 2 === 0 ? t(x, 74, "10^" + e, e === exp ? "f-accent f-txt" : "f-txt", "middle", 10) : "");
+      b += L(x, 44, x, 56, e === exp ? "f-accent" : "f-line") + (e % 2 === 0 ? t(x, 74, "10^" + e, e === exp ? "f-accent f-txt f-tick" : "f-txt f-tick", "middle", 10) : "");
     }
     return svg(340, 84, b + '<circle cx="' + (16 + (exp + 6) * 22) + '" cy="50" r="6" class="f-dot"/>', "ordres de grandeur");
   }
@@ -171,10 +171,10 @@ const FIG = (() => {
   }
 
   // Parabole y = a(x - p)(x - q) ou a x² + b x + c, avec points marqués.
-  function parabola(f, pts = [], line = null) {
+  function parabola(f, pts = [], line = null, ticks = true) {
     const W = 300, H = 190, X = (x) => 150 + x * 20, Y = (y) => 120 - y * 8;
     let g = L(10, Y(0), 290, Y(0)) + L(X(0), 6, X(0), 184);
-    for (let x = -6; x <= 6; x++) g += L(X(x), Y(0) - 3, X(x), Y(0) + 3);
+    if (ticks) for (let x = -6; x <= 6; x++) g += L(X(x), Y(0) - 3, X(x), Y(0) + 3);
     let d = "";
     for (let x = -7; x <= 7.01; x += 0.1) { const y = f(x); if (Y(y) > -40 && Y(y) < H + 40) d += (d ? " L" : "M") + X(x).toFixed(1) + "," + Y(y).toFixed(1); else if (d && !d.endsWith("B")) d += " B"; }
     d = d.replace(/ B M/g, " M").replace(/ B/g, "");
@@ -233,5 +233,13 @@ const FIG = (() => {
     return svg(300, 160, g + t(185, 24, lr, "f-accent f-txt") + t(228, 84, lh, "f-txt", "start"), "cylindre");
   }
 
-  return { cylinder, unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, pyramid, cone, road, items, scaling, lineGraph, blocks, sciScale, areaSquare, tiles, fmt };
+  function unitLine(axis, v, label) {
+    const cx = 150, cy = 95, r = 75;
+    let g = L(60, cy, 240, cy) + L(cx, 10, cx, 180) + '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" class="f-shape"/>';
+    if (axis === "y") g += L(50, cy - v * r, 250, cy - v * r, "f-accent", 'stroke-width="2" stroke-dasharray="6 4"') + t(252, cy - v * r + 4, label, "f-accent f-txt", "start", 12);
+    else g += L(cx + v * r, 8, cx + v * r, 182, "f-accent", 'stroke-width="2" stroke-dasharray="6 4"') + t(cx + v * r + 4, 18, label, "f-accent f-txt", "start", 12);
+    return svg(320, 190, g + t(cx + r + 8, cy + 14, "1", "f-txt", "start", 11), "cercle trigonométrique");
+  }
+
+  return { unitLine, cylinder, unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, pyramid, cone, road, items, scaling, lineGraph, blocks, sciScale, areaSquare, tiles, fmt };
 })();
