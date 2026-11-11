@@ -33,12 +33,22 @@ const NOTIONS = [
   { id: "vol", theme: "geo", label: "Volumes de solides", ex: "V_{\\text{cône}} = \\frac{\\pi r^2 h}{3}", CH: [10, 5], FR: [8, 8] },
   { id: "thales", theme: "geo", label: "Théorème de Thalès", ex: "\\frac{AD}{AB} = \\frac{AE}{AC} = \\frac{DE}{BC}", CH: [11, 7], FR: [9, 2] },
   { id: "affine", theme: "fonctions", label: "Fonctions affines", ex: "f(x) = 2x - 3, \\; f(4) = 5", CH: [11, 9], FR: [9, 7] },
+  // ---- Secondaire II : 1re du Collège (HarmoS 12) ; FR 2nde = 10, 1re = 11 ; null = hors programme ----
+  { id: "eq3", theme: "algebre", label: "Équations de degré 3 par factorisation", ex: "x^3 - 4x = 0", CH: [12, 2], FR: [10, 3] },
+  { id: "eq2disc", theme: "algebre", label: "Équations du 2e degré (discriminant)", ex: "\\Delta = b^2 - 4ac", CH: [12, 2], FR: [11, 2] },
+  { id: "sys2", theme: "algebre", label: "Systèmes de deux équations", ex: "\\begin{cases} x + y = 7 \\\\ x - y = 1 \\end{cases}", CH: [12, 3], FR: [10, 4] },
+  { id: "fimg", theme: "fonctions", label: "Images et préimages", ex: "f(x) = x^2 - 3 : \\; f(2) = 1", CH: [12, 4], FR: [10, 2] },
+  { id: "f2", theme: "fonctions", label: "Parabole : sommet et zéros", ex: "f(x) = (x - 1)^2 - 4", CH: [12, 5], FR: [10, 6] },
+  { id: "inter", theme: "fonctions", label: "Intersection de deux graphes", ex: "x^2 = x + 2", CH: [12, 6], FR: [10, 7] },
+  { id: "angles", theme: "geo", label: "Angles au centre et inscrits", ex: "\\widehat{AOB} = 2\\,\\widehat{ACB}", CH: [12, 7], FR: null },
+  { id: "euclide", theme: "geo", label: "Théorèmes de la hauteur et d'Euclide", ex: "h^2 = p \\cdot q", CH: [12, 8], FR: null },
+  { id: "trigo", theme: "geo", label: "Trigonométrie du triangle rectangle", ex: "\\sin \\alpha = \\frac{\\text{opposé}}{\\text{hypoténuse}}", CH: [12, 8], FR: [9, 7] },
 ];
 
 // Niveaux proposés à l'élève : clé interne (système + année) et libellé.
 const SYSTEMS = {
-  CH: { label: "Suisse romande", grades: [[9, "9e"], [10, "10e"], [11, "11e"]] },
-  FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"]] },
+  CH: { label: "Suisse romande", grades: [[9, "9e"], [10, "10e"], [11, "11e"], [12, "1re du Collège (sec. II)"]] },
+  FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"]] },
 };
 
 // Difficulté maximale (1 = bases, 3 = approfondi) : on ne demande pas la section à l'élève ;

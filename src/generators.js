@@ -353,3 +353,121 @@ const GEN = {
     return { q: "Soit " + M("f(x) = " + poly([a, b])) + ". Pour quelle valeur de " + M("x") + " a-t-on " + M("f(x) = " + y) + " ?", spec: { kind: "value", value: x }, sol: M(poly([a, b]) + " = " + y + " \\iff x = " + x) };
   },
 };
+
+// ---------- Secondaire II : 1re du Collège ----------
+Object.assign(GEN, {
+  eq3(d) {
+    if (d === 1) {
+      const k = R.int(1, 9);
+      return { fig: FIG.parabola((x) => (x ** 3 - k * k * x) / 6, [[0, 0, "0"]]), q: "Résous : " + M("x^3 - " + k * k + "x = 0") + ". Sépare les solutions par « ; ».", spec: { kind: "set", values: [0, k, -k] }, sol: M("x(x^2 - " + k * k + ") = x(x - " + k + ")(x + " + k + ") = 0") + " : " + M("S = \\{-" + k + " ; 0 ; " + k + "\\}") };
+    }
+    if (d === 2) {
+      const b = R.nz(-9, 9);
+      return { q: "Résous : " + M("x^3 " + (b < 0 ? "- " + -b : "+ " + b) + "x^2 = 0") + ".", spec: { kind: "set", values: [0, -b] }, sol: M("x^2(x " + (b < 0 ? "- " + -b : "+ " + b) + ") = 0") + " : " + M("S = \\{0 ; " + -b + "\\}") + " (0 est une solution double)." };
+    }
+    const a = R.nz(-5, 5), b = R.int(1, 6);
+    if (a === b || a === -b) return GEN.eq3(3);
+    return { q: "Résous : " + M("(x " + (a < 0 ? "+ " + -a : "- " + a) + ")(x^2 - " + b * b + ") = 0") + ".", spec: { kind: "set", values: [a, b, -b] }, sol: M("(x " + (a < 0 ? "+ " + -a : "- " + a) + ")(x - " + b + ")(x + " + b + ") = 0") + " : " + M("S = \\{" + [a, b, -b].sort((u, v) => u - v).join(" ; ") + "\\}") };
+  },
+
+  eq2disc(d) {
+    if (d === 1) {
+      const p = R.nz(-8, 8), q = R.nz(-8, 8), b = -(p + q), c = p * q;
+      return { fig: FIG.parabola((x) => (x - p) * (x - q) / 3, [[p, 0, String(p)], [q, 0, String(q)]]), q: "Résous : " + M(poly([1, b, c]) + " = 0") + ".", spec: { kind: "set", values: [...new Set([p, q])] }, sol: M("\\Delta = " + par(b) + "^2 - 4 \\cdot " + par(c) + " = " + (b * b - 4 * c)) + " ; " + M("x = \\frac{" + -b + " \\pm " + Math.abs(p - q) + "}{2}") + " : " + M("S = \\{" + [...new Set([p, q])].sort((u, v) => u - v).join(" ; ") + "\\}") };
+    }
+    if (d === 2) {
+      if (Math.random() < 0.3) {
+        const a = R.int(1, 3), b = R.int(-3, 3), c = R.int(Math.ceil((b * b) / (4 * a)) + 1, 9);
+        return { fig: FIG.parabola((x) => (a * x * x + b * x + c) / 2), q: "Résous : " + M(poly([a, b, c]) + " = 0") + ". (S'il n'y a pas de solution, écris « aucune ».)", spec: { kind: "set", values: [] }, sol: M("\\Delta = " + (b * b - 4 * a * c) + " < 0") + " : aucune solution réelle, la parabole ne coupe pas l'axe des x." };
+      }
+      const a = R.int(2, 4), p = R.nz(-5, 5), q = R.int(1, 5);
+      // a(x - p)(x - q/a) = a x² - (a p + q) x + p q
+      const B = -(a * p + q), C = p * q;
+      return { q: "Résous : " + M(poly([a, B, C]) + " = 0") + ".", spec: { kind: "set", values: [...new Set([p, q / a])] }, sol: M("\\Delta = " + (B * B - 4 * a * C)) + " ; " + M("x = \\frac{" + -B + " \\pm " + Math.round(Math.sqrt(B * B - 4 * a * C)) + "}{" + 2 * a + "}") + " : " + M("S = \\{" + p + " ; " + frac(q, a) + "\\}") };
+    }
+    let b, c, D;
+    do { b = R.int(-6, 6); c = R.int(-6, 4); D = b * b - 4 * c; } while (D <= 0 || Number.isInteger(Math.sqrt(D)));
+    return { fig: FIG.parabola((x) => (x * x + b * x + c) / 3), q: "Résous : " + M(poly([1, b, c]) + " = 0") + " (valeurs exactes, par exemple " + M("(3 + \\sqrt{5})/2") + ").", spec: { kind: "set", values: [(-b + Math.sqrt(D)) / 2, (-b - Math.sqrt(D)) / 2] }, sol: M("\\Delta = " + D) + " ; " + M("x = \\frac{" + -b + " \\pm \\sqrt{" + D + "}}{2}") };
+  },
+
+  sys2(d) {
+    const x = R.nz(-6, 8), y = R.nz(-6, 8);
+    if (d === 1) return { q: "Résous le système " + M("\\begin{cases} x + y = " + (x + y) + " \\\\ x - y = " + (x - y) + " \\end{cases}") + ". Réponds « x ; y ».", spec: { kind: "pair", values: [x, y] }, sol: "En additionnant : " + M("2x = " + 2 * x) + ", donc " + M("x = " + x) + " et " + M("y = " + y) + "." };
+    if (d === 2) {
+      let a, b, c, e; do { a = R.nz(-5, 5); b = R.nz(-5, 5); c = R.nz(-5, 5); e = R.nz(-5, 5); } while (a * e - b * c === 0);
+      return { q: "Résous le système " + M("\\begin{cases} " + poly([a, 0]).replace("x", "x") + (b < 0 ? " - " + (b === -1 ? "" : -b) : " + " + (b === 1 ? "" : b)) + "y = " + (a * x + b * y) + " \\\\ " + poly([c, 0]) + (e < 0 ? " - " + (e === -1 ? "" : -e) : " + " + (e === 1 ? "" : e)) + "y = " + (c * x + e * y) + " \\end{cases}") + ". Réponds « x ; y ».", spec: { kind: "pair", values: [x, y] }, sol: "Par combinaison ou substitution : " + M("(x ; y) = (" + x + " ; " + y + ")") + "." };
+    }
+    const pa = R.int(12, 20), pe = R.int(5, 10), na = R.int(2, 6), ne = R.int(2, 6), nb = R.int(1, 5), nf = R.int(1, 5);
+    if (na * nf === nb * ne) return GEN.sys2(3);
+    return { q: M(na) + " billets adultes et " + M(ne) + " billets enfants coûtent " + M(na * pa + ne * pe) + " CHF ; " + M(nb) + " adultes et " + M(nf) + " enfants coûtent " + M(nb * pa + nf * pe) + " CHF. Prix d'un billet adulte et d'un billet enfant ? Réponds « adulte ; enfant ».", spec: { kind: "pair", values: [pa, pe] }, sol: M("\\begin{cases} " + na + "a + " + ne + "e = " + (na * pa + ne * pe) + " \\\\ " + nb + "a + " + nf + "e = " + (nb * pa + nf * pe) + " \\end{cases}") + " : " + M("a = " + pa) + " CHF, " + M("e = " + pe) + " CHF." };
+  },
+
+  fimg(d) {
+    if (d === 1) {
+      const b = R.nz(-5, 5), c = R.nz(-6, 6), x = R.nz(-4, 4);
+      return { fig: FIG.parabola((t) => (t * t + b * t + c) / 3, [[x, (x * x + b * x + c) / 3, "?"]]), q: "Soit " + M("f(x) = " + poly([1, b, c])) + ". Calcule " + M("f(" + x + ")") + ".", spec: { kind: "value", value: x * x + b * x + c }, sol: M(par(x) + "^2 " + (b < 0 ? "- " + -b : "+ " + b) + " \\cdot " + par(x) + (c < 0 ? " - " + -c : " + " + c) + " = " + (x * x + b * x + c)) };
+    }
+    if (d === 2) {
+      const k = R.int(-5, 5), r = R.int(1, 6);
+      return { q: "Soit " + M("f(x) = \\sqrt{x " + (k < 0 ? "- " + -k : "+ " + k) + "}") + ". Calcule " + M("f(" + (r * r - k) + ")") + ".", spec: { kind: "value", value: r }, sol: M("\\sqrt{" + (r * r - k) + " " + (k < 0 ? "- " + -k : "+ " + k) + "} = \\sqrt{" + r * r + "} = " + r) };
+    }
+    const c = R.int(-6, 4), v = R.int(1, 7), y = v * v + c;
+    return { fig: FIG.parabola((t) => (t * t + c) / 3, [], () => y / 3), q: "Soit " + M("f(x) = x^2 " + (c < 0 ? "- " + -c : c > 0 ? "+ " + c : "")) + ". Détermine les préimages de " + M(y) + ".", spec: { kind: "set", values: [v, -v] }, sol: M("x^2 = " + v * v) + " : " + M("x = " + v) + " ou " + M("x = -" + v) + "." };
+  },
+
+  f2(d) {
+    if (d === 1) {
+      const p = R.nz(-5, 5), q = R.nz(-5, 5);
+      return { fig: FIG.parabola((x) => (x - p) * (x - q) / 3), q: "Quels sont les zéros de " + M("f(x) = (x " + (p < 0 ? "+ " + -p : "- " + p) + ")(x " + (q < 0 ? "+ " + -q : "- " + q) + ")") + " ?", spec: { kind: "set", values: [...new Set([p, q])] }, sol: "Un produit est nul si un facteur est nul : " + M(p) + " et " + M(q) + "." };
+    }
+    if (d === 2) {
+      const h = R.nz(-4, 4), k = R.int(-6, 6);
+      const b = -2 * h, c = h * h + k;
+      return { fig: FIG.parabola((x) => (x * x + b * x + c) / 3, [[h, k / 3, "S"]]), q: "Détermine le sommet de " + M("f(x) = " + poly([1, b, c])) + ". Réponds « x ; y ».", spec: { kind: "pair", values: [h, k] }, sol: M("x_S = -\\frac{b}{2a} = " + h) + " ; " + M("f(" + h + ") = " + k) + " : " + M("S(" + h + " ; " + k + ")") };
+    }
+    const a = R.pick([-2, -1, 2, 3]), b = R.nz(-6, 6), c = R.int(-5, 5);
+    const xs = -b / (2 * a), ys = a * xs * xs + b * xs + c;
+    return { fig: FIG.parabola((x) => (a * x * x + b * x + c) / 4, [[xs, ys / 4, "S"]]), q: "Détermine le sommet de " + M("f(x) = " + poly([a, b, c])) + ". Réponds « x ; y » (fractions acceptées).", spec: { kind: "pair", values: [xs, ys] }, sol: M("x_S = -\\frac{" + b + "}{" + 2 * a + "} = " + frac(-b, 2 * a)) + " ; " + M("y_S = f(x_S) = " + frac(Math.round(ys * 4 * a * a), 4 * a * a)) };
+  },
+
+  inter(d) {
+    if (d === 1) {
+      const p = R.int(-3, 0), q = R.int(1, 4);
+      // x² = (p + q) x - p q
+      return { fig: FIG.parabola((x) => x * x / 3, [[p, p * p / 3, ""], [q, q * q / 3, ""]], (x) => ((p + q) * x - p * q) / 3), q: "Pour quelles valeurs de " + M("x") + " les graphes de " + M("f(x) = x^2") + " et " + M("g(x) = " + poly([p + q, -p * q])) + " se coupent-ils ?", spec: { kind: "set", values: [...new Set([p, q])] }, sol: M("x^2 = " + poly([p + q, -p * q]) + " \\iff " + poly([1, -(p + q), p * q]) + " = 0") + " : " + M("x = " + p) + " ou " + M("x = " + q) + "." };
+    }
+    // f(x) = x² + B x + c et g(x) = m x + k, choisis pour que f(x) - g(x) = (x - p)(x - q)
+    const p = R.nz(-4, 3), q = p + R.int(1, 5), m = R.nz(-3, 3), c = R.int(-5, 5);
+    const B = m - (p + q), k = c - p * q;
+    return { fig: FIG.parabola((x) => (x * x + B * x + c) / 4, [[p, (m * p + k) / 4, ""], [q, (m * q + k) / 4, ""]], (x) => (m * x + k) / 4), q: "Détermine les abscisses des points d'intersection de " + M("f(x) = " + poly([1, B, c])) + " et " + M("g(x) = " + poly([m, k])) + ".", spec: { kind: "set", values: [p, q] }, sol: M("f(x) = g(x) \\iff " + poly([1, -(p + q), p * q]) + " = 0") + " : " + M("x = " + p) + " ou " + M("x = " + q) + "." };
+  },
+
+  angles(d) {
+    const ins = R.int(15, 80);
+    if (d === 1) return { fig: FIG.circleAngles("?", ins + "°"), q: "Dans un cercle de centre " + M("O") + ", l'angle inscrit " + M("\\widehat{ACB}") + " mesure " + M(ins + "°") + ". Que mesure l'angle au centre " + M("\\widehat{AOB}") + " (en degrés) ?", spec: { kind: "value", value: 2 * ins }, sol: "L'angle au centre vaut le double de l'angle inscrit qui intercepte le même arc : " + M(2 * ins + "°") + "." };
+    if (d === 2) return { fig: FIG.circleAngles(2 * ins + "°", "?"), q: "L'angle au centre " + M("\\widehat{AOB}") + " mesure " + M(2 * ins + "°") + ". Que mesure l'angle inscrit " + M("\\widehat{ACB}") + " ?", spec: { kind: "value", value: ins }, sol: M(2 * ins + "° : 2 = " + ins + "°") };
+    const a = R.int(20, 70);
+    return { q: M("[AB]") + " est un diamètre d'un cercle et " + M("C") + " un point du cercle. Si " + M("\\widehat{CAB} = " + a + "°") + ", que mesure " + M("\\widehat{CBA}") + " ?", spec: { kind: "value", value: 90 - a }, sol: "Un angle inscrit dans un demi-cercle est droit : " + M("\\widehat{ACB} = 90°") + ", donc " + M("180° - 90° - " + a + "° = " + (90 - a) + "°") + "." };
+  },
+
+  euclide(d) {
+    const p = R.int(1, 9), q = R.int(1, 9), h2 = p * q;
+    if (d === 1) {
+      const pp = R.pick([1, 2, 3, 4]), qq = R.pick([4, 9, 16, 1]) * pp;
+      return { fig: FIG.trigTriangle(["p = " + pp + " ; q = " + qq, "", "h = ?"], ""), q: "Dans un triangle rectangle, la hauteur issue de l'angle droit découpe l'hypoténuse en " + M("p = " + pp) + " et " + M("q = " + qq) + ". Calcule la hauteur " + M("h") + ".", spec: { kind: "value", value: Math.sqrt(pp * qq) }, sol: M("h^2 = p \\cdot q = " + pp * qq) + ", donc " + M("h = " + dec(Math.sqrt(pp * qq))) + "." };
+    }
+    if (d === 2) return { q: "Dans un triangle rectangle d'hypoténuse " + M("c = " + (p + q)) + ", la projection d'une cathète " + M("a") + " sur l'hypoténuse mesure " + M(p) + ". Calcule " + M("a") + " (valeur exacte ou au centième).", spec: { kind: "value", value: Math.sqrt(p * (p + q)), round: 0.01, exactOk: true }, sol: "Euclide : " + M("a^2 = " + p + " \\cdot " + (p + q) + " = " + p * (p + q)) + ", donc " + M("a = \\sqrt{" + p * (p + q) + "} \\approx " + dec(Math.sqrt(p * (p + q)).toFixed(2))) + "." };
+    return { q: "Dans un triangle rectangle, la hauteur sur l'hypoténuse mesure " + M("h = \\sqrt{" + h2 + "}") + " et découpe l'hypoténuse en deux segments dont l'un mesure " + M(p) + ". Que mesure l'autre ?", spec: { kind: "value", value: q }, sol: M("h^2 = p \\cdot q") + " : " + M(h2 + " = " + p + " \\cdot q") + ", donc " + M("q = " + q) + "." };
+  },
+
+  trigo(d) {
+    const a = R.int(20, 70), hyp = R.int(4, 15);
+    if (d === 1) return { fig: FIG.trigTriangle(["", "?", hyp + " cm"], a + "°"), q: "Dans un triangle rectangle, l'hypoténuse mesure " + M(hyp) + " cm et un angle aigu " + M(a + "°") + ". Calcule le côté opposé à cet angle, au centième.", spec: { kind: "value", value: hyp * Math.sin((a * Math.PI) / 180), round: 0.01 }, sol: M("\\text{opposé} = " + hyp + " \\cdot \\sin " + a + "° \\approx " + dec((hyp * Math.sin((a * Math.PI) / 180)).toFixed(2))) + " cm." };
+    if (d === 2) {
+      const o = R.int(3, 12), ad = R.int(3, 12), ang = (Math.atan(o / ad) * 180) / Math.PI;
+      return { fig: FIG.trigTriangle([ad + " cm", o + " cm", ""], "α ?"), q: "Les cathètes d'un triangle rectangle mesurent " + M(o) + " cm (opposée à " + M("\\alpha") + ") et " + M(ad) + " cm (adjacente). Calcule " + M("\\alpha") + " en degrés, au centième.", spec: { kind: "value", value: ang, round: 0.01 }, sol: M("\\tan \\alpha = \\frac{" + o + "}{" + ad + "}") + ", " + M("\\alpha \\approx " + dec(ang.toFixed(2)) + "°") };
+    }
+    const dist = R.int(10, 60);
+    return { fig: FIG.trigTriangle([dist + " m", "?", ""], a + "°"), q: "À " + M(dist) + " m du pied d'un immeuble, on voit son sommet sous un angle de " + M(a + "°") + ". Quelle est sa hauteur, au centième ?", spec: { kind: "value", value: dist * Math.tan((a * Math.PI) / 180), round: 0.01 }, sol: M("h = " + dist + " \\cdot \\tan " + a + "° \\approx " + dec((dist * Math.tan((a * Math.PI) / 180)).toFixed(2))) + " m." };
+  },
+});

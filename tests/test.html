@@ -22,7 +22,7 @@ const cases = [
   ["(x+3)(x-3)", { kind: "expr", expr: "x^2-9", form: "expanded" }, "form"], ["x^2 - 9", { kind: "expr", expr: "(x+3)(x-3)", form: "expanded" }, "correct"],
   ["-x²+4x", { kind: "expr", expr: "-x^2+4x", form: "expanded" }, "correct"], ["3x(2x-5)", { kind: "expr", expr: "6x^2-15x", form: "product" }, "correct"],
   ["-(x-3)(x+3)", { kind: "expr", expr: "9-x^2", form: "product" }, "correct"], ["2 ; -5", { kind: "set", values: [-5, 2] }, "correct"],
-  ["2", { kind: "set", values: [-5, 2] }, "close"], ["(2", { kind: "value", value: 2 }, "invalid"], ["3x", { kind: "value", value: 3 }, "invalid"],
+  ["2", { kind: "set", values: [-5, 2] }, "close"], ["(2", { kind: "value", value: 2 }, "invalid"], ["aucune", { kind: "set", values: [] }, "correct"], ["2", { kind: "set", values: [] }, "wrong"], ["aucune", { kind: "set", values: [1] }, "wrong"], ["3 ; -1", { kind: "pair", values: [3, -1] }, "correct"], ["-1 ; 3", { kind: "pair", values: [3, -1] }, "close"], ["(3+√5)/2 ; (3-√5)/2", { kind: "set", values: [(3 - Math.sqrt(5)) / 2, (3 + Math.sqrt(5)) / 2] }, "correct"], ["3x", { kind: "value", value: 3 }, "invalid"],
 ];
 for (const [inp, spec, want] of cases) {
   const r = checkAnswer(spec, inp);
@@ -32,7 +32,8 @@ for (const [inp, spec, want] of cases) {
 // 2. Générateurs : réponse canonique acceptée, figure valide, pas de NaN
 function canonical(spec) {
   if (spec.kind === "value") return String(spec.value);
-  if (spec.kind === "set") return spec.values.join(" ; ");
+  if (spec.kind === "set") return spec.values.length ? spec.values.join(" ; ") : "aucune";
+  if (spec.kind === "pair") return spec.values.join(" ; ");
   if (spec.kind === "expr" && spec.form === "expanded") {
     const t = Expr.parse(spec.expr), f = (x) => Expr.evaluate(t, { x });
     const c = f(0), a = (f(1) + f(-1)) / 2 - c, b = (f(1) - f(-1)) / 2;

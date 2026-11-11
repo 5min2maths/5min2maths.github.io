@@ -49,10 +49,10 @@ function itemRating(profile, id, d) {
   return 700 + (harmos(profile.system, g) - 8) * 150 + m * 8 + (d - 1) * 130;
 }
 // Échelle de référence (sans données partagées) : Mathélo typique en fin d'année par niveau HarmoS.
-const ELO_REF = [[8, 850], [9, 1000], [10, 1150], [11, 1300], [12, 1450]];
+const ELO_REF = [[8, 850], [9, 1000], [10, 1150], [11, 1300], [12, 1450], [13, 1600]];
 function eloLabel(profile, r) {
   const sys = SYSTEMS[profile.system];
-  const name = (h) => { const g = sys.grades.find(([gg]) => harmos(profile.system, gg) === h); return g ? g[1] : h === 12 ? (profile.system === "FR" ? "2nde" : "1re du secondaire II") : h + "e"; };
+  const name = (h) => { const g = sys.grades.find(([gg]) => harmos(profile.system, gg) === h); return g ? g[1] : h === 12 ? (profile.system === "FR" ? "2nde" : "1re du Collège") : h === 13 ? (profile.system === "FR" ? "1re" : "2e du Collège") : h + "e"; };
   let lvl = ELO_REF[0];
   for (const ref of ELO_REF) if (r >= ref[1] - 75) lvl = ref;
   const h = lvl[0], gap = r - lvl[1];
@@ -70,7 +70,7 @@ const Engine = {
   // Notions du programme jusqu'à l'année de l'élève, avec statut proposé selon la date.
   catalog(profile, date = new Date()) {
     const mo = schoolMonth(date);
-    return NOTIONS.filter((n) => n[profile.system][0] <= profile.grade).map((n) => {
+    return NOTIONS.filter((n) => n[profile.system] && n[profile.system][0] <= profile.grade).map((n) => {
       const [g, m] = n[profile.system];
       let status = "vu";
       if (g === profile.grade) status = mo > m ? "vu" : mo === m ? "encours" : "nonvu";

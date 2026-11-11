@@ -170,5 +170,36 @@ const FIG = (() => {
     return svg(300, b + 50, g + t(40 + a / 2, b + 40, la) + t(32, 20 + b / 2, lb, "f-txt", "end"), "aire d'un rectangle");
   }
 
-  return { numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, pyramid, cone, road, items, scaling, lineGraph, blocks, sciScale, areaSquare, tiles, fmt };
+  // Parabole y = a(x - p)(x - q) ou a x² + b x + c, avec points marqués.
+  function parabola(f, pts = [], line = null) {
+    const W = 300, H = 190, X = (x) => 150 + x * 20, Y = (y) => 120 - y * 8;
+    let g = L(10, Y(0), 290, Y(0)) + L(X(0), 6, X(0), 184);
+    for (let x = -6; x <= 6; x++) g += L(X(x), Y(0) - 3, X(x), Y(0) + 3);
+    let d = "";
+    for (let x = -7; x <= 7.01; x += 0.1) { const y = f(x); if (Y(y) > -40 && Y(y) < H + 40) d += (d ? " L" : "M") + X(x).toFixed(1) + "," + Y(y).toFixed(1); else if (d && !d.endsWith("B")) d += " B"; }
+    d = d.replace(/ B M/g, " M").replace(/ B/g, "");
+    g += '<clipPath id="cp"><rect x="6" y="6" width="288" height="178"/></clipPath><path d="' + d + '" class="f-accent" fill="none" stroke-width="2.5" clip-path="url(#cp)"/>';
+    if (line) g += '<line x1="' + X(-7) + '" y1="' + Y(line(-7)) + '" x2="' + X(7) + '" y2="' + Y(line(7)) + '" class="f-line" stroke-width="2" clip-path="url(#cp)"/>';
+    pts.forEach(([x, y, s]) => (g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="4.5" class="f-dot"/>' + t(X(x) + 8, Y(y) - 8, s, "f-txt", "start", 12)));
+    return svg(W, H, g, "parabole");
+  }
+  // Triangle rectangle avec angle marqué en A (trigonométrie).
+  function trigTriangle(lab, angle) {
+    const A = [40, 130], B = [260, 130], C = [260, 40];
+    let b = P([A, B, C], "f-shape") + '<rect x="248" y="118" width="12" height="12" class="f-line" fill="none"/>';
+    b += '<path d="M80,130 A40,40 0 0,0 77,115" class="f-accent" fill="none" stroke-width="2"/>' + t(92, 124, angle, "f-accent f-txt", "start", 13);
+    b += t(150, 150, lab[0]) + t(272, 88, lab[1], "f-txt", "start") + t(138, 74, lab[2], "f-txt", "end");
+    return svg(320, 160, b, "triangle rectangle et angle");
+  }
+  // Cercle, angle au centre et angle inscrit.
+  function circleAngles(lCenter, lInscribed) {
+    const cx = 150, cy = 90, r = 70, pt = (deg) => [cx + r * Math.cos((deg * Math.PI) / 180), cy - r * Math.sin((deg * Math.PI) / 180)];
+    const A = pt(210), B = pt(330), C = pt(95);
+    let g = '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" class="f-shape"/>' + P([A, [cx, cy], B], "f-fill2") + L(A[0], A[1], C[0], C[1]) + L(B[0], B[1], C[0], C[1]);
+    g += t(A[0] - 10, A[1] + 12, "A") + t(B[0] + 10, B[1] + 12, "B") + t(C[0], C[1] - 8, "C") + t(cx, cy - 8, "O");
+    g += t(cx, cy + 34, lCenter, "f-accent f-txt", "middle", 12) + t(C[0] + 4, C[1] + 34, lInscribed, "f-accent f-txt", "start", 12);
+    return svg(300, 180, g, "angles au centre et inscrit");
+  }
+
+  return { parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, pyramid, cone, road, items, scaling, lineGraph, blocks, sciScale, areaSquare, tiles, fmt };
 })();

@@ -212,6 +212,8 @@ const Expr = (() => {
 // Résultat : { status: "correct" | "close" | "wrong" | "invalid" | "form", message }
 function checkAnswer(spec, input) {
   if (spec.kind === "choice") return { status: input === spec.index ? "correct" : "wrong" };
+  const none = /aucun|∅|vide|pas de solution|impossible/i.test(String(input));
+  if (spec.kind === "set" && (none || spec.values.length === 0)) return { status: none && spec.values.length === 0 ? "correct" : spec.values.length === 0 ? "wrong" : "wrong" };
   let tree;
   try { tree = Expr.parse(String(input)); }
   catch (e) { return { status: "invalid", message: e.message }; }
@@ -236,6 +238,14 @@ function checkAnswer(spec, input) {
     const okAll = want.every((w) => got.some((g) => Expr.sameValue(g, w))) && got.every((g) => want.some((w) => Expr.sameValue(g, w)));
     if (okAll) return { status: "correct" };
     if (want.some((w) => got.some((g) => Expr.sameValue(g, w)))) return { status: "close", message: "Il manque une solution, ou il y en a une en trop." };
+    return { status: "wrong" };
+  }
+  if (spec.kind === "pair") {
+    const items = tree.t === "list" ? tree.items : [tree];
+    if (items.length !== 2 || items.some((i) => Expr.vars(i).size)) return { status: "invalid", message: "Donne deux nombres séparés par « ; » (x d'abord, puis y)." };
+    const [u, v] = items.map((i) => Expr.evaluate(i));
+    if (Expr.sameValue(u, spec.values[0]) && Expr.sameValue(v, spec.values[1])) return { status: "correct" };
+    if (Expr.sameValue(u, spec.values[1]) && Expr.sameValue(v, spec.values[0])) return { status: "close", message: "Les deux valeurs sont justes, mais dans le mauvais ordre : x d'abord." };
     return { status: "wrong" };
   }
   if (spec.kind === "expr") {
