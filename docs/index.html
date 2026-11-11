@@ -1,0 +1,1750 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>5minutes2mathsparjour</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Chaque jour, quelques minutes de maths, à ton niveau.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Concept : une page de cahier à petits carreaux ; encre bleue, marge rouge, une carte = une question. */
+:root {
+  --paper: #fbfcfe;
+  --grid: #e3e9f4;
+  --ink: #1d2b4f;
+  --ink-soft: #5b6687;
+  --blue: #2457d6;
+  --blue-soft: #e4ecff;
+  --margin: #e0565b;
+  --card: #ffffff;
+  --line: #ccd5e6;
+  --ok: #1e8a5a;
+  --ok-soft: #e1f5ea;
+  --warn: #b7791f;
+  --warn-soft: #fdf1dc;
+  --bad: #c2413f;
+  --bad-soft: #fbe5e4;
+  --fluo: #e9ff47;
+  --fluo-ink: #1d2b4f;
+  --shadow: #1a3fa3;
+  --font-display: "Bricolage Grotesque", "Atkinson Hyperlegible", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #10162a; --grid: #1b2440; --ink: #e6ebf7; --ink-soft: #9aa6c6; --blue: #7ea2ff; --blue-soft: #1d2c57;
+    --margin: #ff7a7f; --card: #161e36; --line: #2a3557; --ok: #4fd39a; --ok-soft: #12352a; --warn: #f0b75a; --warn-soft: #3a2c12;
+    --bad: #ff8a87; --bad-soft: #3d1a1d; --fluo: #d6f53a; --fluo-ink: #10162a; --shadow: #3c5fc4; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #10162a; --grid: #1b2440; --ink: #e6ebf7; --ink-soft: #9aa6c6; --blue: #7ea2ff; --blue-soft: #1d2c57;
+  --margin: #ff7a7f; --card: #161e36; --line: #2a3557; --ok: #4fd39a; --ok-soft: #12352a; --warn: #f0b75a; --warn-soft: #3a2c12;
+  --bad: #ff8a87; --bad-soft: #3d1a1d; --fluo: #d6f53a; --fluo-ink: #10162a; --shadow: #3c5fc4; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0; color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.5;
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 18px 40px;
+}
+#app { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; margin: 0; text-wrap: balance; }
+h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: 1.35rem; font-weight: 700; }
+h3 { font-size: 1.05rem; font-weight: 700; }
+p { margin: 0; }
+.muted { color: var(--ink-soft); }
+.small { font-size: 0.85rem; }
+.eyebrow { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); font-weight: 700; }
+
+.brand { display: flex; align-items: baseline; gap: 8px; }
+.brand b { font-family: var(--font-display); font-size: 1.25rem; font-weight: 800; color: var(--blue); }
+.brand span { font-family: var(--font-mono); font-size: 0.8rem; color: var(--margin); }
+
+/* Carte : la feuille d'exercice, avec sa marge rouge */
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px 18px 18px 26px;
+  position: relative; display: flex; flex-direction: column; gap: 14px; min-width: 0;
+}
+.card::before { content: ""; position: absolute; left: 14px; top: 10px; bottom: 10px; width: 2px; background: var(--margin); opacity: 0.55; border-radius: 2px; }
+.card.flat { padding: 16px; }
+.card.flat::before { display: none; }
+
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.stack { display: flex; flex-direction: column; gap: 10px; }
+.spread { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+button { font: inherit; cursor: pointer; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink); padding: 10px 16px; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+.btn-primary { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 700; padding: 13px 20px; font-size: 1.05rem; }
+.btn-ghost { background: transparent; border-color: transparent; color: var(--blue); padding: 8px 10px; }
+.btn-big { width: 100%; }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { padding: 8px 12px; border-radius: 999px; font-size: 0.95rem; }
+.seg button[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 700; }
+
+/* Curseur de temps 1–2–5–10 */
+.timepick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.timepick button { display: flex; flex-direction: column; align-items: center; padding: 10px 4px; gap: 2px; }
+.timepick b { font-family: var(--font-display); font-size: 1.4rem; }
+.timepick small { font-size: 0.72rem; color: var(--ink-soft); }
+.timepick button[aria-pressed="true"] { background: var(--blue-soft); border-color: var(--blue); }
+
+/* Question */
+.qmeta { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--ink-soft); }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font-weight: 700; font-size: 0.78rem; }
+.dots { display: inline-flex; gap: 3px; }
+.dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); display: inline-block; }
+.dots i.on { background: var(--blue); }
+.qtext { font-size: 1.12rem; }
+.figwrap { display: flex; justify-content: center; }
+.fig { width: 100%; max-width: 340px; height: auto; }
+.fig .f-line, .fig line.f-line { stroke: var(--ink); stroke-width: 1.5; fill: none; }
+.fig .f-shape { fill: var(--blue-soft); stroke: var(--ink); stroke-width: 1.6; }
+.fig .f-shape2 { fill: var(--grid); stroke: var(--ink); stroke-width: 1.4; }
+.fig .f-fill { fill: var(--blue); stroke: none; }
+.fig .f-fill2 { fill: var(--blue-soft); stroke: var(--blue); stroke-width: 1.2; }
+.fig .f-soft { fill: var(--grid); stroke: var(--line); }
+.fig .f-accent { stroke: var(--margin); fill: none; }
+.fig text.f-accent, .fig .f-accent.f-txt { fill: var(--margin); stroke: none; font-weight: 700; }
+.fig .f-txt { fill: var(--ink); font-family: var(--font-body); }
+.fig .f-on { fill: #fff; font-family: var(--font-body); font-weight: 700; }
+.fig .f-dot { fill: var(--margin); }
+.fig .f-jump { stroke: var(--margin); fill: none; stroke-width: 1.6; }
+.fig .f-head { fill: var(--ink); }
+.fig .f-headacc { fill: var(--margin); }
+
+/* Saisie : calculateur */
+.answer { display: flex; flex-direction: column; gap: 8px; }
+.answer input {
+  font-family: var(--font-mono); font-size: 1.15rem; padding: 12px 14px; border-radius: 12px; border: 2px solid var(--line);
+  background: var(--paper); color: var(--ink); width: 100%;
+}
+.preview { min-height: 2.2em; padding: 6px 12px; border-radius: 10px; background: var(--paper); border: 1px dashed var(--line); display: flex; align-items: center; gap: 10px; overflow-x: auto; }
+.preview .val { font-family: var(--font-mono); color: var(--ink-soft); font-size: 0.9rem; white-space: nowrap; }
+.preview .err { color: var(--ink-soft); font-size: 0.85rem; }
+.keypad { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.keypad button { padding: 10px 0; font-family: var(--font-mono); font-size: 1.05rem; border-radius: 10px; }
+.keypad .k-op { background: var(--blue-soft); border-color: transparent; color: var(--blue); font-weight: 700; }
+.actions { display: flex; gap: 8px; }
+.actions .btn-primary { flex: 1; }
+
+/* Feedback à la Moodle */
+.fb { border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+.fb.ok { background: var(--ok-soft); color: var(--ok); }
+.fb.hint { background: var(--warn-soft); color: var(--warn); }
+.fb.bad { background: var(--bad-soft); color: var(--bad); }
+.fb .sol { color: var(--ink); }
+.fb b { font-family: var(--font-display); font-size: 1.05rem; }
+.pop { animation: pop 380ms cubic-bezier(.2, 1.4, .4, 1); }
+@keyframes pop { from { transform: scale(0.96); opacity: 0.4; } to { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .pop { animation: none; } }
+.vote { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 0.85rem; color: var(--ink-soft); flex-wrap: wrap; }
+.vote button { padding: 6px 12px; font-size: 1rem; }
+.vote button[aria-pressed="true"] { background: var(--blue-soft); border-color: var(--blue); }
+.code { font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-soft); user-select: all; }
+
+/* Accueil */
+.elo { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; }
+.elo .num { font-family: var(--font-display); font-weight: 800; font-size: 3rem; line-height: 1; font-variant-numeric: tabular-nums; color: var(--blue); }
+.elo .delta { font-family: var(--font-mono); font-size: 0.85rem; }
+.delta.up { color: var(--ok); } .delta.down { color: var(--bad); }
+.spark { width: 100%; height: 56px; }
+.spark path.l { stroke: var(--blue); stroke-width: 2.2; fill: none; }
+.spark path.a { fill: var(--blue-soft); stroke: none; }
+.spark circle { fill: var(--margin); }
+.streak { display: flex; align-items: center; gap: 10px; }
+.streak .flame { font-size: 1.6rem; }
+.streak b { font-family: var(--font-display); font-size: 1.5rem; }
+.badge { font-size: 0.72rem; padding: 2px 8px; border-radius: 999px; background: var(--warn-soft); color: var(--warn); font-weight: 700; }
+.bars { display: flex; flex-direction: column; gap: 10px; }
+.bar { display: grid; grid-template-columns: minmax(0, 1fr) 90px; gap: 10px; align-items: center; font-size: 0.92rem; }
+.bar .track { height: 10px; border-radius: 999px; background: var(--grid); overflow: hidden; }
+.bar .track i { display: block; height: 100%; background: var(--blue); border-radius: 999px; }
+
+/* Liste des notions (entrée) */
+.notion { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; padding: 10px 0; border-bottom: 1px dashed var(--line); }
+.notion:last-child { border-bottom: none; }
+.notion .ex { font-size: 0.9rem; color: var(--ink-soft); overflow-x: auto; }
+.tri { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; width: max-content; }
+.tri button { border: none; border-radius: 0; padding: 5px 10px; font-size: 0.82rem; background: transparent; }
+.tri button + button { border-left: 1px solid var(--line); }
+.tri button[aria-pressed="true"] { background: var(--blue); color: #fff; font-weight: 700; }
+
+.timer { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.confirm { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+mjx-container { max-width: 100%; overflow-x: auto; overflow-y: hidden; }
+
+/* ---- Identité : surligneur, pense-bête, boutons en relief, explosion de symboles ---- */
+.mark { background: linear-gradient(100deg, transparent 2%, var(--fluo) 4%, var(--fluo) 94%, transparent 97%); color: var(--fluo-ink); padding: 0 0.12em; border-radius: 0.2em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+h1 { font-size: clamp(2rem, 7vw, 2.6rem); }
+.tilt { box-shadow: 0 10px 24px -14px rgba(29, 43, 79, 0.45); }
+.btn-primary { box-shadow: 0 5px 0 var(--shadow); transition: transform 80ms ease, box-shadow 80ms ease; }
+.btn-primary:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 var(--shadow); }
+.keypad button { box-shadow: 0 2px 0 var(--line); transition: transform 60ms ease; }
+.keypad button:active { transform: translateY(2px); box-shadow: none; }
+.elo .num { background: linear-gradient(transparent 58%, var(--fluo) 58%, var(--fluo) 92%, transparent 92%); color: var(--ink); padding: 0 4px; }
+.burst { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 20; }
+.burst span { position: absolute; font-family: var(--font-display); font-weight: 800; color: var(--blue); animation: fly 900ms cubic-bezier(.15, .8, .3, 1) forwards; }
+.burst span:nth-child(3n) { color: var(--margin); }
+.burst span:nth-child(4n) { color: var(--ok); }
+@keyframes fly { from { transform: translate(0, 0) rotate(0) scale(0.6); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(1.1); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .burst { display: none; } }
+
+</style>
+<script>
+window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "global" }, startup: { typeset: false } };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
+</head>
+<body>
+<main id="app" aria-live="polite"></main>
+<script>
+// Catalogue des notions et correspondance des niveaux (Suisse romande / France).
+// grade : année où la notion est introduite (CH : 9-11 ; FR : 6-9 avec 6=6e, 7=5e, 8=4e, 9=3e).
+// m : mois de l'année scolaire où elle est en général traitée (0 = septembre … 9 = juin).
+const THEMES = {
+  nombres: "Nombres et calculs",
+  algebre: "Calcul littéral et équations",
+  prop: "Proportionnalité",
+  geo: "Géométrie et mesures",
+  fonctions: "Fonctions",
+};
+
+const NOTIONS = [
+  { id: "prio", theme: "nombres", label: "Priorités des opérations", ex: "3 + 4 \\cdot 2 = 11", CH: [9, 0], FR: [6, 1] },
+  { id: "rel", theme: "nombres", label: "Nombres relatifs", ex: "(-3) - 5 \\cdot (-2) = 7", CH: [9, 1], FR: [7, 2] },
+  { id: "fracadd", theme: "nombres", label: "Additionner des fractions", ex: "\\frac{2}{3} + \\frac{1}{4} = \\frac{11}{12}", CH: [9, 3], FR: [7, 4] },
+  { id: "fracmul", theme: "nombres", label: "Multiplier, diviser des fractions", ex: "\\frac{2}{3} \\cdot \\frac{9}{4} = \\frac{3}{2}", CH: [10, 1], FR: [8, 2] },
+  { id: "pct", theme: "nombres", label: "Pourcentages", ex: "15\\,\\% \\text{ de } 80 = 12", CH: [9, 6], FR: [6, 6] },
+  { id: "puiss", theme: "nombres", label: "Puissances", ex: "2^3 \\cdot 2^4 = 2^7", CH: [10, 2], FR: [8, 3] },
+  { id: "sci", theme: "nombres", label: "Notation scientifique", ex: "0{,}0042 = 4{,}2 \\cdot 10^{-3}", CH: [10, 3], FR: [8, 4] },
+  { id: "rac", theme: "nombres", label: "Racines carrées", ex: "\\sqrt{72} = 6\\sqrt{2}", CH: [11, 0], FR: [9, 2] },
+  { id: "valnum", theme: "algebre", label: "Remplacer une lettre par un nombre", ex: "3x^2 \\text{ pour } x = -2 \\text{ vaut } 12", CH: [9, 4], FR: [7, 5] },
+  { id: "reduire", theme: "algebre", label: "Réduire une expression", ex: "3x + 5 - x + 2 = 2x + 7", CH: [9, 5], FR: [7, 6] },
+  { id: "distrib", theme: "algebre", label: "Développer", ex: "(x + 2)(x - 3) = x^2 - x - 6", CH: [10, 4], FR: [8, 5] },
+  { id: "idrem", theme: "algebre", label: "Identités remarquables", ex: "(x + 3)^2 = x^2 + 6x + 9", CH: [11, 4], FR: [9, 3] },
+  { id: "factor", theme: "algebre", label: "Factoriser", ex: "x^2 - 9 = (x - 3)(x + 3)", CH: [11, 5], FR: [9, 4] },
+  { id: "eq1", theme: "algebre", label: "Équations du 1er degré", ex: "3x - 5 = 7 \\iff x = 4", CH: [10, 6], FR: [8, 6] },
+  { id: "eq2", theme: "algebre", label: "Équations produit nul", ex: "(x - 2)(x + 5) = 0", CH: [11, 6], FR: [9, 5] },
+  { id: "prop", theme: "prop", label: "Proportionnalité, règle de trois", ex: "3 \\text{ kg} \\to 7{,}50 \\text{ CHF}, \\; 5 \\text{ kg} \\to ?", CH: [9, 2], FR: [6, 3] },
+  { id: "vitesse", theme: "prop", label: "Vitesse moyenne, durées", ex: "150 \\text{ km en } 2 \\text{ h} \\to 75 \\text{ km/h}", CH: [11, 3], FR: [8, 7] },
+  { id: "echelle", theme: "prop", label: "Échelle, agrandissement, réduction", ex: "1 : 200 : \\; 3 \\text{ cm} \\to 6 \\text{ m}", CH: [11, 3], FR: [9, 6] },
+  { id: "aires", theme: "geo", label: "Aires de figures planes", ex: "\\text{triangle : } \\frac{b \\cdot h}{2}", CH: [9, 3], FR: [6, 5] },
+  { id: "pyth", theme: "geo", label: "Théorème de Pythagore", ex: "3^2 + 4^2 = 5^2", CH: [11, 1], FR: [8, 3] },
+  { id: "vol", theme: "geo", label: "Volumes de solides", ex: "V_{\\text{cône}} = \\frac{\\pi r^2 h}{3}", CH: [10, 5], FR: [8, 8] },
+  { id: "thales", theme: "geo", label: "Théorème de Thalès", ex: "\\frac{AD}{AB} = \\frac{AE}{AC} = \\frac{DE}{BC}", CH: [11, 7], FR: [9, 2] },
+  { id: "affine", theme: "fonctions", label: "Fonctions affines", ex: "f(x) = 2x - 3, \\; f(4) = 5", CH: [11, 9], FR: [9, 7] },
+  // ---- Secondaire II : 1re du Collège (HarmoS 12) ; FR 2nde = 10, 1re = 11 ; null = hors programme ----
+  { id: "eq3", theme: "algebre", label: "Équations de degré 3 par factorisation", ex: "x^3 - 4x = 0", CH: [12, 2], FR: [10, 3] },
+  { id: "eq2disc", theme: "algebre", label: "Équations du 2e degré (discriminant)", ex: "\\Delta = b^2 - 4ac", CH: [12, 2], FR: [11, 2] },
+  { id: "sys2", theme: "algebre", label: "Systèmes de deux équations", ex: "\\begin{cases} x + y = 7 \\\\ x - y = 1 \\end{cases}", CH: [12, 3], FR: [10, 4] },
+  { id: "fimg", theme: "fonctions", label: "Images et préimages", ex: "f(x) = x^2 - 3 : \\; f(2) = 1", CH: [12, 4], FR: [10, 2] },
+  { id: "f2", theme: "fonctions", label: "Parabole : sommet et zéros", ex: "f(x) = (x - 1)^2 - 4", CH: [12, 5], FR: [10, 6] },
+  { id: "inter", theme: "fonctions", label: "Intersection de deux graphes", ex: "x^2 = x + 2", CH: [12, 6], FR: [10, 7] },
+  { id: "angles", theme: "geo", label: "Angles au centre et inscrits", ex: "\\widehat{AOB} = 2\\,\\widehat{ACB}", CH: [12, 7], FR: null },
+  { id: "euclide", theme: "geo", label: "Théorèmes de la hauteur et d'Euclide", ex: "h^2 = p \\cdot q", CH: [12, 8], FR: null },
+  { id: "trigo", theme: "geo", label: "Trigonométrie du triangle rectangle", ex: "\\sin \\alpha = \\frac{\\text{opposé}}{\\text{hypoténuse}}", CH: [12, 8], FR: [9, 7] },
+];
+
+// Niveaux proposés à l'élève : clé interne (système + année) et libellé.
+const SYSTEMS = {
+  CH: { label: "Suisse romande", grades: [[9, "9e"], [10, "10e"], [11, "11e"], [12, "1re du Collège (sec. II)"]] },
+  FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"]] },
+};
+
+// Difficulté maximale (1 = bases, 3 = approfondi) : on ne demande pas la section à l'élève ;
+// c'est le Mathélo qui situe son niveau. Seules les petites classes (6e, 5e) plafonnent à 2.
+function difficultyCap(profile) {
+  return profile.system === "FR" && profile.grade <= 7 ? 2 : 3;
+}
+
+// Mois de l'année scolaire (0 = septembre ; août compte comme septembre).
+function schoolMonth(date) {
+  const mo = date.getMonth(); // 0 = janvier
+  if (mo >= 7) return Math.max(0, mo - 8);
+  return mo + 4; // janvier = 4 … juin = 9, juillet = 10
+}
+
+// Calculateur d'expressions : lecture souple de la réponse de l'élève, calcul, mise en forme TeX,
+// équivalence d'expressions (par évaluation en plusieurs points) et contrôle de forme.
+// Inspiré de Probability Puzzles (atorch) : on ne fixe pas le format de la réponse.
+
+const Expr = (() => {
+  function tokenize(src) {
+    const s = src
+      .replace(/[−–]/g, "-").replace(/[×·∙⋅]/g, "*").replace(/[÷:]/g, "/")
+      .replace(/²/g, "^2").replace(/³/g, "^3")
+      .replace(/(\d)'(?=\d{3})/g, "$1")          // séparateur de milliers 1'200
+      .replace(/(\d)\s+(?=\d{3}\b)/g, "$1")      // 1 200
+      .replace(/\[/g, "(").replace(/\]/g, ")");
+    const toks = [];
+    let i = 0;
+    while (i < s.length) {
+      const c = s[i];
+      if (/\s/.test(c)) { i++; continue; }
+      if (/[0-9.,]/.test(c)) {
+        let j = i, seenSep = false;
+        while (j < s.length && (/[0-9]/.test(s[j]) || (!seenSep && /[.,]/.test(s[j]) && /[0-9]/.test(s[j + 1] || "")))) {
+          if (/[.,]/.test(s[j])) seenSep = true;
+          j++;
+        }
+        if (j === i) throw new Error("Nombre mal écrit");
+        toks.push({ t: "num", v: parseFloat(s.slice(i, j).replace(",", ".")) });
+        i = j; continue;
+      }
+      if (c === "√") { toks.push({ t: "fn", v: "sqrt" }); i++; continue; }
+      if (c === "∛") { toks.push({ t: "fn", v: "cbrt" }); i++; continue; }
+      if (c === "π") { toks.push({ t: "const", v: "pi" }); i++; continue; }
+      if (/[a-zA-Zéè]/.test(c)) {
+        let j = i;
+        while (j < s.length && /[a-zA-Zéè]/.test(s[j])) j++;
+        const w = s.slice(i, j).toLowerCase();
+        if (w === "sqrt" || w === "racine" || w === "rac") toks.push({ t: "fn", v: "sqrt" });
+        else if (w === "cbrt") toks.push({ t: "fn", v: "cbrt" });
+        else if (w === "pi") toks.push({ t: "const", v: "pi" });
+        else for (const ch of w) toks.push({ t: "var", v: ch }); // xy = x·y
+        i = j; continue;
+      }
+      if ("+-*/^();=".includes(c)) { toks.push({ t: "op", v: c }); i++; continue; }
+      throw new Error("Caractère non reconnu : « " + c + " »");
+    }
+    return toks;
+  }
+
+  function parse(src) {
+    const toks = tokenize(src);
+    let p = 0;
+    const peek = () => toks[p];
+    const isOp = (v) => peek() && peek().t === "op" && peek().v === v;
+    const startsFactor = () => {
+      const k = peek();
+      return k && (k.t === "num" || k.t === "var" || k.t === "const" || k.t === "fn" || (k.t === "op" && k.v === "("));
+    };
+    function list() {
+      const items = [stripEq(expr())];
+      while (isOp(";")) { p++; items.push(stripEq(expr())); }
+      return items.length === 1 ? items[0] : { t: "list", items };
+    }
+    // « x = 4 » : on garde le membre de droite si le gauche est une variable seule.
+    function stripEq(e) {
+      if (isOp("=")) {
+        p++;
+        const r = expr();
+        if (e.t === "var") return r;
+        return { t: "eq", a: e, b: r };
+      }
+      return e;
+    }
+    function expr() {
+      let a = term();
+      while (isOp("+") || isOp("-")) {
+        const o = toks[p++].v;
+        a = { t: o === "+" ? "add" : "sub", a, b: term() };
+      }
+      return a;
+    }
+    function term() {
+      let a = unary();
+      for (;;) {
+        if (isOp("*") || isOp("/")) {
+          const o = toks[p++].v;
+          a = { t: o === "*" ? "mul" : "div", a, b: unary() };
+        } else if (startsFactor()) {
+          a = { t: "mul", a, b: power(), implicit: true };
+        } else break;
+      }
+      return a;
+    }
+    function unary() {
+      if (isOp("-")) { p++; return { t: "neg", a: unary() }; }
+      if (isOp("+")) { p++; return unary(); }
+      return power();
+    }
+    function power() {
+      const base = primary();
+      if (isOp("^")) { p++; return { t: "pow", a: base, b: unary() }; }
+      return base;
+    }
+    function primary() {
+      const k = peek();
+      if (!k) throw new Error("Expression incomplète");
+      if (k.t === "num") { p++; return { t: "num", v: k.v }; }
+      if (k.t === "var") { p++; return { t: "var", v: k.v }; }
+      if (k.t === "const") { p++; return { t: "const", v: k.v }; }
+      if (k.t === "fn") {
+        p++;
+        // √2, √(x+1), √x : l'argument est un facteur (avec sa puissance éventuelle)
+        return { t: "fn", f: k.v, a: power() };
+      }
+      if (isOp("(")) {
+        p++;
+        const e = expr();
+        if (!isOp(")")) throw new Error("Parenthèse non fermée");
+        p++;
+        return { t: "par", a: e };
+      }
+      throw new Error("Symbole inattendu : « " + k.v + " »");
+    }
+    const tree = list();
+    if (p < toks.length) throw new Error("Symbole en trop : « " + toks[p].v + " »");
+    return tree;
+  }
+
+  function evaluate(n, env = {}) {
+    switch (n.t) {
+      case "num": return n.v;
+      case "const": return Math.PI;
+      case "var": return env[n.v] !== undefined ? env[n.v] : NaN;
+      case "par": return evaluate(n.a, env);
+      case "neg": return -evaluate(n.a, env);
+      case "add": return evaluate(n.a, env) + evaluate(n.b, env);
+      case "sub": return evaluate(n.a, env) - evaluate(n.b, env);
+      case "mul": return evaluate(n.a, env) * evaluate(n.b, env);
+      case "div": return evaluate(n.a, env) / evaluate(n.b, env);
+      case "pow": return Math.pow(evaluate(n.a, env), evaluate(n.b, env));
+      case "fn": { const v = evaluate(n.a, env); return n.f === "sqrt" ? Math.sqrt(v) : Math.cbrt(v); }
+      default: return NaN;
+    }
+  }
+
+  const fmtNum = (v) => String(+v.toPrecision(12)).replace(".", "{,}");
+  function tex(n) {
+    switch (n.t) {
+      case "num": return fmtNum(n.v);
+      case "const": return "\\pi";
+      case "var": return n.v;
+      case "par": return "\\left(" + tex(n.a) + "\\right)";
+      case "neg": return "-" + tex(n.a);
+      case "add": return tex(n.a) + " + " + tex(n.b);
+      case "sub": return tex(n.a) + " - " + tex(n.b);
+      case "mul": return tex(n.a) + (n.implicit ? " " : " \\cdot ") + tex(n.b);
+      case "div": return "\\frac{" + tex(unpar(n.a)) + "}{" + tex(unpar(n.b)) + "}";
+      case "pow": return "{" + tex(n.a) + "}^{" + tex(unpar(n.b)) + "}";
+      case "fn": return n.f === "sqrt" ? "\\sqrt{" + tex(unpar(n.a)) + "}" : "\\sqrt[3]{" + tex(unpar(n.a)) + "}";
+      case "list": return n.items.map(tex).join(" \\; ; \\; ");
+      case "eq": return tex(n.a) + " = " + tex(n.b);
+      default: return "?";
+    }
+  }
+  const unpar = (n) => (n.t === "par" ? n.a : n);
+
+  const vars = (n, s = new Set()) => {
+    if (!n) return s;
+    if (n.t === "var") s.add(n.v);
+    for (const k of ["a", "b"]) if (n[k]) vars(n[k], s);
+    if (n.items) n.items.forEach((i) => vars(i, s));
+    return s;
+  };
+  const hasSum = (n) => {
+    n = unpar(n);
+    if (n.t === "add" || n.t === "sub") return vars(n).size > 0;
+    if (n.t === "neg") return hasSum(n.a);
+    return false;
+  };
+  // Forme « produit » : le nœud principal est un produit ou une puissance (signe moins mis à part).
+  function isProduct(n) {
+    n = unpar(n);
+    while (n.t === "neg") n = unpar(n.a);
+    return n.t === "mul" || (n.t === "pow" && hasSum(n.a));
+  }
+  // Forme « développée » : aucun produit ni puissance d'une somme contenant une lettre.
+  function isExpanded(n) {
+    if (!n) return true;
+    if (n.t === "mul" && (hasSum(n.a) || hasSum(n.b))) return false;
+    if (n.t === "pow" && hasSum(n.a)) return false;
+    if (n.t === "div" && vars(n.b).size > 0) return false;
+    return ["a", "b"].every((k) => isExpanded(n[k]));
+  }
+
+  const SAMPLES = [-3.7, -1.3, 0.6, 2.2, 4.1];
+  function sameValue(u, v, rel = 1e-9) {
+    if (!isFinite(u) || !isFinite(v)) return false;
+    return Math.abs(u - v) <= rel * Math.max(1, Math.abs(v));
+  }
+  function equivalent(a, b) {
+    const vs = [...new Set([...vars(a), ...vars(b)])];
+    return SAMPLES.every((s, i) => {
+      const env = {};
+      vs.forEach((v, j) => (env[v] = SAMPLES[(i + j) % SAMPLES.length]));
+      return sameValue(evaluate(a, env), evaluate(b, env), 1e-8);
+    });
+  }
+
+  return { parse, evaluate, tex, vars, isProduct, isExpanded, equivalent, sameValue, unpar };
+})();
+
+// Vérifie la réponse de l'élève selon la spécification de la question.
+// spec.kind : "value" (valeur numérique, round = précision demandée), "expr" (expression en x,
+// form = "product" | "expanded"), "set" (liste de solutions), "choice" (index d'option).
+// Résultat : { status: "correct" | "close" | "wrong" | "invalid" | "form", message }
+function checkAnswer(spec, input) {
+  if (spec.kind === "choice") return { status: input === spec.index ? "correct" : "wrong" };
+  const none = /aucun|∅|vide|pas de solution|impossible/i.test(String(input));
+  if (spec.kind === "set" && (none || spec.values.length === 0)) return { status: none && spec.values.length === 0 ? "correct" : spec.values.length === 0 ? "wrong" : "wrong" };
+  let tree;
+  try { tree = Expr.parse(String(input)); }
+  catch (e) { return { status: "invalid", message: e.message }; }
+  if (spec.kind === "value") {
+    if (Expr.vars(tree).size) return { status: "invalid", message: "La réponse est un nombre : pas de lettre." };
+    const v = Expr.evaluate(tree);
+    if (!isFinite(v)) return { status: "invalid", message: "Ce calcul n'a pas de valeur (division par zéro ?)." };
+    if (spec.round) {
+      if (Math.abs(v - spec.value) <= spec.round / 2 + 1e-9) return { status: "correct" };
+      if (Math.abs(v - spec.value) <= spec.round * 5) return { status: "close", message: "Presque : vérifie l'arrondi (au " + (spec.round === 0.01 ? "centième" : spec.round === 0.1 ? "dixième" : "près") + ")." };
+      return { status: "wrong" };
+    }
+    if (Expr.sameValue(v, spec.value)) return { status: "correct" };
+    if (Math.abs(v - spec.value) <= 1e-3 * Math.max(1, Math.abs(spec.value))) return { status: "close", message: "Très proche : donne la valeur exacte (fraction, racine, π…)." };
+    return { status: "wrong" };
+  }
+  if (spec.kind === "set") {
+    const items = tree.t === "list" ? tree.items : [tree];
+    if (items.some((i) => Expr.vars(i).size)) return { status: "invalid", message: "Sépare les solutions par « ; »." };
+    const got = items.map((i) => Expr.evaluate(i));
+    const want = spec.values;
+    const okAll = want.every((w) => got.some((g) => Expr.sameValue(g, w))) && got.every((g) => want.some((w) => Expr.sameValue(g, w)));
+    if (okAll) return { status: "correct" };
+    if (want.some((w) => got.some((g) => Expr.sameValue(g, w)))) return { status: "close", message: "Il manque une solution, ou il y en a une en trop." };
+    return { status: "wrong" };
+  }
+  if (spec.kind === "pair") {
+    const items = tree.t === "list" ? tree.items : [tree];
+    if (items.length !== 2 || items.some((i) => Expr.vars(i).size)) return { status: "invalid", message: "Donne deux nombres séparés par « ; » (x d'abord, puis y)." };
+    const [u, v] = items.map((i) => Expr.evaluate(i));
+    if (Expr.sameValue(u, spec.values[0]) && Expr.sameValue(v, spec.values[1])) return { status: "correct" };
+    if (Expr.sameValue(u, spec.values[1]) && Expr.sameValue(v, spec.values[0])) return { status: "close", message: "Les deux valeurs sont justes, mais dans le mauvais ordre : x d'abord." };
+    return { status: "wrong" };
+  }
+  if (spec.kind === "expr") {
+    const target = Expr.parse(spec.expr);
+    if (!Expr.equivalent(tree, target)) return { status: "wrong" };
+    if (spec.form === "product" && !Expr.isProduct(tree)) return { status: "form", message: "C'est égal, mais ce n'est pas factorisé : écris un produit." };
+    if (spec.form === "expanded" && !Expr.isExpanded(tree)) return { status: "form", message: "C'est égal, mais il reste des parenthèses : développe complètement." };
+    return { status: "correct" };
+  }
+  return { status: "invalid" };
+}
+
+// Figures SVG générées avec les valeurs de chaque question (aucune image externe).
+// Couleurs par classes CSS (.f-line, .f-fill, .f-accent, .f-soft, .f-txt) pour suivre le thème clair / sombre.
+
+const FIG = (() => {
+  const svg = (w, h, body, label) =>
+    '<svg class="fig" viewBox="0 0 ' + w + " " + h + '" role="img" aria-label="' + (label || "figure") + '" xmlns="http://www.w3.org/2000/svg">' + body + "</svg>";
+  const t = (x, y, s, cls = "f-txt", anchor = "middle", size = 14) =>
+    '<text x="' + x + '" y="' + y + '" class="' + cls + '" text-anchor="' + anchor + '" font-size="' + size + '">' + s + "</text>";
+  const L = (x1, y1, x2, y2, cls = "f-line", extra = "") => '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" class="' + cls + '" ' + extra + "/>";
+  const P = (pts, cls = "f-line") => '<polygon points="' + pts.map((p) => p.join(",")).join(" ") + '" class="' + cls + '"/>';
+  const fmt = (v) => String(+(+v).toFixed(3)).replace(".", ",");
+
+  // Droite graduée avec flèches de saut (nombres relatifs).
+  function numberLine(start, jumps) {
+    const vals = [start];
+    jumps.forEach((j) => vals.push(vals[vals.length - 1] + j));
+    let lo = Math.min(...vals, 0) - 1, hi = Math.max(...vals, 0) + 1;
+    if (hi - lo > 30) { lo = Math.min(...vals) - 1; hi = Math.max(...vals) + 1; }
+    const W = 340, X = (v) => 16 + ((v - lo) / (hi - lo)) * (W - 32);
+    let b = L(8, 70, W - 8, 70, "f-line", 'marker-end="url(#arr)"');
+    const step = hi - lo > 20 ? 5 : hi - lo > 10 ? 2 : 1;
+    for (let v = Math.ceil(lo); v <= hi; v++) {
+      b += L(X(v), 64, X(v), 76, v === 0 ? "f-accent" : "f-line");
+      if (v % step === 0) b += t(X(v), 94, v, v === 0 ? "f-accent f-txt" : "f-txt", "middle", 12);
+    }
+    vals.slice(0, -1).forEach((v, i) => {
+      const a = X(v), c = X(vals[i + 1]), mid = (a + c) / 2, up = 62 - 14 * (i % 2);
+      b += '<path d="M' + a + ",62 Q" + mid + "," + (up - 28) + " " + c + ',62" class="f-jump" marker-end="url(#arr2)"/>';
+      b += t(mid, up - 22, (jumps[i] > 0 ? "+" : "") + jumps[i], "f-accent f-txt", "middle", 12);
+    });
+    b += '<circle cx="' + X(start) + '" cy="70" r="5" class="f-dot"/>';
+    return svg(W, 104, defs() + b, "droite graduée");
+  }
+  const defs = () => '<defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="f-head"/></marker><marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="f-headacc"/></marker></defs>';
+
+  // Barres de fractions : chaque fraction est une barre découpée en parts égales.
+  function fractionBars(list) {
+    const W = 340, H = 30 + list.length * 40;
+    let b = "";
+    list.forEach(([n, d], i) => {
+      const y = 14 + i * 40, w = 250, cw = w / d;
+      for (let k = 0; k < d; k++) b += '<rect x="' + (16 + k * cw) + '" y="' + y + '" width="' + cw + '" height="26" class="' + (k < n ? "f-fill" : "f-soft") + '"/>';
+      b += t(16 + w + 36, y + 19, n + "/" + d, "f-txt", "middle", 15);
+    });
+    return svg(W, H, b, "barres de fractions");
+  }
+
+  // Jauge de pourcentage.
+  function percentBar(p, total, unit = "") {
+    const W = 340, w = 300 * p / 100;
+    let b = '<rect x="16" y="24" width="300" height="28" rx="6" class="f-soft"/>' + '<rect x="16" y="24" width="' + w + '" height="28" rx="6" class="f-fill"/>';
+    b += t(16 + w / 2, 43, p + " %", "f-on", "middle", 13) + t(316, 16, fmt(total) + unit, "f-txt", "end", 12) + t(16, 16, "0", "f-txt", "start", 12);
+    return svg(W, 62, b, "pourcentage");
+  }
+
+  // Balance : équation a·x + b = c.
+  function balance(left, right) {
+    let b = L(170, 30, 170, 108) + P([[150, 108], [190, 108], [170, 92]], "f-soft") + L(50, 40, 290, 40, "f-line", 'stroke-width="3"');
+    b += L(70, 40, 70, 58) + L(270, 40, 270, 58);
+    b += '<rect x="20" y="58" width="100" height="30" rx="6" class="f-fill"/>' + t(70, 78, left, "f-on", "middle", 13);
+    b += '<rect x="220" y="58" width="100" height="30" rx="6" class="f-soft"/>' + t(270, 78, right, "f-txt", "middle", 13);
+    return svg(340, 116, b, "balance");
+  }
+
+  // Triangle rectangle coté (Pythagore) ; labels : [cathète horizontale, cathète verticale, hypoténuse].
+  function rightTriangle(lab) {
+    const A = [80, 130], B = [290, 130], C = [80, 30];
+    let b = P([A, B, C], "f-shape") + '<rect x="80" y="118" width="12" height="12" class="f-line" fill="none"/>';
+    b += t(185, 150, lab[0]) + t(72, 84, lab[1], "f-txt", "end") + t(196, 72, lab[2], "f-accent f-txt", "start");
+    return svg(320, 160, b, "triangle rectangle");
+  }
+
+  // Configuration de Thalès.
+  function thales(lab) {
+    const A = [150, 20], B = [40, 150], C = [290, 150], k = 0.45;
+    const D = [A[0] + (B[0] - A[0]) * k, A[1] + (B[1] - A[1]) * k], E = [A[0] + (C[0] - A[0]) * k, A[1] + (C[1] - A[1]) * k];
+    let b = P([A, B, C], "f-shape") + L(D[0], D[1], E[0], E[1], "f-accent", 'stroke-width="2.5"');
+    b += t(A[0], A[1] - 6, "A") + t(B[0] - 10, B[1] + 4, "B") + t(C[0] + 10, C[1] + 4, "C") + t(D[0] - 10, D[1], "D") + t(E[0] + 10, E[1], "E");
+    (lab || []).forEach(([x, y, s]) => (b += t(x, y, s, "f-accent f-txt", "middle", 12)));
+    return svg(330, 170, b, "configuration de Thalès");
+  }
+
+  function rectFig(w, h, lw, lh) {
+    const s = Math.min(240 / w, 110 / h), W = w * s, H = h * s;
+    return svg(300, H + 40, '<rect x="' + (150 - W / 2) + '" y="12" width="' + W + '" height="' + H + '" class="f-shape"/>' + t(150, H + 32, lw) + t(150 - W / 2 - 8, 12 + H / 2, lh, "f-txt", "end"), "rectangle");
+  }
+  function triangleFig(lb, lh) {
+    let b = P([[40, 130], [260, 130], [180, 30]], "f-shape") + L(180, 30, 180, 130, "f-accent", 'stroke-dasharray="5 4"');
+    return svg(300, 152, b + t(150, 148, lb) + t(190, 86, lh, "f-accent f-txt", "start"), "triangle");
+  }
+  function trapezoid(lB, lb, lh) {
+    let b = P([[30, 130], [270, 130], [210, 40], [90, 40]], "f-shape") + L(90, 40, 90, 130, "f-accent", 'stroke-dasharray="5 4"');
+    return svg(300, 152, b + t(150, 148, lB) + t(150, 32, lb) + t(82, 90, lh, "f-accent f-txt", "end"), "trapèze");
+  }
+  function disk(lr) {
+    return svg(300, 150, '<circle cx="150" cy="75" r="62" class="f-shape"/>' + L(150, 75, 212, 75, "f-accent", 'stroke-width="2"') + '<circle cx="150" cy="75" r="3" class="f-dot"/>' + t(181, 68, lr, "f-accent f-txt"), "disque");
+  }
+  function square(ls) {
+    return svg(300, 160, '<rect x="80" y="14" width="130" height="130" class="f-shape"/>' + L(80, 144, 210, 14, "f-accent", 'stroke-dasharray="6 4"') + t(145, 158, ls) + t(158, 74, "?", "f-accent f-txt", "start", 16), "carré");
+  }
+  // Pavé droit en perspective cavalière.
+  function box(la, lb, lc) {
+    const x = 60, y = 60, w = 150, h = 80, dx = 50, dy = -36;
+    let b = '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" class="f-shape"/>';
+    b += P([[x, y], [x + dx, y + dy], [x + w + dx, y + dy], [x + w, y]], "f-shape2") + P([[x + w, y], [x + w + dx, y + dy], [x + w + dx, y + h + dy], [x + w, y + h]], "f-shape2");
+    return svg(300, 170, b + t(x + w / 2, y + h + 18, la) + t(x + w + dx / 2 + 14, y + h + dy / 2 + 6, lb, "f-txt", "start") + t(x - 8, y + h / 2, lc, "f-txt", "end"), "pavé");
+  }
+  function pyramid(lc, lh) {
+    const b = P([[60, 140], [200, 140], [250, 110], [110, 110]], "f-shape2") + P([[60, 140], [200, 140], [150, 20]], "f-shape") + P([[200, 140], [250, 110], [150, 20]], "f-shape2") + L(155, 125, 150, 20, "f-accent", 'stroke-dasharray="5 4"');
+    return svg(300, 162, b + t(130, 158, lc) + t(160, 80, lh, "f-accent f-txt", "start"), "pyramide");
+  }
+  function cone(lr, lh) {
+    const b = '<ellipse cx="150" cy="130" rx="80" ry="18" class="f-shape2"/>' + P([[70, 130], [230, 130], [150, 20]], "f-shape") + L(150, 130, 150, 20, "f-accent", 'stroke-dasharray="5 4"') + L(150, 130, 230, 130, "f-accent");
+    return svg(300, 160, b + t(190, 124, lr, "f-accent f-txt") + t(158, 80, lh, "f-accent f-txt", "start"), "cône");
+  }
+  // Route et chronomètre (vitesse).
+  function road(ld, lt) {
+    let b = '<rect x="16" y="56" width="300" height="26" rx="4" class="f-soft"/>' + L(24, 69, 308, 69, "f-on", 'stroke-dasharray="14 10" stroke-width="2"');
+    b += '<rect x="20" y="40" width="34" height="16" rx="4" class="f-fill"/><circle cx="28" cy="58" r="4" class="f-dot"/><circle cx="46" cy="58" r="4" class="f-dot"/>';
+    b += L(312, 30, 312, 56, "f-line") + P([[312, 30], [330, 36], [312, 42]], "f-fill");
+    return svg(340, 104, b + t(166, 100, ld) + t(166, 28, lt, "f-accent f-txt"), "trajet");
+  }
+  // Rangée d'objets (proportionnalité).
+  function items(n, label, maxShow = 12) {
+    let b = "";
+    const k = Math.min(n, maxShow);
+    for (let i = 0; i < k; i++) b += '<rect x="' + (16 + i * 26) + '" y="20" width="20" height="28" rx="3" class="' + (i % 2 ? "f-fill" : "f-fill2") + '"/>';
+    if (n > maxShow) b += t(16 + k * 26 + 14, 40, "…");
+    return svg(340, 74, b + t(16, 68, label, "f-txt", "start", 12), "objets");
+  }
+  // Agrandissement : petite et grande figure.
+  function scaling(k, kind) {
+    const s = 30, S = 30 * Math.min(k, 4);
+    let b = '<rect x="16" y="' + (130 - s) + '" width="' + s + '" height="' + s + '" class="f-shape"/>' + '<rect x="' + (80) + '" y="' + (130 - S) + '" width="' + S + '" height="' + S + '" class="f-fill2"/>';
+    return svg(340, 140, b + t(31, 124 - s, "1") + t(80 + S + 10, 130 - S / 2, "× " + k + (kind ? " (" + kind + ")" : ""), "f-accent f-txt", "start"), "agrandissement");
+  }
+  // Repère avec une droite (fonctions affines).
+  function lineGraph(a, b, pts = []) {
+    const W = 300, H = 180, X = (x) => 150 + x * 18, Y = (y) => 90 - y * 6;
+    let g = L(10, 90, 290, 90) + L(150, 8, 150, 172);
+    for (let x = -7; x <= 7; x++) g += L(X(x), 87, X(x), 93);
+    const x1 = -7.5, x2 = 7.5;
+    g += '<clipPath id="cl"><rect x="10" y="8" width="280" height="164"/></clipPath>';
+    g += '<line x1="' + X(x1) + '" y1="' + Y(a * x1 + b) + '" x2="' + X(x2) + '" y2="' + Y(a * x2 + b) + '" class="f-accent" stroke-width="2.5" clip-path="url(#cl)"/>';
+    pts.forEach(([x, y, s]) => (g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="4.5" class="f-dot"/>' + t(X(x) + 8, Y(y) - 8, s, "f-txt", "start", 12)));
+    return svg(W, H, g, "droite");
+  }
+  // Puissances : blocs (base^exposant).
+  function blocks(label) {
+    let b = "";
+    for (let i = 0; i < 3; i++) for (let j = 0; j <= i; j++) b += '<rect x="' + (30 + i * 70 + j * 10) + '" y="' + (80 - j * 18) + '" width="44" height="16" rx="2" class="' + (j % 2 ? "f-fill2" : "f-fill") + '"/>';
+    return svg(300, 110, b + t(150, 108, label, "f-txt", "middle", 12), "puissances");
+  }
+  // Échelle de puissances de 10.
+  function sciScale(exp) {
+    let b = L(16, 50, 324, 50);
+    for (let e = -6; e <= 8; e++) {
+      const x = 16 + (e + 6) * 22;
+      b += L(x, 44, x, 56, e === exp ? "f-accent" : "f-line") + (e % 2 === 0 ? t(x, 74, "10^" + e, e === exp ? "f-accent f-txt" : "f-txt", "middle", 10) : "");
+    }
+    return svg(340, 84, b + '<circle cx="' + (16 + (exp + 6) * 22) + '" cy="50" r="6" class="f-dot"/>', "ordres de grandeur");
+  }
+  // Carré d'aire n (racines).
+  function areaSquare(label) {
+    return svg(300, 150, '<rect x="95" y="15" width="110" height="110" class="f-fill2"/>' + t(150, 76, label, "f-txt", "middle", 15) + t(150, 145, "côté = ?", "f-accent f-txt", "middle", 13), "carré d'aire donnée");
+  }
+  // Expression en tuiles (calcul littéral) : rectangle découpé.
+  function tiles(a, b, la, lb) {
+    let g = '<rect x="40" y="20" width="' + a + '" height="' + b + '" class="f-fill2"/>';
+    return svg(300, b + 50, g + t(40 + a / 2, b + 40, la) + t(32, 20 + b / 2, lb, "f-txt", "end"), "aire d'un rectangle");
+  }
+
+  // Parabole y = a(x - p)(x - q) ou a x² + b x + c, avec points marqués.
+  function parabola(f, pts = [], line = null) {
+    const W = 300, H = 190, X = (x) => 150 + x * 20, Y = (y) => 120 - y * 8;
+    let g = L(10, Y(0), 290, Y(0)) + L(X(0), 6, X(0), 184);
+    for (let x = -6; x <= 6; x++) g += L(X(x), Y(0) - 3, X(x), Y(0) + 3);
+    let d = "";
+    for (let x = -7; x <= 7.01; x += 0.1) { const y = f(x); if (Y(y) > -40 && Y(y) < H + 40) d += (d ? " L" : "M") + X(x).toFixed(1) + "," + Y(y).toFixed(1); else if (d && !d.endsWith("B")) d += " B"; }
+    d = d.replace(/ B M/g, " M").replace(/ B/g, "");
+    g += '<clipPath id="cp"><rect x="6" y="6" width="288" height="178"/></clipPath><path d="' + d + '" class="f-accent" fill="none" stroke-width="2.5" clip-path="url(#cp)"/>';
+    if (line) g += '<line x1="' + X(-7) + '" y1="' + Y(line(-7)) + '" x2="' + X(7) + '" y2="' + Y(line(7)) + '" class="f-line" stroke-width="2" clip-path="url(#cp)"/>';
+    pts.forEach(([x, y, s]) => (g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="4.5" class="f-dot"/>' + t(X(x) + 8, Y(y) - 8, s, "f-txt", "start", 12)));
+    return svg(W, H, g, "parabole");
+  }
+  // Triangle rectangle avec angle marqué en A (trigonométrie).
+  function trigTriangle(lab, angle) {
+    const A = [40, 130], B = [260, 130], C = [260, 40];
+    let b = P([A, B, C], "f-shape") + '<rect x="248" y="118" width="12" height="12" class="f-line" fill="none"/>';
+    b += '<path d="M80,130 A40,40 0 0,0 77,115" class="f-accent" fill="none" stroke-width="2"/>' + t(92, 124, angle, "f-accent f-txt", "start", 13);
+    b += t(150, 150, lab[0]) + t(272, 88, lab[1], "f-txt", "start") + t(138, 74, lab[2], "f-txt", "end");
+    return svg(320, 160, b, "triangle rectangle et angle");
+  }
+  // Cercle, angle au centre et angle inscrit.
+  function circleAngles(lCenter, lInscribed) {
+    const cx = 150, cy = 90, r = 70, pt = (deg) => [cx + r * Math.cos((deg * Math.PI) / 180), cy - r * Math.sin((deg * Math.PI) / 180)];
+    const A = pt(210), B = pt(330), C = pt(95);
+    let g = '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" class="f-shape"/>' + P([A, [cx, cy], B], "f-fill2") + L(A[0], A[1], C[0], C[1]) + L(B[0], B[1], C[0], C[1]);
+    g += t(A[0] - 10, A[1] + 12, "A") + t(B[0] + 10, B[1] + 12, "B") + t(C[0], C[1] - 8, "C") + t(cx, cy - 8, "O");
+    g += t(cx, cy + 34, lCenter, "f-accent f-txt", "middle", 12) + t(C[0] + 4, C[1] + 34, lInscribed, "f-accent f-txt", "start", 12);
+    return svg(300, 180, g, "angles au centre et inscrit");
+  }
+
+  return { parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, pyramid, cone, road, items, scaling, lineGraph, blocks, sciScale, areaSquare, tiles, fmt };
+})();
+
+// Générateurs de questions : un par notion, 3 niveaux de difficulté (1 = bases, 3 = approfondi).
+// Chaque générateur rend { q, spec, sol } : énoncé (HTML + TeX entre \( \)), spécification de la
+// réponse pour checkAnswer(), corrigé court. Les nombres sont tirés au hasard ; les réponses sont
+// calculées, jamais saisies à la main.
+
+const R = {
+  int: (a, b) => a + Math.floor(Math.random() * (b - a + 1)),
+  nz: (a, b) => { let v; do v = R.int(a, b); while (v === 0); return v; },
+  pick: (arr) => arr[Math.floor(Math.random() * arr.length)],
+  sign: () => (Math.random() < 0.5 ? -1 : 1),
+};
+const gcd = (a, b) => (b ? gcd(b, a % b) : Math.abs(a));
+const M = (t) => "\\(" + t + "\\)";
+const dec = (v) => String(+(+v).toFixed(10)).replace(".", "{,}");
+const decTxt = (v) => String(+(+v).toFixed(10)).replace(".", ",");
+const par = (v) => (v < 0 ? "(" + v + ")" : String(v));
+function frac(n, d) {
+  if (d < 0) { n = -n; d = -d; }
+  const g = gcd(n, d) || 1; n /= g; d /= g;
+  if (d === 1) return String(n);
+  return (n < 0 ? "-" : "") + "\\frac{" + Math.abs(n) + "}{" + d + "}";
+}
+// Polynôme en x à partir de coefficients [a_n … a_0] (degré = longueur - 1).
+function poly(cs, x = "x") {
+  const deg = cs.length - 1;
+  let out = "";
+  cs.forEach((c, i) => {
+    const p = deg - i;
+    if (c === 0) return;
+    const abs = Math.abs(c);
+    const coef = p === 0 ? String(abs) : abs === 1 ? "" : String(abs);
+    const term = coef + (p === 0 ? "" : p === 1 ? x : x + "^" + p);
+    out += out === "" ? (c < 0 ? "-" : "") + term : (c < 0 ? " - " : " + ") + term;
+  });
+  return out || "0";
+}
+const plain = (t) => t.replace(/\\frac\{([^}]*)\}\{([^}]*)\}/g, "($1)/($2)").replace(/\\cdot/g, "*").replace(/[{}\\]/g, "").replace(/ /g, "");
+
+const GEN = {
+  prio(d) {
+    if (d === 1) {
+      const a = R.int(2, 9), b = R.int(2, 9), c = R.int(2, 9);
+      return { fig: FIG.blocks(b + " groupes de " + c + ", puis + " + a), q: "Calcule : " + M(a + " + " + b + " \\cdot " + c), spec: { kind: "value", value: a + b * c }, sol: M(a + " + " + b * c + " = " + (a + b * c)) + " : la multiplication passe avant l'addition." };
+    }
+    if (d === 2) {
+      const a = R.int(10, 30), b = R.int(2, 6), c = R.int(5, 9), e = R.int(1, 4);
+      return { q: "Calcule : " + M(a + " - " + b + " \\cdot (" + c + " - " + e + ")"), spec: { kind: "value", value: a - b * (c - e) }, sol: M(a + " - " + b + " \\cdot " + (c - e) + " = " + a + " - " + b * (c - e) + " = " + (a - b * (c - e))) };
+    }
+    const a = R.int(2, 6), b = R.int(1, 5), e = R.int(2, 5), k = R.int(2, 6), c = e * k, dd = R.int(2, 5);
+    const v = (a + b) ** 2 - c * dd / e;
+    return { q: "Calcule : " + M("(" + a + " + " + b + ")^2 - " + c + " \\cdot " + dd + " : " + e), spec: { kind: "value", value: v }, sol: M((a + b) ** 2 + " - " + c * dd + " : " + e + " = " + (a + b) ** 2 + " - " + c * dd / e + " = " + v) };
+  },
+
+  rel(d) {
+    if (d === 1) {
+      const a = R.nz(-12, 12), b = R.nz(-12, 12);
+      return { fig: FIG.numberLine(a, [b]), q: "Calcule : " + M(par(a) + " + " + par(b)), spec: { kind: "value", value: a + b }, sol: M(par(a) + " + " + par(b) + " = " + (a + b)) };
+    }
+    if (d === 2) {
+      const a = R.nz(-9, 9), b = R.int(2, 6), c = R.nz(-6, 6);
+      return { fig: FIG.numberLine(a, [-b * c]), q: "Calcule : " + M(par(a) + " - " + b + " \\cdot " + par(c)), spec: { kind: "value", value: a - b * c }, sol: M(par(a) + " - " + par(b * c) + " = " + (a - b * c)) };
+    }
+    const a = R.int(2, 5), b = R.int(2, 3);
+    const v = -(a ** 2) + (-a) ** 2 - (-b) ** 3;
+    return { q: "Calcule : " + M("-" + a + "^2 + (-" + a + ")^2 - (-" + b + ")^3"), spec: { kind: "value", value: v }, sol: M("-" + a * a + " + " + a * a + " - (" + (-(b ** 3)) + ") = " + v) + " : " + M("-" + a + "^2") + " vaut " + M("-" + a * a) + ", mais " + M("(-" + a + ")^2 = " + a * a) + "." };
+  },
+
+  fracadd(d) {
+    if (d === 1) {
+      const b = R.int(3, 9), a = R.int(1, b - 1), c = R.int(1, b - 1);
+      return { fig: FIG.fractionBars([[a, b], [c, b]]), q: "Calcule et simplifie : " + M("\\frac{" + a + "}{" + b + "} + \\frac{" + c + "}{" + b + "}"), spec: { kind: "value", value: (a + c) / b }, sol: M("\\frac{" + (a + c) + "}{" + b + "}" + (gcd(a + c, b) > 1 ? " = " + frac(a + c, b) : "")) };
+    }
+    if (d === 2) {
+      let b, e; do { b = R.int(2, 9); e = R.int(2, 9); } while (b === e);
+      const a = R.int(1, b - 1), c = R.int(1, e - 1);
+      return { fig: FIG.fractionBars([[a, b], [c, e]]), q: "Calcule et simplifie : " + M("\\frac{" + a + "}{" + b + "} + \\frac{" + c + "}{" + e + "}"), spec: { kind: "value", value: a / b + c / e }, sol: M("\\frac{" + a * e + " + " + c * b + "}{" + b * e + "} = " + frac(a * e + c * b, b * e)) + " (dénominateur commun)." };
+    }
+    const b = R.pick([2, 3, 4]), e = R.pick([3, 4, 6]), f = 12;
+    const a = R.int(1, b), c = R.int(1, e), g = R.int(1, 11);
+    const num = a * (f / b) - c * (f / e) + g;
+    return { q: "Calcule et simplifie : " + M("\\frac{" + a + "}{" + b + "} - \\frac{" + c + "}{" + e + "} + \\frac{" + g + "}{12}"), spec: { kind: "value", value: num / 12 }, sol: M("\\frac{" + a * (f / b) + " - " + c * (f / e) + " + " + g + "}{12} = " + frac(num, 12)) };
+  },
+
+  fracmul(d) {
+    if (d === 1) {
+      const a = R.int(1, 9), b = R.int(2, 9), c = R.int(1, 9), e = R.int(2, 9);
+      return { fig: FIG.fractionBars([[a, b], [c, e]]), q: "Calcule et simplifie : " + M("\\frac{" + a + "}{" + b + "} \\cdot \\frac{" + c + "}{" + e + "}"), spec: { kind: "value", value: (a * c) / (b * e) }, sol: M("\\frac{" + a + " \\cdot " + c + "}{" + b + " \\cdot " + e + "} = " + frac(a * c, b * e)) };
+    }
+    if (d === 2) {
+      const a = R.int(1, 9), b = R.int(2, 9), c = R.int(1, 9), e = R.int(2, 9);
+      return { q: "Calcule et simplifie : " + M("\\frac{" + a + "}{" + b + "} : \\frac{" + c + "}{" + e + "}"), spec: { kind: "value", value: (a * e) / (b * c) }, sol: "Diviser, c'est multiplier par l'inverse : " + M("\\frac{" + a + "}{" + b + "} \\cdot \\frac{" + e + "}{" + c + "} = " + frac(a * e, b * c)) };
+    }
+    const a = R.int(1, 3), b = 4, c = R.int(1, 2), e = 3, f = R.int(2, 5), g = R.int(2, 7);
+    const inner = a / b - c / e;
+    return { q: "Calcule et simplifie : " + M("\\left(\\frac{" + a + "}{4} - \\frac{" + c + "}{3}\\right) : \\frac{" + f + "}{" + g + "}"), spec: { kind: "value", value: inner * g / f }, sol: M("\\frac{" + (3 * a - 4 * c) + "}{12} \\cdot \\frac{" + g + "}{" + f + "} = " + frac((3 * a - 4 * c) * g, 12 * f)) };
+  },
+
+  pct(d) {
+    if (d === 1) {
+      const p = R.pick([10, 20, 25, 50, 75]), n = 20 * R.int(2, 15);
+      return { fig: FIG.percentBar(p, n), q: "Calcule " + M(p + "\\,\\%") + " de " + M(n) + ".", spec: { kind: "value", value: (p * n) / 100 }, sol: M("\\frac{" + p + "}{100} \\cdot " + n + " = " + dec((p * n) / 100)) };
+    }
+    if (d === 2) {
+      const p = R.pick([10, 20, 25, 30, 40]), n = 10 * R.int(3, 20), up = Math.random() < 0.5;
+      const v = n * (1 + (up ? p : -p) / 100);
+      return { fig: FIG.percentBar(p, n, " CHF"), q: "Un article coûte " + M(n) + " CHF. Son prix " + (up ? "augmente" : "baisse") + " de " + M(p + "\\,\\%") + ". Quel est le nouveau prix ?", spec: { kind: "value", value: v }, sol: M(n + " \\cdot " + dec(1 + (up ? p : -p) / 100) + " = " + dec(v)) + " CHF." };
+    }
+    const p = R.pick([10, 20, 25, 50]), n = 4 * R.int(5, 30), f = n * (1 + p / 100);
+    return { q: "Après une hausse de " + M(p + "\\,\\%") + ", un prix vaut " + M(dec(f)) + " CHF. Quel était le prix de départ ?", spec: { kind: "value", value: n }, sol: M(dec(f) + " : " + dec(1 + p / 100) + " = " + n) + " CHF (on divise, on ne retire pas " + p + " %)." };
+  },
+
+  puiss(d) {
+    if (d === 1) {
+      const a = R.pick([2, 3, 10]), m = R.int(1, 3), n = R.int(1, 3);
+      return { fig: FIG.blocks(a + "^" + m + " · " + a + "^" + n), q: "Calcule : " + M(a + "^" + m + " \\cdot " + a + "^" + n), spec: { kind: "value", value: a ** (m + n) }, sol: M(a + "^{" + (m + n) + "} = " + a ** (m + n)) };
+    }
+    if (d === 2) {
+      const m = R.int(2, 7), n = R.int(-6, -1);
+      return { q: "Écris sous la forme d'une puissance de 10, puis calcule si tu veux : " + M("10^{" + m + "} \\cdot 10^{" + n + "}"), spec: { kind: "value", value: 10 ** (m + n) }, sol: M("10^{" + m + " + (" + n + ")} = 10^{" + (m + n) + "}") + " (on accepte aussi " + M(dec(10 ** (m + n))) + ")." };
+    }
+    const a = R.pick([2, 3]), m = R.int(2, 3), n = 2, k = R.int(2, 5);
+    return { q: "Calcule : " + M("\\frac{(" + a + "^" + m + ")^" + n + "}{" + a + "^" + k + "}"), spec: { kind: "value", value: a ** (m * n - k) }, sol: M(a + "^{" + m * n + " - " + k + "} = " + a + "^{" + (m * n - k) + "}" + " = " + frac(m * n - k >= 0 ? a ** (m * n - k) : 1, m * n - k >= 0 ? 1 : a ** (k - m * n))) };
+  },
+
+  sci(d) {
+    if (d === 1) {
+      const m = R.int(11, 99) / 10, e = R.int(-5, -2);
+      const v = m * 10 ** e;
+      return { fig: FIG.sciScale(e), q: "Écris " + M(dec(v)) + " en notation scientifique (par exemple " + M("2{,}5 \\cdot 10^{-3}") + ").", spec: { kind: "value", value: v }, sol: M(dec(v) + " = " + dec(m) + " \\cdot 10^{" + e + "}") };
+    }
+    if (d === 2) {
+      const a = R.int(2, 9), b = R.int(2, 9), m = R.int(3, 8), n = R.int(-6, -2);
+      const v = a * b * 10 ** (m + n);
+      const mant = a * b >= 10 ? a * b / 10 : a * b, ex = a * b >= 10 ? m + n + 1 : m + n;
+      return { q: "Calcule et donne le résultat en notation scientifique : " + M("(" + a + " \\cdot 10^{" + m + "}) \\cdot (" + b + " \\cdot 10^{" + n + "})"), spec: { kind: "value", value: v }, sol: M(a * b + " \\cdot 10^{" + (m + n) + "} = " + dec(mant) + " \\cdot 10^{" + ex + "}") };
+    }
+    const b = R.pick([2, 4, 5]), q = R.int(1, 9) * b, m = R.int(5, 9), n = R.int(-4, -1);
+    const v = (q / b) * 10 ** (m - n);
+    return { q: "Calcule : " + M("(" + q + " \\cdot 10^{" + m + "}) : (" + b + " \\cdot 10^{" + n + "})"), spec: { kind: "value", value: v }, sol: M(q / b + " \\cdot 10^{" + m + " - (" + n + ")} = " + q / b + " \\cdot 10^{" + (m - n) + "}") };
+  },
+
+  rac(d) {
+    if (d === 1) {
+      const k = R.int(2, 20);
+      return { fig: FIG.areaSquare("aire " + k * k), q: "Calcule " + M("\\sqrt{" + k * k + "}") + ".", spec: { kind: "value", value: k }, sol: M("\\sqrt{" + k * k + "} = " + k) + " car " + M(k + "^2 = " + k * k) + "." };
+    }
+    if (d === 2) {
+      const k = R.int(2, 7), m = R.pick([2, 3, 5, 6, 7]);
+      return { fig: FIG.areaSquare("aire " + k * k * m), q: "Écris " + M("\\sqrt{" + k * k * m + "}") + " sous la forme " + M("a\\sqrt{b}") + " (tape par exemple " + M("3\\sqrt{2}") + " avec la touche √).", spec: { kind: "value", value: k * Math.sqrt(m) }, sol: M("\\sqrt{" + k * k + " \\cdot " + m + "} = " + k + "\\sqrt{" + m + "}") };
+    }
+    const m = R.pick([2, 3, 5]), a = R.int(2, 4), b = R.int(2, 5);
+    return { q: "Simplifie : " + M("\\sqrt{" + a * a * m + "} + \\sqrt{" + b * b * m + "}"), spec: { kind: "value", value: (a + b) * Math.sqrt(m) }, sol: M(a + "\\sqrt{" + m + "} + " + b + "\\sqrt{" + m + "} = " + (a + b) + "\\sqrt{" + m + "}") };
+  },
+
+  valnum(d) {
+    const x = R.nz(-5, 5);
+    if (d === 1) {
+      const a = R.nz(-6, 6), b = R.nz(-9, 9);
+      return { fig: FIG.numberLine(0, [x]), q: "Calcule " + M(poly([a, b])) + " pour " + M("x = " + x) + ".", spec: { kind: "value", value: a * x + b }, sol: M(a + " \\cdot " + par(x) + (b < 0 ? " - " + -b : " + " + b) + " = " + (a * x + b)) };
+    }
+    if (d === 2) {
+      const a = R.nz(-4, 4), b = R.nz(-6, 6);
+      return { q: "Calcule " + M(poly([a, b, 0])) + " pour " + M("x = " + x) + ".", spec: { kind: "value", value: a * x * x + b * x }, sol: M(a + " \\cdot " + par(x) + "^2 " + (b < 0 ? "- " + -b : "+ " + b) + " \\cdot " + par(x) + " = " + (a * x * x + b * x)) };
+    }
+    let a, b; do { a = R.int(-6, 8); b = R.nz(-6, 6); } while (a + b === 0);
+    return { q: "Calcule " + M("\\frac{(a - b)^2}{a + b}") + " pour " + M("a = " + a) + " et " + M("b = " + b) + ".", spec: { kind: "value", value: (a - b) ** 2 / (a + b) }, sol: M("\\frac{" + par(a - b) + "^2}{" + (a + b) + "} = " + frac((a - b) ** 2, a + b)) };
+  },
+
+  reduire(d) {
+    if (d === 1) {
+      const a = R.int(2, 9), b = R.nz(-9, 9), c = R.nz(-5, 5), e = R.nz(-9, 9);
+      const t = poly([a, b]) + (c < 0 ? " - " : " + ") + (Math.abs(c) === 1 ? "" : Math.abs(c)) + "x" + (e < 0 ? " - " : " + ") + Math.abs(e);
+      return { q: "Réduis : " + M(t), spec: { kind: "expr", expr: (a + c) + "x+(" + (b + e) + ")", form: "expanded" }, sol: M(poly([a + c, b + e])) };
+    }
+    if (d === 2) {
+      const a = R.int(2, 6), b = R.nz(-6, 6), c = R.nz(-5, 5), e = R.nz(-6, 6), f = R.nz(-9, 9);
+      const t = poly([a, b, 0]) + (c < 0 ? " - " : " + ") + Math.abs(c) + "x^2" + (e < 0 ? " - " : " + ") + Math.abs(e) + "x" + (f < 0 ? " - " : " + ") + Math.abs(f);
+      return { q: "Réduis : " + M(t), spec: { kind: "expr", expr: (a + c) + "x^2+(" + (b + e) + ")x+(" + f + ")", form: "expanded" }, sol: M(poly([a + c, b + e, f])) };
+    }
+    const a = R.int(2, 5), b = R.int(1, 7), c = R.int(2, 5), e = R.int(1, 7);
+    return { q: "Réduis : " + M("-(" + a + "x - " + b + ") + " + c + "(x - " + e + ")"), spec: { kind: "expr", expr: "-" + a + "x+" + b + "+" + c + "x-" + c * e, form: "expanded" }, sol: M("-" + a + "x + " + b + " + " + c + "x - " + c * e + " = " + poly([c - a, b - c * e])) };
+  },
+
+  distrib(d) {
+    if (d === 1) {
+      const k = R.pick([-6, -5, -4, -3, -2, 2, 3, 4, 5, 6, 7]), a = R.int(1, 6), b = R.nz(-9, 9);
+      return { fig: FIG.tiles(160, 70, poly([a, b]).replace(/\^2/g,"²"), String(k)), q: "Développe : " + M(k + "(" + poly([a, b]) + ")"), spec: { kind: "expr", expr: k + "*(" + a + "x+(" + b + "))", form: "expanded" }, sol: M(poly([k * a, k * b])) };
+    }
+    if (d === 2) {
+      const a = R.nz(-8, 8), b = R.nz(-8, 8);
+      return { fig: FIG.tiles(170, 90, "x " + (a < 0 ? "− " + -a : "+ " + a), "x " + (b < 0 ? "− " + -b : "+ " + b)), q: "Développe et réduis : " + M("(" + poly([1, a]) + ")(" + poly([1, b]) + ")"), spec: { kind: "expr", expr: "(x+(" + a + "))(x+(" + b + "))", form: "expanded" }, sol: M("x^2 " + (b < 0 ? "- " + -b : "+ " + b) + "x " + (a < 0 ? "- " + -a : "+ " + a) + "x " + (a * b < 0 ? "- " + -a * b : "+ " + a * b) + " = " + poly([1, a + b, a * b])) };
+    }
+    const a = R.int(2, 5), b = R.nz(-7, 7), c = R.int(2, 5), e = R.nz(-7, 7);
+    return { q: "Développe et réduis : " + M("(" + poly([a, b]) + ")(" + poly([c, e]) + ")"), spec: { kind: "expr", expr: "(" + a + "x+(" + b + "))(" + c + "x+(" + e + "))", form: "expanded" }, sol: M(poly([a * c, a * e + b * c, b * e])) };
+  },
+
+  idrem(d) {
+    const a = R.int(1, 9);
+    if (d === 1) return { fig: FIG.tiles(120, 120, "x + " + a, "x + " + a), q: "Développe : " + M("(x + " + a + ")^2"), spec: { kind: "expr", expr: "(x+" + a + ")^2", form: "expanded" }, sol: M("x^2 + 2 \\cdot " + a + "x + " + a + "^2 = " + poly([1, 2 * a, a * a])) };
+    if (d === 2) {
+      if (Math.random() < 0.5) return { q: "Développe : " + M("(x - " + a + ")^2"), spec: { kind: "expr", expr: "(x-" + a + ")^2", form: "expanded" }, sol: M(poly([1, -2 * a, a * a])) + " (n'oublie pas le double produit)." };
+      return { q: "Développe : " + M("(x + " + a + ")(x - " + a + ")"), spec: { kind: "expr", expr: "x^2-" + a * a, form: "expanded" }, sol: M("x^2 - " + a * a) };
+    }
+    const k = R.int(2, 5), b = R.int(1, 7);
+    return { q: "Développe : " + M("(" + k + "x - " + b + ")^2"), spec: { kind: "expr", expr: "(" + k + "x-" + b + ")^2", form: "expanded" }, sol: M(k * k + "x^2 - " + 2 * k * b + "x + " + b * b) };
+  },
+
+  factor(d) {
+    if (d === 1) {
+      const g = R.int(2, 6), a = R.int(1, 5), b = R.nz(-7, 7);
+      if (gcd(a, b) !== 1) return GEN.factor(1);
+      return { fig: FIG.tiles(170, 70, "?", "?"), q: "Factorise : " + M(poly([g * a, g * b, 0])), spec: { kind: "expr", expr: g + "x(" + a + "x+(" + b + "))", form: "product" }, sol: M(g + "x(" + poly([a, b]) + ")") + " : mise en évidence de " + M(g + "x") + "." };
+    }
+    if (d === 2) {
+      const a = R.int(1, 9), k = R.pick([1, 1, 2, 3]);
+      const t = (k === 1 ? "" : k * k) + "x^2 - " + a * a;
+      return { q: "Factorise : " + M(t), spec: { kind: "expr", expr: "(" + k + "x-" + a + ")(" + k + "x+" + a + ")", form: "product" }, sol: M("(" + (k === 1 ? "" : k) + "x - " + a + ")(" + (k === 1 ? "" : k) + "x + " + a + ")") + " : identité " + M("a^2 - b^2") + "." };
+    }
+    if (Math.random() < 0.5) {
+      const a = R.nz(-9, 9);
+      return { q: "Factorise : " + M(poly([1, 2 * a, a * a])), spec: { kind: "expr", expr: "(x+(" + a + "))^2", form: "product" }, sol: M("(" + poly([1, a]) + ")^2") };
+    }
+    let a, b; do { a = R.nz(-8, 8); b = R.nz(-8, 8); } while (a === -b || a === b);
+    return { q: "Factorise : " + M(poly([1, a + b, a * b])), spec: { kind: "expr", expr: "(x+(" + a + "))(x+(" + b + "))", form: "product" }, sol: M("(" + poly([1, a]) + ")(" + poly([1, b]) + ")") + " : deux nombres de somme " + M(a + b) + " et de produit " + M(a * b) + "." };
+  },
+
+  eq1(d) {
+    if (d === 1) {
+      const a = R.nz(-6, 7), x = R.nz(-9, 9), b = R.nz(-12, 12);
+      return { fig: FIG.balance(poly([a, b]).replace(/\^2/g,"²"), String(a * x + b)), q: "Résous : " + M(poly([a, b]) + " = " + (a * x + b)), spec: { kind: "value", value: x }, sol: M(a + "x = " + (a * x + b - b) + " \\iff x = " + x) };
+    }
+    if (d === 2) {
+      let a, c; do { a = R.int(2, 6); c = R.int(1, 5); } while (a === c);
+      const b = R.nz(-6, 6), e = R.nz(-9, 9);
+      const x = (e - a * b) / (a - c);
+      return { fig: FIG.balance(a + "(x " + (b < 0 ? "− " + -b : "+ " + b) + ")", poly([c, e])), q: "Résous : " + M(a + "(x " + (b < 0 ? "- " + -b : "+ " + b) + ") = " + poly([c, e])), spec: { kind: "value", value: x }, sol: M(a + "x " + (a * b < 0 ? "- " + -a * b : "+ " + a * b) + " = " + poly([c, e]) + " \\iff " + (a - c) + "x = " + (e - a * b) + " \\iff x = " + frac(e - a * b, a - c)) };
+    }
+    const p = R.pick([2, 3, 4]), r = R.pick([3, 5, 6]), b = R.nz(-5, 5);
+    if (p === r) return GEN.eq1(3);
+    // x/p + b = x/r  →  x(1/p - 1/r) = -b
+    const x = -b / (1 / p - 1 / r);
+    return { q: "Résous : " + M("\\frac{x}{" + p + "} " + (b < 0 ? "- " + -b : "+ " + b) + " = \\frac{x}{" + r + "}"), spec: { kind: "value", value: x }, sol: "On multiplie par " + M(p * r / gcd(p, r)) + " : la solution est " + M("x = " + frac(-b * p * r, r - p)) + "." };
+  },
+
+  eq2(d) {
+    if (d === 1) {
+      const a = R.nz(-9, 9), b = R.nz(-9, 9);
+      return { q: "Résous : " + M("(" + poly([1, -a]) + ")(" + poly([1, b]) + ") = 0") + ". Sépare les solutions par « ; ».", spec: { kind: "set", values: [...new Set([a, -b])] }, sol: "Un produit est nul si l'un des facteurs est nul : " + M("x = " + a) + " ou " + M("x = " + -b) + "." };
+    }
+    if (d === 2) {
+      const k = R.int(2, 12);
+      return { q: "Résous : " + M("x^2 - " + k + "x = 0") + ". Sépare les solutions par « ; ».", spec: { kind: "set", values: [0, k] }, sol: M("x(x - " + k + ") = 0") + " : " + M("x = 0") + " ou " + M("x = " + k) + "." };
+    }
+    const a = R.int(2, 5), b = R.int(1, 9);
+    if (gcd(a, b) !== 1) return GEN.eq2(3);
+    return { q: "Résous : " + M(a * a + "x^2 - " + b * b + " = 0") + ". Sépare les solutions par « ; ».", spec: { kind: "set", values: [b / a, -b / a] }, sol: M("(" + a + "x - " + b + ")(" + a + "x + " + b + ") = 0") + " : " + M("x = " + frac(b, a)) + " ou " + M("x = -" + frac(b, a)) + "." };
+  },
+
+  prop(d) {
+    if (d === 1) {
+      const k = R.int(2, 6), u = R.int(2, 9), n = R.int(2, 12);
+      return { fig: FIG.items(k, k + " cahiers → " + k * u + " CHF"), q: M(k) + " cahiers coûtent " + M(k * u) + " CHF. Combien coûtent " + M(n) + " cahiers ?", spec: { kind: "value", value: n * u }, sol: "Un cahier coûte " + M(u) + " CHF, donc " + M(n + " \\cdot " + u + " = " + n * u) + " CHF." };
+    }
+    if (d === 2) {
+      const g = 25 * R.int(4, 16), p1 = R.pick([4, 6, 8]), p2 = R.pick([3, 5, 10, 12]);
+      return { fig: FIG.items(p1, p1 + " personnes → " + g + " g"), q: "Pour " + M(p1) + " personnes, une recette demande " + M(g) + " g de farine. Combien en faut-il pour " + M(p2) + " personnes ?", spec: { kind: "value", value: (g * p2) / p1 }, sol: M("\\frac{" + g + "}{" + p1 + "} \\cdot " + p2 + " = " + dec((g * p2) / p1)) + " g." };
+    }
+    const rate = R.pick([0.92, 0.94, 0.95, 1.05, 1.08]), e = 10 * R.int(2, 30);
+    return { q: "1 euro vaut " + M(dec(rate)) + " CHF. Combien d'euros obtient-on pour " + M(dec(e * rate)) + " CHF ?", spec: { kind: "value", value: e }, sol: M(dec(e * rate) + " : " + dec(rate) + " = " + e) + " euros." };
+  },
+
+  vitesse(d) {
+    if (d === 1) {
+      const v = 10 * R.int(3, 12), t = R.int(2, 5);
+      return { fig: FIG.road(v * t + " km", t + " h"), q: "Une voiture parcourt " + M(v * t) + " km en " + M(t) + " h. Quelle est sa vitesse moyenne (en km/h) ?", spec: { kind: "value", value: v }, sol: M("v = \\frac{" + v * t + "}{" + t + "} = " + v) + " km/h." };
+    }
+    if (d === 2) {
+      const v = R.pick([60, 72, 80, 90, 120]), mins = R.pick([15, 20, 30, 40, 45]), dist = (v * mins) / 60;
+      return { fig: FIG.road(FIG.fmt(dist) + " km", v + " km/h"), q: "À " + M(v) + " km/h, combien de minutes faut-il pour parcourir " + M(dec(dist)) + " km ?", spec: { kind: "value", value: mins }, sol: M("t = \\frac{" + dec(dist) + "}{" + v + "} \\text{ h} = " + mins) + " min." };
+    }
+    const v = 18 * R.int(1, 7);
+    return { q: "Convertis " + M(v) + " km/h en m/s.", spec: { kind: "value", value: v / 3.6 }, sol: M(v + " : 3{,}6 = " + dec(v / 3.6)) + " m/s." };
+  },
+
+  echelle(d) {
+    if (d === 1) {
+      const k = R.pick([100, 200, 500, 1000]), c = R.int(2, 12);
+      return { fig: FIG.scaling(k, "1:" + k), q: "Sur un plan à l'échelle " + M("1 : " + k) + ", un mur mesure " + M(c) + " cm. Quelle est sa longueur réelle, en mètres ?", spec: { kind: "value", value: (c * k) / 100 }, sol: M(c + " \\cdot " + k + " = " + c * k) + " cm, soit " + M(dec((c * k) / 100)) + " m." };
+    }
+    if (d === 2) {
+      const k = R.int(2, 5), A = R.int(2, 12);
+      return { fig: FIG.scaling(k, "aires × " + k * k), q: "On agrandit une figure de rapport " + M(k) + ". Son aire était de " + M(A) + " cm². Quelle est sa nouvelle aire (en cm²) ?", spec: { kind: "value", value: A * k * k }, sol: "Les aires sont multipliées par " + M(k + "^2 = " + k * k) + " : " + M(A * k * k) + " cm²." };
+    }
+    const k = R.int(2, 4), V = R.int(2, 9);
+    return { fig: FIG.scaling(k, "volumes × " + k ** 3), q: "Une maquette est " + M(k) + " fois plus petite que l'objet réel. Son volume est de " + M(V) + " dm³. Quel est le volume de l'objet réel (en dm³) ?", spec: { kind: "value", value: V * k ** 3 }, sol: "Les volumes sont multipliés par " + M(k + "^3 = " + k ** 3) + " : " + M(V * k ** 3) + " dm³." };
+  },
+
+  aires(d) {
+    if (d === 1) {
+      const b = R.int(3, 15), h = 2 * R.int(2, 8);
+      return { fig: FIG.triangleFig(b + " cm", h + " cm"), q: "Calcule l'aire d'un triangle de base " + M(b) + " cm et de hauteur " + M(h) + " cm (en cm²).", spec: { kind: "value", value: (b * h) / 2 }, sol: M("\\frac{" + b + " \\cdot " + h + "}{2} = " + (b * h) / 2) + " cm²." };
+    }
+    if (d === 2) {
+      const B = R.int(6, 14), b = R.int(2, B - 2), h = 2 * R.int(2, 6);
+      return { fig: FIG.trapezoid(B + " cm", b + " cm", h + " cm"), q: "Calcule l'aire d'un trapèze de bases " + M(B) + " cm et " + M(b) + " cm, de hauteur " + M(h) + " cm (en cm²).", spec: { kind: "value", value: ((B + b) * h) / 2 }, sol: M("\\frac{(" + B + " + " + b + ") \\cdot " + h + "}{2} = " + ((B + b) * h) / 2) + " cm²." };
+    }
+    const r = R.int(2, 9);
+    return { fig: FIG.disk("r = " + r + " cm"), q: "Calcule l'aire d'un disque de rayon " + M(r) + " cm (valeur exacte avec π, ou arrondie au centième).", spec: { kind: "value", value: Math.PI * r * r, round: 0.01, exactOk: true }, sol: M("\\pi \\cdot " + r + "^2 = " + r * r + "\\pi \\approx " + dec((Math.PI * r * r).toFixed(2))) + " cm²." };
+  },
+
+  pyth(d) {
+    const tr = R.pick([[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [6, 8, 10]]), k = R.int(1, 3);
+    const [a, b, c] = tr.map((v) => v * k);
+    if (d === 1) return { fig: FIG.rightTriangle([a + " cm", b + " cm", "?"]), q: "Un triangle rectangle a des cathètes de " + M(a) + " cm et " + M(b) + " cm. Calcule l'hypoténuse (en cm).", spec: { kind: "value", value: c }, sol: M("\\sqrt{" + a + "^2 + " + b + "^2} = \\sqrt{" + c * c + "} = " + c) + " cm." };
+    if (d === 2) return { fig: FIG.rightTriangle([a + " cm", "?", c + " cm"]), q: "Dans un triangle rectangle, l'hypoténuse mesure " + M(c) + " cm et une cathète " + M(a) + " cm. Calcule l'autre cathète (en cm).", spec: { kind: "value", value: b }, sol: M("\\sqrt{" + c + "^2 - " + a + "^2} = \\sqrt{" + b * b + "} = " + b) + " cm." };
+    const s = R.int(2, 9);
+    return { fig: FIG.square(s + " cm"), q: "Calcule la diagonale d'un carré de côté " + M(s) + " cm (valeur exacte, ou arrondie au centième).", spec: { kind: "value", value: s * Math.SQRT2, round: 0.01, exactOk: true }, sol: M("\\sqrt{" + s + "^2 + " + s + "^2} = " + s + "\\sqrt{2} \\approx " + dec((s * Math.SQRT2).toFixed(2))) + " cm." };
+  },
+
+  vol(d) {
+    if (d === 1) {
+      const a = R.int(2, 9), b = R.int(2, 9), c = R.int(2, 9);
+      return { fig: FIG.box(a + " cm", b + " cm", c + " cm"), q: "Calcule le volume d'un pavé droit de " + M(a) + " cm × " + M(b) + " cm × " + M(c) + " cm (en cm³).", spec: { kind: "value", value: a * b * c }, sol: M(a + " \\cdot " + b + " \\cdot " + c + " = " + a * b * c) + " cm³." };
+    }
+    if (d === 2) {
+      const c = R.int(2, 9), h = 3 * R.int(1, 5);
+      return { fig: FIG.pyramid(c + " cm", "h = " + h), q: "Calcule le volume d'une pyramide à base carrée de côté " + M(c) + " cm et de hauteur " + M(h) + " cm (en cm³).", spec: { kind: "value", value: (c * c * h) / 3 }, sol: M("\\frac{" + c + "^2 \\cdot " + h + "}{3} = " + (c * c * h) / 3) + " cm³." };
+    }
+    const r = R.int(1, 6), h = 3 * R.int(1, 4);
+    return { fig: FIG.cone("r = " + r, "h = " + h), q: "Calcule le volume d'un cône de rayon " + M(r) + " cm et de hauteur " + M(h) + " cm (valeur exacte avec π, ou arrondie au centième).", spec: { kind: "value", value: (Math.PI * r * r * h) / 3, round: 0.01, exactOk: true }, sol: M("\\frac{\\pi \\cdot " + r + "^2 \\cdot " + h + "}{3} = " + (r * r * h) / 3 + "\\pi \\approx " + dec(((Math.PI * r * r * h) / 3).toFixed(2))) + " cm³." };
+  },
+
+  thales(d) {
+    const k = R.pick([2, 3, 4]), ad = R.int(2, 6), ae = R.int(2, 6), de = R.int(2, 7);
+    const ab = ad * k, ac = ae * k, bc = de * k;
+    if (d === 1) return { fig: FIG.thales([[95, 96, "?"], [165, 168, String(bc)]]), q: "Dans un triangle " + M("ABC") + ", " + M("D \\in [AB]") + ", " + M("E \\in [AC]") + " et " + M("(DE) \\parallel (BC)") + ". On sait que " + M("AD = " + ad) + ", " + M("AB = " + ab) + " et " + M("BC = " + bc) + ". Calcule " + M("DE") + ".", spec: { kind: "value", value: de }, sol: M("\\frac{DE}{BC} = \\frac{AD}{AB} = \\frac{" + ad + "}{" + ab + "}") + ", donc " + M("DE = " + bc + " \\cdot \\frac{" + ad + "}{" + ab + "} = " + de) + "." };
+    if (d === 2) return { fig: FIG.thales([[110, 52, String(ad)], [80, 124, String(ab - ad)], [205, 52, String(ae)]]), q: "Même configuration de Thalès : " + M("AD = " + ad) + ", " + M("DB = " + (ab - ad)) + " et " + M("AE = " + ae) + ". Calcule " + M("AC") + ".", spec: { kind: "value", value: ac }, sol: M("AB = " + ab) + " ; " + M("AC = " + ae + " \\cdot \\frac{" + ab + "}{" + ad + "} = " + ac) + "." };
+    const b = R.pick([1, 1.2, 1.5, 2]), o = R.pick([1.5, 2, 2.5]), O = R.int(4, 12) * o;
+    return { q: "Un bâton vertical de " + M(dec(b)) + " m a une ombre de " + M(dec(o)) + " m. Au même moment, l'ombre d'un arbre mesure " + M(dec(O)) + " m. Quelle est la hauteur de l'arbre (en m) ?", spec: { kind: "value", value: (b * O) / o }, sol: M("h = " + dec(b) + " \\cdot \\frac{" + dec(O) + "}{" + dec(o) + "} = " + dec((b * O) / o)) + " m." };
+  },
+
+  affine(d) {
+    const a = R.nz(-5, 5), b = R.nz(-9, 9);
+    if (d === 1) {
+      const x = R.nz(-6, 6);
+      return { fig: FIG.lineGraph(a, b, [[x, a * x + b, "?"]]), q: "Soit " + M("f(x) = " + poly([a, b])) + ". Calcule " + M("f(" + x + ")") + ".", spec: { kind: "value", value: a * x + b }, sol: M("f(" + x + ") = " + a + " \\cdot " + par(x) + (b < 0 ? " - " + -b : " + " + b) + " = " + (a * x + b)) };
+    }
+    if (d === 2) {
+      const x1 = R.int(-4, 1), x2 = x1 + R.int(1, 4);
+      return { fig: FIG.lineGraph(a, b, [[x1, a * x1 + b, "A"], [x2, a * x2 + b, "B"]]), q: "Une droite passe par " + M("A(" + x1 + " ; " + (a * x1 + b) + ")") + " et " + M("B(" + x2 + " ; " + (a * x2 + b) + ")") + ". Calcule sa pente.", spec: { kind: "value", value: a }, sol: M("\\frac{" + (a * x2 + b) + " - " + par(a * x1 + b) + "}{" + x2 + " - " + par(x1) + "} = " + a) };
+    }
+    const x = R.nz(-6, 6), y = a * x + b;
+    return { q: "Soit " + M("f(x) = " + poly([a, b])) + ". Pour quelle valeur de " + M("x") + " a-t-on " + M("f(x) = " + y) + " ?", spec: { kind: "value", value: x }, sol: M(poly([a, b]) + " = " + y + " \\iff x = " + x) };
+  },
+};
+
+// ---------- Secondaire II : 1re du Collège ----------
+Object.assign(GEN, {
+  eq3(d) {
+    if (d === 1) {
+      const k = R.int(1, 9);
+      return { fig: FIG.parabola((x) => (x ** 3 - k * k * x) / 6, [[0, 0, "0"]]), q: "Résous : " + M("x^3 - " + k * k + "x = 0") + ". Sépare les solutions par « ; ».", spec: { kind: "set", values: [0, k, -k] }, sol: M("x(x^2 - " + k * k + ") = x(x - " + k + ")(x + " + k + ") = 0") + " : " + M("S = \\{-" + k + " ; 0 ; " + k + "\\}") };
+    }
+    if (d === 2) {
+      const b = R.nz(-9, 9);
+      return { q: "Résous : " + M("x^3 " + (b < 0 ? "- " + -b : "+ " + b) + "x^2 = 0") + ".", spec: { kind: "set", values: [0, -b] }, sol: M("x^2(x " + (b < 0 ? "- " + -b : "+ " + b) + ") = 0") + " : " + M("S = \\{0 ; " + -b + "\\}") + " (0 est une solution double)." };
+    }
+    const a = R.nz(-5, 5), b = R.int(1, 6);
+    if (a === b || a === -b) return GEN.eq3(3);
+    return { q: "Résous : " + M("(x " + (a < 0 ? "+ " + -a : "- " + a) + ")(x^2 - " + b * b + ") = 0") + ".", spec: { kind: "set", values: [a, b, -b] }, sol: M("(x " + (a < 0 ? "+ " + -a : "- " + a) + ")(x - " + b + ")(x + " + b + ") = 0") + " : " + M("S = \\{" + [a, b, -b].sort((u, v) => u - v).join(" ; ") + "\\}") };
+  },
+
+  eq2disc(d) {
+    if (d === 1) {
+      const p = R.nz(-8, 8), q = R.nz(-8, 8), b = -(p + q), c = p * q;
+      return { fig: FIG.parabola((x) => (x - p) * (x - q) / 3, [[p, 0, String(p)], [q, 0, String(q)]]), q: "Résous : " + M(poly([1, b, c]) + " = 0") + ".", spec: { kind: "set", values: [...new Set([p, q])] }, sol: M("\\Delta = " + par(b) + "^2 - 4 \\cdot " + par(c) + " = " + (b * b - 4 * c)) + " ; " + M("x = \\frac{" + -b + " \\pm " + Math.abs(p - q) + "}{2}") + " : " + M("S = \\{" + [...new Set([p, q])].sort((u, v) => u - v).join(" ; ") + "\\}") };
+    }
+    if (d === 2) {
+      if (Math.random() < 0.3) {
+        const a = R.int(1, 3), b = R.int(-3, 3), c = R.int(Math.ceil((b * b) / (4 * a)) + 1, 9);
+        return { fig: FIG.parabola((x) => (a * x * x + b * x + c) / 2), q: "Résous : " + M(poly([a, b, c]) + " = 0") + ". (S'il n'y a pas de solution, écris « aucune ».)", spec: { kind: "set", values: [] }, sol: M("\\Delta = " + (b * b - 4 * a * c) + " < 0") + " : aucune solution réelle, la parabole ne coupe pas l'axe des x." };
+      }
+      const a = R.int(2, 4), p = R.nz(-5, 5), q = R.int(1, 5);
+      // a(x - p)(x - q/a) = a x² - (a p + q) x + p q
+      const B = -(a * p + q), C = p * q;
+      return { q: "Résous : " + M(poly([a, B, C]) + " = 0") + ".", spec: { kind: "set", values: [...new Set([p, q / a])] }, sol: M("\\Delta = " + (B * B - 4 * a * C)) + " ; " + M("x = \\frac{" + -B + " \\pm " + Math.round(Math.sqrt(B * B - 4 * a * C)) + "}{" + 2 * a + "}") + " : " + M("S = \\{" + p + " ; " + frac(q, a) + "\\}") };
+    }
+    let b, c, D;
+    do { b = R.int(-6, 6); c = R.int(-6, 4); D = b * b - 4 * c; } while (D <= 0 || Number.isInteger(Math.sqrt(D)));
+    return { fig: FIG.parabola((x) => (x * x + b * x + c) / 3), q: "Résous : " + M(poly([1, b, c]) + " = 0") + " (valeurs exactes, par exemple " + M("(3 + \\sqrt{5})/2") + ").", spec: { kind: "set", values: [(-b + Math.sqrt(D)) / 2, (-b - Math.sqrt(D)) / 2] }, sol: M("\\Delta = " + D) + " ; " + M("x = \\frac{" + -b + " \\pm \\sqrt{" + D + "}}{2}") };
+  },
+
+  sys2(d) {
+    const x = R.nz(-6, 8), y = R.nz(-6, 8);
+    if (d === 1) return { q: "Résous le système " + M("\\begin{cases} x + y = " + (x + y) + " \\\\ x - y = " + (x - y) + " \\end{cases}") + ". Réponds « x ; y ».", spec: { kind: "pair", values: [x, y] }, sol: "En additionnant : " + M("2x = " + 2 * x) + ", donc " + M("x = " + x) + " et " + M("y = " + y) + "." };
+    if (d === 2) {
+      let a, b, c, e; do { a = R.nz(-5, 5); b = R.nz(-5, 5); c = R.nz(-5, 5); e = R.nz(-5, 5); } while (a * e - b * c === 0);
+      return { q: "Résous le système " + M("\\begin{cases} " + poly([a, 0]).replace("x", "x") + (b < 0 ? " - " + (b === -1 ? "" : -b) : " + " + (b === 1 ? "" : b)) + "y = " + (a * x + b * y) + " \\\\ " + poly([c, 0]) + (e < 0 ? " - " + (e === -1 ? "" : -e) : " + " + (e === 1 ? "" : e)) + "y = " + (c * x + e * y) + " \\end{cases}") + ". Réponds « x ; y ».", spec: { kind: "pair", values: [x, y] }, sol: "Par combinaison ou substitution : " + M("(x ; y) = (" + x + " ; " + y + ")") + "." };
+    }
+    const pa = R.int(12, 20), pe = R.int(5, 10), na = R.int(2, 6), ne = R.int(2, 6), nb = R.int(1, 5), nf = R.int(1, 5);
+    if (na * nf === nb * ne) return GEN.sys2(3);
+    return { q: M(na) + " billets adultes et " + M(ne) + " billets enfants coûtent " + M(na * pa + ne * pe) + " CHF ; " + M(nb) + " adultes et " + M(nf) + " enfants coûtent " + M(nb * pa + nf * pe) + " CHF. Prix d'un billet adulte et d'un billet enfant ? Réponds « adulte ; enfant ».", spec: { kind: "pair", values: [pa, pe] }, sol: M("\\begin{cases} " + na + "a + " + ne + "e = " + (na * pa + ne * pe) + " \\\\ " + nb + "a + " + nf + "e = " + (nb * pa + nf * pe) + " \\end{cases}") + " : " + M("a = " + pa) + " CHF, " + M("e = " + pe) + " CHF." };
+  },
+
+  fimg(d) {
+    if (d === 1) {
+      const b = R.nz(-5, 5), c = R.nz(-6, 6), x = R.nz(-4, 4);
+      return { fig: FIG.parabola((t) => (t * t + b * t + c) / 3, [[x, (x * x + b * x + c) / 3, "?"]]), q: "Soit " + M("f(x) = " + poly([1, b, c])) + ". Calcule " + M("f(" + x + ")") + ".", spec: { kind: "value", value: x * x + b * x + c }, sol: M(par(x) + "^2 " + (b < 0 ? "- " + -b : "+ " + b) + " \\cdot " + par(x) + (c < 0 ? " - " + -c : " + " + c) + " = " + (x * x + b * x + c)) };
+    }
+    if (d === 2) {
+      const k = R.int(-5, 5), r = R.int(1, 6);
+      return { q: "Soit " + M("f(x) = \\sqrt{x " + (k < 0 ? "- " + -k : "+ " + k) + "}") + ". Calcule " + M("f(" + (r * r - k) + ")") + ".", spec: { kind: "value", value: r }, sol: M("\\sqrt{" + (r * r - k) + " " + (k < 0 ? "- " + -k : "+ " + k) + "} = \\sqrt{" + r * r + "} = " + r) };
+    }
+    const c = R.int(-6, 4), v = R.int(1, 7), y = v * v + c;
+    return { fig: FIG.parabola((t) => (t * t + c) / 3, [], () => y / 3), q: "Soit " + M("f(x) = x^2 " + (c < 0 ? "- " + -c : c > 0 ? "+ " + c : "")) + ". Détermine les préimages de " + M(y) + ".", spec: { kind: "set", values: [v, -v] }, sol: M("x^2 = " + v * v) + " : " + M("x = " + v) + " ou " + M("x = -" + v) + "." };
+  },
+
+  f2(d) {
+    if (d === 1) {
+      const p = R.nz(-5, 5), q = R.nz(-5, 5);
+      return { fig: FIG.parabola((x) => (x - p) * (x - q) / 3), q: "Quels sont les zéros de " + M("f(x) = (x " + (p < 0 ? "+ " + -p : "- " + p) + ")(x " + (q < 0 ? "+ " + -q : "- " + q) + ")") + " ?", spec: { kind: "set", values: [...new Set([p, q])] }, sol: "Un produit est nul si un facteur est nul : " + M(p) + " et " + M(q) + "." };
+    }
+    if (d === 2) {
+      const h = R.nz(-4, 4), k = R.int(-6, 6);
+      const b = -2 * h, c = h * h + k;
+      return { fig: FIG.parabola((x) => (x * x + b * x + c) / 3, [[h, k / 3, "S"]]), q: "Détermine le sommet de " + M("f(x) = " + poly([1, b, c])) + ". Réponds « x ; y ».", spec: { kind: "pair", values: [h, k] }, sol: M("x_S = -\\frac{b}{2a} = " + h) + " ; " + M("f(" + h + ") = " + k) + " : " + M("S(" + h + " ; " + k + ")") };
+    }
+    const a = R.pick([-2, -1, 2, 3]), b = R.nz(-6, 6), c = R.int(-5, 5);
+    const xs = -b / (2 * a), ys = a * xs * xs + b * xs + c;
+    return { fig: FIG.parabola((x) => (a * x * x + b * x + c) / 4, [[xs, ys / 4, "S"]]), q: "Détermine le sommet de " + M("f(x) = " + poly([a, b, c])) + ". Réponds « x ; y » (fractions acceptées).", spec: { kind: "pair", values: [xs, ys] }, sol: M("x_S = -\\frac{" + b + "}{" + 2 * a + "} = " + frac(-b, 2 * a)) + " ; " + M("y_S = f(x_S) = " + frac(Math.round(ys * 4 * a * a), 4 * a * a)) };
+  },
+
+  inter(d) {
+    if (d === 1) {
+      const p = R.int(-3, 0), q = R.int(1, 4);
+      // x² = (p + q) x - p q
+      return { fig: FIG.parabola((x) => x * x / 3, [[p, p * p / 3, ""], [q, q * q / 3, ""]], (x) => ((p + q) * x - p * q) / 3), q: "Pour quelles valeurs de " + M("x") + " les graphes de " + M("f(x) = x^2") + " et " + M("g(x) = " + poly([p + q, -p * q])) + " se coupent-ils ?", spec: { kind: "set", values: [...new Set([p, q])] }, sol: M("x^2 = " + poly([p + q, -p * q]) + " \\iff " + poly([1, -(p + q), p * q]) + " = 0") + " : " + M("x = " + p) + " ou " + M("x = " + q) + "." };
+    }
+    // f(x) = x² + B x + c et g(x) = m x + k, choisis pour que f(x) - g(x) = (x - p)(x - q)
+    const p = R.nz(-4, 3), q = p + R.int(1, 5), m = R.nz(-3, 3), c = R.int(-5, 5);
+    const B = m - (p + q), k = c - p * q;
+    return { fig: FIG.parabola((x) => (x * x + B * x + c) / 4, [[p, (m * p + k) / 4, ""], [q, (m * q + k) / 4, ""]], (x) => (m * x + k) / 4), q: "Détermine les abscisses des points d'intersection de " + M("f(x) = " + poly([1, B, c])) + " et " + M("g(x) = " + poly([m, k])) + ".", spec: { kind: "set", values: [p, q] }, sol: M("f(x) = g(x) \\iff " + poly([1, -(p + q), p * q]) + " = 0") + " : " + M("x = " + p) + " ou " + M("x = " + q) + "." };
+  },
+
+  angles(d) {
+    const ins = R.int(15, 80);
+    if (d === 1) return { fig: FIG.circleAngles("?", ins + "°"), q: "Dans un cercle de centre " + M("O") + ", l'angle inscrit " + M("\\widehat{ACB}") + " mesure " + M(ins + "°") + ". Que mesure l'angle au centre " + M("\\widehat{AOB}") + " (en degrés) ?", spec: { kind: "value", value: 2 * ins }, sol: "L'angle au centre vaut le double de l'angle inscrit qui intercepte le même arc : " + M(2 * ins + "°") + "." };
+    if (d === 2) return { fig: FIG.circleAngles(2 * ins + "°", "?"), q: "L'angle au centre " + M("\\widehat{AOB}") + " mesure " + M(2 * ins + "°") + ". Que mesure l'angle inscrit " + M("\\widehat{ACB}") + " ?", spec: { kind: "value", value: ins }, sol: M(2 * ins + "° : 2 = " + ins + "°") };
+    const a = R.int(20, 70);
+    return { q: M("[AB]") + " est un diamètre d'un cercle et " + M("C") + " un point du cercle. Si " + M("\\widehat{CAB} = " + a + "°") + ", que mesure " + M("\\widehat{CBA}") + " ?", spec: { kind: "value", value: 90 - a }, sol: "Un angle inscrit dans un demi-cercle est droit : " + M("\\widehat{ACB} = 90°") + ", donc " + M("180° - 90° - " + a + "° = " + (90 - a) + "°") + "." };
+  },
+
+  euclide(d) {
+    const p = R.int(1, 9), q = R.int(1, 9), h2 = p * q;
+    if (d === 1) {
+      const pp = R.pick([1, 2, 3, 4]), qq = R.pick([4, 9, 16, 1]) * pp;
+      return { fig: FIG.trigTriangle(["p = " + pp + " ; q = " + qq, "", "h = ?"], ""), q: "Dans un triangle rectangle, la hauteur issue de l'angle droit découpe l'hypoténuse en " + M("p = " + pp) + " et " + M("q = " + qq) + ". Calcule la hauteur " + M("h") + ".", spec: { kind: "value", value: Math.sqrt(pp * qq) }, sol: M("h^2 = p \\cdot q = " + pp * qq) + ", donc " + M("h = " + dec(Math.sqrt(pp * qq))) + "." };
+    }
+    if (d === 2) return { q: "Dans un triangle rectangle d'hypoténuse " + M("c = " + (p + q)) + ", la projection d'une cathète " + M("a") + " sur l'hypoténuse mesure " + M(p) + ". Calcule " + M("a") + " (valeur exacte ou au centième).", spec: { kind: "value", value: Math.sqrt(p * (p + q)), round: 0.01, exactOk: true }, sol: "Euclide : " + M("a^2 = " + p + " \\cdot " + (p + q) + " = " + p * (p + q)) + ", donc " + M("a = \\sqrt{" + p * (p + q) + "} \\approx " + dec(Math.sqrt(p * (p + q)).toFixed(2))) + "." };
+    return { q: "Dans un triangle rectangle, la hauteur sur l'hypoténuse mesure " + M("h = \\sqrt{" + h2 + "}") + " et découpe l'hypoténuse en deux segments dont l'un mesure " + M(p) + ". Que mesure l'autre ?", spec: { kind: "value", value: q }, sol: M("h^2 = p \\cdot q") + " : " + M(h2 + " = " + p + " \\cdot q") + ", donc " + M("q = " + q) + "." };
+  },
+
+  trigo(d) {
+    const a = R.int(20, 70), hyp = R.int(4, 15);
+    if (d === 1) return { fig: FIG.trigTriangle(["", "?", hyp + " cm"], a + "°"), q: "Dans un triangle rectangle, l'hypoténuse mesure " + M(hyp) + " cm et un angle aigu " + M(a + "°") + ". Calcule le côté opposé à cet angle, au centième.", spec: { kind: "value", value: hyp * Math.sin((a * Math.PI) / 180), round: 0.01 }, sol: M("\\text{opposé} = " + hyp + " \\cdot \\sin " + a + "° \\approx " + dec((hyp * Math.sin((a * Math.PI) / 180)).toFixed(2))) + " cm." };
+    if (d === 2) {
+      const o = R.int(3, 12), ad = R.int(3, 12), ang = (Math.atan(o / ad) * 180) / Math.PI;
+      return { fig: FIG.trigTriangle([ad + " cm", o + " cm", ""], "α ?"), q: "Les cathètes d'un triangle rectangle mesurent " + M(o) + " cm (opposée à " + M("\\alpha") + ") et " + M(ad) + " cm (adjacente). Calcule " + M("\\alpha") + " en degrés, au centième.", spec: { kind: "value", value: ang, round: 0.01 }, sol: M("\\tan \\alpha = \\frac{" + o + "}{" + ad + "}") + ", " + M("\\alpha \\approx " + dec(ang.toFixed(2)) + "°") };
+    }
+    const dist = R.int(10, 60);
+    return { fig: FIG.trigTriangle([dist + " m", "?", ""], a + "°"), q: "À " + M(dist) + " m du pied d'un immeuble, on voit son sommet sous un angle de " + M(a + "°") + ". Quelle est sa hauteur, au centième ?", spec: { kind: "value", value: dist * Math.tan((a * Math.PI) / 180), round: 0.01 }, sol: M("h = " + dist + " \\cdot \\tan " + a + "° \\approx " + dec((dist * Math.tan((a * Math.PI) / 180)).toFixed(2))) + " m." };
+  },
+});
+
+// Moteur adaptatif : profil, état de chaque notion, positionnement, choix des questions, mise à jour.
+// Tout reste sur l'appareil (localStorage) ; aucune donnée ne part ailleurs.
+
+const HINTS = {
+  prio: "D'abord les parenthèses, puis les puissances, puis × et :, enfin + et −.",
+  rel: "Moins par moins donne plus. Et attention : −3² = −9, alors que (−3)² = 9.",
+  fracadd: "Mets les fractions au même dénominateur avant d'additionner les numérateurs.",
+  fracmul: "Multiplie les numérateurs entre eux et les dénominateurs entre eux. Diviser, c'est multiplier par l'inverse.",
+  pct: "p % de N, c'est p/100 × N. Une hausse de p % multiplie par (1 + p/100).",
+  puiss: "aᵐ · aⁿ = aᵐ⁺ⁿ et (aᵐ)ⁿ = aᵐⁿ. Une puissance négative est un inverse.",
+  sci: "Notation scientifique : a · 10ⁿ avec 1 ≤ a < 10. Compte de combien de rangs la virgule se déplace.",
+  rac: "Cherche le plus grand carré qui divise le nombre : √72 = √(36 · 2) = 6√2.",
+  valnum: "Remplace la lettre par le nombre entre parenthèses, puis respecte les priorités.",
+  reduire: "Regroupe les termes de même nature : les x², les x, les nombres.",
+  distrib: "Chaque terme de la première parenthèse multiplie chaque terme de la seconde.",
+  idrem: "(a + b)² = a² + 2ab + b² : n'oublie pas le double produit 2ab.",
+  factor: "Cherche d'abord un facteur commun, puis une identité remarquable.",
+  eq1: "Fais la même opération des deux côtés pour isoler x.",
+  eq2: "Un produit est nul si l'un de ses facteurs est nul : résous chaque facteur = 0.",
+  prop: "Calcule d'abord pour 1 (passage à l'unité), puis multiplie.",
+  vitesse: "v = d / t. Attention aux unités : 1 h = 60 min, et 1 m/s = 3,6 km/h.",
+  echelle: "Longueurs × k, aires × k², volumes × k³.",
+  aires: "Triangle : b·h/2 ; trapèze : (B + b)·h/2 ; disque : π·r².",
+  pyth: "Hypoténuse² = somme des carrés des deux autres côtés.",
+  vol: "Prisme : base × hauteur ; pyramide et cône : base × hauteur / 3.",
+  thales: "Écris les trois rapports égaux AD/AB = AE/AC = DE/BC, puis utilise les deux utiles.",
+  affine: "f(x) = ax + b : a est la pente, b l'ordonnée à l'origine.",
+};
+
+const Store = {
+  key: "5m2m.v1",
+  load() { try { return JSON.parse(localStorage.getItem(this.key)) || null; } catch (e) { return null; } },
+  save(s) { try { localStorage.setItem(this.key, JSON.stringify(s)); } catch (e) {} },
+  clear() { try { localStorage.removeItem(this.key); } catch (e) {} },
+};
+
+const day = (d = new Date()) => d.toISOString().slice(0, 10);
+const addDays = (s, n) => { const d = new Date(s + "T12:00:00"); d.setDate(d.getDate() + n); return day(d); };
+const INTERVALS = [0, 1, 3, 7, 14, 30];
+const QUESTIONS_FOR = { 1: 1, 2: 3, 5: 7, 10: 14 };
+
+// ---------- Mathélo : score de type Elo ----------
+// Année HarmoS équivalente : CH 9e–11e = 9–11 ; FR 6e = 8 … 3e = 11.
+const harmos = (system, grade) => (system === "FR" ? grade + 2 : grade);
+// Score d'une question : niveau scolaire de la notion + difficulté.
+function itemRating(profile, id, d) {
+  const n = NOTIONS.find((x) => x.id === id);
+  const [g, m] = n[profile.system];
+  return 700 + (harmos(profile.system, g) - 8) * 150 + m * 8 + (d - 1) * 130;
+}
+// Échelle de référence (sans données partagées) : Mathélo typique en fin d'année par niveau HarmoS.
+const ELO_REF = [[8, 850], [9, 1000], [10, 1150], [11, 1300], [12, 1450], [13, 1600]];
+function eloLabel(profile, r) {
+  const sys = SYSTEMS[profile.system];
+  const name = (h) => { const g = sys.grades.find(([gg]) => harmos(profile.system, gg) === h); return g ? g[1] : h === 12 ? (profile.system === "FR" ? "2nde" : "1re du Collège") : h === 13 ? (profile.system === "FR" ? "1re" : "2e du Collège") : h + "e"; };
+  let lvl = ELO_REF[0];
+  for (const ref of ELO_REF) if (r >= ref[1] - 75) lvl = ref;
+  const h = lvl[0], gap = r - lvl[1];
+  const adj = gap >= 60 ? "solide" : gap <= -40 ? "en route vers la fin" : "typique de fin";
+  return r < ELO_REF[0][1] - 75 ? "En route vers la fin de " + name(8) : "Niveau " + adj + (adj === "solide" ? " de " : " de ") + name(h);
+}
+
+const Engine = {
+  newState(profile) {
+    const h = harmos(profile.system, profile.grade);
+    const start = 700 + (h - 8) * 150 + 100;
+    return { v: 1, profile, notions: {}, streak: { count: 0, last: null }, history: [], created: day(), elo: { r: Math.round(start), n: 0, log: [] } };
+  },
+
+  // Notions du programme jusqu'à l'année de l'élève, avec statut proposé selon la date.
+  catalog(profile, date = new Date()) {
+    const mo = schoolMonth(date);
+    return NOTIONS.filter((n) => n[profile.system] && n[profile.system][0] <= profile.grade).map((n) => {
+      const [g, m] = n[profile.system];
+      let status = "vu";
+      if (g === profile.grade) status = mo > m ? "vu" : mo === m ? "encours" : "nonvu";
+      return { ...n, defaultStatus: status, current: g === profile.grade };
+    });
+  },
+
+  initNotions(state, statuses) {
+    state.notions = {};
+    for (const [id, status] of Object.entries(statuses)) {
+      state.notions[id] = { status, m: status === "vu" ? 0.55 : status === "encours" ? 0.4 : 0, box: status === "vu" ? 1 : 0, due: day(), seen: 0, ok: 0 };
+    }
+  },
+
+  eligible(state) {
+    return Object.entries(state.notions).filter(([, s]) => s.status !== "nonvu").map(([id]) => id);
+  },
+
+  // Difficulté : visée ≈ 70 % de réussite (question ≈ 150 points sous le Mathélo), corrigée par la maîtrise de la notion.
+  difficulty(state, id) {
+    const cap = difficultyCap(state.profile), m = state.notions[id].m;
+    let best = 1, bestGap = Infinity;
+    for (let d = 1; d <= cap; d++) {
+      const gap = Math.abs(itemRating(state.profile, id, d) - (state.elo.r - 150));
+      if (gap < bestGap) { bestGap = gap; best = d; }
+    }
+    if (m < 0.3) best = Math.max(1, best - 1);
+    if (m > 0.8) best = Math.min(cap, best + 1);
+    return best;
+  },
+
+  // Mise à jour du Mathélo. score : 1, 0,5 ou 0. K plus grand au début (positionnement rapide).
+  updateElo(state, id, d, score) {
+    const e = state.elo, q = itemRating(state.profile, id, d);
+    const expected = 1 / (1 + Math.pow(10, (q - e.r) / 400));
+    const K = e.n < 20 ? 48 : e.n < 60 ? 32 : 20; // calibrage progressif : provisoire tant que n < 20
+    const delta = Math.round(K * (score - expected));
+    e.r = Math.max(400, e.r + delta);
+    e.n++;
+    const today = day(), last = e.log[e.log.length - 1];
+    if (last && last[0] === today) last[1] = e.r; else e.log.push([today, e.r]);
+    e.log = e.log.slice(-90);
+    return delta;
+  },
+
+  make(state, id, d) {
+    const level = d || this.difficulty(state, id);
+    const q = GEN[id](level);
+    return { ...q, id, d: level, hint: q.hint || HINTS[id] };
+  },
+
+  // Positionnement : premier repère rapide (5 notions vues ou en cours) ; le niveau se précise ensuite au fil des séances, en variant les thèmes, notions récentes d'abord.
+  placementPlan(state) {
+    const ids = this.eligible(state);
+    const byTheme = {};
+    for (const id of ids) {
+      const n = NOTIONS.find((x) => x.id === id);
+      (byTheme[n.theme] = byTheme[n.theme] || []).push(n);
+    }
+    Object.values(byTheme).forEach((arr) => arr.sort((a, b) => b[state.profile.system][0] - a[state.profile.system][0] || b[state.profile.system][1] - a[state.profile.system][1]));
+    const plan = [];
+    while (plan.length < 5 && Object.values(byTheme).some((a) => a.length)) {
+      for (const arr of Object.values(byTheme)) if (arr.length && plan.length < 5) plan.push(arr.shift().id);
+    }
+    return plan;
+  },
+
+  // Résultat d'une question de positionnement : true, false ou null (« je ne sais pas »).
+  placementResult(state, id, ok, d = 2) {
+    this.updateElo(state, id, d, ok === true ? 1 : 0);
+    const s = state.notions[id];
+    if (ok === true) Object.assign(s, { m: 0.75, box: 2, due: addDays(day(), 3) });
+    else if (ok === false) Object.assign(s, { m: 0.3, box: 0, due: day() });
+    else Object.assign(s, { m: 0.2, box: 0, due: day() });
+    s.placed = true;
+  },
+
+  // Séance du jour : notions dues et fragiles d'abord, puis « en cours », puis rappels espacés.
+  planSession(state) {
+    const n = QUESTIONS_FOR[state.profile.minutes] || 7, today = day();
+    const scored = this.eligible(state).map((id) => {
+      const s = state.notions[id];
+      const overdue = Math.max(0, (new Date(today) - new Date(s.due)) / 864e5);
+      const due = s.due <= today ? 1 : 0;
+      return { id, score: due * 3 + overdue * 0.5 + (1 - s.m) * 3 + (s.status === "encours" ? 1.5 : 0) + Math.random() * 0.8 };
+    }).sort((a, b) => b.score - a.score);
+    const plan = [];
+    let i = 0;
+    while (plan.length < n && scored.length) {
+      const id = scored[i % scored.length].id;
+      if (plan[plan.length - 1] !== id || scored.length === 1) plan.push(id);
+      i++;
+    }
+    return plan;
+  },
+
+  // Score Moodle : 1 au premier essai, 0,5 au deuxième, 0 ensuite.
+  record(state, id, d, tries, solved) {
+    const s = state.notions[id];
+    const today = day();
+    s.seen++;
+    if (solved && tries === 1) {
+      s.m = Math.min(1, s.m + (1 - s.m) * (0.18 + 0.06 * d));
+      s.box = Math.min(5, s.box + 1);
+      s.ok++;
+    } else if (solved) {
+      s.m = Math.min(1, s.m + (1 - s.m) * 0.06);
+    } else {
+      s.m = s.m * 0.6;
+      s.box = 0;
+    }
+    s.due = addDays(today, solved && tries === 1 ? INTERVALS[s.box] : 1);
+    if (s.status === "encours" && s.m > 0.7) s.status = "vu";
+    return solved ? (tries === 1 ? 1 : 0.5) : 0;
+  },
+
+  finishDay(state, answered, score) {
+    const today = day();
+    if (answered > 0) {
+      if (state.streak.last !== today) state.streak.count = state.streak.last === addDays(today, -1) ? state.streak.count + 1 : 1;
+      state.streak.last = today;
+      const h = state.history.find((x) => x.date === today);
+      if (h) { h.n += answered; h.score += score; } else state.history.push({ date: today, n: answered, score });
+      state.history = state.history.slice(-120);
+    }
+  },
+
+  isProvisional(state) { return state.elo.n < 20; },
+
+  themeLevels(state) {
+    const out = {};
+    for (const [id, s] of Object.entries(state.notions)) {
+      if (s.status === "nonvu") continue;
+      const th = NOTIONS.find((n) => n.id === id).theme;
+      (out[th] = out[th] || []).push(s.m);
+    }
+    return Object.fromEntries(Object.entries(out).map(([k, v]) => [k, v.reduce((a, b) => a + b, 0) / v.length]));
+  },
+};
+
+// Interface : entrée (niveau, temps, notions, positionnement), accueil, séance, bilan.
+// Point de collecte des votes 👍 / 👎 : laisser vide tant qu'aucun n'est configuré (votes gardés sur l'appareil).
+const VOTE_ENDPOINT = "";
+
+const app = document.getElementById("app");
+let state = Store.load();
+const save = () => Store.save(state);
+const h = (html) => { app.innerHTML = html; typeset(app); window.scrollTo(0, 0); };
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const gradeName = (p) => (SYSTEMS[p.system].grades.find(([g]) => g === p.grade) || [0, ""])[1];
+const brand = '<div class="brand"><b>5 minutes de maths</b><span>par jour</span></div>';
+const PRAISE = ["Juste !", "Bien vu !", "Exact !", "Parfait.", "C'est ça !", "Bravo !"];
+const pick = (a) => a[Math.floor(Math.random() * a.length)];
+
+function typeset(el) {
+  const go = () => window.MathJax && MathJax.typesetPromise ? MathJax.typesetPromise([el]).catch(() => {}) : setTimeout(go, 150);
+  go();
+}
+const hash = (s) => { let x = 0; for (const c of s) x = (x * 31 + c.charCodeAt(0)) >>> 0; return x.toString(36).slice(-4); };
+
+// ---------------- Entrée ----------------
+let draft = { system: "CH", grade: 11, track: "college", minutes: 5 };
+
+function screenWelcome() {
+  const demo = GEN.pyth(1);
+  const c = demo.spec.value;
+  h(`${brand}
+  <div class="stack"><h1>Chaque jour, <span class="mark">5 minutes</span> de maths, à ton niveau.</h1>
+  <p class="muted">Une question du jour choisie pour toi, une figure, une correction immédiate. Ton Mathélo monte quand tu progresses. Pas de compte : tout reste sur ton téléphone.</p></div>
+  <div class="card tilt"><div class="qmeta"><span class="chip">Exemple · Pythagore</span><span class="dots"><i class="on"></i><i></i><i></i></span></div>
+  <div class="qtext">${demo.q}</div><div class="figwrap">${demo.fig || ""}</div>
+  <p class="small muted">Tape ta réponse comme tu veux : ${c}, √${c * c}, ${2 * c}/2… le calculateur comprend.</p></div>
+  <button class="btn-primary btn-big" id="go">Commencer (3 minutes)</button>`);
+  document.getElementById("go").onclick = screenLevel;
+}
+
+function screenLevel() {
+  const sys = SYSTEMS[draft.system];
+  if (!sys.grades.some(([g]) => g === draft.grade)) draft.grade = sys.grades[sys.grades.length - 2][0];
+  const sec2 = draft.system === "CH" && draft.grade >= 12;
+  h(`${brand}<div class="eyebrow">Étape 1 sur 3</div><h2>Où en es-tu ?</h2>
+  <div class="card flat stack"><h3>Ton école</h3><div class="seg" id="sys">${Object.entries(SYSTEMS).map(([k, v]) => `<button aria-pressed="${k === draft.system}" data-v="${k}">${v.label}</button>`).join("")}</div>
+  <h3>Ta classe cette année</h3><div class="seg" id="grade">${sys.grades.map(([g, n]) => `<button aria-pressed="${g === draft.grade}" data-v="${g}">${n}</button>`).join("")}</div>
+  ${sec2 ? `<h3>Ta voie</h3><div class="seg" id="track"><button aria-pressed="${draft.track === "college"}" data-v="college">Collège (maturité gymnasiale)</button><button aria-pressed="${draft.track === "mp"}" data-v="mp">Maturité professionnelle</button></div>` : ""}</div>
+  <div class="card flat stack"><h3>Combien de temps par jour ?</h3><div class="timepick" id="time">${[1, 2, 5, 10].map((m) => `<button aria-pressed="${m === draft.minutes}" data-v="${m}"><b>${m}</b><small>${m === 1 ? "minute" : "minutes"} · ${QUESTIONS_FOR[m]} q.</small></button>`).join("")}</div>
+  <p class="small muted">5 minutes, c'est le conseil. Tu pourras changer chaque jour.</p></div>
+  <button class="btn-primary btn-big" id="next">Continuer</button>`);
+  const bind = (id, key, num) => app.querySelectorAll("#" + id + " button").forEach((b) => (b.onclick = () => { draft[key] = num ? +b.dataset.v : b.dataset.v; screenLevel(); }));
+  bind("sys", "system"); bind("grade", "grade", true); bind("track", "track"); bind("time", "minutes", true);
+  document.getElementById("next").onclick = () => { draft.statuses = null; screenNotions(); };
+}
+
+function screenNotions(editing = false) {
+  const prof = editing ? state.profile : draft;
+  const cat = Engine.catalog(prof);
+  const st = editing ? Object.fromEntries(Object.entries(state.notions).map(([k, v]) => [k, v.status])) : (draft.statuses ||= Object.fromEntries(cat.map((c) => [c.id, c.defaultStatus])));
+  const groups = {};
+  cat.forEach((c) => (groups[c.theme] = groups[c.theme] || []).push(c));
+  const label = { vu: "déjà vu", encours: "en cours", nonvu: "pas encore" };
+  h(`${brand}${editing ? "" : '<div class="eyebrow">Étape 2 sur 3</div>'}<h2>${editing ? "Mes notions" : "Qu'as-tu déjà étudié ?"}</h2>
+  <p class="muted">${editing ? "Tu as vu une nouvelle notion en classe ? Mets-la à jour : elle entrera dans tes questions." : "J'ai coché selon la date ; corrige si besoin. Les notions des années précédentes comptent comme vues."}</p>
+  ${Object.entries(groups).map(([th, list]) => `<div class="card flat"><h3>${THEMES[th]}</h3>${list.map((c) => `<div class="notion"><div><b>${c.label}</b>${c.current ? "" : ' <span class="small muted">· années précédentes</span>'}</div><div class="ex">\\(${c.ex}\\)</div>
+    <div class="tri" data-id="${c.id}">${["vu", "encours", "nonvu"].map((s) => `<button aria-pressed="${st[c.id] === s}" data-v="${s}">${label[s]}</button>`).join("")}</div></div>`).join("")}</div>`).join("")}
+  <button class="btn-primary btn-big" id="next">${editing ? "Enregistrer" : "Continuer"}</button>${editing ? '<button class="btn-ghost" id="back">Annuler</button>' : ""}`);
+  app.querySelectorAll(".tri").forEach((tri) => tri.querySelectorAll("button").forEach((b) => (b.onclick = () => {
+    st[tri.dataset.id] = b.dataset.v;
+    tri.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+  })));
+  document.getElementById("next").onclick = () => {
+    if (editing) {
+      for (const [id, s] of Object.entries(st)) {
+        const n = state.notions[id];
+        if (n.status === "nonvu" && s !== "nonvu") Object.assign(n, { m: 0.4, box: 0, due: day() });
+        n.status = s;
+      }
+      save(); screenHome();
+    } else {
+      state = Engine.newState({ system: draft.system, grade: draft.grade, track: draft.track, minutes: draft.minutes });
+      Engine.initNotions(state, st);
+      save(); startPlacement();
+    }
+  };
+  if (editing) document.getElementById("back").onclick = screenHome;
+}
+
+// ---------------- Positionnement ----------------
+function startPlacement() {
+  const plan = Engine.placementPlan(state);
+  let i = 0;
+  const next = () => {
+    if (i >= plan.length) { state.placed = true; save(); return screenPlacementDone(); }
+    const id = plan[i], q = Engine.make(state, id, Math.min(2, difficultyCap(state.profile)));
+    renderQuestion(q, {
+      eyebrow: "Étape 3 sur 3 · positionnement " + (i + 1) + "/" + plan.length, single: true,
+      onDone: (res) => { Engine.placementResult(state, id, res.solved ? true : res.dontKnow ? null : false, q.d); save(); },
+      onNext: () => { i++; next(); },
+    });
+  };
+  next();
+}
+
+function screenPlacementDone() {
+  const lv = Engine.themeLevels(state);
+  h(`${brand}<h2>Ton <span class="mark">point de départ</span></h2>
+  <div class="card">${eloBlock()}</div>
+  <div class="card flat"><h3>Par thème</h3><div class="bars">${themeBars(lv)}</div>
+  <p class="small muted">Ton niveau va se préciser au fil des séances : les 20 premières questions servent de calibrage.</p></div>
+  <button class="btn-primary btn-big" id="go">Voir ma première séance</button>`);
+  document.getElementById("go").onclick = screenHome;
+}
+
+// ---------------- Accueil ----------------
+function eloBlock() {
+  const e = state.elo, prev = e.log.length > 1 ? e.log[e.log.length - 2][1] : null, d = prev === null ? 0 : e.r - prev;
+  const pts = e.log.slice(-30).map((x) => x[1]);
+  let spark = "";
+  if (pts.length > 1) {
+    const lo = Math.min(...pts) - 10, hi = Math.max(...pts) + 10, X = (i) => (i / (pts.length - 1)) * 300, Y = (v) => 52 - ((v - lo) / (hi - lo)) * 48;
+    const line = pts.map((v, i) => (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(v).toFixed(1)).join(" ");
+    spark = `<svg class="spark" viewBox="0 0 300 56" preserveAspectRatio="none"><path class="a" d="${line} L300,56 L0,56 Z"/><path class="l" d="${line}"/><circle cx="300" cy="${Y(pts[pts.length - 1]).toFixed(1)}" r="3.5"/></svg>`;
+  }
+  return `<div class="elo"><div><div class="eyebrow">Mathélo ${Engine.isProvisional(state) ? '<span class="badge">provisoire</span>' : ""}</div><div class="num">${e.r}</div>
+  ${d ? `<div class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "▲ +" : "▼ "}${d} depuis hier</div>` : ""}</div>
+  <div class="stack"><b>${eloLabel(state.profile, e.r)}</b>${spark}</div></div>`;
+}
+function themeBars(lv) {
+  return Object.entries(lv).map(([th, m]) => `<div class="bar"><span>${THEMES[th]}</span><span class="track"><i style="width:${Math.round(m * 100)}%"></i></span></div>`).join("");
+}
+
+function screenHome() {
+  if (!state) return screenWelcome();
+  const today = day(), done = state.history.find((x) => x.date === today);
+  const s = state.streak, alive = s.last === today || s.last === addDays(today, -1);
+  h(`<div class="spread">${brand}<span class="small muted">${SYSTEMS[state.profile.system].label} · ${gradeName(state.profile)}</span></div>
+  <div class="card flat streak"><span class="flame" aria-hidden="true">${alive && s.count ? "🔥" : "✏️"}</span><div><b>${alive ? s.count : 0} ${(alive ? s.count : 0) > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span><div class="small muted">${done ? "Séance du jour faite : " + done.n + " question" + (done.n > 1 ? "s" : "") + ". Tu peux en refaire une." : "Ta séance du jour t'attend."}</div></div></div>
+  <div class="card">${eloBlock()}</div>
+  <div class="card flat stack"><h3>Temps aujourd'hui</h3><div class="timepick" id="time">${[1, 2, 5, 10].map((m) => `<button aria-pressed="${m === state.profile.minutes}" data-v="${m}"><b>${m}</b><small>min · ${QUESTIONS_FOR[m]} q.</small></button>`).join("")}</div>
+  <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "Ma question du jour"}</button></div>
+  <div class="card flat"><h3>Mes thèmes</h3><div class="bars">${themeBars(Engine.themeLevels(state))}</div></div>
+  <div class="stack"><button id="notions">J'ai vu une nouvelle notion en classe</button><button id="level">Changer de classe ou d'école</button>
+  <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div></div>`);
+  app.querySelectorAll("#time button").forEach((b) => (b.onclick = () => { state.profile.minutes = +b.dataset.v; save(); screenHome(); }));
+  document.getElementById("go").onclick = startSession;
+  document.getElementById("notions").onclick = () => screenNotions(true);
+  document.getElementById("level").onclick = () => { draft = { ...state.profile }; screenLevel(); };
+  document.getElementById("r1").onclick = () => {
+    document.getElementById("reset").innerHTML = '<span class="small">Effacer ta progression et ton Mathélo ?</span><button id="r2">Oui, effacer</button><button class="btn-ghost" id="r3">Non</button>';
+    document.getElementById("r2").onclick = () => { Store.clear(); state = null; screenWelcome(); };
+    document.getElementById("r3").onclick = screenHome;
+  };
+}
+
+// ---------------- Séance ----------------
+let session = null;
+function startSession() {
+  const plan = Engine.planSession(state);
+  session = { plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), limit: state.profile.minutes * 60 };
+  nextQuestion();
+}
+function nextQuestion(redo) {
+  const timeUp = (Date.now() - session.start) / 1000 > session.limit + 30;
+  if (!redo && (session.i >= session.plan.length || (timeUp && session.answered > 0))) return screenSummary();
+  const id = redo ? redo.id : session.plan[session.i];
+  const q = redo ? Engine.make(state, id, Math.max(1, redo.d - 1)) : Engine.make(state, id);
+  renderQuestion(q, {
+    eyebrow: (session.i === 0 && !redo ? "Question du jour" : "Question " + (session.i + 1) + " sur " + session.plan.length) + (redo ? " · nouvelles valeurs" : ""),
+    onDone: (res) => {
+      const sc = Engine.record(state, id, q.d, res.tries, res.solved);
+      res.delta = Engine.updateElo(state, id, q.d, sc);
+      session.score += sc; session.answered++; session.ids.add(id);
+      Engine.finishDay(state, 1, sc); save();
+      return res.delta;
+    },
+    onNext: (wantRedo) => { if (wantRedo) return nextQuestion(q); session.i++; nextQuestion(); },
+  });
+}
+
+// Affiche une question ; feedback Moodle : indice au 1er échec, corrigé au 2e.
+function renderQuestion(q, opt) {
+  const notion = NOTIONS.find((n) => n.id === q.id);
+  const code = q.id + "·" + q.d + "·" + hash(q.q);
+  let tries = 0, finished = false, inputMode = "none";
+  h(`<div class="spread">${brand}${session && !opt.single ? '<span class="timer small muted" id="timer"></span>' : ""}</div>
+  <div class="eyebrow">${opt.eyebrow}</div>
+  <div class="card pop"><div class="qmeta"><span class="chip">${notion.label}</span><span class="dots" title="difficulté">${[1, 2, 3].map((k) => `<i class="${k <= q.d ? "on" : ""}"></i>`).join("")}</span></div>
+  <div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
+  <div class="answer"><input id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="none" placeholder="Ta réponse…" aria-label="Ta réponse">
+  <div class="preview" id="prev"><span class="err">L'aperçu de ta réponse s'affiche ici.</span></div>
+  <div class="keypad" id="kp">${["7", "8", "9", "/", "(", ")", "4", "5", "6", "*", "^", "√", "1", "2", "3", "-", "x", "π", "0", ",", "+", ";", "⌫", "⌨"].map((k) => `<button type="button" class="${/[\d,]/.test(k) ? "" : "k-op"}" data-k="${k}">${k === "*" ? "×" : k}</button>`).join("")}</div>
+  <div class="actions"><button class="btn-primary" id="check">Valider</button><button id="idk">Je ne sais pas</button></div></div>
+  <div id="fb"></div></div>`);
+  const inp = document.getElementById("ans"), prev = document.getElementById("prev"), fb = document.getElementById("fb");
+  if (window.matchMedia("(pointer: fine)").matches) { inp.setAttribute("inputmode", "text"); inputMode = "text"; inp.focus(); }
+  let tm;
+  const showPreview = () => {
+    clearTimeout(tm);
+    tm = setTimeout(() => {
+      const v = inp.value.trim();
+      if (!v) { prev.innerHTML = '<span class="err">L\'aperçu de ta réponse s\'affiche ici.</span>'; return; }
+      try {
+        const t = Expr.parse(v);
+        const val = Expr.vars(t).size || t.t === "list" ? "" : Expr.evaluate(t);
+        prev.innerHTML = "\\(" + Expr.tex(t) + "\\)" + (val !== "" && isFinite(val) ? `<span class="val">≈ ${String(+val.toPrecision(8)).replace(".", ",")}</span>` : "");
+        typeset(prev);
+      } catch (e) { prev.innerHTML = `<span class="err">${esc(e.message)}</span>`; }
+    }, 180);
+  };
+  inp.oninput = showPreview;
+  inp.onkeydown = (e) => { if (e.key === "Enter") check(); };
+  app.querySelectorAll("#kp button").forEach((b) => (b.onclick = () => {
+    const k = b.dataset.k;
+    if (k === "⌨") { inputMode = inputMode === "none" ? "text" : "none"; inp.setAttribute("inputmode", inputMode); inp.blur(); inp.focus(); return; }
+    const s = inp.selectionStart ?? inp.value.length, e = inp.selectionEnd ?? inp.value.length;
+    if (k === "⌫") { const a = s === e ? Math.max(0, s - 1) : s; inp.value = inp.value.slice(0, a) + inp.value.slice(e); inp.setSelectionRange(a, a); }
+    else { inp.value = inp.value.slice(0, s) + k + inp.value.slice(e); inp.setSelectionRange(s + k.length, s + k.length); }
+    showPreview();
+  }));
+  const timerEl = document.getElementById("timer");
+  if (timerEl) {
+    const tick = () => {
+      if (!document.body.contains(timerEl)) return;
+      const left = Math.max(0, session.limit - Math.floor((Date.now() - session.start) / 1000));
+      timerEl.textContent = left ? "⏱ " + Math.floor(left / 60) + ":" + String(left % 60).padStart(2, "0") : "Temps écoulé : finis cette question";
+      setTimeout(tick, 1000);
+    };
+    tick();
+  }
+
+  const end = (solved, dontKnow) => {
+    finished = true;
+    inp.disabled = true;
+    app.querySelectorAll("#kp button, #check, #idk").forEach((b) => (b.disabled = true));
+    const res = { solved, tries, dontKnow };
+    if (solved) burst();
+    const delta = opt.onDone(res);
+    if (opt.single) {
+      fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><b>${solved ? pick(PRAISE) : dontKnow ? "D'accord, on s'en occupera." : "Noté."}</b>${solved ? "" : '<span class="sol">' + q.sol + "</span>"}</div><div class="actions"><button class="btn-primary" id="nx">Suivant</button></div>`;
+      typeset(fb);
+      document.getElementById("nx").onclick = () => opt.onNext();
+      document.getElementById("nx").focus();
+      return;
+    }
+    const d = typeof delta === "number" && delta !== 0 ? `<span class="delta ${delta > 0 ? "up" : "down"}">Mathélo ${delta > 0 ? "+" : ""}${delta}</span>` : "";
+    fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><div class="spread"><b>${solved ? (tries === 1 ? pick(PRAISE) : "Juste au deuxième essai.") : dontKnow ? "Voici la méthode." : "Pas cette fois."}</b>${d}</div>
+      <div class="sol">${q.sol}</div></div>
+      <div class="vote"><span>Cette question était… <button data-v="up" aria-label="Bonne question">👍</button> <button data-v="down" aria-label="Question à revoir">👎</button></span><span class="code" title="Code de la question">${code}</span></div>
+      <div class="actions">${solved ? "" : '<button id="redo">Refaire avec d\'autres valeurs</button>'}<button class="btn-primary" id="nx">Continuer</button></div>`;
+    typeset(fb);
+    fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
+    document.getElementById("nx").onclick = () => opt.onNext(false);
+    const r = document.getElementById("redo");
+    if (r) r.onclick = () => opt.onNext(true);
+    document.getElementById("nx").focus();
+  };
+
+  const check = () => {
+    if (finished) return;
+    const v = inp.value.trim();
+    if (!v) return;
+    const r = checkAnswer(q.spec, v);
+    if (r.status === "correct") { tries++; return end(true); }
+    if (r.status === "invalid" || r.status === "form") {
+      fb.innerHTML = `<div class="fb hint pop"><b>${r.status === "form" ? "Presque" : "Je n'arrive pas à lire ta réponse"}</b><span>${esc(r.message || "")}</span></div>`;
+      return;
+    }
+    tries++;
+    if (opt.single || tries >= 2) return end(false);
+    fb.innerHTML = `<div class="fb hint pop"><b>${r.status === "close" ? "Presque !" : "Pas encore. Réessaie !"}</b><span>${esc(r.message || "")}</span><span><b>Indice</b> · ${esc(q.hint)}</span></div>`;
+    inp.select();
+  };
+  document.getElementById("check").onclick = check;
+  document.getElementById("idk").onclick = () => { if (!finished) end(false, true); };
+}
+
+function burst() {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const b = document.createElement("div");
+  b.className = "burst";
+  const syms = ["π", "√", "∞", "Σ", "x²", "½", "Δ", "∫", "≈", "%", "θ", "+"];
+  const cx = window.innerWidth / 2, cy = window.innerHeight * 0.55;
+  for (let i = 0; i < 22; i++) {
+    const s = document.createElement("span"), a = Math.random() * Math.PI * 2, r = 120 + Math.random() * 180;
+    s.textContent = syms[i % syms.length];
+    s.style.left = cx + "px"; s.style.top = cy + "px"; s.style.fontSize = 16 + Math.random() * 18 + "px";
+    s.style.setProperty("--dx", Math.cos(a) * r + "px"); s.style.setProperty("--dy", Math.sin(a) * r - 80 + "px"); s.style.setProperty("--r", (Math.random() * 120 - 60) + "deg");
+    b.appendChild(s);
+  }
+  document.body.appendChild(b);
+  setTimeout(() => b.remove(), 1000);
+}
+
+function vote(code, v) {
+  try {
+    state.votes = state.votes || {};
+    state.votes[code] = { v, date: day() };
+    save();
+    if (VOTE_ENDPOINT) fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ code, vote: v, date: day() }) }).catch(() => {});
+  } catch (e) {}
+}
+
+function screenSummary() {
+  const n = session.answered, sc = session.score, d = state.elo.r - session.elo0;
+  h(`${brand}<h2>${sc >= n * 0.8 ? "Excellente séance !" : sc >= n * 0.5 ? "Bonne séance." : "Séance faite : c'est en pratiquant qu'on progresse."}</h2>
+  <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span><div class="small muted">À demain pour ta question du jour.</div></div></div>
+  <div class="card stack"><div class="spread"><span>Score</span><b>${String(sc).replace(".", ",")} / ${n}</b></div>
+  <div class="spread"><span>Mathélo</span><b>${state.elo.r} <span class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</span></b></div>
+  <div class="small muted">Notions travaillées : ${[...session.ids].map((id) => NOTIONS.find((x) => x.id === id).label).join(" · ")}</div></div>
+  <button class="btn-primary btn-big" id="home">Retour à l'accueil</button>`);
+  document.getElementById("home").onclick = screenHome;
+}
+
+// Démarrage
+if (state && state.placed) screenHome(); else { state = null; screenWelcome(); }
+
+</script>
+</body>
+</html>

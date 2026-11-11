@@ -30,4 +30,7 @@ body = '<main id="app" aria-live="polite"></main>\n<script>\n' + "\n".join((SRC 
     '<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n'
     '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
     + head + "</head>\n<body>\n" + body + "</body>\n</html>\n")
-print("dist/5min2maths.html et dist/index.html :", round(len(head + body) / 1024), "Ko")
+(ROOT / "docs").mkdir(exist_ok=True)
+(ROOT / "docs" / "index.html").write_text((ROOT / "dist" / "index.html").read_text())
+(ROOT / "docs" / ".nojekyll").write_text("")
+print("dist/5min2maths.html, dist/index.html et docs/index.html (GitHub Pages) :", round(len(head + body) / 1024), "Ko")
