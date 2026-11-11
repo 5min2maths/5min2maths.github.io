@@ -610,3 +610,102 @@ Object.assign(GEN, {
     return { fig: FIG.barChart(xs), q: "Calcule l'écart-type " + M("\\sigma") + " de la série " + M(xs.join(" ; ")) + ", au centième.", spec: { kind: "value", value: sd, round: 0.01 }, sol: "Moyenne " + M(dec(mean.toFixed(2))) + " ; " + M("\\sigma = \\sqrt{\\frac{\\sum (x_i - \\bar{x})^2}{" + n + "}} \\approx " + dec(sd.toFixed(2))) };
   },
 });
+
+// ---------- Niveau 4 : problèmes en plusieurs parties (modélisation, plusieurs étapes) ----------
+// Chaque problème : { q, fig, parts: [{ label, spec }], hints: [outil, calcul], sol }.
+const r2 = (v) => Math.round(v * 100) / 100;
+const PROB = {
+  f2() {
+    const p = R.pick([2, 3]), q = R.pick([0.4, 0.6, 0.8, 1]), c = 5 * p * q, b = 5 * (p - q);
+    const tm = (p - q) / 2, hm = -5 * (tm - p) * (tm + q);
+    return { fig: FIG.parabola((t) => (-5 * (t - p) * (t + q)) / 3, [[0, c / 3, "plongeoir"], [p, 0, "eau"]]), q: "Une plongeuse saute d'un plongeoir. Sa hauteur au-dessus de l'eau (en m) après " + M("t") + " secondes est " + M("h(t) = -5t^2 + " + dec(b) + "t + " + dec(c)) + ".",
+      parts: [{ label: "a) Hauteur du plongeoir (m)", spec: { kind: "value", value: c } }, { label: "b) Instant où elle entre dans l'eau (s)", spec: { kind: "value", value: p } }, { label: "c) Hauteur maximale atteinte (m)", spec: { kind: "value", value: hm, round: 0.01, exactOk: true } }],
+      hints: ["Associe chaque question à un outil : départ → t = 0 ; entrée dans l'eau → h(t) = 0 ; hauteur max → sommet.", "a) h(0). b) Résous −5t² + " + dec(b) + "t + " + dec(c) + " = 0 et garde la solution positive. c) t = −b / 2a, puis h(t)."],
+      sol: "a) " + M("h(0) = " + dec(c)) + " m. b) " + M("h(t) = -5(t - " + p + ")(t + " + dec(q) + ") = 0") + " : " + M("t = " + p) + " s. c) " + M("t = " + dec(tm)) + " s, " + M("h = " + dec(r2(hm))) + " m." };
+  },
+  factor() {
+    const L = 20 * R.int(2, 6), k = R.int(5, L / 4 - 1);
+    return { fig: FIG.rectFig(2, 1, "mur (pas de clôture)", "x"), q: "Avec " + M(L) + " m de clôture, on entoure un enclos rectangulaire le long d'un mur (le mur forme un côté). On note " + M("x") + " la largeur (perpendiculaire au mur).",
+      parts: [{ label: "a) Aire (m²) si x = " + k, spec: { kind: "value", value: k * (L - 2 * k) } }, { label: "b) Largeur x qui donne l'aire maximale (m)", spec: { kind: "value", value: L / 4 } }, { label: "c) Aire maximale (m²)", spec: { kind: "value", value: (L / 4) * (L / 2) } }],
+      hints: ["Exprime l'aire en fonction de x : la longueur vaut " + L + " − 2x. L'aire maximale est au sommet de la parabole.", "A(x) = x(" + L + " − 2x) = −2x² + " + L + "x ; sommet en x = −b / 2a."],
+      sol: M("A(x) = x(" + L + " - 2x)") + ". a) " + M(k * (L - 2 * k)) + " m². b) " + M("x = \\frac{" + L + "}{4} = " + L / 4) + " m. c) " + M(L / 4 + " \\cdot " + L / 2 + " = " + (L / 4) * (L / 2)) + " m²." };
+  },
+  pct() {
+    const P = 20 * R.int(3, 25), up = R.pick([10, 20, 25, 30, 50]), dn = R.pick([10, 20, 25, 40]);
+    const p1 = P * (1 + up / 100), p2 = p1 * (1 - dn / 100), glob = (p2 / P - 1) * 100;
+    return { fig: FIG.percentBar(up, P, " CHF"), q: "Un vélo coûte " + M(P) + " CHF. Son prix augmente de " + M(up + "\\,\\%") + ", puis baisse de " + M(dn + "\\,\\%") + " pendant les soldes.",
+      parts: [{ label: "a) Prix après la hausse (CHF)", spec: { kind: "value", value: p1 } }, { label: "b) Prix soldé (CHF)", spec: { kind: "value", value: p2 } }, { label: "c) Variation globale en % (négative si baisse)", spec: { kind: "value", value: glob, round: 0.01 } }],
+      hints: ["Les pourcentages successifs se multiplient : on ne les additionne pas.", "Multiplie par " + dec(1 + up / 100) + " puis par " + dec(1 - dn / 100) + " ; variation globale = (prix final / prix initial − 1) · 100."],
+      sol: "a) " + M(P + " \\cdot " + dec(1 + up / 100) + " = " + dec(p1)) + ". b) " + M(dec(p1) + " \\cdot " + dec(1 - dn / 100) + " = " + dec(r2(p2))) + ". c) " + M(dec(r2(glob)) + "\\,\\%") + " (et non " + (up - dn) + " %)." };
+  },
+  pyth() {
+    const [a, b, c] = R.pick([[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [20, 21, 29]]).map((v) => v * R.int(2, 5));
+    return { fig: FIG.rectFig(b, a, b + " m ?", a + " m"), q: "Un terrain rectangulaire a une diagonale de " + M(c) + " m et un côté de " + M(a) + " m.",
+      parts: [{ label: "a) Autre côté (m)", spec: { kind: "value", value: b } }, { label: "b) Aire du terrain (m²)", spec: { kind: "value", value: a * b } }, { label: "c) Longueur de clôture pour en faire le tour (m)", spec: { kind: "value", value: 2 * (a + b) } }],
+      hints: ["La diagonale découpe le rectangle en deux triangles rectangles : Pythagore.", "Autre côté = √(" + c + "² − " + a + "²), puis aire = longueur · largeur et périmètre = 2(longueur + largeur)."],
+      sol: "a) " + M("\\sqrt{" + c * c + " - " + a * a + "} = " + b) + " m. b) " + M(a * b) + " m². c) " + M(2 * (a + b)) + " m." };
+  },
+  vol() {
+    const r = R.int(2, 6), hh = R.int(5, 15), rho = R.pick([2.7, 7.8, 8.9, 0.9]), mat = { 2.7: "aluminium", 7.8: "acier", 8.9: "cuivre", 0.9: "glace" }[rho];
+    const V = Math.PI * r * r * hh, m = V * rho;
+    return { fig: FIG.cylinder("r = " + r, "h = " + hh), q: "Une pièce en " + mat + " (" + M("\\rho = " + dec(rho)) + " g/cm³) est un cylindre de rayon " + M(r) + " cm et de hauteur " + M(hh) + " cm.",
+      parts: [{ label: "a) Volume (cm³, au centième)", spec: { kind: "value", value: V, round: 0.01, exactOk: true } }, { label: "b) Masse (g, au centième)", spec: { kind: "value", value: m, round: 0.01 } }, { label: "c) Nombre de pièces complètes dans 10 kg", spec: { kind: "value", value: Math.floor(10000 / m) } }],
+      hints: ["Volume du cylindre, puis masse = masse volumique · volume. Attention : 10 kg = 10 000 g.", "V = π · " + r + "² · " + hh + " ; m = " + dec(rho) + " · V ; pièces = partie entière de 10 000 / m."],
+      sol: "a) " + M(r * r * hh + "\\pi \\approx " + dec(r2(V))) + " cm³. b) " + M("\\approx " + dec(r2(m))) + " g. c) " + M("10\\,000 : " + dec(r2(m)) + " \\approx " + dec(r2(10000 / m))) + ", donc " + M(Math.floor(10000 / m)) + " pièces." };
+  },
+  sys2() {
+    const pa = R.int(12, 20), pe = R.int(5, 10), na = R.int(2, 5), ne = R.int(2, 5), nb = R.int(1, 4), nf = R.int(3, 7);
+    if (na * nf === nb * ne) return PROB.sys2();
+    const ga = R.int(2, 6), ge = R.int(10, 25);
+    return { q: "Au musée, " + M(na) + " adultes et " + M(ne) + " enfants paient " + M(na * pa + ne * pe) + " CHF ; " + M(nb) + " adultes et " + M(nf) + " enfants paient " + M(nb * pa + nf * pe) + " CHF.",
+      parts: [{ label: "a) Prix d'un billet adulte (CHF)", spec: { kind: "value", value: pa } }, { label: "b) Prix d'un billet enfant (CHF)", spec: { kind: "value", value: pe } }, { label: "c) Prix pour une classe : " + ga + " adultes et " + ge + " enfants (CHF)", spec: { kind: "value", value: ga * pa + ge * pe } }],
+      hints: ["Deux inconnues (prix adulte a, prix enfant e), deux informations : un système.", na + "a + " + ne + "e = " + (na * pa + ne * pe) + " et " + nb + "a + " + nf + "e = " + (nb * pa + nf * pe) + " : élimine une inconnue."],
+      sol: "a) " + M("a = " + pa) + " CHF. b) " + M("e = " + pe) + " CHF. c) " + M(ga + " \\cdot " + pa + " + " + ge + " \\cdot " + pe + " = " + (ga * pa + ge * pe)) + " CHF." };
+  },
+  log() {
+    const C = 1000 * R.int(2, 9), t = R.pick([2, 3, 4, 5]), n0 = R.int(3, 8);
+    const v = C * Math.pow(1 + t / 100, n0), years = Math.ceil(Math.log(2) / Math.log(1 + t / 100));
+    return { fig: FIG.parabola((x) => Math.pow(1 + t / 100, x * 3) * 2 - 2), q: "On place " + M(C) + " CHF à " + M(t + "\\,\\%") + " d'intérêt composé par an.",
+      parts: [{ label: "a) Capital après " + n0 + " ans (CHF, au centime)", spec: { kind: "value", value: v, round: 0.01 } }, { label: "b) Nombre d'années pour que le capital double (années entières)", spec: { kind: "value", value: years } }],
+      hints: ["Chaque année, le capital est multiplié par " + dec(1 + t / 100) + ". Doubler : résoudre " + dec(1 + t / 100) + "ⁿ = 2.", "n = ln 2 / ln " + dec(1 + t / 100) + ", puis arrondir à l'année supérieure."],
+      sol: "a) " + M(C + " \\cdot " + dec(1 + t / 100) + "^{" + n0 + "} \\approx " + dec(r2(v))) + " CHF. b) " + M("n = \\frac{\\ln 2}{\\ln " + dec(1 + t / 100) + "} \\approx " + dec(r2(Math.log(2) / Math.log(1 + t / 100)))) + ", donc " + M(years) + " ans." };
+  },
+  eq2() {
+    const x = R.int(3, 12), k = R.int(2, 8);
+    return { fig: FIG.rectFig(x + k, x, "x + " + k, "x"), q: "Un rectangle a une longueur qui dépasse sa largeur " + M("x") + " de " + M(k) + " cm. Son aire vaut " + M(x * (x + k)) + " cm².",
+      parts: [{ label: "a) Largeur (cm)", spec: { kind: "value", value: x } }, { label: "b) Longueur (cm)", spec: { kind: "value", value: x + k } }, { label: "c) Périmètre (cm)", spec: { kind: "value", value: 2 * (2 * x + k) } }],
+      hints: ["Traduis l'aire en équation : x(x + " + k + ") = " + x * (x + k) + ".", "Mets tout d'un côté : x² + " + k + "x − " + x * (x + k) + " = 0, puis factorise et garde la solution positive."],
+      sol: M("x^2 + " + k + "x - " + x * (x + k) + " = (x - " + x + ")(x + " + (x + k) + ") = 0") + " : a) " + M(x) + " cm, b) " + M(x + k) + " cm, c) " + M(2 * (2 * x + k)) + " cm." };
+  },
+  trigo() {
+    const Lr = R.int(4, 12), a = R.int(4, 15), hgt = Lr * Math.sin(rad(a)), hor = Lr * Math.cos(rad(a));
+    return { fig: FIG.trigTriangle(["?", "?", Lr + " m"], a + "°"), q: "Une rampe d'accès de " + M(Lr) + " m de long fait un angle de " + M(a + "°") + " avec le sol.",
+      parts: [{ label: "a) Hauteur atteinte (m, au centième)", spec: { kind: "value", value: hgt, round: 0.01 } }, { label: "b) Distance horizontale (m, au centième)", spec: { kind: "value", value: hor, round: 0.01 } }, { label: "c) Pente en % (au centième)", spec: { kind: "value", value: Math.tan(rad(a)) * 100, round: 0.01 } }],
+      hints: ["La rampe est l'hypoténuse d'un triangle rectangle : hauteur → sinus, horizontale → cosinus.", "Pente en % = hauteur / horizontale · 100 = tan α · 100."],
+      sol: "a) " + M(Lr + " \\sin " + a + "° \\approx " + dec(r2(hgt))) + " m. b) " + M(Lr + " \\cos " + a + "° \\approx " + dec(r2(hor))) + " m. c) " + M("\\tan " + a + "° \\cdot 100 \\approx " + dec(r2(Math.tan(rad(a)) * 100)) + "\\,\\%") };
+  },
+  stats() {
+    const notes = Array.from({ length: 4 }, () => R.int(7, 11) / 2), target = R.pick([4.5, 5]);
+    const s = notes.reduce((a, b) => a + b, 0), need = target * 5 - s;
+    if (need > 6 || need < 1) return PROB.stats();
+    return { fig: FIG.barChart(notes), q: "Tes quatre premières notes sont " + M(notes.map(dec).join(" ; ")) + ". Il reste une épreuve, de même coefficient.",
+      parts: [{ label: "a) Moyenne actuelle", spec: { kind: "value", value: s / 4 } }, { label: "b) Note à obtenir pour finir avec " + decTxt(target) + " de moyenne", spec: { kind: "value", value: need } }],
+      hints: ["La moyenne finale = (somme des 5 notes) / 5.", "Il faut une somme de " + decTxt(target) + " · 5 = " + decTxt(target * 5) + " : retire la somme actuelle."],
+      sol: "a) " + M("\\frac{" + dec(s) + "}{4} = " + dec(s / 4)) + ". b) " + M(dec(target * 5) + " - " + dec(s) + " = " + dec(need)) + "." };
+  },
+  vitesse() {
+    const d = 10 * R.int(6, 18), v1 = R.pick([60, 80, 90, 100, 120]), v2 = R.pick([40, 50, 60, 75].filter((v) => v !== v1));
+    const t1 = d / v1, t2 = d / v2, vm = (2 * d) / (t1 + t2);
+    return { fig: FIG.road(d + " km", v1 + " km/h → " + v2 + " km/h"), q: "Une voiture fait l'aller de " + M(d) + " km à " + M(v1) + " km/h et le retour à " + M(v2) + " km/h.",
+      parts: [{ label: "a) Durée de l'aller (min)", spec: { kind: "value", value: t1 * 60, round: 0.01 } }, { label: "b) Durée du retour (min)", spec: { kind: "value", value: t2 * 60, round: 0.01 } }, { label: "c) Vitesse moyenne sur l'aller-retour (km/h, au centième)", spec: { kind: "value", value: vm, round: 0.01 } }],
+      hints: ["La vitesse moyenne n'est pas la moyenne des vitesses : c'est la distance totale divisée par la durée totale.", "t = d / v pour chaque trajet ; v moyenne = " + 2 * d + " km / (durée aller + durée retour)."],
+      sol: "a) " + M(dec(r2(t1 * 60))) + " min. b) " + M(dec(r2(t2 * 60))) + " min. c) " + M("\\frac{" + 2 * d + "}{" + dec(r2(t1 + t2)) + "} \\approx " + dec(r2(vm))) + " km/h (et non " + (v1 + v2) / 2 + ")." };
+  },
+  echelle() {
+    const k = R.pick([20, 25, 50, 100]), lm = R.int(4, 15), am = R.int(6, 40), vm = R.int(2, 9);
+    return { fig: FIG.scaling(3, "1 : " + k), q: "Une maquette de bâtiment est à l'échelle " + M("1 : " + k) + ".",
+      parts: [{ label: "a) Un mur mesure " + lm + " cm sur la maquette : longueur réelle (m)", spec: { kind: "value", value: (lm * k) / 100 } }, { label: "b) Une pièce mesure " + am + " cm² sur la maquette : aire réelle (m²)", spec: { kind: "value", value: (am * k * k) / 10000 } }, { label: "c) Une cuve de " + vm + " cm³ sur la maquette : volume réel (m³)", spec: { kind: "value", value: (vm * k ** 3) / 1e6 } }],
+      hints: ["Longueurs × " + k + ", aires × " + k + "², volumes × " + k + "³.", "Puis convertis : 1 m = 100 cm, 1 m² = 10 000 cm², 1 m³ = 1 000 000 cm³."],
+      sol: "a) " + M(lm * k + " \\text{ cm} = " + dec((lm * k) / 100)) + " m. b) " + M(am + " \\cdot " + k * k + " = " + am * k * k + " \\text{ cm}^2 = " + dec((am * k * k) / 10000)) + " m². c) " + M(vm + " \\cdot " + k ** 3 + " = " + vm * k ** 3 + " \\text{ cm}^3 = " + dec((vm * k ** 3) / 1e6)) + " m³." };
+  },
+};

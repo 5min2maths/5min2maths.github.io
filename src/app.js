@@ -130,17 +130,19 @@ function themeBars(lv) {
 function screenHome() {
   if (!state) return screenWelcome();
   const today = day(), done = state.history.find((x) => x.date === today);
-  const s = state.streak, alive = s.last === today || s.last === addDays(today, -1);
+  const s = state.streak, alive = s.last === today || s.last === addDays(today, -1), wp = Engine.weeklyProblem(state);
   h(`<div class="spread">${brand}<span class="small muted">${SYSTEMS[state.profile.system].label} · ${gradeName(state.profile)}</span></div>
   <div class="card flat streak"><span class="flame" aria-hidden="true">${alive && s.count ? "🔥" : "✏️"}</span><div><b>${alive ? s.count : 0} ${(alive ? s.count : 0) > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span><div class="small muted">${done ? "Séance du jour faite : " + done.n + " question" + (done.n > 1 ? "s" : "") + ". Tu peux en refaire une." : "Ta séance du jour t'attend."}</div></div></div>
   <div class="card">${eloBlock()}</div>
   <div class="card flat stack"><h3>Temps aujourd'hui</h3><div class="timepick" id="time">${[1, 2, 5, 10].map((m) => `<button aria-pressed="${m === state.profile.minutes}" data-v="${m}"><b>${m}</b><small>min · ${QUESTIONS_FOR[m]} q.</small></button>`).join("")}</div>
   <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "Ma question du jour"}</button></div>
+  ${wp ? `<div class="card flat stack"><div class="eyebrow">Problème de la semaine</div><h3>${NOTIONS.find((n) => n.id === wp).label}</h3><p class="small muted">Un problème en plusieurs étapes, avec indices. Facultatif, et il rapporte gros.</p><button id="wp">Relever le défi</button></div>` : ""}
   <div class="card flat"><h3>Mes thèmes</h3><div class="bars">${themeBars(Engine.themeLevels(state))}</div></div>
   <div class="stack"><button id="notions">J'ai vu une nouvelle notion en classe</button><button id="level">Changer de classe ou d'école</button>
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div></div>`);
   app.querySelectorAll("#time button").forEach((b) => (b.onclick = () => { state.profile.minutes = +b.dataset.v; save(); screenHome(); }));
   document.getElementById("go").onclick = startSession;
+  if (wp) document.getElementById("wp").onclick = () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), limit: 600, weekly: true }; nextQuestion(); };
   document.getElementById("notions").onclick = () => screenNotions(true);
   document.getElementById("level").onclick = () => { draft = { ...state.profile }; screenLevel(); };
   document.getElementById("r1").onclick = () => {
@@ -161,11 +163,11 @@ function nextQuestion(redo) {
   const timeUp = (Date.now() - session.start) / 1000 > session.limit + 30;
   if (!redo && (session.i >= session.plan.length || (timeUp && session.answered > 0))) return screenSummary();
   const id = redo ? redo.id : session.plan[session.i];
-  const q = redo ? Engine.make(state, id, Math.max(1, redo.d - 1)) : Engine.make(state, id);
+  const q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly ? 4 : undefined);
   renderQuestion(q, {
-    eyebrow: (session.i === 0 && !redo ? "Question du jour" : "Question " + (session.i + 1) + " sur " + session.plan.length) + (redo ? " · nouvelles valeurs" : ""),
+    eyebrow: (session.weekly ? "Problème de la semaine" : session.i === 0 && !redo ? "Question du jour" : "Question " + (session.i + 1) + " sur " + session.plan.length) + (redo ? " · nouvelles valeurs" : ""),
     onDone: (res) => {
-      const sc = Engine.record(state, id, q.d, res.tries, res.solved);
+      const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
       res.delta = Engine.updateElo(state, id, q.d, sc);
       session.score += sc; session.answered++; session.ids.add(id);
       Engine.finishDay(state, 1, sc); save();
@@ -175,8 +177,98 @@ function nextQuestion(redo) {
   });
 }
 
+// Clavier mathématique partagé : écrit dans le champ actif.
+const KEYS = ["7", "8", "9", "/", "(", ")", "4", "5", "6", "*", "^", "√", "1", "2", "3", "-", "x", "π", "0", ",", "+", ";", "⌫", "⌨"];
+const keypadHtml = () => `<div class="keypad" id="kp">${KEYS.map((k) => `<button type="button" class="${/[\d,]/.test(k) ? "" : "k-op"}" data-k="${k}">${k === "*" ? "×" : k}</button>`).join("")}</div>`;
+function previewOf(inp, prev) {
+  const v = inp.value.trim();
+  if (!v) { prev.innerHTML = ""; return; }
+  try {
+    const t = Expr.parse(v), val = Expr.vars(t).size || t.t === "list" ? "" : Expr.evaluate(t);
+    prev.innerHTML = "\\(" + Expr.tex(t) + "\\)" + (val !== "" && isFinite(val) ? `<span class="val">≈ ${String(+val.toPrecision(8)).replace(".", ",")}</span>` : "");
+    typeset(prev);
+  } catch (e) { prev.innerHTML = `<span class="err">${esc(e.message)}</span>`; }
+}
+function bindKeypad(getInput, after) {
+  let mode = window.matchMedia("(pointer: fine)").matches ? "text" : "none";
+  app.querySelectorAll("input.ans").forEach((i) => i.setAttribute("inputmode", mode));
+  app.querySelectorAll("#kp button").forEach((b) => (b.onclick = () => {
+    const inp = getInput(), k = b.dataset.k;
+    if (!inp || inp.disabled) return;
+    if (k === "⌨") { mode = mode === "none" ? "text" : "none"; app.querySelectorAll("input.ans").forEach((i) => i.setAttribute("inputmode", mode)); inp.blur(); inp.focus(); return; }
+    const s = inp.selectionStart ?? inp.value.length, e = inp.selectionEnd ?? inp.value.length;
+    if (k === "⌫") { const a = s === e ? Math.max(0, s - 1) : s; inp.value = inp.value.slice(0, a) + inp.value.slice(e); inp.setSelectionRange(a, a); }
+    else { inp.value = inp.value.slice(0, s) + k + inp.value.slice(e); inp.setSelectionRange(s + k.length, s + k.length); }
+    after(inp);
+  }));
+}
+
+// Problème en plusieurs parties : 3 essais, indices progressifs (outil, puis calcul), score partiel.
+function renderProblem(q, opt) {
+  const notion = NOTIONS.find((n) => n.id === q.id);
+  const code = q.id + "·4·" + hash(q.q);
+  let tries = 0, finished = false, active = null;
+  const ok = q.parts.map(() => false);
+  h(`<div class="spread">${brand}</div><div class="eyebrow">${opt.eyebrow}</div>
+  <div class="card pop"><div class="qmeta"><span class="chip">Problème · ${notion.label}</span><span class="dots" title="difficulté"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+  <div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
+  ${q.parts.map((p, i) => `<div class="answer part" data-i="${i}"><label for="p${i}"><b>${p.label}</b> <span class="mk" id="mk${i}"></span></label>
+    <input id="p${i}" class="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…"><div class="preview" id="pv${i}"></div></div>`).join("")}
+  ${keypadHtml()}
+  <div class="actions"><button class="btn-primary" id="check">Valider</button><button id="idk">Voir le corrigé</button></div>
+  <div id="fb"></div></div>`);
+  const fb = document.getElementById("fb");
+  q.parts.forEach((p, i) => {
+    const inp = document.getElementById("p" + i), pv = document.getElementById("pv" + i);
+    inp.onfocus = () => (active = inp);
+    let tm; inp.oninput = () => { clearTimeout(tm); tm = setTimeout(() => previewOf(inp, pv), 180); };
+    inp.onkeydown = (e) => { if (e.key === "Enter") check(); };
+  });
+  active = document.getElementById("p0");
+  bindKeypad(() => active, (inp) => previewOf(inp, document.getElementById("pv" + inp.id.slice(1))));
+  const end = (giveUp) => {
+    finished = true;
+    app.querySelectorAll("input.ans, #kp button, #check, #idk").forEach((b) => (b.disabled = true));
+    const frac = ok.filter(Boolean).length / q.parts.length, factor = [1, 1, 2 / 3, 1 / 3][Math.min(tries, 3)] || 1 / 3;
+    const score = giveUp && tries === 0 ? 0 : Math.round(frac * factor * 100) / 100;
+    if (frac === 1) burst();
+    const delta = opt.onDone({ solved: frac === 1, tries, partial: score });
+    const d = typeof delta === "number" && delta !== 0 ? `<span class="delta ${delta > 0 ? "up" : "down"}">Mathélo ${delta > 0 ? "+" : ""}${delta}</span>` : "";
+    fb.innerHTML = `<div class="fb ${frac === 1 ? "ok" : "bad"} pop"><div class="spread"><b>${frac === 1 ? (tries === 1 ? "Problème résolu du premier coup !" : "Problème résolu.") : ok.filter(Boolean).length + " partie(s) juste(s) sur " + q.parts.length + "."}</b>${d}</div><div class="sol">${q.sol}</div></div>
+      <div class="vote"><span>Ce problème était… <button data-v="up" aria-label="Bon problème">👍</button> <button data-v="down" aria-label="Problème à revoir">👎</button></span><span class="code">${code}</span></div>
+      <div class="actions">${frac === 1 ? "" : '<button id="redo">Refaire avec d\'autres valeurs</button>'}<button class="btn-primary" id="nx">Continuer</button></div>`;
+    typeset(fb);
+    fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
+    document.getElementById("nx").onclick = () => opt.onNext(false);
+    const r = document.getElementById("redo"); if (r) r.onclick = () => opt.onNext(true);
+  };
+  const check = () => {
+    if (finished) return;
+    let invalid = "";
+    q.parts.forEach((p, i) => {
+      if (ok[i]) return;
+      const v = document.getElementById("p" + i).value.trim();
+      if (!v) return;
+      const r = checkAnswer(p.spec, v);
+      if (r.status === "invalid" || r.status === "form") invalid = r.message || "Réponse illisible.";
+      else ok[i] = r.status === "correct";
+    });
+    if (invalid) { fb.innerHTML = `<div class="fb hint pop"><b>Je n'arrive pas à lire une réponse</b><span>${esc(invalid)}</span></div>`; return; }
+    tries++;
+    q.parts.forEach((p, i) => {
+      document.getElementById("mk" + i).textContent = ok[i] ? "✓" : "✗";
+      if (ok[i]) document.getElementById("p" + i).disabled = true;
+    });
+    if (ok.every(Boolean) || tries >= 3) return end(false);
+    fb.innerHTML = `<div class="fb hint pop"><b>${ok.some(Boolean) ? "En partie juste. Continue !" : "Pas encore."}</b><span><b>Indice ${tries}</b> · ${esc(q.hints[tries - 1])}</span></div>`;
+  };
+  document.getElementById("check").onclick = check;
+  document.getElementById("idk").onclick = () => { if (!finished) end(true); };
+}
+
 // Affiche une question ; feedback Moodle : indice au 1er échec, corrigé au 2e.
 function renderQuestion(q, opt) {
+  if (q.parts) return renderProblem(q, opt);
   const notion = NOTIONS.find((n) => n.id === q.id);
   const code = q.id + "·" + q.d + "·" + hash(q.q);
   let tries = 0, finished = false, inputMode = "none";

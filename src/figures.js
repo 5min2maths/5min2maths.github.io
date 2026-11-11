@@ -227,5 +227,11 @@ const FIG = (() => {
     return svg(320, 164, g, "série statistique");
   }
 
-  return { unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, pyramid, cone, road, items, scaling, lineGraph, blocks, sciScale, areaSquare, tiles, fmt };
+  function cylinder(lr, lh) {
+    let g = '<rect x="80" y="30" width="140" height="100" class="f-shape"/>' + '<ellipse cx="150" cy="130" rx="70" ry="16" class="f-shape"/>' + '<ellipse cx="150" cy="30" rx="70" ry="16" class="f-shape2"/>';
+    g += '<rect x="81" y="31" width="138" height="98" fill="var(--blue-soft)" stroke="none"/>' + L(80, 30, 80, 130) + L(220, 30, 220, 130) + L(150, 30, 220, 30, "f-accent", 'stroke-width="2"');
+    return svg(300, 160, g + t(185, 24, lr, "f-accent f-txt") + t(228, 84, lh, "f-txt", "start"), "cylindre");
+  }
+
+  return { cylinder, unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, pyramid, cone, road, items, scaling, lineGraph, blocks, sciScale, areaSquare, tiles, fmt };
 })();

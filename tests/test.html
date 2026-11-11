@@ -67,6 +67,20 @@ for (const id of Object.keys(GEN)) for (const d of [1, 2, 3]) for (let i = 0; i 
   if (s.kind === "value" && checkAnswer(s, String(s.value * 1.013 + 0.71)).status === "correct") fail(id + " d" + d + " accepte valeur+1");
 }
 
+// 2 bis. Problèmes : chaque partie, réponse canonique acceptée
+for (const id of Object.keys(PROB)) for (let i = 0; i < 300; i++) {
+  let p; try { p = PROB[id](); } catch (e) { fail("PROB " + id + " lève " + e.message); continue; }
+  n++;
+  if (!GEN[id]) fail("PROB " + id + " sans notion");
+  if (/NaN|undefined|Infinity/.test(p.q + p.sol + (p.fig || ""))) fail("PROB " + id + " NaN : " + p.q);
+  if (!p.hints || p.hints.length < 2) fail("PROB " + id + " indices");
+  p.parts.forEach((pt, k) => {
+    const s = pt.spec, ans = s.round ? s.value.toFixed(2) : String(s.value);
+    if (!isFinite(s.value)) fail("PROB " + id + " partie " + k + " valeur " + s.value);
+    else if (checkAnswer(s, ans).status !== "correct") fail("PROB " + id + " partie " + k + " refusée : " + ans);
+  });
+}
+
 // 3. Moteur : parcours complet
 const prof = { system: "CH", grade: 11, minutes: 5 };
 for (const p of [{ system: "CH", grade: 12, track: "college" }, { system: "CH", grade: 12, track: "mp" }, { system: "CH", grade: 13, track: "college" }, { system: "CH", grade: 13, track: "mp" }, { system: "FR", grade: 11 }]) log.push(p.system + p.grade + (p.track || "") + " : " + Engine.catalog(p, new Date("2027-03-01")).length + " notions — " + Engine.catalog(p, new Date("2027-03-01")).filter((c) => c.current).map((c) => c.id).join(" "));

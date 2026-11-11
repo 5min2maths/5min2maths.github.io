@@ -118,6 +118,8 @@ const Engine = {
     }
     if (m < 0.3) best = Math.max(1, best - 1);
     if (m > 0.8) best = Math.min(cap, best + 1);
+    // Niveau 4 (problème) : notion solide, Mathélo suffisant, environ une fois sur trois.
+    if (typeof PROB !== "undefined" && PROB[id] && m >= 0.7 && state.elo.r >= itemRating(state.profile, id, 4) - 250 && Math.random() < 0.35) return 4;
     return best;
   },
 
@@ -137,6 +139,7 @@ const Engine = {
 
   make(state, id, d) {
     const level = d || this.difficulty(state, id);
+    if (level === 4 && PROB[id]) { const p = PROB[id](); return { ...p, id, d: 4, spec: { kind: "multi" }, hint: p.hints[0] }; }
     const q = GEN[id](level);
     return { ...q, id, d: level, hint: q.hint || HINTS[id] };
   },
@@ -188,8 +191,15 @@ const Engine = {
   },
 
   // Score Moodle : 1 au premier essai, 0,5 au deuxième, 0 ensuite.
-  record(state, id, d, tries, solved) {
+  record(state, id, d, tries, solved, partial) {
     const s = state.notions[id];
+    if (partial !== undefined) { // problème : score partiel 0..1
+      s.seen++;
+      s.m = Math.min(1, Math.max(0, s.m + (partial - 0.5) * 0.2));
+      if (partial >= 0.99) { s.box = Math.min(5, s.box + 1); s.ok++; } else if (partial < 0.5) s.box = 0;
+      s.due = addDays(day(), partial >= 0.99 ? INTERVALS[s.box] : 1);
+      return partial;
+    }
     const today = day();
     s.seen++;
     if (solved && tries === 1) {
@@ -216,6 +226,14 @@ const Engine = {
       if (h) { h.n += answered; h.score += score; } else state.history.push({ date: today, n: answered, score });
       state.history = state.history.slice(-120);
     }
+  },
+
+  // Problème de la semaine : une notion « à problème » parmi celles vues, fixée par la semaine.
+  weeklyProblem(state) {
+    const ids = this.eligible(state).filter((id) => PROB[id]);
+    if (!ids.length) return null;
+    const d = new Date(), week = Math.floor((d - new Date(d.getFullYear(), 0, 1)) / 6048e5);
+    return ids[week % ids.length];
   },
 
   isProvisional(state) { return state.elo.n < 20; },

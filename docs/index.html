@@ -202,6 +202,9 @@ h1 { font-size: clamp(2rem, 7vw, 2.6rem); }
 .burst span:nth-child(4n) { color: var(--ok); }
 @keyframes fly { from { transform: translate(0, 0) rotate(0) scale(0.6); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(1.1); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .burst { display: none; } }
+.part label { display: flex; justify-content: space-between; gap: 8px; font-size: 0.98rem; }
+.part .mk { font-family: var(--font-display); font-weight: 800; }
+.part input:disabled { border-color: var(--ok); background: var(--ok-soft); }
 
 </style>
 <script>
@@ -797,7 +800,13 @@ const FIG = (() => {
     return svg(320, 164, g, "série statistique");
   }
 
-  return { unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, pyramid, cone, road, items, scaling, lineGraph, blocks, sciScale, areaSquare, tiles, fmt };
+  function cylinder(lr, lh) {
+    let g = '<rect x="80" y="30" width="140" height="100" class="f-shape"/>' + '<ellipse cx="150" cy="130" rx="70" ry="16" class="f-shape"/>' + '<ellipse cx="150" cy="30" rx="70" ry="16" class="f-shape2"/>';
+    g += '<rect x="81" y="31" width="138" height="98" fill="var(--blue-soft)" stroke="none"/>' + L(80, 30, 80, 130) + L(220, 30, 220, 130) + L(150, 30, 220, 30, "f-accent", 'stroke-width="2"');
+    return svg(300, 160, g + t(185, 24, lr, "f-accent f-txt") + t(228, 84, lh, "f-txt", "start"), "cylindre");
+  }
+
+  return { cylinder, unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, pyramid, cone, road, items, scaling, lineGraph, blocks, sciScale, areaSquare, tiles, fmt };
 })();
 
 // Générateurs de questions : un par notion, 3 niveaux de difficulté (1 = bases, 3 = approfondi).
@@ -1413,6 +1422,105 @@ Object.assign(GEN, {
   },
 });
 
+// ---------- Niveau 4 : problèmes en plusieurs parties (modélisation, plusieurs étapes) ----------
+// Chaque problème : { q, fig, parts: [{ label, spec }], hints: [outil, calcul], sol }.
+const r2 = (v) => Math.round(v * 100) / 100;
+const PROB = {
+  f2() {
+    const p = R.pick([2, 3]), q = R.pick([0.4, 0.6, 0.8, 1]), c = 5 * p * q, b = 5 * (p - q);
+    const tm = (p - q) / 2, hm = -5 * (tm - p) * (tm + q);
+    return { fig: FIG.parabola((t) => (-5 * (t - p) * (t + q)) / 3, [[0, c / 3, "plongeoir"], [p, 0, "eau"]]), q: "Une plongeuse saute d'un plongeoir. Sa hauteur au-dessus de l'eau (en m) après " + M("t") + " secondes est " + M("h(t) = -5t^2 + " + dec(b) + "t + " + dec(c)) + ".",
+      parts: [{ label: "a) Hauteur du plongeoir (m)", spec: { kind: "value", value: c } }, { label: "b) Instant où elle entre dans l'eau (s)", spec: { kind: "value", value: p } }, { label: "c) Hauteur maximale atteinte (m)", spec: { kind: "value", value: hm, round: 0.01, exactOk: true } }],
+      hints: ["Associe chaque question à un outil : départ → t = 0 ; entrée dans l'eau → h(t) = 0 ; hauteur max → sommet.", "a) h(0). b) Résous −5t² + " + dec(b) + "t + " + dec(c) + " = 0 et garde la solution positive. c) t = −b / 2a, puis h(t)."],
+      sol: "a) " + M("h(0) = " + dec(c)) + " m. b) " + M("h(t) = -5(t - " + p + ")(t + " + dec(q) + ") = 0") + " : " + M("t = " + p) + " s. c) " + M("t = " + dec(tm)) + " s, " + M("h = " + dec(r2(hm))) + " m." };
+  },
+  factor() {
+    const L = 20 * R.int(2, 6), k = R.int(5, L / 4 - 1);
+    return { fig: FIG.rectFig(2, 1, "mur (pas de clôture)", "x"), q: "Avec " + M(L) + " m de clôture, on entoure un enclos rectangulaire le long d'un mur (le mur forme un côté). On note " + M("x") + " la largeur (perpendiculaire au mur).",
+      parts: [{ label: "a) Aire (m²) si x = " + k, spec: { kind: "value", value: k * (L - 2 * k) } }, { label: "b) Largeur x qui donne l'aire maximale (m)", spec: { kind: "value", value: L / 4 } }, { label: "c) Aire maximale (m²)", spec: { kind: "value", value: (L / 4) * (L / 2) } }],
+      hints: ["Exprime l'aire en fonction de x : la longueur vaut " + L + " − 2x. L'aire maximale est au sommet de la parabole.", "A(x) = x(" + L + " − 2x) = −2x² + " + L + "x ; sommet en x = −b / 2a."],
+      sol: M("A(x) = x(" + L + " - 2x)") + ". a) " + M(k * (L - 2 * k)) + " m². b) " + M("x = \\frac{" + L + "}{4} = " + L / 4) + " m. c) " + M(L / 4 + " \\cdot " + L / 2 + " = " + (L / 4) * (L / 2)) + " m²." };
+  },
+  pct() {
+    const P = 20 * R.int(3, 25), up = R.pick([10, 20, 25, 30, 50]), dn = R.pick([10, 20, 25, 40]);
+    const p1 = P * (1 + up / 100), p2 = p1 * (1 - dn / 100), glob = (p2 / P - 1) * 100;
+    return { fig: FIG.percentBar(up, P, " CHF"), q: "Un vélo coûte " + M(P) + " CHF. Son prix augmente de " + M(up + "\\,\\%") + ", puis baisse de " + M(dn + "\\,\\%") + " pendant les soldes.",
+      parts: [{ label: "a) Prix après la hausse (CHF)", spec: { kind: "value", value: p1 } }, { label: "b) Prix soldé (CHF)", spec: { kind: "value", value: p2 } }, { label: "c) Variation globale en % (négative si baisse)", spec: { kind: "value", value: glob, round: 0.01 } }],
+      hints: ["Les pourcentages successifs se multiplient : on ne les additionne pas.", "Multiplie par " + dec(1 + up / 100) + " puis par " + dec(1 - dn / 100) + " ; variation globale = (prix final / prix initial − 1) · 100."],
+      sol: "a) " + M(P + " \\cdot " + dec(1 + up / 100) + " = " + dec(p1)) + ". b) " + M(dec(p1) + " \\cdot " + dec(1 - dn / 100) + " = " + dec(r2(p2))) + ". c) " + M(dec(r2(glob)) + "\\,\\%") + " (et non " + (up - dn) + " %)." };
+  },
+  pyth() {
+    const [a, b, c] = R.pick([[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [20, 21, 29]]).map((v) => v * R.int(2, 5));
+    return { fig: FIG.rectFig(b, a, b + " m ?", a + " m"), q: "Un terrain rectangulaire a une diagonale de " + M(c) + " m et un côté de " + M(a) + " m.",
+      parts: [{ label: "a) Autre côté (m)", spec: { kind: "value", value: b } }, { label: "b) Aire du terrain (m²)", spec: { kind: "value", value: a * b } }, { label: "c) Longueur de clôture pour en faire le tour (m)", spec: { kind: "value", value: 2 * (a + b) } }],
+      hints: ["La diagonale découpe le rectangle en deux triangles rectangles : Pythagore.", "Autre côté = √(" + c + "² − " + a + "²), puis aire = longueur · largeur et périmètre = 2(longueur + largeur)."],
+      sol: "a) " + M("\\sqrt{" + c * c + " - " + a * a + "} = " + b) + " m. b) " + M(a * b) + " m². c) " + M(2 * (a + b)) + " m." };
+  },
+  vol() {
+    const r = R.int(2, 6), hh = R.int(5, 15), rho = R.pick([2.7, 7.8, 8.9, 0.9]), mat = { 2.7: "aluminium", 7.8: "acier", 8.9: "cuivre", 0.9: "glace" }[rho];
+    const V = Math.PI * r * r * hh, m = V * rho;
+    return { fig: FIG.cylinder("r = " + r, "h = " + hh), q: "Une pièce en " + mat + " (" + M("\\rho = " + dec(rho)) + " g/cm³) est un cylindre de rayon " + M(r) + " cm et de hauteur " + M(hh) + " cm.",
+      parts: [{ label: "a) Volume (cm³, au centième)", spec: { kind: "value", value: V, round: 0.01, exactOk: true } }, { label: "b) Masse (g, au centième)", spec: { kind: "value", value: m, round: 0.01 } }, { label: "c) Nombre de pièces complètes dans 10 kg", spec: { kind: "value", value: Math.floor(10000 / m) } }],
+      hints: ["Volume du cylindre, puis masse = masse volumique · volume. Attention : 10 kg = 10 000 g.", "V = π · " + r + "² · " + hh + " ; m = " + dec(rho) + " · V ; pièces = partie entière de 10 000 / m."],
+      sol: "a) " + M(r * r * hh + "\\pi \\approx " + dec(r2(V))) + " cm³. b) " + M("\\approx " + dec(r2(m))) + " g. c) " + M("10\\,000 : " + dec(r2(m)) + " \\approx " + dec(r2(10000 / m))) + ", donc " + M(Math.floor(10000 / m)) + " pièces." };
+  },
+  sys2() {
+    const pa = R.int(12, 20), pe = R.int(5, 10), na = R.int(2, 5), ne = R.int(2, 5), nb = R.int(1, 4), nf = R.int(3, 7);
+    if (na * nf === nb * ne) return PROB.sys2();
+    const ga = R.int(2, 6), ge = R.int(10, 25);
+    return { q: "Au musée, " + M(na) + " adultes et " + M(ne) + " enfants paient " + M(na * pa + ne * pe) + " CHF ; " + M(nb) + " adultes et " + M(nf) + " enfants paient " + M(nb * pa + nf * pe) + " CHF.",
+      parts: [{ label: "a) Prix d'un billet adulte (CHF)", spec: { kind: "value", value: pa } }, { label: "b) Prix d'un billet enfant (CHF)", spec: { kind: "value", value: pe } }, { label: "c) Prix pour une classe : " + ga + " adultes et " + ge + " enfants (CHF)", spec: { kind: "value", value: ga * pa + ge * pe } }],
+      hints: ["Deux inconnues (prix adulte a, prix enfant e), deux informations : un système.", na + "a + " + ne + "e = " + (na * pa + ne * pe) + " et " + nb + "a + " + nf + "e = " + (nb * pa + nf * pe) + " : élimine une inconnue."],
+      sol: "a) " + M("a = " + pa) + " CHF. b) " + M("e = " + pe) + " CHF. c) " + M(ga + " \\cdot " + pa + " + " + ge + " \\cdot " + pe + " = " + (ga * pa + ge * pe)) + " CHF." };
+  },
+  log() {
+    const C = 1000 * R.int(2, 9), t = R.pick([2, 3, 4, 5]), n0 = R.int(3, 8);
+    const v = C * Math.pow(1 + t / 100, n0), years = Math.ceil(Math.log(2) / Math.log(1 + t / 100));
+    return { fig: FIG.parabola((x) => Math.pow(1 + t / 100, x * 3) * 2 - 2), q: "On place " + M(C) + " CHF à " + M(t + "\\,\\%") + " d'intérêt composé par an.",
+      parts: [{ label: "a) Capital après " + n0 + " ans (CHF, au centime)", spec: { kind: "value", value: v, round: 0.01 } }, { label: "b) Nombre d'années pour que le capital double (années entières)", spec: { kind: "value", value: years } }],
+      hints: ["Chaque année, le capital est multiplié par " + dec(1 + t / 100) + ". Doubler : résoudre " + dec(1 + t / 100) + "ⁿ = 2.", "n = ln 2 / ln " + dec(1 + t / 100) + ", puis arrondir à l'année supérieure."],
+      sol: "a) " + M(C + " \\cdot " + dec(1 + t / 100) + "^{" + n0 + "} \\approx " + dec(r2(v))) + " CHF. b) " + M("n = \\frac{\\ln 2}{\\ln " + dec(1 + t / 100) + "} \\approx " + dec(r2(Math.log(2) / Math.log(1 + t / 100)))) + ", donc " + M(years) + " ans." };
+  },
+  eq2() {
+    const x = R.int(3, 12), k = R.int(2, 8);
+    return { fig: FIG.rectFig(x + k, x, "x + " + k, "x"), q: "Un rectangle a une longueur qui dépasse sa largeur " + M("x") + " de " + M(k) + " cm. Son aire vaut " + M(x * (x + k)) + " cm².",
+      parts: [{ label: "a) Largeur (cm)", spec: { kind: "value", value: x } }, { label: "b) Longueur (cm)", spec: { kind: "value", value: x + k } }, { label: "c) Périmètre (cm)", spec: { kind: "value", value: 2 * (2 * x + k) } }],
+      hints: ["Traduis l'aire en équation : x(x + " + k + ") = " + x * (x + k) + ".", "Mets tout d'un côté : x² + " + k + "x − " + x * (x + k) + " = 0, puis factorise et garde la solution positive."],
+      sol: M("x^2 + " + k + "x - " + x * (x + k) + " = (x - " + x + ")(x + " + (x + k) + ") = 0") + " : a) " + M(x) + " cm, b) " + M(x + k) + " cm, c) " + M(2 * (2 * x + k)) + " cm." };
+  },
+  trigo() {
+    const Lr = R.int(4, 12), a = R.int(4, 15), hgt = Lr * Math.sin(rad(a)), hor = Lr * Math.cos(rad(a));
+    return { fig: FIG.trigTriangle(["?", "?", Lr + " m"], a + "°"), q: "Une rampe d'accès de " + M(Lr) + " m de long fait un angle de " + M(a + "°") + " avec le sol.",
+      parts: [{ label: "a) Hauteur atteinte (m, au centième)", spec: { kind: "value", value: hgt, round: 0.01 } }, { label: "b) Distance horizontale (m, au centième)", spec: { kind: "value", value: hor, round: 0.01 } }, { label: "c) Pente en % (au centième)", spec: { kind: "value", value: Math.tan(rad(a)) * 100, round: 0.01 } }],
+      hints: ["La rampe est l'hypoténuse d'un triangle rectangle : hauteur → sinus, horizontale → cosinus.", "Pente en % = hauteur / horizontale · 100 = tan α · 100."],
+      sol: "a) " + M(Lr + " \\sin " + a + "° \\approx " + dec(r2(hgt))) + " m. b) " + M(Lr + " \\cos " + a + "° \\approx " + dec(r2(hor))) + " m. c) " + M("\\tan " + a + "° \\cdot 100 \\approx " + dec(r2(Math.tan(rad(a)) * 100)) + "\\,\\%") };
+  },
+  stats() {
+    const notes = Array.from({ length: 4 }, () => R.int(7, 11) / 2), target = R.pick([4.5, 5]);
+    const s = notes.reduce((a, b) => a + b, 0), need = target * 5 - s;
+    if (need > 6 || need < 1) return PROB.stats();
+    return { fig: FIG.barChart(notes), q: "Tes quatre premières notes sont " + M(notes.map(dec).join(" ; ")) + ". Il reste une épreuve, de même coefficient.",
+      parts: [{ label: "a) Moyenne actuelle", spec: { kind: "value", value: s / 4 } }, { label: "b) Note à obtenir pour finir avec " + decTxt(target) + " de moyenne", spec: { kind: "value", value: need } }],
+      hints: ["La moyenne finale = (somme des 5 notes) / 5.", "Il faut une somme de " + decTxt(target) + " · 5 = " + decTxt(target * 5) + " : retire la somme actuelle."],
+      sol: "a) " + M("\\frac{" + dec(s) + "}{4} = " + dec(s / 4)) + ". b) " + M(dec(target * 5) + " - " + dec(s) + " = " + dec(need)) + "." };
+  },
+  vitesse() {
+    const d = 10 * R.int(6, 18), v1 = R.pick([60, 80, 90, 100, 120]), v2 = R.pick([40, 50, 60, 75].filter((v) => v !== v1));
+    const t1 = d / v1, t2 = d / v2, vm = (2 * d) / (t1 + t2);
+    return { fig: FIG.road(d + " km", v1 + " km/h → " + v2 + " km/h"), q: "Une voiture fait l'aller de " + M(d) + " km à " + M(v1) + " km/h et le retour à " + M(v2) + " km/h.",
+      parts: [{ label: "a) Durée de l'aller (min)", spec: { kind: "value", value: t1 * 60, round: 0.01 } }, { label: "b) Durée du retour (min)", spec: { kind: "value", value: t2 * 60, round: 0.01 } }, { label: "c) Vitesse moyenne sur l'aller-retour (km/h, au centième)", spec: { kind: "value", value: vm, round: 0.01 } }],
+      hints: ["La vitesse moyenne n'est pas la moyenne des vitesses : c'est la distance totale divisée par la durée totale.", "t = d / v pour chaque trajet ; v moyenne = " + 2 * d + " km / (durée aller + durée retour)."],
+      sol: "a) " + M(dec(r2(t1 * 60))) + " min. b) " + M(dec(r2(t2 * 60))) + " min. c) " + M("\\frac{" + 2 * d + "}{" + dec(r2(t1 + t2)) + "} \\approx " + dec(r2(vm))) + " km/h (et non " + (v1 + v2) / 2 + ")." };
+  },
+  echelle() {
+    const k = R.pick([20, 25, 50, 100]), lm = R.int(4, 15), am = R.int(6, 40), vm = R.int(2, 9);
+    return { fig: FIG.scaling(3, "1 : " + k), q: "Une maquette de bâtiment est à l'échelle " + M("1 : " + k) + ".",
+      parts: [{ label: "a) Un mur mesure " + lm + " cm sur la maquette : longueur réelle (m)", spec: { kind: "value", value: (lm * k) / 100 } }, { label: "b) Une pièce mesure " + am + " cm² sur la maquette : aire réelle (m²)", spec: { kind: "value", value: (am * k * k) / 10000 } }, { label: "c) Une cuve de " + vm + " cm³ sur la maquette : volume réel (m³)", spec: { kind: "value", value: (vm * k ** 3) / 1e6 } }],
+      hints: ["Longueurs × " + k + ", aires × " + k + "², volumes × " + k + "³.", "Puis convertis : 1 m = 100 cm, 1 m² = 10 000 cm², 1 m³ = 1 000 000 cm³."],
+      sol: "a) " + M(lm * k + " \\text{ cm} = " + dec((lm * k) / 100)) + " m. b) " + M(am + " \\cdot " + k * k + " = " + am * k * k + " \\text{ cm}^2 = " + dec((am * k * k) / 10000)) + " m². c) " + M(vm + " \\cdot " + k ** 3 + " = " + vm * k ** 3 + " \\text{ cm}^3 = " + dec((vm * k ** 3) / 1e6)) + " m³." };
+  },
+};
+
 // Moteur adaptatif : profil, état de chaque notion, positionnement, choix des questions, mise à jour.
 // Tout reste sur l'appareil (localStorage) ; aucune donnée ne part ailleurs.
 
@@ -1533,6 +1641,8 @@ const Engine = {
     }
     if (m < 0.3) best = Math.max(1, best - 1);
     if (m > 0.8) best = Math.min(cap, best + 1);
+    // Niveau 4 (problème) : notion solide, Mathélo suffisant, environ une fois sur trois.
+    if (typeof PROB !== "undefined" && PROB[id] && m >= 0.7 && state.elo.r >= itemRating(state.profile, id, 4) - 250 && Math.random() < 0.35) return 4;
     return best;
   },
 
@@ -1552,6 +1662,7 @@ const Engine = {
 
   make(state, id, d) {
     const level = d || this.difficulty(state, id);
+    if (level === 4 && PROB[id]) { const p = PROB[id](); return { ...p, id, d: 4, spec: { kind: "multi" }, hint: p.hints[0] }; }
     const q = GEN[id](level);
     return { ...q, id, d: level, hint: q.hint || HINTS[id] };
   },
@@ -1603,8 +1714,15 @@ const Engine = {
   },
 
   // Score Moodle : 1 au premier essai, 0,5 au deuxième, 0 ensuite.
-  record(state, id, d, tries, solved) {
+  record(state, id, d, tries, solved, partial) {
     const s = state.notions[id];
+    if (partial !== undefined) { // problème : score partiel 0..1
+      s.seen++;
+      s.m = Math.min(1, Math.max(0, s.m + (partial - 0.5) * 0.2));
+      if (partial >= 0.99) { s.box = Math.min(5, s.box + 1); s.ok++; } else if (partial < 0.5) s.box = 0;
+      s.due = addDays(day(), partial >= 0.99 ? INTERVALS[s.box] : 1);
+      return partial;
+    }
     const today = day();
     s.seen++;
     if (solved && tries === 1) {
@@ -1631,6 +1749,14 @@ const Engine = {
       if (h) { h.n += answered; h.score += score; } else state.history.push({ date: today, n: answered, score });
       state.history = state.history.slice(-120);
     }
+  },
+
+  // Problème de la semaine : une notion « à problème » parmi celles vues, fixée par la semaine.
+  weeklyProblem(state) {
+    const ids = this.eligible(state).filter((id) => PROB[id]);
+    if (!ids.length) return null;
+    const d = new Date(), week = Math.floor((d - new Date(d.getFullYear(), 0, 1)) / 6048e5);
+    return ids[week % ids.length];
   },
 
   isProvisional(state) { return state.elo.n < 20; },
@@ -1778,17 +1904,19 @@ function themeBars(lv) {
 function screenHome() {
   if (!state) return screenWelcome();
   const today = day(), done = state.history.find((x) => x.date === today);
-  const s = state.streak, alive = s.last === today || s.last === addDays(today, -1);
+  const s = state.streak, alive = s.last === today || s.last === addDays(today, -1), wp = Engine.weeklyProblem(state);
   h(`<div class="spread">${brand}<span class="small muted">${SYSTEMS[state.profile.system].label} · ${gradeName(state.profile)}</span></div>
   <div class="card flat streak"><span class="flame" aria-hidden="true">${alive && s.count ? "🔥" : "✏️"}</span><div><b>${alive ? s.count : 0} ${(alive ? s.count : 0) > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span><div class="small muted">${done ? "Séance du jour faite : " + done.n + " question" + (done.n > 1 ? "s" : "") + ". Tu peux en refaire une." : "Ta séance du jour t'attend."}</div></div></div>
   <div class="card">${eloBlock()}</div>
   <div class="card flat stack"><h3>Temps aujourd'hui</h3><div class="timepick" id="time">${[1, 2, 5, 10].map((m) => `<button aria-pressed="${m === state.profile.minutes}" data-v="${m}"><b>${m}</b><small>min · ${QUESTIONS_FOR[m]} q.</small></button>`).join("")}</div>
   <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "Ma question du jour"}</button></div>
+  ${wp ? `<div class="card flat stack"><div class="eyebrow">Problème de la semaine</div><h3>${NOTIONS.find((n) => n.id === wp).label}</h3><p class="small muted">Un problème en plusieurs étapes, avec indices. Facultatif, et il rapporte gros.</p><button id="wp">Relever le défi</button></div>` : ""}
   <div class="card flat"><h3>Mes thèmes</h3><div class="bars">${themeBars(Engine.themeLevels(state))}</div></div>
   <div class="stack"><button id="notions">J'ai vu une nouvelle notion en classe</button><button id="level">Changer de classe ou d'école</button>
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div></div>`);
   app.querySelectorAll("#time button").forEach((b) => (b.onclick = () => { state.profile.minutes = +b.dataset.v; save(); screenHome(); }));
   document.getElementById("go").onclick = startSession;
+  if (wp) document.getElementById("wp").onclick = () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), limit: 600, weekly: true }; nextQuestion(); };
   document.getElementById("notions").onclick = () => screenNotions(true);
   document.getElementById("level").onclick = () => { draft = { ...state.profile }; screenLevel(); };
   document.getElementById("r1").onclick = () => {
@@ -1809,11 +1937,11 @@ function nextQuestion(redo) {
   const timeUp = (Date.now() - session.start) / 1000 > session.limit + 30;
   if (!redo && (session.i >= session.plan.length || (timeUp && session.answered > 0))) return screenSummary();
   const id = redo ? redo.id : session.plan[session.i];
-  const q = redo ? Engine.make(state, id, Math.max(1, redo.d - 1)) : Engine.make(state, id);
+  const q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly ? 4 : undefined);
   renderQuestion(q, {
-    eyebrow: (session.i === 0 && !redo ? "Question du jour" : "Question " + (session.i + 1) + " sur " + session.plan.length) + (redo ? " · nouvelles valeurs" : ""),
+    eyebrow: (session.weekly ? "Problème de la semaine" : session.i === 0 && !redo ? "Question du jour" : "Question " + (session.i + 1) + " sur " + session.plan.length) + (redo ? " · nouvelles valeurs" : ""),
     onDone: (res) => {
-      const sc = Engine.record(state, id, q.d, res.tries, res.solved);
+      const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
       res.delta = Engine.updateElo(state, id, q.d, sc);
       session.score += sc; session.answered++; session.ids.add(id);
       Engine.finishDay(state, 1, sc); save();
@@ -1823,8 +1951,98 @@ function nextQuestion(redo) {
   });
 }
 
+// Clavier mathématique partagé : écrit dans le champ actif.
+const KEYS = ["7", "8", "9", "/", "(", ")", "4", "5", "6", "*", "^", "√", "1", "2", "3", "-", "x", "π", "0", ",", "+", ";", "⌫", "⌨"];
+const keypadHtml = () => `<div class="keypad" id="kp">${KEYS.map((k) => `<button type="button" class="${/[\d,]/.test(k) ? "" : "k-op"}" data-k="${k}">${k === "*" ? "×" : k}</button>`).join("")}</div>`;
+function previewOf(inp, prev) {
+  const v = inp.value.trim();
+  if (!v) { prev.innerHTML = ""; return; }
+  try {
+    const t = Expr.parse(v), val = Expr.vars(t).size || t.t === "list" ? "" : Expr.evaluate(t);
+    prev.innerHTML = "\\(" + Expr.tex(t) + "\\)" + (val !== "" && isFinite(val) ? `<span class="val">≈ ${String(+val.toPrecision(8)).replace(".", ",")}</span>` : "");
+    typeset(prev);
+  } catch (e) { prev.innerHTML = `<span class="err">${esc(e.message)}</span>`; }
+}
+function bindKeypad(getInput, after) {
+  let mode = window.matchMedia("(pointer: fine)").matches ? "text" : "none";
+  app.querySelectorAll("input.ans").forEach((i) => i.setAttribute("inputmode", mode));
+  app.querySelectorAll("#kp button").forEach((b) => (b.onclick = () => {
+    const inp = getInput(), k = b.dataset.k;
+    if (!inp || inp.disabled) return;
+    if (k === "⌨") { mode = mode === "none" ? "text" : "none"; app.querySelectorAll("input.ans").forEach((i) => i.setAttribute("inputmode", mode)); inp.blur(); inp.focus(); return; }
+    const s = inp.selectionStart ?? inp.value.length, e = inp.selectionEnd ?? inp.value.length;
+    if (k === "⌫") { const a = s === e ? Math.max(0, s - 1) : s; inp.value = inp.value.slice(0, a) + inp.value.slice(e); inp.setSelectionRange(a, a); }
+    else { inp.value = inp.value.slice(0, s) + k + inp.value.slice(e); inp.setSelectionRange(s + k.length, s + k.length); }
+    after(inp);
+  }));
+}
+
+// Problème en plusieurs parties : 3 essais, indices progressifs (outil, puis calcul), score partiel.
+function renderProblem(q, opt) {
+  const notion = NOTIONS.find((n) => n.id === q.id);
+  const code = q.id + "·4·" + hash(q.q);
+  let tries = 0, finished = false, active = null;
+  const ok = q.parts.map(() => false);
+  h(`<div class="spread">${brand}</div><div class="eyebrow">${opt.eyebrow}</div>
+  <div class="card pop"><div class="qmeta"><span class="chip">Problème · ${notion.label}</span><span class="dots" title="difficulté"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+  <div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
+  ${q.parts.map((p, i) => `<div class="answer part" data-i="${i}"><label for="p${i}"><b>${p.label}</b> <span class="mk" id="mk${i}"></span></label>
+    <input id="p${i}" class="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…"><div class="preview" id="pv${i}"></div></div>`).join("")}
+  ${keypadHtml()}
+  <div class="actions"><button class="btn-primary" id="check">Valider</button><button id="idk">Voir le corrigé</button></div>
+  <div id="fb"></div></div>`);
+  const fb = document.getElementById("fb");
+  q.parts.forEach((p, i) => {
+    const inp = document.getElementById("p" + i), pv = document.getElementById("pv" + i);
+    inp.onfocus = () => (active = inp);
+    let tm; inp.oninput = () => { clearTimeout(tm); tm = setTimeout(() => previewOf(inp, pv), 180); };
+    inp.onkeydown = (e) => { if (e.key === "Enter") check(); };
+  });
+  active = document.getElementById("p0");
+  bindKeypad(() => active, (inp) => previewOf(inp, document.getElementById("pv" + inp.id.slice(1))));
+  const end = (giveUp) => {
+    finished = true;
+    app.querySelectorAll("input.ans, #kp button, #check, #idk").forEach((b) => (b.disabled = true));
+    const frac = ok.filter(Boolean).length / q.parts.length, factor = [1, 1, 2 / 3, 1 / 3][Math.min(tries, 3)] || 1 / 3;
+    const score = giveUp && tries === 0 ? 0 : Math.round(frac * factor * 100) / 100;
+    if (frac === 1) burst();
+    const delta = opt.onDone({ solved: frac === 1, tries, partial: score });
+    const d = typeof delta === "number" && delta !== 0 ? `<span class="delta ${delta > 0 ? "up" : "down"}">Mathélo ${delta > 0 ? "+" : ""}${delta}</span>` : "";
+    fb.innerHTML = `<div class="fb ${frac === 1 ? "ok" : "bad"} pop"><div class="spread"><b>${frac === 1 ? (tries === 1 ? "Problème résolu du premier coup !" : "Problème résolu.") : ok.filter(Boolean).length + " partie(s) juste(s) sur " + q.parts.length + "."}</b>${d}</div><div class="sol">${q.sol}</div></div>
+      <div class="vote"><span>Ce problème était… <button data-v="up" aria-label="Bon problème">👍</button> <button data-v="down" aria-label="Problème à revoir">👎</button></span><span class="code">${code}</span></div>
+      <div class="actions">${frac === 1 ? "" : '<button id="redo">Refaire avec d\'autres valeurs</button>'}<button class="btn-primary" id="nx">Continuer</button></div>`;
+    typeset(fb);
+    fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
+    document.getElementById("nx").onclick = () => opt.onNext(false);
+    const r = document.getElementById("redo"); if (r) r.onclick = () => opt.onNext(true);
+  };
+  const check = () => {
+    if (finished) return;
+    let invalid = "";
+    q.parts.forEach((p, i) => {
+      if (ok[i]) return;
+      const v = document.getElementById("p" + i).value.trim();
+      if (!v) return;
+      const r = checkAnswer(p.spec, v);
+      if (r.status === "invalid" || r.status === "form") invalid = r.message || "Réponse illisible.";
+      else ok[i] = r.status === "correct";
+    });
+    if (invalid) { fb.innerHTML = `<div class="fb hint pop"><b>Je n'arrive pas à lire une réponse</b><span>${esc(invalid)}</span></div>`; return; }
+    tries++;
+    q.parts.forEach((p, i) => {
+      document.getElementById("mk" + i).textContent = ok[i] ? "✓" : "✗";
+      if (ok[i]) document.getElementById("p" + i).disabled = true;
+    });
+    if (ok.every(Boolean) || tries >= 3) return end(false);
+    fb.innerHTML = `<div class="fb hint pop"><b>${ok.some(Boolean) ? "En partie juste. Continue !" : "Pas encore."}</b><span><b>Indice ${tries}</b> · ${esc(q.hints[tries - 1])}</span></div>`;
+  };
+  document.getElementById("check").onclick = check;
+  document.getElementById("idk").onclick = () => { if (!finished) end(true); };
+}
+
 // Affiche une question ; feedback Moodle : indice au 1er échec, corrigé au 2e.
 function renderQuestion(q, opt) {
+  if (q.parts) return renderProblem(q, opt);
   const notion = NOTIONS.find((n) => n.id === q.id);
   const code = q.id + "·" + q.d + "·" + hash(q.q);
   let tries = 0, finished = false, inputMode = "none";
