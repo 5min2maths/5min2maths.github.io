@@ -25,6 +25,25 @@ const HINTS = {
   vol: "Prisme : base × hauteur ; pyramide et cône : base × hauteur / 3.",
   thales: "Écris les trois rapports égaux AD/AB = AE/AC = DE/BC, puis utilise les deux utiles.",
   affine: "f(x) = ax + b : a est la pente, b l'ordonnée à l'origine.",
+  eq3: "Mets x en évidence, puis factorise ce qui reste.",
+  eq2disc: "Δ = b² − 4ac ; si Δ > 0, x = (−b ± √Δ) / 2a ; si Δ < 0, aucune solution.",
+  sys2: "Additionne ou soustrais les équations pour éliminer une inconnue, ou isole-la et remplace.",
+  fimg: "Image : remplace x par le nombre. Préimage : résous f(x) = valeur.",
+  f2: "Sommet : x = −b / 2a, puis calcule f en ce point. Zéros : f(x) = 0.",
+  inter: "Les graphes se coupent là où f(x) = g(x) : mets tout d'un côté et résous.",
+  angles: "L'angle au centre vaut le double de l'angle inscrit qui intercepte le même arc.",
+  euclide: "Hauteur : h² = p · q. Euclide : cathète² = projection · hypoténuse.",
+  trigo: "SOH CAH TOA : sin = opposé/hypoténuse, cos = adjacent/hypoténuse, tan = opposé/adjacent.",
+  cart: "Distance : √((xB − xA)² + (yB − yA)²). Milieu : moyenne des coordonnées. Pente : Δy / Δx.",
+  recip: "(f ∘ g)(x) = f(g(x)) : calcule d'abord g. Réciproque : résous y = f(x) pour x.",
+  sinlaw: "Sinus : a / sin α = b / sin β. Cosinus : c² = a² + b² − 2ab·cos γ.",
+  expo: "Écris les deux membres comme puissances de la même base, puis égale les exposants.",
+  log: "log_b(x) = y signifie b^y = x. Pour résoudre b^x = c : x = ln c / ln b.",
+  absval: "|A| = b (b ≥ 0) donne A = b ou A = −b. Une valeur absolue n'est jamais négative.",
+  ineq: "Comme une équation, mais on retourne le signe en multipliant ou divisant par un négatif.",
+  trigcercle: "180° = π rad. Sur le cercle trigonométrique, le point a pour coordonnées (cos α ; sin α).",
+  trigeq: "Sur [0° ; 360°[ : sin x = s donne x et 180° − x ; cos x = c donne x et 360° − x.",
+  stats: "Moyenne : somme / effectif. Médiane : valeur du milieu de la série triée. Écart-type : √(moyenne des carrés des écarts).",
 };
 
 const Store = {
@@ -45,7 +64,7 @@ const harmos = (system, grade) => (system === "FR" ? grade + 2 : grade);
 // Score d'une question : niveau scolaire de la notion + difficulté.
 function itemRating(profile, id, d) {
   const n = NOTIONS.find((x) => x.id === id);
-  const [g, m] = n[profile.system];
+  const [g, m] = placeOf(n, profile) || n.CH || n.FR;
   return 700 + (harmos(profile.system, g) - 8) * 150 + m * 8 + (d - 1) * 130;
 }
 // Échelle de référence (sans données partagées) : Mathélo typique en fin d'année par niveau HarmoS.
@@ -70,8 +89,8 @@ const Engine = {
   // Notions du programme jusqu'à l'année de l'élève, avec statut proposé selon la date.
   catalog(profile, date = new Date()) {
     const mo = schoolMonth(date);
-    return NOTIONS.filter((n) => n[profile.system] && n[profile.system][0] <= profile.grade).map((n) => {
-      const [g, m] = n[profile.system];
+    return NOTIONS.filter((n) => { const pl = placeOf(n, profile); return pl && pl[0] <= profile.grade; }).map((n) => {
+      const [g, m] = placeOf(n, profile);
       let status = "vu";
       if (g === profile.grade) status = mo > m ? "vu" : mo === m ? "encours" : "nonvu";
       return { ...n, defaultStatus: status, current: g === profile.grade };
@@ -130,7 +149,8 @@ const Engine = {
       const n = NOTIONS.find((x) => x.id === id);
       (byTheme[n.theme] = byTheme[n.theme] || []).push(n);
     }
-    Object.values(byTheme).forEach((arr) => arr.sort((a, b) => b[state.profile.system][0] - a[state.profile.system][0] || b[state.profile.system][1] - a[state.profile.system][1]));
+    const pl = (n) => placeOf(n, state.profile);
+    Object.values(byTheme).forEach((arr) => arr.sort((a, b) => pl(b)[0] - pl(a)[0] || pl(b)[1] - pl(a)[1]));
     const plan = [];
     while (plan.length < 5 && Object.values(byTheme).some((a) => a.length)) {
       for (const arr of Object.values(byTheme)) if (arr.length && plan.length < 5) plan.push(arr.shift().id);

@@ -34,6 +34,7 @@ function canonical(spec) {
   if (spec.kind === "value") return String(spec.value);
   if (spec.kind === "set") return spec.values.length ? spec.values.join(" ; ") : "aucune";
   if (spec.kind === "pair") return spec.values.join(" ; ");
+  if (spec.kind === "ineq") return "x " + spec.op + " " + spec.value;
   if (spec.kind === "expr" && spec.form === "expanded") {
     const t = Expr.parse(spec.expr), f = (x) => Expr.evaluate(t, { x });
     const c = f(0), a = (f(1) + f(-1)) / 2 - c, b = (f(1) - f(-1)) / 2;
@@ -62,11 +63,13 @@ for (const id of Object.keys(GEN)) for (const d of [1, 2, 3]) for (let i = 0; i 
     const wrong = checkAnswer(s, s.expr + "+1");
     if (wrong.status === "correct") fail(id + " d" + d + " accepte une réponse fausse");
   }
+  if (s.kind === "ineq" && checkAnswer(s, "x " + s.op + " " + (s.value + 1)).status === "correct") fail(id + " ineq accepte une borne fausse");
   if (s.kind === "value" && checkAnswer(s, String(s.value * 1.013 + 0.71)).status === "correct") fail(id + " d" + d + " accepte valeur+1");
 }
 
 // 3. Moteur : parcours complet
 const prof = { system: "CH", grade: 11, minutes: 5 };
+for (const p of [{ system: "CH", grade: 12, track: "college" }, { system: "CH", grade: 12, track: "mp" }, { system: "CH", grade: 13, track: "college" }, { system: "CH", grade: 13, track: "mp" }, { system: "FR", grade: 11 }]) log.push(p.system + p.grade + (p.track || "") + " : " + Engine.catalog(p, new Date("2027-03-01")).length + " notions — " + Engine.catalog(p, new Date("2027-03-01")).filter((c) => c.current).map((c) => c.id).join(" "));
 const st = Engine.newState(prof);
 const cat = Engine.catalog(prof, new Date("2026-11-11"));
 Engine.initNotions(st, Object.fromEntries(cat.map((c) => [c.id, c.defaultStatus])));

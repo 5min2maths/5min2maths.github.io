@@ -471,3 +471,142 @@ Object.assign(GEN, {
     return { fig: FIG.trigTriangle([dist + " m", "?", ""], a + "°"), q: "À " + M(dist) + " m du pied d'un immeuble, on voit son sommet sous un angle de " + M(a + "°") + ". Quelle est sa hauteur, au centième ?", spec: { kind: "value", value: dist * Math.tan((a * Math.PI) / 180), round: 0.01 }, sol: M("h = " + dist + " \\cdot \\tan " + a + "° \\approx " + dec((dist * Math.tan((a * Math.PI) / 180)).toFixed(2))) + " m." };
   },
 });
+
+// ---------- Secondaire II : 2e du Collège et MP2 ----------
+const deg = (x) => (x * 180) / Math.PI, rad = (x) => (x * Math.PI) / 180;
+Object.assign(GEN, {
+  cart(d) {
+    const xa = R.int(-5, 3), ya = R.int(-4, 4);
+    if (d === 1) {
+      const tr = R.pick([[3, 4, 5], [6, 8, 10], [5, 12, 13]]), sx = R.sign(), sy = R.sign();
+      const xb = xa + sx * tr[0], yb = ya + sy * tr[1];
+      return { fig: FIG.lineGraph((yb - ya) / (xb - xa), ya - ((yb - ya) / (xb - xa)) * xa, [[xa, ya, "A"], [xb, yb, "B"]]), q: "Calcule la distance entre " + M("A(" + xa + " ; " + ya + ")") + " et " + M("B(" + xb + " ; " + yb + ")") + ".", spec: { kind: "value", value: tr[2] }, sol: M("\\sqrt{" + par(xb - xa) + "^2 + " + par(yb - ya) + "^2} = \\sqrt{" + tr[2] ** 2 + "} = " + tr[2]) };
+    }
+    if (d === 2) {
+      const xb = xa + 2 * R.nz(-3, 3), yb = ya + 2 * R.nz(-3, 3);
+      return { q: "Donne les coordonnées du milieu de " + M("[AB]") + " avec " + M("A(" + xa + " ; " + ya + ")") + " et " + M("B(" + xb + " ; " + yb + ")") + ". Réponds « x ; y ».", spec: { kind: "pair", values: [(xa + xb) / 2, (ya + yb) / 2] }, sol: M("M\\left(\\frac{" + xa + " + " + par(xb) + "}{2} ; \\frac{" + ya + " + " + par(yb) + "}{2}\\right) = (" + (xa + xb) / 2 + " ; " + (ya + yb) / 2 + ")") };
+    }
+    const m = R.nz(-3, 3), hh = R.nz(-5, 5), x1 = R.int(-3, 0), x2 = x1 + R.int(1, 3);
+    return { fig: FIG.lineGraph(m, hh, [[x1, m * x1 + hh, "A"], [x2, m * x2 + hh, "B"]]), q: "Donne l'équation de la droite passant par " + M("A(" + x1 + " ; " + (m * x1 + hh) + ")") + " et " + M("B(" + x2 + " ; " + (m * x2 + hh) + ")") + " (par exemple « y = 2x + 1 »).", spec: { kind: "expr", expr: m + "x+(" + hh + ")" }, sol: "Pente " + M("\\frac{" + (m * x2 + hh) + " - " + par(m * x1 + hh) + "}{" + x2 + " - " + par(x1) + "} = " + m) + ", puis " + M("y = " + poly([m, hh])) + "." };
+  },
+
+  recip(d) {
+    const a = R.nz(-4, 5), b = R.nz(-6, 6);
+    if (d === 1) {
+      const x = R.nz(-5, 5), y = a * x + b;
+      return { q: "Soit " + M("f(x) = " + poly([a, b])) + ". Calcule " + M("f^{-1}(" + y + ")") + ".", spec: { kind: "value", value: x }, sol: "On cherche " + M("x") + " tel que " + M(poly([a, b]) + " = " + y) + " : " + M("x = " + x) + "." };
+    }
+    if (d === 2) {
+      const c = R.nz(-3, 3), x = R.nz(-3, 3);
+      return { q: "Soit " + M("f(x) = " + poly([a, b])) + " et " + M("g(x) = x^2 " + (c < 0 ? "- " + -c : "+ " + c)) + ". Calcule " + M("(f \\circ g)(" + x + ")") + ".", spec: { kind: "value", value: a * (x * x + c) + b }, sol: M("g(" + x + ") = " + (x * x + c)) + ", puis " + M("f(" + (x * x + c) + ") = " + (a * (x * x + c) + b)) + "." };
+    }
+    return { q: "Soit " + M("f(x) = " + poly([a, b])) + ". Donne l'expression de " + M("f^{-1}(x)") + ".", spec: { kind: "expr", expr: "(x-(" + b + "))/(" + a + ")" }, sol: M("y = " + poly([a, b]) + " \\iff x = \\frac{y " + (b < 0 ? "+ " + -b : "- " + b) + "}{" + a + "}") + ", donc " + M("f^{-1}(x) = \\frac{x " + (b < 0 ? "+ " + -b : "- " + b) + "}{" + a + "}") + "." };
+  },
+
+  sinlaw(d) {
+    if (d === 1) {
+      const a = R.int(5, 15), al = R.int(30, 70), be = R.int(30, 70);
+      const b = (a * Math.sin(rad(be))) / Math.sin(rad(al));
+      return { fig: FIG.anyTriangle(["a = " + a, "b = ?", "", "α = " + al + "°, β = " + be + "°", "A"]), q: "Dans le triangle " + M("ABC") + ", " + M("a = " + a) + ", " + M("\\alpha = " + al + "°") + " et " + M("\\beta = " + be + "°") + ". Calcule " + M("b") + " au centième.", spec: { kind: "value", value: b, round: 0.01 }, sol: "Théorème du sinus : " + M("b = \\frac{" + a + " \\sin " + be + "°}{\\sin " + al + "°} \\approx " + dec(b.toFixed(2))) };
+    }
+    const a = R.int(4, 12), b = R.int(4, 12), g = R.int(35, 120);
+    const c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(rad(g)));
+    if (d === 2) return { fig: FIG.anyTriangle(["a = " + a, "b = " + b, "c = ?", "γ = " + g + "°", "C"]), q: "Dans le triangle " + M("ABC") + ", " + M("a = " + a) + ", " + M("b = " + b) + " et " + M("\\gamma = " + g + "°") + ". Calcule " + M("c") + " au centième.", spec: { kind: "value", value: c, round: 0.01 }, sol: "Théorème du cosinus : " + M("c^2 = " + a + "^2 + " + b + "^2 - 2 \\cdot " + a + " \\cdot " + b + " \\cos " + g + "°") + ", " + M("c \\approx " + dec(c.toFixed(2))) };
+    const A = R.int(4, 9), B = R.int(4, 9), C = R.int(Math.abs(A - B) + 1, A + B - 1);
+    const gam = deg(Math.acos((A * A + B * B - C * C) / (2 * A * B)));
+    return { fig: FIG.anyTriangle(["a = " + A, "b = " + B, "c = " + C, "γ = ?", "C"]), q: "Un triangle a pour côtés " + M("a = " + A) + ", " + M("b = " + B) + " et " + M("c = " + C) + ". Calcule l'angle " + M("\\gamma") + " (opposé à " + M("c") + ") en degrés, au centième.", spec: { kind: "value", value: gam, round: 0.01 }, sol: M("\\cos\\gamma = \\frac{" + A * A + " + " + B * B + " - " + C * C + "}{2 \\cdot " + A + " \\cdot " + B + "}") + ", " + M("\\gamma \\approx " + dec(gam.toFixed(2)) + "°") };
+  },
+
+  expo(d) {
+    if (d === 1) {
+      const b = R.pick([2, 3, 5]), n = R.int(2, b === 2 ? 7 : 4);
+      return { fig: FIG.parabola((x) => Math.pow(b, x) / 3), q: "Résous : " + M(b + "^x = " + b ** n) + ".", spec: { kind: "value", value: n }, sol: M(b ** n + " = " + b + "^" + n) + ", donc " + M("x = " + n) + "." };
+    }
+    if (d === 2) {
+      const b = R.pick([2, 3]), k = R.int(-2, 3), n = R.int(2, b === 2 ? 6 : 4);
+      return { q: "Résous : " + M(b + "^{x " + (k < 0 ? "- " + -k : "+ " + k) + "} = " + b ** n) + ".", spec: { kind: "value", value: n - k }, sol: M("x " + (k < 0 ? "- " + -k : "+ " + k) + " = " + n) + ", donc " + M("x = " + (n - k)) + "." };
+    }
+    const C = 1000 * R.int(1, 9), t = R.pick([1, 1.5, 2, 2.5, 3]), n = R.int(3, 12);
+    const v = C * Math.pow(1 + t / 100, n);
+    return { fig: FIG.parabola((x) => Math.pow(1.3, x)), q: "Un capital de " + M(C) + " CHF est placé à " + M(dec(t) + "\\,\\%") + " d'intérêt composé par an. Que vaut-il après " + M(n) + " ans (au centime) ?", spec: { kind: "value", value: v, round: 0.01 }, sol: M(C + " \\cdot " + dec(1 + t / 100) + "^{" + n + "} \\approx " + dec(v.toFixed(2))) + " CHF." };
+  },
+
+  log(d) {
+    if (d === 1) {
+      const b = R.pick([2, 3, 10]), n = R.int(-2, b === 2 ? 6 : 4);
+      const x = Math.pow(b, n), xs = n >= 0 ? String(x) : "\\frac{1}{" + b ** -n + "}";
+      return { q: "Calcule " + M("\\log_{" + b + "} " + xs) + ".", spec: { kind: "value", value: n }, sol: M(b + "^{" + n + "} = " + xs) + ", donc " + M("\\log_{" + b + "} " + xs + " = " + n) + "." };
+    }
+    if (d === 2) {
+      const b = R.pick([2, 3, 5]), c = R.pick([7, 10, 15, 20, 50].filter((v) => v !== b));
+      return { fig: FIG.parabola((x) => Math.pow(b, x) / 4, [], () => c / 4), q: "Résous " + M(b + "^x = " + c) + " (valeur exacte avec ln, ou au centième).", spec: { kind: "value", value: Math.log(c) / Math.log(b), round: 0.01, exactOk: true }, sol: M("x = \\frac{\\ln " + c + "}{\\ln " + b + "} \\approx " + dec((Math.log(c) / Math.log(b)).toFixed(2))) };
+    }
+    const a = R.pick([2, 4, 5, 20, 25]), b2 = 100 / a * R.pick([1, 10]);
+    return { q: "Calcule sans calculatrice : " + M("\\log " + a + " + \\log " + b2) + ".", spec: { kind: "value", value: Math.log10(a * b2) }, sol: M("\\log(" + a + " \\cdot " + b2 + ") = \\log " + a * b2 + " = " + Math.round(Math.log10(a * b2))) + "." };
+  },
+
+  absval(d) {
+    const a = R.nz(-6, 6), b = R.int(1, 8);
+    if (d === 1) return { fig: FIG.numberLine(a, [b]), q: "Résous : " + M("|x " + (a < 0 ? "+ " + -a : "- " + a) + "| = " + b) + ".", spec: { kind: "set", values: [a - b, a + b] }, sol: M("x " + (a < 0 ? "+ " + -a : "- " + a) + " = " + b) + " ou " + M("= -" + b) + " : " + M("x = " + (a + b)) + " ou " + M("x = " + (a - b)) + "." };
+    if (d === 2) {
+      const k = R.pick([2, 3]), c = R.nz(-6, 6);
+      return { q: "Résous : " + M("|" + k + "x " + (c < 0 ? "- " + -c : "+ " + c) + "| = " + b) + ".", spec: { kind: "set", values: [(b - c) / k, (-b - c) / k] }, sol: M(k + "x " + (c < 0 ? "- " + -c : "+ " + c) + " = \\pm " + b) + " : " + M("x = " + frac(b - c, k)) + " ou " + M("x = " + frac(-b - c, k)) + "." };
+    }
+    return { q: "Résous : " + M("|x " + (a < 0 ? "+ " + -a : "- " + a) + "| + " + b + " = " + (b > 1 ? R.int(0, b - 1) : 0)) + ". (S'il n'y a pas de solution, écris « aucune ».)", spec: { kind: "set", values: [] }, sol: "Une valeur absolue est positive ou nulle : " + M("|\\ldots| = " + "\\text{un nombre négatif}") + " est impossible. Aucune solution." };
+  },
+
+  ineq(d) {
+    const x0 = R.nz(-6, 6);
+    if (d === 1) {
+      const a = R.int(2, 6), b = R.nz(-9, 9), op = R.pick([">", "<", ">=", "<="]);
+      const tx = { ">": ">", "<": "<", ">=": "\\ge", "<=": "\\le" }[op];
+      return { q: "Résous : " + M(poly([a, b]) + " " + tx + " " + (a * x0 + b)) + ". Réponds par exemple « x > 4 » ou « x <= -3 ».", spec: { kind: "ineq", op, value: x0 }, sol: M(a + "x " + tx + " " + a * x0 + " \\iff x " + tx + " " + x0) };
+    }
+    const a = -R.int(2, 6), b = R.nz(-9, 9), op = R.pick([">", "<", ">=", "<="]);
+    const flip = { ">": "<", "<": ">", ">=": "<=", "<=": ">=" }[op];
+    const tx = { ">": ">", "<": "<", ">=": "\\ge", "<=": "\\le" };
+    return { fig: d === 3 ? FIG.numberLine(0, [x0]) : undefined, q: "Résous : " + M(poly([a, b]) + " " + tx[op] + " " + (a * x0 + b)) + ". Réponds par exemple « x > 4 » ou « x <= -3 ».", spec: { kind: "ineq", op: flip, value: x0 }, sol: M(a + "x " + tx[op] + " " + a * x0) + " ; on divise par " + M(a) + " (négatif) et on retourne le signe : " + M("x " + tx[flip] + " " + x0) + "." };
+  },
+
+  trigcercle(d) {
+    if (d === 1) {
+      const dg = R.pick([30, 45, 60, 90, 120, 135, 150, 180, 210, 270, 300, 360]);
+      const g = gcd(dg, 180);
+      return { fig: FIG.unitCircle(dg), q: "Convertis " + M(dg + "°") + " en radians (par exemple « π/4 »).", spec: { kind: "value", value: rad(dg) }, sol: M(dg + "° = " + dg + " \\cdot \\frac{\\pi}{180} = " + (dg / g === 1 ? "" : dg / g) + "\\pi" + (180 / g === 1 ? "" : "/" + 180 / g)) };
+    }
+    const angles = [[30, "1/2", "√3/2"], [45, "√2/2", "√2/2"], [60, "√3/2", "1/2"], [120, "√3/2", "-1/2"], [135, "√2/2", "-√2/2"], [150, "1/2", "-√3/2"], [210, "-1/2", "-√3/2"], [225, "-√2/2", "-√2/2"], [240, "-√3/2", "-1/2"], [300, "-√3/2", "1/2"], [315, "-√2/2", "√2/2"], [330, "-1/2", "√3/2"]];
+    const [dg, sn, cs] = R.pick(angles);
+    if (d === 2) {
+      const f = R.pick(["sin", "cos"]);
+      return { fig: FIG.unitCircle(dg), q: "Donne la valeur exacte de " + M("\\" + f + " " + dg + "°") + " (par exemple « √3/2 »).", spec: { kind: "value", value: f === "sin" ? Math.sin(rad(dg)) : Math.cos(rad(dg)) }, sol: M("\\" + f + " " + dg + "° = " + (f === "sin" ? sn : cs).replace("√", "\\sqrt{").replace(/\{(\d)/, "{$1}")) + " (lis l'" + (f === "sin" ? "ordonnée" : "abscisse") + " du point)." };
+    }
+    return { fig: FIG.unitCircle(dg, "?"), q: "Donne les coordonnées exactes du point du cercle trigonométrique associé à " + M(dg + "°") + ". Réponds « x ; y ».", spec: { kind: "pair", values: [Math.cos(rad(dg)), Math.sin(rad(dg))] }, sol: M("(\\cos " + dg + "° ; \\sin " + dg + "°)") + " = (" + cs + " ; " + sn + ")" };
+  },
+
+  trigeq(d) {
+    if (d === 1) {
+      const [v, a] = R.pick([["1/2", 30], ["√2/2", 45], ["√3/2", 60], ["-1/2", 210], ["-√2/2", 225], ["-√3/2", 240]]);
+      const sols = a < 180 ? [a, 180 - a] : [a, 540 - a];
+      return { fig: FIG.unitCircle(sols[0]), q: "Résous " + M("\\sin x = " + v.replace("√", "\\sqrt{").replace(/\{(\d)/, "{$1}")) + " pour " + M("x \\in [0° ; 360°[") + " (en degrés, sépare par « ; »).", spec: { kind: "set", values: sols }, sol: M("x = " + sols[0] + "°") + " ou " + M("x = " + sols[1] + "°") + " (symétrie par rapport à l'axe vertical)." };
+    }
+    if (d === 2) {
+      const [v, a] = R.pick([["1/2", 60], ["√2/2", 45], ["√3/2", 30], ["-1/2", 120], ["-√2/2", 135], ["-√3/2", 150]]);
+      return { fig: FIG.unitCircle(a), q: "Résous " + M("\\cos x = " + v.replace("√", "\\sqrt{").replace(/\{(\d)/, "{$1}")) + " pour " + M("x \\in [0° ; 360°[") + " (en degrés).", spec: { kind: "set", values: [a, 360 - a] }, sol: M("x = " + a + "°") + " ou " + M("x = " + (360 - a) + "°") + " (symétrie par rapport à l'axe horizontal)." };
+    }
+    const [v, a] = R.pick([["1", 45], ["√3", 60], ["√3/3", 30], ["-1", 135], ["-√3", 120]]);
+    return { fig: FIG.unitCircle(a), q: "Résous " + M("\\tan x = " + v.replace("√", "\\sqrt{").replace(/\{(\d)/, "{$1}")) + " pour " + M("x \\in [0° ; 360°[") + ".", spec: { kind: "set", values: [a, a + 180] }, sol: M("x = " + a + "°") + " ou " + M("x = " + (a + 180) + "°") + " (la tangente a une période de 180°)." };
+  },
+
+  stats(d) {
+    const n = d === 2 ? 2 * R.int(3, 4) : R.int(5, 7);
+    const xs = Array.from({ length: n }, () => R.int(2, 20));
+    const sum = xs.reduce((a, b) => a + b, 0), mean = sum / n;
+    if (d === 1) return { fig: FIG.barChart(xs), q: "Calcule la moyenne de la série : " + M(xs.join(" ; ")) + ".", spec: { kind: "value", value: mean }, sol: M("\\frac{" + sum + "}{" + n + "} = " + frac(sum, n)) + (Number.isInteger(mean) ? "" : " " + M("\\approx " + dec(mean.toFixed(2)))) };
+    if (d === 2) {
+      const so = [...xs].sort((a, b) => a - b), med = (so[n / 2 - 1] + so[n / 2]) / 2;
+      return { fig: FIG.barChart(xs), q: "Donne la médiane de la série : " + M(xs.join(" ; ")) + ".", spec: { kind: "value", value: med }, sol: "Série triée : " + M(so.join(" ; ")) + " ; médiane " + M("\\frac{" + so[n / 2 - 1] + " + " + so[n / 2] + "}{2} = " + dec(med)) };
+    }
+    const sd = Math.sqrt(xs.reduce((a, x) => a + (x - mean) ** 2, 0) / n);
+    return { fig: FIG.barChart(xs), q: "Calcule l'écart-type " + M("\\sigma") + " de la série " + M(xs.join(" ; ")) + ", au centième.", spec: { kind: "value", value: sd, round: 0.01 }, sol: "Moyenne " + M(dec(mean.toFixed(2))) + " ; " + M("\\sigma = \\sqrt{\\frac{\\sum (x_i - \\bar{x})^2}{" + n + "}} \\approx " + dec(sd.toFixed(2))) };
+  },
+});

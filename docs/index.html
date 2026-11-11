@@ -248,21 +248,38 @@ const NOTIONS = [
   { id: "thales", theme: "geo", label: "Théorème de Thalès", ex: "\\frac{AD}{AB} = \\frac{AE}{AC} = \\frac{DE}{BC}", CH: [11, 7], FR: [9, 2] },
   { id: "affine", theme: "fonctions", label: "Fonctions affines", ex: "f(x) = 2x - 3, \\; f(4) = 5", CH: [11, 9], FR: [9, 7] },
   // ---- Secondaire II : 1re du Collège (HarmoS 12) ; FR 2nde = 10, 1re = 11 ; null = hors programme ----
-  { id: "eq3", theme: "algebre", label: "Équations de degré 3 par factorisation", ex: "x^3 - 4x = 0", CH: [12, 2], FR: [10, 3] },
-  { id: "eq2disc", theme: "algebre", label: "Équations du 2e degré (discriminant)", ex: "\\Delta = b^2 - 4ac", CH: [12, 2], FR: [11, 2] },
-  { id: "sys2", theme: "algebre", label: "Systèmes de deux équations", ex: "\\begin{cases} x + y = 7 \\\\ x - y = 1 \\end{cases}", CH: [12, 3], FR: [10, 4] },
-  { id: "fimg", theme: "fonctions", label: "Images et préimages", ex: "f(x) = x^2 - 3 : \\; f(2) = 1", CH: [12, 4], FR: [10, 2] },
-  { id: "f2", theme: "fonctions", label: "Parabole : sommet et zéros", ex: "f(x) = (x - 1)^2 - 4", CH: [12, 5], FR: [10, 6] },
-  { id: "inter", theme: "fonctions", label: "Intersection de deux graphes", ex: "x^2 = x + 2", CH: [12, 6], FR: [10, 7] },
-  { id: "angles", theme: "geo", label: "Angles au centre et inscrits", ex: "\\widehat{AOB} = 2\\,\\widehat{ACB}", CH: [12, 7], FR: null },
-  { id: "euclide", theme: "geo", label: "Théorèmes de la hauteur et d'Euclide", ex: "h^2 = p \\cdot q", CH: [12, 8], FR: null },
-  { id: "trigo", theme: "geo", label: "Trigonométrie du triangle rectangle", ex: "\\sin \\alpha = \\frac{\\text{opposé}}{\\text{hypoténuse}}", CH: [12, 8], FR: [9, 7] },
+  { id: "eq3", theme: "algebre", label: "Équations de degré 3 par factorisation", ex: "x^3 - 4x = 0", CH: [12, 2], FR: [10, 3] , MP: null },
+  { id: "eq2disc", theme: "algebre", label: "Équations du 2e degré (discriminant)", ex: "\\Delta = b^2 - 4ac", CH: [12, 2], FR: [11, 2] , MP: [13, 3] },
+  { id: "sys2", theme: "algebre", label: "Systèmes de deux équations", ex: "\\begin{cases} x + y = 7 \\\\ x - y = 1 \\end{cases}", CH: [12, 3], FR: [10, 4] , MP: [12, 7] },
+  { id: "fimg", theme: "fonctions", label: "Images et préimages", ex: "f(x) = x^2 - 3 : \\; f(2) = 1", CH: [12, 4], FR: [10, 2] , MP: [12, 8] },
+  { id: "f2", theme: "fonctions", label: "Parabole : sommet et zéros", ex: "f(x) = (x - 1)^2 - 4", CH: [12, 5], FR: [10, 6] , MP: [13, 3] },
+  { id: "inter", theme: "fonctions", label: "Intersection de deux graphes", ex: "x^2 = x + 2", CH: [12, 6], FR: [10, 7] , MP: [13, 4] },
+  { id: "angles", theme: "geo", label: "Angles au centre et inscrits", ex: "\\widehat{AOB} = 2\\,\\widehat{ACB}", CH: [12, 7], FR: null , MP: [12, 5] },
+  { id: "euclide", theme: "geo", label: "Théorèmes de la hauteur et d'Euclide", ex: "h^2 = p \\cdot q", CH: [12, 8], FR: null , MP: [12, 5] },
+  { id: "trigo", theme: "geo", label: "Trigonométrie du triangle rectangle", ex: "\\sin \\alpha = \\frac{\\text{opposé}}{\\text{hypoténuse}}", CH: [12, 8], FR: [9, 7] , MP: [12, 6] },
+  // ---- 2e du Collège (HarmoS 13) et MP2 ----
+  { id: "cart", theme: "fonctions", label: "Géométrie cartésienne", ex: "d(A,B) = \\sqrt{(x_B - x_A)^2 + (y_B - y_A)^2}", CH: [13, 0], MP: null, FR: [10, 5] },
+  { id: "recip", theme: "fonctions", label: "Réciproque et composition", ex: "(f \\circ g)(x) = f(g(x))", CH: [13, 1], MP: null, FR: [11, 3] },
+  { id: "sinlaw", theme: "geo", label: "Triangle quelconque (sinus, cosinus)", ex: "c^2 = a^2 + b^2 - 2ab\\cos\\gamma", CH: [13, 1], MP: [13, 1], FR: null },
+  { id: "expo", theme: "fonctions", label: "Exponentielles", ex: "2^x = 32 \\iff x = 5", CH: [13, 2], MP: null, FR: [11, 5] },
+  { id: "log", theme: "fonctions", label: "Logarithmes", ex: "\\log_2 8 = 3", CH: [13, 3], MP: null, FR: [12, 3] },
+  { id: "absval", theme: "algebre", label: "Valeur absolue", ex: "|x - 3| = 5", CH: [13, 4], MP: null, FR: [10, 6] },
+  { id: "ineq", theme: "algebre", label: "Inéquations", ex: "-2x + 3 \\le 9 \\iff x \\ge -3", CH: [13, 4], MP: null, FR: [10, 7] },
+  { id: "trigcercle", theme: "geo", label: "Cercle trigonométrique, radians", ex: "180° = \\pi \\text{ rad}", CH: [13, 5], MP: [13, 1], FR: [11, 6] },
+  { id: "trigeq", theme: "geo", label: "Équations trigonométriques", ex: "\\sin x = \\frac{1}{2}", CH: [13, 6], MP: [13, 2], FR: [11, 7] },
+  { id: "stats", theme: "prop", label: "Statistiques", ex: "\\bar{x}, \\text{ médiane}, \\sigma", CH: null, MP: [13, 7], FR: [10, 8] },
 ];
+
+// Place d'une notion dans le parcours de l'élève : [année, mois] ou null (hors parcours).
+function placeOf(n, profile) {
+  if (profile.system === "CH" && profile.track === "mp" && n.MP !== undefined) return n.MP;
+  return n[profile.system];
+}
 
 // Niveaux proposés à l'élève : clé interne (système + année) et libellé.
 const SYSTEMS = {
-  CH: { label: "Suisse romande", grades: [[9, "9e"], [10, "10e"], [11, "11e"], [12, "1re du Collège (sec. II)"]] },
-  FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"]] },
+  CH: { label: "Suisse romande", grades: [[9, "9e"], [10, "10e"], [11, "11e"], [12, "1re (sec. II)"], [13, "2e (sec. II)"]] },
+  FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"]] },
 };
 
 // Difficulté maximale (1 = bases, 3 = approfondi) : on ne demande pas la section à l'élève ;
@@ -314,6 +331,9 @@ const Expr = (() => {
         const w = s.slice(i, j).toLowerCase();
         if (w === "sqrt" || w === "racine" || w === "rac") toks.push({ t: "fn", v: "sqrt" });
         else if (w === "cbrt") toks.push({ t: "fn", v: "cbrt" });
+        else if (w === "ln") toks.push({ t: "fn", v: "ln" });
+        else if (w === "log") toks.push({ t: "fn", v: "log" });
+        else if (w === "e" && !/[a-z]/i.test(s[j] || "")) toks.push({ t: "const", v: "e" });
         else if (w === "pi") toks.push({ t: "const", v: "pi" });
         else for (const ch of w) toks.push({ t: "var", v: ch }); // xy = x·y
         i = j; continue;
@@ -406,7 +426,7 @@ const Expr = (() => {
   function evaluate(n, env = {}) {
     switch (n.t) {
       case "num": return n.v;
-      case "const": return Math.PI;
+      case "const": return n.v === "e" ? Math.E : Math.PI;
       case "var": return env[n.v] !== undefined ? env[n.v] : NaN;
       case "par": return evaluate(n.a, env);
       case "neg": return -evaluate(n.a, env);
@@ -415,7 +435,7 @@ const Expr = (() => {
       case "mul": return evaluate(n.a, env) * evaluate(n.b, env);
       case "div": return evaluate(n.a, env) / evaluate(n.b, env);
       case "pow": return Math.pow(evaluate(n.a, env), evaluate(n.b, env));
-      case "fn": { const v = evaluate(n.a, env); return n.f === "sqrt" ? Math.sqrt(v) : Math.cbrt(v); }
+      case "fn": { const v = evaluate(n.a, env); return n.f === "sqrt" ? Math.sqrt(v) : n.f === "cbrt" ? Math.cbrt(v) : n.f === "ln" ? Math.log(v) : Math.log10(v); }
       default: return NaN;
     }
   }
@@ -424,7 +444,7 @@ const Expr = (() => {
   function tex(n) {
     switch (n.t) {
       case "num": return fmtNum(n.v);
-      case "const": return "\\pi";
+      case "const": return n.v === "e" ? "e" : "\\pi";
       case "var": return n.v;
       case "par": return "\\left(" + tex(n.a) + "\\right)";
       case "neg": return "-" + tex(n.a);
@@ -433,7 +453,7 @@ const Expr = (() => {
       case "mul": return tex(n.a) + (n.implicit ? " " : " \\cdot ") + tex(n.b);
       case "div": return "\\frac{" + tex(unpar(n.a)) + "}{" + tex(unpar(n.b)) + "}";
       case "pow": return "{" + tex(n.a) + "}^{" + tex(unpar(n.b)) + "}";
-      case "fn": return n.f === "sqrt" ? "\\sqrt{" + tex(unpar(n.a)) + "}" : "\\sqrt[3]{" + tex(unpar(n.a)) + "}";
+      case "fn": return n.f === "sqrt" ? "\\sqrt{" + tex(unpar(n.a)) + "}" : n.f === "cbrt" ? "\\sqrt[3]{" + tex(unpar(n.a)) + "}" : "\\" + n.f + "\\left(" + tex(unpar(n.a)) + "\\right)";
       case "list": return n.items.map(tex).join(" \\; ; \\; ");
       case "eq": return tex(n.a) + " = " + tex(n.b);
       default: return "?";
@@ -492,6 +512,16 @@ const Expr = (() => {
 // Résultat : { status: "correct" | "close" | "wrong" | "invalid" | "form", message }
 function checkAnswer(spec, input) {
   if (spec.kind === "choice") return { status: input === spec.index ? "correct" : "wrong" };
+  if (spec.kind === "ineq") {
+    const m = String(input).replace(/≤/g, "<=").replace(/≥/g, ">=").match(/^\s*x\s*(<=|>=|<|>)\s*(.+)$/i);
+    if (!m) return { status: "invalid", message: "Écris par exemple « x > 4 » ou « x <= -3 »." };
+    let v;
+    try { const t = Expr.parse(m[2]); v = Expr.evaluate(t); } catch (e) { return { status: "invalid", message: e.message }; }
+    const okVal = Expr.sameValue(v, spec.value), okOp = m[1] === spec.op;
+    if (okVal && okOp) return { status: "correct" };
+    if (okVal) return { status: "close", message: "La borne est juste ; vérifie le sens de l'inégalité (et s'il faut retourner le signe)." };
+    return { status: "wrong" };
+  }
   const none = /aucun|∅|vide|pas de solution|impossible/i.test(String(input));
   if (spec.kind === "set" && (none || spec.values.length === 0)) return { status: none && spec.values.length === 0 ? "correct" : spec.values.length === 0 ? "wrong" : "wrong" };
   let tree;
@@ -741,7 +771,33 @@ const FIG = (() => {
     return svg(300, 180, g, "angles au centre et inscrit");
   }
 
-  return { parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, pyramid, cone, road, items, scaling, lineGraph, blocks, sciScale, areaSquare, tiles, fmt };
+  // Cercle trigonométrique avec un angle (degrés).
+  function unitCircle(deg, label) {
+    const cx = 150, cy = 95, r = 75, a = (deg * Math.PI) / 180, px = cx + r * Math.cos(a), py = cy - r * Math.sin(a);
+    let g = L(60, cy, 240, cy) + L(cx, 10, cx, 180) + '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" class="f-shape"/>';
+    g += L(cx, cy, px, py, "f-accent", 'stroke-width="2.5"') + L(px, py, px, cy, "f-line", 'stroke-dasharray="4 4"') + L(px, py, cx, py, "f-line", 'stroke-dasharray="4 4"');
+    const large = deg % 360 > 180 ? 1 : 0, ax = cx + 22 * Math.cos(a), ay = cy - 22 * Math.sin(a);
+    g += '<path d="M' + (cx + 22) + "," + cy + " A22,22 0 " + large + ",0 " + ax.toFixed(1) + "," + ay.toFixed(1) + '" class="f-accent" fill="none" stroke-width="2"/>';
+    g += '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="5" class="f-dot"/>' + t(cx + 30, cy - 8, label || deg + "°", "f-accent f-txt", "start", 12) + t(cx + r + 8, cy + 14, "1", "f-txt", "start", 11);
+    return svg(300, 190, g, "cercle trigonométrique");
+  }
+  // Triangle quelconque avec étiquettes [a, b, c, angle].
+  function anyTriangle(lab) {
+    const A = [30, 140], B = [290, 140], C = [110, 30];
+    let g = P([A, B, C], "f-shape") + t(A[0] - 12, A[1] + 6, "A") + t(B[0] + 12, B[1] + 6, "B") + t(C[0], C[1] - 8, "C");
+    g += t(160, 158, lab[2] || "", "f-txt") + t(215, 80, lab[0] || "", "f-txt", "start") + t(58, 80, lab[1] || "", "f-txt", "end");
+    if (lab[3]) g += t(lab[4] === "C" ? C[0] + 6 : lab[4] === "B" ? B[0] - 40 : A[0] + 26, lab[4] === "C" ? C[1] + 30 : 132, lab[3], "f-accent f-txt", "start", 12);
+    return svg(320, 168, g, "triangle quelconque");
+  }
+  // Diagramme en bâtons d'une petite série.
+  function barChart(values) {
+    const max = Math.max(...values), w = 280 / values.length;
+    let g = L(20, 140, 300, 140);
+    values.forEach((v, i) => { const hh = (v / max) * 110; g += '<rect x="' + (24 + i * w) + '" y="' + (140 - hh) + '" width="' + (w - 8) + '" height="' + hh + '" rx="3" class="' + (i % 2 ? "f-fill2" : "f-fill") + '"/>' + t(24 + i * w + (w - 8) / 2, 156, String(v).replace(".", ","), "f-txt", "middle", 11); });
+    return svg(320, 164, g, "série statistique");
+  }
+
+  return { unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, pyramid, cone, road, items, scaling, lineGraph, blocks, sciScale, areaSquare, tiles, fmt };
 })();
 
 // Générateurs de questions : un par notion, 3 niveaux de difficulté (1 = bases, 3 = approfondi).
@@ -1218,6 +1274,145 @@ Object.assign(GEN, {
   },
 });
 
+// ---------- Secondaire II : 2e du Collège et MP2 ----------
+const deg = (x) => (x * 180) / Math.PI, rad = (x) => (x * Math.PI) / 180;
+Object.assign(GEN, {
+  cart(d) {
+    const xa = R.int(-5, 3), ya = R.int(-4, 4);
+    if (d === 1) {
+      const tr = R.pick([[3, 4, 5], [6, 8, 10], [5, 12, 13]]), sx = R.sign(), sy = R.sign();
+      const xb = xa + sx * tr[0], yb = ya + sy * tr[1];
+      return { fig: FIG.lineGraph((yb - ya) / (xb - xa), ya - ((yb - ya) / (xb - xa)) * xa, [[xa, ya, "A"], [xb, yb, "B"]]), q: "Calcule la distance entre " + M("A(" + xa + " ; " + ya + ")") + " et " + M("B(" + xb + " ; " + yb + ")") + ".", spec: { kind: "value", value: tr[2] }, sol: M("\\sqrt{" + par(xb - xa) + "^2 + " + par(yb - ya) + "^2} = \\sqrt{" + tr[2] ** 2 + "} = " + tr[2]) };
+    }
+    if (d === 2) {
+      const xb = xa + 2 * R.nz(-3, 3), yb = ya + 2 * R.nz(-3, 3);
+      return { q: "Donne les coordonnées du milieu de " + M("[AB]") + " avec " + M("A(" + xa + " ; " + ya + ")") + " et " + M("B(" + xb + " ; " + yb + ")") + ". Réponds « x ; y ».", spec: { kind: "pair", values: [(xa + xb) / 2, (ya + yb) / 2] }, sol: M("M\\left(\\frac{" + xa + " + " + par(xb) + "}{2} ; \\frac{" + ya + " + " + par(yb) + "}{2}\\right) = (" + (xa + xb) / 2 + " ; " + (ya + yb) / 2 + ")") };
+    }
+    const m = R.nz(-3, 3), hh = R.nz(-5, 5), x1 = R.int(-3, 0), x2 = x1 + R.int(1, 3);
+    return { fig: FIG.lineGraph(m, hh, [[x1, m * x1 + hh, "A"], [x2, m * x2 + hh, "B"]]), q: "Donne l'équation de la droite passant par " + M("A(" + x1 + " ; " + (m * x1 + hh) + ")") + " et " + M("B(" + x2 + " ; " + (m * x2 + hh) + ")") + " (par exemple « y = 2x + 1 »).", spec: { kind: "expr", expr: m + "x+(" + hh + ")" }, sol: "Pente " + M("\\frac{" + (m * x2 + hh) + " - " + par(m * x1 + hh) + "}{" + x2 + " - " + par(x1) + "} = " + m) + ", puis " + M("y = " + poly([m, hh])) + "." };
+  },
+
+  recip(d) {
+    const a = R.nz(-4, 5), b = R.nz(-6, 6);
+    if (d === 1) {
+      const x = R.nz(-5, 5), y = a * x + b;
+      return { q: "Soit " + M("f(x) = " + poly([a, b])) + ". Calcule " + M("f^{-1}(" + y + ")") + ".", spec: { kind: "value", value: x }, sol: "On cherche " + M("x") + " tel que " + M(poly([a, b]) + " = " + y) + " : " + M("x = " + x) + "." };
+    }
+    if (d === 2) {
+      const c = R.nz(-3, 3), x = R.nz(-3, 3);
+      return { q: "Soit " + M("f(x) = " + poly([a, b])) + " et " + M("g(x) = x^2 " + (c < 0 ? "- " + -c : "+ " + c)) + ". Calcule " + M("(f \\circ g)(" + x + ")") + ".", spec: { kind: "value", value: a * (x * x + c) + b }, sol: M("g(" + x + ") = " + (x * x + c)) + ", puis " + M("f(" + (x * x + c) + ") = " + (a * (x * x + c) + b)) + "." };
+    }
+    return { q: "Soit " + M("f(x) = " + poly([a, b])) + ". Donne l'expression de " + M("f^{-1}(x)") + ".", spec: { kind: "expr", expr: "(x-(" + b + "))/(" + a + ")" }, sol: M("y = " + poly([a, b]) + " \\iff x = \\frac{y " + (b < 0 ? "+ " + -b : "- " + b) + "}{" + a + "}") + ", donc " + M("f^{-1}(x) = \\frac{x " + (b < 0 ? "+ " + -b : "- " + b) + "}{" + a + "}") + "." };
+  },
+
+  sinlaw(d) {
+    if (d === 1) {
+      const a = R.int(5, 15), al = R.int(30, 70), be = R.int(30, 70);
+      const b = (a * Math.sin(rad(be))) / Math.sin(rad(al));
+      return { fig: FIG.anyTriangle(["a = " + a, "b = ?", "", "α = " + al + "°, β = " + be + "°", "A"]), q: "Dans le triangle " + M("ABC") + ", " + M("a = " + a) + ", " + M("\\alpha = " + al + "°") + " et " + M("\\beta = " + be + "°") + ". Calcule " + M("b") + " au centième.", spec: { kind: "value", value: b, round: 0.01 }, sol: "Théorème du sinus : " + M("b = \\frac{" + a + " \\sin " + be + "°}{\\sin " + al + "°} \\approx " + dec(b.toFixed(2))) };
+    }
+    const a = R.int(4, 12), b = R.int(4, 12), g = R.int(35, 120);
+    const c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(rad(g)));
+    if (d === 2) return { fig: FIG.anyTriangle(["a = " + a, "b = " + b, "c = ?", "γ = " + g + "°", "C"]), q: "Dans le triangle " + M("ABC") + ", " + M("a = " + a) + ", " + M("b = " + b) + " et " + M("\\gamma = " + g + "°") + ". Calcule " + M("c") + " au centième.", spec: { kind: "value", value: c, round: 0.01 }, sol: "Théorème du cosinus : " + M("c^2 = " + a + "^2 + " + b + "^2 - 2 \\cdot " + a + " \\cdot " + b + " \\cos " + g + "°") + ", " + M("c \\approx " + dec(c.toFixed(2))) };
+    const A = R.int(4, 9), B = R.int(4, 9), C = R.int(Math.abs(A - B) + 1, A + B - 1);
+    const gam = deg(Math.acos((A * A + B * B - C * C) / (2 * A * B)));
+    return { fig: FIG.anyTriangle(["a = " + A, "b = " + B, "c = " + C, "γ = ?", "C"]), q: "Un triangle a pour côtés " + M("a = " + A) + ", " + M("b = " + B) + " et " + M("c = " + C) + ". Calcule l'angle " + M("\\gamma") + " (opposé à " + M("c") + ") en degrés, au centième.", spec: { kind: "value", value: gam, round: 0.01 }, sol: M("\\cos\\gamma = \\frac{" + A * A + " + " + B * B + " - " + C * C + "}{2 \\cdot " + A + " \\cdot " + B + "}") + ", " + M("\\gamma \\approx " + dec(gam.toFixed(2)) + "°") };
+  },
+
+  expo(d) {
+    if (d === 1) {
+      const b = R.pick([2, 3, 5]), n = R.int(2, b === 2 ? 7 : 4);
+      return { fig: FIG.parabola((x) => Math.pow(b, x) / 3), q: "Résous : " + M(b + "^x = " + b ** n) + ".", spec: { kind: "value", value: n }, sol: M(b ** n + " = " + b + "^" + n) + ", donc " + M("x = " + n) + "." };
+    }
+    if (d === 2) {
+      const b = R.pick([2, 3]), k = R.int(-2, 3), n = R.int(2, b === 2 ? 6 : 4);
+      return { q: "Résous : " + M(b + "^{x " + (k < 0 ? "- " + -k : "+ " + k) + "} = " + b ** n) + ".", spec: { kind: "value", value: n - k }, sol: M("x " + (k < 0 ? "- " + -k : "+ " + k) + " = " + n) + ", donc " + M("x = " + (n - k)) + "." };
+    }
+    const C = 1000 * R.int(1, 9), t = R.pick([1, 1.5, 2, 2.5, 3]), n = R.int(3, 12);
+    const v = C * Math.pow(1 + t / 100, n);
+    return { fig: FIG.parabola((x) => Math.pow(1.3, x)), q: "Un capital de " + M(C) + " CHF est placé à " + M(dec(t) + "\\,\\%") + " d'intérêt composé par an. Que vaut-il après " + M(n) + " ans (au centime) ?", spec: { kind: "value", value: v, round: 0.01 }, sol: M(C + " \\cdot " + dec(1 + t / 100) + "^{" + n + "} \\approx " + dec(v.toFixed(2))) + " CHF." };
+  },
+
+  log(d) {
+    if (d === 1) {
+      const b = R.pick([2, 3, 10]), n = R.int(-2, b === 2 ? 6 : 4);
+      const x = Math.pow(b, n), xs = n >= 0 ? String(x) : "\\frac{1}{" + b ** -n + "}";
+      return { q: "Calcule " + M("\\log_{" + b + "} " + xs) + ".", spec: { kind: "value", value: n }, sol: M(b + "^{" + n + "} = " + xs) + ", donc " + M("\\log_{" + b + "} " + xs + " = " + n) + "." };
+    }
+    if (d === 2) {
+      const b = R.pick([2, 3, 5]), c = R.pick([7, 10, 15, 20, 50].filter((v) => v !== b));
+      return { fig: FIG.parabola((x) => Math.pow(b, x) / 4, [], () => c / 4), q: "Résous " + M(b + "^x = " + c) + " (valeur exacte avec ln, ou au centième).", spec: { kind: "value", value: Math.log(c) / Math.log(b), round: 0.01, exactOk: true }, sol: M("x = \\frac{\\ln " + c + "}{\\ln " + b + "} \\approx " + dec((Math.log(c) / Math.log(b)).toFixed(2))) };
+    }
+    const a = R.pick([2, 4, 5, 20, 25]), b2 = 100 / a * R.pick([1, 10]);
+    return { q: "Calcule sans calculatrice : " + M("\\log " + a + " + \\log " + b2) + ".", spec: { kind: "value", value: Math.log10(a * b2) }, sol: M("\\log(" + a + " \\cdot " + b2 + ") = \\log " + a * b2 + " = " + Math.round(Math.log10(a * b2))) + "." };
+  },
+
+  absval(d) {
+    const a = R.nz(-6, 6), b = R.int(1, 8);
+    if (d === 1) return { fig: FIG.numberLine(a, [b]), q: "Résous : " + M("|x " + (a < 0 ? "+ " + -a : "- " + a) + "| = " + b) + ".", spec: { kind: "set", values: [a - b, a + b] }, sol: M("x " + (a < 0 ? "+ " + -a : "- " + a) + " = " + b) + " ou " + M("= -" + b) + " : " + M("x = " + (a + b)) + " ou " + M("x = " + (a - b)) + "." };
+    if (d === 2) {
+      const k = R.pick([2, 3]), c = R.nz(-6, 6);
+      return { q: "Résous : " + M("|" + k + "x " + (c < 0 ? "- " + -c : "+ " + c) + "| = " + b) + ".", spec: { kind: "set", values: [(b - c) / k, (-b - c) / k] }, sol: M(k + "x " + (c < 0 ? "- " + -c : "+ " + c) + " = \\pm " + b) + " : " + M("x = " + frac(b - c, k)) + " ou " + M("x = " + frac(-b - c, k)) + "." };
+    }
+    return { q: "Résous : " + M("|x " + (a < 0 ? "+ " + -a : "- " + a) + "| + " + b + " = " + (b > 1 ? R.int(0, b - 1) : 0)) + ". (S'il n'y a pas de solution, écris « aucune ».)", spec: { kind: "set", values: [] }, sol: "Une valeur absolue est positive ou nulle : " + M("|\\ldots| = " + "\\text{un nombre négatif}") + " est impossible. Aucune solution." };
+  },
+
+  ineq(d) {
+    const x0 = R.nz(-6, 6);
+    if (d === 1) {
+      const a = R.int(2, 6), b = R.nz(-9, 9), op = R.pick([">", "<", ">=", "<="]);
+      const tx = { ">": ">", "<": "<", ">=": "\\ge", "<=": "\\le" }[op];
+      return { q: "Résous : " + M(poly([a, b]) + " " + tx + " " + (a * x0 + b)) + ". Réponds par exemple « x > 4 » ou « x <= -3 ».", spec: { kind: "ineq", op, value: x0 }, sol: M(a + "x " + tx + " " + a * x0 + " \\iff x " + tx + " " + x0) };
+    }
+    const a = -R.int(2, 6), b = R.nz(-9, 9), op = R.pick([">", "<", ">=", "<="]);
+    const flip = { ">": "<", "<": ">", ">=": "<=", "<=": ">=" }[op];
+    const tx = { ">": ">", "<": "<", ">=": "\\ge", "<=": "\\le" };
+    return { fig: d === 3 ? FIG.numberLine(0, [x0]) : undefined, q: "Résous : " + M(poly([a, b]) + " " + tx[op] + " " + (a * x0 + b)) + ". Réponds par exemple « x > 4 » ou « x <= -3 ».", spec: { kind: "ineq", op: flip, value: x0 }, sol: M(a + "x " + tx[op] + " " + a * x0) + " ; on divise par " + M(a) + " (négatif) et on retourne le signe : " + M("x " + tx[flip] + " " + x0) + "." };
+  },
+
+  trigcercle(d) {
+    if (d === 1) {
+      const dg = R.pick([30, 45, 60, 90, 120, 135, 150, 180, 210, 270, 300, 360]);
+      const g = gcd(dg, 180);
+      return { fig: FIG.unitCircle(dg), q: "Convertis " + M(dg + "°") + " en radians (par exemple « π/4 »).", spec: { kind: "value", value: rad(dg) }, sol: M(dg + "° = " + dg + " \\cdot \\frac{\\pi}{180} = " + (dg / g === 1 ? "" : dg / g) + "\\pi" + (180 / g === 1 ? "" : "/" + 180 / g)) };
+    }
+    const angles = [[30, "1/2", "√3/2"], [45, "√2/2", "√2/2"], [60, "√3/2", "1/2"], [120, "√3/2", "-1/2"], [135, "√2/2", "-√2/2"], [150, "1/2", "-√3/2"], [210, "-1/2", "-√3/2"], [225, "-√2/2", "-√2/2"], [240, "-√3/2", "-1/2"], [300, "-√3/2", "1/2"], [315, "-√2/2", "√2/2"], [330, "-1/2", "√3/2"]];
+    const [dg, sn, cs] = R.pick(angles);
+    if (d === 2) {
+      const f = R.pick(["sin", "cos"]);
+      return { fig: FIG.unitCircle(dg), q: "Donne la valeur exacte de " + M("\\" + f + " " + dg + "°") + " (par exemple « √3/2 »).", spec: { kind: "value", value: f === "sin" ? Math.sin(rad(dg)) : Math.cos(rad(dg)) }, sol: M("\\" + f + " " + dg + "° = " + (f === "sin" ? sn : cs).replace("√", "\\sqrt{").replace(/\{(\d)/, "{$1}")) + " (lis l'" + (f === "sin" ? "ordonnée" : "abscisse") + " du point)." };
+    }
+    return { fig: FIG.unitCircle(dg, "?"), q: "Donne les coordonnées exactes du point du cercle trigonométrique associé à " + M(dg + "°") + ". Réponds « x ; y ».", spec: { kind: "pair", values: [Math.cos(rad(dg)), Math.sin(rad(dg))] }, sol: M("(\\cos " + dg + "° ; \\sin " + dg + "°)") + " = (" + cs + " ; " + sn + ")" };
+  },
+
+  trigeq(d) {
+    if (d === 1) {
+      const [v, a] = R.pick([["1/2", 30], ["√2/2", 45], ["√3/2", 60], ["-1/2", 210], ["-√2/2", 225], ["-√3/2", 240]]);
+      const sols = a < 180 ? [a, 180 - a] : [a, 540 - a];
+      return { fig: FIG.unitCircle(sols[0]), q: "Résous " + M("\\sin x = " + v.replace("√", "\\sqrt{").replace(/\{(\d)/, "{$1}")) + " pour " + M("x \\in [0° ; 360°[") + " (en degrés, sépare par « ; »).", spec: { kind: "set", values: sols }, sol: M("x = " + sols[0] + "°") + " ou " + M("x = " + sols[1] + "°") + " (symétrie par rapport à l'axe vertical)." };
+    }
+    if (d === 2) {
+      const [v, a] = R.pick([["1/2", 60], ["√2/2", 45], ["√3/2", 30], ["-1/2", 120], ["-√2/2", 135], ["-√3/2", 150]]);
+      return { fig: FIG.unitCircle(a), q: "Résous " + M("\\cos x = " + v.replace("√", "\\sqrt{").replace(/\{(\d)/, "{$1}")) + " pour " + M("x \\in [0° ; 360°[") + " (en degrés).", spec: { kind: "set", values: [a, 360 - a] }, sol: M("x = " + a + "°") + " ou " + M("x = " + (360 - a) + "°") + " (symétrie par rapport à l'axe horizontal)." };
+    }
+    const [v, a] = R.pick([["1", 45], ["√3", 60], ["√3/3", 30], ["-1", 135], ["-√3", 120]]);
+    return { fig: FIG.unitCircle(a), q: "Résous " + M("\\tan x = " + v.replace("√", "\\sqrt{").replace(/\{(\d)/, "{$1}")) + " pour " + M("x \\in [0° ; 360°[") + ".", spec: { kind: "set", values: [a, a + 180] }, sol: M("x = " + a + "°") + " ou " + M("x = " + (a + 180) + "°") + " (la tangente a une période de 180°)." };
+  },
+
+  stats(d) {
+    const n = d === 2 ? 2 * R.int(3, 4) : R.int(5, 7);
+    const xs = Array.from({ length: n }, () => R.int(2, 20));
+    const sum = xs.reduce((a, b) => a + b, 0), mean = sum / n;
+    if (d === 1) return { fig: FIG.barChart(xs), q: "Calcule la moyenne de la série : " + M(xs.join(" ; ")) + ".", spec: { kind: "value", value: mean }, sol: M("\\frac{" + sum + "}{" + n + "} = " + frac(sum, n)) + (Number.isInteger(mean) ? "" : " " + M("\\approx " + dec(mean.toFixed(2)))) };
+    if (d === 2) {
+      const so = [...xs].sort((a, b) => a - b), med = (so[n / 2 - 1] + so[n / 2]) / 2;
+      return { fig: FIG.barChart(xs), q: "Donne la médiane de la série : " + M(xs.join(" ; ")) + ".", spec: { kind: "value", value: med }, sol: "Série triée : " + M(so.join(" ; ")) + " ; médiane " + M("\\frac{" + so[n / 2 - 1] + " + " + so[n / 2] + "}{2} = " + dec(med)) };
+    }
+    const sd = Math.sqrt(xs.reduce((a, x) => a + (x - mean) ** 2, 0) / n);
+    return { fig: FIG.barChart(xs), q: "Calcule l'écart-type " + M("\\sigma") + " de la série " + M(xs.join(" ; ")) + ", au centième.", spec: { kind: "value", value: sd, round: 0.01 }, sol: "Moyenne " + M(dec(mean.toFixed(2))) + " ; " + M("\\sigma = \\sqrt{\\frac{\\sum (x_i - \\bar{x})^2}{" + n + "}} \\approx " + dec(sd.toFixed(2))) };
+  },
+});
+
 // Moteur adaptatif : profil, état de chaque notion, positionnement, choix des questions, mise à jour.
 // Tout reste sur l'appareil (localStorage) ; aucune donnée ne part ailleurs.
 
@@ -1245,6 +1440,25 @@ const HINTS = {
   vol: "Prisme : base × hauteur ; pyramide et cône : base × hauteur / 3.",
   thales: "Écris les trois rapports égaux AD/AB = AE/AC = DE/BC, puis utilise les deux utiles.",
   affine: "f(x) = ax + b : a est la pente, b l'ordonnée à l'origine.",
+  eq3: "Mets x en évidence, puis factorise ce qui reste.",
+  eq2disc: "Δ = b² − 4ac ; si Δ > 0, x = (−b ± √Δ) / 2a ; si Δ < 0, aucune solution.",
+  sys2: "Additionne ou soustrais les équations pour éliminer une inconnue, ou isole-la et remplace.",
+  fimg: "Image : remplace x par le nombre. Préimage : résous f(x) = valeur.",
+  f2: "Sommet : x = −b / 2a, puis calcule f en ce point. Zéros : f(x) = 0.",
+  inter: "Les graphes se coupent là où f(x) = g(x) : mets tout d'un côté et résous.",
+  angles: "L'angle au centre vaut le double de l'angle inscrit qui intercepte le même arc.",
+  euclide: "Hauteur : h² = p · q. Euclide : cathète² = projection · hypoténuse.",
+  trigo: "SOH CAH TOA : sin = opposé/hypoténuse, cos = adjacent/hypoténuse, tan = opposé/adjacent.",
+  cart: "Distance : √((xB − xA)² + (yB − yA)²). Milieu : moyenne des coordonnées. Pente : Δy / Δx.",
+  recip: "(f ∘ g)(x) = f(g(x)) : calcule d'abord g. Réciproque : résous y = f(x) pour x.",
+  sinlaw: "Sinus : a / sin α = b / sin β. Cosinus : c² = a² + b² − 2ab·cos γ.",
+  expo: "Écris les deux membres comme puissances de la même base, puis égale les exposants.",
+  log: "log_b(x) = y signifie b^y = x. Pour résoudre b^x = c : x = ln c / ln b.",
+  absval: "|A| = b (b ≥ 0) donne A = b ou A = −b. Une valeur absolue n'est jamais négative.",
+  ineq: "Comme une équation, mais on retourne le signe en multipliant ou divisant par un négatif.",
+  trigcercle: "180° = π rad. Sur le cercle trigonométrique, le point a pour coordonnées (cos α ; sin α).",
+  trigeq: "Sur [0° ; 360°[ : sin x = s donne x et 180° − x ; cos x = c donne x et 360° − x.",
+  stats: "Moyenne : somme / effectif. Médiane : valeur du milieu de la série triée. Écart-type : √(moyenne des carrés des écarts).",
 };
 
 const Store = {
@@ -1265,7 +1479,7 @@ const harmos = (system, grade) => (system === "FR" ? grade + 2 : grade);
 // Score d'une question : niveau scolaire de la notion + difficulté.
 function itemRating(profile, id, d) {
   const n = NOTIONS.find((x) => x.id === id);
-  const [g, m] = n[profile.system];
+  const [g, m] = placeOf(n, profile) || n.CH || n.FR;
   return 700 + (harmos(profile.system, g) - 8) * 150 + m * 8 + (d - 1) * 130;
 }
 // Échelle de référence (sans données partagées) : Mathélo typique en fin d'année par niveau HarmoS.
@@ -1290,8 +1504,8 @@ const Engine = {
   // Notions du programme jusqu'à l'année de l'élève, avec statut proposé selon la date.
   catalog(profile, date = new Date()) {
     const mo = schoolMonth(date);
-    return NOTIONS.filter((n) => n[profile.system] && n[profile.system][0] <= profile.grade).map((n) => {
-      const [g, m] = n[profile.system];
+    return NOTIONS.filter((n) => { const pl = placeOf(n, profile); return pl && pl[0] <= profile.grade; }).map((n) => {
+      const [g, m] = placeOf(n, profile);
       let status = "vu";
       if (g === profile.grade) status = mo > m ? "vu" : mo === m ? "encours" : "nonvu";
       return { ...n, defaultStatus: status, current: g === profile.grade };
@@ -1350,7 +1564,8 @@ const Engine = {
       const n = NOTIONS.find((x) => x.id === id);
       (byTheme[n.theme] = byTheme[n.theme] || []).push(n);
     }
-    Object.values(byTheme).forEach((arr) => arr.sort((a, b) => b[state.profile.system][0] - a[state.profile.system][0] || b[state.profile.system][1] - a[state.profile.system][1]));
+    const pl = (n) => placeOf(n, state.profile);
+    Object.values(byTheme).forEach((arr) => arr.sort((a, b) => pl(b)[0] - pl(a)[0] || pl(b)[1] - pl(a)[1]));
     const plan = [];
     while (plan.length < 5 && Object.values(byTheme).some((a) => a.length)) {
       for (const arr of Object.values(byTheme)) if (arr.length && plan.length < 5) plan.push(arr.shift().id);

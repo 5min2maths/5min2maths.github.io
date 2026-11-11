@@ -34,6 +34,9 @@ const Expr = (() => {
         const w = s.slice(i, j).toLowerCase();
         if (w === "sqrt" || w === "racine" || w === "rac") toks.push({ t: "fn", v: "sqrt" });
         else if (w === "cbrt") toks.push({ t: "fn", v: "cbrt" });
+        else if (w === "ln") toks.push({ t: "fn", v: "ln" });
+        else if (w === "log") toks.push({ t: "fn", v: "log" });
+        else if (w === "e" && !/[a-z]/i.test(s[j] || "")) toks.push({ t: "const", v: "e" });
         else if (w === "pi") toks.push({ t: "const", v: "pi" });
         else for (const ch of w) toks.push({ t: "var", v: ch }); // xy = x·y
         i = j; continue;
@@ -126,7 +129,7 @@ const Expr = (() => {
   function evaluate(n, env = {}) {
     switch (n.t) {
       case "num": return n.v;
-      case "const": return Math.PI;
+      case "const": return n.v === "e" ? Math.E : Math.PI;
       case "var": return env[n.v] !== undefined ? env[n.v] : NaN;
       case "par": return evaluate(n.a, env);
       case "neg": return -evaluate(n.a, env);
@@ -135,7 +138,7 @@ const Expr = (() => {
       case "mul": return evaluate(n.a, env) * evaluate(n.b, env);
       case "div": return evaluate(n.a, env) / evaluate(n.b, env);
       case "pow": return Math.pow(evaluate(n.a, env), evaluate(n.b, env));
-      case "fn": { const v = evaluate(n.a, env); return n.f === "sqrt" ? Math.sqrt(v) : Math.cbrt(v); }
+      case "fn": { const v = evaluate(n.a, env); return n.f === "sqrt" ? Math.sqrt(v) : n.f === "cbrt" ? Math.cbrt(v) : n.f === "ln" ? Math.log(v) : Math.log10(v); }
       default: return NaN;
     }
   }
@@ -144,7 +147,7 @@ const Expr = (() => {
   function tex(n) {
     switch (n.t) {
       case "num": return fmtNum(n.v);
-      case "const": return "\\pi";
+      case "const": return n.v === "e" ? "e" : "\\pi";
       case "var": return n.v;
       case "par": return "\\left(" + tex(n.a) + "\\right)";
       case "neg": return "-" + tex(n.a);
@@ -153,7 +156,7 @@ const Expr = (() => {
       case "mul": return tex(n.a) + (n.implicit ? " " : " \\cdot ") + tex(n.b);
       case "div": return "\\frac{" + tex(unpar(n.a)) + "}{" + tex(unpar(n.b)) + "}";
       case "pow": return "{" + tex(n.a) + "}^{" + tex(unpar(n.b)) + "}";
-      case "fn": return n.f === "sqrt" ? "\\sqrt{" + tex(unpar(n.a)) + "}" : "\\sqrt[3]{" + tex(unpar(n.a)) + "}";
+      case "fn": return n.f === "sqrt" ? "\\sqrt{" + tex(unpar(n.a)) + "}" : n.f === "cbrt" ? "\\sqrt[3]{" + tex(unpar(n.a)) + "}" : "\\" + n.f + "\\left(" + tex(unpar(n.a)) + "\\right)";
       case "list": return n.items.map(tex).join(" \\; ; \\; ");
       case "eq": return tex(n.a) + " = " + tex(n.b);
       default: return "?";
@@ -212,6 +215,16 @@ const Expr = (() => {
 // Résultat : { status: "correct" | "close" | "wrong" | "invalid" | "form", message }
 function checkAnswer(spec, input) {
   if (spec.kind === "choice") return { status: input === spec.index ? "correct" : "wrong" };
+  if (spec.kind === "ineq") {
+    const m = String(input).replace(/≤/g, "<=").replace(/≥/g, ">=").match(/^\s*x\s*(<=|>=|<|>)\s*(.+)$/i);
+    if (!m) return { status: "invalid", message: "Écris par exemple « x > 4 » ou « x <= -3 »." };
+    let v;
+    try { const t = Expr.parse(m[2]); v = Expr.evaluate(t); } catch (e) { return { status: "invalid", message: e.message }; }
+    const okVal = Expr.sameValue(v, spec.value), okOp = m[1] === spec.op;
+    if (okVal && okOp) return { status: "correct" };
+    if (okVal) return { status: "close", message: "La borne est juste ; vérifie le sens de l'inégalité (et s'il faut retourner le signe)." };
+    return { status: "wrong" };
+  }
   const none = /aucun|∅|vide|pas de solution|impossible/i.test(String(input));
   if (spec.kind === "set" && (none || spec.values.length === 0)) return { status: none && spec.values.length === 0 ? "correct" : spec.values.length === 0 ? "wrong" : "wrong" };
   let tree;

@@ -201,5 +201,31 @@ const FIG = (() => {
     return svg(300, 180, g, "angles au centre et inscrit");
   }
 
-  return { parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, pyramid, cone, road, items, scaling, lineGraph, blocks, sciScale, areaSquare, tiles, fmt };
+  // Cercle trigonométrique avec un angle (degrés).
+  function unitCircle(deg, label) {
+    const cx = 150, cy = 95, r = 75, a = (deg * Math.PI) / 180, px = cx + r * Math.cos(a), py = cy - r * Math.sin(a);
+    let g = L(60, cy, 240, cy) + L(cx, 10, cx, 180) + '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" class="f-shape"/>';
+    g += L(cx, cy, px, py, "f-accent", 'stroke-width="2.5"') + L(px, py, px, cy, "f-line", 'stroke-dasharray="4 4"') + L(px, py, cx, py, "f-line", 'stroke-dasharray="4 4"');
+    const large = deg % 360 > 180 ? 1 : 0, ax = cx + 22 * Math.cos(a), ay = cy - 22 * Math.sin(a);
+    g += '<path d="M' + (cx + 22) + "," + cy + " A22,22 0 " + large + ",0 " + ax.toFixed(1) + "," + ay.toFixed(1) + '" class="f-accent" fill="none" stroke-width="2"/>';
+    g += '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="5" class="f-dot"/>' + t(cx + 30, cy - 8, label || deg + "°", "f-accent f-txt", "start", 12) + t(cx + r + 8, cy + 14, "1", "f-txt", "start", 11);
+    return svg(300, 190, g, "cercle trigonométrique");
+  }
+  // Triangle quelconque avec étiquettes [a, b, c, angle].
+  function anyTriangle(lab) {
+    const A = [30, 140], B = [290, 140], C = [110, 30];
+    let g = P([A, B, C], "f-shape") + t(A[0] - 12, A[1] + 6, "A") + t(B[0] + 12, B[1] + 6, "B") + t(C[0], C[1] - 8, "C");
+    g += t(160, 158, lab[2] || "", "f-txt") + t(215, 80, lab[0] || "", "f-txt", "start") + t(58, 80, lab[1] || "", "f-txt", "end");
+    if (lab[3]) g += t(lab[4] === "C" ? C[0] + 6 : lab[4] === "B" ? B[0] - 40 : A[0] + 26, lab[4] === "C" ? C[1] + 30 : 132, lab[3], "f-accent f-txt", "start", 12);
+    return svg(320, 168, g, "triangle quelconque");
+  }
+  // Diagramme en bâtons d'une petite série.
+  function barChart(values) {
+    const max = Math.max(...values), w = 280 / values.length;
+    let g = L(20, 140, 300, 140);
+    values.forEach((v, i) => { const hh = (v / max) * 110; g += '<rect x="' + (24 + i * w) + '" y="' + (140 - hh) + '" width="' + (w - 8) + '" height="' + hh + '" rx="3" class="' + (i % 2 ? "f-fill2" : "f-fill") + '"/>' + t(24 + i * w + (w - 8) / 2, 156, String(v).replace(".", ","), "f-txt", "middle", 11); });
+    return svg(320, 164, g, "série statistique");
+  }
+
+  return { unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, pyramid, cone, road, items, scaling, lineGraph, blocks, sciScale, areaSquare, tiles, fmt };
 })();

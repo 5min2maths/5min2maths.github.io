@@ -34,21 +34,38 @@ const NOTIONS = [
   { id: "thales", theme: "geo", label: "Théorème de Thalès", ex: "\\frac{AD}{AB} = \\frac{AE}{AC} = \\frac{DE}{BC}", CH: [11, 7], FR: [9, 2] },
   { id: "affine", theme: "fonctions", label: "Fonctions affines", ex: "f(x) = 2x - 3, \\; f(4) = 5", CH: [11, 9], FR: [9, 7] },
   // ---- Secondaire II : 1re du Collège (HarmoS 12) ; FR 2nde = 10, 1re = 11 ; null = hors programme ----
-  { id: "eq3", theme: "algebre", label: "Équations de degré 3 par factorisation", ex: "x^3 - 4x = 0", CH: [12, 2], FR: [10, 3] },
-  { id: "eq2disc", theme: "algebre", label: "Équations du 2e degré (discriminant)", ex: "\\Delta = b^2 - 4ac", CH: [12, 2], FR: [11, 2] },
-  { id: "sys2", theme: "algebre", label: "Systèmes de deux équations", ex: "\\begin{cases} x + y = 7 \\\\ x - y = 1 \\end{cases}", CH: [12, 3], FR: [10, 4] },
-  { id: "fimg", theme: "fonctions", label: "Images et préimages", ex: "f(x) = x^2 - 3 : \\; f(2) = 1", CH: [12, 4], FR: [10, 2] },
-  { id: "f2", theme: "fonctions", label: "Parabole : sommet et zéros", ex: "f(x) = (x - 1)^2 - 4", CH: [12, 5], FR: [10, 6] },
-  { id: "inter", theme: "fonctions", label: "Intersection de deux graphes", ex: "x^2 = x + 2", CH: [12, 6], FR: [10, 7] },
-  { id: "angles", theme: "geo", label: "Angles au centre et inscrits", ex: "\\widehat{AOB} = 2\\,\\widehat{ACB}", CH: [12, 7], FR: null },
-  { id: "euclide", theme: "geo", label: "Théorèmes de la hauteur et d'Euclide", ex: "h^2 = p \\cdot q", CH: [12, 8], FR: null },
-  { id: "trigo", theme: "geo", label: "Trigonométrie du triangle rectangle", ex: "\\sin \\alpha = \\frac{\\text{opposé}}{\\text{hypoténuse}}", CH: [12, 8], FR: [9, 7] },
+  { id: "eq3", theme: "algebre", label: "Équations de degré 3 par factorisation", ex: "x^3 - 4x = 0", CH: [12, 2], FR: [10, 3] , MP: null },
+  { id: "eq2disc", theme: "algebre", label: "Équations du 2e degré (discriminant)", ex: "\\Delta = b^2 - 4ac", CH: [12, 2], FR: [11, 2] , MP: [13, 3] },
+  { id: "sys2", theme: "algebre", label: "Systèmes de deux équations", ex: "\\begin{cases} x + y = 7 \\\\ x - y = 1 \\end{cases}", CH: [12, 3], FR: [10, 4] , MP: [12, 7] },
+  { id: "fimg", theme: "fonctions", label: "Images et préimages", ex: "f(x) = x^2 - 3 : \\; f(2) = 1", CH: [12, 4], FR: [10, 2] , MP: [12, 8] },
+  { id: "f2", theme: "fonctions", label: "Parabole : sommet et zéros", ex: "f(x) = (x - 1)^2 - 4", CH: [12, 5], FR: [10, 6] , MP: [13, 3] },
+  { id: "inter", theme: "fonctions", label: "Intersection de deux graphes", ex: "x^2 = x + 2", CH: [12, 6], FR: [10, 7] , MP: [13, 4] },
+  { id: "angles", theme: "geo", label: "Angles au centre et inscrits", ex: "\\widehat{AOB} = 2\\,\\widehat{ACB}", CH: [12, 7], FR: null , MP: [12, 5] },
+  { id: "euclide", theme: "geo", label: "Théorèmes de la hauteur et d'Euclide", ex: "h^2 = p \\cdot q", CH: [12, 8], FR: null , MP: [12, 5] },
+  { id: "trigo", theme: "geo", label: "Trigonométrie du triangle rectangle", ex: "\\sin \\alpha = \\frac{\\text{opposé}}{\\text{hypoténuse}}", CH: [12, 8], FR: [9, 7] , MP: [12, 6] },
+  // ---- 2e du Collège (HarmoS 13) et MP2 ----
+  { id: "cart", theme: "fonctions", label: "Géométrie cartésienne", ex: "d(A,B) = \\sqrt{(x_B - x_A)^2 + (y_B - y_A)^2}", CH: [13, 0], MP: null, FR: [10, 5] },
+  { id: "recip", theme: "fonctions", label: "Réciproque et composition", ex: "(f \\circ g)(x) = f(g(x))", CH: [13, 1], MP: null, FR: [11, 3] },
+  { id: "sinlaw", theme: "geo", label: "Triangle quelconque (sinus, cosinus)", ex: "c^2 = a^2 + b^2 - 2ab\\cos\\gamma", CH: [13, 1], MP: [13, 1], FR: null },
+  { id: "expo", theme: "fonctions", label: "Exponentielles", ex: "2^x = 32 \\iff x = 5", CH: [13, 2], MP: null, FR: [11, 5] },
+  { id: "log", theme: "fonctions", label: "Logarithmes", ex: "\\log_2 8 = 3", CH: [13, 3], MP: null, FR: [12, 3] },
+  { id: "absval", theme: "algebre", label: "Valeur absolue", ex: "|x - 3| = 5", CH: [13, 4], MP: null, FR: [10, 6] },
+  { id: "ineq", theme: "algebre", label: "Inéquations", ex: "-2x + 3 \\le 9 \\iff x \\ge -3", CH: [13, 4], MP: null, FR: [10, 7] },
+  { id: "trigcercle", theme: "geo", label: "Cercle trigonométrique, radians", ex: "180° = \\pi \\text{ rad}", CH: [13, 5], MP: [13, 1], FR: [11, 6] },
+  { id: "trigeq", theme: "geo", label: "Équations trigonométriques", ex: "\\sin x = \\frac{1}{2}", CH: [13, 6], MP: [13, 2], FR: [11, 7] },
+  { id: "stats", theme: "prop", label: "Statistiques", ex: "\\bar{x}, \\text{ médiane}, \\sigma", CH: null, MP: [13, 7], FR: [10, 8] },
 ];
+
+// Place d'une notion dans le parcours de l'élève : [année, mois] ou null (hors parcours).
+function placeOf(n, profile) {
+  if (profile.system === "CH" && profile.track === "mp" && n.MP !== undefined) return n.MP;
+  return n[profile.system];
+}
 
 // Niveaux proposés à l'élève : clé interne (système + année) et libellé.
 const SYSTEMS = {
-  CH: { label: "Suisse romande", grades: [[9, "9e"], [10, "10e"], [11, "11e"], [12, "1re du Collège (sec. II)"]] },
-  FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"]] },
+  CH: { label: "Suisse romande", grades: [[9, "9e"], [10, "10e"], [11, "11e"], [12, "1re (sec. II)"], [13, "2e (sec. II)"]] },
+  FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"]] },
 };
 
 // Difficulté maximale (1 = bases, 3 = approfondi) : on ne demande pas la section à l'élève ;
