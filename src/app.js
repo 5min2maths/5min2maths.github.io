@@ -1,6 +1,6 @@
 // Interface : entrée (niveau, temps, notions, positionnement), accueil, séance, bilan.
 // Point de collecte des votes 👍 / 👎 : laisser vide tant qu'aucun n'est configuré (votes gardés sur l'appareil).
-const VOTE_ENDPOINT = "";
+const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7gqEVGIeAbBF0cML8VEDYtQfaOmO0743jRcmeHSQ-WglFVCb-dd/exec";
 
 const app = document.getElementById("app");
 let state = Store.load();
