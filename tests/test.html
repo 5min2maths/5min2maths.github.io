@@ -122,6 +122,18 @@ for (const n of NOTIONS) {
     if (t.notions[id].easy !== 1) fail("trop facile : décalage");
     Engine.record(t, id, 2, 2, false); if (t.notions[id].easy !== 0) fail("échec : décalage non retombé");
     const r3 = Engine.tooEasy(t, "cart", 3, "app"); if (r3.next !== null && !r3.next.startsWith("cart|4")) fail("trop facile niveau 3 : " + r3.next); }
+  // Notions anciennes : jamais triviales, au plus 1 par séance (2 en révision)
+  { const t = mk({ system: "CH", grade: 13, track: "college", minutes: 5 }, 1750); let oldSeen = 0;
+    for (let k = 0; k < 300; k++) for (const f of Object.keys(FORMATS)) {
+      const p = Engine.planSession(t, f), olds = p.filter((e) => !Engine.isRecent(t, e.split("|")[0]));
+      if (olds.length > (f === "revision" ? 2 : 1)) fail("trop d'anciennes notions (" + f + ") : " + olds.join(" "));
+      for (const e of olds) { oldSeen++; const [id, d, kd] = e.split("|"); const tg = t.elo.r + TARGET[kd === "defi" && f === "defi" ? "defi4" : kd === "rev" ? "rev" : kd];
+        if (+d < 3 || itemRating(t.profile, id, +d) < tg - 150) fail("ancienne notion triviale : " + e); } }
+    if (oldSeen < 100) fail("notions anciennes presque jamais proposées : " + oldSeen);
+    log.push("2e Collège, 1750 : " + oldSeen + " anciennes notions sur 1500 séances");
+    t.notions.fracadd.m = 0.3; let w = 0;
+    for (let k = 0; k < 200; k++) for (const e of Engine.planSession(t, "revision")) if (e.startsWith("fracadd|")) { w++; if (+e.split("|")[1] < 2) fail("fragile ancienne au niveau 1"); }
+    log.push("fractions ratées : " + w + " fois en 200 révisions"); if (w < 50) fail("ancienne notion ratée pas revue"); }
   // équilibre sur 14 jours simulés
   const cnt = {}; strong.formats = [];
   for (let dd = 14; dd >= 1; dd--) { const date = addDays(day(), -dd); strong.today = null; const f = Engine.chooseFormat(strong, [], date); strong.formats.push({ date, f }); cnt[f] = (cnt[f] || 0) + 1; }

@@ -201,10 +201,15 @@ const Engine = {
     const pl = placeOf(NOTIONS.find((n) => n.id === id), state.profile);
     return pl && pl[0] >= state.profile.grade - 1;
   },
+  // Toutes les notions vues sont candidates ; les anciennes sont filtrées par niveau dans oldLevels.
   pool(state, kind) {
-    const all = this.eligible(state);
-    const p = all.filter((id) => this.isRecent(state, id) || (kind !== "defi" && state.notions[id].m < 0.45));
-    return p.length ? p : all;
+    return this.eligible(state);
+  },
+  // Notion ancienne : jamais triviale. Niveau 3 ou problème, assez proche de la cible ;
+  // ou niveau ≥ 2 si l'élève l'a ratée (fragile), car alors elle n'est pas triviale pour lui.
+  oldLevels(state, id, levels, target) {
+    const s = state.notions[id], weak = s.m < 0.45;
+    return levels.filter((d) => weak ? d >= 2 : d >= 3 && itemRating(state.profile, id, d) >= target - 150);
   },
 
   // Format du jour : le plus en retard sur l'équilibre des 7 derniers jours, jamais celui de la veille.
@@ -251,17 +256,25 @@ const Engine = {
   // Remplit des créneaux : pour chacun, la notion ET le niveau les plus proches de la cible fixée par le Mathélo.
   planSlots(state, slots) {
     const today = day(), elo = state.elo.r, cap = difficultyCap(state.profile), used = new Set(), plan = [];
-    for (const kind of slots) {
-      let best = null;
-      const base = kind === "defi4" ? "defi" : kind;
-      let pool = this.pool(state, base === "rev" ? "app" : base);
+    const maxOld = slots.includes("rev") ? 2 : 1;
+    let old = 0;
+    // Créneau « Rappel » : une notion ancienne, jamais triviale. Une séance sur trois environ ;
+    // en révision, chaque fois qu'une notion ancienne est fragile. Sans candidate valable : créneau normal.
+    const weakOld = this.eligible(state).some((id) => !this.isRecent(state, id) && state.notions[id].m < 0.45);
+    const wantRappel = slots.length > 1 && ((slots.includes("rev") && weakOld) || Math.random() < 0.35);
+    const rappelAt = wantRappel ? slots.length - 1 - Math.floor(Math.random() * Math.min(2, slots.length)) : -1;
+    const choose = (kind, base, rappel) => {
+      let best = null, pool = this.pool(state, base);
       if (kind === "rev") { const due = pool.filter((id) => state.notions[id].due <= today || state.notions[id].m < 0.5); if (due.length) pool = due; }
       for (const id of pool) {
-        const s = state.notions[id];
-        const levels = [1, 2, 3].filter((d) => d <= cap && (base !== "defi" || d >= 2) && (kind !== "drill" || d <= 2));
+        const s = state.notions[id], recent = this.isRecent(state, id), target = elo + TARGET[kind] + (s.easy || 0) * 120;
+        if (rappel ? recent : !recent) continue; // les anciennes notions ne passent que par le créneau Rappel
+        let levels = [1, 2, 3].filter((d) => d <= cap && (base !== "defi" || d >= 2) && (kind !== "drill" || d <= 2 || !recent));
         if ((kind === "defi4" || kind === "defi") && hasProb(id)) levels.push(4);
+        if (!recent) levels = this.oldLevels(state, id, levels, target);
         for (const d of levels) {
-          let sc = Math.abs(itemRating(state.profile, id, d) - (elo + TARGET[kind] + (s.easy || 0) * 120)) / 100;
+          let sc = Math.abs(itemRating(state.profile, id, d) - target) / 100;
+          if (rappel) sc = (s.m < 0.45 ? -1 : 0) + Math.max(0, itemRating(state.profile, id, d) - target) / 200;
           if (s.due <= today && base !== "defi") sc -= 0.6;
           if (kind === "app" || kind === "rev") sc -= (1 - s.m) * 0.8;
           if (s.status === "encours") sc -= 0.4;
@@ -272,6 +285,13 @@ const Engine = {
           if (!best || sc < best.sc) best = { id, d, sc };
         }
       }
+      return best;
+    };
+    for (const [si, kind] of slots.entries()) {
+      const base = kind === "defi4" ? "defi" : kind;
+      let best = si === rappelAt && old < maxOld ? choose(kind, base, true) : null;
+      if (best) old++; else best = choose(kind, base, false);
+      if (!best) best = choose(kind, base, true); // aucune notion de l'année disponible
       if (!best) continue;
       used.add(best.id);
       plan.push(best.id + "|" + best.d + "|" + base);
