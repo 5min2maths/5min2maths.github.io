@@ -30,7 +30,7 @@ function screenWelcome() {
   <div class="card tilt"><div class="qmeta"><span class="chip">Exemple · Pythagore</span><span class="dots"><i class="on"></i><i></i><i></i></span></div>
   <div class="qtext">${demo.q}</div><div class="figwrap">${demo.fig || ""}</div>
   <p class="small muted">Tape ta réponse comme tu veux : ${c}, √${c * c}, ${2 * c}/2… le calculateur comprend.</p></div>
-  <button class="btn-primary btn-big" id="go">Commencer (3 minutes)</button>`);
+  <button class="btn-primary btn-big" id="go">Commencer</button>`);
   document.getElementById("go").onclick = screenLevel;
 }
 
@@ -42,11 +42,10 @@ function screenLevel() {
   <div class="card flat stack"><h3>Ton école</h3><div class="seg" id="sys">${Object.entries(SYSTEMS).map(([k, v]) => `<button aria-pressed="${k === draft.system}" data-v="${k}">${v.label}</button>`).join("")}</div>
   <h3>Ta classe cette année</h3><div class="seg" id="grade">${sys.grades.map(([g, n]) => `<button aria-pressed="${g === draft.grade}" data-v="${g}">${n}</button>`).join("")}</div>
   ${sec2 ? `<h3>Ta voie</h3><div class="seg" id="track"><button aria-pressed="${draft.track === "college"}" data-v="college">Collège (maturité gymnasiale)</button><button aria-pressed="${draft.track === "mp"}" data-v="mp">Maturité professionnelle</button></div>` : ""}</div>
-  <div class="card flat stack"><h3>Combien de temps par jour ?</h3><div class="timepick" id="time">${[1, 2, 5, 10].map((m) => `<button aria-pressed="${m === draft.minutes}" data-v="${m}"><b>${m}</b><small>${m === 1 ? "minute" : "minutes"}</small></button>`).join("")}</div>
-  <p class="small muted">C'est un repère : chaque jour, l'app te propose un programme différent (un défi, une série d'automatismes, des applications…), équilibré sur la semaine.</p></div>
+  <p class="small muted">Chaque jour, l'app te propose un programme différent (un défi, une série d'automatismes, des applications…), équilibré sur la semaine. Pas de chrono : l'important, c'est de venir chaque jour.</p>
   <button class="btn-primary btn-big" id="next">Continuer</button>`);
   const bind = (id, key, num) => app.querySelectorAll("#" + id + " button").forEach((b) => (b.onclick = () => { draft[key] = num ? +b.dataset.v : b.dataset.v; screenLevel(); }));
-  bind("sys", "system"); bind("grade", "grade", true); bind("track", "track"); bind("time", "minutes", true);
+  bind("sys", "system"); bind("grade", "grade", true); bind("track", "track");
   document.getElementById("next").onclick = () => { draft.statuses = null; screenNotions(); };
 }
 
@@ -136,24 +135,22 @@ function screenHome() {
   <div class="card flat streak"><span class="flame" aria-hidden="true">${alive && s.count ? "🔥" : "✏️"}</span><div><b>${alive ? s.count : 0} ${(alive ? s.count : 0) > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span><div class="small muted">${done ? "Séance du jour faite : " + done.n + " question" + (done.n > 1 ? "s" : "") + ". Tu peux en refaire une." : "Ta séance du jour t'attend."}</div></div></div>
   <div class="card">${eloBlock()}</div>
   <div class="card stack"><div class="eyebrow">${done ? "Séance faite · tu peux en refaire une" : "Ton programme aujourd'hui"}</div>
-  <h2>${FORMATS[fmt].label}</h2><p class="muted">${FORMATS[fmt].text} <span class="small">≈ ${FORMATS[fmt].min} min</span></p>
+  <h2>${FORMATS[fmt].label}</h2><p class="muted">${FORMATS[fmt].text} </p>
   <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>
   <div class="spread"><span class="small muted">Varié d'un jour à l'autre, équilibré sur la semaine.</span><button class="btn-ghost small" id="other">Autre format</button></div></div>
-  <div class="card flat stack"><h3>Temps visé (indicatif)</h3><div class="timepick" id="time">${[1, 2, 5, 10].map((m) => `<button aria-pressed="${m === state.profile.minutes}" data-v="${m}"><b>${m}</b><small>min</small></button>`).join("")}</div></div>
   ${Engine.prepActive(state) ? (() => { const left = Math.round((new Date(state.prep.date) - new Date(today)) / 864e5); return `<div class="card flat stack"><div class="eyebrow">Je prépare mon test</div><h3>${left === 0 ? "Test aujourd'hui" : left === 1 ? "Test demain" : "Test dans " + left + " jours"} · ${state.prep.ids.length} notion${state.prep.ids.length > 1 ? "s" : ""}</h3><p class="small muted">${state.prep.ids.map((id) => NOTIONS.find((n) => n.id === id).label).join(" · ")}</p><div class="row"><button class="btn-primary" id="prepgo">Séance de révision</button><button class="btn-ghost" id="prepedit">Modifier</button></div></div>`; })() : ""}
   ${wp ? `<div class="card flat stack"><div class="eyebrow">Problème de la semaine</div><h3>${NOTIONS.find((n) => n.id === wp).label}</h3><p class="small muted">Un problème en plusieurs étapes, avec indices. Facultatif, et il rapporte gros.</p><button id="wp">Relever le défi</button></div>` : ""}
   <div class="card flat"><h3>Mes thèmes</h3><div class="bars">${themeBars(Engine.themeLevels(state))}</div></div>
   <div class="stack">${Engine.prepActive(state) ? "" : '<button id="prep">Je prépare un test</button>'}<button id="notions">J'ai vu une nouvelle notion en classe</button><button id="level">Changer de classe ou d'école</button>
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div></div>`);
-  app.querySelectorAll("#time button").forEach((b) => (b.onclick = () => { state.profile.minutes = +b.dataset.v; save(); screenHome(); }));
   document.getElementById("go").onclick = startSession;
   document.getElementById("other").onclick = () => { Engine.otherFormat(state); save(); screenHome(); };
-  if (wp) document.getElementById("wp").onclick = () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), limit: 600, weekly: true }; nextQuestion(); };
+  if (wp) document.getElementById("wp").onclick = () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); };
   document.getElementById("notions").onclick = () => screenNotions(true);
   const byId = (x) => document.getElementById(x);
   if (byId("prep")) byId("prep").onclick = screenPrep;
   if (byId("prepedit")) byId("prepedit").onclick = screenPrep;
-  if (byId("prepgo")) byId("prepgo").onclick = () => { session = { plan: Engine.planPrep(state), i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), limit: state.profile.minutes * 60, prep: true }; nextQuestion(); };
+  if (byId("prepgo")) byId("prepgo").onclick = () => { session = { plan: Engine.planPrep(state), i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), prep: true }; nextQuestion(); };
   document.getElementById("level").onclick = () => { draft = { ...state.profile }; screenLevel(); };
   document.getElementById("r1").onclick = () => {
     document.getElementById("reset").innerHTML = '<span class="small">Effacer ta progression et ton Mathélo ?</span><button id="r2">Oui, effacer</button><button class="btn-ghost" id="r3">Non</button>';
@@ -209,11 +206,11 @@ let session = null;
 function startSession() {
   const fmt = Engine.todayFormat(state), plan = Engine.planSession(state, fmt);
   Engine.logFormat(state, fmt); save();
-  session = { fmt, plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), limit: state.profile.minutes * 60 };
+  session = { fmt, plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set() };
   nextQuestion();
 }
 function nextQuestion(redo) {
-  // Le temps est un repère, jamais une limite : la séance finit quand les questions prévues sont faites.
+  // Pas de chrono : la séance finit quand le programme du jour est fait.
   if (!redo && session.i >= session.plan.length) return screenSummary();
   const raw = redo ? redo.id : session.plan[session.i], forceProb = String(raw).startsWith("PROB:");
   const parts = String(raw).split("|"), id = forceProb ? raw.slice(5) : parts[0], level = parts[1] ? +parts[1] : undefined, kind = redo ? redo.kind : parts[2];
@@ -345,7 +342,7 @@ function renderQuestion(q, opt) {
   const notion = NOTIONS.find((n) => n.id === q.id);
   const code = q.code;
   let tries = 0, finished = false, inputMode = "none";
-  h(`<div class="spread">${brand}${session && !opt.single ? '<span class="timer small muted" id="timer"></span>' : ""}</div>
+  h(`<div class="spread">${brand}</div>
   ${session && !opt.single && session.answered > 0 ? '<div class="spread"><span></span><button class="btn-ghost small" id="stop">Terminer ici</button></div>' : ""}
   <div class="eyebrow">${opt.eyebrow}</div>
   <div class="card pop"><div class="qmeta"><span class="chip">${notion.label}</span><span class="dots" title="difficulté">${[1, 2, 3].map((k) => `<i class="${k <= q.d ? "on" : ""}"></i>`).join("")}</span>${opt.onEasy ? '<button class="btn-ghost small easy" id="easy" title="Passer cette question et monter d\'un cran">Trop facile ⏭</button>' : ""}</div>
@@ -384,16 +381,6 @@ function renderQuestion(q, opt) {
   }));
   const stopBtn = document.getElementById("stop");
   if (stopBtn) stopBtn.onclick = screenSummary;
-  const timerEl = document.getElementById("timer");
-  if (timerEl) {
-    const tick = () => {
-      if (!document.body.contains(timerEl)) return;
-      const left = Math.max(0, session.limit - Math.floor((Date.now() - session.start) / 1000));
-      timerEl.textContent = left ? "⏱ " + Math.floor(left / 60) + ":" + String(left % 60).padStart(2, "0") : "✓ " + Math.round(session.limit / 60) + " min atteintes, finis tranquillement";
-      setTimeout(tick, 1000);
-    };
-    tick();
-  }
 
   const end = (solved, dontKnow) => {
     finished = true;

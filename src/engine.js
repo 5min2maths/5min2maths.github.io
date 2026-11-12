@@ -56,16 +56,15 @@ const Store = {
 const day = (d = new Date()) => d.toISOString().slice(0, 10);
 const addDays = (s, n) => { const d = new Date(s + "T12:00:00"); d.setDate(d.getDate() + n); return day(d); };
 const INTERVALS = [0, 1, 3, 7, 14, 30];
-const QUESTIONS_FOR = { 1: 1, 2: 3, 5: 7, 10: 14 };
 const TARGET = { drill: -300, app: -100, defi: 80, defi4: 80, rev: -150 }; // écart visé au Mathélo (≈ 85 %, 65 %, 40 % de réussite)
 const KIND_LABEL = { drill: "🔁 Automatisme", app: "🧩 Application", defi: "🏔 Défi", rev: "🔄 Révision" };
 // Programme du jour : le format change d'un jour à l'autre ; l'équilibre se fait sur 7 jours.
 const FORMATS = {
-  defi: { label: "🏔 Défi du jour", slots: ["defi4"], min: 5, text: "Un seul problème, à ton niveau. Prends ton temps." },
-  auto: { label: "🔁 Série d'automatismes", slots: ["drill", "drill", "drill", "drill", "drill", "drill", "drill", "drill"], min: 3, text: "8 calculs rapides, enchaînés." },
-  app: { label: "🧩 Applications", slots: ["app", "app", "app"], min: 4, text: "Trois questions de fond sur tes notions actuelles." },
-  mixte: { label: "⚖️ Mixte", slots: ["drill", "app", "defi"], min: 5, text: "Un automatisme, une application, un défi." },
-  revision: { label: "🔄 Révision", slots: ["rev", "rev", "rev", "rev"], min: 4, text: "Les notions à revoir aujourd'hui, pour ne pas les oublier." },
+  defi: { label: "🏔 Défi du jour", slots: ["defi4"], text: "Un seul problème, à ton niveau. Prends ton temps." },
+  auto: { label: "🔁 Série d'automatismes", slots: ["drill", "drill", "drill", "drill", "drill", "drill", "drill", "drill"], text: "8 calculs rapides, enchaînés." },
+  app: { label: "🧩 Applications", slots: ["app", "app", "app"], text: "Trois questions de fond sur tes notions actuelles." },
+  mixte: { label: "⚖️ Mixte", slots: ["drill", "app", "defi"], text: "Un automatisme, une application, un défi." },
+  revision: { label: "🔄 Révision", slots: ["rev", "rev", "rev", "rev"], text: "Les notions à revoir aujourd'hui, pour ne pas les oublier." },
 };
 const WEEK = { defi: 2, auto: 2, app: 1, mixte: 1, revision: 1 };
 
@@ -217,7 +216,6 @@ const Engine = {
     let best = null;
     for (const f of Object.keys(FORMATS)) {
       if (exclude.includes(f)) continue;
-      if (state.profile.minutes <= 2 && FORMATS[f].min > 3 && f !== "defi") continue; // temps court : formats brefs (le défi reste possible)
       let sc = WEEK[f] - log.filter((x) => x.f === f).length;
       if (yesterday && yesterday.f === f) sc -= 3;
       if (f === "revision") sc += due >= 4 && !recentRev ? 1 : due >= 4 ? 0 : -1;
@@ -339,7 +337,7 @@ const Engine = {
   prepActive(state) { return !!(state.prep && state.prep.ids.length && state.prep.date >= day()); },
   planPrep(state) {
     const ids = state.prep.ids.filter((id) => state.notions[id]);
-    const n = Math.max(5, QUESTIONS_FOR[state.profile.minutes] || 7);
+    const n = 7;
     const order = [...ids].sort((a, b) => state.notions[a].m - state.notions[b].m);
     const plan = [];
     for (let i = 0; plan.length < n - 1; i++) plan.push(order[i % order.length]);

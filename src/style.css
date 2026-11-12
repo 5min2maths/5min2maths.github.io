@@ -85,11 +85,6 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .seg button[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 700; }
 
 /* Curseur de temps 1–2–5–10 */
-.timepick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-.timepick button { display: flex; flex-direction: column; align-items: center; padding: 10px 4px; gap: 2px; }
-.timepick b { font-family: var(--font-display); font-size: 1.4rem; }
-.timepick small { font-size: 0.72rem; color: var(--ink-soft); }
-.timepick button[aria-pressed="true"] { background: var(--blue-soft); border-color: var(--blue); }
 
 /* Question */
 .qmeta { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--ink-soft); }
