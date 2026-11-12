@@ -1553,6 +1553,95 @@ const PROB = {
   },
 };
 
+// ---------- Défis supplémentaires (1re et 2e du secondaire II) : plusieurs problèmes par notion ----------
+const PROB_EXTRA = {
+  eq2disc: [() => {
+    const k = R.int(2, 9);
+    return { q: "On considère l'équation " + M("x^2 + m x + " + k * k + " = 0") + ", avec " + M("m > 0") + ".",
+      parts: [{ label: "a) Valeur de m pour laquelle l'équation a une seule solution", spec: { kind: "value", value: 2 * k } }, { label: "b) Cette solution unique", spec: { kind: "value", value: -k } }, { label: "c) Plus petite valeur entière de m > 0 pour laquelle il y a deux solutions", spec: { kind: "value", value: 2 * k + 1 } }],
+      hints: ["Une seule solution ⇔ Δ = 0. Deux solutions ⇔ Δ > 0.", "Δ = m² − " + 4 * k * k + " ; Δ = 0 ⇔ m = " + 2 * k + " ; la solution vaut alors −m / 2."],
+      sol: "a) " + M("m^2 - " + 4 * k * k + " = 0") + ", " + M("m = " + 2 * k) + ". b) " + M("x = -\\frac{m}{2} = " + -k) + ". c) " + M("m^2 > " + 4 * k * k + " \\iff m > " + 2 * k) + ", donc " + M(2 * k + 1) + "." };
+  }],
+  inter: [() => {
+    const a = R.nz(-3, 3), m = 2 * a, k = -a * a;
+    return { fig: FIG.parabola((x) => x * x / 3, [], null, false), q: "La droite " + M("g(x) = " + m + "x + k") + " et la parabole " + M("f(x) = x^2") + ".",
+      parts: [{ label: "a) Valeur de k pour que la droite soit tangente à la parabole (un seul point commun)", spec: { kind: "value", value: k } }, { label: "b) Abscisse du point de contact", spec: { kind: "value", value: a } }, { label: "c) Ordonnée du point de contact", spec: { kind: "value", value: a * a } }],
+      hints: ["Les points communs vérifient x² = " + m + "x + k. Un seul point commun ⇔ cette équation a une seule solution.", "x² − " + m + "x − k = 0 : Δ = " + m * m + " + 4k = 0."],
+      sol: M("x^2 - " + m + "x - k = 0") + ", " + M("\\Delta = " + m * m + " + 4k = 0") + " : a) " + M("k = " + k) + ". b) " + M("x = " + a) + ". c) " + M("y = " + a * a) + "." };
+  }],
+  expo: [() => {
+    const m0 = 100 * R.pick([2, 4, 8, 16]), T = R.pick([3, 5, 8, 10, 12]), t = R.int(1, 4) * T + R.int(1, T - 1), seuil = m0 / R.pick([10, 20, 50]);
+    const mt = m0 * Math.pow(0.5, t / T), n = Math.ceil((T * Math.log(m0 / seuil)) / Math.log(2));
+    return { q: "Une substance radioactive a une demi-vie de " + M(T) + " ans : sa masse est divisée par 2 tous les " + M(T) + " ans. On part de " + M(m0) + " g.",
+      parts: [{ label: "a) Masse après " + 2 * T + " ans (g)", spec: { kind: "value", value: m0 / 4 } }, { label: "b) Masse après " + t + " ans (g, au centième)", spec: { kind: "value", value: mt, round: 0.01 } }, { label: "c) Après combien d'années entières la masse devient-elle inférieure à " + decTxt(seuil) + " g ?", spec: { kind: "value", value: n } }],
+      hints: ["m(t) = " + m0 + " · 0,5^(t / " + T + ").", "c) Résous " + m0 + " · 0,5^(t/" + T + ") < " + decTxt(seuil) + " avec les logarithmes, puis arrondis à l'année supérieure."],
+      sol: "a) " + M(m0 + " \\cdot 0{,}5^2 = " + m0 / 4) + " g. b) " + M(m0 + " \\cdot 0{,}5^{" + t + "/" + T + "} \\approx " + dec(r2(mt))) + " g. c) " + M("t > " + T + " \\cdot \\frac{\\ln " + dec(m0 / seuil) + "}{\\ln 2} \\approx " + dec(r2((T * Math.log(m0 / seuil)) / Math.log(2)))) + " : " + M(n) + " ans." };
+  }],
+  log: [() => {
+    const n = R.pick([5, 8, 10, 12, 15, 20]), t = (Math.pow(2, 1 / n) - 1) * 100;
+    return { q: "La population d'une ville double en " + M(n) + " ans, avec un taux de croissance annuel constant.",
+      parts: [{ label: "a) Taux de croissance annuel (en %, au centième)", spec: { kind: "value", value: t, round: 0.01 } }, { label: "b) Facteur de multiplication en " + 3 * n + " ans", spec: { kind: "value", value: 8 } }],
+      hints: ["Si le facteur annuel est q, alors qⁿ = 2.", "q = 2^(1/" + n + ") ; taux = (q − 1) · 100. b) " + 3 * n + " ans = 3 doublements."],
+      sol: "a) " + M("q = 2^{1/" + n + "} \\approx " + dec(Math.pow(2, 1 / n).toFixed(4))) + ", taux " + M("\\approx " + dec(r2(t)) + "\\,\\%") + ". b) " + M("2^3 = 8") + "." };
+  }],
+  sinlaw: [() => {
+    const d = 10 * R.int(5, 20), al = R.int(40, 75), be = R.int(40, 75), ga = 180 - al - be;
+    const AC = (d * Math.sin(rad(be))) / Math.sin(rad(ga)), h = AC * Math.sin(rad(al));
+    return { fig: FIG.anyTriangle(["", "", "AB = " + d + " m", "α = " + al + "°, β = " + be + "°", "A"]), q: "Deux géomètres en " + M("A") + " et " + M("B") + ", distants de " + M(d) + " m, visent un arbre " + M("C") + " de l'autre côté d'une rivière : " + M("\\widehat{CAB} = " + al + "°") + " et " + M("\\widehat{CBA} = " + be + "°") + ".",
+      parts: [{ label: "a) Angle en C (°)", spec: { kind: "value", value: ga } }, { label: "b) Distance AC (m, au centième)", spec: { kind: "value", value: AC, round: 0.01 } }, { label: "c) Largeur de la rivière, distance de C à la droite (AB) (m, au centième)", spec: { kind: "value", value: h, round: 0.01 } }],
+      hints: ["Somme des angles, puis théorème du sinus (le côté AB est en face de C).", "AC = AB · sin β / sin γ ; la distance à (AB) est AC · sin α."],
+      sol: "a) " + M(ga + "°") + ". b) " + M("AC = \\frac{" + d + " \\sin " + be + "°}{\\sin " + ga + "°} \\approx " + dec(r2(AC))) + " m. c) " + M("AC \\sin " + al + "° \\approx " + dec(r2(h))) + " m." };
+  }],
+  cart: [() => {
+    const [p, q] = R.pick([[3, 4], [6, 8], [5, 12], [8, 6]]), xa = R.int(-4, 1), ya = R.int(-3, 2);
+    const B = [xa + p, ya], C = [xa, ya + q];
+    return { fig: FIG.lineGraph(0, ya, [[xa, ya, "A"], [B[0], B[1], "B"], [C[0], C[1], "C"]]), q: "Soit " + M("A(" + xa + " ; " + ya + ")") + ", " + M("B(" + B[0] + " ; " + B[1] + ")") + " et " + M("C(" + C[0] + " ; " + C[1] + ")") + ".",
+      parts: [{ label: "a) Longueur BC", spec: { kind: "value", value: Math.hypot(p, q) } }, { label: "b) Aire du triangle ABC", spec: { kind: "value", value: (p * q) / 2 } }, { label: "c) Distance de A à la droite (BC), au centième", spec: { kind: "value", value: (p * q) / Math.hypot(p, q), round: 0.01 } }],
+      hints: ["Le triangle est rectangle en A (un côté horizontal, un côté vertical).", "Aire = AB · AC / 2 = BC · d / 2, d'où la distance d."],
+      sol: "a) " + M("\\sqrt{" + p * p + " + " + q * q + "} = " + Math.hypot(p, q)) + ". b) " + M("\\frac{" + p + " \\cdot " + q + "}{2} = " + (p * q) / 2) + ". c) " + M("d = \\frac{2 \\cdot " + (p * q) / 2 + "}{" + Math.hypot(p, q) + "} = " + dec(r2((p * q) / Math.hypot(p, q)))) + "." };
+  }],
+  trigeq: [() => {
+    const [v, a] = R.pick([["1/2", 30], ["√2/2", 45], ["√3/2", 60]]);
+    const sols = [a / 2, (180 - a) / 2, a / 2 + 180, (180 - a) / 2 + 180];
+    return { fig: FIG.unitLine("y", Math.sin(rad(a)), "y = " + v), q: "On résout " + M("\\sin(2x) = " + v.replace("√", "\\sqrt{").replace(/\{(\d)/, "{$1}")) + " pour " + M("x \\in [0° ; 360°[") + ".",
+      parts: [{ label: "a) Nombre de solutions", spec: { kind: "value", value: 4 } }, { label: "b) Toutes les solutions (en degrés, séparées par « ; »)", spec: { kind: "set", values: sols } }],
+      hints: ["Pose u = 2x : u parcourt [0° ; 720°[, donc deux tours de cercle.", "sin u = " + v + " donne u = " + a + "° ou " + (180 - a) + "° (+ 360°), puis x = u / 2."],
+      sol: M("2x \\in \\{" + a + "° ; " + (180 - a) + "° ; " + (a + 360) + "° ; " + (540 - a) + "°\\}") + ", donc " + M("x \\in \\{" + sols.join("° ; ") + "°\\}") + " : 4 solutions." };
+  }],
+  euclide: [() => {
+    const [p, q] = R.pick([[4, 9], [1, 4], [9, 16], [4, 1], [16, 9], [2, 8]]), c = p + q, h = Math.sqrt(p * q);
+    return { fig: FIG.trigTriangle(["c = " + c, "", ""], ""), q: "Dans un triangle rectangle, la hauteur issue de l'angle droit découpe l'hypoténuse (" + M("c = " + c) + ") en deux segments, dont l'un mesure " + M(p) + ".",
+      parts: [{ label: "a) Hauteur h", spec: { kind: "value", value: h } }, { label: "b) Cathète adjacente au segment de " + p, spec: { kind: "value", value: Math.sqrt(p * c), round: 0.01, exactOk: true } }, { label: "c) Aire du triangle", spec: { kind: "value", value: (c * h) / 2 } }],
+      hints: ["L'autre segment vaut " + c + " − " + p + " = " + q + ". Hauteur : h² = p · q. Euclide : cathète² = projection · hypoténuse.", "Aire = hypoténuse · hauteur / 2."],
+      sol: "a) " + M("h = \\sqrt{" + p + " \\cdot " + q + "} = " + dec(h)) + ". b) " + M("\\sqrt{" + p + " \\cdot " + c + "} \\approx " + dec(r2(Math.sqrt(p * c)))) + ". c) " + M("\\frac{" + c + " \\cdot " + dec(h) + "}{2} = " + dec((c * h) / 2)) + "." };
+  }],
+  eq3: [() => {
+    const L = R.pick([12, 18, 24, 30]), V = (x) => x * (L - 2 * x) ** 2, xs = Array.from({ length: L / 2 - 1 }, (_, i) => i + 1), best = xs.reduce((a, b) => (V(b) > V(a) ? b : a));
+    const x1 = R.int(1, L / 2 - 1);
+    return { fig: FIG.rectFig(1, 1, L + " cm", L + " cm"), q: "Dans un carton carré de " + M(L) + " cm de côté, on découpe un carré de côté " + M("x") + " cm à chaque coin, puis on plie pour obtenir une boîte sans couvercle.",
+      parts: [{ label: "a) Volume (cm³) si x = " + x1, spec: { kind: "value", value: V(x1) } }, { label: "b) Valeur entière de x qui donne le plus grand volume", spec: { kind: "value", value: best } }, { label: "c) Ce volume maximal (cm³)", spec: { kind: "value", value: V(best) } }],
+      hints: ["La base est un carré de côté " + L + " − 2x, la hauteur vaut x.", "V(x) = x(" + L + " − 2x)² ; calcule V pour x = 1, 2, 3… et compare."],
+      sol: M("V(x) = x(" + L + " - 2x)^2") + ". a) " + M(V(x1)) + " cm³. b) " + M("x = " + best) + ". c) " + M(V(best)) + " cm³ (le maximum exact est en " + M("x = " + frac(L, 6)) + ")." };
+  }],
+  ineq: [() => {
+    const a = R.int(5, 20), b = R.int(15, 30) / 10, c = a + R.int(15, 40), d = b - R.int(5, 10) / 10, k = (c - a) / (b - d);
+    return { q: "Forfait A : " + M(a) + " CHF par mois + " + M(dec(b)) + " CHF par Go. Forfait B : " + M(c) + " CHF par mois + " + M(dec(d)) + " CHF par Go. On note " + M("x") + " le nombre de Go consommés.",
+      parts: [{ label: "a) Pour quels x le forfait B est-il moins cher ? (réponds « x > … »)", spec: { kind: "ineq", op: ">", value: k } }, { label: "b) Coût du forfait A pour 20 Go (CHF)", spec: { kind: "value", value: a + 20 * b } }],
+      hints: ["Écris le coût de chaque forfait en fonction de x, puis l'inéquation B < A.", c + " + " + dec(d) + "x < " + a + " + " + dec(b) + "x ⇔ " + (c - a) + " < " + dec(r2(b - d)) + "x."],
+      sol: "a) " + M(c + " + " + dec(d) + "x < " + a + " + " + dec(b) + "x \\iff x > \\frac{" + (c - a) + "}{" + dec(r2(b - d)) + "} \\approx " + dec(r2(k))) + ". b) " + M(dec(a + 20 * b)) + " CHF." };
+  }],
+  thales: [() => {
+    const ad = R.int(3, 8), db = R.int(10, 40), de = R.int(4, 12), bc = (de * (ad + db)) / ad;
+    return { fig: FIG.thales([[110, 52, ad + " m"], [80, 124, db + " m"], [150, 70, de + " m"]]), q: "Pour mesurer la largeur " + M("BC") + " d'un étang, on plante des piquets : " + M("(DE) \\parallel (BC)") + ", " + M("AD = " + ad) + " m, " + M("DB = " + db) + " m et " + M("DE = " + de) + " m.",
+      parts: [{ label: "a) Longueur AB (m)", spec: { kind: "value", value: ad + db } }, { label: "b) Largeur BC de l'étang (m, au centième)", spec: { kind: "value", value: bc, round: 0.01 } }],
+      hints: ["Thalès : le petit triangle ADE et le grand triangle ABC.", "BC / DE = AB / AD."],
+      sol: "a) " + M(ad + db) + " m. b) " + M("BC = " + de + " \\cdot \\frac{" + (ad + db) + "}{" + ad + "} \\approx " + dec(r2(bc))) + " m." };
+  }],
+};
+const probList = (id) => [...(PROB[id] ? [PROB[id]] : []), ...(PROB_EXTRA[id] || [])];
+const hasProb = (id) => probList(id).length > 0;
+const probFor = (id) => R.pick(probList(id));
+
 // Mini-leçons (rappel de cours en 30 secondes), une par notion.
 // Format repris du prototype d'octobre (titre, intro, règle, exemples, piège) ; calcul littéral = textes d'octobre.
 const L_ = (titre, intro, regle, exemple, piege) => ({ titre, intro, regle, exemple, piege });
@@ -1702,6 +1791,13 @@ const day = (d = new Date()) => d.toISOString().slice(0, 10);
 const addDays = (s, n) => { const d = new Date(s + "T12:00:00"); d.setDate(d.getDate() + n); return day(d); };
 const INTERVALS = [0, 1, 3, 7, 14, 30];
 const QUESTIONS_FOR = { 1: 1, 2: 3, 5: 7, 10: 14 };
+const SLOTS = {
+  1: ["app"], 2: ["drill", "app", "defi"],
+  5: ["drill", "app", "drill", "app", "defi", "app", "defi"],
+  10: ["drill", "app", "drill", "app", "defi", "app", "drill", "app", "defi", "app", "drill", "app", "defi", "defi"],
+};
+const TARGET = { drill: -300, app: -100, defi: 80 }; // écart visé au Mathélo (≈ 85 %, 65 %, 40 % de réussite)
+const KIND_LABEL = { drill: "🔁 Automatisme", app: "🧩 Application", defi: "🏔 Défi" };
 
 // ---------- Mathélo : score de type Elo ----------
 // Année HarmoS équivalente : CH 9e–11e = 9–11 ; FR 6e = 8 … 3e = 11.
@@ -1764,7 +1860,7 @@ const Engine = {
     if (m < 0.3) best = Math.max(1, best - 1);
     if (m > 0.8) best = Math.min(cap, best + 1);
     // Niveau 4 (problème) : notion solide, Mathélo suffisant, environ une fois sur trois.
-    if (typeof PROB !== "undefined" && PROB[id] && m >= 0.7 && state.elo.r >= itemRating(state.profile, id, 4) - 250 && Math.random() < 0.35) return 4;
+    if (hasProb(id) && m >= 0.7 && state.elo.r >= itemRating(state.profile, id, 4) - 250 && Math.random() < 0.35) return 4;
     return best;
   },
 
@@ -1791,20 +1887,21 @@ const Engine = {
     seed = seed || Math.floor(Math.random() * 46655) + 1;
     R.seed(seed * 7919 + level * 104729 + [...id].reduce((a, c) => a + c.charCodeAt(0), 0));
     const code = id + "-" + level + "-" + seed.toString(36);
-    if (level === 4 && PROB[id]) { const p = PROB[id](); return { ...p, id, d: 4, seed, code, spec: { kind: "multi" }, hint: p.hints[0] }; }
+    if (level === 4 && hasProb(id)) { const p = probFor(id)(); return { ...p, id, d: 4, seed, code, spec: { kind: "multi" }, hint: p.hints[0] }; }
     const q = GEN[id](level);
     return { ...q, id, d: level, seed, code, hint: q.hint || HINTS[id] };
   },
   // Lecture d'un code « eq2disc-2-k3f » → question exacte (ou null).
   fromCode(code) {
     const m = /^([a-z0-9]+)-([1-4])-([a-z0-9]+)$/.exec(String(code).trim().toLowerCase());
-    if (!m || !GEN[m[1]] || (m[2] === "4" && !PROB[m[1]])) return null;
+    if (!m || !GEN[m[1]] || (m[2] === "4" && !hasProb(m[1]))) return null;
     return this.build(m[1], +m[2], parseInt(m[3], 36));
   },
 
   // Positionnement : premier repère rapide (5 notions vues ou en cours) ; le niveau se précise ensuite au fil des séances, en variant les thèmes, notions récentes d'abord.
   placementPlan(state) {
-    const ids = this.eligible(state);
+    const all = this.eligible(state), recent = all.filter((id) => this.isRecent(state, id));
+    const ids = recent.length >= 3 ? recent : all;
     const byTheme = {};
     for (const id of ids) {
       const n = NOTIONS.find((x) => x.id === id);
@@ -1830,21 +1927,45 @@ const Engine = {
   },
 
   // Séance du jour : notions dues et fragiles d'abord, puis « en cours », puis rappels espacés.
+  // Notion « actuelle » : année en cours ou précédente. Les plus anciennes ne reviennent qu'en remédiation.
+  isRecent(state, id) {
+    const pl = placeOf(NOTIONS.find((n) => n.id === id), state.profile);
+    return pl && pl[0] >= state.profile.grade - 1;
+  },
+  pool(state, kind) {
+    const all = this.eligible(state);
+    const p = all.filter((id) => this.isRecent(state, id) || (kind !== "defi" && state.notions[id].m < 0.45));
+    return p.length ? p : all;
+  },
+
+  // Séance équilibrée : automatismes (≈ 85 % de réussite visée), applications (≈ 65 %), défis (≈ 40 %).
+  // Pour chaque créneau, on choisit la notion ET le niveau dont le score est le plus proche de la cible fixée par le Mathélo.
   planSession(state) {
-    const n = QUESTIONS_FOR[state.profile.minutes] || 7, today = day();
-    const scored = this.eligible(state).map((id) => {
-      const s = state.notions[id];
-      const overdue = Math.max(0, (new Date(today) - new Date(s.due)) / 864e5);
-      const due = s.due <= today ? 1 : 0;
-      const prep = this.prepActive(state) && state.prep.ids.includes(id) ? 2.5 : 0;
-      return { id, score: due * 3 + overdue * 0.5 + (1 - s.m) * 3 + (s.status === "encours" ? 1.5 : 0) + prep + Math.random() * 0.8 };
-    }).sort((a, b) => b.score - a.score);
-    const plan = [];
-    let i = 0;
-    while (plan.length < n && scored.length) {
-      const id = scored[i % scored.length].id;
-      if (plan[plan.length - 1] !== id || scored.length === 1) plan.push(id);
-      i++;
+    const slots = SLOTS[state.profile.minutes] || SLOTS[5], today = day(), elo = state.elo.r, cap = difficultyCap(state.profile);
+    const maxProb = state.profile.minutes >= 10 ? 2 : 1, used = new Set(), plan = [];
+    let probs = 0;
+    for (const kind of slots) {
+      let best = null;
+      for (const id of this.pool(state, kind)) {
+        const s = state.notions[id];
+        const levels = [1, 2, 3].filter((d) => d <= cap && (kind !== "defi" || d >= 2) && (kind !== "drill" || d <= 2));
+        if (kind === "defi" && hasProb(id) && probs < maxProb) levels.push(4);
+        for (const d of levels) {
+          let sc = Math.abs(itemRating(state.profile, id, d) - (elo + TARGET[kind])) / 100;
+          if (s.due <= today && kind !== "defi") sc -= 0.6;
+          if (kind === "app") sc -= (1 - s.m) * 0.8;
+          if (s.status === "encours") sc -= 0.4;
+          if (this.prepActive(state) && state.prep.ids.includes(id)) sc -= 1.2;
+          if (used.has(id)) sc += 2;
+          if (d === 4) sc -= 0.3;
+          sc += Math.random() * 0.5;
+          if (!best || sc < best.sc) best = { id, d, sc };
+        }
+      }
+      if (!best) continue;
+      used.add(best.id);
+      if (best.d === 4) probs++;
+      plan.push(best.id + "|" + best.d + "|" + kind);
     }
     return plan;
   },
@@ -1895,14 +2016,14 @@ const Engine = {
     const order = [...ids].sort((a, b) => state.notions[a].m - state.notions[b].m);
     const plan = [];
     for (let i = 0; plan.length < n - 1; i++) plan.push(order[i % order.length]);
-    const withProb = order.filter((id) => PROB[id]);
+    const withProb = order.filter((id) => hasProb(id));
     plan.push(withProb.length ? "PROB:" + withProb[0] : order[0]);
     return plan;
   },
 
   // Problème de la semaine : une notion « à problème » parmi celles vues, fixée par la semaine.
   weeklyProblem(state) {
-    const ids = this.eligible(state).filter((id) => PROB[id]);
+    const ids = this.eligible(state).filter((id) => hasProb(id));
     if (!ids.length) return null;
     const d = new Date(), week = Math.floor((d - new Date(d.getFullYear(), 0, 1)) / 6048e5);
     return ids[week % ids.length];
@@ -2132,16 +2253,18 @@ function startSession() {
 function nextQuestion(redo) {
   // Le temps est un repère, jamais une limite : la séance finit quand les questions prévues sont faites.
   if (!redo && session.i >= session.plan.length) return screenSummary();
-  const raw = redo ? redo.id : session.plan[session.i], forceProb = String(raw).startsWith("PROB:"), id = forceProb ? raw.slice(5) : raw;
+  const raw = redo ? redo.id : session.plan[session.i], forceProb = String(raw).startsWith("PROB:");
+  const parts = String(raw).split("|"), id = forceProb ? raw.slice(5) : parts[0], level = parts[1] ? +parts[1] : undefined, kind = redo ? redo.kind : parts[2];
   const ns = state.notions[id];
   // Écran de leçon : seulement la première fois, et pour une notion en cours en classe ou encore fragile.
   if (!redo && LESSONS[id] && ns && !ns.lessonSeen && (ns.status === "encours" || ns.m < 0.4)) {
     state.notions[id].lessonSeen = true; save();
     return screenLesson(id, () => { session.lessonShown = id; nextQuestion(); });
   }
-  const q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : undefined);
+  const q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : level);
+  q.kind = kind;
   renderQuestion(q, {
-    eyebrow: (session.weekly ? "Problème de la semaine" : session.prep ? "Révision du test · " + (session.i + 1) + " sur " + session.plan.length : session.i === 0 && !redo ? "Question du jour" : "Question " + (session.i + 1) + " sur " + session.plan.length) + (redo ? " · nouvelles valeurs" : ""),
+    eyebrow: (session.weekly ? "Problème de la semaine" : session.prep ? "Révision du test · " + (session.i + 1) + " sur " + session.plan.length : session.i === 0 && !redo ? "Question du jour" : "Question " + (session.i + 1) + " sur " + session.plan.length) + (kind && KIND_LABEL[kind] ? " · " + KIND_LABEL[kind] : "") + (redo ? " · nouvelles valeurs" : ""),
     onDone: (res) => {
       const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
       res.delta = Engine.updateElo(state, id, q.d, sc);

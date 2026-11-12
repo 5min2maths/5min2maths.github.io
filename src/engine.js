@@ -57,6 +57,13 @@ const day = (d = new Date()) => d.toISOString().slice(0, 10);
 const addDays = (s, n) => { const d = new Date(s + "T12:00:00"); d.setDate(d.getDate() + n); return day(d); };
 const INTERVALS = [0, 1, 3, 7, 14, 30];
 const QUESTIONS_FOR = { 1: 1, 2: 3, 5: 7, 10: 14 };
+const SLOTS = {
+  1: ["app"], 2: ["drill", "app", "defi"],
+  5: ["drill", "app", "drill", "app", "defi", "app", "defi"],
+  10: ["drill", "app", "drill", "app", "defi", "app", "drill", "app", "defi", "app", "drill", "app", "defi", "defi"],
+};
+const TARGET = { drill: -300, app: -100, defi: 80 }; // écart visé au Mathélo (≈ 85 %, 65 %, 40 % de réussite)
+const KIND_LABEL = { drill: "🔁 Automatisme", app: "🧩 Application", defi: "🏔 Défi" };
 
 // ---------- Mathélo : score de type Elo ----------
 // Année HarmoS équivalente : CH 9e–11e = 9–11 ; FR 6e = 8 … 3e = 11.
@@ -119,7 +126,7 @@ const Engine = {
     if (m < 0.3) best = Math.max(1, best - 1);
     if (m > 0.8) best = Math.min(cap, best + 1);
     // Niveau 4 (problème) : notion solide, Mathélo suffisant, environ une fois sur trois.
-    if (typeof PROB !== "undefined" && PROB[id] && m >= 0.7 && state.elo.r >= itemRating(state.profile, id, 4) - 250 && Math.random() < 0.35) return 4;
+    if (hasProb(id) && m >= 0.7 && state.elo.r >= itemRating(state.profile, id, 4) - 250 && Math.random() < 0.35) return 4;
     return best;
   },
 
@@ -146,20 +153,21 @@ const Engine = {
     seed = seed || Math.floor(Math.random() * 46655) + 1;
     R.seed(seed * 7919 + level * 104729 + [...id].reduce((a, c) => a + c.charCodeAt(0), 0));
     const code = id + "-" + level + "-" + seed.toString(36);
-    if (level === 4 && PROB[id]) { const p = PROB[id](); return { ...p, id, d: 4, seed, code, spec: { kind: "multi" }, hint: p.hints[0] }; }
+    if (level === 4 && hasProb(id)) { const p = probFor(id)(); return { ...p, id, d: 4, seed, code, spec: { kind: "multi" }, hint: p.hints[0] }; }
     const q = GEN[id](level);
     return { ...q, id, d: level, seed, code, hint: q.hint || HINTS[id] };
   },
   // Lecture d'un code « eq2disc-2-k3f » → question exacte (ou null).
   fromCode(code) {
     const m = /^([a-z0-9]+)-([1-4])-([a-z0-9]+)$/.exec(String(code).trim().toLowerCase());
-    if (!m || !GEN[m[1]] || (m[2] === "4" && !PROB[m[1]])) return null;
+    if (!m || !GEN[m[1]] || (m[2] === "4" && !hasProb(m[1]))) return null;
     return this.build(m[1], +m[2], parseInt(m[3], 36));
   },
 
   // Positionnement : premier repère rapide (5 notions vues ou en cours) ; le niveau se précise ensuite au fil des séances, en variant les thèmes, notions récentes d'abord.
   placementPlan(state) {
-    const ids = this.eligible(state);
+    const all = this.eligible(state), recent = all.filter((id) => this.isRecent(state, id));
+    const ids = recent.length >= 3 ? recent : all;
     const byTheme = {};
     for (const id of ids) {
       const n = NOTIONS.find((x) => x.id === id);
@@ -185,21 +193,45 @@ const Engine = {
   },
 
   // Séance du jour : notions dues et fragiles d'abord, puis « en cours », puis rappels espacés.
+  // Notion « actuelle » : année en cours ou précédente. Les plus anciennes ne reviennent qu'en remédiation.
+  isRecent(state, id) {
+    const pl = placeOf(NOTIONS.find((n) => n.id === id), state.profile);
+    return pl && pl[0] >= state.profile.grade - 1;
+  },
+  pool(state, kind) {
+    const all = this.eligible(state);
+    const p = all.filter((id) => this.isRecent(state, id) || (kind !== "defi" && state.notions[id].m < 0.45));
+    return p.length ? p : all;
+  },
+
+  // Séance équilibrée : automatismes (≈ 85 % de réussite visée), applications (≈ 65 %), défis (≈ 40 %).
+  // Pour chaque créneau, on choisit la notion ET le niveau dont le score est le plus proche de la cible fixée par le Mathélo.
   planSession(state) {
-    const n = QUESTIONS_FOR[state.profile.minutes] || 7, today = day();
-    const scored = this.eligible(state).map((id) => {
-      const s = state.notions[id];
-      const overdue = Math.max(0, (new Date(today) - new Date(s.due)) / 864e5);
-      const due = s.due <= today ? 1 : 0;
-      const prep = this.prepActive(state) && state.prep.ids.includes(id) ? 2.5 : 0;
-      return { id, score: due * 3 + overdue * 0.5 + (1 - s.m) * 3 + (s.status === "encours" ? 1.5 : 0) + prep + Math.random() * 0.8 };
-    }).sort((a, b) => b.score - a.score);
-    const plan = [];
-    let i = 0;
-    while (plan.length < n && scored.length) {
-      const id = scored[i % scored.length].id;
-      if (plan[plan.length - 1] !== id || scored.length === 1) plan.push(id);
-      i++;
+    const slots = SLOTS[state.profile.minutes] || SLOTS[5], today = day(), elo = state.elo.r, cap = difficultyCap(state.profile);
+    const maxProb = state.profile.minutes >= 10 ? 2 : 1, used = new Set(), plan = [];
+    let probs = 0;
+    for (const kind of slots) {
+      let best = null;
+      for (const id of this.pool(state, kind)) {
+        const s = state.notions[id];
+        const levels = [1, 2, 3].filter((d) => d <= cap && (kind !== "defi" || d >= 2) && (kind !== "drill" || d <= 2));
+        if (kind === "defi" && hasProb(id) && probs < maxProb) levels.push(4);
+        for (const d of levels) {
+          let sc = Math.abs(itemRating(state.profile, id, d) - (elo + TARGET[kind])) / 100;
+          if (s.due <= today && kind !== "defi") sc -= 0.6;
+          if (kind === "app") sc -= (1 - s.m) * 0.8;
+          if (s.status === "encours") sc -= 0.4;
+          if (this.prepActive(state) && state.prep.ids.includes(id)) sc -= 1.2;
+          if (used.has(id)) sc += 2;
+          if (d === 4) sc -= 0.3;
+          sc += Math.random() * 0.5;
+          if (!best || sc < best.sc) best = { id, d, sc };
+        }
+      }
+      if (!best) continue;
+      used.add(best.id);
+      if (best.d === 4) probs++;
+      plan.push(best.id + "|" + best.d + "|" + kind);
     }
     return plan;
   },
@@ -250,14 +282,14 @@ const Engine = {
     const order = [...ids].sort((a, b) => state.notions[a].m - state.notions[b].m);
     const plan = [];
     for (let i = 0; plan.length < n - 1; i++) plan.push(order[i % order.length]);
-    const withProb = order.filter((id) => PROB[id]);
+    const withProb = order.filter((id) => hasProb(id));
     plan.push(withProb.length ? "PROB:" + withProb[0] : order[0]);
     return plan;
   },
 
   // Problème de la semaine : une notion « à problème » parmi celles vues, fixée par la semaine.
   weeklyProblem(state) {
-    const ids = this.eligible(state).filter((id) => PROB[id]);
+    const ids = this.eligible(state).filter((id) => hasProb(id));
     if (!ids.length) return null;
     const d = new Date(), week = Math.floor((d - new Date(d.getFullYear(), 0, 1)) / 6048e5);
     return ids[week % ids.length];

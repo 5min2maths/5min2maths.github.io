@@ -714,3 +714,92 @@ const PROB = {
       sol: "a) " + M(lm * k + " \\text{ cm} = " + dec((lm * k) / 100)) + " m. b) " + M(am + " \\cdot " + k * k + " = " + am * k * k + " \\text{ cm}^2 = " + dec((am * k * k) / 10000)) + " m². c) " + M(vm + " \\cdot " + k ** 3 + " = " + vm * k ** 3 + " \\text{ cm}^3 = " + dec((vm * k ** 3) / 1e6)) + " m³." };
   },
 };
+
+// ---------- Défis supplémentaires (1re et 2e du secondaire II) : plusieurs problèmes par notion ----------
+const PROB_EXTRA = {
+  eq2disc: [() => {
+    const k = R.int(2, 9);
+    return { q: "On considère l'équation " + M("x^2 + m x + " + k * k + " = 0") + ", avec " + M("m > 0") + ".",
+      parts: [{ label: "a) Valeur de m pour laquelle l'équation a une seule solution", spec: { kind: "value", value: 2 * k } }, { label: "b) Cette solution unique", spec: { kind: "value", value: -k } }, { label: "c) Plus petite valeur entière de m > 0 pour laquelle il y a deux solutions", spec: { kind: "value", value: 2 * k + 1 } }],
+      hints: ["Une seule solution ⇔ Δ = 0. Deux solutions ⇔ Δ > 0.", "Δ = m² − " + 4 * k * k + " ; Δ = 0 ⇔ m = " + 2 * k + " ; la solution vaut alors −m / 2."],
+      sol: "a) " + M("m^2 - " + 4 * k * k + " = 0") + ", " + M("m = " + 2 * k) + ". b) " + M("x = -\\frac{m}{2} = " + -k) + ". c) " + M("m^2 > " + 4 * k * k + " \\iff m > " + 2 * k) + ", donc " + M(2 * k + 1) + "." };
+  }],
+  inter: [() => {
+    const a = R.nz(-3, 3), m = 2 * a, k = -a * a;
+    return { fig: FIG.parabola((x) => x * x / 3, [], null, false), q: "La droite " + M("g(x) = " + m + "x + k") + " et la parabole " + M("f(x) = x^2") + ".",
+      parts: [{ label: "a) Valeur de k pour que la droite soit tangente à la parabole (un seul point commun)", spec: { kind: "value", value: k } }, { label: "b) Abscisse du point de contact", spec: { kind: "value", value: a } }, { label: "c) Ordonnée du point de contact", spec: { kind: "value", value: a * a } }],
+      hints: ["Les points communs vérifient x² = " + m + "x + k. Un seul point commun ⇔ cette équation a une seule solution.", "x² − " + m + "x − k = 0 : Δ = " + m * m + " + 4k = 0."],
+      sol: M("x^2 - " + m + "x - k = 0") + ", " + M("\\Delta = " + m * m + " + 4k = 0") + " : a) " + M("k = " + k) + ". b) " + M("x = " + a) + ". c) " + M("y = " + a * a) + "." };
+  }],
+  expo: [() => {
+    const m0 = 100 * R.pick([2, 4, 8, 16]), T = R.pick([3, 5, 8, 10, 12]), t = R.int(1, 4) * T + R.int(1, T - 1), seuil = m0 / R.pick([10, 20, 50]);
+    const mt = m0 * Math.pow(0.5, t / T), n = Math.ceil((T * Math.log(m0 / seuil)) / Math.log(2));
+    return { q: "Une substance radioactive a une demi-vie de " + M(T) + " ans : sa masse est divisée par 2 tous les " + M(T) + " ans. On part de " + M(m0) + " g.",
+      parts: [{ label: "a) Masse après " + 2 * T + " ans (g)", spec: { kind: "value", value: m0 / 4 } }, { label: "b) Masse après " + t + " ans (g, au centième)", spec: { kind: "value", value: mt, round: 0.01 } }, { label: "c) Après combien d'années entières la masse devient-elle inférieure à " + decTxt(seuil) + " g ?", spec: { kind: "value", value: n } }],
+      hints: ["m(t) = " + m0 + " · 0,5^(t / " + T + ").", "c) Résous " + m0 + " · 0,5^(t/" + T + ") < " + decTxt(seuil) + " avec les logarithmes, puis arrondis à l'année supérieure."],
+      sol: "a) " + M(m0 + " \\cdot 0{,}5^2 = " + m0 / 4) + " g. b) " + M(m0 + " \\cdot 0{,}5^{" + t + "/" + T + "} \\approx " + dec(r2(mt))) + " g. c) " + M("t > " + T + " \\cdot \\frac{\\ln " + dec(m0 / seuil) + "}{\\ln 2} \\approx " + dec(r2((T * Math.log(m0 / seuil)) / Math.log(2)))) + " : " + M(n) + " ans." };
+  }],
+  log: [() => {
+    const n = R.pick([5, 8, 10, 12, 15, 20]), t = (Math.pow(2, 1 / n) - 1) * 100;
+    return { q: "La population d'une ville double en " + M(n) + " ans, avec un taux de croissance annuel constant.",
+      parts: [{ label: "a) Taux de croissance annuel (en %, au centième)", spec: { kind: "value", value: t, round: 0.01 } }, { label: "b) Facteur de multiplication en " + 3 * n + " ans", spec: { kind: "value", value: 8 } }],
+      hints: ["Si le facteur annuel est q, alors qⁿ = 2.", "q = 2^(1/" + n + ") ; taux = (q − 1) · 100. b) " + 3 * n + " ans = 3 doublements."],
+      sol: "a) " + M("q = 2^{1/" + n + "} \\approx " + dec(Math.pow(2, 1 / n).toFixed(4))) + ", taux " + M("\\approx " + dec(r2(t)) + "\\,\\%") + ". b) " + M("2^3 = 8") + "." };
+  }],
+  sinlaw: [() => {
+    const d = 10 * R.int(5, 20), al = R.int(40, 75), be = R.int(40, 75), ga = 180 - al - be;
+    const AC = (d * Math.sin(rad(be))) / Math.sin(rad(ga)), h = AC * Math.sin(rad(al));
+    return { fig: FIG.anyTriangle(["", "", "AB = " + d + " m", "α = " + al + "°, β = " + be + "°", "A"]), q: "Deux géomètres en " + M("A") + " et " + M("B") + ", distants de " + M(d) + " m, visent un arbre " + M("C") + " de l'autre côté d'une rivière : " + M("\\widehat{CAB} = " + al + "°") + " et " + M("\\widehat{CBA} = " + be + "°") + ".",
+      parts: [{ label: "a) Angle en C (°)", spec: { kind: "value", value: ga } }, { label: "b) Distance AC (m, au centième)", spec: { kind: "value", value: AC, round: 0.01 } }, { label: "c) Largeur de la rivière, distance de C à la droite (AB) (m, au centième)", spec: { kind: "value", value: h, round: 0.01 } }],
+      hints: ["Somme des angles, puis théorème du sinus (le côté AB est en face de C).", "AC = AB · sin β / sin γ ; la distance à (AB) est AC · sin α."],
+      sol: "a) " + M(ga + "°") + ". b) " + M("AC = \\frac{" + d + " \\sin " + be + "°}{\\sin " + ga + "°} \\approx " + dec(r2(AC))) + " m. c) " + M("AC \\sin " + al + "° \\approx " + dec(r2(h))) + " m." };
+  }],
+  cart: [() => {
+    const [p, q] = R.pick([[3, 4], [6, 8], [5, 12], [8, 6]]), xa = R.int(-4, 1), ya = R.int(-3, 2);
+    const B = [xa + p, ya], C = [xa, ya + q];
+    return { fig: FIG.lineGraph(0, ya, [[xa, ya, "A"], [B[0], B[1], "B"], [C[0], C[1], "C"]]), q: "Soit " + M("A(" + xa + " ; " + ya + ")") + ", " + M("B(" + B[0] + " ; " + B[1] + ")") + " et " + M("C(" + C[0] + " ; " + C[1] + ")") + ".",
+      parts: [{ label: "a) Longueur BC", spec: { kind: "value", value: Math.hypot(p, q) } }, { label: "b) Aire du triangle ABC", spec: { kind: "value", value: (p * q) / 2 } }, { label: "c) Distance de A à la droite (BC), au centième", spec: { kind: "value", value: (p * q) / Math.hypot(p, q), round: 0.01 } }],
+      hints: ["Le triangle est rectangle en A (un côté horizontal, un côté vertical).", "Aire = AB · AC / 2 = BC · d / 2, d'où la distance d."],
+      sol: "a) " + M("\\sqrt{" + p * p + " + " + q * q + "} = " + Math.hypot(p, q)) + ". b) " + M("\\frac{" + p + " \\cdot " + q + "}{2} = " + (p * q) / 2) + ". c) " + M("d = \\frac{2 \\cdot " + (p * q) / 2 + "}{" + Math.hypot(p, q) + "} = " + dec(r2((p * q) / Math.hypot(p, q)))) + "." };
+  }],
+  trigeq: [() => {
+    const [v, a] = R.pick([["1/2", 30], ["√2/2", 45], ["√3/2", 60]]);
+    const sols = [a / 2, (180 - a) / 2, a / 2 + 180, (180 - a) / 2 + 180];
+    return { fig: FIG.unitLine("y", Math.sin(rad(a)), "y = " + v), q: "On résout " + M("\\sin(2x) = " + v.replace("√", "\\sqrt{").replace(/\{(\d)/, "{$1}")) + " pour " + M("x \\in [0° ; 360°[") + ".",
+      parts: [{ label: "a) Nombre de solutions", spec: { kind: "value", value: 4 } }, { label: "b) Toutes les solutions (en degrés, séparées par « ; »)", spec: { kind: "set", values: sols } }],
+      hints: ["Pose u = 2x : u parcourt [0° ; 720°[, donc deux tours de cercle.", "sin u = " + v + " donne u = " + a + "° ou " + (180 - a) + "° (+ 360°), puis x = u / 2."],
+      sol: M("2x \\in \\{" + a + "° ; " + (180 - a) + "° ; " + (a + 360) + "° ; " + (540 - a) + "°\\}") + ", donc " + M("x \\in \\{" + sols.join("° ; ") + "°\\}") + " : 4 solutions." };
+  }],
+  euclide: [() => {
+    const [p, q] = R.pick([[4, 9], [1, 4], [9, 16], [4, 1], [16, 9], [2, 8]]), c = p + q, h = Math.sqrt(p * q);
+    return { fig: FIG.trigTriangle(["c = " + c, "", ""], ""), q: "Dans un triangle rectangle, la hauteur issue de l'angle droit découpe l'hypoténuse (" + M("c = " + c) + ") en deux segments, dont l'un mesure " + M(p) + ".",
+      parts: [{ label: "a) Hauteur h", spec: { kind: "value", value: h } }, { label: "b) Cathète adjacente au segment de " + p, spec: { kind: "value", value: Math.sqrt(p * c), round: 0.01, exactOk: true } }, { label: "c) Aire du triangle", spec: { kind: "value", value: (c * h) / 2 } }],
+      hints: ["L'autre segment vaut " + c + " − " + p + " = " + q + ". Hauteur : h² = p · q. Euclide : cathète² = projection · hypoténuse.", "Aire = hypoténuse · hauteur / 2."],
+      sol: "a) " + M("h = \\sqrt{" + p + " \\cdot " + q + "} = " + dec(h)) + ". b) " + M("\\sqrt{" + p + " \\cdot " + c + "} \\approx " + dec(r2(Math.sqrt(p * c)))) + ". c) " + M("\\frac{" + c + " \\cdot " + dec(h) + "}{2} = " + dec((c * h) / 2)) + "." };
+  }],
+  eq3: [() => {
+    const L = R.pick([12, 18, 24, 30]), V = (x) => x * (L - 2 * x) ** 2, xs = Array.from({ length: L / 2 - 1 }, (_, i) => i + 1), best = xs.reduce((a, b) => (V(b) > V(a) ? b : a));
+    const x1 = R.int(1, L / 2 - 1);
+    return { fig: FIG.rectFig(1, 1, L + " cm", L + " cm"), q: "Dans un carton carré de " + M(L) + " cm de côté, on découpe un carré de côté " + M("x") + " cm à chaque coin, puis on plie pour obtenir une boîte sans couvercle.",
+      parts: [{ label: "a) Volume (cm³) si x = " + x1, spec: { kind: "value", value: V(x1) } }, { label: "b) Valeur entière de x qui donne le plus grand volume", spec: { kind: "value", value: best } }, { label: "c) Ce volume maximal (cm³)", spec: { kind: "value", value: V(best) } }],
+      hints: ["La base est un carré de côté " + L + " − 2x, la hauteur vaut x.", "V(x) = x(" + L + " − 2x)² ; calcule V pour x = 1, 2, 3… et compare."],
+      sol: M("V(x) = x(" + L + " - 2x)^2") + ". a) " + M(V(x1)) + " cm³. b) " + M("x = " + best) + ". c) " + M(V(best)) + " cm³ (le maximum exact est en " + M("x = " + frac(L, 6)) + ")." };
+  }],
+  ineq: [() => {
+    const a = R.int(5, 20), b = R.int(15, 30) / 10, c = a + R.int(15, 40), d = b - R.int(5, 10) / 10, k = (c - a) / (b - d);
+    return { q: "Forfait A : " + M(a) + " CHF par mois + " + M(dec(b)) + " CHF par Go. Forfait B : " + M(c) + " CHF par mois + " + M(dec(d)) + " CHF par Go. On note " + M("x") + " le nombre de Go consommés.",
+      parts: [{ label: "a) Pour quels x le forfait B est-il moins cher ? (réponds « x > … »)", spec: { kind: "ineq", op: ">", value: k } }, { label: "b) Coût du forfait A pour 20 Go (CHF)", spec: { kind: "value", value: a + 20 * b } }],
+      hints: ["Écris le coût de chaque forfait en fonction de x, puis l'inéquation B < A.", c + " + " + dec(d) + "x < " + a + " + " + dec(b) + "x ⇔ " + (c - a) + " < " + dec(r2(b - d)) + "x."],
+      sol: "a) " + M(c + " + " + dec(d) + "x < " + a + " + " + dec(b) + "x \\iff x > \\frac{" + (c - a) + "}{" + dec(r2(b - d)) + "} \\approx " + dec(r2(k))) + ". b) " + M(dec(a + 20 * b)) + " CHF." };
+  }],
+  thales: [() => {
+    const ad = R.int(3, 8), db = R.int(10, 40), de = R.int(4, 12), bc = (de * (ad + db)) / ad;
+    return { fig: FIG.thales([[110, 52, ad + " m"], [80, 124, db + " m"], [150, 70, de + " m"]]), q: "Pour mesurer la largeur " + M("BC") + " d'un étang, on plante des piquets : " + M("(DE) \\parallel (BC)") + ", " + M("AD = " + ad) + " m, " + M("DB = " + db) + " m et " + M("DE = " + de) + " m.",
+      parts: [{ label: "a) Longueur AB (m)", spec: { kind: "value", value: ad + db } }, { label: "b) Largeur BC de l'étang (m, au centième)", spec: { kind: "value", value: bc, round: 0.01 } }],
+      hints: ["Thalès : le petit triangle ADE et le grand triangle ABC.", "BC / DE = AB / AD."],
+      sol: "a) " + M(ad + db) + " m. b) " + M("BC = " + de + " \\cdot \\frac{" + (ad + db) + "}{" + ad + "} \\approx " + dec(r2(bc))) + " m." };
+  }],
+};
+const probList = (id) => [...(PROB[id] ? [PROB[id]] : []), ...(PROB_EXTRA[id] || [])];
+const hasProb = (id) => probList(id).length > 0;
+const probFor = (id) => R.pick(probList(id));

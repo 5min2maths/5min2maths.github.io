@@ -209,16 +209,18 @@ function startSession() {
 function nextQuestion(redo) {
   // Le temps est un repère, jamais une limite : la séance finit quand les questions prévues sont faites.
   if (!redo && session.i >= session.plan.length) return screenSummary();
-  const raw = redo ? redo.id : session.plan[session.i], forceProb = String(raw).startsWith("PROB:"), id = forceProb ? raw.slice(5) : raw;
+  const raw = redo ? redo.id : session.plan[session.i], forceProb = String(raw).startsWith("PROB:");
+  const parts = String(raw).split("|"), id = forceProb ? raw.slice(5) : parts[0], level = parts[1] ? +parts[1] : undefined, kind = redo ? redo.kind : parts[2];
   const ns = state.notions[id];
   // Écran de leçon : seulement la première fois, et pour une notion en cours en classe ou encore fragile.
   if (!redo && LESSONS[id] && ns && !ns.lessonSeen && (ns.status === "encours" || ns.m < 0.4)) {
     state.notions[id].lessonSeen = true; save();
     return screenLesson(id, () => { session.lessonShown = id; nextQuestion(); });
   }
-  const q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : undefined);
+  const q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : level);
+  q.kind = kind;
   renderQuestion(q, {
-    eyebrow: (session.weekly ? "Problème de la semaine" : session.prep ? "Révision du test · " + (session.i + 1) + " sur " + session.plan.length : session.i === 0 && !redo ? "Question du jour" : "Question " + (session.i + 1) + " sur " + session.plan.length) + (redo ? " · nouvelles valeurs" : ""),
+    eyebrow: (session.weekly ? "Problème de la semaine" : session.prep ? "Révision du test · " + (session.i + 1) + " sur " + session.plan.length : session.i === 0 && !redo ? "Question du jour" : "Question " + (session.i + 1) + " sur " + session.plan.length) + (kind && KIND_LABEL[kind] ? " · " + KIND_LABEL[kind] : "") + (redo ? " · nouvelles valeurs" : ""),
     onDone: (res) => {
       const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
       res.delta = Engine.updateElo(state, id, q.d, sc);
