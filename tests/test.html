@@ -114,6 +114,14 @@ for (const n of NOTIONS) {
   if (plan.join() && kinds.join() !== "drill,app,defi") fail("mixte : " + kinds.join(","));
   if (Engine.planSession(strong, "defi").length !== 1) fail("défi du jour : plus d'une question");
   if (Engine.planSession(strong, "auto").length !== 8) fail("série d'automatismes");
+  // « Trop facile » : demi-victoire, notion relevée, remplaçante un cran au-dessus, cible relevée
+  { const t = mk({ system: "CH", grade: 13, track: "college", minutes: 5 }, 1500), r0 = t.elo.r, id = "expo";
+    const r = Engine.tooEasy(t, id, 1, "drill");
+    if (!(t.elo.r > r0 && t.elo.r - r0 <= 24)) fail("trop facile : Mathélo " + r0 + " → " + t.elo.r);
+    if (r.next !== "expo|2|app") fail("trop facile : remplaçante " + r.next);
+    if (t.notions[id].easy !== 1) fail("trop facile : décalage");
+    Engine.record(t, id, 2, 2, false); if (t.notions[id].easy !== 0) fail("échec : décalage non retombé");
+    const r3 = Engine.tooEasy(t, "cart", 3, "app"); if (r3.next !== null && !r3.next.startsWith("cart|4")) fail("trop facile niveau 3 : " + r3.next); }
   // équilibre sur 14 jours simulés
   const cnt = {}; strong.formats = [];
   for (let dd = 14; dd >= 1; dd--) { const date = addDays(day(), -dd); strong.today = null; const f = Engine.chooseFormat(strong, [], date); strong.formats.push({ date, f }); cnt[f] = (cnt[f] || 0) + 1; }

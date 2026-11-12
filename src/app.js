@@ -235,6 +235,17 @@ function nextQuestion(redo) {
       return res.delta;
     },
     onNext: (wantRedo) => { if (wantRedo) return nextQuestion(q); session.i++; nextQuestion(); },
+    // « Trop facile » : au plus 3 par séance, pas en préparation de test ni pour le problème de la semaine.
+    onEasy: session.weekly || (session.skips || 0) >= 3 ? null : () => {
+      session.skips = (session.skips || 0) + 1;
+      const r = Engine.tooEasy(state, id, q.d, kind);
+      vote(q.code, "facile");
+      session.ids.add(id);
+      if (r.next && !redo) session.plan[session.i] = r.next; else session.i++;
+      save();
+      toast(r.next ? "Noté : on monte d'un cran." + (r.delta ? " Mathélo +" + r.delta : "") : "Noté, on passe à la suite.");
+      nextQuestion();
+    },
   });
 }
 
@@ -337,7 +348,7 @@ function renderQuestion(q, opt) {
   h(`<div class="spread">${brand}${session && !opt.single ? '<span class="timer small muted" id="timer"></span>' : ""}</div>
   ${session && !opt.single && session.answered > 0 ? '<div class="spread"><span></span><button class="btn-ghost small" id="stop">Terminer ici</button></div>' : ""}
   <div class="eyebrow">${opt.eyebrow}</div>
-  <div class="card pop"><div class="qmeta"><span class="chip">${notion.label}</span><span class="dots" title="difficulté">${[1, 2, 3].map((k) => `<i class="${k <= q.d ? "on" : ""}"></i>`).join("")}</span></div>
+  <div class="card pop"><div class="qmeta"><span class="chip">${notion.label}</span><span class="dots" title="difficulté">${[1, 2, 3].map((k) => `<i class="${k <= q.d ? "on" : ""}"></i>`).join("")}</span>${opt.onEasy ? '<button class="btn-ghost small easy" id="easy" title="Passer cette question et monter d\'un cran">Trop facile ⏭</button>' : ""}</div>
   <div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
   ${opt.single ? "" : lessonDetails(q.id)}
   <div class="answer"><input id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="none" placeholder="Ta réponse…" aria-label="Ta réponse">
@@ -422,12 +433,23 @@ function renderQuestion(q, opt) {
       return;
     }
     tries++;
+    const ez = document.getElementById("easy"); if (ez) ez.remove();
     if (opt.single || tries >= 2) return end(false);
     fb.innerHTML = `<div class="fb hint pop"><b>${r.status === "close" ? "Presque !" : "Pas encore. Réessaie !"}</b><span>${esc(r.message || "")}</span><span><b>Indice</b> · ${esc(q.hint)}</span></div>`;
     inp.select();
   };
   document.getElementById("check").onclick = check;
   document.getElementById("idk").onclick = () => { if (!finished) end(false, true); };
+  const ez = document.getElementById("easy");
+  if (ez) ez.onclick = () => { if (!finished && tries === 0) { finished = true; opt.onEasy(); } };
+}
+
+// Petit message éphémère.
+function toast(msg) {
+  const t = document.createElement("div");
+  t.className = "toast pop"; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2200);
 }
 
 function burst() {

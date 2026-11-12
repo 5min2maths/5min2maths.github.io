@@ -135,10 +135,10 @@ const Engine = {
   },
 
   // Mise à jour du Mathélo. score : 1, 0,5 ou 0. K plus grand au début (positionnement rapide).
-  updateElo(state, id, d, score) {
+  updateElo(state, id, d, score, weight = 1) {
     const e = state.elo, q = itemRating(state.profile, id, d);
     const expected = 1 / (1 + Math.pow(10, (q - e.r) / 400));
-    const K = e.n < 20 ? 48 : e.n < 60 ? 32 : 20; // calibrage progressif : provisoire tant que n < 20
+    const K = (e.n < 20 ? 48 : e.n < 60 ? 32 : 20) * weight; // calibrage progressif : provisoire tant que n < 20
     const delta = Math.round(K * (score - expected));
     e.r = Math.max(400, e.r + delta);
     e.n++;
@@ -263,7 +263,7 @@ const Engine = {
         const levels = [1, 2, 3].filter((d) => d <= cap && (base !== "defi" || d >= 2) && (kind !== "drill" || d <= 2));
         if ((kind === "defi4" || kind === "defi") && hasProb(id)) levels.push(4);
         for (const d of levels) {
-          let sc = Math.abs(itemRating(state.profile, id, d) - (elo + TARGET[kind])) / 100;
+          let sc = Math.abs(itemRating(state.profile, id, d) - (elo + TARGET[kind] + (s.easy || 0) * 120)) / 100;
           if (s.due <= today && base !== "defi") sc -= 0.6;
           if (kind === "app" || kind === "rev") sc -= (1 - s.m) * 0.8;
           if (s.status === "encours") sc -= 0.4;
@@ -279,6 +279,21 @@ const Engine = {
       plan.push(best.id + "|" + best.d + "|" + base);
     }
     return plan;
+  },
+
+  // « Trop facile » : l'élève passe la question. Demi-victoire au Mathélo (sans répondre, on ne compte pas plein),
+  // la notion monte, et son niveau visé est relevé (décalage par notion, qui retombe si l'élève échoue ensuite).
+  tooEasy(state, id, d, kind) {
+    const s = state.notions[id];
+    s.easy = Math.min(3, (s.easy || 0) + 1);
+    s.m = Math.min(1, s.m + (1 - s.m) * 0.25);
+    s.box = Math.min(5, s.box + 1);
+    s.due = addDays(day(), INTERVALS[s.box]);
+    if (s.status === "encours" && s.m > 0.7) s.status = "vu";
+    const delta = this.updateElo(state, id, d, 1, 0.5);
+    // Remplaçante : même notion, un cran au-dessus (si possible), sinon la question suivante du programme.
+    const cap = difficultyCap(state.profile), top = hasProb(id) && kind !== "drill" ? 4 : Math.min(3, cap);
+    return { delta, next: d < top && d < 4 ? id + "|" + (d + 1) + "|" + (kind === "drill" ? "app" : kind || "app") : null };
   },
 
   // Score Moodle : 1 au premier essai, 0,5 au deuxième, 0 ensuite.
@@ -302,6 +317,7 @@ const Engine = {
     } else {
       s.m = s.m * 0.6;
       s.box = 0;
+      if (s.easy) s.easy--;
     }
     s.due = addDays(today, solved && tries === 1 ? INTERVALS[s.box] : 1);
     if (s.status === "encours" && s.m > 0.7) s.status = "vu";

@@ -225,6 +225,10 @@ details.lesson { border: 1px dashed var(--line); border-radius: 10px; padding: 6
 details.lesson summary { cursor: pointer; color: var(--blue); font-weight: 700; padding: 4px 0; }
 details.lesson[open] { background: var(--paper); }
 
+.qmeta .easy { margin-left: auto; padding: 4px 10px; }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 50; max-width: calc(100% - 32px);
+  background: var(--ink, #1d3f8f); color: #fff; padding: 10px 16px; border-radius: 10px; font-size: .95rem; box-shadow: 0 6px 18px rgba(0,0,0,.2); }
+
 </style>
 <script>
 window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "global" }, startup: { typeset: false } };
@@ -1869,10 +1873,10 @@ const Engine = {
   },
 
   // Mise à jour du Mathélo. score : 1, 0,5 ou 0. K plus grand au début (positionnement rapide).
-  updateElo(state, id, d, score) {
+  updateElo(state, id, d, score, weight = 1) {
     const e = state.elo, q = itemRating(state.profile, id, d);
     const expected = 1 / (1 + Math.pow(10, (q - e.r) / 400));
-    const K = e.n < 20 ? 48 : e.n < 60 ? 32 : 20; // calibrage progressif : provisoire tant que n < 20
+    const K = (e.n < 20 ? 48 : e.n < 60 ? 32 : 20) * weight; // calibrage progressif : provisoire tant que n < 20
     const delta = Math.round(K * (score - expected));
     e.r = Math.max(400, e.r + delta);
     e.n++;
@@ -1997,7 +2001,7 @@ const Engine = {
         const levels = [1, 2, 3].filter((d) => d <= cap && (base !== "defi" || d >= 2) && (kind !== "drill" || d <= 2));
         if ((kind === "defi4" || kind === "defi") && hasProb(id)) levels.push(4);
         for (const d of levels) {
-          let sc = Math.abs(itemRating(state.profile, id, d) - (elo + TARGET[kind])) / 100;
+          let sc = Math.abs(itemRating(state.profile, id, d) - (elo + TARGET[kind] + (s.easy || 0) * 120)) / 100;
           if (s.due <= today && base !== "defi") sc -= 0.6;
           if (kind === "app" || kind === "rev") sc -= (1 - s.m) * 0.8;
           if (s.status === "encours") sc -= 0.4;
@@ -2013,6 +2017,21 @@ const Engine = {
       plan.push(best.id + "|" + best.d + "|" + base);
     }
     return plan;
+  },
+
+  // « Trop facile » : l'élève passe la question. Demi-victoire au Mathélo (sans répondre, on ne compte pas plein),
+  // la notion monte, et son niveau visé est relevé (décalage par notion, qui retombe si l'élève échoue ensuite).
+  tooEasy(state, id, d, kind) {
+    const s = state.notions[id];
+    s.easy = Math.min(3, (s.easy || 0) + 1);
+    s.m = Math.min(1, s.m + (1 - s.m) * 0.25);
+    s.box = Math.min(5, s.box + 1);
+    s.due = addDays(day(), INTERVALS[s.box]);
+    if (s.status === "encours" && s.m > 0.7) s.status = "vu";
+    const delta = this.updateElo(state, id, d, 1, 0.5);
+    // Remplaçante : même notion, un cran au-dessus (si possible), sinon la question suivante du programme.
+    const cap = difficultyCap(state.profile), top = hasProb(id) && kind !== "drill" ? 4 : Math.min(3, cap);
+    return { delta, next: d < top && d < 4 ? id + "|" + (d + 1) + "|" + (kind === "drill" ? "app" : kind || "app") : null };
   },
 
   // Score Moodle : 1 au premier essai, 0,5 au deuxième, 0 ensuite.
@@ -2036,6 +2055,7 @@ const Engine = {
     } else {
       s.m = s.m * 0.6;
       s.box = 0;
+      if (s.easy) s.easy--;
     }
     s.due = addDays(today, solved && tries === 1 ? INTERVALS[s.box] : 1);
     if (s.status === "encours" && s.m > 0.7) s.status = "vu";
@@ -2324,6 +2344,17 @@ function nextQuestion(redo) {
       return res.delta;
     },
     onNext: (wantRedo) => { if (wantRedo) return nextQuestion(q); session.i++; nextQuestion(); },
+    // « Trop facile » : au plus 3 par séance, pas en préparation de test ni pour le problème de la semaine.
+    onEasy: session.weekly || (session.skips || 0) >= 3 ? null : () => {
+      session.skips = (session.skips || 0) + 1;
+      const r = Engine.tooEasy(state, id, q.d, kind);
+      vote(q.code, "facile");
+      session.ids.add(id);
+      if (r.next && !redo) session.plan[session.i] = r.next; else session.i++;
+      save();
+      toast(r.next ? "Noté : on monte d'un cran." + (r.delta ? " Mathélo +" + r.delta : "") : "Noté, on passe à la suite.");
+      nextQuestion();
+    },
   });
 }
 
@@ -2426,7 +2457,7 @@ function renderQuestion(q, opt) {
   h(`<div class="spread">${brand}${session && !opt.single ? '<span class="timer small muted" id="timer"></span>' : ""}</div>
   ${session && !opt.single && session.answered > 0 ? '<div class="spread"><span></span><button class="btn-ghost small" id="stop">Terminer ici</button></div>' : ""}
   <div class="eyebrow">${opt.eyebrow}</div>
-  <div class="card pop"><div class="qmeta"><span class="chip">${notion.label}</span><span class="dots" title="difficulté">${[1, 2, 3].map((k) => `<i class="${k <= q.d ? "on" : ""}"></i>`).join("")}</span></div>
+  <div class="card pop"><div class="qmeta"><span class="chip">${notion.label}</span><span class="dots" title="difficulté">${[1, 2, 3].map((k) => `<i class="${k <= q.d ? "on" : ""}"></i>`).join("")}</span>${opt.onEasy ? '<button class="btn-ghost small easy" id="easy" title="Passer cette question et monter d\'un cran">Trop facile ⏭</button>' : ""}</div>
   <div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
   ${opt.single ? "" : lessonDetails(q.id)}
   <div class="answer"><input id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="none" placeholder="Ta réponse…" aria-label="Ta réponse">
@@ -2511,12 +2542,23 @@ function renderQuestion(q, opt) {
       return;
     }
     tries++;
+    const ez = document.getElementById("easy"); if (ez) ez.remove();
     if (opt.single || tries >= 2) return end(false);
     fb.innerHTML = `<div class="fb hint pop"><b>${r.status === "close" ? "Presque !" : "Pas encore. Réessaie !"}</b><span>${esc(r.message || "")}</span><span><b>Indice</b> · ${esc(q.hint)}</span></div>`;
     inp.select();
   };
   document.getElementById("check").onclick = check;
   document.getElementById("idk").onclick = () => { if (!finished) end(false, true); };
+  const ez = document.getElementById("easy");
+  if (ez) ez.onclick = () => { if (!finished && tries === 0) { finished = true; opt.onEasy(); } };
+}
+
+// Petit message éphémère.
+function toast(msg) {
+  const t = document.createElement("div");
+  t.className = "toast pop"; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2200);
 }
 
 function burst() {

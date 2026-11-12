@@ -209,3 +209,7 @@ h1 { font-size: clamp(2rem, 7vw, 2.6rem); }
 details.lesson { border: 1px dashed var(--line); border-radius: 10px; padding: 6px 12px; font-size: 0.95rem; }
 details.lesson summary { cursor: pointer; color: var(--blue); font-weight: 700; padding: 4px 0; }
 details.lesson[open] { background: var(--paper); }
+
+.qmeta .easy { margin-left: auto; padding: 4px 10px; }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 50; max-width: calc(100% - 32px);
+  background: var(--ink, #1d3f8f); color: #fff; padding: 10px 16px; border-radius: 10px; font-size: .95rem; box-shadow: 0 6px 18px rgba(0,0,0,.2); }
