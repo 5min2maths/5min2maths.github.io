@@ -60,9 +60,9 @@ function screenNotions(editing = false) {
   Object.keys(THEMES).forEach((th) => { const l = cat.filter((c) => c.current && c.theme === th); if (l.length) groups[th] = l; });
   const label = { vu: "déjà vu", encours: "en cours", nonvu: "pas encore" };
   h(`${brand}${editing ? "" : '<div class="eyebrow">Étape 2 sur 3</div>'}<h2>${editing ? "Mes notions" : "Qu'as-tu déjà étudié ?"}</h2>
-  <p class="muted">${editing ? "Tu as vu une nouvelle notion en classe ? Mets-la à jour : elle entrera dans tes questions." : "Seulement les notions de cette année : indique celles que tu as déjà vues en classe. Tu pourras mettre à jour quand tu veux."}</p>
+  <p class="muted">${editing ? "Tu as vu une nouvelle notion en classe ? Mets-la à jour : elle entrera dans tes questions." : "Les notions travaillées cette année : indique celles que tu as déjà vues en classe. Celles des années précédentes sont déjà cochées. Tu pourras mettre à jour quand tu veux."}</p>
   ${Object.keys(groups).length ? "" : '<div class="card flat"><p class="muted">Rien à cocher : tout ce qui te concerne vient des années précédentes.</p></div>'}
-  ${Object.entries(groups).map(([th, list]) => `<div class="card flat"><h3>${THEMES[th]}</h3>${list.map((c) => `<div class="notion"><div><b>${c.label}</b></div><div class="ex">\\(${c.ex}\\)</div>
+  ${Object.entries(groups).map(([th, list]) => `<div class="card flat"><h3>${THEMES[th]}</h3>${list.map((c) => `<div class="notion"><div><b>${c.label}</b>${c.again ? ' <span class="small muted">· reprise cette année</span>' : ""}</div><div class="ex">\\(${c.ex}\\)</div>
     <div class="tri" data-id="${c.id}">${["vu", "encours", "nonvu"].map((s) => `<button aria-pressed="${st[c.id] === s}" data-v="${s}">${label[s]}</button>`).join("")}</div></div>`).join("")}</div>`).join("")}
   <button class="btn-primary btn-big" id="next">${editing ? "Enregistrer" : "Continuer"}</button>${editing ? '<button class="btn-ghost" id="back">Annuler</button>' : ""}`);
   app.querySelectorAll(".tri").forEach((tri) => tri.querySelectorAll("button").forEach((b) => (b.onclick = () => {

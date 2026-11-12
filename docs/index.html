@@ -236,6 +236,7 @@ window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "glo
 // Catalogue des notions (recalibré le 12.11 sur les référentiels : PER / CO, programme du Collège de Genève 2021,
 // PEE de la maturité professionnelle ; correspondance notion → compétences dans tools/referentiels.py).
 // CH : [année] (9-11 = CO, 12-13 = 1re-2e du Collège). Pas de mois : l'ordre des chapitres varie d'une école à l'autre.
+// again : années suivantes où le référentiel reprend la notion (elle reste proposée dans « Mes notions » ces années-là).
 // MP : [année, semestre du PEE] ; absent = comme au CO (notion antérieure) ; null = hors programme MP.
 // FR : conservé pour plus tard (France masquée pendant la bêta genevoise).
 const THEMES = {
@@ -246,45 +247,45 @@ const THEMES = {
 };
 
 const NOTIONS = [
-  { id: "decim", theme: "no", label: "Nombres décimaux", ex: "3{,}47 \\approx 3{,}5", CH: [9], FR: null },
-  { id: "prio", theme: "no", label: "Priorités des opérations", ex: "3 + 4 \\cdot 2 = 11", CH: [9], FR: [6, 1] },
-  { id: "rel", theme: "no", label: "Nombres relatifs", ex: "(-3) - 5 \\cdot (-2) = 7", CH: [9], MP: [12, "S1"], FR: [7, 2] },
-  { id: "arith", theme: "no", label: "Diviseurs, PGDC et PPMC", ex: "\\text{PGDC}(24 ; 36) = 12", CH: [9], MP: [12, "S1"], FR: null },
-  { id: "fracadd", theme: "no", label: "Fractions : simplifier, additionner", ex: "\\frac{2}{3} + \\frac{1}{4} = \\frac{11}{12}", CH: [9], MP: [12, "S1"], FR: [7, 4] },
-  { id: "diagr", theme: "no", label: "Diagrammes et moyennes", ex: "\\bar{x} = \\frac{\\text{somme}}{\\text{effectif}}", CH: [9], FR: null },
-  { id: "unites", theme: "gm", label: "Unités de mesure", ex: "1\\ \\text{dm}^3 = 1\\ \\text{L}", CH: [9], FR: null },
-  { id: "aires", theme: "gm", label: "Périmètres et aires", ex: "\\text{triangle : } \\frac{b \\cdot h}{2}", CH: [9], FR: [6, 5] },
-  { id: "vol", theme: "gm", label: "Volumes : pavé, prisme, cylindre", ex: "V = A_{\\text{base}} \\cdot h", CH: [9], FR: [8, 8] },
-  { id: "prop", theme: "fa", label: "Proportionnalité, règle de trois", ex: "3 \\text{ kg} \\to 7{,}50 \\text{ CHF}, \\; 5 \\text{ kg} \\to ?", CH: [9], FR: [6, 3] },
-  { id: "valnum", theme: "fa", label: "Expressions littérales", ex: "3x^2 \\text{ pour } x = -2 \\text{ vaut } 12", CH: [9], FR: [7, 5] },
+  { id: "decim", theme: "no", label: "Nombres décimaux", ex: "3{,}47 \\approx 3{,}5", CH: [9], again: [10], FR: null },
+  { id: "prio", theme: "no", label: "Priorités des opérations", ex: "3 + 4 \\cdot 2 = 11", CH: [9], again: [10,11], FR: [6, 1] },
+  { id: "rel", theme: "no", label: "Nombres relatifs", ex: "(-3) - 5 \\cdot (-2) = 7", CH: [9], again: [10,11], MP: [12, "S1"], FR: [7, 2] },
+  { id: "arith", theme: "no", label: "Diviseurs, PGDC et PPMC", ex: "\\text{PGDC}(24 ; 36) = 12", CH: [9], again: [10], MP: [12, "S1"], FR: null },
+  { id: "fracadd", theme: "no", label: "Fractions : simplifier, additionner", ex: "\\frac{2}{3} + \\frac{1}{4} = \\frac{11}{12}", CH: [9], again: [10,11], MP: [12, "S1"], FR: [7, 4] },
+  { id: "diagr", theme: "no", label: "Diagrammes et moyennes", ex: "\\bar{x} = \\frac{\\text{somme}}{\\text{effectif}}", CH: [9], again: [10], FR: null },
+  { id: "unites", theme: "gm", label: "Unités de mesure", ex: "1\\ \\text{dm}^3 = 1\\ \\text{L}", CH: [9], again: [10], FR: null },
+  { id: "aires", theme: "gm", label: "Périmètres et aires", ex: "\\text{triangle : } \\frac{b \\cdot h}{2}", CH: [9], again: [10], FR: [6, 5] },
+  { id: "vol", theme: "gm", label: "Volumes : pavé, prisme, cylindre", ex: "V = A_{\\text{base}} \\cdot h", CH: [9], again: [10,11], FR: [8, 8] },
+  { id: "prop", theme: "fa", label: "Proportionnalité, règle de trois", ex: "3 \\text{ kg} \\to 7{,}50 \\text{ CHF}, \\; 5 \\text{ kg} \\to ?", CH: [9], again: [10], FR: [6, 3] },
+  { id: "valnum", theme: "fa", label: "Expressions littérales", ex: "3x^2 \\text{ pour } x = -2 \\text{ vaut } 12", CH: [9], again: [10,11], FR: [7, 5] },
   { id: "angtri", theme: "es", label: "Angles des triangles et quadrilatères", ex: "\\alpha + \\beta + \\gamma = 180°", CH: [9], FR: null },
-  { id: "fracmul", theme: "no", label: "Fractions : multiplier, diviser", ex: "\\frac{2}{3} \\cdot \\frac{9}{4} = \\frac{3}{2}", CH: [10], MP: [12, "S1"], FR: [8, 2] },
+  { id: "fracmul", theme: "no", label: "Fractions : multiplier, diviser", ex: "\\frac{2}{3} \\cdot \\frac{9}{4} = \\frac{3}{2}", CH: [10], again: [11], MP: [12, "S1"], FR: [8, 2] },
   { id: "pct", theme: "no", label: "Pourcentages", ex: "15\\,\\% \\text{ de } 80 = 12", CH: [10], FR: [6, 6] },
-  { id: "puiss", theme: "no", label: "Puissances", ex: "2^3 \\cdot 2^4 = 2^7", CH: [10], MP: [12, "S1"], FR: [8, 3] },
-  { id: "sci", theme: "no", label: "Notation scientifique", ex: "0{,}0042 = 4{,}2 \\cdot 10^{-3}", CH: [10], FR: [8, 4] },
-  { id: "rac", theme: "no", label: "Racines carrées", ex: "\\sqrt{72} = 6\\sqrt{2}", CH: [10], MP: [12, "S1"], FR: [9, 2] },
+  { id: "puiss", theme: "no", label: "Puissances", ex: "2^3 \\cdot 2^4 = 2^7", CH: [10], again: [11], MP: [12, "S1"], FR: [8, 3] },
+  { id: "sci", theme: "no", label: "Notation scientifique", ex: "0{,}0042 = 4{,}2 \\cdot 10^{-3}", CH: [10], again: [11], FR: [8, 4] },
+  { id: "rac", theme: "no", label: "Racines carrées", ex: "\\sqrt{72} = 6\\sqrt{2}", CH: [10], again: [11], MP: [12, "S1"], FR: [9, 2] },
   { id: "disque", theme: "gm", label: "Cercle et disque", ex: "A = \\pi r^2", CH: [10], FR: null },
-  { id: "vitesse", theme: "gm", label: "Vitesse, distance, durée", ex: "150 \\text{ km en } 2 \\text{ h} \\to 75 \\text{ km/h}", CH: [10], FR: [8, 7] },
-  { id: "pyth", theme: "gm", label: "Théorème de Pythagore", ex: "a^2 + b^2 = c^2", CH: [10], MP: [12, "S2"], FR: [8, 3] },
-  { id: "reduire", theme: "fa", label: "Réduire une expression", ex: "3x + 5 - x + 2 = 2x + 7", CH: [10], MP: [12, "S1"], FR: [7, 6] },
-  { id: "distrib", theme: "fa", label: "Développer", ex: "(x + 2)(x - 3) = x^2 - x - 6", CH: [10], MP: [12, "S1"], FR: [8, 5] },
-  { id: "eq1", theme: "fa", label: "Équations du 1er degré", ex: "3x - 5 = 7 \\iff x = 4", CH: [10], MP: [12, "S1"], FR: [8, 6] },
-  { id: "probeq", theme: "fa", label: "Mettre un problème en équation", ex: "n + (n+1) + (n+2) = 48", CH: [10], MP: [12, "S1"], FR: null },
+  { id: "vitesse", theme: "gm", label: "Vitesse, distance, durée", ex: "150 \\text{ km en } 2 \\text{ h} \\to 75 \\text{ km/h}", CH: [10], again: [11], FR: [8, 7] },
+  { id: "pyth", theme: "gm", label: "Théorème de Pythagore", ex: "a^2 + b^2 = c^2", CH: [10], again: [11], MP: [12, "S2"], FR: [8, 3] },
+  { id: "reduire", theme: "fa", label: "Réduire une expression", ex: "3x + 5 - x + 2 = 2x + 7", CH: [10], again: [11], MP: [12, "S1"], FR: [7, 6] },
+  { id: "distrib", theme: "fa", label: "Développer", ex: "(x + 2)(x - 3) = x^2 - x - 6", CH: [10], again: [11], MP: [12, "S1"], FR: [8, 5] },
+  { id: "eq1", theme: "fa", label: "Équations du 1er degré", ex: "3x - 5 = 7 \\iff x = 4", CH: [10], again: [11,12], MP: [12, "S1"], FR: [8, 6] },
+  { id: "probeq", theme: "fa", label: "Mettre un problème en équation", ex: "n + (n+1) + (n+2) = 48", CH: [10], again: [11], MP: [12, "S1"], FR: null },
   { id: "echelle", theme: "fa", label: "Échelles et pentes", ex: "1 : 200 : \\; 3 \\text{ cm} \\to 6 \\text{ m}", CH: [10], FR: [9, 6] },
-  { id: "affine", theme: "fa", label: "Fonctions affines", ex: "f(x) = ax + b", CH: [10], MP: [13, "S1"], FR: [9, 7] },
+  { id: "affine", theme: "fa", label: "Fonctions affines", ex: "f(x) = ax + b", CH: [10], again: [11,12], MP: [13, "S1"], FR: [9, 7] },
   { id: "polyreg", theme: "es", label: "Polygones réguliers", ex: "\\text{angle au centre} = \\frac{360°}{n}", CH: [10], FR: null },
   { id: "proba", theme: "no", label: "Probabilités", ex: "P = \\frac{\\text{cas favorables}}{\\text{cas possibles}}", CH: [11], FR: null },
   { id: "volcone", theme: "gm", label: "Volumes : pyramide, cône, boule", ex: "V = \\frac{1}{3} A_{\\text{base}} \\cdot h", CH: [11], FR: null },
   { id: "gquot", theme: "gm", label: "Grandeurs quotients (vitesse, masse volumique, débit)", ex: "\\rho = \\frac{m}{V}", CH: [11], FR: null },
   { id: "thales", theme: "gm", label: "Théorème de Thalès", ex: "\\frac{AD}{AB} = \\frac{AE}{AC} = \\frac{DE}{BC}", CH: [11], MP: [12, "S2"], FR: [9, 2] },
-  { id: "idrem", theme: "fa", label: "Identités remarquables", ex: "(x + 3)^2 = x^2 + 6x + 9", CH: [11], MP: [12, "S1"], FR: [9, 3] },
-  { id: "factor", theme: "fa", label: "Factoriser", ex: "x^2 - 9 = (x - 3)(x + 3)", CH: [11], MP: [12, "S1"], FR: [9, 4] },
+  { id: "idrem", theme: "fa", label: "Identités remarquables", ex: "(x + 3)^2 = x^2 + 6x + 9", CH: [11], again: [12], MP: [12, "S1"], FR: [9, 3] },
+  { id: "factor", theme: "fa", label: "Factoriser", ex: "x^2 - 9 = (x - 3)(x + 3)", CH: [11], again: [12], MP: [12, "S1"], FR: [9, 4] },
   { id: "formule", theme: "fa", label: "Transformer une formule", ex: "v = \\frac{d}{t} \\iff t = \\frac{d}{v}", CH: [11], MP: [12, "S1"], FR: null },
   { id: "eq2", theme: "fa", label: "Équations produit nul", ex: "(x - 2)(x + 5) = 0", CH: [11], MP: [12, "S1"], FR: [9, 5] },
-  { id: "eq2disc", theme: "fa", label: "Équations du 2e degré (formule)", ex: "x = \\frac{-b \\pm \\sqrt{\\Delta}}{2a}", CH: [11], MP: [12, "S1"], FR: [11, 2] },
-  { id: "sys2", theme: "fa", label: "Systèmes de deux équations", ex: "\\begin{cases} x + y = 7 \\\\ x - y = 1 \\end{cases}", CH: [11], MP: [12, "S2"], FR: [10, 4] },
-  { id: "angles", theme: "es", label: "Angles : parallèles, cercle", ex: "\\widehat{AOB} = 2\\,\\widehat{ACB}", CH: [11], MP: [12, "S2"], FR: null },
-  { id: "simil", theme: "es", label: "Homothéties et similitudes", ex: "\\text{aires} \\times k^2", CH: [11], FR: null },
+  { id: "eq2disc", theme: "fa", label: "Équations du 2e degré (formule)", ex: "x = \\frac{-b \\pm \\sqrt{\\Delta}}{2a}", CH: [11], again: [12], MP: [12, "S1"], FR: [11, 2] },
+  { id: "sys2", theme: "fa", label: "Systèmes de deux équations", ex: "\\begin{cases} x + y = 7 \\\\ x - y = 1 \\end{cases}", CH: [11], again: [12], MP: [12, "S2"], FR: [10, 4] },
+  { id: "angles", theme: "es", label: "Angles : parallèles, cercle", ex: "\\widehat{AOB} = 2\\,\\widehat{ACB}", CH: [11], again: [12], MP: [12, "S2"], FR: null },
+  { id: "simil", theme: "es", label: "Homothéties et similitudes", ex: "\\text{aires} \\times k^2", CH: [11], again: [12], FR: null },
   { id: "polyop", theme: "fa", label: "Polynômes : développer et réduire", ex: "(2x - 1)^2 - (x + 3)(x - 3)", CH: [12], MP: [12, "S1"], FR: null },
   { id: "factor2", theme: "fa", label: "Factoriser au maximum", ex: "x^3 + 2x^2 - 9x - 18", CH: [12], MP: [12, "S1"], FR: null },
   { id: "eq3", theme: "fa", label: "Équations de degré 3 par factorisation", ex: "x^3 - 4x = 0", CH: [12], MP: null, FR: [10, 3] },
@@ -2833,7 +2834,9 @@ const Engine = {
       // Année en cours : l'élève dit ce qu'il a vu (pas de calendrier commun). MP : semestre du PEE.
       let status = "vu";
       if (g === profile.grade) status = m === "S1" ? (mo <= 4 ? "encours" : "vu") : m === "S2" ? (mo <= 4 ? "nonvu" : "encours") : typeof m === "number" ? (mo > m ? "vu" : mo === m ? "encours" : "nonvu") : "nonvu";
-      return { ...n, defaultStatus: status, current: g === profile.grade };
+      // Notion reprise cette année (référentiel) : elle est proposée à l'élève, déjà cochée « vu ».
+      const again = profile.track !== "mp" && (n.again || []).includes(profile.grade);
+      return { ...n, defaultStatus: status, current: g === profile.grade || again, again };
     });
   },
 
@@ -2941,7 +2944,8 @@ const Engine = {
   // Notion « actuelle » : année en cours ou précédente. Les plus anciennes ne reviennent qu'en remédiation.
   isRecent(state, id) {
     const pl = placeOf(NOTIONS.find((n) => n.id === id), state.profile);
-    return pl && pl[0] >= state.profile.grade - 1;
+    const n = NOTIONS.find((x) => x.id === id);
+    return pl && (pl[0] >= state.profile.grade - 1 || (state.profile.track !== "mp" && (n.again || []).includes(state.profile.grade)));
   },
   // Toutes les notions vues sont candidates ; les anciennes sont filtrées par niveau dans oldLevels.
   pool(state, kind) {
@@ -3191,9 +3195,9 @@ function screenNotions(editing = false) {
   Object.keys(THEMES).forEach((th) => { const l = cat.filter((c) => c.current && c.theme === th); if (l.length) groups[th] = l; });
   const label = { vu: "déjà vu", encours: "en cours", nonvu: "pas encore" };
   h(`${brand}${editing ? "" : '<div class="eyebrow">Étape 2 sur 3</div>'}<h2>${editing ? "Mes notions" : "Qu'as-tu déjà étudié ?"}</h2>
-  <p class="muted">${editing ? "Tu as vu une nouvelle notion en classe ? Mets-la à jour : elle entrera dans tes questions." : "Seulement les notions de cette année : indique celles que tu as déjà vues en classe. Tu pourras mettre à jour quand tu veux."}</p>
+  <p class="muted">${editing ? "Tu as vu une nouvelle notion en classe ? Mets-la à jour : elle entrera dans tes questions." : "Les notions travaillées cette année : indique celles que tu as déjà vues en classe. Celles des années précédentes sont déjà cochées. Tu pourras mettre à jour quand tu veux."}</p>
   ${Object.keys(groups).length ? "" : '<div class="card flat"><p class="muted">Rien à cocher : tout ce qui te concerne vient des années précédentes.</p></div>'}
-  ${Object.entries(groups).map(([th, list]) => `<div class="card flat"><h3>${THEMES[th]}</h3>${list.map((c) => `<div class="notion"><div><b>${c.label}</b></div><div class="ex">\\(${c.ex}\\)</div>
+  ${Object.entries(groups).map(([th, list]) => `<div class="card flat"><h3>${THEMES[th]}</h3>${list.map((c) => `<div class="notion"><div><b>${c.label}</b>${c.again ? ' <span class="small muted">· reprise cette année</span>' : ""}</div><div class="ex">\\(${c.ex}\\)</div>
     <div class="tri" data-id="${c.id}">${["vu", "encours", "nonvu"].map((s) => `<button aria-pressed="${st[c.id] === s}" data-v="${s}">${label[s]}</button>`).join("")}</div></div>`).join("")}</div>`).join("")}
   <button class="btn-primary btn-big" id="next">${editing ? "Enregistrer" : "Continuer"}</button>${editing ? '<button class="btn-ghost" id="back">Annuler</button>' : ""}`);
   app.querySelectorAll(".tri").forEach((tri) => tri.querySelectorAll("button").forEach((b) => (b.onclick = () => {

@@ -107,7 +107,9 @@ const Engine = {
       // Année en cours : l'élève dit ce qu'il a vu (pas de calendrier commun). MP : semestre du PEE.
       let status = "vu";
       if (g === profile.grade) status = m === "S1" ? (mo <= 4 ? "encours" : "vu") : m === "S2" ? (mo <= 4 ? "nonvu" : "encours") : typeof m === "number" ? (mo > m ? "vu" : mo === m ? "encours" : "nonvu") : "nonvu";
-      return { ...n, defaultStatus: status, current: g === profile.grade };
+      // Notion reprise cette année (référentiel) : elle est proposée à l'élève, déjà cochée « vu ».
+      const again = profile.track !== "mp" && (n.again || []).includes(profile.grade);
+      return { ...n, defaultStatus: status, current: g === profile.grade || again, again };
     });
   },
 
@@ -215,7 +217,8 @@ const Engine = {
   // Notion « actuelle » : année en cours ou précédente. Les plus anciennes ne reviennent qu'en remédiation.
   isRecent(state, id) {
     const pl = placeOf(NOTIONS.find((n) => n.id === id), state.profile);
-    return pl && pl[0] >= state.profile.grade - 1;
+    const n = NOTIONS.find((x) => x.id === id);
+    return pl && (pl[0] >= state.profile.grade - 1 || (state.profile.track !== "mp" && (n.again || []).includes(state.profile.grade)));
   },
   // Toutes les notions vues sont candidates ; les anciennes sont filtrées par niveau dans oldLevels.
   pool(state, kind) {
