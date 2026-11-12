@@ -1,0 +1,29 @@
+<!doctype html><meta charset="utf-8"><div id="app"></div><pre id="o"></pre>
+<script>window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}</script>
+<script src="../src/curriculum.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/lessons.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script>
+const out = [], $ = (s) => document.querySelector(s), log = (m) => out.push(m);
+window.onerror = (m, s, l) => out.push("ERREUR " + m + " ligne " + l);
+const click = (sel) => { const e = typeof sel === "string" ? $(sel) : sel; if (!e) { out.push("introuvable " + sel); return false; } e.click(); return true; };
+try {
+  click("#go"); log("niveau : " + [...document.querySelectorAll("#grade button")].map((b) => b.textContent).join(", ") + " | choix école : " + !!$("#sys"));
+  click('#grade button[data-v="12"]'); click('#track button[data-v="college"]'); click("#next");
+  log("notions 1re : " + [...document.querySelectorAll(".card h3")].map((h) => h.textContent + " (" + h.parentNode.querySelectorAll(".notion").length + ")").join(" · "));
+  log("pré-cochées vu : " + document.querySelectorAll('.tri button[data-v="vu"][aria-pressed="true"]').length);
+  document.querySelectorAll('.tri button[data-v="vu"]').forEach((b, i) => { if (i < 6) b.click(); });
+  click("#next");
+  log("après notions : " + ($(".eyebrow") ? $(".eyebrow").textContent : "?") + " | " + ($(".qtext") ? $(".qtext").textContent.slice(0, 80) : document.querySelector("h2").textContent));
+  // positionnement : « je ne sais pas » partout
+  for (let k = 0; k < 12 && $("#idk"); k++) { click("#idk"); const nx = $("#nx"); if (nx) nx.click(); }
+  log("écran : " + (document.querySelector("h2") ? document.querySelector("h2").textContent : "?"));
+  const b = [...document.querySelectorAll("button")].find((x) => /Commencer|accueil|C'est parti|Continuer/.test(x.textContent)); if (b) b.click();
+  log("accueil : " + [...document.querySelectorAll("h2, h3")].map((h) => h.textContent).join(" | ").slice(0, 300));
+  log("boutons : " + [...document.querySelectorAll("button")].map((x) => (x.id || "-") + ":" + x.textContent.slice(0, 18)).join(" / "));
+  click("#go");
+  click("#go");
+  log("après go : " + [...document.querySelectorAll("h2, .eyebrow")].map((h) => h.textContent).join(" | ").slice(0, 200));
+  { const c = [...document.querySelectorAll("button")].find((x) => /compris|question|Passer/i.test(x.textContent)); if (c && !document.querySelector(".qtext")) c.click(); }
+  for (let k = 0; k < 3; k++) { log("question : " + ($(".eyebrow") ? $(".eyebrow").textContent : "") + " — " + ($(".qtext") ? $(".qtext").textContent.slice(0, 90) : "(pas de question) " + (document.querySelector("h2") || {}).textContent) + " | trop facile : " + !!$("#easy")); if ($("#idk")) { click("#idk"); if ($("#nx")) click("#nx"); } }
+} catch (e) { out.push("EXCEPTION " + e.message + " " + (e.stack || "").split("\n")[1]); }
+document.getElementById("o").textContent = out.join("\n");
+</script>

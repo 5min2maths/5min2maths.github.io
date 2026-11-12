@@ -4,6 +4,7 @@
 <script src="../src/expr.js"></script>
 <script src="../src/figures.js"></script>
 <script src="../src/generators.js"></script>
+<script src="../src/gen2.js"></script>
 <script src="../src/lessons.js"></script>
 <script src="../src/engine.js"></script>
 <script>
@@ -32,6 +33,8 @@ for (const [inp, spec, want] of cases) {
 
 // 2. Générateurs : réponse canonique acceptée, figure valide, pas de NaN
 function canonical(spec) {
+  if (spec.canon) return spec.canon;
+  if (spec.kind === "solset") return SolSet.show(spec.ivs, false);
   if (spec.kind === "value") return String(spec.value);
   if (spec.kind === "set") return spec.values.length ? spec.values.join(" ; ") : "aucune";
   if (spec.kind === "pair") return spec.values.join(" ; ");
@@ -47,6 +50,7 @@ let n = 0;
 for (const id of Object.keys(GEN)) for (const d of [1, 2, 3]) for (let i = 0; i < 200; i++) {
   let q;
   try { q = GEN[id](d); } catch (e) { fail(id + " d" + d + " lève " + e.message); continue; }
+  if (q.canon && q.spec) q.spec.canon = q.canon;
   n++;
   if (!q.q || /NaN|undefined|Infinity/.test(q.q + q.sol)) { fail(id + " d" + d + " texte : " + q.q); continue; }
   if (q.fig && !/^<svg/.test(q.fig)) fail(id + " figure invalide");
@@ -108,7 +112,7 @@ for (const n of NOTIONS) {
 
 // 2 quinquies. Séances équilibrées et adaptées
 {
-  const mk = (p, elo) => { const st = Engine.newState(p); Engine.initNotions(st, Object.fromEntries(Engine.catalog(p, new Date("2027-03-01")).map((c) => [c.id, c.defaultStatus]))); st.elo.r = elo; return st; };
+  const mk = (p, elo) => { const st = Engine.newState(p); Engine.initNotions(st, Object.fromEntries(Engine.catalog(p, new Date("2027-03-01")).map((c) => [c.id, c.current ? "vu" : c.defaultStatus]))); st.elo.r = elo; return st; };
   const strong = mk({ system: "CH", grade: 13, track: "college", minutes: 5 }, 1750);
   const plan = Engine.planSession(strong, "mixte"), kinds = plan.map((e) => e.split("|")[2]);
   if (plan.join() && kinds.join() !== "drill,app,defi") fail("mixte : " + kinds.join(","));
@@ -149,10 +153,10 @@ for (const n of NOTIONS) {
 
 // 3. Moteur : parcours complet
 const prof = { system: "CH", grade: 11, minutes: 5 };
-for (const p of [{ system: "CH", grade: 12, track: "college" }, { system: "CH", grade: 12, track: "mp" }, { system: "CH", grade: 13, track: "college" }, { system: "CH", grade: 13, track: "mp" }, { system: "FR", grade: 11 }]) log.push(p.system + p.grade + (p.track || "") + " : " + Engine.catalog(p, new Date("2027-03-01")).length + " notions — " + Engine.catalog(p, new Date("2027-03-01")).filter((c) => c.current).map((c) => c.id).join(" "));
+for (const p of [{ system: "CH", grade: 12, track: "college" }, { system: "CH", grade: 12, track: "mp" }, { system: "CH", grade: 13, track: "college" }, { system: "CH", grade: 13, track: "mp" }]) log.push(p.system + p.grade + (p.track || "") + " : " + Engine.catalog(p, new Date("2027-03-01")).length + " notions — " + Engine.catalog(p, new Date("2027-03-01")).filter((c) => c.current).map((c) => c.id).join(" "));
 const st = Engine.newState(prof);
 const cat = Engine.catalog(prof, new Date("2026-11-11"));
-Engine.initNotions(st, Object.fromEntries(cat.map((c) => [c.id, c.defaultStatus])));
+Engine.initNotions(st, Object.fromEntries(cat.map((c) => [c.id, c.current ? "vu" : c.defaultStatus])));
 const plan = Engine.placementPlan(st);
 if (plan.length !== 5) fail("positionnement : " + plan.length + " questions");
 plan.forEach((id, i) => Engine.placementResult(st, id, i % 3 === 0 ? false : i % 3 === 1 ? true : null));
@@ -163,11 +167,8 @@ Engine.finishDay(st, sess.length, sess.length);
 if (st.streak.count !== 1) fail("série " + st.streak.count);
 const r0 = st.elo.r; Engine.updateElo(st, "factor", 3, 1); if (st.elo.r <= r0) fail("Mathélo ne monte pas");
 const r1 = st.elo.r; Engine.updateElo(st, "prio", 1, 0); if (st.elo.r >= r1) fail("Mathélo ne descend pas");
-log.push("Mathélo : " + st.elo.r + " — " + eloLabel(prof, st.elo.r) + " | FR 4e départ " + Engine.newState({ system: "FR", grade: 8, minutes: 5 }).elo.r);
-const fr = { system: "FR", grade: 8, minutes: 2 };
-const sf = Engine.newState(fr);
-Engine.initNotions(sf, Object.fromEntries(Engine.catalog(fr, new Date("2027-03-01")).map((c) => [c.id, c.defaultStatus])));
-if (!FORMATS[Engine.todayFormat(sf)]) fail("FR format du jour");
+log.push("Mathélo : " + st.elo.r + " — " + eloLabel(prof, st.elo.r));
+
 
 document.getElementById("out").textContent = (fails ? fails + " échec(s)\n" : "OK\n") + log.join("\n") + "\n" + n + " questions générées ; positionnement : " + plan.join(", ") + "\nséance : " + sess.join(", ") + "\nnotions CH 11e en novembre : " + cat.map((c) => c.id + "=" + c.defaultStatus).join(" ");
 </script>

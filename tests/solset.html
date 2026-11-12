@@ -1,0 +1,10 @@
+<meta charset="utf-8"><script src="../src/expr.js"></script><pre id="o"></pre><script>
+const W=[[-Infinity,false,-2,true],[3,true,Infinity,false]];
+const cases=["x <= -2 ou x >= 3","]-∞ ; -2] ∪ [3 ; +∞[","x<-2 ou x>=3","x ≤ -2 ou x ≥ 3","-2 <= x <= 3","(-inf,-2] U [3,inf)", "x >= 3 ou x <= -2"];
+let o=cases.map(c=>c+" → "+JSON.stringify(checkAnswer({kind:"solset",ivs:W},c))).join("\n");
+const D=[[-Infinity,false,2,false],[2,false,Infinity,false]];
+o+="\n"+["R\\{2}","ℝ \\ {2}","x != 2","x ≠ 2","x > 2","R"].map(c=>c+" → "+JSON.stringify(checkAnswer({kind:"solset",ivs:D},c))).join("\n");
+o+="\n"+["-1 < x < 2/3","]-1 ; 2/3[","]-1;0,666666667["].map(c=>c+" → "+JSON.stringify(checkAnswer({kind:"solset",ivs:[[-1,false,2/3,false]]},c))).join("\n");
+o+="\n"+SolSet.show(W,false)+" | "+SolSet.show(D,true)+" | "+SolSet.show([[-1,false,2/3,false]],false);
+o+="\n"+JSON.stringify(checkAnswer({kind:"pair",values:[1,2,3]},"1;2;3"));
+document.getElementById("o").textContent=o;</script>

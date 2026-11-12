@@ -4,6 +4,8 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 
 const app = document.getElementById("app");
 let state = Store.load();
+if (state && state.profile && !SYSTEMS[state.profile.system]) state = null; // système masqué (France) : on repart de zéro
+if (state && state.profile && state.notions && Object.keys(state.notions).length && Engine.migrate(state)) Store.save(state);
 const save = () => Store.save(state);
 const h = (html) => { app.innerHTML = html; typeset(app); window.scrollTo(0, 0); };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -39,7 +41,7 @@ function screenLevel() {
   if (!sys.grades.some(([g]) => g === draft.grade)) draft.grade = sys.grades[sys.grades.length - 2][0];
   const sec2 = draft.system === "CH" && draft.grade >= 12;
   h(`${brand}<div class="eyebrow">Étape 1 sur 3</div><h2>Où en es-tu ?</h2>
-  <div class="card flat stack"><h3>Ton école</h3><div class="seg" id="sys">${Object.entries(SYSTEMS).map(([k, v]) => `<button aria-pressed="${k === draft.system}" data-v="${k}">${v.label}</button>`).join("")}</div>
+  <div class="card flat stack">${Object.keys(SYSTEMS).length > 1 ? `<h3>Ton école</h3><div class="seg" id="sys">${Object.entries(SYSTEMS).map(([k, v]) => `<button aria-pressed="${k === draft.system}" data-v="${k}">${v.label}</button>`).join("")}</div>` : ""}
   <h3>Ta classe cette année</h3><div class="seg" id="grade">${sys.grades.map(([g, n]) => `<button aria-pressed="${g === draft.grade}" data-v="${g}">${n}</button>`).join("")}</div>
   ${sec2 ? `<h3>Ta voie</h3><div class="seg" id="track"><button aria-pressed="${draft.track === "college"}" data-v="college">Collège (maturité gymnasiale)</button><button aria-pressed="${draft.track === "mp"}" data-v="mp">Maturité professionnelle</button></div>` : ""}</div>
   <p class="small muted">Chaque jour, l'app te propose un programme différent (un défi, une série d'automatismes, des applications…), équilibré sur la semaine. Pas de chrono : l'important, c'est de venir chaque jour.</p>
@@ -55,10 +57,10 @@ function screenNotions(editing = false) {
   const st = editing ? Object.fromEntries(Object.entries(state.notions).map(([k, v]) => [k, v.status])) : (draft.statuses ||= Object.fromEntries(cat.map((c) => [c.id, c.defaultStatus])));
   // On ne demande que les notions de l'année : celles des années précédentes sont vues, sans poser la question.
   const groups = {};
-  cat.filter((c) => c.current).forEach((c) => (groups[c.theme] = groups[c.theme] || []).push(c));
+  Object.keys(THEMES).forEach((th) => { const l = cat.filter((c) => c.current && c.theme === th); if (l.length) groups[th] = l; });
   const label = { vu: "déjà vu", encours: "en cours", nonvu: "pas encore" };
   h(`${brand}${editing ? "" : '<div class="eyebrow">Étape 2 sur 3</div>'}<h2>${editing ? "Mes notions" : "Qu'as-tu déjà étudié ?"}</h2>
-  <p class="muted">${editing ? "Tu as vu une nouvelle notion en classe ? Mets-la à jour : elle entrera dans tes questions." : "Seulement les notions de cette année. J'ai coché selon la date ; corrige si ton cours avance autrement."}</p>
+  <p class="muted">${editing ? "Tu as vu une nouvelle notion en classe ? Mets-la à jour : elle entrera dans tes questions." : "Seulement les notions de cette année : indique celles que tu as déjà vues en classe. Tu pourras mettre à jour quand tu veux."}</p>
   ${Object.keys(groups).length ? "" : '<div class="card flat"><p class="muted">Rien à cocher : tout ce qui te concerne vient des années précédentes.</p></div>'}
   ${Object.entries(groups).map(([th, list]) => `<div class="card flat"><h3>${THEMES[th]}</h3>${list.map((c) => `<div class="notion"><div><b>${c.label}</b></div><div class="ex">\\(${c.ex}\\)</div>
     <div class="tri" data-id="${c.id}">${["vu", "encours", "nonvu"].map((s) => `<button aria-pressed="${st[c.id] === s}" data-v="${s}">${label[s]}</button>`).join("")}</div></div>`).join("")}</div>`).join("")}
@@ -167,7 +169,7 @@ function screenPrep() {
   const chosen = new Set(state.prep && Engine.prepActive(state) ? state.prep.ids : []);
   // On ne demande que les notions de l'année : celles des années précédentes sont vues, sans poser la question.
   const groups = {};
-  cat.filter((c) => c.current).forEach((c) => (groups[c.theme] = groups[c.theme] || []).push(c));
+  Object.keys(THEMES).forEach((th) => { const l = cat.filter((c) => c.current && c.theme === th); if (l.length) groups[th] = l; });
   const date = state.prep && Engine.prepActive(state) ? state.prep.date : addDays(day(), 7);
   h(`${brand}<h2>Je prépare <span class="mark">un test</span></h2>
   <p class="muted">Choisis les notions de ton test et sa date. Jusqu'à ce jour-là, tes séances porteront surtout sur elles, avec un problème pour finir.</p>

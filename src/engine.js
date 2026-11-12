@@ -45,6 +45,7 @@ const HINTS = {
   trigeq: "Sur [0° ; 360°[ : sin x = s donne x et 180° − x ; cos x = c donne x et 360° − x.",
   stats: "Moyenne : somme / effectif. Médiane : valeur du milieu de la série triée. Écart-type : √(moyenne des carrés des écarts).",
 };
+if (typeof HINTS_EXTRA !== "undefined") Object.assign(HINTS, HINTS_EXTRA);
 
 const Store = {
   key: "5m2m.v1",
@@ -74,8 +75,10 @@ const harmos = (system, grade) => (system === "FR" ? grade + 2 : grade);
 // Score d'une question : niveau scolaire de la notion + difficulté.
 function itemRating(profile, id, d) {
   const n = NOTIONS.find((x) => x.id === id);
-  const [g, m] = placeOf(n, profile) || n.CH || n.FR;
-  return 700 + (harmos(profile.system, g) - 8) * 150 + m * 8 + (d - 1) * 130;
+  // Niveau propre à la notion : l'année où elle apparaît au CO / Collège. Reprise plus tard en MP : demi-écart en plus.
+  const pl = placeOf(n, profile) || n.CH || n.MP || n.FR, base = profile.system === "CH" && n.CH ? n.CH[0] : pl[0];
+  const g = base + Math.max(0, pl[0] - base) / 2;
+  return 700 + (harmos(profile.system, g) - 8) * 150 + 40 + (d - 1) * 130;
 }
 // Échelle de référence (sans données partagées) : Mathélo typique en fin d'année par niveau HarmoS.
 const ELO_REF = [[8, 850], [9, 1000], [10, 1150], [11, 1300], [12, 1450], [13, 1600]];
@@ -101,10 +104,23 @@ const Engine = {
     const mo = schoolMonth(date);
     return NOTIONS.filter((n) => { const pl = placeOf(n, profile); return pl && pl[0] <= profile.grade; }).map((n) => {
       const [g, m] = placeOf(n, profile);
+      // Année en cours : l'élève dit ce qu'il a vu (pas de calendrier commun). MP : semestre du PEE.
       let status = "vu";
-      if (g === profile.grade) status = mo > m ? "vu" : mo === m ? "encours" : "nonvu";
+      if (g === profile.grade) status = m === "S1" ? (mo <= 4 ? "encours" : "vu") : m === "S2" ? (mo <= 4 ? "nonvu" : "encours") : typeof m === "number" ? (mo > m ? "vu" : mo === m ? "encours" : "nonvu") : "nonvu";
       return { ...n, defaultStatus: status, current: g === profile.grade };
     });
+  },
+
+  // Catalogue modifié depuis la création du profil : ajoute les notions manquantes (anciennes = vues, année en cours = à cocher).
+  migrate(state) {
+    let changed = false;
+    for (const c of this.catalog(state.profile)) if (!state.notions[c.id]) {
+      const status = c.defaultStatus;
+      state.notions[c.id] = { status, m: status === "vu" ? 0.55 : status === "encours" ? 0.4 : 0, box: status === "vu" ? 1 : 0, due: day(), seen: 0, ok: 0 };
+      changed = true;
+    }
+    for (const id of Object.keys(state.notions)) { const n = NOTIONS.find((x) => x.id === id); if (!n || !placeOf(n, state.profile)) { delete state.notions[id]; changed = true; } }
+    return changed;
   },
 
   initNotions(state, statuses) {

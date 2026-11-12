@@ -87,3 +87,6 @@ const LESSONS = {
   stats: L_("Statistiques", "Résumer une série de données en quelques nombres.", "Moyenne : somme / effectif. Médiane : valeur du milieu de la série triée. Écart-type : racine de la moyenne des carrés des écarts à la moyenne.",
     ["2 ; 4 ; 9 : moyenne 5, médiane 4"], "Trie la série avant de chercher la médiane."),
 };
+
+// Leçons des notions ajoutées le 12.11 (définies dans gen2.js).
+if (typeof LESSONS_EXTRA !== "undefined") for (const [k, v] of Object.entries(LESSONS_EXTRA)) LESSONS[k] = L_(...v);

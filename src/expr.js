@@ -197,16 +197,111 @@ const Expr = (() => {
     if (!isFinite(u) || !isFinite(v)) return false;
     return Math.abs(u - v) <= rel * Math.max(1, Math.abs(v));
   }
-  function equivalent(a, b) {
-    const vs = [...new Set([...vars(a), ...vars(b)])];
-    return SAMPLES.every((s, i) => {
+  // pos : lettres positives (formules de géométrie : racines définies).
+  function equivalent(a, b, pos) {
+    const vs = [...new Set([...vars(a), ...vars(b)])], S = pos ? [0.7, 1.3, 2.2, 3.7, 4.1, 5.9, 0.4] : SAMPLES;
+    let valid = 0;
+    for (let i = 0; i < S.length; i++) {
       const env = {};
-      vs.forEach((v, j) => (env[v] = SAMPLES[(i + j) % SAMPLES.length]));
-      return sameValue(evaluate(a, env), evaluate(b, env), 1e-8);
-    });
+      vs.forEach((v, j) => (env[v] = S[(i + 2 * j) % S.length] + (pos ? j * 0.37 : 0)));
+      const want = evaluate(b, env);
+      if (!isFinite(want)) continue; // point hors domaine de la réponse attendue
+      valid++;
+      if (!sameValue(evaluate(a, env), want, 1e-8)) return false;
+    }
+    return valid >= 2;
   }
 
-  return { parse, evaluate, tex, vars, isProduct, isExpanded, equivalent, sameValue, unpar };
+  // Nombre de nœuds et présence d'une division par une expression littérale.
+  const nodes = (n) => (!n || typeof n !== "object" ? 0 : 1 + nodes(n.a) + nodes(n.b));
+  const hasDiv = (n) => !!n && typeof n === "object" && ((n.t === "div" && vars(n.b).size > 0) || hasDiv(n.a) || hasDiv(n.b));
+  // « Une seule fraction » : un quotient (éventuellement précédé d'un signe), sans autre division littérale.
+  function isOneFrac(n) {
+    n = unpar(n);
+    while (n.t === "neg") n = unpar(n.a);
+    return n.t === "div" && !hasDiv(n.a) && !hasDiv(n.b);
+  }
+  return { parse, evaluate, tex, vars, isProduct, isExpanded, equivalent, sameValue, unpar, nodes, hasDiv, isOneFrac };
+})();
+
+// Ensembles de solutions (inéquations, domaines) : réunion d'intervalles [a, aIncl, b, bIncl].
+const SolSet = (() => {
+  const INF = /^\s*(\+?\s*(∞|inf(ini)?|oo))\s*$/i, NINF = /^\s*-\s*(∞|inf(ini)?|oo)\s*$/i;
+  const num = (s) => {
+    if (INF.test(s)) return Infinity;
+    if (NINF.test(s)) return -Infinity;
+    const t = Expr.parse(s);
+    if (Expr.vars(t).size) throw new Error("Borne illisible : " + s);
+    return Expr.evaluate(t);
+  };
+  const inside = (ivs, x) => ivs.some(([a, ai, b, bi]) => (x > a || (ai && x === a) || (ai && Expr.sameValue(x, a))) && (x < b || (bi && x === b) || (bi && Expr.sameValue(x, b))));
+  // Lecture de la réponse de l'élève → liste d'intervalles (ou exclusions).
+  function parse(input) {
+    let s = String(input).trim().replace(/≤|=</g, "<=").replace(/≥|=>/g, ">=").replace(/≠|=\/=|<>/g, "!=").replace(/−/g, "-").replace(/\s+/g, " ");
+    if (/^(aucune?s?|∅|\{\s*\}|vide|pas de solution|impossible)/i.test(s)) return [];
+    const ALL = "(?:ℝ|R|IR|tous|tout)";
+    if (new RegExp("^" + ALL + "$", "i").test(s)) return [[-Infinity, false, Infinity, false]];
+    let m = s.match(new RegExp("^" + ALL + "\\s*(?:\\\\|\\-|privé de|sauf)\\s*\\{?([^}]*)\\}?$", "i"));
+    if (m) return excl(m[1].split(/;|\s+et\s+/).map((x) => num(x)));
+    const pieces = s.split(/\s*(?:∪|\bU\b|\bou\b|\bor\b)\s*/i);
+    let out = [], ex = [];
+    for (const pc of pieces) {
+      let q = pc.trim();
+      if (!q) continue;
+      if ((m = q.match(/^([\[\]\(])\s*(.+?)\s*;\s*(.+?)\s*([\[\]\)])$/)) || (m = q.match(/^([\[\]\(])\s*([^,;]+?)\s*,\s*([^,;]+?)\s*([\[\]\)])$/))) {
+        out.push([num(m[2]), m[1] === "[", num(m[3]), m[4] === "]"]); continue;
+      }
+      if ((m = q.match(/^(.+?)\s*(<=|<)\s*x\s*(<=|<)\s*(.+)$/i))) { out.push([num(m[1]), m[2] === "<=", num(m[4]), m[3] === "<="]); continue; }
+      if ((m = q.match(/^(.+?)\s*(>=|>)\s*x\s*(>=|>)\s*(.+)$/i))) { out.push([num(m[4]), m[3] === ">=", num(m[1]), m[2] === ">="]); continue; }
+      if ((m = q.match(/^x\s*(<=|>=|<|>|!=|=)\s*(.+)$/i))) { add(out, ex, m[1], num(m[2])); continue; }
+      if ((m = q.match(/^(.+?)\s*(<=|>=|<|>)\s*x$/i))) { add(out, ex, { "<=": ">=", ">=": "<=", "<": ">", ">": "<" }[m[2]], num(m[1])); continue; }
+      throw new Error("Écris par exemple « x <= -2 ou x > 3 », « -1 < x <= 4 » ou « ]-∞ ; 2] ∪ [5 ; +∞[ ».");
+    }
+    if (ex.length) { const e = excl(ex); return out.length ? out.concat(e) : e; }
+    return out;
+  }
+  function add(out, ex, op, v) {
+    if (op === "<") out.push([-Infinity, false, v, false]);
+    else if (op === "<=") out.push([-Infinity, false, v, true]);
+    else if (op === ">") out.push([v, false, Infinity, false]);
+    else if (op === ">=") out.push([v, true, Infinity, false]);
+    else if (op === "=") out.push([v, true, v, true]);
+    else ex.push(v);
+  }
+  function excl(vals) {
+    const v = [...vals].sort((a, b) => a - b), out = [];
+    let lo = -Infinity;
+    v.forEach((x) => { out.push([lo, false, x, false]); lo = x; });
+    out.push([lo, false, Infinity, false]);
+    return out;
+  }
+  // Points de test : bornes des deux ensembles, voisins immédiats, milieux, au-delà.
+  function check(want, got) {
+    const bs = [...new Set(want.concat(got).flatMap(([a, , b]) => [a, b]).filter(isFinite))].sort((a, b) => a - b);
+    const pts = [], edges = new Set(bs);
+    if (!bs.length) pts.push(0, 1e4, -1e4);
+    bs.forEach((b, i) => { pts.push(b, b - 1e-6, b + 1e-6); if (i < bs.length - 1) pts.push((b + bs[i + 1]) / 2); });
+    if (bs.length) pts.push(bs[0] - 1.7, bs[bs.length - 1] + 1.7, -1e5, 1e5);
+    let edgeOnly = true, bad = false;
+    for (const x of pts) if (inside(want, x) !== inside(got, x)) { bad = true; if (!edges.has(x)) edgeOnly = false; }
+    if (!bad) return { status: "correct" };
+    if (edgeOnly) return { status: "close", message: "Les intervalles sont justes : vérifie si les bornes sont comprises ou exclues." };
+    return { status: "wrong" };
+  }
+  // Écriture : fraction simple si possible.
+  const nstr = (v, tex) => {
+    if (v === Infinity) return tex ? "+\\infty" : "+∞";
+    if (v === -Infinity) return tex ? "-\\infty" : "-∞";
+    if (Number.isInteger(v)) return String(v);
+    for (let d = 2; d <= 30; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return tex ? (v < 0 ? "-" : "") + "\\frac{" + Math.abs(Math.round(v * d)) + "}{" + d + "}" : Math.round(v * d) + "/" + d;
+    return tex ? String(+v.toFixed(3)).replace(".", "{,}") : String(v);
+  };
+  function show(ivs, tex = true) {
+    if (!ivs.length) return tex ? "\\varnothing" : "aucune";
+    const sep = tex ? " \\cup " : " ∪ ";
+    return ivs.map(([a, ai, b, bi]) => a === b ? (tex ? "\\{" + nstr(a, tex) + "\\}" : "[" + nstr(a) + " ; " + nstr(a) + "]") : (ai ? "[" : "]") + nstr(a, tex) + (tex ? " \\, ; \\, " : " ; ") + nstr(b, tex) + (bi ? "]" : "[")).join(sep);
+  }
+  return { parse, check, show, inside };
 })();
 
 // Vérifie la réponse de l'élève selon la spécification de la question.
@@ -224,6 +319,11 @@ function checkAnswer(spec, input) {
     if (okVal && okOp) return { status: "correct" };
     if (okVal) return { status: "close", message: "La borne est juste ; vérifie le sens de l'inégalité (et s'il faut retourner le signe)." };
     return { status: "wrong" };
+  }
+  if (spec.kind === "solset") {
+    let got;
+    try { got = SolSet.parse(input); } catch (e) { return { status: "invalid", message: e.message }; }
+    return SolSet.check(spec.ivs, got);
   }
   const none = /aucun|∅|vide|pas de solution|impossible/i.test(String(input));
   if (spec.kind === "set" && (none || spec.values.length === 0)) return { status: none && spec.values.length === 0 ? "correct" : spec.values.length === 0 ? "wrong" : "wrong" };
@@ -255,7 +355,9 @@ function checkAnswer(spec, input) {
   }
   if (spec.kind === "pair") {
     const items = tree.t === "list" ? tree.items : [tree];
-    if (items.length !== 2 || items.some((i) => Expr.vars(i).size)) return { status: "invalid", message: "Donne deux nombres séparés par « ; » (x d'abord, puis y)." };
+    const n = spec.values.length;
+    if (items.length !== n || items.some((i) => Expr.vars(i).size)) return { status: "invalid", message: n === 3 ? "Donne trois nombres séparés par « ; » (x, puis y, puis z)." : "Donne deux nombres séparés par « ; » (x d'abord, puis y)." };
+    if (n === 3) { const g = items.map((i) => Expr.evaluate(i)); if (g.every((v, k) => Expr.sameValue(v, spec.values[k]))) return { status: "correct" }; return g.filter((v, k) => Expr.sameValue(v, spec.values[k])).length >= 1 ? { status: "close", message: "Une partie est juste : vérifie chaque valeur dans les trois équations." } : { status: "wrong" }; }
     const [u, v] = items.map((i) => Expr.evaluate(i));
     if (Expr.sameValue(u, spec.values[0]) && Expr.sameValue(v, spec.values[1])) return { status: "correct" };
     if (Expr.sameValue(u, spec.values[1]) && Expr.sameValue(v, spec.values[0])) return { status: "close", message: "Les deux valeurs sont justes, mais dans le mauvais ordre : x d'abord." };
@@ -263,7 +365,11 @@ function checkAnswer(spec, input) {
   }
   if (spec.kind === "expr") {
     const target = Expr.parse(spec.expr);
-    if (!Expr.equivalent(tree, target)) return { status: "wrong" };
+    if (tree.t === "list" || tree.t === "eq") return { status: "invalid", message: "Donne une seule expression." };
+    if (!Expr.equivalent(tree, target, spec.pos)) return { status: "wrong" };
+    if (spec.form === "nodiv" && Expr.hasDiv(tree)) return { status: "form", message: "C'est égal, mais on peut encore simplifier : il ne doit plus rester de fraction." };
+    if (spec.form === "onefrac" && !Expr.isOneFrac(tree)) return { status: "form", message: "C'est égal, mais écris le résultat comme une seule fraction." };
+    if (spec.maxNodes && Expr.nodes(tree) > spec.maxNodes) return { status: "form", message: "C'est égal, mais la fraction n'est pas simplifiée." };
     if (spec.form === "product" && !Expr.isProduct(tree)) return { status: "form", message: "C'est égal, mais ce n'est pas factorisé : écris un produit." };
     if (spec.form === "expanded" && !Expr.isExpanded(tree)) return { status: "form", message: "C'est égal, mais il reste des parenthèses : développe complètement." };
     return { status: "correct" };
