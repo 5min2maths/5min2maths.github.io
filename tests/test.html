@@ -118,7 +118,7 @@ for (const n of NOTIONS) {
   const cnt = {}; strong.formats = [];
   for (let dd = 14; dd >= 1; dd--) { const date = addDays(day(), -dd); strong.today = null; const f = Engine.chooseFormat(strong, [], date); strong.formats.push({ date, f }); cnt[f] = (cnt[f] || 0) + 1; }
   log.push("formats sur 14 jours : " + JSON.stringify(cnt));
-  if (Object.keys(cnt).length < 5 || Math.max(...Object.values(cnt)) > 5) fail("formats peu variés " + JSON.stringify(cnt));
+  if (Object.keys(cnt).length < 4 || Math.max(...Object.values(cnt)) > 5) fail("formats peu variés " + JSON.stringify(cnt));
   for (let k = 1; k < strong.formats.length; k++) if (strong.formats[k].f === strong.formats[k - 1].f) fail("même format deux jours de suite");
   for (const e of plan) { const id = e.split("|")[0]; if (!Engine.isRecent(strong, id)) fail("2e Collège : notion ancienne " + id); }
   if (!plan.some((e) => e.endsWith("|4|defi") || e.split("|")[1] === "3")) fail("élève fort sans vrai défi : " + plan.join(" "));

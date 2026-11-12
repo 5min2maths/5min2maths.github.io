@@ -57,11 +57,6 @@ const day = (d = new Date()) => d.toISOString().slice(0, 10);
 const addDays = (s, n) => { const d = new Date(s + "T12:00:00"); d.setDate(d.getDate() + n); return day(d); };
 const INTERVALS = [0, 1, 3, 7, 14, 30];
 const QUESTIONS_FOR = { 1: 1, 2: 3, 5: 7, 10: 14 };
-const SLOTS = {
-  1: ["app"], 2: ["drill", "app", "defi"],
-  5: ["drill", "app", "drill", "app", "defi", "app", "defi"],
-  10: ["drill", "app", "drill", "app", "defi", "app", "drill", "app", "defi", "app", "drill", "app", "defi", "defi"],
-};
 const TARGET = { drill: -300, app: -100, defi: 80, defi4: 80, rev: -150 }; // écart visé au Mathélo (≈ 85 %, 65 %, 40 % de réussite)
 const KIND_LABEL = { drill: "🔁 Automatisme", app: "🧩 Application", defi: "🏔 Défi", rev: "🔄 Révision" };
 // Programme du jour : le format change d'un jour à l'autre ; l'équilibre se fait sur 7 jours.
