@@ -62,8 +62,17 @@ const SLOTS = {
   5: ["drill", "app", "drill", "app", "defi", "app", "defi"],
   10: ["drill", "app", "drill", "app", "defi", "app", "drill", "app", "defi", "app", "drill", "app", "defi", "defi"],
 };
-const TARGET = { drill: -300, app: -100, defi: 80 }; // écart visé au Mathélo (≈ 85 %, 65 %, 40 % de réussite)
-const KIND_LABEL = { drill: "🔁 Automatisme", app: "🧩 Application", defi: "🏔 Défi" };
+const TARGET = { drill: -300, app: -100, defi: 80, defi4: 80, rev: -150 }; // écart visé au Mathélo (≈ 85 %, 65 %, 40 % de réussite)
+const KIND_LABEL = { drill: "🔁 Automatisme", app: "🧩 Application", defi: "🏔 Défi", rev: "🔄 Révision" };
+// Programme du jour : le format change d'un jour à l'autre ; l'équilibre se fait sur 7 jours.
+const FORMATS = {
+  defi: { label: "🏔 Défi du jour", slots: ["defi4"], min: 5, text: "Un seul problème, à ton niveau. Prends ton temps." },
+  auto: { label: "🔁 Série d'automatismes", slots: ["drill", "drill", "drill", "drill", "drill", "drill", "drill", "drill"], min: 3, text: "8 calculs rapides, enchaînés." },
+  app: { label: "🧩 Applications", slots: ["app", "app", "app"], min: 4, text: "Trois questions de fond sur tes notions actuelles." },
+  mixte: { label: "⚖️ Mixte", slots: ["drill", "app", "defi"], min: 5, text: "Un automatisme, une application, un défi." },
+  revision: { label: "🔄 Révision", slots: ["rev", "rev", "rev", "rev"], min: 4, text: "Les notions à revoir aujourd'hui, pour ne pas les oublier." },
+};
+const WEEK = { defi: 2, auto: 2, app: 1, mixte: 1, revision: 1 };
 
 // ---------- Mathélo : score de type Elo ----------
 // Année HarmoS équivalente : CH 9e–11e = 9–11 ; FR 6e = 8 … 3e = 11.
@@ -204,34 +213,75 @@ const Engine = {
     return p.length ? p : all;
   },
 
-  // Séance équilibrée : automatismes (≈ 85 % de réussite visée), applications (≈ 65 %), défis (≈ 40 %).
-  // Pour chaque créneau, on choisit la notion ET le niveau dont le score est le plus proche de la cible fixée par le Mathélo.
-  planSession(state) {
-    const slots = SLOTS[state.profile.minutes] || SLOTS[5], today = day(), elo = state.elo.r, cap = difficultyCap(state.profile);
-    const maxProb = state.profile.minutes >= 10 ? 2 : 1, used = new Set(), plan = [];
-    let probs = 0;
+  // Format du jour : le plus en retard sur l'équilibre des 7 derniers jours, jamais celui de la veille.
+  chooseFormat(state, exclude = [], today = day()) {
+    const since = addDays(today, -7), log = (state.formats || []).filter((f) => f.date >= since && f.date < today);
+    const recentRev = log.some((x) => x.f === "revision" && x.date >= addDays(today, -3));
+    const yesterday = (state.formats || []).filter((f) => f.date < today).slice(-1)[0];
+    const due = this.eligible(state).filter((id) => state.notions[id].due <= today).length;
+    let best = null;
+    for (const f of Object.keys(FORMATS)) {
+      if (exclude.includes(f)) continue;
+      if (state.profile.minutes <= 2 && FORMATS[f].min > 3 && f !== "defi") continue; // temps court : formats brefs (le défi reste possible)
+      let sc = WEEK[f] - log.filter((x) => x.f === f).length;
+      if (yesterday && yesterday.f === f) sc -= 3;
+      if (f === "revision") sc += due >= 4 && !recentRev ? 1 : due >= 4 ? 0 : -1;
+      if (f === "defi" && !this.eligible(state).some((id) => hasProb(id) && this.isRecent(state, id))) sc -= 0.5;
+      sc += Math.random() * 0.4;
+      if (!best || sc > best.sc) best = { f, sc };
+    }
+    return best ? best.f : "mixte";
+  },
+
+  planSession(state, format) {
+    const f = format || this.todayFormat(state);
+    return this.planSlots(state, FORMATS[f].slots);
+  },
+  // Format retenu pour aujourd'hui (stable dans la journée, sauf « Autre format »).
+  todayFormat(state) {
+    const today = day();
+    if (!state.today || state.today.date !== today) state.today = { date: today, f: this.chooseFormat(state) };
+    return state.today.f;
+  },
+  otherFormat(state) {
+    const cur = this.todayFormat(state);
+    state.today = { date: day(), f: this.chooseFormat(state, [cur]) };
+    return state.today.f;
+  },
+  // Trace du format fait (pour l'équilibre sur 7 jours).
+  logFormat(state, f) {
+    const today = day();
+    state.formats = (state.formats || []).filter((x) => x.date >= addDays(today, -30));
+    if (!state.formats.some((x) => x.date === today && x.f === f)) state.formats.push({ date: today, f });
+  },
+
+  // Remplit des créneaux : pour chacun, la notion ET le niveau les plus proches de la cible fixée par le Mathélo.
+  planSlots(state, slots) {
+    const today = day(), elo = state.elo.r, cap = difficultyCap(state.profile), used = new Set(), plan = [];
     for (const kind of slots) {
       let best = null;
-      for (const id of this.pool(state, kind)) {
+      const base = kind === "defi4" ? "defi" : kind;
+      let pool = this.pool(state, base === "rev" ? "app" : base);
+      if (kind === "rev") { const due = pool.filter((id) => state.notions[id].due <= today || state.notions[id].m < 0.5); if (due.length) pool = due; }
+      for (const id of pool) {
         const s = state.notions[id];
-        const levels = [1, 2, 3].filter((d) => d <= cap && (kind !== "defi" || d >= 2) && (kind !== "drill" || d <= 2));
-        if (kind === "defi" && hasProb(id) && probs < maxProb) levels.push(4);
+        const levels = [1, 2, 3].filter((d) => d <= cap && (base !== "defi" || d >= 2) && (kind !== "drill" || d <= 2));
+        if ((kind === "defi4" || kind === "defi") && hasProb(id)) levels.push(4);
         for (const d of levels) {
           let sc = Math.abs(itemRating(state.profile, id, d) - (elo + TARGET[kind])) / 100;
-          if (s.due <= today && kind !== "defi") sc -= 0.6;
-          if (kind === "app") sc -= (1 - s.m) * 0.8;
+          if (s.due <= today && base !== "defi") sc -= 0.6;
+          if (kind === "app" || kind === "rev") sc -= (1 - s.m) * 0.8;
           if (s.status === "encours") sc -= 0.4;
           if (this.prepActive(state) && state.prep.ids.includes(id)) sc -= 1.2;
           if (used.has(id)) sc += 2;
-          if (d === 4) sc -= 0.3;
+          if (d === 4) sc -= kind === "defi4" ? 3 : 0.3;
           sc += Math.random() * 0.5;
           if (!best || sc < best.sc) best = { id, d, sc };
         }
       }
       if (!best) continue;
       used.add(best.id);
-      if (best.d === 4) probs++;
-      plan.push(best.id + "|" + best.d + "|" + kind);
+      plan.push(best.id + "|" + best.d + "|" + base);
     }
     return plan;
   },

@@ -1796,8 +1796,17 @@ const SLOTS = {
   5: ["drill", "app", "drill", "app", "defi", "app", "defi"],
   10: ["drill", "app", "drill", "app", "defi", "app", "drill", "app", "defi", "app", "drill", "app", "defi", "defi"],
 };
-const TARGET = { drill: -300, app: -100, defi: 80 }; // écart visé au Mathélo (≈ 85 %, 65 %, 40 % de réussite)
-const KIND_LABEL = { drill: "🔁 Automatisme", app: "🧩 Application", defi: "🏔 Défi" };
+const TARGET = { drill: -300, app: -100, defi: 80, defi4: 80, rev: -150 }; // écart visé au Mathélo (≈ 85 %, 65 %, 40 % de réussite)
+const KIND_LABEL = { drill: "🔁 Automatisme", app: "🧩 Application", defi: "🏔 Défi", rev: "🔄 Révision" };
+// Programme du jour : le format change d'un jour à l'autre ; l'équilibre se fait sur 7 jours.
+const FORMATS = {
+  defi: { label: "🏔 Défi du jour", slots: ["defi4"], min: 5, text: "Un seul problème, à ton niveau. Prends ton temps." },
+  auto: { label: "🔁 Série d'automatismes", slots: ["drill", "drill", "drill", "drill", "drill", "drill", "drill", "drill"], min: 3, text: "8 calculs rapides, enchaînés." },
+  app: { label: "🧩 Applications", slots: ["app", "app", "app"], min: 4, text: "Trois questions de fond sur tes notions actuelles." },
+  mixte: { label: "⚖️ Mixte", slots: ["drill", "app", "defi"], min: 5, text: "Un automatisme, une application, un défi." },
+  revision: { label: "🔄 Révision", slots: ["rev", "rev", "rev", "rev"], min: 4, text: "Les notions à revoir aujourd'hui, pour ne pas les oublier." },
+};
+const WEEK = { defi: 2, auto: 2, app: 1, mixte: 1, revision: 1 };
 
 // ---------- Mathélo : score de type Elo ----------
 // Année HarmoS équivalente : CH 9e–11e = 9–11 ; FR 6e = 8 … 3e = 11.
@@ -1938,34 +1947,75 @@ const Engine = {
     return p.length ? p : all;
   },
 
-  // Séance équilibrée : automatismes (≈ 85 % de réussite visée), applications (≈ 65 %), défis (≈ 40 %).
-  // Pour chaque créneau, on choisit la notion ET le niveau dont le score est le plus proche de la cible fixée par le Mathélo.
-  planSession(state) {
-    const slots = SLOTS[state.profile.minutes] || SLOTS[5], today = day(), elo = state.elo.r, cap = difficultyCap(state.profile);
-    const maxProb = state.profile.minutes >= 10 ? 2 : 1, used = new Set(), plan = [];
-    let probs = 0;
+  // Format du jour : le plus en retard sur l'équilibre des 7 derniers jours, jamais celui de la veille.
+  chooseFormat(state, exclude = [], today = day()) {
+    const since = addDays(today, -7), log = (state.formats || []).filter((f) => f.date >= since && f.date < today);
+    const recentRev = log.some((x) => x.f === "revision" && x.date >= addDays(today, -3));
+    const yesterday = (state.formats || []).filter((f) => f.date < today).slice(-1)[0];
+    const due = this.eligible(state).filter((id) => state.notions[id].due <= today).length;
+    let best = null;
+    for (const f of Object.keys(FORMATS)) {
+      if (exclude.includes(f)) continue;
+      if (state.profile.minutes <= 2 && FORMATS[f].min > 3 && f !== "defi") continue; // temps court : formats brefs (le défi reste possible)
+      let sc = WEEK[f] - log.filter((x) => x.f === f).length;
+      if (yesterday && yesterday.f === f) sc -= 3;
+      if (f === "revision") sc += due >= 4 && !recentRev ? 1 : due >= 4 ? 0 : -1;
+      if (f === "defi" && !this.eligible(state).some((id) => hasProb(id) && this.isRecent(state, id))) sc -= 0.5;
+      sc += Math.random() * 0.4;
+      if (!best || sc > best.sc) best = { f, sc };
+    }
+    return best ? best.f : "mixte";
+  },
+
+  planSession(state, format) {
+    const f = format || this.todayFormat(state);
+    return this.planSlots(state, FORMATS[f].slots);
+  },
+  // Format retenu pour aujourd'hui (stable dans la journée, sauf « Autre format »).
+  todayFormat(state) {
+    const today = day();
+    if (!state.today || state.today.date !== today) state.today = { date: today, f: this.chooseFormat(state) };
+    return state.today.f;
+  },
+  otherFormat(state) {
+    const cur = this.todayFormat(state);
+    state.today = { date: day(), f: this.chooseFormat(state, [cur]) };
+    return state.today.f;
+  },
+  // Trace du format fait (pour l'équilibre sur 7 jours).
+  logFormat(state, f) {
+    const today = day();
+    state.formats = (state.formats || []).filter((x) => x.date >= addDays(today, -30));
+    if (!state.formats.some((x) => x.date === today && x.f === f)) state.formats.push({ date: today, f });
+  },
+
+  // Remplit des créneaux : pour chacun, la notion ET le niveau les plus proches de la cible fixée par le Mathélo.
+  planSlots(state, slots) {
+    const today = day(), elo = state.elo.r, cap = difficultyCap(state.profile), used = new Set(), plan = [];
     for (const kind of slots) {
       let best = null;
-      for (const id of this.pool(state, kind)) {
+      const base = kind === "defi4" ? "defi" : kind;
+      let pool = this.pool(state, base === "rev" ? "app" : base);
+      if (kind === "rev") { const due = pool.filter((id) => state.notions[id].due <= today || state.notions[id].m < 0.5); if (due.length) pool = due; }
+      for (const id of pool) {
         const s = state.notions[id];
-        const levels = [1, 2, 3].filter((d) => d <= cap && (kind !== "defi" || d >= 2) && (kind !== "drill" || d <= 2));
-        if (kind === "defi" && hasProb(id) && probs < maxProb) levels.push(4);
+        const levels = [1, 2, 3].filter((d) => d <= cap && (base !== "defi" || d >= 2) && (kind !== "drill" || d <= 2));
+        if ((kind === "defi4" || kind === "defi") && hasProb(id)) levels.push(4);
         for (const d of levels) {
           let sc = Math.abs(itemRating(state.profile, id, d) - (elo + TARGET[kind])) / 100;
-          if (s.due <= today && kind !== "defi") sc -= 0.6;
-          if (kind === "app") sc -= (1 - s.m) * 0.8;
+          if (s.due <= today && base !== "defi") sc -= 0.6;
+          if (kind === "app" || kind === "rev") sc -= (1 - s.m) * 0.8;
           if (s.status === "encours") sc -= 0.4;
           if (this.prepActive(state) && state.prep.ids.includes(id)) sc -= 1.2;
           if (used.has(id)) sc += 2;
-          if (d === 4) sc -= 0.3;
+          if (d === 4) sc -= kind === "defi4" ? 3 : 0.3;
           sc += Math.random() * 0.5;
           if (!best || sc < best.sc) best = { id, d, sc };
         }
       }
       if (!best) continue;
       used.add(best.id);
-      if (best.d === 4) probs++;
-      plan.push(best.id + "|" + best.d + "|" + kind);
+      plan.push(best.id + "|" + best.d + "|" + base);
     }
     return plan;
   },
@@ -2086,8 +2136,8 @@ function screenLevel() {
   <div class="card flat stack"><h3>Ton école</h3><div class="seg" id="sys">${Object.entries(SYSTEMS).map(([k, v]) => `<button aria-pressed="${k === draft.system}" data-v="${k}">${v.label}</button>`).join("")}</div>
   <h3>Ta classe cette année</h3><div class="seg" id="grade">${sys.grades.map(([g, n]) => `<button aria-pressed="${g === draft.grade}" data-v="${g}">${n}</button>`).join("")}</div>
   ${sec2 ? `<h3>Ta voie</h3><div class="seg" id="track"><button aria-pressed="${draft.track === "college"}" data-v="college">Collège (maturité gymnasiale)</button><button aria-pressed="${draft.track === "mp"}" data-v="mp">Maturité professionnelle</button></div>` : ""}</div>
-  <div class="card flat stack"><h3>Combien de temps par jour ?</h3><div class="timepick" id="time">${[1, 2, 5, 10].map((m) => `<button aria-pressed="${m === draft.minutes}" data-v="${m}"><b>${m}</b><small>${m === 1 ? "minute" : "minutes"} · ${QUESTIONS_FOR[m]} q.</small></button>`).join("")}</div>
-  <p class="small muted">5 minutes, c'est le conseil. Tu pourras changer chaque jour.</p></div>
+  <div class="card flat stack"><h3>Combien de temps par jour ?</h3><div class="timepick" id="time">${[1, 2, 5, 10].map((m) => `<button aria-pressed="${m === draft.minutes}" data-v="${m}"><b>${m}</b><small>${m === 1 ? "minute" : "minutes"}</small></button>`).join("")}</div>
+  <p class="small muted">C'est un repère : chaque jour, l'app te propose un programme différent (un défi, une série d'automatismes, des applications…), équilibré sur la semaine.</p></div>
   <button class="btn-primary btn-big" id="next">Continuer</button>`);
   const bind = (id, key, num) => app.querySelectorAll("#" + id + " button").forEach((b) => (b.onclick = () => { draft[key] = num ? +b.dataset.v : b.dataset.v; screenLevel(); }));
   bind("sys", "system"); bind("grade", "grade", true); bind("track", "track"); bind("time", "minutes", true);
@@ -2174,12 +2224,16 @@ function themeBars(lv) {
 function screenHome() {
   if (!state) return screenWelcome();
   const today = day(), done = state.history.find((x) => x.date === today);
-  const s = state.streak, alive = s.last === today || s.last === addDays(today, -1), wp = Engine.weeklyProblem(state);
+  const s = state.streak, alive = s.last === today || s.last === addDays(today, -1), wp = Engine.weeklyProblem(state), fmt = Engine.todayFormat(state);
+  save();
   h(`<div class="spread">${brand}<span class="small muted">${SYSTEMS[state.profile.system].label} · ${gradeName(state.profile)}</span></div>
   <div class="card flat streak"><span class="flame" aria-hidden="true">${alive && s.count ? "🔥" : "✏️"}</span><div><b>${alive ? s.count : 0} ${(alive ? s.count : 0) > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span><div class="small muted">${done ? "Séance du jour faite : " + done.n + " question" + (done.n > 1 ? "s" : "") + ". Tu peux en refaire une." : "Ta séance du jour t'attend."}</div></div></div>
   <div class="card">${eloBlock()}</div>
-  <div class="card flat stack"><h3>Temps aujourd'hui</h3><div class="timepick" id="time">${[1, 2, 5, 10].map((m) => `<button aria-pressed="${m === state.profile.minutes}" data-v="${m}"><b>${m}</b><small>min · ${QUESTIONS_FOR[m]} q.</small></button>`).join("")}</div>
-  <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "Ma question du jour"}</button></div>
+  <div class="card stack"><div class="eyebrow">${done ? "Séance faite · tu peux en refaire une" : "Ton programme aujourd'hui"}</div>
+  <h2>${FORMATS[fmt].label}</h2><p class="muted">${FORMATS[fmt].text} <span class="small">≈ ${FORMATS[fmt].min} min</span></p>
+  <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>
+  <div class="spread"><span class="small muted">Varié d'un jour à l'autre, équilibré sur la semaine.</span><button class="btn-ghost small" id="other">Autre format</button></div></div>
+  <div class="card flat stack"><h3>Temps visé (indicatif)</h3><div class="timepick" id="time">${[1, 2, 5, 10].map((m) => `<button aria-pressed="${m === state.profile.minutes}" data-v="${m}"><b>${m}</b><small>min</small></button>`).join("")}</div></div>
   ${Engine.prepActive(state) ? (() => { const left = Math.round((new Date(state.prep.date) - new Date(today)) / 864e5); return `<div class="card flat stack"><div class="eyebrow">Je prépare mon test</div><h3>${left === 0 ? "Test aujourd'hui" : left === 1 ? "Test demain" : "Test dans " + left + " jours"} · ${state.prep.ids.length} notion${state.prep.ids.length > 1 ? "s" : ""}</h3><p class="small muted">${state.prep.ids.map((id) => NOTIONS.find((n) => n.id === id).label).join(" · ")}</p><div class="row"><button class="btn-primary" id="prepgo">Séance de révision</button><button class="btn-ghost" id="prepedit">Modifier</button></div></div>`; })() : ""}
   ${wp ? `<div class="card flat stack"><div class="eyebrow">Problème de la semaine</div><h3>${NOTIONS.find((n) => n.id === wp).label}</h3><p class="small muted">Un problème en plusieurs étapes, avec indices. Facultatif, et il rapporte gros.</p><button id="wp">Relever le défi</button></div>` : ""}
   <div class="card flat"><h3>Mes thèmes</h3><div class="bars">${themeBars(Engine.themeLevels(state))}</div></div>
@@ -2187,6 +2241,7 @@ function screenHome() {
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div></div>`);
   app.querySelectorAll("#time button").forEach((b) => (b.onclick = () => { state.profile.minutes = +b.dataset.v; save(); screenHome(); }));
   document.getElementById("go").onclick = startSession;
+  document.getElementById("other").onclick = () => { Engine.otherFormat(state); save(); screenHome(); };
   if (wp) document.getElementById("wp").onclick = () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), limit: 600, weekly: true }; nextQuestion(); };
   document.getElementById("notions").onclick = () => screenNotions(true);
   const byId = (x) => document.getElementById(x);
@@ -2246,8 +2301,9 @@ function screenLesson(id, cont) {
 // ---------------- Séance ----------------
 let session = null;
 function startSession() {
-  const plan = Engine.planSession(state);
-  session = { plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), limit: state.profile.minutes * 60 };
+  const fmt = Engine.todayFormat(state), plan = Engine.planSession(state, fmt);
+  Engine.logFormat(state, fmt); save();
+  session = { fmt, plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), limit: state.profile.minutes * 60 };
   nextQuestion();
 }
 function nextQuestion(redo) {
@@ -2264,7 +2320,7 @@ function nextQuestion(redo) {
   const q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : level);
   q.kind = kind;
   renderQuestion(q, {
-    eyebrow: (session.weekly ? "Problème de la semaine" : session.prep ? "Révision du test · " + (session.i + 1) + " sur " + session.plan.length : session.i === 0 && !redo ? "Question du jour" : "Question " + (session.i + 1) + " sur " + session.plan.length) + (kind && KIND_LABEL[kind] ? " · " + KIND_LABEL[kind] : "") + (redo ? " · nouvelles valeurs" : ""),
+    eyebrow: (session.weekly ? "Problème de la semaine" : session.prep ? "Révision du test · " + (session.i + 1) + " sur " + session.plan.length : session.plan.length === 1 ? (session.fmt ? FORMATS[session.fmt].label : "Question du jour") : (session.fmt ? FORMATS[session.fmt].label + " · " : "") + (session.i + 1) + " sur " + session.plan.length) + (kind && KIND_LABEL[kind] ? " · " + KIND_LABEL[kind] : "") + (redo ? " · nouvelles valeurs" : ""),
     onDone: (res) => {
       const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
       res.delta = Engine.updateElo(state, id, q.d, sc);

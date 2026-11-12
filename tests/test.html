@@ -110,14 +110,21 @@ for (const n of NOTIONS) {
 {
   const mk = (p, elo) => { const st = Engine.newState(p); Engine.initNotions(st, Object.fromEntries(Engine.catalog(p, new Date("2027-03-01")).map((c) => [c.id, c.defaultStatus]))); st.elo.r = elo; return st; };
   const strong = mk({ system: "CH", grade: 13, track: "college", minutes: 5 }, 1750);
-  const plan = Engine.planSession(strong), kinds = plan.map((e) => e.split("|")[2]);
-  if (plan.length !== 7) fail("séance 5 min : " + plan.length);
-  if (kinds.filter((k) => k === "defi").length !== 2 || kinds.filter((k) => k === "drill").length !== 2) fail("composition : " + kinds.join(","));
+  const plan = Engine.planSession(strong, "mixte"), kinds = plan.map((e) => e.split("|")[2]);
+  if (plan.join() && kinds.join() !== "drill,app,defi") fail("mixte : " + kinds.join(","));
+  if (Engine.planSession(strong, "defi").length !== 1) fail("défi du jour : plus d'une question");
+  if (Engine.planSession(strong, "auto").length !== 8) fail("série d'automatismes");
+  // équilibre sur 14 jours simulés
+  const cnt = {}; strong.formats = [];
+  for (let dd = 14; dd >= 1; dd--) { const date = addDays(day(), -dd); strong.today = null; const f = Engine.chooseFormat(strong, [], date); strong.formats.push({ date, f }); cnt[f] = (cnt[f] || 0) + 1; }
+  log.push("formats sur 14 jours : " + JSON.stringify(cnt));
+  if (Object.keys(cnt).length < 5 || Math.max(...Object.values(cnt)) > 5) fail("formats peu variés " + JSON.stringify(cnt));
+  for (let k = 1; k < strong.formats.length; k++) if (strong.formats[k].f === strong.formats[k - 1].f) fail("même format deux jours de suite");
   for (const e of plan) { const id = e.split("|")[0]; if (!Engine.isRecent(strong, id)) fail("2e Collège : notion ancienne " + id); }
   if (!plan.some((e) => e.endsWith("|4|defi") || e.split("|")[1] === "3")) fail("élève fort sans vrai défi : " + plan.join(" "));
   log.push("2e Collège, Mathélo 1750 : " + plan.join("  "));
   const weak = mk({ system: "CH", grade: 11, minutes: 5 }, 900);
-  log.push("11e, Mathélo 900 : " + Engine.planSession(weak).join("  "));
+  log.push("11e, Mathélo 900, défi : " + Engine.planSession(weak, "defi").join("  ") + " | auto : " + Engine.planSession(weak, "auto").join(" "));
 }
 
 // 3. Moteur : parcours complet
@@ -129,8 +136,8 @@ Engine.initNotions(st, Object.fromEntries(cat.map((c) => [c.id, c.defaultStatus]
 const plan = Engine.placementPlan(st);
 if (plan.length !== 5) fail("positionnement : " + plan.length + " questions");
 plan.forEach((id, i) => Engine.placementResult(st, id, i % 3 === 0 ? false : i % 3 === 1 ? true : null));
-const sess = Engine.planSession(st).map((e) => e.split("|")[0]);
-if (sess.length !== 7) fail("séance " + sess.length + " questions");
+const sess = Engine.planSession(st, "app").map((e) => e.split("|")[0]);
+if (sess.length !== 3) fail("séance applications : " + sess.length + " questions");
 sess.forEach((id) => { const q = Engine.make(st, id); Engine.record(st, id, q.d, 1, true); });
 Engine.finishDay(st, sess.length, sess.length);
 if (st.streak.count !== 1) fail("série " + st.streak.count);
@@ -140,7 +147,7 @@ log.push("Mathélo : " + st.elo.r + " — " + eloLabel(prof, st.elo.r) + " | FR 
 const fr = { system: "FR", grade: 8, minutes: 2 };
 const sf = Engine.newState(fr);
 Engine.initNotions(sf, Object.fromEntries(Engine.catalog(fr, new Date("2027-03-01")).map((c) => [c.id, c.defaultStatus])));
-if (Engine.planSession(sf).length !== 3) fail("FR 2 min");
+if (!FORMATS[Engine.todayFormat(sf)]) fail("FR format du jour");
 
 document.getElementById("out").textContent = (fails ? fails + " échec(s)\n" : "OK\n") + log.join("\n") + "\n" + n + " questions générées ; positionnement : " + plan.join(", ") + "\nséance : " + sess.join(", ") + "\nnotions CH 11e en novembre : " + cat.map((c) => c.id + "=" + c.defaultStatus).join(" ");
 </script>

@@ -42,8 +42,8 @@ function screenLevel() {
   <div class="card flat stack"><h3>Ton école</h3><div class="seg" id="sys">${Object.entries(SYSTEMS).map(([k, v]) => `<button aria-pressed="${k === draft.system}" data-v="${k}">${v.label}</button>`).join("")}</div>
   <h3>Ta classe cette année</h3><div class="seg" id="grade">${sys.grades.map(([g, n]) => `<button aria-pressed="${g === draft.grade}" data-v="${g}">${n}</button>`).join("")}</div>
   ${sec2 ? `<h3>Ta voie</h3><div class="seg" id="track"><button aria-pressed="${draft.track === "college"}" data-v="college">Collège (maturité gymnasiale)</button><button aria-pressed="${draft.track === "mp"}" data-v="mp">Maturité professionnelle</button></div>` : ""}</div>
-  <div class="card flat stack"><h3>Combien de temps par jour ?</h3><div class="timepick" id="time">${[1, 2, 5, 10].map((m) => `<button aria-pressed="${m === draft.minutes}" data-v="${m}"><b>${m}</b><small>${m === 1 ? "minute" : "minutes"} · ${QUESTIONS_FOR[m]} q.</small></button>`).join("")}</div>
-  <p class="small muted">5 minutes, c'est le conseil. Tu pourras changer chaque jour.</p></div>
+  <div class="card flat stack"><h3>Combien de temps par jour ?</h3><div class="timepick" id="time">${[1, 2, 5, 10].map((m) => `<button aria-pressed="${m === draft.minutes}" data-v="${m}"><b>${m}</b><small>${m === 1 ? "minute" : "minutes"}</small></button>`).join("")}</div>
+  <p class="small muted">C'est un repère : chaque jour, l'app te propose un programme différent (un défi, une série d'automatismes, des applications…), équilibré sur la semaine.</p></div>
   <button class="btn-primary btn-big" id="next">Continuer</button>`);
   const bind = (id, key, num) => app.querySelectorAll("#" + id + " button").forEach((b) => (b.onclick = () => { draft[key] = num ? +b.dataset.v : b.dataset.v; screenLevel(); }));
   bind("sys", "system"); bind("grade", "grade", true); bind("track", "track"); bind("time", "minutes", true);
@@ -130,12 +130,16 @@ function themeBars(lv) {
 function screenHome() {
   if (!state) return screenWelcome();
   const today = day(), done = state.history.find((x) => x.date === today);
-  const s = state.streak, alive = s.last === today || s.last === addDays(today, -1), wp = Engine.weeklyProblem(state);
+  const s = state.streak, alive = s.last === today || s.last === addDays(today, -1), wp = Engine.weeklyProblem(state), fmt = Engine.todayFormat(state);
+  save();
   h(`<div class="spread">${brand}<span class="small muted">${SYSTEMS[state.profile.system].label} · ${gradeName(state.profile)}</span></div>
   <div class="card flat streak"><span class="flame" aria-hidden="true">${alive && s.count ? "🔥" : "✏️"}</span><div><b>${alive ? s.count : 0} ${(alive ? s.count : 0) > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span><div class="small muted">${done ? "Séance du jour faite : " + done.n + " question" + (done.n > 1 ? "s" : "") + ". Tu peux en refaire une." : "Ta séance du jour t'attend."}</div></div></div>
   <div class="card">${eloBlock()}</div>
-  <div class="card flat stack"><h3>Temps aujourd'hui</h3><div class="timepick" id="time">${[1, 2, 5, 10].map((m) => `<button aria-pressed="${m === state.profile.minutes}" data-v="${m}"><b>${m}</b><small>min · ${QUESTIONS_FOR[m]} q.</small></button>`).join("")}</div>
-  <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "Ma question du jour"}</button></div>
+  <div class="card stack"><div class="eyebrow">${done ? "Séance faite · tu peux en refaire une" : "Ton programme aujourd'hui"}</div>
+  <h2>${FORMATS[fmt].label}</h2><p class="muted">${FORMATS[fmt].text} <span class="small">≈ ${FORMATS[fmt].min} min</span></p>
+  <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>
+  <div class="spread"><span class="small muted">Varié d'un jour à l'autre, équilibré sur la semaine.</span><button class="btn-ghost small" id="other">Autre format</button></div></div>
+  <div class="card flat stack"><h3>Temps visé (indicatif)</h3><div class="timepick" id="time">${[1, 2, 5, 10].map((m) => `<button aria-pressed="${m === state.profile.minutes}" data-v="${m}"><b>${m}</b><small>min</small></button>`).join("")}</div></div>
   ${Engine.prepActive(state) ? (() => { const left = Math.round((new Date(state.prep.date) - new Date(today)) / 864e5); return `<div class="card flat stack"><div class="eyebrow">Je prépare mon test</div><h3>${left === 0 ? "Test aujourd'hui" : left === 1 ? "Test demain" : "Test dans " + left + " jours"} · ${state.prep.ids.length} notion${state.prep.ids.length > 1 ? "s" : ""}</h3><p class="small muted">${state.prep.ids.map((id) => NOTIONS.find((n) => n.id === id).label).join(" · ")}</p><div class="row"><button class="btn-primary" id="prepgo">Séance de révision</button><button class="btn-ghost" id="prepedit">Modifier</button></div></div>`; })() : ""}
   ${wp ? `<div class="card flat stack"><div class="eyebrow">Problème de la semaine</div><h3>${NOTIONS.find((n) => n.id === wp).label}</h3><p class="small muted">Un problème en plusieurs étapes, avec indices. Facultatif, et il rapporte gros.</p><button id="wp">Relever le défi</button></div>` : ""}
   <div class="card flat"><h3>Mes thèmes</h3><div class="bars">${themeBars(Engine.themeLevels(state))}</div></div>
@@ -143,6 +147,7 @@ function screenHome() {
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div></div>`);
   app.querySelectorAll("#time button").forEach((b) => (b.onclick = () => { state.profile.minutes = +b.dataset.v; save(); screenHome(); }));
   document.getElementById("go").onclick = startSession;
+  document.getElementById("other").onclick = () => { Engine.otherFormat(state); save(); screenHome(); };
   if (wp) document.getElementById("wp").onclick = () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), limit: 600, weekly: true }; nextQuestion(); };
   document.getElementById("notions").onclick = () => screenNotions(true);
   const byId = (x) => document.getElementById(x);
@@ -202,8 +207,9 @@ function screenLesson(id, cont) {
 // ---------------- Séance ----------------
 let session = null;
 function startSession() {
-  const plan = Engine.planSession(state);
-  session = { plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), limit: state.profile.minutes * 60 };
+  const fmt = Engine.todayFormat(state), plan = Engine.planSession(state, fmt);
+  Engine.logFormat(state, fmt); save();
+  session = { fmt, plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), limit: state.profile.minutes * 60 };
   nextQuestion();
 }
 function nextQuestion(redo) {
@@ -220,7 +226,7 @@ function nextQuestion(redo) {
   const q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : level);
   q.kind = kind;
   renderQuestion(q, {
-    eyebrow: (session.weekly ? "Problème de la semaine" : session.prep ? "Révision du test · " + (session.i + 1) + " sur " + session.plan.length : session.i === 0 && !redo ? "Question du jour" : "Question " + (session.i + 1) + " sur " + session.plan.length) + (kind && KIND_LABEL[kind] ? " · " + KIND_LABEL[kind] : "") + (redo ? " · nouvelles valeurs" : ""),
+    eyebrow: (session.weekly ? "Problème de la semaine" : session.prep ? "Révision du test · " + (session.i + 1) + " sur " + session.plan.length : session.plan.length === 1 ? (session.fmt ? FORMATS[session.fmt].label : "Question du jour") : (session.fmt ? FORMATS[session.fmt].label + " · " : "") + (session.i + 1) + " sur " + session.plan.length) + (kind && KIND_LABEL[kind] ? " · " + KIND_LABEL[kind] : "") + (redo ? " · nouvelles valeurs" : ""),
     onDone: (res) => {
       const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
       res.delta = Engine.updateElo(state, id, q.d, sc);
