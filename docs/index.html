@@ -2155,12 +2155,14 @@ function screenNotions(editing = false) {
   const prof = editing ? state.profile : draft;
   const cat = Engine.catalog(prof);
   const st = editing ? Object.fromEntries(Object.entries(state.notions).map(([k, v]) => [k, v.status])) : (draft.statuses ||= Object.fromEntries(cat.map((c) => [c.id, c.defaultStatus])));
+  // On ne demande que les notions de l'année : celles des années précédentes sont vues, sans poser la question.
   const groups = {};
-  cat.forEach((c) => (groups[c.theme] = groups[c.theme] || []).push(c));
+  cat.filter((c) => c.current).forEach((c) => (groups[c.theme] = groups[c.theme] || []).push(c));
   const label = { vu: "déjà vu", encours: "en cours", nonvu: "pas encore" };
   h(`${brand}${editing ? "" : '<div class="eyebrow">Étape 2 sur 3</div>'}<h2>${editing ? "Mes notions" : "Qu'as-tu déjà étudié ?"}</h2>
-  <p class="muted">${editing ? "Tu as vu une nouvelle notion en classe ? Mets-la à jour : elle entrera dans tes questions." : "J'ai coché selon la date ; corrige si besoin. Les notions des années précédentes comptent comme vues."}</p>
-  ${Object.entries(groups).map(([th, list]) => `<div class="card flat"><h3>${THEMES[th]}</h3>${list.map((c) => `<div class="notion"><div><b>${c.label}</b>${c.current ? "" : ' <span class="small muted">· années précédentes</span>'}</div><div class="ex">\\(${c.ex}\\)</div>
+  <p class="muted">${editing ? "Tu as vu une nouvelle notion en classe ? Mets-la à jour : elle entrera dans tes questions." : "Seulement les notions de cette année. J'ai coché selon la date ; corrige si ton cours avance autrement."}</p>
+  ${Object.keys(groups).length ? "" : '<div class="card flat"><p class="muted">Rien à cocher : tout ce qui te concerne vient des années précédentes.</p></div>'}
+  ${Object.entries(groups).map(([th, list]) => `<div class="card flat"><h3>${THEMES[th]}</h3>${list.map((c) => `<div class="notion"><div><b>${c.label}</b></div><div class="ex">\\(${c.ex}\\)</div>
     <div class="tri" data-id="${c.id}">${["vu", "encours", "nonvu"].map((s) => `<button aria-pressed="${st[c.id] === s}" data-v="${s}">${label[s]}</button>`).join("")}</div></div>`).join("")}</div>`).join("")}
   <button class="btn-primary btn-big" id="next">${editing ? "Enregistrer" : "Continuer"}</button>${editing ? '<button class="btn-ghost" id="back">Annuler</button>' : ""}`);
   app.querySelectorAll(".tri").forEach((tri) => tri.querySelectorAll("button").forEach((b) => (b.onclick = () => {
@@ -2265,12 +2267,14 @@ function screenHome() {
 function screenPrep() {
   const cat = Engine.catalog(state.profile).filter((c) => state.notions[c.id] && state.notions[c.id].status !== "nonvu");
   const chosen = new Set(state.prep && Engine.prepActive(state) ? state.prep.ids : []);
+  // On ne demande que les notions de l'année : celles des années précédentes sont vues, sans poser la question.
   const groups = {};
-  cat.forEach((c) => (groups[c.theme] = groups[c.theme] || []).push(c));
+  cat.filter((c) => c.current).forEach((c) => (groups[c.theme] = groups[c.theme] || []).push(c));
   const date = state.prep && Engine.prepActive(state) ? state.prep.date : addDays(day(), 7);
   h(`${brand}<h2>Je prépare <span class="mark">un test</span></h2>
   <p class="muted">Choisis les notions de ton test et sa date. Jusqu'à ce jour-là, tes séances porteront surtout sur elles, avec un problème pour finir.</p>
   <div class="card flat stack"><label for="pdate"><h3>Date du test</h3></label><input type="date" id="pdate" value="${date}" min="${day()}" class="datein"></div>
+  ${Object.keys(groups).length ? "" : '<div class="card flat"><p class="muted">Rien à cocher : tout ce qui te concerne vient des années précédentes.</p></div>'}
   ${Object.entries(groups).map(([th, list]) => `<div class="card flat"><h3>${THEMES[th]}</h3><div class="checks">${list.map((c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${c.label}</span></label>`).join("")}</div></div>`).join("")}
   <p class="small muted" id="perr"></p>
   <button class="btn-primary btn-big" id="save">Enregistrer mon test</button>
