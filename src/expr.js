@@ -331,6 +331,8 @@ function checkAnswer(spec, input) {
   try { tree = Expr.parse(String(input)); }
   catch (e) { return { status: "invalid", message: e.message }; }
   if (spec.kind === "value") {
+    // plain : on attend un nombre écrit en chiffres (conversion, écriture décimale), pas une fraction ni un calcul
+    if (spec.plain && !/^\s*-?\s*\d[\d'’ ]*([.,]\d+)?\s*$/.test(String(input))) return { status: "invalid", message: "Écris le résultat comme un nombre décimal (pas de fraction ni de calcul)." };
     if (Expr.vars(tree).size) return { status: "invalid", message: "La réponse est un nombre : pas de lettre." };
     const v = Expr.evaluate(tree);
     if (!isFinite(v)) return { status: "invalid", message: "Ce calcul n'a pas de valeur (division par zéro ?)." };

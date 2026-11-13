@@ -1,4 +1,5 @@
-<meta charset="utf-8"><script src="../src/curriculum.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><pre id="o"></pre><script>
+<meta charset="utf-8"><script src="../src/curriculum.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script>
+<script src="../src/gen3.js"></script><pre id="o"></pre><script>
 const ids = (new URLSearchParams(location.search).get("ids") || "").split(",");
 let o = "";
 for (const id of ids) for (const d of [1, 2, 3]) for (let k = 0; k < 2; k++) { R.seed(d * 1000 + k * 77 + id.length * 13); const q = GEN[id](d); o += id + " " + d + " | " + q.q + "\n      → " + (q.spec.kind === "solset" ? SolSet.show(q.spec.ivs, false) : q.canon || q.spec.expr || (q.spec.values || [q.spec.value]).join(" ; ")) + " | " + q.sol + "\n"; }
