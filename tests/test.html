@@ -1,11 +1,11 @@
 <meta charset="utf-8">
 <pre id="out">en cours</pre>
-<script src="../src/curriculum.js"></script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script>
 <script src="../src/expr.js"></script>
 <script src="../src/figures.js"></script>
 <script src="../src/generators.js"></script>
 <script src="../src/gen2.js"></script>
-<script src="../src/gen3.js"></script>
+<script src="../src/gen3.js"></script><script src="../src/competences.js"></script>
 <script src="../src/lessons.js"></script>
 <script src="../src/engine.js"></script>
 <script>
@@ -153,11 +153,33 @@ for (const n of NOTIONS) {
   log.push("11e, Mathélo 900, défi : " + Engine.planSession(weak, "defi").join("  ") + " | auto : " + Engine.planSession(weak, "auto").join(" "));
 }
 
+// 2 sexies. Compétences : chaque notion a ses libellés, chaque question sa compétence ; notes de 1 à 6
+for (const n of NOTIONS) {
+  const L = COMPS[n.id];
+  if (!L || L.length !== 3 || L.some((x) => !x)) fail("compétences manquantes : " + n.id);
+  if (ORDRE.CO[n.id] === undefined && ORDRE.MATU[n.id] === undefined && ORDRE.MP[n.id] === undefined) fail("notion hors de l'ordre du référentiel : " + n.id);
+}
+if (compNote({ r: [1, 1] }) !== null || compNote({ r: [1, 1, 1] }) !== 6 || compNote({ r: [0, 0, 0] }) !== 1 || compNote({ r: [1, 0.5, 1, 0, 1] }) !== 4.5) fail("note de compétence");
+// Ouverture des notions de l'année dans l'ordre du référentiel, sans questionnaire ; « pas encore vu en classe »
+{ const t = Engine.newState({ system: "CH", grade: 9, track: "college", minutes: 5 }); Engine.initNotions(t, Object.fromEntries(Engine.catalog(t.profile).map((c) => [c.id, c.defaultStatus])));
+  Engine.unlock(t, new Date("2026-09-10"));
+  const open = () => Object.entries(t.notions).filter(([, s]) => s.status === "encours").map(([id]) => id);
+  if (open().length !== 3) fail("rentrée de 9e : " + open().length + " notions ouvertes (3 attendues) : " + open().join(" "));
+  if (open().join() !== "decread,deccomp,decarr") fail("9e : ordre du référentiel non suivi : " + open().join(" "));
+  Engine.notYet(t, "deccomp");
+  if (t.notions.deccomp.status !== "nonvu" || open().length < 3 || open().includes("deccomp")) fail("pas encore vu : " + open().join(" "));
+  Engine.unlock(t, new Date("2027-03-01"));
+  const share = open().length / Object.values(t.notions).length;
+  if (share < 0.5) fail("9e en mars : seulement " + open().length + " notions ouvertes");
+  for (let k = 0; k < 3; k++) Engine.record(t, "decread", 1, 1, true);
+  const cid = compOf("decread", 1); if (compNote(t.comps[cid]) !== 6) fail("compétence non notée : " + JSON.stringify(t.comps));
+  log.push("9e : rentrée " + "decread,deccomp,decarr" + " ; mars " + open().length + " notions ouvertes"); }
+
 // 3. Moteur : parcours complet
 const prof = { system: "CH", grade: 11, minutes: 5 };
 for (const p of [{ system: "CH", grade: 12, track: "college" }, { system: "CH", grade: 12, track: "mp" }, { system: "CH", grade: 13, track: "college" }, { system: "CH", grade: 13, track: "mp" }]) log.push(p.system + p.grade + (p.track || "") + " : " + Engine.catalog(p, new Date("2027-03-01")).length + " notions — " + Engine.catalog(p, new Date("2027-03-01")).filter((c) => c.current).map((c) => c.id).join(" "));
 const st = Engine.newState(prof);
-const cat = Engine.catalog(prof, new Date("2026-11-11"));
+const cat = Engine.catalog(prof);
 Engine.initNotions(st, Object.fromEntries(cat.map((c) => [c.id, c.current ? "vu" : c.defaultStatus])));
 const plan = Engine.placementPlan(st);
 if (plan.length !== 5) fail("positionnement : " + plan.length + " questions");

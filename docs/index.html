@@ -224,6 +224,19 @@ details.lesson[open] { background: var(--paper); }
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 50; max-width: calc(100% - 32px);
   background: var(--ink, #1d3f8f); color: #fff; padding: 10px 16px; border-radius: 10px; font-size: .95rem; box-shadow: 0 6px 18px rgba(0,0,0,.2); }
 
+/* Mes compétences */
+.cnotion { padding: 10px 0; border-bottom: 1px dashed var(--line); display: grid; gap: 6px; }
+.cnotion:last-child { border-bottom: none; }
+.comp { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 0.92rem; color: var(--ink-soft); }
+.note { min-width: 3.2em; text-align: center; font-weight: 700; font-size: 0.85rem; padding: 2px 8px; border-radius: 999px; }
+.note.none { background: var(--grid); color: var(--ink-soft); font-weight: 400; font-size: 0.78rem; }
+.note.good { background: var(--ok-soft); color: var(--ok); }
+.note.ok { background: var(--blue-soft); color: var(--blue); }
+.note.low { background: var(--bad-soft); color: var(--bad); }
+.tag { font-size: 0.75rem; color: var(--ink-soft); border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
+details.olds summary { cursor: pointer; color: var(--blue); font-weight: 700; padding: 8px 0; }
+.notyet { margin-top: 6px; justify-self: start; }
+
 </style>
 <script>
 window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "global" }, startup: { typeset: false } };
@@ -340,6 +353,9 @@ function schoolMonth(date) {
   if (mo >= 7) return Math.max(0, mo - 8);
   return mo + 4; // janvier = 4 … juin = 9, juillet = 10
 }
+
+// Généré par tools/referentiels.py : rang de chaque notion dans l'ordre du référentiel (CO, matu, MP).
+const ORDRE = {"CO":{"decread":0,"deccomp":1,"decarr":2,"ordgr":3,"decadd":4,"dec10":5,"decmul":6,"decdiv":7,"decprob":8,"pow9":9,"prio":10,"tradexpr":11,"ulong":12,"uaire":13,"uvol":14,"utemps":15,"angtype":16,"quadri":17,"angtri":18,"multdiv":19,"divcrit":20,"premiers":21,"arith":22,"perim":23,"aire1":24,"aire2":25,"aire3":26,"relrep":27,"repere":28,"reladd":29,"solides":30,"volpave":31,"fracrep":32,"fracsimp":33,"fracconv":34,"fracper":35,"fractout":36,"fracadd":37,"proptab":38,"prop":39,"change":40,"agrand":41,"litelab":42,"valnum":43,"diagr":44,"rel":45,"disque":46,"grandmanq":47,"fracmul":48,"fracops":49,"pct":50,"vol":51,"airelat":52,"voldecomp":53,"vitesse":54,"carres":55,"rac":56,"racenc":57,"sci":58,"puiss":59,"scicalc":60,"reduire":61,"monomes":62,"distrib":63,"pyth":64,"pythfig":65,"eqverif":66,"eq1":67,"eqfrac":68,"probeq":69,"echelle":70,"pctvar":71,"pente":72,"tabval":73,"affine":74,"polyreg":75,"rotation":76,"pythrec":77,"volcone":78,"airepyr":79,"volcomp":80,"volmanq":81,"ucomp":82,"gquot":83,"parenth":84,"idrem":85,"factor":86,"formule":87,"eq2":88,"eq2fact":89,"eq2disc":90,"probeq2":91,"angles":92,"cercthales":93,"thalesrec":94,"thales":95,"sysprob":96,"sys2":97,"simil":98,"denombr":99,"proba":100},"MATU":{"racinv":0,"interpar":1,"domaine":2,"tabval":3,"fimg":4,"lectgraph":5,"modaff":6,"optim":7,"eq1":8,"eqfrac":9,"eqspec":10,"formule":11,"probeq":12,"sys2":13,"sysgraph":14,"sys3":15,"sysprob":16,"affine":17,"affzero":18,"droites":19,"reduire":20,"monomes":21,"polyop":22,"parenth":23,"distrib":24,"idrem":25,"factor":26,"factor2":27,"eq2fact":28,"eq2":29,"eq2disc":30,"trinfact":31,"probeq2":32,"eq3":33,"bicarre":34,"f2":35,"f2formes":36,"f2expr":37,"f2trois":38,"inter":39,"ineq2":40,"simil":41,"thales":42,"pyth":43,"pythfig":44,"pythrec":45,"euclide":46,"geocomb":47,"angles":48,"angtri":49,"cercthales":50,"trigo":51,"trigexact":52,"absval":53,"cart":54,"droitesinter":55,"cercle":56,"cercletan":57,"droitesrem":58,"polydiv":59,"polyfact":60,"ineq":61,"polyexpr":62,"valint":63,"fracrat":64,"fracetage":65,"eqrat":66,"probrat":67,"homog":68,"homogrec":69,"expo":70,"log":71,"logbase":72,"compo":73,"decomp":74,"bijection":75,"recip":76,"modexp":77,"trigeq2":78,"sinlaw":79,"triaire":80,"trigcercle":81,"trigassoc":82,"trigeq":83,"trigfn":84},"MP":{"ensembles":0,"vabs":1,"fracadd":2,"prio":3,"rel":4,"arith":5,"fracmul":6,"puiss":7,"rac":8,"ratden":9,"reduire":10,"distrib":11,"polyop":12,"idrem":13,"factor":14,"factor2":15,"fracrat":16,"valint":17,"formule":18,"eq1":19,"eqparam":20,"probeq":21,"eq2":22,"eq2disc":23,"trinfact":24,"exactes":25,"droitesrem":26,"pyth":27,"thales":28,"euclide":29,"angles":30,"trigo":31,"sys2":32,"sys3":33,"sysgraph":34,"fimg":35,"domaine":36,"inter":37,"affine":38,"droites":39,"f2":40,"f2expr":41,"optim":42,"trigcercle":43,"sinlaw":44,"trigeq":45,"statfreq":46,"stats":47,"quartiles":48}};
 
 // Calculateur d'expressions : lecture souple de la réponse de l'élève, calcul, mise en forme TeX,
 // équivalence d'expressions (par évaluation en plusieurs points) et contrôle de forme.
@@ -1059,6 +1075,7 @@ const GEN = {
   fracmul(d) {
     if (d === 1) {
       const a = R.int(1, 9), b = R.int(2, 9), c = R.int(1, 9), e = R.int(2, 9);
+      if (a === b || c === e) return GEN.fracmul(1);
       return { fig: FIG.fractionBars([[a, b], [c, e]]), q: "Calcule et simplifie : " + M("\\frac{" + a + "}{" + b + "} \\cdot \\frac{" + c + "}{" + e + "}"), spec: { kind: "value", value: (a * c) / (b * e) }, sol: M("\\frac{" + a + " \\cdot " + c + "}{" + b + " \\cdot " + e + "} = " + frac(a * c, b * e)) };
     }
     if (d === 2) {
@@ -3506,6 +3523,207 @@ const FINE_PATCH = {
   }
 })();
 
+// Compétences (13.11) : chaque notion est découpée en savoir-faire, un par niveau de question (1, 2, 3 ;
+// le problème en plusieurs étapes compte pour le niveau 3). Deux niveaux qui travaillent le même
+// savoir-faire portent le même libellé : ils alimentent la même compétence.
+// Libellés rédigés pour l'élève (les référentiels eux-mêmes ne sont pas publiés).
+// Note de 1 à 6 (échelle suisse, demi-points) à partir de 3 réponses ; « pas testé » avant.
+const COMPS = {
+  // ----- 9e -----
+  prio: ["Calculer avec les priorités (· avant +)", "Calculer avec des parenthèses", "Calculer avec puissances et parenthèses"],
+  arith: ["Trouver le PGDC de deux nombres", "Trouver le PPMC de deux nombres", "Résoudre un problème de PGDC ou de PPMC"],
+  fracadd: ["Additionner des fractions de même dénominateur", "Additionner des fractions de dénominateurs différents", "Additionner et soustraire plusieurs fractions"],
+  diagr: ["Calculer une moyenne", "Calculer l'angle d'un diagramme circulaire", "Calculer une moyenne à partir des effectifs"],
+  prop: ["Calculer une quatrième proportionnelle", "Calculer une quatrième proportionnelle", "Utiliser la proportionnalité dans un problème"],
+  valnum: ["Remplacer une lettre par un nombre", "Calculer une expression du 2e degré pour une valeur", "Calculer une expression à deux lettres"],
+  angtri: ["Utiliser la somme des angles d'un triangle", "Calculer les angles d'un triangle isocèle", "Utiliser la somme des angles d'un quadrilatère"],
+  decread: ["Lire le rang d'un chiffre", "Écrire un nombre à partir de sa décomposition", "Passer de l'écriture fractionnaire à l'écriture décimale"],
+  deccomp: ["Comparer deux nombres décimaux", "Ranger des nombres décimaux", "Intercaler un nombre entre deux décimaux"],
+  decarr: ["Arrondir au dixième ou au centième", "Encadrer un nombre décimal", "Arrondir avec retenue ou à la dizaine"],
+  ordgr: ["Estimer une somme", "Estimer un produit", "Estimer un quotient"],
+  decadd: ["Additionner des nombres décimaux", "Soustraire des nombres décimaux", "Enchaîner additions et soustractions"],
+  dec10: ["Multiplier par 10, 100, 1000", "Diviser par 10, 100, 1000", "Multiplier ou diviser par 0,1 ; 0,01…"],
+  decmul: ["Multiplier un décimal par un entier", "Multiplier deux nombres décimaux", "Multiplier des décimaux plus petits que 1"],
+  decdiv: ["Diviser un décimal par un entier", "Diviser par un nombre décimal", "Diviser par un nombre décimal"],
+  decprob: ["Résoudre un problème avec des décimaux", "Résoudre un problème avec des décimaux", "Résoudre un problème de partage"],
+  pow9: ["Calculer un carré ou un cube", "Calculer une puissance d'un décimal ou de 10", "Enchaîner des puissances"],
+  tradexpr: ["Traduire une phrase en calcul", "Traduire une phrase en calcul", "Traduire une phrase en calcul (puissances)"],
+  multdiv: ["Trouver des multiples", "Trouver les diviseurs d'un nombre", "Compter des multiples dans un intervalle"],
+  divcrit: ["Utiliser les critères de divisibilité par 3 et 9", "Utiliser les critères de divisibilité par 3 et 9", "Combiner des critères de divisibilité"],
+  premiers: ["Reconnaître un nombre premier", "Décomposer en facteurs premiers", "Décomposer en facteurs premiers"],
+  relrep: ["Comparer des nombres relatifs", "Calculer une distance sur la droite graduée", "Trouver le milieu de deux relatifs"],
+  reladd: ["Additionner des nombres relatifs", "Soustraire un nombre relatif", "Calculer une somme de plusieurs relatifs"],
+  fracrep: ["Comparer des fractions de même dénominateur", "Comparer des fractions de dénominateurs différents", "Encadrer une fraction entre deux entiers"],
+  fracsimp: ["Amplifier une fraction", "Simplifier une fraction", "Rendre une fraction irréductible"],
+  fracconv: ["Écrire une fraction en nombre décimal", "Écrire une fraction en pourcentage", "Écrire un pourcentage en fraction"],
+  fracper: ["Reconnaître un nombre périodique", "Reconnaître un nombre périodique", "Écrire un nombre périodique en fraction"],
+  fractout: ["Calculer une fraction d'une quantité", "Calculer une fraction d'une quantité", "Retrouver le tout à partir d'une fraction"],
+  ulong: ["Convertir longueurs et masses", "Convertir longueurs et masses", "Résoudre un problème avec des unités"],
+  uaire: ["Convertir des unités d'aire", "Convertir des unités d'aire", "Convertir ares, hectares et km²"],
+  uvol: ["Convertir des capacités (L, dL, cL, mL)", "Convertir des unités de volume", "Passer des volumes aux litres"],
+  utemps: ["Convertir des durées", "Additionner des durées", "Calculer une durée entre deux horaires"],
+  perim: ["Calculer un périmètre", "Retrouver un côté à partir du périmètre", "Calculer le périmètre d'une figure découpée"],
+  aire1: ["Calculer l'aire d'un carré ou d'un rectangle", "Calculer l'aire d'un triangle", "Combiner aire, périmètre et unités"],
+  aire2: ["Calculer l'aire d'un parallélogramme", "Calculer l'aire d'un losange", "Choisir la bonne hauteur"],
+  aire3: ["Calculer une aire par décomposition", "Calculer une aire par décomposition", "Calculer une aire par différence"],
+  volpave: ["Calculer le volume d'un pavé", "Calculer l'aire totale d'un cube ou d'un pavé", "Passer d'un volume à une contenance"],
+  solides: ["Décrire un cube ou un pavé", "Décrire un prisme droit", "Décrire un prisme droit"],
+  proptab: ["Trouver un coefficient de proportionnalité", "Trouver un coefficient de proportionnalité", "Compléter un tableau de proportionnalité"],
+  change: ["Convertir des euros en francs", "Convertir des francs en euros", "Comparer des prix en deux monnaies"],
+  agrand: ["Trouver le facteur d'agrandissement", "Agrandir ou réduire une longueur", "Agrandir ou réduire avec une fraction"],
+  litelab: ["Écrire une expression littérale", "Écrire un périmètre avec une lettre", "Écrire et réduire une expression littérale"],
+  angtype: ["Utiliser l'angle plat", "Utiliser l'angle plein", "Reconnaître angles aigus et obtus"],
+  quadri: ["Utiliser les propriétés du losange et du carré", "Utiliser les angles du parallélogramme", "Connaître symétries et diagonales des quadrilatères"],
+  // ----- 10e -----
+  rel: ["Additionner des nombres relatifs", "Multiplier des relatifs avec les priorités", "Calculer avec des puissances de relatifs"],
+  vol: ["Calculer le volume d'un pavé", "Calculer le volume d'un prisme droit", "Retrouver une dimension d'un cylindre"],
+  fracmul: ["Multiplier des fractions", "Diviser des fractions", "Calculer avec des fractions et des parenthèses"],
+  pct: ["Calculer un pourcentage d'une quantité", "Calculer un prix après une baisse", "Retrouver une valeur de départ"],
+  puiss: ["Multiplier des puissances de même base", "Calculer avec des exposants négatifs", "Utiliser les règles des puissances"],
+  sci: ["Écrire en notation scientifique", "Calculer en notation scientifique", "Calculer en notation scientifique"],
+  rac: ["Calculer une racine carrée", "Simplifier une racine carrée", "Additionner des racines carrées"],
+  disque: ["Calculer le périmètre d'un cercle", "Calculer l'aire d'un disque", "Calculer un arc ou un secteur"],
+  vitesse: ["Calculer une vitesse", "Calculer une durée", "Calculer une vitesse moyenne sur un trajet"],
+  pyth: ["Calculer l'hypoténuse", "Calculer une cathète", "Utiliser Pythagore dans une figure"],
+  reduire: ["Réduire une expression du 1er degré", "Réduire une expression du 2e degré", "Réduire après avoir supprimé des parenthèses"],
+  distrib: ["Développer avec la simple distributivité", "Développer avec la double distributivité", "Développer avec la double distributivité"],
+  eq1: ["Résoudre une équation du type ax + b = c", "Résoudre une équation avec parenthèses", "Résoudre une équation avec fractions"],
+  probeq: ["Mettre un problème en équation", "Mettre un problème en équation", "Mettre un problème en équation (2e degré)"],
+  echelle: ["Utiliser une échelle", "Agrandir une aire", "Agrandir un volume"],
+  affine: ["Calculer l'image par une fonction affine", "Calculer la pente d'une droite", "Calculer une préimage par une fonction affine"],
+  polyreg: ["Calculer l'angle au centre d'un polygone régulier", "Calculer l'angle intérieur d'un polygone régulier", "Retrouver le nombre de côtés"],
+  grandmanq: ["Retrouver une longueur à partir de l'aire", "Retrouver une hauteur à partir de l'aire", "Retrouver une dimension à partir de l'aire"],
+  fracops: ["Soustraire des fractions (résultat négatif)", "Multiplier et diviser des fractions relatives", "Calculer avec des fractions et les priorités"],
+  airelat: ["Calculer l'aire latérale d'un prisme", "Calculer l'aire latérale d'un cylindre", "Calculer l'aire totale d'un cylindre"],
+  voldecomp: ["Calculer le volume d'un solide composé", "Calculer le volume d'un solide composé", "Calculer une contenance en litres"],
+  carres: ["Calculer une racine carrée exacte", "Calculer une racine cubique ou décimale", "Calculer une racine de somme ou de produit"],
+  racenc: ["Encadrer une racine carrée", "Comparer une racine et un entier", "Encadrer une racine carrée"],
+  scicalc: ["Multiplier en notation scientifique", "Diviser en notation scientifique", "Écrire le résultat en notation scientifique"],
+  monomes: ["Multiplier des monômes", "Multiplier des monômes", "Calculer la puissance d'un monôme"],
+  pythfig: ["Calculer la diagonale d'un rectangle", "Calculer la hauteur d'un triangle isocèle", "Calculer la diagonale d'un pavé"],
+  eqverif: ["Vérifier une solution", "Vérifier une solution", "Vérifier les solutions d'une équation du 2e degré"],
+  pctvar: ["Calculer une augmentation", "Calculer une réduction", "Retrouver un prix ou un pourcentage de variation"],
+  pente: ["Calculer une pente", "Calculer un dénivelé", "Calculer une distance horizontale"],
+  repere: ["Lire des coordonnées", "Distance d'un point aux axes", "Trouver un sommet d'un rectangle"],
+  tabval: ["Calculer une image (fonction affine)", "Calculer une image (fonction du 2e degré)", "Calculer une image (fonctions diverses)"],
+  rotation: ["Trouver l'angle d'une rotation", "Trouver l'angle d'une rotation", "Trouver l'image d'un point par une rotation"],
+  // ----- 11e -----
+  proba: ["Calculer une probabilité simple", "Calculer une probabilité avec deux dés", "Calculer une probabilité sans remise"],
+  volcone: ["Calculer le volume d'une pyramide", "Calculer le volume d'une boule", "Calculer le volume d'un cône"],
+  gquot: ["Convertir une vitesse", "Utiliser la masse volumique", "Utiliser un débit"],
+  thales: ["Calculer une longueur avec Thalès", "Calculer une longueur avec Thalès", "Résoudre un problème avec Thalès"],
+  idrem: ["Développer (a + b)²", "Développer (a + b)(a − b)", "Développer (a − b)²"],
+  factor: ["Factoriser par mise en évidence", "Factoriser une différence de deux carrés", "Factoriser un carré parfait"],
+  formule: ["Transformer une formule", "Transformer une formule", "Transformer une formule (racine)"],
+  eq2: ["Résoudre une équation produit nul", "Résoudre en mettant x en évidence", "Résoudre avec une différence de carrés"],
+  eq2disc: ["Résoudre une équation du 2e degré", "Résoudre une équation du 2e degré", "Résoudre une équation du 2e degré (racines)"],
+  sys2: ["Résoudre un système de deux équations", "Résoudre un système de deux équations", "Mettre un problème en système"],
+  angles: ["Angle au centre et angle inscrit", "Angle au centre et angle inscrit", "Utiliser le cercle de Thalès"],
+  simil: ["Utiliser des triangles semblables", "Agrandir une aire (rapport k²)", "Agrandir un volume (rapport k³)"],
+  pythrec: ["Repérer l'hypoténuse", "Reconnaître un triangle rectangle", "Montrer qu'un triangle n'est pas rectangle"],
+  airepyr: ["Calculer l'aire latérale d'une pyramide", "Calculer l'aire totale d'une pyramide", "Calculer l'apothème puis l'aire"],
+  volcomp: ["Calculer le volume d'un solide composé", "Calculer le volume d'un solide composé", "Calculer le volume d'un solide composé"],
+  volmanq: ["Retrouver la hauteur d'un pavé", "Retrouver la hauteur d'un cylindre", "Retrouver le rayon d'un cône"],
+  ucomp: ["Convertir des km/h en m/s", "Convertir des m/s en km/h", "Convertir une masse volumique ou un débit"],
+  parenth: ["Supprimer des parenthèses", "Supprimer des parenthèses", "Supprimer des parenthèses (2e degré)"],
+  eqfrac: ["Résoudre une équation avec parenthèses", "Résoudre une équation avec une fraction", "Résoudre une équation avec plusieurs fractions"],
+  eq2fact: ["Résoudre x² = a", "Résoudre en mettant x en évidence", "Résoudre en factorisant"],
+  probeq2: ["Résoudre un problème du 2e degré", "Résoudre un problème du 2e degré", "Résoudre un problème du 2e degré"],
+  cercthales: ["Utiliser le cercle de Thalès", "Utiliser une tangente au cercle", "Utiliser le cercle de Thalès"],
+  thalesrec: ["Utiliser la réciproque de Thalès", "Utiliser la réciproque de Thalès", "Reconnaître des droites parallèles"],
+  sysprob: ["Résoudre un problème avec somme et différence", "Mettre un problème en système", "Mettre un problème en système"],
+  denombr: ["Dénombrer avec un arbre", "Dénombrer sans répétition", "Dénombrer des paires"],
+  // ----- 1re du Collège -----
+  polyop: ["Développer un produit de polynômes", "Développer avec des identités", "Développer un cube"],
+  factor2: ["Factoriser par mise en évidence", "Factoriser un trinôme", "Factoriser par groupements"],
+  eq3: ["Résoudre une équation de degré 3", "Résoudre une équation de degré 3", "Résoudre une équation de degré 3"],
+  sys3: ["Résoudre un système triangulaire", "Résoudre un système de trois équations", "Mettre un problème en système de trois équations"],
+  domaine: ["Trouver un domaine de définition", "Trouver un domaine de définition", "Trouver un domaine (2e degré sous la racine)"],
+  fimg: ["Calculer une image", "Calculer une image", "Trouver des préimages"],
+  f2: ["Trouver les zéros d'une parabole", "Trouver le sommet d'une parabole", "Trouver le sommet d'une parabole"],
+  f2expr: ["Retrouver une parabole par ses zéros", "Retrouver une parabole par son sommet", "Retrouver une parabole par trois points"],
+  inter: ["Intersection d'une parabole et d'une droite", "Intersection d'une parabole et d'une droite", "Intersection d'une parabole et d'une droite"],
+  ineq2: ["Résoudre une inéquation produit", "Résoudre une inéquation du 2e degré", "Comparer deux fonctions"],
+  racinv: ["Calculer une préimage par la fonction inverse", "Résoudre une équation avec une racine", "Intersection d'une hyperbole et d'une droite"],
+  euclide: ["Utiliser le théorème de la hauteur", "Utiliser le théorème d'Euclide", "Calculer la hauteur relative à l'hypoténuse"],
+  droitesrem: ["Utiliser le centre de gravité", "Utiliser les bissectrices", "Utiliser le cercle circonscrit"],
+  trigo: ["Calculer un côté avec sin, cos, tan", "Calculer un angle avec sin, cos, tan", "Résoudre un problème de trigonométrie"],
+  trinfact: ["Factoriser un trinôme par ses zéros", "Factoriser un trinôme par ses zéros", "Factoriser un trinôme par ses zéros"],
+  exactes: ["Diagonale d'un carré en valeur exacte", "Hauteur d'un triangle équilatéral en valeur exacte", "Aire en valeur exacte"],
+  sysgraph: ["Système sans solution (droites parallèles)", "Système sans solution", "Système avec une infinité de solutions"],
+  optim: ["Trouver où une fonction atteint son maximum", "Calculer une hauteur maximale", "Résoudre un problème d'optimisation"],
+  eqspec: ["Reconnaître une équation impossible", "Reconnaître une équation impossible", "Reconnaître une équation indéterminée"],
+  bicarre: ["Résoudre une équation bicarrée", "Résoudre une équation bicarrée", "Résoudre une équation bicarrée"],
+  lectgraph: ["Lire les zéros sur un graphique", "Lire les variations sur un graphique", "Résoudre graphiquement f(x) = k"],
+  affzero: ["Calculer le zéro d'une fonction affine", "Étudier le signe d'une fonction affine", "Étudier le signe d'une fonction affine"],
+  f2formes: ["Passer de la forme canonique à la forme développée", "Écrire la forme canonique", "Passer de la forme factorisée à la forme canonique"],
+  f2trois: ["Retrouver une parabole par trois points", "Retrouver une parabole par trois points", "Retrouver une parabole par trois points"],
+  interpar: ["Intersection de deux paraboles", "Intersection de deux paraboles", "Nombre de points d'intersection"],
+  modaff: ["Modéliser un tarif", "Comparer deux offres", "Comparer deux offres"],
+  trigexact: ["Utiliser les valeurs exactes de 30° et 60°", "Utiliser les valeurs exactes de 30°, 45° et 60°", "Relier pente et angle"],
+  geocomb: ["Enchaîner Pythagore et l'aire", "Calculer une hauteur par les aires", "Combiner Pythagore et trigonométrie"],
+  // ----- 2e du Collège -----
+  polydiv: ["Calculer le reste d'une division", "Diviser un polynôme par x − a", "Trouver un paramètre pour que la division tombe juste"],
+  polyfact: ["Résoudre avec une racine connue", "Trouver une racine évidente", "Résoudre une équation de degré 4"],
+  fracrat: ["Simplifier une fraction rationnelle", "Additionner des fractions rationnelles", "Simplifier une fraction rationnelle"],
+  eqrat: ["Résoudre une équation rationnelle simple", "Résoudre une proportion", "Résoudre une équation rationnelle"],
+  ineq: ["Résoudre une inéquation du 1er degré", "Résoudre une inéquation avec un quotient", "Résoudre avec un tableau des signes"],
+  recip: ["Calculer avec une réciproque", "Calculer avec une composée", "Trouver l'expression d'une réciproque"],
+  absval: ["Résoudre une équation avec valeur absolue", "Résoudre une équation avec valeur absolue", "Reconnaître une équation sans solution"],
+  homog: ["Trouver l'asymptote verticale", "Trouver l'asymptote horizontale", "Trouver la réciproque d'une homographique"],
+  trigfn: ["Lire l'amplitude d'une sinusoïde", "Calculer la période d'une sinusoïde", "Trouver le maximum d'une sinusoïde"],
+  expo: ["Résoudre une équation exponentielle", "Résoudre une équation exponentielle", "Calculer des intérêts composés"],
+  log: ["Calculer un logarithme", "Résoudre avec un logarithme", "Utiliser les propriétés du logarithme"],
+  trigcercle: ["Convertir des degrés en radians", "Valeurs exactes sur le cercle trigonométrique", "Coordonnées d'un point du cercle trigonométrique"],
+  trigeq: ["Résoudre sin x = c", "Résoudre cos x = c", "Résoudre tan x = c"],
+  sinlaw: ["Utiliser le théorème du sinus", "Utiliser le théorème du cosinus", "Calculer un angle avec le cosinus"],
+  cart: ["Calculer une distance entre deux points", "Calculer un milieu", "Trouver l'équation d'une droite"],
+  droites: ["Trouver l'équation d'une droite", "Trouver une droite perpendiculaire", "Trouver l'intersection de deux droites"],
+  cercle: ["Lire centre et rayon d'un cercle", "Trouver le rayon (compléter les carrés)", "Intersection d'un cercle et d'une droite"],
+  valint: ["Trouver une valeur interdite", "Trouver les valeurs interdites", "Trouver les valeurs interdites (factoriser)"],
+  modexp: ["Calculer des intérêts composés", "Calculer une croissance par doublements", "Trouver un temps de doublement"],
+  compo: ["Calculer avec une composée", "Trouver l'expression d'une composée", "Comparer f ∘ g et g ∘ f"],
+  fracetage: ["Simplifier une fraction à étages", "Simplifier une fraction à étages", "Simplifier une fraction à étages"],
+  probrat: ["Résoudre un problème de travail en commun", "Résoudre un problème de travail en commun", "Résoudre un problème de vitesse"],
+  bijection: ["Restreindre une fonction pour une bijection", "Restreindre une fonction pour une bijection", "Reconnaître une fonction injective"],
+  decomp: ["Décomposer une fonction", "Décomposer une fonction", "Décomposer une fonction"],
+  polyexpr: ["Retrouver un polynôme par ses zéros", "Retrouver un polynôme (zéro double)", "Modéliser avec un polynôme"],
+  homogrec: ["Trouver la réciproque d'une homographique", "Trouver la réciproque d'une homographique", "Calculer une préimage par une homographique"],
+  trigassoc: ["Utiliser les angles associés", "Utiliser les angles complémentaires", "Utiliser sin² + cos² = 1"],
+  trigeq2: ["Résoudre sin(kx) = c", "Trouver amplitude et valeur moyenne", "Modéliser un phénomène périodique"],
+  logbase: ["Changer de base (valeur exacte)", "Changer de base (calculatrice)", "Enchaîner des changements de base"],
+  triaire: ["Calculer l'aire d'un triangle avec le sinus", "Calculer l'aire d'un triangle avec le sinus", "Calculer une distance avec le cosinus"],
+  droitesinter: ["Trouver l'intersection de deux droites", "Trouver une médiatrice", "Trouver une hauteur d'un triangle"],
+  cercletan: ["Trouver un cercle par son diamètre", "Rayon d'un cercle tangent à une droite", "Pente d'une tangente à un cercle"],
+  // ----- Maturité professionnelle -----
+  ensembles: ["Compter les entiers d'un intervalle", "Lire des bornes ouvertes ou fermées", "Intersection de deux intervalles"],
+  vabs: ["Calculer une valeur absolue", "Calculer avec des valeurs absolues", "Calculer avec des valeurs absolues"],
+  ratden: ["Rendre un dénominateur rationnel", "Rendre un dénominateur rationnel", "Utiliser l'expression conjuguée"],
+  eqparam: ["Équation sans solution selon un paramètre", "Équation sans solution selon un paramètre", "Solution double selon un paramètre"],
+  statfreq: ["Calculer une fréquence", "Calculer un effectif cumulé", "Calculer l'angle d'un secteur"],
+  quartiles: ["Calculer une étendue", "Calculer une médiane", "Calculer l'écart interquartile"],
+  stats: ["Calculer une moyenne", "Calculer une médiane", "Calculer un écart-type"],
+};
+
+// Compétence d'une question : notion + niveau (le problème compte pour le niveau 3).
+function compOf(id, d) {
+  const L = COMPS[id];
+  if (!L) return id + ":0";
+  const k = Math.min(d, 3) - 1, i = L.indexOf(L[k]);
+  return id + ":" + i;
+}
+// Compétences distinctes d'une notion : [{ cid, label }].
+function compsOf(id) {
+  const L = COMPS[id] || [NOTIONS.find((n) => n.id === id).label];
+  return L.map((label, i) => ({ cid: id + ":" + i, label, i })).filter((c) => L.indexOf(c.label) === c.i);
+}
+// Note sur l'échelle suisse (1 à 6, demi-points) à partir des 8 dernières réponses ; null avant 3 réponses.
+function compNote(rec) {
+  if (!rec || rec.r.length < 3) return null;
+  const avg = rec.r.reduce((a, b) => a + b, 0) / rec.r.length;
+  return Math.round((1 + 5 * avg) * 2) / 2;
+}
+
 // Mini-leçons (rappel de cours en 30 secondes), une par notion.
 // Format repris du prototype d'octobre (titre, intro, règle, exemples, piège) ; calcul littéral = textes d'octobre.
 const L_ = (titre, intro, regle, exemple, piege) => ({ titre, intro, regle, exemple, piege });
@@ -3700,41 +3918,82 @@ const Engine = {
     return { v: 1, profile, notions: {}, streak: { count: 0, last: null }, history: [], created: day(), elo: { r: Math.round(start), n: 0, log: [] } };
   },
 
-  // Notions du programme jusqu'à l'année de l'élève, avec statut proposé selon la date.
-  catalog(profile, date = new Date()) {
-    const mo = schoolMonth(date);
+  // Notions du programme jusqu'à l'année de l'élève. Années précédentes : vues. Année en cours : « à venir » ;
+  // elles s'ouvrent dans l'ordre du référentiel (unlock), sans rien demander à l'élève.
+  catalog(profile) {
     return NOTIONS.filter((n) => { const pl = placeOf(n, profile); return pl && pl[0] <= profile.grade; }).map((n) => {
-      const [g, m] = placeOf(n, profile);
-      // Année en cours : l'élève dit ce qu'il a vu (pas de calendrier commun). MP : semestre du PEE.
-      let status = "vu";
-      if (g === profile.grade) status = m === "S1" ? (mo <= 4 ? "encours" : "vu") : m === "S2" ? (mo <= 4 ? "nonvu" : "encours") : typeof m === "number" ? (mo > m ? "vu" : mo === m ? "encours" : "nonvu") : "nonvu";
-      // Notion reprise cette année (référentiel) : elle est proposée à l'élève, déjà cochée « vu ».
+      const [g] = placeOf(n, profile);
       const again = profile.track !== "mp" && (n.again || []).includes(profile.grade);
-      return { ...n, defaultStatus: status, current: g === profile.grade || again, again };
+      return { ...n, defaultStatus: g < profile.grade ? "vu" : "avenir", current: g === profile.grade || again, again };
     });
+  },
+  // Rang dans l'ordre du référentiel (CO, matu ou MP selon l'élève).
+  rank(profile, id) {
+    const ref = profile.track === "mp" ? "MP" : profile.grade >= 12 ? "MATU" : "CO";
+    const r = (ORDRE[ref] || {})[id] ?? ORDRE.CO[id];
+    return r ?? 1000 + NOTIONS.findIndex((n) => n.id === id);
+  },
+  newNotion(status) {
+    return { status, m: status === "vu" ? 0.55 : status === "encours" ? 0.4 : 0, box: status === "vu" ? 1 : 0, due: day(), seen: 0, ok: 0 };
+  },
+  autoInit(state) {
+    this.initNotions(state, Object.fromEntries(this.catalog(state.profile).map((c) => [c.id, c.defaultStatus])));
+    this.unlock(state);
+  },
+  // Ouvre les notions de l'année dans l'ordre du référentiel : toujours au moins 3 notions ouvertes et pas encore
+  // maîtrisées, et au moins la part de l'année écoulée (novembre ≈ 20 %, juin ≈ 90 %). Une notion « pas encore vue
+  // en classe » revient au bout de 3 semaines.
+  unlock(state, date = new Date()) {
+    const today = day(date), p = state.profile;
+    const cur = Object.keys(state.notions).filter((id) => { const pl = placeOf(NOTIONS.find((n) => n.id === id), p); return pl && pl[0] === p.grade; })
+      .sort((a, b) => this.rank(p, a) - this.rank(p, b));
+    for (const id of cur) { const s = state.notions[id]; if (s.status === "nonvu" && (!s.retry || s.retry <= today)) s.status = "avenir"; }
+    const open = () => cur.filter((id) => ["encours", "vu"].includes(state.notions[id].status));
+    const active = () => open().filter((id) => { const s = state.notions[id]; return !(s.ok >= 2 && s.m >= 0.6); }).length;
+    const minOpen = Math.ceil((cur.length * schoolMonth(date)) / 10);
+    let changed = false;
+    while (active() < 3 || open().length < minOpen) {
+      const next = cur.find((id) => state.notions[id].status === "avenir");
+      if (!next) break;
+      Object.assign(state.notions[next], { status: "encours", m: Math.max(0.4, state.notions[next].m), due: today });
+      changed = true;
+    }
+    return changed;
+  },
+  // « Pas encore vu en classe » : la notion sort des séances pendant 3 semaines, sans pénalité.
+  notYet(state, id) {
+    const s = state.notions[id];
+    if (!s) return;
+    s.status = "nonvu"; s.retry = addDays(day(), 21); s.due = s.retry;
+    this.unlock(state);
+  },
+  // Compétence : les 8 dernières réponses (1, 0,5 ou 0).
+  recordComp(state, id, d, score) {
+    state.comps = state.comps || {};
+    const cid = compOf(id, d), rec = (state.comps[cid] = state.comps[cid] || { r: [], n: 0 });
+    rec.r.push(score); rec.r = rec.r.slice(-8); rec.n++; rec.last = day();
   },
 
   // Catalogue modifié depuis la création du profil : ajoute les notions manquantes (anciennes = vues, année en cours = à cocher).
   migrate(state) {
     let changed = false;
-    for (const c of this.catalog(state.profile)) if (!state.notions[c.id]) {
-      const status = c.defaultStatus;
-      state.notions[c.id] = { status, m: status === "vu" ? 0.55 : status === "encours" ? 0.4 : 0, box: status === "vu" ? 1 : 0, due: day(), seen: 0, ok: 0 };
-      changed = true;
-    }
+    for (const c of this.catalog(state.profile)) if (!state.notions[c.id]) { state.notions[c.id] = this.newNotion(c.defaultStatus); changed = true; }
+    // Ancien questionnaire : « pas encore » coché par l'élève → à venir (la notion s'ouvrira dans l'ordre).
+    for (const s of Object.values(state.notions)) if (s.status === "nonvu" && !s.retry) { s.status = "avenir"; changed = true; }
     for (const id of Object.keys(state.notions)) { const n = NOTIONS.find((x) => x.id === id); if (!n || !placeOf(n, state.profile)) { delete state.notions[id]; changed = true; } }
+    if (this.unlock(state)) changed = true;
     return changed;
   },
 
   initNotions(state, statuses) {
     state.notions = {};
     for (const [id, status] of Object.entries(statuses)) {
-      state.notions[id] = { status, m: status === "vu" ? 0.55 : status === "encours" ? 0.4 : 0, box: status === "vu" ? 1 : 0, due: day(), seen: 0, ok: 0 };
+      state.notions[id] = this.newNotion(status);
     }
   },
 
   eligible(state) {
-    return Object.entries(state.notions).filter(([, s]) => s.status !== "nonvu").map(([id]) => id);
+    return Object.entries(state.notions).filter(([, s]) => s.status === "vu" || s.status === "encours").map(([id]) => id);
   },
 
   // Difficulté : visée ≈ 70 % de réussite (question ≈ 150 points sous le Mathélo), corrigée par la maîtrise de la notion.
@@ -3807,6 +4066,7 @@ const Engine = {
   // Résultat d'une question de positionnement : true, false ou null (« je ne sais pas »).
   placementResult(state, id, ok, d = 2) {
     this.updateElo(state, id, d, ok === true ? 1 : 0);
+    this.recordComp(state, id, d, ok === true ? 1 : 0);
     const s = state.notions[id];
     if (ok === true) Object.assign(s, { m: 0.75, box: 2, due: addDays(day(), 3) });
     else if (ok === false) Object.assign(s, { m: 0.3, box: 0, due: day() });
@@ -3929,6 +4189,7 @@ const Engine = {
     s.due = addDays(day(), INTERVALS[s.box]);
     if (s.status === "encours" && s.m > 0.7) s.status = "vu";
     const delta = this.updateElo(state, id, d, 1, 0.5);
+    this.recordComp(state, id, d, 1);
     // Remplaçante : même notion, un cran au-dessus (si possible), sinon la question suivante du programme.
     const cap = difficultyCap(state.profile), top = hasProb(id) && kind !== "drill" ? 4 : Math.min(3, cap);
     return { delta, next: d < top && d < 4 ? id + "|" + (d + 1) + "|" + (kind === "drill" ? "app" : kind || "app") : null };
@@ -3938,6 +4199,7 @@ const Engine = {
   record(state, id, d, tries, solved, partial) {
     const s = state.notions[id];
     if (partial !== undefined) { // problème : score partiel 0..1
+      this.recordComp(state, id, d, partial);
       s.seen++;
       s.m = Math.min(1, Math.max(0, s.m + (partial - 0.5) * 0.2));
       if (partial >= 0.99) { s.box = Math.min(5, s.box + 1); s.ok++; } else if (partial < 0.5) s.box = 0;
@@ -3959,7 +4221,10 @@ const Engine = {
     }
     s.due = addDays(today, solved && tries === 1 ? INTERVALS[s.box] : 1);
     if (s.status === "encours" && s.m > 0.7) s.status = "vu";
-    return solved ? (tries === 1 ? 1 : 0.5) : 0;
+    const sc = solved ? (tries === 1 ? 1 : 0.5) : 0;
+    this.recordComp(state, id, d, sc);
+    this.unlock(state);
+    return sc;
   },
 
   finishDay(state, answered, score) {
@@ -3999,7 +4264,7 @@ const Engine = {
   themeLevels(state) {
     const out = {};
     for (const [id, s] of Object.entries(state.notions)) {
-      if (s.status === "nonvu") continue;
+      if (s.status !== "vu" && s.status !== "encours") continue;
       const th = NOTIONS.find((n) => n.id === id).theme;
       (out[th] = out[th] || []).push(s.m);
     }
@@ -4007,7 +4272,7 @@ const Engine = {
   },
 };
 
-// Interface : entrée (niveau, temps, notions, positionnement), accueil, séance, bilan.
+// Interface : entrée (niveau, positionnement), accueil, séance, bilan, compétences.
 // Point de collecte des votes 👍 / 👎 : laisser vide tant qu'aucun n'est configuré (votes gardés sur l'appareil).
 const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7gqEVGIeAbBF0cML8VEDYtQfaOmO0743jRcmeHSQ-WglFVCb-dd/exec";
 
@@ -4049,7 +4314,7 @@ function screenLevel() {
   const sys = SYSTEMS[draft.system];
   if (!sys.grades.some(([g]) => g === draft.grade)) draft.grade = sys.grades[sys.grades.length - 2][0];
   const sec2 = draft.system === "CH" && draft.grade >= 12;
-  h(`${brand}<div class="eyebrow">Étape 1 sur 3</div><h2>Où en es-tu ?</h2>
+  h(`${brand}<div class="eyebrow">Étape 1 sur 2</div><h2>Où en es-tu ?</h2>
   <div class="card flat stack">${Object.keys(SYSTEMS).length > 1 ? `<h3>Ton école</h3><div class="seg" id="sys">${Object.entries(SYSTEMS).map(([k, v]) => `<button aria-pressed="${k === draft.system}" data-v="${k}">${v.label}</button>`).join("")}</div>` : ""}
   <h3>Ta classe cette année</h3><div class="seg" id="grade">${sys.grades.map(([g, n]) => `<button aria-pressed="${g === draft.grade}" data-v="${g}">${n}</button>`).join("")}</div>
   ${sec2 ? `<h3>Ta voie</h3><div class="seg" id="track"><button aria-pressed="${draft.track === "college"}" data-v="college">Collège (maturité gymnasiale)</button><button aria-pressed="${draft.track === "mp"}" data-v="mp">Maturité professionnelle</button></div>` : ""}</div>
@@ -4057,42 +4322,14 @@ function screenLevel() {
   <button class="btn-primary btn-big" id="next">Continuer</button>`);
   const bind = (id, key, num) => app.querySelectorAll("#" + id + " button").forEach((b) => (b.onclick = () => { draft[key] = num ? +b.dataset.v : b.dataset.v; screenLevel(); }));
   bind("sys", "system"); bind("grade", "grade", true); bind("track", "track");
-  document.getElementById("next").onclick = () => { draft.statuses = null; screenNotions(); };
-}
-
-function screenNotions(editing = false) {
-  const prof = editing ? state.profile : draft;
-  const cat = Engine.catalog(prof);
-  const st = editing ? Object.fromEntries(Object.entries(state.notions).map(([k, v]) => [k, v.status])) : (draft.statuses ||= Object.fromEntries(cat.map((c) => [c.id, c.defaultStatus])));
-  // On ne demande que les notions de l'année : celles des années précédentes sont vues, sans poser la question.
-  const groups = {};
-  Object.keys(THEMES).forEach((th) => { const l = cat.filter((c) => c.current && c.theme === th); if (l.length) groups[th] = l; });
-  const label = { vu: "déjà vu", encours: "en cours", nonvu: "pas encore" };
-  h(`${brand}${editing ? "" : '<div class="eyebrow">Étape 2 sur 3</div>'}<h2>${editing ? "Mes notions" : "Qu'as-tu déjà étudié ?"}</h2>
-  <p class="muted">${editing ? "Tu as vu une nouvelle notion en classe ? Mets-la à jour : elle entrera dans tes questions." : "Les notions travaillées cette année : indique celles que tu as déjà vues en classe. Celles des années précédentes sont déjà cochées. Tu pourras mettre à jour quand tu veux."}</p>
-  ${Object.keys(groups).length ? "" : '<div class="card flat"><p class="muted">Rien à cocher : tout ce qui te concerne vient des années précédentes.</p></div>'}
-  ${Object.entries(groups).map(([th, list]) => `<div class="card flat"><h3>${THEMES[th]}</h3>${list.map((c) => `<div class="notion"><div><b>${c.label}</b>${c.again ? ' <span class="small muted">· reprise cette année</span>' : ""}</div><div class="ex">\\(${c.ex}\\)</div>
-    <div class="tri" data-id="${c.id}">${["vu", "encours", "nonvu"].map((s) => `<button aria-pressed="${st[c.id] === s}" data-v="${s}">${label[s]}</button>`).join("")}</div></div>`).join("")}</div>`).join("")}
-  <button class="btn-primary btn-big" id="next">${editing ? "Enregistrer" : "Continuer"}</button>${editing ? '<button class="btn-ghost" id="back">Annuler</button>' : ""}`);
-  app.querySelectorAll(".tri").forEach((tri) => tri.querySelectorAll("button").forEach((b) => (b.onclick = () => {
-    st[tri.dataset.id] = b.dataset.v;
-    tri.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b));
-  })));
+  // Plus de questionnaire sur les notions : celles de l'année s'ouvrent dans l'ordre du référentiel.
   document.getElementById("next").onclick = () => {
-    if (editing) {
-      for (const [id, s] of Object.entries(st)) {
-        const n = state.notions[id];
-        if (n.status === "nonvu" && s !== "nonvu") Object.assign(n, { m: 0.4, box: 0, due: day() });
-        n.status = s;
-      }
-      save(); screenHome();
-    } else {
-      state = Engine.newState({ system: draft.system, grade: draft.grade, track: draft.track, minutes: draft.minutes });
-      Engine.initNotions(state, st);
-      save(); startPlacement();
-    }
+    const keep = state && state.comps;
+    state = Engine.newState({ system: draft.system, grade: draft.grade, track: draft.track, minutes: draft.minutes });
+    if (keep) state.comps = keep; // changement de classe : les notes des compétences restent
+    Engine.autoInit(state);
+    save(); startPlacement();
   };
-  if (editing) document.getElementById("back").onclick = screenHome;
 }
 
 // ---------------- Positionnement ----------------
@@ -4103,9 +4340,10 @@ function startPlacement() {
     if (i >= plan.length) { state.placed = true; save(); return screenPlacementDone(); }
     const id = plan[i], q = Engine.make(state, id, Math.min(2, difficultyCap(state.profile)));
     renderQuestion(q, {
-      eyebrow: "Étape 3 sur 3 · positionnement " + (i + 1) + "/" + plan.length, single: true,
+      eyebrow: "Étape 2 sur 2 · positionnement " + (i + 1) + "/" + plan.length, single: true,
       onDone: (res) => { Engine.placementResult(state, id, res.solved ? true : res.dontKnow ? null : false, q.d); save(); },
       onNext: () => { i++; next(); },
+      onNotYet: () => { Engine.notYet(state, id); save(); toast("Noté : cette notion reviendra plus tard."); i++; next(); },
     });
   };
   next();
@@ -4117,6 +4355,7 @@ function screenPlacementDone() {
   <div class="card">${eloBlock()}</div>
   <div class="card flat"><h3>Par thème</h3><div class="bars">${themeBars(lv)}</div>
   <p class="small muted">Ton niveau va se préciser au fil des séances : les 20 premières questions servent de calibrage.</p></div>
+  <div class="card flat"><p class="small muted">Les notions de ton année s'ajoutent au fur et à mesure, dans l'ordre du programme. Si une question porte sur quelque chose que tu n'as pas encore vu en classe, touche « Pas encore vu en classe » : elle reviendra plus tard, sans pénalité.</p></div>
   <button class="btn-primary btn-big" id="go">Voir ma première séance</button>`);
   document.getElementById("go").onclick = screenHome;
 }
@@ -4153,13 +4392,13 @@ function screenHome() {
   <div class="spread"><span class="small muted">Varié d'un jour à l'autre, équilibré sur la semaine.</span><button class="btn-ghost small" id="other">Autre format</button></div></div>
   ${Engine.prepActive(state) ? (() => { const left = Math.round((new Date(state.prep.date) - new Date(today)) / 864e5); return `<div class="card flat stack"><div class="eyebrow">Je prépare mon test</div><h3>${left === 0 ? "Test aujourd'hui" : left === 1 ? "Test demain" : "Test dans " + left + " jours"} · ${state.prep.ids.length} notion${state.prep.ids.length > 1 ? "s" : ""}</h3><p class="small muted">${state.prep.ids.map((id) => NOTIONS.find((n) => n.id === id).label).join(" · ")}</p><div class="row"><button class="btn-primary" id="prepgo">Séance de révision</button><button class="btn-ghost" id="prepedit">Modifier</button></div></div>`; })() : ""}
   ${wp ? `<div class="card flat stack"><div class="eyebrow">Problème de la semaine</div><h3>${NOTIONS.find((n) => n.id === wp).label}</h3><p class="small muted">Un problème en plusieurs étapes, avec indices. Facultatif, et il rapporte gros.</p><button id="wp">Relever le défi</button></div>` : ""}
-  <div class="card flat"><h3>Mes thèmes</h3><div class="bars">${themeBars(Engine.themeLevels(state))}</div></div>
-  <div class="stack">${Engine.prepActive(state) ? "" : '<button id="prep">Je prépare un test</button>'}<button id="notions">J'ai vu une nouvelle notion en classe</button><button id="level">Changer de classe ou d'école</button>
+  ${compsCard()}
+  <div class="stack">${Engine.prepActive(state) ? "" : '<button id="prep">Je prépare un test</button>'}<button id="level">Changer de classe ou d'école</button>
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div></div>`);
   document.getElementById("go").onclick = startSession;
   document.getElementById("other").onclick = () => { Engine.otherFormat(state); save(); screenHome(); };
   if (wp) document.getElementById("wp").onclick = () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); };
-  document.getElementById("notions").onclick = () => screenNotions(true);
+  document.getElementById("comps").onclick = screenComps;
   const byId = (x) => document.getElementById(x);
   if (byId("prep")) byId("prep").onclick = screenPrep;
   if (byId("prepedit")) byId("prepedit").onclick = screenPrep;
@@ -4172,9 +4411,41 @@ function screenHome() {
   };
 }
 
+// ---------------- Mes compétences ----------------
+const noteCls = (n) => (n === null ? "none" : n >= 5 ? "good" : n >= 4 ? "ok" : "low");
+const noteTxt = (n) => (n === null ? "pas testé" : String(n).replace(".", ","));
+function compStats(ids) {
+  const all = ids.flatMap((id) => compsOf(id)), notes = all.map((c) => compNote((state.comps || {})[c.cid])).filter((x) => x !== null);
+  return { total: all.length, tested: notes.length, avg: notes.length ? notes.reduce((a, b) => a + b, 0) / notes.length : null };
+}
+function compsCard() {
+  const cur = Engine.catalog(state.profile).filter((c) => c.current).map((c) => c.id), st = compStats(cur);
+  return `<div class="card flat stack"><div class="spread"><h3>Mes compétences</h3>${st.avg !== null ? `<span class="note ${noteCls(Math.round(st.avg * 2) / 2)}">${String(Math.round(st.avg * 10) / 10).replace(".", ",")}</span>` : ""}</div>
+  <p class="small muted">${st.tested ? `${st.tested} compétence${st.tested > 1 ? "s" : ""} notée${st.tested > 1 ? "s" : ""} sur ${st.total} cette année.` : "Tes notes apparaissent au fil des séances, compétence par compétence."}</p>
+  <button id="comps">Voir mes compétences</button></div>`;
+}
+function screenComps() {
+  const cat = Engine.catalog(state.profile), comps = state.comps || {};
+  const statusTag = (id) => { const s = state.notions[id]; return !s ? "" : s.status === "avenir" ? '<span class="tag">à venir</span>' : s.status === "nonvu" ? '<span class="tag">pas encore vu en classe</span>' : ""; };
+  const block = (list) => Object.keys(THEMES).map((th) => {
+    const ns = list.filter((c) => c.theme === th).sort((a, b) => Engine.rank(state.profile, a.id) - Engine.rank(state.profile, b.id));
+    if (!ns.length) return "";
+    return `<div class="card flat"><h3>${THEMES[th]}</h3>${ns.map((c) => `<div class="cnotion"><div class="spread"><b>${c.label}</b>${statusTag(c.id)}</div>
+      ${compsOf(c.id).map((k) => { const n = compNote(comps[k.cid]); return `<div class="comp"><span>${k.label}</span><span class="note ${noteCls(n)}">${noteTxt(n)}</span></div>`; }).join("")}</div>`).join("")}</div>`;
+  }).join("");
+  const cur = cat.filter((c) => c.current), old = cat.filter((c) => !c.current), st = compStats(cur.map((c) => c.id));
+  h(`${brand}<h2>Mes <span class="mark">compétences</span></h2>
+  <p class="muted">Chaque compétence reçoit une note de 1 à 6 dès que tu y as répondu 3 fois. La note suit tes 8 dernières réponses : elle monte quand tu progresses.</p>
+  <div class="card flat"><div class="spread"><span>Cette année</span><b>${st.tested} / ${st.total} notées${st.avg !== null ? " · moyenne " + String(Math.round(st.avg * 10) / 10).replace(".", ",") : ""}</b></div></div>
+  ${block(cur)}
+  ${old.length ? `<details class="olds"><summary>Années précédentes (${compStats(old.map((c) => c.id)).tested} notées)</summary>${block(old)}</details>` : ""}
+  <button class="btn-primary btn-big" id="back">Retour</button>`);
+  document.getElementById("back").onclick = screenHome;
+}
+
 // ---------------- Je prépare mon test ----------------
 function screenPrep() {
-  const cat = Engine.catalog(state.profile).filter((c) => state.notions[c.id] && state.notions[c.id].status !== "nonvu");
+  const cat = Engine.catalog(state.profile).filter((c) => state.notions[c.id]);
   const chosen = new Set(state.prep && Engine.prepActive(state) ? state.prep.ids : []);
   // On ne demande que les notions de l'année : celles des années précédentes sont vues, sans poser la question.
   const groups = {};
@@ -4192,7 +4463,9 @@ function screenPrep() {
     const ids = [...app.querySelectorAll(".check input:checked")].map((i) => i.value), dt = document.getElementById("pdate").value;
     if (!ids.length) { document.getElementById("perr").textContent = "Coche au moins une notion."; return; }
     if (!dt || dt < day()) { document.getElementById("perr").textContent = "Choisis une date à partir d'aujourd'hui."; return; }
-    state.prep = { ids, date: dt }; save(); screenHome();
+    state.prep = { ids, date: dt };
+    for (const id of ids) { const n = state.notions[id]; if (n.status !== "vu" && n.status !== "encours") Object.assign(n, { status: "encours", m: Math.max(0.4, n.m), due: day() }); }
+    save(); screenHome();
   };
   document.getElementById("back").onclick = screenHome;
   const del = document.getElementById("del");
@@ -4247,6 +4520,8 @@ function nextQuestion(redo) {
       return res.delta;
     },
     onNext: (wantRedo) => { if (wantRedo) return nextQuestion(q); session.i++; nextQuestion(); },
+    // « Pas encore vu en classe » : pas en préparation de test (l'élève a choisi ses notions) ni pour le problème de la semaine.
+    onNotYet: session.weekly || session.prep ? null : () => { Engine.notYet(state, id); save(); toast("Noté : cette notion reviendra dans quelques semaines."); session.i++; nextQuestion(); },
     // « Trop facile » : au plus 3 par séance, pas en préparation de test ni pour le problème de la semaine.
     onEasy: session.weekly || (session.skips || 0) >= 3 ? null : () => {
       session.skips = (session.skips || 0) + 1;
@@ -4366,7 +4641,8 @@ function renderQuestion(q, opt) {
   <div class="answer"><input id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="none" placeholder="Ta réponse…" aria-label="Ta réponse">
   <div class="preview" id="prev"><span class="err">L'aperçu de ta réponse s'affiche ici.</span></div>
   <div class="keypad" id="kp">${["7", "8", "9", "/", "(", ")", "4", "5", "6", "*", "^", "√", "1", "2", "3", "-", "x", "π", "0", ",", "+", ";", "⌫", "⌨"].map((k) => `<button type="button" class="${/[\d,]/.test(k) ? "" : "k-op"}" data-k="${k}">${k === "*" ? "×" : k}</button>`).join("")}</div>
-  <div class="actions"><button class="btn-primary" id="check">Valider</button><button id="idk">Je ne sais pas</button></div></div>
+  <div class="actions"><button class="btn-primary" id="check">Valider</button><button id="idk">Je ne sais pas</button></div>
+  ${opt.onNotYet ? '<button class="btn-ghost small notyet" id="notyet">Pas encore vu en classe</button>' : ""}</div>
   <div id="fb"></div></div>`);
   const inp = document.getElementById("ans"), prev = document.getElementById("prev"), fb = document.getElementById("fb");
   if (window.matchMedia("(pointer: fine)").matches) { inp.setAttribute("inputmode", "text"); inputMode = "text"; inp.focus(); }
@@ -4400,7 +4676,7 @@ function renderQuestion(q, opt) {
   const end = (solved, dontKnow) => {
     finished = true;
     inp.disabled = true;
-    app.querySelectorAll("#kp button, #check, #idk").forEach((b) => (b.disabled = true));
+    app.querySelectorAll("#kp button, #check, #idk, #notyet").forEach((b) => (b.disabled = true));
     const res = { solved, tries, dontKnow };
     if (solved) burst();
     const delta = opt.onDone(res);
@@ -4436,12 +4712,15 @@ function renderQuestion(q, opt) {
     }
     tries++;
     const ez = document.getElementById("easy"); if (ez) ez.remove();
+    const ny = document.getElementById("notyet"); if (ny) ny.remove();
     if (opt.single || tries >= 2) return end(false);
     fb.innerHTML = `<div class="fb hint pop"><b>${r.status === "close" ? "Presque !" : "Pas encore. Réessaie !"}</b><span>${esc(r.message || "")}</span><span><b>Indice</b> · ${esc(q.hint)}</span></div>`;
     inp.select();
   };
   document.getElementById("check").onclick = check;
   document.getElementById("idk").onclick = () => { if (!finished) end(false, true); };
+  const ny = document.getElementById("notyet");
+  if (ny) ny.onclick = () => { if (!finished && tries === 0) { finished = true; opt.onNotYet(); } };
   const ez = document.getElementById("easy");
   if (ez) ez.onclick = () => { if (!finished && tries === 0) { finished = true; opt.onEasy(); } };
 }

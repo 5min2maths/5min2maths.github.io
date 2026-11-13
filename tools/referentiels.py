@@ -5,7 +5,7 @@ Lit les trois référentiels (hors dépôt, dans Dropbox) et le catalogue src/cu
 tools/couverture.md (non versionné) : compétences couvertes par notion, compétences non couvertes.
 Les motifs sont des expressions régulières sur les codes des référentiels.
 """
-import csv, re, sys
+import csv, re, sys, json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -130,7 +130,31 @@ def main():
         larges = [f"{n} ({k})" for n, k in larges if k > 5]
         if larges: print("   notions encore larges (> 5 compétences) :", ", ".join(larges))
     (ROOT / "tools/couverture.md").write_text("\n".join(out), encoding="utf-8")
+    write_order()
     if missing: print("sans correspondance :", missing)
+
+def write_order():
+    """src/ordre.js : rang de chaque notion dans l'ordre du référentiel (seulement des numéros, aucun libellé).
+    CO et MP : ordre des lignes du référentiel ; matu : ordre des chapitres Sésamath (Ma1, Ma2), puis des lignes."""
+    rank = {}
+    for ref, (path, kc, kt) in REFS.items():
+        if not path.exists(): continue
+        rows = list(csv.DictReader(open(path, encoding="utf-8"), delimiter=";"))
+        def key(i, r):
+            if ref == "MATU":
+                m = re.search(r"Ma(\d) Ch(\d+)", r.get("sesamath", ""))
+                return (int(m.group(1)) * 100 + int(m.group(2))) * 1000 + i if m else int(r[kc][0]) * 100000 + i
+            return i
+        rk = {}
+        for i, r in enumerate(rows):
+            for n, m in MAP.items():
+                if ref in m and re.match(m[ref], r[kc]):
+                    rk[n] = min(rk.get(n, 10 ** 9), key(i, r))
+        order = sorted(rk, key=lambda n: rk[n])
+        rank[ref] = {n: k for k, n in enumerate(order)}
+    js = "// Généré par tools/referentiels.py : rang de chaque notion dans l'ordre du référentiel (CO, matu, MP).\n"
+    js += "const ORDRE = " + json.dumps(rank, separators=(",", ":")) + ";\n"
+    (ROOT / "src/ordre.js").write_text(js, encoding="utf-8")
 
 if __name__ == "__main__":
     main()

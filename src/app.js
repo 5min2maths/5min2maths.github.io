@@ -1,4 +1,4 @@
-// Interface : entrée (niveau, temps, notions, positionnement), accueil, séance, bilan.
+// Interface : entrée (niveau, positionnement), accueil, séance, bilan, compétences.
 // Point de collecte des votes 👍 / 👎 : laisser vide tant qu'aucun n'est configuré (votes gardés sur l'appareil).
 const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7gqEVGIeAbBF0cML8VEDYtQfaOmO0743jRcmeHSQ-WglFVCb-dd/exec";
 
@@ -40,7 +40,7 @@ function screenLevel() {
   const sys = SYSTEMS[draft.system];
   if (!sys.grades.some(([g]) => g === draft.grade)) draft.grade = sys.grades[sys.grades.length - 2][0];
   const sec2 = draft.system === "CH" && draft.grade >= 12;
-  h(`${brand}<div class="eyebrow">Étape 1 sur 3</div><h2>Où en es-tu ?</h2>
+  h(`${brand}<div class="eyebrow">Étape 1 sur 2</div><h2>Où en es-tu ?</h2>
   <div class="card flat stack">${Object.keys(SYSTEMS).length > 1 ? `<h3>Ton école</h3><div class="seg" id="sys">${Object.entries(SYSTEMS).map(([k, v]) => `<button aria-pressed="${k === draft.system}" data-v="${k}">${v.label}</button>`).join("")}</div>` : ""}
   <h3>Ta classe cette année</h3><div class="seg" id="grade">${sys.grades.map(([g, n]) => `<button aria-pressed="${g === draft.grade}" data-v="${g}">${n}</button>`).join("")}</div>
   ${sec2 ? `<h3>Ta voie</h3><div class="seg" id="track"><button aria-pressed="${draft.track === "college"}" data-v="college">Collège (maturité gymnasiale)</button><button aria-pressed="${draft.track === "mp"}" data-v="mp">Maturité professionnelle</button></div>` : ""}</div>
@@ -48,42 +48,14 @@ function screenLevel() {
   <button class="btn-primary btn-big" id="next">Continuer</button>`);
   const bind = (id, key, num) => app.querySelectorAll("#" + id + " button").forEach((b) => (b.onclick = () => { draft[key] = num ? +b.dataset.v : b.dataset.v; screenLevel(); }));
   bind("sys", "system"); bind("grade", "grade", true); bind("track", "track");
-  document.getElementById("next").onclick = () => { draft.statuses = null; screenNotions(); };
-}
-
-function screenNotions(editing = false) {
-  const prof = editing ? state.profile : draft;
-  const cat = Engine.catalog(prof);
-  const st = editing ? Object.fromEntries(Object.entries(state.notions).map(([k, v]) => [k, v.status])) : (draft.statuses ||= Object.fromEntries(cat.map((c) => [c.id, c.defaultStatus])));
-  // On ne demande que les notions de l'année : celles des années précédentes sont vues, sans poser la question.
-  const groups = {};
-  Object.keys(THEMES).forEach((th) => { const l = cat.filter((c) => c.current && c.theme === th); if (l.length) groups[th] = l; });
-  const label = { vu: "déjà vu", encours: "en cours", nonvu: "pas encore" };
-  h(`${brand}${editing ? "" : '<div class="eyebrow">Étape 2 sur 3</div>'}<h2>${editing ? "Mes notions" : "Qu'as-tu déjà étudié ?"}</h2>
-  <p class="muted">${editing ? "Tu as vu une nouvelle notion en classe ? Mets-la à jour : elle entrera dans tes questions." : "Les notions travaillées cette année : indique celles que tu as déjà vues en classe. Celles des années précédentes sont déjà cochées. Tu pourras mettre à jour quand tu veux."}</p>
-  ${Object.keys(groups).length ? "" : '<div class="card flat"><p class="muted">Rien à cocher : tout ce qui te concerne vient des années précédentes.</p></div>'}
-  ${Object.entries(groups).map(([th, list]) => `<div class="card flat"><h3>${THEMES[th]}</h3>${list.map((c) => `<div class="notion"><div><b>${c.label}</b>${c.again ? ' <span class="small muted">· reprise cette année</span>' : ""}</div><div class="ex">\\(${c.ex}\\)</div>
-    <div class="tri" data-id="${c.id}">${["vu", "encours", "nonvu"].map((s) => `<button aria-pressed="${st[c.id] === s}" data-v="${s}">${label[s]}</button>`).join("")}</div></div>`).join("")}</div>`).join("")}
-  <button class="btn-primary btn-big" id="next">${editing ? "Enregistrer" : "Continuer"}</button>${editing ? '<button class="btn-ghost" id="back">Annuler</button>' : ""}`);
-  app.querySelectorAll(".tri").forEach((tri) => tri.querySelectorAll("button").forEach((b) => (b.onclick = () => {
-    st[tri.dataset.id] = b.dataset.v;
-    tri.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b));
-  })));
+  // Plus de questionnaire sur les notions : celles de l'année s'ouvrent dans l'ordre du référentiel.
   document.getElementById("next").onclick = () => {
-    if (editing) {
-      for (const [id, s] of Object.entries(st)) {
-        const n = state.notions[id];
-        if (n.status === "nonvu" && s !== "nonvu") Object.assign(n, { m: 0.4, box: 0, due: day() });
-        n.status = s;
-      }
-      save(); screenHome();
-    } else {
-      state = Engine.newState({ system: draft.system, grade: draft.grade, track: draft.track, minutes: draft.minutes });
-      Engine.initNotions(state, st);
-      save(); startPlacement();
-    }
+    const keep = state && state.comps;
+    state = Engine.newState({ system: draft.system, grade: draft.grade, track: draft.track, minutes: draft.minutes });
+    if (keep) state.comps = keep; // changement de classe : les notes des compétences restent
+    Engine.autoInit(state);
+    save(); startPlacement();
   };
-  if (editing) document.getElementById("back").onclick = screenHome;
 }
 
 // ---------------- Positionnement ----------------
@@ -94,9 +66,10 @@ function startPlacement() {
     if (i >= plan.length) { state.placed = true; save(); return screenPlacementDone(); }
     const id = plan[i], q = Engine.make(state, id, Math.min(2, difficultyCap(state.profile)));
     renderQuestion(q, {
-      eyebrow: "Étape 3 sur 3 · positionnement " + (i + 1) + "/" + plan.length, single: true,
+      eyebrow: "Étape 2 sur 2 · positionnement " + (i + 1) + "/" + plan.length, single: true,
       onDone: (res) => { Engine.placementResult(state, id, res.solved ? true : res.dontKnow ? null : false, q.d); save(); },
       onNext: () => { i++; next(); },
+      onNotYet: () => { Engine.notYet(state, id); save(); toast("Noté : cette notion reviendra plus tard."); i++; next(); },
     });
   };
   next();
@@ -108,6 +81,7 @@ function screenPlacementDone() {
   <div class="card">${eloBlock()}</div>
   <div class="card flat"><h3>Par thème</h3><div class="bars">${themeBars(lv)}</div>
   <p class="small muted">Ton niveau va se préciser au fil des séances : les 20 premières questions servent de calibrage.</p></div>
+  <div class="card flat"><p class="small muted">Les notions de ton année s'ajoutent au fur et à mesure, dans l'ordre du programme. Si une question porte sur quelque chose que tu n'as pas encore vu en classe, touche « Pas encore vu en classe » : elle reviendra plus tard, sans pénalité.</p></div>
   <button class="btn-primary btn-big" id="go">Voir ma première séance</button>`);
   document.getElementById("go").onclick = screenHome;
 }
@@ -144,13 +118,13 @@ function screenHome() {
   <div class="spread"><span class="small muted">Varié d'un jour à l'autre, équilibré sur la semaine.</span><button class="btn-ghost small" id="other">Autre format</button></div></div>
   ${Engine.prepActive(state) ? (() => { const left = Math.round((new Date(state.prep.date) - new Date(today)) / 864e5); return `<div class="card flat stack"><div class="eyebrow">Je prépare mon test</div><h3>${left === 0 ? "Test aujourd'hui" : left === 1 ? "Test demain" : "Test dans " + left + " jours"} · ${state.prep.ids.length} notion${state.prep.ids.length > 1 ? "s" : ""}</h3><p class="small muted">${state.prep.ids.map((id) => NOTIONS.find((n) => n.id === id).label).join(" · ")}</p><div class="row"><button class="btn-primary" id="prepgo">Séance de révision</button><button class="btn-ghost" id="prepedit">Modifier</button></div></div>`; })() : ""}
   ${wp ? `<div class="card flat stack"><div class="eyebrow">Problème de la semaine</div><h3>${NOTIONS.find((n) => n.id === wp).label}</h3><p class="small muted">Un problème en plusieurs étapes, avec indices. Facultatif, et il rapporte gros.</p><button id="wp">Relever le défi</button></div>` : ""}
-  <div class="card flat"><h3>Mes thèmes</h3><div class="bars">${themeBars(Engine.themeLevels(state))}</div></div>
-  <div class="stack">${Engine.prepActive(state) ? "" : '<button id="prep">Je prépare un test</button>'}<button id="notions">J'ai vu une nouvelle notion en classe</button><button id="level">Changer de classe ou d'école</button>
+  ${compsCard()}
+  <div class="stack">${Engine.prepActive(state) ? "" : '<button id="prep">Je prépare un test</button>'}<button id="level">Changer de classe ou d'école</button>
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div></div>`);
   document.getElementById("go").onclick = startSession;
   document.getElementById("other").onclick = () => { Engine.otherFormat(state); save(); screenHome(); };
   if (wp) document.getElementById("wp").onclick = () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); };
-  document.getElementById("notions").onclick = () => screenNotions(true);
+  document.getElementById("comps").onclick = screenComps;
   const byId = (x) => document.getElementById(x);
   if (byId("prep")) byId("prep").onclick = screenPrep;
   if (byId("prepedit")) byId("prepedit").onclick = screenPrep;
@@ -163,9 +137,41 @@ function screenHome() {
   };
 }
 
+// ---------------- Mes compétences ----------------
+const noteCls = (n) => (n === null ? "none" : n >= 5 ? "good" : n >= 4 ? "ok" : "low");
+const noteTxt = (n) => (n === null ? "pas testé" : String(n).replace(".", ","));
+function compStats(ids) {
+  const all = ids.flatMap((id) => compsOf(id)), notes = all.map((c) => compNote((state.comps || {})[c.cid])).filter((x) => x !== null);
+  return { total: all.length, tested: notes.length, avg: notes.length ? notes.reduce((a, b) => a + b, 0) / notes.length : null };
+}
+function compsCard() {
+  const cur = Engine.catalog(state.profile).filter((c) => c.current).map((c) => c.id), st = compStats(cur);
+  return `<div class="card flat stack"><div class="spread"><h3>Mes compétences</h3>${st.avg !== null ? `<span class="note ${noteCls(Math.round(st.avg * 2) / 2)}">${String(Math.round(st.avg * 10) / 10).replace(".", ",")}</span>` : ""}</div>
+  <p class="small muted">${st.tested ? `${st.tested} compétence${st.tested > 1 ? "s" : ""} notée${st.tested > 1 ? "s" : ""} sur ${st.total} cette année.` : "Tes notes apparaissent au fil des séances, compétence par compétence."}</p>
+  <button id="comps">Voir mes compétences</button></div>`;
+}
+function screenComps() {
+  const cat = Engine.catalog(state.profile), comps = state.comps || {};
+  const statusTag = (id) => { const s = state.notions[id]; return !s ? "" : s.status === "avenir" ? '<span class="tag">à venir</span>' : s.status === "nonvu" ? '<span class="tag">pas encore vu en classe</span>' : ""; };
+  const block = (list) => Object.keys(THEMES).map((th) => {
+    const ns = list.filter((c) => c.theme === th).sort((a, b) => Engine.rank(state.profile, a.id) - Engine.rank(state.profile, b.id));
+    if (!ns.length) return "";
+    return `<div class="card flat"><h3>${THEMES[th]}</h3>${ns.map((c) => `<div class="cnotion"><div class="spread"><b>${c.label}</b>${statusTag(c.id)}</div>
+      ${compsOf(c.id).map((k) => { const n = compNote(comps[k.cid]); return `<div class="comp"><span>${k.label}</span><span class="note ${noteCls(n)}">${noteTxt(n)}</span></div>`; }).join("")}</div>`).join("")}</div>`;
+  }).join("");
+  const cur = cat.filter((c) => c.current), old = cat.filter((c) => !c.current), st = compStats(cur.map((c) => c.id));
+  h(`${brand}<h2>Mes <span class="mark">compétences</span></h2>
+  <p class="muted">Chaque compétence reçoit une note de 1 à 6 dès que tu y as répondu 3 fois. La note suit tes 8 dernières réponses : elle monte quand tu progresses.</p>
+  <div class="card flat"><div class="spread"><span>Cette année</span><b>${st.tested} / ${st.total} notées${st.avg !== null ? " · moyenne " + String(Math.round(st.avg * 10) / 10).replace(".", ",") : ""}</b></div></div>
+  ${block(cur)}
+  ${old.length ? `<details class="olds"><summary>Années précédentes (${compStats(old.map((c) => c.id)).tested} notées)</summary>${block(old)}</details>` : ""}
+  <button class="btn-primary btn-big" id="back">Retour</button>`);
+  document.getElementById("back").onclick = screenHome;
+}
+
 // ---------------- Je prépare mon test ----------------
 function screenPrep() {
-  const cat = Engine.catalog(state.profile).filter((c) => state.notions[c.id] && state.notions[c.id].status !== "nonvu");
+  const cat = Engine.catalog(state.profile).filter((c) => state.notions[c.id]);
   const chosen = new Set(state.prep && Engine.prepActive(state) ? state.prep.ids : []);
   // On ne demande que les notions de l'année : celles des années précédentes sont vues, sans poser la question.
   const groups = {};
@@ -183,7 +189,9 @@ function screenPrep() {
     const ids = [...app.querySelectorAll(".check input:checked")].map((i) => i.value), dt = document.getElementById("pdate").value;
     if (!ids.length) { document.getElementById("perr").textContent = "Coche au moins une notion."; return; }
     if (!dt || dt < day()) { document.getElementById("perr").textContent = "Choisis une date à partir d'aujourd'hui."; return; }
-    state.prep = { ids, date: dt }; save(); screenHome();
+    state.prep = { ids, date: dt };
+    for (const id of ids) { const n = state.notions[id]; if (n.status !== "vu" && n.status !== "encours") Object.assign(n, { status: "encours", m: Math.max(0.4, n.m), due: day() }); }
+    save(); screenHome();
   };
   document.getElementById("back").onclick = screenHome;
   const del = document.getElementById("del");
@@ -238,6 +246,8 @@ function nextQuestion(redo) {
       return res.delta;
     },
     onNext: (wantRedo) => { if (wantRedo) return nextQuestion(q); session.i++; nextQuestion(); },
+    // « Pas encore vu en classe » : pas en préparation de test (l'élève a choisi ses notions) ni pour le problème de la semaine.
+    onNotYet: session.weekly || session.prep ? null : () => { Engine.notYet(state, id); save(); toast("Noté : cette notion reviendra dans quelques semaines."); session.i++; nextQuestion(); },
     // « Trop facile » : au plus 3 par séance, pas en préparation de test ni pour le problème de la semaine.
     onEasy: session.weekly || (session.skips || 0) >= 3 ? null : () => {
       session.skips = (session.skips || 0) + 1;
@@ -357,7 +367,8 @@ function renderQuestion(q, opt) {
   <div class="answer"><input id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="none" placeholder="Ta réponse…" aria-label="Ta réponse">
   <div class="preview" id="prev"><span class="err">L'aperçu de ta réponse s'affiche ici.</span></div>
   <div class="keypad" id="kp">${["7", "8", "9", "/", "(", ")", "4", "5", "6", "*", "^", "√", "1", "2", "3", "-", "x", "π", "0", ",", "+", ";", "⌫", "⌨"].map((k) => `<button type="button" class="${/[\d,]/.test(k) ? "" : "k-op"}" data-k="${k}">${k === "*" ? "×" : k}</button>`).join("")}</div>
-  <div class="actions"><button class="btn-primary" id="check">Valider</button><button id="idk">Je ne sais pas</button></div></div>
+  <div class="actions"><button class="btn-primary" id="check">Valider</button><button id="idk">Je ne sais pas</button></div>
+  ${opt.onNotYet ? '<button class="btn-ghost small notyet" id="notyet">Pas encore vu en classe</button>' : ""}</div>
   <div id="fb"></div></div>`);
   const inp = document.getElementById("ans"), prev = document.getElementById("prev"), fb = document.getElementById("fb");
   if (window.matchMedia("(pointer: fine)").matches) { inp.setAttribute("inputmode", "text"); inputMode = "text"; inp.focus(); }
@@ -391,7 +402,7 @@ function renderQuestion(q, opt) {
   const end = (solved, dontKnow) => {
     finished = true;
     inp.disabled = true;
-    app.querySelectorAll("#kp button, #check, #idk").forEach((b) => (b.disabled = true));
+    app.querySelectorAll("#kp button, #check, #idk, #notyet").forEach((b) => (b.disabled = true));
     const res = { solved, tries, dontKnow };
     if (solved) burst();
     const delta = opt.onDone(res);
@@ -427,12 +438,15 @@ function renderQuestion(q, opt) {
     }
     tries++;
     const ez = document.getElementById("easy"); if (ez) ez.remove();
+    const ny = document.getElementById("notyet"); if (ny) ny.remove();
     if (opt.single || tries >= 2) return end(false);
     fb.innerHTML = `<div class="fb hint pop"><b>${r.status === "close" ? "Presque !" : "Pas encore. Réessaie !"}</b><span>${esc(r.message || "")}</span><span><b>Indice</b> · ${esc(q.hint)}</span></div>`;
     inp.select();
   };
   document.getElementById("check").onclick = check;
   document.getElementById("idk").onclick = () => { if (!finished) end(false, true); };
+  const ny = document.getElementById("notyet");
+  if (ny) ny.onclick = () => { if (!finished && tries === 0) { finished = true; opt.onNotYet(); } };
   const ez = document.getElementById("easy");
   if (ez) ez.onclick = () => { if (!finished && tries === 0) { finished = true; opt.onEasy(); } };
 }

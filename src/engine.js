@@ -99,41 +99,82 @@ const Engine = {
     return { v: 1, profile, notions: {}, streak: { count: 0, last: null }, history: [], created: day(), elo: { r: Math.round(start), n: 0, log: [] } };
   },
 
-  // Notions du programme jusqu'à l'année de l'élève, avec statut proposé selon la date.
-  catalog(profile, date = new Date()) {
-    const mo = schoolMonth(date);
+  // Notions du programme jusqu'à l'année de l'élève. Années précédentes : vues. Année en cours : « à venir » ;
+  // elles s'ouvrent dans l'ordre du référentiel (unlock), sans rien demander à l'élève.
+  catalog(profile) {
     return NOTIONS.filter((n) => { const pl = placeOf(n, profile); return pl && pl[0] <= profile.grade; }).map((n) => {
-      const [g, m] = placeOf(n, profile);
-      // Année en cours : l'élève dit ce qu'il a vu (pas de calendrier commun). MP : semestre du PEE.
-      let status = "vu";
-      if (g === profile.grade) status = m === "S1" ? (mo <= 4 ? "encours" : "vu") : m === "S2" ? (mo <= 4 ? "nonvu" : "encours") : typeof m === "number" ? (mo > m ? "vu" : mo === m ? "encours" : "nonvu") : "nonvu";
-      // Notion reprise cette année (référentiel) : elle est proposée à l'élève, déjà cochée « vu ».
+      const [g] = placeOf(n, profile);
       const again = profile.track !== "mp" && (n.again || []).includes(profile.grade);
-      return { ...n, defaultStatus: status, current: g === profile.grade || again, again };
+      return { ...n, defaultStatus: g < profile.grade ? "vu" : "avenir", current: g === profile.grade || again, again };
     });
+  },
+  // Rang dans l'ordre du référentiel (CO, matu ou MP selon l'élève).
+  rank(profile, id) {
+    const ref = profile.track === "mp" ? "MP" : profile.grade >= 12 ? "MATU" : "CO";
+    const r = (ORDRE[ref] || {})[id] ?? ORDRE.CO[id];
+    return r ?? 1000 + NOTIONS.findIndex((n) => n.id === id);
+  },
+  newNotion(status) {
+    return { status, m: status === "vu" ? 0.55 : status === "encours" ? 0.4 : 0, box: status === "vu" ? 1 : 0, due: day(), seen: 0, ok: 0 };
+  },
+  autoInit(state) {
+    this.initNotions(state, Object.fromEntries(this.catalog(state.profile).map((c) => [c.id, c.defaultStatus])));
+    this.unlock(state);
+  },
+  // Ouvre les notions de l'année dans l'ordre du référentiel : toujours au moins 3 notions ouvertes et pas encore
+  // maîtrisées, et au moins la part de l'année écoulée (novembre ≈ 20 %, juin ≈ 90 %). Une notion « pas encore vue
+  // en classe » revient au bout de 3 semaines.
+  unlock(state, date = new Date()) {
+    const today = day(date), p = state.profile;
+    const cur = Object.keys(state.notions).filter((id) => { const pl = placeOf(NOTIONS.find((n) => n.id === id), p); return pl && pl[0] === p.grade; })
+      .sort((a, b) => this.rank(p, a) - this.rank(p, b));
+    for (const id of cur) { const s = state.notions[id]; if (s.status === "nonvu" && (!s.retry || s.retry <= today)) s.status = "avenir"; }
+    const open = () => cur.filter((id) => ["encours", "vu"].includes(state.notions[id].status));
+    const active = () => open().filter((id) => { const s = state.notions[id]; return !(s.ok >= 2 && s.m >= 0.6); }).length;
+    const minOpen = Math.ceil((cur.length * schoolMonth(date)) / 10);
+    let changed = false;
+    while (active() < 3 || open().length < minOpen) {
+      const next = cur.find((id) => state.notions[id].status === "avenir");
+      if (!next) break;
+      Object.assign(state.notions[next], { status: "encours", m: Math.max(0.4, state.notions[next].m), due: today });
+      changed = true;
+    }
+    return changed;
+  },
+  // « Pas encore vu en classe » : la notion sort des séances pendant 3 semaines, sans pénalité.
+  notYet(state, id) {
+    const s = state.notions[id];
+    if (!s) return;
+    s.status = "nonvu"; s.retry = addDays(day(), 21); s.due = s.retry;
+    this.unlock(state);
+  },
+  // Compétence : les 8 dernières réponses (1, 0,5 ou 0).
+  recordComp(state, id, d, score) {
+    state.comps = state.comps || {};
+    const cid = compOf(id, d), rec = (state.comps[cid] = state.comps[cid] || { r: [], n: 0 });
+    rec.r.push(score); rec.r = rec.r.slice(-8); rec.n++; rec.last = day();
   },
 
   // Catalogue modifié depuis la création du profil : ajoute les notions manquantes (anciennes = vues, année en cours = à cocher).
   migrate(state) {
     let changed = false;
-    for (const c of this.catalog(state.profile)) if (!state.notions[c.id]) {
-      const status = c.defaultStatus;
-      state.notions[c.id] = { status, m: status === "vu" ? 0.55 : status === "encours" ? 0.4 : 0, box: status === "vu" ? 1 : 0, due: day(), seen: 0, ok: 0 };
-      changed = true;
-    }
+    for (const c of this.catalog(state.profile)) if (!state.notions[c.id]) { state.notions[c.id] = this.newNotion(c.defaultStatus); changed = true; }
+    // Ancien questionnaire : « pas encore » coché par l'élève → à venir (la notion s'ouvrira dans l'ordre).
+    for (const s of Object.values(state.notions)) if (s.status === "nonvu" && !s.retry) { s.status = "avenir"; changed = true; }
     for (const id of Object.keys(state.notions)) { const n = NOTIONS.find((x) => x.id === id); if (!n || !placeOf(n, state.profile)) { delete state.notions[id]; changed = true; } }
+    if (this.unlock(state)) changed = true;
     return changed;
   },
 
   initNotions(state, statuses) {
     state.notions = {};
     for (const [id, status] of Object.entries(statuses)) {
-      state.notions[id] = { status, m: status === "vu" ? 0.55 : status === "encours" ? 0.4 : 0, box: status === "vu" ? 1 : 0, due: day(), seen: 0, ok: 0 };
+      state.notions[id] = this.newNotion(status);
     }
   },
 
   eligible(state) {
-    return Object.entries(state.notions).filter(([, s]) => s.status !== "nonvu").map(([id]) => id);
+    return Object.entries(state.notions).filter(([, s]) => s.status === "vu" || s.status === "encours").map(([id]) => id);
   },
 
   // Difficulté : visée ≈ 70 % de réussite (question ≈ 150 points sous le Mathélo), corrigée par la maîtrise de la notion.
@@ -206,6 +247,7 @@ const Engine = {
   // Résultat d'une question de positionnement : true, false ou null (« je ne sais pas »).
   placementResult(state, id, ok, d = 2) {
     this.updateElo(state, id, d, ok === true ? 1 : 0);
+    this.recordComp(state, id, d, ok === true ? 1 : 0);
     const s = state.notions[id];
     if (ok === true) Object.assign(s, { m: 0.75, box: 2, due: addDays(day(), 3) });
     else if (ok === false) Object.assign(s, { m: 0.3, box: 0, due: day() });
@@ -328,6 +370,7 @@ const Engine = {
     s.due = addDays(day(), INTERVALS[s.box]);
     if (s.status === "encours" && s.m > 0.7) s.status = "vu";
     const delta = this.updateElo(state, id, d, 1, 0.5);
+    this.recordComp(state, id, d, 1);
     // Remplaçante : même notion, un cran au-dessus (si possible), sinon la question suivante du programme.
     const cap = difficultyCap(state.profile), top = hasProb(id) && kind !== "drill" ? 4 : Math.min(3, cap);
     return { delta, next: d < top && d < 4 ? id + "|" + (d + 1) + "|" + (kind === "drill" ? "app" : kind || "app") : null };
@@ -337,6 +380,7 @@ const Engine = {
   record(state, id, d, tries, solved, partial) {
     const s = state.notions[id];
     if (partial !== undefined) { // problème : score partiel 0..1
+      this.recordComp(state, id, d, partial);
       s.seen++;
       s.m = Math.min(1, Math.max(0, s.m + (partial - 0.5) * 0.2));
       if (partial >= 0.99) { s.box = Math.min(5, s.box + 1); s.ok++; } else if (partial < 0.5) s.box = 0;
@@ -358,7 +402,10 @@ const Engine = {
     }
     s.due = addDays(today, solved && tries === 1 ? INTERVALS[s.box] : 1);
     if (s.status === "encours" && s.m > 0.7) s.status = "vu";
-    return solved ? (tries === 1 ? 1 : 0.5) : 0;
+    const sc = solved ? (tries === 1 ? 1 : 0.5) : 0;
+    this.recordComp(state, id, d, sc);
+    this.unlock(state);
+    return sc;
   },
 
   finishDay(state, answered, score) {
@@ -398,7 +445,7 @@ const Engine = {
   themeLevels(state) {
     const out = {};
     for (const [id, s] of Object.entries(state.notions)) {
-      if (s.status === "nonvu") continue;
+      if (s.status !== "vu" && s.status !== "encours") continue;
       const th = NOTIONS.find((n) => n.id === id).theme;
       (out[th] = out[th] || []).push(s.m);
     }
