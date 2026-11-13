@@ -3800,7 +3800,7 @@ function ineqLine(k, b, opSol) {
 const sysT = (l1, l2) => M("\\begin{cases} " + l1 + " \\\\ " + l2 + " \\end{cases}");
 const setAns = " Donne l'ensemble des solutions (intervalle, ou « aucune »).";
 FINE.push(
-  { id: "sysineq", theme: "fa", label: "Systèmes d'inéquations du 1er degré", ex: "\\begin{cases} 2x - 1 > 3 \\\\ x + 4 \\le 9 \\end{cases}", CH: [12], codesMATU: "2\\.AL\\.04a",
+  { id: "sysineq", theme: "fa", label: "Systèmes d'inéquations du 1er degré", ex: "\\begin{cases} 2x - 1 > 3 \\\\ x + 4 \\le 9 \\end{cases}", CH: [12], MP: null, codesMATU: "2\\.AL\\.04a",
     hint: "Résous chaque inéquation séparément, puis garde les x qui vérifient les deux : c'est l'intersection des deux intervalles.",
     lesson: ["Systèmes d'inéquations", "Un système d'inéquations demande que toutes les conditions soient vraies en même temps.", "On résout chaque inéquation. On dessine les solutions sur une même droite graduée. L'ensemble des solutions est l'intersection (la partie commune). Si les deux parties ne se chevauchent pas, il n'y a aucune solution.",
       ["\\(x > 2\\) et \\(x \\le 5\\) : \\(S = \\,]2 ; 5]\\)", "\\(x < 1\\) et \\(x > 4\\) : \\(S = \\varnothing\\)", "\\(x \\ge -1\\) et \\(x > 3\\) : \\(S = \\,]3 ; +\\infty[\\)"],
@@ -3818,7 +3818,7 @@ FINE.push(
         const iv = ivAnd(ivOf(o1, x1), ivOf(o2, x2)), ivs = iv ? [iv] : [];
         return { q: "Résous le système " + sysT(ineqLine(k1, x1, o1), ineqLine(k2, x2, o2)) + "." + setAns, spec: solsetSpec(ivs), sol: "Les deux lignes donnent " + M("x " + OPT[o1] + " " + x1) + " et " + M("x " + OPT[o2] + " " + x2) + (k1 < 0 || k2 < 0 ? " (signe retourné quand on divise par un négatif)" : "") + ". " + (ivs.length ? "Partie commune : " + M("S = " + SolSet.show(ivs)) : "Aucun nombre ne vérifie les deux : " + M("S = \\varnothing")) + "." }; },
     ] },
-  { id: "ineqfrac", theme: "fa", label: "Inéquations fractionnaires", ex: "\\frac{x - 1}{x + 2} \\ge 0", CH: [12], codesMATU: "2\\.AL\\.04d",
+  { id: "ineqfrac", theme: "fa", label: "Inéquations fractionnaires", ex: "\\frac{x - 1}{x + 2} \\ge 0", CH: [12], MP: null, codesMATU: "2\\.AL\\.04d",
     hint: "Tableau des signes : une ligne pour le numérateur, une pour le dénominateur. La valeur qui annule le dénominateur est toujours exclue.",
     lesson: ["Inéquations fractionnaires", "Le signe d'un quotient dépend des signes du numérateur et du dénominateur.", "On ramène tout d'un côté pour comparer à 0. On cherche les zéros du numérateur et du dénominateur, on fait le tableau des signes, puis on lit l'ensemble des solutions. Le zéro du dénominateur est toujours exclu (crochet ouvert).",
       ["\\(\\frac{x - 1}{x + 2} \\ge 0\\) : \\(S = \\,]-\\infty ; -2[ \\cup [1 ; +\\infty[\\)", "\\(\\frac{x + 3}{x - 1} \\ge 1 \\iff \\frac{4}{x - 1} \\ge 0 \\iff x > 1\\)"],
@@ -3832,7 +3832,7 @@ FINE.push(
       () => { const b = R.int(-4, 4); let z; do z = R.int(-4, 4); while (z === b); const a = z + b, op = R.pick([">=", "<=", ">", "<"]), f = (x) => (x - z) / (x - b), ivs = signSet(f, [z], [b], op);
         return { q: "Résous " + M("\\frac{" + lin(2, -a) + "}{" + xm(b) + "} " + OPT[op] + " 1") + "." + setAns, spec: solsetSpec(ivs), sol: "On soustrait 1 : " + M("\\frac{" + lin(2, -a) + " - (" + xm(b) + ")}{" + xm(b) + "} = \\frac{" + xm(z) + "}{" + xm(b) + "} " + OPT[op] + " 0") + ". Tableau des signes : " + M("S = " + SolSet.show(ivs)) + "." }; },
     ] },
-  { id: "eqirr", theme: "fa", label: "Équations irrationnelles", ex: "\\sqrt{x + 7} = x + 1", CH: [12],
+  { id: "eqirr", theme: "fa", label: "Équations irrationnelles", ex: "\\sqrt{x + 7} = x + 1", CH: [12], MP: null,
     hint: "Isole la racine, élève au carré, résous, puis vérifie chaque solution dans l'équation de départ : le carré peut créer des solutions parasites.",
     lesson: ["Équations irrationnelles", "L'inconnue est sous une racine carrée.", "On isole la racine, on élève les deux membres au carré, on résout l'équation obtenue, puis on vérifie chaque solution dans l'équation de départ. Une racine carrée n'est jamais négative : si \\(\\sqrt{A} = B\\), il faut \\(B \\ge 0\\).",
       ["\\(\\sqrt{x + 3} = 4 \\Rightarrow x + 3 = 16 \\Rightarrow x = 13\\)", "\\(\\sqrt{x + 7} = x + 1 \\Rightarrow x^2 + x - 6 = 0 \\Rightarrow x = 2\\) ou \\(x = -3\\) ; \\(-3\\) est à rejeter (\\(x + 1 < 0\\))"],
@@ -3855,7 +3855,7 @@ FINE.push(
 // Fonction définie par morceaux : ax + b si x < c ; x² + e si x ≥ c
 const pieceT = (a, b, c, e) => M("f(x) = \\begin{cases} " + lin(a, b) + " & \\text{si } x < " + c + " \\\\ " + poly([1, 0, e]) + " & \\text{si } x \\ge " + c + " \\end{cases}");
 FINE.push(
-  { id: "morceaux", theme: "fa", label: "Fonctions définies par morceaux", ex: "f(x) = \\begin{cases} x + 1 & x < 2 \\\\ x^2 & x \\ge 2 \\end{cases}", CH: [12], codesMATU: "2\\.FO\\.05c",
+  { id: "morceaux", theme: "fa", label: "Fonctions définies par morceaux", ex: "f(x) = \\begin{cases} x + 1 & x < 2 \\\\ x^2 & x \\ge 2 \\end{cases}", CH: [12], MP: null, codesMATU: "2\\.FO\\.05c",
     hint: "Regarde d'abord dans quel morceau se trouve x (compare-le à la frontière), puis utilise la formule de ce morceau seulement.",
     lesson: ["Fonctions définies par morceaux", "La formule change selon l'intervalle où se trouve \\(x\\).", "Pour calculer \\(f(a)\\) : on cherche le morceau qui contient \\(a\\) (attention à la frontière : « \\(<\\) » ou « \\(\\ge\\) »), puis on applique sa formule. Pour résoudre \\(f(x) = k\\) : on résout dans chaque morceau et on garde seulement les solutions qui sont dans le bon intervalle.",
       ["\\(f(x) = x + 1\\) si \\(x < 2\\), \\(x^2\\) si \\(x \\ge 2\\) : \\(f(2) = 4\\), \\(f(0) = 1\\)", "La valeur absolue est une fonction par morceaux : \\(|x| = -x\\) si \\(x < 0\\), \\(x\\) sinon."],
@@ -3872,7 +3872,7 @@ FINE.push(
         return { q: "On donne " + M("f(x) = \\begin{cases} " + (a === 1 ? "" : a === -1 ? "-" : a) + "x + m & \\text{si } x < " + c + " \\\\ " + poly([1, 0, e]) + " & \\text{si } x \\ge " + c + " \\end{cases}") + ". Quelle valeur de " + M("m") + " rend le graphe de " + M("f") + " continu (sans saut) ?", spec: { kind: "value", value: m },
           sol: "Les deux morceaux doivent donner la même valeur en " + M("x = " + c) + " : " + M(a + " \\cdot " + par(c) + " + m = " + par(c) + "^2" + sg(e)) + ", donc " + M("m = " + m) + "." }; },
     ] },
-  { id: "transf", theme: "fa", label: "Transformer un graphe : f(x − a) + b", ex: "g(x) = (x - 2)^2 + 3", CH: [12],
+  { id: "transf", theme: "fa", label: "Transformer un graphe : f(x − a) + b", ex: "g(x) = (x - 2)^2 + 3", CH: [12], MP: null,
     hint: "f(x − a) décale le graphe de a vers la droite ; + b le monte de b ; k·f(x) étire verticalement (et retourne si k < 0).",
     lesson: ["Transformations de graphes", "À partir du graphe de \\(f\\), on obtient celui de \\(g\\) par des déplacements.", "\\(g(x) = f(x - a) + b\\) : translation de \\(a\\) horizontalement et de \\(b\\) verticalement. Le point \\((p ; q)\\) devient \\((p + a ; q + b)\\). \\(g(x) = k \\cdot f(x)\\) : les ordonnées sont multipliées par \\(k\\) ; \\(k < 0\\) retourne le graphe.",
       ["\\(f(x) = x^2\\), \\(g(x) = (x - 2)^2 + 3\\) : sommet \\((2 ; 3)\\)", "\\(P(1 ; 4)\\) sur \\(f\\), \\(g(x) = f(x + 3) - 1\\) : \\(P'(-2 ; 3)\\)"],
@@ -3888,7 +3888,7 @@ FINE.push(
         return { q: "Le point " + M("P(" + p + " ; " + q + ")") + " est sur le graphe de " + M("f") + ". On pose " + M("g(x) = " + (k === -1 ? "-" : k) + "f" + xmT(a) + sg(b)) + ". Quel point du graphe de " + M("g") + " correspond à " + M("P") + " ? Réponds « x ; y ».", spec: { kind: "pair", values: [p + a, k * q + b] },
           sol: "Abscisse : " + M(p + sg(a) + " = " + (p + a)) + ". Ordonnée : " + M(k + " \\cdot " + par(q) + sg(b) + " = " + (k * q + b)) + ". Point " + M("(" + (p + a) + " ; " + (k * q + b) + ")") + "." }; },
     ] },
-  { id: "trigrel", theme: "es", label: "Relations trigonométriques", ex: "\\sin^2\\alpha + \\cos^2\\alpha = 1", CH: [12], codesMATU: "2\\.FO\\.07e",
+  { id: "trigrel", theme: "es", label: "Relations trigonométriques", ex: "\\sin^2\\alpha + \\cos^2\\alpha = 1", CH: [12], MP: null, codesMATU: "2\\.FO\\.07e",
     hint: "sin²α + cos²α = 1 et tan α = sin α / cos α. Pour un angle aigu, sin, cos et tan sont positifs.",
     lesson: ["Relations trigonométriques", "Le sinus, le cosinus et la tangente d'un même angle sont liés.", "Pour tout angle \\(\\alpha\\) : \\(\\sin^2\\alpha + \\cos^2\\alpha = 1\\) (Pythagore dans le triangle rectangle) et \\(\\tan\\alpha = \\frac{\\sin\\alpha}{\\cos\\alpha}\\). Connaissant l'un des trois, on calcule les deux autres.",
       ["\\(\\sin\\alpha = \\frac{3}{5}\\), \\(\\alpha\\) aigu : \\(\\cos\\alpha = \\sqrt{1 - \\frac{9}{25}} = \\frac{4}{5}\\), \\(\\tan\\alpha = \\frac{3}{4}\\)"],
@@ -3908,7 +3908,7 @@ FINE.push(
 const rtn = (n, a) => (n === 2 ? "\\sqrt{" + a + "}" : "\\sqrt[" + n + "]{" + a + "}");
 const FRP = [[4, 2], [8, 3], [9, 2], [16, 2], [16, 4], [25, 2], [27, 3], [32, 5], [36, 2], [49, 2], [64, 2], [64, 3], [64, 6], [81, 2], [81, 4], [100, 2], [125, 3]];
 FINE.push(
-  { id: "expfrac", theme: "no", label: "Exposants fractionnaires", ex: "8^{\\frac{2}{3}} = 4", CH: [13], codesMATU: "2\\.FO\\.10a",
+  { id: "expfrac", theme: "no", label: "Exposants fractionnaires", ex: "8^{\\frac{2}{3}} = 4", CH: [13], MP: null, codesMATU: "2\\.FO\\.10a",
     hint: "a^(1/n) est la racine n-ième de a ; a^(p/n) = (racine n-ième de a)^p ; un exposant négatif donne l'inverse.",
     lesson: ["Exposants fractionnaires", "Les puissances s'étendent aux exposants fractionnaires.", "\\(a^{\\frac{1}{n}} = \\sqrt[n]{a}\\) et \\(a^{\\frac{p}{n}} = \\left(\\sqrt[n]{a}\\right)^p = \\sqrt[n]{a^p}\\) (pour \\(a > 0\\)). Les règles restent vraies : \\(a^r \\cdot a^s = a^{r + s}\\), \\((a^r)^s = a^{r s}\\), \\(a^{-r} = \\frac{1}{a^r}\\).",
       ["\\(8^{\\frac{2}{3}} = (\\sqrt[3]{8})^2 = 4\\)", "\\(16^{-\\frac{3}{4}} = \\frac{1}{(\\sqrt[4]{16})^3} = \\frac{1}{8}\\)", "\\(\\sqrt[3]{x^2} \\cdot \\sqrt{x} = x^{\\frac{2}{3} + \\frac{1}{2}} = x^{\\frac{7}{6}}\\)"],
@@ -3924,7 +3924,7 @@ FINE.push(
         return QV("Écris " + M(sgn > 0 ? r1 + " \\cdot " + r2 : "\\frac{" + r1 + "}{" + r2 + "}") + " sous la forme " + M("x^r") + " (avec " + M("x > 0") + "). Donne " + M("r") + ".", num / den,
           M(sgn > 0 ? "x^{" + frac(p1, n1) + "} \\cdot x^{" + frac(p2, n2) + "}" : "\\frac{x^{" + frac(p1, n1) + "}}{x^{" + frac(p2, n2) + "}}") + " : " + M("r = " + frac(p1, n1) + (sgn > 0 ? " + " : " - ") + frac(p2, n2) + " = " + frac(num, den)) + "."); },
     ] },
-  { id: "vecteurs", theme: "es", label: "Vecteurs : composantes, norme, produit scalaire", ex: "\\vec{AB} = \\begin{pmatrix} x_B - x_A \\\\ y_B - y_A \\end{pmatrix}", CH: [13],
+  { id: "vecteurs", theme: "es", label: "Vecteurs : composantes, norme, produit scalaire", ex: "\\vec{AB} = \\begin{pmatrix} x_B - x_A \\\\ y_B - y_A \\end{pmatrix}", CH: [13], MP: null,
     hint: "Composantes de AB : arrivée moins départ. Norme : √(x² + y²). Produit scalaire : x·x' + y·y' ; il est nul si les vecteurs sont perpendiculaires.",
     lesson: ["Vecteurs dans le plan", "Un vecteur est un déplacement : une direction, un sens, une longueur.", "\\(\\vec{AB} = \\begin{pmatrix} x_B - x_A \\\\ y_B - y_A \\end{pmatrix}\\). On additionne et on multiplie par un nombre composante par composante. Norme : \\(\\|\\vec{u}\\| = \\sqrt{x^2 + y^2}\\). Produit scalaire : \\(\\vec{u} \\cdot \\vec{v} = x x' + y y'\\) ; \\(\\vec{u} \\perp \\vec{v} \\iff \\vec{u} \\cdot \\vec{v} = 0\\).",
       ["\\(A(1 ; 2)\\), \\(B(4 ; 6)\\) : \\(\\vec{AB} = \\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}\\), \\(\\|\\vec{AB}\\| = 5\\)", "\\(\\begin{pmatrix} 2 \\\\ 3 \\end{pmatrix} \\cdot \\begin{pmatrix} 3 \\\\ -2 \\end{pmatrix} = 6 - 6 = 0\\) : perpendiculaires"],
