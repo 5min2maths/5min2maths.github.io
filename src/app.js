@@ -221,6 +221,7 @@ function screenPrivacy(back) {
   <div class="card flat stack"><b>Ce qui est envoyé, de façon anonyme</b>
   <span class="small muted">Vers un tableau tenu par l'auteur de l'app (Google Sheets), pour l'améliorer pendant la phase de test :</span>
   <ul class="plain"><li><b>Un signal d'ouverture</b> (au plus une fois par jour) et <b>un signal de fin de séance</b>, avec la date et un identifiant tiré au hasard, propre à cet appareil. Il sert seulement à compter combien de personnes testent l'app.</li>
+  <li><b>Le début et la fin de chaque séance</b>, avec ta classe et le format ; à la fin, le nombre de questions, le score et la durée en minutes. Ni les questions, ni tes réponses. Ça sert à savoir si les séances sont trop longues ou trop difficiles.</li>
   <li><b>Tes avis</b> 👍 / 👎, « trop facile » et « pas compris », avec le code de la question ou du rappel et le même identifiant.</li>
   <li><b>Tes commentaires</b>, si tu en écris, avec ta classe (par exemple « 10e ») et le même identifiant. N'y écris pas ton nom.</li>
   <li><b>Ton chapitre du moment</b>, si tu en choisis un : les notions, ta classe et le mois, sans identifiant. Ça sert à proposer les notions dans l'ordre où elles se font vraiment en classe.</li></ul></div>
@@ -413,6 +414,7 @@ function startSession() {
   nextQuestion();
 }
 function nextQuestion(redo) {
+  if (!redo && session.i === 0 && !session.pinged) { session.pinged = true; ping("start", sessionInfo()); }
   // Pas de chrono : la séance finit quand le programme du jour est fait.
   if (!redo && session.i >= session.plan.length) return screenSummary();
   const raw = redo ? redo.id : session.plan[session.i], forceProb = String(raw).startsWith("PROB:");
@@ -677,11 +679,11 @@ function deviceId() {
     return id;
   } catch (e) { return ""; }
 }
-function ping(ev) {
+function ping(ev, extra = {}) {
   try {
     if (!VOTE_ENDPOINT || location.protocol !== "https:" || /claude/.test(location.hostname)) return;
     if (ev === "open") { if (localStorage.getItem("m2m-ping") === day()) return; localStorage.setItem("m2m-ping", day()); }
-    fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ ev, dev: deviceId(), date: day() }) }).catch(() => {});
+    fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ ev, dev: deviceId(), date: day(), ...extra }) }).catch(() => {});
   } catch (e) {}
 }
 
@@ -744,8 +746,10 @@ function vote(code, v) {
   } catch (e) {}
 }
 
+// Début et fin de séance (anonymes) : classe, format ; à la fin, nombre de questions, score, durée en minutes.
+const sessionInfo = () => ({ niveau: state ? gradeName(state.profile) + (state.profile.track === "mp" ? " MP" : "") : "", fmt: session.prep ? "test" : session.weekly ? "semaine" : session.fmt || "" });
 function screenSummary() {
-  ping("session");
+  ping("session", { ...sessionInfo(), n: session.answered, score: session.score, min: Math.max(1, Math.round((Date.now() - session.start) / 6e4)) });
   Badges.check(state); save();
   const nb = newBadgesCard();
   const n = session.answered, sc = session.score, d = state.elo.r - session.elo0;

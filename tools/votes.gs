@@ -1,7 +1,8 @@
 /**
  * Collecte des votes 👍 / 👎 de l'app 5minutes2mathsparjour (Google Apps Script, lié à une feuille Google).
- * Reçoit uniquement : code de la question, vote (up / down), date, identifiant aléatoire d'appareil (pour compter les testeurs). Aucune donnée sur l'élève.
- * Feuille « visites » : une ligne par ouverture (1 par jour et par appareil) ou par séance terminée.
+ * Reçoit uniquement : code de la question, vote (up / down / facile), date, identifiant aléatoire d'appareil (pour compter les testeurs). Aucune donnée sur l'élève.
+ * Feuille « visites » : une ligne par ouverture (1 par jour et par appareil), par séance commencée ou terminée
+ * (classe, format ; à la fin : questions, score, minutes). Activité par jour : …/exec?activite=CLÉ.
  * Feuille « commentaires » : commentaires libres des testeurs (question ou application), avec la classe déclarée.
  * Lecture des commentaires par l'URL …/exec?commentaires=CLÉ : la clé n'est PAS dans ce fichier (dépôt public) ;
  * la définir dans Apps Script > Paramètres du projet > Propriétés du script : CLE_LECTURE = (une suite de lettres au hasard).
@@ -27,12 +28,16 @@ function sheet_() {
 }
 
 // Reçoit un vote : corps JSON {code, vote, date}.
+const VISITES = ["reçu le", "événement", "appareil", "date élève", "classe", "format", "questions", "score", "minutes"];
 function visits_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   let sh = ss.getSheetByName("visites");
-  if (!sh) { sh = ss.insertSheet("visites"); sh.appendRow(["reçu le", "événement", "appareil", "date élève"]); sh.setFrozenRows(1); }
+  if (!sh) { sh = ss.insertSheet("visites"); sh.appendRow(VISITES); sh.setFrozenRows(1); }
+  else if (sh.getLastColumn() < VISITES.length) sh.getRange(1, 1, 1, VISITES.length).setValues([VISITES]);
   return sh;
 }
+const num_ = (x) => (typeof x === "number" && isFinite(x) ? Math.round(x * 100) / 100 : "");
+const jour_ = (r) => (r[3] instanceof Date ? Utilities.formatDate(r[3], "Europe/Zurich", "yyyy-MM-dd") : String(r[3] || "").slice(0, 10)) || Utilities.formatDate(new Date(r[0]), "Europe/Zurich", "yyyy-MM-dd");
 
 function comments_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -66,12 +71,14 @@ function doPost(e) {
       chapters_().appendRow([new Date(), String(d.niveau || "").slice(0, 30), String(d.mois || "").slice(0, 7), ids]);
       return out_({ ok: true });
     }
-    if (d.ev === "open" || d.ev === "session") {
-      visits_().appendRow([new Date(), d.ev, dev, String(d.date || "").slice(0, 10)]);
+    if (d.ev === "open" || d.ev === "session" || d.ev === "start") {
+      const s = (x, n) => String(x || "").slice(0, n);
+      visits_().appendRow(d.ev === "open" ? [new Date(), d.ev, dev, s(d.date, 10)]
+        : [new Date(), d.ev, dev, s(d.date, 10), s(d.niveau, 30), s(d.fmt, 12), num_(d.n), num_(d.score), num_(d.min)]);
       return out_({ ok: true });
     }
     const code = String(d.code || "").slice(0, 40);
-    const vote = d.vote === "up" ? "up" : d.vote === "down" ? "down" : "";
+    const vote = ["up", "down", "facile"].includes(d.vote) ? d.vote : "";
     if (!code || !vote) return out_({ ok: false });
     const [notion, diff] = code.split(/[·-]/);
     sheet_().appendRow([new Date(), code, notion || "", diff || "", vote, String(d.date || "").slice(0, 10), dev]);
@@ -94,6 +101,32 @@ function doGet(e) {
     if (!cle || e.parameter.chapitres !== cle) return out_({ erreur: "clé absente ou incorrecte" });
     return out_(chapters_().getDataRange().getValues().slice(1).map((r) => ({ recu: r[0], classe: r[1], mois: r[2], notions: r[3] })));
   }
+  // Activité par jour et rétention : …/exec?activite=CLÉ
+  if (e && e.parameter && e.parameter.activite) {
+    const cle = PropertiesService.getScriptProperties().getProperty("CLE_LECTURE");
+    if (!cle || e.parameter.activite !== cle) return out_({ erreur: "clé absente ou incorrecte" });
+    const jours = {}, parApp = {};
+    visits_().getDataRange().getValues().slice(1).forEach((r) => {
+      if (!r[2]) return;
+      const j = jour_(r), x = (jours[j] = jours[j] || { app: {}, debut: 0, fin: 0, min: [], reussite: [], classes: {} });
+      x.app[r[2]] = 1;
+      (parApp[r[2]] = parApp[r[2]] || {})[j] = 1;
+      if (r[1] === "start") x.debut++;
+      if (r[1] === "session") {
+        x.fin++;
+        if (typeof r[8] === "number") x.min.push(r[8]);
+        if (typeof r[6] === "number" && r[6] > 0 && typeof r[7] === "number") x.reussite.push(r[7] / r[6]);
+        if (r[4]) x.classes[r[4]] = (x.classes[r[4]] || 0) + 1;
+      }
+    });
+    const moy = (a) => (a.length ? Math.round((a.reduce((p, q) => p + q, 0) / a.length) * 100) / 100 : null);
+    const nb = Object.values(parApp).map((o) => Object.keys(o).length), n = nb.length || 1;
+    return out_({
+      retention: { testeurs: nb.length, "2_jours_ou_plus": Math.round((100 * nb.filter((k) => k >= 2).length) / n) + " %", "5_jours_ou_plus": Math.round((100 * nb.filter((k) => k >= 5).length) / n) + " %" },
+      jours: Object.keys(jours).sort().map((j) => { const x = jours[j]; return { jour: j, appareils: Object.keys(x.app).length, seances_commencees: x.debut, seances_terminees: x.fin, minutes_moy: moy(x.min), reussite_moy: moy(x.reussite), classes: x.classes }; }),
+      trop_facile: sheet_().getDataRange().getValues().slice(1).filter((r) => r[4] === "facile").length,
+    });
+  }
   if (e && e.parameter && e.parameter.testeurs) {
     const all = new Set(), w = new Set(), today = new Set(), seances = {};
     const lim = new Date(Date.now() - 7 * 864e5), j = Utilities.formatDate(new Date(), "Europe/Zurich", "yyyy-MM-dd");
@@ -110,7 +143,7 @@ function doGet(e) {
   const agg = {};
   rows.forEach((r) => {
     const k = r[2] + " · niveau " + r[3];
-    agg[k] = agg[k] || { up: 0, down: 0 };
+    agg[k] = agg[k] || { up: 0, down: 0, facile: 0 };
     agg[k][r[4]]++;
   });
   return out_(agg);
