@@ -32,7 +32,7 @@ const Badges = {
   },
   // Badges de l'élève : les badges de thème suivent le découpage de son référentiel (CO, matu ou MP).
   list(state) {
-    const themes = state && state.profile ? Engine.themeOrder(Engine.catalog(state.profile).filter((c) => c.current)) : Object.keys(THEMES);
+    const themes = state && state.profile ? Engine.themeOrder(Engine.catalog(state.profile).filter((c) => c.current), state.profile) : Object.keys(THEMES);
     const L = [
       { id: "premier", fam: "reg", icon: "👣", name: "Premier pas", crit: "Terminer une première séance.", prog: (s, b) => [Math.min(b.days, 1), 1] },
       { id: "semaine", fam: "reg", icon: "📅", name: "Semaine pleine", crit: "S'entraîner 5 jours dans une même semaine (du lundi au dimanche).", prog: (s, b) => [Math.min(5, b.weeks[weekOf(day())] || 0, 5), 5, b.full >= 1] },
@@ -43,7 +43,7 @@ const Badges = {
       { id: "notion", fam: "mai", icon: "🎯", name: "Notion maîtrisée", crit: "Toutes les compétences d'une notion à 5 ou plus.",
         prog: (s) => Object.keys(s.notions).map((id) => this.notionProgress(s, id)).reduce((a, p) => (p[1] && p[0] / p[1] > a[0] / a[1] ? p : a), [0, 3]) },
       { id: "expert", fam: "mai", icon: "💎", name: "Expert", crit: "Une compétence atteint la note 6.", prog: (s) => [this.notes(s).some((n) => n >= 6) ? 1 : 0, 1] },
-      ...themes.map((th) => ({ id: "th-" + th, fam: "mai", icon: this.themeIcon(Engine.themeLabel(th)), name: Engine.themeLabel(th),
+      ...themes.map((th) => ({ id: "th-" + th, fam: "mai", icon: this.themeIcon(Engine.themeLabel(th, state && state.profile)), name: Engine.themeLabel(th, state && state.profile),
         crit: th.includes(".") ? "Toutes les notions ouvertes de ce chapitre maîtrisées." : "Toutes les notions ouvertes de ce thème cette année maîtrisées (au moins 2 notions).",
         // Au moins 2 notions, sauf pour un chapitre qui n'en compte qu'une (ex. Ensembles).
         prog: (s) => {

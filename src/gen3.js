@@ -846,6 +846,34 @@ const LESSON_FIGS = {
   euclide: () => GF.altitude(4, 9, { lp: "p", lq: "q", lh: "h", la: "a", lb: "b", lc: "c" }),
 };
 
+// ======================= CO 9e : transformations du plan (13.11, chapitre 9e · 11 du plan) =======================
+const symFig = (pts, o = {}) => FIG.plot([], pts, Object.assign({ xr: [-7, 7], yr: [-6, 6], squash: 0.85, label: "repère" }, o));
+FINE.push(
+  { id: "symetries", theme: "es", label: "Symétries et translations dans un repère", ex: "A(2 ; 3) \\to A'(-2 ; 3)", CH: [9], codes: "9ES5\\.01",
+    hint: "Symétrie d'axe vertical : seule l'abscisse change. Symétrie centrale de centre O : les deux coordonnées changent de signe. Translation : on ajoute le déplacement.",
+    lesson: ["Symétries et translations", "Une transformation déplace chaque point d'une figure ; la figure image a la même forme et les mêmes dimensions.", "Symétrie d'axe \\(Oy\\) : \\((x ; y) \\to (-x ; y)\\). Symétrie d'axe \\(Ox\\) : \\((x ; y) \\to (x ; -y)\\). Symétrie de centre \\(O\\) : \\((x ; y) \\to (-x ; -y)\\). Translation de « \\(a\\) à droite, \\(b\\) en haut » : \\((x ; y) \\to (x + a ; y + b)\\).",
+      ["\\(A(2 ; 3)\\), symétrie d'axe \\(Oy\\) : \\(A'(-2 ; 3)\\)", "\\(A(2 ; 3)\\), symétrie de centre \\(O\\) : \\(A'(-2 ; -3)\\)", "\\(A(2 ; 3)\\), 4 à gauche et 1 en haut : \\(A'(-2 ; 4)\\)"],
+      "Le point et son image sont à la même distance de l'axe (ou du centre), de part et d'autre."],
+    g: [
+      () => { const a = R.nz(-5, 5), b = R.nz(-4, 4), ax = R.pick(["Oy", "Ox"]), img = ax === "Oy" ? [-a, b] : [a, -b];
+        return { q: "Quelles sont les coordonnées de l'image de " + M("A(" + a + " ; " + b + ")") + " par la symétrie d'axe " + M(ax === "Oy" ? "Oy" : "Ox") + " (l'axe " + (ax === "Oy" ? "vertical" : "horizontal") + ") ? Réponds « x ; y ».", spec: { kind: "pair", values: img }, fig: symFig([[a, b, "A"]]),
+          sol: "Axe " + (ax === "Oy" ? "vertical : l'abscisse change de signe" : "horizontal : l'ordonnée change de signe") + ", " + M("A'(" + img[0] + " ; " + img[1] + ")") + "." }; },
+      () => { const a = R.nz(-5, 5), b = R.nz(-4, 4);
+        if (R.rand() < 0.5) return { q: "Quelles sont les coordonnées de l'image de " + M("A(" + a + " ; " + b + ")") + " par la symétrie de centre " + M("O(0 ; 0)") + " ? Réponds « x ; y ».", spec: { kind: "pair", values: [-a, -b] }, fig: symFig([[a, b, "A"], [0, 0, "O"]]),
+          sol: "Symétrie centrale de centre " + M("O") + " : les deux coordonnées changent de signe, " + M("A'(" + -a + " ; " + -b + ")") + "." };
+        const dx = R.nz(-4, 4), dy = R.nz(-3, 3), hz = (dx > 0 ? dx + " vers la droite" : -dx + " vers la gauche"), vt = (dy > 0 ? dy + " vers le haut" : -dy + " vers le bas");
+        return { q: "On déplace " + M("A(" + a + " ; " + b + ")") + " par une translation de " + hz + " et " + vt + ". Quelles sont les coordonnées de son image ? Réponds « x ; y ».", spec: { kind: "pair", values: [a + dx, b + dy] }, fig: symFig([[a, b, "A"]]),
+          sol: M("(" + a + sg(dx) + " ; " + b + sg(dy) + ") = (" + (a + dx) + " ; " + (b + dy) + ")") + "." }; },
+      () => { const a = R.int(-5, 5), b = R.nz(-4, 4);
+        if (R.rand() < 0.5) { const c = R.nz(-3, 3); if (c === a) return GEN.symetries(3);
+          return { q: "Quelles sont les coordonnées de l'image de " + M("A(" + a + " ; " + b + ")") + " par la symétrie d'axe vertical " + M("x = " + c) + " ? Réponds « x ; y ».", spec: { kind: "pair", values: [2 * c - a, b] }, fig: symFig([[a, b, "A"]], { vlines: [c] }),
+            sol: M("A") + " est à " + M(Math.abs(a - c)) + " de l'axe ; son image est à la même distance de l'autre côté : abscisse " + M(c + sg(c - a) + " = " + (2 * c - a)) + ", " + M("A'(" + (2 * c - a) + " ; " + b + ")") + "." }; }
+        const c = R.nz(-3, 3), d = R.nz(-3, 3); if (c === a && d === b) return GEN.symetries(3);
+        return { q: "Quelles sont les coordonnées de l'image de " + M("A(" + a + " ; " + b + ")") + " par la symétrie de centre " + M("C(" + c + " ; " + d + ")") + " ? Réponds « x ; y ».", spec: { kind: "pair", values: [2 * c - a, 2 * d - b] }, fig: symFig([[a, b, "A"], [c, d, "C"]]),
+          sol: M("C") + " est le milieu de " + M("[AA']") + " : " + M("A'(2 \\cdot " + par(c) + " - " + par(a) + " ; 2 \\cdot " + par(d) + " - " + par(b) + ") = (" + (2 * c - a) + " ; " + (2 * d - b) + ")") + "." }; },
+    ] },
+);
+
 // ======================= Matu : notions des cours réels (pinkmaths 2026-27, Sésamath) =======================
 // Ajoutées le 13.11 : systèmes d'inéquations, inéquations fractionnaires, équations irrationnelles, fonctions par
 // morceaux, transformations de graphes, relations trigonométriques (1re) ; exposants fractionnaires, vecteurs (2e).

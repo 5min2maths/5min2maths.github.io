@@ -142,6 +142,7 @@ const COMPS = {
   polyfact: ["Résoudre avec une racine connue", "Trouver une racine évidente", "Résoudre une équation de degré 4"],
   fracrat: ["Simplifier une fraction rationnelle", "Additionner des fractions rationnelles", "Simplifier une fraction rationnelle"],
   eqrat: ["Résoudre une équation rationnelle simple", "Résoudre une proportion", "Résoudre une équation rationnelle"],
+  symetries: ["Trouver l'image d'un point par une symétrie d'axe Ox ou Oy", "Trouver l'image par une symétrie centrale ou une translation", "Symétrie d'axe x = c ou de centre quelconque"],
   sysineq: ["Résoudre un système d'inéquations simple", "Résoudre un système d'inéquations (coefficient négatif)", "Reconnaître un système sans solution ou à une borne"],
   ineqfrac: ["Résoudre une inéquation fractionnaire simple", "Résoudre une inéquation fractionnaire avec coefficients", "Ramener une inéquation fractionnaire à 0"],
   eqirr: ["Résoudre une équation avec une racine", "Résoudre une équation irrationnelle et rejeter les solutions parasites", "Résoudre une équation irrationnelle plus complexe"],

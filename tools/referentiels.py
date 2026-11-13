@@ -185,6 +185,17 @@ def write_order():
             for n, c in SESA_ALSO.items():  # rang : la première des deux années
                 rk[n] = min(rk.get(n, 10 ** 9), (int(c[1]) * 100 + int(c[3:])) * 1000 + 900)
             lab = dict(SESA)
+        elif ref == "CO":
+            # CO : chapitres du plan (référentiel du cycle, PER) par année ; une notion peut avoir un chapitre par année.
+            by = {}
+            for i, r in enumerate(rows):
+                k = "%sC%02d" % (r["degre"], int(r["chap"]))
+                lab.setdefault(k, "%s. %s" % (int(r["chap"]), r["chapitre"]))
+                for n, m in MAP.items():
+                    if "CO" in m and re.match(m["CO"], r[kc]):
+                        by.setdefault(n, {}).setdefault(r["degre"], k)
+                        rk[n] = min(rk.get(n, 10 ** 9), i)
+            theme["CO_BY"], label["CO"] = by, lab
         else:
             # MP : chapitre du référentiel, code « S1.CN.01 » → CN ; libellé court seulement.
             for r in rows:

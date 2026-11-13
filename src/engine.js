@@ -107,23 +107,47 @@ const Engine = {
       // Matu : une notion est « de l'année » si son chapitre Sésamath est celui de l'année (Ma1 = 1re, Ma2 = 2e).
       const yr = "M" + (profile.grade - 11), sesa = profile.track !== "mp" && profile.grade >= 12 && typeof ORDRE_THEME !== "undefined" &&
         [(ORDRE_THEME.MATU || {})[n.id], (ORDRE_THEME.MATU_ALT || {})[n.id]].some((k) => (k || "").startsWith(yr));
-      const again = sesa || (profile.track !== "mp" && (n.again || []).includes(profile.grade));
+      const coYear = this.coChap(profile, n.id, true);
+      const again = sesa || coYear || (profile.track !== "mp" && (n.again || []).includes(profile.grade));
       return { ...n, theme: this.themeKey(profile, n.id), defaultStatus: g < profile.grade ? "vu" : "avenir", current: g === profile.grade || again, again };
     });
   },
   refOf(profile) { return profile.track === "mp" ? "MP" : profile.grade >= 12 ? "MATU" : "CO"; },
   // Thème d'une notion selon le référentiel de l'élève (13.11) : matu = thèmes (Algèbre, Fonctions…), MP = chapitres ;
   // CO, ou notion absente du référentiel : les 4 thèmes du CO.
+  // CO (élèves suisses, 9e–11e) : chapitre du plan de l'année ; pour une notion d'une année précédente, son dernier chapitre.
+  coChap(profile, id, onlyThisYear = false) {
+    if (profile.system !== "CH" || profile.grade > 11 || typeof ORDRE_THEME === "undefined") return null;
+    const by = (ORDRE_THEME.CO_BY || {})[id];
+    if (!by) return null;
+    if (by[profile.grade]) return by[profile.grade];
+    if (onlyThisYear) return null;
+    const ys = Object.keys(by).map(Number).sort((a, b) => a - b), y = ys.filter((v) => v <= profile.grade).pop() ?? ys[0];
+    return by[y];
+  },
   themeKey(profile, id) {
+    const co = this.coChap(profile, id);
+    if (co) return "CO." + co;
     const ref = this.refOf(profile), alt = ref === "MATU" && typeof ORDRE_THEME !== "undefined" && (ORDRE_THEME.MATU_ALT || {})[id];
     // Notion sur deux années : le chapitre de l'année de l'élève.
     const k = alt && alt.startsWith("M" + (profile.grade - 11)) ? alt : ref !== "CO" && typeof ORDRE_THEME !== "undefined" && (ORDRE_THEME[ref] || {})[id];
     return k ? ref + "." + k : NOTIONS.find((n) => n.id === id).theme;
   },
-  themeLabel(key) { const [ref, k] = key.split("."); return k ? THEME_LABEL[ref][k] : THEMES[key]; },
+  // Libellé d'un thème ou chapitre ; chapitre CO d'une autre année : précédé de l'année (« 9e · 10. Calcul littéral »).
+  themeLabel(key, profile) {
+    const [ref, k] = key.split(".");
+    if (!k) return THEMES[key];
+    const y = ref === "CO" && k.split("C")[0];
+    return (y && profile && +y !== profile.grade ? y + "e · " : "") + THEME_LABEL[ref][k];
+  },
   // Thèmes présents dans une liste du catalogue, dans l'ordre du référentiel puis ceux du CO.
-  themeOrder(list) {
-    const keys = [...new Set(list.map((c) => c.theme))], pos = (k) => { const [ref, t] = k.split("."); return t ? Object.keys(THEME_LABEL[ref]).indexOf(t) : 100 + Object.keys(THEMES).indexOf(k); };
+  // Chapitres CO d'une autre année (révisions) : après ceux de l'année.
+  themeOrder(list, profile) {
+    const keys = [...new Set(list.map((c) => c.theme))], pos = (k) => {
+      const [ref, t] = k.split(".");
+      if (!t) return 1000 + Object.keys(THEMES).indexOf(k);
+      return Object.keys(THEME_LABEL[ref]).indexOf(t) + (ref === "CO" && profile && +t.split("C")[0] !== profile.grade ? 500 : 0);
+    };
     return keys.sort((a, b) => pos(a) - pos(b));
   },
   // Rang dans l'ordre du référentiel (CO, matu ou MP selon l'élève).
