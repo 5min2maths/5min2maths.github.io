@@ -32,6 +32,7 @@ for (const [inp, spec, want] of cases) {
   if (r.status !== want) fail("calc « " + inp + " » → " + r.status + " (attendu " + want + ")");
 }
 
+if (typeof FINE === "undefined" || FINE.length < 90) fail("src/gen3.js non chargé (erreur de syntaxe ?) : notions fines absentes");
 // 2. Générateurs : réponse canonique acceptée, figure valide, pas de NaN
 function canonical(spec) {
   if (spec.canon) return spec.canon;
