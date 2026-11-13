@@ -846,6 +846,176 @@ const LESSON_FIGS = {
   euclide: () => GF.altitude(4, 9, { lp: "p", lq: "q", lh: "h", la: "a", lb: "b", lc: "c" }),
 };
 
+// ======================= Matu : notions des cours réels (pinkmaths 2026-27, Sésamath) =======================
+// Ajoutées le 13.11 : systèmes d'inéquations, inéquations fractionnaires, équations irrationnelles, fonctions par
+// morceaux, transformations de graphes, relations trigonométriques (1re) ; exposants fractionnaires, vecteurs (2e).
+const ineqT = (k, c, op, v) => lin(k, c) + " " + OPT[op] + " " + v; // « kx + c op v »
+const flipOp = { ">": "<", "<": ">", ">=": "<=", "<=": ">=" };
+// x op b → intervalle [a, aIncl, b, bIncl]
+const ivOf = (op, b) => (op === ">" ? [b, false, Infinity, false] : op === ">=" ? [b, true, Infinity, false] : op === "<" ? [-Infinity, false, b, false] : [-Infinity, false, b, true]);
+// Intersection de deux intervalles (null si vide)
+function ivAnd(p, q) {
+  let a = p[0], ai = p[1], b = p[2], bi = p[3];
+  if (q[0] > a || (q[0] === a && !q[1])) { a = q[0]; ai = q[1] && (q[0] > p[0] || p[1]); }
+  if (q[2] < b || (q[2] === b && !q[3])) { b = q[2]; bi = q[3] && (q[2] < p[2] || p[3]); }
+  if (a > b || (a === b && !(ai && bi))) return null;
+  return [a, ai, b, bi];
+}
+// Inéquation « kx + c op k·b + c » dont la solution est « x op' b » (op' retourné si k < 0).
+function ineqLine(k, b, opSol) {
+  const c = R.nz(-9, 9), op = k < 0 ? flipOp[opSol] : opSol;
+  return ineqT(k, c, op, k * b + c);
+}
+const sysT = (l1, l2) => M("\\begin{cases} " + l1 + " \\\\ " + l2 + " \\end{cases}");
+const setAns = " Donne l'ensemble des solutions (intervalle, ou « aucune »).";
+FINE.push(
+  { id: "sysineq", theme: "fa", label: "Systèmes d'inéquations du 1er degré", ex: "\\begin{cases} 2x - 1 > 3 \\\\ x + 4 \\le 9 \\end{cases}", CH: [12], codesMATU: "2\\.AL\\.04a",
+    hint: "Résous chaque inéquation séparément, puis garde les x qui vérifient les deux : c'est l'intersection des deux intervalles.",
+    lesson: ["Systèmes d'inéquations", "Un système d'inéquations demande que toutes les conditions soient vraies en même temps.", "On résout chaque inéquation. On dessine les solutions sur une même droite graduée. L'ensemble des solutions est l'intersection (la partie commune). Si les deux parties ne se chevauchent pas, il n'y a aucune solution.",
+      ["\\(x > 2\\) et \\(x \\le 5\\) : \\(S = \\,]2 ; 5]\\)", "\\(x < 1\\) et \\(x > 4\\) : \\(S = \\varnothing\\)", "\\(x \\ge -1\\) et \\(x > 3\\) : \\(S = \\,]3 ; +\\infty[\\)"],
+      "En divisant par un nombre négatif, on retourne le sens de l'inégalité, dans chaque ligne du système."],
+    g: [
+      () => { const a = R.int(-5, 3), b = a + R.int(2, 7), o1 = R.pick([">", ">="]), o2 = R.pick(["<", "<="]), iv = ivAnd(ivOf(o1, a), ivOf(o2, b));
+        return { q: "Résous le système " + sysT(ineqLine(1, a, o1), ineqLine(1, b, o2)) + "." + setAns, spec: solsetSpec([iv]), sol: "Première ligne : " + M("x " + OPT[o1] + " " + a) + " ; deuxième : " + M("x " + OPT[o2] + " " + b) + ". Partie commune : " + M("S = " + SolSet.show([iv])) + "." }; },
+      () => { const a = R.int(-5, 3), b = a + R.int(2, 7), o1 = R.pick([">", ">="]), o2 = R.pick(["<", "<="]), k1 = -R.int(2, 5), k2 = R.int(2, 5), iv = ivAnd(ivOf(o1, a), ivOf(o2, b));
+        const L = [ineqLine(k1, a, o1), ineqLine(k2, b, o2)]; if (R.rand() < 0.5) L.reverse();
+        return { q: "Résous le système " + sysT(L[0], L[1]) + "." + setAns, spec: solsetSpec([iv]), sol: "On divise par " + M(k1) + " (négatif : on retourne le signe) : " + M("x " + OPT[o1] + " " + a) + ". Dans l'autre ligne : " + M("x " + OPT[o2] + " " + b) + ". " + M("S = " + SolSet.show([iv])) + "." }; },
+      () => { const a = R.int(-4, 2), b = a + R.int(1, 5), k1 = R.pick([-1, 1]) * R.int(2, 4), k2 = R.pick([-1, 1]) * R.int(2, 4), kind = R.pick(["vide", "meme", "meme"]);
+        let o1, o2, x1, x2;
+        if (kind === "vide") { o1 = R.pick([">", ">="]); o2 = R.pick(["<", "<="]); x1 = b; x2 = a; }
+        else { const up = R.rand() < 0.5; o1 = up ? R.pick([">", ">="]) : R.pick(["<", "<="]); o2 = up ? R.pick([">", ">="]) : R.pick(["<", "<="]); x1 = a; x2 = b; }
+        const iv = ivAnd(ivOf(o1, x1), ivOf(o2, x2)), ivs = iv ? [iv] : [];
+        return { q: "Résous le système " + sysT(ineqLine(k1, x1, o1), ineqLine(k2, x2, o2)) + "." + setAns, spec: solsetSpec(ivs), sol: "Les deux lignes donnent " + M("x " + OPT[o1] + " " + x1) + " et " + M("x " + OPT[o2] + " " + x2) + (k1 < 0 || k2 < 0 ? " (signe retourné quand on divise par un négatif)" : "") + ". " + (ivs.length ? "Partie commune : " + M("S = " + SolSet.show(ivs)) : "Aucun nombre ne vérifie les deux : " + M("S = \\varnothing")) + "." }; },
+    ] },
+  { id: "ineqfrac", theme: "fa", label: "Inéquations fractionnaires", ex: "\\frac{x - 1}{x + 2} \\ge 0", CH: [12], codesMATU: "2\\.AL\\.04d",
+    hint: "Tableau des signes : une ligne pour le numérateur, une pour le dénominateur. La valeur qui annule le dénominateur est toujours exclue.",
+    lesson: ["Inéquations fractionnaires", "Le signe d'un quotient dépend des signes du numérateur et du dénominateur.", "On ramène tout d'un côté pour comparer à 0. On cherche les zéros du numérateur et du dénominateur, on fait le tableau des signes, puis on lit l'ensemble des solutions. Le zéro du dénominateur est toujours exclu (crochet ouvert).",
+      ["\\(\\frac{x - 1}{x + 2} \\ge 0\\) : \\(S = \\,]-\\infty ; -2[ \\cup [1 ; +\\infty[\\)", "\\(\\frac{x + 3}{x - 1} \\ge 1 \\iff \\frac{4}{x - 1} \\ge 0 \\iff x > 1\\)"],
+      "On ne multiplie pas par le dénominateur : son signe est inconnu. On soustrait et on met au même dénominateur."],
+    g: [
+      () => { const a = R.int(-5, 5); let b; do b = R.int(-5, 5); while (b === a); const op = R.pick([">", ">=", "<", "<="]), f = (x) => (x - a) / (x - b), ivs = signSet(f, [a], [b], op);
+        return { q: "Résous " + M("\\frac{" + xm(a) + "}{" + xm(b) + "} " + OPT[op] + " 0") + "." + setAns, spec: solsetSpec(ivs), sol: "Zéro du numérateur : " + M(a) + " ; zéro du dénominateur (exclu) : " + M(b) + ". Tableau des signes : " + M("S = " + SolSet.show(ivs)) + "." }; },
+      () => { const z = R.int(-4, 4); let p; do p = R.int(-4, 4); while (p === z); const k1 = R.pick([-1, 1]) * R.int(1, 3), k2 = R.pick([-1, 1]) * R.int(1, 3), op = R.pick([">", ">=", "<", "<="]);
+        const f = (x) => (k1 * (x - z)) / (k2 * (x - p)), ivs = signSet(f, [z], [p], op);
+        return { q: "Résous " + M("\\frac{" + lin(k1, -k1 * z) + "}{" + lin(k2, -k2 * p) + "} " + OPT[op] + " 0") + "." + setAns, spec: solsetSpec(ivs), sol: "Numérateur nul en " + M(z) + ", dénominateur nul en " + M(p) + " (exclu). Attention au signe des coefficients de " + M("x") + ". " + M("S = " + SolSet.show(ivs)) + "." }; },
+      () => { const b = R.int(-4, 4); let z; do z = R.int(-4, 4); while (z === b); const a = z + b, op = R.pick([">=", "<=", ">", "<"]), f = (x) => (x - z) / (x - b), ivs = signSet(f, [z], [b], op);
+        return { q: "Résous " + M("\\frac{" + lin(2, -a) + "}{" + xm(b) + "} " + OPT[op] + " 1") + "." + setAns, spec: solsetSpec(ivs), sol: "On soustrait 1 : " + M("\\frac{" + lin(2, -a) + " - (" + xm(b) + ")}{" + xm(b) + "} = \\frac{" + xm(z) + "}{" + xm(b) + "} " + OPT[op] + " 0") + ". Tableau des signes : " + M("S = " + SolSet.show(ivs)) + "." }; },
+    ] },
+  { id: "eqirr", theme: "fa", label: "Équations irrationnelles", ex: "\\sqrt{x + 7} = x + 1", CH: [12],
+    hint: "Isole la racine, élève au carré, résous, puis vérifie chaque solution dans l'équation de départ : le carré peut créer des solutions parasites.",
+    lesson: ["Équations irrationnelles", "L'inconnue est sous une racine carrée.", "On isole la racine, on élève les deux membres au carré, on résout l'équation obtenue, puis on vérifie chaque solution dans l'équation de départ. Une racine carrée n'est jamais négative : si \\(\\sqrt{A} = B\\), il faut \\(B \\ge 0\\).",
+      ["\\(\\sqrt{x + 3} = 4 \\Rightarrow x + 3 = 16 \\Rightarrow x = 13\\)", "\\(\\sqrt{x + 7} = x + 1 \\Rightarrow x^2 + x - 6 = 0 \\Rightarrow x = 2\\) ou \\(x = -3\\) ; \\(-3\\) est à rejeter (\\(x + 1 < 0\\))"],
+      "\\(\\sqrt{x + 1} = -2\\) n'a aucune solution : une racine n'est jamais négative."],
+    g: [
+      () => { const b = R.int(2, 7), a = R.nz(-9, 9);
+        if (R.rand() < 0.2) return { q: "Résous " + M("\\sqrt{" + xm(-a) + "} = -" + b) + ". (Réponds « aucune » s'il n'y a pas de solution.)", spec: { kind: "set", values: [] }, sol: "Une racine carrée n'est jamais négative : aucune solution." };
+        return { q: "Résous " + M("\\sqrt{" + xm(-a) + "} = " + b) + ".", spec: { kind: "set", values: [b * b - a] }, sol: "On élève au carré : " + M(xm(-a) + " = " + b * b) + ", donc " + M("x = " + (b * b - a)) + ". Vérification : " + M("\\sqrt{" + (b * b) + "} = " + b) + "." }; },
+      () => { const m = R.int(1, 4), s = R.int(-3, 5), c = m - s, t = 1 - 2 * c - s, a = c * c - s * t, sols = [s].concat(t + c >= 0 ? [t] : []);
+        if (t === s) return GEN.eqirr(2);
+        return { q: "Résous " + M("\\sqrt{" + xm(-a) + "} = " + xm(-c)) + ". (Plusieurs solutions : sépare-les par « ; ».)", spec: { kind: "set", values: [...new Set(sols)] },
+          sol: "Au carré : " + M(xm(-a) + " = (" + xm(-c) + ")^2") + ", soit " + M(poly([1, 2 * c - 1, c * c - a]) + " = 0") + " : " + M("x = " + s) + " ou " + M("x = " + t) + ". " + (t + c >= 0 ? "Les deux conviennent." : M("x = " + t) + " est à rejeter, car " + M(xm(-c) + " = " + (t + c)) + " est négatif.") }; },
+      () => { if (R.rand() < 0.25) { const b = R.int(1, 6), a = R.nz(-9, 9); return { q: "Résous " + M("\\sqrt{" + xm(-a) + "} + " + b + " = 0") + ". (Réponds « aucune » s'il n'y a pas de solution.)", spec: { kind: "set", values: [] }, sol: M("\\sqrt{" + xm(-a) + "} = -" + b) + " : une racine n'est jamais négative, aucune solution." }; }
+        const m = R.int(1, 5), s = R.int(-2, 6), c = m - s, t = 2 - 2 * c - s, b = c * c - s * t, sols = [s].concat(t + c >= 0 ? [t] : []);
+        if (t === s) return GEN.eqirr(3);
+        return { q: "Résous " + M("\\sqrt{" + lin(2, b) + "} = " + xm(-c)) + ". (Plusieurs solutions : sépare-les par « ; ».)", spec: { kind: "set", values: [...new Set(sols)] },
+          sol: "Au carré : " + M(lin(2, b) + " = (" + xm(-c) + ")^2") + ", soit " + M(poly([1, 2 * c - 2, c * c - b]) + " = 0") + " : " + M("x = " + s) + " ou " + M("x = " + t) + ". " + (t + c >= 0 ? "Les deux conviennent." : M("x = " + t) + " est à rejeter (" + M(xm(-c)) + " serait négatif).") }; },
+    ] },
+);
+// Fonction définie par morceaux : ax + b si x < c ; x² + e si x ≥ c
+const pieceT = (a, b, c, e) => M("f(x) = \\begin{cases} " + lin(a, b) + " & \\text{si } x < " + c + " \\\\ " + poly([1, 0, e]) + " & \\text{si } x \\ge " + c + " \\end{cases}");
+FINE.push(
+  { id: "morceaux", theme: "fa", label: "Fonctions définies par morceaux", ex: "f(x) = \\begin{cases} x + 1 & x < 2 \\\\ x^2 & x \\ge 2 \\end{cases}", CH: [12], codesMATU: "2\\.FO\\.05c",
+    hint: "Regarde d'abord dans quel morceau se trouve x (compare-le à la frontière), puis utilise la formule de ce morceau seulement.",
+    lesson: ["Fonctions définies par morceaux", "La formule change selon l'intervalle où se trouve \\(x\\).", "Pour calculer \\(f(a)\\) : on cherche le morceau qui contient \\(a\\) (attention à la frontière : « \\(<\\) » ou « \\(\\ge\\) »), puis on applique sa formule. Pour résoudre \\(f(x) = k\\) : on résout dans chaque morceau et on garde seulement les solutions qui sont dans le bon intervalle.",
+      ["\\(f(x) = x + 1\\) si \\(x < 2\\), \\(x^2\\) si \\(x \\ge 2\\) : \\(f(2) = 4\\), \\(f(0) = 1\\)", "La valeur absolue est une fonction par morceaux : \\(|x| = -x\\) si \\(x < 0\\), \\(x\\) sinon."],
+      "À la frontière, une seule formule s'applique : lis bien « \\(<\\) » et « \\(\\ge\\) »."],
+    g: [
+      () => { const a = R.nz(-3, 3), b = R.nz(-4, 4), c = R.int(-1, 2), e = R.nz(-4, 3), k = R.pick([c - R.int(1, 3), c, c + R.int(1, 2)]), v = k < c ? a * k + b : k * k + e;
+        return { q: "On donne " + pieceT(a, b, c, e) + ". Calcule " + M("f(" + k + ")") + ".", spec: { kind: "value", value: v }, fig: FIG.plot([{ f: (x) => a * x + b, to: c - 0.001 }, { f: (x) => x * x + e, from: c }], [], { xr: [-5, 5], yr: [-6, 8], squash: 0.6, label: "fonction par morceaux" }),
+          sol: M(k) + (k < c ? " est plus petit que " + M(c) + " : premier morceau, " + M("f(" + k + ") = " + a + " \\cdot " + par(k) + sg(b) + " = " + v) : " n'est pas plus petit que " + M(c) + " : second morceau, " + M("f(" + k + ") = " + par(k) + "^2" + sg(e) + " = " + v)) + "." }; },
+      () => { const c = R.int(0, 2), a = R.nz(-3, 3), b = R.int(-4, 4), x1 = R.int(c - 4, c + 2), y = a * x1 + b, r = R.int(1, 4), e = y - r * r;
+        const sols = [...new Set([...(x1 < c ? [x1] : []), ...[r, -r].filter((x) => x >= c)])];
+        return { q: "On donne " + pieceT(a, b, c, e) + ". Résous " + M("f(x) = " + y) + ". (Plusieurs solutions : sépare-les par « ; » ; « aucune » s'il n'y en a pas.)", spec: { kind: "set", values: sols },
+          sol: "Premier morceau : " + M(lin(a, b) + " = " + y + " \\Rightarrow x = " + x1) + (x1 < c ? " (convient, " + M(x1 + " < " + c) + ")" : " (rejeté, " + M(x1 + " \\ge " + c) + ")") + ". Second : " + M("x^2 = " + r * r + " \\Rightarrow x = \\pm " + r) + ", on garde " + (sols.filter((x) => x >= c).length ? M(sols.filter((x) => x >= c).join(" ; ")) : "aucune") + " (il faut " + M("x \\ge " + c) + ")." }; },
+      () => { const a = R.nz(-3, 3), c = R.int(-2, 3), e = R.int(-4, 4), m = c * c + e - a * c;
+        return { q: "On donne " + M("f(x) = \\begin{cases} " + (a === 1 ? "" : a === -1 ? "-" : a) + "x + m & \\text{si } x < " + c + " \\\\ " + poly([1, 0, e]) + " & \\text{si } x \\ge " + c + " \\end{cases}") + ". Quelle valeur de " + M("m") + " rend le graphe de " + M("f") + " continu (sans saut) ?", spec: { kind: "value", value: m },
+          sol: "Les deux morceaux doivent donner la même valeur en " + M("x = " + c) + " : " + M(a + " \\cdot " + par(c) + " + m = " + par(c) + "^2" + sg(e)) + ", donc " + M("m = " + m) + "." }; },
+    ] },
+  { id: "transf", theme: "fa", label: "Transformer un graphe : f(x − a) + b", ex: "g(x) = (x - 2)^2 + 3", CH: [12],
+    hint: "f(x − a) décale le graphe de a vers la droite ; + b le monte de b ; k·f(x) étire verticalement (et retourne si k < 0).",
+    lesson: ["Transformations de graphes", "À partir du graphe de \\(f\\), on obtient celui de \\(g\\) par des déplacements.", "\\(g(x) = f(x - a) + b\\) : translation de \\(a\\) horizontalement et de \\(b\\) verticalement. Le point \\((p ; q)\\) devient \\((p + a ; q + b)\\). \\(g(x) = k \\cdot f(x)\\) : les ordonnées sont multipliées par \\(k\\) ; \\(k < 0\\) retourne le graphe.",
+      ["\\(f(x) = x^2\\), \\(g(x) = (x - 2)^2 + 3\\) : sommet \\((2 ; 3)\\)", "\\(P(1 ; 4)\\) sur \\(f\\), \\(g(x) = f(x + 3) - 1\\) : \\(P'(-2 ; 3)\\)"],
+      "\\(f(x - 2)\\) décale vers la droite (et non vers la gauche) : le signe est inversé."],
+    g: [
+      () => { const a = R.nz(-5, 5), b = R.nz(-5, 5);
+        return { q: "Le graphe de " + M("g(x) = " + xmT(a) + "^2" + sg(b)) + " est obtenu en déplaçant celui de " + M("f(x) = x^2") + ". Quel est le sommet de la parabole de " + M("g") + " ? Réponds « x ; y ».", spec: { kind: "pair", values: [a, b] },
+          sol: M(xmT(a) + "^2") + " décale de " + M(a) + " horizontalement et " + M(sg(b).trim()) + " décale de " + M(b) + " verticalement : le sommet " + M("(0 ; 0)") + " devient " + M("(" + a + " ; " + b + ")") + "." }; },
+      () => { const p = R.int(-4, 4), q = R.int(-4, 4), a = R.nz(-4, 4), b = R.nz(-4, 4);
+        return { q: "Le point " + M("P(" + p + " ; " + q + ")") + " est sur le graphe de " + M("f") + ". On pose " + M("g(x) = f" + xmT(a) + sg(b)) + ". Quel point du graphe de " + M("g") + " correspond à " + M("P") + " ? Réponds « x ; y ».", spec: { kind: "pair", values: [p + a, q + b] },
+          sol: "Translation de " + M(a) + " horizontalement et " + M(b) + " verticalement : " + M("(" + p + sg(a) + " ; " + q + sg(b) + ") = (" + (p + a) + " ; " + (q + b) + ")") + "." }; },
+      () => { const p = R.int(-3, 3), q = R.nz(-4, 4), a = R.nz(-3, 3), b = R.nz(-4, 4), k = R.pick([-1, 2, -2, 3]);
+        return { q: "Le point " + M("P(" + p + " ; " + q + ")") + " est sur le graphe de " + M("f") + ". On pose " + M("g(x) = " + (k === -1 ? "-" : k) + "f" + xmT(a) + sg(b)) + ". Quel point du graphe de " + M("g") + " correspond à " + M("P") + " ? Réponds « x ; y ».", spec: { kind: "pair", values: [p + a, k * q + b] },
+          sol: "Abscisse : " + M(p + sg(a) + " = " + (p + a)) + ". Ordonnée : " + M(k + " \\cdot " + par(q) + sg(b) + " = " + (k * q + b)) + ". Point " + M("(" + (p + a) + " ; " + (k * q + b) + ")") + "." }; },
+    ] },
+  { id: "trigrel", theme: "es", label: "Relations trigonométriques", ex: "\\sin^2\\alpha + \\cos^2\\alpha = 1", CH: [12], codesMATU: "2\\.FO\\.07e",
+    hint: "sin²α + cos²α = 1 et tan α = sin α / cos α. Pour un angle aigu, sin, cos et tan sont positifs.",
+    lesson: ["Relations trigonométriques", "Le sinus, le cosinus et la tangente d'un même angle sont liés.", "Pour tout angle \\(\\alpha\\) : \\(\\sin^2\\alpha + \\cos^2\\alpha = 1\\) (Pythagore dans le triangle rectangle) et \\(\\tan\\alpha = \\frac{\\sin\\alpha}{\\cos\\alpha}\\). Connaissant l'un des trois, on calcule les deux autres.",
+      ["\\(\\sin\\alpha = \\frac{3}{5}\\), \\(\\alpha\\) aigu : \\(\\cos\\alpha = \\sqrt{1 - \\frac{9}{25}} = \\frac{4}{5}\\), \\(\\tan\\alpha = \\frac{3}{4}\\)"],
+      "\\(\\sin^2\\alpha\\) signifie \\((\\sin\\alpha)^2\\), pas \\(\\sin(\\alpha^2)\\)."],
+    g: [
+      () => { const [a, b, c] = R.pick(TRIPLES), sw = R.rand() < 0.5, [p, q] = sw ? [b, a] : [a, b];
+        return QV("L'angle " + M("\\alpha") + " est aigu et " + M("\\sin\\alpha = " + frac(p, c)) + ". Calcule " + M("\\cos\\alpha") + " (fraction).", q / c, M("\\cos^2\\alpha = 1 - " + frac(p * p, c * c) + " = " + frac(q * q, c * c)) + ", donc " + M("\\cos\\alpha = " + frac(q, c)) + " (positif, car " + M("\\alpha") + " est aigu)."); },
+      () => { const [a, b, c] = R.pick(TRIPLES), sw = R.rand() < 0.5, [p, q] = sw ? [b, a] : [a, b];
+        return QV("L'angle " + M("\\alpha") + " est aigu et " + M("\\cos\\alpha = " + frac(q, c)) + ". Calcule " + M("\\tan\\alpha") + " (fraction).", p / q, M("\\sin\\alpha = \\sqrt{1 - " + frac(q * q, c * c) + "} = " + frac(p, c)) + ", puis " + M("\\tan\\alpha = \\frac{\\sin\\alpha}{\\cos\\alpha} = " + frac(p, q)) + "."); },
+      () => { let p, q; do { q = R.int(3, 7); p = R.int(1, q - 1); } while (gcd(p, q) !== 1 || Number.isInteger(Math.sqrt(q * q - p * p)));
+        const r = q * q - p * p; let k = 1, m = r; for (let i = 2; i * i <= m; i++) while (m % (i * i) === 0) { m /= i * i; k *= i; }
+        const ex = (k === 1 ? "" : k) + "\\sqrt{" + m + "}";
+        return QV("L'angle " + M("\\alpha") + " est aigu et " + M("\\sin\\alpha = " + frac(p, q)) + ". Calcule la valeur exacte de " + M("\\cos\\alpha") + ".", Math.sqrt(r) / q, M("\\cos^2\\alpha = 1 - " + frac(p * p, q * q) + " = " + frac(r, q * q)) + ", donc " + M("\\cos\\alpha = \\frac{" + ex + "}{" + q + "}") + "."); },
+    ] },
+);
+// 2e : exposants fractionnaires, vecteurs
+const rtn = (n, a) => (n === 2 ? "\\sqrt{" + a + "}" : "\\sqrt[" + n + "]{" + a + "}");
+const FRP = [[4, 2], [8, 3], [9, 2], [16, 2], [16, 4], [25, 2], [27, 3], [32, 5], [36, 2], [49, 2], [64, 2], [64, 3], [64, 6], [81, 2], [81, 4], [100, 2], [125, 3]];
+FINE.push(
+  { id: "expfrac", theme: "no", label: "Exposants fractionnaires", ex: "8^{\\frac{2}{3}} = 4", CH: [13], codesMATU: "2\\.FO\\.10a",
+    hint: "a^(1/n) est la racine n-ième de a ; a^(p/n) = (racine n-ième de a)^p ; un exposant négatif donne l'inverse.",
+    lesson: ["Exposants fractionnaires", "Les puissances s'étendent aux exposants fractionnaires.", "\\(a^{\\frac{1}{n}} = \\sqrt[n]{a}\\) et \\(a^{\\frac{p}{n}} = \\left(\\sqrt[n]{a}\\right)^p = \\sqrt[n]{a^p}\\) (pour \\(a > 0\\)). Les règles restent vraies : \\(a^r \\cdot a^s = a^{r + s}\\), \\((a^r)^s = a^{r s}\\), \\(a^{-r} = \\frac{1}{a^r}\\).",
+      ["\\(8^{\\frac{2}{3}} = (\\sqrt[3]{8})^2 = 4\\)", "\\(16^{-\\frac{3}{4}} = \\frac{1}{(\\sqrt[4]{16})^3} = \\frac{1}{8}\\)", "\\(\\sqrt[3]{x^2} \\cdot \\sqrt{x} = x^{\\frac{2}{3} + \\frac{1}{2}} = x^{\\frac{7}{6}}\\)"],
+      "Calcule d'abord la racine, puis la puissance : les nombres restent petits."],
+    g: [
+      () => { const [a, n] = R.pick(FRP), r = Math.round(a ** (1 / n)), p = R.pick([1, 1, 2, 3].filter((k) => r ** k <= 1000)); const e = frac(p, n);
+        return QV("Calcule " + M(a + "^{" + e + "}") + ".", r ** p, M(a + "^{" + e + "} = " + (p === 1 ? rtn(n, a) : "\\left(" + rtn(n, a) + "\\right)^{" + p + "} = " + r + "^{" + p + "}") + " = " + r ** p) + "."); },
+      () => { const [a, n] = R.pick(FRP.filter(([a2, n2]) => n2 > 2 || a2 <= 49)), r = Math.round(a ** (1 / n)), p = R.pick([1, 2, 3].filter((k) => r ** k <= 400)); const e = frac(p, n);
+        return QV("Calcule " + M(a + "^{-" + e + "}") + " (fraction).", 1 / r ** p, M(a + "^{-" + e + "} = \\frac{1}{\\left(" + rtn(n, a) + "\\right)^{" + p + "}} = " + frac(1, r ** p)) + "."); },
+      () => { const n1 = R.int(2, 5), p1 = R.int(1, n1 + 2), n2 = R.pick([2, 3]), p2 = R.int(1, 3), sgn = R.pick([1, 1, -1]), num = p1 * n2 + sgn * p2 * n1, den = n1 * n2;
+        if (gcd(p1, n1) !== 1 || gcd(p2, n2) !== 1 || num === 0) return GEN.expfrac(3);
+        const xp = (k) => (k === 1 ? "x" : "x^{" + k + "}"), r1 = rtn(n1, xp(p1)), r2 = rtn(n2, xp(p2));
+        return QV("Écris " + M(sgn > 0 ? r1 + " \\cdot " + r2 : "\\frac{" + r1 + "}{" + r2 + "}") + " sous la forme " + M("x^r") + " (avec " + M("x > 0") + "). Donne " + M("r") + ".", num / den,
+          M(sgn > 0 ? "x^{" + frac(p1, n1) + "} \\cdot x^{" + frac(p2, n2) + "}" : "\\frac{x^{" + frac(p1, n1) + "}}{x^{" + frac(p2, n2) + "}}") + " : " + M("r = " + frac(p1, n1) + (sgn > 0 ? " + " : " - ") + frac(p2, n2) + " = " + frac(num, den)) + "."); },
+    ] },
+  { id: "vecteurs", theme: "es", label: "Vecteurs : composantes, norme, produit scalaire", ex: "\\vec{AB} = \\begin{pmatrix} x_B - x_A \\\\ y_B - y_A \\end{pmatrix}", CH: [13],
+    hint: "Composantes de AB : arrivée moins départ. Norme : √(x² + y²). Produit scalaire : x·x' + y·y' ; il est nul si les vecteurs sont perpendiculaires.",
+    lesson: ["Vecteurs dans le plan", "Un vecteur est un déplacement : une direction, un sens, une longueur.", "\\(\\vec{AB} = \\begin{pmatrix} x_B - x_A \\\\ y_B - y_A \\end{pmatrix}\\). On additionne et on multiplie par un nombre composante par composante. Norme : \\(\\|\\vec{u}\\| = \\sqrt{x^2 + y^2}\\). Produit scalaire : \\(\\vec{u} \\cdot \\vec{v} = x x' + y y'\\) ; \\(\\vec{u} \\perp \\vec{v} \\iff \\vec{u} \\cdot \\vec{v} = 0\\).",
+      ["\\(A(1 ; 2)\\), \\(B(4 ; 6)\\) : \\(\\vec{AB} = \\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}\\), \\(\\|\\vec{AB}\\| = 5\\)", "\\(\\begin{pmatrix} 2 \\\\ 3 \\end{pmatrix} \\cdot \\begin{pmatrix} 3 \\\\ -2 \\end{pmatrix} = 6 - 6 = 0\\) : perpendiculaires"],
+      "Pour \\(\\vec{AB}\\), c'est l'arrivée moins le départ, pas l'inverse."],
+    g: [
+      () => { const A = [R.int(-5, 5), R.int(-5, 5)], B = [R.int(-5, 5), R.int(-5, 5)]; if (A[0] === B[0] && A[1] === B[1]) return GEN.vecteurs(1);
+        return { q: "On donne " + M("A(" + A[0] + " ; " + A[1] + ")") + " et " + M("B(" + B[0] + " ; " + B[1] + ")") + ". Quelles sont les composantes de " + M("\\vec{AB}") + " ? Réponds « x ; y ».", spec: { kind: "pair", values: [B[0] - A[0], B[1] - A[1]] },
+          sol: "Arrivée moins départ : " + M("\\vec{AB} = \\begin{pmatrix} " + B[0] + " - " + par(A[0]) + " \\\\ " + B[1] + " - " + par(A[1]) + " \\end{pmatrix} = \\begin{pmatrix} " + (B[0] - A[0]) + " \\\\ " + (B[1] - A[1]) + " \\end{pmatrix}") + "." }; },
+      () => { if (R.rand() < 0.5) { const [a, b, c] = R.pick(TRIPLES.filter((t) => t[2] <= 15)), A = [R.int(-4, 4), R.int(-4, 4)], sx = R.sign(), sy = R.sign(), B = [A[0] + sx * a, A[1] + sy * b];
+          return QV("On donne " + M("A(" + A[0] + " ; " + A[1] + ")") + " et " + M("B(" + B[0] + " ; " + B[1] + ")") + ". Calcule la norme " + M("\\|\\vec{AB}\\|") + ".", c, M("\\vec{AB} = \\begin{pmatrix} " + sx * a + " \\\\ " + sy * b + " \\end{pmatrix}") + ", " + M("\\|\\vec{AB}\\| = \\sqrt{" + a * a + " + " + b * b + "} = " + c) + "."); }
+        const u = [R.nz(-5, 5), R.nz(-5, 5)], v = [R.nz(-5, 5), R.nz(-5, 5)], k = R.pick([2, 3, -2]), m = R.pick([1, 2, -1, -3]), w = [k * u[0] + m * v[0], k * u[1] + m * v[1]];
+        const cm = (c) => (c === 1 ? " + " : c === -1 ? " - " : c < 0 ? " - " + -c : " + " + c);
+        return { q: "On donne " + M("\\vec{u} = \\begin{pmatrix} " + u[0] + " \\\\ " + u[1] + " \\end{pmatrix}") + " et " + M("\\vec{v} = \\begin{pmatrix} " + v[0] + " \\\\ " + v[1] + " \\end{pmatrix}") + ". Calcule les composantes de " + M(k + "\\vec{u}" + cm(m) + "\\vec{v}") + ". Réponds « x ; y ».", spec: { kind: "pair", values: w },
+          sol: "Composante par composante : " + M(k + " \\cdot " + par(u[0]) + cm(m) + (Math.abs(m) === 1 ? "" : "\\cdot ") + par(v[0]) + " = " + w[0]) + " et " + M(k + " \\cdot " + par(u[1]) + cm(m) + (Math.abs(m) === 1 ? "" : "\\cdot ") + par(v[1]) + " = " + w[1]) + "." }; },
+      () => { if (R.rand() < 0.5) { const u = [R.nz(-6, 6), R.nz(-6, 6)], v = [R.nz(-6, 6), R.nz(-6, 6)], p = u[0] * v[0] + u[1] * v[1];
+          return QV("Calcule le produit scalaire " + M("\\begin{pmatrix} " + u[0] + " \\\\ " + u[1] + " \\end{pmatrix} \\cdot \\begin{pmatrix} " + v[0] + " \\\\ " + v[1] + " \\end{pmatrix}") + ".", p, M(par(u[0]) + " \\cdot " + par(v[0]) + " + " + par(u[1]) + " \\cdot " + par(v[1]) + " = " + p) + "."); }
+        const a = R.nz(-4, 4), b = R.nz(-4, 4), k = R.nz(-5, 5), d = (-a * k) / b; if (!Number.isInteger(d) || d === 0) return GEN.vecteurs(3);
+        return QV("Pour quelle valeur de " + M("k") + " les vecteurs " + M("\\begin{pmatrix} " + a + " \\\\ " + b + " \\end{pmatrix}") + " et " + M("\\begin{pmatrix} k \\\\ " + d + " \\end{pmatrix}") + " sont-ils perpendiculaires ?", k,
+          "Produit scalaire nul : " + M(a + "k + " + par(b) + " \\cdot " + par(d) + " = 0") + ", donc " + M(a + "k = " + -b * d) + " et " + M("k = " + k) + "."); },
+    ] },
+);
+
 // ======================= Enregistrement =======================
 // Notions remplacées par des notions plus fines (retirées du catalogue et des générateurs).
 const FINE_REMOVED = ["decim", "unites", "aires"];

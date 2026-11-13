@@ -148,15 +148,19 @@ SESA = {"M1C01": "1. Nombres", "M1C02": "2. Ensembles", "M1C03": "3. Argumenter"
         "M1C10": "10. Trigonométrie du triangle rectangle",
         "M2C01": "1. Équations cartésiennes", "M2C02": "2. Raisonner en géométrie", "M2C03": "3. Fonctions polynomiales",
         "M2C04": "4. Fonctions rationnelles", "M2C05": "5. Exponentielles", "M2C06": "6. Composition et réciproque", "M2C07": "7. Logarithmes",
-        "M2C08": "8. Trigonométrie du triangle quelconque", "M2C09": "9. Fonctions trigonométriques"}
+        "M2C08": "8. Trigonométrie du triangle quelconque", "M2C09": "9. Fonctions trigonométriques",
+        "M2C10": "Géométrie vectorielle"}  # pas de chapitre Sésamath en 2e (Ma3) ; enseignée en 2e chez pinkmaths
 # Chapitre imposé : notions sans ligne Sésamath (reprises du CO en 1re) ou dont le premier chapitre trouvé n'est pas le bon.
 SESA_FIX = {"rel": "M1C01", "fracops": "M1C01", "puiss": "M1C01", "rac": "M1C01", "racenc": "M1C01", "sci": "M1C01", "scicalc": "M1C01",
             "pct": "M1C01", "arith": "M1C01", "ensembles": "M1C02", "divcrit": "M1C03", "tradexpr": "M1C03", "exactes": "M1C08",
             "droitesrem": "M1C08", "inter": "M1C07", "ineq2": "M1C07", "interpar": "M1C07", "optim": "M1C07", "log": "M2C07", "logbase": "M2C07",
-            "trigeq2": "M2C09", "absval": "M2C06", "droites": "M2C01", "modexp": "M2C05"}
+            "trigeq2": "M2C09", "absval": "M2C06", "droites": "M2C01", "modexp": "M2C05",
+            # notions ajoutées le 13.11 d'après les cours pinkmaths 2026-27
+            "sysineq": "M1C05", "ineqfrac": "M2C04", "eqirr": "M1C07", "morceaux": "M2C06", "transf": "M1C04", "trigrel": "M2C09",
+            "expfrac": "M2C05", "vecteurs": "M2C10"}
 
 # Notions enseignées sur deux années (cours réels du Collège, ex. pinkmaths 2026-27) : chapitre de 1re en plus du chapitre principal.
-SESA_ALSO = {"ineq": "M1C05", "absval": "M1C04"}
+SESA_ALSO = {"ineq": "M1C05", "absval": "M1C04", "ineqfrac": "M1C07", "morceaux": "M1C04", "trigrel": "M1C10"}
 
 def write_order():
     """src/ordre.js : rang de chaque notion dans l'ordre du référentiel (seulement des numéros, aucun libellé).
