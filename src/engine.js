@@ -151,8 +151,9 @@ const Engine = {
   // Compétence : les 8 dernières réponses (1, 0,5 ou 0).
   recordComp(state, id, d, score) {
     state.comps = state.comps || {};
-    const cid = compOf(id, d), rec = (state.comps[cid] = state.comps[cid] || { r: [], n: 0 });
+    const cid = compOf(id, d), rec = (state.comps[cid] = state.comps[cid] || { r: [], n: 0 }), before = compNote(rec);
     rec.r.push(score); rec.r = rec.r.slice(-8); rec.n++; rec.last = day();
+    if (typeof Badges !== "undefined") Badges.onComp(state, cid, before, compNote(rec));
   },
 
   // Catalogue modifié depuis la création du profil : ajoute les notions manquantes (anciennes = vues, année en cours = à cocher).
@@ -379,6 +380,7 @@ const Engine = {
   // Score Moodle : 1 au premier essai, 0,5 au deuxième, 0 ensuite.
   record(state, id, d, tries, solved, partial) {
     const s = state.notions[id];
+    if (typeof Badges !== "undefined") Badges.onAnswer(state, id, d, tries, solved, partial);
     if (partial !== undefined) { // problème : score partiel 0..1
       this.recordComp(state, id, d, partial);
       s.seen++;
@@ -411,6 +413,7 @@ const Engine = {
   finishDay(state, answered, score) {
     const today = day();
     if (answered > 0) {
+      if (typeof Badges !== "undefined") Badges.onDay(state, today);
       if (state.streak.last !== today) state.streak.count = state.streak.last === addDays(today, -1) ? state.streak.count + 1 : 1;
       state.streak.last = today;
       const h = state.history.find((x) => x.date === today);

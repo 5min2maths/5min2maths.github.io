@@ -247,6 +247,24 @@ details.cmt textarea { width: 100%; box-sizing: border-box; font: inherit; paddi
 .lfb { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .lfb button[aria-pressed="true"] { background: var(--blue-soft); border-color: var(--blue); }
 
+/* Badges et sauvegarde (13.11) */
+.bdg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.bdg { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px; padding: 6px 2px; background: none; border: 1.5px solid transparent; border-radius: 10px; box-shadow: none; color: var(--ink); font: inherit; cursor: pointer; min-height: 0; }
+.bdg[aria-pressed="true"] { border-color: var(--blue); }
+.bdg-n { font-weight: 700; font-size: 13px; line-height: 1.2; }
+.bdg-info { min-height: 2.6em; border-top: 1px dashed var(--line); padding-top: 8px; }
+.bdg.off .bdg-ic { color: var(--ink-soft); }
+.bdg.off .bdg-ic text { opacity: 0.35; filter: grayscale(1); }
+.bdg.off .bdg-n { color: var(--ink-soft); }
+.bdg-row { display: flex; gap: 12px; align-items: center; }
+.bdg-new { animation: bdg-pop 0.5s ease-out; }
+@keyframes bdg-pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .bdg-new { animation: none; } }
+.qrwrap { display: flex; justify-content: center; }
+.qrwrap svg { max-width: 100%; height: auto; border-radius: 6px; }
+.code-box { width: 100%; font-family: var(--font-mono); font-size: 12px; word-break: break-all; padding: 8px; border: 1.5px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); }
+.center { align-items: center; text-align: center; }
+
 </style>
 <script>
 window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "global" }, startup: { typeset: false } };
@@ -3955,6 +3973,315 @@ function compNote(rec) {
   return Math.round((1 + 5 * avg) * 2) / 2;
 }
 
+// Badges (13.11) : régularité (pas de série qui se perd), maîtrise (notes de compétences), persévérance, curiosité.
+// Tout reste sur l'appareil ; un badge gagné ne se perd jamais. Compteurs dans state.bc, badges gagnés dans state.badges.
+const BADGE_FAM = { reg: "Régularité", mai: "Maîtrise", per: "Persévérance", cur: "Curiosité" };
+const weekOf = (s) => { const d = new Date(s + "T12:00:00"); return addDays(s, -((d.getDay() + 6) % 7)); };
+const daysBetween = (a, b) => Math.round((new Date(b + "T12:00:00") - new Date(a + "T12:00:00")) / 864e5);
+
+const Badges = {
+  bc(state) {
+    if (!state.bc) {
+      // Profil existant : on repart de l'historique déjà enregistré.
+      const days = (state.history || []).filter((x) => x.n > 0).map((x) => x.date), weeks = {};
+      for (const d of days) weeks[weekOf(d)] = (weeks[weekOf(d)] || 0) + 1;
+      state.bc = { days: days.length, last: days[days.length - 1] || null, weeks, full: Object.values(weeks).filter((n) => n >= 5).length, rentree: false,
+        retry: 0, d3: 0, lessons: [], fb: Object.keys(state.votes || {}).filter((k) => state.votes[k].v !== "facile").length + (state.comments || []).length,
+        low: {}, pente: false, down: {}, compris: false };
+    }
+    return state.bc;
+  },
+  // Notes des compétences.
+  notes(state) { return Object.values(state.comps || {}).map(compNote).filter((n) => n !== null); },
+  // Notion maîtrisée : toutes ses compétences notées 5 ou plus.
+  notionProgress(state, id) { const cs = compsOf(id); return [cs.filter((c) => (compNote((state.comps || {})[c.cid]) ?? 0) >= 5).length, cs.length]; },
+  // Notions ouvertes de l'année (vues ou en cours) d'un thème.
+  openOf(state, th) {
+    return Engine.catalog(state.profile).filter((c) => c.current && c.theme === th && state.notions[c.id] && ["vu", "encours"].includes(state.notions[c.id].status)).map((c) => c.id);
+  },
+  list() {
+    const L = [
+      { id: "premier", fam: "reg", icon: "👣", name: "Premier pas", crit: "Terminer une première séance.", prog: (s, b) => [Math.min(b.days, 1), 1] },
+      { id: "semaine", fam: "reg", icon: "📅", name: "Semaine pleine", crit: "S'entraîner 5 jours dans une même semaine (du lundi au dimanche).", prog: (s, b) => [Math.min(5, b.weeks[weekOf(day())] || 0, 5), 5, b.full >= 1] },
+      { id: "mois", fam: "reg", icon: "🗓️", name: "Un mois fidèle", crit: "4 semaines pleines, pas forcément d'affilée.", prog: (s, b) => [Math.min(b.full, 4), 4] },
+      { id: "rentree", fam: "reg", icon: "🎒", name: "Rentrée", crit: "Reprendre l'entraînement après au moins 10 jours de pause.", prog: (s, b) => [b.rentree ? 1 : 0, 1] },
+      { id: "s50", fam: "reg", icon: "🏅", name: "50 séances", crit: "50 jours d'entraînement au total.", prog: (s, b) => [Math.min(b.days, 50), 50] },
+      { id: "comp5", fam: "mai", icon: "⭐", name: "Première compétence", crit: "Une compétence atteint la note 5.", prog: (s) => [this.notes(s).some((n) => n >= 5) ? 1 : 0, 1] },
+      { id: "notion", fam: "mai", icon: "🎯", name: "Notion maîtrisée", crit: "Toutes les compétences d'une notion à 5 ou plus.",
+        prog: (s) => Object.keys(s.notions).map((id) => this.notionProgress(s, id)).reduce((a, p) => (p[1] && p[0] / p[1] > a[0] / a[1] ? p : a), [0, 3]) },
+      { id: "expert", fam: "mai", icon: "💎", name: "Expert", crit: "Une compétence atteint la note 6.", prog: (s) => [this.notes(s).some((n) => n >= 6) ? 1 : 0, 1] },
+      ...Object.keys(THEMES).map((th) => ({ id: "th-" + th, fam: "mai", icon: { no: "🔢", gm: "📏", fa: "📈", es: "📐" }[th], name: THEMES[th],
+        crit: "Toutes les notions ouvertes de ce thème cette année maîtrisées (au moins 2 notions).",
+        prog: (s) => { const ids = this.openOf(s, th), ok = ids.filter((id) => { const p = this.notionProgress(s, id); return p[0] === p[1]; }).length; return [ok, Math.max(2, ids.length)]; } })),
+      { id: "retry", fam: "per", icon: "🔁", name: "Deuxième essai", crit: "Réussir 10 fois une question au deuxième essai.", prog: (s, b) => [Math.min(b.retry, 10), 10] },
+      { id: "compris", fam: "per", icon: "💡", name: "Ça y est !", crit: "Après « pas compris » sur un rappel de cours, réussir 3 questions de suite de cette notion.",
+        prog: (s, b) => [b.compris ? 3 : Math.max(0, ...Object.values(b.down)), 3] },
+      { id: "pente", fam: "per", icon: "⛰️", name: "Remonter la pente", crit: "Faire passer une compétence de 3 ou moins à 5 ou plus.", prog: (s, b) => [b.pente ? 1 : 0, 1] },
+      { id: "d3", fam: "per", icon: "🧗", name: "Niveau supérieur", crit: "Réussir 5 questions de difficulté 3 du premier coup.", prog: (s, b) => [Math.min(b.d3, 5), 5] },
+      { id: "lecteur", fam: "cur", icon: "📖", name: "Lecteur", crit: "Ouvrir 10 rappels de cours différents.", prog: (s, b) => [Math.min(b.lessons.length, 10), 10] },
+      { id: "testeur", fam: "cur", icon: "💬", name: "Testeur", crit: "Donner un avis (👍 / 👎) ou envoyer un commentaire.", prog: (s, b) => [Math.min(b.fb, 1), 1] },
+    ];
+    return L;
+  },
+  // Badges nouvellement gagnés : ajoutés à state.badges et à la file d'annonce state.badgesNew.
+  check(state) {
+    if (!state || !state.profile) return [];
+    const b = this.bc(state), got = (state.badges = state.badges || {}), fresh = [];
+    for (const x of this.list()) {
+      if (got[x.id]) continue;
+      const p = x.prog(state, b);
+      if (p[2] || (p[1] > 0 && p[0] >= p[1])) { got[x.id] = day(); fresh.push(x.id); }
+    }
+    if (fresh.length) state.badgesNew = (state.badgesNew || []).concat(fresh);
+    return fresh;
+  },
+
+  // ---- Événements ----
+  onDay(state, today) {
+    const b = this.bc(state);
+    if (b.last === today) return;
+    if (b.last && daysBetween(b.last, today) >= 10) b.rentree = true;
+    b.days++; b.last = today;
+    const w = weekOf(today);
+    b.weeks[w] = (b.weeks[w] || 0) + 1;
+    if (b.weeks[w] === 5) b.full++;
+    for (const k of Object.keys(b.weeks)) if (daysBetween(k, today) > 60) delete b.weeks[k];
+  },
+  onAnswer(state, id, d, tries, solved, partial) {
+    const b = this.bc(state), first = partial !== undefined ? partial >= 0.99 : solved && tries === 1;
+    if (partial === undefined && solved && tries === 2) b.retry++;
+    if (first && d >= 3) b.d3++;
+    if (b.down[id] !== undefined && !b.compris) {
+      b.down[id] = first ? b.down[id] + 1 : 0;
+      if (b.down[id] >= 3) { b.compris = true; b.down = {}; }
+    }
+  },
+  onComp(state, cid, before, after) {
+    const b = this.bc(state);
+    if (before !== null && before <= 3) b.low[cid] = 1;
+    if (after !== null && after <= 3) b.low[cid] = 1;
+    if (b.low[cid] && after !== null && after >= 5) b.pente = true;
+  },
+  onLesson(state, id) { const b = this.bc(state); if (!b.lessons.includes(id)) b.lessons.push(id); },
+  onLessonDown(state, id) { const b = this.bc(state); if (!b.compris) b.down[id] = 0; },
+  onFeedback(state) { this.bc(state).fb++; },
+
+  // ---- Affichage ----
+  COLORS: { reg: ["#f08a24", "#fde7cf"], mai: ["#2457d6", "#e4ecff"], per: ["#1e8a5a", "#e1f5ea"], cur: ["#8a3fd1", "#f0e4fb"] },
+  icon(x, on, px = 56) {
+    const [c, soft] = this.COLORS[x.fam];
+    const pts = [...Array(6)].map((_, i) => { const a = Math.PI / 6 + (i * Math.PI) / 3; return (50 + 44 * Math.cos(a)).toFixed(1) + "," + (50 + 44 * Math.sin(a)).toFixed(1); }).join(" ");
+    return `<svg class="bdg-ic${on ? "" : " off"}" viewBox="0 0 100 100" width="${px}" height="${px}" aria-hidden="true"><polygon points="${pts}" fill="${on ? soft : "none"}" stroke="${on ? c : "currentColor"}" stroke-width="${on ? 7 : 4}" stroke-dasharray="${on ? "" : "6 6"}"/><text x="50" y="52" text-anchor="middle" dominant-baseline="central" font-size="40">${x.icon}</text></svg>`;
+  },
+};
+
+// Code de sauvegarde (13.11) : toute la progression dans un code (texte, lien, QR), sans serveur ni compte.
+// Format compact : seules les notions modifiées, dates en jours relatifs, puis compression (deflate) et base64url.
+const Backup = {
+  ST: { vu: "v", encours: "e", avenir: "a", nonvu: "n" },
+  pack(s) {
+    const t = day(), off = (d) => (d ? daysBetween(t, d) : null), r2 = (x) => Math.round(x * 100) / 100;
+    const n = {}, defs = Object.fromEntries(Engine.catalog(s.profile).map((c) => [c.id, c.defaultStatus]));
+    for (const [id, x] of Object.entries(s.notions || {})) {
+      const def = Engine.newNotion(x.status);
+      if (!x.seen && !x.placed && !x.lessonSeen && !x.easy && !x.retry && x.m === def.m && x.box === def.box) { if (x.status !== defs[id]) n[id] = [this.ST[x.status]]; continue; }
+      n[id] = [this.ST[x.status] || "v", r2(x.m), x.box, off(x.due), x.seen, x.ok, (x.placed ? 1 : 0) | (x.lessonSeen ? 2 : 0), x.easy || 0, off(x.retry)];
+    }
+    const c = {};
+    for (const [cid, x] of Object.entries(s.comps || {})) c[cid] = [x.r.map((v) => Math.round(v * 4)).join(""), x.n, off(x.last)];
+    const b = s.bc ? { ...s.bc, last: off(s.bc.last), weeks: Object.fromEntries(Object.entries(s.bc.weeks).map(([k, v]) => [off(k), v])) } : null;
+    return {
+      v: 1, t, p: s.profile, n, c, cr: off(s.created),
+      e: [s.elo.r, s.elo.n, (s.elo.log || []).slice(-8).map(([d, r]) => [off(d), r])],
+      k: [s.streak.count, off(s.streak.last)],
+      h: (s.history || []).slice(-14).map((x) => [off(x.date), x.n, r2(x.score)]),
+      b, pr: s.prep || null, g: Object.fromEntries(Object.entries(s.badges || {}).map(([k, d]) => [k, off(d)])),
+    };
+  },
+  unpack(o) {
+    if (!o || o.v !== 1 || !o.p || !o.n) throw new Error("code");
+    const t = day(), on = (k) => (k === null || k === undefined ? null : addDays(t, k)), ST = Object.fromEntries(Object.entries(this.ST).map(([a, b]) => [b, a]));
+    const s = Engine.newState(o.p);
+    s.created = on(o.cr) || t;
+    Engine.initNotions(s, Object.fromEntries(Engine.catalog(o.p).map((c) => [c.id, c.defaultStatus])));
+    for (const [id, a] of Object.entries(o.n)) {
+      if (!s.notions[id]) continue;
+      const st = ST[a[0]] || "vu";
+      if (a.length === 1) { s.notions[id] = Engine.newNotion(st); continue; }
+      const x = { status: st, m: a[1], box: a[2], due: on(a[3]) || t, seen: a[4], ok: a[5] };
+      if (a[6] & 1) x.placed = true;
+      if (a[6] & 2) x.lessonSeen = true;
+      if (a[7]) x.easy = a[7];
+      if (a[8] !== null && a[8] !== undefined) x.retry = on(a[8]);
+      s.notions[id] = x;
+    }
+    s.comps = Object.fromEntries(Object.entries(o.c || {}).map(([cid, [r, n, l]]) => [cid, { r: [...r].map((ch) => +ch / 4), n, last: on(l) }]));
+    s.elo = { r: o.e[0], n: o.e[1], log: o.e[2].map(([d, r]) => [on(d), r]) };
+    s.streak = { count: o.k[0], last: on(o.k[1]) };
+    s.history = o.h.map(([d, n, sc]) => ({ date: on(d), n, score: sc }));
+    if (o.b) s.bc = { ...o.b, last: on(o.b.last), weeks: Object.fromEntries(Object.entries(o.b.weeks).map(([k, v]) => [on(+k), v])) };
+    s.badges = Object.fromEntries(Object.entries(o.g || {}).map(([k, d]) => [k, on(d)]));
+    if (o.pr) s.prep = o.pr;
+    s.placed = true;
+    Engine.migrate(s);
+    return s;
+  },
+  b64(bytes) { let s = ""; for (const b of bytes) s += String.fromCharCode(b); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); },
+  unb64(s) { const t = atob(s.replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from(t, (c) => c.charCodeAt(0)); },
+  async pipe(bytes, Stream, mode) { return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new Stream(mode))).arrayBuffer()); },
+  // Code : « 1 » + deflate si le navigateur sait compresser, sinon « 0 » + JSON brut.
+  async encode(state) {
+    const raw = new TextEncoder().encode(JSON.stringify(this.pack(state)));
+    if (typeof CompressionStream !== "undefined") { try { return "1" + this.b64(await this.pipe(raw, CompressionStream, "deflate-raw")); } catch (e) {} }
+    return "0" + this.b64(raw);
+  },
+  async decode(code) {
+    code = String(code).trim().replace(/^.*#r=/, "").replace(/\s+/g, "");
+    const bytes = this.unb64(code.slice(1));
+    const raw = code[0] === "1" ? await this.pipe(bytes, DecompressionStream, "deflate-raw") : bytes;
+    return this.unpack(JSON.parse(new TextDecoder().decode(raw)));
+  },
+  url(code) { return location.origin + location.pathname + "#r=" + code; },
+};
+
+// QR code (mode octet, correction L), écrit pour l'app : sert au code de sauvegarde. Rendu en SVG.
+// Tables : norme ISO/IEC 18004 (blocs de correction, niveau L). Vérifié par décodage OpenCV (tests/qr.html).
+const QR_L = [null, [1, 26, 19], [1, 44, 34], [1, 70, 55], [1, 100, 80], [1, 134, 108], [2, 86, 68], [2, 98, 78], [2, 121, 97], [2, 146, 116],
+  [2, 86, 68, 2, 87, 69], [4, 101, 81], [2, 116, 92, 2, 117, 93], [4, 133, 107], [3, 145, 115, 1, 146, 116], [5, 109, 87, 1, 110, 88],
+  [5, 122, 98, 1, 123, 99], [1, 135, 107, 5, 136, 108], [5, 150, 120, 1, 151, 121], [3, 141, 113, 4, 142, 114], [3, 135, 107, 5, 136, 108],
+  [4, 144, 116, 4, 145, 117], [2, 139, 111, 7, 140, 112], [4, 151, 121, 5, 152, 122], [6, 147, 117, 4, 148, 118], [8, 132, 106, 4, 133, 107],
+  [10, 142, 114, 2, 143, 115], [8, 152, 122, 4, 153, 123], [3, 147, 117, 10, 148, 118], [7, 146, 116, 7, 147, 117], [5, 145, 115, 10, 146, 116],
+  [13, 145, 115, 3, 146, 116], [17, 145, 115], [17, 145, 115, 1, 146, 116], [13, 145, 115, 6, 146, 116], [12, 151, 121, 7, 152, 122],
+  [6, 151, 121, 14, 152, 122], [17, 152, 122, 4, 153, 123], [4, 152, 122, 18, 153, 123], [20, 147, 117, 4, 148, 118], [19, 148, 118, 6, 149, 119]];
+
+const QR = {
+  blocks(v) { const t = QR_L[v], out = []; for (let i = 0; i < t.length; i += 3) for (let k = 0; k < t[i]; k++) out.push([t[i + 1], t[i + 2]]); return out; },
+  dataLen(v) { return this.blocks(v).reduce((a, b) => a + b[1], 0); },
+  rawModules(v) {
+    let r = (16 * v + 128) * v + 64;
+    if (v >= 2) { const n = Math.floor(v / 7) + 2; r -= (25 * n - 10) * n - 55; if (v >= 7) r -= 36; }
+    return r;
+  },
+  mul(x, y) { let z = 0; for (let i = 7; i >= 0; i--) { z = (z << 1) ^ ((z >>> 7) * 0x11d); z ^= ((y >>> i) & 1) * x; } return z; },
+  ecc(data, deg) {
+    const div = new Array(deg).fill(0); div[deg - 1] = 1;
+    let root = 1;
+    for (let i = 0; i < deg; i++) { for (let j = 0; j < deg; j++) { div[j] = this.mul(div[j], root); if (j + 1 < deg) div[j] ^= div[j + 1]; } root = this.mul(root, 2); }
+    const res = new Array(deg).fill(0);
+    for (const b of data) { const f = b ^ res.shift(); res.push(0); for (let i = 0; i < deg; i++) res[i] ^= this.mul(div[i], f); }
+    return res;
+  },
+  align(v) {
+    if (v === 1) return [];
+    const n = Math.floor(v / 7) + 2, size = v * 4 + 17, step = Math.floor((v * 8 + n * 3 + 5) / (n * 4 - 4)) * 2, r = [6];
+    for (let p = size - 7; r.length < n; p -= step) r.splice(1, 0, p);
+    return r;
+  },
+  // Matrice de modules (true = noir) pour une liste d'octets ; null si trop long (> 2953 octets).
+  encode(bytes) {
+    let v = 1;
+    for (; v <= 40; v++) if (4 + (v < 10 ? 8 : 16) + bytes.length * 8 <= this.dataLen(v) * 8) break;
+    if (v > 40) return null;
+    const cap = this.dataLen(v) * 8, bits = [];
+    const put = (x, n) => { for (let i = n - 1; i >= 0; i--) bits.push((x >>> i) & 1); };
+    put(4, 4); put(bytes.length, v < 10 ? 8 : 16); for (const b of bytes) put(b, 8);
+    put(0, Math.min(4, cap - bits.length)); put(0, (8 - (bits.length % 8)) % 8);
+    for (let p = 0xec; bits.length < cap; p ^= 0xec ^ 0x11) put(p, 8);
+    const data = []; for (let i = 0; i < bits.length; i += 8) data.push(bits.slice(i, i + 8).reduce((a, b) => (a << 1) | b, 0));
+    // Blocs, correction, entrelacement.
+    const bl = this.blocks(v), deg = bl[0][0] - bl[0][1], parts = [];
+    let k = 0;
+    for (const [, d] of bl) { const dat = data.slice(k, k + d); k += d; parts.push([dat, this.ecc(dat, deg)]); }
+    const seq = [], maxD = Math.max(...bl.map((b) => b[1]));
+    for (let i = 0; i < maxD; i++) for (const [d] of parts) if (i < d.length) seq.push(d[i]);
+    for (let i = 0; i < deg; i++) for (const [, e] of parts) seq.push(e[i]);
+    // Motifs fixes.
+    const size = v * 4 + 17, m = [...Array(size)].map(() => Array(size).fill(false)), fn = [...Array(size)].map(() => Array(size).fill(false));
+    const set = (x, y, on) => { m[y][x] = on; fn[y][x] = true; };
+    for (let i = 0; i < size; i++) { set(6, i, i % 2 === 0); set(i, 6, i % 2 === 0); }
+    const finder = (cx, cy) => { for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) { const x = cx + dx, y = cy + dy, d = Math.max(Math.abs(dx), Math.abs(dy)); if (x >= 0 && x < size && y >= 0 && y < size) set(x, y, d !== 2 && d !== 4); } };
+    finder(3, 3); finder(size - 4, 3); finder(3, size - 4);
+    const al = this.align(v), na = al.length;
+    for (let i = 0; i < na; i++) for (let j = 0; j < na; j++) {
+      if ((i === 0 && j === 0) || (i === 0 && j === na - 1) || (i === na - 1 && j === 0)) continue;
+      for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) set(al[i] + dx, al[j] + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1);
+    }
+    const format = (mask) => {
+      const d = (1 << 3) | mask; let r = d; // niveau L = 01
+      for (let i = 0; i < 10; i++) r = (r << 1) ^ ((r >>> 9) * 0x537);
+      const b = ((d << 10) | r) ^ 0x5412, bit = (i) => ((b >>> i) & 1) === 1;
+      for (let i = 0; i <= 5; i++) set(8, i, bit(i));
+      set(8, 7, bit(6)); set(8, 8, bit(7)); set(7, 8, bit(8));
+      for (let i = 9; i < 15; i++) set(14 - i, 8, bit(i));
+      for (let i = 0; i < 8; i++) set(size - 1 - i, 8, bit(i));
+      for (let i = 8; i < 15; i++) set(8, size - 15 + i, bit(i));
+      set(8, size - 8, true);
+    };
+    format(0);
+    if (v >= 7) {
+      let r = v; for (let i = 0; i < 12; i++) r = (r << 1) ^ ((r >>> 11) * 0x1f25);
+      const b = (v << 12) | r;
+      for (let i = 0; i < 18; i++) { const on = ((b >>> i) & 1) === 1, a = size - 11 + (i % 3), c = Math.floor(i / 3); set(a, c, on); set(c, a, on); }
+    }
+    // Données en zigzag.
+    let i = 0;
+    for (let right = size - 1; right >= 1; right -= 2) {
+      if (right === 6) right = 5;
+      for (let vert = 0; vert < size; vert++) for (let j = 0; j < 2; j++) {
+        const x = right - j, up = ((right + 1) & 2) === 0, y = up ? size - 1 - vert : vert;
+        if (!fn[y][x] && i < seq.length * 8) { m[y][x] = ((seq[i >>> 3] >>> (7 - (i & 7))) & 1) === 1; i++; }
+      }
+    }
+    // Masque : le moins pénalisé.
+    const MASKS = [(x, y) => (x + y) % 2, (x, y) => y % 2, (x) => x % 3, (x, y) => (x + y) % 3, (x, y) => (Math.floor(x / 3) + Math.floor(y / 2)) % 2,
+      (x, y) => ((x * y) % 2) + ((x * y) % 3), (x, y) => (((x * y) % 2) + ((x * y) % 3)) % 2, (x, y) => (((x + y) % 2) + ((x * y) % 3)) % 2];
+    const apply = (k) => { for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (!fn[y][x] && MASKS[k](x, y) === 0) m[y][x] = !m[y][x]; };
+    let best = null;
+    for (let k = 0; k < 8; k++) {
+      apply(k); format(k);
+      const p = this.penalty(m);
+      if (!best || p < best.p) best = { k, p };
+      apply(k);
+    }
+    apply(best.k); format(best.k);
+    return m;
+  },
+  penalty(m) {
+    const n = m.length; let p = 0, dark = 0;
+    const lines = (get) => {
+      for (let a = 0; a < n; a++) {
+        let run = 1;
+        for (let b = 1; b <= n; b++) {
+          if (b < n && get(a, b) === get(a, b - 1)) run++;
+          else { if (run >= 5) p += run - 2; run = 1; }
+        }
+        for (let b = 0; b + 7 <= n; b++) { // motif 1:1:3:1:1 bordé de clair
+          const s = [0, 1, 2, 3, 4, 5, 6].map((k) => get(a, b + k));
+          if (s.join() === "true,false,true,true,true,false,true") {
+            const before = b >= 4 && [1, 2, 3, 4].every((k) => !get(a, b - k)), after = b + 11 <= n && [7, 8, 9, 10].every((k) => !get(a, b + k));
+            if (before || after) p += 40;
+          }
+        }
+      }
+    };
+    lines((a, b) => m[a][b]); lines((a, b) => m[b][a]);
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+      if (m[y][x]) dark++;
+      if (x < n - 1 && y < n - 1 && m[y][x] === m[y][x + 1] && m[y][x] === m[y + 1][x] && m[y][x] === m[y + 1][x + 1]) p += 3;
+    }
+    return p + Math.floor(Math.abs(dark * 20 - n * n * 10) / (n * n)) * 10;
+  },
+  // SVG noir sur blanc (même en mode sombre : les lecteurs le préfèrent), marge de 4 modules.
+  svg(text, px = 260) {
+    const m = this.encode([...new TextEncoder().encode(text)]);
+    if (!m) return "";
+    const n = m.length, q = 4;
+    let d = "";
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (m[y][x]) d += `M${x + q} ${y + q}h1v1h-1z`;
+    return `<svg class="qr" viewBox="0 0 ${n + 2 * q} ${n + 2 * q}" width="${px}" height="${px}" role="img" aria-label="QR code de sauvegarde" shape-rendering="crispEdges"><rect width="100%" height="100%" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;
+  },
+};
+
 // Mini-leçons (rappel de cours en 30 secondes), une par notion.
 // Format repris du prototype d'octobre (titre, intro, règle, exemples, piège) ; calcul littéral = textes d'octobre.
 const L_ = (titre, intro, regle, exemple, piege) => ({ titre, intro, regle, exemple, piege });
@@ -4699,8 +5026,9 @@ const Engine = {
   // Compétence : les 8 dernières réponses (1, 0,5 ou 0).
   recordComp(state, id, d, score) {
     state.comps = state.comps || {};
-    const cid = compOf(id, d), rec = (state.comps[cid] = state.comps[cid] || { r: [], n: 0 });
+    const cid = compOf(id, d), rec = (state.comps[cid] = state.comps[cid] || { r: [], n: 0 }), before = compNote(rec);
     rec.r.push(score); rec.r = rec.r.slice(-8); rec.n++; rec.last = day();
+    if (typeof Badges !== "undefined") Badges.onComp(state, cid, before, compNote(rec));
   },
 
   // Catalogue modifié depuis la création du profil : ajoute les notions manquantes (anciennes = vues, année en cours = à cocher).
@@ -4927,6 +5255,7 @@ const Engine = {
   // Score Moodle : 1 au premier essai, 0,5 au deuxième, 0 ensuite.
   record(state, id, d, tries, solved, partial) {
     const s = state.notions[id];
+    if (typeof Badges !== "undefined") Badges.onAnswer(state, id, d, tries, solved, partial);
     if (partial !== undefined) { // problème : score partiel 0..1
       this.recordComp(state, id, d, partial);
       s.seen++;
@@ -4959,6 +5288,7 @@ const Engine = {
   finishDay(state, answered, score) {
     const today = day();
     if (answered > 0) {
+      if (typeof Badges !== "undefined") Badges.onDay(state, today);
       if (state.streak.last !== today) state.streak.count = state.streak.last === addDays(today, -1) ? state.streak.count + 1 : 1;
       state.streak.last = today;
       const h = state.history.find((x) => x.date === today);
@@ -5010,7 +5340,7 @@ let state = Store.load();
 if (state && state.profile && !SYSTEMS[state.profile.system]) state = null; // système masqué (France) : on repart de zéro
 if (state && state.profile && state.notions && Object.keys(state.notions).length && Engine.migrate(state)) Store.save(state);
 const save = () => Store.save(state);
-const h = (html) => { app.innerHTML = html; typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); };
+const h = (html) => { app.innerHTML = html; typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const gradeName = (p) => (SYSTEMS[p.system].grades.find(([g]) => g === p.grade) || [0, ""])[1];
 const brand = '<div class="brand"><b>5 minutes de maths</b><span>par jour</span></div>';
@@ -5035,8 +5365,10 @@ function screenWelcome() {
   <div class="card tilt"><div class="qmeta"><span class="chip">Exemple · Pythagore</span><span class="dots"><i class="on"></i><i></i><i></i></span></div>
   <div class="qtext">${demo.q}</div><div class="figwrap">${demo.fig || ""}</div>
   <p class="small muted">Tape ta réponse comme tu veux : ${c}, √${c * c}, ${2 * c}/2… le calculateur comprend.</p></div>
-  <button class="btn-primary btn-big" id="go">Commencer</button>`);
+  <button class="btn-primary btn-big" id="go">Commencer</button>
+  <button class="btn-ghost" id="restore">J'ai déjà un code de sauvegarde</button>`);
   document.getElementById("go").onclick = screenLevel;
+  document.getElementById("restore").onclick = () => screenRestore();
 }
 
 function screenLevel() {
@@ -5109,6 +5441,7 @@ function themeBars(lv) {
 
 function screenHome() {
   if (!state) return screenWelcome();
+  Badges.check(state);
   const today = day(), done = state.history.find((x) => x.date === today);
   const s = state.streak, alive = s.last === today || s.last === addDays(today, -1), wp = Engine.weeklyProblem(state), fmt = Engine.todayFormat(state);
   save();
@@ -5121,13 +5454,15 @@ function screenHome() {
   <div class="spread"><span class="small muted">Varié d'un jour à l'autre, équilibré sur la semaine.</span><button class="btn-ghost small" id="other">Autre format</button></div></div>
   ${Engine.prepActive(state) ? (() => { const left = Math.round((new Date(state.prep.date) - new Date(today)) / 864e5); return `<div class="card flat stack"><div class="eyebrow">Je prépare mon test</div><h3>${left === 0 ? "Test aujourd'hui" : left === 1 ? "Test demain" : "Test dans " + left + " jours"} · ${state.prep.ids.length} notion${state.prep.ids.length > 1 ? "s" : ""}</h3><p class="small muted">${state.prep.ids.map((id) => NOTIONS.find((n) => n.id === id).label).join(" · ")}</p><div class="row"><button class="btn-primary" id="prepgo">Séance de révision</button><button class="btn-ghost" id="prepedit">Modifier</button></div></div>`; })() : ""}
   ${wp ? `<div class="card flat stack"><div class="eyebrow">Problème de la semaine</div><h3>${NOTIONS.find((n) => n.id === wp).label}</h3><p class="small muted">Un problème en plusieurs étapes, avec indices. Facultatif, et il rapporte gros.</p><button id="wp">Relever le défi</button></div>` : ""}
+  ${newBadgesCard()}
   ${compsCard()}
-  <div class="stack">${Engine.prepActive(state) ? "" : '<button id="prep">Je prépare un test</button>'}<button id="level">Changer de classe ou d'école</button>
+  <div class="stack">${Engine.prepActive(state) ? "" : '<button id="prep">Je prépare un test</button>'}<button id="backup">💾 Sauvegarder ou transférer ma progression</button><button id="level">Changer de classe ou d'école</button>
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div></div>`);
   document.getElementById("go").onclick = startSession;
   document.getElementById("other").onclick = () => { Engine.otherFormat(state); save(); screenHome(); };
   if (wp) document.getElementById("wp").onclick = () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); };
   document.getElementById("comps").onclick = screenComps;
+  document.getElementById("backup").onclick = screenBackup;
   const byId = (x) => document.getElementById(x);
   if (byId("prep")) byId("prep").onclick = screenPrep;
   if (byId("prepedit")) byId("prepedit").onclick = screenPrep;
@@ -5151,7 +5486,8 @@ function compsCard() {
   const cur = Engine.catalog(state.profile).filter((c) => c.current).map((c) => c.id), st = compStats(cur);
   return `<div class="card flat stack"><div class="spread"><h3>Mes compétences</h3>${st.avg !== null ? `<span class="note ${noteCls(Math.round(st.avg * 2) / 2)}">${String(Math.round(st.avg * 10) / 10).replace(".", ",")}</span>` : ""}</div>
   <p class="small muted">${st.tested ? `${st.tested} compétence${st.tested > 1 ? "s" : ""} notée${st.tested > 1 ? "s" : ""} sur ${st.total} cette année.` : "Tes notes apparaissent au fil des séances, compétence par compétence."}</p>
-  <button id="comps">Voir mes compétences</button></div>`;
+  <p class="small">🏅 ${Object.keys(state.badges || {}).length} badge${Object.keys(state.badges || {}).length > 1 ? "s" : ""} sur ${Badges.list().length}</p>
+  <button id="comps">Voir mes compétences et mes badges</button></div>`;
 }
 function screenComps() {
   const cat = Engine.catalog(state.profile), comps = state.comps || {};
@@ -5163,13 +5499,96 @@ function screenComps() {
       ${compsOf(c.id).map((k) => { const n = compNote(comps[k.cid]); return `<div class="comp"><span>${k.label}</span><span class="note ${noteCls(n)}">${noteTxt(n)}</span></div>`; }).join("")}</div>`).join("")}</div>`;
   }).join("");
   const cur = cat.filter((c) => c.current), old = cat.filter((c) => !c.current), st = compStats(cur.map((c) => c.id));
+  Badges.check(state); state.badgesNew = []; save();
   h(`${brand}<h2>Mes <span class="mark">compétences</span></h2>
   <p class="muted">Chaque compétence reçoit une note de 1 à 6 dès que tu y as répondu 3 fois. La note suit tes 8 dernières réponses : elle monte quand tu progresses.</p>
+  ${badgesSection()}
   <div class="card flat"><div class="spread"><span>Cette année</span><b>${st.tested} / ${st.total} notées${st.avg !== null ? " · moyenne " + String(Math.round(st.avg * 10) / 10).replace(".", ",") : ""}</b></div></div>
   ${block(cur)}
   ${old.length ? `<details class="olds"><summary>Années précédentes (${compStats(old.map((c) => c.id)).tested} notées)</summary>${block(old)}</details>` : ""}
   <button class="btn-primary btn-big" id="back">Retour</button>`);
+  bindBadges(app);
   document.getElementById("back").onclick = screenHome;
+}
+
+// ---------------- Badges ----------------
+function newBadgesCard() {
+  const ids = (state.badgesNew || []).filter((id, i, a) => a.indexOf(id) === i), L = Badges.list();
+  if (!ids.length) return "";
+  state.badgesNew = []; save();
+  const xs = ids.map((id) => L.find((x) => x.id === id)).filter(Boolean);
+  return `<div class="card pop stack bdg-new"><div class="eyebrow">${xs.length > 1 ? "Nouveaux badges" : "Nouveau badge"} !</div>
+  ${xs.map((x) => `<div class="bdg-row">${Badges.icon(x, true, 64)}<div><b>${x.name}</b><div class="small muted">${x.crit}</div></div></div>`).join("")}</div>`;
+}
+function badgesSection() {
+  const got = state.badges || {}, b = Badges.bc(state), L = Badges.list();
+  const fmt = (d) => d.slice(8, 10) + "." + d.slice(5, 7);
+  return `<div class="card flat stack bdg-sec"><div class="spread"><h3>Mes badges</h3><b>${Object.keys(got).length} / ${L.length}</b></div>
+  ${Object.entries(BADGE_FAM).map(([f, label]) => `<div class="eyebrow">${label}</div><div class="bdg-grid">${L.filter((x) => x.fam === f).map((x) => {
+    const on = !!got[x.id], p = x.prog(state, b);
+    const info = on ? "Gagné le " + fmt(got[x.id]) + ". " + x.crit : x.crit + (p[1] > 1 ? ` Où tu en es : ${p[0]} / ${p[1]}.` : "");
+    return `<button type="button" class="bdg${on ? "" : " off"}" data-info="${esc(x.name + " · " + info)}">${Badges.icon(x, on, 48)}<span class="bdg-n">${x.name}</span><span class="small muted">${on ? fmt(got[x.id]) : p[1] > 1 ? p[0] + " / " + p[1] : "à gagner"}</span></button>`;
+  }).join("")}</div>`).join("")}
+  <p class="small muted bdg-info" aria-live="polite">Touche un badge pour savoir comment le gagner.</p></div>`;
+}
+function bindBadges(root) {
+  const info = root.querySelector(".bdg-info");
+  root.querySelectorAll(".bdg[data-info]").forEach((x) => (x.onclick = () => { info.textContent = x.dataset.info; root.querySelectorAll(".bdg").forEach((y) => y.setAttribute("aria-pressed", y === x)); }));
+}
+function bindLessonOpen(root) {
+  root.querySelectorAll("details.lesson[data-id]").forEach((d) => d.addEventListener("toggle", () => { if (d.open && state) { Badges.onLesson(state, d.dataset.id); Badges.check(state); save(); } }));
+}
+
+// ---------------- Sauvegarde ----------------
+async function screenBackup() {
+  h(`${brand}<h2>Sauvegarder <span class="mark">ma progression</span></h2><p class="muted">Préparation du code…</p>`);
+  let code;
+  try { code = await Backup.encode(state); } catch (e) { code = null; }
+  if (!code) { h(`${brand}<div class="card flat"><p>Impossible de créer le code sur ce navigateur.</p></div><button class="btn-primary btn-big" id="back">Retour</button>`); document.getElementById("back").onclick = screenHome; return; }
+  const url = Backup.url(code), qr = url.length <= 2000 ? QR.svg(url) : "";
+  h(`${brand}<h2>Sauvegarder <span class="mark">ma progression</span></h2>
+  <p class="muted">Ce code contient toute ta progression : notions, compétences, badges, Mathélo. Rien n'est envoyé sur Internet. Garde-le pour changer de téléphone ou continuer sur un ordinateur.</p>
+  ${qr ? `<div class="card flat stack center"><b>Sur un autre appareil</b><span class="small muted">Scanne ce QR code avec l'appareil photo : l'app s'ouvre et propose de reprendre ta progression.</span><div class="qrwrap">${qr}</div></div>` : ""}
+  <div class="card flat stack"><b>Ou garde le code</b><span class="small muted">Envoie-le-toi (message, mail) ou colle-le dans tes notes. Le code d'aujourd'hui remplace les anciens.</span>
+  <textarea class="code-box" readonly rows="4">${code}</textarea>
+  <div class="row"><button class="btn-primary" id="copy">Copier le code</button>${navigator.share ? '<button id="share">Envoyer…</button>' : ""}</div><span class="small muted" id="msg"></span></div>
+  <div class="card flat stack"><b>Reprendre une progression</b><span class="small muted">Tu as un code d'un autre appareil ?</span><button id="restore">J'ai un code de sauvegarde</button></div>
+  <button class="btn-primary btn-big" id="back">Retour</button>`);
+  const msg = document.getElementById("msg"), ta = app.querySelector(".code-box");
+  document.getElementById("copy").onclick = async () => {
+    try { await navigator.clipboard.writeText(code); msg.textContent = "Code copié."; } catch (e) { ta.select(); msg.textContent = "Sélectionne le code et copie-le."; }
+  };
+  if (document.getElementById("share")) document.getElementById("share").onclick = () => navigator.share({ title: "Ma progression 5 minutes de maths", text: "Mon code de sauvegarde 5 minutes de maths (ouvre ce lien sur l'autre appareil) :", url }).catch(() => {});
+  document.getElementById("restore").onclick = () => screenRestore();
+  document.getElementById("back").onclick = screenHome;
+}
+function screenRestore(code) {
+  h(`${brand}<h2>Reprendre <span class="mark">ma progression</span></h2>
+  <p class="muted">Colle ici ton code de sauvegarde (ou le lien qui le contient).</p>
+  <textarea class="code-box" id="code" rows="4" placeholder="1x…">${code ? esc(code) : ""}</textarea>
+  <div id="prev" class="stack"></div>
+  <button class="btn-primary btn-big" id="check">Vérifier le code</button>
+  <button class="btn-ghost" id="back">Annuler</button>`);
+  const back = () => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); };
+  document.getElementById("back").onclick = back;
+  const check = async () => {
+    const box = document.getElementById("prev");
+    let s;
+    try { s = await Backup.decode(document.getElementById("code").value); } catch (e) { box.innerHTML = '<div class="card flat"><b>Code illisible.</b><p class="small muted">Vérifie qu\'il est complet (copie-le en entier).</p></div>'; return; }
+    const nb = Object.keys(s.badges || {}).length, days = s.bc ? s.bc.days : s.history.length;
+    box.innerHTML = `<div class="card flat stack"><b>Progression trouvée</b><span>${SYSTEMS[s.profile.system].label} · ${gradeName(s.profile)} · Mathélo ${s.elo.r} · ${days} jour${days > 1 ? "s" : ""} d'entraînement · ${nb} badge${nb > 1 ? "s" : ""}</span>
+    ${state && state.placed ? '<span class="small">Elle remplacera la progression de cet appareil.</span>' : ""}<button class="btn-primary" id="ok">Reprendre cette progression</button></div>`;
+    document.getElementById("check").style.display = "none";
+    document.getElementById("ok").onclick = () => { state = s; save(); history.replaceState(null, "", location.pathname); toast("Progression reprise."); screenHome(); };
+  };
+  document.getElementById("check").onclick = check;
+  if (code) check();
+}
+function restoreFromHash() {
+  const m = /^#r=(.+)$/.exec(location.hash);
+  if (!m) return false;
+  screenRestore(m[1]);
+  return true;
 }
 
 // ---------------- Je prépare mon test ----------------
@@ -5229,9 +5648,10 @@ function lessonBody(id) {
   <div class="lfb" data-id="${id}"><span class="small muted">Ce rappel est…</span><button class="small" data-v="up">👍 clair</button><button class="small" data-v="down">🤔 pas compris</button><span class="small muted lfb-msg"></span></div>
   ${commentBox("💬 Un commentaire sur ce rappel ?", "Ce qui n'est pas clair, un exemple qui manque… (n'écris pas ton nom)", "lecon-" + id)}`;
 }
-const lessonDetails = (id) => (LESSONS[id] ? `<details class="lesson"><summary>📖 Rappel de cours</summary><div class="stack">${lessonBody(id)}</div></details>` : "");
+const lessonDetails = (id) => (LESSONS[id] ? `<details class="lesson" data-id="${id}"><summary>📖 Rappel de cours</summary><div class="stack">${lessonBody(id)}</div></details>` : "");
 function screenLesson(id, cont) {
   const L = LESSONS[id];
+  if (state) { Badges.onLesson(state, id); save(); }
   h(`${brand}<div class="eyebrow">Nouvelle notion · 30 secondes de cours</div>
   <div class="card pop lesson-card"><h2>${L.titre}</h2>${lessonBody(id)}</div>
   <button class="btn-primary btn-big" id="go">J'ai compris, à moi !</button>`);
@@ -5549,7 +5969,7 @@ function bindLessonFeedback(root) {
       box.querySelectorAll("button[data-v]").forEach((x) => x.setAttribute("aria-pressed", x === b));
       const msg = box.querySelector(".lfb-msg");
       if (b.dataset.v === "down") {
-        if (state && state.notions[id]) { state.notions[id].lessonSeen = false; save(); }
+        if (state && state.notions[id]) { state.notions[id].lessonSeen = false; Badges.onLessonDown(state, id); save(); }
         msg.textContent = "Merci. Dis-nous ce qui n'est pas clair : on améliorera ce rappel.";
         const d = box.parentNode.querySelector("details.cmt"); if (d) d.open = true;
       } else msg.textContent = "Merci !";
@@ -5562,6 +5982,7 @@ function comment(code, text) {
   try {
     const p = state && state.profile, niveau = p ? gradeName(p) + (p.track === "mp" ? " MP" : "") : "";
     state.comments = (state.comments || []).concat({ code, text, date: day() }).slice(-50);
+    Badges.onFeedback(state);
     save();
     if (canSend()) fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ ev: "comment", code, text: text.slice(0, 500), niveau, dev: deviceId(), date: day() }) }).catch(() => {});
   } catch (e) {}
@@ -5570,6 +5991,7 @@ function comment(code, text) {
 function vote(code, v) {
   try {
     state.votes = state.votes || {};
+    if (v !== "facile") Badges.onFeedback(state);
     state.votes[code] = { v, date: day() };
     save();
     if (canSend()) fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ code, vote: v, date: day(), dev: deviceId() }) }).catch(() => {});
@@ -5578,15 +6000,19 @@ function vote(code, v) {
 
 function screenSummary() {
   ping("session");
+  Badges.check(state); save();
+  const nb = newBadgesCard();
   const n = session.answered, sc = session.score, d = state.elo.r - session.elo0;
   h(`${brand}<h2>${sc >= n * 0.8 ? "Excellente séance !" : sc >= n * 0.5 ? "Bonne séance." : "Séance faite : c'est en pratiquant qu'on progresse."}</h2>
   <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span><div class="small muted">À demain pour ta question du jour.</div></div></div>
   <div class="card stack"><div class="spread"><span>Score</span><b>${String(sc).replace(".", ",")} / ${n}</b></div>
   <div class="spread"><span>Mathélo</span><b>${state.elo.r} <span class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</span></b></div>
   <div class="small muted">Notions travaillées : ${[...session.ids].map((id) => NOTIONS.find((x) => x.id === id).label).join(" · ")}</div></div>
+  ${nb}
   <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)", "app")}</div>
   <button class="btn-primary btn-big" id="home">Retour à l'accueil</button>`);
   bindComment(app, "app");
+  if (nb) setTimeout(burst, 250);
   document.getElementById("home").onclick = screenHome;
 }
 
@@ -5600,14 +6026,14 @@ function showCode() {
   renderQuestion(q, { eyebrow: "Question " + q.code + " (consultation)", onDone: () => 0, onNext: back });
   return true;
 }
-window.addEventListener("hashchange", showCode);
+window.addEventListener("hashchange", () => showCode() || restoreFromHash());
 
 // Application installable (hors claude.ai) : cache hors ligne.
 if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude/.test(location.hostname)) navigator.serviceWorker.register("sw.js").catch(() => {});
 
 // Démarrage
 ping("open");
-if (!showCode()) { if (state && state.placed) screenHome(); else { state = null; screenWelcome(); } }
+if (!showCode() && !restoreFromHash()) { if (state && state.placed) screenHome(); else { state = null; screenWelcome(); } }
 
 </script>
 </body>

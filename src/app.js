@@ -7,7 +7,7 @@ let state = Store.load();
 if (state && state.profile && !SYSTEMS[state.profile.system]) state = null; // système masqué (France) : on repart de zéro
 if (state && state.profile && state.notions && Object.keys(state.notions).length && Engine.migrate(state)) Store.save(state);
 const save = () => Store.save(state);
-const h = (html) => { app.innerHTML = html; typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); };
+const h = (html) => { app.innerHTML = html; typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const gradeName = (p) => (SYSTEMS[p.system].grades.find(([g]) => g === p.grade) || [0, ""])[1];
 const brand = '<div class="brand"><b>5 minutes de maths</b><span>par jour</span></div>';
@@ -32,8 +32,10 @@ function screenWelcome() {
   <div class="card tilt"><div class="qmeta"><span class="chip">Exemple · Pythagore</span><span class="dots"><i class="on"></i><i></i><i></i></span></div>
   <div class="qtext">${demo.q}</div><div class="figwrap">${demo.fig || ""}</div>
   <p class="small muted">Tape ta réponse comme tu veux : ${c}, √${c * c}, ${2 * c}/2… le calculateur comprend.</p></div>
-  <button class="btn-primary btn-big" id="go">Commencer</button>`);
+  <button class="btn-primary btn-big" id="go">Commencer</button>
+  <button class="btn-ghost" id="restore">J'ai déjà un code de sauvegarde</button>`);
   document.getElementById("go").onclick = screenLevel;
+  document.getElementById("restore").onclick = () => screenRestore();
 }
 
 function screenLevel() {
@@ -106,6 +108,7 @@ function themeBars(lv) {
 
 function screenHome() {
   if (!state) return screenWelcome();
+  Badges.check(state);
   const today = day(), done = state.history.find((x) => x.date === today);
   const s = state.streak, alive = s.last === today || s.last === addDays(today, -1), wp = Engine.weeklyProblem(state), fmt = Engine.todayFormat(state);
   save();
@@ -118,13 +121,15 @@ function screenHome() {
   <div class="spread"><span class="small muted">Varié d'un jour à l'autre, équilibré sur la semaine.</span><button class="btn-ghost small" id="other">Autre format</button></div></div>
   ${Engine.prepActive(state) ? (() => { const left = Math.round((new Date(state.prep.date) - new Date(today)) / 864e5); return `<div class="card flat stack"><div class="eyebrow">Je prépare mon test</div><h3>${left === 0 ? "Test aujourd'hui" : left === 1 ? "Test demain" : "Test dans " + left + " jours"} · ${state.prep.ids.length} notion${state.prep.ids.length > 1 ? "s" : ""}</h3><p class="small muted">${state.prep.ids.map((id) => NOTIONS.find((n) => n.id === id).label).join(" · ")}</p><div class="row"><button class="btn-primary" id="prepgo">Séance de révision</button><button class="btn-ghost" id="prepedit">Modifier</button></div></div>`; })() : ""}
   ${wp ? `<div class="card flat stack"><div class="eyebrow">Problème de la semaine</div><h3>${NOTIONS.find((n) => n.id === wp).label}</h3><p class="small muted">Un problème en plusieurs étapes, avec indices. Facultatif, et il rapporte gros.</p><button id="wp">Relever le défi</button></div>` : ""}
+  ${newBadgesCard()}
   ${compsCard()}
-  <div class="stack">${Engine.prepActive(state) ? "" : '<button id="prep">Je prépare un test</button>'}<button id="level">Changer de classe ou d'école</button>
+  <div class="stack">${Engine.prepActive(state) ? "" : '<button id="prep">Je prépare un test</button>'}<button id="backup">💾 Sauvegarder ou transférer ma progression</button><button id="level">Changer de classe ou d'école</button>
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div></div>`);
   document.getElementById("go").onclick = startSession;
   document.getElementById("other").onclick = () => { Engine.otherFormat(state); save(); screenHome(); };
   if (wp) document.getElementById("wp").onclick = () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); };
   document.getElementById("comps").onclick = screenComps;
+  document.getElementById("backup").onclick = screenBackup;
   const byId = (x) => document.getElementById(x);
   if (byId("prep")) byId("prep").onclick = screenPrep;
   if (byId("prepedit")) byId("prepedit").onclick = screenPrep;
@@ -148,7 +153,8 @@ function compsCard() {
   const cur = Engine.catalog(state.profile).filter((c) => c.current).map((c) => c.id), st = compStats(cur);
   return `<div class="card flat stack"><div class="spread"><h3>Mes compétences</h3>${st.avg !== null ? `<span class="note ${noteCls(Math.round(st.avg * 2) / 2)}">${String(Math.round(st.avg * 10) / 10).replace(".", ",")}</span>` : ""}</div>
   <p class="small muted">${st.tested ? `${st.tested} compétence${st.tested > 1 ? "s" : ""} notée${st.tested > 1 ? "s" : ""} sur ${st.total} cette année.` : "Tes notes apparaissent au fil des séances, compétence par compétence."}</p>
-  <button id="comps">Voir mes compétences</button></div>`;
+  <p class="small">🏅 ${Object.keys(state.badges || {}).length} badge${Object.keys(state.badges || {}).length > 1 ? "s" : ""} sur ${Badges.list().length}</p>
+  <button id="comps">Voir mes compétences et mes badges</button></div>`;
 }
 function screenComps() {
   const cat = Engine.catalog(state.profile), comps = state.comps || {};
@@ -160,13 +166,96 @@ function screenComps() {
       ${compsOf(c.id).map((k) => { const n = compNote(comps[k.cid]); return `<div class="comp"><span>${k.label}</span><span class="note ${noteCls(n)}">${noteTxt(n)}</span></div>`; }).join("")}</div>`).join("")}</div>`;
   }).join("");
   const cur = cat.filter((c) => c.current), old = cat.filter((c) => !c.current), st = compStats(cur.map((c) => c.id));
+  Badges.check(state); state.badgesNew = []; save();
   h(`${brand}<h2>Mes <span class="mark">compétences</span></h2>
   <p class="muted">Chaque compétence reçoit une note de 1 à 6 dès que tu y as répondu 3 fois. La note suit tes 8 dernières réponses : elle monte quand tu progresses.</p>
+  ${badgesSection()}
   <div class="card flat"><div class="spread"><span>Cette année</span><b>${st.tested} / ${st.total} notées${st.avg !== null ? " · moyenne " + String(Math.round(st.avg * 10) / 10).replace(".", ",") : ""}</b></div></div>
   ${block(cur)}
   ${old.length ? `<details class="olds"><summary>Années précédentes (${compStats(old.map((c) => c.id)).tested} notées)</summary>${block(old)}</details>` : ""}
   <button class="btn-primary btn-big" id="back">Retour</button>`);
+  bindBadges(app);
   document.getElementById("back").onclick = screenHome;
+}
+
+// ---------------- Badges ----------------
+function newBadgesCard() {
+  const ids = (state.badgesNew || []).filter((id, i, a) => a.indexOf(id) === i), L = Badges.list();
+  if (!ids.length) return "";
+  state.badgesNew = []; save();
+  const xs = ids.map((id) => L.find((x) => x.id === id)).filter(Boolean);
+  return `<div class="card pop stack bdg-new"><div class="eyebrow">${xs.length > 1 ? "Nouveaux badges" : "Nouveau badge"} !</div>
+  ${xs.map((x) => `<div class="bdg-row">${Badges.icon(x, true, 64)}<div><b>${x.name}</b><div class="small muted">${x.crit}</div></div></div>`).join("")}</div>`;
+}
+function badgesSection() {
+  const got = state.badges || {}, b = Badges.bc(state), L = Badges.list();
+  const fmt = (d) => d.slice(8, 10) + "." + d.slice(5, 7);
+  return `<div class="card flat stack bdg-sec"><div class="spread"><h3>Mes badges</h3><b>${Object.keys(got).length} / ${L.length}</b></div>
+  ${Object.entries(BADGE_FAM).map(([f, label]) => `<div class="eyebrow">${label}</div><div class="bdg-grid">${L.filter((x) => x.fam === f).map((x) => {
+    const on = !!got[x.id], p = x.prog(state, b);
+    const info = on ? "Gagné le " + fmt(got[x.id]) + ". " + x.crit : x.crit + (p[1] > 1 ? ` Où tu en es : ${p[0]} / ${p[1]}.` : "");
+    return `<button type="button" class="bdg${on ? "" : " off"}" data-info="${esc(x.name + " · " + info)}">${Badges.icon(x, on, 48)}<span class="bdg-n">${x.name}</span><span class="small muted">${on ? fmt(got[x.id]) : p[1] > 1 ? p[0] + " / " + p[1] : "à gagner"}</span></button>`;
+  }).join("")}</div>`).join("")}
+  <p class="small muted bdg-info" aria-live="polite">Touche un badge pour savoir comment le gagner.</p></div>`;
+}
+function bindBadges(root) {
+  const info = root.querySelector(".bdg-info");
+  root.querySelectorAll(".bdg[data-info]").forEach((x) => (x.onclick = () => { info.textContent = x.dataset.info; root.querySelectorAll(".bdg").forEach((y) => y.setAttribute("aria-pressed", y === x)); }));
+}
+function bindLessonOpen(root) {
+  root.querySelectorAll("details.lesson[data-id]").forEach((d) => d.addEventListener("toggle", () => { if (d.open && state) { Badges.onLesson(state, d.dataset.id); Badges.check(state); save(); } }));
+}
+
+// ---------------- Sauvegarde ----------------
+async function screenBackup() {
+  h(`${brand}<h2>Sauvegarder <span class="mark">ma progression</span></h2><p class="muted">Préparation du code…</p>`);
+  let code;
+  try { code = await Backup.encode(state); } catch (e) { code = null; }
+  if (!code) { h(`${brand}<div class="card flat"><p>Impossible de créer le code sur ce navigateur.</p></div><button class="btn-primary btn-big" id="back">Retour</button>`); document.getElementById("back").onclick = screenHome; return; }
+  const url = Backup.url(code), qr = url.length <= 2000 ? QR.svg(url) : "";
+  h(`${brand}<h2>Sauvegarder <span class="mark">ma progression</span></h2>
+  <p class="muted">Ce code contient toute ta progression : notions, compétences, badges, Mathélo. Rien n'est envoyé sur Internet. Garde-le pour changer de téléphone ou continuer sur un ordinateur.</p>
+  ${qr ? `<div class="card flat stack center"><b>Sur un autre appareil</b><span class="small muted">Scanne ce QR code avec l'appareil photo : l'app s'ouvre et propose de reprendre ta progression.</span><div class="qrwrap">${qr}</div></div>` : ""}
+  <div class="card flat stack"><b>Ou garde le code</b><span class="small muted">Envoie-le-toi (message, mail) ou colle-le dans tes notes. Le code d'aujourd'hui remplace les anciens.</span>
+  <textarea class="code-box" readonly rows="4">${code}</textarea>
+  <div class="row"><button class="btn-primary" id="copy">Copier le code</button>${navigator.share ? '<button id="share">Envoyer…</button>' : ""}</div><span class="small muted" id="msg"></span></div>
+  <div class="card flat stack"><b>Reprendre une progression</b><span class="small muted">Tu as un code d'un autre appareil ?</span><button id="restore">J'ai un code de sauvegarde</button></div>
+  <button class="btn-primary btn-big" id="back">Retour</button>`);
+  const msg = document.getElementById("msg"), ta = app.querySelector(".code-box");
+  document.getElementById("copy").onclick = async () => {
+    try { await navigator.clipboard.writeText(code); msg.textContent = "Code copié."; } catch (e) { ta.select(); msg.textContent = "Sélectionne le code et copie-le."; }
+  };
+  if (document.getElementById("share")) document.getElementById("share").onclick = () => navigator.share({ title: "Ma progression 5 minutes de maths", text: "Mon code de sauvegarde 5 minutes de maths (ouvre ce lien sur l'autre appareil) :", url }).catch(() => {});
+  document.getElementById("restore").onclick = () => screenRestore();
+  document.getElementById("back").onclick = screenHome;
+}
+function screenRestore(code) {
+  h(`${brand}<h2>Reprendre <span class="mark">ma progression</span></h2>
+  <p class="muted">Colle ici ton code de sauvegarde (ou le lien qui le contient).</p>
+  <textarea class="code-box" id="code" rows="4" placeholder="1x…">${code ? esc(code) : ""}</textarea>
+  <div id="prev" class="stack"></div>
+  <button class="btn-primary btn-big" id="check">Vérifier le code</button>
+  <button class="btn-ghost" id="back">Annuler</button>`);
+  const back = () => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); };
+  document.getElementById("back").onclick = back;
+  const check = async () => {
+    const box = document.getElementById("prev");
+    let s;
+    try { s = await Backup.decode(document.getElementById("code").value); } catch (e) { box.innerHTML = '<div class="card flat"><b>Code illisible.</b><p class="small muted">Vérifie qu\'il est complet (copie-le en entier).</p></div>'; return; }
+    const nb = Object.keys(s.badges || {}).length, days = s.bc ? s.bc.days : s.history.length;
+    box.innerHTML = `<div class="card flat stack"><b>Progression trouvée</b><span>${SYSTEMS[s.profile.system].label} · ${gradeName(s.profile)} · Mathélo ${s.elo.r} · ${days} jour${days > 1 ? "s" : ""} d'entraînement · ${nb} badge${nb > 1 ? "s" : ""}</span>
+    ${state && state.placed ? '<span class="small">Elle remplacera la progression de cet appareil.</span>' : ""}<button class="btn-primary" id="ok">Reprendre cette progression</button></div>`;
+    document.getElementById("check").style.display = "none";
+    document.getElementById("ok").onclick = () => { state = s; save(); history.replaceState(null, "", location.pathname); toast("Progression reprise."); screenHome(); };
+  };
+  document.getElementById("check").onclick = check;
+  if (code) check();
+}
+function restoreFromHash() {
+  const m = /^#r=(.+)$/.exec(location.hash);
+  if (!m) return false;
+  screenRestore(m[1]);
+  return true;
 }
 
 // ---------------- Je prépare mon test ----------------
@@ -226,9 +315,10 @@ function lessonBody(id) {
   <div class="lfb" data-id="${id}"><span class="small muted">Ce rappel est…</span><button class="small" data-v="up">👍 clair</button><button class="small" data-v="down">🤔 pas compris</button><span class="small muted lfb-msg"></span></div>
   ${commentBox("💬 Un commentaire sur ce rappel ?", "Ce qui n'est pas clair, un exemple qui manque… (n'écris pas ton nom)", "lecon-" + id)}`;
 }
-const lessonDetails = (id) => (LESSONS[id] ? `<details class="lesson"><summary>📖 Rappel de cours</summary><div class="stack">${lessonBody(id)}</div></details>` : "");
+const lessonDetails = (id) => (LESSONS[id] ? `<details class="lesson" data-id="${id}"><summary>📖 Rappel de cours</summary><div class="stack">${lessonBody(id)}</div></details>` : "");
 function screenLesson(id, cont) {
   const L = LESSONS[id];
+  if (state) { Badges.onLesson(state, id); save(); }
   h(`${brand}<div class="eyebrow">Nouvelle notion · 30 secondes de cours</div>
   <div class="card pop lesson-card"><h2>${L.titre}</h2>${lessonBody(id)}</div>
   <button class="btn-primary btn-big" id="go">J'ai compris, à moi !</button>`);
@@ -546,7 +636,7 @@ function bindLessonFeedback(root) {
       box.querySelectorAll("button[data-v]").forEach((x) => x.setAttribute("aria-pressed", x === b));
       const msg = box.querySelector(".lfb-msg");
       if (b.dataset.v === "down") {
-        if (state && state.notions[id]) { state.notions[id].lessonSeen = false; save(); }
+        if (state && state.notions[id]) { state.notions[id].lessonSeen = false; Badges.onLessonDown(state, id); save(); }
         msg.textContent = "Merci. Dis-nous ce qui n'est pas clair : on améliorera ce rappel.";
         const d = box.parentNode.querySelector("details.cmt"); if (d) d.open = true;
       } else msg.textContent = "Merci !";
@@ -559,6 +649,7 @@ function comment(code, text) {
   try {
     const p = state && state.profile, niveau = p ? gradeName(p) + (p.track === "mp" ? " MP" : "") : "";
     state.comments = (state.comments || []).concat({ code, text, date: day() }).slice(-50);
+    Badges.onFeedback(state);
     save();
     if (canSend()) fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ ev: "comment", code, text: text.slice(0, 500), niveau, dev: deviceId(), date: day() }) }).catch(() => {});
   } catch (e) {}
@@ -567,6 +658,7 @@ function comment(code, text) {
 function vote(code, v) {
   try {
     state.votes = state.votes || {};
+    if (v !== "facile") Badges.onFeedback(state);
     state.votes[code] = { v, date: day() };
     save();
     if (canSend()) fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ code, vote: v, date: day(), dev: deviceId() }) }).catch(() => {});
@@ -575,15 +667,19 @@ function vote(code, v) {
 
 function screenSummary() {
   ping("session");
+  Badges.check(state); save();
+  const nb = newBadgesCard();
   const n = session.answered, sc = session.score, d = state.elo.r - session.elo0;
   h(`${brand}<h2>${sc >= n * 0.8 ? "Excellente séance !" : sc >= n * 0.5 ? "Bonne séance." : "Séance faite : c'est en pratiquant qu'on progresse."}</h2>
   <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span><div class="small muted">À demain pour ta question du jour.</div></div></div>
   <div class="card stack"><div class="spread"><span>Score</span><b>${String(sc).replace(".", ",")} / ${n}</b></div>
   <div class="spread"><span>Mathélo</span><b>${state.elo.r} <span class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</span></b></div>
   <div class="small muted">Notions travaillées : ${[...session.ids].map((id) => NOTIONS.find((x) => x.id === id).label).join(" · ")}</div></div>
+  ${nb}
   <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)", "app")}</div>
   <button class="btn-primary btn-big" id="home">Retour à l'accueil</button>`);
   bindComment(app, "app");
+  if (nb) setTimeout(burst, 250);
   document.getElementById("home").onclick = screenHome;
 }
 
@@ -597,11 +693,11 @@ function showCode() {
   renderQuestion(q, { eyebrow: "Question " + q.code + " (consultation)", onDone: () => 0, onNext: back });
   return true;
 }
-window.addEventListener("hashchange", showCode);
+window.addEventListener("hashchange", () => showCode() || restoreFromHash());
 
 // Application installable (hors claude.ai) : cache hors ligne.
 if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude/.test(location.hostname)) navigator.serviceWorker.register("sw.js").catch(() => {});
 
 // Démarrage
 ping("open");
-if (!showCode()) { if (state && state.placed) screenHome(); else { state = null; screenWelcome(); } }
+if (!showCode() && !restoreFromHash()) { if (state && state.placed) screenHome(); else { state = null; screenWelcome(); } }

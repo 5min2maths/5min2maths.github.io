@@ -5,7 +5,7 @@
 <script src="../src/figures.js"></script><script src="../src/geo.js"></script>
 <script src="../src/generators.js"></script>
 <script src="../src/gen2.js"></script>
-<script src="../src/gen3.js"></script><script src="../src/competences.js"></script>
+<script src="../src/gen3.js"></script><script src="../src/competences.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script>
 <script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script>
 <script src="../src/engine.js"></script>
 <script>
@@ -203,6 +203,42 @@ const r0 = st.elo.r; Engine.updateElo(st, "factor", 3, 1); if (st.elo.r <= r0) f
 const r1 = st.elo.r; Engine.updateElo(st, "prio", 1, 0); if (st.elo.r >= r1) fail("Mathélo ne descend pas");
 log.push("Mathélo : " + st.elo.r + " — " + eloLabel(prof, st.elo.r));
 
+// 4. Badges
+{ const b = Engine.newState({ system: "CH", grade: 9, minutes: 5 }); Engine.autoInit(b); b.placed = true;
+  if (Badges.check(b).length) fail("badges sans rien faire : " + JSON.stringify(b.badges));
+  Engine.finishDay(b, 1, 1); Badges.check(b); if (!b.badges.premier) fail("badge premier pas");
+  const ids = Engine.eligible(b), id0 = ids[0];
+  for (let k = 0; k < 3; k++) Engine.record(b, id0, 1, 1, false);
+  for (let k = 0; k < 8; k++) Engine.record(b, id0, 1, 1, true);
+  Badges.check(b); for (const x of ["comp5", "expert", "pente"]) if (!b.badges[x]) fail("badge " + x + " : " + JSON.stringify(Badges.bc(b)));
+  for (let k = 0; k < 10; k++) Engine.record(b, id0, 2, 2, true);
+  for (let k = 0; k < 8; k++) Engine.record(b, id0, 2, 1, true);
+  for (let k = 0; k < 5; k++) Engine.record(b, id0, 3, 1, true);
+  Badges.onLessonDown(b, id0); Engine.record(b, id0, 2, 1, true); Engine.record(b, id0, 2, 1, true);
+  Badges.check(b); if (b.badges.compris) fail("ça y est trop tôt");
+  Engine.record(b, id0, 2, 1, true); Badges.check(b);
+  for (const x of ["retry", "d3", "compris", "notion"]) if (!b.badges[x]) fail("badge " + x);
+  // Régularité : 5 jours la même semaine, retour après 10 jours
+  const c = Engine.newState({ system: "CH", grade: 9, minutes: 5 }); Engine.autoInit(c);
+  for (const d of ["2026-11-02", "2026-11-03", "2026-11-05", "2026-11-06", "2026-11-08"]) Badges.onDay(c, d);
+  Badges.onDay(c, "2026-11-20"); Badges.check(c);
+  if (!c.badges.semaine || !c.badges.rentree || c.badges.mois) fail("régularité " + JSON.stringify(c.bc));
+  if (Badges.list().length !== 18) fail(Badges.list().length + " badges");
+  log.push("badges : " + Object.keys(b.badges).join(" ")); }
 
-document.getElementById("out").textContent = (fails ? fails + " échec(s)\n" : "OK\n") + log.join("\n") + "\n" + n + " questions générées ; positionnement : " + plan.join(", ") + "\nséance : " + sess.join(", ") + "\nnotions CH 11e en novembre : " + cat.map((c) => c.id + "=" + c.defaultStatus).join(" ");
+document.getElementById("out").textContent = "en cours (sauvegarde)";
+// 5. Sauvegarde : aller-retour, et taille du code pour un élève très actif
+(async () => {
+  const u = Engine.newState({ system: "CH", grade: 11, minutes: 5 }); Engine.autoInit(u); u.placed = true;
+  for (let day0 = 0; day0 < 60; day0++) for (const id of Engine.eligible(u).slice(0, 25)) Engine.record(u, id, 1 + (day0 % 3), 1 + (day0 % 2), day0 % 4 !== 0);
+  Engine.finishDay(u, 3, 2); Badges.onLesson(u, "pyth"); Badges.check(u); Engine.notYet(u, Engine.eligible(u)[3]);
+  const code = await Backup.encode(u), v = await Backup.decode(Backup.url(code));
+  const norm = (s) => JSON.stringify({ n: Object.fromEntries(Object.entries(s.notions).map(([k, x]) => [k, { ...x, m: Math.round(x.m * 100) }])), c: Object.fromEntries(Object.entries(s.comps).map(([k, x]) => [k, x.r.map((r) => Math.round(r * 4))])), e: s.elo.r, b: s.badges, p: s.profile, k: s.streak });
+  if (norm(u) !== norm(v)) { fail("sauvegarde : aller-retour différent"); const a = JSON.parse(norm(u)), z = JSON.parse(norm(v)); for (const k in a.n) if (JSON.stringify(a.n[k]) !== JSON.stringify(z.n[k])) { log.push(k + " " + JSON.stringify(a.n[k]) + " ≠ " + JSON.stringify(z.n[k])); break; } }
+  const n0 = Engine.newState({ system: "CH", grade: 10, minutes: 5 }); Engine.autoInit(n0); n0.placed = true;
+  const c0 = await Backup.encode(n0);
+  if (!QR.svg(Backup.url(code)).startsWith("<svg")) fail("QR non produit");
+  log.push("code de sauvegarde : " + c0.length + " car. (nouveau) ; " + code.length + " car. (60 jours, " + Object.keys(u.comps).length + " compétences)");
+  document.getElementById("out").textContent = (fails ? fails + " échec(s)\n" : "OK\n") + log.join("\n") + "\n" + n + " questions générées ; positionnement : " + plan.join(", ") + "\nséance : " + sess.join(", ") + "\nnotions CH 11e en novembre : " + cat.map((c) => c.id + "=" + c.defaultStatus).join(" ");
+})();
 </script>

@@ -231,3 +231,21 @@ details.cmt summary { cursor: pointer; color: var(--blue); padding: 4px 0; }
 details.cmt textarea { width: 100%; box-sizing: border-box; font: inherit; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--ink); resize: vertical; margin: 6px 0; }
 .lfb { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .lfb button[aria-pressed="true"] { background: var(--blue-soft); border-color: var(--blue); }
+
+/* Badges et sauvegarde (13.11) */
+.bdg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.bdg { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px; padding: 6px 2px; background: none; border: 1.5px solid transparent; border-radius: 10px; box-shadow: none; color: var(--ink); font: inherit; cursor: pointer; min-height: 0; }
+.bdg[aria-pressed="true"] { border-color: var(--blue); }
+.bdg-n { font-weight: 700; font-size: 13px; line-height: 1.2; }
+.bdg-info { min-height: 2.6em; border-top: 1px dashed var(--line); padding-top: 8px; }
+.bdg.off .bdg-ic { color: var(--ink-soft); }
+.bdg.off .bdg-ic text { opacity: 0.35; filter: grayscale(1); }
+.bdg.off .bdg-n { color: var(--ink-soft); }
+.bdg-row { display: flex; gap: 12px; align-items: center; }
+.bdg-new { animation: bdg-pop 0.5s ease-out; }
+@keyframes bdg-pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .bdg-new { animation: none; } }
+.qrwrap { display: flex; justify-content: center; }
+.qrwrap svg { max-width: 100%; height: auto; border-radius: 6px; }
+.code-box { width: 100%; font-family: var(--font-mono); font-size: 12px; word-break: break-all; padding: 8px; border: 1.5px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); }
+.center { align-items: center; text-align: center; }
