@@ -6,5 +6,6 @@
 // #q-CODE : question ; #l-ID : rappel de cours
 const k = location.hash.slice(1);
 if (k.startsWith("l-")) h(`<div class="card pop lesson-card"><h2>${LESSONS[k.slice(2)].titre}</h2>${lessonBody(k.slice(2))}</div><pre>${JSON.stringify(LESSONS[k.slice(2)], null, 1).replace(/</g, "&lt;")}</pre>`);
+else if (k.startsWith("g-")) { const [, id, d] = k.split("-"); const q = Engine.make(Engine.newState({ system: "CH", grade: 12, track: "college", minutes: 5 }), id, +d); renderQuestion(q, { eyebrow: "aperçu", onDone: () => 0, onNext: () => {} }); }
 else { location.hash = "#q-" + k; showCode(); }
 </script>

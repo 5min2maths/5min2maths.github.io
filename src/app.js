@@ -456,8 +456,21 @@ function nextQuestion(redo) {
 // Clavier mathématique partagé : écrit dans le champ actif.
 // Clavier 7 colonnes : y et = ajoutés (13.11) ; 0 et ⌨ prennent deux cases.
 const KEYS = ["7", "8", "9", "/", "(", ")", "⌫", "4", "5", "6", "*", "^", "√", "π", "1", "2", "3", "-", "x", "y", "=", "0", ",", "+", ";", "⌨"];
-const keyBtn = (k) => `<button type="button" class="${/[\d,]/.test(k) ? "" : "k-op"}${k === "0" || k === "⌨" ? " k-wide" : ""}" data-k="${k}">${k === "*" ? "×" : k}</button>`;
-const keypadHtml = () => `<div class="keypad" id="kp">${KEYS.map(keyBtn).join("")}</div>`;
+// Clavier « intervalles » (13.11) : domaines, inéquations, ensembles de solutions. « | » = place du curseur après insertion.
+const SET_KEYS = ["7", "8", "9", "-", "+", "/", "⌫", "4", "5", "6", "[", "]", ";", "∞", "1", "2", "3", "x", "<", ">", "∪",
+  "0", ",", "≤", "≥", "≠", "=", "ℝ \\ {|}", "ℝ", "∅", "√", "⌨"];
+const KEY_LABEL = { "*": "×", "ℝ \\ {|}": "ℝ∖{ }" };
+const keyBtn = (k, set) => `<button type="button" class="${/^[\d,]$/.test(k) ? "" : "k-op"}${k === "0" || (k === "⌨" && !set) || k === "ℝ \\ {|}" || (k === "⌨" && set) ? " k-wide" : ""}" data-k="${esc(k)}">${KEY_LABEL[k] || k}</button>`;
+const isSetSpec = (spec) => !!spec && (spec.kind === "solset" || spec.kind === "ineq");
+const keysFor = (spec) => (isSetSpec(spec) ? SET_KEYS.map((k) => keyBtn(k, true)) : KEYS.map((k) => keyBtn(k))).join("");
+const keypadHtml = (spec) => `<div class="keypad${isSetSpec(spec) ? " k-set" : ""}" id="kp">${keysFor(spec)}</div>`;
+// Insère une touche dans le champ (avec « | » : place du curseur), ou efface.
+function typeKey(inp, k) {
+  const s = inp.selectionStart ?? inp.value.length, e = inp.selectionEnd ?? inp.value.length;
+  if (k === "⌫") { const a = s === e ? Math.max(0, s - 1) : s; inp.value = inp.value.slice(0, a) + inp.value.slice(e); inp.setSelectionRange(a, a); return; }
+  const at = k.indexOf("|"), t = k.replace("|", ""), c = s + (at >= 0 ? at : t.length);
+  inp.value = inp.value.slice(0, s) + t + inp.value.slice(e); inp.setSelectionRange(c, c);
+}
 function previewOf(inp, prev) {
   const v = inp.value.trim();
   if (!v) { prev.innerHTML = ""; return; }
@@ -474,9 +487,7 @@ function bindKeypad(getInput, after) {
     const inp = getInput(), k = b.dataset.k;
     if (!inp || inp.disabled) return;
     if (k === "⌨") { mode = mode === "none" ? "text" : "none"; app.querySelectorAll("input.ans").forEach((i) => i.setAttribute("inputmode", mode)); inp.blur(); inp.focus(); return; }
-    const s = inp.selectionStart ?? inp.value.length, e = inp.selectionEnd ?? inp.value.length;
-    if (k === "⌫") { const a = s === e ? Math.max(0, s - 1) : s; inp.value = inp.value.slice(0, a) + inp.value.slice(e); inp.setSelectionRange(a, a); }
-    else { inp.value = inp.value.slice(0, s) + k + inp.value.slice(e); inp.setSelectionRange(s + k.length, s + k.length); }
+    typeKey(inp, k);
     after(inp);
   }));
 }
@@ -493,18 +504,24 @@ function renderProblem(q, opt) {
   ${lessonDetails(q.id)}
   ${q.parts.map((p, i) => `<div class="answer part" data-i="${i}"><label for="p${i}"><b>${p.label}</b> <span class="mk" id="mk${i}"></span></label>
     <input id="p${i}" class="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…"><div class="preview" id="pv${i}"></div></div>`).join("")}
-  ${keypadHtml()}
+  ${keypadHtml(q.parts[0].spec)}
   <div class="actions"><button class="btn-primary" id="check">Valider</button><button id="idk">Voir le corrigé</button></div>
   <div id="fb"></div></div>`);
   const fb = document.getElementById("fb");
   q.parts.forEach((p, i) => {
     const inp = document.getElementById("p" + i), pv = document.getElementById("pv" + i);
-    inp.onfocus = () => (active = inp);
+    // Clavier adapté à la partie active (intervalles ou calcul).
+    inp.onfocus = () => {
+      active = inp;
+      const kp = document.getElementById("kp"), set = isSetSpec(p.spec);
+      if (kp.classList.contains("k-set") !== set) { kp.classList.toggle("k-set", set); kp.innerHTML = keysFor(p.spec); bindKp(); }
+    };
     let tm; inp.oninput = () => { clearTimeout(tm); tm = setTimeout(() => previewOf(inp, pv), 180); };
     inp.onkeydown = (e) => { if (e.key === "Enter") check(); };
   });
   active = document.getElementById("p0");
-  bindKeypad(() => active, (inp) => previewOf(inp, document.getElementById("pv" + inp.id.slice(1))));
+  const bindKp = () => bindKeypad(() => active, (inp) => previewOf(inp, document.getElementById("pv" + inp.id.slice(1))));
+  bindKp();
   const end = (giveUp) => {
     finished = true;
     app.querySelectorAll("input.ans, #kp button, #check, #idk").forEach((b) => (b.disabled = true));
@@ -560,7 +577,7 @@ function renderQuestion(q, opt) {
   ${opt.single ? "" : lessonDetails(q.id)}
   <div class="answer"><input id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="none" placeholder="Ta réponse…" aria-label="Ta réponse">
   <div class="preview" id="prev"><span class="err">L'aperçu de ta réponse s'affiche ici.</span></div>
-  <div class="keypad" id="kp">${KEYS.map(keyBtn).join("")}</div>
+  ${keypadHtml(q.spec)}
   <div class="actions"><button class="btn-primary" id="check">Valider</button><button id="idk">Je ne sais pas</button></div>
   ${opt.onNotYet ? '<button class="btn-ghost small notyet" id="notyet">Pas encore vu en classe</button>' : ""}</div>
   <div id="fb"></div></div>`);
@@ -585,9 +602,7 @@ function renderQuestion(q, opt) {
   app.querySelectorAll("#kp button").forEach((b) => (b.onclick = () => {
     const k = b.dataset.k;
     if (k === "⌨") { inputMode = inputMode === "none" ? "text" : "none"; inp.setAttribute("inputmode", inputMode); inp.blur(); inp.focus(); return; }
-    const s = inp.selectionStart ?? inp.value.length, e = inp.selectionEnd ?? inp.value.length;
-    if (k === "⌫") { const a = s === e ? Math.max(0, s - 1) : s; inp.value = inp.value.slice(0, a) + inp.value.slice(e); inp.setSelectionRange(a, a); }
-    else { inp.value = inp.value.slice(0, s) + k + inp.value.slice(e); inp.setSelectionRange(s + k.length, s + k.length); }
+    typeKey(inp, k);
     showPreview();
   }));
   const stopBtn = document.getElementById("stop");

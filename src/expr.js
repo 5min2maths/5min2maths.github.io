@@ -312,7 +312,12 @@ function checkAnswer(spec, input) {
   if (spec.kind === "choice") return { status: input === spec.index ? "correct" : "wrong" };
   if (spec.kind === "ineq") {
     const m = String(input).replace(/≤/g, "<=").replace(/≥/g, ">=").match(/^\s*x\s*(<=|>=|<|>)\s*(.+)$/i);
-    if (!m) return { status: "invalid", message: "Écris par exemple « x > 4 » ou « x <= -3 »." };
+    if (!m) {
+      // Écriture en intervalle (« [3 ; +∞[ ») : même ensemble que l'inégalité attendue.
+      const v = spec.value, want = { "<": [[-Infinity, false, v, false]], "<=": [[-Infinity, false, v, true]], ">": [[v, false, Infinity, false]], ">=": [[v, true, Infinity, false]] }[spec.op];
+      if (want && /[\[\]∞]/.test(String(input))) return checkAnswer({ kind: "solset", ivs: want }, input);
+      return { status: "invalid", message: "Écris par exemple « x > 4 », « x <= -3 » ou « [3 ; +∞[ »." };
+    }
     let v;
     try { const t = Expr.parse(m[2]); v = Expr.evaluate(t); } catch (e) { return { status: "invalid", message: e.message }; }
     const okVal = Expr.sameValue(v, spec.value), okOp = m[1] === spec.op;
