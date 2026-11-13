@@ -340,10 +340,11 @@ function renderProblem(q, opt) {
     const delta = opt.onDone({ solved: frac === 1, tries, partial: score });
     const d = typeof delta === "number" && delta !== 0 ? `<span class="delta ${delta > 0 ? "up" : "down"}">Mathélo ${delta > 0 ? "+" : ""}${delta}</span>` : "";
     fb.innerHTML = `<div class="fb ${frac === 1 ? "ok" : "bad"} pop"><div class="spread"><b>${frac === 1 ? (tries === 1 ? "Problème résolu du premier coup !" : "Problème résolu.") : ok.filter(Boolean).length + " partie(s) juste(s) sur " + q.parts.length + "."}</b>${d}</div><div class="sol">${q.sol}</div></div>
-      <div class="vote"><span>Ce problème était… <button data-v="up" aria-label="Bon problème">👍</button> <button data-v="down" aria-label="Problème à revoir">👎</button></span><span class="code">${code}</span></div>
+      <div class="vote"><span>Ce problème était… <button data-v="up" aria-label="Bon problème">👍</button> <button data-v="down" aria-label="Problème à revoir">👎</button></span><span class="code">${code}</span></div>${commentBox()}
       <div class="actions">${frac === 1 ? "" : '<button id="redo">Refaire avec d\'autres valeurs</button>'}<button class="btn-primary" id="nx">Continuer</button></div>`;
     typeset(fb);
     fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
+    bindComment(fb, code);
     document.getElementById("nx").onclick = () => opt.onNext(false);
     const r = document.getElementById("redo"); if (r) r.onclick = () => opt.onNext(true);
   };
@@ -435,10 +436,11 @@ function renderQuestion(q, opt) {
     const d = typeof delta === "number" && delta !== 0 ? `<span class="delta ${delta > 0 ? "up" : "down"}">Mathélo ${delta > 0 ? "+" : ""}${delta}</span>` : "";
     fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><div class="spread"><b>${solved ? (tries === 1 ? pick(PRAISE) : "Juste au deuxième essai.") : dontKnow ? "Voici la méthode." : "Pas cette fois."}</b>${d}</div>
       <div class="sol">${q.sol}</div></div>
-      <div class="vote"><span>Cette question était… <button data-v="up" aria-label="Bonne question">👍</button> <button data-v="down" aria-label="Question à revoir">👎</button></span><span class="code" title="Code de la question">${code}</span></div>
+      <div class="vote"><span>Cette question était… <button data-v="up" aria-label="Bonne question">👍</button> <button data-v="down" aria-label="Question à revoir">👎</button></span><span class="code" title="Code de la question">${code}</span></div>${commentBox()}
       <div class="actions">${solved ? "" : '<button id="redo">Refaire avec d\'autres valeurs</button>'}<button class="btn-primary" id="nx">Continuer</button></div>`;
     typeset(fb);
     fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
+    bindComment(fb, code);
     document.getElementById("nx").onclick = () => opt.onNext(false);
     const r = document.getElementById("redo");
     if (r) r.onclick = () => opt.onNext(true);
@@ -511,6 +513,29 @@ function ping(ev) {
   } catch (e) {}
 }
 
+// Commentaire libre (facultatif) : envoyé avec le code de la question, la classe et l'identifiant anonyme de l'appareil.
+const commentBox = (title = "💬 Un commentaire sur cette question ?", ph = "Une erreur, une consigne pas claire, une idée… (n'écris pas ton nom)") =>
+  `<details class="cmt"><summary>${title}</summary><textarea id="cmt" maxlength="500" rows="3" placeholder="${ph}"></textarea>
+  <div class="spread"><span class="small muted" id="cmtok"></span><button class="small" id="cmtsend">Envoyer</button></div></details>`;
+function bindComment(root, code) {
+  const b = root.querySelector("#cmtsend"), ta = root.querySelector("#cmt"), ok = root.querySelector("#cmtok");
+  if (!b) return;
+  b.onclick = () => {
+    const text = ta.value.trim();
+    if (!text) { ok.textContent = "Écris d'abord ton commentaire."; return; }
+    comment(code, text);
+    ta.value = ""; ta.disabled = true; b.disabled = true; ok.textContent = "Merci ! Ton commentaire est envoyé.";
+  };
+}
+function comment(code, text) {
+  try {
+    const p = state && state.profile, niveau = p ? gradeName(p) + (p.track === "mp" ? " MP" : "") : "";
+    state.comments = (state.comments || []).concat({ code, text, date: day() }).slice(-50);
+    save();
+    if (VOTE_ENDPOINT) fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ ev: "comment", code, text: text.slice(0, 500), niveau, dev: deviceId(), date: day() }) }).catch(() => {});
+  } catch (e) {}
+}
+
 function vote(code, v) {
   try {
     state.votes = state.votes || {};
@@ -528,7 +553,9 @@ function screenSummary() {
   <div class="card stack"><div class="spread"><span>Score</span><b>${String(sc).replace(".", ",")} / ${n}</b></div>
   <div class="spread"><span>Mathélo</span><b>${state.elo.r} <span class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</span></b></div>
   <div class="small muted">Notions travaillées : ${[...session.ids].map((id) => NOTIONS.find((x) => x.id === id).label).join(" · ")}</div></div>
+  <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)")}</div>
   <button class="btn-primary btn-big" id="home">Retour à l'accueil</button>`);
+  bindComment(app, "app");
   document.getElementById("home").onclick = screenHome;
 }
 

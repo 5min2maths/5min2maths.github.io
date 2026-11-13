@@ -2,3 +2,4 @@ dist/
 *.png
 tools/couverture.md
 tmp-shots/
+tools/.cle_lecture

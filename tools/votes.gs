@@ -2,6 +2,9 @@
  * Collecte des votes 👍 / 👎 de l'app 5minutes2mathsparjour (Google Apps Script, lié à une feuille Google).
  * Reçoit uniquement : code de la question, vote (up / down), date, identifiant aléatoire d'appareil (pour compter les testeurs). Aucune donnée sur l'élève.
  * Feuille « visites » : une ligne par ouverture (1 par jour et par appareil) ou par séance terminée.
+ * Feuille « commentaires » : commentaires libres des testeurs (question ou application), avec la classe déclarée.
+ * Lecture des commentaires par l'URL …/exec?commentaires=CLÉ : la clé n'est PAS dans ce fichier (dépôt public) ;
+ * la définir dans Apps Script > Paramètres du projet > Propriétés du script : CLE_LECTURE = (une suite de lettres au hasard).
  *
  * Installation (une seule fois) :
  *  1. Créer une feuille Google « 5min2maths – votes ».
@@ -31,10 +34,25 @@ function visits_() {
   return sh;
 }
 
+function comments_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName("commentaires");
+  if (!sh) { sh = ss.insertSheet("commentaires"); sh.appendRow(["reçu le", "code question", "notion", "classe", "commentaire", "appareil"]); sh.setFrozenRows(1); }
+  return sh;
+}
+
 function doPost(e) {
   try {
     const d = JSON.parse(e.postData.contents);
     const dev = String(d.dev || "").slice(0, 20);
+    if (d.ev === "comment") {
+      let txt = String(d.text || "").slice(0, 500).replace(/[\r\n]+/g, " ");
+      if (/^[=+\-@]/.test(txt)) txt = "'" + txt; // pas de formule dans la feuille
+      const code = String(d.code || "").slice(0, 40);
+      if (!txt) return out_({ ok: false });
+      comments_().appendRow([new Date(), code, code.split(/[·-]/)[0], String(d.niveau || "").slice(0, 30), txt, dev]);
+      return out_({ ok: true });
+    }
     if (d.ev === "open" || d.ev === "session") {
       visits_().appendRow([new Date(), d.ev, dev, String(d.date || "").slice(0, 10)]);
       return out_({ ok: true });
@@ -52,6 +70,12 @@ function doPost(e) {
 
 // Bilan : ouvrir l'URL …/exec dans le navigateur. ?testeurs=1 : nombre de testeurs ; sinon bilan par notion.
 function doGet(e) {
+  if (e && e.parameter && e.parameter.commentaires) {
+    const cle = PropertiesService.getScriptProperties().getProperty("CLE_LECTURE");
+    if (!cle || e.parameter.commentaires !== cle) return out_({ erreur: "clé absente ou incorrecte" });
+    const rows = comments_().getDataRange().getValues().slice(1).slice(-300);
+    return out_(rows.map((r) => ({ recu: r[0], code: r[1], notion: r[2], classe: r[3], commentaire: r[4] })));
+  }
   if (e && e.parameter && e.parameter.testeurs) {
     const all = new Set(), w = new Set(), today = new Set(), seances = {};
     const lim = new Date(Date.now() - 7 * 864e5), j = Utilities.formatDate(new Date(), "Europe/Zurich", "yyyy-MM-dd");

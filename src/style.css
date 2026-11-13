@@ -224,3 +224,8 @@ details.lesson[open] { background: var(--paper); }
 .tag { font-size: 0.75rem; color: var(--ink-soft); border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
 details.olds summary { cursor: pointer; color: var(--blue); font-weight: 700; padding: 8px 0; }
 .notyet { margin-top: 6px; justify-self: start; }
+
+/* Commentaires des testeurs */
+details.cmt { font-size: 0.9rem; }
+details.cmt summary { cursor: pointer; color: var(--blue); padding: 4px 0; }
+details.cmt textarea { width: 100%; box-sizing: border-box; font: inherit; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--ink); resize: vertical; margin: 6px 0; }
