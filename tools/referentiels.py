@@ -135,12 +135,25 @@ def main():
 
 # Notions sans code dans le référentiel de l'élève (soutien, reprises du CO) : rangées dans le thème ou chapitre le plus proche.
 THEME_FALLBACK = {
-    "MATU": {"exactes": "GE"},
+    "MATU": {},
     "MP": {"divcrit": "CN", "premiers": "CN", "fracsimp": "CN", "fracops": "CN", "pctvar": "CN", "pythfig": "GE", "pythrec": "GE",
            "eqfrac": "EQ", "parenth": "CA", "eq2fact": "EQ", "eqspec": "EQ", "sysprob": "SY", "lectgraph": "FO", "cercthales": "GE",
            "trigexact": "TR", "geocomb": "GE", "affzero": "FA", "modaff": "FA", "f2formes": "FQ", "f2trois": "FQ",
            "trigassoc": "TG", "trigeq2": "TG", "triaire": "TG", "droitesinter": "FA"},
 }
+
+# Matu : chapitres des manuels Sésamath matu gym (1re : Ma1, 2e : Ma2), ce que les élèves étudient vraiment (13.11).
+SESA = {"M1C01": "1. Nombres", "M1C02": "2. Ensembles", "M1C03": "3. Argumenter", "M1C04": "4. Fonctions", "M1C05": "5. Degrés 0 et 1",
+        "M1C06": "6. Calcul littéral", "M1C07": "7. Degré 2", "M1C08": "8. De Thalès à Pythagore", "M1C09": "9. Cercles",
+        "M1C10": "10. Trigonométrie du triangle rectangle",
+        "M2C01": "1. Équations cartésiennes", "M2C02": "2. Raisonner en géométrie", "M2C03": "3. Fonctions polynomiales",
+        "M2C04": "4. Fonctions rationnelles", "M2C05": "5. Exponentielles", "M2C06": "6. Composition et réciproque", "M2C07": "7. Logarithmes",
+        "M2C08": "8. Trigonométrie du triangle quelconque", "M2C09": "9. Fonctions trigonométriques"}
+# Chapitre imposé : notions sans ligne Sésamath (reprises du CO en 1re) ou dont le premier chapitre trouvé n'est pas le bon.
+SESA_FIX = {"rel": "M1C01", "fracops": "M1C01", "puiss": "M1C01", "rac": "M1C01", "racenc": "M1C01", "sci": "M1C01", "scicalc": "M1C01",
+            "pct": "M1C01", "arith": "M1C01", "ensembles": "M1C02", "divcrit": "M1C03", "tradexpr": "M1C03", "exactes": "M1C08",
+            "droitesrem": "M1C08", "inter": "M1C07", "ineq2": "M1C07", "interpar": "M1C07", "optim": "M1C07", "log": "M2C07", "logbase": "M2C07",
+            "trigeq2": "M2C09", "absval": "M2C06", "droites": "M2C01", "modexp": "M2C05"}
 
 def write_order():
     """src/ordre.js : rang de chaque notion dans l'ordre du référentiel (seulement des numéros, aucun libellé).
@@ -149,23 +162,31 @@ def write_order():
     for ref, (path, kc, kt) in REFS.items():
         if not path.exists(): continue
         rows = list(csv.DictReader(open(path, encoding="utf-8"), delimiter=";"))
-        def key(i, r):
-            if ref == "MATU":
+        rk, th, lab = {}, {}, {}
+        if ref == "MATU":
+            # Chapitre Sésamath de chaque notion (premier chapitre cité par ses compétences, ou imposé), rang = chapitre puis ligne.
+            for i, r in enumerate(rows):
                 m = re.search(r"Ma(\d) Ch(\d+)", r.get("sesamath", ""))
-                return (int(m.group(1)) * 100 + int(m.group(2))) * 1000 + i if m else int(r[kc][0]) * 100000 + i
-            return i
-        rk, th = {}, {}
-        # Thème (matu) ou chapitre (MP) du référentiel : code « 1.AL.01 » → AL, « S1.CN.01 » → CN ; libellé court seulement.
-        lab = {}
-        for r in rows:
-            if ref == "CO": break
-            k = r[kc].split(".")[1]
-            lab.setdefault(k, re.sub(r"\s*\(S\d.*\)$", "", (r.get("theme") if ref == "MATU" else r.get("chapitre")) or k).strip())
-        for i, r in enumerate(rows):
-            for n, m in MAP.items():
-                if ref in m and re.match(m[ref], r[kc]):
-                    if key(i, r) < rk.get(n, 10 ** 9) and ref != "CO": th[n] = r[kc].split(".")[1]
-                    rk[n] = min(rk.get(n, 10 ** 9), key(i, r))
+                for n, mm in MAP.items():
+                    if "MATU" in mm and re.match(mm["MATU"], r[kc]) and m:
+                        k = (int(m.group(1)) * 100 + int(m.group(2))) * 1000 + i
+                        if k < rk.get(n, 10 ** 9): rk[n], th[n] = k, "M%sC%02d" % (m.group(1), int(m.group(2)))
+            co = {n: i for i, n in enumerate(rank.get("CO", {}))}
+            for n, c in SESA_FIX.items():
+                th[n] = c
+                rk[n] = (int(c[1]) * 100 + int(c[3:])) * 1000 + (rk.get(n, 0) % 1000 if n in rk and th.get(n) == c else 500 + co.get(n, 0))
+            lab = dict(SESA)
+        else:
+            # MP : chapitre du référentiel, code « S1.CN.01 » → CN ; libellé court seulement.
+            for r in rows:
+                if ref == "CO": break
+                k = r[kc].split(".")[1]
+                lab.setdefault(k, re.sub(r"\s*\(S\d.*\)$", "", r.get("chapitre") or k).strip())
+            for i, r in enumerate(rows):
+                for n, m in MAP.items():
+                    if ref in m and re.match(m[ref], r[kc]):
+                        if i < rk.get(n, 10 ** 9) and ref != "CO": th[n] = r[kc].split(".")[1]
+                        rk[n] = min(rk.get(n, 10 ** 9), i)
         order = sorted(rk, key=lambda n: rk[n])
         rank[ref] = {n: k for k, n in enumerate(order)}
         if ref != "CO":
@@ -173,7 +194,7 @@ def write_order():
             theme[ref], label[ref] = th, lab
     js = "// Généré par tools/referentiels.py : rang de chaque notion dans l'ordre du référentiel (CO, matu, MP).\n"
     js += "const ORDRE = " + json.dumps(rank, separators=(",", ":")) + ";\n"
-    js += "// Thème (matu) ou chapitre (MP) de chaque notion, et libellés courts des thèmes.\n"
+    js += "// Matu : chapitre Sésamath de chaque notion ; MP : chapitre du référentiel MP. Libellés courts des chapitres.\n"
     js += "const ORDRE_THEME = " + json.dumps(theme, separators=(",", ":"), ensure_ascii=False) + ";\n"
     js += "const THEME_LABEL = " + json.dumps(label, separators=(",", ":"), ensure_ascii=False) + ";\n"
     (ROOT / "src/ordre.js").write_text(js, encoding="utf-8")

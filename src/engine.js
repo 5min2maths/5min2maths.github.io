@@ -104,7 +104,9 @@ const Engine = {
   catalog(profile) {
     return NOTIONS.filter((n) => { const pl = placeOf(n, profile); return pl && pl[0] <= profile.grade; }).map((n) => {
       const [g] = placeOf(n, profile);
-      const again = profile.track !== "mp" && (n.again || []).includes(profile.grade);
+      // Matu : une notion est « de l'année » si son chapitre Sésamath est celui de l'année (Ma1 = 1re, Ma2 = 2e).
+      const sesa = profile.track !== "mp" && profile.grade >= 12 && typeof ORDRE_THEME !== "undefined" && ((ORDRE_THEME.MATU || {})[n.id] || "").startsWith("M" + (profile.grade - 11));
+      const again = sesa || (profile.track !== "mp" && (n.again || []).includes(profile.grade));
       return { ...n, theme: this.themeKey(profile, n.id), defaultStatus: g < profile.grade ? "vu" : "avenir", current: g === profile.grade || again, again };
     });
   },

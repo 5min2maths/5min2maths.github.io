@@ -96,7 +96,7 @@ FINE.push(
       () => { const t = R.int(0, 2); if (t === 0) { const a = R.int(2, 9) / 10; return QV("Calcule : " + M(dec(a) + "^2"), fx(a * a), M(dec(a) + " \\cdot " + dec(a) + " = " + dec(fx(a * a)))); } if (t === 1) { const n = R.int(3, 6); return QV("Calcule : " + M("10^" + n), 10 ** n, M("10^" + n) + " s'écrit 1 suivi de " + n + " zéros : " + M(nb(10 ** n)) + "."); } const a = R.int(11, 15) / 10; return QV("Calcule : " + M(dec(a) + "^2"), fx(a * a), M(dec(a) + " \\cdot " + dec(a) + " = " + dec(fx(a * a)))); },
       () => { const a = R.int(4, 9), b = R.int(2, 3), c = b === 2 ? R.int(4, 5) : R.int(2, 5), v = a * a - b ** 3 + 2 ** c; return QV("Calcule : " + M(a + "^2 - " + b + "^3 + 2^" + c), v, M(a * a + " - " + b ** 3 + " + " + 2 ** c + " = " + v)); },
     ] },
-  { id: "tradexpr", theme: "no", label: "Traduire un énoncé en calcul", ex: "\\text{le double de la somme de 3 et 4} = 2 \\cdot (3 + 4)", CH: [9], codes: "9NO3\\.03",
+  { id: "tradexpr", theme: "no", label: "Traduire un énoncé en calcul", ex: "\\text{le double de la somme de 3 et 4} = 2 \\cdot (3 + 4)", CH: [9], again: [12], codes: "9NO3\\.03",
     hint: "Somme : +, différence : −, produit : ×, quotient : ÷. La dernière opération nommée… est la première dans la phrase.",
     lesson: ["Du français au calcul", "Une phrase décrit un calcul, avec son ordre.", "Somme (+), différence (−), produit (·), quotient (:). « Le double de la somme » : on calcule d'abord la somme, donc on met des parenthèses.", ["Le double de la somme de 3 et 4 : \\(2 \\cdot (3 + 4) = 14\\)", "La somme de 3 et du double de 4 : \\(3 + 2 \\cdot 4 = 11\\)"], "« Le produit de 2 par la somme de 3 et 4 » n'est pas \\(2 \\cdot 3 + 4\\)."],
     g: [
@@ -112,7 +112,7 @@ FINE.push(
       () => { const n = R.pick([12, 18, 20, 24, 28, 30, 36, 40, 42, 45, 48, 50, 60, 64, 72]), ds = divisors(n); return QV("Combien de diviseurs le nombre " + M(n) + " possède-t-il ?", ds.length, "Diviseurs : " + ds.join(", ") + ". Il y en a " + M(ds.length) + "."); },
       () => { const a = R.int(3, 9), L = R.int(10, 40), H = L + R.int(30, 60), c = Math.floor(H / a) - Math.ceil(L / a) + 1; return QV("Combien y a-t-il de multiples de " + M(a) + " entre " + M(L) + " et " + M(H) + " (bornes comprises) ?", c, "Du premier, " + M(Math.ceil(L / a) * a + " = " + a + " \\cdot " + Math.ceil(L / a)) + ", au dernier, " + M(Math.floor(H / a) * a + " = " + a + " \\cdot " + Math.floor(H / a)) + " : " + M(Math.floor(H / a) + " - " + Math.ceil(L / a) + " + 1 = " + c) + "."); },
     ] },
-  { id: "divcrit", theme: "no", label: "Critères de divisibilité", ex: "471 : \\; 4 + 7 + 1 = 12 \\Rightarrow \\text{divisible par } 3", CH: [9], MP: [12, "S1"], codes: "9NO4\\.02",
+  { id: "divcrit", theme: "no", label: "Critères de divisibilité", ex: "471 : \\; 4 + 7 + 1 = 12 \\Rightarrow \\text{divisible par } 3", CH: [9], again: [12], MP: [12, "S1"], codes: "9NO4\\.02",
     hint: "Par 2 : dernier chiffre pair. Par 5 : finit par 0 ou 5. Par 3 (ou 9) : la somme des chiffres est divisible par 3 (ou 9).",
     lesson: ["Critères de divisibilité", "On peut savoir si une division tombe juste sans la faire.", "Par 2 : chiffre des unités pair. Par 5 : 0 ou 5. Par 10 : 0. Par 3 : somme des chiffres divisible par 3. Par 9 : somme divisible par 9. Par 25 : finit par 00, 25, 50, 75.", ["\\(471\\) : \\(4 + 7 + 1 = 12\\), divisible par 3, pas par 9", "\\(1350\\) : divisible par 2, 3, 5, 9, 10, 25"], "Pour 3 et 9, c'est la somme des chiffres qui compte, pas le dernier chiffre : 13 n'est pas divisible par 3."],
     g: [
@@ -328,7 +328,7 @@ FINE.push(
       () => { const b = R.int(4, 14), h = R.int(3, 12); return QV("Un triangle a une aire de " + M(dec(b * h / 2)) + " cm² et une base de " + M(b) + " cm. Quelle est sa hauteur (en cm) ?", h, M("\\frac{" + b + " \\cdot h}{2} = " + dec(b * h / 2)) + ", donc " + M("h = \\frac{" + b * h + "}{" + b + "} = " + h) + " cm.", { fig: FIG.triangleFig(b + " cm", "h = ?") }); },
       () => { if (R.rand() < 0.5) { const D = 2 * R.int(3, 9), d = R.int(3, 12); return QV("Un losange a une aire de " + M(D * d / 2) + " cm². L'une de ses diagonales mesure " + M(D) + " cm. Combien mesure l'autre (en cm) ?", d, M("\\frac{" + D + " \\cdot d}{2} = " + D * d / 2) + ", donc " + M("d = \\frac{" + D * d + "}{" + D + "} = " + d) + " cm.", { fig: GF.losange(D, d, { lD: D + " cm", ld: "?" }) }); } const b = 2 * R.int(2, 6), h = R.int(3, 9), a = R.pick(divisors(b * h / 2).filter((x) => x > 1 && x < b * h / 2)) || 1, c = b * h / 2 / a; return QV("Un triangle de base " + M(b) + " cm a la même aire qu'un rectangle de " + M(a) + " cm sur " + M(c) + " cm. Quelle est sa hauteur (en cm) ?", h, "Aire : " + M(a + " \\cdot " + c + " = " + a * c) + " cm². " + M("h = \\frac{2 \\cdot " + a * c + "}{" + b + "} = " + h) + " cm.", { fig: FIG.triangleFig(b + " cm", "h = ?") }); },
     ] },
-  { id: "fracops", theme: "no", label: "Fractions relatives et priorités", ex: "\\frac{1}{2} - \\frac{3}{4} \\cdot \\frac{2}{3} = 0", CH: [10], again: [11], MP: [12, "S1"], codes: "10NO2\\.09|11NO1\\.0[45]",
+  { id: "fracops", theme: "no", label: "Fractions relatives et priorités", ex: "\\frac{1}{2} - \\frac{3}{4} \\cdot \\frac{2}{3} = 0", CH: [10], again: [11,12], MP: [12, "S1"], codes: "10NO2\\.09|11NO1\\.0[45]",
     hint: "Règle des signes comme pour les entiers ; la multiplication et la division passent avant l'addition.",
     lesson: ["Fractions : signes et priorités", "Les règles des relatifs et des priorités s'appliquent aussi aux fractions.", "On détermine le signe, puis on calcule. Multiplier : numérateurs entre eux, dénominateurs entre eux (simplifier avant). Diviser : multiplier par l'inverse. Les multiplications et divisions passent avant les additions et soustractions.", ["\\(-\\frac{2}{3} \\cdot \\frac{9}{4} = -\\frac{3}{2}\\)", "\\(\\frac{1}{2} + \\frac{3}{4} \\cdot \\left(-\\frac{2}{3}\\right) = \\frac{1}{2} - \\frac{1}{2} = 0\\)"], "\\(\\frac{1}{2} - \\frac{2}{3} = -\\frac{1}{6}\\) : le résultat peut être négatif."],
     g: [
@@ -360,7 +360,7 @@ FINE.push(
       () => { if (R.rand() < 0.5) { const k = R.pick([2, 3, 4, 5, 10]); return QV("Calcule : " + M("\\sqrt[3]{" + k ** 3 + "}"), k, M(k + "^3 = " + k ** 3) + ", donc " + M("\\sqrt[3]{" + k ** 3 + "} = " + k) + "."); } const k = R.pick([3, 4, 5, 6, 7, 8, 9, 11, 12]); return QV("Calcule : " + M("\\sqrt{" + dec(k * k / 100) + "}"), k / 10, M(dec(k / 10) + "^2 = " + dec(k * k / 100)) + ", donc " + M("\\sqrt{" + dec(k * k / 100) + "} = " + dec(k / 10)) + "."); },
       () => { if (R.rand() < 0.5) { const [a, b, c] = R.pick(TRIPLES); return QV("Calcule : " + M("\\sqrt{" + a + "^2 + " + b + "^2}"), c, M("\\sqrt{" + a * a + " + " + b * b + "} = \\sqrt{" + c * c + "} = " + c) + "."); } const a = R.pick([4, 9, 16, 25]), b = R.pick([4, 9, 16, 25, 36, 49]); return QV("Calcule : " + M("\\sqrt{" + a + " \\cdot " + b + "}"), Math.sqrt(a * b), M("\\sqrt{" + a + "} \\cdot \\sqrt{" + b + "} = " + Math.sqrt(a) + " \\cdot " + Math.sqrt(b) + " = " + Math.sqrt(a * b)) + "."); },
     ] },
-  { id: "racenc", theme: "no", label: "Encadrer et comparer des racines", ex: "7 < \\sqrt{50} < 8", CH: [10], codes: "10NO3\\.0[34]",
+  { id: "racenc", theme: "no", label: "Encadrer et comparer des racines", ex: "7 < \\sqrt{50} < 8", CH: [10], again: [12], codes: "10NO3\\.0[34]",
     hint: "Encadre le nombre sous la racine par deux carrés parfaits consécutifs : 49 < 50 < 64, donc 7 < √50 < 8.",
     lesson: ["Encadrer une racine", "La plupart des racines ne tombent pas juste.", "On encadre le nombre sous la racine par deux carrés parfaits consécutifs. Pour comparer une racine et un entier, on compare les carrés.", ["\\(49 < 50 < 64\\), donc \\(7 < \\sqrt{50} < 8\\)", "\\(\\sqrt{50} > 7\\) car \\(50 > 49\\)"], "\\(\\sqrt{50}\\) n'est pas \\(25\\) : la racine n'est pas la moitié."],
     g: [
@@ -368,7 +368,7 @@ FINE.push(
       () => { const k = R.int(3, 12), n = k * k + R.pick([-3, -2, -1, 1, 2, 3]), big = R.rand() < 0.5, rootBigger = n > k * k; return QV("Quel est le plus " + (big ? "grand" : "petit") + " de ces deux nombres : " + M(k) + " ou " + M("\\sqrt{" + n + "}") + " ?", rootBigger === big ? Math.sqrt(n) : k, M(k + " = \\sqrt{" + k * k + "}") + " et " + M(k * k + (rootBigger ? " < " : " > ") + n) + ", donc " + M(k + (rootBigger ? " < " : " > ") + "\\sqrt{" + n + "}") + "."); },
       () => { const a = R.int(3, 12); return QV("Combien y a-t-il de nombres entiers " + M("n") + " tels que " + M(a + " < \\sqrt{n} < " + (a + 1)) + " ?", 2 * a, "Il faut " + M(a * a + " < n < " + (a + 1) ** 2) + " : de " + M(a * a + 1) + " à " + M((a + 1) ** 2 - 1) + ", soit " + M(2 * a) + " entiers."); },
     ] },
-  { id: "scicalc", theme: "no", label: "Calculer en notation scientifique", ex: "(2 \\cdot 10^3) \\cdot (4 \\cdot 10^5) = 8 \\cdot 10^8", CH: [10], again: [11], codes: "10NO3\\.08|11NO1\\.09",
+  { id: "scicalc", theme: "no", label: "Calculer en notation scientifique", ex: "(2 \\cdot 10^3) \\cdot (4 \\cdot 10^5) = 8 \\cdot 10^8", CH: [10], again: [11,12], codes: "10NO3\\.08|11NO1\\.09",
     hint: "Multiplie les nombres entre eux et additionne les exposants de 10 (soustrais-les pour une division).",
     lesson: ["Calculer en notation scientifique", "On traite séparément les nombres et les puissances de 10.", "\\((a \\cdot 10^m) \\cdot (b \\cdot 10^n) = (a \\cdot b) \\cdot 10^{m+n}\\) ; pour un quotient, \\(10^{m-n}\\). Si le premier facteur n'est plus entre 1 et 10, on le réécrit.", ["\\((2 \\cdot 10^3) \\cdot (4 \\cdot 10^5) = 8 \\cdot 10^8\\)", "\\((4 \\cdot 10^3) \\cdot (5 \\cdot 10^4) = 20 \\cdot 10^7 = 2 \\cdot 10^8\\)"], "\\(20 \\cdot 10^7\\) n'est pas une notation scientifique : il faut \\(2 \\cdot 10^8\\)."],
     g: [
@@ -552,7 +552,7 @@ FINE.push(
 
 // ======================= Secondaire II (Collège 1re-2e, MP1-MP2) =======================
 FINE.push(
-  { id: "ensembles", theme: "no", label: "Intervalles et ensembles de nombres", ex: "[-3 \\, ; 5[", CH: null, MP: [12, "S1"], codesMP: "S1\\.CN\\.0[13]",
+  { id: "ensembles", theme: "no", label: "Intervalles et ensembles de nombres", ex: "[-3 \\, ; 5[", CH: [12], MP: [12, "S1"], codesMP: "S1\\.CN\\.0[13]",
     hint: "Crochet tourné vers le nombre : il est compris. Crochet tourné vers l'extérieur : il est exclu.",
     lesson: ["Intervalles", "Un intervalle contient tous les nombres réels entre deux bornes.", "\\([a \\, ; b]\\) : bornes comprises. \\(]a \\, ; b[\\) : bornes exclues. \\([a \\, ; b[\\) : \\(a\\) compris, \\(b\\) exclu. \\(\\mathbb{N} \\subset \\mathbb{Z} \\subset \\mathbb{Q} \\subset \\mathbb{R}\\).", ["\\([-3 \\, ; 5]\\) contient 9 entiers", "\\(]-3 \\, ; 5[\\) en contient 7"], "\\(]2 \\, ; 5]\\) ne contient pas 2, mais contient \\(2{,}001\\)."],
     g: [

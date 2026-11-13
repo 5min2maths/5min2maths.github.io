@@ -44,8 +44,13 @@ const Badges = {
         prog: (s) => Object.keys(s.notions).map((id) => this.notionProgress(s, id)).reduce((a, p) => (p[1] && p[0] / p[1] > a[0] / a[1] ? p : a), [0, 3]) },
       { id: "expert", fam: "mai", icon: "💎", name: "Expert", crit: "Une compétence atteint la note 6.", prog: (s) => [this.notes(s).some((n) => n >= 6) ? 1 : 0, 1] },
       ...themes.map((th) => ({ id: "th-" + th, fam: "mai", icon: this.themeIcon(Engine.themeLabel(th)), name: Engine.themeLabel(th),
-        crit: "Toutes les notions ouvertes de ce thème cette année maîtrisées (au moins 2 notions).",
-        prog: (s) => { const ids = this.openOf(s, th), ok = ids.filter((id) => { const p = this.notionProgress(s, id); return p[0] === p[1]; }).length; return [ok, Math.max(2, ids.length)]; } })),
+        crit: th.includes(".") ? "Toutes les notions ouvertes de ce chapitre maîtrisées." : "Toutes les notions ouvertes de ce thème cette année maîtrisées (au moins 2 notions).",
+        // Au moins 2 notions, sauf pour un chapitre qui n'en compte qu'une (ex. Ensembles).
+        prog: (s) => {
+          const ids = this.openOf(s, th), all = Engine.catalog(s.profile).filter((c) => c.current && c.theme === th).length;
+          const ok = ids.filter((id) => { const p = this.notionProgress(s, id); return p[0] === p[1]; }).length;
+          return [ok, Math.max(Math.min(2, all), ids.length, 1)];
+        } })),
       { id: "retry", fam: "per", icon: "🔁", name: "Deuxième essai", crit: "Réussir 10 fois une question au deuxième essai.", prog: (s, b) => [Math.min(b.retry, 10), 10] },
       { id: "compris", fam: "per", icon: "💡", name: "Ça y est !", crit: "Après « pas compris » sur un rappel de cours, réussir 3 questions de suite de cette notion.",
         prog: (s, b) => [b.compris ? 3 : Math.max(0, ...Object.values(b.down)), 3] },
