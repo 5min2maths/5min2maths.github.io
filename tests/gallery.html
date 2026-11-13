@@ -1,0 +1,14 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css"><style>body{background:#fff;padding:8px} .g{display:grid;grid-template-columns:repeat(3,300px);gap:8px} .g div{border:1px solid #ccc} p{margin:0;font:11px sans-serif}</style>
+<script src="../src/figures.js"></script><script src="../src/geo.js"></script><div class="g" id="g"></div><script>
+const F = [
+ ["altitude", GF.altitude(4, 9, { lp: "4 cm", lq: "9 cm", lh: "h = ?" })], ["altitude euclide", GF.altitude(3, 9, { lp: "3", lq: "", lc: "c = 12", lb: "a = ?" })], ["rightTri", GF.rightTri(5, 12, { la: "5 cm", lb: "?", lc: "13 cm", angA: "30°" })],
+ ["isoH", GF.isoH(10, 13, { lb: "10 cm", ls: "13 cm", lh: "h = ?" })], ["para", GF.para(8, 5, { lb: "8 cm", lh: "5 cm", ls: "6 cm" })], ["losange", GF.losange(10, 6, { lD: "10 cm", ld: "6 cm" })],
+ ["rect diag", GF.rect(8, 5, { lw: "8 cm", lh: "?", diag: "d = 10" })], ["notch", GF.notch(10, 8, 3, 2, { la: "10 cm", lb: "8 cm", lc: "3", le: "2" })], ["lshape", GF.lshape(6, 5, 3, 3, { a: "6", b: "5", c: "3", e: "3" })],
+ ["house", GF.house(8, 4, 3, { a: "8 m", b: "4 m", h: "3 m" })], ["frame", GF.frame(10, 8, 1, { a: "10 cm", b: "8 cm", w: "1 cm" })], ["sas", GF.sas(8, 6, 30, { la: "8 cm", lb: "6 cm", lg: "30°" })],
+ ["straight", GF.straight(65, "65°", "?")], ["around", GF.around(110, 90, "110°", "90°", "?")], ["diam", GF.diam(60, { lA: "35°", lB: "?" })],
+ ["tangent", GF.tangent(5, 13, { lr: "5", ld: "13", lt: "?" })], ["thales", GF.thales(0.4, { AD: "4", AB: "10", AE: "5", AC: "?" })], ["shadows", GF.shadows(1.5, 2.5, 25, { h: "1,5 m", s: "2,5 m", S: "25 m", H: "?" })],
+ ["slope", GF.slope(12, { a: "12°", h: "100 m", v: "?" })], ["profile cone", GF.profile("cone", 6, 5, 3, { r: "r = 3", h1: "5", h2: "3" })], ["profile pyr", GF.profile("pyr", 6, 6, 4, { a: "6", h1: "6", h2: "4" })],
+ ["profile dome", GF.profile("dome", 6, 8, 0, { r: "r = 3", h1: "8 m" })], ["clock", GF.clock(5)], ["boats", GF.boats(5, 8, 60, { a: "5 km", b: "8 km", d: "?", g: "60°" })], ["assoc", GF.assoc(40, 140, "α", "180° − α")],
+];
+document.getElementById("g").innerHTML = F.map(([n, s]) => "<div><p>" + n + "</p>" + s + "</div>").join("");
+</script>

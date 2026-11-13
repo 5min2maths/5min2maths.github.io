@@ -1,0 +1,11 @@
+<!doctype html><meta charset="utf-8"><div id="app"></div><pre id="o"></pre>
+<script>window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script>
+<script src="../src/gen3.js"></script><script src="../src/competences.js"></script><script src="../src/lessons.js"></script><script src="../src/engine.js"></script>
+<pre id="o"></pre><script>
+const out = [];
+for (const n of NOTIONS) { if (n.theme !== "gm" && n.theme !== "es") continue; const row = [];
+  for (const d of [1, 2, 3]) { let f = 0, ex = ""; for (let i = 0; i < 30; i++) { const q = GEN[n.id](d); if (q.fig) f++; else if (!ex) ex = q.q.replace(/<[^>]*>|\\\(|\\\)/g, "").slice(0, 90); } row.push("d" + d + ":" + Math.round(f / 30 * 100) + "%" + (f < 30 ? " [" + ex + "]" : "")); }
+  out.push(n.id + " (" + (n.CH || n.MP) + ") " + row.join(" | ")); }
+document.getElementById("o").textContent = out.join("\n");
+</script>

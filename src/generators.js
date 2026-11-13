@@ -342,7 +342,7 @@ const GEN = {
     if (d === 1) return { fig: FIG.thales([[95, 96, "?"], [165, 168, String(bc)]]), q: "Dans un triangle " + M("ABC") + ", " + M("D \\in [AB]") + ", " + M("E \\in [AC]") + " et " + M("(DE) \\parallel (BC)") + ". On sait que " + M("AD = " + ad) + ", " + M("AB = " + ab) + " et " + M("BC = " + bc) + ". Calcule " + M("DE") + ".", spec: { kind: "value", value: de }, sol: M("\\frac{DE}{BC} = \\frac{AD}{AB} = \\frac{" + ad + "}{" + ab + "}") + ", donc " + M("DE = " + bc + " \\cdot \\frac{" + ad + "}{" + ab + "} = " + de) + "." };
     if (d === 2) return { fig: FIG.thales([[110, 52, String(ad)], [80, 124, String(ab - ad)], [205, 52, String(ae)]]), q: "Même configuration de Thalès : " + M("AD = " + ad) + ", " + M("DB = " + (ab - ad)) + " et " + M("AE = " + ae) + ". Calcule " + M("AC") + ".", spec: { kind: "value", value: ac }, sol: M("AB = " + ab) + " ; " + M("AC = " + ae + " \\cdot \\frac{" + ab + "}{" + ad + "} = " + ac) + "." };
     const b = R.pick([1, 1.2, 1.5, 2]), o = R.pick([1.5, 2, 2.5]), O = R.int(4, 12) * o;
-    return { q: "Un bâton vertical de " + M(dec(b)) + " m a une ombre de " + M(dec(o)) + " m. Au même moment, l'ombre d'un arbre mesure " + M(dec(O)) + " m. Quelle est la hauteur de l'arbre (en m) ?", spec: { kind: "value", value: (b * O) / o }, sol: M("h = " + dec(b) + " \\cdot \\frac{" + dec(O) + "}{" + dec(o) + "} = " + dec((b * O) / o)) + " m." };
+    return { fig: GF.shadows(b, o, O, { h: decTxt(b) + " m", s: decTxt(o) + " m", S: decTxt(O) + " m", H: "?" }), q: "Un bâton vertical de " + M(dec(b)) + " m a une ombre de " + M(dec(o)) + " m. Au même moment, l'ombre d'un arbre mesure " + M(dec(O)) + " m. Quelle est la hauteur de l'arbre (en m) ?", spec: { kind: "value", value: (b * O) / o }, sol: M("h = " + dec(b) + " \\cdot \\frac{" + dec(O) + "}{" + dec(o) + "} = " + dec((b * O) / o)) + " m." };
   },
 
   affine(d) {
@@ -453,7 +453,7 @@ Object.assign(GEN, {
     if (d === 1) return { fig: FIG.circleAngles("?", ins + "°"), q: "Dans un cercle de centre " + M("O") + ", l'angle inscrit " + M("\\widehat{ACB}") + " mesure " + M(ins + "°") + ". Que mesure l'angle au centre " + M("\\widehat{AOB}") + " (en degrés) ?", spec: { kind: "value", value: 2 * ins }, sol: "L'angle au centre vaut le double de l'angle inscrit qui intercepte le même arc : " + M(2 * ins + "°") + "." };
     if (d === 2) return { fig: FIG.circleAngles(2 * ins + "°", "?"), q: "L'angle au centre " + M("\\widehat{AOB}") + " mesure " + M(2 * ins + "°") + ". Que mesure l'angle inscrit " + M("\\widehat{ACB}") + " ?", spec: { kind: "value", value: ins }, sol: M(2 * ins + "° : 2 = " + ins + "°") };
     const a = R.int(20, 70);
-    return { q: M("[AB]") + " est un diamètre d'un cercle et " + M("C") + " un point du cercle. Si " + M("\\widehat{CAB} = " + a + "°") + ", que mesure " + M("\\widehat{CBA}") + " ?", spec: { kind: "value", value: 90 - a }, sol: "Un angle inscrit dans un demi-cercle est droit : " + M("\\widehat{ACB} = 90°") + ", donc " + M("180° - 90° - " + a + "° = " + (90 - a) + "°") + "." };
+    return { fig: GF.diam(2 * a, { lA: a + "°", lB: "?" }), q: M("[AB]") + " est un diamètre d'un cercle et " + M("C") + " un point du cercle. Si " + M("\\widehat{CAB} = " + a + "°") + ", que mesure " + M("\\widehat{CBA}") + " ?", spec: { kind: "value", value: 90 - a }, sol: "Un angle inscrit dans un demi-cercle est droit : " + M("\\widehat{ACB} = 90°") + ", donc " + M("180° - 90° - " + a + "° = " + (90 - a) + "°") + "." };
   },
 
   euclide(d) {
@@ -463,7 +463,7 @@ Object.assign(GEN, {
       return { fig: FIG.trigTriangle(["p = " + pp + " ; q = " + qq, "", "h = ?"], ""), q: "Dans un triangle rectangle, la hauteur issue de l'angle droit découpe l'hypoténuse en " + M("p = " + pp) + " et " + M("q = " + qq) + ". Calcule la hauteur " + M("h") + ".", spec: { kind: "value", value: Math.sqrt(pp * qq) }, sol: M("h^2 = p \\cdot q = " + pp * qq) + ", donc " + M("h = " + dec(Math.sqrt(pp * qq))) + "." };
     }
     if (d === 2) return { q: "Dans un triangle rectangle d'hypoténuse " + M("c = " + (p + q)) + ", la projection d'une cathète " + M("a") + " sur l'hypoténuse mesure " + M(p) + ". Calcule " + M("a") + " (valeur exacte ou au centième).", spec: { kind: "value", value: Math.sqrt(p * (p + q)), round: 0.01, exactOk: true }, sol: "Euclide : " + M("a^2 = " + p + " \\cdot " + (p + q) + " = " + p * (p + q)) + ", donc " + M("a = \\sqrt{" + p * (p + q) + "} \\approx " + dec(Math.sqrt(p * (p + q)).toFixed(2))) + "." };
-    return { q: "Dans un triangle rectangle, la hauteur sur l'hypoténuse mesure " + M("h = \\sqrt{" + h2 + "}") + " et découpe l'hypoténuse en deux segments dont l'un mesure " + M(p) + ". Que mesure l'autre ?", spec: { kind: "value", value: q }, sol: M("h^2 = p \\cdot q") + " : " + M(h2 + " = " + p + " \\cdot q") + ", donc " + M("q = " + q) + "." };
+    return { fig: GF.altitude(p, q, { lp: p + " cm", lq: "?", lh: "h = √" + h2 }), q: "Dans un triangle rectangle, la hauteur sur l'hypoténuse mesure " + M("h = \\sqrt{" + h2 + "}") + " et découpe l'hypoténuse en deux segments dont l'un mesure " + M(p) + ". Que mesure l'autre ?", spec: { kind: "value", value: q }, sol: M("h^2 = p \\cdot q") + " : " + M(h2 + " = " + p + " \\cdot q") + ", donc " + M("q = " + q) + "." };
   },
 
   trigo(d) {

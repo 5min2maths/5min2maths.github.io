@@ -614,14 +614,14 @@ Object.assign(GEN, {
   euclide(d) {
     if (d === 1) {
       const p = R.int(1, 9), q = R.int(1, 9); if (!Number.isInteger(Math.sqrt(p * q))) return GEN.euclide(1);
-      return { fig: FIG.rightTriangle(["", "", ""]), q: "Dans un triangle rectangle, la hauteur issue de l'angle droit découpe l'hypoténuse en segments de " + M(p) + " cm et " + M(q) + " cm. Calcule la hauteur (en cm).", spec: { kind: "value", value: Math.sqrt(p * q) }, sol: "Théorème de la hauteur : " + M("h^2 = p \\cdot q = " + p * q) + ", " + M("h = " + Math.sqrt(p * q)) + " cm." };
+      return { fig: GF.altitude(p, q, { lp: p + " cm", lq: q + " cm", lh: "h = ?" }), q: "Dans un triangle rectangle, la hauteur issue de l'angle droit découpe l'hypoténuse en segments de " + M(p) + " cm et " + M(q) + " cm. Calcule la hauteur (en cm).", spec: { kind: "value", value: Math.sqrt(p * q) }, sol: "Théorème de la hauteur : " + M("h^2 = p \\cdot q = " + p * q) + ", " + M("h = " + Math.sqrt(p * q)) + " cm." };
     }
     if (d === 2) {
       const c = R.int(5, 16), p = R.int(1, c - 1), a = Math.sqrt(p * c);
-      return { fig: FIG.rightTriangle(["", "", ""]), q: "Un triangle est rectangle en " + M("C") + ", d'hypoténuse " + M("c = " + c) + " cm. La projection de la cathète " + M("a") + " sur l'hypoténuse mesure " + M(p) + " cm. Calcule " + M("a") + " (exacte ou au centième).", spec: { kind: "value", value: a, round: 0.01, exactOk: true }, sol: "Théorème d'Euclide : " + M("a^2 = p \\cdot c = " + p * c) + ", " + M("a = \\sqrt{" + p * c + "} \\approx " + dec(a.toFixed(2))) + " cm." };
+      return { fig: GF.altitude(p, c - p, { lp: p + " cm", lq: "", lh: "", lc: "c = " + c + " cm", la: "a = ?" }), q: "Un triangle est rectangle en " + M("C") + ", d'hypoténuse " + M("c = " + c) + " cm. La projection de la cathète " + M("a") + " sur l'hypoténuse mesure " + M(p) + " cm. Calcule " + M("a") + " (exacte ou au centième).", spec: { kind: "value", value: a, round: 0.01, exactOk: true }, sol: "Théorème d'Euclide : " + M("a^2 = p \\cdot c = " + p * c) + ", " + M("a = \\sqrt{" + p * c + "} \\approx " + dec(a.toFixed(2))) + " cm." };
     }
     const tr = R.pick([[3, 4, 5], [6, 8, 10], [5, 12, 13], [9, 12, 15], [8, 15, 17]]), [a, b, c] = tr, h = (a * b) / c;
-    return { fig: FIG.rightTriangle([a + " cm", b + " cm", ""]), q: "Un triangle rectangle a des cathètes de " + M(a) + " cm et " + M(b) + " cm. Calcule la hauteur relative à l'hypoténuse (en cm).", spec: { kind: "value", value: h }, sol: "Hypoténuse " + M(c) + " cm ; aire : " + M("\\frac{" + a + " \\cdot " + b + "}{2} = \\frac{" + c + " \\cdot h}{2}") + " donc " + M("h = " + ratT(h)) + " cm." };
+    return { fig: GF.altitude((a * a) / c, (b * b) / c, { lp: "", lq: "", lh: "h = ?", la: a + " cm", lb: b + " cm" }), q: "Un triangle rectangle a des cathètes de " + M(a) + " cm et " + M(b) + " cm. Calcule la hauteur relative à l'hypoténuse (en cm).", spec: { kind: "value", value: h }, sol: "Hypoténuse " + M(c) + " cm ; aire : " + M("\\frac{" + a + " \\cdot " + b + "}{2} = \\frac{" + c + " \\cdot h}{2}") + " donc " + M("h = " + ratT(h)) + " cm." };
   },
 
   droitesrem(d) {
