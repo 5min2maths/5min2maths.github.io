@@ -155,6 +155,9 @@ SESA_FIX = {"rel": "M1C01", "fracops": "M1C01", "puiss": "M1C01", "rac": "M1C01"
             "droitesrem": "M1C08", "inter": "M1C07", "ineq2": "M1C07", "interpar": "M1C07", "optim": "M1C07", "log": "M2C07", "logbase": "M2C07",
             "trigeq2": "M2C09", "absval": "M2C06", "droites": "M2C01", "modexp": "M2C05"}
 
+# Notions enseignées sur deux années (cours réels du Collège, ex. pinkmaths 2026-27) : chapitre de 1re en plus du chapitre principal.
+SESA_ALSO = {"ineq": "M1C05", "absval": "M1C04"}
+
 def write_order():
     """src/ordre.js : rang de chaque notion dans l'ordre du référentiel (seulement des numéros, aucun libellé).
     CO et MP : ordre des lignes du référentiel ; matu : ordre des chapitres Sésamath (Ma1, Ma2), puis des lignes."""
@@ -175,6 +178,8 @@ def write_order():
             for n, c in SESA_FIX.items():
                 th[n] = c
                 rk[n] = (int(c[1]) * 100 + int(c[3:])) * 1000 + (rk.get(n, 0) % 1000 if n in rk and th.get(n) == c else 500 + co.get(n, 0))
+            for n, c in SESA_ALSO.items():  # rang : la première des deux années
+                rk[n] = min(rk.get(n, 10 ** 9), (int(c[1]) * 100 + int(c[3:])) * 1000 + 900)
             lab = dict(SESA)
         else:
             # MP : chapitre du référentiel, code « S1.CN.01 » → CN ; libellé court seulement.
@@ -192,6 +197,7 @@ def write_order():
         if ref != "CO":
             for n, k in THEME_FALLBACK.get(ref, {}).items(): th.setdefault(n, k)
             theme[ref], label[ref] = th, lab
+            if ref == "MATU": theme["MATU_ALT"] = dict(SESA_ALSO)
     js = "// Généré par tools/referentiels.py : rang de chaque notion dans l'ordre du référentiel (CO, matu, MP).\n"
     js += "const ORDRE = " + json.dumps(rank, separators=(",", ":")) + ";\n"
     js += "// Matu : chapitre Sésamath de chaque notion ; MP : chapitre du référentiel MP. Libellés courts des chapitres.\n"

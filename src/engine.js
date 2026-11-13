@@ -105,7 +105,8 @@ const Engine = {
     return NOTIONS.filter((n) => { const pl = placeOf(n, profile); return pl && pl[0] <= profile.grade; }).map((n) => {
       const [g] = placeOf(n, profile);
       // Matu : une notion est « de l'année » si son chapitre Sésamath est celui de l'année (Ma1 = 1re, Ma2 = 2e).
-      const sesa = profile.track !== "mp" && profile.grade >= 12 && typeof ORDRE_THEME !== "undefined" && ((ORDRE_THEME.MATU || {})[n.id] || "").startsWith("M" + (profile.grade - 11));
+      const yr = "M" + (profile.grade - 11), sesa = profile.track !== "mp" && profile.grade >= 12 && typeof ORDRE_THEME !== "undefined" &&
+        [(ORDRE_THEME.MATU || {})[n.id], (ORDRE_THEME.MATU_ALT || {})[n.id]].some((k) => (k || "").startsWith(yr));
       const again = sesa || (profile.track !== "mp" && (n.again || []).includes(profile.grade));
       return { ...n, theme: this.themeKey(profile, n.id), defaultStatus: g < profile.grade ? "vu" : "avenir", current: g === profile.grade || again, again };
     });
@@ -114,7 +115,9 @@ const Engine = {
   // Thème d'une notion selon le référentiel de l'élève (13.11) : matu = thèmes (Algèbre, Fonctions…), MP = chapitres ;
   // CO, ou notion absente du référentiel : les 4 thèmes du CO.
   themeKey(profile, id) {
-    const ref = this.refOf(profile), k = ref !== "CO" && typeof ORDRE_THEME !== "undefined" && (ORDRE_THEME[ref] || {})[id];
+    const ref = this.refOf(profile), alt = ref === "MATU" && typeof ORDRE_THEME !== "undefined" && (ORDRE_THEME.MATU_ALT || {})[id];
+    // Notion sur deux années : le chapitre de l'année de l'élève.
+    const k = alt && alt.startsWith("M" + (profile.grade - 11)) ? alt : ref !== "CO" && typeof ORDRE_THEME !== "undefined" && (ORDRE_THEME[ref] || {})[id];
     return k ? ref + "." + k : NOTIONS.find((n) => n.id === id).theme;
   },
   themeLabel(key) { const [ref, k] = key.split("."); return k ? THEME_LABEL[ref][k] : THEMES[key]; },
