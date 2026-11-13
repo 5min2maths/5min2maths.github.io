@@ -12,14 +12,11 @@ const THEMES = {
 };
 
 const NOTIONS = [
-  { id: "decim", theme: "no", label: "Nombres décimaux", ex: "3{,}47 \\approx 3{,}5", CH: [9], again: [10], FR: null },
   { id: "prio", theme: "no", label: "Priorités des opérations", ex: "3 + 4 \\cdot 2 = 11", CH: [9], again: [10,11], FR: [6, 1] },
   { id: "rel", theme: "no", label: "Nombres relatifs", ex: "(-3) - 5 \\cdot (-2) = 7", CH: [9], again: [10,11], MP: [12, "S1"], FR: [7, 2] },
   { id: "arith", theme: "no", label: "Diviseurs, PGDC et PPMC", ex: "\\text{PGDC}(24 ; 36) = 12", CH: [9], again: [10], MP: [12, "S1"], FR: null },
   { id: "fracadd", theme: "no", label: "Fractions : simplifier, additionner", ex: "\\frac{2}{3} + \\frac{1}{4} = \\frac{11}{12}", CH: [9], again: [10,11], MP: [12, "S1"], FR: [7, 4] },
   { id: "diagr", theme: "no", label: "Diagrammes et moyennes", ex: "\\bar{x} = \\frac{\\text{somme}}{\\text{effectif}}", CH: [9], again: [10], FR: null },
-  { id: "unites", theme: "gm", label: "Unités de mesure", ex: "1\\ \\text{dm}^3 = 1\\ \\text{L}", CH: [9], again: [10], FR: null },
-  { id: "aires", theme: "gm", label: "Périmètres et aires", ex: "\\text{triangle : } \\frac{b \\cdot h}{2}", CH: [9], again: [10], FR: [6, 5] },
   { id: "vol", theme: "gm", label: "Volumes : pavé, prisme, cylindre", ex: "V = A_{\\text{base}} \\cdot h", CH: [9], again: [10,11], FR: [8, 8] },
   { id: "prop", theme: "fa", label: "Proportionnalité, règle de trois", ex: "3 \\text{ kg} \\to 7{,}50 \\text{ CHF}, \\; 5 \\text{ kg} \\to ?", CH: [9], again: [10], FR: [6, 3] },
   { id: "valnum", theme: "fa", label: "Expressions littérales", ex: "3x^2 \\text{ pour } x = -2 \\text{ vaut } 12", CH: [9], again: [10,11], FR: [7, 5] },

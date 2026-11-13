@@ -18,45 +18,42 @@ REFS = {
 
 # notion → motifs par référentiel
 MAP = {
-    "decim": {"CO": r"9NO1\.|9NO2\.|10NO1\.01"},
-    "prio": {"CO": r"9NO3\.0[23]|10NO1\.02|11NO1\.11", "MP": r"S1\.CN\.0[56]"},
-    "rel": {"CO": r"9NO5\.|10NO1\.0[3-7]|11NO1\.01", "MP": r"S1\.CN\.06"},
-    "arith": {"CO": r"9NO4\.|10NO2\.0[12]", "MP": r"S1\.CN\.0[7-9]"},
-    "fracadd": {"CO": r"9NO6\.|10NO2\.0[3-7]|11NO1\.0[26]", "MP": r"S1\.CN\.(04|10|11)"},
-    "fracmul": {"CO": r"10NO2\.(08|09|10)|11NO1\.0[345]", "MP": r"S1\.CN\.11"},
-    "pct": {"CO": r"10NO2\.1[12]|10FA3\.0[23]"},
-    "puiss": {"CO": r"9NO3\.01|10NO3\.07|11NO1\.08", "MP": r"S1\.CN\.1[23]"},
-    "sci": {"CO": r"10NO3\.0[568]|11NO1\.0[79]"},
-    "rac": {"CO": r"10NO3\.0[1-4]|11NO1\.10", "MP": r"S1\.CN\.1[45]"},
+    "prio": {"CO": r"9NO3\.02|10NO1\.02|11NO1\.11", "MP": r"S1\.CN\.0[56]"},
+    "rel": {"CO": r"10NO1\.0[567]|11NO1\.01", "MP": r"S1\.CN\.06"},
+    "arith": {"CO": r"9NO4\.0[45]|10NO2\.02", "MP": r"S1\.CN\.0[7-9]"},
+    "fracadd": {"CO": r"9NO6\.08|10NO2\.0[67]|11NO1\.02", "MP": r"S1\.CN\.(04|10|11)"},
+    "fracmul": {"CO": r"10NO2\.08|11NO1\.03", "MP": r"S1\.CN\.11"},
+    "pct": {"CO": r"10NO2\.1[12]"},
+    "puiss": {"CO": r"10NO3\.07|11NO1\.08", "MP": r"S1\.CN\.1[23]"},
+    "sci": {"CO": r"10NO3\.0[56]|11NO1\.07"},
+    "rac": {"CO": r"10NO3\.02|11NO1\.10", "MP": r"S1\.CN\.1[45]"},
     "diagr": {"CO": r"9DO1\.|10DO1\."},
-    "proba": {"CO": r"11DO1\."},
-    "unites": {"CO": r"9GM1\.|10GM2\.06|10GM3\.0[12]"},
-    "aires": {"CO": r"9GM2\.|10GM1\.0[56]", "MP": r"S2\.GE\.09"},
+    "proba": {"CO": r"11DO1\.04"},
     "disque": {"CO": r"10GM1\.0[1-4]"},
-    "vol": {"CO": r"9GM3\.|10GM2\.0[1-57]|11GM2\.01"},
-    "volcone": {"CO": r"11GM2\.0[2-7]|11ES1\.01"},
+    "vol": {"CO": r"10GM2\.0[14]|11GM2\.01"},
+    "volcone": {"CO": r"11GM2\.0[245]|11ES1\.01"},
     "vitesse": {"CO": r"10GM3\.03|11FA1\.02"},
-    "gquot": {"CO": r"11FA1\.0[1345]"},
-    "pyth": {"CO": r"10GM4\.|11GM1\.", "MP": r"S2\.GE\.0[45]"},
-    "thales": {"CO": r"11GM3\.0[2-6]", "MP": r"S2\.GE\.06"},
-    "simil": {"CO": r"11GM3\.01|11ES3\.|10ES3\.03", "MATU": r"1\.GE\.03"},
-    "prop": {"CO": r"9FA1\.|10FA3\.05"},
-    "echelle": {"CO": r"10FA3\.0[14]"},
-    "valnum": {"CO": r"9FA2\.|10FA1\.0[1-5]|11FA2\.0[1-4]"},
-    "reduire": {"CO": r"10FA1\.0[678]|11FA2\.0[5-8]", "MP": r"S1\.CA\.0[1-3]"},
+    "gquot": {"CO": r"11FA1\.0[345]"},
+    "pyth": {"CO": r"10GM4\.0[123]|11GM1\.01", "MP": r"S2\.GE\.0[45]"},
+    "thales": {"CO": r"11GM3\.0[36]", "MP": r"S2\.GE\.06"},
+    "simil": {"CO": r"11ES3\.0[13]", "MATU": r"1\.GE\.03"},
+    "prop": {"CO": r"9FA1\.02|10FA3\.05"},
+    "echelle": {"CO": r"10FA3\.01"},
+    "valnum": {"CO": r"9FA2\.02|10FA1\.02|11FA2\.02"},
+    "reduire": {"CO": r"10FA1\.0[67]|11FA2\.0[67]", "MP": r"S1\.CA\.0[1-3]"},
     "distrib": {"CO": r"10FA1\.09|11FA2\.(09|10)", "MP": r"S1\.CA\.04"},
     "idrem": {"CO": r"11FA2\.11", "MP": r"S1\.CA\.05"},
     "factor": {"CO": r"11FA2\.1[23]", "MP": r"S1\.CA\.0[6-8]"},
-    "eq1": {"CO": r"10FA2\.0[1-4]|11FA3\.0[12]", "MATU": r"1\.AL\.04", "MP": r"S1\.EQ\.0[12]"},
-    "probeq": {"CO": r"10FA2\.05|11FA3\.0[38]", "MP": r"S1\.EQ\.0[38]"},
+    "eq1": {"CO": r"10FA2\.0[23]|11FA3\.01", "MATU": r"1\.AL\.04", "MP": r"S1\.EQ\.0[12]"},
+    "probeq": {"CO": r"10FA2\.05|11FA3\.03", "MP": r"S1\.EQ\.0[38]"},
     "formule": {"CO": r"11FA3\.04", "MP": r"S1\.CA\.14"},
-    "eq2": {"CO": r"11FA3\.0[56]", "MP": r"S1\.EQ\.04"},
+    "eq2": {"CO": r"11FA3\.05", "MP": r"S1\.EQ\.04"},
     "eq2disc": {"CO": r"11FA3\.07", "MATU": r"1\.AL\.05", "MP": r"S1\.EQ\.0[5-7]"},
-    "sys2": {"CO": r"11FA4\.", "MATU": r"1\.AL\.07", "MP": r"S2\.SY\.0[1245]"},
-    "affine": {"CO": r"10FA4\.|11FA5\.", "MATU": r"1\.FO\.0[56]", "MP": r"S3\.FA\."},
-    "angtri": {"CO": r"9ES1\.05|9ES2\.02|9ES3\.0[16]"},
+    "sys2": {"CO": r"11FA4\.0[23]", "MATU": r"1\.AL\.07", "MP": r"S2\.SY\.0[1245]"},
+    "affine": {"CO": r"10FA4\.0[35]|11FA5\.0[35678]", "MATU": r"1\.FO\.0[56]", "MP": r"S3\.FA\.0[1256]"},
+    "angtri": {"CO": r"9ES3\.0[16]"},
     "polyreg": {"CO": r"10ES2\.01"},
-    "angles": {"CO": r"11ES2\.", "MATU": r"1\.GE\.01", "MP": r"S2\.GE\.08"},
+    "angles": {"CO": r"11ES2\.0[1236]", "MATU": r"1\.GE\.01", "MP": r"S2\.GE\.08"},
     "polyop": {"MATU": r"1\.AL\.0[12]", "MP": r"S1\.CA\.0[45]"},
     "factor2": {"MATU": r"1\.AL\.03", "MP": r"S1\.CA\.0[6-9]"},
     "eq3": {"MATU": r"1\.AL\.06"},
@@ -86,17 +83,23 @@ MAP = {
     "log": {"MATU": r"2\.FO\.1[01]"},
     "sinlaw": {"MATU": r"2\.GE\.0[12]", "MP": r"S4\.TG\.0[456]"},
     "cart": {"MATU": r"2\.GE\.03"},
-    "droites": {"MATU": r"2\.GE\.03"},
+    "droites": {"MATU": r"2\.GE\.03", "MP": r"S3\.FA\.0[34]"},
     "cercle": {"MATU": r"2\.GE\.0[45]"},
-    "stats": {"MP": r"S4\.AD\."},
+    "stats": {"MP": r"S4\.AD\.0[57]"},
 }
 # Compétences qui ne se prêtent pas à une réponse saisie (constructions, dessins, démonstrations…)
 HORS = re.compile(r"construire|réaliser|représenter|tracer|croquis|dessin|développement d|reconnaître, nommer|démonstration|Démontrer|placer|calculatrice|livrets|vocabulaire|justifier|prouver|expérience|illustrer|Représenter|Maîtriser une démonstration|mesurer et construire", re.I)
 
 def main():
-    cur = (ROOT / "src/curriculum.js").read_text()
+    cur = (ROOT / "src/curriculum.js").read_text() + (ROOT / "src/gen3.js").read_text()
     ids = re.findall(r'\{ id: "(\w+)"', cur)
     labels = dict(re.findall(r'\{ id: "(\w+)", theme: "\w+", label: "((?:[^"\\]|\\.)*)"', cur))
+    # notions fines (src/gen3.js) : motifs déclarés avec la notion (codes = CO, codesMATU, codesMP)
+    for m in re.finditer(r'\{ id: "(\w+)", theme[^\n]*', cur):
+        for key, ref in (("codes", "CO"), ("codesMATU", "MATU"), ("codesMP", "MP")):
+            c = re.search(key + r': "((?:[^"\\]|\\.)*)"', m.group(0))
+            if c: MAP.setdefault(m.group(1), {})[ref] = c.group(1).replace("\\\\", "\\")
+    ids = [i for i in ids if i in MAP or i in labels]
     missing = [i for i in ids if i not in MAP]
     out = ["# Couverture des référentiels par l'app 5min2maths", "", "Généré par `tools/referentiels.py`. Usage interne (les référentiels ne sont pas dans le dépôt).", ""]
     if missing: out += ["**Notions sans correspondance :** " + ", ".join(missing), ""]
@@ -122,6 +125,10 @@ def main():
             if cs: out.append(f"| {labels.get(n, n)} (`{n}`) | {', '.join(cs)} |")
         out.append("")
         print(f"{ref}: {len(ok)}/{len(scope)} couvertes, {len(ko_saisie)} à traiter, {len(ko) - len(ko_saisie)} hors saisie")
+        for r in ko_saisie: print("   à traiter :", r[kc], r[kt][:90])
+        larges = [(n, len([c for c, ns in cov.items() if n in ns])) for n in MAP]
+        larges = [f"{n} ({k})" for n, k in larges if k > 5]
+        if larges: print("   notions encore larges (> 5 compétences) :", ", ".join(larges))
     (ROOT / "tools/couverture.md").write_text("\n".join(out), encoding="utf-8")
     if missing: print("sans correspondance :", missing)
 
