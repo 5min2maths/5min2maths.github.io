@@ -117,6 +117,7 @@ function screenHome() {
   h(`<div class="spread">${brand}<span class="small muted">${SYSTEMS[state.profile.system].label} · ${gradeName(state.profile)}</span></div>
   <div class="card flat streak"><span class="flame" aria-hidden="true">${alive && s.count ? "🔥" : "✏️"}</span><div><b>${alive ? s.count : 0} ${(alive ? s.count : 0) > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span><div class="small muted">${done ? "Séance du jour faite : " + done.n + " question" + (done.n > 1 ? "s" : "") + ". Tu peux en refaire une." : "Ta séance du jour t'attend."}</div></div></div>
   <div class="card">${eloBlock()}</div>
+  ${nowCard()}
   <div class="card stack"><div class="eyebrow">${done ? "Séance faite · tu peux en refaire une" : "Ton programme aujourd'hui"}</div>
   <h2>${FORMATS[fmt].label}</h2><p class="muted">${FORMATS[fmt].text} </p>
   <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>
@@ -129,6 +130,7 @@ function screenHome() {
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button><button class="btn-ghost" id="privacy">🔒 Ce que l'app envoie</button></div></div>`);
   document.getElementById("privacy").onclick = () => screenPrivacy(screenHome);
   document.getElementById("go").onclick = startSession;
+  bindNowCard();
   document.getElementById("other").onclick = () => { Engine.otherFormat(state); save(); screenHome(); };
   if (wp) document.getElementById("wp").onclick = () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); };
   document.getElementById("comps").onclick = screenComps;
@@ -220,7 +222,8 @@ function screenPrivacy(back) {
   <span class="small muted">Vers un tableau tenu par l'auteur de l'app (Google Sheets), pour l'améliorer pendant la phase de test :</span>
   <ul class="plain"><li><b>Un signal d'ouverture</b> (au plus une fois par jour) et <b>un signal de fin de séance</b>, avec la date et un identifiant tiré au hasard, propre à cet appareil. Il sert seulement à compter combien de personnes testent l'app.</li>
   <li><b>Tes avis</b> 👍 / 👎, « trop facile » et « pas compris », avec le code de la question ou du rappel et le même identifiant.</li>
-  <li><b>Tes commentaires</b>, si tu en écris, avec ta classe (par exemple « 10e ») et le même identifiant. N'y écris pas ton nom.</li></ul></div>
+  <li><b>Tes commentaires</b>, si tu en écris, avec ta classe (par exemple « 10e ») et le même identifiant. N'y écris pas ton nom.</li>
+  <li><b>Ton chapitre du moment</b>, si tu en choisis un : les notions, ta classe et le mois, sans identifiant. Ça sert à proposer les notions dans l'ordre où elles se font vraiment en classe.</li></ul></div>
   <div class="card flat stack"><b>À savoir</b>
   <ul class="plain"><li>L'identifiant ne permet pas de savoir qui tu es : il n'est lié à aucun nom ni compte.</li>
   <li>Comme pour tout site, les services qui hébergent l'app (GitHub) et chargent ses polices et ses formules (Google Fonts, Cloudflare) voient passer la connexion. L'auteur de l'app n'y a pas accès.</li>
@@ -279,6 +282,59 @@ function restoreFromHash() {
   if (!m) return false;
   screenRestore(m[1]);
   return true;
+}
+
+// ---------------- En ce moment en classe (13.11) ----------------
+const nLabel = (id) => NOTIONS.find((n) => n.id === id).label;
+function nowCard() {
+  if (!Engine.nowActive(state)) return `<div class="card flat stack now-card"><div class="eyebrow">En ce moment en classe</div>
+    <p class="small">Dis-moi ce que vous faites en classe : tes séances s'y concentreront.</p><button id="nowpick">Choisir mon chapitre</button></div>`;
+  const labels = state.now.ids.map(nLabel).join(" · ");
+  if (Engine.nowStale(state)) return `<div class="card flat stack now-card"><div class="eyebrow">En ce moment en classe</div>
+    <h3>Toujours sur ${state.now.ids.length > 1 ? "ces notions" : "cette notion"} ?</h3><p class="small muted">${labels}</p>
+    <div class="row"><button class="btn-primary" id="nowyes">Oui, toujours</button><button id="nowpick">On est passés à autre chose</button></div></div>`;
+  return `<div class="card flat stack now-card"><div class="spread"><div class="eyebrow">En ce moment en classe</div><button class="btn-ghost small" id="nowpick">Changer</button></div>
+    <h3>${labels}</h3><p class="small muted">Environ 2 questions sur 3 de tes séances portent dessus.</p></div>`;
+}
+function bindNowCard() {
+  const b = document.getElementById("nowpick"), y = document.getElementById("nowyes");
+  if (b) b.onclick = screenNow;
+  if (y) y.onclick = () => { state.now.since = day(); save(); screenHome(); };
+}
+function screenNow() {
+  const p = state.profile, cur = Engine.catalog(p).filter((c) => c.current && state.notions[c.id]);
+  const chosen = new Set(Engine.nowActive(state) ? state.now.ids : []), sug = Engine.nowSuggest(state);
+  const box = (c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${c.label}</span></label>`;
+  const groups = Object.keys(THEMES).map((th) => [th, cur.filter((c) => c.theme === th && !sug.includes(c.id)).sort((a, b) => Engine.rank(p, a.id) - Engine.rank(p, b.id))]).filter(([, l]) => l.length);
+  h(`${brand}<h2>En ce moment <span class="mark">en classe</span></h2>
+  <p class="muted">Choisis 1 à 3 notions que vous travaillez en ce moment. Tes séances s'y concentreront, avec le rappel de cours la première fois, et je te redemanderai dans 3 semaines.</p>
+  ${sug.length ? `<div class="card flat"><h3>Probablement en ce moment</h3><div class="checks">${sug.map((id) => box(cur.find((c) => c.id === id))).join("")}</div></div>` : ""}
+  <details class="olds"><summary>Toutes les notions de l'année</summary>${groups.map(([th, l]) => `<div class="card flat"><h3>${THEMES[th]}</h3><div class="checks">${l.map(box).join("")}</div></div>`).join("")}</details>
+  <p class="small muted" id="nerr"></p>
+  <button class="btn-primary btn-big" id="save">C'est ça</button>
+  <div class="row"><button class="btn-ghost" id="back">Annuler</button>${chosen.size ? '<button class="btn-ghost" id="none">Rien de particulier en ce moment</button>' : ""}</div>`);
+  const inputs = [...app.querySelectorAll(".check input")];
+  inputs.forEach((i) => (i.onchange = () => {
+    // Une même notion peut apparaître une seule fois ; au plus 3 cochées.
+    const on = inputs.filter((x) => x.checked);
+    if (on.length > 3) { i.checked = false; document.getElementById("nerr").textContent = "3 notions au plus : décoche-en une d'abord."; } else document.getElementById("nerr").textContent = "";
+  }));
+  document.getElementById("save").onclick = () => {
+    const ids = [...new Set(inputs.filter((x) => x.checked).map((x) => x.value))];
+    if (!ids.length) { document.getElementById("nerr").textContent = "Coche au moins une notion."; return; }
+    Engine.setNow(state, ids); save(); sendNow(ids); toast("Noté : tes séances se concentrent sur ce chapitre."); screenHome();
+  };
+  document.getElementById("back").onclick = screenHome;
+  const none = document.getElementById("none");
+  if (none) none.onclick = () => { Engine.setNow(state, []); save(); screenHome(); };
+}
+// Chapitre du moment, anonyme (sans identifiant d'appareil) : notions, classe, mois. Sert à recaler l'ordre des notions.
+function sendNow(ids) {
+  try {
+    if (!canSend()) return;
+    const p = state.profile, niveau = gradeName(p) + (p.track === "mp" ? " MP" : "");
+    fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ ev: "now", ids: ids.join(","), niveau, mois: day().slice(0, 7) }) }).catch(() => {});
+  } catch (e) {}
 }
 
 // ---------------- Je prépare mon test ----------------

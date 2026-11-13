@@ -325,9 +325,13 @@ const Engine = {
     const weakOld = this.eligible(state).some((id) => !this.isRecent(state, id) && state.notions[id].m < 0.45);
     const wantRappel = slots.length > 1 && ((slots.includes("rev") && weakOld) || Math.random() < 0.35);
     const rappelAt = wantRappel ? slots.length - 1 - Math.floor(Math.random() * Math.min(2, slots.length)) : -1;
-    const choose = (kind, base, rappel) => {
-      let best = null, pool = this.pool(state, base);
-      if (kind === "rev") { const due = pool.filter((id) => state.notions[id].due <= today || state.notions[id].m < 0.5); if (due.length) pool = due; }
+    // « En ce moment en classe » : environ 2 créneaux sur 3 portent sur le chapitre choisi par l'élève.
+    const nowIds = this.nowActive(state) ? state.now.ids.filter((id) => state.notions[id] && ["vu", "encours"].includes(state.notions[id].status)) : [];
+    const nowK = nowIds.length ? (slots.length === 1 ? 1 : Math.round((slots.length * 2) / 3)) : 0;
+    const usedPair = new Set();
+    const choose = (kind, base, rappel, only) => {
+      let best = null, pool = only || this.pool(state, base);
+      if (kind === "rev" && !only) { const due = pool.filter((id) => state.notions[id].due <= today || state.notions[id].m < 0.5); if (due.length) pool = due; }
       for (const id of pool) {
         const s = state.notions[id], recent = this.isRecent(state, id), target = elo + TARGET[kind] + (s.easy || 0) * 120;
         if (rappel ? recent : !recent) continue; // les anciennes notions ne passent que par le créneau Rappel
@@ -341,7 +345,8 @@ const Engine = {
           if (kind === "app" || kind === "rev") sc -= (1 - s.m) * 0.8;
           if (s.status === "encours") sc -= 0.4;
           if (this.prepActive(state) && state.prep.ids.includes(id)) sc -= 1.2;
-          if (used.has(id)) sc += 2;
+          if (used.has(id)) sc += only ? 0.5 : 2;
+          if (usedPair.has(id + "|" + d)) sc += 1;
           if (d === 4) sc -= kind === "defi4" ? 3 : 0.3;
           sc += Math.random() * 0.5;
           if (!best || sc < best.sc) best = { id, d, sc };
@@ -349,8 +354,13 @@ const Engine = {
       }
       return best;
     };
+    const nowPart = [];
     for (const [si, kind] of slots.entries()) {
       const base = kind === "defi4" ? "defi" : kind;
+      if (si < nowK && si !== rappelAt) {
+        const b = choose(kind, base, false, nowIds);
+        if (b) { used.add(b.id); usedPair.add(b.id + "|" + b.d); nowPart.push(b.id + "|" + b.d + "|" + base); continue; }
+      }
       let best = si === rappelAt && old < maxOld ? choose(kind, base, true) : null;
       if (best) old++; else best = choose(kind, base, false);
       if (!best) best = choose(kind, base, true); // aucune notion de l'année disponible
@@ -358,7 +368,8 @@ const Engine = {
       used.add(best.id);
       plan.push(best.id + "|" + best.d + "|" + base);
     }
-    return plan;
+    // Le chapitre du moment d'abord, du plus simple au plus difficile.
+    return [...nowPart.sort((x, y) => +x.split("|")[1] - +y.split("|")[1]), ...plan];
   },
 
   // « Trop facile » : l'élève passe la question. Demi-victoire au Mathélo (sans répondre, on ne compte pas plein),
@@ -423,6 +434,20 @@ const Engine = {
   },
 
   // « Je prépare mon test » : notions choisies, actif jusqu'au jour du test inclus.
+  // « En ce moment en classe » (13.11) : 1 à 3 notions choisies par l'élève ; question de relance après 3 semaines.
+  nowActive(state) { return !!(state.now && state.now.ids && state.now.ids.length); },
+  nowStale(state, today = day()) { return this.nowActive(state) && addDays(state.now.since, 21) <= today; },
+  setNow(state, ids) {
+    state.now = ids.length ? { ids, since: day() } : null;
+    for (const id of ids) { const n = state.notions[id]; if (n && n.status !== "vu" && n.status !== "encours") { Object.assign(n, { status: "encours", m: Math.max(0.4, n.m), due: day() }); delete n.retry; } }
+  },
+  // Notions probables du moment : ouvertes et pas encore maîtrisées, puis les suivantes dans l'ordre du référentiel.
+  nowSuggest(state, n = 6) {
+    const p = state.profile, cur = this.catalog(p).filter((c) => c.current && state.notions[c.id]).sort((a, b) => this.rank(p, a.id) - this.rank(p, b.id));
+    const open = cur.filter((c) => ["vu", "encours"].includes(state.notions[c.id].status) && !(state.notions[c.id].m >= 0.75 && state.notions[c.id].ok >= 3));
+    const next = cur.filter((c) => ["avenir", "nonvu"].includes(state.notions[c.id].status));
+    return [...open.slice(-4), ...next.slice(0, n)].slice(0, n).map((c) => c.id);
+  },
   prepActive(state) { return !!(state.prep && state.prep.ids.length && state.prep.date >= day()); },
   planPrep(state) {
     const ids = state.prep.ids.filter((id) => state.notions[id]);

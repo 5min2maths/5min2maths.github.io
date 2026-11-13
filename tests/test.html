@@ -226,6 +226,23 @@ log.push("Mathélo : " + st.elo.r + " — " + eloLabel(prof, st.elo.r));
   if (Badges.list().length !== 18) fail(Badges.list().length + " badges");
   log.push("badges : " + Object.keys(b.badges).join(" ")); }
 
+// 4 bis. En ce moment en classe : ~2 créneaux sur 3 sur le chapitre, du plus simple au plus difficile
+{ const s = Engine.newState({ system: "CH", grade: 10, minutes: 5 }); Engine.autoInit(s); s.placed = true;
+  const sug = Engine.nowSuggest(s); if (sug.length < 3) fail("suggestions : " + sug.join(" "));
+  const later = Engine.catalog(s.profile).filter((c) => c.current && s.notions[c.id].status === "avenir").map((c) => c.id).slice(-1)[0];
+  Engine.setNow(s, [later]);
+  if (s.notions[later].status !== "encours") fail("notion du moment non ouverte");
+  let on = 0, tot = 0, order = true;
+  for (let k = 0; k < 40; k++) for (const f of ["app", "auto", "mixte", "defi"]) {
+    const pl = Engine.planSession(s, f); tot += pl.length; const mine = pl.filter((e) => e.startsWith(later + "|")); on += mine.length;
+    const ds = mine.map((e) => +e.split("|")[1]); if (ds.some((d, i) => i && d < ds[i - 1])) order = false;
+    if (f === "defi" && !mine.length) fail("défi hors chapitre");
+  }
+  if (on / tot < 0.55 || on / tot > 0.8) fail("part du chapitre : " + (on / tot).toFixed(2));
+  if (!order) fail("chapitre pas du plus simple au plus difficile");
+  if (Engine.nowStale(s) || !Engine.nowStale(s, addDays(day(), 21))) fail("relance à 3 semaines");
+  log.push("chapitre du moment (" + later + ") : " + Math.round((100 * on) / tot) + " % des questions"); }
+
 document.getElementById("out").textContent = "en cours (sauvegarde)";
 // 5. Sauvegarde : aller-retour, et taille du code pour un élève très actif
 (async () => {

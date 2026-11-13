@@ -15,5 +15,8 @@ else if (w === "backup") screenBackup();
 else if (w === "restore") Backup.encode(state).then((c) => { state = null; screenRestore(c); });
 else if (w === "privacy") screenPrivacy(screenHome);
 else if (w === "home") screenHome();
+else if (w === "nowpick") screenNow();
+else if (w === "nowset") { Engine.setNow(state, ["fracmul", "fracops"].filter((x) => state.notions[x]).concat(["prio"]).slice(0, 2)); screenHome(); }
+else if (w === "nowstale") { Engine.setNow(state, ["prio"]); state.now.since = addDays(day(), -22); screenHome(); }
 else screenComps();
 </script>

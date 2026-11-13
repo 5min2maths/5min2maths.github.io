@@ -41,6 +41,13 @@ function comments_() {
   return sh;
 }
 
+function chapters_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName("chapitres");
+  if (!sh) { sh = ss.insertSheet("chapitres"); sh.appendRow(["reçu le", "classe", "mois", "notions"]); sh.setFrozenRows(1); }
+  return sh;
+}
+
 function doPost(e) {
   try {
     const d = JSON.parse(e.postData.contents);
@@ -51,6 +58,12 @@ function doPost(e) {
       const code = String(d.code || "").slice(0, 40);
       if (!txt) return out_({ ok: false });
       comments_().appendRow([new Date(), code, code.split(/[·-]/)[0], String(d.niveau || "").slice(0, 30), txt, dev]);
+      return out_({ ok: true });
+    }
+    if (d.ev === "now") { // chapitre du moment : anonyme (pas d'identifiant d'appareil)
+      const ids = String(d.ids || "").slice(0, 80).replace(/[^a-z0-9,]/gi, "");
+      if (!ids) return out_({ ok: false });
+      chapters_().appendRow([new Date(), String(d.niveau || "").slice(0, 30), String(d.mois || "").slice(0, 7), ids]);
       return out_({ ok: true });
     }
     if (d.ev === "open" || d.ev === "session") {
@@ -75,6 +88,11 @@ function doGet(e) {
     if (!cle || e.parameter.commentaires !== cle) return out_({ erreur: "clé absente ou incorrecte" });
     const rows = comments_().getDataRange().getValues().slice(1).slice(-300);
     return out_(rows.map((r) => ({ recu: r[0], code: r[1], notion: r[2], classe: r[3], commentaire: r[4] })));
+  }
+  if (e && e.parameter && e.parameter.chapitres) {
+    const cle = PropertiesService.getScriptProperties().getProperty("CLE_LECTURE");
+    if (!cle || e.parameter.chapitres !== cle) return out_({ erreur: "clé absente ou incorrecte" });
+    return out_(chapters_().getDataRange().getValues().slice(1).map((r) => ({ recu: r[0], classe: r[1], mois: r[2], notions: r[3] })));
   }
   if (e && e.parameter && e.parameter.testeurs) {
     const all = new Set(), w = new Set(), today = new Set(), seances = {};

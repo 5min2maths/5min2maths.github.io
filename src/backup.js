@@ -18,7 +18,7 @@ const Backup = {
       e: [s.elo.r, s.elo.n, (s.elo.log || []).slice(-8).map(([d, r]) => [off(d), r])],
       k: [s.streak.count, off(s.streak.last)],
       h: (s.history || []).slice(-14).map((x) => [off(x.date), x.n, r2(x.score)]),
-      b, pr: s.prep || null, g: Object.fromEntries(Object.entries(s.badges || {}).map(([k, d]) => [k, off(d)])),
+      b, pr: s.prep || null, nw: s.now || null, g: Object.fromEntries(Object.entries(s.badges || {}).map(([k, d]) => [k, off(d)])),
     };
   },
   unpack(o) {
@@ -45,6 +45,7 @@ const Backup = {
     if (o.b) s.bc = { ...o.b, last: on(o.b.last), weeks: Object.fromEntries(Object.entries(o.b.weeks).map(([k, v]) => [on(+k), v])) };
     s.badges = Object.fromEntries(Object.entries(o.g || {}).map(([k, d]) => [k, on(d)]));
     if (o.pr) s.prep = o.pr;
+    if (o.nw) s.now = o.nw;
     s.placed = true;
     Engine.migrate(s);
     return s;
