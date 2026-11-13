@@ -63,11 +63,16 @@ const GEN = {
     }
     if (d === 2) {
       const a = R.nz(-9, 9), b = R.int(2, 6), c = R.nz(-6, 6);
-      return { fig: FIG.numberLine(a, []), q: "Calcule : " + M(par(a) + " - " + b + " \\cdot " + par(c)), spec: { kind: "value", value: a - b * c }, sol: M(par(a) + " - " + par(b * c) + " = " + (a - b * c)) };
+      return { q: "Calcule : " + M(par(a) + " - " + b + " \\cdot " + par(c)), spec: { kind: "value", value: a - b * c }, sol: M(par(a) + " - " + par(b * c) + " = " + (a - b * c)) };
     }
-    const a = R.int(2, 5), b = R.int(2, 3);
-    const v = -(a ** 2) + (-a) ** 2 - (-b) ** 3;
-    return { q: "Calcule : " + M("-" + a + "^2 + (-" + a + ")^2 - (-" + b + ")^3"), spec: { kind: "value", value: v }, sol: M("-" + a * a + " + " + a * a + " - (" + (-(b ** 3)) + ") = " + v) + " : " + M("-" + a + "^2") + " vaut " + M("-" + a * a) + ", mais " + M("(-" + a + ")^2 = " + a * a) + "." };
+    // Niveau 3 varié (audit 13.11) : puissances de relatifs et priorités, le résultat change à chaque fois.
+    const a = R.int(2, 5), b = R.int(2, 4), c = R.int(2, 3), form = R.int(0, 2);
+    if (form === 0) { const v = -(a ** 2) - (-b) ** 2 + c * (-2) ** 3;
+      return { q: "Calcule : " + M("-" + a + "^2 - (-" + b + ")^2 + " + c + " \\cdot (-2)^3"), spec: { kind: "value", value: v }, sol: M("-" + a * a + " - " + b * b + " + " + c + " \\cdot (-8) = " + v) + " : " + M("-" + a + "^2 = -" + a * a) + " (le carré ne porte que sur " + M(a) + "), " + M("(-" + b + ")^2 = " + b * b) + "." }; }
+    if (form === 1) { const v = (-a) ** 3 * (-b) ** 2;
+      return { q: "Calcule : " + M("(-" + a + ")^3 \\cdot (-" + b + ")^2"), spec: { kind: "value", value: v }, sol: M("(-" + a + ")^3 = " + (-(a ** 3))) + " (exposant impair : négatif), " + M("(-" + b + ")^2 = " + b * b) + " ; produit : " + M(String(v)) + "." }; }
+    const k = R.int(2, 6), v = -(b ** 2) * k / -b + (-c) ** 2;
+    return { q: "Calcule : " + M("-" + b + "^2 \\cdot " + k + " : (-" + b + ") + (-" + c + ")^2"), spec: { kind: "value", value: v }, sol: M("-" + b * b + " \\cdot " + k + " : (-" + b + ") + " + c * c + " = " + (-(b * b) * k) + " : (-" + b + ") + " + c * c + " = " + (b * k) + " + " + c * c + " = " + v) + "." };
   },
 
   fracadd(d) {
@@ -152,10 +157,10 @@ const GEN = {
     }
     if (d === 2) {
       const k = R.int(2, 7), m = R.pick([2, 3, 5, 6, 7]);
-      return { fig: FIG.areaSquare("aire " + k * k * m), q: "Écris " + M("\\sqrt{" + k * k * m + "}") + " sous la forme " + M("a\\sqrt{b}") + " (tape par exemple " + M("3\\sqrt{2}") + " avec la touche √).", spec: { kind: "value", value: k * Math.sqrt(m) }, sol: M("\\sqrt{" + k * k + " \\cdot " + m + "} = " + k + "\\sqrt{" + m + "}") };
+      return { fig: FIG.areaSquare("aire " + k * k * m), q: "Écris " + M("\\sqrt{" + k * k * m + "}") + " sous la forme " + M("a\\sqrt{b}") + " (tape par exemple " + M("3\\sqrt{2}") + " avec la touche √).", spec: { kind: "value", value: k * Math.sqrt(m), radical: true }, canon: k + "√" + m, sol: M("\\sqrt{" + k * k + " \\cdot " + m + "} = " + k + "\\sqrt{" + m + "}") };
     }
     const m = R.pick([2, 3, 5]), a = R.int(2, 4), b = R.int(2, 5);
-    return { q: "Simplifie : " + M("\\sqrt{" + a * a * m + "} + \\sqrt{" + b * b * m + "}"), spec: { kind: "value", value: (a + b) * Math.sqrt(m) }, sol: M(a + "\\sqrt{" + m + "} + " + b + "\\sqrt{" + m + "} = " + (a + b) + "\\sqrt{" + m + "}") };
+    return { q: "Simplifie : " + M("\\sqrt{" + a * a * m + "} + \\sqrt{" + b * b * m + "}") + " (réponse sous la forme " + M("a\\sqrt{b}") + ").", spec: { kind: "value", value: (a + b) * Math.sqrt(m), radical: true }, canon: (a + b) + "√" + m, sol: M(a + "\\sqrt{" + m + "} + " + b + "\\sqrt{" + m + "} = " + (a + b) + "\\sqrt{" + m + "}") };
   },
 
   valnum(d) {
@@ -340,7 +345,7 @@ const GEN = {
     const k = R.pick([2, 3, 4]), ad = R.int(2, 6), ae = R.int(2, 6), de = R.int(2, 7);
     const ab = ad * k, ac = ae * k, bc = de * k;
     if (d === 1) return { fig: FIG.thales([[95, 96, "?"], [165, 168, String(bc)]]), q: "Dans un triangle " + M("ABC") + ", " + M("D \\in [AB]") + ", " + M("E \\in [AC]") + " et " + M("(DE) \\parallel (BC)") + ". On sait que " + M("AD = " + ad) + ", " + M("AB = " + ab) + " et " + M("BC = " + bc) + ". Calcule " + M("DE") + ".", spec: { kind: "value", value: de }, sol: M("\\frac{DE}{BC} = \\frac{AD}{AB} = \\frac{" + ad + "}{" + ab + "}") + ", donc " + M("DE = " + bc + " \\cdot \\frac{" + ad + "}{" + ab + "} = " + de) + "." };
-    if (d === 2) return { fig: FIG.thales([[110, 52, String(ad)], [80, 124, String(ab - ad)], [205, 52, String(ae)]]), q: "Même configuration de Thalès : " + M("AD = " + ad) + ", " + M("DB = " + (ab - ad)) + " et " + M("AE = " + ae) + ". Calcule " + M("AC") + ".", spec: { kind: "value", value: ac }, sol: M("AB = " + ab) + " ; " + M("AC = " + ae + " \\cdot \\frac{" + ab + "}{" + ad + "} = " + ac) + "." };
+    if (d === 2) return { fig: FIG.thales([[110, 52, String(ad)], [80, 124, String(ab - ad)], [205, 52, String(ae)]]), q: "Dans un triangle " + M("ABC") + ", " + M("D \\in [AB]") + ", " + M("E \\in [AC]") + " et " + M("(DE) \\parallel (BC)") + ". On sait que " + M("AD = " + ad) + ", " + M("DB = " + (ab - ad)) + " et " + M("AE = " + ae) + ". Calcule " + M("AC") + ".", spec: { kind: "value", value: ac }, sol: M("AB = AD + DB = " + ab) + " ; Thalès : " + M("\\frac{AE}{AC} = \\frac{AD}{AB}") + ", donc " + M("AC = " + ae + " \\cdot \\frac{" + ab + "}{" + ad + "} = " + ac) + "." };
     const b = R.pick([1, 1.2, 1.5, 2]), o = R.pick([1.5, 2, 2.5]), O = R.int(4, 12) * o;
     return { fig: GF.shadows(b, o, O, { h: decTxt(b) + " m", s: decTxt(o) + " m", S: decTxt(O) + " m", H: "?" }), q: "Un bâton vertical de " + M(dec(b)) + " m a une ombre de " + M(dec(o)) + " m. Au même moment, l'ombre d'un arbre mesure " + M(dec(O)) + " m. Quelle est la hauteur de l'arbre (en m) ?", spec: { kind: "value", value: (b * O) / o }, sol: M("h = " + dec(b) + " \\cdot \\frac{" + dec(O) + "}{" + dec(o) + "} = " + dec((b * O) / o)) + " m." };
   },
@@ -379,7 +384,7 @@ Object.assign(GEN, {
   eq2disc(d) {
     if (d === 1) {
       const p = R.nz(-8, 8), q = R.nz(-8, 8), b = -(p + q), c = p * q;
-      return { fig: FIG.balance(poly([1, b, c]).replace(/\^2/g, "²"), "0"), q: "Résous : " + M(poly([1, b, c]) + " = 0") + ".", spec: { kind: "set", values: [...new Set([p, q])] }, sol: M("\\Delta = " + par(b) + "^2 - 4 \\cdot " + par(c) + " = " + (b * b - 4 * c)) + " ; " + M("x = \\frac{" + -b + " \\pm " + Math.abs(p - q) + "}{2}") + " : " + M("S = \\{" + [...new Set([p, q])].sort((u, v) => u - v).join(" ; ") + "\\}") };
+      return { fig: FIG.balance(poly([1, b, c]).replace(/\^2/g, "²"), "0"), q: "Résous : " + M(poly([1, b, c]) + " = 0") + ".", spec: { kind: "set", values: [...new Set([p, q])] }, sol: M("\\Delta = " + par(b) + "^2 - 4 \\cdot " + par(c) + " = " + (b * b - 4 * c)) + " ; " + M("x = \\frac{" + -b + " \\pm " + Math.abs(p - q) + "}{2}") + " : " + (p === q ? "discriminant nul, une seule solution : " : "") + M("S = \\{" + [...new Set([p, q])].sort((u, v) => u - v).join(" ; ") + "\\}") };
     }
     if (d === 2) {
       if (R.rand() < 0.3) {
@@ -389,7 +394,7 @@ Object.assign(GEN, {
       const a = R.int(2, 4), p = R.nz(-5, 5), q = R.int(1, 5);
       // a(x - p)(x - q/a) = a x² - (a p + q) x + p q
       const B = -(a * p + q), C = p * q;
-      return { q: "Résous : " + M(poly([a, B, C]) + " = 0") + ".", spec: { kind: "set", values: [...new Set([p, q / a])] }, sol: M("\\Delta = " + (B * B - 4 * a * C)) + " ; " + M("x = \\frac{" + -B + " \\pm " + Math.round(Math.sqrt(B * B - 4 * a * C)) + "}{" + 2 * a + "}") + " : " + M("S = \\{" + p + " ; " + frac(q, a) + "\\}") };
+      return { q: "Résous : " + M(poly([a, B, C]) + " = 0") + ".", spec: { kind: "set", values: [...new Set([p, q / a])] }, sol: M("\\Delta = " + (B * B - 4 * a * C)) + " ; " + M("x = \\frac{" + -B + " \\pm " + Math.round(Math.sqrt(B * B - 4 * a * C)) + "}{" + 2 * a + "}") + " : " + (p * a === q ? "discriminant nul, une seule solution : " + M("S = \\{" + p + "\\}") : M("S = \\{" + p + " ; " + frac(q, a) + "\\}")) };
     }
     let b, c, D;
     do { b = R.int(-6, 6); c = R.int(-6, 4); D = b * b - 4 * c; } while (D <= 0 || Number.isInteger(Math.sqrt(D)));
@@ -529,7 +534,7 @@ Object.assign(GEN, {
       return { fig: FIG.parabola((x) => Math.pow(b, x) / 3, [], null, false), q: "Résous : " + M(b + "^x = " + b ** n) + ".", spec: { kind: "value", value: n }, sol: M(b ** n + " = " + b + "^" + n) + ", donc " + M("x = " + n) + "." };
     }
     if (d === 2) {
-      const b = R.pick([2, 3]), k = R.int(-2, 3), n = R.int(2, b === 2 ? 6 : 4);
+      const b = R.pick([2, 3]), k = R.nz(-3, 3), n = R.int(2, b === 2 ? 6 : 4);
       return { q: "Résous : " + M(b + "^{x " + (k < 0 ? "- " + -k : "+ " + k) + "} = " + b ** n) + ".", spec: { kind: "value", value: n - k }, sol: M("x " + (k < 0 ? "- " + -k : "+ " + k) + " = " + n) + ", donc " + M("x = " + (n - k)) + "." };
     }
     const C = 1000 * R.int(1, 9), t = R.pick([1, 1.5, 2, 2.5, 3]), n = R.int(3, 12);
@@ -558,6 +563,12 @@ Object.assign(GEN, {
       const k = R.pick([2, 3]), c = R.nz(-6, 6);
       return { q: "Résous : " + M("|" + k + "x " + (c < 0 ? "- " + -c : "+ " + c) + "| = " + b) + ".", spec: { kind: "set", values: [(b - c) / k, (-b - c) / k] }, sol: M(k + "x " + (c < 0 ? "- " + -c : "+ " + c) + " = \\pm " + b) + " : " + M("x = " + frac(b - c, k)) + " ou " + M("x = " + frac(-b - c, k)) + "." };
     }
+    // Niveau 3 varié (audit 13.11) : isoler la valeur absolue (2 solutions), égalité de deux valeurs absolues, ou impossible.
+    const absT = (r) => "|x" + (r < 0 ? " + " + -r : " - " + r) + "|", kind3 = R.pick(["iso", "iso", "deux", "imp"]);
+    if (kind3 === "iso") { const c = b + R.int(1, 6), k = R.pick([1, 2, 3]), r = c - b; if ((r % k) !== 0 && k > 1) return GEN.absval(3);
+      return { q: "Résous : " + M((k === 1 ? "" : k) + absT(a) + " + " + b + " = " + (k === 1 ? c : k * 0 + c)) + ".", spec: { kind: "set", values: [a - r / k, a + r / k] }, sol: "On isole la valeur absolue : " + M((k === 1 ? "" : k) + absT(a) + " = " + r) + (k === 1 ? "" : ", " + M(absT(a) + " = " + r / k)) + ", donc " + M("x = " + (a + r / k)) + " ou " + M("x = " + (a - r / k)) + "." }; }
+    if (kind3 === "deux") { let e; do e = R.nz(-6, 6); while (e === a || (a + e) % 2 !== 0);
+      return { q: "Résous : " + M(absT(a) + " = " + absT(e)) + ".", spec: { kind: "set", values: [(a + e) / 2] }, sol: "Les distances de " + M("x") + " à " + M(a) + " et à " + M(e) + " sont égales : " + M("x") + " est le milieu, " + M("x = \\frac{" + a + " + " + par(e) + "}{2} = " + (a + e) / 2) + ". (Ou : " + M(xm(a) + " = -(" + xm(e) + ")") + ".)" }; }
     return { q: "Résous : " + M("|x " + (a < 0 ? "+ " + -a : "- " + a) + "| + " + b + " = " + (b > 1 ? R.int(0, b - 1) : 0)) + ". (S'il n'y a pas de solution, écris « aucune ».)", spec: { kind: "set", values: [] }, sol: "Une valeur absolue est positive ou nulle : " + M("|\\ldots| = " + "\\text{un nombre négatif}") + " est impossible. Aucune solution." };
   },
 
@@ -586,6 +597,10 @@ Object.assign(GEN, {
       const f = R.pick(["sin", "cos"]);
       return { fig: FIG.unitCircle(dg), q: "Donne la valeur exacte de " + M("\\" + f + " " + dg + "°") + " (par exemple « √3/2 »).", spec: { kind: "value", value: f === "sin" ? Math.sin(rad(dg)) : Math.cos(rad(dg)) }, sol: M("\\" + f + " " + dg + "° = " + (f === "sin" ? sn : cs).replace("√", "\\sqrt{").replace(/\{(\d)/, "{$1}")) + " (lis l'" + (f === "sin" ? "ordonnée" : "abscisse") + " du point)." };
     }
+    // Niveau 3 : hors du premier quadrant (audit 13.11).
+    const [dg3, sn3, cs3] = R.pick(angles.filter((x) => x[0] > 90));
+    if (R.rand() < 0.4) { const tn = Math.tan(rad(dg3)); return { q: "Donne la valeur exacte de " + M("\\tan " + dg3 + "°") + ".", spec: { kind: "value", value: tn }, sol: M("\\tan " + dg3 + "° = \\frac{\\sin " + dg3 + "°}{\\cos " + dg3 + "°}") + " = " + "(" + sn3 + ") / (" + cs3 + ") = " + M(Math.abs(Math.abs(tn) - 1) < 1e-9 ? String(Math.round(tn)) : (tn < 0 ? "-" : "") + (Math.abs(tn) > 1 ? "\\sqrt{3}" : "\\frac{\\sqrt{3}}{3}")) + "." }; }
+    return { fig: FIG.unitCircle(dg3, "?"), q: "Donne les coordonnées exactes du point du cercle trigonométrique associé à " + M(dg3 + "°") + ". Réponds « x ; y ».", spec: { kind: "pair", values: [Math.cos(rad(dg3)), Math.sin(rad(dg3))] }, sol: M("(\\cos " + dg3 + "° ; \\sin " + dg3 + "°)") + " = (" + cs3 + " ; " + sn3 + ")" };
     return { fig: FIG.unitCircle(dg, "?"), q: "Donne les coordonnées exactes du point du cercle trigonométrique associé à " + M(dg + "°") + ". Réponds « x ; y ».", spec: { kind: "pair", values: [Math.cos(rad(dg)), Math.sin(rad(dg))] }, sol: M("(\\cos " + dg + "° ; \\sin " + dg + "°)") + " = (" + cs + " ; " + sn + ")" };
   },
 
@@ -607,7 +622,7 @@ Object.assign(GEN, {
     const n = d === 2 ? 2 * R.int(3, 4) : R.int(5, 7);
     const xs = Array.from({ length: n }, () => R.int(2, 20));
     const sum = xs.reduce((a, b) => a + b, 0), mean = sum / n;
-    if (d === 1) return { fig: FIG.barChart(xs), q: "Calcule la moyenne de la série : " + M(xs.join(" ; ")) + ".", spec: { kind: "value", value: mean }, sol: M("\\frac{" + sum + "}{" + n + "} = " + frac(sum, n)) + (Number.isInteger(mean) ? "" : " " + M("\\approx " + dec(mean.toFixed(2)))) };
+    if (d === 1) return { fig: FIG.barChart(xs), q: "Calcule la moyenne de la série : " + M(xs.join(" ; ")) + (Number.isInteger(mean * 100) ? "." : " (arrondie au centième)."), spec: Number.isInteger(mean * 100) ? { kind: "value", value: mean } : { kind: "value", value: mean, round: 0.01 }, sol: M("\\frac{" + sum + "}{" + n + "} = " + frac(sum, n)) + (Number.isInteger(mean) ? "" : " " + M("\\approx " + dec(mean.toFixed(2)))) };
     if (d === 2) {
       const so = [...xs].sort((a, b) => a - b), med = (so[n / 2 - 1] + so[n / 2]) / 2;
       return { fig: FIG.barChart(xs), q: "Donne la médiane de la série : " + M(xs.join(" ; ")) + ".", spec: { kind: "value", value: med }, sol: "Série triée : " + M(so.join(" ; ")) + " ; médiane " + M("\\frac{" + so[n / 2 - 1] + " + " + so[n / 2] + "}{2} = " + dec(med)) };
@@ -784,7 +799,7 @@ const PROB_EXTRA = {
     return { fig: FIG.rectFig(1, 1, L + " cm", L + " cm"), q: "Dans un carton carré de " + M(L) + " cm de côté, on découpe un carré de côté " + M("x") + " cm à chaque coin, puis on plie pour obtenir une boîte sans couvercle.",
       parts: [{ label: "a) Volume (cm³) si x = " + x1, spec: { kind: "value", value: V(x1) } }, { label: "b) Valeur entière de x qui donne le plus grand volume", spec: { kind: "value", value: best } }, { label: "c) Ce volume maximal (cm³)", spec: { kind: "value", value: V(best) } }],
       hints: ["La base est un carré de côté " + L + " − 2x, la hauteur vaut x.", "V(x) = x(" + L + " − 2x)² ; calcule V pour x = 1, 2, 3… et compare."],
-      sol: M("V(x) = x(" + L + " - 2x)^2") + ". a) " + M(V(x1)) + " cm³. b) " + M("x = " + best) + ". c) " + M(V(best)) + " cm³ (le maximum exact est en " + M("x = " + frac(L, 6)) + ")." };
+      sol: M("V(x) = x(" + L + " - 2x)^2") + ". a) " + M(V(x1)) + " cm³. b) On calcule le volume pour les valeurs entières possibles : " + [1, 2, 3, 4, 5, 6, 7, 8].filter((t) => 2 * t < L).map((t) => M("V(" + t + ") = " + V(t))).join(", ") + " ; le plus grand est pour " + M("x = " + best) + ". c) " + M(V(best)) + " cm³." };
   }],
   ineq: [() => {
     const a = R.int(5, 20), b = R.int(15, 30) / 10, c = a + R.int(15, 40), d = b - R.int(5, 10) / 10, k = (c - a) / (b - d);

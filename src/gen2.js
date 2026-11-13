@@ -370,6 +370,10 @@ Object.assign(GEN, {
           { f: "P = 4c", ask: "c", ans: "P/4", sol: M("c = \\frac{P}{4}") },
           { f: "U = R \\cdot I", ask: "I", ans: "U/R", sol: M("I = \\frac{U}{R}") },
           { f: "y = 3x + b", ask: "b", ans: "y - 3x", sol: M("b = y - 3x") },
+          { f: "F = m \\cdot a", ask: "a", ans: "F/m", sol: "On divise par " + M("m") + " : " + M("a = \\frac{F}{m}") },
+          { f: "p = \\frac{F}{S}", ask: "F", ans: "p*S", sol: "On multiplie par " + M("S") + " : " + M("F = p \\cdot S") },
+          { f: "E = m \\cdot g \\cdot h", ask: "h", ans: "E/(m*g)", sol: "On divise par " + M("m \\cdot g") + " : " + M("h = \\frac{E}{m g}") },
+          { f: "P = a + b + c", ask: "c", ans: "P - a - b", sol: M("c = P - a - b") },
         ])
       : d === 2
       ? R.pick([
@@ -377,14 +381,21 @@ Object.assign(GEN, {
           { f: "P = 2(x + y)", ask: "y", ans: "P/2 - x", sol: M("\\frac{P}{2} = x + y") + " donc " + M("y = \\frac{P}{2} - x") },
           { f: "v = \\frac{d}{t}", ask: "t", ans: "d/v", sol: M("t = \\frac{d}{v}") },
           { f: "y = mx + h", ask: "m", ans: "(y - h)/x", sol: M("mx = y - h") + " donc " + M("m = \\frac{y - h}{x}") },
+          { f: "C = 2\\pi r", ask: "r", ans: "C/(2*pi)", sol: "On divise par " + M("2\\pi") + " : " + M("r = \\frac{C}{2\\pi}") },
+          { f: "M = \\frac{a + b}{2}", ask: "b", ans: "2M - a", sol: M("2M = a + b") + " donc " + M("b = 2M - a") },
+          { f: "y = \\frac{k}{x}", ask: "x", ans: "k/y", sol: M("xy = k") + " donc " + M("x = \\frac{k}{y}") },
+          { f: "V = a \\cdot b \\cdot c", ask: "c", ans: "V/(a*b)", sol: M("c = \\frac{V}{a b}") },
         ])
       : R.pick([
           { f: "V = \\frac{1}{3}\\pi r^2 h", ask: "h", ans: "3V/(pi*r^2)", sol: M("h = \\frac{3V}{\\pi r^2}") },
           { f: "A = \\pi r^2", ask: "r", ans: "sqrt(A/pi)", sol: M("r^2 = \\frac{A}{\\pi}") + " donc " + M("r = \\sqrt{\\frac{A}{\\pi}}") + " (un rayon est positif)" },
           { f: "A = \\frac{(c + b) \\cdot h}{2}", ask: "b", ans: "2A/h - c", sol: M("c + b = \\frac{2A}{h}") + " donc " + M("b = \\frac{2A}{h} - c") },
           { f: "c^2 = a^2 + b^2", ask: "a", ans: "sqrt(c^2 - b^2)", sol: M("a = \\sqrt{c^2 - b^2}") + " (une longueur est positive)" },
+          { f: "E = \\frac{1}{2} m v^2", ask: "v", ans: "sqrt(2E/m)", sol: M("v^2 = \\frac{2E}{m}") + " donc " + M("v = \\sqrt{\\frac{2E}{m}}") + " (une vitesse est positive)" },
+          { f: "V = \\pi r^2 h", ask: "r", ans: "sqrt(V/(pi*h))", sol: M("r^2 = \\frac{V}{\\pi h}") + " donc " + M("r = \\sqrt{\\frac{V}{\\pi h}}") },
+          { f: "A = \\frac{d \\cdot D}{2}", ask: "D", ans: "2A/d", sol: M("D = \\frac{2A}{d}") },
         ]);
-    return { q: "Dans la formule " + M(F.f) + ", exprime " + M(F.ask) + " en fonction des autres lettres. (Écris par exemple « " + F.ask + " = … » ou seulement l'expression.)", spec: { kind: "expr", expr: F.ans, pos: true }, canon: F.ans, sol: F.sol + "." };
+    return { q: "Dans la formule " + M(F.f) + ", exprime " + M(F.ask) + " en fonction des autres lettres. (Écris par exemple « " + F.ask + " = … » ou seulement l'expression ; pour π, utilise la touche π, pour une racine la touche √.)", spec: { kind: "expr", expr: F.ans, pos: true }, canon: F.ans, sol: F.sol + "." };
   },
 
   simil(d) {
@@ -430,12 +441,17 @@ Object.assign(GEN, {
       const enf = (age + y) / 2 - y; if (enf < 1 || enf >= age) return GEN.probeq(2);
       return { q: "Un parent a " + M(age) + " ans et son enfant " + M("x") + " ans. Dans " + M(y) + " ans, le parent aura le double de l'âge de l'enfant. Quel âge a l'enfant aujourd'hui ?", spec: { kind: "value", value: enf }, sol: M(age + " + " + y + " = 2(x + " + y + ") \\iff x = " + enf) + "." };
     }
-    if (R.rand() < 0.5) {
-      const n = R.int(3, 15);
-      return { q: "Le produit de deux entiers naturels consécutifs vaut " + M(n * (n + 1)) + ". Quel est le plus petit ?", spec: { kind: "value", value: n }, sol: M("n(n + 1) = " + n * (n + 1) + " \\iff n^2 + n - " + n * (n + 1) + " = 0") + " ; " + M("n = " + n) + " (l'autre solution, " + M(-(n + 1)) + ", n'est pas naturelle)." };
-    }
-    const L = R.int(4, 15), l = R.int(2, L - 1);
-    return { fig: FIG.rectFig(L, l, "?", "?"), q: "Un rectangle a un périmètre de " + M(2 * (L + l)) + " cm et une aire de " + M(L * l) + " cm². Quelle est sa longueur (le plus grand côté, en cm) ?", spec: { kind: "value", value: L }, sol: M("x(" + (L + l) + " - x) = " + L * l + " \\iff x^2 - " + (L + l) + "x + " + L * l + " = 0") + " : " + M("x = " + l) + " ou " + M("x = " + L) + " ; la longueur vaut " + M(L) + " cm." };
+    // Niveau 3 : problèmes plus longs, toujours du 1er degré (le 2e degré est dans probeq2) — audit 13.11.
+    const t3 = R.int(0, 2);
+    if (t3 === 0) { const n = R.int(12, 40), x = R.int(3, n - 3), A = R.pick([12, 15, 18, 20, 24]), E = R.pick([5, 6, 8, 9, 10]), T = A * x + E * (n - x);
+      return { q: "Un groupe de " + M(n) + " personnes visite un musée. Le billet adulte coûte " + M(A) + " CHF, le billet enfant " + M(E) + " CHF. Le groupe paie " + M(nb(T)) + " CHF en tout. Combien y a-t-il d'adultes ?", spec: { kind: "value", value: x },
+        sol: M("x") + " adultes et " + M(n + " - x") + " enfants : " + M(A + "x + " + E + "(" + n + " - x) = " + T + " \\iff " + (A - E) + "x = " + (T - E * n) + " \\iff x = " + x) + "." }; }
+    if (t3 === 1) { const v1 = R.pick([60, 70, 80, 90, 100]), v2 = R.pick([40, 50, 60, 80]), t = R.pick([1.5, 2, 2.5, 3]), D = (v1 + v2) * t;
+      return { q: "Deux trains partent en même temps de deux villes distantes de " + M(D) + " km et roulent l'un vers l'autre, à " + M(v1) + " km/h et " + M(v2) + " km/h. Au bout de combien d'heures se croisent-ils ?", spec: { kind: "value", value: t },
+        sol: "En " + M("t") + " heures, ils parcourent ensemble " + M("(" + v1 + " + " + v2 + ")t") + " km : " + M((v1 + v2) + "t = " + D + " \\iff t = " + dec(t)) + " h." }; }
+    const l = R.int(3, 20), k = R.int(2, 9), P = 2 * (2 * l + k);
+    return { fig: FIG.rectFig(l + k, l, "?", "?"), q: "Un rectangle a un périmètre de " + M(P) + " cm. Sa longueur dépasse sa largeur de " + M(k) + " cm. Quelle est sa largeur (en cm) ?", spec: { kind: "value", value: l },
+      sol: "Largeur " + M("x") + ", longueur " + M("x + " + k) + " : " + M("2(x + x + " + k + ") = " + P + " \\iff 4x + " + 2 * k + " = " + P + " \\iff x = " + l) + " cm." };
   },
 
   // ===== Collège 1re =====
@@ -491,19 +507,25 @@ Object.assign(GEN, {
   },
 
   sys2(d) {
+    // Corrigé détaillé par combinaison (audit 13.11).
+    const steps = (a, b, r1, c, e, r2, X, Y) => {
+      const k = a * e - b * c, rhs = r1 * e - r2 * b;
+      return "On multiplie la 1re équation par " + M(par(e)) + " et la 2e par " + M(par(b)) + ", puis on soustrait pour éliminer " + M("y") + " : " +
+        M(k + "x = " + rhs) + ", donc " + M("x = " + ratT(X)) + ". On remplace dans la 1re : " + M((b === 1 ? "" : b === -1 ? "-" : b) + "y = " + r1 + " - " + par(a) + " \\cdot " + par(+X.toFixed(6)) + " = " + (r1 - a * X)) + ", donc " + M("y = " + ratT(Y)) + ". Solution : " + M("(" + ratT(X) + " ; " + ratT(Y) + ")") + ".";
+    };
     const x = R.nz(-6, 8), y = R.nz(-6, 8);
     const term = (c, v) => (c === 1 ? v : c === -1 ? "-" + v : c + v);
     const row = (a, b, r) => term(a, "x") + (b < 0 ? " - " + term(-b, "y") : " + " + term(b, "y")) + " = " + r;
     if (d === 1) {
       let a, b, c, e; do { a = R.nz(-4, 4); b = R.nz(-4, 4); c = R.nz(-4, 4); e = R.nz(-4, 4); } while (a * e - b * c === 0 || (Math.abs(a) !== 1 && Math.abs(b) !== 1 && Math.abs(c) !== 1 && Math.abs(e) !== 1));
-      return { q: "Résous le système " + M("\\begin{cases} " + row(a, b, a * x + b * y) + " \\\\ " + row(c, e, c * x + e * y) + " \\end{cases}") + ". Réponds « x ; y ».", spec: { kind: "pair", values: [x, y] }, sol: "Par substitution (un coefficient vaut ±1) ou par combinaison : " + M("(x ; y) = (" + x + " ; " + y + ")") + "." };
+      return { q: "Résous le système " + M("\\begin{cases} " + row(a, b, a * x + b * y) + " \\\\ " + row(c, e, c * x + e * y) + " \\end{cases}") + ". Réponds « x ; y ».", spec: { kind: "pair", values: [x, y] }, sol: steps(a, b, a * x + b * y, c, e, c * x + e * y, x, y) };
     }
     if (d === 2) {
       let a, b, c, e; do { a = R.nz(-7, 7); b = R.nz(-7, 7); c = R.nz(-7, 7); e = R.nz(-7, 7); } while (a * e - b * c === 0 || Math.abs(a) < 2 || Math.abs(b) < 2 || Math.abs(c) < 2 || Math.abs(e) < 2);
       const X = R.nz(-5, 5) / 2, Y = R.nz(-6, 6);
       const r1 = a * X + b * Y, r2 = c * X + e * Y;
       if (!Number.isInteger(r1) || !Number.isInteger(r2)) return GEN.sys2(2);
-      return { q: "Résous le système " + M("\\begin{cases} " + row(a, b, r1) + " \\\\ " + row(c, e, r2) + " \\end{cases}") + ". Réponds « x ; y » (fractions acceptées).", spec: { kind: "pair", values: [X, Y] }, sol: "Combinaison linéaire (multiplier les équations pour éliminer une inconnue) : " + M("x = " + ratT(X)) + ", " + M("y = " + Y) + "." };
+      return { q: "Résous le système " + M("\\begin{cases} " + row(a, b, r1) + " \\\\ " + row(c, e, r2) + " \\end{cases}") + ". Réponds « x ; y » (fractions acceptées).", spec: { kind: "pair", values: [X, Y] }, sol: steps(a, b, r1, c, e, r2, X, Y) };
     }
     const n1 = R.int(4, 9), n2 = n1 + R.int(3, 8), a = R.int(3, 9), b = 5 * R.int(2, 8);
     return { q: "Un cinéma propose un abonnement annuel fixe plus un prix réduit par film. Un client qui a vu " + M(n1) + " films a payé " + M(a * n1 + b) + " CHF ; un autre qui en a vu " + M(n2) + " a payé " + M(a * n2 + b) + " CHF. Donne le prix d'un film puis celui de l'abonnement : « prix ; abonnement ».", spec: { kind: "pair", values: [a, b] }, sol: M("\\begin{cases} " + n1 + "a + b = " + (a * n1 + b) + " \\\\ " + n2 + "a + b = " + (a * n2 + b) + " \\end{cases}") + " : soustraction, " + M((n2 - n1) + "a = " + a * (n2 - n1)) + ", donc " + M("a = " + a) + " CHF et " + M("b = " + b) + " CHF." };
@@ -518,13 +540,26 @@ Object.assign(GEN, {
     if (d === 1) m = [[1, 1, 1], [0, 1, R.nz(-3, 3)], [0, 0, R.nz(-3, 3)]];
     else if (d === 2) { do m = [[1, R.int(-2, 2), R.int(-2, 2)], [R.int(-2, 3), R.nz(-2, 3), R.int(-2, 2)], [R.int(-2, 3), R.int(-2, 2), R.nz(-3, 3)]]; while (det(m) === 0); }
     else { do m = [0, 1, 2].map(() => [R.nz(-4, 4), R.nz(-4, 4), R.nz(-4, 4)]); while (det(m) === 0 || m.some((r) => r.every((v) => Math.abs(v) === 1))); }
+    // Corrigé de Gauss détaillé (audit 13.11) : x éliminé de L2 et L3 avec L1, puis y, puis remontée.
+    const gauss = (m, rhs, sol, names = ["x", "y", "z"]) => {
+      const [A, B, C] = m.map((r, i) => r.concat([rhs[i]]));
+      const lin2 = (r) => T(r[1], names[1], true) + T(r[2], names[2], r[1] === 0) + " = " + r[3];
+      const comb = (r, p, f) => r.map((v, k) => p * v - f * A[k]);
+      const B2 = comb(B, A[0], B[0]), C2 = comb(C, A[0], C[0]);
+      const sB = B[0] === 0 ? "" : "L2 ← " + (A[0] === 1 ? "" : A[0]) + "L2 " + (B[0] < 0 ? "+ " + (B[0] === -1 ? "" : -B[0]) : "- " + (B[0] === 1 ? "" : B[0])) + "L1", sC = C[0] === 0 ? "" : "L3 ← " + (A[0] === 1 ? "" : A[0]) + "L3 " + (C[0] < 0 ? "+ " + (C[0] === -1 ? "" : -C[0]) : "- " + (C[0] === 1 ? "" : C[0])) + "L1";
+      let t = "On élimine " + M(names[0]) + (sB || sC ? " (" + [sB, sC].filter(Boolean).join(", ") + ")" : "") + " : " + M("\\begin{cases} " + lin2(B2) + " \\\\ " + lin2(C2) + " \\end{cases}") + ". ";
+      const C3 = B2[1] === 0 ? C2 : C2[1] === 0 ? C2 : C2.map((v, k) => B2[1] * v - C2[1] * B2[k]);
+      const zRow = B2[1] === 0 ? B2 : C3;
+      t += "On élimine " + M(names[1]) + " : " + M((zRow[2] === 1 ? "" : zRow[2] === -1 ? "-" : zRow[2]) + names[2] + " = " + zRow[3]) + ", donc " + M(names[2] + " = " + sol[2]) + ". ";
+      return t + "On remonte : " + M(names[1] + " = " + sol[1]) + ", puis " + M(names[0] + " = " + sol[0]) + ". Solution : " + M("(" + sol.join(" ; ") + ")") + ".";
+    };
     if (d === 3 && R.rand() < 0.5) {
       const a = R.int(8, 20), e = R.int(4, 12), s = R.int(5, 10), na = R.int(1, 4), ne = R.int(1, 4), ns = R.int(1, 4);
       const t1 = 2 * a + 3 * e + s, t2 = a + 2 * e + 2 * s, t3 = na * a + ne * e + ns * s;
       const mm = [[2, 3, 1], [1, 2, 2], [na, ne, ns]]; if (det(mm) === 0) return GEN.sys3(3);
-      return { q: "Au cinéma : 2 adultes, 3 enfants et 1 senior paient " + M(t1) + " CHF ; 1 adulte, 2 enfants et 2 seniors paient " + M(t2) + " CHF ; " + na + " adulte" + (na > 1 ? "s" : "") + ", " + ne + " enfant" + (ne > 1 ? "s" : "") + " et " + ns + " senior" + (ns > 1 ? "s" : "") + " paient " + M(t3) + " CHF. Prix adulte, enfant, senior : « a ; e ; s ».", spec: { kind: "pair", values: [a, e, s] }, sol: "Système 3 × 3 (Gauss) : " + M("a = " + a + ",\\ e = " + e + ",\\ s = " + s) + " CHF." };
+      return { q: "Au cinéma : 2 adultes, 3 enfants et 1 senior paient " + M(t1) + " CHF ; 1 adulte, 2 enfants et 2 seniors paient " + M(t2) + " CHF ; " + na + " adulte" + (na > 1 ? "s" : "") + ", " + ne + " enfant" + (ne > 1 ? "s" : "") + " et " + ns + " senior" + (ns > 1 ? "s" : "") + " paient " + M(t3) + " CHF. Prix adulte, enfant, senior : « a ; e ; s ».", spec: { kind: "pair", values: [a, e, s] }, sol: "Système " + M("\\begin{cases} 2a + 3e + s = " + t1 + " \\\\ a + 2e + 2s = " + t2 + " \\\\ " + (na === 1 ? "" : na) + "a + " + (ne === 1 ? "" : ne) + "e + " + (ns === 1 ? "" : ns) + "s = " + t3 + " \\end{cases}") + ". " + gauss(mm, [t1, t2, t3], [a, e, s], ["a", "e", "s"]) + " (en CHF)" };
     }
-    return { q: "Résous le système " + M("\\begin{cases} " + m.map(row).join(" \\\\ ") + " \\end{cases}") + ". Réponds « x ; y ; z ».", spec: { kind: "pair", values: [x, y, z] }, sol: (d === 1 ? "Le système est triangulaire : on trouve " + M("z") + ", puis " + M("y") + ", puis " + M("x") : "Méthode de Gauss (éliminer " + M("x") + " dans deux équations, puis " + M("y") + ")") + " : " + M("(x ; y ; z) = (" + x + " ; " + y + " ; " + z + ")") + "." };
+    return { q: "Résous le système " + M("\\begin{cases} " + m.map(row).join(" \\\\ ") + " \\end{cases}") + ". Réponds « x ; y ; z ».", spec: { kind: "pair", values: [x, y, z] }, sol: d === 1 ? "Le système est triangulaire : la 3e équation donne " + M("z = " + z) + ", la 2e " + M("y = " + y) + ", la 1re " + M("x = " + x) + "." : gauss(m, m.map((r) => r[0] * x + r[1] * y + r[2] * z), [x, y, z]) };
   },
 
   domaine(d) {
@@ -601,7 +636,7 @@ Object.assign(GEN, {
     if (d === 2) {
       if (R.rand() < 0.25) { const b = R.int(-3, 3), c = R.int(Math.ceil((b * b) / 4) + 1, 9), f = (x) => x * x + b * x + c, ivs = signSet(f, [], [], op); return { q: "Résous " + M(poly([1, b, c]) + " " + OPT[op] + " 0") + ". (Réponds « R » ou « aucune » si besoin.)", spec: solsetSpec(ivs), sol: M("\\Delta = " + (b * b - 4 * c) + " < 0") + " : le trinôme est toujours positif, " + M("S = " + (ivs.length ? "\\mathbb{R}" : "\\varnothing")) + "." }; }
       const p = R.nz(-6, 4), q = p + R.int(1, 7), a = R.pick([1, -1, 2, -1]), f = (x) => a * (x - p) * (x - q);
-      return { q: "Résous " + M(poly([a, -a * (p + q), a * p * q]) + " " + OPT[op] + " 0") + ".", spec: solsetSpec(signSet(f, [p, q], [], op)), sol: "Zéros " + M(p) + " et " + M(q) + " ; signe de " + M("a = " + a) + " à l'extérieur des racines : " + M("S = " + SolSet.show(signSet(f, [p, q], [], op))) + "." };
+      return { q: "Résous " + M(poly([a, -a * (p + q), a * p * q]) + " " + OPT[op] + " 0") + ".", spec: solsetSpec(signSet(f, [p, q], [], op)), sol: "Zéros " + M(p) + " et " + M(q) + ". Comme " + M("a = " + a) + (a > 0 ? " > 0" : " < 0") + ", le trinôme est " + (a > 0 ? "positif" : "négatif") + " à l'extérieur des zéros et " + (a > 0 ? "négatif" : "positif") + " entre eux. On cherche où il est " + (op[0] === ">" ? "positif" : "négatif") + (op.length > 1 ? " ou nul" : "") + " : " + M("S = " + SolSet.show(signSet(f, [p, q], [], op))) + "." };
     }
     // f(x) op g(x), f quadratique non unitaire, g affine (épreuve commune 1re)
     const p = R.nz(-4, 2), q = p + R.pick([1.5, 2.5, 3, 3.5, 4.5, 5]), a = R.pick([-2, 2, -1, 1]), m = R.nz(-3, 3), k = R.int(-4, 4);
@@ -620,8 +655,8 @@ Object.assign(GEN, {
       const c = R.int(5, 16), p = R.int(1, c - 1), a = Math.sqrt(p * c);
       return { fig: GF.altitude(p, c - p, { lp: p + " cm", lq: "", lh: "", lc: "c = " + c + " cm", la: "a = ?" }), q: "Un triangle est rectangle en " + M("C") + ", d'hypoténuse " + M("c = " + c) + " cm. La projection de la cathète " + M("a") + " sur l'hypoténuse mesure " + M(p) + " cm. Calcule " + M("a") + " (exacte ou au centième).", spec: { kind: "value", value: a, round: 0.01, exactOk: true }, sol: "Théorème d'Euclide : " + M("a^2 = p \\cdot c = " + p * c) + ", " + M("a = \\sqrt{" + p * c + "} \\approx " + dec(a.toFixed(2))) + " cm." };
     }
-    const tr = R.pick([[3, 4, 5], [6, 8, 10], [5, 12, 13], [9, 12, 15], [8, 15, 17]]), [a, b, c] = tr, h = (a * b) / c;
-    return { fig: GF.altitude((a * a) / c, (b * b) / c, { lp: "", lq: "", lh: "h = ?", la: a + " cm", lb: b + " cm" }), q: "Un triangle rectangle a des cathètes de " + M(a) + " cm et " + M(b) + " cm. Calcule la hauteur relative à l'hypoténuse (en cm).", spec: { kind: "value", value: h }, sol: "Hypoténuse " + M(c) + " cm ; aire : " + M("\\frac{" + a + " \\cdot " + b + "}{2} = \\frac{" + c + " \\cdot h}{2}") + " donc " + M("h = " + ratT(h)) + " cm." };
+    const tr = R.pick([[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [20, 21, 29]]), k = R.pick([1, 1, 2, 3]), [a, b, c] = tr.map((v) => v * k), h = (a * b) / c;
+    return { fig: GF.altitude((a * a) / c, (b * b) / c, { lp: "", lq: "", lh: "h = ?", la: a + " cm", lb: b + " cm" }), q: "Un triangle rectangle a des cathètes de " + M(a) + " cm et " + M(b) + " cm. Calcule la hauteur relative à l'hypoténuse (en cm, valeur exacte ou au centième).", spec: { kind: "value", value: h, round: 0.01, exactOk: true }, sol: "Hypoténuse " + M(c) + " cm ; aire : " + M("\\frac{" + a + " \\cdot " + b + "}{2} = \\frac{" + c + " \\cdot h}{2}") + " donc " + M("h = " + ratT(h)) + " cm." };
   },
 
   droitesrem(d) {
@@ -645,7 +680,8 @@ Object.assign(GEN, {
     }
     if (d === 2) {
       const qc = [R.nz(-3, 3), R.int(-5, 5), R.int(-6, 6)], a = R.nz(-4, 4), P = pmul(qc, [1, -a]);
-      return { q: "Sachant que " + M("P(x) = " + poly(P)) + " est divisible par " + M(xm(a)) + ", donne le quotient " + M("Q(x)") + ".", spec: { kind: "expr", expr: poly(qc), form: "expanded" }, canon: poly(qc), sol: "Schéma de Horner avec " + M(a) + " : " + M("Q(x) = " + poly(qc)) + "." };
+      return { q: "Sachant que " + M("P(x) = " + poly(P)) + " est divisible par " + M(xm(a)) + ", donne le quotient " + M("Q(x)") + ".", spec: { kind: "expr", expr: poly(qc), form: "expanded" }, canon: poly(qc), sol: (() => { const r = [P[0]]; for (let i = 1; i < P.length; i++) r.push(r[i - 1] * a + P[i]);
+      return "Schéma de Horner avec " + M(a) + " : coefficients de " + M("P") + " : " + M(P.join(" \\;|\\; ")) + ". On abaisse " + M(P[0]) + ", puis à chaque colonne on multiplie par " + M(a) + " et on ajoute : " + M(r.join(" \\;|\\; ")) + ". Le dernier nombre est le reste (" + M(r[r.length - 1]) + "), les autres sont les coefficients du quotient : " + M("Q(x) = " + poly(qc)) + "."; })() };
     }
     const a = R.nz(-3, 3), b = R.int(-4, 4), c = R.int(-9, 9);
     // x³ + b x² + k x + c divisible par (x - a) ⇔ a³ + b a² + k a + c = 0
@@ -739,7 +775,7 @@ Object.assign(GEN, {
     if (d === 1) return { fig, q: "Soit " + M(txt) + ". Quelle est l'équation de l'asymptote verticale ? Donne la valeur de " + M("x") + ".", spec: { kind: "value", value: -e / c }, sol: "Le dénominateur s'annule en " + M("x = " + ratT(-e / c)) + " (et pas le numérateur) : asymptote " + M("x = " + ratT(-e / c)) + "." };
     if (d === 2) return { fig, q: "Soit " + M(txt) + ". Quelle est l'équation de l'asymptote horizontale ? Donne la valeur de " + M("y") + ".", spec: { kind: "value", value: a / c }, sol: "Quand " + M("x") + " devient grand, " + M("f(x) \\approx \\frac{" + cx(a) + "x}{" + cx(c) + "x}") + " : asymptote " + M("y = " + ratT(a / c)) + "." };
     const inv = "(" + lin(-e, b) + ")/(" + lin(c, -a) + ")";
-    return { fig, q: "Soit " + M(txt) + ". Détermine la réciproque " + M("f^{-1}(x)") + ".", spec: { kind: "expr", expr: inv }, canon: inv, sol: M("y = \\frac{" + lin(a, b) + "}{" + lin(c, e) + "} \\iff y(" + lin(c, e) + ") = " + lin(a, b)) + " ; on isole " + M("x") + " : " + M("f^{-1}(x) = \\frac{" + lin(-e, b) + "}{" + lin(c, -a) + "}") + "." };
+    return { fig, q: "Soit " + M(txt) + ". Détermine la réciproque " + M("f^{-1}(x)") + ".", spec: { kind: "expr", expr: inv }, canon: inv, sol: "On pose " + M("y = \\frac{" + lin(a, b) + "}{" + lin(c, e) + "}") + " et on isole " + M("x") + " : " + M("y(" + lin(c, e) + ") = " + lin(a, b)) + ", " + M((c === 1 ? "" : c === -1 ? "-" : c) + "xy" + sg(e) + "y = " + lin(a, b)) + ", donc " + M("x(" + lin(c, -a, "y") + ") = " + lin(-e, b, "y")) + " et " + M("x = \\frac{" + lin(-e, b, "y") + "}{" + lin(c, -a, "y") + "}") + ". On échange les lettres : " + M("f^{-1}(x) = \\frac{" + lin(-e, b) + "}{" + lin(c, -a) + "}") + "." };
   },
 
   trigfn(d) {

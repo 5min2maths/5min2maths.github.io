@@ -346,7 +346,19 @@ function checkAnswer(spec, input) {
       if (Math.abs(v - spec.value) <= spec.round * 5) return { status: "close", message: "Presque : vérifie l'arrondi (au " + (spec.round === 0.01 ? "centième" : spec.round === 0.1 ? "dixième" : "près") + ")." };
       return { status: "wrong" };
     }
-    if (Expr.sameValue(v, spec.value)) return { status: "correct" };
+    if (Expr.sameValue(v, spec.value)) {
+      // Forme exigée par la consigne (audit 13.11) : notation scientifique, racine simplifiée a√b.
+      const raw = String(input).replace(/\s+/g, "").replace(/[·×]/g, "*").replace(/,/g, ".");
+      if (spec.sci) {
+        const m = raw.match(/^(-?\d+(?:\.\d+)?)\*10\^\(?(-?\d+)\)?$/), a = m ? Math.abs(+m[1]) : 0;
+        if (!(m && a >= 1 && a < 10) && !(/^-?\d+(\.\d+)?$/.test(raw) && Math.abs(v) >= 1 && Math.abs(v) < 10)) return { status: "form", message: "La valeur est juste ; écris-la en notation scientifique : a · 10^n avec 1 ≤ a < 10 (par exemple 4,5*10^-3)." };
+      }
+      if (spec.radical) {
+        const m = raw.match(/^-?(\d*)\*?√\(?(\d+)\)?$/), sqf = (n) => { for (let k = 2; k * k <= n; k++) if (n % (k * k) === 0) return false; return true; };
+        if (!(/^-?\d+$/.test(raw) || (m && sqf(+m[2])))) return { status: "form", message: "La valeur est juste ; simplifie : écris a√b avec b le plus petit possible (par exemple 6√3)." };
+      }
+      return { status: "correct" };
+    }
     if (Math.abs(v - spec.value) <= 1e-3 * Math.max(1, Math.abs(spec.value))) return { status: "close", message: "Très proche : donne la valeur exacte (fraction, racine, π…)." };
     return { status: "wrong" };
   }

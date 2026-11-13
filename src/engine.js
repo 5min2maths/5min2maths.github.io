@@ -249,9 +249,16 @@ const Engine = {
     return delta;
   },
 
+  // Anti-répétition (audit 13.11) : une question déjà posée parmi les 15 dernières de la notion est retirée.
   make(state, id, d, seed) {
     const level = d || this.difficulty(state, id);
-    return this.build(id, level, seed);
+    if (seed) return this.build(id, level, seed);
+    const rec = ((state.recentQ = state.recentQ || {})[id] = (state.recentQ[id] || []));
+    const key = (q) => { let h = 0; for (const c of String(q.q) + JSON.stringify(q.spec)) h = (h * 31 + c.charCodeAt(0)) | 0; return h; };
+    let q;
+    for (let k = 0; k < 8; k++) { q = this.build(id, level); if (!rec.includes(key(q))) break; }
+    rec.push(key(q)); state.recentQ[id] = rec.slice(-15);
+    return q;
   },
   // Question reproductible : même notion, niveau et graine → même question.
   build(id, level, seed) {
@@ -260,6 +267,11 @@ const Engine = {
     const code = id + "-" + level + "-" + seed.toString(36);
     if (level === 4 && hasProb(id)) { const p = probFor(id)(); return { ...p, id, d: 4, seed, code, spec: { kind: "multi" }, hint: p.hints[0] }; }
     const q = GEN[id](level);
+    // Consigne de forme : « notation scientifique » contrôlée par le correcteur.
+    if (q.spec && q.spec.kind === "value" && /notation scientifique/.test(q.q) && !/^Calcule : /.test(q.q)) {
+      q.spec = { ...q.spec, sci: true };
+      if (!q.canon) { const e = Math.floor(Math.log10(Math.abs(q.spec.value)) + 1e-9), a = +(q.spec.value / 10 ** e).toFixed(8); q.canon = String(a).replace(".", ",") + "*10^" + e; }
+    }
     return { ...q, id, d: level, seed, code, hint: q.hint || HINTS[id] };
   },
   // Lecture d'un code « eq2disc-2-k3f » → question exacte (ou null).
