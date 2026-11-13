@@ -13,5 +13,7 @@ const w = location.hash.slice(1);
 if (w === "summary") { session = { answered: 3, score: 2.5, elo0: state.elo.r - 12, ids: new Set(["decread"]) }; screenSummary(); }
 else if (w === "backup") screenBackup();
 else if (w === "restore") Backup.encode(state).then((c) => { state = null; screenRestore(c); });
+else if (w === "privacy") screenPrivacy(screenHome);
+else if (w === "home") screenHome();
 else screenComps();
 </script>

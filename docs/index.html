@@ -264,6 +264,7 @@ details.cmt textarea { width: 100%; box-sizing: border-box; font: inherit; paddi
 .qrwrap svg { max-width: 100%; height: auto; border-radius: 6px; }
 .code-box { width: 100%; font-family: var(--font-mono); font-size: 12px; word-break: break-all; padding: 8px; border: 1.5px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); }
 .center { align-items: center; text-align: center; }
+ul.plain { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
 
 </style>
 <script>
@@ -5366,8 +5367,10 @@ function screenWelcome() {
   <div class="qtext">${demo.q}</div><div class="figwrap">${demo.fig || ""}</div>
   <p class="small muted">Tape ta réponse comme tu veux : ${c}, √${c * c}, ${2 * c}/2… le calculateur comprend.</p></div>
   <button class="btn-primary btn-big" id="go">Commencer</button>
-  <button class="btn-ghost" id="restore">J'ai déjà un code de sauvegarde</button>`);
+  <button class="btn-ghost" id="restore">J'ai déjà un code de sauvegarde</button>
+  <button class="btn-ghost small" id="privacy">🔒 Ce que l'app envoie</button>`);
   document.getElementById("go").onclick = screenLevel;
+  document.getElementById("privacy").onclick = () => screenPrivacy(screenWelcome);
   document.getElementById("restore").onclick = () => screenRestore();
 }
 
@@ -5457,7 +5460,8 @@ function screenHome() {
   ${newBadgesCard()}
   ${compsCard()}
   <div class="stack">${Engine.prepActive(state) ? "" : '<button id="prep">Je prépare un test</button>'}<button id="backup">💾 Sauvegarder ou transférer ma progression</button><button id="level">Changer de classe ou d'école</button>
-  <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div></div>`);
+  <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button><button class="btn-ghost" id="privacy">🔒 Ce que l'app envoie</button></div></div>`);
+  document.getElementById("privacy").onclick = () => screenPrivacy(screenHome);
   document.getElementById("go").onclick = startSession;
   document.getElementById("other").onclick = () => { Engine.otherFormat(state); save(); screenHome(); };
   if (wp) document.getElementById("wp").onclick = () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); };
@@ -5470,7 +5474,7 @@ function screenHome() {
   document.getElementById("level").onclick = () => { draft = { ...state.profile }; screenLevel(); };
   document.getElementById("r1").onclick = () => {
     document.getElementById("reset").innerHTML = '<span class="small">Effacer ta progression et ton Mathélo ?</span><button id="r2">Oui, effacer</button><button class="btn-ghost" id="r3">Non</button>';
-    document.getElementById("r2").onclick = () => { Store.clear(); state = null; screenWelcome(); };
+    document.getElementById("r2").onclick = () => { Store.clear(); try { localStorage.removeItem("m2m-device"); localStorage.removeItem("m2m-ping"); } catch (e) {} state = null; screenWelcome(); };
     document.getElementById("r3").onclick = screenHome;
   };
 }
@@ -5537,6 +5541,26 @@ function bindBadges(root) {
 }
 function bindLessonOpen(root) {
   root.querySelectorAll("details.lesson[data-id]").forEach((d) => d.addEventListener("toggle", () => { if (d.open && state) { Badges.onLesson(state, d.dataset.id); Badges.check(state); save(); } }));
+}
+
+// ---------------- Ce que l'app envoie (13.11) ----------------
+function screenPrivacy(back) {
+  h(`${brand}<h2>Ce que l'app <span class="mark">envoie</span></h2>
+  <p class="muted">Pas de compte, pas de nom, pas d'adresse e-mail. Ta progression reste sur ton appareil.</p>
+  <div class="card flat stack"><b>Ce qui reste sur ton appareil</b>
+  <ul class="plain"><li>Tes réponses, tes notes de compétences, tes badges, ton Mathélo et ta classe.</li>
+  <li>Rien de tout cela n'est envoyé. Le code de sauvegarde, lui aussi, n'est envoyé nulle part : c'est toi qui le gardes.</li></ul></div>
+  <div class="card flat stack"><b>Ce qui est envoyé, de façon anonyme</b>
+  <span class="small muted">Vers un tableau tenu par l'auteur de l'app (Google Sheets), pour l'améliorer pendant la phase de test :</span>
+  <ul class="plain"><li><b>Un signal d'ouverture</b> (au plus une fois par jour) et <b>un signal de fin de séance</b>, avec la date et un identifiant tiré au hasard, propre à cet appareil. Il sert seulement à compter combien de personnes testent l'app.</li>
+  <li><b>Tes avis</b> 👍 / 👎, « trop facile » et « pas compris », avec le code de la question ou du rappel et le même identifiant.</li>
+  <li><b>Tes commentaires</b>, si tu en écris, avec ta classe (par exemple « 10e ») et le même identifiant. N'y écris pas ton nom.</li></ul></div>
+  <div class="card flat stack"><b>À savoir</b>
+  <ul class="plain"><li>L'identifiant ne permet pas de savoir qui tu es : il n'est lié à aucun nom ni compte.</li>
+  <li>Comme pour tout site, les services qui hébergent l'app (GitHub) et chargent ses polices et ses formules (Google Fonts, Cloudflare) voient passer la connexion. L'auteur de l'app n'y a pas accès.</li>
+  <li>« Tout effacer » (en bas de l'accueil) supprime ta progression et l'identifiant de cet appareil. Les avis et commentaires déjà envoyés ne contiennent rien qui te désigne.</li></ul></div>
+  <button class="btn-primary btn-big" id="back">Retour</button>`);
+  document.getElementById("back").onclick = back;
 }
 
 // ---------------- Sauvegarde ----------------

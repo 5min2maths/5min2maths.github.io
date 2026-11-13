@@ -249,3 +249,4 @@ details.cmt textarea { width: 100%; box-sizing: border-box; font: inherit; paddi
 .qrwrap svg { max-width: 100%; height: auto; border-radius: 6px; }
 .code-box { width: 100%; font-family: var(--font-mono); font-size: 12px; word-break: break-all; padding: 8px; border: 1.5px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); }
 .center { align-items: center; text-align: center; }
+ul.plain { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
