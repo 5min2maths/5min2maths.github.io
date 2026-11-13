@@ -771,7 +771,7 @@ Object.assign(GEN, {
   cercle(d) {
     const a = R.int(-5, 5), b = R.int(-5, 5), r = R.int(1, 7);
     const sq = (v, n) => (v === 0 ? n + "^2" : "(" + n + sg(-v) + ")^2");
-    if (d === 1) return { fig: FIG.plot([], [], { grid: true, ticks: false }), q: "Le cercle " + M(sq(a, "x") + " + " + sq(b, "y") + " = " + r * r) + " a pour centre " + M("C(a ; b)") + " et pour rayon " + M("r") + ". Réponds « a ; b ; r ».", spec: { kind: "pair", values: [a, b, r] }, sol: "Forme " + M("(x - a)^2 + (y - b)^2 = r^2") + " : " + M("C(" + a + " ; " + b + ")") + ", " + M("r = " + r) + "." };
+    if (d === 1) return { fig: GEO().circle([0, 0], 1, "f-shape").pt("C", 0, 0, false).dot("C").text("C", "C(a ; b)", 0, 18).side("C", [0.8, 0.6], "r", { draw: true, cls: "f-accent", w: 2 }).svg("cercle de centre C et de rayon r"), q: "Le cercle " + M(sq(a, "x") + " + " + sq(b, "y") + " = " + r * r) + " a pour centre " + M("C(a ; b)") + " et pour rayon " + M("r") + ". Réponds « a ; b ; r ».", spec: { kind: "pair", values: [a, b, r] }, sol: "Forme " + M("(x - a)^2 + (y - b)^2 = r^2") + " : " + M("C(" + a + " ; " + b + ")") + ", " + M("r = " + r) + "." };
     if (d === 2) {
       const D = -2 * a, E = -2 * b, F = a * a + b * b - r * r;
       const T = "x^2 + y^2" + (D ? sg(D) + "x" : "") + (E ? sg(E) + "y" : "") + (F ? sg(F) : "") + " = 0";

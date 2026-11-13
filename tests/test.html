@@ -57,6 +57,8 @@ for (const id of Object.keys(GEN)) for (const d of [1, 2, 3]) for (let i = 0; i 
   if (!q.q || /NaN|undefined|Infinity/.test(q.q + q.sol)) { fail(id + " d" + d + " texte : " + q.q); continue; }
   if (q.fig && !/^<svg/.test(q.fig)) fail(id + " figure invalide");
   if (q.fig && /NaN|undefined/.test(q.fig)) fail(id + " d" + d + " figure NaN");
+  // Figure vide : un repère sans courbe ni point ne montre rien
+  if (q.fig && /aria-label="graphique"/.test(q.fig) && !/<path d=" ?M/.test(q.fig) && !/f-dot/.test(q.fig)) fail(id + " d" + d + " figure vide (repère seul)");
   const s = q.spec;
   // La figure ne doit pas donner la réponse : aucune étiquette égale à la réponse, sauf si ce nombre est dans l'énoncé.
   if (q.fig) {
