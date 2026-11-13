@@ -3597,16 +3597,33 @@ function burst() {
   setTimeout(() => b.remove(), 1000);
 }
 
+// Identifiant anonyme de l'appareil (aléatoire, sans lien avec une personne) : sert uniquement à compter les testeurs.
+function deviceId() {
+  try {
+    let id = localStorage.getItem("m2m-device");
+    if (!id) { id = Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4); localStorage.setItem("m2m-device", id); }
+    return id;
+  } catch (e) { return ""; }
+}
+function ping(ev) {
+  try {
+    if (!VOTE_ENDPOINT || location.protocol !== "https:" || /claude/.test(location.hostname)) return;
+    if (ev === "open") { if (localStorage.getItem("m2m-ping") === day()) return; localStorage.setItem("m2m-ping", day()); }
+    fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ ev, dev: deviceId(), date: day() }) }).catch(() => {});
+  } catch (e) {}
+}
+
 function vote(code, v) {
   try {
     state.votes = state.votes || {};
     state.votes[code] = { v, date: day() };
     save();
-    if (VOTE_ENDPOINT) fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ code, vote: v, date: day() }) }).catch(() => {});
+    if (VOTE_ENDPOINT) fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ code, vote: v, date: day(), dev: deviceId() }) }).catch(() => {});
   } catch (e) {}
 }
 
 function screenSummary() {
+  ping("session");
   const n = session.answered, sc = session.score, d = state.elo.r - session.elo0;
   h(`${brand}<h2>${sc >= n * 0.8 ? "Excellente séance !" : sc >= n * 0.5 ? "Bonne séance." : "Séance faite : c'est en pratiquant qu'on progresse."}</h2>
   <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span><div class="small muted">À demain pour ta question du jour.</div></div></div>
@@ -3633,6 +3650,7 @@ window.addEventListener("hashchange", showCode);
 if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude/.test(location.hostname)) navigator.serviceWorker.register("sw.js").catch(() => {});
 
 // Démarrage
+ping("open");
 if (!showCode()) { if (state && state.placed) screenHome(); else { state = null; screenWelcome(); } }
 
 </script>
