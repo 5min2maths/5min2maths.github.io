@@ -133,10 +133,19 @@ def main():
     write_order()
     if missing: print("sans correspondance :", missing)
 
+# Notions sans code dans le référentiel de l'élève (soutien, reprises du CO) : rangées dans le thème ou chapitre le plus proche.
+THEME_FALLBACK = {
+    "MATU": {"exactes": "GE"},
+    "MP": {"divcrit": "CN", "premiers": "CN", "fracsimp": "CN", "fracops": "CN", "pctvar": "CN", "pythfig": "GE", "pythrec": "GE",
+           "eqfrac": "EQ", "parenth": "CA", "eq2fact": "EQ", "eqspec": "EQ", "sysprob": "SY", "lectgraph": "FO", "cercthales": "GE",
+           "trigexact": "TR", "geocomb": "GE", "affzero": "FA", "modaff": "FA", "f2formes": "FQ", "f2trois": "FQ",
+           "trigassoc": "TG", "trigeq2": "TG", "triaire": "TG", "droitesinter": "FA"},
+}
+
 def write_order():
     """src/ordre.js : rang de chaque notion dans l'ordre du référentiel (seulement des numéros, aucun libellé).
     CO et MP : ordre des lignes du référentiel ; matu : ordre des chapitres Sésamath (Ma1, Ma2), puis des lignes."""
-    rank = {}
+    rank, theme, label = {}, {}, {}
     for ref, (path, kc, kt) in REFS.items():
         if not path.exists(): continue
         rows = list(csv.DictReader(open(path, encoding="utf-8"), delimiter=";"))
@@ -145,15 +154,28 @@ def write_order():
                 m = re.search(r"Ma(\d) Ch(\d+)", r.get("sesamath", ""))
                 return (int(m.group(1)) * 100 + int(m.group(2))) * 1000 + i if m else int(r[kc][0]) * 100000 + i
             return i
-        rk = {}
+        rk, th = {}, {}
+        # Thème (matu) ou chapitre (MP) du référentiel : code « 1.AL.01 » → AL, « S1.CN.01 » → CN ; libellé court seulement.
+        lab = {}
+        for r in rows:
+            if ref == "CO": break
+            k = r[kc].split(".")[1]
+            lab.setdefault(k, re.sub(r"\s*\(S\d.*\)$", "", (r.get("theme") if ref == "MATU" else r.get("chapitre")) or k).strip())
         for i, r in enumerate(rows):
             for n, m in MAP.items():
                 if ref in m and re.match(m[ref], r[kc]):
+                    if key(i, r) < rk.get(n, 10 ** 9) and ref != "CO": th[n] = r[kc].split(".")[1]
                     rk[n] = min(rk.get(n, 10 ** 9), key(i, r))
         order = sorted(rk, key=lambda n: rk[n])
         rank[ref] = {n: k for k, n in enumerate(order)}
+        if ref != "CO":
+            for n, k in THEME_FALLBACK.get(ref, {}).items(): th.setdefault(n, k)
+            theme[ref], label[ref] = th, lab
     js = "// Généré par tools/referentiels.py : rang de chaque notion dans l'ordre du référentiel (CO, matu, MP).\n"
     js += "const ORDRE = " + json.dumps(rank, separators=(",", ":")) + ";\n"
+    js += "// Thème (matu) ou chapitre (MP) de chaque notion, et libellés courts des thèmes.\n"
+    js += "const ORDRE_THEME = " + json.dumps(theme, separators=(",", ":"), ensure_ascii=False) + ";\n"
+    js += "const THEME_LABEL = " + json.dumps(label, separators=(",", ":"), ensure_ascii=False) + ";\n"
     (ROOT / "src/ordre.js").write_text(js, encoding="utf-8")
 
 if __name__ == "__main__":

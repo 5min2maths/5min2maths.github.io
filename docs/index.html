@@ -385,6 +385,9 @@ function schoolMonth(date) {
 
 // Généré par tools/referentiels.py : rang de chaque notion dans l'ordre du référentiel (CO, matu, MP).
 const ORDRE = {"CO":{"decread":0,"deccomp":1,"decarr":2,"ordgr":3,"decadd":4,"dec10":5,"decmul":6,"decdiv":7,"decprob":8,"pow9":9,"prio":10,"tradexpr":11,"ulong":12,"uaire":13,"uvol":14,"utemps":15,"angtype":16,"quadri":17,"angtri":18,"multdiv":19,"divcrit":20,"premiers":21,"arith":22,"perim":23,"aire1":24,"aire2":25,"aire3":26,"relrep":27,"repere":28,"reladd":29,"solides":30,"volpave":31,"fracrep":32,"fracsimp":33,"fracconv":34,"fracper":35,"fractout":36,"fracadd":37,"proptab":38,"prop":39,"change":40,"agrand":41,"litelab":42,"valnum":43,"diagr":44,"rel":45,"disque":46,"grandmanq":47,"fracmul":48,"fracops":49,"pct":50,"vol":51,"airelat":52,"voldecomp":53,"vitesse":54,"carres":55,"rac":56,"racenc":57,"sci":58,"puiss":59,"scicalc":60,"reduire":61,"monomes":62,"distrib":63,"pyth":64,"pythfig":65,"eqverif":66,"eq1":67,"eqfrac":68,"probeq":69,"echelle":70,"pctvar":71,"pente":72,"tabval":73,"affine":74,"polyreg":75,"rotation":76,"pythrec":77,"volcone":78,"airepyr":79,"volcomp":80,"volmanq":81,"ucomp":82,"gquot":83,"parenth":84,"idrem":85,"factor":86,"formule":87,"eq2":88,"eq2fact":89,"eq2disc":90,"probeq2":91,"angles":92,"cercthales":93,"thalesrec":94,"thales":95,"sysprob":96,"sys2":97,"simil":98,"denombr":99,"proba":100},"MATU":{"racinv":0,"interpar":1,"domaine":2,"tabval":3,"fimg":4,"lectgraph":5,"modaff":6,"optim":7,"eq1":8,"eqfrac":9,"eqspec":10,"formule":11,"probeq":12,"sys2":13,"sysgraph":14,"sys3":15,"sysprob":16,"affine":17,"affzero":18,"droites":19,"reduire":20,"monomes":21,"polyop":22,"parenth":23,"distrib":24,"idrem":25,"factor":26,"factor2":27,"eq2fact":28,"eq2":29,"eq2disc":30,"trinfact":31,"probeq2":32,"eq3":33,"bicarre":34,"f2":35,"f2formes":36,"f2expr":37,"f2trois":38,"inter":39,"ineq2":40,"simil":41,"thales":42,"pyth":43,"pythfig":44,"pythrec":45,"euclide":46,"geocomb":47,"angles":48,"angtri":49,"cercthales":50,"trigo":51,"trigexact":52,"absval":53,"cart":54,"droitesinter":55,"cercle":56,"cercletan":57,"droitesrem":58,"polydiv":59,"polyfact":60,"ineq":61,"polyexpr":62,"valint":63,"fracrat":64,"fracetage":65,"eqrat":66,"probrat":67,"homog":68,"homogrec":69,"expo":70,"log":71,"logbase":72,"compo":73,"decomp":74,"bijection":75,"recip":76,"modexp":77,"trigeq2":78,"sinlaw":79,"triaire":80,"trigcercle":81,"trigassoc":82,"trigeq":83,"trigfn":84},"MP":{"ensembles":0,"vabs":1,"fracadd":2,"prio":3,"rel":4,"arith":5,"fracmul":6,"puiss":7,"rac":8,"ratden":9,"reduire":10,"distrib":11,"polyop":12,"idrem":13,"factor":14,"factor2":15,"fracrat":16,"valint":17,"formule":18,"eq1":19,"eqparam":20,"probeq":21,"eq2":22,"eq2disc":23,"trinfact":24,"exactes":25,"droitesrem":26,"pyth":27,"thales":28,"euclide":29,"angles":30,"trigo":31,"sys2":32,"sys3":33,"sysgraph":34,"fimg":35,"domaine":36,"inter":37,"affine":38,"droites":39,"f2":40,"f2expr":41,"optim":42,"trigcercle":43,"sinlaw":44,"trigeq":45,"statfreq":46,"stats":47,"quartiles":48}};
+// Thème (matu) ou chapitre (MP) de chaque notion, et libellés courts des thèmes.
+const ORDRE_THEME = {"MATU":{"reduire":"AL","monomes":"AL","polyop":"AL","parenth":"AL","distrib":"AL","idrem":"AL","factor":"AL","factor2":"AL","eq1":"AL","eqfrac":"AL","eqspec":"AL","formule":"AL","probeq":"AL","eq2fact":"AL","eq2":"AL","eq2disc":"AL","trinfact":"AL","probeq2":"AL","eq3":"AL","bicarre":"AL","sys2":"AL","sysgraph":"AL","sys3":"AL","sysprob":"AL","domaine":"FO","tabval":"FO","fimg":"FO","lectgraph":"FO","affine":"FO","affzero":"FO","droites":"FO","f2":"FO","f2formes":"FO","f2expr":"FO","f2trois":"FO","inter":"FO","interpar":"FO","ineq2":"FO","racinv":"FO","modaff":"FO","optim":"FO","angles":"GE","angtri":"GE","cercthales":"GE","simil":"GE","thales":"GE","pyth":"GE","pythfig":"GE","pythrec":"GE","euclide":"GE","geocomb":"GE","droitesrem":"GE","trigo":"GE","trigexact":"GE","polydiv":"AL","polyfact":"AL","valint":"AL","fracrat":"AL","fracetage":"AL","eqrat":"AL","probrat":"AL","ineq":"AL","compo":"FO","decomp":"FO","bijection":"FO","recip":"FO","polyexpr":"FO","absval":"FO","homog":"FO","homogrec":"FO","trigcercle":"FO","trigassoc":"FO","trigeq":"FO","trigeq2":"FO","trigfn":"FO","expo":"FO","log":"FO","logbase":"FO","modexp":"FO","sinlaw":"GE","triaire":"GE","cart":"GE","droitesinter":"GE","cercle":"GE","cercletan":"GE","exactes":"GE"},"MP":{"ensembles":"CN","vabs":"CN","fracadd":"CN","prio":"CN","rel":"CN","arith":"CN","fracmul":"CN","puiss":"CN","rac":"CN","ratden":"CN","reduire":"CA","distrib":"CA","polyop":"CA","idrem":"CA","factor":"CA","factor2":"CA","fracrat":"CA","valint":"CA","formule":"CA","eq1":"EQ","eqparam":"EQ","probeq":"EQ","eq2":"EQ","eq2disc":"EQ","trinfact":"EQ","exactes":"GE","droitesrem":"GE","pyth":"GE","thales":"GE","euclide":"GE","angles":"GE","trigo":"TR","sys2":"SY","sys3":"SY","sysgraph":"SY","fimg":"FO","domaine":"FO","inter":"FO","affine":"FA","droites":"FA","f2":"FQ","f2expr":"FQ","optim":"FQ","trigcercle":"TG","sinlaw":"TG","trigeq":"TG","statfreq":"AD","stats":"AD","quartiles":"AD","divcrit":"CN","premiers":"CN","fracsimp":"CN","fracops":"CN","pctvar":"CN","pythfig":"GE","pythrec":"GE","eqfrac":"EQ","parenth":"CA","eq2fact":"EQ","eqspec":"EQ","sysprob":"SY","lectgraph":"FO","cercthales":"GE","trigexact":"TR","geocomb":"GE","affzero":"FA","modaff":"FA","f2formes":"FQ","f2trois":"FQ","trigassoc":"TG","trigeq2":"TG","triaire":"TG","droitesinter":"FA"}};
+const THEME_LABEL = {"MATU":{"AL":"Algèbre","FO":"Fonctions","GE":"Géométrie","AN":"Analyse","GV":"Géométrie vectorielle","PS":"Probabilités et statistiques","NC":"Nombres complexes"},"MP":{"CN":"Calcul numérique","CA":"Calcul algébrique","EQ":"Équations","GE":"Géométrie","TR":"Trigonométrie du triangle rectangle","SY":"Systèmes d'équations linéaires","FO":"Fonctions : généralités","FA":"Fonctions affines","FQ":"Fonctions quadratiques","TG":"Trigonométrie","AD":"Analyse de données","EA":"Équations avancées","PL":"Puissances et logarithmes","EL":"Équations exponentielles et logarithmiques","VS":"Volumes et similitude","CO":"Systèmes de coordonnées","VE":"Géométrie vectorielle en dimension 2 et 3","DP":"Droites paramétriques","IN":"Inéquations","FP":"Fonctions : transformations et polynômes","FS":"Fonctions sinusoïdales, exponentielles et logarithmiques"}};
 
 // Calculateur d'expressions : lecture souple de la réponse de l'élève, calcul, mise en forme TeX,
 // équivalence d'expressions (par évaluation en plusieurs points) et contrôle de forme.
@@ -4010,7 +4013,15 @@ const Badges = {
   openOf(state, th) {
     return Engine.catalog(state.profile).filter((c) => c.current && c.theme === th && state.notions[c.id] && ["vu", "encours"].includes(state.notions[c.id].status)).map((c) => c.id);
   },
-  list() {
+  // Icône d'un badge de thème, d'après son libellé.
+  themeIcon(label) {
+    const T = [[/vectoriel|coordonn|droites param/i, "🧭"], [/probab|statist|données/i, "🎲"], [/complexe/i, "🌀"], [/analyse/i, "📉"], [/trigo/i, "📐"], [/géom|volume|espace/i, "📐"],
+      [/syst|équation|inéquation/i, "⚖️"], [/fonction|puissance|log/i, "📈"], [/algèbre|algébrique/i, "🔣"], [/nombre|numérique/i, "🔢"], [/grandeur|mesure/i, "📏"]];
+    return (T.find(([r]) => r.test(label)) || [0, "🏆"])[1];
+  },
+  // Badges de l'élève : les badges de thème suivent le découpage de son référentiel (CO, matu ou MP).
+  list(state) {
+    const themes = state && state.profile ? Engine.themeOrder(Engine.catalog(state.profile).filter((c) => c.current)) : Object.keys(THEMES);
     const L = [
       { id: "premier", fam: "reg", icon: "👣", name: "Premier pas", crit: "Terminer une première séance.", prog: (s, b) => [Math.min(b.days, 1), 1] },
       { id: "semaine", fam: "reg", icon: "📅", name: "Semaine pleine", crit: "S'entraîner 5 jours dans une même semaine (du lundi au dimanche).", prog: (s, b) => [Math.min(5, b.weeks[weekOf(day())] || 0, 5), 5, b.full >= 1] },
@@ -4021,7 +4032,7 @@ const Badges = {
       { id: "notion", fam: "mai", icon: "🎯", name: "Notion maîtrisée", crit: "Toutes les compétences d'une notion à 5 ou plus.",
         prog: (s) => Object.keys(s.notions).map((id) => this.notionProgress(s, id)).reduce((a, p) => (p[1] && p[0] / p[1] > a[0] / a[1] ? p : a), [0, 3]) },
       { id: "expert", fam: "mai", icon: "💎", name: "Expert", crit: "Une compétence atteint la note 6.", prog: (s) => [this.notes(s).some((n) => n >= 6) ? 1 : 0, 1] },
-      ...Object.keys(THEMES).map((th) => ({ id: "th-" + th, fam: "mai", icon: { no: "🔢", gm: "📏", fa: "📈", es: "📐" }[th], name: THEMES[th],
+      ...themes.map((th) => ({ id: "th-" + th, fam: "mai", icon: this.themeIcon(Engine.themeLabel(th)), name: Engine.themeLabel(th),
         crit: "Toutes les notions ouvertes de ce thème cette année maîtrisées (au moins 2 notions).",
         prog: (s) => { const ids = this.openOf(s, th), ok = ids.filter((id) => { const p = this.notionProgress(s, id); return p[0] === p[1]; }).length; return [ok, Math.max(2, ids.length)]; } })),
       { id: "retry", fam: "per", icon: "🔁", name: "Deuxième essai", crit: "Réussir 10 fois une question au deuxième essai.", prog: (s, b) => [Math.min(b.retry, 10), 10] },
@@ -4038,7 +4049,7 @@ const Badges = {
   check(state) {
     if (!state || !state.profile) return [];
     const b = this.bc(state), got = (state.badges = state.badges || {}), fresh = [];
-    for (const x of this.list()) {
+    for (const x of this.list(state)) {
       if (got[x.id]) continue;
       const p = x.prog(state, b);
       if (p[2] || (p[1] > 0 && p[0] >= p[1])) { got[x.id] = day(); fresh.push(x.id); }
@@ -4992,12 +5003,25 @@ const Engine = {
     return NOTIONS.filter((n) => { const pl = placeOf(n, profile); return pl && pl[0] <= profile.grade; }).map((n) => {
       const [g] = placeOf(n, profile);
       const again = profile.track !== "mp" && (n.again || []).includes(profile.grade);
-      return { ...n, defaultStatus: g < profile.grade ? "vu" : "avenir", current: g === profile.grade || again, again };
+      return { ...n, theme: this.themeKey(profile, n.id), defaultStatus: g < profile.grade ? "vu" : "avenir", current: g === profile.grade || again, again };
     });
+  },
+  refOf(profile) { return profile.track === "mp" ? "MP" : profile.grade >= 12 ? "MATU" : "CO"; },
+  // Thème d'une notion selon le référentiel de l'élève (13.11) : matu = thèmes (Algèbre, Fonctions…), MP = chapitres ;
+  // CO, ou notion absente du référentiel : les 4 thèmes du CO.
+  themeKey(profile, id) {
+    const ref = this.refOf(profile), k = ref !== "CO" && typeof ORDRE_THEME !== "undefined" && (ORDRE_THEME[ref] || {})[id];
+    return k ? ref + "." + k : NOTIONS.find((n) => n.id === id).theme;
+  },
+  themeLabel(key) { const [ref, k] = key.split("."); return k ? THEME_LABEL[ref][k] : THEMES[key]; },
+  // Thèmes présents dans une liste du catalogue, dans l'ordre du référentiel puis ceux du CO.
+  themeOrder(list) {
+    const keys = [...new Set(list.map((c) => c.theme))], pos = (k) => { const [ref, t] = k.split("."); return t ? Object.keys(THEME_LABEL[ref]).indexOf(t) : 100 + Object.keys(THEMES).indexOf(k); };
+    return keys.sort((a, b) => pos(a) - pos(b));
   },
   // Rang dans l'ordre du référentiel (CO, matu ou MP selon l'élève).
   rank(profile, id) {
-    const ref = profile.track === "mp" ? "MP" : profile.grade >= 12 ? "MATU" : "CO";
+    const ref = this.refOf(profile);
     const r = (ORDRE[ref] || {})[id] ?? ORDRE.CO[id];
     return r ?? 1000 + NOTIONS.findIndex((n) => n.id === id);
   },
@@ -5475,7 +5499,7 @@ function eloBlock() {
   <div class="stack"><b>${eloLabel(state.profile, e.r)}</b>${spark}</div></div>`;
 }
 function themeBars(lv) {
-  return Object.entries(lv).map(([th, m]) => `<div class="bar"><span>${THEMES[th]}</span><span class="track"><i style="width:${Math.round(m * 100)}%"></i></span></div>`).join("");
+  return Object.entries(lv).map(([th, m]) => `<div class="bar"><span>${Engine.themeLabel(th)}</span><span class="track"><i style="width:${Math.round(m * 100)}%"></i></span></div>`).join("");
 }
 
 function screenHome() {
@@ -5528,16 +5552,16 @@ function compsCard() {
   const cur = Engine.catalog(state.profile).filter((c) => c.current).map((c) => c.id), st = compStats(cur);
   return `<div class="card flat stack"><div class="spread"><h3>Mes compétences</h3>${st.avg !== null ? `<span class="note ${noteCls(Math.round(st.avg * 2) / 2)}">${String(Math.round(st.avg * 10) / 10).replace(".", ",")}</span>` : ""}</div>
   <p class="small muted">${st.tested ? `${st.tested} compétence${st.tested > 1 ? "s" : ""} notée${st.tested > 1 ? "s" : ""} sur ${st.total} cette année.` : "Tes notes apparaissent au fil des séances, compétence par compétence."}</p>
-  <p class="small">🏅 ${Object.keys(state.badges || {}).length} badge${Object.keys(state.badges || {}).length > 1 ? "s" : ""} sur ${Badges.list().length}</p>
+  <p class="small">🏅 ${Object.keys(state.badges || {}).length} badge${Object.keys(state.badges || {}).length > 1 ? "s" : ""} sur ${Badges.list(state).length}</p>
   <button id="comps">Voir mes compétences et mes badges</button></div>`;
 }
 function screenComps() {
   const cat = Engine.catalog(state.profile), comps = state.comps || {};
   const statusTag = (id) => { const s = state.notions[id]; return !s ? "" : s.status === "avenir" ? '<span class="tag">à venir</span>' : s.status === "nonvu" ? '<span class="tag">pas encore vu en classe</span>' : ""; };
-  const block = (list) => Object.keys(THEMES).map((th) => {
+  const block = (list) => Engine.themeOrder(list).map((th) => {
     const ns = list.filter((c) => c.theme === th).sort((a, b) => Engine.rank(state.profile, a.id) - Engine.rank(state.profile, b.id));
     if (!ns.length) return "";
-    return `<div class="card flat"><h3>${THEMES[th]}</h3>${ns.map((c) => `<div class="cnotion"><div class="spread"><b>${c.label}</b>${statusTag(c.id)}</div>
+    return `<div class="card flat"><h3>${Engine.themeLabel(th)}</h3>${ns.map((c) => `<div class="cnotion"><div class="spread"><b>${c.label}</b>${statusTag(c.id)}</div>
       ${compsOf(c.id).map((k) => { const n = compNote(comps[k.cid]); return `<div class="comp"><span>${k.label}</span><span class="note ${noteCls(n)}">${noteTxt(n)}</span></div>`; }).join("")}</div>`).join("")}</div>`;
   }).join("");
   const cur = cat.filter((c) => c.current), old = cat.filter((c) => !c.current), st = compStats(cur.map((c) => c.id));
@@ -5555,7 +5579,7 @@ function screenComps() {
 
 // ---------------- Badges ----------------
 function newBadgesCard() {
-  const ids = (state.badgesNew || []).filter((id, i, a) => a.indexOf(id) === i), L = Badges.list();
+  const ids = (state.badgesNew || []).filter((id, i, a) => a.indexOf(id) === i), L = Badges.list(state);
   if (!ids.length) return "";
   state.badgesNew = []; save();
   const xs = ids.map((id) => L.find((x) => x.id === id)).filter(Boolean);
@@ -5563,7 +5587,7 @@ function newBadgesCard() {
   ${xs.map((x) => `<div class="bdg-row">${Badges.icon(x, true, 64)}<div><b>${x.name}</b><div class="small muted">${x.crit}</div></div></div>`).join("")}</div>`;
 }
 function badgesSection() {
-  const got = state.badges || {}, b = Badges.bc(state), L = Badges.list();
+  const got = state.badges || {}, b = Badges.bc(state), L = Badges.list(state);
   const fmt = (d) => d.slice(8, 10) + "." + d.slice(5, 7);
   return `<div class="card flat stack bdg-sec"><div class="spread"><h3>Mes badges</h3><b>${Object.keys(got).length} / ${L.length}</b></div>
   ${Object.entries(BADGE_FAM).map(([f, label]) => `<div class="eyebrow">${label}</div><div class="bdg-grid">${L.filter((x) => x.fam === f).map((x) => {
@@ -5676,11 +5700,11 @@ function screenNow() {
   const p = state.profile, cur = Engine.catalog(p).filter((c) => c.current && state.notions[c.id]);
   const chosen = new Set(Engine.nowActive(state) ? state.now.ids : []), sug = Engine.nowSuggest(state);
   const box = (c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${c.label}</span></label>`;
-  const groups = Object.keys(THEMES).map((th) => [th, cur.filter((c) => c.theme === th && !sug.includes(c.id)).sort((a, b) => Engine.rank(p, a.id) - Engine.rank(p, b.id))]).filter(([, l]) => l.length);
+  const groups = Engine.themeOrder(cur).map((th) => [th, cur.filter((c) => c.theme === th && !sug.includes(c.id)).sort((a, b) => Engine.rank(p, a.id) - Engine.rank(p, b.id))]).filter(([, l]) => l.length);
   h(`${brand}<h2>En ce moment <span class="mark">en classe</span></h2>
   <p class="muted">Choisis 1 à 3 notions que vous travaillez en ce moment. Tes séances s'y concentreront, avec le rappel de cours la première fois, et je te redemanderai dans 3 semaines.</p>
   ${sug.length ? `<div class="card flat"><h3>Probablement en ce moment</h3><div class="checks">${sug.map((id) => box(cur.find((c) => c.id === id))).join("")}</div></div>` : ""}
-  <details class="olds"><summary>Toutes les notions de l'année</summary>${groups.map(([th, l]) => `<div class="card flat"><h3>${THEMES[th]}</h3><div class="checks">${l.map(box).join("")}</div></div>`).join("")}</details>
+  <details class="olds"><summary>Toutes les notions de l'année</summary>${groups.map(([th, l]) => `<div class="card flat"><h3>${Engine.themeLabel(th)}</h3><div class="checks">${l.map(box).join("")}</div></div>`).join("")}</details>
   <p class="small muted" id="nerr"></p>
   <button class="btn-primary btn-big" id="save">C'est ça</button>
   <div class="row"><button class="btn-ghost" id="back">Annuler</button>${chosen.size ? '<button class="btn-ghost" id="none">Rien de particulier en ce moment</button>' : ""}</div>`);
@@ -5714,13 +5738,13 @@ function screenPrep() {
   const chosen = new Set(state.prep && Engine.prepActive(state) ? state.prep.ids : []);
   // On ne demande que les notions de l'année : celles des années précédentes sont vues, sans poser la question.
   const groups = {};
-  Object.keys(THEMES).forEach((th) => { const l = cat.filter((c) => c.current && c.theme === th); if (l.length) groups[th] = l; });
+  Engine.themeOrder(cat.filter((c) => c.current)).forEach((th) => { const l = cat.filter((c) => c.current && c.theme === th); if (l.length) groups[th] = l; });
   const date = state.prep && Engine.prepActive(state) ? state.prep.date : addDays(day(), 7);
   h(`${brand}<h2>Je prépare <span class="mark">un test</span></h2>
   <p class="muted">Choisis les notions de ton test et sa date. Jusqu'à ce jour-là, tes séances porteront surtout sur elles, avec un problème pour finir.</p>
   <div class="card flat stack"><label for="pdate"><h3>Date du test</h3></label><input type="date" id="pdate" value="${date}" min="${day()}" class="datein"></div>
   ${Object.keys(groups).length ? "" : '<div class="card flat"><p class="muted">Rien à cocher : tout ce qui te concerne vient des années précédentes.</p></div>'}
-  ${Object.entries(groups).map(([th, list]) => `<div class="card flat"><h3>${THEMES[th]}</h3><div class="checks">${list.map((c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${c.label}</span></label>`).join("")}</div></div>`).join("")}
+  ${Object.entries(groups).map(([th, list]) => `<div class="card flat"><h3>${Engine.themeLabel(th)}</h3><div class="checks">${list.map((c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${c.label}</span></label>`).join("")}</div></div>`).join("")}
   <p class="small muted" id="perr"></p>
   <button class="btn-primary btn-big" id="save">Enregistrer mon test</button>
   <div class="row"><button class="btn-ghost" id="back">Annuler</button>${chosen.size ? '<button class="btn-ghost" id="del">Supprimer ce test</button>' : ""}</div>`);

@@ -105,12 +105,25 @@ const Engine = {
     return NOTIONS.filter((n) => { const pl = placeOf(n, profile); return pl && pl[0] <= profile.grade; }).map((n) => {
       const [g] = placeOf(n, profile);
       const again = profile.track !== "mp" && (n.again || []).includes(profile.grade);
-      return { ...n, defaultStatus: g < profile.grade ? "vu" : "avenir", current: g === profile.grade || again, again };
+      return { ...n, theme: this.themeKey(profile, n.id), defaultStatus: g < profile.grade ? "vu" : "avenir", current: g === profile.grade || again, again };
     });
+  },
+  refOf(profile) { return profile.track === "mp" ? "MP" : profile.grade >= 12 ? "MATU" : "CO"; },
+  // Thème d'une notion selon le référentiel de l'élève (13.11) : matu = thèmes (Algèbre, Fonctions…), MP = chapitres ;
+  // CO, ou notion absente du référentiel : les 4 thèmes du CO.
+  themeKey(profile, id) {
+    const ref = this.refOf(profile), k = ref !== "CO" && typeof ORDRE_THEME !== "undefined" && (ORDRE_THEME[ref] || {})[id];
+    return k ? ref + "." + k : NOTIONS.find((n) => n.id === id).theme;
+  },
+  themeLabel(key) { const [ref, k] = key.split("."); return k ? THEME_LABEL[ref][k] : THEMES[key]; },
+  // Thèmes présents dans une liste du catalogue, dans l'ordre du référentiel puis ceux du CO.
+  themeOrder(list) {
+    const keys = [...new Set(list.map((c) => c.theme))], pos = (k) => { const [ref, t] = k.split("."); return t ? Object.keys(THEME_LABEL[ref]).indexOf(t) : 100 + Object.keys(THEMES).indexOf(k); };
+    return keys.sort((a, b) => pos(a) - pos(b));
   },
   // Rang dans l'ordre du référentiel (CO, matu ou MP selon l'élève).
   rank(profile, id) {
-    const ref = profile.track === "mp" ? "MP" : profile.grade >= 12 ? "MATU" : "CO";
+    const ref = this.refOf(profile);
     const r = (ORDRE[ref] || {})[id] ?? ORDRE.CO[id];
     return r ?? 1000 + NOTIONS.findIndex((n) => n.id === id);
   },

@@ -105,7 +105,7 @@ function eloBlock() {
   <div class="stack"><b>${eloLabel(state.profile, e.r)}</b>${spark}</div></div>`;
 }
 function themeBars(lv) {
-  return Object.entries(lv).map(([th, m]) => `<div class="bar"><span>${THEMES[th]}</span><span class="track"><i style="width:${Math.round(m * 100)}%"></i></span></div>`).join("");
+  return Object.entries(lv).map(([th, m]) => `<div class="bar"><span>${Engine.themeLabel(th)}</span><span class="track"><i style="width:${Math.round(m * 100)}%"></i></span></div>`).join("");
 }
 
 function screenHome() {
@@ -158,16 +158,16 @@ function compsCard() {
   const cur = Engine.catalog(state.profile).filter((c) => c.current).map((c) => c.id), st = compStats(cur);
   return `<div class="card flat stack"><div class="spread"><h3>Mes compétences</h3>${st.avg !== null ? `<span class="note ${noteCls(Math.round(st.avg * 2) / 2)}">${String(Math.round(st.avg * 10) / 10).replace(".", ",")}</span>` : ""}</div>
   <p class="small muted">${st.tested ? `${st.tested} compétence${st.tested > 1 ? "s" : ""} notée${st.tested > 1 ? "s" : ""} sur ${st.total} cette année.` : "Tes notes apparaissent au fil des séances, compétence par compétence."}</p>
-  <p class="small">🏅 ${Object.keys(state.badges || {}).length} badge${Object.keys(state.badges || {}).length > 1 ? "s" : ""} sur ${Badges.list().length}</p>
+  <p class="small">🏅 ${Object.keys(state.badges || {}).length} badge${Object.keys(state.badges || {}).length > 1 ? "s" : ""} sur ${Badges.list(state).length}</p>
   <button id="comps">Voir mes compétences et mes badges</button></div>`;
 }
 function screenComps() {
   const cat = Engine.catalog(state.profile), comps = state.comps || {};
   const statusTag = (id) => { const s = state.notions[id]; return !s ? "" : s.status === "avenir" ? '<span class="tag">à venir</span>' : s.status === "nonvu" ? '<span class="tag">pas encore vu en classe</span>' : ""; };
-  const block = (list) => Object.keys(THEMES).map((th) => {
+  const block = (list) => Engine.themeOrder(list).map((th) => {
     const ns = list.filter((c) => c.theme === th).sort((a, b) => Engine.rank(state.profile, a.id) - Engine.rank(state.profile, b.id));
     if (!ns.length) return "";
-    return `<div class="card flat"><h3>${THEMES[th]}</h3>${ns.map((c) => `<div class="cnotion"><div class="spread"><b>${c.label}</b>${statusTag(c.id)}</div>
+    return `<div class="card flat"><h3>${Engine.themeLabel(th)}</h3>${ns.map((c) => `<div class="cnotion"><div class="spread"><b>${c.label}</b>${statusTag(c.id)}</div>
       ${compsOf(c.id).map((k) => { const n = compNote(comps[k.cid]); return `<div class="comp"><span>${k.label}</span><span class="note ${noteCls(n)}">${noteTxt(n)}</span></div>`; }).join("")}</div>`).join("")}</div>`;
   }).join("");
   const cur = cat.filter((c) => c.current), old = cat.filter((c) => !c.current), st = compStats(cur.map((c) => c.id));
@@ -185,7 +185,7 @@ function screenComps() {
 
 // ---------------- Badges ----------------
 function newBadgesCard() {
-  const ids = (state.badgesNew || []).filter((id, i, a) => a.indexOf(id) === i), L = Badges.list();
+  const ids = (state.badgesNew || []).filter((id, i, a) => a.indexOf(id) === i), L = Badges.list(state);
   if (!ids.length) return "";
   state.badgesNew = []; save();
   const xs = ids.map((id) => L.find((x) => x.id === id)).filter(Boolean);
@@ -193,7 +193,7 @@ function newBadgesCard() {
   ${xs.map((x) => `<div class="bdg-row">${Badges.icon(x, true, 64)}<div><b>${x.name}</b><div class="small muted">${x.crit}</div></div></div>`).join("")}</div>`;
 }
 function badgesSection() {
-  const got = state.badges || {}, b = Badges.bc(state), L = Badges.list();
+  const got = state.badges || {}, b = Badges.bc(state), L = Badges.list(state);
   const fmt = (d) => d.slice(8, 10) + "." + d.slice(5, 7);
   return `<div class="card flat stack bdg-sec"><div class="spread"><h3>Mes badges</h3><b>${Object.keys(got).length} / ${L.length}</b></div>
   ${Object.entries(BADGE_FAM).map(([f, label]) => `<div class="eyebrow">${label}</div><div class="bdg-grid">${L.filter((x) => x.fam === f).map((x) => {
@@ -306,11 +306,11 @@ function screenNow() {
   const p = state.profile, cur = Engine.catalog(p).filter((c) => c.current && state.notions[c.id]);
   const chosen = new Set(Engine.nowActive(state) ? state.now.ids : []), sug = Engine.nowSuggest(state);
   const box = (c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${c.label}</span></label>`;
-  const groups = Object.keys(THEMES).map((th) => [th, cur.filter((c) => c.theme === th && !sug.includes(c.id)).sort((a, b) => Engine.rank(p, a.id) - Engine.rank(p, b.id))]).filter(([, l]) => l.length);
+  const groups = Engine.themeOrder(cur).map((th) => [th, cur.filter((c) => c.theme === th && !sug.includes(c.id)).sort((a, b) => Engine.rank(p, a.id) - Engine.rank(p, b.id))]).filter(([, l]) => l.length);
   h(`${brand}<h2>En ce moment <span class="mark">en classe</span></h2>
   <p class="muted">Choisis 1 à 3 notions que vous travaillez en ce moment. Tes séances s'y concentreront, avec le rappel de cours la première fois, et je te redemanderai dans 3 semaines.</p>
   ${sug.length ? `<div class="card flat"><h3>Probablement en ce moment</h3><div class="checks">${sug.map((id) => box(cur.find((c) => c.id === id))).join("")}</div></div>` : ""}
-  <details class="olds"><summary>Toutes les notions de l'année</summary>${groups.map(([th, l]) => `<div class="card flat"><h3>${THEMES[th]}</h3><div class="checks">${l.map(box).join("")}</div></div>`).join("")}</details>
+  <details class="olds"><summary>Toutes les notions de l'année</summary>${groups.map(([th, l]) => `<div class="card flat"><h3>${Engine.themeLabel(th)}</h3><div class="checks">${l.map(box).join("")}</div></div>`).join("")}</details>
   <p class="small muted" id="nerr"></p>
   <button class="btn-primary btn-big" id="save">C'est ça</button>
   <div class="row"><button class="btn-ghost" id="back">Annuler</button>${chosen.size ? '<button class="btn-ghost" id="none">Rien de particulier en ce moment</button>' : ""}</div>`);
@@ -344,13 +344,13 @@ function screenPrep() {
   const chosen = new Set(state.prep && Engine.prepActive(state) ? state.prep.ids : []);
   // On ne demande que les notions de l'année : celles des années précédentes sont vues, sans poser la question.
   const groups = {};
-  Object.keys(THEMES).forEach((th) => { const l = cat.filter((c) => c.current && c.theme === th); if (l.length) groups[th] = l; });
+  Engine.themeOrder(cat.filter((c) => c.current)).forEach((th) => { const l = cat.filter((c) => c.current && c.theme === th); if (l.length) groups[th] = l; });
   const date = state.prep && Engine.prepActive(state) ? state.prep.date : addDays(day(), 7);
   h(`${brand}<h2>Je prépare <span class="mark">un test</span></h2>
   <p class="muted">Choisis les notions de ton test et sa date. Jusqu'à ce jour-là, tes séances porteront surtout sur elles, avec un problème pour finir.</p>
   <div class="card flat stack"><label for="pdate"><h3>Date du test</h3></label><input type="date" id="pdate" value="${date}" min="${day()}" class="datein"></div>
   ${Object.keys(groups).length ? "" : '<div class="card flat"><p class="muted">Rien à cocher : tout ce qui te concerne vient des années précédentes.</p></div>'}
-  ${Object.entries(groups).map(([th, list]) => `<div class="card flat"><h3>${THEMES[th]}</h3><div class="checks">${list.map((c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${c.label}</span></label>`).join("")}</div></div>`).join("")}
+  ${Object.entries(groups).map(([th, list]) => `<div class="card flat"><h3>${Engine.themeLabel(th)}</h3><div class="checks">${list.map((c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${c.label}</span></label>`).join("")}</div></div>`).join("")}
   <p class="small muted" id="perr"></p>
   <button class="btn-primary btn-big" id="save">Enregistrer mon test</button>
   <div class="row"><button class="btn-ghost" id="back">Annuler</button>${chosen.size ? '<button class="btn-ghost" id="del">Supprimer ce test</button>' : ""}</div>`);

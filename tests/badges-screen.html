@@ -16,6 +16,7 @@ else if (w === "restore") Backup.encode(state).then((c) => { state = null; scree
 else if (w === "privacy") screenPrivacy(screenHome);
 else if (w === "home") screenHome();
 else if (w === "nowpick") screenNow();
+else if (w.startsWith("now-")) { state = Engine.newState({ system: "CH", grade: 12, track: w.slice(4), minutes: 5 }); Engine.autoInit(state); state.placed = true; screenNow(); document.querySelector("details.olds").open = true; }
 else if (w === "nowset") { Engine.setNow(state, ["fracmul", "fracops"].filter((x) => state.notions[x]).concat(["prio"]).slice(0, 2)); screenHome(); }
 else if (w === "nowstale") { Engine.setNow(state, ["prio"]); state.now.since = addDays(day(), -22); screenHome(); }
 else screenComps();
