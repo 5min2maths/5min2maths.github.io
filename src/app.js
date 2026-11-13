@@ -199,10 +199,27 @@ function screenPrep() {
 }
 
 // ---------------- Mini-leçons ----------------
+// Découpe un texte en phrases (hors des formules \( … \)) : une phrase par ligne, plus lisible.
+function sentences(t) {
+  const out = []; let cur = "", math = 0;
+  for (let i = 0; i < t.length; i++) {
+    if (t.startsWith("\\(", i)) math++;
+    if (t.startsWith("\\)", i)) math = Math.max(0, math - 1);
+    cur += t[i];
+    // fin de phrase hors formule : « . » suivi d'une majuscule, d'un chiffre ou d'une formule ; « ; » suivi d'une majuscule
+    const next = t.slice(i + 1, i + 4);
+    const endDot = t[i] === "." && /^ (?:[A-ZÀÂÉÈÊÎÔÛÇ0-9«]|\\\()/.test(next);
+    const endSemi = t[i] === ";" && /^ [A-ZÀÂÉÈÊÎÔÛÇ]/.test(next);
+    const listOfFormulas = t[i] === "," && cur.endsWith("\\),") && next.startsWith(" \\("); // « \(a\), \(b\) » : une formule par ligne
+    if (!math && (endDot || endSemi || listOfFormulas)) { out.push(cur.trim().replace(/,$/, "")); cur = ""; }
+  }
+  if (cur.trim()) out.push(cur.trim());
+  return out;
+}
 function lessonBody(id) {
   const L = LESSONS[id];
   if (!L) return "";
-  return `<p>${L.intro}</p><div class="rule"><b>À retenir</b> · ${L.regle}</div>
+  return `<p>${L.intro}</p><div class="rule"><b>À retenir</b>${(() => { const ss = sentences(L.regle); return ss.length > 1 ? "<ul>" + ss.map((x) => "<li>" + x + "</li>").join("") + "</ul>" : " · " + L.regle; })()}</div>
   <div class="ex-list">${L.exemple.map((e) => `<div>${e}</div>`).join("")}</div>
   <div class="trap"><b>Piège</b> · ${L.piege}</div>`;
 }

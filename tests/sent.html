@@ -1,0 +1,7 @@
+<meta charset="utf-8"><script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/competences.js"></script><script src="../src/lessons.js"></script><script src="../src/engine.js"></script><div id="app"></div><script src="../src/app.js"></script>
+<pre id="o"></pre><script>
+const out = []; for (const id of ["droitesinter", "angtype", "decarr", "trigassoc", "prio"]) out.push(id + " → " + sentences(LESSONS[id].regle).join("  ‖  "));
+let maxOne = 0; for (const [id, L] of Object.entries(LESSONS)) { const n = sentences(L.regle).length; if (n === 1 && L.regle.length > 160) { maxOne++; out.push("  bloc : " + id + " : " + L.regle.slice(0, 160)); } }
+out.push("règles longues restées en un bloc : " + maxOne);
+document.getElementById("o").textContent = out.join("\n");
+</script>
