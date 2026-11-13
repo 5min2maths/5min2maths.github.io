@@ -1,7 +1,7 @@
 <link rel="stylesheet" href="../src/style.css"><!doctype html><meta charset="utf-8"><div id="app"></div><pre id="o"></pre>
 <script>window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}</script>
 <script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script>
-<script src="../src/gen3.js"></script><script src="../src/competences.js"></script><script src="../src/lessons.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script src="../src/gen3.js"></script><script src="../src/competences.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
 <script>
 state = Engine.newState({ system: "CH", grade: 9, track: "college", minutes: 5 }); Engine.autoInit(state);
 for (const [id, d, sc] of [["decread", 1, 1], ["decread", 1, 1], ["decread", 1, 0.5], ["decread", 2, 1], ["decread", 2, 0], ["decread", 2, 0], ["decarr", 1, 1], ["decarr", 1, 1], ["decarr", 1, 1], ["prio", 1, 1], ["prio", 1, 0], ["prio", 1, 1]]) Engine.recordComp(state, id, d, sc);

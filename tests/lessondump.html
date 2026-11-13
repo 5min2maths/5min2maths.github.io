@@ -1,0 +1,7 @@
+<meta charset="utf-8"><script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/competences.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script>
+<pre id="o"></pre><script>
+const want = location.hash.slice(1).split(","), out = [];
+for (const n of NOTIONS) { const y = n.CH ? n.CH[0] : 99; if (!want.includes(String(y)) && !(want.includes("mp") && !n.CH)) continue; const L = LESSONS[n.id];
+  out.push("## " + n.id + " [" + y + "] " + n.label + (typeof LESSON_FIGS !== "undefined" && LESSON_FIGS[n.id] ? " (figure)" : ""), "T: " + L.titre, "I: " + L.intro, "R: " + L.regle, "E: " + L.exemple.join(" ‖ "), "P: " + L.piege, ""); }
+document.getElementById("o").textContent = out.join("\n");
+</script>

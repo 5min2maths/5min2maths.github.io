@@ -1,0 +1,10 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css"><style>body{background:#fff;padding:6px}.g{display:grid;grid-template-columns:repeat(3,380px);gap:6px}.g>div{border:1px solid #ccc;padding:6px;font-size:13px}</style>
+<script>window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "global" } };</script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script>
+<script src="../src/gen3.js"></script><script src="../src/competences.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/engine.js"></script>
+<script>const app = document.createElement("div"); let state = null; const save = () => 0;</script>
+<div class="g" id="g"></div><script>
+const ids = (location.hash.slice(1) || "euclide,trigo,ineq2,f2,sinlaw,droites").split(",");
+function sentences(t){const o=[];let c="",m=0;for(let i=0;i<t.length;i++){if(t.startsWith("\\(",i))m++;if(t.startsWith("\\)",i))m=Math.max(0,m-1);c+=t[i];const n=t.slice(i+1,i+4);const d=t[i]==="."&&/^ (?:[A-ZÀÂÉÈÊÎÔÛÇ0-9«]|\\\()/.test(n),s=t[i]===";"&&/^ [A-ZÀÂÉÈÊÎÔÛÇ]/.test(n),l=t[i]===","&&c.endsWith("\\),")&&n.startsWith(" \\(");if(!m&&(d||s||l)){o.push(c.trim().replace(/,$/,""));c="";}}if(c.trim())o.push(c.trim());return o;}
+document.getElementById("g").innerHTML = ids.map((id) => { const L = LESSONS[id], f = LESSON_FIGS[id] ? LESSON_FIGS[id]() : ""; return "<div><b>" + L.titre + "</b><p>" + L.intro + "</p>" + f + '<div class="rule"><b>À retenir</b><ul>' + sentences(L.regle).map((x) => "<li>" + x + "</li>").join("") + "</ul></div>" + L.exemple.map((e) => "<p>" + e + "</p>").join("") + '<div class="trap"><b>Piège</b> · ' + L.piege + "</div></div>"; }).join("");
+</script>
