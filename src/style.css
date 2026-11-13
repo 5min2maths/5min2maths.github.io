@@ -229,3 +229,5 @@ details.olds summary { cursor: pointer; color: var(--blue); font-weight: 700; pa
 details.cmt { font-size: 0.9rem; }
 details.cmt summary { cursor: pointer; color: var(--blue); padding: 4px 0; }
 details.cmt textarea { width: 100%; box-sizing: border-box; font: inherit; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--ink); resize: vertical; margin: 6px 0; }
+.lfb { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.lfb button[aria-pressed="true"] { background: var(--blue-soft); border-color: var(--blue); }

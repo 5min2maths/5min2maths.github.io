@@ -7,7 +7,7 @@ let state = Store.load();
 if (state && state.profile && !SYSTEMS[state.profile.system]) state = null; // système masqué (France) : on repart de zéro
 if (state && state.profile && state.notions && Object.keys(state.notions).length && Engine.migrate(state)) Store.save(state);
 const save = () => Store.save(state);
-const h = (html) => { app.innerHTML = html; typeset(app); window.scrollTo(0, 0); };
+const h = (html) => { app.innerHTML = html; typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const gradeName = (p) => (SYSTEMS[p.system].grades.find(([g]) => g === p.grade) || [0, ""])[1];
 const brand = '<div class="brand"><b>5 minutes de maths</b><span>par jour</span></div>';
@@ -219,9 +219,12 @@ function sentences(t) {
 function lessonBody(id) {
   const L = LESSONS[id];
   if (!L) return "";
-  return `<p>${L.intro}</p><div class="rule"><b>À retenir</b>${(() => { const ss = sentences(L.regle); return ss.length > 1 ? "<ul>" + ss.map((x) => "<li>" + x + "</li>").join("") + "</ul>" : " · " + L.regle; })()}</div>
+  const fig = typeof LESSON_FIGS !== "undefined" && LESSON_FIGS[id] ? `<div class="figwrap">${LESSON_FIGS[id]()}</div>` : "";
+  return `<p>${L.intro}</p>${fig}<div class="rule"><b>À retenir</b>${(() => { const ss = sentences(L.regle); return ss.length > 1 ? "<ul>" + ss.map((x) => "<li>" + x + "</li>").join("") + "</ul>" : " · " + L.regle; })()}</div>
   <div class="ex-list">${L.exemple.map((e) => `<div>${e}</div>`).join("")}</div>
-  <div class="trap"><b>Piège</b> · ${L.piege}</div>`;
+  <div class="trap"><b>Piège</b> · ${L.piege}</div>
+  <div class="lfb" data-id="${id}"><span class="small muted">Ce rappel est…</span><button class="small" data-v="up">👍 clair</button><button class="small" data-v="down">🤔 pas compris</button><span class="small muted lfb-msg"></span></div>
+  ${commentBox("💬 Un commentaire sur ce rappel ?", "Ce qui n'est pas clair, un exemple qui manque… (n'écris pas ton nom)", "lecon-" + id)}`;
 }
 const lessonDetails = (id) => (LESSONS[id] ? `<details class="lesson"><summary>📖 Rappel de cours</summary><div class="stack">${lessonBody(id)}</div></details>` : "");
 function screenLesson(id, cont) {
@@ -514,19 +517,42 @@ function ping(ev) {
 }
 
 // Commentaire libre (facultatif) : envoyé avec le code de la question, la classe et l'identifiant anonyme de l'appareil.
-const commentBox = (title = "💬 Un commentaire sur cette question ?", ph = "Une erreur, une consigne pas claire, une idée… (n'écris pas ton nom)") =>
-  `<details class="cmt"><summary>${title}</summary><textarea id="cmt" maxlength="500" rows="3" placeholder="${ph}"></textarea>
-  <div class="spread"><span class="small muted" id="cmtok"></span><button class="small" id="cmtsend">Envoyer</button></div></details>`;
+const commentBox = (title = "💬 Un commentaire sur cette question ?", ph = "Une erreur, une consigne pas claire, une idée… (n'écris pas ton nom)", code = "") =>
+  `<details class="cmt"${code ? ` data-code="${code}"` : ""}><summary>${title}</summary><textarea class="cmt-t" maxlength="500" rows="3" placeholder="${ph}"></textarea>
+  <div class="spread"><span class="small muted cmt-ok"></span><button class="small cmt-s">Envoyer</button></div></details>`;
 function bindComment(root, code) {
-  const b = root.querySelector("#cmtsend"), ta = root.querySelector("#cmt"), ok = root.querySelector("#cmtok");
-  if (!b) return;
-  b.onclick = () => {
-    const text = ta.value.trim();
-    if (!text) { ok.textContent = "Écris d'abord ton commentaire."; return; }
-    comment(code, text);
-    ta.value = ""; ta.disabled = true; b.disabled = true; ok.textContent = "Merci ! Ton commentaire est envoyé.";
-  };
+  root.querySelectorAll("details.cmt").forEach((box) => {
+    const b = box.querySelector(".cmt-s"), ta = box.querySelector(".cmt-t"), ok = box.querySelector(".cmt-ok");
+    if (!b || b.dataset.bound) return;
+    b.dataset.bound = 1;
+    b.onclick = () => {
+      const text = ta.value.trim();
+      if (!text) { ok.textContent = "Écris d'abord ton commentaire."; return; }
+      comment(box.dataset.code || code, text);
+      ta.value = ""; ta.disabled = true; b.disabled = true; ok.textContent = "Merci ! Ton commentaire est envoyé.";
+    };
+  });
 }
+// Rappel de cours : « clair » ou « pas compris » (+ commentaire). « Pas compris » : la leçon sera reproposée.
+function bindLessonFeedback(root) {
+  root.querySelectorAll(".lfb").forEach((box) => {
+    if (box.dataset.bound) return;
+    box.dataset.bound = 1;
+    const id = box.dataset.id;
+    box.querySelectorAll("button[data-v]").forEach((b) => (b.onclick = () => {
+      vote("lecon-" + id, b.dataset.v === "up" ? "up" : "down");
+      box.querySelectorAll("button[data-v]").forEach((x) => x.setAttribute("aria-pressed", x === b));
+      const msg = box.querySelector(".lfb-msg");
+      if (b.dataset.v === "down") {
+        if (state && state.notions[id]) { state.notions[id].lessonSeen = false; save(); }
+        msg.textContent = "Merci. Dis-nous ce qui n'est pas clair : on améliorera ce rappel.";
+        const d = box.parentNode.querySelector("details.cmt"); if (d) d.open = true;
+      } else msg.textContent = "Merci !";
+    }));
+  });
+  bindComment(root, "");
+}
+
 function comment(code, text) {
   try {
     const p = state && state.profile, niveau = p ? gradeName(p) + (p.track === "mp" ? " MP" : "") : "";
@@ -553,7 +579,7 @@ function screenSummary() {
   <div class="card stack"><div class="spread"><span>Score</span><b>${String(sc).replace(".", ",")} / ${n}</b></div>
   <div class="spread"><span>Mathélo</span><b>${state.elo.r} <span class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</span></b></div>
   <div class="small muted">Notions travaillées : ${[...session.ids].map((id) => NOTIONS.find((x) => x.id === id).label).join(" · ")}</div></div>
-  <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)")}</div>
+  <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)", "app")}</div>
   <button class="btn-primary btn-big" id="home">Retour à l'accueil</button>`);
   bindComment(app, "app");
   document.getElementById("home").onclick = screenHome;
