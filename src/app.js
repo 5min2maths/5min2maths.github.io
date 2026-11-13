@@ -471,14 +471,22 @@ function typeKey(inp, k) {
   const at = k.indexOf("|"), t = k.replace("|", ""), c = s + (at >= 0 ? at : t.length);
   inp.value = inp.value.slice(0, s) + t + inp.value.slice(e); inp.setSelectionRange(c, c);
 }
-function previewOf(inp, prev) {
+// Aperçu d'une réponse : ensemble (intervalles, ℝ \ {…}, x ≥ …) pour les questions d'ensemble, sinon calcul.
+function previewHtml(v, spec) {
+  if (isSetSpec(spec)) {
+    const ivs = SolSet.parse(v).slice().sort((x, y) => x[0] - y[0]);
+    // ℝ privé de points : ]-∞ ; a[ ∪ ]a ; b[ ∪ … ∪ ]z ; +∞[
+    const holes = ivs.length && ivs[0][0] === -Infinity && ivs[ivs.length - 1][2] === Infinity && ivs.every((x, i) => !x[1] && !x[3] && (i === 0 || x[0] === ivs[i - 1][2])) ? ivs.slice(1).map((x) => x[0]) : null;
+    const nt = (x) => SolSet.show([[x, true, x, true]]).replace(/^\\\{|\\\}$/g, "");
+    return "\\(S = " + (holes ? "\\mathbb{R}" + (holes.length ? " \\setminus \\{" + holes.map(nt).join(" ; ") + "\\}" : "") : SolSet.show(ivs)) + "\\)";
+  }
+  const t = Expr.parse(v), val = Expr.vars(t).size || t.t === "list" ? "" : Expr.evaluate(t);
+  return "\\(" + Expr.tex(t) + "\\)" + (val !== "" && isFinite(val) ? `<span class="val">≈ ${String(+val.toPrecision(8)).replace(".", ",")}</span>` : "");
+}
+function previewOf(inp, prev, spec) {
   const v = inp.value.trim();
   if (!v) { prev.innerHTML = ""; return; }
-  try {
-    const t = Expr.parse(v), val = Expr.vars(t).size || t.t === "list" ? "" : Expr.evaluate(t);
-    prev.innerHTML = "\\(" + Expr.tex(t) + "\\)" + (val !== "" && isFinite(val) ? `<span class="val">≈ ${String(+val.toPrecision(8)).replace(".", ",")}</span>` : "");
-    typeset(prev);
-  } catch (e) { prev.innerHTML = `<span class="err">${esc(e.message)}</span>`; }
+  try { prev.innerHTML = previewHtml(v, spec); typeset(prev); } catch (e) { prev.innerHTML = `<span class="err">${esc(e.message)}</span>`; }
 }
 function bindKeypad(getInput, after) {
   let mode = window.matchMedia("(pointer: fine)").matches ? "text" : "none";
@@ -516,11 +524,11 @@ function renderProblem(q, opt) {
       const kp = document.getElementById("kp"), set = isSetSpec(p.spec);
       if (kp.classList.contains("k-set") !== set) { kp.classList.toggle("k-set", set); kp.innerHTML = keysFor(p.spec); bindKp(); }
     };
-    let tm; inp.oninput = () => { clearTimeout(tm); tm = setTimeout(() => previewOf(inp, pv), 180); };
+    let tm; inp.oninput = () => { clearTimeout(tm); tm = setTimeout(() => previewOf(inp, pv, p.spec), 180); };
     inp.onkeydown = (e) => { if (e.key === "Enter") check(); };
   });
   active = document.getElementById("p0");
-  const bindKp = () => bindKeypad(() => active, (inp) => previewOf(inp, document.getElementById("pv" + inp.id.slice(1))));
+  const bindKp = () => bindKeypad(() => active, (inp) => previewOf(inp, document.getElementById("pv" + inp.id.slice(1)), q.parts[+inp.id.slice(1)].spec));
   bindKp();
   const end = (giveUp) => {
     finished = true;
@@ -590,9 +598,7 @@ function renderQuestion(q, opt) {
       const v = inp.value.trim();
       if (!v) { prev.innerHTML = '<span class="err">L\'aperçu de ta réponse s\'affiche ici.</span>'; return; }
       try {
-        const t = Expr.parse(v);
-        const val = Expr.vars(t).size || t.t === "list" ? "" : Expr.evaluate(t);
-        prev.innerHTML = "\\(" + Expr.tex(t) + "\\)" + (val !== "" && isFinite(val) ? `<span class="val">≈ ${String(+val.toPrecision(8)).replace(".", ",")}</span>` : "");
+        prev.innerHTML = previewHtml(v, q.spec);
         typeset(prev);
       } catch (e) { prev.innerHTML = `<span class="err">${esc(e.message)}</span>`; }
     }, 180);
