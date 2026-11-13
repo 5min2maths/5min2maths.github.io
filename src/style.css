@@ -254,3 +254,12 @@ ul.plain { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
 .dyn { display: grid; gap: 6px; }
 .dyn-ctl { display: grid; gap: 2px; }
 .dyn-ctl input[type="range"] { width: 100%; accent-color: var(--blue); }
+/* Élèves en difficulté (13.11) : diagnostic, pas à pas */
+.diag { background: var(--warn-soft); color: var(--ink); border-radius: 8px; padding: 8px 10px; margin: 6px 0; }
+.gstep { border-left: 3px solid var(--blue); padding: 6px 10px; display: grid; gap: 6px; color: var(--ink); background: var(--card); border-radius: 0 8px 8px 0; }
+.gstep.ok { border-left-color: var(--ok); }
+.gstep .row { display: flex; gap: 6px; }
+.gstep .gin { flex: 1; min-width: 0; }
+.gok-msg { color: var(--ok); }
+.gno-msg { color: var(--ink); }
+details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em; margin-top: 6px; }

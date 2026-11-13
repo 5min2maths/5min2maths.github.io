@@ -431,6 +431,12 @@ function nextQuestion(redo) {
     eyebrow: (session.weekly ? "Problème de la semaine" : session.prep ? "Révision du test · " + (session.i + 1) + " sur " + session.plan.length : session.plan.length === 1 ? (session.fmt ? FORMATS[session.fmt].label : "Question du jour") : (session.fmt ? FORMATS[session.fmt].label + " · " : "") + (session.i + 1) + " sur " + session.plan.length) + (kind && KIND_LABEL[kind] ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo ? " · nouvelles valeurs" : ""),
     onDone: (res) => {
       const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
+      // Deux échecs de suite : on glisse juste après une question sur une notion de base (une fois par notion et par séance).
+      if (!session.weekly && !session.prep && sc < 0.5) {
+        session.remed = session.remed || new Set();
+        const p = !session.remed.has(id) && Engine.remediation(state, id);
+        if (p) { session.remed.add(id); session.plan.splice(session.i + 1, 0, p + "|1|rem"); }
+      }
       res.delta = Engine.updateElo(state, id, q.d, sc);
       session.score += sc; session.answered++; session.ids.add(id);
       Engine.finishDay(state, 1, sc); save();
@@ -628,6 +634,7 @@ function renderQuestion(q, opt) {
   const stopBtn = document.getElementById("stop");
   if (stopBtn) stopBtn.onclick = screenSummary;
 
+  let lastDiag = null;
   const end = (solved, dontKnow) => {
     finished = true;
     inp.disabled = true;
@@ -643,8 +650,11 @@ function renderQuestion(q, opt) {
       return;
     }
     const d = typeof delta === "number" && delta !== 0 ? `<span class="delta ${delta > 0 ? "up" : "down"}">Mathélo ${delta > 0 ? "+" : ""}${delta}</span>` : "";
+    // Élève en difficulté (13.11) : erreur reconnue, et « on le fait ensemble » (sous-questions guidées) avant la correction complète.
+    const guided = !solved && q.guide && q.guide.length;
     fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><div class="spread"><b>${solved ? (tries === 1 ? pick(PRAISE) : "Juste au deuxième essai.") : dontKnow ? "Voici la méthode." : "Pas cette fois."}</b>${d}</div>
-      <div class="sol">${q.sol}</div></div>
+      ${!solved && lastDiag ? `<div class="diag">🔎 ${esc(lastDiag)}</div>` : ""}
+      ${guided ? `<button class="btn-primary" id="guide">🪜 On le fait ensemble, pas à pas</button><div id="gsteps" class="stack"></div><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : `<div class="sol">${q.sol}</div>`}</div>
       <div class="vote"><span>Cette question était… <button data-v="up" aria-label="Bonne question">👍</button> <button data-v="down" aria-label="Question à revoir">👎</button></span><span class="code" title="Code de la question">${code}</span></div>${commentBox()}
       <div class="actions">${solved ? "" : '<button id="redo">Refaire avec d\'autres valeurs</button>'}<button class="btn-primary" id="nx">Continuer</button></div>`;
     typeset(fb);
@@ -653,7 +663,9 @@ function renderQuestion(q, opt) {
     document.getElementById("nx").onclick = () => opt.onNext(false);
     const r = document.getElementById("redo");
     if (r) r.onclick = () => opt.onNext(true);
-    document.getElementById("nx").focus();
+    const gb = document.getElementById("guide");
+    if (gb) { gb.onclick = () => { gb.remove(); runGuide(q, document.getElementById("gsteps"), () => { const rd = document.getElementById("redo"); if (rd) { rd.classList.add("btn-primary"); rd.textContent = "À toi : une question du même type"; rd.focus(); } }); }; gb.focus(); }
+    else document.getElementById("nx").focus();
   };
 
   const check = () => {
@@ -669,8 +681,11 @@ function renderQuestion(q, opt) {
     tries++;
     const ez = document.getElementById("easy"); if (ez) ez.remove();
     const ny = document.getElementById("notyet"); if (ny) ny.remove();
+    const diag = r.status === "wrong" ? diagnose(q, v) : null;
+    lastDiag = diag;
     if (opt.single || tries >= 2) return end(false);
-    fb.innerHTML = `<div class="fb hint pop"><b>${r.status === "close" ? "Presque !" : "Pas encore. Réessaie !"}</b><span>${esc(r.message || "")}</span><span><b>Indice</b> · ${esc(q.hint)}</span></div>`;
+    fb.innerHTML = `<div class="fb hint pop"><b>${r.status === "close" ? "Presque !" : "Pas encore. Réessaie !"}</b><span>${esc(diag || r.message || "")}</span><span><b>Indice</b> · ${esc(q.hint)}</span></div>`;
+    typeset(fb);
     inp.select();
   };
   document.getElementById("check").onclick = check;
@@ -679,6 +694,31 @@ function renderQuestion(q, opt) {
   if (ny) ny.onclick = () => { if (!finished && tries === 0) { finished = true; opt.onNotYet(); } };
   const ez = document.getElementById("easy");
   if (ez) ez.onclick = () => { if (!finished && tries === 0) { finished = true; opt.onEasy(); } };
+}
+
+// « On le fait ensemble » : une sous-question à la fois ; juste ou non, on montre l'étape et on continue.
+function runGuide(q, box, done) {
+  let k = 0;
+  const step = () => {
+    if (k >= q.guide.length) { box.insertAdjacentHTML("beforeend", `<div class="gstep ok"><b>Bravo, tu as reconstruit la solution.</b><div class="sol">${q.sol}</div></div>`); typeset(box); done(); return; }
+    const g = q.guide[k], id = "gs" + k;
+    box.insertAdjacentHTML("beforeend", `<div class="gstep" id="${id}"><span class="small muted">Étape ${k + 1} sur ${q.guide.length}</span><div>${g.ask}</div>
+      <div class="row"><input class="ans gin" inputmode="decimal" autocomplete="off" aria-label="Réponse de l'étape"><button class="small gok">OK</button></div><div class="gfb"></div></div>`);
+    typeset(box);
+    const el = document.getElementById(id), inp = el.querySelector("input"), fbk = el.querySelector(".gfb");
+    const go = () => {
+      const v = inp.value.trim(); if (!v) return;
+      const r = checkAnswer(g.spec, v);
+      if (r.status === "invalid") { fbk.innerHTML = `<span class="small">${esc(r.message || "Réponse illisible.")}</span>`; return; }
+      inp.disabled = true; el.querySelector(".gok").remove();
+      fbk.innerHTML = `<div class="${r.status === "correct" ? "gok-msg" : "gno-msg"}">${r.status === "correct" ? "✓ Oui." : "Pas tout à fait."} ${g.sol}</div>`;
+      typeset(fbk); k++; step();
+    };
+    el.querySelector(".gok").onclick = go;
+    inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
+    inp.focus();
+  };
+  step();
 }
 
 // Petit message éphémère.

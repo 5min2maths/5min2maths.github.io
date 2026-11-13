@@ -253,6 +253,28 @@ log.push("Mathélo : " + st.elo.r + " — " + eloLabel(prof, st.elo.r));
   if (Engine.nowStale(s) || !Engine.nowStale(s, addDays(day(), 21))) fail("relance à 3 semaines");
   log.push("chapitre du moment (" + later + ") : " + Math.round((100 * on) / tot) + " % des questions"); }
 
+// 4 ter. Élèves en difficulté : diagnostic, pas à pas, remédiation
+{ let ng = 0;
+  for (const id of Object.keys(GEN)) for (const d of [1, 2, 3]) for (let k = 0; k < 6; k++) {
+    let q; try { q = Engine.build(id, d, k + 1); } catch (e) { continue; }
+    if (!q.guide) continue; ng++;
+    for (const g of q.guide) if (!isFinite(g.spec.value) || !g.ask || !g.sol) fail("étape guidée invalide " + q.code);
+    const last = q.guide[q.guide.length - 1].spec.value;
+    if (Math.abs(last - q.spec.value) > (q.guide[q.guide.length - 1].spec.round || 1e-9)) fail("dernière étape ≠ réponse " + q.code + " : " + last + " / " + q.spec.value);
+    for (const t of q.traps || []) if (Math.abs(t.v - q.spec.value) < 1e-9) fail("piège égal à la bonne réponse " + q.code);
+  }
+  if (ng < 50) fail("peu de questions guidées : " + ng);
+  const qp = Engine.build("pyth", 1, 3), [a, b] = [qp.spec.value]; // cathètes dans l'énoncé
+  const nums = qp.q.match(/\d+/g).map(Number), dg = diagnose(qp, String(nums[0] + nums[1]));
+  if (!dg || !/carrés/.test(dg)) fail("diagnostic Pythagore : " + dg);
+  if (!/signe/.test(diagnose({ spec: { kind: "value", value: 7 } }, "-7") || "")) fail("diagnostic signe");
+  if (!/virgule/.test(diagnose({ spec: { kind: "value", value: 3.5 } }, "35") || "")) fail("diagnostic virgule");
+  const r = Engine.newState({ system: "CH", grade: 11, minutes: 5 }); Engine.autoInit(r);
+  Engine.record(r, "eq1", 1, 2, false); if (Engine.remediation(r, "eq1")) fail("remédiation trop tôt");
+  Engine.record(r, "eq1", 1, 2, false); const rp = Engine.remediation(r, "eq1");
+  if (!["rel", "valnum"].includes(rp)) fail("remédiation eq1 : " + rp);
+  log.push("pas à pas : " + ng + " questions guidées sur l'échantillon ; remédiation eq1 → " + rp); }
+
 document.getElementById("out").textContent = "en cours (sauvegarde)";
 // 5. Sauvegarde : aller-retour, et taille du code pour un élève très actif
 (async () => {
@@ -260,7 +282,7 @@ document.getElementById("out").textContent = "en cours (sauvegarde)";
   for (let day0 = 0; day0 < 60; day0++) for (const id of Engine.eligible(u).slice(0, 25)) Engine.record(u, id, 1 + (day0 % 3), 1 + (day0 % 2), day0 % 4 !== 0);
   Engine.finishDay(u, 3, 2); Badges.onLesson(u, "pyth"); Badges.check(u); Engine.notYet(u, Engine.eligible(u)[3]);
   const code = await Backup.encode(u), v = await Backup.decode(Backup.url(code));
-  const norm = (s) => JSON.stringify({ n: Object.fromEntries(Object.entries(s.notions).map(([k, x]) => [k, { ...x, m: Math.round(x.m * 100) }])), c: Object.fromEntries(Object.entries(s.comps).map(([k, x]) => [k, x.r.map((r) => Math.round(r * 4))])), e: s.elo.r, b: s.badges, p: s.profile, k: s.streak });
+  const norm = (s) => JSON.stringify({ n: Object.fromEntries(Object.entries(s.notions).map(([k, x]) => [k, Object.fromEntries(Object.entries({ ...x, m: Math.round(x.m * 100) }).sort())])), c: Object.fromEntries(Object.entries(s.comps).map(([k, x]) => [k, x.r.map((r) => Math.round(r * 4))])), e: s.elo.r, b: s.badges, p: s.profile, k: s.streak });
   if (norm(u) !== norm(v)) { fail("sauvegarde : aller-retour différent"); const a = JSON.parse(norm(u)), z = JSON.parse(norm(v)); for (const k in a.n) if (JSON.stringify(a.n[k]) !== JSON.stringify(z.n[k])) { log.push(k + " " + JSON.stringify(a.n[k]) + " ≠ " + JSON.stringify(z.n[k])); break; } }
   const n0 = Engine.newState({ system: "CH", grade: 10, minutes: 5 }); Engine.autoInit(n0); n0.placed = true;
   const c0 = await Backup.encode(n0);

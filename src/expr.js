@@ -304,6 +304,23 @@ const SolSet = (() => {
   return { parse, check, show, inside };
 })();
 
+// Diagnostic d'une réponse fausse (13.11, élèves en difficulté) : pièges propres à la question (q.traps), puis erreurs
+// typiques reconnues sur la valeur : signe, virgule ou unité, fraction inversée, racine ou carré oublié.
+function diagnose(q, input) {
+  const spec = q.spec;
+  if (!spec || spec.kind !== "value") return null;
+  let v; try { const t = Expr.parse(input); if (Expr.vars(t).size) return null; v = Expr.evaluate(t); } catch (e) { return null; }
+  if (!isFinite(v)) return null;
+  const w = spec.value, tol = (x, y) => Math.abs(x - y) <= Math.max(spec.round ? spec.round * 0.6 : 0, 1e-6 * Math.max(1, Math.abs(y)));
+  for (const tr of q.traps || []) if (tol(v, tr.v)) return tr.m;
+  if (w !== 0 && tol(v, -w)) return "Le nombre est bon, mais pas le signe : vérifie les règles des signes.";
+  for (const k of [1, 2, 3]) if (w !== 0 && (tol(v, w * 10 ** k) || tol(v, w / 10 ** k))) return "Les chiffres sont bons, mais pas la virgule (ou l'unité) : vérifie la conversion ou le rang.";
+  if (w !== 0 && Math.abs(w) !== 1 && tol(v, 1 / w)) return "Tu as inversé : c'est l'inverse de la bonne réponse (numérateur et dénominateur échangés ?).";
+  if (Math.abs(w) > 1 && tol(v, w * w)) return "Il manque une étape : n'oublie pas la racine carrée à la fin.";
+  if (w > 1 && tol(v, Math.sqrt(w))) return "Il manque une étape : pense à élever au carré.";
+  return null;
+}
+
 // Vérifie la réponse de l'élève selon la spécification de la question.
 // spec.kind : "value" (valeur numérique, round = précision demandée), "expr" (expression en x,
 // form = "product" | "expanded"), "set" (liste de solutions), "choice" (index d'option).

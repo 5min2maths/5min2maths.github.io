@@ -16,6 +16,9 @@ const R = {
 };
 const gcd = (a, b) => (b ? gcd(b, a % b) : Math.abs(a));
 const M = (t) => "\\(" + t + "\\)";
+// Étape guidée (« on le fait ensemble ») : consigne, valeur attendue, explication ; et piège typique { v, m }.
+const GS = (ask, value, sol, round) => ({ ask, spec: Object.assign({ kind: "value", value }, round ? { round } : {}), sol });
+const TRAP = (v, m) => ({ v, m });
 const dec = (v) => String(+(+v).toFixed(10)).replace(".", "{,}");
 const decTxt = (v) => String(+(+v).toFixed(10)).replace(".", ",");
 const par = (v) => (v < 0 ? "(" + v + ")" : String(v));
@@ -45,11 +48,15 @@ const GEN = {
   prio(d) {
     if (d === 1) {
       const a = R.int(2, 9), b = R.int(2, 9), c = R.int(2, 9);
-      return { fig: FIG.blocks(b + " groupes de " + c + ", puis + " + a), q: "Calcule : " + M(a + " + " + b + " \\cdot " + c), spec: { kind: "value", value: a + b * c }, sol: M(a + " + " + b * c + " = " + (a + b * c)) + " : la multiplication passe avant l'addition." };
+      return { fig: FIG.blocks(b + " groupes de " + c + ", puis + " + a), q: "Calcule : " + M(a + " + " + b + " \\cdot " + c), spec: { kind: "value", value: a + b * c }, sol: M(a + " + " + b * c + " = " + (a + b * c)) + " : la multiplication passe avant l'addition.",
+        traps: [TRAP((a + b) * c, "Tu as calculé de gauche à droite. Mais la multiplication passe avant l'addition.")],
+        guide: [GS("On commence par la multiplication : combien font " + M(b + " \\cdot " + c) + " ?", b * c, M(b + " \\cdot " + c + " = " + b * c) + "."), GS("Il reste l'addition : " + M(a + " + " + b * c) + " = ?", a + b * c, M(a + " + " + b * c + " = " + (a + b * c)) + ".")] };
     }
     if (d === 2) {
       const a = R.int(10, 30), b = R.int(2, 6), c = R.int(5, 9), e = R.int(1, 4);
-      return { q: "Calcule : " + M(a + " - " + b + " \\cdot (" + c + " - " + e + ")"), spec: { kind: "value", value: a - b * (c - e) }, sol: M(a + " - " + b + " \\cdot " + (c - e) + " = " + a + " - " + b * (c - e) + " = " + (a - b * (c - e))) };
+      return { q: "Calcule : " + M(a + " - " + b + " \\cdot (" + c + " - " + e + ")"), spec: { kind: "value", value: a - b * (c - e) }, sol: M(a + " - " + b + " \\cdot " + (c - e) + " = " + a + " - " + b * (c - e) + " = " + (a - b * (c - e))),
+        traps: [TRAP((a - b) * (c - e), "Tu as fait la soustraction avant la multiplication. Ordre : parenthèses, puis multiplications, puis additions et soustractions."), TRAP(a - b * c - e, "La parenthèse compte : on calcule d'abord ce qu'elle contient.")],
+        guide: [GS("D'abord la parenthèse : " + M(c + " - " + e) + " = ?", c - e, M(c + " - " + e + " = " + (c - e)) + "."), GS("Puis la multiplication : " + M(b + " \\cdot " + (c - e)) + " = ?", b * (c - e), M(b + " \\cdot " + (c - e) + " = " + b * (c - e)) + "."), GS("Enfin la soustraction : " + M(a + " - " + b * (c - e)) + " = ?", a - b * (c - e), M(a + " - " + b * (c - e) + " = " + (a - b * (c - e))) + ".")] };
     }
     const a = R.int(2, 6), b = R.int(1, 5), e = R.int(2, 5), k = R.int(2, 6), c = e * k, dd = R.int(2, 5);
     const v = (a + b) ** 2 - c * dd / e;
@@ -63,7 +70,9 @@ const GEN = {
     }
     if (d === 2) {
       const a = R.nz(-9, 9), b = R.int(2, 6), c = R.nz(-6, 6);
-      return { q: "Calcule : " + M(par(a) + " - " + b + " \\cdot " + par(c)), spec: { kind: "value", value: a - b * c }, sol: M(par(a) + " - " + par(b * c) + " = " + (a - b * c)) };
+      return { q: "Calcule : " + M(par(a) + " - " + b + " \\cdot " + par(c)), spec: { kind: "value", value: a - b * c }, sol: M(par(a) + " - " + par(b * c) + " = " + (a - b * c)),
+        traps: [TRAP((a - b) * c, "La multiplication passe avant la soustraction."), ...(c < 0 ? [TRAP(a - b * -c, "Le produit " + M(b + " \\cdot " + par(c)) + " est négatif ; soustraire un négatif, c'est ajouter.")] : [])],
+        guide: [GS("D'abord le produit : " + M(b + " \\cdot " + par(c)) + " = ?", b * c, M(b + " \\cdot " + par(c) + " = " + b * c) + "."), GS("Puis " + M(par(a) + " - " + par(b * c)) + " = ?", a - b * c, M(par(a) + " - " + par(b * c) + " = " + (a - b * c)) + (b * c < 0 ? " (soustraire un négatif, c'est ajouter)" : "") + ".")] };
     }
     // Niveau 3 varié (audit 13.11) : puissances de relatifs et priorités, le résultat change à chaque fois.
     const a = R.int(2, 5), b = R.int(2, 4), c = R.int(2, 3), form = R.int(0, 2);
@@ -78,12 +87,16 @@ const GEN = {
   fracadd(d) {
     if (d === 1) {
       const b = R.int(3, 9), a = R.int(1, b - 1), c = R.int(1, b - 1);
-      return { fig: FIG.fractionBars([[a, b], [c, b]]), q: "Calcule et simplifie : " + M("\\frac{" + a + "}{" + b + "} + \\frac{" + c + "}{" + b + "}"), spec: { kind: "value", value: (a + c) / b }, sol: M("\\frac{" + (a + c) + "}{" + b + "}" + (gcd(a + c, b) > 1 ? " = " + frac(a + c, b) : "")) };
+      return { fig: FIG.fractionBars([[a, b], [c, b]]), q: "Calcule et simplifie : " + M("\\frac{" + a + "}{" + b + "} + \\frac{" + c + "}{" + b + "}"), spec: { kind: "value", value: (a + c) / b }, sol: M("\\frac{" + (a + c) + "}{" + b + "}" + (gcd(a + c, b) > 1 ? " = " + frac(a + c, b) : "")),
+        traps: [TRAP((a + c) / (2 * b), "On n'additionne pas les dénominateurs : ils sont déjà égaux, on garde " + M(b) + " et on additionne les numérateurs.")],
+        guide: [GS("Les dénominateurs sont égaux. On additionne les numérateurs : " + M(a + " + " + c) + " = ?", a + c, M(a + " + " + c + " = " + (a + c)) + ", donc " + M("\\frac{" + (a + c) + "}{" + b + "}") + "."), GS("Écris le résultat (simplifié si possible) :", (a + c) / b, M("\\frac{" + (a + c) + "}{" + b + "}" + (gcd(a + c, b) > 1 ? " = " + frac(a + c, b) : "")) + ".")] };
     }
     if (d === 2) {
       let b, e; do { b = R.int(2, 9); e = R.int(2, 9); } while (b === e);
       const a = R.int(1, b - 1), c = R.int(1, e - 1);
-      return { fig: FIG.fractionBars([[a, b], [c, e]]), q: "Calcule et simplifie : " + M("\\frac{" + a + "}{" + b + "} + \\frac{" + c + "}{" + e + "}"), spec: { kind: "value", value: a / b + c / e }, sol: M("\\frac{" + a * e + " + " + c * b + "}{" + b * e + "} = " + frac(a * e + c * b, b * e)) + " (dénominateur commun)." };
+      return { fig: FIG.fractionBars([[a, b], [c, e]]), q: "Calcule et simplifie : " + M("\\frac{" + a + "}{" + b + "} + \\frac{" + c + "}{" + e + "}"), spec: { kind: "value", value: a / b + c / e }, sol: M("\\frac{" + a * e + " + " + c * b + "}{" + b * e + "} = " + frac(a * e + c * b, b * e)) + " (dénominateur commun).",
+        traps: [TRAP((a + c) / (b + e), "On n'additionne ni les numérateurs ni les dénominateurs directement : il faut d'abord un dénominateur commun."), TRAP((a + c) / (b * e), "Le dénominateur commun est bon, mais il faut aussi transformer les numérateurs (multiplier par le même nombre).")],
+        guide: [GS("Dénominateur commun : " + M(b + " \\cdot " + e) + " = ?", b * e, M(b + " \\cdot " + e + " = " + b * e) + "."), GS("On écrit " + M("\\frac{" + a + "}{" + b + "}") + " avec le dénominateur " + M(b * e) + " : quel numérateur ? (" + M(a + " \\cdot " + e) + ")", a * e, M("\\frac{" + a + "}{" + b + "} = \\frac{" + a * e + "}{" + b * e + "}") + "."), GS("Et " + M("\\frac{" + c + "}{" + e + "}") + " : quel numérateur ? (" + M(c + " \\cdot " + b) + ")", c * b, M("\\frac{" + c + "}{" + e + "} = \\frac{" + c * b + "}{" + b * e + "}") + "."), GS("On additionne les numérateurs et on simplifie : le résultat ?", a / b + c / e, M("\\frac{" + (a * e + c * b) + "}{" + b * e + "} = " + frac(a * e + c * b, b * e)) + ".")] };
     }
     const b = R.pick([2, 3, 4]), e = R.pick([3, 4, 6]), f = 12;
     const a = R.int(1, b), c = R.int(1, e), g = R.int(1, 11);
@@ -109,12 +122,15 @@ const GEN = {
   pct(d) {
     if (d === 1) {
       const p = R.pick([10, 20, 25, 50, 75]), n = 20 * R.int(2, 15);
-      return { fig: FIG.percentBar(p, n), q: "Calcule " + M(p + "\\,\\%") + " de " + M(n) + ".", spec: { kind: "value", value: (p * n) / 100 }, sol: M("\\frac{" + p + "}{100} \\cdot " + n + " = " + dec((p * n) / 100)) };
+      return { fig: FIG.percentBar(p, n), q: "Calcule " + M(p + "\\,\\%") + " de " + M(n) + ".", spec: { kind: "value", value: (p * n) / 100 }, sol: M("\\frac{" + p + "}{100} \\cdot " + n + " = " + dec((p * n) / 100)),
+        guide: [GS("Combien vaut " + M("1\\,\\%") + " de " + M(n) + " ? (on divise par 100)", n / 100, M(n + " : 100 = " + dec(n / 100)) + "."), GS("Et " + M(p + "\\,\\%") + ", c'est " + M(p) + " fois plus : combien ?", (p * n) / 100, M(p + " \\cdot " + dec(n / 100) + " = " + dec((p * n) / 100)) + ".")] };
     }
     if (d === 2) {
       const p = R.pick([10, 20, 25, 30, 40]), n = 10 * R.int(3, 20), up = R.rand() < 0.5;
       const v = n * (1 + (up ? p : -p) / 100);
-      return { fig: FIG.percentBar(p, n, " CHF"), q: "Un article coûte " + M(n) + " CHF. Son prix " + (up ? "augmente" : "baisse") + " de " + M(p + "\\,\\%") + ". Quel est le nouveau prix ?", spec: { kind: "value", value: v }, sol: M(n + " \\cdot " + dec(1 + (up ? p : -p) / 100) + " = " + dec(v)) + " CHF." };
+      return { fig: FIG.percentBar(p, n, " CHF"), q: "Un article coûte " + M(n) + " CHF. Son prix " + (up ? "augmente" : "baisse") + " de " + M(p + "\\,\\%") + ". Quel est le nouveau prix ?", spec: { kind: "value", value: v }, sol: M(n + " \\cdot " + dec(1 + (up ? p : -p) / 100) + " = " + dec(v)) + " CHF.",
+        traps: [TRAP((n * p) / 100, "Ça, c'est " + (up ? "l'augmentation" : "la baisse") + " seulement. Il faut encore " + (up ? "l'ajouter au" : "la retirer du") + " prix de départ."), TRAP(n * (1 + (up ? -p : p) / 100), "Attention au sens : le prix " + (up ? "augmente" : "baisse") + ".")],
+        guide: [GS("Combien font " + M(p + "\\,\\%") + " de " + M(n) + " CHF ?", (n * p) / 100, M("\\frac{" + p + "}{100} \\cdot " + n + " = " + dec((n * p) / 100)) + " CHF."), GS("Le prix " + (up ? "augmente" : "baisse") + " : nouveau prix ?", v, M(n + (up ? " + " : " - ") + dec((n * p) / 100) + " = " + dec(v)) + " CHF.")] };
     }
     const p = R.pick([10, 20, 25, 50]), n = 4 * R.int(5, 30), f = n * (1 + p / 100);
     return { q: "Après une hausse de " + M(p + "\\,\\%") + ", un prix vaut " + M(dec(f)) + " CHF. Quel était le prix de départ ?", spec: { kind: "value", value: n }, sol: M(dec(f) + " : " + dec(1 + p / 100) + " = " + n) + " CHF (on divise, on ne retire pas " + p + " %)." };
@@ -238,13 +254,17 @@ const GEN = {
   eq1(d) {
     if (d === 1) {
       const a = R.nz(-6, 7), x = R.nz(-9, 9), b = R.nz(-12, 12);
-      return { fig: FIG.balance(poly([a, b]).replace(/\^2/g,"²"), String(a * x + b)), q: "Résous : " + M(poly([a, b]) + " = " + (a * x + b)), spec: { kind: "value", value: x }, sol: "On " + (b > 0 ? "soustrait " + b : "ajoute " + -b) + " des deux côtés : " + M((a === 1 ? "" : a === -1 ? "-" : a) + "x = " + (a * x + b) + (b > 0 ? " - " + b : " + " + -b) + " = " + a * x) + (a === 1 ? "." : ", puis on divise par " + M(par(a)) + " : " + M("x = " + x) + ".") };
+      return { fig: FIG.balance(poly([a, b]).replace(/\^2/g,"²"), String(a * x + b)), q: "Résous : " + M(poly([a, b]) + " = " + (a * x + b)), spec: { kind: "value", value: x }, sol: "On " + (b > 0 ? "soustrait " + b : "ajoute " + -b) + " des deux côtés : " + M((a === 1 ? "" : a === -1 ? "-" : a) + "x = " + (a * x + b) + (b > 0 ? " - " + b : " + " + -b) + " = " + a * x) + (a === 1 ? "." : ", puis on divise par " + M(par(a)) + " : " + M("x = " + x) + "."),
+        traps: [TRAP((a * x + 2 * b) / a, "Quand on fait passer " + M(b) + " de l'autre côté, il change de signe : on " + (b > 0 ? "soustrait" : "ajoute") + " " + M(Math.abs(b)) + " des deux côtés."), ...(a !== 1 ? [TRAP(a * x * a, "Pour isoler " + M("x") + ", on divise par " + M(a) + " (on ne multiplie pas).")] : [])],
+        guide: [GS("On enlève " + M(b) + " des deux côtés : " + M((a === 1 ? "" : a === -1 ? "-" : a) + "x = \\ ?"), a * x, M((a === 1 ? "" : a === -1 ? "-" : a) + "x = " + (a * x + b) + (b > 0 ? " - " + b : " + " + -b) + " = " + a * x) + "."), ...(a !== 1 ? [GS("On divise par " + M(par(a)) + " : " + M("x") + " = ?", x, M("x = " + a * x + " : " + par(a) + " = " + x) + ".")] : [])] };
     }
     if (d === 2) {
       let a, c; do { a = R.int(2, 6); c = R.int(1, 5); } while (a === c);
       const b = R.nz(-6, 6), e = R.nz(-9, 9);
       const x = (e - a * b) / (a - c);
-      return { fig: FIG.balance(a + "(x " + (b < 0 ? "− " + -b : "+ " + b) + ")", poly([c, e])), q: "Résous : " + M(a + "(x " + (b < 0 ? "- " + -b : "+ " + b) + ") = " + poly([c, e])), spec: { kind: "value", value: x }, sol: M(a + "x " + (a * b < 0 ? "- " + -a * b : "+ " + a * b) + " = " + poly([c, e]) + " \\iff " + (a - c) + "x = " + (e - a * b) + " \\iff x = " + frac(e - a * b, a - c)) };
+      return { fig: FIG.balance(a + "(x " + (b < 0 ? "− " + -b : "+ " + b) + ")", poly([c, e])), q: "Résous : " + M(a + "(x " + (b < 0 ? "- " + -b : "+ " + b) + ") = " + poly([c, e])), spec: { kind: "value", value: x }, sol: M(a + "x " + (a * b < 0 ? "- " + -a * b : "+ " + a * b) + " = " + poly([c, e]) + " \\iff " + (a - c) + "x = " + (e - a * b) + " \\iff x = " + frac(e - a * b, a - c)),
+        traps: [TRAP((e - b) / (a - c), "En développant, il faut multiplier les deux termes de la parenthèse : " + M(a + " \\cdot " + par(b)) + " aussi.")],
+        guide: [GS("On développe " + M(a + "(x " + (b < 0 ? "- " + -b : "+ " + b) + ")") + " : quel est le nombre seul obtenu (" + M(a + " \\cdot " + par(b)) + ") ?", a * b, M(a + "(x " + (b < 0 ? "- " + -b : "+ " + b) + ") = " + a + "x " + (a * b < 0 ? "- " + -a * b : "+ " + a * b)) + "."), GS("On regroupe les " + M("x") + " à gauche et les nombres à droite : " + M((a - c) + "x = \\ ?"), e - a * b, M((a - c) + "x = " + (e - a * b)) + "."), GS("On divise par " + M(a - c) + " : " + M("x") + " = ? (fraction acceptée)", x, M("x = " + frac(e - a * b, a - c)) + ".")] };
     }
     const p = R.pick([2, 3, 4]), r = R.pick([3, 5, 6]), b = R.nz(-5, 5);
     if (p === r) return GEN.eq1(3);
@@ -322,8 +342,12 @@ const GEN = {
   pyth(d) {
     const tr = R.pick([[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [6, 8, 10]]), k = R.int(1, 3);
     const [a, b, c] = tr.map((v) => v * k);
-    if (d === 1) return { fig: FIG.rightTriangle([a + " cm", b + " cm", "?"]), q: "Un triangle rectangle a des cathètes de " + M(a) + " cm et " + M(b) + " cm. Calcule l'hypoténuse (en cm).", spec: { kind: "value", value: c }, sol: M("\\sqrt{" + a + "^2 + " + b + "^2} = \\sqrt{" + c * c + "} = " + c) + " cm." };
-    if (d === 2) return { fig: FIG.rightTriangle([a + " cm", "?", c + " cm"]), q: "Dans un triangle rectangle, l'hypoténuse mesure " + M(c) + " cm et une cathète " + M(a) + " cm. Calcule l'autre cathète (en cm).", spec: { kind: "value", value: b }, sol: M("\\sqrt{" + c + "^2 - " + a + "^2} = \\sqrt{" + b * b + "} = " + b) + " cm." };
+    if (d === 1) return { fig: FIG.rightTriangle([a + " cm", b + " cm", "?"]), q: "Un triangle rectangle a des cathètes de " + M(a) + " cm et " + M(b) + " cm. Calcule l'hypoténuse (en cm).", spec: { kind: "value", value: c }, sol: M("\\sqrt{" + a + "^2 + " + b + "^2} = \\sqrt{" + c * c + "} = " + c) + " cm.",
+      traps: [TRAP(a + b, "On n'additionne pas les côtés : on additionne leurs carrés, puis on prend la racine."), TRAP(c * c, "C'est " + M("c^2") + " : il manque la racine carrée.")],
+      guide: [GS("Calcule le carré de la première cathète : " + M(a + "^2") + " = ?", a * a, M(a + "^2 = " + a * a) + "."), GS("Le carré de l'autre : " + M(b + "^2") + " = ?", b * b, M(b + "^2 = " + b * b) + "."), GS("Pythagore : " + M("c^2 = " + a * a + " + " + b * b) + ". Combien vaut " + M("c^2") + " ?", c * c, M("c^2 = " + c * c) + "."), GS("Il reste la racine carrée : " + M("c = \\sqrt{" + c * c + "}") + " = ?", c, M("c = " + c) + " cm.")] };
+    if (d === 2) return { fig: FIG.rightTriangle([a + " cm", "?", c + " cm"]), q: "Dans un triangle rectangle, l'hypoténuse mesure " + M(c) + " cm et une cathète " + M(a) + " cm. Calcule l'autre cathète (en cm).", spec: { kind: "value", value: b }, sol: M("\\sqrt{" + c + "^2 - " + a + "^2} = \\sqrt{" + b * b + "} = " + b) + " cm.",
+      traps: [TRAP(Math.sqrt(c * c + a * a), "Pour une cathète, on soustrait : " + M("b^2 = c^2 - a^2") + " (l'hypoténuse est le plus grand côté)."), TRAP(b * b, "C'est " + M("b^2") + " : il manque la racine carrée."), TRAP(c - a, "On ne soustrait pas les côtés : on soustrait leurs carrés.")],
+      guide: [GS("L'hypoténuse au carré : " + M(c + "^2") + " = ?", c * c, M(c + "^2 = " + c * c) + "."), GS("La cathète connue au carré : " + M(a + "^2") + " = ?", a * a, M(a + "^2 = " + a * a) + "."), GS("Pour une cathète, on soustrait : " + M(c * c + " - " + a * a) + " = ?", b * b, M("b^2 = " + b * b) + "."), GS("Racine carrée : " + M("b = \\sqrt{" + b * b + "}") + " = ?", b, M("b = " + b) + " cm.")] };
     const s = R.int(2, 9);
     return { fig: FIG.square(s + " cm"), q: "Calcule la diagonale d'un carré de côté " + M(s) + " cm (valeur exacte, ou arrondie au centième).", spec: { kind: "value", value: s * Math.SQRT2, round: 0.01, exactOk: true }, sol: M("\\sqrt{" + s + "^2 + " + s + "^2} = " + s + "\\sqrt{2} \\approx " + dec((s * Math.SQRT2).toFixed(2))) + " cm." };
   },
@@ -473,7 +497,9 @@ Object.assign(GEN, {
 
   trigo(d) {
     const a = R.int(20, 70), hyp = R.int(4, 15);
-    if (d === 1) return { fig: FIG.trigTriangle(["", "?", hyp + " cm"], a + "°"), q: "Dans un triangle rectangle, l'hypoténuse mesure " + M(hyp) + " cm et un angle aigu " + M(a + "°") + ". Calcule le côté opposé à cet angle, au centième.", spec: { kind: "value", value: hyp * Math.sin((a * Math.PI) / 180), round: 0.01 }, sol: M("\\text{opposé} = " + hyp + " \\cdot \\sin " + a + "° \\approx " + dec((hyp * Math.sin((a * Math.PI) / 180)).toFixed(2))) + " cm." };
+    if (d === 1) return { fig: FIG.trigTriangle(["", "?", hyp + " cm"], a + "°"), q: "Dans un triangle rectangle, l'hypoténuse mesure " + M(hyp) + " cm et un angle aigu " + M(a + "°") + ". Calcule le côté opposé à cet angle, au centième.", spec: { kind: "value", value: hyp * Math.sin((a * Math.PI) / 180), round: 0.01 }, sol: M("\\text{opposé} = " + hyp + " \\cdot \\sin " + a + "° \\approx " + dec((hyp * Math.sin((a * Math.PI) / 180)).toFixed(2))) + " cm.",
+      traps: [TRAP(hyp * Math.cos((a * Math.PI) / 180), "Tu as utilisé le cosinus. Le côté opposé à l'angle va avec le sinus : " + M("\\sin = \\frac{\\text{opposé}}{\\text{hypoténuse}}") + "."), TRAP(hyp * Math.tan((a * Math.PI) / 180), "La tangente utilise les deux cathètes ; ici on connaît l'hypoténuse : c'est le sinus."), TRAP(hyp * Math.sin(a), "Ta calculatrice est en radians : passe-la en degrés (DEG).")],
+      guide: [GS("On connaît l'hypoténuse et on cherche l'opposé : c'est le sinus. Calcule " + M("\\sin " + a + "°") + " (au millième).", Math.sin((a * Math.PI) / 180), M("\\sin " + a + "° \\approx " + dec(Math.sin((a * Math.PI) / 180).toFixed(3))) + " (calculatrice en degrés).", 0.001), GS("Opposé = hypoténuse " + M("\\cdot \\sin " + a + "°") + " : " + M(hyp + " \\cdot \\sin " + a + "°") + " = ? (au centième)", hyp * Math.sin((a * Math.PI) / 180), M(hyp + " \\cdot \\sin " + a + "° \\approx " + dec((hyp * Math.sin((a * Math.PI) / 180)).toFixed(2))) + " cm.", 0.01)] };
     if (d === 2) {
       const o = R.int(3, 12), ad = R.int(3, 12), ang = (Math.atan(o / ad) * 180) / Math.PI;
       return { fig: FIG.trigTriangle([ad + " cm", o + " cm", ""], "α ?"), q: "Les cathètes d'un triangle rectangle mesurent " + M(o) + " cm (opposée à " + M("\\alpha") + ") et " + M(ad) + " cm (adjacente). Calcule " + M("\\alpha") + " en degrés, au centième.", spec: { kind: "value", value: ang, round: 0.01 }, sol: M("\\tan \\alpha = \\frac{" + o + "}{" + ad + "}") + ", " + M("\\alpha \\approx " + dec(ang.toFixed(2)) + "°") };
