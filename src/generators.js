@@ -646,7 +646,7 @@ const PROB = {
   },
   pyth() {
     const [a, b, c] = R.pick([[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [20, 21, 29]]).map((v) => v * R.int(2, 5));
-    return { fig: FIG.rectFig(b, a, b + " m ?", a + " m"), q: "Un terrain rectangulaire a une diagonale de " + M(c) + " m et un côté de " + M(a) + " m.",
+    return { fig: GEO().pt("A", 0, 0, false).pt("B", b, 0, false).pt("C", b, a, false).pt("D", 0, a, false).poly(["A", "B", "C", "D"]).side("A", "B", "?").side("B", "C", a + " m").seg("A", "C", { cls: "f-accent", dash: true }).side("A", "C", c + " m", { inside: true }).svg("terrain rectangulaire"), q: "Un terrain rectangulaire a une diagonale de " + M(c) + " m et un côté de " + M(a) + " m.",
       parts: [{ label: "a) Autre côté (m)", spec: { kind: "value", value: b } }, { label: "b) Aire du terrain (m²)", spec: { kind: "value", value: a * b } }, { label: "c) Longueur de clôture pour en faire le tour (m)", spec: { kind: "value", value: 2 * (a + b) } }],
       hints: ["La diagonale découpe le rectangle en deux triangles rectangles : Pythagore.", "Autre côté = √(" + c + "² − " + a + "²), puis aire = longueur · largeur et périmètre = 2(longueur + largeur)."],
       sol: "a) " + M("\\sqrt{" + c * c + " - " + a * a + "} = " + b) + " m. b) " + M(a * b) + " m². c) " + M(2 * (a + b)) + " m." };

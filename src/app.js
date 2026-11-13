@@ -517,6 +517,8 @@ function ping(ev) {
 }
 
 // Commentaire libre (facultatif) : envoyé avec le code de la question, la classe et l'identifiant anonyme de l'appareil.
+// Envois vers la feuille Google : seulement depuis le site publié (jamais depuis les pages de test ni claude.ai).
+const canSend = () => VOTE_ENDPOINT && location.protocol === "https:" && !/claude/.test(location.hostname);
 const commentBox = (title = "💬 Un commentaire sur cette question ?", ph = "Une erreur, une consigne pas claire, une idée… (n'écris pas ton nom)", code = "") =>
   `<details class="cmt"${code ? ` data-code="${code}"` : ""}><summary>${title}</summary><textarea class="cmt-t" maxlength="500" rows="3" placeholder="${ph}"></textarea>
   <div class="spread"><span class="small muted cmt-ok"></span><button class="small cmt-s">Envoyer</button></div></details>`;
@@ -558,7 +560,7 @@ function comment(code, text) {
     const p = state && state.profile, niveau = p ? gradeName(p) + (p.track === "mp" ? " MP" : "") : "";
     state.comments = (state.comments || []).concat({ code, text, date: day() }).slice(-50);
     save();
-    if (VOTE_ENDPOINT) fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ ev: "comment", code, text: text.slice(0, 500), niveau, dev: deviceId(), date: day() }) }).catch(() => {});
+    if (canSend()) fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ ev: "comment", code, text: text.slice(0, 500), niveau, dev: deviceId(), date: day() }) }).catch(() => {});
   } catch (e) {}
 }
 
@@ -567,7 +569,7 @@ function vote(code, v) {
     state.votes = state.votes || {};
     state.votes[code] = { v, date: day() };
     save();
-    if (VOTE_ENDPOINT) fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ code, vote: v, date: day(), dev: deviceId() }) }).catch(() => {});
+    if (canSend()) fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ code, vote: v, date: day(), dev: deviceId() }) }).catch(() => {});
   } catch (e) {}
 }
 

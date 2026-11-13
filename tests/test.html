@@ -62,7 +62,7 @@ for (const id of Object.keys(GEN)) for (const d of [1, 2, 3]) for (let i = 0; i 
   const s = q.spec;
   // La figure ne doit pas donner la réponse : aucune étiquette égale à la réponse, sauf si ce nombre est dans l'énoncé.
   if (q.fig) {
-    const labels = [...q.fig.matchAll(/<text(?![^>]*f-tick)[^>]*>([^<]*)<\/text>/g)].map((m) => m[1].replace(",", ".").replace(/\s|cm|m|°|km|h|CHF/g, ""));
+    const labels = [...q.fig.matchAll(/<text(?![^>]*f-tick)[^>]*>([^<]*)<\/text>/g)].map((m) => m[1].replace(",", ".").replace(/\s|cm|m|°|km|h|CHF|\?|=|[a-zA-Z]+\s*=/g, ""));
     const answers = s.kind === "value" ? [s.value] : s.kind === "set" || s.kind === "pair" ? s.values : [];
     const qtxt = q.q.replace(/\{,\}/g, ".");
     for (const a of answers) {
@@ -93,6 +93,12 @@ for (const id of Object.keys(GEN).filter(hasProb)) for (const fn of probList(id)
   if (!GEN[id]) fail("PROB " + id + " sans notion");
   if (/NaN|undefined|Infinity/.test(p.q + p.sol + (p.fig || ""))) fail("PROB " + id + " NaN : " + p.q);
   if (!p.hints || p.hints.length < 2) fail("PROB " + id + " indices");
+  // La figure d'un problème ne doit donner la réponse d'aucune partie (sauf nombre déjà dans l'énoncé)
+  if (p.fig) {
+    const labs = [...p.fig.matchAll(/<text(?![^>]*f-tick)[^>]*>([^<]*)<\/text>/g)].map((m) => m[1].replace(",", ".").replace(/\s|cm|m|°|km|h|CHF|\?|=/g, ""));
+    const qt = p.q.replace(/\{,\}/g, ".");
+    for (const pt of p.parts) if (pt.spec.kind === "value" && pt.spec.value !== 0) { const str = String(+(+pt.spec.value).toFixed(4)); if (labs.includes(str) && !new RegExp("(^|[^0-9.])" + str.replace(".", "\\.") + "([^0-9]|$)").test(qt)) fail("PROB " + id + " : la figure révèle la réponse " + str); }
+  }
   p.parts.forEach((pt, k) => {
     const s = pt.spec, ans = s.round ? s.value.toFixed(2) : canonical(s);
     if (s.kind === "value" && !isFinite(s.value)) fail("PROB " + id + " partie " + k + " valeur " + s.value);

@@ -831,7 +831,7 @@ const FIG = (() => {
   }
 
   function rectFig(w, h, lw, lh) {
-    const s = Math.min(240 / w, 110 / h), W = w * s, H = h * s;
+    const s = Math.min(200 / w, 110 / h), W = w * s, H = h * s; // marge pour l'étiquette de gauche (ne pas la couper)
     return svg(300, H + 40, '<rect x="' + (150 - W / 2) + '" y="12" width="' + W + '" height="' + H + '" class="f-shape"/>' + t(150, H + 32, lw) + t(150 - W / 2 - 8, 12 + H / 2, lh, "f-txt", "end"), "rectangle");
   }
   function triangleFig(lb, lh) {
@@ -1853,7 +1853,7 @@ const PROB = {
   },
   pyth() {
     const [a, b, c] = R.pick([[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [20, 21, 29]]).map((v) => v * R.int(2, 5));
-    return { fig: FIG.rectFig(b, a, b + " m ?", a + " m"), q: "Un terrain rectangulaire a une diagonale de " + M(c) + " m et un côté de " + M(a) + " m.",
+    return { fig: GEO().pt("A", 0, 0, false).pt("B", b, 0, false).pt("C", b, a, false).pt("D", 0, a, false).poly(["A", "B", "C", "D"]).side("A", "B", "?").side("B", "C", a + " m").seg("A", "C", { cls: "f-accent", dash: true }).side("A", "C", c + " m", { inside: true }).svg("terrain rectangulaire"), q: "Un terrain rectangulaire a une diagonale de " + M(c) + " m et un côté de " + M(a) + " m.",
       parts: [{ label: "a) Autre côté (m)", spec: { kind: "value", value: b } }, { label: "b) Aire du terrain (m²)", spec: { kind: "value", value: a * b } }, { label: "c) Longueur de clôture pour en faire le tour (m)", spec: { kind: "value", value: 2 * (a + b) } }],
       hints: ["La diagonale découpe le rectangle en deux triangles rectangles : Pythagore.", "Autre côté = √(" + c + "² − " + a + "²), puis aire = longueur · largeur et périmètre = 2(longueur + largeur)."],
       sol: "a) " + M("\\sqrt{" + c * c + " - " + a * a + "} = " + b) + " m. b) " + M(a * b) + " m². c) " + M(2 * (a + b)) + " m." };
@@ -5520,6 +5520,8 @@ function ping(ev) {
 }
 
 // Commentaire libre (facultatif) : envoyé avec le code de la question, la classe et l'identifiant anonyme de l'appareil.
+// Envois vers la feuille Google : seulement depuis le site publié (jamais depuis les pages de test ni claude.ai).
+const canSend = () => VOTE_ENDPOINT && location.protocol === "https:" && !/claude/.test(location.hostname);
 const commentBox = (title = "💬 Un commentaire sur cette question ?", ph = "Une erreur, une consigne pas claire, une idée… (n'écris pas ton nom)", code = "") =>
   `<details class="cmt"${code ? ` data-code="${code}"` : ""}><summary>${title}</summary><textarea class="cmt-t" maxlength="500" rows="3" placeholder="${ph}"></textarea>
   <div class="spread"><span class="small muted cmt-ok"></span><button class="small cmt-s">Envoyer</button></div></details>`;
@@ -5561,7 +5563,7 @@ function comment(code, text) {
     const p = state && state.profile, niveau = p ? gradeName(p) + (p.track === "mp" ? " MP" : "") : "";
     state.comments = (state.comments || []).concat({ code, text, date: day() }).slice(-50);
     save();
-    if (VOTE_ENDPOINT) fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ ev: "comment", code, text: text.slice(0, 500), niveau, dev: deviceId(), date: day() }) }).catch(() => {});
+    if (canSend()) fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ ev: "comment", code, text: text.slice(0, 500), niveau, dev: deviceId(), date: day() }) }).catch(() => {});
   } catch (e) {}
 }
 
@@ -5570,7 +5572,7 @@ function vote(code, v) {
     state.votes = state.votes || {};
     state.votes[code] = { v, date: day() };
     save();
-    if (VOTE_ENDPOINT) fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ code, vote: v, date: day(), dev: deviceId() }) }).catch(() => {});
+    if (canSend()) fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ code, vote: v, date: day(), dev: deviceId() }) }).catch(() => {});
   } catch (e) {}
 }
 

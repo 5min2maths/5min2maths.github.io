@@ -81,7 +81,7 @@ const FIG = (() => {
   }
 
   function rectFig(w, h, lw, lh) {
-    const s = Math.min(240 / w, 110 / h), W = w * s, H = h * s;
+    const s = Math.min(200 / w, 110 / h), W = w * s, H = h * s; // marge pour l'étiquette de gauche (ne pas la couper)
     return svg(300, H + 40, '<rect x="' + (150 - W / 2) + '" y="12" width="' + W + '" height="' + H + '" class="f-shape"/>' + t(150, H + 32, lw) + t(150 - W / 2 - 8, 12 + H / 2, lh, "f-txt", "end"), "rectangle");
   }
   function triangleFig(lb, lh) {
