@@ -227,10 +227,15 @@ const FIG = (() => {
     return svg(320, 164, g, "série statistique");
   }
 
+  // Cylindre (13.11, retour testeur) : base arrière en pointillés, rayon sur la face du haut avec son étiquette
+  // au-dessus du bord (sans chevauchement), hauteur en cote à droite.
   function cylinder(lr, lh) {
-    let g = '<rect x="80" y="30" width="140" height="100" class="f-shape"/>' + '<ellipse cx="150" cy="130" rx="70" ry="16" class="f-shape"/>' + '<ellipse cx="150" cy="30" rx="70" ry="16" class="f-shape2"/>';
-    g += '<rect x="81" y="31" width="138" height="98" fill="var(--blue-soft)" stroke="none"/>' + L(80, 30, 80, 130) + L(220, 30, 220, 130) + L(150, 30, 220, 30, "f-accent", 'stroke-width="2"');
-    return svg(300, 160, g + t(185, 24, lr, "f-accent f-txt") + t(228, 84, lh, "f-txt", "start"), "cylindre");
+    const A = (sw, cls, extra = "") => '<path d="M80 140 A70 16 0 0 ' + sw + ' 220 140" class="' + cls + '" fill="none" ' + extra + "/>";
+    let g = '<path d="M80 40 L80 140 A70 16 0 0 0 220 140 L220 40 Z" fill="var(--blue-soft)" stroke="none"/>';
+    g += A(1, "f-line", 'stroke-dasharray="5 4"') + A(0, "f-line") + L(80, 40, 80, 140) + L(220, 40, 220, 140);
+    g += '<ellipse cx="150" cy="40" rx="70" ry="16" class="f-shape2"/>' + '<circle cx="150" cy="40" r="2.5" fill="var(--ink)"/>' + L(150, 40, 220, 40, "f-accent", 'stroke-width="2.2"');
+    g += L(240, 40, 240, 140) + L(235, 40, 245, 40) + L(235, 140, 245, 140);
+    return svg(300, 166, g + t(185, 17, lr, "f-accent f-txt") + t(250, 95, lh, "f-txt", "start"), "cylindre");
   }
 
   function unitLine(axis, v, label) {

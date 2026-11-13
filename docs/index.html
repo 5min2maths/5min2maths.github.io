@@ -996,10 +996,15 @@ const FIG = (() => {
     return svg(320, 164, g, "série statistique");
   }
 
+  // Cylindre (13.11, retour testeur) : base arrière en pointillés, rayon sur la face du haut avec son étiquette
+  // au-dessus du bord (sans chevauchement), hauteur en cote à droite.
   function cylinder(lr, lh) {
-    let g = '<rect x="80" y="30" width="140" height="100" class="f-shape"/>' + '<ellipse cx="150" cy="130" rx="70" ry="16" class="f-shape"/>' + '<ellipse cx="150" cy="30" rx="70" ry="16" class="f-shape2"/>';
-    g += '<rect x="81" y="31" width="138" height="98" fill="var(--blue-soft)" stroke="none"/>' + L(80, 30, 80, 130) + L(220, 30, 220, 130) + L(150, 30, 220, 30, "f-accent", 'stroke-width="2"');
-    return svg(300, 160, g + t(185, 24, lr, "f-accent f-txt") + t(228, 84, lh, "f-txt", "start"), "cylindre");
+    const A = (sw, cls, extra = "") => '<path d="M80 140 A70 16 0 0 ' + sw + ' 220 140" class="' + cls + '" fill="none" ' + extra + "/>";
+    let g = '<path d="M80 40 L80 140 A70 16 0 0 0 220 140 L220 40 Z" fill="var(--blue-soft)" stroke="none"/>';
+    g += A(1, "f-line", 'stroke-dasharray="5 4"') + A(0, "f-line") + L(80, 40, 80, 140) + L(220, 40, 220, 140);
+    g += '<ellipse cx="150" cy="40" rx="70" ry="16" class="f-shape2"/>' + '<circle cx="150" cy="40" r="2.5" fill="var(--ink)"/>' + L(150, 40, 220, 40, "f-accent", 'stroke-width="2.2"');
+    g += L(240, 40, 240, 140) + L(235, 40, 245, 40) + L(235, 140, 245, 140);
+    return svg(300, 166, g + t(185, 17, lr, "f-accent f-txt") + t(250, 95, lh, "f-txt", "start"), "cylindre");
   }
 
   function unitLine(axis, v, label) {
@@ -3220,7 +3225,7 @@ FINE.push(
     ] },
   { id: "fracops", theme: "no", label: "Fractions relatives et priorités", ex: "\\frac{1}{2} - \\frac{3}{4} \\cdot \\frac{2}{3} = 0", CH: [10], again: [11], MP: [12, "S1"], codes: "10NO2\\.09|11NO1\\.0[45]",
     hint: "Règle des signes comme pour les entiers ; la multiplication et la division passent avant l'addition.",
-    lesson: ["Fractions : signes et priorités", "Les règles des relatifs et des priorités s'appliquent aussi aux fractions.", "On détermine le signe, puis on calcule. Multiplier : numérateurs entre eux, dénominateurs entre eux (simplifier avant). Diviser : multiplier par l'inverse. Priorité à \\(\\cdot\\) et \\(:\\).", ["\\(-\\frac{2}{3} \\cdot \\frac{9}{4} = -\\frac{3}{2}\\)", "\\(\\frac{1}{2} + \\frac{3}{4} \\cdot \\left(-\\frac{2}{3}\\right) = \\frac{1}{2} - \\frac{1}{2} = 0\\)"], "\\(\\frac{1}{2} - \\frac{2}{3} = -\\frac{1}{6}\\) : le résultat peut être négatif."],
+    lesson: ["Fractions : signes et priorités", "Les règles des relatifs et des priorités s'appliquent aussi aux fractions.", "On détermine le signe, puis on calcule. Multiplier : numérateurs entre eux, dénominateurs entre eux (simplifier avant). Diviser : multiplier par l'inverse. Les multiplications et divisions passent avant les additions et soustractions.", ["\\(-\\frac{2}{3} \\cdot \\frac{9}{4} = -\\frac{3}{2}\\)", "\\(\\frac{1}{2} + \\frac{3}{4} \\cdot \\left(-\\frac{2}{3}\\right) = \\frac{1}{2} - \\frac{1}{2} = 0\\)"], "\\(\\frac{1}{2} - \\frac{2}{3} = -\\frac{1}{6}\\) : le résultat peut être négatif."],
     g: [
       () => { let b, e; do { b = R.int(2, 6); e = R.int(2, 8); } while (b === e); const a = R.int(1, b - 1), c = R.int(1, 2 * e), n = a * e - c * b, d = b * e; if (n >= 0 || gcd(a, b) !== 1 || gcd(c, e) !== 1) return GEN.fracops(1); return QV("Calcule et simplifie : " + M(fr(a, b) + " - " + fr(c, e)), n / d, M("\\frac{" + a * e + "}{" + d + "} - \\frac{" + c * b + "}{" + d + "} = " + frac(n, d))); },
       () => { const b = R.int(2, 7), a = R.int(1, b + 3), e = R.int(2, 7), c = R.int(1, e + 3); if (gcd(a, b) !== 1 || gcd(c, e) !== 1 || a === b || c === e) return GEN.fracops(2); if (R.rand() < 0.5) return QV("Calcule et simplifie : " + M("\\left(" + fr(-a, b) + "\\right) \\cdot " + fr(c, e)), -a * c / (b * e), "Signe − ; " + M("\\frac{" + a + " \\cdot " + c + "}{" + b + " \\cdot " + e + "}") + " : " + M(frac(-a * c, b * e)) + "."); return QV("Calcule et simplifie : " + M("\\left(" + fr(-a, b) + "\\right) : \\left(" + fr(-c, e) + "\\right)"), a * e / (b * c), "Signe + ; on multiplie par l'inverse : " + M(fr(a, b) + " \\cdot " + fr(e, c) + " = " + frac(a * e, b * c)) + "."); },
