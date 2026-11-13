@@ -132,7 +132,7 @@ const FIG = (() => {
   function scaling(k, kind) {
     const s = 30, S = 30 * Math.min(k, 4);
     let b = '<rect x="16" y="' + (130 - s) + '" width="' + s + '" height="' + s + '" class="f-shape"/>' + '<rect x="' + (80) + '" y="' + (130 - S) + '" width="' + S + '" height="' + S + '" class="f-fill2"/>';
-    return svg(340, 140, b + t(31, 124 - s, "1") + t(80 + S + 10, 130 - S / 2, "× " + k + (kind ? " (" + kind + ")" : ""), "f-accent f-txt", "start"), "agrandissement");
+    return svg(340, 140, b + t(31, 124 - s, "1") + t(80 + S + 10, 130 - S / 2, "× " + String(k).replace(".", ",") + (kind ? " (" + kind + ")" : ""), "f-accent f-txt", "start"), "agrandissement");
   }
   // Repère avec une droite (fonctions affines).
   function lineGraph(a, b, pts = []) {

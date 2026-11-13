@@ -921,7 +921,7 @@ const FIG = (() => {
   function scaling(k, kind) {
     const s = 30, S = 30 * Math.min(k, 4);
     let b = '<rect x="16" y="' + (130 - s) + '" width="' + s + '" height="' + s + '" class="f-shape"/>' + '<rect x="' + (80) + '" y="' + (130 - S) + '" width="' + S + '" height="' + S + '" class="f-fill2"/>';
-    return svg(340, 140, b + t(31, 124 - s, "1") + t(80 + S + 10, 130 - S / 2, "× " + k + (kind ? " (" + kind + ")" : ""), "f-accent f-txt", "start"), "agrandissement");
+    return svg(340, 140, b + t(31, 124 - s, "1") + t(80 + S + 10, 130 - S / 2, "× " + String(k).replace(".", ",") + (kind ? " (" + kind + ")" : ""), "f-accent f-txt", "start"), "agrandissement");
   }
   // Repère avec une droite (fonctions affines).
   function lineGraph(a, b, pts = []) {
@@ -1489,7 +1489,7 @@ const GEN = {
   eq1(d) {
     if (d === 1) {
       const a = R.nz(-6, 7), x = R.nz(-9, 9), b = R.nz(-12, 12);
-      return { fig: FIG.balance(poly([a, b]).replace(/\^2/g,"²"), String(a * x + b)), q: "Résous : " + M(poly([a, b]) + " = " + (a * x + b)), spec: { kind: "value", value: x }, sol: M(a + "x = " + (a * x + b - b) + " \\iff x = " + x) };
+      return { fig: FIG.balance(poly([a, b]).replace(/\^2/g,"²"), String(a * x + b)), q: "Résous : " + M(poly([a, b]) + " = " + (a * x + b)), spec: { kind: "value", value: x }, sol: "On " + (b > 0 ? "soustrait " + b : "ajoute " + -b) + " des deux côtés : " + M((a === 1 ? "" : a === -1 ? "-" : a) + "x = " + (a * x + b) + (b > 0 ? " - " + b : " + " + -b) + " = " + a * x) + (a === 1 ? "." : ", puis on divise par " + M(par(a)) + " : " + M("x = " + x) + ".") };
     }
     if (d === 2) {
       let a, c; do { a = R.int(2, 6); c = R.int(1, 5); } while (a === c);
@@ -1769,7 +1769,7 @@ Object.assign(GEN, {
     if (d === 1) {
       const a = R.int(5, 15), al = R.int(30, 70), be = R.int(30, 70);
       const b = (a * Math.sin(rad(be))) / Math.sin(rad(al));
-      return { fig: FIG.anyTriangle(["a = " + a, "b = ?", "", "α = " + al + "°, β = " + be + "°", "A"]), q: "Dans le triangle " + M("ABC") + ", " + M("a = " + a) + ", " + M("\\alpha = " + al + "°") + " et " + M("\\beta = " + be + "°") + ". Calcule " + M("b") + " au centième.", spec: { kind: "value", value: b, round: 0.01 }, sol: "Théorème du sinus : " + M("b = \\frac{" + a + " \\sin " + be + "°}{\\sin " + al + "°} \\approx " + dec(b.toFixed(2))) };
+      return { fig: FIG.anyTriangle(["a = " + a, "b = ?", "", "α = " + al + "°, β = " + be + "°", "A"]), q: "Dans le triangle " + M("ABC") + ", " + M("a = " + a) + " (côté opposé à " + M("\\alpha") + "), " + M("\\alpha = " + al + "°") + " et " + M("\\beta = " + be + "°") + ". Calcule " + M("b") + " (côté opposé à " + M("\\beta") + ") au centième.", spec: { kind: "value", value: b, round: 0.01 }, sol: "Théorème du sinus : " + M("b = \\frac{" + a + " \\sin " + be + "°}{\\sin " + al + "°} \\approx " + dec(b.toFixed(2))) };
     }
     const a = R.int(4, 12), b = R.int(4, 12), g = R.int(35, 120);
     const c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(rad(g)));
@@ -1977,7 +1977,7 @@ const PROB = {
     const k = R.pick([20, 25, 50, 100]), lm = R.int(4, 15), am = R.int(6, 40), vm = R.int(2, 9);
     return { fig: FIG.scaling(3, "1 : " + k), q: "Une maquette de bâtiment est à l'échelle " + M("1 : " + k) + ".",
       parts: [{ label: "a) Un mur mesure " + lm + " cm sur la maquette : longueur réelle (m)", spec: { kind: "value", value: (lm * k) / 100 } }, { label: "b) Une pièce mesure " + am + " cm² sur la maquette : aire réelle (m²)", spec: { kind: "value", value: (am * k * k) / 10000 } }, { label: "c) Une cuve de " + vm + " cm³ sur la maquette : volume réel (m³)", spec: { kind: "value", value: (vm * k ** 3) / 1e6 } }],
-      hints: ["Longueurs × " + k + ", aires × " + k + "², volumes × " + k + "³.", "Puis convertis : 1 m = 100 cm, 1 m² = 10 000 cm², 1 m³ = 1 000 000 cm³."],
+      hints: ["Longueurs × " + decTxt(k) + ", aires × " + decTxt(k) + "², volumes × " + decTxt(k) + "³.", "Puis convertis : 1 m = 100 cm, 1 m² = 10 000 cm², 1 m³ = 1 000 000 cm³."],
       sol: "a) " + M(lm * k + " \\text{ cm} = " + dec((lm * k) / 100)) + " m. b) " + M(am + " \\cdot " + k * k + " = " + am * k * k + " \\text{ cm}^2 = " + dec((am * k * k) / 10000)) + " m². c) " + M(vm + " \\cdot " + k ** 3 + " = " + vm * k ** 3 + " \\text{ cm}^3 = " + dec((vm * k ** 3) / 1e6)) + " m³." };
   },
 };
@@ -2097,7 +2097,7 @@ const ptrim = (a) => { let i = 0; while (i < a.length - 1 && a[i] === 0) i++; re
 const shuffle = (arr) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(R.rand() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
 const lin = (a, b, v = "x") => poly([a, b], v);
 const cx = (c) => (c === 1 ? "" : c === -1 ? "-" : String(c)); // coefficient devant une lettre
-const nb = (v) => { const [i, f] = String(+(+v).toFixed(6)).split("."); return (Math.abs(+i) >= 10000 ? i.replace(/\B(?=(\d{3})+(?!\d))/g, "{'}") : i) + (f ? "{,}" + f : ""); }; // 10'000
+const nb = (v) => { const [i, f] = String(+(+v).toFixed(6)).split("."); return (Math.abs(+i) >= 10000 ? i.replace(/\B(?=(\d{3})+(?!\d))/g, "\\text{'}") : i) + (f ? "{,}" + f : ""); }; // 10'000
 // Ensemble des solutions d'une inéquation f(x) op 0 : zéros (inclus si op large), pôles (exclus).
 function signSet(f, zeros, poles, op) {
   const crit = [...new Set(zeros.concat(poles))].sort((a, b) => a - b);
@@ -2857,7 +2857,7 @@ Object.assign(GEN, {
     const fig = FIG.plot([{ f: (x) => A * Math[fn](k * x) + m }], [], { xr: [-1, 7], yr: [-6, 6], grid: false, ticks: false, label: "sinusoïde" });
     if (d === 1) return { fig, q: "Quelle est l'amplitude de " + M(txt) + " ?", spec: { kind: "value", value: A }, sol: "L'amplitude est le coefficient devant " + M("\\" + fn) + " : " + M(dec(A)) + "." };
     if (d === 2) return { fig, q: "Quelle est la période de " + M(txt) + " ? (avec π)", spec: { kind: "value", value: (2 * Math.PI) / k }, sol: M("T = \\frac{2\\pi}{k}" + " = " + ["", "2\\pi", "\\pi", "\\frac{2\\pi}{3}", "\\frac{\\pi}{2}"][k]) + " (ici " + M("k = " + k) + ")." };
-    return { fig, q: "Quelle est la valeur maximale de " + M(txt) + ", et en quel plus petit " + M("x \\ge 0") + " est-elle atteinte ? Réponds « x ; max » (avec π).", spec: { kind: "pair", values: [fn === "cos" ? 0 : Math.PI / (2 * k), A + m] }, sol: "Le maximum vaut " + M(dec(A) + (m ? sg(m) : "") + " = " + dec(A + m)) + " ; il est atteint quand " + M("\\" + fn + "(" + (k === 1 ? "" : k) + "x) = 1") + ", soit " + M("x = " + (fn === "cos" ? "0" : "\\frac{\\pi}{" + 2 * k + "}")) + "." };
+    return { fig, q: "En quel plus petit " + M("x \\ge 0") + " la fonction " + M(txt) + " atteint-elle sa valeur maximale, et quelle est cette valeur ? Réponds « x ; max » (avec π).", spec: { kind: "pair", values: [fn === "cos" ? 0 : Math.PI / (2 * k), A + m] }, sol: "Le maximum vaut " + M(dec(A) + (m ? sg(m) : "") + " = " + dec(A + m)) + " ; il est atteint quand " + M("\\" + fn + "(" + (k === 1 ? "" : k) + "x) = 1") + ", soit " + M("x = " + (fn === "cos" ? "0" : "\\frac{\\pi}{" + 2 * k + "}")) + "." };
   },
 
   droites(d) {
@@ -3063,7 +3063,7 @@ FINE.push(
       () => { const a = R.int(4, 9), b = R.int(2, 3), c = b === 2 ? R.int(4, 5) : R.int(2, 5), v = a * a - b ** 3 + 2 ** c; return QV("Calcule : " + M(a + "^2 - " + b + "^3 + 2^" + c), v, M(a * a + " - " + b ** 3 + " + " + 2 ** c + " = " + v)); },
     ] },
   { id: "tradexpr", theme: "no", label: "Traduire un énoncé en calcul", ex: "\\text{le double de la somme de 3 et 4} = 2 \\cdot (3 + 4)", CH: [9], again: [12], codes: "9NO3\\.03",
-    hint: "Somme : +, différence : −, produit : ×, quotient : ÷. La dernière opération nommée… est la première dans la phrase.",
+    hint: "Somme : +, différence : −, produit : ×, quotient : ÷. Le premier mot de la phrase dit quelle opération on fait en dernier : « le double de la somme de 3 et 5 » = 2 · (3 + 5).",
     lesson: ["Du français au calcul", "Une phrase décrit un calcul, avec son ordre.", "Somme (+), différence (−), produit (·), quotient (:). « Le double de la somme » : on calcule d'abord la somme, donc on met des parenthèses.", ["Le double de la somme de 3 et 4 : \\(2 \\cdot (3 + 4) = 14\\)", "La somme de 3 et du double de 4 : \\(3 + 2 \\cdot 4 = 11\\)"], "« Le produit de 2 par la somme de 3 et 4 » n'est pas \\(2 \\cdot 3 + 4\\)."],
     g: [
       () => { const a = R.int(2, 9), b = R.int(2, 9), c = R.int(2, 9); if (R.rand() < 0.5) return QV("Calcule le double de la somme de " + M(a) + " et " + M(b) + ".", 2 * (a + b), M("2 \\cdot (" + a + " + " + b + ") = " + 2 * (a + b))); return QV("Calcule la somme de " + M(a) + " et du produit de " + M(b) + " par " + M(c) + ".", a + b * c, M(a + " + " + b + " \\cdot " + c + " = " + (a + b * c))); },
@@ -3552,7 +3552,7 @@ FINE.push(
     ] },
   { id: "eqparam", theme: "fa", label: "Équations avec un paramètre", ex: "(m - 2)x = 5", CH: null, MP: [12, "S1"], codesMP: "S1\\.EQ\\.0[26]",
     hint: "1er degré : pas de solution unique quand le coefficient de x vaut 0. 2e degré : solution double quand Δ = 0.",
-    lesson: ["Discuter selon un paramètre", "Le nombre de solutions dépend de la valeur du paramètre.", "\\(ax = b\\) : une solution si \\(a \\ne 0\\) ; aucune si \\(a = 0\\) et \\(b \\ne 0\\). 2e degré : deux solutions si \\(\\Delta > 0\\), une (double) si \\(\\Delta = 0\\), aucune si \\(\\Delta < 0\\).", ["\\((m - 2)x = 5\\) : aucune solution pour \\(m = 2\\)", "\\(x^2 + 6x + m = 0\\) : solution double pour \\(m = 9\\)"], "Avant de diviser par une expression contenant le paramètre, vérifie qu'elle n'est pas nulle."],
+    lesson: ["Discuter selon un paramètre", "Le nombre de solutions dépend de la valeur du paramètre.", "\\(ax = b\\) : une solution si \\(a \\ne 0\\) ; aucune si \\(a = 0\\) et \\(b \\ne 0\\) ; une infinité (tous les nombres) si \\(a = 0\\) et \\(b = 0\\). 2e degré : deux solutions si \\(\\Delta > 0\\), une (double) si \\(\\Delta = 0\\), aucune si \\(\\Delta < 0\\).", ["\\((m - 2)x = 5\\) : aucune solution pour \\(m = 2\\)", "\\(x^2 + 6x + m = 0\\) : solution double pour \\(m = 9\\)"], "Avant de diviser par une expression contenant le paramètre, vérifie qu'elle n'est pas nulle."],
     g: [
       () => { const a = R.nz(-9, 9), b = R.nz(-9, 9); return QV("Pour quelle valeur de " + M("m") + " l'équation " + M("(m" + sg(-a) + ")x = " + b) + " n'a-t-elle aucune solution ?", a, "Si " + M("m = " + a) + ", l'équation devient " + M("0x = " + b) + " : impossible."); },
       () => { const b = R.int(2, 9), a = R.int(1, 9), c = a + R.nz(-5, 5); return QV("Pour quelle valeur de " + M("m") + " l'équation " + M("mx + " + a + " = " + b + "x" + sg(c)) + " n'a-t-elle aucune solution ?", b, M("(m - " + b + ")x = " + (c - a)) + " : aucune solution si " + M("m = " + b) + "."); },
@@ -3756,7 +3756,7 @@ FINE.push(
     ] },
   { id: "trigassoc", theme: "es", label: "Angles associés, relations fondamentales", ex: "\\sin(180° - \\alpha) = \\sin \\alpha", CH: [13], MP: [13, "S2"], codesMATU: "2\\.FO\\.07[de]",
     hint: "Place les angles sur le cercle trigonométrique : les symétries donnent les signes. Et sin² α + cos² α = 1.",
-    lesson: ["Angles associés", "Les symétries du cercle trigonométrique relient les sinus et cosinus.", "\\(\\sin(180° - \\alpha) = \\sin \\alpha\\), \\(\\cos(180° - \\alpha) = -\\cos \\alpha\\), \\(\\sin(-\\alpha) = -\\sin \\alpha\\), \\(\\cos(-\\alpha) = \\cos \\alpha\\), \\(\\sin(90° - \\alpha) = \\cos \\alpha\\). Toujours : \\(\\sin^2 \\alpha + \\cos^2 \\alpha = 1\\) et \\(\\tan \\alpha = \\frac{\\sin \\alpha}{\\cos \\alpha}\\).", ["\\(\\sin \\alpha = 0{,}6\\) : \\(\\sin(180° - \\alpha) = 0{,}6\\)", "\\(\\sin \\alpha = \\frac{3}{5}\\), \\(\\alpha\\) aigu : \\(\\cos \\alpha = \\frac{4}{5}\\)"], "Pour un angle obtus, le cosinus est négatif."],
+    lesson: ["Angles associés", "Les symétries du cercle trigonométrique relient les sinus et cosinus.", "\\(\\sin(180° - \\alpha) = \\sin \\alpha\\), \\(\\cos(180° - \\alpha) = -\\cos \\alpha\\), \\(\\sin(-\\alpha) = -\\sin \\alpha\\), \\(\\cos(-\\alpha) = \\cos \\alpha\\), \\(\\sin(90° - \\alpha) = \\cos \\alpha\\), \\(\\sin(180° + \\alpha) = -\\sin \\alpha\\), \\(\\cos(180° + \\alpha) = -\\cos \\alpha\\), \\(\\cos(90° + \\alpha) = -\\sin \\alpha\\). Toujours : \\(\\sin^2 \\alpha + \\cos^2 \\alpha = 1\\) et \\(\\tan \\alpha = \\frac{\\sin \\alpha}{\\cos \\alpha}\\).", ["\\(\\sin \\alpha = 0{,}6\\) : \\(\\sin(180° - \\alpha) = 0{,}6\\)", "\\(\\sin \\alpha = \\frac{3}{5}\\), \\(\\alpha\\) aigu : \\(\\cos \\alpha = \\frac{4}{5}\\)"], "Pour un angle obtus, le cosinus est négatif."],
     g: [
       () => { const v = R.pick([0.2, 0.3, 0.6, 0.8, 0.28, 0.96]), [t, fn, sgn] = R.pick([["\\sin(180° - \\alpha)", "sin", 1], ["\\cos(180° - \\alpha)", "cos", -1], ["\\sin(-\\alpha)", "sin", -1], ["\\cos(-\\alpha)", "cos", 1], ["\\sin(180° + \\alpha)", "sin", -1], ["\\cos(180° + \\alpha)", "cos", -1]]); return QV("On sait que " + M("\\" + fn + " \\alpha = " + dec(v)) + ". Que vaut " + M(t) + " ?", sgn * v, M(t + " = " + (sgn < 0 ? "-" : "") + "\\" + fn + " \\alpha = " + dec(sgn * v)) + ".", { fig: GF.assoc(40, assocAngle(t)[0], "α", assocAngle(t)[1]) }); },
       () => { const v = R.pick([0.2, 0.3, 0.6, 0.8, 0.28, 0.96]), [t, fn, sgn] = R.pick([["\\sin(90° - \\alpha)", "cos", 1], ["\\cos(90° - \\alpha)", "sin", 1], ["\\cos(90° + \\alpha)", "sin", -1], ["\\sin(90° + \\alpha)", "cos", 1]]); return QV("On sait que " + M("\\" + fn + " \\alpha = " + dec(v)) + ". Que vaut " + M(t) + " ?", sgn * v, M(t + " = " + (sgn < 0 ? "-" : "") + "\\" + fn + " \\alpha = " + dec(sgn * v)) + ".", { fig: GF.assoc(40, assocAngle(t)[0], "α", assocAngle(t)[1]) }); },
@@ -3800,7 +3800,7 @@ FINE.push(
     ] },
   { id: "cercletan", theme: "es", label: "Cercles : conditions et tangentes", ex: "x^2 + y^2 = 25 \\text{ en } (3 \\, ; 4)", CH: [13], MP: null, codesMATU: "2\\.GE\\.04c|2\\.GE\\.05[bc]",
     hint: "Une droite est tangente si sa distance au centre vaut le rayon. La tangente en un point est perpendiculaire au rayon.",
-    lesson: ["Cercles et tangentes", "Trois réflexes pour les cercles dans un repère.", "Le cercle de centre \\(C(a \\, ; b)\\) et de rayon \\(r\\) a pour équation \\((x - a)^2 + (y - b)^2 = r^2\\). Si \\([AB]\\) est un diamètre, le centre est le milieu de \\([AB]\\) et le rayon vaut la moitié de \\(AB\\). Une droite est tangente au cercle quand sa distance au centre est égale au rayon. Plus petite que le rayon : la droite coupe le cercle en deux points. Plus grande : elle ne le touche pas. La tangente en un point \\(T\\) du cercle est perpendiculaire au rayon \\([CT]\\) : sa pente est l'opposé de l'inverse de la pente du rayon.", ["Diamètre \\([AB]\\) avec \\(A(0 \\, ; 0)\\) et \\(B(6 \\, ; 8)\\) : centre \\(C(3 \\, ; 4)\\), \\(AB = 10\\), rayon \\(5\\). Équation : \\((x - 3)^2 + (y - 4)^2 = 25\\).", "Cercle \\(x^2 + y^2 = 25\\) (centre \\(O\\)) et point \\(T(3 \\, ; 4)\\) : le rayon \\([OT]\\) a pour pente \\(\\frac{4}{3}\\), donc la tangente en \\(T\\) a pour pente \\(-\\frac{3}{4}\\)."], "Dans \\((x - 3)^2 + (y - 4)^2 = 25\\), le rayon est \\(5\\) et non \\(25\\) : le second membre est \\(r^2\\)."],
+    lesson: ["Cercles et tangentes", "Trois réflexes pour les cercles dans un repère.", "Le cercle de centre \\(C(a \\, ; b)\\) et de rayon \\(r\\) a pour équation \\((x - a)^2 + (y - b)^2 = r^2\\). Si \\([AB]\\) est un diamètre, le centre est le milieu de \\([AB]\\) et le rayon vaut la moitié de \\(AB\\). Une droite est tangente au cercle quand sa distance au centre est égale au rayon ; distance du point \\((x_0 ; y_0)\\) à la droite \\(ax + by + c = 0\\) : \\(\\frac{|a x_0 + b y_0 + c|}{\\sqrt{a^2 + b^2}}\\). Plus petite que le rayon : la droite coupe le cercle en deux points. Plus grande : elle ne le touche pas. La tangente en un point \\(T\\) du cercle est perpendiculaire au rayon \\([CT]\\) : sa pente est l'opposé de l'inverse de la pente du rayon.", ["Diamètre \\([AB]\\) avec \\(A(0 \\, ; 0)\\) et \\(B(6 \\, ; 8)\\) : centre \\(C(3 \\, ; 4)\\), \\(AB = 10\\), rayon \\(5\\). Équation : \\((x - 3)^2 + (y - 4)^2 = 25\\).", "Cercle \\(x^2 + y^2 = 25\\) (centre \\(O\\)) et point \\(T(3 \\, ; 4)\\) : le rayon \\([OT]\\) a pour pente \\(\\frac{4}{3}\\), donc la tangente en \\(T\\) a pour pente \\(-\\frac{3}{4}\\)."], "Dans \\((x - 3)^2 + (y - 4)^2 = 25\\), le rayon est \\(5\\) et non \\(25\\) : le second membre est \\(r^2\\)."],
     g: [
       () => { const x1 = R.int(-5, 3), y1 = R.int(-5, 3), p = R.int(1, 4), q = R.int(1, 4); return QV("Le cercle de diamètre " + M("[AB]") + ", avec " + M("A(" + x1 + " \\, ; " + y1 + ")") + " et " + M("B(" + (x1 + 2 * p) + " \\, ; " + (y1 + 2 * q) + ")") + ", a pour équation " + M("(x - a)^2 + (y - b)^2 = r^2") + ". Que vaut " + M("r^2") + " ?", p * p + q * q, "Centre : " + M("(" + (x1 + p) + " \\, ; " + (y1 + q) + ")") + ". " + M("r^2 = " + p + "^2 + " + q + "^2 = " + (p * p + q * q)) + ".", { fig: FIG.plot([], [[x1, y1, "A"], [x1 + 2 * p, y1 + 2 * q, "B"]], { numbers: true, step: 2, xr: [-7, 9], yr: [-7, 9] }) }); },
       () => { const a = R.int(-4, 4), b = R.int(-4, 4), k = R.int(1, 5); if (R.rand() < 0.5) { const y = b + R.pick([-1, 1]) * k; return QV("Pour quel rayon le cercle de centre " + M("(" + a + " \\, ; " + b + ")") + " est-il tangent à la droite " + M("y = " + y) + " ?", k, "La distance du centre à la droite est " + M("|" + b + " - " + par(y) + "| = " + k) + " : c'est le rayon."); } const c = R.pick([-1, 1]) * 5 * k - 3 * a - 4 * b; return QV("Pour quel rayon le cercle de centre " + M("(" + a + " \\, ; " + b + ")") + " est-il tangent à la droite " + M("3x + 4y" + sg(c) + " = 0") + " ?", k, "Distance du centre à la droite : " + M("\\frac{|3 \\cdot " + par(a) + " + 4 \\cdot " + par(b) + sg(c) + "|}{\\sqrt{3^2 + 4^2}} = \\frac{" + 5 * k + "}{5} = " + k) + "."); },
@@ -4919,11 +4919,11 @@ const LESSONS_V2 = {
     ["\\(2^x = 32\\) : \\(32 = 2^5\\), donc \\(x = 5\\).", "1000 CHF à \\(2\\,\\%\\) pendant 3 ans : \\(1000 \\cdot 1{,}02^3 \\approx 1061{,}21\\) CHF."],
     "\\(1{,}02^3\\), et non \\(1 + 0{,}02 \\cdot 3\\) : les intérêts rapportent eux aussi des intérêts."],
   log: ["Logarithmes", "Le logarithme répond à la question : « quel exposant faut-il ? »",
-    "\\(\\log_b x = y\\) signifie \\(b^y = x\\). Pour résoudre \\(b^x = c\\), on écrit \\(x = \\frac{\\ln c}{\\ln b}\\). Propriétés : \\(\\log(ab) = \\log a + \\log b\\), \\(\\log\\frac{a}{b} = \\log a - \\log b\\), \\(\\log(a^n) = n \\log a\\).",
+    "\\(\\log_b x = y\\) signifie \\(b^y = x\\). Pour résoudre \\(b^x = c\\), on écrit \\(x = \\frac{\\ln c}{\\ln b}\\). Propriétés : \\(\\log(ab) = \\log a + \\log b\\), \\(\\log\\frac{a}{b} = \\log a - \\log b\\), \\(\\log(a^n) = n \\log a\\). Sans base écrite, \\(\\log\\) est le logarithme en base 10 : \\(\\log 100 = 2\\).",
     ["\\(\\log_2 8 = 3\\), car \\(2^3 = 8\\).", "\\(2^x = 7\\) : \\(x = \\frac{\\ln 7}{\\ln 2} \\approx 2{,}81\\)."],
     "\\(\\log(a + b) \\ne \\log a + \\log b\\)."],
   trigcercle: ["Cercle trigonométrique", "Un cercle de rayon 1, centré à l'origine, sur lequel on place les angles.",
-    "Le point associé à l'angle \\(\\alpha\\) a pour coordonnées \\((\\cos\\alpha \\, ; \\sin\\alpha)\\). Les angles se mesurent depuis l'axe des \\(x\\), dans le sens inverse des aiguilles d'une montre. \\(180° = \\pi\\) rad, donc \\(1° = \\frac{\\pi}{180}\\) rad.",
+    "Le point associé à l'angle \\(\\alpha\\) a pour coordonnées \\((\\cos\\alpha \\, ; \\sin\\alpha)\\). Les angles se mesurent depuis l'axe des \\(x\\), dans le sens inverse des aiguilles d'une montre. \\(180° = \\pi\\) rad, donc \\(1° = \\frac{\\pi}{180}\\) rad. Valeurs à connaître : \\(\\cos 30° = \\sin 60° = \\frac{\\sqrt{3}}{2}\\), \\(\\cos 45° = \\sin 45° = \\frac{\\sqrt{2}}{2}\\), \\(\\cos 60° = \\sin 30° = \\frac{1}{2}\\) ; les autres angles s'en déduisent par symétrie, avec le signe du quadrant.",
     ["\\(90° = \\frac{\\pi}{2}\\) rad, \\(60° = \\frac{\\pi}{3}\\) rad.", "Point associé à 150° : \\(\\left(-\\frac{\\sqrt{3}}{2} \\, ; \\frac{1}{2}\\right)\\), car il est le symétrique de celui de 30°."],
     "Dans le 2e quadrant (entre 90° et 180°), le cosinus est négatif."],
   trigeq: ["Équations trigonométriques", "Sur un tour complet, il y a en général deux solutions.",
@@ -4931,7 +4931,7 @@ const LESSONS_V2 = {
     ["\\(\\sin x = \\frac{1}{2}\\) sur \\([0° \\, ; 360°[\\) : \\(x = 30°\\) ou \\(x = 180° - 30° = 150°\\)."],
     "Ne t'arrête pas à la première solution."],
   sinlaw: ["Triangle quelconque", "Sans angle droit, deux théorèmes remplacent Pythagore et la trigonométrie.",
-    "Chaque côté porte le nom de l'angle qui lui fait face : \\(a\\) en face de \\(\\alpha\\). Théorème du sinus : \\(\\frac{a}{\\sin\\alpha} = \\frac{b}{\\sin\\beta} = \\frac{c}{\\sin\\gamma}\\) (utile si on connaît un côté et l'angle en face). Théorème du cosinus : \\(c^2 = a^2 + b^2 - 2ab\\cos\\gamma\\) (utile avec deux côtés et l'angle entre eux).",
+    "Chaque côté porte le nom de l'angle qui lui fait face : \\(a\\) en face de \\(\\alpha\\). Théorème du sinus : \\(\\frac{a}{\\sin\\alpha} = \\frac{b}{\\sin\\beta} = \\frac{c}{\\sin\\gamma}\\) (utile si on connaît un côté et l'angle en face). Théorème du cosinus : \\(c^2 = a^2 + b^2 - 2ab\\cos\\gamma\\) (utile avec deux côtés et l'angle entre eux, ou avec les trois côtés pour trouver un angle : \\(\\cos\\gamma = \\frac{a^2 + b^2 - c^2}{2ab}\\)).",
     ["\\(a = 5\\), \\(b = 8\\), \\(\\gamma = 60°\\) : \\(c^2 = 25 + 64 - 80 \\cdot \\frac{1}{2} = 49\\), donc \\(c = 7\\)."],
     "Dans le théorème du cosinus, \\(\\gamma\\) est l'angle en face de \\(c\\), entre \\(a\\) et \\(b\\)."],
   cart: ["Distance et milieu", "Dans un repère, on calcule avec les coordonnées.",
@@ -5444,6 +5444,10 @@ const Engine = {
     const code = id + "-" + level + "-" + seed.toString(36);
     if (level === 4 && hasProb(id)) { const p = probFor(id)(); return { ...p, id, d: 4, seed, code, spec: { kind: "multi" }, hint: p.hints[0] }; }
     const q = GEN[id](level);
+    // Écritures maladroites des générateurs (audit 13.11) : « 1x » → « x », « + -2 » → « - 2 », « - -3 » → « + 3 ».
+    const tidy = (t) => typeof t !== "string" ? t : t.replace(/([(=+\-\s{]|\\\()(-?)1([a-z])(?![a-z{])/g, "$1$2$3").replace(/\+\s*-\s*(?=[\da-z(\\])/g, "- ").replace(/-\s*-\s*(?=[\da-z(\\])/g, "+ ");
+    q.q = tidy(q.q); q.sol = tidy(q.sol);
+    if (q.parts) q.parts = q.parts.map((p) => ({ ...p, label: tidy(p.label) }));
     // Consigne de forme : « notation scientifique » contrôlée par le correcteur.
     if (q.spec && q.spec.kind === "value" && /notation scientifique/.test(q.q) && !/^Calcule : /.test(q.q)) {
       q.spec = { ...q.spec, sci: true };
@@ -6173,9 +6177,16 @@ const KEYS = ["7", "8", "9", "/", "(", ")", "⌫", "4", "5", "6", "*", "^", "√
 // Réponse exacte non décimale sans arrondi demandé (audit 13.11) : on le dit à l'élève, sauf si l'énoncé le précise déjà.
 const isTerm = (v) => Math.abs(v * 1e6 - Math.round(v * 1e6)) < 1e-6;
 function exactNote(spec, text) {
-  if (!spec || spec.round || spec.plain || /exact|fraction|arrondi|au centième|au dixième/i.test(text || "")) return "";
-  const vals = spec.kind === "value" ? [spec.value] : spec.kind === "set" || spec.kind === "pair" ? spec.values : [];
-  return vals.some((v) => isFinite(v) && !isTerm(v)) ? "Réponse exacte attendue : fraction ou racine, pas d'arrondi." : "";
+  if (!spec) return "";
+  const t = text || "", notes = [];
+  // Consigne de saisie quand l'énoncé ne la donne pas (audit 13.11).
+  if (spec.kind === "set" && !/« ; »|sépare|aucune/i.test(t)) notes.push("Plusieurs solutions : sépare-les par « ; » ; « aucune » s'il n'y en a pas.");
+  if (spec.kind === "solset" && !/intervalle|« x|aucune/i.test(t)) notes.push("Réponds avec des intervalles (par exemple ]-∞ ; 2] ∪ [5 ; +∞[), « x ≥ 3 » ou « aucune ».");
+  if (!spec.round && !spec.plain && !/exact|fraction|arrondi|au centième|au dixième/i.test(t)) {
+    const vals = spec.kind === "value" ? [spec.value] : spec.kind === "set" || spec.kind === "pair" ? spec.values : [];
+    if (vals.some((v) => isFinite(v) && !isTerm(v))) notes.push("Réponse exacte attendue : fraction ou racine, pas d'arrondi.");
+  }
+  return notes.join(" ");
 }
 // Clavier « intervalles » (13.11) : domaines, inéquations, ensembles de solutions. « | » = place du curseur après insertion.
 const SET_KEYS = ["7", "8", "9", "-", "+", "/", "⌫", "4", "5", "6", "[", "]", ";", "∞", "1", "2", "3", "x", "<", ">", "∪",

@@ -24,7 +24,7 @@ const ptrim = (a) => { let i = 0; while (i < a.length - 1 && a[i] === 0) i++; re
 const shuffle = (arr) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(R.rand() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
 const lin = (a, b, v = "x") => poly([a, b], v);
 const cx = (c) => (c === 1 ? "" : c === -1 ? "-" : String(c)); // coefficient devant une lettre
-const nb = (v) => { const [i, f] = String(+(+v).toFixed(6)).split("."); return (Math.abs(+i) >= 10000 ? i.replace(/\B(?=(\d{3})+(?!\d))/g, "{'}") : i) + (f ? "{,}" + f : ""); }; // 10'000
+const nb = (v) => { const [i, f] = String(+(+v).toFixed(6)).split("."); return (Math.abs(+i) >= 10000 ? i.replace(/\B(?=(\d{3})+(?!\d))/g, "\\text{'}") : i) + (f ? "{,}" + f : ""); }; // 10'000
 // Ensemble des solutions d'une inéquation f(x) op 0 : zéros (inclus si op large), pôles (exclus).
 function signSet(f, zeros, poles, op) {
   const crit = [...new Set(zeros.concat(poles))].sort((a, b) => a - b);
@@ -784,7 +784,7 @@ Object.assign(GEN, {
     const fig = FIG.plot([{ f: (x) => A * Math[fn](k * x) + m }], [], { xr: [-1, 7], yr: [-6, 6], grid: false, ticks: false, label: "sinusoïde" });
     if (d === 1) return { fig, q: "Quelle est l'amplitude de " + M(txt) + " ?", spec: { kind: "value", value: A }, sol: "L'amplitude est le coefficient devant " + M("\\" + fn) + " : " + M(dec(A)) + "." };
     if (d === 2) return { fig, q: "Quelle est la période de " + M(txt) + " ? (avec π)", spec: { kind: "value", value: (2 * Math.PI) / k }, sol: M("T = \\frac{2\\pi}{k}" + " = " + ["", "2\\pi", "\\pi", "\\frac{2\\pi}{3}", "\\frac{\\pi}{2}"][k]) + " (ici " + M("k = " + k) + ")." };
-    return { fig, q: "Quelle est la valeur maximale de " + M(txt) + ", et en quel plus petit " + M("x \\ge 0") + " est-elle atteinte ? Réponds « x ; max » (avec π).", spec: { kind: "pair", values: [fn === "cos" ? 0 : Math.PI / (2 * k), A + m] }, sol: "Le maximum vaut " + M(dec(A) + (m ? sg(m) : "") + " = " + dec(A + m)) + " ; il est atteint quand " + M("\\" + fn + "(" + (k === 1 ? "" : k) + "x) = 1") + ", soit " + M("x = " + (fn === "cos" ? "0" : "\\frac{\\pi}{" + 2 * k + "}")) + "." };
+    return { fig, q: "En quel plus petit " + M("x \\ge 0") + " la fonction " + M(txt) + " atteint-elle sa valeur maximale, et quelle est cette valeur ? Réponds « x ; max » (avec π).", spec: { kind: "pair", values: [fn === "cos" ? 0 : Math.PI / (2 * k), A + m] }, sol: "Le maximum vaut " + M(dec(A) + (m ? sg(m) : "") + " = " + dec(A + m)) + " ; il est atteint quand " + M("\\" + fn + "(" + (k === 1 ? "" : k) + "x) = 1") + ", soit " + M("x = " + (fn === "cos" ? "0" : "\\frac{\\pi}{" + 2 * k + "}")) + "." };
   },
 
   droites(d) {

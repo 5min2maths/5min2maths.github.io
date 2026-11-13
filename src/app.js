@@ -459,9 +459,16 @@ const KEYS = ["7", "8", "9", "/", "(", ")", "⌫", "4", "5", "6", "*", "^", "√
 // Réponse exacte non décimale sans arrondi demandé (audit 13.11) : on le dit à l'élève, sauf si l'énoncé le précise déjà.
 const isTerm = (v) => Math.abs(v * 1e6 - Math.round(v * 1e6)) < 1e-6;
 function exactNote(spec, text) {
-  if (!spec || spec.round || spec.plain || /exact|fraction|arrondi|au centième|au dixième/i.test(text || "")) return "";
-  const vals = spec.kind === "value" ? [spec.value] : spec.kind === "set" || spec.kind === "pair" ? spec.values : [];
-  return vals.some((v) => isFinite(v) && !isTerm(v)) ? "Réponse exacte attendue : fraction ou racine, pas d'arrondi." : "";
+  if (!spec) return "";
+  const t = text || "", notes = [];
+  // Consigne de saisie quand l'énoncé ne la donne pas (audit 13.11).
+  if (spec.kind === "set" && !/« ; »|sépare|aucune/i.test(t)) notes.push("Plusieurs solutions : sépare-les par « ; » ; « aucune » s'il n'y en a pas.");
+  if (spec.kind === "solset" && !/intervalle|« x|aucune/i.test(t)) notes.push("Réponds avec des intervalles (par exemple ]-∞ ; 2] ∪ [5 ; +∞[), « x ≥ 3 » ou « aucune ».");
+  if (!spec.round && !spec.plain && !/exact|fraction|arrondi|au centième|au dixième/i.test(t)) {
+    const vals = spec.kind === "value" ? [spec.value] : spec.kind === "set" || spec.kind === "pair" ? spec.values : [];
+    if (vals.some((v) => isFinite(v) && !isTerm(v))) notes.push("Réponse exacte attendue : fraction ou racine, pas d'arrondi.");
+  }
+  return notes.join(" ");
 }
 // Clavier « intervalles » (13.11) : domaines, inéquations, ensembles de solutions. « | » = place du curseur après insertion.
 const SET_KEYS = ["7", "8", "9", "-", "+", "/", "⌫", "4", "5", "6", "[", "]", ";", "∞", "1", "2", "3", "x", "<", ">", "∪",

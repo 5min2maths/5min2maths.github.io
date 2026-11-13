@@ -267,6 +267,10 @@ const Engine = {
     const code = id + "-" + level + "-" + seed.toString(36);
     if (level === 4 && hasProb(id)) { const p = probFor(id)(); return { ...p, id, d: 4, seed, code, spec: { kind: "multi" }, hint: p.hints[0] }; }
     const q = GEN[id](level);
+    // Écritures maladroites des générateurs (audit 13.11) : « 1x » → « x », « + -2 » → « - 2 », « - -3 » → « + 3 ».
+    const tidy = (t) => typeof t !== "string" ? t : t.replace(/([(=+\-\s{]|\\\()(-?)1([a-z])(?![a-z{])/g, "$1$2$3").replace(/\+\s*-\s*(?=[\da-z(\\])/g, "- ").replace(/-\s*-\s*(?=[\da-z(\\])/g, "+ ");
+    q.q = tidy(q.q); q.sol = tidy(q.sol);
+    if (q.parts) q.parts = q.parts.map((p) => ({ ...p, label: tidy(p.label) }));
     // Consigne de forme : « notation scientifique » contrôlée par le correcteur.
     if (q.spec && q.spec.kind === "value" && /notation scientifique/.test(q.q) && !/^Calcule : /.test(q.q)) {
       q.spec = { ...q.spec, sci: true };

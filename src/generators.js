@@ -238,7 +238,7 @@ const GEN = {
   eq1(d) {
     if (d === 1) {
       const a = R.nz(-6, 7), x = R.nz(-9, 9), b = R.nz(-12, 12);
-      return { fig: FIG.balance(poly([a, b]).replace(/\^2/g,"²"), String(a * x + b)), q: "Résous : " + M(poly([a, b]) + " = " + (a * x + b)), spec: { kind: "value", value: x }, sol: M(a + "x = " + (a * x + b - b) + " \\iff x = " + x) };
+      return { fig: FIG.balance(poly([a, b]).replace(/\^2/g,"²"), String(a * x + b)), q: "Résous : " + M(poly([a, b]) + " = " + (a * x + b)), spec: { kind: "value", value: x }, sol: "On " + (b > 0 ? "soustrait " + b : "ajoute " + -b) + " des deux côtés : " + M((a === 1 ? "" : a === -1 ? "-" : a) + "x = " + (a * x + b) + (b > 0 ? " - " + b : " + " + -b) + " = " + a * x) + (a === 1 ? "." : ", puis on divise par " + M(par(a)) + " : " + M("x = " + x) + ".") };
     }
     if (d === 2) {
       let a, c; do { a = R.int(2, 6); c = R.int(1, 5); } while (a === c);
@@ -518,7 +518,7 @@ Object.assign(GEN, {
     if (d === 1) {
       const a = R.int(5, 15), al = R.int(30, 70), be = R.int(30, 70);
       const b = (a * Math.sin(rad(be))) / Math.sin(rad(al));
-      return { fig: FIG.anyTriangle(["a = " + a, "b = ?", "", "α = " + al + "°, β = " + be + "°", "A"]), q: "Dans le triangle " + M("ABC") + ", " + M("a = " + a) + ", " + M("\\alpha = " + al + "°") + " et " + M("\\beta = " + be + "°") + ". Calcule " + M("b") + " au centième.", spec: { kind: "value", value: b, round: 0.01 }, sol: "Théorème du sinus : " + M("b = \\frac{" + a + " \\sin " + be + "°}{\\sin " + al + "°} \\approx " + dec(b.toFixed(2))) };
+      return { fig: FIG.anyTriangle(["a = " + a, "b = ?", "", "α = " + al + "°, β = " + be + "°", "A"]), q: "Dans le triangle " + M("ABC") + ", " + M("a = " + a) + " (côté opposé à " + M("\\alpha") + "), " + M("\\alpha = " + al + "°") + " et " + M("\\beta = " + be + "°") + ". Calcule " + M("b") + " (côté opposé à " + M("\\beta") + ") au centième.", spec: { kind: "value", value: b, round: 0.01 }, sol: "Théorème du sinus : " + M("b = \\frac{" + a + " \\sin " + be + "°}{\\sin " + al + "°} \\approx " + dec(b.toFixed(2))) };
     }
     const a = R.int(4, 12), b = R.int(4, 12), g = R.int(35, 120);
     const c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(rad(g)));
@@ -726,7 +726,7 @@ const PROB = {
     const k = R.pick([20, 25, 50, 100]), lm = R.int(4, 15), am = R.int(6, 40), vm = R.int(2, 9);
     return { fig: FIG.scaling(3, "1 : " + k), q: "Une maquette de bâtiment est à l'échelle " + M("1 : " + k) + ".",
       parts: [{ label: "a) Un mur mesure " + lm + " cm sur la maquette : longueur réelle (m)", spec: { kind: "value", value: (lm * k) / 100 } }, { label: "b) Une pièce mesure " + am + " cm² sur la maquette : aire réelle (m²)", spec: { kind: "value", value: (am * k * k) / 10000 } }, { label: "c) Une cuve de " + vm + " cm³ sur la maquette : volume réel (m³)", spec: { kind: "value", value: (vm * k ** 3) / 1e6 } }],
-      hints: ["Longueurs × " + k + ", aires × " + k + "², volumes × " + k + "³.", "Puis convertis : 1 m = 100 cm, 1 m² = 10 000 cm², 1 m³ = 1 000 000 cm³."],
+      hints: ["Longueurs × " + decTxt(k) + ", aires × " + decTxt(k) + "², volumes × " + decTxt(k) + "³.", "Puis convertis : 1 m = 100 cm, 1 m² = 10 000 cm², 1 m³ = 1 000 000 cm³."],
       sol: "a) " + M(lm * k + " \\text{ cm} = " + dec((lm * k) / 100)) + " m. b) " + M(am + " \\cdot " + k * k + " = " + am * k * k + " \\text{ cm}^2 = " + dec((am * k * k) / 10000)) + " m². c) " + M(vm + " \\cdot " + k ** 3 + " = " + vm * k ** 3 + " \\text{ cm}^3 = " + dec((vm * k ** 3) / 1e6)) + " m³." };
   },
 };
