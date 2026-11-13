@@ -263,8 +263,10 @@ function nextQuestion(redo) {
 }
 
 // Clavier mathématique partagé : écrit dans le champ actif.
-const KEYS = ["7", "8", "9", "/", "(", ")", "4", "5", "6", "*", "^", "√", "1", "2", "3", "-", "x", "π", "0", ",", "+", ";", "⌫", "⌨"];
-const keypadHtml = () => `<div class="keypad" id="kp">${KEYS.map((k) => `<button type="button" class="${/[\d,]/.test(k) ? "" : "k-op"}" data-k="${k}">${k === "*" ? "×" : k}</button>`).join("")}</div>`;
+// Clavier 7 colonnes : y et = ajoutés (13.11) ; 0 et ⌨ prennent deux cases.
+const KEYS = ["7", "8", "9", "/", "(", ")", "⌫", "4", "5", "6", "*", "^", "√", "π", "1", "2", "3", "-", "x", "y", "=", "0", ",", "+", ";", "⌨"];
+const keyBtn = (k) => `<button type="button" class="${/[\d,]/.test(k) ? "" : "k-op"}${k === "0" || k === "⌨" ? " k-wide" : ""}" data-k="${k}">${k === "*" ? "×" : k}</button>`;
+const keypadHtml = () => `<div class="keypad" id="kp">${KEYS.map(keyBtn).join("")}</div>`;
 function previewOf(inp, prev) {
   const v = inp.value.trim();
   if (!v) { prev.innerHTML = ""; return; }
@@ -366,7 +368,7 @@ function renderQuestion(q, opt) {
   ${opt.single ? "" : lessonDetails(q.id)}
   <div class="answer"><input id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="none" placeholder="Ta réponse…" aria-label="Ta réponse">
   <div class="preview" id="prev"><span class="err">L'aperçu de ta réponse s'affiche ici.</span></div>
-  <div class="keypad" id="kp">${["7", "8", "9", "/", "(", ")", "4", "5", "6", "*", "^", "√", "1", "2", "3", "-", "x", "π", "0", ",", "+", ";", "⌫", "⌨"].map((k) => `<button type="button" class="${/[\d,]/.test(k) ? "" : "k-op"}" data-k="${k}">${k === "*" ? "×" : k}</button>`).join("")}</div>
+  <div class="keypad" id="kp">${KEYS.map(keyBtn).join("")}</div>
   <div class="actions"><button class="btn-primary" id="check">Valider</button><button id="idk">Je ne sais pas</button></div>
   ${opt.onNotYet ? '<button class="btn-ghost small notyet" id="notyet">Pas encore vu en classe</button>' : ""}</div>
   <div id="fb"></div></div>`);

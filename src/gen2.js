@@ -755,7 +755,7 @@ Object.assign(GEN, {
     const m = R.nz(-3, 3), h = R.nz(-5, 5);
     if (d === 1) {
       const x1 = R.int(-3, 0), x2 = x1 + R.int(1, 3);
-      return { fig: FIG.plot([{ f: (x) => m * x + h }], [[x1, m * x1 + h, "A"], [x2, m * x2 + h, "B"]], { numbers: true, yr: [-8, 8], squash: 0.7 }), q: "Donne l'équation de la droite passant par " + M("A(" + x1 + " ; " + (m * x1 + h) + ")") + " et " + M("B(" + x2 + " ; " + (m * x2 + h) + ")") + ". Écris « y = … ».", spec: { kind: "expr", expr: lin(m, h) }, canon: lin(m, h), sol: "Pente " + M("m = \\frac{" + (m * x2 + h) + " - " + par(m * x1 + h) + "}{" + x2 + " - " + par(x1) + "} = " + m) + " ; ordonnée à l'origine " + M(h) + " : " + M("y = " + lin(m, h)) + "." };
+      return { fig: FIG.plot([], [[x1, m * x1 + h, "A"], [x2, m * x2 + h, "B"]], { numbers: true, yr: [-8, 8], squash: 0.7 }), q: "Donne l'équation de la droite passant par " + M("A(" + x1 + " ; " + (m * x1 + h) + ")") + " et " + M("B(" + x2 + " ; " + (m * x2 + h) + ")") + ". Écris « y = … ».", spec: { kind: "expr", expr: lin(m, h) }, canon: lin(m, h), sol: "Pente " + M("m = \\frac{" + (m * x2 + h) + " - " + par(m * x1 + h) + "}{" + x2 + " - " + par(x1) + "} = " + m) + " ; ordonnée à l'origine " + M(h) + " : " + M("y = " + lin(m, h)) + "." };
     }
     if (d === 2) {
       const x0 = R.nz(-4, 4), y0 = R.int(-5, 5), perp = R.rand() < 0.6, mm = perp ? -1 / m : m, hh = y0 - mm * x0;

@@ -119,7 +119,8 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .preview { min-height: 2.2em; padding: 6px 12px; border-radius: 10px; background: var(--paper); border: 1px dashed var(--line); display: flex; align-items: center; gap: 10px; overflow-x: auto; }
 .preview .val { font-family: var(--font-mono); color: var(--ink-soft); font-size: 0.9rem; white-space: nowrap; }
 .preview .err { color: var(--ink-soft); font-size: 0.85rem; }
-.keypad { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.keypad { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+.keypad .k-wide { grid-column: span 2; }
 .keypad button { padding: 10px 0; font-family: var(--font-mono); font-size: 1.05rem; border-radius: 10px; }
 .keypad .k-op { background: var(--blue-soft); border-color: transparent; color: var(--blue); font-weight: 700; }
 .actions { display: flex; gap: 8px; }
