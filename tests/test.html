@@ -128,7 +128,7 @@ for (const n of NOTIONS) {
   if (!L.titre || !L.intro || !L.regle || !L.exemple.length || !L.piege) fail("leçon incomplète : " + n.id);
 }
 
-for (const [id, f] of Object.entries(typeof LESSON_FIGS !== "undefined" ? LESSON_FIGS : {})) { try { const g = f(); if (!/^(<svg|<div class="dyn")/.test(g) || /NaN|undefined/.test(g)) fail("figure de leçon invalide : " + id); } catch (e) { fail("figure de leçon " + id + " : " + e.message); } }
+for (const [id, f] of Object.entries(typeof LESSON_FIGS !== "undefined" ? LESSON_FIGS : {})) { try { const g = f(); if (!/^(<svg|<div class="dyn"|<div class="figstack">)/.test(g) || /NaN|undefined/.test(g)) fail("figure de leçon invalide : " + id); } catch (e) { fail("figure de leçon " + id + " : " + e.message); } }
 for (const id of Object.keys(LESSONS_V2)) if (!NOTIONS.some((n) => n.id === id)) fail("rappel réécrit pour une notion inconnue : " + id);
 // 2 quinquies. Séances équilibrées et adaptées
 {

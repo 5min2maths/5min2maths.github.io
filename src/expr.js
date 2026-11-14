@@ -353,6 +353,13 @@ function checkAnswer(spec, input) {
   try { tree = Expr.parse(String(input)); }
   catch (e) { return { status: "invalid", message: e.message }; }
   if (spec.kind === "value") {
+    // final (14.11, retour testeur : « on peut taper le calcul ») : au CO, la réponse est le résultat, pas l'opération.
+    // Admis : entier, décimal, fraction a/b, a√b, aπ (avec signe, « x = » devant, séparateur de milliers).
+    if (spec.final) {
+      const raw = String(input).replace(/^\s*[a-zA-Z]\s*=/, "").replace(/[\s'’]/g, "").replace(/,/g, ".").replace(/[−–]/g, "-");
+      const num = "\\d+(\\.\\d+)?", ok = new RegExp("^-?(" + num + "|\\(?-?\\d+/\\d+\\)?|\\d*√\\d+(/\\d+)?|" + num + "?π)$");
+      if (!ok.test(raw)) return { status: "form", message: "Calcule jusqu'au bout : écris seulement le résultat (un nombre ou une fraction), sans opération." };
+    }
     // plain : on attend un nombre écrit en chiffres (conversion, écriture décimale), pas une fraction ni un calcul
     if (spec.plain && !/^\s*-?\s*\d[\d'’ ]*([.,]\d+)?\s*$/.test(String(input))) return { status: "invalid", message: "Écris le résultat comme un nombre décimal (pas de fraction ni de calcul)." };
     if (Expr.vars(tree).size) return { status: "invalid", message: "La réponse est un nombre : pas de lettre." };

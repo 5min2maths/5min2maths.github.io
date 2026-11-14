@@ -464,7 +464,7 @@ const LESSON_FIGS_V2 = {
       .seg("O", "A").seg("O", "B").seg("C", "A").seg("C", "B").angle("O", "A", "B", "2α", { r: 18 }).angle("C", "A", "B", "α", { r: 26 }).svg("angle au centre et angle inscrit");
     const f2 = GEO().circle([0, 0], 3, "f-soft").pt("O", 0, 0).dot("O").pt("A", -3, 0).pt("B", 3, 0).pt("C", ...P(120))
       .seg("A", "B").seg("A", "C").seg("C", "B").right("C", "A", "B").angle("A", "B", "C", "60°", { r: 22 }).angle("B", "C", "A", "?", { r: 26 }).svg("[AB] diamètre : angle droit en C");
-    return '<div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:8px">' + f1 + f2 + '</div>';
+    return '<div class="figstack">' + f1 + f2 + '</div>';
   },
   pythrec: () => GF.rightTri(3, 4, { la: "a", lb: "b", lc: "c" }),
   airepyr: () => FIG.pyramid("c", "h"),

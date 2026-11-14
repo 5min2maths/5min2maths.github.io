@@ -336,6 +336,9 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .home-head { flex-wrap: nowrap; }
 .home-head .row { flex-wrap: nowrap; flex-shrink: 0; }
 @media (max-width: 430px) { .home-head .brand span { display: none; } }
+.keypad.k-num { grid-template-columns: repeat(4, 1fr); width: 100%; max-width: 340px; margin-inline: auto; align-self: center; }
+.keypad.k-num button { padding: 12px 0; font-size: 1.2rem; }
+.figstack { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px; }
 
 </style>
 <script>
@@ -815,6 +818,13 @@ function checkAnswer(spec, input) {
   try { tree = Expr.parse(String(input)); }
   catch (e) { return { status: "invalid", message: e.message }; }
   if (spec.kind === "value") {
+    // final (14.11, retour testeur : « on peut taper le calcul ») : au CO, la réponse est le résultat, pas l'opération.
+    // Admis : entier, décimal, fraction a/b, a√b, aπ (avec signe, « x = » devant, séparateur de milliers).
+    if (spec.final) {
+      const raw = String(input).replace(/^\s*[a-zA-Z]\s*=/, "").replace(/[\s'’]/g, "").replace(/,/g, ".").replace(/[−–]/g, "-");
+      const num = "\\d+(\\.\\d+)?", ok = new RegExp("^-?(" + num + "|\\(?-?\\d+/\\d+\\)?|\\d*√\\d+(/\\d+)?|" + num + "?π)$");
+      if (!ok.test(raw)) return { status: "form", message: "Calcule jusqu'au bout : écris seulement le résultat (un nombre ou une fraction), sans opération." };
+    }
     // plain : on attend un nombre écrit en chiffres (conversion, écriture décimale), pas une fraction ni un calcul
     if (spec.plain && !/^\s*-?\s*\d[\d'’ ]*([.,]\d+)?\s*$/.test(String(input))) return { status: "invalid", message: "Écris le résultat comme un nombre décimal (pas de fraction ni de calcul)." };
     if (Expr.vars(tree).size) return { status: "invalid", message: "La réponse est un nombre : pas de lettre." };
@@ -5380,7 +5390,7 @@ const LESSON_FIGS_V2 = {
       .seg("O", "A").seg("O", "B").seg("C", "A").seg("C", "B").angle("O", "A", "B", "2α", { r: 18 }).angle("C", "A", "B", "α", { r: 26 }).svg("angle au centre et angle inscrit");
     const f2 = GEO().circle([0, 0], 3, "f-soft").pt("O", 0, 0).dot("O").pt("A", -3, 0).pt("B", 3, 0).pt("C", ...P(120))
       .seg("A", "B").seg("A", "C").seg("C", "B").right("C", "A", "B").angle("A", "B", "C", "60°", { r: 22 }).angle("B", "C", "A", "?", { r: 26 }).svg("[AB] diamètre : angle droit en C");
-    return '<div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:8px">' + f1 + f2 + '</div>';
+    return '<div class="figstack">' + f1 + f2 + '</div>';
   },
   pythrec: () => GF.rightTri(3, 4, { la: "a", lb: "b", lc: "c" }),
   airepyr: () => FIG.pyramid("c", "h"),
@@ -6069,9 +6079,18 @@ const Engine = {
   },
 
   // Anti-répétition (audit 13.11) : une question déjà posée parmi les 15 dernières de la notion est retirée.
+  // Au CO (9e–11e), une réponse numérique est un résultat : pas d'opération ni de calculatrice (14.11).
+  // Sauf les notions où l'écriture attendue contient elle-même une puissance.
+  finalize(state, id, q) {
+    const p = state && state.profile;
+    if (!q || !p || p.system !== "CH" || p.grade > 11 || ["sci", "scicalc", "puiss"].includes(id)) return q;
+    const mark = (sp) => { if (sp && sp.kind === "value" && !sp.sci) sp.final = true; };
+    mark(q.spec); (q.parts || []).forEach((x) => mark(x.spec));
+    return q;
+  },
   make(state, id, d, seed) {
     const level = d || this.difficulty(state, id);
-    if (seed) return this.build(id, level, seed);
+    if (seed) return this.finalize(state, id, this.build(id, level, seed));
     const rec = ((state.recentQ = state.recentQ || {})[id] = (state.recentQ[id] || []));
     const key = (q) => { let h = 0; for (const c of String(q.q) + JSON.stringify(q.spec)) h = (h * 31 + c.charCodeAt(0)) | 0; return h; };
     let q;
@@ -6080,7 +6099,7 @@ const Engine = {
     for (let k = 0; k < 12; k++) { q = this.build(id, level); if (!rec.includes(key(q)) && !(q.ctx && ctxs.includes(q.ctx))) break; }
     rec.push(key(q)); state.recentQ[id] = rec.slice(-15);
     if (q.ctx) state.recentCtx[id] = [...ctxs, q.ctx].slice(-2);
-    return q;
+    return this.finalize(state, id, q);
   },
   // Question reproductible : même notion, niveau et graine → même question.
   build(id, level, seed) {
@@ -6938,8 +6957,11 @@ const SET_KEYS = ["7", "8", "9", "-", "+", "/", "⌫", "4", "5", "6", "[", "]", 
 const KEY_LABEL = { "*": "×", "ℝ \\ {|}": "ℝ∖{ }" };
 const keyBtn = (k, set) => `<button type="button" class="${/^[\d,]$/.test(k) ? "" : "k-op"}${k === "0" || (k === "⌨" && !set) || k === "ℝ \\ {|}" || (k === "⌨" && set) ? " k-wide" : ""}" data-k="${esc(k)}">${KEY_LABEL[k] || k}</button>`;
 const isSetSpec = (spec) => !!spec && (spec.kind === "solset" || spec.kind === "ineq");
-const keysFor = (spec) => (isSetSpec(spec) ? SET_KEYS.map((k) => keyBtn(k, true)) : KEYS.map((k) => keyBtn(k))).join("");
-const keypadHtml = (spec) => `<div class="keypad${isSetSpec(spec) ? " k-set" : ""}" id="kp">${keysFor(spec)}</div>`;
+// Clavier « résultat » (14.11) : chiffres seulement, pas de calculatrice ; √ si la réponse exacte en a besoin.
+const numKeys = (spec) => { const root = !isTerm(spec.value); return ["7", "8", "9", "⌫", "4", "5", "6", "-", "1", "2", "3", "/", "0", ",", ...(root ? ["√"] : []), "⌨"]
+  .map((k) => `<button type="button" class="${/^[\d,]$/.test(k) ? "" : "k-op"}${k === "0" && !root ? " k-wide" : ""}" data-k="${esc(k)}">${KEY_LABEL[k] || k}</button>`).join(""); };
+const keysFor = (spec) => (spec && spec.final ? numKeys(spec) : isSetSpec(spec) ? SET_KEYS.map((k) => keyBtn(k, true)).join("") : KEYS.map((k) => keyBtn(k)).join(""));
+const keypadHtml = (spec) => { const kind = spec && spec.final ? "k-num" : isSetSpec(spec) ? "k-set" : ""; return `<div class="keypad${kind ? " " + kind : ""}" id="kp" data-kind="${kind + (kind === "k-num" && !isTerm(spec.value) ? "r" : "")}">${keysFor(spec)}</div>`; };
 // Insère une touche dans le champ (avec « | » : place du curseur), ou efface.
 function typeKey(inp, k) {
   const s = inp.selectionStart ?? inp.value.length, e = inp.selectionEnd ?? inp.value.length;
@@ -6957,7 +6979,7 @@ function previewHtml(v, spec) {
     return "\\(S = " + (holes ? "\\mathbb{R}" + (holes.length ? " \\setminus \\{" + holes.map(nt).join(" ; ") + "\\}" : "") : SolSet.show(ivs)) + "\\)";
   }
   const t = Expr.parse(v), val = Expr.vars(t).size || t.t === "list" ? "" : Expr.evaluate(t);
-  return "\\(" + Expr.tex(t) + "\\)" + (val !== "" && isFinite(val) ? `<span class="val">≈ ${String(+val.toPrecision(8)).replace(".", ",")}</span>` : "");
+  return "\\(" + Expr.tex(t) + "\\)" + (val !== "" && isFinite(val) && !(spec && spec.final) ? `<span class="val">≈ ${String(+val.toPrecision(8)).replace(".", ",")}</span>` : "");
 }
 function previewOf(inp, prev, spec) {
   const v = inp.value.trim();
@@ -6997,8 +7019,10 @@ function renderProblem(q, opt) {
     // Clavier adapté à la partie active (intervalles ou calcul).
     inp.onfocus = () => {
       active = inp;
-      const kp = document.getElementById("kp"), set = isSetSpec(p.spec);
-      if (kp.classList.contains("k-set") !== set) { kp.classList.toggle("k-set", set); kp.innerHTML = keysFor(p.spec); bindKp(); }
+      const kp = document.getElementById("kp"), kind = p.spec && p.spec.final ? "k-num" : isSetSpec(p.spec) ? "k-set" : "";
+      if ((kp.dataset.kind || "") !== kind + (kind === "k-num" && !isTerm(p.spec.value) ? "r" : "")) {
+        kp.classList.remove("k-set", "k-num"); if (kind) kp.classList.add(kind);
+        kp.dataset.kind = kind + (kind === "k-num" && !isTerm(p.spec.value) ? "r" : ""); kp.innerHTML = keysFor(p.spec); bindKp(); }
     };
     let tm; inp.oninput = () => { clearTimeout(tm); tm = setTimeout(() => previewOf(inp, pv, p.spec), 180); };
     inp.onkeydown = (e) => { if (e.key === "Enter") check(); };

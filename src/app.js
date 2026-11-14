@@ -555,8 +555,11 @@ const SET_KEYS = ["7", "8", "9", "-", "+", "/", "⌫", "4", "5", "6", "[", "]", 
 const KEY_LABEL = { "*": "×", "ℝ \\ {|}": "ℝ∖{ }" };
 const keyBtn = (k, set) => `<button type="button" class="${/^[\d,]$/.test(k) ? "" : "k-op"}${k === "0" || (k === "⌨" && !set) || k === "ℝ \\ {|}" || (k === "⌨" && set) ? " k-wide" : ""}" data-k="${esc(k)}">${KEY_LABEL[k] || k}</button>`;
 const isSetSpec = (spec) => !!spec && (spec.kind === "solset" || spec.kind === "ineq");
-const keysFor = (spec) => (isSetSpec(spec) ? SET_KEYS.map((k) => keyBtn(k, true)) : KEYS.map((k) => keyBtn(k))).join("");
-const keypadHtml = (spec) => `<div class="keypad${isSetSpec(spec) ? " k-set" : ""}" id="kp">${keysFor(spec)}</div>`;
+// Clavier « résultat » (14.11) : chiffres seulement, pas de calculatrice ; √ si la réponse exacte en a besoin.
+const numKeys = (spec) => { const root = !isTerm(spec.value); return ["7", "8", "9", "⌫", "4", "5", "6", "-", "1", "2", "3", "/", "0", ",", ...(root ? ["√"] : []), "⌨"]
+  .map((k) => `<button type="button" class="${/^[\d,]$/.test(k) ? "" : "k-op"}${k === "0" && !root ? " k-wide" : ""}" data-k="${esc(k)}">${KEY_LABEL[k] || k}</button>`).join(""); };
+const keysFor = (spec) => (spec && spec.final ? numKeys(spec) : isSetSpec(spec) ? SET_KEYS.map((k) => keyBtn(k, true)).join("") : KEYS.map((k) => keyBtn(k)).join(""));
+const keypadHtml = (spec) => { const kind = spec && spec.final ? "k-num" : isSetSpec(spec) ? "k-set" : ""; return `<div class="keypad${kind ? " " + kind : ""}" id="kp" data-kind="${kind + (kind === "k-num" && !isTerm(spec.value) ? "r" : "")}">${keysFor(spec)}</div>`; };
 // Insère une touche dans le champ (avec « | » : place du curseur), ou efface.
 function typeKey(inp, k) {
   const s = inp.selectionStart ?? inp.value.length, e = inp.selectionEnd ?? inp.value.length;
@@ -574,7 +577,7 @@ function previewHtml(v, spec) {
     return "\\(S = " + (holes ? "\\mathbb{R}" + (holes.length ? " \\setminus \\{" + holes.map(nt).join(" ; ") + "\\}" : "") : SolSet.show(ivs)) + "\\)";
   }
   const t = Expr.parse(v), val = Expr.vars(t).size || t.t === "list" ? "" : Expr.evaluate(t);
-  return "\\(" + Expr.tex(t) + "\\)" + (val !== "" && isFinite(val) ? `<span class="val">≈ ${String(+val.toPrecision(8)).replace(".", ",")}</span>` : "");
+  return "\\(" + Expr.tex(t) + "\\)" + (val !== "" && isFinite(val) && !(spec && spec.final) ? `<span class="val">≈ ${String(+val.toPrecision(8)).replace(".", ",")}</span>` : "");
 }
 function previewOf(inp, prev, spec) {
   const v = inp.value.trim();
@@ -614,8 +617,10 @@ function renderProblem(q, opt) {
     // Clavier adapté à la partie active (intervalles ou calcul).
     inp.onfocus = () => {
       active = inp;
-      const kp = document.getElementById("kp"), set = isSetSpec(p.spec);
-      if (kp.classList.contains("k-set") !== set) { kp.classList.toggle("k-set", set); kp.innerHTML = keysFor(p.spec); bindKp(); }
+      const kp = document.getElementById("kp"), kind = p.spec && p.spec.final ? "k-num" : isSetSpec(p.spec) ? "k-set" : "";
+      if ((kp.dataset.kind || "") !== kind + (kind === "k-num" && !isTerm(p.spec.value) ? "r" : "")) {
+        kp.classList.remove("k-set", "k-num"); if (kind) kp.classList.add(kind);
+        kp.dataset.kind = kind + (kind === "k-num" && !isTerm(p.spec.value) ? "r" : ""); kp.innerHTML = keysFor(p.spec); bindKp(); }
     };
     let tm; inp.oninput = () => { clearTimeout(tm); tm = setTimeout(() => previewOf(inp, pv, p.spec), 180); };
     inp.onkeydown = (e) => { if (e.key === "Enter") check(); };

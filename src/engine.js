@@ -311,9 +311,18 @@ const Engine = {
   },
 
   // Anti-répétition (audit 13.11) : une question déjà posée parmi les 15 dernières de la notion est retirée.
+  // Au CO (9e–11e), une réponse numérique est un résultat : pas d'opération ni de calculatrice (14.11).
+  // Sauf les notions où l'écriture attendue contient elle-même une puissance.
+  finalize(state, id, q) {
+    const p = state && state.profile;
+    if (!q || !p || p.system !== "CH" || p.grade > 11 || ["sci", "scicalc", "puiss"].includes(id)) return q;
+    const mark = (sp) => { if (sp && sp.kind === "value" && !sp.sci) sp.final = true; };
+    mark(q.spec); (q.parts || []).forEach((x) => mark(x.spec));
+    return q;
+  },
   make(state, id, d, seed) {
     const level = d || this.difficulty(state, id);
-    if (seed) return this.build(id, level, seed);
+    if (seed) return this.finalize(state, id, this.build(id, level, seed));
     const rec = ((state.recentQ = state.recentQ || {})[id] = (state.recentQ[id] || []));
     const key = (q) => { let h = 0; for (const c of String(q.q) + JSON.stringify(q.spec)) h = (h * 31 + c.charCodeAt(0)) | 0; return h; };
     let q;
@@ -322,7 +331,7 @@ const Engine = {
     for (let k = 0; k < 12; k++) { q = this.build(id, level); if (!rec.includes(key(q)) && !(q.ctx && ctxs.includes(q.ctx))) break; }
     rec.push(key(q)); state.recentQ[id] = rec.slice(-15);
     if (q.ctx) state.recentCtx[id] = [...ctxs, q.ctx].slice(-2);
-    return q;
+    return this.finalize(state, id, q);
   },
   // Question reproductible : même notion, niveau et graine → même question.
   build(id, level, seed) {
