@@ -201,6 +201,52 @@ Object.assign(ACTIVE, {
     },
   },
 });
+// ---- 2e · Cercles et tangentes (14.11, retour testeur « Je ne comprends pas la pente ») ----
+Object.assign(ACTIVE, {
+  cercletan: {
+    predict: { q: "Cercle de centre O(0 ; 0), point T(3 ; 4). De O à T, on avance de 3 et on monte de 4. La tangente en T…", choices: ["monte", "descend", "est horizontale"], good: 1,
+      why: "Elle est perpendiculaire au rayon : un quart de tour change « avancer de 3, monter de 4 » en « avancer de 4, descendre de 3 ». Sa pente est −3/4." },
+    defis: ["Déplace T pour que la tangente soit horizontale.", "Déplace T pour que la tangente ait une pente de 3/4."],
+    play(box, onWin) {
+      // points entiers du cercle de rayon 5, dans l'ordre du tour
+      const P = [[5, 0], [4, 3], [3, 4], [0, 5], [-3, 4], [-4, 3], [-5, 0], [-4, -3], [-3, -4], [0, -5], [3, -4], [4, -3]];
+      let i = 2, step = 0;
+      const fr = (a, b) => { if (b === 0) return null; const g = (u, v) => (v ? g(v, u % v) : Math.abs(u)); const k = g(a, b) * Math.sign(b); const n = a / k, d = b / k; return d === 1 ? String(n) : (n < 0 ? "−" : "") + Math.abs(n) + "/" + d; };
+      const draw = () => {
+        const [x, y] = P[i], W = 330, H = 300, X = (u) => 165 + u * 14, Y = (v) => 150 - v * 14;
+        let g = '<line x1="' + X(-10.5) + '" y1="' + Y(0) + '" x2="' + X(10.5) + '" y2="' + Y(0) + '" class="f-grid"/><line x1="' + X(0) + '" y1="' + Y(-10.5) + '" x2="' + X(0) + '" y2="' + Y(10.5) + '" class="f-grid"/>';
+        g += '<circle cx="' + X(0) + '" cy="' + Y(0) + '" r="70" class="f-soft"/>';
+        // rayon et son triangle de pente (avancer de x, monter de y)
+        g += '<line x1="' + X(0) + '" y1="' + Y(0) + '" x2="' + X(x) + '" y2="' + Y(y) + '" class="f-line" stroke-width="2.5"/>';
+        if (x && y) g += '<path d="M' + X(0) + "," + Y(0) + " L" + X(x) + "," + Y(0) + " L" + X(x) + "," + Y(y) + '" class="f-line" fill="none" stroke-dasharray="4 3"/>' +
+          '<text x="' + X(x / 2) + '" y="' + (Y(0) + (y > 0 ? 15 : -6)) + '" class="f-txt" text-anchor="middle" font-size="12">' + (x > 0 ? "+" : "−") + Math.abs(x) + "</text>" +
+          '<text x="' + (X(x) + (x > 0 ? 5 : -5)) + '" y="' + Y(y / 2) + '" class="f-txt" text-anchor="' + (x > 0 ? "start" : "end") + '" font-size="12">' + (y > 0 ? "+" : "−") + Math.abs(y) + "</text>";
+        // tangente : direction (y ; −x), triangle de pente depuis T
+        const tx = y, ty = -x, L = 1.9;
+        g += '<line x1="' + X(x - tx * L) + '" y1="' + Y(y - ty * L) + '" x2="' + X(x + tx * L) + '" y2="' + Y(y + ty * L) + '" class="f-accent" stroke-width="2.5"/>';
+        if (tx && ty) { const s = tx > 0 ? 1 : -1, ax = s * tx, ay = s * ty; // on avance vers la droite
+          g += '<path d="M' + X(x) + "," + Y(y) + " L" + X(x + ax) + "," + Y(y) + " L" + X(x + ax) + "," + Y(y + ay) + '" class="f-accent" fill="none" stroke-dasharray="4 3"/>' +
+            '<text x="' + X(x + ax / 2) + '" y="' + (Y(y) + (ay > 0 ? 15 : -6)) + '" class="f-accent f-txt" text-anchor="middle" font-size="12">+' + ax + "</text>" +
+            '<text x="' + (X(x + ax) + 5) + '" y="' + Y(y + ay / 2) + '" class="f-accent f-txt" font-size="12">' + (ay > 0 ? "+" : "−") + Math.abs(ay) + "</text>"; }
+        g += '<circle cx="' + X(0) + '" cy="' + Y(0) + '" r="3.5" class="f-dot"/><text x="' + (X(0) + (x < 0 ? 7 : -7)) + '" y="' + (Y(0) + (y > 0 ? 16 : -7)) + '" class="f-txt" text-anchor="' + (x < 0 ? "start" : "end") + '" font-size="13">O</text>';
+        g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="6" class="f-dot"/><text x="' + (X(x) + (x >= 0 ? 10 : -10)) + '" y="' + (Y(y) + (y >= 0 ? -8 : 18)) + '" class="f-txt" text-anchor="' + (x >= 0 ? "start" : "end") + '" font-size="13">T(' + x + " ; " + y + ")</text>";
+        const mr = fr(y, x), mt = fr(-x, y);
+        box.innerHTML = `<svg class="fig" viewBox="0 0 ${W} ${H}" role="img" aria-label="cercle, rayon OT et tangente en T(${x} ; ${y})">${g}</svg>
+          <label class="dyn-ctl"><input type="range" min="0" max="${P.length - 1}" step="1" value="${i}" aria-label="déplacer T sur le cercle"><span class="small muted">Fais glisser pour déplacer T sur le cercle.</span></label>
+          <div class="act-out">Rayon [OT] : pente ${mr === null ? "aucune (vertical)" : `Δy/Δx = ${y < 0 ? "−" + -y : y}/${x < 0 ? "(−" + -x + ")" : x}${mr === y + "/" + x || mr === String(y / x) && Math.abs(x) === 1 ? "" : " = <b>" + mr + "</b>"}`}<br><span style="color:var(--margin)">Tangente : pente ${mt === null ? "aucune (verticale)" : `<b>${mt}</b>`}</span>${mr !== null && mt !== null && x && y ? `<br><span class="small">Produit des pentes : ${mr} · (${mt}) = <b>−1</b></span>` : ""}</div>`;
+        const inp = box.querySelector("input");
+        inp.oninput = () => { i = +inp.value; draw(); box.querySelector("input").focus(); check(); };
+      };
+      const check = () => {
+        const [x, y] = P[i];
+        if (step === 0 && x === 0) { onWin(0, "En T(0 ; " + y + "), le rayon est vertical, donc la tangente est horizontale (pente 0)."); step = 1; }
+        else if (step === 1 && y !== 0 && -x * 4 === 3 * y) { onWin(1, "En T(" + x + " ; " + y + "), le rayon a pour pente " + fr(y, x) + " ; on inverse et on change le signe : 3/4."); step = 2; }
+      };
+      draw();
+    },
+  },
+});
+
 // Message d'aide sous une manipulation (sans valider le défi).
 function $hint(box, t) { let el = box.querySelector(".act-hint"); if (!el) { el = document.createElement("div"); el.className = "small act-hint"; box.appendChild(el); } el.textContent = t; }
 

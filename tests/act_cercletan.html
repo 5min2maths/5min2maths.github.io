@@ -1,0 +1,10 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css"><body style="width:400px"><main id="app"></main><pre id="log" hidden></pre>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/competences.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script><script>const log=[];const click=(s)=>{const e=document.querySelector(s);if(!e){log.push("MANQUE "+s);return;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));};
+try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; screenLesson("cercletan",()=>log.push("cont"));click('#pc button[data-i="1"]');
+const sl=(v)=>{const e=document.querySelector('#play input'); e.value=v; e.dispatchEvent(new Event("input"));};
+log.push("T(3;4): "+document.querySelector(".act-out").textContent);
+sl(3); log.push("d1: "+document.querySelector("#gfb").textContent);
+sl(4); log.push("T(-3;4): "+document.querySelector(".act-out").textContent);
+log.push("gfb: "+document.querySelector("#gfb").textContent, "s3 visible: "+!document.getElementById("s3").hidden, "go visible: "+!document.getElementById("go").hidden);}catch(e){log.push("ERR "+e.stack)}
+document.getElementById("log").textContent=log.join("\n");</script>
