@@ -5384,6 +5384,45 @@ function eloLabel(profile, r) {
   return r < ELO_REF[0][1] - 75 ? "En route vers la fin de " + name(8) : "Niveau " + adj + (adj === "solide" ? " de " : " de ") + name(h);
 }
 
+// Correction en étapes (étape 0 de l'aide pas à pas, 14.11) : pour les questions sans guide interactif,
+// le corrigé est découpé en étapes que l'élève dévoile une à une. Coupure après « . » ou « ; » (hors formules
+// \( … \) et hors balises), sinon devant « , donc » / « , soit » ; moins de 2 étapes → pas de découpage.
+function splitSol(html) {
+  const t = String(html || ""), cut = (re) => {
+    const parts = []; let depth = 0, tag = false, last = 0;
+    for (let i = 0; i < t.length; i++) {
+      const c = t[i];
+      if (t.startsWith("\\(", i)) depth++; else if (t.startsWith("\\)", i)) depth = Math.max(0, depth - 1);
+      else if (c === "<") tag = true; else if (c === ">") tag = false;
+      if (depth || tag) continue;
+      const m = re.exec(t.slice(i, i + 8));
+      if (m && m.index === 0) { const end = i + m[1].length; parts.push(t.slice(last, end).trim()); last = end; i = end - 1; }
+    }
+    parts.push(t.slice(last).trim());
+    return parts.filter((p) => p.replace(/<[^>]+>/g, "").trim().length > 1);
+  };
+  let p = cut(/^([.;] )(?=[A-ZÀ-Ý(\\<]|[a-zà-ÿ])/);
+  if (p.length < 2) p = cut(/^(,)(?= (donc|soit|puis|d'où) )/);
+  if (p.length >= 2 && p.length <= 6) return p;
+  // Sinon : la plus longue chaîne de calcul \( a = b = c \) ou \( … \iff … \) est dévoilée relation par relation.
+  let best = null;
+  for (const m of t.matchAll(/\\\(([\s\S]*?)\\\)/g)) {
+    const cuts = []; let dep = 0;
+    for (let i = 0; i < m[1].length; i++) {
+      const c = m[1][i]; if (c === "{") dep++; else if (c === "}") dep--;
+      if (dep) continue;
+      if (c === "=" && m[1][i - 1] !== "\\" && m[1][i + 1] !== "=") cuts.push(i);
+      else if (m[1].startsWith("\\iff", i)) cuts.push(i);
+    }
+    if (cuts.length >= 2 && (!best || cuts.length > best.cuts.length)) best = { m, cuts };
+  }
+  if (!best) return null;
+  const { m, cuts } = best, before = t.slice(0, m.index), after = t.slice(m.index + m[0].length);
+  const steps = cuts.slice(1).map((c) => before + "\\(" + m[1].slice(0, c).trim() + "\\)");
+  steps.push(t);
+  return steps.length <= 6 ? steps : [...steps.slice(0, 4), t];
+}
+
 // Question triviale ? (règle du 14.11, contrôlée aussi par tests/trivial.html)
 // - écriture neutre visible : « + 0 », « - 0 », « · 1 », « × 1 », exposant 1 ;
 // - réponse lisible dans l'énoncé alors que deux données sont égales (ex. « 5 cahiers coûtent 30 CHF ; combien coûtent 5 cahiers ? ») ;
@@ -6528,9 +6567,11 @@ function renderQuestion(q, opt) {
     const d = typeof delta === "number" && delta !== 0 ? `<span class="delta ${delta > 0 ? "up" : "down"}">Mathélo ${delta > 0 ? "+" : ""}${delta}</span>` : "";
     // Élève en difficulté (13.11) : erreur reconnue, et « on le fait ensemble » (sous-questions guidées) avant la correction complète.
     const guided = !solved && q.guide && q.guide.length;
+    // Sans guide interactif : correction dévoilée étape par étape (étape 0, 14.11).
+    const solSteps = !solved && !guided && splitSol(q.sol);
     fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><div class="spread"><b>${solved ? (tries === 1 ? pick(PRAISE) : "Juste au deuxième essai.") : dontKnow ? "Voici la méthode." : "Pas cette fois."}</b>${d}</div>
       ${!solved && lastDiag ? `<div class="diag">🔎 ${esc(lastDiag)}</div>` : ""}
-      ${guided ? `<button class="btn-primary" id="guide">🪜 On le fait ensemble, pas à pas</button><div id="gsteps" class="stack"></div><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : `<div class="sol">${q.sol}</div>`}</div>
+      ${guided ? `<button class="btn-primary" id="guide">🪜 On le fait ensemble, pas à pas</button><div id="gsteps" class="stack"></div><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : solSteps ? `<button class="btn-primary" id="solstep">🪜 Voir la correction étape par étape</button><div id="ssteps" class="stack"></div><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : `<div class="sol">${q.sol}</div>`}</div>
       <div class="vote"><span>Cette question était… <button data-v="up" aria-label="Bonne question">👍</button> <button data-v="down" aria-label="Question à revoir">👎</button></span><span class="code" title="Code de la question">${code}</span></div>${commentBox()}
       <div class="actions">${solved ? "" : '<button id="redo">Refaire avec d\'autres valeurs</button>'}<button class="btn-primary" id="nx">Continuer</button></div>`;
     typeset(fb);
@@ -6541,6 +6582,17 @@ function renderQuestion(q, opt) {
     if (r) r.onclick = () => opt.onNext(true);
     const gb = document.getElementById("guide");
     if (gb) { gb.onclick = () => { gb.remove(); runGuide(q, document.getElementById("gsteps"), () => { const rd = document.getElementById("redo"); if (rd) { rd.classList.add("btn-primary"); rd.textContent = "À toi : une question du même type"; rd.focus(); } }); }; gb.focus(); }
+    else if (solSteps) {
+      const sb = document.getElementById("solstep"), box = document.getElementById("ssteps");
+      let k = 0;
+      const more = () => {
+        box.insertAdjacentHTML("beforeend", `<div class="gstep"><span class="small muted">Étape ${k + 1} sur ${solSteps.length}</span><div class="sol">${solSteps[k]}</div></div>`);
+        typeset(box); k++;
+        if (k < solSteps.length) { sb.textContent = "Étape suivante (essaie d'abord de la trouver)"; sb.focus(); }
+        else { sb.remove(); fb.querySelector("details.solfull").remove(); const rd = document.getElementById("redo"); if (rd) { rd.classList.add("btn-primary"); rd.textContent = "À toi : une question du même type"; rd.focus(); } }
+      };
+      sb.onclick = more; sb.focus();
+    }
     else document.getElementById("nx").focus();
   };
 

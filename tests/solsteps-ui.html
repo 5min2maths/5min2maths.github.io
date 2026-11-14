@@ -1,0 +1,5 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css">
+<body style="padding:16px;background:#fff;max-width:440px"><div class="fb bad"><b>Pas cette fois.</b><div id="ssteps" class="stack"></div></div>
+<script src="../src/engine.js"></script>
+<script>const st = splitSol("La hauteur coupe la base en deux segments de \\(15\\) cm : \\(h^2 = 25^2 - 15^2 = 400\\), donc \\(h = 20\\) cm.");
+document.getElementById("ssteps").innerHTML = st.map((s, k) => `<div class="gstep"><span class="small muted">Étape ${k + 1} sur ${st.length}</span><div class="sol">${s}</div></div>`).join("") + '<button class="btn-primary">Étape suivante (essaie d\'abord de la trouver)</button>';</script>

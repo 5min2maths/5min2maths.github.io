@@ -98,6 +98,45 @@ function eloLabel(profile, r) {
   return r < ELO_REF[0][1] - 75 ? "En route vers la fin de " + name(8) : "Niveau " + adj + (adj === "solide" ? " de " : " de ") + name(h);
 }
 
+// Correction en étapes (étape 0 de l'aide pas à pas, 14.11) : pour les questions sans guide interactif,
+// le corrigé est découpé en étapes que l'élève dévoile une à une. Coupure après « . » ou « ; » (hors formules
+// \( … \) et hors balises), sinon devant « , donc » / « , soit » ; moins de 2 étapes → pas de découpage.
+function splitSol(html) {
+  const t = String(html || ""), cut = (re) => {
+    const parts = []; let depth = 0, tag = false, last = 0;
+    for (let i = 0; i < t.length; i++) {
+      const c = t[i];
+      if (t.startsWith("\\(", i)) depth++; else if (t.startsWith("\\)", i)) depth = Math.max(0, depth - 1);
+      else if (c === "<") tag = true; else if (c === ">") tag = false;
+      if (depth || tag) continue;
+      const m = re.exec(t.slice(i, i + 8));
+      if (m && m.index === 0) { const end = i + m[1].length; parts.push(t.slice(last, end).trim()); last = end; i = end - 1; }
+    }
+    parts.push(t.slice(last).trim());
+    return parts.filter((p) => p.replace(/<[^>]+>/g, "").trim().length > 1);
+  };
+  let p = cut(/^([.;] )(?=[A-ZÀ-Ý(\\<]|[a-zà-ÿ])/);
+  if (p.length < 2) p = cut(/^(,)(?= (donc|soit|puis|d'où) )/);
+  if (p.length >= 2 && p.length <= 6) return p;
+  // Sinon : la plus longue chaîne de calcul \( a = b = c \) ou \( … \iff … \) est dévoilée relation par relation.
+  let best = null;
+  for (const m of t.matchAll(/\\\(([\s\S]*?)\\\)/g)) {
+    const cuts = []; let dep = 0;
+    for (let i = 0; i < m[1].length; i++) {
+      const c = m[1][i]; if (c === "{") dep++; else if (c === "}") dep--;
+      if (dep) continue;
+      if (c === "=" && m[1][i - 1] !== "\\" && m[1][i + 1] !== "=") cuts.push(i);
+      else if (m[1].startsWith("\\iff", i)) cuts.push(i);
+    }
+    if (cuts.length >= 2 && (!best || cuts.length > best.cuts.length)) best = { m, cuts };
+  }
+  if (!best) return null;
+  const { m, cuts } = best, before = t.slice(0, m.index), after = t.slice(m.index + m[0].length);
+  const steps = cuts.slice(1).map((c) => before + "\\(" + m[1].slice(0, c).trim() + "\\)");
+  steps.push(t);
+  return steps.length <= 6 ? steps : [...steps.slice(0, 4), t];
+}
+
 // Question triviale ? (règle du 14.11, contrôlée aussi par tests/trivial.html)
 // - écriture neutre visible : « + 0 », « - 0 », « · 1 », « × 1 », exposant 1 ;
 // - réponse lisible dans l'énoncé alors que deux données sont égales (ex. « 5 cahiers coûtent 30 CHF ; combien coûtent 5 cahiers ? ») ;
