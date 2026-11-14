@@ -1,5 +1,5 @@
 <meta charset="utf-8"><script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script>
-<script src="../src/gen3.js"></script><script src="../src/competences.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/engine.js"></script>
+<script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/engine.js"></script>
 <pre id="o"></pre><script>
 const out=[]; const want=(location.hash||"").slice(1);
 for (const f of FINE) { if (want && !new RegExp(want).test(String(f.CH ? f.CH[0] : "MP") + (f.MP ? "MP" : ""))) continue; for (const d of [1,2,3]) for (let i=0;i<2;i++){ R.seed(d*1000+i*77+f.id.length*13+f.id.charCodeAt(1)); const q=GEN[f.id](d); out.push(f.id+" d"+d+" | "+q.q.replace(/\\\(|\\\)/g,"")+" => "+(q.spec.value!==undefined?q.spec.value:q.spec.expr||JSON.stringify(q.spec.values||q.spec))+" || "+q.sol.replace(/\\\(|\\\)/g,"")); } }

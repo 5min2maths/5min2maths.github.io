@@ -183,7 +183,7 @@ function screenHome() {
   on("wp", () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); });
   on("comps", screenComps);
   on("prep", screenPrep); on("prepedit", screenPrep);
-  on("mock", screenMock);
+  if (typeof screenMock === "function") on("mock", screenMock);
   on("prepgo", () => { session = { plan: Engine.planPrep(state), i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), prep: true }; nextQuestion(); });
 }
 // Glisser à gauche / à droite sur l'accueil : cadre suivant / précédent (pas sur un curseur ou un champ).
