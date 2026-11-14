@@ -1,0 +1,25 @@
+<!doctype html><meta charset="utf-8"><pre id="out">en cours</pre><script>window.MathJax={typesetPromise:()=>Promise.resolve()};</script><script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/competences.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/engine.js"></script><script>try{
+const out = { classes: [] };
+const PROFILES = [["9e", { system: "CH", grade: 9, track: "college" }], ["10e", { system: "CH", grade: 10, track: "college" }], ["11e", { system: "CH", grade: 11, track: "college" }],
+  ["1re", { system: "CH", grade: 12, track: "college" }], ["2e", { system: "CH", grade: 13, track: "college" }], ["MP 1re", { system: "CH", grade: 12, track: "mp" }], ["MP 2e", { system: "CH", grade: 13, track: "mp" }]];
+const probe = {};
+for (const n of NOTIONS) {
+  const lv = [];
+  for (let d = 1; d <= 4; d++) {
+    let ok = 0, fig = 0, err = "";
+    for (let r = 0; r < 12; r++) { try { const q = GEN[n.id](d); if (q && (q.q || q.parts)) { ok++; if (q.fig) fig++; } } catch (e) { err = String(e).slice(0, 80); } }
+    lv.push({ d, ok, fig, err });
+  }
+  let prob = null; if (typeof PROB !== "undefined" && PROB[n.id]) { prob = { ok: 0, fig: 0 }; for (let r = 0; r < 6; r++) { try { const q = PROB[n.id](); if (q && q.parts) { prob.ok++; if (q.fig) prob.fig++; } } catch (e) {} } }
+  probe[n.id] = { prob, label: n.label, lesson: !!LESSONS[n.id], lessonFig: !!(typeof LESSON_FIGS !== "undefined" && LESSON_FIGS[n.id]), dyn: !!(typeof DYN !== "undefined" && DYN[n.id]), active: !!(typeof ACTIVE !== "undefined" && ACTIVE[n.id]), comps: (typeof COMPS !== "undefined" && COMPS[n.id]) || null, lv };
+}
+for (const [name, p] of PROFILES) {
+  const cat = Engine.catalog(p).filter((c) => c.current).sort((a, b) => { const ta = Engine.themeOrder([a, b], p); return 0; });
+  const order = Engine.themeOrder(cat, p);
+  const rows = [];
+  for (const th of order) cat.filter((c) => c.theme === th).sort((a, b) => Engine.rank(p, a.id) - Engine.rank(p, b.id)).forEach((c) => rows.push({ id: c.id, chap: Engine.themeLabel(th, p), again: !!c.again && !(placeOf(c, p) && placeOf(c, p)[0] === p.grade) }));
+  out.classes.push({ name, rows });
+}
+out.probe = probe;
+document.getElementById("out").textContent = JSON.stringify(out);
+}catch(e){document.getElementById("out").textContent="ERR "+e.stack}</script>
