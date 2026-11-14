@@ -107,7 +107,7 @@ function eloBlock() {
   }
   return `<div class="elo"><div><div class="eyebrow">Mathélo ${Engine.isProvisional(state) ? '<span class="badge">provisoire</span>' : ""}</div><div class="num">${e.r}</div>
   ${d ? `<div class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "▲ +" : "▼ "}${d} depuis hier</div>` : ""}</div>
-  <div class="stack"><b>${eloLabel(state.profile, e.r)}</b>${spark}</div></div>`;
+  <div class="stack">${spark}</div></div>`;
 }
 // Bandeau Mathélo (14.11, demande de l'utilisateur : « on a envie de le voir monter ») : sur tous les cadres de l'accueil.
 function eloBanner() {
