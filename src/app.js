@@ -159,9 +159,11 @@ function screenHome() {
         <p class="small muted">${wpDone ? "Bravo ! Un nouveau problème arrive la semaine prochaine." : "Un nouveau problème chaque semaine."}</p></div>`,
     test: () => prep ? `<div class="card stack"><div class="eyebrow">Je prépare mon test</div><h2>${left === 0 ? "Test aujourd'hui" : left === 1 ? "Test demain" : "Test dans " + left + " jours"}</h2>
         <p class="small muted">${state.prep.ids.length} notion${state.prep.ids.length > 1 ? "s" : ""} : ${state.prep.ids.map((id) => NOTIONS.find((n) => n.id === id).label).join(" · ")}</p>
-        <button class="btn-primary btn-big" id="prepgo">Séance de révision</button><button class="btn-ghost" id="prepedit">Modifier le test</button></div>`
+        <button class="btn-primary btn-big" id="prepgo">Séance de révision</button>
+        <button id="mock">📝 Sujet de préparation (avec corrigé)</button>${state.mock && state.mock.done && state.mock.ids.join() === state.prep.ids.join() ? `<p class="small muted">Dernier sujet de préparation : ${String(state.mock.done.pts).replace(".", ",")} points sur ${state.mock.done.total}.</p>` : ""}
+        <button class="btn-ghost" id="prepedit">Modifier le test</button></div>`
       : `<div class="card stack"><div class="eyebrow">Je prépare un test</div><h2>Un test approche ?</h2>
-        <p class="muted">Dis-moi sa date et les notions : chaque jour, l'app te fait réviser juste ce qu'il faut, jusqu'au jour J.</p>
+        <p class="muted">Dis-moi sa date et les notions : chaque jour, l'app te fait réviser juste ce qu'il faut, jusqu'au jour J. Tu pourras aussi t'entraîner sur un sujet de préparation, avec son corrigé.</p>
         <button class="btn-primary btn-big" id="prep">Je prépare un test</button></div>`,
     prog: () => `${newBadgesCard()}${compsCard()}`,
   };
@@ -181,6 +183,7 @@ function screenHome() {
   on("wp", () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); });
   on("comps", screenComps);
   on("prep", screenPrep); on("prepedit", screenPrep);
+  on("mock", screenMock);
   on("prepgo", () => { session = { plan: Engine.planPrep(state), i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), prep: true }; nextQuestion(); });
 }
 // Glisser à gauche / à droite sur l'accueil : cadre suivant / précédent (pas sur un curseur ou un champ).

@@ -1,0 +1,17 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css"><body style="width:400px"><main id="app"></main><pre id="log"></pre>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/sujet.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script><script>try{ Element.prototype.scrollIntoView=function(){}; window.print=()=>{};
+state = Engine.newState({ system: "CH", grade: 9, track: "college", minutes: 5 }); Engine.autoInit(state);
+state.prep = { date: addDays(day(), 5), ids: ["fractout", "prio", "decmul"] }; save();
+const L=[]; homeTab="test"; screenHome(); L.push("bouton : "+document.getElementById("mock").textContent);
+document.getElementById("mock").click();
+L.push("titre : "+document.querySelector(".eyebrow").textContent);
+L.push("parties : "+[...document.querySelectorAll(".mock-part h3")].map(x=>x.textContent).join(" | "));
+L.push("exercices : "+[...document.querySelectorAll(".mock-ex h4")].map(x=>x.textContent).join(" | "));
+L.push("questions : "+document.querySelectorAll(".mock-q").length+" ; V/F : "+[...document.querySelectorAll(".mock-q")].filter(x=>/raison \? Justifie/.test(x.textContent)).length);
+document.getElementById("corr").click();
+document.querySelectorAll(".mock-mark").forEach((g,i)=>g.querySelectorAll("button")[i%3===0?2:0].click());
+document.getElementById("valid").click();
+L.push("bilan : "+document.querySelector(".card b").textContent+" | à retravailler : "+[...document.querySelectorAll("li")].map(x=>x.textContent).join(", "));
+L.push("comps : "+Object.keys(state.comps||{}).length);
+document.getElementById("log").textContent=L.join("\n"); }catch(e){document.getElementById("log").textContent="ERR "+e.stack}</script>

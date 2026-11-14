@@ -331,3 +331,24 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .cyc-h { display: grid; gap: 2px; flex: 1; }
 .cyc[open] summary { margin-bottom: 8px; }
 .tag.yr { background: var(--blue-soft); color: var(--blue); }
+
+/* Sujet blanc (14.11) : à l'écran et à l'impression */
+.mock-list { padding-left: 0; list-style: none; display: grid; gap: 14px; }
+.mock-q { display: grid; gap: 8px; }
+.mock-parts { display: grid; gap: 6px; padding-left: 1.2em; }
+.mock-space { display: none; }
+.mock-mark button[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #fff; }
+@media print {
+  .no-print, .tabs, .gear, button { display: none !important; }
+  #app { padding: 0 !important; max-width: none !important; }
+  body { background: #fff !important; }
+  .mock-q { break-inside: avoid; border-bottom: 1px solid #bbb; padding-bottom: 6px; }
+  .mock-space { display: block; height: 3.2cm; }
+  .mock-parts .mock-space { height: 1.8cm; }
+}
+.mock-part { display: grid; gap: 12px; margin-top: 8px; }
+.mock-part > h3 { border-bottom: 2px solid var(--line); padding-bottom: 4px; }
+.mock-ex { display: grid; gap: 8px; padding-left: 8px; border-left: 3px solid var(--blue-soft); }
+.mock-ex h4 { margin: 4px 0 0; }
+@media print { .mock-ex { border-left: none; padding-left: 0; } .mock-part { break-before: auto; } }
+@media print { .mock-ex h4, .mock-part > h3 { break-after: avoid; page-break-after: avoid; } .mock-ex { break-inside: auto; } }
