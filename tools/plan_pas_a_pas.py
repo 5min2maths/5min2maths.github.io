@@ -2,7 +2,7 @@
 """Plan de l'aide pas à pas (« On le fait ensemble », q.guide) — lissé dans le temps (demande du 14.11).
 
 Repère, pour chaque notion, les niveaux (1 à 3) qui ont déjà un guide, classe les notions par priorité
-(bêta-testeurs 1re Collège, puis 11e, MP, 2e Collège, 10e, 9e) et découpe le reste en lots de LOT notions.
+(11e d'abord — priorité de l'utilisateur, 14.11 —, puis bêta-testeurs 1re Collège, MP, 2e Collège, 10e, 9e) et découpe le reste en lots de LOT notions.
 Écrit tools/plan_pas_a_pas.md ; `--prochain` affiche une ligne (lue par le point du jour).
 """
 import json, os, re, sys
@@ -37,7 +37,7 @@ def ordre():
     m1 = [i for i in rang(O["MATU"]) if T["MATU"].get(i, "").startswith("M1")]
     m2 = [i for i in rang(O["MATU"]) if T["MATU"].get(i, "").startswith("M2")]
     co = lambda y: [i for i in rang(O["CO"]) if str(y) in T["CO_BY"].get(i, {})]
-    groupes = [("1re Collège (bêta-testeurs)", m1), ("11e CO", co(11)), ("MP", rang(O["MP"])),
+    groupes = [("11e CO (priorité, 14.11)", co(11)), ("1re Collège (bêta-testeurs)", m1), ("MP", rang(O["MP"])),
                ("2e Collège", m2), ("10e CO", co(10)), ("9e CO", co(9))]
     vus, res = set(), []
     for nom, ids in groupes:
