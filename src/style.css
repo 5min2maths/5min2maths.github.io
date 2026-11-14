@@ -266,3 +266,19 @@ ul.plain { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
 .gok-msg { color: var(--ok); }
 .gno-msg { color: var(--ink); }
 details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em; margin-top: 6px; }
+
+/* Leçons actives (14.11) : devine, manipule, retiens */
+.act-step { display: grid; gap: 8px; border-top: 1px dashed var(--line); padding-top: 10px; }
+.act-step:first-of-type { border-top: none; padding-top: 0; }
+.act-h { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.act-n { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 0.85rem; }
+.act-goal { font-weight: 700; color: var(--blue); margin: 0; }
+.seg button.act-wrong { border-color: var(--bad); color: var(--bad); text-decoration: line-through; }
+.act-out { font-size: 1.05rem; }
+.act-expr { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; font-size: 1.6rem; justify-content: center; padding: 6px 0; }
+.act-num { min-width: 46px; min-height: 46px; font-size: 1.5rem; border-radius: 10px; padding: 2px 8px; }
+.act-num.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+.act-par { color: var(--margin); font-weight: 800; font-size: 1.9rem; }
+.act-op { padding: 0 2px; }
+.act-val { color: var(--margin); min-width: 2ch; }
+.act-part:hover rect { opacity: 0.85; }

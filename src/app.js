@@ -412,6 +412,7 @@ const lessonDetails = (id) => (LESSONS[id] ? `<details class="lesson" data-id="$
 function screenLesson(id, cont) {
   const L = LESSONS[id];
   if (state) { Badges.onLesson(state, id); save(); }
+  if (typeof ACTIVE !== "undefined" && ACTIVE[id]) return activeLesson(id, L, cont);
   h(`${brand}<div class="eyebrow">Nouvelle notion · 30 secondes de cours</div>
   <div class="card pop lesson-card"><h2>${L.titre}</h2>${lessonBody(id)}</div>
   <button class="btn-primary btn-big" id="go">J'ai compris, à moi !</button>`);
