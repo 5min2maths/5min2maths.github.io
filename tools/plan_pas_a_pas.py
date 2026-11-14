@@ -59,7 +59,8 @@ def main():
     L = ["# Plan de l'aide pas à pas (généré par tools/plan_pas_a_pas.py — ne pas éditer à la main)", "",
          f"Couverture : {len(faits)} notions complètes (3 niveaux), {len(partiels)} partielles, {len(a_faire)} à faire, sur {len(liste)}.",
          f"Rythme visé : 1 lot de {LOT} notions par séance de travail, 2 séances par semaine → ≈ {len(lots) / 2:.0f} semaines.", "",
-         "Méthode par lot : GS() pour chaque niveau (2 à 4 étapes, la dernière = la réponse), q.traps pour les erreurs typiques,",
+         "Méthode par lot : GS() pour chaque niveau (2 à 4 étapes, la dernière = la réponse), q.traps pour les erreurs typiques ;",
+         "problèmes à contexte : au moins 3 situations parlantes par niveau, étiquette ctx (règle du 14.11 : jamais le même contexte en boucle),",
          "puis tests/test.html (contrôle des guides) et tests/trivial.html, commit, push. Le point du jour affiche le prochain lot.", ""]
     for k, lot in enumerate(lots, 1):
         L.append(f"- [ ] Lot {k} ({lot[0][0]}) : " + ", ".join(f"{i}" + (f" ({niveaux_guides(B[i])}/3)" if niveaux_guides(B[i]) else "") for _, i in lot))
