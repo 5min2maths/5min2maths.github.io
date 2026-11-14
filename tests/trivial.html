@@ -25,10 +25,10 @@ for (const id of Object.keys(GEN)) for (const d of [1, 2, 3]) {
       if (sp.value === 0) add("réponse 0");
       if (Math.abs(sp.value) === 1) add("réponse ±1");
       const nums = (txt.match(/-?\d+(?:[.,]\d+)?/g) || []).map((s) => +s.replace(",", "."));
-      if (Number.isInteger(sp.value) && Math.abs(sp.value) > 1 && nums.includes(sp.value)) add("réponse dans l'énoncé");
+      if (Number.isInteger(sp.value) && Math.abs(sp.value) > 1 && nums.includes(sp.value) && !/ces nombres|parmi|lequel|laquelle/i.test(raw)) add("réponse dans l'énoncé"); // questions à choix : la réponse est forcément dans la liste
     }
     if (sp.kind === "set" && Array.isArray(sp.values) && new Set(sp.values).size < sp.values.length) add("solutions doublées");
-    if (/(^|[^\d.,{\w])-?\s*1\s*[a-z](?![a-z{])/.test(raw.replace(/\\[a-zA-Z]+/g, " "))) add("écriture 1x");
+    if (/(^|[^\d.,{\w])-?\s*1[a-z](?![a-z{])/.test(raw.replace(/\\[a-zA-Z]+/g, " "))) add("écriture 1x"); // « 1 h 26 » (unité) n'est pas « 1x »
     if (/(^|[^\d.,])[+-]\s*0(?![\d.,])/.test(raw)) add("terme + 0");
     if (/\\cdot\s*1(?![\d.,])|×\s*1(?![\d.,])|\^\{?1\}?(?![\d.,])/.test(raw)) add("×1 ou ^1");
   }

@@ -3750,7 +3750,7 @@ FINE.push(
     lesson: ["Discuter selon un paramètre", "Le nombre de solutions dépend de la valeur du paramètre.", "\\(ax = b\\) : une solution si \\(a \\ne 0\\) ; aucune si \\(a = 0\\) et \\(b \\ne 0\\) ; une infinité (tous les nombres) si \\(a = 0\\) et \\(b = 0\\). 2e degré : deux solutions si \\(\\Delta > 0\\), une (double) si \\(\\Delta = 0\\), aucune si \\(\\Delta < 0\\).", ["\\((m - 2)x = 5\\) : aucune solution pour \\(m = 2\\)", "\\(x^2 + 6x + m = 0\\) : solution double pour \\(m = 9\\)"], "Avant de diviser par une expression contenant le paramètre, vérifie qu'elle n'est pas nulle."],
     g: [
       () => { const a = R.nz(-6, 6), b = R.nz(-9, 9), k = R.int(2, 4); return QV("Pour quelle valeur de " + M("m") + " l'équation " + M("(" + k + "m" + sg(-k * a) + ")x = " + b) + " n'a-t-elle aucune solution ?", a, "Il faut " + M(k + "m" + sg(-k * a) + " = 0") + ", donc " + M("m = " + a) + " ; l'équation devient " + M("0x = " + b) + " : impossible."); },
-      () => { const b = R.int(2, 9), d = R.nz(-4, 4), a = R.int(1, 9), c = a + R.nz(-5, 5); if (b + d === 0 || b + d === 1) return GEN.eqparam(2); return QV("Pour quelle valeur de " + M("m") + " l'équation " + M("mx + " + a + " = " + b + "x" + sg(c) + sg(d) + "x") + " n'a-t-elle aucune solution ?", b + d, "À droite : " + M((b + d) + "x" + sg(c)) + ". " + M("(m" + sg(-(b + d)) + ")x = " + (c - a)) + " : aucune solution si " + M("m = " + (b + d)) + "."); },
+      () => { const b = R.int(2, 9), d = R.nz(-4, 4), a = R.int(1, 9), c = a + R.nz(-5, 5); if (b + d === 0 || b + d === 1 || c === 0 || [a, b, c, Math.abs(d)].includes(b + d)) return GEN.eqparam(2); /* réponse jamais lisible dans l'énoncé (audit 14.11) */ return QV("Pour quelle valeur de " + M("m") + " l'équation " + M("mx + " + a + " = " + b + "x" + sg(c) + sg(d) + "x") + " n'a-t-elle aucune solution ?", b + d, "À droite : " + M((b + d) + "x" + sg(c)) + ". " + M("(m" + sg(-(b + d)) + ")x = " + (c - a)) + " : aucune solution si " + M("m = " + (b + d)) + "."); },
       () => { const k = R.int(1, 7); if (R.rand() < 0.5) return QV("Pour quelle valeur de " + M("m") + " l'équation " + M("x^2 + " + 2 * k + "x + m = 0") + " a-t-elle une solution double ?", k * k, M("\\Delta = " + 4 * k * k + " - 4m = 0") + ", donc " + M("m = " + k * k) + "."); return QV("Pour quelle valeur positive de " + M("m") + " l'équation " + M("x^2 + mx + " + k * k + " = 0") + " a-t-elle une solution double ?", 2 * k, M("\\Delta = m^2 - " + 4 * k * k + " = 0") + ", donc " + M("m = " + 2 * k) + " (valeur positive)."); },
     ] },
   { id: "trinfact", theme: "fa", label: "Factoriser un trinôme par ses zéros", ex: "2x^2 - 2x - 12 = 2(x - 3)(x + 2)", CH: [12], MP: [12, "S1"], codesMATU: "1\\.AL\\.05d", codesMP: "S1\\.EQ\\.07",
@@ -7117,6 +7117,15 @@ function trivialQ(q, k) {
   return "";
 }
 
+// Réponse visible par coïncidence (audit 14.11) : la valeur attendue (entier, |v| > 1) figure parmi les nombres de l'énoncé,
+// hors questions à choix dans une liste. Le tirage l'évite quand il peut (préférence, pas interdiction).
+function answerShown(q) {
+  const sp = q.spec || {}, raw = String(q.q || "").replace(/<[^>]+>/g, " ");
+  if (sp.kind !== "value" || !Number.isInteger(sp.value) || Math.abs(sp.value) < 2 || /ces nombres|parmi|lequel|laquelle/i.test(raw)) return false;
+  const nums = (raw.replace(/\{,\}/g, ".").replace(/\\[a-zA-Z]+/g, " ").match(/-?\d+(?:[.,]\d+)?/g) || []).map((t) => +t.replace(",", "."));
+  return nums.includes(sp.value) || nums.includes(-sp.value);
+}
+
 // Forme d'une question : l'énoncé sans les nombres (deux questions de même forme ne diffèrent que par les valeurs).
 const qForm = (q) => String(q.q || "").replace(/\d+(?:[.,]\d+|\{,\}\d+)?/g, "#").replace(/\s+/g, " ");
 
@@ -7321,15 +7330,18 @@ const Engine = {
     const tidy = (t) => typeof t !== "string" ? t : t.replace(/([(=+\-\s{]|\\\()(-?)1([a-z])(?![a-z{])/g, "$1$2$3").replace(/\+\s*-\s*(?=[\da-z(\\])/g, "- ").replace(/-\s*-\s*(?=[\da-z(\\])/g, "+ ");
     // Pas de question triviale (règle du 14.11 : la trivialité fait décrocher) : tirage refait, de façon
     // déterministe (même code → même question), jusqu'à 6 essais ; le dernier est gardé quoi qu'il arrive.
-    let q;
+    let q, keep = null;
     for (let k = 0; k < 6; k++) {
       if (k) R.seed(seed * 7919 + level * 104729 + [...id].reduce((a, c) => a + c.charCodeAt(0), 0) + k * 15485863);
       // Variantes (variantes.js) : la forme d'origine ou une forme ajoutée, au hasard.
       const vs = typeof VAR !== "undefined" && VAR[id] && VAR[id][level], vk = vs && vs.length ? Math.floor(R.rand() * (vs.length + 1)) : 0;
       q = vk ? vs[vk - 1]() : GEN[id](level);
       q.q = tidy(q.q); q.sol = tidy(q.sol);
-      if (!trivialQ(q, k)) break;
+      if (trivialQ(q, k)) continue;
+      if (!answerShown(q)) { keep = null; break; }
+      if (!keep) keep = q; // non triviale mais réponse visible : gardée en réserve
     }
+    if (keep) q = keep;
     if (q.guide) q.guide = q.guide.map((g) => ({ ...g, ask: tidy(g.ask), sol: tidy(g.sol) }));
     if (q.traps && q.spec && q.spec.kind === "value") q.traps = q.traps.filter((t) => isFinite(t.v) && Math.abs(t.v - q.spec.value) > Math.max(q.spec.round || 0, 1e-6 * Math.max(1, Math.abs(q.spec.value))));
     if (q.parts) q.parts = q.parts.map((p) => ({ ...p, label: tidy(p.label) }));

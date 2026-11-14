@@ -153,6 +153,15 @@ function trivialQ(q, k) {
   return "";
 }
 
+// Réponse visible par coïncidence (audit 14.11) : la valeur attendue (entier, |v| > 1) figure parmi les nombres de l'énoncé,
+// hors questions à choix dans une liste. Le tirage l'évite quand il peut (préférence, pas interdiction).
+function answerShown(q) {
+  const sp = q.spec || {}, raw = String(q.q || "").replace(/<[^>]+>/g, " ");
+  if (sp.kind !== "value" || !Number.isInteger(sp.value) || Math.abs(sp.value) < 2 || /ces nombres|parmi|lequel|laquelle/i.test(raw)) return false;
+  const nums = (raw.replace(/\{,\}/g, ".").replace(/\\[a-zA-Z]+/g, " ").match(/-?\d+(?:[.,]\d+)?/g) || []).map((t) => +t.replace(",", "."));
+  return nums.includes(sp.value) || nums.includes(-sp.value);
+}
+
 // Forme d'une question : l'énoncé sans les nombres (deux questions de même forme ne diffèrent que par les valeurs).
 const qForm = (q) => String(q.q || "").replace(/\d+(?:[.,]\d+|\{,\}\d+)?/g, "#").replace(/\s+/g, " ");
 
@@ -357,15 +366,18 @@ const Engine = {
     const tidy = (t) => typeof t !== "string" ? t : t.replace(/([(=+\-\s{]|\\\()(-?)1([a-z])(?![a-z{])/g, "$1$2$3").replace(/\+\s*-\s*(?=[\da-z(\\])/g, "- ").replace(/-\s*-\s*(?=[\da-z(\\])/g, "+ ");
     // Pas de question triviale (règle du 14.11 : la trivialité fait décrocher) : tirage refait, de façon
     // déterministe (même code → même question), jusqu'à 6 essais ; le dernier est gardé quoi qu'il arrive.
-    let q;
+    let q, keep = null;
     for (let k = 0; k < 6; k++) {
       if (k) R.seed(seed * 7919 + level * 104729 + [...id].reduce((a, c) => a + c.charCodeAt(0), 0) + k * 15485863);
       // Variantes (variantes.js) : la forme d'origine ou une forme ajoutée, au hasard.
       const vs = typeof VAR !== "undefined" && VAR[id] && VAR[id][level], vk = vs && vs.length ? Math.floor(R.rand() * (vs.length + 1)) : 0;
       q = vk ? vs[vk - 1]() : GEN[id](level);
       q.q = tidy(q.q); q.sol = tidy(q.sol);
-      if (!trivialQ(q, k)) break;
+      if (trivialQ(q, k)) continue;
+      if (!answerShown(q)) { keep = null; break; }
+      if (!keep) keep = q; // non triviale mais réponse visible : gardée en réserve
     }
+    if (keep) q = keep;
     if (q.guide) q.guide = q.guide.map((g) => ({ ...g, ask: tidy(g.ask), sol: tidy(g.sol) }));
     if (q.traps && q.spec && q.spec.kind === "value") q.traps = q.traps.filter((t) => isFinite(t.v) && Math.abs(t.v - q.spec.value) > Math.max(q.spec.round || 0, 1e-6 * Math.max(1, Math.abs(q.spec.value))));
     if (q.parts) q.parts = q.parts.map((p) => ({ ...p, label: tidy(p.label) }));
