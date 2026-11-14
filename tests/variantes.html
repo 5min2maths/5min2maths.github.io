@@ -4,7 +4,7 @@
 // Banc de contrôle des variantes (14.11) : chaque modèle, 60 tirages. Réponse attendue acceptée (règle « résultat final »
 // du CO comprise), pas de NaN / undefined, pas de question triviale. #ids=a,b pour filtrer.
 try {
-const SHOW = location.hash.includes("show"); const only = decodeURIComponent(location.hash.slice(1)).replace("show","").split(",").filter(Boolean), out = [], bad = [];
+const SHOW = location.hash.includes("show"); const only = decodeURIComponent(location.hash.slice(1)).replace("show","").replace("last","").split(",").filter(Boolean), out = [], bad = [];
 const toFrac = (v) => { for (let d = 1; d <= 400; d++) { const n = Math.round(v * d); if (Math.abs(n / d - v) < 1e-9) return (n < 0 ? "-" : "") + Math.abs(n) + (d > 1 ? "/" + d : ""); } return null; };
 const sqf = (n) => { for (let k = 2; k * k <= n; k++) if (n % (k * k) === 0) return false; return true; };
 const answerOf = (sp) => { if (sp.kind === "expr") return sp.expr;
@@ -22,7 +22,7 @@ for (const id of Object.keys(VAR)) { if (only.length && !only.includes(id)) cont
       if (!q.spec) { errs.add("pas de spec"); continue; }
       const sp = Object.assign({}, q.spec, q.spec.kind === "value" && !q.spec.round && !q.spec.sci && !["sci", "scicalc", "puiss"].includes(id) ? { final: true } : {}), a = q.canon && sp.kind === "expr" ? q.canon : answerOf(sp);
       if (a !== null) { const c = checkAnswer(sp, a); if (c.status !== "correct") errs.add("réponse « " + a + " » → " + c.status + " " + (c.message || "") + " | " + String(q.q).slice(0, 90)); }
-      if (SHOW && r === 0 && lv !== "4") out.push(id + " N" + lv + "." + (k + 1) + " | " + String(q.q).replace(/\\\(|\\\)/g, "").replace(/\\cdot/g, "·").replace(/\{,\}/g, ",").slice(0, 150) + "  ⇒ " + (q.spec.kind === "value" ? +(+q.spec.value).toFixed(6) : q.spec.expr));
+      if (SHOW && r === 0 && lv !== "4" && (!location.hash.includes("last") || k === VAR[id][lv].length - 1)) out.push(id + " N" + lv + "." + (k + 1) + " | " + String(q.q).replace(/\\\(|\\\)/g, "").replace(/\\cdot/g, "·").replace(/\{,\}/g, ",").slice(0, 150) + "  ⇒ " + (q.spec.kind === "value" ? +(+q.spec.value).toFixed(6) : q.spec.expr));
       const tq = trivialQ(q, 0); if (tq) { triv++; if (triv === 4) errs.add("motif : " + tq + " | " + String(q.q).slice(0, 110)); }
     }
     if (triv > 3) errs.add("triviale " + triv + "/60");
