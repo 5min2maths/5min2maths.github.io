@@ -297,6 +297,16 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .act-op { padding: 0 2px; }
 .act-val { color: var(--margin); min-width: 2ch; }
 .act-part:hover rect { opacity: 0.85; }
+.act-stepper { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.act-stepper button { width: 44px; height: 44px; border-radius: 50%; font-size: 1.4rem; padding: 0; }
+.act-stepper b { font-size: 1.4rem; min-width: 2ch; text-align: center; }
+.act-lamps { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+.act-lamp { padding: 6px 10px; border-radius: 999px; border: 1.5px solid var(--line); color: var(--ink-soft); font-weight: 700; }
+.act-lamp.on { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
+.act-prime { display: inline-grid; place-items: center; min-width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--ok); color: var(--ok); font-weight: 800; font-size: 1.3rem; padding: 0 4px; }
+.act-ladder { color: var(--ink-soft); text-align: center; font-size: 1.05rem; }
+.act-hint { color: var(--warn); text-align: center; }
+.fig .act-over { fill: var(--bad-soft, #fde2e1); stroke: var(--bad); stroke-dasharray: 3 3; }
 
 </style>
 <script>
@@ -5498,6 +5508,137 @@ const ACTIVE = {
     },
   },
 };
+
+// ---- 9e · 4. Arithmétique (14.11) ----
+// Petit compteur − valeur + (réutilisé par plusieurs manipulations).
+const actStepper = (label, v, id) => `<div class="act-stepper"><span class="small muted">${label}</span><button type="button" data-st="${id}" data-d="-1" aria-label="moins">−</button><b>${v}</b><button type="button" data-st="${id}" data-d="1" aria-label="plus">+</button></div>`;
+const actBindStepper = (box, id, get, set, min, max) => box.querySelectorAll('[data-st="' + id + '"]').forEach((b) => (b.onclick = () => set(Math.max(min, Math.min(max, get() + +b.dataset.d)))));
+
+Object.assign(ACTIVE, {
+  multdiv: {
+    predict: { q: "7 est-il un diviseur de 84 ?", choices: ["Oui", "Non"], good: 0, why: "84 = 7 · 12 : la division de 84 par 7 tombe juste, donc 7 divise 84." },
+    defis: ["Range 12 jetons en rectangle de toutes les façons possibles.", "Même jeu avec 18 jetons : trouve tous ses diviseurs."],
+    play(box, onWin) {
+      let n = 12, r = 3, found = new Set(), step = 0;
+      const draw = () => {
+        const c = Math.ceil(n / r), full = n % r === 0, sz = Math.min(26, 300 / c, 200 / r), W = 320, H = r * sz + 8;
+        let g = "";
+        for (let k = 0; k < n; k++) { const i = Math.floor(k / c), j = k % c; g += '<circle cx="' + (10 + j * sz + sz / 2).toFixed(1) + '" cy="' + (4 + i * sz + sz / 2).toFixed(1) + '" r="' + (sz * 0.38).toFixed(1) + '" class="' + (full ? "f-fill" : i === r - 1 && n % c ? "f-dot" : "f-fill2") + '"/>'; }
+        const divs = [...found].sort((a, b) => a - b);
+        box.innerHTML = actStepper("Rangées", r, "r") + `<svg class="fig" viewBox="0 0 ${W} ${H}" role="img" aria-label="${n} jetons en ${r} rangées">${g}</svg>
+          <div class="act-out">${full ? `<b>${r} rangées de ${n / r}</b> : ${n} = ${r} · ${n / r} ✓` : `${r} rangées : il reste un trou, ${r} ne divise pas ${n}.`}</div>
+          <div class="small">Diviseurs de ${n} trouvés : ${divs.length ? divs.map((d) => `<b>${d}</b>`).join(", ") : "aucun pour l'instant"}</div>`;
+        actBindStepper(box, "r", () => r, (v) => { r = v; if (n % r === 0) found.add(r).add(n / r); draw(); check(); }, 1, n);
+      };
+      const check = () => {
+        const all = Array.from({ length: n }, (_, i) => i + 1).filter((d) => n % d === 0);
+        if (all.every((d) => found.has(d))) {
+          if (step === 0) { onWin(0, "Les diviseurs de 12 : 1, 2, 3, 4, 6, 12. Ils vont par paires : 1 · 12, 2 · 6, 3 · 4."); step = 1; n = 18; r = 2; found = new Set([2, 9]); draw(); }
+          else if (step === 1) { onWin(1, "Diviseurs de 18 : 1, 2, 3, 6, 9, 18 (paires 1 · 18, 2 · 9, 3 · 6)."); step = 2; }
+        }
+      };
+      found.add(3).add(4); draw();
+    },
+  },
+
+  divcrit: {
+    predict: { q: "471 est-il divisible par 3 ?", choices: ["Oui", "Non"], good: 0, why: "4 + 7 + 1 = 12, et 12 est divisible par 3 : 471 = 3 · 157." },
+    defis: ["Change un seul chiffre de 472 pour qu'il devienne divisible par 9.", "Fabrique un nombre divisible à la fois par 2, 3 et 5."],
+    play(box, onWin) {
+      const start = [4, 7, 2];
+      let d = start.slice(), step = 0;
+      const draw = () => {
+        const n = +d.join(""), s = d.reduce((a, b) => a + b, 0);
+        const tests = [[2, "dernier chiffre pair"], [3, "somme divisible par 3"], [5, "finit par 0 ou 5"], [9, "somme divisible par 9"], [10, "finit par 0"]];
+        box.innerHTML = `<div class="act-expr">${d.map((v, i) => `<button type="button" class="act-num" data-i="${i}">${v}</button>`).join("")}</div>
+          <div class="small muted" style="text-align:center">Touche un chiffre pour l'augmenter de 1.</div>
+          <div class="act-out" style="text-align:center">Somme des chiffres : ${d.join(" + ")} = <b>${s}</b></div>
+          <div class="act-lamps">${tests.map(([k, why]) => `<span class="act-lamp${n % k === 0 ? " on" : ""}" title="${why}">÷${k}</span>`).join("")}</div>`;
+        box.querySelectorAll(".act-num").forEach((b) => (b.onclick = () => { const i = +b.dataset.i; d[i] = (d[i] + 1) % 10; if (i === 0 && d[0] === 0) d[0] = 1; draw(); check(); }));
+      };
+      const check = () => {
+        const n = +d.join(""), diff = d.filter((v, i) => v !== start[i]).length;
+        if (step === 0) {
+          if (n % 9 === 0 && diff <= 1) { onWin(0, n + " : somme " + d.reduce((a, b) => a + b, 0) + ", divisible par 9. Remarque : il est aussi divisible par 3 !"); step = 1; }
+          else if (diff > 1) $hint(box, "Un seul chiffre doit changer : remets les autres comme dans 472.");
+        } else if (step === 1 && n % 30 === 0) { onWin(1, n + " : il finit par 0 (donc ÷2 et ÷5) et la somme de ses chiffres est divisible par 3."); step = 2; }
+      };
+      draw();
+    },
+  },
+
+  premiers: {
+    predict: { q: "91 est-il un nombre premier ?", choices: ["Oui", "Non"], good: 1, why: "91 = 7 · 13 : il a d'autres diviseurs que 1 et lui-même." },
+    defis: ["Casse 84 en nombres premiers.", "À toi : casse 90."],
+    play(box, onWin) {
+      const isP = (x) => x > 1 && Array.from({ length: Math.floor(Math.sqrt(x)) - 1 }, (_, i) => i + 2).every((k) => x % k);
+      let n = 84, leaves = [84], hist = [], pick = null, msg = "", step = 0;
+      const pow = (ls) => { const c = {}; ls.forEach((x) => (c[x] = (c[x] || 0) + 1)); return Object.keys(c).map(Number).sort((a, b) => a - b).map((p) => p + (c[p] > 1 ? "<sup>" + c[p] + "</sup>" : "")).join(" · "); };
+      const draw = () => {
+        const done = leaves.every(isP);
+        box.innerHTML = `<div class="act-ladder">${hist.map((h, i) => `<div>${i ? "=" : n + " ="} ${h}</div>`).join("")}</div>
+          <div class="act-expr">${hist.length ? "=" : n + " ="} ${leaves.map((x, i) => isP(x) ? `<span class="act-prime">${x}</span>` : `<button type="button" class="act-num${pick === i ? " on" : ""}" data-i="${i}">${x}</button>`).join('<span class="act-op">·</span>')}</div>
+          ${pick !== null ? `<div class="seg" style="justify-content:center">${[2, 3, 5, 7].map((p) => `<button type="button" data-p="${p}">÷ ${p}</button>`).join("")}</div>` : `<div class="small muted" style="text-align:center">${done ? "Que des nombres premiers : " + n + " = " + pow(leaves) : "Touche un nombre bleu pour le casser."}</div>`}
+          <div class="small" style="text-align:center">${msg}</div>`;
+        box.querySelectorAll(".act-num").forEach((b) => (b.onclick = () => { pick = +b.dataset.i; msg = ""; draw(); }));
+        box.querySelectorAll("[data-p]").forEach((b) => (b.onclick = () => {
+          const p = +b.dataset.p, x = leaves[pick];
+          if (x % p) { msg = x + " n'est pas divisible par " + p + " : essaie un autre nombre premier."; pick = null; draw(); return; }
+          if (leaves.length > 1) hist.push(leaves.join(" · "));
+          leaves.splice(pick, 1, p, x / p); leaves.sort((a, b) => (isP(b) - isP(a)) || a - b); pick = null; msg = ""; draw(); check();
+        }));
+      };
+      const check = () => {
+        if (!leaves.every(isP)) return;
+        if (step === 0) { onWin(0, "84 = 2 · 2 · 3 · 7 = 2² · 3 · 7. Quel que soit l'ordre, on arrive toujours au même résultat."); step = 1; setTimeout(() => { n = 90; leaves = [90]; hist = []; draw(); }, 1600); }
+        else if (step === 1) { onWin(1, "90 = 2 · 3² · 5."); step = 2; }
+      };
+      draw();
+    },
+  },
+
+  arith: {
+    predict: { q: "Un bus passe toutes les 6 min, un autre toutes les 8 min. Ils partent ensemble. Ils se retrouvent après…", choices: ["14 min", "24 min", "48 min"], good: 1,
+      why: "Il faut un multiple commun de 6 et de 8, le plus petit : 24 (le PPMC)." },
+    defis: ["Fais atterrir les deux grenouilles sur la même case (pas 0).", "Pave un rectangle 12 × 18 avec les plus grands carrés possibles."],
+    play(box, onWin) {
+      let a = 0, b = 0, s = 2, step = 0;
+      const drawFrogs = () => {
+        const W = 330, X = (v) => 12 + v * 6.1;
+        let g = '<line x1="' + X(0) + '" y1="60" x2="' + X(50) + '" y2="60" class="f-line"/>';
+        for (let v = 0; v <= 50; v += 2) g += '<line x1="' + X(v) + '" y1="' + (v % 10 ? 56 : 52) + '" x2="' + X(v) + '" y2="64" class="f-line"/>' + (v % 10 === 0 ? '<text x="' + X(v) + '" y="80" class="f-txt" text-anchor="middle" font-size="11">' + v + "</text>" : "");
+        for (let v = 6; v <= a; v += 6) g += '<path d="M' + X(v - 6) + ",52 Q" + X(v - 3) + ",28 " + X(v) + ',52" class="f-line" fill="none" stroke-dasharray="3 3"/>';
+        for (let v = 8; v <= b; v += 8) g += '<path d="M' + X(v - 8) + ",68 Q" + X(v - 4) + ",96 " + X(v) + ',68" class="f-accent" fill="none" stroke-dasharray="3 3"/>';
+        g += '<circle cx="' + X(a) + '" cy="46" r="7" class="f-fill"/><circle cx="' + X(b) + '" cy="74" r="7" class="f-dot"/>';
+        box.innerHTML = `<svg class="fig" viewBox="0 0 ${W} 100" role="img" aria-label="deux grenouilles sur une droite graduée">${g}</svg>
+          <div class="seg" style="justify-content:center"><button type="button" id="ja">🔵 saute de 6</button><button type="button" id="jb">🔴 saute de 8</button><button type="button" class="btn-ghost" id="j0">Recommencer</button></div>
+          <div class="act-out" style="text-align:center">🔵 sur <b>${a}</b> · 🔴 sur <b>${b}</b></div>`;
+        box.querySelector("#ja").onclick = () => { if (a + 6 <= 50) a += 6; drawFrogs(); check(); };
+        box.querySelector("#jb").onclick = () => { if (b + 8 <= 50) b += 8; drawFrogs(); check(); };
+        box.querySelector("#j0").onclick = () => { a = b = 0; drawFrogs(); };
+      };
+      const drawTiles = () => {
+        const L = 18, H = 12, k = 15, W = 330, nx = Math.ceil(L / s), ny = Math.ceil(H / s), ok = L % s === 0 && H % s === 0;
+        let g = '<rect x="10" y="6" width="' + L * k + '" height="' + H * k + '" class="f-soft"/>';
+        for (let i = 0; i < ny; i++) for (let j = 0; j < nx; j++) {
+          const x = 10 + j * s * k, y = 6 + i * s * k, out = (j + 1) * s > L || (i + 1) * s > H;
+          g += '<rect x="' + x + '" y="' + y + '" width="' + s * k + '" height="' + s * k + '" class="' + (out ? "act-over" : "f-fill2") + '"/>';
+        }
+        g += '<rect x="10" y="6" width="' + L * k + '" height="' + H * k + '" fill="none" stroke="var(--ink)" stroke-width="2"/>';
+        box.innerHTML = actStepper("Côté du carré", s, "s") + `<svg class="fig" viewBox="0 0 ${W} ${H * k + 12}" role="img" aria-label="rectangle 18 sur 12 pavé de carrés de côté ${s}">${g}</svg>
+          <div class="act-out">${ok ? `Carrés de ${s} : ça tombe juste (${L} = ${L / s} · ${s} et ${H} = ${H / s} · ${s}).${s < 6 ? " Mais il y a plus grand !" : ""}` : `Carrés de ${s} : ça dépasse, ${s} ne divise pas ${L % s ? L : H}.`}</div>`;
+        actBindStepper(box, "s", () => s, (v) => { s = v; drawTiles(); check(); }, 1, 12);
+      };
+      const check = () => {
+        if (step === 0 && a && a === b) { onWin(0, "Les deux sur " + a + " : c'est un multiple de 6 et de 8. Le premier, 24, est le PPMC." + (a > 24 ? " (Tu as trouvé " + a + ", mais 24 vient avant.)" : "")); step = 1; setTimeout(drawTiles, 1600); }
+        else if (step === 1 && s === 6) { onWin(1, "6 divise 12 et 18, et aucun carré plus grand ne tombe juste : 6 est le PGDC de 12 et 18."); step = 2; }
+      };
+      drawFrogs();
+    },
+  },
+});
+// Message d'aide sous une manipulation (sans valider le défi).
+function $hint(box, t) { let el = box.querySelector(".act-hint"); if (!el) { el = document.createElement("div"); el.className = "small act-hint"; box.appendChild(el); } el.textContent = t; }
 
 // Écran de leçon active. cont : suite de la séance.
 function activeLesson(id, L, cont) {
