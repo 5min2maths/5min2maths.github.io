@@ -648,3 +648,188 @@ V("rotation", 2,
   () => { const n = R.pick([5, 6, 8, 9, 10]); return QV("Une étoile régulière à " + n + " branches tourne autour de son centre. Quel est le plus petit angle de rotation (non nul) qui la superpose à elle-même (en degrés) ?", 360 / n, M("360° : " + n + " = " + 360 / n + "°") + "."); },
   () => { const n = R.pick([3, 4, 5, 6]), k = R.int(2, n - 1); return QV("Une éolienne a " + n + " pales régulièrement espacées. De quel angle doit-elle tourner pour que chaque pale prenne la place de celle située " + k + " crans plus loin (en degrés) ?", (360 / n) * k, "Un cran : " + 360 / n + "° ; " + M(k + " \\cdot " + 360 / n + "° = " + (360 / n) * k + "°") + "."); },
 );
+
+// ======================= 11e =======================
+const QSet = (q, values, sol) => ({ q, spec: { kind: "set", values }, sol });
+const QPair = (q, values, sol) => ({ q, spec: { kind: "pair", values }, sol });
+const TRIP = [[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 15, 17], [7, 24, 25], [9, 12, 15], [20, 21, 29], [12, 16, 20], [9, 40, 41]];
+V("pythrec", 1,
+  () => { const [a, b, c] = R.pick(TRIP); return QV("Un triangle a pour côtés " + b + " cm, " + c + " cm et " + a + " cm. Pour tester s'il est rectangle, calcule le carré de son plus long côté.", c * c, "Le plus long côté est " + c + " cm : " + M(c + "^2 = " + c * c) + " (à comparer avec " + M(a + "^2 + " + b + "^2 = " + (a * a + b * b)) + ")."); },
+  () => { const [a, b, c] = R.pick(TRIP); return QV("Les côtés de l'angle droit d'un triangle rectangle mesurent " + a + " cm et " + b + " cm. Que vaut le carré de l'hypoténuse (en cm²) ?", c * c, M(a + "^2 + " + b + "^2 = " + a * a + " + " + b * b + " = " + c * c) + "."); },
+);
+V("pythrec", 2,
+  () => clean(() => { const ok = R.pick(TRIP), bads = [[5, 6, 8], [7, 9, 12], [6, 7, 9], [10, 11, 15], [4, 6, 7], [8, 9, 12]].sort(() => R.rand() - 0.5).slice(0, 2), k = R.int(0, 2), L = bads.slice(); L.splice(k, 0, ok);
+    return QV("Un seul de ces triangles est rectangle. Donne la longueur de son hypoténuse (en cm). Côtés : " + L.map((t) => "(" + t.join(", ") + ")").join("   "), ok[2], "Seul " + M(ok[0] + "^2 + " + ok[1] + "^2 = " + ok[2] + "^2") + " est vérifié : l'hypoténuse mesure " + ok[2] + " cm."); }),
+  () => clean(() => { const oks = TRIP.slice().sort(() => R.rand() - 0.5).slice(0, R.int(1, 2)), bads = [[5, 6, 8], [7, 9, 12], [6, 7, 9], [10, 11, 15], [4, 6, 7], [8, 9, 12]].sort(() => R.rand() - 0.5).slice(0, 4 - oks.length), L = oks.concat(bads).sort(() => R.rand() - 0.5);
+    return QV("Combien de ces triangles ne sont PAS rectangles ? Côtés (en cm) : " + L.map((t) => "(" + t.join(", ") + ")").join("   "), bads.length, "Rectangles : " + oks.map((t) => "(" + t.join(", ") + ")").join(", ") + ". Les " + bads.length + " autres ne vérifient pas " + M("a^2 + b^2 = c^2") + "."); }),
+);
+V34("pythrec",
+  () => { const [a, b, c] = R.pick([[6, 7, 8], [7, 8, 10], [5, 7, 8], [8, 9, 11], [9, 10, 12]]); return QV("Un triangle a pour côtés " + a + " cm, " + b + " cm et " + c + " cm. De combien " + M(a + "^2 + " + b + "^2") + " dépasse-t-il " + M(c + "^2") + " ? (S'il le dépasse, le triangle n'est pas rectangle.)", a * a + b * b - c * c, M(a * a + " + " + b * b + " = " + (a * a + b * b)) + " et " + M(c + "^2 = " + c * c) + " : écart " + (a * a + b * b - c * c) + ". Pas rectangle."); },
+  () => { const [a, b, c] = R.pick(TRIP); return QV("Un triangle a deux côtés de " + a + " cm et " + b + " cm. Quelle doit être la longueur du troisième côté pour qu'il soit rectangle, ce côté étant l'hypoténuse (en cm) ?", c, M("\\sqrt{" + a + "^2 + " + b + "^2} = \\sqrt{" + c * c + "} = " + c) + " cm."); },
+);
+V("volcone", 1,
+  () => { let a, b; do { a = R.int(3, 9); b = R.int(2, 8); } while (a === b); const h = R.int(1, 5) * 3; return QV("Calcule le volume d'une pyramide à base rectangulaire de " + a + " cm sur " + b + " cm et de hauteur " + h + " cm (en cm³).", (a * b * h) / 3, M("V = \\frac{1}{3} \\cdot " + a + " \\cdot " + b + " \\cdot " + h + " = " + (a * b * h) / 3) + " cm³."); },
+  () => { const r = R.int(2, 6), h = R.int(1, 4) * 3; return QE("Calcule le volume d'un cône de rayon " + r + " cm et de hauteur " + h + " cm (valeur exacte avec π, ou au centième), en cm³.", (Math.PI * r * r * h) / 3, M("V = \\frac{1}{3}\\pi \\cdot " + r + "^2 \\cdot " + h + " = " + (r * r * h) / 3 + "\\pi") + " cm³."); },
+  () => { const a = R.int(3, 9), h = R.int(1, 4) * 3; return QV("Une pyramide à base carrée de " + a + " cm de côté a un volume de " + (a * a * h) / 3 + " cm³. Quelle est sa hauteur (en cm) ?", h, M("\\frac{1}{3} \\cdot " + a * a + " \\cdot h = " + (a * a * h) / 3) + ", donc " + M("h = \\frac{3 \\cdot " + (a * a * h) / 3 + "}{" + a * a + "} = " + h) + " cm."); },
+);
+V("airepyr", 1,
+  () => { const a = R.int(4, 12), p = R.int(5, 15); if ((3 * a * p) % 2) return VAR.airepyr[1][0](); return QV("Une pyramide régulière a pour base un triangle équilatéral de " + a + " cm de côté ; ses faces latérales ont un apothème de " + p + " cm. Quelle est son aire latérale (en cm²) ?", (3 * a * p) / 2, "Trois triangles : " + M("3 \\cdot \\frac{" + a + " \\cdot " + p + "}{2} = " + (3 * a * p) / 2) + " cm²."); },
+  () => { const a = R.int(2, 6), p = R.int(4, 12); return QV("Une tente a la forme d'une pyramide régulière à base hexagonale de " + a + " m de côté ; l'apothème de ses faces mesure " + p + " m. Quelle surface de toile faut-il pour les faces (sans le sol), en m² ?", 3 * a * p, "Six triangles : " + M("6 \\cdot \\frac{" + a + " \\cdot " + p + "}{2} = " + 3 * a * p) + " m²."); },
+);
+V("airepyr", 2,
+  () => { const a = R.int(4, 10), p = R.int(5, 12); return QV("On peint toutes les faces (base comprise) d'une pyramide régulière à base carrée de " + a + " cm de côté et d'apothème " + p + " cm. Quelle surface peint-on (en cm²) ?", a * a + 2 * a * p, "Base " + a * a + " cm², faces " + M("4 \\cdot \\frac{" + a + " \\cdot " + p + "}{2} = " + 2 * a * p) + " cm² : " + (a * a + 2 * a * p) + " cm²."); },
+  () => { const a = R.int(4, 10), p = R.int(5, 12), A = a * a + 2 * a * p; return QV("Une pyramide régulière à base carrée de " + a + " cm de côté a une aire totale de " + A + " cm². Quel est l'apothème de ses faces (en cm) ?", p, "Faces : " + M(A + " - " + a * a + " = " + 2 * a * p) + " cm² = " + M("4 \\cdot \\frac{" + a + " \\cdot p}{2}") + ", donc " + M("p = " + p) + " cm."); },
+);
+V34("airepyr",
+  () => { const [h, m, p] = R.pick([[4, 3, 5], [12, 5, 13], [8, 6, 10], [15, 8, 17], [12, 9, 15]]); return QV("Une pyramide régulière à base carrée de " + 2 * m + " cm de côté a une hauteur de " + h + " cm. Combien mesure l'apothème de ses faces (en cm) ?", p, "Triangle rectangle hauteur / demi-côté / apothème : " + M("\\sqrt{" + h + "^2 + " + m + "^2} = " + p) + " cm."); },
+  () => { const [h, m, p] = R.pick([[4, 3, 5], [12, 5, 13], [8, 6, 10], [15, 8, 17], [12, 9, 15]]); return QV("Une pyramide régulière à base carrée de " + 2 * m + " cm de côté a des faces d'apothème " + p + " cm. Quelle est sa hauteur (en cm) ?", h, M("\\sqrt{" + p + "^2 - " + m + "^2} = \\sqrt{" + h * h + "} = " + h) + " cm."); },
+);
+V("volcomp", 1,
+  () => { const r = R.int(2, 6), h = R.int(1, 4) * 3; return QE("Dans un cylindre de rayon " + r + " cm et de hauteur " + h + " cm, on creuse un cône de même base et de même hauteur. Quel volume reste-t-il (exact avec π, ou au centième), en cm³ ?", (2 / 3) * Math.PI * r * r * h, M(r * r * h + "\\pi - \\frac{" + r * r * h + "\\pi}{3} = " + (2 * r * r * h) / 3 + "\\pi") + " cm³."); },
+  () => { const r = R.int(2, 4), hc = R.int(5, 12), hk = R.int(1, 3) * 3; return QE("Un crayon taillé est formé d'un cylindre de rayon " + r + " mm et de longueur " + hc + " cm, terminé par un cône de même rayon et de " + hk + " mm de haut. Quel est son volume, en mm³ (exact avec π, ou au centième) ?", Math.PI * r * r * hc * 10 + (Math.PI * r * r * hk) / 3, hc + " cm = " + hc * 10 + " mm ; " + M(r * r * hc * 10 + "\\pi + " + (r * r * hk) / 3 + "\\pi = " + (r * r * hc * 10 + (r * r * hk) / 3) + "\\pi") + " mm³."); },
+);
+V("volcomp", 2,
+  () => { const a = R.int(3, 8), b = R.int(2, 6), h1 = R.int(2, 6), h2 = R.int(1, 4) * 3; return QV("Un solide est formé d'un pavé de " + a + " cm × " + b + " cm × " + h1 + " cm, surmonté d'une pyramide de même base et de " + h2 + " cm de hauteur. Quel est son volume (en cm³) ?", a * b * h1 + (a * b * h2) / 3, M(a * b * h1 + " + \\frac{" + a * b + " \\cdot " + h2 + "}{3} = " + a * b * h1 + " + " + (a * b * h2) / 3 + " = " + (a * b * h1 + (a * b * h2) / 3)) + " cm³."); },
+  () => { const a = R.int(2, 6) * 3, h = R.int(2, 8); return QV("Un octaèdre est formé de deux pyramides identiques à base carrée de " + a + " cm de côté, collées par leur base. Chacune a une hauteur de " + h + " cm. Quel est son volume (en cm³) ?", (2 * a * a * h) / 3, M("2 \\cdot \\frac{" + a * a + " \\cdot " + h + "}{3} = " + (2 * a * a * h) / 3) + " cm³."); },
+);
+V34("volcomp",
+  () => { const r = R.pick([3, 6, 9]); return QE("Une boule de rayon " + r + " cm est enfermée dans un cylindre de même rayon et de hauteur " + 2 * r + " cm. Quel volume d'air reste-t-il (exact avec π, ou au centième), en cm³ ?", Math.PI * r * r * 2 * r - (4 / 3) * Math.PI * r ** 3, M(2 * r ** 3 + "\\pi - \\frac{4}{3}\\pi \\cdot " + r + "^3 = " + 2 * r ** 3 + "\\pi - " + (4 * r ** 3) / 3 + "\\pi = " + (2 * r ** 3) / 3 + "\\pi") + " cm³."); },
+  () => { const r = R.int(1, 3) * 3, h = R.int(2, 5) * 3; return QE("Un cornet de glace est un cône de rayon " + r + " cm et de hauteur " + h + " cm, surmonté d'une demi-boule de glace de même rayon. Quel est le volume total (exact avec π, ou au centième), en cm³ ?", (Math.PI * r * r * h) / 3 + (2 / 3) * Math.PI * r ** 3, M("\\frac{" + r * r * h + "\\pi}{3} + \\frac{2}{3}\\pi \\cdot " + r ** 3 + " = " + (r * r * h) / 3 + "\\pi + " + (2 * r ** 3) / 3 + "\\pi = " + ((r * r * h) / 3 + (2 * r ** 3) / 3) + "\\pi") + " cm³."); },
+);
+V("volmanq", 1,
+  () => { const a = R.int(3, 9), h = R.int(2, 12); return QV("Un pavé droit à base carrée de " + a + " cm de côté a un volume de " + a * a * h + " cm³. Quelle est sa hauteur (en cm) ?", h, M(a * a * h + " : " + a * a + " = " + h) + " cm."); },
+  () => { const a = R.int(4, 12); return QV("Un cube a un volume de " + mille(a ** 3) + " cm³. Combien mesure son arête (en cm) ?", a, M(a + "^3 = " + a ** 3) + " : l'arête mesure " + a + " cm."); },
+);
+V("volmanq", 2,
+  () => { const r = R.int(2, 7), h = R.int(2, 10); return QV("Un cylindre de hauteur " + h + " cm a un volume de " + M(r * r * h + "\\pi") + " cm³. Quel est son rayon (en cm) ?", r, M("\\pi r^2 \\cdot " + h + " = " + r * r * h + "\\pi") + ", donc " + M("r^2 = " + r * r) + " et " + M("r = " + r) + " cm."); },
+  () => { const r = R.pick([4, 5, 10]), h = R.int(2, 8) * 2; return QV("Une boîte de conserve cylindrique de rayon " + r + " cm contient " + M(r * r * h + "\\pi") + " cm³. Quelle est sa hauteur (en cm) ?", h, M(r * r * h + "\\pi : (" + r + "^2\\pi) = " + h) + " cm."); },
+);
+V34("volmanq",
+  () => { const a = R.int(2, 6) * 2, h = R.int(1, 5) * 3; return QV("Une pyramide à base carrée de hauteur " + h + " cm a un volume de " + (a * a * h) / 3 + " cm³. Combien mesure le côté de sa base (en cm) ?", a, M("\\frac{1}{3} c^2 \\cdot " + h + " = " + (a * a * h) / 3) + ", donc " + M("c^2 = " + a * a) + " et " + M("c = " + a) + " cm."); },
+  () => { const r = R.int(2, 6), h = R.int(1, 5) * 3; return QV("Un cône de rayon " + r + " cm a un volume de " + M((r * r * h) / 3 + "\\pi") + " cm³. Quelle est sa hauteur (en cm) ?", h, M("\\frac{1}{3}\\pi \\cdot " + r * r + " \\cdot h = " + (r * r * h) / 3 + "\\pi") + ", donc " + M("h = " + h) + " cm."); },
+);
+V("ucomp", 1,
+  () => { const v = R.pick([72, 90, 108, 36, 18, 126]); return QV("Un guépard court à " + v + " km/h. Quelle est sa vitesse en m/s ?", v / 3.6, M(v + " : 3{,}6 = " + v / 3.6) + " m/s."); },
+  () => { const v = R.pick([36, 48, 60, 72, 90]); return QV("Convertis " + v + " km/h en mètres par minute.", (v * 1000) / 60, M(v + " \\text{ km/h} = \\frac{" + mille(v * 1000) + " \\text{ m}}{60 \\text{ min}} = " + (v * 1000) / 60) + " m/min."); },
+);
+V("ucomp", 2,
+  () => { const v = R.pick([10, 12, 15, 20, 25, 30]); return QV("Une sprinteuse court à " + v + " m/s. Quelle est sa vitesse en km/h ?", r6(v * 3.6), M(v + " \\cdot 3{,}6 = " + dec(r6(v * 3.6))) + " km/h."); },
+  () => { const v = R.pick([300, 600, 900, 1200, 1500]); return QV("Convertis " + v + " mètres par minute en km/h.", (v * 60) / 1000, M(v + " \\cdot 60 = " + mille(v * 60)) + " m/h = " + (v * 60) / 1000 + " km/h."); },
+);
+V34("gquot",
+  () => { const d = R.pick([6, 8, 12, 15]), t = R.int(3, 12) * 5; return QV("Un robinet remplit une cuve de " + d * t + " L en " + t + " minutes. Quel est son débit (en L/min) ?", d, M(d * t + " : " + t + " = " + d) + " L/min."); },
+  () => { const d = R.pick([8, 12, 15, 20]), h = R.int(1, 2), m = R.pick([15, 30, 45]); return QV("Une pompe débite " + d + " L/min pendant " + h + " h " + m + " min. Combien de litres pompe-t-elle ?", d * (60 * h + m), (60 * h + m) + " min ; " + M(d + " \\cdot " + (60 * h + m) + " = " + mille(d * (60 * h + m))) + " L."); },
+);
+V("idrem", 1,
+  () => { const a = R.int(2, 5), b = R.int(1, 7); return Object.assign(QX("Développe : " + M("(" + a + "x + " + b + ")^2"), "(" + a + "x+" + b + ")^2", M(a * a + "x^2 + " + 2 * a * b + "x + " + b * b), { form: "expanded" }), { canon: a * a + "x^2+" + 2 * a * b + "x+" + b * b }); },
+  () => { const a = R.int(2, 9); return Object.assign(QX("Développe : " + M("(" + a + " + x)^2"), "(" + a + "+x)^2", M(a * a + " + " + 2 * a + "x + x^2"), { form: "expanded" }), { canon: "x^2+" + 2 * a + "x+" + a * a }); },
+);
+V34("idrem",
+  () => { const a = R.int(2, 9); return Object.assign(QX("Développe : " + M("(x - " + a + ")^2"), "(x-" + a + ")^2", M("x^2 - " + 2 * a + "x + " + a * a), { form: "expanded" }), { canon: "x^2-" + 2 * a + "x+" + a * a }); },
+  () => { const a = R.int(2, 9), b = R.int(2, 4); return Object.assign(QX("Développe : " + M("(" + a + " - " + b + "x)^2"), "(" + a + "-" + b + "x)^2", M(a * a + " - " + 2 * a * b + "x + " + b * b + "x^2"), { form: "expanded" }), { canon: b * b + "x^2-" + 2 * a * b + "x+" + a * a }); },
+);
+V("eq2", 2,
+  () => { const k = R.int(2, 5), a = R.int(2, 7); return QSet("Résous : " + M(k + "x^2 = " + k * a + "x") + ". Sépare les solutions par « ; ».", [0, a], M(k + "x(x - " + a + ") = 0") + " : " + M("x = 0") + " ou " + M("x = " + a) + "."); },
+  () => { const a = R.int(2, 9); return QSet("Résous : " + M("x^2 + " + a + "x = 0") + ". Sépare les solutions par « ; ».", [0, -a], M("x(x + " + a + ") = 0") + " : " + M("x = 0") + " ou " + M("x = -" + a) + "."); },
+);
+V34("eq2",
+  () => { const [p, q] = R.pick([[2, 3], [1, 3], [3, 2], [4, 3], [5, 2], [1, 2]]); return QSet("Résous : " + M(q * q + "x^2 = " + p * p) + ". Sépare les solutions par « ; ».", [p / q, -p / q], M("x^2 = \\frac{" + p * p + "}{" + q * q + "}") + " : " + M("x = \\pm" + frac(p, q)) + "."); },
+  () => { const a = R.int(1, 5), b = R.int(2, 6); if (b === a) return VAR.eq2[3][1](); return QSet("Résous : " + M("(x - " + a + ")^2 = " + b * b) + ". Sépare les solutions par « ; ».", [a - b, a + b], M("x - " + a + " = \\pm " + b) + " : " + M("x = " + (a - b)) + " ou " + M("x = " + (a + b)) + "."); },
+);
+V("eq2fact", 1,
+  () => { const a = R.int(4, 12); return QSet("Résous : " + M("x^2 - " + a * a + " = 0") + ". Donne toutes les solutions, séparées par « ; ».", [-a, a], M("(x - " + a + ")(x + " + a + ") = 0") + " : " + M("x = \\pm " + a) + "."); },
+  () => { const k = R.int(2, 5), a = R.int(2, 8); return QSet("Résous : " + M(k + "x^2 = " + k * a * a) + ". Donne toutes les solutions, séparées par « ; ».", [-a, a], M("x^2 = " + a * a) + " : " + M("x = \\pm " + a) + "."); },
+  () => { const a = R.int(3, 9), c = R.int(2, 20); return QSet("Résous : " + M("x^2 + " + c + " = " + (a * a + c)) + ". Donne toutes les solutions, séparées par « ; ».", [-a, a], M("x^2 = " + a * a) + " : " + M("x = \\pm " + a) + "."); },
+);
+V("probeq2", 1,
+  () => { const n = R.int(5, 14), c = R.int(2, 20); return QV("Le carré d'un nombre positif, augmenté de " + c + ", vaut " + (n * n + c) + ". Quel est ce nombre ?", n, M("x^2 = " + (n * n + c) + " - " + c + " = " + n * n) + ", donc " + M("x = " + n) + "."); },
+  () => { const n = R.int(3, 8) * 2; return QV("Le produit de deux nombres pairs positifs consécutifs vaut " + n * (n + 2) + ". Quel est le plus petit ?", n, M("n(n + 2) = " + n * (n + 2)) + " ; on essaie autour de " + M("\\sqrt{" + n * (n + 2) + "}") + " : " + M(n + " \\cdot " + (n + 2) + " = " + n * (n + 2)) + "."); },
+);
+V("probeq2", 2,
+  () => { const c = R.int(3, 9), k = R.int(2, 5); return QV("Si on augmente de " + k + " cm le côté d'un carré, son aire devient " + (c + k) ** 2 + " cm². Combien mesurait le côté au départ (en cm) ?", c, M("(c + " + k + ")^2 = " + (c + k) ** 2) + ", donc " + M("c + " + k + " = " + (c + k)) + " et " + M("c = " + c) + " cm."); },
+  () => { const [w, L] = R.pick([[5, 8], [4, 9], [3, 10], [6, 7], [4, 11], [5, 9]]); return QV("Un rectangle a un périmètre de " + 2 * (w + L) + " cm et une aire de " + w * L + " cm². Quelle est sa largeur (le plus petit côté), en cm ?", w, M("x(" + (w + L) + " - x) = " + w * L) + " : " + M("x^2 - " + (w + L) + "x + " + w * L + " = (x - " + w + ")(x - " + L + ") = 0") + ". Largeur " + w + " cm."); },
+);
+V34("probeq2",
+  () => { const x = R.int(4, 10); return QV("Un jardin carré est entouré d'une allée de 2 m de large. L'ensemble (jardin + allée) a une aire de " + (x + 4) ** 2 + " m². Quel est le côté du jardin (en m) ?", x, M("(x + 4)^2 = " + (x + 4) ** 2) + ", donc " + M("x + 4 = " + (x + 4)) + " et " + M("x = " + x) + " m."); },
+  () => { const n = R.int(5, 12); return QV("La somme des carrés de deux entiers positifs consécutifs vaut " + (n * n + (n + 1) ** 2) + ". Quel est le plus petit ?", n, M("n^2 + (n + 1)^2 = " + (n * n + (n + 1) ** 2)) + " ; " + M(n * n + " + " + (n + 1) ** 2 + " = " + (n * n + (n + 1) ** 2)) + " : " + n + "."); },
+);
+V("angles", 1,
+  () => { const c = R.int(4, 16) * 10; return QV("Dans un cercle de centre O, l'angle au centre " + M("\\widehat{AOB}") + " mesure " + c + "°. Combien mesure l'angle " + M("\\widehat{OAB}") + " (en degrés) ?", (180 - c) / 2, "Le triangle AOB est isocèle en O (OA = OB, deux rayons) : " + M("\\frac{180° - " + c + "°}{2} = " + (180 - c) / 2 + "°") + "."); },
+  () => { const x = R.int(20, 70); return QV("Dans un cercle, l'angle inscrit " + M("\\widehat{ACB}") + " mesure " + x + "°. Combien mesure l'arc AB, c'est-à-dire l'angle au centre " + M("\\widehat{AOB}") + " (en degrés) ?", 2 * x, "Le double de l'angle inscrit : " + M(2 * x + "°") + "."); },
+);
+V("angles", 2,
+  () => { const x = R.int(15, 60); return QV("Dans un cercle de centre O, l'angle inscrit " + M("\\widehat{ACB}") + " mesure " + x + "°. Combien mesure l'angle " + M("\\widehat{OAB}") + " (en degrés) ?", 90 - x, M("\\widehat{AOB} = " + 2 * x + "°") + " ; le triangle AOB est isocèle : " + M("\\frac{180° - " + 2 * x + "°}{2} = " + (90 - x) + "°") + "."); },
+  () => { const c = R.int(5, 16) * 10; return QV("Un angle au centre mesure " + c + "°. Combien mesure un angle inscrit qui intercepte le même arc (en degrés) ?", c / 2, M(c + "° : 2 = " + c / 2 + "°") + "."); },
+);
+V34("angles",
+  () => { const k = R.pick([2, 4, 5, 8]), a = 90 / (k + 1); return QV("[AB] est un diamètre d'un cercle et C un point du cercle. L'angle " + M("\\widehat{CBA}") + " " + (k === 2 ? "est le double de" : "mesure " + k + " fois") + " l'angle " + M("\\widehat{CAB}") + ". Combien mesure " + M("\\widehat{CAB}") + " (en degrés) ?", a, "L'angle en C est droit : les deux autres font 90°, soit " + (k + 1) + " parts : " + M("90° : " + (k + 1) + " = " + a + "°") + "."); },
+  () => { const a = R.int(15, 40); return QV("[AB] est un diamètre d'un cercle et C un point du cercle. L'angle " + M("\\widehat{CBA}") + " mesure " + a + "° de plus que " + M("\\widehat{CAB}") + ". Combien mesure " + M("\\widehat{CAB}") + " (en degrés) ?", (90 - a) / 2, "Les deux angles font 90° : " + M("\\frac{90° - " + a + "°}{2} = " + dec((90 - a) / 2) + "°") + "."); },
+);
+V("cercthales", 1,
+  () => { const k = R.pick([2, 4, 5]), a = 90 / (k + 1); return QV("[AB] est un diamètre d'un cercle et C un point du cercle. " + M("\\widehat{ABC}") + " " + (k === 2 ? "est le double de" : "mesure " + k + " fois") + " " + M("\\widehat{BAC}") + ". Combien mesure " + M("\\widehat{ABC}") + " (en degrés) ?", k * a, "Le triangle est rectangle en C : " + M("90° : " + (k + 1) + " = " + a + "°") + ", donc " + M("\\widehat{ABC} = " + k * a + "°") + "."); },
+  () => { const r = R.int(3, 10); return QV("[AB] est un diamètre d'un cercle de rayon " + r + " cm, et C un point du cercle tel que AC = BC. Que vaut " + M("AC^2") + " (en cm²) ?", 2 * r * r, "Rectangle isocèle en C : " + M("2 \\cdot AC^2 = AB^2 = " + 4 * r * r) + ", donc " + M("AC^2 = " + 2 * r * r) + "."); },
+);
+V("cercthales", 2,
+  () => { const [r, t, d] = R.pick([[5, 12, 13], [3, 4, 5], [8, 15, 17], [6, 8, 10], [7, 24, 25]]); return QV("D'un point P, on trace une tangente à un cercle de centre O et de rayon " + r + " cm ; elle touche le cercle en T, et PT = " + t + " cm. Calcule PO (en cm).", d, "OT est perpendiculaire à PT : " + M("PO = \\sqrt{" + r + "^2 + " + t + "^2} = " + d) + " cm."); },
+  () => { const [r, t, d] = R.pick([[6, 8, 10], [5, 12, 13], [9, 12, 15], [8, 15, 17]]); return QV("Un point P est à " + d + " cm du centre O d'un cercle. La tangente issue de P touche le cercle en T, avec PT = " + t + " cm. Quel est le rayon du cercle (en cm) ?", r, M("OT = \\sqrt{" + d + "^2 - " + t + "^2} = " + r) + " cm."); },
+);
+V34("cercthales",
+  () => { const [a, b, c] = R.pick([[6, 8, 10], [10, 24, 26], [12, 16, 20], [8, 15, 17], [16, 30, 34]]); return QV("Le triangle ABC est inscrit dans un cercle dont [AB] est un diamètre. On sait que AC = " + a + " cm et BC = " + b + " cm. Quel est le rayon du cercle (en cm) ?", c / 2, "Rectangle en C : " + M("AB = \\sqrt{" + a + "^2 + " + b + "^2} = " + c) + " ; rayon " + dec(c / 2) + " cm."); },
+  () => { const [a, b, c] = R.pick([[8, 15, 17], [7, 24, 25], [20, 21, 29], [9, 40, 41]]); return QV("[AB] est un diamètre d'un cercle de rayon " + dT(c / 2) + " cm, et C un point du cercle tel que BC = " + b + " cm. Calcule AC (en cm).", a, "AB = " + c + " cm ; rectangle en C : " + M("AC = \\sqrt{" + c + "^2 - " + b + "^2} = " + a) + " cm."); },
+);
+V("thalesrec", 1,
+  () => { const k = R.pick([2, 3, 2.5, 1.5]), ad = R.int(2, 6) * 2, ae = R.int(2, 6) * 2; if (ad === ae) return VAR.thalesrec[1][0](); return QV("Sur deux demi-droites d'origine A : AD = " + ad + ", AB = " + dT(ad * k) + " et AC = " + dT(ae * k) + ". Pour quelle longueur AE les droites (DE) et (BC) sont-elles parallèles ?", ae, "Il faut " + M("\\frac{AE}{AC} = \\frac{AD}{AB} = \\frac{1}{" + dec(k) + "}") + ", donc " + M("AE = " + dec(ae * k) + " : " + dec(k) + " = " + ae) + "."); },
+  () => { const k = R.int(2, 4), ad = R.int(2, 7), ae = R.int(2, 7); if (ad === ae) return VAR.thalesrec[1][1](); return QV("Sur deux demi-droites d'origine A : AE = " + ae + ", AC = " + ae * k + " et AB = " + ad * k + ". Pour quelle longueur AD les droites (DE) et (BC) sont-elles parallèles ?", ad, M("\\frac{AD}{AB} = \\frac{AE}{AC} = \\frac{1}{" + k + "}") + " : " + M("AD = " + ad * k + " : " + k + " = " + ad) + "."); },
+);
+V("thalesrec", 2,
+  () => clean(() => { const ad = R.int(2, 6), db = ad * R.int(1, 3), ae = R.int(2, 6); if (ad === ae) return VAR.thalesrec[2][0](); const k = db / ad; return QV("Dans un triangle ABC, D est sur [AB] et E sur [AC]. AD = " + ad + ", DB = " + db + " et AE = " + ae + ". Pour quelle longueur EC a-t-on (DE) ∥ (BC) ?", ae * k, "Il faut " + M("\\frac{AD}{DB} = \\frac{AE}{EC}") + " : " + M("EC = " + ae + " \\cdot \\frac{" + db + "}{" + ad + "} = " + ae * k) + "."); }),
+  () => { const [n, d] = R.pick([[2, 5], [1, 3], [3, 4], [2, 3]]), ab = d * R.int(2, 5), ac = d * R.int(2, 5); if (ab === ac) return VAR.thalesrec[2][1](); return QV("Dans un triangle ABC, D est sur [AB] et E sur [AC]. AB = " + ab + ", AC = " + ac + " et AE = " + (ac / d) * n + ". Pour quelle longueur AD a-t-on (DE) ∥ (BC) ?", (ab / d) * n, M("\\frac{AE}{AC} = \\frac{" + (ac / d) * n + "}{" + ac + "} = \\frac{" + n + "}{" + d + "}") + ", donc " + M("AD = " + ab + " \\cdot \\frac{" + n + "}{" + d + "} = " + (ab / d) * n) + "."); },
+);
+V34("thalesrec",
+  () => clean(() => { const ad = R.int(2, 6), k = R.pick([2, 3, 2.5]), ae = R.int(2, 6) * 2, ab = r6(ad * k), need = r6(ae * k), d = R.int(1, 4), ac = r6(need - d); return QV("D ∈ [AB] et E ∈ [AC], avec AD = " + ad + ", AB = " + dT(ab) + ", AE = " + ae + " et AC = " + dT(ac) + ". De combien faut-il allonger [AC] (en gardant E à sa place) pour que (DE) et (BC) deviennent parallèles ?", d, "Il faudrait " + M("\\frac{AE}{AC} = \\frac{AD}{AB}") + ", donc " + M("AC = " + ae + " \\cdot \\frac{" + dec(ab) + "}{" + ad + "} = " + dec(need)) + " : il manque " + M(dec(need) + " - " + dec(ac) + " = " + d) + "."); }),
+  () => clean(() => { const ad = R.int(2, 5), ab = ad * R.int(2, 4), ac = R.int(2, 5) * (ab / ad), ae = (ac * ad) / ab; return QV("D ∈ [AB] et E ∈ [AC], avec AD = " + ad + ", AB = " + ab + " et AC = " + ac + ". On veut (DE) ∥ (BC). Combien doit valoir EC ?", ac - ae, "Il faut " + M("AE = " + ac + " \\cdot \\frac{" + ad + "}{" + ab + "} = " + ae) + ", donc " + M("EC = " + ac + " - " + ae + " = " + (ac - ae)) + "."); }),
+);
+V("thales", 1,
+  () => { const k = R.int(2, 4), ad = R.int(2, 6), ae = R.int(2, 7); if (ad === ae) return VAR.thales[1][0](); return QV("Dans un triangle ABC, D ∈ [AB], E ∈ [AC] et (DE) ∥ (BC). AD = " + ad + ", AB = " + ad * k + " et AC = " + ae * k + ". Calcule AE.", ae, M("\\frac{AE}{AC} = \\frac{AD}{AB} = \\frac{1}{" + k + "}") + ", donc " + M("AE = " + ae * k + " : " + k + " = " + ae) + "."); },
+  () => { const k = R.int(2, 4), de = R.int(2, 6), ad = R.int(2, 7); if (de === ad) return VAR.thales[1][1](); return QV("Dans un triangle ABC, D ∈ [AB], E ∈ [AC] et (DE) ∥ (BC). DE = " + de + ", BC = " + de * k + " et AB = " + ad * k + ". Calcule AD.", ad, M("\\frac{AD}{AB} = \\frac{DE}{BC} = \\frac{1}{" + k + "}") + ", donc " + M("AD = " + ad) + "."); },
+);
+V("thales", 2,
+  () => { const ad = R.int(2, 6), db = R.int(2, 8), de = R.int(2, 6) * 2; if (ad === db) return VAR.thales[2][0](); const bc = (de * (ad + db)) / ad; return QV("Dans un triangle ABC, D ∈ [AB], E ∈ [AC] et (DE) ∥ (BC). AD = " + ad + ", DB = " + db + " et DE = " + de + ". Calcule BC (au centième si besoin).", bc, "AB = " + (ad + db) + " ; " + M("BC = " + de + " \\cdot \\frac{" + (ad + db) + "}{" + ad + "} = " + dec(+bc.toFixed(2))) + ".", ); },
+  () => clean(() => { const ae = R.int(2, 5), ec = ae * R.int(1, 3), bc = (ae + ec) * R.int(1, 3); return QV("Dans un triangle ABC, D ∈ [AB], E ∈ [AC] et (DE) ∥ (BC). AE = " + ae + ", EC = " + ec + " et BC = " + bc + ". Calcule DE.", (bc * ae) / (ae + ec), "AC = " + (ae + ec) + " ; " + M("DE = " + bc + " \\cdot \\frac{" + ae + "}{" + (ae + ec) + "} = " + dec((bc * ae) / (ae + ec))) + "."); }),
+);
+V34("thales",
+  () => { const [p, o] = R.pick([[3, 4], [2, 5], [1.5, 2], [2, 3]]), O = R.int(3, 9) * o; return QV("Un poteau de " + dT(p) + " m a une ombre de " + o + " m. Au même moment, un immeuble a une ombre de " + O + " m. Quelle est la hauteur de l'immeuble (en m) ?", (p * O) / o, M("h = " + dec(p) + " \\cdot \\frac{" + O + "}{" + o + "} = " + dec((p * O) / o)) + " m."); },
+  () => { const e = R.pick([1.2, 1.5, 1.6]), d = R.int(2, 5), s = R.int(1, 3) * 2; const L = (e * (d + s)) / s; if (!Number.isInteger(L * 10)) return VAR.thales[3][0](); return QV("Un enfant de " + dT(e) + " m se tient à " + d + " m d'un lampadaire. Son ombre mesure " + s + " m. Quelle est la hauteur du lampadaire (en m) ?", L, "Triangles emboîtés : " + M("\\frac{h}{" + dec(e) + "} = \\frac{" + (d + s) + "}{" + s + "}") + ", donc " + M("h = " + dec(L)) + " m."); },
+);
+V("sysprob", 1,
+  () => { const x = R.int(5, 20), k = R.int(2, 4); return QV("La somme de deux nombres vaut " + x * (k + 1) + ", et l'un est " + (k === 2 ? "le double" : k === 3 ? "le triple" : "le quadruple") + " de l'autre. Quel est le plus petit ?", x, M("x + " + k + "x = " + x * (k + 1) + " \\iff x = " + x) + "."); },
+  () => { const a = R.int(10, 30), b = R.int(2, a - 2); return QV("La somme de deux nombres vaut " + (a + b) + " et leur différence " + (a - b) + ". Quel est le plus petit des deux ?", b, "En soustrayant les deux équations : " + M("2y = " + 2 * b) + ", donc " + M("y = " + b) + "."); },
+);
+V34("sysprob",
+  () => { const pa = R.pick([12, 15, 18]), pe = R.pick([6, 8, 9]), a = R.int(2, 8), e = R.int(2, 8); return QV("Au cinéma, une place adulte coûte " + pa + " CHF et une place enfant " + pe + " CHF. Un groupe de " + (a + e) + " personnes a payé " + (a * pa + e * pe) + " CHF. Combien y a-t-il d'adultes ?", a, M("x + y = " + (a + e)) + " et " + M(pa + "x + " + pe + "y = " + (a * pa + e * pe)) + " : " + a + " adultes."); },
+  () => clean(() => { const c = R.int(4, 15), d = R.int(4, 15); return QV("Une tirelire contient " + (c + d) + " pièces de 2 CHF et de 5 CHF, pour un total de " + (2 * d + 5 * c) + " CHF. Combien y a-t-il de pièces de 5 CHF ?", c, M("x + y = " + (c + d)) + " et " + M("5x + 2y = " + (2 * d + 5 * c)) + " : en retirant deux fois la première, " + M("3x = " + 3 * c) + ", donc " + c + " pièces."); }),
+);
+V34("sys2",
+  () => { const p = R.int(2, 4), f = R.int(4, 9), k1 = R.int(3, 6), k2 = R.int(8, 15); return QPair("Un taxi facture une prise en charge fixe plus un prix par kilomètre. Une course de " + k1 + " km coûte " + (f + p * k1) + " CHF, une course de " + k2 + " km coûte " + (f + p * k2) + " CHF. Donne le prix au km puis la prise en charge : « prix ; prise en charge ».", [p, f], M("\\begin{cases} " + k1 + "a + b = " + (f + p * k1) + " \\\\ " + k2 + "a + b = " + (f + p * k2) + " \\end{cases}") + " : " + M((k2 - k1) + "a = " + p * (k2 - k1)) + ", donc a = " + p + " CHF et b = " + f + " CHF."); },
+  () => { const c = R.pick([1.5, 2, 2.5]), k = R.pick([3, 3.5, 4]); return QPair("2 croissants et 3 cafés coûtent " + dT(2 * c + 3 * k) + " CHF ; 4 croissants et 1 café coûtent " + dT(4 * c + k) + " CHF. Donne le prix d'un croissant puis celui d'un café : « croissant ; café ».", [c, k], "On double la première : 4 croissants et 6 cafés = " + dT(4 * c + 6 * k) + " CHF ; on soustrait la seconde : 5 cafés = " + dT(5 * k) + " CHF, donc café " + dT(k) + " CHF et croissant " + dT(c) + " CHF."); },
+);
+V("simil", 1,
+  () => { const [a, b, c] = R.pick([[3, 4, 5], [5, 12, 13], [4, 5, 6], [6, 8, 9]]), k = R.int(2, 4); return QV("Deux triangles sont semblables. Les côtés du grand mesurent " + a * k + ", " + b * k + " et " + c * k + " cm. Le plus long côté du petit mesure " + c + " cm. Combien mesure le plus court côté du petit (en cm) ?", a, "Rapport " + M("\\frac{" + c + "}{" + c * k + "} = \\frac{1}{" + k + "}") + " : " + M(a * k + " : " + k + " = " + a) + " cm."); },
+  () => { const [a, b, c] = R.pick([[3, 4, 5], [5, 6, 7], [4, 6, 7], [6, 8, 10]]), k = R.pick([1.5, 2.5, 2, 3]); return QV("Un triangle de côtés " + a + ", " + b + " et " + c + " cm est semblable à un triangle de périmètre " + dT((a + b + c) * k) + " cm. Combien mesure le plus long côté de ce second triangle (en cm) ?", r6(c * k), "Les périmètres sont dans le même rapport : " + M("k = \\frac{" + dec((a + b + c) * k) + "}{" + (a + b + c) + "} = " + dec(k)) + " ; " + M(c + " \\cdot " + dec(k) + " = " + dec(r6(c * k))) + " cm."); },
+);
+V("denombr", 1,
+  () => { const p = R.int(2, 5), t = R.int(3, 6), c = R.int(2, 4); return QV("Tu as " + p + " pantalons, " + t + " t-shirts et " + c + " casquettes. Combien de tenues différentes (un de chaque) peux-tu composer ?", p * t * c, M(p + " \\cdot " + t + " \\cdot " + c + " = " + p * t * c) + " tenues."); },
+  () => { const n = R.int(3, 5), k = R.int(3, 4); return QV("Un cadenas a " + k + " molettes portant chacune les chiffres 1 à " + n + ". Combien de codes différents existe-t-il ?", n ** k, M(Array(k).fill(n).join(" \\cdot ") + " = " + n ** k) + " codes."); },
+);
+V("denombr", 2,
+  () => { const n = R.int(6, 10); return QV(n + " coureurs participent à une course. Combien de podiums différents (or, argent, bronze) sont possibles ?", n * (n - 1) * (n - 2), M(n + " \\cdot " + (n - 1) + " \\cdot " + (n - 2) + " = " + n * (n - 1) * (n - 2)) + " podiums."); },
+  () => { const n = R.int(18, 26); return QV("Une classe de " + n + " élèves élit un délégué et un suppléant (deux personnes différentes). Combien de choix sont possibles ?", n * (n - 1), M(n + " \\cdot " + (n - 1) + " = " + n * (n - 1)) + " choix."); },
+);
+V("proba", 2,
+  () => { const s = R.pick([10, 9, 11]), c = { 9: 10, 10: 6, 11: 3 }[s]; return QV("On lance deux dés équilibrés et on additionne les points. Quelle est la probabilité d'obtenir au moins " + s + " ? (fraction acceptée)", c / 36, "Tableau 6 × 6 : " + c + " cases sur 36, soit " + M(frac(c, 36)) + "."); },
+  () => { const [p, c] = R.pick([[6, 4], [12, 4], [4, 3], [8, 2], [24, 2]]); return QV("On lance deux dés équilibrés et on multiplie les points. Quelle est la probabilité que le produit vaille " + p + " ? (fraction acceptée)", c / 36, c + " cases sur 36 donnent " + p + " : " + M(frac(c, 36)) + "."); },
+);
+V34("proba",
+  () => { const r = R.int(3, 6), b = R.int(2, 5); return QV("Une urne contient " + r + " boules rouges et " + b + " vertes. On tire deux boules sans remise. Quelle est la probabilité d'obtenir deux boules rouges ? (fraction acceptée)", (r / (r + b)) * ((r - 1) / (r + b - 1)), M("\\frac{" + r + "}{" + (r + b) + "} \\cdot \\frac{" + (r - 1) + "}{" + (r + b - 1) + "} = " + frac(r * (r - 1), (r + b) * (r + b - 1))) + "."); },
+  () => { const r = R.int(2, 6), b = R.int(2, 5); return QV("Une urne contient " + r + " boules rouges et " + b + " vertes. On tire deux boules sans remise. Quelle est la probabilité d'obtenir une boule de chaque couleur ? (fraction acceptée)", (2 * r * b) / ((r + b) * (r + b - 1)), "Rouge puis verte, ou verte puis rouge : " + M("2 \\cdot \\frac{" + r + "}{" + (r + b) + "} \\cdot \\frac{" + b + "}{" + (r + b - 1) + "} = " + frac(2 * r * b, (r + b) * (r + b - 1))) + "."); },
+);
