@@ -2,7 +2,7 @@
 """Plan de l'aide pas à pas (« On le fait ensemble », q.guide) — lissé dans le temps (demande du 14.11).
 
 Repère, pour chaque notion, les niveaux (1 à 3) qui ont déjà un guide, classe les notions par priorité
-(11e d'abord — priorité de l'utilisateur, 14.11 —, puis bêta-testeurs 1re Collège, MP, 2e Collège, 10e, 9e) et découpe le reste en lots de LOT notions.
+(11e et 1re Collège d'abord, en alternant leurs lots — les bêta-testeurs sont sur ces deux niveaux, 14.11 —, puis MP, 2e Collège, 10e, 9e) et découpe le reste en lots de LOT notions.
 Écrit tools/plan_pas_a_pas.md ; `--prochain` affiche une ligne (lue par le point du jour).
 """
 import json, os, re, sys
@@ -37,7 +37,7 @@ def ordre():
     m1 = [i for i in rang(O["MATU"]) if T["MATU"].get(i, "").startswith("M1")]
     m2 = [i for i in rang(O["MATU"]) if T["MATU"].get(i, "").startswith("M2")]
     co = lambda y: [i for i in rang(O["CO"]) if str(y) in T["CO_BY"].get(i, {})]
-    groupes = [("11e CO (priorité, 14.11)", co(11)), ("1re Collège (bêta-testeurs)", m1), ("MP", rang(O["MP"])),
+    groupes = [("11e CO (bêta-testeurs)", co(11)), ("1re Collège (bêta-testeurs)", m1), ("MP", rang(O["MP"])),
                ("2e Collège", m2), ("10e CO", co(10)), ("9e CO", co(9))]
     vus, res = set(), []
     for nom, ids in groupes:
@@ -51,7 +51,11 @@ def main():
     a_faire = [(g, i) for g, i in liste if i in B and niveaux_guides(B[i]) < 3]
     faits = [i for g, i in liste if i in B and niveaux_guides(B[i]) >= 3]
     partiels = [i for g, i in a_faire if niveaux_guides(B[i]) > 0]
-    lots = [a_faire[k:k + LOT] for k in range(0, len(a_faire), LOT)]
+    # 11e et 1re Collège en priorité égale (bêta-testeurs, 14.11) : leurs lots alternent, puis les autres niveaux.
+    prio = [[x for x in a_faire if x[0] == g] for g in ("11e CO (bêta-testeurs)", "1re Collège (bêta-testeurs)")]
+    autres = [x for x in a_faire if x[0] not in ("11e CO (bêta-testeurs)", "1re Collège (bêta-testeurs)")]
+    chunks = [[g[k:k + LOT] for k in range(0, len(g), LOT)] for g in prio]
+    lots = [c for pair in __import__("itertools").zip_longest(*chunks) for c in pair if c] + [autres[k:k + LOT] for k in range(0, len(autres), LOT)]
     if "--prochain" in sys.argv:
         if lots:
             print(f"Pas à pas : prochain lot ({len(lots)} restants) — " + ", ".join(i for _, i in lots[0]) + f" ({lots[0][0][0]}) ; {len(faits)} notions couvertes sur {len(liste)}")
