@@ -1,0 +1,11 @@
+<!doctype html><meta charset="utf-8"><body><main id="app"></main><pre id="log"></pre>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/competences.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script><script>try{ state = Engine.newState({ system: "CH", grade: 13, track: "college", minutes: 5 }); Engine.autoInit(state); save();
+const L=[];
+let bad=0; for (let d=1; d<=3; d++) for (let r=0;r<40;r++){ const q=GEN.fracetage(d); const c=checkAnswer(q.spec, q.spec.expr); if(c.status!=="correct"){bad++; L.push("KO "+q.q+" -> "+c.status+" "+(c.message||""));} }
+L.push("réponses attendues acceptées (120 tirages) : "+(bad===0));
+const b=[...document.querySelectorAll(".ctest")]; screenComps(); const t=document.querySelector('.ctest[data-id="fracetage"]'); t.click();
+L.push("plan Me tester : "+session.plan.join(", "));
+const st=Engine.newState({ system: "CH", grade: 13, track: "college", minutes: 5 }); Engine.autoInit(st);
+for (let t=0;t<3;t++){ const qs=session.plan.map((e)=>{const [id,lv]=e.split("|"); return qForm(Engine.make(st,id,+lv)).replace(/\\/g,"").slice(40,95);}); L.push("test "+(t+1)+" : "+qs.join("  ||  ")); }
+document.getElementById("log").textContent=L.join("\n"); }catch(e){document.getElementById("log").textContent="ERR "+e.stack}</script>

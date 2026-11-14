@@ -261,7 +261,10 @@ function screenComps() {
   // « Me tester » (14.11, demande de l'utilisateur) : 3 questions de la compétence, au niveau de la compétence.
   app.querySelectorAll(".ctest").forEach((b) => (b.onclick = () => {
     const id = b.dataset.id, d = +b.dataset.d, cid = id + ":" + (d - 1);
-    session = { plan: [1, 2, 3].map(() => id + "|" + d), i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), prep: true,
+    // Tous les niveaux qui travaillent cette compétence (même libellé), pour varier les 3 questions (14.11).
+    const lab = (COMPS[id] || [])[d - 1], lvls = lab ? COMPS[id].map((x, j) => (x === lab ? j + 1 : 0)).filter(Boolean) : [d];
+    const order = lvls.slice().sort(() => Math.random() - 0.5), pick = [0, 1, 2].map((k) => order[k % order.length]);
+    session = { plan: pick.map((lv) => id + "|" + lv), i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), prep: true,
       ctest: { label: b.dataset.label, cid, before: compNote((state.comps || {})[cid]) } };
     nextQuestion();
   }));

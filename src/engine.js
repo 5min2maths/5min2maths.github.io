@@ -153,6 +153,9 @@ function trivialQ(q, k) {
   return "";
 }
 
+// Forme d'une question : l'énoncé sans les nombres (deux questions de même forme ne diffèrent que par les valeurs).
+const qForm = (q) => String(q.q || "").replace(/\d+(?:[.,]\d+|\{,\}\d+)?/g, "#").replace(/\s+/g, " ");
+
 const Engine = {
   newState(profile) {
     const h = harmos(profile.system, profile.grade);
@@ -328,9 +331,20 @@ const Engine = {
     let q;
     // Contextes variés (règle du 14.11) : un contexte (q.ctx) vu dans les 2 dernières questions de la notion est évité.
     const ctxs = ((state.recentCtx = state.recentCtx || {})[id] = (state.recentCtx[id] || []));
-    for (let k = 0; k < 12; k++) { q = this.build(id, level); if (!rec.includes(key(q)) && !(q.ctx && ctxs.includes(q.ctx))) break; }
+    // Formes variées (14.11, « les questions doivent absolument être variées ») : la forme d'une question
+    // (son énoncé aux nombres près) vue dans les 2 dernières questions de la notion est évitée quand c'est possible.
+    const forms = ((state.recentForm = state.recentForm || {})[id] = (state.recentForm[id] || []));
+    let found = false, fresh1 = null;
+    for (let k = 0; k < 16 && !found; k++) {
+      q = this.build(id, level);
+      const fresh = !rec.includes(key(q)) && !(q.ctx && ctxs.includes(q.ctx));
+      if (fresh && !forms.includes(qForm(q))) found = true;
+      else if (fresh && !fresh1) fresh1 = q;
+    }
+    if (!found && fresh1) q = fresh1; // une seule forme possible : au moins une question jamais vue
     rec.push(key(q)); state.recentQ[id] = rec.slice(-15);
     if (q.ctx) state.recentCtx[id] = [...ctxs, q.ctx].slice(-2);
+    state.recentForm[id] = [...forms, qForm(q)].slice(-2);
     return this.finalize(state, id, q);
   },
   // Question reproductible : même notion, niveau et graine → même question.

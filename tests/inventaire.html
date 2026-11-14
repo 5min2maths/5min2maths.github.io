@@ -6,9 +6,9 @@ const probe = {};
 for (const n of NOTIONS) {
   const lv = [];
   for (let d = 1; d <= 4; d++) {
-    let ok = 0, fig = 0, err = "";
-    for (let r = 0; r < 12; r++) { try { const q = GEN[n.id](d); if (q && (q.q || q.parts)) { ok++; if (q.fig) fig++; } } catch (e) { err = String(e).slice(0, 80); } }
-    lv.push({ d, ok, fig, err });
+    let ok = 0, fig = 0, err = ""; const fs = new Set();
+    for (let r = 0; r < 40; r++) { try { const q = GEN[n.id](d); if (q && (q.q || q.parts)) { if (r < 12) { ok++; if (q.fig) fig++; } fs.add(qForm(q)); } } catch (e) { err = String(e).slice(0, 80); } }
+    lv.push({ d, ok, fig, err, forms: fs.size });
   }
   let prob = null; if (typeof PROB !== "undefined" && PROB[n.id]) { prob = { ok: 0, fig: 0 }; for (let r = 0; r < 6; r++) { try { const q = PROB[n.id](); if (q && q.parts) { prob.ok++; if (q.fig) prob.fig++; } } catch (e) {} } }
   probe[n.id] = { prob, label: n.label, lesson: !!LESSONS[n.id], lessonFig: !!(typeof LESSON_FIGS !== "undefined" && LESSON_FIGS[n.id]), dyn: !!(typeof DYN !== "undefined" && DYN[n.id]), active: !!(typeof ACTIVE !== "undefined" && ACTIVE[n.id]), comps: (typeof COMPS !== "undefined" && COMPS[n.id]) || null, lv };

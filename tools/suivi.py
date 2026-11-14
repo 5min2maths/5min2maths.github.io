@@ -23,9 +23,9 @@ OUT = ROOT / "suivi" / "Suivi_5min2maths.xlsx"
 INV = ROOT / "suivi" / "inventaire.json"
 STATUTS = ["à faire", "vu", "à corriger", "validé"]
 NIV = {1: "N1", 2: "N2", 3: "N3", 4: "Défi"}
-COLS = ["Chapitre", "Notion", "id", "Question", "Compétence", "Révision", "Générateur", "Figure", "Leçon",
+COLS = ["Chapitre", "Notion", "id", "Question", "Compétence", "Révision", "Générateur", "Formes", "Figure", "Leçon",
         "Leçon active", "Retours leçon", "👍", "👎", "💬", "Contrôlé", "Remarque"]
-WIDTH = [30, 30, 10, 9, 42, 9, 11, 9, 9, 13, 13, 5, 5, 5, 12, 40]
+WIDTH = [30, 30, 10, 9, 42, 9, 11, 8, 9, 9, 13, 13, 5, 5, 5, 12, 40]
 
 
 def inventaire():
@@ -123,21 +123,24 @@ def main():
                 key = (row["id"], str(l["d"]))
                 vq = v_q.get(key, {})
                 ctl, rem = keep.get((cl["name"], row["id"], qn), ("à faire", None))
-                ws.append([row["chap"], n["label"], row["id"], qn, comp, "oui" if row["again"] else "", gen, fig,
+                ws.append([row["chap"], n["label"], row["id"], qn, comp, "oui" if row["again"] else "", gen, l.get("forms"), fig,
                            "✓" if n["lesson"] else "—", act, rl, vq.get("up") or None, vq.get("down") or None,
                            c_q.get(key) or None, ctl or "à faire", rem])
         last = ws.max_row
         for i, w in enumerate(WIDTH):
             ws.column_dimensions[chr(65 + i)].width = w
         ws.freeze_panes = "E2"
-        ws.auto_filter.ref = f"A1:P{last}"
+        ws.auto_filter.ref = f"A1:Q{last}"
         dv = DataValidation(type="list", formula1='"' + ",".join(STATUTS) + '"', allow_blank=True)
         ws.add_data_validation(dv)
-        dv.add(f"O2:O{last}")
+        dv.add(f"P2:P{last}")
         for s, col in fills.items():
-            ws.conditional_formatting.add(f"O2:O{last}", CellIsRule(operator="equal", formula=[f'"{s}"'], fill=PatternFill("solid", fgColor=col)))
-        ws.conditional_formatting.add(f"J2:J{last}", CellIsRule(operator="equal", formula=['"✓ dynamique"'], fill=PatternFill("solid", fgColor="C6EFCE")))
+            ws.conditional_formatting.add(f"P2:P{last}", CellIsRule(operator="equal", formula=[f'"{s}"'], fill=PatternFill("solid", fgColor=col)))
+        ws.conditional_formatting.add(f"K2:K{last}", CellIsRule(operator="equal", formula=['"✓ dynamique"'], fill=PatternFill("solid", fgColor="C6EFCE")))
         ws.conditional_formatting.add(f"G2:G{last}", FormulaRule(formula=['LEFT(G2,1)="✗"'], fill=PatternFill("solid", fgColor="FFC7CE")))
+        # Variété (14.11) : une seule forme de question = rouge, deux = orange
+        ws.conditional_formatting.add(f"H2:H{last}", CellIsRule(operator="equal", formula=["1"], fill=PatternFill("solid", fgColor="FFC7CE")))
+        ws.conditional_formatting.add(f"H2:H{last}", CellIsRule(operator="equal", formula=["2"], fill=PatternFill("solid", fgColor="FFEB9C")))
         # chapitre en gras au premier rang de chaque chapitre
         prev = None
         for r in range(2, last + 1):
@@ -148,7 +151,7 @@ def main():
                 ws.cell(r, 1).font = Font(color="999999")
 
     # Synthèse : formules (se met à jour quand l'utilisateur change « Contrôlé »)
-    syn.append(["Classe", "Notions", "Questions", "Leçons actives", "% notions actives", "Validées", "À corriger", "Vues", "% validé"])
+    syn.append(["Classe", "Notions", "Questions", "Leçons actives", "% notions actives", "Validées", "À corriger", "Vues", "% validé", "Questions à 1 forme"])
     for c in syn[1]:
         c.font, c.fill = bold, head_fill
     for i, cl in enumerate(d["classes"], start=2):
@@ -156,11 +159,11 @@ def main():
         notions = len(cl["rows"])
         actives = sum(1 for r in cl["rows"] if P[r["id"]]["active"])
         syn.append([cl["name"], notions, f"=COUNTA({t}C:C)-1", actives, f"=D{i}/B{i}",
-                    f'=COUNTIF({t}O:O,"validé")', f'=COUNTIF({t}O:O,"à corriger")', f'=COUNTIF({t}O:O,"vu")', f"=F{i}/C{i}"])
+                    f'=COUNTIF({t}P:P,"validé")', f'=COUNTIF({t}P:P,"à corriger")', f'=COUNTIF({t}P:P,"vu")', f"=F{i}/C{i}", f"=COUNTIF({t}H:H,1)"])
         syn[f"E{i}"].number_format = syn[f"I{i}"].number_format = "0%"
     syn.append([])
     syn.append(["Statuts « Contrôlé » : à faire → vu → à corriger → validé. Colonnes automatiques recalculées par tools/suivi.py ; Contrôlé et Remarque conservés."])
-    for col, w in zip("ABCDEFGHI", [12, 9, 10, 14, 16, 9, 11, 7, 9]):
+    for col, w in zip("ABCDEFGHIJ", [12, 9, 10, 14, 16, 9, 11, 7, 9, 18]):
         syn.column_dimensions[col].width = w
     OUT.parent.mkdir(exist_ok=True)
     wb.save(OUT)
