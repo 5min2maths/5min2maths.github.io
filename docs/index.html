@@ -376,7 +376,7 @@ const NOTIONS = [
 ];
 
 function placeOf(n, profile) {
-  if (profile.system === "CH" && profile.track === "mp" && n.MP !== undefined) return n.MP;
+  if (profile.system === "CH" && profile.track === "mp" && profile.grade >= 12 && n.MP !== undefined) return n.MP;
   return n[profile.system];
 }
 
@@ -6003,6 +6003,8 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 const app = document.getElementById("app");
 let state = Store.load();
 if (state && state.profile && !SYSTEMS[state.profile.system]) state = null; // système masqué (France) : on repart de zéro
+// Voie MP gardée en revenant au CO (bug 14.11 : « 9e MP » sans critères de divisibilité, nombres premiers ni PGDC) : la voie n'existe qu'au sec. II.
+if (state && state.profile && state.profile.track === "mp" && state.profile.grade < 12) { state.profile.track = "college"; Store.save(state); }
 if (state && state.profile && state.notions && Object.keys(state.notions).length && Engine.migrate(state)) Store.save(state);
 const save = () => Store.save(state);
 const h = (html) => { app.innerHTML = html; typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
@@ -6053,7 +6055,7 @@ function screenLevel() {
   // Plus de questionnaire sur les notions : celles de l'année s'ouvrent dans l'ordre du référentiel.
   document.getElementById("next").onclick = () => {
     const keep = state && state.comps;
-    state = Engine.newState({ system: draft.system, grade: draft.grade, track: draft.track, minutes: draft.minutes });
+    state = Engine.newState({ system: draft.system, grade: draft.grade, track: draft.system === "CH" && draft.grade >= 12 ? draft.track : "college", minutes: draft.minutes });
     if (keep) state.comps = keep; // changement de classe : les notes des compétences restent
     Engine.autoInit(state);
     save(); startPlacement();

@@ -83,7 +83,7 @@ const NOTIONS = [
 ];
 
 function placeOf(n, profile) {
-  if (profile.system === "CH" && profile.track === "mp" && n.MP !== undefined) return n.MP;
+  if (profile.system === "CH" && profile.track === "mp" && profile.grade >= 12 && n.MP !== undefined) return n.MP;
   return n[profile.system];
 }
 
