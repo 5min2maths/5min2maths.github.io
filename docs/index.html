@@ -1303,6 +1303,12 @@ const M = (t) => "\\(" + t + "\\)";
 // Étape guidée (« on le fait ensemble ») : consigne, valeur attendue, explication ; et piège typique { v, m }.
 const GS = (ask, value, sol, round) => ({ ask, spec: Object.assign({ kind: "value", value }, round ? { round } : {}), sol });
 const TRAP = (v, m) => ({ v, m });
+// Étape guidée dont la réponse s'écrit avec une racine (a√b exigé).
+const GSR = (ask, value, sol) => ({ ask, spec: { kind: "value", value, radical: true }, sol });
+// Pas à pas du PGDC (lot 1, 14.11) : un diviseur commun divise aussi la différence.
+const pgdcGuide = (x, y, g) => { const a = Math.min(x, y), b = Math.max(x, y); return [
+  GS("Tout diviseur commun de " + M(a) + " et " + M(b) + " divise aussi leur différence. Calcule " + M(b + " - " + a) + ".", b - a, M(b + " - " + a + " = " + (b - a)) + "."),
+  GS("Cherche le plus grand diviseur de " + M(b - a) + " qui divise aussi " + M(a) + " : PGDC = ?", g, M(a + " = " + g + " \\cdot " + a / g) + " et " + M(b + " = " + g + " \\cdot " + b / g) + " : PGDC " + M("= " + g) + ".")]; };
 const dec = (v) => String(+(+v).toFixed(10)).replace(".", "{,}");
 const decTxt = (v) => String(+(+v).toFixed(10)).replace(".", ",");
 const par = (v) => (v < 0 ? "(" + v + ")" : String(v));
@@ -1350,7 +1356,11 @@ const GEN = {
   rel(d) {
     if (d === 1) {
       const a = R.nz(-12, 12), b = R.nz(-12, 12);
-      return { fig: FIG.numberLine(a, []), q: "Calcule : " + M(par(a) + " + " + par(b)), spec: { kind: "value", value: a + b }, sol: M(par(a) + " + " + par(b) + " = " + (a + b)) };
+      const same = a * b > 0, big = Math.abs(a) >= Math.abs(b) ? a : b, A = Math.abs(a), B = Math.abs(b);
+      return { fig: FIG.numberLine(a, []), q: "Calcule : " + M(par(a) + " + " + par(b)), spec: { kind: "value", value: a + b }, sol: M(par(a) + " + " + par(b) + " = " + (a + b)),
+        guide: [same ? GS("Même signe : on additionne les distances à zéro. " + M(A + " + " + B) + " = ?", A + B, M(A + " + " + B + " = " + (A + B)) + ".")
+          : GS("Signes contraires : on soustrait les distances à zéro (la grande moins la petite). " + M(Math.max(A, B) + " - " + Math.min(A, B)) + " = ?", Math.abs(A - B), M(Math.max(A, B) + " - " + Math.min(A, B) + " = " + Math.abs(A - B)) + "."),
+          GS(same ? "Le résultat garde le signe commun : résultat ?" : "Le résultat prend le signe du nombre le plus loin de zéro (" + M(par(big)) + ") : résultat ?", a + b, M(par(a) + " + " + par(b) + " = " + (a + b)) + ".")] };
     }
     if (d === 2) {
       const a = R.nz(-9, 9), b = R.int(2, 6), c = R.nz(-6, 6);
@@ -1361,11 +1371,14 @@ const GEN = {
     // Niveau 3 varié (audit 13.11) : puissances de relatifs et priorités, le résultat change à chaque fois.
     const a = R.int(2, 5), b = R.int(2, 4), c = R.int(2, 3), form = R.int(0, 2);
     if (form === 0) { const v = -(a ** 2) - (-b) ** 2 + c * (-2) ** 3;
-      return { q: "Calcule : " + M("-" + a + "^2 - (-" + b + ")^2 + " + c + " \\cdot (-2)^3"), spec: { kind: "value", value: v }, sol: M("-" + a * a + " - " + b * b + " + " + c + " \\cdot (-8) = " + v) + " : " + M("-" + a + "^2 = -" + a * a) + " (le carré ne porte que sur " + M(a) + "), " + M("(-" + b + ")^2 = " + b * b) + "." }; }
+      return { guide: [GS(M("-" + a + "^2") + " = ? (le carré ne porte que sur " + M(a) + ")", -(a * a), M("-" + a + "^2 = -" + a * a) + "."), GS(M("(-" + b + ")^2") + " = ?", b * b, M("(-" + b + ")^2 = " + b * b) + " (exposant pair : positif)."), GS(M(c + " \\cdot (-2)^3") + " = ?", -8 * c, M("(-2)^3 = -8") + ", donc " + M(c + " \\cdot (-8) = " + -8 * c) + "."), GS("Assemble : " + M("-" + a * a + " - " + b * b + " - " + 8 * c) + " = ?", v, M("-" + a * a + " - " + b * b + " - " + 8 * c + " = " + v) + ".")],
+        q: "Calcule : " + M("-" + a + "^2 - (-" + b + ")^2 + " + c + " \\cdot (-2)^3"), spec: { kind: "value", value: v }, sol: M("-" + a * a + " - " + b * b + " + " + c + " \\cdot (-8) = " + v) + " : " + M("-" + a + "^2 = -" + a * a) + " (le carré ne porte que sur " + M(a) + "), " + M("(-" + b + ")^2 = " + b * b) + "." }; }
     if (form === 1) { const v = (-a) ** 3 * (-b) ** 2;
-      return { q: "Calcule : " + M("(-" + a + ")^3 \\cdot (-" + b + ")^2"), spec: { kind: "value", value: v }, sol: M("(-" + a + ")^3 = " + (-(a ** 3))) + " (exposant impair : négatif), " + M("(-" + b + ")^2 = " + b * b) + " ; produit : " + M(String(v)) + "." }; }
+      return { guide: [GS(M("(-" + a + ")^3") + " = ?", -(a ** 3), M("(-" + a + ")^3 = " + -(a ** 3)) + " (exposant impair : négatif)."), GS(M("(-" + b + ")^2") + " = ?", b * b, M("(-" + b + ")^2 = " + b * b) + "."), GS("Le produit : " + M(par(-(a ** 3)) + " \\cdot " + b * b) + " = ?", v, M(par(-(a ** 3)) + " \\cdot " + b * b + " = " + v) + ".")],
+        q: "Calcule : " + M("(-" + a + ")^3 \\cdot (-" + b + ")^2"), spec: { kind: "value", value: v }, sol: M("(-" + a + ")^3 = " + (-(a ** 3))) + " (exposant impair : négatif), " + M("(-" + b + ")^2 = " + b * b) + " ; produit : " + M(String(v)) + "." }; }
     const k = R.int(2, 6), v = -(b ** 2) * k / -b + (-c) ** 2;
-    return { q: "Calcule : " + M("-" + b + "^2 \\cdot " + k + " : (-" + b + ") + (-" + c + ")^2"), spec: { kind: "value", value: v }, sol: M("-" + b * b + " \\cdot " + k + " : (-" + b + ") + " + c * c + " = " + (-(b * b) * k) + " : (-" + b + ") + " + c * c + " = " + (b * k) + " + " + c * c + " = " + v) + "." };
+    return { guide: [GS("D'abord les puissances : " + M("-" + b + "^2") + " = ?", -(b * b), M("-" + b + "^2 = -" + b * b) + "."), GS("De gauche à droite : " + M("-" + b * b + " \\cdot " + k + " : (-" + b + ")") + " = ?", b * k, M("-" + b * b * k + " : (-" + b + ") = " + b * k) + "."), GS("Il reste " + M(b * k + " + (-" + c + ")^2") + " = ?", v, M("(-" + c + ")^2 = " + c * c) + ", donc " + M(b * k + " + " + c * c + " = " + v) + ".")],
+        q: "Calcule : " + M("-" + b + "^2 \\cdot " + k + " : (-" + b + ") + (-" + c + ")^2"), spec: { kind: "value", value: v }, sol: M("-" + b * b + " \\cdot " + k + " : (-" + b + ") + " + c * c + " = " + (-(b * b) * k) + " : (-" + b + ") + " + c * c + " = " + (b * k) + " + " + c * c + " = " + v) + "." };
   },
 
   fracadd(d) {
@@ -1417,7 +1430,9 @@ const GEN = {
         guide: [GS("Combien font " + M(p + "\\,\\%") + " de " + M(n) + " CHF ?", (n * p) / 100, M("\\frac{" + p + "}{100} \\cdot " + n + " = " + dec((n * p) / 100)) + " CHF."), GS("Le prix " + (up ? "augmente" : "baisse") + " : nouveau prix ?", v, M(n + (up ? " + " : " - ") + dec((n * p) / 100) + " = " + dec(v)) + " CHF.")] };
     }
     const p = R.pick([10, 20, 25, 50]), n = 4 * R.int(5, 30), f = n * (1 + p / 100);
-    return { q: "Après une hausse de " + M(p + "\\,\\%") + ", un prix vaut " + M(dec(f)) + " CHF. Quel était le prix de départ ?", spec: { kind: "value", value: n }, sol: M(dec(f) + " : " + dec(1 + p / 100) + " = " + n) + " CHF (on divise, on ne retire pas " + p + " %)." };
+    return { traps: [TRAP(f * (1 - p / 100), "On ne retire pas " + p + " % du nouveau prix : la hausse était calculée sur le prix de départ.")],
+      guide: [GS("Une hausse de " + M(p + "\\,\\%") + " : le prix de départ a été multiplié par quel nombre ?", 1 + p / 100, M("1 + \\frac{" + p + "}{100} = " + dec(1 + p / 100)) + "."), GS("Pour revenir en arrière, on divise : " + M(dec(f) + " : " + dec(1 + p / 100)) + " = ?", n, M(dec(f) + " : " + dec(1 + p / 100) + " = " + n) + " CHF.")],
+      q: "Après une hausse de " + M(p + "\\,\\%") + ", un prix vaut " + M(dec(f)) + " CHF. Quel était le prix de départ ?", spec: { kind: "value", value: n }, sol: M(dec(f) + " : " + dec(1 + p / 100) + " = " + n) + " CHF (on divise, on ne retire pas " + p + " %)." };
   },
 
   puiss(d) {
@@ -1453,14 +1468,17 @@ const GEN = {
   rac(d) {
     if (d === 1) {
       const k = R.int(2, 20);
-      return { fig: FIG.areaSquare("aire " + k * k), q: "Calcule " + M("\\sqrt{" + k * k + "}") + ".", spec: { kind: "value", value: k }, sol: M("\\sqrt{" + k * k + "} = " + k) + " car " + M(k + "^2 = " + k * k) + "." };
+      return { fig: FIG.areaSquare("aire " + k * k), q: "Calcule " + M("\\sqrt{" + k * k + "}") + ".", spec: { kind: "value", value: k }, sol: M("\\sqrt{" + k * k + "} = " + k) + " car " + M(k + "^2 = " + k * k) + ".",
+        guide: [GS("On cherche le nombre qui, multiplié par lui-même, donne " + M(k * k) + ". Essaie " + M(k - 1) + " : " + M((k - 1) + "^2") + " = ?", (k - 1) ** 2, M((k - 1) + "^2 = " + (k - 1) ** 2) + " : c'est moins que " + M(k * k) + ", essaie un peu plus."), GS("Alors " + M("\\sqrt{" + k * k + "}") + " = ?", k, M(k + "^2 = " + k * k) + ", donc " + M("\\sqrt{" + k * k + "} = " + k) + ".")] };
     }
     if (d === 2) {
       const k = R.int(2, 7), m = R.pick([2, 3, 5, 6, 7]);
-      return { fig: FIG.areaSquare("aire " + k * k * m), q: "Écris " + M("\\sqrt{" + k * k * m + "}") + " sous la forme " + M("a\\sqrt{b}") + " (tape par exemple " + M("3\\sqrt{2}") + " avec la touche √).", spec: { kind: "value", value: k * Math.sqrt(m), radical: true }, canon: k + "√" + m, sol: M("\\sqrt{" + k * k + " \\cdot " + m + "} = " + k + "\\sqrt{" + m + "}") };
+      return { fig: FIG.areaSquare("aire " + k * k * m), q: "Écris " + M("\\sqrt{" + k * k * m + "}") + " sous la forme " + M("a\\sqrt{b}") + " (tape par exemple " + M("3\\sqrt{2}") + " avec la touche √).", spec: { kind: "value", value: k * Math.sqrt(m), radical: true }, canon: k + "√" + m, sol: M("\\sqrt{" + k * k + " \\cdot " + m + "} = " + k + "\\sqrt{" + m + "}"),
+        guide: [GS("Quel est le plus grand carré parfait qui divise " + M(k * k * m) + " ? (4, 9, 16, 25, 36, 49…)", k * k, M(k * k * m + " = " + k * k + " \\cdot " + m) + "."), GS("La racine de ce carré : " + M("\\sqrt{" + k * k + "}") + " = ?", k, M("\\sqrt{" + k * k + "} = " + k) + "."), GSR("Donc " + M("\\sqrt{" + k * k * m + "} = \\sqrt{" + k * k + "} \\cdot \\sqrt{" + m + "}") + " = ? (forme " + M("a\\sqrt{b}") + ")", k * Math.sqrt(m), M("\\sqrt{" + k * k * m + "} = " + k + "\\sqrt{" + m + "}") + ".")] };
     }
     const m = R.pick([2, 3, 5]), a = R.int(2, 4), b = R.int(2, 5);
-    return { q: "Simplifie : " + M("\\sqrt{" + a * a * m + "} + \\sqrt{" + b * b * m + "}") + " (réponse sous la forme " + M("a\\sqrt{b}") + ").", spec: { kind: "value", value: (a + b) * Math.sqrt(m), radical: true }, canon: (a + b) + "√" + m, sol: M(a + "\\sqrt{" + m + "} + " + b + "\\sqrt{" + m + "} = " + (a + b) + "\\sqrt{" + m + "}") };
+    return { q: "Simplifie : " + M("\\sqrt{" + a * a * m + "} + \\sqrt{" + b * b * m + "}") + " (réponse sous la forme " + M("a\\sqrt{b}") + ").", spec: { kind: "value", value: (a + b) * Math.sqrt(m), radical: true }, canon: (a + b) + "√" + m, sol: M(a + "\\sqrt{" + m + "} + " + b + "\\sqrt{" + m + "} = " + (a + b) + "\\sqrt{" + m + "}"),
+      guide: [GSR("Simplifie la première racine : " + M("\\sqrt{" + a * a * m + "} = \\sqrt{" + a * a + " \\cdot " + m + "}") + " = ?", a * Math.sqrt(m), M("\\sqrt{" + a * a * m + "} = " + a + "\\sqrt{" + m + "}") + "."), GSR("Puis la seconde : " + M("\\sqrt{" + b * b * m + "}") + " = ?", b * Math.sqrt(m), M("\\sqrt{" + b * b * m + "} = " + b + "\\sqrt{" + m + "}") + "."), GSR("Les deux termes contiennent " + M("\\sqrt{" + m + "}") + " : on les additionne comme " + M(a + "x + " + b + "x") + ". Résultat ?", (a + b) * Math.sqrt(m), M(a + "\\sqrt{" + m + "} + " + b + "\\sqrt{" + m + "} = " + (a + b) + "\\sqrt{" + m + "}") + ".")] };
   },
 
   valnum(d) {
@@ -2362,14 +2380,16 @@ Object.assign(GEN, {
   arith(d) {
     const g = R.pick([2, 3, 4, 5, 6, 7, 8, 9, 12, 15]);
     let p, q; do { p = R.int(2, 9); q = R.int(2, 9); } while (p === q || gcd(p, q) !== 1);
-    if (d === 1) return { q: "Détermine le PGDC de " + M(g * p) + " et " + M(g * q) + ".", spec: { kind: "value", value: g }, sol: M(g * p + " = " + g + " \\cdot " + p) + " et " + M(g * q + " = " + g + " \\cdot " + q) + " : PGDC " + M("= " + g) + "." };
-    if (d === 2) return { q: "Détermine le PPMC de " + M(g * p) + " et " + M(g * q) + ".", spec: { kind: "value", value: g * p * q }, sol: "PPMC " + M("= \\frac{" + g * p + " \\cdot " + g * q + "}{\\text{PGDC}} = \\frac{" + g * p * g * q + "}{" + g + "} = " + g * p * q) + "." };
+    if (d === 1) return { q: "Détermine le PGDC de " + M(g * p) + " et " + M(g * q) + ".", spec: { kind: "value", value: g }, sol: M(g * p + " = " + g + " \\cdot " + p) + " et " + M(g * q + " = " + g + " \\cdot " + q) + " : PGDC " + M("= " + g) + ".", guide: pgdcGuide(g * p, g * q, g) };
+    if (d === 2) return { q: "Détermine le PPMC de " + M(g * p) + " et " + M(g * q) + ".", spec: { kind: "value", value: g * p * q }, sol: "PPMC " + M("= \\frac{" + g * p + " \\cdot " + g * q + "}{\\text{PGDC}} = \\frac{" + g * p * g * q + "}{" + g + "} = " + g * p * q) + ".",
+      guide: [GS("D'abord le PGDC de " + M(g * p) + " et " + M(g * q) + " : ?", g, M(g * p + " = " + g + " \\cdot " + p) + ", " + M(g * q + " = " + g + " \\cdot " + q) + " : PGDC " + M("= " + g) + "."), GS("Le produit des deux nombres : " + M(g * p + " \\cdot " + g * q) + " = ?", g * p * g * q, M(g * p + " \\cdot " + g * q + " = " + g * p * g * q) + "."), GS("PPMC = produit : PGDC. Combien ?", g * p * q, M(g * p * g * q + " : " + g + " = " + g * p * q) + ".")] };
     if (R.rand() < 0.5) {
       const a = R.pick([6, 8, 9, 10, 12, 15]), b = R.pick([4, 6, 10, 14, 16, 20]); if (a === b) return GEN.arith(3);
       const l = (a * b) / gcd(a, b);
-      return { q: "Deux bus partent ensemble de la gare à 8 h. L'un repart toutes les " + M(a) + " minutes, l'autre toutes les " + M(b) + " minutes. Dans combien de minutes repartiront-ils de nouveau ensemble ?", spec: { kind: "value", value: l }, sol: "C'est le PPMC de " + M(a) + " et " + M(b) + " : " + M(l) + " minutes." };
+      return { q: "Deux bus partent ensemble de la gare à 8 h. L'un repart toutes les " + M(a) + " minutes, l'autre toutes les " + M(b) + " minutes. Dans combien de minutes repartiront-ils de nouveau ensemble ?", spec: { kind: "value", value: l }, sol: "C'est le PPMC de " + M(a) + " et " + M(b) + " : " + M(l) + " minutes.",
+        guide: [GS("Ils repartent ensemble après un nombre de minutes multiple de " + M(a) + " et de " + M(b) + " : le plus petit, c'est le PPMC. D'abord le PGDC de " + M(a) + " et " + M(b) + " : ?", gcd(a, b), "PGDC " + M("= " + gcd(a, b)) + "."), GS("PPMC " + M("= \\frac{" + a + " \\cdot " + b + "}{" + gcd(a, b) + "}") + " = ?", l, M("\\frac{" + a * b + "}{" + gcd(a, b) + "} = " + l) + " minutes.")] };
     }
-    return { fig: FIG.tiles(p, q, g * p + " cm", g * q + " cm"), q: "On veut paver un rectangle de " + M(g * p) + " cm sur " + M(g * q) + " cm avec des carrés tous identiques, les plus grands possible. Quel est le côté d'un carré (en cm) ?", spec: { kind: "value", value: g }, sol: "Le côté divise les deux longueurs et doit être le plus grand : PGDC " + M("= " + g) + " cm." };
+    return { fig: FIG.tiles(p, q, g * p + " cm", g * q + " cm"), q: "On veut paver un rectangle de " + M(g * p) + " cm sur " + M(g * q) + " cm avec des carrés tous identiques, les plus grands possible. Quel est le côté d'un carré (en cm) ?", spec: { kind: "value", value: g }, sol: "Le côté divise les deux longueurs et doit être le plus grand : PGDC " + M("= " + g) + " cm.", guide: pgdcGuide(g * p, g * q, g) };
   },
 
   diagr(d) {
@@ -3357,9 +3377,22 @@ FINE.push(
     hint: "Règle des signes comme pour les entiers ; la multiplication et la division passent avant l'addition.",
     lesson: ["Fractions : signes et priorités", "Les règles des relatifs et des priorités s'appliquent aussi aux fractions.", "On détermine le signe, puis on calcule. Multiplier : numérateurs entre eux, dénominateurs entre eux (simplifier avant). Diviser : multiplier par l'inverse. Les multiplications et divisions passent avant les additions et soustractions.", ["\\(-\\frac{2}{3} \\cdot \\frac{9}{4} = -\\frac{3}{2}\\)", "\\(\\frac{1}{2} + \\frac{3}{4} \\cdot \\left(-\\frac{2}{3}\\right) = \\frac{1}{2} - \\frac{1}{2} = 0\\)"], "\\(\\frac{1}{2} - \\frac{2}{3} = -\\frac{1}{6}\\) : le résultat peut être négatif."],
     g: [
-      () => { let b, e; do { b = R.int(2, 6); e = R.int(2, 8); } while (b === e); const a = R.int(1, b - 1), c = R.int(1, 2 * e), n = a * e - c * b, d = b * e; if (n >= 0 || gcd(a, b) !== 1 || gcd(c, e) !== 1) return GEN.fracops(1); return QV("Calcule et simplifie : " + M(fr(a, b) + " - " + fr(c, e)), n / d, M("\\frac{" + a * e + "}{" + d + "} - \\frac{" + c * b + "}{" + d + "} = " + frac(n, d))); },
-      () => { const b = R.int(2, 7), a = R.int(1, b + 3), e = R.int(2, 7), c = R.int(1, e + 3); if (gcd(a, b) !== 1 || gcd(c, e) !== 1 || a === b || c === e) return GEN.fracops(2); if (R.rand() < 0.5) return QV("Calcule et simplifie : " + M("\\left(" + fr(-a, b) + "\\right) \\cdot " + fr(c, e)), -a * c / (b * e), "Signe − ; " + M("\\frac{" + a + " \\cdot " + c + "}{" + b + " \\cdot " + e + "}") + " : " + M(frac(-a * c, b * e)) + "."); return QV("Calcule et simplifie : " + M("\\left(" + fr(-a, b) + "\\right) : \\left(" + fr(-c, e) + "\\right)"), a * e / (b * c), "Signe + ; on multiplie par l'inverse : " + M(fr(a, b) + " \\cdot " + fr(e, c) + " = " + frac(a * e, b * c)) + "."); },
-      () => { const b = R.int(2, 4), a = 1, e = R.int(2, 5), c = R.int(1, e - 1), g2 = R.int(2, 4), f = R.int(1, g2 + 2); if (gcd(c, e) !== 1 || gcd(f, g2) !== 1 || f === g2) return GEN.fracops(3); const n = a * e * g2 - c * f * b, d = b * e * g2; return QV("Calcule et simplifie : " + M(fr(a, b) + " - " + fr(c, e) + " \\cdot " + fr(f, g2)), n / d, "D'abord le produit : " + M(fr(c, e) + " \\cdot " + fr(f, g2) + " = " + frac(c * f, e * g2)) + ". Puis " + M(fr(a, b) + " - " + frac(c * f, e * g2) + " = " + frac(n, d)) + "."); },
+      () => { let b, e; do { b = R.int(2, 6); e = R.int(2, 8); } while (b === e); const a = R.int(1, b - 1), c = R.int(1, 2 * e), n = a * e - c * b, d = b * e; if (n >= 0 || gcd(a, b) !== 1 || gcd(c, e) !== 1) return GEN.fracops(1); return Object.assign(QV("Calcule et simplifie : " + M(fr(a, b) + " - " + fr(c, e)), n / d, M("\\frac{" + a * e + "}{" + d + "} - \\frac{" + c * b + "}{" + d + "} = " + frac(n, d))), { guide: [
+        GS("Dénominateur commun : " + M(b + " \\cdot " + e) + " = ?", d, M(b + " \\cdot " + e + " = " + d) + "."),
+        GS("Avec ce dénominateur : " + M(fr(a, b) + " = \\frac{" + a * e + "}{" + d + "}") + " et " + M(fr(c, e) + " = \\frac{" + c * b + "}{" + d + "}") + ". Différence des numérateurs " + M(a * e + " - " + c * b) + " = ?", n, M(a * e + " - " + c * b + " = " + n) + "."),
+        GS("Le résultat est " + M(fr(n, d)) + ". Écris-le simplifié si possible :", n / d, M(fr(n, d) + (gcd(Math.abs(n), d) > 1 ? " = " + frac(n, d) : "")) + (gcd(Math.abs(n), d) > 1 ? "." : " : déjà simplifié."))] }); },
+      () => { const b = R.int(2, 7), a = R.int(1, b + 3), e = R.int(2, 7), c = R.int(1, e + 3); if (gcd(a, b) !== 1 || gcd(c, e) !== 1 || a === b || c === e) return GEN.fracops(2); if (R.rand() < 0.5) return Object.assign(QV("Calcule et simplifie : " + M("\\left(" + fr(-a, b) + "\\right) \\cdot " + fr(c, e)), -a * c / (b * e), "Signe − ; " + M("\\frac{" + a + " \\cdot " + c + "}{" + b + " \\cdot " + e + "}") + " : " + M(frac(-a * c, b * e)) + "."), { guide: [
+        GS("Négatif fois positif : le résultat est négatif. Produit des numérateurs (sans le signe) : " + M(a + " \\cdot " + c) + " = ?", a * c, M(a + " \\cdot " + c + " = " + a * c) + "."),
+        GS("Produit des dénominateurs : " + M(b + " \\cdot " + e) + " = ?", b * e, M(b + " \\cdot " + e + " = " + b * e) + "."),
+        GS("Avec le signe −, simplifié : résultat ?", -a * c / (b * e), M("-\\frac{" + a * c + "}{" + b * e + "} = " + frac(-a * c, b * e)) + ".")] });
+      return Object.assign(QV("Calcule et simplifie : " + M("\\left(" + fr(-a, b) + "\\right) : \\left(" + fr(-c, e) + "\\right)"), a * e / (b * c), "Signe + ; on multiplie par l'inverse : " + M(fr(a, b) + " \\cdot " + fr(e, c) + " = " + frac(a * e, b * c)) + "."), { guide: [
+        GS("Négatif divisé par négatif : le résultat est positif. Diviser, c'est multiplier par l'inverse : l'inverse de " + M(fr(c, e)) + " a pour numérateur ?", e, "L'inverse de " + M(fr(c, e)) + " est " + M(fr(e, c)) + "."),
+        GS("Numérateurs : " + M(a + " \\cdot " + e) + " = ?", a * e, M(a + " \\cdot " + e + " = " + a * e) + "."),
+        GS("Dénominateurs : " + M(b + " \\cdot " + c) + " = ?", b * c, M(b + " \\cdot " + c + " = " + b * c) + "."),
+        GS("Résultat simplifié ?", a * e / (b * c), M("\\frac{" + a * e + "}{" + b * c + "} = " + frac(a * e, b * c)) + ".")] }); },
+      () => { const b = R.int(2, 4), a = 1, e = R.int(2, 5), c = R.int(1, e - 1), g2 = R.int(2, 4), f = R.int(1, g2 + 2); if (gcd(c, e) !== 1 || gcd(f, g2) !== 1 || f === g2) return GEN.fracops(3); const n = a * e * g2 - c * f * b, d = b * e * g2; return Object.assign(QV("Calcule et simplifie : " + M(fr(a, b) + " - " + fr(c, e) + " \\cdot " + fr(f, g2)), n / d, "D'abord le produit : " + M(fr(c, e) + " \\cdot " + fr(f, g2) + " = " + frac(c * f, e * g2)) + ". Puis " + M(fr(a, b) + " - " + frac(c * f, e * g2) + " = " + frac(n, d)) + "."), { guide: [
+        GS("La multiplication passe avant la soustraction : " + M(fr(c, e) + " \\cdot " + fr(f, g2)) + " = ? (simplifie)", c * f / (e * g2), M(fr(c, e) + " \\cdot " + fr(f, g2) + " = \\frac{" + c * f + "}{" + e * g2 + "} = " + frac(c * f, e * g2)) + "."),
+        GS("Il reste " + M(fr(a, b) + " - " + frac(c * f, e * g2)) + " : même dénominateur, puis soustraction. Résultat simplifié ?", n / d, M(fr(a, b) + " - " + frac(c * f, e * g2) + " = " + frac(n, d)) + ".")] }); },
     ] },
   { id: "airelat", theme: "gm", label: "Aire latérale et totale : prisme, cylindre", ex: "A_{\\text{lat}} = \\text{périmètre de base} \\cdot h", CH: [10], codes: "10GM2\\.0[25]",
     hint: "Aire latérale = périmètre de la base × hauteur. Aire totale = aire latérale + 2 × aire de la base.",

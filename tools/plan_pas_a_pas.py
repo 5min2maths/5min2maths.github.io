@@ -54,7 +54,7 @@ def main():
     lots = [a_faire[k:k + LOT] for k in range(0, len(a_faire), LOT)]
     if "--prochain" in sys.argv:
         if lots:
-            print(f"Pas à pas : lot 1/{len(lots)} — " + ", ".join(i for _, i in lots[0]) + f" ({lots[0][0][0]}) ; {len(faits)} notions couvertes sur {len(liste)}")
+            print(f"Pas à pas : prochain lot ({len(lots)} restants) — " + ", ".join(i for _, i in lots[0]) + f" ({lots[0][0][0]}) ; {len(faits)} notions couvertes sur {len(liste)}")
         return
     L = ["# Plan de l'aide pas à pas (généré par tools/plan_pas_a_pas.py — ne pas éditer à la main)", "",
          f"Couverture : {len(faits)} notions complètes (3 niveaux), {len(partiels)} partielles, {len(a_faire)} à faire, sur {len(liste)}.",

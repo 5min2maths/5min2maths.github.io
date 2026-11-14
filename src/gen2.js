@@ -230,14 +230,16 @@ Object.assign(GEN, {
   arith(d) {
     const g = R.pick([2, 3, 4, 5, 6, 7, 8, 9, 12, 15]);
     let p, q; do { p = R.int(2, 9); q = R.int(2, 9); } while (p === q || gcd(p, q) !== 1);
-    if (d === 1) return { q: "Détermine le PGDC de " + M(g * p) + " et " + M(g * q) + ".", spec: { kind: "value", value: g }, sol: M(g * p + " = " + g + " \\cdot " + p) + " et " + M(g * q + " = " + g + " \\cdot " + q) + " : PGDC " + M("= " + g) + "." };
-    if (d === 2) return { q: "Détermine le PPMC de " + M(g * p) + " et " + M(g * q) + ".", spec: { kind: "value", value: g * p * q }, sol: "PPMC " + M("= \\frac{" + g * p + " \\cdot " + g * q + "}{\\text{PGDC}} = \\frac{" + g * p * g * q + "}{" + g + "} = " + g * p * q) + "." };
+    if (d === 1) return { q: "Détermine le PGDC de " + M(g * p) + " et " + M(g * q) + ".", spec: { kind: "value", value: g }, sol: M(g * p + " = " + g + " \\cdot " + p) + " et " + M(g * q + " = " + g + " \\cdot " + q) + " : PGDC " + M("= " + g) + ".", guide: pgdcGuide(g * p, g * q, g) };
+    if (d === 2) return { q: "Détermine le PPMC de " + M(g * p) + " et " + M(g * q) + ".", spec: { kind: "value", value: g * p * q }, sol: "PPMC " + M("= \\frac{" + g * p + " \\cdot " + g * q + "}{\\text{PGDC}} = \\frac{" + g * p * g * q + "}{" + g + "} = " + g * p * q) + ".",
+      guide: [GS("D'abord le PGDC de " + M(g * p) + " et " + M(g * q) + " : ?", g, M(g * p + " = " + g + " \\cdot " + p) + ", " + M(g * q + " = " + g + " \\cdot " + q) + " : PGDC " + M("= " + g) + "."), GS("Le produit des deux nombres : " + M(g * p + " \\cdot " + g * q) + " = ?", g * p * g * q, M(g * p + " \\cdot " + g * q + " = " + g * p * g * q) + "."), GS("PPMC = produit : PGDC. Combien ?", g * p * q, M(g * p * g * q + " : " + g + " = " + g * p * q) + ".")] };
     if (R.rand() < 0.5) {
       const a = R.pick([6, 8, 9, 10, 12, 15]), b = R.pick([4, 6, 10, 14, 16, 20]); if (a === b) return GEN.arith(3);
       const l = (a * b) / gcd(a, b);
-      return { q: "Deux bus partent ensemble de la gare à 8 h. L'un repart toutes les " + M(a) + " minutes, l'autre toutes les " + M(b) + " minutes. Dans combien de minutes repartiront-ils de nouveau ensemble ?", spec: { kind: "value", value: l }, sol: "C'est le PPMC de " + M(a) + " et " + M(b) + " : " + M(l) + " minutes." };
+      return { q: "Deux bus partent ensemble de la gare à 8 h. L'un repart toutes les " + M(a) + " minutes, l'autre toutes les " + M(b) + " minutes. Dans combien de minutes repartiront-ils de nouveau ensemble ?", spec: { kind: "value", value: l }, sol: "C'est le PPMC de " + M(a) + " et " + M(b) + " : " + M(l) + " minutes.",
+        guide: [GS("Ils repartent ensemble après un nombre de minutes multiple de " + M(a) + " et de " + M(b) + " : le plus petit, c'est le PPMC. D'abord le PGDC de " + M(a) + " et " + M(b) + " : ?", gcd(a, b), "PGDC " + M("= " + gcd(a, b)) + "."), GS("PPMC " + M("= \\frac{" + a + " \\cdot " + b + "}{" + gcd(a, b) + "}") + " = ?", l, M("\\frac{" + a * b + "}{" + gcd(a, b) + "} = " + l) + " minutes.")] };
     }
-    return { fig: FIG.tiles(p, q, g * p + " cm", g * q + " cm"), q: "On veut paver un rectangle de " + M(g * p) + " cm sur " + M(g * q) + " cm avec des carrés tous identiques, les plus grands possible. Quel est le côté d'un carré (en cm) ?", spec: { kind: "value", value: g }, sol: "Le côté divise les deux longueurs et doit être le plus grand : PGDC " + M("= " + g) + " cm." };
+    return { fig: FIG.tiles(p, q, g * p + " cm", g * q + " cm"), q: "On veut paver un rectangle de " + M(g * p) + " cm sur " + M(g * q) + " cm avec des carrés tous identiques, les plus grands possible. Quel est le côté d'un carré (en cm) ?", spec: { kind: "value", value: g }, sol: "Le côté divise les deux longueurs et doit être le plus grand : PGDC " + M("= " + g) + " cm.", guide: pgdcGuide(g * p, g * q, g) };
   },
 
   diagr(d) {

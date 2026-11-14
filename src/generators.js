@@ -19,6 +19,12 @@ const M = (t) => "\\(" + t + "\\)";
 // Étape guidée (« on le fait ensemble ») : consigne, valeur attendue, explication ; et piège typique { v, m }.
 const GS = (ask, value, sol, round) => ({ ask, spec: Object.assign({ kind: "value", value }, round ? { round } : {}), sol });
 const TRAP = (v, m) => ({ v, m });
+// Étape guidée dont la réponse s'écrit avec une racine (a√b exigé).
+const GSR = (ask, value, sol) => ({ ask, spec: { kind: "value", value, radical: true }, sol });
+// Pas à pas du PGDC (lot 1, 14.11) : un diviseur commun divise aussi la différence.
+const pgdcGuide = (x, y, g) => { const a = Math.min(x, y), b = Math.max(x, y); return [
+  GS("Tout diviseur commun de " + M(a) + " et " + M(b) + " divise aussi leur différence. Calcule " + M(b + " - " + a) + ".", b - a, M(b + " - " + a + " = " + (b - a)) + "."),
+  GS("Cherche le plus grand diviseur de " + M(b - a) + " qui divise aussi " + M(a) + " : PGDC = ?", g, M(a + " = " + g + " \\cdot " + a / g) + " et " + M(b + " = " + g + " \\cdot " + b / g) + " : PGDC " + M("= " + g) + ".")]; };
 const dec = (v) => String(+(+v).toFixed(10)).replace(".", "{,}");
 const decTxt = (v) => String(+(+v).toFixed(10)).replace(".", ",");
 const par = (v) => (v < 0 ? "(" + v + ")" : String(v));
@@ -66,7 +72,11 @@ const GEN = {
   rel(d) {
     if (d === 1) {
       const a = R.nz(-12, 12), b = R.nz(-12, 12);
-      return { fig: FIG.numberLine(a, []), q: "Calcule : " + M(par(a) + " + " + par(b)), spec: { kind: "value", value: a + b }, sol: M(par(a) + " + " + par(b) + " = " + (a + b)) };
+      const same = a * b > 0, big = Math.abs(a) >= Math.abs(b) ? a : b, A = Math.abs(a), B = Math.abs(b);
+      return { fig: FIG.numberLine(a, []), q: "Calcule : " + M(par(a) + " + " + par(b)), spec: { kind: "value", value: a + b }, sol: M(par(a) + " + " + par(b) + " = " + (a + b)),
+        guide: [same ? GS("Même signe : on additionne les distances à zéro. " + M(A + " + " + B) + " = ?", A + B, M(A + " + " + B + " = " + (A + B)) + ".")
+          : GS("Signes contraires : on soustrait les distances à zéro (la grande moins la petite). " + M(Math.max(A, B) + " - " + Math.min(A, B)) + " = ?", Math.abs(A - B), M(Math.max(A, B) + " - " + Math.min(A, B) + " = " + Math.abs(A - B)) + "."),
+          GS(same ? "Le résultat garde le signe commun : résultat ?" : "Le résultat prend le signe du nombre le plus loin de zéro (" + M(par(big)) + ") : résultat ?", a + b, M(par(a) + " + " + par(b) + " = " + (a + b)) + ".")] };
     }
     if (d === 2) {
       const a = R.nz(-9, 9), b = R.int(2, 6), c = R.nz(-6, 6);
@@ -77,11 +87,14 @@ const GEN = {
     // Niveau 3 varié (audit 13.11) : puissances de relatifs et priorités, le résultat change à chaque fois.
     const a = R.int(2, 5), b = R.int(2, 4), c = R.int(2, 3), form = R.int(0, 2);
     if (form === 0) { const v = -(a ** 2) - (-b) ** 2 + c * (-2) ** 3;
-      return { q: "Calcule : " + M("-" + a + "^2 - (-" + b + ")^2 + " + c + " \\cdot (-2)^3"), spec: { kind: "value", value: v }, sol: M("-" + a * a + " - " + b * b + " + " + c + " \\cdot (-8) = " + v) + " : " + M("-" + a + "^2 = -" + a * a) + " (le carré ne porte que sur " + M(a) + "), " + M("(-" + b + ")^2 = " + b * b) + "." }; }
+      return { guide: [GS(M("-" + a + "^2") + " = ? (le carré ne porte que sur " + M(a) + ")", -(a * a), M("-" + a + "^2 = -" + a * a) + "."), GS(M("(-" + b + ")^2") + " = ?", b * b, M("(-" + b + ")^2 = " + b * b) + " (exposant pair : positif)."), GS(M(c + " \\cdot (-2)^3") + " = ?", -8 * c, M("(-2)^3 = -8") + ", donc " + M(c + " \\cdot (-8) = " + -8 * c) + "."), GS("Assemble : " + M("-" + a * a + " - " + b * b + " - " + 8 * c) + " = ?", v, M("-" + a * a + " - " + b * b + " - " + 8 * c + " = " + v) + ".")],
+        q: "Calcule : " + M("-" + a + "^2 - (-" + b + ")^2 + " + c + " \\cdot (-2)^3"), spec: { kind: "value", value: v }, sol: M("-" + a * a + " - " + b * b + " + " + c + " \\cdot (-8) = " + v) + " : " + M("-" + a + "^2 = -" + a * a) + " (le carré ne porte que sur " + M(a) + "), " + M("(-" + b + ")^2 = " + b * b) + "." }; }
     if (form === 1) { const v = (-a) ** 3 * (-b) ** 2;
-      return { q: "Calcule : " + M("(-" + a + ")^3 \\cdot (-" + b + ")^2"), spec: { kind: "value", value: v }, sol: M("(-" + a + ")^3 = " + (-(a ** 3))) + " (exposant impair : négatif), " + M("(-" + b + ")^2 = " + b * b) + " ; produit : " + M(String(v)) + "." }; }
+      return { guide: [GS(M("(-" + a + ")^3") + " = ?", -(a ** 3), M("(-" + a + ")^3 = " + -(a ** 3)) + " (exposant impair : négatif)."), GS(M("(-" + b + ")^2") + " = ?", b * b, M("(-" + b + ")^2 = " + b * b) + "."), GS("Le produit : " + M(par(-(a ** 3)) + " \\cdot " + b * b) + " = ?", v, M(par(-(a ** 3)) + " \\cdot " + b * b + " = " + v) + ".")],
+        q: "Calcule : " + M("(-" + a + ")^3 \\cdot (-" + b + ")^2"), spec: { kind: "value", value: v }, sol: M("(-" + a + ")^3 = " + (-(a ** 3))) + " (exposant impair : négatif), " + M("(-" + b + ")^2 = " + b * b) + " ; produit : " + M(String(v)) + "." }; }
     const k = R.int(2, 6), v = -(b ** 2) * k / -b + (-c) ** 2;
-    return { q: "Calcule : " + M("-" + b + "^2 \\cdot " + k + " : (-" + b + ") + (-" + c + ")^2"), spec: { kind: "value", value: v }, sol: M("-" + b * b + " \\cdot " + k + " : (-" + b + ") + " + c * c + " = " + (-(b * b) * k) + " : (-" + b + ") + " + c * c + " = " + (b * k) + " + " + c * c + " = " + v) + "." };
+    return { guide: [GS("D'abord les puissances : " + M("-" + b + "^2") + " = ?", -(b * b), M("-" + b + "^2 = -" + b * b) + "."), GS("De gauche à droite : " + M("-" + b * b + " \\cdot " + k + " : (-" + b + ")") + " = ?", b * k, M("-" + b * b * k + " : (-" + b + ") = " + b * k) + "."), GS("Il reste " + M(b * k + " + (-" + c + ")^2") + " = ?", v, M("(-" + c + ")^2 = " + c * c) + ", donc " + M(b * k + " + " + c * c + " = " + v) + ".")],
+        q: "Calcule : " + M("-" + b + "^2 \\cdot " + k + " : (-" + b + ") + (-" + c + ")^2"), spec: { kind: "value", value: v }, sol: M("-" + b * b + " \\cdot " + k + " : (-" + b + ") + " + c * c + " = " + (-(b * b) * k) + " : (-" + b + ") + " + c * c + " = " + (b * k) + " + " + c * c + " = " + v) + "." };
   },
 
   fracadd(d) {
@@ -133,7 +146,9 @@ const GEN = {
         guide: [GS("Combien font " + M(p + "\\,\\%") + " de " + M(n) + " CHF ?", (n * p) / 100, M("\\frac{" + p + "}{100} \\cdot " + n + " = " + dec((n * p) / 100)) + " CHF."), GS("Le prix " + (up ? "augmente" : "baisse") + " : nouveau prix ?", v, M(n + (up ? " + " : " - ") + dec((n * p) / 100) + " = " + dec(v)) + " CHF.")] };
     }
     const p = R.pick([10, 20, 25, 50]), n = 4 * R.int(5, 30), f = n * (1 + p / 100);
-    return { q: "Après une hausse de " + M(p + "\\,\\%") + ", un prix vaut " + M(dec(f)) + " CHF. Quel était le prix de départ ?", spec: { kind: "value", value: n }, sol: M(dec(f) + " : " + dec(1 + p / 100) + " = " + n) + " CHF (on divise, on ne retire pas " + p + " %)." };
+    return { traps: [TRAP(f * (1 - p / 100), "On ne retire pas " + p + " % du nouveau prix : la hausse était calculée sur le prix de départ.")],
+      guide: [GS("Une hausse de " + M(p + "\\,\\%") + " : le prix de départ a été multiplié par quel nombre ?", 1 + p / 100, M("1 + \\frac{" + p + "}{100} = " + dec(1 + p / 100)) + "."), GS("Pour revenir en arrière, on divise : " + M(dec(f) + " : " + dec(1 + p / 100)) + " = ?", n, M(dec(f) + " : " + dec(1 + p / 100) + " = " + n) + " CHF.")],
+      q: "Après une hausse de " + M(p + "\\,\\%") + ", un prix vaut " + M(dec(f)) + " CHF. Quel était le prix de départ ?", spec: { kind: "value", value: n }, sol: M(dec(f) + " : " + dec(1 + p / 100) + " = " + n) + " CHF (on divise, on ne retire pas " + p + " %)." };
   },
 
   puiss(d) {
@@ -169,14 +184,17 @@ const GEN = {
   rac(d) {
     if (d === 1) {
       const k = R.int(2, 20);
-      return { fig: FIG.areaSquare("aire " + k * k), q: "Calcule " + M("\\sqrt{" + k * k + "}") + ".", spec: { kind: "value", value: k }, sol: M("\\sqrt{" + k * k + "} = " + k) + " car " + M(k + "^2 = " + k * k) + "." };
+      return { fig: FIG.areaSquare("aire " + k * k), q: "Calcule " + M("\\sqrt{" + k * k + "}") + ".", spec: { kind: "value", value: k }, sol: M("\\sqrt{" + k * k + "} = " + k) + " car " + M(k + "^2 = " + k * k) + ".",
+        guide: [GS("On cherche le nombre qui, multiplié par lui-même, donne " + M(k * k) + ". Essaie " + M(k - 1) + " : " + M((k - 1) + "^2") + " = ?", (k - 1) ** 2, M((k - 1) + "^2 = " + (k - 1) ** 2) + " : c'est moins que " + M(k * k) + ", essaie un peu plus."), GS("Alors " + M("\\sqrt{" + k * k + "}") + " = ?", k, M(k + "^2 = " + k * k) + ", donc " + M("\\sqrt{" + k * k + "} = " + k) + ".")] };
     }
     if (d === 2) {
       const k = R.int(2, 7), m = R.pick([2, 3, 5, 6, 7]);
-      return { fig: FIG.areaSquare("aire " + k * k * m), q: "Écris " + M("\\sqrt{" + k * k * m + "}") + " sous la forme " + M("a\\sqrt{b}") + " (tape par exemple " + M("3\\sqrt{2}") + " avec la touche √).", spec: { kind: "value", value: k * Math.sqrt(m), radical: true }, canon: k + "√" + m, sol: M("\\sqrt{" + k * k + " \\cdot " + m + "} = " + k + "\\sqrt{" + m + "}") };
+      return { fig: FIG.areaSquare("aire " + k * k * m), q: "Écris " + M("\\sqrt{" + k * k * m + "}") + " sous la forme " + M("a\\sqrt{b}") + " (tape par exemple " + M("3\\sqrt{2}") + " avec la touche √).", spec: { kind: "value", value: k * Math.sqrt(m), radical: true }, canon: k + "√" + m, sol: M("\\sqrt{" + k * k + " \\cdot " + m + "} = " + k + "\\sqrt{" + m + "}"),
+        guide: [GS("Quel est le plus grand carré parfait qui divise " + M(k * k * m) + " ? (4, 9, 16, 25, 36, 49…)", k * k, M(k * k * m + " = " + k * k + " \\cdot " + m) + "."), GS("La racine de ce carré : " + M("\\sqrt{" + k * k + "}") + " = ?", k, M("\\sqrt{" + k * k + "} = " + k) + "."), GSR("Donc " + M("\\sqrt{" + k * k * m + "} = \\sqrt{" + k * k + "} \\cdot \\sqrt{" + m + "}") + " = ? (forme " + M("a\\sqrt{b}") + ")", k * Math.sqrt(m), M("\\sqrt{" + k * k * m + "} = " + k + "\\sqrt{" + m + "}") + ".")] };
     }
     const m = R.pick([2, 3, 5]), a = R.int(2, 4), b = R.int(2, 5);
-    return { q: "Simplifie : " + M("\\sqrt{" + a * a * m + "} + \\sqrt{" + b * b * m + "}") + " (réponse sous la forme " + M("a\\sqrt{b}") + ").", spec: { kind: "value", value: (a + b) * Math.sqrt(m), radical: true }, canon: (a + b) + "√" + m, sol: M(a + "\\sqrt{" + m + "} + " + b + "\\sqrt{" + m + "} = " + (a + b) + "\\sqrt{" + m + "}") };
+    return { q: "Simplifie : " + M("\\sqrt{" + a * a * m + "} + \\sqrt{" + b * b * m + "}") + " (réponse sous la forme " + M("a\\sqrt{b}") + ").", spec: { kind: "value", value: (a + b) * Math.sqrt(m), radical: true }, canon: (a + b) + "√" + m, sol: M(a + "\\sqrt{" + m + "} + " + b + "\\sqrt{" + m + "} = " + (a + b) + "\\sqrt{" + m + "}"),
+      guide: [GSR("Simplifie la première racine : " + M("\\sqrt{" + a * a * m + "} = \\sqrt{" + a * a + " \\cdot " + m + "}") + " = ?", a * Math.sqrt(m), M("\\sqrt{" + a * a * m + "} = " + a + "\\sqrt{" + m + "}") + "."), GSR("Puis la seconde : " + M("\\sqrt{" + b * b * m + "}") + " = ?", b * Math.sqrt(m), M("\\sqrt{" + b * b * m + "} = " + b + "\\sqrt{" + m + "}") + "."), GSR("Les deux termes contiennent " + M("\\sqrt{" + m + "}") + " : on les additionne comme " + M(a + "x + " + b + "x") + ". Résultat ?", (a + b) * Math.sqrt(m), M(a + "\\sqrt{" + m + "} + " + b + "\\sqrt{" + m + "} = " + (a + b) + "\\sqrt{" + m + "}") + ".")] };
   },
 
   valnum(d) {

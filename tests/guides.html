@@ -1,0 +1,27 @@
+<meta charset="utf-8">
+<!-- Contrôle des guides pas à pas (lots, 14.11) : chaque étape a une valeur finie, la dernière étape donne la réponse ;
+     couverture par notion et niveau. tests/guides.html#arith,rel (notions à contrôler) ou sans # (toutes). -->
+<pre id="out">en cours</pre>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script>
+<script src="../src/expr.js"></script>
+<script src="../src/figures.js"></script><script src="../src/geo.js"></script>
+<script src="../src/generators.js"></script>
+<script src="../src/gen2.js"></script>
+<script src="../src/gen3.js"></script><script src="../src/competences.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script>
+<script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script>
+<script src="../src/engine.js"></script>
+<script>
+const out = [], ids = location.hash ? location.hash.slice(1).split(",") : Object.keys(GEN); let bad = 0, n = 0;
+for (const id of ids) { const cov = [];
+  for (const d of [1, 2, 3]) { let g = 0;
+    for (let s = 1; s <= 150; s++) { const q = Engine.build(id, d, s); if (!q.guide) continue; g++; n++;
+      const vals = q.guide.map((x) => x.spec.value), last = vals[vals.length - 1], ans = q.spec.value;
+      if (vals.some((v) => !isFinite(v))) { bad++; if (bad < 15) out.push("ÉCHEC valeur non finie " + q.code); }
+      else if (q.spec.kind === "value" && Math.abs(last - ans) > 1e-9 * Math.max(1, Math.abs(ans))) { bad++; if (bad < 15) out.push("ÉCHEC dernière étape ≠ réponse " + q.code + " : " + last + " / " + ans); }
+      else if (q.guide.some((x) => !x.ask || x.sol === undefined)) { bad++; if (bad < 15) out.push("ÉCHEC étape vide " + q.code); }
+    } cov.push(Math.round(g / 1.5) + " %"); }
+  if (location.hash) out.push(id + " : guides " + cov.join(" / "));
+}
+out.unshift((bad ? bad + " échec(s)" : "OK") + " — " + n + " questions guidées contrôlées");
+document.getElementById("out").textContent = out.join("\n");
+</script>
