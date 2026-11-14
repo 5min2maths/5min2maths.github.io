@@ -315,7 +315,7 @@ const GEN = {
 
   echelle(d) {
     if (d === 1) {
-      const k = R.pick([100, 200, 500, 1000]), c = R.int(2, 12);
+      const k = R.pick([50, 200, 250, 500, 1000]), c = R.int(2, 12);
       return { fig: FIG.scaling(k, "1:" + k), q: "Sur un plan à l'échelle " + M("1 : " + k) + ", un mur mesure " + M(c) + " cm. Quelle est sa longueur réelle, en mètres ?", spec: { kind: "value", value: (c * k) / 100 }, sol: M(c + " \\cdot " + k + " = " + c * k) + " cm, soit " + M(dec((c * k) / 100)) + " m." };
     }
     if (d === 2) {

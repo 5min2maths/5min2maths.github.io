@@ -98,6 +98,22 @@ function eloLabel(profile, r) {
   return r < ELO_REF[0][1] - 75 ? "En route vers la fin de " + name(8) : "Niveau " + adj + (adj === "solide" ? " de " : " de ") + name(h);
 }
 
+// Question triviale ? (règle du 14.11, contrôlée aussi par tests/trivial.html)
+// - écriture neutre visible : « + 0 », « - 0 », « · 1 », « × 1 », exposant 1 ;
+// - réponse lisible dans l'énoncé alors que deux données sont égales (ex. « 5 cahiers coûtent 30 CHF ; combien coûtent 5 cahiers ? ») ;
+// - réponse 0 ou ±1 : écartée aux deux premiers essais seulement (fréquence divisée, mais encore possible quand c'est le sujet).
+function trivialQ(q, k) {
+  const raw = String(q.q || "").replace(/<[^>]+>/g, " ");
+  if (/(^|[^\d.,{}])[+-]\s*0(?![\d.,{])/.test(raw)) return "terme nul";
+  if (/\\cdot\s*1(?![\d.,{])|×\s*1(?![\d.,{])|\^\s*\{?\s*1\s*\}?(?![\d.,{])/.test(raw)) return "facteur ou exposant 1";
+  const sp = q.spec || {};
+  if (sp.kind !== "value" || typeof sp.value !== "number") return "";
+  const nums = (raw.replace(/\{,\}/g, ".").replace(/[\^_]\s*(\{[^}]*\}|-?\d)/g, " ").replace(/\\[a-zA-Z]+/g, " ").match(/-?\d+(?:[.,]\d+)?/g) || []).map((t) => +t.replace(",", "."));
+  if (nums.includes(sp.value) && new Set(nums).size < nums.length) return "réponse dans l'énoncé, données égales";
+  if (k < 2 && (sp.value === 0 || Math.abs(sp.value) === 1)) return "réponse 0 ou ±1";
+  return "";
+}
+
 const Engine = {
   newState(profile) {
     const h = harmos(profile.system, profile.grade);
@@ -272,10 +288,17 @@ const Engine = {
     R.seed(seed * 7919 + level * 104729 + [...id].reduce((a, c) => a + c.charCodeAt(0), 0));
     const code = id + "-" + level + "-" + seed.toString(36);
     if (level === 4 && hasProb(id)) { const p = probFor(id)(); return { ...p, id, d: 4, seed, code, spec: { kind: "multi" }, hint: p.hints[0] }; }
-    const q = GEN[id](level);
     // Écritures maladroites des générateurs (audit 13.11) : « 1x » → « x », « + -2 » → « - 2 », « - -3 » → « + 3 ».
     const tidy = (t) => typeof t !== "string" ? t : t.replace(/([(=+\-\s{]|\\\()(-?)1([a-z])(?![a-z{])/g, "$1$2$3").replace(/\+\s*-\s*(?=[\da-z(\\])/g, "- ").replace(/-\s*-\s*(?=[\da-z(\\])/g, "+ ");
-    q.q = tidy(q.q); q.sol = tidy(q.sol);
+    // Pas de question triviale (règle du 14.11 : la trivialité fait décrocher) : tirage refait, de façon
+    // déterministe (même code → même question), jusqu'à 6 essais ; le dernier est gardé quoi qu'il arrive.
+    let q;
+    for (let k = 0; k < 6; k++) {
+      if (k) R.seed(seed * 7919 + level * 104729 + [...id].reduce((a, c) => a + c.charCodeAt(0), 0) + k * 15485863);
+      q = GEN[id](level);
+      q.q = tidy(q.q); q.sol = tidy(q.sol);
+      if (!trivialQ(q, k)) break;
+    }
     if (q.guide) q.guide = q.guide.map((g) => ({ ...g, ask: tidy(g.ask), sol: tidy(g.sol) }));
     if (q.traps && q.spec && q.spec.kind === "value") q.traps = q.traps.filter((t) => isFinite(t.v) && Math.abs(t.v - q.spec.value) > Math.max(q.spec.round || 0, 1e-6 * Math.max(1, Math.abs(q.spec.value))));
     if (q.parts) q.parts = q.parts.map((p) => ({ ...p, label: tidy(p.label) }));

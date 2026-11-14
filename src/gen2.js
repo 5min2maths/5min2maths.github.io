@@ -284,7 +284,7 @@ Object.assign(GEN, {
       return { fig: FIG.road(v * t + " km", t + " h"), q: "Une voiture parcourt " + M(v * t) + " km en " + M(t) + " h. Quelle est sa vitesse moyenne (en km/h) ?", spec: { kind: "value", value: v }, sol: M("v = \\frac{" + v * t + "}{" + t + "} = " + v) + " km/h." };
     }
     if (d === 2) {
-      const v = R.pick([60, 72, 80, 90, 120]), mins = R.pick([15, 20, 30, 40, 45]), dist = (v * mins) / 60;
+      const v = R.pick([48, 72, 80, 90, 120]), mins = R.pick([15, 20, 30, 40, 45]), dist = (v * mins) / 60;
       return { fig: FIG.road(FIG.fmt(dist) + " km", v + " km/h"), q: "À " + M(v) + " km/h, combien de minutes faut-il pour parcourir " + M(dec(dist)) + " km ?", spec: { kind: "value", value: mins }, sol: M("t = \\frac{" + dec(dist) + "}{" + v + "}\\ \\text{h} = " + mins) + " min." };
     }
     const [v1, v2, dd] = R.pick([[40, 60, 120], [60, 120, 120], [30, 60, 60], [60, 90, 180], [40, 120, 120], [60, 40, 240], [90, 60, 180]]);
