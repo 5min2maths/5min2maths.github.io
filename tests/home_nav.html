@@ -1,0 +1,12 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../src/style.css"><body><main id="app"></main><pre id="log"></pre>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/competences.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script><script>try{ state = Engine.newState({ system: "CH", grade: 9, track: "college", minutes: 5 }); Engine.autoInit(state); state.streak={count:4,last:day()}; save(); homeTab="today"; screenHome();
+const L=[]; document.querySelector('.tab[data-tab="prog"]').click(); L.push("clic Progrès -> "+document.querySelector(".home-panel").dataset.tab);
+const sw=(dx)=>{ const t=document.querySelector(".home-panel"); const mk=(x)=>new Touch({identifier:1,target:t,clientX:x,clientY:300});
+ t.dispatchEvent(new TouchEvent("touchstart",{bubbles:true,touches:[mk(200)],changedTouches:[mk(200)]}));
+ t.dispatchEvent(new TouchEvent("touchend",{bubbles:true,touches:[],changedTouches:[mk(200+dx)]})); };
+sw(120); L.push("glisser à droite -> "+document.querySelector(".home-panel").dataset.tab);
+sw(-120); L.push("glisser à gauche -> "+document.querySelector(".home-panel").dataset.tab);
+document.getElementById("settings").click(); L.push("roue -> "+document.querySelector("h2").textContent+", barre: "+!!document.querySelector(".tabs")+", has-tabs: "+app.classList.contains("has-tabs"));
+document.getElementById("back").click(); L.push("retour -> "+document.querySelector(".home-panel").dataset.tab);
+document.getElementById("log").textContent=L.join("\n"); }catch(e){document.getElementById("log").textContent="ERR "+e.stack}</script>

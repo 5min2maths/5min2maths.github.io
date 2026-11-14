@@ -1,6 +1,6 @@
 // Cache hors ligne : la page d'abord depuis le réseau (pour recevoir les mises à jour), sinon depuis le cache ;
 // le reste (MathJax, polices, icônes) depuis le cache, complété au fil de l'eau.
-const CACHE = "5m2m-948ea17d9a";
+const CACHE = "5m2m-bd580d7bed";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
   "https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"];
 self.addEventListener("install", (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)).then(() => self.skipWaiting())); });
