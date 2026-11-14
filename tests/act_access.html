@@ -1,0 +1,13 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css"><body><main id="app"></main><pre id="log"></pre>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/competences.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script><script>try{ Element.prototype.scrollIntoView=function(){}; state = Engine.newState({ system: "CH", grade: 9, track: "college", minutes: 5 }); Engine.autoInit(state); save();
+const L=[]; const q=Engine.make(state,"arith",1); renderQuestion(q,{eyebrow:"T",onDone(){},onNext(){}});
+const d=document.querySelector("details.lesson"); d.open=true; d.dispatchEvent(new Event("toggle"));
+setTimeout(()=>{ L.push("rappel : "+document.querySelector(".act-inline .act-goal").textContent);
+ for(let i=0;i<4;i++) document.querySelector(".act-inline #ja").click(); for(let i=0;i<3;i++) document.querySelector(".act-inline #jb").click();
+ L.push("défi : "+document.querySelector(".act-inline .act-fb").textContent);
+ screenComps(); const det=[...document.querySelectorAll(".cyc")][0]; det.open=true;
+ const b=document.querySelector('.lopen[data-id="arith"]'); L.push("bouton : "+(b&&b.textContent)); b.click();
+ L.push("écran : "+document.querySelector(".eyebrow").textContent+" / "+document.querySelector("h2").textContent);
+ document.getElementById("log").textContent=L.join("\n"); },50);
+}catch(e){document.getElementById("log").textContent="ERR "+e.stack}</script>

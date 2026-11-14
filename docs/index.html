@@ -6653,7 +6653,7 @@ function screenComps() {
     if (!ns.length) return "";
     const t = compStats(ns.map((c) => c.id));
     return `<details class="card flat cyc"><summary><span class="cyc-h"><b>${THEMES[th]}</b><span class="small muted">${t.tested} / ${t.total} notées${t.avg !== null ? " · moyenne " + String(Math.round(t.avg * 10) / 10).replace(".", ",") : ""}</span></span>${t.avg !== null ? `<span class="note ${noteCls(Math.round(t.avg * 2) / 2)}">${String(Math.round(t.avg * 10) / 10).replace(".", ",")}</span>` : ""}</summary>
-      ${ns.map((c) => `<div class="cnotion"><div class="spread"><b>${c.label}</b><span class="row" style="gap:4px"><span class="tag yr">${yearOf(c)}e</span>${statusTag(c.id)}</span></div>${compLine(c)}</div>`).join("")}</details>`;
+      ${ns.map((c) => `<div class="cnotion"><div class="spread"><b>${c.label}</b><span class="row" style="gap:4px"><span class="tag yr">${yearOf(c)}e</span>${statusTag(c.id)}</span></div>${LESSONS[c.id] ? `<button type="button" class="btn-ghost small lopen" data-id="${c.id}">${typeof ACTIVE !== "undefined" && ACTIVE[c.id] ? "🖐 Leçon à manipuler" : "📖 Leçon"}</button>` : ""}${compLine(c)}</div>`).join("")}</details>`;
   }).join("");
   const sc = compStats(cat.map((c) => c.id));
   Badges.check(state); state.badgesNew = []; save();
@@ -6666,6 +6666,7 @@ function screenComps() {
   ${old.length ? `<details class="olds"><summary>Années précédentes (${compStats(old.map((c) => c.id)).tested} notées)</summary>${block(old)}</details>` : ""}`}
   <button class="btn-primary btn-big" id="back">Retour</button>`);
   bindBadges(app);
+  app.querySelectorAll(".lopen").forEach((b) => (b.onclick = () => screenLesson(b.dataset.id, screenComps)));
   // « Me tester » (14.11, demande de l'utilisateur) : 3 questions de la compétence, au niveau de la compétence.
   app.querySelectorAll(".ctest").forEach((b) => (b.onclick = () => {
     const id = b.dataset.id, d = +b.dataset.d, cid = id + ":" + (d - 1);
@@ -6701,7 +6702,21 @@ function bindBadges(root) {
   root.querySelectorAll(".bdg[data-info]").forEach((x) => (x.onclick = () => { info.textContent = x.dataset.info; root.querySelectorAll(".bdg").forEach((y) => y.setAttribute("aria-pressed", y === x)); }));
 }
 function bindLessonOpen(root) {
-  root.querySelectorAll("details.lesson[data-id]").forEach((d) => d.addEventListener("toggle", () => { if (d.open && state) { Badges.onLesson(state, d.dataset.id); Badges.check(state); save(); } }));
+  root.querySelectorAll("details.lesson[data-id]").forEach((d) => d.addEventListener("toggle", () => { if (d.open && state) { Badges.onLesson(state, d.dataset.id); Badges.check(state); save(); } if (d.open) startInlineAct(d); }));
+}
+// Manipulation dans le rappel de cours (14.11) : les défis de la leçon active, lancés à l'ouverture.
+function startInlineAct(root) {
+  root.querySelectorAll(".act-inline[data-act]").forEach((el) => {
+    if (el.dataset.on) return;
+    const A = ACTIVE[el.dataset.act]; if (!A) return;
+    el.dataset.on = 1;
+    const goal = el.querySelector(".act-goal"), fb = el.querySelector(".act-fb");
+    goal.textContent = "Défi 1 · " + A.defis[0];
+    A.play(el.querySelector(".act-box"), (k, msg) => {
+      fb.innerHTML = `<div class="fb ok">✓ ${msg}</div>`;
+      goal.textContent = k + 1 < A.defis.length ? "Défi " + (k + 2) + " · " + A.defis[k + 1] : "Défis réussis !";
+    });
+  });
 }
 
 // ---------------- Ce que l'app envoie (13.11) ----------------
@@ -6883,7 +6898,8 @@ function lessonBody(id) {
   const L = LESSONS[id];
   if (!L) return "";
   const fig = typeof LESSON_FIGS !== "undefined" && LESSON_FIGS[id] ? `<div class="figwrap">${LESSON_FIGS[id]()}</div>` : "";
-  return `<p>${L.intro}</p>${fig}<div class="rule"><b>À retenir</b>${(() => { const ss = sentences(L.regle); return ss.length > 1 ? "<ul>" + ss.map((x) => "<li>" + x + "</li>").join("") + "</ul>" : " · " + L.regle; })()}</div>
+  const act = typeof ACTIVE !== "undefined" && ACTIVE[id] ? `<div class="act-inline stack" data-act="${id}"><div class="act-h"><span class="act-n">🖐</span> Manipule</div><p class="act-goal"></p><div class="act-box stack"></div><div class="act-fb"></div></div>` : "";
+  return `<p>${L.intro}</p>${act || fig}<div class="rule"><b>À retenir</b>${(() => { const ss = sentences(L.regle); return ss.length > 1 ? "<ul>" + ss.map((x) => "<li>" + x + "</li>").join("") + "</ul>" : " · " + L.regle; })()}</div>
   <div class="ex-list">${L.exemple.map((e) => `<div>${e}</div>`).join("")}</div>
   <div class="trap"><b>Piège</b> · ${L.piege}</div>
   <div class="lfb" data-id="${id}"><span class="small muted">Ce rappel est…</span><button class="small" data-v="up">👍 clair</button><button class="small" data-v="down">🤔 pas compris</button><span class="small muted lfb-msg"></span></div>
