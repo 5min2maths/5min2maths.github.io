@@ -585,14 +585,14 @@ Object.assign(GEN, {
 
   f2(d) {
     if (d === 1) {
-      const p = R.nz(-6, 6), q = R.nz(-6, 6);
-      return { fig: FIG.parabola((x) => (x - p) * (x - q) / 3, [], null, false), q: "Détermine les zéros de " + M("f(x) = " + poly([1, -(p + q), p * q])) + ".", spec: { kind: "set", values: [...new Set([p, q])] }, sol: "Produit-somme ou discriminant : " + M("f(x) = (" + xm(p) + ")(" + xm(q) + ")") + ", zéros " + M(p) + " et " + M(q) + "." };
+      const p = R.nz(-6, 6), q = R.nz(-6, 6), a0 = R.pick([1, 1, -1, 2, -2, 3, 0.5, -0.5]);
+      return { fig: FIG.parabola((x) => a0 * (x - p) * (x - q) / 3, [], null, false), q: "Détermine les zéros de " + M("f(x) = " + poly([a0, -a0 * (p + q), a0 * p * q])) + ".", spec: { kind: "set", values: [...new Set([p, q])] }, sol: "Produit-somme ou discriminant : " + M("f(x) = " + (a0 === 1 ? "" : a0 === -1 ? "-" : ratT(a0)) + "(" + xm(p) + ")(" + xm(q) + ")") + ", zéros " + M(p) + " et " + M(q) + "." };
     }
     if (d === 2) {
-      const h = R.nz(-4, 4), k = R.int(-6, 6), a = R.pick([1, -1, 2, -2]);
+      const h = R.nz(-4, 4), k = R.int(-6, 6), a = R.pick([1, -1, 2, -2, 3, 0.5, -0.5, 1.5]);
       return { fig: FIG.parabola((x) => (a * (x - h) ** 2 + k) / 3, [], null, false), q: "Détermine le sommet de la parabole " + M("f(x) = " + poly([a, -2 * a * h, a * h * h + k])) + ". Réponds « x ; y ».", spec: { kind: "pair", values: [h, k] }, sol: M("x_S = -\\frac{b}{2a} = " + h) + " ; " + M("y_S = f(" + h + ") = " + k) + "." };
     }
-    const a = R.pick([-2, -1, 2, 3, -3]), b = R.nz(-7, 7), c = R.int(-5, 5);
+    const a = R.pick([-2, 2, 3, -3, 0.5, -0.5, 1.5, -1]), b = R.nz(-7, 7), c = R.int(-5, 5);
     const xs = -b / (2 * a), ys = a * xs * xs + b * xs + c;
     return { fig: FIG.parabola((x) => (a * x * x + b * x + c) / 4, [], null, false), q: "Détermine le sommet de " + M("f(x) = " + poly([a, b, c])) + ". Réponds « x ; y » (fractions acceptées).", spec: { kind: "pair", values: [xs, ys] }, sol: M("x_S = -\\frac{" + b + "}{" + 2 * a + "} = " + ratT(xs)) + " ; " + M("y_S = f(x_S) = " + ratT(ys)) + "." };
   },

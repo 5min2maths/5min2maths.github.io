@@ -42,7 +42,9 @@ function poly(cs, x = "x") {
     const p = deg - i;
     if (c === 0) return;
     const abs = Math.abs(c);
-    const coef = p === 0 ? String(abs) : abs === 1 ? "" : String(abs);
+    // Coefficient non entier : fraction en TeX (\frac{1}{2}x^2), jamais 0.5x^2 (14.11).
+    const fq = (v) => { if (Number.isInteger(v)) return String(v); for (let q = 2; q <= 60; q++) if (Math.abs(v * q - Math.round(v * q)) < 1e-9) return "\\frac{" + Math.round(v * q) + "}{" + q + "}"; return String(+v.toFixed(6)).replace(".", "{,}"); };
+    const coef = p === 0 ? fq(abs) : abs === 1 ? "" : fq(abs);
     const term = coef + (p === 0 ? "" : p === 1 ? x : x + "^" + p);
     out += out === "" ? (c < 0 ? "-" : "") + term : (c < 0 ? " - " : " + ") + term;
   });
