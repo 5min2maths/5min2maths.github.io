@@ -1,5 +1,6 @@
-"""Index des exercices du brevet (annales APMEP découpées par Coopmaths) rangés
-par chapitre 11e CO et 1re Collège, pour modeler les « exercices riches ».
+"""Index des annales françaises découpées par Coopmaths (brevet, E3C, épreuve anticipée
+de 1re, bac ; transcriptions APMEP) rangées par chapitre 11e CO, 1re et 2e Collège,
+pour modeler les « exercices riches ».
 
 Sources (hors Dropbox, usage interne, on modèle sans recopier) :
   ~/DATA/Enseignement/Sources/Libres/coopmaths_mathalea/src/json/dictionnaireDNB.ts
@@ -12,9 +13,14 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 
 SRC = Path.home() / "DATA/Enseignement/Sources/Libres"
-DICO = SRC / "coopmaths_mathalea/src/json/dictionnaireDNB.ts"
-TEX = SRC / "coopmaths_dnb/sujets_decoupes"
-OUT = Path(__file__).resolve().parent.parent / "banque" / "dnb_index.xlsx"
+JSON = SRC / "coopmaths_mathalea/src/json"
+SOURCES = [  # (nom, index Coopmaths, dépôt)
+    ("brevet", "dictionnaireDNB.ts", "coopmaths_dnb"),
+    ("E3C 1re", "dictionnaireE3C.ts", "coopmaths_e3c"),
+    ("EAM 1re", "dictionnaireEAM.ts", "coopmaths_eam"),
+    ("bac", "dictionnaireBAC.ts", "coopmaths_bac"),
+]
+OUT = Path(__file__).resolve().parent.parent / "banque" / "annales_index.xlsx"
 
 CH11 = {  # tag Coopmaths -> chapitre 11e (THEME_LABEL CO)
     "Calcul numérique": "11C01", "Fractions": "11C01", "Puissances": "11C01", "Arithmétique": "11C01",
@@ -35,13 +41,22 @@ CH1C = {  # tag -> chapitre 1re Collège (THEME_LABEL MATU)
     "Thalès": "M1C08", "Pythagore": "M1C08", "Triangles semblables": "M1C08",
     "Agrandissement-réduction": "M1C08", "Géométrie plane": "M1C09", "Trigonométrie": "M1C10",
 }
+LYC = {  # thèmes lycée -> chapitres Collège (M1 = 1re, M2 = 2e)
+    "Second degré": "M1C07", "Polynômes": "M2C03", "Troisième degré": "M2C03",
+    "Géométrie repérée": "M2C01", "Produit scalaire": "M2C10", "Espace": "M2C10",
+    "Trigonométrie": "M2C09", "Exponentielle": "M2C05", "Logarithme": "M2C07",
+    "Pourcentages (évolutions)": "M1C01", "Automatismes": "M1C01",
+    "Affirmations": "M1C03", "Vrai/Faux": "M1C03", "Croissance linéaire": "M1C05",
+}
 LAB = {
     "11C01": "Nombres et opérations", "11C02": "Pythagore", "11C03": "3D", "11C04": "Proportionnalité, grandeurs",
     "11C05": "Calcul littéral", "11C06": "Équations", "11C07": "Angles", "11C08": "Thalès",
     "11C10": "Fonctions", "11C11": "Transformations, similitude", "11C12": "Probabilités",
     "M1C01": "Nombres", "M1C03": "Argumenter", "M1C04": "Fonctions", "M1C05": "Degrés 0 et 1",
     "M1C06": "Calcul littéral", "M1C08": "Thalès à Pythagore", "M1C09": "Cercles, angles",
-    "M1C10": "Trigonométrie",
+    "M1C07": "Degré 2", "M1C10": "Trigonométrie", "M2C01": "Équations cartésiennes",
+    "M2C03": "Fonctions polynomiales", "M2C05": "Exponentielles", "M2C07": "Logarithmes",
+    "M2C09": "Fonctions trigonométriques", "M2C10": "Géométrie vectorielle",
 }
 # Ce qui rend un exercice « riche » (repérage grossier dans l'énoncé)
 TYPES = [
@@ -55,10 +70,10 @@ TYPES = [
 ]
 
 
-def parse_dico():
-    txt = DICO.read_text(encoding="utf-8")
+def parse_dico(name):
+    txt = (JSON / name).read_text(encoding="utf-8")
     out = {}
-    for m in re.finditer(r"\n  (dnb_\w+): \{(.*?)\n  \},", txt, re.S):
+    for m in re.finditer(r"\n  (\w+): \{(.*?)\n  \},", txt, re.S):
         body = m.group(2)
         g = lambda k: (re.search(k + r": '([^']*)'", body) or [None, ""])[1]
         tags = re.findall(r"'((?:[^'\\]|\\.)*)'", (re.search(r"tags: \[(.*?)\]", body, re.S) or [0, ""])[1])
@@ -78,32 +93,37 @@ def plain(tex):
 
 
 def main():
-    dico = parse_dico()
     wb = Workbook()
     ws = wb.active
     ws.title = "Exercices"
-    head = ["id", "année", "session", "chap. 11e", "chap. 1re Coll.", "thèmes", "questions",
+    head = ["id", "source", "année", "session", "chap. 11e", "chap. 1re Coll.", "chap. 2e Coll.", "thèmes", "questions",
             "types", "début de l'énoncé", "énoncé .tex", "corrigé .tex"]
     ws.append(head)
     count = {}
-    for eid, d in sorted(dico.items()):
-        f = TEX / d["annee"] / "tex" / f"{eid}.tex"
-        if not f.exists():
+    for src, dname, repo in SOURCES:
+      files = {f.stem: f for f in (SRC / repo).rglob("*.tex")}
+      for eid, d in sorted(parse_dico(dname).items()):
+        f = files.get(eid)
+        if f is None:
             continue
         tex = f.read_text(encoding="utf-8", errors="replace")
-        c11 = sorted({CH11[t] for t in d["tags"] if t in CH11})
-        c1c = sorted({CH1C[t] for t in d["tags"] if t in CH1C})
-        if not (c11 or c1c):
+        c11 = sorted({CH11[t] for t in d["tags"] if t in CH11}) if src == "brevet" else []
+        cm = {CH1C[t] for t in d["tags"] if t in CH1C} | {LYC[t] for t in d["tags"] if t in LYC}
+        if src == "bac":  # Terminale : on ne garde que ce que fait le Collège
+            cm = {c for c in cm if c in ("M2C05", "M2C07", "M2C09", "M2C10", "M1C03")}
+        c1c = sorted(c for c in cm if c.startswith("M1"))
+        c2c = sorted(c for c in cm if c.startswith("M2"))
+        if not (c11 or c1c or c2c):
             continue
         low = re.sub(r"aucune justification[^.]*", "", tex.lower())
         types = [n for n, rx in TYPES if re.search(rx, low)]
         nq = len(re.findall(r"\\item", tex))
         txt = plain(tex)
-        cor = f.with_name(f"{eid}_cor.tex")
-        ws.append([eid, int(d["annee"]), f'{d["mois"]} {d["lieu"]}',
-                   ", ".join(c11), ", ".join(c1c), ", ".join(d["tags"]), nq,
-                   ", ".join(types), txt[:300], str(f), str(cor) if cor.exists() else ""])
-        for c in c11 + c1c:
+        cor = files.get(f"{eid}_cor")
+        ws.append([eid, src, int(d["annee"]), f'{d["mois"]} {d["lieu"]}',
+                   ", ".join(c11), ", ".join(c1c), ", ".join(c2c), ", ".join(d["tags"]), nq,
+                   ", ".join(types), txt[:300], str(f), str(cor) if cor else ""])
+        for c in c11 + c1c + c2c:
             k = count.setdefault(c, [0, 0, 0])
             k[0] += 1
             k[1] += "justifier" in types or "comparer" in types or "inverse" in types
@@ -112,10 +132,10 @@ def main():
     fill = PatternFill("solid", fgColor="DDEBF7")
     for cell in ws[1]:
         cell.font, cell.fill = bold, fill
-    for col, w in zip("ABCDEFGHIJK", [30, 7, 22, 14, 14, 34, 9, 26, 80, 20, 20]):
+    for col, w in zip("ABCDEFGHIJKLM", [30, 9, 7, 22, 14, 14, 14, 34, 9, 26, 80, 20, 20]):
         ws.column_dimensions[col].width = w
     for row in ws.iter_rows(min_row=2):
-        row[8].alignment = Alignment(wrap_text=True, vertical="top")
+        row[10].alignment = Alignment(wrap_text=True, vertical="top")
     ws.freeze_panes = "B2"
     ws.auto_filter.ref = ws.dimensions
 
