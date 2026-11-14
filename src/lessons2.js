@@ -54,7 +54,7 @@ const LESSONS_V2 = {
   angles: ["Angle au centre, angle inscrit", "Dans un cercle, un angle au centre et un angle inscrit peuvent « regarder » le même arc.",
     "L'angle au centre vaut le double de l'angle inscrit qui intercepte le même arc. Deux angles inscrits qui interceptent le même arc sont égaux. Un angle inscrit dans un demi-cercle est droit.",
     ["Angle inscrit de 35° : l'angle au centre qui intercepte le même arc mesure 70°.",
-      "\\([AB]\\) est un diamètre et \\(\\widehat{CAB} = 60°\\) : l'angle en \\(C\\) est droit, donc \\(\\widehat{CBA} = 30°\\)."],
+      "Si \\([AB]\\) est un diamètre et \\(C\\) un point du cercle, l'angle en \\(C\\) est droit. Avec \\(\\widehat{CAB} = 60°\\), on trouve \\(\\widehat{CBA} = 180° - 90° - 60° = 30°\\) (2e figure)."],
     "Vérifie que les deux angles interceptent bien le même arc."],
   simil: ["Agrandir, réduire", "Deux figures semblables ont la même forme : l'une est un agrandissement de l'autre.",
     "Si les longueurs sont multipliées par \\(k\\), les aires sont multipliées par \\(k^2\\). Les volumes sont multipliés par \\(k^3\\).",
@@ -387,7 +387,7 @@ const LESSONS_V2 = {
 // Figures des rappels réécrits (sans valeurs numériques de question).
 const LESSON_FIGS_V2 = {
   // 9e–10e
-  prio: () => FIG.blocks("3 + 4 · 2 : d'abord 4 · 2"),
+  prio: () => FIG.prioSteps([["20 − 2 · ", "3²", "", "puissance"], ["20 − ", "2 · 9", "", "multiplication"], ["", "20 − 18", "", "soustraction"]], "2"),
   angtri: () => FIG.triAngles(["α", "β", "γ"]),
   diagr: () => FIG.sector("", 90, "90°"),
   rel: () => FIG.numberLine(-2, [5]),
@@ -418,7 +418,7 @@ const LESSON_FIGS_V2 = {
   relrep: () => FIG.numberLine(-4, [7]),
   reladd: () => FIG.numberLine(-3, [5]),
   fracrep: () => FIG.fractionBars([[2, 3], [5, 6]]),
-  fractout: () => FIG.fractionBars([[3, 4]]),
+  fractout: () => FIG.fractionOf(3, 4, 20),
   agrand: () => FIG.scaling(2.5, "rect"),
   grandmanq: () => FIG.triangleFig("b", "h = ?"),
   airelat: () => FIG.cylinder("r", "h"),
@@ -457,7 +457,15 @@ const LESSON_FIGS_V2 = {
   volcone: () => FIG.cone("r", "h"),
   thales: () => GF.thales(0.45, {}),
   thalesrec: () => GF.thales(0.45, {}),
-  angles: () => FIG.circleAngles("2α", "α"),
+  // 14.11 (retour testeur) : angles marqués ; seconde figure pour le cas du diamètre.
+  angles: () => {
+    const P = (deg) => [3 * Math.cos((deg * Math.PI) / 180), 3 * Math.sin((deg * Math.PI) / 180)];
+    const f1 = GEO().circle([0, 0], 3, "f-soft").pt("O", 0, 0).dot("O").pt("A", ...P(210)).pt("B", ...P(330)).pt("C", ...P(95))
+      .seg("O", "A").seg("O", "B").seg("C", "A").seg("C", "B").angle("O", "A", "B", "2α", { r: 18 }).angle("C", "A", "B", "α", { r: 26 }).svg("angle au centre et angle inscrit");
+    const f2 = GEO().circle([0, 0], 3, "f-soft").pt("O", 0, 0).dot("O").pt("A", -3, 0).pt("B", 3, 0).pt("C", ...P(120))
+      .seg("A", "B").seg("A", "C").seg("C", "B").right("C", "A", "B").angle("A", "B", "C", "60°", { r: 22 }).angle("B", "C", "A", "?", { r: 26 }).svg("[AB] diamètre : angle droit en C");
+    return '<div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:8px">' + f1 + f2 + '</div>';
+  },
   pythrec: () => GF.rightTri(3, 4, { la: "a", lb: "b", lc: "c" }),
   airepyr: () => FIG.pyramid("c", "h"),
   volcomp: () => GF.profile("cone", 6, 5, 3, { r: "r", h1: "h", h2: "h'" }),

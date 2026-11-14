@@ -45,6 +45,35 @@ const FIG = (() => {
     return svg(W, H, b, "barres de fractions");
   }
 
+  // Accolade horizontale de x1 à x2, pointe vers le haut (s = 1) ou vers le bas (s = -1).
+  const brace = (x1, x2, y, s) => { const m = (x1 + x2) / 2, h = 8 * s;
+    return '<path d="M' + x1 + "," + y + " q0," + -h + " 8," + -h + " L" + (m - 8) + "," + (y - h) + " q8,0 8," + -h + " q0," + h + " 8," + h + " L" + (x2 - 8) + "," + (y - h) + " q8,0 8," + h + '" class="f-line" fill="none" stroke-width="1.6"/>'; };
+  // Fraction d'une quantité (14.11, retour testeur) : le tout n en accolade, b parts égales de n ÷ b, a parts prises en couleur.
+  function fractionOf(a, b, n) {
+    const x0 = 30, w = 280, y = 46, hh = 36, cw = w / b, part = n / b;
+    let g = brace(x0, x0 + w, y - 6, 1) + t(x0 + w / 2, y - 26, String(n), "f-txt", "middle", 15);
+    for (let k = 0; k < b; k++) {
+      g += '<rect x="' + (x0 + k * cw) + '" y="' + y + '" width="' + cw + '" height="' + hh + '" class="' + (k < a ? "f-fill" : "f-soft") + '" stroke="var(--ink)" stroke-width="1.5"/>';
+      g += t(x0 + k * cw + cw / 2, y + 23, fmt(part), k < a ? "f-on" : "f-txt", "middle", 14);
+    }
+    g += brace(x0, x0 + a * cw, y + hh + 6, -1) + t(x0 + (a * cw) / 2, y + hh + 38, a + "/" + b + " de " + n + " = " + fmt(part * a), "f-accent f-txt", "middle", 14);
+    g += t(x0 + w, y + hh + 38, "1 part = " + n + " ÷ " + b + " = " + fmt(part), "f-txt", "end", 11);
+    return svg(340, y + hh + 50, g, a + "/" + b + " de " + n);
+  }
+  // Priorités pas à pas (14.11, retour testeur) : rows = [[avant, surligné, après, étape]] ; dernière ligne = résultat.
+  function prioSteps(rows, result) {
+    let g = "";
+    rows.forEach(([pre, hi, post, step], i) => {
+      const y = 26 + i * 36;
+      g += '<text x="24" y="' + y + '" class="f-txt" font-size="18">' + (i ? "= " : "") + pre + '<tspan class="f-accent f-txt">' + hi + "</tspan>" + post + "</text>";
+      g += t(326, y, (i + 1) + ". " + step, "f-txt", "end", 12);
+      g += L(196, y - 5, 230, y - 5, "f-line", 'stroke-dasharray="3 3"');
+    });
+    const y = 26 + rows.length * 36;
+    g += '<text x="24" y="' + y + '" class="f-accent f-txt" font-size="18">= ' + result + "</text>";
+    return svg(340, y + 14, g, "priorités des opérations, étape par étape");
+  }
+
   // Jauge de pourcentage.
   function percentBar(p, total, unit = "") {
     const W = 340, w = 300 * p / 100;
@@ -246,5 +275,5 @@ const FIG = (() => {
     return svg(320, 190, g + t(cx + r + 8, cy + 14, "1", "f-txt", "start", 11), "cercle trigonométrique");
   }
 
-  return { unitLine, cylinder, unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, pyramid, cone, road, items, scaling, lineGraph, blocks, sciScale, areaSquare, tiles, fmt };
+  return { unitLine, cylinder, unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, pyramid, cone, road, items, scaling, lineGraph, blocks, fractionOf, prioSteps, sciScale, areaSquare, tiles, fmt };
 })();
