@@ -507,7 +507,9 @@ function nextQuestion(redo) {
   const parts = String(raw).split("|"), id = forceProb ? raw.slice(5) : parts[0], level = parts[1] ? +parts[1] : undefined, kind = redo ? redo.kind : parts[2];
   const ns = state.notions[id];
   // Écran de leçon : seulement la première fois, et pour une notion en cours en classe ou encore fragile.
-  if (!redo && LESSONS[id] && ns && !ns.lessonSeen && (ns.status === "encours" || ns.m < 0.4)) {
+  // Pas dans « Me tester » (14.11, retour de l'utilisateur) : on y attend 3 questions sur la compétence choisie ;
+  // le rappel de cours reste ouvrable dans chaque question.
+  if (!redo && !session.ctest && LESSONS[id] && ns && !ns.lessonSeen && (ns.status === "encours" || ns.m < 0.4)) {
     state.notions[id].lessonSeen = true; save();
     return screenLesson(id, () => { session.lessonShown = id; nextQuestion(); });
   }
