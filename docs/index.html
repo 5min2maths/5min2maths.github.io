@@ -284,7 +284,7 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 
 </style>
 <script>
-window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "global" }, startup: { typeset: false } };
+window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "global" }, startup: { typeset: false, ready() { MathJax.startup.defaultReady(); MathJax.startup.input[0].preFilters.add(({ math }) => { if (window.divSign) math.math = window.divSign(math.math); }); } } };
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
 </head>
@@ -326,7 +326,7 @@ const NOTIONS = [
   { id: "distrib", theme: "fa", label: "Développer", ex: "(x + 2)(x - 3) = x^2 - x - 6", CH: [10], again: [11], MP: [12, "S1"], FR: [8, 5] },
   { id: "eq1", theme: "fa", label: "Équations du 1er degré", ex: "3x - 5 = 7 \\iff x = 4", CH: [10], again: [11,12], MP: [12, "S1"], FR: [8, 6] },
   { id: "probeq", theme: "fa", label: "Mettre un problème en équation", ex: "n + (n+1) + (n+2) = 48", CH: [10], again: [11], MP: [12, "S1"], FR: null },
-  { id: "echelle", theme: "fa", label: "Échelles et pentes", ex: "1 : 200 : \\; 3 \\text{ cm} \\to 6 \\text{ m}", CH: [10], FR: [9, 6] },
+  { id: "echelle", theme: "fa", label: "Échelles et pentes", ex: "1\\,:\\,200 : \\; 3 \\text{ cm} \\to 6 \\text{ m}", CH: [10], FR: [9, 6] },
   { id: "affine", theme: "fa", label: "Fonctions affines", ex: "f(x) = ax + b", CH: [10], again: [11,12], MP: [13, "S1"], FR: [9, 7] },
   { id: "polyreg", theme: "es", label: "Polygones réguliers", ex: "\\text{angle au centre} = \\frac{360°}{n}", CH: [10], FR: null },
   { id: "proba", theme: "no", label: "Probabilités", ex: "P = \\frac{\\text{cas favorables}}{\\text{cas possibles}}", CH: [11], FR: null },
@@ -1649,7 +1649,7 @@ const GEN = {
   echelle(d) {
     if (d === 1) {
       const k = R.pick([50, 200, 250, 500, 1000]), c = R.int(2, 12);
-      return { fig: FIG.scaling(k, "1:" + k), q: "Sur un plan à l'échelle " + M("1 : " + k) + ", un mur mesure " + M(c) + " cm. Quelle est sa longueur réelle, en mètres ?", spec: { kind: "value", value: (c * k) / 100 }, sol: M(c + " \\cdot " + k + " = " + c * k) + " cm, soit " + M(dec((c * k) / 100)) + " m." };
+      return { fig: FIG.scaling(k, "1:" + k), q: "Sur un plan à l'échelle " + M("1\\,:\\, " + k) + ", un mur mesure " + M(c) + " cm. Quelle est sa longueur réelle, en mètres ?", spec: { kind: "value", value: (c * k) / 100 }, sol: M(c + " \\cdot " + k + " = " + c * k) + " cm, soit " + M(dec((c * k) / 100)) + " m." };
     }
     if (d === 2) {
       const k = R.int(2, 5), A = R.int(2, 12);
@@ -2083,7 +2083,7 @@ const PROB = {
   },
   echelle() {
     const k = R.pick([20, 25, 50, 100]), lm = R.int(4, 15), am = R.int(6, 40), vm = R.int(2, 9);
-    return { fig: FIG.scaling(3, "1 : " + k), q: "Une maquette de bâtiment est à l'échelle " + M("1 : " + k) + ".",
+    return { fig: FIG.scaling(3, "1 : " + k), q: "Une maquette de bâtiment est à l'échelle " + M("1\\,:\\, " + k) + ".",
       parts: [{ label: "a) Un mur mesure " + lm + " cm sur la maquette : longueur réelle (m)", spec: { kind: "value", value: (lm * k) / 100 } }, { label: "b) Une pièce mesure " + am + " cm² sur la maquette : aire réelle (m²)", spec: { kind: "value", value: (am * k * k) / 10000 } }, { label: "c) Une cuve de " + vm + " cm³ sur la maquette : volume réel (m³)", spec: { kind: "value", value: (vm * k ** 3) / 1e6 } }],
       hints: ["Longueurs × " + decTxt(k) + ", aires × " + decTxt(k) + "², volumes × " + decTxt(k) + "³.", "Puis convertis : 1 m = 100 cm, 1 m² = 10 000 cm², 1 m³ = 1 000 000 cm³."],
       sol: "a) " + M(lm * k + " \\text{ cm} = " + dec((lm * k) / 100)) + " m. b) " + M(am + " \\cdot " + k * k + " = " + am * k * k + " \\text{ cm}^2 = " + dec((am * k * k) / 10000)) + " m². c) " + M(vm + " \\cdot " + k ** 3 + " = " + vm * k ** 3 + " \\text{ cm}^3 = " + dec((vm * k ** 3) / 1e6)) + " m³." };
@@ -2593,7 +2593,7 @@ Object.assign(GEN, {
     }
     const kk = R.pick([2, 3, 4, 5]), A1 = R.int(2, 12);
     if (R.rand() < 0.5) return { q: "Deux figures semblables ont pour aires " + M(A1) + " cm² et " + M(A1 * kk * kk) + " cm². Le périmètre de la petite vaut " + M(A1 + 7) + " cm. Quel est le périmètre de la grande (en cm) ?", spec: { kind: "value", value: (A1 + 7) * kk }, sol: M("k^2 = \\frac{" + A1 * kk * kk + "}{" + A1 + "} = " + kk * kk) + " donc " + M("k = " + kk)+ " ; les longueurs sont multipliées par " + M(kk) + " : " + M((A1 + 7) * kk) + " cm." };
-    return { fig: FIG.box("", "", ""), q: "Une maquette est à l'échelle " + M("1 : " + kk * 10) + ". Le volume de la maquette est de " + M(A1) + " cm³. Quel est le volume réel, en litres ?", spec: { kind: "value", value: (A1 * (kk * 10) ** 3) / 1000 }, sol: "Les volumes sont multipliés par " + M("k^3 = " + (kk * 10) ** 3) + " : " + M(A1 * (kk * 10) ** 3 + "\\ \\text{cm}^3 = " + dec((A1 * (kk * 10) ** 3) / 1000) + "\\ \\text{L}") + "." };
+    return { fig: FIG.box("", "", ""), q: "Une maquette est à l'échelle " + M("1\\,:\\, " + kk * 10) + ". Le volume de la maquette est de " + M(A1) + " cm³. Quel est le volume réel, en litres ?", spec: { kind: "value", value: (A1 * (kk * 10) ** 3) / 1000 }, sol: "Les volumes sont multipliés par " + M("k^3 = " + (kk * 10) ** 3) + " : " + M(A1 * (kk * 10) ** 3 + "\\ \\text{cm}^3 = " + dec((A1 * (kk * 10) ** 3) / 1000) + "\\ \\text{L}") + "." };
   },
 
   proba(d) {
@@ -3180,7 +3180,7 @@ FINE.push(
       () => { const a = R.int(3, 9), b = R.int(3, 9), e = R.int(2, 6), c = e * R.int(2, 5); return QV("Calcule la différence entre le produit de " + M(a) + " par " + M(b) + " et le quotient de " + M(c) + " par " + M(e) + ".", a * b - c / e, M(a + " \\cdot " + b + " - " + c + " : " + e + " = " + a * b + " - " + c / e + " = " + (a * b - c / e))); },
       () => { const a = R.int(2, 6), b = R.int(2, 6), c = R.int(2, 7); return QV("Calcule le carré de la somme de " + M(a) + " et " + M(b) + ", diminué du triple de " + M(c) + ".", (a + b) ** 2 - 3 * c, M("(" + a + " + " + b + ")^2 - 3 \\cdot " + c + " = " + (a + b) ** 2 + " - " + 3 * c + " = " + ((a + b) ** 2 - 3 * c))); },
     ] },
-  { id: "multdiv", theme: "no", label: "Multiples et diviseurs", ex: "\\text{diviseurs de } 12 : 1, 2, 3, 4, 6, 12", CH: [9], codes: "9NO4\\.01",
+  { id: "multdiv", theme: "no", label: "Multiples et diviseurs", ex: "\\text{diviseurs de } 12 : \\; 1, 2, 3, 4, 6, 12", CH: [9], codes: "9NO4\\.01",
     hint: "Les diviseurs vont par paires : 1 et n, 2 et n/2… Les multiples de a sont a, 2a, 3a…",
     lesson: ["Multiples et diviseurs", "\\(12 = 3 \\cdot 4\\) : 12 est un multiple de 3 ; 3 est un diviseur de 12.", "Pour lister les diviseurs, on cherche les paires de facteurs : \\(1 \\cdot 12\\), \\(2 \\cdot 6\\), \\(3 \\cdot 4\\).", ["Diviseurs de 12 : 1, 2, 3, 4, 6, 12", "Multiples de 7 : 7, 14, 21, 28…"], "1 et le nombre lui-même sont toujours des diviseurs : ne les oublie pas."],
     g: [
@@ -3513,7 +3513,7 @@ FINE.push(
       () => { const x = R.nz(-9, 9), y = R.nz(-9, 9), ax = R.rand() < 0.5; if (Math.abs(x) === Math.abs(y)) return GEN.repere(2); return QV("À quelle distance de l'axe des " + (ax ? "abscisses" : "ordonnées") + " le point " + M("M(" + x + " \\, ; " + y + ")") + " se trouve-t-il ?", Math.abs(ax ? y : x), "La distance à l'axe des " + (ax ? "abscisses est la valeur absolue de l'ordonnée" : "ordonnées est la valeur absolue de l'abscisse") + " : " + M(Math.abs(ax ? y : x)) + "."); },
       () => { const x1 = R.int(-6, 0), y1 = R.int(-5, 0), w = R.int(2, 7), h = R.int(2, 6); return { q: M("ABCD") + " est un rectangle dont les côtés sont parallèles aux axes, avec " + M("A(" + x1 + " \\, ; " + y1 + ")") + ", " + M("B(" + (x1 + w) + " \\, ; " + y1 + ")") + " et " + M("C(" + (x1 + w) + " \\, ; " + (y1 + h) + ")") + ". Quelles sont les coordonnées de " + M("D") + " ? Réponds « x ; y ».", spec: { kind: "pair", values: [x1, y1 + h] }, sol: M("D") + " a la même abscisse que " + M("A") + " et la même ordonnée que " + M("C") + " : " + M("D(" + x1 + " \\, ; " + (y1 + h) + ")") + "." }; },
     ] },
-  { id: "tabval", theme: "fa", label: "Tableau de valeurs d'une fonction", ex: "f(x) = 2x^2 : \; f(-3) = 18", CH: [10], again: [11], codesMATU: "1\\.FO\\.02b", codes: "10FA4\\.0[24]|11FA5\\.0[24]",
+  { id: "tabval", theme: "fa", label: "Tableau de valeurs d'une fonction", ex: "f(x) = 2x^2 : \\; f(-3) = 18", CH: [10], again: [11], codesMATU: "1\\.FO\\.02b", codes: "10FA4\\.0[24]|11FA5\\.0[24]",
     hint: "Remplace x par le nombre, entre parenthèses s'il est négatif : (−3)² = 9.",
     lesson: ["Tableau de valeurs", "À chaque valeur de \\(x\\), la fonction associe une valeur.", "On remplace \\(x\\) par le nombre choisi, en mettant des parenthèses autour d'un nombre négatif, puis on calcule en respectant les priorités.", ["\\(f(x) = 3x - 2\\) : \\(f(4) = 10\\)", "\\(f(x) = 2x^2\\) : \\(f(-3) = 2 \\cdot 9 = 18\\)"], "\\(-3^2 = -9\\), mais \\((-3)^2 = 9\\)."],
     g: [
@@ -3665,7 +3665,7 @@ FINE.push(
       () => { const b = R.pick([2, 3, 5]), c = R.int(2, 4), k = R.int(1, 5); return QV("On écrit " + M("\\frac{" + k * b * c + "}{" + c + "\\sqrt{" + b + "}}") + " sous la forme " + M("k\\sqrt{" + b + "}") + ". Que vaut " + M("k") + " ?", k, M("\\frac{" + k * b * c + "\\sqrt{" + b + "}}{" + c + " \\cdot " + b + "} = " + (k === 1 ? "" : k) + "\\sqrt{" + b + "}") + "."); },
       () => { const [b, c, m] = R.pick([[5, 2, 1], [7, 2, 3], [6, 2, 2], [3, 1, 2], [5, 1, 4], [2, 1, 1], [10, 3, 1], [11, 3, 2]]), p = R.int(1, 4); return QV("On écrit " + M("\\frac{" + p * m + "}{\\sqrt{" + b + "} - " + c + "}") + " sous la forme " + M("p\\,(\\sqrt{" + b + "} + " + c + ")") + ". Que vaut " + M("p") + " ?", p, "On multiplie par l'expression conjuguée : dénominateur " + M(b + " - " + c * c + " = " + m) + ", donc " + M("p = " + p * m + " : " + m + " = " + p) + "."); },
     ] },
-  { id: "valint", theme: "fa", label: "Valeurs interdites d'une fraction rationnelle", ex: "\\frac{x + 1}{x^2 - 9} : \; x \\ne \\pm 3", CH: [13], MP: [12, "S1"], codesMATU: "2\\.AL\\.02a", codesMP: "S1\\.CA\\.10",
+  { id: "valint", theme: "fa", label: "Valeurs interdites d'une fraction rationnelle", ex: "\\frac{x + 1}{x^2 - 9} : \\; x \\ne \\pm 3", CH: [13], MP: [12, "S1"], codesMATU: "2\\.AL\\.02a", codesMP: "S1\\.CA\\.10",
     hint: "Une fraction n'existe pas quand son dénominateur vaut 0 : résous « dénominateur = 0 ».",
     lesson: ["Valeurs interdites", "On ne divise jamais par zéro.", "Les valeurs interdites sont les solutions de « dénominateur \\(= 0\\) ». On factorise le dénominateur si nécessaire.", ["\\(\\frac{5}{x - 4}\\) : \\(x \\ne 4\\)", "\\(\\frac{x + 1}{x^2 - 9}\\) : \\(x \\ne 3\\) et \\(x \\ne -3\\)"], "Les zéros du numérateur ne sont pas des valeurs interdites."],
     g: [
@@ -3897,7 +3897,7 @@ FINE.push(
       () => { const [a, b, t] = R.pick([[3, 6, 2], [4, 12, 3], [6, 12, 4], [10, 15, 6], [12, 24, 8], [20, 30, 12]]); return QV("Deux peintres mettent ensemble " + M(t) + " heures pour repeindre une salle. Le premier, seul, mettrait " + M(a) + " heures. Combien d'heures mettrait le second, seul ?", b, M("\\frac{1}{" + a + "} + \\frac{1}{x} = \\frac{1}{" + t + "}") + ", donc " + M("\\frac{1}{x} = \\frac{1}{" + t + "} - \\frac{1}{" + a + "} = \\frac{1}{" + b + "}") + " : " + M(b) + " heures."); },
       () => { const [v, d] = R.pick([[10, 30], [15, 60], [20, 100], [25, 150], [30, 210]]); return QV("Un cycliste parcourt " + M(d) + " km. En roulant " + M(5) + " km/h plus vite, il mettrait une heure de moins. Quelle est sa vitesse (en km/h) ?", v, M("\\frac{" + d + "}{v} - \\frac{" + d + "}{v + 5} = 1") + " mène à " + M("v^2 + 5v - " + 5 * d + " = 0") + ", dont la solution positive est " + M("v = " + v) + " km/h."); },
     ] },
-  { id: "bijection", theme: "fa", label: "Injection, bijection", ex: "f : [h \\, ; +\\infty[ \\to [k \\, ; +\\infty[", CH: [13], MP: null, codesMATU: "2\\.FO\\.02",
+  { id: "bijection", theme: "fa", label: "Injection, bijection", ex: "f \\colon [h \\, ; +\\infty[ \\to [k \\, ; +\\infty[", CH: [13], MP: null, codesMATU: "2\\.FO\\.02",
     hint: "Injective : deux nombres différents n'ont jamais la même image (toute horizontale coupe le graphe au plus une fois).",
     lesson: ["Bijection", "Une bijection associe à chaque élément de l'arrivée exactement une préimage.", "Injective : toute droite horizontale coupe le graphe au plus une fois. Pour rendre bijective \\(f(x) = (x - h)^2 + k\\), on restreint le départ à \\([h \\, ; +\\infty[\\) (une seule branche) et l'arrivée à l'ensemble des images \\([k \\, ; +\\infty[\\).", ["\\(x^3\\) et \\(2x + 1\\) sont injectives sur \\(\\mathbb{R}\\) ; \\(x^2\\) ne l'est pas", "\\((x - 3)^2 + 1\\) : bijection de \\([3 \\, ; +\\infty[\\) vers \\([1 \\, ; +\\infty[\\)"], "\\(x^2\\) n'est pas injective sur \\(\\mathbb{R}\\) : \\((-2)^2 = 2^2\\)."],
     g: [
@@ -4804,7 +4804,7 @@ const LESSONS = {
     ["3 kg coûtent 7,50 CHF → 1 kg : 2,50 CHF → 5 kg : 12,50 CHF"], "L'âge et la taille ne sont pas proportionnels : vérifie que la situation l'est."),
   vitesse: L_("Vitesse moyenne et durées", "La vitesse moyenne relie distance et durée.", "\\(v = \\frac{d}{t}\\), \\(d = v \\cdot t\\), \\(t = \\frac{d}{v}\\). \\(1\\) h \\(= 60\\) min ; \\(1\\) m/s \\(= 3{,}6\\) km/h.",
     ["\\(150\\) km en \\(2\\) h → \\(75\\) km/h", "\\(1\\) h \\(30\\) min \\(= 1{,}5\\) h"], "\\(1{,}5\\) h n'est pas \\(1\\) h \\(50\\) min : c'est \\(1\\) h \\(30\\) min."),
-  echelle: L_("Échelle, agrandissement, réduction", "Une échelle \\(1 : 200\\) signifie : 1 cm sur le plan = 200 cm en vrai.", "Rapport \\(k\\) : les longueurs sont multipliées par \\(k\\), les aires par \\(k^2\\), les volumes par \\(k^3\\).",
+  echelle: L_("Échelle, agrandissement, réduction", "Une échelle \\(1\\,:\\,200\\) signifie : 1 cm sur le plan = 200 cm en vrai.", "Rapport \\(k\\) : les longueurs sont multipliées par \\(k\\), les aires par \\(k^2\\), les volumes par \\(k^3\\).",
     ["\\(1 : 200\\) : \\(3\\) cm → \\(600\\) cm \\(= 6\\) m", "\\(k = 3\\) : aire \\(\\times 9\\), volume \\(\\times 27\\)"], "Doubler les côtés multiplie l'aire par 4, pas par 2."),
   aires: L_("Aires de figures", "L'aire mesure la surface, en unités carrées.", "Rectangle \\(L \\cdot l\\) ; triangle \\(\\frac{b \\cdot h}{2}\\) ; trapèze \\(\\frac{(B + b) \\cdot h}{2}\\) ; disque \\(\\pi r^2\\).",
     ["Triangle \\(b = 6\\), \\(h = 4\\) : \\(12\\) cm²", "Disque \\(r = 3\\) : \\(9\\pi \\approx 28{,}27\\) cm²"], "La hauteur est perpendiculaire à la base : ce n'est pas forcément un côté."),
@@ -5232,8 +5232,8 @@ const LESSONS_V2 = {
     ["Trois entiers consécutifs ont pour somme 48. Le premier est \\(n\\) : \\(n + (n + 1) + (n + 2) = 48\\), \\(3n + 3 = 48\\), \\(n = 15\\). Les nombres sont 15, 16 et 17."],
     "Une solution de l'équation peut ne pas convenir à l'énoncé (âge négatif, nombre non entier)."],
   echelle: ["Échelle, agrandissement, réduction", "Une échelle compare les longueurs d'un plan aux longueurs réelles.",
-    "Échelle \\(1 : 200\\) : 1 cm sur le plan représente 200 cm en réalité. Quand les longueurs sont multipliées par \\(k\\), les aires sont multipliées par \\(k^2\\) et les volumes par \\(k^3\\).",
-    ["Échelle \\(1 : 200\\), 3 cm sur le plan : \\(3 \\cdot 200 = 600\\) cm, soit 6 m.", "Rapport \\(k = 3\\) : une aire est multipliée par 9, un volume par 27."],
+    "Échelle \\(1\\,:\\,200\\) : 1 cm sur le plan représente 200 cm en réalité. Quand les longueurs sont multipliées par \\(k\\), les aires sont multipliées par \\(k^2\\) et les volumes par \\(k^3\\).",
+    ["Échelle \\(1\\,:\\,200\\), 3 cm sur le plan : \\(3 \\cdot 200 = 600\\) cm, soit 6 m.", "Rapport \\(k = 3\\) : une aire est multipliée par 9, un volume par 27."],
     "Doubler les côtés multiplie l'aire par 4, pas par 2."],
   affine: ["Fonctions affines", "\\(f(x) = ax + b\\) : son graphe est une droite.",
     "\\(a\\) est la pente : quand \\(x\\) augmente de 1, \\(f(x)\\) augmente de \\(a\\). Entre deux points, \\(a = \\frac{\\Delta y}{\\Delta x}\\). \\(b\\) est l'ordonnée à l'origine : \\(f(0) = b\\).",
@@ -6051,6 +6051,9 @@ const brand = '<div class="brand"><b>5 minutes de maths</b><span>par jour</span>
 const PRAISE = ["Juste !", "Bien vu !", "Exact !", "Parfait.", "C'est ça !", "Bravo !"];
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 
+// Signe de division (14.11, décision de l'utilisateur) : « : » devient ÷ dans toutes les formules, au rendu.
+// Restent « : » : le texte \text{…}, la ponctuation suivie de \; ou ;, et ce qui n'a pas d'espaces (échelle 1\,:\,200, f\colon).
+window.divSign = (t) => t.replace(/(\\text\{[^}]*\})|( : (?!\\;|;))/g, (m, txt) => txt || " \\div ");
 function typeset(el) {
   const go = () => window.MathJax && MathJax.typesetPromise ? MathJax.typesetPromise([el]).catch(() => {}) : setTimeout(go, 150);
   go();

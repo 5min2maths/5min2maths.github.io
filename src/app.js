@@ -16,6 +16,9 @@ const brand = '<div class="brand"><b>5 minutes de maths</b><span>par jour</span>
 const PRAISE = ["Juste !", "Bien vu !", "Exact !", "Parfait.", "C'est ça !", "Bravo !"];
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 
+// Signe de division (14.11, décision de l'utilisateur) : « : » devient ÷ dans toutes les formules, au rendu.
+// Restent « : » : le texte \text{…}, la ponctuation suivie de \; ou ;, et ce qui n'a pas d'espaces (échelle 1\,:\,200, f\colon).
+window.divSign = (t) => t.replace(/(\\text\{[^}]*\})|( : (?!\\;|;))/g, (m, txt) => txt || " \\div ");
 function typeset(el) {
   const go = () => window.MathJax && MathJax.typesetPromise ? MathJax.typesetPromise([el]).catch(() => {}) : setTimeout(go, 150);
   go();

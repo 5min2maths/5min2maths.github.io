@@ -36,7 +36,7 @@ const LESSONS = {
     ["3 kg coûtent 7,50 CHF → 1 kg : 2,50 CHF → 5 kg : 12,50 CHF"], "L'âge et la taille ne sont pas proportionnels : vérifie que la situation l'est."),
   vitesse: L_("Vitesse moyenne et durées", "La vitesse moyenne relie distance et durée.", "\\(v = \\frac{d}{t}\\), \\(d = v \\cdot t\\), \\(t = \\frac{d}{v}\\). \\(1\\) h \\(= 60\\) min ; \\(1\\) m/s \\(= 3{,}6\\) km/h.",
     ["\\(150\\) km en \\(2\\) h → \\(75\\) km/h", "\\(1\\) h \\(30\\) min \\(= 1{,}5\\) h"], "\\(1{,}5\\) h n'est pas \\(1\\) h \\(50\\) min : c'est \\(1\\) h \\(30\\) min."),
-  echelle: L_("Échelle, agrandissement, réduction", "Une échelle \\(1 : 200\\) signifie : 1 cm sur le plan = 200 cm en vrai.", "Rapport \\(k\\) : les longueurs sont multipliées par \\(k\\), les aires par \\(k^2\\), les volumes par \\(k^3\\).",
+  echelle: L_("Échelle, agrandissement, réduction", "Une échelle \\(1\\,:\\,200\\) signifie : 1 cm sur le plan = 200 cm en vrai.", "Rapport \\(k\\) : les longueurs sont multipliées par \\(k\\), les aires par \\(k^2\\), les volumes par \\(k^3\\).",
     ["\\(1 : 200\\) : \\(3\\) cm → \\(600\\) cm \\(= 6\\) m", "\\(k = 3\\) : aire \\(\\times 9\\), volume \\(\\times 27\\)"], "Doubler les côtés multiplie l'aire par 4, pas par 2."),
   aires: L_("Aires de figures", "L'aire mesure la surface, en unités carrées.", "Rectangle \\(L \\cdot l\\) ; triangle \\(\\frac{b \\cdot h}{2}\\) ; trapèze \\(\\frac{(B + b) \\cdot h}{2}\\) ; disque \\(\\pi r^2\\).",
     ["Triangle \\(b = 6\\), \\(h = 4\\) : \\(12\\) cm²", "Disque \\(r = 3\\) : \\(9\\pi \\approx 28{,}27\\) cm²"], "La hauteur est perpendiculaire à la base : ce n'est pas forcément un côté."),

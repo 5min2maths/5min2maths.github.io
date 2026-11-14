@@ -18,7 +18,7 @@ head = """<title>5minutes2mathsparjour</title>
 """ + (SRC / "style.css").read_text() + """
 </style>
 <script>
-window.MathJax = { tex: { inlineMath: [["\\\\(", "\\\\)"]] }, svg: { fontCache: "global" }, startup: { typeset: false } };
+window.MathJax = { tex: { inlineMath: [["\\\\(", "\\\\)"]] }, svg: { fontCache: "global" }, startup: { typeset: false, ready() { MathJax.startup.defaultReady(); MathJax.startup.input[0].preFilters.add(({ math }) => { if (window.divSign) math.math = window.divSign(math.math); }); } } };
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
 """

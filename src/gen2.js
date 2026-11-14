@@ -412,7 +412,7 @@ Object.assign(GEN, {
     }
     const kk = R.pick([2, 3, 4, 5]), A1 = R.int(2, 12);
     if (R.rand() < 0.5) return { q: "Deux figures semblables ont pour aires " + M(A1) + " cm² et " + M(A1 * kk * kk) + " cm². Le périmètre de la petite vaut " + M(A1 + 7) + " cm. Quel est le périmètre de la grande (en cm) ?", spec: { kind: "value", value: (A1 + 7) * kk }, sol: M("k^2 = \\frac{" + A1 * kk * kk + "}{" + A1 + "} = " + kk * kk) + " donc " + M("k = " + kk)+ " ; les longueurs sont multipliées par " + M(kk) + " : " + M((A1 + 7) * kk) + " cm." };
-    return { fig: FIG.box("", "", ""), q: "Une maquette est à l'échelle " + M("1 : " + kk * 10) + ". Le volume de la maquette est de " + M(A1) + " cm³. Quel est le volume réel, en litres ?", spec: { kind: "value", value: (A1 * (kk * 10) ** 3) / 1000 }, sol: "Les volumes sont multipliés par " + M("k^3 = " + (kk * 10) ** 3) + " : " + M(A1 * (kk * 10) ** 3 + "\\ \\text{cm}^3 = " + dec((A1 * (kk * 10) ** 3) / 1000) + "\\ \\text{L}") + "." };
+    return { fig: FIG.box("", "", ""), q: "Une maquette est à l'échelle " + M("1\\,:\\, " + kk * 10) + ". Le volume de la maquette est de " + M(A1) + " cm³. Quel est le volume réel, en litres ?", spec: { kind: "value", value: (A1 * (kk * 10) ** 3) / 1000 }, sol: "Les volumes sont multipliés par " + M("k^3 = " + (kk * 10) ** 3) + " : " + M(A1 * (kk * 10) ** 3 + "\\ \\text{cm}^3 = " + dec((A1 * (kk * 10) ** 3) / 1000) + "\\ \\text{L}") + "." };
   },
 
   proba(d) {

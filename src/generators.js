@@ -336,7 +336,7 @@ const GEN = {
   echelle(d) {
     if (d === 1) {
       const k = R.pick([50, 200, 250, 500, 1000]), c = R.int(2, 12);
-      return { fig: FIG.scaling(k, "1:" + k), q: "Sur un plan à l'échelle " + M("1 : " + k) + ", un mur mesure " + M(c) + " cm. Quelle est sa longueur réelle, en mètres ?", spec: { kind: "value", value: (c * k) / 100 }, sol: M(c + " \\cdot " + k + " = " + c * k) + " cm, soit " + M(dec((c * k) / 100)) + " m." };
+      return { fig: FIG.scaling(k, "1:" + k), q: "Sur un plan à l'échelle " + M("1\\,:\\, " + k) + ", un mur mesure " + M(c) + " cm. Quelle est sa longueur réelle, en mètres ?", spec: { kind: "value", value: (c * k) / 100 }, sol: M(c + " \\cdot " + k + " = " + c * k) + " cm, soit " + M(dec((c * k) / 100)) + " m." };
     }
     if (d === 2) {
       const k = R.int(2, 5), A = R.int(2, 12);
@@ -770,7 +770,7 @@ const PROB = {
   },
   echelle() {
     const k = R.pick([20, 25, 50, 100]), lm = R.int(4, 15), am = R.int(6, 40), vm = R.int(2, 9);
-    return { fig: FIG.scaling(3, "1 : " + k), q: "Une maquette de bâtiment est à l'échelle " + M("1 : " + k) + ".",
+    return { fig: FIG.scaling(3, "1 : " + k), q: "Une maquette de bâtiment est à l'échelle " + M("1\\,:\\, " + k) + ".",
       parts: [{ label: "a) Un mur mesure " + lm + " cm sur la maquette : longueur réelle (m)", spec: { kind: "value", value: (lm * k) / 100 } }, { label: "b) Une pièce mesure " + am + " cm² sur la maquette : aire réelle (m²)", spec: { kind: "value", value: (am * k * k) / 10000 } }, { label: "c) Une cuve de " + vm + " cm³ sur la maquette : volume réel (m³)", spec: { kind: "value", value: (vm * k ** 3) / 1e6 } }],
       hints: ["Longueurs × " + decTxt(k) + ", aires × " + decTxt(k) + "², volumes × " + decTxt(k) + "³.", "Puis convertis : 1 m = 100 cm, 1 m² = 10 000 cm², 1 m³ = 1 000 000 cm³."],
       sol: "a) " + M(lm * k + " \\text{ cm} = " + dec((lm * k) / 100)) + " m. b) " + M(am + " \\cdot " + k * k + " = " + am * k * k + " \\text{ cm}^2 = " + dec((am * k * k) / 10000)) + " m². c) " + M(vm + " \\cdot " + k ** 3 + " = " + vm * k ** 3 + " \\text{ cm}^3 = " + dec((vm * k ** 3) / 1e6)) + " m³." };
