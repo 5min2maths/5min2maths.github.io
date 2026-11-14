@@ -5733,12 +5733,12 @@ Object.assign(ACTIVE, {
 function $hint(box, t) { let el = box.querySelector(".act-hint"); if (!el) { el = document.createElement("div"); el.className = "small act-hint"; box.appendChild(el); } el.textContent = t; }
 
 // Écran de leçon active. cont : suite de la séance.
-function activeLesson(id, L, cont) {
+function activeLesson(id, L, cont, review) {
   const A = ACTIVE[id], P = A.predict;
   const ss = sentences(L.regle);
   const rule = ss.length > 1 ? "<ul>" + ss.map((x) => "<li>" + x + "</li>").join("") + "</ul>" : " · " + L.regle;
   const tail = lessonBody(id), fb = tail.slice(tail.indexOf('<div class="lfb"'));
-  h(`${brand}<div class="eyebrow">Nouvelle notion · à toi de jouer</div>
+  h(`${brand}<div class="eyebrow">${review ? "Leçon" : "Nouvelle notion"} · à toi de jouer</div>
   <div class="card pop lesson-card stack"><h2>${L.titre}</h2>
     <div class="act-step"><div class="act-h"><span class="act-n">1</span> Devine</div><p>${P.q}</p>
       <div class="seg" id="pc">${P.choices.map((c, i) => `<button type="button" data-i="${i}">${c}</button>`).join("")}</div><div id="pfb"></div></div>
@@ -5750,7 +5750,7 @@ function activeLesson(id, L, cont) {
       <div class="ex-list">${L.exemple.map((e) => `<div>${e}</div>`).join("")}</div>
       <div class="trap"><b>Piège</b> · ${L.piege}</div>${fb}</div>
   </div>
-  <button class="btn-primary btn-big" id="go" hidden>J'ai compris, à moi !</button>`);
+  <button class="btn-primary btn-big" id="go" hidden>${review ? "Retour à mes compétences" : "J'ai compris, à moi !"}</button>`);
   const $ = (s) => document.getElementById(s);
   const reveal = (el) => { el.hidden = false; el.classList.add("pop"); setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 60); };
   const finish = () => { $("skip").hidden = true; reveal($("s3")); typeset($("s3")); $("go").hidden = false; };
@@ -6666,7 +6666,7 @@ function screenComps() {
   ${old.length ? `<details class="olds"><summary>Années précédentes (${compStats(old.map((c) => c.id)).tested} notées)</summary>${block(old)}</details>` : ""}`}
   <button class="btn-primary btn-big" id="back">Retour</button>`);
   bindBadges(app);
-  app.querySelectorAll(".lopen").forEach((b) => (b.onclick = () => screenLesson(b.dataset.id, screenComps)));
+  app.querySelectorAll(".lopen").forEach((b) => (b.onclick = () => screenLesson(b.dataset.id, screenComps, true)));
   // « Me tester » (14.11, demande de l'utilisateur) : 3 questions de la compétence, au niveau de la compétence.
   app.querySelectorAll(".ctest").forEach((b) => (b.onclick = () => {
     const id = b.dataset.id, d = +b.dataset.d, cid = id + ":" + (d - 1);
@@ -6906,13 +6906,14 @@ function lessonBody(id) {
   ${commentBox("💬 Un commentaire sur ce rappel ?", "Ce qui n'est pas clair, un exemple qui manque… (n'écris pas ton nom)", "lecon-" + id)}`;
 }
 const lessonDetails = (id) => (LESSONS[id] ? `<details class="lesson" data-id="${id}"><summary>📖 Rappel de cours</summary><div class="stack">${lessonBody(id)}</div></details>` : "");
-function screenLesson(id, cont) {
+// review : leçon rouverte depuis « Mes compétences » (pas une nouvelle notion), retour à cet écran.
+function screenLesson(id, cont, review) {
   const L = LESSONS[id];
   if (state) { Badges.onLesson(state, id); save(); }
-  if (typeof ACTIVE !== "undefined" && ACTIVE[id]) return activeLesson(id, L, cont);
-  h(`${brand}<div class="eyebrow">Nouvelle notion · 30 secondes de cours</div>
+  if (typeof ACTIVE !== "undefined" && ACTIVE[id]) return activeLesson(id, L, cont, review);
+  h(`${brand}<div class="eyebrow">${review ? "Leçon" : "Nouvelle notion · 30 secondes de cours"}</div>
   <div class="card pop lesson-card"><h2>${L.titre}</h2>${lessonBody(id)}</div>
-  <button class="btn-primary btn-big" id="go">J'ai compris, à moi !</button>`);
+  <button class="btn-primary btn-big" id="go">${review ? "Retour à mes compétences" : "J'ai compris, à moi !"}</button>`);
   document.getElementById("go").onclick = cont;
 }
 

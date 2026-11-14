@@ -257,7 +257,7 @@ function screenComps() {
   ${old.length ? `<details class="olds"><summary>Années précédentes (${compStats(old.map((c) => c.id)).tested} notées)</summary>${block(old)}</details>` : ""}`}
   <button class="btn-primary btn-big" id="back">Retour</button>`);
   bindBadges(app);
-  app.querySelectorAll(".lopen").forEach((b) => (b.onclick = () => screenLesson(b.dataset.id, screenComps)));
+  app.querySelectorAll(".lopen").forEach((b) => (b.onclick = () => screenLesson(b.dataset.id, screenComps, true)));
   // « Me tester » (14.11, demande de l'utilisateur) : 3 questions de la compétence, au niveau de la compétence.
   app.querySelectorAll(".ctest").forEach((b) => (b.onclick = () => {
     const id = b.dataset.id, d = +b.dataset.d, cid = id + ":" + (d - 1);
@@ -497,13 +497,14 @@ function lessonBody(id) {
   ${commentBox("💬 Un commentaire sur ce rappel ?", "Ce qui n'est pas clair, un exemple qui manque… (n'écris pas ton nom)", "lecon-" + id)}`;
 }
 const lessonDetails = (id) => (LESSONS[id] ? `<details class="lesson" data-id="${id}"><summary>📖 Rappel de cours</summary><div class="stack">${lessonBody(id)}</div></details>` : "");
-function screenLesson(id, cont) {
+// review : leçon rouverte depuis « Mes compétences » (pas une nouvelle notion), retour à cet écran.
+function screenLesson(id, cont, review) {
   const L = LESSONS[id];
   if (state) { Badges.onLesson(state, id); save(); }
-  if (typeof ACTIVE !== "undefined" && ACTIVE[id]) return activeLesson(id, L, cont);
-  h(`${brand}<div class="eyebrow">Nouvelle notion · 30 secondes de cours</div>
+  if (typeof ACTIVE !== "undefined" && ACTIVE[id]) return activeLesson(id, L, cont, review);
+  h(`${brand}<div class="eyebrow">${review ? "Leçon" : "Nouvelle notion · 30 secondes de cours"}</div>
   <div class="card pop lesson-card"><h2>${L.titre}</h2>${lessonBody(id)}</div>
-  <button class="btn-primary btn-big" id="go">J'ai compris, à moi !</button>`);
+  <button class="btn-primary btn-big" id="go">${review ? "Retour à mes compétences" : "J'ai compris, à moi !"}</button>`);
   document.getElementById("go").onclick = cont;
 }
 

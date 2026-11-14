@@ -251,12 +251,12 @@ Object.assign(ACTIVE, {
 function $hint(box, t) { let el = box.querySelector(".act-hint"); if (!el) { el = document.createElement("div"); el.className = "small act-hint"; box.appendChild(el); } el.textContent = t; }
 
 // Écran de leçon active. cont : suite de la séance.
-function activeLesson(id, L, cont) {
+function activeLesson(id, L, cont, review) {
   const A = ACTIVE[id], P = A.predict;
   const ss = sentences(L.regle);
   const rule = ss.length > 1 ? "<ul>" + ss.map((x) => "<li>" + x + "</li>").join("") + "</ul>" : " · " + L.regle;
   const tail = lessonBody(id), fb = tail.slice(tail.indexOf('<div class="lfb"'));
-  h(`${brand}<div class="eyebrow">Nouvelle notion · à toi de jouer</div>
+  h(`${brand}<div class="eyebrow">${review ? "Leçon" : "Nouvelle notion"} · à toi de jouer</div>
   <div class="card pop lesson-card stack"><h2>${L.titre}</h2>
     <div class="act-step"><div class="act-h"><span class="act-n">1</span> Devine</div><p>${P.q}</p>
       <div class="seg" id="pc">${P.choices.map((c, i) => `<button type="button" data-i="${i}">${c}</button>`).join("")}</div><div id="pfb"></div></div>
@@ -268,7 +268,7 @@ function activeLesson(id, L, cont) {
       <div class="ex-list">${L.exemple.map((e) => `<div>${e}</div>`).join("")}</div>
       <div class="trap"><b>Piège</b> · ${L.piege}</div>${fb}</div>
   </div>
-  <button class="btn-primary btn-big" id="go" hidden>J'ai compris, à moi !</button>`);
+  <button class="btn-primary btn-big" id="go" hidden>${review ? "Retour à mes compétences" : "J'ai compris, à moi !"}</button>`);
   const $ = (s) => document.getElementById(s);
   const reveal = (el) => { el.hidden = false; el.classList.add("pop"); setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 60); };
   const finish = () => { $("skip").hidden = true; reveal($("s3")); typeset($("s3")); $("go").hidden = false; };
