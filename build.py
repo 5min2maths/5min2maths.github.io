@@ -7,7 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent
 SRC = ROOT / "src"
-JS = ["curriculum.js", "ordre.js", "expr.js", "figures.js", "geo.js", "generators.js", "gen2.js", "gen3.js", "competences.js", "badges.js", "backup.js", "qr.js", "lessons.js", "lessons2.js", "dyn.js", "active.js", "engine.js", "app.js"]
+JS = ["curriculum.js", "ordre.js", "expr.js", "figures.js", "geo.js", "generators.js", "gen2.js", "gen3.js", "variantes.js", "competences.js", "badges.js", "backup.js", "qr.js", "lessons.js", "lessons2.js", "dyn.js", "active.js", "engine.js", "app.js"]
 
 head = """<title>5minutes2mathsparjour</title>
 <meta name="claude:viewport-fit-sides" content="cover">

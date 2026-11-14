@@ -360,7 +360,9 @@ const Engine = {
     let q;
     for (let k = 0; k < 6; k++) {
       if (k) R.seed(seed * 7919 + level * 104729 + [...id].reduce((a, c) => a + c.charCodeAt(0), 0) + k * 15485863);
-      q = GEN[id](level);
+      // Variantes (variantes.js) : la forme d'origine ou une forme ajoutée, au hasard.
+      const vs = typeof VAR !== "undefined" && VAR[id] && VAR[id][level], vk = vs && vs.length ? Math.floor(R.rand() * (vs.length + 1)) : 0;
+      q = vk ? vs[vk - 1]() : GEN[id](level);
       q.q = tidy(q.q); q.sol = tidy(q.sol);
       if (!trivialQ(q, k)) break;
     }

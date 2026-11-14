@@ -1,0 +1,31 @@
+<!doctype html><meta charset="utf-8"><pre id="out">en cours</pre>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/engine.js"></script><script>
+// Banc de contrôle des variantes (14.11) : chaque modèle, 60 tirages. Réponse attendue acceptée (règle « résultat final »
+// du CO comprise), pas de NaN / undefined, pas de question triviale. #ids=a,b pour filtrer.
+try {
+const SHOW = location.hash.includes("show"); const only = decodeURIComponent(location.hash.slice(1)).replace("show","").split(",").filter(Boolean), out = [], bad = [];
+const toFrac = (v) => { for (let d = 1; d <= 400; d++) { const n = Math.round(v * d); if (Math.abs(n / d - v) < 1e-9) return (n < 0 ? "-" : "") + Math.abs(n) + (d > 1 ? "/" + d : ""); } return null; };
+const answerOf = (sp) => { if (sp.kind === "expr") return sp.expr; if (sp.kind === "value") { const v = sp.value; if (isTerm(v)) return String(+(+v).toFixed(8)).replace(".", ","); return toFrac(v) || String(v).replace(".", ","); } return null; };
+const isTerm = (v) => Math.abs(v * 1e6 - Math.round(v * 1e6)) < 1e-6;
+let nModels = 0, nDraws = 0;
+for (const id of Object.keys(VAR)) { if (only.length && !only.includes(id)) continue;
+  for (const lv of Object.keys(VAR[id])) VAR[id][lv].forEach((f, k) => { nModels++; let triv = 0, errs = new Set();
+    for (let r = 0; r < 60; r++) { nDraws++; R.seed(r * 7919 + k * 31 + +lv * 104729 + id.length);
+      let q; try { q = f(); } catch (e) { errs.add("exception " + e.message); continue; }
+      const txt = String(q.q) + " " + String(q.sol);
+      if (/NaN|undefined|Infinity|\[object/.test(txt)) errs.add("NaN/undefined : " + txt.slice(0, 120));
+      if (!q.spec) { errs.add("pas de spec"); continue; }
+      const sp = Object.assign({}, q.spec, q.spec.kind === "value" && !q.spec.round ? { final: true } : {}), a = answerOf(sp);
+      if (a !== null) { const c = checkAnswer(sp, a); if (c.status !== "correct") errs.add("réponse « " + a + " » → " + c.status + " " + (c.message || "") + " | " + String(q.q).slice(0, 90)); }
+      if (SHOW && r === 0 && lv !== "4") out.push(id + " N" + lv + "." + (k + 1) + " | " + String(q.q).replace(/\\\(|\\\)/g, "").replace(/\\cdot/g, "·").replace(/\{,\}/g, ",").slice(0, 150) + "  ⇒ " + (q.spec.kind === "value" ? +(+q.spec.value).toFixed(6) : q.spec.expr));
+      const tq = trivialQ(q, 0); if (tq) { triv++; if (triv === 4) errs.add("motif : " + tq + " | " + String(q.q).slice(0, 110)); }
+    }
+    if (triv > 3) errs.add("triviale " + triv + "/60");
+    if (errs.size) bad.push(id + " N" + lv + " modèle " + (k + 1) + " : " + [...errs].slice(0, 3).join(" ;; "));
+  });
+}
+out.push(nModels + " modèles, " + nDraws + " tirages, " + bad.length + " modèle(s) en défaut");
+document.getElementById("out").textContent = out.concat(bad).join("\n");
+} catch (e) { document.getElementById("out").textContent = "ERR " + e.stack; }
+</script>

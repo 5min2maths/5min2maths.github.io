@@ -1,0 +1,14 @@
+<!doctype html><meta charset="utf-8"><pre id="out">en cours</pre>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/engine.js"></script><script>try{
+const ids = decodeURIComponent(location.hash.slice(1)).split(",").filter(Boolean), out = [];
+const clean = (t) => String(t || "").replace(/<svg[\s\S]*?<\/svg>/g, "[fig]").replace(/\\\(|\\\)/g, "").replace(/\\(text|mathrm)\{([^}]*)\}/g, "$2").replace(/\\,|\;|\\ /g, " ").replace(/\{,\}/g, ",").replace(/\\cdot/g, "·").slice(0, 260);
+for (const id of ids) for (let d = 1; d <= 4; d++) {
+  const fs = new Map(); let n = 0;
+  for (let r = 0; r < 40; r++) { try { R.seed(r * 977 + d * 31 + 7); const q = Engine.build(id, d, r + 1); const f = qForm(q); if (!fs.has(f)) fs.set(f, q); } catch (e) { fs.set("ERR " + e, null); } }
+  const qs = [...fs.values()].filter(Boolean);
+  out.push(`## ${id} N${d} · ${(COMPS[id] || [])[Math.min(d, 3) - 1] || ""} · formes ${fs.size}`);
+  qs.slice(0, 2).forEach((q) => out.push("  Q: " + clean(q.q) + "\n     spec " + JSON.stringify(q.spec).slice(0, 120) + "\n     sol: " + clean(q.sol).slice(0, 160)));
+}
+document.getElementById("out").textContent = out.join("\n");
+}catch(e){document.getElementById("out").textContent="ERR "+e.stack}</script>
