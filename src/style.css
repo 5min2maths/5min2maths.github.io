@@ -309,3 +309,15 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .home-panel .streak .flame { font-size: 1.7rem; margin: 0; }
 .home-panel .now-card { padding: 12px 14px; gap: 6px; }
 .home-panel .now-card .eyebrow { margin: 0; }
+.elo-band { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; width: 100%; text-align: left; padding: 10px 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); box-shadow: none; margin-bottom: 12px; }
+.elo-band .eyebrow { margin: 0; }
+.eb-l { display: grid; gap: 2px; }
+.eb-n { display: flex; align-items: baseline; gap: 8px; }
+.elo-band .num { font-family: var(--font-display); font-weight: 800; font-size: 2rem; line-height: 1.05; font-variant-numeric: tabular-nums; color: var(--ink); background: linear-gradient(transparent 58%, var(--fluo) 58%, var(--fluo) 92%, transparent 92%); padding: 0 3px; }
+.elo-band .delta { font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700; }
+.eb-r { display: grid; gap: 2px; min-width: 0; }
+.elo-band .spark { height: 32px; }
+.streak-chip { display: inline-flex; align-items: center; gap: 3px; padding: 3px 9px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); font-size: 0.9rem; }
+.home-head { flex-wrap: nowrap; }
+.home-head .row { flex-wrap: nowrap; flex-shrink: 0; }
+@media (max-width: 430px) { .home-head .brand span { display: none; } }

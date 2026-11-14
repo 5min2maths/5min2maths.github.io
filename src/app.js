@@ -109,6 +109,20 @@ function eloBlock() {
   ${d ? `<div class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "▲ +" : "▼ "}${d} depuis hier</div>` : ""}</div>
   <div class="stack"><b>${eloLabel(state.profile, e.r)}</b>${spark}</div></div>`;
 }
+// Bandeau Mathélo (14.11, demande de l'utilisateur : « on a envie de le voir monter ») : sur tous les cadres de l'accueil.
+function eloBanner() {
+  const e = state.elo, prev = e.log.length > 1 ? e.log[e.log.length - 2][1] : null, d = prev === null ? 0 : e.r - prev;
+  const pts = e.log.slice(-30).map((x) => x[1]);
+  let spark = "";
+  if (pts.length > 1) {
+    const lo = Math.min(...pts) - 10, hi = Math.max(...pts) + 10, X = (i) => (i / (pts.length - 1)) * 200, Y = (v) => 30 - ((v - lo) / (hi - lo)) * 26;
+    const line = pts.map((v, i) => (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(v).toFixed(1)).join(" ");
+    spark = `<svg class="spark" viewBox="0 0 200 32" preserveAspectRatio="none"><path class="a" d="${line} L200,32 L0,32 Z"/><path class="l" d="${line}"/><circle cx="200" cy="${Y(pts[pts.length - 1]).toFixed(1)}" r="3"/></svg>`;
+  }
+  return `<button type="button" class="elo-band" id="eloband" aria-label="Mathélo ${e.r}, voir mes progrès">
+    <span class="eb-l"><span class="eyebrow">Mathélo${Engine.isProvisional(state) ? " · provisoire" : ""}</span><span class="eb-n"><b class="num">${e.r}</b>${d ? `<span class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "▲ +" : "▼ "}${d}</span>` : ""}</span></span>
+    <span class="eb-r">${spark || '<span class="small muted">Ta courbe apparaît après ta 2e séance.</span>'}<span class="small muted">${eloLabel(state.profile, e.r)}</span></span></button>`;
+}
 function themeBars(lv) {
   return Object.entries(lv).map(([th, m]) => `<div class="bar"><span>${Engine.themeLabel(th, state.profile)}</span><span class="track"><i style="width:${Math.round(m * 100)}%"></i></span></div>`).join("");
 }
@@ -133,8 +147,7 @@ function screenHome() {
   const dots = { prob: !!wp && !wpDone, test: prep && left <= 3, prog: (state.badgesNew || []).length > 0 };
   save();
   const panels = {
-    today: () => `<div class="card flat streak"><span class="flame" aria-hidden="true">${alive && s.count ? "🔥" : "✏️"}</span><div><b>${alive ? s.count : 0} ${(alive ? s.count : 0) > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span><div class="small muted">${done ? "Séance du jour faite : " + done.n + " question" + (done.n > 1 ? "s" : "") + "." : "Ta séance du jour t'attend."}</div></div></div>
-      <div class="card stack"><div class="eyebrow">${done ? "Séance faite · tu peux en refaire une" : "Ton programme aujourd'hui"}</div>
+    today: () => `<div class="card stack"><div class="eyebrow">${done ? "Séance faite · tu peux en refaire une" : "Ton programme aujourd'hui"}</div>
       <h2>${FORMATS[fmt].label}</h2><p class="muted">${FORMATS[fmt].text} </p>
       <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>
       <div class="spread"><span class="small muted">Varié d'un jour à l'autre.</span><button class="btn-ghost small" id="other">Autre format</button></div></div>
@@ -150,16 +163,18 @@ function screenHome() {
       : `<div class="card stack"><div class="eyebrow">Je prépare un test</div><h2>Un test approche ?</h2>
         <p class="muted">Dis-moi sa date et les notions : chaque jour, l'app te fait réviser juste ce qu'il faut, jusqu'au jour J.</p>
         <button class="btn-primary btn-big" id="prep">Je prépare un test</button></div>`,
-    prog: () => `<div class="card">${eloBlock()}</div>${newBadgesCard()}${compsCard()}`,
+    prog: () => `${newBadgesCard()}${compsCard()}`,
   };
   if (!panels[homeTab]) homeTab = "today";
-  h(`<div class="spread">${brand}<span class="row" style="gap:6px"><span class="small muted">${gradeName(state.profile)}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>
+  h(`<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted">${gradeName(state.profile)}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>
+  ${eloBanner()}
   <div class="home-panel" data-tab="${homeTab}">${panels[homeTab]()}</div>
   <nav class="tabs" aria-label="Sections"><div class="tabs-inner" role="tablist">${HOME_TABS.map(([id, label, ic]) => `<button class="tab" role="tab" data-tab="${id}" aria-selected="${id === homeTab}"><span class="tab-ic"><svg viewBox="0 0 24 24">${ic}</svg>${dots[id] && id !== homeTab ? '<i class="tab-dot"></i>' : ""}</span>${label}</button>`).join("")}</div></nav>`);
   app.classList.add("has-tabs");
   const byId = (x) => document.getElementById(x), on = (x, f) => { if (byId(x)) byId(x).onclick = f; };
   app.querySelectorAll(".tab").forEach((b) => (b.onclick = () => { homeTab = b.dataset.tab; screenHome(); }));
   on("settings", screenSettings);
+  on("eloband", () => { if (homeTab !== "prog") { homeTab = "prog"; screenHome(); } });
   on("go", startSession);
   on("other", () => { Engine.otherFormat(state); save(); screenHome(); });
   if (homeTab === "today") bindNowCard();
