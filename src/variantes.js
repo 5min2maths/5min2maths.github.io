@@ -833,3 +833,252 @@ V34("proba",
   () => { const r = R.int(3, 6), b = R.int(2, 5); return QV("Une urne contient " + r + " boules rouges et " + b + " vertes. On tire deux boules sans remise. Quelle est la probabilité d'obtenir deux boules rouges ? (fraction acceptée)", (r / (r + b)) * ((r - 1) / (r + b - 1)), M("\\frac{" + r + "}{" + (r + b) + "} \\cdot \\frac{" + (r - 1) + "}{" + (r + b - 1) + "} = " + frac(r * (r - 1), (r + b) * (r + b - 1))) + "."); },
   () => { const r = R.int(2, 6), b = R.int(2, 5); return QV("Une urne contient " + r + " boules rouges et " + b + " vertes. On tire deux boules sans remise. Quelle est la probabilité d'obtenir une boule de chaque couleur ? (fraction acceptée)", (2 * r * b) / ((r + b) * (r + b - 1)), "Rouge puis verte, ou verte puis rouge : " + M("2 \\cdot \\frac{" + r + "}{" + (r + b) + "} \\cdot \\frac{" + b + "}{" + (r + b - 1) + "} = " + frac(2 * r * b, (r + b) * (r + b - 1))) + "."); },
 );
+
+// ======================= Secondaire II (1re, 2e, MP) =======================
+const DEG = Math.PI / 180; // r2 (arrondi au centième) vient de generators.js
+V("simil", 2,
+  () => { const k = R.int(2, 5), A0 = R.int(3, 20); return QV("Une figure a été agrandie dans le rapport " + k + " ; sa nouvelle aire est de " + A0 * k * k + " cm². Quelle était son aire au départ (en cm²) ?", A0, "Aires multipliées par " + M(k + "^2 = " + k * k) + " : " + M(A0 * k * k + " : " + k * k + " = " + A0) + " cm²."); },
+  () => { const k = R.int(2, 6); return QV("En agrandissant une photo, son aire est multipliée par " + k * k + ". Par combien ses longueurs ont-elles été multipliées ?", k, M("k^2 = " + k * k) + ", donc " + M("k = " + k) + "."); },
+);
+V("ensembles", 1,
+  () => { const a = R.int(2, 9), b = R.int(3, 12); return QV("Combien de nombres entiers l'intervalle " + M("]-" + a + " \\,;\\, " + b + "[") + " contient-il ?", a + b - 1, "Bornes exclues : de " + (-a + 1) + " à " + (b - 1) + ", soit " + (a + b - 1) + " entiers."); },
+  () => { const a = R.int(2, 9), b = R.int(3, 15); return QV("Combien de nombres entiers naturels (0, 1, 2…) l'intervalle " + M("[-" + a + " \\,;\\, " + b + "]") + " contient-il ?", b + 1, "Les naturels de 0 à " + b + " : " + (b + 1) + " nombres."); },
+);
+V("racinv", 2,
+  () => clean(() => { const d = R.int(1, 4), s = R.int(d + 2, d + 6), p = 2 * d + 1 - s, c = d * d - s * p; return QSet("Résous " + M("\\sqrt{x " + (c >= 0 ? "+ " + c : "- " + -c) + "} = x - " + d) + ". (Attention aux solutions parasites.)", [s], "En élevant au carré : " + M("x " + (c >= 0 ? "+ " + c : "- " + -c) + " = (x - " + d + ")^2") + ", d'où " + M("x = " + s) + " ou " + M("x = " + p) + ". Vérification : seule " + M("x = " + s) + " convient (pour " + p + ", " + M("x - " + d + " < 0") + ")."); }),
+  () => { const b = R.int(2, 9), a = R.int(-5, 12); return QSet("Résous " + M("\\sqrt{x " + (a >= 0 ? "+ " + a : "- " + -a) + "} = " + b) + ".", [b * b - a], M("x " + (a >= 0 ? "+ " + a : "- " + -a) + " = " + b * b) + ", donc " + M("x = " + (b * b - a)) + " (une racine positive : pas de solution parasite ici)."); },
+);
+V("modaff", 1,
+  () => { const f = R.pick([15, 20, 25, 30]), u = R.pick([0.1, 0.15, 0.2]), n = R.int(5, 20) * 10; return QV("Un forfait de téléphone coûte " + f + " CHF par mois, plus " + dT(u) + " CHF par SMS. Combien paie-t-on pour un mois avec " + n + " SMS (en CHF) ?", r6(f + u * n), M("C(n) = " + f + " + " + dec(u) + "n") + " : " + M("C(" + n + ") = " + dec(r6(f + u * n))) + " CHF."); },
+  () => { const d = R.pick([60, 80, 90]), h = R.pick([65, 75, 85]), t = R.pick([1.5, 2.5, 3.5, 2]); return QV("Un plombier facture " + d + " CHF de déplacement et " + h + " CHF de l'heure. Combien coûte une intervention de " + dT(t) + " h (en CHF) ?", r6(d + h * t), M(d + " + " + h + " \\cdot " + dec(t) + " = " + dec(r6(d + h * t))) + " CHF."); },
+);
+V("modaff", 2,
+  () => { const a = R.pick([8, 10, 12]), b = a - R.int(2, 4), F = R.int(20, 60); const n = Math.floor(F / (a - b)) + 1; return QV("Sans abonnement, un film coûte " + a + " CHF. Avec un abonnement de " + F + " CHF, le film coûte " + b + " CHF. À partir de combien de films l'abonnement est-il strictement plus avantageux ?", n, M(F + " + " + b + "n < " + a + "n \\iff n > " + dec(r6(F / (a - b)))) + " : à partir de " + n + " films."); },
+  () => { const a = R.pick([4, 5, 6]), b = a - R.int(1, 3), F = (a - b) * R.int(5, 15); return QV("Sans carte, une entrée à la patinoire coûte " + a + " CHF ; avec une carte de " + F + " CHF, elle coûte " + b + " CHF. Pour combien d'entrées les deux formules coûtent-elles le même prix ?", F / (a - b), M(F + " + " + b + "n = " + a + "n \\iff n = " + F / (a - b)) + "."); },
+);
+V34("modaff",
+  () => { const [fa, ua, fb, ub, x] = R.pick([[12, 0.25, 20, 0.21, 200], [10, 0.3, 25, 0.25, 300], [8, 0.28, 18, 0.23, 200], [15, 0.24, 27, 0.2, 300]]); return QV("Électricité. Fournisseur A : " + fa + " CHF par mois plus " + dT(ua) + " CHF par kWh. Fournisseur B : " + fb + " CHF par mois plus " + dT(ub) + " CHF par kWh. Pour quelle consommation mensuelle (en kWh) les deux coûtent-ils le même prix ?", x, M(fa + " + " + dec(ua) + "x = " + fb + " + " + dec(ub) + "x \\iff " + dec(r6(ua - ub)) + "x = " + (fb - fa)) + ", donc " + M("x = " + x) + " kWh."); },
+  () => { const fa = R.pick([200, 300, 400]), pa = R.pick([15, 18, 20]), pb = pa - R.pick([3, 5]), n = R.int(2, 8) * 10; const fb = fa + (pa - pb) * n; return QV("Location de salle. Salle A : " + fa + " CHF plus " + pa + " CHF par invité. Salle B : " + fb + " CHF plus " + pb + " CHF par invité. Pour combien d'invités les deux salles coûtent-elles le même prix ?", n, M(fa + " + " + pa + "n = " + fb + " + " + pb + "n \\iff " + (pa - pb) + "n = " + (fb - fa)) + ", donc " + n + " invités."); },
+);
+V("sysgraph", 2,
+  () => clean(() => { const a = R.int(1, 5), b = R.int(2, 6), k = R.int(2, 4), c = R.int(1, 9); return QV("Pour quelle valeur de m le système " + M("\\begin{cases} " + a + "x + my = " + c + " \\\\ " + a * k + "x + " + b * k + "y = " + (c * k + R.int(1, 5)) + " \\end{cases}") + " n'a-t-il aucune solution ?", b, "Les membres de gauche doivent être proportionnels (facteur " + k + ") : " + M("m = " + b * k + " : " + k + " = " + b) + "."); }),
+  () => { const a = R.int(2, 6), b = R.int(2, 6), k = R.int(2, 4); if (a === b) return VAR.sysgraph[2][1](); return QV("Pour quelle valeur de m les droites d'équations " + M("y = " + a + "x + " + b) + " et " + M("y = \\frac{m}{" + k + "}x - " + (b + R.int(1, 5))) + " sont-elles parallèles (système sans solution) ?", a * k, "Même pente : " + M("\\frac{m}{" + k + "} = " + a) + ", donc " + M("m = " + a * k) + "."); },
+);
+V34("sysgraph",
+  () => clean(() => { const a = R.int(1, 5), b = R.int(2, 7), c = R.int(1, 9), k = R.int(2, 4); return QV("Pour quelle valeur de m le système " + M("\\begin{cases} mx + " + b + "y = " + c + " \\\\ " + a * k + "x + " + b * k + "y = " + c * k + " \\end{cases}") + " a-t-il une infinité de solutions ?", a, "Les deux équations doivent être proportionnelles (facteur " + k + ") : " + M("m = " + a * k + " : " + k + " = " + a) + "."); }),
+  () => clean(() => { const a = R.int(1, 5), b = R.int(2, 7), c = R.int(1, 9), k = R.int(2, 4); return QV("Pour quelle valeur de m le système " + M("\\begin{cases} " + a + "x + " + b + "y = " + c + " \\\\ " + a * k + "x + my = " + c * k + " \\end{cases}") + " a-t-il une infinité de solutions ?", b * k, "Facteur " + k + " entre les équations : " + M("m = " + k + " \\cdot " + b + " = " + b * k) + "."); }),
+);
+V("bicarre", 1,
+  () => clean(() => { let a, b; do { a = R.int(2, 5); b = R.int(1, 6); } while (a === b); const m = a * a - b * b; return QSet("Résous : " + M("x^4 " + (m > 0 ? "- " + m : "+ " + -m) + "x^2 - " + a * a * b * b + " = 0") + ". Donne toutes les solutions, séparées par « ; ».", [-a, a], "Avec " + M("X = x^2") + " : " + M("X = " + a * a) + " ou " + M("X = -" + b * b) + " (impossible, un carré n'est pas négatif). Donc " + M("x = \\pm " + a) + "."); }),
+  () => clean(() => { const a = R.int(3, 6), b = R.int(1, a - 1); const c = (a * a + b * b) / 2, d = (a * a - b * b) / 2; if (!Number.isInteger(c)) return VAR.bicarre[1][0](); return QSet("Résous : " + M("(x^2 - " + c + ")^2 = " + d * d) + ". Donne toutes les solutions, séparées par « ; ».", [-a, -b, b, a], M("x^2 - " + c + " = \\pm " + d) + " : " + M("x^2 = " + a * a) + " ou " + M("x^2 = " + b * b) + ", donc " + M("x = \\pm " + a) + " ou " + M("x = \\pm " + b) + "."); }),
+);
+V("euclide", 1,
+  () => { const [p, q] = R.pick([[4, 9], [2, 8], [3, 12], [1, 16], [4, 16], [9, 16]]); const h = Math.sqrt(p * q); return QV("Dans un triangle rectangle, la hauteur issue de l'angle droit mesure " + h + " cm et découpe l'hypoténuse en deux segments ; l'un mesure " + p + " cm. Combien mesure l'autre (en cm) ?", q, "Théorème de la hauteur : " + M("h^2 = p \\cdot q") + ", donc " + M("q = \\frac{" + h * h + "}{" + p + "} = " + q) + " cm."); },
+  () => { const [p, q] = R.pick([[9, 16], [4, 9], [2, 8], [4, 16], [3, 12]]); const h = Math.sqrt(p * q); return QV("Dans un triangle rectangle, la hauteur relative à l'hypoténuse mesure " + h + " cm et découpe l'hypoténuse en un segment de " + p + " cm et un autre. Combien mesure l'hypoténuse (en cm) ?", p + q, "Autre segment : " + M("\\frac{" + h * h + "}{" + p + "} = " + q) + " ; hypoténuse " + M(p + " + " + q + " = " + (p + q)) + " cm."); },
+);
+V("euclide", 2,
+  () => { const [a, c, p] = R.pick([[6, 9, 4], [6, 12, 3], [10, 25, 4], [12, 16, 9], [15, 25, 9]]); return QV("Un triangle rectangle a une hypoténuse de " + c + " cm et une cathète de " + a + " cm. Combien mesure la projection de cette cathète sur l'hypoténuse (en cm) ?", p, "Théorème d'Euclide : " + M("a^2 = p \\cdot c") + ", donc " + M("p = \\frac{" + a * a + "}{" + c + "} = " + p) + " cm."); },
+  () => { const [a, c, p] = R.pick([[15, 25, 9], [20, 25, 16], [12, 16, 9], [6, 9, 4], [10, 25, 4]]); return QV("Dans un triangle rectangle, une cathète mesure " + a + " cm et sa projection sur l'hypoténuse " + p + " cm. Combien mesure l'hypoténuse (en cm) ?", c, M("a^2 = p \\cdot c") + " : " + M("c = \\frac{" + a * a + "}{" + p + "} = " + c) + " cm."); },
+);
+V34("euclide",
+  () => { const [a, b, c] = R.pick([[9, 12, 15], [6, 8, 10], [12, 16, 20], [15, 20, 25]]); return QE("Un triangle rectangle a des cathètes de " + a + " cm et " + b + " cm. Calcule la hauteur relative à l'hypoténuse (en cm, valeur exacte ou au centième).", (a * b) / c, "Hypoténuse " + c + " cm ; aire : " + M("\\frac{" + a + " \\cdot " + b + "}{2} = \\frac{" + c + " \\cdot h}{2}") + ", donc " + M("h = \\frac{" + a * b + "}{" + c + "} = " + dec((a * b) / c)) + " cm."); },
+  () => { const [c, h] = R.pick([[25, 12], [10, 4.8], [20, 9.6], [13, 6]]); return QV("Un triangle rectangle a une hypoténuse de " + c + " cm, et la hauteur relative à l'hypoténuse mesure " + dT(h) + " cm. Quelle est son aire (en cm²) ?", r6((c * h) / 2), M("\\frac{" + c + " \\cdot " + dec(h) + "}{2} = " + dec(r6((c * h) / 2))) + " cm²."); },
+);
+V("geocomb", 1,
+  () => { const [a, b, c] = R.pick([[5, 12, 13], [6, 8, 10], [8, 15, 17], [9, 12, 15], [7, 24, 25]]); return QV("Un triangle rectangle a une aire de " + (a * b) / 2 + " cm² et un côté de l'angle droit de " + a + " cm. Combien mesure son hypoténuse (en cm) ?", c, "Autre cathète : " + M("\\frac{2 \\cdot " + (a * b) / 2 + "}{" + a + "} = " + b) + " ; hypoténuse " + M("\\sqrt{" + a + "^2 + " + b + "^2} = " + c) + " cm."); },
+  () => { const [a, b, c] = R.pick([[5, 12, 13], [8, 15, 17], [9, 40, 41], [20, 21, 29], [12, 35, 37]]); return QV("Un rectangle a une diagonale de " + c + " cm et un côté de " + a + " cm. Quelle est son aire (en cm²) ?", a * b, "Autre côté : " + M("\\sqrt{" + c + "^2 - " + a + "^2} = " + b) + " ; aire " + M(a + " \\cdot " + b + " = " + a * b) + " cm²."); },
+);
+V("geocomb", 2,
+  () => { const [p, q, s] = R.pick([[6, 8, 10], [5, 12, 13], [9, 12, 15], [8, 15, 17]]); return QV("Un losange a des diagonales de " + 2 * p + " cm et " + 2 * q + " cm. Combien mesure son côté (en cm) ?", s, "Les diagonales se coupent à angle droit en leur milieu : " + M("\\sqrt{" + p + "^2 + " + q + "^2} = " + s) + " cm."); },
+  () => { const [p, q, s] = R.pick([[6, 8, 10], [5, 12, 13], [9, 12, 15], [8, 15, 17]]); return QE("Un losange a des diagonales de " + 2 * p + " cm et " + 2 * q + " cm. Calcule sa hauteur (distance entre deux côtés opposés), en cm (valeur exacte ou au centième).", (2 * p * q) / s, "Côté " + M("\\sqrt{" + p + "^2 + " + q + "^2} = " + s) + " ; aire " + M("\\frac{" + 2 * p + " \\cdot " + 2 * q + "}{2} = " + 2 * p * q) + " = côté × hauteur, donc " + M("h = \\frac{" + 2 * p * q + "}{" + s + "}") + " cm."); },
+);
+V34("geocomb",
+  () => { const [a, b] = R.pick([[5, 12], [3, 4], [8, 15], [7, 24]]); return QV("Un rectangle mesure " + a + " cm sur " + b + " cm. Quel angle sa diagonale fait-elle avec le grand côté, en degrés ? Arrondis au dixième.", Math.atan(a / b) / DEG, M("\\tan \\alpha = \\frac{" + a + "}{" + b + "}") + ", donc " + M("\\alpha \\approx " + dec(+(Math.atan(a / b) / DEG).toFixed(1)) + "°") + ".", { round: 0.1 }); },
+  () => { const [r, h, g] = R.pick([[5, 12, 13], [3, 4, 5], [8, 15, 17], [6, 8, 10]]); return QV("Un cône a un rayon de " + r + " cm et une génératrice de " + g + " cm. Quel angle la génératrice fait-elle avec la base, en degrés ? Arrondis au dixième.", Math.acos(r / g) / DEG, "Hauteur " + M("\\sqrt{" + g + "^2 - " + r + "^2} = " + h) + " ; " + M("\\cos \\alpha = \\frac{" + r + "}{" + g + "}") + ", " + M("\\alpha \\approx " + dec(+(Math.acos(r / g) / DEG).toFixed(1)) + "°") + ".", { round: 0.1 }); },
+);
+V("droitesrem", 1,
+  () => { const g = R.int(2, 12) * 2; return QV("Dans un triangle, G est le centre de gravité et CG = " + g + " cm. Combien mesure la médiane [CM] (en cm) ?", (3 * g) / 2, "G est aux " + M("\\frac{2}{3}") + " de la médiane depuis le sommet : " + M("CM = \\frac{3}{2} \\cdot " + g + " = " + (3 * g) / 2) + " cm."); },
+  () => { const gm = R.int(2, 9); return QV("Dans un triangle, G est le centre de gravité et M le milieu de [AB]. On sait que GM = " + gm + " cm. Combien mesure CG (en cm) ?", 2 * gm, "CG vaut le double de GM (2/3 et 1/3 de la médiane) : " + M(2 * gm) + " cm."); },
+);
+V("droitesrem", 2,
+  () => { const b = R.int(4, 16) * 10 + 10; return QV("Dans un triangle ABC, I est le point d'intersection des bissectrices et " + M("\\widehat{BIC} = " + (90 + b / 2) + "°") + ". Combien mesure " + M("\\widehat{A}") + " (en degrés) ?", b, M("\\widehat{BIC} = 90° + \\frac{\\widehat{A}}{2}") + ", donc " + M("\\widehat{A} = 2 \\cdot " + b / 2 + "° = " + b + "°") + "."); },
+  () => { const A = R.int(4, 8) * 10, B = R.int(3, 7) * 10; return QV("Dans un triangle ABC, " + M("\\widehat{A} = " + A + "°") + " et " + M("\\widehat{B} = " + B + "°") + ". I est le point d'intersection des bissectrices. Combien mesure " + M("\\widehat{AIB}") + " (en degrés) ?", 180 - A / 2 - B / 2, M("180° - " + A / 2 + "° - " + B / 2 + "° = " + (180 - A / 2 - B / 2) + "°") + "."); },
+);
+V34("droitesrem",
+  () => { const [a, b, c] = R.pick([[8, 15, 17], [7, 24, 25], [5, 12, 13], [9, 40, 41]]); return QV("Un triangle rectangle est inscrit dans un cercle de rayon " + dT(c / 2) + " cm. Un côté de l'angle droit mesure " + a + " cm. Combien mesure l'autre (en cm) ?", b, "L'hypoténuse est un diamètre : " + c + " cm ; " + M("\\sqrt{" + c + "^2 - " + a + "^2} = " + b) + " cm."); },
+  () => { const c = R.int(5, 20) * 2; return QV("Un triangle ABC est rectangle en C, d'hypoténuse AB = " + c + " cm. À quelle distance de C se trouve le centre de son cercle circonscrit (en cm) ?", c / 2, "Le centre est le milieu de [AB], et C est sur le cercle : la distance vaut le rayon, " + M(c / 2) + " cm."); },
+);
+V("exactes", 1,
+  () => { const a = R.int(3, 12); return QV("Un carré a un périmètre de " + 4 * a + " cm. Calcule la longueur exacte de sa diagonale (en cm).", a * Math.SQRT2, "Côté " + a + " cm ; " + M("d = " + a + "\\sqrt{2}") + " cm."); },
+  () => { const a = R.int(3, 12); return QV("La diagonale d'un carré mesure " + M(a + "\\sqrt{2}") + " cm. Quelle est son aire (en cm²) ?", a * a, "Côté " + a + " cm ; aire " + M(a * a) + " cm²."); },
+);
+V("exactes", 2,
+  () => { const a = R.int(2, 8) * 2; return QV("La hauteur d'un triangle équilatéral mesure " + M(a / 2 + "\\sqrt{3}") + " cm. Combien mesure son côté (en cm) ?", a, M("h = \\frac{c\\sqrt{3}}{2}") + ", donc " + M("c = " + a) + " cm."); },
+  () => { const a = R.int(2, 6) * 2; return QV("Calcule l'aire exacte d'un triangle équilatéral de côté " + a + " cm (en cm²).", ((a * a) / 4) * Math.sqrt(3), "Hauteur " + M(a / 2 + "\\sqrt{3}") + " ; aire " + M("\\frac{" + a + " \\cdot " + a / 2 + "\\sqrt{3}}{2} = " + (a * a) / 4 + "\\sqrt{3}") + " cm²."); },
+);
+V("trigo", 1,
+  () => { const h = R.int(4, 15), a = R.int(20, 70); return QV("Dans un triangle rectangle, l'hypoténuse mesure " + h + " cm et un angle aigu " + a + "°. Calcule le côté adjacent à cet angle, au centième.", h * Math.cos(a * DEG), "adjacent " + M("= " + h + " \\cdot \\cos " + a + "° \\approx " + dec(r2(h * Math.cos(a * DEG)))) + " cm.", { round: 0.01 }); },
+  () => { const d = R.int(3, 15), a = R.int(20, 70); return QV("Dans un triangle rectangle, le côté adjacent à un angle de " + a + "° mesure " + d + " cm. Calcule le côté opposé à cet angle, au centième.", d * Math.tan(a * DEG), "opposé " + M("= " + d + " \\cdot \\tan " + a + "° \\approx " + dec(r2(d * Math.tan(a * DEG)))) + " cm.", { round: 0.01 }); },
+);
+V("trigo", 2,
+  () => { const h = R.int(6, 15), o = R.int(2, h - 1); return QV("Dans un triangle rectangle, le côté opposé à " + M("\\alpha") + " mesure " + o + " cm et l'hypoténuse " + h + " cm. Calcule " + M("\\alpha") + " en degrés, au centième.", Math.asin(o / h) / DEG, M("\\sin \\alpha = \\frac{" + o + "}{" + h + "}") + ", " + M("\\alpha \\approx " + dec(r2(Math.asin(o / h) / DEG)) + "°") + ".", { round: 0.01 }); },
+  () => { const h = R.int(6, 15), d = R.int(2, h - 1); return QV("Dans un triangle rectangle, le côté adjacent à " + M("\\alpha") + " mesure " + d + " cm et l'hypoténuse " + h + " cm. Calcule " + M("\\alpha") + " en degrés, au centième.", Math.acos(d / h) / DEG, M("\\cos \\alpha = \\frac{" + d + "}{" + h + "}") + ", " + M("\\alpha \\approx " + dec(r2(Math.acos(d / h) / DEG)) + "°") + ".", { round: 0.01 }); },
+);
+V34("trigo",
+  () => { const L = R.pick([4, 5, 6, 8]), a = R.int(60, 78); return QV("Une échelle de " + L + " m est appuyée contre un mur et fait un angle de " + a + "° avec le sol. À quelle hauteur touche-t-elle le mur (en m, au centième) ?", L * Math.sin(a * DEG), M("h = " + L + " \\cdot \\sin " + a + "° \\approx " + dec(r2(L * Math.sin(a * DEG)))) + " m.", { round: 0.01 }); },
+  () => { const d = R.pick([800, 1000, 1500, 2000]), a = R.int(6, 15); return QV("Un avion monte en ligne droite avec un angle de " + a + "° par rapport au sol. Quelle altitude a-t-il gagnée quand il a parcouru " + mille(d) + " m à l'horizontale (en m, au centième) ?", d * Math.tan(a * DEG), M("h = " + mille(d) + " \\cdot \\tan " + a + "° \\approx " + dec(r2(d * Math.tan(a * DEG)))) + " m.", { round: 0.01 }); },
+);
+const PYT = [[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [20, 21, 29], [9, 40, 41]];
+V("trigrel", 1,
+  () => { const [a, b, c] = R.pick(PYT); return QV("L'angle " + M("\\alpha") + " est aigu et " + M("\\cos\\alpha = \\frac{" + b + "}{" + c + "}") + ". Calcule " + M("\\sin\\alpha") + " (fraction).", a / c, M("\\sin^2\\alpha = 1 - \\frac{" + b * b + "}{" + c * c + "} = \\frac{" + a * a + "}{" + c * c + "}") + ", donc " + M("\\sin\\alpha = \\frac{" + a + "}{" + c + "}") + "."); },
+  () => { const [a, b, c] = R.pick(PYT); return QV("L'angle " + M("\\alpha") + " est aigu et " + M("\\tan\\alpha = \\frac{" + a + "}{" + b + "}") + ". Calcule " + M("\\cos\\alpha") + " (fraction).", b / c, "Triangle de côtés " + a + ", " + b + " et " + M("\\sqrt{" + a * a + " + " + b * b + "} = " + c) + " : " + M("\\cos\\alpha = \\frac{" + b + "}{" + c + "}") + "."); },
+);
+V("trigrel", 2,
+  () => { const [a, b, c] = R.pick(PYT); return QV("L'angle " + M("\\alpha") + " est aigu et " + M("\\sin\\alpha = \\frac{" + a + "}{" + c + "}") + ". Calcule " + M("\\tan\\alpha") + " (fraction).", a / b, M("\\cos\\alpha = \\frac{" + b + "}{" + c + "}") + ", donc " + M("\\tan\\alpha = \\frac{" + a + "}{" + b + "}") + "."); },
+  () => { const [a, b, c] = R.pick(PYT); return QV("L'angle " + M("\\alpha") + " est aigu et " + M("\\tan\\alpha = \\frac{" + a + "}{" + b + "}") + ". Calcule " + M("\\sin\\alpha") + " (fraction).", a / c, "Hypoténuse " + M("\\sqrt{" + a * a + " + " + b * b + "} = " + c) + " : " + M("\\sin\\alpha = \\frac{" + a + "}{" + c + "}") + "."); },
+);
+V34("trigrel",
+  () => { const [n, d] = R.pick([[1, 3], [2, 5], [1, 4], [3, 7], [2, 7]]); return QV("L'angle " + M("\\alpha") + " est aigu et " + M("\\cos\\alpha = \\frac{" + n + "}{" + d + "}") + ". Calcule la valeur exacte de " + M("\\sin\\alpha") + ".", Math.sqrt(d * d - n * n) / d, M("\\sin^2\\alpha = 1 - \\frac{" + n * n + "}{" + d * d + "} = \\frac{" + (d * d - n * n) + "}{" + d * d + "}") + ", donc " + M("\\sin\\alpha = \\frac{\\sqrt{" + (d * d - n * n) + "}}{" + d + "}") + "."); },
+  () => { const t = R.pick([2, 3, 4]); return QV("L'angle " + M("\\alpha") + " est aigu et " + M("\\tan\\alpha = " + t) + ". Calcule la valeur exacte de " + M("\\cos\\alpha") + ".", 1 / Math.sqrt(1 + t * t), M("1 + \\tan^2\\alpha = \\frac{1}{\\cos^2\\alpha}") + " : " + M("\\cos^2\\alpha = \\frac{1}{" + (1 + t * t) + "}") + ", donc " + M("\\cos\\alpha = \\frac{1}{\\sqrt{" + (1 + t * t) + "}}") + "."); },
+);
+V34("polyexpr",
+  () => { const P = R.pick([16, 20, 24, 28]), x = R.int(2, P / 4 - 1); return QV("Un rectangle a un périmètre de " + P + " cm et une largeur x. Exprime son aire, puis calcule-la pour x = " + x + " cm (en cm²).", x * (P / 2 - x), M("A(x) = x(" + P / 2 + " - x)") + " : " + M("A(" + x + ") = " + x + " \\cdot " + (P / 2 - x) + " = " + x * (P / 2 - x)) + " cm²."); },
+  () => { const s = R.pick([10, 12, 15]), x = R.int(2, s - 3); return QV("Une boîte a une base carrée de côté x et une hauteur de " + s + " - x (en cm). Quel est son volume pour x = " + x + " cm (en cm³) ?", x * x * (s - x), M("V(x) = x^2(" + s + " - x)") + " : " + M("V(" + x + ") = " + x * x + " \\cdot " + (s - x) + " = " + x * x * (s - x)) + " cm³."); },
+);
+V("valint", 2,
+  () => { const a = R.int(2, 9), b = R.int(1, 9); return QSet("Quelles sont les valeurs interdites de " + M("\\frac{x + " + b + "}{x^2 - " + a * a + "}") + " ? Sépare-les par « ; ».", [-a, a], M("x^2 - " + a * a + " = (x - " + a + ")(x + " + a + ")") + " s'annule pour " + M("x = \\pm " + a) + "."); },
+  () => { const a = R.int(2, 9), k = R.int(2, 5); return QSet("Quelles sont les valeurs interdites de " + M("\\frac{" + k + "x}{x^2 - " + a + "x}") + " ? Sépare-les par « ; ».", [0, a], M("x^2 - " + a + "x = x(x - " + a + ")") + " s'annule pour " + M("x = 0") + " et " + M("x = " + a) + "."); },
+);
+V("probrat", 1,
+  () => { const [a, b, t] = R.pick([[6, 3, 2], [12, 4, 3], [20, 5, 4], [10, 15, 6], [30, 6, 5], [12, 6, 4]]); return QV("Deux pompes vident une cuve, l'une en " + a + " h, l'autre en " + b + " h. En combien d'heures la vident-elles ensemble ?", t, M("\\frac{1}{" + a + "} + \\frac{1}{" + b + "} = \\frac{1}{" + t + "}") + " : " + t + " h."); },
+  () => { const [a, b, c, t] = R.pick([[4, 6, 12, 2], [3, 6, 6, 1.5], [6, 10, 15, 3], [5, 20, 4, 2]]); return QV("Trois robinets remplissent un bassin seuls en " + a + " h, " + b + " h et " + c + " h. En combien d'heures le remplissent-ils ensemble ?", t, M("\\frac{1}{" + a + "} + \\frac{1}{" + b + "} + \\frac{1}{" + c + "} = \\frac{1}{" + dec(t) + "}") + " : " + dec(t) + " h."); },
+);
+V("probrat", 2,
+  () => { const [t, a, b] = R.pick([[6, 10, 15], [4, 12, 6], [2, 3, 6], [12, 20, 30], [8, 12, 24]]); return QV("Ensemble, deux jardiniers tondent un parc en " + t + " h. Le premier, seul, mettrait " + a + " h. Combien d'heures mettrait le second, seul ?", b, M("\\frac{1}{x} = \\frac{1}{" + t + "} - \\frac{1}{" + a + "} = \\frac{1}{" + b + "}") + " : " + b + " h."); },
+  () => { const t = R.pick([2, 4, 6]); return QV("Deux imprimantes impriment ensemble un lot en " + t + " h. L'une est deux fois plus rapide que l'autre. Combien d'heures mettrait la plus lente, seule ?", 3 * t, "Si la lente met x heures, la rapide " + M("\\frac{x}{2}") + " : " + M("\\frac{1}{x} + \\frac{2}{x} = \\frac{1}{" + t + "}") + ", donc " + M("x = " + 3 * t) + " h."); },
+);
+V34("probrat",
+  () => { const [d, v, dv, t] = R.pick([[300, 60, 20, 1.25], [120, 40, 20, 1], [240, 40, 20, 2], [180, 60, 30, 1], [150, 50, 25, 1], [360, 60, 30, 2]]); return QV("Un train parcourt " + d + " km. S'il roulait " + dv + " km/h plus vite, il mettrait " + (t === 1.25 ? "1 h 15" : t + " h") + " de moins. Quelle est sa vitesse (en km/h) ?", v, M("\\frac{" + d + "}{v} - \\frac{" + d + "}{v + " + dv + "} = " + dec(t)) + " ; la solution positive est " + M("v = " + v) + " km/h (" + d / v + " h au lieu de " + dec(d / (v + dv)) + " h)."); },
+  () => { const [d, v, dv, t] = R.pick([[60, 20, 10, 1], [120, 30, 10, 1], [90, 15, 15, 3], [40, 10, 10, 2]]); return QV("Une cycliste fait une randonnée de " + d + " km. Si elle roulait " + dv + " km/h moins vite, elle mettrait " + t + " h de plus. Quelle est sa vitesse (en km/h) ?", v, M("\\frac{" + d + "}{v - " + dv + "} - \\frac{" + d + "}{v} = " + t) + " ; solution positive " + M("v = " + v) + " km/h."); },
+);
+V("expo", 1,
+  () => { const n = R.int(2, 5); return QV("Résous : " + M("2^{x + 1} = " + 2 ** (n + 1)) + ".", n, M(2 ** (n + 1) + " = 2^{" + (n + 1) + "}") + ", donc " + M("x + 1 = " + (n + 1)) + " et " + M("x = " + n) + "."); },
+  () => { const [b, n] = R.pick([[5, 2], [3, 3], [2, 4], [10, 3], [4, 2]]); return QV("Résous : " + M(b + "^x = \\frac{1}{" + b ** n + "}") + ".", -n, M("\\frac{1}{" + b ** n + "} = " + b + "^{-" + n + "}") + ", donc " + M("x = -" + n) + "."); },
+  () => { const [b, c, v] = R.pick([[9, 27, 1.5], [4, 8, 1.5], [8, 4, 2 / 3], [25, 125, 1.5]]); return QV("Résous : " + M(b + "^x = " + c) + ".", v, "Même base : " + (b === 9 ? M("3^{2x} = 3^3") : b === 4 ? M("2^{2x} = 2^3") : b === 8 ? M("2^{3x} = 2^2") : M("5^{2x} = 5^3")) + ", donc " + M("x = " + frac(Math.round(v * 6), 6)) + "."); },
+);
+V34("expo",
+  () => { const [p, n] = R.pick([[5, 15], [4, 18], [3, 24], [6, 12], [8, 10]]); return QV("Un capital est placé à " + p + " % d'intérêt composé par an. Au bout de combien d'années complètes aura-t-il au moins doublé ?", n, M("1{,}0" + (p < 10 ? p : "") + "^n \\ge 2") + " : " + M("n \\ge \\frac{\\ln 2}{\\ln " + dec(1 + p / 100) + "} \\approx " + dec(+(Math.log(2) / Math.log(1 + p / 100)).toFixed(2))) + ", donc " + n + " ans."); },
+  () => { const C = R.pick([2000, 4000, 5000, 8000]), p = R.pick([2, 3, 4, 5]), n = R.int(2, 3); const F = r2(C * (1 + p / 100) ** n); return QV("Après " + n + " ans à " + p + " % d'intérêt composé, un capital vaut " + M(dec(F)) + " CHF. Quel était le capital de départ (en CHF) ?", C, M("\\frac{" + dec(F) + "}{" + dec(1 + p / 100) + "^" + n + "} \\approx " + mille(C)) + " CHF.", { round: 0.01 }); },
+);
+V("expfrac", 1,
+  () => { const [b, p, q, v] = R.pick([[8, 2, 3, 4], [27, 2, 3, 9], [16, 3, 4, 8], [125, 2, 3, 25], [4, 3, 2, 8], [9, 3, 2, 27]]); return QV("Calcule " + M(b + "^{\\frac{" + p + "}{" + q + "}}") + ".", v, M(b + "^{\\frac{" + p + "}{" + q + "}} = \\left(\\sqrt[" + q + "]{" + b + "}\\right)^{" + p + "} = " + Math.round(b ** (1 / q)) + "^{" + p + "} = " + v) + "."); },
+  () => { const [a, b] = R.pick([[27, 16], [8, 25], [64, 9], [125, 4]]); const v = Math.round(a ** (1 / 3)) + Math.round(b ** 0.5); return QV("Calcule " + M(a + "^{\\frac{1}{3}} + " + b + "^{\\frac{1}{2}}") + ".", v, M("\\sqrt[3]{" + a + "} + \\sqrt{" + b + "} = " + Math.round(a ** (1 / 3)) + " + " + Math.round(b ** 0.5) + " = " + v) + "."); },
+);
+V("expfrac", 2,
+  () => { const [b, p, q, v] = R.pick([[16, 3, 4, 1 / 8], [8, 2, 3, 1 / 4], [27, 2, 3, 1 / 9], [4, 3, 2, 1 / 8], [9, 3, 2, 1 / 27]]); return QV("Calcule " + M(b + "^{-\\frac{" + p + "}{" + q + "}}") + " (fraction).", v, M("\\frac{1}{" + b + "^{\\frac{" + p + "}{" + q + "}}} = \\frac{1}{" + Math.round(1 / v) + "}") + "."); },
+  () => { const [n, v] = R.pick([[9, 3], [4, 2], [25, 5], [16, 4]]); return QV("Calcule " + M("\\left(\\frac{1}{" + n + "}\\right)^{-\\frac{1}{2}}") + ".", v, M("\\left(\\frac{1}{" + n + "}\\right)^{-\\frac{1}{2}} = " + n + "^{\\frac{1}{2}} = " + v) + "."); },
+);
+V("modexp", 1,
+  () => { const P = R.pick([20000, 30000, 40000]), p = R.pick([10, 15, 20]), n = 2; const v = r2(P * (1 - p / 100) ** n); return QV("Une voiture achetée " + mille(P) + " CHF perd " + p + " % de sa valeur chaque année. Que vaut-elle après " + n + " ans (en CHF) ?", v, M(mille(P) + " \\cdot " + dec(1 - p / 100) + "^2 = " + mille(v)) + " CHF."); },
+  () => { const N = R.pick([1000, 2000, 5000]), p = R.pick([10, 20]), n = 3; const v = r2(N * (1 + p / 100) ** n); return QV("Une ville de " + mille(N) + " habitants grandit de " + p + " % par an. Combien d'habitants a-t-elle après " + n + " ans ?", v, M(mille(N) + " \\cdot " + dec(1 + p / 100) + "^3 = " + mille(v)) + "."); },
+);
+V("modexp", 2,
+  () => { const m = R.pick([800, 640, 1600]), T = R.pick([2, 3, 5]), k = R.int(3, 4); return QV("Un échantillon radioactif de " + m + " g a une demi-vie de " + T + " jours. Quelle masse reste-t-il après " + T * k + " jours (en g) ?", m / 2 ** k, k + " demi-vies : " + M(m + " \\cdot \\left(\\frac{1}{2}\\right)^{" + k + "} = " + dec(m / 2 ** k)) + " g."); },
+  () => { const N = R.pick([20, 50, 100]), T = R.pick([2, 3]), k = R.int(3, 4); return QV("Une population de " + N + " insectes triple toutes les " + T + " semaines. Combien y en a-t-il après " + T * k + " semaines ?", N * 3 ** k, k + " triplements : " + M(N + " \\cdot 3^{" + k + "} = " + mille(N * 3 ** k)) + "."); },
+);
+V34("modexp",
+  () => { const T = R.pick([3, 5, 8]), k = R.int(3, 5); return QV("Une quantité est divisée par 2 tous les " + T + " ans. Au bout de combien d'années aura-t-elle été divisée par " + 2 ** k + " ?", T * k, M(2 ** k + " = 2^{" + k + "}") + " : " + k + " périodes de " + T + " ans, soit " + T * k + " ans."); },
+  () => { const k = R.int(3, 5); return QV("Une colonie triple chaque année. Au bout de combien d'années aura-t-elle été multipliée par " + 3 ** k + " ?", k, M("3^n = " + 3 ** k + " = 3^{" + k + "}") + ", donc " + k + " ans."); },
+);
+V("log", 2,
+  () => { const b = R.pick([2, 5, 7]), c = R.pick([40, 60, 75, 100]); return QE("Résous " + M(b + "^x = " + c) + " (valeur exacte avec ln, ou au centième).", Math.log(c) / Math.log(b), M("x = \\frac{\\ln " + c + "}{\\ln " + b + "} \\approx " + dec(r2(Math.log(c) / Math.log(b))))); },
+  () => { const c = R.pick([250, 40, 3000, 75]); return QE("Résous " + M("10^x = " + c) + " (valeur exacte avec log, ou au centième).", Math.log10(c), M("x = \\log " + c + " \\approx " + dec(r2(Math.log10(c))))); },
+);
+V34("log",
+  () => { const [a, b, v] = R.pick([[50, 20, 3], [25, 4, 2], [8, 125, 3], [200, 5, 3], [4, 250, 3]]); return QV("Calcule sans calculatrice : " + M("\\log " + a + " + \\log " + b) + ".", v, M("\\log(" + a + " \\cdot " + b + ") = \\log " + mille(a * b) + " = " + v) + "."); },
+  () => { const [a, b, v] = R.pick([[8000, 8, 3], [500, 5, 2], [300, 3, 2], [7000, 7, 3]]); return QV("Calcule sans calculatrice : " + M("\\log " + a + " - \\log " + b) + ".", v, M("\\log\\frac{" + a + "}{" + b + "} = \\log " + mille(a / b) + " = " + v) + "."); },
+);
+V("logbase", 1,
+  () => { const [b, x, v, s] = R.pick([[8, 2, 1 / 3, "\\frac{\\ln 2}{\\ln 2^3}"], [9, 27, 1.5, "\\frac{\\ln 3^3}{\\ln 3^2}"], [16, 8, 0.75, "\\frac{\\ln 2^3}{\\ln 2^4}"], [27, 9, 2 / 3, "\\frac{\\ln 3^2}{\\ln 3^3}"]]); return QV("Calcule " + M("\\log_{" + b + "} " + x) + " (valeur exacte).", v, M(s + " = " + frac(Math.round(v * 12), 12)) + "."); },
+  () => { const [b, x, v] = R.pick([[2, 32, 5], [3, 81, 4], [5, 125, 3], [4, 64, 3]]); return QV("Calcule " + M("\\log_{" + b + "} \\frac{1}{" + x + "}") + " (valeur exacte).", -v, M("\\frac{1}{" + x + "} = " + b + "^{-" + v + "}") + ", donc " + M("-" + v) + "."); },
+);
+V("logbase", 2,
+  () => { const b = R.pick([2, 5, 7]), x = R.pick([200, 1000, 50, 300]); return QV("Calcule " + M("\\log_{" + b + "} " + x) + " à la calculatrice. Arrondis au centième.", Math.log(x) / Math.log(b), M("\\frac{\\ln " + x + "}{\\ln " + b + "} \\approx " + dec(r2(Math.log(x) / Math.log(b)))) + ".", { round: 0.01 }); },
+  () => { const b = R.pick([3, 6, 8]), x = R.pick([0.5, 0.2, 0.05]); return QV("Calcule " + M("\\log_{" + b + "} " + dec(x)) + " à la calculatrice. Arrondis au centième.", Math.log(x) / Math.log(b), M("\\frac{\\ln " + dec(x) + "}{\\ln " + b + "} \\approx " + dec(r2(Math.log(x) / Math.log(b)))) + " (négatif : " + dec(x) + " < 1).", { round: 0.01 }); },
+);
+V34("logbase",
+  () => { const [a, b, e] = R.pick([[3, 5, 4], [2, 7, 3], [5, 3, 2], [7, 2, 2], [2, 3, 5]]); return QV("Calcule " + M("\\log_{" + a + "} " + b + " \\cdot \\log_{" + b + "} " + a ** e) + " (valeur exacte).", e, M("\\frac{\\ln " + b + "}{\\ln " + a + "} \\cdot \\frac{\\ln " + a + "^{" + e + "}}{\\ln " + b + "} = " + e) + "."); },
+  () => { const [b, x, e] = R.pick([[2, 9, 2], [5, 8, 3], [7, 25, 2], [3, 16, 4]]); const base = Math.round(x ** (1 / e)); return QV("Calcule " + M("\\frac{\\log_{" + b + "} " + x + "}{\\log_{" + b + "} " + base + "}") + " (valeur exacte).", e, M("\\frac{\\ln " + base + "^{" + e + "}}{\\ln " + base + "} = " + e) + " (la base " + b + " ne joue aucun rôle)."); },
+);
+V("sinlaw", 1,
+  () => { const c = R.int(8, 20), g = R.int(40, 70), a = R.int(40, 70); return QV("Dans le triangle ABC, c = " + c + " (côté opposé à " + M("\\gamma") + "), " + M("\\gamma = " + g + "°") + " et " + M("\\alpha = " + a + "°") + ". Calcule a au centième.", (c * Math.sin(a * DEG)) / Math.sin(g * DEG), M("a = \\frac{" + c + " \\sin " + a + "°}{\\sin " + g + "°} \\approx " + dec(r2((c * Math.sin(a * DEG)) / Math.sin(g * DEG))))); },
+  () => { const a = R.int(8, 14), al = R.int(50, 80), b = R.int(5, a - 2); const be = Math.asin((b * Math.sin(al * DEG)) / a) / DEG; return QV("Dans le triangle ABC, a = " + a + ", b = " + b + " et " + M("\\alpha = " + al + "°") + ". Calcule l'angle " + M("\\beta") + " (aigu) en degrés, au centième.", be, M("\\sin\\beta = \\frac{" + b + " \\sin " + al + "°}{" + a + "}") + ", " + M("\\beta \\approx " + dec(r2(be)) + "°") + ".", { round: 0.01 }); },
+);
+V("sinlaw", 2,
+  () => { const [b, c, a] = R.pick([[5, 8, 7], [3, 8, 7], [8, 15, 13], [5, 21, 19]]); return QV("Dans le triangle ABC, b = " + b + ", c = " + c + " et " + M("\\alpha = 60°") + ". Calcule a.", a, M("a^2 = " + b + "^2 + " + c + "^2 - 2 \\cdot " + b + " \\cdot " + c + " \\cdot \\cos 60° = " + (b * b + c * c - b * c) + " = " + a * a) + ", donc " + M("a = " + a) + "."); },
+  () => { const a = R.int(4, 9), b = R.int(4, 9); const c = Math.sqrt(a * a + b * b + a * b); return QV("Dans le triangle ABC, a = " + a + ", b = " + b + " et " + M("\\gamma = 120°") + ". Calcule c au centième.", c, M("c^2 = " + a * a + " + " + b * b + " - 2 \\cdot " + a + " \\cdot " + b + " \\cos 120° = " + (a * a + b * b + a * b)) + " (cos 120° = −1/2), " + M("c \\approx " + dec(r2(c)))); },
+);
+V34("sinlaw",
+  () => { const [a, b, c, g] = R.pick([[5, 8, 7, 60], [3, 8, 7, 60], [3, 5, 7, 120], [5, 3, 7, 120], [7, 8, 13, 120]]); return QV("Un triangle a pour côtés a = " + a + ", b = " + b + " et c = " + c + ". Calcule l'angle " + M("\\gamma") + " (opposé à c) en degrés.", g, M("\\cos\\gamma = \\frac{" + a * a + " + " + b * b + " - " + c * c + "}{2 \\cdot " + a + " \\cdot " + b + "} = " + (g === 60 ? "\\frac{1}{2}" : "-\\frac{1}{2}")) + ", donc " + M("\\gamma = " + g + "°") + "."); },
+  () => { const a = R.int(5, 12), b = R.int(5, 12), c = R.int(Math.abs(a - b) + 2, a + b - 2); const g = Math.acos((a * a + b * b - c * c) / (2 * a * b)) / DEG; return QV("Un triangle a pour côtés a = " + a + ", b = " + b + " et c = " + c + ". Calcule l'angle " + M("\\gamma") + " (opposé à c) en degrés, au centième.", g, M("\\cos\\gamma = \\frac{" + (a * a + b * b - c * c) + "}{" + 2 * a * b + "}") + ", " + M("\\gamma \\approx " + dec(r2(g)) + "°") + ".", { round: 0.01 }); },
+);
+V("triaire", 1,
+  () => { const a = R.int(3, 9) * 2, b = R.int(3, 9); return QV("Un triangle a deux côtés de " + a + " cm et " + b + " cm, qui forment un angle de 150°. Calcule son aire (en cm²).", (a * b) / 4, M("\\frac{1}{2} \\cdot " + a + " \\cdot " + b + " \\cdot \\sin 150° = \\frac{1}{2} \\cdot " + a * b + " \\cdot \\frac{1}{2} = " + dec((a * b) / 4)) + " cm²."); },
+  () => { const a = R.int(4, 12), b = R.int(3, 9) * 2; return QV("Un parallélogramme a des côtés de " + a + " cm et " + b + " cm, qui forment un angle de 30°. Calcule son aire (en cm²).", (a * b) / 2, M(a + " \\cdot " + b + " \\cdot \\sin 30° = " + (a * b) / 2) + " cm²."); },
+);
+V("triaire", 2,
+  () => { const a = R.int(4, 12), b = R.int(4, 12) * 2; return QV("Un triangle a deux côtés de " + a + " cm et " + b + " cm et une aire de " + (a * b) / 4 + " cm². L'angle entre ces côtés est aigu. Combien mesure-t-il (en degrés) ?", 30, M("\\frac{1}{2} \\cdot " + a + " \\cdot " + b + " \\cdot \\sin\\alpha = " + (a * b) / 4) + ", donc " + M("\\sin\\alpha = \\frac{1}{2}") + " et " + M("\\alpha = 30°") + "."); },
+  () => { const a = R.int(5, 12), b = R.int(5, 12), g = R.int(35, 80); return QV("Une parcelle triangulaire a deux côtés de " + a + " m et " + b + " m, qui forment un angle de " + g + "°. Calcule son aire (en m²). Arrondis au dixième.", 0.5 * a * b * Math.sin(g * DEG), M("\\frac{1}{2} \\cdot " + a + " \\cdot " + b + " \\cdot \\sin " + g + "° \\approx " + dec(+(0.5 * a * b * Math.sin(g * DEG)).toFixed(1))) + " m².", { round: 0.1 }); },
+);
+V34("triaire",
+  () => { const [a, b, c] = R.pick([[3, 5, 7], [5, 3, 7], [7, 8, 13], [5, 16, 19]]); return QV("Deux randonneurs partent du même refuge dans des directions qui forment un angle de 120°. L'un parcourt " + a + " km, l'autre " + b + " km. Quelle distance les sépare (en km) ?", c, M("d^2 = " + a * a + " + " + b * b + " - 2 \\cdot " + a + " \\cdot " + b + " \\cos 120° = " + (a * a + b * b + a * b) + " = " + c * c) + ", donc " + c + " km."); },
+  () => { const [a, b, c] = R.pick([[8, 5, 7], [8, 3, 7], [15, 8, 13], [21, 5, 19]]); return QV("Un triangle a deux côtés de " + a + " cm et " + b + " cm, qui forment un angle de 60°. Combien mesure le troisième côté (en cm) ?", c, M("c^2 = " + a * a + " + " + b * b + " - 2 \\cdot " + a + " \\cdot " + b + " \\cdot \\frac{1}{2} = " + c * c) + ", donc " + c + " cm."); },
+);
+V("trigcercle", 1,
+  () => { const [n, d, deg] = R.pick([[1, 3, 60], [3, 4, 135], [5, 6, 150], [2, 3, 120], [1, 6, 30], [5, 4, 225]]); return QV("Convertis " + M((n === 1 ? "" : n) + "\\frac{\\pi}{" + d + "}") + " radians en degrés.", deg, M((n === 1 ? "" : n) + "\\frac{\\pi}{" + d + "} = " + (n === 1 ? "" : n + " \\cdot ") + "\\frac{180°}{" + d + "} = " + deg + "°") + "."); },
+  () => { const [deg, s, v] = R.pick([[45, "\\frac{\\pi}{4}", Math.PI / 4], [120, "\\frac{2\\pi}{3}", (2 * Math.PI) / 3], [270, "\\frac{3\\pi}{2}", (3 * Math.PI) / 2], [30, "\\frac{\\pi}{6}", Math.PI / 6], [150, "\\frac{5\\pi}{6}", (5 * Math.PI) / 6]]); return QV("Convertis " + deg + "° en radians (par exemple « π/4 »).", v, M(deg + "° = " + deg + " \\cdot \\frac{\\pi}{180} = " + s)); },
+);
+V("vabs", 1,
+  () => { const a = R.int(3, 12), b = R.int(2, 9); return QV("Sur une droite graduée, quelle est la distance entre " + M("-" + a) + " et " + M(b) + " ? (C'est " + M("|" + b + " - (-" + a + ")|") + ".)", a + b, M("|" + b + " + " + a + "| = " + (a + b)) + "."); },
+  () => { let a, b; do { a = R.int(5, 15); b = R.int(2, 9); } while (Math.abs(a - b) < 2); return QV("Calcule : " + M("|-" + a + "| - |" + b + "|"), a - b, M(a + " - " + b + " = " + (a - b)) + "."); },
+);
+V("vabs", 2,
+  () => { let a, b, c; do { a = R.int(2, 9); b = R.int(10, 20); c = R.int(2, 9); } while (b - a + c === c || Math.abs(b - a + c) < 2); return QV("Calcule : " + M("|" + a + " - " + b + "| + |-" + c + "|"), b - a + c, M("|-" + (b - a) + "| + " + c + " = " + (b - a) + " + " + c + " = " + (b - a + c)) + "."); },
+  () => { let a, d; do { a = R.int(1, 8); d = R.int(2, 9); } while (Math.abs(a - d) < 2 || a - d === a); return QV("L'équation " + M("|x - " + a + "| = " + d) + " a deux solutions. Quelle est la plus petite ?", a - d, M("x - " + a + " = \\pm " + d) + " : " + M("x = " + (a + d)) + " ou " + M("x = " + (a - d)) + "."); },
+);
+V34("vabs",
+  () => { const a = R.int(2, 3), b = R.int(3, 9), c = R.int(2, 5); const v = a ** 3 - Math.abs(b - 2 * b) * c; return QV("Calcule : " + M("|-" + a + "|^3 - |" + b + " - " + 2 * b + "| \\cdot " + c), v, M(a ** 3 + " - " + b + " \\cdot " + c + " = " + v) + "."); },
+  () => clean(() => { let a, b, c; do { a = R.int(2, 9); b = R.int(2, 9); c = R.int(2, 9); } while (Math.abs(-a * b + c) < 2); return QV("Calcule : " + M("|-" + a + " \\cdot " + b + " + " + c + "| - " + a), Math.abs(-a * b + c) - a, M("|" + (-a * b + c) + "| - " + a + " = " + Math.abs(-a * b + c) + " - " + a + " = " + (Math.abs(-a * b + c) - a)) + "."); }),
+);
+V("ratden", 1,
+  () => clean(() => { const [n, s] = R.pick([[2, 2], [3, 3], [5, 5], [7, 7]]), k = R.int(2, 5); return QV("On écrit " + M("\\frac{" + k * s + "}{\\sqrt{" + s + "}} + \\sqrt{" + s + "}") + " sous la forme " + M("k\\sqrt{" + s + "}") + ". Que vaut k ?", k + 1, M("\\frac{" + k * s + "}{\\sqrt{" + s + "}} = " + k + "\\sqrt{" + s + "}") + ", puis " + M("+ \\sqrt{" + s + "}") + " : " + M((k + 1) + "\\sqrt{" + s + "}") + "."); }),
+  () => { let a, t; do { t = R.pick([2, 3, 5, 6]); a = t * R.int(2, 3); } while ((a * a) % t || a * a / t < 2); return QV("Calcule " + M("\\left(\\frac{" + a + "}{\\sqrt{" + t + "}}\\right)^2") + ".", (a * a) / t, M("\\frac{" + a * a + "}{" + t + "} = " + (a * a) / t) + " : le carré fait disparaître la racine."); },
+);
+V("ratden", 2,
+  () => clean(() => { const s = R.pick([2, 3, 5]), k = R.int(3, 6); return QV("On écrit " + M("\\frac{" + k * s + "}{\\sqrt{" + s + "}} - \\sqrt{" + s + "}") + " sous la forme " + M("k\\sqrt{" + s + "}") + ". Que vaut k ?", k - 1, M(k + "\\sqrt{" + s + "} - \\sqrt{" + s + "} = " + (k - 1) + "\\sqrt{" + s + "}") + "."); }),
+  () => clean(() => { const s = R.pick([2, 3, 5]), a = R.int(2, 4), k = R.int(2, 5); return QV("On écrit " + M("\\frac{" + k * a * s + "}{" + a + "\\sqrt{" + s + "}}") + " sous la forme " + M("k\\sqrt{" + s + "}") + ". Que vaut k ?", k, M("\\frac{" + k * a * s + "\\sqrt{" + s + "}}{" + a + " \\cdot " + s + "} = " + k + "\\sqrt{" + s + "}") + "."); }),
+);
+V34("ratden",
+  () => clean(() => { const [s, d] = R.pick([[6, 5], [7, 6], [10, 9], [5, 4], [3, 2]]), p = R.int(2, 4); return QV("On écrit " + M("\\frac{" + p * d + "}{\\sqrt{" + s + "} + 1}") + " sous la forme " + M("p(\\sqrt{" + s + "} - 1)") + ". Que vaut p ?", p, "Expression conjuguée : dénominateur " + M(s + " - 1 = " + d) + ", donc " + M("p = " + p * d + " : " + d + " = " + p) + "."); }),
+  () => clean(() => { const [a, s] = R.pick([[3, 5], [4, 7], [3, 7], [4, 11]]), d = a * a - s, p = R.int(2, 4); return QV("On écrit " + M("\\frac{" + p * d + "}{" + a + " - \\sqrt{" + s + "}}") + " sous la forme " + M("p(" + a + " + \\sqrt{" + s + "})") + ". Que vaut p ?", p, "Dénominateur après conjugaison : " + M(a * a + " - " + s + " = " + d) + " ; " + M("p = " + p * d + " : " + d + " = " + p) + "."); }),
+);
+V("statfreq", 1,
+  () => { const n = R.pick([20, 25, 40, 50]); let k; do k = R.int(2, n - 2); while ((k * 100) % n); return QV("Sur " + n + " réponses, " + k + " sont « oui ». Quelle est la fréquence de « oui », en pour cent ?", (k * 100) / n, M("\\frac{" + k + "}{" + n + "} = " + dec(k / n) + " = " + (k * 100) / n + " \\%") + "."); },
+  () => { const n = R.pick([40, 60, 80, 120]), p = R.pick([15, 25, 30, 35, 45]); return QV("Dans un sondage auprès de " + n + " personnes, " + p + " % ont répondu « oui ». Combien de personnes ont répondu « oui » ?", (n * p) / 100, M("\\frac{" + p + "}{100} \\cdot " + n + " = " + (n * p) / 100) + "."); },
+);
+V34("statfreq",
+  () => { let n, a; do { n = R.pick([20, 24, 30, 36, 40]); a = R.pick([36, 45, 60, 72, 90, 120]); } while ((a * n) % 360 || (a * n) / 360 < 2); return QV("Dans un diagramme circulaire représentant " + n + " personnes, un secteur mesure " + a + "°. Combien de personnes représente-t-il ?", (a * n) / 360, M("\\frac{" + a + "}{360} \\cdot " + n + " = " + (a * n) / 360) + "."); },
+  () => { const p = R.pick([15, 35, 45, 55, 65]); return QV("Une modalité a une fréquence de " + p + " %. Quel est l'angle de son secteur dans un diagramme circulaire (en degrés) ?", (p * 360) / 100, M("\\frac{" + p + "}{100} \\cdot 360° = " + (p * 360) / 100 + "°") + "."); },
+);
+V("quartiles", 1,
+  () => { const m = R.int(5, 20), e = R.int(10, 40); return QV("L'étendue d'une série vaut " + e + " et sa plus petite valeur " + m + ". Quelle est sa plus grande valeur ?", m + e, M(m + " + " + e + " = " + (m + e)) + "."); },
+  () => { const mi = R.int(1, 8), ma = R.int(10, 22); return QV("Pendant une semaine, la température minimale relevée a été de " + M("-" + mi) + " °C et la maximale de " + ma + " °C. Quelle est l'étendue des températures (en °C) ?", ma + mi, M(ma + " - (-" + mi + ") = " + (ma + mi)) + " °C."); },
+);
+V("quartiles", 2,
+  () => clean(() => { const s = Array.from({ length: 7 }, () => R.int(2, 40)); const t = s.slice().sort((a, b) => a - b); return QV("Quelle est la médiane de la série " + s.join("   ") + " ?", t[3], "Série triée : " + t.join("   ") + ". Effectif impair : la 4e valeur, " + t[3] + "."); }),
+  () => { const t = Array.from({ length: 6 }, () => R.int(2, 30)).sort((a, b) => a - b); if ((t[2] + t[3]) % 2) t[3]++; return QV("Une série triée de 6 valeurs : " + t.join("   ") + ". Quelle est sa médiane ?", (t[2] + t[3]) / 2, "Effectif pair : " + M("\\frac{" + t[2] + " + " + t[3] + "}{2} = " + (t[2] + t[3]) / 2) + "."); },
+);
+V34("quartiles",
+  () => { const t = Array.from({ length: 7 }, () => R.int(2, 50)).sort((a, b) => a - b); if (t[5] === t[1]) t[5] += 3; return QV("Série triée de 7 valeurs : " + t.join("   ") + ". Calcule l'écart interquartile " + M("Q_3 - Q_1") + ".", t[5] - t[1], "Médiane : 4e valeur. " + M("Q_1") + " : médiane des 3 premières, " + t[1] + ". " + M("Q_3") + " : médiane des 3 dernières, " + t[5] + ". Écart : " + (t[5] - t[1]) + "."); },
+  () => { const q1 = R.int(5, 20), q3 = q1 + R.int(6, 20); return QV("Dans un diagramme en boîte, la boîte va de " + q1 + " à " + q3 + ". Quel est l'écart interquartile ?", q3 - q1, "La boîte va de " + M("Q_1") + " à " + M("Q_3") + " : " + M(q3 + " - " + q1 + " = " + (q3 - q1)) + "."); },
+);
