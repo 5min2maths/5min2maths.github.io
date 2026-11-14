@@ -317,8 +317,11 @@ const Engine = {
     const rec = ((state.recentQ = state.recentQ || {})[id] = (state.recentQ[id] || []));
     const key = (q) => { let h = 0; for (const c of String(q.q) + JSON.stringify(q.spec)) h = (h * 31 + c.charCodeAt(0)) | 0; return h; };
     let q;
-    for (let k = 0; k < 8; k++) { q = this.build(id, level); if (!rec.includes(key(q))) break; }
+    // Contextes variés (règle du 14.11) : un contexte (q.ctx) vu dans les 2 dernières questions de la notion est évité.
+    const ctxs = ((state.recentCtx = state.recentCtx || {})[id] = (state.recentCtx[id] || []));
+    for (let k = 0; k < 12; k++) { q = this.build(id, level); if (!rec.includes(key(q)) && !(q.ctx && ctxs.includes(q.ctx))) break; }
     rec.push(key(q)); state.recentQ[id] = rec.slice(-15);
+    if (q.ctx) state.recentCtx[id] = [...ctxs, q.ctx].slice(-2);
     return q;
   },
   // Question reproductible : même notion, niveau et graine → même question.
