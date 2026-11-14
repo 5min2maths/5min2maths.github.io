@@ -9,6 +9,7 @@ L.push("titre : "+document.querySelector(".eyebrow").textContent);
 L.push("parties : "+[...document.querySelectorAll(".mock-part h3")].map(x=>x.textContent).join(" | "));
 L.push("exercices : "+[...document.querySelectorAll(".mock-ex h4")].map(x=>x.textContent).join(" | "));
 L.push("questions : "+document.querySelectorAll(".mock-q").length+" ; V/F : "+[...document.querySelectorAll(".mock-q")].filter(x=>/raison \? Justifie/.test(x.textContent)).length);
+for (const lv of ["facile","exigeant"]) { document.querySelector('#mlv button[data-lv="'+lv+'"]').click(); L.push(lv+" : "+document.querySelector(".eyebrow").textContent+" / "+document.querySelectorAll(".mock-q").length+" questions / "+document.querySelector(".mock-head .small").textContent.split("·").pop()); }
 document.getElementById("corr").click();
 document.querySelectorAll(".mock-mark").forEach((g,i)=>g.querySelectorAll("button")[i%3===0?2:0].click());
 document.getElementById("valid").click();

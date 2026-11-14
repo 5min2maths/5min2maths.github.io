@@ -7,15 +7,21 @@
 
 const mockSeed = () => Math.floor(Math.random() * 46655) + 1;
 
-function mockPlan(ids) {
-  const items = [], n = ids.length;
-  // A. Automatismes : une question courte (niveau 1) par notion, 5 au plus.
-  ids.slice(0, 5).forEach((id) => items.push({ part: "A", id, d: 1, seed: mockSeed() }));
-  // B. Exercices : un par notion (4 au plus), sous-questions de difficulté croissante.
-  ids.slice(0, 4).forEach((id, ex) => (n <= 2 ? [1, 2, 3] : [2, 3]).forEach((d) => items.push({ part: "B", ex, id, d, seed: mockSeed() })));
+// Niveaux du sujet (14.11) : facile, standard, exigeant.
+const MOCK_LV = {
+  facile: { label: "Facile", A: 1, B: (n) => [1, 2], vf: 1, prob: false },
+  standard: { label: "Standard", A: 1, B: (n) => (n <= 2 ? [1, 2, 3] : [2, 3]), vf: 2, prob: true },
+  exigeant: { label: "Exigeant", A: 2, B: (n) => (n <= 2 ? [2, 3, 4] : [3, 4]), vf: 3, prob: true },
+};
+function mockPlan(ids, level = "standard") {
+  const L = MOCK_LV[level] || MOCK_LV.standard, items = [], n = ids.length;
+  // A. Automatismes : une question courte par notion, 5 au plus.
+  ids.slice(0, 5).forEach((id) => items.push({ part: "A", id, d: L.A, seed: mockSeed() }));
+  // B. Exercices : un par notion (4 au plus), sous-questions de difficulté croissante (4 = défi).
+  ids.slice(0, 4).forEach((id, ex) => L.B(n).forEach((d) => items.push({ part: "B", ex, id, d: d === 4 && typeof hasProb === "function" && hasProb(id) ? 3 : d, seed: mockSeed() })));
   // C. Raisonnement : « Vrai ou faux ? Justifie » (1 ou 2) et un problème en plusieurs étapes si la notion en a un.
-  ids.slice(0, n >= 3 ? 2 : 1).forEach((id, k) => items.push({ part: "C", id: ids[(k + 1) % n], d: 2, seed: mockSeed(), vf: true }));
-  const pid = ids.find((id) => typeof hasProb === "function" && hasProb(id));
+  ids.slice(0, n >= 3 ? 2 : 1).forEach((id, k) => items.push({ part: "C", id: ids[(k + 1) % n], d: L.vf, seed: mockSeed(), vf: true }));
+  const pid = L.prob && ids.find((id) => typeof hasProb === "function" && hasProb(id));
   if (pid) items.push({ part: "C", id: pid, d: 4, seed: mockSeed() });
   return items;
 }
@@ -48,11 +54,12 @@ function mockQuestions() {
   return state.mock.items.map((it) => {
     let q = Engine.make(state, it.id, it.d, it.seed);
     if (it.vf) { const f = mockVF(it, q); if (f) q = f; else it = { ...it, vf: false }; }
-    return { ...it, q, pts: q.parts ? 2 * q.parts.length : it.vf ? 2 : it.part === "A" ? 1 : it.d };
+    return { ...it, q, pts: q.parts ? 2 * q.parts.length : it.vf ? 2 : it.part === "A" ? it.d : Math.min(it.d, 4) };
   });
 }
-function mockNew() {
-  state.mock = { date: day(), ids: state.prep.ids.slice(), items: mockPlan(state.prep.ids), done: null };
+function mockNew(level) {
+  level = level || (state.mock && state.mock.level) || "standard";
+  state.mock = { date: day(), ids: state.prep.ids.slice(), level, items: mockPlan(state.prep.ids, level), done: null };
   save();
 }
 const ptsTxt = (p) => p + " pt" + (p > 1 ? "s" : "");
@@ -68,7 +75,8 @@ function screenMock() {
   const A = qs.filter((x) => x.part === "A"), B = qs.filter((x) => x.part === "B"), C = qs.filter((x) => x.part === "C");
   const exs = [...new Set(B.map((x) => x.ex))];
   h(`<div class="mock-head">${brand}<div class="eyebrow">Sujet de préparation · environ ${minutes} min · ${total} points</div>
-  <h2>Je m'entraîne pour mon test</h2><p class="small muted">${state.prep.ids.map(nLabel).join(" · ")}</p></div>
+  <h2>Je m'entraîne pour mon test</h2><p class="small muted">${state.prep.ids.map(nLabel).join(" · ")} · niveau ${MOCK_LV[state.mock.level || "standard"].label.toLowerCase()}</p></div>
+  <div class="seg no-print" id="mlv">${Object.entries(MOCK_LV).map(([k, v]) => `<button type="button" data-lv="${k}" aria-pressed="${(state.mock.level || "standard") === k}">${v.label}</button>`).join("")}</div>
   <div class="card flat"><p class="small">Pour t'entraîner avant ton test. <b>Ce n'est pas une évaluation</b> : il n'y a pas de note, et personne d'autre que toi ne voit le résultat. Fais-le sur une feuille, sans regarder tes cours, puis corrige-toi avec le corrigé.</p></div>
   <section class="mock-part"><h3>A. Automatismes</h3>${A.map((x) => qHtml(x, "Question " + ++num)).join("")}</section>
   <section class="mock-part"><h3>B. Exercices</h3>${exs.map((e, k) => { const L = B.filter((x) => x.ex === e); num++; return `<div class="mock-ex"><h4>Exercice ${k + 1} · ${nLabel(L[0].id)}</h4>${L.map((x, j) => qHtml(x, String.fromCharCode(97 + j) + ")")).join("")}</div>`; }).join("")}</section>
@@ -77,6 +85,7 @@ function screenMock() {
     <button class="btn-primary btn-big" id="corr">J'ai fini : voir le corrigé</button>
     <div class="row"><button id="print">🖨 Imprimer / PDF</button><button class="btn-ghost" id="again">Un autre sujet</button><button class="btn-ghost" id="back">Retour</button></div>
   </div>`);
+  app.querySelectorAll("#mlv button").forEach((b) => (b.onclick = () => { if (b.dataset.lv !== (state.mock.level || "standard")) { mockNew(b.dataset.lv); screenMock(); } }));
   document.getElementById("corr").onclick = screenMockCorr;
   document.getElementById("print").onclick = () => window.print();
   document.getElementById("again").onclick = () => { mockNew(); screenMock(); };
