@@ -339,6 +339,13 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .keypad.k-num { grid-template-columns: repeat(4, 1fr); width: 100%; max-width: 340px; margin-inline: auto; align-self: center; }
 .keypad.k-num button { padding: 12px 0; font-size: 1.2rem; }
 .figstack { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.cyc summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; list-style: none; }
+.cyc summary::-webkit-details-marker { display: none; }
+.cyc summary::after { content: "▾"; color: var(--ink-soft); margin-left: 4px; transition: transform 150ms; }
+.cyc:not([open]) summary::after { transform: rotate(-90deg); }
+.cyc-h { display: grid; gap: 2px; flex: 1; }
+.cyc[open] summary { margin-bottom: 8px; }
+.tag.yr { background: var(--blue-soft); color: var(--blue); }
 
 </style>
 <script>
@@ -6637,13 +6644,26 @@ function screenComps() {
       ${compsOf(c.id).map((k) => { const n = compNote(comps[k.cid]); return `<div class="comp"><span>${k.label}</span><span class="comp-r"><button type="button" class="ctest" data-id="${c.id}" data-d="${k.i + 1}" data-label="${esc(k.label)}" title="3 questions sur cette compétence">Me tester</button><span class="note ${noteCls(n)}">${noteTxt(n)}</span></span></div>`; }).join("")}</div>`).join("")}</div>`;
   }).join("");
   const cur = cat.filter((c) => c.current), old = cat.filter((c) => !c.current), st = compStats(cur.map((c) => c.id));
+  // CO (14.11, demande de l'utilisateur) : compétences du cycle classées par grand thème du PER, un bloc repliable par thème.
+  const co = state.profile.system === "CH" && state.profile.grade <= 11;
+  const yearOf = (c) => (placeOf(c, state.profile) || [state.profile.grade])[0];
+  const compLine = (c) => compsOf(c.id).map((k) => { const n = compNote(comps[k.cid]); return `<div class="comp"><span>${k.label}</span><span class="comp-r"><button type="button" class="ctest" data-id="${c.id}" data-d="${k.i + 1}" data-label="${esc(k.label)}" title="3 questions sur cette compétence">Me tester</button><span class="note ${noteCls(n)}">${noteTxt(n)}</span></span></div>`; }).join("");
+  const cycle = () => Object.keys(THEMES).map((th, i) => {
+    const ns = cat.filter((c) => NOTIONS.find((n) => n.id === c.id).theme === th).sort((a, b) => yearOf(a) - yearOf(b) || Engine.rank(state.profile, a.id) - Engine.rank(state.profile, b.id));
+    if (!ns.length) return "";
+    const t = compStats(ns.map((c) => c.id));
+    return `<details class="card flat cyc"><summary><span class="cyc-h"><b>${THEMES[th]}</b><span class="small muted">${t.tested} / ${t.total} notées${t.avg !== null ? " · moyenne " + String(Math.round(t.avg * 10) / 10).replace(".", ",") : ""}</span></span>${t.avg !== null ? `<span class="note ${noteCls(Math.round(t.avg * 2) / 2)}">${String(Math.round(t.avg * 10) / 10).replace(".", ",")}</span>` : ""}</summary>
+      ${ns.map((c) => `<div class="cnotion"><div class="spread"><b>${c.label}</b><span class="row" style="gap:4px"><span class="tag yr">${yearOf(c)}e</span>${statusTag(c.id)}</span></div>${compLine(c)}</div>`).join("")}</details>`;
+  }).join("");
+  const sc = compStats(cat.map((c) => c.id));
   Badges.check(state); state.badgesNew = []; save();
   h(`${brand}<h2>Mes <span class="mark">compétences</span></h2>
   <p class="muted">Chaque compétence reçoit une note de 1 à 6 dès que tu y as répondu 3 fois. La note suit tes 8 dernières réponses : elle monte quand tu progresses.</p>
   ${badgesSection()}
-  <div class="card flat"><div class="spread"><span>Cette année</span><b>${st.tested} / ${st.total} notées${st.avg !== null ? " · moyenne " + String(Math.round(st.avg * 10) / 10).replace(".", ",") : ""}</b></div></div>
+  ${co ? `<div class="card flat"><div class="spread"><span>Cycle 3 · jusqu'en ${state.profile.grade}e</span><b>${sc.tested} / ${sc.total} notées${sc.avg !== null ? " · moyenne " + String(Math.round(sc.avg * 10) / 10).replace(".", ",") : ""}</b></div></div>
+  ${cycle()}` : `<div class="card flat"><div class="spread"><span>Cette année</span><b>${st.tested} / ${st.total} notées${st.avg !== null ? " · moyenne " + String(Math.round(st.avg * 10) / 10).replace(".", ",") : ""}</b></div></div>
   ${block(cur)}
-  ${old.length ? `<details class="olds"><summary>Années précédentes (${compStats(old.map((c) => c.id)).tested} notées)</summary>${block(old)}</details>` : ""}
+  ${old.length ? `<details class="olds"><summary>Années précédentes (${compStats(old.map((c) => c.id)).tested} notées)</summary>${block(old)}</details>` : ""}`}
   <button class="btn-primary btn-big" id="back">Retour</button>`);
   bindBadges(app);
   // « Me tester » (14.11, demande de l'utilisateur) : 3 questions de la compétence, au niveau de la compétence.
