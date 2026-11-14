@@ -20,6 +20,22 @@ SOURCES = [  # (nom, index Coopmaths, dépôt)
     ("EAM 1re", "dictionnaireEAM.ts", "coopmaths_eam"),
     ("bac", "dictionnaireBAC.ts", "coopmaths_bac"),
 ]
+# Base C. Poulain (forge cpoulain/bases-college) : dossiers par thème, 3e et 4e françaises
+# (≈ 10e-11e CO). Usage personnel libre ; mise en ligne = autorisation de l'auteur.
+POULAIN = SRC / "cpoulain_bases-college"
+PDIR = {
+    "3arithmetique": "11C01", "3racines": "11C01", "4fractions": "11C01", "4puissances": "11C01",
+    "3litteral": "11C05", "4litteral": "11C05", "3equainequa": "11C06", "4equa": "11C06",
+    "3fonctions": "11C10", "3affine": "11C10", "3geoana": "11C10", "3espace": "11C03",
+    "4espace": "11C03", "3geoplane": "11C07", "4trireccercle": "11C07", "3proba": "11C12",
+    "3rotation": "11C11", "3systemes": "11C09", "3thales": "11C08", "4thales": "11C08",
+    "4pythagore": "11C02", "4proportionnalite": "11C04", "3trigo": "M1C10", "4cosinus": "M1C10",
+    "3vecteurs": "M2C10", "4demonstration": "M1C03",
+    "3Probleme": "", "3problemegeo": "", "3problemenum": "", "3cumul": "",
+    "4Problemes": "", "4TachesComplexes": "", "4geoprobleme": "",
+}
+VERS1C = {"11C01": "M1C01", "11C05": "M1C06", "11C06": "M1C05", "11C10": "M1C04",
+          "11C02": "M1C08", "11C08": "M1C08", "11C07": "M1C09", "11C09": "M1C05"}
 OUT = Path(__file__).resolve().parent.parent / "banque" / "annales_index.xlsx"
 
 CH11 = {  # tag Coopmaths -> chapitre 11e (THEME_LABEL CO)
@@ -128,6 +144,31 @@ def main():
             k[0] += 1
             k[1] += "justifier" in types or "comparer" in types or "inverse" in types
             k[2] += nq >= 3
+    labs = dict((b, a.strip().rstrip(".")) for a, b in re.findall(
+        r"\+ \[([^]]*)\]\(([^)]*)\)", (POULAIN / "README.md").read_text(encoding="utf-8")))
+    for d, ch in PDIR.items():
+        lab = labs.get(d, d)
+        for f in sorted((POULAIN / d / "tex").glob("*.tex")):
+            tex = f.read_text(encoding="utf-8", errors="replace")
+            com = " ".join(re.findall(r"%@Commentaire:(.*)", tex)).strip()
+            low = re.sub(r"aucune justification[^.]*", "", tex.lower())
+            types = [n for n, rx in TYPES if re.search(rx, low)]
+            if not ch:
+                types.insert(0, "problème")
+            if "riche" in com.lower():
+                types.insert(0, "situation riche")
+            c11 = [ch] if ch.startswith("11") else []
+            cm = [VERS1C[ch]] if ch in VERS1C else ([ch] if ch.startswith("M") else [])
+            nq = len(re.findall(r"\\item", tex))
+            ws.append([f"{d}/{f.stem}", "Poulain " + d[0] + "e", None, lab,
+                       ", ".join(c11), ", ".join(c for c in cm if c.startswith("M1")),
+                       ", ".join(c for c in cm if c.startswith("M2")), lab, nq, ", ".join(types),
+                       (("[" + com + "] ") if com else "") + plain(tex)[:300], str(f), ""])
+            for c in c11 + cm:
+                k = count.setdefault(c, [0, 0, 0])
+                k[0] += 1
+                k[1] += "justifier" in types or "comparer" in types or "inverse" in types
+                k[2] += nq >= 3
     bold = Font(bold=True)
     fill = PatternFill("solid", fgColor="DDEBF7")
     for cell in ws[1]:
