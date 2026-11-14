@@ -27,7 +27,7 @@ const Badges = {
   // Icône d'un badge de thème, d'après son libellé.
   themeIcon(label) {
     const T = [[/vectoriel|coordonn|droites param/i, "🧭"], [/probab|statist|données/i, "🎲"], [/complexe/i, "🌀"], [/analyse/i, "📉"], [/trigo/i, "📐"], [/géom|volume|espace/i, "📐"],
-      [/syst|équation|inéquation/i, "⚖️"], [/fonction|puissance|log/i, "📈"], [/algèbre|algébrique/i, "🔣"], [/nombre|numérique/i, "🔢"], [/grandeur|mesure/i, "📏"]];
+      [/quadrat|degré 2/i, "svg:parabole"], [/syst|équation|inéquation/i, "⚖️"], [/fonction|puissance|log/i, "📈"], [/algèbre|algébrique/i, "🔣"], [/nombre|numérique/i, "🔢"], [/grandeur|mesure/i, "📏"]];
     return (T.find(([r]) => r.test(label)) || [0, "🏆"])[1];
   },
   // Badges de l'élève : les badges de thème suivent le découpage de son référentiel (CO, matu ou MP).
@@ -105,10 +105,16 @@ const Badges = {
   onFeedback(state) { this.bc(state).fb++; },
 
   // ---- Affichage ----
+  // Icônes dessinées (14.11) : « svg:<nom> » au lieu d'un émoji, quand aucun émoji ne convient (parabole des fonctions quadratiques).
+  drawn(icon, col) {
+    if (icon === "svg:parabole")
+      return `<g fill="none" stroke-linecap="round"><path d="M26 72 H74 M50 24 V78" stroke="${col}" stroke-width="2.5" opacity=".45"/><path d="M21 30 Q50 90 79 30" stroke="${col}" stroke-width="6"/><circle cx="50" cy="60" r="4.5" fill="${col}" stroke="none"/></g>`;
+    return "";
+  },
   COLORS: { reg: ["#f08a24", "#fde7cf"], mai: ["#2457d6", "#e4ecff"], per: ["#1e8a5a", "#e1f5ea"], cur: ["#8a3fd1", "#f0e4fb"] },
   icon(x, on, px = 56) {
     const [c, soft] = this.COLORS[x.fam];
     const pts = [...Array(6)].map((_, i) => { const a = Math.PI / 6 + (i * Math.PI) / 3; return (50 + 44 * Math.cos(a)).toFixed(1) + "," + (50 + 44 * Math.sin(a)).toFixed(1); }).join(" ");
-    return `<svg class="bdg-ic${on ? "" : " off"}" viewBox="0 0 100 100" width="${px}" height="${px}" aria-hidden="true"><polygon points="${pts}" fill="${on ? soft : "none"}" stroke="${on ? c : "currentColor"}" stroke-width="${on ? 7 : 4}" stroke-dasharray="${on ? "" : "6 6"}"/><text x="50" y="52" text-anchor="middle" dominant-baseline="central" font-size="40">${x.icon}</text></svg>`;
+    return `<svg class="bdg-ic${on ? "" : " off"}" viewBox="0 0 100 100" width="${px}" height="${px}" aria-hidden="true"><polygon points="${pts}" fill="${on ? soft : "none"}" stroke="${on ? c : "currentColor"}" stroke-width="${on ? 7 : 4}" stroke-dasharray="${on ? "" : "6 6"}"/>${this.drawn(x.icon, on ? c : "currentColor") || `<text x="50" y="52" text-anchor="middle" dominant-baseline="central" font-size="40">${x.icon}</text>`}</svg>`;
   },
 };

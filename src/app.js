@@ -168,7 +168,7 @@ function screenComps() {
     const ns = list.filter((c) => c.theme === th).sort((a, b) => Engine.rank(state.profile, a.id) - Engine.rank(state.profile, b.id));
     if (!ns.length) return "";
     return `<div class="card flat"><h3>${Engine.themeLabel(th, state.profile)}</h3>${ns.map((c) => `<div class="cnotion"><div class="spread"><b>${c.label}</b>${statusTag(c.id)}</div>
-      ${compsOf(c.id).map((k) => { const n = compNote(comps[k.cid]); return `<div class="comp"><span>${k.label}</span><span class="note ${noteCls(n)}">${noteTxt(n)}</span></div>`; }).join("")}</div>`).join("")}</div>`;
+      ${compsOf(c.id).map((k) => { const n = compNote(comps[k.cid]); return `<div class="comp"><span>${k.label}</span><span class="comp-r"><button type="button" class="ctest" data-id="${c.id}" data-d="${k.i + 1}" data-label="${esc(k.label)}" title="3 questions sur cette compétence">Me tester</button><span class="note ${noteCls(n)}">${noteTxt(n)}</span></span></div>`; }).join("")}</div>`).join("")}</div>`;
   }).join("");
   const cur = cat.filter((c) => c.current), old = cat.filter((c) => !c.current), st = compStats(cur.map((c) => c.id));
   Badges.check(state); state.badgesNew = []; save();
@@ -180,6 +180,13 @@ function screenComps() {
   ${old.length ? `<details class="olds"><summary>Années précédentes (${compStats(old.map((c) => c.id)).tested} notées)</summary>${block(old)}</details>` : ""}
   <button class="btn-primary btn-big" id="back">Retour</button>`);
   bindBadges(app);
+  // « Me tester » (14.11, demande de l'utilisateur) : 3 questions de la compétence, au niveau de la compétence.
+  app.querySelectorAll(".ctest").forEach((b) => (b.onclick = () => {
+    const id = b.dataset.id, d = +b.dataset.d, cid = id + ":" + (d - 1);
+    session = { plan: [1, 2, 3].map(() => id + "|" + d), i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), prep: true,
+      ctest: { label: b.dataset.label, cid, before: compNote((state.comps || {})[cid]) } };
+    nextQuestion();
+  }));
   document.getElementById("back").onclick = screenHome;
 }
 
@@ -428,7 +435,7 @@ function nextQuestion(redo) {
   const q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : level);
   q.kind = kind;
   renderQuestion(q, {
-    eyebrow: (session.weekly ? "Problème de la semaine" : session.prep ? "Révision du test · " + (session.i + 1) + " sur " + session.plan.length : session.plan.length === 1 ? (session.fmt ? FORMATS[session.fmt].label : "Question du jour") : (session.fmt ? FORMATS[session.fmt].label + " · " : "") + (session.i + 1) + " sur " + session.plan.length) + (kind && KIND_LABEL[kind] ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo ? " · nouvelles valeurs" : ""),
+    eyebrow: (session.weekly ? "Problème de la semaine" : session.ctest ? "Me tester · " + session.ctest.label + " · " + (session.i + 1) + " sur " + session.plan.length : session.prep ? "Révision du test · " + (session.i + 1) + " sur " + session.plan.length : session.plan.length === 1 ? (session.fmt ? FORMATS[session.fmt].label : "Question du jour") : (session.fmt ? FORMATS[session.fmt].label + " · " : "") + (session.i + 1) + " sur " + session.plan.length) + (kind && KIND_LABEL[kind] ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo ? " · nouvelles valeurs" : ""),
     onDone: (res) => {
       const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
       // Deux échecs de suite : on glisse juste après une question sur une notion de base (une fois par notion et par séance).
@@ -822,7 +829,7 @@ function vote(code, v) {
 }
 
 // Début et fin de séance (anonymes) : classe, format ; à la fin, nombre de questions, score, durée en minutes.
-const sessionInfo = () => ({ niveau: state ? gradeName(state.profile) + (state.profile.track === "mp" ? " MP" : "") : "", fmt: session.prep ? "test" : session.weekly ? "semaine" : session.fmt || "" });
+const sessionInfo = () => ({ niveau: state ? gradeName(state.profile) + (state.profile.track === "mp" ? " MP" : "") : "", fmt: session.ctest ? "competence" : session.prep ? "test" : session.weekly ? "semaine" : session.fmt || "" });
 function screenSummary() {
   ping("session", { ...sessionInfo(), n: session.answered, score: session.score, min: Math.max(1, Math.round((Date.now() - session.start) / 6e4)) });
   Badges.check(state); save();
@@ -833,12 +840,14 @@ function screenSummary() {
   <div class="card stack"><div class="spread"><span>Score</span><b>${String(sc).replace(".", ",")} / ${n}</b></div>
   <div class="spread"><span>Mathélo</span><b>${state.elo.r} <span class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</span></b></div>
   <div class="small muted">Notions travaillées : ${[...session.ids].map((id) => NOTIONS.find((x) => x.id === id).label).join(" · ")}</div></div>
+  ${session.ctest ? (() => { const a = compNote((state.comps || {})[session.ctest.cid]), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? "La note apparaît après 3 réponses sur cette compétence." : b === null ? "Première note pour cette compétence." : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". Elle remontera avec la pratique." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
   ${nb}
   <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)", "app")}</div>
   <button class="btn-primary btn-big" id="home">Retour à l'accueil</button>`);
   bindComment(app, "app");
   if (nb) setTimeout(burst, 250);
   document.getElementById("home").onclick = screenHome;
+  if (document.getElementById("backcomps")) document.getElementById("backcomps").onclick = screenComps;
 }
 
 // Consultation d'une question par son code : adresse …/#q-eq2disc-2-k3f (rien n'est enregistré).

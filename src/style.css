@@ -216,6 +216,9 @@ details.lesson[open] { background: var(--paper); }
 .cnotion { padding: 10px 0; border-bottom: 1px dashed var(--line); display: grid; gap: 6px; }
 .cnotion:last-child { border-bottom: none; }
 .comp { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 0.92rem; color: var(--ink-soft); }
+.comp-r { display: inline-flex; align-items: center; gap: 8px; }
+.ctest { font-size: 0.78rem; padding: 4px 10px; min-height: 0; border-radius: 999px; background: var(--paper, transparent); border: 1px solid currentColor; color: var(--blue); cursor: pointer; white-space: nowrap; }
+.ctest:hover { filter: brightness(0.9); }
 .note { min-width: 3.2em; text-align: center; font-weight: 700; font-size: 0.85rem; padding: 2px 8px; border-radius: 999px; }
 .note.none { background: var(--grid); color: var(--ink-soft); font-weight: 400; font-size: 0.78rem; }
 .note.good { background: var(--ok-soft); color: var(--ok); }

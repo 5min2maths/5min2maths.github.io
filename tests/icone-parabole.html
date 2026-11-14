@@ -1,0 +1,7 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css">
+<!-- Contrôle visuel (14.11) : icône dessinée du badge « Fonctions quadratiques » (gagné / à gagner) et bouton « Me tester ». -->
+<script src="../src/badges.js"></script>
+<body style="padding:16px;background:#fff"><div id="o" style="display:flex;gap:16px;align-items:center"></div>
+<div class="comp" style="max-width:420px;margin-top:16px"><span>Déterminer le sommet d'une parabole</span><span class="comp-r"><button class="ctest">Me tester</button><span class="note good">5</span></span></div>
+<script>const x = { fam: "mai", icon: Badges.themeIcon("Fonctions quadratiques") };
+document.getElementById("o").innerHTML = Badges.icon(x, true, 96) + Badges.icon(x, false, 96) + Badges.icon({ fam: "mai", icon: Badges.themeIcon("Degré 2") }, true, 48);</script>
