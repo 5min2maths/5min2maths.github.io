@@ -24,8 +24,9 @@ INV = ROOT / "suivi" / "inventaire.json"
 STATUTS = ["à faire", "vu", "à corriger", "validé"]
 NIV = {1: "N1", 2: "N2", 3: "N3", 4: "Défi"}
 COLS = ["Chapitre", "Notion", "id", "Question", "Compétence", "Révision", "Générateur", "Formes", "Figure", "Leçon",
-        "Leçon active", "Retours leçon", "👍", "👎", "💬", "Contrôlé", "Remarque"]
-WIDTH = [30, 30, 10, 9, 42, 9, 11, 8, 9, 9, 13, 13, 5, 5, 5, 12, 40]
+        "Leçon active", "Retours leçon", "👍", "👎", "💬", "Contrôlé", "Remarque", "Ex. 1", "Ex. 2", "Ex. 3", "Voir la leçon"]
+SITE = "https://5min2maths.github.io/"
+WIDTH = [30, 30, 10, 9, 42, 9, 11, 8, 9, 9, 13, 13, 5, 5, 5, 12, 40, 7, 7, 7, 12]
 
 
 def inventaire():
@@ -140,6 +141,13 @@ def main():
                 ws.append([row["chap"], n["label"], row["id"], qn, comp, "oui" if row["again"] else "", gen, l.get("forms"), fig,
                            "✓" if n["lesson"] else "—", act, rl, vq.get("up") or None, vq.get("down") or None,
                            c_q.get(key) or None, ctl or "à faire", rem])
+                # Liens de contrôle (15.11) : trois tirages de la question dans l'app (…/#q-id-niveau-graine) et la leçon.
+                lv = 4 if l["d"] in (4, "P") else l["d"]
+                r = ws.max_row
+                for j, seed in enumerate(["1", "2", "3"]):
+                    c = ws.cell(r, 18 + j, f"ex. {j + 1}"); c.hyperlink = f"{SITE}#q-{row['id']}-{lv}-{seed}"; c.font = Font(color="1F4FD8", underline="single")
+                if n["lesson"]:
+                    c = ws.cell(r, 21, "leçon"); c.hyperlink = f"{SITE}#l-{row['id']}"; c.font = Font(color="1F4FD8", underline="single")
             # Fin de chapitre : statut du test de préparation (évaluation d'entraînement, demande du 15.11).
             if k + 1 == len(rows) or rows[k + 1]["chap"] != row["chap"]:
                 ids = [r["id"] for r in rows if r["chap"] == row["chap"]]
@@ -154,7 +162,7 @@ def main():
         for i, w in enumerate(WIDTH):
             ws.column_dimensions[chr(65 + i)].width = w
         ws.freeze_panes = "E2"
-        ws.auto_filter.ref = f"A1:Q{last}"
+        ws.auto_filter.ref = f"A1:U{last}"
         dv = DataValidation(type="list", formula1='"' + ",".join(STATUTS) + '"', allow_blank=True)
         ws.add_data_validation(dv)
         dv.add(f"P2:P{last}")
