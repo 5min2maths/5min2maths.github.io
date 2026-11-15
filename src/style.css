@@ -352,3 +352,7 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .mock-ex h4 { margin: 4px 0 0; }
 @media print { .mock-ex { border-left: none; padding-left: 0; } .mock-part { break-before: auto; } }
 @media print { .mock-ex h4, .mock-part > h3 { break-after: avoid; page-break-after: avoid; } .mock-ex { break-inside: auto; } }
+
+/* Tableau de données dans un exercice riche (riche.js, 15.11) */
+.mtab { border-collapse: collapse; margin: .5em 0; font-size: .95em; }
+.mtab th, .mtab td { border: 1px solid var(--line, #999); padding: .25em .6em; text-align: center; }

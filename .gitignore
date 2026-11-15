@@ -13,3 +13,4 @@ suivi/
 gantt.typ
 tools/gantt.py
 banque/
+tools/chantier_*.md

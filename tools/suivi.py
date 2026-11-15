@@ -57,6 +57,17 @@ def retours():
         return {}, []
 
 
+def banques_riches():
+    """Chapitres qui ont un test de préparation de qualité (src/riche.js, 15.11) : clé -> (notions, nb exercices, nb raisonnement)."""
+    f = ROOT / "src" / "riche.js"
+    out = {}
+    if f.exists():
+        s = f.read_text()
+        for m in re.finditer(r'RICH\.(\w+) = \{ ids: \[([^\]]*)\]', s):
+            out[m.group(1)] = re.findall(r'"([a-z0-9]+)"', m.group(2))
+    return out
+
+
 def manuel():
     """(classe, id, question) -> (contrôlé, remarque) du tableau existant."""
     if not OUT.exists():
@@ -79,6 +90,8 @@ def main():
     d = inventaire()
     votes, comms = retours()
     keep = manuel()
+    global RICH_B
+    RICH_B = banques_riches()
     P = d["probe"]
     # votes : « notion · niveau d » et « lecon · niveau id » ; commentaires : code « notion-d-… » ou « lecon-id »
     v_q, v_l, c_q, c_l = {}, {}, {}, {}
@@ -107,7 +120,8 @@ def main():
         ws.append(COLS)
         for c in ws[1]:
             c.font, c.fill = bold, head_fill
-        for row in cl["rows"]:
+        rows = cl["rows"]
+        for k, row in enumerate(rows):
             n = P[row["id"]]
             comps = n["comps"] or [n["label"]] * 3
             act = "✓ dynamique" if n["active"] else ("curseur" if n["dyn"] else "à faire")
@@ -126,6 +140,16 @@ def main():
                 ws.append([row["chap"], n["label"], row["id"], qn, comp, "oui" if row["again"] else "", gen, l.get("forms"), fig,
                            "✓" if n["lesson"] else "—", act, rl, vq.get("up") or None, vq.get("down") or None,
                            c_q.get(key) or None, ctl or "à faire", rem])
+            # Fin de chapitre : statut du test de préparation (évaluation d'entraînement, demande du 15.11).
+            if k + 1 == len(rows) or rows[k + 1]["chap"] != row["chap"]:
+                ids = [r["id"] for r in rows if r["chap"] == row["chap"]]
+                ch = next((c for c, cids in RICH_B.items() if 2 * sum(i in cids for i in ids) >= len(ids)), None)
+                sid = "sujet:" + row["chap"][:20]
+                ctl, rem = keep.get((cl["name"], sid, "Test"), ("à faire", None))
+                ws.append([row["chap"], "Test de préparation (évaluation)", sid, "Test", "Sujet type test : automatismes, exercices en situation, raisonnement", "",
+                           ("✓ qualité (banque " + ch + ")") if ch else "✗ drill seulement", None, "", "", "", "", None, None, None, ctl or "à faire", rem])
+                for c in ws[ws.max_row]:
+                    c.fill = PatternFill("solid", fgColor="FFF2CC")
         last = ws.max_row
         for i, w in enumerate(WIDTH):
             ws.column_dimensions[chr(65 + i)].width = w
@@ -151,7 +175,7 @@ def main():
                 ws.cell(r, 1).font = Font(color="999999")
 
     # Synthèse : formules (se met à jour quand l'utilisateur change « Contrôlé »)
-    syn.append(["Classe", "Notions", "Questions", "Leçons actives", "% notions actives", "Validées", "À corriger", "Vues", "% validé", "Questions à 1 forme"])
+    syn.append(["Classe", "Notions", "Questions", "Leçons actives", "% notions actives", "Validées", "À corriger", "Vues", "% validé", "Questions à 1 forme", "Tests de qualité"])
     for c in syn[1]:
         c.font, c.fill = bold, head_fill
     for i, cl in enumerate(d["classes"], start=2):
@@ -159,11 +183,11 @@ def main():
         notions = len(cl["rows"])
         actives = sum(1 for r in cl["rows"] if P[r["id"]]["active"])
         syn.append([cl["name"], notions, f"=COUNTA({t}C:C)-1", actives, f"=D{i}/B{i}",
-                    f'=COUNTIF({t}P:P,"validé")', f'=COUNTIF({t}P:P,"à corriger")', f'=COUNTIF({t}P:P,"vu")', f"=F{i}/C{i}", f"=COUNTIF({t}H:H,1)"])
+                    f'=COUNTIF({t}P:P,"validé")', f'=COUNTIF({t}P:P,"à corriger")', f'=COUNTIF({t}P:P,"vu")', f"=F{i}/C{i}", f"=COUNTIF({t}H:H,1)", f'=COUNTIF({t}G:G,"✓ qualité*")&" / "&COUNTIF({t}D:D,"Test")'])
         syn[f"E{i}"].number_format = syn[f"I{i}"].number_format = "0%"
     syn.append([])
     syn.append(["Statuts « Contrôlé » : à faire → vu → à corriger → validé. Colonnes automatiques recalculées par tools/suivi.py ; Contrôlé et Remarque conservés."])
-    for col, w in zip("ABCDEFGHIJ", [12, 9, 10, 14, 16, 9, 11, 7, 9, 18]):
+    for col, w in zip("ABCDEFGHIJK", [12, 9, 10, 14, 16, 9, 11, 7, 9, 18, 14]):
         syn.column_dimensions[col].width = w
     OUT.parent.mkdir(exist_ok=True)
     wb.save(OUT)

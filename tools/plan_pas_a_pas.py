@@ -9,6 +9,13 @@ import json, os, re, sys
 
 RAC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOT = 5
+# Chantier en cours (décision du 15.11 : la rétention passe par la qualité) : on finit « nickel » les chapitres
+# que les bêta-testeurs travaillent, dans l'ordre de leur année, avant tout le reste (liste de contrôle locale).
+CHANTIER = [
+    ("11e · 4. Proportionnalité (chapitre en cours des testeurs)", ["utemps", "ucomp", "vitesse", "gquot"]),
+    ("11e · 5. Calcul littéral 1 (chapitre suivant)", ["litelab", "valnum", "reduire", "monomes", "parenth", "distrib"]),
+    ("11e · 5. Calcul littéral 2 (ensuite)", ["idrem", "factor"]),
+]
 src = lambda f: open(os.path.join(RAC, "src", f), encoding="utf-8").read()
 
 def blocs():
@@ -23,6 +30,12 @@ def blocs():
     ms = list(re.finditer(r'^  \{ id: "([a-z0-9]+)"', t, re.M))
     for i, m in enumerate(ms):
         out[m.group(1)] = t[m.start(): ms[i + 1].start() if i + 1 < len(ms) else len(t)]
+    # Modules de chapitre (chantier du 15.11) : toutes les formes ont un guide ; ils remplacent les anciennes versions.
+    for f in ("ch11_prop.js",):
+        if os.path.exists(os.path.join(RAC, "src", f)):
+            m = re.search(r"const ALL = \{([^}]*)\}", src(f))
+            for i in re.findall(r"([a-z0-9]+):", m.group(1) if m else ""):
+                out[i] = "guide: guide: guide:"
     return out
 
 def niveaux_guides(b):
@@ -56,6 +69,10 @@ def main():
     autres = [x for x in a_faire if x[0] not in ("11e CO (bêta-testeurs)", "1re Collège (bêta-testeurs)")]
     chunks = [[g[k:k + LOT] for k in range(0, len(g), LOT)] for g in prio]
     lots = [c for pair in __import__("itertools").zip_longest(*chunks) for c in pair if c] + [autres[k:k + LOT] for k in range(0, len(autres), LOT)]
+    # Chantier en tête : ses notions sont retirées des lots ordinaires.
+    pris = {i for _, ids in CHANTIER for i in ids}
+    fait = set(faits)
+    lots = [l for l in ([(nom, i) for i in ids if i not in fait] for nom, ids in CHANTIER) if l] + [l for l in ([x for x in lot if x[1] not in pris] for lot in lots) if l]
     if "--prochain" in sys.argv:
         if lots:
             print(f"Pas à pas : prochain lot ({len(lots)} restants) — " + ", ".join(i for _, i in lots[0]) + f" ({lots[0][0][0]}) ; {len(faits)} notions couvertes sur {len(liste)}")

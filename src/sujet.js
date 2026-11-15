@@ -13,7 +13,26 @@ const MOCK_LV = {
   standard: { label: "Standard", A: 1, B: (n) => (n <= 2 ? [1, 2, 3] : [2, 3]), vf: 2, prob: true },
   exigeant: { label: "Exigeant", A: 2, B: (n) => (n <= 2 ? [2, 3, 4] : [3, 4]), vf: 3, prob: true },
 };
+// Sujet de qualité (15.11, « pas seulement du drill ») : si le chapitre révisé a sa banque d'exercices riches
+// (riche.js), le sujet ressemble à un vrai test : A. automatismes courts, B. trois exercices en situation
+// (questions liées, donnée inutile, estimation, interprétation), C. raisonnement (trouve l'erreur, vrai ou faux, deux méthodes).
+function richPlan(ch, ids, level) {
+  const C = RICH[ch], items = [], mine = C.ids.filter((id) => ids.includes(id));
+  const dA = { facile: [1, 1, 1, 1], standard: [1, 2, 1, 2], exigeant: [2, 2, 3, 2] }[level] || [1, 2, 1, 2];
+  dA.forEach((d, k) => items.push({ part: "A", id: mine[k % mine.length], d, seed: mockSeed() }));
+  const lvOk = { facile: (l) => l <= 2, standard: () => true, exigeant: (l) => l >= 2 }[level] || (() => true);
+  const probe = (arr, kind) => arr.map((f, k) => { R.seed(1); const x = f(); return { k, id: x.id, lv: x.lv, kind }; });
+  let ex = probe(C.ex, "ex").filter((x) => lvOk(x.lv));
+  R.seed(mockSeed()); // tirage des exercices : un sujet différent à chaque fois
+  const inIds = ex.filter((x) => ids.includes(x.id));
+  if (inIds.length >= 3) ex = inIds;
+  shuffle(ex).slice(0, 3).forEach((x, j) => items.push({ part: "B", ex: j, rich: ch, kind: "ex", k: x.k, id: x.id, d: 3, seed: mockSeed() }));
+  shuffle(probe(C.raison, "raison")).slice(0, 2).forEach((x) => items.push({ part: "C", rich: ch, kind: "raison", k: x.k, id: x.id, d: 3, seed: mockSeed() }));
+  return items;
+}
 function mockPlan(ids, level = "standard") {
+  const ch = typeof richChapter === "function" && richChapter(ids);
+  if (ch) return richPlan(ch, ids, level);
   const L = MOCK_LV[level] || MOCK_LV.standard, items = [], n = ids.length;
   // A. Automatismes : une question courte par notion, 5 au plus.
   ids.slice(0, 5).forEach((id) => items.push({ part: "A", id, d: L.A, seed: mockSeed() }));
@@ -52,6 +71,7 @@ function mockVF(it, q) {
 }
 function mockQuestions() {
   return state.mock.items.map((it) => {
+    if (it.rich && RICH[it.rich]) { R.seed(it.seed); const q = RICH[it.rich][it.kind === "raison" ? "raison" : "ex"][it.k](); return { ...it, id: q.id, q, pts: q.pts }; }
     let q = Engine.make(state, it.id, it.d, it.seed);
     if (it.vf) { const f = mockVF(it, q); if (f) q = f; else it = { ...it, vf: false }; }
     return { ...it, q, pts: q.parts ? 2 * q.parts.length : it.vf ? 2 : it.part === "A" ? it.d : Math.min(it.d, 4) };
@@ -67,7 +87,7 @@ const ptsTxt = (p) => p + " pt" + (p > 1 ? "s" : "");
 function screenMock() {
   if (!Engine.prepActive(state)) return screenHome();
   if (!state.mock || state.mock.ids.join() !== state.prep.ids.join()) mockNew();
-  const qs = mockQuestions(), total = qs.reduce((s, x) => s + x.pts, 0), minutes = Math.max(15, Math.round((total * 1.5) / 5) * 5);
+  const qs = mockQuestions(), total = qs.reduce((s, x) => s + x.pts, 0), minutes = state.mock.items.some((it) => it.rich) ? 45 : Math.max(15, Math.round((total * 1.5) / 5) * 5);
   let num = 0;
   const qHtml = (x, label) => `<div class="mock-q"><div class="spread"><b>${label}</b><span class="small muted">${ptsTxt(x.pts)}</span></div>
     <div>${x.q.q}</div>${x.q.fig ? `<div class="figwrap">${x.q.fig}</div>` : ""}
@@ -79,8 +99,8 @@ function screenMock() {
   <div class="seg no-print" id="mlv">${Object.entries(MOCK_LV).map(([k, v]) => `<button type="button" data-lv="${k}" aria-pressed="${(state.mock.level || "standard") === k}">${v.label}</button>`).join("")}</div>
   <div class="card flat"><p class="small">Pour t'entraîner avant ton test. <b>Ce n'est pas une évaluation</b> : il n'y a pas de note, et personne d'autre que toi ne voit le résultat. Fais-le sur une feuille, sans regarder tes cours, puis corrige-toi avec le corrigé.</p></div>
   <section class="mock-part"><h3>A. Automatismes</h3>${A.map((x) => qHtml(x, "Question " + ++num)).join("")}</section>
-  <section class="mock-part"><h3>B. Exercices</h3>${exs.map((e, k) => { const L = B.filter((x) => x.ex === e); num++; return `<div class="mock-ex"><h4>Exercice ${k + 1} · ${nLabel(L[0].id)}</h4>${L.map((x, j) => qHtml(x, String.fromCharCode(97 + j) + ")")).join("")}</div>`; }).join("")}</section>
-  ${C.length ? `<section class="mock-part"><h3>C. Raisonnement</h3>${C.map((x) => qHtml(x, (x.q.parts ? "Problème" : "Vrai ou faux ?"))).join("")}</section>` : ""}
+  <section class="mock-part"><h3>B. Exercices</h3>${exs.map((e, k) => { const L = B.filter((x) => x.ex === e); num++; return `<div class="mock-ex"><h4>Exercice ${k + 1} · ${L[0].q.titre || nLabel(L[0].id)}</h4>${L.map((x, j) => qHtml(x, x.q.titre ? "" : String.fromCharCode(97 + j) + ")")).join("")}</div>`; }).join("")}</section>
+  ${C.length ? `<section class="mock-part"><h3>C. Raisonnement</h3>${C.map((x) => qHtml(x, x.q.titre || (x.q.parts ? "Problème" : "Vrai ou faux ?"))).join("")}</section>` : ""}
   <div class="stack no-print">
     <button class="btn-primary btn-big" id="corr">J'ai fini : voir le corrigé</button>
     <div class="row"><button id="print">🖨 Imprimer / PDF</button><button class="btn-ghost" id="again">Un autre sujet</button><button class="btn-ghost" id="back">Retour</button></div>
@@ -97,7 +117,7 @@ function screenMockCorr() {
   const partName = { A: "A. Automatismes", B: "B. Exercices", C: "C. Raisonnement" };
   h(`${brand}<div class="eyebrow">Sujet de préparation · corrigé</div><h2>Corrige-toi</h2>
   <p class="small muted">Compare avec ta feuille et coche honnêtement, question par question. Pour « Vrai ou faux », la justification compte : sans justification juste, coche « en partie ».</p>
-  <div class="mock-list">${qs.map((x, i) => `${i === 0 || qs[i - 1].part !== x.part ? `<h3>${partName[x.part]}</h3>` : ""}<div class="mock-q card flat"><div class="spread"><b>${x.part === "B" ? "Exercice · " + nLabel(x.id) : x.vf ? "Vrai ou faux ?" : x.q.parts ? "Problème" : "Question"}</b><span class="small muted">${ptsTxt(x.pts)}</span></div>
+  <div class="mock-list">${qs.map((x, i) => `${i === 0 || qs[i - 1].part !== x.part ? `<h3>${partName[x.part]}</h3>` : ""}<div class="mock-q card flat"><div class="spread"><b>${x.q.titre ? x.q.titre : x.part === "B" ? "Exercice · " + nLabel(x.id) : x.vf ? "Vrai ou faux ?" : x.q.parts ? "Problème" : "Question"}</b><span class="small muted">${ptsTxt(x.pts)}</span></div>
     <div class="small">${x.q.q}</div>
     <div class="rule"><b>Corrigé</b> · ${x.q.sol || ""}</div>
     <div class="seg mock-mark" data-i="${i}"><button type="button" data-v="1">✓ Juste</button><button type="button" data-v="0.5">½ En partie</button><button type="button" data-v="0">✗ Faux</button></div></div>`).join("")}</div>
