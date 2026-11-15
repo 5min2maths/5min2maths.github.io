@@ -201,7 +201,7 @@
         return Qv(c[0] + " de " + Q(D, "km") + " à " + Q(V1, "km/h") + " et le retour à " + Q(V2, "km/h") + ". Quelle est sa vitesse moyenne sur l'aller-retour (en km/h) ?", (2 * D) / (D / V1 + D / V2),
           "Durées : " + M(N(D) + " : " + N(V1) + " = " + N(r6(D / V1))) + " h et " + M(N(D) + " : " + N(V2) + " = " + N(r6(D / V2))) + " h. Total " + M(N(r6(D / V1 + D / V2))) + " h pour " + M(N(2 * D)) + " km : " + M("v = " + N(r6(vm * D / dd))) + " km/h (et non la moyenne des deux vitesses).",
           { ctx: c[1], fig: FIG.road(N(D) + " km", "aller-retour"),
-            guide: [GS("Durée de l'aller (en h) ?", r6(D / V1), M(N(D) + " : " + N(V1) + " = " + N(r6(D / V1))) + " h."), GS("Durée du retour (en h) ?", r6(D / V2), M(N(D) + " : " + N(V2) + " = " + N(r6(D / V2))) + " h."), GS("Vitesse moyenne = distance totale : durée totale. Combien ?", (2 * D) / (D / V1 + D / V2), M(N(2 * D) + " : " + N(r6(D / V1 + D / V2)) + " = " + N(r6(vm * D / dd))) + " km/h.")],
+            guide: [GS("Durée de l'aller (en h) ?", r6(D / V1), M(N(D) + " : " + N(V1) + " = " + N(r6(D / V1))) + " h."), GS("Durée du retour (en h) ?", r6(D / V2), M(N(D) + " : " + N(V2) + " = " + N(r6(D / V2))) + " h."), GS("Vitesse moyenne = distance totale ÷ durée totale. Combien ?", (2 * D) / (D / V1 + D / V2), M(N(2 * D) + " : " + N(r6(D / V1 + D / V2)) + " = " + N(r6(vm * D / dd))) + " km/h.")],
             traps: [TRAP((V1 + V2) / 2, "On ne fait jamais la moyenne des vitesses : on roule plus longtemps à la vitesse la plus lente. Divise la distance totale par la durée totale.")] }); },
       () => { const [m1, v1, m2, v2] = pickBy([[30, 60, 90, 100], [20, 90, 40, 60], [45, 80, 15, 120], [40, 45, 80, 90], [30, 50, 90, 110]]), d1 = v1 * m1 / 60, d2 = v2 * m2 / 60, vm = (d1 + d2) / ((m1 + m2) / 60), c = pickBy([["Un car roule", "car"], ["Une voiture roule", "voiture"], ["Un train régional roule", "train"]]);
         if (vm === (v1 + v2) / 2) return VIT[3][1]();
@@ -238,7 +238,7 @@
       () => { const m = pickBy(MET), V = R.int(6, 60), mass = r6(m[1] * V), obj = pickBy(["Une statuette", "Un presse-papier", "Une médaille", "Une pièce de collection"]);
         return Qv(obj + " " + m[0] + " (" + M(N(m[1]) + u("g/cm^3")) + ") a une masse de " + Q(mass, "g") + ". Quel est son volume (en " + M("\\text{cm}^3") + ") ?", V, M("V = \\frac{m}{\\rho} = \\frac{" + N(mass) + "}{" + N(m[1]) + "} = " + V) + " cm³.",
           { ctx: m[2] + "-obj", guide: [GS("Chaque cm³ pèse " + N(m[1]).replace("{,}", ",") + " g. Combien de cm³ pour " + N(mass).replace("{,}", ",").replace("\\text{'}", "'") + " g ? (" + M("V = \\frac{m}{\\rho}") + ")", V, M(N(mass) + " : " + N(m[1]) + " = " + V) + " cm³.")],
-            traps: [TRAP(r6(mass * m[1]), "On cherche un volume : volume = masse : masse volumique."), TRAP(r6(m[1] / mass), "C'est l'inverse : masse divisée par masse volumique.")] }); },
+            traps: [TRAP(r6(mass * m[1]), "On cherche un volume : volume = masse ÷ masse volumique."), TRAP(r6(m[1] / mass), "C'est l'inverse : masse divisée par masse volumique.")] }); },
     ],
     2: [
       () => { const L = R.int(7, 12), l = R.int(5, 8), h = pickBy([2.5, 3, 3.5, 4]), V = r6(L * l * h), mass = r6(1.2 * V), c = pickBy([["une salle de classe", "classe"], ["une chambre", "chambre"], ["un local de musique", "musique"]]);
@@ -250,7 +250,7 @@
         return Qv(obj + " " + m[0] + " a une masse de " + Q(mass, "g") + ". La masse volumique de ce métal est " + Q(m[1] * 1000, "kg/m^3") + ". Quel est son volume (en " + M("\\text{cm}^3") + ") ?", V,
           Q(m[1] * 1000, "kg/m^3") + " = " + M(N(m[1]) + u("g/cm^3")) + ". " + M("V = \\frac{" + N(mass) + "}{" + N(m[1]) + "} = " + V) + " cm³.",
           { ctx: m[2] + "-bijou", guide: [GS("Convertis la masse volumique en " + M("\\text{g/cm}^3") + " (divise par 1000).", m[1], M(N(m[1] * 1000) + u("kg/m^3") + " = " + N(m[1]) + u("g/cm^3")) + "."), GS("Volume : " + M("V = \\frac{m}{\\rho}") + " ?", V, M(N(mass) + " : " + N(m[1]) + " = " + V) + " cm³.")],
-            traps: [TRAP(r6(mass / (m[1] * 1000)), "Les unités ne vont pas ensemble : convertis d'abord la masse volumique en g/cm³."), TRAP(r6(mass * m[1]), "Volume = masse : masse volumique.")] }); },
+            traps: [TRAP(r6(mass / (m[1] * 1000)), "Les unités ne vont pas ensemble : convertis d'abord la masse volumique en g/cm³."), TRAP(r6(mass * m[1]), "Volume = masse ÷ masse volumique.")] }); },
       () => { const c = pickBy([[4.3, 8.2, "tonnes de bois de sapin occupent", "sapin"], [6.5, 5.2, "tonnes de sable sec occupent", "sable"], [3.6, 4.8, "tonnes de neige tassée occupent", "neige"], [9.2, 3.4, "tonnes de pierres occupent", "pierre"]]), rho = c[0] * 1000 / c[1];
         return Qv(M(N(c[0])) + " " + c[2] + " " + Q(c[1], "m^3") + ". Quelle est leur masse volumique en " + M("\\text{kg/m}^3") + " (à l'unité) ?", rho,
           Q(c[0], "t") + " = " + Q(c[0] * 1000, "kg") + ". " + M("\\rho = \\frac{" + N(c[0] * 1000) + "}{" + N(c[1]) + "} \\approx " + N(Math.round(rho))) + " kg/m³.",
@@ -262,12 +262,12 @@
         return Qv(c[2] + " " + Q(V, "m^3") + " est " + c[3] + " " + Q(q, "L/min") + ". Combien de minutes faut-il pour la remplir ?", t,
           Q(V, "m^3") + " = " + Q(V * 1000, "L") + ". " + M("t = \\frac{" + N(V * 1000) + "}{" + q + "} = " + N(t)) + " min" + (t >= 60 ? ", soit " + hmT(t) : "") + ".",
           { ctx: c[4], guide: [GS("Convertis le volume en litres.", V * 1000, Q(V, "m^3") + " = " + Q(V * 1000, "L") + "."), GS("Il coule " + q + " L chaque minute. Combien de minutes ? (" + M("t = \\frac{V}{\\text{débit}}") + ")", t, M(N(V * 1000) + " : " + q + " = " + N(t)) + " min.")],
-            traps: [TRAP(V / q, "Convertis d'abord les m³ en litres (1 m³ = 1000 L)."), TRAP(V * 1000 * q, "Durée = volume : débit.")] }); },
+            traps: [TRAP(V / q, "Convertis d'abord les m³ en litres (1 m³ = 1000 L)."), TRAP(V * 1000 * q, "Durée = volume ÷ débit.")] }); },
       () => { const c = pickBy([[10, 25, "Une fontaine remplit un seau de", "fontaine"], [6, 15, "Un robinet remplit un arrosoir de", "arrosoir"], [1.5, 9, "Un distributeur remplit une bouteille de", "bouteille"]]), V = c[0], s = c[1], q = V / s * 60;
         return Qv(c[2] + " " + Q(V, "L") + " en " + Q(s, "s") + ". Quel est son débit en L/min ?", q,
           "En une seconde : " + M(N(V) + " : " + s + " = " + N(r6(V / s))) + " L. En une minute : " + M(N(r6(V / s)) + " \\cdot 60 = " + N(q)) + " L/min.",
           { ctx: c[3], guide: [GS("Combien de litres en une seconde ?", V / s, M(N(V) + " : " + s + " = " + N(r6(V / s))) + " L/s."), GS("Et en une minute ?", q, M(N(r6(V / s)) + " \\cdot 60 = " + N(q)) + " L/min.")],
-            traps: [TRAP(V / s, "Ça, c'est le débit en litres par seconde : il en coule 60 fois plus en une minute."), TRAP(s / V, "Débit = volume : durée.")] }); },
+            traps: [TRAP(V / s, "Ça, c'est le débit en litres par seconde : il en coule 60 fois plus en une minute."), TRAP(s / V, "Débit = volume ÷ durée.")] }); },
       () => { const q = pickBy([8, 9, 12, 15]), m = R.int(4, 9), s = 30, t = m + s / 60, V = q * t, c = pickBy([["Une douche", "douche"], ["Un tuyau d'arrosage", "jardin"], ["Le robinet de la cuisine", "cuisine"]]);
         return Qv(c[0] + " a un débit de " + Q(q, "L/min") + ". Combien de litres coulent en " + M(m + u("min") + "\\ " + s + u("s")) + " ?", V,
           M(m + u("min") + "\\ 30" + u("s") + " = " + N(t) + u("min")) + ". " + M("V = " + q + " \\cdot " + N(t) + " = " + N(V)) + " L.",
@@ -323,7 +323,7 @@
       () => { const dep = 60 * R.int(20, 22) + R.int(31, 58), dur = R.int(380, 560), arr = dep + dur;
         return P(null, "Un train de nuit part à " + horaire(dep) + " et arrive le lendemain à " + horaire(arr) + ".",
           [["a) Minutes jusqu'à minuit", 24 * 60 - dep], ["b) Durée du voyage en minutes", dur], ["c) Durée du voyage en heures (au centième)", dur / 60, 0.01]],
-          ["Compte d'abord jusqu'à minuit (24 h 00), puis de minuit à l'arrivée.", "Heures décimales : minutes : 60."],
+          ["Compte d'abord jusqu'à minuit (24 h 00), puis de minuit à l'arrivée.", "Heures décimales : minutes ÷ 60."],
           "a) " + M(24 * 60 - dep) + " min. b) " + M((24 * 60 - dep) + " + " + (arr - 24 * 60) + " = " + dur) + " min. c) " + M(dur + " : 60 \\approx " + N(+(dur / 60).toFixed(2))) + " h."); },
       () => { const t = 3600 * R.int(1, 4) + 60 * R.int(10, 50) + R.int(5, 55), h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
         return P(null, "Le chronomètre d'une course de relais affiche " + M(N(t)) + " secondes.",
@@ -344,7 +344,7 @@
       () => { const q = pickBy([1.5, 1.8, 2.1]), V = pickBy([45, 63, 72]);
         return P(null, "Une pompe vide une piscine de " + Q(V, "m^3") + " avec un débit de " + Q(q, "m^3/h") + ".",
           [["a) Débit en L/min", q * 1000 / 60], ["b) Durée de la vidange en heures", V / q], ["c) Durée de la vidange en jours (au dixième)", V / q / 24, 0.1]],
-          ["1 m³ = 1000 L, 1 h = 60 min.", "Durée = volume : débit."],
+          ["1 m³ = 1000 L, 1 h = 60 min.", "Durée = volume ÷ débit."],
           "a) " + M(N(q * 1000) + " : 60 = " + N(q * 1000 / 60)) + " L/min. b) " + M(V + " : " + N(q) + " = " + N(V / q)) + " h. c) " + M(N(V / q) + " : 24 \\approx " + N(+(V / q / 24).toFixed(1))) + " jours."); },
     ],
     vitesse: [
@@ -356,7 +356,7 @@
       () => { const dep = 60 * R.int(6, 9) + pickBy([12, 18, 24, 36, 42, 48]), dur = pickBy([135, 150, 165, 105]), v = pickBy([84, 92, 76, 88]), d = v * dur / 60, arr = dep + dur;
         return P(null, "Un train part à " + horaire(dep) + " et arrive à " + horaire(arr) + " après avoir parcouru " + Q(d, "km") + ".",
           [["a) Durée du trajet en minutes", dur], ["b) Durée en heures (nombre décimal)", dur / 60], ["c) Vitesse moyenne en km/h", v], ["d) Vitesse moyenne en m/s (au dixième)", v / 3.6, 0.1]],
-          ["Complète jusqu'à l'heure pleine, puis ajoute.", "v = d : t avec t en heures ; puis km/h → m/s : divise par 3,6."],
+          ["Complète jusqu'à l'heure pleine, puis ajoute.", "v = d ÷ t avec t en heures ; puis km/h → m/s : divise par 3,6."],
           "a) " + hmT(dur) + " = " + dur + " min. b) " + M(dur + " : 60 = " + N(dur / 60)) + " h. c) " + M(N(d) + " : " + N(dur / 60) + " = " + v) + " km/h. d) " + M(v + " : 3{,}6 \\approx " + N(+(v / 3.6).toFixed(1))) + " m/s."); },
       () => { const t1 = pickBy([1.3, 1.2, 1.4]), mn = 8, s = pickBy([20, 10, 30]), T = 60 * mn + s;
         return P(null, "La lumière va à environ " + M("300\\text{'}000" + u("km/s")) + ".",
@@ -366,7 +366,7 @@
       () => { const v = 100 / 9.58, d = 42195, t = d / v;
         return P(null, "Usain Bolt a couru le 100 m en " + M("9{,}58" + u("s")) + ". Un marathon mesure " + M("42\\text{'}195" + u("m")) + ".",
           [["a) Vitesse de Bolt en m/s (au centième)", v, 0.01], ["b) Durée d'un marathon à cette vitesse, en secondes (à l'unité)", t, 1], ["c) Combien de minutes entières (après l'heure) ?", Math.floor((t - 3600) / 60)]],
-          ["v = d : t.", "t = d : v ; puis 1 h = 3600 s, le reste en minutes."],
+          ["v = d ÷ t.", "t = d ÷ v ; puis 1 h = 3600 s, le reste en minutes."],
           "a) " + M("100 : 9{,}58 \\approx 10{,}44") + " m/s. b) " + M("42\\text{'}195 : 10{,}438 \\approx " + N(Math.round(t))) + " s. c) " + hmsT(Math.round(t)) + " (le vrai record est d'environ 2 h)."); },
     ],
     gquot: [
@@ -378,12 +378,12 @@
       () => { const m = pickBy(MET.slice(0, 6)), L = pickBy([20, 25, 30]), l = pickBy([4, 5, 6]), h = pickBy([2, 3]), V = L * l * h, mass = r6(m[1] * V);
         return P(FIG.box(L + " cm", l + " cm", h + " cm"), "Une barre métallique (pavé droit) mesure " + Q(L, "cm") + " sur " + Q(l, "cm") + " sur " + Q(h, "cm") + " et a une masse de " + Q(mass / 1000, "kg") + ".",
           [["a) Volume en cm³", V], ["b) Masse en g", mass], ["c) Masse volumique en g/cm³", m[1]]],
-          ["Volume d'un pavé : L · l · h.", "ρ = m : V, avec m en g et V en cm³. Compare : alu 2,7 ; fer 7,9 ; cuivre 8,9 ; argent 10,5 ; plomb 11,3 ; or 19,3."],
+          ["Volume d'un pavé : L · l · h.", "ρ = m ÷ V, avec m en g et V en cm³. Compare : alu 2,7 ; fer 7,9 ; cuivre 8,9 ; argent 10,5 ; plomb 11,3 ; or 19,3."],
           "a) " + M(L + " \\cdot " + l + " \\cdot " + h + " = " + V) + " cm³. b) " + Q(mass, "g") + ". c) " + M(N(mass) + " : " + V + " = " + N(m[1])) + " g/cm³ : c'est une barre " + m[0] + "."); },
       () => { const L = pickBy([60, 80, 100]), l = pickBy([30, 40]), h = pickBy([35, 40, 50]), q = pickBy([6, 8, 12]), V = L * l * h / 1000, vide = pickBy([18, 23, 27, 35]);
         return P(FIG.box(L + " cm", l + " cm", h + " cm"), "Un aquarium (pavé droit) mesure " + Q(L, "cm") + " sur " + Q(l, "cm") + " et " + Q(h, "cm") + " de haut. On le remplit avec un robinet qui débite " + Q(q, "L/min") + ".",
           [["a) Volume de l'aquarium en litres", V], ["b) Durée du remplissage en minutes", V / q], ["c) L'aquarium vide pèse " + vide + " kg. Masse totale une fois plein (kg) ? (1 L d'eau pèse 1 kg)", V + vide]],
-          ["1 L = 1 dm³ = 1000 cm³.", "Durée = volume : débit."],
+          ["1 L = 1 dm³ = 1000 cm³.", "Durée = volume ÷ débit."],
           "a) " + M(L + " \\cdot " + l + " \\cdot " + h + " = " + N(L * l * h)) + " cm³ = " + Q(V, "L") + ". b) " + M(N(V) + " : " + q + " = " + N(V / q)) + " min. c) " + M(N(V) + " + " + vide + " = " + N(V + vide)) + " kg."); },
     ],
   };
@@ -401,8 +401,8 @@
   Object.assign(HINTS_EXTRA, {
     utemps: "Le temps se compte par 60 : 1 h = 60 min, 1 min = 60 s. 1,5 h = 1 h 30 min, pas 1 h 50.",
     ucomp: "Convertis chaque unité séparément : combien de mètres en une heure ? puis en une seconde ? (km/h → m/s : divise par 3,6.)",
-    vitesse: "v = d : t, d = v · t, t = d : v. Écris la durée en heures décimales (1 h 45 min = 1,75 h).",
-    gquot: "Masse volumique : ρ = m : V (masse d'un cm³ ou d'un m³). Débit : volume : durée. Vérifie que les unités vont ensemble.",
+    vitesse: "v = d ÷ t, d = v · t, t = d ÷ v. Écris la durée en heures décimales (1 h 45 min = 1,75 h).",
+    gquot: "Masse volumique : ρ = m ÷ V (masse d'un cm³ ou d'un m³). Débit : volume ÷ durée. Vérifie que les unités vont ensemble.",
   });
   if (typeof COMPS !== "undefined") Object.assign(COMPS, {
     utemps: ["Convertir des durées (h, min, s)", "Passer des heures décimales aux minutes", "Calculer une durée, écrire en h min s"],

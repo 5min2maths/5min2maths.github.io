@@ -43,14 +43,14 @@
           g += '<rect class="act-hit" x="' + x0 + '" y="14" width="' + w + '" height="46" fill="transparent" style="cursor:pointer"/>';
           box.innerHTML = `<svg class="fig" viewBox="0 0 ${svgW} 80" role="img" aria-label="barre d'une heure, ${m} minutes">${g}</svg>
             ${actStepper("Minutes", m, "m")}
-            <div class="act-out"><b>${m} min</b> = ${m} : 60 h = <b>${dec(m / 60, 4)} h</b></div>
+            <div class="act-out"><b>${m} min</b> = ${m} ÷ 60 h = <b>${dec(m / 60, 4)} h</b></div>
             <div class="small muted">Touche la barre, puis ajuste avec − et +.</div>`;
           actBindStepper(box, "m", () => m, (v) => { m = v; draw(); check(); }, 0, 60);
           const hit = box.querySelector(".act-hit");
           hit.onclick = (e) => { const r = hit.getBoundingClientRect(); m = Math.max(0, Math.min(60, Math.round(((e.clientX - r.left) / r.width) * 60))); draw(); check(); };
         };
         const check = () => {
-          if (step === 0 && m === 45) { onWin(0, "45 min = 45 : 60 = 0,75 h : trois quarts d'heure."); step = 1; }
+          if (step === 0 && m === 45) { onWin(0, "45 min = 45 ÷ 60 = 0,75 h : trois quarts d'heure."); step = 1; }
           else if (step === 1 && m === 12) { onWin(1, "0,2 h = 0,2 · 60 = 12 min (un cinquième d'heure)."); step = 2; }
           else if (step === 2 && m === 21) { onWin(2, "0,35 h = 0,35 · 60 = 21 min. Pour passer des heures aux minutes, on multiplie par 60."); step = 3; }
         };
@@ -79,7 +79,7 @@
         };
         const check = () => {
           if (step === 0 && v === 10) { onWin(0, "10 m/s : 36'000 m en une heure, soit 36 km/h. C'est le « × 3,6 »."); step = 1; }
-          else if (step === 1 && v === 25) { onWin(1, "90 km/h = 90 : 3,6 = 25 m/s. Des km/h vers les m/s, on divise par 3,6."); step = 2; }
+          else if (step === 1 && v === 25) { onWin(1, "90 km/h = 90 ÷ 3,6 = 25 m/s. Des km/h vers les m/s, on divise par 3,6."); step = 2; }
           else if (step === 2 && v === 28) { onWin(2, "27 m/s = 97,2 km/h, mais 28 m/s = 100,8 km/h : c'est 28 m/s."); step = 3; }
           else if (step === 2 && v > 28) $hint(box, v + " m/s = " + String(+(v * 3.6).toFixed(1)).replace(".", ",") + " km/h dépasse bien 100 km/h… mais y a-t-il plus petit ?");
         };
@@ -110,9 +110,9 @@
         };
         const check = () => {
           const D = d();
-          if (step === 0 && t === 150 && D === 150) { onWin(0, "2 h 30 min = 2,5 h ; 150 : 2,5 = 60 km/h."); step = 1; }
+          if (step === 0 && t === 150 && D === 150) { onWin(0, "2 h 30 min = 2,5 h ; 150 ÷ 2,5 = 60 km/h."); step = 1; }
           else if (step === 0 && D === 150) $hint(box, "150 km, c'est bien, mais en 2 h 30 min exactement.");
-          else if (step === 1 && v() === 80 && D === 100) { onWin(1, "t = 100 : 80 = 1,25 h = 1 h 15 min = 75 min."); step = 2; }
+          else if (step === 1 && v() === 80 && D === 100) { onWin(1, "t = 100 ÷ 80 = 1,25 h = 1 h 15 min = 75 min."); step = 2; }
           else if (step === 2 && D === 90) { found.add(v() + "|" + t); if (found.size >= 2) { onWin(2, "Plusieurs réglages donnent 90 km : si la vitesse double, la durée est divisée par deux (ex. 60 km/h en 1 h 30, 90 km/h en 1 h)."); step = 3; } else $hint(box, "Bien : " + v() + " km/h pendant " + t + " min. Trouves-en un autre."); }
         };
         draw();
@@ -145,7 +145,7 @@
           if (step === 0 && nom === "or" && V === 6) { onWin(0, "5 cm³ d'or pèsent 96,5 g, 6 cm³ pèsent 115,8 g : il faut 6 cm³."); step = 1; }
           else if (step === 0 && nom === "or" && V > 6) $hint(box, "Plus de 100 g, oui… mais avec moins de cm³ ?");
           else if (step === 1 && nom === "aluminium" && V === 7) { onWin(1, "7 cm³ d'aluminium pèsent 18,9 g : il faut environ 7 fois plus d'aluminium que d'or pour la même masse."); step = 2; }
-          else if (step === 2 && nom === "glace" && Math.abs(m - 46) < 1e-9) { onWin(2, "V = m : ρ = 46 : 0,92 = 50 cm³."); step = 3; }
+          else if (step === 2 && nom === "glace" && Math.abs(m - 46) < 1e-9) { onWin(2, "V = m ÷ ρ = 46 ÷ 0,92 = 50 cm³."); step = 3; }
         };
         draw();
       },

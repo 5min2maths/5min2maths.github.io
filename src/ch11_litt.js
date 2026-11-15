@@ -53,7 +53,7 @@
             traps: [TX(m + "*" + y + "+" + k, "Sans parenthèses, seul " + M(y) + " est multiplié. Ici, c'est toute la somme qu'on multiplie : " + M(m + "(" + y + " + " + k + ")") + ".")] }); },
       () => { const c = pk([["le produit de x et du carré de y", "x*y^2", "x y^2", "(x*y)^2", "Ici seul y est au carré : x · y²."], ["le carré du produit de x et de y", "(x*y)^2", "(x y)^2", "x*y^2", "C'est tout le produit qui est au carré : (xy)²."], ["la somme des carrés de a et de b", "a^2+b^2", "a^2 + b^2", "(a+b)^2", "On élève chaque nombre au carré, puis on additionne."], ["le carré de la somme de a et de b", "(a+b)^2", "(a + b)^2", "a^2+b^2", "On additionne d'abord, puis on élève la somme au carré."]]);
         return Qx("Écris l'expression littérale : « " + c[0].replace(/ (x|y|a|b)( |$)/g, " \\($1\\)$2") + " ».", c[1], M(c[2]) + ". " + c[4],
-          { ctx: "carre", guide: [GX("Quelle est la dernière opération de la phrase ? Écris l'expression.", c[1], M(c[2]) + ". " + c[4])], traps: [TX(c[3], c[4])] }); },
+          { ctx: "carre", guide: [GX("Le début de la phrase donne l'opération faite en dernier. Écris l'expression.", c[1], M(c[2]) + ". " + c[4])], traps: [TX(c[3], c[4])] }); },
     ],
     2: [
       () => { const c = pk([["le nombre entier qui suit n", "n+1", "n + 1", "n*1"], ["le nombre pair qui suit 2n", "2*n+2", "2n + 2", "2*n+1"], ["la somme de trois nombres entiers consécutifs, le plus petit étant n", "3*n+3", "n + (n + 1) + (n + 2) = 3n + 3", "3*n"], ["le nombre impair qui suit 2n + 1", "2*n+3", "2n + 3", "2*n+2"], ["le produit d'un nombre entier n et de son successeur", "n*(n+1)", "n(n + 1)", "n+n+1"]]);
@@ -466,7 +466,7 @@
     PROB_EXTRA[id] = PROBS[id];
   }
   Object.assign(HINTS_EXTRA, {
-    litelab: "Repère la dernière opération de la phrase : « le double de la somme » → 2(… + …) ; « la somme du double » → 2… + ….",
+    litelab: "Le début de la phrase donne l'opération faite en dernier : « le double de la somme… » → 2(… + …) ; « la somme du double… » → 2… + ….",
     valnum: "Remplace la lettre par sa valeur entre parenthèses, puis respecte les priorités : puissances, puis · et ÷, puis + et −.",
     reduire: "On additionne seulement les termes semblables : même lettre, même exposant. x et x² ne s'additionnent pas.",
     monomes: "Multiplie les coefficients ; pour chaque lettre, additionne les exposants (x = x¹).",

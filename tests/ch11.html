@@ -24,6 +24,7 @@ for (const id of ids) {
       let q; try { q = Engine.build(id, d, s); } catch (e) { fail(id + "-" + d + "-" + s + " exception " + e.message); continue; }
       n++; forms.add(qForm(q)); if (q.ctx) ctx.add(q.ctx);
       const t = txt(q);
+      { const plainTxt = t.replace(/\\\(.*?\\\)/g, " "); const dv = [...plainTxt.matchAll(/.{0,25}(\d|\)) : (\d|\().{0,10}/g)].map((m) => m[0]).find((s) => !/h \d{1,2} : \d/.test(s)); if (dv) fail(q.code + " division « : » en texte simple (écrire ÷) : " + dv); }
       if (/undefined|NaN|Infinity|\[object/.test(t)) fail(q.code + " texte : " + t.match(/.{0,40}(undefined|NaN|Infinity|\[object).{0,20}/)[0]);
       if (q.parts) { q.parts.forEach((p) => { if (!isFinite(p.spec.value)) fail(q.code + " partie non finie " + p.label); }); if (s <= 2) samples.push(q.q.replace(/<[^>]+>/g, "").slice(0, 90) + " → " + q.parts.map((p) => +(+p.spec.value).toFixed(4)).join(" ; ")); continue; }
       if (q.spec.kind === "expr") { // réponse littérale (calcul littéral, 15.11)

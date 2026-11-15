@@ -4,7 +4,7 @@
 (function () {
   const R2 = {
     litelab: ["Écrire une expression littérale", "Une lettre remplace un nombre qu'on ne connaît pas, ou n'importe quel nombre.",
-      "On repère la dernière opération de la phrase : elle donne la forme de l'expression. « Le triple de la somme de x et 5 » se termine par « le triple de » : c'est \\(3(x + 5)\\). « La somme du triple de x et de 5 » se termine par une somme : c'est \\(3x + 5\\). Avec \\(n\\) entier : \\(2n\\) est pair, \\(2n + 1\\) est impair, \\(n\\) et \\(n + 1\\) sont consécutifs.",
+      "Le début de la phrase donne l'opération qu'on fait en dernier, donc la forme de l'expression. « Le triple de la somme de x et 5 » commence par « le triple de » : on fait d'abord la somme, puis on la triple, c'est \\(3(x + 5)\\). « La somme du triple de x et de 5 » commence par « la somme » : on triple d'abord x, puis on ajoute 5, c'est \\(3x + 5\\). Avec \\(n\\) entier : \\(2n\\) est pair, \\(2n + 1\\) est impair, \\(n\\) et \\(n + 1\\) sont consécutifs.",
       ["Le double de \\(x\\), diminué de 7 : \\(2x - 7\\).", "Le carré de la somme de \\(a\\) et \\(b\\) : \\((a + b)^2\\).", "Périmètre d'un rectangle \\(x\\) sur \\(x + 3\\) : \\(2x + 2(x + 3) = 4x + 6\\)."],
       "Sans parenthèses, la multiplication passe avant l'addition : \\(3x + 5\\) n'est pas \\(3(x + 5)\\)."],
     valnum: ["Calculer la valeur d'une expression", "Remplacer une lettre par un nombre, c'est substituer.",
@@ -46,19 +46,24 @@
   Object.assign(ACTIVE, {
     // ---- Écrire une expression : deux machines ----
     litelab: {
-      predict: { q: "« Le triple de la somme de x et 5 » s'écrit…", choices: ["3x + 5", "3(x + 5)"], good: 1, why: "La phrase se termine par « le triple de… » : on calcule d'abord la somme x + 5, puis on la triple. Il faut des parenthèses." },
-      defis: ["Machine A : « × 3, puis + 5 ». Trouve le nombre qui donne 20.", "Machine B : « + 5, puis × 3 ». Trouve le nombre qui donne 30.", "Essaie trois nombres différents : que vaut toujours B − A ?"],
+      predict: { q: "« Le triple de la somme de x et 5 » s'écrit…", choices: ["3x + 5", "3(x + 5)"], good: 1, why: "La phrase commence par « le triple de… » : c'est l'opération qu'on fait en dernier. On calcule d'abord la somme x + 5, puis on la triple. Il faut des parenthèses." },
+      defis: ["Voici la machine A : « × 3, puis + 5 ». Trouve le nombre qui donne 20.", "Voici la machine B : « + 5, puis × 3 ». Trouve le nombre qui donne 30.", "Compare les deux machines : essaie trois nombres. Que vaut toujours B − A ?"],
       play(box, onWin) {
         let n = 2, step = 0; const seen = new Set();
+        // Une machine à la fois (retour de l'utilisateur, 15.11) : A seule, puis B seule, puis les deux et l'écart.
         const draw = () => {
           const A = 3 * n + 5, B = 3 * (n + 5);
-          box.innerHTML = actStepper("Nombre choisi", n, "n") + `<div class="act-out">Machine A : 3 · ${nb(n)} + 5 = <b>${nb(A)}</b> &nbsp;·&nbsp; Machine B : 3 · (${nb(n)} + 5) = <b>${nb(B)}</b></div>
-            <div class="small muted">A s'écrit 3n + 5 ; B s'écrit 3(n + 5). B − A = ${nb(B - A)}</div>`;
+          const mA = `<div class="act-out"><b>Machine A</b> <span class="small muted">(× 3, puis + 5)</span><br>3 · ${nb(n)} + 5 = <b>${nb(A)}</b></div>`;
+          const mB = `<div class="act-out"><b>Machine B</b> <span class="small muted">(+ 5, puis × 3)</span><br>(${nb(n)} + 5) · 3 = <b>${nb(B)}</b></div>`;
+          const body = step === 0 ? mA + '<div class="small muted">La machine A s\'écrit 3n + 5.</div>'
+            : step === 1 ? mB + '<div class="small muted">Nouvelle machine : on ajoute 5 <b>d\'abord</b>. Elle s\'écrit 3(n + 5).</div>'
+            : mA + mB + `<div class="act-out">B − A = ${nb(B)} − ${nb(A)} = <b>${nb(B - A)}</b></div><div class="small muted">Essais : ${seen.size} sur 3</div>`;
+          box.innerHTML = actStepper("Nombre choisi", n, "n") + body;
           actBindStepper(box, "n", () => n, (v) => { n = v; seen.add(v); draw(); check(); }, -10, 20);
         };
         const check = () => {
-          if (step === 0 && 3 * n + 5 === 20) { onWin(0, "n = 5 : 3 · 5 + 5 = 20."); step = 1; seen.clear(); }
-          else if (step === 1 && 3 * (n + 5) === 30) { onWin(1, "n = 5 : 3 · (5 + 5) = 30. Même nombre de départ, résultats différents : l'ordre des opérations compte."); step = 2; seen.clear(); }
+          if (step === 0 && 3 * n + 5 === 20) { onWin(0, "n = 5 : 3 · 5 + 5 = 20."); step = 1; seen.clear(); draw(); }
+          else if (step === 1 && 3 * (n + 5) === 30) { onWin(1, "n = 5 : (5 + 5) · 3 = 30. Même nombre de départ que pour A, mais pas le même résultat : l'ordre des opérations compte."); step = 2; seen.clear(); draw(); }
           else if (step === 2 && seen.size >= 3) { onWin(2, "B − A vaut toujours 10 : 3(n + 5) − (3n + 5) = 3n + 15 − 3n − 5 = 10. Le calcul littéral le prouve pour tous les nombres."); step = 3; }
         };
         draw();
