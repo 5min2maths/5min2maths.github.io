@@ -10380,6 +10380,9 @@ function screenSummary() {
 
 // Consultation d'une question par son code : adresse …/#q-eq2disc-2-k3f (rien n'est enregistré).
 function showCode() {
+  // Consultation d'une leçon (active ou rappel) : …/#l-vitesse (lien du tableau de suivi, 15.11).
+  const ml = /^#l-([a-z0-9]+)$/.exec(location.hash);
+  if (ml && typeof LESSONS !== "undefined" && LESSONS[ml[1]]) { screenLesson(ml[1], () => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); }); return true; }
   const m = /^#q-(.+)$/.exec(location.hash);
   if (!m) return false;
   const q = Engine.fromCode(m[1]);
