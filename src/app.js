@@ -10,6 +10,7 @@ if (state && state.profile && state.profile.track === "mp" && state.profile.grad
 if (state && state.profile && state.notions && Object.keys(state.notions).length && Engine.migrate(state)) Store.save(state);
 const save = () => Store.save(state);
 const h = (html) => { app.classList.remove("has-tabs"); app.innerHTML = html; typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
+if (typeof MutationObserver !== "undefined" && typeof app !== "undefined" && app) new MutationObserver((ms) => { for (const m of ms) m.addedNodes.forEach(divWalk); }).observe(app, { childList: true, subtree: true });
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const gradeName = (p) => (SYSTEMS[p.system].grades.find(([g]) => g === p.grade) || [0, ""])[1];
 const brand = '<div class="brand"><b>5 minutes de maths</b><span>par jour</span></div>';
@@ -19,6 +20,20 @@ const pick = (a) => a[Math.floor(Math.random() * a.length)];
 // Signe de division (14.11, décision de l'utilisateur) : « : » devient ÷ dans toutes les formules, au rendu.
 // Restent « : » : le texte \text{…}, la ponctuation suivie de \; ou ;, et ce qui n'a pas d'espaces (échelle 1\,:\,200, f\colon).
 window.divSign = (t) => t.replace(/(\\text\{[^}]*\})|( : (?!\\;|;))/g, (m, txt) => txt || " \\div ");
+// Division ÷ aussi dans le texte simple (demande du 15.11 : « systématiquement ») : messages des leçons actives,
+// étiquettes de figures, corrigés hors formules. « 45 : 60 », « m : ρ », « (…) : 2 » → ÷ ; on épargne la ponctuation
+// (« Erreur : la… »), les échelles (« au 1 : 10 », « échelle 1 : 200 ») et les libellés (« Défi 1 : … »).
+const DIV_TXT = /(^|[\s(=≈+\-−·×÷\/])(\d+(?:[,.]\d+)?|[a-zA-Zρ])\s:\s(?=\d|\(|[a-zA-Zρ](?![a-zA-Zàâäéèêëîïôöùûüçœ']))/g;
+const DIV_SKIP = /(?:\bau|échelle|Défi|Question|Étape|Exercice|Exemple|Partie|Lot|Test|Niveau|niveau|Série|Version)\s*$/;
+window.divText = (s) => s.split(/(\\\(.*?\\\)|\\\[.*?\\\])/s).map((p, i) => i % 2 ? p
+  : p.replace(DIV_TXT, (m, pre, tok, off, str) => (DIV_SKIP.test(str.slice(Math.max(0, off - 14), off) + pre) ? m : pre + tok + " ÷ ")).replace(/\)\s:\s(?=\d|\()/g, ") ÷ ")).join("");
+function divWalk(root) {
+  const fix = (n) => { if (n.nodeValue.includes(" : ") && !(n.parentElement && n.parentElement.closest("mjx-container, script, style, textarea"))) { const v = divText(n.nodeValue); if (v !== n.nodeValue) n.nodeValue = v; } };
+  if (root.nodeType === 3) return fix(root);
+  if (root.nodeType !== 1) return;
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); let n;
+  while ((n = w.nextNode())) fix(n);
+}
 function typeset(el) {
   const go = () => window.MathJax && MathJax.typesetPromise ? MathJax.typesetPromise([el]).catch(() => {}) : setTimeout(go, 150);
   go();
@@ -782,12 +797,26 @@ function renderQuestion(q, opt) {
     document.getElementById("nx").onclick = () => opt.onNext(false);
     const r = document.getElementById("redo");
     if (r) r.onclick = () => opt.onNext(true);
+    // Pas à pas (demande du 15.11) : tout ce qui sépare l'énoncé des étapes est replié (réponse, clavier, rappel,
+    // diagnostic), pour garder l'énoncé en lecture directe juste au-dessus des étapes ; un bouton le rouvre.
+    const fold = (box) => {
+      const els = [app.querySelector(".card .answer"), fb.querySelector(".fb > .spread"), fb.querySelector(".diag")].filter(Boolean);
+      els.forEach((e) => (e.style.display = "none"));
+      app.querySelectorAll(".card details:not(.solfull)").forEach((d) => (d.open = false));
+      const lesson = app.querySelector(".card details.lesson, .card .lesson-details"); if (lesson) lesson.style.display = "none";
+      const tg = document.createElement("button");
+      tg.type = "button"; tg.className = "btn-ghost small fold-toggle"; tg.textContent = "Afficher ma réponse";
+      tg.onclick = () => { const show = els[0] && els[0].style.display === "none"; els.forEach((e) => (e.style.display = show ? "" : "none")); if (lesson) lesson.style.display = show ? "" : "none"; tg.textContent = show ? "Replier ma réponse" : "Afficher ma réponse"; };
+      box.parentNode.insertBefore(tg, box);
+      const qt = app.querySelector(".qtext"); if (qt) qt.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
     const gb = document.getElementById("guide");
-    if (gb) { gb.onclick = () => { gb.remove(); runGuide(q, document.getElementById("gsteps"), () => { const rd = document.getElementById("redo"); if (rd) { rd.classList.add("btn-primary"); rd.textContent = "À toi : une question du même type"; rd.focus(); } }); }; gb.focus(); }
+    if (gb) { gb.onclick = () => { gb.remove(); fold(document.getElementById("gsteps")); runGuide(q, document.getElementById("gsteps"), () => { const rd = document.getElementById("redo"); if (rd) { rd.classList.add("btn-primary"); rd.textContent = "À toi : une question du même type"; rd.focus(); } }); }; gb.focus(); }
     else if (solSteps) {
       const sb = document.getElementById("solstep"), box = document.getElementById("ssteps");
-      let k = 0;
+      let k = 0, folded = false;
       const more = () => {
+        if (!folded) { folded = true; fold(box); }
         box.insertAdjacentHTML("beforeend", `<div class="gstep"><span class="small muted">Étape ${k + 1} sur ${solSteps.length}</span><div class="sol">${solSteps[k]}</div></div>`);
         typeset(box); k++;
         if (k < solSteps.length) { sb.textContent = "Étape suivante (essaie d'abord de la trouver)"; sb.focus(); }
@@ -846,7 +875,8 @@ function runGuide(q, box, done) {
     };
     el.querySelector(".gok").onclick = go;
     inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
-    inp.focus();
+    inp.focus({ preventScroll: true });
+    if (k > 0) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
   };
   step();
 }
