@@ -1011,7 +1011,9 @@ function showCode() {
   if (ml && typeof LESSONS !== "undefined" && LESSONS[ml[1]]) { screenLesson(ml[1], () => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); }); return true; }
   const m = /^#q-(.+)$/.exec(location.hash);
   if (!m) return false;
-  const q = Engine.fromCode(m[1]);
+  let q = Engine.fromCode(m[1]);
+  // Même exigence qu'en séance (commentaire testeur du 15.11) : au CO, on donne le résultat, pas le calcul.
+  if (q) { const n = NOTIONS.find((x) => x.id === q.id), y = n && n.CH && n.CH[0]; if (y && y <= 11) q = Engine.finalize({ profile: { system: "CH", grade: y } }, q.id, q); }
   if (!q) { h(`${brand}<div class="card flat"><h3>Code inconnu</h3><p class="muted">« ${esc(m[1])} » ne correspond à aucune question.</p></div>`); return true; }
   const back = () => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); };
   renderQuestion(q, { eyebrow: "Question " + q.code + " (consultation)", onDone: () => 0, onNext: back });

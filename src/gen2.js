@@ -239,7 +239,7 @@ Object.assign(GEN, {
       return { q: "Deux bus partent ensemble de la gare à 8 h. L'un repart toutes les " + M(a) + " minutes, l'autre toutes les " + M(b) + " minutes. Dans combien de minutes repartiront-ils de nouveau ensemble ?", spec: { kind: "value", value: l }, sol: "C'est le PPMC de " + M(a) + " et " + M(b) + " : " + M(l) + " minutes.",
         guide: [GS("Ils repartent ensemble après un nombre de minutes multiple de " + M(a) + " et de " + M(b) + " : le plus petit, c'est le PPMC. D'abord le PGDC de " + M(a) + " et " + M(b) + " : ?", gcd(a, b), "PGDC " + M("= " + gcd(a, b)) + "."), GS("PPMC " + M("= \\frac{" + a + " \\cdot " + b + "}{" + gcd(a, b) + "}") + " = ?", l, M("\\frac{" + a * b + "}{" + gcd(a, b) + "} = " + l) + " minutes.")] };
     }
-    return { fig: FIG.tiles(p, q, g * p + " cm", g * q + " cm"), q: "On veut paver un rectangle de " + M(g * p) + " cm sur " + M(g * q) + " cm avec des carrés tous identiques, les plus grands possible. Quel est le côté d'un carré (en cm) ?", spec: { kind: "value", value: g }, sol: "Le côté divise les deux longueurs et doit être le plus grand : PGDC " + M("= " + g) + " cm.", guide: pgdcGuide(g * p, g * q, g) };
+    return { fig: FIG.tiles(g * p, g * q, g * p + " cm", g * q + " cm"), q: "On veut paver un rectangle de " + M(g * p) + " cm sur " + M(g * q) + " cm avec des carrés tous identiques, les plus grands possible. Quel est le côté d'un carré (en cm) ?", spec: { kind: "value", value: g }, sol: "Le côté divise les deux longueurs et doit être le plus grand : PGDC " + M("= " + g) + " cm.", guide: pgdcGuide(g * p, g * q, g) };
   },
 
   diagr(d) {

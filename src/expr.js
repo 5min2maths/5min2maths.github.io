@@ -401,6 +401,9 @@ function checkAnswer(spec, input) {
       const raw = String(input).replace(/^\s*[a-zA-Z]\s*=/, "").replace(/[\s'’]/g, "").replace(/,/g, ".").replace(/[−–]/g, "-");
       const num = "\\d+(\\.\\d+)?", ok = new RegExp("^-?(" + num + "|\\(?-?\\d+/\\d+\\)?|\\d*√\\d+(/\\d+)?|" + num + "?π)$");
       if (!ok.test(raw)) return { status: "form", message: "Calcule jusqu'au bout : écris seulement le résultat (un nombre ou une fraction), sans opération." };
+      // Fraction : irréductible exigée (commentaire testeur du 15.11).
+      const fr = raw.match(/^-?\(?-?(\d+)\/(\d+)\)?$/), g = (u, v) => (v ? g(v, u % v) : u);
+      if (fr && (g(+fr[1], +fr[2]) > 1 || +fr[2] === 1)) return { status: "form", message: +fr[2] === 1 ? "Écris simplement le nombre entier." : "Simplifie la fraction : elle doit être irréductible." };
     }
     // plain : on attend un nombre écrit en chiffres (conversion, écriture décimale), pas une fraction ni un calcul
     if (spec.plain && !/^\s*-?\s*\d[\d'’ ]*([.,]\d+)?\s*$/.test(String(input))) return { status: "invalid", message: "Écris le résultat comme un nombre décimal (pas de fraction ni de calcul)." };

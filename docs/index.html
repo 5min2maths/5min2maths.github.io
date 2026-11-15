@@ -902,6 +902,9 @@ function checkAnswer(spec, input) {
       const raw = String(input).replace(/^\s*[a-zA-Z]\s*=/, "").replace(/[\s'’]/g, "").replace(/,/g, ".").replace(/[−–]/g, "-");
       const num = "\\d+(\\.\\d+)?", ok = new RegExp("^-?(" + num + "|\\(?-?\\d+/\\d+\\)?|\\d*√\\d+(/\\d+)?|" + num + "?π)$");
       if (!ok.test(raw)) return { status: "form", message: "Calcule jusqu'au bout : écris seulement le résultat (un nombre ou une fraction), sans opération." };
+      // Fraction : irréductible exigée (commentaire testeur du 15.11).
+      const fr = raw.match(/^-?\(?-?(\d+)\/(\d+)\)?$/), g = (u, v) => (v ? g(v, u % v) : u);
+      if (fr && (g(+fr[1], +fr[2]) > 1 || +fr[2] === 1)) return { status: "form", message: +fr[2] === 1 ? "Écris simplement le nombre entier." : "Simplifie la fraction : elle doit être irréductible." };
     }
     // plain : on attend un nombre écrit en chiffres (conversion, écriture décimale), pas une fraction ni un calcul
     if (spec.plain && !/^\s*-?\s*\d[\d'’ ]*([.,]\d+)?\s*$/.test(String(input))) return { status: "invalid", message: "Écris le résultat comme un nombre décimal (pas de fraction ni de calcul)." };
@@ -1161,9 +1164,14 @@ const FIG = (() => {
     return svg(300, 150, '<rect x="95" y="15" width="110" height="110" class="f-fill2"/>' + t(150, 76, label, "f-txt", "middle", 15) + t(150, 145, "côté = ?", "f-accent f-txt", "middle", 13), "carré d'aire donnée");
   }
   // Expression en tuiles (calcul littéral) : rectangle découpé.
+  // Rectangle à paver (commentaire testeur du 15.11 : figure illisible) : rectangle à l'échelle des vraies dimensions,
+  // un carré en pointillé « ? » dans un coin (le carré cherché, sans donner sa taille).
   function tiles(a, b, la, lb) {
-    let g = '<rect x="40" y="20" width="' + a + '" height="' + b + '" class="f-fill2"/>';
-    return svg(300, b + 50, g + t(40 + a / 2, b + 40, la) + t(32, 20 + b / 2, lb, "f-txt", "end"), "aire d'un rectangle");
+    const k = Math.min(220 / a, 120 / b), W = a * k, H = b * k, s = Math.min(W, H) / 3.2;
+    let g = '<rect x="40" y="20" width="' + W.toFixed(1) + '" height="' + H.toFixed(1) + '" class="f-fill2" stroke="var(--ink)" stroke-width="1.5"/>';
+    g += '<rect x="40" y="20" width="' + s.toFixed(1) + '" height="' + s.toFixed(1) + '" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-dasharray="4 3"/>';
+    g += t(40 + s / 2, 25 + s / 2, "?", "f-accent f-txt");
+    return svg(300, H + 50, g + t(40 + W / 2, H + 40, la) + t(32, 20 + H / 2, lb, "f-txt", "end"), "rectangle à paver avec des carrés");
   }
 
   // Parabole y = a(x - p)(x - q) ou a x² + b x + c, avec points marqués.
@@ -2034,8 +2042,12 @@ Object.assign(GEN, {
 
   expo(d) {
     if (d === 1) {
-      const b = R.pick([2, 3, 5]), n = R.int(2, b === 2 ? 7 : 4);
-      return { fig: FIG.parabola((x) => Math.pow(b, x) / 3, [], null, false), q: "Résous : " + M(b + "^x = " + b ** n) + ".", spec: { kind: "value", value: n }, sol: M(b ** n + " = " + b + "^" + n) + ", donc " + M("x = " + n) + "." };
+      // Solutions variées (commentaire testeur du 15.11 : « x tombe toujours entier ») : entière, demi-entière, négative, fractionnaire.
+      const b = R.pick([2, 3, 5]), n = R.int(2, b === 2 ? 6 : 3), f = R.int(0, 3), fig = FIG.parabola((x) => Math.pow(b, x) / 3, [], null, false);
+      if (f === 1) return { fig, q: "Résous : " + M(b + "^x = " + (n > 1 ? b ** (n - 1) : "") + "\\sqrt{" + b + "}") + ".", spec: { kind: "value", value: n - 0.5 }, sol: M("\\sqrt{" + b + "} = " + b + "^{1/2}") + ", donc " + M(b + "^x = " + b + "^{" + (n - 1) + " + 1/2}") + " et " + M("x = " + frac(2 * n - 1, 2)) + "." };
+      if (f === 2) return { fig, q: "Résous : " + M(b + "^x = \\frac{1}{" + b ** (n - 1) + "\\sqrt{" + b + "}}") + ".", spec: { kind: "value", value: -(n - 0.5) }, sol: M("\\frac{1}{" + b ** (n - 1) + "\\sqrt{" + b + "}} = " + b + "^{-(" + (n - 1) + " + 1/2)}") + ", donc " + M("x = " + frac(-(2 * n - 1), 2)) + "." };
+      if (f === 3) { const k = 2 * R.int(1, 3) + 1; return { fig, q: "Résous : " + M(b + "^{2x} = " + b ** k) + ".", spec: { kind: "value", value: k / 2 }, sol: M(b + "^{2x} = " + b + "^{" + k + "}") + ", donc " + M("2x = " + k) + " et " + M("x = " + frac(k, 2)) + "." }; }
+      return { fig, q: "Résous : " + M(b + "^x = " + b ** n) + ".", spec: { kind: "value", value: n }, sol: M(b ** n + " = " + b + "^" + n) + ", donc " + M("x = " + n) + "." };
     }
     if (d === 2) {
       const b = R.pick([2, 3]), k = R.nz(-3, 3), n = R.int(2, b === 2 ? 6 : 4);
@@ -2565,7 +2577,7 @@ Object.assign(GEN, {
       return { q: "Deux bus partent ensemble de la gare à 8 h. L'un repart toutes les " + M(a) + " minutes, l'autre toutes les " + M(b) + " minutes. Dans combien de minutes repartiront-ils de nouveau ensemble ?", spec: { kind: "value", value: l }, sol: "C'est le PPMC de " + M(a) + " et " + M(b) + " : " + M(l) + " minutes.",
         guide: [GS("Ils repartent ensemble après un nombre de minutes multiple de " + M(a) + " et de " + M(b) + " : le plus petit, c'est le PPMC. D'abord le PGDC de " + M(a) + " et " + M(b) + " : ?", gcd(a, b), "PGDC " + M("= " + gcd(a, b)) + "."), GS("PPMC " + M("= \\frac{" + a + " \\cdot " + b + "}{" + gcd(a, b) + "}") + " = ?", l, M("\\frac{" + a * b + "}{" + gcd(a, b) + "} = " + l) + " minutes.")] };
     }
-    return { fig: FIG.tiles(p, q, g * p + " cm", g * q + " cm"), q: "On veut paver un rectangle de " + M(g * p) + " cm sur " + M(g * q) + " cm avec des carrés tous identiques, les plus grands possible. Quel est le côté d'un carré (en cm) ?", spec: { kind: "value", value: g }, sol: "Le côté divise les deux longueurs et doit être le plus grand : PGDC " + M("= " + g) + " cm.", guide: pgdcGuide(g * p, g * q, g) };
+    return { fig: FIG.tiles(g * p, g * q, g * p + " cm", g * q + " cm"), q: "On veut paver un rectangle de " + M(g * p) + " cm sur " + M(g * q) + " cm avec des carrés tous identiques, les plus grands possible. Quel est le côté d'un carré (en cm) ?", spec: { kind: "value", value: g }, sol: "Le côté divise les deux longueurs et doit être le plus grand : PGDC " + M("= " + g) + " cm.", guide: pgdcGuide(g * p, g * q, g) };
   },
 
   diagr(d) {
@@ -7795,6 +7807,32 @@ const LESSON_FIGS_V2 = {
 };
 
 for (const [id, v] of Object.entries(LESSONS_V2)) LESSONS[id] = L_(...v);
+// Commentaires testeurs du 14.11 (traités le 15.11) :
+// « priorités : illustration incompréhensible » → étapes verticales, une flèche par opération, sous la ligne qu'elle transforme ;
+// « multiples et diviseurs : mettre les paires de facteurs en accolade » → diviseurs alignés, paires reliées par une accolade.
+LESSON_FIGS_V2.prio = () => {
+  const rows = [["20 − 2 · ", "3²", ""], ["20 − ", "2 · 9", ""], ["", "20 − 18", ""], ["", "2", ""]], ops = ["1. la puissance : 3² = 9", "2. la multiplication : 2 · 9 = 18", "3. la soustraction : 20 − 18 = 2"];
+  let g = "", y = 24;
+  rows.forEach((r, i) => {
+    const last = i === rows.length - 1;
+    g += '<text x="150" y="' + y + '" class="f-txt" text-anchor="middle" font-size="17">' + (i ? "= " : "") + r[0] + '<tspan style="fill:' + (last ? "var(--ok)" : "var(--margin)") + '" font-weight="700">' + r[1] + "</tspan>" + r[2] + "</text>";
+    if (!last) { g += '<path d="M150,' + (y + 7) + " L150," + (y + 25) + '" class="f-line" stroke-width="1.4"/><path d="M146,' + (y + 20) + " L150," + (y + 26) + " L154," + (y + 20) + '" class="f-line" fill="none" stroke-width="1.4"/>';
+      g += '<text x="160" y="' + (y + 21) + '" class="f-txt" font-size="11.5">' + ops[i] + "</text>"; }
+    y += 46;
+  });
+  return '<svg class="fig" viewBox="0 0 330 ' + (y - 18) + '" role="img" aria-label="calcul de 20 − 2 · 3² étape par étape">' + g + "</svg>";
+};
+LESSON_FIGS_V2.multdiv = () => {
+  const d = [1, 2, 3, 4, 6, 12], X = (i) => 30 + i * 52, pairs = [[0, 5], [1, 4], [2, 3]];
+  let g = "";
+  d.forEach((v, i) => (g += '<text x="' + X(i) + '" y="26" class="f-txt" text-anchor="middle" font-size="18" font-weight="700">' + v + "</text>"));
+  pairs.forEach(([a, b], k) => {
+    const yb = 40 + (2 - k) * 22, xa = X(a), xb = X(b);
+    g += '<path d="M' + xa + ",34 L" + xa + "," + yb + " L" + xb + "," + yb + " L" + xb + ',34" fill="none" class="f-accent" stroke="currentColor" stroke-width="1.6"/>';
+    g += '<text x="' + (xa + xb) / 2 + '" y="' + (yb + 14) + '" class="f-accent f-txt" text-anchor="middle" font-size="12">' + d[a] + " · " + d[b] + " = 12</text>";
+  });
+  return '<svg class="fig" viewBox="0 0 320 124" role="img" aria-label="diviseurs de 12 reliés par paires">' + g + "</svg>";
+};
 if (typeof LESSON_FIGS !== "undefined") Object.assign(LESSON_FIGS, LESSON_FIGS_V2);
 
 // Figures dynamiques (13.11, demande d'un testeur) : un curseur fait varier la figure en direct.
@@ -10394,7 +10432,9 @@ function showCode() {
   if (ml && typeof LESSONS !== "undefined" && LESSONS[ml[1]]) { screenLesson(ml[1], () => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); }); return true; }
   const m = /^#q-(.+)$/.exec(location.hash);
   if (!m) return false;
-  const q = Engine.fromCode(m[1]);
+  let q = Engine.fromCode(m[1]);
+  // Même exigence qu'en séance (commentaire testeur du 15.11) : au CO, on donne le résultat, pas le calcul.
+  if (q) { const n = NOTIONS.find((x) => x.id === q.id), y = n && n.CH && n.CH[0]; if (y && y <= 11) q = Engine.finalize({ profile: { system: "CH", grade: y } }, q.id, q); }
   if (!q) { h(`${brand}<div class="card flat"><h3>Code inconnu</h3><p class="muted">« ${esc(m[1])} » ne correspond à aucune question.</p></div>`); return true; }
   const back = () => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); };
   renderQuestion(q, { eyebrow: "Question " + q.code + " (consultation)", onDone: () => 0, onNext: back });

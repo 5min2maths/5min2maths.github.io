@@ -576,8 +576,12 @@ Object.assign(GEN, {
 
   expo(d) {
     if (d === 1) {
-      const b = R.pick([2, 3, 5]), n = R.int(2, b === 2 ? 7 : 4);
-      return { fig: FIG.parabola((x) => Math.pow(b, x) / 3, [], null, false), q: "Résous : " + M(b + "^x = " + b ** n) + ".", spec: { kind: "value", value: n }, sol: M(b ** n + " = " + b + "^" + n) + ", donc " + M("x = " + n) + "." };
+      // Solutions variées (commentaire testeur du 15.11 : « x tombe toujours entier ») : entière, demi-entière, négative, fractionnaire.
+      const b = R.pick([2, 3, 5]), n = R.int(2, b === 2 ? 6 : 3), f = R.int(0, 3), fig = FIG.parabola((x) => Math.pow(b, x) / 3, [], null, false);
+      if (f === 1) return { fig, q: "Résous : " + M(b + "^x = " + (n > 1 ? b ** (n - 1) : "") + "\\sqrt{" + b + "}") + ".", spec: { kind: "value", value: n - 0.5 }, sol: M("\\sqrt{" + b + "} = " + b + "^{1/2}") + ", donc " + M(b + "^x = " + b + "^{" + (n - 1) + " + 1/2}") + " et " + M("x = " + frac(2 * n - 1, 2)) + "." };
+      if (f === 2) return { fig, q: "Résous : " + M(b + "^x = \\frac{1}{" + b ** (n - 1) + "\\sqrt{" + b + "}}") + ".", spec: { kind: "value", value: -(n - 0.5) }, sol: M("\\frac{1}{" + b ** (n - 1) + "\\sqrt{" + b + "}} = " + b + "^{-(" + (n - 1) + " + 1/2)}") + ", donc " + M("x = " + frac(-(2 * n - 1), 2)) + "." };
+      if (f === 3) { const k = 2 * R.int(1, 3) + 1; return { fig, q: "Résous : " + M(b + "^{2x} = " + b ** k) + ".", spec: { kind: "value", value: k / 2 }, sol: M(b + "^{2x} = " + b + "^{" + k + "}") + ", donc " + M("2x = " + k) + " et " + M("x = " + frac(k, 2)) + "." }; }
+      return { fig, q: "Résous : " + M(b + "^x = " + b ** n) + ".", spec: { kind: "value", value: n }, sol: M(b ** n + " = " + b + "^" + n) + ", donc " + M("x = " + n) + "." };
     }
     if (d === 2) {
       const b = R.pick([2, 3]), k = R.nz(-3, 3), n = R.int(2, b === 2 ? 6 : 4);

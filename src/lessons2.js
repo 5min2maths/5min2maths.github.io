@@ -502,4 +502,30 @@ const LESSON_FIGS_V2 = {
 };
 
 for (const [id, v] of Object.entries(LESSONS_V2)) LESSONS[id] = L_(...v);
+// Commentaires testeurs du 14.11 (traités le 15.11) :
+// « priorités : illustration incompréhensible » → étapes verticales, une flèche par opération, sous la ligne qu'elle transforme ;
+// « multiples et diviseurs : mettre les paires de facteurs en accolade » → diviseurs alignés, paires reliées par une accolade.
+LESSON_FIGS_V2.prio = () => {
+  const rows = [["20 − 2 · ", "3²", ""], ["20 − ", "2 · 9", ""], ["", "20 − 18", ""], ["", "2", ""]], ops = ["1. la puissance : 3² = 9", "2. la multiplication : 2 · 9 = 18", "3. la soustraction : 20 − 18 = 2"];
+  let g = "", y = 24;
+  rows.forEach((r, i) => {
+    const last = i === rows.length - 1;
+    g += '<text x="150" y="' + y + '" class="f-txt" text-anchor="middle" font-size="17">' + (i ? "= " : "") + r[0] + '<tspan style="fill:' + (last ? "var(--ok)" : "var(--margin)") + '" font-weight="700">' + r[1] + "</tspan>" + r[2] + "</text>";
+    if (!last) { g += '<path d="M150,' + (y + 7) + " L150," + (y + 25) + '" class="f-line" stroke-width="1.4"/><path d="M146,' + (y + 20) + " L150," + (y + 26) + " L154," + (y + 20) + '" class="f-line" fill="none" stroke-width="1.4"/>';
+      g += '<text x="160" y="' + (y + 21) + '" class="f-txt" font-size="11.5">' + ops[i] + "</text>"; }
+    y += 46;
+  });
+  return '<svg class="fig" viewBox="0 0 330 ' + (y - 18) + '" role="img" aria-label="calcul de 20 − 2 · 3² étape par étape">' + g + "</svg>";
+};
+LESSON_FIGS_V2.multdiv = () => {
+  const d = [1, 2, 3, 4, 6, 12], X = (i) => 30 + i * 52, pairs = [[0, 5], [1, 4], [2, 3]];
+  let g = "";
+  d.forEach((v, i) => (g += '<text x="' + X(i) + '" y="26" class="f-txt" text-anchor="middle" font-size="18" font-weight="700">' + v + "</text>"));
+  pairs.forEach(([a, b], k) => {
+    const yb = 40 + (2 - k) * 22, xa = X(a), xb = X(b);
+    g += '<path d="M' + xa + ",34 L" + xa + "," + yb + " L" + xb + "," + yb + " L" + xb + ',34" fill="none" class="f-accent" stroke="currentColor" stroke-width="1.6"/>';
+    g += '<text x="' + (xa + xb) / 2 + '" y="' + (yb + 14) + '" class="f-accent f-txt" text-anchor="middle" font-size="12">' + d[a] + " · " + d[b] + " = 12</text>";
+  });
+  return '<svg class="fig" viewBox="0 0 320 124" role="img" aria-label="diviseurs de 12 reliés par paires">' + g + "</svg>";
+};
 if (typeof LESSON_FIGS !== "undefined") Object.assign(LESSON_FIGS, LESSON_FIGS_V2);
