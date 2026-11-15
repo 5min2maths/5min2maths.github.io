@@ -48,6 +48,7 @@ for (const [ch, C] of Object.entries(RICH)) for (const kind of ["ex", "raison"])
     const t = [x.q, x.sol, ...x.parts.map((p) => p.label)].join(" | ");
     if (/undefined|NaN|Infinity|\[object/.test(t)) fail(ch + " " + kind + k + " s" + s + " texte : " + t.match(/.{0,50}(undefined|NaN|Infinity|\[object).{0,20}/)[0]);
     if (!GEN[x.id] || !x.titre || !(x.lv >= 1 && x.lv <= 3)) fail(ch + " " + kind + k + " id/titre/lv");
+    if (/\d+ pts?\b|sans point|Pas de points/.test(t)) fail(ch + " " + kind + k + " s" + s + " points affichés (sans points depuis le 15.11) : " + t.match(/.{0,30}(\d+ pts?\b|sans point|Pas de points).{0,10}/)[0]);
     pts.add(x.pts); if (s === 1) sample = x.titre + " (" + x.id + ", N" + x.lv + ") : " + x.q.replace(/<[^>]+>/g, " ").replace(/\\\(|\\\)/g, "").slice(0, 100);
   }
   out.push("riche " + kind + k + " · " + [...pts].join("/") + " pts · " + sample);

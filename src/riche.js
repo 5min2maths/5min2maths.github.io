@@ -15,7 +15,9 @@ const RICH = {};
   const two = (n) => (n < 10 ? "0" : "") + n;
   const hor = (m) => Math.floor(m / 60) + " h " + two(m % 60);
   const pk = (a) => a[Math.floor(R.rand() * a.length)];
-  const X = (o) => Object.assign({ pts: o.parts.reduce((s, p) => s + p.pts, 0) }, o, { parts: o.parts.map((p) => ({ label: p.label + " <span class=\"small muted\">(" + (p.pts ? p.pts + " pt" + (p.pts > 1 ? "s" : "") : "sans point") + ")</span>", pts: p.pts })) });
+  // Pas de points affichés (15.11) : le poids sert seulement à pondérer l'auto-correction en interne.
+  const nopts = (s) => s.replace(/ ?\((?:\d+ pts?(?: \+ \d+ pts?)*)(?: par objet| avec la justification)?\)/g, "").replace(/\(\d+ pts?, /g, "(").replace(/Pas de points : on/g, "On");
+  const X = (o) => Object.assign({ pts: Math.max(1, o.parts.reduce((s, p) => s + p.pts, 0)) }, o, { sol: nopts(o.sol), parts: o.parts.map((p) => ({ label: p.label, pts: p.pts })) });
   const ul = (rows) => "<ol type=\"a\" class=\"mock-parts\">" + rows.map((r) => "<li>" + r + "</li>").join("") + "</ol>";
 
   // ===================== 11e · 4. Proportionnalité, grandeurs quotients et unités =====================

@@ -89,12 +89,12 @@ function screenMock() {
   if (!state.mock || state.mock.ids.join() !== state.prep.ids.join()) mockNew();
   const qs = mockQuestions(), total = qs.reduce((s, x) => s + x.pts, 0), minutes = state.mock.items.some((it) => it.rich) ? 45 : Math.max(15, Math.round((total * 1.5) / 5) * 5);
   let num = 0;
-  const qHtml = (x, label) => `<div class="mock-q"><div class="spread"><b>${label}</b><span class="small muted">${ptsTxt(x.pts)}</span></div>
+  const qHtml = (x, label) => `<div class="mock-q"><div class="spread"><b>${label}</b></div>
     <div>${x.q.q}</div>${x.q.fig ? `<div class="figwrap">${x.q.fig}</div>` : ""}
     ${x.q.parts ? `<ol type="a" class="mock-parts">${x.q.parts.map((p) => `<li>${p.label}<div class="mock-space"></div></li>`).join("")}</ol>` : '<div class="mock-space"></div>'}</div>`;
   const A = qs.filter((x) => x.part === "A"), B = qs.filter((x) => x.part === "B"), C = qs.filter((x) => x.part === "C");
   const exs = [...new Set(B.map((x) => x.ex))];
-  h(`<div class="mock-head">${brand}<div class="eyebrow">Sujet de préparation · environ ${minutes} min · ${total} points</div>
+  h(`<div class="mock-head">${brand}<div class="eyebrow">Sujet de préparation · environ ${minutes} min</div>
   <h2>Je m'entraîne pour mon test</h2><p class="small muted">${state.prep.ids.map(nLabel).join(" · ")} · niveau ${MOCK_LV[state.mock.level || "standard"].label.toLowerCase()}</p></div>
   <div class="seg no-print" id="mlv">${Object.entries(MOCK_LV).map(([k, v]) => `<button type="button" data-lv="${k}" aria-pressed="${(state.mock.level || "standard") === k}">${v.label}</button>`).join("")}</div>
   <div class="card flat"><p class="small">Pour t'entraîner avant ton test. <b>Ce n'est pas une évaluation</b> : il n'y a pas de note, et personne d'autre que toi ne voit le résultat. Fais-le sur une feuille, sans regarder tes cours, puis corrige-toi avec le corrigé.</p></div>
@@ -117,7 +117,7 @@ function screenMockCorr() {
   const partName = { A: "A. Automatismes", B: "B. Exercices", C: "C. Raisonnement" };
   h(`${brand}<div class="eyebrow">Sujet de préparation · corrigé</div><h2>Corrige-toi</h2>
   <p class="small muted">Compare avec ta feuille et coche honnêtement, question par question. Pour « Vrai ou faux », la justification compte : sans justification juste, coche « en partie ».</p>
-  <div class="mock-list">${qs.map((x, i) => `${i === 0 || qs[i - 1].part !== x.part ? `<h3>${partName[x.part]}</h3>` : ""}<div class="mock-q card flat"><div class="spread"><b>${x.q.titre ? x.q.titre : x.part === "B" ? "Exercice · " + nLabel(x.id) : x.vf ? "Vrai ou faux ?" : x.q.parts ? "Problème" : "Question"}</b><span class="small muted">${ptsTxt(x.pts)}</span></div>
+  <div class="mock-list">${qs.map((x, i) => `${i === 0 || qs[i - 1].part !== x.part ? `<h3>${partName[x.part]}</h3>` : ""}<div class="mock-q card flat"><div class="spread"><b>${x.q.titre ? x.q.titre : x.part === "B" ? "Exercice · " + nLabel(x.id) : x.vf ? "Vrai ou faux ?" : x.q.parts ? "Problème" : "Question"}</b></div>
     <div class="small">${x.q.q}</div>
     <div class="rule"><b>Corrigé</b> · ${x.q.sol || ""}</div>
     <div class="seg mock-mark" data-i="${i}"><button type="button" data-v="1">✓ Juste</button><button type="button" data-v="0.5">½ En partie</button><button type="button" data-v="0">✗ Faux</button></div></div>`).join("")}</div>
@@ -135,22 +135,22 @@ function screenMockCorr() {
     const total = qs.reduce((s, x) => s + x.pts, 0), pts = qs.reduce((s, x, i) => s + x.pts * marks[i], 0);
     const byId = {}; qs.forEach((x, i) => { (byId[x.id] = byId[x.id] || []).push(marks[i]); });
     const ok = Object.keys(byId).filter((id) => byId[id].every((m) => m === 1)), weak = Object.keys(byId).filter((id) => byId[id].some((m) => m < 1));
-    state.mock.done = { date: day(), pts, total };
+    const cnt = { juste: marks.filter((m) => m === 1).length, partie: marks.filter((m) => m === 0.5).length, faux: marks.filter((m) => m === 0).length };
+    state.mock.done = { date: day(), pts, total, ...cnt, n: marks.length };
     Badges.check(state); save();
-    screenMockResult(pts, total, ok, weak);
+    screenMockResult(cnt, marks.length, ok, weak);
   };
 }
 
-function screenMockResult(pts, total, ok, weak) {
-  const pc = Math.round((100 * pts) / total);
+// Pas de points (15.11) : un barème donnerait une fausse idée de l'importance des notions ; on compte les questions.
+function screenMockResult(cnt, n, ok, weak) {
   h(`${brand}<div class="eyebrow">Sujet de préparation · bilan</div><h2>Où tu en es</h2>
-  <div class="card stack"><div class="spread"><b>${String(pts).replace(".", ",")} points sur ${total}</b><span class="muted">${pc} %</span></div>
-    <div class="bar"><span class="track"><i style="width:${pc}%"></i></span></div><p class="small muted">Ce n'est pas une note : c'est pour savoir quoi travailler d'ici ton test.</p></div>
+  <div class="card stack"><p><b>${cnt.juste}</b> question${cnt.juste > 1 ? "s" : ""} juste${cnt.juste > 1 ? "s" : ""} sur ${n}${cnt.partie ? ` · <b>${cnt.partie}</b> en partie` : ""}${cnt.faux ? ` · <b>${cnt.faux}</b> à revoir` : ""}</p><p class="small muted">Ce n'est pas une note : c'est pour savoir quoi travailler d'ici ton test.</p></div>
   ${ok.length ? `<div class="card flat"><h3>✓ Acquis</h3><ul>${ok.map((id) => `<li>${nLabel(id)}</li>`).join("")}</ul></div>` : ""}
   ${weak.length ? `<div class="card flat stack"><h3>À retravailler</h3><ul>${weak.map((id) => `<li>${nLabel(id)}</li>`).join("")}</ul>
     <button class="btn-primary" id="rev">Réviser ces notions maintenant</button></div>` : '<div class="card flat"><p>Tout est juste : bravo ! Une séance de révision par jour suffit jusqu\'au test.</p></div>'}
   <div class="row"><button id="again">Un autre sujet</button><button class="btn-ghost" id="home">Retour à l'accueil</button></div>`);
-  if (pc >= 80) burst();
+  if (cnt.juste >= 0.8 * n) burst();
   if (document.getElementById("rev")) document.getElementById("rev").onclick = () => {
     session = { plan: weak.flatMap((id) => [id + "|2", id + "|3"]), i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), prep: true };
     nextQuestion();

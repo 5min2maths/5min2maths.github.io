@@ -176,7 +176,7 @@ function screenHome() {
     test: () => prep ? `<div class="card stack"><div class="eyebrow">Je prépare mon test</div><h2>${left === 0 ? "Test aujourd'hui" : left === 1 ? "Test demain" : "Test dans " + left + " jours"}</h2>
         <p class="small muted">${state.prep.ids.length} notion${state.prep.ids.length > 1 ? "s" : ""} : ${state.prep.ids.map((id) => NOTIONS.find((n) => n.id === id).label).join(" · ")}</p>
         <button class="btn-primary btn-big" id="prepgo">Séance de révision</button>
-        <button id="mock">📝 Sujet de préparation (avec corrigé)</button>${state.mock && state.mock.done && state.mock.ids.join() === state.prep.ids.join() ? `<p class="small muted">Dernier sujet de préparation : ${String(state.mock.done.pts).replace(".", ",")} points sur ${state.mock.done.total}.</p>` : ""}
+        <button id="mock">📝 Sujet de préparation (avec corrigé)</button>${state.mock && state.mock.done && state.mock.ids.join() === state.prep.ids.join() ? `<p class="small muted">Dernier sujet de préparation : ${state.mock.done.n ? state.mock.done.juste + " question" + (state.mock.done.juste > 1 ? "s" : "") + " juste" + (state.mock.done.juste > 1 ? "s" : "") + " sur " + state.mock.done.n : "fait"}.</p>` : ""}
         <button class="btn-ghost" id="prepedit">Modifier le test</button></div>`
       : `<div class="card stack"><div class="eyebrow">Je prépare un test</div><h2>Un test approche ?</h2>
         <p class="muted">Dis-moi sa date et les notions : chaque jour, l'app te fait réviser juste ce qu'il faut, jusqu'au jour J. Tu pourras aussi t'entraîner sur un sujet de préparation, avec son corrigé.</p>
