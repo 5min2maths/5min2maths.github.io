@@ -1,0 +1,20 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css"><body style="width:420px"><main id="app"></main><pre id="log"></pre>
+<script>window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script>
+<script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/riche.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script>
+// Simulation : un élève en difficulté se trompe deux fois sur Pythagore (additionne les côtés), puis suit le pas à pas.
+const q = (()=>{for(let s=1;s<200;s++){const q=Engine.build("reduire",1,s); if(/a/.test(q.spec.expr)&&/b/.test(q.spec.expr)) return q;}})();
+renderQuestion(q, { eyebrow: "Démonstration", onDone: () => -8, onNext: () => {} });
+const ans = document.getElementById("ans"), chk = document.getElementById("check");
+document.getElementById("idk").click();
+const first = "";
+document.getElementById("guide").click();
+const steps = 1; document.querySelector(".gin");
+for (let k = 0; k < steps; k++) { const i = document.querySelectorAll(".gin")[k]; i.value = q.guide[k].spec.expr || String(q.guide[k].spec.value).replace(".", ","); i.closest(".gstep").querySelector(".gok").click(); }
+document.title = first;
+const KP = [...document.querySelectorAll(".gstep .keypad button")].map(b=>b.dataset.k).join(" "); const A = document.querySelector(".card .answer"), T = document.querySelector(".fold-toggle"), Ls = document.querySelector("details.lesson");
+ document.getElementById("log").textContent = "clavier de l'étape 2 : " + KP + " · réponse repliée : " + (A.style.display === "none") + " · bouton : " + (T ? T.textContent : "ABSENT") + " · rappel replié : " + (!Ls || Ls.style.display === "none") + " · étapes : " + document.querySelectorAll(".gstep").length;
+T.click(); const l2 = " · après clic : " + (A.style.display !== "none") + " / " + T.textContent; T.click();
+document.getElementById("log").textContent += l2 + " · re-replié : " + (A.style.display === "none");
+</script>

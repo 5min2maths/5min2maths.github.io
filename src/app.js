@@ -597,7 +597,9 @@ const isSetSpec = (spec) => !!spec && (spec.kind === "solset" || spec.kind === "
 // Clavier « résultat » (14.11) : chiffres seulement, pas de calculatrice ; √ si la réponse exacte en a besoin.
 const numKeys = (spec) => { const root = !isTerm(spec.value); return ["7", "8", "9", "⌫", "4", "5", "6", "-", "1", "2", "3", "/", "0", ",", ...(root ? ["√"] : []), "⌨"]
   .map((k) => `<button type="button" class="${/^[\d,]$/.test(k) ? "" : "k-op"}${k === "0" && !root ? " k-wide" : ""}" data-k="${esc(k)}">${KEY_LABEL[k] || k}</button>`).join(""); };
-const keysFor = (spec) => (spec && spec.final ? numKeys(spec) : isSetSpec(spec) ? SET_KEYS.map((k) => keyBtn(k, true)).join("") : KEYS.map((k) => keyBtn(k)).join(""));
+// Lettres du clavier (15.11) : celles de l'expression attendue (a, b, n…) remplacent x et y ; une 3e lettre prend la place de « = ».
+const keyLetters = (spec) => { let L = []; try { if (spec && spec.kind === "expr") L = [...Expr.vars(Expr.parse(spec.expr))].sort(); } catch (e) {} if (!L.length || (L.length <= 2 && L.every((v) => v === "x" || v === "y"))) return KEYS; const k = KEYS.slice(); k[k.indexOf("x")] = L[0]; k[k.indexOf("y")] = L[1] || (L[0] === "x" ? "y" : "x"); if (L[2]) k[k.indexOf("=")] = L[2]; return k; };
+const keysFor = (spec) => (spec && spec.final ? numKeys(spec) : isSetSpec(spec) ? SET_KEYS.map((k) => keyBtn(k, true)).join("") : keyLetters(spec).map((k) => keyBtn(k)).join(""));
 const keypadHtml = (spec) => { const kind = spec && spec.final ? "k-num" : isSetSpec(spec) ? "k-set" : ""; return `<div class="keypad${kind ? " " + kind : ""}" id="kp" data-kind="${kind + (kind === "k-num" && !isTerm(spec.value) ? "r" : "")}">${keysFor(spec)}</div>`; };
 // Insère une touche dans le champ (avec « | » : place du curseur), ou efface.
 function typeKey(inp, k) {
@@ -846,15 +848,28 @@ function runGuide(q, box, done) {
   const step = () => {
     if (k >= q.guide.length) { box.insertAdjacentHTML("beforeend", `<div class="gstep ok"><b>Bravo, tu as reconstruit la solution.</b><div class="sol">${q.sol}</div></div>`); typeset(box); done(); return; }
     const g = q.guide[k], id = "gs" + k;
+    // Saisie de l'étape (15.11) : comme la question principale — champ large, aperçu, clavier de l'app (repliée au-dessus).
+    const fine = window.matchMedia("(pointer: fine)").matches, ks = g.spec.kind === "value" ? { ...g.spec, final: true } : g.spec;
     box.insertAdjacentHTML("beforeend", `<div class="gstep" id="${id}"><span class="small muted">Étape ${k + 1} sur ${q.guide.length}</span><div>${g.ask}</div>
-      <div class="row"><input class="ans gin" inputmode="${g.spec.kind === "value" ? "decimal" : "text"}" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Réponse de l'étape"><button class="small gok">OK</button></div><div class="gfb"></div></div>`);
+      <div class="answer gans"><input class="ans gin" inputmode="${fine ? "text" : "none"}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Réponse de l'étape">
+      <div class="preview gprev"></div>${keypadHtml(ks).replace(' id="kp"', "")}
+      <div class="actions"><button class="btn-primary gok">Valider l'étape</button></div></div><div class="gfb"></div></div>`);
     typeset(box);
-    const el = document.getElementById(id), inp = el.querySelector("input"), fbk = el.querySelector(".gfb");
+    const el = document.getElementById(id), inp = el.querySelector("input"), fbk = el.querySelector(".gfb"), gprev = el.querySelector(".gprev");
+    let gmode = fine ? "text" : "none";
+    const gshow = () => previewOf(inp, gprev, g.spec);
+    inp.oninput = gshow;
+    el.querySelectorAll(".keypad button").forEach((b) => (b.onclick = () => {
+      if (inp.disabled) return;
+      const kk = b.dataset.k;
+      if (kk === "⌨") { gmode = gmode === "none" ? "text" : "none"; inp.setAttribute("inputmode", gmode); inp.blur(); inp.focus(); return; }
+      typeKey(inp, kk); gshow();
+    }));
     const go = () => {
       const v = inp.value.trim(); if (!v) return;
       const r = checkAnswer(g.spec, v);
       if (r.status === "invalid") { fbk.innerHTML = `<span class="small">${esc(r.message || "Réponse illisible.")}</span>`; return; }
-      inp.disabled = true; el.querySelector(".gok").remove();
+      inp.disabled = true; el.querySelector(".gok").remove(); const kp = el.querySelector(".keypad"); if (kp) kp.remove(); gprev.remove();
       fbk.innerHTML = `<div class="${r.status === "correct" ? "gok-msg" : "gno-msg"}">${r.status === "correct" ? "✓ Oui." : "Pas tout à fait."} ${g.sol}</div>`;
       typeset(fbk); k++; step();
     };

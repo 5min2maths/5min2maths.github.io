@@ -356,3 +356,7 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 /* Tableau de données dans un exercice riche (riche.js, 15.11) */
 .mtab { border-collapse: collapse; margin: .5em 0; font-size: .95em; }
 .mtab th, .mtab td { border: 1px solid var(--line, #999); padding: .25em .6em; text-align: center; }
+
+/* Saisie d'une étape du pas à pas (15.11) : même zone que la question principale */
+.gstep .gans { margin: 4px 0 0; }
+.gstep .gans .actions { margin-top: 6px; }
