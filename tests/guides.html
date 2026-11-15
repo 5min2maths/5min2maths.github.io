@@ -7,7 +7,7 @@
 <script src="../src/figures.js"></script><script src="../src/geo.js"></script>
 <script src="../src/generators.js"></script>
 <script src="../src/gen2.js"></script>
-<script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/riche.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script>
+<script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/riche.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script>
 <script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script>
 <script src="../src/engine.js"></script>
 <script>
@@ -15,6 +15,10 @@ const out = [], ids = location.hash ? location.hash.slice(1).split(",") : Object
 for (const id of ids) { const cov = [];
   for (const d of [1, 2, 3]) { let g = 0;
     for (let s = 1; s <= 150; s++) { const q = Engine.build(id, d, s); if (!q.guide) continue; g++; n++;
+      if (q.spec.kind === "expr") { // réponses littérales (15.11) : chaque étape accepte sa réponse, la dernière est équivalente à la réponse
+        if (q.guide.some((x) => x.spec.kind === "expr" ? checkAnswer(x.spec, x.spec.expr).status !== "correct" : !isFinite(x.spec.value))) { bad++; if (bad < 15) out.push("ÉCHEC étape littérale " + q.code); }
+        const lx = q.guide[q.guide.length - 1].spec; if (lx.kind === "expr" && !Expr.equivalent(Expr.parse(lx.expr), Expr.parse(q.spec.expr))) { bad++; if (bad < 15) out.push("ÉCHEC dernière étape ≠ réponse " + q.code); }
+        continue; }
       const vals = q.guide.map((x) => x.spec.value), last = vals[vals.length - 1], ans = q.spec.value;
       if (vals.some((v) => !isFinite(v))) { bad++; if (bad < 15) out.push("ÉCHEC valeur non finie " + q.code); }
       else if (q.spec.kind === "value" && Math.abs(last - ans) > 1e-9 * Math.max(1, Math.abs(ans))) { bad++; if (bad < 15) out.push("ÉCHEC dernière étape ≠ réponse " + q.code + " : " + last + " / " + ans); }

@@ -5,7 +5,7 @@
 <script src="../src/figures.js"></script><script src="../src/geo.js"></script>
 <script src="../src/generators.js"></script>
 <script src="../src/gen2.js"></script>
-<script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/riche.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script>
+<script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/riche.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script>
 <script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script>
 <script src="../src/engine.js"></script>
 <script>
@@ -258,7 +258,7 @@ log.push("Mathélo : " + st.elo.r + " — " + eloLabel(prof, st.elo.r));
   for (const id of Object.keys(GEN)) for (const d of [1, 2, 3]) for (let k = 0; k < 6; k++) {
     let q; try { q = Engine.build(id, d, k + 1); } catch (e) { continue; }
     if (!q.guide) continue; ng++;
-    for (const g of q.guide) if (!isFinite(g.spec.value) || !g.ask || !g.sol) fail("étape guidée invalide " + q.code);
+    for (const g of q.guide) if (!(g.spec.kind === "expr" ? checkAnswer(g.spec, g.spec.expr).status === "correct" : isFinite(g.spec.value)) || !g.ask || !g.sol) fail("étape guidée invalide " + q.code);
     const last = q.guide[q.guide.length - 1].spec.value;
     if (Math.abs(last - q.spec.value) > (q.guide[q.guide.length - 1].spec.round || 1e-9)) fail("dernière étape ≠ réponse " + q.code + " : " + last + " / " + q.spec.value);
     for (const t of q.traps || []) if (Math.abs(t.v - q.spec.value) < 1e-9) fail("piège égal à la bonne réponse " + q.code);

@@ -8,13 +8,13 @@
 <script src="../src/figures.js"></script><script src="../src/geo.js"></script>
 <script src="../src/generators.js"></script>
 <script src="../src/gen2.js"></script>
-<script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/riche.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script>
+<script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/riche.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script>
 <script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script>
-<script src="../src/engine.js"></script><script src="../src/sujet.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script>
+<script src="../src/engine.js"></script><script src="../src/sujet.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script>
 <pre id="out">en cours</pre>
 <script>
-const out = [], ids = location.hash ? location.hash.slice(1).split(",") : ["utemps", "ucomp", "vitesse", "gquot"]; let bad = 0;
-const fail = (m) => { bad++; if (bad < 40) out.push("ÉCHEC " + m); };
+const out = [], ids = location.hash ? location.hash.slice(1).split(",") : ["utemps", "ucomp", "vitesse", "gquot", "litelab", "valnum", "reduire", "monomes", "parenth", "distrib", "idrem", "factor"]; let bad = 0;
+const fail = (m) => { bad++; if (bad < 3000) out.push("ÉCHEC " + m); };
 const txt = (q) => [q.q, q.sol, ...(q.guide || []).flatMap((g) => [g.ask, g.sol]), ...(q.parts || []).map((p) => p.label), ...(q.hints || [])].join(" | ");
 for (const id of ids) {
   const line = [];
@@ -26,6 +26,17 @@ for (const id of ids) {
       const t = txt(q);
       if (/undefined|NaN|Infinity|\[object/.test(t)) fail(q.code + " texte : " + t.match(/.{0,40}(undefined|NaN|Infinity|\[object).{0,20}/)[0]);
       if (q.parts) { q.parts.forEach((p) => { if (!isFinite(p.spec.value)) fail(q.code + " partie non finie " + p.label); }); if (s <= 2) samples.push(q.q.replace(/<[^>]+>/g, "").slice(0, 90) + " → " + q.parts.map((p) => +(+p.spec.value).toFixed(4)).join(" ; ")); continue; }
+      if (q.spec.kind === "expr") { // réponse littérale (calcul littéral, 15.11)
+        const self = checkAnswer(q.spec, q.spec.expr); if (self.status !== "correct") fail(q.code + " la réponse attendue est refusée (" + self.status + " " + (self.message || "") + ") : " + q.spec.expr);
+        if (!q.guide) fail(q.code + " sans guide"); else { g++; const last = q.guide[q.guide.length - 1].spec;
+          if (last.kind === "expr" && !Expr.equivalent(Expr.parse(last.expr), Expr.parse(q.spec.expr))) fail(q.code + " dernière étape ≠ réponse : " + last.expr + " / " + q.spec.expr);
+          q.guide.forEach((x) => { const r = checkAnswer(x.spec, x.spec.kind === "expr" ? x.spec.expr : String(x.spec.value)); if (r.status !== "correct") fail(q.code + " étape refuse sa propre réponse : " + (x.spec.expr || x.spec.value) + " " + (r.message || r.status)); }); }
+        if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+        (q.traps || []).forEach((tr) => { if (tr.e) { let te; try { te = Expr.parse(tr.e); } catch (e) { fail(q.code + " piège illisible " + tr.e); return; } if (Expr.equivalent(te, Expr.parse(q.spec.expr))) fail(q.code + " piège = bonne réponse : " + tr.e); } });
+        if (!q.ctx) fail(q.code + " sans ctx");
+        if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 100) + " → " + q.spec.expr + (q.spec.form ? " [" + q.spec.form + (q.spec.minFactors ? " ≥" + q.spec.minFactors : "") + "]" : ""));
+        continue;
+      }
       const ans = q.spec.value; if (!isFinite(ans)) fail(q.code + " réponse non finie");
       if (trivialQ(q, 0)) triv++; if (answerShown(q)) shown++;
       if (q.guide) { g++; const last = q.guide[q.guide.length - 1].spec.value, tol = Math.max(q.spec.round || 0, q.guide[q.guide.length - 1].spec.round || 0, 1e-9 * Math.max(1, Math.abs(ans)));
@@ -53,7 +64,7 @@ for (const [ch, C] of Object.entries(RICH)) for (const kind of ["ex", "raison"])
   }
   out.push("riche " + kind + k + " · " + [...pts].join("/") + " pts · " + sample);
 });
-for (const lv of ["facile", "standard", "exigeant"]) { const seen = new Set(); for (let i = 0; i < 20; i++) { const pl = mockPlan(["utemps", "ucomp", "vitesse", "gquot"], lv); seen.add(pl.filter((x) => x.rich).map((x) => x.kind + x.k).join(",")); if (pl.filter((x) => x.part === "B").length !== 3) fail("plan " + lv + " sans 3 exercices"); } out.push("plan " + lv + " : " + seen.size + " sujets différents sur 20"); }
+for (const [nm, ids0] of [["prop", ["utemps", "ucomp", "vitesse", "gquot"]], ["litt", ["litelab", "valnum", "reduire", "monomes", "parenth", "distrib", "idrem", "factor"]]]) for (const lv of ["facile", "standard", "exigeant"]) { const seen = new Set(); for (let i = 0; i < 20; i++) { const pl = mockPlan(ids0, lv); seen.add(pl.filter((x) => x.rich).map((x) => x.kind + x.k).join(",")); if (pl.filter((x) => x.part === "B").length !== 3) fail("plan " + lv + " sans 3 exercices"); } out.push("plan " + nm + " " + lv + " : " + seen.size + " sujets différents sur 20"); }
 // Figure à manipuler du rappel « vitesse » (dyn) : toutes les positions du curseur.
 if (typeof DYN === "undefined" || !DYN.vitesse) fail("DYN.vitesse absent"); else for (let x = 0; x <= 3; x += 0.25) { const s = DYN.vitesse.render(x) + DYN.vitesse.label(x); if (/NaN|undefined/.test(s)) fail("dyn vitesse " + x); }
 if (!LESSON_FIGS.vitesse || !/data-dyn="vitesse"/.test(LESSON_FIGS.vitesse())) fail("LESSON_FIGS.vitesse sans curseur");

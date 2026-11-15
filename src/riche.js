@@ -105,6 +105,84 @@ const RICH = {};
         parts: [{ label: "Explique pourquoi les deux méthodes donnent le même résultat.", pts: 2 }, { label: "Utilise la méthode de ton choix pour convertir " + Q(v / 3.6 + 5, "m/s") + " en km/h.", pts: 1 }],
         sol: ul(["Léa multiplie par 1000 puis divise par 3600 : c'est diviser par " + M("3600 : 1000 = 3{,}6") + " (1 pt), ce que fait Yanis en une étape (1 pt).", M(N(v / 3.6 + 5) + " \\cdot 3{,}6 = " + N(r6((v / 3.6 + 5) * 3.6))) + " km/h (1 pt)."]) }); },
   ];
+  // ===================== 11e · 5. Calcul littéral (15.11) =====================
+  const sgn = (v) => (v < 0 ? "- " + Math.abs(v) : "+ " + v);
+  const EXL = [
+    // Max a perdu les consignes (développer / réduire / factoriser)
+    () => { const a = R.int(2, 6), b = R.int(2, 5), c = R.int(2, 4), g = pk([2, 3, 5]); let p, q; do { p = R.int(2, 5); q = pk([1, 3, 5, 7]); } while (q % g === 0 || [2, 3, 5, 7].some((d) => p % d === 0 && q % d === 0));
+      return X({ id: "distrib", lv: 1, titre: "Les consignes perdues de Max",
+        q: "Max a fait trois calculs, mais il n'a pas recopié les consignes." + ul([M(a + "y(" + b + "x - " + c + ") = " + a * b + "xy - " + a * c + "y"), M("x^2 + 3x - 4 + 2x^2 - x = 3x^2 + 2x - 4"), M(g * p + "x + " + g * q + " = " + g + "(" + p + "x + " + q + ")")]),
+        parts: [{ label: "Pour chaque calcul, écris la consigne : développer, réduire ou factoriser.", pts: 3 }, { label: "Vérifie le premier calcul en remplaçant " + M("x") + " par 1 et " + M("y") + " par 2 des deux côtés.", pts: 1 }, { label: "Le troisième résultat est-il factorisé au maximum ? Explique.", pts: 1 }],
+        sol: ul(["a) développer (distributivité) ; b) réduire (termes semblables) ; c) factoriser (mise en évidence de " + g + ").", "Gauche : " + M(a + " \\cdot 2 \\cdot (" + b + " - " + c + ") = " + 2 * a * (b - c)) + " ; droite : " + M(a * b + " \\cdot 2 - " + a * c + " \\cdot 2 = " + (2 * a * b - 2 * a * c)) + " : c'est égal.", "Oui : " + M(p) + " et " + M(q) + " n'ont pas de diviseur commun autre que 1, et il n'y a pas de lettre commune."]) }); },
+    // Tour de magie (modéliser, prouver)
+    () => { const k = R.int(3, 9), m = pk([2, 3, 4]);
+      return X({ id: "litelab", lv: 2, titre: "Le tour de magie",
+        q: "Programme : « Choisis un nombre. Ajoute " + k + ". Multiplie le résultat par " + m + ". Retire " + m * k + ". »",
+        parts: [{ label: "Applique le programme à 5, puis à −2. Que remarques-tu ?", pts: 1 }, { label: "On appelle " + M("n") + " le nombre choisi. Écris le résultat sous forme d'une expression.", pts: 1 }, { label: "Prouve que le résultat est toujours " + (m === 2 ? "le double" : m === 3 ? "le triple" : "le quadruple") + " du nombre choisi.", pts: 2 }, { label: "Modifie la dernière étape pour retrouver toujours le nombre de départ.", pts: 1 }],
+        sol: ul(["5 donne " + m * 5 + " ; −2 donne " + -2 * m + " : on obtient " + m + " fois le nombre choisi.", M(m + "(n + " + k + ") - " + m * k) + ".", M(m + "(n + " + k + ") - " + m * k + " = " + m + "n + " + m * k + " - " + m * k + " = " + m + "n") + ", quel que soit " + M("n") + " : c'est une preuve, pas seulement des exemples.", "Par exemple : « Retire " + m * k + ", puis divise par " + m + " » (ou « Divise par " + m + ", puis retire " + k + " »)."]) }); },
+    // Aire d'une figure (expression, développer, valeur)
+    () => { const a = R.int(2, 6), b = R.int(1, 5), x = R.int(3, 7);
+      return X({ id: "distrib", lv: 2, titre: "L'aire du jardin",
+        q: "Un jardin rectangulaire mesure " + M("(x + " + a + ")") + " m sur " + M("(x + " + b + ")") + " m. On y installe une terrasse carrée de côté " + M("x") + " m dans un coin. Le reste est du gazon.",
+        fig: FIG.rectFig(10, 7, "x + " + a, "x + " + b),
+        parts: [{ label: "Écris l'aire du gazon sous forme d'une différence.", pts: 1 }, { label: "Développe et réduis cette expression.", pts: 2 }, { label: "Calcule l'aire du gazon pour " + M("x = " + x) + ", avec les deux expressions.", pts: 1 }, { label: "Le gazon peut être découpé en deux rectangles. Retrouve l'expression réduite à partir de ce découpage.", pts: 1 }],
+        sol: ul([M("(x + " + a + ")(x + " + b + ") - x^2") + ".", M("x^2 + " + (a + b) + "x + " + a * b + " - x^2 = " + (a + b) + "x + " + a * b) + ".", M((a + b) + " \\cdot " + x + " + " + a * b + " = " + ((a + b) * x + a * b)) + " m² ; et " + M((x + a) * (x + b) + " - " + x * x + " = " + ((x + a) * (x + b) - x * x)) + " m².", "Un rectangle " + M(a + " \\cdot (x + " + b + ")") + " et un rectangle " + M("x \\cdot " + b) + " : " + M(a + "x + " + a * b + " + " + b + "x = " + (a + b) + "x + " + a * b) + "."]) }); },
+    // Nombres consécutifs (preuve et contre-exemple)
+    () => { const k = pk([3, 5]);
+      return X({ id: "litelab", lv: 2, titre: "Nombres consécutifs",
+        q: "On s'intéresse à la somme de " + k + " nombres entiers consécutifs. Exemples : " + (k === 3 ? "4 + 5 + 6 = 15, 10 + 11 + 12 = 33." : "1 + 2 + 3 + 4 + 5 = 15, 6 + 7 + 8 + 9 + 10 = 40."),
+        parts: [{ label: "Le plus petit nombre est " + M("n") + ". Écris les " + k + " nombres, puis leur somme réduite.", pts: 2 }, { label: "Prouve que cette somme est toujours un multiple de " + k + ".", pts: 1 }, { label: "Est-ce vrai pour la somme de 4 nombres consécutifs ? Justifie.", pts: 2 }],
+        sol: ul([k === 3 ? M("n + (n + 1) + (n + 2) = 3n + 3") : M("n + (n + 1) + \\ldots + (n + 4) = 5n + 10"), (k === 3 ? M("3n + 3 = 3(n + 1)") : M("5n + 10 = 5(n + 2)")) + " : c'est " + k + " fois un nombre entier.", "Non : " + M("4n + 6") + " ; par exemple " + M("1 + 2 + 3 + 4 = 10") + ", qui n'est pas un multiple de 4 (un contre-exemple suffit)."]) }); },
+    // Calcul mental avec les identités
+    () => { const a = pk([101, 102, 201]), b = pk([99, 98]), c = pk([53, 56, 61]);
+      return X({ id: "idrem", lv: 2, titre: "Calcul mental",
+        q: "Sans calculatrice, on peut calculer vite avec les identités remarquables.",
+        parts: [{ label: "Calcule " + M(a + "^2") + " en écrivant " + M(a + " = " + (a - (a % 100)) + " + " + (a % 100)) + ".", pts: 1 }, { label: "Calcule " + M(b + " \\cdot " + (200 - b)) + ".", pts: 1 }, { label: "Calcule " + M(c + "^2 - " + (100 - c) + "^2") + ".", pts: 1 }, { label: "Pour chaque calcul, quelle identité as-tu utilisée ?", pts: 1 }],
+        sol: ul([M("(" + (a - (a % 100)) + " + " + (a % 100) + ")^2 = " + (a - (a % 100)) ** 2 + " + " + 2 * (a - (a % 100)) * (a % 100) + " + " + (a % 100) ** 2 + " = " + a * a) + ".", M("(100 - " + (100 - b) + ")(100 + " + (100 - b) + ") = 10\\text{'}000 - " + (100 - b) ** 2 + " = " + b * (200 - b)) + ".", M("(" + c + " - " + (100 - c) + ")(" + c + " + " + (100 - c) + ") = " + (2 * c - 100) + " \\cdot 100 = " + (c * c - (100 - c) ** 2)) + ".", M("(a + b)^2") + " ; " + M("(a - b)(a + b) = a^2 - b^2") + " ; " + M("a^2 - b^2 = (a - b)(a + b)") + "."]) }); },
+    // Pythagore par les aires
+    () => X({ id: "idrem", lv: 3, titre: "Pythagore par les aires",
+        q: "Dans un grand carré de côté " + M("a + b") + ", on place quatre triangles rectangles identiques (cathètes " + M("a") + " et " + M("b") + ", hypoténuse " + M("c") + "). Au milieu, il reste un carré de côté " + M("c") + ".",
+        parts: [{ label: "Écris l'aire du grand carré à l'aide de " + M("a") + " et " + M("b") + ", puis développe-la.", pts: 1 }, { label: "Écris aussi cette aire comme la somme des aires des quatre triangles et du petit carré.", pts: 2 }, { label: "Déduis-en que " + M("a^2 + b^2 = c^2") + ".", pts: 1 }],
+        sol: ul([M("(a + b)^2 = a^2 + 2ab + b^2") + ".", M("4 \\cdot \\frac{ab}{2} + c^2 = 2ab + c^2") + ".", "Les deux expressions sont égales : " + M("a^2 + 2ab + b^2 = 2ab + c^2") + ", donc " + M("a^2 + b^2 = c^2") + " (on retire " + M("2ab") + " des deux côtés)."]) }),
+    // Développer ou factoriser ? (choisir la bonne forme)
+    () => { const v = pk([[2, 3, 1, 1], [3, 1, 1, 2], [2, 5, 1, 2]]), [p, q, r, s] = v, A = p * p - r * r, B = 2 * p * q - 2 * r * s, C = q * q - s * s, x0 = -(q + s) / (p + r);
+      return X({ id: "factor", lv: 3, titre: "Développer ou factoriser ?",
+        q: "On considère " + M("E = (" + p + "x + " + q + ")^2 - (" + (r > 1 ? r : "") + "x + " + s + ")^2") + ".",
+        parts: [{ label: "Développe et réduis " + M("E") + ".", pts: 2 }, { label: "Factorise " + M("E") + " (différence de deux carrés).", pts: 2 }, { label: "Vérifie que les deux formes donnent la même valeur pour " + M("x = 1") + ".", pts: 1 }, { label: "Quelle forme est la plus pratique pour trouver une valeur de " + M("x") + " qui rend " + M("E") + " nul ? Explique.", pts: 1 }],
+        sol: ul([M("E = " + A + "x^2 " + sgn(B) + "x " + sgn(C)) + ".", M("E = [(" + p + "x + " + q + ") - (" + (r > 1 ? r : "") + "x + " + s + ")][(" + p + "x + " + q + ") + (" + (r > 1 ? r : "") + "x + " + s + ")] = (" + (p - r) + "x " + sgn(q - s) + ")(" + (p + r) + "x " + sgn(q + s) + ")") + ".", "Les deux donnent " + M(A + B + C) + ".", "La forme factorisée : un produit est nul si un de ses facteurs est nul, par exemple " + M("x = " + (Number.isInteger(x0) ? x0 : "-\\frac{" + (q + s) + "}{" + (p + r) + "}")) + "."]) }); },
+    // Deux programmes de calcul
+    () => { const k = R.int(2, 6);
+      return X({ id: "distrib", lv: 3, titre: "Deux programmes",
+        q: "Programme A : « Ajoute " + k + " au nombre, élève au carré, retire " + k * k + ". » Programme B : « Multiplie le nombre par le nombre augmenté de " + 2 * k + ". »",
+        parts: [{ label: "Teste les deux programmes avec 3 et avec −1.", pts: 1 }, { label: "Écris chaque programme sous forme d'une expression en " + M("x") + ".", pts: 1 }, { label: "Prouve que les deux programmes donnent toujours le même résultat.", pts: 2 }, { label: "Trouve un nombre négatif pour lequel le résultat est 0.", pts: 1 }],
+        sol: ul(["3 : A et B donnent " + 3 * (3 + 2 * k) + " ; −1 : A et B donnent " + -1 * (-1 + 2 * k) + ".", "A : " + M("(x + " + k + ")^2 - " + k * k) + " ; B : " + M("x(x + " + 2 * k + ")") + ".", M("(x + " + k + ")^2 - " + k * k + " = x^2 + " + 2 * k + "x + " + k * k + " - " + k * k + " = x^2 + " + 2 * k + "x = x(x + " + 2 * k + ")") + ".", M("x = -" + 2 * k) + " : " + M("-" + 2 * k + " \\cdot 0 = 0") + "."]) }); },
+  ];
+  const RAISONL = [
+    () => { const a = R.int(2, 7), b = R.int(2, 9), who = pk(["Sam", "Léa", "Noé"]);
+      return X({ id: "parenth", lv: 1, titre: "Trouve l'erreur",
+        q: who + " écrit : " + M("10 - (" + a + "x - " + b + ") = 10 - " + a + "x - " + b + " = " + (10 - b) + " - " + a + "x") + ".",
+        parts: [{ label: "Explique l'erreur de " + who + ".", pts: 1 }, { label: "Corrige le calcul.", pts: 1 }, { label: "Vérifie ta correction en remplaçant " + M("x") + " par 2.", pts: 1 }],
+        sol: ul(["Le « − » devant la parenthèse change le signe de <b>tous</b> les termes : " + M("-(-" + b + ") = +" + b) + ".", M("10 - " + a + "x + " + b + " = " + (10 + b) + " - " + a + "x") + ".", "Départ : " + M("10 - (" + 2 * a + " - " + b + ") = " + (10 - 2 * a + b)) + " ; correction : " + M((10 + b) + " - " + 2 * a + " = " + (10 + b - 2 * a)) + " ✓."]) }); },
+    () => { const a = R.int(2, 9), who = pk(["Inès", "Yanis", "Lina"]);
+      return X({ id: "idrem", lv: 2, titre: "Trouve l'erreur",
+        q: who + " affirme : " + M("(x + " + a + ")^2 = x^2 + " + a * a) + ".",
+        parts: [{ label: "Teste l'égalité avec " + M("x = 1") + ". Conclus.", pts: 1 }, { label: "Écris le bon développement et explique ce qui manque.", pts: 2 }],
+        sol: ul(["Gauche : " + M((1 + a) + "^2 = " + (1 + a) ** 2) + " ; droite : " + M("1 + " + a * a + " = " + (1 + a * a)) + " : c'est faux.", M("(x + " + a + ")^2 = x^2 + " + 2 * a + "x + " + a * a) + " : il manque le double produit " + M(2 * a + "x") + " (" + M("(x + " + a + ")(x + " + a + ")") + " donne 4 produits)."]) }); },
+    () => { const S = pk([
+        [["« " + M("3x + 2x^2 = 5x^3") + " »", false, "On n'additionne pas des termes non semblables ; on ne peut pas réduire."], ["« " + M("(x - 3)(x + 3) = x^2 - 9") + " »", true, "Identité " + M("(a - b)(a + b) = a^2 - b^2") + "."], ["« Pour " + M("x = -3") + ", " + M("-x^2") + " vaut 9 »", false, M("-x^2 = -(-3)^2 = -9") + " : le carré se calcule avant le signe moins."]],
+        [["« " + M("x^2 \\ge x") + " pour tout nombre " + M("x") + " »", false, "Contre-exemple : " + M("x = 0{,}5") + " donne " + M("0{,}25 < 0{,}5") + "."], ["« " + M("2(x + 3) = 2x + 6") + " »", true, "Distributivité : on multiplie les deux termes."], ["« " + M("(2x)^3 = 2x^3") + " »", false, M("(2x)^3 = 8x^3") + " : le coefficient aussi est au cube."]],
+        [["« " + M("-(a - b) = b - a") + " »", true, M("-a + b = b - a") + "."], ["« " + M("x^2 + x^2 = x^4") + " »", false, M("x^2 + x^2 = 2x^2") + " ; c'est " + M("x^2 \\cdot x^2") + " qui vaut " + M("x^4") + "."], ["« La somme de deux nombres impairs est paire »", true, M("(2n + 1) + (2m + 1) = 2(n + m + 1)") + "."]],
+      ]);
+      return X({ id: "reduire", lv: 1, titre: "Vrai ou faux ? Justifie",
+        q: "Pour chaque affirmation, dis si elle est vraie ou fausse, et justifie (calcul, contre-exemple ou propriété).",
+        parts: S.map((s) => ({ label: s[0], pts: 1 })), sol: ul(S.map((s) => "<b>" + (s[1] ? "Vrai" : "Faux") + "</b>. " + s[2])) }); },
+    () => { const k = R.int(2, 6);
+      return X({ id: "factor", lv: 2, titre: "Deux méthodes",
+        q: "Pour simplifier " + M("3x(x + " + k + ") - 2x(x + " + k + ")") + ", Noé développe tout, puis réduit. Léa met " + M("(x + " + k + ")") + " en évidence.",
+        parts: [{ label: "Fais le calcul de Noé.", pts: 1 }, { label: "Fais le calcul de Léa.", pts: 1 }, { label: "Les deux résultats sont-ils égaux ? Quelle méthode préfères-tu, et pourquoi ?", pts: 1 }],
+        sol: ul([M("3x^2 + " + 3 * k + "x - 2x^2 - " + 2 * k + "x = x^2 + " + k + "x") + ".", M("(x + " + k + ")(3x - 2x) = x(x + " + k + ")") + ".", "Oui : " + M("x(x + " + k + ") = x^2 + " + k + "x") + ". La méthode de Léa est plus courte : le facteur commun saute aux yeux."]) }); },
+  ];
+  RICH.litt11 = { ids: ["litelab", "valnum", "reduire", "monomes", "parenth", "distrib", "idrem", "factor"], label: "Calcul littéral", ex: EXL, raison: RAISONL, minutes: 45 };
   RICH.prop11 = { ids: ["utemps", "ucomp", "vitesse", "gquot"], label: "Proportionnalité, grandeurs quotients et unités", ex: EX, raison: RAISON, minutes: 45 };
 })();
 

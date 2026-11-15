@@ -15,6 +15,8 @@ CHANTIER = [
     ("11e · 4. Proportionnalité (chapitre en cours des testeurs)", ["utemps", "ucomp", "vitesse", "gquot"]),
     ("11e · 5. Calcul littéral 1 (chapitre suivant)", ["litelab", "valnum", "reduire", "monomes", "parenth", "distrib"]),
     ("11e · 5. Calcul littéral 2 (ensuite)", ["idrem", "factor"]),
+    ("1re Collège · équations du 1er degré (testeurs de 1re)", ["eq1", "eqfrac", "eqspec", "formule", "probeq"]),
+    ("1re Collège · équations du 2e degré", ["eq2fact", "eq2", "eq2disc", "probeq2", "eq3", "bicarre", "eqirr"]),
 ]
 src = lambda f: open(os.path.join(RAC, "src", f), encoding="utf-8").read()
 
@@ -31,7 +33,7 @@ def blocs():
     for i, m in enumerate(ms):
         out[m.group(1)] = t[m.start(): ms[i + 1].start() if i + 1 < len(ms) else len(t)]
     # Modules de chapitre (chantier du 15.11) : toutes les formes ont un guide ; ils remplacent les anciennes versions.
-    for f in ("ch11_prop.js",):
+    for f in ("ch11_prop.js", "ch11_litt.js"):
         if os.path.exists(os.path.join(RAC, "src", f)):
             m = re.search(r"const ALL = \{([^}]*)\}", src(f))
             for i in re.findall(r"([a-z0-9]+):", m.group(1) if m else ""):

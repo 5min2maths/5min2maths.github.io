@@ -862,7 +862,7 @@ function runGuide(q, box, done) {
     if (k >= q.guide.length) { box.insertAdjacentHTML("beforeend", `<div class="gstep ok"><b>Bravo, tu as reconstruit la solution.</b><div class="sol">${q.sol}</div></div>`); typeset(box); done(); return; }
     const g = q.guide[k], id = "gs" + k;
     box.insertAdjacentHTML("beforeend", `<div class="gstep" id="${id}"><span class="small muted">Étape ${k + 1} sur ${q.guide.length}</span><div>${g.ask}</div>
-      <div class="row"><input class="ans gin" inputmode="decimal" autocomplete="off" aria-label="Réponse de l'étape"><button class="small gok">OK</button></div><div class="gfb"></div></div>`);
+      <div class="row"><input class="ans gin" inputmode="${g.spec.kind === "value" ? "decimal" : "text"}" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Réponse de l'étape"><button class="small gok">OK</button></div><div class="gfb"></div></div>`);
     typeset(box);
     const el = document.getElementById(id), inp = el.querySelector("input"), fbk = el.querySelector(".gfb");
     const go = () => {

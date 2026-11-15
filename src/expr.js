@@ -192,6 +192,41 @@ const Expr = (() => {
     return ["a", "b"].every((k) => isExpanded(n[k]));
   }
 
+  // Forme « réduite » (calcul littéral 11e, 15.11) : somme de monômes, chacun écrit une seule fois
+  // (un coefficient au plus, chaque lettre une seule fois), sans deux termes semblables ni terme nul.
+  function monoSig(n) {
+    const pw = {}; let nums = 0, dens = 0, ok = true;
+    const walk = (m, den) => {
+      m = unpar(m);
+      if (m.t === "neg") return walk(m.a, den);
+      if (m.t === "num") { if (den) dens++; else nums++; if (!den && m.v === 0) ok = false; return; }
+      if (m.t === "const") { nums++; return; }
+      if (den) { ok = false; return; }
+      if (m.t === "var") { if (pw[m.v]) ok = false; pw[m.v] = 1; return; }
+      if (m.t === "pow" && unpar(m.a).t === "var" && unpar(m.b).t === "num") { const v = unpar(m.a).v; if (pw[v]) ok = false; pw[v] = unpar(m.b).v; return; }
+      if (m.t === "mul") { walk(m.a, den); walk(m.b, den); return; }
+      if (m.t === "div") { walk(m.a, den); walk(m.b, true); return; }
+      ok = false;
+    };
+    walk(n, false);
+    if (!ok || nums > 1 || dens > 1) return null;
+    return Object.keys(pw).sort().map((k) => k + pw[k]).join("");
+  }
+  function isReduced(n) {
+    const terms = [], split = (m) => { m = unpar(m); if (m.t === "add" || m.t === "sub") { split(m.a); split(m.b); } else if (m.t === "neg" && ["add", "sub"].includes(unpar(m.a).t)) split(m.a); else terms.push(m); };
+    split(n);
+    const sigs = terms.map(monoSig);
+    return sigs.every((s) => s !== null) && new Set(sigs).size === sigs.length;
+  }
+  // Nombre de facteurs « somme » d'un produit (factorisation maximale : 2(x − 2)(x + 2) en a 2).
+  function sumFactors(n) {
+    n = unpar(n);
+    while (n.t === "neg") n = unpar(n.a);
+    if (n.t === "mul") return sumFactors(n.a) + sumFactors(n.b);
+    if (n.t === "pow" && hasSum(n.a)) return unpar(n.b).t === "num" ? unpar(n.b).v : 1;
+    return hasSum(n) ? 1 : 0;
+  }
+
   const SAMPLES = [-3.7, -1.3, 0.6, 2.2, 4.1];
   function sameValue(u, v, rel = 1e-9) {
     if (!isFinite(u) || !isFinite(v)) return false;
@@ -221,7 +256,7 @@ const Expr = (() => {
     while (n.t === "neg") n = unpar(n.a);
     return n.t === "div" && !hasDiv(n.a) && !hasDiv(n.b);
   }
-  return { parse, evaluate, tex, vars, isProduct, isExpanded, equivalent, sameValue, unpar, nodes, hasDiv, isOneFrac };
+  return { parse, evaluate, tex, vars, isProduct, isExpanded, isReduced, sumFactors, equivalent, sameValue, unpar, nodes, hasDiv, isOneFrac };
 })();
 
 // Ensembles de solutions (inéquations, domaines) : réunion d'intervalles [a, aIncl, b, bIncl].
@@ -308,6 +343,13 @@ const SolSet = (() => {
 // typiques reconnues sur la valeur : signe, virgule ou unité, fraction inversée, racine ou carré oublié.
 function diagnose(q, input) {
   const spec = q.spec;
+  // Réponse en expression (calcul littéral, 15.11) : pièges { e: "expression", m } reconnus par équivalence.
+  if (spec && spec.kind === "expr") {
+    let g; try { g = Expr.parse(String(input)); } catch (e) { return null; }
+    for (const tr of q.traps || []) if (tr.e) { try { if (Expr.equivalent(g, Expr.parse(tr.e))) return tr.m; } catch (e) {} }
+    try { if (Expr.equivalent(g, Expr.parse("-(" + spec.expr + ")"))) return "Tous les signes sont inversés : vérifie le signe devant la parenthèse (un « − » change tous les signes)."; } catch (e) {}
+    return null;
+  }
   if (!spec || spec.kind !== "value") return null;
   let v; try { const t = Expr.parse(input); if (Expr.vars(t).size) return null; v = Expr.evaluate(t); } catch (e) { return null; }
   if (!isFinite(v)) return null;
@@ -415,6 +457,8 @@ function checkAnswer(spec, input) {
     if (spec.maxNodes && Expr.nodes(tree) > spec.maxNodes) return { status: "form", message: "C'est égal, mais la fraction n'est pas simplifiée." };
     if (spec.form === "product" && !Expr.isProduct(tree)) return { status: "form", message: "C'est égal, mais ce n'est pas factorisé : écris un produit." };
     if (spec.form === "expanded" && !Expr.isExpanded(tree)) return { status: "form", message: "C'est égal, mais il reste des parenthèses : développe complètement." };
+    if (spec.form === "reduced" && !(Expr.isExpanded(tree) && Expr.isReduced(tree))) return { status: "form", message: "C'est égal, mais ce n'est pas réduit : enlève les parenthèses et regroupe les termes semblables (chaque lettre une seule fois par terme)." };
+    if (spec.minFactors && Expr.sumFactors(tree) < spec.minFactors) return { status: "form", message: "C'est égal et factorisé, mais pas au maximum : un des facteurs se factorise encore." };
     return { status: "correct" };
   }
   return { status: "invalid" };
