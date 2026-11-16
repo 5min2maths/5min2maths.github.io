@@ -1,0 +1,88 @@
+<meta charset="utf-8">
+<!-- Contrôle du chantier 1re Collège · équations (16.11), copié de ch11.html : tests/ch1c.html#eq1,eqfrac. Réponses « set » (ensembles de solutions) contrôlées aussi. Pour chaque notion et niveau (1–3, et 4 = problèmes) :
+     pas d erreur, réponse finie, guide présent et dont la dernière étape = réponse, pièges ≠ réponse, pas de trivialité ni de réponse visible,
+     pas de « undefined » / « NaN » dans le texte ; nombre de formes et de contextes. -->
+<script>window.MathJax = { typesetPromise: () => Promise.resolve() };</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script>
+<script src="../src/expr.js"></script>
+<script src="../src/figures.js"></script><script src="../src/geo.js"></script>
+<script src="../src/generators.js"></script>
+<script src="../src/gen2.js"></script>
+<script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/riche.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script>
+<script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script>
+<script src="../src/engine.js"></script><script src="../src/sujet.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script>
+<pre id="out">en cours</pre>
+<script>
+const out = [], ids = location.hash ? location.hash.slice(1).split(",") : ["eq1", "eqfrac", "eqspec", "formule", "probeq", "eq2fact", "eq2", "eq2disc", "probeq2", "eq3", "bicarre", "eqirr"]; let bad = 0;
+const fail = (m) => { bad++; if (bad < 3000) out.push("ÉCHEC " + m); };
+const txt = (q) => [q.q, q.sol, ...(q.guide || []).flatMap((g) => [g.ask, g.sol]), ...(q.parts || []).map((p) => p.label), ...(q.hints || [])].join(" | ");
+for (const id of ids) {
+  const line = [];
+  for (const d of [1, 2, 3, 4]) {
+    const forms = new Set(), ctx = new Set(); let n = 0, g = 0, triv = 0, shown = 0, samples = [];
+    for (let s = 1; s <= 300; s++) {
+      let q; try { q = Engine.build(id, d, s); } catch (e) { fail(id + "-" + d + "-" + s + " exception " + e.message); continue; }
+      n++; forms.add(qForm(q)); if (q.ctx) ctx.add(q.ctx);
+      const t = txt(q);
+      { const plainTxt = t.replace(/\\\(.*?\\\)/g, " "); const dv = [...plainTxt.matchAll(/.{0,25}(\d|\)) : (\d|\().{0,10}/g)].map((m) => m[0]).find((s) => !/h \d{1,2} : \d/.test(s)); if (dv) fail(q.code + " division « : » en texte simple (écrire ÷) : " + dv); }
+      { const pl = t.replace(/\\\(.*?\\\)/g, " "); const bad = pl.match(/.{0,30}(\{,\}|\\frac|\\cdot|\^\{).{0,10}/); if (bad) fail(q.code + " TeX hors formule : " + bad[0]); }
+      if (/undefined|NaN|Infinity|\[object/.test(t)) fail(q.code + " texte : " + t.match(/.{0,40}(undefined|NaN|Infinity|\[object).{0,20}/)[0]);
+      if (q.parts) { q.parts.forEach((p) => { if (!isFinite(p.spec.value)) fail(q.code + " partie non finie " + p.label); }); if (s <= 2) samples.push(q.q.replace(/<[^>]+>/g, "").slice(0, 90) + " → " + q.parts.map((p) => +(+p.spec.value).toFixed(4)).join(" ; ")); continue; }
+      if (q.spec.kind === "expr") { // réponse littérale (calcul littéral, 15.11)
+        const self = checkAnswer(q.spec, q.spec.expr); if (self.status !== "correct") fail(q.code + " la réponse attendue est refusée (" + self.status + " " + (self.message || "") + ") : " + q.spec.expr);
+        if (!q.guide) fail(q.code + " sans guide"); else { g++; const last = q.guide[q.guide.length - 1].spec;
+          if (last.kind === "expr" && !Expr.equivalent(Expr.parse(last.expr), Expr.parse(q.spec.expr), q.spec.pos)) fail(q.code + " dernière étape ≠ réponse : " + last.expr + " / " + q.spec.expr);
+          q.guide.forEach((x) => { const r = checkAnswer(x.spec, x.spec.kind === "expr" ? x.spec.expr : String(x.spec.value)); if (r.status !== "correct") fail(q.code + " étape refuse sa propre réponse : " + (x.spec.expr || x.spec.value) + " " + (r.message || r.status)); }); }
+        if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+        (q.traps || []).forEach((tr) => { if (tr.e) { let te; try { te = Expr.parse(tr.e); } catch (e) { fail(q.code + " piège illisible " + tr.e); return; } if (Expr.equivalent(te, Expr.parse(q.spec.expr))) fail(q.code + " piège = bonne réponse : " + tr.e); } });
+        if (!q.ctx) fail(q.code + " sans ctx");
+        if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 100) + " → " + q.spec.expr + (q.spec.form ? " [" + q.spec.form + (q.spec.minFactors ? " ≥" + q.spec.minFactors : "") + "]" : ""));
+        continue;
+      }
+      if (q.spec.kind === "set") { // ensemble de solutions (équations, 16.11)
+        const canon = q.spec.all ? "tous" : q.spec.values.length ? q.spec.values.map((v) => { for (let d = 1; d <= 60; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return d === 1 ? String(Math.round(v)) : Math.round(v * d) + "/" + d; const r = Math.round(v * v * 1e6) / 1e6; return v; }).join(" ; ") : "aucune";
+        const self = checkAnswer(q.spec, canon); if (self.status !== "correct") fail(q.code + " la réponse attendue est refusée (" + self.status + ") : " + canon);
+        if (!q.spec.all && q.spec.values.some((v) => !isFinite(v))) fail(q.code + " solution non finie");
+        if (!q.guide) fail(q.code + " sans guide"); else { g++; const last = q.guide[q.guide.length - 1].spec;
+          if (last.kind !== "set" || !!last.all !== !!q.spec.all || last.values.length !== q.spec.values.length || last.values.some((v, i) => Math.abs(v - q.spec.values[i]) > 1e-9)) fail(q.code + " dernière étape ≠ réponse");
+          q.guide.forEach((x) => { if (x.spec.kind === "value" && !isFinite(x.spec.value)) fail(q.code + " étape non finie"); }); }
+        if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+        (q.traps || []).forEach((tr) => { if (tr.s && checkAnswer(q.spec, tr.s.join(";")).status === "correct") fail(q.code + " piège = bonne réponse"); if (tr.s && tr.s.some((v) => !isFinite(v))) fail(q.code + " piège non fini"); });
+        if (!q.ctx) fail(q.code + " sans ctx");
+        // le diagnostic retrouve chaque piège
+        (q.traps || []).forEach((tr) => { const inp = tr.none ? "aucune" : tr.all ? "tous" : tr.s ? tr.s.join(" ; ") : null; if (inp && diagnose(q, inp) !== tr.m && checkAnswer(q.spec, inp).status !== "correct") fail(q.code + " piège non diagnostiqué : " + inp); });
+        if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 110) + " → " + canon);
+        continue;
+      }
+      const ans = q.spec.value; if (!isFinite(ans)) fail(q.code + " réponse non finie");
+      if (trivialQ(q, 0)) triv++; if (answerShown(q)) shown++;
+      if (q.guide) { g++; const last = q.guide[q.guide.length - 1].spec.value, tol = Math.max(q.spec.round || 0, q.guide[q.guide.length - 1].spec.round || 0, 1e-9 * Math.max(1, Math.abs(ans)));
+        if (Math.abs(last - ans) > tol) fail(q.code + " dernière étape " + last + " ≠ " + ans);
+        q.guide.forEach((x) => { if (!isFinite(x.spec.value)) fail(q.code + " étape non finie"); }); }
+      else fail(q.code + " sans guide");
+      if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+      if (!q.ctx) fail(q.code + " sans ctx");
+      if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 110) + " → " + +(+ans).toFixed(4));
+    }
+    line.push("  N" + d + " : " + n + " q., " + forms.size + " formes, " + ctx.size + " contextes" + (d < 4 ? ", guides " + Math.round(100 * g / n) + " %, triviales " + triv + ", réponse visible " + shown : ""));
+    samples.forEach((x) => line.push("     · " + x));
+  }
+  out.push(id + "\n" + line.join("\n"));
+}
+// Exercices riches (riche.js) : 200 tirages par exercice, textes propres, points cohérents ; plans de sujet.
+for (const [ch, C] of Object.entries(RICH)) for (const kind of ["ex", "raison"]) C[kind].forEach((f, k) => {
+  let pts = new Set(), sample = "";
+  for (let s = 1; s <= 200; s++) { R.seed(s); let x; try { x = f(); } catch (e) { fail(ch + " " + kind + k + " exception " + e.message); continue; }
+    const t = [x.q, x.sol, ...x.parts.map((p) => p.label)].join(" | ");
+    if (/undefined|NaN|Infinity|\[object/.test(t)) fail(ch + " " + kind + k + " s" + s + " texte : " + t.match(/.{0,50}(undefined|NaN|Infinity|\[object).{0,20}/)[0]);
+    { const pl = t.replace(/\\\(.*?\\\)/g, " ").replace(/<[^>]+>/g, " "); const bad = pl.match(/.{0,30}(\{,\}|\\frac|\\cdot|\^\{|\\sqrt).{0,10}/); if (bad) fail(ch + " " + kind + k + " s" + s + " TeX hors formule : " + bad[0]); }
+    if (!GEN[x.id] || !x.titre || !(x.lv >= 1 && x.lv <= 3)) fail(ch + " " + kind + k + " id/titre/lv");
+    if (/\d+ pts?\b|sans point|Pas de points/.test(t)) fail(ch + " " + kind + k + " s" + s + " points affichés (sans points depuis le 15.11) : " + t.match(/.{0,30}(\d+ pts?\b|sans point|Pas de points).{0,10}/)[0]);
+    pts.add(x.pts); if (s === 1) sample = x.titre + " (" + x.id + ", N" + x.lv + ") : " + x.q.replace(/<[^>]+>/g, " ").replace(/\\\(|\\\)/g, "").slice(0, 100);
+  }
+  out.push("riche " + kind + k + " · " + [...pts].join("/") + " pts · " + sample);
+});
+for (const [nm, ids0] of [["eq", ["eq1", "eqfrac", "eqspec", "formule", "probeq", "eq2fact", "eq2", "eq2disc", "probeq2", "eq3", "bicarre", "eqirr"]]]) for (const lv of ["facile", "standard", "exigeant"]) { const seen = new Set(); for (let i = 0; i < 20; i++) { const pl = mockPlan(ids0, lv); seen.add(pl.filter((x) => x.rich).map((x) => x.kind + x.k).join(",")); if (pl.filter((x) => x.part === "B").length !== 3) fail("plan " + lv + " sans 3 exercices"); } out.push("plan " + nm + " " + lv + " : " + seen.size + " sujets différents sur 20"); }
+out.unshift(bad ? bad + " échec(s)" : "OK");
+document.getElementById("out").textContent = out.join("\n");
+</script>

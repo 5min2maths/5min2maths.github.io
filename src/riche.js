@@ -10,14 +10,16 @@ const RICH = {};
   const N = (v) => { let [i, f] = String(r6(v)).split("."); if (i.replace("-", "").length >= 4) i = i.replace(/\B(?=(\d{3})+(?!\d))/g, "\\text{'}"); return i + (f ? "{,}" + f : ""); };
   const T = (v) => M(N(v));
   const A = (v, k) => N(+(+v).toFixed(k)); // arrondi
-  const u = (s) => ("\\ \\text{" + s.replace(/\^3/, "}^3\\text{") + "}").replace(/\\text\{\}$/, "");
+  const u = (s) => ("\\ \\text{" + s.replace(/\^([23])/, "}^$1\\text{") + "}").replace(/\\text\{\}$/, "");
   const Q = (v, s) => M(N(v) + u(s));
   const two = (n) => (n < 10 ? "0" : "") + n;
   const hor = (m) => Math.floor(m / 60) + " h " + two(m % 60);
   const pk = (a) => a[Math.floor(R.rand() * a.length)];
   // Pas de points affichés (15.11) : le poids sert seulement à pondérer l'auto-correction en interne.
   const nopts = (s) => s.replace(/ ?\((?:\d+ pts?(?: \+ \d+ pts?)*)(?: par objet| avec la justification)?\)/g, "").replace(/\(\d+ pts?, /g, "(").replace(/Pas de points : on/g, "On");
-  const X = (o) => Object.assign({ pts: Math.max(1, o.parts.reduce((s, p) => s + p.pts, 0)) }, o, { sol: nopts(o.sol), parts: o.parts.map((p) => ({ label: p.label, pts: p.pts })) });
+  // Virgule décimale hors formule (16.11) : « 20{,}9 » écrit hors de \( \) s'affichait tel quel ; on la remet en texte.
+  const pd = (t) => String(t).split(/(\\\(.*?\\\))/).map((seg, i) => (i % 2 ? seg : seg.replace(/\{,\}/g, ",").replace(/\\text\{'\}/g, "'"))).join("");
+  const X = (o) => Object.assign({ pts: Math.max(1, o.parts.reduce((s, p) => s + p.pts, 0)) }, o, { q: pd(o.q), sol: pd(nopts(o.sol)), parts: o.parts.map((p) => ({ label: pd(p.label), pts: p.pts })) });
   const ul = (rows) => "<ol type=\"a\" class=\"mock-parts\">" + rows.map((r) => "<li>" + r + "</li>").join("") + "</ol>";
 
   // ===================== 11e · 4. Proportionnalité, grandeurs quotients et unités =====================
@@ -182,6 +184,115 @@ const RICH = {};
         parts: [{ label: "Fais le calcul de Noé.", pts: 1 }, { label: "Fais le calcul de Léa.", pts: 1 }, { label: "Les deux résultats sont-ils égaux ? Quelle méthode préfères-tu, et pourquoi ?", pts: 1 }],
         sol: ul([M("3x^2 + " + 3 * k + "x - 2x^2 - " + 2 * k + "x = x^2 + " + k + "x") + ".", M("(x + " + k + ")(3x - 2x) = x(x + " + k + ")") + ".", "Oui : " + M("x(x + " + k + ") = x^2 + " + k + "x") + ". La méthode de Léa est plus courte : le facteur commun saute aux yeux."]) }); },
   ];
+  // ===================== 1re Collège · Équations (16.11) =====================
+  // Modèle : polycopié d'algèbre de 1re du Collège (problèmes du 1er et du 2e degré, formules de physique, vrai ou faux
+  // justifié), au niveau d'un test de 1re ; modelé, jamais recopié.
+  const sE = (v) => (v < 0 ? " - " + -v : " + " + v), tE = (v) => { if (Number.isInteger(v)) return String(v); for (let d = 2; d <= 60; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return frac(Math.round(v * d), d); return N(v); };
+  const xE = (r) => (r === 0 ? "x" : "x" + sE(-r));
+  const SE = (vs) => M(vs.length ? "S = \\{" + vs.slice().sort((a, b) => a - b).map(tE).join(" \\,;\\, ") + "\\}" : "S = \\varnothing");
+  const EXE = [
+    // Les notes du semestre (moyenne pondérée ; possible ou non)
+    () => { let notes, k, m, x, S; for (let t = 0; t < 200; t++) { notes = Array.from({ length: 4 }, () => pk([3.5, 4, 4.5, 5, 5.5])); k = pk([2, 3]); m = pk([4.5, 5]); S = notes.reduce((a, b) => a + b, 0); x = (m * (4 + k) - S) / k; if (x >= 3.5 && x <= 6 && Number.isInteger(x * 2)) break; x = null; }
+      if (x === null) { notes = [4, 4.5, 5, 4]; k = 2; m = 4.5; S = 17.5; x = 5; }
+      const m2 = m + 0.5, x2 = (m2 * (4 + k) - S) / k;
+      return X({ id: "probeq", lv: 1, titre: "Les notes du semestre",
+        q: "Au premier semestre, Lina a obtenu " + notes.map((v) => T(v)).join(", ") + ". L'examen final compte " + (k === 2 ? "double" : "triple") + " (comme " + k + " notes).",
+        parts: [{ label: "Calcule sa moyenne actuelle.", pts: 1 }, { label: "Écris une équation, puis trouve la note qu'il lui faut à l'examen pour obtenir exactement " + T(m) + " de moyenne.", pts: 2 }, { label: "Peut-elle encore obtenir " + T(m2) + " de moyenne ? Explique.", pts: 1 }],
+        sol: ul([M(N(S) + " : 4 = " + N(S / 4)) + ".", M("\\frac{" + N(S) + " + " + k + "x}{" + (4 + k) + "} = " + N(m)) + ", donc " + M(N(S) + " + " + k + "x = " + N(m * (4 + k))) + " et " + M("x = " + N(x)) + ".", x2 <= 6 ? "Oui : il lui faudrait " + M(N(x2)) + ", ce qui est possible (note maximale 6)." : "Non : il lui faudrait " + M(N(+x2.toFixed(2))) + ", plus que la note maximale 6."]) }); },
+    // Deux forfaits (équation, interprétation, troisième formule)
+    () => { const a = pk([12, 14, 15, 16]), b = pk([6, 7, 8]), x = R.int(8, 16), F = (a - b) * x, U = a * (x + R.int(6, 12)), n1 = x - R.int(3, 5), n2 = x + R.int(3, 6);
+      return X({ id: "probeq", lv: 2, titre: "Deux forfaits de fitness",
+        q: "Formule A : " + Q(a, "CHF") + " la séance. Formule B : un abonnement de " + Q(F, "CHF") + " par an, puis " + Q(b, "CHF") + " la séance. Formule C : " + Q(U, "CHF") + " par an, séances illimitées.",
+        parts: [{ label: "Combien coûtent " + n1 + " séances avec A ? avec B ?", pts: 1 }, { label: "Écris une équation et trouve le nombre de séances pour lequel A et B coûtent autant.", pts: 2 }, { label: "Noé prévoit " + n2 + " séances. Quelle formule lui conseilles-tu entre A et B ? Justifie.", pts: 1 }, { label: "À partir de combien de séances C est-elle plus avantageuse que A ?", pts: 1 }],
+        sol: ul(["A : " + M(n1 + " \\cdot " + a + " = " + n1 * a) + " CHF ; B : " + M(F + " + " + n1 + " \\cdot " + b + " = " + (F + n1 * b)) + " CHF.", M(a + "x = " + F + " + " + b + "x \\iff " + (a - b) + "x = " + F + " \\iff x = " + x) + " séances.", "B : " + M(F + n2 * b) + " CHF contre " + M(n2 * a) + " CHF avec A ; au-delà de " + x + " séances, B est moins chère.", M(a + "x = " + U + " \\iff x = " + N(U / a)) + " : à partir de " + (Math.floor(U / a) + 1) + " séances, C coûte moins que A."]) }); },
+    // Le canal (formule du trapèze transformée)
+    () => { const b = pk([2, 3, 4]), h = pk([1.5, 2, 2.5]), B = b + pk([2, 3, 4]), A = ((B + b) * h) / 2, A2 = A + pk([1, 2, 3]) * h;
+      return X({ id: "formule", lv: 2, titre: "La coupe d'un canal",
+        q: "La coupe d'un canal est un trapèze de petite base " + M("b") + ", de grande base " + M("B") + " et de hauteur " + M("h") + " : son aire est " + M("A = \\frac{(B + b) \\cdot h}{2}") + ".", fig: FIG.trapezoid("B", "b", "h"),
+        parts: [{ label: "Exprime " + M("h") + " en fonction de " + M("A") + ", " + M("B") + " et " + M("b") + ".", pts: 1 }, { label: "Exprime " + M("B") + " en fonction des autres lettres.", pts: 2 }, { label: "Calcule " + M("B") + " pour " + M("b = " + b) + " m, " + M("h = " + N(h)) + " m et " + M("A = " + N(A)) + " m².", pts: 1 }, { label: "On veut une aire de " + Q(A2, "m²") + " sans changer " + M("b") + " ni " + M("h") + ". De combien faut-il élargir la grande base ?", pts: 1 }],
+        sol: ul([M("h = \\frac{2A}{B + b}") + ".", M("B + b = \\frac{2A}{h}") + ", donc " + M("B = \\frac{2A}{h} - b") + ".", M("B = \\frac{2 \\cdot " + N(A) + "}{" + N(h) + "} - " + b + " = " + N(B)) + " m.", M("\\frac{2 \\cdot " + N(A2) + "}{" + N(h) + "} - " + b + " = " + N((2 * A2) / h - b)) + " m : il faut l'élargir de " + M(N((2 * A2) / h - b - B)) + " m."]) }); },
+    // Équations sous la loupe (aucune, tous, x = 0)
+    () => { const a = R.int(2, 6), b = R.int(2, 7), c = R.int(2, 9), d = R.int(1, 9);
+      return X({ id: "eqspec", lv: 1, titre: "Équations sous la loupe",
+        q: "Résous chaque équation et donne l'ensemble des solutions.",
+        parts: [{ label: M(a + "(x - " + b + ") + " + a * b + " = " + a + "x"), pts: 1 }, { label: M(c + "x + " + d + " = " + c + "(x + 1)"), pts: 1 }, { label: M(c + 2 + "x + " + d + " = " + c + "x + " + d), pts: 1 }, { label: "Invente une équation du 1er degré qui n'a aucune solution, et explique pourquoi.", pts: 1 }],
+        sol: ul([M(a + "x - " + a * b + " + " + a * b + " = " + a + "x") + " : " + M("0 = 0") + ", vrai ; tous les nombres sont solutions, " + M("S = \\mathbb{R}") + ".", M(c + "x + " + d + " = " + c + "x + " + c) + " : " + M(d + " = " + c) + (d === c ? ", vrai : " + M("S = \\mathbb{R}") : ", faux : " + M("S = \\varnothing")) + ".", M("2x = 0") + ", donc " + M("x = 0") + " : " + M("S = \\{0\\}") + " (une solution, ce n'est pas « aucune »).", "Par exemple " + M("x + 1 = x + 2") + " : les " + M("x") + " s'éliminent et il reste " + M("1 = 2") + ", faux."]) }); },
+    // Le cadre (2e degré, solution à écarter)
+    () => { const w = pk([20, 24, 30]), h = pk([15, 16, 18]), x = pk([2, 3, 4, 5]), A = (w + 2 * x) * (h + 2 * x), c = w * h - A, x2 = -(w + h) / 2 - x;
+      return X({ id: "probeq2", lv: 2, titre: "Le cadre",
+        q: "Une affiche de " + Q(w, "cm") + " sur " + Q(h, "cm") + " est entourée d'un cadre de largeur constante " + M("x") + " cm. L'ensemble occupe " + Q(A, "cm^2") + ".", fig: FIG.rectFig(10, 7, Math.max(w, h) + " + 2x", Math.min(w, h) + " + 2x"),
+        parts: [{ label: "Exprime l'aire de l'ensemble en fonction de " + M("x") + ", sous forme développée.", pts: 1 }, { label: "Montre que " + M("x") + " vérifie " + M("4x^2 + " + 2 * (w + h) + "x " + sE(c).trim() + " = 0") + ".", pts: 1 }, { label: "Résous cette équation.", pts: 2 }, { label: "Quelle est la largeur du cadre ? Pourquoi écarte-t-on l'autre solution ?", pts: 1 }],
+        sol: ul([M("(" + w + " + 2x)(" + h + " + 2x) = 4x^2 + " + 2 * (w + h) + "x + " + w * h) + ".", M("4x^2 + " + 2 * (w + h) + "x + " + w * h + " = " + A) + ", on soustrait " + A + ".", "On divise par 2 : " + M("2x^2 + " + (w + h) + "x " + sE(c / 2).trim() + " = 0") + " ; " + M("\\Delta = " + ((w + h) ** 2 - 8 * (c / 2))) + ", " + M("x = " + x) + " ou " + M("x = " + tE(x2)) + ".", x + " cm : une largeur ne peut pas être négative."]) }); },
+    // Le jardin et ses allées (2e degré, solution trop grande)
+    () => { const J = []; for (let Lg = 12; Lg <= 40; Lg++) for (let l = 8; l < Lg; l++) for (let x = 1; x <= l / 2; x++) if (2 * (Lg - x) * (l - x) === Lg * l) J.push([Lg, l, x]);
+      const [Lg, l, x] = pk(J), x2 = Lg + l - x;
+      return X({ id: "probeq2", lv: 3, titre: "Le jardin et ses allées",
+        q: "Un jardin rectangulaire de " + Q(Lg, "m") + " sur " + Q(l, "m") + " est traversé par deux allées perpendiculaires de même largeur " + M("x") + " m, parallèles aux côtés. Le reste est du gazon.",
+        parts: [{ label: "Explique pourquoi l'aire du gazon vaut " + M("(" + Lg + " - x)(" + l + " - x)") + " (tu peux « pousser » les allées contre les bords).", pts: 1 }, { label: "On veut autant d'allées que de gazon. Écris l'équation et ramène-la à la forme " + M("x^2 + bx + c = 0") + ".", pts: 2 }, { label: "Résous-la et donne la largeur des allées.", pts: 2 }],
+        sol: ul(["En regroupant les allées contre deux bords, le gazon forme un rectangle de " + M("(" + Lg + " - x)") + " sur " + M("(" + l + " - x)") + ".", M("(" + Lg + " - x)(" + l + " - x) = \\frac{" + Lg * l + "}{2} = " + (Lg * l) / 2) + ", soit " + M("x^2 - " + (Lg + l) + "x + " + (Lg * l) / 2 + " = 0") + ".", M("x = " + x) + " ou " + M("x = " + x2) + " ; " + x2 + " m est plus large que le jardin : les allées mesurent " + x + " m."]) }); },
+    // La chute (méthode directe, formule transformée)
+    () => { const T = pk([3, 4, 5]), h0 = 5 * T * T, t1 = T - 1, h1 = h0 - 5 * t1 * t1;
+      return X({ id: "eq2fact", lv: 2, titre: "La chute d'une bille",
+        q: "On lâche une bille du haut d'une tour de " + Q(h0, "m") + ". Après " + M("t") + " secondes, elle se trouve à la hauteur " + M("h = " + h0 + " - 5t^2") + " (en m).",
+        parts: [{ label: "À quelle hauteur est-elle après 1 s ? après 2 s ? A-t-elle parcouru deux fois plus de chemin pendant les 2 s ?", pts: 1 }, { label: "Quand est-elle à " + Q(h1, "m") + " ?", pts: 1 }, { label: "Quand touche-t-elle le sol ? Pourquoi garde-t-on une seule solution ?", pts: 2 }, { label: "Exprime " + M("t") + " en fonction de " + M("h") + ".", pts: 1 }],
+        sol: ul([M(h0 - 5) + " m et " + M(h0 - 20) + " m : elle a parcouru 5 m, puis 20 m en tout, soit 4 fois plus (la chute s'accélère).", M("5t^2 = " + 5 * t1 * t1 + " \\iff t^2 = " + t1 * t1) + ", " + M("t = " + t1) + " s.", M("5t^2 = " + h0 + " \\iff t^2 = " + T * T) + ", " + M("t = " + T) + " s ; " + M("t = -" + T) + " est écarté : le temps est positif depuis le lâcher.", M("t = \\sqrt{\\frac{" + h0 + " - h}{5}}") + "."]) }); },
+    // Une équation, trois méthodes (factorisation, Δ, somme et produit)
+    () => { let p, q; do { p = R.int(1, 9) * pk([1, -1]); q = R.int(1, 9) * pk([1, -1]); } while (p === q || p === -q); const s = p + q, pr = p * q;
+      return X({ id: "eq2disc", lv: 3, titre: "Une équation, trois méthodes",
+        q: "On veut résoudre " + M(poly([1, -s, pr]) + " = 0") + ".",
+        parts: [{ label: "Résous-la en factorisant (trouve deux nombres de somme " + M(-s) + " et de produit " + M(pr) + ").", pts: 2 }, { label: "Résous-la avec le discriminant.", pts: 2 }, { label: "Vérifie que la somme des solutions vaut " + M("-\\frac{b}{a}") + " et leur produit " + M("\\frac{c}{a}") + ".", pts: 1 }, { label: "Quelle méthode préfères-tu ici ? Laquelle marche toujours ?", pts: 1 }],
+        sol: ul([M("(" + xE(p) + ")(" + xE(q) + ") = 0") + " : " + SE([p, q]) + ".", M("\\Delta = " + (s * s - 4 * pr) + " = " + Math.abs(p - q) + "^2") + ", " + M("x = \\frac{" + s + " \\pm " + Math.abs(p - q) + "}{2}") + " : mêmes solutions.", "Somme " + M(p + " + " + (q < 0 ? "(" + q + ")" : q) + " = " + s + " = -\\frac{" + -s + "}{1}") + " ; produit " + M(pr) + ".", "La factorisation est rapide quand on voit les deux nombres ; le discriminant marche toujours, même quand les solutions ne sont pas entières."]) }); },
+    // Températures (formule, équation C = F)
+    () => { const C1 = pk([15, 20, 25, 35]), F2 = pk([50, 59, 68, 86, 95]);
+      return X({ id: "formule", lv: 2, titre: "Celsius et Fahrenheit",
+        q: "Aux États-Unis, on mesure la température en degrés Fahrenheit : " + M("F = \\frac{9}{5}C + 32") + ", où " + M("C") + " est la température en degrés Celsius.",
+        parts: [{ label: "Il fait " + C1 + " °C à Genève. Combien de degrés Fahrenheit ?", pts: 1 }, { label: "Exprime " + M("C") + " en fonction de " + M("F") + ".", pts: 2 }, { label: "Il fait " + F2 + " °F à New York. Fait-il plus chaud qu'à Genève ?", pts: 1 }, { label: "Existe-t-il une température qui s'écrit avec le même nombre dans les deux échelles ? Laquelle ?", pts: 2 }],
+        sol: ul([M("\\frac{9}{5} \\cdot " + C1 + " + 32 = " + N((9 * C1) / 5 + 32)) + " °F.", M("F - 32 = \\frac{9}{5}C") + ", donc " + M("C = \\frac{5}{9}(F - 32)") + ".", M("\\frac{5}{9}(" + F2 + " - 32) = " + tE(((F2 - 32) * 5) / 9)) + " °C : " + (((F2 - 32) * 5) / 9 > C1 ? "oui, plus chaud" : ((F2 - 32) * 5) / 9 === C1 ? "la même température" : "non, plus froid") + ".", "Oui : " + M("x = \\frac{9}{5}x + 32 \\iff -\\frac{4}{5}x = 32 \\iff x = -40") + " : " + M("-40") + " °C = " + M("-40") + " °F."]) }); },
+    // Degré 4 déguisé (bicarrée)
+    () => { const p = R.int(1, 3), q = p + R.int(1, 3), a = p * p + q * q, b = p * p * q * q;
+      return X({ id: "bicarre", lv: 3, titre: "Un degré 4 déguisé",
+        q: "On veut résoudre " + M("x^4 - " + a + "x^2 + " + b + " = 0") + ".",
+        parts: [{ label: "On pose " + M("X = x^2") + ". Écris l'équation en " + M("X") + ".", pts: 1 }, { label: "Résous-la.", pts: 1 }, { label: "Reviens à " + M("x") + " et donne toutes les solutions.", pts: 2 }, { label: "Combien de solutions aurait " + M("x^4 + " + a + "x^2 + " + b + " = 0") + " ? Explique sans calcul.", pts: 1 }],
+        sol: ul([M("X^2 - " + a + "X + " + b + " = 0") + ".", M("(X - " + p * p + ")(X - " + q * q + ") = 0") + " : " + M("X = " + p * p) + " ou " + M("X = " + q * q) + ".", M("x^2 = " + p * p) + " ou " + M("x^2 = " + q * q) + " : " + SE([-q, -p, p, q]) + ".", "Aucune : pour tout " + M("x") + ", " + M("x^4 + " + a + "x^2 + " + b + " \\ge " + b + " > 0") + "."]) }); },
+    // Racine et vérification (solution parasite)
+    () => { let b, r, pp, a; for (let t = 0; t < 80; t++) { b = R.int(-2, 3); r = R.int(Math.max(1 - b, 0), 6); pp = 1 - 2 * b - r; a = b * b - r * pp; if (pp + b < 0 && r !== pp && pp + a >= 0) break; a = null; }
+      if (a === null) { b = 1; r = 2; pp = -3; a = 7; }
+      return X({ id: "eqirr", lv: 2, titre: "Racine et vérification",
+        q: "On veut résoudre " + M("\\sqrt{x" + sE(a) + "} = x" + sE(b)) + ".",
+        parts: [{ label: "Élève les deux membres au carré et ramène l'équation à la forme " + M("x^2 + px + q = 0") + ".", pts: 1 }, { label: "Résous cette équation du 2e degré.", pts: 1 }, { label: "Vérifie chaque valeur dans l'équation de départ. Conclus.", pts: 2 }, { label: "Explique pourquoi élever au carré peut faire apparaître une « fausse » solution.", pts: 1 }],
+        sol: ul([M("x" + sE(a) + " = x^2 " + sE(2 * b).trim() + "x + " + b * b) + ", soit " + M(poly([1, 2 * b - 1, b * b - a]) + " = 0") + ".", M("x = " + r) + " ou " + M("x = " + pp) + ".", "Pour " + M(r) + " : " + M("\\sqrt{" + (r + a) + "} = " + Math.sqrt(r + a)) + " et " + M(r + b) + " ✓. Pour " + M(pp) + " : " + M("\\sqrt{" + (pp + a) + "} = " + Math.sqrt(pp + a)) + " mais " + M(pp + b) + " ✗. " + M("S = \\{" + r + "\\}") + ".", "Si " + M("A^2 = B^2") + ", on a " + M("A = B") + " <b>ou</b> " + M("A = -B") + " : le carré « oublie » le signe, donc il faut vérifier."]) }); },
+  ];
+  const RAISONE = [
+    () => { const k = R.int(2, 9), w = pk(["Sam", "Léa", "Noé"]);
+      return X({ id: "eq2fact", lv: 1, titre: "Trouve l'erreur",
+        q: w + " résout " + M("x^2 = " + k + "x") + " : « je divise par " + M("x") + ", donc " + M("x = " + k) + " ».",
+        parts: [{ label: "Vérifie que " + M("x = 0") + " est aussi solution.", pts: 1 }, { label: "Explique l'erreur de " + w + ".", pts: 1 }, { label: "Résous correctement.", pts: 1 }],
+        sol: ul([M("0^2 = 0") + " et " + M(k + " \\cdot 0 = 0") + " : oui.", "Diviser par " + M("x") + " suppose " + M("x \\ne 0") + " : on perd la solution " + M("x = 0") + ". On ne divise jamais par l'inconnue.", M("x^2 - " + k + "x = x(x - " + k + ") = 0") + " : " + M("S = \\{0 \\,;\\, " + k + "\\}") + "."]) }); },
+    () => { const [a, b] = pk([[2, 3], [3, 4], [4, 6], [2, 5], [3, 5]]), L2 = (a * b) / gcd(a, b), c = R.int(1, 6), w = pk(["Inès", "Yanis", "Mia"]), A = L2 / a, B = L2 / b, solx = (-L2 * c) / (A - B), wrongX = -c / (A - B);
+      return X({ id: "eqfrac", lv: 2, titre: "Trouve l'erreur",
+        q: w + " résout " + M("\\frac{x}{" + a + "} + " + c + " = \\frac{x}{" + b + "}") + " : « je multiplie par " + L2 + " : " + M(A + "x + " + c + " = " + B + "x") + ", donc " + M("x = " + tE(wrongX)) + " ».",
+        parts: [{ label: "Vérifie la solution de " + w + ". Que constates-tu ?", pts: 1 }, { label: "Quelle est l'erreur ? Corrige et résous.", pts: 2 }],
+        sol: ul([M("\\frac{" + tE(wrongX) + "}{" + a + "} + " + c + " = " + tE(wrongX / a + c)) + " et " + M("\\frac{" + tE(wrongX) + "}{" + b + "} = " + tE(wrongX / b)) + " : les deux membres diffèrent, la solution est fausse.", "Le terme " + c + " n'a pas été multiplié par " + L2 + " : on multiplie <b>chaque</b> terme. " + M(A + "x + " + L2 * c + " = " + B + "x") + ", donc " + M((A - B) + "x = " + -L2 * c) + " et " + M("x = " + tE(solx)) + "."]) }); },
+    () => { const S = pk([
+        [["« L'équation " + M("x^2 + 4 = 0") + " a deux solutions, 2 et −2. »", false, M("2^2 + 4 = 8 \\ne 0") + " ; " + M("x^2 = -4") + " n'a pas de solution."], ["« " + M("x^2 - 6x + 9 = 0") + " a au moins une solution. »", true, M("(x - 3)^2 = 0") + " : " + M("x = 3") + " (" + M("\\Delta = 0") + ")."], ["« " + M("(x - 3)(x + 5) = 0") + " et " + M("4(x - 3)(x + 5) = 0") + " ont les mêmes solutions. »", true, "Le facteur 4 ne s'annule jamais : 3 et −5 dans les deux cas."]],
+        [["« Une équation du 2e degré a toujours deux solutions. »", false, "Contre-exemple : " + M("x^2 + 1 = 0") + " n'en a aucune ; " + M("x^2 = 0") + " n'en a qu'une."], ["« " + M("(x - 3)(x + 5) = 4") + " donne " + M("x = 7") + " ou " + M("x = -1") + ". »", false, "Le produit nul ne marche qu'avec 0 ; " + M("x = 7") + " donne " + M("4 \\cdot 12 = 48 \\ne 4") + "."], ["« Il existe une infinité d'équations de solutions 3 et −5. »", true, M("k(x - 3)(x + 5) = 0") + " pour tout " + M("k \\ne 0") + "."]],
+        [["« Si " + M("\\Delta < 0") + ", l'équation n'a pas de solution réelle. »", true, M("\\sqrt{\\Delta}") + " n'existe pas."], ["« " + M("x^3 = 9x") + " a pour solutions 3 et −3. »", false, "Il manque " + M("x = 0") + " : " + M("x(x - 3)(x + 3) = 0") + "."], ["« " + M("\\sqrt{x} = -2") + " a pour solution " + M("x = 4") + ". »", false, M("\\sqrt{4} = 2 \\ne -2") + " : une racine n'est jamais négative, aucune solution."]],
+      ]);
+      return X({ id: "eq2disc", lv: 2, titre: "Vrai ou faux ? Justifie",
+        q: "Pour chaque affirmation, dis si elle est vraie ou fausse, et justifie (calcul, contre-exemple ou propriété).",
+        parts: S.map((s) => ({ label: s[0], pts: 1 })), sol: ul(S.map((s) => "<b>" + (s[1] ? "Vrai" : "Faux") + "</b>. " + s[2])) }); },
+    () => { const w = pk(["Noé", "Lina", "Yanis"]), r = 2, p = -3;
+      return X({ id: "eqirr", lv: 2, titre: "Deux solutions ?",
+        q: w + " résout " + M("\\sqrt{x + 7} = x + 1") + " : « au carré, " + M("x + 7 = x^2 + 2x + 1") + ", soit " + M("x^2 + x - 6 = 0") + ", donc " + M("S = \\{-3 \\,;\\, 2\\}") + " ».",
+        parts: [{ label: "Vérifie les deux valeurs dans l'équation de départ.", pts: 1 }, { label: "Corrige la conclusion de " + w + " et explique ce qui s'est passé.", pts: 2 }],
+        sol: ul(["Pour 2 : " + M("\\sqrt{9} = 3 = 2 + 1") + " ✓. Pour −3 : " + M("\\sqrt{4} = 2") + " mais " + M("-3 + 1 = -2") + " ✗.", M("S = \\{2\\}") + ". En élevant au carré, on résout aussi " + M("\\sqrt{x + 7} = -(x + 1)") + " : −3 est une solution « parasite » de cette autre équation."]) }); },
+    () => { let p, q; do { p = R.int(1, 7); q = -R.int(1, 7); } while (p === -q);
+      return X({ id: "eq2", lv: 2, titre: "Construis une équation",
+        q: "On cherche des équations dont on connaît les solutions.",
+        parts: [{ label: "Écris une équation dont les solutions sont exactement " + p + " et " + q + ", puis développe-la.", pts: 1 }, { label: "Écris une autre équation, différente, qui a les mêmes solutions.", pts: 1 }, { label: "Écris une équation du 2e degré qui a " + p + " pour seule solution.", pts: 1 }, { label: "Écris une équation du 2e degré qui n'a aucune solution.", pts: 1 }],
+        sol: ul([M("(" + xE(p) + ")(" + xE(q) + ") = 0") + ", soit " + M(poly([1, -(p + q), p * q]) + " = 0") + ".", "Par exemple " + M("2(" + xE(p) + ")(" + xE(q) + ") = 0") + " (n'importe quel facteur non nul).", M("(" + xE(p) + ")^2 = 0") + ".", M("x^2 + 1 = 0") + " (un carré plus 1 n'est jamais nul)."]) }); },
+  ];
+  RICH.eq1c = { ids: ["eq1", "eqfrac", "eqspec", "formule", "probeq", "eq2fact", "eq2", "eq2disc", "probeq2", "eq3", "bicarre", "eqirr"], label: "Équations", ex: EXE, raison: RAISONE, minutes: 45 };
   RICH.litt11 = { ids: ["litelab", "valnum", "reduire", "monomes", "parenth", "distrib", "idrem", "factor"], label: "Calcul littéral", ex: EXL, raison: RAISONL, minutes: 45 };
   RICH.prop11 = { ids: ["utemps", "ucomp", "vitesse", "gquot"], label: "Proportionnalité, grandeurs quotients et unités", ex: EX, raison: RAISON, minutes: 45 };
 })();

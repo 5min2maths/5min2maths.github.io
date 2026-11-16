@@ -350,6 +350,20 @@ function diagnose(q, input) {
     try { if (Expr.equivalent(g, Expr.parse("-(" + spec.expr + ")"))) return "Tous les signes sont inversés : vérifie le signe devant la parenthèse (un « − » change tous les signes)."; } catch (e) {}
     return null;
   }
+  // Ensemble de solutions (équations, 16.11) : pièges { s: [valeurs] }, { none } (« aucune »), { all } (« tous »).
+  if (spec && spec.kind === "set") {
+    const raw = setInput(input), none = NONE_RE.test(raw), all = ALL_RE.test(raw);
+    let got = null;
+    if (!none && !all) { try { const t = Expr.parse(raw); const items = t.t === "list" ? t.items : [t]; if (items.some((i) => Expr.vars(i).size)) return null; got = items.map((i) => Expr.evaluate(i)); } catch (e) { return null; } }
+    const same = (A, B) => A.every((x) => B.some((y) => Expr.sameValue(x, y))) && B.every((y) => A.some((x) => Expr.sameValue(x, y)));
+    for (const tr of q.traps || []) {
+      if (tr.none && none) return tr.m;
+      if (tr.all && all) return tr.m;
+      if (tr.s && got && same(got, tr.s)) return tr.m;
+    }
+    if (got && !spec.all && spec.values.length && got.length === spec.values.length && same(got.map((x) => -x), spec.values)) return "Les nombres sont bons, mais pas les signes : " + "x − a = 0 donne x = a.";
+    return null;
+  }
   if (!spec || spec.kind !== "value") return null;
   let v; try { const t = Expr.parse(input); if (Expr.vars(t).size) return null; v = Expr.evaluate(t); } catch (e) { return null; }
   if (!isFinite(v)) return null;
@@ -363,6 +377,9 @@ function diagnose(q, input) {
   return null;
 }
 
+// Saisie d'un ensemble de solutions (16.11) : « x = 3 ou x = -2 », « x1 = 3 ; x2 = -2 », « S = {3 ; -2} » sont lus comme « 3 ; -2 ».
+const NONE_RE = /aucun|∅|vide|pas de solution|impossible/i, ALL_RE = /\btou[st]e?s?\b|ℝ|\bR\b|infinit/;
+const setInput = (input) => String(input).replace(/\bou\b/gi, ";").replace(/\b[a-zA-Z]\w*\s*=(?!=)/g, " ").replace(/[{}]/g, " ").replace(/^\s*;|;\s*$/g, "").trim();
 // Vérifie la réponse de l'élève selon la spécification de la question.
 // spec.kind : "value" (valeur numérique, round = précision demandée), "expr" (expression en x,
 // form = "product" | "expanded"), "set" (liste de solutions), "choice" (index d'option).
@@ -389,10 +406,12 @@ function checkAnswer(spec, input) {
     try { got = SolSet.parse(input); } catch (e) { return { status: "invalid", message: e.message }; }
     return SolSet.check(spec.ivs, got);
   }
-  const none = /aucun|∅|vide|pas de solution|impossible/i.test(String(input));
+  const none = NONE_RE.test(String(input));
+  // « tous » (équation indéterminée, 16.11) : tout nombre est solution.
+  if (spec.kind === "set" && (spec.all || ALL_RE.test(String(input)))) return { status: spec.all && ALL_RE.test(String(input)) && !none ? "correct" : "wrong" };
   if (spec.kind === "set" && (none || spec.values.length === 0)) return { status: none && spec.values.length === 0 ? "correct" : spec.values.length === 0 ? "wrong" : "wrong" };
   let tree;
-  try { tree = Expr.parse(String(input)); }
+  try { tree = Expr.parse(spec.kind === "set" ? setInput(input) : String(input)); }
   catch (e) { return { status: "invalid", message: e.message }; }
   if (spec.kind === "value") {
     // final (14.11, retour testeur : « on peut taper le calcul ») : au CO, la réponse est le résultat, pas l'opération.

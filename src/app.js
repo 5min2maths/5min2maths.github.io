@@ -827,7 +827,7 @@ function renderQuestion(q, opt) {
     tries++;
     const ez = document.getElementById("easy"); if (ez) ez.remove();
     const ny = document.getElementById("notyet"); if (ny) ny.remove();
-    const diag = r.status === "wrong" ? diagnose(q, v) : null;
+    const diag = r.status === "wrong" || (r.status === "close" && q.spec.kind === "set") ? diagnose(q, v) : null;
     lastDiag = diag;
     if (opt.single || tries >= 2) return end(false);
     fb.innerHTML = `<div class="fb hint pop"><b>${r.status === "close" ? "Presque !" : "Pas encore. Réessaie !"}</b><span>${esc(diag || r.message || "")}</span><span><b>Indice</b> · ${esc(q.hint)}</span></div>`;

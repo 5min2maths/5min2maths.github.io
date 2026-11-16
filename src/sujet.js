@@ -19,7 +19,9 @@ const MOCK_LV = {
 function richPlan(ch, ids, level) {
   const C = RICH[ch], items = [], mine = C.ids.filter((id) => ids.includes(id));
   const dA = { facile: [1, 1, 1, 1], standard: [1, 2, 1, 2], exigeant: [2, 2, 3, 2] }[level] || [1, 2, 1, 2];
-  dA.forEach((d, k) => items.push({ part: "A", id: mine[k % mine.length], d, seed: mockSeed() }));
+  // Automatismes tirés parmi toutes les notions révisées (16.11 : avec 8 ou 12 notions, les 4 premières revenaient toujours).
+  R.seed(mockSeed()); const pickA = mine.length > dA.length ? shuffle(mine.slice()).slice(0, dA.length).sort((a, b) => mine.indexOf(a) - mine.indexOf(b)) : mine;
+  dA.forEach((d, k) => items.push({ part: "A", id: pickA[k % pickA.length], d, seed: mockSeed() }));
   const lvOk = { facile: (l) => l <= 2, standard: () => true, exigeant: (l) => l >= 2 }[level] || (() => true);
   const probe = (arr, kind) => arr.map((f, k) => { R.seed(1); const x = f(); return { k, id: x.id, lv: x.lv, kind }; });
   let ex = probe(C.ex, "ex").filter((x) => lvOk(x.lv));
