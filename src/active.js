@@ -282,7 +282,7 @@ function activeLesson(id, L, cont, review) {
     $("goal").textContent = "Défi 1 · " + A.defis[0];
     reveal($("s2"));
     A.play($("play"), (k, msg) => {
-      $("gfb").innerHTML = `<div class="fb ok">✓ ${msg}</div>`;
+      $("gfb").innerHTML = `<div class="fb ok">✓ ${colonBreak(msg)}</div>`;
       if (k + 1 < A.defis.length) $("goal").textContent = "Défi " + (k + 2) + " · " + A.defis[k + 1];
       else { $("goal").textContent = "Défis réussis !"; burst(); finish(); }
     });

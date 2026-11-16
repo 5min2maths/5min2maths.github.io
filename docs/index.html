@@ -1501,6 +1501,23 @@ const R = {
 };
 const gcd = (a, b) => (b ? gcd(b, a % b) : Math.abs(a));
 const M = (t) => "\\(" + t + "\\)";
+// Deux-points lisibles (16.11, demande de l'utilisateur : « on ne comprend rien avec deux points ») : un « : » qui suit
+// une formule (« \(x = 3\) : \(9 = 9\) ») ou une égalité en texte simple (« x = 3 : 9 = 9 ») se lit comme une division.
+// Il devient un retour à la ligne. Les « : » après un mot (« Résous : », « Erreur : ») restent ; dans les formules, « : » est ÷.
+const colonBreak = (s) => {
+  if (typeof s !== "string" || s.indexOf(":") < 0) return s;
+  const parts = s.split(/(\\\(.*?\\\))/);
+  for (let i = 0; i < parts.length; i += 2) {
+    let t = parts[i];
+    if (i > 0) t = t.replace(/^\s*:\s+(?=\S)/, "<br>").replace(/^\s*:\s*$/, i + 1 < parts.length ? "<br>" : " :"); // juste après une formule
+    t = t.replace(/(^|[.!?]\s+|<br>)([^.!?<:]*?=[^.!?<:]*?[0-9A-Za-zÀ-ÿ²³⁴)\]]) : (?=\S)/g, "$1$2<br>"); // « x = 3 : … »
+    // « Divisibles par 9 : 117, 126 » se lit « 9 ÷ 117 » : on garde les deux-points et on passe à la ligne.
+    t = t.replace(/([0-9)²³°]) : (?=[-−0-9(]|$)/g, "$1 :<br>");
+    if (i + 1 < parts.length) t = t.replace(/([0-9)²³°]) :\s*$/, "$1 :<br>");
+    parts[i] = t;
+  }
+  return parts.join("").replace(/<br>(\s*)([a-zàâçéèêëîïôûù])/g, (m, sp, c) => "<br>" + c.toUpperCase());
+};
 // Étape guidée (« on le fait ensemble ») : consigne, valeur attendue, explication ; et piège typique { v, m }.
 const GS = (ask, value, sol, round) => ({ ask, spec: Object.assign({ kind: "value", value }, round ? { round } : {}), sol });
 const TRAP = (v, m) => ({ v, m });
@@ -2181,7 +2198,10 @@ const PROB = {
   },
   factor() {
     const L = 20 * R.int(2, 6), k = R.int(5, L / 4 - 1);
-    return { fig: FIG.rectFig(2, 1, "mur (pas de clôture)", "x"), q: "Avec " + M(L) + " m de clôture, on entoure un enclos rectangulaire le long d'un mur (le mur forme un côté). On note " + M("x") + " la largeur (perpendiculaire au mur).",
+    // Mur en trait épais et coloré, clôture en pointillé (commentaire testeur du 15.11 : « représenter clairement le mur »).
+    const enclos = '<svg class="fig" viewBox="0 0 300 150" role="img" aria-label="enclos le long d\'un mur"><line x1="30" y1="28" x2="270" y2="28" class="f-accent" stroke-width="8" stroke-linecap="round"/><text x="150" y="18" class="f-txt" text-anchor="middle" font-size="13" font-weight="700">mur (pas de clôture)</text>'
+      + '<polyline points="60,28 60,118 240,118 240,28" fill="none" class="f-line" stroke-width="2.5" stroke-dasharray="7 5"/><text x="150" y="138" class="f-txt" text-anchor="middle" font-size="13">clôture : ' + L + ' − 2x</text><text x="52" y="78" class="f-txt" text-anchor="end" font-size="13">x</text><text x="248" y="78" class="f-txt" font-size="13">x</text></svg>';
+    return { fig: enclos, q: "Avec " + M(L) + " m de clôture, on entoure un enclos rectangulaire le long d'un mur (le mur forme un côté). On note " + M("x") + " la largeur (perpendiculaire au mur).",
       parts: [{ label: "a) Aire (m²) si x = " + k, spec: { kind: "value", value: k * (L - 2 * k) } }, { label: "b) Largeur x qui donne l'aire maximale (m)", spec: { kind: "value", value: L / 4 } }, { label: "c) Aire maximale (m²)", spec: { kind: "value", value: (L / 4) * (L / 2) } }],
       hints: ["Exprime l'aire en fonction de x : la longueur vaut " + L + " − 2x. L'aire maximale est au sommet de la parabole.", "A(x) = x(" + L + " − 2x) = −2x² + " + L + "x ; sommet en x = −b / 2a."],
       sol: M("A(x) = x(" + L + " - 2x)") + ". a) " + M(k * (L - 2 * k)) + " m². b) " + M("x = \\frac{" + L + "}{4} = " + L / 4) + " m. c) " + M(L / 4 + " \\cdot " + L / 2 + " = " + (L / 4) * (L / 2)) + " m²." };
@@ -4679,7 +4699,7 @@ V34("aire3",
 );
 // --- Nombres relatifs ---
 V("relrep", 2,
-  () => { const a = R.int(3, 12), b = R.int(2, 9); return QV("Le matin, il fait " + M("-" + a) + " °C ; l'après-midi, " + M(b) + " °C. De combien de degrés la température a-t-elle monté ?", a + b, "De " + M("-" + a) + " à 0 : " + a + " ; de 0 à " + b + " : " + b + ". Écart : " + (a + b) + " °C."); },
+  () => { const a = R.int(3, 12), b = R.int(2, 9); return QV("Le matin, il fait " + M("-" + a) + " °C ; l'après-midi, " + M(b) + " °C. De combien de degrés la température a-t-elle monté ?", a + b, "De " + M("-" + a) + " °C à 0 °C, elle monte de " + a + " °C ; de 0 °C à " + b + " °C, de " + b + " °C. Écart : " + (a + b) + " °C."); },
   () => { const a = R.int(8, 15), b = R.int(2, a - 2); return QV("Sur une droite graduée, quelle est la distance entre les points d'abscisses " + M("-" + a) + " et " + M("-" + b) + " ?", a - b, "Les deux sont négatifs : " + M(a + " - " + b + " = " + (a - b)) + "."); },
 );
 V34("relrep",
@@ -5584,7 +5604,7 @@ VA("logbase", 3, () => { const n = R.int(3, 5); return QV("Calcule " + M("\\log_
 VA("trigcercle", 2, () => { const [v, s, a] = R.pick([[0.5, "\\frac{1}{2}", 150], [Math.SQRT1_2, "\\frac{\\sqrt{2}}{2}", 135], [Math.sqrt(3) / 2, "\\frac{\\sqrt{3}}{2}", 120]]); return QV("Pour quel angle " + M("\\alpha") + " compris entre 90° et 180° a-t-on " + M("\\sin\\alpha = " + s) + " (en degrés) ?", a, "L'angle aigu associé est " + (180 - a) + "° ; dans le 2e quadrant : " + M("180° - " + (180 - a) + "° = " + a + "°") + "."); });
 VA("trigcercle", 3, () => { const [t, s, a] = R.pick([[1, "1", 225], [Math.sqrt(3), "\\sqrt{3}", 240], [1 / Math.sqrt(3), "\\frac{\\sqrt{3}}{3}", 210]]); return QV("Quel angle " + M("\\alpha") + " compris entre 180° et 270° vérifie " + M("\\tan\\alpha = " + s) + " (en degrés) ?", a, "Angle aigu associé " + (a - 180) + "° ; 3e quadrant : " + M("180° + " + (a - 180) + "° = " + a + "°") + "."); });
 VA("eqparam", 3, () => { const b = R.pick([4, 6, 8, 12]), c = R.pick([1, 2, 4]); const m = (b * b) / (4 * c); if (!Number.isInteger(m) || m < 2) return VAR.eqparam[3][0](); return QV("Pour quelle valeur de m l'équation " + M("mx^2 + " + b + "x + " + c + " = 0") + " a-t-elle une solution double ?", m, M("\\Delta = " + b * b + " - 4 \\cdot m \\cdot " + c + " = 0 \\iff m = " + m) + "."); });
-VA("statfreq", 2, () => clean(() => { const e = [R.int(2, 9), R.int(2, 9), R.int(2, 9), R.int(2, 9)], k = R.int(2, 3); const c = e.slice(0, k).reduce((a, b) => a + b, 0); return QV("Notes d'un test (sur 6) : note 3 : " + e[0] + " élèves ; note 4 : " + e[1] + " ; note 5 : " + e[2] + " ; note 6 : " + e[3] + ". Combien d'élèves ont une note inférieure ou égale à " + (k + 2) + " (effectif cumulé) ?", c, e.slice(0, k).join(" + ") + " = " + c + "."); }));
+VA("statfreq", 2, () => clean(() => { const e = [R.int(2, 9), R.int(2, 9), R.int(2, 9), R.int(2, 9)], k = R.int(2, 3); const c = e.slice(0, k).reduce((a, b) => a + b, 0); return QV("Notes d'un test (sur 6) : " + e[0] + " élèves ont 3, " + e[1] + " ont 4, " + e[2] + " ont 5 et " + e[3] + " ont 6. Combien d'élèves ont une note inférieure ou égale à " + (k + 2) + " (effectif cumulé) ?", c, e.slice(0, k).join(" + ") + " = " + c + "."); }));
 VA("stats", 2, () => { const a = R.int(1, 4), b = R.int(5, 8), x = R.int(9, 12), y = R.int(14, 17), c = R.int(18, 22), d = R.int(23, 28); const m = (x + y) / 2; if (!Number.isInteger(m)) return VAR.stats[2][0](); return QV("Série triée de 6 valeurs : " + a + "   " + b + "   x   " + y + "   " + c + "   " + d + ". Sa médiane vaut " + m + ". Que vaut x ?", x, M("\\frac{x + " + y + "}{2} = " + m) + ", donc " + M("x = " + x) + "."); });
 VA("domaine", 2,
   () => { const a = R.int(1, 9); return { q: "Détermine le domaine de définition de " + M("f(x) = \\frac{1}{\\sqrt{x - " + a + "}}") + ".", spec: { kind: "solset", ivs: [[a, false, Infinity, false]] }, sol: "Sous la racine : " + M("x - " + a + " \\ge 0") + ", et la racine ne doit pas être nulle (dénominateur) : " + M("x > " + a) + ", soit " + M("]" + a + " \\,;\\, +\\infty[") + "." }; },
@@ -7464,7 +7484,7 @@ function compNote(rec) {
   const PROBS = {
     eq1: [() => { const h1 = pk([24, 30, 36]), a = pk([3, 4, 6]), b = pk([1, 1.5, 2]), t = pk([4, 5, 6]), h2 = h1 - (a - b) * t; if (h2 <= 0 || h2 >= h1) return PROBS.eq1[0]();
       return Pb("Deux bougies sont allumées en même temps. La bougie A mesure " + h1 + " cm et raccourcit de " + a + " cm par heure ; la bougie B mesure " + M(dec(h2)) + " cm et raccourcit de " + M(dec(b)) + " cm par heure.", [["a) Hauteur de A après 2 h (cm)", h1 - 2 * a], ["b) Au bout de combien d'heures ont-elles la même hauteur ?", t], ["c) Quelle est alors cette hauteur (cm) ?", h1 - a * t]],
-        ["Hauteur de A : " + h1 + " − " + a + "t ; de B : " + decTxt(h2) + " − " + decTxt(b) + "t.", "Résous " + h1 + " − " + a + "t = " + decTxt(h2) + " − " + decTxt(b) + "t."], "a) " + M(h1 + " - " + 2 * a + " = " + (h1 - 2 * a)) + " cm. b) " + M(h1 + " - " + a + "t = " + dec(h2) + " - " + dec(b) + "t") + " donne " + M(dec(a - b) + "t = " + dec(h1 - h2)) + ", " + M("t = " + t) + " h. c) " + M(h1 + " - " + a * t + " = " + (h1 - a * t)) + " cm."); }],
+        ["Hauteur de A : " + h1 + " − " + a + "t ; de B : " + decTxt(h2) + " − " + (b === 1 ? "" : decTxt(b)) + "t.", "Résous " + h1 + " − " + a + "t = " + decTxt(h2) + " − " + (b === 1 ? "" : decTxt(b)) + "t."], "a) " + M(h1 + " - " + 2 * a + " = " + (h1 - 2 * a)) + " cm. b) " + M(h1 + " - " + a + "t = " + dec(h2) + " - " + (b === 1 ? "" : dec(b)) + "t") + " donne " + M(dec(a - b) + "t = " + dec(h1 - h2)) + ", " + M("t = " + t) + " h. c) " + M(h1 + " - " + a * t + " = " + (h1 - a * t)) + " cm."); }],
     eqfrac: [() => { const [a, b] = pk([[3, 6], [4, 12], [2, 3], [6, 3], [10, 15], [4, 6]]), t = (a * b) / (a + b);
       return Pb("Un robinet remplit une cuve en " + a + " h ; un autre la remplit en " + b + " h. On les ouvre ensemble.", [["a) Fraction de la cuve remplie en 1 h par le premier", 1 / a], ["b) Fraction remplie en 1 h par les deux ensemble", 1 / a + 1 / b], ["c) Durée pour remplir la cuve ensemble (h)", t]],
         ["En 1 h, le premier remplit 1/" + a + " de la cuve.", "Résous t/" + a + " + t/" + b + " = 1."], "a) " + M("\\frac{1}{" + a + "}") + ". b) " + M("\\frac{1}{" + a + "} + \\frac{1}{" + b + "} = " + frac(a + b, a * b)) + ". c) " + M("\\frac{t}{" + a + "} + \\frac{t}{" + b + "} = 1 \\iff t = " + tn(t)) + " h."); }],
@@ -7558,7 +7578,7 @@ const RICH = {};
   // Pas de points affichés (15.11) : le poids sert seulement à pondérer l'auto-correction en interne.
   const nopts = (s) => s.replace(/ ?\((?:\d+ pts?(?: \+ \d+ pts?)*)(?: par objet| avec la justification)?\)/g, "").replace(/\(\d+ pts?, /g, "(").replace(/Pas de points : on/g, "On");
   // Virgule décimale hors formule (16.11) : « 20{,}9 » écrit hors de \( \) s'affichait tel quel ; on la remet en texte.
-  const pd = (t) => String(t).split(/(\\\(.*?\\\))/).map((seg, i) => (i % 2 ? seg : seg.replace(/\{,\}/g, ",").replace(/\\text\{'\}/g, "'"))).join("");
+  const pd = (t) => colonBreak(String(t).split(/(\\\(.*?\\\))/).map((seg, i) => (i % 2 ? seg : seg.replace(/\{,\}/g, ",").replace(/\\text\{'\}/g, "'"))).join(""));
   const X = (o) => Object.assign({ pts: Math.max(1, o.parts.reduce((s, p) => s + p.pts, 0)) }, o, { q: pd(o.q), sol: pd(nopts(o.sol)), parts: o.parts.map((p) => ({ label: pd(p.label), pts: p.pts })) });
   const ul = (rows) => "<ol type=\"a\" class=\"mock-parts\">" + rows.map((r) => "<li>" + r + "</li>").join("") + "</ol>";
 
@@ -8328,7 +8348,7 @@ const LESSONS_V2 = {
   simil: ["Agrandir, réduire", "Deux figures semblables ont la même forme : l'une est un agrandissement de l'autre.",
     "Si les longueurs sont multipliées par \\(k\\), les aires sont multipliées par \\(k^2\\). Les volumes sont multipliés par \\(k^3\\).",
     ["Rapport \\(k = 3\\) : une aire de 5 cm² devient \\(5 \\cdot 9 = 45\\) cm².",
-      "Maquette au 1 : 10 : le volume réel est \\(10^3 = 1000\\) fois plus grand."],
+      "Maquette à l'échelle \\(1\\,:\\,10\\) : le volume réel est \\(10^3 = 1000\\) fois plus grand."],
     "Doubler les longueurs ne double pas l'aire : elle est multipliée par 4."],
   pythrec: ["Le triangle est-il rectangle ?", "Le théorème de Pythagore fonctionne aussi dans l'autre sens.",
     "On repère le plus grand côté \\(c\\). On compare \\(c^2\\) et \\(a^2 + b^2\\). S'ils sont égaux, le triangle est rectangle (réciproque de Pythagore). S'ils sont différents, il ne l'est pas (contraposée).",
@@ -9126,7 +9146,7 @@ function activeLesson(id, L, cont, review) {
     $("goal").textContent = "Défi 1 · " + A.defis[0];
     reveal($("s2"));
     A.play($("play"), (k, msg) => {
-      $("gfb").innerHTML = `<div class="fb ok">✓ ${msg}</div>`;
+      $("gfb").innerHTML = `<div class="fb ok">✓ ${colonBreak(msg)}</div>`;
       if (k + 1 < A.defis.length) $("goal").textContent = "Défi " + (k + 2) + " · " + A.defis[k + 1];
       else { $("goal").textContent = "Défis réussis !"; burst(); finish(); }
     });
@@ -9541,7 +9561,17 @@ function activeLesson(id, L, cont, review) {
         const draw = () => {
           if (step >= E.length) return;
           const [p, q] = E[step], okDiv = p % k === 0 && q % k === 0;
-          box.innerHTML = `<div class="act-out">Aire : <b>${poly([[p, "x"], [q, ""]])}</b></div>${actStepper("largeur (facteur)", k, "k")}
+          // Le rectangle dessiné (commentaires testeurs des 15 et 16.11 : « on ne voit pas le rectangle ») : largeur k, longueur partagée en deux.
+          const L1 = Math.abs(p) / k, L2 = Math.abs(q) / k, W = 300, sc = Math.min(22, 230 / (L1 * 2 + L2 + 0.001)), hk = Math.min(90, 14 * k), w1 = okDiv ? 2 * L1 * sc : 150, w2 = okDiv ? L2 * sc : 70, x0 = 40, y0 = 14;
+          const svg = `<svg class="fig" viewBox="0 0 ${W} ${hk + 48}" role="img" aria-label="rectangle de largeur ${k}">
+            <rect x="${x0}" y="${y0}" width="${w1}" height="${hk}" class="f-soft" stroke="var(--ink)" stroke-width="1.5"/>
+            <rect x="${x0 + w1}" y="${y0}" width="${w2}" height="${hk}" class="f-soft" stroke="var(--ink)" stroke-width="1.5"${q < 0 ? ' stroke-dasharray="4 3"' : ""}/>
+            <text x="${x0 + w1 / 2}" y="${y0 + hk / 2 + 5}" class="f-txt" text-anchor="middle" font-size="14">${okDiv ? p + "x" : "?"}</text>
+            <text x="${x0 + w1 + w2 / 2}" y="${y0 + hk / 2 + 5}" class="f-txt" text-anchor="middle" font-size="14">${okDiv ? (q < 0 ? "−" + Math.abs(q) : q) : "?"}</text>
+            <text x="${x0 - 8}" y="${y0 + hk / 2 + 5}" class="f-accent f-txt" text-anchor="end" font-size="15" font-weight="700">${k}</text>
+            <text x="${x0 + w1 / 2}" y="${y0 + hk + 22}" class="f-txt" text-anchor="middle" font-size="13">${okDiv ? (L1 === 1 ? "" : L1) + "x" : "?"}</text>
+            <text x="${x0 + w1 + w2 / 2}" y="${y0 + hk + 22}" class="f-txt" text-anchor="middle" font-size="13">${okDiv ? (q < 0 ? "−" : "") + L2 : "?"}</text></svg>`;
+          box.innerHTML = `<div class="act-out">Aire : <b>${poly([[p, "x"], [q, ""]])}</b></div><div class="small muted">On range l'aire dans un rectangle de largeur ${k} : que mesure sa longueur ?${q < 0 ? " (partie en pointillé : aire à retirer)" : ""}</div>${svg}${actStepper("largeur (facteur)", k, "k")}
             <div class="act-out">${okDiv ? `${p}x ${q < 0 ? "−" : "+"} ${Math.abs(q)} = <b>${k}(${poly([[p / k, "x"], [q / k, ""]])})</b>` : `${k} ne divise pas ${p} et ${Math.abs(q)} : pas de rectangle entier.`}</div>
             <button type="button" class="btn-primary small" id="actok">C'est factorisé</button>`;
           actBindStepper(box, "k", () => k, (v) => { k = v; draw(); }, 1, 12);
@@ -9654,7 +9684,7 @@ function activeLesson(id, L, cont, review) {
     const check = () => {
       const [a, b, c, d] = st;
       const sol = (near(a, 1) && near(b, 0) && near(c, 0)) ? d : (near(c, 1) && near(d, 0) && near(a, 0)) ? b : null;
-      if (sol !== null) { onWin(step, E[step][5] || "x = " + fr(sol) + ". Contrôle-le dans l'équation de départ."); step++; load(); }
+      if (sol !== null) { onWin(step, E[step][5] || "Solution : x = " + fr(sol) + ".<br>Contrôle-la dans l'équation de départ."); step++; load(); }
       draw();
     };
     draw();
@@ -9664,7 +9694,7 @@ function activeLesson(id, L, cont, review) {
   const hunt = (o) => (box, onWin) => {
     let x = o.start, step = 0; const seen = new Set();
     const draw = () => {
-      box.innerHTML = actStepper(o.label || "x", nb(x), "x") + o.show(x) + (o.note ? `<div class="small muted">${o.note}</div>` : "");
+      box.innerHTML = actStepper(o.label || "x", nb(x), "x") + o.show(x, step) + (o.note ? `<div class="small muted">${o.note}</div>` : "");
       box.querySelectorAll('[data-st="x"]').forEach((b) => (b.onclick = () => { x = Math.max(o.min, Math.min(o.max, +(x + +b.dataset.d * (o.step || 1)).toFixed(6))); draw(); check(); }));
     };
     const check = () => { if (step >= o.wins.length) return; const m = o.wins[step](x, seen); if (m) { onWin(step, m); step++; check(); } };
@@ -9735,7 +9765,9 @@ function activeLesson(id, L, cont, review) {
     eq2fact: {
       predict: { q: "x² = 3x : combien de solutions ?", choices: ["Une : x = 3", "Deux : 0 et 3", "Aucune"], good: 1, why: "0² = 3 · 0 = 0 et 3² = 3 · 3 = 9 : deux solutions. Diviser par x aurait fait perdre x = 0." },
       defis: ["Trouve un nombre x tel que x² = 3x.", "Trouves-en un autre !", "Mode x² = 16 : trouve la solution négative."],
-      play: hunt({ start: 1, min: -6, max: 6, show: (x) => `<div class="act-out">x² = <b>${sq(x)}</b> · 3x = <b>${nb(3 * x)}</b> · 16 → ${x * x === 16 ? "<b>x² = 16 ✓</b>" : "x² ≠ 16"}</div>`, note: "Compare les deux membres.",
+      play: hunt({ start: 1, min: -6, max: 6, show: (x, st) => st < 2
+        ? `<div class="act-out">Équation : x² = 3x<br>Membre de gauche : x² = (${nb(x)})² = <b>${sq(x)}</b><br>Membre de droite : 3x = 3 · (${nb(x)}) = <b>${nb(3 * x)}</b><br>${x * x === 3 * x ? "<b>Égaux ✓</b>" : "Pas égaux"}</div>`
+        : `<div class="act-out">Nouvelle équation : x² = 16<br>x² = (${nb(x)})² = <b>${sq(x)}</b><br>${x * x === 16 ? "<b>Égal à 16 ✓</b>" : "Pas égal à 16"}</div>`, note: "Change x avec − et + ; compare les deux membres.",
         wins: [(x, s) => (x * x === 3 * x ? (s.add(x), "x = " + nb(x) + " : " + sq(x) + " = " + nb(3 * x) + ".") : null), (x, s) => (x * x === 3 * x && !s.has(x) ? "Deux solutions : 0 et 3. x(x − 3) = 0." : null), (x) => (x === -4 ? "x = −4 : (−4)² = 16. x² = 16 a deux solutions, ±4." : null)] }),
     },
     eq2: {
@@ -9754,7 +9786,7 @@ function activeLesson(id, L, cont, review) {
           let p = ""; for (let x = -2; x <= 6.01; x += 0.1) p += (p ? " L" : "M") + gx(x).toFixed(1) + "," + Math.max(-20, gy(x * x - 4 * x + c)).toFixed(1);
           const sols = D > 0 ? [2 - Math.sqrt(D) / 2, 2 + Math.sqrt(D) / 2] : D === 0 ? [2] : [];
           box.innerHTML = actStepper("c", c, "c") + `<svg class="fig" viewBox="0 0 ${W} ${H}" role="img" aria-label="parabole"><line x1="0" y1="${gy(0)}" x2="${W}" y2="${gy(0)}" class="f-line"/><path d="${p}" class="f-line" fill="none" stroke-width="2"/>${sols.map((s) => `<circle cx="${gx(s)}" cy="${gy(0)}" r="5" class="f-dot"/>`).join("")}</svg>
-            <div class="act-out">Δ = 16 − 4 · ${nb(c)} = <b>${nb(D)}</b> · ${n} solution${n > 1 ? "s" : ""}${sols.length ? " : " + sols.map((s) => nb(+s.toFixed(2))).join(" ; ") : ""}</div>`;
+            <div class="act-out">Δ = 16 − 4 · ${nb(c)} = <b>${nb(D)}</b><br>Nombre de solutions : <b>${n}</b>${sols.length ? "<br>x ≈ " + sols.map((s) => nb(+s.toFixed(2))).join(" ; x ≈ ") : ""}</div>`;
           actBindStepper(box, "c", () => c, (v) => { c = v; draw(); check(); }, -8, 10);
         };
         const check = () => {
@@ -9769,7 +9801,7 @@ function activeLesson(id, L, cont, review) {
     probeq2: {
       predict: { q: "Un rectangle a une longueur égale à sa largeur + 3 et une aire de 40. Sa largeur est…", choices: ["5", "8", "10"], good: 0, why: "5 · 8 = 40. L'équation x(x + 3) = 40 a aussi la solution −8, qu'on écarte : une largeur est positive." },
       defis: ["Trouve la largeur pour une aire de 40.", "Trouve la largeur pour une aire de 70.", "Et pour une aire de 28 ?"],
-      play: hunt({ start: 2, min: 1, max: 12, label: "largeur x", show: (x) => `<svg class="fig" viewBox="0 0 320 ${Math.round(20 + x * 9)}" role="img" aria-label="rectangle"><rect x="10" y="10" width="${(x + 3) * 18}" height="${x * 9}" class="f-shape"/></svg><div class="act-out">${nb(x)} · ${nb(x + 3)} = <b>${nb(x * (x + 3))}</b></div>`,
+      play: hunt({ start: 2, min: 1, max: 12, label: "largeur x", show: (x) => `<svg class="fig" viewBox="0 0 320 ${Math.round(20 + x * 9)}" role="img" aria-label="rectangle"><rect x="10" y="10" width="${(x + 3) * 18}" height="${x * 9}" class="f-shape"/></svg><div class="act-out">Largeur ${nb(x)}, longueur ${nb(x + 3)}<br>Aire : ${nb(x)} · ${nb(x + 3)} = <b>${nb(x * (x + 3))}</b></div>`,
         wins: [(x) => (x * (x + 3) === 40 ? "x = 5 : x² + 3x − 40 = (x − 5)(x + 8) = 0 ; −8 est écarté." : null), (x) => (x * (x + 3) === 70 ? "x = 7 : 7 · 10 = 70." : null), (x) => (x * (x + 3) === 28 ? "x = 4 : (x − 4)(x + 7) = 0." : null)] }),
     },
     eq3: {
@@ -9781,13 +9813,13 @@ function activeLesson(id, L, cont, review) {
     bicarre: {
       predict: { q: "x⁴ − 5x² + 4 = 0. Si l'on pose X = x², l'équation devient…", choices: ["X² − 5X + 4 = 0", "X⁴ − 5X + 4 = 0", "X − 5X + 4 = 0"], good: 0, why: "x⁴ = (x²)² = X². C'est une équation du 2e degré en X : X = 1 ou X = 4." },
       defis: ["Trouve une solution x de x⁴ − 5x² + 4 = 0.", "Trouve une solution x de valeur absolue différente.", "Trouve les quatre solutions."],
-      play: hunt({ start: 0, min: -3, max: 3, show: (x) => `<div class="act-out">X = x² = <b>${sq(x)}</b><br>X² − 5X + 4 = ${sq(x * x)} − ${nb(5 * x * x)} + 4 = <b>${nb(x ** 4 - 5 * x * x + 4)}</b></div>`, note: "Chaque valeur de X positive donne deux x opposés.",
+      play: hunt({ start: 0, min: -3, max: 3, show: (x) => `<div class="act-out">X = x² = <b>${sq(x)}</b><br>X² − 5X + 4 = ${sq(x * x)} − ${nb(5 * x * x)} + 4 = <b>${nb(x ** 4 - 5 * x * x + 4)}</b><br>${x ** 4 - 5 * x * x + 4 === 0 ? "<b>Solution ✓</b>" : "Pas une solution"}</div>`, note: "Chaque valeur de X positive donne deux x opposés.",
         wins: [(x, s) => (x ** 4 - 5 * x * x + 4 === 0 ? (s.add(x), "x = " + nb(x) + " : X = " + sq(x) + ".") : null), (x, s) => { if (x ** 4 - 5 * x * x + 4 === 0) s.add(x); return [...s].some((u) => Math.abs(u) !== Math.abs(x)) && x ** 4 - 5 * x * x + 4 === 0 ? "Deux valeurs de X : 1 et 4." : null; }, (x, s) => { if (x ** 4 - 5 * x * x + 4 === 0) s.add(x); return s.size === 4 ? "Quatre solutions : −2, −1, 1, 2 (X = 1 et X = 4 en donnent deux chacune)." : null; }] }),
     },
     eqirr: {
       predict: { q: "√(x + 7) = x + 1. En élevant au carré, on trouve x = 2 ou x = −3. Les deux conviennent-elles ?", choices: ["Oui", "Non, seulement 2", "Non, seulement −3"], good: 1, why: "Pour −3 : √4 = 2, mais x + 1 = −2. Une racine n'est jamais négative : −3 est une solution « parasite »." },
       defis: ["Trouve x tel que √(x + 7) = x + 1.", "Trouve un x tel que les carrés soient égaux mais pas les deux membres.", "Trouve x tel que √(x + 7) = 4."],
-      play: hunt({ start: 0, min: -7, max: 12, show: (x) => `<div class="act-out">√(x + 7) = <b>${nb(+Math.sqrt(x + 7).toFixed(3))}</b> · x + 1 = <b>${nb(x + 1)}</b><br><span class="small muted">au carré : x + 7 = ${nb(x + 7)} · (x + 1)² = ${sq(x + 1)}</span></div>`,
+      play: hunt({ start: 0, min: -7, max: 12, show: (x) => `<div class="act-out">Membre de gauche : √(x + 7) = <b>${nb(+Math.sqrt(x + 7).toFixed(3))}</b><br>Membre de droite : x + 1 = <b>${nb(x + 1)}</b><br><span class="small muted">Au carré, à gauche : x + 7 = ${nb(x + 7)}<br>Au carré, à droite : (x + 1)² = ${sq(x + 1)}</span></div>`,
         wins: [(x) => (Math.sqrt(x + 7) === x + 1 ? "x = 2 : √9 = 3 = 2 + 1." : null), (x) => (x + 7 === (x + 1) ** 2 && Math.sqrt(x + 7) !== x + 1 ? "x = −3 : 4 = 4 au carré, mais √4 = 2 ≠ −2. Le carré a « oublié » le signe : on vérifie toujours." : null), (x) => (Math.sqrt(x + 7) === 4 ? "x = 9 : x + 7 = 16." : null)] }),
     },
   });
@@ -10336,9 +10368,12 @@ const Engine = {
       if (!keep) keep = q; // non triviale mais réponse visible : gardée en réserve
     }
     if (keep) q = keep;
-    if (q.guide) q.guide = q.guide.map((g) => ({ ...g, ask: tidy(g.ask), sol: tidy(g.sol) }));
+    if (q.guide) q.guide = q.guide.map((g) => ({ ...g, ask: colonBreak(tidy(g.ask)), sol: colonBreak(tidy(g.sol)) }));
+    q.q = colonBreak(q.q); q.sol = colonBreak(q.sol);
+    if (q.traps) q.traps = q.traps.map((t) => ({ ...t, m: colonBreak(t.m) }));
+    if (q.hints) q.hints = q.hints.map(colonBreak);
     if (q.traps && q.spec && q.spec.kind === "value") q.traps = q.traps.filter((t) => isFinite(t.v) && Math.abs(t.v - q.spec.value) > Math.max(q.spec.round || 0, 1e-6 * Math.max(1, Math.abs(q.spec.value))));
-    if (q.parts) q.parts = q.parts.map((p) => ({ ...p, label: tidy(p.label) }));
+    if (q.parts) q.parts = q.parts.map((p) => ({ ...p, label: colonBreak(tidy(p.label)) }));
     // Consigne de forme : « notation scientifique » contrôlée par le correcteur.
     if (q.spec && q.spec.kind === "value" && /notation scientifique/.test(q.q) && !/^Calcule : /.test(q.q)) {
       q.spec = { ...q.spec, sci: true };
@@ -10618,6 +10653,10 @@ const Engine = {
   },
 };
 
+// Deux-points lisibles (16.11) : rappels de cours et « Devine » des leçons actives, une fois tout chargé.
+if (typeof LESSONS !== "undefined") for (const L of Object.values(LESSONS)) if (L && typeof L === "object") { for (const k of ["intro", "regle", "piege"]) if (typeof L[k] === "string") L[k] = colonBreak(L[k]); if (Array.isArray(L.exemple)) L.exemple = L.exemple.map(colonBreak); }
+if (typeof ACTIVE !== "undefined") for (const A of Object.values(ACTIVE)) if (A && A.predict) A.predict.why = colonBreak(A.predict.why);
+
 // Interface : entrée (niveau, positionnement), accueil, séance, bilan, compétences.
 // Point de collecte des votes 👍 / 👎 : laisser vide tant qu'aucun n'est configuré (votes gardés sur l'appareil).
 const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7gqEVGIeAbBF0cML8VEDYtQfaOmO0743jRcmeHSQ-WglFVCb-dd/exec";
@@ -10631,6 +10670,8 @@ if (state && state.profile && state.notions && Object.keys(state.notions).length
 const save = () => Store.save(state);
 const h = (html) => { app.classList.remove("has-tabs"); app.innerHTML = html; typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+// Textes de l'app (indices, erreurs typiques) : échappés, sauf <b>, <i>, <br> (16.11 : les balises s'affichaient telles quelles).
+const escT = (s) => esc(s).replace(/&lt;(\/?)(b|i|br)&gt;/g, "<$1$2>");
 const gradeName = (p) => (SYSTEMS[p.system].grades.find(([g]) => g === p.grade) || [0, ""])[1];
 const brand = '<div class="brand"><b>5 minutes de maths</b><span>par jour</span></div>';
 const PRAISE = ["Juste !", "Bien vu !", "Exact !", "Parfait.", "C'est ça !", "Bravo !"];
@@ -11324,7 +11365,7 @@ function renderProblem(q, opt) {
       if (ok[i]) document.getElementById("p" + i).disabled = true;
     });
     if (ok.every(Boolean) || tries >= 3) return end(false);
-    fb.innerHTML = `<div class="fb hint pop"><b>${ok.some(Boolean) ? "En partie juste. Continue !" : "Pas encore."}</b><span><b>Indice ${tries}</b> · ${esc(q.hints[tries - 1])}</span></div>`;
+    fb.innerHTML = `<div class="fb hint pop"><b>${ok.some(Boolean) ? "En partie juste. Continue !" : "Pas encore."}</b><span><b>Indice ${tries}</b> · ${escT(q.hints[tries - 1])}</span></div>`;
   };
   document.getElementById("check").onclick = check;
   document.getElementById("idk").onclick = () => { if (!finished) end(true); };
@@ -11450,7 +11491,7 @@ function renderQuestion(q, opt) {
     const diag = r.status === "wrong" || (r.status === "close" && q.spec.kind === "set") ? diagnose(q, v) : null;
     lastDiag = diag;
     if (opt.single || tries >= 2) return end(false);
-    fb.innerHTML = `<div class="fb hint pop"><b>${r.status === "close" ? "Presque !" : "Pas encore. Réessaie !"}</b><span>${esc(diag || r.message || "")}</span><span><b>Indice</b> · ${esc(q.hint)}</span></div>`;
+    fb.innerHTML = `<div class="fb hint pop"><b>${r.status === "close" ? "Presque !" : "Pas encore. Réessaie !"}</b><span>${escT(diag || r.message || "")}</span><span><b>Indice</b> · ${escT(q.hint)}</span></div>`;
     typeset(fb);
     inp.select();
   };

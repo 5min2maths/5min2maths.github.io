@@ -18,7 +18,7 @@ const RICH = {};
   // Pas de points affichés (15.11) : le poids sert seulement à pondérer l'auto-correction en interne.
   const nopts = (s) => s.replace(/ ?\((?:\d+ pts?(?: \+ \d+ pts?)*)(?: par objet| avec la justification)?\)/g, "").replace(/\(\d+ pts?, /g, "(").replace(/Pas de points : on/g, "On");
   // Virgule décimale hors formule (16.11) : « 20{,}9 » écrit hors de \( \) s'affichait tel quel ; on la remet en texte.
-  const pd = (t) => String(t).split(/(\\\(.*?\\\))/).map((seg, i) => (i % 2 ? seg : seg.replace(/\{,\}/g, ",").replace(/\\text\{'\}/g, "'"))).join("");
+  const pd = (t) => colonBreak(String(t).split(/(\\\(.*?\\\))/).map((seg, i) => (i % 2 ? seg : seg.replace(/\{,\}/g, ",").replace(/\\text\{'\}/g, "'"))).join(""));
   const X = (o) => Object.assign({ pts: Math.max(1, o.parts.reduce((s, p) => s + p.pts, 0)) }, o, { q: pd(o.q), sol: pd(nopts(o.sol)), parts: o.parts.map((p) => ({ label: pd(p.label), pts: p.pts })) });
   const ul = (rows) => "<ol type=\"a\" class=\"mock-parts\">" + rows.map((r) => "<li>" + r + "</li>").join("") + "</ol>";
 

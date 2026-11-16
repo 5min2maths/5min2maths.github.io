@@ -378,9 +378,12 @@ const Engine = {
       if (!keep) keep = q; // non triviale mais réponse visible : gardée en réserve
     }
     if (keep) q = keep;
-    if (q.guide) q.guide = q.guide.map((g) => ({ ...g, ask: tidy(g.ask), sol: tidy(g.sol) }));
+    if (q.guide) q.guide = q.guide.map((g) => ({ ...g, ask: colonBreak(tidy(g.ask)), sol: colonBreak(tidy(g.sol)) }));
+    q.q = colonBreak(q.q); q.sol = colonBreak(q.sol);
+    if (q.traps) q.traps = q.traps.map((t) => ({ ...t, m: colonBreak(t.m) }));
+    if (q.hints) q.hints = q.hints.map(colonBreak);
     if (q.traps && q.spec && q.spec.kind === "value") q.traps = q.traps.filter((t) => isFinite(t.v) && Math.abs(t.v - q.spec.value) > Math.max(q.spec.round || 0, 1e-6 * Math.max(1, Math.abs(q.spec.value))));
-    if (q.parts) q.parts = q.parts.map((p) => ({ ...p, label: tidy(p.label) }));
+    if (q.parts) q.parts = q.parts.map((p) => ({ ...p, label: colonBreak(tidy(p.label)) }));
     // Consigne de forme : « notation scientifique » contrôlée par le correcteur.
     if (q.spec && q.spec.kind === "value" && /notation scientifique/.test(q.q) && !/^Calcule : /.test(q.q)) {
       q.spec = { ...q.spec, sci: true };
@@ -659,3 +662,7 @@ const Engine = {
     return Object.fromEntries(Object.entries(out).map(([k, v]) => [k, v.reduce((a, b) => a + b, 0) / v.length]));
   },
 };
+
+// Deux-points lisibles (16.11) : rappels de cours et « Devine » des leçons actives, une fois tout chargé.
+if (typeof LESSONS !== "undefined") for (const L of Object.values(LESSONS)) if (L && typeof L === "object") { for (const k of ["intro", "regle", "piege"]) if (typeof L[k] === "string") L[k] = colonBreak(L[k]); if (Array.isArray(L.exemple)) L.exemple = L.exemple.map(colonBreak); }
+if (typeof ACTIVE !== "undefined") for (const A of Object.values(ACTIVE)) if (A && A.predict) A.predict.why = colonBreak(A.predict.why);

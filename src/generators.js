@@ -16,6 +16,23 @@ const R = {
 };
 const gcd = (a, b) => (b ? gcd(b, a % b) : Math.abs(a));
 const M = (t) => "\\(" + t + "\\)";
+// Deux-points lisibles (16.11, demande de l'utilisateur : « on ne comprend rien avec deux points ») : un « : » qui suit
+// une formule (« \(x = 3\) : \(9 = 9\) ») ou une égalité en texte simple (« x = 3 : 9 = 9 ») se lit comme une division.
+// Il devient un retour à la ligne. Les « : » après un mot (« Résous : », « Erreur : ») restent ; dans les formules, « : » est ÷.
+const colonBreak = (s) => {
+  if (typeof s !== "string" || s.indexOf(":") < 0) return s;
+  const parts = s.split(/(\\\(.*?\\\))/);
+  for (let i = 0; i < parts.length; i += 2) {
+    let t = parts[i];
+    if (i > 0) t = t.replace(/^\s*:\s+(?=\S)/, "<br>").replace(/^\s*:\s*$/, i + 1 < parts.length ? "<br>" : " :"); // juste après une formule
+    t = t.replace(/(^|[.!?]\s+|<br>)([^.!?<:]*?=[^.!?<:]*?[0-9A-Za-zÀ-ÿ²³⁴)\]]) : (?=\S)/g, "$1$2<br>"); // « x = 3 : … »
+    // « Divisibles par 9 : 117, 126 » se lit « 9 ÷ 117 » : on garde les deux-points et on passe à la ligne.
+    t = t.replace(/([0-9)²³°]) : (?=[-−0-9(]|$)/g, "$1 :<br>");
+    if (i + 1 < parts.length) t = t.replace(/([0-9)²³°]) :\s*$/, "$1 :<br>");
+    parts[i] = t;
+  }
+  return parts.join("").replace(/<br>(\s*)([a-zàâçéèêëîïôûù])/g, (m, sp, c) => "<br>" + c.toUpperCase());
+};
 // Étape guidée (« on le fait ensemble ») : consigne, valeur attendue, explication ; et piège typique { v, m }.
 const GS = (ask, value, sol, round) => ({ ask, spec: Object.assign({ kind: "value", value }, round ? { round } : {}), sol });
 const TRAP = (v, m) => ({ v, m });
@@ -696,7 +713,10 @@ const PROB = {
   },
   factor() {
     const L = 20 * R.int(2, 6), k = R.int(5, L / 4 - 1);
-    return { fig: FIG.rectFig(2, 1, "mur (pas de clôture)", "x"), q: "Avec " + M(L) + " m de clôture, on entoure un enclos rectangulaire le long d'un mur (le mur forme un côté). On note " + M("x") + " la largeur (perpendiculaire au mur).",
+    // Mur en trait épais et coloré, clôture en pointillé (commentaire testeur du 15.11 : « représenter clairement le mur »).
+    const enclos = '<svg class="fig" viewBox="0 0 300 150" role="img" aria-label="enclos le long d\'un mur"><line x1="30" y1="28" x2="270" y2="28" class="f-accent" stroke-width="8" stroke-linecap="round"/><text x="150" y="18" class="f-txt" text-anchor="middle" font-size="13" font-weight="700">mur (pas de clôture)</text>'
+      + '<polyline points="60,28 60,118 240,118 240,28" fill="none" class="f-line" stroke-width="2.5" stroke-dasharray="7 5"/><text x="150" y="138" class="f-txt" text-anchor="middle" font-size="13">clôture : ' + L + ' − 2x</text><text x="52" y="78" class="f-txt" text-anchor="end" font-size="13">x</text><text x="248" y="78" class="f-txt" font-size="13">x</text></svg>';
+    return { fig: enclos, q: "Avec " + M(L) + " m de clôture, on entoure un enclos rectangulaire le long d'un mur (le mur forme un côté). On note " + M("x") + " la largeur (perpendiculaire au mur).",
       parts: [{ label: "a) Aire (m²) si x = " + k, spec: { kind: "value", value: k * (L - 2 * k) } }, { label: "b) Largeur x qui donne l'aire maximale (m)", spec: { kind: "value", value: L / 4 } }, { label: "c) Aire maximale (m²)", spec: { kind: "value", value: (L / 4) * (L / 2) } }],
       hints: ["Exprime l'aire en fonction de x : la longueur vaut " + L + " − 2x. L'aire maximale est au sommet de la parabole.", "A(x) = x(" + L + " − 2x) = −2x² + " + L + "x ; sommet en x = −b / 2a."],
       sol: M("A(x) = x(" + L + " - 2x)") + ". a) " + M(k * (L - 2 * k)) + " m². b) " + M("x = \\frac{" + L + "}{4} = " + L / 4) + " m. c) " + M(L / 4 + " \\cdot " + L / 2 + " = " + (L / 4) * (L / 2)) + " m²." };

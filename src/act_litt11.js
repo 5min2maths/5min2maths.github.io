@@ -230,7 +230,17 @@
         const draw = () => {
           if (step >= E.length) return;
           const [p, q] = E[step], okDiv = p % k === 0 && q % k === 0;
-          box.innerHTML = `<div class="act-out">Aire : <b>${poly([[p, "x"], [q, ""]])}</b></div>${actStepper("largeur (facteur)", k, "k")}
+          // Le rectangle dessiné (commentaires testeurs des 15 et 16.11 : « on ne voit pas le rectangle ») : largeur k, longueur partagée en deux.
+          const L1 = Math.abs(p) / k, L2 = Math.abs(q) / k, W = 300, sc = Math.min(22, 230 / (L1 * 2 + L2 + 0.001)), hk = Math.min(90, 14 * k), w1 = okDiv ? 2 * L1 * sc : 150, w2 = okDiv ? L2 * sc : 70, x0 = 40, y0 = 14;
+          const svg = `<svg class="fig" viewBox="0 0 ${W} ${hk + 48}" role="img" aria-label="rectangle de largeur ${k}">
+            <rect x="${x0}" y="${y0}" width="${w1}" height="${hk}" class="f-soft" stroke="var(--ink)" stroke-width="1.5"/>
+            <rect x="${x0 + w1}" y="${y0}" width="${w2}" height="${hk}" class="f-soft" stroke="var(--ink)" stroke-width="1.5"${q < 0 ? ' stroke-dasharray="4 3"' : ""}/>
+            <text x="${x0 + w1 / 2}" y="${y0 + hk / 2 + 5}" class="f-txt" text-anchor="middle" font-size="14">${okDiv ? p + "x" : "?"}</text>
+            <text x="${x0 + w1 + w2 / 2}" y="${y0 + hk / 2 + 5}" class="f-txt" text-anchor="middle" font-size="14">${okDiv ? (q < 0 ? "−" + Math.abs(q) : q) : "?"}</text>
+            <text x="${x0 - 8}" y="${y0 + hk / 2 + 5}" class="f-accent f-txt" text-anchor="end" font-size="15" font-weight="700">${k}</text>
+            <text x="${x0 + w1 / 2}" y="${y0 + hk + 22}" class="f-txt" text-anchor="middle" font-size="13">${okDiv ? (L1 === 1 ? "" : L1) + "x" : "?"}</text>
+            <text x="${x0 + w1 + w2 / 2}" y="${y0 + hk + 22}" class="f-txt" text-anchor="middle" font-size="13">${okDiv ? (q < 0 ? "−" : "") + L2 : "?"}</text></svg>`;
+          box.innerHTML = `<div class="act-out">Aire : <b>${poly([[p, "x"], [q, ""]])}</b></div><div class="small muted">On range l'aire dans un rectangle de largeur ${k} : que mesure sa longueur ?${q < 0 ? " (partie en pointillé : aire à retirer)" : ""}</div>${svg}${actStepper("largeur (facteur)", k, "k")}
             <div class="act-out">${okDiv ? `${p}x ${q < 0 ? "−" : "+"} ${Math.abs(q)} = <b>${k}(${poly([[p / k, "x"], [q / k, ""]])})</b>` : `${k} ne divise pas ${p} et ${Math.abs(q)} : pas de rectangle entier.`}</div>
             <button type="button" class="btn-primary small" id="actok">C'est factorisé</button>`;
           actBindStepper(box, "k", () => k, (v) => { k = v; draw(); }, 1, 12);

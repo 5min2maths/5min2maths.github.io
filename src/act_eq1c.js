@@ -92,7 +92,7 @@
     const check = () => {
       const [a, b, c, d] = st;
       const sol = (near(a, 1) && near(b, 0) && near(c, 0)) ? d : (near(c, 1) && near(d, 0) && near(a, 0)) ? b : null;
-      if (sol !== null) { onWin(step, E[step][5] || "x = " + fr(sol) + ". Contrôle-le dans l'équation de départ."); step++; load(); }
+      if (sol !== null) { onWin(step, E[step][5] || "Solution : x = " + fr(sol) + ".<br>Contrôle-la dans l'équation de départ."); step++; load(); }
       draw();
     };
     draw();
@@ -102,7 +102,7 @@
   const hunt = (o) => (box, onWin) => {
     let x = o.start, step = 0; const seen = new Set();
     const draw = () => {
-      box.innerHTML = actStepper(o.label || "x", nb(x), "x") + o.show(x) + (o.note ? `<div class="small muted">${o.note}</div>` : "");
+      box.innerHTML = actStepper(o.label || "x", nb(x), "x") + o.show(x, step) + (o.note ? `<div class="small muted">${o.note}</div>` : "");
       box.querySelectorAll('[data-st="x"]').forEach((b) => (b.onclick = () => { x = Math.max(o.min, Math.min(o.max, +(x + +b.dataset.d * (o.step || 1)).toFixed(6))); draw(); check(); }));
     };
     const check = () => { if (step >= o.wins.length) return; const m = o.wins[step](x, seen); if (m) { onWin(step, m); step++; check(); } };
@@ -173,7 +173,9 @@
     eq2fact: {
       predict: { q: "x² = 3x : combien de solutions ?", choices: ["Une : x = 3", "Deux : 0 et 3", "Aucune"], good: 1, why: "0² = 3 · 0 = 0 et 3² = 3 · 3 = 9 : deux solutions. Diviser par x aurait fait perdre x = 0." },
       defis: ["Trouve un nombre x tel que x² = 3x.", "Trouves-en un autre !", "Mode x² = 16 : trouve la solution négative."],
-      play: hunt({ start: 1, min: -6, max: 6, show: (x) => `<div class="act-out">x² = <b>${sq(x)}</b> · 3x = <b>${nb(3 * x)}</b> · 16 → ${x * x === 16 ? "<b>x² = 16 ✓</b>" : "x² ≠ 16"}</div>`, note: "Compare les deux membres.",
+      play: hunt({ start: 1, min: -6, max: 6, show: (x, st) => st < 2
+        ? `<div class="act-out">Équation : x² = 3x<br>Membre de gauche : x² = (${nb(x)})² = <b>${sq(x)}</b><br>Membre de droite : 3x = 3 · (${nb(x)}) = <b>${nb(3 * x)}</b><br>${x * x === 3 * x ? "<b>Égaux ✓</b>" : "Pas égaux"}</div>`
+        : `<div class="act-out">Nouvelle équation : x² = 16<br>x² = (${nb(x)})² = <b>${sq(x)}</b><br>${x * x === 16 ? "<b>Égal à 16 ✓</b>" : "Pas égal à 16"}</div>`, note: "Change x avec − et + ; compare les deux membres.",
         wins: [(x, s) => (x * x === 3 * x ? (s.add(x), "x = " + nb(x) + " : " + sq(x) + " = " + nb(3 * x) + ".") : null), (x, s) => (x * x === 3 * x && !s.has(x) ? "Deux solutions : 0 et 3. x(x − 3) = 0." : null), (x) => (x === -4 ? "x = −4 : (−4)² = 16. x² = 16 a deux solutions, ±4." : null)] }),
     },
     eq2: {
@@ -192,7 +194,7 @@
           let p = ""; for (let x = -2; x <= 6.01; x += 0.1) p += (p ? " L" : "M") + gx(x).toFixed(1) + "," + Math.max(-20, gy(x * x - 4 * x + c)).toFixed(1);
           const sols = D > 0 ? [2 - Math.sqrt(D) / 2, 2 + Math.sqrt(D) / 2] : D === 0 ? [2] : [];
           box.innerHTML = actStepper("c", c, "c") + `<svg class="fig" viewBox="0 0 ${W} ${H}" role="img" aria-label="parabole"><line x1="0" y1="${gy(0)}" x2="${W}" y2="${gy(0)}" class="f-line"/><path d="${p}" class="f-line" fill="none" stroke-width="2"/>${sols.map((s) => `<circle cx="${gx(s)}" cy="${gy(0)}" r="5" class="f-dot"/>`).join("")}</svg>
-            <div class="act-out">Δ = 16 − 4 · ${nb(c)} = <b>${nb(D)}</b> · ${n} solution${n > 1 ? "s" : ""}${sols.length ? " : " + sols.map((s) => nb(+s.toFixed(2))).join(" ; ") : ""}</div>`;
+            <div class="act-out">Δ = 16 − 4 · ${nb(c)} = <b>${nb(D)}</b><br>Nombre de solutions : <b>${n}</b>${sols.length ? "<br>x ≈ " + sols.map((s) => nb(+s.toFixed(2))).join(" ; x ≈ ") : ""}</div>`;
           actBindStepper(box, "c", () => c, (v) => { c = v; draw(); check(); }, -8, 10);
         };
         const check = () => {
@@ -207,7 +209,7 @@
     probeq2: {
       predict: { q: "Un rectangle a une longueur égale à sa largeur + 3 et une aire de 40. Sa largeur est…", choices: ["5", "8", "10"], good: 0, why: "5 · 8 = 40. L'équation x(x + 3) = 40 a aussi la solution −8, qu'on écarte : une largeur est positive." },
       defis: ["Trouve la largeur pour une aire de 40.", "Trouve la largeur pour une aire de 70.", "Et pour une aire de 28 ?"],
-      play: hunt({ start: 2, min: 1, max: 12, label: "largeur x", show: (x) => `<svg class="fig" viewBox="0 0 320 ${Math.round(20 + x * 9)}" role="img" aria-label="rectangle"><rect x="10" y="10" width="${(x + 3) * 18}" height="${x * 9}" class="f-shape"/></svg><div class="act-out">${nb(x)} · ${nb(x + 3)} = <b>${nb(x * (x + 3))}</b></div>`,
+      play: hunt({ start: 2, min: 1, max: 12, label: "largeur x", show: (x) => `<svg class="fig" viewBox="0 0 320 ${Math.round(20 + x * 9)}" role="img" aria-label="rectangle"><rect x="10" y="10" width="${(x + 3) * 18}" height="${x * 9}" class="f-shape"/></svg><div class="act-out">Largeur ${nb(x)}, longueur ${nb(x + 3)}<br>Aire : ${nb(x)} · ${nb(x + 3)} = <b>${nb(x * (x + 3))}</b></div>`,
         wins: [(x) => (x * (x + 3) === 40 ? "x = 5 : x² + 3x − 40 = (x − 5)(x + 8) = 0 ; −8 est écarté." : null), (x) => (x * (x + 3) === 70 ? "x = 7 : 7 · 10 = 70." : null), (x) => (x * (x + 3) === 28 ? "x = 4 : (x − 4)(x + 7) = 0." : null)] }),
     },
     eq3: {
@@ -219,13 +221,13 @@
     bicarre: {
       predict: { q: "x⁴ − 5x² + 4 = 0. Si l'on pose X = x², l'équation devient…", choices: ["X² − 5X + 4 = 0", "X⁴ − 5X + 4 = 0", "X − 5X + 4 = 0"], good: 0, why: "x⁴ = (x²)² = X². C'est une équation du 2e degré en X : X = 1 ou X = 4." },
       defis: ["Trouve une solution x de x⁴ − 5x² + 4 = 0.", "Trouve une solution x de valeur absolue différente.", "Trouve les quatre solutions."],
-      play: hunt({ start: 0, min: -3, max: 3, show: (x) => `<div class="act-out">X = x² = <b>${sq(x)}</b><br>X² − 5X + 4 = ${sq(x * x)} − ${nb(5 * x * x)} + 4 = <b>${nb(x ** 4 - 5 * x * x + 4)}</b></div>`, note: "Chaque valeur de X positive donne deux x opposés.",
+      play: hunt({ start: 0, min: -3, max: 3, show: (x) => `<div class="act-out">X = x² = <b>${sq(x)}</b><br>X² − 5X + 4 = ${sq(x * x)} − ${nb(5 * x * x)} + 4 = <b>${nb(x ** 4 - 5 * x * x + 4)}</b><br>${x ** 4 - 5 * x * x + 4 === 0 ? "<b>Solution ✓</b>" : "Pas une solution"}</div>`, note: "Chaque valeur de X positive donne deux x opposés.",
         wins: [(x, s) => (x ** 4 - 5 * x * x + 4 === 0 ? (s.add(x), "x = " + nb(x) + " : X = " + sq(x) + ".") : null), (x, s) => { if (x ** 4 - 5 * x * x + 4 === 0) s.add(x); return [...s].some((u) => Math.abs(u) !== Math.abs(x)) && x ** 4 - 5 * x * x + 4 === 0 ? "Deux valeurs de X : 1 et 4." : null; }, (x, s) => { if (x ** 4 - 5 * x * x + 4 === 0) s.add(x); return s.size === 4 ? "Quatre solutions : −2, −1, 1, 2 (X = 1 et X = 4 en donnent deux chacune)." : null; }] }),
     },
     eqirr: {
       predict: { q: "√(x + 7) = x + 1. En élevant au carré, on trouve x = 2 ou x = −3. Les deux conviennent-elles ?", choices: ["Oui", "Non, seulement 2", "Non, seulement −3"], good: 1, why: "Pour −3 : √4 = 2, mais x + 1 = −2. Une racine n'est jamais négative : −3 est une solution « parasite »." },
       defis: ["Trouve x tel que √(x + 7) = x + 1.", "Trouve un x tel que les carrés soient égaux mais pas les deux membres.", "Trouve x tel que √(x + 7) = 4."],
-      play: hunt({ start: 0, min: -7, max: 12, show: (x) => `<div class="act-out">√(x + 7) = <b>${nb(+Math.sqrt(x + 7).toFixed(3))}</b> · x + 1 = <b>${nb(x + 1)}</b><br><span class="small muted">au carré : x + 7 = ${nb(x + 7)} · (x + 1)² = ${sq(x + 1)}</span></div>`,
+      play: hunt({ start: 0, min: -7, max: 12, show: (x) => `<div class="act-out">Membre de gauche : √(x + 7) = <b>${nb(+Math.sqrt(x + 7).toFixed(3))}</b><br>Membre de droite : x + 1 = <b>${nb(x + 1)}</b><br><span class="small muted">Au carré, à gauche : x + 7 = ${nb(x + 7)}<br>Au carré, à droite : (x + 1)² = ${sq(x + 1)}</span></div>`,
         wins: [(x) => (Math.sqrt(x + 7) === x + 1 ? "x = 2 : √9 = 3 = 2 + 1." : null), (x) => (x + 7 === (x + 1) ** 2 && Math.sqrt(x + 7) !== x + 1 ? "x = −3 : 4 = 4 au carré, mais √4 = 2 ≠ −2. Le carré a « oublié » le signe : on vérifie toujours." : null), (x) => (Math.sqrt(x + 7) === 4 ? "x = 9 : x + 7 = 16." : null)] }),
     },
   });

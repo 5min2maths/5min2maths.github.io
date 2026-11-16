@@ -59,7 +59,7 @@ const LESSONS_V2 = {
   simil: ["Agrandir, réduire", "Deux figures semblables ont la même forme : l'une est un agrandissement de l'autre.",
     "Si les longueurs sont multipliées par \\(k\\), les aires sont multipliées par \\(k^2\\). Les volumes sont multipliés par \\(k^3\\).",
     ["Rapport \\(k = 3\\) : une aire de 5 cm² devient \\(5 \\cdot 9 = 45\\) cm².",
-      "Maquette au 1 : 10 : le volume réel est \\(10^3 = 1000\\) fois plus grand."],
+      "Maquette à l'échelle \\(1\\,:\\,10\\) : le volume réel est \\(10^3 = 1000\\) fois plus grand."],
     "Doubler les longueurs ne double pas l'aire : elle est multipliée par 4."],
   pythrec: ["Le triangle est-il rectangle ?", "Le théorème de Pythagore fonctionne aussi dans l'autre sens.",
     "On repère le plus grand côté \\(c\\). On compare \\(c^2\\) et \\(a^2 + b^2\\). S'ils sont égaux, le triangle est rectangle (réciproque de Pythagore). S'ils sont différents, il ne l'est pas (contraposée).",
