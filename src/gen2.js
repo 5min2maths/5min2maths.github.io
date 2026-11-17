@@ -140,7 +140,11 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
   FIG.regPoly = function (n, lab) {
     const cx = 150, cy = 90, r = 72, pts = Array.from({ length: n }, (_, i) => [cx + r * Math.cos((2 * Math.PI * i) / n - Math.PI / 2), cy + r * Math.sin((2 * Math.PI * i) / n - Math.PI / 2)]);
     let g = P(pts) + L(cx, cy, pts[0][0], pts[0][1], "f-line", 'stroke-dasharray="4 4"') + L(cx, cy, pts[1][0], pts[1][1], "f-line", 'stroke-dasharray="4 4"');
-    g += '<circle cx="' + cx + '" cy="' + cy + '" r="3" class="f-dot"/>' + (lab ? t(cx + 10, cy - 4, lab, "f-accent f-txt", "start", 12) : "");
+    // Angle au centre marqué (commentaire testeur du 16.11 : « marquer l'angle ») : arc coloré et étiquette sur sa bissectrice.
+    const ar = 20, a0 = -Math.PI / 2, a1 = (2 * Math.PI) / n - Math.PI / 2, am = (a0 + a1) / 2;
+    g += '<path d="M' + (cx + ar * Math.cos(a0)).toFixed(1) + "," + (cy + ar * Math.sin(a0)).toFixed(1) + " A" + ar + "," + ar + " 0 0 1 " + (cx + ar * Math.cos(a1)).toFixed(1) + "," + (cy + ar * Math.sin(a1)).toFixed(1) + '" fill="none" class="f-accent" stroke-width="2.5"/>';
+    const lt = lab; // valeur seulement si on la donne (sinon la figure révélerait la réponse)
+    g += '<circle cx="' + cx + '" cy="' + cy + '" r="3" class="f-dot"/>' + (lt ? t(cx + 40 * Math.cos(am), cy + 40 * Math.sin(am) + 5, lt, "f-accent f-txt", "middle", 13) : "");
     return svg(300, 180, g, "polygone régulier");
   };
   // Deux triangles semblables (le petit et le grand), étiquettes de côtés.

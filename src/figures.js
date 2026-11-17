@@ -143,9 +143,20 @@ const FIG = (() => {
     return svg(300, 160, b + t(190, 124, lr, "f-accent f-txt") + t(158, 80, lh, "f-accent f-txt", "start"), "cône");
   }
   // Route et chronomètre (vitesse).
-  function road(ld, lt) {
+  // Véhicule dessiné selon le contexte (commentaire testeur du 16.11 : « mettre un vélo » quand c'est une cycliste).
+  function vehicle(who) {
+    const k = 'stroke="var(--ink)" stroke-width="2" fill="none" stroke-linecap="round"';
+    if (who === "velo") return '<circle cx="26" cy="48" r="8" ' + k + '/><circle cx="52" cy="48" r="8" ' + k + '/><polyline points="26,48 35,36 47,36 52,48 39,48 35,36" ' + k + '/><line x1="47" y1="36" x2="45" y2="30" ' + k + '/><line x1="35" y1="36" x2="34" y2="32" ' + k + '/><circle cx="38" cy="22" r="4" class="f-fill"/><line x1="37" y1="26" x2="35" y2="34" ' + k + '/>';
+    if (who === "moto") return '<circle cx="26" cy="49" r="7" class="f-dot"/><circle cx="54" cy="49" r="7" class="f-dot"/><path d="M26,49 L36,38 L50,38 L54,49 Z" class="f-fill"/><circle cx="42" cy="28" r="5" class="f-fill"/>';
+    if (["tgv", "train", "tram"].includes(who)) return '<path d="M18,40 L66,40 Q78,40 80,54 L18,54 Z" class="f-fill"/><rect x="24" y="43" width="8" height="5" rx="1" class="f-soft"/><rect x="38" y="43" width="8" height="5" rx="1" class="f-soft"/><rect x="52" y="43" width="8" height="5" rx="1" class="f-soft"/><circle cx="28" cy="57" r="3" class="f-dot"/><circle cx="66" cy="57" r="3" class="f-dot"/>';
+    if (who === "bateau" || who === "aviron") return '<path d="M18,46 L70,46 L62,56 L26,56 Z" class="f-fill"/>' + (who === "bateau" ? '<line x1="44" y1="46" x2="44" y2="24" ' + k + '/><path d="M46,26 L62,44 L46,44 Z" class="f-soft" stroke="var(--ink)" stroke-width="1"/>' : '<line x1="30" y1="40" x2="58" y2="62" ' + k + '/>');
+    if (who === "course") return '<circle cx="38" cy="20" r="5" class="f-fill"/><polyline points="37,25 35,40 28,54" ' + k + '/><polyline points="35,40 44,47 42,56" ' + k + '/><polyline points="28,32 37,29 46,34" ' + k + '/>';
+    return '<rect x="20" y="40" width="34" height="16" rx="4" class="f-fill"/><circle cx="28" cy="58" r="4" class="f-dot"/><circle cx="46" cy="58" r="4" class="f-dot"/>';
+  }
+  function road(ld, lt, who) {
     let b = '<rect x="16" y="56" width="300" height="26" rx="4" class="f-soft"/>' + L(24, 69, 308, 69, "f-on", 'stroke-dasharray="14 10" stroke-width="2"');
-    b += '<rect x="20" y="40" width="34" height="16" rx="4" class="f-fill"/><circle cx="28" cy="58" r="4" class="f-dot"/><circle cx="46" cy="58" r="4" class="f-dot"/>';
+    if (who === "bateau" || who === "aviron") b = '<rect x="16" y="56" width="300" height="26" rx="4" class="f-soft"/>' + L(24, 69, 308, 69, "f-on", 'stroke-dasharray="3 9" stroke-width="2"');
+    b += vehicle(who);
     b += L(312, 30, 312, 56, "f-line") + P([[312, 30], [330, 36], [312, 42]], "f-fill");
     return svg(340, 104, b + t(166, 100, ld) + t(166, 28, lt, "f-accent f-txt"), "trajet");
   }

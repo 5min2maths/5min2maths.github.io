@@ -399,7 +399,7 @@ const LESSON_FIGS_V2 = {
   pyth: () => GF.rightTri(3, 4, { la: "a", lb: "b", lc: "c" }),
   echelle: () => FIG.scaling(2, "rect"),
   affine: () => FIG.plot([{ f: (x) => 2 * x - 3 }], [[0, -3, "b"], [4, 5, ""]], { numbers: true, xr: [-2, 5], yr: [-4, 6], squash: 0.6 }),
-  polyreg: () => FIG.regPoly(6, ""),
+  polyreg: () => FIG.regPoly(6, "60°"),
   perim: () => GF.rect(7, 4, { lw: "L", lh: "l" }),
   aire1: () => FIG.triangleFig("b", "h"),
   aire2: () => GF.para(8, 5, { lb: "b", lh: "h" }),

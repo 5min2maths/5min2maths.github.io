@@ -1132,9 +1132,20 @@ const FIG = (() => {
     return svg(300, 160, b + t(190, 124, lr, "f-accent f-txt") + t(158, 80, lh, "f-accent f-txt", "start"), "cône");
   }
   // Route et chronomètre (vitesse).
-  function road(ld, lt) {
+  // Véhicule dessiné selon le contexte (commentaire testeur du 16.11 : « mettre un vélo » quand c'est une cycliste).
+  function vehicle(who) {
+    const k = 'stroke="var(--ink)" stroke-width="2" fill="none" stroke-linecap="round"';
+    if (who === "velo") return '<circle cx="26" cy="48" r="8" ' + k + '/><circle cx="52" cy="48" r="8" ' + k + '/><polyline points="26,48 35,36 47,36 52,48 39,48 35,36" ' + k + '/><line x1="47" y1="36" x2="45" y2="30" ' + k + '/><line x1="35" y1="36" x2="34" y2="32" ' + k + '/><circle cx="38" cy="22" r="4" class="f-fill"/><line x1="37" y1="26" x2="35" y2="34" ' + k + '/>';
+    if (who === "moto") return '<circle cx="26" cy="49" r="7" class="f-dot"/><circle cx="54" cy="49" r="7" class="f-dot"/><path d="M26,49 L36,38 L50,38 L54,49 Z" class="f-fill"/><circle cx="42" cy="28" r="5" class="f-fill"/>';
+    if (["tgv", "train", "tram"].includes(who)) return '<path d="M18,40 L66,40 Q78,40 80,54 L18,54 Z" class="f-fill"/><rect x="24" y="43" width="8" height="5" rx="1" class="f-soft"/><rect x="38" y="43" width="8" height="5" rx="1" class="f-soft"/><rect x="52" y="43" width="8" height="5" rx="1" class="f-soft"/><circle cx="28" cy="57" r="3" class="f-dot"/><circle cx="66" cy="57" r="3" class="f-dot"/>';
+    if (who === "bateau" || who === "aviron") return '<path d="M18,46 L70,46 L62,56 L26,56 Z" class="f-fill"/>' + (who === "bateau" ? '<line x1="44" y1="46" x2="44" y2="24" ' + k + '/><path d="M46,26 L62,44 L46,44 Z" class="f-soft" stroke="var(--ink)" stroke-width="1"/>' : '<line x1="30" y1="40" x2="58" y2="62" ' + k + '/>');
+    if (who === "course") return '<circle cx="38" cy="20" r="5" class="f-fill"/><polyline points="37,25 35,40 28,54" ' + k + '/><polyline points="35,40 44,47 42,56" ' + k + '/><polyline points="28,32 37,29 46,34" ' + k + '/>';
+    return '<rect x="20" y="40" width="34" height="16" rx="4" class="f-fill"/><circle cx="28" cy="58" r="4" class="f-dot"/><circle cx="46" cy="58" r="4" class="f-dot"/>';
+  }
+  function road(ld, lt, who) {
     let b = '<rect x="16" y="56" width="300" height="26" rx="4" class="f-soft"/>' + L(24, 69, 308, 69, "f-on", 'stroke-dasharray="14 10" stroke-width="2"');
-    b += '<rect x="20" y="40" width="34" height="16" rx="4" class="f-fill"/><circle cx="28" cy="58" r="4" class="f-dot"/><circle cx="46" cy="58" r="4" class="f-dot"/>';
+    if (who === "bateau" || who === "aviron") b = '<rect x="16" y="56" width="300" height="26" rx="4" class="f-soft"/>' + L(24, 69, 308, 69, "f-on", 'stroke-dasharray="3 9" stroke-width="2"');
+    b += vehicle(who);
     b += L(312, 30, 312, 56, "f-line") + P([[312, 30], [330, 36], [312, 42]], "f-fill");
     return svg(340, 104, b + t(166, 100, ld) + t(166, 28, lt, "f-accent f-txt"), "trajet");
   }
@@ -2517,7 +2528,11 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
   FIG.regPoly = function (n, lab) {
     const cx = 150, cy = 90, r = 72, pts = Array.from({ length: n }, (_, i) => [cx + r * Math.cos((2 * Math.PI * i) / n - Math.PI / 2), cy + r * Math.sin((2 * Math.PI * i) / n - Math.PI / 2)]);
     let g = P(pts) + L(cx, cy, pts[0][0], pts[0][1], "f-line", 'stroke-dasharray="4 4"') + L(cx, cy, pts[1][0], pts[1][1], "f-line", 'stroke-dasharray="4 4"');
-    g += '<circle cx="' + cx + '" cy="' + cy + '" r="3" class="f-dot"/>' + (lab ? t(cx + 10, cy - 4, lab, "f-accent f-txt", "start", 12) : "");
+    // Angle au centre marqué (commentaire testeur du 16.11 : « marquer l'angle ») : arc coloré et étiquette sur sa bissectrice.
+    const ar = 20, a0 = -Math.PI / 2, a1 = (2 * Math.PI) / n - Math.PI / 2, am = (a0 + a1) / 2;
+    g += '<path d="M' + (cx + ar * Math.cos(a0)).toFixed(1) + "," + (cy + ar * Math.sin(a0)).toFixed(1) + " A" + ar + "," + ar + " 0 0 1 " + (cx + ar * Math.cos(a1)).toFixed(1) + "," + (cy + ar * Math.sin(a1)).toFixed(1) + '" fill="none" class="f-accent" stroke-width="2.5"/>';
+    const lt = lab; // valeur seulement si on la donne (sinon la figure révélerait la réponse)
+    g += '<circle cx="' + cx + '" cy="' + cy + '" r="3" class="f-dot"/>' + (lt ? t(cx + 40 * Math.cos(am), cy + 40 * Math.sin(am) + 5, lt, "f-accent f-txt", "middle", 13) : "");
     return svg(300, 180, g, "polygone régulier");
   };
   // Deux triangles semblables (le petit et le grand), étiquettes de côtés.
@@ -5981,7 +5996,7 @@ function compNote(rec) {
         const v = c[3] + R.int(-2, 2) * (c[3] >= 50 ? 5 : 1), t = c[4] + R.int(0, 2), d = v * t;
         return Qv(c[0] + " " + Q(d, c[1]) + " en " + Q(t, c[2]) + ". Quelle est sa vitesse moyenne (en " + c[6] + ") ?", v,
           M("v = \\frac{d}{t} = \\frac{" + N(d) + "}{" + t + "} = " + N(v)) + " " + c[6] + ".",
-          { ctx: c[5], fig: c[1] === "km" ? FIG.road(N(d).replace("\\text{'}", "'") + " km", t + " h") : undefined,
+          { ctx: c[5], fig: c[1] === "km" ? FIG.road(N(d).replace("\\text{'}", "'") + " km", t + " h", c[5]) : undefined,
             guide: [GS("La vitesse est la distance parcourue en une unité de temps : " + M("v = \\frac{d}{t}") + ". Calcule " + M(N(d) + " : " + t) + ".", v, M(N(d) + " : " + t + " = " + N(v)) + " " + c[6] + ".")],
             traps: [TRAP(d * t, "On ne multiplie pas : la vitesse, c'est la distance divisée par la durée."), TRAP(r6(t / d), "C'est l'inverse : distance divisée par durée.")] }); },
       () => { const c = pickBy([["Pendant un orage, on entend le tonnerre", "s", "après avoir vu l'éclair. Le son va à 340 m/s. À quelle distance (en m) la foudre est-elle tombée ?", 340, [3, 4, 5, 6, 7, 9], "m", "orage"], ["Un train roule à 120 km/h pendant", "h", ". Quelle distance parcourt-il (en km) ?", 120, [1.5, 2.5, 3.5, 0.75], "km", "train"], ["Une hirondelle vole à 15 m/s pendant", "s", ". Quelle distance parcourt-elle (en m) ?", 15, [12, 25, 40, 75], "m", "oiseau"]]);
@@ -6023,7 +6038,7 @@ function compNote(rec) {
         const V1 = c[1] === "velo" ? v1 / 4 : v1, V2 = c[1] === "velo" ? v2 / 4 : v2, D = c[1] === "velo" ? dd / 4 : dd;
         return Qv(c[0] + " de " + Q(D, "km") + " à " + Q(V1, "km/h") + " et le retour à " + Q(V2, "km/h") + ". Quelle est sa vitesse moyenne sur l'aller-retour (en km/h) ?", (2 * D) / (D / V1 + D / V2),
           "Durées : " + M(N(D) + " : " + N(V1) + " = " + N(r6(D / V1))) + " h et " + M(N(D) + " : " + N(V2) + " = " + N(r6(D / V2))) + " h. Total " + M(N(r6(D / V1 + D / V2))) + " h pour " + M(N(2 * D)) + " km : " + M("v = " + N(r6(vm * D / dd))) + " km/h (et non la moyenne des deux vitesses).",
-          { ctx: c[1], fig: FIG.road(N(D) + " km", "aller-retour"),
+          { ctx: c[1], fig: FIG.road(N(D) + " km", "aller-retour", c[1]),
             guide: [GS("Durée de l'aller (en h) ?", r6(D / V1), M(N(D) + " : " + N(V1) + " = " + N(r6(D / V1))) + " h."), GS("Durée du retour (en h) ?", r6(D / V2), M(N(D) + " : " + N(V2) + " = " + N(r6(D / V2))) + " h."), GS("Vitesse moyenne = distance totale ÷ durée totale. Combien ?", (2 * D) / (D / V1 + D / V2), M(N(2 * D) + " : " + N(r6(D / V1 + D / V2)) + " = " + N(r6(vm * D / dd))) + " km/h.")],
             traps: [TRAP((V1 + V2) / 2, "On ne fait jamais la moyenne des vitesses : on roule plus longtemps à la vitesse la plus lente. Divise la distance totale par la durée totale.")] }); },
       () => { const [m1, v1, m2, v2] = pickBy([[30, 60, 90, 100], [20, 90, 40, 60], [45, 80, 15, 120], [40, 45, 80, 90], [30, 50, 90, 110]]), d1 = v1 * m1 / 60, d2 = v2 * m2 / 60, vm = (d1 + d2) / ((m1 + m2) / 60), c = pickBy([["Un car roule", "car"], ["Une voiture roule", "voiture"], ["Un train régional roule", "train"]]);
@@ -8688,7 +8703,7 @@ const LESSON_FIGS_V2 = {
   pyth: () => GF.rightTri(3, 4, { la: "a", lb: "b", lc: "c" }),
   echelle: () => FIG.scaling(2, "rect"),
   affine: () => FIG.plot([{ f: (x) => 2 * x - 3 }], [[0, -3, "b"], [4, 5, ""]], { numbers: true, xr: [-2, 5], yr: [-4, 6], squash: 0.6 }),
-  polyreg: () => FIG.regPoly(6, ""),
+  polyreg: () => FIG.regPoly(6, "60°"),
   perim: () => GF.rect(7, 4, { lw: "L", lh: "l" }),
   aire1: () => FIG.triangleFig("b", "h"),
   aire2: () => GF.para(8, 5, { lb: "b", lh: "h" }),
