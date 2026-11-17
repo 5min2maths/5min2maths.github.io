@@ -226,7 +226,7 @@ Object.assign(ACTIVE, {
         g += '<line x1="' + X(x - tx * L) + '" y1="' + Y(y - ty * L) + '" x2="' + X(x + tx * L) + '" y2="' + Y(y + ty * L) + '" class="f-accent" stroke-width="2.5"/>';
         if (tx && ty) { const s = tx > 0 ? 1 : -1, ax = s * tx, ay = s * ty; // on avance vers la droite
           g += '<path d="M' + X(x) + "," + Y(y) + " L" + X(x + ax) + "," + Y(y) + " L" + X(x + ax) + "," + Y(y + ay) + '" class="f-accent" fill="none" stroke-dasharray="4 3"/>' +
-            '<text x="' + X(x + ax / 2) + '" y="' + (Y(y) + (ay > 0 ? 15 : -6)) + '" class="f-accent f-txt" text-anchor="middle" font-size="12">+' + ax + "</text>" +
+            '<text x="' + X(x + ax / 2) + '" y="' + (Y(y) + (ay > 0 ? 15 : -6) * (ay < 0 ? -2.5 : 1)) + '" class="f-accent f-txt" text-anchor="middle" font-size="12">+' + ax + "</text>" +
             '<text x="' + (X(x + ax) + 5) + '" y="' + Y(y + ay / 2) + '" class="f-accent f-txt" font-size="12">' + (ay > 0 ? "+" : "−") + Math.abs(ay) + "</text>"; }
         g += '<circle cx="' + X(0) + '" cy="' + Y(0) + '" r="3.5" class="f-dot"/><text x="' + (X(0) + (x < 0 ? 7 : -7)) + '" y="' + (Y(0) + (y > 0 ? 16 : -7)) + '" class="f-txt" text-anchor="' + (x < 0 ? "start" : "end") + '" font-size="13">O</text>';
         g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="6" class="f-dot"/><text x="' + (X(x) + (x >= 0 ? 10 : -10)) + '" y="' + (Y(y) + (y >= 0 ? -8 : 18)) + '" class="f-txt" text-anchor="' + (x >= 0 ? "start" : "end") + '" font-size="13">T(' + x + " ; " + y + ")</text>";

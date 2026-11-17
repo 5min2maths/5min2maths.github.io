@@ -20,7 +20,7 @@ const M = (t) => "\\(" + t + "\\)";
 // une formule (« \(x = 3\) : \(9 = 9\) ») ou une égalité en texte simple (« x = 3 : 9 = 9 ») se lit comme une division.
 // Il devient un retour à la ligne. Les « : » après un mot (« Résous : », « Erreur : ») restent ; dans les formules, « : » est ÷.
 const colonBreak = (s) => {
-  if (typeof s !== "string" || s.indexOf(":") < 0) return s;
+  if (typeof s !== "string" || !/[:;?!]/.test(s)) return s;
   const parts = s.split(/(\\\(.*?\\\))/);
   for (let i = 0; i < parts.length; i += 2) {
     let t = parts[i];
@@ -29,7 +29,7 @@ const colonBreak = (s) => {
     // « Divisibles par 9 : 117, 126 » se lit « 9 ÷ 117 » : on garde les deux-points et on passe à la ligne.
     t = t.replace(/([0-9)²³°]) : (?=[-−0-9(]|$)/g, "$1 :<br>");
     if (i + 1 < parts.length) t = t.replace(/([0-9)²³°]) :\s*$/, "$1 :<br>");
-    parts[i] = t;
+    parts[i] = t.replace(/ ([:;?!])/g, "\u00a0$1"); // espace insécable : le signe ne passe pas seul à la ligne
   }
   return parts.join("").replace(/<br>(\s*)([a-zàâçéèêëîïôûù])/g, (m, sp, c) => "<br>" + c.toUpperCase());
 };
