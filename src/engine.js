@@ -382,7 +382,7 @@ const Engine = {
     q.q = colonBreak(q.q); q.sol = colonBreak(q.sol);
     if (q.traps) q.traps = q.traps.map((t) => ({ ...t, m: colonBreak(t.m) }));
     if (q.hints) q.hints = q.hints.map(colonBreak);
-    if (q.traps && q.spec && q.spec.kind === "value") q.traps = q.traps.filter((t) => isFinite(t.v) && Math.abs(t.v - q.spec.value) > Math.max(q.spec.round || 0, 1e-6 * Math.max(1, Math.abs(q.spec.value))));
+    if (q.traps && q.spec && q.spec.kind === "value") q.traps = q.traps.filter((t) => isFinite(t.v) && Math.abs(t.v - q.spec.value) > Math.max(q.spec.round || 0, 1e-6 * (Math.abs(q.spec.value) >= 1 ? Math.abs(q.spec.value) : Math.max(Math.abs(q.spec.value), 1e-300))));
     if (q.parts) q.parts = q.parts.map((p) => ({ ...p, label: colonBreak(tidy(p.label)) }));
     // Consigne de forme : « notation scientifique » contrôlée par le correcteur.
     if (q.spec && q.spec.kind === "value" && /notation scientifique/.test(q.q) && !/^Calcule : /.test(q.q)) {

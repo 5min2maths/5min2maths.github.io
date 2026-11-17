@@ -18,15 +18,15 @@ CHANTIER = [
     ("1re Collège · équations du 1er degré (testeurs de 1re)", ["eq1", "eqfrac", "eqspec", "formule", "probeq"]),
     ("1re Collège · équations du 2e degré", ["eq2fact", "eq2", "eq2disc", "probeq2", "eq3", "bicarre", "eqirr"]),
     # Suite du plan de cheminement 11e (Bude/outils/planif_11ls.py, demande du 17.11) : les testeurs de 11e
-    # trouvent la matière de leur chapitre en cours ; ensuite les chapitres déjà passés (révision EVACOM).
+    # comblent d'abord le début d'année (ch. 1–3, déjà vus : décision du 17.11), puis la suite du plan.
+    ("11e · 1. Nombres et opérations (début d'année, déjà vu par les testeurs)", ["prio", "fracconv", "fracadd", "fracmul", "puiss", "sci", "scicalc"]),
+    ("11e · 2. Pythagore (début d'année, déjà vu par les testeurs)", ["pyth", "pythfig", "pythrec"]),
+    ("11e · 3. 3D (début d'année, déjà vu par les testeurs)", ["vol", "volcone", "airepyr", "volcomp", "volmanq"]),
     ("11e · 7. Angles (dès le 26.02)", ["angles", "cercthales"]),
     ("11e · 8. Thalès (dès le 12.03)", ["thales", "thalesrec", "simil"]),
     ("11e · 9. Systèmes d'équations (dès le 16.04)", ["sys2", "sysprob"]),
     ("11e · 10. Fonctions (dès le 30.04)", ["repere", "tabval", "affine"]),
     ("11e · 12. Probabilités (dès le 18.06)", ["denombr", "proba"]),
-    ("11e · 1. Nombres et opérations (révision)", ["prio", "fracconv", "fracadd", "fracmul", "puiss", "sci", "scicalc"]),
-    ("11e · 2. Pythagore (révision)", ["pyth", "pythfig", "pythrec"]),
-    ("11e · 3. 3D (révision)", ["vol", "volcone", "airepyr", "volcomp", "volmanq"]),
 ]
 src = lambda f: open(os.path.join(RAC, "src", f), encoding="utf-8").read()
 
@@ -43,7 +43,7 @@ def blocs():
     for i, m in enumerate(ms):
         out[m.group(1)] = t[m.start(): ms[i + 1].start() if i + 1 < len(ms) else len(t)]
     # Modules de chapitre (chantier du 15.11) : toutes les formes ont un guide ; ils remplacent les anciennes versions.
-    for f in ("ch11_prop.js", "ch11_litt.js", "ch1c_eq.js"):
+    for f in ("ch11_prop.js", "ch11_litt.js", "ch1c_eq.js", "ch11_no.js"):
         if os.path.exists(os.path.join(RAC, "src", f)):
             m = re.search(r"const ALL = \{([^}]*)\}", src(f))
             for i in re.findall(r"([a-z0-9]+):", m.group(1) if m else ""):

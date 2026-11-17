@@ -851,7 +851,7 @@ function runGuide(q, box, done) {
     if (k >= q.guide.length) { box.insertAdjacentHTML("beforeend", `<div class="gstep ok"><b>Bravo, tu as reconstruit la solution.</b><div class="sol">${q.sol}</div></div>`); typeset(box); done(); return; }
     const g = q.guide[k], id = "gs" + k;
     // Saisie de l'étape (15.11) : comme la question principale — champ large, aperçu, clavier de l'app (repliée au-dessus).
-    const fine = window.matchMedia("(pointer: fine)").matches, ks = g.spec.kind === "value" ? { ...g.spec, final: true } : g.spec;
+    const fine = window.matchMedia("(pointer: fine)").matches, ks = g.spec.kind === "value" && !g.spec.sci ? { ...g.spec, final: true } : g.spec; // notation scientifique : clavier avec puissances
     box.insertAdjacentHTML("beforeend", `<div class="gstep" id="${id}"><span class="small muted">Étape ${k + 1} sur ${q.guide.length}</span><div>${g.ask}</div>
       <div class="answer gans"><input class="ans gin" inputmode="${fine ? "text" : "none"}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Réponse de l'étape">
       <div class="preview gprev"></div>${keypadHtml(ks).replace(' id="kp"', "")}

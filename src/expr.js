@@ -367,7 +367,7 @@ function diagnose(q, input) {
   if (!spec || spec.kind !== "value") return null;
   let v; try { const t = Expr.parse(input); if (Expr.vars(t).size) return null; v = Expr.evaluate(t); } catch (e) { return null; }
   if (!isFinite(v)) return null;
-  const w = spec.value, tol = (x, y) => Math.abs(x - y) <= Math.max(spec.round ? spec.round * 0.6 : 0, 1e-6 * Math.max(1, Math.abs(y)));
+  const w = spec.value, tol = (x, y) => Math.abs(x - y) <= Math.max(spec.round ? spec.round * 0.6 : 0, 1e-6 * (Math.abs(y) >= 1 ? Math.abs(y) : Math.max(Math.abs(y), 1e-300))); // relative : très petits nombres (17.11)
   for (const tr of q.traps || []) if (tol(v, tr.v)) return tr.m;
   if (w !== 0 && tol(v, -w)) return "Le nombre est bon, mais pas le signe : vérifie les règles des signes.";
   for (const k of [1, 2, 3]) if (w !== 0 && (tol(v, w * 10 ** k) || tol(v, w / 10 ** k))) return "Les chiffres sont bons, mais pas la virgule (ou l'unité) : vérifie la conversion ou le rang.";
