@@ -7,11 +7,11 @@ Méthode par lot : GS() pour chaque niveau (2 à 4 étapes, la dernière = la r�
 problèmes à contexte : au moins 3 situations parlantes par niveau, étiquette ctx (règle du 14.11 : jamais le même contexte en boucle),
 puis tests/test.html (contrôle des guides) et tests/trivial.html, commit, push. Le point du jour affiche le prochain lot.
 
-- [ ] Lot 1 (11e · 7. Angles (dès le 26.02)) : angles, cercthales
-- [ ] Lot 2 (11e · 8. Thalès (dès le 12.03)) : thales, thalesrec, simil
-- [ ] Lot 3 (11e · 9. Systèmes d'équations (dès le 16.04)) : sys2, sysprob
-- [ ] Lot 4 (11e · 10. Fonctions (dès le 30.04)) : repere, tabval, affine
-- [ ] Lot 5 (11e · 12. Probabilités (dès le 18.06)) : denombr, proba
+- [ ] Lot 1 (11e · 7. Angles) : angles, cercthales
+- [ ] Lot 2 (11e · 8. Thalès) : thales, thalesrec, simil
+- [ ] Lot 3 (11e · 9. Systèmes d'équations) : sys2, sysprob
+- [ ] Lot 4 (11e · 10. Fonctions) : repere, tabval, affine
+- [ ] Lot 5 (11e · 12. Probabilités) : denombr, proba
 - [ ] Lot 6 (1re Collège (bêta-testeurs)) : racenc, ensembles, tradexpr, divcrit, domaine
 - [ ] Lot 7 (1re Collège (bêta-testeurs)) : fimg, lectgraph, racinv, modaff, transf
 - [ ] Lot 8 (1re Collège (bêta-testeurs)) : sysgraph, sys3, affzero, sysineq, polyop
