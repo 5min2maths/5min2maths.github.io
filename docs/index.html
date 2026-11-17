@@ -9014,6 +9014,222 @@ function richChapter(ids) {
   return best && n * 2 >= ids.length ? best : null;
 }
 
+// Chantier 11e · 1. Nombres et opérations, 2. Pythagore, 3. 3D (17.11) : exercices riches et raisonnements du test de
+// préparation, au niveau d'un vrai test de 11e (contexte, plusieurs étapes, interprétation), pas du drill.
+// Même format que riche.js (RICH.<chapitre> = { ids, label, ex, raison, minutes }). Chargé après riche.js.
+(function () {
+  const r6 = (v) => Math.round(v * 1e6) / 1e6;
+  const N = (v) => { let [i, f] = String(r6(v)).split("."); if (i.replace("-", "").length >= 4) i = i.replace(/\B(?=(\d{3})+(?!\d))/g, "\\text{'}"); return i + (f ? "{,}" + f : ""); };
+  const T = (v) => M(N(v));
+  const A = (v, k) => N(+(+v).toFixed(k));
+  const u = (s) => ("\\ \\text{" + s.replace(/\^([23])/, "}^$1\\text{") + "}").replace(/\\text\{\}$/, "");
+  const Q = (v, s) => M(N(v) + u(s));
+  const pk = (a) => a[Math.floor(R.rand() * a.length)];
+  const g2 = (a, b) => (b ? g2(b, a % b) : Math.abs(a));
+  const F = (n, d) => { const g = g2(n, d) || 1; n /= g; d /= g; return d === 1 ? String(n) : (n < 0 ? "-" : "") + "\\frac{" + Math.abs(n) + "}{" + d + "}"; };
+  const pd = (t) => colonBreak(String(t).split(/(\\\(.*?\\\))/).map((seg, i) => (i % 2 ? seg : seg.replace(/\{,\}/g, ",").replace(/\\text\{'\}/g, "'"))).join(""));
+  const X = (o) => Object.assign({ pts: Math.max(1, o.parts.reduce((s, p) => s + p.pts, 0)) }, o, { q: pd(o.q), sol: pd(o.sol), parts: o.parts.map((p) => ({ label: pd(p.label), pts: p.pts })) });
+  const ul = (rows) => "<ol type=\"a\" class=\"mock-parts\">" + rows.map((r) => "<li>" + r + "</li>").join("") + "</ol>";
+  const who = () => pk(["Lina", "Noé", "Inès", "Yanis", "Mia", "Sam"]);
+
+  // ===================== 11e · 1. Nombres et opérations =====================
+  const EXN = [
+    // Le budget de la course d'école (fractions)
+    () => { const [a, b, c, e] = pk([[2, 5, 1, 4], [1, 3, 1, 4], [3, 8, 1, 6], [2, 5, 1, 3]]), tot = pk([2400, 3600, 4800]), used = a / b + c / e, rn = (1 - used);
+      const L = (b * e) / g2(b, e), num = L - (a * L) / b - (c * L) / e;
+      return X({ id: "fracadd", lv: 1, titre: "Le budget de la course d'école",
+        q: "Pour la course d'école, la classe dispose de " + Q(tot, "CHF") + ". Le transport coûte les " + M(F(a, b)) + " du budget, l'hébergement les " + M(F(c, e)) + ", et le reste sert aux activités.",
+        parts: [{ label: "Quelle fraction du budget reste-t-il pour les activités ? (fraction irréductible)", pts: 2 }, { label: "Combien de francs cela représente-t-il ?", pts: 1 }, { label: "Une activité coûte " + Q(Math.round(tot * rn * 0.6), "CHF") + ". Quelle fraction du budget total est-ce ? Le reste suffit-il ?", pts: 1 }],
+        sol: ul([M("1 - \\frac{" + a + "}{" + b + "} - \\frac{" + c + "}{" + e + "} = \\frac{" + num + "}{" + L + "}" + (g2(num, L) > 1 ? " = " + F(num, L) : "")) + ".", M(F(num, L) + " \\cdot " + N(tot) + " = " + N(tot * rn)) + " CHF.", M(F(Math.round(tot * rn * 0.6), tot)) + " du budget ; oui, c'est moins que les " + M(N(tot * rn)) + " CHF disponibles."]) }); },
+    // La recette (multiplier des fractions)
+    () => { const [n0, n1] = pk([[4, 6], [6, 9], [4, 10], [6, 8]]), [lait, beurre] = pk([[[3, 4], [1, 5]], [[2, 3], [1, 4]], [[1, 2], [3, 10]]]);
+      const kL = [lait[0] * n1, lait[1] * n0], kB = [beurre[0] * n1, beurre[1] * n0];
+      return X({ id: "fracmul", lv: 1, titre: "La recette de crêpes",
+        q: "Une recette pour " + n0 + " personnes demande " + M(F(...lait)) + " L de lait et " + M(F(...beurre)) + " kg de beurre. " + who() + " cuisine pour " + n1 + " personnes.",
+        parts: [{ label: "Par quelle fraction faut-il multiplier les quantités ?", pts: 1 }, { label: "Quelle quantité de lait faut-il (fraction irréductible, en L) ?", pts: 1 }, { label: "Il reste les " + M(F(2, 3)) + " d'une plaquette de beurre de " + M(F(1, 4)) + " kg. Cela suffit-il ?", pts: 2 }],
+        sol: ul([M(F(n1, n0)) + ".", M(F(...lait) + " \\cdot " + F(n1, n0) + " = " + F(...kL)) + " L.", "Il reste " + M(F(2, 3) + " \\cdot " + F(1, 4) + " = " + F(1, 6)) + " kg ; il faut " + M(F(...kB)) + " kg : " + (kB[0] / kB[1] <= 1 / 6 ? "oui, cela suffit." : "non, cela ne suffit pas (" + M(F(...kB) + " > " + F(1, 6)) + ").")]) }); },
+    // Soldes successifs (pourcentages)
+    () => { const P = pk([80, 120, 150, 200]), p1 = pk([20, 30, 25]), p2 = pk([10, 15, 20]), f = (1 - p1 / 100) * (1 - p2 / 100), fin = P * f;
+      return X({ id: "fracconv", lv: 2, titre: "Soldes successifs",
+        q: "Un manteau coûte " + Q(P, "CHF") + ". En janvier, son prix baisse de " + p1 + " %. En février, le nouveau prix baisse encore de " + p2 + " %. Une affiche annonce : « −" + (p1 + p2) + " % au total ! »",
+        parts: [{ label: "Calcule le prix en janvier, puis en février.", pts: 2 }, { label: "De quel pourcentage le prix a-t-il baissé en tout ?", pts: 1 }, { label: "L'affiche a-t-elle raison ? Explique.", pts: 1 }],
+        sol: ul([M(N(P) + " \\cdot " + N(1 - p1 / 100) + " = " + N(P * (1 - p1 / 100))) + " CHF, puis " + M(N(P * (1 - p1 / 100)) + " \\cdot " + N(1 - p2 / 100) + " = " + N(fin)) + " CHF.", M("1 - " + N(r6(f)) + " = " + N(r6(1 - f))) + ", soit " + M(N(r6(100 * (1 - f))) + "\\,\\%") + ".", "Non : la deuxième baisse porte sur le prix déjà baissé, elle « rapporte » moins. La baisse totale (" + N(r6(100 * (1 - f))).replace("{,}", ",") + " %) est plus petite que " + (p1 + p2) + " %."]) }); },
+    // Nombres périodiques
+    () => { const a = pk([4, 5, 7, 2]), bc = pk([36, 18, 27, 45]);
+      return X({ id: "fracconv", lv: 2, titre: "Nombres périodiques",
+        q: "On note " + M("x = 0{,}\\overline{" + a + "}") + " (soit " + M("0{,}" + String(a).repeat(4) + "\\ldots") + ") et " + M("y = 0{,}\\overline{" + bc + "}") + ".",
+        parts: [{ label: "Calcule " + M("10x - x") + " et déduis-en " + M("x") + " sous forme de fraction.", pts: 2 }, { label: "Même méthode pour " + M("y") + " (choisis bien la puissance de 10).", pts: 2 }, { label: "Calcule " + M("x + y") + " en fraction irréductible.", pts: 1 }],
+        sol: ul([M("10x - x = " + a) + ", donc " + M("9x = " + a) + " et " + M("x = " + F(a, 9)) + ".", "Période de 2 chiffres : " + M("100y - y = " + bc) + ", " + M("y = \\frac{" + bc + "}{99} = " + F(bc, 99)) + ".", M(F(a, 9) + " + " + F(bc, 99) + " = \\frac{" + (11 * a + bc) + "}{99}" + (g2(11 * a + bc, 99) > 1 ? " = " + F(11 * a + bc, 99) : "")) + "."]) }); },
+    // Les bactéries (puissances de 2)
+    () => { const t = pk([30, 60]), n0 = pk([4, 8]);
+      return X({ id: "puiss", lv: 1, titre: "Les bactéries",
+        q: "Une population de bactéries double toutes les " + t + " minutes. Au départ, il y a " + n0 + " bactérie" + (n0 > 1 ? "s" : "") + ".",
+        parts: [{ label: "Combien y en a-t-il après 4 doublements ? Écris-le avec une puissance de 2.", pts: 1 }, { label: "Combien y en a-t-il après " + (10 * t) / 60 + " h ?", pts: 1 }, { label: "Après combien de doublements dépasse-t-on un million ?", pts: 2 }, { label: "Que représente " + M(n0 + " \\cdot 2^{-1}") + " dans cette situation ?", pts: 1 }],
+        sol: ul([M(n0 + " \\cdot 2^4 = " + n0 * 16) + ".", (10 * t) / 60 + " h = 10 doublements : " + M(n0 + " \\cdot 2^{10} = " + N(n0 * 1024)) + ".", M(n0 + " \\cdot 2^{" + Math.ceil(Math.log2(1e6 / n0)) + "} = " + N(n0 * 2 ** Math.ceil(Math.log2(1e6 / n0)))) + " : " + Math.ceil(Math.log2(1e6 / n0)) + " doublements (" + M(n0 + " \\cdot 2^{" + (Math.ceil(Math.log2(1e6 / n0)) - 1) + "}") + " est encore trop petit).", "Le nombre de bactéries " + t + " minutes <b>avant</b> le départ : " + M(N(n0 / 2)) + "."]) }); },
+    // Distances dans l'Univers (notation scientifique)
+    () => { const [star, al] = pk([["Proxima du Centaure", 4.2], ["Sirius", 8.6], ["Véga", 25]]);
+      return X({ id: "scicalc", lv: 2, titre: "Distances dans l'Univers",
+        q: "La lumière parcourt " + M("3 \\cdot 10^5") + " km par seconde. Une année compte environ " + M("3{,}15 \\cdot 10^7") + " s. L'étoile " + star + " est à " + T(al) + " années-lumière.",
+        parts: [{ label: "Calcule la distance parcourue par la lumière en un an (une année-lumière), en km, en notation scientifique.", pts: 2 }, { label: "Calcule la distance de " + star + " en km.", pts: 1 }, { label: "Une sonde voyage à " + M("6 \\cdot 10^4") + " km/h. Combien d'années lui faudrait-il ? (ordre de grandeur)", pts: 2 }],
+        sol: ul([M("3 \\cdot 10^5 \\cdot 3{,}15 \\cdot 10^7 = 9{,}45 \\cdot 10^{12}") + " km.", M(N(al) + " \\cdot 9{,}45 \\cdot 10^{12} \\approx " + A((al * 9.45) / (al * 9.45 >= 10 ? 10 : 1), 2) + " \\cdot 10^{" + (al * 9.45 >= 10 ? 13 : 12) + "}") + " km.", "Durée : " + M(A(al * 9.45, 2) + " \\cdot 10^{12} : (6 \\cdot 10^4) \\approx " + A((al * 9.45) / 6, 2) + " \\cdot 10^8") + " h, soit environ " + M(N(Math.round((al * 9.45e12) / 6e4 / 24 / 365 / 1000) * 1000)) + " ans."]) }); },
+    // Fourmis et humains (notation scientifique)
+    () => X({ id: "scicalc", lv: 2, titre: "Fourmis contre humains",
+        q: "On estime qu'il y a environ " + M("2 \\cdot 10^{16}") + " fourmis sur Terre, d'une masse moyenne de " + M("3 \\cdot 10^{-6}") + " kg. Il y a environ " + M("8 \\cdot 10^9") + " humains, d'une masse moyenne de " + M("60") + " kg.",
+        parts: [{ label: "Calcule la masse totale des fourmis (en kg, notation scientifique).", pts: 1 }, { label: "Calcule la masse totale des humains.", pts: 1 }, { label: "Qui pèse le plus en tout, et combien de fois plus ? (au dixième)", pts: 2 }],
+        sol: ul([M("2 \\cdot 10^{16} \\cdot 3 \\cdot 10^{-6} = 6 \\cdot 10^{10}") + " kg.", M("8 \\cdot 10^9 \\cdot 60 = 480 \\cdot 10^9 = 4{,}8 \\cdot 10^{11}") + " kg.", "Les humains : " + M("4{,}8 \\cdot 10^{11} : (6 \\cdot 10^{10}) = 8") + " fois plus."]) }),
+    // Calcul en chaîne (priorités, fractions, puissances)
+    () => { const k = pk([2, 3]);
+      return X({ id: "prio", lv: 3, titre: "Calculs en chaîne",
+        q: "Calcule sans calculatrice, en détaillant chaque étape.",
+        parts: [{ label: M("A = 5 - 2 \\cdot (3 - " + (k + 4) + ")^2"), pts: 1 }, { label: M("B = \\frac{2}{3} + \\frac{1}{4} \\cdot \\frac{8}{9}"), pts: 1 }, { label: M("C = \\frac{(-2)^3 + 4^2}{10^{-1} \\cdot 20}"), pts: 2 }, { label: "Place des parenthèses dans " + M("2 + 3 \\cdot 4 - 1") + " pour obtenir 15.", pts: 1 }],
+        sol: ul([M("5 - 2 \\cdot (-" + (k + 1) + ")^2 = 5 - 2 \\cdot " + (k + 1) ** 2 + " = " + (5 - 2 * (k + 1) ** 2)) + ".", M("\\frac{2}{3} + \\frac{2}{9} = \\frac{6}{9} + \\frac{2}{9} = \\frac{8}{9}") + " (la multiplication d'abord).", M("\\frac{-8 + 16}{0{,}1 \\cdot 20} = \\frac{8}{2} = 4") + ".", M("(2 + 3) \\cdot (4 - 1) = 15") + "."]) }); },
+    // Calcul astucieux (puissances)
+    () => X({ id: "puiss", lv: 3, titre: "Calcul astucieux",
+        q: "Calcule astucieusement, sans calculatrice, en utilisant les propriétés des puissances.",
+        parts: [{ label: M("2^{10} \\cdot 5^{8}"), pts: 1 }, { label: M("\\frac{6^5}{2^4 \\cdot 3^3}"), pts: 1 }, { label: M("0{,}25^{5} \\cdot 4^{6}"), pts: 1 }, { label: "Range dans l'ordre croissant : " + M("2^{30}") + ", " + M("3^{20}") + ", " + M("10^{9}") + " (indice : " + M("2^{10} \\approx 10^3") + ").", pts: 2 }],
+        sol: ul([M("2^2 \\cdot (2 \\cdot 5)^8 = 4 \\cdot 10^8") + ".", M("2^{5-4} \\cdot 3^{5-3} = 2 \\cdot 9 = 18") + ".", M("(0{,}25 \\cdot 4)^5 \\cdot 4 = 1 \\cdot 4 = 4") + ".", M("2^{30} = (2^{10})^3 \\approx 1{,}07 \\cdot 10^9") + ", " + M("3^{20} = (3^{10})^2 \\approx 3{,}5 \\cdot 10^9") + " : " + M("10^9 < 2^{30} < 3^{20}") + "."]) }),
+  ];
+  const RAISONN = [
+    () => { const [a, b, c, d] = pk([[2, 3, 1, 4], [1, 2, 1, 3], [3, 5, 1, 2]]), w = who();
+      return X({ id: "fracadd", lv: 1, titre: "Trouve l'erreur",
+        q: w + " écrit : " + M("\\frac{" + a + "}{" + b + "} + \\frac{" + c + "}{" + d + "} = \\frac{" + (a + c) + "}{" + (b + d) + "}") + ".",
+        parts: [{ label: "Sans calculer la bonne réponse, explique pourquoi c'est forcément faux (compare avec " + M("\\frac{" + a + "}{" + b + "}") + ").", pts: 1 }, { label: "Calcule correctement.", pts: 1 }],
+        sol: ul([M("\\frac{" + (a + c) + "}{" + (b + d) + "} \\approx " + A((a + c) / (b + d), 2)) + " est plus petit que " + M("\\frac{" + a + "}{" + b + "} \\approx " + A(a / b, 2)) + " : en ajoutant un nombre positif, on ne peut pas obtenir moins.", M("\\frac{" + a * d + "}{" + b * d + "} + \\frac{" + c * b + "}{" + b * d + "} = " + F(a * d + c * b, b * d)) + "."]) }); },
+    () => { const S = [["« " + M("(-2)^4 = -16") + " »", false, M("(-2)^4 = 16") + " : quatre facteurs négatifs, résultat positif."], ["« " + M("2^3 \\cdot 2^4 = 2^{12}") + " »", false, "On additionne les exposants : " + M("2^7") + "."], ["« " + M("10^{-2} = 0{,}01") + " »", true, M("10^{-2} = \\frac{1}{100}") + "."], ["« " + M("5^0 = 0") + " »", false, M("5^0 = 1") + " (" + M("5^1 : 5") + ")."]];
+      return X({ id: "puiss", lv: 1, titre: "Vrai ou faux ? Justifie", q: "Pour chaque affirmation, dis si elle est vraie ou fausse, et justifie.",
+        parts: S.map((s) => ({ label: s[0], pts: 1 })), sol: ul(S.map((s) => "<b>" + (s[1] ? "Vrai" : "Faux") + "</b>. " + s[2])) }); },
+    () => { const w = who();
+      return X({ id: "scicalc", lv: 2, titre: "Trouve l'erreur",
+        q: w + " calcule " + M("(3 \\cdot 10^4) \\cdot (4 \\cdot 10^{-7})") + " et écrit : « " + M("= 12 \\cdot 10^{-28}") + ", c'est en notation scientifique ».",
+        parts: [{ label: "Trouve les deux erreurs de " + w + ".", pts: 2 }, { label: "Donne le bon résultat en notation scientifique.", pts: 1 }],
+        sol: ul(["Les exposants s'<b>additionnent</b> (" + M("4 + (-7) = -3") + "), ils ne se multiplient pas ; et 12 n'est pas entre 1 et 10.", M("12 \\cdot 10^{-3} = 1{,}2 \\cdot 10^{-2}") + "."]) }); },
+    () => { const p = pk([10, 20, 50]);
+      return X({ id: "fracconv", lv: 2, titre: "Retour au prix de départ ?",
+        q: "Un prix augmente de " + p + " %, puis le nouveau prix baisse de " + p + " %. " + who() + " affirme : « on revient au prix de départ ».",
+        parts: [{ label: "Teste avec un prix de 100 CHF.", pts: 1 }, { label: "L'affirmation est-elle vraie ? Explique avec les coefficients multiplicateurs.", pts: 2 }],
+        sol: ul([M("100 \\cdot " + N(1 + p / 100) + " = " + (100 + p)) + ", puis " + M((100 + p) + " \\cdot " + N(1 - p / 100) + " = " + N((100 + p) * (1 - p / 100))) + " CHF.", "Faux : " + M(N(1 + p / 100) + " \\cdot " + N(1 - p / 100) + " = " + N((1 + p / 100) * (1 - p / 100))) + ", le prix baisse de " + M(N((p * p) / 100) + "\\,\\%") + " au total. La baisse porte sur un prix plus grand."]) }); },
+  ];
+
+  // ===================== 11e · 2. Pythagore =====================
+  const EXP = [
+    () => { const [a, h, c] = pk([[6, 8, 10], [9, 12, 15], [7, 24, 25], [5, 12, 13]]), d2 = a + pk([1, 2]);
+      return X({ id: "pyth", lv: 1, titre: "L'échelle des pompiers",
+        q: "Une échelle de " + Q(c, "m") + " est appuyée contre une façade verticale. Son pied est à " + Q(a, "m") + " du mur.",
+        parts: [{ label: "Fais un croquis et calcule la hauteur atteinte par le haut de l'échelle.", pts: 2 }, { label: "On recule le pied de l'échelle jusqu'à " + Q(d2, "m") + " du mur. De combien le haut descend-il ? (au cm)", pts: 2 }],
+        sol: ul([M("h = \\sqrt{" + c + "^2 - " + a + "^2} = \\sqrt{" + h * h + "} = " + h) + " m.", "Nouvelle hauteur " + M("\\sqrt{" + c * c + " - " + d2 * d2 + "} \\approx " + A(Math.sqrt(c * c - d2 * d2), 2)) + " m : il descend d'environ " + M(A(h - Math.sqrt(c * c - d2 * d2), 2)) + " m."]) }); },
+    () => { const a = pk([60, 80, 90]), b = pk([45, 60, 120]), d = Math.sqrt(a * a + b * b), v = pk([1.2, 1.5]);
+      return X({ id: "pyth", lv: 1, titre: "Le raccourci",
+        q: "Pour traverser un parc rectangulaire de " + Q(a, "m") + " sur " + Q(b, "m") + ", " + who() + " coupe en diagonale au lieu de longer deux côtés. On marche à " + Q(v, "m/s") + ".",
+        parts: [{ label: "Calcule la longueur de la diagonale (au dixième).", pts: 2 }, { label: "Combien de mètres économise-t-on ?", pts: 1 }, { label: "Combien de secondes gagne-t-on ?", pts: 1 }],
+        sol: ul([M("\\sqrt{" + a + "^2 + " + b + "^2} \\approx " + A(d, 1)) + " m.", M((a + b) + " - " + A(d, 1) + " \\approx " + A(a + b - d, 1)) + " m.", M(A(a + b - d, 1) + " : " + N(v) + " \\approx " + A((a + b - d) / v, 0)) + " s."]) }); },
+    () => { const x0 = R.int(-3, 1), y0 = R.int(-3, 1), [p, q] = pk([[4, 2], [3, 1], [2, 4], [6, 3]]);
+      const A0 = [x0, y0], B0 = [x0 + p, y0 + q], C0 = [x0 + p - q, y0 + q + p];
+      const ab = p * p + q * q, bc = q * q + p * p, ac = (p - q) ** 2 + (q + p) ** 2;
+      return X({ id: "pythrec", lv: 2, titre: "Un triangle dans un repère",
+        q: "Dans un repère orthonormé (unité : 1 cm), on place " + M("A(" + A0.join(" \\,;\\, ") + ")") + ", " + M("B(" + B0.join(" \\,;\\, ") + ")") + " et " + M("C(" + C0.join(" \\,;\\, ") + ")") + ".",
+        parts: [{ label: "Calcule " + M("AB^2") + ", " + M("BC^2") + " et " + M("AC^2") + ".", pts: 2 }, { label: "Le triangle " + M("ABC") + " est-il rectangle ? Justifie.", pts: 1 }, { label: "Calcule son aire.", pts: 1 }],
+        sol: ul([M("AB^2 = " + p + "^2 + " + q + "^2 = " + ab) + ", " + M("BC^2 = " + q + "^2 + " + p + "^2 = " + bc) + ", " + M("AC^2 = " + Math.abs(p - q) + "^2 + " + (p + q) + "^2 = " + ac) + ".", M(ab + " + " + bc + " = " + (ab + bc) + " = AC^2") + " : rectangle en " + M("B") + " (réciproque de Pythagore), et isocèle.", M("\\frac{AB \\cdot BC}{2} = \\frac{" + ab + "}{2} = " + N(ab / 2)) + " cm² (car " + M("AB = BC") + ")."]) }); },
+    () => { const [a, b, c, d] = pk([[30, 40, 120, 130], [20, 40, 40, 60], [10, 20, 20, 30], [40, 40, 70, 90]]), stick = pk([d - 5, d + 5]);
+      return X({ id: "pythfig", lv: 2, titre: "Le bâton dans la boîte",
+        q: "Une boîte en forme de pavé droit mesure " + a + " cm × " + b + " cm × " + c + " cm. On veut y ranger un bâton rigide de " + stick + " cm.",
+        parts: [{ label: "Calcule la diagonale du fond " + a + " × " + b + ".", pts: 1 }, { label: "Calcule la grande diagonale de la boîte.", pts: 2 }, { label: "Le bâton entre-t-il dans la boîte ? Justifie.", pts: 1 }],
+        sol: ul([M("\\sqrt{" + a + "^2 + " + b + "^2} \\approx " + A(Math.hypot(a, b), 2)) + " cm.", M("\\sqrt{" + a + "^2 + " + b + "^2 + " + c + "^2} = \\sqrt{" + d * d + "} = " + d) + " cm.", stick <= d ? "Oui : " + stick + " cm ≤ " + d + " cm, en le plaçant le long de la grande diagonale." : "Non : " + stick + " cm > " + d + " cm, la plus grande longueur possible dans la boîte."]) }); },
+    () => { const r = pk([4, 5, 6]);
+      return X({ id: "pythfig", lv: 3, titre: "Le carré dans le cercle",
+        q: "Un carré " + M("ABCD") + " est inscrit dans un cercle de centre " + M("O") + " et de rayon " + Q(r, "cm") + ".",
+        parts: [{ label: "Que représente la diagonale " + M("[AC]") + " pour le cercle ? Quelle est sa longueur ?", pts: 1 }, { label: "Calcule la valeur exacte du côté du carré.", pts: 2 }, { label: "Calcule l'aire du carré, puis le pourcentage du disque qu'il occupe (au %).", pts: 2 }],
+        sol: ul(["Un diamètre : " + M(2 * r) + " cm.", M("c^2 + c^2 = " + 4 * r * r) + ", " + M("c^2 = " + 2 * r * r) + ", " + M("c = \\sqrt{" + 2 * r * r + "} = " + r + "\\sqrt{2}") + " cm.", "Aire " + M(2 * r * r) + " cm² ; disque " + M(r * r + "\\pi") + " ; " + M("\\frac{" + 2 * r * r + "}{" + r * r + "\\pi} = \\frac{2}{\\pi} \\approx 64\\,\\%") + "."]) }); },
+    () => { const p = pk([32, 43, 55, 65]);
+      return X({ id: "pyth", lv: 3, titre: "L'écran 16:9",
+        q: "La taille d'un écran est la longueur de sa diagonale, en pouces (1 pouce = " + Q(2.54, "cm") + "). Un écran 16:9 a une largeur " + M("16k") + " et une hauteur " + M("9k") + ". On considère un écran de " + p + " pouces.",
+        parts: [{ label: "Diagonale en cm (au dixième).", pts: 1 }, { label: "Montre que " + M("(16k)^2 + (9k)^2 = 337k^2") + " et calcule " + M("k") + " (au centième).", pts: 2 }, { label: "Calcule la largeur et la hauteur de l'écran (au cm).", pts: 2 }],
+        sol: ul([M(p + " \\cdot 2{,}54 = " + A(p * 2.54, 1)) + " cm.", M("256k^2 + 81k^2 = 337k^2") + " ; " + M("k = \\frac{" + A(p * 2.54, 1) + "}{\\sqrt{337}} \\approx " + A((p * 2.54) / Math.sqrt(337), 2)) + ".", "Largeur " + M("\\approx " + A((16 * p * 2.54) / Math.sqrt(337), 0)) + " cm, hauteur " + M("\\approx " + A((9 * p * 2.54) / Math.sqrt(337), 0)) + " cm."]) }); },
+  ];
+  const RAISONP = [
+    () => { const [a, b, c] = pk([[5, 12, 13], [6, 8, 10], [9, 12, 15]]), w = who();
+      return X({ id: "pyth", lv: 1, titre: "Trouve l'erreur",
+        q: "Dans un triangle rectangle de cathètes " + a + " cm et " + b + " cm, " + w + " écrit : « l'hypoténuse mesure " + (a + b) + " cm ».",
+        parts: [{ label: "Explique pourquoi c'est impossible (pense aux côtés d'un triangle).", pts: 1 }, { label: "Calcule l'hypoténuse correctement.", pts: 1 }],
+        sol: ul(["Dans un triangle, un côté est toujours plus court que la somme des deux autres (inégalité triangulaire) : " + (a + b) + " cm donnerait un triangle « aplati ».", M("\\sqrt{" + a + "^2 + " + b + "^2} = \\sqrt{" + c * c + "} = " + c) + " cm."]) }); },
+    () => { const S = [["« Le triangle de côtés 5, 7 et 9 est rectangle. »", false, M("25 + 49 = 74 \\ne 81") + "."], ["« Le triangle de côtés 1,5 ; 2 et 2,5 est rectangle. »", true, M("2{,}25 + 4 = 6{,}25 = 2{,}5^2") + "."], ["« Dans un triangle rectangle, l'hypoténuse est le plus grand côté. »", true, M("c^2 = a^2 + b^2 > a^2") + ", donc " + M("c > a") + " (et de même " + M("c > b") + ")."], ["« Un triangle de côtés 3, 4 et 6 est rectangle, car 3 + 4 > 6. »", false, "Il faut comparer les carrés : " + M("9 + 16 = 25 \\ne 36") + "."]];
+      return X({ id: "pythrec", lv: 1, titre: "Vrai ou faux ? Justifie", q: "Pour chaque affirmation, dis si elle est vraie ou fausse, et justifie.", parts: S.map((s) => ({ label: s[0], pts: 1 })), sol: ul(S.map((s) => "<b>" + (s[1] ? "Vrai" : "Faux") + "</b>. " + s[2])) }); },
+    () => { const [a, b, c] = pk([[60, 80, 100], [30, 40, 50], [90, 120, 150]]);
+      return X({ id: "pythrec", lv: 2, titre: "L'équerre du maçon",
+        q: "Pour tracer un angle droit sans équerre, un maçon marque " + a + " cm sur un mur et " + b + " cm sur l'autre, à partir du coin. Il mesure ensuite la distance entre les deux marques.",
+        parts: [{ label: "Quelle distance doit-il trouver si l'angle est droit ? Justifie.", pts: 1 }, { label: "Il mesure " + (c + 3) + " cm. L'angle est-il droit ? Plus grand ou plus petit qu'un angle droit ?", pts: 2 }],
+        sol: ul([M(c) + " cm, car " + M(a + "^2 + " + b + "^2 = " + c * c + " = " + c + "^2") + " (réciproque de Pythagore).", "Non : " + M((c + 3) + "^2 = " + (c + 3) ** 2 + " \\ne " + c * c) + ". La distance est trop grande : les murs sont plus écartés, l'angle est plus grand qu'un angle droit."]) }); },
+    () => { const w = who();
+      return X({ id: "pythfig", lv: 2, titre: "Trouve l'erreur",
+        q: "Pour la hauteur d'un triangle isocèle de côtés 13 cm, 13 cm et de base 10 cm, " + w + " écrit : « " + M("h^2 = 13^2 - 10^2 = 69") + ", donc " + M("h \\approx 8{,}3") + " cm ».",
+        parts: [{ label: "Quelle est l'erreur ? Fais un croquis.", pts: 1 }, { label: "Calcule la hauteur correctement.", pts: 1 }],
+        sol: ul(["La hauteur coupe la base en son milieu : le triangle rectangle a pour côté la <b>demi</b>-base, 5 cm.", M("h = \\sqrt{13^2 - 5^2} = \\sqrt{144} = 12") + " cm."]) }); },
+  ];
+
+  // ===================== 11e · 3. 3D (volumes et aires) =====================
+  const EX3 = [
+    () => { const a = pk([60, 80, 100]), b = pk([30, 40]), c = pk([40, 50]), L = pk([30, 40, 60]);
+      return X({ id: "vol", lv: 1, titre: "L'aquarium",
+        q: "Un aquarium en forme de pavé mesure " + a + " cm de long, " + b + " cm de large et " + c + " cm de haut.",
+        parts: [{ label: "Calcule son volume en cm³, puis sa contenance en litres.", pts: 2 }, { label: "On y verse " + L + " L d'eau. À quelle hauteur monte l'eau (au mm) ?", pts: 2 }],
+        sol: ul([M(a + " \\cdot " + b + " \\cdot " + c + " = " + N(a * b * c)) + " cm³ = " + M(N((a * b * c) / 1000)) + " L.", M(L + "\\ \\text{L} = " + N(L * 1000)) + " cm³ ; " + M("h = " + N(L * 1000) + " : " + a * b + " \\approx " + A((L * 1000) / (a * b), 1)) + " cm."]) }); },
+    () => { const r = pk([3.3, 3.2, 3]), V = 33;
+      return X({ id: "vol", lv: 2, titre: "La canette",
+        q: "Une canette cylindrique contient 33 cL. Son rayon intérieur est " + Q(r, "cm") + ".",
+        parts: [{ label: "Exprime 33 cL en cm³.", pts: 1 }, { label: "Calcule la hauteur minimale de la canette (au mm).", pts: 2 }, { label: "Calcule l'aire totale de métal (disques et paroi), en cm², pour cette hauteur.", pts: 2 }],
+        sol: ul(["330 cm³.", M("h = \\frac{330}{\\pi \\cdot " + N(r) + "^2} \\approx " + A(330 / (Math.PI * r * r), 1)) + " cm.", M("2\\pi \\cdot " + N(r) + "^2 + 2\\pi \\cdot " + N(r) + " \\cdot " + A(330 / (Math.PI * r * r), 1) + " \\approx " + A(2 * Math.PI * r * r + 2 * Math.PI * r * +(330 / (Math.PI * r * r)).toFixed(1), 1)) + " cm²."]) }); },
+    () => X({ id: "airepyr", lv: 2, titre: "La pyramide du Louvre",
+        q: "La pyramide du Louvre est une pyramide régulière à base carrée de côté " + Q(35.4, "m") + " et de hauteur " + Q(21.6, "m") + ". Ses quatre faces sont en verre.",
+        parts: [{ label: "Calcule son volume (au m³).", pts: 1 }, { label: "Calcule son apothème (au cm).", pts: 2 }, { label: "Calcule la surface de verre (au m²).", pts: 2 }],
+        sol: ul([M("\\frac{35{,}4^2 \\cdot 21{,}6}{3} \\approx 9\\text{'}023") + " m³.", M("\\sqrt{21{,}6^2 + 17{,}7^2} \\approx 27{,}93") + " m.", M("4 \\cdot \\frac{35{,}4 \\cdot 27{,}93}{2} \\approx 1\\text{'}977") + " m²."]) }),
+    () => { const r = pk([2, 3]), h = pk([6, 8, 10]), rho = 0.8;
+      return X({ id: "volcomp", lv: 2, titre: "Le silo à grains",
+        q: "Un silo est formé d'un cylindre de rayon " + Q(r, "m") + " et de hauteur " + Q(h, "m") + ", surmonté d'une demi-boule de même rayon. Un mètre cube de blé pèse environ " + M("0{,}8") + " tonne.",
+        parts: [{ label: "Calcule le volume exact du silo (avec " + M("\\pi") + ").", pts: 2 }, { label: "Donne une valeur arrondie au m³.", pts: 1 }, { label: "Quelle masse de blé contient-il quand il est plein ? (à la tonne)", pts: 1 }],
+        sol: ul(["Cylindre " + M(r * r * h + "\\pi") + ", demi-boule " + M("\\frac{2}{3}\\pi \\cdot " + r + "^3 = " + F(2 * r ** 3, 3) + "\\pi") + " ; total " + M(F(3 * r * r * h + 2 * r ** 3, 3) + "\\pi") + " m³.", M("\\approx " + A(((3 * r * r * h + 2 * r ** 3) / 3) * Math.PI, 0)) + " m³.", M("\\approx " + A((((3 * r * r * h + 2 * r ** 3) / 3) * Math.PI * rho), 0)) + " t."]) }); },
+    () => { const r = 3, L = pk([14, 16, 18]);
+      return X({ id: "volcomp", lv: 3, titre: "La gélule",
+        q: "Une gélule a la forme d'un cylindre terminé par deux demi-boules. Son diamètre est " + Q(2 * r, "mm") + " et sa longueur totale " + Q(L, "mm") + ".",
+        parts: [{ label: "Quelle est la longueur de la partie cylindrique ?", pts: 1 }, { label: "Calcule le volume exact de la gélule (en mm³, avec " + M("\\pi") + ").", pts: 2 }, { label: "Combien de gélules peut-on remplir avec 1 cm³ de poudre ? (1 cm³ = 1000 mm³)", pts: 1 }],
+        sol: ul([M(L + " - 2 \\cdot " + r + " = " + (L - 2 * r)) + " mm.", "Boule " + M("36\\pi") + " + cylindre " + M(9 * (L - 2 * r) + "\\pi") + " = " + M((36 + 9 * (L - 2 * r)) + "\\pi \\approx " + A((36 + 9 * (L - 2 * r)) * Math.PI, 1)) + " mm³.", M("1000 : " + A((36 + 9 * (L - 2 * r)) * Math.PI, 1) + " \\approx " + A(1000 / ((36 + 9 * (L - 2 * r)) * Math.PI), 1)) + " : " + Math.floor(1000 / ((36 + 9 * (L - 2 * r)) * Math.PI)) + " gélules complètes."]) }); },
+    () => { const r = pk([3, 4]), h = pk([9, 12]);
+      return X({ id: "volcone", lv: 1, titre: "Le cornet de glace",
+        q: "Un cornet a la forme d'un cône de rayon " + Q(r, "cm") + " et de hauteur " + Q(h, "cm") + ". On le remplit de glace, puis on pose dessus une demi-boule de glace de même rayon.",
+        parts: [{ label: "Calcule le volume du cône (valeur exacte).", pts: 1 }, { label: "Calcule le volume de la demi-boule (valeur exacte).", pts: 1 }, { label: "Quel volume de glace en tout ? Quelle part (en %) est dans le cône ?", pts: 2 }],
+        sol: ul([M("\\frac{1}{3}\\pi \\cdot " + r + "^2 \\cdot " + h + " = " + (r * r * h) / 3 + "\\pi") + " cm³.", M("\\frac{2}{3}\\pi \\cdot " + r + "^3 = " + F(2 * r ** 3, 3) + "\\pi") + " cm³.", M(F(r * r * h + 2 * r ** 3, 3) + "\\pi \\approx " + A(((r * r * h + 2 * r ** 3) / 3) * Math.PI, 1)) + " cm³ ; dans le cône : " + M("\\approx " + A((100 * r * r * h) / (r * r * h + 2 * r ** 3), 0) + "\\,\\%") + "."]) }); },
+    () => X({ id: "volcone", lv: 3, titre: "Variations",
+        q: "On s'intéresse à l'effet d'un agrandissement sur les volumes.",
+        parts: [{ label: "Une boule a un rayon de 3 cm. Calcule son volume (exact). Même question pour un rayon de 6 cm.", pts: 1 }, { label: "Par combien le volume est-il multiplié quand le rayon double ? Explique avec la formule.", pts: 1 }, { label: "Un cône a une hauteur de 6 cm et un rayon de 2 cm. Que devient son volume si on double le rayon seulement ? la hauteur seulement ?", pts: 2 }],
+        sol: ul([M("36\\pi") + " et " + M("288\\pi") + " cm³.", "Par " + M("2^3 = 8") + " : " + M("\\frac{4}{3}\\pi (2r)^3 = 8 \\cdot \\frac{4}{3}\\pi r^3") + ".", "Rayon doublé : volume × 4 (" + M("r^2") + ") ; hauteur doublée : volume × 2."]) }),
+    () => { const r = pk([4, 5, 6]), V = pk([20, 25, 30]);
+      return X({ id: "volmanq", lv: 2, titre: "Le verre conique",
+        q: "On veut fabriquer un verre en forme de cône de rayon " + Q(r, "cm") + " qui contienne exactement " + V + " cL.",
+        parts: [{ label: "Exprime le volume en cm³.", pts: 1 }, { label: "Calcule la profondeur (hauteur) du verre, au mm.", pts: 2 }, { label: "On remplit le verre jusqu'à mi-hauteur : le liquide forme un cône deux fois plus petit. Quelle fraction du verre est remplie ?", pts: 1 }],
+        sol: ul([M(V * 10) + " cm³.", M("h = \\frac{3 \\cdot " + V * 10 + "}{\\pi \\cdot " + r + "^2} \\approx " + A((3 * V * 10) / (Math.PI * r * r), 1)) + " cm.", "Toutes les longueurs divisées par 2, le volume par " + M("2^3 = 8") + " : " + M("\\frac{1}{8}") + " du verre seulement !"]) }); },
+  ];
+  const RAISON3 = [
+    () => { const r = pk([3, 6]), h = pk([4, 5]), w = who();
+      return X({ id: "volcone", lv: 1, titre: "Trouve l'erreur",
+        q: w + " calcule le volume d'un cône de rayon " + r + " cm et de hauteur " + h + " cm : « " + M("V = \\pi \\cdot " + r + "^2 \\cdot " + h + " = " + r * r * h + "\\pi") + " cm³ ».",
+        parts: [{ label: "Quelle est l'erreur ?", pts: 1 }, { label: "Calcule le bon volume.", pts: 1 }],
+        sol: ul(["C'est le volume du cylindre ; le cône en vaut le tiers.", M("\\frac{" + r * r * h + "\\pi}{3} = " + (r * r * h) / 3 + "\\pi") + " cm³."]) }); },
+    () => { const S = [["« Si on double le rayon d'une boule, son volume double. »", false, "Il est multiplié par " + M("2^3 = 8") + "."], ["« Une pyramide vaut le tiers du prisme de même base et même hauteur. »", true, M("V = \\frac{1}{3} A_{\\text{base}} \\cdot h") + "."], ["« 1 L = 100 cm³. »", false, M("1\\ \\text{L} = 1\\ \\text{dm}^3 = 1000\\ \\text{cm}^3") + "."], ["« L'aire d'une sphère de rayon " + M("r") + " vaut " + M("4\\pi r^2") + ". »", true, "C'est la formule (4 fois l'aire d'un grand disque)."]];
+      return X({ id: "volcone", lv: 1, titre: "Vrai ou faux ? Justifie", q: "Pour chaque affirmation, dis si elle est vraie ou fausse, et justifie.", parts: S.map((s) => ({ label: s[0], pts: 1 })), sol: ul(S.map((s) => "<b>" + (s[1] ? "Vrai" : "Faux") + "</b>. " + s[2])) }); },
+    () => { const d = pk([8, 10, 12]), h = pk([5, 7]), w = who();
+      return X({ id: "vol", lv: 2, titre: "Trouve l'erreur",
+        q: "Un cylindre a un diamètre de " + d + " cm et une hauteur de " + h + " cm. " + w + " écrit : « " + M("V = \\pi \\cdot " + d + "^2 \\cdot " + h + " = " + d * d * h + "\\pi") + " cm³ ».",
+        parts: [{ label: "Quelle est l'erreur ? Par combien le résultat de " + w + " est-il trop grand ?", pts: 2 }, { label: "Calcule le bon volume.", pts: 1 }],
+        sol: ul(["Il a pris le diamètre au lieu du rayon : le rayon est doublé, donc le volume est 4 fois trop grand.", M("\\pi \\cdot " + d / 2 + "^2 \\cdot " + h + " = " + (d * d * h) / 4 + "\\pi") + " cm³."]) }); },
+    () => X({ id: "airepyr", lv: 2, titre: "Hauteur ou apothème ?",
+        q: "Une pyramide régulière à base carrée a un côté de base de 12 cm et une hauteur de 8 cm. " + who() + " calcule son aire latérale : « " + M("4 \\cdot \\frac{12 \\cdot 8}{2} = 192") + " cm² ».",
+        parts: [{ label: "Quelle longueur aurait-il fallu utiliser à la place de 8 cm ? Pourquoi ?", pts: 1 }, { label: "Calcule-la, puis calcule l'aire latérale correcte.", pts: 2 }],
+        sol: ul(["L'apothème : c'est la hauteur des faces triangulaires, pas celle de la pyramide.", M("a = \\sqrt{8^2 + 6^2} = 10") + " cm ; aire latérale " + M("4 \\cdot \\frac{12 \\cdot 10}{2} = 240") + " cm²."]) }),
+  ];
+
+  RICH.no11 = { ids: ["prio", "fracadd", "fracmul", "fracconv", "puiss", "sci", "scicalc"], label: "Nombres et opérations", ex: EXN, raison: RAISONN, minutes: 45 };
+  RICH.pyth11 = { ids: ["pyth", "pythfig", "pythrec"], label: "Théorème de Pythagore", ex: EXP, raison: RAISONP, minutes: 45 };
+  RICH.gm3d11 = { ids: ["vol", "volcone", "airepyr", "volcomp", "volmanq"], label: "Volumes et aires (3D)", ex: EX3, raison: RAISON3, minutes: 45 };
+})();
+
 // Badges (13.11) : régularité (pas de série qui se perd), maîtrise (notes de compétences), persévérance, curiosité.
 // Tout reste sur l'appareil ; un badge gagné ne se perd jamais. Compteurs dans state.bc, badges gagnés dans state.badges.
 const BADGE_FAM = { reg: "Régularité", mai: "Maîtrise", per: "Persévérance", cur: "Curiosité" };
@@ -10971,6 +11187,221 @@ function activeLesson(id, L, cont, review) {
       defis: ["Trouve x tel que √(x + 7) = x + 1.", "Trouve un x tel que les carrés soient égaux mais pas les deux membres.", "Trouve x tel que √(x + 7) = 4."],
       play: hunt({ start: 0, min: -7, max: 12, show: (x) => `<div class="act-out">Membre de gauche : √(x + 7) = <b>${nb(+Math.sqrt(x + 7).toFixed(3))}</b><br>Membre de droite : x + 1 = <b>${nb(x + 1)}</b><br><span class="small muted">Au carré, à gauche : x + 7 = ${nb(x + 7)}<br>Au carré, à droite : (x + 1)² = ${sq(x + 1)}</span></div>`,
         wins: [(x) => (Math.sqrt(x + 7) === x + 1 ? "x = 2 : √9 = 3 = 2 + 1." : null), (x) => (x + 7 === (x + 1) ** 2 && Math.sqrt(x + 7) !== x + 1 ? "x = −3 : 4 = 4 au carré, mais √4 = 2 ≠ −2. Le carré a « oublié » le signe : on vérifie toujours." : null), (x) => (Math.sqrt(x + 7) === 4 ? "x = 9 : x + 7 = 16." : null)] }),
+    },
+  });
+})();
+
+// Chantier 11e · 1. Nombres et opérations, 2. Pythagore, 3. 3D (17.11) : leçons actives (devine / manipule / retiens)
+// et rappels de cours pour fracadd, fracmul, fracconv, puiss, sci, scicalc, pyth, pythfig, pythrec, vol, volcone,
+// airepyr, volcomp, volmanq (prio a déjà la sienne). Chargé après active.js et lessons2.js. Pas de TeX dans ce qui est
+// redessiné (exposants en caractères ⁰¹²³…).
+(function () {
+  const R2 = {
+    fracadd: ["Additionner des fractions", "On n'additionne que des parts de même taille : il faut un dénominateur commun.",
+      "On cherche le plus petit multiple commun des dénominateurs. On écrit chaque fraction avec ce dénominateur (en multipliant numérateur <b>et</b> dénominateur par le même nombre), on additionne les numérateurs, puis on simplifie. Un nombre entier s'écrit aussi comme une fraction : \\(2 = \\frac{6}{3}\\).",
+      ["\\(\\frac{1}{4} + \\frac{1}{6} = \\frac{3}{12} + \\frac{2}{12} = \\frac{5}{12}\\).", "\\(\\frac{5}{6} - \\frac{3}{4} = \\frac{10}{12} - \\frac{9}{12} = \\frac{1}{12}\\).", "\\(2 - \\frac{3}{5} = \\frac{10}{5} - \\frac{3}{5} = \\frac{7}{5}\\)."],
+      "On n'additionne jamais les dénominateurs : \\(\\frac{1}{4} + \\frac{1}{6}\\) n'est pas \\(\\frac{2}{10}\\)."],
+    fracmul: ["Multiplier et diviser des fractions", "Prendre une fraction d'une fraction, c'est multiplier.",
+      "On multiplie les numérateurs entre eux et les dénominateurs entre eux ; on simplifie avant si possible. Diviser par une fraction, c'est multiplier par son inverse : \\(\\frac{a}{b} : \\frac{c}{d} = \\frac{a}{b} \\cdot \\frac{d}{c}\\). Les fractions d’un nombre se calculent : \\(\\frac{3}{4}\\) de 28, c'est \\(28 : 4 \\cdot 3 = 21\\).",
+      ["\\(\\frac{2}{3} \\cdot \\frac{3}{4} = \\frac{6}{12} = \\frac{1}{2}\\).", "\\(\\frac{4}{9} \\cdot \\frac{15}{8} = \\frac{1 \\cdot 5}{3 \\cdot 2} = \\frac{5}{6}\\) (simplifié avant).", "\\(\\frac{3}{4} : \\frac{3}{8} = \\frac{3}{4} \\cdot \\frac{8}{3} = 2\\) : il y a deux fois \\(\\frac{3}{8}\\) dans \\(\\frac{3}{4}\\)."],
+      "Pour multiplier, pas de dénominateur commun ; pour diviser, on inverse la <b>deuxième</b> fraction."],
+    fracconv: ["Fraction, décimal, pourcentage", "Un même nombre a plusieurs écritures.",
+      "Fraction → décimal : on divise le numérateur par le dénominateur. Décimal → fraction : sur 10, 100, 1000…, puis on simplifie. Pourcentage : « pour cent », donc sur 100. Un nombre périodique s'écrit aussi en fraction : avec \\(x = 0{,}\\overline{3}\\), \\(10x - x = 3\\), donc \\(x = \\frac{3}{9} = \\frac{1}{3}\\).",
+      ["\\(\\frac{3}{8} = 3 : 8 = 0{,}375 = 37{,}5\\,\\%\\).", "\\(0{,}35 = \\frac{35}{100} = \\frac{7}{20}\\).", "\\(0{,}\\overline{27} = \\frac{27}{99} = \\frac{3}{11}\\) (période de 2 chiffres : sur 99)."],
+      "Deux baisses successives de 20 % ne font pas 40 % : la deuxième porte sur le prix déjà baissé (\\(0{,}8 \\cdot 0{,}8 = 0{,}64\\), soit 36 %)."],
+    puiss: ["Puissances", "\\(a^n\\) est un raccourci pour \\(n\\) facteurs \\(a\\).",
+      "Même base : \\(a^m \\cdot a^n = a^{m+n}\\), \\(\\frac{a^m}{a^n} = a^{m-n}\\), \\((a^m)^n = a^{m \\cdot n}\\). Exposant nul ou négatif : \\(a^0 = 1\\) et \\(a^{-n} = \\frac{1}{a^n}\\) (chaque marche vers le bas divise par \\(a\\)). Sans parenthèses, la puissance ne porte que sur le nombre : \\(-3^2 = -9\\), mais \\((-3)^2 = 9\\).",
+      ["\\(2^3 \\cdot 2^4 = 2^7 = 128\\).", "\\(\\frac{5^2}{5^5} = 5^{-3} = \\frac{1}{125}\\).", "\\(2^5 \\cdot 5^5 = 10^5\\) : même exposant, on regroupe les bases."],
+      "Un exposant négatif ne rend pas le nombre négatif : \\(2^{-3} = \\frac{1}{8}\\), pas \\(-8\\)."],
+    sci: ["Notation scientifique", "Un nombre très grand ou très petit s'écrit \\(a \\cdot 10^n\\), avec \\(1 \\le a < 10\\).",
+      "On place la virgule après le premier chiffre non nul : c'est \\(a\\). L'exposant \\(n\\) compte de combien de rangs on a déplacé la virgule : positif pour un nombre plus grand que 10, négatif pour un nombre plus petit que 1. Pour comparer, on regarde d'abord l'exposant.",
+      ["\\(4\\text{'}500\\text{'}000 = 4{,}5 \\cdot 10^6\\).", "\\(0{,}00045 = 4{,}5 \\cdot 10^{-4}\\).", "\\(34 \\cdot 10^5 = 3{,}4 \\cdot 10^1 \\cdot 10^5 = 3{,}4 \\cdot 10^6\\)."],
+      "\\(52 \\cdot 10^{-5}\\) n'est pas en notation scientifique : 52 n'est pas entre 1 et 10."],
+    scicalc: ["Calculer en notation scientifique", "On traite séparément les nombres devant et les puissances de 10.",
+      "Produit : on multiplie les nombres devant et on additionne les exposants. Quotient : on divise les nombres et on soustrait les exposants. À la fin, on remet le nombre devant entre 1 et 10, en corrigeant l'exposant.",
+      ["\\((3 \\cdot 10^4) \\cdot (2 \\cdot 10^5) = 6 \\cdot 10^9\\).", "\\((5 \\cdot 10^6) \\cdot (4 \\cdot 10^2) = 20 \\cdot 10^8 = 2 \\cdot 10^9\\).", "\\(\\frac{4 \\cdot 10^3}{8 \\cdot 10^{-2}} = 0{,}5 \\cdot 10^5 = 5 \\cdot 10^4\\)."],
+      "Si le nombre devant grandit (20 au lieu de 2), l'exposant diminue d'autant, et inversement."],
+    pyth: ["Théorème de Pythagore", "Dans un triangle rectangle, le carré de l'hypoténuse vaut la somme des carrés des deux autres côtés.",
+      "L'hypoténuse est le plus grand côté, en face de l'angle droit. Pour la trouver : on additionne les carrés des cathètes, puis on prend la racine. Pour trouver une cathète : on soustrait les carrés. La réponse exacte s'écrit souvent \\(a\\sqrt{b}\\).",
+      ["Cathètes 6 et 8 : \\(c^2 = 36 + 64 = 100\\), \\(c = 10\\).", "Hypoténuse 13, cathète 5 : \\(b^2 = 169 - 25 = 144\\), \\(b = 12\\).", "Cathètes 2 et 4 : \\(c = \\sqrt{20} = 2\\sqrt{5}\\)."],
+      "On additionne les carrés, pas les côtés : \\(6 + 8 = 14\\) n'est pas l'hypoténuse."],
+    pythfig: ["Pythagore dans les figures", "Le triangle rectangle est souvent caché.",
+      "Diagonale d'un rectangle : les deux côtés et la diagonale. Hauteur d'un triangle isocèle : elle coupe la base en son milieu. Grande diagonale d'un pavé : \\(d^2 = a^2 + b^2 + c^2\\). Pyramide : la hauteur, le demi-côté et l'apothème (ou la demi-diagonale et l'arête) forment un triangle rectangle.",
+      ["Rectangle 9 × 12 : \\(d = \\sqrt{81 + 144} = 15\\).", "Isocèle 10, 10, base 12 : \\(h = \\sqrt{100 - 36} = 8\\).", "Pavé 2 × 3 × 6 : \\(d = \\sqrt{4 + 9 + 36} = 7\\)."],
+      "Dans le triangle isocèle, on prend la <b>demi</b>-base."],
+    pythrec: ["La réciproque de Pythagore", "Pythagore sert aussi à savoir si un triangle est rectangle.",
+      "On calcule le carré du plus grand côté et la somme des carrés des deux autres. S'ils sont égaux, le triangle est rectangle (réciproque) ; sinon, il ne l'est pas. C'est le principe de l'équerre des maçons : 3, 4, 5 (ou 60, 80, 100 cm).",
+      ["5, 12, 13 : \\(25 + 144 = 169 = 13^2\\), rectangle.", "5, 7, 9 : \\(25 + 49 = 74 \\neq 81\\), pas rectangle.", "1,5 ; 2 ; 2,5 : \\(2{,}25 + 4 = 6{,}25\\), rectangle."],
+      "Une égalité « presque » vraie ne suffit pas : 74 et 81, ce n'est pas égal."],
+    vol: ["Volumes des prismes et cylindres", "Volume = aire de la base × hauteur.",
+      "On empile des couches identiques à la base. Pavé : \\(a \\cdot b \\cdot c\\). Prisme : aire du triangle (ou du trapèze) de base × longueur. Cylindre : \\(\\pi r^2 h\\). Contenances : \\(1\\ \\text{L} = 1\\ \\text{dm}^3 = 1000\\ \\text{cm}^3\\), \\(1\\ \\text{cL} = 10\\ \\text{cm}^3\\).",
+      ["Pavé 4 × 3 × 3 : 12 cubes par couche, 3 couches, \\(36\\ \\text{cm}^3\\).", "Prisme de base triangulaire (base 6, hauteur 4), long de 10 : \\(12 \\cdot 10 = 120\\).", "Cylindre \\(r = 3\\), \\(h = 5\\) : \\(45\\pi \\approx 141{,}4\\)."],
+      "\\(2\\pi r h\\) est l'aire latérale du cylindre, pas son volume."],
+    volcone: ["Pyramide, cône, boule", "Une pyramide vaut le tiers du prisme de même base et même hauteur.",
+      "Pyramide et cône : \\(V = \\frac{1}{3} \\cdot A_{\\text{base}} \\cdot h\\). Boule : \\(V = \\frac{4}{3}\\pi r^3\\). Sphère (la surface) : \\(A = 4\\pi r^2\\). Si toutes les longueurs sont multipliées par \\(k\\), le volume est multiplié par \\(k^3\\).",
+      ["Pyramide base 6 × 6, hauteur 5 : \\(\\frac{36 \\cdot 5}{3} = 60\\).", "Cône \\(r = 3\\), \\(h = 4\\) : \\(12\\pi\\).", "Boule \\(r = 3\\) : \\(36\\pi\\)."],
+      "Avec un diamètre, on prend d'abord la moitié pour avoir le rayon."],
+    airepyr: ["Aire d'une pyramide", "Les faces latérales sont des triangles ; leur hauteur est l'apothème.",
+      "Pyramide régulière à base carrée de côté \\(c\\) et d'apothème \\(a\\) : aire latérale \\(4 \\cdot \\frac{c \\cdot a}{2} = 2ca\\) ; aire totale \\(c^2 + 2ca\\). L'apothème se calcule avec Pythagore : \\(a^2 = h^2 + \\left(\\frac{c}{2}\\right)^2\\). Cône : aire latérale \\(\\pi r g\\) (\\(g\\) : génératrice).",
+      ["\\(c = 6\\), \\(h = 4\\) : \\(a = 5\\), aire latérale \\(60\\).", "\\(c = 10\\), \\(h = 12\\) : \\(a = 13\\), aire totale \\(100 + 260 = 360\\)."],
+      "La hauteur des faces est l'apothème, pas la hauteur de la pyramide."],
+    volcomp: ["Solides composés", "On découpe en solides simples.",
+      "On repère les solides (cube, pyramide, cylindre, cône, demi-boule), on calcule chaque volume avec ses propres dimensions, puis on additionne (ou on soustrait un trou). On garde \\(\\pi\\) en facteur jusqu'au bout.",
+      ["Cube 3 + pyramide de hauteur 3 : \\(27 + 9 = 36\\).", "Silo : cylindre \\(r = 3\\), \\(h = 10\\) et demi-boule : \\(90\\pi + 18\\pi = 108\\pi\\).", "Cube 10 percé d'un trou \\(r = 2\\) : \\(1000 - 40\\pi\\)."],
+      "Dans une gélule, la partie cylindrique est plus courte que la gélule : on retire deux rayons."],
+    volmanq: ["Retrouver une dimension", "Une formule de volume est une équation.",
+      "On écrit la formule, on remplace ce qu'on connaît, puis on isole la dimension cherchée. Pour un cône ou une pyramide, n'oublie pas le facteur 3 ; pour un rayon, on termine par une racine (carrée ou cubique).",
+      ["Cylindre \\(r = 3\\), \\(V = 36\\pi\\) : \\(9h = 36\\), \\(h = 4\\).", "Cône \\(r = 3\\), \\(V = 18\\pi\\) : \\(\\frac{9h}{3} = 18\\), \\(h = 6\\).", "Boule \\(V = 36\\pi\\) : \\(r^3 = 27\\), \\(r = 3\\)."],
+      "Convertis d'abord : 1 L = 1000 cm³."],
+  };
+  for (const [id, v] of Object.entries(R2)) LESSONS[id] = L_(...v);
+
+  // ---------- outils ----------
+  const nb = (v) => String(+(+v).toFixed(4)).replace(".", ",").replace("-", "−");
+  const gcd = (a, b) => (b ? gcd(b, a % b) : Math.abs(a));
+  const fr = (n, d) => { const g = gcd(n, d) || 1; n /= g; d /= g; return d === 1 ? String(n).replace("-", "−") : String(n).replace("-", "−") + "/" + d; };
+  const SUP = { "-": "⁻", 0: "⁰", 1: "¹", 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹" };
+  const sup = (n) => String(n).split("").map((c) => SUP[c] || c).join("");
+  const ok = (good, low) => (good ? '<b class="act-ok">✓ égalité</b>' : low ? "trop petit" : "trop grand");
+  const svg = (w, h, g, lab) => `<svg class="fig" viewBox="0 0 ${w} ${h}" role="img" aria-label="${lab}">${g}</svg>`;
+  // Chercheur : un curseur, l'affichage calculé en direct ; chaque défi vérifie la valeur.
+  const hunt = (o) => (box, onWin) => {
+    let x = o.start, step = 0;
+    const draw = () => {
+      box.innerHTML = actStepper(o.label || "x", nb(x), "x") + o.show(x, Math.min(step, o.wins.length - 1)) + (o.note ? `<div class="small muted">${o.note}</div>` : "");
+      box.querySelectorAll('[data-st="x"]').forEach((b) => (b.onclick = () => { x = Math.max(o.min, Math.min(o.max, +(x + +b.dataset.d * (o.step || 1)).toFixed(6))); draw(); check(); }));
+    };
+    const check = () => { if (step >= o.wins.length) return; const m = o.wins[step](x); if (m) { onWin(step, m); step++; draw(); } };
+    draw();
+  };
+  const W = (target, msg) => (x) => (Math.abs(x - target) < 1e-9 ? msg : "");
+  // Barre de fraction : a/b de la longueur, avec graduations en 1/n
+  const bar = (a, b, n, y, cls) => { const x0 = 20, w = 280; let g = `<rect x="${x0}" y="${y}" width="${w}" height="18" class="f-soft" stroke="var(--ink)" stroke-width="1"/><rect x="${x0}" y="${y}" width="${(w * a) / b}" height="18" class="${cls}"/>`;
+    if (n && n <= 60) for (let k = 1; k < n; k++) g += `<line x1="${x0 + (w * k) / n}" y1="${y}" x2="${x0 + (w * k) / n}" y2="${y + 18}" class="f-line" stroke-width="0.6"/>`;
+    return g; };
+
+  Object.assign(ACTIVE, {
+    fracadd: {
+      predict: { q: "Combien font 1/4 + 1/6 ?", choices: ["2/10", "5/12", "2/24"], good: 1, why: "Un quart et un sixième ne sont pas des parts de même taille : on les découpe en douzièmes, 3/12 + 2/12 = 5/12. Additionner les dénominateurs donnerait 2/10 = 1/5, moins qu'un quart seul !" },
+      defis: ["Trouve le plus petit dénominateur commun de 1/4 et 1/6.", "Même chose pour 2/3 et 3/5.", "Et pour 3/8 et 5/12."],
+      play: hunt({ label: "Dénominateur commun", start: 2, min: 2, max: 60,
+        show: (x, s) => { const [a, b, c, d] = [[1, 4, 1, 6], [2, 3, 3, 5], [3, 8, 5, 12]][s], okb = x % b === 0, okd = x % d === 0;
+          return svg(320, 70, bar(a, b, okb ? x : 0, 8, "f-fill") + bar(c, d, okd ? x : 0, 40, "f-fill2"), "deux barres de fraction") +
+            `<div class="act-out">${a}/${b} ${okb ? "= <b>" + (a * x) / b + "/" + x + "</b>" : ": " + x + " n'est pas un multiple de " + b}<br>${c}/${d} ${okd ? "= <b>" + (c * x) / d + "/" + x + "</b>" : ": " + x + " n'est pas un multiple de " + d}${okb && okd ? "<br>Somme : " + ((a * x) / b + (c * x) / d) + "/" + x + " = <b>" + fr((a * x) / b + (c * x) / d, x) + "</b>" : ""}</div>`; },
+        wins: [W(12, "12 : 3/12 + 2/12 = 5/12. 24 marcherait aussi, mais 12 est le plus petit."), W(15, "15 : 10/15 + 9/15 = 19/15."), W(24, "24 : 9/24 + 10/24 = 19/24. Inutile d'aller jusqu'à 8 · 12 = 96.")] }),
+    },
+    fracmul: {
+      predict: { q: "Les 2/3 de 3/4 d'une tablette de chocolat, c'est…", choices: ["5/7 de la tablette", "1/2 de la tablette", "6/7 de la tablette"], good: 1, why: "On prend 2 tiers d'une part de 3 quarts : 2/3 · 3/4 = 6/12 = 1/2. « De » veut dire « fois »." },
+      defis: ["Colorie les 2/3 de 3/4 du carré (règle les lignes).", "Colorie la moitié de 4/5.", "Colorie les 3/4 de 2/5."],
+      play: hunt({ label: "Lignes coloriées", start: 0, min: 0, max: 4,
+        show: (x, s) => { const [a, b, c, e] = [[3, 4, 2, 3], [4, 5, 1, 2], [2, 5, 3, 4]][s], r = Math.min(x, e), cw = 240 / b, rh = 120 / e; let g = "";
+          for (let i = 0; i < b; i++) for (let j = 0; j < e; j++) g += `<rect x="${40 + i * cw}" y="${10 + j * rh}" width="${cw}" height="${rh}" class="${i < a && j < r ? "f-fill" : i < a ? "f-fill2" : "f-soft"}" stroke="var(--ink)" stroke-width="0.8"/>`;
+          return svg(320, 140, g, "carré découpé") + `<div class="act-out">${r}/${e} de ${a}/${b} = ${r * a}/${e * b}${r ? " = <b>" + fr(r * a, e * b) + "</b>" : ""} du carré<br><span class="small muted">colonnes coloriées : ${a}/${b} ; cases doublement coloriées : ${r * a} sur ${e * b}</span></div>`; },
+        wins: [W(2, "2/3 · 3/4 = 6/12 = 1/2 : numérateurs entre eux, dénominateurs entre eux."), W(1, "1/2 · 4/5 = 4/10 = 2/5."), W(3, "3/4 · 2/5 = 6/20 = 3/10.")] }),
+    },
+    fracconv: {
+      predict: { q: "3/4 s'écrit en nombre décimal…", choices: ["0,34", "0,75", "3,4"], good: 1, why: "3/4, c'est 3 ÷ 4 = 0,75, soit 75 %. La barre de fraction n'est pas une virgule." },
+      defis: ["Règle le pourcentage égal à 3/4.", "Trouve le pourcentage égal à 1/5.", "Trouve le pourcentage qui s'écrit 7/20."],
+      play: hunt({ label: "Pourcentage", start: 50, min: 0, max: 100, step: 5,
+        show: (x) => { let g = ""; for (let k = 0; k < 100; k++) g += `<rect x="${60 + (k % 10) * 20}" y="${4 + Math.floor(k / 10) * 13}" width="19" height="12" class="${k < x ? "f-fill" : "f-soft"}"/>`;
+          return svg(320, 136, g, x + " cases sur 100") + `<div class="act-out">${x} % = ${x}/100 = <b>${fr(x, 100)}</b> = ${nb(x / 100)}</div>`; },
+        wins: [W(75, "75 % = 75/100 = 3/4 = 0,75."), W(20, "20 % = 20/100 = 1/5 = 0,2."), W(35, "35 % = 35/100 = 7/20 = 0,35 (on simplifie par 5).")] }),
+    },
+    puiss: {
+      predict: { q: "Que vaut 2⁻³ ?", choices: ["−8", "1/8", "−6"], good: 1, why: "Chaque fois que l'exposant baisse de 1, on divise par 2 : 2³ = 8, 2² = 4, 2¹ = 2, 2⁰ = 1, 2⁻¹ = 1/2, 2⁻² = 1/4, 2⁻³ = 1/8." },
+      defis: ["Descends l'escalier jusqu'à 2⁰. Que vaut-il ?", "Trouve l'exposant qui donne 1/2.", "Trouve l'exposant qui donne 1/8."],
+      play: hunt({ label: "Exposant", start: 4, min: -4, max: 6,
+        show: (x) => { let rows = ""; for (let n = 6; n >= -4; n--) { const v = n >= 0 ? String(2 ** n) : "1/" + 2 ** -n; rows += `<div style="padding-left:${(6 - n) * 10}px;${n === x ? "font-weight:700;color:var(--blue)" : "opacity:.55"}">2${sup(n)} = ${v}${n > -4 ? ' <span class="small muted">÷ 2 ↓</span>' : ""}</div>`; }
+          return `<div class="act-out" style="text-align:left">${rows}</div>`; },
+        wins: [W(0, "2⁰ = 1 : c'est 2¹ ÷ 2. Toute puissance d'exposant 0 vaut 1."), W(-1, "2⁻¹ = 1 ÷ 2 = 1/2 : un exposant négatif donne l'inverse."), W(-3, "2⁻³ = 1/2³ = 1/8 : positif, mais plus petit que 1.")] }),
+    },
+    sci: {
+      predict: { q: "0,00052 en notation scientifique, c'est…", choices: ["5,2 · 10⁴", "5,2 · 10⁻⁴", "52 · 10⁻⁵"], good: 1, why: "La virgule recule de 4 rangs pour arriver à 5,2 : le nombre est plus petit que 1, l'exposant est négatif, −4. 52 · 10⁻⁵ est juste en valeur, mais 52 n'est pas entre 1 et 10." },
+      defis: ["Écris 4'500'000 sous la forme 4,5 · 10ⁿ.", "Écris 0,00045 sous la forme 4,5 · 10ⁿ.", "Écris 450 sous la forme 4,5 · 10ⁿ."],
+      play: hunt({ label: "Exposant n", start: 0, min: -8, max: 9,
+        show: (x, s) => { const t = [4500000, 0.00045, 450][s], v = 4.5 * 10 ** x, txt = (y) => (y >= 1 ? String(Math.round(y)).replace(/\B(?=(\d{3})+(?!\d))/g, "'") : y.toFixed(12).replace(/0+$/, "")).replace(".", ",");
+          return `<div class="act-out">4,5 · 10${sup(x)} = <b>${txt(v)}</b><br>cible : ${txt(t)} → ${ok(Math.abs(v - t) < 1e-12 * t, v < t)}</div>`; },
+        note: "Chaque cran déplace la virgule d'un rang.",
+        wins: [W(6, "4'500'000 = 4,5 · 10⁶ : la virgule avance de 6 rangs."), W(-4, "0,00045 = 4,5 · 10⁻⁴ : plus petit que 1, exposant négatif."), W(2, "450 = 4,5 · 10² : deux rangs.")] }),
+    },
+    scicalc: {
+      predict: { q: "(2 · 10³) · (4 · 10⁵) = ?", choices: ["8 · 10⁸", "8 · 10¹⁵", "6 · 10⁸"], good: 0, why: "On multiplie les nombres (2 · 4 = 8) et on additionne les exposants (3 + 5 = 8) : 10³ · 10⁵, c'est 3 + 5 facteurs 10." },
+      defis: ["(3 · 10⁴) · (2 · 10⁵) = 6 · 10ⁿ : trouve n.", "(4 · 10³) ÷ (8 · 10⁻²) = 5 · 10ⁿ : trouve n.", "(5 · 10⁶) · (4 · 10²) = 2 · 10ⁿ : trouve n."],
+      play: hunt({ label: "n", start: 5, min: -4, max: 14,
+        show: (x, s) => { const [lab, m, t] = [["(3 · 10⁴) · (2 · 10⁵)", 6, 6e9], ["(4 · 10³) ÷ (8 · 10⁻²)", 5, 5e4], ["(5 · 10⁶) · (4 · 10²)", 2, 2e9]][s], v = m * 10 ** x;
+          return `<div class="act-out">${lab} = ${m} · 10${sup(x)} ? → ${ok(Math.abs(v - t) < 1e-6 * t, v < t)}</div>`; },
+        note: "Calcule d'abord avec les nombres, puis avec les exposants ; remets le nombre devant entre 1 et 10.",
+        wins: [W(9, "6 · 10⁹ : 3 · 2 = 6 et 4 + 5 = 9."), W(4, "4 ÷ 8 = 0,5 et 3 − (−2) = 5 : 0,5 · 10⁵ = 5 · 10⁴."), W(9, "5 · 4 = 20 et 6 + 2 = 8 : 20 · 10⁸ = 2 · 10⁹.")] }),
+    },
+    pyth: {
+      predict: { q: "Un triangle rectangle a des cathètes de 6 cm et 8 cm. Son hypoténuse mesure…", choices: ["14 cm", "10 cm", "48 cm"], good: 1, why: "6² + 8² = 36 + 64 = 100, et √100 = 10. On additionne les carrés, pas les côtés." },
+      defis: ["Cathètes 6 et 8 : règle l'hypoténuse.", "Cathètes 5 et 12 : règle l'hypoténuse.", "Hypoténuse 15 et cathète 9 : règle l'autre cathète."],
+      play: hunt({ label: "Longueur", start: 7, min: 1, max: 20,
+        show: (x, s) => { const [a, b, unk] = [[8, 6, "c"], [12, 5, "c"], [9, x, "b"]][s], k = 11, A = [40, 185], B = [40 + a * k, 185];
+          const C = [40, 185 - Math.min(unk === "b" ? x : b, 16) * k], hyp = unk === "c" ? x : 15, real = Math.hypot(B[0] - C[0], B[1] - C[1]) / k, ang = Math.atan2(B[1] - C[1], B[0] - C[0]), tip = [C[0] + Math.cos(ang) * hyp * k, C[1] + Math.sin(ang) * hyp * k];
+          const g = `<polyline points="${B.join(",")} ${A.join(",")} ${C.join(",")}" class="f-line" fill="none" stroke-width="2"/><rect x="40" y="173" width="12" height="12" class="f-line" fill="none"/><line x1="${C[0]}" y1="${C[1]}" x2="${tip[0].toFixed(1)}" y2="${tip[1].toFixed(1)}" class="f-accent" stroke-width="3"/>`;
+          const lhs = unk === "c" ? a * a + b * b : 81 + x * x, rhs = hyp * hyp;
+          return svg(320, 195, g, "triangle rectangle") + `<div class="act-out">${unk === "c" ? a + "² + " + b + "² = " + lhs + " ; " + x + "² = " + rhs : "9² + " + x + "² = " + lhs + " ; 15² = 225"} → ${ok(lhs === rhs, unk === "c" ? rhs < lhs : lhs < rhs)}</div>`; },
+        note: "Le trait coloré doit fermer exactement le triangle.",
+        wins: [W(10, "6² + 8² = 100 = 10² : l'hypoténuse mesure 10."), W(13, "5² + 12² = 169 = 13²."), W(12, "15² − 9² = 225 − 81 = 144 = 12² : pour une cathète, on soustrait.")] }),
+    },
+    pythfig: {
+      predict: { q: "Un rectangle mesure 9 cm sur 12 cm. Sa diagonale mesure…", choices: ["21 cm", "15 cm", "108 cm"], good: 1, why: "La diagonale coupe le rectangle en deux triangles rectangles : √(81 + 144) = √225 = 15." },
+      defis: ["Rectangle 9 × 12 : trouve la diagonale.", "Triangle isocèle de côtés 10, 10 et de base 12 : trouve la hauteur.", "Pavé 2 × 3 × 6 : trouve la grande diagonale."],
+      play: hunt({ label: "Longueur", start: 5, min: 1, max: 20,
+        show: (x, s) => { const L = [["Triangle (9 ; 12 ; diagonale) : 9² + 12² = 225", 225, x * x, "diagonale² = " + x * x], ["Triangle (demi-base 6 ; hauteur ; côté 10) : 6² + h² = " + (36 + x * x), 100, 36 + x * x, "côté² = 100"], ["Pavé : 2² + 3² + 6² = 49", 49, x * x, "diagonale² = " + x * x]][s];
+          return `<div class="act-out">${L[0]}<br>${L[3]} → ${ok(L[1] === L[2], L[2] < L[1])}</div>`; },
+        wins: [W(15, "√225 = 15."), W(8, "La hauteur coupe la base en deux : 10² − 6² = 64, h = 8."), W(7, "4 + 9 + 36 = 49 = 7² : d = 7.")] }),
+    },
+    pythrec: {
+      predict: { q: "Un triangle de côtés 5, 7 et 9 est-il rectangle ?", choices: ["Oui", "Non", "On ne peut pas savoir"], good: 1, why: "5² + 7² = 25 + 49 = 74, mais 9² = 81. Pas d'égalité : il n'est pas rectangle." },
+      defis: ["Côtés 6, 8 et x (le plus grand) : règle x pour que le triangle soit rectangle.", "Côtés 7, x et 25 (25 le plus grand) : règle x.", "Côtés 20, 21 et x (le plus grand) : règle x."],
+      play: hunt({ label: "x", start: 10, min: 1, max: 40,
+        show: (x, s) => { const [l, r, txt] = [[100, x * x, "6² + 8² = 100 ; x² = " + x * x], [49 + x * x, 625, "7² + x² = " + (49 + x * x) + " ; 25² = 625"], [841, x * x, "20² + 21² = 841 ; x² = " + x * x]][s];
+          return `<div class="act-out">${txt} → ${l === r ? '<b class="act-ok">égalité : rectangle</b>' : "pas d'égalité : pas rectangle"}</div>`; },
+        wins: [W(10, "6, 8, 10 : rectangle (le double de 3, 4, 5)."), W(24, "7² + 24² = 625 = 25²."), W(29, "20² + 21² = 841 = 29².")] }),
+    },
+    vol: {
+      predict: { q: "Combien de cubes de 1 cm³ faut-il pour remplir un pavé de 4 cm × 3 cm × 2 cm ?", choices: ["9", "24", "14"], good: 1, why: "Une couche de 4 · 3 = 12 cubes, et 2 couches : 24 cm³. Volume = aire de la base × hauteur." },
+      defis: ["Base 4 × 3 : combien de couches pour 36 cm³ ?", "Base 5 × 2 : combien de couches pour 70 cm³ ?", "Prisme de base triangulaire d'aire 6 cm² : quelle longueur pour 48 cm³ ?"],
+      play: hunt({ label: "Couches (hauteur en cm)", start: 1, min: 1, max: 12,
+        show: (x, s) => { const [base, lab, t] = [[12, "4 × 3", 36], [10, "5 × 2", 70], [6, "triangle de 6 cm²", 48]][s]; let g = "";
+          for (let k = 0; k < x; k++) g += `<rect x="${60 + k * 3}" y="${118 - k * 9}" width="160" height="9" class="${k % 2 ? "f-fill2" : "f-fill"}" stroke="var(--ink)" stroke-width="0.6"/>`;
+          return svg(320, 132, g, x + " couches") + `<div class="act-out">base ${lab} = ${base} cm² ; ${base} · ${x} = <b>${base * x} cm³</b> (cible ${t}) → ${ok(base * x === t, base * x < t)}</div>`; },
+        wins: [W(3, "12 · 3 = 36 cm³."), W(7, "10 · 7 = 70 cm³."), W(8, "6 · 8 = 48 cm³ : même règle pour un prisme, aire de la base × longueur.")] }),
+    },
+    volcone: {
+      predict: { q: "Combien de pyramides (même base, même hauteur) faut-il pour remplir un prisme ?", choices: ["2", "3", "4"], good: 1, why: "Une pyramide vaut exactement le tiers du prisme de même base et même hauteur : V = ⅓ · base · hauteur." },
+      defis: ["Combien de cônes (même base, même hauteur) pour remplir le cylindre ?", "Combien de pyramides (même base, même hauteur) pour remplir le pavé ?", "Des cônes de même base, mais deux fois moins hauts : combien pour le cylindre ?"],
+      play: hunt({ label: "Nombre de solides versés", start: 1, min: 1, max: 8,
+        show: (x, s) => { const d = s === 2 ? 6 : 3, f = Math.min(x / d, 1.2); const g = `<rect x="110" y="20" width="100" height="110" class="f-soft" stroke="var(--ink)" stroke-width="1.5"/><rect x="110" y="${(130 - Math.min(f, 1) * 110).toFixed(1)}" width="100" height="${(Math.min(f, 1) * 110).toFixed(1)}" class="f-fill"/>`;
+          return svg(320, 140, g, "récipient rempli") + `<div class="act-out">${x} ${s === 1 ? "pyramide" : "cône"}${x > 1 ? "s" : ""} = ${fr(x, d)} du ${s === 1 ? "pavé" : "cylindre"} → ${x === d ? '<b class="act-ok">plein</b>' : x < d ? "pas encore plein" : "ça déborde"}</div>`; },
+        wins: [W(3, "3 cônes : un cône vaut le tiers du cylindre, V = ⅓ π r² h."), W(3, "3 pyramides : V = ⅓ · base · hauteur."), W(6, "Deux fois moins haut, deux fois moins de volume : chaque cône vaut 1/6 du cylindre.")] }),
+    },
+    airepyr: {
+      predict: { q: "Une pyramide à base carrée de 6 cm a une hauteur de 4 cm. Son apothème (hauteur d'une face) mesure…", choices: ["4 cm", "5 cm", "7 cm"], good: 1, why: "Hauteur, demi-côté et apothème forment un triangle rectangle : √(4² + 3²) = √25 = 5. L'apothème est plus long que la hauteur." },
+      defis: ["Base 6 cm, hauteur 4 cm : règle l'apothème.", "Base 10 cm, hauteur 12 cm : règle l'apothème.", "Base 16 cm, hauteur 6 cm : règle l'apothème, puis lis l'aire latérale."],
+      play: hunt({ label: "Apothème", start: 3, min: 1, max: 20,
+        show: (x, s) => { const [c, h] = [[6, 4], [10, 12], [16, 6]][s], t = h * h + (c / 2) ** 2;
+          return `<div class="act-out">${h}² + ${c / 2}² = ${t} ; ${x}² = ${x * x} → ${ok(t === x * x, x * x < t)}<br>aire latérale : 4 · (${c} · ${x}) ÷ 2 = <b>${2 * c * x} cm²</b></div>`; },
+        note: "Sous l'apothème, il y a le demi-côté de la base.",
+        wins: [W(5, "√(16 + 9) = 5 ; aire latérale 2 · 6 · 5 = 60 cm²."), W(13, "√(144 + 25) = 13 ; aire latérale 260 cm²."), W(10, "√(36 + 64) = 10 ; aire latérale 2 · 16 · 10 = 320 cm².")] }),
+    },
+    volcomp: {
+      predict: { q: "Un cube de 3 cm surmonté d'une pyramide de même base et de 3 cm de haut : volume total ?", choices: ["36 cm³", "54 cm³", "30 cm³"], good: 0, why: "Cube : 27. Pyramide : ⅓ · 9 · 3 = 9. Total : 36 cm³. On additionne les volumes des parties." },
+      defis: ["Cube d'arête 3 et pyramide : quelle hauteur de pyramide pour 36 cm³ en tout ?", "Même cube : quelle hauteur pour 45 cm³ ?", "Cylindre (r = 1, h = 4) et cône de même base : quelle hauteur de cône pour 6π en tout ?"],
+      play: hunt({ label: "Hauteur du toit", start: 1, min: 1, max: 12,
+        show: (x, s) => { if (s < 2) { const v = 27 + 3 * x, t = s ? 45 : 36; return `<div class="act-out">cube 27 + pyramide ⅓ · 9 · ${x} = 27 + ${3 * x} = <b>${v} cm³</b> (cible ${t}) → ${ok(v === t, v < t)}</div>`; }
+          const v = 4 + x / 3; return `<div class="act-out">cylindre 4π + cône ⅓ · π · 1² · ${x} = <b>${nb(v)}π</b> (cible 6π) → ${ok(Math.abs(v - 6) < 1e-9, v < 6)}</div>`; },
+        wins: [W(3, "27 + 9 = 36."), W(6, "27 + 18 = 45."), W(6, "4π + 2π = 6π : le cône de hauteur 6 vaut un cylindre de hauteur 2.")] }),
+    },
+    volmanq: {
+      predict: { q: "Un cylindre de rayon 3 cm a un volume de 36π cm³. Sa hauteur mesure…", choices: ["4 cm", "12 cm", "6 cm"], good: 0, why: "π · 3² · h = 36π, donc 9h = 36 et h = 4. On remplace ce qu'on connaît, puis on isole h." },
+      defis: ["Cylindre de rayon 3 et de volume 36π : règle la hauteur.", "Cône de rayon 3 et de volume 18π : règle la hauteur.", "Pavé de base 5 × 4 et de volume 140 cm³ : règle la hauteur."],
+      play: hunt({ label: "Hauteur", start: 1, min: 1, max: 12,
+        show: (x, s) => { const [lab, v, t] = [["π · 3² · " + x, 9 * x, 36], ["⅓ · π · 3² · " + x, 3 * x, 18], ["5 · 4 · " + x, 20 * x, 140]][s];
+          return `<div class="act-out">${lab} = <b>${v}${s < 2 ? "π" : ""}</b> (cible ${t}${s < 2 ? "π" : ""}) → ${ok(v === t, v < t)}</div>`; },
+        wins: [W(4, "9h = 36, h = 4."), W(6, "3h = 18, h = 6 : le facteur ⅓ du cône compte."), W(7, "20h = 140, h = 7.")] }),
     },
   });
 })();

@@ -8,9 +8,9 @@
 <script src="../src/figures.js"></script><script src="../src/geo.js"></script>
 <script src="../src/generators.js"></script>
 <script src="../src/gen2.js"></script>
-<script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/riche.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script>
+<script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script>
 <script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script>
-<script src="../src/engine.js"></script><script src="../src/sujet.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script>
+<script src="../src/engine.js"></script><script src="../src/sujet.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_ch11b.js"></script>
 <pre id="out">en cours</pre>
 <script>
 const out = [], ids = location.hash ? location.hash.slice(1).split(",") : ["utemps", "ucomp", "vitesse", "gquot", "litelab", "valnum", "reduire", "monomes", "parenth", "distrib", "idrem", "factor"]; let bad = 0;
@@ -65,7 +65,7 @@ for (const [ch, C] of Object.entries(RICH)) for (const kind of ["ex", "raison"])
   }
   out.push("riche " + kind + k + " · " + [...pts].join("/") + " pts · " + sample);
 });
-for (const [nm, ids0] of [["prop", ["utemps", "ucomp", "vitesse", "gquot"]], ["litt", ["litelab", "valnum", "reduire", "monomes", "parenth", "distrib", "idrem", "factor"]]]) for (const lv of ["facile", "standard", "exigeant"]) { const seen = new Set(); for (let i = 0; i < 20; i++) { const pl = mockPlan(ids0, lv); seen.add(pl.filter((x) => x.rich).map((x) => x.kind + x.k).join(",")); if (pl.filter((x) => x.part === "B").length !== 3) fail("plan " + lv + " sans 3 exercices"); } out.push("plan " + nm + " " + lv + " : " + seen.size + " sujets différents sur 20"); }
+for (const [nm, ids0] of [["prop", ["utemps", "ucomp", "vitesse", "gquot"]], ["litt", ["litelab", "valnum", "reduire", "monomes", "parenth", "distrib", "idrem", "factor"]], ["no", ["prio", "fracadd", "fracmul", "fracconv", "puiss", "sci", "scicalc"]], ["pyth", ["pyth", "pythfig", "pythrec"]], ["3d", ["vol", "volcone", "airepyr", "volcomp", "volmanq"]]]) for (const lv of ["facile", "standard", "exigeant"]) { const seen = new Set(); for (let i = 0; i < 20; i++) { const pl = mockPlan(ids0, lv); seen.add(pl.filter((x) => x.rich).map((x) => x.kind + x.k).join(",")); if (pl.filter((x) => x.part === "B").length !== 3) fail("plan " + lv + " sans 3 exercices"); } out.push("plan " + nm + " " + lv + " : " + seen.size + " sujets différents sur 20"); }
 // Figure à manipuler du rappel « vitesse » (dyn) : toutes les positions du curseur.
 if (typeof DYN === "undefined" || !DYN.vitesse) fail("DYN.vitesse absent"); else for (let x = 0; x <= 3; x += 0.25) { const s = DYN.vitesse.render(x) + DYN.vitesse.label(x); if (/NaN|undefined/.test(s)) fail("dyn vitesse " + x); }
 if (!LESSON_FIGS.vitesse || !/data-dyn="vitesse"/.test(LESSON_FIGS.vitesse())) fail("LESSON_FIGS.vitesse sans curseur");
