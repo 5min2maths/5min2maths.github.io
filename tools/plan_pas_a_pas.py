@@ -17,6 +17,16 @@ CHANTIER = [
     ("11e · 5. Calcul littéral 2 (ensuite)", ["idrem", "factor"]),
     ("1re Collège · équations du 1er degré (testeurs de 1re)", ["eq1", "eqfrac", "eqspec", "formule", "probeq"]),
     ("1re Collège · équations du 2e degré", ["eq2fact", "eq2", "eq2disc", "probeq2", "eq3", "bicarre", "eqirr"]),
+    # Suite du plan de cheminement 11e (Bude/outils/planif_11ls.py, demande du 17.11) : les testeurs de 11e
+    # trouvent la matière de leur chapitre en cours ; ensuite les chapitres déjà passés (révision EVACOM).
+    ("11e · 7. Angles (dès le 26.02)", ["angles", "cercthales"]),
+    ("11e · 8. Thalès (dès le 12.03)", ["thales", "thalesrec", "simil"]),
+    ("11e · 9. Systèmes d'équations (dès le 16.04)", ["sys2", "sysprob"]),
+    ("11e · 10. Fonctions (dès le 30.04)", ["repere", "tabval", "affine"]),
+    ("11e · 12. Probabilités (dès le 18.06)", ["denombr", "proba"]),
+    ("11e · 1. Nombres et opérations (révision)", ["prio", "fracconv", "fracadd", "fracmul", "puiss", "sci", "scicalc"]),
+    ("11e · 2. Pythagore (révision)", ["pyth", "pythfig", "pythrec"]),
+    ("11e · 3. 3D (révision)", ["vol", "volcone", "airepyr", "volcomp", "volmanq"]),
 ]
 src = lambda f: open(os.path.join(RAC, "src", f), encoding="utf-8").read()
 
