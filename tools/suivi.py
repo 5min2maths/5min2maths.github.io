@@ -60,9 +60,8 @@ def retours():
 
 def banques_riches():
     """Chapitres qui ont un test de préparation de qualité (src/riche.js, 15.11) : clé -> (notions, nb exercices, nb raisonnement)."""
-    f = ROOT / "src" / "riche.js"
     out = {}
-    if f.exists():
+    for f in sorted((ROOT / "src").glob("riche*.js")):  # riche.js et riche_11b.js (17.11)
         s = f.read_text()
         for m in re.finditer(r'RICH\.(\w+) = \{ ids: \[([^\]]*)\]', s):
             out[m.group(1)] = re.findall(r'"([a-z0-9]+)"', m.group(2))
