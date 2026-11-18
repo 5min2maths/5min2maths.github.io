@@ -10792,6 +10792,9 @@ function bindDyn(root) {
 }
 if (typeof LESSON_FIGS !== "undefined") LESSON_FIGS.optim = () => dynHtml("optim");
 
+// Ordre des choix de « Devine » tiré au hasard à chaque affichage (18.11 : la bonne réponse était au milieu dans 32
+// questions sur 46). Deux choix (Oui / Non) : ordre naturel conservé. data-i garde l'indice d'origine.
+function predOrder(n) { const o = [...Array(n).keys()]; if (n < 3) return o; for (let i = n - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [o[i], o[j]] = [o[j], o[i]]; } return o; }
 // Leçons actives (14.11, demande de l'utilisateur : « l'élève doit être actif ») : trois temps.
 // 1. Devine : une question à toucher avant toute règle. 2. Manipule : des défis à réussir avec les doigts.
 // 3. Retiens : la règle, les exemples et le piège arrivent après. Prototype : fractout, prio.
@@ -11053,7 +11056,7 @@ function activeLesson(id, L, cont, review) {
   h(`${brand}<div class="eyebrow">${review ? "Leçon" : "Nouvelle notion"} · à toi de jouer</div>
   <div class="card pop lesson-card stack"><h2>${L.titre}</h2>
     <div class="act-step"><div class="act-h"><span class="act-n">1</span> Devine</div><p>${P.q}</p>
-      <div class="seg" id="pc">${P.choices.map((c, i) => `<button type="button" data-i="${i}">${c}</button>`).join("")}</div><div id="pfb"></div></div>
+      <div class="seg" id="pc">${predOrder(P.choices.length).map((i) => `<button type="button" data-i="${i}">${P.choices[i]}</button>`).join("")}</div><div id="pfb"></div></div>
     <div class="act-step" id="s2" hidden><div class="act-h"><span class="act-n">2</span> Manipule</div>
       <p class="act-goal" id="goal"></p><div id="play" class="stack"></div><div id="gfb"></div>
       <button type="button" class="btn-ghost small" id="skip">Passer les défis</button></div>
