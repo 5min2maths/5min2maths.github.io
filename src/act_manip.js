@@ -45,11 +45,11 @@
       if (!A) { win(m); return; }
       asking = true;
       askBox.innerHTML = `<div class="act-out" style="margin-top:6px"><b>✓ ${esc(m)}</b></div><div class="small" style="margin:6px 0"><b>À toi, sans la figure :</b> ${A.q}</div>
-        <div style="display:flex;gap:8px;justify-content:center;align-items:center"><input class="ans act-in" inputmode="decimal" autocomplete="off" style="max-width:130px" aria-label="Ta réponse"><button type="button" class="btn-primary" data-go>Vérifier</button></div>`;
-      const inp = askBox.querySelector("input"), go = () => { const v = Number(String(inp.value).replace(",", ".").replace("−", "-").replace(/^(-?\d+)\/(\d+)$/, (s, a, b) => String(a / b)).trim());
+        ${actAnswerHtml("")}`;
+      const inp = askBox.querySelector("input"), go = () => { const v = Number(String(inp.value).replace(/,/g, ".").replace("−", "-").replace(/\s/g, "").replace(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/, (s, u, w) => String(u / w)));
         if (inp.value.trim() === "" || !isFinite(v)) { $hint(box, "Tape un nombre."); return; }
         if (near(v, A.ans)) win(A.ok); else $hint(box, A.no || "Pas encore : reprends le raisonnement de la figure."); };
-      askBox.querySelector("[data-go]").onclick = go; inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
+      actAnswerBind(askBox, go);
     };
     drawHandles(); refresh();
     // Point d'entrée pour les tests automatiques (tests/act_manip.html)

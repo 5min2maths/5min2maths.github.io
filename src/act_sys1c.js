@@ -40,9 +40,9 @@
     let x = null, step = 0;
     const draw = () => {
       const s = Math.min(step, o.wins.length - 1);
-      box.innerHTML = `<div class="act-in-row" style="display:flex;gap:8px;justify-content:center;align-items:center;margin:6px 0"><span class="small muted">${o.label || "Ta réponse"}</span><input class="ans act-in" inputmode="decimal" autocomplete="off" style="max-width:120px" aria-label="${o.label || "Ta réponse"}" value="${x === null ? "" : nb(x)}"><button type="button" class="btn-primary" data-go>Vérifier</button></div>` + o.show(x, s);
-      const inp = box.querySelector(".act-in"), go = () => { const v = Number(String(inp.value).replace(",", ".").replace("−", "-").trim()); if (inp.value.trim() === "" || !isFinite(v)) { $hint(box, "Tape un nombre."); return; } x = v; draw(); if (!check()) $hint(box, "Pas encore : regarde la figure, puis recalcule."); };
-      box.querySelector("[data-go]").onclick = go; inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
+      box.innerHTML = (actAnswerHtml(o.label || "Ta réponse")) + o.show(x, s);
+      const inp = box.querySelector(".act-in"); if (x !== null) inp.value = nb(x).replace("−", "-"); const go = () => { const v = Number(String(inp.value).replace(/,/g, ".").replace("−", "-").replace(/\s/g, "").replace(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/, (s, u, w) => String(u / w))); if (inp.value.trim() === "" || !isFinite(v)) { $hint(box, "Tape un nombre."); return; } x = v; draw(); if (!check()) $hint(box, box.querySelector("svg.fig") ? "Pas encore : regarde la figure, puis recalcule." : "Pas encore : relis les calculs affichés, puis recalcule."); };
+      actAnswerBind(box, go);
     };
     const check = () => { if (step >= o.wins.length) return false; const m = o.wins[step](x); if (m) { onWin(step, m); step++; x = null; draw(); return true; } return false; };
     draw();

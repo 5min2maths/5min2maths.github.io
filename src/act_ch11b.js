@@ -79,12 +79,12 @@
     let x = o.ask ? null : o.start, step = 0;
     const draw = () => {
       const s = Math.min(step, o.wins.length - 1), fig = x === null ? (o.blank ? o.blank(s) : "") : o.show(x, s);
-      const ctl = o.ask ? `<div class="act-in-row" style="display:flex;gap:8px;justify-content:center;align-items:center;margin:6px 0"><span class="small muted">${o.label || "Ta réponse"}</span><input class="ans act-in" inputmode="decimal" autocomplete="off" style="max-width:120px" aria-label="${o.label || "Ta réponse"}" value="${x === null ? "" : nb(x)}"><button type="button" class="btn-primary" data-go>Vérifier</button></div>`
+      const ctl = o.ask ? (actAnswerHtml(o.label || "Ta réponse"))
         : actStepper(o.label || "x", nb(x), "x");
       box.innerHTML = ctl + fig + (o.note ? `<div class="small muted">${o.note}</div>` : "");
       if (o.ask) {
-        const inp = box.querySelector(".act-in"), go = () => { const v = Number(String(inp.value).replace(",", ".").replace("−", "-").trim()); if (inp.value.trim() === "" || !isFinite(v)) { $hint(box, "Tape un nombre."); return; } x = v; draw(); if (!check()) $hint(box, o.miss || "Pas encore : regarde la figure, puis recalcule."); };
-        box.querySelector("[data-go]").onclick = go; inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
+        const inp = box.querySelector(".act-in"); if (x !== null) inp.value = nb(x).replace("−", "-"); const go = () => { const v = Number(String(inp.value).replace(/,/g, ".").replace("−", "-").replace(/\s/g, "").replace(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/, (s, u, w) => String(u / w))); if (inp.value.trim() === "" || !isFinite(v)) { $hint(box, "Tape un nombre."); return; } x = v; draw(); if (!check()) $hint(box, o.miss || (box.querySelector("svg.fig") ? "Pas encore : regarde la figure, puis recalcule." : "Pas encore : relis les calculs affichés, puis recalcule.")); };
+        actAnswerBind(box, go);
       } else box.querySelectorAll('[data-st="x"]').forEach((b) => (b.onclick = () => { x = Math.max(o.min, Math.min(o.max, +(x + +b.dataset.d * (o.step || 1)).toFixed(6))); draw(); check(); }));
     };
     const check = () => { if (step >= o.wins.length) return false; const m = o.wins[step](x); if (m) { onWin(step, m); step++; if (o.ask) x = null; draw(); return true; } return false; };

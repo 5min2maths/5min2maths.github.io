@@ -1,5 +1,20 @@
 // Ordre des choix de « Devine » tiré au hasard à chaque affichage (18.11 : la bonne réponse était au milieu dans 32
 // questions sur 46). Deux choix (Oui / Non) : ordre naturel conservé. data-i garde l'indice d'origine.
+// Zone de réponse des leçons actives (18.11, commentaire testeur : « on avait dit de normaliser ») : la même que celle
+// des questions et du pas à pas — champ large, aperçu, clavier de l'app. actAnswerHtml(label) puis actAnswerBind(box, go).
+function actAnswerHtml(label) {
+  const fine = window.matchMedia("(pointer: fine)").matches;
+  return `<div class="answer gans act-ans">${label ? `<div class="small muted">${label}</div>` : ""}<input class="ans gin act-in" inputmode="${fine ? "text" : "none"}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Ta réponse">
+    <div class="preview gprev"></div>${keypadHtml({ kind: "value", value: 1, final: true }).replace(' id="kp"', "")}<div class="actions"><button type="button" class="btn-primary" data-go>Vérifier</button></div></div>`;
+}
+function actAnswerBind(box, go) {
+  const el = box.querySelector(".act-ans"); if (!el) return;
+  const inp = el.querySelector("input"), prev = el.querySelector(".gprev"), sp = { kind: "value", value: 1, final: true }, show = () => previewOf(inp, prev, sp);
+  let mode = inp.getAttribute("inputmode");
+  inp.oninput = show; inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
+  el.querySelectorAll(".keypad button").forEach((b) => (b.onclick = () => { const k = b.dataset.k; if (k === "⌨") { mode = mode === "none" ? "text" : "none"; inp.setAttribute("inputmode", mode); inp.blur(); inp.focus(); return; } typeKey(inp, k); show(); }));
+  el.querySelector("[data-go]").onclick = go;
+}
 function predOrder(n) { const o = [...Array(n).keys()]; if (n < 3) return o; for (let i = n - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [o[i], o[j]] = [o[j], o[i]]; } return o; }
 // Leçons actives (14.11, demande de l'utilisateur : « l'élève doit être actif ») : trois temps.
 // 1. Devine : une question à toucher avant toute règle. 2. Manipule : des défis à réussir avec les doigts.

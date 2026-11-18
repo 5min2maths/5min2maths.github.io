@@ -11137,6 +11137,21 @@ if (typeof LESSON_FIGS !== "undefined") LESSON_FIGS.optim = () => dynHtml("optim
 
 // Ordre des choix de « Devine » tiré au hasard à chaque affichage (18.11 : la bonne réponse était au milieu dans 32
 // questions sur 46). Deux choix (Oui / Non) : ordre naturel conservé. data-i garde l'indice d'origine.
+// Zone de réponse des leçons actives (18.11, commentaire testeur : « on avait dit de normaliser ») : la même que celle
+// des questions et du pas à pas — champ large, aperçu, clavier de l'app. actAnswerHtml(label) puis actAnswerBind(box, go).
+function actAnswerHtml(label) {
+  const fine = window.matchMedia("(pointer: fine)").matches;
+  return `<div class="answer gans act-ans">${label ? `<div class="small muted">${label}</div>` : ""}<input class="ans gin act-in" inputmode="${fine ? "text" : "none"}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Ta réponse">
+    <div class="preview gprev"></div>${keypadHtml({ kind: "value", value: 1, final: true }).replace(' id="kp"', "")}<div class="actions"><button type="button" class="btn-primary" data-go>Vérifier</button></div></div>`;
+}
+function actAnswerBind(box, go) {
+  const el = box.querySelector(".act-ans"); if (!el) return;
+  const inp = el.querySelector("input"), prev = el.querySelector(".gprev"), sp = { kind: "value", value: 1, final: true }, show = () => previewOf(inp, prev, sp);
+  let mode = inp.getAttribute("inputmode");
+  inp.oninput = show; inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
+  el.querySelectorAll(".keypad button").forEach((b) => (b.onclick = () => { const k = b.dataset.k; if (k === "⌨") { mode = mode === "none" ? "text" : "none"; inp.setAttribute("inputmode", mode); inp.blur(); inp.focus(); return; } typeKey(inp, k); show(); }));
+  el.querySelector("[data-go]").onclick = go;
+}
 function predOrder(n) { const o = [...Array(n).keys()]; if (n < 3) return o; for (let i = n - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [o[i], o[j]] = [o[j], o[i]]; } return o; }
 // Leçons actives (14.11, demande de l'utilisateur : « l'élève doit être actif ») : trois temps.
 // 1. Devine : une question à toucher avant toute règle. 2. Manipule : des défis à réussir avec les doigts.
@@ -12143,9 +12158,9 @@ function activeLesson(id, L, cont, review) {
     let x = null, step = 0;
     const draw = () => {
       const s = Math.min(step, o.wins.length - 1);
-      box.innerHTML = `<div class="act-in-row" style="display:flex;gap:8px;justify-content:center;align-items:center;margin:6px 0"><span class="small muted">${o.label || "Ta réponse"}</span><input class="ans act-in" inputmode="decimal" autocomplete="off" style="max-width:120px" aria-label="${o.label || "Ta réponse"}" value="${x === null ? "" : nb(x)}"><button type="button" class="btn-primary" data-go>Vérifier</button></div>` + o.show(x, s);
-      const inp = box.querySelector(".act-in"), go = () => { const v = Number(String(inp.value).replace(",", ".").replace("−", "-").trim()); if (inp.value.trim() === "" || !isFinite(v)) { $hint(box, "Tape un nombre."); return; } x = v; draw(); if (!check()) $hint(box, "Pas encore : regarde la figure, puis recalcule."); };
-      box.querySelector("[data-go]").onclick = go; inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
+      box.innerHTML = (actAnswerHtml(o.label || "Ta réponse")) + o.show(x, s);
+      const inp = box.querySelector(".act-in"); if (x !== null) inp.value = nb(x).replace("−", "-"); const go = () => { const v = Number(String(inp.value).replace(/,/g, ".").replace("−", "-").replace(/\s/g, "").replace(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/, (s, u, w) => String(u / w))); if (inp.value.trim() === "" || !isFinite(v)) { $hint(box, "Tape un nombre."); return; } x = v; draw(); if (!check()) $hint(box, box.querySelector("svg.fig") ? "Pas encore : regarde la figure, puis recalcule." : "Pas encore : relis les calculs affichés, puis recalcule."); };
+      actAnswerBind(box, go);
     };
     const check = () => { if (step >= o.wins.length) return false; const m = o.wins[step](x); if (m) { onWin(step, m); step++; x = null; draw(); return true; } return false; };
     draw();
@@ -12310,12 +12325,12 @@ function activeLesson(id, L, cont, review) {
     let x = o.ask ? null : o.start, step = 0;
     const draw = () => {
       const s = Math.min(step, o.wins.length - 1), fig = x === null ? (o.blank ? o.blank(s) : "") : o.show(x, s);
-      const ctl = o.ask ? `<div class="act-in-row" style="display:flex;gap:8px;justify-content:center;align-items:center;margin:6px 0"><span class="small muted">${o.label || "Ta réponse"}</span><input class="ans act-in" inputmode="decimal" autocomplete="off" style="max-width:120px" aria-label="${o.label || "Ta réponse"}" value="${x === null ? "" : nb(x)}"><button type="button" class="btn-primary" data-go>Vérifier</button></div>`
+      const ctl = o.ask ? (actAnswerHtml(o.label || "Ta réponse"))
         : actStepper(o.label || "x", nb(x), "x");
       box.innerHTML = ctl + fig + (o.note ? `<div class="small muted">${o.note}</div>` : "");
       if (o.ask) {
-        const inp = box.querySelector(".act-in"), go = () => { const v = Number(String(inp.value).replace(",", ".").replace("−", "-").trim()); if (inp.value.trim() === "" || !isFinite(v)) { $hint(box, "Tape un nombre."); return; } x = v; draw(); if (!check()) $hint(box, o.miss || "Pas encore : regarde la figure, puis recalcule."); };
-        box.querySelector("[data-go]").onclick = go; inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
+        const inp = box.querySelector(".act-in"); if (x !== null) inp.value = nb(x).replace("−", "-"); const go = () => { const v = Number(String(inp.value).replace(/,/g, ".").replace("−", "-").replace(/\s/g, "").replace(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/, (s, u, w) => String(u / w))); if (inp.value.trim() === "" || !isFinite(v)) { $hint(box, "Tape un nombre."); return; } x = v; draw(); if (!check()) $hint(box, o.miss || (box.querySelector("svg.fig") ? "Pas encore : regarde la figure, puis recalcule." : "Pas encore : relis les calculs affichés, puis recalcule.")); };
+        actAnswerBind(box, go);
       } else box.querySelectorAll('[data-st="x"]').forEach((b) => (b.onclick = () => { x = Math.max(o.min, Math.min(o.max, +(x + +b.dataset.d * (o.step || 1)).toFixed(6))); draw(); check(); }));
     };
     const check = () => { if (step >= o.wins.length) return false; const m = o.wins[step](x); if (m) { onWin(step, m); step++; if (o.ask) x = null; draw(); return true; } return false; };
@@ -12507,11 +12522,11 @@ function activeLesson(id, L, cont, review) {
       if (!A) { win(m); return; }
       asking = true;
       askBox.innerHTML = `<div class="act-out" style="margin-top:6px"><b>✓ ${esc(m)}</b></div><div class="small" style="margin:6px 0"><b>À toi, sans la figure :</b> ${A.q}</div>
-        <div style="display:flex;gap:8px;justify-content:center;align-items:center"><input class="ans act-in" inputmode="decimal" autocomplete="off" style="max-width:130px" aria-label="Ta réponse"><button type="button" class="btn-primary" data-go>Vérifier</button></div>`;
-      const inp = askBox.querySelector("input"), go = () => { const v = Number(String(inp.value).replace(",", ".").replace("−", "-").replace(/^(-?\d+)\/(\d+)$/, (s, a, b) => String(a / b)).trim());
+        ${actAnswerHtml("")}`;
+      const inp = askBox.querySelector("input"), go = () => { const v = Number(String(inp.value).replace(/,/g, ".").replace("−", "-").replace(/\s/g, "").replace(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/, (s, u, w) => String(u / w)));
         if (inp.value.trim() === "" || !isFinite(v)) { $hint(box, "Tape un nombre."); return; }
         if (near(v, A.ans)) win(A.ok); else $hint(box, A.no || "Pas encore : reprends le raisonnement de la figure."); };
-      askBox.querySelector("[data-go]").onclick = go; inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
+      actAnswerBind(askBox, go);
     };
     drawHandles(); refresh();
     // Point d'entrée pour les tests automatiques (tests/act_manip.html)
