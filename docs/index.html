@@ -13660,18 +13660,57 @@ const hash = (s) => { let x = 0; for (const c of s) x = (x * 31 + c.charCodeAt(0
 // ---------------- Entrée ----------------
 let draft = { system: "CH", grade: 11, track: "college", minutes: 5 };
 
+// Accueil (18.11) : un exemple JOUABLE (réponse, correction, pas à pas) qui change de sujet à chaque visite,
+// tiré parmi des notions au point (chapitres repris au standard) — pour goûter l'app avant de choisir son niveau.
+const DEMO_POOL = ["pyth", "fracadd", "fracmul", "eq1", "sci", "vitesse", "thales", "angles", "puiss", "reduire", "tabval", "volcone", "ucomp", "prio", "cercthales"];
+function demoQuestion() {
+  for (let k = 0; k < 30; k++) {
+    const id = DEMO_POOL[Math.floor(Math.random() * DEMO_POOL.length)];
+    if (!GEN[id]) continue;
+    let q; try { q = Engine.build(id, Math.random() < 0.6 ? 1 : 2, 1 + Math.floor(Math.random() * 1e6)); } catch (e) { continue; }
+    if (q && q.spec && q.spec.kind === "value" && !q.parts && q.guide && q.guide.length) return q;
+  }
+  return Engine.build("pyth", 1, 7);
+}
 function screenWelcome() {
-  const demo = GEN.pyth(1);
-  const c = demo.spec.value;
+  const q = demoQuestion(), n = NOTIONS.find((x) => x.id === q.id), fine = window.matchMedia("(pointer: fine)").matches;
   h(`${brand}
   <div class="stack"><h1>Chaque jour, <span class="mark">5 minutes</span> de maths, à ton niveau.</h1>
   <p class="muted">Une question du jour choisie pour toi, une figure, une correction immédiate. Ton Mathélo monte quand tu progresses. Pas de compte : tout reste sur ton téléphone.</p></div>
-  <div class="card tilt"><div class="qmeta"><span class="chip">Exemple · Pythagore</span><span class="dots"><i class="on"></i><i></i><i></i></span></div>
-  <div class="qtext">${demo.q}</div><div class="figwrap">${demo.fig || ""}</div>
-  <p class="small muted">Tape ta réponse comme tu veux : ${c}, √${c * c}, ${2 * c}/2… le calculateur comprend.</p></div>
+  <div class="card tilt" id="demo"><div class="qmeta"><span class="chip">Essaie · ${n ? n.label : "exemple"}</span><span class="dots"><i class="on"></i><i></i><i></i></span></div>
+  <div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
+  <div class="answer"><input class="ans" id="dans" inputmode="${fine ? "text" : "none"}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Ta réponse">
+  <div class="preview" id="dprev"></div>${keypadHtml({ ...q.spec, final: true })}<div class="actions"><button class="btn-primary" id="dok">Vérifier</button></div></div>
+  <div id="dfb"></div>
+  <p class="small muted">Un autre sujet à chaque visite. Tape ta réponse comme tu veux : fractions, racines, π… le calculateur comprend.</p></div>
   <button class="btn-primary btn-big" id="go">Commencer</button>
   <button class="btn-ghost" id="restore">J'ai déjà un code de sauvegarde</button>
   <button class="btn-ghost small" id="privacy">🔒 Ce que l'app envoie</button>`);
+  const inp = document.getElementById("dans"), prev = document.getElementById("dprev"), fb = document.getElementById("dfb");
+  const show = () => previewOf(inp, prev, q.spec);
+  inp.oninput = show;
+  bindKeypad(() => inp, show);
+  const done = (ok, msg) => {
+    inp.disabled = true; const kp = document.getElementById("kp"); if (kp) kp.remove(); document.getElementById("dok").remove(); prev.remove();
+    fb.innerHTML = `<div class="fb ${ok ? "ok" : "hint"} pop">${ok ? "✓ Juste !" : msg}</div><div class="sol">${q.sol}</div>
+      <p class="small">${ok ? "C'est ça, chaque jour : une question adaptée, puis la suivante un peu plus loin." : "Chaque jour, l'app t'aide comme ça, étape par étape."} <b>Commencer</b> pour choisir ton niveau.</p>`;
+    typeset(fb);
+  };
+  const go = () => {
+    const v = inp.value.trim(); if (!v) return;
+    const r = checkAnswer(q.spec, v);
+    if (r.status === "correct") { done(true); return; }
+    if (r.status === "invalid" || r.status === "form") { fb.innerHTML = `<div class="fb hint pop">${escT(r.message || "Écris un nombre.")}</div>`; typeset(fb); return; }
+    const d = diagnose(q, v);
+    fb.innerHTML = `<div class="fb hint pop">${d ? escT(d) : r.status === "close" ? escT(r.message || "Presque !") : "Pas tout à fait."}</div>
+      <div class="actions"><button class="btn-primary" id="dguide">On le fait ensemble</button><button class="btn-ghost" id="dsol">Voir la solution</button></div><div id="dgbox"></div>`;
+    typeset(fb);
+    document.getElementById("dsol").onclick = () => done(false, "Voici la solution :");
+    document.getElementById("dguide").onclick = () => { inp.disabled = true; const kp = document.getElementById("kp"); if (kp) kp.remove(); document.getElementById("dok").remove(); prev.remove();
+      fb.querySelector(".actions").remove(); runGuide(q, document.getElementById("dgbox"), () => {}); };
+  };
+  document.getElementById("dok").onclick = go;
+  inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
   document.getElementById("go").onclick = screenLevel;
   document.getElementById("privacy").onclick = () => screenPrivacy(screenWelcome);
   document.getElementById("restore").onclick = () => screenRestore();
