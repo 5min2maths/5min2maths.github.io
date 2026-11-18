@@ -43,7 +43,7 @@ def blocs():
     for i, m in enumerate(ms):
         out[m.group(1)] = t[m.start(): ms[i + 1].start() if i + 1 < len(ms) else len(t)]
     # Modules de chapitre (chantier du 15.11) : toutes les formes ont un guide ; ils remplacent les anciennes versions.
-    for f in ("ch11_prop.js", "ch11_litt.js", "ch1c_eq.js", "ch11_no.js", "ch11_gm.js"):
+    for f in ("ch11_prop.js", "ch11_litt.js", "ch1c_eq.js", "ch1c_sys.js", "ch11_no.js", "ch11_gm.js"):
         if os.path.exists(os.path.join(RAC, "src", f)):
             m = re.search(r"const ALL = \{([^}]*)\}", src(f))
             for i in re.findall(r"([a-z0-9]+):", m.group(1) if m else ""):

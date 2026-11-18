@@ -8,9 +8,9 @@
 <script src="../src/figures.js"></script><script src="../src/geo.js"></script>
 <script src="../src/generators.js"></script>
 <script src="../src/gen2.js"></script>
-<script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script>
+<script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script>
 <script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script>
-<script src="../src/engine.js"></script><script src="../src/sujet.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_ch11b.js"></script>
+<script src="../src/engine.js"></script><script src="../src/sujet.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script>
 <pre id="out">en cours</pre>
 <script>
 const out = [], ids = location.hash ? location.hash.slice(1).split(",") : ["eq1", "eqfrac", "eqspec", "formule", "probeq", "eq2fact", "eq2", "eq2disc", "probeq2", "eq3", "bicarre", "eqirr"]; let bad = 0;
@@ -37,6 +37,20 @@ for (const id of ids) {
         (q.traps || []).forEach((tr) => { if (tr.e) { let te; try { te = Expr.parse(tr.e); } catch (e) { fail(q.code + " piège illisible " + tr.e); return; } if (Expr.equivalent(te, Expr.parse(q.spec.expr))) fail(q.code + " piège = bonne réponse : " + tr.e); } });
         if (!q.ctx) fail(q.code + " sans ctx");
         if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 100) + " → " + q.spec.expr + (q.spec.form ? " [" + q.spec.form + (q.spec.minFactors ? " ≥" + q.spec.minFactors : "") + "]" : ""));
+        continue;
+      }
+      if (["pair", "ineq", "solset"].includes(q.spec.kind)) { // couples, inégalités, intervalles (systèmes, 18.11)
+        const fS = (v) => { for (let d = 1; d <= 120; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return d === 1 ? String(Math.round(v)) : Math.round(v * d) + "/" + d; return String(v); };
+        const canon = (sp) => sp.kind === "pair" ? sp.values.map(fS).join(" ; ") : sp.kind === "ineq" ? "x " + sp.op + " " + fS(sp.value) : sp.kind === "solset" ? SolSet.show(sp.ivs, false) : sp.kind === "expr" ? sp.expr : String(sp.value);
+        const c0 = canon(q.spec), self = checkAnswer(q.spec, c0); if (self.status !== "correct") fail(q.code + " la réponse attendue est refusée (" + self.status + " " + (self.message || "") + ") : " + c0);
+        if (q.spec.kind === "pair" && q.spec.values.some((v) => !isFinite(v))) fail(q.code + " valeur non finie");
+        if (!q.guide) fail(q.code + " sans guide"); else { g++; const last = q.guide[q.guide.length - 1].spec;
+          if (last.kind !== q.spec.kind || checkAnswer(q.spec, canon(last)).status !== "correct") fail(q.code + " dernière étape ≠ réponse : " + canon(last) + " / " + c0);
+          q.guide.forEach((x) => { const r = checkAnswer(x.spec, canon(x.spec)); if (r.status !== "correct") fail(q.code + " étape refuse sa propre réponse : " + canon(x.spec) + " " + (r.message || r.status)); }); }
+        if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+        (q.traps || []).forEach((tr) => { if (!tr.spec) return; const ci = canon(tr.spec); if (checkAnswer(q.spec, ci).status === "correct") fail(q.code + " piège = bonne réponse : " + ci); else if (diagnose(q, ci) !== tr.m) fail(q.code + " piège non diagnostiqué : " + ci); });
+        if (!q.ctx) fail(q.code + " sans ctx");
+        if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 110) + " → " + c0);
         continue;
       }
       if (q.spec.kind === "set") { // ensemble de solutions (équations, 16.11)

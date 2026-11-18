@@ -350,6 +350,11 @@ function diagnose(q, input) {
     try { if (Expr.equivalent(g, Expr.parse("-(" + spec.expr + ")"))) return "Tous les signes sont inversés : vérifie le signe devant la parenthèse (un « − » change tous les signes)."; } catch (e) {}
     return null;
   }
+  // Couple, inégalité, intervalle (systèmes, 18.11) : piège { spec, m } reconnu si la réponse est juste pour cette spec.
+  if (spec && ["pair", "ineq", "solset"].includes(spec.kind)) {
+    for (const tr of q.traps || []) if (tr.spec) { try { if (checkAnswer(tr.spec, input).status === "correct") return tr.m; } catch (e) {} }
+    if (spec.kind !== "pair") return null;
+  }
   // Ensemble de solutions (équations, 16.11) : pièges { s: [valeurs] }, { none } (« aucune »), { all } (« tous »).
   if (spec && spec.kind === "set") {
     const raw = setInput(input), none = NONE_RE.test(raw), all = ALL_RE.test(raw);
