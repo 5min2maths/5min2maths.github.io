@@ -40,7 +40,7 @@
           { ctx: opp ? "oppose" : "adjacent", fig: par(a, [[0, 1, a + "°"], [0, opp ? 3 : 2, "?"]], true), guide: [GS(opp ? "Les deux angles sont opposés par le sommet : ont-ils la même mesure ? Tape la mesure de « ? »." : "Les deux angles sont côte à côte sur une droite : quelle est leur somme ?", opp ? a : 180, opp ? "Oui : " + deg(a) + "." : "180° (angle plat)."), ...(opp ? [] : [GS("Mesure de « ? » ?", 180 - a, deg(180 - a) + ".")])],
             traps: [TR(opp ? 180 - a : a, opp ? "Ces deux angles sont opposés par le sommet (en face l'un de l'autre) : ils sont égaux." : "Ces angles sont adjacents sur une droite : ils sont supplémentaires (somme 180°).")] }); },
       () => { const a = R.int(30, 70), r = pk([1, 2, 3, 4]);
-        return Qv("Les droites " + M("d_1") + " et " + M("d_2") + " sont parallèles. Combien mesure l'angle marqué « ? » ?", rv(a, r), "Les deux angles sont correspondants (même position aux deux intersections) : avec des parallèles, ils sont égaux, " + deg(rv(a, r)) + ".",
+        return Qv("Les droites " + M("d_1") + " et " + M("d_2") + " sont parallèles. Un angle mesure " + deg(rv(a, r)) + ". Combien mesure l'angle marqué « ? » ?", rv(a, r), "Les deux angles sont correspondants (même position aux deux intersections) : avec des parallèles, ils sont égaux, " + deg(rv(a, r)) + ".",
           { ctx: "correspondants", fig: par(a, [[0, r, rv(a, r) + "°"], [1, r, "?"]]), guide: [GS("Les deux angles occupent la même position aux deux intersections : ce sont des angles correspondants. Avec des parallèles, ils sont égaux. Mesure de « ? » ?", rv(a, r), deg(rv(a, r)) + ".")],
             traps: [TR(180 - rv(a, r), "Correspondants : même position, même mesure (pas supplémentaires).")] }); },
       () => { const a = R.int(70, 140), b = R.int(60, 150); if (a + b >= 330) return null;
@@ -50,12 +50,12 @@
     ],
     2: [
       () => { const a = R.int(30, 70), [r1, r2] = pk([[1, 3], [2, 4]]);
-        return Qv("Les droites " + M("d_1") + " et " + M("d_2") + " sont parallèles. Combien mesure l'angle marqué « ? » ?", rv(a, r2), "Les deux angles sont alternes-internes (entre les parallèles, de part et d'autre de la sécante) : ils sont égaux, " + deg(rv(a, r2)) + ".",
+        return Qv("Les droites " + M("d_1") + " et " + M("d_2") + " sont parallèles. Un angle mesure " + deg(rv(a, r1)) + ". Combien mesure l'angle marqué « ? » ?", rv(a, r2), "Les deux angles sont alternes-internes (entre les parallèles, de part et d'autre de la sécante) : ils sont égaux, " + deg(rv(a, r2)) + ".",
           { ctx: "alternes", fig: par(a, [[0, r1, rv(a, r1) + "°"], [1, r2, "?"]]),
             guide: [GS("Les deux angles sont entre les parallèles, de part et d'autre de la sécante : alternes-internes. Mesure de « ? » ?", rv(a, r2), deg(rv(a, r2)) + ".")],
             traps: [TR(180 - rv(a, r2), "Alternes-internes : les angles sont égaux (pas supplémentaires).")] }); },
       () => { const a = R.int(30, 70);
-        return Qv("Les droites " + M("d_1") + " et " + M("d_2") + " sont parallèles. Combien mesure l'angle marqué « ? » ?", 180 - a, "L'angle correspondant à " + deg(a) + " sur " + M("d_2") + " mesure aussi " + deg(a) + " ; « ? » lui est adjacent sur la droite : " + M("180° - " + a + "° = " + (180 - a) + "°") + ".",
+        return Qv("Les droites " + M("d_1") + " et " + M("d_2") + " sont parallèles. Un angle mesure " + deg(a) + ". Combien mesure l'angle marqué « ? » ?", 180 - a, "L'angle correspondant à " + deg(a) + " sur " + M("d_2") + " mesure aussi " + deg(a) + " ; « ? » lui est adjacent sur la droite : " + M("180° - " + a + "° = " + (180 - a) + "°") + ".",
           { ctx: "deux-etapes", fig: par(a, [[0, 1, a + "°"], [1, 2, "?"]]), guide: [GS("Sur " + M("d_2") + ", l'angle correspondant à " + deg(a) + " (même position) mesure ?", a, deg(a) + "."), GS("« ? » est adjacent à cet angle sur une droite : mesure ?", 180 - a, deg(180 - a) + ".")],
             traps: [TR(a, "« ? » n'est pas à la même position que l'angle donné : il lui est supplémentaire.")] }); },
       () => { const ins = R.int(18, 80), dir = R.rand() < 0.5;
