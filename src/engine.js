@@ -1,3 +1,7 @@
+// Notions reprises au standard (formes variées, pas à pas, erreurs typiques) : réservoir du mode libre « au point » (18.11).
+const FREE_READY = ["utemps", "ucomp", "vitesse", "gquot", "litelab", "valnum", "reduire", "monomes", "parenth", "distrib", "idrem", "factor",
+  "eq1", "eqfrac", "eqspec", "formule", "probeq", "eq2fact", "eq2", "eq2disc", "probeq2", "eq3", "bicarre", "eqirr", "sys2", "sysprob", "sysgraph", "sys3", "affine", "affzero", "sysineq",
+  "prio", "fracadd", "fracmul", "fracconv", "puiss", "sci", "scicalc", "pyth", "pythfig", "pythrec", "vol", "volcone", "airepyr", "volcomp", "volmanq", "angles", "cercthales", "thales", "thalesrec", "simil", "repere", "tabval"];
 // Moteur adaptatif : profil, état de chaque notion, positionnement, choix des questions, mise à jour.
 // Tout reste sur l'appareil (localStorage) ; aucune donnée ne part ailleurs.
 
@@ -287,6 +291,23 @@ const Engine = {
     for (const [id, status] of Object.entries(statuses)) {
       state.notions[id] = this.newNotion(status);
     }
+  },
+
+  // Mode « progression libre » (18.11) : tous sujets, sans programme ni note. Tirage équilibré (« cross-training ») :
+  // 1/3 points forts (maîtrise ≥ 0,7), 1/3 points à travailler, 1/3 notions neuves (jamais vues), thèmes alternés.
+  // Périmètre choisi par l'élève : « point » = notions au standard (FREE_READY), « annee » = tout jusqu'à son année.
+  freePlan(state, scope = "point", n = 6) {
+    const theme = (id) => (NOTIONS.find((x) => x.id === id) || {}).theme || "";
+    let pool = Object.keys(state.notions).filter((id) => GEN[id]);
+    if (scope === "point") { const r = pool.filter((id) => FREE_READY.includes(id)); if (r.length >= 6) pool = r; }
+    const sh = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+    const s = (id) => state.notions[id];
+    const groups = [sh(pool.filter((id) => s(id).seen > 0 && s(id).m >= 0.7)), sh(pool.filter((id) => s(id).seen > 0 && s(id).m < 0.7)), sh(pool.filter((id) => !s(id).seen))];
+    const out = [], used = new Set(), want = [Math.round(n / 3), Math.round(n / 3), n - 2 * Math.round(n / 3)];
+    const take = (g) => { const last = out.length ? theme(out[out.length - 1]) : ""; let k = g.findIndex((id) => !used.has(id) && theme(id) !== last); if (k < 0) k = g.findIndex((id) => !used.has(id)); if (k < 0) return false; used.add(g[k]); out.push(g[k]); return true; };
+    // On alterne les trois familles ; une famille vide est complétée par les autres.
+    for (let round = 0; out.length < n && round < 3 * n; round++) { const gi = round % 3; if (want[gi] > 0 && take(groups[gi])) want[gi]--; else if (want.every((w, i) => w <= 0 || !groups[i].some((id) => !used.has(id)))) { if (!groups.some((g) => take(g))) break; } }
+    return out.map((id) => id + "|" + this.difficulty(state, id));
   },
 
   eligible(state) {

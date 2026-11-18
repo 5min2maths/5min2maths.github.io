@@ -189,11 +189,11 @@ function screenHome() {
   const dots = { prob: !!wp && !wpDone, test: prep && left <= 3, prog: (state.badgesNew || []).length > 0 };
   save();
   const panels = {
-    today: () => `<div class="card stack"><div class="eyebrow">${done ? "Séance faite · tu peux en refaire une" : "Ton programme aujourd'hui"}</div>
+    today: () => `<div class="card stack"><div class="eyebrow">Je travaille mon chapitre · ${done ? "séance faite, tu peux en refaire une" : "ton programme aujourd'hui"}</div>
       <h2>${FORMATS[fmt].label}</h2><p class="muted">${FORMATS[fmt].text} </p>
       <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>
       <div class="spread"><span class="small muted">Varié d'un jour à l'autre.</span><button class="btn-ghost small" id="other">Autre format</button></div></div>
-      ${nowCard()}`,
+      ${freeCard()}${nowCard()}`,
     prob: () => !wp ? `<div class="card flat stack"><div class="eyebrow">Problème de la semaine</div><h3>Pas encore de problème pour toi</h3><p class="small muted">Les problèmes arrivent avec les notions que tu as déjà travaillées. Fais quelques séances !</p></div>`
       : `<div class="card stack"><div class="eyebrow">Problème de la semaine${wpDone ? " · fait ✓" : ""}</div><h2>${NOTIONS.find((n) => n.id === wp).label}</h2>
         <p class="muted">Un problème en plusieurs étapes, avec des indices si tu bloques. Facultatif, et il rapporte gros.</p>
@@ -207,7 +207,7 @@ function screenHome() {
       : `<div class="card stack"><div class="eyebrow">Je prépare un test</div><h2>Un test approche ?</h2>
         <p class="muted">Dis-moi sa date et les notions : chaque jour, l'app te fait réviser juste ce qu'il faut, jusqu'au jour J. Tu pourras aussi t'entraîner sur un sujet de préparation, avec son corrigé.</p>
         <button class="btn-primary btn-big" id="prep">Je prépare un test</button></div>`,
-    prog: () => `${newBadgesCard()}${compsCard()}`,
+    prog: () => `${newBadgesCard()}${themeMapCard()}${compsCard()}`,
   };
   if (!panels[homeTab]) homeTab = "today";
   h(`<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted">${gradeName(state.profile)}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>
@@ -220,6 +220,8 @@ function screenHome() {
   on("settings", screenSettings);
   on("eloband", () => { if (homeTab !== "prog") { homeTab = "prog"; screenHome(); } });
   on("go", startSession);
+  on("freego", startFree);
+  app.querySelectorAll("[data-scope]").forEach((b) => (b.onclick = () => { state.freeScope = b.dataset.scope; save(); screenHome(); }));
   on("other", () => { Engine.otherFormat(state); save(); screenHome(); });
   if (homeTab === "today") bindNowCard();
   on("wp", () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); });
@@ -558,6 +560,32 @@ function screenLesson(id, cont, review) {
 
 // ---------------- Séance ----------------
 let session = null;
+// Mode « progression libre » (18.11) : deux portes égales sur l'accueil ; l'élève choisit le périmètre.
+const FREE_THEMES = { no: "Nombres et opérations", fa: "Fonctions et algèbre", gm: "Grandeurs et mesures", es: "Espace et géométrie" };
+function freeCard() {
+  const sc = state.freeScope || "point";
+  return `<div class="card stack"><div class="eyebrow">Mon défi du jour · progression libre</div><h2>Tous les sujets, à ton rythme</h2>
+    <p class="muted">Un mélange équilibré : tes points forts, tes points à travailler et des notions nouvelles. Sans programme ni note : juste progresser.</p>
+    <button class="btn-primary btn-big" id="freego">Relever le défi</button>
+    <div class="seg" role="group" aria-label="Notions du défi">${[["point", "Notions au point"], ["annee", "Tout jusqu'à mon année"]].map(([k, l]) => `<button type="button" data-scope="${k}" aria-pressed="${sc === k}">${l}</button>`).join("")}</div></div>`;
+}
+function startFree() {
+  const plan = Engine.freePlan(state, state.freeScope || "point", 6);
+  if (!plan.length) return startSession();
+  session = { free: true, plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set() };
+  nextQuestion();
+}
+// Carte de progression par thème : une case par notion, colorée selon la maîtrise (grise : jamais travaillée).
+function themeMapCard() {
+  const by = {};
+  for (const [id, s] of Object.entries(state.notions)) { const n = NOTIONS.find((x) => x.id === id); if (!n || !GEN[id]) continue; (by[n.theme] = by[n.theme] || []).push([n, s]); }
+  const col = (s) => (!s.seen ? "var(--line)" : s.m >= 0.7 ? "var(--ok)" : s.m >= 0.45 ? "var(--warn)" : "var(--bad)");
+  const rows = Object.keys(FREE_THEMES).filter((k) => by[k]).map((k) => { const L = by[k], done = L.filter(([, s]) => s.seen && s.m >= 0.7).length;
+    return `<div style="margin:8px 0"><div class="spread small"><b>${FREE_THEMES[k]}</b><span class="muted">${done} / ${L.length} maîtrisées</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px">${L.map(([n, s]) => `<span title="${esc(n.label)}" aria-label="${esc(n.label)}" style="width:14px;height:14px;border-radius:3px;background:${col(s)};display:inline-block"></span>`).join("")}</div></div>`; }).join("");
+  return `<div class="card stack"><div class="eyebrow">Ma carte de progression</div>${rows}
+    <p class="small muted">Vert : maîtrisé · orange : en route · rouge : à travailler · gris : pas encore essayé.</p></div>`;
+}
 function startSession() {
   const fmt = Engine.todayFormat(state), plan = Engine.planSession(state, fmt);
   Engine.logFormat(state, fmt); save();
@@ -581,7 +609,7 @@ function nextQuestion(redo) {
   const q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : level);
   q.kind = kind;
   renderQuestion(q, {
-    eyebrow: (session.weekly ? "Problème de la semaine" : session.ctest ? "Me tester · " + session.ctest.label + " · " + (session.i + 1) + " sur " + session.plan.length : session.prep ? "Révision du test · " + (session.i + 1) + " sur " + session.plan.length : session.plan.length === 1 ? (session.fmt ? FORMATS[session.fmt].label : "Question du jour") : (session.fmt ? FORMATS[session.fmt].label + " · " : "") + (session.i + 1) + " sur " + session.plan.length) + (kind && KIND_LABEL[kind] ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo ? " · nouvelles valeurs" : ""),
+    eyebrow: (session.free ? "Mon défi du jour · " + (session.i + 1) + " sur " + session.plan.length : session.weekly ? "Problème de la semaine" : session.ctest ? "Me tester · " + session.ctest.label + " · " + (session.i + 1) + " sur " + session.plan.length : session.prep ? "Révision du test · " + (session.i + 1) + " sur " + session.plan.length : session.plan.length === 1 ? (session.fmt ? FORMATS[session.fmt].label : "Question du jour") : (session.fmt ? FORMATS[session.fmt].label + " · " : "") + (session.i + 1) + " sur " + session.plan.length) + (kind && KIND_LABEL[kind] ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo ? " · nouvelles valeurs" : ""),
     onDone: (res) => {
       const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
       // Deux échecs de suite : on glisse juste après une question sur une notion de base (une fois par notion et par séance).
