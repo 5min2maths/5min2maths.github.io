@@ -4,7 +4,9 @@
 <script>const log=[];const click=(s)=>{const e=document.querySelector(s);if(!e){log.push("MANQUE "+s);return false;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));return true;};
 // Chaque défi : on fait varier le curseur (d'abord vers le haut, puis vers le bas) jusqu'à ce que le message change.
 const gfb=()=>document.querySelector('#gfb').textContent;
-const seek=()=>{const b=gfb();for(let i=0;i<70;i++){click('[data-st="x"][data-d="1"]');if(gfb()!==b)return true;}for(let i=0;i<160;i++){click('[data-st="x"][data-d="-1"]');if(gfb()!==b)return true;}return false;};
+const C=[];for(let v=-12;v<=120;v++)C.push(v);
+const seek=()=>{const b=gfb();const inp=()=>document.querySelector(".act-in");
+if(inp()){for(const v of C){const el=inp();if(!el)return gfb()!==b;el.value=String(v);click("[data-go]");if(gfb()!==b)return true;}return false;}for(let i=0;i<70;i++){click('[data-st="x"][data-d="1"]');if(gfb()!==b)return true;}for(let i=0;i<160;i++){click('[data-st="x"][data-d="-1"]');if(gfb()!==b)return true;}return false;};
 const run=(id)=>{ try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; screenLesson(id,()=>{});
   const A=ACTIVE[id]; click('#pc button[data-i="'+A.predict.good+'"]'); const msgs=[];
   for(let k=0;k<A.defis.length;k++){ if(!seek()) msgs.push("défi "+(k+1)+" non trouvé"); else msgs.push(gfb().slice(0,60)); }

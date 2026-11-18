@@ -72,13 +72,22 @@
   const ok = (good, low) => (good ? '<b class="act-ok">✓ égalité</b>' : low ? "trop petit" : "trop grand");
   const svg = (w, h, g, lab) => `<svg class="fig" viewBox="0 0 ${w} ${h}" role="img" aria-label="${lab}">${g}</svg>`;
   // Chercheur : un curseur, l'affichage calculé en direct ; chaque défi vérifie la valeur.
+  // Commentaire testeur du 17.11 : « les manipulations où on ne fait que toucher des curseurs n'apportent pas grand-chose ».
+  // Mode réponse (o.ask) : l'élève calcule et tape sa réponse ; la figure se met à jour seulement après « Vérifier ».
+  // Le curseur reste pour les vraies manipulations (colorier, descendre l'escalier) : o.ask absent.
   const hunt = (o) => (box, onWin) => {
-    let x = o.start, step = 0;
+    let x = o.ask ? null : o.start, step = 0;
     const draw = () => {
-      box.innerHTML = actStepper(o.label || "x", nb(x), "x") + o.show(x, Math.min(step, o.wins.length - 1)) + (o.note ? `<div class="small muted">${o.note}</div>` : "");
-      box.querySelectorAll('[data-st="x"]').forEach((b) => (b.onclick = () => { x = Math.max(o.min, Math.min(o.max, +(x + +b.dataset.d * (o.step || 1)).toFixed(6))); draw(); check(); }));
+      const s = Math.min(step, o.wins.length - 1), fig = x === null ? (o.blank ? o.blank(s) : "") : o.show(x, s);
+      const ctl = o.ask ? `<div class="act-in-row" style="display:flex;gap:8px;justify-content:center;align-items:center;margin:6px 0"><span class="small muted">${o.label || "Ta réponse"}</span><input class="ans act-in" inputmode="decimal" autocomplete="off" style="max-width:120px" aria-label="${o.label || "Ta réponse"}" value="${x === null ? "" : nb(x)}"><button type="button" class="btn-primary" data-go>Vérifier</button></div>`
+        : actStepper(o.label || "x", nb(x), "x");
+      box.innerHTML = ctl + fig + (o.note ? `<div class="small muted">${o.note}</div>` : "");
+      if (o.ask) {
+        const inp = box.querySelector(".act-in"), go = () => { const v = Number(String(inp.value).replace(",", ".").replace("−", "-").trim()); if (inp.value.trim() === "" || !isFinite(v)) { $hint(box, "Tape un nombre."); return; } x = v; draw(); if (!check()) $hint(box, o.miss || "Pas encore : regarde la figure, puis recalcule."); };
+        box.querySelector("[data-go]").onclick = go; inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
+      } else box.querySelectorAll('[data-st="x"]').forEach((b) => (b.onclick = () => { x = Math.max(o.min, Math.min(o.max, +(x + +b.dataset.d * (o.step || 1)).toFixed(6))); draw(); check(); }));
     };
-    const check = () => { if (step >= o.wins.length) return; const m = o.wins[step](x); if (m) { onWin(step, m); step++; draw(); } };
+    const check = () => { if (step >= o.wins.length) return false; const m = o.wins[step](x); if (m) { onWin(step, m); step++; if (o.ask) x = null; draw(); return true; } return false; };
     draw();
   };
   const W = (target, msg) => (x) => (Math.abs(x - target) < 1e-9 ? msg : "");
@@ -91,7 +100,7 @@
     fracadd: {
       predict: { q: "Combien font 1/4 + 1/6 ?", choices: ["2/10", "5/12", "2/24"], good: 1, why: "Un quart et un sixième ne sont pas des parts de même taille : on les découpe en douzièmes, 3/12 + 2/12 = 5/12. Additionner les dénominateurs donnerait 2/10 = 1/5, moins qu'un quart seul !" },
       defis: ["Trouve le plus petit dénominateur commun de 1/4 et 1/6.", "Même chose pour 2/3 et 3/5.", "Et pour 3/8 et 5/12."],
-      play: hunt({ label: "Dénominateur commun", start: 2, min: 2, max: 60,
+      play: hunt({ ask: true, label: "Dénominateur commun", start: 2, min: 2, max: 60,
         show: (x, s) => { const [a, b, c, d] = [[1, 4, 1, 6], [2, 3, 3, 5], [3, 8, 5, 12]][s], okb = x % b === 0, okd = x % d === 0;
           return svg(320, 70, bar(a, b, okb ? x : 0, 8, "f-fill") + bar(c, d, okd ? x : 0, 40, "f-fill2"), "deux barres de fraction") +
             `<div class="act-out">${a}/${b} ${okb ? "= <b>" + (a * x) / b + "/" + x + "</b>" : ": " + x + " n'est pas un multiple de " + b}<br>${c}/${d} ${okd ? "= <b>" + (c * x) / d + "/" + x + "</b>" : ": " + x + " n'est pas un multiple de " + d}${okb && okd ? "<br>Somme : " + ((a * x) / b + (c * x) / d) + "/" + x + " = <b>" + fr((a * x) / b + (c * x) / d, x) + "</b>" : ""}</div>`; },
@@ -108,8 +117,8 @@
     },
     fracconv: {
       predict: { q: "3/4 s'écrit en nombre décimal…", choices: ["0,34", "0,75", "3,4"], good: 1, why: "3/4, c'est 3 ÷ 4 = 0,75, soit 75 %. La barre de fraction n'est pas une virgule." },
-      defis: ["Règle le pourcentage égal à 3/4.", "Trouve le pourcentage égal à 1/5.", "Trouve le pourcentage qui s'écrit 7/20."],
-      play: hunt({ label: "Pourcentage", start: 50, min: 0, max: 100, step: 5,
+      defis: ["Trouve le pourcentage égal à 3/4.", "Trouve le pourcentage égal à 1/5.", "Trouve le pourcentage qui s'écrit 7/20."],
+      play: hunt({ ask: true, label: "Pourcentage", start: 50, min: 0, max: 100, step: 5,
         show: (x) => { let g = ""; for (let k = 0; k < 100; k++) g += `<rect x="${60 + (k % 10) * 20}" y="${4 + Math.floor(k / 10) * 13}" width="19" height="12" class="${k < x ? "f-fill" : "f-soft"}"/>`;
           return svg(320, 136, g, x + " cases sur 100") + `<div class="act-out">${x} % = ${x}/100 = <b>${fr(x, 100)}</b> = ${nb(x / 100)}</div>`; },
         wins: [W(75, "75 % = 75/100 = 3/4 = 0,75."), W(20, "20 % = 20/100 = 1/5 = 0,2."), W(35, "35 % = 35/100 = 7/20 = 0,35 (on simplifie par 5).")] }),
@@ -125,16 +134,16 @@
     sci: {
       predict: { q: "0,00052 en notation scientifique, c'est…", choices: ["5,2 · 10⁴", "5,2 · 10⁻⁴", "52 · 10⁻⁵"], good: 1, why: "La virgule recule de 4 rangs pour arriver à 5,2 : le nombre est plus petit que 1, l'exposant est négatif, −4. 52 · 10⁻⁵ est juste en valeur, mais 52 n'est pas entre 1 et 10." },
       defis: ["Écris 4'500'000 sous la forme 4,5 · 10ⁿ.", "Écris 0,00045 sous la forme 4,5 · 10ⁿ.", "Écris 450 sous la forme 4,5 · 10ⁿ."],
-      play: hunt({ label: "Exposant n", start: 0, min: -8, max: 9,
+      play: hunt({ ask: true, label: "Exposant n", start: 0, min: -8, max: 9,
         show: (x, s) => { const t = [4500000, 0.00045, 450][s], v = 4.5 * 10 ** x, txt = (y) => (y >= 1 ? String(Math.round(y)).replace(/\B(?=(\d{3})+(?!\d))/g, "'") : y.toFixed(12).replace(/0+$/, "")).replace(".", ",");
           return `<div class="act-out">4,5 · 10${sup(x)} = <b>${txt(v)}</b><br>cible : ${txt(t)} → ${ok(Math.abs(v - t) < 1e-12 * t, v < t)}</div>`; },
-        note: "Chaque cran déplace la virgule d'un rang.",
+        note: "Compte de combien de rangs la virgule se déplace.",
         wins: [W(6, "4'500'000 = 4,5 · 10⁶ : la virgule avance de 6 rangs."), W(-4, "0,00045 = 4,5 · 10⁻⁴ : plus petit que 1, exposant négatif."), W(2, "450 = 4,5 · 10² : deux rangs.")] }),
     },
     scicalc: {
       predict: { q: "(2 · 10³) · (4 · 10⁵) = ?", choices: ["8 · 10⁸", "8 · 10¹⁵", "6 · 10⁸"], good: 0, why: "On multiplie les nombres (2 · 4 = 8) et on additionne les exposants (3 + 5 = 8) : 10³ · 10⁵, c'est 3 + 5 facteurs 10." },
       defis: ["(3 · 10⁴) · (2 · 10⁵) = 6 · 10ⁿ : trouve n.", "(4 · 10³) ÷ (8 · 10⁻²) = 5 · 10ⁿ : trouve n.", "(5 · 10⁶) · (4 · 10²) = 2 · 10ⁿ : trouve n."],
-      play: hunt({ label: "n", start: 5, min: -4, max: 14,
+      play: hunt({ ask: true, label: "n", start: 5, min: -4, max: 14,
         show: (x, s) => { const [lab, m, t] = [["(3 · 10⁴) · (2 · 10⁵)", 6, 6e9], ["(4 · 10³) ÷ (8 · 10⁻²)", 5, 5e4], ["(5 · 10⁶) · (4 · 10²)", 2, 2e9]][s], v = m * 10 ** x;
           return `<div class="act-out">${lab} = ${m} · 10${sup(x)} ? → ${ok(Math.abs(v - t) < 1e-6 * t, v < t)}</div>`; },
         note: "Calcule d'abord avec les nombres, puis avec les exposants ; remets le nombre devant entre 1 et 10.",
@@ -142,8 +151,8 @@
     },
     pyth: {
       predict: { q: "Un triangle rectangle a des cathètes de 6 cm et 8 cm. Son hypoténuse mesure…", choices: ["14 cm", "10 cm", "48 cm"], good: 1, why: "6² + 8² = 36 + 64 = 100, et √100 = 10. On additionne les carrés, pas les côtés." },
-      defis: ["Cathètes 6 et 8 : règle l'hypoténuse.", "Cathètes 5 et 12 : règle l'hypoténuse.", "Hypoténuse 15 et cathète 9 : règle l'autre cathète."],
-      play: hunt({ label: "Longueur", start: 7, min: 1, max: 20,
+      defis: ["Cathètes 6 et 8 : calcule l'hypoténuse.", "Cathètes 5 et 12 : calcule l'hypoténuse.", "Hypoténuse 15 et cathète 9 : calcule l'autre cathète."],
+      play: hunt({ ask: true, label: "Longueur", start: 7, min: 1, max: 20,
         show: (x, s) => { const [a, b, unk] = [[8, 6, "c"], [12, 5, "c"], [9, x, "b"]][s], k = 11, A = [40, 185], B = [40 + a * k, 185];
           const C = [40, 185 - Math.min(unk === "b" ? x : b, 16) * k], hyp = unk === "c" ? x : 15, real = Math.hypot(B[0] - C[0], B[1] - C[1]) / k, ang = Math.atan2(B[1] - C[1], B[0] - C[0]), tip = [C[0] + Math.cos(ang) * hyp * k, C[1] + Math.sin(ang) * hyp * k];
           const g = `<polyline points="${B.join(",")} ${A.join(",")} ${C.join(",")}" class="f-line" fill="none" stroke-width="2"/><rect x="40" y="173" width="12" height="12" class="f-line" fill="none"/><line x1="${C[0]}" y1="${C[1]}" x2="${tip[0].toFixed(1)}" y2="${tip[1].toFixed(1)}" class="f-accent" stroke-width="3"/>`;
@@ -155,15 +164,15 @@
     pythfig: {
       predict: { q: "Un rectangle mesure 9 cm sur 12 cm. Sa diagonale mesure…", choices: ["21 cm", "15 cm", "108 cm"], good: 1, why: "La diagonale coupe le rectangle en deux triangles rectangles : √(81 + 144) = √225 = 15." },
       defis: ["Rectangle 9 × 12 : trouve la diagonale.", "Triangle isocèle de côtés 10, 10 et de base 12 : trouve la hauteur.", "Pavé 2 × 3 × 6 : trouve la grande diagonale."],
-      play: hunt({ label: "Longueur", start: 5, min: 1, max: 20,
+      play: hunt({ ask: true, label: "Longueur", start: 5, min: 1, max: 20,
         show: (x, s) => { const L = [["Triangle (9 ; 12 ; diagonale) : 9² + 12² = 225", 225, x * x, "diagonale² = " + x * x], ["Triangle (demi-base 6 ; hauteur ; côté 10) : 6² + h² = " + (36 + x * x), 100, 36 + x * x, "côté² = 100"], ["Pavé : 2² + 3² + 6² = 49", 49, x * x, "diagonale² = " + x * x]][s];
           return `<div class="act-out">${L[0]}<br>${L[3]} → ${ok(L[1] === L[2], L[2] < L[1])}</div>`; },
         wins: [W(15, "√225 = 15."), W(8, "La hauteur coupe la base en deux : 10² − 6² = 64, h = 8."), W(7, "4 + 9 + 36 = 49 = 7² : d = 7.")] }),
     },
     pythrec: {
       predict: { q: "Un triangle de côtés 5, 7 et 9 est-il rectangle ?", choices: ["Oui", "Non", "On ne peut pas savoir"], good: 1, why: "5² + 7² = 25 + 49 = 74, mais 9² = 81. Pas d'égalité : il n'est pas rectangle." },
-      defis: ["Côtés 6, 8 et x (le plus grand) : règle x pour que le triangle soit rectangle.", "Côtés 7, x et 25 (25 le plus grand) : règle x.", "Côtés 20, 21 et x (le plus grand) : règle x."],
-      play: hunt({ label: "x", start: 10, min: 1, max: 40,
+      defis: ["Côtés 6, 8 et x (le plus grand) : trouve x pour que le triangle soit rectangle.", "Côtés 7, x et 25 (25 le plus grand) : trouve x.", "Côtés 20, 21 et x (le plus grand) : trouve x."],
+      play: hunt({ ask: true, label: "x", start: 10, min: 1, max: 40,
         show: (x, s) => { const [l, r, txt] = [[100, x * x, "6² + 8² = 100 ; x² = " + x * x], [49 + x * x, 625, "7² + x² = " + (49 + x * x) + " ; 25² = 625"], [841, x * x, "20² + 21² = 841 ; x² = " + x * x]][s];
           return `<div class="act-out">${txt} → ${l === r ? '<b class="act-ok">égalité : rectangle</b>' : "pas d'égalité : pas rectangle"}</div>`; },
         wins: [W(10, "6, 8, 10 : rectangle (le double de 3, 4, 5)."), W(24, "7² + 24² = 625 = 25²."), W(29, "20² + 21² = 841 = 29².")] }),
@@ -171,7 +180,7 @@
     vol: {
       predict: { q: "Combien de cubes de 1 cm³ faut-il pour remplir un pavé de 4 cm × 3 cm × 2 cm ?", choices: ["9", "24", "14"], good: 1, why: "Une couche de 4 · 3 = 12 cubes, et 2 couches : 24 cm³. Volume = aire de la base × hauteur." },
       defis: ["Base 4 × 3 : combien de couches pour 36 cm³ ?", "Base 5 × 2 : combien de couches pour 70 cm³ ?", "Prisme de base triangulaire d'aire 6 cm² : quelle longueur pour 48 cm³ ?"],
-      play: hunt({ label: "Couches (hauteur en cm)", start: 1, min: 1, max: 12,
+      play: hunt({ ask: true, label: "Couches (hauteur en cm)", start: 1, min: 1, max: 12,
         show: (x, s) => { const [base, lab, t] = [[12, "4 × 3", 36], [10, "5 × 2", 70], [6, "triangle de 6 cm²", 48]][s]; let g = "";
           for (let k = 0; k < x; k++) g += `<rect x="${60 + k * 3}" y="${118 - k * 9}" width="160" height="9" class="${k % 2 ? "f-fill2" : "f-fill"}" stroke="var(--ink)" stroke-width="0.6"/>`;
           return svg(320, 132, g, x + " couches") + `<div class="act-out">base ${lab} = ${base} cm² ; ${base} · ${x} = <b>${base * x} cm³</b> (cible ${t}) → ${ok(base * x === t, base * x < t)}</div>`; },
@@ -180,15 +189,22 @@
     volcone: {
       predict: { q: "Combien de pyramides (même base, même hauteur) faut-il pour remplir un prisme ?", choices: ["2", "3", "4"], good: 1, why: "Une pyramide vaut exactement le tiers du prisme de même base et même hauteur : V = ⅓ · base · hauteur." },
       defis: ["Combien de cônes (même base, même hauteur) pour remplir le cylindre ?", "Combien de pyramides (même base, même hauteur) pour remplir le pavé ?", "Des cônes de même base, mais deux fois moins hauts : combien pour le cylindre ?"],
-      play: hunt({ label: "Nombre de solides versés", start: 1, min: 1, max: 8,
-        show: (x, s) => { const d = s === 2 ? 6 : 3, f = Math.min(x / d, 1.2); const g = `<rect x="110" y="20" width="100" height="110" class="f-soft" stroke="var(--ink)" stroke-width="1.5"/><rect x="110" y="${(130 - Math.min(f, 1) * 110).toFixed(1)}" width="100" height="${(Math.min(f, 1) * 110).toFixed(1)}" class="f-fill"/>`;
-          return svg(320, 140, g, "récipient rempli") + `<div class="act-out">${x} ${s === 1 ? "pyramide" : "cône"}${x > 1 ? "s" : ""} = ${fr(x, d)} du ${s === 1 ? "pavé" : "cylindre"} → ${x === d ? '<b class="act-ok">plein</b>' : x < d ? "pas encore plein" : "ça déborde"}</div>`; },
+      play: hunt({ ask: true, label: "Nombre de solides versés", start: 1, min: 1, max: 8,
+        show: (x, s) => { const d = s === 2 ? 6 : 3, pyr = s === 1, H = 100, hc = s === 2 ? H / 2 : H, lvl = Math.min(x / d, 1) * H, over = x > d, y0 = 125;
+          let g = `<text x="70" y="14" class="f-txt" text-anchor="middle" font-size="12">1 ${pyr ? "pyramide" : "cône"}</text>`;
+          g += pyr ? `<polygon points="30,${y0} 110,${y0} 70,${y0 - hc}" class="f-fill"/><polygon points="30,${y0} 110,${y0} 125,${y0 - 12} 70,${y0 - hc}" class="f-shape2" fill-opacity=".35"/>` : `<ellipse cx="70" cy="${y0}" rx="40" ry="9" class="f-fill"/><polygon points="30,${y0} 110,${y0} 70,${y0 - hc}" class="f-fill"/>`;
+          g += `<text x="225" y="14" class="f-txt" text-anchor="middle" font-size="12">${pyr ? "pavé" : "cylindre"} (même base, hauteur ${s === 2 ? "double" : "égale"})</text>`;
+          g += pyr ? `<rect x="185" y="${y0 - H}" width="80" height="${H}" class="f-soft" stroke="var(--ink)"/><rect x="185" y="${(y0 - lvl).toFixed(1)}" width="80" height="${lvl.toFixed(1)}" class="f-fill" fill-opacity=".8"/>`
+            : `<rect x="185" y="${y0 - H}" width="80" height="${H}" class="f-soft"/><rect x="185" y="${(y0 - lvl).toFixed(1)}" width="80" height="${lvl.toFixed(1)}" class="f-fill" fill-opacity=".8"/><ellipse cx="225" cy="${y0 - H}" rx="40" ry="8" class="f-shape2"/><path d="M185 ${y0 - H} V${y0} A40 8 0 0 0 265 ${y0} V${y0 - H}" class="f-line" fill="none"/>`;
+          for (let k = 1; k < d; k++) g += `<line x1="180" y1="${y0 - (k * H) / d}" x2="270" y2="${y0 - (k * H) / d}" class="f-line" stroke-dasharray="3 3" stroke-width=".6"/>`;
+          return svg(320, 140, g, "solide versé dans le récipient") + `<div class="act-out">${x} ${pyr ? "pyramide" : "cône"}${x > 1 ? "s" : ""} versé${x > 1 ? "s" : ""} : ${fr(Math.min(x, 99), d)} du ${pyr ? "pavé" : "cylindre"} → ${x === d ? '<b class="act-ok">plein exactement</b>' : over ? "ça déborde" : "pas encore plein"}</div>`; },
+        blank: (s) => `<div class="small muted">${["Imagine qu'on remplit un cône d'eau et qu'on le verse dans le cylindre.", "Même expérience avec une pyramide et un pavé.", "Cette fois, les cônes sont deux fois moins hauts que le cylindre."][s]}</div>`,
         wins: [W(3, "3 cônes : un cône vaut le tiers du cylindre, V = ⅓ π r² h."), W(3, "3 pyramides : V = ⅓ · base · hauteur."), W(6, "Deux fois moins haut, deux fois moins de volume : chaque cône vaut 1/6 du cylindre.")] }),
     },
     airepyr: {
       predict: { q: "Une pyramide à base carrée de 6 cm a une hauteur de 4 cm. Son apothème (hauteur d'une face) mesure…", choices: ["4 cm", "5 cm", "7 cm"], good: 1, why: "Hauteur, demi-côté et apothème forment un triangle rectangle : √(4² + 3²) = √25 = 5. L'apothème est plus long que la hauteur." },
-      defis: ["Base 6 cm, hauteur 4 cm : règle l'apothème.", "Base 10 cm, hauteur 12 cm : règle l'apothème.", "Base 16 cm, hauteur 6 cm : règle l'apothème, puis lis l'aire latérale."],
-      play: hunt({ label: "Apothème", start: 3, min: 1, max: 20,
+      defis: ["Base 6 cm, hauteur 4 cm : calcule l'apothème.", "Base 10 cm, hauteur 12 cm : calcule l'apothème.", "Base 16 cm, hauteur 6 cm : calcule l'apothème, puis lis l'aire latérale."],
+      play: hunt({ ask: true, label: "Apothème", start: 3, min: 1, max: 20,
         show: (x, s) => { const [c, h] = [[6, 4], [10, 12], [16, 6]][s], t = h * h + (c / 2) ** 2;
           return `<div class="act-out">${h}² + ${c / 2}² = ${t} ; ${x}² = ${x * x} → ${ok(t === x * x, x * x < t)}<br>aire latérale : 4 · (${c} · ${x}) ÷ 2 = <b>${2 * c * x} cm²</b></div>`; },
         note: "Sous l'apothème, il y a le demi-côté de la base.",
@@ -197,15 +213,15 @@
     volcomp: {
       predict: { q: "Un cube de 3 cm surmonté d'une pyramide de même base et de 3 cm de haut : volume total ?", choices: ["36 cm³", "54 cm³", "30 cm³"], good: 0, why: "Cube : 27. Pyramide : ⅓ · 9 · 3 = 9. Total : 36 cm³. On additionne les volumes des parties." },
       defis: ["Cube d'arête 3 et pyramide : quelle hauteur de pyramide pour 36 cm³ en tout ?", "Même cube : quelle hauteur pour 45 cm³ ?", "Cylindre (r = 1, h = 4) et cône de même base : quelle hauteur de cône pour 6π en tout ?"],
-      play: hunt({ label: "Hauteur du toit", start: 1, min: 1, max: 12,
+      play: hunt({ ask: true, label: "Hauteur du toit", start: 1, min: 1, max: 12,
         show: (x, s) => { if (s < 2) { const v = 27 + 3 * x, t = s ? 45 : 36; return `<div class="act-out">cube 27 + pyramide ⅓ · 9 · ${x} = 27 + ${3 * x} = <b>${v} cm³</b> (cible ${t}) → ${ok(v === t, v < t)}</div>`; }
           const v = 4 + x / 3; return `<div class="act-out">cylindre 4π + cône ⅓ · π · 1² · ${x} = <b>${nb(v)}π</b> (cible 6π) → ${ok(Math.abs(v - 6) < 1e-9, v < 6)}</div>`; },
         wins: [W(3, "27 + 9 = 36."), W(6, "27 + 18 = 45."), W(6, "4π + 2π = 6π : le cône de hauteur 6 vaut un cylindre de hauteur 2.")] }),
     },
     volmanq: {
       predict: { q: "Un cylindre de rayon 3 cm a un volume de 36π cm³. Sa hauteur mesure…", choices: ["4 cm", "12 cm", "6 cm"], good: 0, why: "π · 3² · h = 36π, donc 9h = 36 et h = 4. On remplace ce qu'on connaît, puis on isole h." },
-      defis: ["Cylindre de rayon 3 et de volume 36π : règle la hauteur.", "Cône de rayon 3 et de volume 18π : règle la hauteur.", "Pavé de base 5 × 4 et de volume 140 cm³ : règle la hauteur."],
-      play: hunt({ label: "Hauteur", start: 1, min: 1, max: 12,
+      defis: ["Cylindre de rayon 3 et de volume 36π : calcule la hauteur.", "Cône de rayon 3 et de volume 18π : calcule la hauteur.", "Pavé de base 5 × 4 et de volume 140 cm³ : calcule la hauteur."],
+      play: hunt({ ask: true, label: "Hauteur", start: 1, min: 1, max: 12,
         show: (x, s) => { const [lab, v, t] = [["π · 3² · " + x, 9 * x, 36], ["⅓ · π · 3² · " + x, 3 * x, 18], ["5 · 4 · " + x, 20 * x, 140]][s];
           return `<div class="act-out">${lab} = <b>${v}${s < 2 ? "π" : ""}</b> (cible ${t}${s < 2 ? "π" : ""}) → ${ok(v === t, v < t)}</div>`; },
         wins: [W(4, "9h = 36, h = 4."), W(6, "3h = 18, h = 6 : le facteur ⅓ du cône compte."), W(7, "20h = 140, h = 7.")] }),
