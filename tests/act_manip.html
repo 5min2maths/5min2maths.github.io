@@ -1,0 +1,25 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css"><body style="width:400px"><main id="app"></main><pre id="log" hidden></pre>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_manip.js"></script><script src="../src/sujet.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script>const log=[];const click=(s)=>{const e=document.querySelector(s);if(!e){log.push("MANQUE "+s);return;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));};
+const gfb=()=>document.querySelector('#gfb').textContent;
+const box=()=>[...document.querySelectorAll("div")].find((d)=>d.__manip);
+const answer=(v)=>{const i=document.querySelector(".manip-ask input");if(!i)return;i.value=String(v);click(".manip-ask [data-go]");};
+// geste réel : pointerdown / pointermove / pointerup sur la poignée k, vers le point SVG (sx, sy)
+const drag=(k,sx,sy)=>{const svg=document.querySelector("svg.manip"),r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal,cx=r.left+sx*r.width/vb.width,cy=r.top+sy*r.height/vb.height,g=svg.querySelectorAll(".manip-h")[k],c=g.querySelector("circle"),x0=r.left+(+c.getAttribute("cx"))*r.width/vb.width,y0=r.top+(+c.getAttribute("cy"))*r.height/vb.height;
+  const ev=(t,x,y)=>g.dispatchEvent(new PointerEvent(t,{bubbles:true,clientX:x,clientY:y,pointerId:1,isPrimary:true}));ev("pointerdown",x0,y0);ev("pointermove",(x0+cx)/2,(y0+cy)/2);ev("pointermove",cx,cy);ev("pointerup",cx,cy);};
+const SOL={
+  pyth:[["drag",0,90+1*24,165-2*24],100,[(s)=>{s.C=[4,2]}],13,[(s)=>{s.C=[2.5,1]}],0],
+  affine:[[(s)=>{s.P=[0,1];s.Q=[1,3]}],7,[(s)=>{s.P=[0,0];s.Q=[2,-1]}],-0.5,[(s)=>{s.P=[0,3];s.Q=[1,2]}],3],
+  fracconv:[[(s)=>{s.v=[.5,.25,.75]}],75,[(s)=>{s.v=[.6,.35,.8]}],20,[(s)=>{s.v=[.375,.45,.2]}],0.4],
+  sysineq:[[(s)=>{s.L=-1;s.Lc=false;s.R=4;s.Rc=true}],null,[(s)=>{s.L=2;s.Lc=false;s.R=5;s.Rc=true}],3,[(s)=>{s.L=-5;s.Lc=true;s.R=-2;s.Rc=false}],3]};
+for(const [id,seq] of Object.entries(SOL)){ try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; screenLesson(id,()=>{});
+  click('#pc button[data-i="'+ACTIVE[id].predict.good+'"]'); const msgs=[];
+  for(let k=0;k<seq.length;k+=2){ const act=seq[k][0]; const b=gfb();
+    if(act==="drag") drag(seq[k][1],seq[k][2],seq[k][3]); else box().__manip.set(act);
+    if(seq[k+1]!==null) answer(seq[k+1]);
+    msgs.push(gfb()!==b?"✓":"✗ défi "+(k/2+1)+" (étape "+box().__manip.step+")"); }
+  const html=document.body.innerHTML.replace(/<script[\s\S]*?<\/script>/g,"").replace(/<pre id="log"[\s\S]*?<\/pre>/,"");
+  log.push(id+" : "+(document.getElementById("s3").hidden||/NaN|undefined/.test(html)?"ÉCHEC":"OK")+" · "+msgs.join(" "));
+  }catch(e){log.push(id+" ERR "+e.stack)} }
+document.getElementById("log").hidden=false; document.getElementById("log").textContent=log.join("\n");</script>
