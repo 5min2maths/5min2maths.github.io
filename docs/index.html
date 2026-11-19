@@ -17326,7 +17326,7 @@ function renderQuestion(q, opt) {
     if (solved) burst();
     const delta = opt.onDone(res);
     if (opt.single) {
-      fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><b>${solved ? pick(PRAISE) : dontKnow ? "D'accord, on s'en occupera." : "Noté."}</b>${solved ? "" : '<span class="sol">' + q.sol + "</span>"}</div><div class="actions"><button class="btn-primary" id="nx">Suivant</button></div>`;
+      fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><b>${solved ? "✓ Juste ! " + pick(PRAISE) : dontKnow ? "D'accord, on s'en occupera. Voici la solution :" : "✗ Pas tout à fait. Voici la solution :"}</b>${solved ? "" : '<span class="sol">' + q.sol + "</span>"}</div><div class="actions"><button class="btn-primary" id="nx">Suivant</button></div>`;
       typeset(fb);
       document.getElementById("nx").onclick = () => opt.onNext();
       document.getElementById("nx").focus();
