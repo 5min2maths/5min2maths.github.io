@@ -192,9 +192,9 @@ function screenHome() {
     today: () => `<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire${done ? " · séance faite, tu peux en refaire une" : ""}</div>
       <h2>Ton chapitre, au rythme de la classe</h2>
       <p class="muted">Tes séances suivent ce que tu fais en classe : le chapitre en cours, des révisions au bon moment pour ne rien oublier, et la préparation de tes tests.</p>
-      <p class="small"><b>Aujourd'hui : ${FORMATS[fmt].label}</b> · ${FORMATS[fmt].text}</p>
-      <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>
-      <div class="spread"><span class="small muted">Varié d'un jour à l'autre.</span><button class="btn-ghost small" id="other">Autre format</button></div>${nowCard()}</div>
+      <div class="fmt-box stack"><div class="spread"><span class="eyebrow">Aujourd'hui</span><button class="btn-ghost small" id="other">🔀 Autre format</button></div>
+        <h3>${FORMATS[fmt].label}</h3><p class="small muted">${FORMATS[fmt].text} Le format change d'un jour à l'autre.</p></div>
+      <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>${nowCard()}</div>
       ${freeCard()}`,
     prob: () => !wp ? `<div class="card flat stack"><div class="eyebrow">Problème de la semaine</div><h3>Pas encore de problème pour toi</h3><p class="small muted">Les problèmes arrivent avec les notions que tu as déjà travaillées. Fais quelques séances !</p></div>`
       : `<div class="card stack"><div class="eyebrow">Problème de la semaine${wpDone ? " · fait ✓" : ""}</div><h2>${NOTIONS.find((n) => n.id === wp).label}</h2>

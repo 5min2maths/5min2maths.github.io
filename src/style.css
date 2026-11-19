@@ -371,3 +371,9 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .mode-school .now-in { border-top: 1px dashed var(--line); padding-top: 10px; margin-top: 4px; gap: 6px; }
 .mode-school .now-in .eyebrow { margin: 0; color: var(--ink-soft); }
 .mode-school .now-in h3 { margin: 0; font-size: 1rem; }
+/* Format du jour du mode scolaire (19.11) : en grand, avec « Autre format » collé au titre. */
+.mode-school .fmt-box { background: var(--card, #fff); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; gap: 4px; }
+.mode-school .fmt-box .eyebrow { margin: 0; }
+.mode-school .fmt-box h3 { margin: 0; font-size: 1.25rem; }
+.mode-school .fmt-box p { margin: 0; }
+.mode-school .fmt-box #other { font-weight: 700; color: var(--blue); }
