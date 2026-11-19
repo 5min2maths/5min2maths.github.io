@@ -15110,7 +15110,7 @@ function restoreFromHash() {
 const nLabel = (id) => NOTIONS.find((n) => n.id === id).label;
 function nowCard() {
   if (!Engine.nowActive(state)) return `<div class="stack now-in"><div class="eyebrow">📚 En ce moment en classe</div>
-    <p class="small">Dis-moi ce que tu étudies en classe en ce moment : tes séances s'y concentreront.</p><button id="nowpick">Choisir mon chapitre</button></div>`;
+    <p class="small">Dis-moi ce que tu étudies en classe en ce moment : tes séances s'y concentreront.</p><button class="btn-primary btn-big" id="nowpick">Choisir mon chapitre</button></div>`;
   const labels = state.now.ids.map(nLabel).join(" · ");
   if (Engine.nowStale(state)) return `<div class="stack now-in"><div class="eyebrow">📚 En ce moment en classe</div>
     <h3>Toujours sur ${state.now.ids.length > 1 ? "ces notions" : "cette notion"} ?</h3><p class="small muted">${labels}</p>
