@@ -189,7 +189,7 @@ function screenHome() {
   const dots = { prob: !!wp && !wpDone, test: prep && left <= 3, prog: (state.badgesNew || []).length > 0 };
   save();
   const panels = {
-    today: () => `<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire · je travaille mon chapitre · ${done ? "séance faite, tu peux en refaire une" : "ton programme aujourd'hui"}</div>
+    today: () => `<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire · ${done ? "séance faite, tu peux en refaire une" : "mon chapitre aujourd'hui"}</div>
       <h2>${FORMATS[fmt].label}</h2><p class="muted">${FORMATS[fmt].text} </p>
       <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>
       <div class="spread"><span class="small muted">Varié d'un jour à l'autre.</span><button class="btn-ghost small" id="other">Autre format</button></div></div>
@@ -221,7 +221,6 @@ function screenHome() {
   on("eloband", () => { if (homeTab !== "prog") { homeTab = "prog"; screenHome(); } });
   on("go", startSession);
   on("freego", startFree);
-  app.querySelectorAll("[data-scope]").forEach((b) => (b.onclick = () => { state.freeScope = b.dataset.scope; save(); screenHome(); }));
   on("other", () => { Engine.otherFormat(state); save(); screenHome(); });
   if (homeTab === "today") bindNowCard();
   on("wp", () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); });
@@ -563,14 +562,12 @@ let session = null;
 // Mode « progression libre » (18.11) : deux portes égales sur l'accueil ; l'élève choisit le périmètre.
 const FREE_THEMES = { no: "Nombres et opérations", fa: "Fonctions et algèbre", gm: "Grandeurs et mesures", es: "Espace et géométrie" };
 function freeCard() {
-  const sc = state.freeScope || "point";
   return `<div class="card stack mode-free"><div class="eyebrow">🧭 Mode libre · mon défi du jour</div><h2>Tous les sujets, à ton rythme</h2>
     <p class="muted">Un mélange équilibré : tes points forts, tes points à travailler et des notions nouvelles. Sans programme ni note : juste progresser.</p>
-    <button class="btn-primary btn-big" id="freego">Relever le défi</button>
-    <p class="small muted">Quelles notions dans ton défi ?</p><div class="seg" role="group" aria-label="Notions du défi">${[["point", "Une sélection pour moi"], ["annee", "Tout le programme jusqu'à ma classe"]].map(([k, l]) => `<button type="button" data-scope="${k}" aria-pressed="${sc === k}">${l}</button>`).join("")}</div><p class="small muted">${sc === "point" ? "Sélection : les notions les plus complètes de l'app (cours, figures, exercices variés)." : "Tout le programme : toutes les notions jusqu'à ta classe, y compris celles encore en construction."}</p></div>`;
+    <button class="btn-primary btn-big" id="freego">Relever le défi</button></div>`;
 }
 function startFree() {
-  const plan = Engine.freePlan(state, state.freeScope || "point", 6);
+  const plan = Engine.freePlan(state, "annee", 6);
   if (!plan.length) return startSession();
   session = { free: true, plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set() };
   nextQuestion();
