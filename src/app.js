@@ -192,7 +192,7 @@ function screenHome() {
     today: () => `<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire${done ? " · séance faite, tu peux en refaire une" : ""}</div>
       <h2>Ton chapitre, au rythme de la classe</h2>
       <p class="muted">Tes séances suivent ce que tu fais en classe : le chapitre en cours, des révisions au bon moment pour ne rien oublier, et la préparation de tes tests.</p>
-      <div class="fmt-box stack"><div class="spread"><span class="eyebrow">Aujourd'hui</span><button class="btn-ghost small" id="other">Changer de format ›</button></div>
+      <div class="fmt-box stack"><div class="spread"><span class="eyebrow">Aujourd'hui</span><button class="btn-ghost small" id="other">🔁 Changer de format</button></div>
         <h3>${FORMATS[fmt].label}</h3><p class="small muted">${FORMATS[fmt].text} Le format change d'un jour à l'autre.</p></div>
       <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>${nowCard()}</div>
       ${freeCard()}`,

@@ -62,7 +62,7 @@ const day = (d = new Date()) => d.toISOString().slice(0, 10);
 const addDays = (s, n) => { const d = new Date(s + "T12:00:00"); d.setDate(d.getDate() + n); return day(d); };
 const INTERVALS = [0, 1, 3, 7, 14, 30];
 const TARGET = { drill: -300, app: -100, defi: 80, defi4: 80, rev: -150 }; // écart visé au Mathélo (≈ 85 %, 65 %, 40 % de réussite)
-const KIND_LABEL = { drill: "🔁 Automatisme", app: "🧩 Application", defi: "🏔 Défi", rev: "🔄 Révision", rem: "🧱 Une base à consolider" };
+const KIND_LABEL = { drill: "⚡ Automatisme", app: "🧩 Application", defi: "🏔 Défi", rev: "🧠 Révision", rem: "🧱 Une base à consolider" };
 // Remédiation (13.11) : notions de base à reprendre quand une notion échoue deux fois de suite.
 const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2fact", "rel"], eq2fact: ["factor"], fracadd: ["fracsimp", "arith"], fracmul: ["fracsimp"],
   fracops: ["fracadd", "fracmul", "rel"], pyth: ["carres", "rac"], pythfig: ["pyth"], pythrec: ["pyth"], thales: ["prop"], affine: ["valnum", "rel"], factor: ["distrib"],
@@ -72,10 +72,10 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
 // Programme du jour : le format change d'un jour à l'autre ; l'équilibre se fait sur 7 jours.
 const FORMATS = {
   defi: { label: "🏔 Défi du jour", slots: ["defi4"], text: "Un seul problème, à ton niveau. Prends ton temps." },
-  auto: { label: "🔁 Série d'automatismes", slots: ["drill", "drill", "drill", "drill", "drill", "drill", "drill", "drill"], text: "8 calculs rapides, enchaînés." },
+  auto: { label: "⚡ Série d'automatismes", slots: ["drill", "drill", "drill", "drill", "drill", "drill", "drill", "drill"], text: "8 calculs rapides, enchaînés." },
   app: { label: "🧩 Applications", slots: ["app", "app", "app"], text: "Trois questions de fond sur tes notions actuelles." },
   mixte: { label: "⚖️ Mixte", slots: ["drill", "app", "defi"], text: "Un automatisme, une application, un défi." },
-  revision: { label: "🔄 Révision", slots: ["rev", "rev", "rev", "rev"], text: "Les notions à revoir aujourd'hui, pour ne pas les oublier." },
+  revision: { label: "🧠 Révision", slots: ["rev", "rev", "rev", "rev"], text: "Les notions à revoir aujourd'hui, pour ne pas les oublier." },
 };
 const WEEK = { defi: 2, auto: 2, app: 1, mixte: 1, revision: 1 };
 
