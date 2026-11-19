@@ -15228,7 +15228,7 @@ function activeLesson(id, L, cont, review) {
 })();
 
 // Chantier 1re Collège (19.11) : leçons actives pour pct, racenc, tradexpr, fimg, modaff, f2, optim, euclide, angtri,
-// trigexact (devine / manipule / retiens). Même moteur que act_ch11c.js (outils recopiés).
+// trigexact, ensembles, domaine, racinv, transf, absval, ineq, trinfact, f2formes, f2trois, inter, geocomb, droitesrem (devine / manipule / retiens). Même moteur que act_ch11c.js (outils recopiés).
 (function () {
   // ---------- outils ----------
   const nb = (v) => String(+(+v).toFixed(4)).replace(".", ",").replace("-", "−");
@@ -15337,6 +15337,78 @@ function activeLesson(id, L, cont, review) {
       defis: ["Hypoténuse 12, angle 30° : côté opposé ?", "Pente d'une route inclinée à 45° (en %) ?", "Hypoténuse 20, angle 60° : côté adjacent ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["12 · sin 30° = 12 · 1/2", "tan 45° = 1", "20 · cos 60° = 20 · 1/2"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(6, "sin 30° = 1/2 : 6."), W(100, "tan 45° = 1 : 100 %."), W(10, "cos 60° = 1/2 : 10.")] }),
+    },
+    ensembles: {
+      predict: { q: "Combien de nombres entiers l'intervalle ]2 ; 5] contient-il ?", choices: ["4", "3", "2"], good: 1, why: "Crochet tourné vers l'extérieur en 2 : 2 est exclu ; 5 est compris. Il reste 3, 4, 5." },
+      defis: ["Nombre d'entiers de [−3 ; 4] ?", "Nombre d'entiers de [−3 ; 4] ∩ ]0 ; 9[ ?", "Plus petit entier de ]−2 ; 7] ?"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["de −3 à 4, bornes comprises", "partie commune : ]0 ; 4]", "−2 est exclu"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(8, "−3, −2, −1, 0, 1, 2, 3, 4 : 8 entiers."), W(4, "]0 ; 4] : 1, 2, 3, 4."), W(-1, "−2 exclu : le plus petit est −1.")] }),
+    },
+    domaine: {
+      predict: { q: "Pour f(x) = √(x − 3), quel nombre est interdit ?", choices: ["3", "0", "2"], good: 2, why: "Sous la racine, il faut x − 3 ≥ 0, donc x ≥ 3 : 2 est interdit, 3 est permis (√0 = 0)." },
+      defis: ["f(x) = 1/(x − 7) : valeur interdite ?", "f(x) = √(x + 5) : plus petite valeur permise ?", "f(x) = 1/(x² − 16) : valeur interdite positive ?"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["dénominateur " + nb(x) + " − 7 = " + nb(x - 7), "sous la racine : " + nb(x) + " + 5 = " + nb(x + 5), "x² − 16 = " + nb(x * x - 16)][s]),
+        wins: [W(7, "x − 7 = 0 pour x = 7."), W(-5, "x + 5 ≥ 0 ⇔ x ≥ −5."), W(4, "x² = 16 : ±4 interdits.")] }),
+    },
+    racinv: {
+      predict: { q: "Quand x double, que devient f(x) = 12/x ?", choices: ["il double", "il est divisé par 2", "il ne change pas"], good: 1, why: "12/(2x) = (12/x) ÷ 2 : la fonction inverse « fait l'inverse »." },
+      defis: ["f(x) = 12/x : f(3) ?", "Préimage de 4 par f ?", "√x = 9 : x ?"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(s < 2 ? "12 ÷ " + nb(x) + " = " + nb(12 / x) : "√" + nb(x) + " ≈ " + nb(Math.sqrt(Math.max(0, x)))),
+        wins: [W(4, "12 ÷ 3 = 4."), W(3, "12/x = 4 ⇔ x = 3."), W(81, "On élève au carré : x = 81.")] }),
+    },
+    transf: {
+      predict: { q: "Le graphe de (x − 3)² est celui de x² déplacé de…", choices: ["3 vers la gauche", "3 vers la droite", "3 vers le haut"], good: 1, why: "(x − 3)² vaut 0 en x = 3 : le sommet passe de 0 à 3, vers la DROITE (signe inversé dans la parenthèse)." },
+      defis: ["g(x) = (x − 3)² + 2 : abscisse du sommet ?", "Son ordonnée ?", "g(x) = (x + 4)² − 1 : abscisse du sommet ?"],
+      play: hunt({ ask: true, label: "Ta réponse", blank: (s) => FIG.plot([{ f: (t) => t * t, dash: true }, { f: s < 2 ? (t) => (t - 3) ** 2 + 2 : (t) => (t + 4) ** 2 - 1 }], [], { numbers: true, xr: [-7, 7], yr: [-3, 8] }), show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(3, "(x − 3)² : 3 vers la droite."), W(2, "+ 2 : 2 vers le haut."), W(-4, "(x + 4)² = (x − (−4))² : 4 vers la gauche.")] }),
+    },
+    absval: {
+      predict: { q: "Combien de solutions a |x − 2| = 5 ?", choices: ["une", "deux", "aucune"], good: 1, why: "x est à distance 5 de 2 : x = 7 ou x = −3." },
+      defis: ["|x − 2| = 5 : plus grande solution ?", "Plus petite solution ?", "Distance entre −4 et 6 (|−4 − 6|) ?"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(s < 2 ? "|" + nb(x) + " − 2| = " + nb(Math.abs(x - 2)) : "tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(7, "2 + 5 = 7."), W(-3, "2 − 5 = −3."), W(10, "|−10| = 10.")] }),
+    },
+    ineq: {
+      predict: { q: "−2x > 6 donne…", choices: ["x > −3", "x < −3", "x > 3"], good: 1, why: "En divisant par −2 (négatif), on RETOURNE le sens : x < −3." },
+      defis: ["−2x > 6 : x < … ?", "3x − 4 ≤ 11 : x ≤ … ?", "Plus petit entier solution de 5 − x < 2 ?"],
+      play: hunt({ ask: true, label: "Borne", show: (x, s) => plain(["6 ÷ (−2)", "3x ≤ 15", "−x < −3 ⇔ x > 3"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(-3, "x < −3 (sens retourné)."), W(5, "x ≤ 5."), W(4, "x > 3 : le plus petit entier est 4.")] }),
+    },
+    trinfact: {
+      predict: { q: "x² − 5x + 6 se factorise en…", choices: ["(x − 2)(x − 3)", "(x + 2)(x + 3)", "(x − 1)(x − 6)"], good: 0, why: "Deux nombres de somme 5 et de produit 6 : 2 et 3. Zéros 2 et 3, donc (x − 2)(x − 3)." },
+      defis: ["x² − 7x + 10 : plus petit zéro ?", "Plus grand zéro ?", "x² + x − 12 : zéro positif ?"],
+      play: hunt({ ask: true, label: "Zéro", show: (x, s) => plain(s < 2 ? nb(x) + "² − 7·" + nb(x) + " + 10 = " + nb(x * x - 7 * x + 10) : nb(x) + "² + " + nb(x) + " − 12 = " + nb(x * x + x - 12)),
+        wins: [W(2, "4 − 14 + 10 = 0."), W(5, "(x − 2)(x − 5)."), W(3, "(x − 3)(x + 4) : zéros 3 et −4.")] }),
+    },
+    f2formes: {
+      predict: { q: "(x − 2)² + 3 a pour sommet…", choices: ["(2 ; 3)", "(−2 ; 3)", "(3 ; 2)"], good: 0, why: "Forme canonique a(x − h)² + k : sommet (h ; k) = (2 ; 3)." },
+      defis: ["x² − 8x + 20 = (x − h)² + k : h ?", "k ?", "Constante de (x + 3)² − 4 développé ?"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["h = 8 ÷ 2", "(x − 4)² = x² − 8x + 16 ; 20 − 16", "9 − 4"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(4, "h = 4."), W(4, "k = 20 − 16 = 4."), W(5, "(x + 3)² = x² + 6x + 9 ; 9 − 4 = 5.")] }),
+    },
+    f2trois: {
+      predict: { q: "Une parabole passe par (0 ; 7). Que vaut c dans ax² + bx + c ?", choices: ["7", "0", "on ne peut pas savoir"], good: 0, why: "f(0) = c : le point d'abscisse 0 donne directement c." },
+      defis: ["Points (0 ; 1), (1 ; 4), (−1 ; 0) : c ?", "a + b = ? (f(1) − c)", "a ?"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["f(0)", "4 − 1", "(a + b) + (a − b) = 3 + (−1)"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(1, "c = f(0) = 1."), W(3, "a + b = 3 (et a − b = −1)."), W(1, "2a = 2 : a = 1, b = 2 ; f(x) = x² + 2x + 1.")] }),
+    },
+    inter: {
+      predict: { q: "Combien de points communs ont y = x² et y = −1 ?", choices: ["deux", "un", "aucun"], good: 2, why: "x² = −1 n'a pas de solution : un carré n'est jamais négatif. La droite passe sous la parabole." },
+      defis: ["y = x² et y = x + 6 : abscisse positive d'intersection ?", "Abscisse négative ?", "Ordonnée du point d'abscisse positive ?"],
+      play: hunt({ ask: true, label: "Ta réponse", blank: () => FIG.plot([{ f: (t) => t * t }, { f: (t) => t + 6 }], [], { numbers: true, xr: [-4, 4], yr: [-1, 10], squash: 0.6 }), show: (x, s) => plain(s < 2 ? nb(x) + "² = " + nb(x * x) + " ; " + nb(x) + " + 6 = " + nb(x + 6) : "tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(3, "x² − x − 6 = (x − 3)(x + 2)."), W(-2, "x = −2."), W(9, "3² = 9 = 3 + 6.")] }),
+    },
+    geocomb: {
+      predict: { q: "Un losange a des diagonales de 6 et 8 cm. Son côté mesure…", choices: ["7 cm", "5 cm", "10 cm"], good: 1, why: "Les diagonales se coupent en leur milieu à angle droit : √(3² + 4²) = 5." },
+      defis: ["Côté du losange de diagonales 6 et 8 ?", "Hauteur d'un triangle isocèle de côtés 10, 10 et base 12 ?", "Diagonale d'un pavé 2 × 3 × 6 ?"],
+      play: hunt({ ask: true, label: "Longueur", show: (x, s) => plain(["√(3² + 4²)", "√(10² − 6²)", "√(4 + 9 + 36)"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(5, "Demi-diagonales 3 et 4 : 5."), W(8, "Demi-base 6 : √64 = 8."), W(7, "√49 = 7.")] }),
+    },
+    droitesrem: {
+      predict: { q: "Le centre de gravité G partage la médiane [AM] en…", choices: ["deux moitiés", "AG = 2/3 de AM", "AG = 1/3 de AM"], good: 1, why: "G est aux deux tiers de chaque médiane en partant du sommet." },
+      defis: ["Médiane de 12 cm : AG ?", "GM ?", "Triangle rectangle d'hypoténuse 10 : rayon du cercle circonscrit ?"],
+      play: hunt({ ask: true, label: "Longueur", show: (x, s) => plain(["2/3 de 12", "1/3 de 12", "milieu de l'hypoténuse"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(8, "AG = 8."), W(4, "GM = 4."), W(5, "Rayon = 10 ÷ 2 = 5.")] }),
     },
   });
 })();
