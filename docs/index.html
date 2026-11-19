@@ -15410,6 +15410,72 @@ function activeLesson(id, L, cont, review) {
       play: hunt({ ask: true, label: "Longueur", show: (x, s) => plain(["2/3 de 12", "1/3 de 12", "milieu de l'hypoténuse"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(8, "AG = 8."), W(4, "GM = 4."), W(5, "Rayon = 10 ÷ 2 = 5.")] }),
     },
+    lectgraph: {
+      predict: { q: "Pour lire les solutions de f(x) = 2 sur un graphique, on regarde…", choices: ["où la courbe coupe l'axe des y", "où la courbe croise la droite horizontale y = 2", "la valeur f(2)"], good: 1, why: "f(x) = 2 : on cherche les x dont l'image vaut 2, donc les points de la courbe à la hauteur 2." },
+      defis: ["f(x) = (x − 1)² − 4 : plus petit zéro ?", "Plus grand zéro ?", "Nombre de solutions de f(x) = −4 ?"],
+      play: hunt({ ask: true, label: "Ta réponse", blank: () => FIG.plot([{ f: (t) => (t - 1) ** 2 - 4 }], [], { numbers: true, xr: [-4, 6], yr: [-5, 6], hlines: [-4] }), show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(-1, "La courbe coupe l'axe en −1."), W(3, "… et en 3."), W(1, "y = −4 touche la courbe au sommet seulement.")] }),
+    },
+    morceaux: {
+      predict: { q: "f(x) = 2x si x < 3, et f(x) = 10 − x si x ≥ 3. Que vaut f(3) ?", choices: ["6", "7", "les deux"], good: 1, why: "x = 3 relève du 2e morceau (x ≥ 3) : f(3) = 10 − 3 = 7." },
+      defis: ["f(1) ?", "f(5) ?", "f(3) ?"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["1 < 3 : 2 · 1", "5 ≥ 3 : 10 − 5", "3 ≥ 3 : 10 − 3"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(2, "1er morceau : 2."), W(5, "2e morceau : 5."), W(7, "x = 3 est dans le 2e morceau : 7.")] }),
+    },
+    polyop: {
+      predict: { q: "(x + 3)² = …", choices: ["x² + 9", "x² + 6x + 9", "x² + 3x + 9"], good: 1, why: "(a + b)² = a² + 2ab + b² : le double produit 2 · x · 3 = 6x ne disparaît pas." },
+      defis: ["Coefficient de x dans (x + 3)² ?", "Terme constant de (x − 3)(x + 3) ?", "Coefficient de x dans (2x + 1)(x − 4) ?"],
+      play: hunt({ ask: true, label: "Coefficient", show: (x, s) => plain(["2 · x · 3", "−3 · 3", "2x · (−4) + 1 · x"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(6, "x² + 6x + 9."), W(-9, "x² − 9."), W(-7, "2x² − 7x − 4.")] }),
+    },
+    factor2: {
+      predict: { q: "2x² − 18 factorisé au maximum, c'est…", choices: ["2(x² − 9)", "2(x − 3)(x + 3)", "(2x − 6)(x + 3)"], good: 1, why: "On met 2 en évidence, puis x² − 9 est une différence de carrés : 2(x − 3)(x + 3)." },
+      defis: ["Facteur mis en évidence dans 2x² − 18 ?", "Racine du carré parfait 9 ?", "x² + 10x + 25 = (x + ?)²"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(2, "2(x² − 9)."), W(3, "(x − 3)(x + 3)."), W(5, "(x + 5)² = x² + 10x + 25.")] }),
+    },
+    f2expr: {
+      predict: { q: "Une parabole a pour zéros 1 et 5 et passe par (0 ; 10). Son coefficient a vaut…", choices: ["1", "2", "10"], good: 1, why: "f(x) = a(x − 1)(x − 5) ; f(0) = 5a = 10, donc a = 2." },
+      defis: ["Produit (0 − 1)(0 − 5) ?", "Valeur de a ?", "f(3) = a(3 − 1)(3 − 5) ?"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(5, "(−1)(−5) = 5."), W(2, "5a = 10."), W(-8, "2 · 2 · (−2) = −8 (sommet).")] }),
+    },
+    interpar: {
+      predict: { q: "Deux paraboles y = x² + 1 et y = x² + 2x − 5 se coupent en…", choices: ["deux points", "un point", "aucun"], good: 1, why: "Les x² s'annulent : 1 = 2x − 5, une équation du 1er degré, x = 3." },
+      defis: ["Abscisse du point commun ?", "Son ordonnée ?", "y = x² et y = −x² + 8 : abscisse positive ?"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(3, "2x = 6."), W(10, "3² + 1 = 10."), W(2, "2x² = 8, x = ±2.")] }),
+    },
+    ineq2: {
+      predict: { q: "(x − 1)(x − 5) < 0 est vrai…", choices: ["entre 1 et 5", "en dehors de [1 ; 5]", "jamais"], good: 0, why: "Parabole tournée vers le haut : négative entre ses zéros." },
+      defis: ["Nombre d'entiers avec (x − 1)(x − 5) < 0 ?", "Et avec ≤ 0 ?", "x² ≤ 16 : plus grand entier ?"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["entre 1 et 5 exclus", "bornes comprises", "−4 ≤ x ≤ 4"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(3, "2, 3, 4."), W(5, "1 à 5."), W(4, "x ∈ [−4 ; 4].")] }),
+    },
+    ineqfrac: {
+      predict: { q: "Pour résoudre (x − 2)/(x + 3) ≥ 0, x = −3 est…", choices: ["solution", "interdit", "la seule solution"], good: 1, why: "−3 annule le dénominateur : valeur interdite, jamais dans la solution." },
+      defis: ["Valeur interdite ?", "Zéro du numérateur ?", "Combien d'entiers de [−5 ; 5] vérifient (x − 2)/(x + 3) ≥ 0 ?"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(-3, "x + 3 = 0."), W(2, "x − 2 = 0."), W(6, "x < −3 : −5, −4 ; x ≥ 2 : 2, 3, 4, 5.")] }),
+    },
+    exactes: {
+      predict: { q: "La diagonale d'un carré de côté 5 mesure exactement…", choices: ["5√2", "10", "7,07"], good: 0, why: "√(25 + 25) = √50 = 5√2. 7,07 n'est qu'une valeur approchée." },
+      defis: ["(5√2)² = ?", "Hauteur² d'un équilatéral de côté 6 ?", "(3√3)² = ?"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(50, "25 · 2 = 50."), W(27, "36 − 9 = 27 : h = 3√3."), W(27, "9 · 3 = 27.")] }),
+    },
+    trigo: {
+      predict: { q: "Hypoténuse connue, on cherche le côté opposé à l'angle : on utilise…", choices: ["le sinus", "le cosinus", "la tangente"], good: 0, why: "SOH : sin = opposé / hypoténuse." },
+      defis: ["Hypoténuse 10, angle 30° : opposé ?", "Adjacent 8, angle 45° : opposé ?", "Hypoténuse 50, cos α = 0,6 : adjacent ?"],
+      play: hunt({ ask: true, label: "Longueur", show: (x, s) => plain(["10 · sin 30°", "8 · tan 45°", "50 · 0,6"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(5, "sin 30° = 0,5."), W(8, "tan 45° = 1."), W(30, "50 · 0,6 = 30.")] }),
+    },
+    trigrel: {
+      predict: { q: "Si sin α = 0,6 (α aigu), cos α vaut…", choices: ["0,4", "0,8", "0,6"], good: 1, why: "sin² + cos² = 1 : cos² = 1 − 0,36 = 0,64, cos = 0,8 (et non 1 − 0,6)." },
+      defis: ["sin α = 3/5 : cos α = 4/? (dénominateur)", "tan α = sin/cos = 3/?", "100 · (sin² + cos²) = ?"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(5, "cos = 4/5."), W(4, "tan = (3/5)/(4/5) = 3/4."), W(100, "sin² + cos² = 1.")] }),
+    },
   });
 })();
 

@@ -13,5 +13,5 @@ const run=(id)=>{ try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=
   const html=document.body.innerHTML.replace(/<script[\s\S]*?<\/script>/g,"").replace(/<pre id="log"[\s\S]*?<\/pre>/,""); const bad=/NaN|undefined|Infinity/.test(html);
   log.push(id+" : "+(document.getElementById("s3").hidden||bad?"ÉCHEC "+(bad?"(NaN/undefined) ":""):"OK")+" · "+msgs.join(" | "));
   }catch(e){log.push(id+" ERR "+e.stack)} };
-for(const id of ["pct","racenc","tradexpr","fimg","modaff","f2","optim","euclide","angtri","trigexact","ensembles","domaine","racinv","transf","absval","ineq","trinfact","f2formes","f2trois","inter","geocomb","droitesrem"]) run(id);
+for(const id of ["pct","racenc","tradexpr","fimg","modaff","f2","optim","euclide","angtri","trigexact","ensembles","domaine","racinv","transf","absval","ineq","trinfact","f2formes","f2trois","inter","geocomb","droitesrem","lectgraph","morceaux","polyop","factor2","f2expr","interpar","ineq2","ineqfrac","exactes","trigo","trigrel"]) run(id);
 document.getElementById("log").hidden=false; document.getElementById("log").textContent=log.join("\n");</script>
