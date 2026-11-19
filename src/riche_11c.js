@@ -202,6 +202,69 @@
       sol: ul(["<b>Vrai</b> : le nombre de choix diminue à chaque position.", "<b>Faux</b> : une probabilité est toujours entre 0 et 1."]) }),
   ];
 
+  // ===================== Révisions de 10e : 6. Puissances et racines, 10. Proportionnalité =====================
+  const EXC = [
+    () => { const s = pk([12, 15, 18, 25]);
+      return X({ id: "carres", lv: 1, titre: "Le carrelage",
+        q: "Une terrasse carrée a une aire de " + Q(s * s, "m^2") + ". On la borde d'une bande de fleurs sur tout son tour.",
+        parts: [{ label: "Calcule la longueur du côté de la terrasse.", pts: 1 }, { label: "Calcule la longueur de la bande de fleurs (périmètre).", pts: 1 }, { label: "Une deuxième terrasse a une aire de " + Q(2 * s * s, "m^2") + ". Son côté est-il le double ? Calcule-le au cm près.", pts: 2 }],
+        sol: ul([M("\\sqrt{" + s * s + "} = " + s) + " m.", M("4 \\cdot " + s + " = " + 4 * s) + " m.", "Non : " + M("\\sqrt{" + 2 * s * s + "} = " + s + "\\sqrt{2} \\approx " + N(Math.round(s * Math.SQRT2 * 100) / 100)) + " m (côté × √2, aire × 2)."]) }); },
+    () => { const k = pk([7, 8, 9, 11]);
+      return X({ id: "carres", lv: 2, titre: "Encadrer sans calculatrice",
+        q: "Sans calculatrice, on veut situer " + M("\\sqrt{" + (k * k + k) + "}") + ".",
+        parts: [{ label: "Entre quels carrés parfaits consécutifs se trouve " + M(k * k + k) + " ?", pts: 1 }, { label: "Encadre " + M("\\sqrt{" + (k * k + k) + "}") + " entre deux entiers consécutifs.", pts: 1 }, { label: "Est-il plus proche de " + k + " ou de " + (k + 1) + " ? Justifie avec " + M(N(k + 0.5) + "^2") + ".", pts: 2 }],
+        sol: ul([M(k * k + " < " + (k * k + k) + " < " + (k + 1) * (k + 1)) + ".", M(k + " < \\sqrt{" + (k * k + k) + "} < " + (k + 1)) + ".", M(N(k + 0.5) + "^2 = " + N((k + 0.5) ** 2)) + " > " + M(k * k + k) + " : il est plus proche de " + k + "."]) }); },
+    () => { const e = pk([3, 4, 5]);
+      return X({ id: "puiss", lv: 2, titre: "La feuille pliée",
+        q: "On plie une feuille en deux, puis encore en deux, et ainsi de suite. Une feuille mesure " + Q(0.1, "mm") + " d'épaisseur.",
+        parts: [{ label: "Combien de couches y a-t-il après " + e + " pliages ? Écris-le comme une puissance.", pts: 1 }, { label: "Quelle est alors l'épaisseur (en mm) ?", pts: 1 }, { label: "Après combien de pliages dépasse-t-on 1 cm ?", pts: 2 }],
+        sol: ul([M("2^" + e + " = " + 2 ** e) + " couches.", M(2 ** e + " \\cdot 0{,}1 = " + N(2 ** e * 0.1)) + " mm.", "Il faut " + M("2^n \\cdot 0{,}1 > 10") + ", soit " + M("2^n > 100") + " : " + M("2^7 = 128") + ", donc 7 pliages."]) }); },
+    () => X({ id: "rac", lv: 3, titre: "Valeurs exactes",
+      q: "Un carré a un côté de " + Q(6, "cm") + ".",
+      parts: [{ label: "Calcule la valeur exacte de sa diagonale, sous la forme " + M("a\\sqrt{b}") + ".", pts: 2 }, { label: "Un carré a une aire de " + Q(72, "cm^2") + ". Écris son côté sous la forme " + M("a\\sqrt{b}") + ".", pts: 1 }, { label: "Compare les deux résultats. Que remarques-tu ?", pts: 1 }],
+      sol: ul([M("\\sqrt{36 + 36} = \\sqrt{72} = 6\\sqrt{2}") + " cm.", M("\\sqrt{72} = \\sqrt{36 \\cdot 2} = 6\\sqrt{2}") + " cm.", "Égaux : le carré construit sur la diagonale a une aire double (72 = 2 · 36)."]) }),
+  ];
+  const RAISONC = [
+    () => X({ id: "carres", lv: 1, titre: "Trouve l'erreur", q: who() + " écrit : « " + M("\\sqrt{16 + 9} = \\sqrt{16} + \\sqrt{9} = 7") + " ».",
+      parts: [{ label: "Où est l'erreur ?", pts: 1 }, { label: "Calcule correctement.", pts: 1 }],
+      sol: ul(["La racine d'une somme n'est pas la somme des racines.", M("\\sqrt{25} = 5") + "."]) }),
+    () => X({ id: "puiss", lv: 2, titre: "Vrai ou faux ? Justifie", q: "Pour chaque affirmation, dis si elle est vraie ou fausse, et justifie.",
+      parts: [{ label: "« " + M("(-3)^2 = -9") + " »", pts: 1 }, { label: "« " + M("2^3 \\cdot 2^4 = 2^7") + " »", pts: 1 }, { label: "« " + M("0{,}2^2 = 0{,}4") + " »", pts: 1 }],
+      sol: ul(["<b>Faux</b> : " + M("(-3) \\cdot (-3) = 9") + ".", "<b>Vrai</b> : on additionne les exposants.", "<b>Faux</b> : " + M("0{,}2 \\cdot 0{,}2 = 0{,}04") + "."]) }),
+  ];
+  const EXV = [
+    () => { const P0 = pk([60, 80, 120]), p = pk([15, 20, 25]);
+      return X({ id: "pctvar", lv: 1, titre: "Les soldes",
+        q: "Un sweat coûte " + Q(P0, "CHF") + ". Pendant les soldes, son prix baisse de " + p + " %.",
+        parts: [{ label: "Calcule le montant de la réduction.", pts: 1 }, { label: "Calcule le prix soldé, puis le coefficient multiplicateur utilisé.", pts: 2 }],
+        sol: ul([M(N(P0) + " \\cdot " + N(p / 100) + " = " + N(P0 * p / 100)) + " CHF.", M(N(P0 * (1 - p / 100))) + " CHF ; coefficient " + M(N(1 - p / 100)) + "."]) }); },
+    () => { const a = pk([40, 50, 80]), b = a * pk([1.2, 1.25, 1.5]);
+      return X({ id: "pctvar", lv: 2, titre: "L'abonnement augmente",
+        q: "L'abonnement de bus passe de " + Q(a, "CHF") + " à " + Q(b, "CHF") + " par mois.",
+        parts: [{ label: "Calcule le coefficient multiplicateur.", pts: 1 }, { label: "De quel pourcentage a-t-il augmenté ?", pts: 1 }, { label: "L'an prochain, il baisse du même pourcentage. Revient-il à " + Q(a, "CHF") + " ? Calcule.", pts: 2 }],
+        sol: ul([M(N(b) + " : " + a + " = " + N(b / a)) + ".", M(N(r6((b / a - 1) * 100))) + " %.", "Non : " + M(N(b) + " \\cdot " + N(r6(2 - b / a)) + " = " + N(r6(b * (2 - b / a)))) + " CHF : la baisse porte sur un montant plus grand."]) }); },
+    () => { const r = pk([3, 4, 5]), P0 = pk([200, 400, 500]);
+      return X({ id: "pctvar", lv: 2, titre: "Retrouver le prix de départ",
+        q: "Après une hausse de " + (r * 5) + " %, un vélo coûte " + Q(P0 * (1 + r * 5 / 100), "CHF") + ".",
+        parts: [{ label: "Quel coefficient correspond à une hausse de " + r * 5 + " % ?", pts: 1 }, { label: "Calcule le prix avant la hausse.", pts: 2 }, { label: who() + " a calculé " + M(N(P0 * (1 + r * 5 / 100)) + " \\cdot " + N(1 - r * 5 / 100)) + ". Pourquoi est-ce faux ?", pts: 1 }],
+        sol: ul([M(N(1 + r * 5 / 100)) + ".", M(N(P0 * (1 + r * 5 / 100)) + " : " + N(1 + r * 5 / 100) + " = " + P0) + " CHF.", "Le pourcentage portait sur le prix de départ : il faut diviser par le coefficient, pas enlever " + r * 5 + " % du nouveau prix."]) }); },
+    () => { const t = pk([2, 3]), p = pk([4, 5, 10]);
+      return X({ id: "pctvar", lv: 3, titre: "Hausses successives",
+        q: "Une population augmente de " + p + " % par an pendant " + t + " ans. Elle compte " + Q(10000, "habitants") + " au départ.",
+        parts: [{ label: "Quel est le coefficient multiplicateur sur " + t + " ans ?", pts: 2 }, { label: "Combien d'habitants y a-t-il à la fin (à l'unité) ?", pts: 1 }, { label: "Le pourcentage total d'augmentation vaut-il " + p * t + " % ? Explique.", pts: 1 }],
+        sol: ul([M(N(1 + p / 100) + "^" + t + " = " + N(r6((1 + p / 100) ** t))) + ".", M(N(Math.round(10000 * (1 + p / 100) ** t))) + " habitants.", "Non : " + M(N(r6(((1 + p / 100) ** t - 1) * 100))) + " %, un peu plus, car chaque hausse porte sur une population déjà augmentée."]) }); },
+  ];
+  const RAISONV = [
+    () => X({ id: "pctvar", lv: 1, titre: "Trouve l'erreur", q: who() + " dit : « une hausse de 50 % puis une baisse de 50 %, ça revient au prix de départ ».",
+      parts: [{ label: "Teste avec un prix de 100 CHF.", pts: 1 }, { label: "Quel est le coefficient global ?", pts: 1 }],
+      sol: ul(["100 → 150 → 75 CHF.", M("1{,}5 \\cdot 0{,}5 = 0{,}75") + " : baisse de 25 %."]) }),
+    () => X({ id: "pctvar", lv: 2, titre: "Vrai ou faux ? Justifie", q: "Pour chaque affirmation, dis si elle est vraie ou fausse, et justifie.",
+      parts: [{ label: "« Baisser de 20 %, c'est multiplier par 0,8. »", pts: 1 }, { label: "« Augmenter de 100 %, c'est doubler. »", pts: 1 }],
+      sol: ul(["<b>Vrai</b> : 1 − 0,2 = 0,8.", "<b>Vrai</b> : coefficient 2."]) }),
+  ];
+
+  RICH.pr10 = { ids: ["carres", "puiss", "rac"], label: "Puissances et racines (révision de 10e)", ex: EXC, raison: RAISONC, minutes: 45 };
+  RICH.pct10 = { ids: ["pctvar"], label: "Pourcentages (révision de 10e)", ex: EXV, raison: RAISONV, minutes: 45 };
   RICH.ang11 = { ids: ["angles", "cercthales"], label: "Angles", ex: EXA, raison: RAISONA, minutes: 45 };
   RICH.thal11 = { ids: ["thales", "thalesrec"], label: "Théorème de Thalès", ex: EXT, raison: RAISONT, minutes: 45 };
   RICH.fct11 = { ids: ["repere", "tabval", "affine"], label: "Fonctions", ex: EXF, raison: RAISONF, minutes: 45 };
