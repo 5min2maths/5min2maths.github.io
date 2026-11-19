@@ -1,6 +1,6 @@
-// Chantier 11e (19.11, « on se concentre sur la 11e ») : leçons actives (devine / manipule / retiens) pour les 12
+// Chantier 11e (19.11, « on se concentre sur la 11e ») : leçons actives (devine / manipule / retiens) pour les 14
 // notions de 11e qui n'en avaient pas : rel, fracops, rac, angles, cercthales, thales, thalesrec, repere, tabval, simil,
-// denombr, proba. Même moteur que act_ch11b.js (outils recopiés : chaque fichier reste autonome). Réponses entières ;
+// denombr, proba, et les révisions de 10e carres, pctvar. Même moteur que act_ch11b.js (outils recopiés : chaque fichier reste autonome). Réponses entières ;
 // mode « réponse » (l'élève calcule et tape) sauf vraies manipulations (agrandir un carré, un rapport k).
 (function () {
   // ---------- outils ----------
@@ -143,6 +143,20 @@
         blank: (s) => grid(s === 1 ? 7 : s === 2 ? 10 : 0),
         show: (x, s) => grid(s === 1 ? 7 : s === 2 ? 10 : 0) + plain(s ? "cases coloriées : la somme vaut " + (s === 1 ? 7 : 10) + " ; tu proposes <b>" + nb(x) + "</b>" : "tableau 6 × 6 ; tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(36, "6 · 6 = 36 issues."), W(6, "6 façons sur 36 : P(7) = 6/36 = 1/6."), W(3, "4+6, 5+5, 6+4 : 3 façons, P(10) = 3/36 = 1/12.")] }),
+    },
+    carres: {
+      predict: { q: "Combien vaut 0,3² ?", choices: ["0,9", "0,09", "0,6"], good: 1, why: "0,3 · 0,3 = 0,09 : deux chiffres après la virgule. Élever au carré, c'est multiplier par lui-même, pas par 2 ni par 3." },
+      defis: ["Quel nombre positif a pour carré 144 ?", "Quel nombre positif a pour carré 121 ?", "Quel est le plus grand entier dont le carré est inférieur à 200 ?"],
+      play: hunt({ ask: true, label: "Ta réponse",
+        show: (x, s) => plain(nb(x) + "² = <b>" + nb(x * x) + "</b>" + (s === 2 ? (x * x < 200 ? " (sous 200)" : " (dépasse 200)") : "")),
+        wins: [W(12, "12² = 144 : √144 = 12."), W(11, "11² = 121 : √121 = 11."), W(14, "14² = 196 < 200 < 225 = 15².")] }),
+    },
+    pctvar: {
+      predict: { q: "Un prix augmente de 10 %, puis baisse de 10 %. À la fin, il est…", choices: ["revenu au prix de départ", "plus bas qu'au départ", "plus haut qu'au départ"], good: 1, why: "100 → 110 (× 1,1) → 99 (× 0,9) : la baisse de 10 % porte sur 110, un montant plus grand. × 1,1 × 0,9 = × 0,99." },
+      defis: ["Un article à 80 CHF augmente de 25 %. Nouveau prix ?", "Un article à 50 CHF baisse de 20 %. Nouveau prix ?", "Un prix passe de 40 à 50 CHF. Augmentation en % ?"],
+      play: hunt({ ask: true, label: "Ta réponse",
+        show: (x, s) => plain(["80 · 1,25 (coefficient d'une hausse de 25 %)", "50 · 0,8 (coefficient d'une baisse de 20 %)", "hausse 10 CHF sur 40 CHF : 10/40"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(100, "80 · 1,25 = 100 CHF."), W(40, "50 · 0,8 = 40 CHF."), W(25, "10/40 = 0,25 = 25 % : on divise par le prix de DÉPART.")] }),
     },
   });
   // Tableau de valeurs de f(x) = 2x − 3 ; la case du défi s est vide (« ? ») tant que la réponse n'est pas trouvée.

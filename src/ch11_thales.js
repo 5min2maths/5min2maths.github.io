@@ -81,6 +81,10 @@
       () => { const k = pk([2, 3, 4]), ad = R.int(2, 6), ae = R.int(2, 6), ac = ae * k; if (ad === ae) return null;
         return Qv(M("D \\in [AB]") + ", " + M("E \\in [AC]") + ", " + M("AD = " + ad) + ", " + M("AE = " + ae) + " et " + M("AC = " + ac) + ". Quelle longueur " + M("AB") + " faut-il pour que " + M("(DE) \\parallel (BC)") + " ?", ad * k,
           M("\\frac{AB}{AD} = \\frac{AC}{AE} = " + k) + " : " + M("AB = " + ad * k) + ".", { ctx: "AB", guide: [GS("Rapport " + M("AC : AE") + " ?", k, M(k) + "."), GS(M("AB") + " = ?", ad * k, M(ad * k) + ".")], traps: [TR(ad + ac - ae, "Rapports égaux, pas différences égales.")] }); },
+      () => { const [ad, ab, ae, ac, ok] = pk([[1.2, 3, 1.6, 4, 1], [0.9, 3, 1.2, 4, 1], [1.5, 4, 2, 5, 0], [0.8, 2, 1.4, 3.5, 1], [1.1, 2.5, 1.5, 3, 0]]), x = pk([["Sur la charpente d'un toit, ", "toit"], ["Sur une étagère vue de profil, ", "etagere"]]);
+        return Qv(x[0] + "on mesure " + M("AD = " + N(ad)) + " m et " + M("AB = " + N(ab)) + " m sur un montant, " + M("AE = " + N(ae)) + " m et " + M("AC = " + N(ac)) + " m sur l'autre. Calcule le rapport " + M("\frac{AD}{AB}") + " en nombre décimal : si " + M("\frac{AE}{AC}") + " a la même valeur, la traverse " + M("(DE)") + " est parallèle à " + M("(BC)") + ".", r6(ad / ab),
+          M("\frac{" + N(ad) + "}{" + N(ab) + "} = " + N(ad / ab)) + " et " + M("\frac{" + N(ae) + "}{" + N(ac) + "} = " + N(ae / ac)) + (ok ? " : égaux, la traverse est parallèle (réciproque de Thalès)." : " : différents, la traverse n'est pas parallèle."),
+          { ctx: x[1], guide: [GS(M("\frac{AD}{AB}") + " (décimal) ?", r6(ad / ab), M(N(ad / ab)) + "."), GS(M("\frac{AE}{AC}") + " (décimal) ?", r6(ae / ac), M(N(ae / ac)) + (ok ? " : même valeur." : " : valeur différente."))], traps: [TR(r6(ab / ad), "On divise AD par AB (le petit par le grand)."), TR(r6(ad / ae), "Le rapport compare deux longueurs du MÊME côté : AD et AB.")] }); },
     ],
     2: [
       () => { const [ad, ab, ae] = pk([[2.4, 6, 3], [1.8, 4.5, 2], [3.2, 8, 2.5], [1.5, 6, 2.2]]), ac = r6(ae * ab / ad);
@@ -107,6 +111,10 @@
         return Qv("Combien de ces configurations donnent " + M("(DE) \\parallel (BC)") + " ? " + cs.map((c, i) => "(" + (i + 1) + ") " + M("AD = " + c[0] + ", AB = " + N(c[1]) + ", AE = " + c[2] + ", AC = " + N(c[3]))).join(" ; "), n,
           cs.map((c, i) => "(" + (i + 1) + ") " + M(c[0] + " \\cdot " + N(c[3]) + (c[4] ? " = " : " \\neq ") + c[2] + " \\cdot " + N(c[1]))).join(" ; ") + " (produits en croix) : " + n + ".",
           { ctx: "compter-decimaux", fig: GF.thales(0.45, { AD: "AD", AE: "AE" }), guide: [GS("Astuce : compare les produits en croix " + M("AD \\cdot AC") + " et " + M("AE \\cdot AB") + ". Cas (1) : " + M("AD \\cdot AC") + " = ?", r6(cs[0][0] * cs[0][3]), M(N(cs[0][0] * cs[0][3])) + "."), GS("Nombre de cas parallèles ?", n, n + ".")], traps: [TR(4, "Un petit écart suffit : pas parallèles."), TR(n === 0 ? 1 : n - 1, "Vérifie chaque cas.")] }); },
+      () => { const k = pk([1.5, 2.5, 2, 3]), ad = R.int(2, 6), ae = R.int(2, 6), de = R.int(2, 7); if (ad === ae) return null; const ab = r6(ad * k), ac = r6(ae * k), bc = r6(de * k);
+        return Qv("Configuration « papillon » : " + M("(BD)") + " et " + M("(CE)") + " se coupent en " + M("A") + ". " + M("AD = " + ad) + ", " + M("AB = " + N(ab)) + ", " + M("AE = " + ae) + ", " + M("AC = " + N(ac)) + " et " + M("DE = " + de) + ". Vérifie que " + M("(DE) \\parallel (BC)") + ", puis calcule " + M("BC") + ".", bc,
+          M("\\frac{AB}{AD} = \\frac{AC}{AE} = " + N(k)) + " : parallèles (réciproque). " + M("BC = " + de + " \\cdot " + N(k) + " = " + N(bc)) + ".",
+          { ctx: "papillon-BC", guide: [GS(M("\\frac{AB}{AD}") + " (décimal) ?", k, M(N(k)) + "."), GS(M("\\frac{AC}{AE}") + " (même valeur : parallèles) ?", k, M(N(k)) + "."), GS(M("BC") + " = ?", bc, M(N(bc)) + ".")], traps: [TR(r6(de / k), "BC est du côté des grandes longueurs (AB, AC) : on multiplie."), TR(r6(de + ab - ad), "Thalès conserve les rapports, pas les différences.")] }); }
     ],
   };
 

@@ -9443,6 +9443,10 @@ function compNote(rec) {
       () => { const k = pk([2, 3, 4]), ad = R.int(2, 6), ae = R.int(2, 6), ac = ae * k; if (ad === ae) return null;
         return Qv(M("D \\in [AB]") + ", " + M("E \\in [AC]") + ", " + M("AD = " + ad) + ", " + M("AE = " + ae) + " et " + M("AC = " + ac) + ". Quelle longueur " + M("AB") + " faut-il pour que " + M("(DE) \\parallel (BC)") + " ?", ad * k,
           M("\\frac{AB}{AD} = \\frac{AC}{AE} = " + k) + " : " + M("AB = " + ad * k) + ".", { ctx: "AB", guide: [GS("Rapport " + M("AC : AE") + " ?", k, M(k) + "."), GS(M("AB") + " = ?", ad * k, M(ad * k) + ".")], traps: [TR(ad + ac - ae, "Rapports égaux, pas différences égales.")] }); },
+      () => { const [ad, ab, ae, ac, ok] = pk([[1.2, 3, 1.6, 4, 1], [0.9, 3, 1.2, 4, 1], [1.5, 4, 2, 5, 0], [0.8, 2, 1.4, 3.5, 1], [1.1, 2.5, 1.5, 3, 0]]), x = pk([["Sur la charpente d'un toit, ", "toit"], ["Sur une étagère vue de profil, ", "etagere"]]);
+        return Qv(x[0] + "on mesure " + M("AD = " + N(ad)) + " m et " + M("AB = " + N(ab)) + " m sur un montant, " + M("AE = " + N(ae)) + " m et " + M("AC = " + N(ac)) + " m sur l'autre. Calcule le rapport " + M("\frac{AD}{AB}") + " en nombre décimal : si " + M("\frac{AE}{AC}") + " a la même valeur, la traverse " + M("(DE)") + " est parallèle à " + M("(BC)") + ".", r6(ad / ab),
+          M("\frac{" + N(ad) + "}{" + N(ab) + "} = " + N(ad / ab)) + " et " + M("\frac{" + N(ae) + "}{" + N(ac) + "} = " + N(ae / ac)) + (ok ? " : égaux, la traverse est parallèle (réciproque de Thalès)." : " : différents, la traverse n'est pas parallèle."),
+          { ctx: x[1], guide: [GS(M("\frac{AD}{AB}") + " (décimal) ?", r6(ad / ab), M(N(ad / ab)) + "."), GS(M("\frac{AE}{AC}") + " (décimal) ?", r6(ae / ac), M(N(ae / ac)) + (ok ? " : même valeur." : " : valeur différente."))], traps: [TR(r6(ab / ad), "On divise AD par AB (le petit par le grand)."), TR(r6(ad / ae), "Le rapport compare deux longueurs du MÊME côté : AD et AB.")] }); },
     ],
     2: [
       () => { const [ad, ab, ae] = pk([[2.4, 6, 3], [1.8, 4.5, 2], [3.2, 8, 2.5], [1.5, 6, 2.2]]), ac = r6(ae * ab / ad);
@@ -9469,6 +9473,10 @@ function compNote(rec) {
         return Qv("Combien de ces configurations donnent " + M("(DE) \\parallel (BC)") + " ? " + cs.map((c, i) => "(" + (i + 1) + ") " + M("AD = " + c[0] + ", AB = " + N(c[1]) + ", AE = " + c[2] + ", AC = " + N(c[3]))).join(" ; "), n,
           cs.map((c, i) => "(" + (i + 1) + ") " + M(c[0] + " \\cdot " + N(c[3]) + (c[4] ? " = " : " \\neq ") + c[2] + " \\cdot " + N(c[1]))).join(" ; ") + " (produits en croix) : " + n + ".",
           { ctx: "compter-decimaux", fig: GF.thales(0.45, { AD: "AD", AE: "AE" }), guide: [GS("Astuce : compare les produits en croix " + M("AD \\cdot AC") + " et " + M("AE \\cdot AB") + ". Cas (1) : " + M("AD \\cdot AC") + " = ?", r6(cs[0][0] * cs[0][3]), M(N(cs[0][0] * cs[0][3])) + "."), GS("Nombre de cas parallèles ?", n, n + ".")], traps: [TR(4, "Un petit écart suffit : pas parallèles."), TR(n === 0 ? 1 : n - 1, "Vérifie chaque cas.")] }); },
+      () => { const k = pk([1.5, 2.5, 2, 3]), ad = R.int(2, 6), ae = R.int(2, 6), de = R.int(2, 7); if (ad === ae) return null; const ab = r6(ad * k), ac = r6(ae * k), bc = r6(de * k);
+        return Qv("Configuration « papillon » : " + M("(BD)") + " et " + M("(CE)") + " se coupent en " + M("A") + ". " + M("AD = " + ad) + ", " + M("AB = " + N(ab)) + ", " + M("AE = " + ae) + ", " + M("AC = " + N(ac)) + " et " + M("DE = " + de) + ". Vérifie que " + M("(DE) \\parallel (BC)") + ", puis calcule " + M("BC") + ".", bc,
+          M("\\frac{AB}{AD} = \\frac{AC}{AE} = " + N(k)) + " : parallèles (réciproque). " + M("BC = " + de + " \\cdot " + N(k) + " = " + N(bc)) + ".",
+          { ctx: "papillon-BC", guide: [GS(M("\\frac{AB}{AD}") + " (décimal) ?", k, M(N(k)) + "."), GS(M("\\frac{AC}{AE}") + " (même valeur : parallèles) ?", k, M(N(k)) + "."), GS(M("BC") + " = ?", bc, M(N(bc)) + ".")], traps: [TR(r6(de / k), "BC est du côté des grandes longueurs (AB, AC) : on multiplie."), TR(r6(de + ab - ad), "Thalès conserve les rapports, pas les différences.")] }); }
     ],
   };
 
@@ -14048,9 +14056,9 @@ function activeLesson(id, L, cont, review) {
   });
 })();
 
-// Chantier 11e (19.11, « on se concentre sur la 11e ») : leçons actives (devine / manipule / retiens) pour les 12
+// Chantier 11e (19.11, « on se concentre sur la 11e ») : leçons actives (devine / manipule / retiens) pour les 14
 // notions de 11e qui n'en avaient pas : rel, fracops, rac, angles, cercthales, thales, thalesrec, repere, tabval, simil,
-// denombr, proba. Même moteur que act_ch11b.js (outils recopiés : chaque fichier reste autonome). Réponses entières ;
+// denombr, proba, et les révisions de 10e carres, pctvar. Même moteur que act_ch11b.js (outils recopiés : chaque fichier reste autonome). Réponses entières ;
 // mode « réponse » (l'élève calcule et tape) sauf vraies manipulations (agrandir un carré, un rapport k).
 (function () {
   // ---------- outils ----------
@@ -14193,6 +14201,20 @@ function activeLesson(id, L, cont, review) {
         blank: (s) => grid(s === 1 ? 7 : s === 2 ? 10 : 0),
         show: (x, s) => grid(s === 1 ? 7 : s === 2 ? 10 : 0) + plain(s ? "cases coloriées : la somme vaut " + (s === 1 ? 7 : 10) + " ; tu proposes <b>" + nb(x) + "</b>" : "tableau 6 × 6 ; tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(36, "6 · 6 = 36 issues."), W(6, "6 façons sur 36 : P(7) = 6/36 = 1/6."), W(3, "4+6, 5+5, 6+4 : 3 façons, P(10) = 3/36 = 1/12.")] }),
+    },
+    carres: {
+      predict: { q: "Combien vaut 0,3² ?", choices: ["0,9", "0,09", "0,6"], good: 1, why: "0,3 · 0,3 = 0,09 : deux chiffres après la virgule. Élever au carré, c'est multiplier par lui-même, pas par 2 ni par 3." },
+      defis: ["Quel nombre positif a pour carré 144 ?", "Quel nombre positif a pour carré 121 ?", "Quel est le plus grand entier dont le carré est inférieur à 200 ?"],
+      play: hunt({ ask: true, label: "Ta réponse",
+        show: (x, s) => plain(nb(x) + "² = <b>" + nb(x * x) + "</b>" + (s === 2 ? (x * x < 200 ? " (sous 200)" : " (dépasse 200)") : "")),
+        wins: [W(12, "12² = 144 : √144 = 12."), W(11, "11² = 121 : √121 = 11."), W(14, "14² = 196 < 200 < 225 = 15².")] }),
+    },
+    pctvar: {
+      predict: { q: "Un prix augmente de 10 %, puis baisse de 10 %. À la fin, il est…", choices: ["revenu au prix de départ", "plus bas qu'au départ", "plus haut qu'au départ"], good: 1, why: "100 → 110 (× 1,1) → 99 (× 0,9) : la baisse de 10 % porte sur 110, un montant plus grand. × 1,1 × 0,9 = × 0,99." },
+      defis: ["Un article à 80 CHF augmente de 25 %. Nouveau prix ?", "Un article à 50 CHF baisse de 20 %. Nouveau prix ?", "Un prix passe de 40 à 50 CHF. Augmentation en % ?"],
+      play: hunt({ ask: true, label: "Ta réponse",
+        show: (x, s) => plain(["80 · 1,25 (coefficient d'une hausse de 25 %)", "50 · 0,8 (coefficient d'une baisse de 20 %)", "hausse 10 CHF sur 40 CHF : 10/40"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(100, "80 · 1,25 = 100 CHF."), W(40, "50 · 0,8 = 40 CHF."), W(25, "10/40 = 0,25 = 25 % : on divise par le prix de DÉPART.")] }),
     },
   });
   // Tableau de valeurs de f(x) = 2x − 3 ; la case du défi s est vide (« ? ») tant que la réponse n'est pas trouvée.
