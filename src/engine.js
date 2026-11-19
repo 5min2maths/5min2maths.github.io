@@ -512,9 +512,10 @@ const Engine = {
     if (!state.today || state.today.date !== today) state.today = { date: today, f: this.chooseFormat(state) };
     return state.today.f;
   },
+  // « Changer de format » : toujours le même ordre (défi → automatismes → applications → mixte → révision → défi…), demande du 19.11.
   otherFormat(state) {
-    const cur = this.todayFormat(state);
-    state.today = { date: day(), f: this.chooseFormat(state, [cur]) };
+    const cur = this.todayFormat(state), order = Object.keys(FORMATS);
+    state.today = { date: day(), f: order[(order.indexOf(cur) + 1) % order.length] };
     return state.today.f;
   },
   // Trace du format fait (pour l'équilibre sur 7 jours).

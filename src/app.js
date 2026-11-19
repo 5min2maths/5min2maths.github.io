@@ -9,7 +9,18 @@ if (state && state.profile && !SYSTEMS[state.profile.system]) state = null; // s
 if (state && state.profile && state.profile.track === "mp" && state.profile.grade < 12) { state.profile.track = "college"; Store.save(state); }
 if (state && state.profile && state.notions && Object.keys(state.notions).length && Engine.migrate(state)) Store.save(state);
 const save = () => Store.save(state);
-const h = (html) => { app.classList.remove("has-tabs"); app.innerHTML = html; typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
+// Barre d'onglets du bas (19.11 : visible partout, même pendant une activité, pour pouvoir interrompre).
+const navTabs = (cur, dots = {}) => `<nav class="tabs" aria-label="Sections"><div class="tabs-inner" role="tablist">${HOME_TABS.map(([id, label, ic]) => `<button class="tab" role="tab" data-tab="${id}" aria-selected="${id === cur}"><span class="tab-ic"><svg viewBox="0 0 24 24">${ic}</svg>${dots[id] && id !== cur ? '<i class="tab-dot"></i>' : ""}</span>${label}</button>`).join("")}</div></nav>`;
+const addTabs = () => {
+  if (typeof state === "undefined" || !state || !state.placed || app.querySelector("nav.tabs")) return;
+  app.insertAdjacentHTML("beforeend", navTabs(null)); app.classList.add("has-tabs");
+  app.querySelectorAll("nav.tabs .tab").forEach((b) => (b.onclick = () => {
+    const busy = typeof session !== "undefined" && session && session.i < session.plan.length && session.answered > 0;
+    if (busy && !confirm("Interrompre l'activité en cours ?")) return;
+    homeTab = b.dataset.tab; screenHome();
+  }));
+};
+const h = (html) => { app.classList.remove("has-tabs"); app.innerHTML = html; addTabs(); typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 // Textes de l'app (indices, erreurs typiques) : échappés, sauf <b>, <i>, <br> (16.11 : les balises s'affichaient telles quelles).
 const escT = (s) => esc(s).replace(/&lt;(\/?)(b|i|br)&gt;/g, "<$1$2>");
@@ -215,7 +226,7 @@ function screenHome() {
   h(`<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted">${gradeName(state.profile)}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>
   ${eloBanner()}
   <div class="home-panel" data-tab="${homeTab}">${panels[homeTab]()}</div>
-  <nav class="tabs" aria-label="Sections"><div class="tabs-inner" role="tablist">${HOME_TABS.map(([id, label, ic]) => `<button class="tab" role="tab" data-tab="${id}" aria-selected="${id === homeTab}"><span class="tab-ic"><svg viewBox="0 0 24 24">${ic}</svg>${dots[id] && id !== homeTab ? '<i class="tab-dot"></i>' : ""}</span>${label}</button>`).join("")}</div></nav>`);
+  ${navTabs(homeTab, dots)}`);
   app.classList.add("has-tabs");
   const byId = (x) => document.getElementById(x), on = (x, f) => { if (byId(x)) byId(x).onclick = f; };
   app.querySelectorAll(".tab").forEach((b) => (b.onclick = () => { homeTab = b.dataset.tab; screenHome(); }));
