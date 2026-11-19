@@ -1440,7 +1440,14 @@ const GF = {
   },
   around(a, b, la, lb, lc) {
     const r = 3.5, d = (x) => [r * Math.cos((x * Math.PI) / 180), r * Math.sin((x * Math.PI) / 180)], u = d(0), v = d(a), w = d(a + b);
-    return GEO().pt("O", 0, 0, false).add([-r, -r], [r, r]).seg("O", u).seg("O", v).seg("O", w).angle("O", u, v, la, { r: 22 }).angle("O", v, w, lb, { r: 26 }).angle("O", w, u, lc, { r: 30 }).dot("O").svg("angles autour d'un point");
+    // 19.11 (testeur) : angle() trace toujours le plus petit arc ; le 3e angle (souvent > 180°) était marqué du mauvais côté.
+    // Chaque secteur est donc tracé dans le sens direct, de son début à sa fin, avec l'étiquette sur sa bissectrice.
+    const g = GEO().pt("O", 0, 0, false).add([-r - 1.2, -r - 1.2], [r + 1.2, r + 1.2]).seg("O", u).seg("O", v).seg("O", w);
+    const sector = (s0, s1, rr, lab) => { const cls = /\?/.test(lab) ? "f-accent" : "f-line", n = Math.max(4, Math.ceil((s1 - s0) / 6)), P = (t) => [rr * Math.cos((t * Math.PI) / 180), rr * Math.sin((t * Math.PI) / 180)];
+      for (let i = 0; i < n; i++) g.seg(P(s0 + ((s1 - s0) * i) / n), P(s0 + ((s1 - s0) * (i + 1)) / n), { cls, w: 1.6 });
+      const m = (s0 + s1) / 2, lr = rr + 1.05; g.text([lr * Math.cos((m * Math.PI) / 180), lr * Math.sin((m * Math.PI) / 180)], lab); };
+    sector(0, a, 1.2, la); sector(a, a + b, 1.45, lb); sector(a + b, 360, 1.7, lc);
+    return g.dot("O").svg("angles autour d'un point");
   },
   // Cercle de diamètre [AB] et point C du cercle (angle en degrés depuis A), angles et côtés optionnels.
   diam(cAng, { lA = "", lB = "", lAC = "", lBC = "", lAB = "", center = false } = {}) {
