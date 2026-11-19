@@ -12563,6 +12563,74 @@ function richChapter(ids) {
   RICH.fct1c = { ids: ["absval", "domaine", "fimg", "lectgraph", "modaff", "morceaux", "racinv", "tabval", "transf"], label: "Fonctions", ex: EXF, raison: RAISONF, minutes: 45 };
   RICH.geo1c = { ids: ["droitesrem", "euclide", "exactes", "geocomb", "pyth", "pythfig", "pythrec", "simil", "thales"], label: "De Thalès à Pythagore", ex: EXG, raison: RAISONG, minutes: 45 };
   RICH.trig1c = { ids: ["trigexact", "trigo", "trigrel"], label: "Trigonométrie du triangle rectangle", ex: EXT, raison: RAISONT, minutes: 45 };
+  // ===================== 1. Nombres =====================
+  const EXN = [
+    () => { const P0 = pk([80, 120, 200]), a = pk([20, 25]), b = pk([10, 20]);
+      return X({ id: "pct", lv: 1, titre: "Hausse puis baisse", q: "Un article coûte " + Q(P0, "CHF") + ". Son prix augmente de " + a + " %, puis baisse de " + b + " %.",
+        parts: [{ label: "Calcule le prix final.", pts: 2 }, { label: "Quel est le pourcentage de variation global ?", pts: 1 }],
+        sol: ul([M(N(P0) + " \\cdot " + N(1 + a / 100) + " \\cdot " + N(1 - b / 100) + " = " + N(P0 * (1 + a / 100) * (1 - b / 100))) + " CHF.", M(N(r6(((1 + a / 100) * (1 - b / 100) - 1) * 100))) + " %."]) }); },
+    () => { const e = pk([8, 9]), n = pk([3, 4, 6]);
+      return X({ id: "scicalc", lv: 2, titre: "Les étoiles de la galaxie", q: "Notre galaxie compte environ " + M(n + " \\cdot 10^{11}") + " étoiles. Un ordinateur en recense " + M("2 \\cdot 10^{" + e + "}") + " par jour.",
+        parts: [{ label: "Combien de jours faut-il ? (notation scientifique)", pts: 2 }, { label: "Combien d'années environ (365 jours) ?", pts: 1 }],
+        sol: ul([M("\\frac{" + n + " \\cdot 10^{11}}{2 \\cdot 10^{" + e + "}} = " + N(n / 2) + " \\cdot 10^{" + (11 - e) + "}") + " jours.", "Environ " + M(N(Math.round((n / 2) * 10 ** (11 - e) / 365 * 10) / 10)) + " ans."]) }); },
+    () => { const k = pk([2, 3, 5]);
+      return X({ id: "rac", lv: 2, titre: "Simplifier pour comparer", q: "On compare " + M("A = \\sqrt{" + 12 * k * k + "}") + " et " + M("B = " + k + "\\sqrt{3} + \\sqrt{" + 3 * k * k + "}") + ".",
+        parts: [{ label: "Écris A sous la forme " + M("a\\sqrt{3}") + ".", pts: 1 }, { label: "Écris B sous la même forme.", pts: 1 }, { label: "Conclus.", pts: 1 }],
+        sol: ul([M("A = " + 2 * k + "\\sqrt{3}") + ".", M("B = " + k + "\\sqrt{3} + " + k + "\\sqrt{3} = " + 2 * k + "\\sqrt{3}") + ".", "A = B."]) }); },
+    () => { const [a, b, c, d] = pk([[1, 2, 1, 3], [2, 3, 1, 4], [3, 4, 1, 6]]);
+      return X({ id: "fracops", lv: 3, titre: "Le dosage du sirop", q: "Un sirop se dilue : " + M("\\frac{" + a + "}{" + b + "}") + " de la bouteille pour un jus, et on en a déjà utilisé " + M("\\frac{" + c + "}{" + d + "}") + ". Il reste " + M("\\frac{" + (b * d - b * c - a * d) + "}{" + b * d + "}").replace(/\\frac\{-/, "-\\frac{") + " de la bouteille après le jus.",
+        parts: [{ label: "Vérifie ce reste par un calcul.", pts: 2 }, { label: "Combien de jus identiques peut-on encore faire avec ce reste ?", pts: 1 }],
+        sol: ul([M("1 - \\frac{" + c + "}{" + d + "} - \\frac{" + a + "}{" + b + "} = \\frac{" + (b * d - b * c - a * d) + "}{" + b * d + "}") + ".", (b * d - b * c - a * d) >= 0 ? M(Math.floor((b * d - b * c - a * d) / (a * d))) + " jus." : "Le reste est négatif : il n'y avait pas assez de sirop pour ce jus."]) }); },
+  ];
+  const RAISONN = [
+    () => X({ id: "puiss", lv: 1, titre: "Trouve l'erreur", q: who() + " écrit : « " + M("2^3 \\cdot 2^4 = 4^7") + " ».", parts: [{ label: "Où est l'erreur ?", pts: 1 }, { label: "Calcule correctement.", pts: 1 }], sol: ul(["On garde la base 2 et on additionne les exposants.", M("2^7 = 128") + "."]) }),
+    () => X({ id: "pct", lv: 2, titre: "Vrai ou faux ? Justifie", q: "Pour chaque affirmation, dis si elle est vraie ou fausse, et justifie.", parts: [{ label: "« Deux hausses de 10 % font une hausse de 21 %. »", pts: 1 }, { label: "« √(a + b) = √a + √b. »", pts: 1 }], sol: ul(["<b>Vrai</b> : " + M("1{,}1^2 = 1{,}21") + ".", "<b>Faux</b> : " + M("\\sqrt{9 + 16} = 5 \\ne 7") + "."]) }),
+  ];
+  // ===================== 2. Ensembles =====================
+  const EXE = [
+    () => { const a = pk([-3, -2]), b = pk([4, 5]), c = pk([1, 2]), d = pk([7, 8]);
+      return X({ id: "ensembles", lv: 1, titre: "Horaires d'ouverture", q: "Une piscine est ouverte de " + (a + 10) + " h à " + (b + 10) + " h (intervalle " + M("A = [" + (a + 10) + " \\,;\\, " + (b + 10) + "]") + ") ; le sauna de " + (c + 10) + " h à " + (d + 10) + " h (" + M("B = [" + (c + 10) + " \\,;\\, " + (d + 10) + "]") + ").",
+        parts: [{ label: "Écris " + M("A \\cap B") + ". Que représente-t-il ?", pts: 2 }, { label: "Écris " + M("A \\cup B") + ".", pts: 1 }],
+        sol: ul([M("[" + (c + 10) + " \\,;\\, " + (b + 10) + "]") + " : les heures où les deux sont ouverts.", M("[" + (a + 10) + " \\,;\\, " + (d + 10) + "]") + "."]) }); },
+    () => X({ id: "ensembles", lv: 2, titre: "La bonne température", q: "Un aquarium doit rester entre 24 °C et 28 °C (bornes comprises). Le thermomètre affiche " + M("T") + ".",
+      parts: [{ label: "Écris la condition avec une double inégalité, puis un intervalle.", pts: 1 }, { label: "Écris la condition avec une valeur absolue " + M("|T - c| \\le r") + ".", pts: 2 }],
+      sol: ul([M("24 \\le T \\le 28") + " ; " + M("T \\in [24 \\,;\\, 28]") + ".", M("|T - 26| \\le 2") + "."]) }),
+    () => { const n = pk([20, 30]);
+      return X({ id: "ensembles", lv: 2, titre: "Les sports de la classe", q: "Dans une classe de " + n + " élèves, " + (n / 2) + " font du foot, " + (n / 2 - 4) + " du basket, et 3 les deux.",
+        parts: [{ label: "Combien font au moins un des deux sports ?", pts: 1 }, { label: "Combien ne font ni l'un ni l'autre ?", pts: 1 }, { label: "Représente la situation par un diagramme de Venn.", pts: 1 }],
+        sol: ul([M(n / 2 + " + " + (n / 2 - 4) + " - 3 = " + (n - 7)) + ".", M(n + " - " + (n - 7) + " = 7") + ".", "Deux ensembles qui se chevauchent : 3 dans l'intersection."]) }); },
+    () => X({ id: "ensembles", lv: 3, titre: "Nombres et ensembles", q: "On considère les nombres " + M("-3") + ", " + M("0{,}5") + ", " + M("\\sqrt{16}") + ", " + M("\\frac{2}{3}") + ", " + M("\\sqrt{2}") + ", " + M("\\pi") + ".",
+      parts: [{ label: "Lesquels sont des entiers (ℤ) ?", pts: 1 }, { label: "Lesquels sont rationnels (ℚ) ?", pts: 1 }, { label: "Lesquels sont irrationnels ?", pts: 1 }],
+      sol: ul([M("-3") + " et " + M("\\sqrt{16} = 4") + ".", M("-3") + ", " + M("0{,}5") + ", " + M("4") + ", " + M("\\frac{2}{3}") + ".", M("\\sqrt{2}") + " et " + M("\\pi") + "."]) }),
+  ];
+  const RAISONE = [
+    () => X({ id: "ensembles", lv: 1, titre: "Trouve l'erreur", q: who() + " écrit : « " + M("]2 \\,;\\, 5]") + " contient 2, 3, 4 et 5 ».", parts: [{ label: "Où est l'erreur ?", pts: 1 }, { label: "Combien d'entiers contient-il ?", pts: 1 }], sol: ul(["Le crochet est tourné vers l'extérieur en 2 : 2 est exclu.", "3 entiers : 3, 4, 5."]) }),
+    () => X({ id: "ensembles", lv: 2, titre: "Vrai ou faux ? Justifie", q: "Pour chaque affirmation, dis si elle est vraie ou fausse, et justifie.", parts: [{ label: "« ℕ ⊂ ℤ ⊂ ℚ ⊂ ℝ. »", pts: 1 }, { label: "« [1 ; 3] ∩ [3 ; 5] est vide. »", pts: 1 }], sol: ul(["<b>Vrai</b>.", "<b>Faux</b> : il contient 3."]) }),
+  ];
+  // ===================== 3. Argumenter =====================
+  const EXR = [
+    () => X({ id: "divcrit", lv: 1, titre: "Le code du cadenas", q: "Le code d'un cadenas est un nombre de 3 chiffres " + M("4\\,■\\,■") + ", divisible par 5 et par 9.",
+      parts: [{ label: "Quel peut être le chiffre des unités ?", pts: 1 }, { label: "Trouve toutes les possibilités pour le code.", pts: 2 }],
+      sol: ul(["0 ou 5 (divisible par 5).", "Somme des chiffres multiple de 9 : 450 (4 + 5 + 0), 405 (4 + 0 + 5), 495 (4 + 9 + 5)."]) }),
+    () => { const n = pk([3, 4, 5]);
+      return X({ id: "tradexpr", lv: 2, titre: "Le tour de magie", q: "Pense à un nombre. Ajoute " + n + ", multiplie par 2, soustrais " + 2 * n + ", puis divise par 2.",
+        parts: [{ label: "Essaie avec deux nombres. Que remarques-tu ?", pts: 1 }, { label: "Prouve-le en appelant " + M("x") + " le nombre de départ.", pts: 2 }],
+        sol: ul(["On retrouve le nombre de départ.", M("\\frac{2(x + " + n + ") - " + 2 * n + "}{2} = \\frac{2x}{2} = x") + "."]) }); },
+    () => X({ id: "divcrit", lv: 2, titre: "Trois entiers consécutifs", q: "On additionne trois nombres entiers consécutifs.",
+      parts: [{ label: "Essaie avec 4, 5, 6 puis 10, 11, 12. Que remarques-tu ?", pts: 1 }, { label: "Prouve que la somme est toujours divisible par 3.", pts: 2 }],
+      sol: ul(["15 et 33 : des multiples de 3.", M("n + (n + 1) + (n + 2) = 3n + 3 = 3(n + 1)") + "."]) }),
+    () => X({ id: "tradexpr", lv: 3, titre: "Pair ou impair ?", q: "On s'intéresse à la somme de deux nombres impairs.",
+      parts: [{ label: "Écris un nombre impair à l'aide d'un entier " + M("n") + ".", pts: 1 }, { label: "Prouve que la somme de deux impairs est paire.", pts: 2 }, { label: "Le produit de deux impairs est-il pair ou impair ? Justifie.", pts: 1 }],
+      sol: ul([M("2n + 1") + ".", M("(2n + 1) + (2m + 1) = 2(n + m + 1)") + " : pair.", "Impair : " + M("(2n + 1)(2m + 1) = 2(2nm + n + m) + 1") + "."]) }),
+  ];
+  const RAISONR = [
+    () => X({ id: "divcrit", lv: 1, titre: "Trouve l'erreur", q: who() + " dit : « 7 + 9 = 16 et 16 n'est pas divisible par 3, donc 79 n'est pas divisible par 3, mais 81 non plus car il finit par 1 ».", parts: [{ label: "Où est l'erreur pour 81 ?", pts: 1 }, { label: "81 est-il divisible par 3 ?", pts: 1 }], sol: ul(["Pour 3, on regarde la somme des chiffres, pas le dernier chiffre.", "Oui : 8 + 1 = 9."]) }),
+    () => X({ id: "tradexpr", lv: 2, titre: "Un exemple suffit-il ?", q: who() + " vérifie que " + M("n^2 + n + 41") + " est premier pour n = 1, 2, 3, 4 et conclut : « c'est toujours un nombre premier ».", parts: [{ label: "Un exemple peut-il prouver une propriété générale ?", pts: 1 }, { label: "Teste n = 41.", pts: 1 }], sol: ul(["Non : il faut une preuve ; un seul contre-exemple suffit à réfuter.", M("41^2 + 41 + 41 = 41 \\cdot 43") + " : pas premier."]) }),
+  ];
+
+  RICH.no1c = { ids: ["arith", "fracops", "pct", "puiss", "rac", "racenc", "rel", "sci", "scicalc"], label: "Nombres", ex: EXN, raison: RAISONN, minutes: 45 };
+  RICH.ens1c = { ids: ["ensembles"], label: "Ensembles", ex: EXE, raison: RAISONE, minutes: 45 };
+  RICH.arg1c = { ids: ["divcrit", "tradexpr"], label: "Argumenter", ex: EXR, raison: RAISONR, minutes: 45 };
 })();
 
 // Chantier 1re Collège · systèmes et fonctions affines (18.11) : exercices riches et raisonnements du test de préparation
