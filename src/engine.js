@@ -293,21 +293,38 @@ const Engine = {
     }
   },
 
-  // Mode « progression libre » (18.11) : tous sujets, sans programme ni note. Tirage équilibré (« cross-training ») :
-  // 1/3 points forts (maîtrise ≥ 0,7), 1/3 points à travailler, 1/3 notions neuves (jamais vues), thèmes alternés.
-  // Périmètre choisi par l'élève : « point » = notions au standard (FREE_READY), « annee » = tout jusqu'à son année.
-  freePlan(state, scope = "point", n = 6) {
+  // Mode « progression libre » (18.11), programme adaptatif (19.11, demande de l'auteur : pas de bouton, c'est l'app
+  // qui construit le parcours). Niveau L = maîtrise moyenne des notions travaillées :
+  //  - élève à l'aise (L ≥ 0,75) : surtout des notions neuves, prises un peu plus loin dans le référentiel, et un cran
+  //    de difficulté en plus sur ce qu'il maîtrise déjà ;
+  //  - élève moyen : tiers forts / à travailler / neuves (cross-training) ;
+  //  - élève en difficulté (L < 0,55) : surtout ses points faibles, précédés de leurs bases (PREREQ) non maîtrisées ;
+  //    les notions neuves sont les premières du référentiel, et seulement si leurs bases sont acquises.
+  // Thèmes alternés. Le second argument (ancien choix de périmètre) est ignoré.
+  freePlan(state, scope, n = 6) {
     const theme = (id) => (NOTIONS.find((x) => x.id === id) || {}).theme || "";
-    let pool = Object.keys(state.notions).filter((id) => GEN[id]);
-    if (scope === "point") { const r = pool.filter((id) => FREE_READY.includes(id)); if (r.length >= 6) pool = r; }
+    const pool = Object.keys(state.notions).filter((id) => GEN[id]);
+    const s = (id) => state.notions[id], ok = (id) => !state.notions[id] || (s(id).seen > 0 && s(id).m >= 0.7);
+    const seen = pool.filter((id) => s(id).seen > 0), L = seen.length ? seen.reduce((t, id) => t + s(id).m, 0) / seen.length : 0.6;
+    const tier = seen.length < 3 ? "mid" : L >= 0.75 ? "fort" : L < 0.55 ? "fragile" : "mid";
     const sh = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-    const s = (id) => state.notions[id];
-    const groups = [sh(pool.filter((id) => s(id).seen > 0 && s(id).m >= 0.7)), sh(pool.filter((id) => s(id).seen > 0 && s(id).m < 0.7)), sh(pool.filter((id) => !s(id).seen))];
-    const out = [], used = new Set(), want = [Math.round(n / 3), Math.round(n / 3), n - 2 * Math.round(n / 3)];
+    const rk = (id) => this.rank(state.profile, id);
+    const strong = sh(pool.filter((id) => s(id).seen > 0 && s(id).m >= 0.7));
+    // Points faibles du plus fragile au moins fragile ; pour un élève fragile, chaque point faible est précédé de ses bases.
+    let weak = pool.filter((id) => s(id).seen > 0 && s(id).m < 0.7).sort((a, b) => s(a).m - s(b).m + (Math.random() - 0.5) * 0.1);
+    if (tier === "fragile") weak = [...new Set(weak.flatMap((id) => [...(PREREQ[id] || []).filter((p) => pool.includes(p) && !ok(p)), id]))];
+    // Notions neuves dans l'ordre du référentiel : l'élève fragile prend les premières (bases d'abord, prérequis acquis) ;
+    // l'élève à l'aise pioche plus loin (fenêtre décalée).
+    let fresh = pool.filter((id) => !s(id).seen).sort((a, b) => rk(a) - rk(b));
+    if (tier === "fragile") fresh = fresh.filter((id) => (PREREQ[id] || []).every(ok));
+    const win = tier === "fort" ? fresh.slice(Math.min(4, Math.max(0, fresh.length - 8)), Math.min(4, Math.max(0, fresh.length - 8)) + 12) : fresh.slice(0, tier === "fragile" ? 6 : 10);
+    fresh = sh(win.length ? win : fresh);
+    const want = tier === "fort" ? [1, 1, n - 2] : tier === "fragile" ? [1, n - 2, 1] : [Math.round(n / 3), Math.round(n / 3), n - 2 * Math.round(n / 3)];
+    const groups = [strong, weak, fresh], out = [], used = new Set();
     const take = (g) => { const last = out.length ? theme(out[out.length - 1]) : ""; let k = g.findIndex((id) => !used.has(id) && theme(id) !== last); if (k < 0) k = g.findIndex((id) => !used.has(id)); if (k < 0) return false; used.add(g[k]); out.push(g[k]); return true; };
-    // On alterne les trois familles ; une famille vide est complétée par les autres.
-    for (let round = 0; out.length < n && round < 3 * n; round++) { const gi = round % 3; if (want[gi] > 0 && take(groups[gi])) want[gi]--; else if (want.every((w, i) => w <= 0 || !groups[i].some((id) => !used.has(id)))) { if (!groups.some((g) => take(g))) break; } }
-    return out.map((id) => id + "|" + this.difficulty(state, id));
+    for (let round = 0; out.length < n && round < 3 * n; round++) { const gi = [1, 2, 0][round % 3]; if (want[gi] > 0 && take(groups[gi])) want[gi]--; else if (want.every((w, i) => w <= 0 || !groups[i].some((id) => !used.has(id)))) { if (!groups.some((g) => take(g))) break; } }
+    const cap = difficultyCap(state.profile);
+    return out.map((id) => { let d = this.difficulty(state, id); if (tier === "fort" && s(id).seen > 0 && s(id).m >= 0.85) d = Math.min(cap, d + 1); return id + "|" + d; });
   },
 
   eligible(state) {

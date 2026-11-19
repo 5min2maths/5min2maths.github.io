@@ -192,8 +192,8 @@ function screenHome() {
     today: () => `<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire · ${done ? "séance faite, tu peux en refaire une" : "mon chapitre aujourd'hui"}</div>
       <h2>${FORMATS[fmt].label}</h2><p class="muted">${FORMATS[fmt].text} </p>
       <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>
-      <div class="spread"><span class="small muted">Varié d'un jour à l'autre.</span><button class="btn-ghost small" id="other">Autre format</button></div></div>
-      ${freeCard()}${nowCard()}`,
+      <div class="spread"><span class="small muted">Varié d'un jour à l'autre.</span><button class="btn-ghost small" id="other">Autre format</button></div>${nowCard()}</div>
+      ${freeCard()}`,
     prob: () => !wp ? `<div class="card flat stack"><div class="eyebrow">Problème de la semaine</div><h3>Pas encore de problème pour toi</h3><p class="small muted">Les problèmes arrivent avec les notions que tu as déjà travaillées. Fais quelques séances !</p></div>`
       : `<div class="card stack"><div class="eyebrow">Problème de la semaine${wpDone ? " · fait ✓" : ""}</div><h2>${NOTIONS.find((n) => n.id === wp).label}</h2>
         <p class="muted">Un problème en plusieurs étapes, avec des indices si tu bloques. Facultatif, et il rapporte gros.</p>
@@ -437,13 +437,13 @@ function restoreFromHash() {
 // ---------------- En ce moment en classe (13.11) ----------------
 const nLabel = (id) => NOTIONS.find((n) => n.id === id).label;
 function nowCard() {
-  if (!Engine.nowActive(state)) return `<div class="card flat stack now-card"><div class="eyebrow">En ce moment en classe</div>
+  if (!Engine.nowActive(state)) return `<div class="stack now-in"><div class="eyebrow">📚 En ce moment en classe</div>
     <p class="small">Dis-moi ce que tu étudies en classe en ce moment : tes séances s'y concentreront.</p><button id="nowpick">Choisir mon chapitre</button></div>`;
   const labels = state.now.ids.map(nLabel).join(" · ");
-  if (Engine.nowStale(state)) return `<div class="card flat stack now-card"><div class="eyebrow">En ce moment en classe</div>
+  if (Engine.nowStale(state)) return `<div class="stack now-in"><div class="eyebrow">📚 En ce moment en classe</div>
     <h3>Toujours sur ${state.now.ids.length > 1 ? "ces notions" : "cette notion"} ?</h3><p class="small muted">${labels}</p>
     <div class="row"><button class="btn-primary" id="nowyes">Oui, toujours</button><button id="nowpick">On est passés à autre chose</button></div></div>`;
-  return `<div class="card flat stack now-card"><div class="spread"><div class="eyebrow">En ce moment en classe</div><button class="btn-ghost small" id="nowpick">Changer</button></div>
+  return `<div class="stack now-in"><div class="spread"><div class="eyebrow">📚 En ce moment en classe</div><button class="btn-ghost small" id="nowpick">Changer</button></div>
     <h3>${labels}</h3><p class="small muted">Environ 2 questions sur 3 de tes séances portent dessus.</p></div>`;
 }
 function bindNowCard() {
