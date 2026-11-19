@@ -189,8 +189,10 @@ function screenHome() {
   const dots = { prob: !!wp && !wpDone, test: prep && left <= 3, prog: (state.badgesNew || []).length > 0 };
   save();
   const panels = {
-    today: () => `<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire · ${done ? "séance faite, tu peux en refaire une" : "mon chapitre aujourd'hui"}</div>
-      <h2>${FORMATS[fmt].label}</h2><p class="muted">${FORMATS[fmt].text} </p>
+    today: () => `<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire${done ? " · séance faite, tu peux en refaire une" : ""}</div>
+      <h2>Ton chapitre, au rythme de la classe</h2>
+      <p class="muted">Tes séances suivent ce que tu fais en classe : le chapitre en cours, des révisions au bon moment pour ne rien oublier, et la préparation de tes tests.</p>
+      <p class="small"><b>Aujourd'hui : ${FORMATS[fmt].label}</b> · ${FORMATS[fmt].text}</p>
       <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>
       <div class="spread"><span class="small muted">Varié d'un jour à l'autre.</span><button class="btn-ghost small" id="other">Autre format</button></div>${nowCard()}</div>
       ${freeCard()}`,
@@ -563,7 +565,7 @@ let session = null;
 const FREE_THEMES = { no: "Nombres et opérations", fa: "Fonctions et algèbre", gm: "Grandeurs et mesures", es: "Espace et géométrie" };
 function freeCard() {
   return `<div class="card stack mode-free"><div class="eyebrow">🧭 Mode libre · mon défi du jour</div><h2>Tous les sujets, à ton rythme</h2>
-    <p class="muted">Un mélange équilibré : tes points forts, tes points à travailler et des notions nouvelles. Sans programme ni note : juste progresser.</p>
+    <p class="muted">Un parcours qui s'adapte à toi : si tout va bien, tu avances vite vers des notions nouvelles et plus difficiles ; si ça coince, on reprend d'abord les bases. Sans programme ni note : juste progresser.</p>
     <button class="btn-primary btn-big" id="freego">Relever le défi</button></div>`;
 }
 function startFree() {
