@@ -189,7 +189,7 @@ function screenHome() {
   const dots = { prob: !!wp && !wpDone, test: prep && left <= 3, prog: (state.badgesNew || []).length > 0 };
   save();
   const panels = {
-    today: () => `<div class="card stack"><div class="eyebrow">Je travaille mon chapitre · ${done ? "séance faite, tu peux en refaire une" : "ton programme aujourd'hui"}</div>
+    today: () => `<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire · je travaille mon chapitre · ${done ? "séance faite, tu peux en refaire une" : "ton programme aujourd'hui"}</div>
       <h2>${FORMATS[fmt].label}</h2><p class="muted">${FORMATS[fmt].text} </p>
       <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>
       <div class="spread"><span class="small muted">Varié d'un jour à l'autre.</span><button class="btn-ghost small" id="other">Autre format</button></div></div>
@@ -439,7 +439,7 @@ function restoreFromHash() {
 const nLabel = (id) => NOTIONS.find((n) => n.id === id).label;
 function nowCard() {
   if (!Engine.nowActive(state)) return `<div class="card flat stack now-card"><div class="eyebrow">En ce moment en classe</div>
-    <p class="small">Dis-moi ce que vous faites en classe : tes séances s'y concentreront.</p><button id="nowpick">Choisir mon chapitre</button></div>`;
+    <p class="small">Dis-moi ce que tu étudies en classe en ce moment : tes séances s'y concentreront.</p><button id="nowpick">Choisir mon chapitre</button></div>`;
   const labels = state.now.ids.map(nLabel).join(" · ");
   if (Engine.nowStale(state)) return `<div class="card flat stack now-card"><div class="eyebrow">En ce moment en classe</div>
     <h3>Toujours sur ${state.now.ids.length > 1 ? "ces notions" : "cette notion"} ?</h3><p class="small muted">${labels}</p>
@@ -564,10 +564,10 @@ let session = null;
 const FREE_THEMES = { no: "Nombres et opérations", fa: "Fonctions et algèbre", gm: "Grandeurs et mesures", es: "Espace et géométrie" };
 function freeCard() {
   const sc = state.freeScope || "point";
-  return `<div class="card stack"><div class="eyebrow">Mon défi du jour · progression libre</div><h2>Tous les sujets, à ton rythme</h2>
+  return `<div class="card stack mode-free"><div class="eyebrow">🧭 Mode libre · mon défi du jour</div><h2>Tous les sujets, à ton rythme</h2>
     <p class="muted">Un mélange équilibré : tes points forts, tes points à travailler et des notions nouvelles. Sans programme ni note : juste progresser.</p>
     <button class="btn-primary btn-big" id="freego">Relever le défi</button>
-    <div class="seg" role="group" aria-label="Notions du défi">${[["point", "Notions au point"], ["annee", "Tout jusqu'à mon année"]].map(([k, l]) => `<button type="button" data-scope="${k}" aria-pressed="${sc === k}">${l}</button>`).join("")}</div></div>`;
+    <p class="small muted">Quelles notions dans ton défi ?</p><div class="seg" role="group" aria-label="Notions du défi">${[["point", "Une sélection pour moi"], ["annee", "Tout le programme jusqu'à ma classe"]].map(([k, l]) => `<button type="button" data-scope="${k}" aria-pressed="${sc === k}">${l}</button>`).join("")}</div><p class="small muted">${sc === "point" ? "Sélection : les notions les plus complètes de l'app (cours, figures, exercices variés)." : "Tout le programme : toutes les notions jusqu'à ta classe, y compris celles encore en construction."}</p></div>`;
 }
 function startFree() {
   const plan = Engine.freePlan(state, state.freeScope || "point", 6);

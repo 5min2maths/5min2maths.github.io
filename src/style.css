@@ -360,3 +360,10 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 /* Saisie d'une étape du pas à pas (15.11) : même zone que la question principale */
 .gstep .gans { margin: 4px 0 0; }
 .gstep .gans .actions { margin-top: 6px; }
+
+/* Deux modes bien distincts sur l'accueil (commentaire testeur 19.11) */
+.card.mode-school { border-left: 6px solid var(--blue); }
+.card.mode-free { border-left: 6px solid var(--ok); background: color-mix(in srgb, var(--ok) 7%, var(--card, #fff)); }
+.card.mode-school .eyebrow { color: var(--blue); }
+.card.mode-free .eyebrow { color: var(--ok); }
+.card.mode-free .seg button[aria-pressed="true"] { background: var(--ok); border-color: var(--ok); }

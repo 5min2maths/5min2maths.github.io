@@ -376,6 +376,13 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .gstep .gans { margin: 4px 0 0; }
 .gstep .gans .actions { margin-top: 6px; }
 
+/* Deux modes bien distincts sur l'accueil (commentaire testeur 19.11) */
+.card.mode-school { border-left: 6px solid var(--blue); }
+.card.mode-free { border-left: 6px solid var(--ok); background: color-mix(in srgb, var(--ok) 7%, var(--card, #fff)); }
+.card.mode-school .eyebrow { color: var(--blue); }
+.card.mode-free .eyebrow { color: var(--ok); }
+.card.mode-free .seg button[aria-pressed="true"] { background: var(--ok); border-color: var(--ok); }
+
 </style>
 <script>
 window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "global" }, startup: { typeset: false, ready() { MathJax.startup.defaultReady(); MathJax.startup.input[0].preFilters.add(({ math }) => { if (window.divSign) math.math = window.divSign(math.math); }); } } };
@@ -9403,11 +9410,11 @@ function compNote(rec) {
       () => { const x = pk([["Pour mesurer la largeur d'une rivière, on plante des piquets", "riviere"], ["Pour estimer la largeur d'un étang, on construit une figure au sol", "etang"]]), ad = pk([4, 5, 6]), db = pk([10, 12, 15, 20]), de = pk([3, 4, 5]), bc = r6(de * (ad + db) / ad);
         return Qv(x[0] + " : " + M("A") + ", " + M("D") + ", " + M("B") + " alignés, " + M("(DE) \\parallel (BC)") + ", avec " + M("AD = " + ad) + " m, " + M("DB = " + db) + " m (la largeur cherchée est " + M("BC") + ") et " + M("DE = " + de) + " m. Calcule " + M("BC") + " (au dixième).", bc,
           M("AB = " + (ad + db)) + " ; " + M("BC = " + de + " \\cdot \\frac{" + (ad + db) + "}{" + ad + "} \\approx " + N(Math.round(bc * 10) / 10)) + " m.",
-          { ctx: x[1], round: 0.1, guide: [GS(M("AB") + " = ?", ad + db, M(ad + db) + " m."), GS(M("BC = DE \\cdot \\frac{AB}{AD}") + " (au dixième) ?", bc, M(N(Math.round(bc * 10) / 10)) + " m.")], traps: [TR(r6(de * db / ad), "Le rapport est AB / AD (AB = AD + DB), pas DB / AD.")] }); },
+          { ctx: x[1], round: 0.1, fig: GF.thales(ad / (ad + db), { AD: ad + " m", DB: db + " m", DE: de + " m", BC: "?" }), guide: [GS(M("AB") + " = ?", ad + db, M(ad + db) + " m."), GS(M("BC = DE \\cdot \\frac{AB}{AD}") + " (au dixième) ?", bc, M(N(Math.round(bc * 10) / 10)) + " m.")], traps: [TR(r6(de * db / ad), "Le rapport est AB / AD (AB = AD + DB), pas DB / AD.")] }); },
       () => { const ad = R.int(2, 9), k = pk([2, 3, 4]), db = ad * (k - 1), ae = R.int(2, 9), ec = ae * (k - 1); if (ad === ae) return null;
         return Qv("Dans un triangle " + M("ABC") + ", " + cfg + ". " + M("AD = x") + ", " + M("DB = " + db) + ", " + M("AE = " + ae) + " et " + M("EC = " + ec) + ". Que vaut " + M("x") + " ?", ad,
           M("\\frac{AD}{DB} = \\frac{AE}{EC}") + " : " + M("\\frac{x}{" + db + "} = \\frac{" + ae + "}{" + ec + "}") + ", donc " + M("x = " + db + " \\cdot \\frac{" + ae + "}{" + ec + "} = " + ad) + ".",
-          { ctx: "equation", guide: [GS("Rapport " + M("\\frac{AE}{EC}") + " (fraction ou décimal) ?", ae / ec, M("\\frac{" + ae + "}{" + ec + "}") + "."), GS(M("x = " + db + " \\cdot \\frac{AE}{EC}") + " = ?", ad, M("x = " + ad) + ".")], traps: [TR(r6(db * ec / ae), "Même ordre dans les deux rapports : AD/DB = AE/EC.")] }); },
+          { ctx: "equation", fig: GF.thales(1 / k, { AD: "x", DB: db + "", AE: ae + "", EC: ec + "" }), guide: [GS("Rapport " + M("\\frac{AE}{EC}") + " (fraction ou décimal) ?", ae / ec, M("\\frac{" + ae + "}{" + ec + "}") + "."), GS(M("x = " + db + " \\cdot \\frac{AE}{EC}") + " = ?", ad, M("x = " + ad) + ".")], traps: [TR(r6(db * ec / ae), "Même ordre dans les deux rapports : AD/DB = AE/EC.")] }); },
     ],
   };
 
@@ -9444,14 +9451,14 @@ function compNote(rec) {
       () => { const k = pk([2, 3, 4]), ad = R.int(2, 5), ae = R.int(2, 6), bc = 2 * R.int(3, 9); if (ad === ae) return null;
         return Qv(M("D \\in [AB]") + ", " + M("E \\in [AC]") + ", " + M("AD = " + ad) + ", " + M("AB = " + ad * k) + ", " + M("AE = " + ae) + ", " + M("AC = " + ae * k) + " et " + M("BC = " + bc) + ". Montre que " + M("(DE) \\parallel (BC)") + ", puis calcule " + M("DE") + ".", r6(bc / k),
           M("\\frac{AD}{AB} = \\frac{AE}{AC} = \\frac{1}{" + k + "}") + " : parallèles (réciproque). Puis " + M("DE = " + bc + " : " + k + " = " + N(bc / k)) + ".",
-          { ctx: "prouver-calculer", guide: [GS(M("\\frac{AD}{AB}") + " = ? (fraction)", 1 / k, M("\\frac{1}{" + k + "}") + "."), GS(M("\\frac{AE}{AC}") + " = ? (même valeur : parallèles)", 1 / k, M("\\frac{1}{" + k + "}") + "."), GS(M("DE") + " = ?", r6(bc / k), M(N(bc / k)) + ".")], traps: [TR(bc * k, "DE est le petit côté : on divise.")] }); },
+          { ctx: "prouver-calculer", fig: GF.thales(1 / k, { AD: ad + "", AE: ae + "", BC: bc + "", DE: "?" }), guide: [GS(M("\\frac{AD}{AB}") + " = ? (fraction)", 1 / k, M("\\frac{1}{" + k + "}") + "."), GS(M("\\frac{AE}{AC}") + " = ? (même valeur : parallèles)", 1 / k, M("\\frac{1}{" + k + "}") + "."), GS(M("DE") + " = ?", r6(bc / k), M(N(bc / k)) + ".")], traps: [TR(bc * k, "DE est le petit côté : on divise.")] }); },
       () => { const ad = R.int(2, 6), db = R.int(3, 9), ae = R.int(2, 6); if (ad === ae) return null; const ec = r6(ae * db / ad);
         return Qv(M("D \\in [AB]") + ", " + M("E \\in [AC]") + ", " + M("AD = " + ad) + ", " + M("DB = " + db) + ", " + M("AE = " + ae) + ". Quelle longueur " + M("EC") + " faut-il pour que " + M("(DE) \\parallel (BC)") + " ? (fraction ou décimal)", ec,
-          M("\\frac{EC}{AE} = \\frac{DB}{AD}") + " : " + M("EC = " + ae + " \\cdot \\frac{" + db + "}{" + ad + "} = " + N(ec)) + ".", { ctx: "EC", guide: [GS("Rapport " + M("\\frac{DB}{AD}") + " ?", db / ad, M("\\frac{" + db + "}{" + ad + "}") + "."), GS(M("EC") + " = ?", ec, M(N(ec)) + ".")], traps: [TR(r6(ae * ad / db), "Même ordre : DB/AD = EC/AE.")] }); },
+          M("\\frac{EC}{AE} = \\frac{DB}{AD}") + " : " + M("EC = " + ae + " \\cdot \\frac{" + db + "}{" + ad + "} = " + N(ec)) + ".", { ctx: "EC", fig: GF.thales(ad / (ad + db), { AD: ad + "", DB: db + "", AE: ae + "", EC: "?" }), guide: [GS("Rapport " + M("\\frac{DB}{AD}") + " ?", db / ad, M("\\frac{" + db + "}{" + ad + "}") + "."), GS(M("EC") + " = ?", ec, M(N(ec)) + ".")], traps: [TR(r6(ae * ad / db), "Même ordre : DB/AD = EC/AE.")] }); },
       () => { const cs = [0, 1, 2, 3].map(() => { const k = pk([1.25, 1.5, 2.5, 0.8].filter((x) => x > 1)), a = R.int(2, 9), b = R.int(2, 9), ok = R.rand() < 0.5; return [a, r6(a * k), b, r6(b * k + (ok ? 0 : pk([-0.1, 0.1, 0.2]))), ok]; }), n = cs.filter((c) => c[4]).length;
         return Qv("Combien de ces configurations donnent " + M("(DE) \\parallel (BC)") + " ? " + cs.map((c, i) => "(" + (i + 1) + ") " + M("AD = " + c[0] + ", AB = " + N(c[1]) + ", AE = " + c[2] + ", AC = " + N(c[3]))).join(" ; "), n,
           cs.map((c, i) => "(" + (i + 1) + ") " + M(c[0] + " \\cdot " + N(c[3]) + (c[4] ? " = " : " \\neq ") + c[2] + " \\cdot " + N(c[1]))).join(" ; ") + " (produits en croix) : " + n + ".",
-          { ctx: "compter-decimaux", guide: [GS("Astuce : compare les produits en croix " + M("AD \\cdot AC") + " et " + M("AE \\cdot AB") + ". Cas (1) : " + M("AD \\cdot AC") + " = ?", r6(cs[0][0] * cs[0][3]), M(N(cs[0][0] * cs[0][3])) + "."), GS("Nombre de cas parallèles ?", n, n + ".")], traps: [TR(4, "Un petit écart suffit : pas parallèles."), TR(n === 0 ? 1 : n - 1, "Vérifie chaque cas.")] }); },
+          { ctx: "compter-decimaux", fig: GF.thales(0.45, { AD: "AD", AE: "AE" }), guide: [GS("Astuce : compare les produits en croix " + M("AD \\cdot AC") + " et " + M("AE \\cdot AB") + ". Cas (1) : " + M("AD \\cdot AC") + " = ?", r6(cs[0][0] * cs[0][3]), M(N(cs[0][0] * cs[0][3])) + "."), GS("Nombre de cas parallèles ?", n, n + ".")], traps: [TR(4, "Un petit écart suffit : pas parallèles."), TR(n === 0 ? 1 : n - 1, "Vérifie chaque cas.")] }); },
     ],
   };
 
@@ -13840,7 +13847,7 @@ function screenHome() {
   const dots = { prob: !!wp && !wpDone, test: prep && left <= 3, prog: (state.badgesNew || []).length > 0 };
   save();
   const panels = {
-    today: () => `<div class="card stack"><div class="eyebrow">Je travaille mon chapitre · ${done ? "séance faite, tu peux en refaire une" : "ton programme aujourd'hui"}</div>
+    today: () => `<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire · je travaille mon chapitre · ${done ? "séance faite, tu peux en refaire une" : "ton programme aujourd'hui"}</div>
       <h2>${FORMATS[fmt].label}</h2><p class="muted">${FORMATS[fmt].text} </p>
       <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>
       <div class="spread"><span class="small muted">Varié d'un jour à l'autre.</span><button class="btn-ghost small" id="other">Autre format</button></div></div>
@@ -14090,7 +14097,7 @@ function restoreFromHash() {
 const nLabel = (id) => NOTIONS.find((n) => n.id === id).label;
 function nowCard() {
   if (!Engine.nowActive(state)) return `<div class="card flat stack now-card"><div class="eyebrow">En ce moment en classe</div>
-    <p class="small">Dis-moi ce que vous faites en classe : tes séances s'y concentreront.</p><button id="nowpick">Choisir mon chapitre</button></div>`;
+    <p class="small">Dis-moi ce que tu étudies en classe en ce moment : tes séances s'y concentreront.</p><button id="nowpick">Choisir mon chapitre</button></div>`;
   const labels = state.now.ids.map(nLabel).join(" · ");
   if (Engine.nowStale(state)) return `<div class="card flat stack now-card"><div class="eyebrow">En ce moment en classe</div>
     <h3>Toujours sur ${state.now.ids.length > 1 ? "ces notions" : "cette notion"} ?</h3><p class="small muted">${labels}</p>
@@ -14215,10 +14222,10 @@ let session = null;
 const FREE_THEMES = { no: "Nombres et opérations", fa: "Fonctions et algèbre", gm: "Grandeurs et mesures", es: "Espace et géométrie" };
 function freeCard() {
   const sc = state.freeScope || "point";
-  return `<div class="card stack"><div class="eyebrow">Mon défi du jour · progression libre</div><h2>Tous les sujets, à ton rythme</h2>
+  return `<div class="card stack mode-free"><div class="eyebrow">🧭 Mode libre · mon défi du jour</div><h2>Tous les sujets, à ton rythme</h2>
     <p class="muted">Un mélange équilibré : tes points forts, tes points à travailler et des notions nouvelles. Sans programme ni note : juste progresser.</p>
     <button class="btn-primary btn-big" id="freego">Relever le défi</button>
-    <div class="seg" role="group" aria-label="Notions du défi">${[["point", "Notions au point"], ["annee", "Tout jusqu'à mon année"]].map(([k, l]) => `<button type="button" data-scope="${k}" aria-pressed="${sc === k}">${l}</button>`).join("")}</div></div>`;
+    <p class="small muted">Quelles notions dans ton défi ?</p><div class="seg" role="group" aria-label="Notions du défi">${[["point", "Une sélection pour moi"], ["annee", "Tout le programme jusqu'à ma classe"]].map(([k, l]) => `<button type="button" data-scope="${k}" aria-pressed="${sc === k}">${l}</button>`).join("")}</div><p class="small muted">${sc === "point" ? "Sélection : les notions les plus complètes de l'app (cours, figures, exercices variés)." : "Tout le programme : toutes les notions jusqu'à ta classe, y compris celles encore en construction."}</p></div>`;
 }
 function startFree() {
   const plan = Engine.freePlan(state, state.freeScope || "point", 6);
