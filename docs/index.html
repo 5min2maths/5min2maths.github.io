@@ -15476,6 +15476,36 @@ function activeLesson(id, L, cont, review) {
       play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(5, "cos = 4/5."), W(4, "tan = (3/5)/(4/5) = 3/4."), W(100, "sin² + cos² = 1.")] }),
     },
+    vabs: {
+      predict: { q: "|3 − 8| vaut…", choices: ["−5", "5", "11"], good: 1, why: "On calcule l'intérieur, 3 − 8 = −5, puis la distance à zéro : 5. Une valeur absolue n'est jamais négative." },
+      defis: ["|3 − 8| ?", "Distance entre −4 et 7 ?", "|x − 2| = 6 : plus petite solution ?"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(5, "|−5| = 5."), W(11, "|−4 − 7| = 11."), W(-4, "2 − 6 = −4 (et 8).")] }),
+    },
+    ratden: {
+      predict: { q: "6/√3 s'écrit aussi…", choices: ["2√3", "6√3", "√2"], good: 0, why: "On multiplie haut et bas par √3 : 6√3/3 = 2√3." },
+      defis: ["(6/√3)² = ?", "(2 + √3)(2 − √3) = ?", "(10/√5)² = ?"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(12, "36/3 = 12."), W(1, "4 − 3 = 1 : le conjugué fait disparaître la racine."), W(20, "100/5 = 20.")] }),
+    },
+    fracrat: {
+      predict: { q: "(x² − 9)/(x − 3), pour x ≠ 3, se simplifie en…", choices: ["x − 3", "x + 3", "x² − 3"], good: 1, why: "x² − 9 = (x − 3)(x + 3) : on simplifie le FACTEUR x − 3, jamais terme à terme." },
+      defis: ["Valeur de (x² − 9)/(x − 3) pour x = 5 ?", "Pour x = 10 ?", "(3 − x)/(x − 3) pour x = 7 ?"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(8, "x + 3 = 8."), W(13, "x + 3 = 13."), W(-1, "Toujours −1 (opposés).")] }),
+    },
+    valint: {
+      predict: { q: "Combien de valeurs interdites a 1/(x² − 4) ?", choices: ["une", "deux", "aucune"], good: 1, why: "x² = 4 ⇔ x = 2 ou x = −2." },
+      defis: ["1/(x² − 4) : valeur interdite positive ?", "Négative ?", "1/(x² + 4) : nombre de valeurs interdites ?"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(2, "2² − 4 = 0."), W(-2, "(−2)² − 4 = 0."), W(0, "x² + 4 ≥ 4 : jamais nul.")] }),
+    },
+    eqparam: {
+      predict: { q: "(m − 3)x = 5 n'a aucune solution quand…", choices: ["m = 3", "m = 5", "m = −3"], good: 0, why: "Pour m = 3 : 0 · x = 5, impossible." },
+      defis: ["m pour aucune solution ?", "Pour m = 8, la solution x ?", "x² + mx + 9 = 0 : m > 0 pour une seule solution ?"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
+        wins: [W(3, "0 · x = 5 : impossible."), W(1, "5x = 5."), W(6, "Δ = m² − 36 = 0.")] }),
+    },
   });
 })();
 
