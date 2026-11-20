@@ -1,0 +1,66 @@
+<!doctype html><meta charset="utf-8"><div id="app"></div><pre id="out"></pre>
+<script>window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_manip.js"></script><script src="../src/sujet.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script>
+// Signaux muets (20.11) : vérifie les lignes envoyées (envoi remplacé par une capture).
+const sent = [], fails = [];
+sigSend = (S) => sent.push({ ...S, t0: undefined, sec: S.sec != null ? S.sec : sigSec(S) });
+const ok = (c, m) => { if (!c) fails.push(m); };
+const last = () => sent[sent.length - 1];
+try {
+  state = Engine.newState({ system: "CH", grade: 11, track: "college", minutes: 5 }); Engine.autoInit(state); state.placed = true;
+  // 1. question en séance : 2 réponses fausses, pas à pas guidé, puis Continuer
+  session = { fmt: "", plan: ["prio|1"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), pinged: true };
+  let q = Engine.build("prio", 1, 7); q.kind = "";
+  renderQuestion(q, { eyebrow: "t", track: "seance", onDone: () => 1, onNext: () => screenHome() });
+  const inp = () => document.getElementById("ans");
+  inp().value = "abc"; document.getElementById("check").click();
+  inp().value = "999999"; document.getElementById("check").click();
+  inp().value = "999998"; document.getElementById("check").click();
+  const g = document.getElementById("guide") || document.getElementById("solstep"); if (g) g.click();
+  document.getElementById("nx").click();
+  let r = last();
+  ok(r && r.ev === "q" && r.code === q.code, "1 code " + JSON.stringify(r));
+  ok(r.issue === "faux" && r.essais === 2, "1 issue/essais " + r.issue + r.essais);
+  ok(r.illis === 1, "1 illisible " + r.illis);
+  ok(r.rep1 === "999999", "1 rep1 " + r.rep1);
+  ok(r.aide.length > 0 && /[ge]/.test(r.aide), "1 aide " + r.aide);
+  // 2. question quittée sans répondre (onglet / écran suivant)
+  q = Engine.build("prio", 2, 8);
+  renderQuestion(q, { eyebrow: "t", track: "seance", onDone: () => 1, onNext: () => 0 });
+  screenHome();
+  ok(last().issue === "quitte" && last().code === q.code, "2 quitte " + JSON.stringify(last()));
+  // 3. juste du premier coup
+  q = Engine.build("prio", 1, 9);
+  renderQuestion(q, { eyebrow: "t", track: "seance", onDone: () => 1, onNext: () => screenHome() });
+  inp().value = String(q.spec.value).replace(".", ","); document.getElementById("check").click();
+  document.getElementById("nx").click();
+  ok(last().issue === "ok1" && last().essais === 1, "3 ok1 " + JSON.stringify(last()));
+  // 4. « Je ne sais pas » puis correction complète
+  q = Engine.build("prio", 1, 10);
+  renderQuestion(q, { eyebrow: "t", track: "test", onDone: () => 1, onNext: () => screenHome() });
+  document.getElementById("idk").click(); document.getElementById("nx").click();
+  ok(last().issue === "idk" && last().fmt === "test", "4 idk " + JSON.stringify(last()));
+  // 5. consultation (#q-) : rien d'envoyé
+  const n = sent.length;
+  renderQuestion(Engine.build("prio", 1, 11), { eyebrow: "t", onDone: () => 0, onNext: () => 0 }); screenHome();
+  ok(sent.length === n, "5 consultation envoyée");
+  // 6. mot à la place d'un calcul : [texte]
+  ok(sigRep("julie martin") === "[texte]" && sigRep("2sqrt(3)") === "2sqrt(3)" && sigRep("3/4") === "3/4", "6 sigRep");
+  // 7. leçon active : devine, passer les défis, J'ai compris
+  const act = Object.keys(ACTIVE).find((id) => LESSONS[id]);
+  screenLesson(act, () => screenHome());
+  document.querySelector("#pc button").click(); document.getElementById("skip").click(); document.getElementById("go").click();
+  r = last();
+  ok(r.ev === "lecon" && r.code === "lecon-" + act && r.issue === "lue" && /^[Dd]P$/.test(r.aide) && r.kind === "active", "7 leçon " + JSON.stringify(r));
+  // 8. leçon par lien (#l-) : rien
+  const m = sent.length; screenLesson(act, () => screenHome(), false, false); document.querySelector("#pc button").click(); document.getElementById("skip").click(); document.getElementById("go").click();
+  ok(sent.length === m, "8 consultation leçon envoyée");
+  // 9. problème : voir le corrigé
+  const pid = NOTIONS.map((x) => x.id).find((id) => { try { return Engine.build(id, 4, 3).parts; } catch (e) { return false; } });
+  if (pid) { const pq = Engine.build(pid, 4, 3); renderQuestion(pq, { eyebrow: "t", track: "semaine", onDone: () => 0, onNext: () => screenHome() }); document.getElementById("idk").click(); document.getElementById("nx").click();
+    ok(last().issue === "idk" && last().code === pq.code, "9 problème " + JSON.stringify(last())); }
+  else fails.push("9 aucun problème trouvé");
+} catch (e) { fails.push("exception " + e.message + " " + e.stack); }
+document.getElementById("out").textContent = (fails.length ? "ÉCHEC\n" + fails.join("\n") : "OK " + sent.length + " lignes") + "\n" + JSON.stringify(sent.slice(0, 3));
+</script>

@@ -3,6 +3,9 @@
  * Reçoit uniquement : code de la question, vote (up / down / facile), date, identifiant aléatoire d'appareil (pour compter les testeurs). Aucune donnée sur l'élève.
  * Feuille « visites » : une ligne par ouverture (1 par jour et par appareil), par séance commencée ou terminée
  * (classe, format ; à la fin : questions, score, minutes). Activité par jour : …/exec?activite=CLÉ.
+ * Feuille « questions » (signaux muets, 20.11) : une ligne anonyme par question jouée ou leçon vue (issue, essais,
+ * réponses illisibles, durée, aide, 1re réponse fausse — un mot y est remplacé par « [texte] » dans l'app).
+ * Lecture : …/exec?questions=CLÉ&jours=60 (analyse : tools/signaux.py).
  * Feuille « commentaires » : commentaires libres des testeurs (question ou application), avec la classe déclarée.
  * Lecture des commentaires par l'URL …/exec?commentaires=CLÉ : la clé n'est PAS dans ce fichier (dépôt public) ;
  * la définir dans Apps Script > Paramètres du projet > Propriétés du script : CLE_LECTURE = (une suite de lettres au hasard).
@@ -46,6 +49,15 @@ function comments_() {
   return sh;
 }
 
+const QUESTIONS = ["reçu le", "type", "uid", "appareil", "date élève", "classe", "format", "code", "notion", "niveau", "genre",
+  "issue", "essais", "illisibles", "secondes", "aide", "1re réponse fausse", "erreur typique", "refaite"];
+function questions_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName("questions");
+  if (!sh) { sh = ss.insertSheet("questions"); sh.appendRow(QUESTIONS); sh.setFrozenRows(1); }
+  return sh;
+}
+
 function chapters_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   let sh = ss.getSheetByName("chapitres");
@@ -63,6 +75,17 @@ function doPost(e) {
       const code = String(d.code || "").slice(0, 40);
       if (!txt) return out_({ ok: false });
       comments_().appendRow([new Date(), code, code.split(/[·-]/)[0], String(d.niveau || "").slice(0, 30), txt, dev]);
+      return out_({ ok: true });
+    }
+    if (d.ev === "q" || d.ev === "lecon") { // signaux muets (20.11)
+      const s = (x, n) => String(x == null ? "" : x).slice(0, n);
+      let rep = s(d.rep1, 30);
+      if (/^[=+\-@]/.test(rep)) rep = "'" + rep; // pas de formule dans la feuille
+      const code = s(d.code, 40).replace(/[^a-z0-9:-]/gi, "");
+      if (!code) return out_({ ok: false });
+      questions_().appendRow([new Date(), d.ev, s(d.uid, 12), dev, s(d.date, 10), s(d.niveau, 30), s(d.fmt, 16), code,
+        code.replace(/^lecon-/, "").split("-")[0], num_(d.d), s(d.kind, 12), s(d.issue, 10), num_(d.essais), num_(d.illis),
+        num_(Math.min(+d.sec || 0, 3600)), s(d.aide, 30), rep, num_(d.diag), num_(d.redo)]);
       return out_({ ok: true });
     }
     if (d.ev === "now") { // chapitre du moment : anonyme (pas d'identifiant d'appareil)
@@ -95,6 +118,13 @@ function doGet(e) {
     if (!cle || e.parameter.commentaires !== cle) return out_({ erreur: "clé absente ou incorrecte" });
     const rows = comments_().getDataRange().getValues().slice(1).slice(-300);
     return out_(rows.map((r) => ({ recu: r[0], code: r[1], notion: r[2], classe: r[3], commentaire: r[4] })));
+  }
+  if (e && e.parameter && e.parameter.questions) {
+    const cle = PropertiesService.getScriptProperties().getProperty("CLE_LECTURE");
+    if (!cle || e.parameter.questions !== cle) return out_({ erreur: "clé absente ou incorrecte" });
+    const lim = new Date(Date.now() - (+e.parameter.jours || 60) * 864e5);
+    const rows = questions_().getDataRange().getValues().slice(1).filter((r) => new Date(r[0]) >= lim);
+    return ContentService.createTextOutput(JSON.stringify({ colonnes: QUESTIONS, lignes: rows })).setMimeType(ContentService.MimeType.JSON);
   }
   if (e && e.parameter && e.parameter.chapitres) {
     const cle = PropertiesService.getScriptProperties().getProperty("CLE_LECTURE");

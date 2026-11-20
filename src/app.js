@@ -41,7 +41,7 @@ function addFab() {
     comment(pageCode(), text); ta.value = ""; ok.textContent = "Merci ! C'est envoyé."; setTimeout(() => (sheet.hidden = true), 1200);
   };
 }
-const h = (html) => { app.classList.remove("has-tabs"); app.innerHTML = html; addTabs(); addFab(); const sh = document.getElementById("fabs"); if (sh) sh.hidden = true; typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
+const h = (html) => { sigClose(); app.classList.remove("has-tabs"); app.innerHTML = html; addTabs(); addFab(); const sh = document.getElementById("fabs"); if (sh) sh.hidden = true; typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 // Textes de l'app (indices, erreurs typiques) : échappés, sauf <b>, <i>, <br> (16.11 : les balises s'affichaient telles quelles).
 const escT = (s) => esc(s).replace(/&lt;(\/?)(b|i|br)&gt;/g, "<$1$2>");
@@ -148,7 +148,7 @@ function startPlacement() {
     if (i >= plan.length) { state.placed = true; save(); return screenPlacementDone(); }
     const id = plan[i], q = Engine.make(state, id, Math.min(2, difficultyCap(state.profile)));
     renderQuestion(q, {
-      eyebrow: "Étape 2 sur 2 · positionnement " + (i + 1) + "/" + plan.length, single: true,
+      eyebrow: "Étape 2 sur 2 · positionnement " + (i + 1) + "/" + plan.length, single: true, track: "positionnement",
       onDone: (res) => { Engine.placementResult(state, id, res.solved ? true : res.dontKnow ? null : false, q.d); save(); },
       onNext: () => { i++; next(); },
       onNotYet: () => { Engine.notYet(state, id); save(); toast("Noté : cette notion reviendra plus tard."); i++; next(); },
@@ -583,13 +583,18 @@ function lessonBody(id) {
 }
 const lessonDetails = (id) => (LESSONS[id] ? `<details class="lesson" data-id="${id}"><summary>📖 Rappel de cours</summary><div class="stack">${lessonBody(id)}</div></details>` : "");
 // review : leçon rouverte depuis « Mes compétences » (pas une nouvelle notion), retour à cet écran.
-function screenLesson(id, cont, review) {
+// track = false : consultation par lien (#l-…, contrôle de l'auteur), rien n'est envoyé.
+function screenLesson(id, cont0, review, track = true) {
   const L = LESSONS[id];
   if (state) { Badges.onLesson(state, id); save(); }
-  if (typeof ACTIVE !== "undefined" && ACTIVE[id]) return activeLesson(id, L, cont, review);
+  let S = null;
+  const cont = () => { if (S) { S.issue = "lue"; S.sec = sigSec(S); } cont0(); };
+  const open = () => { if (track) S = sigOpen({ ev: "lecon", code: "lecon-" + id, fmt: review ? "revue" : "nouvelle", kind: typeof ACTIVE !== "undefined" && ACTIVE[id] ? "active" : "rappel" }); };
+  if (typeof ACTIVE !== "undefined" && ACTIVE[id]) { const r = activeLesson(id, L, cont, review); open(); return r; }
   h(`${brand}<div class="eyebrow">${review ? "Leçon" : "Nouvelle notion · 30 secondes de cours"}</div>
   <div class="card pop lesson-card"><h2>${L.titre}</h2>${lessonBody(id)}</div>
   <button class="btn-primary btn-big" id="go">${review ? "Retour à mes compétences" : "J'ai compris, à moi !"}</button>`);
+  open();
   document.getElementById("go").onclick = cont;
 }
 
@@ -642,6 +647,7 @@ function nextQuestion(redo) {
   const q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : level);
   q.kind = kind;
   renderQuestion(q, {
+    track: sessionInfo().fmt || "seance", redo: !!redo,
     eyebrow: (session.free ? "Mon défi du jour · " + (session.i + 1) + " sur " + session.plan.length : session.weekly ? "Problème de la semaine" : session.ctest ? "Me tester · " + session.ctest.label + " · " + (session.i + 1) + " sur " + session.plan.length : session.prep ? "Révision du test · " + (session.i + 1) + " sur " + session.plan.length : session.plan.length === 1 ? (session.fmt ? FORMATS[session.fmt].label : "Question du jour") : (session.fmt ? FORMATS[session.fmt].label + " · " : "") + (session.i + 1) + " sur " + session.plan.length) + (kind && KIND_LABEL[kind] ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo ? " · nouvelles valeurs" : ""),
     onDone: (res) => {
       const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
@@ -757,6 +763,8 @@ function renderProblem(q, opt) {
   ${keypadHtml(q.parts[0].spec)}
   <div class="actions"><button class="btn-primary" id="check">Valider</button><button id="idk">Voir le corrigé</button></div>
   <div id="fb"></div></div>`);
+  const S = opt.track ? sigOpen({ ev: "q", code, d: q.d, kind: q.kind || "", fmt: opt.track, redo: opt.redo ? 1 : 0 }) : null;
+  sigWatchLesson(S);
   const fb = document.getElementById("fb");
   q.parts.forEach((p, i) => {
     const inp = document.getElementById("p" + i), pv = document.getElementById("pv" + i);
@@ -779,6 +787,7 @@ function renderProblem(q, opt) {
     app.querySelectorAll("input.ans, #kp button, #check, #idk").forEach((b) => (b.disabled = true));
     const frac = ok.filter(Boolean).length / q.parts.length, factor = [1, 1, 2 / 3, 1 / 3][Math.min(tries, 3)] || 1 / 3;
     const score = giveUp && tries === 0 ? 0 : Math.round(frac * factor * 100) / 100;
+    if (S) { S.issue = frac === 1 ? (tries === 1 ? "ok1" : "ok2") : giveUp && tries === 0 ? "idk" : ok.some(Boolean) ? "partiel" : "faux"; S.essais = tries; S.sec = sigSec(S); }
     if (frac === 1) burst();
     const delta = opt.onDone({ solved: frac === 1, tries, partial: score });
     const d = typeof delta === "number" && delta !== 0 ? `<span class="delta ${delta > 0 ? "up" : "down"}">Mathélo ${delta > 0 ? "+" : ""}${delta}</span>` : "";
@@ -789,7 +798,7 @@ function renderProblem(q, opt) {
     fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
     bindComment(fb, code);
     document.getElementById("nx").onclick = () => opt.onNext(false);
-    const r = document.getElementById("redo"); if (r) r.onclick = () => opt.onNext(true);
+    const r = document.getElementById("redo"); if (r) r.onclick = () => { sigAide(S, "x"); opt.onNext(true); };
   };
   const check = () => {
     if (finished) return;
@@ -801,8 +810,9 @@ function renderProblem(q, opt) {
       const r = checkAnswer(p.spec, v);
       if (r.status === "invalid" || r.status === "form") invalid = r.message || "Réponse illisible.";
       else ok[i] = r.status === "correct";
+      if (S && !S.rep1 && !ok[i] && r.status !== "invalid" && r.status !== "form") S.rep1 = "p" + (i + 1) + ":" + sigRep(v);
     });
-    if (invalid) { fb.innerHTML = `<div class="fb hint pop"><b>Je n'arrive pas à lire une réponse</b><span>${esc(invalid)}</span></div>`; return; }
+    if (invalid) { if (S) S.illis = (S.illis || 0) + 1; fb.innerHTML = `<div class="fb hint pop"><b>Je n'arrive pas à lire une réponse</b><span>${esc(invalid)}</span></div>`; return; }
     tries++;
     q.parts.forEach((p, i) => {
       document.getElementById("mk" + i).textContent = ok[i] ? "✓" : "✗";
@@ -833,6 +843,8 @@ function renderQuestion(q, opt) {
   <div class="actions"><button class="btn-primary" id="check">Valider</button><button id="idk">Je ne sais pas</button></div>
   ${opt.onNotYet ? '<button class="btn-ghost small notyet" id="notyet">Pas encore vu en classe</button>' : ""}</div>
   <div id="fb"></div></div>`);
+  const S = opt.track ? sigOpen({ ev: "q", code, d: q.d, kind: q.kind || "", fmt: opt.track, redo: opt.redo ? 1 : 0 }) : null;
+  sigWatchLesson(S);
   const inp = document.getElementById("ans"), prev = document.getElementById("prev"), fb = document.getElementById("fb");
   if (window.matchMedia("(pointer: fine)").matches) { inp.setAttribute("inputmode", "text"); inputMode = "text"; inp.focus(); }
   let tm;
@@ -864,6 +876,7 @@ function renderQuestion(q, opt) {
     inp.disabled = true;
     app.querySelectorAll("#kp button, #check, #idk, #notyet").forEach((b) => (b.disabled = true));
     const res = { solved, tries, dontKnow };
+    if (S) { S.issue = solved ? (tries === 1 ? "ok1" : "ok2") : dontKnow ? "idk" : "faux"; S.essais = tries; S.sec = sigSec(S); }
     if (solved) burst();
     const delta = opt.onDone(res);
     if (opt.single) {
@@ -888,7 +901,8 @@ function renderQuestion(q, opt) {
     bindComment(fb, code);
     document.getElementById("nx").onclick = () => opt.onNext(false);
     const r = document.getElementById("redo");
-    if (r) r.onclick = () => opt.onNext(true);
+    if (r) r.onclick = () => { sigAide(S, "x"); opt.onNext(true); };
+    const sf = fb.querySelector("details.solfull"); if (sf) sf.addEventListener("toggle", () => { if (sf.open) sigAide(S, "s"); });
     // Pas à pas (demande du 15.11) : tout ce qui sépare l'énoncé des étapes est replié (réponse, clavier, rappel,
     // diagnostic), pour garder l'énoncé en lecture directe juste au-dessus des étapes ; un bouton le rouvre.
     const fold = (box) => {
@@ -903,14 +917,14 @@ function renderQuestion(q, opt) {
       const qt = app.querySelector(".qtext"); if (qt) qt.scrollIntoView({ behavior: "smooth", block: "start" });
     };
     const gb = document.getElementById("guide");
-    if (gb) { gb.onclick = () => { gb.remove(); fold(document.getElementById("gsteps")); runGuide(q, document.getElementById("gsteps"), () => { const rd = document.getElementById("redo"); if (rd) { rd.classList.add("btn-primary"); rd.textContent = "À toi : une question du même type"; rd.focus(); } }); }; gb.focus(); }
+    if (gb) { gb.onclick = () => { sigAide(S, "g"); gb.remove(); fold(document.getElementById("gsteps")); runGuide(q, document.getElementById("gsteps"), () => { const rd = document.getElementById("redo"); if (rd) { rd.classList.add("btn-primary"); rd.textContent = "À toi : une question du même type"; rd.focus(); } }); }; gb.focus(); }
     else if (solSteps) {
       const sb = document.getElementById("solstep"), box = document.getElementById("ssteps");
       let k = 0, folded = false;
       const more = () => {
         if (!folded) { folded = true; fold(box); }
         box.insertAdjacentHTML("beforeend", `<div class="gstep"><span class="small muted">Étape ${k + 1} sur ${solSteps.length}</span><div class="sol">${solSteps[k]}</div></div>`);
-        typeset(box); k++;
+        typeset(box); k++; sigAide(S, "e");
         if (k < solSteps.length) { sb.textContent = "Étape suivante (essaie d'abord de la trouver)"; sb.focus(); }
         else { sb.remove(); fb.querySelector("details.solfull").remove(); const rd = document.getElementById("redo"); if (rd) { rd.classList.add("btn-primary"); rd.textContent = "À toi : une question du même type"; rd.focus(); } }
       };
@@ -926,6 +940,7 @@ function renderQuestion(q, opt) {
     const r = checkAnswer(q.spec, v);
     if (r.status === "correct") { tries++; return end(true); }
     if (r.status === "invalid" || r.status === "form") {
+      if (S) S.illis = (S.illis || 0) + 1;
       fb.innerHTML = `<div class="fb hint pop"><b>${r.status === "form" ? "Presque" : "Je n'arrive pas à lire ta réponse"}</b><span>${esc(r.message || "")}</span></div>`;
       return;
     }
@@ -934,6 +949,7 @@ function renderQuestion(q, opt) {
     const ny = document.getElementById("notyet"); if (ny) ny.remove();
     const diag = r.status === "wrong" || (r.status === "close" && q.spec.kind === "set") ? diagnose(q, v) : null;
     lastDiag = diag;
+    if (S && !S.rep1) { S.rep1 = sigRep(v); S.diag = diag ? 1 : 0; }
     if (opt.single || tries >= 2) return end(false);
     fb.innerHTML = `<div class="fb hint pop"><b>${r.status === "close" ? "Presque !" : "Pas encore. Réessaie !"}</b><span>${escT(diag || r.message || "")}</span><span><b>Indice</b> · ${escT(q.hint)}</span></div>`;
     typeset(fb);
@@ -942,9 +958,9 @@ function renderQuestion(q, opt) {
   document.getElementById("check").onclick = check;
   document.getElementById("idk").onclick = () => { if (!finished) end(false, true); };
   const ny = document.getElementById("notyet");
-  if (ny) ny.onclick = () => { if (!finished && tries === 0) { finished = true; opt.onNotYet(); } };
+  if (ny) ny.onclick = () => { if (!finished && tries === 0) { finished = true; if (S) { S.issue = "pasvu"; S.sec = sigSec(S); } opt.onNotYet(); } };
   const ez = document.getElementById("easy");
-  if (ez) ez.onclick = () => { if (!finished && tries === 0) { finished = true; opt.onEasy(); } };
+  if (ez) ez.onclick = () => { if (!finished && tries === 0) { finished = true; if (S) { S.issue = "facile"; S.sec = sigSec(S); } opt.onEasy(); } };
 }
 
 // « On le fait ensemble » : une sous-question à la fois ; juste ou non, on montre l'étape et on continue.
@@ -1026,6 +1042,32 @@ function ping(ev, extra = {}) {
     fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ ev, dev: deviceId(), date: day(), ...extra }) }).catch(() => {});
   } catch (e) {}
 }
+
+// Signaux muets (20.11) : ce que les élèves font sans le dire, pour repérer les questions qui posent problème.
+// Une ligne anonyme par question jouée (issue, essais, réponses illisibles, durée, aide utilisée, 1re réponse fausse)
+// et par leçon (durée, devine / défis / passé). Rien de nominatif ; un mot tapé à la place d'un calcul est remplacé par
+// « [texte] ». La ligne part quand l'élève quitte l'écran ; un instantané part aussi si l'app passe en arrière-plan
+// (même uid : l'analyse garde la dernière). Consultation par lien (#q-…, #l-…) et démo de l'accueil : rien n'est envoyé.
+// Codes : issue ok1 / ok2 / faux / partiel / idk (je ne sais pas) / facile / pasvu / quitte (écran quitté sans répondre) / lue ;
+// aide : r rappel ouvert, g pas à pas guidé, e une étape de correction (répété), s correction complète, x refaire ;
+// leçon active : D devine juste / d devine faux, f un défi réussi (répété), P défis passés.
+var sig = null;
+const sigSec = (S) => Math.round((Date.now() - S.t0) / 1000);
+const sigAide = (S, c) => { if (S && !(c !== "e" && c !== "f" && S.aide.includes(c))) S.aide += c; };
+function sigRep(v) {
+  const s = String(v || "").replace(/\s+/g, " ").trim().slice(0, 24);
+  return /[a-zà-ÿ]{3,}/i.test(s.toLowerCase().replace(/sqrt|racine|sin|cos|tan|log|ln|pi/g, "")) ? "[texte]" : s;
+}
+function sigSend(S) {
+  if (!S || !canSend()) return;
+  const p = state && state.profile, niveau = p ? gradeName(p) + (p.track === "mp" ? " MP" : "") : "";
+  const { t0, ...rec } = S;
+  try { fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", keepalive: true, body: JSON.stringify({ ...rec, sec: S.sec != null ? S.sec : sigSec(S), niveau, dev: deviceId(), date: day() }) }).catch(() => {}); } catch (e) {}
+}
+function sigOpen(rec) { sigClose(); sig = { uid: Math.random().toString(36).slice(2, 10), t0: Date.now(), aide: "", issue: "", ...rec }; return sig; }
+function sigClose() { if (!sig) return; if (!sig.issue) sig.issue = "quitte"; sigSend(sig); sig = null; }
+function sigWatchLesson(S) { if (S) app.querySelectorAll(".card details.lesson").forEach((d) => d.addEventListener("toggle", () => { if (d.open) sigAide(S, "r"); })); }
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden" && sig) sigSend({ ...sig, issue: sig.issue || "quitte" }); });
 
 // Commentaire libre (facultatif) : envoyé avec le code de la question, la classe et l'identifiant anonyme de l'appareil.
 // Envois vers la feuille Google : seulement depuis le site publié (jamais depuis les pages de test ni claude.ai).
@@ -1113,7 +1155,7 @@ function screenSummary() {
 function showCode() {
   // Consultation d'une leçon (active ou rappel) : …/#l-vitesse (lien du tableau de suivi, 15.11).
   const ml = /^#l-([a-z0-9]+)$/.exec(location.hash);
-  if (ml && typeof LESSONS !== "undefined" && LESSONS[ml[1]]) { screenLesson(ml[1], () => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); }); return true; }
+  if (ml && typeof LESSONS !== "undefined" && LESSONS[ml[1]]) { screenLesson(ml[1], () => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); }, false, false); return true; }
   const m = /^#q-(.+)$/.exec(location.hash);
   if (!m) return false;
   let q = Engine.fromCode(m[1]);

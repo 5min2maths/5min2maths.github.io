@@ -292,7 +292,8 @@ function activeLesson(id, L, cont, review) {
   const finish = () => { $("skip").hidden = true; reveal($("s3")); typeset($("s3")); $("go").hidden = false; };
   let started = false;
   app.querySelectorAll("#pc button").forEach((b) => (b.onclick = () => {
-    const i = +b.dataset.i, ok = i === P.good;
+    const i = +b.dataset.i, ok = i === P.good, S = typeof sig !== "undefined" && sig && sig.ev === "lecon" ? sig : null;
+    if (S && !started) sigAide(S, ok ? "D" : "d");
     app.querySelectorAll("#pc button").forEach((x) => { x.disabled = true; if (+x.dataset.i === P.good) x.setAttribute("aria-pressed", "true"); });
     if (!ok) b.classList.add("act-wrong");
     $("pfb").innerHTML = `<div class="fb ${ok ? "ok" : "hint"}">${ok ? "Exact !" : "Pas tout à fait."} ${P.why}</div>`;
@@ -301,10 +302,11 @@ function activeLesson(id, L, cont, review) {
     reveal($("s2"));
     A.play($("play"), (k, msg) => {
       $("gfb").innerHTML = `<div class="fb ok">✓ ${colonBreak(msg)}</div>`;
+      if (typeof sig !== "undefined" && sig && sig.ev === "lecon") sigAide(sig, "f");
       if (k + 1 < A.defis.length) $("goal").textContent = "Défi " + (k + 2) + " · " + A.defis[k + 1];
       else { $("goal").textContent = "Défis réussis !"; burst(); finish(); }
     });
   }));
-  $("skip").onclick = finish;
+  $("skip").onclick = () => { if (typeof sig !== "undefined" && sig && sig.ev === "lecon") sigAide(sig, "P"); finish(); };
   $("go").onclick = cont;
 }

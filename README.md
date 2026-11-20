@@ -9,3 +9,4 @@ Web app d'entraînement quotidien en maths (secondaire, Suisse romande et France
 - `src/figures.js` : figures SVG
 - `src/engine.js` : adaptation, Mathélo, révisions espacées
 - `tests/test.html` : tests (chromium --headless --dump-dom)
+- `tools/signaux.py` : signaux muets (20.11) — par question et par leçon, ce que font les élèves sans le dire (échecs, réponses illisibles, abandons, durée, aide) ; alertes dans le point du jour ; test `tests/signaux.html`. Feuille « questions » de `tools/votes.gs`.
