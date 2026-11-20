@@ -152,7 +152,7 @@ function trivialQ(q, k) {
   const sp = q.spec || {};
   if (sp.kind !== "value" || typeof sp.value !== "number") return "";
   const nums = (raw.replace(/\{,\}/g, ".").replace(/[\^_]\s*(\{[^}]*\}|-?\d)/g, " ").replace(/\\[a-zA-Z]+/g, " ").match(/-?\d+(?:[.,]\d+)?/g) || []).map((t) => +t.replace(",", "."));
-  if (nums.includes(sp.value) && new Set(nums).size < nums.length) return "réponse dans l'énoncé, données égales";
+  if (!q.shownOk && nums.includes(sp.value) && new Set(nums).size < nums.length) return "réponse dans l'énoncé, données égales";
   if (k < 2 && (sp.value === 0 || Math.abs(sp.value) === 1)) return "réponse 0 ou ±1";
   return "";
 }
@@ -161,7 +161,8 @@ function trivialQ(q, k) {
 // hors questions à choix dans une liste. Le tirage l'évite quand il peut (préférence, pas interdiction).
 function answerShown(q) {
   const sp = q.spec || {}, raw = String(q.q || "").replace(/<[^>]+>/g, " ");
-  if (sp.kind !== "value" || !Number.isInteger(sp.value) || Math.abs(sp.value) < 2 || /ces nombres|parmi|lequel|laquelle/i.test(raw)) return false;
+  // q.shownOk (20.11) : la réponse est par nature une des données (mode, médiane, quartile d'une série).
+  if (q.shownOk || sp.kind !== "value" || !Number.isInteger(sp.value) || Math.abs(sp.value) < 2 || /ces nombres|parmi|lequel|laquelle/i.test(raw)) return false;
   const nums = (raw.replace(/\{,\}/g, ".").replace(/\\[a-zA-Z]+/g, " ").match(/-?\d+(?:[.,]\d+)?/g) || []).map((t) => +t.replace(",", "."));
   return nums.includes(sp.value) || nums.includes(-sp.value);
 }

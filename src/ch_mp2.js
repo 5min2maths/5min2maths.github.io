@@ -1,7 +1,7 @@
 // Chantier MP 2e (20.11 : « tout le dev MP2 », les classes MP2C et MP2D de l'auteur deviennent bêta-testeuses),
 // calé sur le cours CFPT (plans_mp2.py) : A. fonctions affines (droites, droitesinter) et réciproque d'une fonction
 // affine (recipaff, notion nouvelle) ; B. trigonométrie (trigcercle, trigfn, sinlaw, trigeq, trigassoc, trigeq2, triaire) ;
-// C. analyse de données. Niveau maturité professionnelle :
+// C. analyse de données (statfreq, stats, quartiles). Niveau maturité professionnelle :
 // méthodes guidées, nombres simples. Standard du chantier : ≥ 3 formes par niveau, pas à pas partout, erreurs typiques,
 // étiquette ctx, défis.
 (function () {
@@ -25,7 +25,7 @@
   const keepT = (spec, traps) => { const seen = new Set(); return (traps || []).filter((tr) => { if (!tr) return false; if (tr.e) return true;
     if (tr.spec) { const c = pairS(tr.spec.values); try { if (seen.has(c) || !tr.spec.values.every(isFinite) || checkAnswer(tr.spec, c).status !== "correct" || checkAnswer(spec, c).status === "correct") return false; } catch (e) { return false; } seen.add(c); return true; }
     return isFinite(tr.v) && spec.kind === "value" && Math.abs(tr.v - spec.value) > 1e-6 * Math.max(1, Math.abs(spec.value)); }); };
-  const mk = (q, spec, sol, o) => { const x = { q, spec, sol, guide: o.guide, ctx: o.ctx, traps: keepT(spec, o.traps) }; if (o.fig) x.fig = o.fig; if (o.canon) x.canon = o.canon; return x; };
+  const mk = (q, spec, sol, o) => { const x = { q, spec, sol, guide: o.guide, ctx: o.ctx, traps: keepT(spec, o.traps) }; if (o.fig) x.fig = o.fig; if (o.canon) x.canon = o.canon; if (o.shownOk) x.shownOk = true; return x; };
   // Valeurs non arrondies dans les spécifications (20.11) : arrondir π/4 ou √3/2 au millionième rendait la réponse
   // exacte « très proche » au lieu de juste. r6 seulement pour l'affichage.
   const QN = (q, value, sol, o) => mk(q, Object.assign({ kind: "value", value: value }, o.round ? { round: o.round } : {}), sol, o);
@@ -486,7 +486,130 @@
     ],
   };
 
+  // ===================================== C. ANALYSE DE DONNÉES =====================================
+  const sum = (a) => a.reduce((x, y) => x + y, 0), srt = (a) => a.slice().sort((x, y) => x - y);
+  const med = (s) => (s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2);
+  const lst = (a) => M(a.map((v) => N(v)).join(" \\,;\\, "));
+  const tab = (vals, effs, h1, h2) => M("\\begin{array}{c|" + "c".repeat(vals.length) + "} \\text{" + h1 + "} & " + vals.map(N).join(" & ") + " \\\\ \\hline \\text{" + h2 + "} & " + effs.join(" & ") + " \\end{array}");
+
+  // ===================== C1. statfreq : effectifs, fréquences, diagramme circulaire =====================
+  const SF = {
+    1: [
+      () => { const n = pk([20, 25, 40, 50, 80]), k = R.int(2, n - 2), f = r6(100 * k / n); if (!Number.isInteger(f * 10)) return null; const c = pk([["Dans une classe de " + M(n) + " apprentis, " + M(k) + " viennent en train.", "viennent en train"], ["Sur " + M(n) + " réponses à un sondage, " + M(k) + " sont « oui ».", "ont répondu « oui »"], ["Sur " + M(n) + " clients d'un magasin, " + M(k) + " paient par carte.", "paient par carte"]]);
+        return QN(c[0] + " Quelle est la fréquence (en %) de ceux qui " + c[1] + " ?", f, "Fréquence " + M("= \\frac{" + k + "}{" + n + "} = " + N(r6(k / n)) + " = " + N(f) + "\\,\\%") + ".",
+          { ctx: "frequence", guide: [G("Fréquence en décimal " + M("\\frac{" + k + "}{" + n + "}") + " ?", k / n, M(N(r6(k / n)))), G("En pour cent ?", f, M(N(f) + "\\,\\%") + ".")], traps: [TR(k, "C'est l'effectif ; la fréquence est effectif ÷ total."), TR(r6(100 * n / k), "Effectif ÷ total (et non l'inverse).")] }); },
+      () => { const n = pk([200, 300, 400, 500, 800, 1200]), p = pk([15, 20, 25, 35, 40, 45, 60, 65]), k = n * p / 100;
+        return QN("Dans un sondage auprès de " + M(N(n)) + " personnes, " + M(p + "\\,\\%") + " ont répondu « oui ». Combien de personnes ont répondu « oui » ?", k, M(p + "\\,\\% \\text{ de } " + N(n) + " = " + N(r6(p / 100)) + " \\cdot " + N(n) + " = " + N(k)) + ".",
+          { ctx: "effectif", guide: [G(M(p + "\\,\\%") + " en décimal ?", p / 100, M(N(r6(p / 100)))), G("Effectif ?", k, M(N(k)) + ".")], traps: [TR(p, "C'est la fréquence ; on demande un nombre de personnes."), TR(n - k, "Ce sont celles qui n'ont pas répondu « oui ».")] }); },
+      () => { const vals = [1, 2, 3, 4], effs = vals.map(() => R.int(2, 9)), n = sum(effs), i = R.int(0, 3), f = r6(100 * effs[i] / n); if (!Number.isInteger(f * 10)) return null;
+        return QN("Nombre de frères et sœurs des apprentis d'une classe : " + tab(vals, effs, "frères et sœurs", "effectif") + ". Quelle est la fréquence (en %) de la valeur " + M(vals[i]) + " ?", f, "Effectif total " + M(n) + " ; fréquence " + M("\\frac{" + effs[i] + "}{" + n + "} = " + N(f) + "\\,\\%") + ".",
+          { ctx: "tableau", guide: [G("Effectif total ?", n, M(effs.join(" + ") + " = " + n) + "."), G("Fréquence (en %) de " + M(vals[i]) + " ?", f, M(N(f) + "\\,\\%") + ".")], traps: [TR(effs[i], "C'est l'effectif ; divise par le total."), TR(r6(100 * effs[i] / 4), "Le total est la somme des effectifs, pas le nombre de colonnes.")] }); },
+    ],
+    2: [
+      () => { const vals = [0, 1, 2, 3, 4], effs = vals.map(() => R.int(1, 9)), lim = pk([2, 3]), k = sum(effs.slice(0, lim)), c = pk(["retards relevés par apprenti", "livres lus pendant les vacances"]);
+        return QN("Nombre de " + c + " : " + tab(vals, effs, "nombre", "effectif") + ". Combien de personnes en ont moins de " + M(lim) + " ?", k, "Moins de " + lim + " : valeurs " + vals.slice(0, lim).join(", ") + " : " + M(effs.slice(0, lim).join(" + ") + " = " + k) + " (effectif cumulé).",
+          { ctx: "cumule", guide: [G("Quelles valeurs comptent (« moins de " + lim + " ») ? Combien y en a-t-il ?", lim, vals.slice(0, lim).join(", ") + "."), G("Somme de leurs effectifs ?", k, M(k) + ".")], traps: [TR(k + effs[lim], "« Moins de " + lim + " » : la valeur " + lim + " n'est pas comprise."), TR(effs[lim - 1], "On additionne les effectifs de toutes les valeurs plus petites.")] }); },
+      () => { const vals = pk([[4, 4.5, 5, 5.5, 6], [3, 3.5, 4, 4.5, 5, 5.5]]), effs = vals.map(() => R.int(1, 8)), mx = Math.max(...effs); if (effs.filter((e) => e === mx).length > 1) return null; const mode = vals[effs.indexOf(mx)];
+        return QN("Notes d'un test : " + tab(vals, effs, "note", "effectif") + ". Quel est le mode de cette série ?", mode, "Le mode est la valeur la plus fréquente : " + M(N(mode)) + " (effectif " + mx + ").",
+          { shownOk: true, ctx: "mode", guide: [G("Plus grand effectif ?", mx, M(mx) + "."), G("Valeur correspondante (le mode) ?", mode, M(N(mode)) + ".")], traps: [TR(mx, "Le mode est la VALEUR la plus fréquente, pas son effectif."), TR(Math.max(...vals), "Le mode n'est pas la plus grande valeur.")] }); },
+      () => { const vals = [1, 2, 3, 4, 5], effs = vals.map(() => R.int(2, 9)), n = sum(effs), lim = pk([2, 3]), f = r6(100 * sum(effs.slice(0, lim)) / n); if (!Number.isInteger(f * 10)) return null;
+        return QN("Nombre de pièces d'un appartement, dans un immeuble : " + tab(vals, effs, "pièces", "effectif") + ". Quel pourcentage des appartements a au plus " + M(lim) + " pièces ?", f, M("\\frac{" + effs.slice(0, lim).join(" + ") + "}{" + n + "} = \\frac{" + sum(effs.slice(0, lim)) + "}{" + n + "} = " + N(f) + "\\,\\%") + " (fréquence cumulée).",
+          { ctx: "frequence-cumulee", guide: [G("Effectif des appartements d'au plus " + lim + " pièces ?", sum(effs.slice(0, lim)), M(sum(effs.slice(0, lim))) + "."), G("Effectif total ?", n, M(n) + "."), G("Pourcentage ?", f, M(N(f) + "\\,\\%") + ".")], traps: [TR(r6(100 * sum(effs.slice(0, lim - 1)) / n), "« Au plus " + lim + " » : la valeur " + lim + " est comprise."), TR(sum(effs.slice(0, lim)), "C'est un effectif ; on demande un pourcentage.")] }); },
+    ],
+    3: [
+      () => { const n = pk([20, 24, 30, 36, 40, 60, 72]), k = R.int(2, n - 2), a = r6(360 * k / n); if (!Number.isInteger(a)) return null;
+        return QN("Sur " + M(n) + " personnes interrogées, " + M(k) + " ont choisi la réponse A. Dans un diagramme circulaire, quel est l'angle (en degrés) du secteur « A » ?", a, M("\\frac{" + k + "}{" + n + "} \\cdot 360° = " + a + "°") + ".",
+          { ctx: "angle", fig: FIG.sector("", a, "?"), guide: [G("Fréquence " + M("\\frac{" + k + "}{" + n + "}") + " (fraction ou décimal) ?", k / n, M(fT(k / n)) + "."), G("Angle = fréquence × 360° ?", a, M(a + "°") + ".")], traps: [TR(r6(100 * k / n), "C'est un pourcentage ; un tour complet fait 360°."), TR(r6(180 * k / n), "Le cercle entier fait 360°, pas 180°.")] }); },
+      () => { const a = pk([36, 54, 72, 90, 108, 126, 144, 162, 18]), f = r6(100 * a / 360);
+        return QN("Dans un diagramme circulaire, un secteur mesure " + M(a + "°") + ". Quelle fréquence (en %) représente-t-il ?", f, M("\\frac{" + a + "}{360} = " + N(r6(a / 360)) + " = " + N(f) + "\\,\\%") + ".",
+          { ctx: "angle-vers-pourcent", fig: FIG.sector("", a, a + "°"), guide: [G("Fraction du tour " + M("\\frac{" + a + "}{360}") + " en décimal ?", a / 360, M(N(r6(a / 360))) + "."), G("En pour cent ?", f, M(N(f) + "\\,\\%") + ".")], traps: [TR(a, "C'est l'angle ; divise par 360."), TR(r6(100 * a / 180), "Un tour complet fait 360°.")] }); },
+      () => { const n = pk([120, 180, 240, 360, 600]), a = pk([30, 45, 60, 90, 120, 150]), k = n * a / 360;
+        return QN("Un diagramme circulaire représente les " + M(n) + " élèves d'une école. Le secteur « vélo » mesure " + M(a + "°") + ". Combien d'élèves viennent à vélo ?", k, M("\\frac{" + a + "}{360} \\cdot " + n + " = " + k) + " élèves.",
+          { ctx: "angle-vers-effectif", fig: FIG.sector("", a, a + "°"), guide: [G("Fraction du tour " + M("\\frac{" + a + "}{360}") + " (fraction ou décimal) ?", a / 360, M(fT(a / 360)) + "."), G("Effectif ?", k, M(k) + " élèves.")], traps: [TR(a, "C'est l'angle, pas un nombre d'élèves."), TR(r6(n * a / 100), "L'angle se compare à 360°, pas à 100.")] }); },
+    ],
+  };
+
+  // ===================== C2. stats : moyenne, mode, médiane, écart-type =====================
+  const ST = {
+    1: [
+      () => { const n = pk([5, 6, 8]), xs = Array.from({ length: n }, () => R.int(2, 30)), m = sum(xs) / n; if (!Number.isInteger(m * 4)) return null;
+        return QN("Calcule la moyenne de la série : " + lst(xs) + ".", m, M("\\frac{" + xs.join(" + ") + "}{" + n + "} = \\frac{" + sum(xs) + "}{" + n + "} = " + N(m)) + ".",
+          { ctx: "moyenne", guide: [G("Somme des valeurs ?", sum(xs), M(sum(xs)) + "."), G("Moyenne (somme ÷ nombre de valeurs) ?", m, M(sum(xs) + " \\div " + n + " = " + N(m)) + ".")], traps: [TR(med(srt(xs)), "C'est la médiane ; la moyenne = somme ÷ effectif."), TR(r6(sum(xs) / (n - 1)), "On divise par le nombre de valeurs (" + n + ").")] }); },
+      () => { const vals = [4, 4.5, 5, 5.5, 6], effs = vals.map(() => R.int(1, 6)), n = sum(effs), s = sum(vals.map((v, i) => v * effs[i])), m = r6(s / n); if (!Number.isInteger(m * 100)) return null;
+        return QN("Notes d'un test : " + tab(vals, effs, "note", "effectif") + ". Calcule la moyenne de la classe (au centième).", m, "Moyenne pondérée : " + M("\\frac{" + vals.map((v, i) => N(v) + " \\cdot " + effs[i]).join(" + ") + "}{" + n + "} = \\frac{" + N(s) + "}{" + n + "} = " + N(m)) + ".",
+          { ctx: "ponderee", guide: [G("Somme des notes × effectifs ?", s, M(N(s)) + "."), G("Effectif total ?", n, M(n) + "."), G("Moyenne ?", m, M(N(m)) + ".")], traps: [TR(r6(sum(vals) / vals.length), "Chaque note compte autant de fois que son effectif (moyenne pondérée)."), TR(r6(s / vals.length), "On divise par l'effectif total, pas par le nombre de notes différentes.")] }); },
+      () => { const base = R.int(10, 40), xs = [base, base + R.int(1, 5), base, base + R.int(6, 9), base + R.int(10, 14), base - R.int(1, 4), base], s = xs.slice().sort(() => R.rand() - 0.5);
+        return QN("Quel est le mode de la série : " + lst(s) + " ?", base, "Le mode est la valeur qui apparaît le plus souvent : " + M(base) + " (3 fois).",
+          { shownOk: true, ctx: "mode", guide: [G("Quelle valeur apparaît le plus souvent ?", base, M(base) + ", 3 fois.")], traps: [TR(3, "3, c'est le nombre de fois ; le mode est la valeur."), TR(r6(sum(xs) / xs.length), "Le mode n'est pas la moyenne.")] }); },
+    ],
+    2: [
+      () => { const n = pk([7, 8, 9, 10]), xs = Array.from({ length: n }, () => R.int(1, 40)), s = srt(xs), m = med(s);
+        return QN("Donne la médiane de la série : " + lst(xs) + ".", m, "Série triée : " + lst(s) + ". " + (n % 2 ? "Effectif impair : valeur du milieu (" + ((n + 1) / 2) + "e), " + M(N(m)) : "Effectif pair : moyenne des " + n / 2 + "e et " + (n / 2 + 1) + "e valeurs, " + M("\\frac{" + s[n / 2 - 1] + " + " + s[n / 2] + "}{2} = " + N(m))) + ".",
+          { shownOk: true, ctx: n % 2 ? "mediane-impair" : "mediane-pair", guide: [G("On trie la série. Plus petite valeur ?", s[0], M(s[0]) + " (série triée : " + s.join(" ; ") + ")."), G("Médiane ?", m, M(N(m)) + ".")], traps: [TR(n % 2 ? xs[(n - 1) / 2] : (xs[n / 2 - 1] + xs[n / 2]) / 2, "Il faut d'abord TRIER la série."), TR(r6(sum(xs) / n), "C'est la moyenne.")] }); },
+      () => { const n = pk([4, 5]), xs = Array.from({ length: n - 1 }, () => R.int(3, 6) + pk([0, 0.5])), target = pk([4.5, 5]), miss = r6(target * n - sum(xs)); if (miss < 1 || miss > 6 || !Number.isInteger(miss * 2)) return null;
+        return QN(who() + " a eu les notes " + lst(xs) + ". Quelle note lui faut-il au prochain test pour avoir exactement " + M(N(target)) + " de moyenne ?", miss, "Il faut une somme de " + M(N(target) + " \\cdot " + n + " = " + N(target * n)) + " ; on a déjà " + M(N(sum(xs))) + " : " + M(N(target * n) + " - " + N(sum(xs)) + " = " + N(miss)) + ".",
+          { ctx: "valeur-manquante", guide: [G("Somme nécessaire (" + n + " notes de moyenne " + N(target).replace("{,}", ",") + ") ?", target * n, M(N(target * n)) + "."), G("Somme actuelle ?", sum(xs), M(N(sum(xs))) + "."), G("Note nécessaire ?", miss, M(N(miss)) + ".")], traps: [TR(target, "Il faut compenser les notes précédentes."), TR(r6(target * (n - 1) - sum(xs) + target), "La moyenne porte sur " + n + " notes au total.")] }); },
+      () => { const vals = [1, 2, 3, 4, 5], effs = vals.map(() => R.int(1, 6)), n = sum(effs); if (n % 2 === 0) return null; const s = vals.flatMap((v, i) => Array(effs[i]).fill(v)), m = med(s), pos = (n + 1) / 2;
+        return QN("Nombre de pièces d'un appartement : " + tab(vals, effs, "pièces", "effectif") + ". Quelle est la médiane du nombre de pièces ?", m, "Effectif total " + M(n) + " (impair) : la médiane est la " + pos + "e valeur. Effectifs cumulés : " + effs.map((_, i) => sum(effs.slice(0, i + 1))).join(", ") + " → " + M(m) + " pièces.",
+          { shownOk: true, ctx: "mediane-tableau", guide: [G("Effectif total ?", n, M(n) + "."), G("Rang de la médiane (" + M("\\frac{n + 1}{2}") + ") ?", pos, M(pos) + "e valeur."), G("Valeur à ce rang (effectifs cumulés) ?", m, M(m) + ".")], traps: [TR(3, "La médiane n'est pas la valeur du milieu du tableau : compte les effectifs."), TR(r6(sum(vals.map((v, i) => v * effs[i])) / n), "C'est la moyenne.")] }); },
+    ],
+    3: [
+      () => { const n = pk([4, 5, 6]), m0 = R.int(5, 20), xs = Array.from({ length: n }, () => m0 + R.int(-6, 6)), m = sum(xs) / n, v = sum(xs.map((x) => (x - m) ** 2)) / n, sd = Math.sqrt(v); if (!Number.isInteger(m * 2)) return null;
+        return QRd("Calcule l'écart-type " + M("\\sigma") + " de la série " + lst(xs) + " (au centième).", sd, "Moyenne " + M(N(m)) + " ; variance " + M("\\frac{" + xs.map((x) => "(" + x + " - " + N(m) + ")^2").join(" + ") + "}{" + n + "} \\approx " + N(Math.round(v * 100) / 100)) + " ; " + M("\\sigma = \\sqrt{\\text{variance}} \\approx " + N(Math.round(sd * 100) / 100)) + ".", 0.01,
+          { ctx: "ecart-type", guide: [G("Moyenne ?", m, M(N(m)) + "."), Gd("Variance (moyenne des carrés des écarts) ≈ ? (au centième)", v, M("\\approx " + N(Math.round(v * 100) / 100)) + ".", 0.01), Gd("Écart-type " + M("\\sigma") + " ≈ ?", sd, M("\\approx " + N(Math.round(sd * 100) / 100)) + ".", 0.01)], traps: [TR(r6(v), "C'est la variance ; l'écart-type est sa racine."), TR(r6(Math.sqrt(v * n / (n - 1))), "Ici, on divise par n (" + n + "), pas par n − 1.")] }); },
+      () => { const sd = pk([1.2, 1.5, 2, 2.5, 3.4, 0.8]), k = pk([2, 3, 10]), m = R.int(10, 40);
+        return QN("Une série a une moyenne de " + M(m) + " et un écart-type de " + M(N(sd)) + ". On multiplie toutes les valeurs par " + M(k) + ". Quel est le nouvel écart-type ?", r6(sd * k), "Multiplier toutes les valeurs par " + k + " multiplie aussi les écarts à la moyenne par " + k + " : " + M("\\sigma' = " + k + " \\cdot " + N(sd) + " = " + N(r6(sd * k))) + ".",
+          { ctx: "transformation", guide: [G("Les écarts à la moyenne sont multipliés par combien ?", k, M(k) + "."), G("Nouvel écart-type ?", r6(sd * k), M(N(r6(sd * k))) + ".")], traps: [TR(sd, "La dispersion change : les écarts sont multipliés par " + k + "."), TR(r6(sd * k * k), "C'est la variance qui est multipliée par " + k + "² ; l'écart-type par " + k + ".")] }); },
+      () => { const sd = pk([1.5, 2, 2.5, 3]), c = pk([3, 5, 10]), m = R.int(10, 40), ask = pk(["moyenne", "sigma"]);
+        return ask === "moyenne"
+          ? QN("Une série a une moyenne de " + M(m) + " et un écart-type de " + M(N(sd)) + ". On ajoute " + M(c) + " à toutes les valeurs. Quelle est la nouvelle moyenne ?", m + c, "Toutes les valeurs augmentent de " + c + " : la moyenne aussi, " + M(m + " + " + c + " = " + (m + c)) + " (l'écart-type, lui, ne change pas).", { ctx: "decalage-moyenne", guide: [G("Nouvelle moyenne ?", m + c, M(m + c) + ".")], traps: [TR(m, "Toutes les valeurs augmentent : la moyenne aussi."), TR(m * c, "On ajoute " + c + ", on ne multiplie pas.")] })
+          : QN("Les scores d'une classe à un jeu ont une moyenne de " + M(m) + " points et un écart-type de " + M(N(sd)) + ". Chaque joueur reçoit un bonus de " + M(c) + " points. Quel est le nouvel écart-type ?", sd, "Ajouter la même valeur à toutes les données décale la série sans changer la dispersion : " + M("\\sigma' = " + N(sd)) + ".", { ctx: "decalage-sigma", guide: [G("Les écarts à la moyenne changent-ils ? Nouvel écart-type ?", sd, M(N(sd)) + " (inchangé).")], traps: [TR(r6(sd + c), "Ajouter une constante ne change pas les écarts à la moyenne."), TR(r6(sd * c), "On ajoute, on ne multiplie pas.")] }); },
+    ],
+  };
+
+  // ===================== C3. quartiles : étendue, quartiles, écart interquartile, boîte à moustaches =====================
+  // Séries de 7, 11 ou 15 valeurs : les conventions usuelles (médianes des moitiés, rang (n + 1)/4, calculatrice) concordent.
+  const qs = (s) => { const h = (s.length - 1) / 2; return [med(s.slice(0, h)), med(s), med(s.slice(h + 1))]; };
+  const QU = {
+    1: [
+      () => { const xs = Array.from({ length: 7 }, () => R.int(2, 40)), mn = Math.min(...xs), mx = Math.max(...xs); if (mn === mx) return null;
+        return QN("Quelle est l'étendue de la série " + lst(xs) + " ?", mx - mn, "Étendue " + M("= \\max - \\min = " + mx + " - " + mn + " = " + (mx - mn)) + ".",
+          { ctx: "etendue", guide: [G("Plus grande valeur ?", mx, M(mx) + "."), G("Plus petite valeur ?", mn, M(mn) + "."), G("Étendue ?", mx - mn, M(mx - mn) + ".")], traps: [TR(xs[xs.length - 1] - xs[0], "Il faut le max et le min, pas la dernière et la première valeur."), TR(mx + mn, "Étendue = max − min.")] }); },
+      () => { const e = R.int(8, 30), mn = R.int(-5, 20), mx = mn + e, c = pk([["L'étendue d'une série vaut " + M(e) + " et sa plus petite valeur " + M(mn) + ". Quelle est sa plus grande valeur ?", "max"], ["Pendant une semaine, la température minimale a été de " + M(mn) + " °C et l'étendue des températures de " + M(e) + " °C. Quelle a été la température maximale (en °C) ?", "temperature"]]);
+        return QN(c[0], mx, "Étendue = max − min, donc max = min + étendue = " + M(mn + " + " + e + " = " + mx) + ".",
+          { ctx: c[1], guide: [G("max = min + étendue = ?", mx, M(mx) + ".")], traps: [TR(e - mn, "max = min + étendue."), TR(mn - e, "Le maximum est plus grand que le minimum.")] }); },
+      () => { const s = srt(Array.from({ length: 7 }, () => R.int(1, 40))), [q1, m, q3] = qs(s);
+        return QN("Série triée de 7 valeurs : " + lst(s) + ". Quel est le premier quartile " + M("Q_1") + " ?", q1, "Médiane : 4e valeur (" + M(m) + "). " + M("Q_1") + " : médiane des 3 premières valeurs, " + M(q1) + ".",
+          { shownOk: true, ctx: "q1", guide: [G("Médiane (4e valeur) ?", m, M(m) + "."), G(M("Q_1") + " (médiane des 3 valeurs en dessous) ?", q1, M(q1) + ".")], traps: [TR(q3, "C'est Q3 ; Q1 est dans la moitié inférieure."), TR(m, "C'est la médiane.")] }); },
+    ],
+    2: [
+      () => { const s = srt(Array.from({ length: 11 }, () => R.int(2, 40))), [q1, m, q3] = qs(s), sh = s.slice().sort(() => R.rand() - 0.5), ask = pk(["Q_3", "Q_1"]);
+        return QN("Série de 11 valeurs : " + lst(sh) + ". Calcule " + M(ask) + ".", ask === "Q_1" ? q1 : q3, "Série triée : " + lst(s) + ". Médiane : 6e valeur (" + M(m) + "). " + M("Q_1") + " = 3e valeur (" + M(q1) + "), " + M("Q_3") + " = 9e valeur (" + M(q3) + ").",
+          { shownOk: true, ctx: "quartile-" + ask.replace("_", ""), guide: [G("On trie. Médiane (6e valeur) ?", m, M(m) + "."), G(M(ask) + " (médiane de la moitié " + (ask === "Q_1" ? "inférieure" : "supérieure") + ", 5 valeurs) ?", ask === "Q_1" ? q1 : q3, M(ask === "Q_1" ? q1 : q3) + ".")], traps: [TR(ask === "Q_1" ? q3 : q1, "Q1 est dans la moitié inférieure, Q3 dans la moitié supérieure."), TR(ask === "Q_1" ? sh[2] : sh[8], "Trie d'abord la série.")] }); },
+      () => { const a = R.int(5, 30), b = a + R.int(4, 20), c = pk([["Dans un diagramme en boîte, la boîte va de " + M(a) + " à " + M(b) + ". Quel est l'écart interquartile ?", "boite"], ["Pour les salaires d'une entreprise (en centaines de CHF), " + M("Q_1 = " + a) + " et " + M("Q_3 = " + b) + ". Quel est l'écart interquartile ?", "salaires"]]);
+        return QN(c[0], b - a, "Écart interquartile " + M("= Q_3 - Q_1 = " + b + " - " + a + " = " + (b - a)) + " (la moitié centrale des données tient dans cet intervalle).",
+          { ctx: c[1], guide: [G(M("Q_3 - Q_1") + " = ?", b - a, M(b - a) + ".")], traps: [TR(a + b, "Écart = différence."), TR((a + b) / 2, "Ce n'est pas la médiane.")] }); },
+      () => { const s = srt(Array.from({ length: 7 }, () => R.int(5, 60))), [q1, m, q3] = qs(s), ask = pk(["% en dessous de Q1", "% entre Q1 et Q3", "% au-dessus de la médiane"]), v = ask === "% entre Q1 et Q3" ? 50 : ask === "% en dessous de Q1" ? 25 : 50;
+        return QN("Une boîte à moustaches résume une grande série : minimum " + M(s[0]) + ", " + M("Q_1 = " + q1) + ", médiane " + M(m) + ", " + M("Q_3 = " + q3) + ", maximum " + M(s[6]) + ". Environ quel pourcentage des valeurs est " + (ask === "% en dessous de Q1" ? "inférieur à " + M(q1) : ask === "% entre Q1 et Q3" ? "compris entre " + M(q1) + " et " + M(q3) : "supérieur à " + M(m)) + " ?", v, "Les quartiles partagent la série en quatre parts d'environ 25 % : " + (v === 25 ? "en dessous de Q1, environ 25 %." : ask === "% entre Q1 et Q3" ? "de Q1 à Q3 (la boîte), environ 50 %." : "au-dessus de la médiane, environ 50 %."),
+          { ctx: "lecture-boite", guide: [G("Quelle part des valeurs (en %) se trouve entre deux quartiles voisins ?", 25, "Environ 25 %."), G("Pourcentage demandé ?", v, M(v + "\\,\\%") + ".")], traps: [TR(v === 25 ? 75 : 25, "Chaque quart de la boîte (moustache ou demi-boîte) contient environ 25 % des valeurs."), TR(v === 50 ? 100 : 50, "Compte les quarts concernés.")] }); },
+    ],
+    3: [
+      () => { const s = srt(Array.from({ length: 11 }, () => R.int(2, 50))), [q1, m, q3] = qs(s);
+        return QN("Série triée de 11 valeurs : " + lst(s) + ". Calcule l'écart interquartile " + M("Q_3 - Q_1") + ".", q3 - q1, "Médiane : 6e valeur (" + M(m) + "). " + M("Q_1") + " : médiane des 5 premières, " + M(q1) + ". " + M("Q_3") + " : médiane des 5 dernières, " + M(q3) + ". Écart : " + M(q3 + " - " + q1 + " = " + (q3 - q1)) + ".",
+          { shownOk: true, ctx: "eiq", guide: [G(M("Q_1") + " (3e valeur) ?", q1, M(q1) + "."), G(M("Q_3") + " (9e valeur) ?", q3, M(q3) + "."), G("Écart interquartile ?", q3 - q1, M(q3 - q1) + ".")], traps: [TR(s[10] - s[0], "C'est l'étendue ; l'écart interquartile utilise Q1 et Q3."), TR(q3 - m, "Q1, pas la médiane.")] }); },
+      () => { const s = srt(Array.from({ length: 15 }, () => R.int(10, 90))), [q1, m, q3] = qs(s);
+        return QN("Temps (en minutes) de 15 apprentis pour un exercice, triés : " + lst(s) + ". Calcule l'écart interquartile.", q3 - q1, "15 valeurs : médiane = 8e (" + M(m) + "), " + M("Q_1") + " = 4e (" + M(q1) + "), " + M("Q_3") + " = 12e (" + M(q3) + "). Écart " + M(q3 - q1) + " min.",
+          { shownOk: true, ctx: "eiq-15", guide: [G("Rang de la médiane ?", 8, "8e valeur."), G(M("Q_1") + " (médiane des 7 premières, 4e valeur) ?", q1, M(q1) + "."), G(M("Q_3") + " (12e valeur) ?", q3, M(q3) + "."), G("Écart interquartile ?", q3 - q1, M(q3 - q1) + ".")], traps: [TR(s[14] - s[0], "C'est l'étendue."), TR(s[11] - s[3] === q3 - q1 ? s[10] - s[4] : s[11] - s[3], "Q1 = 4e valeur et Q3 = 12e valeur.")] }); },
+      () => { const s = srt(Array.from({ length: 11 }, () => R.int(10, 40))), [q1, m, q3] = qs(s), e = q3 - q1, out = q3 + 1.5 * e + R.int(1, 10), v = r6(q3 + 1.5 * e);
+        return QN("Pour une série, " + M("Q_1 = " + q1) + " et " + M("Q_3 = " + q3) + ". On considère comme « valeur extrême » toute valeur supérieure à " + M("Q_3 + 1{,}5 \\cdot (Q_3 - Q_1)") + ". À partir de quelle valeur une donnée est-elle extrême ?", v, "Écart interquartile " + M(e) + " ; " + M(q3 + " + 1{,}5 \\cdot " + e + " = " + N(v)) + ". (Par exemple " + M(N(out)) + " serait une valeur extrême.)",
+          { ctx: "valeur-extreme", guide: [G("Écart interquartile ?", e, M(q3 + " - " + q1 + " = " + e) + "."), G("Seuil " + M("Q_3 + 1{,}5 \\cdot " + e) + " ?", v, M(N(v)) + ".")], traps: [TR(r6(q1 + 1.5 * e), "On part de Q3 (le haut de la boîte)."), TR(q3 + e, "N'oublie pas le facteur 1,5.")] }); },
+    ],
+  };
+
   const PROBS = {
+    statfreq: [() => P("Sondage auprès de 40 apprentis sur leur moyen de transport : train 14, bus 10, vélo 6, voiture 10.", [["a) Fréquence du train (%)", 35], ["b) Angle du secteur « vélo » (degrés)", 54], ["c) Pourcentage de ceux qui ne viennent pas en voiture (%)", 75]], ["14 ÷ 40.", "6/40 · 360°."], "a) 35 % ; b) " + M("\\frac{6}{40} \\cdot 360° = 54°") + " ; c) " + M("\\frac{30}{40} = 75\\,\\%") + ".")],
+    stats: [() => P("Notes de 6 tests : 4 ; 5,5 ; 4,5 ; 5 ; 6 ; 5.", [["a) Moyenne", 5], ["b) Médiane", 5], ["c) Note au 7e test pour une moyenne de 5,1", 5.7]], ["Somme 30.", "5,1 · 7 = 35,7."], "a) " + M("30 \\div 6 = 5") + " ; b) série triée 4 ; 4,5 ; 5 ; 5 ; 5,5 ; 6 : " + M("5") + " ; c) " + M("35{,}7 - 30 = 5{,}7") + ".")],
+    quartiles: [() => P("Série triée de 11 valeurs : 3 ; 5 ; 6 ; 8 ; 9 ; 10 ; 12 ; 13 ; 15 ; 18 ; 30.", [["a) Médiane", 10], ["b) Écart interquartile", 9], ["c) Seuil des valeurs extrêmes Q3 + 1,5 · EIQ", 28.5]], ["6e valeur.", "Q1 = 6, Q3 = 15."], "a) 10 ; b) " + M("15 - 6 = 9") + " ; c) " + M("15 + 13{,}5 = 28{,}5") + " : 30 est une valeur extrême.")],
     trigcercle: [() => P("On considère l'angle de 150°.", [["a) En radians, c'est k·π/6 : que vaut k ?", 5], ["b) Quadrant", 2], ["c) Signe du cosinus (1 ou −1)", -1]], ["150 ÷ 30 = 5.", "Entre 90° et 180°."], "a) " + M("\\frac{5\\pi}{6}") + " ; b) quadrant 2 ; c) négatif : " + M("\\cos 150° = -\\frac{\\sqrt{3}}{2}") + ".")],
     trigfn: [() => P("f(x) = 3 sin(2x) + 1 (x en degrés).", [["a) Valeur maximale", 4], ["b) Période (degrés)", 180], ["c) Premier x > 0 où f est maximale (degrés)", 45]], ["sin vaut au plus 1.", "360 ÷ 2."], "a) " + M("3 + 1 = 4") + " ; b) " + M("180°") + " ; c) " + M("2x = 90°") + ", " + M("x = 45°") + ".")],
     sinlaw: [() => P("Dans le triangle ABC : a = 7, b = 8 et γ = 60°.", [["a) c² (théorème du cosinus)", 57], ["b) c (au centième)", Math.sqrt(57), 0.01], ["c) Aire (au centième)", 14 * Math.sqrt(3), 0.01]], ["49 + 64 − 2 · 7 · 8 · 0,5.", "½ · 7 · 8 · sin 60°."], "a) " + M("49 + 64 - 56 = 57") + " ; b) " + M("\\sqrt{57} \\approx 7{,}55") + " ; c) " + M("14\\sqrt{3} \\approx 24{,}25") + ".")],
@@ -512,7 +635,7 @@
   const tf = NOTIONS.find((n) => n.id === "trigfn");
   if (tf && tf.MP == null) { tf.MP = [13, "S2"]; if (typeof ORDRE !== "undefined") ORDRE.MP.trigfn = (ORDRE.MP.trigcercle ?? 43) + 0.5; if (typeof ORDRE_THEME !== "undefined") ORDRE_THEME.MP.trigfn = "TG"; }
 
-  const ALL = { droites: DR, droitesinter: DI, recipaff: RF, trigcercle: TC, trigfn: TF, sinlaw: SL, trigeq: TQ, trigassoc: TA, trigeq2: T2, triaire: TAi };
+  const ALL = { droites: DR, droitesinter: DI, recipaff: RF, trigcercle: TC, trigfn: TF, sinlaw: SL, trigeq: TQ, trigassoc: TA, trigeq2: T2, triaire: TAi, statfreq: SF, stats: ST, quartiles: QU };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
     if (typeof VAR !== "undefined") VAR[id] = {};
@@ -530,6 +653,9 @@
     trigassoc: "Dessine les angles sur le cercle : −α (symétrie horizontale), 180° − α (verticale), 180° + α (centre). sin² + cos² = 1 ; le quadrant donne le signe.",
     trigeq2: "Modèle d + a sin(bt) : valeurs de d − a à d + a, période 360/b. Pour sin(bx) = k : résous en u = bx (plusieurs tours), puis divise par b.",
     triaire: "Aire = ½ ab sin γ (deux côtés et l'angle compris). Parallélogramme : ab sin α. Polygones réguliers : découpe en triangles.",
+    statfreq: "Fréquence = effectif ÷ total (× 100 pour des %). Diagramme circulaire : angle = fréquence × 360°. Effectif cumulé : on additionne.",
+    stats: "Moyenne = somme ÷ effectif (pondérée avec un tableau). Médiane : on trie, valeur du milieu. Écart-type : racine de la moyenne des carrés des écarts.",
+    quartiles: "Trie la série. Étendue = max − min. Q1 et Q3 : médianes des moitiés inférieure et supérieure. Écart interquartile = Q3 − Q1.",
   });
   if (typeof COMPS !== "undefined") Object.assign(COMPS, {
     droites: ["Pente, lecture graphique, équation par deux points", "Parallèle, perpendiculaire, paramètre", "Système, point sur une droite, modéliser"],
@@ -542,5 +668,8 @@
     trigassoc: ["Angles associés, angle de référence, Pythagore", "Complémentaires, tangente, angle obtus", "Expression, combinaison, quadrant donné"],
     trigeq2: ["sin(2x) = k, max ou min d'un modèle, période", "a et d d'une sinusoïde, hauteur d'un port, heure de marée haute", "Équation du port, grande roue, cos(bx) = 0"],
     triaire: ["½ ab sin γ exact ou à la calculatrice, parallélogramme", "Terrain, angle depuis l'aire, triangle équilatéral", "Randonneurs, hexagone, hauteur"],
+    statfreq: ["Fréquence, effectif depuis un %, tableau", "Effectif cumulé, mode, fréquence cumulée", "Angle d'un secteur, angle vers %, angle vers effectif"],
+    stats: ["Moyenne, moyenne pondérée, mode", "Médiane, valeur manquante, médiane d'un tableau", "Écart-type, multiplier, ajouter une constante"],
+    quartiles: ["Étendue, maximum, Q1", "Q1 ou Q3, boîte, lecture d'une boîte", "Écart interquartile (11 et 15 valeurs), valeurs extrêmes"],
   });
 })();
