@@ -83,8 +83,9 @@ def ordre():
                ("MP", rang(O["MP"])), ("2e Collège", m2)]
     if INVD:  # appartenance réelle aux classes (une notion de 1re rangée aussi en 2e reste en 1re)
         cl = {c["name"]: [r["id"] for r in c["rows"]] for c in INVD["classes"]}
-        groupes = [("11e CO (bêta-testeurs)", cl.get("11e", [])), ("1re Collège (bêta-testeurs)", cl.get("1re", [])), ("10e CO", cl.get("10e", [])), ("9e CO", cl.get("9e", [])),
-                   ("MP", cl.get("MP 1re", []) + cl.get("MP 2e", [])), ("2e Collège", cl.get("2e", []))]
+        # 20.11 (suite) : MP 2e d'abord — les classes MP2C et MP2D de l'auteur deviennent bêta-testeuses.
+        groupes = [("11e CO (bêta-testeurs)", cl.get("11e", [])), ("1re Collège (bêta-testeurs)", cl.get("1re", [])), ("MP 2e (bêta-testeurs)", cl.get("MP 2e", [])),
+                   ("10e CO", cl.get("10e", [])), ("9e CO", cl.get("9e", [])), ("MP 1re", cl.get("MP 1re", [])), ("2e Collège", cl.get("2e", []))]
     vus, res = set(), []
     for nom, ids in groupes:
         for i in ids:
@@ -98,8 +99,8 @@ def main():
     faits = [i for g, i in liste if (i in B or INVD) and niveaux(i, B) >= 3]
     partiels = [i for g, i in a_faire if niveaux(i, B) > 0]
     # 11e et 1re Collège en priorité égale (bêta-testeurs, 14.11) : leurs lots alternent, puis les autres niveaux.
-    prio = [[x for x in a_faire if x[0] == g] for g in ("11e CO (bêta-testeurs)", "1re Collège (bêta-testeurs)")]
-    autres = [x for x in a_faire if x[0] not in ("11e CO (bêta-testeurs)", "1re Collège (bêta-testeurs)")]
+    prio = [[x for x in a_faire if x[0] == g] for g in ("11e CO (bêta-testeurs)", "1re Collège (bêta-testeurs)", "MP 2e (bêta-testeurs)")]
+    autres = [x for x in a_faire if x[0] not in ("11e CO (bêta-testeurs)", "1re Collège (bêta-testeurs)", "MP 2e (bêta-testeurs)")]
     chunks = [[g[k:k + LOT] for k in range(0, len(g), LOT)] for g in prio]
     lots = [c for pair in __import__("itertools").zip_longest(*chunks) for c in pair if c] + [autres[k:k + LOT] for k in range(0, len(autres), LOT)]
     # Chantier en tête : ses notions sont retirées des lots ordinaires.
