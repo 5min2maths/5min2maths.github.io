@@ -86,14 +86,70 @@
     ],
   };
 
+  // ===================== trigrel : relations trigonométriques (20.11, fin de la 1re Collège) =====================
+  const TRI = [[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [20, 21, 29]]; // triplets primitifs : fractions irréductibles
+  const fr = (p, q) => "\\frac{" + p + "}{" + q + "}";
+  const pick3 = () => { const [a, b, c] = pk(TRI), sw = R.rand() < 0.5; return sw ? [b, a, c] : [a, b, c]; }; // opp, adj, hyp
+  const Qx = (q, value, sol, o) => Qv(q, value, sol, Object.assign({ canon: o.canon }, o));
+  const TRL = {
+    1: [
+      () => { const [p, q, c] = pick3();
+        return Qx("L'angle " + M("\\alpha") + " est aigu et " + M("\\sin\\alpha = " + fr(p, c)) + ". Calcule " + M("\\cos\\alpha") + " (fraction).", q / c, M("\\cos^2\\alpha = 1 - \\sin^2\\alpha = 1 - " + fr(p * p, c * c) + " = " + fr(q * q, c * c)) + ", donc " + M("\\cos\\alpha = " + fr(q, c)) + " (positif : l'angle est aigu).",
+          { ctx: "sin-vers-cos", canon: q + "/" + c, guide: [GS(M("\\sin^2\\alpha") + " = ? (fraction)", (p * p) / (c * c), M("\\left(" + fr(p, c) + "\\right)^2 = " + fr(p * p, c * c)) + "."), GS(M("\\cos^2\\alpha = 1 - \\sin^2\\alpha") + " = ?", (q * q) / (c * c), M(fr(q * q, c * c)) + "."), GS(M("\\cos\\alpha") + " = ?", q / c, M(fr(q, c)) + " (racine positive).")],
+            traps: [TR(1 - p / c, "On utilise les carrés : cos²α = 1 − sin²α, pas cos α = 1 − sin α."), TR((q * q) / (c * c), "C'est cos²α ; il reste à prendre la racine."), TR(p / c, "C'est le sinus ; on cherche le cosinus.")] }); },
+      () => { const [p, q, c] = pick3();
+        return Qx("L'angle " + M("\\alpha") + " est aigu et " + M("\\cos\\alpha = " + fr(q, c)) + ". Calcule " + M("\\sin\\alpha") + " (fraction).", p / c, M("\\sin^2\\alpha = 1 - " + fr(q * q, c * c) + " = " + fr(p * p, c * c)) + ", donc " + M("\\sin\\alpha = " + fr(p, c)) + ".",
+          { ctx: "cos-vers-sin", canon: p + "/" + c, guide: [GS(M("\\sin^2\\alpha = 1 - \\cos^2\\alpha") + " = ? (fraction)", (p * p) / (c * c), M("1 - " + fr(q * q, c * c) + " = " + fr(p * p, c * c)) + "."), GS(M("\\sin\\alpha") + " = ?", p / c, M(fr(p, c)) + ".")],
+            traps: [TR(1 - q / c, "sin²α + cos²α = 1 porte sur les carrés."), TR((p * p) / (c * c), "C'est sin²α ; prends la racine.")] }); },
+      () => { const [a0, b0, c] = pk([[3, 4, 5], [7, 24, 25]]), sw = R.rand() < 0.5, p = sw ? b0 : a0, q = sw ? a0 : b0, dS = (p / c).toFixed(2), dC = (q / c).toFixed(2);
+        const ask = pk(["tan", "cos"]);
+        return ask === "tan"
+          ? Qx("Pour un angle aigu " + M("\\alpha") + ", " + M("\\sin\\alpha = " + dS.replace(".", "{,}")) + " et " + M("\\cos\\alpha = " + dC.replace(".", "{,}")) + ". Calcule " + M("\\tan\\alpha") + " (fraction ou décimal).", p / q, M("\\tan\\alpha = \\frac{\\sin\\alpha}{\\cos\\alpha} = \\frac{" + dS.replace(".", "{,}") + "}{" + dC.replace(".", "{,}") + "} = " + fr(p, q)) + ".",
+            { ctx: "tan-quotient", guide: [GS(M("\\tan\\alpha = \\sin\\alpha \\div \\cos\\alpha") + " = ?", p / q, M(fr(p, q)) + ".")], traps: [TR(q / p, "tan α = sin α ÷ cos α (et non l'inverse)."), TR((p * q) / (c * c), "On divise, on ne multiplie pas.")] })
+          : Qx("Pour un angle aigu " + M("\\alpha") + ", " + M("\\sin\\alpha = " + dS.replace(".", "{,}")) + ". Calcule " + M("\\cos\\alpha") + " (décimal).", q / c, M("\\cos\\alpha = \\sqrt{1 - " + dS.replace(".", "{,}") + "^2} = \\sqrt{" + (1 - (p / c) ** 2).toFixed(4).replace(/0+$/, "").replace(".", "{,}") + "} = " + dC.replace(".", "{,}")) + ".",
+            { ctx: "decimal", guide: [GS(M(dS.replace(".", "{,}") + "^2") + " = ?", (p / c) ** 2, M(((p / c) ** 2).toFixed(4).replace(/0+$/, "").replace(".", "{,}")) + "."), GS(M("1 - " + dS.replace(".", "{,}") + "^2") + " = ?", 1 - (p / c) ** 2, M((1 - (p / c) ** 2).toFixed(4).replace(/0+$/, "").replace(".", "{,}")) + "."), GS(M("\\cos\\alpha") + " = ?", q / c, M(dC.replace(".", "{,}")) + ".")], traps: [TR(1 - p / c, "On travaille avec les carrés : cos²α = 1 − sin²α."), TR((q / c) ** 2, "C'est cos²α ; prends la racine.")] }); },
+    ],
+    2: [
+      () => { const [p, q, c] = pick3();
+        return Qx("L'angle " + M("\\alpha") + " est aigu et " + M("\\sin\\alpha = " + fr(p, c)) + ". Calcule " + M("\\tan\\alpha") + " (fraction).", p / q, M("\\cos\\alpha = \\sqrt{1 - " + fr(p * p, c * c) + "} = " + fr(q, c)) + ", puis " + M("\\tan\\alpha = \\frac{\\sin\\alpha}{\\cos\\alpha} = " + fr(p, c) + " \\div " + fr(q, c) + " = " + fr(p, q)) + ".",
+          { ctx: "sin-vers-tan", canon: p + "/" + q, guide: [GS("D'abord " + M("\\cos\\alpha") + " = ?", q / c, M(fr(q, c)) + "."), GS(M("\\tan\\alpha = \\sin\\alpha \\div \\cos\\alpha") + " = ?", p / q, M(fr(p, c) + " \\div " + fr(q, c) + " = " + fr(p, q)) + ".")],
+            traps: [TR(q / p, "tan α = sin α ÷ cos α : opposé sur adjacent."), TR(q / c, "C'est cos α ; il faut encore diviser.")] }); },
+      () => { const [p, q, c] = pick3(), ask = pk(["sin", "cos"]), v = ask === "sin" ? p / c : q / c;
+        return Qx("L'angle " + M("\\alpha") + " est aigu et " + M("\\tan\\alpha = " + fr(p, q)) + ". Calcule " + M("\\" + ask + "\\alpha") + " (fraction).", v, "On dessine un triangle rectangle avec opposé " + M(p) + " et adjacent " + M(q) + " : hypoténuse " + M("\\sqrt{" + p * p + " + " + q * q + "} = " + c) + ". " + M("\\" + ask + "\\alpha = " + (ask === "sin" ? fr(p, c) : fr(q, c))) + ".",
+          { ctx: "tan-vers-" + ask, canon: (ask === "sin" ? p : q) + "/" + c, fig: F([String(q), String(p), "?"], "α"), guide: [GS("Triangle d'opposé " + M(p) + " et d'adjacent " + M(q) + ". Hypoténuse ?", c, M("\\sqrt{" + p * p + " + " + q * q + "} = " + c) + "."), GS(M("\\" + ask + "\\alpha") + " = ?", v, M(ask === "sin" ? fr(p, c) : fr(q, c)) + (ask === "sin" ? " (opposé sur hypoténuse)." : " (adjacent sur hypoténuse)."))],
+            traps: [TR(ask === "sin" ? q / c : p / c, ask === "sin" ? "Le sinus, c'est l'opposé sur l'hypoténuse." : "Le cosinus, c'est l'adjacent sur l'hypoténuse."), TR(ask === "sin" ? p / (p + q) : q / (p + q), "L'hypoténuse se calcule avec Pythagore, pas en additionnant.")] }); },
+      () => { let p, q; do { q = R.int(3, 7); p = R.int(1, q - 1); } while (gcd(p, q) !== 1 || Number.isInteger(Math.sqrt(q * q - p * p)));
+        const r = q * q - p * p; let k = 1, m = r; for (let i = 2; i * i <= m; i++) while (m % (i * i) === 0) { m /= i * i; k *= i; }
+        const ex = (k === 1 ? "" : k) + "\\sqrt{" + m + "}", sw = R.rand() < 0.5;
+        return Qv("L'angle " + M("\\alpha") + " est aigu et " + M((sw ? "\\cos" : "\\sin") + "\\alpha = " + fr(p, q)) + ". Calcule la valeur exacte de " + M((sw ? "\\sin" : "\\cos") + "\\alpha") + ".", Math.sqrt(r) / q, M((sw ? "\\sin" : "\\cos") + "^2\\alpha = 1 - " + fr(p * p, q * q) + " = " + fr(r, q * q)) + ", donc " + M((sw ? "\\sin" : "\\cos") + "\\alpha = \\frac{" + ex + "}{" + q + "}") + ".",
+          { ctx: "exacte", radical: true, canon: (k === 1 ? "" : k) + "sqrt(" + m + ")/" + q, guide: [GS(M((sw ? "\\sin" : "\\cos") + "^2\\alpha") + " = ? (fraction)", r / (q * q), M("1 - " + fr(p * p, q * q) + " = " + fr(r, q * q)) + "."), GSR(M((sw ? "\\sin" : "\\cos") + "\\alpha") + " = ? (valeur exacte, avec √)", Math.sqrt(r) / q, M("\\frac{\\sqrt{" + r + "}}{" + q + "} = \\frac{" + ex + "}{" + q + "}") + ".")],
+            traps: [TR(1 - p / q, "On travaille avec les carrés."), TR(r / (q * q), "C'est le carré ; prends la racine.")] }); },
+    ],
+    3: [
+      () => { const [p, q, c] = pick3(), v = 1 + p / c;
+        return Qx("L'angle " + M("\\alpha") + " est aigu et " + M("\\sin\\alpha = " + fr(p, c)) + ". Calcule " + M("\\sin^2\\alpha + \\cos^2\\alpha + \\tan\\alpha \\cdot \\cos\\alpha") + " (fraction).", v, M("\\sin^2\\alpha + \\cos^2\\alpha = 1") + " et " + M("\\tan\\alpha \\cdot \\cos\\alpha = \\frac{\\sin\\alpha}{\\cos\\alpha} \\cdot \\cos\\alpha = \\sin\\alpha") + " : " + M("1 + " + fr(p, c) + " = " + fr(c + p, c)) + ".",
+          { ctx: "simplifier", canon: (c + p) + "/" + c, guide: [GS(M("\\sin^2\\alpha + \\cos^2\\alpha") + " = ?", 1, "Toujours " + M(1) + "."), GS(M("\\tan\\alpha \\cdot \\cos\\alpha") + " = ? (c'est une des trois valeurs)", p / c, M("\\sin\\alpha = " + fr(p, c)) + "."), GS("Total ?", v, M(fr(c + p, c)) + ".")],
+            traps: [TR(1 + q / c, "tan α · cos α = sin α (et non cos α)."), TR(p / c, "N'oublie pas sin²α + cos²α = 1.")] }); },
+      () => { const t = pk([2, 3, 4, 5]), ask = pk(["cos", "sin"]), v = ask === "cos" ? 1 / Math.sqrt(1 + t * t) : t / Math.sqrt(1 + t * t);
+        return Qv("L'angle " + M("\\alpha") + " est aigu et " + M("\\tan\\alpha = " + t) + ". Calcule la valeur exacte de " + M("\\" + ask + "\\alpha") + ".", v, "Triangle rectangle d'opposé " + M(t) + " et d'adjacent " + M(1) + " : hypoténuse " + M("\\sqrt{" + (1 + t * t) + "}") + ". " + M("\\" + ask + "\\alpha = \\frac{" + (ask === "cos" ? 1 : t) + "}{\\sqrt{" + (1 + t * t) + "}}") + ".",
+          { ctx: "tan-entier-" + ask, radical: true, canon: (ask === "cos" ? 1 : t) + "/sqrt(" + (1 + t * t) + ")", fig: F(["1", String(t), "?"], "α"), guide: [GS(M("\\tan\\alpha = " + t + " = \\frac{" + t + "}{1}") + " : opposé " + M(t) + ", adjacent " + M(1) + ". Hypoténuse (au carré) ?", 1 + t * t, M(t * t + " + 1 = " + (1 + t * t)) + " : hypoténuse " + M("\\sqrt{" + (1 + t * t) + "}") + "."), GSR(M("\\" + ask + "\\alpha") + " = ? (avec √)", v, M("\\frac{" + (ask === "cos" ? 1 : t) + "}{\\sqrt{" + (1 + t * t) + "}}") + ".")],
+            traps: [TR(ask === "cos" ? 1 / t : t / (1 + t), ask === "cos" ? "1/t, c'est l'adjacent sur l'opposé, pas le cosinus." : "L'hypoténuse vient de Pythagore."), TR(ask === "cos" ? t / Math.sqrt(1 + t * t) : 1 / Math.sqrt(1 + t * t), ask === "cos" ? "Ça, c'est le sinus." : "Ça, c'est le cosinus.")] }); },
+      () => { const [p, q, c] = pick3(), v = q / p;
+        return Qx("L'angle " + M("\\alpha") + " est aigu et " + M("\\sin\\alpha = " + fr(p, c)) + ". Calcule " + M("\\tan(90° - \\alpha)") + " (fraction).", v, "Dans le triangle rectangle, l'autre angle aigu vaut " + M("90° - \\alpha") + " : son opposé est l'adjacent de " + M("\\alpha") + ". Donc " + M("\\tan(90° - \\alpha) = \\frac{\\cos\\alpha}{\\sin\\alpha} = " + fr(q, c) + " \\div " + fr(p, c) + " = " + fr(q, p)) + ".",
+          { ctx: "complementaire", canon: q + "/" + p, guide: [GS(M("\\cos\\alpha") + " = ?", q / c, M(fr(q, c)) + "."), GS(M("\\sin(90° - \\alpha)") + " = ? (l'opposé de l'autre angle est l'adjacent de α)", q / c, M("\\cos\\alpha = " + fr(q, c)) + "."), GS(M("\\tan(90° - \\alpha) = \\frac{\\sin(90° - \\alpha)}{\\cos(90° - \\alpha)}") + " = ?", v, M(fr(q, p)) + ".")],
+            traps: [TR(p / q, "Ça, c'est tan α ; pour l'angle complémentaire, opposé et adjacent s'échangent."), TR(q / c, "C'est cos α ; il faut encore diviser.")] }); },
+    ],
+  };
+
   const PROBS = {
+    trigrel: [() => P("Dans un triangle rectangle, l'angle aigu α vérifie sin α = 0,6. L'hypoténuse mesure 15 cm.", [["a) cos α (décimal)", 0.8], ["b) Côté opposé à α (cm)", 9], ["c) Côté adjacent à α (cm)", 12]], ["cos²α = 1 − 0,36.", "opposé = 15 · sin α."], "a) " + M("\\sqrt{0{,}64} = 0{,}8") + " ; b) " + M("15 \\cdot 0{,}6 = 9") + " ; c) " + M("15 \\cdot 0{,}8 = 12") + " cm.")],
     trigo: [() => P("Un cerf-volant est retenu par un fil tendu de 40 m qui fait un angle de 35° avec le sol (fil tenu à 1 m du sol).", [["a) Hauteur au-dessus de la main (m, au centième)", 22.94, 0.01], ["b) Hauteur au-dessus du sol (m, au centième)", 23.94, 0.01], ["c) Distance horizontale main–cerf-volant (m, au centième)", 32.77, 0.01]], ["Le fil est l'hypoténuse.", "sin pour la hauteur, cos pour l'horizontale."], "a) " + M("40 \\sin 35° \\approx 22{,}94") + " ; b) " + M("23{,}94") + " ; c) " + M("40 \\cos 35° \\approx 32{,}77") + ".")],
     trigexact: [() => P("Un triangle rectangle a une hypoténuse de 12 cm et un angle de 30°.", [["a) Côté opposé à 30° (cm)", 6], ["b) Côté adjacent (cm, valeur exacte : tape 6√3)", 6 * Math.sqrt(3)], ["c) Aire (cm², valeur exacte : tape 18√3)", 18 * Math.sqrt(3)]], ["sin 30° = 1/2.", "cos 30° = √3/2."], "a) 6 ; b) " + M("6\\sqrt{3}") + " ; c) " + M("\\frac{6 \\cdot 6\\sqrt{3}}{2} = 18\\sqrt{3}") + ".")],
   };
 
-  const ALL = { trigo: TG, trigexact: TE };
+  const ALL = { trigo: TG, trigexact: TE, trigrel: TRL };
   for (const [id, lv] of Object.entries(ALL)) {
-    GEN[id] = (d) => { const L0 = lv[Math.min(Math.max(d, 1), 3)]; let q = null; for (let k = 0; k < 40 && !(q && q.traps && q.traps.length); k++) q = pk(L0)(); return q; };
+    GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
     if (typeof VAR !== "undefined") VAR[id] = {};
     if (typeof PROB !== "undefined") delete PROB[id];
     PROB_EXTRA[id] = PROBS[id];

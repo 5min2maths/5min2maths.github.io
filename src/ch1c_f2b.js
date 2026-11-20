@@ -1,5 +1,5 @@
 // Chantier 1re Collège (bêta-testeurs) · lot 5 du plan pas à pas (19.11) : une seule source pour f2expr, f2trois,
-// inter, interpar, ineq2. Même standard que ch1c_sys.js : au moins 3 formes par niveau, pas à pas, erreurs typiques,
+// inter, interpar, ineq2 ; ineqfrac ajouté le 20.11. Même standard que ch1c_sys.js : au moins 3 formes par niveau, pas à pas, erreurs typiques,
 // étiquette ctx, figures ; défis en plusieurs étapes.
 (function () {
   const pk = (a) => a[Math.floor(R.rand() * a.length)];
@@ -232,7 +232,60 @@
     ],
   };
 
+  // ===================== ineqfrac : inéquations fractionnaires (20.11, fin de la 1re Collège) =====================
+  const ANF = " Donne l'ensemble des solutions (intervalles).";
+  const linE = (a, b) => (a === 0 ? fT(b) : co(a) + "x" + (b ? sg(b) : ""));
+  // pièges communs : valeur interdite comprise (on a traité le quotient comme un produit) ; signe contraire
+  const fracTraps = (f, zeros, poles, op) => [TS(signSet(f, zeros.concat(poles), [], op), "La valeur interdite (dénominateur nul) est toujours exclue : crochet ouvert."), TS(signSet(f, zeros, poles, opp[op]), "Relis le tableau des signes : tu as pris le signe contraire.")];
+  const fracGuide = (zeros, poles, ivs, extra) => (extra || []).concat([GSet("Zéro(s) du numérateur ?", zeros, zeros.map(fT).join(" et ") + "."), GSet("Valeur(s) interdite(s) (dénominateur nul) ?", poles, poles.map(fT).join(" et ") + " : exclue(s) de toute façon."), GSS("Tableau des signes. Ensemble des solutions ?", ivs, M("S = " + IT(ivs)) + ".")]);
+  const IFQ = {
+    1: [
+      () => { const a = nz(-5, 5), b = nz(-5, 5), op = pk(["<", "<=", ">", ">="]); if (a === b) return null; const f = (x) => (x - a) / (x - b), ivs = signSet(f, [a], [b], op);
+        return QS("Résous " + M("\\frac{" + xm(a) + "}{" + xm(b) + "} " + OPT[op] + " 0") + "." + ANF, ivs, "Numérateur nul en " + M(a) + ", dénominateur nul en " + M(b) + " (valeur interdite, exclue). Tableau des signes : " + M("S = " + IT(ivs)) + ".",
+          { ctx: "simple", guide: fracGuide([a], [b], ivs), traps: fracTraps(f, [a], [b], op) }); },
+      () => { const k = nz(-6, 6), b = nz(-5, 5), op = pk(["<", "<=", ">", ">="]), f = (x) => k / (x - b), ivs = signSet(f, [], [b], op);
+        return QS("Résous " + M("\\frac{" + k + "}{" + xm(b) + "} " + OPT[op] + " 0") + "." + ANF, ivs, "Le numérateur " + M(k) + " est " + (k > 0 ? "positif" : "négatif") + " et jamais nul : le quotient a le signe " + (k > 0 ? "du" : "contraire du") + " dénominateur, qui change en " + M(b) + " (exclu). " + M("S = " + IT(ivs)) + ".",
+          { ctx: "numerateur-constant", guide: [GS("Valeur interdite ?", b, M(b) + "."), GSS("Le numérateur " + M(k) + " ne change jamais de signe. Ensemble des solutions ?", ivs, M("S = " + IT(ivs)) + ".")],
+            traps: [TS(signSet(f, [b], [], op.length === 2 ? op : op + "="), "La valeur interdite " + b + " est exclue."), TS(signSet(f, [], [b], opp[op]), k < 0 ? "Le numérateur est négatif : le quotient a le signe contraire du dénominateur." : "Relis le signe du dénominateur de part et d'autre de " + b + ".")] }); },
+      () => { const z = nz(-4, 4), p = nz(-4, 4), k1 = pk([-1, 1]) * R.int(1, 3), k2 = pk([-1, 1]) * R.int(1, 3), op = pk(["<", "<=", ">", ">="]); if (z === p || (k1 > 0 && k2 > 0)) return null;
+        const f = (x) => (k1 * (x - z)) / (k2 * (x - p)), ivs = signSet(f, [z], [p], op);
+        return QS("Résous " + M("\\frac{" + linE(k1, -k1 * z) + "}{" + linE(k2, -k2 * p) + "} " + OPT[op] + " 0") + "." + ANF, ivs, "Numérateur nul en " + M(z) + ", dénominateur nul en " + M(p) + " (exclu). Attention : un coefficient de " + M("x") + " est négatif, ce qui inverse le signe de ce facteur. " + M("S = " + IT(ivs)) + ".",
+          { ctx: "coef-negatif", guide: fracGuide([z], [p], ivs), traps: [TS(signSet((x) => (x - z) / (x - p), [z], [p], op), "Un coefficient de x négatif inverse le signe de sa ligne dans le tableau."), ...fracTraps(f, [z], [p], op)] }); },
+    ],
+    2: [
+      () => { const b = nz(-4, 4), pp = pk([2, 3, -1]), k = pk([1, 2, -1].filter((v) => v !== pp)), z = nz(-5, 5); if (z === b) return null;
+        // (pp·x + q)/(x − b) op k  ⇔  ((pp − k)x + q + k·b)/(x − b) op 0, numérateur (pp − k)(x − z)
+        const A = pp - k, q = -A * z - k * b, op = pk(["<", "<=", ">", ">="]), f = (x) => (A * (x - z)) / (x - b), ivs = signSet(f, [z], [b], op);
+        const wrongLin = signSet((x) => A * (x - z), [z], [], op);
+        return QS("Résous " + M("\\frac{" + linE(pp, q) + "}{" + xm(b) + "} " + OPT[op] + " " + k) + "." + ANF, ivs, "On ne multiplie pas par " + M(xm(b)) + " (signe inconnu) : on soustrait " + M(k) + " et on met au même dénominateur, " + M("\\frac{" + linE(A, -A * z) + "}{" + xm(b) + "} " + OPT[op] + " 0") + ". Tableau des signes : " + M("S = " + IT(ivs)) + ".",
+          { ctx: "comparer-k", guide: [GX("On soustrait " + M(k) + " : " + M("\\frac{" + linE(pp, q) + "}{" + xm(b) + "} - " + par(k) + " = \\frac{?}{" + xm(b) + "}") + ". Numérateur ?", linE(A, -A * z).replace(/\s/g, ""), M(linE(pp, q) + " - " + par(k) + "(" + xm(b) + ") = " + linE(A, -A * z)) + "."), ...fracGuide([z], [b], ivs)],
+            traps: [TS(wrongLin, "On ne peut pas multiplier par x − " + b + " sans connaître son signe : la valeur interdite disparaîtrait."), ...fracTraps(f, [z], [b], op)] }); },
+      () => { const a = nz(-5, 4), c = a + R.int(1, 5), b = nz(-5, 5), op = pk(["<", "<=", ">", ">="]); if (b === a || b === c) return null; const f = (x) => ((x - a) * (x - c)) / (x - b), ivs = signSet(f, [a, c], [b], op);
+        return QS("Résous " + M("\\frac{(" + xm(a) + ")(" + xm(c) + ")}{" + xm(b) + "} " + OPT[op] + " 0") + "." + ANF, ivs, "Zéros du numérateur : " + M(a) + " et " + M(c) + " ; valeur interdite : " + M(b) + ". Tableau des signes à trois lignes : " + M("S = " + IT(ivs)) + ".",
+          { ctx: "trois-facteurs", guide: fracGuide([a, c], [b], ivs), traps: fracTraps(f, [a, c], [b], op) }); },
+      () => { const m = R.int(1, 5), b = nz(-6, 6), op = pk(["<", "<=", ">", ">="]); if (Math.abs(b) === m) return null; const f = (x) => (x * x - m * m) / (x - b), ivs = signSet(f, [-m, m], [b], op);
+        return QS("Résous " + M("\\frac{x^2 - " + m * m + "}{" + xm(b) + "} " + OPT[op] + " 0") + "." + ANF, ivs, M("x^2 - " + m * m + " = (x - " + m + ")(x + " + m + ")") + " : zéros " + M(-m) + " et " + M(m) + ", valeur interdite " + M(b) + ". " + M("S = " + IT(ivs)) + ".",
+          { ctx: "diff-carres", guide: fracGuide([-m, m], [b], ivs, [GSet("On factorise " + M("x^2 - " + m * m) + ". Ses zéros ?", [-m, m], M("\\pm " + m) + ".")]).filter((g, i) => i !== 1), traps: [TS(signSet(f, [m], [b], op), "x² − " + m * m + " s'annule aussi en −" + m + "."), ...fracTraps(f, [-m, m], [b], op)] }); },
+    ],
+    3: [
+      () => { const b = nz(-4, 4), c = nz(-4, 4), op = pk(["<", "<=", ">", ">="]); if (b === c) return null; const f = (x) => (b - c) / ((x - b) * (x - c)), ivs = signSet(f, [], [b, c], op);
+        return QS("Résous " + M("\\frac{1}{" + xm(b) + "} " + OPT[op] + " \\frac{1}{" + xm(c) + "}") + "." + ANF, ivs, "On ramène à 0 : " + M("\\frac{1}{" + xm(b) + "} - \\frac{1}{" + xm(c) + "} = \\frac{" + (b - c) + "}{(" + xm(b) + ")(" + xm(c) + ")}") + ". Le numérateur " + M(b - c) + " ne change pas de signe : tout dépend du dénominateur. " + M("S = " + IT(ivs)) + ".",
+          { ctx: "deux-fractions", guide: [GS("On soustrait et on met au même dénominateur " + M("(" + xm(b) + ")(" + xm(c) + ")") + ". Numérateur (un nombre) ?", b - c, M("(" + xm(c) + ") - (" + xm(b) + ") = " + (b - c)) + "."), GSet("Valeurs interdites ?", [b, c], M(b) + " et " + M(c) + "."), GSS("Ensemble des solutions ?", ivs, M("S = " + IT(ivs)) + ".")],
+            traps: [TS(signSet((x) => (x - c) - (x - b) > 0 ? 1 : -1, [], [], op), "On ne « croise » pas les dénominateurs sans connaître leur signe."), TS(signSet(f, [], [b, c], opp[op]), "Relis le signe : numérateur " + (b - c) + ".")] }); },
+      () => { const m = R.int(1, 4), op = pk(["<", "<=", ">", ">="]), f = (x) => (x * x - m * m) / x, ivs = signSet(f, [-m, m], [0], op);
+        return QS("Résous " + M("x " + OPT[op] + " \\frac{" + m * m + "}{x}") + "." + ANF, ivs, "On ne multiplie pas par " + M("x") + " (signe inconnu) : " + M("x - \\frac{" + m * m + "}{x} = \\frac{x^2 - " + m * m + "}{x}") + ", zéros " + M("\\pm " + m) + ", valeur interdite " + M(0) + ". " + M("S = " + IT(ivs)) + ".",
+          { ctx: "x-et-1sur-x", guide: [GX("On ramène à 0 : " + M("x - \\frac{" + m * m + "}{x} = \\frac{?}{x}") + ". Numérateur ?", "x^2-" + m * m, M("x^2 - " + m * m) + "."), ...fracGuide([-m, m], [0], ivs)],
+            traps: [TS(signSet((x) => x * x - m * m, [-m, m], [], op), "Multiplier par x change le sens quand x < 0 : on perd des solutions (ou on en ajoute)."), ...fracTraps(f, [-m, m], [0], op)] }); },
+      () => { const F = pk([120, 150, 200, 240, 300]), v = pk([2, 3, 4, 5]), s = v + pk([1, 2, 3]), t = F / (s - v), n = Number.isInteger(t) ? t : Math.ceil(t), c = pk([["t-shirts imprimés", "la machine d'impression", "par t-shirt"], ["gâteaux", "le four", "par gâteau"], ["badges", "la presse", "par badge"]]);
+        return QN("Pour fabriquer des " + c[0] + ", une association loue " + c[1] + " " + M(F) + " CHF, puis chaque pièce coûte " + M(v) + " CHF de matériel. Le coût moyen par pièce est " + M("\\frac{" + F + " + " + v + "n}{n}") + ". À partir de combien de pièces ce coût moyen est-il d'au plus " + M(s) + " CHF ?", n,
+          M("\\frac{" + F + " + " + v + "n}{n} \\le " + s) + " ; comme " + M("n > 0") + ", on peut multiplier par " + M("n") + " sans changer le sens : " + M(F + " + " + v + "n \\le " + s + "n") + ", " + M((s - v) + "n \\ge " + F) + ", " + M("n \\ge " + (Number.isInteger(t) ? t : String(+t.toFixed(2)).replace(".", "{,}"))) + " : à partir de " + M(n) + " pièces.",
+          { ctx: "cout-moyen", guide: [GS("Ici " + M("n > 0") + " : on multiplie par " + M("n") + ", on regroupe. " + M((s - v) + "n \\ge") + " ?", F, M(F) + "."), GS("Plus petit nombre entier " + M("n") + " ?", n, M(n) + ".")],
+            traps: [TR(Math.floor(t) === t ? t - 1 : Math.floor(t), "Avec moins de pièces, les frais fixes pèsent trop : arrondis vers le haut."), TR(F / s, "Il faut retirer le coût du matériel : " + (s - v) + "n ≥ " + F + ".")] }); },
+    ],
+  };
+
   const PROBS = {
+    ineqfrac: [() => P("On étudie le quotient q(x) = (x − 2)/(x + 3).", [["a) Valeur interdite", -3], ["b) Zéro de q", 2], ["c) Nombre d'entiers x de −10 à 10 tels que q(x) < 0", 4]], ["Le dénominateur s'annule en −3.", "q(x) < 0 entre −3 et 2 (exclus)."], "a) −3 ; b) 2 ; c) " + M("S = \\,]-3 \\,;\\, 2[") + " : les entiers −2, −1, 0, 1, soit 4.")],
     f2expr: [() => P("Une parabole a pour sommet S(1 ; −4) et passe par (3 ; 0).", [["a) Coefficient a", 1], ["b) f(0)", -3], ["c) L'autre zéro", -1]], ["f(x) = a(x − 1)² − 4.", "Les zéros sont symétriques par rapport à x = 1."], "a) " + M("0 = 4a - 4") + ", a = 1 ; b) " + M("f(0) = 1 - 4 = -3") + " ; c) −1.")],
     f2trois: [() => P("Une parabole passe par (0 ; 3), (1 ; 0) et (−1 ; 8).", [["a) c", 3], ["b) a", 1], ["c) b", -4]], ["c = f(0).", "a + b = −3 et a − b = 5."], "a) 3 ; b) " + M("2a = 2") + " ; c) " + M("b = -4") + " : " + M("f(x) = x^2 - 4x + 3") + ".")],
     inter: [() => P("f(x) = x² − 2x − 1 et g(x) = x + 3.", [["a) Plus petite abscisse d'intersection", -1], ["b) Plus grande abscisse d'intersection", 4], ["c) Ordonnée du point le plus à droite", 7]], ["x² − 3x − 4 = 0.", "(x − 4)(x + 1) = 0."], "a) −1 ; b) 4 ; c) " + M("g(4) = 7") + ".")],
@@ -240,9 +293,9 @@
     ineq2: [() => P("On résout x² − 2x − 8 ≤ 0.", [["a) Plus petit zéro", -2], ["b) Plus grand zéro", 4], ["c) Nombre d'entiers solutions", 7]], ["(x − 4)(x + 2).", "Solution [−2 ; 4]."], "a) −2 ; b) 4 ; c) de −2 à 4 : 7 entiers.")],
   };
 
-  const ALL = { f2expr: FE, f2trois: T3, inter: IN, interpar: IP, ineq2: IQ };
+  const ALL = { f2expr: FE, f2trois: T3, inter: IN, interpar: IP, ineq2: IQ, ineqfrac: IFQ };
   for (const [id, lv] of Object.entries(ALL)) {
-    GEN[id] = (d) => { const L0 = lv[Math.min(Math.max(d, 1), 3)]; let q = null; for (let k = 0; k < 40 && !(q && q.traps && q.traps.length); k++) q = pk(L0)(); return q; };
+    GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
     if (typeof VAR !== "undefined") VAR[id] = {};
     if (typeof PROB !== "undefined") delete PROB[id];
     PROB_EXTRA[id] = PROBS[id];
@@ -253,6 +306,7 @@
     inter: "Résous f(x) = g(x) : ramène tout d'un côté (… = 0). Les solutions sont les abscisses ; l'ordonnée se calcule avec f ou g.",
     interpar: "Égale les deux expressions et ramène à « … = 0 ». Si les x² s'annulent, l'équation est du 1er degré. Δ donne le nombre de points.",
     ineq2: "Cherche les zéros, puis le signe : a > 0 → négatif entre les zéros, positif à l'extérieur (l'inverse si a < 0). ≤, ≥ : zéros compris.",
+    ineqfrac: "Ramène tout à « … ≷ 0 » sans multiplier par le dénominateur. Zéros du numérateur, valeurs interdites (toujours exclues), puis tableau des signes.",
   });
   if (typeof COMPS !== "undefined") Object.assign(COMPS, {
     f2expr: ["Zéros et ordonnée, sommet et a", "Sommet et point, zéros et point, lecture", "Trois points, extremum, axe de symétrie"],
@@ -260,5 +314,6 @@
     inter: ["x² et une droite, horizontale, point", "Cas général, Δ, coordonnées", "Tangente, coefficient a, distance"],
     interpar: ["Deux paraboles", "Hyperbole, même a", "Point, Δ, symétrie"],
     ineq2: ["Produit, différence de carrés, x² ≤ k", "Coefficient a, Δ < 0, carré parfait", "f(x) ≤ g(x), entiers, rectangle"],
+    ineqfrac: ["Quotient simple, numérateur constant, coefficients négatifs", "Comparer à un nombre, trois facteurs, différence de carrés", "Deux fractions, x et 1/x, coût moyen"],
   });
 })();

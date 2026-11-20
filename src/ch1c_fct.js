@@ -210,9 +210,10 @@
       () => { const h = nz(-3, 3), k = nz(-4, 4), a = nz(-3, 3), b = nz(-3, 3);
         return QP("Soit " + M("f(x) = " + xmT(h) + "^2" + sg(k)) + " et " + M("g(x) = f" + xmT(a) + sg(b)) + ". Quel est le sommet de la parabole de " + M("g") + " ? Réponds « x ; y ».", [h + a, k + b], "Sommet de " + M("f") + " : " + M("(" + h + " ; " + k + ")") + " ; translation " + M("(" + a + " ; " + b + ")") + " : " + M("(" + (h + a) + " ; " + (k + b) + ")") + ".",
           { ctx: "sommet-compose", guide: [GP("Sommet de " + M("f") + " ?", [h, k], M("(" + h + " ; " + k + ")") + "."), GP("Sommet de " + M("g") + " ?", [h + a, k + b], M("(" + (h + a) + " ; " + (k + b) + ")") + ".")], traps: [TP([h - a, k + b], "f(x − a) décale de +a vers la droite."), TP([a, b], "Pars du sommet de f, pas de (0 ; 0).")] }); },
-      () => { const a = nz(-5, 5), b = nz(-5, 5), min = R.rand() < 0.5;
-        return QN("Soit " + M("g(x) = |" + xm(a) + "|" + sg(b)) + ". " + (min ? "Quelle est la valeur minimale de " + M("g") + " ?" : "Pour quelle valeur de " + M("x") + " le minimum de " + M("g") + " est-il atteint ?"), min ? b : a, "Le « V » de " + M("|x|") + " a sa pointe en " + M("(0 ; 0)") + " ; elle va en " + M("(" + a + " ; " + b + ")") + ".",
-          { ctx: min ? "abs-min" : "abs-xmin", fig: PL([{ f: (x) => Math.abs(x), dash: true }]), guide: [GP("Pointe du V ? (« x ; y »)", [a, b], M("(" + a + " ; " + b + ")") + "."), GS("Réponse ?", min ? b : a, M(min ? b : a) + ".")], traps: [TR(min ? a : b, min ? "La valeur minimale est une ordonnée." : "On demande l'abscisse x."), TR(min ? -b : -a, "Attention au signe.")] }); },
+      () => { const h = nz(-4, 4), k = nz(-4, 4), a = nz(-3, 3), b = nz(-3, 3), min = R.rand() < 0.5, X = h + a, Y = k + b; if (X === 0 || Y === 0 || X === h || Y === k) return null;
+        return QN("Soit " + M("f(x) = |" + xm(h) + "|" + sg(k)) + " et " + M("g(x) = f" + xmT(a) + sg(b)) + ". " + (min ? "Quelle est la valeur minimale de " + M("g") + " ?" : "Pour quelle valeur de " + M("x") + " le minimum de " + M("g") + " est-il atteint ?"), min ? Y : X, "La pointe du « V » de " + M("f") + " est en " + M("(" + h + " ; " + k + ")") + " ; la translation " + M("(" + a + " ; " + b + ")") + " l'amène en " + M("(" + X + " ; " + Y + ")") + ". " + (min ? "Minimum de " + M("g") + " : " + M(Y) : "Minimum atteint en " + M("x = " + X)) + ".",
+          { ctx: min ? "abs-min" : "abs-xmin", fig: PL([{ f: (x) => Math.abs(x - h) + k, dash: true }]), guide: [GP("Pointe du V de " + M("f") + " ? (« x ; y »)", [h, k], M("(" + h + " ; " + k + ")") + "."), GP("Pointe du V de " + M("g") + " ?", [X, Y], M("(" + h + sg(a) + " \\,;\\, " + k + sg(b) + ") = (" + X + " ; " + Y + ")") + "."), GS("Réponse ?", min ? Y : X, M(min ? Y : X) + ".")],
+            traps: [TR(min ? X : Y, min ? "La valeur minimale est une ordonnée." : "On demande l'abscisse x."), TR(min ? k - b : h - a, min ? "+ " + b + " à l'extérieur : on monte (ou descend) de " + b + "." : "f(x − a) décale de +a vers la droite."), TR(min ? k : h, "C'est le sommet de f ; il faut encore appliquer la translation.")] }); },
     ],
     3: [
       () => { const p = R.int(-3, 3), q = nz(-4, 4), a = nz(-3, 3), b = nz(-4, 4), k = pk([-1, 2, -2, 3]);
@@ -367,7 +368,7 @@
 
   const ALL = { fimg: FI, lectgraph: LG, racinv: RI, modaff: MA, transf: TF, absval: AV, morceaux: MO };
   for (const [id, lv] of Object.entries(ALL)) {
-    GEN[id] = (d) => { const L0 = lv[Math.min(Math.max(d, 1), 3)]; let q = null; for (let k = 0; k < 40 && !(q && q.traps && q.traps.length); k++) q = pk(L0)(); return q; };
+    GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
     if (typeof VAR !== "undefined") VAR[id] = {};
     if (typeof PROB !== "undefined") delete PROB[id];
     PROB_EXTRA[id] = PROBS[id];

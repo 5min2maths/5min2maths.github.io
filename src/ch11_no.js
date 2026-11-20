@@ -593,7 +593,7 @@
   // ===================== Enregistrement =====================
   const ALL = { prio: PRIO, fracadd: FADD, fracmul: FMUL, fracconv: FCONV, puiss: PUISS, sci: SCI, scicalc: SCALC };
   for (const [id, lv] of Object.entries(ALL)) {
-    GEN[id] = (d) => { const L = lv[Math.min(Math.max(d, 1), 3)]; let q = null; for (let k = 0; k < 40 && !(q && q.traps && q.traps.length); k++) q = pk(L)(); return q; };
+    GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
     if (typeof VAR !== "undefined") VAR[id] = {};
     if (typeof PROB !== "undefined") delete PROB[id];
     PROB_EXTRA[id] = PROBS[id];

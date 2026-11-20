@@ -447,8 +447,10 @@ function checkAnswer(spec, input) {
         if (!(m && a >= 1 && a < 10) && !(/^-?\d+(\.\d+)?$/.test(raw) && Math.abs(v) >= 1 && Math.abs(v) < 10)) return { status: "form", message: "La valeur est juste ; écris-la en notation scientifique : a · 10^n avec 1 ≤ a < 10 (par exemple 4,5*10^-3)." };
       }
       if (spec.radical) {
-        const m = raw.match(/^-?(\d*)\*?√\(?(\d+)\)?$/), sqf = (n) => { for (let k = 2; k * k <= n; k++) if (n % (k * k) === 0) return false; return true; };
-        if (!(/^-?\d+$/.test(raw) || (m && sqf(+m[2])))) return { status: "form", message: "La valeur est juste ; simplifie : écris a√b avec b le plus petit possible (par exemple 6√3)." };
+        // a√b, et aussi a√b/c, (a√b)/c, a/√b (20.11 : √21/5 ou √2/2 étaient refusés) ; « sqrt » tapé au clavier = √.
+        const rr = raw.replace(/sqrt/gi, "√").replace(/^\((.*)\)(\/\d+)$/, "$1$2");
+        const m = rr.match(/^-?(\d*)\*?√\(?(\d+)\)?(?:\/(\d+))?$/) || rr.match(/^-?(\d+)\/√\(?(\d+)\)?$/), sqf = (n) => { for (let k = 2; k * k <= n; k++) if (n % (k * k) === 0) return false; return true; };
+        if (!(/^-?\d+(\/\d+)?$/.test(raw) || (m && sqf(+m[2])))) return { status: "form", message: "La valeur est juste ; simplifie : écris a√b avec b le plus petit possible (par exemple 6√3)." };
       }
       return { status: "correct" };
     }

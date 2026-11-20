@@ -39,6 +39,18 @@ const TRAP = (v, m) => ({ v, m });
 // Étape guidée dont la réponse s'écrit avec une racine (a√b exigé).
 const GSR = (ask, value, sol) => ({ ask, spec: { kind: "value", value, radical: true }, sol });
 // Pas à pas du PGDC (lot 1, 14.11) : un diviseur commun divise aussi la différence.
+// Tirage d'une forme dans un niveau (20.11) : on choisit d'abord la forme au hasard, puis on la regénère jusqu'à avoir
+// des erreurs typiques ; sans pièges valides, on la garde quand même. Avant, on retirait au hasard tant qu'il n'y avait
+// pas de pièges : une forme dont les pièges étaient toujours rejetés ne sortait jamais (un seul type de question par niveau).
+const pickForm = (L) => {
+  const one = () => L[Math.floor(R.rand() * L.length)];
+  for (let t = 0; t < 4; t++) {
+    const f = one(); let first = null;
+    for (let k = 0; k < 25; k++) { const q = f(); if (!q) continue; if (q.traps && q.traps.length) return q; first = first || q; if (k >= 8) break; }
+    if (first) return first;
+  }
+  return null;
+};
 const pgdcGuide = (x, y, g) => { const a = Math.min(x, y), b = Math.max(x, y); return [
   GS("Tout diviseur commun de " + M(a) + " et " + M(b) + " divise aussi leur différence. Calcule " + M(b + " - " + a) + ".", b - a, M(b + " - " + a + " = " + (b - a)) + "."),
   GS("Cherche le plus grand diviseur de " + M(b - a) + " qui divise aussi " + M(a) + " : PGDC = ?", g, M(a + " = " + g + " \\cdot " + a / g) + " et " + M(b + " = " + g + " \\cdot " + b / g) + " : PGDC " + M("= " + g) + ".")]; };

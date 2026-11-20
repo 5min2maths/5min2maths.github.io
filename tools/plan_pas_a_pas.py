@@ -51,8 +51,24 @@ def blocs():
     return out
 
 def niveaux_guides(b):
-    """Nombre approximatif de branches avec guide (0 à 3)."""
+    """Nombre approximatif de branches avec guide (0 à 3) — repli si l'inventaire n'a pas les comptes."""
     return min(3, len(re.findall(r"\bguide:", b)))
+
+# Comptage réel (20.11) : la lecture du code se trompait (formes sans guide dans variantes.js, notion rangée dans une
+# seule classe). On lit suivi/inventaire.json (tests/inventaire.html, relancé par tools/suivi.py) : un niveau est
+# couvert si au moins 95 % des tirages réels ont un pas à pas.
+INV = os.path.join(RAC, "suivi", "inventaire.json")
+try:
+    INVD = json.load(open(INV, encoding="utf-8"))
+    if not any("guide" in l for p in INVD["probe"].values() for l in p.get("lv", [])):
+        INVD = None
+except Exception:
+    INVD = None
+
+def niveaux(i, B):
+    if INVD and i in INVD["probe"]:
+        return sum(1 for l in INVD["probe"][i]["lv"][:3] if l.get("n") and l.get("guide", 0) >= 0.95 * l["n"])
+    return niveaux_guides(B[i]) if i in B else 0
 
 def ordre():
     t = src("ordre.js")
@@ -64,6 +80,10 @@ def ordre():
     co = lambda y: [i for i in rang(O["CO"]) if str(y) in T["CO_BY"].get(i, {})]
     groupes = [("11e CO (bêta-testeurs)", co(11)), ("1re Collège (bêta-testeurs)", m1), ("MP", rang(O["MP"])),
                ("2e Collège", m2), ("10e CO", co(10)), ("9e CO", co(9))]
+    if INVD:  # appartenance réelle aux classes (une notion de 1re rangée aussi en 2e reste en 1re)
+        cl = {c["name"]: [r["id"] for r in c["rows"]] for c in INVD["classes"]}
+        groupes = [("11e CO (bêta-testeurs)", cl.get("11e", [])), ("1re Collège (bêta-testeurs)", cl.get("1re", [])), ("MP", cl.get("MP 1re", []) + cl.get("MP 2e", [])),
+                   ("2e Collège", cl.get("2e", [])), ("10e CO", cl.get("10e", [])), ("9e CO", cl.get("9e", []))]
     vus, res = set(), []
     for nom, ids in groupes:
         for i in ids:
@@ -73,9 +93,9 @@ def ordre():
 
 def main():
     B, liste = blocs(), ordre()
-    a_faire = [(g, i) for g, i in liste if i in B and niveaux_guides(B[i]) < 3]
-    faits = [i for g, i in liste if i in B and niveaux_guides(B[i]) >= 3]
-    partiels = [i for g, i in a_faire if niveaux_guides(B[i]) > 0]
+    a_faire = [(g, i) for g, i in liste if (i in B or INVD) and niveaux(i, B) < 3]
+    faits = [i for g, i in liste if (i in B or INVD) and niveaux(i, B) >= 3]
+    partiels = [i for g, i in a_faire if niveaux(i, B) > 0]
     # 11e et 1re Collège en priorité égale (bêta-testeurs, 14.11) : leurs lots alternent, puis les autres niveaux.
     prio = [[x for x in a_faire if x[0] == g] for g in ("11e CO (bêta-testeurs)", "1re Collège (bêta-testeurs)")]
     autres = [x for x in a_faire if x[0] not in ("11e CO (bêta-testeurs)", "1re Collège (bêta-testeurs)")]
@@ -96,7 +116,7 @@ def main():
          "problèmes à contexte : au moins 3 situations parlantes par niveau, étiquette ctx (règle du 14.11 : jamais le même contexte en boucle),",
          "puis tests/test.html (contrôle des guides) et tests/trivial.html, commit, push. Le point du jour affiche le prochain lot.", ""]
     for k, lot in enumerate(lots, 1):
-        L.append(f"- [ ] Lot {k} ({lot[0][0]}) : " + ", ".join(f"{i}" + (f" ({niveaux_guides(B[i])}/3)" if niveaux_guides(B[i]) else "") for _, i in lot))
+        L.append(f"- [ ] Lot {k} ({lot[0][0]}) : " + ", ".join(f"{i}" + (f" ({niveaux(i, B)}/3)" if niveaux(i, B) else "") for _, i in lot))
     open(os.path.join(RAC, "tools", "plan_pas_a_pas.md"), "w", encoding="utf-8").write("\n".join(L) + "\n")
     print("\n".join(L[:4])); print(f"{len(lots)} lots")
 
