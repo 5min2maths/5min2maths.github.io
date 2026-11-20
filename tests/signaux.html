@@ -45,6 +45,11 @@ try {
   const n = sent.length;
   renderQuestion(Engine.build("prio", 1, 11), { eyebrow: "t", onDone: () => 0, onNext: () => 0 }); screenHome();
   ok(sent.length === n, "5 consultation envoyée");
+  // 5 bis. bouton 💬 : code de la question dès l'affichage (avant toute réponse), puis de la leçon, puis titre de page
+  q = Engine.build("prio", 2, 12); renderQuestion(q, { eyebrow: "t", track: "seance", onDone: () => 1, onNext: () => 0 });
+  ok(pageCode() === q.code, "5b code question avant réponse " + pageCode());
+  screenLesson(Object.keys(LESSONS)[0], () => 0); ok(pageCode() === "lecon-" + Object.keys(LESSONS)[0], "5b leçon " + pageCode());
+  screenHome(); ok(/^page-/.test(pageCode()), "5b accueil " + pageCode());
   // 6. mot à la place d'un calcul : [texte]
   ok(sigRep("julie martin") === "[texte]" && sigRep("2sqrt(3)") === "2sqrt(3)" && sigRep("3/4") === "3/4", "6 sigRep");
   // 7. leçon active : devine, passer les défis, J'ai compris

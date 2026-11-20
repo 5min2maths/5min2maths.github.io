@@ -22,7 +22,11 @@ const addTabs = () => {
 };
 // Commentaire depuis n'importe quel écran (20.11, demande de l'auteur) : bouton 💬 fixe ; le commentaire part avec le
 // code de la question affichée, sinon le titre de l'écran (« page-… »).
+// pageQ (20.11) : code de la question ou de la leçon affichée, connu dès l'affichage (le code visible n'apparaît
+// qu'avec la correction : avant, le commentaire partait sans la question).
+var pageQ = null;
 function pageCode() {
+  if (pageQ) return pageQ;
   const q = app.querySelector(".code"), t = app.querySelector("h2") || app.querySelector(".eyebrow");
   if (q && q.textContent.trim()) return q.textContent.trim();
   return "page-" + ((t && t.textContent) || "accueil").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
@@ -49,7 +53,7 @@ function placeFab() {
   if (br) br.appendChild(b); else document.body.appendChild(b);
   if (sh) sh.classList.toggle("top", !!br);
 }
-const h = (html) => { sigClose(); app.classList.remove("has-tabs"); app.innerHTML = html; addTabs(); addFab(); const sh = document.getElementById("fabs"); if (sh) sh.hidden = true; placeFab(); typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
+const h = (html) => { sigClose(); pageQ = null; app.classList.remove("has-tabs"); app.innerHTML = html; addTabs(); addFab(); const sh = document.getElementById("fabs"); if (sh) sh.hidden = true; placeFab(); typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 // Textes de l'app (indices, erreurs typiques) : échappés, sauf <b>, <i>, <br> (16.11 : les balises s'affichaient telles quelles).
 const escT = (s) => esc(s).replace(/&lt;(\/?)(b|i|br)&gt;/g, "<$1$2>");
@@ -598,7 +602,7 @@ function screenLesson(id, cont0, review, track = true) {
   if (state) { Badges.onLesson(state, id); save(); }
   let S = null;
   const cont = () => { if (S) { S.issue = "lue"; S.sec = sigSec(S); } cont0(); };
-  const open = () => { if (track) S = sigOpen({ ev: "lecon", code: "lecon-" + id, fmt: review ? "revue" : "nouvelle", kind: typeof ACTIVE !== "undefined" && ACTIVE[id] ? "active" : "rappel" }); };
+  const open = () => { pageQ = "lecon-" + id; if (track) S = sigOpen({ ev: "lecon", code: "lecon-" + id, fmt: review ? "revue" : "nouvelle", kind: typeof ACTIVE !== "undefined" && ACTIVE[id] ? "active" : "rappel" }); };
   if (typeof ACTIVE !== "undefined" && ACTIVE[id]) { const r = activeLesson(id, L, cont, review); open(); return r; }
   h(`${brand}<div class="eyebrow">${review ? "Leçon" : "Nouvelle notion · 30 secondes de cours"}</div>
   <div class="card pop lesson-card"><h2>${L.titre}</h2>${lessonBody(id)}</div>
@@ -773,7 +777,7 @@ function renderProblem(q, opt) {
   <div class="actions"><button class="btn-primary" id="check">Valider</button><button id="idk">Voir le corrigé</button></div>
   <div id="fb"></div></div>`);
   const S = opt.track ? sigOpen({ ev: "q", code, d: q.d, kind: q.kind || "", fmt: opt.track, redo: opt.redo ? 1 : 0 }) : null;
-  sigWatchLesson(S);
+  sigWatchLesson(S); pageQ = code;
   const fb = document.getElementById("fb");
   q.parts.forEach((p, i) => {
     const inp = document.getElementById("p" + i), pv = document.getElementById("pv" + i);
@@ -853,7 +857,7 @@ function renderQuestion(q, opt) {
   ${opt.onNotYet ? '<button class="btn-ghost small notyet" id="notyet">Pas encore vu en classe</button>' : ""}</div>
   <div id="fb"></div></div>`);
   const S = opt.track ? sigOpen({ ev: "q", code, d: q.d, kind: q.kind || "", fmt: opt.track, redo: opt.redo ? 1 : 0 }) : null;
-  sigWatchLesson(S);
+  sigWatchLesson(S); pageQ = code;
   const inp = document.getElementById("ans"), prev = document.getElementById("prev"), fb = document.getElementById("fb");
   if (window.matchMedia("(pointer: fine)").matches) { inp.setAttribute("inputmode", "text"); inputMode = "text"; inp.focus(); }
   let tm;
