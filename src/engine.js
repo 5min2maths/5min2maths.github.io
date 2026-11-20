@@ -309,21 +309,31 @@ const Engine = {
     const tier = seen.length < 3 ? "mid" : L >= 0.75 ? "fort" : L < 0.55 ? "fragile" : "mid";
     const sh = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
     const rk = (id) => this.rank(state.profile, id);
-    const strong = sh(pool.filter((id) => s(id).seen > 0 && s(id).m >= 0.7));
+    // Anti-répétition entre séances (commentaire testeur du 20.11 : « beaucoup trop de questions de temps ») : une notion
+    // posée lors des deux dernières séances libres passe après les autres ; les points faibles reviennent, mais en alternance.
+    const recent = (state.freeRecent || []).flat(), rec = (id) => recent.filter((x) => x === id).length;
+    const byRecent = (a) => a.map((id, i) => [id, i]).sort((x, y) => rec(x[0]) - rec(y[0]) || x[1] - y[1]).map((x) => x[0]);
+    const strong = byRecent(sh(pool.filter((id) => s(id).seen > 0 && s(id).m >= 0.7)));
     // Points faibles du plus fragile au moins fragile ; pour un élève fragile, chaque point faible est précédé de ses bases.
-    let weak = pool.filter((id) => s(id).seen > 0 && s(id).m < 0.7).sort((a, b) => s(a).m - s(b).m + (Math.random() - 0.5) * 0.1);
+    let weak = pool.filter((id) => s(id).seen > 0 && s(id).m < 0.7).sort((a, b) => s(a).m + 0.3 * rec(a) - s(b).m - 0.3 * rec(b) + (Math.random() - 0.5) * 0.1);
     if (tier === "fragile") weak = [...new Set(weak.flatMap((id) => [...(PREREQ[id] || []).filter((p) => pool.includes(p) && !ok(p)), id]))];
     // Notions neuves dans l'ordre du référentiel : l'élève fragile prend les premières (bases d'abord, prérequis acquis) ;
     // l'élève à l'aise pioche plus loin (fenêtre décalée).
     let fresh = pool.filter((id) => !s(id).seen).sort((a, b) => rk(a) - rk(b));
     if (tier === "fragile") fresh = fresh.filter((id) => (PREREQ[id] || []).every(ok));
-    const win = tier === "fort" ? fresh.slice(Math.min(4, Math.max(0, fresh.length - 8)), Math.min(4, Math.max(0, fresh.length - 8)) + 12) : fresh.slice(0, tier === "fragile" ? 6 : 10);
-    fresh = sh(win.length ? win : fresh);
+    const win = tier === "fort" ? fresh.slice(Math.min(4, Math.max(0, fresh.length - 8)), Math.min(4, Math.max(0, fresh.length - 8)) + 20) : fresh.slice(0, tier === "fragile" ? 10 : 20); // fenêtre élargie (20.11) : plusieurs chapitres, pour la limite de 2 par chapitre
+    fresh = byRecent(sh(win.length ? win : fresh));
     const want = tier === "fort" ? [1, 1, n - 2] : tier === "fragile" ? [1, n - 2, 1] : [Math.round(n / 3), Math.round(n / 3), n - 2 * Math.round(n / 3)];
     const groups = [strong, weak, fresh], out = [], used = new Set();
-    const take = (g) => { const last = out.length ? theme(out[out.length - 1]) : ""; let k = g.findIndex((id) => !used.has(id) && theme(id) !== last); if (k < 0) k = g.findIndex((id) => !used.has(id)); if (k < 0) return false; used.add(g[k]); out.push(g[k]); return true; };
-    for (let round = 0; out.length < n && round < 3 * n; round++) { const gi = [1, 2, 0][round % 3]; if (want[gi] > 0 && take(groups[gi])) want[gi]--; else if (want.every((w, i) => w <= 0 || !groups[i].some((id) => !used.has(id)))) { if (!groups.some((g) => take(g))) break; } }
+    // Au plus 2 notions du même chapitre par séance (20.11) : un élève qui rate tout un chapitre (ex. proportionnalité,
+    // durées et vitesses) ne reçoit plus que ça ; les places libérées vont aux autres chapitres, sinon on lève la limite.
+    const fam = (id) => { try { return this.themeKey(state.profile, id) || theme(id); } catch (e) { return theme(id); } };
+    const famN = (id) => out.filter((x) => fam(x) === fam(id)).length;
+    const take = (g, cap = true) => { const last = out.length ? theme(out[out.length - 1]) : "", free = (id) => !used.has(id) && (!cap || famN(id) < 2); let k = g.findIndex((id) => free(id) && theme(id) !== last); if (k < 0) k = g.findIndex(free); if (k < 0) return false; used.add(g[k]); out.push(g[k]); return true; };
+    for (let round = 0; out.length < n && round < 3 * n; round++) { const gi = [1, 2, 0][round % 3]; if (want[gi] > 0 && take(groups[gi])) want[gi]--; else if (want.every((w, i) => w <= 0 || !groups[i].some((id) => !used.has(id) && famN(id) < 2))) { if (!groups.some((g) => take(g))) break; } }
+    while (out.length < n && (groups.some((g) => take(g)) || groups.some((g) => take(g, false)))) {}
     const cap = difficultyCap(state.profile);
+    state.freeRecent = [...(state.freeRecent || []), out.slice()].slice(-2);
     return out.map((id) => { let d = this.difficulty(state, id); if (tier === "fort" && s(id).seen > 0 && s(id).m >= 0.85) d = Math.min(cap, d + 1); return id + "|" + d; });
   },
 

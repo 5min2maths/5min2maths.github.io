@@ -634,7 +634,7 @@ V("polyreg", 1,
 );
 V("polyreg", 2,
   () => { const n = R.int(5, 12); return QV("Quelle est la somme des angles intérieurs d'un polygone à " + n + " côtés (en degrés) ?", (n - 2) * 180, M("(" + n + " - 2) \\cdot 180° = " + (n - 2) * 180 + "°") + "."); },
-  () => { const [n, nom] = R.pick([[5, "pentagone"], [6, "hexagone"], [8, "octogone"], [10, "décagone"]]); return QV("Quelle est la mesure d'un angle intérieur d'un " + nom + " régulier (en degrés) ?", 180 - 360 / n, "Angle au centre " + 360 / n + "° ; angle intérieur " + M("180° - " + 360 / n + "° = " + (180 - 360 / n) + "°") + "."); },
+  () => { const [n, nom] = R.pick([[5, "pentagone"], [6, "hexagone"], [8, "octogone"], [10, "décagone"]]); return QV("Quelle est la mesure d'un angle intérieur d'un " + nom + " régulier, c'est-à-dire l'angle entre deux côtés voisins (marqué sur la figure), en degrés ?", 180 - 360 / n, "Angle au centre " + M("\\frac{360°}{" + n + "} = " + 360 / n + "°") + " ; angle intérieur " + M("180° - " + 360 / n + "° = " + (180 - 360 / n) + "°") + ".", { fig: FIG.regPoly(n, "?", true) }); },
 );
 V34("polyreg",
   () => { const n = R.pick([5, 6, 8, 9, 10, 12, 15, 18]); return QV("L'angle au centre d'un polygone régulier mesure " + 360 / n + "°. Combien le polygone a-t-il de côtés ?", n, M("\\frac{360}{" + 360 / n + "} = " + n) + "."); },

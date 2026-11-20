@@ -2575,8 +2575,18 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
     return svg(320, 180, g, "prisme");
   };
   // Polygone régulier à n côtés.
-  FIG.regPoly = function (n, lab) {
+  FIG.regPoly = function (n, lab, interior) {
     const cx = 150, cy = 90, r = 72, pts = Array.from({ length: n }, (_, i) => [cx + r * Math.cos((2 * Math.PI * i) / n - Math.PI / 2), cy + r * Math.sin((2 * Math.PI * i) / n - Math.PI / 2)]);
+    // Angle intérieur marqué (commentaire testeur du 20.11 : « mettre une figure ; angle intérieur pas forcément clair ») :
+    // arc au sommet entre deux côtés voisins, à l'intérieur du polygone.
+    if (interior) {
+      const v = pts[1], u = pts[0], w = pts[2], a0 = Math.atan2(u[1] - v[1], u[0] - v[0]); let da = Math.atan2(w[1] - v[1], w[0] - v[0]) - a0;
+      while (da > Math.PI) da -= 2 * Math.PI; while (da <= -Math.PI) da += 2 * Math.PI;
+      const ar = 18, arc = Array.from({ length: 13 }, (_, k) => [v[0] + ar * Math.cos(a0 + (da * k) / 12), v[1] + ar * Math.sin(a0 + (da * k) / 12)]), am = a0 + da / 2;
+      let g = P(pts) + '<polyline points="' + arc.map((q) => q.map((x) => x.toFixed(1)).join(",")).join(" ") + '" fill="none" class="f-accent" stroke-width="2.5"/>';
+      g += t(v[0] + 36 * Math.cos(am), v[1] + 36 * Math.sin(am) + 5, lab || "?", "f-accent f-txt", "middle", 13);
+      return svg(300, 180, g, "polygone régulier, angle intérieur marqué");
+    }
     let g = P(pts) + L(cx, cy, pts[0][0], pts[0][1], "f-line", 'stroke-dasharray="4 4"') + L(cx, cy, pts[1][0], pts[1][1], "f-line", 'stroke-dasharray="4 4"');
     // Angle au centre marqué (commentaire testeur du 16.11 : « marquer l'angle ») : arc coloré et étiquette sur sa bissectrice.
     const ar = 20, a0 = -Math.PI / 2, a1 = (2 * Math.PI) / n - Math.PI / 2, am = (a0 + a1) / 2;
@@ -2636,7 +2646,7 @@ Object.assign(GEN, {
       return { q: "Calcule sans calculatrice : " + M(dec(a) + " \\cdot " + dec(b)) + ".", spec: { kind: "value", value: +(a * b).toFixed(4) }, sol: M(Math.round(a * 10) + " \\cdot " + Math.round(b * 10) + " = " + Math.round(a * 10) * Math.round(b * 10)) + ", puis 2 chiffres après la virgule : " + M(dec(+(a * b).toFixed(4))) + "." };
     }
     const n1 = R.int(2, 5), p1 = R.int(115, 395) / 100, n2 = R.int(2, 4), p2 = R.int(45, 180) / 100, tot = +(n1 * p1 + n2 * p2).toFixed(2), billet = tot < 20 ? 20 : 50;
-    return { fig: FIG.items(n1 + n2, "articles"), q: "Tu achètes " + M(n1) + " cahiers à " + M(dec(p1)) + " CHF et " + M(n2) + " stylos à " + M(dec(p2)) + " CHF. Tu paies avec un billet de " + M(billet) + " CHF. Combien te rend-on (en CHF) ?", spec: { kind: "value", value: +(billet - tot).toFixed(2) }, sol: M(n1 + " \\cdot " + dec(p1) + " + " + n2 + " \\cdot " + dec(p2) + " = " + dec(tot)) + " ; " + M(billet + " - " + dec(tot) + " = " + dec(+(billet - tot).toFixed(2))) + " CHF." };
+    return { q: "Tu achètes " + M(n1) + " cahiers à " + M(dec(p1)) + " CHF et " + M(n2) + " stylos à " + M(dec(p2)) + " CHF. Tu paies avec un billet de " + M(billet) + " CHF. Combien te rend-on (en CHF) ?", spec: { kind: "value", value: +(billet - tot).toFixed(2) }, sol: M(n1 + " \\cdot " + dec(p1) + " + " + n2 + " \\cdot " + dec(p2) + " = " + dec(tot)) + " ; " + M(billet + " - " + dec(tot) + " = " + dec(+(billet - tot).toFixed(2))) + " CHF." };
   },
 
   unites(d) {
@@ -2768,7 +2778,7 @@ Object.assign(GEN, {
   polyreg(d) {
     const n = R.pick([5, 6, 8, 9, 10, 12]);
     if (d === 1) return { fig: FIG.regPoly(n, "?"), q: "Quelle est la mesure de l'angle au centre d'un polygone régulier à " + M(n) + " côtés (en degrés) ?", spec: { kind: "value", value: 360 / n }, sol: M("\\frac{360°}{" + n + "} = " + dec(360 / n) + "°") + "." };
-    if (d === 2) return { fig: FIG.regPoly(n, ""), q: "Quelle est la mesure d'un angle intérieur d'un polygone régulier à " + M(n) + " côtés (en degrés) ?", spec: { kind: "value", value: ((n - 2) * 180) / n }, sol: "Somme des angles : " + M("(" + n + " - 2) \\cdot 180° = " + (n - 2) * 180 + "°") + " ; un angle : " + M(dec(((n - 2) * 180) / n) + "°") + "." };
+    if (d === 2) return { fig: FIG.regPoly(n, "?", true), q: "Quelle est la mesure d'un angle intérieur d'un polygone régulier à " + M(n) + " côtés (l'angle entre deux côtés voisins, marqué sur la figure), en degrés ?", spec: { kind: "value", value: ((n - 2) * 180) / n }, sol: "Somme des angles : " + M("(" + n + " - 2) \\cdot 180° = " + (n - 2) * 180 + "°") + " ; un angle : " + M(dec(((n - 2) * 180) / n) + "°") + "." };
     const m = R.pick([5, 6, 8, 9, 10, 12, 15, 18, 20]), a = ((m - 2) * 180) / m;
     return { q: "Un angle intérieur d'un polygone régulier mesure " + M(dec(a) + "°") + ". Combien le polygone a-t-il de côtés ?", spec: { kind: "value", value: m }, sol: "L'angle au centre vaut " + M("180° - " + dec(a) + "° = " + dec(180 - a) + "°") + " ; " + M("n = \\frac{360}{" + dec(180 - a) + "} = " + m) + "." };
   },
@@ -5136,7 +5146,7 @@ V("polyreg", 1,
 );
 V("polyreg", 2,
   () => { const n = R.int(5, 12); return QV("Quelle est la somme des angles intérieurs d'un polygone à " + n + " côtés (en degrés) ?", (n - 2) * 180, M("(" + n + " - 2) \\cdot 180° = " + (n - 2) * 180 + "°") + "."); },
-  () => { const [n, nom] = R.pick([[5, "pentagone"], [6, "hexagone"], [8, "octogone"], [10, "décagone"]]); return QV("Quelle est la mesure d'un angle intérieur d'un " + nom + " régulier (en degrés) ?", 180 - 360 / n, "Angle au centre " + 360 / n + "° ; angle intérieur " + M("180° - " + 360 / n + "° = " + (180 - 360 / n) + "°") + "."); },
+  () => { const [n, nom] = R.pick([[5, "pentagone"], [6, "hexagone"], [8, "octogone"], [10, "décagone"]]); return QV("Quelle est la mesure d'un angle intérieur d'un " + nom + " régulier, c'est-à-dire l'angle entre deux côtés voisins (marqué sur la figure), en degrés ?", 180 - 360 / n, "Angle au centre " + M("\\frac{360°}{" + n + "} = " + 360 / n + "°") + " ; angle intérieur " + M("180° - " + 360 / n + "° = " + (180 - 360 / n) + "°") + ".", { fig: FIG.regPoly(n, "?", true) }); },
 );
 V34("polyreg",
   () => { const n = R.pick([5, 6, 8, 9, 10, 12, 15, 18]); return QV("L'angle au centre d'un polygone régulier mesure " + 360 / n + "°. Combien le polygone a-t-il de côtés ?", n, M("\\frac{360}{" + 360 / n + "} = " + n) + "."); },
@@ -13101,6 +13111,28 @@ function richChapter(ids) {
       q: "Un carré a un côté de " + Q(6, "cm") + ".",
       parts: [{ label: "Calcule la valeur exacte de sa diagonale, sous la forme " + M("a\\sqrt{b}") + ".", pts: 2 }, { label: "Un carré a une aire de " + Q(72, "cm^2") + ". Écris son côté sous la forme " + M("a\\sqrt{b}") + ".", pts: 1 }, { label: "Compare les deux résultats. Que remarques-tu ?", pts: 1 }],
       sol: ul([M("\\sqrt{36 + 36} = \\sqrt{72} = 6\\sqrt{2}") + " cm.", M("\\sqrt{72} = \\sqrt{36 \\cdot 2} = 6\\sqrt{2}") + " cm.", "Égaux : le carré construit sur la diagonale a une aire double (72 = 2 · 36)."]) }),
+    // 20.11 (commentaires testeurs : « questions identiques », « manque les racines cubiques et des calculs plus complexes ») :
+    // banque élargie de 4 à 8 exercices, dont racines cubiques et calculs enchaînés.
+    () => { const k = pk([4, 5, 6, 7, 8]);
+      return X({ id: "carres", lv: 2, titre: "L'aquarium cubique",
+        q: "Un aquarium cubique a une contenance de " + Q(k ** 3, "dm^3") + ".",
+        parts: [{ label: "Calcule la longueur d'une arête (en dm).", pts: 1 }, { label: "Calcule l'aire d'une face, puis l'aire totale des vitres si l'aquarium n'a pas de couvercle (en dm²).", pts: 2 }, { label: "Combien de litres contient-il ? Et combien de litres contiendrait un aquarium d'arête double ?", pts: 1 }],
+        sol: ul([M("\\sqrt[3]{" + k ** 3 + "} = " + k) + " dm.", "Une face : " + M(k + "^2 = " + k * k) + " dm² ; sans couvercle, 5 faces : " + M("5 \\cdot " + k * k + " = " + 5 * k * k) + " dm².", M(N(k ** 3)) + " L (1 dm³ = 1 L) ; arête double : volume × 8, soit " + M(N(8 * k ** 3)) + " L."]) }); },
+    () => { const [a, b, c] = pk([[3, 4, 5], [6, 8, 10], [5, 12, 13]]), m = pk([2, 3, 4]), n = pk([2, 3]), v1 = c * m, v2 = -(n ** 3) + Math.sqrt(49), e = pk([2, 3]);
+      return X({ id: "rac", lv: 3, titre: "Calculs enchaînés",
+        q: "Calcule sans calculatrice, en détaillant les étapes.",
+        parts: [{ label: M("\\sqrt{" + a + "^2 + " + b + "^2} \\cdot \\sqrt[3]{" + m ** 3 + "}"), pts: 1 }, { label: M("\\sqrt[3]{-" + n ** 3 + "} + \\sqrt{0{,}49} \\cdot 10"), pts: 1 }, { label: M("(-2)^" + (e * 2 + 1) + " + \\sqrt{" + (e * 6) ** 2 + "} \\div " + e), pts: 1 }, { label: M("\\left(\\sqrt{5}\\right)^2 + \\sqrt[3]{" + 1000 + "} - 2^4"), pts: 1 }],
+        sol: ul([M("\\sqrt{" + c * c + "} \\cdot " + m + " = " + c + " \\cdot " + m + " = " + v1) + ".", M("-" + n + " + 0{,}7 \\cdot 10 = -" + n + " + 7 = " + (7 - n)) + ".", M((-(2 ** (e * 2 + 1))) + " + " + e * 6 + " \\div " + e + " = " + (-(2 ** (e * 2 + 1))) + " + 6 = " + (-(2 ** (e * 2 + 1)) + 6)) + " (division avant addition).", M("5 + 10 - 16 = -1") + "."]) }); },
+    () => { const L = pk([2, 3, 4, 5]), c = 10 * L;
+      return X({ id: "carres", lv: 3, titre: "Le cube de sucres",
+        q: "Avec des morceaux de sucre cubiques de " + Q(1, "cm") + " d'arête, on construit un grand cube plein.",
+        parts: [{ label: "Le grand cube contient " + M(N(c ** 3)) + " morceaux. Combien de morceaux y a-t-il sur une arête ?", pts: 1 }, { label: "Combien de morceaux sont visibles sur une seule face ?", pts: 1 }, { label: "On ajoute une couche pour obtenir un cube d'arête " + (c + 1) + ". Combien de morceaux faut-il ajouter ?", pts: 2 }],
+        sol: ul([M("\\sqrt[3]{" + N(c ** 3) + "} = " + c) + " (car " + M(c + "^3 = " + N(c ** 3)) + ").", M(c + "^2 = " + N(c * c)) + ".", M((c + 1) + "^3 - " + c + "^3 = " + N((c + 1) ** 3) + " - " + N(c ** 3) + " = " + N((c + 1) ** 3 - c ** 3)) + "."]) }); },
+    () => { const e = pk([3, 4, 5, 6]), x = pk([2, 3, 4]);
+      return X({ id: "puiss", lv: 3, titre: "Puissances et racines mêlées",
+        q: "Simplifie, puis calcule.",
+        parts: [{ label: M("\\frac{" + x + "^{" + (e + 2) + "}}{" + x + "^{" + e + "}}"), pts: 1 }, { label: M("\\sqrt{" + x + "^{" + 2 * e + "}}") + " (écris-le comme une puissance de " + x + ")", pts: 1 }, { label: M("\\sqrt[3]{" + x + "^6} + \\sqrt{" + x + "^4}"), pts: 1 }, { label: M("10^3 \\cdot \\sqrt{0{,}01}"), pts: 1 }],
+        sol: ul([M(x + "^2 = " + x * x) + ".", M(x + "^{" + e + "} = " + N(x ** e)) + " (car " + M("(" + x + "^{" + e + "})^2 = " + x + "^{" + 2 * e + "}") + ").", M(x + "^2 + " + x + "^2 = " + 2 * x * x) + ".", M("1000 \\cdot 0{,}1 = 100") + "."]) }); },
   ];
   const RAISONC = [
     () => X({ id: "carres", lv: 1, titre: "Trouve l'erreur", q: who() + " écrit : « " + M("\\sqrt{16 + 9} = \\sqrt{16} + \\sqrt{9} = 7") + " ».",
@@ -13109,6 +13141,9 @@ function richChapter(ids) {
     () => X({ id: "puiss", lv: 2, titre: "Vrai ou faux ? Justifie", q: "Pour chaque affirmation, dis si elle est vraie ou fausse, et justifie.",
       parts: [{ label: "« " + M("(-3)^2 = -9") + " »", pts: 1 }, { label: "« " + M("2^3 \\cdot 2^4 = 2^7") + " »", pts: 1 }, { label: "« " + M("0{,}2^2 = 0{,}4") + " »", pts: 1 }],
       sol: ul(["<b>Faux</b> : " + M("(-3) \\cdot (-3) = 9") + ".", "<b>Vrai</b> : on additionne les exposants.", "<b>Faux</b> : " + M("0{,}2 \\cdot 0{,}2 = 0{,}04") + "."]) }),
+    () => X({ id: "carres", lv: 2, titre: "Vrai ou faux ? Justifie", q: "Pour chaque affirmation, dis si elle est vraie ou fausse, et justifie.",
+      parts: [{ label: "« " + M("\\sqrt[3]{-8} = -2") + " »", pts: 1 }, { label: "« " + M("\\sqrt[3]{8 + 27} = \\sqrt[3]{8} + \\sqrt[3]{27} = 5") + " »", pts: 1 }, { label: "« Le cube d'un nombre est toujours plus grand que ce nombre. »", pts: 1 }],
+      sol: ul(["<b>Vrai</b> : " + M("(-2)^3 = -8") + ".", "<b>Faux</b> : " + M("\\sqrt[3]{35}") + " n'est pas entier (" + M("3^3 = 27 < 35 < 64 = 4^3") + ") ; la racine d'une somme n'est pas la somme des racines.", "<b>Faux</b> : " + M("0{,}5^3 = 0{,}125 < 0{,}5") + " (et pour les négatifs, " + M("(-2)^3 = -8 < -2") + ")."]) }),
   ];
   const EXV = [
     () => { const P0 = pk([60, 80, 120]), p = pk([15, 20, 25]);
@@ -16489,9 +16524,23 @@ function mockQuestions() {
     return { ...it, q, pts: q.parts ? 2 * q.parts.length : it.vf ? 2 : it.part === "A" ? it.d : Math.min(it.d, 4) };
   });
 }
+// Pas deux fois la même question dans un sujet (commentaire testeur du 20.11 : « questions identiques dans le test ») :
+// une question d'automatisme ou d'exercice qui reprend la forme d'une précédente est retirée avec une autre graine.
+function mockDistinct(items) {
+  const seen = new Set();
+  return items.map((it) => {
+    if (it.rich || !it.id) return it;
+    for (let t = 0; t < 15; t++) {
+      let f = ""; try { const q = Engine.make(state, it.id, it.d, it.seed); f = it.id + "|" + (q.ctx || qForm(q)); } catch (e) { return it; }
+      if (!seen.has(f)) { seen.add(f); return it; }
+      it = { ...it, seed: mockSeed() };
+    }
+    return it;
+  });
+}
 function mockNew(level) {
   level = level || (state.mock && state.mock.level) || "standard";
-  state.mock = { date: day(), ids: state.prep.ids.slice(), level, items: mockPlan(state.prep.ids, level), done: null };
+  state.mock = { date: day(), ids: state.prep.ids.slice(), level, items: mockDistinct(mockPlan(state.prep.ids, level)), done: null };
   save();
 }
 const ptsTxt = (p) => p + " pt" + (p > 1 ? "s" : "");
@@ -16882,21 +16931,31 @@ const Engine = {
     const tier = seen.length < 3 ? "mid" : L >= 0.75 ? "fort" : L < 0.55 ? "fragile" : "mid";
     const sh = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
     const rk = (id) => this.rank(state.profile, id);
-    const strong = sh(pool.filter((id) => s(id).seen > 0 && s(id).m >= 0.7));
+    // Anti-répétition entre séances (commentaire testeur du 20.11 : « beaucoup trop de questions de temps ») : une notion
+    // posée lors des deux dernières séances libres passe après les autres ; les points faibles reviennent, mais en alternance.
+    const recent = (state.freeRecent || []).flat(), rec = (id) => recent.filter((x) => x === id).length;
+    const byRecent = (a) => a.map((id, i) => [id, i]).sort((x, y) => rec(x[0]) - rec(y[0]) || x[1] - y[1]).map((x) => x[0]);
+    const strong = byRecent(sh(pool.filter((id) => s(id).seen > 0 && s(id).m >= 0.7)));
     // Points faibles du plus fragile au moins fragile ; pour un élève fragile, chaque point faible est précédé de ses bases.
-    let weak = pool.filter((id) => s(id).seen > 0 && s(id).m < 0.7).sort((a, b) => s(a).m - s(b).m + (Math.random() - 0.5) * 0.1);
+    let weak = pool.filter((id) => s(id).seen > 0 && s(id).m < 0.7).sort((a, b) => s(a).m + 0.3 * rec(a) - s(b).m - 0.3 * rec(b) + (Math.random() - 0.5) * 0.1);
     if (tier === "fragile") weak = [...new Set(weak.flatMap((id) => [...(PREREQ[id] || []).filter((p) => pool.includes(p) && !ok(p)), id]))];
     // Notions neuves dans l'ordre du référentiel : l'élève fragile prend les premières (bases d'abord, prérequis acquis) ;
     // l'élève à l'aise pioche plus loin (fenêtre décalée).
     let fresh = pool.filter((id) => !s(id).seen).sort((a, b) => rk(a) - rk(b));
     if (tier === "fragile") fresh = fresh.filter((id) => (PREREQ[id] || []).every(ok));
-    const win = tier === "fort" ? fresh.slice(Math.min(4, Math.max(0, fresh.length - 8)), Math.min(4, Math.max(0, fresh.length - 8)) + 12) : fresh.slice(0, tier === "fragile" ? 6 : 10);
-    fresh = sh(win.length ? win : fresh);
+    const win = tier === "fort" ? fresh.slice(Math.min(4, Math.max(0, fresh.length - 8)), Math.min(4, Math.max(0, fresh.length - 8)) + 20) : fresh.slice(0, tier === "fragile" ? 10 : 20); // fenêtre élargie (20.11) : plusieurs chapitres, pour la limite de 2 par chapitre
+    fresh = byRecent(sh(win.length ? win : fresh));
     const want = tier === "fort" ? [1, 1, n - 2] : tier === "fragile" ? [1, n - 2, 1] : [Math.round(n / 3), Math.round(n / 3), n - 2 * Math.round(n / 3)];
     const groups = [strong, weak, fresh], out = [], used = new Set();
-    const take = (g) => { const last = out.length ? theme(out[out.length - 1]) : ""; let k = g.findIndex((id) => !used.has(id) && theme(id) !== last); if (k < 0) k = g.findIndex((id) => !used.has(id)); if (k < 0) return false; used.add(g[k]); out.push(g[k]); return true; };
-    for (let round = 0; out.length < n && round < 3 * n; round++) { const gi = [1, 2, 0][round % 3]; if (want[gi] > 0 && take(groups[gi])) want[gi]--; else if (want.every((w, i) => w <= 0 || !groups[i].some((id) => !used.has(id)))) { if (!groups.some((g) => take(g))) break; } }
+    // Au plus 2 notions du même chapitre par séance (20.11) : un élève qui rate tout un chapitre (ex. proportionnalité,
+    // durées et vitesses) ne reçoit plus que ça ; les places libérées vont aux autres chapitres, sinon on lève la limite.
+    const fam = (id) => { try { return this.themeKey(state.profile, id) || theme(id); } catch (e) { return theme(id); } };
+    const famN = (id) => out.filter((x) => fam(x) === fam(id)).length;
+    const take = (g, cap = true) => { const last = out.length ? theme(out[out.length - 1]) : "", free = (id) => !used.has(id) && (!cap || famN(id) < 2); let k = g.findIndex((id) => free(id) && theme(id) !== last); if (k < 0) k = g.findIndex(free); if (k < 0) return false; used.add(g[k]); out.push(g[k]); return true; };
+    for (let round = 0; out.length < n && round < 3 * n; round++) { const gi = [1, 2, 0][round % 3]; if (want[gi] > 0 && take(groups[gi])) want[gi]--; else if (want.every((w, i) => w <= 0 || !groups[i].some((id) => !used.has(id) && famN(id) < 2))) { if (!groups.some((g) => take(g))) break; } }
+    while (out.length < n && (groups.some((g) => take(g)) || groups.some((g) => take(g, false)))) {}
     const cap = difficultyCap(state.profile);
+    state.freeRecent = [...(state.freeRecent || []), out.slice()].slice(-2);
     return out.map((id) => { let d = this.difficulty(state, id); if (tier === "fort" && s(id).seen > 0 && s(id).m >= 0.85) d = Math.min(cap, d + 1); return id + "|" + d; });
   },
 
@@ -17785,7 +17844,7 @@ function screenNow() {
   const box = (c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${c.label}</span></label>`;
   const groups = Engine.themeOrder(cur, state.profile).map((th) => [th, cur.filter((c) => c.theme === th).sort((a, b) => Engine.rank(p, a.id) - Engine.rank(p, b.id))]).filter(([, l]) => l.length);
   h(`${brand}<h2>En ce moment <span class="mark">en classe</span></h2>
-  <p class="muted">Choisis 1 à 3 notions que vous travaillez en ce moment. Tes séances s'y concentreront, avec le rappel de cours la première fois, et je te redemanderai dans 3 semaines.</p>
+  <p class="muted">Choisis 1 à 3 notions que tu travailles en classe en ce moment. Tes séances s'y concentreront, avec le rappel de cours la première fois, et je te redemanderai dans 3 semaines.</p>
   ${sug.length ? `<div class="card flat"><h3>Probablement en ce moment</h3><div class="checks">${sug.map((id) => box(cur.find((c) => c.id === id))).join("")}</div></div>` : ""}
   <details class="olds"><summary>Toutes les notions de l'année</summary>${groups.map(([th, l]) => `<div class="card flat"><h3>${Engine.themeLabel(th, state.profile)}</h3><div class="checks">${l.map(box).join("")}</div></div>`).join("")}</details>
   <p class="small muted" id="nerr"></p>

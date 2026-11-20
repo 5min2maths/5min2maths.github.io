@@ -223,6 +223,28 @@
       q: "Un carré a un côté de " + Q(6, "cm") + ".",
       parts: [{ label: "Calcule la valeur exacte de sa diagonale, sous la forme " + M("a\\sqrt{b}") + ".", pts: 2 }, { label: "Un carré a une aire de " + Q(72, "cm^2") + ". Écris son côté sous la forme " + M("a\\sqrt{b}") + ".", pts: 1 }, { label: "Compare les deux résultats. Que remarques-tu ?", pts: 1 }],
       sol: ul([M("\\sqrt{36 + 36} = \\sqrt{72} = 6\\sqrt{2}") + " cm.", M("\\sqrt{72} = \\sqrt{36 \\cdot 2} = 6\\sqrt{2}") + " cm.", "Égaux : le carré construit sur la diagonale a une aire double (72 = 2 · 36)."]) }),
+    // 20.11 (commentaires testeurs : « questions identiques », « manque les racines cubiques et des calculs plus complexes ») :
+    // banque élargie de 4 à 8 exercices, dont racines cubiques et calculs enchaînés.
+    () => { const k = pk([4, 5, 6, 7, 8]);
+      return X({ id: "carres", lv: 2, titre: "L'aquarium cubique",
+        q: "Un aquarium cubique a une contenance de " + Q(k ** 3, "dm^3") + ".",
+        parts: [{ label: "Calcule la longueur d'une arête (en dm).", pts: 1 }, { label: "Calcule l'aire d'une face, puis l'aire totale des vitres si l'aquarium n'a pas de couvercle (en dm²).", pts: 2 }, { label: "Combien de litres contient-il ? Et combien de litres contiendrait un aquarium d'arête double ?", pts: 1 }],
+        sol: ul([M("\\sqrt[3]{" + k ** 3 + "} = " + k) + " dm.", "Une face : " + M(k + "^2 = " + k * k) + " dm² ; sans couvercle, 5 faces : " + M("5 \\cdot " + k * k + " = " + 5 * k * k) + " dm².", M(N(k ** 3)) + " L (1 dm³ = 1 L) ; arête double : volume × 8, soit " + M(N(8 * k ** 3)) + " L."]) }); },
+    () => { const [a, b, c] = pk([[3, 4, 5], [6, 8, 10], [5, 12, 13]]), m = pk([2, 3, 4]), n = pk([2, 3]), v1 = c * m, v2 = -(n ** 3) + Math.sqrt(49), e = pk([2, 3]);
+      return X({ id: "rac", lv: 3, titre: "Calculs enchaînés",
+        q: "Calcule sans calculatrice, en détaillant les étapes.",
+        parts: [{ label: M("\\sqrt{" + a + "^2 + " + b + "^2} \\cdot \\sqrt[3]{" + m ** 3 + "}"), pts: 1 }, { label: M("\\sqrt[3]{-" + n ** 3 + "} + \\sqrt{0{,}49} \\cdot 10"), pts: 1 }, { label: M("(-2)^" + (e * 2 + 1) + " + \\sqrt{" + (e * 6) ** 2 + "} \\div " + e), pts: 1 }, { label: M("\\left(\\sqrt{5}\\right)^2 + \\sqrt[3]{" + 1000 + "} - 2^4"), pts: 1 }],
+        sol: ul([M("\\sqrt{" + c * c + "} \\cdot " + m + " = " + c + " \\cdot " + m + " = " + v1) + ".", M("-" + n + " + 0{,}7 \\cdot 10 = -" + n + " + 7 = " + (7 - n)) + ".", M((-(2 ** (e * 2 + 1))) + " + " + e * 6 + " \\div " + e + " = " + (-(2 ** (e * 2 + 1))) + " + 6 = " + (-(2 ** (e * 2 + 1)) + 6)) + " (division avant addition).", M("5 + 10 - 16 = -1") + "."]) }); },
+    () => { const L = pk([2, 3, 4, 5]), c = 10 * L;
+      return X({ id: "carres", lv: 3, titre: "Le cube de sucres",
+        q: "Avec des morceaux de sucre cubiques de " + Q(1, "cm") + " d'arête, on construit un grand cube plein.",
+        parts: [{ label: "Le grand cube contient " + M(N(c ** 3)) + " morceaux. Combien de morceaux y a-t-il sur une arête ?", pts: 1 }, { label: "Combien de morceaux sont visibles sur une seule face ?", pts: 1 }, { label: "On ajoute une couche pour obtenir un cube d'arête " + (c + 1) + ". Combien de morceaux faut-il ajouter ?", pts: 2 }],
+        sol: ul([M("\\sqrt[3]{" + N(c ** 3) + "} = " + c) + " (car " + M(c + "^3 = " + N(c ** 3)) + ").", M(c + "^2 = " + N(c * c)) + ".", M((c + 1) + "^3 - " + c + "^3 = " + N((c + 1) ** 3) + " - " + N(c ** 3) + " = " + N((c + 1) ** 3 - c ** 3)) + "."]) }); },
+    () => { const e = pk([3, 4, 5, 6]), x = pk([2, 3, 4]);
+      return X({ id: "puiss", lv: 3, titre: "Puissances et racines mêlées",
+        q: "Simplifie, puis calcule.",
+        parts: [{ label: M("\\frac{" + x + "^{" + (e + 2) + "}}{" + x + "^{" + e + "}}"), pts: 1 }, { label: M("\\sqrt{" + x + "^{" + 2 * e + "}}") + " (écris-le comme une puissance de " + x + ")", pts: 1 }, { label: M("\\sqrt[3]{" + x + "^6} + \\sqrt{" + x + "^4}"), pts: 1 }, { label: M("10^3 \\cdot \\sqrt{0{,}01}"), pts: 1 }],
+        sol: ul([M(x + "^2 = " + x * x) + ".", M(x + "^{" + e + "} = " + N(x ** e)) + " (car " + M("(" + x + "^{" + e + "})^2 = " + x + "^{" + 2 * e + "}") + ").", M(x + "^2 + " + x + "^2 = " + 2 * x * x) + ".", M("1000 \\cdot 0{,}1 = 100") + "."]) }); },
   ];
   const RAISONC = [
     () => X({ id: "carres", lv: 1, titre: "Trouve l'erreur", q: who() + " écrit : « " + M("\\sqrt{16 + 9} = \\sqrt{16} + \\sqrt{9} = 7") + " ».",
@@ -231,6 +253,9 @@
     () => X({ id: "puiss", lv: 2, titre: "Vrai ou faux ? Justifie", q: "Pour chaque affirmation, dis si elle est vraie ou fausse, et justifie.",
       parts: [{ label: "« " + M("(-3)^2 = -9") + " »", pts: 1 }, { label: "« " + M("2^3 \\cdot 2^4 = 2^7") + " »", pts: 1 }, { label: "« " + M("0{,}2^2 = 0{,}4") + " »", pts: 1 }],
       sol: ul(["<b>Faux</b> : " + M("(-3) \\cdot (-3) = 9") + ".", "<b>Vrai</b> : on additionne les exposants.", "<b>Faux</b> : " + M("0{,}2 \\cdot 0{,}2 = 0{,}04") + "."]) }),
+    () => X({ id: "carres", lv: 2, titre: "Vrai ou faux ? Justifie", q: "Pour chaque affirmation, dis si elle est vraie ou fausse, et justifie.",
+      parts: [{ label: "« " + M("\\sqrt[3]{-8} = -2") + " »", pts: 1 }, { label: "« " + M("\\sqrt[3]{8 + 27} = \\sqrt[3]{8} + \\sqrt[3]{27} = 5") + " »", pts: 1 }, { label: "« Le cube d'un nombre est toujours plus grand que ce nombre. »", pts: 1 }],
+      sol: ul(["<b>Vrai</b> : " + M("(-2)^3 = -8") + ".", "<b>Faux</b> : " + M("\\sqrt[3]{35}") + " n'est pas entier (" + M("3^3 = 27 < 35 < 64 = 4^3") + ") ; la racine d'une somme n'est pas la somme des racines.", "<b>Faux</b> : " + M("0{,}5^3 = 0{,}125 < 0{,}5") + " (et pour les négatifs, " + M("(-2)^3 = -8 < -2") + ")."]) }),
   ];
   const EXV = [
     () => { const P0 = pk([60, 80, 120]), p = pk([15, 20, 25]);

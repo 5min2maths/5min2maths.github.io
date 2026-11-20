@@ -79,9 +79,23 @@ function mockQuestions() {
     return { ...it, q, pts: q.parts ? 2 * q.parts.length : it.vf ? 2 : it.part === "A" ? it.d : Math.min(it.d, 4) };
   });
 }
+// Pas deux fois la même question dans un sujet (commentaire testeur du 20.11 : « questions identiques dans le test ») :
+// une question d'automatisme ou d'exercice qui reprend la forme d'une précédente est retirée avec une autre graine.
+function mockDistinct(items) {
+  const seen = new Set();
+  return items.map((it) => {
+    if (it.rich || !it.id) return it;
+    for (let t = 0; t < 15; t++) {
+      let f = ""; try { const q = Engine.make(state, it.id, it.d, it.seed); f = it.id + "|" + (q.ctx || qForm(q)); } catch (e) { return it; }
+      if (!seen.has(f)) { seen.add(f); return it; }
+      it = { ...it, seed: mockSeed() };
+    }
+    return it;
+  });
+}
 function mockNew(level) {
   level = level || (state.mock && state.mock.level) || "standard";
-  state.mock = { date: day(), ids: state.prep.ids.slice(), level, items: mockPlan(state.prep.ids, level), done: null };
+  state.mock = { date: day(), ids: state.prep.ids.slice(), level, items: mockDistinct(mockPlan(state.prep.ids, level)), done: null };
   save();
 }
 const ptsTxt = (p) => p + " pt" + (p > 1 ? "s" : "");

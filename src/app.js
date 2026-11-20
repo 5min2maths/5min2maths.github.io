@@ -504,7 +504,7 @@ function screenNow() {
   const box = (c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${c.label}</span></label>`;
   const groups = Engine.themeOrder(cur, state.profile).map((th) => [th, cur.filter((c) => c.theme === th).sort((a, b) => Engine.rank(p, a.id) - Engine.rank(p, b.id))]).filter(([, l]) => l.length);
   h(`${brand}<h2>En ce moment <span class="mark">en classe</span></h2>
-  <p class="muted">Choisis 1 à 3 notions que vous travaillez en ce moment. Tes séances s'y concentreront, avec le rappel de cours la première fois, et je te redemanderai dans 3 semaines.</p>
+  <p class="muted">Choisis 1 à 3 notions que tu travailles en classe en ce moment. Tes séances s'y concentreront, avec le rappel de cours la première fois, et je te redemanderai dans 3 semaines.</p>
   ${sug.length ? `<div class="card flat"><h3>Probablement en ce moment</h3><div class="checks">${sug.map((id) => box(cur.find((c) => c.id === id))).join("")}</div></div>` : ""}
   <details class="olds"><summary>Toutes les notions de l'année</summary>${groups.map(([th, l]) => `<div class="card flat"><h3>${Engine.themeLabel(th, state.profile)}</h3><div class="checks">${l.map(box).join("")}</div></div>`).join("")}</details>
   <p class="small muted" id="nerr"></p>

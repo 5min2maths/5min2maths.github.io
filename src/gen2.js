@@ -137,8 +137,18 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
     return svg(320, 180, g, "prisme");
   };
   // Polygone régulier à n côtés.
-  FIG.regPoly = function (n, lab) {
+  FIG.regPoly = function (n, lab, interior) {
     const cx = 150, cy = 90, r = 72, pts = Array.from({ length: n }, (_, i) => [cx + r * Math.cos((2 * Math.PI * i) / n - Math.PI / 2), cy + r * Math.sin((2 * Math.PI * i) / n - Math.PI / 2)]);
+    // Angle intérieur marqué (commentaire testeur du 20.11 : « mettre une figure ; angle intérieur pas forcément clair ») :
+    // arc au sommet entre deux côtés voisins, à l'intérieur du polygone.
+    if (interior) {
+      const v = pts[1], u = pts[0], w = pts[2], a0 = Math.atan2(u[1] - v[1], u[0] - v[0]); let da = Math.atan2(w[1] - v[1], w[0] - v[0]) - a0;
+      while (da > Math.PI) da -= 2 * Math.PI; while (da <= -Math.PI) da += 2 * Math.PI;
+      const ar = 18, arc = Array.from({ length: 13 }, (_, k) => [v[0] + ar * Math.cos(a0 + (da * k) / 12), v[1] + ar * Math.sin(a0 + (da * k) / 12)]), am = a0 + da / 2;
+      let g = P(pts) + '<polyline points="' + arc.map((q) => q.map((x) => x.toFixed(1)).join(",")).join(" ") + '" fill="none" class="f-accent" stroke-width="2.5"/>';
+      g += t(v[0] + 36 * Math.cos(am), v[1] + 36 * Math.sin(am) + 5, lab || "?", "f-accent f-txt", "middle", 13);
+      return svg(300, 180, g, "polygone régulier, angle intérieur marqué");
+    }
     let g = P(pts) + L(cx, cy, pts[0][0], pts[0][1], "f-line", 'stroke-dasharray="4 4"') + L(cx, cy, pts[1][0], pts[1][1], "f-line", 'stroke-dasharray="4 4"');
     // Angle au centre marqué (commentaire testeur du 16.11 : « marquer l'angle ») : arc coloré et étiquette sur sa bissectrice.
     const ar = 20, a0 = -Math.PI / 2, a1 = (2 * Math.PI) / n - Math.PI / 2, am = (a0 + a1) / 2;
@@ -198,7 +208,7 @@ Object.assign(GEN, {
       return { q: "Calcule sans calculatrice : " + M(dec(a) + " \\cdot " + dec(b)) + ".", spec: { kind: "value", value: +(a * b).toFixed(4) }, sol: M(Math.round(a * 10) + " \\cdot " + Math.round(b * 10) + " = " + Math.round(a * 10) * Math.round(b * 10)) + ", puis 2 chiffres après la virgule : " + M(dec(+(a * b).toFixed(4))) + "." };
     }
     const n1 = R.int(2, 5), p1 = R.int(115, 395) / 100, n2 = R.int(2, 4), p2 = R.int(45, 180) / 100, tot = +(n1 * p1 + n2 * p2).toFixed(2), billet = tot < 20 ? 20 : 50;
-    return { fig: FIG.items(n1 + n2, "articles"), q: "Tu achètes " + M(n1) + " cahiers à " + M(dec(p1)) + " CHF et " + M(n2) + " stylos à " + M(dec(p2)) + " CHF. Tu paies avec un billet de " + M(billet) + " CHF. Combien te rend-on (en CHF) ?", spec: { kind: "value", value: +(billet - tot).toFixed(2) }, sol: M(n1 + " \\cdot " + dec(p1) + " + " + n2 + " \\cdot " + dec(p2) + " = " + dec(tot)) + " ; " + M(billet + " - " + dec(tot) + " = " + dec(+(billet - tot).toFixed(2))) + " CHF." };
+    return { q: "Tu achètes " + M(n1) + " cahiers à " + M(dec(p1)) + " CHF et " + M(n2) + " stylos à " + M(dec(p2)) + " CHF. Tu paies avec un billet de " + M(billet) + " CHF. Combien te rend-on (en CHF) ?", spec: { kind: "value", value: +(billet - tot).toFixed(2) }, sol: M(n1 + " \\cdot " + dec(p1) + " + " + n2 + " \\cdot " + dec(p2) + " = " + dec(tot)) + " ; " + M(billet + " - " + dec(tot) + " = " + dec(+(billet - tot).toFixed(2))) + " CHF." };
   },
 
   unites(d) {
@@ -330,7 +340,7 @@ Object.assign(GEN, {
   polyreg(d) {
     const n = R.pick([5, 6, 8, 9, 10, 12]);
     if (d === 1) return { fig: FIG.regPoly(n, "?"), q: "Quelle est la mesure de l'angle au centre d'un polygone régulier à " + M(n) + " côtés (en degrés) ?", spec: { kind: "value", value: 360 / n }, sol: M("\\frac{360°}{" + n + "} = " + dec(360 / n) + "°") + "." };
-    if (d === 2) return { fig: FIG.regPoly(n, ""), q: "Quelle est la mesure d'un angle intérieur d'un polygone régulier à " + M(n) + " côtés (en degrés) ?", spec: { kind: "value", value: ((n - 2) * 180) / n }, sol: "Somme des angles : " + M("(" + n + " - 2) \\cdot 180° = " + (n - 2) * 180 + "°") + " ; un angle : " + M(dec(((n - 2) * 180) / n) + "°") + "." };
+    if (d === 2) return { fig: FIG.regPoly(n, "?", true), q: "Quelle est la mesure d'un angle intérieur d'un polygone régulier à " + M(n) + " côtés (l'angle entre deux côtés voisins, marqué sur la figure), en degrés ?", spec: { kind: "value", value: ((n - 2) * 180) / n }, sol: "Somme des angles : " + M("(" + n + " - 2) \\cdot 180° = " + (n - 2) * 180 + "°") + " ; un angle : " + M(dec(((n - 2) * 180) / n) + "°") + "." };
     const m = R.pick([5, 6, 8, 9, 10, 12, 15, 18, 20]), a = ((m - 2) * 180) / m;
     return { q: "Un angle intérieur d'un polygone régulier mesure " + M(dec(a) + "°") + ". Combien le polygone a-t-il de côtés ?", spec: { kind: "value", value: m }, sol: "L'angle au centre vaut " + M("180° - " + dec(a) + "° = " + dec(180 - a) + "°") + " ; " + M("n = \\frac{360}{" + dec(180 - a) + "} = " + m) + "." };
   },
