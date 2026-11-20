@@ -790,11 +790,15 @@ function renderProblem(q, opt) {
       if ((kp.dataset.kind || "") !== kind + (kind === "k-num" && !isTerm(p.spec.value) ? "r" : "")) {
         kp.classList.remove("k-set", "k-num"); if (kind) kp.classList.add(kind);
         kp.dataset.kind = kind + (kind === "k-num" && !isTerm(p.spec.value) ? "r" : ""); kp.innerHTML = keysFor(p.spec); bindKp(); }
+      placeKp(inp);
     };
     let tm; inp.oninput = () => { clearTimeout(tm); tm = setTimeout(() => previewOf(inp, pv, p.spec), 180); };
     inp.onkeydown = (e) => { if (e.key === "Enter") check(); };
   });
+  // Clavier sous la case active (20.11, demande de l'auteur) : il suit la réponse en cours, plus besoin de défiler.
+  const placeKp = (inp) => { const kp = document.getElementById("kp"), part = inp.closest(".part"); if (!kp || !part || kp.previousElementSibling === part) return; part.after(kp); setTimeout(() => kp.scrollIntoView({ behavior: "smooth", block: "nearest" }), 40); };
   active = document.getElementById("p0");
+  placeKp(active);
   const bindKp = () => bindKeypad(() => active, (inp) => previewOf(inp, document.getElementById("pv" + inp.id.slice(1)), q.parts[+inp.id.slice(1)].spec));
   bindKp();
   const end = (giveUp) => {
@@ -834,6 +838,7 @@ function renderProblem(q, opt) {
       if (ok[i]) document.getElementById("p" + i).disabled = true;
     });
     if (ok.every(Boolean) || tries >= 3) return end(false);
+    const nx = ok.findIndex((v) => !v); if (nx >= 0) { active = document.getElementById("p" + nx); placeKp(active); }
     fb.innerHTML = `<div class="fb hint pop"><b>${ok.some(Boolean) ? "En partie juste. Continue !" : "Pas encore."}</b><span><b>Indice ${tries}</b> · ${escT(q.hints[tries - 1])}</span></div>`;
   };
   document.getElementById("check").onclick = check;
