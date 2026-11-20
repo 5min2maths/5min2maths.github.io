@@ -20,7 +20,28 @@ const addTabs = () => {
     homeTab = b.dataset.tab; screenHome();
   }));
 };
-const h = (html) => { app.classList.remove("has-tabs"); app.innerHTML = html; addTabs(); typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
+// Commentaire depuis n'importe quel écran (20.11, demande de l'auteur) : bouton 💬 fixe ; le commentaire part avec le
+// code de la question affichée, sinon le titre de l'écran (« page-… »).
+function pageCode() {
+  const q = app.querySelector(".code"), t = app.querySelector("h2") || app.querySelector(".eyebrow");
+  if (q && q.textContent.trim()) return q.textContent.trim();
+  return "page-" + ((t && t.textContent) || "accueil").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
+}
+function addFab() {
+  if (document.getElementById("fabc")) return;
+  document.body.insertAdjacentHTML("beforeend", `<button type="button" id="fabc" class="fab-cmt" aria-label="Envoyer un commentaire sur cette page">💬</button>
+  <div id="fabs" class="fab-sheet" hidden><div class="card stack"><div class="spread"><b>Un commentaire sur cette page ?</b><button type="button" class="btn-ghost small" id="fabx" aria-label="Fermer">✕</button></div>
+  <textarea id="fabt" maxlength="500" rows="4" placeholder="Une erreur, une idée, une remarque générale… (n'écris pas ton nom)"></textarea>
+  <div class="spread"><span class="small muted" id="fabo"></span><button type="button" class="btn-primary" id="fabg">Envoyer</button></div></div></div>`);
+  const sheet = document.getElementById("fabs"), ta = document.getElementById("fabt"), ok = document.getElementById("fabo");
+  document.getElementById("fabc").onclick = () => { sheet.hidden = !sheet.hidden; ok.textContent = ""; if (!sheet.hidden) ta.focus(); };
+  document.getElementById("fabx").onclick = () => (sheet.hidden = true);
+  document.getElementById("fabg").onclick = () => {
+    const text = ta.value.trim(); if (!text) { ok.textContent = "Écris d'abord ton commentaire."; return; }
+    comment(pageCode(), text); ta.value = ""; ok.textContent = "Merci ! C'est envoyé."; setTimeout(() => (sheet.hidden = true), 1200);
+  };
+}
+const h = (html) => { app.classList.remove("has-tabs"); app.innerHTML = html; addTabs(); addFab(); const sh = document.getElementById("fabs"); if (sh) sh.hidden = true; typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 // Textes de l'app (indices, erreurs typiques) : échappés, sauf <b>, <i>, <br> (16.11 : les balises s'affichaient telles quelles).
 const escT = (s) => esc(s).replace(/&lt;(\/?)(b|i|br)&gt;/g, "<$1$2>");
@@ -468,7 +489,7 @@ function screenNow() {
   const p = state.profile, cur = Engine.catalog(p).filter((c) => c.current && state.notions[c.id]);
   const chosen = new Set(Engine.nowActive(state) ? state.now.ids : []), sug = Engine.nowSuggest(state);
   const box = (c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${c.label}</span></label>`;
-  const groups = Engine.themeOrder(cur, state.profile).map((th) => [th, cur.filter((c) => c.theme === th && !sug.includes(c.id)).sort((a, b) => Engine.rank(p, a.id) - Engine.rank(p, b.id))]).filter(([, l]) => l.length);
+  const groups = Engine.themeOrder(cur, state.profile).map((th) => [th, cur.filter((c) => c.theme === th).sort((a, b) => Engine.rank(p, a.id) - Engine.rank(p, b.id))]).filter(([, l]) => l.length);
   h(`${brand}<h2>En ce moment <span class="mark">en classe</span></h2>
   <p class="muted">Choisis 1 à 3 notions que vous travaillez en ce moment. Tes séances s'y concentreront, avec le rappel de cours la première fois, et je te redemanderai dans 3 semaines.</p>
   ${sug.length ? `<div class="card flat"><h3>Probablement en ce moment</h3><div class="checks">${sug.map((id) => box(cur.find((c) => c.id === id))).join("")}</div></div>` : ""}
@@ -479,8 +500,10 @@ function screenNow() {
   const inputs = [...app.querySelectorAll(".check input")];
   inputs.forEach((i) => (i.onchange = () => {
     // Une même notion peut apparaître une seule fois ; au plus 3 cochées.
-    const on = inputs.filter((x) => x.checked);
-    if (on.length > 3) { i.checked = false; document.getElementById("nerr").textContent = "3 notions au plus : décoche-en une d'abord."; } else document.getElementById("nerr").textContent = "";
+    // 20.11 : une notion suggérée figure aussi dans son chapitre (deux cases) : on les garde synchronisées.
+    inputs.filter((x) => x !== i && x.value === i.value).forEach((x) => (x.checked = i.checked));
+    const on = [...new Set(inputs.filter((x) => x.checked).map((x) => x.value))];
+    if (on.length > 3) { inputs.filter((x) => x.value === i.value).forEach((x) => (x.checked = false)); document.getElementById("nerr").textContent = "3 notions au plus : décoche-en une d'abord."; } else document.getElementById("nerr").textContent = "";
   }));
   document.getElementById("save").onclick = () => {
     const ids = [...new Set(inputs.filter((x) => x.checked).map((x) => x.value))];

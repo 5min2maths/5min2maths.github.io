@@ -310,7 +310,7 @@
           { ctx: "tot", guide: [GS("Aire de la base ?", c * c, M(c * c) + " cm²."), GS("Aire latérale (4 triangles) ?", 2 * c * a, M(2 * c * a) + " cm²."), GS("Aire totale ?", c * c + 2 * c * a, M(c * c + 2 * c * a) + " cm².")],
             traps: [TR(2 * c * a, "C'est l'aire latérale : ajoute la base."), TR(c * c + c * a / 2, "Il y a quatre faces triangulaires.")] }); },
       () => { const c = R.int(4, 16), a = R.int(5, 15), x = pk([["une tente en forme de pyramide", "tente"], ["le toit d'une tour, en forme de pyramide", "toit"]]); if (a === c) return null;
-        return Qv("On veut recouvrir de toile les quatre faces de " + x[0] + " (base carrée de " + M(c) + " dm, apothème " + M(a) + " dm). Quelle surface de toile faut-il (en dm²) ?", 2 * c * a, M("4 \\cdot \\frac{" + c + " \\cdot " + a + "}{2} = " + 2 * c * a) + " dm² (sans le sol).",
+        return Qv("On veut recouvrir de toile les quatre faces " + (x[0].startsWith("le ") ? "du " + x[0].slice(3) : "d'" + x[0]) + " (base carrée de " + M(c) + " dm, apothème " + M(a) + " dm). Quelle surface de toile faut-il (en dm²) ?", 2 * c * a, M("4 \\cdot \\frac{" + c + " \\cdot " + a + "}{2} = " + 2 * c * a) + " dm² (sans le sol).",
           { ctx: x[1], guide: [GS("Une face ?", c * a / 2, M(c * a / 2) + " dm²."), GS("Quatre faces ?", 2 * c * a, M(2 * c * a) + " dm².")], traps: [TR(c * c + 2 * c * a, "Le sol n'est pas recouvert de toile.")] }); },
     ],
     2: [

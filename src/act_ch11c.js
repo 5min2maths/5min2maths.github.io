@@ -21,7 +21,7 @@
       const s = Math.min(step, o.wins.length - 1), fig = x === null ? (o.blank ? o.blank(s) : "") : o.show(x, s);
       const ctl = o.ask ? (actAnswerHtml(o.label || "Ta réponse"))
         : actStepper(o.label || "x", nb(x), "x");
-      box.innerHTML = ctl + fig + (o.note ? `<div class="small muted">${o.note}</div>` : "");
+      box.innerHTML = fig + ctl + (o.note ? `<div class="small muted">${o.note}</div>` : "");
       if (o.ask) {
         const inp = box.querySelector(".act-in"); if (x !== null) inp.value = nb(x).replace("−", "-"); const go = () => { const v = Number(String(inp.value).replace(/,/g, ".").replace("−", "-").replace(/\s/g, "").replace(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/, (s, u, w) => String(u / w))); if (inp.value.trim() === "" || !isFinite(v)) { $hint(box, "Tape un nombre."); return; } x = v; draw(); if (!check()) $hint(box, o.miss || (box.querySelector("svg.fig") ? "Pas encore : regarde la figure, puis recalcule." : "Pas encore : relis les calculs affichés, puis recalcule.")); };
         actAnswerBind(box, go);

@@ -377,3 +377,8 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .mode-school .fmt-box h3 { margin: 0; font-size: 1.25rem; }
 .mode-school .fmt-box p { margin: 0; }
 .mode-school .fmt-box #other { font-weight: 700; color: var(--blue); }
+
+/* Bouton « commentaire » présent sur tous les écrans (20.11) */
+.fab-cmt { position: fixed; right: 14px; bottom: 86px; z-index: 40; width: 46px; height: 46px; border-radius: 50%; padding: 0; font-size: 1.3rem; background: var(--card, #fff); border: 1px solid var(--line); box-shadow: 0 3px 10px rgba(0,0,0,.15); }
+.fab-sheet { position: fixed; left: 12px; right: 12px; bottom: 140px; z-index: 41; max-width: 460px; margin: 0 auto; }
+.fab-sheet textarea { width: 100%; box-sizing: border-box; font: inherit; padding: 8px; border-radius: 10px; border: 1px solid var(--line); background: var(--card, #fff); color: inherit; }
