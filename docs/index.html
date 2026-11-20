@@ -16983,12 +16983,13 @@ function screenPrivacy(back) {
   h(`${brand}<h2>Ce que l'app <span class="mark">envoie</span></h2>
   <p class="muted">Pas de compte, pas de nom, pas d'adresse e-mail. Ta progression reste sur ton appareil.</p>
   <div class="card flat stack"><b>Ce qui reste sur ton appareil</b>
-  <ul class="plain"><li>Tes réponses, tes notes de compétences, tes badges, ton Mathélo et ta classe.</li>
-  <li>Rien de tout cela n'est envoyé. Le code de sauvegarde, lui aussi, n'est envoyé nulle part : c'est toi qui le gardes.</li></ul></div>
+  <ul class="plain"><li>Ta progression : tes notes de compétences, tes badges, ton Mathélo, l'historique de tes réponses.</li>
+  <li>Rien de tout cela n'est envoyé (sauf ce qui est décrit ci-dessous, question par question, sans rien qui te désigne). Le code de sauvegarde, lui aussi, n'est envoyé nulle part : c'est toi qui le gardes.</li></ul></div>
   <div class="card flat stack"><b>Ce qui est envoyé, de façon anonyme</b>
   <span class="small muted">Vers un tableau tenu par l'auteur de l'app (Google Sheets), pour l'améliorer pendant la phase de test :</span>
   <ul class="plain"><li><b>Un signal d'ouverture</b> (au plus une fois par jour) et <b>un signal de fin de séance</b>, avec la date et un identifiant tiré au hasard, propre à cet appareil. Il sert seulement à compter combien de personnes testent l'app.</li>
-  <li><b>Le début et la fin de chaque séance</b>, avec ta classe et le format ; à la fin, le nombre de questions, le score et la durée en minutes. Ni les questions, ni tes réponses. Ça sert à savoir si les séances sont trop longues ou trop difficiles.</li>
+  <li><b>Le début et la fin de chaque séance</b>, avec ta classe et le format ; à la fin, le nombre de questions, le score et la durée en minutes. Ça sert à savoir si les séances sont trop longues ou trop difficiles.</li>
+  <li><b>Pour chaque question et chaque rappel de cours</b> : le code de la question, si tu as trouvé (du premier coup ou non), si tu as quitté avant de répondre, le temps passé, l'aide utilisée (pas à pas, correction) et ta première réponse fausse (un nombre ou un calcul ; si tu as écrit des mots, seulement « [texte] »), avec le même identifiant. Ça sert à repérer les questions mal posées, trop dures, ou que l'app corrige mal.</li>
   <li><b>Tes avis</b> 👍 / 👎, « trop facile » et « pas compris », avec le code de la question ou du rappel et le même identifiant.</li>
   <li><b>Tes commentaires</b>, si tu en écris, avec ta classe (par exemple « 10e ») et le même identifiant. N'y écris pas ton nom.</li>
   <li><b>Ton chapitre du moment</b>, si tu en choisis un : les notions, ta classe et le mois, sans identifiant. Ça sert à proposer les notions dans l'ordre où elles se font vraiment en classe.</li></ul></div>
