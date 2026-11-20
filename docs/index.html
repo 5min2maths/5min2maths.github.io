@@ -18455,7 +18455,7 @@ function screenPrivacy(back) {
   <li><b>Tes avis</b> 👍 / 👎, « trop facile » et « pas compris », avec le code de la question ou du rappel et le même identifiant.</li>
   <li><b>Tes commentaires</b>, si tu en écris, avec ta classe (par exemple « 10e ») et le même identifiant. N'y écris pas ton nom.</li>
   <li><b>Ton chapitre du moment</b>, si tu en choisis un : les notions, ta classe et le mois, sans identifiant. Ça sert à proposer les notions dans l'ordre où elles se font vraiment en classe.</li></ul></div>
-  <p class="small muted">Identifiant tiré au hasard pour cet appareil : <code>${esc(deviceId() || "—")}</code></p>
+  <p class="small muted">Identifiant tiré au hasard pour cet appareil : <code>${esc(deviceId() || "—")}</code></p>${isAuthor() ? '<p class="small"><b>Appareil de l\'auteur</b> : rien n\'est envoyé depuis cet appareil, sauf les commentaires 💬 (marqués « auteur »).</p>' : ""}
   <div class="card flat stack"><b>À savoir</b>
   <ul class="plain"><li>L'identifiant ne permet pas de savoir qui tu es : il n'est lié à aucun nom ni compte.</li>
   <li>Comme pour tout site, les services qui hébergent l'app (GitHub) et chargent ses polices et ses formules (Google Fonts, Cloudflare) voient passer la connexion. L'auteur de l'app n'y a pas accès.</li>
@@ -18510,6 +18510,17 @@ function screenRestore(code) {
   if (code) check();
 }
 function restoreFromHash() {
+  const au = /^#auteur(-off)?$/.exec(location.hash);
+  if (au) {
+    try { if (au[1]) localStorage.removeItem("m2m-auteur"); else localStorage.setItem("m2m-auteur", "1"); } catch (e) {}
+    history.replaceState(null, "", location.pathname);
+    h(`${brand}<div class="card stack"><div class="eyebrow">${au[1] ? "Appareil ordinaire" : "Appareil de l'auteur"}</div>
+      <h2>${au[1] ? "Cet appareil compte de nouveau dans les statistiques" : "Cet appareil n'est plus compté dans les statistiques"}</h2>
+      <p class="muted">${au[1] ? "Visites, séances, signaux et votes sont de nouveau envoyés, comme pour un élève." : "Plus de visites, séances, signaux muets ni votes envoyés depuis cet appareil. Tes commentaires 💬 arrivent toujours, marqués « auteur ». Pour annuler : …/#auteur-off."}</p>
+      <button class="btn-primary btn-big" id="aok">Continuer</button></div>`);
+    document.getElementById("aok").onclick = () => (state && state.placed ? screenHome() : screenWelcome());
+    return true;
+  }
   const m = /^#r=(.+)$/.exec(location.hash);
   if (!m) return false;
   screenRestore(m[1]);
@@ -19177,7 +19188,7 @@ function deviceId() {
 }
 function ping(ev, extra = {}) {
   try {
-    if (!VOTE_ENDPOINT || location.protocol !== "https:" || /claude/.test(location.hostname)) return;
+    if (!VOTE_ENDPOINT || location.protocol !== "https:" || /claude/.test(location.hostname) || isAuthor() || location.hash === "#auteur") return;
     if (ev === "open") { if (localStorage.getItem("m2m-ping") === day()) return; localStorage.setItem("m2m-ping", day()); }
     fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ ev, dev: deviceId(), date: day(), ...extra }) }).catch(() => {});
   } catch (e) {}
@@ -19211,7 +19222,11 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
 
 // Commentaire libre (facultatif) : envoyé avec le code de la question, la classe et l'identifiant anonyme de l'appareil.
 // Envois vers la feuille Google : seulement depuis le site publié (jamais depuis les pages de test ni claude.ai).
-const canSend = () => VOTE_ENDPOINT && location.protocol === "https:" && !/claude/.test(location.hostname);
+const canSend = () => VOTE_ENDPOINT && location.protocol === "https:" && !/claude/.test(location.hostname) && !isAuthor();
+// Appareil de l'auteur (20.11) : …/#auteur le marque une fois pour toutes (…/#auteur-off pour annuler). Il n'envoie alors
+// plus ni visites, ni séances, ni signaux muets, ni votes, ni chapitre du moment : les statistiques ne comptent que les
+// élèves. Ses commentaires 💬 partent toujours, étiquetés « auteur ».
+function isAuthor() { try { return localStorage.getItem("m2m-auteur") === "1"; } catch (e) { return false; } }
 const commentBox = (title = "💬 Un commentaire sur cette question ?", ph = "Une erreur, une consigne pas claire, une idée… (n'écris pas ton nom)", code = "") =>
   `<details class="cmt"${code ? ` data-code="${code}"` : ""}><summary>${title}</summary><textarea class="cmt-t" maxlength="500" rows="3" placeholder="${ph}"></textarea>
   <div class="spread"><span class="small muted cmt-ok"></span><button class="small cmt-s">Envoyer</button></div></details>`;
@@ -19254,7 +19269,7 @@ function comment(code, text) {
     state.comments = (state.comments || []).concat({ code, text, date: day() }).slice(-50);
     Badges.onFeedback(state);
     save();
-    if (canSend()) fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ ev: "comment", code, text: text.slice(0, 500), niveau, dev: deviceId(), date: day() }) }).catch(() => {});
+    if (VOTE_ENDPOINT && location.protocol === "https:" && !/claude/.test(location.hostname)) fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ ev: "comment", code, text: text.slice(0, 500), niveau: (isAuthor() ? "auteur · " : "") + niveau, dev: deviceId(), date: day() }) }).catch(() => {});
   } catch (e) {}
 }
 
