@@ -1,5 +1,5 @@
 // Chantier 11e · 1. Nombres et opérations, fin (19.11, « on se concentre sur la 11e ») : rel, fracops, rac, les trois
-// dernières notions de 11e encore sur les anciens générateurs. Même standard que ch11_no.js : au moins 3 formes par
+// dernières notions de 11e encore sur les anciens générateurs ; carres et pctvar (révisions de 10e) ajoutés le 20.11. Même standard que ch11_no.js : au moins 3 formes par
 // niveau, pas à pas, erreurs typiques, étiquette ctx ; défis en plusieurs étapes.
 (function () {
   const pk = (a) => a[Math.floor(R.rand() * a.length)];
@@ -148,13 +148,121 @@
     ],
   };
 
+  // ===================== carres : carrés parfaits, cubes, racines exactes (20.11, révision de 10e en 11e) =====================
+  const TH = (v) => { let [i, f] = String(r6(v)).split("."); if (i.replace("-", "").length >= 4) i = i.replace(/\B(?=(\d{3})+(?!\d))/g, "\\text{'}"); return i + (f ? "{,}" + f : ""); };
+  const TRIP = [[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 15, 17], [9, 12, 15], [7, 24, 25], [12, 16, 20]];
+  const CA = {
+    1: [
+      () => { const k = R.int(6, 15);
+        return Qv("Calcule : " + M("\\sqrt{" + k * k + "}"), k, M(k + "^2 = " + k * k) + ", donc " + M("\\sqrt{" + k * k + "} = " + k) + ".",
+          { ctx: "racine", guide: [GS("Quel est le carré de " + M(k - 1) + " ?", (k - 1) ** 2, M((k - 1) ** 2) + " : trop petit."), GS("Et le carré de " + M(k) + " ?", k * k, M(k * k) + " : c'est le nombre sous la racine."), GS(M("\\sqrt{" + k * k + "}") + " = ?", k, M(k) + ".")],
+            traps: [TR((k * k) / 2, "La racine carrée n'est pas la moitié : on cherche le nombre qui, multiplié par lui-même, donne " + k * k + "."), TR(k + 1, M((k + 1) + "^2 = " + (k + 1) ** 2) + ", trop grand.")] }); },
+      () => { const k = R.int(11, 19);
+        return Qv("Calcule de tête : " + M(k + "^2"), k * k, M(k + "^2 = " + k + " \\cdot " + k + " = " + k + " \\cdot 10 + " + k + " \\cdot " + (k - 10) + " = " + 10 * k + " + " + k * (k - 10) + " = " + k * k) + ".",
+          { ctx: "carre", guide: [GS(M(k + " \\cdot 10") + " = ?", 10 * k, M(10 * k) + "."), GS(M(k + " \\cdot " + (k - 10)) + " = ?", k * (k - 10), M(k * (k - 10)) + "."), GS(M(k + "^2") + " = ?", k * k, M(10 * k + " + " + k * (k - 10) + " = " + k * k) + ".")],
+            traps: [TR(2 * k, M(k + "^2") + ", c'est " + k + " · " + k + ", pas " + k + " · 2."), TR(100 + (k - 10) ** 2, "(10 + " + (k - 10) + ")² n'est pas 10² + " + (k - 10) + "² : il manque le double produit.")] }); },
+      () => { const k = pk([2, 3, 4, 5, 6, 10]);
+        return Qv("Calcule : " + M("\\sqrt[3]{" + TH(k ** 3) + "}"), k, M(k + "^3 = " + k + " \\cdot " + k + " \\cdot " + k + " = " + TH(k ** 3)) + ", donc " + M("\\sqrt[3]{" + TH(k ** 3) + "} = " + k) + ".",
+          { ctx: "cube", guide: [GS("Quel est le cube de " + M(k) + " (" + M(k + " \\cdot " + k + " \\cdot " + k) + ") ?", k ** 3, M(TH(k ** 3)) + "."), GS(M("\\sqrt[3]{" + TH(k ** 3) + "}") + " = ?", k, M(k) + ".")],
+            traps: [TR(k ** 3 / 3, "La racine cubique n'est pas le tiers : on cherche le nombre dont le cube vaut " + k ** 3 + "."), TR(Math.sqrt(k ** 3), "Racine cubique, pas racine carrée.")] }); },
+      () => { const k = R.int(5, 15), c = pk([["Un carré a une aire de " + M(k * k + "\\text{ cm}^2") + ". Quelle est la longueur de son côté (en cm) ?", "aire"], ["Un potager carré mesure " + M(k * k + "\\text{ m}^2") + ". Quelle longueur de clôture faut-il pour un seul de ses côtés (en m) ?", "potager"], ["On veut ranger " + M(k * k) + " chaises en un carré parfait (autant de rangées que de chaises par rangée). Combien de chaises par rangée ?", "chaises"]]);
+        return Qv(c[0], k, "Côté " + M("= \\sqrt{" + k * k + "} = " + k) + " (car " + M(k + "^2 = " + k * k) + ").",
+          { ctx: c[1], guide: [GS("Le côté au carré donne " + M(k * k) + " : côté " + M("= \\sqrt{" + k * k + "}") + " = ?", k, M(k) + ".")],
+            traps: [TR((k * k) / 4, "On ne divise pas par 4 (ça, c'est pour le périmètre)."), TR((k * k) / 2, "La racine n'est pas la moitié.")] }); },
+    ],
+    2: [
+      () => { const a = pk([4, 9, 16, 25, 36, 49]), b = pk([4, 9, 25, 64, 81, 100].filter((x) => x !== a)), v = Math.sqrt(a * b);
+        return Qv("Calcule : " + M("\\sqrt{" + a + " \\cdot " + b + "}"), v, M("\\sqrt{" + a + " \\cdot " + b + "} = \\sqrt{" + a + "} \\cdot \\sqrt{" + b + "} = " + Math.sqrt(a) + " \\cdot " + Math.sqrt(b) + " = " + v) + ".",
+          { ctx: "produit", guide: [GS(M("\\sqrt{" + a + "}") + " = ?", Math.sqrt(a), M(Math.sqrt(a)) + "."), GS(M("\\sqrt{" + b + "}") + " = ?", Math.sqrt(b), M(Math.sqrt(b)) + "."), GS("Produit ?", v, M(Math.sqrt(a) + " \\cdot " + Math.sqrt(b) + " = " + v) + ".")],
+            traps: [TR(Math.sqrt(a) + Math.sqrt(b), "√(a · b) = √a · √b : on multiplie, on n'additionne pas."), TR(a * b, "N'oublie pas la racine.")] }); },
+      () => { const k = pk([2, 3, 4, 5, 6, 7, 8, 9, 11, 12]), big = k > 9, n = big ? k * k / 100 : k * k / 100, v = k / 10;
+        return Qv("Calcule : " + M("\\sqrt{" + N(n) + "}"), v, M(N(n) + " = \\frac{" + k * k + "}{100}") + ", donc " + M("\\sqrt{" + N(n) + "} = \\frac{" + k + "}{10} = " + N(v)) + ".",
+          { ctx: "decimal", guide: [GS("Écris " + M(N(n)) + " en centièmes : " + M(N(n) + " = \\frac{?}{100}") + ". Numérateur ?", k * k, M(k * k) + "."), GS(M("\\sqrt{" + k * k + "}") + " = ?", k, M(k) + "."), GS(M("\\sqrt{" + N(n) + "} = \\frac{" + k + "}{\\sqrt{100}}") + " = ?", v, M(N(v)) + ".")],
+            traps: [TR(k / 100, M("\\sqrt{100} = 10") + ", pas 100 : " + M("\\sqrt{" + N(n) + "} = " + N(v)) + "."), TR(n / 2, "La racine n'est pas la moitié.")] }); },
+      () => { const [a, b, c] = pk(TRIP);
+        return Qv("Calcule : " + M("\\sqrt{" + a + "^2 + " + b + "^2}"), c, M("\\sqrt{" + a * a + " + " + b * b + "} = \\sqrt{" + c * c + "} = " + c) + ".",
+          { ctx: "somme-carres", guide: [GS(M(a + "^2 + " + b + "^2") + " = ?", c * c, M(a * a + " + " + b * b + " = " + c * c) + "."), GS(M("\\sqrt{" + c * c + "}") + " = ?", c, M(c) + ".")],
+            traps: [TR(a + b, "√(a² + b²) ≠ a + b : on calcule d'abord la somme sous la racine."), TR(c * c, "N'oublie pas la racine.")] }); },
+      () => { const [p, q] = pk([[1, 4], [4, 9], [9, 16], [1, 9], [16, 25], [4, 25], [9, 49], [25, 36]]), v = Math.sqrt(p) / Math.sqrt(q);
+        return Qv("Calcule : " + M("\\sqrt{\\frac{" + p + "}{" + q + "}}") + FA + ".", v, M("\\frac{\\sqrt{" + p + "}}{\\sqrt{" + q + "}} = \\frac{" + Math.sqrt(p) + "}{" + Math.sqrt(q) + "}") + ".",
+          { ctx: "fraction", canon: Math.sqrt(p) + "/" + Math.sqrt(q), guide: [GS("Racine du numérateur ?", Math.sqrt(p), M(Math.sqrt(p)) + "."), GS("Racine du dénominateur ?", Math.sqrt(q), M(Math.sqrt(q)) + "."), GS(M("\\sqrt{\\frac{" + p + "}{" + q + "}}") + " = ?", v, M("\\frac{" + Math.sqrt(p) + "}{" + Math.sqrt(q) + "}") + ".")],
+            traps: [TR(p / q / 2, "La racine n'est pas la moitié."), TR(p / Math.sqrt(q), "Il faut prendre la racine du numérateur aussi.")] }); },
+    ],
+    3: [
+      () => { const k = pk([2, 3, 4, 5]), neg = R.rand() < 0.5, dec = !neg, v = neg ? -k : k / 10, n = neg ? -(k ** 3) : (k ** 3) / 1000;
+        return Qv("Calcule : " + M("\\sqrt[3]{" + N(n) + "}"), v, neg ? M("(" + -k + ")^3 = " + -(k ** 3)) + " : la racine cubique d'un nombre négatif existe, " + M("\\sqrt[3]{" + n + "} = " + -k) + "." : M(N(n) + " = \\frac{" + k ** 3 + "}{1000}") + " et " + M("\\sqrt[3]{1000} = 10") + " : " + M("\\sqrt[3]{" + N(n) + "} = " + N(v)) + ".",
+          { ctx: neg ? "cube-negatif" : "cube-decimal", guide: neg ? [GS("Cube de " + M(k) + " ?", k ** 3, M(k ** 3) + "."), GS("Un cube garde le signe : " + M("(" + -k + ")^3") + " = ?", -(k ** 3), M(-(k ** 3)) + "."), GS(M("\\sqrt[3]{" + n + "}") + " = ?", v, M(v) + ".")] : [GS(M(N(n)) + " en millièmes : numérateur ?", k ** 3, M(N(n) + " = \\frac{" + k ** 3 + "}{1000}") + "."), GS(M("\\sqrt[3]{" + k ** 3 + "}") + " = ?", k, M(k) + "."), GS(M("\\sqrt[3]{" + N(n) + "}") + " = ?", v, M(N(v)) + " (car " + M("\\sqrt[3]{1000} = 10") + ").")],
+            traps: neg ? [TR(k, "Le cube d'un négatif est négatif : la racine cubique de " + n + " est négative.")] : [TR(k / 100, M("\\sqrt[3]{1000} = 10") + ", donc on divise par 10."), TR(k / 1000, "La racine cubique de 1000 est 10, pas 1000.")] }); },
+      () => { const n = R.int(30, 400), f = Math.floor(Math.sqrt(n)); if (f * f === n) return null; const v = (f + 1) ** 2;
+        return Qv("Quel est le plus petit carré parfait strictement supérieur à " + M(n) + " ?", v, M(f + "^2 = " + f * f + " < " + n + " < " + (f + 1) + "^2 = " + v) + " : c'est " + M(v) + ".",
+          { ctx: "encadrer", guide: [GS("Plus grand entier dont le carré est inférieur à " + M(n) + " ?", f, M(f + "^2 = " + f * f) + "."), GS("Carré suivant, " + M((f + 1) + "^2") + " = ?", v, M(v) + ".")],
+            traps: [TR(f * f, M(f * f) + " est plus petit que " + n + "."), TR(f + 1, "On demande le carré parfait, pas sa racine.")] }); },
+      () => { const k = pk([2, 3, 4, 5, 6, 10]), V = k ** 3, A = 6 * k * k, c = pk([["Un dé cubique a un volume de " + M(TH(V) + "\\text{ cm}^3") + ". Quelle est l'aire totale de ses six faces (en cm²) ?", "de"], ["Une boîte cubique contient exactement " + M(TH(V) + "\\text{ cm}^3") + ". Combien de cm² de carton faut-il pour ses six faces ?", "boite"], ["Un bloc de glace cubique a un volume de " + M(TH(V) + "\\text{ dm}^3") + ". Quelle est l'aire de ses six faces (en dm²) ?", "glace"]]);
+        return Qv(c[0], A, "Arête " + M("= \\sqrt[3]{" + TH(V) + "} = " + k) + " ; une face : " + M(k + "^2 = " + k * k) + " ; six faces : " + M("6 \\cdot " + k * k + " = " + A) + ".",
+          { ctx: "cube-" + c[1], guide: [GS("Arête " + M("= \\sqrt[3]{" + TH(V) + "}") + " = ?", k, M(k) + "."), GS("Aire d'une face ?", k * k, M(k + "^2 = " + k * k) + "."), GS("Aire des six faces ?", A, M("6 \\cdot " + k * k + " = " + A) + ".")],
+            traps: [TR(k * k, "C'est l'aire d'une seule face ; un cube en a six."), TR(V / 6, "On passe par l'arête : racine cubique du volume.")] }); },
+      () => { const [a, b, v] = pk([[2, 8, 4], [3, 12, 6], [2, 18, 6], [5, 20, 10], [3, 27, 9], [2, 32, 8], [6, 24, 12]]);
+        return Qv("Calcule : " + M("\\sqrt{" + a + "} \\cdot \\sqrt{" + b + "}"), v, M("\\sqrt{" + a + "} \\cdot \\sqrt{" + b + "} = \\sqrt{" + a + " \\cdot " + b + "} = \\sqrt{" + a * b + "} = " + v) + ".",
+          { ctx: "produit-racines", guide: [GS("On regroupe sous une seule racine : " + M(a + " \\cdot " + b) + " = ?", a * b, M(a * b) + "."), GS(M("\\sqrt{" + a * b + "}") + " = ?", v, M(v) + ".")],
+            traps: [TR(Math.sqrt(a + b), "√a · √b = √(a · b), pas √(a + b)."), TR(a * b, "N'oublie pas la racine.")] }); },
+    ],
+  };
+
+  // ===================== pctvar : augmentation et diminution en pourcentage (20.11) =====================
+  const PV = {
+    1: [
+      () => { const t = pk([5, 10, 15, 20, 25, 30, 50]), p = 20 * R.int(2, 15), inc = (p * t) / 100, v = p + inc, c = pk([["Un article coûte", "son prix augmente"], ["Un abonnement de fitness coûte", "son prix augmente"], ["Une place de concert coûte", "le prix augmente"]]);
+        return Qv(c[0] + " " + M(p) + " CHF ; " + c[1] + " de " + M(t + "\\,\\%") + ". Nouveau prix (en CHF) ?", v, "Augmentation : " + M("\\frac{" + t + "}{100} \\cdot " + p + " = " + N(inc)) + " CHF ; nouveau prix " + M(p + " + " + N(inc) + " = " + N(v)) + " CHF.",
+          { ctx: "hausse", guide: [GS("Montant de l'augmentation : " + M(t + "\\,\\%") + " de " + M(p) + " = ?", inc, M(N(inc)) + " CHF."), GS("Nouveau prix ?", v, M(p + " + " + N(inc) + " = " + N(v)) + " CHF.")],
+            traps: [TR(inc, "C'est l'augmentation ; il faut l'ajouter au prix de départ."), TR(p + t, "On ajoute " + t + " %, pas " + t + " CHF.")] }); },
+      () => { const t = pk([10, 15, 20, 25, 30, 40]), p = 20 * R.int(2, 15), red = (p * t) / 100, v = p - red, c = pk([["Un jean à", "est soldé"], ["Un vélo à", "bénéficie d'une réduction"], ["Une console à", "est en promotion"]]);
+        return Qv(c[0] + " " + M(p) + " CHF " + c[1] + " de " + M(t + "\\,\\%") + ". Combien le paie-t-on (en CHF) ?", v, "Réduction : " + M("\\frac{" + t + "}{100} \\cdot " + p + " = " + N(red)) + " CHF ; prix " + M(p + " - " + N(red) + " = " + N(v)) + " CHF.",
+          { ctx: "baisse", guide: [GS("Montant de la réduction ?", red, M(N(red)) + " CHF."), GS("Prix payé ?", v, M(p + " - " + N(red) + " = " + N(v)) + " CHF.")],
+            traps: [TR(red, "C'est la réduction ; il faut la retirer du prix."), TR(p - t, "On retire " + t + " %, pas " + t + " CHF.")] }); },
+      () => { const t = pk([3, 5, 8, 12, 15, 20, 25, 40, 60]), up = R.rand() < 0.5, v = 1 + (up ? t : -t) / 100;
+        return Qv((up ? "Augmenter" : "Diminuer") + " une quantité de " + M(t + "\\,\\%") + " revient à la multiplier par quel nombre ?", v, M("100\\,\\% " + (up ? "+ " : "- ") + t + "\\,\\% = " + (100 + (up ? t : -t)) + "\\,\\%") + ", soit " + M(N(v)) + ".",
+          { ctx: "coefficient", guide: [GS("On garde 100 % de la quantité, " + (up ? "plus" : "moins") + " " + M(t + "\\,\\%") + " : combien de % au total ?", 100 + (up ? t : -t), M(100 + (up ? t : -t) + "\\,\\%") + "."), GS("En nombre décimal (÷ 100) ?", v, M(N(v)) + ".")],
+            traps: [TR(t / 100, "Multiplier par " + N(t / 100) + " donnerait seulement le montant de la variation."), TR(1 + (up ? -t : t) / 100, up ? "Augmenter : le coefficient est plus grand que 1." : "Diminuer : le coefficient est plus petit que 1.")] }); },
+    ],
+    2: [
+      () => { const a = 20 * R.int(2, 15), t = pk([-40, -25, -20, -10, 10, 15, 20, 25, 50, 75]), b = (a * (100 + t)) / 100, c = pk(["Le prix d'un article passe", "Le nombre d'abonnés d'une chaîne passe", "La fréquentation d'une piscine passe"]);
+        return Qv(c + " de " + M(a) + " à " + M(N(b)) + ". Quel est le pourcentage de variation ? (Réponds par un nombre, négatif pour une baisse.)", t, "Variation : " + M(N(b) + " - " + a + " = " + N(b - a)) + " ; " + M("\\frac{" + N(b - a) + "}{" + a + "} = " + N(t / 100)) + ", soit " + M(t + "\\,\\%") + ".",
+          { ctx: "taux", guide: [GS("Variation (arrivée − départ) ?", b - a, M(N(b - a)) + "."), GS("On divise par la valeur de départ " + M(a) + " : ?", t / 100, M(N(t / 100)) + "."), GS("En pour cent ?", t, M(t + "\\,\\%") + ".")],
+            traps: [TR(r6(((b - a) / b) * 100), "Le pourcentage se calcule sur la valeur de DÉPART, pas d'arrivée."), TR(-t, "Attention au signe : " + (t > 0 ? "c'est une hausse." : "c'est une baisse."))] }); },
+      () => { const t = pk([10, 20, 25, 50, 60, 5]), p = 20 * R.int(2, 12), np = r6(p * (1 + t / 100));
+        return Qv("Après une augmentation de " + M(t + "\\,\\%") + ", un article coûte " + M(N(np)) + " CHF. Quel était son prix avant (en CHF) ?", p, "Le prix a été multiplié par " + M(N(1 + t / 100)) + " ; on divise : " + M(N(np) + " \\div " + N(1 + t / 100) + " = " + p) + " CHF.",
+          { ctx: "avant-hausse", guide: [GS("Par quel nombre le prix de départ a-t-il été multiplié ?", 1 + t / 100, M(N(1 + t / 100)) + "."), GS("Prix de départ " + M("= " + N(np) + " \\div " + N(1 + t / 100)) + " = ?", p, M(p) + " CHF.")],
+            traps: [TR(r6(np * (1 - t / 100)), "On ne retire pas " + t + " % du nouveau prix : la hausse portait sur l'ancien."), TR(r6(np - t), "Ce sont des pourcents, pas des francs.")] }); },
+      () => { const c = pk([["Un loyer mensuel de", "augmente de", 1, [1200, 1500, 1800, 2000, 2400]], ["Un salaire mensuel de", "augmente de", 1, [4000, 4500, 5000, 6000]], ["La facture d'électricité annuelle de", "baisse de", -1, [800, 900, 1200, 1500]]]), p = pk(c[3]), t = pk([2, 3, 4, 5, 8]), v = r6(p * (1 + (c[2] * t) / 100));
+        return Qv(c[0] + " " + M(TH(p)) + " CHF " + c[1] + " " + M(t + "\\,\\%") + ". Nouveau montant (en CHF) ?", v, M(TH(p) + " \\cdot " + N(1 + (c[2] * t) / 100) + " = " + TH(v)) + " CHF.",
+          { ctx: "quotidien", guide: [GS("Coefficient multiplicateur ?", 1 + (c[2] * t) / 100, M(N(1 + (c[2] * t) / 100)) + "."), GS("Nouveau montant ?", v, M(TH(p) + " \\cdot " + N(1 + (c[2] * t) / 100) + " = " + TH(v)) + " CHF.")],
+            traps: [TR(r6((p * t) / 100), "C'est seulement la variation."), TR(r6(p * (1 - (c[2] * t) / 100)), c[2] > 0 ? "Le montant augmente." : "Le montant baisse.")] }); },
+    ],
+    3: [
+      () => { const a = pk([10, 20, 25, 50]), b = pk([10, 20, 25, 40, 50]), v = r6(((1 + a / 100) * (1 - b / 100) - 1) * 100); if (v === 0 || a === b && R.rand() < 0.3) return null;
+        return Qv("Un prix augmente de " + M(a + "\\,\\%") + ", puis baisse de " + M(b + "\\,\\%") + ". Quelle est la variation globale en pour cent ? (Négatif pour une baisse.)", v, "Coefficients " + M(N(1 + a / 100)) + " puis " + M(N(1 - b / 100)) + " ; " + M(N(1 + a / 100) + " \\cdot " + N(1 - b / 100) + " = " + N(r6((1 + a / 100) * (1 - b / 100)))) + ", soit " + M((v > 0 ? "+" : "") + N(v) + "\\,\\%") + ".",
+          { ctx: "successives", guide: [GS("Coefficient de la hausse ?", 1 + a / 100, M(N(1 + a / 100)) + "."), GS("Coefficient de la baisse ?", 1 - b / 100, M(N(1 - b / 100)) + "."), GS("Coefficient global (produit) ?", r6((1 + a / 100) * (1 - b / 100)), M(N(r6((1 + a / 100) * (1 - b / 100)))) + "."), GS("Variation en % ?", v, M(N(v) + "\\,\\%") + ".")],
+            traps: [TR(a - b, "Les pourcentages ne s'additionnent pas : la baisse porte sur le prix déjà augmenté."), TR(-v, "Attention au signe.")] }); },
+      () => { const t = pk([10, 20, 25, 40]), x = 20 * R.int(3, 20), y = r6(x * (1 - t / 100));
+        return Qv("Après une baisse de " + M(t + "\\,\\%") + ", un prix vaut " + M(N(y)) + " CHF. Quel était le prix de départ (en CHF) ?", x, M(N(y) + " \\div " + N(1 - t / 100) + " = " + x) + " CHF (on divise, on n'ajoute pas " + t + " %).",
+          { ctx: "avant-baisse", guide: [GS("Coefficient de la baisse ?", 1 - t / 100, M(N(1 - t / 100)) + "."), GS("Prix de départ " + M("= " + N(y) + " \\div " + N(1 - t / 100)) + " = ?", x, M(x) + " CHF.")],
+            traps: [TR(r6(y * (1 + t / 100)), "Ajouter " + t + " % au prix soldé ne redonne pas le prix de départ."), TR(r6(y + t), "Ce sont des pourcents, pas des francs.")] }); },
+      () => { const ht = 10 * R.int(3, 60), ttc = r6(ht * 1.081), ask = pk(["ht", "tva"]), C = (v) => (Number.isInteger(v) ? String(v) : v.toFixed(2).replace(".", "{,}"));
+        return Qv("En Suisse, la TVA normale est de " + M("8{,}1\\,\\%") + ". Un appareil coûte " + M(C(ttc)) + " CHF TVA comprise. " + (ask === "ht" ? "Quel est son prix hors taxe (en CHF) ?" : "Quel est le montant de la TVA (en CHF) ?"), ask === "ht" ? ht : r6(ttc - ht), "Prix hors taxe " + M("= " + C(ttc) + " \\div 1{,}081 = " + ht) + " CHF" + (ask === "tva" ? " ; TVA " + M("= " + C(ttc) + " - " + ht + " = " + C(r6(ttc - ht))) + " CHF" : "") + ".",
+          { ctx: "tva-" + ask, guide: [GS("Coefficient de la TVA ?", 1.081, M("1 + 0{,}081 = 1{,}081") + "."), GS("Prix hors taxe ?", ht, M(C(ttc) + " \\div 1{,}081 = " + ht) + " CHF.")].concat(ask === "tva" ? [GS("Montant de la TVA ?", r6(ttc - ht), M(C(ttc) + " - " + ht + " = " + C(r6(ttc - ht))) + " CHF.")] : []),
+            traps: [TR(r6(ttc * (1 - 0.081)), "Retirer 8,1 % du prix TTC ne donne pas le prix HT : la TVA est calculée sur le prix HT."), TR(r6(ttc * 0.081), "La TVA se calcule sur le prix hors taxe, pas sur le prix TTC.")] }); },
+    ],
+  };
+
   const PROBS = {
+    carres: [() => P("Un carrelage carré est formé de 196 dalles carrées identiques de 30 cm de côté.", [["a) Nombre de dalles sur un côté", 14], ["b) Côté du carrelage (m)", 4.2], ["c) Aire du carrelage (m²)", 17.64]], ["√196.", "14 · 0,3 m."], "a) " + M("\\sqrt{196} = 14") + " ; b) " + M("14 \\cdot 0{,}3 = 4{,}2") + " m ; c) " + M("4{,}2^2 = 17{,}64") + " m².")],
+    pctvar: [() => P("Un vélo coûte 800 CHF. Il augmente de 10 %, puis il est soldé à −20 %.", [["a) Prix après la hausse (CHF)", 880], ["b) Prix soldé (CHF)", 704], ["c) Variation globale (%, négatif pour une baisse)", -12]], ["800 · 1,1.", "880 · 0,8."], "a) 880 ; b) 704 ; c) " + M("1{,}1 \\cdot 0{,}8 = 0{,}88") + " : " + M("-12\\,\\%") + " (et non −10 %).")],
     rel: [() => P("À Genève, la température passe de −6 °C à 7 h à +9 °C à 14 h, puis baisse de 11 °C jusqu'à minuit.", [["a) Hausse entre 7 h et 14 h (°C)", 15], ["b) Température à minuit (°C)", -2], ["c) Moyenne des trois relevés (°C)", 1 / 3]], ["9 − (−6).", "9 − 11."], "a) " + M("9 - (-6) = 15") + " ; b) " + M("9 - 11 = -2") + " ; c) " + M("\\frac{-6 + 9 - 2}{3} = \\frac{1}{3}") + ".")],
     fracops: [() => P("Calcule A = 1/2 − 3/4 · 2/3 et B = (1/2 − 3/4) · 2/3 (fractions acceptées).", [["a) A", 0], ["b) B", -1 / 6], ["c) A − B", 1 / 6]], ["A : le produit d'abord.", "B : la parenthèse d'abord."], "a) " + M("\\frac{1}{2} - \\frac{1}{2} = 0") + " ; b) " + M("-\\frac{1}{4} \\cdot \\frac{2}{3} = -\\frac{1}{6}") + " ; c) " + M("\\frac{1}{6}") + ".")],
     rac: [() => P("Un carré a une aire de 50 cm².", [["a) Son côté vaut a√2 : a ?", 5], ["b) Sa diagonale (cm)", 10], ["c) Aire du carré construit sur la diagonale (cm²)", 100]], ["√50 = √(25 · 2).", "Diagonale = côté · √2."], "a) " + M("5\\sqrt{2}") + " ; b) " + M("5\\sqrt{2} \\cdot \\sqrt{2} = 10") + " ; c) " + M("100") + ".")],
   };
 
-  const ALL = { rel: RE, fracops: FO, rac: RA };
+  const ALL = { rel: RE, fracops: FO, rac: RA, carres: CA, pctvar: PV };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
     if (typeof VAR !== "undefined") VAR[id] = {};
@@ -165,10 +273,14 @@
     rel: "Addition : même signe → on additionne les distances ; signes contraires → on soustrait. Soustraire, c'est ajouter l'opposé. Produit : même signe → +.",
     fracops: "Signe d'abord, puis priorités : × et : avant + et −. Diviser, c'est multiplier par l'inverse. Simplifie à la fin (ou avant de multiplier).",
     rac: "√(a · b) = √a · √b ; sors les carrés parfaits : √72 = √(36 · 2) = 6√2. Mais √(a + b) ≠ √a + √b.",
+    carres: "Carrés à connaître de 1 à 20 ; la racine carrée « défait » le carré, la racine cubique « défait » le cube. √(a · b) = √a · √b, mais √(a + b) ≠ √a + √b.",
+    pctvar: "+t % : multiplier par 1 + t/100 ; −t % : par 1 − t/100. Pour revenir au départ, on divise. Variations successives : on multiplie les coefficients.",
   });
   if (typeof COMPS !== "undefined") Object.assign(COMPS, {
     rel: ["Additionner, soustraire, multiplier", "Priorités, puissances, écarts", "Expressions, moyennes, enchaînements"],
     fracops: ["Différence négative, produit, quotient", "Priorités, parenthèses", "Fractions étagées, carrés, problèmes"],
     rac: ["Carrés parfaits, décimaux, côté d'un carré", "Simplifier, produits, quotients", "Sommes, carrés, longueurs exactes"],
+    carres: ["Racines, carrés, cubes, côté d'un carré", "Produits, décimaux, sommes de carrés, fractions", "Cubes négatifs ou décimaux, encadrer, aire d'un cube"],
+    pctvar: ["Hausse, réduction, coefficient", "Taux de variation, prix avant hausse, quotidien", "Variations successives, prix avant baisse, TVA"],
   });
 })();
