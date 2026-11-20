@@ -666,7 +666,7 @@ const Engine = {
   },
 
   // « Je prépare mon test » : notions choisies, actif jusqu'au jour du test inclus.
-  // « En ce moment en classe » (13.11) : 1 à 3 notions choisies par l'élève ; question de relance après 3 semaines.
+  // « En ce moment en classe » (13.11) : 1 à 5 notions choisies par l'élève (3 jusqu'au 20.11) ; question de relance après 3 semaines.
   nowActive(state) { return !!(state.now && state.now.ids && state.now.ids.length); },
   nowStale(state, today = day()) { return this.nowActive(state) && addDays(state.now.since, 21) <= today; },
   setNow(state, ids) {

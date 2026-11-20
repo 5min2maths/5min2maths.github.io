@@ -17979,7 +17979,7 @@ const Engine = {
   },
 
   // « Je prépare mon test » : notions choisies, actif jusqu'au jour du test inclus.
-  // « En ce moment en classe » (13.11) : 1 à 3 notions choisies par l'élève ; question de relance après 3 semaines.
+  // « En ce moment en classe » (13.11) : 1 à 5 notions choisies par l'élève (3 jusqu'au 20.11) ; question de relance après 3 semaines.
   nowActive(state) { return !!(state.now && state.now.ids && state.now.ids.length); },
   nowStale(state, today = day()) { return this.nowActive(state) && addDays(state.now.since, 21) <= today; },
   setNow(state, ids) {
@@ -18550,7 +18550,7 @@ function screenNow() {
   const box = (c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${c.label}</span></label>`;
   const groups = Engine.themeOrder(cur, state.profile).map((th) => [th, cur.filter((c) => c.theme === th).sort((a, b) => Engine.rank(p, a.id) - Engine.rank(p, b.id))]).filter(([, l]) => l.length);
   h(`${brand}<h2>En ce moment <span class="mark">en classe</span></h2>
-  <p class="muted">Choisis 1 à 3 notions que tu travailles en classe en ce moment. Tes séances s'y concentreront, avec le rappel de cours la première fois, et je te redemanderai dans 3 semaines.</p>
+  <p class="muted">Choisis 1 à 5 notions que tu travailles en classe en ce moment. Tes séances s'y concentreront, avec le rappel de cours la première fois, et je te redemanderai dans 3 semaines.</p>
   ${sug.length ? `<div class="card flat"><h3>Probablement en ce moment</h3><div class="checks">${sug.map((id) => box(cur.find((c) => c.id === id))).join("")}</div></div>` : ""}
   <details class="olds"><summary>Toutes les notions de l'année</summary>${groups.map(([th, l]) => `<div class="card flat"><h3>${Engine.themeLabel(th, state.profile)}</h3><div class="checks">${l.map(box).join("")}</div></div>`).join("")}</details>
   <p class="small muted" id="nerr"></p>
@@ -18558,11 +18558,12 @@ function screenNow() {
   <div class="row"><button class="btn-ghost" id="back">Annuler</button>${chosen.size ? '<button class="btn-ghost" id="none">Rien de particulier en ce moment</button>' : ""}</div>`);
   const inputs = [...app.querySelectorAll(".check input")];
   inputs.forEach((i) => (i.onchange = () => {
-    // Une même notion peut apparaître une seule fois ; au plus 3 cochées.
+    // Une même notion peut apparaître une seule fois ; au plus 5 cochées.
     // 20.11 : une notion suggérée figure aussi dans son chapitre (deux cases) : on les garde synchronisées.
     inputs.filter((x) => x !== i && x.value === i.value).forEach((x) => (x.checked = i.checked));
     const on = [...new Set(inputs.filter((x) => x.checked).map((x) => x.value))];
-    if (on.length > 3) { inputs.filter((x) => x.value === i.value).forEach((x) => (x.checked = false)); document.getElementById("nerr").textContent = "3 notions au plus : décoche-en une d'abord."; } else document.getElementById("nerr").textContent = "";
+    // 5 notions au plus (20.11, demande de l'auteur ; avant : 3).
+    if (on.length > 5) { inputs.filter((x) => x.value === i.value).forEach((x) => (x.checked = false)); document.getElementById("nerr").textContent = "5 notions au plus : décoche-en une d'abord."; } else document.getElementById("nerr").textContent = "";
   }));
   document.getElementById("save").onclick = () => {
     const ids = [...new Set(inputs.filter((x) => x.checked).map((x) => x.value))];
