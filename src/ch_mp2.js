@@ -1,6 +1,7 @@
 // Chantier MP 2e (20.11 : « tout le dev MP2 », les classes MP2C et MP2D de l'auteur deviennent bêta-testeuses),
 // calé sur le cours CFPT (plans_mp2.py) : A. fonctions affines (droites, droitesinter) et réciproque d'une fonction
-// affine (recipaff, notion nouvelle) ; B. trigonométrie ; C. analyse de données. Niveau maturité professionnelle :
+// affine (recipaff, notion nouvelle) ; B. trigonométrie (trigcercle, trigfn, sinlaw, trigeq, trigassoc, trigeq2, triaire) ;
+// C. analyse de données. Niveau maturité professionnelle :
 // méthodes guidées, nombres simples. Standard du chantier : ≥ 3 formes par niveau, pas à pas partout, erreurs typiques,
 // étiquette ctx, défis.
 (function () {
@@ -22,19 +23,21 @@
   // ---------- constructeurs (même modèle que ch1c_sys.js) ----------
   const pairS = (vals) => vals.map(fS).join(" ; ");
   const keepT = (spec, traps) => { const seen = new Set(); return (traps || []).filter((tr) => { if (!tr) return false; if (tr.e) return true;
-    if (tr.spec) { const c = pairS(tr.spec.values); try { if (seen.has(c) || !tr.spec.values.every(isFinite) || checkAnswer(tr.spec, c).status !== "correct" || checkAnswer(spec, c).status !== "wrong") return false; } catch (e) { return false; } seen.add(c); return true; }
-    return isFinite(tr.v) && spec.kind === "value" && Math.abs(tr.v - spec.value) > 1e-9; }); };
+    if (tr.spec) { const c = pairS(tr.spec.values); try { if (seen.has(c) || !tr.spec.values.every(isFinite) || checkAnswer(tr.spec, c).status !== "correct" || checkAnswer(spec, c).status === "correct") return false; } catch (e) { return false; } seen.add(c); return true; }
+    return isFinite(tr.v) && spec.kind === "value" && Math.abs(tr.v - spec.value) > 1e-6 * Math.max(1, Math.abs(spec.value)); }); };
   const mk = (q, spec, sol, o) => { const x = { q, spec, sol, guide: o.guide, ctx: o.ctx, traps: keepT(spec, o.traps) }; if (o.fig) x.fig = o.fig; if (o.canon) x.canon = o.canon; return x; };
-  const QN = (q, value, sol, o) => mk(q, Object.assign({ kind: "value", value: r6(value) }, o.round ? { round: o.round } : {}), sol, o);
-  const QP = (q, vals, sol, o) => mk(q, { kind: "pair", values: vals.map(r6) }, sol, Object.assign({ canon: pairS(vals) }, o));
+  // Valeurs non arrondies dans les spécifications (20.11) : arrondir π/4 ou √3/2 au millionième rendait la réponse
+  // exacte « très proche » au lieu de juste. r6 seulement pour l'affichage.
+  const QN = (q, value, sol, o) => mk(q, Object.assign({ kind: "value", value: value }, o.round ? { round: o.round } : {}), sol, o);
+  const QP = (q, vals, sol, o) => mk(q, { kind: "pair", values: vals.slice() }, sol, Object.assign({ canon: pairS(vals) }, o));
   const QX = (q, expr, sol, o) => mk(q, { kind: "expr", expr }, sol, Object.assign({ canon: expr }, o, { traps: (o.traps || []).filter((tr) => { try { return !Expr.equivalent(Expr.parse(tr.e), Expr.parse(expr)); } catch (e) { return false; } }) }));
-  const G = (ask, value, sol) => GS(ask, r6(value), sol);
-  const GP = (ask, vals, sol) => ({ ask, spec: { kind: "pair", values: vals.map(r6) }, sol });
+  const G = (ask, value, sol) => GS(ask, value, sol);
+  const GP = (ask, vals, sol) => ({ ask, spec: { kind: "pair", values: vals.slice() }, sol });
   const GX = (ask, expr, sol) => ({ ask, spec: { kind: "expr", expr }, sol });
-  const TR = (v, m) => TRAP(r6(v), m);
-  const TP = (vals, m) => ({ spec: { kind: "pair", values: vals.map(r6) }, m });
+  const TR = (v, m) => TRAP(v, m);
+  const TP = (vals, m) => ({ spec: { kind: "pair", values: vals.slice() }, m });
   const TX = (e, m) => ({ e, m });
-  const P = (q, parts, hints, sol) => ({ q, parts: parts.map(([label, value]) => ({ label, spec: { kind: "value", value } })), hints, sol });
+  const P = (q, parts, hints, sol) => ({ q, parts: parts.map(([label, value, round]) => ({ label, spec: Object.assign({ kind: "value", value }, round ? { round } : {}) })), hints, sol });
   const PAIR = " Réponds « x ; y ».";
   const Y = " Écris « y = … ».";
   const who = () => pk(["Lina", "Noé", "Inès", "Yanis", "Mia", "Sam", "Léa", "Tom"]);
@@ -178,7 +181,319 @@
     ],
   };
 
+  // ===================================== B. TRIGONOMÉTRIE =====================================
+  const D2R = Math.PI / 180, cl = (v) => (Math.abs(v - Math.round(v * 2) / 2) < 1e-12 ? Math.round(v * 2) / 2 : v), sinD = (a) => cl(Math.sin(a * D2R)), cosD = (a) => cl(Math.cos(a * D2R)), tanD = (a) => cl(Math.tan(a * D2R));
+  const QR = (q, value, sol, o) => mk(q, { kind: "value", value, radical: true }, sol, o); // valeur exacte (racines)
+  const QRd = (q, value, sol, round, o) => mk(q, { kind: "value", value, round }, sol, o); // arrondi demandé
+  const GR = (ask, value, sol) => ({ ask, spec: { kind: "value", value, radical: true }, sol });
+  const Gd = (ask, value, sol, round) => ({ ask, spec: { kind: "value", value, round }, sol });
+  const uniq = (vals) => vals.filter((v, i) => vals.findIndex((w) => Math.abs(w - v) < 1e-9) === i);
+  const QSet = (q, vals, sol, o) => mk(q, { kind: "set", values: uniq(vals) }, sol, o);
+  const GSet = (ask, vals, sol) => ({ ask, spec: { kind: "set", values: uniq(vals) }, sol });
+  const TSet = (vals, m) => ({ spec: { kind: "set", values: uniq(vals) }, m });
+  // valeurs exactes : texte TeX et saisie
+  const EXA = { 0: ["0", "0"], 30: ["\\frac{1}{2}", "1/2"], 45: ["\\frac{\\sqrt{2}}{2}", "√2/2"], 60: ["\\frac{\\sqrt{3}}{2}", "√3/2"], 90: ["1", "1"] };
+  const exT = (v) => { const a = Math.abs(v), s = v < 0 ? "-" : ""; const k = Object.keys(EXA).find((d) => Math.abs(sinD(+d) - a) < 1e-6); return k === undefined ? N(v) : s + EXA[k][0]; };
+  const exE = (v) => { const a = Math.abs(v), s = v < 0 ? "-" : ""; const k = Object.keys(EXA).find((d) => Math.abs(sinD(+d) - a) < 1e-6); return k === undefined ? fS(v) : s + EXA[k][1]; };
+  const ref = (a) => { a = ((a % 360) + 360) % 360; return a <= 90 ? a : a <= 180 ? 180 - a : a <= 270 ? a - 180 : 360 - a; };
+  const quad = (a) => (a < 90 ? 1 : a < 180 ? 2 : a < 270 ? 3 : 4);
+  const radTeX = (deg) => { const g = gcd(deg, 180), n = deg / g, d = 180 / g; if (n === 0) return "0"; const num = (n === 1 ? "" : n) + "\\pi"; return d === 1 ? num : "\\frac{" + num + "}{" + d + "}"; };
+  const radE = (deg) => { const g = gcd(deg, 180), n = deg / g, d = 180 / g; return (n === 1 ? "" : n) + "π" + (d === 1 ? "" : "/" + d); };
+  const NICE = [30, 45, 60, 120, 135, 150, 210, 225, 240, 300, 315, 330];
+
+  // ===================== B1. trigcercle : radians, cercle trigonométrique, valeurs exactes =====================
+  const TC = {
+    1: [
+      () => { const deg = pk([30, 45, 60, 90, 120, 135, 150, 180, 210, 240, 270, 300, 315, 330, 360]), v = deg * D2R, f = deg / 180;
+        return mk("Convertis " + M(deg + "°") + " en radians (valeur exacte, avec " + M("\\pi") + ").", { kind: "value", value: v }, M(deg + "° = " + deg + " \\cdot \\frac{\\pi}{180} = " + radTeX(deg)) + " rad.",
+          { ctx: "deg-rad", canon: radE(deg), fig: FIG.unitCircle(deg), guide: [G(M("180° = \\pi") + " rad. Quelle fraction de 180° vaut " + M(deg + "°") + " ? (fraction)", f, M("\\frac{" + deg + "}{180} = " + fT(f)) + "."), G("En radians (avec π) ?", v, M(radTeX(deg)) + ".")],
+            traps: [TR(deg * Math.PI / 360, "180° = π (et non 360° = π)."), TR(180 / deg * Math.PI, "On multiplie par π/180 : " + deg + "/180, pas 180/" + deg + "."), TR(deg / 180, "N'oublie pas π.")] }); },
+      () => { const deg = pk([30, 45, 60, 90, 120, 135, 150, 210, 240, 270, 300, 330]);
+        return QN("Convertis " + M(radTeX(deg)) + " radians en degrés.", deg, M("\\pi = 180°") + " : " + M(radTeX(deg) + " = " + deg + "°") + ".",
+          { ctx: "rad-deg", guide: [G("On remplace " + M("\\pi") + " par " + M("180°") + ". Résultat ?", deg, M(deg + "°") + ".")], traps: [TR(deg / 2, "π vaut 180°, pas 360°."), TR(r6(deg * D2R), "On demande des degrés.")] }); },
+      () => { const deg = pk([20, 75, 110, 160, 200, 250, 290, 340, 130, 225, 315, 95]), q = quad(deg);
+        return QN("Dans quel quadrant du cercle trigonométrique se trouve l'angle " + M(deg + "°") + " ? (donne son numéro)", q, "Quadrants : 1 de 0° à 90°, 2 de 90° à 180°, 3 de 180° à 270°, 4 de 270° à 360°. " + M(deg + "°") + " est dans le quadrant " + q + " ; donc " + M("\\sin") + " est " + (q <= 2 ? "positif" : "négatif") + " et " + M("\\cos") + " " + (q === 1 || q === 4 ? "positif" : "négatif") + ".",
+          { ctx: "quadrant", guide: [G("Combien de fois 90° tient-il entièrement dans " + M(deg + "°") + " ?", Math.floor(deg / 90), M(Math.floor(deg / 90)) + " fois."), G("Quadrant ?", q, "Le quadrant " + q + ".")], traps: [TR(q === 4 ? 1 : q + 1, "Compte à partir de 0°, dans le sens inverse des aiguilles d'une montre."), TR(Math.ceil(deg / 100), "Les quadrants se comptent de 90° en 90°.")] }); },
+    ],
+    2: [
+      () => { const deg = pk(NICE.filter((a) => a <= 180)), fn = pk(["sin", "cos"]), v = fn === "sin" ? sinD(deg) : cosD(deg), r = ref(deg); if (Math.abs(v) < 1e-9) return null;
+        return QR("Donne la valeur exacte de " + M("\\" + fn + " " + deg + "°") + ".", v, "Angle de référence " + M(r + "°") + " ; dans le quadrant " + quad(deg) + ", " + M("\\" + fn) + " est " + (v > 0 ? "positif" : "négatif") + " : " + M("\\" + fn + " " + deg + "° = " + exT(v)) + ".",
+          { ctx: fn + "-exact", canon: exE(v), fig: FIG.unitCircle(deg), guide: [G("Angle de référence (l'angle aigu avec l'axe horizontal) ?", r, M(r + "°") + "."), GR("Valeur pour l'angle de référence, " + M("\\" + fn + " " + r + "°") + " ?", Math.abs(v), M(exT(Math.abs(v))) + "."), GR("Avec le signe du quadrant : " + M("\\" + fn + " " + deg + "°") + " = ?", v, M(exT(v)) + ".")],
+            traps: [TR(-v, "Vérifie le signe : dans le quadrant " + quad(deg) + ", " + fn + " est " + (v > 0 ? "positif." : "négatif.")), TR(fn === "sin" ? cosD(deg) : sinD(deg), "Ne confonds pas sinus (ordonnée) et cosinus (abscisse).")] }); },
+      () => { const deg = pk([120, 135, 150, 210, 225, 240, 300, 315, 330]), x = cosD(deg), y = sinD(deg);
+        return QP("Donne les coordonnées exactes du point du cercle trigonométrique associé à " + M(deg + "°") + "." + PAIR, [x, y], "Le point est " + M("(\\cos " + deg + "° \\,;\\, \\sin " + deg + "°) = (" + exT(x) + " \\,;\\, " + exT(y) + ")") + ".",
+          { ctx: "coordonnees", canon: exE(x) + " ; " + exE(y), fig: FIG.unitCircle(deg), guide: [GR("Abscisse = " + M("\\cos " + deg + "°") + " ?", x, M(exT(x)) + "."), GR("Ordonnée = " + M("\\sin " + deg + "°") + " ?", y, M(exT(y)) + "."), GP("Point ?", [x, y], M("(" + exT(x) + " \\,;\\, " + exT(y) + ")") + ".")],
+            traps: [TP([y, x], "L'abscisse est le cosinus, l'ordonnée le sinus."), TP([Math.abs(x), Math.abs(y)], "Attention aux signes selon le quadrant.")] }); },
+      () => { const r = pk([30, 45, 60]), fn = pk(["sin", "cos"]), lo = fn === "sin" ? 90 : 270, deg = fn === "sin" ? 180 - r : 360 - r, v = fn === "sin" ? sinD(r) : cosD(r);
+        return QN("Quel angle " + M("\\alpha") + " compris entre " + M(lo + "°") + " et " + M((lo + 90) + "°") + " vérifie " + M("\\" + fn + " \\alpha = " + exT(v)) + " ?", deg, "Angle de référence " + M(r + "°") + " (car " + M("\\" + fn + " " + r + "° = " + exT(v)) + "). Dans ce quadrant : " + M("\\alpha = " + (fn === "sin" ? "180° - " : "360° - ") + r + "° = " + deg + "°") + ".",
+          { ctx: "angle-" + fn, guide: [G("Quel angle aigu a pour " + fn + " " + M(exT(v)) + " ?", r, M(r + "°") + "."), G("Dans le quadrant demandé : " + M("\\alpha") + " = ?", deg, M(deg + "°") + ".")], traps: [TR(r, "On cherche l'angle entre " + lo + "° et " + (lo + 90) + "°, pas l'angle aigu."), TR(lo + r, fn === "sin" ? "sin(180° − α) = sin α : c'est 180° − " + r + "°." : "cos(360° − α) = cos α : c'est 360° − " + r + "°.")] }); },
+    ],
+    3: [
+      () => { const deg = pk([30, 45, 60, 120, 135, 150, 210, 225, 240, 300, 315, 330]), v = tanD(deg);
+        return QR("Donne la valeur exacte de " + M("\\tan " + deg + "°") + ".", v, M("\\tan = \\frac{\\sin}{\\cos}") + " ; angle de référence " + M(ref(deg) + "°") + ", " + M("\\tan " + ref(deg) + "° = " + { 30: "\\frac{\\sqrt{3}}{3}", 45: "1", 60: "\\sqrt{3}" }[ref(deg)]) + " ; signe : " + (v > 0 ? "positif" : "négatif") + " dans le quadrant " + quad(deg) + ".",
+          { ctx: "tan-exact", canon: (v < 0 ? "-" : "") + { 30: "√3/3", 45: "1", 60: "√3" }[ref(deg)], guide: [G("Angle de référence ?", ref(deg), M(ref(deg) + "°") + "."), GR(M("\\tan") + " de l'angle de référence ?", Math.abs(v), M({ 30: "\\frac{\\sqrt{3}}{3}", 45: "1", 60: "\\sqrt{3}" }[ref(deg)]) + "."), GR("Avec le signe : " + M("\\tan " + deg + "°") + " = ?", v, M((v < 0 ? "-" : "") + { 30: "\\frac{\\sqrt{3}}{3}", 45: "1", 60: "\\sqrt{3}" }[ref(deg)]) + ".")],
+            traps: [TR(-v, "Tangente positive dans les quadrants 1 et 3, négative dans 2 et 4."), TR(r6(1 / v), "tan = sin/cos, pas cos/sin.")] }); },
+      () => { const deg = pk([150, 120, 135, 210, 240, 300, 330, 225, 315]), x = cosD(deg), y = sinD(deg);
+        return QP("Donne les coordonnées exactes du point du cercle trigonométrique associé à l'angle " + M(radTeX(deg)) + " (en radians)." + PAIR, [x, y], M(radTeX(deg) + " = " + deg + "°") + " ; point " + M("(" + exT(x) + " \\,;\\, " + exT(y) + ")") + ".",
+          { ctx: "coord-rad", canon: exE(x) + " ; " + exE(y), guide: [G("Angle en degrés ?", deg, M(deg + "°") + "."), GR(M("\\cos") + " ?", x, M(exT(x)) + "."), GR(M("\\sin") + " ?", y, M(exT(y)) + "."), GP("Point ?", [x, y], M("(" + exT(x) + " \\,;\\, " + exT(y) + ")") + ".")],
+            traps: [TP([y, x], "(cos ; sin) : l'abscisse est le cosinus."), TP([-x, y], "Vérifie le signe de l'abscisse dans ce quadrant.")] }); },
+      () => { const a = pk([30, 45, 60, 100, 135, 200, 250, 310]), k = pk([1, 2, -1]), deg = a + 360 * k;
+        return QN("Quel angle compris entre " + M("0°") + " et " + M("360°") + " a le même point sur le cercle trigonométrique que " + M(deg + "°") + " ?", a, "On " + (k > 0 ? "retire" : "ajoute") + " " + Math.abs(k) + " tour" + (Math.abs(k) > 1 ? "s" : "") + " de 360° : " + M(deg + (k > 0 ? " - " : " + ") + Math.abs(k) * 360 + " = " + a + "°") + ".",
+          { ctx: "tours", guide: [G("Combien de tours complets de 360° faut-il " + (k > 0 ? "retirer" : "ajouter") + " ?", Math.abs(k), Math.abs(k) + "."), G("Angle entre 0° et 360° ?", a, M(a + "°") + ".")], traps: [TR(((deg % 180) + 180) % 180, "Un tour complet fait 360°, pas 180°."), TR(Math.abs(deg) - 360, "Pour un angle négatif, on ajoute 360°.")] }); },
+    ],
+  };
+
+  // ===================== B2. trigfn : fonctions sinus et cosinus =====================
+  const sinTxt = (a, f, b, d) => (a === 1 ? "" : a === -1 ? "-" : N(a)) + "\\" + f + "(" + (b === 1 ? "" : N(b)) + "x)" + (d ? sg(d) : "");
+  const TF = {
+    1: [
+      () => { const a = pk([1, 2, 3, 4, 0.5]), d = R.int(-3, 3), f = pk(["sin", "cos"]), ask = pk(["max", "min"]), v = ask === "max" ? d + a : d - a;
+        return QN("Quelle est la valeur " + (ask === "max" ? "maximale" : "minimale") + " de " + M("f(x) = " + sinTxt(a, f, 1, d)) + " ?", v, M("\\" + f + "(x)") + " varie entre −1 et 1, donc " + M("f") + " varie entre " + M(N(d - a)) + " et " + M(N(d + a)) + ".",
+          { ctx: "extremum", fig: PL([{ f: (x) => a * (f === "sin" ? Math.sin(x) : Math.cos(x)) + d }], [], { xr: [-1, 7], yr: [-8, 8], squash: 0.6 }), guide: [G("Valeur " + (ask === "max" ? "maximale" : "minimale") + " de " + M("\\" + f + "(x)") + " ?", ask === "max" ? 1 : -1, ask === "max" ? "1." : "−1."), G("Donc " + M("f") + " vaut au " + (ask === "max" ? "maximum" : "minimum") + " ?", v, M(N(a) + " \\cdot " + (ask === "max" ? "1" : "(-1)") + sg(d) + " = " + N(v)) + ".")],
+            traps: [TR(ask === "max" ? a : -a, "N'oublie pas le décalage vertical " + d + "."), TR(ask === "max" ? d - a : d + a, ask === "max" ? "Le maximum, c'est d + a." : "Le minimum, c'est d − a.")] }); },
+      () => { const a = pk([2, 3, 4, 5, 0.5, 1.5]), d = R.int(-4, 4), b = pk([1, 2, 3]), f = pk(["sin", "cos"]);
+        return QN("Quelle est l'amplitude de " + M("f(x) = " + sinTxt(a, f, b, d)) + " ?", a, "L'amplitude est le coefficient devant " + M("\\" + f) + " (en valeur absolue) : " + M(N(a)) + ". La courbe monte jusqu'à " + M(N(d + a)) + " et descend jusqu'à " + M(N(d - a)) + ".",
+          { ctx: "amplitude", guide: [G("Maximum de " + M("f") + " ?", d + a, M(N(d + a)) + "."), G("Minimum de " + M("f") + " ?", d - a, M(N(d - a)) + "."), G("Amplitude = (max − min) ÷ 2 ?", a, M(N(a)) + ".")], traps: [TR(2 * a, "L'amplitude est la moitié de l'écart entre max et min."), TR(d, "d décale la courbe ; il ne change pas l'amplitude."), TR(b, "b agit sur la période, pas sur l'amplitude.")] }); },
+      () => { const f = pk(["sin", "cos"]), a = pk([2, 3, 4]), ask = pk(["min", "max"]), neg = R.rand() < 0.3, x = f === "sin" ? ((ask === "max") !== neg ? 90 : 270) : ((ask === "max") !== neg ? 360 : 180), xx = x === 360 ? 0 : x;
+        return QN("Sur l'intervalle " + M("0° \\le x < 360°") + ", en quel " + M("x") + " la fonction " + M("f(x) = " + (neg ? "-" : "") + a + "\\" + f + "(x)") + " atteint-elle son " + (ask === "max" ? "maximum" : "minimum") + " ? (en degrés)", xx, M("\\" + f + "(x)") + " vaut " + (((ask === "max") !== neg) ? "1" : "−1") + " en " + M(xx + "°") + (neg ? " ; avec le signe moins, le " + (ask === "max" ? "maximum de f correspond au minimum" : "minimum de f correspond au maximum") + " de " + M("\\" + f) : "") + ".",
+          { ctx: "position-" + ask, fig: PL([{ f: (t) => (neg ? -a : a) * (f === "sin" ? Math.sin(t * D2R) : Math.cos(t * D2R)) }], [], { xr: [-20, 380], yr: [-5, 5], squash: 0.5, numbers: false }), guide: [G("Pour le " + (ask === "max" ? "maximum" : "minimum") + " de " + M("f") + ", " + M("\\" + f + "(x)") + " doit valoir 1 ou −1 ?", ((ask === "max") !== neg) ? 1 : -1, neg ? "Avec le signe moins, c'est l'inverse." : "Le coefficient " + a + " est positif."), G("En quel " + M("x") + " (entre 0° et 360°) ?", xx, M(xx + "°") + ".")],
+            traps: [TR(f === "sin" ? (xx === 90 ? 270 : 90) : (xx === 0 ? 180 : 0), "Maximum de " + f + " : 1 ; minimum : −1. Vérifie aussi le signe devant."), TR(f === "sin" ? (xx === 90 ? 0 : 180) : (xx === 0 ? 90 : 270), f === "sin" ? "Le sinus vaut 1 en 90° et −1 en 270°." : "Le cosinus vaut 1 en 0° et −1 en 180°.")] }); },
+    ],
+    2: [
+      () => { const b = pk([2, 3, 4, 6, 0.5]), f = pk(["sin", "cos"]), a = pk([1, 2, 3]), per = r6(360 / b);
+        return QN("Quelle est la période (en degrés) de " + M("f(x) = " + sinTxt(a, f, b, 0)) + " ?", per, "La période de " + M("\\" + f + "(x)") + " est 360° ; avec " + M(N(b) + "x") + ", la courbe va " + N(b) + " fois plus vite : " + M("\\frac{360°}{" + N(b) + "} = " + N(per) + "°") + ".",
+          { ctx: "periode-deg", guide: [G("Période de " + M("\\" + f + "(x)") + " (en degrés) ?", 360, "360°."), G("On divise par le coefficient de " + M("x") + " : période ?", per, M(N(per) + "°") + ".")], traps: [TR(360 * b, "Avec bx, la courbe va plus vite : on divise par b."), TR(r6(360 / a), "C'est le coefficient de x (b) qui change la période, pas celui devant " + f + ".")] }); },
+      () => { const b = pk([2, 3, 4, 0.5]), f = pk(["sin", "cos"]), per = 2 * Math.PI / b;
+        return mk("Quelle est la période de " + M("f(x) = \\" + f + "(" + N(b) + "x)") + " (x en radians) ? (valeur exacte, avec " + M("\\pi") + ")", { kind: "value", value: per }, "Période de " + M("\\" + f) + " : " + M("2\\pi") + " ; avec " + M(N(b) + "x") + " : " + M("\\frac{2\\pi}{" + N(b) + "}") + ".",
+          { ctx: "periode-rad", canon: b === 0.5 ? "4π" : b === 2 ? "π" : "2π/" + b, guide: [G("Période de " + M("\\" + f + "(x)") + " en radians ? (avec π)", r6(2 * Math.PI), M("2\\pi") + "."), G("Divisée par " + M(N(b)) + " ?", per, M("\\frac{2\\pi}{" + N(b) + "}") + ".")], traps: [TR(r6(2 * Math.PI * b), "On divise par b, on ne multiplie pas."), TR(r6(Math.PI / b), "La période de sin et cos est 2π (pas π).")] }); },
+      () => { const a = pk([2, 3, 4]), d = R.int(-3, 3), x = pk([30, 90, 150, 270, 0, 180]), f = pk(["sin", "cos"]), base = f === "sin" ? sinD(x) : cosD(x), v = r6(a * base + d); if (!Number.isInteger(v * 2)) return null;
+        return QN("Soit " + M("f(x) = " + sinTxt(a, f, 1, d)) + " (x en degrés). Calcule " + M("f(" + x + "°)") + ".", v, M("\\" + f + " " + x + "° = " + exT(base)) + " ; " + M("f(" + x + "°) = " + a + " \\cdot " + pT(base) + sg(d) + " = " + N(v)) + ".",
+          { ctx: "image", guide: [G(M("\\" + f + " " + x + "°") + " = ?", base, M(exT(base)) + "."), G(M("f(" + x + "°)") + " = ?", v, M(N(v)) + ".")], traps: [TR(r6(a * base), "Ajoute " + d + "."), TR(r6(a * (f === "sin" ? cosD(x) : sinD(x)) + d), "Attention : " + f + ", pas " + (f === "sin" ? "cos" : "sin") + ".")] }); },
+    ],
+    3: [
+      () => { const M2 = R.int(3, 9), m = M2 - 2 * R.int(1, 4), a = (M2 - m) / 2, d = (M2 + m) / 2, ask = pk(["a", "d"]);
+        return QN("Une fonction " + M("f(x) = a\\sin(x) + d") + " (avec " + M("a > 0") + ") a pour maximum " + M(M2) + " et pour minimum " + M(m) + ". Que vaut " + M(ask) + " ?", ask === "a" ? a : d, "Amplitude " + M("a = \\frac{" + M2 + " - " + pT(m) + "}{2} = " + N(a)) + " ; milieu " + M("d = \\frac{" + M2 + " + " + pT(m) + "}{2} = " + N(d)) + ".",
+          { ctx: "max-min-" + ask, guide: [G("Écart entre le maximum et le minimum ?", M2 - m, M(M2 - m) + "."), G(ask === "a" ? "L'amplitude en est la moitié : " + M("a") + " = ?" : "Le milieu " + M("d = \\frac{\\max + \\min}{2}") + " = ?", ask === "a" ? a : d, M(N(ask === "a" ? a : d)) + ".")], traps: [TR(ask === "a" ? M2 - m : M2, ask === "a" ? "L'amplitude est la moitié de l'écart." : "d est le milieu entre max et min."), TR(ask === "a" ? d : a, ask === "a" ? "Ça, c'est d (le milieu)." : "Ça, c'est a (l'amplitude).")] }); },
+      () => { const b = pk([2, 3, 4]), f = "sin", n = 2 * b + 1;
+        return QN("Combien de fois la courbe de " + M("f(x) = \\sin(" + b + "x)") + " coupe-t-elle l'axe des abscisses pour " + M("0° \\le x \\le 360°") + " ?", n, "Période " + M("\\frac{360°}{" + b + "} = " + 360 / b + "°") + " : il y a " + b + " périodes complètes, chacune coupe l'axe 2 fois, plus le point final en 360° : " + M("2 \\cdot " + b + " + 1 = " + n) + ".",
+          { ctx: "zeros", guide: [G("Période (en degrés) ?", 360 / b, M(360 / b + "°") + "."), G("Nombre de périodes entre 0° et 360° ?", b, M(b) + "."), G("Nombre de zéros (2 par période, plus x = 360°) ?", n, M(n) + ".")], traps: [TR(2 * b, "Compte aussi x = 360° (sin(" + b + " · 360°) = 0)."), TR(3, "Avec " + b + "x, la courbe oscille " + b + " fois plus vite.")] }); },
+      () => { const a = pk([2, 3]), b = pk([2, 3, 6]), f = pk(["sin", "cos"]), d = R.int(-2, 2), x0 = f === "sin" ? 90 / b : 0;
+        if (f === "cos") { const x1 = 180 / b; return QN("En quel plus petit " + M("x > 0") + " (en degrés) la fonction " + M("f(x) = " + sinTxt(a, "cos", b, d)) + " atteint-elle son minimum ?", x1, M("\\cos") + " est minimal (−1) quand l'angle vaut 180° : " + M(b + "x = 180°") + ", " + M("x = " + N(x1) + "°") + ".", { ctx: "min-cos", guide: [G("Pour quel angle " + M("\\cos") + " vaut-il −1 (le plus petit positif) ?", 180, "180°."), G(M(b + "x = 180°") + " : " + M("x") + " = ?", x1, M(N(x1) + "°") + ".")], traps: [TR(180, "L'angle est " + b + "x : il faut diviser par " + b + "."), TR(360 / b, "Ça, c'est la période (le cos revient à son maximum).")] }); }
+        return QN("En quel plus petit " + M("x > 0") + " (en degrés) la fonction " + M("f(x) = " + sinTxt(a, "sin", b, d)) + " atteint-elle son maximum ?", x0, M("\\sin") + " est maximal (1) quand l'angle vaut 90° : " + M(b + "x = 90°") + ", " + M("x = " + N(x0) + "°") + ".",
+          { ctx: "max-sin", guide: [G("Pour quel angle " + M("\\sin") + " vaut-il 1 (le plus petit positif) ?", 90, "90°."), G(M(b + "x = 90°") + " : " + M("x") + " = ?", x0, M(N(x0) + "°") + ".")], traps: [TR(90, "L'angle est " + b + "x : il faut diviser par " + b + "."), TR(90 * b, "On divise par " + b + ", on ne multiplie pas.")] }); },
+    ],
+  };
+
+  // ===================== B3. sinlaw : théorèmes du sinus et du cosinus =====================
+  const TRI = (lab) => FIG.anyTriangle(lab);
+  const SL = {
+    1: [
+      () => { const al = R.int(35, 80), be = R.int(30, 75), a = R.int(5, 15); if (al + be >= 160) return null; const b = r6(a * Math.sin(be * D2R) / Math.sin(al * D2R)), br = Math.round(b * 100) / 100;
+        return QRd("Dans le triangle " + M("ABC") + ", " + M("a = " + a) + " cm, " + M("\\alpha = " + al + "°") + " et " + M("\\beta = " + be + "°") + ". Calcule " + M("b") + " (au centième, en cm).", b, "Théorème du sinus : " + M("\\frac{b}{\\sin \\beta} = \\frac{a}{\\sin \\alpha}") + ", " + M("b = \\frac{" + a + " \\cdot \\sin " + be + "°}{\\sin " + al + "°} \\approx " + N(br)) + " cm.", 0.01,
+          { ctx: "sinus-cote", fig: TRI(["a = " + a, "b = ?", "", "α = " + al + "°", "A"]), guide: [Gd("Rapport " + M("\\frac{a}{\\sin \\alpha} = \\frac{" + a + "}{\\sin " + al + "°}") + " ≈ ? (au centième)", r6(a / Math.sin(al * D2R)), M("\\approx " + N(Math.round(a / Math.sin(al * D2R) * 100) / 100)) + ".", 0.01), Gd(M("b = \\frac{a}{\\sin\\alpha} \\cdot \\sin \\beta") + " ≈ ?", b, M("\\approx " + N(br)) + " cm.", 0.01)],
+            traps: [TR(r6(a * Math.sin(al * D2R) / Math.sin(be * D2R)), "b est en face de β : b = a · sin β ÷ sin α (et non l'inverse)."), TR(r6(a * be / al), "On utilise les sinus des angles, pas les angles eux-mêmes.")] }); },
+      () => { const al = R.int(40, 80), be = R.int(30, 70), c = R.int(6, 15); if (al + be >= 160) return null; const ga = 180 - al - be, a = r6(c * Math.sin(al * D2R) / Math.sin(ga * D2R));
+        return QRd("Dans le triangle " + M("ABC") + ", " + M("c = " + c) + " cm, " + M("\\alpha = " + al + "°") + " et " + M("\\beta = " + be + "°") + ". Calcule " + M("a") + " (au centième, en cm).", a, M("\\gamma = 180° - " + al + "° - " + be + "° = " + ga + "°") + " ; " + M("a = \\frac{" + c + " \\cdot \\sin " + al + "°}{\\sin " + ga + "°} \\approx " + N(Math.round(a * 100) / 100)) + " cm.", 0.01,
+          { ctx: "troisieme-angle", fig: TRI(["a = ?", "", "c = " + c, "α = " + al + "°", "A"]), guide: [G("Il faut l'angle en face de " + M("c") + " : " + M("\\gamma") + " = ?", ga, M("180° - " + al + "° - " + be + "° = " + ga + "°") + "."), Gd(M("a = \\frac{c \\cdot \\sin\\alpha}{\\sin\\gamma}") + " ≈ ?", a, M("\\approx " + N(Math.round(a * 100) / 100)) + " cm.", 0.01)],
+            traps: [TR(r6(c * Math.sin(al * D2R) / Math.sin(be * D2R)), "c est en face de γ (pas de β) : calcule d'abord γ."), TR(r6(c * Math.sin(be * D2R) / Math.sin(ga * D2R)), "a est en face de α.")] }); },
+      () => { const al = R.int(35, 70), a = R.int(8, 15), b = R.int(4, a - 1), sb = b * Math.sin(al * D2R) / a, be = r6(Math.asin(sb) / D2R);
+        return QRd("Dans le triangle " + M("ABC") + ", " + M("a = " + a) + ", " + M("b = " + b) + " et " + M("\\alpha = " + al + "°") + ". Calcule l'angle " + M("\\beta") + " (au dixième de degré).", be, M("\\sin \\beta = \\frac{b \\cdot \\sin\\alpha}{a} = \\frac{" + b + " \\cdot \\sin " + al + "°}{" + a + "} \\approx " + N(Math.round(sb * 1000) / 1000)) + ", " + M("\\beta \\approx " + N(Math.round(be * 10) / 10) + "°") + " (" + M("\\beta") + " est aigu car " + M("b < a") + ").", 0.1,
+          { ctx: "sinus-angle", fig: TRI(["a = " + a, "b = " + b, "", "α = " + al + "°", "A"]), guide: [Gd(M("\\sin\\beta = \\frac{b \\sin\\alpha}{a}") + " ≈ ? (au millième)", r6(sb), M("\\approx " + N(Math.round(sb * 1000) / 1000)) + ".", 0.001), Gd(M("\\beta") + " (touche " + M("\\sin^{-1}") + ") ≈ ?", be, M("\\approx " + N(Math.round(be * 10) / 10) + "°") + ".", 0.1)],
+            traps: [TR(r6(Math.asin(Math.min(1, a * Math.sin(al * D2R) / b)) / D2R), "sin β = b · sin α ÷ a (b au numérateur)."), TR(r6(180 - be), "b < a : β est plus petit que α, donc aigu.")] }); },
+    ],
+    2: [
+      () => { const a = R.int(4, 12), b = R.int(4, 12), ga = pk([40, 50, 60, 70, 80, 100, 110, 120]), c = r6(Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(ga * D2R))), cr = Math.round(c * 100) / 100;
+        return QRd("Dans le triangle " + M("ABC") + ", " + M("a = " + a) + " cm, " + M("b = " + b) + " cm et l'angle compris " + M("\\gamma = " + ga + "°") + ". Calcule " + M("c") + " (au centième, en cm).", c, "Théorème du cosinus : " + M("c^2 = a^2 + b^2 - 2ab\\cos\\gamma = " + a * a + " + " + b * b + " - " + 2 * a * b + "\\cos " + ga + "° \\approx " + N(Math.round(c * c * 100) / 100)) + ", " + M("c \\approx " + N(cr)) + " cm.", 0.01,
+          { ctx: "cosinus-cote", fig: TRI(["a = " + a, "b = " + b, "c = ?", "γ = " + ga + "°", "C"]), guide: [Gd(M("c^2 = a^2 + b^2 - 2ab\\cos\\gamma") + " ≈ ? (au centième)", r6(c * c), M("\\approx " + N(Math.round(c * c * 100) / 100)) + ".", 0.01), Gd(M("c") + " ≈ ?", c, M("\\approx " + N(cr)) + " cm.", 0.01)],
+            traps: [TR(r6(Math.sqrt(a * a + b * b)), "Pythagore ne vaut que pour un angle droit : il manque − 2ab cos γ."), TR(r6(Math.sqrt(a * a + b * b + 2 * a * b * Math.cos(ga * D2R))), "C'est − 2ab cos γ (signe moins)."), TR(r6(c * c), "N'oublie pas la racine.")] }); },
+      () => { const d1 = R.int(3, 12), d2 = R.int(3, 12), ang = pk([35, 45, 60, 75, 100, 120, 130]), d = r6(Math.sqrt(d1 * d1 + d2 * d2 - 2 * d1 * d2 * Math.cos(ang * D2R))), c = pk([["Deux sentiers partent d'un même carrefour et forment un angle de " + M(ang + "°") + ". Léa marche " + M(d1) + " km sur l'un, Tom " + M(d2) + " km sur l'autre. Quelle distance les sépare à vol d'oiseau (en km, au centième) ?", "sentiers"], ["Depuis un phare, un bateau est à " + M(d1) + " km et un autre à " + M(d2) + " km ; les deux directions forment un angle de " + M(ang + "°") + ". Quelle distance sépare les bateaux (en km, au centième) ?", "bateaux"]]);
+        return QRd(c[0], d, M("d^2 = " + d1 + "^2 + " + d2 + "^2 - 2 \\cdot " + d1 + " \\cdot " + d2 + " \\cos " + ang + "°") + ", " + M("d \\approx " + N(Math.round(d * 100) / 100)) + " km.", 0.01,
+          { ctx: c[1], guide: [Gd(M("d^2") + " ≈ ? (théorème du cosinus, au centième)", r6(d * d), M("\\approx " + N(Math.round(d * d * 100) / 100)) + ".", 0.01), Gd(M("d") + " ≈ ?", d, M("\\approx " + N(Math.round(d * 100) / 100)) + " km.", 0.01)], traps: [TR(r6(Math.sqrt(d1 * d1 + d2 * d2)), "L'angle n'est pas droit : théorème du cosinus."), TR(r6(Math.abs(d1 - d2)), "Il faut tenir compte de l'angle.")] }); },
+      () => { const a = R.int(4, 10), b = R.int(4, 10), al = pk([50, 60, 70, 110, 120]), dg = r6(Math.sqrt(a * a + b * b - 2 * a * b * Math.cos((180 - al) * D2R)));
+        return QRd("Un parallélogramme a des côtés de " + M(a) + " cm et " + M(b) + " cm, et un angle de " + M(al + "°") + ". Calcule la longueur de la diagonale opposée à l'angle de " + M((180 - al) + "°") + " (au centième, en cm).", dg, "Dans le triangle formé par deux côtés et cette diagonale, l'angle compris vaut " + M((180 - al) + "°") + " : " + M("d^2 = " + a * a + " + " + b * b + " - " + 2 * a * b + "\\cos " + (180 - al) + "°") + ", " + M("d \\approx " + N(Math.round(dg * 100) / 100)) + " cm.", 0.01,
+          { ctx: "parallelogramme", guide: [G("Angle compris entre les deux côtés, en face de cette diagonale ?", 180 - al, M((180 - al) + "°") + " (deux angles voisins d'un parallélogramme font 180°)."), Gd("Diagonale ≈ ?", dg, M("\\approx " + N(Math.round(dg * 100) / 100)) + " cm.", 0.01)], traps: [TR(r6(Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(al * D2R))), "C'est l'autre diagonale (angle " + al + "°)."), TR(r6(Math.sqrt(a * a + b * b)), "Le parallélogramme n'est pas un rectangle.")] }); },
+    ],
+    3: [
+      () => { let a, b, c; do { a = R.int(4, 12); b = R.int(4, 12); c = R.int(4, 12); } while (a + b <= c || a + c <= b || b + c <= a); const cg = (a * a + b * b - c * c) / (2 * a * b), ga = r6(Math.acos(cg) / D2R);
+        return QRd("Un triangle a pour côtés " + M("a = " + a) + ", " + M("b = " + b) + " et " + M("c = " + c) + ". Calcule l'angle " + M("\\gamma") + " (opposé à " + M("c") + ", au dixième de degré).", ga, M("\\cos\\gamma = \\frac{a^2 + b^2 - c^2}{2ab} = \\frac{" + (a * a + b * b - c * c) + "}{" + 2 * a * b + "} \\approx " + N(Math.round(cg * 1000) / 1000)) + ", " + M("\\gamma \\approx " + N(Math.round(ga * 10) / 10) + "°") + ".", 0.1,
+          { ctx: "cosinus-angle", fig: TRI(["a = " + a, "b = " + b, "c = " + c, "γ = ?", "C"]), guide: [G("Numérateur " + M("a^2 + b^2 - c^2") + " ?", a * a + b * b - c * c, M(a * a + b * b - c * c) + "."), Gd(M("\\cos\\gamma") + " ≈ ? (au millième)", r6(cg), M("\\approx " + N(Math.round(cg * 1000) / 1000)) + ".", 0.001), Gd(M("\\gamma") + " ≈ ?", ga, M("\\approx " + N(Math.round(ga * 10) / 10) + "°") + ".", 0.1)],
+            traps: [TR(r6(Math.acos(Math.max(-1, Math.min(1, (a * a + b * b + c * c) / (2 * a * b) - 1))) / D2R), "Formule : a² + b² − c² (c, le côté opposé, avec un moins)."), TR(r6(180 - ga), "Le signe du cosinus donne directement l'angle (obtus si cos < 0).")] }); },
+      () => { const base = pk([100, 150, 200, 250]), al = R.int(40, 75), be = R.int(40, 75); const ga = 180 - al - be, d = r6(base * Math.sin(be * D2R) / Math.sin(ga * D2R));
+        return QRd("Deux observateurs A et B sont à " + M(base) + " m l'un de l'autre au bord d'un lac. Ils visent une bouée C : l'angle en A vaut " + M(al + "°") + " et l'angle en B " + M(be + "°") + ". Quelle est la distance AC (en m, au dixième) ?", d, M("\\gamma = 180° - " + al + "° - " + be + "° = " + ga + "°") + " ; AC est en face de B : " + M("AC = \\frac{" + base + " \\sin " + be + "°}{\\sin " + ga + "°} \\approx " + N(Math.round(d * 10) / 10)) + " m.", 0.1,
+          { ctx: "bouee", guide: [G("Angle en C ?", ga, M(ga + "°") + "."), Gd("AC (en face de l'angle en B) ≈ ?", d, M("\\approx " + N(Math.round(d * 10) / 10)) + " m.", 0.1)], traps: [TR(r6(base * Math.sin(al * D2R) / Math.sin(ga * D2R)), "AC est en face de l'angle en B (pas en A)."), TR(r6(base * Math.sin(be * D2R)), "Divise par sin γ (le côté AB est en face de C).")] }); },
+      () => { const a = R.int(5, 12), b = R.int(5, 12), ga = pk([35, 50, 65, 80]), c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(ga * D2R)), be = r6(Math.asin(b * Math.sin(ga * D2R) / c) / D2R); if (b * b > a * a + c * c) return null;
+        return QRd("Dans le triangle " + M("ABC") + ", " + M("a = " + a) + ", " + M("b = " + b) + " et " + M("\\gamma = " + ga + "°") + ". Calcule l'angle " + M("\\beta") + " (au dixième de degré).", be, "D'abord " + M("c") + " par le théorème du cosinus : " + M("c \\approx " + N(Math.round(c * 100) / 100)) + " ; puis le théorème du sinus : " + M("\\sin\\beta = \\frac{b \\sin\\gamma}{c}") + ", " + M("\\beta \\approx " + N(Math.round(be * 10) / 10) + "°") + ".", 0.1,
+          { ctx: "cosinus-puis-sinus", guide: [Gd(M("c") + " (théorème du cosinus) ≈ ? (au centième)", r6(c), M("\\approx " + N(Math.round(c * 100) / 100)) + ".", 0.01), Gd(M("\\beta") + " (théorème du sinus) ≈ ?", be, M("\\approx " + N(Math.round(be * 10) / 10) + "°") + ".", 0.1)], traps: [TR(r6(180 - ga - be), "C'est α ; on demande β (en face de b)."), TR(r6(Math.asin(Math.min(1, a * Math.sin(ga * D2R) / c)) / D2R), "β est en face de b : sin β = b · sin γ ÷ c.")] }); },
+    ],
+  };
+
+  // ===================== B4. trigeq : équations trigonométriques élémentaires (en degrés, sur [0° ; 360°[) =====================
+  const twice = (v) => { const a = Math.abs(v), t = Math.abs(a - 0.5) < 1e-6 ? "1" : Math.abs(a - Math.SQRT2 / 2) < 1e-6 ? "\\sqrt{2}" : "\\sqrt{3}"; return (v < 0 ? "-" : "") + t; }; // 2·(valeur exacte)
+  const IV = " pour " + M("0° \\le x < 360°") + ". Sépare les solutions par « ; » (en degrés).";
+  const TQ = {
+    1: [
+      () => { const r = pk([30, 45, 60]), neg = R.rand() < 0.4, v = neg ? -sinD(r) : sinD(r), s1 = neg ? 180 + r : r, s2 = neg ? 360 - r : 180 - r;
+        return QSet("Résous " + M("\\sin x = " + exT(v)) + IV, [s1, s2], "Angle de référence " + M(r + "°") + ". Le sinus est " + (neg ? "négatif dans les quadrants 3 et 4 : " + M("180° + " + r + "° = " + s1 + "°") + " et " + M("360° - " + r + "° = " + s2 + "°") : "positif dans les quadrants 1 et 2 : " + M(r + "°") + " et " + M("180° - " + r + "° = " + s2 + "°")) + ".",
+          { ctx: neg ? "sin-neg" : "sin-pos", fig: FIG.unitCircle(s1, "x"), guide: [G("Angle de référence (aigu) dont le sinus vaut " + M(exT(Math.abs(v))) + " ?", r, M(r + "°") + "."), GSet("Le sinus est " + (neg ? "négatif" : "positif") + " dans deux quadrants. Les deux solutions ?", [s1, s2], M(s1 + "°") + " et " + M(s2 + "°") + ".")],
+            traps: [TSet([s1], "Il y a deux solutions sur un tour : sin(180° − x) = sin x."), TSet(neg ? [-r, 180 + r] : [r, 360 - r], neg ? "Les solutions doivent être entre 0° et 360°." : "Pour le sinus, l'autre solution est 180° − x (360° − x, c'est pour le cosinus).")] }); },
+      () => { const r = pk([30, 45, 60]), neg = R.rand() < 0.4, v = neg ? -cosD(r) : cosD(r), s1 = neg ? 180 - r : r, s2 = neg ? 180 + r : 360 - r;
+        return QSet("Résous " + M("\\cos x = " + exT(v)) + IV, [s1, s2], "Angle de référence " + M(r + "°") + ". Le cosinus est " + (neg ? "négatif dans les quadrants 2 et 3 : " + M(s1 + "°") + " et " + M(s2 + "°") : "positif dans les quadrants 1 et 4 : " + M(r + "°") + " et " + M("360° - " + r + "° = " + s2 + "°")) + ".",
+          { ctx: neg ? "cos-neg" : "cos-pos", fig: FIG.unitCircle(s1, "x"), guide: [G("Angle de référence (aigu) dont le cosinus vaut " + M(exT(Math.abs(v))) + " ?", r, M(r + "°") + "."), GSet("Les deux solutions ?", [s1, s2], M(s1 + "°") + " et " + M(s2 + "°") + " (le cosinus est symétrique par rapport à l'axe horizontal).")],
+            traps: [TSet([s1], "Il y a deux solutions sur un tour : cos(360° − x) = cos x."), TSet(neg ? [180 - r, 180 + r].map((x) => 360 - x) : [r, 180 - r], "Pour le cosinus, l'autre solution est 360° − x (180° − x, c'est pour le sinus).")] }); },
+      () => { const k = pk([0, 1, -1]), fn = pk(["sin", "cos"]), sols = fn === "sin" ? (k === 0 ? [0, 180] : k === 1 ? [90] : [270]) : (k === 0 ? [90, 270] : k === 1 ? [0] : [180]);
+        return QSet("Résous " + M("\\" + fn + " x = " + k) + IV, sols, "Sur le cercle trigonométrique, " + (fn === "sin" ? "l'ordonnée" : "l'abscisse") + " vaut " + k + " en " + sols.map((x) => M(x + "°")).join(" et ") + ".",
+          { ctx: "valeurs-cles", guide: [GSet("Points du cercle où " + (fn === "sin" ? "l'ordonnée (sinus)" : "l'abscisse (cosinus)") + " vaut " + k + " ?", sols, sols.map((x) => M(x + "°")).join(" et ") + ".")], traps: [TSet(fn === "sin" ? (k === 0 ? [90, 270] : k === 1 ? [0] : [180]) : (k === 0 ? [0, 180] : k === 1 ? [90] : [270]), "Le sinus est l'ordonnée, le cosinus l'abscisse.")] }); },
+    ],
+    2: [
+      () => { const r = pk([30, 45, 60]), neg = R.rand() < 0.5, tv = neg ? -tanD(r) : tanD(r), s1 = neg ? 180 - r : r, s2 = s1 + 180;
+        return QSet("Résous " + M("\\tan x = " + (neg ? "-" : "") + { 30: "\\frac{\\sqrt{3}}{3}", 45: "1", 60: "\\sqrt{3}" }[r]) + IV, [s1, s2], "Angle de référence " + M(r + "°") + ". La tangente se répète tous les 180° : " + M(s1 + "°") + " et " + M(s2 + "°") + ".",
+          { ctx: "tan", guide: [G("Angle de référence ?", r, M(r + "°") + "."), G("Première solution (tangente " + (neg ? "négative : quadrant 2" : "positive : quadrant 1") + ") ?", s1, M(s1 + "°") + "."), GSet("La tangente se répète tous les 180°. Les solutions ?", [s1, s2], M(s1 + "°") + " et " + M(s2 + "°") + ".")],
+            traps: [TSet([s1, 360 - s1], "La tangente a une période de 180° : x et x + 180°."), TSet([s1], "Il y a deux solutions sur un tour.")] }); },
+      () => { const r = pk([30, 45, 60]), fn = pk(["sin", "cos"]), neg = R.rand() < 0.5, v = (neg ? -1 : 1) * (fn === "sin" ? sinD(r) : cosD(r)), rr = ref(fn === "sin" ? r : r), sols = fn === "sin" ? (neg ? [180 + r, 360 - r] : [r, 180 - r]) : (neg ? [180 - r, 180 + r] : [r, 360 - r]);
+        return QSet("Résous " + M("2\\" + fn + " x = " + twice(v)) + IV, sols, "On divise par 2 : " + M("\\" + fn + " x = " + exT(v)) + ". Angle de référence " + M(r + "°") + " : " + sols.map((x) => M(x + "°")).join(" et ") + ".",
+          { ctx: "isoler-" + fn, guide: [GR("On divise par 2 : " + M("\\" + fn + " x") + " = ?", v, M(exT(v)) + "."), GSet("Solutions ?", sols, sols.map((x) => M(x + "°")).join(" et ") + ".")], traps: [TSet(fn === "sin" ? [r, 360 - r] : [r, 180 - r], fn === "sin" ? "Sinus : x et 180° − x." : "Cosinus : x et 360° − x."), TSet([sols[0]], "Deux solutions sur un tour.")] }); },
+      () => { const fn = pk(["sin", "cos"]), sols = fn === "sin" ? [210, 330] : [120, 240];
+        return QSet("Résous " + M("2\\" + fn + " x + 1 = 0") + IV, sols, "On isole : " + M("\\" + fn + " x = -\\frac{1}{2}") + ". Référence " + M((fn === "sin" ? 30 : 60) + "°") + " ; " + fn + " négatif dans les quadrants " + (fn === "sin" ? "3 et 4" : "2 et 3") + " : " + sols.map((x) => M(x + "°")).join(" et ") + ".",
+          { ctx: "2" + fn + "+1", guide: [G("On isole : " + M("\\" + fn + " x") + " = ?", -0.5, M("-\\frac{1}{2}") + "."), G("Angle de référence ?", fn === "sin" ? 30 : 60, M((fn === "sin" ? 30 : 60) + "°") + "."), GSet("Solutions ?", sols, sols.map((x) => M(x + "°")).join(" et ") + ".")], traps: [TSet(fn === "sin" ? [30, 150] : [60, 300], fn + " x = −1/2 est négatif : regarde les bons quadrants."), TSet([sols[0]], "Deux solutions sur un tour.")] }); },
+    ],
+    3: [
+      () => { const sols = [45, 225];
+        return QSet("Résous " + M("\\sin x = \\cos x") + IV, sols, "On divise par " + M("\\cos x") + " : " + M("\\tan x = 1") + ", donc " + M("x = 45°") + " ou " + M("x = 225°") + ".",
+          { ctx: "sin=cos", guide: [G("En divisant par " + M("\\cos x") + ", on obtient " + M("\\tan x") + " = ?", 1, "1."), GSet("Solutions de " + M("\\tan x = 1") + " ?", sols, M("45°") + " et " + M("225°") + ".")], traps: [TSet([45], "La tangente se répète tous les 180° : 45° et 225°."), TSet([45, 135], "C'est tan x = 1 : période 180°.")] }); },
+      () => { const r = pk([30, 45, 60]), fn = pk(["sin", "cos"]), v = fn === "sin" ? sinD(r) : cosD(r), sols = fn === "sin" ? [r, 180 - r] : [r, 360 - r], k = R.int(1, 4);
+        return QSet("Résous " + M("2\\" + fn + " x - " + twice(v) + " = 0") + IV, sols, M("2\\" + fn + " x = " + twice(v)) + ", " + M("\\" + fn + " x = " + exT(v)) + ", référence " + M(r + "°") + " : " + sols.map((x) => M(x + "°")).join(" et ") + ".",
+          { ctx: "isoler2-" + fn, guide: [GR("On isole : " + M("\\" + fn + " x") + " = ?", v, M(exT(v)) + "."), G("Angle de référence ?", r, M(r + "°") + "."), GSet("Solutions ?", sols, sols.map((x) => M(x + "°")).join(" et ") + ".")], traps: [TSet(fn === "sin" ? [r, 360 - r] : [r, 180 - r], fn === "sin" ? "Sinus : x et 180° − x." : "Cosinus : x et 360° − x."), TSet([r], "Deux solutions sur un tour.")] }); },
+      () => { const r = pk([30, 45, 60]), fn = pk(["sin", "cos"]), v = fn === "sin" ? sinD(r) : cosD(r), sols = (fn === "sin" ? [r, 180 - r, 180 + r, 360 - r] : [r, 360 - r, 180 - r, 180 + r]);
+        return QSet("Résous " + M("\\" + fn + "^2 x = " + (r === 45 ? "\\frac{1}{2}" : fn === "sin" ? (r === 30 ? "\\frac{1}{4}" : "\\frac{3}{4}") : (r === 60 ? "\\frac{1}{4}" : "\\frac{3}{4}"))) + IV, sols, M("\\" + fn + " x = " + exT(v)) + " ou " + M("\\" + fn + " x = " + exT(-v)) + " : quatre solutions, " + sols.slice().sort((a, b) => a - b).map((x) => M(x + "°")).join(", ") + ".",
+          { ctx: "carre", guide: [GR("Une valeur positive possible de " + M("\\" + fn + " x") + " ?", v, M(exT(v)) + " (et aussi " + M(exT(-v)) + ")."), GSet("Toutes les solutions (quatre) ?", sols, sols.slice().sort((a, b) => a - b).map((x) => M(x + "°")).join(", ") + ".")], traps: [TSet(sols.slice(0, 2), "N'oublie pas la racine négative : " + fn + " x = ±" + exT(v).replace(/\\\\/g, "") + "."), TSet([r], "Il y a quatre solutions.")] }); },
+    ],
+  };
+
+  // ===================== B5. trigassoc : angles associés, relations fondamentales =====================
+  const TA = {
+    1: [
+      () => { const v = pk([0.2, 0.3, 0.4, 0.6, 0.8, 0.25, 0.75]), c = pk([["\\sin(180° - \\alpha)", "sin", 1, "Symétrie par rapport à l'axe vertical : même ordonnée."], ["\\cos(-\\alpha)", "cos", 1, "Symétrie par rapport à l'axe horizontal : même abscisse."], ["\\sin(-\\alpha)", "sin", -1, "Symétrie par rapport à l'axe horizontal : ordonnée opposée."], ["\\cos(180° - \\alpha)", "cos", -1, "Symétrie par rapport à l'axe vertical : abscisse opposée."], ["\\sin(180° + \\alpha)", "sin", -1, "Symétrie par rapport à l'origine : ordonnée opposée."], ["\\cos(360° - \\alpha)", "cos", 1, "Un tour moins α : même abscisse que −α, donc que α."]]), res = r6(c[2] * v);
+        return QN("On sait que " + M("\\" + c[1] + " \\alpha = " + N(v)) + ". Que vaut " + M(c[0]) + " ?", res, c[3] + " " + M(c[0] + " = " + (c[2] < 0 ? "-" : "") + "\\" + c[1] + " \\alpha = " + N(res)) + ".",
+          { ctx: "assoc-" + c[0].replace(/[^a-z0-9+-]/gi, ""), guide: [G("Même valeur (1) ou valeur opposée (−1) ?", c[2], c[3]), G(M(c[0]) + " = ?", res, M(N(res)) + ".")], traps: [TR(-res, "Dessine les deux angles sur le cercle : " + c[3]), TR(r6(Math.sqrt(1 - v * v)), "On reste avec la même fonction (" + c[1] + ").")] }); },
+      () => { const deg = pk([150, 120, 135, 210, 225, 240, 300, 330, 315]), fn = pk(["sin", "cos"]), r = ref(deg), sgn = Math.sign(fn === "sin" ? sinD(deg) : cosD(deg));
+        return QN("On sait que " + M("\\" + fn + " " + r + "° " + (Math.abs((fn === "sin" ? sinD(r) : cosD(r)) * 2 - Math.round((fn === "sin" ? sinD(r) : cosD(r)) * 2)) < 1e-9 ? "=" : "\\approx") + " " + N(Math.round((fn === "sin" ? sinD(r) : cosD(r)) * 100) / 100)) + ". Sans calculatrice, que vaut " + M("\\" + fn + " " + deg + "°") + " (au centième) ?", r6(Math.round(sgn * (fn === "sin" ? sinD(r) : cosD(r)) * 100) / 100), M(deg + "°") + " a pour angle de référence " + M(r + "°") + " ; dans le quadrant " + quad(deg) + ", " + fn + " est " + (sgn > 0 ? "positif" : "négatif") + ".",
+          { ctx: "reference", round: 0.01, guide: [G("Angle de référence de " + M(deg + "°") + " ?", r, M(r + "°") + "."), G("Signe de " + M("\\" + fn) + " dans le quadrant " + quad(deg) + " (1 ou −1) ?", sgn, sgn > 0 ? "Positif." : "Négatif."), Gd("Valeur ?", r6(sgn * (fn === "sin" ? sinD(r) : cosD(r))), "Signe × valeur de référence.", 0.01)],
+            traps: [TR(r6(-Math.round(sgn * (fn === "sin" ? sinD(r) : cosD(r)) * 100) / 100), "Vérifie le signe dans ce quadrant.")] }); },
+      () => { const s = pk([0.6, 0.8, 0.28, 0.96, 0.6]), c = r6(Math.sqrt(1 - s * s));
+        return QN("L'angle " + M("\\alpha") + " est aigu et " + M("\\sin\\alpha = " + N(s)) + ". Calcule " + M("\\cos\\alpha") + ".", c, M("\\cos^2\\alpha = 1 - \\sin^2\\alpha = 1 - " + N(r6(s * s)) + " = " + N(r6(1 - s * s))) + ", " + M("\\cos\\alpha = " + N(c)) + " (positif, angle aigu).",
+          { ctx: "pythagore", guide: [G(M("\\sin^2\\alpha") + " = ?", s * s, M(N(r6(s * s)))), G(M("\\cos^2\\alpha = 1 - \\sin^2\\alpha") + " = ?", 1 - s * s, M(N(r6(1 - s * s))) + "."), G(M("\\cos\\alpha") + " = ?", c, M(N(c)) + ".")], traps: [TR(r6(1 - s), "On travaille avec les carrés : cos² = 1 − sin²."), TR(r6(1 - s * s), "C'est cos² α ; prends la racine.")] }); },
+    ],
+    2: [
+      () => { const v = pk([0.2, 0.3, 0.4, 0.6, 0.8, 0.25]), c = pk([["\\sin(90° - \\alpha)", "cos", "sin", 1], ["\\cos(90° - \\alpha)", "sin", "cos", 1], ["\\sin(90° + \\alpha)", "cos", "sin", 1], ["\\cos(90° + \\alpha)", "sin", "cos", -1]]), res = r6(c[3] * v);
+        return QN("On sait que " + M("\\" + c[1] + " \\alpha = " + N(v)) + ". Que vaut " + M(c[0]) + " ?", res, "Avec " + M("90°") + ", sinus et cosinus s'échangent : " + M(c[0] + " = " + (c[3] < 0 ? "-" : "") + "\\" + c[1] + "\\alpha = " + N(res)) + ".",
+          { ctx: "complementaire", guide: [G("Avec 90°, " + c[2] + " devient " + c[1] + ". Signe (1 ou −1) ?", c[3], c[3] > 0 ? "Positif." : "Négatif : cos(90° + α) = −sin α."), G(M(c[0]) + " = ?", res, M(N(res)) + ".")], traps: [TR(-res, "Attention au signe."), TR(r6(Math.sqrt(1 - v * v)), "Avec 90°, sin et cos s'échangent directement (pas besoin de Pythagore).")] }); },
+      () => { const s = pk([0.6, 0.8, 0.28, 0.96]), c = r6(Math.sqrt(1 - s * s)), t = r6(s / c);
+        return QN("L'angle " + M("\\alpha") + " est aigu et " + M("\\sin\\alpha = " + N(s)) + ". Calcule " + M("\\tan\\alpha") + " (fraction ou décimal).", t, M("\\cos\\alpha = \\sqrt{1 - " + N(r6(s * s)) + "} = " + N(c)) + ", " + M("\\tan\\alpha = \\frac{" + N(s) + "}{" + N(c) + "} = " + fT(t)) + ".",
+          { ctx: "tan", guide: [G(M("\\cos\\alpha") + " = ?", c, M(N(c)) + "."), G(M("\\tan\\alpha = \\frac{\\sin\\alpha}{\\cos\\alpha}") + " = ?", t, M(fT(t)) + ".")], traps: [TR(r6(c / s), "tan = sin ÷ cos."), TR(c, "C'est cos α.")] }); },
+      () => { const s = pk([0.6, 0.8, 0.28, 0.96]), c = r6(-Math.sqrt(1 - s * s));
+        return QN("L'angle " + M("\\alpha") + " est obtus (entre 90° et 180°) et " + M("\\sin\\alpha = " + N(s)) + ". Calcule " + M("\\cos\\alpha") + ".", c, M("\\cos^2\\alpha = 1 - " + N(r6(s * s)) + " = " + N(r6(c * c))) + " ; angle obtus : cosinus négatif, " + M("\\cos\\alpha = " + N(c)) + ".",
+          { ctx: "obtus", guide: [G(M("\\cos^2\\alpha") + " = ?", c * c, M(N(r6(c * c))) + "."), G("Signe du cosinus pour un angle obtus (1 ou −1) ?", -1, "Négatif (quadrant 2)."), G(M("\\cos\\alpha") + " = ?", c, M(N(c)) + ".")], traps: [TR(-c, "Angle obtus : le cosinus est négatif."), TR(r6(1 - s), "On travaille avec les carrés.")] }); },
+    ],
+    3: [
+      () => { const c0 = pk([0.6, 0.8, -0.6, -0.8]), s0 = r6(Math.sqrt(1 - c0 * c0)) * pk([1, -1]), v = r6(s0 * s0 - c0 * c0);
+        return QN("On sait que " + M("\\cos\\alpha = " + N(c0)) + ". Calcule " + M("\\sin^2\\alpha - \\cos^2\\alpha") + ".", v, M("\\sin^2\\alpha = 1 - \\cos^2\\alpha = " + N(r6(1 - c0 * c0))) + " ; " + M(N(r6(1 - c0 * c0)) + " - " + N(r6(c0 * c0)) + " = " + N(v)) + ". (Le signe de " + M("\\sin\\alpha") + " n'importe pas : il est au carré.)",
+          { ctx: "expression", guide: [G(M("\\cos^2\\alpha") + " = ?", c0 * c0, M(N(r6(c0 * c0))) + "."), G(M("\\sin^2\\alpha = 1 - \\cos^2\\alpha") + " = ?", 1 - c0 * c0, M(N(r6(1 - c0 * c0))) + "."), G("Résultat ?", v, M(N(v)) + ".")], traps: [TR(-v, "C'est sin² − cos² (dans cet ordre)."), TR(1, "sin² + cos² = 1, mais ici c'est une différence.")] }); },
+      () => { const v = pk([0.6, 0.8, 0.28, 0.3, 0.4]), res = r6(2 * v);
+        return QN("On sait que " + M("\\sin\\alpha = " + N(v)) + ". Calcule " + M("\\sin(180° - \\alpha) - \\sin(180° + \\alpha)") + ".", res, M("\\sin(180° - \\alpha) = \\sin\\alpha") + " et " + M("\\sin(180° + \\alpha) = -\\sin\\alpha") + " : " + M(N(v) + " - (" + N(-v) + ") = " + N(res)) + ".",
+          { ctx: "combinaison", guide: [G(M("\\sin(180° - \\alpha)") + " = ?", v, M(N(v)) + " (même ordonnée)."), G(M("\\sin(180° + \\alpha)") + " = ?", -v, M(N(-v)) + " (ordonnée opposée)."), G("Résultat ?", res, M(N(v) + " - (" + N(-v) + ") = " + N(res)) + ".")], traps: [TR(0, "Attention aux signes : − (−sin α) = + sin α."), TR(v, "Les deux termes s'additionnent.")] }); },
+      () => { const c = pk([0.6, 0.8, 0.28, 0.96]), q = pk([4, 1]), sn = r6((q === 4 ? -1 : 1) * Math.sqrt(1 - c * c));
+        return QN("On sait que " + M("\\cos\\alpha = " + N(c)) + " et que " + M("\\alpha") + " est dans le quadrant " + q + (q === 4 ? " (entre 270° et 360°)" : " (entre 0° et 90°)") + ". Calcule " + M("\\sin\\alpha") + ".", sn, M("\\sin^2\\alpha = 1 - " + N(r6(c * c)) + " = " + N(r6(1 - c * c))) + " ; dans le quadrant " + q + ", le sinus est " + (q === 4 ? "négatif" : "positif") + " : " + M("\\sin\\alpha = " + N(sn)) + ".",
+          { ctx: "quadrant-" + q, guide: [G(M("\\sin^2\\alpha") + " = ?", 1 - c * c, M(N(r6(1 - c * c))) + "."), G("Signe du sinus dans le quadrant " + q + " (1 ou −1) ?", q === 4 ? -1 : 1, q === 4 ? "Négatif." : "Positif."), G(M("\\sin\\alpha") + " = ?", sn, M(N(sn)) + ".")], traps: [TR(-sn, "Le signe dépend du quadrant."), TR(r6(1 - c), "On travaille avec les carrés.")] }); },
+    ],
+  };
+
+  // ===================== B6. trigeq2 : équations sin(bx), modèles sinusoïdaux =====================
+  const T2 = {
+    1: [
+      () => { const r = pk([30, 45, 60, 90]), fn = pk(["sin", "cos"]), b = 2, v = fn === "sin" ? sinD(r) : cosD(r), base = fn === "sin" ? (r === 90 ? [90] : [r, 180 - r]) : [r, 360 - r], sols = base.map((u) => u / b).concat(base.map((u) => (u + 360) / b)).filter((x) => x < 360).sort((a, c) => a - c);
+        return QSet("Résous " + M("\\" + fn + "(2x) = " + exT(v)) + " pour " + M("0° \\le x < 360°") + ". Sépare les solutions par « ; » (en degrés).", sols, "On pose " + M("u = 2x") + ", avec " + M("0° \\le u < 720°") + " (deux tours). " + M("\\" + fn + " u = " + exT(v)) + " : " + M("u = " + base.join("° ; ") + "°") + " (+ 360°). Puis " + M("x = \\frac{u}{2}") + " : " + sols.map((x) => M(x + "°")).join(", ") + ".",
+          { ctx: "double-" + fn, guide: [GSet("Solutions de " + M("\\" + fn + " u = " + exT(v)) + " pour " + M("0° \\le u < 360°") + " ?", base, base.map((x) => M(x + "°")).join(" et ") + "."), GSet("Comme " + M("u = 2x") + " fait deux tours, ajoute aussi 360° à chaque solution, puis divise par 2. Solutions en " + M("x") + " ?", sols, sols.map((x) => M(x + "°")).join(", ") + ".")],
+            traps: [TSet(base.map((u) => u / b), "Avec 2x, l'angle fait deux tours : il y a deux fois plus de solutions."), TSet(base, "On a trouvé u = 2x ; il faut encore diviser par 2.")] }); },
+      () => { const a = pk([2, 3, 4]), d = R.int(1, 6), M2 = d + a, m = d - a, ask = pk(["max", "min"]), c = pk([["La température (en °C) dans une serre suit " + M("T(t) = " + d + " + " + a + "\\sin(15t)") + " (t en heures).", "serre"], ["Le niveau d'un bassin (en m) suit " + M("h(t) = " + d + " + " + a + "\\sin(30t)") + " (t en heures).", "bassin"]]);
+        return QN(c[0] + " Quelle est sa valeur " + (ask === "max" ? "maximale" : "minimale") + " ?", ask === "max" ? M2 : m, M("\\sin") + " varie de −1 à 1 : la valeur va de " + M(d + " - " + a + " = " + m) + " à " + M(d + " + " + a + " = " + M2) + ".",
+          { ctx: "modele-" + ask + "-" + c[1], guide: [G("Valeur " + (ask === "max" ? "maximale" : "minimale") + " de " + M("\\sin") + " ?", ask === "max" ? 1 : -1, ask === "max" ? "1." : "−1."), G("Valeur " + (ask === "max" ? "maximale" : "minimale") + " du modèle ?", ask === "max" ? M2 : m, M(ask === "max" ? M2 : m) + ".")], traps: [TR(ask === "max" ? a : -a, "N'oublie pas la valeur moyenne " + d + "."), TR(ask === "max" ? m : M2, ask === "max" ? "Le maximum, c'est la moyenne PLUS l'amplitude." : "Le minimum, c'est la moyenne MOINS l'amplitude.")] }); },
+      () => { const b = pk([15, 30, 45, 60, 20]), per = 360 / b, c = pk([["La hauteur de la marée (en m) est modélisée par", "h"], ["La hauteur d'une cabine de grande roue (en dizaines de m) est modélisée par", "min"], ["La température sur une journée (en dizaines de °C) est modélisée par", "h"]]);
+        return QN(c[0] + " " + M("f(t) = 3 + 2\\sin(" + b + "t)") + " (t en " + c[1] + ", angle en degrés). Quelle est la période (en " + c[1] + ") ?", per, "Le sinus fait un tour complet quand " + M(b + "t") + " augmente de 360° : " + M("T = \\frac{360}{" + b + "} = " + N(per)) + " " + c[1] + ".",
+          { ctx: "periode-" + c[1], guide: [G("Un cycle complet correspond à 360°. Pour quel " + M("t") + " a-t-on " + M(b + "t = 360") + " ?", per, M(N(per)) + " " + c[1] + ".")], traps: [TR(360 * b, "On divise 360 par " + b + "."), TR(b, "C'est la vitesse angulaire (degrés par " + c[1] + "), pas la période.")] }); },
+    ],
+    2: [
+      () => { const M2 = R.int(5, 14), m = R.int(0, M2 - 2), a = (M2 - m) / 2, d = (M2 + m) / 2, ask = pk(["a", "d"]);
+        return QN("Une sinusoïde d'équation " + M("f(x) = a\\sin(x) + d") + " (avec " + M("a > 0") + ") a pour maximum " + M(M2) + " et pour minimum " + M(m) + ". Que vaut " + M(ask) + " ?", ask === "a" ? a : d, M("a = \\frac{" + M2 + " - " + m + "}{2} = " + N(a)) + " (amplitude) ; " + M("d = \\frac{" + M2 + " + " + m + "}{2} = " + N(d)) + " (valeur moyenne).",
+          { ctx: "sinusoide-" + ask, guide: [G(ask === "a" ? "Amplitude = (max − min) ÷ 2 ?" : "Valeur moyenne = (max + min) ÷ 2 ?", ask === "a" ? a : d, M(N(ask === "a" ? a : d)) + ".")], traps: [TR(ask === "a" ? M2 - m : M2 + m, "N'oublie pas de diviser par 2."), TR(ask === "a" ? d : a, ask === "a" ? "Ça, c'est d." : "Ça, c'est a.")] }); },
+      () => { const d = R.int(3, 6), a = R.int(1, d - 1), b = pk([30, 15]), t = pk([1, 2, 3, 5, 7, 9]), ang = b * t, s = sinD(ang), v = r6(d + a * s); if (!Number.isInteger(v * 2)) return null;
+        return QN("La hauteur d'eau d'un port (en m) est " + M("h(t) = " + d + " + " + a + "\\sin(" + b + "t)") + " (t en heures après minuit). Quelle est la hauteur à " + M(t + "\\text{ h}") + " ?", v, M("h(" + t + ") = " + d + " + " + a + "\\sin(" + ang + "°) = " + d + " + " + a + " \\cdot " + pT(s) + " = " + N(v)) + " m.",
+          { ctx: "port-hauteur", guide: [G("Angle " + M(b + " \\cdot " + t) + " (en degrés) ?", ang, M(ang + "°") + "."), G(M("\\sin " + ang + "°") + " = ?", s, M(exT(s)) + "."), G("Hauteur ?", v, M(N(v)) + " m.")], traps: [TR(r6(d + a * cosD(ang)), "C'est un sinus, pas un cosinus."), TR(r6((d + a) * s), "On multiplie seulement a par le sinus, puis on ajoute d.")] }); },
+      () => { const d = R.int(3, 6), a = R.int(1, d - 1), b = pk([30, 15, 45]), t = r6(90 / b);
+        return QN("La hauteur d'eau d'un port (en m) est " + M("h(t) = " + d + " + " + a + "\\sin(" + b + "t)") + " (t en heures après minuit). À quelle heure la marée est-elle haute pour la première fois ?", t, "Le sinus vaut 1 pour un angle de 90° : " + M(b + "t = 90") + ", " + M("t = " + N(t)) + " h (hauteur " + M(d + a) + " m).",
+          { ctx: "port-heure", guide: [G("Pour quel angle (en degrés) le sinus est-il maximal ?", 90, "90°."), G(M(b + "t = 90") + " : " + M("t") + " = ?", t, M(N(t)) + " h.")], traps: [TR(d + a, "C'est la hauteur maximale ; on demande l'heure."), TR(r6(360 / b), "C'est la période (une marée complète).")] }); },
+    ],
+    3: [
+      () => { const d = R.int(4, 8), a = R.int(2, d - 1), b = pk([30, 15]), k = pk([0.5, -0.5]), target = r6(d + a * k), base = k > 0 ? [30, 150] : [210, 330], ts = base.map((u) => r6(u / b)).filter((x) => x < 360 / b);
+        return QSet("Un port : " + M("h(t) = " + d + " + " + a + "\\sin(" + b + "t)") + " (en m, t en heures). Pendant le premier cycle (" + M("0 \\le t < " + 360 / b) + "), à quels instants la hauteur vaut-elle " + M(N(target)) + " m ? Sépare par « ; ».", ts, M(d + " + " + a + "\\sin(" + b + "t) = " + N(target)) + " ⇒ " + M("\\sin(" + b + "t) = " + exT(k)) + " ⇒ " + M(b + "t = " + base.join("° \\text{ ou } ") + "°") + " ⇒ " + M("t = " + ts.map(N).join(" \\text{ ou } ")) + " h.",
+          { ctx: "port-equation", guide: [G("On isole : " + M("\\sin(" + b + "t)") + " = ?", k, M(exT(k)) + "."), GSet("Angles " + M(b + "t") + " (entre 0° et 360°) ?", base, base.map((x) => M(x + "°")).join(" et ") + "."), GSet("Instants " + M("t") + " (on divise par " + b + ") ?", ts, ts.map((x) => M(N(x))).join(" et ") + " h.")],
+            traps: [TSet(base, "Ce sont les angles ; il faut diviser par " + b + " pour obtenir t."), TSet([ts[0]], "Le sinus prend cette valeur deux fois par cycle.")] }); },
+      () => { const D = pk([40, 50, 60, 80]), c = pk([4, 5, 10]), T = pk([8, 10, 12, 20]), r = D / 2, hc = r + c, ask = pk(["max", "min"]), v = ask === "max" ? hc + r : hc - r;
+        return QN("Une grande roue a un diamètre de " + M(D) + " m ; son axe est à " + M(hc) + " m du sol, et un tour dure " + M(T) + " minutes. On modélise la hauteur d'une cabine par " + M("h(t) = " + hc + " - " + r + "\\cos\\left(\\frac{360}{" + T + "} t\\right)") + ". Quelle est la hauteur " + (ask === "max" ? "maximale" : "minimale") + " d'une cabine (en m) ?", v,
+          M("\\cos") + " varie de −1 à 1 : " + M("h") + " varie de " + M(hc + " - " + r + " = " + (hc - r)) + " à " + M(hc + " + " + r + " = " + (hc + r)) + " m.",
+          { ctx: "roue-" + ask, guide: [G("Pour la hauteur " + (ask === "max" ? "maximale" : "minimale") + ", " + M("\\cos") + " doit valoir ?", ask === "max" ? -1 : 1, ask === "max" ? "−1 (le terme soustrait devient positif)." : "1 (on soustrait le rayon)."), G("Hauteur " + (ask === "max" ? "maximale" : "minimale") + " ?", v, M(N(v)) + " m.")],
+            traps: [TR(ask === "max" ? hc - r : hc + r, ask === "max" ? "Ça, c'est la hauteur minimale." : "Ça, c'est la hauteur maximale."), TR(ask === "max" ? D : 0, ask === "max" ? "La roue est surélevée : hauteur de l'axe + rayon." : "La roue ne touche pas le sol : hauteur de l'axe − rayon.")] }); },
+      () => { const b = pk([2, 3]), sols = Array.from({ length: 2 * b }, (_, k) => (90 + 180 * k) / b).filter((x) => x < 360);
+        return QSet("Résous " + M("\\cos(" + b + "x) = 0") + " pour " + M("0° \\le x < 360°") + ". Sépare les solutions par « ; ».", sols, M("\\cos u = 0") + " pour " + M("u = 90° + k \\cdot 180°") + ". Avec " + M("u = " + b + "x") + " : " + M("x = \\frac{90° + k \\cdot 180°}{" + b + "}") + " : " + sols.map((x) => M(x + "°")).join(", ") + ".",
+          { ctx: "cos-bx-0", guide: [GSet("Solutions de " + M("\\cos u = 0") + " pour " + M("0° \\le u < 360°") + " ?", [90, 270], M("90°") + " et " + M("270°") + "."), G("Combien de tours fait " + M("u = " + b + "x") + " quand " + M("x") + " va de 0° à 360° ?", b, M(b) + " tours."), GSet("Toutes les solutions en " + M("x") + " ?", sols, sols.map((x) => M(x + "°")).join(", ") + ".")],
+            traps: [TSet([90 / b, 270 / b], "u = " + b + "x fait " + b + " tours : il y a " + 2 * b + " solutions."), TSet([90, 270], "Il faut diviser par " + b + ".")] }); },
+    ],
+  };
+
+  // ===================== B7. triaire : aire d'un triangle quelconque, problèmes =====================
+  const TAi = {
+    1: [
+      () => { const a = R.int(4, 15), b = R.int(4, 15), g = pk([30, 150, 90]), A = r6(a * b * sinD(g) / 2);
+        return QN("Un triangle a deux côtés de " + M(a) + " cm et " + M(b) + " cm, qui forment un angle de " + M(g + "°") + ". Calcule son aire (en cm²).", A, M("\\mathcal{A} = \\frac{1}{2} \\cdot " + a + " \\cdot " + b + " \\cdot \\sin " + g + "° = \\frac{1}{2} \\cdot " + a * b + " \\cdot " + exT(sinD(g)) + " = " + N(A)) + " cm².",
+          { ctx: "exact", fig: TRI(["a = " + a, "b = " + b, "", "γ = " + g + "°", "C"]), guide: [G(M("\\sin " + g + "°") + " = ?", sinD(g), M(exT(sinD(g))) + "."), G("Aire " + M("= \\frac{1}{2}ab\\sin\\gamma") + " ?", A, M(N(A)) + " cm².")], traps: [TR(r6(a * b * sinD(g)), "N'oublie pas le facteur 1/2."), TR(r6(a * b / 2), "Il faut multiplier par sin γ (sauf si l'angle est droit).")] }); },
+      () => { const a = R.int(4, 15), b = R.int(4, 15), g = pk([35, 40, 50, 65, 70, 110, 125]), A = r6(a * b * Math.sin(g * D2R) / 2);
+        return QRd("Un triangle a deux côtés de " + M(a) + " cm et " + M(b) + " cm, qui forment un angle de " + M(g + "°") + ". Calcule son aire (au centième, en cm²).", A, M("\\mathcal{A} = \\frac{1}{2} \\cdot " + a + " \\cdot " + b + " \\cdot \\sin " + g + "° \\approx " + N(Math.round(A * 100) / 100)) + " cm².", 0.01,
+          { ctx: "calculatrice", fig: TRI(["a = " + a, "b = " + b, "", "γ = " + g + "°", "C"]), guide: [Gd(M("\\sin " + g + "°") + " ≈ ? (au millième)", r6(Math.sin(g * D2R)), M("\\approx " + N(Math.round(Math.sin(g * D2R) * 1000) / 1000)) + ".", 0.001), Gd("Aire ≈ ?", A, M("\\approx " + N(Math.round(A * 100) / 100)) + " cm².", 0.01)], traps: [TR(r6(2 * A), "N'oublie pas le facteur 1/2."), TR(r6(a * b * Math.cos(g * D2R) / 2), "C'est le sinus de l'angle compris (pas le cosinus).")] }); },
+      () => { const a = R.int(4, 12), b = R.int(4, 12), al = pk([30, 45, 60, 120, 150]), A = r6(a * b * Math.sin(al * D2R));
+        return QRd("Un parallélogramme a des côtés de " + M(a) + " cm et " + M(b) + " cm, qui forment un angle de " + M(al + "°") + ". Calcule son aire (au centième, en cm²).", A, "Deux triangles égaux : " + M("\\mathcal{A} = " + a + " \\cdot " + b + " \\cdot \\sin " + al + "° \\approx " + N(Math.round(A * 100) / 100)) + " cm².", 0.01,
+          { ctx: "parallelogramme", guide: [Gd("Aire d'un des deux triangles (diagonale) " + M("= \\frac{1}{2} \\cdot " + a + " \\cdot " + b + " \\cdot \\sin " + al + "°") + " ≈ ?", r6(A / 2), M("\\approx " + N(Math.round(A / 2 * 100) / 100)) + ".", 0.01), Gd("Aire du parallélogramme ≈ ?", A, M("\\approx " + N(Math.round(A * 100) / 100)) + " cm².", 0.01)], traps: [TR(r6(A / 2), "C'est un seul triangle : le parallélogramme en contient deux."), TR(a * b, "Il faut multiplier par sin " + al + "° (ce n'est pas un rectangle).")] }); },
+    ],
+    2: [
+      () => { const a = R.int(20, 80), b = R.int(20, 80), g = R.int(35, 140), A = r6(a * b * Math.sin(g * D2R) / 2), c = pk(["Un terrain triangulaire", "Une parcelle de vigne triangulaire", "Un jardin triangulaire"]);
+        return QRd(c + " a deux côtés de " + M(a) + " m et " + M(b) + " m, qui forment un angle de " + M(g + "°") + ". Quelle est son aire (en m², à l'unité) ?", A, M("\\frac{1}{2} \\cdot " + a + " \\cdot " + b + " \\cdot \\sin " + g + "° \\approx " + Math.round(A)) + " m².", 1,
+          { ctx: "terrain", guide: [Gd("Aire " + M("= \\frac{1}{2}ab\\sin\\gamma") + " ≈ ? (à l'unité)", A, M("\\approx " + Math.round(A)) + " m².", 1)], traps: [TR(r6(2 * A), "N'oublie pas le facteur 1/2."), TR(r6(a * b / 2), "Multiplie par sin γ.")] }); },
+      () => { const a = R.int(5, 12), b = R.int(5, 12), g = pk([30, 45, 60, 50, 70]), A = r6(a * b * Math.sin(g * D2R) / 2), Ar = Math.round(A * 100) / 100, gg = r6(Math.asin(2 * Ar / (a * b)) / D2R);
+        return QRd("Un triangle a deux côtés de " + M(a) + " cm et " + M(b) + " cm et une aire de " + M(N(Ar)) + " cm². L'angle compris entre ces côtés est aigu. Combien mesure-t-il (au degré près) ?", gg, M("\\sin\\gamma = \\frac{2 \\cdot " + N(Ar) + "}{" + a + " \\cdot " + b + "} \\approx " + N(Math.round(2 * Ar / (a * b) * 1000) / 1000)) + ", " + M("\\gamma \\approx " + Math.round(gg) + "°") + ".", 1,
+          { ctx: "angle-depuis-aire", guide: [Gd(M("\\sin\\gamma = \\frac{2\\mathcal{A}}{ab}") + " ≈ ? (au millième)", r6(2 * Ar / (a * b)), M("\\approx " + N(Math.round(2 * Ar / (a * b) * 1000) / 1000)) + ".", 0.001), Gd(M("\\gamma") + " ≈ ?", gg, M("\\approx " + Math.round(gg) + "°") + ".", 1)], traps: [TR(r6(Math.asin(Math.min(1, Ar / (a * b))) / D2R), "Aire = ½ ab sin γ : sin γ = 2 · aire ÷ (ab)."), TR(r6(180 - gg), "L'angle est aigu.")] }); },
+      () => { const c = pk([4, 6, 8, 10]), A = r6(Math.sqrt(3) / 4 * c * c);
+        return QRd("Calcule l'aire d'un triangle équilatéral de côté " + M(c) + " cm (au centième, en cm²).", A, "Deux côtés de " + M(c) + " cm forment un angle de 60° : " + M("\\mathcal{A} = \\frac{1}{2} \\cdot " + c + "^2 \\cdot \\sin 60° = \\frac{\\sqrt{3}}{4} \\cdot " + c * c + " \\approx " + N(Math.round(A * 100) / 100)) + " cm².", 0.01,
+          { ctx: "equilateral", guide: [G("Angle d'un triangle équilatéral ?", 60, "60°."), Gd("Aire " + M("= \\frac{1}{2} \\cdot " + c + " \\cdot " + c + " \\cdot \\sin 60°") + " ≈ ?", A, M("\\approx " + N(Math.round(A * 100) / 100)) + " cm².", 0.01)], traps: [TR(c * c / 2, "Il faut multiplier par sin 60°."), TR(r6(Math.sqrt(3) / 2 * c * c), "N'oublie pas le facteur 1/2.")] }); },
+    ],
+    3: [
+      () => { const v1 = R.int(3, 6), v2 = R.int(3, 6), t = pk([2, 3]), ang = pk([50, 60, 70, 80, 100, 120]), d1 = v1 * t, d2 = v2 * t, d = r6(Math.sqrt(d1 * d1 + d2 * d2 - 2 * d1 * d2 * Math.cos(ang * D2R)));
+        return QRd("Deux randonneurs partent du même refuge dans des directions qui forment un angle de " + M(ang + "°") + ", à " + M(v1) + " km/h et " + M(v2) + " km/h. Quelle distance les sépare après " + M(t) + " h (en km, au centième) ?", d, "Distances : " + M(d1) + " km et " + M(d2) + " km ; théorème du cosinus : " + M("d \\approx " + N(Math.round(d * 100) / 100)) + " km.", 0.01,
+          { ctx: "randonneurs", guide: [G("Distance parcourue par le premier (km) ?", d1, M(d1) + " km."), G("Par le second ?", d2, M(d2) + " km."), Gd("Distance entre eux (théorème du cosinus) ≈ ?", d, M("\\approx " + N(Math.round(d * 100) / 100)) + " km.", 0.01)], traps: [TR(r6(Math.sqrt(d1 * d1 + d2 * d2)), "L'angle n'est pas droit : théorème du cosinus."), TR(r6(Math.sqrt(v1 * v1 + v2 * v2 - 2 * v1 * v2 * Math.cos(ang * D2R))), "C'est la distance après 1 h ; il faut les distances après " + t + " h.")] }); },
+      () => { const c = pk([2, 3, 4, 5, 6]), A = r6(6 * Math.sqrt(3) / 4 * c * c);
+        return QRd("Un hexagone régulier a des côtés de " + M(c) + " cm. Calcule son aire (au centième, en cm²).", A, "Il se découpe en 6 triangles équilatéraux de côté " + M(c) + " : " + M("\\mathcal{A} = 6 \\cdot \\frac{1}{2} \\cdot " + c + "^2 \\cdot \\sin 60° \\approx " + N(Math.round(A * 100) / 100)) + " cm².", 0.01,
+          { ctx: "hexagone", fig: FIG.regPoly(6, ""), guide: [G("En combien de triangles équilatéraux se découpe l'hexagone ?", 6, "6 (depuis le centre)."), Gd("Aire d'un triangle ≈ ?", r6(A / 6), M("\\approx " + N(Math.round(A / 6 * 100) / 100)) + " cm².", 0.01), Gd("Aire de l'hexagone ≈ ?", A, M("\\approx " + N(Math.round(A * 100) / 100)) + " cm².", 0.01)], traps: [TR(r6(A / 6), "C'est un seul des 6 triangles."), TR(6 * c * c / 2, "Multiplie par sin 60° dans chaque triangle.")] }); },
+      () => { const a = R.int(6, 12), b = R.int(6, 12), g = pk([40, 50, 70, 110]), A = r6(a * b * Math.sin(g * D2R) / 2), c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(g * D2R)), h = r6(2 * A / c);
+        return QRd("Dans un triangle, deux côtés mesurent " + M(a) + " cm et " + M(b) + " cm et forment un angle de " + M(g + "°") + ". Calcule la hauteur relative au troisième côté (au centième, en cm).", h, "Aire " + M("\\approx " + N(Math.round(A * 100) / 100)) + " ; troisième côté " + M("\\approx " + N(Math.round(c * 100) / 100)) + " (cosinus) ; hauteur " + M("= \\frac{2\\mathcal{A}}{c} \\approx " + N(Math.round(h * 100) / 100)) + " cm.", 0.01,
+          { ctx: "hauteur", guide: [Gd("Aire " + M("\\frac{1}{2}ab\\sin\\gamma") + " ≈ ?", A, M("\\approx " + N(Math.round(A * 100) / 100)) + ".", 0.01), Gd("Troisième côté (théorème du cosinus) ≈ ?", r6(c), M("\\approx " + N(Math.round(c * 100) / 100)) + ".", 0.01), Gd("Hauteur " + M("= \\frac{2\\mathcal{A}}{c}") + " ≈ ?", h, M("\\approx " + N(Math.round(h * 100) / 100)) + " cm.", 0.01)], traps: [TR(r6(A / c), "Aire = base × hauteur ÷ 2 : hauteur = 2 · aire ÷ base."), TR(r6(a * Math.sin(g * D2R)), "C'est la hauteur relative au côté b, pas au troisième côté.")] }); },
+    ],
+  };
+
   const PROBS = {
+    trigcercle: [() => P("On considère l'angle de 150°.", [["a) En radians, c'est k·π/6 : que vaut k ?", 5], ["b) Quadrant", 2], ["c) Signe du cosinus (1 ou −1)", -1]], ["150 ÷ 30 = 5.", "Entre 90° et 180°."], "a) " + M("\\frac{5\\pi}{6}") + " ; b) quadrant 2 ; c) négatif : " + M("\\cos 150° = -\\frac{\\sqrt{3}}{2}") + ".")],
+    trigfn: [() => P("f(x) = 3 sin(2x) + 1 (x en degrés).", [["a) Valeur maximale", 4], ["b) Période (degrés)", 180], ["c) Premier x > 0 où f est maximale (degrés)", 45]], ["sin vaut au plus 1.", "360 ÷ 2."], "a) " + M("3 + 1 = 4") + " ; b) " + M("180°") + " ; c) " + M("2x = 90°") + ", " + M("x = 45°") + ".")],
+    sinlaw: [() => P("Dans le triangle ABC : a = 7, b = 8 et γ = 60°.", [["a) c² (théorème du cosinus)", 57], ["b) c (au centième)", Math.sqrt(57), 0.01], ["c) Aire (au centième)", 14 * Math.sqrt(3), 0.01]], ["49 + 64 − 2 · 7 · 8 · 0,5.", "½ · 7 · 8 · sin 60°."], "a) " + M("49 + 64 - 56 = 57") + " ; b) " + M("\\sqrt{57} \\approx 7{,}55") + " ; c) " + M("14\\sqrt{3} \\approx 24{,}25") + ".")],
+    trigeq: [() => P("On résout 2 sin x = 1 pour 0° ≤ x < 360°.", [["a) sin x (décimal)", 0.5], ["b) Plus petite solution (degrés)", 30], ["c) Plus grande solution (degrés)", 150]], ["On divise par 2.", "sin(180° − x) = sin x."], "a) 0,5 ; b) 30° ; c) 150°.")],
+    trigassoc: [() => P("On sait que sin α = 0,6 et que α est aigu.", [["a) cos α", 0.8], ["b) sin(180° − α)", 0.6], ["c) cos(180° + α)", -0.8]], ["cos² α = 1 − 0,36.", "180° + α : point symétrique par rapport à l'origine."], "a) 0,8 ; b) 0,6 ; c) −0,8.")],
+    trigeq2: [() => P("La marée d'un port : h(t) = 4 + 2 sin(30t) (m, t en heures).", [["a) Hauteur maximale (m)", 6], ["b) Période (h)", 12], ["c) Heure de la première marée haute", 3]], ["sin vaut au plus 1.", "360 ÷ 30."], "a) 6 m ; b) 12 h ; c) " + M("30t = 90") + ", " + M("t = 3") + " h.")],
+    triaire: [() => P("Un terrain triangulaire a deux côtés de 40 m et 30 m qui forment un angle de 60°.", [["a) Aire (m², à l'unité)", 300 * Math.sqrt(3), 1], ["b) Troisième côté (m, au dixième)", Math.sqrt(1300), 0.1], ["c) Prix à 85 CHF le m² (CHF, à la centaine)", 85 * 300 * Math.sqrt(3), 100]], ["½ · 40 · 30 · sin 60°.", "Théorème du cosinus."], "a) " + M("600 \\cdot \\frac{\\sqrt{3}}{2} \\approx 520") + " m² ; b) " + M("\\sqrt{1600 + 900 - 1200} = \\sqrt{1300} \\approx 36{,}1") + " m ; c) ≈ 44'200 CHF.")],
     droites: [() => P("Une droite passe par A(−1 ; 5) et B(3 ; −3).", [["a) Pente", -2], ["b) Ordonnée à l'origine", 3], ["c) Pente d'une perpendiculaire (fraction acceptée)", 0.5]], ["Δy ÷ Δx.", "5 = −2 · (−1) + h."], "a) " + M("\\frac{-8}{4} = -2") + " ; b) " + M("h = 3") + " ; c) " + M("\\frac{1}{2}") + " (produit des pentes : −1).")],
     droitesinter: [() => P("Offre A : 20 CHF + 1,50 CHF par km. Offre B : 50 CHF + 0,90 CHF par km.", [["a) Prix de A pour 40 km (CHF)", 80], ["b) Nombre de km où les offres coûtent pareil", 50], ["c) Prix commun (CHF)", 95]], ["20 + 1,5 · 40.", "1,5x + 20 = 0,9x + 50."], "a) 80 ; b) " + M("0{,}6x = 30") + ", " + M("x = 50") + " ; c) " + M("20 + 75 = 95") + " CHF.")],
     recipaff: [() => P("Un forfait téléphone coûte f(x) = 0,5x + 12 CHF pour x Go.", [["a) Prix pour 10 Go (CHF)", 17], ["b) Nombre de Go pour une facture de 20 CHF", 16], ["c) f⁻¹(15)", 6]], ["f(10).", "0,5x + 12 = 20."], "a) 17 ; b) " + M("x = (20 - 12) \\div 0{,}5 = 16") + " ; c) " + M("(15 - 12) \\div 0{,}5 = 6") + ".")],
@@ -197,7 +512,7 @@
   const tf = NOTIONS.find((n) => n.id === "trigfn");
   if (tf && tf.MP == null) { tf.MP = [13, "S2"]; if (typeof ORDRE !== "undefined") ORDRE.MP.trigfn = (ORDRE.MP.trigcercle ?? 43) + 0.5; if (typeof ORDRE_THEME !== "undefined") ORDRE_THEME.MP.trigfn = "TG"; }
 
-  const ALL = { droites: DR, droitesinter: DI, recipaff: RF };
+  const ALL = { droites: DR, droitesinter: DI, recipaff: RF, trigcercle: TC, trigfn: TF, sinlaw: SL, trigeq: TQ, trigassoc: TA, trigeq2: T2, triaire: TAi };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
     if (typeof VAR !== "undefined") VAR[id] = {};
@@ -208,10 +523,24 @@
     droites: "Pente = Δy ÷ Δx ; ordonnée à l'origine : valeur de y quand x = 0. Parallèles : même pente ; perpendiculaires : produit des pentes = −1.",
     droitesinter: "Égalise les deux expressions de y, résous en x, puis calcule y. Sur l'axe des abscisses y = 0 ; sur l'axe des ordonnées x = 0.",
     recipaff: "f⁻¹ défait f : si f(a) = b, alors f⁻¹(b) = a. Pour f(x) = ax + b : retire b, divise par a. Graphique : symétrique par rapport à y = x.",
+    trigcercle: "180° = π rad. Sur le cercle trigonométrique, un angle donne le point (cos ; sin). Angle de référence + signe du quadrant.",
+    trigfn: "a sin(bx) + d : amplitude |a|, période 360°/b (2π/b en radians), valeurs entre d − a et d + a.",
+    sinlaw: "Sinus : a/sin α = b/sin β = c/sin γ (un côté et l'angle en face). Cosinus : c² = a² + b² − 2ab cos γ (deux côtés et l'angle compris, ou trois côtés).",
+    trigeq: "Angle de référence, puis deux solutions sur un tour : sin → x et 180° − x ; cos → x et 360° − x ; tan → x et x + 180°.",
+    trigassoc: "Dessine les angles sur le cercle : −α (symétrie horizontale), 180° − α (verticale), 180° + α (centre). sin² + cos² = 1 ; le quadrant donne le signe.",
+    trigeq2: "Modèle d + a sin(bt) : valeurs de d − a à d + a, période 360/b. Pour sin(bx) = k : résous en u = bx (plusieurs tours), puis divise par b.",
+    triaire: "Aire = ½ ab sin γ (deux côtés et l'angle compris). Parallélogramme : ab sin α. Polygones réguliers : découpe en triangles.",
   });
   if (typeof COMPS !== "undefined") Object.assign(COMPS, {
     droites: ["Pente, lecture graphique, équation par deux points", "Parallèle, perpendiculaire, paramètre", "Système, point sur une droite, modéliser"],
     droitesinter: ["Intersection, axes, droite horizontale", "Offres, droite par deux points, médiatrice", "Aire d'un triangle, rencontre, hauteur"],
     recipaff: ["f⁻¹(b), point symétrique, opération inverse", "Expression de f⁻¹, conversion °C/°F, symétrie", "Taxi, reconstruire f, intersection avec y = x"],
+    trigcercle: ["Degrés ↔ radians, quadrants", "Valeurs exactes, coordonnées, angle depuis sin ou cos", "Tangente, radians, angles de plus d'un tour"],
+    trigfn: ["Maximum, amplitude, position du maximum", "Période en degrés ou en radians, image", "a et d depuis max et min, zéros, premier maximum"],
+    sinlaw: ["Théorème du sinus : côté, troisième angle, angle", "Théorème du cosinus : côté, distances, parallélogramme", "Angle par le cosinus, bouée, cosinus puis sinus"],
+    trigeq: ["sin x = k, cos x = k, valeurs clés", "tan x = k, isoler, 2 sin x + 1 = 0", "sin x = cos x, isoler, carré"],
+    trigassoc: ["Angles associés, angle de référence, Pythagore", "Complémentaires, tangente, angle obtus", "Expression, combinaison, quadrant donné"],
+    trigeq2: ["sin(2x) = k, max ou min d'un modèle, période", "a et d d'une sinusoïde, hauteur d'un port, heure de marée haute", "Équation du port, grande roue, cos(bx) = 0"],
+    triaire: ["½ ab sin γ exact ou à la calculatrice, parallélogramme", "Terrain, angle depuis l'aire, triangle équilatéral", "Randonneurs, hexagone, hauteur"],
   });
 })();

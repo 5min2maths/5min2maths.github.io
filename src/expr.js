@@ -450,7 +450,7 @@ function checkAnswer(spec, input) {
         // a√b, et aussi a√b/c, (a√b)/c, a/√b (20.11 : √21/5 ou √2/2 étaient refusés) ; « sqrt » tapé au clavier = √.
         const rr = raw.replace(/sqrt/gi, "√").replace(/^\((.*)\)(\/\d+)$/, "$1$2");
         const m = rr.match(/^-?(\d*)\*?√\(?(\d+)\)?(?:\/(\d+))?$/) || rr.match(/^-?(\d+)\/√\(?(\d+)\)?$/), sqf = (n) => { for (let k = 2; k * k <= n; k++) if (n % (k * k) === 0) return false; return true; };
-        if (!(/^-?\d+(\/\d+)?$/.test(raw) || (m && sqf(+m[2])))) return { status: "form", message: "La valeur est juste ; simplifie : écris a√b avec b le plus petit possible (par exemple 6√3)." };
+        if (!(/^-?\d+(\/\d+|\.\d+)?$/.test(raw) || (m && sqf(+m[2])))) return { status: "form", message: "La valeur est juste ; simplifie : écris a√b avec b le plus petit possible (par exemple 6√3)." };
       }
       return { status: "correct" };
     }
