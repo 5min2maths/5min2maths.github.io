@@ -1,5 +1,5 @@
 // Chantier 1re Collège · fin du chapitre équations et systèmes (18.11, choix de l'utilisateur) : une seule source pour
-// sys2, sysprob, sysgraph, sys3, affine, affzero, sysineq. Même standard que ch1c_eq.js : au moins 3 formes par niveau,
+// sys2, sysprob, sysgraph, sys3, affine, affzero, sysineq, ineq (20.11). Même standard que ch1c_eq.js : au moins 3 formes par niveau,
 // pas à pas sur toutes les questions, erreurs typiques (pièges { spec, m } pour les couples, inégalités et intervalles),
 // étiquette ctx ; défis en plusieurs étapes. Réponses : couple « x ; y » (pair), triplet, nombre, expression, inégalité
 // « x > 3 », intervalle ou « aucune » (solset).
@@ -404,7 +404,65 @@
   };
 
   // ===================== Défis (niveau 4) =====================
+  // ===================== ineq : inéquations du 1er degré (20.11) =====================
+  // 1re Collège : seulement le 1er degré (les inéquations rationnelles sont la notion ineqfrac, en 2e).
+  const TR = TRAP, sg = (v) => (v < 0 ? " - " + -v : " + " + v), par = (v) => (v < 0 ? "(" + v + ")" : String(v)), xm = (r) => (r === 0 ? "x" : r > 0 ? "x - " + r : "x + " + -r);
+  const ANI = " Réponds par exemple « x > 4 », « x <= -3 » ou avec un intervalle.";
+  const ops = [">", ">=", "<", "<="];
+  const SX = (op, v) => M("x " + opT[op] + " " + fT(v));
+  const IQ = {
+    1: [
+      () => { const a = R.int(2, 7), x0 = nz(-6, 6), b = nz(-9, 9), op = pk(ops), c = a * x0 + b, I = [ivOp(op, x0)];
+        return QS("Résous " + M(lin(a, b) + " " + opT[op] + " " + c) + "." + ANI, I, "On retire " + M(fT(b)) + " : " + M(a + "x " + opT[op] + " " + (c - b)) + ". On divise par " + M(a) + " (positif, le sens ne change pas) : " + SX(op, x0) + ", " + M("S = " + SolSet.show(I)) + ".",
+          { ctx: "direct", guide: [GN("On retire " + M(fT(b)) + " des deux côtés : " + M(a + "x " + opT[op]) + " ?", c - b, M(c + sg(-b) + " = " + (c - b)) + "."), GSS("On divise par " + M(a) + " (positif : le sens ne change pas). Solutions ?", I, SX(op, x0) + ".")],
+            traps: [TS([ivOp(flip[op], x0)], "On ne retourne le sens que si on multiplie ou divise par un nombre négatif."), TS([ivOp(op, (c + b) / a)], "Pour faire disparaître " + fS(b) + ", on fait l'opération contraire.")] }); },
+      () => { const a = -R.int(2, 6), x0 = nz(-6, 6), b = nz(-9, 9), op = pk(ops), c = a * x0 + b, rs = flip[op], I = [ivOp(rs, x0)];
+        return QS("Résous " + M(lin(a, b) + " " + opT[op] + " " + c) + "." + ANI, I, M(a + "x " + opT[op] + " " + (c - b)) + ". On divise par " + M(a) + ", un nombre négatif : le sens de l'inégalité se retourne. " + SX(rs, x0) + ".",
+          { ctx: "negatif", guide: [GN("On retire " + M(fT(b)) + " : " + M(a + "x " + opT[op]) + " ?", c - b, M(c - b) + "."), GSS("On divise par " + M(a) + " (négatif !). Solutions ?", I, "Le sens se retourne : " + SX(rs, x0) + ".")],
+            traps: [TS([ivOp(op, x0)], "En divisant par " + a + " (négatif), il faut retourner le sens de l'inégalité.")] }); },
+      () => { const pr = pk([1.5, 2.5, 3.5, 4, 4.5, 6.5, 7]), B = R.int(20, 80), n = Math.floor(B / pr + 1e-9); if (Math.abs(n * pr - B) < 1e-9 || n < 3) return null;
+        const chf = (v) => (Number.isInteger(v) ? String(v) : v.toFixed(2).replace(".", "{,}")), c = pk([["cahiers", "un cahier coûte"], ["billets", "un billet de bus coûte"], ["glaces", "une glace coûte"], ["places de cinéma", "une place de cinéma coûte"]]);
+        return QN("Avec " + M(B) + " CHF, combien de " + c[0] + " peut-on acheter au maximum si " + c[1] + " " + M(chf(pr)) + " CHF ?", n, M(chf(pr) + " \\cdot n \\le " + B) + " donne " + M("n \\le " + B + " \\div " + chf(pr) + " \\approx " + N(+(B / pr).toFixed(2))) + " : au maximum " + M(n) + " (un nombre entier, arrondi vers le bas).",
+          { ctx: "budget", guide: [GN("Inéquation " + M(chf(pr) + " \\cdot n \\le " + B) + ". " + M(B + " \\div " + chf(pr)) + " ≈ ? (au centième)", +(B / pr).toFixed(2), M("\\approx " + N(+(B / pr).toFixed(2))) + "."), GN("Plus grand nombre entier possible ?", n, M(n) + " : on arrondit vers le bas, sinon on dépasse le budget.")],
+            traps: [TR(n + 1, "Avec " + (n + 1) + " " + c[0] + ", on dépasserait " + B + " CHF : on arrondit vers le bas."), TR(+(B / pr).toFixed(2), "On ne peut acheter qu'un nombre entier.")] }); },
+    ],
+    2: [
+      () => { const a = nz(-6, 6), cc = nz(-6, 6), k = a - cc; if (k === 0 || Math.abs(k) === 1 && R.rand() < 0.5) return null; const x0 = nz(-6, 6), b = nz(-9, 9), d = k * x0 + b, op = pk(ops), rs = k < 0 ? flip[op] : op, I = [ivOp(rs, x0)];
+        return QS("Résous " + M(lin(a, b) + " " + opT[op] + " " + lin(cc, d)) + "." + ANI, I, "On regroupe les " + M("x") + " à gauche : " + M(lin(k, 0) + " " + opT[op] + " " + (d - b)) + ". " + (k < 0 ? "On divise par " + M(k) + " (négatif) : le sens se retourne, " : "On divise par " + M(k) + " : ") + SX(rs, x0) + ".",
+          { ctx: "deux-membres", guide: [GN("On regroupe les " + M("x") + " à gauche et les nombres à droite. Coefficient de " + M("x") + " à gauche ?", k, M(a + sg(-cc) + " = " + k) + "."), GN("Membre de droite (constante) ?", d - b, M(d + sg(-b) + " = " + (d - b)) + "."), GSS("Solutions ?", I, (k < 0 ? "Division par un négatif, sens retourné : " : "") + SX(rs, x0) + ".")],
+            traps: [TS([ivOp(k < 0 ? op : flip[op], x0)], k < 0 ? "Le coefficient " + k + " est négatif : on retourne le sens en divisant." : "Le coefficient " + k + " est positif : le sens ne change pas."), TS([ivOp(rs, (d + b) / k)], "Un terme qui change de membre change de signe.")] }); },
+      () => { const k = pk([2, 3, 4, 5]), p = nz(-5, 5), m = pk([2, 3]), q = nz(-5, 5), A = k - m, B = m * q + k * p; if (A === 0 || B % A !== 0) return null; const x0 = B / A, op = pk(ops), rs = A < 0 ? flip[op] : op, I = [ivOp(rs, x0)];
+        return QS("Résous " + M(k + "(" + xm(p) + ") " + opT[op] + " " + m + "(x" + sg(q) + ")") + "." + ANI, I, "On développe : " + M(lin(k, -k * p) + " " + opT[op] + " " + lin(m, m * q)) + ", puis " + M(lin(A, 0) + " " + opT[op] + " " + B) + (A < 0 ? " ; division par " + M(A) + ", sens retourné" : "") + " : " + SX(rs, x0) + ".",
+          { ctx: "parentheses", guide: [GN("On développe " + M(k + "(" + xm(p) + ")") + ". Terme constant ?", -k * p, M(lin(k, -k * p)) + "."), GN("On regroupe : " + M(lin(A, 0) + " " + opT[op]) + " ?", B, M(lin(A, 0) + " " + opT[op] + " " + B) + "."), GSS("Solutions ?", I, SX(rs, x0) + ".")],
+            traps: [TS([ivOp(rs, (m * q + p) / A)], "On multiplie " + k + " par les deux termes de la parenthèse."), TS([ivOp(A < 0 ? op : flip[op], x0)], "Le sens ne se retourne que si on divise par un négatif.")] }); },
+      () => { const [p, r] = pk([[2, 3], [3, 4], [2, 5], [4, 6], [3, 6]]), L = (p * r) / gcd2(p, r), q = R.int(1, 6), op = pk(ops), A = L / p - L / r; if (A === 0) return null; const x0 = (q * L) / A; if (!Number.isInteger(x0)) return null; const rs = A < 0 ? flip[op] : op, I = [ivOp(rs, x0)];
+        return QS("Résous " + M("\\frac{x}{" + p + "} - " + q + " " + opT[op] + " \\frac{x}{" + r + "}") + "." + ANI, I, "On multiplie par " + M(L) + " (positif, le sens ne change pas) : " + M((L / p) + "x - " + q * L + " " + opT[op] + " " + (L / r) + "x") + ", donc " + M(lin(A, 0) + " " + opT[op] + " " + q * L) + (A === 1 ? "" : " : " + SX(rs, x0)) + ".",
+          { ctx: "fractions", guide: [GN("On multiplie tout par le dénominateur commun (positif). Lequel ?", L, M(L) + "."), GN("On obtient " + M((L / p) + "x - " + q * L + " " + opT[op] + " " + (L / r) + "x") + ". Après regroupement, " + M(lin(A, 0) + " " + opT[op]) + " ?", q * L, M(q * L) + "."), GSS("Solutions ?", I, SX(rs, x0) + ".")],
+            traps: [TS([ivOp(rs, q / A)], "On multiplie aussi " + q + " par " + L + "."), TS([ivOp(flip[rs], x0)], "Multiplier par " + L + " (positif) ne change pas le sens.")] }); },
+    ],
+    3: [
+      () => { const a = -R.int(2, 4), b = nz(-6, 6), lo = R.int(-4, 1), hi = lo + R.int(2, 6), ol = pk(["<", "<="]), oh = pk(["<", "<="]);
+        // lo ol x oh hi  ⇔  a·hi + b  oh'  a·x + b  ol'  a·lo + b  (a < 0 : on part des bornes de x)
+        const L = a * hi + b, H = a * lo + b, I = [iv(lo, ol === "<=", hi, oh === "<=")];
+        return QS("Résous " + M(L + " " + opT[oh] + " " + lin(a, b) + " " + opT[ol] + " " + H) + ". Donne l'ensemble des solutions (intervalle).", I, "On retire " + M(fT(b)) + " aux trois membres : " + M((L - b) + " " + opT[oh] + " " + a + "x " + opT[ol] + " " + (H - b)) + ". On divise par " + M(a) + " (négatif) : les deux sens se retournent, " + M(lo + " " + opT[ol] + " x " + opT[oh] + " " + hi) + ", " + M("S = " + SolSet.show(I)) + ".",
+          { ctx: "double-negatif", guide: [GN("On retire " + M(fT(b)) + " aux trois membres, puis on divise par " + M(a) + " (les sens se retournent). Borne de gauche de x ?", lo, M(fT(H - b) + " \\div " + par(a) + " = " + lo) + "."), GN("Borne de droite ?", hi, M(fT(L - b) + " \\div " + par(a) + " = " + hi) + "."), GSS("Ensemble des solutions ?", I, M("S = " + SolSet.show(I)) + " (vérifie les crochets).")],
+            traps: [ol !== oh && TS([iv(lo, oh === "<=", hi, ol === "<=")], "En retournant l'inégalité, chaque borne garde son crochet : regarde quel signe va avec quelle borne."), TS([iv(-hi, false, -lo, false)], "On divise par " + a + " (avec son signe).")] }); },
+      () => { const fA = R.int(0, 10), pA = R.int(4, 9), fB = R.int(15, 60), pB = R.int(1, pA - 2), t = (fB - fA) / (pA - pB), n = Math.floor(t) + 1;
+        const c = pk([["salle de sport", "par séance", "séances"], ["cinéma", "par film", "films"], ["piscine", "par entrée", "entrées"], ["location de kayak", "par sortie", "sorties"]]);
+        return QN(c[0][0].toUpperCase() + c[0].slice(1) + " : formule A, " + (fA ? M(fA) + " CHF d'inscription et " : "") + M(pA) + " CHF " + c[1] + " ; formule B, " + M(fB) + " CHF d'abonnement et " + M(pB) + " CHF " + c[1] + ". À partir de combien de " + c[2] + " la formule B est-elle strictement moins chère ?", n,
+          M(fB + " + " + pB + "n < " + fA + " + " + pA + "n") + " donne " + M((pA - pB) + "n > " + (fB - fA)) + ", " + M("n > " + N(+t.toFixed(2))) + " : à partir de " + M(n) + " " + c[2] + ".",
+          { ctx: "offres", guide: [GN("Inéquation " + M(fB + " + " + pB + "n < " + fA + " + " + pA + "n") + ". On regroupe : " + M((pA - pB) + "n >") + " ?", fB - fA, M(fB + " - " + fA + " = " + (fB - fA)) + "."), GN(M("n >") + " ? (au centième)", +t.toFixed(2), M(N(+t.toFixed(2))) + "."), GN("Plus petit nombre entier qui convient ?", n, M(n) + (Number.isInteger(t) ? " : à " + t + " " + c[2] + " les deux formules coûtent pareil (inégalité stricte)." : "."))],
+            traps: [TR(Number.isInteger(t) ? t : Math.floor(t), Number.isInteger(t) ? "À " + t + " " + c[2] + ", les deux formules coûtent autant : B n'est pas encore « strictement » moins chère." : "n doit être plus grand que " + String(+t.toFixed(2)).replace(".", ",") + " : on arrondit vers le haut."), TR(Math.ceil((fB + fA) / (pA - pB)), "On soustrait les frais fixes : " + fB + " − " + fA + ".")] }); },
+      () => { const k = pk([2, 3, 4, -2]), p = nz(-5, 5), q = nz(-8, 8), op = pk(ops), lhsC = k * p, holds = (op === ">" ? lhsC > q : op === ">=" ? lhsC >= q : op === "<" ? lhsC < q : lhsC <= q); if (lhsC === q) return null;
+        const I = holds ? [[-Infinity, false, Infinity, false]] : [];
+        return QS("Résous " + M(k + "(x" + sg(p) + ") " + opT[op] + " " + lin(k, q)) + ". (Réponds « aucune » ou « tous » si besoin.)", I, "On développe : " + M(lin(k, lhsC) + " " + opT[op] + " " + lin(k, q)) + ". Les " + M("x") + " s'éliminent : " + M(lhsC + " " + opT[op] + " " + q) + ", " + (holds ? "toujours vrai : tous les nombres sont solutions, " + M("S = \\mathbb{R}") : "toujours faux : aucune solution, " + M("S = \\varnothing")) + ".",
+          { ctx: "aucune-tous", guide: [GN("On développe " + M(k + "(x" + sg(p) + ")") + ". Terme constant ?", lhsC, M(lin(k, lhsC)) + "."), GSS("Les termes en " + M("x") + " s'éliminent : il reste " + M(lhsC + " " + opT[op] + " " + q) + ". Solutions (« tous » ou « aucune ») ?", I, holds ? "Vrai pour tout x : " + M("S = \\mathbb{R}") + "." : "Faux pour tout x : " + M("S = \\varnothing") + ".")],
+            traps: [TS(holds ? [] : [[-Infinity, false, Infinity, false]], holds ? M(lhsC + " " + opT[op] + " " + q) + " est vrai : tous les x conviennent." : M(lhsC + " " + opT[op] + " " + q) + " est faux : aucun x ne convient.")] }); },
+    ],
+  };
+
   const PROBS = {
+    ineq: [() => P("Un rectangle a une largeur de x cm et une longueur de (x + 7) cm. Son périmètre ne doit pas dépasser 60 cm, et sa largeur doit valoir au moins 3 cm.", [["a) Périmètre en fonction de x : coefficient de x", 4], ["b) Largeur maximale (cm)", 11.5], ["c) Combien de largeurs entières sont possibles ?", 9]], ["P = 2x + 2(x + 7).", "c) 3 ≤ x ≤ 11,5."], "a) " + M("P = 4x + 14") + " ; b) " + M("4x + 14 \\le 60") + ", " + M("x \\le 11{,}5") + " ; c) " + M("x \\in \\{3, 4, \\ldots, 11\\}") + " : 9 valeurs.")],
     sys2: [
       () => P("Au marché, 3 kg de pommes et 2 kg de poires coûtent 13 CHF ; 2 kg de pommes et 3 kg de poires coûtent 14,50 CHF.", [["a) Prix d'un kg de pommes (CHF)", 2], ["b) Prix d'un kg de poires (CHF)", 3.5], ["c) Prix de 5 kg de pommes et 1 kg de poires (CHF)", 13.5]],
           ["Additionne les deux équations : 5p + 5q = 27,5.", "Puis soustrais-les : p − q = −1,5."], "a) 2 CHF ; b) 3,50 CHF ; c) " + M("5 \\cdot 2 + 3{,}5 = 13{,}5") + " CHF."),
@@ -443,7 +501,7 @@
   };
 
   // ===================== Enregistrement =====================
-  const ALL = { sys2: SYS2, sysprob: SPROB, sysgraph: SGRAPH, sys3: SYS3, affine: AFF, affzero: AZ, sysineq: SI };
+  const ALL = { sys2: SYS2, sysprob: SPROB, sysgraph: SGRAPH, sys3: SYS3, affine: AFF, affzero: AZ, sysineq: SI, ineq: IQ };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => { const L = lv[Math.min(Math.max(d, 1), 3)]; let q = null; for (let k = 0; k < 60 && !(q && q.traps && q.traps.length); k++) q = pk(L)(); return q; };
     if (typeof VAR !== "undefined") VAR[id] = {};
@@ -458,6 +516,7 @@
     affine: "f(x) = ax + b : a = (différence des images) ÷ (différence des x) ; b = f(0), l'ordonnée à l'origine.",
     affzero: "Zéro : résous ax + b = 0. Si a > 0, f est négative avant le zéro et positive après ; si a < 0, l'inverse.",
     sysineq: "Résous chaque inéquation (en retournant le sens si tu divises par un négatif), puis garde la partie commune.",
+    ineq: "Comme une équation : on isole x. Mais en multipliant ou divisant par un nombre négatif, on retourne le sens de l'inégalité.",
   });
   if (typeof COMPS !== "undefined") Object.assign(COMPS, {
     sys2: ["Résoudre par substitution ou addition", "Combinaison, solutions fractionnaires", "Systèmes à fractions, droite par deux points"],
@@ -467,5 +526,6 @@
     affine: ["Image, pente, tarif", "Expression par deux points, antécédent, graphique", "Parallèles, comparaison, conversion"],
     affzero: ["Zéro et signe", "Inéquation avec coefficient négatif", "f(x) > g(x), problèmes"],
     sysineq: ["Système direct, sans solution", "Sens retourné, double inégalité", "Trois inéquations, problèmes"],
+    ineq: ["Résoudre, coefficient négatif, budget", "x des deux côtés, parenthèses, fractions", "Double inégalité, comparer des offres, aucune ou tous"],
   });
 })();

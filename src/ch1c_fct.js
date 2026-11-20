@@ -1,5 +1,5 @@
 // Chantier 1re Collège (bêta-testeurs) · lot 3 du plan pas à pas (19.11) : une seule source pour fimg, lectgraph,
-// racinv, modaff, transf. Même standard que ch1c_sys.js : au moins 3 formes par niveau, pas à pas, erreurs typiques,
+// racinv, modaff, transf ; absval et morceaux ajoutés le 20.11 (dernières notions de 1re sans pas à pas). Même standard que ch1c_sys.js : au moins 3 formes par niveau, pas à pas, erreurs typiques,
 // étiquette ctx, figures (repère gradué) ; défis en plusieurs étapes.
 (function () {
   const pk = (a) => a[Math.floor(R.rand() * a.length)];
@@ -227,7 +227,137 @@
     ],
   };
 
+  // ===================== absval : valeur absolue (20.11, dernier lot de 1re Collège) =====================
+  const opA = { "<": "<", "<=": "\\le", ">": ">", ">=": "\\ge" };
+  const AB = (r) => "|" + xm(r) + "|";
+  const setT = (vs) => vs.length ? M("S = \\{" + vs.map(fT).join(" \\,;\\, ") + "\\}") : M("S = \\varnothing");
+  const AV = {
+    1: [
+      () => { const a = -R.int(2, 9), p = R.int(1, 6), q = p + R.int(2, 9), v = -a - (q - p); if (v === 0) return null;
+        return QN("Calcule " + M("|" + a + "| - |" + p + " - " + q + "|") + ".", v, M("|" + a + "| = " + -a) + " et " + M("|" + p + " - " + q + "| = |" + (p - q) + "| = " + (q - p)) + ", donc " + M(-a + " - " + (q - p) + " = " + v) + ".",
+          { ctx: "calcul", guide: [GS(M("|" + a + "|") + " = ?", -a, M(-a) + " : la distance de " + M(a) + " à 0."), GS(M(p + " - " + q) + " = ?", p - q, M(p - q) + "."), GS(M("|" + (p - q) + "|") + " = ?", q - p, M(q - p) + "."), GS("Résultat ?", v, M(-a + " - " + (q - p) + " = " + v) + ".")],
+            traps: [TR(a - (p - q), "Une valeur absolue n'est jamais négative : " + M("|" + a + "| = " + -a) + "."), TR(-a + (p - q), M("|" + (p - q) + "| = " + (q - p)) + ", pas " + M(p - q) + "."), TR(Math.abs(a - p + q), "On calcule chaque valeur absolue séparément, puis on soustrait.")] }); },
+      () => { const a = -R.int(2, 12), b = R.int(1, 12), d = b - a, c = pk([
+          ["temperature", "Le matin, le thermomètre indique " + M(a + "\\,°\\text{C}") + " ; l'après-midi, " + M(b + "\\,°\\text{C}") + ". De combien de degrés la température a-t-elle monté ?"],
+          ["droite", "Sur une droite graduée, quelle est la distance entre les points d'abscisses " + M(a) + " et " + M(b) + " ?"],
+          ["altitude", "Une plongeuse est à " + M(-a + " \\text{ m}") + " sous le niveau de la mer (altitude " + M(a + " \\text{ m}") + "), une mouette vole à " + M(b + " \\text{ m}") + " au-dessus. Quelle distance verticale les sépare (en m) ?"]]);
+        return QN(c[1], d, (c[0] === "temperature" ? "Écart " : "Distance ") + M("= |" + b + " - " + par(a) + "| = |" + b + " + " + -a + "| = " + d) + ".",
+          { ctx: c[0], guide: [GS(M(b + " - " + par(a)) + " = ?", d, M(b + " + " + -a + " = " + d) + " : soustraire un négatif, c'est ajouter."), GS("Et dans l'autre sens, " + M(a + " - " + b) + " = ?", a - b, M(a - b) + " : même distance, au signe près ; la distance est la valeur absolue."), GS("Distance ?", d, M(d) + ".")],
+            traps: [TR(b + a, M(b + " - " + par(a)) + " = " + M(b + " + " + -a) + " : soustraire un négatif, c'est ajouter."), TR(a - b, "Une distance est positive : on prend la valeur absolue.")] }); },
+      () => { const a = nz(-6, 6), b = R.int(1, 8);
+        return QSet("Résous " + M(AB(a) + " = " + b) + ". Sépare les solutions par « ; ».", [a - b, a + b], M(xm(a) + " = " + b) + " donne " + M("x = " + (a + b)) + " ; " + M(xm(a) + " = -" + b) + " donne " + M("x = " + (a - b)) + ". " + setT([a - b, a + b]) + " : les deux nombres à distance " + M(b) + " de " + M(a) + ".",
+          { ctx: "eq-simple", guide: [GS("Premier cas, " + M(xm(a) + " = " + b) + " : " + M("x") + " = ?", a + b, M(a + b) + "."), GS("Deuxième cas, " + M(xm(a) + " = -" + b) + " : " + M("x") + " = ?", a - b, M(a - b) + "."), GSet("Les solutions ?", [a - b, a + b], setT([a - b, a + b]) + ".")],
+            traps: [TSet([a + b], "Il y a deux nombres à distance " + b + " de " + a + " : n'oublie pas le cas « = −" + b + " »."), TSet([b - a, -b - a], M(AB(a) + " = " + b) + " : " + M(xm(a) + " = \\pm " + b) + ", donc " + M("x = " + a + " \\pm " + b) + " (attention au signe).")] }); },
+      () => { const a = nz(-5, 5), c = nz(-4, 4), k = a + pk([-1, 1]) * R.int(2, 6), v = Math.abs(k - a) + c;
+        return QN("Soit " + M("f(x) = " + AB(a) + sg(c)) + ". Calcule " + M("f(" + k + ")") + ".", v, M("f(" + k + ") = |" + k + sg(-a) + "|" + sg(c) + " = |" + (k - a) + "|" + sg(c) + " = " + Math.abs(k - a) + sg(c) + " = " + v) + ".",
+          { ctx: "image", guide: [GS(M(k + sg(-a)) + " = ?", k - a, M(k - a) + "."), GS(M("|" + (k - a) + "|") + " = ?", Math.abs(k - a), M(Math.abs(k - a)) + "."), GS(M("f(" + k + ")") + " = ?", v, M(Math.abs(k - a) + sg(c) + " = " + v) + ".")],
+            traps: [TR(k - a + c, "La valeur absolue rend positif : " + M("|" + (k - a) + "| = " + Math.abs(k - a)) + "."), TR(Math.abs(k + a) + c, "On remplace x par " + k + " dans " + M(xm(a)) + " : attention au signe.")] }); },
+    ],
+    2: [
+      () => { const k = pk([2, 3, 4, -2]), c = nz(-7, 7), b = R.int(1, 9), s1 = (b - c) / k, s2 = (-b - c) / k; if (den(s1) > 4 || den(s2) > 4) return null;
+        const e = (k === -2 ? "-2" : k) + "x" + sg(c);
+        return QSet("Résous " + M("|" + e + "| = " + b) + ". Sépare les solutions par « ; »" + FA + ".", [s1, s2], M(e + " = " + b) + " donne " + M("x = " + fT(s1)) + " ; " + M(e + " = -" + b) + " donne " + M("x = " + fT(s2)) + ".",
+          { ctx: "eq-lin", guide: [GS("Cas " + M(e + " = " + b) + " : " + M("x") + " = ?", s1, M(k + "x = " + (b - c)) + ", " + M("x = " + fT(s1)) + "."), GS("Cas " + M(e + " = -" + b) + " : " + M("x") + " = ?", s2, M(k + "x = " + (-b - c)) + ", " + M("x = " + fT(s2)) + "."), GSet("Les solutions ?", [s1, s2], setT([s1, s2]) + ".")],
+            traps: [TSet([s1], "Deux cas : " + M(e + " = " + b) + " ou " + M(e + " = -" + b) + "."), TSet([(b + c) / k, (-b + c) / k], "On retire " + M(c) + " (on ne l'ajoute pas) avant de diviser par " + M(k) + ".")] }); },
+      () => { const m = pk([2, 3, 4]), a = nz(-6, 6), r = R.int(1, 6), c = nz(-8, 8), d = m * r + c;
+        return QSet("Résous " + M(m + AB(a) + sg(c) + " = " + d) + ". Sépare les solutions par « ; ».", [a - r, a + r], "On isole la valeur absolue : " + M(m + AB(a) + " = " + (d - c)) + ", " + M(AB(a) + " = " + r) + ". Puis " + M("x = " + a + " \\pm " + r) + " : " + setT([a - r, a + r]) + ".",
+          { ctx: "isoler", guide: [GS("On isole d'abord la valeur absolue : " + M(AB(a)) + " = ?", r, M(m + AB(a) + " = " + (d - c)) + ", on divise par " + M(m) + " : " + M(r) + "."), GS("Plus petite solution ?", a - r, M(a + " - " + r + " = " + (a - r)) + "."), GSet("Les solutions ?", [a - r, a + r], setT([a - r, a + r]) + ".")],
+            traps: [TSet([a - (d - c), a + (d - c)], "Divise par " + m + " avant de séparer les deux cas."), TSet([a + r], "Deux nombres sont à distance " + r + " de " + a + ".")] }); },
+      () => { const a = nz(-6, 6), c = R.int(3, 9), d = c - R.int(1, c + 3), r = d - c;
+        return QSet("Résous " + M(AB(a) + " + " + c + " = " + d) + ". (Écris « aucune » s'il n'y a pas de solution.)", [], "On isole : " + M(AB(a) + " = " + r) + ". Une valeur absolue est toujours positive ou nulle : aucune solution, " + M("S = \\varnothing") + ".",
+          { ctx: "impossible", guide: [GS("On isole : " + M(AB(a)) + " = ?", r, M(d + " - " + c + " = " + r) + "."), GSet("Une valeur absolue peut-elle valoir " + M(r) + " ? Solutions (« aucune » s'il n'y en a pas) ?", [], "Non : une distance n'est jamais négative. Aucune solution.")],
+            traps: [TSet([a + r, a - r], "Une valeur absolue ne peut pas être négative : " + M(AB(a) + " = " + r) + " est impossible.")] }); },
+      () => { const a = nz(-5, 5), c = nz(-4, 4), r = R.int(1, 6), y = c + r;
+        return QSet("Soit " + M("f(x) = " + AB(a) + sg(c)) + ". Détermine les préimages de " + M(y) + ". Sépare-les par « ; ».", [a - r, a + r], M(AB(a) + sg(c) + " = " + y) + " donne " + M(AB(a) + " = " + r) + ", donc " + M("x = " + a + " \\pm " + r) + " : " + setT([a - r, a + r]) + ".",
+          { ctx: "preimage", guide: [GS("On résout " + M("f(x) = " + y) + ". " + M(AB(a)) + " = ?", r, M(y + sg(-c) + " = " + r) + "."), GSet("Préimages ?", [a - r, a + r], setT([a - r, a + r]) + ".")],
+            traps: [TSet([a - y, a + y], "On retire d'abord " + M(c) + " : " + M(AB(a) + " = " + r) + "."), TSet([a + r], "Il y a deux préimages.")] }); },
+    ],
+    3: [
+      () => { let e; const a = nz(-6, 6); do e = nz(-6, 6); while (e === a || (a + e) % 2 !== 0); const mid = (a + e) / 2;
+        return QSet("Résous " + M(AB(a) + " = " + AB(e)) + ".", [mid], "La distance de " + M("x") + " à " + M(a) + " égale sa distance à " + M(e) + " : " + M("x") + " est le milieu, " + M("x = \\frac{" + a + " + " + par(e) + "}{2} = " + mid) + ". (Par le calcul : " + M(xm(a) + " = " + xm(e)) + " est impossible, " + M(xm(a) + " = -(" + xm(e) + ")") + " donne " + M("x = " + mid) + ".)",
+          { ctx: "milieu", guide: [GS("Le nombre cherché est à égale distance de " + M(a) + " et de " + M(e) + " : c'est leur milieu. Milieu = ?", mid, M("\\frac{" + a + " + " + par(e) + "}{2} = " + mid) + "."), GSet("Solutions ?", [mid], setT([mid]) + ".")],
+            traps: [TSet([a, e], "Les solutions sont les x à égale distance de " + a + " et de " + e + " : un seul nombre, le milieu."), TSet([-mid], "Milieu : demi-somme " + M("\\frac{" + a + " + " + par(e) + "}{2}") + ".")] }); },
+      () => { const a = nz(-6, 6), k = pk([2, 3, -2, -3]), c = R.int(-6, 6), x1 = (c + a) / (1 - k), x2 = (a - c) / (1 + k);
+        if (!Number.isInteger(x1) || !Number.isInteger(x2) || x1 === x2) return null; const v1 = k * x1 + c >= 0, v2 = k * x2 + c >= 0; if (v1 === v2) return null; const s = v1 ? x1 : x2, bad = v1 ? x2 : x1, rhs = lin(k, c);
+        return QSet("Résous " + M(AB(a) + " = " + rhs) + ".", [s], "Cas 1 : " + M(xm(a) + " = " + rhs) + " donne " + M("x = " + x1) + ". Cas 2 : " + M("-(" + xm(a) + ") = " + rhs) + " donne " + M("x = " + x2) + ". Le membre de droite est une distance, il doit être positif : en " + M("x = " + bad) + ", " + M(rhs) + " vaut " + M(k * bad + c) + " (rejeté). " + setT([s]) + ".",
+          { ctx: "verif", guide: [GS("Cas 1, " + M(xm(a) + " = " + rhs) + " : " + M("x") + " = ?", x1, M("x = " + x1) + "."), GS("Cas 2, " + M("-(" + xm(a) + ") = " + rhs) + " : " + M("x") + " = ?", x2, M("x = " + x2) + "."), GSet("Le membre de droite doit être positif ou nul (c'est une distance). Solutions retenues ?", [s], "En " + M("x = " + bad) + ", " + M(rhs + " = " + (k * bad + c)) + " < 0 : rejeté. " + setT([s]) + ".")],
+            traps: [TSet([x1, x2], "Vérifie chaque valeur : " + M(rhs) + " doit être positif ou nul. L'une des deux est à rejeter.")] }); },
+      () => { const a = nz(-5, 5), b = R.int(1, 6), op = pk(["<", "<=", ">", ">="]), inside = op[0] === "<", inc = op.length === 2;
+        const ivs = inside ? [[a - b, inc, a + b, inc]] : [[-Infinity, false, a - b, inc], [a + b, inc, Infinity, false]], wrong = inside ? [[-Infinity, false, a - b, !inc], [a + b, !inc, Infinity, false]] : [[a - b, !inc, a + b, !inc]];
+        return QS("Résous " + M(AB(a) + " " + opA[op] + " " + b) + ". Donne l'ensemble des solutions (intervalle ou réunion d'intervalles).", ivs, M(AB(a)) + " est la distance de " + M("x") + " à " + M(a) + ". Elle est " + (inside ? "inférieure" : "supérieure") + " à " + M(b) + (inside ? " entre " : " à l'extérieur de ") + M(a - b) + " et " + M(a + b) + " : " + M("S = " + SolSet.show(ivs)) + ".",
+          { ctx: "inequation", guide: [GS("Nombres à distance exactement " + M(b) + " de " + M(a) + " : le plus petit ?", a - b, M(a + " - " + b + " = " + (a - b)) + "."), GS("Le plus grand ?", a + b, M(a + b) + "."), GSS("Les x " + (inside ? "plus proches" : "plus éloignés") + " de " + M(a) + " (distance " + M(opA[op] + " " + b) + ") : ensemble ?", ivs, M("S = " + SolSet.show(ivs)) + ".")],
+            traps: [TS(wrong, inside ? "Distance plus petite que " + b + " : entre les deux bornes." : "Distance plus grande que " + b + " : à l'extérieur des deux bornes."), TS(inside ? [[a - b, !inc, a + b, !inc]] : [[-Infinity, false, a - b, !inc], [a + b, !inc, Infinity, false]], "Crochets : « ≤ » et « ≥ » gardent les bornes, « < » et « > » les excluent.")] }); },
+    ],
+  };
+
+  // ===================== morceaux : fonctions définies par morceaux (20.11) =====================
+  const PCW = (p1, c, p2) => M("f(x) = \\begin{cases} " + p1 + " & \\text{si } x < " + c + " \\\\ " + p2 + " & \\text{si } x \\ge " + c + " \\end{cases}");
+  // Prix en CHF : décimales (« 1,50 »), jamais en fraction. T : [ctx, énoncé, unité, question, « d'heures » / « de km », « premières » / « premiers »]
+  const chf = (v) => (Number.isInteger(v) ? String(v) : v.toFixed(2).replace(".", "{,}"));
+  const TARIFS = [
+    ["parking", (F, s, p) => "Un parking coûte " + M(chf(F)) + " CHF pour les " + s + " premières heures (ou moins), puis " + M(chf(p)) + " CHF par heure supplémentaire.", "heures", "Combien paie-t-on pour", "d'heures", "premières"],
+    ["taxi", (F, s, p) => "Un taxi facture " + M(chf(F)) + " CHF pour les " + s + " premiers kilomètres (ou moins), puis " + M(chf(p)) + " CHF par kilomètre supplémentaire.", "km", "Prix d'une course de", "de km", "premiers"],
+    ["forfait", (F, s, p) => "Un abonnement mobile coûte " + M(chf(F)) + " CHF par mois avec " + s + " Go inclus, puis " + M(chf(p)) + " CHF par Go supplémentaire.", "Go", "Facture d'un mois avec", "de Go", "premiers"],
+    ["velo", (F, s, p) => "La location d'un vélo coûte " + M(chf(F)) + " CHF pour les " + s + " premières heures (ou moins), puis " + M(chf(p)) + " CHF par heure en plus.", "heures", "Prix pour", "d'heures", "premières"],
+  ];
+  const tarif = () => { const T = pk(TARIFS), F = R.int(3, 25), s = R.int(2, 5), p = pk([1.5, 2, 2.5, 3, 4]); return { T, F, s, p }; };
+  const MO = {
+    1: [
+      () => { const a = nz(-3, 3), b = nz(-4, 4), c = R.int(-1, 2), e = nz(-4, 3), k = pk([c - R.int(1, 3), c, c + R.int(1, 2)]), first = k < c, v = first ? a * k + b : k * k + e, other = first ? k * k + e : a * k + b;
+        if (other === v) return null;
+        return QN("On donne " + PCW(lin(a, b), c, tri(1, 0, e)) + ". Calcule " + M("f(" + k + ")") + ".", v, M(k) + (first ? " est plus petit que " + M(c) + " : premier morceau, " + M("f(" + k + ") = " + a + " \\cdot " + par(k) + sg(b) + " = " + v) : " n'est pas plus petit que " + M(c) + " : second morceau, " + M("f(" + k + ") = " + par(k) + "^2" + sg(e) + " = " + v)) + ".",
+          { ctx: "image", fig: PL([{ f: (x) => a * x + b, to: c - 0.001 }, { f: (x) => x * x + e, from: c }], { yr: [-6, 8] }), guide: [GS("On compare " + M(k) + " à la frontière " + M(c) + ". Numéro du morceau à utiliser (1 ou 2) ?", first ? 1 : 2, first ? M(k + " < " + c) + " : morceau 1." : M(k + " \\ge " + c) + " : morceau 2" + (k === c ? " (à la frontière, « ≥ » : c'est le second)." : ".")), GS(M("f(" + k + ")") + " = ?", v, M(v) + ".")],
+            traps: [TR(other, k === c ? "À la frontière x = " + c + ", c'est « x ≥ " + c + " » qui s'applique : le second morceau." : "Mauvais morceau : compare d'abord " + k + " à " + c + ".")] }); },
+      () => { const c = R.int(-1, 2), a = pk([1, -1, 2]), b = R.int(-2, 3), d = pk([-1, 1, -2, 0.5]), g = a * c + b + pk([0, 2, -2]) - d * c, f = (x) => (x < c ? a * x + b : d * x + g);
+        const xs = [-4, -3, -2, -1, 0, 1, 2, 3, 4].filter((x) => Number.isInteger(f(x)) && Math.abs(f(x)) <= 5 && x !== c); if (!xs.length) return null; const k = pk(xs), v = f(k), wrongPiece = k < c ? d * k + g : a * k + b;
+        return QN("La fonction " + M("f") + " est définie par morceaux (graphique). Lis " + M("f(" + k + ")") + ".", v, "En " + M("x = " + k) + ", on est sur la partie " + (k < c ? "gauche" : "droite") + " de la courbe : on lit " + M("f(" + k + ") = " + v) + ".",
+          { ctx: "lecture", fig: PL([{ f: (x) => a * x + b, to: c - 0.001 }, { f: (x) => d * x + g, from: c }]), guide: [GS("En " + M("x = " + k) + ", la courbe est-elle sur la partie gauche (1) ou droite (2) ?", k < c ? 1 : 2, k < c ? "Gauche : " + M(k + " < " + c) + "." : "Droite : " + M(k + " \\ge " + c) + "."), GS("Ordonnée lue ?", v, M(v) + ".")],
+            traps: [TR(wrongPiece, "Ce morceau-là ne vaut que de l'autre côté de x = " + c + "."), TR(k, "f(" + k + ") est une ordonnée (hauteur), pas une abscisse.")] }); },
+      () => { const { T, F, s, p } = tarif(), t = R.rand() < 0.25 ? R.int(1, s) : s + R.int(1, 6), extra = Math.max(0, t - s), v = F + p * extra;
+        return QN(T[1](F, s, p, t) + " " + T[3] + " " + t + " " + T[2] + " ? (en CHF)", v, extra ? M(t + " - " + s + " = " + extra) + " " + T[2] + " en plus : " + M(chf(F) + " + " + extra + " \\cdot " + chf(p) + " = " + chf(v)) + " CHF." : M(t + " \\le " + s) + " : seulement le prix de base, " + M(chf(F)) + " CHF.",
+          { ctx: "tarif-" + T[0], guide: [GS("Combien " + T[4] + " au-delà des " + s + " " + T[5] + " ?", extra, extra ? M(t + " - " + s + " = " + extra) + "." : "Aucune : " + M(t + " \\le " + s) + "."), GS("Supplément (CHF) ?", p * extra, M(extra + " \\cdot " + chf(p) + " = " + chf(p * extra)) + "."), GS("Total (CHF) ?", v, M(chf(v)) + ".")],
+            traps: [TR(F + p * t, "Le supplément ne compte qu'au-delà des " + s + " " + T[5] + "."), TR(p * extra, "N'oublie pas le prix de base, " + chf(F).replace("{,}", ",") + " CHF."), TR(p * t, "Fonction par morceaux : prix de base jusqu'à " + s + ", puis supplément.")] }); },
+    ],
+    2: [
+      () => { const c = R.int(0, 2), a = nz(-3, 3), b = R.int(-4, 4), x1 = R.int(c - 4, c + 2), y = a * x1 + b, r = R.int(1, 4), e = y - r * r;
+        const sols = [...new Set([...(x1 < c ? [x1] : []), ...[r, -r].filter((x) => x >= c)])], all = [...new Set([x1, r, -r])];
+        if (all.length === sols.length) return null;
+        return QSet("On donne " + PCW(lin(a, b), c, tri(1, 0, e)) + ". Résous " + M("f(x) = " + y) + ". (Sépare les solutions par « ; » ; « aucune » s'il n'y en a pas.)", sols,
+          "Morceau 1 : " + M(lin(a, b) + " = " + y + " \\Rightarrow x = " + x1) + (x1 < c ? " (gardé, " + M(x1 + " < " + c) + ")" : " (rejeté, " + M(x1 + " \\ge " + c) + ")") + ". Morceau 2 : " + M("x^2 = " + r * r + " \\Rightarrow x = \\pm " + r) + ", on garde ceux qui sont " + M("\\ge " + c) + ". " + setT(sols) + ".",
+          { ctx: "equation", guide: [GS("Morceau 1 : " + M(lin(a, b) + " = " + y) + ", " + M("x") + " = ?", x1, M("x = " + x1) + (x1 < c ? " : il est bien " + M("< " + c) + ", on le garde." : " : il n'est pas " + M("< " + c) + ", on le rejette.")), GS("Morceau 2 : " + M(tri(1, 0, e) + " = " + y) + ". " + M("x^2") + " = ?", r * r, M("x = " + r) + " ou " + M("x = -" + r) + " ; on garde ceux qui sont " + M("\\ge " + c) + "."), GSet("Solutions retenues ?", sols, setT(sols) + ".")],
+            traps: [TSet(all, "Chaque solution doit être dans l'intervalle de son morceau : vérifie avec la frontière " + c + ".")] }); },
+      () => { const a = nz(-6, 6), left = R.rand() < 0.5;
+        const e = left ? "-x" + sg(a) : xm(a), ex = left ? a + "-x" : "x" + (a < 0 ? "+" + -a : "-" + a), t = left ? a - R.int(1, 4) : a + R.int(1, 4);
+        return QX("Pour " + M(left ? "x < " + a : "x \\ge " + a) + ", écris " + M(AB(a)) + " sans valeur absolue.", ex, (left ? "Si " + M("x < " + a) + ", " + M(xm(a)) + " est négatif : " + M(AB(a) + " = -(" + xm(a) + ") = " + e) : "Si " + M("x \\ge " + a) + ", " + M(xm(a)) + " est positif ou nul : " + M(AB(a) + " = " + e)) + ". Donc " + M(AB(a)) + " est une fonction par morceaux.",
+          { ctx: "absmorceaux", guide: [GS("Exemple : pour " + M("x = " + t) + ", " + M(t + sg(-a)) + " = ?", t - a, M(t - a) + (left ? " : négatif, la valeur absolue change son signe." : " : positif, la valeur absolue ne change rien.")), GX("Pour " + M(left ? "x < " + a : "x \\ge " + a) + ", " + M(AB(a)) + " = ?", ex, M(e) + ".")],
+            traps: left ? [TX("x" + (a < 0 ? "+" + -a : "-" + a), "Pour x < " + a + ", " + xm(a) + " est négatif : on prend son opposé."), TX("-x" + (a < 0 ? "+" + -a : "-" + a), "L'opposé de " + xm(a) + " est " + (a < 0 ? "−x − " + -a : "−x + " + a) + " : on change le signe des deux termes.")] : [TX(a + "-x", "Pour x ≥ " + a + ", " + xm(a) + " est déjà positif ou nul : on le garde tel quel.")] }); },
+      () => { const { T, F, s, p } = tarif(), extra = R.int(2, 8), tot = F + p * extra, t = s + extra;
+        return QN(T[1](F, s, p) + " On a payé " + M(chf(tot)) + " CHF. Combien " + T[4] + " ?", t, M(chf(tot) + " - " + chf(F) + " = " + chf(p * extra)) + " CHF de supplément, soit " + M(chf(p * extra) + " \\div " + chf(p) + " = " + extra) + " " + T[2] + " en plus des " + s + " " + T[5] + " : " + M(t) + " " + T[2] + ".",
+          { ctx: "tarifinv-" + T[0], guide: [GS("Supplément payé (CHF) ?", p * extra, M(chf(tot) + " - " + chf(F) + " = " + chf(p * extra)) + "."), GS("Nombre " + T[4] + " en plus ?", extra, M(chf(p * extra) + " \\div " + chf(p) + " = " + extra) + "."), GS("Nombre total " + T[4] + " ?", t, M(s + " + " + extra + " = " + t) + ".")],
+            traps: [TR(extra, "Ce sont les " + T[2] + " au-delà des " + s + " " + T[5] + " : ajoute-les."), TR(tot / p, "Le prix de base couvre les " + s + " " + T[5] + " : retire-le d'abord.")] }); },
+    ],
+    3: [
+      () => { const a = nz(-3, 3), c = R.int(-2, 3), e = R.int(-4, 4), m = c * c + e - a * c;
+        return QN("On donne " + M("f(x) = \\begin{cases} " + (a === 1 ? "" : a === -1 ? "-" : a) + "x + m & \\text{si } x < " + c + " \\\\ " + tri(1, 0, e) + " & \\text{si } x \\ge " + c + " \\end{cases}") + ". Quelle valeur de " + M("m") + " rend le graphe de " + M("f") + " continu (sans saut) ?", m,
+          "Les deux morceaux doivent donner la même valeur en " + M("x = " + c) + " : " + M(a + " \\cdot " + par(c) + " + m = " + par(c) + "^2" + sg(e)) + ", donc " + M("m = " + m) + ".",
+          { ctx: "continuite", guide: [GS("Valeur du second morceau en " + M("x = " + c) + " ?", c * c + e, M(par(c) + "^2" + sg(e) + " = " + (c * c + e)) + "."), GS("Le premier morceau doit arriver à la même hauteur : " + M(a + " \\cdot " + par(c) + " + m = " + (c * c + e)) + ". " + M("m") + " = ?", m, M("m = " + (c * c + e) + sg(-a * c) + " = " + m) + ".")],
+            traps: [TR(c * c + e, "C'est la hauteur au raccord ; il faut encore en déduire m."), TR(c * c + e + a * c, "On retire " + a + " · " + par(c) + " = " + a * c + " (attention au signe).")] }); },
+      () => { const c = R.int(-1, 2), a1 = nz(-3, 3), b1 = R.int(-4, 4), a2 = nz(-3, 3), b2 = R.int(-4, 4), y = R.int(-5, 6), x1 = (y - b1) / a1, x2 = (y - b2) / a2;
+        if (!Number.isInteger(x1) || !Number.isInteger(x2) || x1 === x2) return null; const sols = [...(x1 < c ? [x1] : []), ...(x2 >= c ? [x2] : [])]; if (sols.length === 2) return null;
+        return QSet("On donne " + PCW(lin(a1, b1), c, lin(a2, b2)) + ". Résous " + M("f(x) = " + y) + ". (« aucune » s'il n'y a pas de solution.)", sols,
+          "Morceau 1 : " + M("x = " + x1) + (x1 < c ? " (gardé)" : " (rejeté, pas " + M("< " + c) + ")") + ". Morceau 2 : " + M("x = " + x2) + (x2 >= c ? " (gardé)" : " (rejeté, pas " + M("\\ge " + c) + ")") + ". " + setT(sols) + ".",
+          { ctx: "deux-affines", guide: [GS("Morceau 1, " + M(lin(a1, b1) + " = " + y) + " : " + M("x") + " = ?", x1, M("x = " + x1) + (x1 < c ? ", il est " + M("< " + c) + " : gardé." : ", il n'est pas " + M("< " + c) + " : rejeté.")), GS("Morceau 2, " + M(lin(a2, b2) + " = " + y) + " : " + M("x") + " = ?", x2, M("x = " + x2) + (x2 >= c ? ", il est " + M("\\ge " + c) + " : gardé." : ", il n'est pas " + M("\\ge " + c) + " : rejeté.")), GSet("Solutions retenues ?", sols, setT(sols) + ".")],
+            traps: [TSet([x1, x2], "Une solution de morceau ne compte que si elle est dans l'intervalle de ce morceau.")] }); },
+      () => { const c = R.int(0, 2), a = nz(-2, 3), b = R.int(-3, 3), e = R.int(-4, 2), f = (x) => (x < c ? a * x + b : x * x + e), k = R.int(-3, 3), y1 = f(k), v = f(y1); if (Math.abs(v) > 60 || y1 === k) return null;
+        return QN("On donne " + PCW(lin(a, b), c, tri(1, 0, e)) + ". Calcule " + M("f(f(" + k + "))") + ".", v, M("f(" + k + ") = " + y1) + " (morceau " + (k < c ? 1 : 2) + "), puis " + M("f(" + y1 + ") = " + v) + " (morceau " + (y1 < c ? 1 : 2) + ").",
+          { ctx: "fof", guide: [GS(M("f(" + k + ")") + " = ?", y1, "Morceau " + (k < c ? 1 : 2) + " : " + M(y1) + "."), GS(M("f(" + y1 + ")") + " = ?", v, "Morceau " + (y1 < c ? 1 : 2) + " (compare " + y1 + " à " + c + ") : " + M(v) + ".")],
+            traps: [TR(y1, "C'est f(" + k + ") ; il faut encore calculer f de ce résultat."), TR(y1 < c ? y1 * y1 + e : a * y1 + b, "Pour f(" + y1 + "), compare " + y1 + " à la frontière " + c + " : autre morceau.")] }); },
+    ],
+  };
+
   const PROBS = {
+    absval: [() => P("Sur une route droite, deux bornes sont aux kilomètres 12 et 30. On cherche les points (kilomètre x) dont la somme des distances aux deux bornes vaut 26 km : " + M("|x - 12| + |x - 30| = 26") + ".", [["a) Distance entre les deux bornes (km)", 18], ["b) Plus petite solution x", 8], ["c) Plus grande solution x", 34]], ["Entre les bornes, la somme vaut toujours 18 : trop peu.", "À gauche de 12, la somme vaut (12 − x) + (30 − x)."], "a) 18 ; b) " + M("42 - 2x = 26") + ", " + M("x = 8") + " ; c) par symétrie, " + M("x = 34") + ".")],
+    morceaux: [() => P("Un parking : 4 CHF pour les 2 premières heures (ou moins), puis 2,50 CHF par heure supplémentaire, avec un maximum de 20 CHF par jour.", [["a) Prix pour 5 heures (CHF)", 11.5], ["b) Dès combien d'heures paie-t-on le maximum ?", 9], ["c) Prix pour 12 heures (CHF)", 20]], ["5 h = 2 h + 3 h en plus.", "4 + 2,5 · (t − 2) ≥ 20."], "a) " + M("4 + 3 \\cdot 2{,}5 = 11{,}5") + " ; b) " + M("2{,}5(t - 2) \\ge 16") + ", " + M("t \\ge 8{,}4") + " : dès 9 heures ; c) le maximum, 20 CHF.")],
     fimg: [() => P("Soit f(x) = x² − 2x − 3.", [["a) f(−2)", 5], ["b) f(0)", -3], ["c) Plus grande préimage de 0", 3]], ["(−2)² = 4.", "x² − 2x − 3 = (x − 3)(x + 1)."], "a) " + M("4 + 4 - 3 = 5") + " ; b) −3 ; c) zéros −1 et 3 : 3.")],
     lectgraph: [() => P("Une parabole a pour sommet S(2 ; −4) et coupe l'axe des x en 0 et 4.", [["a) Valeur minimale de f", -4], ["b) Plus grand zéro", 4], ["c) Nombre de solutions de f(x) = −2", 2]], ["Le sommet est le point le plus bas.", "y = −2 est au-dessus du sommet."], "a) −4 ; b) 4 ; c) la droite coupe la parabole 2 fois.")],
     racinv: [() => P("f(x) = 12/x et g(x) = x + 1.", [["a) f(3)", 4], ["b) Préimage de 6 par f", 2], ["c) Plus grande abscisse d'intersection de f et g", 3]], ["12/x = x + 1 ⇔ x² + x − 12 = 0.", "(x + 4)(x − 3) = 0."], "a) 4 ; b) 2 ; c) x = 3 (et x = −4).")],
@@ -235,7 +365,7 @@
     transf: [() => P("f(x) = x² ; g(x) = (x − 3)² − 5.", [["a) Abscisse du sommet de g", 3], ["b) Ordonnée du sommet de g", -5], ["c) g(5)", -1]], ["(x − 3) : 3 vers la droite.", "g(5) = 2² − 5."], "a) 3 ; b) −5 ; c) −1.")],
   };
 
-  const ALL = { fimg: FI, lectgraph: LG, racinv: RI, modaff: MA, transf: TF };
+  const ALL = { fimg: FI, lectgraph: LG, racinv: RI, modaff: MA, transf: TF, absval: AV, morceaux: MO };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => { const L0 = lv[Math.min(Math.max(d, 1), 3)]; let q = null; for (let k = 0; k < 40 && !(q && q.traps && q.traps.length); k++) q = pk(L0)(); return q; };
     if (typeof VAR !== "undefined") VAR[id] = {};
@@ -248,6 +378,8 @@
     racinv: "√x : élève au carré puis vérifie (solutions parasites). a/x : multiplie par x. Intersection : égalise les deux expressions.",
     modaff: "Coût = part fixe + prix unitaire · quantité. Pour comparer deux offres, égalise-les ; le résultat est souvent un entier à arrondir.",
     transf: "f(x − a) + b : a vers la droite, b vers le haut ; le point (p ; q) devient (p + a ; q + b). k · f(x) multiplie les ordonnées.",
+    absval: "|A| est la distance de A à 0. |A| = b (b ≥ 0) : A = b ou A = −b ; isole d'abord la valeur absolue ; si elle doit être négative, aucune solution.",
+    morceaux: "Compare d'abord x à la frontière pour choisir le morceau. Pour résoudre, résous dans chaque morceau et garde ce qui est dans le bon intervalle.",
   });
   if (typeof COMPS !== "undefined") Object.assign(COMPS, {
     fimg: ["Image, préimage, lecture", "Racine, deux préimages, lecture", "Trinôme, f(f(x)), paramètre"],
@@ -255,5 +387,7 @@
     racinv: ["Images et préimages", "Équations avec racine, intersections", "Parasites, paramètre"],
     modaff: ["Coût total, prix unitaire, budget", "Seuil, égalité d'offres, expression", "Bougie, bénéfice, réservoir"],
     transf: ["Sommet, expression, décalage", "Point, sommet composé, valeur absolue", "Étirement, calcul de g, forme canonique"],
+    absval: ["Calculer, distance, équation simple", "Isoler, deux cas, aucune solution", "Milieu, vérification, inéquation"],
+    morceaux: ["Image, lecture, tarif", "Équation, |x − a| par morceaux, tarif inverse", "Continuité, deux morceaux affines, f(f(x))"],
   });
 })();
