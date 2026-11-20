@@ -153,6 +153,7 @@ function screenMockCorr() {
     const ok = Object.keys(byId).filter((id) => byId[id].every((m) => m === 1)), weak = Object.keys(byId).filter((id) => byId[id].some((m) => m < 1));
     const cnt = { juste: marks.filter((m) => m === 1).length, partie: marks.filter((m) => m === 0.5).length, faux: marks.filter((m) => m === 0).length };
     state.mock.done = { date: day(), pts, total, ...cnt, n: marks.length };
+    if (typeof prepMark === "function") prepMark("mock");
     Badges.check(state); save();
     screenMockResult(cnt, marks.length, ok, weak);
   };
