@@ -2,7 +2,7 @@
 """Plan de l'aide pas à pas (« On le fait ensemble », q.guide) — lissé dans le temps (demande du 14.11).
 
 Repère, pour chaque notion, les niveaux (1 à 3) qui ont déjà un guide, classe les notions par priorité
-(11e et 1re Collège d'abord, en alternant leurs lots — les bêta-testeurs sont sur ces deux niveaux, 14.11 —, puis MP, 2e Collège, 10e, 9e) et découpe le reste en lots de LOT notions.
+(11e et 1re Collège d'abord, en alternant leurs lots — les bêta-testeurs sont sur ces deux niveaux, 14.11 —, puis 10e, 9e — secondaire I d'abord, décision du 20.11 —, puis MP et 2e Collège) et découpe le reste en lots de LOT notions.
 Écrit tools/plan_pas_a_pas.md ; `--prochain` affiche une ligne (lue par le point du jour).
 """
 import json, os, re, sys
@@ -78,12 +78,13 @@ def ordre():
     m1 = [i for i in rang(O["MATU"]) if T["MATU"].get(i, "").startswith("M1")]
     m2 = [i for i in rang(O["MATU"]) if T["MATU"].get(i, "").startswith("M2")]
     co = lambda y: [i for i in rang(O["CO"]) if str(y) in T["CO_BY"].get(i, {})]
-    groupes = [("11e CO (bêta-testeurs)", co(11)), ("1re Collège (bêta-testeurs)", m1), ("MP", rang(O["MP"])),
-               ("2e Collège", m2), ("10e CO", co(10)), ("9e CO", co(9))]
+    # Cible : le secondaire I d'abord (décision du 20.11) — 11e et 1re (testeurs), puis 10e, 9e, puis MP et 2e Collège.
+    groupes = [("11e CO (bêta-testeurs)", co(11)), ("1re Collège (bêta-testeurs)", m1), ("10e CO", co(10)), ("9e CO", co(9)),
+               ("MP", rang(O["MP"])), ("2e Collège", m2)]
     if INVD:  # appartenance réelle aux classes (une notion de 1re rangée aussi en 2e reste en 1re)
         cl = {c["name"]: [r["id"] for r in c["rows"]] for c in INVD["classes"]}
-        groupes = [("11e CO (bêta-testeurs)", cl.get("11e", [])), ("1re Collège (bêta-testeurs)", cl.get("1re", [])), ("MP", cl.get("MP 1re", []) + cl.get("MP 2e", [])),
-                   ("2e Collège", cl.get("2e", [])), ("10e CO", cl.get("10e", [])), ("9e CO", cl.get("9e", []))]
+        groupes = [("11e CO (bêta-testeurs)", cl.get("11e", [])), ("1re Collège (bêta-testeurs)", cl.get("1re", [])), ("10e CO", cl.get("10e", [])), ("9e CO", cl.get("9e", [])),
+                   ("MP", cl.get("MP 1re", []) + cl.get("MP 2e", [])), ("2e Collège", cl.get("2e", []))]
     vus, res = set(), []
     for nom, ids in groupes:
         for i in ids:
