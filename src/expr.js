@@ -290,7 +290,7 @@ const SolSet = (() => {
       if ((m = q.match(/^(.+?)\s*(>=|>)\s*x\s*(>=|>)\s*(.+)$/i))) { out.push([num(m[4]), m[3] === ">=", num(m[1]), m[2] === ">="]); continue; }
       if ((m = q.match(/^x\s*(<=|>=|<|>|!=|=)\s*(.+)$/i))) { add(out, ex, m[1], num(m[2])); continue; }
       if ((m = q.match(/^(.+?)\s*(<=|>=|<|>)\s*x$/i))) { add(out, ex, { "<=": ">=", ">=": "<=", "<": ">", ">": "<" }[m[2]], num(m[1])); continue; }
-      throw new Error("Écris par exemple « x <= -2 ou x > 3 », « -1 < x <= 4 » ou « ]-∞ ; 2] ∪ [5 ; +∞[ ».");
+      throw new Error("Écris par exemple « x <= -2 ou x > 3 », « -1 < x <= 4 » ou « ]-∞ ; 2] ∪ [5 ; +∞[ » (∞ : touche ∞ du clavier, ou « inf »).");
     }
     if (ex.length) { const e = excl(ex); return out.length ? out.concat(e) : e; }
     return out;

@@ -703,6 +703,8 @@ function exactNote(spec, text) {
   // Consigne de saisie quand l'énoncé ne la donne pas (audit 13.11).
   if (spec.kind === "set" && !/« ; »|sépare|aucune/i.test(t)) notes.push("Plusieurs solutions : sépare-les par « ; » ; « aucune » s'il n'y en a pas.");
   if (spec.kind === "solset" && !/intervalle|« x|aucune/i.test(t)) notes.push("Réponds avec des intervalles (par exemple ]-∞ ; 2] ∪ [5 ; +∞[), « x ≥ 3 » ou « aucune ».");
+  // Commentaire testeur du 20.11 (« comment on tape infini ? ») : la touche ∞ existait, mais rien ne la signalait.
+  if (spec.kind === "solset" && spec.ivs.some(([lo, , hi]) => !isFinite(lo) || !isFinite(hi))) notes.push("Infini : touche ∞ du clavier de l'app (−∞ : touche − puis ∞), ou tape « inf ».");
   if (!spec.round && !spec.plain && !/exact|fraction|arrondi|au centième|au dixième/i.test(t)) {
     const vals = spec.kind === "value" ? [spec.value] : spec.kind === "set" || spec.kind === "pair" ? spec.values : [];
     if (vals.some((v) => isFinite(v) && !isTerm(v))) notes.push(vals.some((v) => isFinite(v) && !isTerm(v) && niceQ(v / Math.PI)) ? "Réponse exacte attendue (avec la touche π), pas d'arrondi." : "Réponse exacte attendue : fraction ou racine, pas d'arrondi.");
