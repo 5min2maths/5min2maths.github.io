@@ -395,6 +395,8 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 
 /* Bouton « commentaire » présent sur tous les écrans (20.11) */
 .fab-cmt { position: fixed; right: 14px; bottom: 86px; z-index: 40; width: 46px; height: 46px; border-radius: 50%; padding: 0; font-size: 1.3rem; background: var(--card, #fff); border: 1px solid var(--line); box-shadow: 0 3px 10px rgba(0,0,0,.15); }
+.brand .fab-cmt { position: static; align-self: center; width: 32px; height: 32px; font-size: 0.95rem; box-shadow: none; margin-left: 2px; flex: none; }
+.fab-sheet.top { top: 64px; bottom: auto; }
 .fab-sheet { position: fixed; left: 12px; right: 12px; bottom: 140px; z-index: 41; max-width: 460px; margin: 0 auto; }
 .fab-sheet textarea { width: 100%; box-sizing: border-box; font: inherit; padding: 8px; border-radius: 10px; border: 1px solid var(--line); background: var(--card, #fff); color: inherit; }
 
@@ -16626,7 +16628,15 @@ function addFab() {
     comment(pageCode(), text); ta.value = ""; ok.textContent = "Merci ! C'est envoyé."; setTimeout(() => (sheet.hidden = true), 1200);
   };
 }
-const h = (html) => { sigClose(); app.classList.remove("has-tabs"); app.innerHTML = html; addTabs(); addFab(); const sh = document.getElementById("fabs"); if (sh) sh.hidden = true; typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
+// Bouton 💬 dans l'en-tête, à droite du titre (20.11 : flottant, il recouvrait une touche du clavier de l'app) ;
+// flottant seulement sur un écran sans en-tête. La fenêtre du commentaire s'ouvre alors en haut.
+function placeFab() {
+  const b = document.getElementById("fabc"), sh = document.getElementById("fabs"), br = app.querySelector(".brand");
+  if (!b) return;
+  if (br) br.appendChild(b); else document.body.appendChild(b);
+  if (sh) sh.classList.toggle("top", !!br);
+}
+const h = (html) => { sigClose(); app.classList.remove("has-tabs"); app.innerHTML = html; addTabs(); addFab(); const sh = document.getElementById("fabs"); if (sh) sh.hidden = true; placeFab(); typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 // Textes de l'app (indices, erreurs typiques) : échappés, sauf <b>, <i>, <br> (16.11 : les balises s'affichaient telles quelles).
 const escT = (s) => esc(s).replace(/&lt;(\/?)(b|i|br)&gt;/g, "<$1$2>");

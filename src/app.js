@@ -41,7 +41,15 @@ function addFab() {
     comment(pageCode(), text); ta.value = ""; ok.textContent = "Merci ! C'est envoyé."; setTimeout(() => (sheet.hidden = true), 1200);
   };
 }
-const h = (html) => { sigClose(); app.classList.remove("has-tabs"); app.innerHTML = html; addTabs(); addFab(); const sh = document.getElementById("fabs"); if (sh) sh.hidden = true; typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
+// Bouton 💬 dans l'en-tête, à droite du titre (20.11 : flottant, il recouvrait une touche du clavier de l'app) ;
+// flottant seulement sur un écran sans en-tête. La fenêtre du commentaire s'ouvre alors en haut.
+function placeFab() {
+  const b = document.getElementById("fabc"), sh = document.getElementById("fabs"), br = app.querySelector(".brand");
+  if (!b) return;
+  if (br) br.appendChild(b); else document.body.appendChild(b);
+  if (sh) sh.classList.toggle("top", !!br);
+}
+const h = (html) => { sigClose(); app.classList.remove("has-tabs"); app.innerHTML = html; addTabs(); addFab(); const sh = document.getElementById("fabs"); if (sh) sh.hidden = true; placeFab(); typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 // Textes de l'app (indices, erreurs typiques) : échappés, sauf <b>, <i>, <br> (16.11 : les balises s'affichaient telles quelles).
 const escT = (s) => esc(s).replace(/&lt;(\/?)(b|i|br)&gt;/g, "<$1$2>");
