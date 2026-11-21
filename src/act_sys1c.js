@@ -17,7 +17,7 @@
       "Compare les pentes après avoir isolé y dans chaque équation."],
     sys3: ["Systèmes de trois équations", "On ramène le système à un système 2 × 2, puis à une équation.",
       "On élimine une inconnue en combinant deux paires de lignes ; on résout le système 2 × 2 obtenu ; on remonte pour trouver la troisième inconnue. Un système « en escalier » (triangulaire) se résout directement de bas en haut.",
-      ["\\(\\begin{cases} x + y + z = 6 \\\\ y + z = 5 \\\\ z = 2 \\end{cases}\\) : \\(z = 2\\), \\(y = 3\\), \\(x = 1\\).", "Si les trois sommes deux à deux sont connues, additionner les trois lignes donne le total."],
+      ["\\(\\begin{cases} x + y + z = 6 \\\\ y + z = 5 \\\\ z = 2 \\end{cases}\\) : \\(z = 2\\), \\(y = 3\\), \\(x = 1\\).", "Astuce quand chaque ligne est la somme de deux inconnues : \\(\\begin{cases} x + y = 7 \\\\ y + z = 9 \\\\ x + z = 8 \\end{cases}\\). On additionne les trois lignes : \\(2x + 2y + 2z = 24\\), donc \\(x + y + z = 12\\). On retranche chaque ligne de 12 : \\(z = 12 - 7 = 5\\), \\(x = 12 - 9 = 3\\), \\(y = 12 - 8 = 4\\)."],
       "Garde l'ordre (x ; y ; z) dans la réponse."],
     affine: ["Fonctions affines", "\\(f(x) = ax + b\\) : une droite de pente \\(a\\) et d'ordonnée à l'origine \\(b\\).",
       "La pente se calcule avec deux points : \\(a = \\frac{f(x_2) - f(x_1)}{x_2 - x_1}\\). L'ordonnée à l'origine est \\(b = f(0)\\), ou \\(b = f(x_1) - a x_1\\). Deux droites parallèles ont la même pente.",

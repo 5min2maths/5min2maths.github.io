@@ -134,6 +134,23 @@ const FIG = (() => {
     b += P([[x, y], [x + dx, y + dy], [x + w + dx, y + dy], [x + w, y]], "f-shape2") + P([[x + w, y], [x + w + dx, y + dy], [x + w + dx, y + h + dy], [x + w, y + h]], "f-shape2");
     return svg(300, 170, b + t(x + w / 2, y + h + 18, la) + t(x + w + dx / 2 + 14, y + h + dy / 2 + 6, lb, "f-txt", "start") + t(x - 8, y + h / 2, lc, "f-txt", "end"), "pavé");
   }
+  // Cube en perspective cavalière (face avant carrée, fuyantes à 45°, réduction 0,5) ; arêtes cachées en pointillé.
+  // withPyr : pyramide inscrite (base = face du dessous, sommet = centre de la face du dessus). Commentaire testeur du 21.11.
+  function cube(la, withPyr) {
+    const x = 70, y = 50, s = 110, dx = 39, dy = -39, D = 'stroke-dasharray="5 4"';
+    const F = [[x, y + s], [x + s, y + s], [x + s, y], [x, y]], B = F.map((p) => [p[0] + dx, p[1] + dy]);
+    let g = P([F[0], F[1], F[2], F[3]], "f-shape") + P([F[3], F[2], B[2], B[3]], "f-shape2") + P([F[1], B[1], B[2], F[2]], "f-shape2");
+    g += L(B[0][0], B[0][1], F[0][0], F[0][1], "f-line", D) + L(B[0][0], B[0][1], B[1][0], B[1][1], "f-line", D) + L(B[0][0], B[0][1], B[3][0], B[3][1], "f-line", D);
+    if (withPyr) {
+      const S = [(F[3][0] + B[2][0]) / 2, (F[3][1] + B[2][1]) / 2], H = [(F[0][0] + B[1][0]) / 2, (F[0][1] + B[1][1]) / 2];
+      g += '<polygon points="' + [F[0], F[1], S].map((p) => p.join(",")).join(" ") + '" fill="var(--margin)" fill-opacity="0.18"/>' + '<polygon points="' + [F[1], B[1], S].map((p) => p.join(",")).join(" ") + '" fill="var(--margin)" fill-opacity="0.28"/>';
+      const E = 'style="stroke:var(--margin);stroke-width:2.2"', Eh = 'style="stroke:var(--margin);stroke-width:1.6" stroke-dasharray="5 4"';
+      g += L(F[0][0], F[0][1], S[0], S[1], "f-line", E) + L(F[1][0], F[1][1], S[0], S[1], "f-line", E) + L(B[1][0], B[1][1], S[0], S[1], "f-line", E) + L(B[0][0], B[0][1], S[0], S[1], "f-line", Eh);
+      g += L(S[0], S[1], H[0], H[1], "f-line", 'style="stroke:var(--ink-soft);stroke-width:1.2" stroke-dasharray="2 3"');
+      g += '<circle cx="' + S[0] + '" cy="' + S[1] + '" r="3" fill="var(--margin)"/>';
+    }
+    return svg(300, 190, g + t(x + s / 2, y + s + 20, la) + t(x + s + dx / 2 + 8, y + s + dy / 2 + 8, la, "f-txt", "start") + t(x - 8, y + s / 2, la, "f-txt", "end"), withPyr ? "pyramide inscrite dans un cube" : "cube");
+  }
   function pyramid(lc, lh) {
     const b = P([[60, 140], [200, 140], [250, 110], [110, 110]], "f-shape2") + P([[60, 140], [200, 140], [150, 20]], "f-shape") + P([[200, 140], [250, 110], [150, 20]], "f-shape2") + L(155, 125, 150, 20, "f-accent", 'stroke-dasharray="5 4"');
     return svg(300, 162, b + t(130, 158, lc) + t(160, 80, lh, "f-accent f-txt", "start"), "pyramide");
@@ -238,12 +255,25 @@ const FIG = (() => {
   }
   // Cercle, angle au centre et angle inscrit.
   function circleAngles(lCenter, lInscribed) {
-    const cx = 150, cy = 90, r = 70, pt = (deg) => [cx + r * Math.cos((deg * Math.PI) / 180), cy - r * Math.sin((deg * Math.PI) / 180)];
-    const A = pt(210), B = pt(330), C = pt(95);
-    let g = '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" class="f-shape"/>' + P([A, [cx, cy], B], "f-fill2") + L(A[0], A[1], C[0], C[1]) + L(B[0], B[1], C[0], C[1]);
-    g += t(A[0] - 10, A[1] + 12, "A") + t(B[0] + 10, B[1] + 12, "B") + t(C[0], C[1] - 8, "C") + t(cx, cy - 8, "O");
-    g += t(cx, cy + 34, lCenter, "f-accent f-txt", "middle", 12) + t(C[0] + 4, C[1] + 34, lInscribed, "f-accent f-txt", "start", 12);
-    return svg(300, 180, g, "angles au centre et inscrit");
+    // Angles marqués par un secteur (commentaire testeur du 21.11) : bleu au centre O, rouge au point C du cercle.
+    const cx = 150, cy = 92, r = 74, pt = (deg) => [cx + r * Math.cos((deg * Math.PI) / 180), cy - r * Math.sin((deg * Math.PI) / 180)];
+    const A = pt(210), B = pt(330), C = pt(95), O = [cx, cy];
+    const wedge = (V, P1, P2, rr, style) => {
+      const a1 = Math.atan2(P1[1] - V[1], P1[0] - V[0]), a2 = Math.atan2(P2[1] - V[1], P2[0] - V[0]);
+      let d = a2 - a1; while (d <= -Math.PI) d += 2 * Math.PI; while (d > Math.PI) d -= 2 * Math.PI;
+      const p1 = [V[0] + rr * Math.cos(a1), V[1] + rr * Math.sin(a1)], p2 = [V[0] + rr * Math.cos(a2), V[1] + rr * Math.sin(a2)], m = a1 + d / 2;
+      return { g: '<path d="M' + V[0].toFixed(1) + "," + V[1].toFixed(1) + " L" + p1[0].toFixed(1) + "," + p1[1].toFixed(1) + " A" + rr + "," + rr + " 0 0," + (d > 0 ? 1 : 0) + " " + p2[0].toFixed(1) + "," + p2[1].toFixed(1) + ' Z" ' + style + "/>", m };
+    };
+    const wO = wedge(O, A, B, 20, 'fill="var(--blue)" fill-opacity="0.25" stroke="var(--blue)" stroke-width="2"');
+    const wC = wedge(C, A, B, 26, 'fill="var(--margin)" fill-opacity="0.25" stroke="var(--margin)" stroke-width="2"');
+    let g = '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" class="f-shape"/>' + wO.g + wC.g;
+    g += L(O[0], O[1], A[0], A[1], "f-line", 'style="stroke:var(--blue);stroke-width:2"') + L(O[0], O[1], B[0], B[1], "f-line", 'style="stroke:var(--blue);stroke-width:2"');
+    g += L(A[0], A[1], C[0], C[1], "f-line", 'style="stroke-width:2"') + L(B[0], B[1], C[0], C[1], "f-line", 'style="stroke-width:2"');
+    g += '<circle cx="' + cx + '" cy="' + cy + '" r="2.5" fill="var(--ink)"/>';
+    g += t(A[0] - 10, A[1] + 12, "A") + t(B[0] + 10, B[1] + 12, "B") + t(C[0], C[1] - 8, "C") + t(cx - 12, cy - 4, "O");
+    g += '<text x="' + (O[0] + 36 * Math.cos(wO.m)).toFixed(1) + '" y="' + (O[1] + 36 * Math.sin(wO.m) + 4).toFixed(1) + '" text-anchor="middle" font-size="13" font-weight="700" fill="var(--blue)">' + lCenter + "</text>";
+    g += '<text x="' + (C[0] + 42 * Math.cos(wC.m)).toFixed(1) + '" y="' + (C[1] + 42 * Math.sin(wC.m) + 4).toFixed(1) + '" text-anchor="middle" font-size="13" font-weight="700" fill="var(--margin)">' + lInscribed + "</text>";
+    return svg(300, 180, g, "angle au centre AOB (bleu) et angle inscrit ACB (rouge)");
   }
 
   // Cercle trigonométrique avec un angle (degrés).
@@ -291,5 +321,5 @@ const FIG = (() => {
     return svg(320, 190, g + t(cx + r + 8, cy + 14, "1", "f-txt", "start", 11), "cercle trigonométrique");
   }
 
-  return { unitLine, cylinder, unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, pyramid, cone, road, items, scaling, lineGraph, blocks, fractionOf, prioSteps, sciScale, areaSquare, tiles, fmt };
+  return { unitLine, cylinder, unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, cube, pyramid, cone, road, items, scaling, lineGraph, blocks, fractionOf, prioSteps, sciScale, areaSquare, tiles, fmt };
 })();

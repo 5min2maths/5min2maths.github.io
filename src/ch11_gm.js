@@ -120,7 +120,7 @@
             traps: [TR(Math.sqrt(a * a + b * b), "C'est la diagonale de la base ; la grande diagonale monte aussi de " + M(c) + " cm."), TR(a + b + c, "On additionne les carrés : " + M("d^2 = a^2 + b^2 + c^2") + ".")] }); },
       () => { const a = R.int(2, 9);
         return Qv("Calcule la longueur de la grande diagonale d'un cube d'arête " + M(a) + " cm" + EXA + ".", a * Math.sqrt(3), M("d^2 = " + a + "^2 + " + a + "^2 + " + a + "^2 = " + 3 * a * a) + ", donc " + M("d = " + rT(a, 3)) + " cm.",
-          { radical: true, canon: rC(a, 3), ctx: "cube", fig: FIG.box(a + " cm", a + " cm", a + " cm"), guide: [GS("Diagonale d'une face, au carré : " + M(a + "^2 + " + a + "^2") + " = ?", 2 * a * a, M(2 * a * a) + "."), GS("Grande diagonale au carré : " + M(2 * a * a + " + " + a + "^2") + " = ?", 3 * a * a, M(3 * a * a) + "."), GSR(M("d") + " = ? (simplifiée)", a * Math.sqrt(3), M(rT(a, 3)) + " cm.")],
+          { radical: true, canon: rC(a, 3), ctx: "cube", fig: FIG.cube(a + " cm"), guide: [GS("Diagonale d'une face, au carré : " + M(a + "^2 + " + a + "^2") + " = ?", 2 * a * a, M(2 * a * a) + "."), GS("Grande diagonale au carré : " + M(2 * a * a + " + " + a + "^2") + " = ?", 3 * a * a, M(3 * a * a) + "."), GSR(M("d") + " = ? (simplifiée)", a * Math.sqrt(3), M(rT(a, 3)) + " cm.")],
             traps: [TR(a * Math.SQRT2, "C'est la diagonale d'une face ; la grande diagonale traverse le cube."), TR(3 * a, "On additionne les carrés : " + M("d^2 = 3a^2") + ".")] }); },
       () => { const c = 2 * R.int(1, 7);
         return Qv("Calcule la hauteur d'un triangle équilatéral de côté " + M(c) + " cm" + EXA + ".", (c / 2) * Math.sqrt(3), "La hauteur coupe le côté en deux : " + M("h^2 = " + c + "^2 - " + c / 2 + "^2 = " + 3 * c * c / 4) + ", donc " + M("h = " + rT(c / 2, 3)) + " cm.",
@@ -274,7 +274,7 @@
             traps: [TR(d * d * h / 3 * Math.PI, "On a donné le diamètre : le rayon en est la moitié.")] }); },
       () => { const a = 3 * R.int(1, 4), V = a ** 3 / 3;
         return Qv("Une pyramide est inscrite dans un cube d'arête " + M(a) + " cm : sa base est une face du cube et son sommet est le centre de la face opposée. Calcule le volume de la pyramide (en cm³).", V, "Base " + M(a * a) + " cm², hauteur " + M(a) + " cm : " + M("\\frac{1}{3} \\cdot " + a * a + " \\cdot " + a + " = " + V) + " cm³, soit le tiers du cube.",
-          { ctx: "pyrcube", fig: FIG.box(a + " cm", a + " cm", a + " cm"), guide: [GS("La hauteur de la pyramide ?", a, "L'arête du cube : " + M(a) + " cm."), GS("Volume ?", V, M(V) + " cm³.")],
+          { ctx: "pyrcube", fig: FIG.cube(a + " cm", true), guide: [GS("La hauteur de la pyramide ?", a, "L'arête du cube : " + M(a) + " cm."), GS("Volume ?", V, M(V) + " cm³.")],
             traps: [TR(a ** 3, "C'est le volume du cube ; la pyramide en vaut le tiers."), TR(a ** 3 / 6, "La hauteur est l'arête entière : le sommet est sur la face opposée.")] }); },
       () => { const r = 3 * R.int(1, 3), k = 2 * r ** 3 / 3;
         return Qv("Un bol a la forme d'une demi-boule de rayon intérieur " + M(r) + " cm. Calcule son volume" + PIX + ".", k * Math.PI, "Demi-boule : " + M("\\frac{1}{2} \\cdot \\frac{4}{3}\\pi \\cdot " + r + "^3 = " + piT(k)) + " cm³.",
@@ -381,7 +381,7 @@
             traps: [TR((r * r * h + 2 * r ** 3 / 3) * Math.PI, "Le cône vaut le tiers du cylindre."), TR((r * r * h / 3 + 4 * r ** 3 / 3) * Math.PI, "C'est une demi-boule.")] }); },
       () => { const a = 3 * R.int(1, 4), V = 2 * a ** 3 / 3;
         return Qv("On découpe dans un cube d'arête " + M(a) + " cm la plus grande pyramide possible (base = une face, sommet = centre de la face opposée). Quel volume de matière enlève-t-on (en cm³) ?", V, "Cube " + M(a ** 3) + ", pyramide " + M(a ** 3 / 3) + " : on enlève " + M(a ** 3 + " - " + a ** 3 / 3 + " = " + V) + " cm³, les deux tiers.",
-          { ctx: "decoupe", guide: [GS("Volume du cube ?", a ** 3, M(a ** 3) + " cm³."), GS("Volume de la pyramide ?", a ** 3 / 3, M(a ** 3 / 3) + " cm³."), GS("Volume enlevé ?", V, M(V) + " cm³.")],
+          { ctx: "decoupe", fig: FIG.cube(a + " cm", true), guide: [GS("Volume du cube ?", a ** 3, M(a ** 3) + " cm³."), GS("Volume de la pyramide ?", a ** 3 / 3, M(a ** 3 / 3) + " cm³."), GS("Volume enlevé ?", V, M(V) + " cm³.")],
             traps: [TR(a ** 3 / 3, "C'est le volume de la pyramide qui reste ; on demande ce qu'on enlève.")] }); },
       () => { const [hb, s, b2] = pk([[4, 5, 3], [12, 13, 5], [8, 10, 6], [6, 10, 8]]), L = R.int(3, 8), b = 2 * b2, V = b * hb / 2 * L;
         return Qv("Une tente a la forme d'un prisme droit couché. Sa face avant est un triangle isocèle de base " + M(b) + " dm et de côtés " + M(s) + " dm ; la tente est longue de " + M(L) + " dm. Calcule son volume (en dm³).", V, "Hauteur du triangle : " + M("\\sqrt{" + s + "^2 - " + b2 + "^2} = " + hb) + " dm ; aire " + M("\\frac{" + b + " \\cdot " + hb + "}{2} = " + b * hb / 2) + " dm² ; volume " + M(V) + " dm³.",

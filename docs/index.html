@@ -1168,6 +1168,23 @@ const FIG = (() => {
     b += P([[x, y], [x + dx, y + dy], [x + w + dx, y + dy], [x + w, y]], "f-shape2") + P([[x + w, y], [x + w + dx, y + dy], [x + w + dx, y + h + dy], [x + w, y + h]], "f-shape2");
     return svg(300, 170, b + t(x + w / 2, y + h + 18, la) + t(x + w + dx / 2 + 14, y + h + dy / 2 + 6, lb, "f-txt", "start") + t(x - 8, y + h / 2, lc, "f-txt", "end"), "pavé");
   }
+  // Cube en perspective cavalière (face avant carrée, fuyantes à 45°, réduction 0,5) ; arêtes cachées en pointillé.
+  // withPyr : pyramide inscrite (base = face du dessous, sommet = centre de la face du dessus). Commentaire testeur du 21.11.
+  function cube(la, withPyr) {
+    const x = 70, y = 50, s = 110, dx = 39, dy = -39, D = 'stroke-dasharray="5 4"';
+    const F = [[x, y + s], [x + s, y + s], [x + s, y], [x, y]], B = F.map((p) => [p[0] + dx, p[1] + dy]);
+    let g = P([F[0], F[1], F[2], F[3]], "f-shape") + P([F[3], F[2], B[2], B[3]], "f-shape2") + P([F[1], B[1], B[2], F[2]], "f-shape2");
+    g += L(B[0][0], B[0][1], F[0][0], F[0][1], "f-line", D) + L(B[0][0], B[0][1], B[1][0], B[1][1], "f-line", D) + L(B[0][0], B[0][1], B[3][0], B[3][1], "f-line", D);
+    if (withPyr) {
+      const S = [(F[3][0] + B[2][0]) / 2, (F[3][1] + B[2][1]) / 2], H = [(F[0][0] + B[1][0]) / 2, (F[0][1] + B[1][1]) / 2];
+      g += '<polygon points="' + [F[0], F[1], S].map((p) => p.join(",")).join(" ") + '" fill="var(--margin)" fill-opacity="0.18"/>' + '<polygon points="' + [F[1], B[1], S].map((p) => p.join(",")).join(" ") + '" fill="var(--margin)" fill-opacity="0.28"/>';
+      const E = 'style="stroke:var(--margin);stroke-width:2.2"', Eh = 'style="stroke:var(--margin);stroke-width:1.6" stroke-dasharray="5 4"';
+      g += L(F[0][0], F[0][1], S[0], S[1], "f-line", E) + L(F[1][0], F[1][1], S[0], S[1], "f-line", E) + L(B[1][0], B[1][1], S[0], S[1], "f-line", E) + L(B[0][0], B[0][1], S[0], S[1], "f-line", Eh);
+      g += L(S[0], S[1], H[0], H[1], "f-line", 'style="stroke:var(--ink-soft);stroke-width:1.2" stroke-dasharray="2 3"');
+      g += '<circle cx="' + S[0] + '" cy="' + S[1] + '" r="3" fill="var(--margin)"/>';
+    }
+    return svg(300, 190, g + t(x + s / 2, y + s + 20, la) + t(x + s + dx / 2 + 8, y + s + dy / 2 + 8, la, "f-txt", "start") + t(x - 8, y + s / 2, la, "f-txt", "end"), withPyr ? "pyramide inscrite dans un cube" : "cube");
+  }
   function pyramid(lc, lh) {
     const b = P([[60, 140], [200, 140], [250, 110], [110, 110]], "f-shape2") + P([[60, 140], [200, 140], [150, 20]], "f-shape") + P([[200, 140], [250, 110], [150, 20]], "f-shape2") + L(155, 125, 150, 20, "f-accent", 'stroke-dasharray="5 4"');
     return svg(300, 162, b + t(130, 158, lc) + t(160, 80, lh, "f-accent f-txt", "start"), "pyramide");
@@ -1272,12 +1289,25 @@ const FIG = (() => {
   }
   // Cercle, angle au centre et angle inscrit.
   function circleAngles(lCenter, lInscribed) {
-    const cx = 150, cy = 90, r = 70, pt = (deg) => [cx + r * Math.cos((deg * Math.PI) / 180), cy - r * Math.sin((deg * Math.PI) / 180)];
-    const A = pt(210), B = pt(330), C = pt(95);
-    let g = '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" class="f-shape"/>' + P([A, [cx, cy], B], "f-fill2") + L(A[0], A[1], C[0], C[1]) + L(B[0], B[1], C[0], C[1]);
-    g += t(A[0] - 10, A[1] + 12, "A") + t(B[0] + 10, B[1] + 12, "B") + t(C[0], C[1] - 8, "C") + t(cx, cy - 8, "O");
-    g += t(cx, cy + 34, lCenter, "f-accent f-txt", "middle", 12) + t(C[0] + 4, C[1] + 34, lInscribed, "f-accent f-txt", "start", 12);
-    return svg(300, 180, g, "angles au centre et inscrit");
+    // Angles marqués par un secteur (commentaire testeur du 21.11) : bleu au centre O, rouge au point C du cercle.
+    const cx = 150, cy = 92, r = 74, pt = (deg) => [cx + r * Math.cos((deg * Math.PI) / 180), cy - r * Math.sin((deg * Math.PI) / 180)];
+    const A = pt(210), B = pt(330), C = pt(95), O = [cx, cy];
+    const wedge = (V, P1, P2, rr, style) => {
+      const a1 = Math.atan2(P1[1] - V[1], P1[0] - V[0]), a2 = Math.atan2(P2[1] - V[1], P2[0] - V[0]);
+      let d = a2 - a1; while (d <= -Math.PI) d += 2 * Math.PI; while (d > Math.PI) d -= 2 * Math.PI;
+      const p1 = [V[0] + rr * Math.cos(a1), V[1] + rr * Math.sin(a1)], p2 = [V[0] + rr * Math.cos(a2), V[1] + rr * Math.sin(a2)], m = a1 + d / 2;
+      return { g: '<path d="M' + V[0].toFixed(1) + "," + V[1].toFixed(1) + " L" + p1[0].toFixed(1) + "," + p1[1].toFixed(1) + " A" + rr + "," + rr + " 0 0," + (d > 0 ? 1 : 0) + " " + p2[0].toFixed(1) + "," + p2[1].toFixed(1) + ' Z" ' + style + "/>", m };
+    };
+    const wO = wedge(O, A, B, 20, 'fill="var(--blue)" fill-opacity="0.25" stroke="var(--blue)" stroke-width="2"');
+    const wC = wedge(C, A, B, 26, 'fill="var(--margin)" fill-opacity="0.25" stroke="var(--margin)" stroke-width="2"');
+    let g = '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" class="f-shape"/>' + wO.g + wC.g;
+    g += L(O[0], O[1], A[0], A[1], "f-line", 'style="stroke:var(--blue);stroke-width:2"') + L(O[0], O[1], B[0], B[1], "f-line", 'style="stroke:var(--blue);stroke-width:2"');
+    g += L(A[0], A[1], C[0], C[1], "f-line", 'style="stroke-width:2"') + L(B[0], B[1], C[0], C[1], "f-line", 'style="stroke-width:2"');
+    g += '<circle cx="' + cx + '" cy="' + cy + '" r="2.5" fill="var(--ink)"/>';
+    g += t(A[0] - 10, A[1] + 12, "A") + t(B[0] + 10, B[1] + 12, "B") + t(C[0], C[1] - 8, "C") + t(cx - 12, cy - 4, "O");
+    g += '<text x="' + (O[0] + 36 * Math.cos(wO.m)).toFixed(1) + '" y="' + (O[1] + 36 * Math.sin(wO.m) + 4).toFixed(1) + '" text-anchor="middle" font-size="13" font-weight="700" fill="var(--blue)">' + lCenter + "</text>";
+    g += '<text x="' + (C[0] + 42 * Math.cos(wC.m)).toFixed(1) + '" y="' + (C[1] + 42 * Math.sin(wC.m) + 4).toFixed(1) + '" text-anchor="middle" font-size="13" font-weight="700" fill="var(--margin)">' + lInscribed + "</text>";
+    return svg(300, 180, g, "angle au centre AOB (bleu) et angle inscrit ACB (rouge)");
   }
 
   // Cercle trigonométrique avec un angle (degrés).
@@ -1325,7 +1355,7 @@ const FIG = (() => {
     return svg(320, 190, g + t(cx + r + 8, cy + 14, "1", "f-txt", "start", 11), "cercle trigonométrique");
   }
 
-  return { unitLine, cylinder, unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, pyramid, cone, road, items, scaling, lineGraph, blocks, fractionOf, prioSteps, sciScale, areaSquare, tiles, fmt };
+  return { unitLine, cylinder, unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, cube, pyramid, cone, road, items, scaling, lineGraph, blocks, fractionOf, prioSteps, sciScale, areaSquare, tiles, fmt };
 })();
 
 // Figures de géométrie (13.11) : petit constructeur en coordonnées mathématiques (y vers le haut), mise à
@@ -2619,10 +2649,13 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
   };
   // Urne : boules colorées (sans indication du résultat).
   FIG.urn = function (counts) {
-    const cls = ["f-accent", "f-dot", "f-fill2"], names = Object.keys(counts);
+    // Vraies couleurs selon le nom (commentaire testeur du 21.11 : boules « rouges » dessinées vides, « bleues » en rouge).
+    const COL = { rouge: "#e03b3b", bleue: "#2f6fe0", verte: "#2fa35a", jaune: "#f2c230", noire: "#2b2b2b", blanche: "#ffffff", orange: "#f08a24", violette: "#8a4fd0" };
+    const fill = (nm) => COL[nm.replace(/s$/, "")] || "#999999", names = Object.keys(counts);
+    const ball = (x, y, r, nm) => '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + fill(nm) + '" stroke="#1d2b4f" stroke-width="1"/>';
     let g = '<path d="M60,40 L60,150 Q60,170 80,170 L220,170 Q240,170 240,150 L240,40" class="f-line" fill="none" stroke-width="2"/>', k = 0;
-    names.forEach((nm, ci) => { for (let i = 0; i < counts[nm]; i++, k++) g += '<circle cx="' + (80 + (k % 8) * 20) + '" cy="' + (155 - Math.floor(k / 8) * 20) + '" r="8" class="' + cls[ci % 3] + '"/>'; });
-    g += names.map((nm, ci) => '<circle cx="' + (262) + '" cy="' + (60 + ci * 22) + '" r="6" class="' + cls[ci % 3] + '"/>' + t(272, 64 + ci * 22, nm, "f-txt", "start", 11)).join("");
+    names.forEach((nm) => { for (let i = 0; i < counts[nm]; i++, k++) g += ball(80 + (k % 8) * 20, 155 - Math.floor(k / 8) * 20, 8, nm); });
+    g += names.map((nm, ci) => ball(262, 60 + ci * 22, 6, nm) + t(272, 64 + ci * 22, nm, "f-txt", "start", 11)).join("");
     return svg(320, 180, g, "urne");
   };
   // Triangle avec ses droites remarquables (sans valeurs).
@@ -2776,7 +2809,7 @@ Object.assign(GEN, {
   vol(d) {
     if (d === 1) {
       const a = R.int(2, 12), b = R.int(2, 9), c = R.int(2, 9);
-      if (R.rand() < 0.3) return { fig: FIG.box(a + " cm", a + " cm", a + " cm"), q: "Calcule le volume d'un cube d'arête " + M(a) + " cm (en cm³).", spec: { kind: "value", value: a ** 3 }, sol: M("V = " + a + "^3 = " + a ** 3) + " cm³." };
+      if (R.rand() < 0.3) return { fig: FIG.cube(a + " cm"), q: "Calcule le volume d'un cube d'arête " + M(a) + " cm (en cm³).", spec: { kind: "value", value: a ** 3 }, sol: M("V = " + a + "^3 = " + a ** 3) + " cm³." };
       return { fig: FIG.box(a + " cm", b + " cm", c + " cm"), q: "Calcule le volume d'un pavé droit de " + M(a) + " cm × " + M(b) + " cm × " + M(c) + " cm (en cm³).", spec: { kind: "value", value: a * b * c }, sol: M(a + " \\cdot " + b + " \\cdot " + c + " = " + a * b * c) + " cm³." };
     }
     if (d === 2) {
@@ -3614,14 +3647,14 @@ FINE.push(
     lesson: ["Cube et pavé droit", "Le volume compte les cubes-unités qui remplissent le solide.", "Pavé : \\(V = a \\cdot b \\cdot c\\), aire totale \\(2 \\cdot (ab + bc + ac)\\). Cube : \\(V = a^3\\), aire totale \\(6a^2\\).", ["Pavé 5 × 4 × 3 cm : \\(V = 60\\ \\text{cm}^3\\)", "Cube d'arête 3 cm : aire \\(6 \\cdot 9 = 54\\ \\text{cm}^2\\)"], "L'aire se mesure en cm², le volume en cm³ : ce ne sont pas les mêmes grandeurs."],
     g: [
       () => { const a = R.int(2, 9), b = R.int(2, 9), c = R.int(2, 9); return QV("Calcule le volume d'un pavé droit de " + M(a) + " cm × " + M(b) + " cm × " + M(c) + " cm (en cm³).", a * b * c, M(a + " \\cdot " + b + " \\cdot " + c + " = " + a * b * c) + " cm³.", { fig: FIG.box(a + " cm", b + " cm", c + " cm") }); },
-      () => { if (R.rand() < 0.5) { const a = R.int(2, 9); return QV("Calcule l'aire totale d'un cube d'arête " + M(a) + " cm (en cm²).", 6 * a * a, "6 faces carrées : " + M("6 \\cdot " + a + "^2 = " + 6 * a * a) + " cm².", { fig: FIG.box(a + " cm", a + " cm", a + " cm") }); } const a = R.int(3, 8), b = R.int(2, 6), c = R.int(2, 5); return QV("Calcule l'aire totale d'un pavé droit de " + M(a) + " cm × " + M(b) + " cm × " + M(c) + " cm (en cm²).", 2 * (a * b + b * c + a * c), M("2 \\cdot (" + a * b + " + " + b * c + " + " + a * c + ") = " + 2 * (a * b + b * c + a * c)) + " cm².", { fig: FIG.box(a + " cm", b + " cm", c + " cm") }); },
+      () => { if (R.rand() < 0.5) { const a = R.int(2, 9); return QV("Calcule l'aire totale d'un cube d'arête " + M(a) + " cm (en cm²).", 6 * a * a, "6 faces carrées : " + M("6 \\cdot " + a + "^2 = " + 6 * a * a) + " cm².", { fig: FIG.cube(a + " cm") }); } const a = R.int(3, 8), b = R.int(2, 6), c = R.int(2, 5); return QV("Calcule l'aire totale d'un pavé droit de " + M(a) + " cm × " + M(b) + " cm × " + M(c) + " cm (en cm²).", 2 * (a * b + b * c + a * c), M("2 \\cdot (" + a * b + " + " + b * c + " + " + a * c + ") = " + 2 * (a * b + b * c + a * c)) + " cm².", { fig: FIG.box(a + " cm", b + " cm", c + " cm") }); },
       () => { const a = 10 * R.int(3, 8), b = 10 * R.int(2, 5), c = 10 * R.int(2, 5); return QV("Un aquarium a la forme d'un pavé droit de " + M(a) + " cm × " + M(b) + " cm × " + M(c) + " cm. Quelle est sa contenance, en litres ?", a * b * c / 1000, "En dm : " + M(a / 10 + " \\cdot " + b / 10 + " \\cdot " + c / 10 + " = " + a * b * c / 1000) + " dm³, soit " + M(a * b * c / 1000) + " L.", { fig: FIG.box(a + " cm", b + " cm", c + " cm") }); },
     ] },
   { id: "solides", theme: "es", label: "Solides : faces, arêtes, sommets", ex: "\\text{pavé : 6 faces, 12 arêtes, 8 sommets}", CH: [9], again: [10], codes: "9ES4\\.01|10ES1\\.01",
     hint: "Prisme droit dont la base a n côtés : n + 2 faces, 2n sommets, 3n arêtes.",
     lesson: ["Décrire un solide", "Un solide a des faces, des arêtes et des sommets.", "Cube et pavé : 6 faces, 12 arêtes, 8 sommets. Prisme droit de base à \\(n\\) côtés : \\(n + 2\\) faces, \\(2n\\) sommets, \\(3n\\) arêtes.", ["Prisme à base triangulaire : 5 faces, 6 sommets, 9 arêtes", "Un pavé a 4 arêtes de chaque longueur"], "Les deux bases comptent parmi les faces."],
     g: [
-      () => { if (R.rand() < 0.5) { const a = R.int(2, 12); return QV("Un cube a une arête de " + M(a) + " cm. Quelle est la longueur totale de ses arêtes (en cm) ?", 12 * a, "Un cube a 12 arêtes : " + M("12 \\cdot " + a + " = " + 12 * a) + " cm.", { fig: FIG.box(a + " cm", a + " cm", a + " cm") }); } const [nm, v] = R.pick([["faces", 6], ["arêtes", 12], ["sommets", 8]]); return QV("Combien de " + nm + " un pavé droit possède-t-il ?", v, "Un pavé droit a 6 faces, 12 arêtes et 8 sommets.", { fig: FIG.box("", "", "") }); },
+      () => { if (R.rand() < 0.5) { const a = R.int(2, 12); return QV("Un cube a une arête de " + M(a) + " cm. Quelle est la longueur totale de ses arêtes (en cm) ?", 12 * a, "Un cube a 12 arêtes : " + M("12 \\cdot " + a + " = " + 12 * a) + " cm.", { fig: FIG.cube(a + " cm") }); } const [nm, v] = R.pick([["faces", 6], ["arêtes", 12], ["sommets", 8]]); return QV("Combien de " + nm + " un pavé droit possède-t-il ?", v, "Un pavé droit a 6 faces, 12 arêtes et 8 sommets.", { fig: FIG.box("", "", "") }); },
       () => { const n = R.int(3, 8), [nm, v, f] = R.pick([["faces", n + 2, "n + 2"], ["sommets", 2 * n, "2n"], ["arêtes", 3 * n, "3n"]]); return QV("Un prisme droit a pour base un polygone à " + M(n) + " côtés. Combien " + (nm === "arêtes" ? "d'" : "de ") + nm + " possède-t-il ?", v, "Avec " + M("n = " + n) + " : " + M(f + " = " + v) + " " + nm + "."); },
       () => { if (R.rand() < 0.5) { const a = R.int(3, 9), b = R.int(2, 7), c = R.int(2, 6); return QV("On construit en fil de fer les arêtes d'un pavé droit de " + M(a) + " cm × " + M(b) + " cm × " + M(c) + " cm. Quelle longueur de fil faut-il (en cm) ?", 4 * (a + b + c), "4 arêtes de chaque longueur : " + M("4 \\cdot (" + a + " + " + b + " + " + c + ") = " + 4 * (a + b + c)) + " cm.", { fig: FIG.box(a + " cm", b + " cm", c + " cm") }); } const n = R.int(3, 9); return QV("Un prisme droit possède " + M(n + 2) + " faces. Combien de sommets a-t-il ?", 2 * n, "Les bases ont " + M(n + 2 + " - 2 = " + n) + " côtés ; il y a " + M("2 \\cdot " + n + " = " + 2 * n) + " sommets."); },
     ] },
@@ -8921,7 +8954,7 @@ function compNote(rec) {
             traps: [TR(Math.sqrt(a * a + b * b), "C'est la diagonale de la base ; la grande diagonale monte aussi de " + M(c) + " cm."), TR(a + b + c, "On additionne les carrés : " + M("d^2 = a^2 + b^2 + c^2") + ".")] }); },
       () => { const a = R.int(2, 9);
         return Qv("Calcule la longueur de la grande diagonale d'un cube d'arête " + M(a) + " cm" + EXA + ".", a * Math.sqrt(3), M("d^2 = " + a + "^2 + " + a + "^2 + " + a + "^2 = " + 3 * a * a) + ", donc " + M("d = " + rT(a, 3)) + " cm.",
-          { radical: true, canon: rC(a, 3), ctx: "cube", fig: FIG.box(a + " cm", a + " cm", a + " cm"), guide: [GS("Diagonale d'une face, au carré : " + M(a + "^2 + " + a + "^2") + " = ?", 2 * a * a, M(2 * a * a) + "."), GS("Grande diagonale au carré : " + M(2 * a * a + " + " + a + "^2") + " = ?", 3 * a * a, M(3 * a * a) + "."), GSR(M("d") + " = ? (simplifiée)", a * Math.sqrt(3), M(rT(a, 3)) + " cm.")],
+          { radical: true, canon: rC(a, 3), ctx: "cube", fig: FIG.cube(a + " cm"), guide: [GS("Diagonale d'une face, au carré : " + M(a + "^2 + " + a + "^2") + " = ?", 2 * a * a, M(2 * a * a) + "."), GS("Grande diagonale au carré : " + M(2 * a * a + " + " + a + "^2") + " = ?", 3 * a * a, M(3 * a * a) + "."), GSR(M("d") + " = ? (simplifiée)", a * Math.sqrt(3), M(rT(a, 3)) + " cm.")],
             traps: [TR(a * Math.SQRT2, "C'est la diagonale d'une face ; la grande diagonale traverse le cube."), TR(3 * a, "On additionne les carrés : " + M("d^2 = 3a^2") + ".")] }); },
       () => { const c = 2 * R.int(1, 7);
         return Qv("Calcule la hauteur d'un triangle équilatéral de côté " + M(c) + " cm" + EXA + ".", (c / 2) * Math.sqrt(3), "La hauteur coupe le côté en deux : " + M("h^2 = " + c + "^2 - " + c / 2 + "^2 = " + 3 * c * c / 4) + ", donc " + M("h = " + rT(c / 2, 3)) + " cm.",
@@ -9075,7 +9108,7 @@ function compNote(rec) {
             traps: [TR(d * d * h / 3 * Math.PI, "On a donné le diamètre : le rayon en est la moitié.")] }); },
       () => { const a = 3 * R.int(1, 4), V = a ** 3 / 3;
         return Qv("Une pyramide est inscrite dans un cube d'arête " + M(a) + " cm : sa base est une face du cube et son sommet est le centre de la face opposée. Calcule le volume de la pyramide (en cm³).", V, "Base " + M(a * a) + " cm², hauteur " + M(a) + " cm : " + M("\\frac{1}{3} \\cdot " + a * a + " \\cdot " + a + " = " + V) + " cm³, soit le tiers du cube.",
-          { ctx: "pyrcube", fig: FIG.box(a + " cm", a + " cm", a + " cm"), guide: [GS("La hauteur de la pyramide ?", a, "L'arête du cube : " + M(a) + " cm."), GS("Volume ?", V, M(V) + " cm³.")],
+          { ctx: "pyrcube", fig: FIG.cube(a + " cm", true), guide: [GS("La hauteur de la pyramide ?", a, "L'arête du cube : " + M(a) + " cm."), GS("Volume ?", V, M(V) + " cm³.")],
             traps: [TR(a ** 3, "C'est le volume du cube ; la pyramide en vaut le tiers."), TR(a ** 3 / 6, "La hauteur est l'arête entière : le sommet est sur la face opposée.")] }); },
       () => { const r = 3 * R.int(1, 3), k = 2 * r ** 3 / 3;
         return Qv("Un bol a la forme d'une demi-boule de rayon intérieur " + M(r) + " cm. Calcule son volume" + PIX + ".", k * Math.PI, "Demi-boule : " + M("\\frac{1}{2} \\cdot \\frac{4}{3}\\pi \\cdot " + r + "^3 = " + piT(k)) + " cm³.",
@@ -9182,7 +9215,7 @@ function compNote(rec) {
             traps: [TR((r * r * h + 2 * r ** 3 / 3) * Math.PI, "Le cône vaut le tiers du cylindre."), TR((r * r * h / 3 + 4 * r ** 3 / 3) * Math.PI, "C'est une demi-boule.")] }); },
       () => { const a = 3 * R.int(1, 4), V = 2 * a ** 3 / 3;
         return Qv("On découpe dans un cube d'arête " + M(a) + " cm la plus grande pyramide possible (base = une face, sommet = centre de la face opposée). Quel volume de matière enlève-t-on (en cm³) ?", V, "Cube " + M(a ** 3) + ", pyramide " + M(a ** 3 / 3) + " : on enlève " + M(a ** 3 + " - " + a ** 3 / 3 + " = " + V) + " cm³, les deux tiers.",
-          { ctx: "decoupe", guide: [GS("Volume du cube ?", a ** 3, M(a ** 3) + " cm³."), GS("Volume de la pyramide ?", a ** 3 / 3, M(a ** 3 / 3) + " cm³."), GS("Volume enlevé ?", V, M(V) + " cm³.")],
+          { ctx: "decoupe", fig: FIG.cube(a + " cm", true), guide: [GS("Volume du cube ?", a ** 3, M(a ** 3) + " cm³."), GS("Volume de la pyramide ?", a ** 3 / 3, M(a ** 3 / 3) + " cm³."), GS("Volume enlevé ?", V, M(V) + " cm³.")],
             traps: [TR(a ** 3 / 3, "C'est le volume de la pyramide qui reste ; on demande ce qu'on enlève.")] }); },
       () => { const [hb, s, b2] = pk([[4, 5, 3], [12, 13, 5], [8, 10, 6], [6, 10, 8]]), L = R.int(3, 8), b = 2 * b2, V = b * hb / 2 * L;
         return Qv("Une tente a la forme d'un prisme droit couché. Sa face avant est un triangle isocèle de base " + M(b) + " dm et de côtés " + M(s) + " dm ; la tente est longue de " + M(L) + " dm. Calcule son volume (en dm³).", V, "Hauteur du triangle : " + M("\\sqrt{" + s + "^2 - " + b2 + "^2} = " + hb) + " dm ; aire " + M("\\frac{" + b + " \\cdot " + hb + "}{2} = " + b * hb / 2) + " dm² ; volume " + M(V) + " dm³.",
@@ -16146,7 +16179,7 @@ function activeLesson(id, L, cont, review) {
       "Compare les pentes après avoir isolé y dans chaque équation."],
     sys3: ["Systèmes de trois équations", "On ramène le système à un système 2 × 2, puis à une équation.",
       "On élimine une inconnue en combinant deux paires de lignes ; on résout le système 2 × 2 obtenu ; on remonte pour trouver la troisième inconnue. Un système « en escalier » (triangulaire) se résout directement de bas en haut.",
-      ["\\(\\begin{cases} x + y + z = 6 \\\\ y + z = 5 \\\\ z = 2 \\end{cases}\\) : \\(z = 2\\), \\(y = 3\\), \\(x = 1\\).", "Si les trois sommes deux à deux sont connues, additionner les trois lignes donne le total."],
+      ["\\(\\begin{cases} x + y + z = 6 \\\\ y + z = 5 \\\\ z = 2 \\end{cases}\\) : \\(z = 2\\), \\(y = 3\\), \\(x = 1\\).", "Astuce quand chaque ligne est la somme de deux inconnues : \\(\\begin{cases} x + y = 7 \\\\ y + z = 9 \\\\ x + z = 8 \\end{cases}\\). On additionne les trois lignes : \\(2x + 2y + 2z = 24\\), donc \\(x + y + z = 12\\). On retranche chaque ligne de 12 : \\(z = 12 - 7 = 5\\), \\(x = 12 - 9 = 3\\), \\(y = 12 - 8 = 4\\)."],
       "Garde l'ordre (x ; y ; z) dans la réponse."],
     affine: ["Fonctions affines", "\\(f(x) = ax + b\\) : une droite de pente \\(a\\) et d'ordonnée à l'origine \\(b\\).",
       "La pente se calcule avec deux points : \\(a = \\frac{f(x_2) - f(x_1)}{x_2 - x_1}\\). L'ordonnée à l'origine est \\(b = f(0)\\), ou \\(b = f(x_1) - a x_1\\). Deux droites parallèles ont la même pente.",

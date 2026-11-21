@@ -167,10 +167,13 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
   };
   // Urne : boules colorées (sans indication du résultat).
   FIG.urn = function (counts) {
-    const cls = ["f-accent", "f-dot", "f-fill2"], names = Object.keys(counts);
+    // Vraies couleurs selon le nom (commentaire testeur du 21.11 : boules « rouges » dessinées vides, « bleues » en rouge).
+    const COL = { rouge: "#e03b3b", bleue: "#2f6fe0", verte: "#2fa35a", jaune: "#f2c230", noire: "#2b2b2b", blanche: "#ffffff", orange: "#f08a24", violette: "#8a4fd0" };
+    const fill = (nm) => COL[nm.replace(/s$/, "")] || "#999999", names = Object.keys(counts);
+    const ball = (x, y, r, nm) => '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + fill(nm) + '" stroke="#1d2b4f" stroke-width="1"/>';
     let g = '<path d="M60,40 L60,150 Q60,170 80,170 L220,170 Q240,170 240,150 L240,40" class="f-line" fill="none" stroke-width="2"/>', k = 0;
-    names.forEach((nm, ci) => { for (let i = 0; i < counts[nm]; i++, k++) g += '<circle cx="' + (80 + (k % 8) * 20) + '" cy="' + (155 - Math.floor(k / 8) * 20) + '" r="8" class="' + cls[ci % 3] + '"/>'; });
-    g += names.map((nm, ci) => '<circle cx="' + (262) + '" cy="' + (60 + ci * 22) + '" r="6" class="' + cls[ci % 3] + '"/>' + t(272, 64 + ci * 22, nm, "f-txt", "start", 11)).join("");
+    names.forEach((nm) => { for (let i = 0; i < counts[nm]; i++, k++) g += ball(80 + (k % 8) * 20, 155 - Math.floor(k / 8) * 20, 8, nm); });
+    g += names.map((nm, ci) => ball(262, 60 + ci * 22, 6, nm) + t(272, 64 + ci * 22, nm, "f-txt", "start", 11)).join("");
     return svg(320, 180, g, "urne");
   };
   // Triangle avec ses droites remarquables (sans valeurs).
@@ -324,7 +327,7 @@ Object.assign(GEN, {
   vol(d) {
     if (d === 1) {
       const a = R.int(2, 12), b = R.int(2, 9), c = R.int(2, 9);
-      if (R.rand() < 0.3) return { fig: FIG.box(a + " cm", a + " cm", a + " cm"), q: "Calcule le volume d'un cube d'arête " + M(a) + " cm (en cm³).", spec: { kind: "value", value: a ** 3 }, sol: M("V = " + a + "^3 = " + a ** 3) + " cm³." };
+      if (R.rand() < 0.3) return { fig: FIG.cube(a + " cm"), q: "Calcule le volume d'un cube d'arête " + M(a) + " cm (en cm³).", spec: { kind: "value", value: a ** 3 }, sol: M("V = " + a + "^3 = " + a ** 3) + " cm³." };
       return { fig: FIG.box(a + " cm", b + " cm", c + " cm"), q: "Calcule le volume d'un pavé droit de " + M(a) + " cm × " + M(b) + " cm × " + M(c) + " cm (en cm³).", spec: { kind: "value", value: a * b * c }, sol: M(a + " \\cdot " + b + " \\cdot " + c + " = " + a * b * c) + " cm³." };
     }
     if (d === 2) {
