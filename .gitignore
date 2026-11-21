@@ -14,3 +14,5 @@ gantt.typ
 tools/gantt.py
 banque/
 tools/chantier_*.md
+!docs/icon-*.png
+!src/pwa/icon-*.png
