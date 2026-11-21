@@ -14,6 +14,7 @@ try{
    const spec={kind:"value",value:q.calc.value,...(q.calc.round?{round:q.calc.round}:{final:true})};
    const g=(a,b)=>b?g(b,a%b):a; let typed=String(+(+q.calc.value).toFixed(q.calc.round?Math.max(0,-Math.floor(Math.log10(q.calc.round))):6)).replace(".",",");
    if(!q.calc.round&&!Number.isInteger(q.calc.value)){for(let d=2;d<=100;d++){const nn=Math.round(q.calc.value*d);if(Math.abs(nn/d-q.calc.value)<1e-9){typed=nn+"/"+d;break;}}}
+   if(q.calc.range){ok(q.calc.range[0]<=q.calc.value&&q.calc.value<=q.calc.range[1],c.key+" valeur hors fourchette");}else
    ok(checkAnswer(spec,typed).status==="correct",c.key+" "+sd+" réponse "+typed+" refusée : "+JSON.stringify(checkAnswer(spec,typed)));
    ok(Curieux.fromCode(q.code).q===q.q,c.key+" code non reproductible");vals.add(q.calc.value);n++;}
   log.push(c.key+" ("+c.fam+", "+c.uses.join("+")+") : "+vals.size+" valeurs");}
@@ -21,7 +22,7 @@ try{
  const st=(g)=>{const s=Engine.newState({system:"CH",grade:g,track:"college",minutes:5});Engine.autoInit(s);return s};
  const a9=Curieux.available(st(9)).map(c=>c.key),a11=Curieux.available(st(11)).map(c=>c.key),a12=Curieux.available(st(12)).map(c=>c.key);
  log.push("9e : "+a9.join(", ")+"\n11e : "+a11.length+"\nsec II : "+a12.length);
- ok(!a9.includes("corde")&&!a9.includes("monty"),"9e : pas de disque ni de proba");ok(a12.length===CURIEUX.length,"sec II : toutes");
+ ok(!a9.includes("corde")&&!a9.includes("monty"),"9e : pas de disque ni de proba");ok(a9.length>=8,"9e : au moins 8 questions");ok(a12.length===CURIEUX.length,"sec II : toutes");
  // Pas de répétition immédiate, familles alternées
  const s=st(12);let last=null,lastFam=null,rep=0,same=0;for(let k=0;k<40;k++){const q=Curieux.pick(s);s.curSeen=[...(s.curSeen||[]),q.key].slice(-20);if(q.key===last)rep++;if(q.fam===lastFam)same++;last=q.key;lastFam=q.fam;}
  ok(rep===0,"répétition immédiate");ok(same===0,"familles non alternées "+same);
@@ -34,7 +35,11 @@ try{
  ok(document.querySelector("#cbet button.act-ok-btn").dataset.i==="1","bonne réponse du pari marquée");ok(pageQ===q.code,"code pour les commentaires");
  screenCurious(Curieux.build("tva",3),back);document.querySelector("#cbet button").click();document.getElementById("cans").value="1";document.getElementById("cok").click();document.getElementById("cans").value="2";document.getElementById("cok").click();
  ok(!document.getElementById("cs3").hidden,"étape 3 après deux essais faux");
- document.getElementById("cback").click();ok(window._back===1,"retour");
+ document.getElementById("cback").click();
+ // Fermi : fourchette, puis ordre de grandeur
+ screenCurious(Curieux.build("coeur",2),back);document.querySelector("#cbet button").click();const fq=Curieux.build("coeur",2);
+ document.getElementById("cans").value=String(Math.round(fq.calc.value*1.6));document.getElementById("cok").click();ok(/ordre de grandeur/.test(document.getElementById("cfb").textContent),"Fermi : ordre de grandeur");
+ document.getElementById("cans").value=String(Math.round(fq.calc.value*1.02));document.getElementById("cok").click();ok(/Juste/.test(document.getElementById("cfb").textContent),"Fermi : dans la fourchette");ok(window._back===1,"retour");
  homeTab="prob";state.placed=true;screenHome();ok(document.getElementById("curgo"),"carte dans l'onglet Problème");
  document.body.insertAdjacentHTML("beforeend","<pre id=log>"+log.join("\n")+"</pre>");
 }catch(e){fails.push("EXC "+e.message+" "+e.stack)}

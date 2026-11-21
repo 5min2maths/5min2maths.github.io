@@ -1318,17 +1318,25 @@ function screenCurious(q, back) {
   }));
   inp.oninput = () => previewOf(inp, prev, spec);
   bindKeypad(() => inp, () => previewOf(inp, prev, spec));
+  // Estimation (Fermi) : toute valeur dans la fourchette est juste ; à un facteur 2 près, l'ordre de grandeur est bon.
+  const rangeCheck = (v) => {
+    let x; try { const t = Expr.parse(v.replace(/[\s'’]/g, "")); if (Expr.vars(t).size) throw new Error("La réponse est un nombre : pas de lettre."); x = Expr.evaluate(t); } catch (e) { return { status: "invalid", message: e.message }; }
+    const [lo, hi] = q.calc.range;
+    if (x >= lo - 1e-9 && x <= hi + 1e-9) return { status: "correct" };
+    if (x >= lo / 2 && x <= hi * 2) return { status: "close", message: "Le bon ordre de grandeur ! Vérifie tes calculs pour t'approcher encore." };
+    return { status: "wrong" };
+  };
   const finish = (calcOk) => {
     inp.disabled = true; ["kp", "cok", "cidk"].forEach((x) => $(x) && $(x).remove()); prev.remove();
     app.querySelectorAll("#cbet button").forEach((x) => { if (+x.dataset.i === q.bet.good) x.classList.add("act-ok-btn"); else if (x.getAttribute("aria-pressed") === "true") x.classList.add("act-wrong"); });
-    const val = String(+(+q.calc.value).toFixed(q.calc.round ? Math.max(0, -Math.floor(Math.log10(q.calc.round))) : 4)).replace(".", ",");
+    const val = (q.calc.range ? "environ " : "") + String(+(+q.calc.value).toFixed(q.calc.round ? Math.max(0, -Math.floor(Math.log10(q.calc.round))) : 4)).replace(/^\d+/, (i) => i.replace(/\B(?=(\d{3})+(?!\d))/g, "'")).replace(".", ",");
     $("cfb").innerHTML = `<div class="fb ${calcOk ? "ok" : "hint"} pop">${calcOk ? "✓ Juste !" : "Réponse : " + val}
       <span>${betOk ? "Et ton intuition était la bonne : bravo !" : "Ton pari était : « " + esc(q.bet.choices[+app.querySelector('#cbet button[aria-pressed="true"]').dataset.i]) + " ». La bonne réponse : « " + q.bet.choices[q.bet.good] + " ». Beaucoup de gens se trompent ici : c'est tout l'intérêt !"}</span></div>`;
     show($("cs3")); $("cnext").hidden = false;
   };
   const go = () => {
     const v = inp.value.trim(); if (!v) return;
-    const r = checkAnswer(spec, v);
+    const r = q.calc.range ? rangeCheck(v) : checkAnswer(spec, v);
     if (r.status === "correct") return finish(true);
     if (r.status === "invalid" || r.status === "form") { $("cfb").innerHTML = `<div class="fb hint pop">${escT(r.message || "Écris un nombre.")}</div>`; return; }
     tries++;
