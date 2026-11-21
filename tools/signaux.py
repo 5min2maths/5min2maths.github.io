@@ -88,7 +88,8 @@ def analyser(lignes):
         if len(rep) >= MIN_N and s["echec"] >= 75:
             alertes.append((1, nom, f"{s['echec']} % d'échec — l'app ou la question ?", [c for c, _ in s["ex"]] or [ls[0]["code"]], s["ex"]))
         # 2. décroche : on quitte l'écran sans répondre
-        if s["quitte"] >= 30:
+        # au moins 2 appareils différents : un seul élève qui ferme l'onglet (ou laisse l'app ouverte une heure) ne fait pas une alerte (21.11)
+        if s["quitte"] >= 30 and len({l["appareil"] for l in quit}) >= 2:
             alertes.append((2, nom, f"{s['quitte']} % quittent sans répondre — énoncé peu clair ou trop long ?", [l["code"] for l in quit][:2]))
         # 3. très long par rapport aux autres questions du même niveau
         if med and ref.get(niv) and med > 2.5 * ref[niv] and len(secs) >= MIN_N:
