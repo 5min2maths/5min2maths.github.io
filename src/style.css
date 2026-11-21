@@ -413,8 +413,5 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .preview:empty { display: none; }
 .card.streak { flex-direction: row; align-items: center; justify-content: flex-start; text-align: left; gap: 12px; }
 .card.streak .flame { margin: 0; }
-.vote-compact { font-size: 0.85rem; opacity: 0.85; }
-.vote-compact button { padding: 2px 8px; min-height: 0; }
-details.cmt > summary { font-size: 0.85rem; }
 .streak-nudge { display: flex; gap: 8px; align-items: center; padding: 8px 12px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); }
 .streak-nudge > span:first-child { font-size: 1.2rem; }

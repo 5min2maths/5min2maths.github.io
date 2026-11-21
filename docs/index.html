@@ -428,9 +428,6 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .preview:empty { display: none; }
 .card.streak { flex-direction: row; align-items: center; justify-content: flex-start; text-align: left; gap: 12px; }
 .card.streak .flame { margin: 0; }
-.vote-compact { font-size: 0.85rem; opacity: 0.85; }
-.vote-compact button { padding: 2px 8px; min-height: 0; }
-details.cmt > summary { font-size: 0.85rem; }
 .streak-nudge { display: flex; gap: 8px; align-items: center; padding: 8px 12px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); }
 .streak-nudge > span:first-child { font-size: 1.2rem; }
 
@@ -19892,7 +19889,7 @@ function renderQuestion(q, opt) {
     fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><div class="spread"><b>${solved ? (tries === 1 ? pick(PRAISE) : "Juste au deuxième essai.") : dontKnow ? "Voici la méthode." : "Pas cette fois."}</b>${d}</div>
       ${!solved && lastDiag ? `<div class="diag">🔎 ${esc(lastDiag)}</div>` : ""}
       ${guided ? `<button class="btn-primary" id="guide">🪜 On le fait ensemble, pas à pas</button><div id="gsteps" class="stack"></div><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : solSteps ? `<button class="btn-primary" id="solstep">🪜 Voir la correction étape par étape</button><div id="ssteps" class="stack"></div><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : `<div class="sol">${q.sol}</div>`}</div>
-      <div class="vote vote-compact"><span>Ton avis <button data-v="up" aria-label="Bonne question">👍</button> <button data-v="down" aria-label="Question à revoir">👎</button></span><span class="code" title="Code de la question">${code}</span></div>${commentBox("💬 Commenter")}
+      <div class="vote"><span>Cette question était… <button data-v="up" aria-label="Bonne question">👍</button> <button data-v="down" aria-label="Question à revoir">👎</button></span><span class="code" title="Code de la question">${code}</span></div>${commentBox()}
       <div class="actions">${solved ? "" : `<button id="redo"${!guided && !solSteps ? ' class="btn-primary"' : ""}>${q.d > 1 && q.d < 4 ? "💪 Une plus facile pour repartir" : "Refaire avec d'autres valeurs"}</button>`}<button class="${solved ? "btn-primary" : ""}" id="nx">Continuer</button></div>`;
     typeset(fb);
     fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));

@@ -50,7 +50,7 @@ ok(!!app.querySelector(".eyebrow .pbar"),"7 barre de progression de séance");
 document.getElementById("idk").click();
 ok(document.getElementById("kp").style.display==="none","7 clavier replié");
 ok(app.querySelectorAll("#fb .btn-primary").length===1,"7 un seul bouton principal ("+app.querySelectorAll("#fb .btn-primary").length+")");
-ok(!!app.querySelector(".vote-compact"),"7 avis compact");
+ok(/Cette question était/.test(app.textContent)&&!!app.querySelector('.vote button[data-v="down"]'),"7 votes visibles");
 // 8. réglages : taille du texte et vibrations
 screenSettings();app.querySelector('#fs button[data-v="1.25"]').click();ok(document.documentElement.style.fontSize==="20px"&&UI.fs===1.25,"8 taille du texte "+document.documentElement.style.fontSize);
 app.querySelector('#vib button[data-v="0"]').click();ok(UI.vib===false&&JSON.parse(localStorage.getItem("m2m-ui")).vib===false,"8 vibrations désactivées");
