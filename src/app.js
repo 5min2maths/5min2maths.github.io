@@ -53,7 +53,19 @@ function placeFab() {
   if (br) br.appendChild(b); else document.body.appendChild(b);
   if (sh) sh.classList.toggle("top", !!br);
 }
-const h = (html) => { sigClose(); pageQ = null; app.classList.remove("has-tabs"); app.innerHTML = html; addTabs(); addFab(); const sh = document.getElementById("fabs"); if (sh) sh.hidden = true; placeFab(); typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
+// Données en gras (21.11) : dans les énoncés à contexte (au moins 8 mots hors formules), les nombres sont en gras.
+// Affichage seulement : le texte de la question (et son code) ne change pas.
+const boldData = (html) => {
+  const words = String(html).replace(/\\\(.*?\\\)/g, " ").replace(/<[^>]+>/g, " ").split(/\s+/).filter((w) => /[a-zà-ÿ]{2,}/i.test(w)).length;
+  if (words < 8) return html;
+  // Formules : un nombre seul (avec son unité) → \mathbf ; texte : nombres en <b>, hors balises et hors formules.
+  return String(html).split(/(<[^>]+>|\\\(.*?\\\))/).map((t, i) => {
+    if (i % 2) return t.replace(/^\\\((-?\d[\d{},']*(?:\\,\\%)?)((?:\\ |\\,)\\text\{[^}]*\})?\\\)$/, (m, n, u) => "\\(\\mathbf{" + n + "}" + (u || "") + "\\)");
+    return t.replace(/(^|[\s(«'’])(-?\d+(?:[.,'’]\d+)*)(?=[\s).,;:!?»%]|$)/g, "$1<b>$2</b>");
+  }).join("");
+};
+
+const h = (html) => { const tr = document.getElementById("tour"); if (tr) tr.remove(); sigClose(); pageQ = null; app.classList.remove("has-tabs"); app.innerHTML = html; addTabs(); addFab(); const sh = document.getElementById("fabs"); if (sh) sh.hidden = true; placeFab(); typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 // Textes de l'app (indices, erreurs typiques) : échappés, sauf <b>, <i>, <br> (16.11 : les balises s'affichaient telles quelles).
 const escT = (s) => esc(s).replace(/&lt;(\/?)(b|i|br)&gt;/g, "<$1$2>");
@@ -232,7 +244,8 @@ function eloBanner() {
     spark = `<svg class="spark" viewBox="0 0 200 32" preserveAspectRatio="none"><path class="a" d="${line} L200,32 L0,32 Z"/><path class="l" d="${line}"/><circle cx="200" cy="${Y(pts[pts.length - 1]).toFixed(1)}" r="3"/></svg>`;
   }
   return `<button type="button" class="elo-band" id="eloband" aria-label="Mathélo ${e.r}, voir mes progrès">
-    <span class="eb-l"><span class="eyebrow">Mathélo${Engine.isProvisional(state) ? " · provisoire" : ""}</span><span class="eb-n"><b class="num">${e.r}</b>${d ? `<span class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "▲ +" : "▼ "}${d}</span>` : ""}</span></span>
+    <span class="eb-l" title="Palier ${Math.floor(e.r / 50)} : encore ${50 - (e.r % 50)} points pour le suivant"><span class="eyebrow">Mathélo${Engine.isProvisional(state) ? " · provisoire" : ""}</span><span class="eb-n"><b class="num">${e.r}</b>${d ? `<span class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "▲ +" : "▼ "}${d}</span>` : ""}</span>
+      <span class="eb-pal">Palier ${Math.floor(e.r / 50)} → ${Math.floor(e.r / 50) + 1} : encore ${50 - (e.r % 50)}<span class="pbar"><i style="width:${(e.r % 50) * 2}%"></i></span></span></span>
     <span class="eb-r">${spark || '<span class="small muted">Ta courbe apparaît après ta 2e séance.</span>'}</span></button>`;
 }
 function themeBars(lv) {
@@ -257,6 +270,40 @@ function streakNudge() {
   if (!s.count || s.last === today || s.last !== addDays(today, -1)) return "";
   return `<div class="streak-nudge small"><span>🔥</span><span><b>${s.count} ${s.count > 1 ? "jours" : "jour"} d'affilée</b> · une séance aujourd'hui et tu passes à ${s.count + 1}${s.count + 1 > (s.best || 0) ? " (record !)" : ""}</span></div>`;
 }
+// Bilan de la semaine passée (21.11) : du lundi au mercredi, une fois par semaine, si l'élève a pratiqué.
+function weekRecapCard() {
+  const now = new Date(day() + "T12:00:00"), dow = (now.getDay() + 6) % 7; // 0 = lundi
+  if (dow > 2 || state.recapSeen === weekKey()) return "";
+  const mon = addDays(day(), -dow), from = addDays(mon, -7), to = addDays(mon, -1);
+  const H = (state.history || []).filter((x) => x.date >= from && x.date <= to && x.n > 0);
+  if (!H.length) return "";
+  const n = H.reduce((a, x) => a + x.n, 0), log = (state.elo && state.elo.log) || [];
+  const at = (d) => { const L = log.filter((x) => x[0] <= d); return L.length ? L[L.length - 1][1] : null; };
+  const r1 = at(to), r0 = at(addDays(from, -1)) ?? (log.find((x) => x[0] >= from) || [])[1], dr = r1 !== null && r0 != null ? r1 - r0 : null;
+  return `<div class="card flat stack recap-card"><div class="eyebrow">📅 Ta semaine dernière</div>
+    <p><b>${H.length}</b> jour${H.length > 1 ? "s" : ""} de pratique · <b>${n}</b> question${n > 1 ? "s" : ""}${dr ? ` · Mathélo <span class="delta ${dr > 0 ? "up" : "down"}">${dr > 0 ? "+" : ""}${dr}</span>` : ""}</p>
+    <p class="small muted">${H.length >= 5 ? "Superbe régularité, continue comme ça !" : H.length >= 3 ? "Bonne régularité. Essaie d'ajouter un jour cette semaine." : "Chaque jour compte : vise 3 jours cette semaine."}</p>
+    <button class="btn-ghost small" id="recapok">OK</button></div>`;
+}
+// Visite guidée (21.11) : au premier accueil, une bulle par onglet.
+const TOUR = [
+  ["today", "📅 Aujourd'hui", "Ta séance du jour : en mode scolaire (au rythme de ta classe) ou en mode libre. Quelques minutes suffisent."],
+  ["prob", "🔍 Problème", "Chaque semaine, un problème plus long. Et des questions curieuses : les maths cachées dans la vie de tous les jours."],
+  ["test", "📝 Test", "Un test approche ? Donne sa date et ses notions : l'app te fait réviser jusqu'au jour J, avec une autoévaluation."],
+  ["prog", "📈 Progrès", "Ton Mathélo, tes compétences, tes badges et ton carnet d'erreurs."],
+];
+let tourK = 0;
+function tourShow() {
+  const old = document.getElementById("tour"); if (old) old.remove();
+  const [tab, title, text] = TOUR[tourK];
+  if (homeTab !== tab) return; // l'élève a touché un autre onglet : la bulle attend son onglet
+  document.body.insertAdjacentHTML("beforeend", `<div id="tour" class="tour" role="dialog" aria-label="Visite guidée"><div class="tour-card"><div class="spread"><b>${title}</b><span class="small muted">${tourK + 1} / ${TOUR.length}</span></div><p class="small">${text}</p>
+    <div class="row"><button class="btn-ghost small" id="tourskip">Passer</button><button class="btn-primary" id="tournext">${tourK + 1 < TOUR.length ? "Suivant" : "C'est parti !"}</button></div></div></div>`);
+  app.querySelectorAll(".tab").forEach((b) => b.classList.toggle("tour-hi", b.dataset.tab === tab));
+  const end = () => { state.tourDone = true; save(); tourK = 0; homeTab = "today"; screenHome(); };
+  document.getElementById("tourskip").onclick = end;
+  document.getElementById("tournext").onclick = () => { if (++tourK >= TOUR.length) return end(); homeTab = TOUR[tourK][0]; screenHome(); };
+}
 function screenHome() {
   if (!state) return screenWelcome();
   Badges.check(state);
@@ -267,7 +314,7 @@ function screenHome() {
   const dots = { prob: !!wp && !wpDone, test: prep && left <= 3, prog: (state.badgesNew || []).length > 0 };
   save();
   const panels = {
-    today: () => `${streakNudge()}${prepTodayCard()}${carnetCard(false)}<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire · au rythme de la classe${done ? " · séance faite, tu peux en refaire une" : ""}</div>
+    today: () => `${resumeCard()}${weekRecapCard()}${streakNudge()}${prepTodayCard()}${carnetCard(false)}<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire · au rythme de la classe${done ? " · séance faite, tu peux en refaire une" : ""}</div>
       <div class="fmt-box stack"><div class="spread"><span class="eyebrow">Aujourd'hui</span><button class="btn-ghost small" id="other">🔁 Changer de format</button></div>
         <h3>${FORMATS[fmt].label}</h3><p class="small muted">${FORMATS[fmt].text}</p></div>
       <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>${nowCard()}</div>
@@ -304,6 +351,10 @@ function screenHome() {
   on("freego", startFree);
   on("other", () => { Engine.otherFormat(state); save(); screenHome(); });
   if (homeTab === "today") bindNowCard();
+  on("resgo", resumeSession);
+  on("resno", () => { delete state.resume; save(); screenHome(); });
+  on("recapok", () => { state.recapSeen = weekKey(); save(); screenHome(); });
+  if (!state.tourDone) tourShow();
   on("wp", () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); });
   on("curgo", () => screenCurious(Curieux.pick(state), () => { homeTab = "prob"; screenHome(); }, "onglet"));
   on("comps", screenComps);
@@ -815,7 +866,24 @@ function startSession() {
   session = { fmt, plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set() };
   nextQuestion();
 }
+// Reprise d'une séance interrompue (21.11) : la séance est gardée à chaque question ; à l'accueil, « Reprendre ».
+function sessionKeep() {
+  if (!session || session.weekly) return;
+  state.resume = { date: day(), s: { ...session, ids: [...(session.ids || [])], remed: [...(session.remed || [])] } }; save();
+}
+function resumeCard() {
+  const r = state.resume;
+  if (!r || r.date !== day() || !r.s || !r.s.answered || r.s.i >= r.s.plan.length) return "";
+  return `<div class="card stack resume-card"><div class="eyebrow">⏸ Séance en cours</div><p>Tu t'étais arrêté·e à la question <b>${r.s.i + 1} sur ${r.s.plan.length}</b>.</p>
+    <div class="row"><button class="btn-primary" id="resgo">Reprendre ma séance</button><button class="btn-ghost small" id="resno">Abandonner</button></div></div>`;
+}
+function resumeSession() {
+  const r = state.resume; if (!r) return;
+  session = { ...r.s, ids: new Set(r.s.ids || []), remed: new Set(r.s.remed || []), start: Date.now(), pinged: true };
+  nextQuestion();
+}
 function nextQuestion(redo) {
+  if (!redo) sessionKeep();
   if (!redo && session.i === 0 && !session.pinged) { session.pinged = true; ping("start", sessionInfo()); }
   // Pas de chrono : la séance finit quand le programme du jour est fait.
   if (!redo && session.i >= session.plan.length) return screenSummary();
@@ -952,7 +1020,7 @@ function renderProblem(q, opt) {
   const ok = q.parts.map(() => false);
   h(`<div class="spread">${brand}</div><div class="eyebrow">${opt.eyebrow}</div>
   <div class="card pop"><div class="qmeta"><span class="chip">Problème · ${notion.label}</span><span class="dots" title="difficulté"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
-  <div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
+  <div class="qtext">${boldData(q.q)}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
   ${lessonDetails(q.id)}
   ${q.parts.map((p, i) => `<div class="answer part" data-i="${i}"><label for="p${i}"><b>${p.label}</b>${exactNote(p.spec, p.label) ? ` <span class="small muted">(valeur exacte)</span>` : ""} <span class="mk" id="mk${i}"></span></label>
     <input id="p${i}" class="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…"><div class="preview" id="pv${i}"></div></div>`).join("")}
@@ -1038,7 +1106,7 @@ function renderQuestion(q, opt) {
   ${session && !opt.single && session.answered > 0 ? '<div class="spread"><span></span><button class="btn-ghost small" id="stop">Terminer ici</button></div>' : ""}
   <div class="eyebrow">${opt.eyebrow}</div>
   <div class="card pop"><div class="qmeta"><span class="chip">${notion.label}</span><span class="dots" title="difficulté">${[1, 2, 3].map((k) => `<i class="${k <= q.d ? "on" : ""}"></i>`).join("")}</span></div>
-  <div class="qtext">${q.q}</div>${exactNote(q.spec, q.q) ? `<p class="small muted exact-note">${exactNote(q.spec, q.q)}</p>` : ""}${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
+  <div class="qtext">${boldData(q.q)}</div>${exactNote(q.spec, q.q) ? `<p class="small muted exact-note">${exactNote(q.spec, q.q)}</p>` : ""}${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
   ${opt.single ? "" : lessonDetails(q.id)}
   <div class="answer"><input id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="none" placeholder="Ta réponse…" aria-label="Ta réponse">
   <div class="preview" id="prev"></div>
@@ -1431,6 +1499,7 @@ function summaryByNotion() {
   return `<div class="card flat stack sum-notions">${line("✅", ok.length > 1 ? "Réussies" : "Réussie", ok)}${line("📈", "En progrès", mid, "Une partie juste : encore une ou deux séances.")}${line("🔁", ko.length > 1 ? "Reviendront bientôt" : "Reviendra bientôt", ko, (state.carnet || []).length ? "Rangées dans ton carnet d'erreurs, à refaire quand tu veux." : "L'app te les reproposera dans les prochains jours.")}</div>`;
 }
 function screenSummary() {
+  if (state) { delete state.resume; save(); }
   if (session && session.weekly && state) { state.weeklyDone = weekKey(); save(); }
   if (session && session.prepKind && session.answered) prepMark(session.prepKind);
   ping("session", { ...sessionInfo(), n: session.answered, score: session.score, min: Math.max(1, Math.round((Date.now() - session.start) / 6e4)) });
@@ -1438,7 +1507,7 @@ function screenSummary() {
   const nb = newBadgesCard();
   const n = session.answered, sc = session.score, d = state.elo.r - session.elo0;
   h(`${brand}<h2>${sc >= n * 0.8 ? "Excellente séance !" : sc >= n * 0.5 ? "Bonne séance." : "Séance faite : c'est en pratiquant qu'on progresse."}</h2>
-  <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span>${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ta série passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div></div></div>
+  <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span>${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ta série passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${FORMATS[Engine.tomorrowFormat(state)].label}</b></div></div></div>
   ${summaryByNotion()}
   <div class="card stack"><div class="spread"><span>Score</span><b>${String(sc).replace(".", ",")} / ${n}</b></div>
   <div class="spread"><span>Mathélo</span><b>${state.elo.r} <span class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</span></b></div>

@@ -58,10 +58,12 @@ function GEO() {
 // ---------- Figures types ----------
 const GF = {
   // Triangle rectangle en C ; la = côté [BC], lb = côté [AC], lc = hypoténuse ; angle optionnel en A.
+  // names : true (A, B, C), false (sans noms) ou [angle droit, sommet du haut, sommet de droite] (21.11 : DEF, RST…).
   rightTri(a, b, { la = "", lb = "", lc = "", angA = "", names = true } = {}) {
-    const g = GEO().pt("C", 0, 0, names).pt("B", 0, a, names).pt("A", b, 0, names).poly(["A", "B", "C"]).right("C", "A", "B");
-    g.side("B", "C", la).side("A", "C", lb).side("A", "B", lc);
-    if (angA) g.angle("A", "B", "C", angA, { r: 24 });
+    const [C, B, A] = Array.isArray(names) ? names : ["C", "B", "A"], show = names !== false;
+    const g = GEO().pt(C, 0, 0, show).pt(B, 0, a, show).pt(A, b, 0, show).poly([A, B, C]).right(C, A, B);
+    g.side(B, C, la).side(A, C, lb).side(A, B, lc);
+    if (angA) g.angle(A, B, C, angA, { r: 24 });
     return g.svg("triangle rectangle");
   },
   // Hauteur issue de l'angle droit : p = projection de [BC] (côté de B), q = projection de [AC] (côté de A).

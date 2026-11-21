@@ -524,8 +524,15 @@ const Engine = {
   // Format retenu pour aujourd'hui (stable dans la journée, sauf « Autre format »).
   todayFormat(state) {
     const today = day();
-    if (!state.today || state.today.date !== today) state.today = { date: today, f: this.chooseFormat(state) };
+    // Format annoncé la veille au bilan (21.11) : promesse tenue.
+    if (!state.today || state.today.date !== today) state.today = { date: today, f: state.tomorrow && state.tomorrow.date === today && FORMATS[state.tomorrow.f] ? state.tomorrow.f : this.chooseFormat(state) };
     return state.today.f;
+  },
+  // Format de demain, choisi dès aujourd'hui et annoncé au bilan (21.11).
+  tomorrowFormat(state) {
+    const tm = addDays(day(), 1);
+    if (!state.tomorrow || state.tomorrow.date !== tm) state.tomorrow = { date: tm, f: this.chooseFormat(state, [], tm) };
+    return state.tomorrow.f;
   },
   // « Changer de format » : toujours le même ordre (défi → automatismes → applications → mixte → révision → défi…), demande du 19.11.
   otherFormat(state) {

@@ -444,3 +444,15 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 @media (prefers-color-scheme: dark) { .at-seg button[aria-pressed="true"] { color: #10162a; } }
 /* Programme du test en italique, pour le distinguer des boutons (21.11) */
 .prep-days li { font-style: italic; }
+/* 21.11 : visite guidée, paliers du Mathélo, reprise, bilan de semaine */
+.tour { position: fixed; left: 0; right: 0; bottom: 78px; z-index: 50; display: flex; justify-content: center; padding: 0 12px; pointer-events: none; }
+.tour-card { pointer-events: auto; max-width: 460px; width: 100%; background: var(--card); border: 2px solid var(--blue); border-radius: 16px; padding: 12px 14px; box-shadow: 0 8px 28px rgba(20, 40, 100, .25); display: grid; gap: 6px; }
+.tour-card .row { justify-content: flex-end; }
+.tab.tour-hi { animation: tourpulse 1.2s ease-in-out infinite; border-radius: 12px; }
+@keyframes tourpulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(36, 87, 214, .0); } 50% { box-shadow: 0 0 0 6px rgba(36, 87, 214, .35); } }
+@media (prefers-reduced-motion: reduce) { .tab.tour-hi { animation: none; outline: 3px solid var(--blue); } }
+.eb-pal { display: block; font-size: 0.72rem; color: var(--ink-soft); margin-top: 2px; }
+.eb-pal .pbar { height: 4px; margin-top: 3px; max-width: 120px; }
+.resume-card { border: 2px solid var(--blue); }
+.tomorrow { margin-top: 2px; }
+.streak .tomorrow b { font-family: inherit; font-size: inherit; }

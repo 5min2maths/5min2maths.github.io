@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="../src/style.css"><!doctype html><meta charset="utf-8"><div id="app"></div><pre id="out"></pre>
+<script>window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_manip.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script>
+// Améliorations élèves du 21.11 (lot 2) : reprise de séance, visite guidée, paliers, bilan de la semaine, format de demain, données en gras.
+const fails=[], ok=(c,m)=>{if(!c)fails.push(m)};
+try{
+state=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.autoInit(state);state.placed=true;
+for(const id in state.notions)state.notions[id].lessonSeen=true;
+// 2. visite guidée
+homeTab="today";screenHome();ok(!!document.getElementById("tour")&&/Aujourd'hui/.test(document.getElementById("tour").textContent),"2 bulle 1");
+document.getElementById("tournext").click();ok(homeTab==="prob"&&/Problème/.test(document.getElementById("tour").textContent),"2 bulle 2 sur l'onglet Problème");
+document.getElementById("tourskip").click();ok(state.tourDone&&!document.getElementById("tour")&&homeTab==="today","2 passer : fini");
+screenHome();ok(!document.getElementById("tour"),"2 plus de visite ensuite");
+// 1. reprise de séance
+session={fmt:"auto",plan:["prio|1","fracadd|1","puiss|1"],i:0,score:0,answered:0,start:Date.now(),elo0:state.elo.r,ids:new Set(),pinged:true};nextQuestion();
+document.getElementById("idk").click();document.getElementById("nx").click();
+ok(state.resume&&state.resume.s.i===1&&state.resume.s.answered===1,"1 séance gardée "+JSON.stringify(state.resume&&{i:state.resume.s.i,a:state.resume.s.answered}));
+session=null;homeTab="today";screenHome();ok(/question <b>2 sur 3<\/b>/.test(app.innerHTML),"1 carte Reprendre");
+document.getElementById("resgo").click();ok(session&&session.i===1&&session.ids instanceof Set&&/2 sur 3/.test(app.textContent),"1 reprise à la question 2");
+document.getElementById("idk").click();document.getElementById("nx").click();document.getElementById("idk").click();document.getElementById("nx").click();
+ok(/Score/.test(app.textContent)&&!state.resume,"1 bilan : plus de reprise");
+// 5. format de demain
+ok(/Demain : /.test(app.textContent)&&state.tomorrow&&state.tomorrow.date===addDays(day(),1),"5 format de demain annoncé");
+const other=Object.keys(FORMATS).find(f=>f!==state.today.f);state.tomorrow={date:day(),f:other};delete state.today;ok(Engine.todayFormat(state)===other,"5 promesse tenue le lendemain");
+// 3. paliers
+state.elo.r=1287;homeTab="today";screenHome();ok(/Palier 25 → 26 : encore 13/.test(app.textContent),"3 palier : "+(app.querySelector(".eb-pal")||{}).textContent);
+// 4. bilan de la semaine (simulé un lundi)
+const dd=new Date(day()+"T12:00:00"),dow=(dd.getDay()+6)%7,mon=addDays(day(),-dow);
+state.history=[{date:addDays(mon,-6),n:5,score:4},{date:addDays(mon,-4),n:3,score:2},{date:addDays(mon,-2),n:4,score:4}];state.elo.log=[[addDays(mon,-8),1200],[addDays(mon,-2),1240]];delete state.recapSeen;
+const card=weekRecapCard();if(dow<=2){ok(/3<\/b> jours de pratique/.test(card)&&/12<\/b> questions/.test(card)&&/\+40/.test(card),"4 bilan : "+card.replace(/<[^>]+>/g," ").slice(0,140));}else ok(card==="","4 rien après mercredi");
+// 6. données en gras
+ok(/\\mathbf\{4\}/.test(boldData("Un magasin vend \\(4\\) cahiers pour \\(32\\) CHF : combien coûtent \\(6\\) cahiers dans ce magasin ?")),"6 gras en contexte");
+ok(!/mathbf/.test(boldData("Calcule : \\(4 + 3 \\cdot 2\\)")),"6 pas de gras dans un calcul nu");
+ok(/<b>5<\/b> billets à <b>9<\/b> CHF/.test(boldData("Au cinéma, une famille paie 5 billets à 9 CHF et un grand pop-corn à 4 CHF. Écris le calcul en une seule ligne.")),"6 gras sur les nombres du texte");
+ok(!/<b>/.test(boldData('Une classe de 11e <span class="x" data-n="3">mesure</span> la cour avec une corde : quelle longueur obtient-elle au total ?').replace(/<span[^>]*>/,"")),"6 pas de gras dans 11e ni dans les attributs");
+}catch(e){fails.push("EXC "+e.message+" "+e.stack)}
+document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC\n"+fails.join("\n"):"OK")+"</pre>");
+</script>

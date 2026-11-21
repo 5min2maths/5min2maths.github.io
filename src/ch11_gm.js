@@ -32,7 +32,7 @@
   const EXA = " (valeur exacte : écris par exemple " + M("3\\sqrt{5}") + ")";
   const PIX = " (valeur exacte avec " + M("\\pi") + ", par exemple " + M("12\\pi") + ")";
   // Figures
-  const RT = (a, b, la, lb, lc) => GF.rightTri(a, b, { la, lb, lc });
+  const RT = (a, b, la, lb, lc, names) => GF.rightTri(a, b, { la, lb, lc, ...(names ? { names } : {}) });
 
   // ===================== pyth : théorème de Pythagore =====================
   const radHyp = () => { let a, b, n; do { a = R.int(1, 9); b = R.int(2, 9); n = a * a + b * b; } while (a >= b || Number.isInteger(Math.sqrt(n)) || simp(n)[0] === 1 && R.rand() < 0.5); return [a, b, n]; };
@@ -59,7 +59,7 @@
     2: [
       () => { const [a, b, n] = radHyp(), [k, m] = simp(n);
         return Qv("Le triangle " + M("DEF") + " est rectangle en " + M("F") + ", avec " + M("DF = " + a) + " cm et " + M("EF = " + b) + " cm. Calcule " + M("DE") + EXA + ".", k * Math.sqrt(m), M("DE^2 = " + a * a + " + " + b * b + " = " + n) + ", donc " + M("DE = \\sqrt{" + n + "}" + (k > 1 ? " = " + rT(k, m) : "")) + " cm.",
-          { radical: true, canon: rC(k, m), ctx: "hyp-exact", fig: RT(b, a, b + " cm", a + " cm", "?"), guide: [GS(M("DE^2 = " + a + "^2 + " + b + "^2") + " = ?", n, M(n) + "."), ...(k > 1 ? [GS("Le plus grand carré qui divise " + M(n) + " ?", k * k, M(n + " = " + k * k + " \\cdot " + m) + ".")] : []), GSR(M("DE = \\sqrt{" + n + "}") + (k > 1 ? " : simplifie" : "") + ".", k * Math.sqrt(m), M(rT(k, m)) + " cm.")],
+          { radical: true, canon: rC(k, m), ctx: "hyp-exact", fig: RT(b, a, b + " cm", a + " cm", "?", ["F", "E", "D"]), guide: [GS(M("DE^2 = " + a + "^2 + " + b + "^2") + " = ?", n, M(n) + "."), ...(k > 1 ? [GS("Le plus grand carré qui divise " + M(n) + " ?", k * k, M(n + " = " + k * k + " \\cdot " + m) + ".")] : []), GSR(M("DE = \\sqrt{" + n + "}") + (k > 1 ? " : simplifie" : "") + ".", k * Math.sqrt(m), M(rT(k, m)) + " cm.")],
             traps: [TR(a + b, "On additionne les carrés, pas les côtés."), TR(n, "C'est " + M("DE^2") + " : prends la racine.")] }); },
       () => { const [c, a, n] = radCat(), [k, m] = simp(n);
         return Qv("Le triangle " + M("RST") + " est rectangle en " + M("S") + ", avec " + M("RT = " + c) + " cm et " + M("RS = " + a) + " cm. Calcule " + M("ST") + EXA + ".", k * Math.sqrt(m), M("ST^2 = " + c * c + " - " + a * a + " = " + n) + ", donc " + M("ST = " + (k > 1 ? "\\sqrt{" + n + "} = " : "") + rT(k, m)) + " cm.",
@@ -91,7 +91,7 @@
             traps: [TR(D + H, "On additionne les carrés, puis on prend la racine."), TR(Math.sqrt(Math.abs(D * D - H * H)), "La pente est l'hypoténuse : on additionne les carrés.")] }); },
       () => { const [a, b, c] = trip(30), k = pk([1, 2, 3]);
         return Qv("Un triangle rectangle a des cathètes de " + M(a * k) + " cm et " + M(b * k) + " cm. Calcule son périmètre (en cm).", (a + b + c) * k, "Hypoténuse : " + M("\\sqrt{" + a * k + "^2 + " + b * k + "^2} = " + c * k) + " ; périmètre : " + M(a * k + " + " + b * k + " + " + c * k + " = " + (a + b + c) * k) + " cm.",
-          { ctx: "perimetre", fig: RT(b * k, a * k, b * k + " cm", a * k + " cm", ""), guide: [GS("Il manque l'hypoténuse : " + M(a * k + "^2 + " + b * k + "^2") + " = ?", (c * k) ** 2, M((c * k) ** 2) + "."), GS("Hypoténuse ?", c * k, M(c * k) + " cm."), GS("Périmètre ?", (a + b + c) * k, M((a + b + c) * k) + " cm.")],
+          { ctx: "perimetre", fig: RT(b * k, a * k, b * k + " cm", a * k + " cm", "", false), guide: [GS("Il manque l'hypoténuse : " + M(a * k + "^2 + " + b * k + "^2") + " = ?", (c * k) ** 2, M((c * k) ** 2) + "."), GS("Hypoténuse ?", c * k, M(c * k) + " cm."), GS("Périmètre ?", (a + b + c) * k, M((a + b + c) * k) + " cm.")],
             traps: [TR((a + b) * k, "Le périmètre compte les trois côtés : calcule d'abord l'hypoténuse."), TR(a * b * k * k / 2, "C'est l'aire ; on demande le périmètre.")] }); },
     ],
   };
