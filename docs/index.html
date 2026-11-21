@@ -14213,12 +14213,17 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
     } });
   add({ key: "yoyo", fam: "arnaque", uses: ["pct"], outil: "les pourcentages : une hausse puis une baisse du même pourcentage ne s'annulent pas (×1,2 puis ×0,8 = ×0,96).",
     make() {
-      const p = pk([10, 20, 25, 50]), P = pk([40, 80, 120, 200, 250]), f = (1 + p / 100) * (1 - p / 100), what = pk([["Une action", "gagne", "perd", "elle"], ["Un jeu vidéo", "augmente de", "baisse de", "il"], ["Un vélo électrique", "augmente de", "baisse de", "il"]]);
-      const unit = " CHF";
-      return { titre: "Montagnes russes", q: what[0] + (what[3] === "elle" ? " vaut " : " coûte ") + T(P) + unit + ". Lundi, son prix " + what[1] + " " + pc(p) + ". Mardi, il " + what[2] + " " + pc(p) + ".",
-        bet: { q: "Mardi soir, on est revenu…", choices: ["au-dessus de " + T(P) + unit, "exactement à " + T(P) + unit, "en dessous de " + T(P) + unit], good: 2 },
-        calc: { label: "Que vaut-" + what[3] + " mardi soir ? (en CHF)", value: r6(P * f), round: 0.01 },
-        reveal: "Lundi : " + M(N(P) + " \\cdot " + N(1 + p / 100) + " = " + N(P * (1 + p / 100))) + ". Mardi, la baisse de " + p + " % porte sur ce <b>nouveau</b> nombre, plus grand : " + M(N(P * (1 + p / 100)) + " \\cdot " + N(1 - p / 100) + " = " + N(P * f)) + ". Au total ×" + N(f).replace("{,}", ",") + " : on a perdu " + pc(100 - 100 * f) + "." };
+      // Prix et variations réalistes par objet (commentaire testeur du 21.11 : « prix pas très cohérent »).
+      const w = pk([
+        { s: "Une action", v: "vaut", P: [40, 80, 120, 250], p: [10, 20, 25], t: ["Lundi", "Mardi", "mardi soir"], up: "gagne", dn: "perd", pr: "elle" },
+        { s: "Un jeu vidéo", v: "coûte", P: [40, 60, 80], p: [10, 20, 25], t: ["Pour sa sortie", "Un mois plus tard", "après ces deux changements"], up: "augmente de", dn: "baisse de", pr: "il" },
+        { s: "Un vélo électrique", v: "coûte", P: [2000, 2500, 3200], p: [10, 20], t: ["Au printemps", "En automne", "en automne"], up: "augmente de", dn: "baisse de", pr: "il" },
+        { s: "Un abonnement de streaming", v: "coûte", P: [15, 20, 25], p: [20, 25], t: ["En janvier", "En juin", "en juin"], up: "augmente de", dn: "baisse de", pr: "il" }]);
+      const p = pk(w.p), P = pk(w.P), f = (1 + p / 100) * (1 - p / 100), u = w.s.includes("abonnement") ? " CHF par mois" : " CHF";
+      return { titre: "Montagnes russes", q: w.s + " " + w.v + " " + T(P) + u + ". " + w.t[0] + ", son prix " + w.up + " " + pc(p) + ". " + w.t[1] + ", il " + w.dn + " " + pc(p) + ".",
+        bet: { q: "Finalement, on est revenu…", choices: ["au-dessus de " + T(P) + " CHF", "exactement à " + T(P) + " CHF", "en dessous de " + T(P) + " CHF"], good: 2 },
+        calc: { label: (w.v === "vaut" ? "Que vaut-" + w.pr : "Combien coûte-t-" + w.pr) + " " + w.t[2] + " ? (en CHF)", value: r6(P * f), round: 0.01 },
+        reveal: "D'abord : " + M(N(P) + " \\cdot " + N(1 + p / 100) + " = " + N(P * (1 + p / 100))) + ". Ensuite, la baisse de " + p + " % porte sur ce <b>nouveau</b> prix, plus grand : " + M(N(P * (1 + p / 100)) + " \\cdot " + N(1 - p / 100) + " = " + N(P * f)) + ". Au total ×" + N(f).replace("{,}", ",") + " : on a perdu " + pc(100 - 100 * f) + "." };
     } });
   add({ key: "format", fam: "arnaque", uses: ["prop"], outil: "la proportionnalité : comparer des prix, c'est comparer le prix d'une même quantité (prix au litre).",
     make() {
@@ -14567,6 +14572,163 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
         bet: { q: "L'écran rentre-t-il dans le meuble ?", choices: ["Oui", "Non"], good: w <= meuble ? 0 : 1 },
         calc: { label: "Largeur de l'écran (en cm, au dixième)", value: Math.round(w * 10) / 10, round: 0.1 },
         reveal: "Diagonale : " + M(inch + " \\cdot 2{,}54 = " + N(dcm, 2)) + " cm. Avec une largeur de " + M("16k") + " et une hauteur de " + M("9k") + " : " + M("(16k)^2 + (9k)^2 = " + N(dcm, 2) + "^2") + ", donc " + M("k = " + N(dcm, 2) + " \\div \\sqrt{337} \\approx " + N(dcm / Math.sqrt(337), 3)) + " et la largeur vaut " + M("16k \\approx " + N(w, 1)) + " cm." };
+    } });
+
+  // ===================== Lot 2 (21.11) =====================
+  const dc = (v, k = 1) => (+v.toFixed(k)).toString().replace(".", ","); // nombre en texte simple, virgule décimale
+  add({ key: "petits", fam: "arnaque", uses: ["pct"], outil: "les pourcentages sur de petits nombres : +100 % peut ne représenter que quelques cas.",
+    make() {
+      const [a, b] = pk([[2, 3], [2, 4], [3, 4], [3, 6], [4, 5], [4, 6]]), rel = ((b - a) / a) * 100, n = pk([450, 600, 800]);
+      const what = pk(["élèves se sont cassé le bras en gym", "vélos ont été volés devant l'école", "élèves se sont perdus en course d'école"]);
+      return { titre: "Le titre qui fait peur", q: "Dans un établissement de " + M(N(n)) + " élèves, " + M(a) + " " + what + " l'an dernier, " + M(b) + " cette année. Le journal local titre : « Hausse de " + dc(rel) + " % ! »",
+        bet: { q: "Faut-il s'inquiéter ?", choices: ["Oui : c'est une hausse énorme", "Pas forcément : sur de si petits nombres, le % exagère", "Non : c'est en fait une baisse"], good: 1 },
+        calc: { label: "Vérifie : de combien de % le nombre a-t-il augmenté ? (au dixième)", value: Math.round(rel * 10) / 10, round: 0.1 },
+        reveal: M("\\frac{" + (b - a) + "}{" + a + "} " + (Number.isInteger(rel) ? "= " : "\\approx ") + N((b - a) / a, 3)) + " : le titre a raison, " + pc(rel, 1) + ". Mais cela ne fait que " + (b - a) + " cas de plus sur " + N(n).replace("\\text{'}", "'") + " élèves : le hasard suffit à l'expliquer. Sur de petits nombres, regarde les nombres, pas seulement le %." };
+    } });
+  add({ key: "salaire", fam: "arnaque", uses: ["pct"], outil: "les pourcentages successifs : ce qui compte, c'est le rapport entre la hausse du salaire et celle des prix.",
+    make() {
+      const s = pk([1, 2, 3]), i = s + pk([0.5, 1, 1.5]), W = pk([4000, 5000, 6000]), pa = ((1 + s / 100) / (1 + i / 100) - 1) * 100;
+      return { titre: "Plus riche ?", q: "Le salaire de Sam augmente de " + pc(s) + ". La même année, les prix augmentent en moyenne de " + pc(i) + ". Sam dit : « Je gagne plus, je suis plus riche ! »",
+        bet: { q: "Avec son salaire, Sam peut-il acheter plus de choses qu'avant ?", choices: ["Oui, plus qu'avant", "Non, un peu moins qu'avant", "Exactement autant"], good: 1 },
+        calc: { label: "Sam gagnait " + chf(W) + " par mois. Combien gagne-t-il maintenant ? (en CHF)", value: r6(W * (1 + s / 100)), round: 0.01 },
+        reveal: "Salaire : " + M(N(W) + " \\cdot " + N(1 + s / 100) + " = " + N(W * (1 + s / 100))) + " CHF. Mais ce qui coûtait 100 CHF en coûte maintenant " + dc(100 + i, 2) + ". Ce que Sam peut acheter est multiplié par " + M("\\frac{" + N(1 + s / 100) + "}{" + N(1 + i / 100) + "} \\approx " + N((1 + s / 100) / (1 + i / 100), 4)) + " : il perd environ " + pc(-pa, 1) + " de pouvoir d'achat." };
+    } });
+  add({ key: "debit", fam: "arnaque", uses: ["decdiv"], outil: "les conversions d'unités : 1 octet = 8 bits ; les débits sont annoncés en bits, les fichiers en octets.",
+    make() {
+      const G = pk([3, 4.5, 6, 9]), D = pk([50, 80, 100]), real = (G * 8000) / D / 60, naive = real / 8;
+      return { titre: "Le téléchargement", q: "Ton abonnement internet annonce « " + M(D + "\\ \\text{Mbit/s}") + " » (mégabits par seconde). Le jeu que tu veux pèse " + M(N(G) + "\\ \\text{Go}") + " (gigaoctets). Rappel : " + M("1\\ \\text{Go} = 1000\\ \\text{Mo}") + " et 1 octet = 8 bits.",
+        bet: { q: "Le téléchargement durera, au mieux…", choices: ["environ " + dc(naive) + " min", "environ " + dc(real) + " min", "plus d'une heure"], good: 1 },
+        calc: { label: "Durée minimale du téléchargement (en minutes, au dixième)", value: Math.round(real * 10) / 10, round: 0.1 },
+        reveal: M(N(G) + "\\ \\text{Go} = " + N(G * 1000) + "\\ \\text{Mo} = " + N(G * 8000) + "\\ \\text{Mbit}") + ". " + M(N(G * 8000) + " \\div " + D + " = " + N((G * 8000) / D)) + " s, soit " + M(N(real, 1)) + " min. Le piège : oublier le ×8 donne " + dc(naive) + " min, huit fois trop peu. (Et en vrai, le débit réel est souvent plus bas que l'annonce.)" };
+    } });
+  add({ key: "montee", fam: "paradoxe", uses: ["vitesse"], outil: "la vitesse moyenne : durée totale = distance totale ÷ vitesse moyenne.",
+    make() {
+      const [d, v] = pk([[1, 10], [1, 12], [2, 12], [2, 15], [3, 15], [3, 20]]), t = (d / v) * 60;
+      return { titre: "Rattraper le temps perdu", q: "Tu montes une côte de " + M(d + "\\ \\text{km}") + " à vélo, à " + M(v + "\\ \\text{km/h}") + ". Puis tu redescends par le même chemin. Tu voudrais une vitesse moyenne de " + M(2 * v + "\\ \\text{km/h}") + " sur l'aller-retour.",
+        bet: { q: "À quelle vitesse faut-il descendre ?", choices: [3 * v + " km/h", 4 * v + " km/h", "C'est impossible"], good: 2 },
+        calc: { label: "Combien de minutes as-tu mis pour monter ?", value: t },
+        reveal: "Monter : " + M(d + " \\div " + v + " \\cdot 60 = " + N(t)) + " min. Pour une moyenne de " + 2 * v + " km/h sur " + 2 * d + " km, il faut au total " + M(2 * d + " \\div " + 2 * v + " \\cdot 60 = " + N(t)) + " min : tout ce temps est déjà utilisé ! Il faudrait descendre en 0 minute, même la lumière n'y arrive pas." };
+    } });
+  add({ key: "depistage", fam: "paradoxe", uses: ["proba"], outil: "les probabilités avec des effectifs : on compte les vrais et les faux positifs sur une grande population.",
+    make() {
+      const [pr, fp] = pk([[1, 10], [1, 5], [2, 10]]), N0 = 10000, sick = (N0 * pr) / 100, tp = sick * 0.9, fpos = ((N0 - sick) * fp) / 100, pos = tp + fpos, p = (tp / pos) * 100;
+      return { titre: "Test positif", q: "Une maladie touche " + pc(pr) + " de la population. Un test la détecte chez 90 % des malades, mais il est aussi positif, par erreur, chez " + pc(fp) + " des personnes en bonne santé. On teste " + M(N(N0)) + " personnes.",
+        bet: { q: "Ton test est positif. La probabilité que tu sois vraiment malade est…", choices: ["environ 90 %", "environ 50 %", "moins de 20 %"], good: 2 },
+        calc: { label: "Sur ces " + "10'000 personnes, combien ont un test positif ?", value: pos },
+        reveal: "Malades : " + M(N(sick)) + ", dont " + M(N(tp)) + " positifs. En bonne santé : " + M(N(N0 - sick)) + ", dont " + M(N(fpos)) + " positifs par erreur. En tout " + M(N(pos)) + " positifs, et seulement " + M(N(tp)) + " vraiment malades : " + M("\\frac{" + N(tp) + "}{" + N(pos) + "} \\approx") + " " + pc(p, 0) + ". Quand une maladie est rare, la plupart des positifs sont des erreurs : on refait un 2e test." };
+    } });
+  add({ key: "pile", fam: "paradoxe", uses: ["proba"], outil: "les probabilités : les lancers sont indépendants, la pièce n'a pas de mémoire.",
+    make() {
+      const k = pk([4, 5, 6]), what = pk([["une pièce", "pile", "face"], ["un dé", "un nombre pair", "un nombre impair"]]);
+      return { titre: "La série", q: "Tu lances " + what[0] + " équilibré" + (what[0] === "une pièce" ? "e" : "") + ". Tu obtiens " + k + " fois de suite " + what[1] + ".",
+        bet: { q: "Au lancer suivant…", choices: [what[2] + " est plus probable, il « doit » arriver", what[1] + " est plus probable, c'est une série", "une chance sur deux, comme toujours"], good: 2 },
+        calc: { label: "Probabilité d'obtenir " + k + " fois de suite " + what[1] + " (fraction)", value: 1 / 2 ** k },
+        reveal: "Chaque lancer a une chance sur deux : " + M("\\left(\\frac{1}{2}\\right)^{" + k + "} = \\frac{1}{" + 2 ** k + "}") + ". Une telle série est rare… mais une fois qu'elle a eu lieu, le lancer suivant reste à " + M("\\frac{1}{2}") + " : " + what[0] + " ne se souvient de rien. Croire le contraire, c'est « l'erreur du joueur »." };
+    } });
+  add({ key: "photo", fam: "paradoxe", uses: [], outil: "l'agrandissement : si chaque côté est multiplié par k, l'aire est multipliée par k × k.",
+    make() {
+      const [a, b] = pk([[10, 15], [9, 13], [13, 18]]), k = pk([2, 3]);
+      return { titre: "Le poster", q: "Tu fais agrandir une photo de " + M(a + "\\ \\text{cm} \\times " + b + "\\ \\text{cm}") + " pour en faire un poster : chaque côté est multiplié par " + M(k) + ".",
+        bet: { q: "Il faudra combien de fois plus d'encre ?", choices: [k + " fois plus", k * k + " fois plus", k ** 3 + " fois plus"], good: 1 },
+        calc: { label: "Aire du poster (en cm²)", value: k * a * k * b },
+        reveal: "Photo : " + M(a + " \\cdot " + b + " = " + a * b) + " cm². Poster : " + M(k * a + " \\cdot " + k * b + " = " + N(k * a * k * b)) + " cm², soit " + M(k * k) + " fois plus : on agrandit dans les deux directions, " + M(k + " \\cdot " + k) + "." };
+    } });
+  add({ key: "ecrantemps", fam: "fermi", uses: ["decdiv"], outil: "la multiplication et les conversions de durées (heures → jours).",
+    make() {
+      const h = pk([2.5, 3, 3.5, 4, 5]), v = (h * 365) / 24;
+      return { titre: "Le temps d'écran", q: "Tu passes environ " + M(N(h) + "\\ \\text{h}") + " par jour sur ton téléphone.",
+        bet: { q: "En une année, cela fait combien de jours entiers, 24 heures sur 24 ?", choices: ["environ 5 jours", "environ 15 jours", "plus d'un mois"], good: 2 },
+        calc: { label: "Nombre de jours entiers (au dixième)", value: Math.round(v * 10) / 10, range: [v * 0.95, v * 1.05] },
+        reveal: M(N(h) + " \\cdot 365 = " + N(h * 365)) + " h, et " + M(N(h * 365) + " \\div 24 \\approx " + N(v, 1)) + " jours : plus d'un mois sans dormir, ni manger, ni aller à l'école." };
+    } });
+  add({ key: "respire", fam: "fermi", uses: ["decmul"], outil: "la multiplication et les conversions de durées (minutes → jour).",
+    make() {
+      const r = pk([12, 14, 15, 16]), v = r * 0.5 * 1440;
+      return { titre: "L'air que tu respires", q: "Au repos, tu respires environ " + M(r) + " fois par minute, et chaque inspiration fait entrer environ " + M("0{,}5\\ \\ell") + " d'air.",
+        bet: { q: "En une journée, tu respires environ…", choices: ["100 litres d'air", "1'000 litres d'air", "10'000 litres d'air"], good: 2 },
+        calc: { label: "Litres d'air respirés en un jour", value: v, range: [v * 0.95, v * 1.05] },
+        reveal: M(r + " \\cdot 0{,}5 = " + N(r * 0.5)) + " litre" + (r * 0.5 > 1 ? "s" : "") + " par minute ; une journée a " + M("24 \\cdot 60 = 1\\text{'}440") + " minutes : " + M(N(r * 0.5) + " \\cdot 1\\text{'}440 = " + N(v)) + " litres, de quoi remplir une petite piscine gonflable chaque jour." };
+    } });
+  add({ key: "file", fam: "fermi", uses: ["decmul"], outil: "la multiplication et la comparaison de longueurs.",
+    make() {
+      const n = pk([200, 300, 500, 800]), t = pk([1.5, 1.6]), L = n * t;
+      return { titre: "La file des élèves", q: "Tous les élèves de ton école (" + M(n) + ") s'allongent par terre, l'un derrière l'autre. Chacun mesure environ " + M(N(t) + "\\ \\text{m}") + ".",
+        bet: { q: "La file fait-elle le tour d'une piste d'athlétisme (400 m) ?", choices: ["Non, pas en entier", "Oui, entre 1 et 2 tours", "Oui, plus de 2 tours"], good: L < 400 ? 0 : L <= 800 ? 1 : 2 },
+        calc: { label: "Longueur de la file (en m)", value: L, range: [L * 0.97, L * 1.03] },
+        reveal: M(n + " \\cdot " + N(t) + " = " + N(L)) + " m, soit " + dc(L / 400, 2) + " tour" + (L >= 800 ? "s" : "") + " de piste." };
+    } });
+  add({ key: "veloterre", fam: "fermi", uses: ["decdiv"], outil: "la division (distance ÷ vitesse) et les conversions de durées.",
+    make() {
+      const v = pk([15, 16, 20, 25]), j = 40000 / v;
+      return { titre: "Le tour du monde à vélo", q: "Tu pédales une heure par jour, à " + M(v + "\\ \\text{km/h}") + ". Tu veux parcourir la longueur de l'équateur : environ " + M("40\\text{'}000\\ \\text{km}") + ".",
+        bet: { q: "Il te faudra…", choices: ["quelques mois", "quelques années", "plus de 50 ans"], good: 1 },
+        calc: { label: "Combien de jours ?", value: Math.round(j), range: [j * 0.97, j * 1.03] },
+        reveal: "Chaque jour : " + v + " km. " + M("40\\text{'}000 \\div " + v + " \\approx " + N(Math.round(j))) + " jours, soit environ " + dc(j / 365) + " ans." };
+    } });
+  add({ key: "chiffres", fam: "enigme", uses: [], outil: "le dénombrement par paquets : les pages à 1, à 2 et à 3 chiffres.",
+    make() {
+      const n = pk([104, 105, 150, 200, 250]), v = 9 + 180 + 3 * (n - 99);
+      return { titre: "Numéroter un livre", q: "Pour numéroter les pages d'un livre, de 1 à " + M(n) + ", l'imprimeur doit imprimer des chiffres (« 12 », c'est deux chiffres).",
+        bet: { q: "Faut-il plus ou moins de " + 2 * n + " chiffres ?", choices: ["moins de " + 2 * n, "plus de " + 2 * n], good: v > 2 * n ? 1 : 0 },
+        calc: { label: "Nombre total de chiffres imprimés", value: v },
+        reveal: "Pages 1 à 9 : 9 chiffres. Pages 10 à 99 : " + M("90 \\cdot 2 = 180") + ". Pages 100 à " + n + " : " + M((n - 99) + " \\cdot 3 = " + 3 * (n - 99)) + ". Total : " + M("9 + 180 + " + 3 * (n - 99) + " = " + v) + "." };
+    } });
+  add({ key: "pesees", fam: "enigme", uses: [], outil: "le raisonnement par élimination : chaque pesée partage les suspectes en trois groupes.",
+    make() {
+      const n = pk([9, 27, 81]), k = Math.round(Math.log(n) / Math.log(3)), obj = pk(["billes", "pièces", "boules de pétanque"]);
+      return { titre: "La balance", q: "Parmi " + M(n) + " " + obj + " identiques, une seule est un peu plus lourde. Tu as une balance à deux plateaux (sans poids). Astuce : fais trois groupes de " + M(n / 3) + ", et mets-en deux sur la balance.",
+        bet: { q: "Combien de pesées faut-il, au minimum, pour être sûr de la trouver ?", choices: [String(k - 1), String(k), String(k + 2)], good: 1 },
+        calc: { label: "Après la 1re pesée, combien de " + obj + " sont encore suspectes ?", value: n / 3 },
+        reveal: "Si la balance penche, la lourde est dans le plateau du bas ; si elle est à l'équilibre, elle est dans le groupe resté de côté. Il reste " + M(n / 3) + " suspectes, puis " + (n / 9 > 1 ? M(n / 9) + ", " : "") + "… jusqu'à une seule : " + M(k) + " pesées suffisent (" + M("3^{" + k + "} = " + n) + ")." };
+    } });
+  add({ key: "tournoi", fam: "enigme", uses: [], outil: "le raisonnement malin : chaque match élimine exactement une équipe.",
+    make() {
+      const n = pk([16, 24, 32, 48, 64]), sp = pk(["de foot", "de ping-pong", "d'échecs", "de jeux vidéo"]);
+      return { titre: "Le tournoi", q: "Un tournoi " + sp + " à élimination directe réunit " + M(n) + " équipes : chaque match a un perdant, qui est éliminé, et il n'y a pas de match nul. Quand le nombre d'équipes est impair, une équipe est qualifiée d'office pour le tour suivant.",
+        bet: { q: "Combien de matchs faut-il pour désigner le vainqueur ?", choices: ["moins de " + n, "exactement " + n, "plus de " + n], good: 0 },
+        calc: { label: "Nombre de matchs joués en tout", value: n - 1 },
+        reveal: "Pas besoin de compter tour par tour : chaque match élimine une équipe, et il faut éliminer toutes les équipes sauf le vainqueur. " + M(n + " - 1 = " + (n - 1)) + " matchs." };
+    } });
+  add({ key: "franchise", fam: "quotidien", uses: ["prop"], outil: "la comparaison de deux tarifs : coût fixe (primes) + coût variable (franchise).",
+    make() {
+      const [pa, fa, pb, fb] = pk([[420, 300, 330, 2500], [380, 300, 300, 2500], [450, 500, 360, 2000]]), F = pk([200, 1500, 4000]);
+      const A = 12 * pa + Math.min(F, fa), B = 12 * pb + Math.min(F, fb);
+      return { titre: "L'assurance maladie", q: "Deux formules d'assurance. A : " + chf(pa) + " par mois, franchise de " + chf(fa) + ". B : " + chf(pb) + " par mois, franchise de " + chf(fb) + ". (La franchise : tu paies toi-même tes frais médicaux jusqu'à ce montant chaque année ; on oublie le reste pour simplifier.) Cette année, tu as " + chf(F) + " de frais médicaux.",
+        bet: { q: "Quelle formule te coûte le moins cette année ?", choices: ["A", "B", "C'est pareil"], good: A < B ? 0 : A > B ? 1 : 2 },
+        calc: { label: "Coût total de B sur l'année (en CHF)", value: B },
+        reveal: "A : " + M("12 \\cdot " + pa + " + " + Math.min(F, fa) + " = " + N(A)) + " CHF. B : " + M("12 \\cdot " + pb + " + " + Math.min(F, fb) + " = " + N(B)) + " CHF. " + (A < B ? "A est moins chère : avec beaucoup de frais, la petite franchise protège." : "B est moins chère : peu de frais, les primes basses gagnent.") };
+    } });
+  add({ key: "rando", fam: "quotidien", uses: ["echelle"], outil: "l'échelle d'une carte (1:50'000 : 1 cm sur la carte = 50'000 cm = 500 m) puis la vitesse.",
+    make() {
+      const d = pk([7, 9, 11, 15, 21]), km = d * 0.5, h = km / 4;
+      return { titre: "La randonnée", q: "Sur ta carte au 1:50'000, le sentier mesure " + M(d + "\\ \\text{cm}") + ". Tu marches à environ " + M("4\\ \\text{km/h}") + ".",
+        bet: { q: "Combien de temps dure la marche ?", choices: ["moins d'1 h 30", "entre 1 h 30 et 2 h 30", "plus de 2 h 30"], good: h < 1.5 ? 0 : h <= 2.5 ? 1 : 2 },
+        calc: { label: "Longueur réelle du sentier (en km)", value: km },
+        reveal: M(d + " \\cdot 50\\text{'}000 = " + N(d * 50000)) + " cm = " + M(N(km)) + " km. À 4 km/h : " + M(N(km) + " \\div 4 = " + N(h, 3)) + " h, soit environ " + Math.floor(h) + " h " + String(Math.round((h % 1) * 60)).padStart(2, "0") + " (sans les pauses ni la montée !)." };
+    } });
+  add({ key: "addition", fam: "quotidien", uses: ["pct"], outil: "les pourcentages et la distributivité : (T × 1,1) ÷ k = (T ÷ k) × 1,1.",
+    make() {
+      const T = pk([63.2, 87.6, 124.8, 146.4]), k = pk([3, 4, 5]), v = (T * 1.1) / k;
+      return { titre: "Partager l'addition", q: "Au restaurant, l'addition est de " + chf(T) + " pour " + M(k) + " amis. Vous voulez ajouter " + pc(10) + " de pourboire et partager équitablement.",
+        bet: { q: "Vaut-il mieux ajouter le pourboire avant ou après le partage ?", choices: ["Avant : ça coûte moins", "Après : ça coûte moins", "C'est pareil"], good: 2 },
+        calc: { label: "Combien paie chacun ? (en CHF, au centime)", value: r6(v), round: 0.01 },
+        reveal: "Avant : " + M(N(T) + " \\cdot 1{,}1 = " + N(T * 1.1)) + ", puis " + M("\\div " + k) + " : " + M(N(v, 2)) + " CHF. Après : " + M(N(T) + " \\div " + k + " = " + N(T / k, 2)) + ", puis " + M("\\cdot 1{,}1") + " : le même résultat. Multiplier et diviser, l'ordre n'y change rien." };
+    } });
+  add({ key: "notes", fam: "quotidien", uses: ["diagr"], outil: "la moyenne : la somme des notes doit valoir 3 × la moyenne visée.",
+    make() {
+      const c = pk([[4, 4.5, 4.5], [3.5, 4, 4.5], [5, 4.5, 5], [4.5, 5.5, 5], [3.5, 5, 4.5], [5.5, 5, 5.5]]), [n1, n2, t] = c, x = r6(3 * t - n1 - n2);
+      return { titre: "La note qu'il te faut", q: "Tu as eu " + M(N(n1)) + " et " + M(N(n2)) + " aux deux premiers tests (même poids). Tu vises une moyenne de " + M(N(t)) + " avec le 3e test.",
+        bet: { q: "Au 3e test, il te faut…", choices: ["exactement " + dc(t) + ", la note visée", "plus que " + dc(t), "moins que " + dc(t)], good: x > t ? 1 : x < t ? 2 : 0 },
+        calc: { label: "Note nécessaire au 3e test", value: x },
+        reveal: "Pour une moyenne de " + N(t).replace("{,}", ",") + " sur 3 tests, il faut " + M("3 \\cdot " + N(t) + " = " + N(3 * t)) + " points en tout. Tu en as " + M(N(n1) + " + " + N(n2) + " = " + N(n1 + n2)) + ". Il manque " + M(N(3 * t) + " - " + N(n1 + n2) + " = " + N(x)) + "." };
+    } });
+  add({ key: "peinture", fam: "quotidien", uses: ["prop"], outil: "l'aire des murs (périmètre × hauteur) puis la proportionnalité (litres par m²).",
+    make() {
+      const [L, l] = pk([[4, 3], [5, 4], [3, 3], [4.5, 3.5]]), h = 2.5, S = 2 * (L + l) * h, lit = (2 * S) / 10, pots = Math.ceil(lit / 2.5);
+      return { titre: "Repeindre ta chambre", q: "Ta chambre mesure " + M(N(L) + "\\ \\text{m} \\times " + N(l) + "\\ \\text{m}") + ", avec " + M("2{,}5\\ \\text{m}") + " de hauteur. Tu repeins les quatre murs (on oublie la fenêtre et la porte), en deux couches. Un litre de peinture couvre " + M("10\\ \\text{m}^2") + " ; la peinture se vend en pots de " + M("2{,}5\\ \\ell") + ".",
+        bet: { q: "Combien de pots faut-il acheter ?", choices: ["2", "3", "4", "5"], good: pots - 2 },
+        calc: { label: "Aire des quatre murs (en m²)", value: S },
+        reveal: "Les quatre murs, déroulés, forment un rectangle : périmètre × hauteur = " + M(N(2 * (L + l)) + " \\cdot 2{,}5 = " + N(S)) + " m². Deux couches : " + M(N(2 * S)) + " m², donc " + M(N(lit)) + " litres, soit " + M(N(lit) + " \\div 2{,}5 = " + N(lit / 2.5)) + " → " + pots + " pots (on arrondit vers le haut)." };
     } });
 
   CURIEUX.forEach((c) => { const n = (id) => NOTIONS.find((x) => x.id === id); c.uses = c.uses.filter(n); });
