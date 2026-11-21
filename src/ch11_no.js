@@ -36,7 +36,7 @@
   // ---------- constructeurs ----------
   const keep = (value, traps) => { const seen = new Set(); return (traps || []).filter((t) => { if (!t || !isFinite(t.v) || Math.abs(t.v - value) <= 1e-9 * Math.max(1, Math.abs(value))) return false; const k = r12(t.v); if (seen.has(k)) return false; seen.add(k); return true; }); };
   const Qv = (q, value, sol, o = {}) => {
-    const spec = Object.assign({ kind: "value", value }, o.plain ? { plain: true } : {}, o.sci ? { sci: true } : {}, o.final ? { final: true } : {});
+    const spec = Object.assign({ kind: "value", value }, o.plain ? { plain: true } : {}, o.sci ? { sci: true } : {}, o.final ? { final: true } : {}, o.round ? { round: o.round } : {});
     const x = { q, spec, sol, guide: o.guide, traps: keep(value, o.traps), ctx: o.ctx };
     if (o.fig) x.fig = o.fig;
     if (o.sci) { const [m, e] = norm(value); x.canon = String(m).replace(".", ",") + "*10^" + e; } // réponse type (affichage, tests)
@@ -296,7 +296,7 @@
         const vals = [f[0] / f[1], d, p / 100], best = Math.max(...vals), second = vals.sort((x, y) => y - x)[1];
         return Qv("Quel est le plus grand de ces nombres : " + M(fT(f[0], f[1])) + ", " + T(d) + " ou " + M(p + "\\,\\%") + " ? Donne sa valeur en nombre décimal" + (f[1] === 3 ? " (arrondie au millième s'il le faut)" : "") + ".", r12(best),
           M(fT(f[0], f[1]) + (f[1] === 3 ? " \\approx " + N(+(f[0] / f[1]).toFixed(3)) : " = " + N(f[0] / f[1]))) + ", " + M(p + "\\,\\% = " + N(p / 100)) + " : le plus grand vaut " + M(N(+best.toFixed(3))) + ".",
-          { plain: true, ctx: "compare", guide: [GS("Écris " + M(fT(f[0], f[1])) + " en décimal" + (f[1] === 3 ? " (au millième)" : "") + ".", f[0] / f[1], M(N(+(f[0] / f[1]).toFixed(3))) + ".", f[1] === 3 ? 0.001 : undefined), GS("Écris " + M(p + "\\,\\%") + " en décimal.", p / 100, M(N(p / 100)) + "."), GS("Le plus grand des trois ?", r12(best), M(N(+best.toFixed(3))) + ".", f[1] === 3 && best === f[0] / f[1] ? 0.001 : undefined)],
+          { plain: true, ctx: "compare", round: f[1] === 3 && best === f[0] / f[1] ? 0.001 : undefined, guide: [GS("Écris " + M(fT(f[0], f[1])) + " en décimal" + (f[1] === 3 ? " (au millième)" : "") + ".", f[0] / f[1], M(N(+(f[0] / f[1]).toFixed(3))) + ".", f[1] === 3 ? 0.001 : undefined), GS("Écris " + M(p + "\\,\\%") + " en décimal.", p / 100, M(N(p / 100)) + "."), GS("Le plus grand des trois ?", r12(best), M(N(+best.toFixed(3))) + ".", f[1] === 3 && best === f[0] / f[1] ? 0.001 : undefined)],
             traps: [TR(r12(second), "Compare les trois écritures décimales : il y a plus grand.")] }); },
       () => { const p = pk([35, 12, 24, 36, 45, 64, 85, 4, 15, 125, 8, 140]), res = rq(p, 100), g = gcd2(p, 100);
         return Qv("Écris " + M(p + "\\,\\%") + " sous forme de fraction irréductible.", p / 100, M(p + "\\,\\% = " + fT(p, 100) + " = " + qT(res)) + " (simplifiée par " + M(g) + ").",

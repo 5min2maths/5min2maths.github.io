@@ -83,7 +83,7 @@ for (const id of Object.keys(GEN)) for (const d of [1, 2, 3]) for (let i = 0; i 
   }
   if (s.kind === "value" && !isFinite(s.value)) { fail(id + " d" + d + " valeur " + s.value); continue; }
   if (s.kind === "value" && s.round) {
-    const r = checkAnswer(s, s.value.toFixed(2));
+    const r = checkAnswer(s, s.value.toFixed(Math.max(2, Math.round(-Math.log10(s.round))))); // au millième si demandé (21.11)
     if (r.status !== "correct") fail(id + " d" + d + " arrondi refusé " + s.value);
     continue;
   }

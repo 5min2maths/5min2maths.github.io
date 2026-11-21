@@ -16,8 +16,10 @@ function qcmFmt(v, spec, text) {
   if (spec.sci && v !== 0) { const e = Math.floor(Math.log10(Math.abs(v)) + 1e-12), a = +(v / 10 ** e).toPrecision(10); return (Math.abs(v) >= 1 && Math.abs(v) < 10) ? String(+v.toPrecision(10)).replace(".", "{,}") : String(a).replace(".", "{,}") + " \\cdot 10^{" + e + "}"; }
   if (Number.isInteger(v) || Math.abs(v - Math.round(v)) < 1e-9) return thou(Math.round(v));
   if (spec.round) { const k = Math.max(0, Math.round(-Math.log10(spec.round))); return String((+v.toFixed(k))).replace(".", "{,}"); }
-  const wantFrac = /sous forme (de|d'une) fraction|fraction irréductible|en fraction/i.test(text || "");
-  const q = ratio(v);
+  const wantFrac = /sous forme (de|d'une) fraction|fraction irréductible|en fraction|\(fraction/i.test(text || "");
+  // Décimal fini (jusqu'à 4 décimales) : écrit en décimal, sauf si l'énoncé demande une fraction.
+  if (!wantFrac && Math.abs(v - +v.toFixed(4)) < 1e-9) return String(+v.toFixed(4)).replace(".", "{,}");
+  const q = ratio(v, wantFrac ? 1000 : 60);
   const term = q && ((d) => { while (d % 2 === 0) d /= 2; while (d % 5 === 0) d /= 5; return d === 1; })(q[1]);
   if (q && (wantFrac || !term)) return fr(q);
   if (term) return String(+v.toFixed(6)).replace(".", "{,}");
@@ -38,6 +40,8 @@ function qcmFmt(v, spec, text) {
 // de « 1,2 » se repère sans calculer) : décimal arrondi au centième si la réponse est décimale, fraction si elle est une fraction.
 function qcmLike(v, good, q) {
   const f = qcmFmt(v, q.spec, q.q), plain = /^-?[\d']+(\{,\}\d+)?$/;
+  // Valeur approchée : tous les choix en « ≈ » au centième, sinon le seul « ≈ » (ou le seul sans) se repère.
+  if (/^\\approx/.test(good)) return /^\\approx/.test(f) ? f : "\\approx " + String(+v.toFixed(2)).replace(".", "{,}");
   if (plain.test(good) && !plain.test(f)) return String(+v.toFixed(2)).replace(".", "{,}");
   if (/\\frac/.test(good) && !/sqrt|pi/.test(good) && plain.test(f) && !Number.isInteger(v)) {
     for (let d = 2; d <= 60; d++) { const n = Math.round(v * d); if (Math.abs(n / d - v) < 1e-9) return (n < 0 ? "-" : "") + "\\frac{" + Math.abs(n) + "}{" + d + "}"; }
@@ -45,20 +49,53 @@ function qcmLike(v, good, q) {
   return f;
 }
 
-// Une question QCM : la question du générateur, la bonne valeur et 2 ou 3 erreurs typiques, toutes distinctes à l'écrit.
+// Plausibilité (21.11, remarque de l'utilisateur : « des valeurs délirantes font qu'il est très facile de déduire la bonne ») :
+// un choix faux reste dans le même ordre de grandeur que la bonne réponse (facteur 10 au plus ; deux puissances de 10 en notation scientifique).
+function qcmPlausible(v, g, spec) {
+  if (!isFinite(v)) return false;
+  if (g === 0) return Math.abs(v) <= 10 && v !== 0;
+  if (v === 0) return Math.abs(g) <= 3;
+  if (spec.sci) return Math.abs(Math.floor(Math.log10(Math.abs(v))) - Math.floor(Math.log10(Math.abs(g)))) <= 2;
+  const r = Math.abs(v / g);
+  return r >= 1 / 10.5 && r <= 10.5;
+}
+// Valeurs voisines, sous la même forme que la bonne réponse, pour compléter à 4 choix quand il manque des pièges plausibles.
+// Un choix négatif n'est plausible que si l'énoncé contient un signe moins (soustraction ou nombre négatif) ou si la réponse est négative.
+const qcmNegOk = (q, g) => g < 0 || /[-−]\s*[\d(]|[\d)]\s*[-−]/.test(String(q.q).replace(/<[^>]+>/g, "")); // pas les mots composés (demi-tour)
+function qcmNear(g, good, q) {
+  const neg = qcmNegOk(q, g), out = [];
+  const ratio = (x, maxD = 60) => { for (let d = 1; d <= maxD; d++) { const n = Math.round(x * d); if (Math.abs(n / d - x) < 1e-9) return [n, d]; } return null; };
+  const sq = /\\sqrt\{(\d+)\}/.exec(good);
+  if (/\\pi/.test(good)) { const k = g / Math.PI; [k + 1, k - 1, 2 * k, k / 2, k + 2].forEach((x) => out.push(x * Math.PI)); }
+  else if (sq) { const r = Math.sqrt(+sq[1]), a = g / r; [a + 1, a - 1, 2 * a, a + 2].forEach((x) => out.push(x * r)); }
+  else if (/\\cdot 10\^/.test(good)) { const e = Math.floor(Math.log10(Math.abs(g)) + 1e-12), m = g / 10 ** e; [m * 10 ** (e + 1), m * 10 ** (e - 1), (m + 1) * 10 ** e, m * 10 ** (e + 2)].forEach((x) => out.push(x)); }
+  else if (/\\frac/.test(good)) { const f = ratio(g); if (f) { const [n, d] = f; [[n + 1, d], [n - 1, d], [n, d + 1], [d, n], [n + d, d], [n, d - 1]].forEach(([x, y]) => y && out.push(x / y)); } }
+  else {
+    const dec = /\{,\}(\d+)/.exec(good), u = dec ? 10 ** -dec[1].length : Math.max(1, 10 ** (Math.floor(Math.log10(Math.abs(g) || 1)) - 1));
+    [g + u, g - u, g + 2 * u, g - 2 * u, g + 10 * u, g - 10 * u, g + 3 * u].forEach((x) => out.push(+x.toFixed(10)));
+  }
+  if (neg && g !== 0) out.push(-g);
+  return shuffle(out.filter((x) => isFinite(x) && (neg || x >= 0 || g < 0)));
+}
+
+// Une question QCM : la bonne valeur, des erreurs typiques plausibles, complétées par des valeurs voisines : 4 choix distincts à l'écrit.
 function qcmMake(id, d) {
   for (let t = 0; t < 30; t++) {
     let q; try { q = Engine.build(id, d, 1 + Math.floor(Math.random() * 46655)); q = Engine.finalize(state, id, q); } catch (e) { continue; }
     if (!q || q.parts || !q.spec || q.spec.kind !== "value" || !isFinite(q.spec.value)) continue;
-    const good = qcmFmt(q.spec.value, q.spec, q.q), seen = new Set([good]), wrong = [];
-    for (const tr of q.traps || []) { if (!isFinite(tr.v) || (Math.abs(tr.v) < 1e-12 && q.spec.value !== 0)) continue; const f = qcmLike(tr.v, good, q); if (seen.has(f)) continue; seen.add(f); wrong.push({ f, m: tr.m }); if (wrong.length === 3) break; }
-    if (wrong.length < 2) continue;
+    const g = q.spec.value, good = qcmFmt(g, q.spec, q.q), seen = new Set([good]), wrong = [];
+    const tol = Math.max(q.spec.round ? q.spec.round : 0, 1e-9 * Math.max(1, Math.abs(g)));
+    const negOk = qcmNegOk(q, g);
+    const take = (v, m) => { if (wrong.length >= 3 || !qcmPlausible(v, g, q.spec) || Math.abs(v - g) <= tol || (v < 0 && !negOk)) return; const f = qcmLike(v, good, q); if (seen.has(f) || /NaN|undefined|Infinity/.test(f) || (/approx/.test(f) && !/approx/.test(good))) return; seen.add(f); wrong.push({ f, m }); };
+    for (const tr of q.traps || []) take(tr.v, tr.m);
+    if (!wrong.length) continue; // au moins une vraie erreur typique, avec son diagnostic
+    for (const v of qcmNear(g, good, q)) take(v, "");
+    if (wrong.length < 3) continue;
     const choices = shuffle([{ f: good, ok: true }, ...wrong]);
     return { id, d, q, choices };
   }
   return null;
 }
-
 
 // Lignes de la grille (21.11, demande de l'utilisateur) :
 // 1. au moins une ligne par notion du test : sa compétence de base (niveau 1) ;
@@ -156,7 +193,7 @@ function atTest() {
       if (typeof buzz === "function") buzz(c.ok);
       if (c.ok) burst();
       const fb = document.getElementById("fb");
-      fb.innerHTML = `<div class="fb ${c.ok ? "ok" : "bad"} pop"><b>${c.ok ? "✓ Juste !" : "✗ Ce n'est pas ça."}</b>${c.ok ? "" : `<div class="diag">🔎 ${escT(c.m || "C'est une erreur fréquente.")}</div>`}
+      fb.innerHTML = `<div class="fb ${c.ok ? "ok" : "bad"} pop"><b>${c.ok ? "✓ Juste !" : "✗ Ce n'est pas ça."}</b>${c.ok ? "" : `<div class="diag">🔎 ${escT(c.m || "Refais le calcul étape par étape : la correction ci-dessous montre la méthode.")}</div>`}
         <details class="solfull"${c.ok ? "" : " open"}><summary>La correction</summary><div class="sol">${q.sol}</div></details></div>
         <div class="actions"><button class="btn-primary" id="nx">${i + 1 < items.length ? "Question suivante" : "Voir ma grille"}</button></div>`;
       typeset(fb);
