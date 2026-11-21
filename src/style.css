@@ -486,3 +486,15 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .grade-ic { font-size: 2.2rem !important; }
 .eb-n { display: inline-flex; align-items: center; gap: 8px; }
 .eb-gic { font-size: 2.6rem; margin: 0; line-height: 1; filter: drop-shadow(0 1px 1px rgba(0,0,0,.15)); }
+/* Page Mes grades (21.11) */
+.grade-big { font-size: 3.4rem !important; }
+.grade-now h2 { margin: 0; }
+.grades { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.grades li { display: grid; grid-template-columns: 2.2em 1fr auto; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--line); }
+.grades .g-ic { font-size: 1.5rem; text-align: center; }
+.grades .g-n { font-weight: 700; }
+.grades .g-at { font-family: var(--font-mono); font-size: 0.85rem; text-align: right; display: grid; }
+.grades .g-at small { font-family: var(--font-body); font-size: 0.68rem; color: var(--ink-soft); }
+.grades li.todo { opacity: 0.45; filter: grayscale(0.7); }
+.grades li.cur { border: 2px solid var(--blue); background: var(--blue-soft); }
+.grades li.ok .g-n { color: var(--ok); }

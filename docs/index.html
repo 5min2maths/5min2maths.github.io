@@ -501,6 +501,18 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .grade-ic { font-size: 2.2rem !important; }
 .eb-n { display: inline-flex; align-items: center; gap: 8px; }
 .eb-gic { font-size: 2.6rem; margin: 0; line-height: 1; filter: drop-shadow(0 1px 1px rgba(0,0,0,.15)); }
+/* Page Mes grades (21.11) */
+.grade-big { font-size: 3.4rem !important; }
+.grade-now h2 { margin: 0; }
+.grades { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.grades li { display: grid; grid-template-columns: 2.2em 1fr auto; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--line); }
+.grades .g-ic { font-size: 1.5rem; text-align: center; }
+.grades .g-n { font-weight: 700; }
+.grades .g-at { font-family: var(--font-mono); font-size: 0.85rem; text-align: right; display: grid; }
+.grades .g-at small { font-family: var(--font-body); font-size: 0.68rem; color: var(--ink-soft); }
+.grades li.todo { opacity: 0.45; filter: grayscale(0.7); }
+.grades li.cur { border: 2px solid var(--blue); background: var(--blue-soft); }
+.grades li.ok .g-n { color: var(--ok); }
 
 </style>
 <script>
@@ -19416,13 +19428,32 @@ function eloBlock() {
 }
 // Grades du Mathélo (21.11, « l'histoire des paliers n'est pas claire, plutôt des grades ») : un grade tous les 75 points,
 // soit deux par année scolaire (le Mathélo de départ monte de 150 par année : 950 en 9e, 1250 en 11e, 1550 en 2e).
+// Échelle anticipée jusqu'en 4e du Collège (départ 3e : 1700, 4e : 1850 ; très bon élève de 4e : 2200 à 2400).
 const GRADES = [[0, "🌱", "Pousse"], [800, "✏️", "Apprenti"], [875, "📏", "Arpenteur"], [950, "🧮", "Calculateur"], [1025, "📐", "Bâtisseur"],
   [1100, "🗺️", "Explorateur"], [1175, "🔦", "Enquêteur"], [1250, "🔭", "Chercheur"], [1325, "♟️", "Stratège"], [1400, "🦉", "Penseur"],
-  [1475, "🥇", "Expert"], [1550, "🎓", "Érudit"], [1625, "🏆", "Maître"], [1700, "💎", "Virtuose"], [1800, "👑", "Génie"], [1900, "🌟", "Légende"]];
+  [1475, "🥇", "Expert"], [1550, "🎓", "Érudit"], [1625, "🧪", "Savant"], [1700, "🏆", "Maître"], [1775, "🧬", "Inventeur"],
+  [1850, "💎", "Virtuose"], [1925, "🪐", "Astronome"], [2000, "👑", "Génie"], [2075, "⚡", "Prodige"], [2150, "🌌", "Visionnaire"], [2225, "🌟", "Légende"]];
+// Point de départ de chaque classe (repères affichés dans « Mes grades »).
+const GRADE_START = { 950: "départ en 9e", 1100: "départ en 10e", 1250: "départ en 11e", 1400: "départ en 1re", 1550: "départ en 2e", 1700: "départ en 3e", 1850: "départ en 4e" };
 function gradeOf(r) {
   let i = 0; while (i + 1 < GRADES.length && r >= GRADES[i + 1][0]) i++;
   const [lo, ic, name] = GRADES[i], nx = GRADES[i + 1];
   return { i, ic, name, lo, next: nx ? { at: nx[0], ic: nx[1], name: nx[2] } : null, pct: nx ? Math.round(((r - lo) / (nx[0] - lo)) * 100) : 100 };
+}
+// Page « Mes grades » (21.11) : l'échelle complète, le grade actuel mis en avant, la courbe du Mathélo.
+function screenGrades() {
+  const r = state.elo.r, g = gradeOf(r), best = Math.max(r, ...((state.elo.log || []).map((x) => x[1])));
+  h(`${brand}<div class="eyebrow">Mathélo</div><h2>Mes grades</h2>
+  <div class="card stack grade-now"><div class="ic-row"><span class="ic grade-big">${g.ic}</span><div><div class="eyebrow">Mon grade</div><h2>${g.name}</h2><div class="small muted">Mathélo ${r}${best > r ? " · meilleur : " + best : ""}</div></div></div>
+    ${g.next ? `<div class="stack" style="gap:4px"><span class="pbar"><i style="width:${g.pct}%"></i></span><span class="small">Prochain grade : <b>${g.next.ic} ${g.next.name}</b>, à ${g.next.at} (encore ${g.next.at - r} points).</span></div>` : '<p class="small">Le plus haut grade : bravo !</p>'}</div>
+  <div class="card">${eloBlock()}</div>
+  <div class="card flat stack"><h3>L'échelle des grades</h3><p class="small muted">Un grade tous les 75 points, deux par année scolaire. Ton Mathélo monte quand tu réussis des questions de ton niveau ou plus difficiles.</p>
+    <ol class="grades">${GRADES.slice().reverse().map(([at, ic, name]) => { const st = r >= at ? (gradeOf(r).name === name ? "cur" : "ok") : "todo";
+      return `<li class="${st}"><span class="g-ic">${ic}</span><span class="g-n">${name}${st === "cur" ? " <span class=\"badge\">toi</span>" : ""}</span><span class="g-at">${at ? at : "–"}${GRADE_START[at] ? `<small>${GRADE_START[at]}</small>` : ""}</span></li>`; }).join("")}</ol></div>
+  <button class="btn-primary btn-big" id="back">Retour</button>`);
+  document.getElementById("back").onclick = screenHome;
+  const cur = app.querySelector(".grades li.cur"); if (cur) cur.scrollIntoView({ block: "center" });
+  window.scrollTo(0, 0);
 }
 // Bandeau Mathélo (14.11, demande de l'utilisateur : « on a envie de le voir monter ») : sur tous les cadres de l'accueil.
 function eloBanner() {
@@ -19539,7 +19570,7 @@ function screenHome() {
   const byId = (x) => document.getElementById(x), on = (x, f) => { if (byId(x)) byId(x).onclick = f; };
   app.querySelectorAll(".tab").forEach((b) => (b.onclick = () => { homeTab = b.dataset.tab; screenHome(); }));
   on("settings", screenSettings);
-  on("eloband", () => { if (homeTab !== "prog") { homeTab = "prog"; screenHome(); } });
+  on("eloband", screenGrades);
   on("go", startSession);
   on("freego", startFree);
   on("other", () => { Engine.otherFormat(state); save(); screenHome(); });
