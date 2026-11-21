@@ -254,8 +254,8 @@ function eloBanner() {
     spark = `<svg class="spark" viewBox="0 0 200 32" preserveAspectRatio="none"><path class="a" d="${line} L200,32 L0,32 Z"/><path class="l" d="${line}"/><circle cx="200" cy="${Y(pts[pts.length - 1]).toFixed(1)}" r="3"/></svg>`;
   }
   return `<button type="button" class="elo-band" id="eloband" aria-label="Mathélo ${e.r}, voir mes progrès">
-    <span class="eb-l"><span class="eyebrow">Mathélo${Engine.isProvisional(state) ? " · provisoire" : ""}</span><span class="eb-n"><b class="num">${e.r}</b>${d ? `<span class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "▲ +" : "▼ "}${d}</span>` : ""}</span>
-      ${(() => { const g = gradeOf(e.r); return `<span class="eb-grade"><b>${g.ic} ${g.name}</b>${g.next ? `<span class="pbar"><i style="width:${g.pct}%"></i></span><span class="eb-next">${g.next.ic} ${g.next.name} dans ${g.next.at - e.r} pts</span>` : ""}</span>`; })()}</span>
+    <span class="eb-l"><span class="eyebrow">Mathélo${Engine.isProvisional(state) ? " · provisoire" : ""}</span><span class="eb-n"><b class="num">${e.r}</b><span class="eb-gic" title="Grade : ${gradeOf(e.r).name}" aria-hidden="true">${gradeOf(e.r).ic}</span>${d ? `<span class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "▲ +" : "▼ "}${d}</span>` : ""}</span>
+      ${(() => { const g = gradeOf(e.r); return `<span class="eb-grade"><b>${g.name}</b>${g.next ? `<span class="pbar"><i style="width:${g.pct}%"></i></span><span class="eb-next">${g.next.ic} ${g.next.name} dans ${g.next.at - e.r} pts</span>` : ""}</span>`; })()}</span>
     <span class="eb-r">${spark || '<span class="small muted">Ta courbe apparaît après ta 2e séance.</span>'}</span></button>`;
 }
 function themeBars(lv) {

@@ -482,3 +482,5 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .eb-next { font-size: 0.7rem; color: var(--ink-soft); }
 .grade-up { border: 2px solid var(--fluo, #e6ff3f); }
 .grade-ic { font-size: 2.2rem !important; }
+.eb-n { display: inline-flex; align-items: center; gap: 8px; }
+.eb-gic { font-size: 2rem; line-height: 1; filter: drop-shadow(0 1px 1px rgba(0,0,0,.15)); }
