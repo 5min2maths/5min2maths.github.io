@@ -18275,26 +18275,43 @@ let draft = { system: "CH", grade: 11, track: null, minutes: 5 };
 
 // Accueil (18.11) : un exemple JOUABLE (réponse, correction, pas à pas) qui change de sujet à chaque visite,
 // tiré parmi des notions au point (chapitres repris au standard) — pour goûter l'app avant de choisir son niveau.
-const DEMO_POOL = ["pyth", "fracadd", "fracmul", "eq1", "sci", "vitesse", "thales", "angles", "puiss", "reduire", "tabval", "volcone", "ucomp", "prio", "cercthales"];
+// 21.11 (remarque de l'auteur : « fraction irréductible » pour un élève de début de 9e) : tant que l'élève n'a pas dit
+// sa classe, l'exemple vient des bases accessibles à tous (DEMO_BASE, niveau 1) ; « Je suis en … » le tire parmi les
+// notions DÉJÀ VUES à cette période de l'année (années précédentes + notions de l'année ouvertes par unlock) ;
+// « Pas encore vu ça ? » en tire un autre, sans rien enregistrer. Le choix de classe pré-remplit l'étape 1.
+const DEMO_BASE = ["prio", "decadd", "decmul", "prop"];
+let demoGrade = null, demoSkip = [];
+function demoPoolFor(grade) {
+  if (!grade) return DEMO_BASE.map((id) => [id, 1]);
+  const st = Engine.newState({ system: "CH", grade, track: "college", minutes: 5 });
+  Engine.autoInit(st);
+  const seen = Object.keys(st.notions).filter((id) => ["vu", "encours"].includes(st.notions[id].status) && GEN[id]);
+  // Notions de l'année ouvertes : niveau 1 seulement ; années précédentes : niveau 1 ou 2.
+  return seen.map((id) => { const pl = placeOf(NOTIONS.find((n) => n.id === id), st.profile); return [id, pl && pl[0] < grade ? 2 : 1]; });
+}
 function demoQuestion() {
-  for (let k = 0; k < 30; k++) {
-    const id = DEMO_POOL[Math.floor(Math.random() * DEMO_POOL.length)];
-    if (!GEN[id]) continue;
-    let q; try { q = Engine.build(id, Math.random() < 0.6 ? 1 : 2, 1 + Math.floor(Math.random() * 1e6)); } catch (e) { continue; }
-    if (q && q.spec && q.spec.kind === "value" && !q.parts && q.guide && q.guide.length) return q;
+  let pool = demoPoolFor(demoGrade).filter(([id]) => !demoSkip.includes(id));
+  if (!pool.length) { demoSkip = []; pool = demoPoolFor(demoGrade); }
+  const prof = { profile: { system: "CH", grade: Math.min(demoGrade || 9, 11) } };
+  for (let k = 0; k < 40; k++) {
+    const [id, maxLv] = pool[Math.floor(Math.random() * pool.length)];
+    let q; try { q = Engine.build(id, maxLv > 1 && Math.random() < 0.4 ? 2 : 1, 1 + Math.floor(Math.random() * 46655)); } catch (e) { continue; }
+    if (q && q.spec && q.spec.kind === "value" && !q.parts && q.guide && q.guide.length) return demoGrade && demoGrade > 11 ? q : Engine.finalize(prof, id, q);
   }
-  return Engine.build("pyth", 1, 7);
+  return Engine.build("prio", 1, 7);
 }
 function screenWelcome() {
   const q = demoQuestion(), n = NOTIONS.find((x) => x.id === q.id), fine = window.matchMedia("(pointer: fine)").matches;
   h(`${brand}
   <div class="stack"><h1>Chaque jour, <span class="mark">5 minutes</span> de maths, à ton niveau.</h1>
   <p class="muted">Une question du jour choisie pour toi, une figure, une correction immédiate. Ton Mathélo monte quand tu progresses. Pas de compte : tout reste sur ton téléphone.</p></div>
+  <div class="stack"><span class="small muted">Je suis en :</span><div class="seg" id="dgrade">${[[9, "9e"], [10, "10e"], [11, "11e"], [12, "Sec. II"]].map(([g, l]) => `<button aria-pressed="${g === demoGrade}" data-v="${g}">${l}</button>`).join("")}</div></div>
   <div class="card tilt" id="demo"><div class="qmeta"><span class="chip">Essaie · ${n ? n.label : "exemple"}</span><span class="dots"><i class="on"></i><i></i><i></i></span></div>
   <div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
   <div class="answer"><input class="ans" id="dans" inputmode="${fine ? "text" : "none"}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Ta réponse">
   <div class="preview" id="dprev"></div>${keypadHtml(q.spec.kind === "value" && !q.spec.sci && (Math.abs(q.spec.value) >= 1e-3 || q.spec.value === 0) && Math.abs(q.spec.value) < 1e7 ? { ...q.spec, final: true } : q.spec)}<div class="actions"><button class="btn-primary" id="dok">Vérifier</button></div></div>
   <div id="dfb"></div>
+  <div class="spread"><span></span><button class="btn-ghost small" id="dskip">Pas encore vu ça ? Autre question</button></div>
   <p class="small muted">Un autre sujet à chaque visite. Tape ta réponse comme tu veux : fractions, racines, π… le calculateur comprend.</p></div>
   <button class="btn-primary btn-big" id="go">Commencer</button>
   <button class="btn-ghost" id="restore">J'ai déjà un code de sauvegarde</button>
@@ -18325,6 +18342,9 @@ function screenWelcome() {
   document.getElementById("dok").onclick = go;
   inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
   document.getElementById("go").onclick = screenLevel;
+  const redraw = () => { screenWelcome(); const d = document.getElementById("demo"); if (d && d.scrollIntoView) d.scrollIntoView({ block: "nearest" }); };
+  document.getElementById("dskip").onclick = () => { demoSkip.push(q.id); redraw(); };
+  app.querySelectorAll("#dgrade button").forEach((b) => (b.onclick = () => { demoGrade = +b.dataset.v; demoSkip = []; draft.grade = demoGrade; redraw(); }));
   document.getElementById("privacy").onclick = () => screenPrivacy(screenWelcome);
   document.getElementById("restore").onclick = () => screenRestore();
 }
