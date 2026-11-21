@@ -14262,7 +14262,7 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
       const [D, d] = pk([[40, 28], [30, 20], [32, 22], [36, 26], [34, 24]]), A1 = Math.PI * (D / 2) ** 2, A2 = 2 * Math.PI * (d / 2) ** 2;
       return { titre: "La grande ou les deux petites ?", q: "Même prix : une pizza de " + M(D + "\\ \\text{cm}") + " de diamètre, ou deux pizzas de " + M(d + "\\ \\text{cm}") + ".",
         bet: { q: "Où y a-t-il le plus à manger ?", choices: ["La grande", "Les deux petites", "C'est pareil"], good: A1 > A2 ? 0 : 1 },
-        calc: { label: "Aire de la grande pizza (en cm², à l'unité)", value: Math.round(A1), round: 1 },
+        calc: { label: "Aire totale des deux petites pizzas (en cm², à l'unité)", value: Math.round(A2), round: 1 },
         reveal: "Grande : " + M("\\pi \\cdot " + D / 2 + "^2 \\approx " + N(A1, 0)) + " cm². Deux petites : " + M("2 \\cdot \\pi \\cdot " + d / 2 + "^2 \\approx " + N(A2, 0)) + " cm². " + (A1 > A2 ? "La grande gagne, alors que " + M("2 \\cdot " + d + " = " + 2 * d) + " cm semble bien plus que " + D + " cm : l'aire dépend du <b>carré</b> du rayon." : "Les deux petites gagnent, de peu : l'aire dépend du <b>carré</b> du rayon, il faut calculer.") };
     } });
   add({ key: "credit", fam: "arnaque", uses: ["pct"], outil: "le calcul du coût total et le pourcentage d'augmentation : « seulement … par mois » cache souvent un supplément.",
@@ -14311,8 +14311,8 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
     } });
   add({ key: "tete", fam: "paradoxe", uses: ["disque"], outil: "le périmètre du cercle : la tête décrit un cercle de rayon plus grand (r + ta taille).",
     make() {
-      const t = pk([1.5, 1.6, 1.7, 1.8]), d = 2 * Math.PI * t;
-      return { titre: "La tête ou les pieds ?", q: "Imagine que tu fasses le tour de la Terre à pied, le long de l'équateur. Tu mesures " + M(N(t) + "\\ \\text{m}") + ".",
+      const t = pk([1.55, 1.6, 1.65, 1.7]), d = 2 * Math.PI * t;
+      return { titre: "La tête ou les pieds ?", q: "Imagine que tu fasses le tour de la Terre à pied, le long de l'équateur. Tu mesures " + M(t.toFixed(2).replace(".", "{,}") + "\\ \\text{m}") + ".",
         bet: { q: "Qui parcourt la plus grande distance ?", choices: ["Tes pieds", "Ta tête, de quelques millimètres", "Ta tête, de plusieurs mètres", "Les deux, exactement autant"], good: 2 },
         calc: { label: "De combien de mètres la tête parcourt-elle plus que les pieds ? (au dixième)", value: Math.round(d * 10) / 10, round: 0.1 },
         reveal: "Les pieds décrivent un cercle de rayon " + M("r") + ", la tête un cercle de rayon " + M("r + " + N(t)) + ". Différence : " + M("2\\pi (r + " + N(t) + ") - 2\\pi r = 2\\pi \\cdot " + N(t) + " \\approx " + N(d, 1)) + " m. Encore une fois, le rayon de la Terre a disparu du calcul." };
@@ -14551,11 +14551,11 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
     } });
   add({ key: "demitarif", fam: "quotidien", uses: ["decdiv"], outil: "la division et l'arrondi vers le haut (il faut un nombre entier de trajets).",
     make() {
-      const ab = 190, t = pk([18.4, 22, 26.8, 31.6, 41.2]), save = t / 2, v = Math.ceil(ab / save), trip = pk(["un aller-retour chez ta grand-mère", "un aller-retour pour ton entraînement", "un aller-retour pour voir des amis"]);
-      return { titre: "L'abonnement demi-tarif", q: "Un abonnement demi-tarif coûte " + chf(ab) + " par an : avec lui, chaque billet coûte la moitié. Plein tarif, " + trip + " coûte " + chf(t) + ".",
+      const ab = pk([120, 150, 190]), t = pk([18.4, 22, 26.8, 31.6, 41.2]), save = t / 2, v = Math.ceil(ab / save), trip = pk(["un aller-retour chez ta grand-mère", "un aller-retour pour ton entraînement", "un aller-retour pour voir des amis"]);
+      return { titre: "L'abonnement demi-tarif", q: "Un abonnement de train, du genre « demi-tarif », coûte " + chf(ab) + " par an (prix inventé pour l'exercice : renseigne-toi pour le vrai). Avec lui, chaque billet coûte la moitié du prix normal. Plein tarif, " + trip + " coûte " + chf(t) + ".",
         bet: { q: "Combien d'allers-retours faut-il pour qu'il soit rentable ?", choices: ["moins de 10", "entre 10 et 20", "plus de 20"], good: v < 10 ? 0 : v <= 20 ? 1 : 2 },
         calc: { label: "Nombre minimum d'allers-retours pour rentabiliser l'abonnement", value: v },
-        reveal: "Chaque aller-retour fait économiser " + M(N(t) + " \\div 2 = " + N(save)) + " CHF. " + M("190 \\div " + N(save) + " \\approx " + N(ab / save, 2)) + " : il faut " + M(v) + " allers-retours (on arrondit vers le haut)." };
+        reveal: "Chaque aller-retour fait économiser " + M(N(t) + " \\div 2 = " + N(save)) + " CHF. " + M(ab + " \\div " + N(save) + " \\approx " + N(ab / save, 2)) + " : il faut " + M(v) + " allers-retours (on arrondit vers le haut)." };
     } });
   add({ key: "essence", fam: "quotidien", uses: ["prop"], outil: "la proportionnalité : la consommation est donnée pour 100 km.",
     make() {
@@ -14568,7 +14568,7 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
   add({ key: "ecran", fam: "quotidien", uses: ["pyth"], outil: "le théorème de Pythagore : la taille d'un écran est sa diagonale.",
     make() {
       const inch = pk([43, 50, 55, 65]), dcm = inch * 2.54, w = dcm * 16 / Math.sqrt(337), meuble = Math.round(w / 10) * 10 + pk([-5, 5]);
-      return { titre: "L'écran dans le meuble", q: "Un écran de " + M(inch) + " pouces, au format 16:9 (un pouce vaut " + M("2{,}54\\ \\text{cm}") + ") : la largeur et la hauteur sont dans le rapport 16 pour 9. La « taille » d'un écran, c'est sa <b>diagonale</b>. Ton meuble mesure " + M(meuble + "\\ \\text{cm}") + " de large.",
+      return { titre: "L'écran dans le meuble", q: "Ta famille veut acheter un écran de " + M(inch) + " pouces et le poser dans un meuble de " + M(meuble + "\\ \\text{cm}") + " de large. Dans les magasins, la « taille » d'un écran est la longueur de sa <b>diagonale</b>, et un pouce vaut " + M("2{,}54\\ \\text{cm}") + ". L'écran est au format 16:9 : sa largeur et sa hauteur sont dans le rapport 16 pour 9.",
         bet: { q: "L'écran rentre-t-il dans le meuble ?", choices: ["Oui", "Non"], good: w <= meuble ? 0 : 1 },
         calc: { label: "Largeur de l'écran (en cm, au dixième)", value: Math.round(w * 10) / 10, round: 0.1 },
         reveal: "Diagonale : " + M(inch + " \\cdot 2{,}54 = " + N(dcm, 2)) + " cm. Avec une largeur de " + M("16k") + " et une hauteur de " + M("9k") + " : " + M("(16k)^2 + (9k)^2 = " + N(dcm, 2) + "^2") + ", donc " + M("k = " + N(dcm, 2) + " \\div \\sqrt{337} \\approx " + N(dcm / Math.sqrt(337), 3)) + " et la largeur vaut " + M("16k \\approx " + N(w, 1)) + " cm." };
