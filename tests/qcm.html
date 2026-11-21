@@ -50,12 +50,12 @@ ok(state.autotest.runs.length===2&&/Après/.test(app.textContent)&&/1er test/.te
 if(document.getElementById("rev")){document.getElementById("rev").click();ok(session&&session.plan.length>=2,"révision des compétences à revoir");}
 state.prep={ids:["fracadd","rel"],date:addDays(day(),3)};screenQcm();ok(state.autotest.runs.length===0&&!!document.getElementById("atgo"),"autre test : nouvelle grille");
 // lignes : une par notion au moins (même au-delà de 8 notions), niveau 3 avant les doublons de base, réponse tapée si pas de QCM
-for(const ids of [["prio","fracadd","puiss","rel","pyth","eq1"],["prop","fracsimp","pctvar"],["reduire","distrib","eq1","valnum","rac","carres","fracops","pctvar","rel"]]){
+for(const ids of [["prio","fracadd","puiss","rel","pyth","eq1"],["reduire","distrib","pctvar"],["reduire","distrib","eq1","valnum","rac","carres","fracops","pctvar","rel"]]){
   const R=atRows(ids);ok(ids.every(id=>R.some(r=>r.id===id)),"chaque notion a sa ligne : "+ids.join());ok(R.length<=Math.max(8,ids.length),"plafond "+R.length);
   if(ids.length<=4)ok(ids.every(id=>R.filter(r=>r.id===id).some(r=>r.lv>=2)||compsOf(id).length===1),"niveau exigeant présent "+ids.join());}
 ok(atRows(["prio","fracadd","puiss"]).filter(r=>r.lv===3).length>=2,"niveau 3 avant les doublons de base");
 // parcours mixte : QCM et réponses tapées
-state.prep={ids:["prop","fracsimp","pctvar"],date:addDays(day(),3)};state.autotest=null;screenQcm();
+state.prep={ids:["reduire","distrib","pctvar"],date:addDays(day(),3)};state.autotest=null;screenQcm();
 [...document.querySelectorAll(".at-seg")].forEach(g=>g.querySelector('button[data-v="1"]').click());document.getElementById("atgo").click();
 let typed=0,mc=0;for(let j=0;j<20;j++){if(document.querySelector(".qcm-c")){document.querySelector(".qcm-c").click();mc++;document.getElementById("nx").click();}else if(document.getElementById("idk")){document.getElementById("idk").click();typed++;document.getElementById("nx").click();}else break;}
 ok(typed>=1&&mc>=1,"parcours mixte : "+typed+" tapées, "+mc+" à choix");
