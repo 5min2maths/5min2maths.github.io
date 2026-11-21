@@ -370,6 +370,8 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .card.mode-free { border-left: 6px solid var(--ok); background: color-mix(in srgb, var(--ok) 7%, var(--card, #fff)); }
 .card.mode-school .eyebrow { color: var(--blue); }
 .card.mode-free .eyebrow { color: var(--ok); }
+.card.mode-test { border-left: 6px solid var(--margin); background: color-mix(in srgb, var(--margin) 7%, var(--card, #fff)); }
+.card.mode-test .eyebrow { color: var(--margin); }
 .card.mode-free .seg button[aria-pressed="true"] { background: var(--ok); border-color: var(--ok); }
 /* « En ce moment en classe » intégré au mode scolaire (demande du 19.11) : c'est lui qui oriente les séances du chapitre. */
 .mode-school .now-in { border-top: 1px dashed var(--line); padding-top: 10px; margin-top: 4px; gap: 6px; }

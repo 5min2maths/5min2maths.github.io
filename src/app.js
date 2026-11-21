@@ -377,6 +377,7 @@ function screenHome() {
   if (typeof screenQcm === "function") on("qcm", screenQcm);
   on("prepgo", () => startPrepTask(prepKind()));
   on("preptask", () => startPrepTask(prepKind()));
+  on("preptab", () => { homeTab = "test"; screenHome(); });
   on("prepauto", () => screenQcm());
   app.querySelectorAll(".pday").forEach((b) => (b.onclick = () => { app.querySelectorAll(".pday").forEach((x) => x.classList.toggle("sel", x === b)); const i = document.getElementById("pdayinfo"); if (i) i.innerHTML = b.dataset.info; }));
   on("carnetgo", () => startCarnet());
@@ -863,12 +864,14 @@ function startPrepTask(kind) {
   session = { plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), prep: true, prepKind: kind };
   nextQuestion();
 }
+// Carte « test » de l'accueil (21.11) : même forme que les modes scolaire et libre, bande rouge à gauche.
 function prepTodayCard() {
   if (!Engine.prepActive(state)) return "";
   const L = prepLeft(state.prep.date), kind = prepKind(), t = PREP_TASK[kind], done = (state.prep.log || {})[day()];
-  return `<div class="card stack prep-today"><div class="eyebrow">${t.ic} ${L === 0 ? "Test aujourd'hui" : L === 1 ? "Test demain" : "Test dans " + L + " jours"}${done ? " · fait ✓" : ""}</div>
-    <h3>Aujourd'hui : ${t.label}</h3><p class="small muted">${t.text}</p>
-    <button class="${done ? "" : "btn-primary"}" id="preptask">${done ? "Recommencer" : "C'est parti"}</button></div>`;
+  return `<div class="card stack mode-test"><div class="eyebrow">📝 Mon test · ${L === 0 ? "aujourd'hui" : L === 1 ? "demain" : "dans " + L + " jours"}${done ? " · étape du jour faite ✓" : ""}</div>
+    <h2>${t.ic} ${t.label}</h2><p class="muted">${t.text}</p>
+    <button class="${done ? "" : "btn-primary "}btn-big" id="preptask">${done ? "Refaire" : "C'est parti"}</button>
+    <button class="btn-ghost small" id="preptab">Voir mon programme</button></div>`;
 }
 const prepJ = (dt, short) => { const d = new Date(dt + "T12:00:00"); return (short ? ["di", "lu", "ma", "me", "je", "ve", "sa"] : ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."])[d.getDay()] + (short ? "" : " " + d.getDate() + "." + String(d.getMonth() + 1).padStart(2, "0")); };
 // Page Test en parcours guidé : en-tête, une seule action du jour, frise des jours, outils en plus.
