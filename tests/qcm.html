@@ -23,13 +23,27 @@ for(const [g,tr] of [[9,"college"],[10,"college"],[11,"college"],[12,"college"],
   }
 }
 log.push("notions avec QCM : "+usable+" sur "+tot+" ; sans : "+notUsable.slice(0,40).join(" "));
-// parcours
+// parcours : grille Avant → test rapide → grille ; puis 2e passage → colonne Après
 state=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.autoInit(state);state.placed=true;
-state.prep={ids:["prio","fracadd","puiss","rel"],date:addDays(day(),4)};
-homeTab="test";screenHome();ok(!!document.getElementById("qcm"),"bouton QCM");document.getElementById("qcm").click();
-let k=0;while(document.querySelector(".qcm-c")&&k<20){const b=[...document.querySelectorAll(".qcm-c")][k%2?0:1];b.click();ok(!!document.querySelector(".qcm-good"),"bonne réponse montrée");document.getElementById("nx").click();k++;}
-ok(k>=8,"au moins 8 questions ("+k+")");ok(/bilan/.test(app.textContent)&&state.qcm&&state.qcm.n===k,"bilan "+JSON.stringify(state.qcm));
-homeTab="test";screenHome();ok(/Dernier QCM/.test(app.textContent),"rappel du dernier QCM");
+state.prep={ids:["prio","fracadd","puiss","rel","pyth","eq1"],date:addDays(day(),4)};
+homeTab="test";screenHome();ok(/Autoévaluation et test rapide/.test(app.textContent),"bouton");document.getElementById("qcm").click();
+const rows=state.autotest.rows;ok(rows.length>=4&&rows.length<=8,"lignes 4 à 8 : "+rows.length);
+ok(new Set(rows.map(r=>r.id)).size>=4,"plusieurs notions dans la grille");
+ok(/Je sais…/.test(app.textContent)&&/Respecter les priorités/.test(app.textContent),"libellé « Je sais… »");
+document.getElementById("atgo").click();ok(/Il te reste/.test(app.textContent),"il faut tout cocher");
+const segs=[...document.querySelectorAll(".at-seg")];segs.forEach((g,k)=>g.querySelector('button[data-v="'+(k%2?2:1)+'"]').click());
+document.getElementById("atgo").click();
+let k=0;while(document.querySelector(".qcm-c")&&k<20){const bs=[...document.querySelectorAll(".qcm-c")];(k%3?bs.find(b=>!state.autotest.rows):null);const it=bs[0];it.click();ok(!!document.querySelector(".qcm-good"),"bonne réponse montrée");document.getElementById("nx").click();k++;}
+ok(k===rows.length,"une question par ligne ("+k+"/"+rows.length+")");
+ok(state.autotest.runs.length===1&&/Avant/.test(app.textContent)&&!/Après/.test(app.textContent.replace(/colonne « Après »/,"")),"grille finale, une colonne test");
+const r0=state.autotest.runs[0].r, wrongBelieved=rows.filter(r=>r0[r.cid]===0&&state.autotest.avant[r.cid]===2).length;
+ok((app.textContent.match(/Tu pensais savoir/g)||[]).length===wrongBelieved,"messages « tu pensais savoir » : "+wrongBelieved);
+homeTab="test";screenHome();ok(/Ma grille d'autoévaluation/.test(app.textContent)&&/Dernier test rapide/.test(app.textContent),"accueil Test : grille gardée");
+document.getElementById("qcm").click();ok(!!document.getElementById("again")&&!document.getElementById("atgo"),"retour direct à la grille");
+document.getElementById("again").click();k=0;while(document.querySelector(".qcm-c")&&k<20){[...document.querySelectorAll(".qcm-c")][1].click();document.getElementById("nx").click();k++;}
+ok(state.autotest.runs.length===2&&/Après/.test(app.textContent)&&/1er test/.test(app.textContent),"2e passage : colonne Après");
+if(document.getElementById("rev")){document.getElementById("rev").click();ok(session&&session.plan.length>=2,"révision des compétences à revoir");}
+state.prep={ids:["fracadd","rel"],date:addDays(day(),3)};screenQcm();ok(state.autotest.runs.length===0&&!!document.getElementById("atgo"),"autre test : nouvelle grille");
 }catch(e){fails.push("EXC "+e.message+" "+e.stack)}
 document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC "+fails.length+"\n"+[...new Set(fails)].slice(0,40).join("\n"):"OK")+"\n"+log.join("\n")+"</pre>");
 </script>

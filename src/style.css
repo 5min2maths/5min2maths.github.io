@@ -425,3 +425,15 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
 a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 700; }
 .ic-row { display: flex; flex-wrap: nowrap; gap: 12px; align-items: center; }
 .ic-row .ic { font-size: 1.6rem; flex: none; }
+/* Autoévaluation (21.11, page « Autoévaluation » des champs) */
+.at-grid { display: grid; gap: 0; padding: 6px 12px; }
+.at-row { display: flex; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.at-row:last-child { border-bottom: 0; }
+.at-l { flex: 1; font-size: 0.95rem; line-height: 1.35; }
+.at-seg { flex: none; }
+.at-seg button { min-width: 42px; padding: 6px 10px; font-weight: 700; }
+.at-c { flex: none; width: 52px; text-align: center; font-weight: 700; }
+.at-head .at-c { font-size: 0.72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-soft); font-weight: 600; }
+.at-s.at-2 { color: var(--ok, #1e8e5a); } .at-s.at-1 { color: #c98a00; } .at-s.at-0 { color: var(--bad, #c0392b); }
+.at-m { display: block; font-size: 0.8rem; margin-top: 2px; color: var(--ink-soft); }
+.at-m.warn { color: var(--bad, #c0392b); font-weight: 600; } .at-m.good { color: var(--ok, #1e8e5a); }

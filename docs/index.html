@@ -440,6 +440,18 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
 a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 700; }
 .ic-row { display: flex; flex-wrap: nowrap; gap: 12px; align-items: center; }
 .ic-row .ic { font-size: 1.6rem; flex: none; }
+/* Autoévaluation (21.11, page « Autoévaluation » des champs) */
+.at-grid { display: grid; gap: 0; padding: 6px 12px; }
+.at-row { display: flex; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.at-row:last-child { border-bottom: 0; }
+.at-l { flex: 1; font-size: 0.95rem; line-height: 1.35; }
+.at-seg { flex: none; }
+.at-seg button { min-width: 42px; padding: 6px 10px; font-weight: 700; }
+.at-c { flex: none; width: 52px; text-align: center; font-weight: 700; }
+.at-head .at-c { font-size: 0.72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-soft); font-weight: 600; }
+.at-s.at-2 { color: var(--ok, #1e8e5a); } .at-s.at-1 { color: #c98a00; } .at-s.at-0 { color: var(--bad, #c0392b); }
+.at-m { display: block; font-size: 0.8rem; margin-top: 2px; color: var(--ink-soft); }
+.at-m.warn { color: var(--bad, #c0392b); font-weight: 600; } .at-m.good { color: var(--ok, #1e8e5a); }
 
 </style>
 <script>
@@ -18106,13 +18118,14 @@ function screenMockResult(cnt, n, ok, weak) {
   document.getElementById("home").onclick = () => { homeTab = "test"; screenHome(); };
 }
 
-// QCM de préparation (21.11, idée du 19.11, « en plus du sujet de préparation ») : dans l'onglet Test, 10 questions
-// à choix sur les notions du test. Les mauvaises réponses proposées sont les erreurs typiques des générateurs
-// (q.traps) : quand l'élève en choisit une, on lui dit quelle erreur il vient de faire. Correction immédiate,
-// bilan par notion à la fin. Ce n'est pas une note ; les compétences sont mises à jour (juste = 1, faux = 0).
-
-const QCM_N = 10;
-const QCM_D = [1, 1, 2, 2, 2, 2, 3, 3, 2, 3];
+// Autoévaluation + test rapide (21.11) : reprise de la page « Autoévaluation » des champs d'évaluation de l'utilisateur.
+// 1. Grille « Je sais… » : une ligne par compétence du test (au plus 8), l'élève coche ✓ / ~ / ✗ (colonne Avant).
+// 2. Test rapide : une question à choix par compétence ; les mauvaises réponses sont les erreurs typiques des
+//    générateurs (q.traps), et l'app dit laquelle l'élève a faite.
+// 3. Grille finale : Avant et Résultat côte à côte ; « tu pensais savoir » → à revoir en priorité.
+// 4. Avant / Après : la grille est gardée (state.autotest) ; refaire le test remplit la colonne Après.
+// Ce n'est pas une note ; les compétences sont mises à jour (juste = 1, faux = 0).
+const AT_MAX = 8;
 
 // Écriture d'une valeur proposée : comme l'élève l'écrirait (entier, décimal, fraction, multiple de π, racine).
 function qcmFmt(v, spec, text) {
@@ -18166,50 +18179,80 @@ function qcmMake(id, d) {
   return null;
 }
 
-function qcmNew() {
-  const ids = shuffle(state.prep.ids.slice()), items = [];
-  for (let k = 0, guard = 0; items.length < QCM_N && guard < 60; guard++, k++) {
-    const id = ids[k % ids.length], it = qcmMake(id, QCM_D[items.length % QCM_D.length]) || qcmMake(id, 1);
-    if (it) items.push(it);
-    if (guard > 3 * ids.length && !items.length) break; // aucune notion compatible
+
+// Lignes de la grille : compétences des notions du test qui se prêtent au QCM, niveaux 1-2 d'abord, notions en alternance.
+function atRows(ids) {
+  const per = ids.map((id) => compsOf(id).map((c) => ({ cid: c.cid, id, lv: c.i + 1, label: c.label })));
+  const out = [];
+  for (const pass of [[1, 2], [3]]) for (let k = 0; k < 3 && out.length < AT_MAX; k++) for (const L of per) {
+    const c = L.filter((x) => pass.includes(x.lv))[k];
+    if (c && out.length < AT_MAX && !out.some((o) => o.cid === c.cid) && qcmMake(c.id, c.lv)) out.push(c);
   }
-  return items;
+  return out.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id) || a.lv - b.lv);
 }
+function atState() {
+  const key = state.prep.ids.join();
+  if (!state.autotest || state.autotest.key !== key) state.autotest = { key, rows: atRows(state.prep.ids), avant: {}, runs: [] };
+  return state.autotest;
+}
+const AT_SYM = { 2: "✓", 1: "~", 0: "✗" };
+const atCell = (v) => (v === undefined || v === null ? '<span class="muted">·</span>' : `<span class="at-s at-${v}">${AT_SYM[v]}</span>`);
 
 function screenQcm() {
   if (!Engine.prepActive(state)) return screenHome();
-  const items = qcmNew();
-  if (items.length < 3) {
-    h(`${brand}<div class="eyebrow">QCM de préparation</div><h2>Pas assez de questions à choix</h2>
-    <p class="muted">Les notions de ton test se prêtent mal au QCM. Fais plutôt le sujet de préparation ou une révision ciblée.</p>
+  const A = atState();
+  if (A.rows.length < 2) {
+    h(`${brand}<div class="eyebrow">Autoévaluation</div><h2>Pas de test rapide pour ces notions</h2>
+    <p class="muted">Les notions de ton test se prêtent mal aux questions à choix. Fais plutôt le sujet de préparation ou une révision ciblée.</p>
     <button class="btn-primary btn-big" id="back">Retour</button>`);
     document.getElementById("back").onclick = () => { homeTab = "test"; screenHome(); };
     return;
   }
-  const res = [];
+  if (A.runs.length) return atGrid();
+  const all = () => A.rows.every((r) => A.avant[r.cid] !== undefined);
+  h(`${brand}<div class="eyebrow">Je prépare mon test · étape 1 sur 2</div><h2>Autoévaluation</h2>
+  <p class="small muted">Pour chaque ligne, sois honnête : ✓ je sais faire, ~ à peu près, ✗ pas encore. Ensuite, un test rapide (une question par ligne) te dira si tu avais raison.</p>
+  <div class="card flat at-grid"><div class="at-row at-head"><span class="at-l">Je sais…</span><span class="at-c" style="width:auto">✓ oui · ~ à peu près · ✗ pas encore</span></div>${A.rows.map((r) => `<div class="at-row"><span class="at-l">${r.label}</span>
+    <div class="seg at-seg" data-cid="${r.cid}">${[2, 1, 0].map((v) => `<button type="button" data-v="${v}" aria-pressed="${A.avant[r.cid] === v}" aria-label="${["pas encore", "à peu près", "je sais faire"][v]}">${AT_SYM[v]}</button>`).join("")}</div></div>`).join("")}</div>
+  <p class="small muted" id="aterr"></p>
+  <button class="btn-primary btn-big" id="atgo">Commencer le test rapide (${A.rows.length} questions)</button>
+  <button class="btn-ghost" id="back">Retour</button>`);
+  app.querySelectorAll(".at-seg").forEach((g) => g.querySelectorAll("button").forEach((b) => (b.onclick = () => {
+    A.avant[g.dataset.cid] = +b.dataset.v; save(); g.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+  })));
+  document.getElementById("back").onclick = () => { homeTab = "test"; screenHome(); };
+  document.getElementById("atgo").onclick = () => {
+    if (!all()) { const n = A.rows.filter((r) => A.avant[r.cid] === undefined).length; document.getElementById("aterr").textContent = "Il te reste " + n + " ligne" + (n > 1 ? "s" : "") + " à cocher."; return; }
+    atTest();
+  };
+}
+
+// Test rapide : une question à choix par ligne de la grille.
+function atTest() {
+  const A = atState(), items = A.rows.map((r) => ({ row: r, it: qcmMake(r.id, r.lv) })).filter((x) => x.it), res = {};
   const show = (i) => {
-    if (i >= items.length) return qcmResult(items, res);
-    const it = items[i], q = it.q, pct = Math.round((i / items.length) * 100);
-    h(`${brand}<div class="eyebrow">✅ QCM de préparation · ${i + 1} sur ${items.length}<span class="pbar" aria-hidden="true"><i style="width:${pct}%"></i></span></div>
-    <div class="card pop"><div class="qmeta"><span class="chip">${nLabel(it.id)}</span><span class="dots" title="difficulté">${[1, 2, 3].map((k) => `<i class="${k <= it.d ? "on" : ""}"></i>`).join("")}</span></div>
+    if (i >= items.length) { A.runs.push({ date: day(), r: res }); A.runs = A.runs.slice(-6); Badges.check(state); save(); return atGrid(true); }
+    const { row, it } = items[i], q = it.q, pct = Math.round((i / items.length) * 100);
+    h(`${brand}<div class="eyebrow">${A.runs.length ? "Test rapide · après" : "Je prépare mon test · étape 2 sur 2"} · ${i + 1} sur ${items.length}<span class="pbar" aria-hidden="true"><i style="width:${pct}%"></i></span></div>
+    <div class="card pop"><div class="qmeta"><span class="chip">${row.label}</span></div>
     <div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
     <p class="small muted">Une seule réponse est juste. Calcule d'abord, puis choisis.</p>
     <div class="qcm-choices">${it.choices.map((c, k) => `<button type="button" class="qcm-c" data-k="${k}"><span class="qcm-l">${"ABCD"[k]}</span><span>\\(${c.f}\\)</span></button>`).join("")}</div>
     <div id="fb"></div></div>`);
-    const S = typeof sigOpen === "function" ? sigOpen({ ev: "q", code: q.code, d: it.d, kind: "qcm", fmt: "qcm" }) : null;
+    const S = typeof sigOpen === "function" ? sigOpen({ ev: "q", code: q.code, d: it.d, kind: "qcm", fmt: "autotest" }) : null;
     app.querySelectorAll(".qcm-c").forEach((b) => (b.onclick = () => {
       const c = it.choices[+b.dataset.k];
       app.querySelectorAll(".qcm-c").forEach((x) => { x.disabled = true; if (it.choices[+x.dataset.k].ok) x.classList.add("qcm-good"); });
       if (!c.ok) b.classList.add("qcm-bad");
-      res[i] = c.ok ? 1 : 0;
+      res[row.cid] = c.ok ? 1 : 0;
       if (S) { S.issue = c.ok ? "ok1" : "faux"; S.essais = 1; S.sec = sigSec(S); if (!c.ok) S.rep1 = c.f.slice(0, 20); }
-      Engine.recordComp(state, it.id, it.d, res[i]); save();
+      Engine.recordComp(state, row.id, it.d, res[row.cid]); save();
       if (typeof buzz === "function") buzz(c.ok);
       if (c.ok) burst();
       const fb = document.getElementById("fb");
       fb.innerHTML = `<div class="fb ${c.ok ? "ok" : "bad"} pop"><b>${c.ok ? "✓ Juste !" : "✗ Ce n'est pas ça."}</b>${c.ok ? "" : `<div class="diag">🔎 ${escT(c.m || "C'est une erreur fréquente.")}</div>`}
         <details class="solfull"${c.ok ? "" : " open"}><summary>La correction</summary><div class="sol">${q.sol}</div></details></div>
-        <div class="actions"><button class="btn-primary" id="nx">${i + 1 < items.length ? "Question suivante" : "Voir mon bilan"}</button></div>`;
+        <div class="actions"><button class="btn-primary" id="nx">${i + 1 < items.length ? "Question suivante" : "Voir ma grille"}</button></div>`;
       typeset(fb);
       document.getElementById("nx").onclick = () => show(i + 1);
       document.getElementById("nx").focus();
@@ -18218,21 +18261,40 @@ function screenQcm() {
   show(0);
 }
 
-function qcmResult(items, res) {
-  const n = items.length, ok = res.filter((x) => x === 1).length, by = {};
-  items.forEach((it, i) => (by[it.id] = by[it.id] || []).push(res[i]));
-  const good = Object.keys(by).filter((id) => by[id].every((x) => x === 1)), weak = Object.keys(by).filter((id) => by[id].some((x) => x !== 1));
-  state.qcm = { date: day(), ok, n, ids: state.prep.ids.slice() }; Badges.check(state); save();
-  h(`${brand}<div class="eyebrow">QCM de préparation · bilan</div><h2>${ok >= 0.8 * n ? "Très bien !" : ok >= 0.5 * n ? "Pas mal." : "Il reste du travail, et tu sais où."}</h2>
-  <div class="card stack"><p><b>${ok}</b> juste${ok > 1 ? "s" : ""} sur ${n}</p><p class="small muted">Ce n'est pas une note. Au vrai test, il faudra écrire tes calculs : le QCM sert à repérer tes erreurs.</p></div>
-  ${good.length ? `<div class="card flat"><h3>✓ Acquis</h3><ul>${good.map((id) => `<li>${nLabel(id)}</li>`).join("")}</ul></div>` : ""}
-  ${weak.length ? `<div class="card flat stack"><h3>À retravailler</h3><ul>${weak.map((id) => `<li>${nLabel(id)}</li>`).join("")}</ul><button class="btn-primary" id="rev">Réviser ces notions maintenant</button></div>` : ""}
-  <div class="row"><button id="again">Un autre QCM</button><button class="btn-ghost" id="home">Retour</button></div>`);
-  if (ok >= 0.8 * n) burst();
+// Grille finale : Avant (ce que je pensais), 1er test, Après (dernier test), et le message de chaque ligne.
+function atGrid(fresh) {
+  const A = atState(), first = A.runs[0], last = A.runs.length > 1 ? A.runs[A.runs.length - 1] : null, cur = (last || first).r;
+  const msg = (r) => {
+    const av = A.avant[r.cid], v = cur[r.cid];
+    if (v === undefined) return "";
+    if (v === 0 && av === 2) return '<span class="at-m warn">⚠️ Tu pensais savoir : à revoir en priorité</span>';
+    if (v === 0) return '<span class="at-m">À travailler</span>';
+    if (last && first.r[r.cid] === 0) return '<span class="at-m good">📈 Réussi cette fois</span>';
+    if (av === 0) return '<span class="at-m good">👍 Tu sais mieux que tu ne le crois</span>';
+    return "";
+  };
+  const weak = A.rows.filter((r) => cur[r.cid] === 0), ok = A.rows.filter((r) => cur[r.cid] === 1).length, n = A.rows.filter((r) => cur[r.cid] !== undefined).length;
+  const surprise = A.rows.filter((r) => cur[r.cid] === 0 && A.avant[r.cid] === 2).length;
+  h(`${brand}<div class="eyebrow">Autoévaluation · ${last ? "avant / après" : "ta grille"}</div><h2>${fresh ? (ok === n ? "Tout juste !" : ok >= n / 2 ? "Ta grille est remplie" : "Tu sais maintenant quoi réviser") : "Ta grille"}</h2>
+  <div class="card flat at-grid at-res"><div class="at-row at-head"><span class="at-l">Je sais…</span><span class="at-c">Avant</span><span class="at-c">${last ? "1er test" : "Test"}</span>${last ? '<span class="at-c">Après</span>' : ""}</div>
+  ${A.rows.map((r) => `<div class="at-row"><span class="at-l">${r.label}${msg(r)}</span><span class="at-c">${atCell(A.avant[r.cid])}</span><span class="at-c">${atCell(first.r[r.cid] === 1 ? 2 : first.r[r.cid] === 0 ? 0 : undefined)}</span>${last ? `<span class="at-c">${atCell(last.r[r.cid] === 1 ? 2 : last.r[r.cid] === 0 ? 0 : undefined)}</span>` : ""}</div>`).join("")}</div>
+  <div class="card stack"><p><b>${ok}</b> juste${ok > 1 ? "s" : ""} sur ${n}${surprise ? ` · <b>${surprise}</b> surprise${surprise > 1 ? "s" : ""} (tu pensais savoir)` : ""}</p>
+  <p class="small muted">Ce n'est pas une note. ${last ? "Compare tes colonnes : c'est ton progrès depuis le " + first.date.slice(8, 10) + "." + first.date.slice(5, 7) + "." : "Refais le test rapide dans quelques jours, juste avant le test : ta colonne « Après » se remplira."}</p></div>
+  ${weak.length ? `<div class="card flat stack"><h3>À revoir${surprise ? " (en priorité les ⚠️)" : ""}</h3>${[...new Set(weak.map((r) => r.id))].map((id) => `<div class="spread"><span class="small">${nLabel(id)}</span>${LESSONS[id] ? `<button type="button" class="btn-ghost small atles" data-id="${id}">📖 Leçon</button>` : ""}</div>`).join("")}
+    <button class="btn-primary" id="rev">Réviser ces compétences maintenant</button></div>` : ""}
+  <div class="row"><button id="again">Refaire le test rapide</button><button class="btn-ghost" id="home">Retour</button></div>
+  <button class="btn-ghost small" id="reset">Recommencer l'autoévaluation (nouvelle colonne Avant)</button>`);
+  if (fresh && ok === n) burst();
+  app.querySelectorAll(".atles").forEach((b) => (b.onclick = () => screenLesson(b.dataset.id, () => atGrid(), true)));
   const rv = document.getElementById("rev");
-  if (rv) rv.onclick = () => { session = { plan: weak.flatMap((id) => [id + "|2", id + "|3"]), i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), prep: true }; nextQuestion(); };
-  document.getElementById("again").onclick = screenQcm;
+  if (rv) rv.onclick = () => {
+    const pri = weak.filter((r) => A.avant[r.cid] === 2).concat(weak.filter((r) => A.avant[r.cid] !== 2));
+    session = { plan: pri.flatMap((r) => [r.id + "|" + r.lv, r.id + "|" + r.lv]), i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), prep: true };
+    nextQuestion();
+  };
+  document.getElementById("again").onclick = atTest;
   document.getElementById("home").onclick = () => { homeTab = "test"; screenHome(); };
+  document.getElementById("reset").onclick = () => { state.autotest = null; save(); screenQcm(); };
 }
 
 // Notions reprises au standard (formes variées, pas à pas, erreurs typiques) : réservoir du mode libre « au point » (18.11).
@@ -19237,7 +19299,8 @@ function screenHome() {
         <p class="small muted">${state.prep.ids.length} notion${state.prep.ids.length > 1 ? "s" : ""} : ${state.prep.ids.map((id) => NOTIONS.find((n) => n.id === id).label).join(" · ")}</p>
         ${prepProgramHtml()}
         <button class="btn-primary btn-big" id="prepgo">${PREP_TASK[prepKind(left)].ic} Aujourd'hui : ${PREP_TASK[prepKind(left)].label}</button>
-        <button id="qcm">✅ QCM de préparation (10 questions)</button>${state.qcm && state.qcm.ids && state.qcm.ids.join() === state.prep.ids.join() ? `<p class="small muted">Dernier QCM : ${state.qcm.ok} juste${state.qcm.ok > 1 ? "s" : ""} sur ${state.qcm.n}.</p>` : ""}
+        ${(() => { const A = state.autotest && state.autotest.key === state.prep.ids.join() ? state.autotest : null, R = A && A.runs.length ? A.runs[A.runs.length - 1].r : null, n = R ? Object.keys(R).length : 0, ok = R ? Object.values(R).filter((x) => x === 1).length : 0;
+          return `<button id="qcm">✅ ${A && A.runs.length ? "Ma grille d'autoévaluation" : "Autoévaluation et test rapide"}</button>${R ? `<p class="small muted">Dernier test rapide : ${ok} juste${ok > 1 ? "s" : ""} sur ${n}${A.runs.length > 1 ? " (colonne Après)" : ""}.</p>` : ""}`; })()}
         <button id="mock">📝 Sujet de préparation (avec corrigé)</button>${state.mock && state.mock.done && state.mock.ids.join() === state.prep.ids.join() ? `<p class="small muted">Dernier sujet de préparation : ${state.mock.done.n ? state.mock.done.juste + " question" + (state.mock.done.juste > 1 ? "s" : "") + " juste" + (state.mock.done.juste > 1 ? "s" : "") + " sur " + state.mock.done.n : "fait"}.</p>` : ""}
         <button class="btn-ghost" id="prepedit">Modifier le test</button></div>`
       : `<div class="card stack"><div class="eyebrow">Je prépare un test</div><h2>Un test approche ?</h2>
