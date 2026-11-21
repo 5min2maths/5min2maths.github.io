@@ -451,8 +451,6 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .tab.tour-hi { animation: tourpulse 1.2s ease-in-out infinite; border-radius: 12px; }
 @keyframes tourpulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(36, 87, 214, .0); } 50% { box-shadow: 0 0 0 6px rgba(36, 87, 214, .35); } }
 @media (prefers-reduced-motion: reduce) { .tab.tour-hi { animation: none; outline: 3px solid var(--blue); } }
-.eb-pal { display: block; font-size: 0.72rem; color: var(--ink-soft); margin-top: 2px; }
-.eb-pal .pbar { height: 4px; margin-top: 3px; max-width: 120px; }
 .resume-card { border: 2px solid var(--blue); }
 .tomorrow { margin-top: 2px; }
 .streak .tomorrow b { font-family: inherit; font-size: inherit; }
@@ -477,3 +475,10 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .pgap { align-self: center; color: var(--ink-soft); padding: 0 2px; }
 .tools2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .tools2 button { display: grid; gap: 2px; text-align: center; padding: 12px 8px; }
+/* Grades du Mathélo (21.11) */
+.eb-grade { display: grid; gap: 2px; margin-top: 4px; font-size: 0.8rem; }
+.eb-grade b { font-size: 0.9rem; }
+.eb-grade .pbar { height: 5px; margin-top: 1px; max-width: 140px; }
+.eb-next { font-size: 0.7rem; color: var(--ink-soft); }
+.grade-up { border: 2px solid var(--fluo, #e6ff3f); }
+.grade-ic { font-size: 2.2rem !important; }

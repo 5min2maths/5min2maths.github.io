@@ -466,8 +466,6 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .tab.tour-hi { animation: tourpulse 1.2s ease-in-out infinite; border-radius: 12px; }
 @keyframes tourpulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(36, 87, 214, .0); } 50% { box-shadow: 0 0 0 6px rgba(36, 87, 214, .35); } }
 @media (prefers-reduced-motion: reduce) { .tab.tour-hi { animation: none; outline: 3px solid var(--blue); } }
-.eb-pal { display: block; font-size: 0.72rem; color: var(--ink-soft); margin-top: 2px; }
-.eb-pal .pbar { height: 4px; margin-top: 3px; max-width: 120px; }
 .resume-card { border: 2px solid var(--blue); }
 .tomorrow { margin-top: 2px; }
 .streak .tomorrow b { font-family: inherit; font-size: inherit; }
@@ -492,6 +490,13 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .pgap { align-self: center; color: var(--ink-soft); padding: 0 2px; }
 .tools2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .tools2 button { display: grid; gap: 2px; text-align: center; padding: 12px 8px; }
+/* Grades du Mathélo (21.11) */
+.eb-grade { display: grid; gap: 2px; margin-top: 4px; font-size: 0.8rem; }
+.eb-grade b { font-size: 0.9rem; }
+.eb-grade .pbar { height: 5px; margin-top: 1px; max-width: 140px; }
+.eb-next { font-size: 0.7rem; color: var(--ink-soft); }
+.grade-up { border: 2px solid var(--fluo, #e6ff3f); }
+.grade-ic { font-size: 2.2rem !important; }
 
 </style>
 <script>
@@ -19405,6 +19410,16 @@ function eloBlock() {
   ${d ? `<div class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "▲ +" : "▼ "}${d} depuis hier</div>` : ""}</div>
   <div class="stack">${spark}</div></div>`;
 }
+// Grades du Mathélo (21.11, « l'histoire des paliers n'est pas claire, plutôt des grades ») : un grade tous les 75 points,
+// soit deux par année scolaire (le Mathélo de départ monte de 150 par année : 950 en 9e, 1250 en 11e, 1550 en 2e).
+const GRADES = [[0, "🌱", "Pousse"], [800, "✏️", "Apprenti"], [875, "📏", "Arpenteur"], [950, "🧮", "Calculateur"], [1025, "📐", "Bâtisseur"],
+  [1100, "🗺️", "Explorateur"], [1175, "🔦", "Enquêteur"], [1250, "🔭", "Chercheur"], [1325, "♟️", "Stratège"], [1400, "🦉", "Penseur"],
+  [1475, "🥇", "Expert"], [1550, "🎓", "Érudit"], [1625, "🏆", "Maître"], [1700, "💎", "Virtuose"], [1800, "👑", "Génie"], [1900, "🌟", "Légende"]];
+function gradeOf(r) {
+  let i = 0; while (i + 1 < GRADES.length && r >= GRADES[i + 1][0]) i++;
+  const [lo, ic, name] = GRADES[i], nx = GRADES[i + 1];
+  return { i, ic, name, lo, next: nx ? { at: nx[0], ic: nx[1], name: nx[2] } : null, pct: nx ? Math.round(((r - lo) / (nx[0] - lo)) * 100) : 100 };
+}
 // Bandeau Mathélo (14.11, demande de l'utilisateur : « on a envie de le voir monter ») : sur tous les cadres de l'accueil.
 function eloBanner() {
   const e = state.elo, prev = e.log.length > 1 ? e.log[e.log.length - 2][1] : null, d = prev === null ? 0 : e.r - prev;
@@ -19416,8 +19431,8 @@ function eloBanner() {
     spark = `<svg class="spark" viewBox="0 0 200 32" preserveAspectRatio="none"><path class="a" d="${line} L200,32 L0,32 Z"/><path class="l" d="${line}"/><circle cx="200" cy="${Y(pts[pts.length - 1]).toFixed(1)}" r="3"/></svg>`;
   }
   return `<button type="button" class="elo-band" id="eloband" aria-label="Mathélo ${e.r}, voir mes progrès">
-    <span class="eb-l" title="Palier ${Math.floor(e.r / 50)} : encore ${50 - (e.r % 50)} points pour le suivant"><span class="eyebrow">Mathélo${Engine.isProvisional(state) ? " · provisoire" : ""}</span><span class="eb-n"><b class="num">${e.r}</b>${d ? `<span class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "▲ +" : "▼ "}${d}</span>` : ""}</span>
-      <span class="eb-pal">Palier ${Math.floor(e.r / 50)} → ${Math.floor(e.r / 50) + 1} : encore ${50 - (e.r % 50)}<span class="pbar"><i style="width:${(e.r % 50) * 2}%"></i></span></span></span>
+    <span class="eb-l"><span class="eyebrow">Mathélo${Engine.isProvisional(state) ? " · provisoire" : ""}</span><span class="eb-n"><b class="num">${e.r}</b>${d ? `<span class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "▲ +" : "▼ "}${d}</span>` : ""}</span>
+      ${(() => { const g = gradeOf(e.r); return `<span class="eb-grade"><b>${g.ic} ${g.name}</b>${g.next ? `<span class="pbar"><i style="width:${g.pct}%"></i></span><span class="eb-next">${g.next.ic} ${g.next.name} dans ${g.next.at - e.r} pts</span>` : ""}</span>`; })()}</span>
     <span class="eb-r">${spark || '<span class="small muted">Ta courbe apparaît après ta 2e séance.</span>'}</span></button>`;
 }
 function themeBars(lv) {
@@ -20751,6 +20766,7 @@ function screenSummary() {
   Badges.check(state); save();
   const nb = newBadgesCard();
   const n = session.answered, sc = session.score, d = state.elo.r - session.elo0;
+  const g0 = gradeOf(session.elo0), g1 = gradeOf(state.elo.r), newGrade = g1.i > g0.i ? `<div class="card stack grade-up"><div class="eyebrow">Nouveau grade !</div><div class="ic-row"><span class="ic grade-ic">${g1.ic}</span><div><h3>Tu es maintenant ${g1.name}</h3><div class="small muted">${g1.next ? "Prochain grade : " + g1.next.ic + " " + g1.next.name + ", à " + g1.next.at + "." : "Le plus haut grade : bravo !"}</div></div></div></div>` : "";
   h(`${brand}<h2>${sc >= n * 0.8 ? "Excellente séance !" : sc >= n * 0.5 ? "Bonne séance." : "Séance faite : c'est en pratiquant qu'on progresse."}</h2>
   <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span>${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ta série passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${FORMATS[Engine.tomorrowFormat(state)].label}</b></div></div></div>
   ${summaryByNotion()}
@@ -20758,14 +20774,14 @@ function screenSummary() {
   <div class="spread"><span>Mathélo</span><b>${state.elo.r} <span class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</span></b></div>
 </div>
   ${session.ctest ? (() => { const a = compNote((state.comps || {})[session.ctest.cid]), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? "La note apparaît après 3 réponses sur cette compétence." : b === null ? "Première note pour cette compétence." : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". Elle remontera avec la pratique." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
-  ${nb}
+  ${newGrade}${nb}
   ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${state.carnet.length} à effacer</b></div><button id="carnetagain">${session.carnet ? "Continuer à effacer" : "📕 Effacer mes erreurs maintenant"}</button></div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
   ${returnCard()}
   ${typeof Curieux !== "undefined" && Curieux.available(state).length ? '<button id="curbonus">🤔 Bonus : une question curieuse</button>' : ""}
   <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)", "app")}</div>
   <button class="btn-primary btn-big" id="home">Retour à l'accueil</button>`);
   bindComment(app, "app"); bindInstall(screenHome);
-  if (nb) setTimeout(burst, 250);
+  if (nb || newGrade) setTimeout(burst, 250);
   document.getElementById("home").onclick = screenHome;
   if (document.getElementById("curbonus")) document.getElementById("curbonus").onclick = () => screenCurious(Curieux.pick(state), screenHome, "bilan");
   if (document.getElementById("carnetagain")) document.getElementById("carnetagain").onclick = () => startCarnet();

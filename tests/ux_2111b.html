@@ -24,7 +24,8 @@ ok(/Score/.test(app.textContent)&&!state.resume,"1 bilan : plus de reprise");
 ok(/Demain : /.test(app.textContent)&&state.tomorrow&&state.tomorrow.date===addDays(day(),1),"5 format de demain annoncé");
 const other=Object.keys(FORMATS).find(f=>f!==state.today.f);state.tomorrow={date:day(),f:other};delete state.today;ok(Engine.todayFormat(state)===other,"5 promesse tenue le lendemain");
 // 3. paliers
-state.elo.r=1287;homeTab="today";screenHome();ok(/Palier 25 → 26 : encore 13/.test(app.textContent),"3 palier : "+(app.querySelector(".eb-pal")||{}).textContent);
+state.elo.r=1287;homeTab="today";screenHome();ok(/Chercheur/.test(app.textContent)&&/Stratège dans 38 pts/.test(app.textContent),"3 grade : "+(app.querySelector(".eb-grade")||{}).textContent);
+ok(gradeOf(950).name==="Calculateur"&&gradeOf(1250).name==="Chercheur"&&gradeOf(1550).name==="Érudit"&&gradeOf(2400).next===null,"3 grades de départ par classe");
 // 4. bilan de la semaine (simulé un lundi)
 const dd=new Date(day()+"T12:00:00"),dow=(dd.getDay()+6)%7,mon=addDays(day(),-dow);
 state.history=[{date:addDays(mon,-6),n:5,score:4},{date:addDays(mon,-4),n:3,score:2},{date:addDays(mon,-2),n:4,score:4}];state.elo.log=[[addDays(mon,-8),1200],[addDays(mon,-2),1240]];delete state.recapSeen;
