@@ -21,7 +21,7 @@ for(let k=0;k<n+2&&state.placement;k++){document.getElementById("idk").click();d
 ok(state.placed&&!state.placement,"1 fin : placed, plus de placement");
 // 2. série : record et rappel
 state.streak={count:4,last:addDays(day(),-1),best:4};homeTab="today";screenHome();
-ok(/Une séance aujourd'hui et tu passes à 5 : nouveau record/.test(app.textContent),"2 rappel de série");
+ok(/tu passes à 5 \(record/.test(app.textContent),"2 rappel de série");
 Engine.finishDay(state,1,1);ok(state.streak.count===5&&state.streak.best===5,"2 record "+JSON.stringify(state.streak));
 screenHome();ok(!app.querySelector(".streak-nudge"),"2 plus de rappel une fois la séance faite");
 // 3. bouton plus facile (niveau 2, échec, sans guide ni étapes)
@@ -42,6 +42,19 @@ const kp=keypadHtml({kind:"value",value:0.5,final:true});ok(/fraction/.test(kp)&
 ok(/puissance/.test(keypadHtml({kind:"expr",expr:"x^2"})),"5 légende puissance");
 // 6. sauvegarde : record conservé
 ok(Backup.unpack(JSON.parse(JSON.stringify(Backup.pack(state)))).streak.best===5,"6 record dans le code de sauvegarde");
+// 7. interface (propositions du 21.11) : aperçu masqué, sauts groupés, clavier replié, un seul bouton principal, progression
+session={fmt:"auto",plan:["prio|1","fracadd|1"],i:0,score:0,answered:0,start:Date.now(),elo0:state.elo.r,ids:new Set(),pinged:true};nextQuestion();
+ok(document.getElementById("prev").innerHTML==="","7 aperçu vide au départ");
+ok(!!app.querySelector(".skips #easy")&&!app.querySelector(".qmeta #easy"),"7 « Trop facile » sorti de l'en-tête");
+ok(!!app.querySelector(".eyebrow .pbar"),"7 barre de progression de séance");
+document.getElementById("idk").click();
+ok(document.getElementById("kp").style.display==="none","7 clavier replié");
+ok(app.querySelectorAll("#fb .btn-primary").length===1,"7 un seul bouton principal ("+app.querySelectorAll("#fb .btn-primary").length+")");
+ok(!!app.querySelector(".vote-compact"),"7 avis compact");
+// 8. réglages : taille du texte et vibrations
+screenSettings();app.querySelector('#fs button[data-v="1.25"]').click();ok(document.documentElement.style.fontSize==="20px"&&UI.fs===1.25,"8 taille du texte "+document.documentElement.style.fontSize);
+app.querySelector('#vib button[data-v="0"]').click();ok(UI.vib===false&&JSON.parse(localStorage.getItem("m2m-ui")).vib===false,"8 vibrations désactivées");
+app.querySelector('#fs button[data-v="1"]').click();
 }catch(e){fails.push("EXC "+e.message+" "+e.stack)}
 document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC\n"+fails.join("\n"):"OK")+"</pre>");
 </script>

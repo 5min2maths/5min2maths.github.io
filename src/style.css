@@ -208,7 +208,8 @@ details.lesson { border: 1px dashed var(--line); border-radius: 10px; padding: 6
 details.lesson summary { cursor: pointer; color: var(--blue); font-weight: 700; padding: 4px 0; }
 details.lesson[open] { background: var(--paper); }
 
-.qmeta .easy { margin-left: auto; padding: 4px 10px; }
+.skips { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; }
+.skips .easy { margin-left: auto; }
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 50; max-width: calc(100% - 32px);
   background: var(--ink, #1d3f8f); color: #fff; padding: 10px 16px; border-radius: 10px; font-size: .95rem; box-shadow: 0 6px 18px rgba(0,0,0,.2); }
 
@@ -409,3 +410,11 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .sum-line > span { font-size: 1.2rem; line-height: 1.4; }
 .keypad button { position: relative; }
 .keypad .k-sub { display: block; font-size: .58rem; line-height: 1; opacity: .7; font-family: system-ui, sans-serif; letter-spacing: 0; margin-top: 2px; }
+.preview:empty { display: none; }
+.card.streak { flex-direction: row; align-items: center; justify-content: flex-start; text-align: left; gap: 12px; }
+.card.streak .flame { margin: 0; }
+.vote-compact { font-size: 0.85rem; opacity: 0.85; }
+.vote-compact button { padding: 2px 8px; min-height: 0; }
+details.cmt > summary { font-size: 0.85rem; }
+.streak-nudge { display: flex; gap: 8px; align-items: center; padding: 8px 12px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); }
+.streak-nudge > span:first-child { font-size: 1.2rem; }
