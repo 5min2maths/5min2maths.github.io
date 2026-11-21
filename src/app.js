@@ -280,8 +280,8 @@ function screenHome() {
         <p class="small muted">${state.prep.ids.length} notion${state.prep.ids.length > 1 ? "s" : ""} : ${state.prep.ids.map((id) => NOTIONS.find((n) => n.id === id).label).join(" · ")}</p>
         ${(() => { const A = state.autotest && state.autotest.key === state.prep.ids.join() ? state.autotest : null, R = A && A.runs.length ? A.runs[A.runs.length - 1].r : null, n = R ? Object.keys(R).length : 0, ok = R ? Object.values(R).filter((x) => x === 1).length : 0;
           return `<button id="qcm" class="btn-primary btn-big">✅ ${A && A.runs.length ? "Ma grille d'autoévaluation" : "Autoévaluation et test rapide"}</button>${R ? `<p class="small muted">Dernier test rapide : ${ok} juste${ok > 1 ? "s" : ""} sur ${n}${A.runs.length > 1 ? " (colonne Après)" : ""}.</p>` : ""}`; })()}
-        ${prepProgramHtml()}
         <button class="btn-primary btn-big" id="prepgo">${PREP_TASK[prepKind(left)].ic} Aujourd'hui : ${PREP_TASK[prepKind(left)].label}</button>
+        ${prepProgramHtml()}
         <button id="mock" class="btn-primary btn-big">📝 Sujet de préparation (avec corrigé)</button>${state.mock && state.mock.done && state.mock.ids.join() === state.prep.ids.join() ? `<p class="small muted">Dernier sujet de préparation : ${state.mock.done.n ? state.mock.done.juste + " question" + (state.mock.done.juste > 1 ? "s" : "") + " juste" + (state.mock.done.juste > 1 ? "s" : "") + " sur " + state.mock.done.n : "fait"}.</p>` : ""}
         <button class="btn-ghost" id="prepedit">Modifier le test</button></div>`
       : `<div class="card stack"><div class="eyebrow">Je prépare un test</div><h2>Un test approche ?</h2>

@@ -442,3 +442,5 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .at-seg button[data-v="1"][aria-pressed="true"] { background: #e08a00; border-color: #e08a00; color: #fff; }
 .at-seg button[data-v="0"][aria-pressed="true"] { background: var(--bad, #c0392b); border-color: var(--bad, #c0392b); color: #fff; }
 @media (prefers-color-scheme: dark) { .at-seg button[aria-pressed="true"] { color: #10162a; } }
+/* Programme du test en italique, pour le distinguer des boutons (21.11) */
+.prep-days li { font-style: italic; }
