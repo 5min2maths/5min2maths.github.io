@@ -52,7 +52,9 @@ def pc(a, b):
 
 
 def analyser(lignes):
-    q = [l for l in lignes if l.get("type") == "q"]
+    # Questions curieuses (21.11) : genre « curieux », code cur-<clé>-<graine> ; à part (pas de niveau, pari en plus).
+    cur = [l for l in lignes if l.get("type") == "q" and (l.get("genre") == "curieux" or str(l.get("code", "")).startswith("cur-"))]
+    q = [l for l in lignes if l.get("type") == "q" and l not in cur]
     lec = [l for l in lignes if l.get("type") == "lecon"]
     groupes = defaultdict(list)
     for l in q:
@@ -111,8 +113,28 @@ def analyser(lignes):
             alertes.append((4, "leçon " + notion, f"lue en {round(med)} s en médiane — pas lue ?", ["lecon-" + notion]))
         if len(act) >= MIN_N and passe >= 60:
             alertes.append((4, "leçon " + notion, f"{passe} % passent les défis", ["lecon-" + notion]))
+    cgr = defaultdict(list)
+    for l in cur:
+        cgr[str(l["code"]).split("-")[1] if str(l["code"]).count("-") >= 2 else "?"].append(l)
+    cstats = []
+    for cle, ls in cgr.items():
+        n, apps = len(ls), len({l["appareil"] for l in ls})
+        paris = [l for l in ls if re.search("[Pp]", str(l["aide"]))]
+        rep = [l for l in ls if l["issue"] in ("ok1", "ok2", "faux")]
+        secs = [float(l["secondes"]) for l in ls if l["issue"] != "quitte" and l["secondes"] != ""]
+        s = dict(cle=cle, n=n, apps=apps, pari=pc(sum("P" in str(l["aide"]) for l in paris), len(paris)),
+                 calc=pc(sum(l["issue"] in ("ok1", "ok2") for l in rep), len(rep)), vu=pc(sum(l["issue"] == "idk" for l in ls), n),
+                 quitte=pc(sum(l["issue"] == "quitte" for l in ls), n), sansp=pc(n - len(paris), n), sec=statistics.median(secs) if secs else None,
+                 ex=[(l["code"], str(l["1re réponse fausse"]).lstrip("'")) for l in ls if l["1re réponse fausse"] != ""][:3])
+        cstats.append(s)
+        if n < MIN_N or apps < MIN_APP:
+            continue
+        if s["sansp"] >= 40:
+            alertes.append((2, "curieuse " + cle, f"{s['sansp']} % repartent avant de parier — énoncé trop long ?", [ls[0]["code"]]))
+        if len(rep) >= MIN_N and s["calc"] <= 25:
+            alertes.append((1, "curieuse " + cle, f"{100 - s['calc']} % ratent le calcul — trop dur ou réponse mal lue ?", [c for c, _ in s["ex"]] or [ls[0]["code"]], s["ex"]))
     alertes.sort(key=lambda a: a[0])
-    return stats, lstats, alertes
+    return stats, lstats, alertes, cstats
 
 
 def lien(code):
@@ -128,11 +150,12 @@ def main():
     except Exception as e:
         print(f"Signaux muets : indisponibles ({e})")
         return
-    stats, lstats, alertes = analyser(lignes)
+    stats, lstats, alertes, cstats = analyser(lignes)
     nq = sum(s["n"] for s in stats)
     if "--point" in a:
         print(f"Signaux muets ({jours} j) : {nq} questions jouées, {sum(s['n'] for s in lstats)} leçons, "
-              f"{len({l['appareil'] for l in lignes})} appareils · {len(alertes) or 'aucune'} alerte{'s' if len(alertes) > 1 else ''}")
+              f"{len({l['appareil'] for l in lignes})} appareils · {len(alertes) or 'aucune'} alerte{'s' if len(alertes) > 1 else ''}"
+              + (f" · questions curieuses : {sum(c['n'] for c in cstats)} jouées, pari juste {pc(sum(c['pari'] * c['n'] for c in cstats), 100 * sum(c['n'] for c in cstats))} %" if cstats else ""))
         for al in alertes[:5]:
             ex = "" if len(al) < 5 or not al[4] else " · ex. " + ", ".join(f"« {r} »" for _, r in al[4][:2])
             print(f"    {al[1]} : {al[2]}{ex} → {lien(al[3][0])}")
@@ -153,6 +176,10 @@ def main():
     for s in sorted(stats, key=lambda s: (-s["n"])):
         print(f"  {s['notion']:<12} N{s['niv']}  {s['n']:>4} · {s['apps']:>3} app. · {s['ok1']:>3} % · {s['echec']:>3} % · {s['quitte']:>3} % · "
               f"{s['illis']} · {('%d s' % s['sec']) if s['sec'] else '—':>5} · {s['aide']} %")
+    print("\nQUESTIONS CURIEUSES : passages · appareils · pari juste · calcul juste · réponse affichée · parties sans parier · quittées · durée médiane")
+    for s in sorted(cstats, key=lambda s: -s["n"]):
+        print(f"  {s['cle']:<12} {s['n']:>4} · {s['apps']:>3} app. · {s['pari']:>3} % · {s['calc']:>3} % · {s['vu']:>3} % · {s['sansp']:>3} % · {s['quitte']:>3} % · "
+              f"{('%d s' % s['sec']) if s['sec'] else '—':>5}")
     print("\nLEÇONS : vues · appareils · durée médiane · devine juste · défis passés · quittées")
     for s in sorted(lstats, key=lambda s: -s["n"]):
         print(f"  {s['notion']:<12} {s['n']:>4} · {s['apps']:>3} app. · {('%d s' % s['sec']) if s['sec'] else '—':>5} · {s['devine']} % · {s['passe']} % · {s['quitte']} %")

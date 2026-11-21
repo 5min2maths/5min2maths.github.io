@@ -293,7 +293,7 @@ function screenHome() {
   on("other", () => { Engine.otherFormat(state); save(); screenHome(); });
   if (homeTab === "today") bindNowCard();
   on("wp", () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); });
-  on("curgo", () => screenCurious(Curieux.pick(state), () => { homeTab = "prob"; screenHome(); }));
+  on("curgo", () => screenCurious(Curieux.pick(state), () => { homeTab = "prob"; screenHome(); }, "onglet"));
   on("comps", screenComps);
   on("prep", screenPrep); on("prepedit", screenPrep);
   if (typeof screenMock === "function") on("mock", screenMock);
@@ -1287,7 +1287,9 @@ function curiousCard() {
 // ---------------- Question curieuse (21.11) ----------------
 // Les maths cachées dans une situation : 1. Ton pari (intuition), 2. On vérifie (calcul), 3. Ce que tu as utilisé.
 // Facultatif : ni Mathélo, ni série, ni carnet d'erreurs. back : écran de retour.
-function screenCurious(q, back) {
+// Signaux muets (21.11) : une ligne « q » par question curieuse, genre « curieux », code cur-… ; aide : P pari juste,
+// p pari faux, s réponse affichée ; issue ok1 / ok2 / faux / idk / quitte. Rien n'est envoyé en consultation par lien.
+function screenCurious(q, back, from = "") {
   if (!q) { toast("Pas encore de question curieuse pour toi : elles arrivent avec les notions vues en classe."); return back(); }
   if (state) { state.curSeen = [...(state.curSeen || []).filter((k) => k !== q.key), q.key].slice(-20); save(); }
   const F = CUR_FAM[q.fam] || { label: "Question curieuse", ic: "🤔" }, co = !state || state.profile.grade <= 11;
@@ -1306,11 +1308,13 @@ function screenCurious(q, back) {
   <button class="btn-primary btn-big" id="cnext" hidden>Une autre question curieuse</button>
   <button class="btn-ghost" id="cback">Retour</button>`);
   pageQ = q.code;
+  const S = from ? sigOpen({ ev: "q", code: q.code, d: 0, kind: "curieux", fmt: from }) : null;
   const $ = (x) => document.getElementById(x), inp = $("cans"), prev = $("cprev");
   const show = (el) => { el.hidden = false; el.classList.add("pop"); typeset(el); setTimeout(() => el.scrollIntoView && el.scrollIntoView({ behavior: "smooth", block: "start" }), 60); };
   let betOk = null, tries = 0;
   app.querySelectorAll("#cbet button").forEach((b) => (b.onclick = () => {
     betOk = +b.dataset.i === q.bet.good;
+    if (S) sigAide(S, betOk ? "P" : "p");
     app.querySelectorAll("#cbet button").forEach((x) => (x.disabled = true));
     b.setAttribute("aria-pressed", "true");
     $("cbfb").innerHTML = `<div class="small muted">Pari noté. Vérifions par le calcul !</div>`;
@@ -1326,7 +1330,8 @@ function screenCurious(q, back) {
     if (x >= lo / 2 && x <= hi * 2) return { status: "close", message: "Le bon ordre de grandeur ! Vérifie tes calculs pour t'approcher encore." };
     return { status: "wrong" };
   };
-  const finish = (calcOk) => {
+  const finish = (calcOk, idk) => {
+    if (S) { S.issue = calcOk ? (tries === 0 ? "ok1" : "ok2") : idk && tries === 0 ? "idk" : "faux"; S.essais = tries + (calcOk ? 1 : 0); S.sec = sigSec(S); if (idk) sigAide(S, "s"); }
     inp.disabled = true; ["kp", "cok", "cidk"].forEach((x) => $(x) && $(x).remove()); prev.remove();
     app.querySelectorAll("#cbet button").forEach((x) => { if (+x.dataset.i === q.bet.good) x.classList.add("act-ok-btn"); else if (x.getAttribute("aria-pressed") === "true") x.classList.add("act-wrong"); });
     const val = (q.calc.range ? "environ " : "") + String(+(+q.calc.value).toFixed(q.calc.round ? Math.max(0, -Math.floor(Math.log10(q.calc.round))) : 4)).replace(/^\d+/, (i) => i.replace(/\B(?=(\d{3})+(?!\d))/g, "'")).replace(".", ",");
@@ -1338,14 +1343,15 @@ function screenCurious(q, back) {
     const v = inp.value.trim(); if (!v) return;
     const r = q.calc.range ? rangeCheck(v) : checkAnswer(spec, v);
     if (r.status === "correct") return finish(true);
-    if (r.status === "invalid" || r.status === "form") { $("cfb").innerHTML = `<div class="fb hint pop">${escT(r.message || "Écris un nombre.")}</div>`; return; }
+    if (r.status === "invalid" || r.status === "form") { if (S) S.illis = (S.illis || 0) + 1; $("cfb").innerHTML = `<div class="fb hint pop">${escT(r.message || "Écris un nombre.")}</div>`; return; }
+    if (S && !S.rep1) S.rep1 = sigRep(v);
     tries++;
     if (tries >= 2) return finish(false);
     $("cfb").innerHTML = `<div class="fb hint pop">${r.status === "close" ? escT(r.message || "Presque !") : "Pas tout à fait. Encore un essai ?"}</div>`;
   };
   $("cok").onclick = go; inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
-  $("cidk").onclick = () => finish(false);
-  $("cnext").onclick = () => screenCurious(Curieux.pick(state), back);
+  $("cidk").onclick = () => finish(false, true);
+  $("cnext").onclick = () => screenCurious(Curieux.pick(state), back, from);
   $("cback").onclick = back;
 }
 
@@ -1370,7 +1376,7 @@ function screenSummary() {
   bindComment(app, "app");
   if (nb) setTimeout(burst, 250);
   document.getElementById("home").onclick = screenHome;
-  if (document.getElementById("curbonus")) document.getElementById("curbonus").onclick = () => screenCurious(Curieux.pick(state), screenHome);
+  if (document.getElementById("curbonus")) document.getElementById("curbonus").onclick = () => screenCurious(Curieux.pick(state), screenHome, "bilan");
   if (document.getElementById("carnetagain")) document.getElementById("carnetagain").onclick = () => startCarnet();
   if (document.getElementById("backcomps")) document.getElementById("backcomps").onclick = screenComps;
 }
