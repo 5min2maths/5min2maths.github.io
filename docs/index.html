@@ -430,6 +430,16 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .card.streak .flame { margin: 0; }
 .streak-nudge { display: flex; gap: 8px; align-items: center; padding: 8px 12px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); }
 .streak-nudge > span:first-child { font-size: 1.2rem; }
+/* QCM de préparation (21.11) */
+.qcm-choices { display: grid; gap: 8px; margin-top: 8px; }
+.qcm-c { display: flex; align-items: center; gap: 12px; text-align: left; justify-content: flex-start; padding: 10px 14px; min-height: 52px; }
+.qcm-l { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--paper); border: 1px solid var(--line); font-weight: 700; flex: none; }
+.qcm-c.qcm-good { border-color: var(--ok, #1e8e5a); background: color-mix(in srgb, var(--ok, #1e8e5a) 14%, var(--card)); opacity: 1; }
+.qcm-c.qcm-bad { border-color: var(--bad, #c0392b); background: color-mix(in srgb, var(--bad, #c0392b) 12%, var(--card)); opacity: 1; }
+a.btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink); padding: 10px 16px; flex: 1; text-align: center; }
+a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 700; }
+.ic-row { display: flex; flex-wrap: nowrap; gap: 12px; align-items: center; }
+.ic-row .ic { font-size: 1.6rem; flex: none; }
 
 </style>
 <script>
@@ -18096,6 +18106,135 @@ function screenMockResult(cnt, n, ok, weak) {
   document.getElementById("home").onclick = () => { homeTab = "test"; screenHome(); };
 }
 
+// QCM de préparation (21.11, idée du 19.11, « en plus du sujet de préparation ») : dans l'onglet Test, 10 questions
+// à choix sur les notions du test. Les mauvaises réponses proposées sont les erreurs typiques des générateurs
+// (q.traps) : quand l'élève en choisit une, on lui dit quelle erreur il vient de faire. Correction immédiate,
+// bilan par notion à la fin. Ce n'est pas une note ; les compétences sont mises à jour (juste = 1, faux = 0).
+
+const QCM_N = 10;
+const QCM_D = [1, 1, 2, 2, 2, 2, 3, 3, 2, 3];
+
+// Écriture d'une valeur proposée : comme l'élève l'écrirait (entier, décimal, fraction, multiple de π, racine).
+function qcmFmt(v, spec, text) {
+  const thou = (n) => { const s = String(Math.abs(n)); return (n < 0 ? "-" : "") + (s.length > 4 ? s.replace(/\B(?=(\d{3})+(?!\d))/g, "'") : s); };
+  const ratio = (x, maxD = 60) => { for (let d = 1; d <= maxD; d++) { const n = Math.round(x * d); if (Math.abs(n / d - x) < 1e-9) return [n, d]; } return null; };
+  const fr = ([n, d]) => (d === 1 ? thou(n) : (n < 0 ? "-" : "") + "\\frac{" + Math.abs(n) + "}{" + d + "}");
+  // Notation scientifique exigée : a · 10^n avec 1 ≤ a < 10.
+  if (spec.sci && v !== 0) { const e = Math.floor(Math.log10(Math.abs(v)) + 1e-12), a = +(v / 10 ** e).toPrecision(10); return (Math.abs(v) >= 1 && Math.abs(v) < 10) ? String(+v.toPrecision(10)).replace(".", "{,}") : String(a).replace(".", "{,}") + " \\cdot 10^{" + e + "}"; }
+  if (Number.isInteger(v) || Math.abs(v - Math.round(v)) < 1e-9) return thou(Math.round(v));
+  if (spec.round) { const k = Math.max(0, Math.round(-Math.log10(spec.round))); return String((+v.toFixed(k))).replace(".", "{,}"); }
+  const wantFrac = /sous forme (de|d'une) fraction|fraction irréductible|en fraction/i.test(text || "");
+  const q = ratio(v);
+  const term = q && ((d) => { while (d % 2 === 0) d /= 2; while (d % 5 === 0) d /= 5; return d === 1; })(q[1]);
+  if (q && (wantFrac || !term)) return fr(q);
+  if (term) return String(+v.toFixed(6)).replace(".", "{,}");
+  const p = ratio(v / Math.PI, 12);
+  if (p) return (p[0] === 1 && p[1] === 1 ? "" : p[1] === 1 ? thou(p[0]) : fr(p)) + "\\pi";
+  // a√b (b sans facteur carré), écrit \frac{a√b}{c} quand il y a un dénominateur.
+  const sqf = (n) => { for (let k = 2; k * k <= n; k++) if (n % (k * k) === 0) return false; return true; };
+  for (let b = 2; b <= 300; b++) {
+    if (!sqf(b)) continue;
+    const a = ratio(v / Math.sqrt(b), 24); if (!a || Math.abs(a[0]) > 200) continue;
+    const [n, d] = a, sg = n < 0 ? "-" : "", num = (Math.abs(n) === 1 ? "" : Math.abs(n)) + "\\sqrt{" + b + "}";
+    return sg + (d === 1 ? num : "\\frac{" + num + "}{" + d + "}");
+  }
+  return "\\approx " + String(+v.toFixed(2)).replace(".", "{,}");
+}
+
+// Un piège s'écrit sous la même forme que la bonne réponse (commentaire de relecture du 21.11 : « 3√34/10 » à côté
+// de « 1,2 » se repère sans calculer) : décimal arrondi au centième si la réponse est décimale, fraction si elle est une fraction.
+function qcmLike(v, good, q) {
+  const f = qcmFmt(v, q.spec, q.q), plain = /^-?[\d']+(\{,\}\d+)?$/;
+  if (plain.test(good) && !plain.test(f)) return String(+v.toFixed(2)).replace(".", "{,}");
+  if (/\\frac/.test(good) && !/sqrt|pi/.test(good) && plain.test(f) && !Number.isInteger(v)) {
+    for (let d = 2; d <= 60; d++) { const n = Math.round(v * d); if (Math.abs(n / d - v) < 1e-9) return (n < 0 ? "-" : "") + "\\frac{" + Math.abs(n) + "}{" + d + "}"; }
+  }
+  return f;
+}
+
+// Une question QCM : la question du générateur, la bonne valeur et 2 ou 3 erreurs typiques, toutes distinctes à l'écrit.
+function qcmMake(id, d) {
+  for (let t = 0; t < 30; t++) {
+    let q; try { q = Engine.build(id, d, 1 + Math.floor(Math.random() * 46655)); q = Engine.finalize(state, id, q); } catch (e) { continue; }
+    if (!q || q.parts || !q.spec || q.spec.kind !== "value" || !isFinite(q.spec.value)) continue;
+    const good = qcmFmt(q.spec.value, q.spec, q.q), seen = new Set([good]), wrong = [];
+    for (const tr of q.traps || []) { if (!isFinite(tr.v) || (Math.abs(tr.v) < 1e-12 && q.spec.value !== 0)) continue; const f = qcmLike(tr.v, good, q); if (seen.has(f)) continue; seen.add(f); wrong.push({ f, m: tr.m }); if (wrong.length === 3) break; }
+    if (wrong.length < 2) continue;
+    const choices = shuffle([{ f: good, ok: true }, ...wrong]);
+    return { id, d, q, choices };
+  }
+  return null;
+}
+
+function qcmNew() {
+  const ids = shuffle(state.prep.ids.slice()), items = [];
+  for (let k = 0, guard = 0; items.length < QCM_N && guard < 60; guard++, k++) {
+    const id = ids[k % ids.length], it = qcmMake(id, QCM_D[items.length % QCM_D.length]) || qcmMake(id, 1);
+    if (it) items.push(it);
+    if (guard > 3 * ids.length && !items.length) break; // aucune notion compatible
+  }
+  return items;
+}
+
+function screenQcm() {
+  if (!Engine.prepActive(state)) return screenHome();
+  const items = qcmNew();
+  if (items.length < 3) {
+    h(`${brand}<div class="eyebrow">QCM de préparation</div><h2>Pas assez de questions à choix</h2>
+    <p class="muted">Les notions de ton test se prêtent mal au QCM. Fais plutôt le sujet de préparation ou une révision ciblée.</p>
+    <button class="btn-primary btn-big" id="back">Retour</button>`);
+    document.getElementById("back").onclick = () => { homeTab = "test"; screenHome(); };
+    return;
+  }
+  const res = [];
+  const show = (i) => {
+    if (i >= items.length) return qcmResult(items, res);
+    const it = items[i], q = it.q, pct = Math.round((i / items.length) * 100);
+    h(`${brand}<div class="eyebrow">✅ QCM de préparation · ${i + 1} sur ${items.length}<span class="pbar" aria-hidden="true"><i style="width:${pct}%"></i></span></div>
+    <div class="card pop"><div class="qmeta"><span class="chip">${nLabel(it.id)}</span><span class="dots" title="difficulté">${[1, 2, 3].map((k) => `<i class="${k <= it.d ? "on" : ""}"></i>`).join("")}</span></div>
+    <div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
+    <p class="small muted">Une seule réponse est juste. Calcule d'abord, puis choisis.</p>
+    <div class="qcm-choices">${it.choices.map((c, k) => `<button type="button" class="qcm-c" data-k="${k}"><span class="qcm-l">${"ABCD"[k]}</span><span>\\(${c.f}\\)</span></button>`).join("")}</div>
+    <div id="fb"></div></div>`);
+    const S = typeof sigOpen === "function" ? sigOpen({ ev: "q", code: q.code, d: it.d, kind: "qcm", fmt: "qcm" }) : null;
+    app.querySelectorAll(".qcm-c").forEach((b) => (b.onclick = () => {
+      const c = it.choices[+b.dataset.k];
+      app.querySelectorAll(".qcm-c").forEach((x) => { x.disabled = true; if (it.choices[+x.dataset.k].ok) x.classList.add("qcm-good"); });
+      if (!c.ok) b.classList.add("qcm-bad");
+      res[i] = c.ok ? 1 : 0;
+      if (S) { S.issue = c.ok ? "ok1" : "faux"; S.essais = 1; S.sec = sigSec(S); if (!c.ok) S.rep1 = c.f.slice(0, 20); }
+      Engine.recordComp(state, it.id, it.d, res[i]); save();
+      if (typeof buzz === "function") buzz(c.ok);
+      if (c.ok) burst();
+      const fb = document.getElementById("fb");
+      fb.innerHTML = `<div class="fb ${c.ok ? "ok" : "bad"} pop"><b>${c.ok ? "✓ Juste !" : "✗ Ce n'est pas ça."}</b>${c.ok ? "" : `<div class="diag">🔎 ${escT(c.m || "C'est une erreur fréquente.")}</div>`}
+        <details class="solfull"${c.ok ? "" : " open"}><summary>La correction</summary><div class="sol">${q.sol}</div></details></div>
+        <div class="actions"><button class="btn-primary" id="nx">${i + 1 < items.length ? "Question suivante" : "Voir mon bilan"}</button></div>`;
+      typeset(fb);
+      document.getElementById("nx").onclick = () => show(i + 1);
+      document.getElementById("nx").focus();
+    }));
+  };
+  show(0);
+}
+
+function qcmResult(items, res) {
+  const n = items.length, ok = res.filter((x) => x === 1).length, by = {};
+  items.forEach((it, i) => (by[it.id] = by[it.id] || []).push(res[i]));
+  const good = Object.keys(by).filter((id) => by[id].every((x) => x === 1)), weak = Object.keys(by).filter((id) => by[id].some((x) => x !== 1));
+  state.qcm = { date: day(), ok, n, ids: state.prep.ids.slice() }; Badges.check(state); save();
+  h(`${brand}<div class="eyebrow">QCM de préparation · bilan</div><h2>${ok >= 0.8 * n ? "Très bien !" : ok >= 0.5 * n ? "Pas mal." : "Il reste du travail, et tu sais où."}</h2>
+  <div class="card stack"><p><b>${ok}</b> juste${ok > 1 ? "s" : ""} sur ${n}</p><p class="small muted">Ce n'est pas une note. Au vrai test, il faudra écrire tes calculs : le QCM sert à repérer tes erreurs.</p></div>
+  ${good.length ? `<div class="card flat"><h3>✓ Acquis</h3><ul>${good.map((id) => `<li>${nLabel(id)}</li>`).join("")}</ul></div>` : ""}
+  ${weak.length ? `<div class="card flat stack"><h3>À retravailler</h3><ul>${weak.map((id) => `<li>${nLabel(id)}</li>`).join("")}</ul><button class="btn-primary" id="rev">Réviser ces notions maintenant</button></div>` : ""}
+  <div class="row"><button id="again">Un autre QCM</button><button class="btn-ghost" id="home">Retour</button></div>`);
+  if (ok >= 0.8 * n) burst();
+  const rv = document.getElementById("rev");
+  if (rv) rv.onclick = () => { session = { plan: weak.flatMap((id) => [id + "|2", id + "|3"]), i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), prep: true }; nextQuestion(); };
+  document.getElementById("again").onclick = screenQcm;
+  document.getElementById("home").onclick = () => { homeTab = "test"; screenHome(); };
+}
+
 // Notions reprises au standard (formes variées, pas à pas, erreurs typiques) : réservoir du mode libre « au point » (18.11).
 const FREE_READY = ["utemps", "ucomp", "vitesse", "gquot", "litelab", "valnum", "reduire", "monomes", "parenth", "distrib", "idrem", "factor",
   "eq1", "eqfrac", "eqspec", "formule", "probeq", "eq2fact", "eq2", "eq2disc", "probeq2", "eq3", "bicarre", "eqirr", "sys2", "sysprob", "sysgraph", "sys3", "affine", "affzero", "sysineq",
@@ -19098,6 +19237,7 @@ function screenHome() {
         <p class="small muted">${state.prep.ids.length} notion${state.prep.ids.length > 1 ? "s" : ""} : ${state.prep.ids.map((id) => NOTIONS.find((n) => n.id === id).label).join(" · ")}</p>
         ${prepProgramHtml()}
         <button class="btn-primary btn-big" id="prepgo">${PREP_TASK[prepKind(left)].ic} Aujourd'hui : ${PREP_TASK[prepKind(left)].label}</button>
+        <button id="qcm">✅ QCM de préparation (10 questions)</button>${state.qcm && state.qcm.ids && state.qcm.ids.join() === state.prep.ids.join() ? `<p class="small muted">Dernier QCM : ${state.qcm.ok} juste${state.qcm.ok > 1 ? "s" : ""} sur ${state.qcm.n}.</p>` : ""}
         <button id="mock">📝 Sujet de préparation (avec corrigé)</button>${state.mock && state.mock.done && state.mock.ids.join() === state.prep.ids.join() ? `<p class="small muted">Dernier sujet de préparation : ${state.mock.done.n ? state.mock.done.juste + " question" + (state.mock.done.juste > 1 ? "s" : "") + " juste" + (state.mock.done.juste > 1 ? "s" : "") + " sur " + state.mock.done.n : "fait"}.</p>` : ""}
         <button class="btn-ghost" id="prepedit">Modifier le test</button></div>`
       : `<div class="card stack"><div class="eyebrow">Je prépare un test</div><h2>Un test approche ?</h2>
@@ -19124,6 +19264,7 @@ function screenHome() {
   on("comps", screenComps);
   on("prep", screenPrep); on("prepedit", screenPrep);
   if (typeof screenMock === "function") on("mock", screenMock);
+  if (typeof screenQcm === "function") on("qcm", screenQcm);
   on("prepgo", () => startPrepTask(prepKind(left)));
   on("preptask", () => startPrepTask(prepKind(left)));
   on("carnetgo", () => startCarnet());
@@ -19147,15 +19288,66 @@ const uiApply = () => { document.documentElement.style.fontSize = 16 * UI.fs + "
 uiApply();
 // Vibration courte : une pour juste, deux pour faux (Android ; sans effet ailleurs).
 const buzz = (ok) => { if (UI.vib && navigator.vibrate) try { navigator.vibrate(ok ? 35 : [40, 70, 40]); } catch (e) {} };
+// ---- Installer l'app et rappel quotidien (21.11, propositions 1 et 2 : faire revenir les élèves) ----
+// Pas de serveur de notifications (site statique) : le rappel passe par l'agenda du téléphone (événement quotidien).
+let installEvt = null;
+window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installEvt = e; });
+window.addEventListener("appinstalled", () => { UI.installed = true; uiSave(); });
+const isStandalone = () => (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const installHow = () => isIOS() ? "Dans Safari : touche <b>Partager</b> (le carré avec la flèche ⬆️), puis <b>« Sur l'écran d'accueil »</b>." : "Dans le menu du navigateur (<b>⋮</b> en haut à droite) : <b>« Installer l'application »</b> ou <b>« Ajouter à l'écran d'accueil »</b>.";
+function installCard(where) {
+  if (isStandalone() || UI.installed) return "";
+  return `<div class="card flat stack install-card"><div class="ic-row"><span class="ic">📲</span><div><b>Mets l'app sur ton écran d'accueil</b><div class="small muted">Un toucher et ta question du jour est là, comme une vraie application. Rien à télécharger d'un store.</div></div></div>
+    ${installEvt ? '<button class="btn-primary" id="instgo">Installer</button>' : `<p class="small">${installHow()}</p>`}${where === "bilan" ? '<button class="btn-ghost small" id="instno">Plus tard</button>' : ""}</div>`;
+}
+function bindInstall(after) {
+  const g = document.getElementById("instgo"), n = document.getElementById("instno");
+  if (g) g.onclick = async () => { const e = installEvt; installEvt = null; e.prompt(); try { const c = await e.userChoice; if (c && c.outcome === "accepted") { UI.installed = true; uiSave(); } } catch (x) {} after(); };
+  if (n) n.onclick = () => { UI.installLater = day(); uiSave(); const c = n.closest(".install-card"); if (c) c.remove(); };
+}
+// Agenda : lien Google Agenda (Android) ou fichier .ics (iPhone, Samsung, Outlook…), événement chaque jour à l'heure choisie.
+const APP_URL = "https://5min2maths.github.io/";
+function reminderLinks(hh) {
+  const t = addDays(day(), 1).replace(/-/g, ""), p2 = (n) => String(n).padStart(2, "0"), a = t + "T" + p2(hh) + "0000", b = t + "T" + p2(hh) + "0500";
+  const title = "5 minutes de maths 🔥", det = "Ta question du jour : " + APP_URL;
+  let tz = ""; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
+  const g = "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(title) + "&dates=" + a + "/" + b + "&details=" + encodeURIComponent(det) + "&recur=" + encodeURIComponent("RRULE:FREQ=DAILY") + (tz ? "&ctz=" + encodeURIComponent(tz) : "");
+  const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//5min2maths//rappel//FR", "BEGIN:VEVENT", "UID:rappel-" + Date.now() + "@5min2maths", "DTSTAMP:" + new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z",
+    "DTSTART:" + a, "DTEND:" + b, "RRULE:FREQ=DAILY", "SUMMARY:" + title, "DESCRIPTION:" + det, "URL:" + APP_URL, "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:" + title, "TRIGGER:PT0M", "END:VALARM", "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+  return { g, ics: "data:text/calendar;charset=utf-8," + encodeURIComponent(ics) };
+}
+function reminderCard(where) {
+  const hh = UI.remH || 18, L = reminderLinks(hh);
+  return `<div class="card flat stack reminder-card"><div class="ic-row"><span class="ic">⏰</span><div><b>Un rappel chaque jour</b><div class="small muted">Un événement dans l'agenda de ton téléphone, avec une alerte. Tu peux l'effacer quand tu veux.</div></div></div>
+    <div class="seg" id="remh">${[16, 17, 18, 19, 20].map((x) => `<button aria-pressed="${x === hh}" data-v="${x}">${x} h</button>`).join("")}</div>
+    <div class="row"><a class="btn btn-primary" id="remg" href="${L.g}" target="_blank" rel="noopener">Google Agenda</a><a class="btn" id="remi" href="${L.ics}" download="rappel-5min2maths.ics">Autre agenda (iPhone…)</a></div>
+    ${where === "bilan" ? '<button class="btn-ghost small" id="remno">Non merci</button>' : ""}</div>`;
+}
+function bindReminder(redraw) {
+  app.querySelectorAll("#remh button").forEach((b) => (b.onclick = () => { UI.remH = +b.dataset.v; uiSave(); const c = app.querySelector(".reminder-card"); if (c) { const w = document.getElementById("remno") ? "bilan" : ""; c.outerHTML = reminderCard(w); bindReminder(redraw); } }));
+  ["remg", "remi"].forEach((x) => { const a = document.getElementById(x); if (a) a.addEventListener("click", () => { UI.remSet = day(); uiSave(); toast("Ajoute l'événement dans ton agenda : le rappel sonnera chaque jour à " + (UI.remH || 18) + " h."); }); });
+  const n = document.getElementById("remno"); if (n) n.onclick = () => { UI.remNo = day(); uiSave(); const c = n.closest(".reminder-card"); if (c) c.remove(); };
+}
+// Au bilan : une seule proposition à la fois. Installer dès le 2e jour de pratique (reproposé après 7 jours), puis le rappel dès le 3e jour.
+function returnCard() {
+  const days = (state.history || []).length;
+  const later = (d, n) => !d || addDays(d, n) <= day();
+  if (days >= 2 && !isStandalone() && !UI.installed && later(UI.installLater, 7)) return installCard("bilan");
+  if (days >= 3 && !UI.remSet && later(UI.remNo, 14)) return reminderCard("bilan");
+  return "";
+}
 function screenSettings() {
   h(`${brand}<h2>Réglages</h2><div class="stack">
   <div class="card flat stack"><h3>Affichage</h3>
     <span class="small muted">Taille du texte</span><div class="seg" id="fs">${[[1, "A"], [1.12, "A+"], [1.25, "A++"]].map(([v, l]) => `<button aria-pressed="${UI.fs === v}" data-v="${v}" style="font-size:${v}em">${l}</button>`).join("")}</div>
     <span class="small muted">Vibrer à chaque réponse (téléphone)</span><div class="seg" id="vib"><button aria-pressed="${UI.vib}" data-v="1">Oui</button><button aria-pressed="${!UI.vib}" data-v="0">Non</button></div></div>
+  ${installCard("")}${reminderCard("")}
   <button id="backup">💾 Sauvegarder ou transférer ma progression</button><button id="level">Changer de classe ou d'école</button><button id="privacy">🔒 Ce que l'app envoie</button>
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div>
   <button class="btn-primary" id="back">Retour</button></div>`);
   document.getElementById("back").onclick = screenHome;
+  bindInstall(screenSettings); bindReminder(screenSettings);
   app.querySelectorAll("#fs button").forEach((b) => (b.onclick = () => { UI.fs = +b.dataset.v; uiSave(); uiApply(); screenSettings(); }));
   app.querySelectorAll("#vib button").forEach((b) => (b.onclick = () => { UI.vib = b.dataset.v === "1"; uiSave(); if (UI.vib) buzz(true); screenSettings(); }));
   document.getElementById("privacy").onclick = () => screenPrivacy(screenSettings);
@@ -20233,10 +20425,11 @@ function screenSummary() {
   ${session.ctest ? (() => { const a = compNote((state.comps || {})[session.ctest.cid]), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? "La note apparaît après 3 réponses sur cette compétence." : b === null ? "Première note pour cette compétence." : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". Elle remontera avec la pratique." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
   ${nb}
   ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${state.carnet.length} à effacer</b></div>${session.carnet ? '<button id="carnetagain">Continuer à effacer</button>' : ""}</div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
+  ${returnCard()}
   ${typeof Curieux !== "undefined" && Curieux.available(state).length ? '<button id="curbonus">🤔 Bonus : une question curieuse</button>' : ""}
   <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)", "app")}</div>
   <button class="btn-primary btn-big" id="home">Retour à l'accueil</button>`);
-  bindComment(app, "app");
+  bindComment(app, "app"); bindInstall(screenHome); bindReminder(screenHome);
   if (nb) setTimeout(burst, 250);
   document.getElementById("home").onclick = screenHome;
   if (document.getElementById("curbonus")) document.getElementById("curbonus").onclick = () => screenCurious(Curieux.pick(state), screenHome, "bilan");

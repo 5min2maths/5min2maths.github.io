@@ -415,3 +415,13 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .card.streak .flame { margin: 0; }
 .streak-nudge { display: flex; gap: 8px; align-items: center; padding: 8px 12px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); }
 .streak-nudge > span:first-child { font-size: 1.2rem; }
+/* QCM de préparation (21.11) */
+.qcm-choices { display: grid; gap: 8px; margin-top: 8px; }
+.qcm-c { display: flex; align-items: center; gap: 12px; text-align: left; justify-content: flex-start; padding: 10px 14px; min-height: 52px; }
+.qcm-l { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--paper); border: 1px solid var(--line); font-weight: 700; flex: none; }
+.qcm-c.qcm-good { border-color: var(--ok, #1e8e5a); background: color-mix(in srgb, var(--ok, #1e8e5a) 14%, var(--card)); opacity: 1; }
+.qcm-c.qcm-bad { border-color: var(--bad, #c0392b); background: color-mix(in srgb, var(--bad, #c0392b) 12%, var(--card)); opacity: 1; }
+a.btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink); padding: 10px 16px; flex: 1; text-align: center; }
+a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 700; }
+.ic-row { display: flex; flex-wrap: nowrap; gap: 12px; align-items: center; }
+.ic-row .ic { font-size: 1.6rem; flex: none; }

@@ -280,6 +280,7 @@ function screenHome() {
         <p class="small muted">${state.prep.ids.length} notion${state.prep.ids.length > 1 ? "s" : ""} : ${state.prep.ids.map((id) => NOTIONS.find((n) => n.id === id).label).join(" · ")}</p>
         ${prepProgramHtml()}
         <button class="btn-primary btn-big" id="prepgo">${PREP_TASK[prepKind(left)].ic} Aujourd'hui : ${PREP_TASK[prepKind(left)].label}</button>
+        <button id="qcm">✅ QCM de préparation (10 questions)</button>${state.qcm && state.qcm.ids && state.qcm.ids.join() === state.prep.ids.join() ? `<p class="small muted">Dernier QCM : ${state.qcm.ok} juste${state.qcm.ok > 1 ? "s" : ""} sur ${state.qcm.n}.</p>` : ""}
         <button id="mock">📝 Sujet de préparation (avec corrigé)</button>${state.mock && state.mock.done && state.mock.ids.join() === state.prep.ids.join() ? `<p class="small muted">Dernier sujet de préparation : ${state.mock.done.n ? state.mock.done.juste + " question" + (state.mock.done.juste > 1 ? "s" : "") + " juste" + (state.mock.done.juste > 1 ? "s" : "") + " sur " + state.mock.done.n : "fait"}.</p>` : ""}
         <button class="btn-ghost" id="prepedit">Modifier le test</button></div>`
       : `<div class="card stack"><div class="eyebrow">Je prépare un test</div><h2>Un test approche ?</h2>
@@ -306,6 +307,7 @@ function screenHome() {
   on("comps", screenComps);
   on("prep", screenPrep); on("prepedit", screenPrep);
   if (typeof screenMock === "function") on("mock", screenMock);
+  if (typeof screenQcm === "function") on("qcm", screenQcm);
   on("prepgo", () => startPrepTask(prepKind(left)));
   on("preptask", () => startPrepTask(prepKind(left)));
   on("carnetgo", () => startCarnet());
@@ -329,15 +331,66 @@ const uiApply = () => { document.documentElement.style.fontSize = 16 * UI.fs + "
 uiApply();
 // Vibration courte : une pour juste, deux pour faux (Android ; sans effet ailleurs).
 const buzz = (ok) => { if (UI.vib && navigator.vibrate) try { navigator.vibrate(ok ? 35 : [40, 70, 40]); } catch (e) {} };
+// ---- Installer l'app et rappel quotidien (21.11, propositions 1 et 2 : faire revenir les élèves) ----
+// Pas de serveur de notifications (site statique) : le rappel passe par l'agenda du téléphone (événement quotidien).
+let installEvt = null;
+window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installEvt = e; });
+window.addEventListener("appinstalled", () => { UI.installed = true; uiSave(); });
+const isStandalone = () => (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const installHow = () => isIOS() ? "Dans Safari : touche <b>Partager</b> (le carré avec la flèche ⬆️), puis <b>« Sur l'écran d'accueil »</b>." : "Dans le menu du navigateur (<b>⋮</b> en haut à droite) : <b>« Installer l'application »</b> ou <b>« Ajouter à l'écran d'accueil »</b>.";
+function installCard(where) {
+  if (isStandalone() || UI.installed) return "";
+  return `<div class="card flat stack install-card"><div class="ic-row"><span class="ic">📲</span><div><b>Mets l'app sur ton écran d'accueil</b><div class="small muted">Un toucher et ta question du jour est là, comme une vraie application. Rien à télécharger d'un store.</div></div></div>
+    ${installEvt ? '<button class="btn-primary" id="instgo">Installer</button>' : `<p class="small">${installHow()}</p>`}${where === "bilan" ? '<button class="btn-ghost small" id="instno">Plus tard</button>' : ""}</div>`;
+}
+function bindInstall(after) {
+  const g = document.getElementById("instgo"), n = document.getElementById("instno");
+  if (g) g.onclick = async () => { const e = installEvt; installEvt = null; e.prompt(); try { const c = await e.userChoice; if (c && c.outcome === "accepted") { UI.installed = true; uiSave(); } } catch (x) {} after(); };
+  if (n) n.onclick = () => { UI.installLater = day(); uiSave(); const c = n.closest(".install-card"); if (c) c.remove(); };
+}
+// Agenda : lien Google Agenda (Android) ou fichier .ics (iPhone, Samsung, Outlook…), événement chaque jour à l'heure choisie.
+const APP_URL = "https://5min2maths.github.io/";
+function reminderLinks(hh) {
+  const t = addDays(day(), 1).replace(/-/g, ""), p2 = (n) => String(n).padStart(2, "0"), a = t + "T" + p2(hh) + "0000", b = t + "T" + p2(hh) + "0500";
+  const title = "5 minutes de maths 🔥", det = "Ta question du jour : " + APP_URL;
+  let tz = ""; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
+  const g = "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(title) + "&dates=" + a + "/" + b + "&details=" + encodeURIComponent(det) + "&recur=" + encodeURIComponent("RRULE:FREQ=DAILY") + (tz ? "&ctz=" + encodeURIComponent(tz) : "");
+  const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//5min2maths//rappel//FR", "BEGIN:VEVENT", "UID:rappel-" + Date.now() + "@5min2maths", "DTSTAMP:" + new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z",
+    "DTSTART:" + a, "DTEND:" + b, "RRULE:FREQ=DAILY", "SUMMARY:" + title, "DESCRIPTION:" + det, "URL:" + APP_URL, "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:" + title, "TRIGGER:PT0M", "END:VALARM", "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+  return { g, ics: "data:text/calendar;charset=utf-8," + encodeURIComponent(ics) };
+}
+function reminderCard(where) {
+  const hh = UI.remH || 18, L = reminderLinks(hh);
+  return `<div class="card flat stack reminder-card"><div class="ic-row"><span class="ic">⏰</span><div><b>Un rappel chaque jour</b><div class="small muted">Un événement dans l'agenda de ton téléphone, avec une alerte. Tu peux l'effacer quand tu veux.</div></div></div>
+    <div class="seg" id="remh">${[16, 17, 18, 19, 20].map((x) => `<button aria-pressed="${x === hh}" data-v="${x}">${x} h</button>`).join("")}</div>
+    <div class="row"><a class="btn btn-primary" id="remg" href="${L.g}" target="_blank" rel="noopener">Google Agenda</a><a class="btn" id="remi" href="${L.ics}" download="rappel-5min2maths.ics">Autre agenda (iPhone…)</a></div>
+    ${where === "bilan" ? '<button class="btn-ghost small" id="remno">Non merci</button>' : ""}</div>`;
+}
+function bindReminder(redraw) {
+  app.querySelectorAll("#remh button").forEach((b) => (b.onclick = () => { UI.remH = +b.dataset.v; uiSave(); const c = app.querySelector(".reminder-card"); if (c) { const w = document.getElementById("remno") ? "bilan" : ""; c.outerHTML = reminderCard(w); bindReminder(redraw); } }));
+  ["remg", "remi"].forEach((x) => { const a = document.getElementById(x); if (a) a.addEventListener("click", () => { UI.remSet = day(); uiSave(); toast("Ajoute l'événement dans ton agenda : le rappel sonnera chaque jour à " + (UI.remH || 18) + " h."); }); });
+  const n = document.getElementById("remno"); if (n) n.onclick = () => { UI.remNo = day(); uiSave(); const c = n.closest(".reminder-card"); if (c) c.remove(); };
+}
+// Au bilan : une seule proposition à la fois. Installer dès le 2e jour de pratique (reproposé après 7 jours), puis le rappel dès le 3e jour.
+function returnCard() {
+  const days = (state.history || []).length;
+  const later = (d, n) => !d || addDays(d, n) <= day();
+  if (days >= 2 && !isStandalone() && !UI.installed && later(UI.installLater, 7)) return installCard("bilan");
+  if (days >= 3 && !UI.remSet && later(UI.remNo, 14)) return reminderCard("bilan");
+  return "";
+}
 function screenSettings() {
   h(`${brand}<h2>Réglages</h2><div class="stack">
   <div class="card flat stack"><h3>Affichage</h3>
     <span class="small muted">Taille du texte</span><div class="seg" id="fs">${[[1, "A"], [1.12, "A+"], [1.25, "A++"]].map(([v, l]) => `<button aria-pressed="${UI.fs === v}" data-v="${v}" style="font-size:${v}em">${l}</button>`).join("")}</div>
     <span class="small muted">Vibrer à chaque réponse (téléphone)</span><div class="seg" id="vib"><button aria-pressed="${UI.vib}" data-v="1">Oui</button><button aria-pressed="${!UI.vib}" data-v="0">Non</button></div></div>
+  ${installCard("")}${reminderCard("")}
   <button id="backup">💾 Sauvegarder ou transférer ma progression</button><button id="level">Changer de classe ou d'école</button><button id="privacy">🔒 Ce que l'app envoie</button>
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div>
   <button class="btn-primary" id="back">Retour</button></div>`);
   document.getElementById("back").onclick = screenHome;
+  bindInstall(screenSettings); bindReminder(screenSettings);
   app.querySelectorAll("#fs button").forEach((b) => (b.onclick = () => { UI.fs = +b.dataset.v; uiSave(); uiApply(); screenSettings(); }));
   app.querySelectorAll("#vib button").forEach((b) => (b.onclick = () => { UI.vib = b.dataset.v === "1"; uiSave(); if (UI.vib) buzz(true); screenSettings(); }));
   document.getElementById("privacy").onclick = () => screenPrivacy(screenSettings);
@@ -1415,10 +1468,11 @@ function screenSummary() {
   ${session.ctest ? (() => { const a = compNote((state.comps || {})[session.ctest.cid]), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? "La note apparaît après 3 réponses sur cette compétence." : b === null ? "Première note pour cette compétence." : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". Elle remontera avec la pratique." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
   ${nb}
   ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${state.carnet.length} à effacer</b></div>${session.carnet ? '<button id="carnetagain">Continuer à effacer</button>' : ""}</div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
+  ${returnCard()}
   ${typeof Curieux !== "undefined" && Curieux.available(state).length ? '<button id="curbonus">🤔 Bonus : une question curieuse</button>' : ""}
   <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)", "app")}</div>
   <button class="btn-primary btn-big" id="home">Retour à l'accueil</button>`);
-  bindComment(app, "app");
+  bindComment(app, "app"); bindInstall(screenHome); bindReminder(screenHome);
   if (nb) setTimeout(burst, 250);
   document.getElementById("home").onclick = screenHome;
   if (document.getElementById("curbonus")) document.getElementById("curbonus").onclick = () => screenCurious(Curieux.pick(state), screenHome, "bilan");
