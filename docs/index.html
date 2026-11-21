@@ -19376,11 +19376,11 @@ function screenHome() {
         <h3>${FORMATS[fmt].label}</h3><p class="small muted">${FORMATS[fmt].text}</p></div>
       <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>${nowCard()}</div>
       ${freeCard()}`,
-    prob: () => curiousCard() + (!wp ? `<div class="card flat stack"><div class="eyebrow">⭐ Problème de la semaine</div><h3>Pas encore de problème pour toi</h3><p class="small muted">Les problèmes arrivent avec les notions que tu as déjà travaillées. Fais quelques séances !</p></div>`
+    prob: () => (!wp ? `<div class="card flat stack"><div class="eyebrow">⭐ Problème de la semaine</div><h3>Pas encore de problème pour toi</h3><p class="small muted">Les problèmes arrivent avec les notions que tu as déjà travaillées. Fais quelques séances !</p></div>`
       : `<div class="card stack"><div class="eyebrow">⭐ Problème de la semaine${wpDone ? " · fait ✓" : ""}</div><h2>${NOTIONS.find((n) => n.id === wp).label}</h2>
         <p class="muted">Un problème en plusieurs étapes, avec des indices si tu bloques. Facultatif, et il rapporte gros.</p>
         <button class="${wpDone ? "" : "btn-primary btn-big"}" id="wp">${wpDone ? "Le refaire" : "Relever le défi"}</button>
-        <p class="small muted">${wpDone ? "Bravo ! Un nouveau problème arrive la semaine prochaine." : "Un nouveau problème chaque semaine."}</p></div>`),
+        <p class="small muted">${wpDone ? "Bravo ! Un nouveau problème arrive la semaine prochaine." : "Un nouveau problème chaque semaine."}</p></div>`) + curiousCard(),
     test: () => prep ? `<div class="card stack"><div class="eyebrow">Je prépare mon test</div><h2>${left === 0 ? "Test aujourd'hui" : left === 1 ? "Test demain" : "Test dans " + left + " jours"}</h2>
         <p class="small muted">${state.prep.ids.length} notion${state.prep.ids.length > 1 ? "s" : ""} : ${state.prep.ids.map((id) => NOTIONS.find((n) => n.id === id).label).join(" · ")}</p>
         ${(() => { const A = state.autotest && state.autotest.key === state.prep.ids.join() ? state.autotest : null, R = A && A.runs.length ? A.runs[A.runs.length - 1].r : null, n = R ? Object.keys(R).length : 0, ok = R ? Object.values(R).filter((x) => x === 1).length : 0;
