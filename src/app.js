@@ -1426,15 +1426,15 @@ function curiousCard() {
 function screenCurious(q, back, from = "") {
   if (!q) { toast("Pas encore de question curieuse pour toi : elles arrivent avec les notions vues en classe."); return back(); }
   if (state) { state.curSeen = [...(state.curSeen || []).filter((k) => k !== q.key), q.key].slice(-20); save(); }
-  const F = CUR_FAM[q.fam] || { label: "Question curieuse", ic: "🤔" }, co = !state || state.profile.grade <= 11;
-  const spec = { kind: "value", value: q.calc.value, ...(q.calc.round ? { round: q.calc.round } : co ? { final: true } : {}) };
+  const F = CUR_FAM[q.fam] || { label: "Question curieuse", ic: "🤔" };
+  const spec = { kind: "value", value: q.calc.value, ...(q.calc.round ? { round: q.calc.round } : {}) }; // calcul tapé accepté (commentaire du 21.11), même au CO
   h(`${brand}<div class="eyebrow">${F.ic} Question curieuse · ${F.label}</div>
   <div class="card pop stack"><h2>${q.titre}</h2><div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
     <div class="act-step"><div class="act-h"><span class="act-n">1</span> Ton pari</div><p>${q.bet.q}</p>
       <div class="seg" id="cbet">${q.bet.choices.map((c, i) => `<button type="button" data-i="${i}">${c}</button>`).join("")}</div><div id="cbfb"></div></div>
     <div class="act-step" id="cs2" hidden><div class="act-h"><span class="act-n">2</span> On vérifie</div><p>${q.calc.label}</p>
       <div class="answer"><input class="ans" id="cans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Ta réponse">
-      <div class="preview" id="cprev"></div>${keypadHtml({ ...spec, final: true })}
+      <div class="preview" id="cprev"></div>${keypadHtml(spec)}
       <div class="actions"><button class="btn-primary" id="cok">Vérifier</button><button class="btn-ghost" id="cidk">Voir la réponse</button></div></div><div id="cfb"></div></div>
     <div class="act-step" id="cs3" hidden><div class="act-h"><span class="act-n">3</span> Le fin mot</div><div class="sol">${q.reveal}</div>
       <div class="rule"><b>🧠 Ici, tu as utilisé</b> ${q.outil}</div><p class="small muted code">${q.code}</p></div>
@@ -1514,7 +1514,7 @@ function screenSummary() {
 </div>
   ${session.ctest ? (() => { const a = compNote((state.comps || {})[session.ctest.cid]), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? "La note apparaît après 3 réponses sur cette compétence." : b === null ? "Première note pour cette compétence." : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". Elle remontera avec la pratique." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
   ${nb}
-  ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${state.carnet.length} à effacer</b></div>${session.carnet ? '<button id="carnetagain">Continuer à effacer</button>' : ""}</div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
+  ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${state.carnet.length} à effacer</b></div><button id="carnetagain">${session.carnet ? "Continuer à effacer" : "📕 Effacer mes erreurs maintenant"}</button></div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
   ${returnCard()}
   ${typeof Curieux !== "undefined" && Curieux.available(state).length ? '<button id="curbonus">🤔 Bonus : une question curieuse</button>' : ""}
   <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)", "app")}</div>

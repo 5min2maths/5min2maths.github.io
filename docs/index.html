@@ -1506,6 +1506,14 @@ const GF = {
     g.side("A", "B", lb).side("B", "C", ls);
     return g.svg("parallélogramme");
   },
+  // Parallélogramme dont l'angle en bas à gauche vaut deg (commentaire du 21.11 : la figure n'était pas un parallélogramme).
+  paraAngles(deg, { la = "", lb = "", b = 5, s = 3.2 } = {}) {
+    const r = (deg * Math.PI) / 180, dx = s * Math.cos(r), dy = s * Math.sin(r);
+    const g = GEO().pt("A", 0, 0, false).pt("B", b, 0, false).pt("C", b + dx, dy, false).pt("D", dx, dy, false).poly(["A", "B", "C", "D"]);
+    if (la) g.angle("A", "B", "D", la, { r: 22 });
+    if (lb) g.angle("B", "C", "A", lb, { r: 22 });
+    return g.svg("parallélogramme");
+  },
   losange(D, d, { lD = "", ld = "" } = {}) {
     const g = GEO().pt("A", 0, 0, false).pt("B", D / 2, -d / 2, false).pt("C", D, 0, false).pt("E", D / 2, d / 2, false).poly(["A", "B", "C", "E"]);
     g.seg("A", "C", { dash: true }).seg("B", "E", { dash: true }).right([D / 2, 0], "C", "E");
@@ -3763,7 +3771,7 @@ FINE.push(
     lesson: ["Quadrilatères particuliers", "Chaque famille a ses propriétés.", "Parallélogramme : côtés opposés parallèles et égaux, angles opposés égaux, angles consécutifs de somme \\(180°\\), diagonales qui se coupent en leur milieu. Losange : 4 côtés égaux, diagonales perpendiculaires. Rectangle : 4 angles droits, diagonales égales. Carré : losange et rectangle.", ["Losange de périmètre 36 cm : côté 9 cm", "Parallélogramme : un angle de 70°, le suivant de 110°"], "Un carré est à la fois un rectangle et un losange."],
     g: [
       () => { const c = R.int(3, 15), nm = R.pick(["losange", "carré"]); return QV("Un " + nm + " a un périmètre de " + M(4 * c) + " cm. Combien mesure un côté (en cm) ?", c, "Quatre côtés égaux : " + M(4 * c + " : 4 = " + c) + " cm.", { fig: nm === "carré" ? GF.rect(c, c, { lw: "?" }) : GF.para(c, c * 0.8, { lb: "?", k: c * 0.6, noH: true }) }); },
-      () => { const a = R.int(35, 85); return QV("Dans un parallélogramme, un angle mesure " + M(a + "°") + ". Combien mesure un angle voisin (consécutif), en degrés ?", 180 - a, "Deux angles consécutifs ont pour somme " + M("180°") + " : " + M("180° - " + a + "° = " + (180 - a) + "°") + ".", { fig: FIG.quadAngles([a + "°", "?", "", ""]) }); },
+      () => { const a = R.int(35, 85); return QV("Dans un parallélogramme, un angle mesure " + M(a + "°") + ". Combien mesure un angle voisin (consécutif), en degrés ?", 180 - a, "Deux angles consécutifs ont pour somme " + M("180°") + " : " + M("180° - " + a + "° = " + (180 - a) + "°") + ".", { fig: GF.paraAngles(a, { la: a + "°", lb: "?" }) }); },
       () => { if (R.rand() < 0.5) { const [nm, v] = R.pick([["un carré", 4], ["un rectangle (non carré)", 2], ["un losange (non carré)", 2], ["un parallélogramme quelconque", 0]]); return QV("Combien d'axes de symétrie " + nm + " possède-t-il ?", v, v === 4 ? "Les deux médianes et les deux diagonales : 4 axes." : v === 2 ? (nm.includes("rectangle") ? "Les deux médianes : 2 axes (les diagonales n'en sont pas)." : "Les deux diagonales : 2 axes.") : "Aucun axe : il a seulement un centre de symétrie."); } const d = 2 * R.int(3, 12); return QV("Les diagonales d'un rectangle mesurent " + M(d) + " cm. À quelle distance d'un sommet se trouve leur point d'intersection (en cm) ?", d / 2, "Les diagonales se coupent en leur milieu : " + M(d + " : 2 = " + d / 2) + " cm.", { fig: GF.rect(8, 5, { diag: d + " cm" }) }); },
     ] },
 );
@@ -20552,15 +20560,15 @@ function curiousCard() {
 function screenCurious(q, back, from = "") {
   if (!q) { toast("Pas encore de question curieuse pour toi : elles arrivent avec les notions vues en classe."); return back(); }
   if (state) { state.curSeen = [...(state.curSeen || []).filter((k) => k !== q.key), q.key].slice(-20); save(); }
-  const F = CUR_FAM[q.fam] || { label: "Question curieuse", ic: "🤔" }, co = !state || state.profile.grade <= 11;
-  const spec = { kind: "value", value: q.calc.value, ...(q.calc.round ? { round: q.calc.round } : co ? { final: true } : {}) };
+  const F = CUR_FAM[q.fam] || { label: "Question curieuse", ic: "🤔" };
+  const spec = { kind: "value", value: q.calc.value, ...(q.calc.round ? { round: q.calc.round } : {}) }; // calcul tapé accepté (commentaire du 21.11), même au CO
   h(`${brand}<div class="eyebrow">${F.ic} Question curieuse · ${F.label}</div>
   <div class="card pop stack"><h2>${q.titre}</h2><div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
     <div class="act-step"><div class="act-h"><span class="act-n">1</span> Ton pari</div><p>${q.bet.q}</p>
       <div class="seg" id="cbet">${q.bet.choices.map((c, i) => `<button type="button" data-i="${i}">${c}</button>`).join("")}</div><div id="cbfb"></div></div>
     <div class="act-step" id="cs2" hidden><div class="act-h"><span class="act-n">2</span> On vérifie</div><p>${q.calc.label}</p>
       <div class="answer"><input class="ans" id="cans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Ta réponse">
-      <div class="preview" id="cprev"></div>${keypadHtml({ ...spec, final: true })}
+      <div class="preview" id="cprev"></div>${keypadHtml(spec)}
       <div class="actions"><button class="btn-primary" id="cok">Vérifier</button><button class="btn-ghost" id="cidk">Voir la réponse</button></div></div><div id="cfb"></div></div>
     <div class="act-step" id="cs3" hidden><div class="act-h"><span class="act-n">3</span> Le fin mot</div><div class="sol">${q.reveal}</div>
       <div class="rule"><b>🧠 Ici, tu as utilisé</b> ${q.outil}</div><p class="small muted code">${q.code}</p></div>
@@ -20640,7 +20648,7 @@ function screenSummary() {
 </div>
   ${session.ctest ? (() => { const a = compNote((state.comps || {})[session.ctest.cid]), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? "La note apparaît après 3 réponses sur cette compétence." : b === null ? "Première note pour cette compétence." : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". Elle remontera avec la pratique." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
   ${nb}
-  ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${state.carnet.length} à effacer</b></div>${session.carnet ? '<button id="carnetagain">Continuer à effacer</button>' : ""}</div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
+  ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${state.carnet.length} à effacer</b></div><button id="carnetagain">${session.carnet ? "Continuer à effacer" : "📕 Effacer mes erreurs maintenant"}</button></div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
   ${returnCard()}
   ${typeof Curieux !== "undefined" && Curieux.available(state).length ? '<button id="curbonus">🤔 Bonus : une question curieuse</button>' : ""}
   <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)", "app")}</div>

@@ -88,6 +88,14 @@ const GF = {
     g.side("A", "B", lb).side("B", "C", ls);
     return g.svg("parallélogramme");
   },
+  // Parallélogramme dont l'angle en bas à gauche vaut deg (commentaire du 21.11 : la figure n'était pas un parallélogramme).
+  paraAngles(deg, { la = "", lb = "", b = 5, s = 3.2 } = {}) {
+    const r = (deg * Math.PI) / 180, dx = s * Math.cos(r), dy = s * Math.sin(r);
+    const g = GEO().pt("A", 0, 0, false).pt("B", b, 0, false).pt("C", b + dx, dy, false).pt("D", dx, dy, false).poly(["A", "B", "C", "D"]);
+    if (la) g.angle("A", "B", "D", la, { r: 22 });
+    if (lb) g.angle("B", "C", "A", lb, { r: 22 });
+    return g.svg("parallélogramme");
+  },
   losange(D, d, { lD = "", ld = "" } = {}) {
     const g = GEO().pt("A", 0, 0, false).pt("B", D / 2, -d / 2, false).pt("C", D, 0, false).pt("E", D / 2, d / 2, false).poly(["A", "B", "C", "E"]);
     g.seg("A", "C", { dash: true }).seg("B", "E", { dash: true }).right([D / 2, 0], "C", "E");
