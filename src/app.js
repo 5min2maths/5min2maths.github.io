@@ -262,11 +262,11 @@ function screenHome() {
         <h3>${FORMATS[fmt].label}</h3><p class="small muted">${FORMATS[fmt].text} Le format change d'un jour à l'autre.</p></div>
       <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>${nowCard()}</div>
       ${freeCard()}`,
-    prob: () => !wp ? `<div class="card flat stack"><div class="eyebrow">Problème de la semaine</div><h3>Pas encore de problème pour toi</h3><p class="small muted">Les problèmes arrivent avec les notions que tu as déjà travaillées. Fais quelques séances !</p></div>`
+    prob: () => curiousCard() + (!wp ? `<div class="card flat stack"><div class="eyebrow">Problème de la semaine</div><h3>Pas encore de problème pour toi</h3><p class="small muted">Les problèmes arrivent avec les notions que tu as déjà travaillées. Fais quelques séances !</p></div>`
       : `<div class="card stack"><div class="eyebrow">Problème de la semaine${wpDone ? " · fait ✓" : ""}</div><h2>${NOTIONS.find((n) => n.id === wp).label}</h2>
         <p class="muted">Un problème en plusieurs étapes, avec des indices si tu bloques. Facultatif, et il rapporte gros.</p>
         <button class="${wpDone ? "" : "btn-primary btn-big"}" id="wp">${wpDone ? "Le refaire" : "Relever le défi"}</button>
-        <p class="small muted">${wpDone ? "Bravo ! Un nouveau problème arrive la semaine prochaine." : "Un nouveau problème chaque semaine."}</p></div>`,
+        <p class="small muted">${wpDone ? "Bravo ! Un nouveau problème arrive la semaine prochaine." : "Un nouveau problème chaque semaine."}</p></div>`),
     test: () => prep ? `<div class="card stack"><div class="eyebrow">Je prépare mon test</div><h2>${left === 0 ? "Test aujourd'hui" : left === 1 ? "Test demain" : "Test dans " + left + " jours"}</h2>
         <p class="small muted">${state.prep.ids.length} notion${state.prep.ids.length > 1 ? "s" : ""} : ${state.prep.ids.map((id) => NOTIONS.find((n) => n.id === id).label).join(" · ")}</p>
         ${prepProgramHtml()}
@@ -293,6 +293,7 @@ function screenHome() {
   on("other", () => { Engine.otherFormat(state); save(); screenHome(); });
   if (homeTab === "today") bindNowCard();
   on("wp", () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); });
+  on("curgo", () => screenCurious(Curieux.pick(state), () => { homeTab = "prob"; screenHome(); }));
   on("comps", screenComps);
   on("prep", screenPrep); on("prepedit", screenPrep);
   if (typeof screenMock === "function") on("mock", screenMock);
@@ -1276,6 +1277,70 @@ function vote(code, v) {
 
 // Début et fin de séance (anonymes) : classe, format ; à la fin, nombre de questions, score, durée en minutes.
 const sessionInfo = () => ({ niveau: state ? gradeName(state.profile) + (state.profile.track === "mp" ? " MP" : "") : "", fmt: session.carnet ? "carnet" : session.ctest ? "competence" : session.prep ? (session.prepKind ? "test-" + session.prepKind : "test") : session.weekly ? "semaine" : session.fmt || "" });
+// Carte de l'onglet « Problème » : la question curieuse (en tête, avant le problème de la semaine).
+function curiousCard() {
+  if (typeof Curieux === "undefined" || !Curieux.available(state).length) return "";
+  return `<div class="card stack"><div class="eyebrow">🤔 Question curieuse</div><h2>Les maths cachées</h2>
+    <p class="muted">Une pub, un paradoxe, une situation de tous les jours : fais ton pari, puis vérifie par le calcul. Ça surprend souvent !</p>
+    <button class="btn-primary" id="curgo">Essayer</button><p class="small muted">Facultatif, sans note ni Mathélo.</p></div>`;
+}
+// ---------------- Question curieuse (21.11) ----------------
+// Les maths cachées dans une situation : 1. Ton pari (intuition), 2. On vérifie (calcul), 3. Ce que tu as utilisé.
+// Facultatif : ni Mathélo, ni série, ni carnet d'erreurs. back : écran de retour.
+function screenCurious(q, back) {
+  if (!q) { toast("Pas encore de question curieuse pour toi : elles arrivent avec les notions vues en classe."); return back(); }
+  if (state) { state.curSeen = [...(state.curSeen || []).filter((k) => k !== q.key), q.key].slice(-20); save(); }
+  const F = CUR_FAM[q.fam] || { label: "Question curieuse", ic: "🤔" }, co = !state || state.profile.grade <= 11;
+  const spec = { kind: "value", value: q.calc.value, ...(q.calc.round ? { round: q.calc.round } : co ? { final: true } : {}) };
+  h(`${brand}<div class="eyebrow">${F.ic} Question curieuse · ${F.label}</div>
+  <div class="card pop stack"><h2>${q.titre}</h2><div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
+    <div class="act-step"><div class="act-h"><span class="act-n">1</span> Ton pari</div><p>${q.bet.q}</p>
+      <div class="seg" id="cbet">${q.bet.choices.map((c, i) => `<button type="button" data-i="${i}">${c}</button>`).join("")}</div><div id="cbfb"></div></div>
+    <div class="act-step" id="cs2" hidden><div class="act-h"><span class="act-n">2</span> On vérifie</div><p>${q.calc.label}</p>
+      <div class="answer"><input class="ans" id="cans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Ta réponse">
+      <div class="preview" id="cprev"></div>${keypadHtml({ ...spec, final: true })}
+      <div class="actions"><button class="btn-primary" id="cok">Vérifier</button><button class="btn-ghost" id="cidk">Voir la réponse</button></div></div><div id="cfb"></div></div>
+    <div class="act-step" id="cs3" hidden><div class="act-h"><span class="act-n">3</span> Le fin mot</div><div class="sol">${q.reveal}</div>
+      <div class="rule"><b>🧠 Ici, tu as utilisé</b> ${q.outil}</div><p class="small muted code">${q.code}</p></div>
+  </div>
+  <button class="btn-primary btn-big" id="cnext" hidden>Une autre question curieuse</button>
+  <button class="btn-ghost" id="cback">Retour</button>`);
+  pageQ = q.code;
+  const $ = (x) => document.getElementById(x), inp = $("cans"), prev = $("cprev");
+  const show = (el) => { el.hidden = false; el.classList.add("pop"); typeset(el); setTimeout(() => el.scrollIntoView && el.scrollIntoView({ behavior: "smooth", block: "start" }), 60); };
+  let betOk = null, tries = 0;
+  app.querySelectorAll("#cbet button").forEach((b) => (b.onclick = () => {
+    betOk = +b.dataset.i === q.bet.good;
+    app.querySelectorAll("#cbet button").forEach((x) => (x.disabled = true));
+    b.setAttribute("aria-pressed", "true");
+    $("cbfb").innerHTML = `<div class="small muted">Pari noté. Vérifions par le calcul !</div>`;
+    show($("cs2")); if (window.matchMedia("(pointer: fine)").matches) inp.focus();
+  }));
+  inp.oninput = () => previewOf(inp, prev, spec);
+  bindKeypad(() => inp, () => previewOf(inp, prev, spec));
+  const finish = (calcOk) => {
+    inp.disabled = true; ["kp", "cok", "cidk"].forEach((x) => $(x) && $(x).remove()); prev.remove();
+    app.querySelectorAll("#cbet button").forEach((x) => { if (+x.dataset.i === q.bet.good) x.classList.add("act-ok-btn"); else if (x.getAttribute("aria-pressed") === "true") x.classList.add("act-wrong"); });
+    const val = String(+(+q.calc.value).toFixed(q.calc.round ? Math.max(0, -Math.floor(Math.log10(q.calc.round))) : 4)).replace(".", ",");
+    $("cfb").innerHTML = `<div class="fb ${calcOk ? "ok" : "hint"} pop">${calcOk ? "✓ Juste !" : "Réponse : " + val}
+      <span>${betOk ? "Et ton intuition était la bonne : bravo !" : "Ton pari était : « " + esc(q.bet.choices[+app.querySelector('#cbet button[aria-pressed="true"]').dataset.i]) + " ». La bonne réponse : « " + q.bet.choices[q.bet.good] + " ». Beaucoup de gens se trompent ici : c'est tout l'intérêt !"}</span></div>`;
+    show($("cs3")); $("cnext").hidden = false;
+  };
+  const go = () => {
+    const v = inp.value.trim(); if (!v) return;
+    const r = checkAnswer(spec, v);
+    if (r.status === "correct") return finish(true);
+    if (r.status === "invalid" || r.status === "form") { $("cfb").innerHTML = `<div class="fb hint pop">${escT(r.message || "Écris un nombre.")}</div>`; return; }
+    tries++;
+    if (tries >= 2) return finish(false);
+    $("cfb").innerHTML = `<div class="fb hint pop">${r.status === "close" ? escT(r.message || "Presque !") : "Pas tout à fait. Encore un essai ?"}</div>`;
+  };
+  $("cok").onclick = go; inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
+  $("cidk").onclick = () => finish(false);
+  $("cnext").onclick = () => screenCurious(Curieux.pick(state), back);
+  $("cback").onclick = back;
+}
+
 function screenSummary() {
   if (session && session.weekly && state) { state.weeklyDone = weekKey(); save(); }
   if (session && session.prepKind && session.answered) prepMark(session.prepKind);
@@ -1291,11 +1356,13 @@ function screenSummary() {
   ${session.ctest ? (() => { const a = compNote((state.comps || {})[session.ctest.cid]), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? "La note apparaît après 3 réponses sur cette compétence." : b === null ? "Première note pour cette compétence." : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". Elle remontera avec la pratique." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
   ${nb}
   ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${state.carnet.length} à effacer</b></div>${session.carnet ? '<button id="carnetagain">Continuer à effacer</button>' : ""}</div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
+  ${typeof Curieux !== "undefined" && Curieux.available(state).length ? '<button id="curbonus">🤔 Bonus : une question curieuse</button>' : ""}
   <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)", "app")}</div>
   <button class="btn-primary btn-big" id="home">Retour à l'accueil</button>`);
   bindComment(app, "app");
   if (nb) setTimeout(burst, 250);
   document.getElementById("home").onclick = screenHome;
+  if (document.getElementById("curbonus")) document.getElementById("curbonus").onclick = () => screenCurious(Curieux.pick(state), screenHome);
   if (document.getElementById("carnetagain")) document.getElementById("carnetagain").onclick = () => startCarnet();
   if (document.getElementById("backcomps")) document.getElementById("backcomps").onclick = screenComps;
 }
@@ -1307,6 +1374,8 @@ function showCode() {
   if (ml && typeof LESSONS !== "undefined" && LESSONS[ml[1]]) { screenLesson(ml[1], () => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); }, false, false); return true; }
   const m = /^#q-(.+)$/.exec(location.hash);
   if (!m) return false;
+  const back0 = () => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); };
+  if (/^cur-/.test(m[1]) && typeof Curieux !== "undefined") { const cq = Curieux.fromCode(m[1]); if (cq) { screenCurious(cq, back0); return true; } }
   let q = Engine.fromCode(m[1]);
   // Même exigence qu'en séance (commentaire testeur du 15.11) : au CO, on donne le résultat, pas le calcul.
   if (q) { const n = NOTIONS.find((x) => x.id === q.id), y = n && n.CH && n.CH[0]; if (y && y <= 11) q = Engine.finalize({ profile: { system: "CH", grade: y } }, q.id, q); }

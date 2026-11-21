@@ -269,11 +269,14 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 
 /* Leçons actives (14.11) : devine, manipule, retiens */
 .act-step { display: grid; gap: 8px; border-top: 1px dashed var(--line); padding-top: 10px; }
+.act-step[hidden] { display: none; } /* 21.11 : display:grid annulait hidden (étapes 2 et 3 visibles avant le pari) */
 .act-step:first-of-type { border-top: none; padding-top: 0; }
 .act-h { display: flex; align-items: center; gap: 8px; font-weight: 700; }
 .act-n { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 0.85rem; }
 .act-goal { font-weight: 700; color: var(--blue); margin: 0; }
 .seg button.act-wrong { border-color: var(--bad); color: var(--bad); text-decoration: line-through; }
+.seg button.act-wrong[aria-pressed="true"] { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); }
+.seg button.act-ok-btn, .seg button.act-ok-btn[aria-pressed="true"] { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); font-weight: 700; }
 .act-out { font-size: 1.05rem; }
 .act-expr { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; font-size: 1.6rem; justify-content: center; padding: 6px 0; }
 .act-num { min-width: 46px; min-height: 46px; font-size: 1.5rem; border-radius: 10px; padding: 2px 8px; }
