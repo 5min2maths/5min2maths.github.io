@@ -380,7 +380,14 @@ function screenHome() {
   on("eloband", screenGrades);
   on("go", startSession);
   on("freego", startFree);
-  on("other", () => { Engine.otherFormat(state); save(); screenHome(); });
+  // Changer de format (21.11, « l'écran saute ») : on ne remplace que le titre et le texte de l'encadré, sans redessiner l'accueil.
+  on("other", () => {
+    const f = Engine.otherFormat(state); save();
+    const box = app.querySelector(".fmt-box"), h3 = box && box.querySelector("h3"), p = box && box.querySelector("p");
+    if (!h3 || !p) return screenHome();
+    h3.textContent = FORMATS[f].label; p.textContent = FORMATS[f].text;
+    box.classList.remove("fmt-swap"); void box.offsetWidth; box.classList.add("fmt-swap");
+  });
   if (homeTab === "today") bindNowCard();
   on("resgo", resumeSession);
   on("resno", () => { delete state.resume; save(); screenHome(); });

@@ -513,6 +513,9 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .grades li.todo { opacity: 0.45; filter: grayscale(0.7); }
 .grades li.cur { border: 2px solid var(--blue); background: var(--blue-soft); }
 .grades li.ok .g-n { color: var(--ok); }
+.fmt-box.fmt-swap h3, .fmt-box.fmt-swap p { animation: fmtswap .25s ease-out; }
+@keyframes fmtswap { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .fmt-box.fmt-swap h3, .fmt-box.fmt-swap p { animation: none; } }
 
 </style>
 <script>
@@ -19573,7 +19576,14 @@ function screenHome() {
   on("eloband", screenGrades);
   on("go", startSession);
   on("freego", startFree);
-  on("other", () => { Engine.otherFormat(state); save(); screenHome(); });
+  // Changer de format (21.11, « l'écran saute ») : on ne remplace que le titre et le texte de l'encadré, sans redessiner l'accueil.
+  on("other", () => {
+    const f = Engine.otherFormat(state); save();
+    const box = app.querySelector(".fmt-box"), h3 = box && box.querySelector("h3"), p = box && box.querySelector("p");
+    if (!h3 || !p) return screenHome();
+    h3.textContent = FORMATS[f].label; p.textContent = FORMATS[f].text;
+    box.classList.remove("fmt-swap"); void box.offsetWidth; box.classList.add("fmt-swap");
+  });
   if (homeTab === "today") bindNowCard();
   on("resgo", resumeSession);
   on("resno", () => { delete state.resume; save(); screenHome(); });

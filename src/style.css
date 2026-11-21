@@ -498,3 +498,6 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .grades li.todo { opacity: 0.45; filter: grayscale(0.7); }
 .grades li.cur { border: 2px solid var(--blue); background: var(--blue-soft); }
 .grades li.ok .g-n { color: var(--ok); }
+.fmt-box.fmt-swap h3, .fmt-box.fmt-swap p { animation: fmtswap .25s ease-out; }
+@keyframes fmtswap { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .fmt-box.fmt-swap h3, .fmt-box.fmt-swap p { animation: none; } }

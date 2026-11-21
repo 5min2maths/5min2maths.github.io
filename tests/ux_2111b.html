@@ -60,6 +60,9 @@ ok(/Mes grades/.test(app.textContent)&&app.querySelectorAll(".grades li").length
 ok(app.querySelector(".grades li.cur")&&/Chercheur/.test(app.querySelector(".grades li.cur").textContent),"10 grade actuel mis en avant");
 ok(/départ en 4e/.test(app.textContent)&&gradeOf(1850).name==="Virtuose"&&gradeOf(2300).name==="Légende","10 échelle jusqu'en 4e");
 document.getElementById("back").click();ok(!!document.getElementById("eloband"),"10 retour accueil");
+// 11. changer de format sans redessiner l'accueil
+homeTab="today";screenHome();const band0=document.getElementById("eloband"),f0=Engine.todayFormat(state);document.getElementById("other").click();
+ok(document.getElementById("eloband")===band0,"11 accueil non redessiné");ok(Engine.todayFormat(state)!==f0&&app.querySelector(".fmt-box h3").textContent===FORMATS[Engine.todayFormat(state)].label,"11 nouveau format affiché");
 }catch(e){fails.push("EXC "+e.message+" "+e.stack)}
 document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC\n"+fails.join("\n"):"OK")+"</pre>");
 </script>
