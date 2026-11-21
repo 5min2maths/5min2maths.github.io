@@ -18125,7 +18125,7 @@ function screenMockResult(cnt, n, ok, weak) {
 // 3. Grille finale : Avant et Résultat côte à côte ; « tu pensais savoir » → à revoir en priorité.
 // 4. Avant / Après : la grille est gardée (state.autotest) ; refaire le test remplit la colonne Après.
 // Ce n'est pas une note ; les compétences sont mises à jour (juste = 1, faux = 0).
-const AT_MAX = 8;
+const AT_MAX = 8; // au plus 8 lignes, sauf si le test compte plus de 8 notions (une ligne chacune)
 
 // Écriture d'une valeur proposée : comme l'élève l'écrirait (entier, décimal, fraction, multiple de π, racine).
 function qcmFmt(v, spec, text) {
@@ -18180,14 +18180,30 @@ function qcmMake(id, d) {
 }
 
 
-// Lignes de la grille : compétences des notions du test qui se prêtent au QCM, niveaux 1-2 d'abord, notions en alternance.
+// Lignes de la grille (21.11, demande de l'utilisateur) :
+// 1. au moins une ligne par notion du test : sa compétence de base (niveau 1) ;
+// 2. s'il reste de la place, une ligne de niveau 3 par notion (la plus exigeante), plutôt qu'un 2e niveau de base ;
+// 3. puis les niveaux 2.
+// Chaque ligne est testée par une question à choix si possible (mode « qcm »), sinon par une question à réponse tapée (« tape »).
+function atTypedOk(id, lv) {
+  for (let t = 0; t < 6; t++) { try { const q = Engine.build(id, lv, 1 + Math.floor(Math.random() * 46655)); if (q && q.spec && !q.parts) return true; } catch (e) {} }
+  return false;
+}
 function atRows(ids) {
   const per = ids.map((id) => compsOf(id).map((c) => ({ cid: c.cid, id, lv: c.i + 1, label: c.label })));
-  const out = [];
-  for (const pass of [[1, 2], [3]]) for (let k = 0; k < 3 && out.length < AT_MAX; k++) for (const L of per) {
-    const c = L.filter((x) => pass.includes(x.lv))[k];
-    if (c && out.length < AT_MAX && !out.some((o) => o.cid === c.cid) && qcmMake(c.id, c.lv)) out.push(c);
-  }
+  const out = [], has = (c) => out.some((o) => o.cid === c.cid), max = Math.max(AT_MAX, ids.length); // jamais une notion du test sans ligne
+  const add = (c) => {
+    if (!c || has(c) || out.length >= max) return false;
+    if (qcmMake(c.id, c.lv)) { out.push({ ...c, mode: "qcm" }); return true; }
+    if (atTypedOk(c.id, c.lv)) { out.push({ ...c, mode: "tape" }); return true; }
+    return false;
+  };
+  // 1. une ligne par notion : la plus basse qui marche
+  per.forEach((L) => { for (const c of L.slice().sort((x, y) => x.lv - y.lv)) if (add(c)) break; });
+  // 2. le niveau le plus exigeant de chaque notion (3, sinon 2)
+  per.forEach((L) => { const top = L.slice().sort((x, y) => y.lv - x.lv).find((c) => c.lv >= 2 && !has(c)); if (top) add(top); });
+  // 3. ce qui reste
+  per.forEach((L) => L.forEach(add));
   return out.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id) || a.lv - b.lv);
 }
 function atState() {
@@ -18229,9 +18245,19 @@ function screenQcm() {
 
 // Test rapide : une question à choix par ligne de la grille.
 function atTest() {
-  const A = atState(), items = A.rows.map((r) => ({ row: r, it: qcmMake(r.id, r.lv) })).filter((x) => x.it), res = {};
+  const A = atState(), items = A.rows.map((r) => ({ row: r, it: r.mode === "tape" ? null : qcmMake(r.id, r.lv) })), res = {};
+  const head = (i, lab = "") => `${A.runs.length ? "Test rapide · après" : "Je prépare mon test · étape 2 sur 2"} · ${i + 1} sur ${items.length}${lab ? " · " + esc(lab) : ""}<span class="pbar" aria-hidden="true"><i style="width:${Math.round((i / items.length) * 100)}%"></i></span>`;
   const show = (i) => {
     if (i >= items.length) { A.runs.push({ date: day(), r: res }); A.runs = A.runs.slice(-6); Badges.check(state); save(); return atGrid(true); }
+    // Ligne sans question à choix : question à réponse tapée, un seul essai, correction affichée.
+    if (!items[i].it) {
+      const row = items[i].row; let q = null;
+      for (let t = 0; t < 8 && !(q && q.spec && !q.parts); t++) { try { q = Engine.make(state, row.id, row.lv); } catch (e) { q = null; } }
+      if (!q) { i++; return show(i); }
+      return renderQuestion(q, { eyebrow: head(i, row.label), single: true, track: "autotest",
+        onDone: (r) => { res[row.cid] = r.solved ? 1 : 0; Engine.recordComp(state, row.id, q.d, res[row.cid]); save(); },
+        onNext: () => show(i + 1) });
+    }
     const { row, it } = items[i], q = it.q, pct = Math.round((i / items.length) * 100);
     h(`${brand}<div class="eyebrow">${A.runs.length ? "Test rapide · après" : "Je prépare mon test · étape 2 sur 2"} · ${i + 1} sur ${items.length}<span class="pbar" aria-hidden="true"><i style="width:${pct}%"></i></span></div>
     <div class="card pop"><div class="qmeta"><span class="chip">${row.label}</span></div>
