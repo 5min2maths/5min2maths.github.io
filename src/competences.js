@@ -25,7 +25,7 @@ const COMPS = {
   tradexpr: ["Traduire une phrase en calcul", "Traduire une phrase en calcul", "Traduire une phrase en calcul (puissances)"],
   multdiv: ["Trouver des multiples", "Trouver les diviseurs d'un nombre", "Compter des multiples dans un intervalle"],
   divcrit: ["Utiliser les critères de divisibilité par 3 et 9", "Utiliser les critères de divisibilité par 3 et 9", "Combiner des critères de divisibilité"],
-  premiers: ["Reconnaître un nombre premier", "Décomposer en facteurs premiers", "Décomposer en facteurs premiers"],
+  premiers: ["Reconnaître un nombre premier", "Décomposer en produit de facteurs premiers", "Décomposer en produit de facteurs premiers"],
   relrep: ["Comparer des nombres relatifs", "Calculer une distance sur la droite graduée", "Trouver le milieu de deux relatifs"],
   reladd: ["Additionner des nombres relatifs", "Soustraire un nombre relatif", "Calculer une somme de plusieurs relatifs"],
   fracrep: ["Comparer des fractions de même dénominateur", "Comparer des fractions de dénominateurs différents", "Encadrer une fraction entre deux entiers"],

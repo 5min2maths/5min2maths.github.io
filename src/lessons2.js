@@ -290,7 +290,7 @@ const LESSONS_V2 = {
     ["\\(3 + 4 \\cdot 2\\) : d'abord \\(4 \\cdot 2 = 8\\), puis \\(3 + 8 = 11\\).", "\\((3 + 4) \\cdot 2 = 7 \\cdot 2 = 14\\).", "\\(20 - 2 \\cdot 3^2\\) : \\(3^2 = 9\\), puis \\(2 \\cdot 9 = 18\\), puis \\(20 - 18 = 2\\)."],
     "\\(12 : 2 \\cdot 3\\) se calcule de gauche à droite : \\(6 \\cdot 3 = 18\\), et non \\(12 : 6 = 2\\)."],
   arith: ["PGDC et PPMC", "Deux outils pour comparer deux nombres entiers.",
-    "On décompose chaque nombre en facteurs premiers. Le PGDC (plus grand diviseur commun) est le produit des facteurs communs, avec le plus petit exposant. Le PPMC (plus petit multiple commun) est le produit de tous les facteurs, avec le plus grand exposant.",
+    "On décompose chaque nombre en produit de facteurs premiers. Le PGDC (plus grand diviseur commun) est le produit des facteurs communs, avec le plus petit exposant. Le PPMC (plus petit multiple commun) est le produit de tous les facteurs, avec le plus grand exposant.",
     ["\\(24 = 2^3 \\cdot 3\\) et \\(36 = 2^2 \\cdot 3^2\\).", "PGDC \\(= 2^2 \\cdot 3 = 12\\) ; PPMC \\(= 2^3 \\cdot 3^2 = 72\\)."],
     "« Partager en parts égales les plus grandes possible » : c'est le PGDC. « Se retrouver de nouveau en même temps » : c'est le PPMC."],
   fracadd: ["Additionner des fractions", "On ne peut additionner que des parts de même taille.",
