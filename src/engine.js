@@ -382,7 +382,11 @@ const Engine = {
     return q;
   },
   make(state, id, d, seed) {
-    const level = d || this.difficulty(state, id);
+    let level = d || this.difficulty(state, id);
+    // Notions de révision trop faciles au niveau 2 pour les grandes classes (21.11, « relève le niveau 2 pour la 11e ») :
+    // dès la classe indiquée, le niveau 2 tire les formes du niveau 3 (le code de la question reste reproductible : …-3-…).
+    const UP2 = { rel: 11 };
+    if (level === 2 && UP2[id] && state && state.profile && state.profile.grade >= UP2[id]) level = 3;
     if (seed) return this.finalize(state, id, this.build(id, level, seed));
     const rec = ((state.recentQ = state.recentQ || {})[id] = (state.recentQ[id] || []));
     const key = (q) => { let h = 0; for (const c of String(q.q) + JSON.stringify(q.spec)) h = (h * 31 + c.charCodeAt(0)) | 0; return h; };

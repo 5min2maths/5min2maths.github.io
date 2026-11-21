@@ -58,6 +58,18 @@
           { ctx: x[1], guide: [GS("Écart " + M((x[1] === "denivele" ? hi * 100 : hi) + " - " + par(x[1] === "denivele" ? lo * 10 : lo)) + " ?", v, M(v) + ".")], traps: [TR(x[1] === "denivele" ? hi * 100 + lo * 10 : hi + lo, "Soustraire un négatif, c'est ajouter : l'écart est plus grand que " + (x[1] === "denivele" ? hi * 100 : hi) + ".")] }); },
     ],
     3: [
+      // 21.11 (niveau 2 relevé pour la 11e) : puissances et priorités mêlées.
+      () => { const a = pk([2, 3]), n = pk([2, 3]), b = nz(-5, 5), c = -R.int(2, 6), k = pk([3, 5]), t1 = (-a) ** n, t2 = b * c, t3 = (-1) ** k, v = t1 - t2 + t3;
+        return Qv("Calcule : " + M("(-" + a + ")^" + n + " - " + par(b) + " \\cdot " + par(c) + " + (-1)^" + k), v,
+          M("(-" + a + ")^" + n + " = " + t1) + ", " + M(par(b) + " \\cdot " + par(c) + " = " + t2) + ", " + M("(-1)^" + k + " = " + t3) + " ; " + M(t1 + " - " + par(t2) + " + " + par(t3) + " = " + v) + ".",
+          { ctx: "puiss-prio", guide: [GS(M("(-" + a + ")^" + n) + " = ?", t1, M(t1) + (n % 2 ? " (exposant impair : négatif)." : " (exposant pair : positif).")), GS(M(par(b) + " \\cdot " + par(c)) + " = ?", t2, M(t2) + "."), GS("Résultat ?", v, M(v) + ".")],
+            traps: [TR(-(a ** n) - t2 + t3, "(−" + a + ")^" + n + " : les parenthèses comptent."), TR(t1 + t2 + t3, "Soustraire " + par(t2) + " : attention au signe."), TR(t1 - t2 - t3, "(−1)^" + k + " = −1 (exposant impair).")] }); },
+      // Crochets : −[a − (b − c) · d] + e
+      () => { const a = nz(-6, 6), b = R.int(1, 6), c = R.int(7, 12), d = pk([2, 3, -2]), e = nz(-9, 9), in1 = b - c, in2 = a - in1 * d, v = -in2 + e;
+        return Qv("Calcule : " + M("-[" + a + " - (" + b + " - " + c + ") \\cdot " + par(d) + "] + " + par(e)), v,
+          M(b + " - " + c + " = " + in1) + " ; " + M(a + " - " + par(in1) + " \\cdot " + par(d) + " = " + a + " - " + par(in1 * d) + " = " + in2) + " ; " + M("-" + par(in2) + " + " + par(e) + " = " + v) + ".",
+          { ctx: "crochets", guide: [GS("D'abord la parenthèse " + M(b + " - " + c) + " ?", in1, M(in1) + "."), GS("Puis le crochet " + M("[" + a + " - " + par(in1) + " \\cdot " + par(d) + "]") + " ?", in2, M(in2) + "."), GS("Résultat ?", v, M("-" + par(in2) + " + " + par(e) + " = " + v) + ".")],
+            traps: [TR(in2 + e, "Le signe − devant le crochet change le signe de tout le crochet."), TR(-((a - in1) * d) + e, "La multiplication passe avant la soustraction dans le crochet.")] }); },
       () => { const a = nz(-6, 6), b = nz(-6, 6), c = nz(-6, 6), d = nz(-6, 6), e = pk([1, 2, -1, -2, 3]); const t = (a - b) * (c - d); if (t % e) return null; const v = t / e;
         return Qv("Calcule : " + M("\\frac{(" + a + " - " + par(b) + ") \\cdot (" + c + " - " + par(d) + ")}{" + e + "}"), v, M("(" + (a - b) + ") \\cdot (" + (c - d) + ") = " + t) + ", puis " + M(t + " : " + par(e) + " = " + v) + ".",
           { ctx: "fraction-rel", guide: [GS(M(a + " - " + par(b)) + " ?", a - b, M(a - b) + "."), GS(M(c + " - " + par(d)) + " ?", c - d, M(c - d) + "."), GS("Résultat ?", v, M(v) + ".")], traps: [TR(-v, "Compte les facteurs négatifs pour le signe."), TR(((a + b) * (c + d)) / e, "Soustraire un négatif, c'est ajouter.")] }); },
