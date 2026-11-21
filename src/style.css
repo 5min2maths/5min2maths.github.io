@@ -437,3 +437,8 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .at-s.at-2 { color: var(--ok, #1e8e5a); } .at-s.at-1 { color: #c98a00; } .at-s.at-0 { color: var(--bad, #c0392b); }
 .at-m { display: block; font-size: 0.8rem; margin-top: 2px; color: var(--ink-soft); }
 .at-m.warn { color: var(--bad, #c0392b); font-weight: 600; } .at-m.good { color: var(--ok, #1e8e5a); }
+/* Autoévaluation : fond coloré de la case cochée (21.11) — ✓ vert, ~ orange, ✗ rouge */
+.at-seg button[data-v="2"][aria-pressed="true"] { background: var(--ok, #1e8e5a); border-color: var(--ok, #1e8e5a); color: #fff; }
+.at-seg button[data-v="1"][aria-pressed="true"] { background: #e08a00; border-color: #e08a00; color: #fff; }
+.at-seg button[data-v="0"][aria-pressed="true"] { background: var(--bad, #c0392b); border-color: var(--bad, #c0392b); color: #fff; }
+@media (prefers-color-scheme: dark) { .at-seg button[aria-pressed="true"] { color: #10162a; } }
