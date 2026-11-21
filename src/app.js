@@ -333,14 +333,7 @@ function screenHome() {
         <p class="muted">Un problème en plusieurs étapes, avec des indices si tu bloques. Facultatif, et il rapporte gros.</p>
         <button class="${wpDone ? "" : "btn-primary btn-big"}" id="wp">${wpDone ? "Le refaire" : "Relever le défi"}</button>
         <p class="small muted">${wpDone ? "Bravo ! Un nouveau problème arrive la semaine prochaine." : "Un nouveau problème chaque semaine."}</p></div>`) + curiousCard(),
-    test: () => prep ? `<div class="card stack"><div class="eyebrow">Je prépare mon test</div><h2>${left === 0 ? "Test aujourd'hui" : left === 1 ? "Test demain" : "Test dans " + left + " jours"}</h2>
-        <p class="small muted">${state.prep.ids.length} notion${state.prep.ids.length > 1 ? "s" : ""} : ${state.prep.ids.map((id) => NOTIONS.find((n) => n.id === id).label).join(" · ")}</p>
-        ${(() => { const A = state.autotest && state.autotest.key === state.prep.ids.join() ? state.autotest : null, R = A && A.runs.length ? A.runs[A.runs.length - 1].r : null, n = R ? Object.keys(R).length : 0, ok = R ? Object.values(R).filter((x) => x === 1).length : 0;
-          return `<button id="qcm" class="btn-primary btn-big">✅ ${A && A.runs.length ? "Ma grille d'autoévaluation" : "Autoévaluation et test rapide"}</button>${R ? `<p class="small muted">Dernier test rapide : ${ok} juste${ok > 1 ? "s" : ""} sur ${n}${A.runs.length > 1 ? " (colonne Après)" : ""}.</p>` : ""}`; })()}
-        <button class="btn-primary btn-big" id="prepgo">${PREP_TASK[prepKind(left)].ic} Aujourd'hui : ${PREP_TASK[prepKind(left)].label}</button>
-        ${prepProgramHtml()}
-        <button id="mock" class="btn-primary btn-big">📝 Sujet de préparation (avec corrigé)</button>${state.mock && state.mock.done && state.mock.ids.join() === state.prep.ids.join() ? `<p class="small muted">Dernier sujet de préparation : ${state.mock.done.n ? state.mock.done.juste + " question" + (state.mock.done.juste > 1 ? "s" : "") + " juste" + (state.mock.done.juste > 1 ? "s" : "") + " sur " + state.mock.done.n : "fait"}.</p>` : ""}
-        <button class="btn-ghost" id="prepedit">Modifier le test</button></div>`
+    test: () => prep ? prepPanel(left)
       : `<div class="card stack"><div class="eyebrow">Je prépare un test</div><h2>Un test approche ?</h2>
         <p class="muted">Dis-moi sa date et les notions : chaque jour, l'app te fait réviser juste ce qu'il faut, jusqu'au jour J. Tu pourras aussi t'entraîner sur un sujet de préparation, avec son corrigé.</p>
         <button class="btn-primary btn-big" id="prep">Je prépare un test</button></div>`,
@@ -372,8 +365,10 @@ function screenHome() {
   on("prep", screenPrep); on("prepedit", screenPrep);
   if (typeof screenMock === "function") on("mock", screenMock);
   if (typeof screenQcm === "function") on("qcm", screenQcm);
-  on("prepgo", () => startPrepTask(prepKind(left)));
-  on("preptask", () => startPrepTask(prepKind(left)));
+  on("prepgo", () => startPrepTask(prepKind()));
+  on("preptask", () => startPrepTask(prepKind()));
+  on("prepauto", () => screenQcm());
+  app.querySelectorAll(".pday").forEach((b) => (b.onclick = () => { app.querySelectorAll(".pday").forEach((x) => x.classList.toggle("sel", x === b)); const i = document.getElementById("pdayinfo"); if (i) i.innerHTML = b.dataset.info; }));
   on("carnetgo", () => startCarnet());
 }
 // Glisser à gauche / à droite sur l'accueil : cadre suivant / précédent (pas sur un curseur ou un champ).
@@ -711,7 +706,7 @@ function screenPrep() {
     const ids = [...app.querySelectorAll(".check input:checked")].map((i) => i.value), dt = document.getElementById("pdate").value;
     if (!ids.length) { document.getElementById("perr").textContent = "Coche au moins une notion."; return; }
     if (!dt || dt < day()) { document.getElementById("perr").textContent = "Choisis une date à partir d'aujourd'hui."; return; }
-    state.prep = { ids, date: dt };
+    state.prep = { ids, date: dt, start: state.prep && state.prep.date === dt && state.prep.start ? state.prep.start : day() };
     for (const id of ids) { const n = state.notions[id]; if (n.status !== "vu" && n.status !== "encours") Object.assign(n, { status: "encours", m: Math.max(0.4, n.m), due: day() }); }
     save(); screenHome();
   };
@@ -811,30 +806,48 @@ function carnetCard(full) {
 
 // ---------------- Programme jusqu'au test (20.11) ----------------
 // J−3 et avant : révision ciblée ; J−2 : sujet de préparation ; J−1 : dernier tour ; jour J : échauffement.
+// Programme jusqu'au test, en parcours guidé (21.11, « la page Test n'est pas intuitive ») :
+// 1er jour : autoévaluation (où en es-tu ?) ; puis révisions ciblées ; J-2 : sujet de préparation ;
+// J-1 : test rapide refait (colonne Après) et révision de ce qui coince ; jour J : échauffement.
 const PREP_TASK = {
+  autoeval: { ic: "📋", label: "Autoévaluation", text: "Où en es-tu ? Coche ce que tu sais faire, puis un test rapide te dira si tu avais raison." },
   revision: { ic: "🎯", label: "Révision ciblée", text: "7 questions sur les notions où tu es le moins sûr·e, avec un problème pour finir." },
-  mock: { ic: "📝", label: "Sujet de préparation", text: "Un sujet comme le vrai, puis tu te corriges avec le corrigé." },
+  mock: { ic: "📝", label: "Sujet de préparation", text: "Un sujet comme le vrai, sur une feuille, puis tu te corriges avec le corrigé." },
+  apres: { ic: "📋", label: "Test rapide final", text: "Où en es-tu maintenant ? Refais le test rapide : ta grille compare avec le début. Puis révise ce qui coince encore." },
   tour: { ic: "🔁", label: "Dernier tour", text: "Une question courte par notion, en commençant par tes erreurs du carnet." },
   jourj: { ic: "✏️", label: "Échauffement, puis le test", text: "3 questions pour te mettre en route. Tu es prêt·e : bonne chance !" },
 };
-const prepLeft = (date) => Math.round((new Date(date) - new Date(day())) / 864e5);
-const prepKind = (left) => (left <= 0 ? "jourj" : left === 1 ? "tour" : left === 2 ? "mock" : "revision");
+const prepLeft = (date, from = day()) => Math.round((new Date(date) - new Date(from)) / 864e5);
+const prepStart = () => state.prep.start || Object.keys(state.prep.log || {}).sort()[0] || day();
+// Tâche d'un jour donné (par défaut aujourd'hui).
+function prepKindOn(dt = day()) {
+  const L = prepLeft(state.prep.date, dt);
+  if (L <= 0) return "jourj";
+  if (L === 1) return "apres";
+  if (L === 2) return "mock";
+  if (dt === prepStart() && L >= 3) return "autoeval";
+  return "revision";
+}
+const prepKind = () => prepKindOn(day());
+// Jours du programme, du début de la préparation au test (au plus 8 affichés : début, …, 6 derniers jours).
 function prepDays() {
-  const L = prepLeft(state.prep.date), out = [];
-  for (let k = 0; k <= Math.min(L, 6); k++) { const dt = addDays(day(), k), kind = prepKind(L - k); out.push({ dt, kind, done: !!(state.prep.log || {})[dt] }); }
-  if (L > 6) out.splice(3, 0, { gap: L - 6 });
+  const start = prepStart() < day() ? prepStart() : day(), n = prepLeft(state.prep.date, start), out = [];
+  for (let k = 0; k <= n; k++) { const dt = addDays(start, k); out.push({ dt, kind: prepKindOn(dt), done: !!(state.prep.log || {})[dt] }); }
+  if (out.length > 8) { const keep = out.slice(0, 1).concat([{ gap: out.length - 7 }], out.slice(-6)); return keep; }
   return out;
 }
 function prepMark(kind) {
   if (!state || !Engine.prepActive(state)) return;
-  if (prepKind(prepLeft(state.prep.date)) !== kind) return;
+  if (prepKind() !== kind) return;
   (state.prep.log = state.prep.log || {})[day()] = kind; save();
 }
 function startPrepTask(kind) {
   const ids = state.prep.ids.filter((id) => state.notions[id]);
+  if (kind === "autoeval") return screenQcm();
+  if (kind === "apres") { const A = typeof atState === "function" ? atState() : null; return A && A.runs.length ? atTest() : screenQcm(); }
   if (kind === "mock") return typeof screenMock === "function" ? screenMock() : screenHome();
   let plan;
-  if (kind === "revision") plan = Engine.planPrep(state);
+  if (kind === "revision") { const c = carnetPlan(2, ids); plan = c.concat(Engine.planPrep(state).slice(c.length)); } // erreurs du carnet sur le test en tête (ex-« dernier tour »)
   else if (kind === "tour") { const c = carnetPlan(3, ids); plan = c.concat([...ids].sort((a, b) => state.notions[a].m - state.notions[b].m).slice(0, 8 - c.length).map((id) => id + "|" + (state.notions[id].m < 0.6 ? 1 : 2))); }
   else plan = [...ids].sort((a, b) => state.notions[b].m - state.notions[a].m).slice(0, 3).map((id) => id + "|1");
   session = { plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), prep: true, prepKind: kind };
@@ -842,10 +855,34 @@ function startPrepTask(kind) {
 }
 function prepTodayCard() {
   if (!Engine.prepActive(state)) return "";
-  const L = prepLeft(state.prep.date), kind = prepKind(L), t = PREP_TASK[kind], done = (state.prep.log || {})[day()];
+  const L = prepLeft(state.prep.date), kind = prepKind(), t = PREP_TASK[kind], done = (state.prep.log || {})[day()];
   return `<div class="card stack prep-today"><div class="eyebrow">${t.ic} ${L === 0 ? "Test aujourd'hui" : L === 1 ? "Test demain" : "Test dans " + L + " jours"}${done ? " · fait ✓" : ""}</div>
     <h3>Aujourd'hui : ${t.label}</h3><p class="small muted">${t.text}</p>
     <button class="${done ? "" : "btn-primary"}" id="preptask">${done ? "Recommencer" : "C'est parti"}</button></div>`;
+}
+const prepJ = (dt, short) => { const d = new Date(dt + "T12:00:00"); return (short ? ["di", "lu", "ma", "me", "je", "ve", "sa"] : ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."])[d.getDay()] + (short ? "" : " " + d.getDate() + "." + String(d.getMonth() + 1).padStart(2, "0")); };
+// Page Test en parcours guidé : en-tête, une seule action du jour, frise des jours, outils en plus.
+function prepPanel(left) {
+  const kind = prepKind(), t = PREP_TASK[kind], done = (state.prep.log || {})[day()], days = prepDays(), steps = days.filter((x) => !x.gap);
+  const k = steps.findIndex((x) => x.dt === day()) + 1, nxt = steps.find((x) => x.dt > day());
+  const A = state.autotest && state.autotest.key === state.prep.ids.join() ? state.autotest : null, R0 = A && A.runs.length ? A.runs[A.runs.length - 1].r : null;
+  const okA = R0 ? Object.values(R0).filter((x) => x === 1).length : 0, nA = R0 ? Object.keys(R0).length : 0;
+  const mk = state.mock && state.mock.done && state.mock.ids.join() === state.prep.ids.join() ? state.mock.done : null;
+  const info = (x) => esc(prepJ(x.dt) + " · " + PREP_TASK[x.kind].ic + " " + PREP_TASK[x.kind].label + (x.dt === day() ? " (aujourd'hui)" : x.done ? " · fait ✓" : ""));
+  return `<div class="card stack prep-head"><div class="spread"><div class="eyebrow">📝 Mon test</div><button class="btn-ghost small" id="prepedit">Modifier</button></div>
+    <h2>${left === 0 ? "Aujourd'hui !" : left === 1 ? "Demain, " : prepJ(state.prep.date) + " · "}${left > 1 ? "dans " + left + " jours" : left === 1 ? prepJ(state.prep.date) : ""}</h2>
+    <div class="chips">${state.prep.ids.map((id) => `<span class="chip">${esc(nLabel(id))}</span>`).join("")}</div></div>
+  <div class="card stack prep-now"><div class="eyebrow">Aujourd'hui${k ? " · étape " + k + " sur " + steps.length : ""}${done ? " · fait ✓" : ""}</div>
+    <h2>${t.ic} ${t.label}</h2><p class="small muted">${t.text}</p>
+    <button class="${done ? "" : "btn-primary "}btn-big" id="prepgo">${done ? "Refaire" : "Commencer"}</button>
+    ${done && nxt ? `<p class="small muted">Bravo ! Demain : ${PREP_TASK[nxt.kind].ic} ${PREP_TASK[nxt.kind].label}.</p>` : ""}</div>
+  <div class="card flat stack"><h3>Mon programme</h3>
+    <div class="pdays">${days.map((x) => x.gap ? `<span class="pgap" title="${x.gap} jours de révision ciblée">…</span>` : `<button type="button" class="pday${x.dt === day() ? " today sel" : ""}${x.done ? " done" : ""}" data-info="${info(x)}"><span class="pd-d">${prepJ(x.dt, true)}</span><span class="pd-i">${x.done ? "✓" : PREP_TASK[x.kind].ic}</span></button>`).join("")}</div>
+    <p class="small" id="pdayinfo">${info(days.find((x) => x.dt === day()) || steps[0])}</p>
+    <p class="small muted">Touche un jour pour voir ce qu'on y fait.</p></div>
+  <div class="card flat stack"><h3>En plus, quand tu veux</h3>
+    <div class="tools2"><button id="prepauto">📋 ${A && A.runs.length ? "Ma grille" : "Autoévaluation"}<span class="small muted">${R0 ? okA + " juste" + (okA > 1 ? "s" : "") + " sur " + nA : "pas encore faite"}</span></button>
+    <button id="mock">📝 Sujet de préparation<span class="small muted">${mk ? (mk.n ? mk.juste + " juste" + (mk.juste > 1 ? "s" : "") + " sur " + mk.n : "fait") : "avec corrigé"}</span></button></div></div>`;
 }
 function prepProgramHtml() {
   const J = (dt) => { const d = new Date(dt + "T12:00:00"); return ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."][d.getDay()] + " " + d.getDate() + "." + String(d.getMonth() + 1).padStart(2, "0"); };

@@ -26,15 +26,18 @@ ok((state.carnet||[]).length===0,"3 effacée après 2 réussites "+JSON.stringif
 document.getElementById("nx").click();ok(/vide : bravo/.test(app.textContent),"3 bilan carnet vide");
 // 4. programme du test : J-5 révision, J-2 sujet, J-1 dernier tour, J jour J
 const ids=["prio","fracadd","puiss"];
-for(const [L,kind] of [[5,"revision"],[2,"mock"],[1,"tour"],[0,"jourj"]]){state.prep={ids,date:addDays(day(),L)};homeTab="today";screenHome();
+for(const [L,kind] of [[5,"autoeval"],[2,"mock"],[1,"apres"],[0,"jourj"]]){state.prep={ids,date:addDays(day(),L)};homeTab="today";screenHome();
  ok(new RegExp(PREP_TASK[kind].label).test(app.textContent),"4 tâche J-"+L+" = "+kind);
- homeTab="test";screenHome();ok(app.querySelectorAll(".prep-days li").length>=L+1,"4 programme J-"+L);}
+ homeTab="test";screenHome();ok(app.querySelectorAll(".pday").length>=L+1&&!!document.getElementById("prepgo"),"4 programme J-"+L);}
 // 5. dernier tour avec une erreur du carnet sur une notion du test, puis marquage fait
-state.carnet=[{id:"fracadd",d:1,code:"x",date:day(),ok:0}];state.prep={ids,date:addDays(day(),1)};startPrepTask("tour");
-ok(session.plan[0]==="fracadd|1|carnet","5 carnet en tête du dernier tour "+session.plan.join());
+state.carnet=[{id:"fracadd",d:1,code:"x",date:day(),ok:0}];state.prep={ids,date:addDays(day(),4),start:addDays(day(),-1)};startPrepTask("revision");
+ok(session.plan[0]==="fracadd|1|carnet","5 carnet en tête de la révision ciblée "+session.plan.join());
 answer(true);ok(state.carnet[0].ok===1,"5 réussite comptée pour le carnet");
-for(let k=0;k<12&&!/Score/.test(app.textContent);k++){const b=document.getElementById("nx");if(b)b.click();else if(document.getElementById("idk"))document.getElementById("idk").click();}
-ok((state.prep.log||{})[day()]==="tour","5 tâche du jour marquée "+JSON.stringify(state.prep.log));
+for(let k=0;k<40&&!/Score/.test(app.textContent);k++){const b=document.getElementById("nx");if(b)b.click();else if(document.getElementById("idk"))document.getElementById("idk").click();}
+ok((state.prep.log||{})[day()]==="revision","5 tâche du jour marquée "+JSON.stringify(state.prep.log));
+// 6. parcours guidé : J-1 = test rapide (après) ; autoévaluation du 1er jour cochée dans la frise
+state.prep={ids,date:addDays(day(),1),start:addDays(day(),-3)};startPrepTask("apres");ok(/Autoévaluation/.test(app.textContent),"6 J-1 : autoévaluation");
+state.prep={ids,date:addDays(day(),5)};state.autotest=null;homeTab="test";screenHome();ok(/étape 1 sur 6/.test(app.textContent)&&/Autoévaluation/.test(app.querySelector(".prep-now").textContent),"6 1er jour : autoévaluation, étape 1 sur 6");
 }catch(e){fails.push("EXC "+e.message+" "+e.stack)}
 document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC\n"+fails.join("\n"):"OK")+"</pre>");
 </script>

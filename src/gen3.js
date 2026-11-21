@@ -5,7 +5,9 @@
 
 const FINE = [];
 const fx = (v, k = 6) => +(+v).toFixed(k);
-const QV = (q, value, sol, o = {}) => Object.assign({ q, spec: Object.assign({ kind: "value", value }, o.round ? { round: o.round } : {}, o.plain ? { plain: true } : {}), sol }, o.fig ? { fig: o.fig } : {});
+// Erreurs typiques (21.11) : o.traps = [TRAP(valeur, message)…] ; on écarte celles qui valent la réponse, les non finies et les doublons.
+const QVtraps = (value, traps) => { const seen = new Set(); return (traps || []).filter((t) => t && isFinite(t.v) && Math.abs(t.v - value) > 1e-9 * Math.max(1, Math.abs(value)) && !seen.has(+t.v.toFixed(9)) && seen.add(+t.v.toFixed(9))); };
+const QV = (q, value, sol, o = {}) => Object.assign({ q, spec: Object.assign({ kind: "value", value }, o.round ? { round: o.round } : {}, o.plain ? { plain: true } : {}), sol }, o.fig ? { fig: o.fig } : {}, o.traps ? { traps: QVtraps(value, o.traps) } : {});
 const QX = (q, expr, sol, o = {}) => Object.assign({ q, spec: Object.assign({ kind: "expr", expr }, o.form ? { form: o.form } : {}), sol }, o.fig ? { fig: o.fig } : {});
 const tu = (u) => "\\ \\text{" + u.replace(/([a-zA-Z]+)\^(\d)/, "$1}^$2\\text{") + "}";
 const pickN = (arr, n) => shuffle(arr.slice()).slice(0, n);

@@ -165,7 +165,7 @@ function atTest() {
   const A = atState(), items = A.rows.map((r) => ({ row: r, it: r.mode === "tape" ? null : qcmMake(r.id, r.lv) })), res = {};
   const head = (i, lab = "") => `${A.runs.length ? "Test rapide · après" : "Je prépare mon test · étape 2 sur 2"} · ${i + 1} sur ${items.length}${lab ? " · " + esc(lab) : ""}<span class="pbar" aria-hidden="true"><i style="width:${Math.round((i / items.length) * 100)}%"></i></span>`;
   const show = (i) => {
-    if (i >= items.length) { A.runs.push({ date: day(), r: res }); A.runs = A.runs.slice(-6); Badges.check(state); save(); return atGrid(true); }
+    if (i >= items.length) { A.runs.push({ date: day(), r: res }); A.runs = A.runs.slice(-6); if (typeof prepMark === "function") { prepMark("autoeval"); prepMark("apres"); } Badges.check(state); save(); return atGrid(true); }
     // Ligne sans question à choix : question à réponse tapée, un seul essai, correction affichée.
     if (!items[i].it) {
       const row = items[i].row; let q = null;
