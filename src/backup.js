@@ -16,7 +16,7 @@ const Backup = {
     return {
       v: 1, t, p: s.profile, n, c, cr: off(s.created),
       e: [s.elo.r, s.elo.n, (s.elo.log || []).slice(-8).map(([d, r]) => [off(d), r])],
-      k: [s.streak.count, off(s.streak.last)],
+      k: [s.streak.count, off(s.streak.last)].concat(s.streak.best ? [s.streak.best] : []),
       h: (s.history || []).slice(-14).map((x) => [off(x.date), x.n, r2(x.score)]),
       b, pr: s.prep || null, nw: s.now || null, g: Object.fromEntries(Object.entries(s.badges || {}).map(([k, d]) => [k, off(d)])),
     };
@@ -41,7 +41,7 @@ const Backup = {
     }
     s.comps = Object.fromEntries(Object.entries(o.c || {}).map(([cid, [r, n, l]]) => [cid, { r: [...r].map((ch) => +ch / 4), n, last: on(l) }]));
     s.elo = { r: o.e[0], n: o.e[1], log: o.e[2].map(([d, r]) => [on(d), r]) };
-    s.streak = { count: o.k[0], last: on(o.k[1]) };
+    s.streak = { count: o.k[0], last: on(o.k[1]) }; if (o.k[2]) s.streak.best = o.k[2];
     s.history = o.h.map(([d, n, sc]) => ({ date: on(d), n, score: sc }));
     if (o.b) s.bc = { ...o.b, last: on(o.b.last), weeks: Object.fromEntries(Object.entries(o.b.weeks).map(([k, v]) => [on(+k), v])) };
     s.badges = Object.fromEntries(Object.entries(o.g || {}).map(([k, d]) => [k, on(d)]));

@@ -222,7 +222,13 @@ Object.assign(ACTIVE, {
 // ---- 2e · Cercles et tangentes (14.11, retour testeur « Je ne comprends pas la pente ») ----
 Object.assign(ACTIVE, {
   cercletan: {
-    predict: { q: "Cercle de centre O(0 ; 0), point T(3 ; 4). De O à T, on avance de 3 et on monte de 4. La tangente en T…", choices: ["monte", "descend", "est horizontale"], good: 1,
+    predict: { q: "Cercle de centre O(0 ; 0), point T(3 ; 4). De O à T, on avance de 3 et on monte de 4. La tangente en T (la droite qui touche le cercle en T sans le traverser)…", choices: ["monte", "descend", "est horizontale"], good: 1,
+      fig: (() => { const X = (u) => 130 + u * 18, Y = (v) => 120 - v * 18;
+      return `<svg class="fig" viewBox="0 0 260 230" role="img" aria-label="cercle de centre O, rayon OT vers T(3 ; 4)"><line x1="${X(-6.5)}" y1="${Y(0)}" x2="${X(6.5)}" y2="${Y(0)}" class="f-grid"/><line x1="${X(0)}" y1="${Y(-6)}" x2="${X(0)}" y2="${Y(6)}" class="f-grid"/>
+      <circle cx="${X(0)}" cy="${Y(0)}" r="90" class="f-soft"/><line x1="${X(0)}" y1="${Y(0)}" x2="${X(3)}" y2="${Y(4)}" class="f-line" stroke-width="2.5"/>
+      <path d="M${X(0)},${Y(0)} L${X(3)},${Y(0)} L${X(3)},${Y(4)}" class="f-line" fill="none" stroke-dasharray="4 3"/><text x="${X(1.5)}" y="${Y(0) + 15}" class="f-txt" text-anchor="middle" font-size="12">+3</text><text x="${X(3) + 5}" y="${Y(2)}" class="f-txt" font-size="12">+4</text>
+      <circle cx="${X(0)}" cy="${Y(0)}" r="3.5" class="f-dot"/><text x="${X(0) - 7}" y="${Y(0) + 16}" class="f-txt" text-anchor="end" font-size="13">O</text>
+      <circle cx="${X(3)}" cy="${Y(4)}" r="6" class="f-dot"/><text x="${X(3) + 9}" y="${Y(4) - 6}" class="f-txt" font-size="13">T(3 ; 4)</text></svg>`; })(),
       why: "Elle est perpendiculaire au rayon : un quart de tour change « avancer de 3, monter de 4 » en « avancer de 4, descendre de 3 ». Sa pente est −3/4." },
     defis: ["Déplace T pour que la tangente soit horizontale.", "Déplace T pour que la tangente ait une pente de 3/4."],
     play(box, onWin) {
@@ -244,7 +250,7 @@ Object.assign(ACTIVE, {
         g += '<line x1="' + X(x - tx * L) + '" y1="' + Y(y - ty * L) + '" x2="' + X(x + tx * L) + '" y2="' + Y(y + ty * L) + '" class="f-accent" stroke-width="2.5"/>';
         if (tx && ty) { const s = tx > 0 ? 1 : -1, ax = s * tx, ay = s * ty; // on avance vers la droite
           g += '<path d="M' + X(x) + "," + Y(y) + " L" + X(x + ax) + "," + Y(y) + " L" + X(x + ax) + "," + Y(y + ay) + '" class="f-accent" fill="none" stroke-dasharray="4 3"/>' +
-            '<text x="' + X(x + ax / 2) + '" y="' + (Y(y) + (ay > 0 ? 15 : -6) * (ay < 0 ? -2.5 : 1)) + '" class="f-accent f-txt" text-anchor="middle" font-size="12">+' + ax + "</text>" +
+            '<text x="' + X(x + ax / 2) + '" y="' + (Y(y) + (ay > 0 ? 15 : -6)) + '" class="f-accent f-txt" text-anchor="middle" font-size="12">+' + ax + "</text>" +
             '<text x="' + (X(x + ax) + 5) + '" y="' + Y(y + ay / 2) + '" class="f-accent f-txt" font-size="12">' + (ay > 0 ? "+" : "−") + Math.abs(ay) + "</text>"; }
         g += '<circle cx="' + X(0) + '" cy="' + Y(0) + '" r="3.5" class="f-dot"/><text x="' + (X(0) + (x < 0 ? 7 : -7)) + '" y="' + (Y(0) + (y > 0 ? 16 : -7)) + '" class="f-txt" text-anchor="' + (x < 0 ? "start" : "end") + '" font-size="13">O</text>';
         g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="6" class="f-dot"/><text x="' + (X(x) + (x >= 0 ? 10 : -10)) + '" y="' + (Y(y) + (y >= 0 ? -8 : 18)) + '" class="f-txt" text-anchor="' + (x >= 0 ? "start" : "end") + '" font-size="13">T(' + x + " ; " + y + ")</text>";
@@ -276,7 +282,7 @@ function activeLesson(id, L, cont, review) {
   const tail = lessonBody(id), fb = tail.slice(tail.indexOf('<div class="lfb"'));
   h(`${brand}<div class="eyebrow">${review ? "Leçon" : "Nouvelle notion"} · à toi de jouer</div>
   <div class="card pop lesson-card stack"><h2>${L.titre}</h2>
-    <div class="act-step"><div class="act-h"><span class="act-n">1</span> Devine</div><p>${P.q}</p>
+    <div class="act-step"><div class="act-h"><span class="act-n">1</span> Devine</div><p>${P.q}</p>${P.fig ? `<div class="figwrap">${P.fig}</div>` : ""}
       <div class="seg" id="pc">${predOrder(P.choices.length).map((i) => `<button type="button" data-i="${i}">${P.choices[i]}</button>`).join("")}</div><div id="pfb"></div></div>
     <div class="act-step" id="s2" hidden><div class="act-h"><span class="act-n">2</span> Manipule</div>
       <p class="act-goal" id="goal"></p><div id="play" class="stack"></div><div id="gfb"></div>

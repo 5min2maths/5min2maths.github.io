@@ -90,6 +90,19 @@
     const check = () => { if (step >= o.wins.length) return false; const m = o.wins[step](x); if (m) { onWin(step, m); step++; if (o.ask) x = null; draw(); return true; } return false; };
     draw();
   };
+  // Pyramide à base carrée (commentaire 👎 du 21.11 : la leçon n'avait aucune figure) : hauteur, demi-côté et apothème en triangle rectangle.
+  const pyrFig = (c, h, a) => {
+    const A = [40, 190], B = [210, 190], C = [270, 140], D = [100, 140], O = [155, 165], S = [155, 40], Mx = [125, 190];
+    const L = (p, q, cls, ex = "") => `<line x1="${p[0]}" y1="${p[1]}" x2="${q[0]}" y2="${q[1]}" class="${cls}" ${ex}/>`;
+    const T = (x, y, t, ex = "") => `<text x="${x}" y="${y}" class="f-txt" font-size="13" ${ex}>${t}</text>`;
+    let g = `<path d="M${A} L${B} L${C} L${D} Z" class="f-soft"/>`;
+    g += L(A, D, "f-line", 'stroke-dasharray="4 3"') + L(D, C, "f-line", 'stroke-dasharray="4 3"') + L(S, D, "f-line", 'stroke-dasharray="4 3"');
+    g += L(A, B, "f-line") + L(B, C, "f-line") + L(S, A, "f-line") + L(S, B, "f-line") + L(S, C, "f-line");
+    g += L(S, O, "f-line", 'stroke-dasharray="5 3" style="stroke:var(--margin)" stroke-width="2"') + L(O, Mx, "f-line", 'style="stroke:var(--margin)" stroke-width="2"') + L(S, Mx, "f-line", 'style="stroke:var(--blue)" stroke-width="3"');
+    g += `<path d="M${O[0]},${O[1] - 9} L${O[0] - 5},${O[1] - 6} L${O[0] - 5},${O[1] + 3}" fill="none" class="f-line" stroke-width="1"/>`;
+    g += T(161, 128, "h = " + h, 'style="fill:var(--margin)"') + T(146, 186, c / 2, 'text-anchor="middle" font-size="12" style="fill:var(--margin)"') + T(133, 120, "a = " + (a == null ? "?" : a), 'text-anchor="end" style="fill:var(--blue)" font-weight="700"') + T(125, 210, "côté " + c + " cm", 'text-anchor="middle"');
+    return svg(300, 220, g, "pyramide à base carrée : hauteur " + h + ", demi-côté " + c / 2 + ", apothème " + (a == null ? "inconnu" : a));
+  };
   const W = (target, msg) => (x) => (Math.abs(x - target) < 1e-9 ? msg : "");
   // Barre de fraction : a/b de la longueur, avec graduations en 1/n
   const bar = (a, b, n, y, cls) => { const x0 = 20, w = 280; let g = `<rect x="${x0}" y="${y}" width="${w}" height="18" class="f-soft" stroke="var(--ink)" stroke-width="1"/><rect x="${x0}" y="${y}" width="${(w * a) / b}" height="18" class="${cls}"/>`;
@@ -202,11 +215,12 @@
         wins: [W(3, "3 cônes : un cône vaut le tiers du cylindre, V = ⅓ π r² h."), W(3, "3 pyramides : V = ⅓ · base · hauteur."), W(6, "Deux fois moins haut, deux fois moins de volume : chaque cône vaut 1/6 du cylindre.")] }),
     },
     airepyr: {
-      predict: { q: "Une pyramide à base carrée de 6 cm a une hauteur de 4 cm. Son apothème (hauteur d'une face) mesure…", choices: ["4 cm", "5 cm", "7 cm"], good: 1, why: "Hauteur, demi-côté et apothème forment un triangle rectangle : √(4² + 3²) = √25 = 5. L'apothème est plus long que la hauteur." },
+      predict: { q: "Une pyramide à base carrée de 6 cm a une hauteur de 4 cm. Son apothème a (la hauteur d'une face triangulaire, en bleu) mesure…", fig: pyrFig(6, 4), choices: ["4 cm", "5 cm", "7 cm"], good: 1, why: "Hauteur, demi-côté et apothème forment un triangle rectangle : √(4² + 3²) = √25 = 5. L'apothème est plus long que la hauteur." },
       defis: ["Base 6 cm, hauteur 4 cm : calcule l'apothème.", "Base 10 cm, hauteur 12 cm : calcule l'apothème.", "Base 16 cm, hauteur 6 cm : calcule l'apothème, puis lis l'aire latérale."],
       play: hunt({ ask: true, label: "Apothème", start: 3, min: 1, max: 20,
+        blank: (s) => { const [c, h] = [[6, 4], [10, 12], [16, 6]][s]; return pyrFig(c, h); },
         show: (x, s) => { const [c, h] = [[6, 4], [10, 12], [16, 6]][s], t = h * h + (c / 2) ** 2;
-          return `<div class="act-out">${h}² + ${c / 2}² = ${t} ; ${x}² = ${x * x} → ${ok(t === x * x, x * x < t)}<br>aire latérale : 4 · (${c} · ${x}) ÷ 2 = <b>${2 * c * x} cm²</b></div>`; },
+          return pyrFig(c, h, x) + `<div class="act-out">${h}² + ${c / 2}² = ${t} ; ${x}² = ${x * x} → ${ok(t === x * x, x * x < t)}<br>aire latérale : 4 · (${c} · ${x}) ÷ 2 = <b>${2 * c * x} cm²</b></div>`; },
         note: "Sous l'apothème, il y a le demi-côté de la base.",
         wins: [W(5, "√(16 + 9) = 5 ; aire latérale 2 · 6 · 5 = 60 cm²."), W(13, "√(144 + 25) = 13 ; aire latérale 260 cm²."), W(10, "√(36 + 64) = 10 ; aire latérale 2 · 16 · 10 = 320 cm².")] }),
     },

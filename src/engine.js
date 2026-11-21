@@ -649,6 +649,7 @@ const Engine = {
       if (typeof Badges !== "undefined") Badges.onDay(state, today);
       if (state.streak.last !== today) state.streak.count = state.streak.last === addDays(today, -1) ? state.streak.count + 1 : 1;
       state.streak.last = today;
+      state.streak.best = Math.max(state.streak.best || 0, state.streak.count);
       const h = state.history.find((x) => x.date === today);
       if (h) { h.n += answered; h.score += score; } else state.history.push({ date: today, n: answered, score });
       state.history = state.history.slice(-120);

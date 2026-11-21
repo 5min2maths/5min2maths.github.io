@@ -160,6 +160,7 @@ function screenLevel() {
   <h3>Ta classe cette année</h3><div class="seg" id="grade">${sys.grades.map(([g, n]) => `<button aria-pressed="${g === draft.grade}" data-v="${g}">${n}</button>`).join("")}</div>
   ${sec2 ? `<h3>Ta voie</h3><p class="small muted">Important : choisis ton école, le programme n'est pas le même.</p><div class="seg track-seg" id="track"><button aria-pressed="${draft.track === "college"}" data-v="college">Collège (maturité gymnasiale)</button><button aria-pressed="${draft.track === "mp"}" data-v="mp">Maturité professionnelle (CFPT, école professionnelle…)</button></div><p class="small" id="trackerr" style="color:var(--bad, #c0392b)"></p>` : ""}</div>
   <p class="small muted">Chaque jour, l'app te propose un programme différent (un défi, une série d'automatismes, des applications…), équilibré sur la semaine. Pas de chrono : l'important, c'est de venir chaque jour.</p>
+  <p class="small muted">Ensuite : au plus 5 questions pour trouver ton point de départ (2 à 3 minutes). Tu peux t'arrêter, tu reprendras au même endroit.</p>
   <button class="btn-primary btn-big" id="next">Continuer</button>`);
   const bind = (id, key, num) => app.querySelectorAll("#" + id + " button").forEach((b) => (b.onclick = () => { draft[key] = num ? +b.dataset.v : b.dataset.v; screenLevel(); }));
   bind("sys", "system"); bind("grade", "grade", true); bind("track", "track");
@@ -175,14 +176,18 @@ function screenLevel() {
 }
 
 // ---------------- Positionnement ----------------
+// Reprise (21.11, signaux muets : élèves qui ferment l'onglet en plein positionnement et recommencent tout) :
+// le plan et la position sont gardés dans state.placement ; au retour, on reprend à la question suivante.
 function startPlacement() {
-  const plan = Engine.placementPlan(state);
-  let i = 0;
+  if (!state.placement || !state.placement.plan || !state.placement.plan.length) { state.placement = { plan: Engine.placementPlan(state), i: 0 }; save(); }
+  const plan = state.placement.plan;
+  let i = state.placement.i;
   const next = () => {
-    if (i >= plan.length) { state.placed = true; save(); return screenPlacementDone(); }
+    state.placement.i = i; save();
+    if (i >= plan.length) { state.placed = true; delete state.placement; save(); return screenPlacementDone(); }
     const id = plan[i], q = Engine.make(state, id, Math.min(2, difficultyCap(state.profile)));
     renderQuestion(q, {
-      eyebrow: "Étape 2 sur 2 · positionnement " + (i + 1) + "/" + plan.length, single: true, track: "positionnement",
+      eyebrow: "Étape 2 sur 2 · question " + (i + 1) + " sur " + plan.length + (plan.length - i > 1 ? " · encore " + (plan.length - i - 1) + " après celle-ci" : " · la dernière !") + `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((i / plan.length) * 100)}%"></i></span>`, single: true, track: "positionnement",
       onDone: (res) => { Engine.placementResult(state, id, res.solved ? true : res.dontKnow ? null : false, q.d); save(); },
       onNext: () => { i++; next(); },
       onNotYet: () => { Engine.notYet(state, id); save(); toast("Noté : cette notion reviendra plus tard."); i++; next(); },
@@ -245,6 +250,12 @@ const HOME_TABS = [
   ["test", "Test", '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>'],
   ["prog", "Progrès", '<path d="M4 20V10M10 20V5M16 20v-7M22 20H2"/>'],
 ];
+// Série en jeu (21.11, amélioration UX 2 : 31 % des appareils reviennent un 2e jour) : rappel discret tant que la séance du jour n'est pas faite.
+function streakNudge() {
+  const s = state.streak, today = day();
+  if (!s.count || s.last === today || s.last !== addDays(today, -1)) return "";
+  return `<div class="card flat streak streak-nudge"><span class="flame">🔥</span><div><b>${s.count} ${s.count > 1 ? "jours" : "jour"} d'affilée</b><div class="small muted">Une séance aujourd'hui et tu passes à ${s.count + 1}${s.best && s.count + 1 > s.best ? " : nouveau record !" : "."}</div></div></div>`;
+}
 function screenHome() {
   if (!state) return screenWelcome();
   Badges.check(state);
@@ -255,7 +266,7 @@ function screenHome() {
   const dots = { prob: !!wp && !wpDone, test: prep && left <= 3, prog: (state.badgesNew || []).length > 0 };
   save();
   const panels = {
-    today: () => `${prepTodayCard()}${carnetCard(false)}<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire${done ? " · séance faite, tu peux en refaire une" : ""}</div>
+    today: () => `${streakNudge()}${prepTodayCard()}${carnetCard(false)}<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire${done ? " · séance faite, tu peux en refaire une" : ""}</div>
       <h2>Ton chapitre, au rythme de la classe</h2>
       <p class="muted">Tes séances suivent ce que tu fais en classe : le chapitre en cours, des révisions au bon moment pour ne rien oublier, et la préparation de tes tests.</p>
       <div class="fmt-box stack"><div class="spread"><span class="eyebrow">Aujourd'hui</span><button class="btn-ghost small" id="other">🔁 Changer de format</button></div>
@@ -279,7 +290,7 @@ function screenHome() {
     prog: () => `${newBadgesCard()}${carnetCard(true)}${themeMapCard()}${compsCard()}`,
   };
   if (!panels[homeTab]) homeTab = "today";
-  h(`<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted">${gradeName(state.profile)}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>
+  h(`<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted">${gradeName(state.profile)}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>
   ${eloBanner()}
   <div class="home-panel" data-tab="${homeTab}">${panels[homeTab]()}</div>
   ${navTabs(homeTab, dots)}`);
@@ -795,6 +806,7 @@ function nextQuestion(redo) {
       }
       res.delta = Engine.updateElo(state, id, q.d, sc);
       session.score += sc; session.answered++; session.ids.add(id);
+      session.res = session.res || {}; const rr = (session.res[id] = session.res[id] || { n: 0, ok: 0 }); rr.n++; if (res.solved) rr.ok++;
       Engine.finishDay(state, 1, sc); save();
       return res.delta;
     },
@@ -838,14 +850,19 @@ function exactNote(spec, text) {
 const SET_KEYS = ["7", "8", "9", "-", "+", "/", "⌫", "4", "5", "6", "[", "]", ";", "∞", "1", "2", "3", "x", "<", ">", "∪",
   "0", ",", "≤", "≥", "≠", "=", "ℝ \\ {|}", "ℝ", "∅", "√", "⌨"];
 const KEY_LABEL = { "*": "×", "ℝ \\ {|}": "ℝ∖{ }" };
-const keyBtn = (k, set) => `<button type="button" class="${/^[\d,]$/.test(k) ? "" : "k-op"}${k === "0" || (k === "⌨" && !set) || k === "ℝ \\ {|}" || (k === "⌨" && set) ? " k-wide" : ""}" data-k="${esc(k)}">${KEY_LABEL[k] || k}</button>`;
+// 21.11 (amélioration UX 4) : « / » et « ⌨ » n'étaient pas compris ; petite légende sous ces touches, nom complet au survol et pour les lecteurs d'écran.
+const KEY_SUB = { "/": "fraction", "⌨": "clavier", "^": "puissance" };
+const KEY_NAME = { "/": "barre de fraction", "⌨": "afficher le clavier du téléphone", "^": "puissance", "⌫": "effacer", "√": "racine carrée", "*": "fois", ";": "séparer deux réponses", "∪": "union", "∞": "infini", "∅": "aucune solution" };
+const keyIn = (k) => (KEY_LABEL[k] || k) + (KEY_SUB[k] ? `<small class="k-sub">${KEY_SUB[k]}</small>` : "");
+const keyAttr = (k) => (KEY_NAME[k] ? ` title="${KEY_NAME[k]}" aria-label="${KEY_NAME[k]}"` : "");
+const keyBtn = (k, set) => `<button type="button" class="${/^[\d,]$/.test(k) ? "" : "k-op"}${k === "0" || (k === "⌨" && !set) || k === "ℝ \\ {|}" || (k === "⌨" && set) ? " k-wide" : ""}" data-k="${esc(k)}"${keyAttr(k)}>${keyIn(k)}</button>`;
 const isSetSpec = (spec) => !!spec && (spec.kind === "solset" || spec.kind === "ineq");
 // Clavier « résultat » (14.11) : chiffres seulement, pas de calculatrice ; √ si la réponse exacte en a besoin.
 // 19.11 (urgent, testeur) : touche π quand la réponse exacte est un multiple simple de π (volumes « en fonction de π »).
 const niceQ = (x) => { if (!isFinite(x) || Math.abs(x) < 1e-3) return false; for (let d = 1; d <= 12; d++) if (Math.round(x * d) !== 0 && Math.abs(x * d - Math.round(x * d)) < 1e-6) return true; return false; };
 const exactKeys = (spec) => { const v = spec.value; if (!isFinite(v) || isTerm(v)) return []; if (!spec.radical && !spec.pi && niceQ(v)) return []; /* fraction : chiffres et / suffisent */ const pi = spec.pi || niceQ(v / Math.PI), root = spec.radical || !pi; return [...(root ? ["√"] : []), ...(pi ? ["π"] : [])]; };
 const numKeys = (spec) => { const ex = exactKeys(spec); return ["7", "8", "9", "⌫", "4", "5", "6", "-", "1", "2", "3", "/", "0", ",", ...ex, "⌨"]
-  .map((k) => `<button type="button" class="${/^[\d,]$/.test(k) ? "" : "k-op"}${k === "0" && !ex.length ? " k-wide" : ""}" data-k="${esc(k)}">${KEY_LABEL[k] || k}</button>`).join(""); };
+  .map((k) => `<button type="button" class="${/^[\d,]$/.test(k) ? "" : "k-op"}${k === "0" && !ex.length ? " k-wide" : ""}" data-k="${esc(k)}"${keyAttr(k)}>${keyIn(k)}</button>`).join(""); };
 // Lettres du clavier (15.11) : celles de l'expression attendue (a, b, n…) remplacent x et y ; une 3e lettre prend la place de « = ».
 const keyLetters = (spec) => { let L = []; try { if (spec && spec.kind === "expr") L = [...Expr.vars(Expr.parse(spec.expr))].sort(); } catch (e) {} if (!L.length || (L.length <= 2 && L.every((v) => v === "x" || v === "y"))) return KEYS; const k = KEYS.slice(); k[k.indexOf("x")] = L[0]; k[k.indexOf("y")] = L[1] || (L[0] === "x" ? "y" : "x"); if (L[2]) k[k.indexOf("=")] = L[2]; return k; };
 const keysFor = (spec) => (spec && spec.final ? numKeys(spec) : isSetSpec(spec) ? SET_KEYS.map((k) => keyBtn(k, true)).join("") : keyLetters(spec).map((k) => keyBtn(k)).join(""));
@@ -1038,7 +1055,7 @@ function renderQuestion(q, opt) {
       ${!solved && lastDiag ? `<div class="diag">🔎 ${esc(lastDiag)}</div>` : ""}
       ${guided ? `<button class="btn-primary" id="guide">🪜 On le fait ensemble, pas à pas</button><div id="gsteps" class="stack"></div><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : solSteps ? `<button class="btn-primary" id="solstep">🪜 Voir la correction étape par étape</button><div id="ssteps" class="stack"></div><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : `<div class="sol">${q.sol}</div>`}</div>
       <div class="vote"><span>Cette question était… <button data-v="up" aria-label="Bonne question">👍</button> <button data-v="down" aria-label="Question à revoir">👎</button></span><span class="code" title="Code de la question">${code}</span></div>${commentBox()}
-      <div class="actions">${solved ? "" : '<button id="redo">Refaire avec d\'autres valeurs</button>'}<button class="btn-primary" id="nx">Continuer</button></div>`;
+      <div class="actions">${solved ? "" : `<button id="redo"${!guided && !solSteps ? ' class="btn-primary"' : ""}>${q.d > 1 && q.d < 4 ? "💪 Une plus facile pour repartir" : "Refaire avec d'autres valeurs"}</button>`}<button class="${!solved && !guided && !solSteps ? "" : "btn-primary"}" id="nx">Continuer</button></div>`;
     typeset(fb);
     fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
     bindComment(fb, code);
@@ -1060,7 +1077,7 @@ function renderQuestion(q, opt) {
       const qt = app.querySelector(".qtext"); if (qt) qt.scrollIntoView({ behavior: "smooth", block: "start" });
     };
     const gb = document.getElementById("guide");
-    if (gb) { gb.onclick = () => { sigAide(S, "g"); gb.remove(); fold(document.getElementById("gsteps")); runGuide(q, document.getElementById("gsteps"), () => { const rd = document.getElementById("redo"); if (rd) { rd.classList.add("btn-primary"); rd.textContent = "À toi : une question du même type"; rd.focus(); } }); }; gb.focus(); }
+    if (gb) { gb.onclick = () => { sigAide(S, "g"); gb.remove(); fold(document.getElementById("gsteps")); runGuide(q, document.getElementById("gsteps"), () => { const rd = document.getElementById("redo"); if (rd) { rd.classList.add("btn-primary"); rd.textContent = q.d > 1 && q.d < 4 ? "À toi : la même, un cran plus facile" : "À toi : une question du même type"; rd.focus(); } }); }; gb.focus(); }
     else if (solSteps) {
       const sb = document.getElementById("solstep"), box = document.getElementById("ssteps");
       let k = 0, folded = false;
@@ -1069,7 +1086,7 @@ function renderQuestion(q, opt) {
         box.insertAdjacentHTML("beforeend", `<div class="gstep"><span class="small muted">Étape ${k + 1} sur ${solSteps.length}</span><div class="sol">${solSteps[k]}</div></div>`);
         typeset(box); k++; sigAide(S, "e");
         if (k < solSteps.length) { sb.textContent = "Étape suivante (essaie d'abord de la trouver)"; sb.focus(); }
-        else { sb.remove(); fb.querySelector("details.solfull").remove(); const rd = document.getElementById("redo"); if (rd) { rd.classList.add("btn-primary"); rd.textContent = "À toi : une question du même type"; rd.focus(); } }
+        else { sb.remove(); fb.querySelector("details.solfull").remove(); const rd = document.getElementById("redo"); if (rd) { rd.classList.add("btn-primary"); rd.textContent = q.d > 1 && q.d < 4 ? "À toi : la même, un cran plus facile" : "À toi : une question du même type"; rd.focus(); } }
       };
       sb.onclick = more; sb.focus();
     }
@@ -1355,6 +1372,15 @@ function screenCurious(q, back, from = "") {
   $("cback").onclick = back;
 }
 
+// Bilan par notion (21.11, amélioration UX 6) : ce qui est acquis aujourd'hui, ce qui reviendra, au lieu d'une simple liste.
+function summaryByNotion() {
+  const r = session.res || {}, ids = [...session.ids].filter((id) => r[id]);
+  if (!ids.length) return "";
+  const lab = (id) => (NOTIONS.find((x) => x.id === id) || {}).label || id;
+  const ok = ids.filter((id) => r[id].ok === r[id].n), mid = ids.filter((id) => r[id].ok > 0 && r[id].ok < r[id].n), ko = ids.filter((id) => !r[id].ok);
+  const line = (ic, t, arr, note) => arr.length ? `<div class="sum-line"><span>${ic}</span><div><b>${t}</b><div class="small">${arr.map(lab).join(" · ")}</div>${note ? `<div class="small muted">${note}</div>` : ""}</div></div>` : "";
+  return `<div class="card flat stack sum-notions">${line("✅", ok.length > 1 ? "Réussies" : "Réussie", ok)}${line("📈", "En progrès", mid, "Une partie juste : encore une ou deux séances.")}${line("🔁", ko.length > 1 ? "Reviendront bientôt" : "Reviendra bientôt", ko, (state.carnet || []).length ? "Rangées dans ton carnet d'erreurs, à refaire quand tu veux." : "L'app te les reproposera dans les prochains jours.")}</div>`;
+}
 function screenSummary() {
   if (session && session.weekly && state) { state.weeklyDone = weekKey(); save(); }
   if (session && session.prepKind && session.answered) prepMark(session.prepKind);
@@ -1363,10 +1389,11 @@ function screenSummary() {
   const nb = newBadgesCard();
   const n = session.answered, sc = session.score, d = state.elo.r - session.elo0;
   h(`${brand}<h2>${sc >= n * 0.8 ? "Excellente séance !" : sc >= n * 0.5 ? "Bonne séance." : "Séance faite : c'est en pratiquant qu'on progresse."}</h2>
-  <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span><div class="small muted">À demain pour ta question du jour.</div></div></div>
+  <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span>${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ta série passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div></div></div>
+  ${summaryByNotion()}
   <div class="card stack"><div class="spread"><span>Score</span><b>${String(sc).replace(".", ",")} / ${n}</b></div>
   <div class="spread"><span>Mathélo</span><b>${state.elo.r} <span class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</span></b></div>
-  <div class="small muted">Notions travaillées : ${[...session.ids].map((id) => NOTIONS.find((x) => x.id === id).label).join(" · ")}</div></div>
+</div>
   ${session.ctest ? (() => { const a = compNote((state.comps || {})[session.ctest.cid]), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? "La note apparaît après 3 réponses sur cette compétence." : b === null ? "Première note pour cette compétence." : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". Elle remontera avec la pratique." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
   ${nb}
   ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${state.carnet.length} à effacer</b></div>${session.carnet ? '<button id="carnetagain">Continuer à effacer</button>' : ""}</div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
@@ -1405,4 +1432,4 @@ if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude/.
 
 // Démarrage
 ping("open");
-if (!showCode() && !restoreFromHash()) { if (state && state.placed) screenHome(); else { state = null; screenWelcome(); } }
+if (!showCode() && !restoreFromHash()) { if (state && state.placed) screenHome(); else if (state && state.placement) { toast("On reprend ton positionnement là où tu l'avais laissé."); startPlacement(); } else { state = null; screenWelcome(); } }
