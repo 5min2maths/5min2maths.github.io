@@ -456,3 +456,10 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .resume-card { border: 2px solid var(--blue); }
 .tomorrow { margin-top: 2px; }
 .streak .tomorrow b { font-family: inherit; font-size: inherit; }
+/* Brouillon au doigt (21.11) */
+.scratch-btn { justify-self: start; }
+.scratch { border: 1.5px dashed var(--line); border-radius: 12px; background: var(--paper); padding: 6px; display: grid; gap: 4px; }
+.scratch[hidden] { display: none; }
+.scratch canvas { width: 100%; height: 240px; touch-action: none; display: block; border-radius: 8px;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 20px 20px; }
+.scratch .row { justify-content: flex-end; }

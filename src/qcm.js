@@ -179,10 +179,12 @@ function atTest() {
     h(`${brand}<div class="eyebrow">${A.runs.length ? "Test rapide · après" : "Je prépare mon test · étape 2 sur 2"} · ${i + 1} sur ${items.length}<span class="pbar" aria-hidden="true"><i style="width:${pct}%"></i></span></div>
     <div class="card pop"><div class="qmeta"><span class="chip">${row.label}</span></div>
     <div class="qtext">${boldData(q.q)}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
+    ${scratchHtml()}
     <p class="small muted">Une seule réponse est juste. Calcule d'abord, puis choisis.</p>
     <div class="qcm-choices">${it.choices.map((c, k) => `<button type="button" class="qcm-c" data-k="${k}"><span class="qcm-l">${"ABCD"[k]}</span><span>\\(${c.f}\\)</span></button>`).join("")}</div>
     <div id="fb"></div></div>`);
     const S = typeof sigOpen === "function" ? sigOpen({ ev: "q", code: q.code, d: it.d, kind: "qcm", fmt: "autotest" }) : null;
+    bindScratch(S);
     app.querySelectorAll(".qcm-c").forEach((b) => (b.onclick = () => {
       const c = it.choices[+b.dataset.k];
       app.querySelectorAll(".qcm-c").forEach((x) => { x.disabled = true; if (it.choices[+x.dataset.k].ok) x.classList.add("qcm-good"); });

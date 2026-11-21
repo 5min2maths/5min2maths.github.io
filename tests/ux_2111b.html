@@ -34,6 +34,25 @@ ok(/\\mathbf\{4\}/.test(boldData("Un magasin vend \\(4\\) cahiers pour \\(32\\) 
 ok(!/mathbf/.test(boldData("Calcule : \\(4 + 3 \\cdot 2\\)")),"6 pas de gras dans un calcul nu");
 ok(/<b>5<\/b> billets à <b>9<\/b> CHF/.test(boldData("Au cinéma, une famille paie 5 billets à 9 CHF et un grand pop-corn à 4 CHF. Écris le calcul en une seule ligne.")),"6 gras sur les nombres du texte");
 ok(!/<b>/.test(boldData('Une classe de 11e <span class="x" data-n="3">mesure</span> la cour avec une corde : quelle longueur obtient-elle au total ?').replace(/<span[^>]*>/,"")),"6 pas de gras dans 11e ni dans les attributs");
+// 7. joker de série
+state.streak={count:6,last:addDays(day(),-2),best:6};delete state.streak.jokerWk;homeTab="today";screenHome();
+ok(/Joker de série/.test(app.textContent),"7 rappel du joker");
+ok(Engine.finishDay(state,1,1)==="joker"&&state.streak.count===7,"7 joker utilisé "+JSON.stringify(state.streak));
+state.streak.last=addDays(day(),-2);state.streak.count=7;const r2=Engine.finishDay(state,1,1);
+if(Engine.weekOf(day())===Engine.weekOf(addDays(day(),-2))||true) ok(r2===""&&state.streak.count===1,"7 un seul joker par semaine "+JSON.stringify(state.streak));
+ok(Backup.unpack(JSON.parse(JSON.stringify(Backup.pack(state)))).streak.jokerWk===state.streak.jokerWk,"7 joker dans la sauvegarde");
+// 8. rappel de sauvegarde
+delete UI.lastBackup;delete UI.backupLater;state.history=Array.from({length:8},(x,k)=>({date:addDays(day(),-k-1),n:3,score:2}));screenHome();
+ok(!!document.getElementById("bkgo"),"8 carte de sauvegarde après 7 jours");
+document.getElementById("bkno").click();ok(!document.getElementById("bkgo"),"8 plus tard");
+delete UI.backupLater;UI.lastBackup=day();screenHome();ok(!document.getElementById("bkgo"),"8 code récent : pas de carte");delete UI.lastBackup;
+// 9. brouillon
+session={fmt:"auto",plan:["prio|1"],i:0,score:0,answered:0,start:Date.now(),elo0:state.elo.r,ids:new Set(),pinged:true};nextQuestion();
+const sb=document.getElementById("scrbtn");ok(!!sb&&document.getElementById("scr").hidden,"9 bouton brouillon, zone cachée");
+sb.click();ok(!document.getElementById("scr").hidden&&/Cacher/.test(sb.textContent),"9 brouillon ouvert");
+const cv=document.querySelector("#scr canvas");cv.dispatchEvent(new PointerEvent("pointerdown",{clientX:cv.getBoundingClientRect().left+10,clientY:cv.getBoundingClientRect().top+10,pointerId:1,bubbles:true}));
+ok(/b/.test(sig&&sig.aide||""),"9 usage du brouillon noté");
+document.getElementById("scrclose").click();ok(document.getElementById("scr").hidden,"9 fermé");
 }catch(e){fails.push("EXC "+e.message+" "+e.stack)}
 document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC\n"+fails.join("\n"):"OK")+"</pre>");
 </script>

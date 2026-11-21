@@ -471,6 +471,13 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .resume-card { border: 2px solid var(--blue); }
 .tomorrow { margin-top: 2px; }
 .streak .tomorrow b { font-family: inherit; font-size: inherit; }
+/* Brouillon au doigt (21.11) */
+.scratch-btn { justify-self: start; }
+.scratch { border: 1.5px dashed var(--line); border-radius: 12px; background: var(--paper); padding: 6px; display: grid; gap: 4px; }
+.scratch[hidden] { display: none; }
+.scratch canvas { width: 100%; height: 240px; touch-action: none; display: block; border-radius: 8px;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 20px 20px; }
+.scratch .row { justify-content: flex-end; }
 
 </style>
 <script>
@@ -14980,7 +14987,7 @@ const Backup = {
     return {
       v: 1, t, p: s.profile, n, c, cr: off(s.created),
       e: [s.elo.r, s.elo.n, (s.elo.log || []).slice(-8).map(([d, r]) => [off(d), r])],
-      k: [s.streak.count, off(s.streak.last)].concat(s.streak.best ? [s.streak.best] : []),
+      k: [s.streak.count, off(s.streak.last)].concat(s.streak.best || s.streak.jokerWk ? [s.streak.best || 0] : []).concat(s.streak.jokerWk ? [off(s.streak.jokerWk)] : []),
       h: (s.history || []).slice(-14).map((x) => [off(x.date), x.n, r2(x.score)]),
       b, pr: s.prep || null, nw: s.now || null, g: Object.fromEntries(Object.entries(s.badges || {}).map(([k, d]) => [k, off(d)])),
     };
@@ -15005,7 +15012,7 @@ const Backup = {
     }
     s.comps = Object.fromEntries(Object.entries(o.c || {}).map(([cid, [r, n, l]]) => [cid, { r: [...r].map((ch) => +ch / 4), n, last: on(l) }]));
     s.elo = { r: o.e[0], n: o.e[1], log: o.e[2].map(([d, r]) => [on(d), r]) };
-    s.streak = { count: o.k[0], last: on(o.k[1]) }; if (o.k[2]) s.streak.best = o.k[2];
+    s.streak = { count: o.k[0], last: on(o.k[1]) }; if (o.k[2]) s.streak.best = o.k[2]; if (o.k[3] != null) s.streak.jokerWk = on(o.k[3]);
     s.history = o.h.map(([d, n, sc]) => ({ date: on(d), n, score: sc }));
     if (o.b) s.bc = { ...o.b, last: on(o.b.last), weeks: Object.fromEntries(Object.entries(o.b.weeks).map(([k, v]) => [on(+k), v])) };
     s.badges = Object.fromEntries(Object.entries(o.g || {}).map(([k, d]) => [k, on(d)]));
@@ -18340,10 +18347,12 @@ function atTest() {
     h(`${brand}<div class="eyebrow">${A.runs.length ? "Test rapide · après" : "Je prépare mon test · étape 2 sur 2"} · ${i + 1} sur ${items.length}<span class="pbar" aria-hidden="true"><i style="width:${pct}%"></i></span></div>
     <div class="card pop"><div class="qmeta"><span class="chip">${row.label}</span></div>
     <div class="qtext">${boldData(q.q)}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
+    ${scratchHtml()}
     <p class="small muted">Une seule réponse est juste. Calcule d'abord, puis choisis.</p>
     <div class="qcm-choices">${it.choices.map((c, k) => `<button type="button" class="qcm-c" data-k="${k}"><span class="qcm-l">${"ABCD"[k]}</span><span>\\(${c.f}\\)</span></button>`).join("")}</div>
     <div id="fb"></div></div>`);
     const S = typeof sigOpen === "function" ? sigOpen({ ev: "q", code: q.code, d: it.d, kind: "qcm", fmt: "autotest" }) : null;
+    bindScratch(S);
     app.querySelectorAll(".qcm-c").forEach((b) => (b.onclick = () => {
       const c = it.choices[+b.dataset.k];
       app.querySelectorAll(".qcm-c").forEach((x) => { x.disabled = true; if (it.choices[+x.dataset.k].ok) x.classList.add("qcm-good"); });
@@ -19061,14 +19070,27 @@ const Engine = {
     const today = day();
     if (answered > 0) {
       if (typeof Badges !== "undefined") Badges.onDay(state, today);
-      if (state.streak.last !== today) state.streak.count = state.streak.last === addDays(today, -1) ? state.streak.count + 1 : 1;
+      // Joker de série (21.11) : un jour manqué par semaine (du lundi au dimanche) ne casse pas la série.
+      let joker = false;
+      if (state.streak.last !== today) {
+        const wk = this.weekOf(today);
+        if (state.streak.last === addDays(today, -1)) state.streak.count++;
+        else if (state.streak.count && state.streak.last === addDays(today, -2) && state.streak.jokerWk !== wk) { state.streak.count++; state.streak.jokerWk = wk; joker = true; }
+        else state.streak.count = 1;
+      }
       state.streak.last = today;
       state.streak.best = Math.max(state.streak.best || 0, state.streak.count);
       const h = state.history.find((x) => x.date === today);
       if (h) { h.n += answered; h.score += score; } else state.history.push({ date: today, n: answered, score });
       state.history = state.history.slice(-120);
+      return joker ? "joker" : "";
     }
+    return "";
   },
+  // Semaine (lundi) d'une date : clé du joker de série.
+  weekOf(d) { const x = new Date(d + "T12:00:00"); return addDays(d, -((x.getDay() + 6) % 7)); },
+  // Joker encore disponible cette semaine ?
+  jokerFree(state, today = day()) { return state.streak.jokerWk !== this.weekOf(today); },
 
   // Notion de base à reprendre après deux échecs de suite (la moins maîtrisée de ses prérequis connus).
   remediation(state, id) {
@@ -19401,8 +19423,17 @@ const HOME_TABS = [
 // Série en jeu (21.11, amélioration UX 2 : 31 % des appareils reviennent un 2e jour) : rappel discret tant que la séance du jour n'est pas faite.
 function streakNudge() {
   const s = state.streak, today = day();
+  if (s.count && s.last === addDays(today, -2) && Engine.jokerFree(state)) return `<div class="streak-nudge small"><span>🛡</span><span><b>Joker de série</b> : tu as manqué hier, mais ta série de ${s.count} jours continue si tu fais ta séance aujourd'hui (un joker par semaine).</span></div>`;
   if (!s.count || s.last === today || s.last !== addDays(today, -1)) return "";
   return `<div class="streak-nudge small"><span>🔥</span><span><b>${s.count} ${s.count > 1 ? "jours" : "jour"} d'affilée</b> · une séance aujourd'hui et tu passes à ${s.count + 1}${s.count + 1 > (s.best || 0) ? " (record !)" : ""}</span></div>`;
+}
+// Rappel de sauvegarde (21.11) : tout est sur le téléphone ; après 7 jours de pratique sans code de sauvegarde
+// (ou un code de plus de 30 jours), une carte propose d'en faire un. « Plus tard » : de nouveau dans 7 jours.
+function backupCard() {
+  const days = (state.history || []).filter((x) => x.n > 0).length, last = UI.lastBackup, later = UI.backupLater;
+  if (days < 7 || (last && addDays(last, 30) > day()) || (later && addDays(later, 7) > day())) return "";
+  return `<div class="card flat stack backup-card"><div class="ic-row"><span class="ic">💾</span><div><b>Sauvegarde ta progression</b><div class="small muted">${days} jours de pratique, et tout est sur ce téléphone : un téléphone changé ou un cache vidé, et tout est perdu. Un code suffit pour tout récupérer.</div></div></div>
+    <div class="row"><button class="btn-primary" id="bkgo">Faire mon code de sauvegarde</button><button class="btn-ghost small" id="bkno">Plus tard</button></div></div>`;
 }
 // Bilan de la semaine passée (21.11) : du lundi au mercredi, une fois par semaine, si l'élève a pratiqué.
 function weekRecapCard() {
@@ -19442,13 +19473,13 @@ function screenHome() {
   if (!state) return screenWelcome();
   Badges.check(state);
   const today = day(), done = state.history.find((x) => x.date === today);
-  const s = state.streak, alive = s.last === today || s.last === addDays(today, -1), wp = Engine.weeklyProblem(state), fmt = Engine.todayFormat(state);
+  const s = state.streak, alive = s.last === today || s.last === addDays(today, -1) || (s.last === addDays(today, -2) && Engine.jokerFree(state)), wp = Engine.weeklyProblem(state), fmt = Engine.todayFormat(state);
   const wpDone = wp && state.weeklyDone === weekKey(), prep = Engine.prepActive(state);
   const left = prep ? Math.round((new Date(state.prep.date) - new Date(today)) / 864e5) : null;
   const dots = { prob: !!wp && !wpDone, test: prep && left <= 3, prog: (state.badgesNew || []).length > 0 };
   save();
   const panels = {
-    today: () => `${resumeCard()}${weekRecapCard()}${streakNudge()}${prepTodayCard()}${carnetCard(false)}<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire · au rythme de la classe${done ? " · séance faite, tu peux en refaire une" : ""}</div>
+    today: () => `${resumeCard()}${weekRecapCard()}${backupCard()}${streakNudge()}${prepTodayCard()}${carnetCard(false)}<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire · au rythme de la classe${done ? " · séance faite, tu peux en refaire une" : ""}</div>
       <div class="fmt-box stack"><div class="spread"><span class="eyebrow">Aujourd'hui</span><button class="btn-ghost small" id="other">🔁 Changer de format</button></div>
         <h3>${FORMATS[fmt].label}</h3><p class="small muted">${FORMATS[fmt].text}</p></div>
       <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>${nowCard()}</div>
@@ -19487,6 +19518,8 @@ function screenHome() {
   if (homeTab === "today") bindNowCard();
   on("resgo", resumeSession);
   on("resno", () => { delete state.resume; save(); screenHome(); });
+  on("bkgo", screenBackup);
+  on("bkno", () => { UI.backupLater = day(); uiSave(); screenHome(); });
   on("recapok", () => { state.recapSeen = weekKey(); save(); screenHome(); });
   if (!state.tourDone) tourShow();
   on("wp", () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); });
@@ -19708,10 +19741,13 @@ async function screenBackup() {
   <div class="card flat stack"><b>Reprendre une progression</b><span class="small muted">Tu as un code d'un autre appareil ?</span><button id="restore">J'ai un code de sauvegarde</button></div>
   <button class="btn-primary btn-big" id="back">Retour</button>`);
   const msg = document.getElementById("msg"), ta = app.querySelector(".code-box");
-  document.getElementById("copy").onclick = async () => {
+  // Code affiché, copié ou envoyé : sauvegarde faite (rappel de sauvegarde remis à zéro).
+  const marked = () => { UI.lastBackup = day(); uiSave(); };
+  app.querySelector(".code-box").addEventListener("copy", marked);
+  document.getElementById("copy").onclick = async () => { marked();
     try { await navigator.clipboard.writeText(code); msg.textContent = "Code copié."; } catch (e) { ta.select(); msg.textContent = "Sélectionne le code et copie-le."; }
   };
-  if (document.getElementById("share")) document.getElementById("share").onclick = () => navigator.share({ title: "Ma progression 5 minutes de maths", text: "Mon code de sauvegarde 5 minutes de maths (ouvre ce lien sur l'autre appareil) :", url }).catch(() => {});
+  if (document.getElementById("share")) document.getElementById("share").onclick = () => marked() || navigator.share({ title: "Ma progression 5 minutes de maths", text: "Mon code de sauvegarde 5 minutes de maths (ouvre ce lien sur l'autre appareil) :", url }).catch(() => {});
   document.getElementById("restore").onclick = () => screenRestore();
   document.getElementById("back").onclick = screenHome;
 }
@@ -20000,6 +20036,26 @@ function startSession() {
   session = { fmt, plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set() };
   nextQuestion();
 }
+// Brouillon au doigt (21.11) : une zone pour poser ses calculs sur le téléphone, effacée à chaque question.
+const scratchHtml = () => `<button type="button" class="btn-ghost small scratch-btn" id="scrbtn">✏️ Brouillon</button>
+  <div class="scratch" id="scr" hidden><canvas aria-label="Brouillon : écris avec le doigt"></canvas><div class="row"><button type="button" class="btn-ghost small" id="scrclr">Effacer</button><button type="button" class="btn-ghost small" id="scrclose">Fermer</button></div></div>`;
+function bindScratch(S) {
+  const btn = document.getElementById("scrbtn"), box = document.getElementById("scr");
+  if (!btn || !box) return;
+  const cv = box.querySelector("canvas"); let ctx = null, down = false, used = false;
+  const setup = () => {
+    const r = cv.getBoundingClientRect(), k = window.devicePixelRatio || 1;
+    cv.width = r.width * k; cv.height = r.height * k; ctx = cv.getContext("2d"); ctx.scale(k, k);
+    ctx.lineWidth = 2.4; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = getComputedStyle(document.body).color;
+  };
+  const pos = (e) => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  cv.addEventListener("pointerdown", (e) => { down = true; cv.setPointerCapture(e.pointerId); const [x, y] = pos(e); ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 0.1, y + 0.1); ctx.stroke(); if (!used && S) { used = true; sigAide(S, "b"); } });
+  cv.addEventListener("pointermove", (e) => { if (!down) return; const [x, y] = pos(e); ctx.lineTo(x, y); ctx.stroke(); });
+  ["pointerup", "pointercancel"].forEach((t) => cv.addEventListener(t, () => (down = false)));
+  btn.onclick = () => { box.hidden = !box.hidden; btn.textContent = box.hidden ? "✏️ Brouillon" : "✏️ Cacher le brouillon"; if (!box.hidden && !ctx) setup(); };
+  document.getElementById("scrclr").onclick = () => { if (ctx) ctx.clearRect(0, 0, cv.width, cv.height); };
+  document.getElementById("scrclose").onclick = () => btn.onclick();
+}
 // Reprise d'une séance interrompue (21.11) : la séance est gardée à chaque question ; à l'accueil, « Reprendre ».
 function sessionKeep() {
   if (!session || session.weekly) return;
@@ -20050,7 +20106,7 @@ function nextQuestion(redo) {
       res.delta = Engine.updateElo(state, id, q.d, sc);
       session.score += sc; session.answered++; session.ids.add(id);
       session.res = session.res || {}; const rr = (session.res[id] = session.res[id] || { n: 0, ok: 0 }); rr.n++; if (res.solved) rr.ok++;
-      Engine.finishDay(state, 1, sc); save();
+      if (Engine.finishDay(state, 1, sc) === "joker") toast("🛡 Joker de série utilisé : ta série continue !"); save();
       return res.delta;
     },
     onNext: (wantRedo) => { if (wantRedo) return nextQuestion(q); session.i++; nextQuestion(); },
@@ -20155,6 +20211,7 @@ function renderProblem(q, opt) {
   h(`<div class="spread">${brand}</div><div class="eyebrow">${opt.eyebrow}</div>
   <div class="card pop"><div class="qmeta"><span class="chip">Problème · ${notion.label}</span><span class="dots" title="difficulté"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
   <div class="qtext">${boldData(q.q)}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
+  ${scratchHtml()}
   ${lessonDetails(q.id)}
   ${q.parts.map((p, i) => `<div class="answer part" data-i="${i}"><label for="p${i}"><b>${p.label}</b>${exactNote(p.spec, p.label) ? ` <span class="small muted">(valeur exacte)</span>` : ""} <span class="mk" id="mk${i}"></span></label>
     <input id="p${i}" class="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…"><div class="preview" id="pv${i}"></div></div>`).join("")}
@@ -20162,7 +20219,7 @@ function renderProblem(q, opt) {
   <div class="actions"><button class="btn-primary" id="check">Valider</button><button id="idk">Voir le corrigé</button></div>
   <div id="fb"></div></div>`);
   const S = opt.track ? sigOpen({ ev: "q", code, d: q.d, kind: q.kind || "", fmt: opt.track, redo: opt.redo ? 1 : 0 }) : null;
-  sigWatchLesson(S); pageQ = code;
+  sigWatchLesson(S); pageQ = code; bindScratch(S);
   const fb = document.getElementById("fb");
   q.parts.forEach((p, i) => {
     const inp = document.getElementById("p" + i), pv = document.getElementById("pv" + i);
@@ -20241,6 +20298,7 @@ function renderQuestion(q, opt) {
   <div class="eyebrow">${opt.eyebrow}</div>
   <div class="card pop"><div class="qmeta"><span class="chip">${notion.label}</span><span class="dots" title="difficulté">${[1, 2, 3].map((k) => `<i class="${k <= q.d ? "on" : ""}"></i>`).join("")}</span></div>
   <div class="qtext">${boldData(q.q)}</div>${exactNote(q.spec, q.q) ? `<p class="small muted exact-note">${exactNote(q.spec, q.q)}</p>` : ""}${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
+  ${scratchHtml()}
   ${opt.single ? "" : lessonDetails(q.id)}
   <div class="answer"><input id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="none" placeholder="Ta réponse…" aria-label="Ta réponse">
   <div class="preview" id="prev"></div>
@@ -20249,7 +20307,7 @@ function renderQuestion(q, opt) {
   ${opt.onNotYet || opt.onEasy ? `<div class="skips">${opt.onNotYet ? '<button class="btn-ghost small notyet" id="notyet">Pas encore vu en classe</button>' : ""}${opt.onEasy ? '<button class="btn-ghost small easy" id="easy" title="Passer cette question et monter d\'un cran">Trop facile ⏭</button>' : ""}</div>` : ""}</div>
   <div id="fb"></div></div>`);
   const S = opt.track ? sigOpen({ ev: "q", code, d: q.d, kind: q.kind || "", fmt: opt.track, redo: opt.redo ? 1 : 0 }) : null;
-  sigWatchLesson(S); pageQ = code;
+  sigWatchLesson(S); pageQ = code; bindScratch(S);
   const inp = document.getElementById("ans"), prev = document.getElementById("prev"), fb = document.getElementById("fb");
   if (window.matchMedia("(pointer: fine)").matches) { inp.setAttribute("inputmode", "text"); inputMode = "text"; inp.focus(); }
   let tm;

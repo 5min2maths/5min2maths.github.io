@@ -658,14 +658,27 @@ const Engine = {
     const today = day();
     if (answered > 0) {
       if (typeof Badges !== "undefined") Badges.onDay(state, today);
-      if (state.streak.last !== today) state.streak.count = state.streak.last === addDays(today, -1) ? state.streak.count + 1 : 1;
+      // Joker de série (21.11) : un jour manqué par semaine (du lundi au dimanche) ne casse pas la série.
+      let joker = false;
+      if (state.streak.last !== today) {
+        const wk = this.weekOf(today);
+        if (state.streak.last === addDays(today, -1)) state.streak.count++;
+        else if (state.streak.count && state.streak.last === addDays(today, -2) && state.streak.jokerWk !== wk) { state.streak.count++; state.streak.jokerWk = wk; joker = true; }
+        else state.streak.count = 1;
+      }
       state.streak.last = today;
       state.streak.best = Math.max(state.streak.best || 0, state.streak.count);
       const h = state.history.find((x) => x.date === today);
       if (h) { h.n += answered; h.score += score; } else state.history.push({ date: today, n: answered, score });
       state.history = state.history.slice(-120);
+      return joker ? "joker" : "";
     }
+    return "";
   },
+  // Semaine (lundi) d'une date : clé du joker de série.
+  weekOf(d) { const x = new Date(d + "T12:00:00"); return addDays(d, -((x.getDay() + 6) % 7)); },
+  // Joker encore disponible cette semaine ?
+  jokerFree(state, today = day()) { return state.streak.jokerWk !== this.weekOf(today); },
 
   // Notion de base à reprendre après deux échecs de suite (la moins maîtrisée de ses prérequis connus).
   remediation(state, id) {
