@@ -18,7 +18,7 @@ function qcmFmt(v, spec, text) {
   if (spec.round) { const k = Math.max(0, Math.round(-Math.log10(spec.round))); return String((+v.toFixed(k))).replace(".", "{,}"); }
   const wantFrac = /sous forme (de|d'une) fraction|fraction irréductible|en fraction|\(fraction/i.test(text || "");
   // Décimal fini (jusqu'à 4 décimales) : écrit en décimal, sauf si l'énoncé demande une fraction.
-  if (!wantFrac && Math.abs(v - +v.toFixed(4)) < 1e-9) return String(+v.toFixed(4)).replace(".", "{,}");
+  if (!wantFrac && Math.abs(v - +v.toFixed(6)) < 1e-9) return String(+v.toFixed(6)).replace(".", "{,}");
   const q = ratio(v, wantFrac ? 1000 : 60);
   const term = q && ((d) => { while (d % 2 === 0) d /= 2; while (d % 5 === 0) d /= 5; return d === 1; })(q[1]);
   if (q && (wantFrac || !term)) return fr(q);
@@ -42,7 +42,7 @@ function qcmLike(v, good, q) {
   const f = qcmFmt(v, q.spec, q.q), plain = /^-?[\d']+(\{,\}\d+)?$/;
   // Valeur approchée : tous les choix en « ≈ » au centième, sinon le seul « ≈ » (ou le seul sans) se repère.
   if (/^\\approx/.test(good)) return /^\\approx/.test(f) ? f : "\\approx " + String(+v.toFixed(2)).replace(".", "{,}");
-  if (plain.test(good) && !plain.test(f)) return String(+v.toFixed(2)).replace(".", "{,}");
+  if (plain.test(good) && !plain.test(f)) return String(Math.abs(v) >= 1 ? +v.toFixed(2) : +v.toPrecision(3)).replace(".", "{,}"); // 0,0327 et pas 0,03
   if (/\\frac/.test(good) && !/sqrt|pi/.test(good) && plain.test(f) && !Number.isInteger(v)) {
     for (let d = 2; d <= 60; d++) { const n = Math.round(v * d); if (Math.abs(n / d - v) < 1e-9) return (n < 0 ? "-" : "") + "\\frac{" + Math.abs(n) + "}{" + d + "}"; }
   }
