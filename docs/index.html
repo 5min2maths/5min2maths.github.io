@@ -19087,7 +19087,7 @@ function addFab() {
   document.getElementById("fabx").onclick = () => (sheet.hidden = true);
   document.getElementById("fabg").onclick = () => {
     const text = ta.value.trim(); if (!text) { ok.textContent = "Écris d'abord ton commentaire."; return; }
-    comment(pageCode(), text); ta.value = ""; ok.textContent = "Merci ! C'est envoyé."; setTimeout(() => (sheet.hidden = true), 1200);
+    comment(pageCode(), text); ta.value = ""; sheet.hidden = true; toast("Merci ! Ton commentaire est envoyé."); // 21.11 : fermeture immédiate (1,2 s paraissait long), la confirmation passe par le toast
   };
 }
 // Bouton 💬 dans l'en-tête, à droite du titre (20.11 : flottant, il recouvrait une touche du clavier de l'app) ;
