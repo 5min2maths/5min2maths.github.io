@@ -59,10 +59,9 @@ app.querySelector('#fs button[data-v="1"]').click();
 localStorage.removeItem("m2m-ui");for(const k of ["installed","installLater","remSet","remNo"])delete UI[k];
 state.history=[{date:addDays(day(),-1),n:1,score:1}];ok(returnCard()==="","9 rien le 1er jour");
 state.history.push({date:day(),n:1,score:1});ok(/écran d'accueil/.test(returnCard()),"9 installer dès le 2e jour");
-UI.installLater=day();ok(returnCard()==="","9 « plus tard » : rien (rappel seulement au 3e jour)");
-state.history.unshift({date:addDays(day(),-2),n:1,score:1});ok(/rappel chaque jour/.test(returnCard()),"9 rappel au 3e jour");
-UI.remSet=day();ok(returnCard()==="","9 rappel posé : plus rien");
-const L=reminderLinks(19);ok(/T190000/.test(L.g)&&/RRULE%3AFREQ%3DDAILY/.test(L.g)&&/VALARM/.test(decodeURIComponent(L.ics)),"9 liens d'agenda");
+UI.installLater=day();ok(returnCard()==="","9 « plus tard » : plus rien");
+state.history.unshift({date:addDays(day(),-2),n:1,score:1});ok(!/rappel/.test(returnCard()),"9 plus de carte rappel");
+screenSettings();ok(!/Un rappel chaque jour/.test(app.textContent),"9 pas de rappel dans les réglages");
 }catch(e){fails.push("EXC "+e.message+" "+e.stack)}
 document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC\n"+fails.join("\n"):"OK")+"</pre>");
 </script>
