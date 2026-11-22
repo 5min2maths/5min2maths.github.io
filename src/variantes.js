@@ -721,7 +721,6 @@ V34("gquot",
   () => { const d = R.pick([8, 12, 15, 20]), h = R.int(1, 2), m = R.pick([15, 30, 45]); return QV("Une pompe débite " + d + " L/min pendant " + h + " h " + m + " min. Combien de litres pompe-t-elle ?", d * (60 * h + m), (60 * h + m) + " min ; " + M(d + " \\cdot " + (60 * h + m) + " = " + mille(d * (60 * h + m))) + " L."); },
 );
 V("idrem", 1,
-  () => { const a = R.int(2, 5), b = R.int(1, 7); return Object.assign(QX("Développe : " + M("(" + a + "x + " + b + ")^2"), "(" + a + "x+" + b + ")^2", M(a * a + "x^2 + " + 2 * a * b + "x + " + b * b), { form: "expanded" }), { canon: a * a + "x^2+" + 2 * a * b + "x+" + b * b }); },
   () => { const a = R.int(2, 9); return Object.assign(QX("Développe : " + M("(" + a + " + x)^2"), "(" + a + "+x)^2", M(a * a + " + " + 2 * a + "x + x^2"), { form: "expanded" }), { canon: "x^2+" + 2 * a + "x+" + a * a }); },
 );
 V34("idrem",

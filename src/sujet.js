@@ -119,7 +119,7 @@ function screenMock() {
   ${C.length ? `<section class="mock-part"><h3>C. Raisonnement</h3>${C.map((x) => qHtml(x, x.q.titre || (x.q.parts ? "Problème" : "Vrai ou faux ?"))).join("")}</section>` : ""}
   <div class="stack no-print">
     <button class="btn-primary btn-big" id="corr">J'ai fini : voir le corrigé</button>
-    <div class="row"><button id="print">🖨 Imprimer / PDF</button><button class="btn-ghost" id="again">Un autre sujet</button><button class="btn-ghost" id="back">Retour</button></div>
+    <div class="row"><button class="btn-primary" id="print">🖨 Imprimer / PDF</button><button class="btn-ghost" id="again">Un autre sujet</button><button class="btn-ghost" id="back">Retour</button></div>
   </div>`);
   app.querySelectorAll("#mlv button").forEach((b) => (b.onclick = () => { if (b.dataset.lv !== (state.mock.level || "standard")) { mockNew(b.dataset.lv); screenMock(); } }));
   document.getElementById("corr").onclick = screenMockCorr;
@@ -166,7 +166,7 @@ function screenMockResult(cnt, n, ok, weak) {
   ${ok.length ? `<div class="card flat"><h3>✓ Acquis</h3><ul>${ok.map((id) => `<li>${nLabel(id)}</li>`).join("")}</ul></div>` : ""}
   ${weak.length ? `<div class="card flat stack"><h3>À retravailler</h3><ul>${weak.map((id) => `<li>${nLabel(id)}</li>`).join("")}</ul>
     <button class="btn-primary" id="rev">Réviser ces notions maintenant</button></div>` : '<div class="card flat"><p>Tout est juste : bravo ! Une séance de révision par jour suffit jusqu\'au test.</p></div>'}
-  <div class="row"><button id="again">Un autre sujet</button><button class="btn-ghost" id="home">Retour à l'accueil</button></div>`);
+  <div class="row"><button class="btn-primary" id="again">Un autre sujet</button><button class="btn-ghost" id="home">Retour à l'accueil</button></div>`);
   if (cnt.juste >= 0.8 * n) burst();
   if (document.getElementById("rev")) document.getElementById("rev").onclick = () => {
     session = { plan: weak.flatMap((id) => [id + "|2", id + "|3"]), i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), prep: true };

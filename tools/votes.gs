@@ -112,7 +112,30 @@ function doPost(e) {
 }
 
 // Bilan : ouvrir l'URL …/exec dans le navigateur. ?testeurs=1 : nombre de testeurs ; sinon bilan par notion.
+// Grades « collector » (22.11) : …/exec?grade=Penseur&app=<identifiant d'appareil> renvoie {grade, n} : n = rang de cet
+// appareil parmi ceux qui ont atteint ce grade (le même appareil garde toujours le même numéro). Feuille « grades ».
+const GRADE_NAMES = ["Pousse", "Apprenti", "Arpenteur", "Calculateur", "Bâtisseur", "Explorateur", "Enquêteur", "Chercheur", "Stratège", "Penseur",
+  "Expert", "Érudit", "Savant", "Maître", "Inventeur", "Virtuose", "Astronome", "Génie", "Prodige", "Visionnaire", "Légende"];
+function grades_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName("grades");
+  if (!sh) { sh = ss.insertSheet("grades"); sh.appendRow(["reçu le", "grade", "appareil"]); sh.setFrozenRows(1); }
+  return sh;
+}
+function gradeNo_(g, app) {
+  if (GRADE_NAMES.indexOf(g) < 0 || !/^[a-z0-9]{4,20}$/.test(app)) return { erreur: "grade ou appareil invalide" };
+  const lock = LockService.getScriptLock(); lock.waitLock(10000);
+  try {
+    const sh = grades_(), rows = sh.getDataRange().getValues().slice(1).filter((r) => r[1] === g);
+    const i = rows.findIndex((r) => r[2] === app);
+    if (i >= 0) return { grade: g, n: i + 1 };
+    sh.appendRow([new Date(), g, app]);
+    return { grade: g, n: rows.length + 1 };
+  } finally { lock.releaseLock(); }
+}
+
 function doGet(e) {
+  if (e && e.parameter && e.parameter.grade) return out_(gradeNo_(String(e.parameter.grade), String(e.parameter.app || "")));
   if (e && e.parameter && e.parameter.commentaires) {
     const cle = PropertiesService.getScriptProperties().getProperty("CLE_LECTURE");
     if (!cle || e.parameter.commentaires !== cle) return out_({ erreur: "clé absente ou incorrecte" });

@@ -227,7 +227,7 @@ function atGrid(fresh) {
   <p class="small muted">Ce n'est pas une note. ${last ? "Compare tes colonnes : c'est ton progrès depuis le " + first.date.slice(8, 10) + "." + first.date.slice(5, 7) + "." : "Refais le test rapide dans quelques jours, juste avant le test : ta colonne « Après » se remplira."}</p></div>
   ${weak.length ? `<div class="card flat stack"><h3>À revoir${surprise ? " (en priorité les ⚠️)" : ""}</h3>${[...new Set(weak.map((r) => r.id))].map((id) => `<div class="spread"><span class="small">${nLabel(id)}</span>${LESSONS[id] ? `<button type="button" class="btn-ghost small atles" data-id="${id}">📖 Leçon</button>` : ""}</div>`).join("")}
     <button class="btn-primary" id="rev">Réviser ces compétences maintenant</button></div>` : ""}
-  <div class="row"><button id="again">Refaire le test rapide</button><button class="btn-ghost" id="home">Retour</button></div>
+  <div class="row"><button class="btn-primary" id="again">Refaire le test rapide</button><button class="btn-ghost" id="home">Retour</button></div>
   <button class="btn-ghost small" id="reset">Recommencer l'autoévaluation (nouvelle colonne Avant)</button>`);
   if (fresh && ok === n) burst();
   app.querySelectorAll(".atles").forEach((b) => (b.onclick = () => screenLesson(b.dataset.id, () => atGrid(), true)));

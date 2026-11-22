@@ -240,8 +240,29 @@ const GRADES = [[0, "🌱", "Pousse"], [800, "✏️", "Apprenti"], [875, "📏"
   [1100, "🗺️", "Explorateur"], [1175, "🔦", "Enquêteur"], [1250, "🔭", "Chercheur"], [1325, "♟️", "Stratège"], [1400, "🦉", "Penseur"],
   [1475, "🥇", "Expert"], [1550, "🎓", "Érudit"], [1625, "🧪", "Savant"], [1700, "🏆", "Maître"], [1775, "🧬", "Inventeur"],
   [1850, "💎", "Virtuose"], [1925, "🪐", "Astronome"], [2000, "👑", "Génie"], [2075, "⚡", "Prodige"], [2150, "🌌", "Visionnaire"], [2225, "🌟", "Légende"]];
-// Point de départ de chaque classe (repères affichés dans « Mes grades »).
-const GRADE_START = { 950: "départ en 9e", 1100: "départ en 10e", 1250: "départ en 11e", 1400: "départ en 1re", 1550: "départ en 2e", 1700: "départ en 3e", 1850: "départ en 4e" };
+// 22.11 (retour de l'auteur) : plus de repères de classe sur l'échelle (« départ en 11e »…) : chacun monte à son rythme.
+// Grades « collector » (22.11) : chaque grade atteint reçoit un numéro, le rang de l'appareil parmi ceux qui l'ont
+// atteint (Apps Script, …/exec?grade=…&app=…). Gardé dans state.gradeNo ; demandé au passage du grade ou à l'ouverture de « Mes grades ».
+function gradeNumbers(done) {
+  if (!canSend()) return;
+  const r = Math.max(state.elo.r, ...((state.elo.log || []).map((x) => x[1]))), no = (state.gradeNo = state.gradeNo || {});
+  const todo = GRADES.filter(([at, , name]) => at && r >= at && !no[name]).map(([, , name]) => name);
+  todo.forEach((name) => fetch(VOTE_ENDPOINT + "?grade=" + encodeURIComponent(name) + "&app=" + encodeURIComponent(deviceId()))
+    .then((x) => x.json()).then((j) => { if (j && j.n) { no[name] = j.n; save(); if (done) done(); } }).catch(() => {}));
+}
+function gradeCard(name) {
+  const G = GRADES.find((x) => x[2] === name); if (!G) return;
+  const n = (state.gradeNo || {})[name];
+  document.querySelectorAll(".collector-bg").forEach((x) => x.remove());
+  document.body.insertAdjacentHTML("beforeend", `<div class="collector-bg" role="dialog" aria-label="Carte du grade ${name}"><div class="collector pop">
+    <div class="eyebrow">Grade collector</div><div class="col-ic">${G[1]}</div><h2>${name}</h2>
+    ${G[0] ? `<div class="col-no">${n ? "#" + n : "# …"}</div>` : ""}
+    <p class="small muted">${!G[0] ? "Le grade de départ : tout le monde commence ici." : n ? `Tu es la ${n === 1 ? "première personne" : n + "<sup>e</sup> personne"} à atteindre ce grade dans l'app.` : isAuthor() ? "Appareil de l'auteur : pas de numéro." : "Numéro attribué dès que l'app est en ligne."}</p>
+    ${G[0] ? `<p class="small muted">Atteint à ${G[0]} points de Mathélo.</p>` : ""}
+    <button type="button" class="btn-primary" id="colx">Fermer</button></div></div>`);
+  const bg = document.querySelector(".collector-bg");
+  bg.onclick = (e) => { if (e.target === bg || e.target.id === "colx") bg.remove(); };
+}
 function gradeOf(r) {
   let i = 0; while (i + 1 < GRADES.length && r >= GRADES[i + 1][0]) i++;
   const [lo, ic, name] = GRADES[i], nx = GRADES[i + 1];
@@ -251,14 +272,16 @@ function gradeOf(r) {
 function screenGrades() {
   const r = state.elo.r, g = gradeOf(r), best = Math.max(r, ...((state.elo.log || []).map((x) => x[1])));
   h(`${brand}<div class="eyebrow">Mathélo</div><h2>Mes grades</h2>
-  <div class="card stack grade-now"><div class="ic-row"><span class="ic grade-big">${g.ic}</span><div><div class="eyebrow">Mon grade</div><h2>${g.name}</h2><div class="small muted">Mathélo ${r}${best > r ? " · meilleur : " + best : ""}</div></div></div>
+  <div class="card stack grade-now"><div class="ic-row"><button type="button" class="ic grade-big grade-open" data-g="${g.name}" aria-label="Voir la carte du grade ${g.name}">${g.ic}</button><div><div class="eyebrow">Mon grade</div><h2>${g.name}</h2><div class="small muted">Mathélo ${r}${best > r ? " · meilleur : " + best : ""}</div></div></div>
     ${g.next ? `<div class="stack" style="gap:4px"><span class="pbar"><i style="width:${g.pct}%"></i></span><span class="small">Prochain grade : <b>${g.next.ic} ${g.next.name}</b>, à ${g.next.at} (encore ${g.next.at - r} points).</span></div>` : '<p class="small">Le plus haut grade : bravo !</p>'}</div>
   <div class="card">${eloBlock()}</div>
-  <div class="card flat stack"><h3>L'échelle des grades</h3><p class="small muted">Un grade tous les 75 points, deux par année scolaire. Ton Mathélo monte quand tu réussis des questions de ton niveau ou plus difficiles.</p>
+  <div class="card flat stack"><h3>L'échelle des grades</h3><p class="small muted">Un grade tous les 75 points. Ton Mathélo monte quand tu réussis des questions de ton niveau ou plus difficiles. Touche un grade atteint pour voir sa carte.</p>
     <ol class="grades">${GRADES.slice().reverse().map(([at, ic, name]) => { const st = r >= at ? (gradeOf(r).name === name ? "cur" : "ok") : "todo";
-      return `<li class="${st}"><span class="g-ic">${ic}</span><span class="g-n">${name}${st === "cur" ? " <span class=\"badge\">toi</span>" : ""}</span><span class="g-at">${at ? at : "–"}${GRADE_START[at] ? `<small>${GRADE_START[at]}</small>` : ""}</span></li>`; }).join("")}</ol></div>
+      const no = st !== "todo" && (state.gradeNo || {})[name];
+      return `<li class="${st}"><span class="g-ic">${st !== "todo" && at ? `<button type="button" class="grade-open" data-g="${name}" aria-label="Voir la carte du grade ${name}">${ic}</button>` : ic}</span><span class="g-n">${name}${st === "cur" ? " <span class=\"badge\">toi</span>" : ""}${no ? ` <small class="g-no">#${no}</small>` : ""}</span><span class="g-at">${at ? at : "–"}</span></li>`; }).join("")}</ol></div>
   <button class="btn-primary btn-big" id="back">Retour</button>`);
   document.getElementById("back").onclick = screenHome;
+  gradeNumbers();
   const cur = app.querySelector(".grades li.cur"); if (cur) cur.scrollIntoView({ block: "center" });
   window.scrollTo(0, 0);
 }
@@ -289,7 +312,7 @@ const HOME_TABS = [
   // Calendrier avec le jour pointé (14.11 : l'ancien soleil à rayons rappelait, d'un coup d'œil, l'étoile de David).
   ["today", "Aujourd'hui", '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15.2" r="1.8" fill="currentColor" stroke="none"/>'],
   // Loupe avec « ? » (21.11 : l'étoile ne disait rien ; 🧩 🏔 🎯 💡 déjà pris ailleurs dans l'app).
-  ["prob", "Problème", '<circle cx="10" cy="10" r="7.6"/><path d="M15.6 15.6L21.5 21.5" stroke-width="2.6"/><path d="M7.7 8.3a2.4 2.4 0 1 1 3.3 2.2c-.6.3-1 .8-1 1.4v.5" stroke-width="2.1"/><circle cx="10" cy="14.6" r="1.15" fill="currentColor" stroke="none"/>'],
+  ["prob", "Exploration", '<circle cx="10" cy="10" r="7.6"/><path d="M15.6 15.6L21.5 21.5" stroke-width="2.6"/><path d="M7.7 8.3a2.4 2.4 0 1 1 3.3 2.2c-.6.3-1 .8-1 1.4v.5" stroke-width="2.1"/><circle cx="10" cy="14.6" r="1.15" fill="currentColor" stroke="none"/>'],
   ["test", "Test", '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>'],
   ["prog", "Progrès", '<path d="M4 20V10M10 20V5M16 20v-7M22 20H2"/>'],
 ];
@@ -325,8 +348,8 @@ function weekRecapCard() {
 }
 // Visite guidée (21.11) : au premier accueil, une bulle par onglet.
 const TOUR = [
-  ["today", "📅 Aujourd'hui", "Ta séance du jour : en mode scolaire (au rythme de ta classe) ou en mode libre. Quelques minutes suffisent."],
-  ["prob", "🔍 Problème", "Chaque semaine, un problème plus long. Et des questions curieuses : les maths cachées dans la vie de tous les jours."],
+  ["today", "📅 Aujourd'hui", "Ta séance du jour : en mode scolaire (au rythme de ton cours en classe) ou en mode libre. Quelques minutes suffisent."],
+  ["prob", "🔍 Exploration", "Chaque semaine, un problème plus long. Des questions curieuses : les maths cachées dans la vie de tous les jours. Et un peu d'histoire des maths."],
   ["test", "📝 Test", "Un test approche ? Donne sa date et ses notions : l'app te fait réviser jusqu'au jour J, avec une autoévaluation."],
   ["prog", "📈 Progrès", "Ton Mathélo, tes compétences, tes badges et ton carnet d'erreurs."],
 ];
@@ -352,7 +375,7 @@ function screenHome() {
   const dots = { prob: !!wp && !wpDone, test: prep && left <= 3, prog: (state.badgesNew || []).length > 0 };
   save();
   const panels = {
-    today: () => `${resumeCard()}${weekRecapCard()}${backupCard()}${streakNudge()}${prepTodayCard()}${carnetCard(false)}<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire · au rythme de la classe${done ? " · séance faite, tu peux en refaire une" : ""}</div>
+    today: () => `${resumeCard()}${weekRecapCard()}${backupCard()}${streakNudge()}${prepTodayCard()}${carnetCard(false)}<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire · au rythme de ton cours en classe${done ? " · séance faite, tu peux en refaire une" : ""}</div>
       <div class="fmt-box stack"><div class="spread"><span class="eyebrow">Aujourd'hui</span><button class="btn-ghost small" id="other">🔁 Changer de format</button></div>
         <h3>${FORMATS[fmt].label}</h3><p class="small muted">${FORMATS[fmt].text}</p></div>
       <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>${nowCard()}</div>
@@ -360,8 +383,8 @@ function screenHome() {
     prob: () => (!wp ? `<div class="card flat stack"><div class="eyebrow">🔍 Problème de la semaine</div><h3>Pas encore de problème pour toi</h3><p class="small muted">Les problèmes arrivent avec les notions que tu as déjà travaillées. Fais quelques séances !</p></div>`
       : `<div class="card stack"><div class="eyebrow">🔍 Problème de la semaine${wpDone ? " · fait ✓" : ""}</div><h2>${NOTIONS.find((n) => n.id === wp).label}</h2>
         <p class="muted">Un problème en plusieurs étapes, avec des indices si tu bloques. Facultatif, et il rapporte gros.</p>
-        <button class="${wpDone ? "" : "btn-primary btn-big"}" id="wp">${wpDone ? "Le refaire" : "Relever le défi"}</button>
-        <p class="small muted">${wpDone ? "Bravo ! Un nouveau problème arrive la semaine prochaine." : "Un nouveau problème chaque semaine."}</p></div>`) + curiousCard(),
+        <button class="btn-primary btn-big" id="wp">${wpDone ? "Le refaire" : "Relever le défi"}</button>
+        <p class="small muted">${wpDone ? "Bravo ! Un nouveau problème arrive la semaine prochaine." : "Un nouveau problème chaque semaine."}</p></div>`) + curiousCard() + (typeof Histoire !== "undefined" ? Histoire.card(Histoire.week()) : ""),
     test: () => prep ? prepPanel(left)
       : `<div class="card stack"><div class="eyebrow">Je prépare un test</div><h2>Un test approche ?</h2>
         <p class="muted">Dis-moi sa date et les notions : chaque jour, l'app te fait réviser juste ce qu'il faut, jusqu'au jour J. Tu pourras aussi t'entraîner sur un sujet de préparation, avec son corrigé.</p>
@@ -397,6 +420,7 @@ function screenHome() {
   if (!state.tourDone) tourShow();
   on("wp", () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); });
   on("curgo", () => screenCurious(Curieux.pick(state), () => { homeTab = "prob"; screenHome(); }, "onglet"));
+  if (typeof Histoire !== "undefined") Histoire.bind(app);
   on("comps", screenComps);
   on("prep", screenPrep); on("prepedit", screenPrep);
   if (typeof screenMock === "function") on("mock", screenMock);
@@ -462,7 +486,7 @@ function screenSettings() {
     <span class="small muted">Taille du texte</span><div class="seg" id="fs">${[[1, "A"], [1.12, "A+"], [1.25, "A++"]].map(([v, l]) => `<button aria-pressed="${UI.fs === v}" data-v="${v}" style="font-size:${v}em">${l}</button>`).join("")}</div>
     <span class="small muted">Vibrer à chaque réponse (téléphone)</span><div class="seg" id="vib"><button aria-pressed="${UI.vib}" data-v="1">Oui</button><button aria-pressed="${!UI.vib}" data-v="0">Non</button></div></div>
   ${installCard("")}
-  <button id="backup">💾 Sauvegarder ou transférer ma progression</button><button id="level">Changer de classe ou d'école</button><button id="privacy">🔒 Ce que l'app envoie</button>
+  <button class="btn-sec" id="backup">💾 Sauvegarder ou transférer ma progression</button><button class="btn-sec" id="level">Changer de classe ou d'école</button><button class="btn-sec" id="privacy">🔒 Ce que l'app envoie</button>
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div>
   <button class="btn-primary" id="back">Retour</button></div>`);
   document.getElementById("back").onclick = screenHome;
@@ -491,7 +515,7 @@ function compsCard() {
   return `<div class="card flat stack"><div class="spread"><h3>Mes compétences</h3>${st.avg !== null ? `<span class="note ${noteCls(Math.round(st.avg * 2) / 2)}">${String(Math.round(st.avg * 10) / 10).replace(".", ",")}</span>` : ""}</div>
   <p class="small muted">${st.tested ? `${st.tested} compétence${st.tested > 1 ? "s" : ""} notée${st.tested > 1 ? "s" : ""} sur ${st.total} cette année.` : "Tes notes apparaissent au fil des séances, compétence par compétence."}</p>
   <p class="small">🏅 ${Object.keys(state.badges || {}).length} badge${Object.keys(state.badges || {}).length > 1 ? "s" : ""} sur ${Badges.list(state).length}</p>
-  <button id="comps">Voir mes compétences et mes badges</button></div>`;
+  <button class="btn-primary" id="comps">Voir mes compétences et mes badges</button></div>`;
 }
 function screenComps() {
   const cat = Engine.catalog(state.profile), comps = state.comps || {};
@@ -597,6 +621,7 @@ function screenPrivacy(back) {
   <li><b>Pour chaque question et chaque rappel de cours</b> : le code de la question, si tu as trouvé (du premier coup ou non), si tu as quitté avant de répondre, le temps passé, l'aide utilisée (pas à pas, correction) et ta première réponse fausse (un nombre ou un calcul ; si tu as écrit des mots, seulement « [texte] »), avec le même identifiant. Ça sert à repérer les questions mal posées, trop dures, ou que l'app corrige mal.</li>
   <li><b>Tes avis</b> 👍 / 👎, « trop facile » et « pas compris », avec le code de la question ou du rappel et le même identifiant.</li>
   <li><b>Tes commentaires</b>, si tu en écris, avec ta classe (par exemple « 10e ») et le même identifiant. N'y écris pas ton nom.</li>
+  <li><b>Tes grades Mathélo</b>, quand tu en atteins un : le nom du grade et le même identifiant, pour te donner ton numéro de « collector ».</li>
   <li><b>Ton chapitre du moment</b>, si tu en choisis un : les notions, ta classe et le mois, sans identifiant. Ça sert à proposer les notions dans l'ordre où elles se font vraiment en classe.</li></ul></div>
   <p class="small muted">Identifiant tiré au hasard pour cet appareil : <code>${esc(deviceId() || "—")}</code></p>${isAuthor() ? '<p class="small"><b>Appareil de l\'auteur</b> : rien n\'est envoyé depuis cet appareil, sauf les commentaires 💬 (marqués « auteur »).</p>' : ""}
   <div class="card flat stack"><b>À savoir</b>
@@ -619,8 +644,8 @@ async function screenBackup() {
   ${qr ? `<div class="card flat stack center"><b>Sur un autre appareil</b><span class="small muted">Scanne ce QR code avec l'appareil photo : l'app s'ouvre et propose de reprendre ta progression.</span><div class="qrwrap">${qr}</div></div>` : ""}
   <div class="card flat stack"><b>Ou garde le code</b><span class="small muted">Envoie-le-toi (message, mail) ou colle-le dans tes notes. Le code d'aujourd'hui remplace les anciens.</span>
   <textarea class="code-box" readonly rows="4">${code}</textarea>
-  <div class="row"><button class="btn-primary" id="copy">Copier le code</button>${navigator.share ? '<button id="share">Envoyer…</button>' : ""}</div><span class="small muted" id="msg"></span></div>
-  <div class="card flat stack"><b>Reprendre une progression</b><span class="small muted">Tu as un code d'un autre appareil ?</span><button id="restore">J'ai un code de sauvegarde</button></div>
+  <div class="row"><button class="btn-primary" id="copy">Copier le code</button>${navigator.share ? '<button class="btn-sec" id="share">Envoyer…</button>' : ""}</div><span class="small muted" id="msg"></span></div>
+  <div class="card flat stack"><b>Reprendre une progression</b><span class="small muted">Tu as un code d'un autre appareil ?</span><button class="btn-primary" id="restore">J'ai un code de sauvegarde</button></div>
   <button class="btn-primary btn-big" id="back">Retour</button>`);
   const msg = document.getElementById("msg"), ta = app.querySelector(".code-box");
   // Code affiché, copié ou envoyé : sauvegarde faite (rappel de sauvegarde remis à zéro).
@@ -681,7 +706,7 @@ function nowCard() {
   const labels = state.now.ids.map(nLabel).join(" · ");
   if (Engine.nowStale(state)) return `<div class="stack now-in"><div class="eyebrow">📚 En ce moment en classe</div>
     <h3>Toujours sur ${state.now.ids.length > 1 ? "ces notions" : "cette notion"} ?</h3><p class="small muted">${labels}</p>
-    <div class="row"><button class="btn-primary" id="nowyes">Oui, toujours</button><button id="nowpick">On est passés à autre chose</button></div></div>`;
+    <div class="row"><button class="btn-primary" id="nowyes">Oui, toujours</button><button class="btn-sec" id="nowpick">On est passés à autre chose</button></div></div>`;
   return `<div class="stack now-in"><div class="spread"><div class="eyebrow">📚 En ce moment en classe</div><button class="btn-ghost small" id="nowpick">Changer</button></div>
     <h3>${labels}</h3><p class="small muted">Environ 2 questions sur 3 de tes séances portent dessus.</p></div>`;
 }
@@ -836,6 +861,7 @@ function startCarnet(only) {
   if (!plan.length) return screenHome();
   session = { carnet: true, plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set() };
   nextQuestion();
+  toast("📕 Pour effacer une erreur : 2 réussites de suite, du premier coup.", 4000); // 22.11 : règle expliquée au départ
 }
 const nLab = (id) => (NOTIONS.find((n) => n.id === id) || {}).label || id;
 function carnetCard(full) {
@@ -902,7 +928,7 @@ function prepTodayCard() {
   const L = prepLeft(state.prep.date), kind = prepKind(), t = PREP_TASK[kind], done = (state.prep.log || {})[day()];
   return `<div class="card stack mode-test"><div class="eyebrow">📝 Mon test · ${L === 0 ? "aujourd'hui" : L === 1 ? "demain" : "dans " + L + " jours"}${done ? " · étape du jour faite ✓" : ""}</div>
     <h2>${t.ic} ${t.label}</h2><p class="muted">${t.text}</p>
-    <button class="${done ? "" : "btn-primary "}btn-big" id="preptask">${done ? "Refaire" : "C'est parti"}</button>
+    <button class="btn-primary btn-big" id="preptask">${done ? "Refaire" : "C'est parti"}</button>
     <button class="btn-ghost small" id="preptab">Voir mon programme</button></div>`;
 }
 const prepJ = (dt, short) => { const d = new Date(dt + "T12:00:00"); return (short ? ["di", "lu", "ma", "me", "je", "ve", "sa"] : ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."])[d.getDay()] + (short ? "" : " " + d.getDate() + "." + String(d.getMonth() + 1).padStart(2, "0")); };
@@ -919,15 +945,15 @@ function prepPanel(left) {
     <div class="chips">${state.prep.ids.map((id) => `<span class="chip">${esc(nLabel(id))}</span>`).join("")}</div></div>
   <div class="card stack prep-now"><div class="eyebrow">Aujourd'hui${k ? " · étape " + k + " sur " + steps.length : ""}${done ? " · fait ✓" : ""}</div>
     <h2>${t.ic} ${t.label}</h2><p class="small muted">${t.text}</p>
-    <button class="${done ? "" : "btn-primary "}btn-big" id="prepgo">${done ? "Refaire" : "Commencer"}</button>
+    <button class="btn-primary btn-big" id="prepgo">${done ? "Refaire" : "Commencer"}</button>
     ${done && nxt ? `<p class="small muted">Bravo ! Demain : ${PREP_TASK[nxt.kind].ic} ${PREP_TASK[nxt.kind].label}.</p>` : ""}</div>
   <div class="card flat stack"><h3>Mon programme</h3>
     <div class="pdays">${days.map((x) => x.gap ? `<span class="pgap" title="${x.gap} jours de révision ciblée">…</span>` : `<button type="button" class="pday${x.dt === day() ? " today sel" : ""}${x.done ? " done" : ""}" data-info="${info(x)}"><span class="pd-d">${prepJ(x.dt, true)}</span><span class="pd-i">${x.done ? "✓" : PREP_TASK[x.kind].ic}</span></button>`).join("")}</div>
     <p class="small" id="pdayinfo">${info(days.find((x) => x.dt === day()) || steps[0])}</p>
     <p class="small muted">Touche un jour pour voir ce qu'on y fait.</p></div>
   <div class="card flat stack"><h3>En plus, quand tu veux</h3>
-    <div class="tools2"><button id="prepauto">📋 ${A && A.runs.length ? "Ma grille" : "Autoévaluation"}<span class="small muted">${R0 ? okA + " juste" + (okA > 1 ? "s" : "") + " sur " + nA : "pas encore faite"}</span></button>
-    <button id="mock">📝 Sujet de préparation<span class="small muted">${mk ? (mk.n ? mk.juste + " juste" + (mk.juste > 1 ? "s" : "") + " sur " + mk.n : "fait") : "avec corrigé"}</span></button></div></div>`;
+    <div class="tools2"><button class="btn-sec" id="prepauto">📋 ${A && A.runs.length ? "Ma grille" : "Autoévaluation"}<span class="small muted">${R0 ? okA + " juste" + (okA > 1 ? "s" : "") + " sur " + nA : "pas encore faite"}</span></button>
+    <button class="btn-sec" id="mock">📝 Sujet de préparation<span class="small muted">${mk ? (mk.n ? mk.juste + " juste" + (mk.juste > 1 ? "s" : "") + " sur " + mk.n : "fait") : "avec corrigé"}</span></button></div></div>`;
 }
 function prepProgramHtml() {
   const J = (dt) => { const d = new Date(dt + "T12:00:00"); return ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."][d.getDay()] + " " + d.getDate() + "." + String(d.getMonth() + 1).padStart(2, "0"); };
@@ -1013,7 +1039,11 @@ function nextQuestion(redo) {
     state.notions[id].lessonSeen = true; save();
     return screenLesson(id, () => { session.lessonShown = id; nextQuestion(); });
   }
-  const q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : level);
+  // Juste après une nouvelle leçon (22.11, retour de l'auteur : « développer deux carrés puis réduire » dès la première
+  // application, pente trop raide) : la première question sur cette notion est toujours de niveau 1.
+  const easy = !redo && !session.weekly && !forceProb && session.lessonShown === id && !session.eased;
+  if (easy) session.eased = true;
+  const q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : easy ? 1 : level);
   q.kind = kind;
   renderQuestion(q, {
     track: sessionInfo().fmt || "seance", redo: !!redo,
@@ -1021,7 +1051,7 @@ function nextQuestion(redo) {
     onDone: (res) => {
       const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
       // Carnet d'erreurs (20.11) : séance « carnet » → progression ; ailleurs, une question ratée y entre.
-      if ((session.carnet || kind === "carnet") && !redo) { const r = carnetResult(id, q.d, res.solved && res.tries === 1); if (r === "efface") toast("📕 Effacée de ton carnet d'erreurs ✓"); else if (r === "encore") toast("📕 Encore une réussite et elle sort du carnet."); }
+      if ((session.carnet || kind === "carnet") && !redo) { const r = carnetResult(id, q.d, res.solved && res.tries === 1); if (r === "efface") toast("📕 Effacée de ton carnet d'erreurs ✓"); else if (r === "encore") toast("📕 1 réussite sur 2 : encore une, du premier coup, et elle sort du carnet.", 4000); else if (r === "rate") toast("📕 Elle reste dans ton carnet : il faut 2 réussites de suite, du premier coup.", 4000); }
       else if (!res.solved && !q.parts && !session.weekly && carnetAdd(id, q.d, q.code)) toast("📕 Rangée dans ton carnet d'erreurs : tu pourras la refaire.");
       // Deux échecs de suite : on glisse juste après une question sur une notion de base (une fois par notion et par séance).
       if (!session.weekly && !session.prep && !session.carnet && sc < 0.5) {
@@ -1142,7 +1172,7 @@ function renderProblem(q, opt) {
   ${q.parts.map((p, i) => `<div class="answer part" data-i="${i}"><label for="p${i}"><b>${p.label}</b>${exactNote(p.spec, p.label) ? ` <span class="small muted">(valeur exacte)</span>` : ""} <span class="mk" id="mk${i}"></span></label>
     <input id="p${i}" class="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…"><div class="preview" id="pv${i}"></div></div>`).join("")}
   ${keypadHtml(q.parts[0].spec)}
-  <div class="actions"><button class="btn-primary" id="check">Valider</button><button id="idk">Voir le corrigé</button></div>
+  <div class="actions"><button class="btn-primary" id="check">Valider</button><button class="btn-sec" id="idk">Voir le corrigé</button></div>
   <div id="fb"></div></div>`);
   const S = opt.track ? sigOpen({ ev: "q", code, d: q.d, kind: q.kind || "", fmt: opt.track, redo: opt.redo ? 1 : 0 }) : null;
   sigWatchLesson(S); pageQ = code; bindScratch(S);
@@ -1180,7 +1210,7 @@ function renderProblem(q, opt) {
     const d = typeof delta === "number" && delta !== 0 ? `<span class="delta ${delta > 0 ? "up" : "down"}">Mathélo ${delta > 0 ? "+" : ""}${delta}</span>` : "";
     fb.innerHTML = `<div class="fb ${frac === 1 ? "ok" : "bad"} pop"><div class="spread"><b>${frac === 1 ? (tries === 1 ? "Problème résolu du premier coup !" : "Problème résolu.") : ok.filter(Boolean).length + " partie(s) juste(s) sur " + q.parts.length + "."}</b>${d}</div><div class="sol">${q.sol}</div></div>
       <div class="vote"><span>Ce problème était… <button data-v="up" aria-label="Bon problème">👍</button> <button data-v="down" aria-label="Problème à revoir">👎</button></span><span class="code">${code}</span></div>${commentBox()}
-      <div class="actions">${frac === 1 ? "" : '<button id="redo">Refaire avec d\'autres valeurs</button>'}<button class="btn-primary" id="nx">Continuer</button></div>`;
+      <div class="actions">${frac === 1 ? "" : '<button class="btn-sec" id="redo">Refaire avec d\'autres valeurs</button>'}<button class="btn-primary" id="nx">Continuer</button></div>`;
     typeset(fb);
     fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
     bindComment(fb, code);
@@ -1229,7 +1259,7 @@ function renderQuestion(q, opt) {
   <div class="answer"><input id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="none" placeholder="Ta réponse…" aria-label="Ta réponse">
   <div class="preview" id="prev"></div>
   ${keypadHtml(q.spec)}
-  <div class="actions"><button class="btn-primary" id="check">Valider</button><button id="idk">Je ne sais pas</button></div>
+  <div class="actions"><button class="btn-primary" id="check">Valider</button><button class="btn-sec" id="idk">Je ne sais pas</button></div>
   ${opt.onNotYet || opt.onEasy ? `<div class="skips">${opt.onNotYet ? '<button class="btn-ghost small notyet" id="notyet">Pas encore vu en classe</button>' : ""}${opt.onEasy ? '<button class="btn-ghost small easy" id="easy" title="Passer cette question et monter d\'un cran">Trop facile ⏭</button>' : ""}</div>` : ""}</div>
   <div id="fb"></div></div>`);
   const S = opt.track ? sigOpen({ ev: "q", code, d: q.d, kind: q.kind || "", fmt: opt.track, redo: opt.redo ? 1 : 0 }) : null;
@@ -1289,7 +1319,7 @@ function renderQuestion(q, opt) {
       ${!solved && lastDiag ? `<div class="diag">🔎 ${esc(lastDiag)}</div>` : ""}
       ${guided ? `<button class="btn-primary" id="guide">🪜 On le fait ensemble, pas à pas</button><div id="gsteps" class="stack"></div><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : solSteps ? `<button class="btn-primary" id="solstep">🪜 Voir la correction étape par étape</button><div id="ssteps" class="stack"></div><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : `<div class="sol">${q.sol}</div>`}</div>
       <div class="vote"><span>Cette question était… <button data-v="up" aria-label="Bonne question">👍</button> <button data-v="down" aria-label="Question à revoir">👎</button></span><span class="code" title="Code de la question">${code}</span></div>${commentBox()}
-      <div class="actions">${solved ? "" : `<button id="redo"${!guided && !solSteps ? ' class="btn-primary"' : ""}>${q.d > 1 && q.d < 4 ? "💪 Une plus facile pour repartir" : "Refaire avec d'autres valeurs"}</button>`}<button class="${solved ? "btn-primary" : ""}" id="nx">Continuer</button></div>`;
+      <div class="actions">${solved ? "" : `<button id="redo" class="${!guided && !solSteps ? "btn-primary" : "btn-sec"}">${q.d > 1 && q.d < 4 ? "💪 Une plus facile pour repartir" : "Refaire avec d'autres valeurs"}</button>`}<button class="${solved ? "btn-primary" : ""}" id="nx">Continuer</button></div>`;
     typeset(fb);
     fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
     bindComment(fb, code);
@@ -1398,11 +1428,11 @@ function runGuide(q, box, done) {
 }
 
 // Petit message éphémère.
-function toast(msg) {
+function toast(msg, ms = 2200) {
   const t = document.createElement("div");
   t.className = "toast pop"; t.textContent = msg;
   document.body.appendChild(t);
-  setTimeout(() => t.remove(), 2200);
+  setTimeout(() => t.remove(), ms);
 }
 
 function burst() {
@@ -1487,6 +1517,22 @@ function bindComment(root, code) {
     };
   });
 }
+// Commentaire tapé mais pas envoyé (22.11, retour de l'auteur) : un clic sur un autre bouton (Continuer, Valider…)
+// l'envoie aussi, au lieu de le perdre. « Fermer » (✕) de la fenêtre 💬 reste une annulation.
+function flushComments(except) {
+  document.querySelectorAll("details.cmt").forEach((box) => {
+    const b = box.querySelector(".cmt-s"), ta = box.querySelector(".cmt-t");
+    if (b && ta && b !== except && !ta.disabled && ta.value.trim()) b.click();
+  });
+  const sheet = document.getElementById("fabs"), fg = document.getElementById("fabg"), ft = document.getElementById("fabt");
+  if (sheet && fg && ft && fg !== except && ft.value.trim()) fg.click();
+}
+document.addEventListener("click", (e) => { const g = e.target.closest && e.target.closest(".grade-open"); if (g) gradeCard(g.dataset.g); });
+document.addEventListener("click", (e) => {
+  const b = e.target.closest && e.target.closest("button");
+  if (!b || b.matches(".cmt-s, #fabg, #fabx, #fabc") || b.closest("details.cmt, #fabs")) return;
+  flushComments(b);
+}, true);
 // Rappel de cours : « clair » ou « pas compris » (+ commentaire). « Pas compris » : la leçon sera reproposée.
 function bindLessonFeedback(root) {
   root.querySelectorAll(".lfb").forEach((box) => {
@@ -1624,7 +1670,9 @@ function screenSummary() {
   Badges.check(state); save();
   const nb = newBadgesCard();
   const n = session.answered, sc = session.score, d = state.elo.r - session.elo0;
-  const g0 = gradeOf(session.elo0), g1 = gradeOf(state.elo.r), newGrade = g1.i > g0.i ? `<div class="card stack grade-up"><div class="eyebrow">Nouveau grade !</div><div class="ic-row"><span class="ic grade-ic">${g1.ic}</span><div><h3>Tu es maintenant ${g1.name}</h3><div class="small muted">${g1.next ? "Prochain grade : " + g1.next.ic + " " + g1.next.name + ", à " + g1.next.at + "." : "Le plus haut grade : bravo !"}</div></div></div></div>` : "";
+  const g0 = gradeOf(session.elo0), g1 = gradeOf(state.elo.r);
+  if (g1.i > g0.i) gradeNumbers();
+  const newGrade = g1.i > g0.i ? `<div class="card stack grade-up"><div class="eyebrow">Nouveau grade !</div><div class="ic-row"><button type="button" class="ic grade-ic grade-open" data-g="${g1.name}" aria-label="Voir la carte du grade ${g1.name}">${g1.ic}</button><div><h3>Tu es maintenant ${g1.name}</h3><div class="small muted">${g1.next ? "Prochain grade : " + g1.next.ic + " " + g1.next.name + ", à " + g1.next.at + "." : "Le plus haut grade : bravo !"}</div></div></div></div>` : "";
   h(`${brand}<h2>${sc >= n * 0.8 ? "Excellente séance !" : sc >= n * 0.5 ? "Bonne séance." : "Séance faite : c'est en pratiquant qu'on progresse."}</h2>
   <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span>${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ta série passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${FORMATS[Engine.tomorrowFormat(state)].label}</b></div></div></div>
   ${summaryByNotion()}
@@ -1633,7 +1681,7 @@ function screenSummary() {
 </div>
   ${session.ctest ? (() => { const a = compNote((state.comps || {})[session.ctest.cid]), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? "La note apparaît après 3 réponses sur cette compétence." : b === null ? "Première note pour cette compétence." : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". Elle remontera avec la pratique." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
   ${newGrade}${nb}
-  ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${state.carnet.length} à effacer</b></div><button id="carnetagain">${session.carnet ? "Continuer à effacer" : "📕 Effacer mes erreurs maintenant"}</button></div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
+  ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${state.carnet.length} à effacer</b></div><span class="small muted">Une erreur s'efface après 2 réussites de suite, du premier coup.</span><button class="btn-primary" id="carnetagain">${session.carnet ? "Continuer à effacer" : "📕 Effacer mes erreurs maintenant"}</button></div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
   ${returnCard()}
   ${typeof Curieux !== "undefined" && Curieux.available(state).length ? '<button class="btn-primary" id="curbonus">🤔 Bonus : une question curieuse</button>' : ""}
   <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)", "app")}</div>

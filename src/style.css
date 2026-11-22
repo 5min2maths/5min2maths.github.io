@@ -78,6 +78,8 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--blue); outl
 .btn-primary { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 700; padding: 13px 20px; font-size: 1.05rem; }
 .btn-ghost { background: transparent; border-color: transparent; color: var(--blue); padding: 8px 10px; }
 .btn-big { width: 100%; }
+/* 22.11 : boutons d'action secondaires en bleu clair (tous les boutons d'action sont bleus ; plein = action principale) */
+.btn-sec { background: var(--blue-soft); border-color: var(--blue); color: var(--blue); font-weight: 700; }
 button:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .seg { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -504,3 +506,23 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .fmt-box.fmt-swap h3, .fmt-box.fmt-swap p { animation: fmtswap .25s ease-out; }
 @keyframes fmtswap { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .fmt-box.fmt-swap h3, .fmt-box.fmt-swap p { animation: none; } }
+
+/* Leçons actives (22.11) : défis réussis gardés au-dessus, nouvelle consigne mise en évidence */
+.act-done { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.act-done:empty { display: none; }
+.act-done li { font-size: 0.85rem; color: var(--ink-soft); text-decoration: line-through; text-decoration-color: var(--ok); }
+.act-goal { border-radius: 8px; padding: 4px 6px; margin-left: -6px; margin-right: -6px; }
+.act-goal.act-new { animation: actnew 1.6s ease; }
+@keyframes actnew { 0% { background: var(--fluo); color: var(--fluo-ink); transform: scale(1.02); } 60% { background: var(--blue-soft); } 100% { background: transparent; transform: none; } }
+.act-suite { margin-top: 6px; font-weight: 700; color: var(--blue); }
+@media (prefers-reduced-motion: reduce) { .act-goal.act-new { animation: none; background: var(--blue-soft); } }
+
+/* Grades collector (22.11) */
+.grade-open { all: unset; cursor: pointer; display: inline-block; border-radius: 10px; }
+.grade-open:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+.grades .g-no { font-family: var(--font-mono); color: var(--blue); font-weight: 700; }
+.collector-bg { position: fixed; inset: 0; background: rgba(16, 22, 42, 0.55); display: grid; place-items: center; z-index: 30; padding: 20px; }
+.collector { background: var(--card); border: 3px solid var(--blue); border-radius: 22px; padding: 26px 24px; text-align: center; max-width: 320px; width: 100%;
+  display: grid; gap: 8px; justify-items: center; box-shadow: 0 10px 0 var(--shadow); }
+.collector .col-ic { font-size: 6rem; line-height: 1.1; }
+.collector .col-no { font-family: var(--font-mono); font-size: 2rem; font-weight: 800; color: var(--blue); }
