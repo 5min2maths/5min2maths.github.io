@@ -496,7 +496,7 @@ const LESSON_FIGS_V2 = {
   triaire: () => GF.sas(6, 8, 30, { la: "a", lb: "b", lg: "γ" }),
   cart: () => FIG.plot([], [[1, 2, "A"], [4, 6, "B"], [2.5, 4, "M"]], { numbers: true, xr: [-1, 6], yr: [-1, 7] , squash: 0.55}),
   droites: () => FIG.plot([{ f: (x) => 2 * x + 1 }], [[0, 1, "A"], [2, 5, "B"]], { numbers: true, xr: [-2, 4], yr: [-2, 7] , squash: 0.4}),
-  cercle: () => FIG.plot([{ f: (x) => (Math.abs(x - 1) <= 3 ? -2 + Math.sqrt(9 - (x - 1) ** 2) : NaN) }, { f: (x) => (Math.abs(x - 1) <= 3 ? -2 - Math.sqrt(9 - (x - 1) ** 2) : NaN) }], [[1, -2, "(1 ; −2)"]], { numbers: true, xr: [-3, 5], yr: [-6, 2] }),
+  cercle: () => FIG.plot([], [[1, -2, "(1 ; −2)"]], { numbers: true, xr: [-3, 5], yr: [-6, 2], circles: [[1, -2, 3]], segs: [[1, -2, 4, -2, "f-accent"]], label: "cercle de centre (1 ; −2) et de rayon 3" }),
   droitesrem: () => FIG.triLines("medianes", {}),
   sys2: () => FIG.plot([{ f: (x) => 7 - x }, { f: (x) => x - 1, cls: "f-line" }], [[4, 3, "(4 ; 3)"]], { numbers: true, step: 2, xr: [-2, 8], yr: [-2, 8] , squash: 0.6}),
 };

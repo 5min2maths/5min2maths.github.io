@@ -298,7 +298,7 @@
     ],
   };
 
-  // ===================== airepyr : aire d'une pyramide, apothème (et cône) =====================
+  // ===================== airepyr : aire d'une pyramide, apothème =====================
   const APYR = {
     1: [
       () => { const c = R.int(4, 12), a = R.int(5, 15); if (a === c) return null;
@@ -332,11 +332,11 @@
         return Qv("La pyramide du Louvre a une base carrée de côté " + cm(c, "m") + " et une hauteur de " + cm(h, "m") + ". Ses quatre faces sont en verre. Calcule la surface de verre (en m², arrondie à l'unité).", A, "Apothème : " + M("\\sqrt{" + N(h) + "^2 + " + N(c / 2) + "^2} \\approx " + N(rd(a, 0.01))) + " m ; surface : " + M("2 \\cdot " + N(c) + " \\cdot " + N(rd(a, 0.01)) + " \\approx " + N(rd(A, 1))) + " m².",
           { round: 1, ctx: "louvre", guide: [GS("Apothème (au centième) ?", a, M(N(rd(a, 0.01))) + " m.", 0.01), GS("Surface des quatre faces (à l'unité) ?", A, M(N(rd(A, 1))) + " m².", 1)],
             traps: [TR(c * c + A, "Le sol n'est pas en verre."), TR(2 * c * h, "La hauteur des faces est l'apothème.")] }); },
-      () => { const [r, h, g] = pk([[3, 4, 5], [6, 8, 10], [5, 12, 13], [9, 12, 15], [8, 15, 17]]), ask = R.int(0, 1);
-        return ask ? Qv("Un cône a un rayon de " + M(r) + " cm et une génératrice de " + M(g) + " cm. Son aire latérale vaut " + M("\\pi r g") + ". Calcule-la" + PIX + ".", r * g * Math.PI, M("\\pi \\cdot " + r + " \\cdot " + g + " = " + piT(r * g)) + " cm².",
-            { canon: r * g + "π", ctx: "conelat", guide: [GS("Nombre devant " + M("\\pi") + " : " + M(r + " \\cdot " + g) + " = ?", r * g, M(r * g) + "."), GS("Aire latérale (avec " + M("\\pi") + ") ?", r * g * Math.PI, M(piT(r * g)) + " cm².")], traps: [TR(r * h * Math.PI, "On utilise la génératrice, pas la hauteur.")] })
-          : Qv("Un cône a un rayon de " + M(r) + " cm et une hauteur de " + M(h) + " cm. Calcule son aire totale (" + M("\\pi r g + \\pi r^2") + ")" + PIX + ".", (r * g + r * r) * Math.PI, "Génératrice : " + M("\\sqrt{" + r + "^2 + " + h + "^2} = " + g) + " ; " + M("\\pi \\cdot " + r + " \\cdot " + g + " + \\pi \\cdot " + r + "^2 = " + piT(r * g + r * r)) + " cm².",
-            { canon: r * g + r * r + "π", ctx: "conetot", guide: [GS("Génératrice (Pythagore) ?", g, M(g) + " cm."), GS("Aire latérale, nombre devant " + M("\\pi") + " ?", r * g, M(piT(r * g)) + "."), GS("Aire totale (avec " + M("\\pi") + ") ?", (r * g + r * r) * Math.PI, M(piT(r * g + r * r)) + " cm².")], traps: [TR((r * h + r * r) * Math.PI, "Il faut la génératrice, pas la hauteur."), TR(r * g * Math.PI, "Ajoute la base (un disque).")] }); },
+      // Aire du cône retirée (22.11) : hors programme 11e. Toit de tour : hauteur donnée, apothème à calculer, puis coût.
+      () => { const [c2, h, a] = pk([[3, 4, 5], [5, 12, 13], [6, 8, 10], [8, 6, 10], [9, 12, 15], [8, 15, 17]]), c = 2 * c2, p = pk([35, 40, 45, 60]), A = 2 * c * a;
+        return Qv("Le toit d'une tour est une pyramide régulière à base carrée de " + M(c) + " m de côté et de " + M(h) + " m de haut. On couvre ses quatre pans d'ardoises à " + M(p) + " CHF le m². Combien coûtent les ardoises (en CHF) ?", A * p, "Apothème : " + M("\\sqrt{" + h + "^2 + " + c2 + "^2} = " + a) + " m ; pans : " + M("4 \\cdot \\frac{" + c + " \\cdot " + a + "}{2} = " + A) + " m² ; prix : " + M(A + " \\cdot " + p + " = " + N(A * p)) + " CHF.",
+          { ctx: "ardoises", guide: [GS("Apothème (Pythagore avec le demi-côté) ?", a, M(a) + " m."), GS("Aire des quatre pans (m²) ?", A, M(A) + " m²."), GS("Prix (CHF) ?", A * p, M(N(A * p)) + " CHF.")],
+            traps: [TR(2 * c * h * p, "Les pans ont pour hauteur l'apothème, pas la hauteur du toit."), TR((c * c + A) * p, "Le plancher n'est pas couvert d'ardoises.")] }); },
       () => { const c = 2 * R.int(2, 8), a = R.int(c / 2 + 1, c + 8), A = c * c + 2 * c * a, cost = pk([12, 15, 18, 25]);
         return Qv("Un artisan fabrique une boîte en forme de pyramide régulière (base carrée de " + M(c) + " cm, apothème " + M(a) + " cm), entièrement fermée. Le carton coûte " + M(cost) + " CHF le m². Quel est le prix du carton pour une boîte (en CHF, au centime) ?", A / 10000 * cost, "Aire : " + M(c * c + " + " + 2 * c * a + " = " + A) + " cm² " + M("= " + N(A / 10000)) + " m² ; prix : " + M(N(A / 10000) + " \\cdot " + cost + " \\approx " + N(rd(A / 10000 * cost, 0.01))) + " CHF.",
           { round: 0.01, ctx: "boite", guide: [GS("Aire totale en cm² ?", A, M(A) + " cm²."), GS("En m² (1 m² = 10'000 cm²) ?", A / 10000, M(N(A / 10000)) + " m²."), GS("Prix (au centime) ?", A / 10000 * cost, M(N(rd(A / 10000 * cost, 0.01))) + " CHF.", 0.01)],
@@ -466,8 +466,8 @@
     airepyr: [
       () => P("Une pyramide régulière à base carrée a une base de 10 m de côté et une hauteur de 12 m.", [["a) Apothème (m)", 13], ["b) Aire latérale (m²)", 260], ["c) Volume (m³)", 400]],
           ["a) √(12² + 5²).", "c) Base × hauteur ÷ 3."], "a) 13 ; b) " + M("2 \\cdot 10 \\cdot 13 = 260") + " ; c) " + M("\\frac{100 \\cdot 12}{3} = 400") + "."),
-      () => P("Patron d'un cône : rayon de la base 6 cm, génératrice 10 cm.", [["a) Hauteur du cône (cm)", 8], ["b) Aire latérale (cm², au centième)", 60 * Math.PI, 0.01], ["c) Volume (cm³, au centième)", 96 * Math.PI, 0.01]],
-          ["a) √(10² − 6²).", "b) π r g ; c) ⅓ π r² h."], "a) 8 ; b) " + M("60\\pi \\approx 188{,}50") + " ; c) " + M("96\\pi \\approx 301{,}59") + "."),
+      () => P("Patron d'une pyramide régulière : un carré de 16 cm de côté et quatre triangles isocèles d'apothème 10 cm.", [["a) Aire du patron (cm²)", 576], ["b) Hauteur de la pyramide montée (cm)", 6], ["c) Volume (cm³)", 512]],
+          ["a) Carré + 4 triangles.", "b) √(10² − 8²) ; c) Base × hauteur ÷ 3."], "a) " + M("256 + 4 \\cdot \\frac{16 \\cdot 10}{2} = 576") + " ; b) " + M("\\sqrt{100 - 64} = 6") + " ; c) " + M("\\frac{256 \\cdot 6}{3} = 512") + "."),
     ],
     volcomp: [
       () => P("Un réservoir : cylindre de rayon 1 m et de hauteur 3 m, avec un fond en cône de même rayon et de hauteur 0,6 m.", [["a) Volume du cylindre (m³, au centième)", 3 * Math.PI, 0.01], ["b) Volume du cône (m³, au centième)", 0.2 * Math.PI, 0.01], ["c) Contenance totale en litres (à l'unité)", 3200 * Math.PI, 1]],
@@ -497,7 +497,7 @@
     pythrec: "Compare le carré du plus grand côté avec la somme des carrés des deux autres : égalité → rectangle ; sinon, pas rectangle.",
     vol: "Prisme et cylindre : V = aire de la base × hauteur. 1 L = 1 dm³ = 1000 cm³, 1 cL = 10 cm³.",
     volcone: "Pyramide et cône : V = ⅓ · aire de la base · hauteur. Boule : V = ⁴⁄₃ π r³ ; sphère : A = 4 π r².",
-    airepyr: "Aire latérale d'une pyramide régulière : 4 triangles de base c et de hauteur l'apothème (Pythagore avec le demi-côté). Cône : π r g.",
+    airepyr: "Aire latérale d'une pyramide régulière : 4 triangles de base c et de hauteur l'apothème (Pythagore avec le demi-côté).",
     volcomp: "Découpe le solide en solides simples, calcule chaque volume (garde π), puis additionne ou soustrais.",
     volmanq: "Écris la formule du volume, remplace ce que tu connais, puis isole la dimension cherchée.",
   });
@@ -507,7 +507,7 @@
     pythrec: ["Tester si un triangle est rectangle", "Décimaux, repère, côté manquant", "Équerre, racines, contrôle d'un cadre"],
     vol: ["Volume d'un pavé, d'un prisme, d'un cylindre", "Prisme à base trapèze, contenances", "Aires totales, cylindre creux"],
     volcone: ["Volume d'une pyramide, d'un cône, d'une boule", "Diamètre, demi-boule, pyramide dans un cube", "Génératrice, aire de la sphère, variations"],
-    airepyr: ["Aire latérale et totale d'une pyramide", "Apothème avec Pythagore", "Problèmes : Louvre, cône, coût"],
+    airepyr: ["Aire latérale et totale d'une pyramide", "Apothème avec Pythagore", "Problèmes : Louvre, toit, coût"],
     volcomp: ["Solides composés simples", "Silo, gélule, cube percé", "Glace, découpe, tente"],
     volmanq: ["Retrouver une hauteur, une longueur", "Rayon d'un cône, d'une boule ; hauteur d'une pyramide", "Problèmes avec conversions"],
   });

@@ -88,6 +88,10 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
       }
       g += '<path d="' + d + '" class="' + (F.cls || (k ? "f-line" : "f-accent")) + '" fill="none" stroke-width="2.4" clip-path="url(#' + id + ')"' + (F.dash ? ' stroke-dasharray="5 4"' : "") + "/>";
     });
+    (o.polys || []).forEach((Q) => (g += P(Q.map(([x, y]) => [X(x), Y(y)]), "f-fill2")));
+    // Cercles entiers (22.11 : les demi-cercles tracés comme deux fonctions s'arrêtaient avant l'axe) : [cx, cy, r, cls].
+    (o.circles || []).forEach(([cx, cy, r, cls]) => (g += '<ellipse cx="' + X(cx).toFixed(1) + '" cy="' + Y(cy).toFixed(1) + '" rx="' + (X(cx + r) - X(cx)).toFixed(1) + '" ry="' + (Y(cy) - Y(cy + r)).toFixed(1) + '" class="' + (cls || "f-blue") + '" fill="none" stroke-width="2.4" clip-path="url(#' + id + ')"/>'));
+    (o.segs || []).forEach(([xa, ya, xb, yb, cls]) => (g += L(X(xa), Y(ya), X(xb), Y(yb), cls || "f-line", 'stroke-width="2"')));
     (o.vlines || []).forEach((x) => (g += L(X(x), Y(y0), X(x), Y(y1), "f-line", 'stroke-dasharray="4 4"')));
     (o.hlines || []).forEach((y) => (g += L(X(x0), Y(y), X(x1), Y(y), "f-line", 'stroke-dasharray="4 4"')));
     pts.forEach(([x, y, s]) => (g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="4" class="f-dot"/>' + (s ? t(X(x) + 7, Y(y) - 7, s, "f-txt", "start", 12) : "")));
@@ -718,7 +722,7 @@ Object.assign(GEN, {
     if (d === 2) {
       const r = [R.nz(-3, 3), R.nz(-4, 4), R.nz(-5, 5)], a = R.pick([1, 2, -1]); if (new Set(r).size < 3) return GEN.polyfact(2);
       const P = pscale(pmul(pmul([1, -r[0]], [1, -r[1]]), [1, -r[2]]), a);
-      return { q: "Résous " + M(poly(P) + " = 0") + ". (Cherche une racine évidente parmi les diviseurs du terme constant.)", spec: { kind: "set", values: r }, sol: "Racine évidente, Horner, puis trinôme : " + M("S = \\{" + [...r].sort((u, v) => u - v).join(" ; ") + "\\}") + "." };
+      return { q: "Résous " + M(poly(P) + " = 0") + ". Cherche d'abord une racine évidente.", spec: { kind: "set", values: r }, sol: "Racine évidente : " + M("x = " + r[0]) + " (diviseur du terme constant, " + M("P(" + r[0] + ") = 0") + "). Horner par " + M(xm(r[0])) + ", puis le trinôme restant : " + M("S = \\{" + [...r].sort((u, v) => u - v).join(" ; ") + "\\}") + "." };
     }
     if (R.rand() < 0.5) {
       const a = R.int(1, 3), b = R.int(a + 1, 5);

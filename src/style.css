@@ -36,7 +36,7 @@
 }
 
 * { box-sizing: border-box; }
-html, body { min-height: 100%; }
+html, body { min-height: 100%; overscroll-behavior-y: contain; } /* pas de « tirer pour actualiser » qui recharge l'app en pleine question (22.11) */
 body {
   margin: 0; color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.5;
   background-color: var(--paper);
@@ -106,6 +106,9 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .fig .f-txt { fill: var(--ink); font-family: var(--font-body); }
 .fig .f-on { fill: #fff; font-family: var(--font-body); font-weight: 700; }
 .fig .f-dot { fill: var(--margin); }
+.fig .f-grid { stroke: var(--line); fill: none; }
+.fig .f-blue { stroke: var(--blue); fill: none; }
+.fig text.f-blue, .fig .f-blue.f-txt { fill: var(--blue); stroke: none; font-weight: 700; }
 .fig .f-jump { stroke: var(--margin); fill: none; stroke-width: 1.6; }
 .fig .f-head { fill: var(--ink); }
 .fig .f-headacc { fill: var(--margin); }

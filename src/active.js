@@ -224,8 +224,8 @@ Object.assign(ACTIVE, {
   cercletan: {
     predict: { q: "Cercle de centre O(0 ; 0), point T(3 ; 4). De O à T, on avance de 3 et on monte de 4. La tangente en T (la droite qui touche le cercle en T sans le traverser)…", choices: ["monte", "descend", "est horizontale"], good: 1,
       fig: (() => { const X = (u) => 130 + u * 18, Y = (v) => 120 - v * 18;
-      return `<svg class="fig" viewBox="0 0 260 230" role="img" aria-label="cercle de centre O, rayon OT vers T(3 ; 4)"><line x1="${X(-6.5)}" y1="${Y(0)}" x2="${X(6.5)}" y2="${Y(0)}" class="f-grid"/><line x1="${X(0)}" y1="${Y(-6)}" x2="${X(0)}" y2="${Y(6)}" class="f-grid"/>
-      <circle cx="${X(0)}" cy="${Y(0)}" r="90" class="f-soft"/><line x1="${X(0)}" y1="${Y(0)}" x2="${X(3)}" y2="${Y(4)}" class="f-line" stroke-width="2.5"/>
+      return `<svg class="fig" viewBox="0 0 260 230" role="img" aria-label="cercle de centre O, rayon OT vers T(3 ; 4)"><line x1="${X(-6.5)}" y1="${Y(0)}" x2="${X(6.5)}" y2="${Y(0)}" class="f-line" stroke-width="1"/><line x1="${X(0)}" y1="${Y(-6)}" x2="${X(0)}" y2="${Y(6)}" class="f-line" stroke-width="1"/>
+      <circle cx="${X(0)}" cy="${Y(0)}" r="90" class="f-blue" stroke-width="2"/><line x1="${X(0)}" y1="${Y(0)}" x2="${X(3)}" y2="${Y(4)}" class="f-line" stroke-width="2.5"/>
       <path d="M${X(0)},${Y(0)} L${X(3)},${Y(0)} L${X(3)},${Y(4)}" class="f-line" fill="none" stroke-dasharray="4 3"/><text x="${X(1.5)}" y="${Y(0) + 15}" class="f-txt" text-anchor="middle" font-size="12">+3</text><text x="${X(3) + 5}" y="${Y(2)}" class="f-txt" font-size="12">+4</text>
       <circle cx="${X(0)}" cy="${Y(0)}" r="3.5" class="f-dot"/><text x="${X(0) - 7}" y="${Y(0) + 16}" class="f-txt" text-anchor="end" font-size="13">O</text>
       <circle cx="${X(3)}" cy="${Y(4)}" r="6" class="f-dot"/><text x="${X(3) + 9}" y="${Y(4) - 6}" class="f-txt" font-size="13">T(3 ; 4)</text></svg>`; })(),
@@ -238,8 +238,8 @@ Object.assign(ACTIVE, {
       const fr = (a, b) => { if (b === 0) return null; const g = (u, v) => (v ? g(v, u % v) : Math.abs(u)); const k = g(a, b) * Math.sign(b); const n = a / k, d = b / k; return d === 1 ? String(n) : (n < 0 ? "−" : "") + Math.abs(n) + "/" + d; };
       const draw = () => {
         const [x, y] = P[i], W = 330, H = 300, X = (u) => 165 + u * 14, Y = (v) => 150 - v * 14;
-        let g = '<line x1="' + X(-10.5) + '" y1="' + Y(0) + '" x2="' + X(10.5) + '" y2="' + Y(0) + '" class="f-grid"/><line x1="' + X(0) + '" y1="' + Y(-10.5) + '" x2="' + X(0) + '" y2="' + Y(10.5) + '" class="f-grid"/>';
-        g += '<circle cx="' + X(0) + '" cy="' + Y(0) + '" r="70" class="f-soft"/>';
+        let g = '<line x1="' + X(-10.5) + '" y1="' + Y(0) + '" x2="' + X(10.5) + '" y2="' + Y(0) + '" class="f-line" stroke-width="1"/><line x1="' + X(0) + '" y1="' + Y(-10.5) + '" x2="' + X(0) + '" y2="' + Y(10.5) + '" class="f-line" stroke-width="1"/>';
+        g += '<circle cx="' + X(0) + '" cy="' + Y(0) + '" r="70" class="f-blue" stroke-width="2"/>';
         // rayon et son triangle de pente (avancer de x, monter de y)
         g += '<line x1="' + X(0) + '" y1="' + Y(0) + '" x2="' + X(x) + '" y2="' + Y(y) + '" class="f-line" stroke-width="2.5"/>';
         if (x && y) g += '<path d="M' + X(0) + "," + Y(0) + " L" + X(x) + "," + Y(0) + " L" + X(x) + "," + Y(y) + '" class="f-line" fill="none" stroke-dasharray="4 3"/>' +
@@ -296,20 +296,22 @@ function activeLesson(id, L, cont, review) {
   const $ = (s) => document.getElementById(s);
   const reveal = (el) => { el.hidden = false; el.classList.add("pop"); setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 60); };
   const finish = () => { $("skip").hidden = true; reveal($("s3")); typeset($("s3")); $("go").hidden = false; };
+  // Défi : formules \( … \) rendues (ex. fractions, 22.11), sinon texte brut.
+  const setGoal = (t) => { const g = $("goal"); if (t.includes("\\(")) { g.innerHTML = t; typeset(g); } else g.textContent = t; };
   let started = false;
   app.querySelectorAll("#pc button").forEach((b) => (b.onclick = () => {
     const i = +b.dataset.i, ok = i === P.good, S = typeof sig !== "undefined" && sig && sig.ev === "lecon" ? sig : null;
     if (S && !started) sigAide(S, ok ? "D" : "d");
     app.querySelectorAll("#pc button").forEach((x) => { x.disabled = true; if (+x.dataset.i === P.good) x.setAttribute("aria-pressed", "true"); });
     if (!ok) b.classList.add("act-wrong");
-    $("pfb").innerHTML = `<div class="fb ${ok ? "ok" : "hint"}">${ok ? "Exact !" : "Pas tout à fait."} ${P.why}</div>`;
+    $("pfb").innerHTML = `<div class="fb ${ok ? "ok" : "hint"}">${ok ? "Exact !" : "Pas tout à fait."} ${P.why}</div>`; typeset($("pfb"));
     if (started) return; started = true;
-    $("goal").textContent = "Défi 1 · " + A.defis[0];
+    setGoal("Défi 1 · " + A.defis[0]);
     reveal($("s2"));
     A.play($("play"), (k, msg) => {
       $("gfb").innerHTML = `<div class="fb ok">✓ ${colonBreak(msg)}</div>`;
       if (typeof sig !== "undefined" && sig && sig.ev === "lecon") sigAide(sig, "f");
-      if (k + 1 < A.defis.length) $("goal").textContent = "Défi " + (k + 2) + " · " + A.defis[k + 1];
+      if (k + 1 < A.defis.length) setGoal("Défi " + (k + 2) + " · " + A.defis[k + 1]);
       else { $("goal").textContent = "Défis réussis !"; burst(); finish(); }
     });
   }));

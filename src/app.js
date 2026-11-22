@@ -411,7 +411,9 @@ function screenHome() {
 // Glisser à gauche / à droite sur l'accueil : cadre suivant / précédent (pas sur un curseur ou un champ).
 (() => {
   let x0 = null, y0 = 0;
-  app.addEventListener("touchstart", (e) => { x0 = !app.querySelector(".tabs") || e.target.closest("input, select, textarea, .seg, details, svg") ? null : e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+  // Seulement sur l'accueil (.home-panel) : la barre d'onglets est aussi affichée pendant une activité, et un balayage
+  // y renvoyait à l'accueil sans prévenir (commentaire du 22.11).
+  app.addEventListener("touchstart", (e) => { x0 = !app.querySelector(".home-panel") || e.target.closest("input, select, textarea, .seg, details, svg") ? null : e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
   app.addEventListener("touchend", (e) => {
     if (x0 === null) return;
     const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
@@ -420,6 +422,8 @@ function screenHome() {
     if (k >= 0 && k < ids.length) { homeTab = ids[k]; screenHome(); }
   }, { passive: true });
 })();
+// Activité en cours : le navigateur demande confirmation avant de recharger ou de quitter la page (22.11).
+window.addEventListener("beforeunload", (e) => { if (typeof session !== "undefined" && session && session.i < session.plan.length && session.answered > 0) { e.preventDefault(); e.returnValue = ""; } });
 // Réglages d'interface (21.11, propositions UI 8 et 10) : propres à l'appareil, gardés hors de la progression.
 const UI = (() => { let u = {}; try { u = JSON.parse(localStorage.getItem("m2m-ui") || "{}"); } catch (e) {} return Object.assign({ fs: 1, vib: true }, u); })();
 const uiSave = () => { try { localStorage.setItem("m2m-ui", JSON.stringify(UI)); } catch (e) {} };
@@ -1629,7 +1633,7 @@ function screenSummary() {
   ${newGrade}${nb}
   ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${state.carnet.length} à effacer</b></div><button id="carnetagain">${session.carnet ? "Continuer à effacer" : "📕 Effacer mes erreurs maintenant"}</button></div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
   ${returnCard()}
-  ${typeof Curieux !== "undefined" && Curieux.available(state).length ? '<button id="curbonus">🤔 Bonus : une question curieuse</button>' : ""}
+  ${typeof Curieux !== "undefined" && Curieux.available(state).length ? '<button class="btn-primary" id="curbonus">🤔 Bonus : une question curieuse</button>' : ""}
   <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)", "app")}</div>
   <button class="btn-primary btn-big" id="home">Retour à l'accueil</button>`);
   bindComment(app, "app"); bindInstall(screenHome);

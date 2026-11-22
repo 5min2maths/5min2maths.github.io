@@ -717,12 +717,20 @@ const Engine = {
     return plan;
   },
 
-  // Problème de la semaine : une notion « à problème » parmi celles vues, fixée par la semaine.
+  // Problème de la semaine : une notion « à problème » parmi celles vues, fixée pour la semaine.
+  // Calé sur le Mathélo (22.11 : un seul problème par semaine, il doit être à la bonne hauteur) :
+  // les 3 notions dont le défi (niveau 4) est le plus proche du Mathélo, une notion pas encore travaillée (m < 0,3) en dernier recours.
   weeklyProblem(state) {
+    const d = new Date(), week = d.getFullYear() + "-" + Math.floor((d - new Date(d.getFullYear(), 0, 1)) / 6048e5);
     const ids = this.eligible(state).filter((id) => hasProb(id));
     if (!ids.length) return null;
-    const d = new Date(), week = Math.floor((d - new Date(d.getFullYear(), 0, 1)) / 6048e5);
-    return ids[week % ids.length];
+    if (state.weeklyPick && state.weeklyPick.week === week && ids.includes(state.weeklyPick.id)) return state.weeklyPick.id;
+    const r = state.elo.r, m = (id) => (state.notions[id] || {}).m || 0;
+    const score = (id) => Math.abs(itemRating(state.profile, id, 4) - r) + (m(id) < 0.3 ? 400 : 0);
+    const best = ids.slice().sort((a, b) => score(a) - score(b)).slice(0, 3);
+    const n = +week.split("-")[1], id = best[n % best.length];
+    state.weeklyPick = { week, id };
+    return id;
   },
 
   isProvisional(state) { return state.elo.n < 20; },

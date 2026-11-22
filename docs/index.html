@@ -51,7 +51,7 @@
 }
 
 * { box-sizing: border-box; }
-html, body { min-height: 100%; }
+html, body { min-height: 100%; overscroll-behavior-y: contain; } /* pas de « tirer pour actualiser » qui recharge l'app en pleine question (22.11) */
 body {
   margin: 0; color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.5;
   background-color: var(--paper);
@@ -121,6 +121,9 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .fig .f-txt { fill: var(--ink); font-family: var(--font-body); }
 .fig .f-on { fill: #fff; font-family: var(--font-body); font-weight: 700; }
 .fig .f-dot { fill: var(--margin); }
+.fig .f-grid { stroke: var(--line); fill: none; }
+.fig .f-blue { stroke: var(--blue); fill: none; }
+.fig text.f-blue, .fig .f-blue.f-txt { fill: var(--blue); stroke: none; font-weight: 700; }
 .fig .f-jump { stroke: var(--margin); fill: none; stroke-width: 1.6; }
 .fig .f-head { fill: var(--ink); }
 .fig .f-headacc { fill: var(--margin); }
@@ -1329,15 +1332,15 @@ const FIG = (() => {
     return svg(340, 140, b + t(31, 124 - s, "1") + t(80 + S + 10, 130 - S / 2, "× " + String(k).replace(".", ",") + (kind ? " (" + kind + ")" : ""), "f-accent f-txt", "start"), "agrandissement");
   }
   // Repère avec une droite (fonctions affines).
-  function lineGraph(a, b, pts = []) {
-    const W = 300, H = 180, X = (x) => 150 + x * 18, Y = (y) => 90 - y * 6;
-    let g = L(10, 90, 290, 90) + L(150, 8, 150, 172);
-    for (let x = -7; x <= 7; x++) g += L(X(x), 87, X(x), 93);
-    const x1 = -7.5, x2 = 7.5;
-    g += '<clipPath id="cl"><rect x="10" y="8" width="280" height="164"/></clipPath>';
-    g += '<line x1="' + X(x1) + '" y1="' + Y(a * x1 + b) + '" x2="' + X(x2) + '" y2="' + Y(a * x2 + b) + '" class="f-accent" stroke-width="2.5" clip-path="url(#cl)"/>';
-    pts.forEach(([x, y, s]) => (g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="4.5" class="f-dot"/>' + t(X(x) + 8, Y(y) - 8, s, "f-txt", "start", 12)));
-    return svg(W, H, g, "droite");
+  // Repère quadrillé à l'échelle (même unité en x et en y, 22.11 : quadrillage demandé, triangles non déformés) :
+  // cadré sur les points et l'origine. a = null : pas de droite ; o.poly : polygone des points (ex. triangle ABC).
+  function lineGraph(a, b, pts = [], o = {}) {
+    const xs = pts.map((p) => p[0]).concat(0), ys = pts.map((p) => p[1]).concat(0);
+    let x0 = Math.min(...xs) - 1, x1 = Math.max(...xs) + 2, y0 = Math.min(...ys) - 1, y1 = Math.max(...ys) + 2;
+    if (x1 - x0 < 8) { const e = (8 - (x1 - x0)) / 2; x0 = Math.floor(x0 - e); x1 = Math.ceil(x1 + e); }
+    if (y1 - y0 < 6) { const e = (6 - (y1 - y0)) / 2; y0 = Math.floor(y0 - e); y1 = Math.ceil(y1 + e); }
+    const ratio = (y1 - y0) / (x1 - x0), big = Math.max(x1 - x0, y1 - y0) > 16;
+    return FIG.plot(a === null ? [] : [{ f: (x) => a * x + b }], pts, { xr: [x0, x1], yr: [y0, y1], numbers: true, step: big ? 2 : 1, squash: ratio > 1.4 ? 1.4 / ratio : 1, polys: o.poly ? [pts.map((p) => [p[0], p[1]])] : [], label: o.label || "repère" });
   }
   // Puissances : blocs (base^exposant).
   function blocks(label) {
@@ -2257,7 +2260,7 @@ Object.assign(GEN, {
     if (d === 1) {
       const tr = R.pick([[3, 4, 5], [6, 8, 10], [5, 12, 13]]), sx = R.sign(), sy = R.sign();
       const xb = xa + sx * tr[0], yb = ya + sy * tr[1];
-      return { fig: FIG.lineGraph((yb - ya) / (xb - xa), ya - ((yb - ya) / (xb - xa)) * xa, [[xa, ya, "A"], [xb, yb, "B"]]), q: "Calcule la distance entre " + M("A(" + xa + " ; " + ya + ")") + " et " + M("B(" + xb + " ; " + yb + ")") + ".", spec: { kind: "value", value: tr[2] }, sol: M("\\sqrt{" + par(xb - xa) + "^2 + " + par(yb - ya) + "^2} = \\sqrt{" + tr[2] ** 2 + "} = " + tr[2]) };
+      return { fig: FIG.lineGraph(null, 0, [[xa, ya, "A"], [xb, yb, "B"]], { poly: true, label: "segment AB" }), q: "Calcule la distance entre " + M("A(" + xa + " ; " + ya + ")") + " et " + M("B(" + xb + " ; " + yb + ")") + ".", spec: { kind: "value", value: tr[2] }, sol: M("\\sqrt{" + par(xb - xa) + "^2 + " + par(yb - ya) + "^2} = \\sqrt{" + tr[2] ** 2 + "} = " + tr[2]) };
     }
     if (d === 2) {
       const xb = xa + 2 * R.nz(-3, 3), yb = ya + 2 * R.nz(-3, 3);
@@ -2546,7 +2549,7 @@ const PROB_EXTRA = {
   cart: [() => {
     const [p, q] = R.pick([[3, 4], [6, 8], [5, 12], [8, 6]]), xa = R.int(-4, 1), ya = R.int(-3, 2);
     const B = [xa + p, ya], C = [xa, ya + q];
-    return { fig: FIG.lineGraph(0, ya, [[xa, ya, "A"], [B[0], B[1], "B"], [C[0], C[1], "C"]]), q: "Soit " + M("A(" + xa + " ; " + ya + ")") + ", " + M("B(" + B[0] + " ; " + B[1] + ")") + " et " + M("C(" + C[0] + " ; " + C[1] + ")") + ".",
+    return { fig: FIG.lineGraph(null, 0, [[xa, ya, "A"], [B[0], B[1], "B"], [C[0], C[1], "C"]], { poly: true, label: "triangle ABC" }), q: "Soit " + M("A(" + xa + " ; " + ya + ")") + ", " + M("B(" + B[0] + " ; " + B[1] + ")") + " et " + M("C(" + C[0] + " ; " + C[1] + ")") + ".",
       parts: [{ label: "a) Longueur BC", spec: { kind: "value", value: Math.hypot(p, q) } }, { label: "b) Aire du triangle ABC", spec: { kind: "value", value: (p * q) / 2 } }, { label: "c) Distance de A à la droite (BC), au centième", spec: { kind: "value", value: (p * q) / Math.hypot(p, q), round: 0.01 } }],
       hints: ["Le triangle est rectangle en A (un côté horizontal, un côté vertical).", "Aire = AB · AC / 2 = BC · d / 2, d'où la distance d."],
       sol: "a) " + M("\\sqrt{" + p * p + " + " + q * q + "} = " + Math.hypot(p, q)) + ". b) " + M("\\frac{" + p + " \\cdot " + q + "}{2} = " + (p * q) / 2) + ". c) " + M("d = \\frac{2 \\cdot " + (p * q) / 2 + "}{" + Math.hypot(p, q) + "} = " + dec(r2((p * q) / Math.hypot(p, q)))) + "." };
@@ -2683,6 +2686,10 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
       }
       g += '<path d="' + d + '" class="' + (F.cls || (k ? "f-line" : "f-accent")) + '" fill="none" stroke-width="2.4" clip-path="url(#' + id + ')"' + (F.dash ? ' stroke-dasharray="5 4"' : "") + "/>";
     });
+    (o.polys || []).forEach((Q) => (g += P(Q.map(([x, y]) => [X(x), Y(y)]), "f-fill2")));
+    // Cercles entiers (22.11 : les demi-cercles tracés comme deux fonctions s'arrêtaient avant l'axe) : [cx, cy, r, cls].
+    (o.circles || []).forEach(([cx, cy, r, cls]) => (g += '<ellipse cx="' + X(cx).toFixed(1) + '" cy="' + Y(cy).toFixed(1) + '" rx="' + (X(cx + r) - X(cx)).toFixed(1) + '" ry="' + (Y(cy) - Y(cy + r)).toFixed(1) + '" class="' + (cls || "f-blue") + '" fill="none" stroke-width="2.4" clip-path="url(#' + id + ')"/>'));
+    (o.segs || []).forEach(([xa, ya, xb, yb, cls]) => (g += L(X(xa), Y(ya), X(xb), Y(yb), cls || "f-line", 'stroke-width="2"')));
     (o.vlines || []).forEach((x) => (g += L(X(x), Y(y0), X(x), Y(y1), "f-line", 'stroke-dasharray="4 4"')));
     (o.hlines || []).forEach((y) => (g += L(X(x0), Y(y), X(x1), Y(y), "f-line", 'stroke-dasharray="4 4"')));
     pts.forEach(([x, y, s]) => (g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="4" class="f-dot"/>' + (s ? t(X(x) + 7, Y(y) - 7, s, "f-txt", "start", 12) : "")));
@@ -3313,7 +3320,7 @@ Object.assign(GEN, {
     if (d === 2) {
       const r = [R.nz(-3, 3), R.nz(-4, 4), R.nz(-5, 5)], a = R.pick([1, 2, -1]); if (new Set(r).size < 3) return GEN.polyfact(2);
       const P = pscale(pmul(pmul([1, -r[0]], [1, -r[1]]), [1, -r[2]]), a);
-      return { q: "Résous " + M(poly(P) + " = 0") + ". (Cherche une racine évidente parmi les diviseurs du terme constant.)", spec: { kind: "set", values: r }, sol: "Racine évidente, Horner, puis trinôme : " + M("S = \\{" + [...r].sort((u, v) => u - v).join(" ; ") + "\\}") + "." };
+      return { q: "Résous " + M(poly(P) + " = 0") + ". Cherche d'abord une racine évidente.", spec: { kind: "set", values: r }, sol: "Racine évidente : " + M("x = " + r[0]) + " (diviseur du terme constant, " + M("P(" + r[0] + ") = 0") + "). Horner par " + M(xm(r[0])) + ", puis le trinôme restant : " + M("S = \\{" + [...r].sort((u, v) => u - v).join(" ; ") + "\\}") + "." };
     }
     if (R.rand() < 0.5) {
       const a = R.int(1, 3), b = R.int(a + 1, 5);
@@ -4423,9 +4430,9 @@ FINE.push(
     hint: "Une droite est tangente si sa distance au centre vaut le rayon. La tangente en un point est perpendiculaire au rayon.",
     lesson: ["Cercles et tangentes", "Trois réflexes pour les cercles dans un repère.", "Le cercle de centre \\(C(a \\, ; b)\\) et de rayon \\(r\\) a pour équation \\((x - a)^2 + (y - b)^2 = r^2\\). Une droite est tangente au cercle quand sa distance au centre est égale au rayon. La tangente en un point \\(T\\) est perpendiculaire au rayon \\([CT]\\) ; sa pente est l'inverse de celle du rayon, avec le signe opposé.", ["Diamètre \\([AB]\\) avec \\(A(0 \\, ; 0)\\) et \\(B(6 \\, ; 8)\\) : le centre est le milieu, \\(C(3 \\, ; 4)\\) ; le rayon vaut la moitié de \\(AB = 10\\), soit \\(5\\). Équation : \\((x - 3)^2 + (y - 4)^2 = 25\\).", "Tangente au cercle \\(x^2 + y^2 = 25\\) en \\(T(3 \\, ; 4)\\) : le rayon \\([OT]\\) a pour pente \\(\\frac{4}{3}\\), donc la tangente a pour pente \\(-\\frac{3}{4}\\). Vérification : \\(\\frac{4}{3} \\cdot \\left(-\\frac{3}{4}\\right) = -1\\).", "Distance de \\(C(1 \\, ; 2)\\) à la droite \\(3x + 4y - 1 = 0\\) : \\(\\frac{|3 \\cdot 1 + 4 \\cdot 2 - 1|}{\\sqrt{3^2 + 4^2}} = \\frac{10}{5} = 2\\). La droite est tangente au cercle de centre \\(C\\) et de rayon \\(2\\) (plus petite : elle le coupe ; plus grande : elle ne le touche pas)."], "Dans \\((x - 3)^2 + (y - 4)^2 = 25\\), le rayon est \\(5\\) et non \\(25\\) : le second membre est \\(r^2\\)."],
     g: [
-      () => { const x1 = R.int(-5, 3), y1 = R.int(-5, 3), p = R.int(1, 4), q = R.int(1, 4); return QV("Le cercle de diamètre " + M("[AB]") + ", avec " + M("A(" + x1 + " \\, ; " + y1 + ")") + " et " + M("B(" + (x1 + 2 * p) + " \\, ; " + (y1 + 2 * q) + ")") + ", a pour équation " + M("(x - a)^2 + (y - b)^2 = r^2") + ". Que vaut " + M("r^2") + " ?", p * p + q * q, "Centre : " + M("(" + (x1 + p) + " \\, ; " + (y1 + q) + ")") + ". " + M("r^2 = " + p + "^2 + " + q + "^2 = " + (p * p + q * q)) + ".", { fig: FIG.plot([], [[x1, y1, "A"], [x1 + 2 * p, y1 + 2 * q, "B"]], { numbers: true, step: 2, xr: [-7, 9], yr: [-7, 9] }) }); },
+      () => { const x1 = R.int(-5, 3), y1 = R.int(-5, 3), p = R.int(1, 4), q = R.int(1, 4); return QV("Le cercle de diamètre " + M("[AB]") + ", avec " + M("A(" + x1 + " \\, ; " + y1 + ")") + " et " + M("B(" + (x1 + 2 * p) + " \\, ; " + (y1 + 2 * q) + ")") + ", a pour équation " + M("(x - a)^2 + (y - b)^2 = r^2") + ". Que vaut " + M("r^2") + " ?", p * p + q * q, "Centre : " + M("(" + (x1 + p) + " \\, ; " + (y1 + q) + ")") + ". " + M("r^2 = " + p + "^2 + " + q + "^2 = " + (p * p + q * q)) + ".", { fig: ((cx, cy, r) => { const lo = Math.floor(Math.min(cx - r, cy - r, 0)) - 1, hi = Math.ceil(Math.max(cx + r, cy + r, 0)) + 1; return FIG.plot([], [[x1, y1, "A"], [x1 + 2 * p, y1 + 2 * q, "B"], [cx, cy, ""]], { numbers: true, step: hi - lo > 14 ? 2 : 1, xr: [lo, hi], yr: [lo, hi], circles: [[cx, cy, r]], segs: [[x1, y1, x1 + 2 * p, y1 + 2 * q, "f-accent"]], label: "cercle de diamètre [AB]" }); })(x1 + p, y1 + q, Math.hypot(p, q)) }); },
       () => { const a = R.int(-4, 4), b = R.int(-4, 4), k = R.int(1, 5); if (R.rand() < 0.5) { const y = b + R.pick([-1, 1]) * k; return QV("Pour quel rayon le cercle de centre " + M("(" + a + " \\, ; " + b + ")") + " est-il tangent à la droite " + M("y = " + y) + " ?", k, "La distance du centre à la droite est " + M("|" + b + " - " + par(y) + "| = " + k) + " : c'est le rayon."); } const c = R.pick([-1, 1]) * 5 * k - 3 * a - 4 * b; return QV("Pour quel rayon le cercle de centre " + M("(" + a + " \\, ; " + b + ")") + " est-il tangent à la droite " + M("3x + 4y" + sg(c) + " = 0") + " ?", k, "Distance du centre à la droite : " + M("\\frac{|3 \\cdot " + par(a) + " + 4 \\cdot " + par(b) + sg(c) + "|}{\\sqrt{3^2 + 4^2}} = \\frac{" + 5 * k + "}{5} = " + k) + "."); },
-      () => { const [p0, q0, r] = R.pick([[3, 4, 5], [4, 3, 5], [5, 12, 13], [12, 5, 13], [6, 8, 10], [8, 6, 10], [8, 15, 17]]), p = p0 * R.pick([-1, 1]), q = q0 * R.pick([-1, 1]); return QV("Quelle est la pente de la tangente au cercle " + M("x^2 + y^2 = " + r * r) + " au point " + M("(" + p + " \\, ; " + q + ")") + " ? Donne la valeur exacte.", -p / q, "Le rayon a pour pente " + M(frac(q, p)) + " ; la tangente lui est perpendiculaire : pente " + M(frac(-p, q)) + ".", { fig: FIG.plot([{ f: (x) => (Math.abs(x) <= r ? Math.sqrt(r * r - x * x) : NaN) }, { f: (x) => (Math.abs(x) <= r ? -Math.sqrt(r * r - x * x) : NaN) }], [[0, 0, "O"], [p, q, "P"]], { grid: false, ticks: false, xr: [-r - 4, r + 4], yr: [-r - 4, r + 4] }) }); },
+      () => { const [p0, q0, r] = R.pick([[3, 4, 5], [4, 3, 5], [5, 12, 13], [12, 5, 13], [6, 8, 10], [8, 6, 10], [8, 15, 17]]), p = p0 * R.pick([-1, 1]), q = q0 * R.pick([-1, 1]); return QV("Quelle est la pente de la tangente au cercle " + M("x^2 + y^2 = " + r * r) + " au point " + M("(" + p + " \\, ; " + q + ")") + " ? Donne la valeur exacte.", -p / q, "Le rayon a pour pente " + M(frac(q, p)) + " ; la tangente lui est perpendiculaire : pente " + M(frac(-p, q)) + ".", { fig: FIG.plot([{ f: (x) => q - (p / q) * (x - p), cls: "f-accent" }], [[0, 0, "O"], [p, q, "P"]], { grid: false, ticks: false, xr: [-r - 4, r + 4], yr: [-r - 4, r + 4], circles: [[0, 0, r]], segs: [[0, 0, p, q, "f-line"]], label: "cercle, rayon OP et tangente en P" }) }); },
     ] },
 );
 
@@ -9247,7 +9254,7 @@ function compNote(rec) {
     ],
   };
 
-  // ===================== airepyr : aire d'une pyramide, apothème (et cône) =====================
+  // ===================== airepyr : aire d'une pyramide, apothème =====================
   const APYR = {
     1: [
       () => { const c = R.int(4, 12), a = R.int(5, 15); if (a === c) return null;
@@ -9281,11 +9288,11 @@ function compNote(rec) {
         return Qv("La pyramide du Louvre a une base carrée de côté " + cm(c, "m") + " et une hauteur de " + cm(h, "m") + ". Ses quatre faces sont en verre. Calcule la surface de verre (en m², arrondie à l'unité).", A, "Apothème : " + M("\\sqrt{" + N(h) + "^2 + " + N(c / 2) + "^2} \\approx " + N(rd(a, 0.01))) + " m ; surface : " + M("2 \\cdot " + N(c) + " \\cdot " + N(rd(a, 0.01)) + " \\approx " + N(rd(A, 1))) + " m².",
           { round: 1, ctx: "louvre", guide: [GS("Apothème (au centième) ?", a, M(N(rd(a, 0.01))) + " m.", 0.01), GS("Surface des quatre faces (à l'unité) ?", A, M(N(rd(A, 1))) + " m².", 1)],
             traps: [TR(c * c + A, "Le sol n'est pas en verre."), TR(2 * c * h, "La hauteur des faces est l'apothème.")] }); },
-      () => { const [r, h, g] = pk([[3, 4, 5], [6, 8, 10], [5, 12, 13], [9, 12, 15], [8, 15, 17]]), ask = R.int(0, 1);
-        return ask ? Qv("Un cône a un rayon de " + M(r) + " cm et une génératrice de " + M(g) + " cm. Son aire latérale vaut " + M("\\pi r g") + ". Calcule-la" + PIX + ".", r * g * Math.PI, M("\\pi \\cdot " + r + " \\cdot " + g + " = " + piT(r * g)) + " cm².",
-            { canon: r * g + "π", ctx: "conelat", guide: [GS("Nombre devant " + M("\\pi") + " : " + M(r + " \\cdot " + g) + " = ?", r * g, M(r * g) + "."), GS("Aire latérale (avec " + M("\\pi") + ") ?", r * g * Math.PI, M(piT(r * g)) + " cm².")], traps: [TR(r * h * Math.PI, "On utilise la génératrice, pas la hauteur.")] })
-          : Qv("Un cône a un rayon de " + M(r) + " cm et une hauteur de " + M(h) + " cm. Calcule son aire totale (" + M("\\pi r g + \\pi r^2") + ")" + PIX + ".", (r * g + r * r) * Math.PI, "Génératrice : " + M("\\sqrt{" + r + "^2 + " + h + "^2} = " + g) + " ; " + M("\\pi \\cdot " + r + " \\cdot " + g + " + \\pi \\cdot " + r + "^2 = " + piT(r * g + r * r)) + " cm².",
-            { canon: r * g + r * r + "π", ctx: "conetot", guide: [GS("Génératrice (Pythagore) ?", g, M(g) + " cm."), GS("Aire latérale, nombre devant " + M("\\pi") + " ?", r * g, M(piT(r * g)) + "."), GS("Aire totale (avec " + M("\\pi") + ") ?", (r * g + r * r) * Math.PI, M(piT(r * g + r * r)) + " cm².")], traps: [TR((r * h + r * r) * Math.PI, "Il faut la génératrice, pas la hauteur."), TR(r * g * Math.PI, "Ajoute la base (un disque).")] }); },
+      // Aire du cône retirée (22.11) : hors programme 11e. Toit de tour : hauteur donnée, apothème à calculer, puis coût.
+      () => { const [c2, h, a] = pk([[3, 4, 5], [5, 12, 13], [6, 8, 10], [8, 6, 10], [9, 12, 15], [8, 15, 17]]), c = 2 * c2, p = pk([35, 40, 45, 60]), A = 2 * c * a;
+        return Qv("Le toit d'une tour est une pyramide régulière à base carrée de " + M(c) + " m de côté et de " + M(h) + " m de haut. On couvre ses quatre pans d'ardoises à " + M(p) + " CHF le m². Combien coûtent les ardoises (en CHF) ?", A * p, "Apothème : " + M("\\sqrt{" + h + "^2 + " + c2 + "^2} = " + a) + " m ; pans : " + M("4 \\cdot \\frac{" + c + " \\cdot " + a + "}{2} = " + A) + " m² ; prix : " + M(A + " \\cdot " + p + " = " + N(A * p)) + " CHF.",
+          { ctx: "ardoises", guide: [GS("Apothème (Pythagore avec le demi-côté) ?", a, M(a) + " m."), GS("Aire des quatre pans (m²) ?", A, M(A) + " m²."), GS("Prix (CHF) ?", A * p, M(N(A * p)) + " CHF.")],
+            traps: [TR(2 * c * h * p, "Les pans ont pour hauteur l'apothème, pas la hauteur du toit."), TR((c * c + A) * p, "Le plancher n'est pas couvert d'ardoises.")] }); },
       () => { const c = 2 * R.int(2, 8), a = R.int(c / 2 + 1, c + 8), A = c * c + 2 * c * a, cost = pk([12, 15, 18, 25]);
         return Qv("Un artisan fabrique une boîte en forme de pyramide régulière (base carrée de " + M(c) + " cm, apothème " + M(a) + " cm), entièrement fermée. Le carton coûte " + M(cost) + " CHF le m². Quel est le prix du carton pour une boîte (en CHF, au centime) ?", A / 10000 * cost, "Aire : " + M(c * c + " + " + 2 * c * a + " = " + A) + " cm² " + M("= " + N(A / 10000)) + " m² ; prix : " + M(N(A / 10000) + " \\cdot " + cost + " \\approx " + N(rd(A / 10000 * cost, 0.01))) + " CHF.",
           { round: 0.01, ctx: "boite", guide: [GS("Aire totale en cm² ?", A, M(A) + " cm²."), GS("En m² (1 m² = 10'000 cm²) ?", A / 10000, M(N(A / 10000)) + " m²."), GS("Prix (au centime) ?", A / 10000 * cost, M(N(rd(A / 10000 * cost, 0.01))) + " CHF.", 0.01)],
@@ -9415,8 +9422,8 @@ function compNote(rec) {
     airepyr: [
       () => P("Une pyramide régulière à base carrée a une base de 10 m de côté et une hauteur de 12 m.", [["a) Apothème (m)", 13], ["b) Aire latérale (m²)", 260], ["c) Volume (m³)", 400]],
           ["a) √(12² + 5²).", "c) Base × hauteur ÷ 3."], "a) 13 ; b) " + M("2 \\cdot 10 \\cdot 13 = 260") + " ; c) " + M("\\frac{100 \\cdot 12}{3} = 400") + "."),
-      () => P("Patron d'un cône : rayon de la base 6 cm, génératrice 10 cm.", [["a) Hauteur du cône (cm)", 8], ["b) Aire latérale (cm², au centième)", 60 * Math.PI, 0.01], ["c) Volume (cm³, au centième)", 96 * Math.PI, 0.01]],
-          ["a) √(10² − 6²).", "b) π r g ; c) ⅓ π r² h."], "a) 8 ; b) " + M("60\\pi \\approx 188{,}50") + " ; c) " + M("96\\pi \\approx 301{,}59") + "."),
+      () => P("Patron d'une pyramide régulière : un carré de 16 cm de côté et quatre triangles isocèles d'apothème 10 cm.", [["a) Aire du patron (cm²)", 576], ["b) Hauteur de la pyramide montée (cm)", 6], ["c) Volume (cm³)", 512]],
+          ["a) Carré + 4 triangles.", "b) √(10² − 8²) ; c) Base × hauteur ÷ 3."], "a) " + M("256 + 4 \\cdot \\frac{16 \\cdot 10}{2} = 576") + " ; b) " + M("\\sqrt{100 - 64} = 6") + " ; c) " + M("\\frac{256 \\cdot 6}{3} = 512") + "."),
     ],
     volcomp: [
       () => P("Un réservoir : cylindre de rayon 1 m et de hauteur 3 m, avec un fond en cône de même rayon et de hauteur 0,6 m.", [["a) Volume du cylindre (m³, au centième)", 3 * Math.PI, 0.01], ["b) Volume du cône (m³, au centième)", 0.2 * Math.PI, 0.01], ["c) Contenance totale en litres (à l'unité)", 3200 * Math.PI, 1]],
@@ -9446,7 +9453,7 @@ function compNote(rec) {
     pythrec: "Compare le carré du plus grand côté avec la somme des carrés des deux autres : égalité → rectangle ; sinon, pas rectangle.",
     vol: "Prisme et cylindre : V = aire de la base × hauteur. 1 L = 1 dm³ = 1000 cm³, 1 cL = 10 cm³.",
     volcone: "Pyramide et cône : V = ⅓ · aire de la base · hauteur. Boule : V = ⁴⁄₃ π r³ ; sphère : A = 4 π r².",
-    airepyr: "Aire latérale d'une pyramide régulière : 4 triangles de base c et de hauteur l'apothème (Pythagore avec le demi-côté). Cône : π r g.",
+    airepyr: "Aire latérale d'une pyramide régulière : 4 triangles de base c et de hauteur l'apothème (Pythagore avec le demi-côté).",
     volcomp: "Découpe le solide en solides simples, calcule chaque volume (garde π), puis additionne ou soustrais.",
     volmanq: "Écris la formule du volume, remplace ce que tu connais, puis isole la dimension cherchée.",
   });
@@ -9456,7 +9463,7 @@ function compNote(rec) {
     pythrec: ["Tester si un triangle est rectangle", "Décimaux, repère, côté manquant", "Équerre, racines, contrôle d'un cadre"],
     vol: ["Volume d'un pavé, d'un prisme, d'un cylindre", "Prisme à base trapèze, contenances", "Aires totales, cylindre creux"],
     volcone: ["Volume d'une pyramide, d'un cône, d'une boule", "Diamètre, demi-boule, pyramide dans un cube", "Génératrice, aire de la sphère, variations"],
-    airepyr: ["Aire latérale et totale d'une pyramide", "Apothème avec Pythagore", "Problèmes : Louvre, cône, coût"],
+    airepyr: ["Aire latérale et totale d'une pyramide", "Apothème avec Pythagore", "Problèmes : Louvre, toit, coût"],
     volcomp: ["Solides composés simples", "Silo, gélule, cube percé", "Glace, découpe, tente"],
     volmanq: ["Retrouver une hauteur, une longueur", "Rayon d'un cône, d'une boule ; hauteur d'une pyramide", "Problèmes avec conversions"],
   });
@@ -11341,8 +11348,8 @@ function compNote(rec) {
         return Qv("Températures relevées à midi pendant " + M(ts.length) + " jours : " + ts.map((t) => M(t)).join(" ; ") + " (en °C). Quelle est la température moyenne ?", v, "Somme " + M(s) + ", divisée par " + M(ts.length) + " : " + M(v) + " °C.",
           { ctx: "moyenne", guide: [GS("Somme des températures ?", s, M(s) + "."), GS("Moyenne ?", v, M(s + " : " + ts.length + " = " + v) + ".")], traps: [TR(ts.reduce((a, b) => a + Math.abs(b), 0) / ts.length, "Les températures négatives se soustraient."), TR(-v, "Vérifie le signe de la somme.")] }); },
       () => { const a = R.int(2, 6), b = R.int(2, 5), c = R.int(2, 4), sgn = [pk([1, -1]), pk([1, -1]), pk([1, -1])], A = sgn[0] * a * b * c, v = (A / (sgn[1] * b)) * (sgn[2] * c);
-        return Qv("Calcule de gauche à droite : " + M(par(A) + " : " + par(sgn[1] * b) + " \\cdot " + par(sgn[2] * c)), v, M(par(A) + " : " + par(sgn[1] * b) + " = " + A / (sgn[1] * b)) + ", puis " + M(par(A / (sgn[1] * b)) + " \\cdot " + par(sgn[2] * c) + " = " + v) + ".",
-          { ctx: "gauche-droite", guide: [GS("D'abord la division ?", A / (sgn[1] * b), M(A / (sgn[1] * b)) + "."), GS("Puis la multiplication ?", v, M(v) + ".")], traps: [TR(A / (sgn[1] * b * sgn[2] * c), "Multiplications et divisions : de gauche à droite."), TR(-v, "Compte les signes négatifs.")] }); },
+        return Qv("Calcule : " + M(par(A) + " : " + par(sgn[1] * b) + " \\cdot " + par(sgn[2] * c)), v, "Division et multiplication ont la même priorité : on les effectue dans l'ordre, de gauche à droite. " + M(par(A) + " : " + par(sgn[1] * b) + " = " + A / (sgn[1] * b)) + ", puis " + M(par(A / (sgn[1] * b)) + " \\cdot " + par(sgn[2] * c) + " = " + v) + ".",
+          { ctx: "gauche-droite", guide: [GS("· et : ont la même priorité : on commence par la gauche. La division d'abord ?", A / (sgn[1] * b), M(A / (sgn[1] * b)) + "."), GS("Puis la multiplication ?", v, M(v) + ".")], traps: [TR(A / (sgn[1] * b * sgn[2] * c), "Multiplications et divisions : de gauche à droite."), TR(-v, "Compte les signes négatifs.")] }); },
     ],
   };
 
@@ -13158,7 +13165,7 @@ function compNote(rec) {
     trigeq2: [() => P("La marée d'un port : h(t) = 4 + 2 sin(30t) (m, t en heures).", [["a) Hauteur maximale (m)", 6], ["b) Période (h)", 12], ["c) Heure de la première marée haute", 3]], ["sin vaut au plus 1.", "360 ÷ 30."], "a) 6 m ; b) 12 h ; c) " + M("30t = 90") + ", " + M("t = 3") + " h.")],
     triaire: [() => P("Un terrain triangulaire a deux côtés de 40 m et 30 m qui forment un angle de 60°.", [["a) Aire (m², à l'unité)", 300 * Math.sqrt(3), 1], ["b) Troisième côté (m, au dixième)", Math.sqrt(1300), 0.1], ["c) Prix à 85 CHF le m² (CHF, à la centaine)", 85 * 300 * Math.sqrt(3), 100]], ["½ · 40 · 30 · sin 60°.", "Théorème du cosinus."], "a) " + M("600 \\cdot \\frac{\\sqrt{3}}{2} \\approx 520") + " m² ; b) " + M("\\sqrt{1600 + 900 - 1200} = \\sqrt{1300} \\approx 36{,}1") + " m ; c) ≈ 44'200 CHF.")],
     droites: [() => P("Une droite passe par A(−1 ; 5) et B(3 ; −3).", [["a) Pente", -2], ["b) Ordonnée à l'origine", 3], ["c) Pente d'une perpendiculaire (fraction acceptée)", 0.5]], ["Δy ÷ Δx.", "5 = −2 · (−1) + h."], "a) " + M("\\frac{-8}{4} = -2") + " ; b) " + M("h = 3") + " ; c) " + M("\\frac{1}{2}") + " (produit des pentes : −1).")],
-    droitesinter: [() => P("Offre A : 20 CHF + 1,50 CHF par km. Offre B : 50 CHF + 0,90 CHF par km.", [["a) Prix de A pour 40 km (CHF)", 80], ["b) Nombre de km où les offres coûtent pareil", 50], ["c) Prix commun (CHF)", 95]], ["20 + 1,5 · 40.", "1,5x + 20 = 0,9x + 50."], "a) 80 ; b) " + M("0{,}6x = 30") + ", " + M("x = 50") + " ; c) " + M("20 + 75 = 95") + " CHF.")],
+    droitesinter: [() => P("Offre A : 20 CHF + 1,50 CHF par km. Offre B : 50 CHF + 0,90 CHF par km.", [["a) Prix de A pour 40 km (CHF)", 80], ["b) Nombre de km où les offres coûtent pareil", 50], ["c) Prix commun pour ce kilométrage (CHF)", 95]], ["20 + 1,5 · 40.", "1,5x + 20 = 0,9x + 50."], "a) 80 ; b) " + M("0{,}6x = 30") + ", " + M("x = 50") + " ; c) " + M("20 + 75 = 95") + " CHF.")],
     recipaff: [() => P("Un forfait téléphone coûte f(x) = 0,5x + 12 CHF pour x Go.", [["a) Prix pour 10 Go (CHF)", 17], ["b) Nombre de Go pour une facture de 20 CHF", 16], ["c) f⁻¹(15)", 6]], ["f(10).", "0,5x + 12 = 20."], "a) 17 ; b) " + M("x = (20 - 12) \\div 0{,}5 = 16") + " ; c) " + M("(15 - 12) \\div 0{,}5 = 6") + ".")],
   };
 
@@ -15809,7 +15816,7 @@ const LESSON_FIGS_V2 = {
   triaire: () => GF.sas(6, 8, 30, { la: "a", lb: "b", lg: "γ" }),
   cart: () => FIG.plot([], [[1, 2, "A"], [4, 6, "B"], [2.5, 4, "M"]], { numbers: true, xr: [-1, 6], yr: [-1, 7] , squash: 0.55}),
   droites: () => FIG.plot([{ f: (x) => 2 * x + 1 }], [[0, 1, "A"], [2, 5, "B"]], { numbers: true, xr: [-2, 4], yr: [-2, 7] , squash: 0.4}),
-  cercle: () => FIG.plot([{ f: (x) => (Math.abs(x - 1) <= 3 ? -2 + Math.sqrt(9 - (x - 1) ** 2) : NaN) }, { f: (x) => (Math.abs(x - 1) <= 3 ? -2 - Math.sqrt(9 - (x - 1) ** 2) : NaN) }], [[1, -2, "(1 ; −2)"]], { numbers: true, xr: [-3, 5], yr: [-6, 2] }),
+  cercle: () => FIG.plot([], [[1, -2, "(1 ; −2)"]], { numbers: true, xr: [-3, 5], yr: [-6, 2], circles: [[1, -2, 3]], segs: [[1, -2, 4, -2, "f-accent"]], label: "cercle de centre (1 ; −2) et de rayon 3" }),
   droitesrem: () => FIG.triLines("medianes", {}),
   sys2: () => FIG.plot([{ f: (x) => 7 - x }, { f: (x) => x - 1, cls: "f-line" }], [[4, 3, "(4 ; 3)"]], { numbers: true, step: 2, xr: [-2, 8], yr: [-2, 8] , squash: 0.6}),
 };
@@ -16112,8 +16119,8 @@ Object.assign(ACTIVE, {
   cercletan: {
     predict: { q: "Cercle de centre O(0 ; 0), point T(3 ; 4). De O à T, on avance de 3 et on monte de 4. La tangente en T (la droite qui touche le cercle en T sans le traverser)…", choices: ["monte", "descend", "est horizontale"], good: 1,
       fig: (() => { const X = (u) => 130 + u * 18, Y = (v) => 120 - v * 18;
-      return `<svg class="fig" viewBox="0 0 260 230" role="img" aria-label="cercle de centre O, rayon OT vers T(3 ; 4)"><line x1="${X(-6.5)}" y1="${Y(0)}" x2="${X(6.5)}" y2="${Y(0)}" class="f-grid"/><line x1="${X(0)}" y1="${Y(-6)}" x2="${X(0)}" y2="${Y(6)}" class="f-grid"/>
-      <circle cx="${X(0)}" cy="${Y(0)}" r="90" class="f-soft"/><line x1="${X(0)}" y1="${Y(0)}" x2="${X(3)}" y2="${Y(4)}" class="f-line" stroke-width="2.5"/>
+      return `<svg class="fig" viewBox="0 0 260 230" role="img" aria-label="cercle de centre O, rayon OT vers T(3 ; 4)"><line x1="${X(-6.5)}" y1="${Y(0)}" x2="${X(6.5)}" y2="${Y(0)}" class="f-line" stroke-width="1"/><line x1="${X(0)}" y1="${Y(-6)}" x2="${X(0)}" y2="${Y(6)}" class="f-line" stroke-width="1"/>
+      <circle cx="${X(0)}" cy="${Y(0)}" r="90" class="f-blue" stroke-width="2"/><line x1="${X(0)}" y1="${Y(0)}" x2="${X(3)}" y2="${Y(4)}" class="f-line" stroke-width="2.5"/>
       <path d="M${X(0)},${Y(0)} L${X(3)},${Y(0)} L${X(3)},${Y(4)}" class="f-line" fill="none" stroke-dasharray="4 3"/><text x="${X(1.5)}" y="${Y(0) + 15}" class="f-txt" text-anchor="middle" font-size="12">+3</text><text x="${X(3) + 5}" y="${Y(2)}" class="f-txt" font-size="12">+4</text>
       <circle cx="${X(0)}" cy="${Y(0)}" r="3.5" class="f-dot"/><text x="${X(0) - 7}" y="${Y(0) + 16}" class="f-txt" text-anchor="end" font-size="13">O</text>
       <circle cx="${X(3)}" cy="${Y(4)}" r="6" class="f-dot"/><text x="${X(3) + 9}" y="${Y(4) - 6}" class="f-txt" font-size="13">T(3 ; 4)</text></svg>`; })(),
@@ -16126,8 +16133,8 @@ Object.assign(ACTIVE, {
       const fr = (a, b) => { if (b === 0) return null; const g = (u, v) => (v ? g(v, u % v) : Math.abs(u)); const k = g(a, b) * Math.sign(b); const n = a / k, d = b / k; return d === 1 ? String(n) : (n < 0 ? "−" : "") + Math.abs(n) + "/" + d; };
       const draw = () => {
         const [x, y] = P[i], W = 330, H = 300, X = (u) => 165 + u * 14, Y = (v) => 150 - v * 14;
-        let g = '<line x1="' + X(-10.5) + '" y1="' + Y(0) + '" x2="' + X(10.5) + '" y2="' + Y(0) + '" class="f-grid"/><line x1="' + X(0) + '" y1="' + Y(-10.5) + '" x2="' + X(0) + '" y2="' + Y(10.5) + '" class="f-grid"/>';
-        g += '<circle cx="' + X(0) + '" cy="' + Y(0) + '" r="70" class="f-soft"/>';
+        let g = '<line x1="' + X(-10.5) + '" y1="' + Y(0) + '" x2="' + X(10.5) + '" y2="' + Y(0) + '" class="f-line" stroke-width="1"/><line x1="' + X(0) + '" y1="' + Y(-10.5) + '" x2="' + X(0) + '" y2="' + Y(10.5) + '" class="f-line" stroke-width="1"/>';
+        g += '<circle cx="' + X(0) + '" cy="' + Y(0) + '" r="70" class="f-blue" stroke-width="2"/>';
         // rayon et son triangle de pente (avancer de x, monter de y)
         g += '<line x1="' + X(0) + '" y1="' + Y(0) + '" x2="' + X(x) + '" y2="' + Y(y) + '" class="f-line" stroke-width="2.5"/>';
         if (x && y) g += '<path d="M' + X(0) + "," + Y(0) + " L" + X(x) + "," + Y(0) + " L" + X(x) + "," + Y(y) + '" class="f-line" fill="none" stroke-dasharray="4 3"/>' +
@@ -16184,20 +16191,22 @@ function activeLesson(id, L, cont, review) {
   const $ = (s) => document.getElementById(s);
   const reveal = (el) => { el.hidden = false; el.classList.add("pop"); setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 60); };
   const finish = () => { $("skip").hidden = true; reveal($("s3")); typeset($("s3")); $("go").hidden = false; };
+  // Défi : formules \( … \) rendues (ex. fractions, 22.11), sinon texte brut.
+  const setGoal = (t) => { const g = $("goal"); if (t.includes("\\(")) { g.innerHTML = t; typeset(g); } else g.textContent = t; };
   let started = false;
   app.querySelectorAll("#pc button").forEach((b) => (b.onclick = () => {
     const i = +b.dataset.i, ok = i === P.good, S = typeof sig !== "undefined" && sig && sig.ev === "lecon" ? sig : null;
     if (S && !started) sigAide(S, ok ? "D" : "d");
     app.querySelectorAll("#pc button").forEach((x) => { x.disabled = true; if (+x.dataset.i === P.good) x.setAttribute("aria-pressed", "true"); });
     if (!ok) b.classList.add("act-wrong");
-    $("pfb").innerHTML = `<div class="fb ${ok ? "ok" : "hint"}">${ok ? "Exact !" : "Pas tout à fait."} ${P.why}</div>`;
+    $("pfb").innerHTML = `<div class="fb ${ok ? "ok" : "hint"}">${ok ? "Exact !" : "Pas tout à fait."} ${P.why}</div>`; typeset($("pfb"));
     if (started) return; started = true;
-    $("goal").textContent = "Défi 1 · " + A.defis[0];
+    setGoal("Défi 1 · " + A.defis[0]);
     reveal($("s2"));
     A.play($("play"), (k, msg) => {
       $("gfb").innerHTML = `<div class="fb ok">✓ ${colonBreak(msg)}</div>`;
       if (typeof sig !== "undefined" && sig && sig.ev === "lecon") sigAide(sig, "f");
-      if (k + 1 < A.defis.length) $("goal").textContent = "Défi " + (k + 2) + " · " + A.defis[k + 1];
+      if (k + 1 < A.defis.length) setGoal("Défi " + (k + 2) + " · " + A.defis[k + 1]);
       else { $("goal").textContent = "Défis réussis !"; burst(); finish(); }
     });
   }));
@@ -17054,12 +17063,12 @@ function activeLesson(id, L, cont, review) {
       ["Pyramide base 6 × 6, hauteur 5 : \\(\\frac{36 \\cdot 5}{3} = 60\\).", "Cône \\(r = 3\\), \\(h = 4\\) : \\(12\\pi\\).", "Boule \\(r = 3\\) : \\(36\\pi\\)."],
       "Avec un diamètre, on prend d'abord la moitié pour avoir le rayon."],
     airepyr: ["Aire d'une pyramide", "Les faces latérales sont des triangles ; leur hauteur est l'apothème.",
-      "Pyramide régulière à base carrée de côté \\(c\\) et d'apothème \\(a\\) : aire latérale \\(4 \\cdot \\frac{c \\cdot a}{2} = 2ca\\) ; aire totale \\(c^2 + 2ca\\). L'apothème se calcule avec Pythagore : \\(a^2 = h^2 + \\left(\\frac{c}{2}\\right)^2\\). Cône : aire latérale \\(\\pi r g\\) (\\(g\\) : génératrice).",
+      "Pyramide régulière à base carrée de côté \\(c\\) et d'apothème \\(a\\) : aire latérale \\(4 \\cdot \\frac{c \\cdot a}{2} = 2ca\\) ; aire totale \\(c^2 + 2ca\\). L'apothème se calcule avec Pythagore : \\(a^2 = h^2 + \\left(\\frac{c}{2}\\right)^2\\).",
       ["\\(c = 6\\), \\(h = 4\\) : \\(a = 5\\), aire latérale \\(60\\).", "\\(c = 10\\), \\(h = 12\\) : \\(a = 13\\), aire totale \\(100 + 260 = 360\\)."],
       "La hauteur des faces est l'apothème, pas la hauteur de la pyramide."],
     volcomp: ["Solides composés", "On découpe en solides simples.",
       "On repère les solides (cube, pyramide, cylindre, cône, demi-boule), on calcule chaque volume avec ses propres dimensions, puis on additionne (ou on soustrait un trou). On garde \\(\\pi\\) en facteur jusqu'au bout.",
-      ["Cube 3 + pyramide de hauteur 3 : \\(27 + 9 = 36\\).", "Silo : cylindre \\(r = 3\\), \\(h = 10\\) et demi-boule : \\(90\\pi + 18\\pi = 108\\pi\\).", "Cube 10 percé d'un trou \\(r = 2\\) : \\(1000 - 40\\pi\\)."],
+      ["Cube de 3 cm d'arête + pyramide de hauteur 3 : \\(27 + 9 = 36\\).", "Silo : cylindre \\(r = 3\\), \\(h = 10\\) et demi-boule : \\(90\\pi + 18\\pi = 108\\pi\\).", "Cube de 10 cm d'arête percé d'un trou \\(r = 2\\) : \\(1000 - 40\\pi\\)."],
       "Dans une gélule, la partie cylindrique est plus courte que la gélule : on retire deux rayons."],
     volmanq: ["Retrouver une dimension", "Une formule de volume est une équation.",
       "On écrit la formule, on remplace ce qu'on connaît, puis on isole la dimension cherchée. Pour un cône ou une pyramide, n'oublie pas le facteur 3 ; pour un rayon, on termine par une racine (carrée ou cubique).",
@@ -17221,21 +17230,22 @@ function activeLesson(id, L, cont, review) {
     },
     airepyr: {
       predict: { q: "Une pyramide à base carrée de 6 cm a une hauteur de 4 cm. Son apothème a (la hauteur d'une face triangulaire, en bleu) mesure…", fig: pyrFig(6, 4), choices: ["4 cm", "5 cm", "7 cm"], good: 1, why: "Hauteur, demi-côté et apothème forment un triangle rectangle : √(4² + 3²) = √25 = 5. L'apothème est plus long que la hauteur." },
-      defis: ["Base 6 cm, hauteur 4 cm : calcule l'apothème.", "Base 10 cm, hauteur 12 cm : calcule l'apothème.", "Base 16 cm, hauteur 6 cm : calcule l'apothème, puis lis l'aire latérale."],
+      // Défis (22.11) : même tâche à chaque fois (trouver l'apothème), sans reprendre la pyramide du « Devine » ; l'aire latérale n'apparaît qu'une fois l'apothème juste.
+      defis: ["Nouvelle pyramide : base 10 cm, hauteur 12 cm. Tape l'apothème.", "Base 16 cm, hauteur 6 cm. Tape l'apothème.", "Base 8 cm, hauteur 3 cm. Tape l'apothème."],
       play: hunt({ ask: true, label: "Apothème", start: 3, min: 1, max: 20,
-        blank: (s) => { const [c, h] = [[6, 4], [10, 12], [16, 6]][s]; return pyrFig(c, h); },
-        show: (x, s) => { const [c, h] = [[6, 4], [10, 12], [16, 6]][s], t = h * h + (c / 2) ** 2;
-          return pyrFig(c, h, x) + `<div class="act-out">${h}² + ${c / 2}² = ${t} ; ${x}² = ${x * x} → ${ok(t === x * x, x * x < t)}<br>aire latérale : 4 · (${c} · ${x}) ÷ 2 = <b>${2 * c * x} cm²</b></div>`; },
+        blank: (s) => { const [c, h] = [[10, 12], [16, 6], [8, 3]][s]; return pyrFig(c, h); },
+        show: (x, s) => { const [c, h] = [[10, 12], [16, 6], [8, 3]][s], t = h * h + (c / 2) ** 2;
+          return pyrFig(c, h, x) + `<div class="act-out">hauteur² + demi-côté² = ${h}² + ${c / 2}² = ${t} ; apothème² = ${x}² = ${x * x} → ${ok(t === x * x, x * x < t)}${t === x * x ? `<br>aire latérale : 4 · (${c} · ${x}) ÷ 2 = <b>${2 * c * x} cm²</b>` : ""}</div>`; },
         note: "Sous l'apothème, il y a le demi-côté de la base.",
-        wins: [W(5, "√(16 + 9) = 5 ; aire latérale 2 · 6 · 5 = 60 cm²."), W(13, "√(144 + 25) = 13 ; aire latérale 260 cm²."), W(10, "√(36 + 64) = 10 ; aire latérale 2 · 16 · 10 = 320 cm².")] }),
+        wins: [W(13, "√(144 + 25) = 13 ; aire latérale 2 · 10 · 13 = 260 cm²."), W(10, "√(36 + 64) = 10 ; aire latérale 2 · 16 · 10 = 320 cm²."), W(5, "√(9 + 16) = 5 ; aire latérale 2 · 8 · 5 = 80 cm².")] }),
     },
     volcomp: {
-      predict: { q: "Un cube de 3 cm surmonté d'une pyramide de même base et de 3 cm de haut : volume total ?", choices: ["36 cm³", "54 cm³", "30 cm³"], good: 0, why: "Cube : 27. Pyramide : ⅓ · 9 · 3 = 9. Total : 36 cm³. On additionne les volumes des parties." },
-      defis: ["Cube d'arête 3 et pyramide : quelle hauteur de pyramide pour 36 cm³ en tout ?", "Même cube : quelle hauteur pour 45 cm³ ?", "Cylindre (r = 1, h = 4) et cône de même base : quelle hauteur de cône pour 6π en tout ?"],
+      predict: { q: "Un cube de 3 cm d'arête est surmonté d'une pyramide de même base, haute de 3 cm. Volume total du solide ?", choices: ["36 cm³", "54 cm³", "30 cm³"], good: 0, why: "Cube : 3 · 3 · 3 = 27. Pyramide : ⅓ · 9 · 3 = 9. Total : 36 cm³. On additionne les volumes des parties." },
+      defis: ["On change la hauteur de la pyramide (même cube de 3 cm d'arête). Quelle hauteur donne 39 cm³ en tout ?", "Même cube : quelle hauteur de pyramide donne 45 cm³ en tout ?", "Cylindre (r = 1, h = 4) et cône de même base : quelle hauteur de cône pour 6π en tout ?"],
       play: hunt({ ask: true, label: "Hauteur du toit", start: 1, min: 1, max: 12,
-        show: (x, s) => { if (s < 2) { const v = 27 + 3 * x, t = s ? 45 : 36; return `<div class="act-out">cube 27 + pyramide ⅓ · 9 · ${x} = 27 + ${3 * x} = <b>${v} cm³</b> (cible ${t}) → ${ok(v === t, v < t)}</div>`; }
+        show: (x, s) => { if (s < 2) { const v = 27 + 3 * x, t = s ? 45 : 39; return `<div class="act-out">cube 27 + pyramide ⅓ · 9 · ${x} = 27 + ${3 * x} = <b>${v} cm³</b> (cible ${t}) → ${ok(v === t, v < t)}</div>`; }
           const v = 4 + x / 3; return `<div class="act-out">cylindre 4π + cône ⅓ · π · 1² · ${x} = <b>${nb(v)}π</b> (cible 6π) → ${ok(Math.abs(v - 6) < 1e-9, v < 6)}</div>`; },
-        wins: [W(3, "27 + 9 = 36."), W(6, "27 + 18 = 45."), W(6, "4π + 2π = 6π : le cône de hauteur 6 vaut un cylindre de hauteur 2.")] }),
+        wins: [W(4, "27 + ⅓ · 9 · 4 = 27 + 12 = 39."), W(6, "27 + 18 = 45 : chaque cm de pyramide ajoute 3 cm³."), W(6, "4π + 2π = 6π : le cône de hauteur 6 vaut un cylindre de hauteur 2.")] }),
     },
     volmanq: {
       predict: { q: "Un cylindre de rayon 3 cm a un volume de 36π cm³. Sa hauteur mesure…", choices: ["4 cm", "12 cm", "6 cm"], good: 0, why: "π · 3² · h = 36π, donc 9h = 36 et h = 4. On remplace ce qu'on connaît, puis on isole h." },
@@ -17643,8 +17653,8 @@ function activeLesson(id, L, cont, review) {
         wins: [W(3, "2, 3, 4."), W(5, "1 à 5."), W(4, "x ∈ [−4 ; 4].")] }),
     },
     ineqfrac: {
-      predict: { q: "Pour résoudre (x − 2)/(x + 3) ≥ 0, x = −3 est…", choices: ["solution", "interdit", "la seule solution"], good: 1, why: "−3 annule le dénominateur : valeur interdite, jamais dans la solution." },
-      defis: ["Valeur interdite ?", "Zéro du numérateur ?", "Combien d'entiers de [−5 ; 5] vérifient (x − 2)/(x + 3) ≥ 0 ?"],
+      predict: { q: "Pour résoudre \\(\\dfrac{x - 2}{x + 3} \\ge 0\\), \\(x = -3\\) est…", choices: ["solution", "interdit", "la seule solution"], good: 1, why: "−3 annule le dénominateur : valeur interdite, jamais dans la solution." },
+      defis: ["Valeur interdite ?", "Zéro du numérateur ?", "Combien d'entiers de [−5 ; 5] vérifient \\(\\dfrac{x - 2}{x + 3} \\ge 0\\) ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(-3, "x + 3 = 0."), W(2, "x − 2 = 0."), W(6, "x < −3 : −5, −4 ; x ≥ 2 : 2, 3, 4, 5.")] }),
     },
@@ -17750,6 +17760,32 @@ function activeLesson(id, L, cont, review) {
   const plain = (html) => `<div class="act-out">${html}</div>`;
 
   const tu = (x) => " ; tu proposes <b>" + nb(x) + "</b>";
+  // Deux droites dans un repère quadrillé ; x proposé : verticale et les deux y lus (droitesinter, 22.11).
+  const DI2 = [
+    { f: (x) => 2 * x - 1, g: (x) => x + 3, fl: "y = 2x − 1", gl: "y = x + 3", xr: [-1, 8], yr: [-3, 16], gx: 1, gy: 2 },
+    { f: (x) => 3 * x - 2, g: (x) => -x + 6, fl: "y = 3x − 2", gl: "y = −x + 6", xr: [-1, 5], yr: [-4, 12], gx: 1, gy: 2 },
+    { f: (x) => 20 + 2 * x, g: (x) => 50 + x, fl: "A : 20 + 2x", gl: "B : 50 + x", xr: [0, 50], yr: [0, 130], gx: 5, gy: 10, unit: " CHF" },
+  ];
+  const twoLines = (s, x) => {
+    const D = DI2[s], W0 = 300, H0 = 190, ml = 30, mb = 20, X = (v) => ml + ((v - D.xr[0]) / (D.xr[1] - D.xr[0])) * (W0 - ml - 10), Y = (v) => H0 - mb - ((v - D.yr[0]) / (D.yr[1] - D.yr[0])) * (H0 - mb - 10);
+    let g = "";
+    for (let v = Math.ceil(D.xr[0] / D.gx) * D.gx; v <= D.xr[1]; v += D.gx) g += L(X(v), Y(D.yr[0]), X(v), Y(D.yr[1]), "f-grid", 0.7);
+    for (let v = Math.ceil(D.yr[0] / D.gy) * D.gy; v <= D.yr[1]; v += D.gy) g += L(X(D.xr[0]), Y(v), X(D.xr[1]), Y(v), "f-grid", 0.7);
+    if (D.yr[0] <= 0) g += L(X(D.xr[0]), Y(0), X(D.xr[1]), Y(0), "f-line", 1.2);
+    if (D.xr[0] <= 0) g += L(X(0), Y(D.yr[0]), X(0), Y(D.yr[1]), "f-line", 1.2);
+    for (let v = Math.ceil(D.xr[0] / D.gx) * D.gx; v <= D.xr[1]; v += D.gx * (D.gx === 1 ? 1 : 2)) if (v) g += T(X(v), Y(Math.max(D.yr[0], 0)) + 13, nb(v), "middle", 9);
+    for (let v = Math.ceil(D.yr[0] / D.gy) * D.gy; v <= D.yr[1]; v += D.gy * 2) if (v) g += T(X(Math.max(D.xr[0], 0)) - 4, Y(v) + 3, nb(v), "end", 9);
+    const seg = (f, cls) => L(X(D.xr[0]), Y(f(D.xr[0])), X(D.xr[1]), Y(f(D.xr[1])), cls, 2.2);
+    g = `<defs><clipPath id="di-clip"><rect x="${ml}" y="10" width="${W0 - ml - 10}" height="${H0 - mb - 10}"/></clipPath></defs>` + g + `<g clip-path="url(#di-clip)">${seg(D.f, "f-accent")}${seg(D.g, "f-blue")}</g>`;
+    g += T(W0 - 12, 22, D.fl, "end", 11, "f-txt f-accent") + T(W0 - 12, 36, D.gl, "end", 11, "f-txt f-blue");
+    let out = "";
+    if (x !== null && x >= D.xr[0] && x <= D.xr[1]) {
+      const y1 = D.f(x), y2 = D.g(x), same = Math.abs(y1 - y2) < 1e-9;
+      g += L(X(x), Y(D.yr[0]), X(x), Y(D.yr[1]), "f-line", 1) + `<circle cx="${X(x)}" cy="${Y(y1)}" r="4" class="f-dot"/><circle cx="${X(x)}" cy="${Y(y2)}" r="4" class="f-dot"/>`;
+      out = `<div class="act-out">x = ${nb(x)} : ${D.fl.split(":")[0].replace("y = ", "")} donne <b>${nb(y1)}${D.unit || ""}</b>, ${D.gl.split(":")[0].replace("y = ", "")} donne <b>${nb(y2)}${D.unit || ""}</b> → ${same ? '<b class="act-ok">même valeur : c\'est le point commun</b>' : "pas encore le même"}</div>`;
+    } else if (x !== null) out = `<div class="act-out">x = ${nb(x)} est hors du graphique : essaie entre ${nb(D.xr[0])} et ${nb(D.xr[1])}.</div>`;
+    return svg(W0, H0, g, "deux droites dans un repère") + out;
+  };
   Object.assign(ACTIVE, {
     droites: {
       predict: { q: "Une droite passe par (0 ; 1) et (2 ; 5). Sa pente vaut…", choices: ["2", "4", "1/2"], good: 0, why: "Pente = variation verticale ÷ variation horizontale = (5 − 1) ÷ (2 − 0) = 4 ÷ 2 = 2 : quand x augmente de 1, y augmente de 2." },
@@ -17759,9 +17795,11 @@ function activeLesson(id, L, cont, review) {
     },
     droitesinter: {
       predict: { q: "Les droites y = x + 1 et y = −x + 5 se coupent pour x = …", choices: ["2", "3", "1"], good: 0, why: "Au point d'intersection, les deux y sont égaux : x + 1 = −x + 5, donc 2x = 4 et x = 2 (puis y = 3)." },
-      defis: ["Abscisse du point d'intersection de y = 2x − 1 et y = x + 3 ?", "Et son ordonnée ?", "Offre A : 20 + 2x ; offre B : 50 + x. Pour combien d'unités coûtent-elles pareil ?"],
-      play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["2x − 1 = x + 3", "y = x + 3 au point trouvé", "20 + 2x = 50 + x"][s] + tu(x)),
-        wins: [W(4, "2x − x = 3 + 1, donc x = 4."), W(7, "y = 4 + 3 = 7 : le point est (4 ; 7)."), W(30, "x = 30 unités (60 + 20 = 80 = 50 + 30).")] }),
+      // Défis repris le 22.11 (« les défis, c'est confusing ») : toujours la même tâche (l'abscisse du point commun),
+      // avec le graphique des deux droites ; la réponse tapée place une verticale qui montre les deux y.
+      defis: ["y = 2x − 1 et y = x + 3 : pour quel x les deux droites donnent-elles le même y ?", "y = 3x − 2 et y = −x + 6 : pour quel x ont-elles le même y ?", "Location d'une voiture. Offre A : 20 CHF + 2 CHF par km ; offre B : 50 CHF + 1 CHF par km. Pour combien de km les deux offres coûtent-elles le même prix ?"],
+      play: hunt({ ask: true, label: "x =", blank: (s) => twoLines(s, null), show: (x, s) => twoLines(s, x),
+        wins: [W(4, "2 · 4 − 1 = 7 et 4 + 3 = 7 : les droites se coupent en (4 ; 7)."), W(2, "3 · 2 − 2 = 4 et −2 + 6 = 4 : point commun (2 ; 4)."), W(30, "20 + 2 · 30 = 80 CHF et 50 + 30 = 80 CHF : pour 30 km, même prix ; au-delà, B est moins chère.")] }),
     },
     recipaff: {
       predict: { q: "f(x) = 2x + 3. Que vaut f⁻¹(11) ?", choices: ["4", "25", "1/11"], good: 0, why: "f⁻¹(11) est le nombre dont l'image vaut 11 : 2x + 3 = 11, donc x = 4. (25, c'est f(11) ; 1/11 n'a rien à voir.)" },
@@ -19169,12 +19207,20 @@ const Engine = {
     return plan;
   },
 
-  // Problème de la semaine : une notion « à problème » parmi celles vues, fixée par la semaine.
+  // Problème de la semaine : une notion « à problème » parmi celles vues, fixée pour la semaine.
+  // Calé sur le Mathélo (22.11 : un seul problème par semaine, il doit être à la bonne hauteur) :
+  // les 3 notions dont le défi (niveau 4) est le plus proche du Mathélo, une notion pas encore travaillée (m < 0,3) en dernier recours.
   weeklyProblem(state) {
+    const d = new Date(), week = d.getFullYear() + "-" + Math.floor((d - new Date(d.getFullYear(), 0, 1)) / 6048e5);
     const ids = this.eligible(state).filter((id) => hasProb(id));
     if (!ids.length) return null;
-    const d = new Date(), week = Math.floor((d - new Date(d.getFullYear(), 0, 1)) / 6048e5);
-    return ids[week % ids.length];
+    if (state.weeklyPick && state.weeklyPick.week === week && ids.includes(state.weeklyPick.id)) return state.weeklyPick.id;
+    const r = state.elo.r, m = (id) => (state.notions[id] || {}).m || 0;
+    const score = (id) => Math.abs(itemRating(state.profile, id, 4) - r) + (m(id) < 0.3 ? 400 : 0);
+    const best = ids.slice().sort((a, b) => score(a) - score(b)).slice(0, 3);
+    const n = +week.split("-")[1], id = best[n % best.length];
+    state.weeklyPick = { week, id };
+    return id;
   },
 
   isProvisional(state) { return state.elo.n < 20; },
@@ -19607,7 +19653,9 @@ function screenHome() {
 // Glisser à gauche / à droite sur l'accueil : cadre suivant / précédent (pas sur un curseur ou un champ).
 (() => {
   let x0 = null, y0 = 0;
-  app.addEventListener("touchstart", (e) => { x0 = !app.querySelector(".tabs") || e.target.closest("input, select, textarea, .seg, details, svg") ? null : e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+  // Seulement sur l'accueil (.home-panel) : la barre d'onglets est aussi affichée pendant une activité, et un balayage
+  // y renvoyait à l'accueil sans prévenir (commentaire du 22.11).
+  app.addEventListener("touchstart", (e) => { x0 = !app.querySelector(".home-panel") || e.target.closest("input, select, textarea, .seg, details, svg") ? null : e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
   app.addEventListener("touchend", (e) => {
     if (x0 === null) return;
     const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
@@ -19616,6 +19664,8 @@ function screenHome() {
     if (k >= 0 && k < ids.length) { homeTab = ids[k]; screenHome(); }
   }, { passive: true });
 })();
+// Activité en cours : le navigateur demande confirmation avant de recharger ou de quitter la page (22.11).
+window.addEventListener("beforeunload", (e) => { if (typeof session !== "undefined" && session && session.i < session.plan.length && session.answered > 0) { e.preventDefault(); e.returnValue = ""; } });
 // Réglages d'interface (21.11, propositions UI 8 et 10) : propres à l'appareil, gardés hors de la progression.
 const UI = (() => { let u = {}; try { u = JSON.parse(localStorage.getItem("m2m-ui") || "{}"); } catch (e) {} return Object.assign({ fs: 1, vib: true }, u); })();
 const uiSave = () => { try { localStorage.setItem("m2m-ui", JSON.stringify(UI)); } catch (e) {} };
@@ -20825,7 +20875,7 @@ function screenSummary() {
   ${newGrade}${nb}
   ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${state.carnet.length} à effacer</b></div><button id="carnetagain">${session.carnet ? "Continuer à effacer" : "📕 Effacer mes erreurs maintenant"}</button></div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
   ${returnCard()}
-  ${typeof Curieux !== "undefined" && Curieux.available(state).length ? '<button id="curbonus">🤔 Bonus : une question curieuse</button>' : ""}
+  ${typeof Curieux !== "undefined" && Curieux.available(state).length ? '<button class="btn-primary" id="curbonus">🤔 Bonus : une question curieuse</button>' : ""}
   <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)", "app")}</div>
   <button class="btn-primary btn-big" id="home">Retour à l'accueil</button>`);
   bindComment(app, "app"); bindInstall(screenHome);

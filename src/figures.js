@@ -192,15 +192,15 @@ const FIG = (() => {
     return svg(340, 140, b + t(31, 124 - s, "1") + t(80 + S + 10, 130 - S / 2, "× " + String(k).replace(".", ",") + (kind ? " (" + kind + ")" : ""), "f-accent f-txt", "start"), "agrandissement");
   }
   // Repère avec une droite (fonctions affines).
-  function lineGraph(a, b, pts = []) {
-    const W = 300, H = 180, X = (x) => 150 + x * 18, Y = (y) => 90 - y * 6;
-    let g = L(10, 90, 290, 90) + L(150, 8, 150, 172);
-    for (let x = -7; x <= 7; x++) g += L(X(x), 87, X(x), 93);
-    const x1 = -7.5, x2 = 7.5;
-    g += '<clipPath id="cl"><rect x="10" y="8" width="280" height="164"/></clipPath>';
-    g += '<line x1="' + X(x1) + '" y1="' + Y(a * x1 + b) + '" x2="' + X(x2) + '" y2="' + Y(a * x2 + b) + '" class="f-accent" stroke-width="2.5" clip-path="url(#cl)"/>';
-    pts.forEach(([x, y, s]) => (g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="4.5" class="f-dot"/>' + t(X(x) + 8, Y(y) - 8, s, "f-txt", "start", 12)));
-    return svg(W, H, g, "droite");
+  // Repère quadrillé à l'échelle (même unité en x et en y, 22.11 : quadrillage demandé, triangles non déformés) :
+  // cadré sur les points et l'origine. a = null : pas de droite ; o.poly : polygone des points (ex. triangle ABC).
+  function lineGraph(a, b, pts = [], o = {}) {
+    const xs = pts.map((p) => p[0]).concat(0), ys = pts.map((p) => p[1]).concat(0);
+    let x0 = Math.min(...xs) - 1, x1 = Math.max(...xs) + 2, y0 = Math.min(...ys) - 1, y1 = Math.max(...ys) + 2;
+    if (x1 - x0 < 8) { const e = (8 - (x1 - x0)) / 2; x0 = Math.floor(x0 - e); x1 = Math.ceil(x1 + e); }
+    if (y1 - y0 < 6) { const e = (6 - (y1 - y0)) / 2; y0 = Math.floor(y0 - e); y1 = Math.ceil(y1 + e); }
+    const ratio = (y1 - y0) / (x1 - x0), big = Math.max(x1 - x0, y1 - y0) > 16;
+    return FIG.plot(a === null ? [] : [{ f: (x) => a * x + b }], pts, { xr: [x0, x1], yr: [y0, y1], numbers: true, step: big ? 2 : 1, squash: ratio > 1.4 ? 1.4 / ratio : 1, polys: o.poly ? [pts.map((p) => [p[0], p[1]])] : [], label: o.label || "repère" });
   }
   // Puissances : blocs (base^exposant).
   function blocks(label) {

@@ -80,8 +80,8 @@
         return Qv("Températures relevées à midi pendant " + M(ts.length) + " jours : " + ts.map((t) => M(t)).join(" ; ") + " (en °C). Quelle est la température moyenne ?", v, "Somme " + M(s) + ", divisée par " + M(ts.length) + " : " + M(v) + " °C.",
           { ctx: "moyenne", guide: [GS("Somme des températures ?", s, M(s) + "."), GS("Moyenne ?", v, M(s + " : " + ts.length + " = " + v) + ".")], traps: [TR(ts.reduce((a, b) => a + Math.abs(b), 0) / ts.length, "Les températures négatives se soustraient."), TR(-v, "Vérifie le signe de la somme.")] }); },
       () => { const a = R.int(2, 6), b = R.int(2, 5), c = R.int(2, 4), sgn = [pk([1, -1]), pk([1, -1]), pk([1, -1])], A = sgn[0] * a * b * c, v = (A / (sgn[1] * b)) * (sgn[2] * c);
-        return Qv("Calcule de gauche à droite : " + M(par(A) + " : " + par(sgn[1] * b) + " \\cdot " + par(sgn[2] * c)), v, M(par(A) + " : " + par(sgn[1] * b) + " = " + A / (sgn[1] * b)) + ", puis " + M(par(A / (sgn[1] * b)) + " \\cdot " + par(sgn[2] * c) + " = " + v) + ".",
-          { ctx: "gauche-droite", guide: [GS("D'abord la division ?", A / (sgn[1] * b), M(A / (sgn[1] * b)) + "."), GS("Puis la multiplication ?", v, M(v) + ".")], traps: [TR(A / (sgn[1] * b * sgn[2] * c), "Multiplications et divisions : de gauche à droite."), TR(-v, "Compte les signes négatifs.")] }); },
+        return Qv("Calcule : " + M(par(A) + " : " + par(sgn[1] * b) + " \\cdot " + par(sgn[2] * c)), v, "Division et multiplication ont la même priorité : on les effectue dans l'ordre, de gauche à droite. " + M(par(A) + " : " + par(sgn[1] * b) + " = " + A / (sgn[1] * b)) + ", puis " + M(par(A / (sgn[1] * b)) + " \\cdot " + par(sgn[2] * c) + " = " + v) + ".",
+          { ctx: "gauche-droite", guide: [GS("· et : ont la même priorité : on commence par la gauche. La division d'abord ?", A / (sgn[1] * b), M(A / (sgn[1] * b)) + "."), GS("Puis la multiplication ?", v, M(v) + ".")], traps: [TR(A / (sgn[1] * b * sgn[2] * c), "Multiplications et divisions : de gauche à droite."), TR(-v, "Compte les signes négatifs.")] }); },
     ],
   };
 

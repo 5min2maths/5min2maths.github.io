@@ -566,7 +566,7 @@ Object.assign(GEN, {
     if (d === 1) {
       const tr = R.pick([[3, 4, 5], [6, 8, 10], [5, 12, 13]]), sx = R.sign(), sy = R.sign();
       const xb = xa + sx * tr[0], yb = ya + sy * tr[1];
-      return { fig: FIG.lineGraph((yb - ya) / (xb - xa), ya - ((yb - ya) / (xb - xa)) * xa, [[xa, ya, "A"], [xb, yb, "B"]]), q: "Calcule la distance entre " + M("A(" + xa + " ; " + ya + ")") + " et " + M("B(" + xb + " ; " + yb + ")") + ".", spec: { kind: "value", value: tr[2] }, sol: M("\\sqrt{" + par(xb - xa) + "^2 + " + par(yb - ya) + "^2} = \\sqrt{" + tr[2] ** 2 + "} = " + tr[2]) };
+      return { fig: FIG.lineGraph(null, 0, [[xa, ya, "A"], [xb, yb, "B"]], { poly: true, label: "segment AB" }), q: "Calcule la distance entre " + M("A(" + xa + " ; " + ya + ")") + " et " + M("B(" + xb + " ; " + yb + ")") + ".", spec: { kind: "value", value: tr[2] }, sol: M("\\sqrt{" + par(xb - xa) + "^2 + " + par(yb - ya) + "^2} = \\sqrt{" + tr[2] ** 2 + "} = " + tr[2]) };
     }
     if (d === 2) {
       const xb = xa + 2 * R.nz(-3, 3), yb = ya + 2 * R.nz(-3, 3);
@@ -855,7 +855,7 @@ const PROB_EXTRA = {
   cart: [() => {
     const [p, q] = R.pick([[3, 4], [6, 8], [5, 12], [8, 6]]), xa = R.int(-4, 1), ya = R.int(-3, 2);
     const B = [xa + p, ya], C = [xa, ya + q];
-    return { fig: FIG.lineGraph(0, ya, [[xa, ya, "A"], [B[0], B[1], "B"], [C[0], C[1], "C"]]), q: "Soit " + M("A(" + xa + " ; " + ya + ")") + ", " + M("B(" + B[0] + " ; " + B[1] + ")") + " et " + M("C(" + C[0] + " ; " + C[1] + ")") + ".",
+    return { fig: FIG.lineGraph(null, 0, [[xa, ya, "A"], [B[0], B[1], "B"], [C[0], C[1], "C"]], { poly: true, label: "triangle ABC" }), q: "Soit " + M("A(" + xa + " ; " + ya + ")") + ", " + M("B(" + B[0] + " ; " + B[1] + ")") + " et " + M("C(" + C[0] + " ; " + C[1] + ")") + ".",
       parts: [{ label: "a) Longueur BC", spec: { kind: "value", value: Math.hypot(p, q) } }, { label: "b) Aire du triangle ABC", spec: { kind: "value", value: (p * q) / 2 } }, { label: "c) Distance de A à la droite (BC), au centième", spec: { kind: "value", value: (p * q) / Math.hypot(p, q), round: 0.01 } }],
       hints: ["Le triangle est rectangle en A (un côté horizontal, un côté vertical).", "Aire = AB · AC / 2 = BC · d / 2, d'où la distance d."],
       sol: "a) " + M("\\sqrt{" + p * p + " + " + q * q + "} = " + Math.hypot(p, q)) + ". b) " + M("\\frac{" + p + " \\cdot " + q + "}{2} = " + (p * q) / 2) + ". c) " + M("d = \\frac{2 \\cdot " + (p * q) / 2 + "}{" + Math.hypot(p, q) + "} = " + dec(r2((p * q) / Math.hypot(p, q)))) + "." };

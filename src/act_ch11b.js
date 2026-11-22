@@ -49,12 +49,12 @@
       ["Pyramide base 6 × 6, hauteur 5 : \\(\\frac{36 \\cdot 5}{3} = 60\\).", "Cône \\(r = 3\\), \\(h = 4\\) : \\(12\\pi\\).", "Boule \\(r = 3\\) : \\(36\\pi\\)."],
       "Avec un diamètre, on prend d'abord la moitié pour avoir le rayon."],
     airepyr: ["Aire d'une pyramide", "Les faces latérales sont des triangles ; leur hauteur est l'apothème.",
-      "Pyramide régulière à base carrée de côté \\(c\\) et d'apothème \\(a\\) : aire latérale \\(4 \\cdot \\frac{c \\cdot a}{2} = 2ca\\) ; aire totale \\(c^2 + 2ca\\). L'apothème se calcule avec Pythagore : \\(a^2 = h^2 + \\left(\\frac{c}{2}\\right)^2\\). Cône : aire latérale \\(\\pi r g\\) (\\(g\\) : génératrice).",
+      "Pyramide régulière à base carrée de côté \\(c\\) et d'apothème \\(a\\) : aire latérale \\(4 \\cdot \\frac{c \\cdot a}{2} = 2ca\\) ; aire totale \\(c^2 + 2ca\\). L'apothème se calcule avec Pythagore : \\(a^2 = h^2 + \\left(\\frac{c}{2}\\right)^2\\).",
       ["\\(c = 6\\), \\(h = 4\\) : \\(a = 5\\), aire latérale \\(60\\).", "\\(c = 10\\), \\(h = 12\\) : \\(a = 13\\), aire totale \\(100 + 260 = 360\\)."],
       "La hauteur des faces est l'apothème, pas la hauteur de la pyramide."],
     volcomp: ["Solides composés", "On découpe en solides simples.",
       "On repère les solides (cube, pyramide, cylindre, cône, demi-boule), on calcule chaque volume avec ses propres dimensions, puis on additionne (ou on soustrait un trou). On garde \\(\\pi\\) en facteur jusqu'au bout.",
-      ["Cube 3 + pyramide de hauteur 3 : \\(27 + 9 = 36\\).", "Silo : cylindre \\(r = 3\\), \\(h = 10\\) et demi-boule : \\(90\\pi + 18\\pi = 108\\pi\\).", "Cube 10 percé d'un trou \\(r = 2\\) : \\(1000 - 40\\pi\\)."],
+      ["Cube de 3 cm d'arête + pyramide de hauteur 3 : \\(27 + 9 = 36\\).", "Silo : cylindre \\(r = 3\\), \\(h = 10\\) et demi-boule : \\(90\\pi + 18\\pi = 108\\pi\\).", "Cube de 10 cm d'arête percé d'un trou \\(r = 2\\) : \\(1000 - 40\\pi\\)."],
       "Dans une gélule, la partie cylindrique est plus courte que la gélule : on retire deux rayons."],
     volmanq: ["Retrouver une dimension", "Une formule de volume est une équation.",
       "On écrit la formule, on remplace ce qu'on connaît, puis on isole la dimension cherchée. Pour un cône ou une pyramide, n'oublie pas le facteur 3 ; pour un rayon, on termine par une racine (carrée ou cubique).",
@@ -216,21 +216,22 @@
     },
     airepyr: {
       predict: { q: "Une pyramide à base carrée de 6 cm a une hauteur de 4 cm. Son apothème a (la hauteur d'une face triangulaire, en bleu) mesure…", fig: pyrFig(6, 4), choices: ["4 cm", "5 cm", "7 cm"], good: 1, why: "Hauteur, demi-côté et apothème forment un triangle rectangle : √(4² + 3²) = √25 = 5. L'apothème est plus long que la hauteur." },
-      defis: ["Base 6 cm, hauteur 4 cm : calcule l'apothème.", "Base 10 cm, hauteur 12 cm : calcule l'apothème.", "Base 16 cm, hauteur 6 cm : calcule l'apothème, puis lis l'aire latérale."],
+      // Défis (22.11) : même tâche à chaque fois (trouver l'apothème), sans reprendre la pyramide du « Devine » ; l'aire latérale n'apparaît qu'une fois l'apothème juste.
+      defis: ["Nouvelle pyramide : base 10 cm, hauteur 12 cm. Tape l'apothème.", "Base 16 cm, hauteur 6 cm. Tape l'apothème.", "Base 8 cm, hauteur 3 cm. Tape l'apothème."],
       play: hunt({ ask: true, label: "Apothème", start: 3, min: 1, max: 20,
-        blank: (s) => { const [c, h] = [[6, 4], [10, 12], [16, 6]][s]; return pyrFig(c, h); },
-        show: (x, s) => { const [c, h] = [[6, 4], [10, 12], [16, 6]][s], t = h * h + (c / 2) ** 2;
-          return pyrFig(c, h, x) + `<div class="act-out">${h}² + ${c / 2}² = ${t} ; ${x}² = ${x * x} → ${ok(t === x * x, x * x < t)}<br>aire latérale : 4 · (${c} · ${x}) ÷ 2 = <b>${2 * c * x} cm²</b></div>`; },
+        blank: (s) => { const [c, h] = [[10, 12], [16, 6], [8, 3]][s]; return pyrFig(c, h); },
+        show: (x, s) => { const [c, h] = [[10, 12], [16, 6], [8, 3]][s], t = h * h + (c / 2) ** 2;
+          return pyrFig(c, h, x) + `<div class="act-out">hauteur² + demi-côté² = ${h}² + ${c / 2}² = ${t} ; apothème² = ${x}² = ${x * x} → ${ok(t === x * x, x * x < t)}${t === x * x ? `<br>aire latérale : 4 · (${c} · ${x}) ÷ 2 = <b>${2 * c * x} cm²</b>` : ""}</div>`; },
         note: "Sous l'apothème, il y a le demi-côté de la base.",
-        wins: [W(5, "√(16 + 9) = 5 ; aire latérale 2 · 6 · 5 = 60 cm²."), W(13, "√(144 + 25) = 13 ; aire latérale 260 cm²."), W(10, "√(36 + 64) = 10 ; aire latérale 2 · 16 · 10 = 320 cm².")] }),
+        wins: [W(13, "√(144 + 25) = 13 ; aire latérale 2 · 10 · 13 = 260 cm²."), W(10, "√(36 + 64) = 10 ; aire latérale 2 · 16 · 10 = 320 cm²."), W(5, "√(9 + 16) = 5 ; aire latérale 2 · 8 · 5 = 80 cm².")] }),
     },
     volcomp: {
-      predict: { q: "Un cube de 3 cm surmonté d'une pyramide de même base et de 3 cm de haut : volume total ?", choices: ["36 cm³", "54 cm³", "30 cm³"], good: 0, why: "Cube : 27. Pyramide : ⅓ · 9 · 3 = 9. Total : 36 cm³. On additionne les volumes des parties." },
-      defis: ["Cube d'arête 3 et pyramide : quelle hauteur de pyramide pour 36 cm³ en tout ?", "Même cube : quelle hauteur pour 45 cm³ ?", "Cylindre (r = 1, h = 4) et cône de même base : quelle hauteur de cône pour 6π en tout ?"],
+      predict: { q: "Un cube de 3 cm d'arête est surmonté d'une pyramide de même base, haute de 3 cm. Volume total du solide ?", choices: ["36 cm³", "54 cm³", "30 cm³"], good: 0, why: "Cube : 3 · 3 · 3 = 27. Pyramide : ⅓ · 9 · 3 = 9. Total : 36 cm³. On additionne les volumes des parties." },
+      defis: ["On change la hauteur de la pyramide (même cube de 3 cm d'arête). Quelle hauteur donne 39 cm³ en tout ?", "Même cube : quelle hauteur de pyramide donne 45 cm³ en tout ?", "Cylindre (r = 1, h = 4) et cône de même base : quelle hauteur de cône pour 6π en tout ?"],
       play: hunt({ ask: true, label: "Hauteur du toit", start: 1, min: 1, max: 12,
-        show: (x, s) => { if (s < 2) { const v = 27 + 3 * x, t = s ? 45 : 36; return `<div class="act-out">cube 27 + pyramide ⅓ · 9 · ${x} = 27 + ${3 * x} = <b>${v} cm³</b> (cible ${t}) → ${ok(v === t, v < t)}</div>`; }
+        show: (x, s) => { if (s < 2) { const v = 27 + 3 * x, t = s ? 45 : 39; return `<div class="act-out">cube 27 + pyramide ⅓ · 9 · ${x} = 27 + ${3 * x} = <b>${v} cm³</b> (cible ${t}) → ${ok(v === t, v < t)}</div>`; }
           const v = 4 + x / 3; return `<div class="act-out">cylindre 4π + cône ⅓ · π · 1² · ${x} = <b>${nb(v)}π</b> (cible 6π) → ${ok(Math.abs(v - 6) < 1e-9, v < 6)}</div>`; },
-        wins: [W(3, "27 + 9 = 36."), W(6, "27 + 18 = 45."), W(6, "4π + 2π = 6π : le cône de hauteur 6 vaut un cylindre de hauteur 2.")] }),
+        wins: [W(4, "27 + ⅓ · 9 · 4 = 27 + 12 = 39."), W(6, "27 + 18 = 45 : chaque cm de pyramide ajoute 3 cm³."), W(6, "4π + 2π = 6π : le cône de hauteur 6 vaut un cylindre de hauteur 2.")] }),
     },
     volmanq: {
       predict: { q: "Un cylindre de rayon 3 cm a un volume de 36π cm³. Sa hauteur mesure…", choices: ["4 cm", "12 cm", "6 cm"], good: 0, why: "π · 3² · h = 36π, donc 9h = 36 et h = 4. On remplace ce qu'on connaît, puis on isole h." },
