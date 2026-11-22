@@ -86,6 +86,71 @@ def manuel():
     return keep
 
 
+TRAITES = ROOT / "tools" / "commentaires_traites.txt"
+C_COLS = ["Reçu le", "Classe", "Code", "Commentaire", "Traité", "Ce qui a été fait", "Remarque"]
+
+
+def traites():
+    """horodatage -> ce qui a été fait (tools/commentaires_traites.txt : « horodatage | note », note facultative)."""
+    out = {}
+    if TRAITES.exists():
+        for l in TRAITES.read_text().splitlines():
+            if l.strip() and not l.startswith("#"):
+                t, _, note = l.partition("|")
+                out[t.strip()] = note.strip()
+    return out
+
+
+def manuel_comms():
+    """Onglet Commentaires existant : reçu -> (traité, fait, remarque) saisis à la main (conservés)."""
+    if not OUT.exists():
+        return {}
+    wb = load_workbook(OUT)
+    if "Commentaires" not in wb.sheetnames:
+        return {}
+    ws, keep = wb["Commentaires"], {}
+    head = [c.value for c in ws[1]]
+    if head[:len(C_COLS)] != C_COLS:
+        return {}
+    for row in ws.iter_rows(min_row=2, values_only=True):
+        if row[0]:
+            keep[str(row[0])] = (row[4], row[5], row[6])
+    return keep
+
+
+def onglet_commentaires(wb, comms, bold, head_fill):
+    """Onglet « Commentaires » (22.11) : tous les commentaires, du plus récent au plus ancien, traité ou non et ce qui a
+    été fait. Sources : l'Apps Script (texte) et tools/commentaires_traites.txt (traité + note) ; ce que l'utilisateur
+    écrit dans les colonnes Traité, Ce qui a été fait et Remarque est conservé d'une génération à l'autre."""
+    T, keep = traites(), manuel_comms()
+    ws = wb.create_sheet("Commentaires", 1)
+    ws.append(C_COLS)
+    for c in ws[1]:
+        c.font, c.fill = bold, head_fill
+    n_non = 0
+    for x in sorted(comms, key=lambda x: str(x.get("recu", "")), reverse=True):
+        recu = str(x.get("recu", ""))
+        k_tr, k_fait, k_rem = keep.get(recu, (None, None, None))
+        fait_txt = T.get(recu) or k_fait or ("traité (détail dans le journal git)" if recu in T else "")
+        tr = "oui" if recu in T else (k_tr or "non")
+        if tr != "oui":
+            n_non += 1
+        ws.append([recu[:16].replace("T", " "), x.get("classe", ""), x.get("code", ""), " ".join(str(x.get("commentaire", "")).split()),
+                   tr, fait_txt if (recu in T or fait_txt) else "", k_rem or ""])
+    dv = DataValidation(type="list", formula1='"oui,non,sans suite"', allow_blank=True)
+    ws.add_data_validation(dv)
+    dv.add(f"E2:E{max(2, ws.max_row)}")
+    ws.conditional_formatting.add(f"A2:G{max(2, ws.max_row)}", FormulaRule(formula=['$E2="non"'], fill=PatternFill("solid", fgColor="FFF2CC")))
+    for col, w in zip("ABCDEFG", [16, 14, 26, 70, 9, 55, 30]):
+        ws.column_dimensions[col].width = w
+    for row in ws.iter_rows(min_row=2):
+        for c in row:
+            c.alignment = Alignment(wrap_text=True, vertical="top")
+    ws.freeze_panes = "A2"
+    ws.auto_filter.ref = f"A1:G{max(1, ws.max_row)}"
+    return len(comms), n_non
+
+
 def main():
     d = inventaire()
     votes, comms = retours()
@@ -181,6 +246,7 @@ def main():
             else:
                 ws.cell(r, 1).font = Font(color="999999")
 
+    n_c, n_non = onglet_commentaires(wb, comms, bold, head_fill)
     # Synthèse : formules (se met à jour quand l'utilisateur change « Contrôlé »)
     syn.append(["Classe", "Notions", "Questions", "Leçons actives", "% notions actives", "Validées", "À corriger", "Vues", "% validé", "Questions à 1 forme", "Tests de qualité"])
     for c in syn[1]:
@@ -193,13 +259,14 @@ def main():
                     f'=COUNTIF({t}P:P,"validé")', f'=COUNTIF({t}P:P,"à corriger")', f'=COUNTIF({t}P:P,"vu")', f"=F{i}/C{i}", f"=COUNTIF({t}H:H,1)", f'=COUNTIF({t}G:G,"✓ qualité*")&" / "&COUNTIF({t}D:D,"Test")'])
         syn[f"E{i}"].number_format = syn[f"I{i}"].number_format = "0%"
     syn.append([])
+    syn.append([f"Commentaires des testeurs : {n_c}, dont {n_non} non traités (onglet Commentaires, lignes en jaune)."])
     syn.append(["Statuts « Contrôlé » : à faire → vu → à corriger → validé. Colonnes automatiques recalculées par tools/suivi.py ; Contrôlé et Remarque conservés."])
     for col, w in zip("ABCDEFGHIJK", [12, 9, 10, 14, 16, 9, 11, 7, 9, 18, 14]):
         syn.column_dimensions[col].width = w
     OUT.parent.mkdir(exist_ok=True)
     wb.save(OUT)
     tot = sum(1 for c, r in keep.values() if (c and c != "à faire") or r)
-    print(f"{OUT.relative_to(ROOT)} : " + ", ".join(f"{c['name']} {len(c['rows'])} notions" for c in d["classes"]) + f" ; {tot} statuts ou remarques conservés")
+    print(f"{OUT.relative_to(ROOT)} : " + ", ".join(f"{c['name']} {len(c['rows'])} notions" for c in d["classes"]) + f" ; {tot} statuts ou remarques conservés ; commentaires : {n_c}, dont {n_non} non traités")
 
 
 if __name__ == "__main__":

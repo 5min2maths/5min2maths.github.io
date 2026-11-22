@@ -739,7 +739,7 @@ function restoreFromHash() {
 }
 
 // ---------------- Statistiques d'usage, appareil de l'auteur (22.11) ----------------
-// Mêmes sources que le point du jour (Apps Script) : testeurs (public), activité et commentaires (clé de lecture,
+// Mêmes sources que le point du jour (Apps Script) : testeurs (public) et activité (clé de lecture,
 // gardée seulement sur l'appareil de l'auteur). Les appareils de l'auteur n'envoient rien : ils ne sont pas comptés.
 function screenStats(back) {
   const cle = (() => { try { return localStorage.getItem("m2m-cle") || ""; } catch (e) { return ""; } })();
@@ -748,8 +748,8 @@ function screenStats(back) {
   const fr = (d) => d.slice(8, 10) + "." + d.slice(5, 7);
   h(`${brand}<div class="eyebrow">Appareil de l'auteur</div><h2>Statistiques d'usage</h2>
   <div class="card stack" id="st1"><p class="small muted">Chargement…</p></div>
-  <div class="card stack" id="st2" ${cle ? "" : "hidden"}></div><div class="card stack" id="st3" ${cle ? "" : "hidden"}></div>
-  ${cle ? "" : '<div class="card flat"><p class="small">Pour voir l\'activité par jour et les commentaires, ouvre une fois le lien <code>…/#auteur-cle=CLÉ</code> sur cet appareil (clé de lecture de l\'Apps Script).</p></div>'}
+  <div class="card stack" id="st2" ${cle ? "" : "hidden"}></div>
+  ${cle ? "" : '<div class="card flat"><p class="small">Pour voir l\'activité par jour, ouvre une fois le lien <code>…/#auteur-cle=CLÉ</code> sur cet appareil (clé de lecture de l\'Apps Script).</p></div>'}
   <button class="btn-sec" id="streload">Actualiser</button><button class="btn-primary btn-big" id="stback">Retour</button>`);
   const $ = (x) => document.getElementById(x);
   $("stback").onclick = back; $("streload").onclick = () => screenStats(back);
@@ -769,11 +769,7 @@ function screenStats(back) {
       ${J.map((j) => `<tr><td>${fr(j.jour)}</td><td>${j.appareils}</td><td>${j.seances_terminees}/${j.seances_commencees}</td><td>${pct(j.reussite_moy)}</td><td>${mn(j.minutes_moy)}</td></tr>`).join("")}</tbody></table>
       <p class="small muted">Séances : terminées / commencées. Classes sur 7 jours : ${Object.entries(cl).sort((x, y) => y[1] - x[1]).map(([k, n]) => esc(k) + " " + n).join(", ") || "aucune"}.</p>`;
   }).catch(() => { $("st2").innerHTML = '<p class="small">Activité indisponible.</p>'; });
-  get("commentaires=" + encodeURIComponent(cle)).then((c) => {
-    if (!Array.isArray(c)) { $("st3").innerHTML = '<p class="small">Commentaires indisponibles.</p>'; return; }
-    const L = c.slice(-12).reverse();
-    $("st3").innerHTML = `<h3>Derniers commentaires (${c.length} en tout)</h3><ul class="st-cmt">${L.map((x) => `<li><span class="small muted">${fr(String(x.recu).slice(0, 10))} · ${esc(String(x.classe || ""))} · ${esc(String(x.code || ""))}</span><br>${esc(String(x.commentaire || ""))}</li>`).join("")}</ul>`;
-  }).catch(() => { $("st3").innerHTML = '<p class="small">Commentaires indisponibles.</p>'; });
+  // 22.11 : les commentaires ne s'affichent plus ici (demande de l'auteur) : onglet Commentaires du tableau de suivi (tools/suivi.py).
 }
 
 // ---------------- En ce moment en classe (13.11) ----------------
