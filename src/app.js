@@ -77,7 +77,36 @@ const pick = (a) => a[Math.floor(Math.random() * a.length)];
 // Signe de division (14.11, décision de l'utilisateur) : « : » devient ÷ dans toutes les formules, au rendu.
 // Restent « : » : le texte \text{…}, la ponctuation suivie de \; ou ;, et ce qui n'a pas d'espaces (échelle 1\,:\,200, f\colon).
 window.divSign = (t) => t.replace(/(\\text\{[^}]*\})|( : (?!\\;|;))/g, (m, txt) => txt || " \\div ");
+// Longues chaînes d'égalités (22.11, retour de l'auteur : la correction dépasse de l'écran sur téléphone) : MathJax ne
+// coupe pas une formule en ligne. Avant le rendu, \( A = B = C \) devient \(A\) \(= B\) \(= C\) : le navigateur peut
+// alors passer à la ligne entre deux morceaux. Seulement au niveau 0 (hors parenthèses, accolades, crochets, environnements).
+function splitEq(tex) {
+  if (tex.length < 26 || /\\begin|\\\\/.test(tex)) return null;
+  const pos = []; let d2 = 0;
+  for (let i = 0; i < tex.length; i++) {
+    const c = tex[i];
+    if (c === "\\") { const m = tex.slice(i).match(/^\\(approx|leq|geq|neq|iff|Rightarrow|Leftrightarrow)(?![a-zA-Z])/); if (m && d2 === 0) pos.push(i); i += m ? m[0].length - 1 : 1; continue; }
+    if ("({[".includes(c)) d2++; else if (")}]".includes(c)) d2--;
+    else if (d2 === 0 && (c === "=" || c === "<" || c === ">")) pos.push(i);
+  }
+  const P = pos.filter((i) => i > 0);
+  if (!P.length) return null;
+  const parts = []; let last = 0;
+  for (const i of P) { parts.push(tex.slice(last, i).trim()); last = i; }
+  parts.push(tex.slice(last).trim());
+  return parts.filter((x) => x).map((x) => "\\(" + x + "\\)").join(" ");
+}
+function splitLongMath(el) {
+  const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), nodes = [];
+  while (w.nextNode()) if (w.currentNode.nodeValue.includes("\\(")) nodes.push(w.currentNode);
+  for (const n of nodes) {
+    if (n.parentNode && n.parentNode.closest && n.parentNode.closest("textarea, input, script, mjx-container")) continue;
+    const v = n.nodeValue.replace(/\\\((.+?)\\\)/gs, (m, t) => splitEq(t) || m);
+    if (v !== n.nodeValue) n.nodeValue = v;
+  }
+}
 function typeset(el) {
+  try { splitLongMath(el); } catch (e) {}
   const go = () => window.MathJax && MathJax.typesetPromise ? MathJax.typesetPromise([el]).catch(() => {}) : setTimeout(go, 150);
   go();
 }
