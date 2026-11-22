@@ -448,7 +448,7 @@ function screenHome() {
   } else {
     const mode = state.homeMode === "libre" ? "libre" : "classe", nC = (state.carnet || []).length;
     const banner = [resumeCard(), prepTodayCard(), backupCard(), weekRecapCard(), streakNudge()].find((x) => x) || "";
-    const nowLine = !Engine.nowActive(state) ? `<button type="button" class="btn-ghost small" id="nowpick">📚 Choisir mon chapitre en classe</button>`
+    const nowLine = !Engine.nowActive(state) ? `<button type="button" class="btn-sec small" id="nowpick">📚 Choisir mon chapitre travaillé en classe</button>`
       : Engine.nowStale(state) ? `<span class="small">📚 Toujours sur ${esc(state.now.ids.map(nLabel).join(" · "))} ?</span> <button type="button" class="btn-ghost small" id="nowyes">Oui</button><button type="button" class="btn-ghost small" id="nowpick">Changer</button>`
       : `<span class="small">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span> <button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
     const door = (id, ic, label, sub, badge) => `<button type="button" class="door" data-door="${id}">${badge ? `<span class="door-badge">${badge}</span>` : ""}<span class="door-sq">${ic}</span><b>${label}</b><small>${sub}</small></button>`;
@@ -457,8 +457,10 @@ function screenHome() {
     ${banner}
     <div class="card stack sess-card">
       <div class="seg sess-seg" role="tablist"><button type="button" data-m="classe" aria-pressed="${mode === "classe"}">🎒 En classe</button><button type="button" data-m="libre" aria-pressed="${mode === "libre"}">🧭 Libre</button></div>
-      ${mode === "classe" ? `<div class="sess-info"><span class="small muted fmt-lab">${FORMATS[fmt].label}${done ? " · séance faite, tu peux en refaire une" : ""}</span> <button type="button" class="btn-ghost small" id="other">🔁 format</button><div class="now-line">${nowLine}</div></div>`
-        : `<p class="small muted sess-info">Tous les sujets, à ton rythme : le parcours s'adapte à toi, sans programme ni note.</p>`}
+      <p class="small sess-mode">${mode === "classe" ? "🎒 <b>En classe</b> : tes questions suivent le chapitre que tu travailles en classe, avec des révisions de ce que tu as déjà vu." : "🧭 <b>Libre</b> : tous les sujets, à ton rythme. Le parcours s'adapte à toi : il avance vite si tout va bien, reprend les bases si ça coince."}</p>
+      ${mode === "classe" ? `<div class="fmt-box2"><span class="eyebrow">Format du jour${done ? " · séance faite ✓" : ""}</span>
+        <b class="fmt-lab">${FORMATS[fmt].label}</b><span class="small muted fmt-txt">${FORMATS[fmt].text}</span><button type="button" class="btn-sec small fmt-btn" id="other">🔁 Changer de format</button></div>
+        <div class="now-line">${nowLine}</div>` : ""}
       <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${done ? "Encore une séance" : mode === "classe" ? "Ma séance du jour" : "Mon défi du jour"}</button>
     </div>
     ${eloBanner()}
@@ -479,9 +481,10 @@ function screenHome() {
   // Changer de format (21.11, « l'écran saute ») : on ne remplace que le titre et le texte de l'encadré, sans redessiner l'accueil.
   on("other", () => {
     const f = Engine.otherFormat(state); save();
-    const lab = app.querySelector(".fmt-lab");
-    if (!lab) return screenHome();
-    lab.textContent = FORMATS[f].label; lab.classList.remove("fmt-swap"); void lab.offsetWidth; lab.classList.add("fmt-swap");
+    const lab = app.querySelector(".fmt-lab"), txt = app.querySelector(".fmt-txt"), box = app.querySelector(".fmt-box2");
+    if (!lab || !box) return screenHome();
+    lab.textContent = FORMATS[f].label; if (txt) txt.textContent = FORMATS[f].text;
+    box.classList.remove("fmt-swap"); void box.offsetWidth; box.classList.add("fmt-swap");
   });
   if (homeTab === "today") bindNowCard();
   on("resgo", resumeSession);
