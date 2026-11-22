@@ -15,13 +15,20 @@ const out = [], ids = location.hash ? location.hash.slice(1).split(",") : Object
 for (const id of ids) { const cov = [];
   for (const d of [1, 2, 3]) { let g = 0;
     for (let s = 1; s <= 150; s++) { const q = Engine.build(id, d, s); if (!q.guide) continue; g++; n++;
+      const stepOk = (sp) => sp.kind === "value" || sp.kind === undefined ? isFinite(sp.value)
+        : sp.kind === "set" || sp.kind === "pair" ? Array.isArray(sp.values) && sp.values.every(isFinite)
+        : sp.kind === "expr" ? checkAnswer(sp, sp.expr).status === "correct"
+        : sp.kind === "solset" ? Array.isArray(sp.ivs)
+        : sp.kind === "ineq" ? isFinite(sp.value) : true;
       if (q.spec.kind === "expr") { // réponses littérales (15.11) : chaque étape accepte sa réponse, la dernière est équivalente à la réponse
-        if (q.guide.some((x) => x.spec.kind === "expr" ? checkAnswer(x.spec, x.spec.expr).status !== "correct" : !isFinite(x.spec.value))) { bad++; if (bad < 15) out.push("ÉCHEC étape littérale " + q.code); }
-        const lx = q.guide[q.guide.length - 1].spec; if (lx.kind === "expr" && !Expr.equivalent(Expr.parse(lx.expr), Expr.parse(q.spec.expr))) { bad++; if (bad < 15) out.push("ÉCHEC dernière étape ≠ réponse " + q.code); }
+        if (q.guide.some((x) => !stepOk(x.spec))) { bad++; if (bad < 15) out.push("ÉCHEC étape littérale " + q.code + " " + JSON.stringify(q.guide.find((x) => !stepOk(x.spec)).spec).slice(0, 80)); }
+        const lx = q.guide[q.guide.length - 1].spec; if (lx.kind === "expr" && lx.expr.replace(/\s/g, "") !== q.spec.expr.replace(/\s/g, "") && !Expr.equivalent(Expr.parse(lx.expr), Expr.parse(q.spec.expr))) { bad++; if (bad < 15) out.push("ÉCHEC dernière étape ≠ réponse " + q.code); }
         continue; }
-      const vals = q.guide.map((x) => x.spec.value), last = vals[vals.length - 1], ans = q.spec.value;
-      if (vals.some((v) => !isFinite(v))) { bad++; if (bad < 15) out.push("ÉCHEC valeur non finie " + q.code); }
-      else if (q.spec.kind === "value" && Math.abs(last - ans) > 1e-9 * Math.max(1, Math.abs(ans))) { bad++; if (bad < 15) out.push("ÉCHEC dernière étape ≠ réponse " + q.code + " : " + last + " / " + ans); }
+      // 22.11 : une étape peut attendre un nombre, un ensemble (équations), un couple (systèmes), un intervalle
+      // (inéquations) ou une expression : chaque type est contrôlé à sa façon (avant : faux « valeur non finie »).
+      const lastS = q.guide[q.guide.length - 1].spec, last = lastS.value, ans = q.spec.value;
+      if (q.guide.some((x) => !stepOk(x.spec))) { bad++; if (bad < 15) out.push("ÉCHEC étape invalide " + q.code + " " + JSON.stringify(q.guide.find((x) => !stepOk(x.spec)).spec).slice(0, 80)); }
+      else if (q.spec.kind === "value" && (lastS.kind || "value") === "value" && Math.abs(last - ans) > Math.max(1e-9 * Math.max(1, Math.abs(ans)), q.spec.round ? q.spec.round : 0, q.spec.tol || 0)) { bad++; if (bad < 15) out.push("ÉCHEC dernière étape ≠ réponse " + q.code + " : " + last + " / " + ans); }
       else if (q.guide.some((x) => !x.ask || x.sol === undefined)) { bad++; if (bad < 15) out.push("ÉCHEC étape vide " + q.code); }
     } cov.push(Math.round(g / 1.5) + " %"); }
   if (location.hash) out.push(id + " : guides " + cov.join(" / "));
