@@ -575,3 +575,27 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .fmt-box2 .fmt-txt { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .st-bar { display: inline-block; height: 8px; border-radius: 4px; background: var(--blue); min-width: 4px; }
 .st-table td:nth-child(2) { width: 50%; text-align: left; }
+
+/* Accueil compact (22.11, « tout sur un écran ») */
+.elo-compact { grid-template-columns: auto 1fr auto; gap: 12px; padding: 8px 12px; }
+.elo-compact .eb-num { display: grid; gap: 0; }
+.elo-compact .eb-num .eyebrow { font-size: 0.62rem; }
+.elo-compact .num { font-size: 1.6rem; }
+.elo-compact .eb-grade { margin-top: 0; }
+.elo-compact .eb-grade .pbar { max-width: none; }
+.elo-compact .eb-chev { font-size: 1.6rem; color: var(--ink-soft); }
+.sess-card::before { display: none; }
+.sess-card { padding: 14px; gap: 10px; }
+.sess-sub { margin: -2px 0 0; }
+.sess-fmt { display: flex; align-items: center; gap: 10px; justify-content: space-between; }
+.sess-fmt-t { display: grid; min-width: 0; }
+.sess-fmt .fmt-lab { font-family: var(--font-display); font-size: 1.05rem; }
+.sess-fmt .fmt-txt { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sess-fmt .btn-sec { flex-shrink: 0; }
+.sess-fmt.fmt-swap .fmt-lab, .sess-fmt.fmt-swap .fmt-txt { animation: fmtswap .25s ease-out; }
+.now-line { flex-wrap: nowrap; gap: 4px; }
+.now-line .now-lab { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.now-line .btn-ghost, .now-line .btn-sec { flex-shrink: 0; }
+.now-line .now-ask { flex: 1; }
+.elo-compact .num { justify-self: start; width: max-content; }
+.elo-compact .eb-gic { font-size: 1.05rem !important; }

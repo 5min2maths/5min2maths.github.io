@@ -330,19 +330,13 @@ function screenGrades() {
   window.scrollTo(0, 0);
 }
 // Bandeau Mathélo (14.11, demande de l'utilisateur : « on a envie de le voir monter ») : sur tous les cadres de l'accueil.
+// 22.11 : bandeau compact sur une ligne (chiffre, grade, barre vers le grade suivant) ; la courbe est dans « Mes grades ».
 function eloBanner() {
-  const e = state.elo, prev = e.log.length > 1 ? e.log[e.log.length - 2][1] : null, d = prev === null ? 0 : e.r - prev;
-  const pts = e.log.slice(-30).map((x) => x[1]);
-  let spark = "";
-  if (pts.length > 1) {
-    const lo = Math.min(...pts) - 10, hi = Math.max(...pts) + 10, X = (i) => (i / (pts.length - 1)) * 200, Y = (v) => 30 - ((v - lo) / (hi - lo)) * 26;
-    const line = pts.map((v, i) => (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(v).toFixed(1)).join(" ");
-    spark = `<svg class="spark" viewBox="0 0 200 32" preserveAspectRatio="none"><path class="a" d="${line} L200,32 L0,32 Z"/><path class="l" d="${line}"/><circle cx="200" cy="${Y(pts[pts.length - 1]).toFixed(1)}" r="3"/></svg>`;
-  }
-  return `<button type="button" class="elo-band" id="eloband" aria-label="Mathélo ${e.r}, voir mes progrès">
-    <span class="eb-l"><span class="eyebrow">Mathélo${Engine.isProvisional(state) ? " · provisoire" : ""}</span><span class="eb-n"><b class="num">${e.r}</b><span class="eb-gic" title="Grade : ${gradeOf(e.r).name}" aria-hidden="true">${gradeOf(e.r).ic}</span>${d ? `<span class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "▲ +" : "▼ "}${d}</span>` : ""}</span>
-      ${(() => { const g = gradeOf(e.r); return `<span class="eb-grade"><b>${g.name}</b>${g.next ? `<span class="pbar"><i style="width:${g.pct}%"></i></span><span class="eb-next">${g.next.ic} ${g.next.name} dans ${g.next.at - e.r} pts</span>` : ""}</span>`; })()}</span>
-    <span class="eb-r">${spark || '<span class="small muted">Ta courbe apparaît après ta 2e séance.</span>'}</span></button>`;
+  const e = state.elo, prev = e.log.length > 1 ? e.log[e.log.length - 2][1] : null, d = prev === null ? 0 : e.r - prev, g = gradeOf(e.r);
+  return `<button type="button" class="elo-band elo-compact" id="eloband" aria-label="Mathélo ${e.r}, voir mes grades">
+    <span class="eb-num"><span class="eyebrow">Mathélo${Engine.isProvisional(state) ? " · provisoire" : ""}</span><b class="num">${e.r}</b>${d ? `<span class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "▲ +" : "▼ "}${d}</span>` : ""}</span>
+    <span class="eb-grade"><b><span class="eb-gic" aria-hidden="true">${g.ic}</span> ${g.name}</b>${g.next ? `<span class="pbar"><i style="width:${g.pct}%"></i></span><span class="eb-next">${g.next.ic} ${g.next.name} dans ${g.next.at - e.r} pts</span>` : ""}</span>
+    <span class="eb-chev" aria-hidden="true">›</span></button>`;
 }
 function themeBars(lv) {
   return Object.entries(lv).map(([th, m]) => `<div class="bar"><span>${Engine.themeLabel(th, state.profile)}</span><span class="track"><i style="width:${Math.round(m * 100)}%"></i></span></div>`).join("");
@@ -451,7 +445,7 @@ function screenHome() {
     const banner = [resumeCard(), prepTodayCard(), backupCard(), weekRecapCard(), streakNudge()].find((x) => x) || "";
     const nowLine = !Engine.nowActive(state) ? `<button type="button" class="btn-sec small" id="nowpick">📚 Choisir mon chapitre travaillé en classe</button>`
       : Engine.nowStale(state) ? `<div class="now-ask"><b>📚 Cette semaine en classe, tu travailles toujours :</b><span>${esc(state.now.ids.map(nLabel).join(" · "))} ?</span><div class="row now-ask-btns"><button type="button" class="btn-sec small" id="nowyes">Oui, toujours</button><button type="button" class="btn-sec small" id="nowpick">J'ai changé de chapitre</button></div></div>`
-      : `<span class="small">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span> <button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
+      : `<span class="small now-lab">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span><button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
     const door = (id, ic, label, sub, badge) => `<button type="button" class="door" data-door="${id}">${badge ? `<span class="door-badge">${badge}</span>` : ""}<span class="door-sq">${ic}</span><b>${label}</b><small>${sub}</small></button>`;
     const svgI = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`, TI = Object.fromEntries(HOME_TABS.map(([k, , ic]) => [k, ic]));
     h(`<div class="hub">${head}
@@ -459,9 +453,8 @@ function screenHome() {
     ${banner}
     <div class="card stack sess-card">
       <div class="seg sess-seg" role="tablist"><button type="button" data-m="classe" aria-pressed="${mode === "classe"}">🎒 En classe</button><button type="button" data-m="libre" aria-pressed="${mode === "libre"}">🧭 Libre</button></div>
-      <p class="small sess-mode">${mode === "classe" ? "🎒 <b>En classe</b> : tes questions suivent le chapitre que tu travailles en classe, avec des révisions de ce que tu as déjà vu." : "🧭 <b>Libre</b> : tous les sujets, à ton rythme. Le parcours s'adapte à toi : il avance vite si tout va bien, reprend les bases si ça coince."}</p>
-      ${mode === "classe" ? `<div class="fmt-box2"><span class="eyebrow">Format du jour${done ? " · séance faite ✓" : ""}</span>
-        <b class="fmt-lab">${FORMATS[fmt].label}</b><span class="small muted fmt-txt">${FORMATS[fmt].text}</span><button type="button" class="btn-sec small fmt-btn" id="other">🔁 Changer de format</button></div>
+      <p class="small muted sess-sub">${mode === "classe" ? "Suit ton chapitre en classe, avec des révisions." : "Tous les sujets, à ton rythme : le parcours s'adapte à toi."}</p>
+      ${mode === "classe" ? `<div class="sess-fmt"><span class="sess-fmt-t"><b class="fmt-lab">${FORMATS[fmt].label}</b><span class="small muted fmt-txt">${FORMATS[fmt].text}${done ? " · séance faite ✓" : ""}</span></span><button type="button" class="btn-sec small" id="other">🔁 Changer</button></div>
         <div class="now-line">${nowLine}</div>` : ""}
       <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${done ? "Encore une séance" : mode === "classe" ? "Ma séance du jour" : "Mon défi du jour"}</button>
     </div>
@@ -482,7 +475,7 @@ function screenHome() {
   // Changer de format (21.11, « l'écran saute ») : on ne remplace que le titre et le texte de l'encadré, sans redessiner l'accueil.
   on("other", () => {
     const f = Engine.otherFormat(state); save();
-    const lab = app.querySelector(".fmt-lab"), txt = app.querySelector(".fmt-txt"), box = app.querySelector(".fmt-box2");
+    const lab = app.querySelector(".fmt-lab"), txt = app.querySelector(".fmt-txt"), box = app.querySelector(".sess-fmt");
     if (!lab || !box) return screenHome();
     lab.textContent = FORMATS[f].label; if (txt) txt.textContent = FORMATS[f].text;
     box.classList.remove("fmt-swap"); void box.offsetWidth; box.classList.add("fmt-swap");
