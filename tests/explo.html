@@ -26,7 +26,7 @@ try{
  state.elo.r=1420;state.gradeNo={Penseur:243};screenGrades();
  ok(!/départ en/.test(app.textContent),"plus de repères de classe");ok(/#243/.test(app.textContent),"numéro affiché");
  document.querySelector(".grade-now h2").click(); // clic sur le cadre, pas sur l'image
- const c=document.querySelector(".collector");ok(c&&/Penseur/.test(c.textContent)&&/#243/.test(c.textContent)&&/243<sup>e<\/sup> personne/.test(c.innerHTML),"carte collector "+(c&&c.textContent));
+ const c=document.querySelector(".collector");ok(c&&/Penseur/.test(c.textContent)&&/#243/.test(c.textContent)&&/243<sup>e<\/sup> utilisateur à obtenir ce grade/.test(c.innerHTML),"carte collector "+(c&&c.textContent));
  document.getElementById("colx").click();ok(!document.querySelector(".collector-bg"),"fermeture");
  // Commentaire tapé puis « Continuer » : envoyé quand même
  app.innerHTML=commentBox()+'<button id="nxt">Continuer</button>';bindComment(app,"x-1");app.querySelector(".cmt-t").value="test oubli";

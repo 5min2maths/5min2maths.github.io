@@ -569,3 +569,6 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .fmt-box2 .fmt-lab { font-family: var(--font-display); font-size: 1.1rem; }
 .now-line { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; }
 .fmt-box2 .fmt-btn { justify-self: start; margin-top: 2px; }
+.now-ask { display: grid; gap: 6px; flex-basis: 100%; padding: 10px 12px; border-radius: 12px; background: var(--warn-soft); border: 1px solid var(--warn); }
+.collector .col-exp { font-weight: 700; font-size: 1.05rem; margin-top: -4px; }
+.now-ask-btns { flex-wrap: wrap; gap: 6px; }

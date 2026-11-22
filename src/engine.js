@@ -691,9 +691,10 @@ const Engine = {
   },
 
   // « Je prépare mon test » : notions choisies, actif jusqu'au jour du test inclus.
-  // « En ce moment en classe » (13.11) : 1 à 5 notions choisies par l'élève (3 jusqu'au 20.11) ; question de relance après 3 semaines.
+  // « En ce moment en classe » (13.11) : 1 à 5 notions choisies par l'élève (3 jusqu'au 20.11) ; question de relance chaque semaine (22.11).
   nowActive(state) { return !!(state.now && state.now.ids && state.now.ids.length); },
-  nowStale(state, today = day()) { return this.nowActive(state) && addDays(state.now.since, 21) <= today; },
+  // 22.11 (demande de l'auteur) : relance chaque semaine (7 jours) au lieu de 3 semaines, pour inciter à changer de chapitre.
+  nowStale(state, today = day()) { return this.nowActive(state) && addDays(state.now.since, 7) <= today; },
   setNow(state, ids) {
     state.now = ids.length ? { ids, since: day() } : null;
     for (const id of ids) { const n = state.notions[id]; if (n && n.status !== "vu" && n.status !== "encours") { Object.assign(n, { status: "encours", m: Math.max(0.4, n.m), due: day() }); delete n.retry; } }

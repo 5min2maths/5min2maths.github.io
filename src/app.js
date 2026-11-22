@@ -295,12 +295,13 @@ function gradeNumbers(done) {
 }
 function gradeCard(name) {
   const G = GRADES.find((x) => x[2] === name); if (!G) return;
-  const n = (state.gradeNo || {})[name];
+  const au = isAuthor(), n = au ? 0 : (state.gradeNo || {})[name]; // 22.11 : l'auteur est le numéro 0
   document.querySelectorAll(".collector-bg").forEach((x) => x.remove());
   document.body.insertAdjacentHTML("beforeend", `<div class="collector-bg" role="dialog" aria-label="Carte du grade ${name}"><div class="collector pop">
     <div class="eyebrow">Grade collector</div><div class="col-ic">${G[1]}</div><h2>${name}</h2>
-    ${G[0] ? `<div class="col-no">${n ? "#" + n : "# …"}</div>` : ""}
-    <p class="small muted">${!G[0] ? "Le grade de départ : tout le monde commence ici." : n ? `Tu es la ${n === 1 ? "première personne" : n + "<sup>e</sup> personne"} à atteindre ce grade dans l'app.` : isAuthor() ? "Appareil de l'auteur : pas de numéro." : "Numéro attribué dès que l'app est en ligne."}</p>
+    ${G[0] ? `<div class="col-no">${n != null ? "#" + n : "# …"}</div>` : ""}
+    ${G[0] && au ? `<div class="col-exp">le créateur de l'app</div>` : G[0] && n ? `<div class="col-exp">${n === 1 ? "1<sup>er</sup>" : n + "<sup>e</sup>"} utilisateur à obtenir ce grade</div>` : ""}
+    <p class="small muted">${!G[0] ? "Le grade de départ : tout le monde commence ici." : au ? "Avant tous les utilisateurs : le numéro 0." : n ? `Ton numéro de collection : le rang auquel tu as atteint le grade ${name}, parmi tous les utilisateurs de l'app.` : "Le numéro (ton rang parmi les utilisateurs qui ont atteint ce grade) arrive dès que l'app est en ligne."}</p>
     ${G[0] ? `<p class="small muted">Atteint à ${G[0]} points de Mathélo.</p>` : ""}
     <button type="button" class="btn-primary" id="colx">Fermer</button></div></div>`);
   const bg = document.querySelector(".collector-bg");
@@ -320,8 +321,8 @@ function screenGrades() {
   <div class="card">${eloBlock()}</div>
   <div class="card flat stack"><h3>L'échelle des grades</h3><p class="small muted">Un grade tous les 75 points. Ton Mathélo monte quand tu réussis des questions de ton niveau ou plus difficiles. Touche un grade atteint pour voir sa carte.</p>
     <ol class="grades">${GRADES.slice().reverse().map(([at, ic, name]) => { const st = r >= at ? (gradeOf(r).name === name ? "cur" : "ok") : "todo";
-      const no = st !== "todo" && (state.gradeNo || {})[name];
-      return `<li class="${st}"><span class="g-ic">${st !== "todo" && at ? `<button type="button" class="grade-open" data-g="${name}" aria-label="Voir la carte du grade ${name}">${ic}</button>` : ic}</span><span class="g-n">${name}${st === "cur" ? " <span class=\"badge\">toi</span>" : ""}${no ? ` <small class="g-no">#${no}</small>` : ""}</span><span class="g-at">${at ? at : "–"}</span></li>`; }).join("")}</ol></div>
+      const no = st !== "todo" && at && (isAuthor() ? "0" : (state.gradeNo || {})[name]);
+      return `<li class="${st}"><span class="g-ic">${st !== "todo" && at ? `<button type="button" class="grade-open" data-g="${name}" aria-label="Voir la carte du grade ${name}">${ic}</button>` : ic}</span><span class="g-n">${name}${st === "cur" ? " <span class=\"badge\">toi</span>" : ""}${no ? ` <small class="g-no" title="${no}e utilisateur à obtenir ce grade">#${no}</small>` : ""}</span><span class="g-at">${at ? at : "–"}</span></li>`; }).join("")}</ol></div>
   <button class="btn-primary btn-big" id="back">Retour</button>`);
   document.getElementById("back").onclick = screenHome;
   gradeNumbers();
@@ -449,7 +450,7 @@ function screenHome() {
     const mode = state.homeMode === "libre" ? "libre" : "classe", nC = (state.carnet || []).length;
     const banner = [resumeCard(), prepTodayCard(), backupCard(), weekRecapCard(), streakNudge()].find((x) => x) || "";
     const nowLine = !Engine.nowActive(state) ? `<button type="button" class="btn-sec small" id="nowpick">📚 Choisir mon chapitre travaillé en classe</button>`
-      : Engine.nowStale(state) ? `<span class="small">📚 Toujours sur ${esc(state.now.ids.map(nLabel).join(" · "))} ?</span> <button type="button" class="btn-ghost small" id="nowyes">Oui</button><button type="button" class="btn-ghost small" id="nowpick">Changer</button>`
+      : Engine.nowStale(state) ? `<div class="now-ask"><b>📚 Cette semaine en classe, tu travailles toujours :</b><span>${esc(state.now.ids.map(nLabel).join(" · "))} ?</span><div class="row now-ask-btns"><button type="button" class="btn-sec small" id="nowyes">Oui, toujours</button><button type="button" class="btn-sec small" id="nowpick">J'ai changé de chapitre</button></div></div>`
       : `<span class="small">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span> <button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
     const door = (id, ic, label, sub, badge) => `<button type="button" class="door" data-door="${id}">${badge ? `<span class="door-badge">${badge}</span>` : ""}<span class="door-sq">${ic}</span><b>${label}</b><small>${sub}</small></button>`;
     const svgI = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`, TI = Object.fromEntries(HOME_TABS.map(([k, , ic]) => [k, ic]));
@@ -837,13 +838,12 @@ function bindNowCard() {
 }
 function screenNow() {
   const p = state.profile, cur = Engine.catalog(p).filter((c) => c.current && state.notions[c.id]);
-  const chosen = new Set(Engine.nowActive(state) ? state.now.ids : []), sug = Engine.nowSuggest(state);
+  const chosen = new Set(Engine.nowActive(state) ? state.now.ids : []);
   const box = (c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${c.label}</span></label>`;
   const groups = Engine.themeOrder(cur, state.profile).map((th) => [th, cur.filter((c) => c.theme === th).sort((a, b) => Engine.rank(p, a.id) - Engine.rank(p, b.id))]).filter(([, l]) => l.length);
   h(`${brand}<h2>En ce moment <span class="mark">en classe</span></h2>
-  <p class="muted">Choisis 1 à 5 notions que tu travailles en classe en ce moment. Tes séances s'y concentreront, avec le rappel de cours la première fois, et je te redemanderai dans 3 semaines.</p>
-  ${sug.length ? `<div class="card flat"><h3>Probablement en ce moment</h3><div class="checks">${sug.map((id) => box(cur.find((c) => c.id === id))).join("")}</div></div>` : ""}
-  <details class="olds"><summary>Toutes les notions de l'année</summary>${groups.map(([th, l]) => `<div class="card flat"><h3>${Engine.themeLabel(th, state.profile)}</h3><div class="checks">${l.map(box).join("")}</div></div>`).join("")}</details>
+  <p class="muted">Choisis 1 à 5 notions que tu travailles en classe en ce moment. Tes séances s'y concentreront, avec le rappel de cours la première fois.</p>
+  ${groups.map(([th, l]) => `<div class="card flat"><h3>${Engine.themeLabel(th, state.profile)}</h3><div class="checks">${l.map(box).join("")}</div></div>`).join("")}
   <p class="small muted" id="nerr"></p>
   <button class="btn-primary btn-big" id="save">C'est ça</button>
   <div class="row"><button class="btn-ghost" id="back">Annuler</button>${chosen.size ? '<button class="btn-ghost" id="none">Rien de particulier en ce moment</button>' : ""}</div>`);

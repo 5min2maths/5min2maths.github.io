@@ -253,7 +253,7 @@ log.push("Mathélo : " + st.elo.r + " — " + eloLabel(prof, st.elo.r));
   }
   if (on / tot < 0.55 || on / tot > 0.8) fail("part du chapitre : " + (on / tot).toFixed(2));
   if (!order) fail("chapitre pas du plus simple au plus difficile");
-  if (Engine.nowStale(s) || !Engine.nowStale(s, addDays(day(), 21))) fail("relance à 3 semaines");
+  if (Engine.nowStale(s) || Engine.nowStale(s, addDays(day(), 6)) || !Engine.nowStale(s, addDays(day(), 7))) fail("relance chaque semaine");
   log.push("chapitre du moment (" + later + ") : " + Math.round((100 * on) / tot) + " % des questions"); }
 
 // 4 ter. Élèves en difficulté : diagnostic, pas à pas, remédiation
