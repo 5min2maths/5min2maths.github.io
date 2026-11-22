@@ -70,12 +70,13 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
   reduire: ["rel"], distrib: ["rel"], sci: ["puiss"], scicalc: ["sci"], monomes: ["puiss"], racenc: ["rac"], valnum: ["prio", "rel"], rel: ["prio"], fracsimp: ["arith"],
   sysineq: ["ineq"], ineqfrac: ["ineq"], eqirr: ["eq2disc"], absval: ["eq1"], trinfact: ["eq2disc"], vol: ["aire2"], echelle: ["prop"] };
 // Programme du jour : le format change d'un jour à l'autre ; l'équilibre se fait sur 7 jours.
+// 22.11 : textes courts (une ligne sur téléphone : pas de saut quand on change de format).
 const FORMATS = {
-  defi: { label: "🏔 Défi du jour", slots: ["defi4"], text: "Un seul problème, à ton niveau. Prends ton temps." },
+  defi: { label: "🏔 Défi du jour", slots: ["defi4"], text: "Un seul problème, prends ton temps." },
   auto: { label: "⚡ Série d'automatismes", slots: ["drill", "drill", "drill", "drill", "drill", "drill", "drill", "drill"], text: "8 calculs rapides, enchaînés." },
-  app: { label: "🧩 Applications", slots: ["app", "app", "app"], text: "Trois questions de fond sur tes notions actuelles." },
-  mixte: { label: "⚖️ Mixte", slots: ["drill", "app", "defi"], text: "Un automatisme, une application, un défi." },
-  revision: { label: "🧠 Révision", slots: ["rev", "rev", "rev", "rev"], text: "Les notions à revoir aujourd'hui, pour ne pas les oublier." },
+  app: { label: "🧩 Applications", slots: ["app", "app", "app"], text: "Trois questions de fond." },
+  mixte: { label: "⚖️ Mixte", slots: ["drill", "app", "defi"], text: "Automatisme, application, défi." },
+  revision: { label: "🧠 Révision", slots: ["rev", "rev", "rev", "rev"], text: "Tes notions à revoir aujourd'hui." },
 };
 const WEEK = { defi: 2, auto: 2, app: 1, mixte: 1, revision: 1 };
 
