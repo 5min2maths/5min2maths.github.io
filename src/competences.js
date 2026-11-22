@@ -56,7 +56,7 @@ const COMPS = {
   pct: ["Calculer un pourcentage d'une quantité", "Calculer un prix après une baisse", "Retrouver une valeur de départ"],
   puiss: ["Multiplier des puissances de même base", "Calculer avec des exposants négatifs", "Utiliser les règles des puissances"],
   sci: ["Écrire en notation scientifique", "Calculer en notation scientifique", "Calculer en notation scientifique"],
-  rac: ["Calculer une racine carrée", "Simplifier une racine carrée", "Additionner des racines carrées"],
+  rac: ["Calculer une racine carrée ou cubique", "Simplifier une racine, encadrer", "Calculer avec des racines carrées et cubiques"],
   disque: ["Calculer le périmètre d'un cercle", "Calculer l'aire d'un disque", "Calculer un arc ou un secteur"],
   vitesse: ["Calculer une vitesse", "Calculer une durée", "Calculer une vitesse moyenne sur un trajet"],
   pyth: ["Calculer l'hypoténuse", "Calculer une cathète", "Utiliser Pythagore dans une figure"],

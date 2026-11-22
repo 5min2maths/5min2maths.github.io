@@ -123,6 +123,7 @@
   };
 
   // ===================== rac =====================
+  const CUB = (k) => (k < 0 ? "(" + k + ")" : k) + "^3"; // 22.11 : racines cubiques en 11e (MER 11e, Nombres réels › Racines, NO89–NO97)
   const RA = {
     1: [
       () => { const k = R.int(2, 20);
@@ -135,8 +136,24 @@
       () => { const s = R.int(4, 15), x = pk([["Un jardin carré a une aire de " + M(s * s) + " m². Quelle est la longueur de son côté (en m) ?", "jardin"], ["Un carrelage carré a une aire de " + M(s * s) + " cm². Combien mesure son côté (en cm) ?", "carrelage"], ["Un terrain carré a une aire de " + M(s * s * 100) + " m². Quelle est la longueur de son côté (en m) ?", "terrain"]]), v = x[1] === "terrain" ? s * 10 : s;
         return Qv(x[0], v, "Côté " + M("= \\sqrt{" + (x[1] === "terrain" ? s * s * 100 : s * s) + "} = " + v) + ".",
           { ctx: x[1], fig: FIG.areaSquare("aire " + (x[1] === "terrain" ? s * s * 100 : s * s)), guide: [GS("Côté = racine de l'aire : ?", v, M(v) + ".")], traps: [TR((x[1] === "terrain" ? s * s * 100 : s * s) / 4, "Diviser par 4 donne le côté à partir du PÉRIMÈTRE, pas de l'aire."), TR((x[1] === "terrain" ? s * s * 100 : s * s) / 2, "La racine n'est pas la moitié.")] }); },
+      () => { const k = pk([2, 3, 4, 5, 6, 7, 8, 9, 10]) * (R.rand() < 0.35 ? -1 : 1), v = k ** 3;
+        return Qv("Calcule " + M("\\sqrt[3]{" + TH(v) + "}") + ".", k, M(CUB(k) + " = " + TH(v)) + ", donc " + M("\\sqrt[3]{" + TH(v) + "} = " + k) + (k < 0 ? " : la racine cubique d'un nombre négatif est négative." : "."),
+          { ctx: k < 0 ? "racine-cubique-neg" : "racine-cubique", guide: [GS("Quel nombre, multiplié trois fois par lui-même, donne " + M(TH(v)) + " ? Essaie " + M(Math.abs(k)) + " : " + M(Math.abs(k) + "^3") + " = ?", Math.abs(k) ** 3, M(TH(Math.abs(k) ** 3)) + "."), GS("Donc la racine cubique (attention au signe) ?", k, M(k) + ".")],
+            traps: [TR(r6(v / 3), "La racine cubique n'est pas le tiers : on cherche le nombre dont le cube vaut " + TH(v) + "."), TR(-k, "Le cube garde le signe : " + M(CUB(k) + " = " + TH(v)) + ".")] }); },
+      () => { const k = pk([3, 4, 5, 6, 8, 10, 12, 15, 20]), V = k ** 3, x = pk([["Une boîte cubique a un volume de " + M(TH(V) + "\\text{ cm}^3") + ". Combien mesure son arête (en cm) ?", "boite"], ["Un dé géant a un volume de " + M(TH(V) + "\\text{ cm}^3") + ". Quelle est la longueur de son arête (en cm) ?", "de"], ["Un aquarium cubique contient " + M(TH(V / 1000)) + " L quand il est plein (" + M("1\\text{ L} = 1\\,000\\text{ cm}^3") + "). Quelle est son arête intérieure (en cm) ?", "aquarium"]]);
+        if (x[1] === "aquarium" && V % 1000) return RA[1][0]();
+        return Qv(x[0], k, "Arête " + M("= \\sqrt[3]{" + TH(V) + "} = " + k) + " cm, car " + M(k + "^3 = " + TH(V)) + ".",
+          { ctx: "arete-" + x[1], guide: [GS("Volume en cm³ ?", V, M(TH(V)) + " cm³."), GS("Arête = racine cubique du volume :", k, M(k) + " cm.")], traps: [TR(r6(V / 3), "Le volume n'est pas trois fois l'arête : on prend la racine cubique."), TR(r6(Math.sqrt(V)), "Racine cubique, pas racine carrée : le volume est un cube.")] }); },
     ],
     2: [
+      () => { const n = pk([20, 40, 70, 100, 150, 300, 500, 888, 1400, 2000, 3000]) * (R.rand() < 0.3 ? -1 : 1), lo = Math.floor(Math.cbrt(n)), lo2 = Number.isInteger(Math.cbrt(n)) ? null : lo;
+        if (lo2 === null) return RA[2][0]();
+        return Qv("Sans calculatrice, " + M("\\sqrt[3]{" + TH(n) + "}") + " est compris entre deux entiers consécutifs. Donne le plus petit.", lo, M(CUB(lo) + " = " + TH(lo ** 3) + " < " + TH(n) + " < " + TH((lo + 1) ** 3) + " = " + CUB(lo + 1)) + ", donc " + M(lo + " < \\sqrt[3]{" + TH(n) + "} < " + (lo + 1)) + ".",
+          { ctx: n < 0 ? "encadrer-cubique-neg" : "encadrer-cubique", guide: [GS("Le cube de " + M(lo + 1) + " ?", (lo + 1) ** 3, M(TH((lo + 1) ** 3)) + "."), GS("Le cube de " + M(lo) + " ?", lo ** 3, M(TH(lo ** 3)) + "."), GS("Plus petit entier ?", lo, M(lo) + ".")],
+            traps: [TR(lo + 1, "C'est le plus grand des deux entiers."), TR(Math.floor(Math.sqrt(Math.abs(n))), "Racine cubique, pas racine carrée.")] }); },
+      () => { const [c, m] = pk([[2, 3], [2, 5], [3, 2], [3, 4], [4, 2], [5, 2], [6, 5], [2, 7], [3, 5]]), n = c ** 3 * m;
+        return Qv("On écrit " + M("\\sqrt[3]{" + TH(n) + "} = a\\sqrt[3]{" + m + "}") + ". Que vaut " + M("a") + " ?", c, M("\\sqrt[3]{" + TH(n) + "} = \\sqrt[3]{" + c ** 3 + " \\cdot " + m + "} = " + c + "\\sqrt[3]{" + m + "}") + ".",
+          { ctx: "extraire-cubique", guide: [GS(M(TH(n) + " \\div " + m) + " ?", c ** 3, M(c ** 3) + ", un cube parfait."), GS("Racine cubique de " + M(c ** 3) + " ?", c, M(c) + ".")], traps: [TR(c ** 3, "On sort la racine cubique de " + c ** 3 + ", pas le nombre lui-même."), TR(n / m / 2, "C'est un cube, pas un carré : cherche le nombre dont le cube vaut " + c ** 3 + ".")] }); },
       () => { const k = R.int(2, 7), m = pk([2, 3, 5, 6, 7]);
         return Qv("Écris " + M("\\sqrt{" + k * k * m + "}") + " sous la forme " + M("a\\sqrt{b}") + " (touche √).", k * Math.sqrt(m), M("\\sqrt{" + k * k + " \\cdot " + m + "} = " + k + "\\sqrt{" + m + "}") + ".",
           { ctx: "simplifier", radical: true, canon: k + "√" + m, guide: [GS("Plus grand carré parfait qui divise " + M(k * k * m) + " ?", k * k, M(k * k * m + " = " + k * k + " \\cdot " + m) + "."), GSR("Résultat ?", k * Math.sqrt(m), M(k + "\\sqrt{" + m + "}") + ".")], traps: [TR(k * k * Math.sqrt(m), "On sort la racine du carré : √" + k * k + " = " + k + "."), TR(m * Math.sqrt(k * k), "Le facteur qui sort est la racine du carré parfait.")] }); },
@@ -157,6 +174,13 @@
       () => { const c = R.int(2, 12), x = pk([["la diagonale d'un carré de côté " + M(c) + " cm", 2, "diag-carre"], ["la diagonale d'un rectangle de " + M(c) + " cm sur " + M(c) + " cm", 2, "diag-carre"], ["la hauteur d'un triangle équilatéral de côté " + M(2 * c) + " cm", 3, "hauteur"]]), v = c * Math.sqrt(x[1]);
         return Qv("Calcule la valeur exacte de " + x[0] + " (forme " + M("a\\sqrt{b}") + ").", v, x[2] === "hauteur" ? M("h^2 = " + (2 * c) + "^2 - " + c + "^2 = " + 3 * c * c) + ", donc " + M("h = " + c + "\\sqrt{3}") + " cm." : M("d^2 = " + c + "^2 + " + c + "^2 = " + 2 * c * c) + ", donc " + M("d = " + c + "\\sqrt{2}") + " cm.",
           { ctx: x[2], radical: true, canon: c + "√" + x[1], guide: [GS("Pythagore : carré de la longueur cherchée ?", x[1] * c * c, M(x[1] * c * c) + "."), GSR("Valeur exacte ?", v, M(c + "\\sqrt{" + x[1] + "}") + ".")], traps: [TR(x[1] * c, "On prend la racine de " + x[1] * c * c + " : " + c + "√" + x[1] + "."), TR(r6(c * x[1] / 2), "Utilise Pythagore.")] }); },
+      () => { const [a, b, r] = pk([[4, 16, 4], [2, 32, 4], [9, 3, 3], [25, 5, 5], [3, 72, 6], [2, 4, 2], [4, 54, 6], [5, 200, 10]]), sw = R.rand() < 0.5;
+        return Qv("Calcule " + M("\\sqrt[3]{" + (sw ? b : a) + "} \\cdot \\sqrt[3]{" + (sw ? a : b) + "}") + ".", r, M("\\sqrt[3]{" + a + " \\cdot " + b + "} = \\sqrt[3]{" + a * b + "} = " + r) + ".",
+          { ctx: "produit-cubique", guide: [GS("Produit sous la racine " + M(a + " \\cdot " + b) + " ?", a * b, M(a * b) + "."), GS("Racine cubique ?", r, M(r) + " car " + M(r + "^3 = " + a * b) + ".")], traps: [TR(r6(Math.cbrt(a) + Math.cbrt(b)), "On multiplie les racines, on n'additionne pas."), TR(a * b, "N'oublie pas la racine cubique du produit.")] }); },
+      () => { const s2 = R.int(3, 12), c = R.int(2, 6) * (R.rand() < 0.6 ? -1 : 1), v = s2 + c;
+        if (v === 0 || v === 1) return RA[3][RA[3].length - 1]();
+        return Qv("Calcule " + M("\\sqrt{" + s2 * s2 + "} + \\sqrt[3]{" + TH(c ** 3) + "}") + ".", v, M(s2 + (c < 0 ? " - " + -c : " + " + c) + " = " + v) + ", car " + M(CUB(c) + " = " + TH(c ** 3)) + ".",
+          { ctx: "carree-cubique", guide: [GS(M("\\sqrt{" + s2 * s2 + "}") + " ?", s2, M(s2) + "."), GS(M("\\sqrt[3]{" + TH(c ** 3) + "}") + " ?", c, M(c) + "."), GS("Somme ?", v, M(v) + ".")], traps: [TR(s2 - c, "La racine cubique d'un négatif est négative : " + M("\\sqrt[3]{" + TH(c ** 3) + "} = " + c) + ".")] }); },
     ],
   };
 
@@ -284,14 +308,14 @@
   Object.assign(HINTS_EXTRA, {
     rel: "Addition : même signe → on additionne les distances ; signes contraires → on soustrait. Soustraire, c'est ajouter l'opposé. Produit : même signe → +.",
     fracops: "Signe d'abord, puis priorités : × et : avant + et −. Diviser, c'est multiplier par l'inverse. Simplifie à la fin (ou avant de multiplier).",
-    rac: "√(a · b) = √a · √b ; sors les carrés parfaits : √72 = √(36 · 2) = 6√2. Mais √(a + b) ≠ √a + √b.",
+    rac: "√(a · b) = √a · √b ; sors les carrés parfaits : √72 = √(36 · 2) = 6√2. Mais √(a + b) ≠ √a + √b. Racine cubique : ∛a est le nombre dont le cube vaut a (∛125 = 5, ∛(−8) = −2) ; on sort les cubes parfaits : ∛1080 = ∛(216 · 5) = 6∛5.",
     carres: "Carrés à connaître de 1 à 20 ; la racine carrée « défait » le carré, la racine cubique « défait » le cube. √(a · b) = √a · √b, mais √(a + b) ≠ √a + √b.",
     pctvar: "+t % : multiplier par 1 + t/100 ; −t % : par 1 − t/100. Pour revenir au départ, on divise. Variations successives : on multiplie les coefficients.",
   });
   if (typeof COMPS !== "undefined") Object.assign(COMPS, {
     rel: ["Additionner, soustraire, multiplier", "Priorités, puissances, écarts", "Expressions, moyennes, enchaînements"],
     fracops: ["Différence négative, produit, quotient", "Priorités, parenthèses", "Fractions étagées, carrés, problèmes"],
-    rac: ["Carrés parfaits, décimaux, côté d'un carré", "Simplifier, produits, quotients", "Sommes, carrés, longueurs exactes"],
+    rac: ["Carrés et cubes parfaits, côté d'un carré, arête d'un cube", "Simplifier, encadrer, produits, quotients", "Sommes, carrés, longueurs exactes, produits de racines cubiques"],
     carres: ["Racines, carrés, cubes, côté d'un carré", "Produits, décimaux, sommes de carrés, fractions", "Cubes négatifs ou décimaux, encadrer, aire d'un cube"],
     pctvar: ["Hausse, réduction, coefficient", "Taux de variation, prix avant hausse, quotidien", "Variations successives, prix avant baisse, TVA"],
   });

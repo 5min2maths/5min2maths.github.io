@@ -573,3 +573,5 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .collector .col-exp { font-weight: 700; font-size: 1.05rem; margin-top: -4px; }
 .now-ask-btns { flex-wrap: wrap; gap: 6px; }
 .fmt-box2 .fmt-txt { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.st-bar { display: inline-block; height: 8px; border-radius: 4px; background: var(--blue); min-width: 4px; }
+.st-table td:nth-child(2) { width: 50%; text-align: left; }

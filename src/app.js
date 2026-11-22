@@ -455,6 +455,7 @@ function screenHome() {
     const door = (id, ic, label, sub, badge) => `<button type="button" class="door" data-door="${id}">${badge ? `<span class="door-badge">${badge}</span>` : ""}<span class="door-sq">${ic}</span><b>${label}</b><small>${sub}</small></button>`;
     const svgI = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`, TI = Object.fromEntries(HOME_TABS.map(([k, , ic]) => [k, ic]));
     h(`<div class="hub">${head}
+    ${eloBanner()}
     ${banner}
     <div class="card stack sess-card">
       <div class="seg sess-seg" role="tablist"><button type="button" data-m="classe" aria-pressed="${mode === "classe"}">🎒 En classe</button><button type="button" data-m="libre" aria-pressed="${mode === "libre"}">🧭 Libre</button></div>
@@ -464,7 +465,6 @@ function screenHome() {
         <div class="now-line">${nowLine}</div>` : ""}
       <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${done ? "Encore une séance" : mode === "classe" ? "Ma séance du jour" : "Mon défi du jour"}</button>
     </div>
-    ${eloBanner()}
     <div class="doors">
       ${door("prob", svgI(TI.prob), "Exploration", "problème, curieux, histoire", dots.prob ? "!" : "")}
       ${door("test", svgI(TI.test), "Mon test", prep ? (left === 0 ? "aujourd'hui !" : left === 1 ? "demain" : "dans " + left + " jours") : "révision jusqu'au jour J", dots.test ? "!" : "")}
@@ -795,7 +795,7 @@ function screenStats(back) {
   const fr = (d) => d.slice(8, 10) + "." + d.slice(5, 7);
   h(`${brand}<div class="eyebrow">Appareil de l'auteur</div><h2>Statistiques d'usage</h2>
   <div class="card stack" id="st1"><p class="small muted">Chargement…</p></div>
-  <div class="card stack" id="st2" ${cle ? "" : "hidden"}></div>
+  <div class="card stack" id="st2" ${cle ? "" : "hidden"}></div><div class="card stack" id="st4" ${cle ? "" : "hidden"}></div>
   ${cle ? "" : '<div class="card flat"><p class="small">Pour voir l\'activité par jour, ouvre une fois le lien <code>…/#auteur-cle=CLÉ</code> sur cet appareil (clé de lecture de l\'Apps Script).</p></div>'}
   <button class="btn-sec" id="streload">Actualiser</button><button class="btn-primary btn-big" id="stback">Retour</button>`);
   const $ = (x) => document.getElementById(x);
@@ -816,6 +816,13 @@ function screenStats(back) {
       ${J.map((j) => `<tr><td>${fr(j.jour)}</td><td>${j.appareils}</td><td>${j.seances_terminees}/${j.seances_commencees}</td><td>${pct(j.reussite_moy)}</td><td>${mn(j.minutes_moy)}</td></tr>`).join("")}</tbody></table>
       <p class="small muted">Séances : terminées / commencées. Classes sur 7 jours : ${Object.entries(cl).sort((x, y) => y[1] - x[1]).map(([k, n]) => esc(k) + " " + n).join(", ") || "aucune"}.</p>`;
   }).catch(() => { $("st2").innerHTML = '<p class="small">Activité indisponible.</p>'; });
+  // 22.11 : grades atteints sur tous les appareils (Apps Script, …?gradescomptes=CLÉ ; feuille « grades » des numéros collector).
+  get("gradescomptes=" + encodeURIComponent(cle)).then((g) => {
+    if (!g || !Array.isArray(g.grades)) { $("st4").innerHTML = `<h3>Grades atteints</h3><p class="small">Indisponible${g && g.erreur ? " : " + esc(g.erreur) : " : redéploie l'Apps Script (tools/votes.gs)"}.</p>`; return; }
+    const L = g.grades.filter(([, n]) => n > 0), max = Math.max(1, ...L.map(([, n]) => n)), ic = Object.fromEntries(GRADES.map(([, i, name]) => [name, i]));
+    $("st4").innerHTML = `<h3>Grades atteints (appareils)</h3>${L.length ? `<table class="st-table"><tbody>${L.map(([name, n]) => `<tr><td>${ic[name] || ""} ${esc(name)}</td><td><span class="st-bar" style="width:${Math.round((n / max) * 100)}%"></span></td><td>${n}</td></tr>`).join("")}</tbody></table>` : '<p class="small muted">Aucun grade enregistré pour l\'instant.</p>'}
+      <p class="small muted">Comptés depuis la mise en place des numéros collector : un grade atteint avant est enregistré quand l'élève ouvre « Mes grades » ou passe un nouveau grade. Tes appareils ne sont pas comptés.</p>`;
+  }).catch(() => { $("st4").innerHTML = '<h3>Grades atteints</h3><p class="small">Indisponible (réseau ?).</p>'; });
   // 22.11 : les commentaires ne s'affichent plus ici (demande de l'auteur) : onglet Commentaires du tableau de suivi (tools/suivi.py).
 }
 

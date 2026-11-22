@@ -136,6 +136,14 @@ function gradeNo_(g, app) {
 
 function doGet(e) {
   if (e && e.parameter && e.parameter.grade) return out_(gradeNo_(String(e.parameter.grade), String(e.parameter.app || "")));
+  // 22.11 : nombre d'appareils qui ont atteint chaque grade (…/exec?gradescomptes=CLÉ), pour l'écran Statistiques de l'auteur.
+  if (e && e.parameter && e.parameter.gradescomptes) {
+    const cle = PropertiesService.getScriptProperties().getProperty("CLE_LECTURE");
+    if (!cle || e.parameter.gradescomptes !== cle) return out_({ erreur: "clé absente ou incorrecte" });
+    const n = {};
+    grades_().getDataRange().getValues().slice(1).forEach((r) => { if (r[1]) n[r[1]] = (n[r[1]] || 0) + 1; });
+    return out_({ grades: GRADE_NAMES.map((g) => [g, n[g] || 0]) });
+  }
   if (e && e.parameter && e.parameter.commentaires) {
     const cle = PropertiesService.getScriptProperties().getProperty("CLE_LECTURE");
     if (!cle || e.parameter.commentaires !== cle) return out_({ erreur: "clé absente ou incorrecte" });
