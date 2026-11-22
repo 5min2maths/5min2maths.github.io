@@ -554,6 +554,29 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .st-cmt { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .st-cmt li { padding: 8px 10px; border-radius: 10px; background: var(--paper); border: 1px solid var(--line); font-size: 0.9rem; }
 
+/* Accueil à cases (22.11, maquette design/maquette_accueil.html) */
+.hub { display: grid; gap: 12px; }
+.hub .elo-band { margin-bottom: 0; }
+.sess-card { border: 2px solid var(--blue); }
+.sess-seg { display: grid; grid-template-columns: 1fr 1fr; }
+.sess-info { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; text-align: left; }
+.sess-info .btn-ghost { padding: 4px 6px; }
+.sess-info .now-line { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; flex-basis: 100%; }
+.sess-go { font-size: 1.2rem; }
+.doors { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 10px; margin-top: 4px; }
+.door { all: unset; box-sizing: border-box; cursor: pointer; display: grid; justify-items: center; gap: 4px; text-align: center; position: relative; padding: 4px; border-radius: 14px; }
+.door:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+.door-sq { width: 74px; height: 74px; border-radius: 20px; background: var(--blue-soft); color: var(--blue); border: 2px solid var(--blue); display: grid; place-items: center; transition: transform 80ms ease; }
+.door:active .door-sq { transform: scale(0.95); }
+.door-sq svg { width: 38px; height: 38px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.door b { font-family: var(--font-display); font-size: 1rem; }
+.door small { color: var(--ink-soft); font-size: 0.78rem; line-height: 1.25; }
+.door-badge { position: absolute; top: -4px; left: calc(50% + 24px); background: var(--margin); color: #fff; border-radius: 999px; padding: 1px 8px; font-size: 0.8rem; font-weight: 800; }
+.back-home { display: block; margin: 0 0 4px; padding: 6px 0; text-align: left; }
+.sub-title { margin-bottom: 10px; }
+.brand-home { cursor: pointer; }
+.tour-hi { outline: 3px solid var(--fluo); outline-offset: 3px; border-radius: 14px; }
+
 </style>
 <script>
 window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "global" }, startup: { typeset: false, ready() { MathJax.startup.defaultReady(); MathJax.startup.input[0].preFilters.add(({ math }) => { if (window.divSign) math.math = window.divSign(math.math); }); } } };
@@ -19550,7 +19573,21 @@ if (state && state.profile && state.notions && Object.keys(state.notions).length
 const save = () => Store.save(state);
 // Barre d'onglets du bas (19.11 : visible partout, même pendant une activité, pour pouvoir interrompre).
 const navTabs = (cur, dots = {}) => `<nav class="tabs" aria-label="Sections"><div class="tabs-inner" role="tablist">${HOME_TABS.map(([id, label, ic]) => `<button class="tab" role="tab" data-tab="${id}" aria-selected="${id === cur}"><span class="tab-ic"><svg viewBox="0 0 24 24">${ic}</svg>${dots[id] && id !== cur ? '<i class="tab-dot"></i>' : ""}</span>${label}</button>`).join("")}</div></nav>`;
+// Accueil à cases (22.11) : plus de barre d'onglets. Hors de l'accueil, le bouton retour du téléphone et le nom de
+// l'app ramènent à l'accueil (confirmation si une activité est en cours).
+const homeBusy = () => typeof session !== "undefined" && session && session.i < session.plan.length && session.answered > 0;
+const goHome = () => { if (homeBusy() && !confirm("Interrompre l'activité en cours ?")) return false; homeTab = "today"; screenHome(); return true; };
 const addTabs = () => {
+  if (typeof state === "undefined" || !state || !state.placed) return;
+  const br = app.querySelector(".brand");
+  if (br && !app.querySelector(".hub")) { br.classList.add("brand-home"); br.title = "Accueil"; br.onclick = goHome; }
+  if (!app.querySelector(".hub") && !(history.state && history.state.m2m)) history.pushState({ m2m: 1 }, "");
+};
+window.addEventListener("popstate", () => {
+  if (typeof state === "undefined" || !state || !state.placed || app.querySelector(".hub")) return;
+  if (!goHome()) history.pushState({ m2m: 1 }, "");
+});
+const addTabsOld = () => {
   if (typeof state === "undefined" || !state || !state.placed || app.querySelector("nav.tabs")) return;
   app.insertAdjacentHTML("beforeend", navTabs(null)); app.classList.add("has-tabs");
   app.querySelectorAll("nav.tabs .tab").forEach((b) => (b.onclick = () => {
@@ -19915,23 +19952,24 @@ function weekRecapCard() {
     <button class="btn-ghost small" id="recapok">OK</button></div>`;
 }
 // Visite guidée (21.11) : au premier accueil, une bulle par onglet.
+// Visite guidée (21.11 ; 22.11 : adaptée à l'accueil à cases) : 3 bulles sur l'accueil, l'élément concerné surligné.
 const TOUR = [
-  ["today", "📅 Aujourd'hui", "Ta séance du jour : en mode scolaire (au rythme de ton cours en classe) ou en mode libre. Quelques minutes suffisent."],
-  ["prob", "🔍 Exploration", "Chaque semaine, un problème plus long. Des questions curieuses : les maths cachées dans la vie de tous les jours. Et un peu d'histoire des maths."],
-  ["test", "📝 Test", "Un test approche ? Donne sa date et ses notions : l'app te fait réviser jusqu'au jour J, avec une autoévaluation."],
-  ["prog", "📈 Progrès", "Ton Mathélo, tes compétences, tes badges et ton carnet d'erreurs."],
+  [".sess-card", "▶ Ta séance du jour", "En classe : au rythme de ton cours (choisis ton chapitre). Libre : tous les sujets, à ton rythme. Quelques minutes suffisent."],
+  [".elo-band", "📈 Ton Mathélo", "Il monte quand tu réussis des questions de ton niveau. Touche-le pour voir tes grades."],
+  [".doors", "Les 4 cases", "Exploration (problème, questions curieuses, histoire), Mon test (révision jusqu'au jour J), ton carnet d'erreurs et tes progrès."],
 ];
 let tourK = 0;
 function tourShow() {
   const old = document.getElementById("tour"); if (old) old.remove();
-  const [tab, title, text] = TOUR[tourK];
-  if (homeTab !== tab) return; // l'élève a touché un autre onglet : la bulle attend son onglet
+  if (homeTab !== "today") return;
+  const [sel, title, text] = TOUR[tourK];
   document.body.insertAdjacentHTML("beforeend", `<div id="tour" class="tour" role="dialog" aria-label="Visite guidée"><div class="tour-card"><div class="spread"><b>${title}</b><span class="small muted">${tourK + 1} / ${TOUR.length}</span></div><p class="small">${text}</p>
     <div class="row"><button class="btn-ghost small" id="tourskip">Passer</button><button class="btn-primary" id="tournext">${tourK + 1 < TOUR.length ? "Suivant" : "C'est parti !"}</button></div></div></div>`);
-  app.querySelectorAll(".tab").forEach((b) => b.classList.toggle("tour-hi", b.dataset.tab === tab));
-  const end = () => { state.tourDone = true; save(); tourK = 0; homeTab = "today"; screenHome(); };
+  app.querySelectorAll(".tour-hi").forEach((x) => x.classList.remove("tour-hi"));
+  const el = app.querySelector(sel); if (el) el.classList.add("tour-hi");
+  const end = () => { state.tourDone = true; save(); tourK = 0; app.querySelectorAll(".tour-hi").forEach((x) => x.classList.remove("tour-hi")); const t = document.getElementById("tour"); if (t) t.remove(); };
   document.getElementById("tourskip").onclick = end;
-  document.getElementById("tournext").onclick = () => { if (++tourK >= TOUR.length) return end(); homeTab = TOUR[tourK][0]; screenHome(); };
+  document.getElementById("tournext").onclick = () => { if (++tourK >= TOUR.length) return end(); tourShow(); };
 }
 function screenHome() {
   if (!state) return screenWelcome();
@@ -19959,14 +19997,43 @@ function screenHome() {
         <button class="btn-primary btn-big" id="prep">Je prépare un test</button></div>`,
     prog: () => `${newBadgesCard()}${carnetCard(true)}${themeMapCard()}${compsCard()}`,
   };
+  // 22.11 : accueil à cases (maquette design/maquette_accueil.html) ; chaque case ouvre une page « ← Accueil ».
+  panels.carnet = () => carnetCard(true) || `<div class="card flat stack"><div class="eyebrow">📕 Carnet d'erreurs</div><p class="small muted">Vide : bravo ! Chaque question ratée viendra s'y ranger, pour que tu puisses la réussir plus tard.</p></div>`;
+  panels.prog = () => `${newBadgesCard()}${themeMapCard()}${compsCard()}`;
   if (!panels[homeTab]) homeTab = "today";
-  h(`<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted">${gradeName(state.profile)}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>
-  ${eloBanner()}
-  <div class="home-panel" data-tab="${homeTab}">${panels[homeTab]()}</div>
-  ${navTabs(homeTab, dots)}`);
-  app.classList.add("has-tabs");
+  const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted">${gradeName(state.profile)}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
+  if (homeTab !== "today") {
+    const T = { prob: "Exploration", test: "Mon test", carnet: "Carnet d'erreurs", prog: "Progrès" };
+    h(`${head}<button type="button" class="btn-ghost back-home" id="hb">← Accueil</button><h2 class="sub-title">${T[homeTab]}</h2>
+    <div class="home-panel" data-tab="${homeTab}">${panels[homeTab]()}</div>`);
+    document.getElementById("hb").onclick = () => { homeTab = "today"; screenHome(); };
+  } else {
+    const mode = state.homeMode === "libre" ? "libre" : "classe", nC = (state.carnet || []).length;
+    const banner = [resumeCard(), prepTodayCard(), backupCard(), weekRecapCard(), streakNudge()].find((x) => x) || "";
+    const nowLine = !Engine.nowActive(state) ? `<button type="button" class="btn-ghost small" id="nowpick">📚 Choisir mon chapitre en classe</button>`
+      : Engine.nowStale(state) ? `<span class="small">📚 Toujours sur ${esc(state.now.ids.map(nLabel).join(" · "))} ?</span> <button type="button" class="btn-ghost small" id="nowyes">Oui</button><button type="button" class="btn-ghost small" id="nowpick">Changer</button>`
+      : `<span class="small">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span> <button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
+    const door = (id, ic, label, sub, badge) => `<button type="button" class="door" data-door="${id}">${badge ? `<span class="door-badge">${badge}</span>` : ""}<span class="door-sq">${ic}</span><b>${label}</b><small>${sub}</small></button>`;
+    const svgI = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`, TI = Object.fromEntries(HOME_TABS.map(([k, , ic]) => [k, ic]));
+    h(`<div class="hub">${head}
+    ${banner}
+    <div class="card stack sess-card">
+      <div class="seg sess-seg" role="tablist"><button type="button" data-m="classe" aria-pressed="${mode === "classe"}">🎒 En classe</button><button type="button" data-m="libre" aria-pressed="${mode === "libre"}">🧭 Libre</button></div>
+      ${mode === "classe" ? `<div class="sess-info"><span class="small muted fmt-lab">${FORMATS[fmt].label}${done ? " · séance faite, tu peux en refaire une" : ""}</span> <button type="button" class="btn-ghost small" id="other">🔁 format</button><div class="now-line">${nowLine}</div></div>`
+        : `<p class="small muted sess-info">Tous les sujets, à ton rythme : le parcours s'adapte à toi, sans programme ni note.</p>`}
+      <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${done ? "Encore une séance" : mode === "classe" ? "Ma séance du jour" : "Mon défi du jour"}</button>
+    </div>
+    ${eloBanner()}
+    <div class="doors">
+      ${door("prob", svgI(TI.prob), "Exploration", "problème, curieux, histoire", dots.prob ? "!" : "")}
+      ${door("test", svgI(TI.test), "Mon test", prep ? (left === 0 ? "aujourd'hui !" : left === 1 ? "demain" : "dans " + left + " jours") : "révision jusqu'au jour J", dots.test ? "!" : "")}
+      ${door("carnet", svgI('<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h10"/><path d="M9 8l4 4M13 8l-4 4"/>'), "Carnet d'erreurs", nC ? nC + " à effacer" : "vide, bravo", nC || "")}
+      ${door("prog", svgI(TI.prog), "Progrès", "compétences, badges", dots.prog ? "!" : "")}
+    </div></div>`);
+    app.querySelectorAll(".door").forEach((b) => (b.onclick = () => { homeTab = b.dataset.door; screenHome(); }));
+    app.querySelectorAll(".sess-seg button").forEach((b) => (b.onclick = () => { state.homeMode = b.dataset.m; save(); screenHome(); }));
+  }
   const byId = (x) => document.getElementById(x), on = (x, f) => { if (byId(x)) byId(x).onclick = f; };
-  app.querySelectorAll(".tab").forEach((b) => (b.onclick = () => { homeTab = b.dataset.tab; screenHome(); }));
   on("settings", screenSettings);
   on("eloband", screenGrades);
   on("go", startSession);
@@ -19974,10 +20041,9 @@ function screenHome() {
   // Changer de format (21.11, « l'écran saute ») : on ne remplace que le titre et le texte de l'encadré, sans redessiner l'accueil.
   on("other", () => {
     const f = Engine.otherFormat(state); save();
-    const box = app.querySelector(".fmt-box"), h3 = box && box.querySelector("h3"), p = box && box.querySelector("p");
-    if (!h3 || !p) return screenHome();
-    h3.textContent = FORMATS[f].label; p.textContent = FORMATS[f].text;
-    box.classList.remove("fmt-swap"); void box.offsetWidth; box.classList.add("fmt-swap");
+    const lab = app.querySelector(".fmt-lab");
+    if (!lab) return screenHome();
+    lab.textContent = FORMATS[f].label; lab.classList.remove("fmt-swap"); void lab.offsetWidth; lab.classList.add("fmt-swap");
   });
   if (homeTab === "today") bindNowCard();
   on("resgo", resumeSession);

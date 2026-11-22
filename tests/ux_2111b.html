@@ -8,8 +8,8 @@ try{
 state=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.autoInit(state);state.placed=true;
 for(const id in state.notions)state.notions[id].lessonSeen=true;
 // 2. visite guidée
-homeTab="today";screenHome();ok(!!document.getElementById("tour")&&/Aujourd'hui/.test(document.getElementById("tour").textContent),"2 bulle 1");
-document.getElementById("tournext").click();ok(homeTab==="prob"&&/Problème/.test(document.getElementById("tour").textContent),"2 bulle 2 sur l'onglet Problème");
+homeTab="today";screenHome();ok(!!document.getElementById("tour")&&/séance du jour/.test(document.getElementById("tour").textContent)&&app.querySelector(".sess-card.tour-hi"),"2 bulle 1 (accueil à cases, 22.11)");
+document.getElementById("tournext").click();ok(homeTab==="today"&&/Mathélo/.test(document.getElementById("tour").textContent)&&app.querySelector(".elo-band.tour-hi"),"2 bulle 2 sur le Mathélo");
 document.getElementById("tourskip").click();ok(state.tourDone&&!document.getElementById("tour")&&homeTab==="today","2 passer : fini");
 screenHome();ok(!document.getElementById("tour"),"2 plus de visite ensuite");
 // 1. reprise de séance
@@ -58,11 +58,11 @@ document.getElementById("scrclose").click();ok(document.getElementById("scr").hi
 state.elo.r=1287;homeTab="today";screenHome();document.getElementById("eloband").click();
 ok(/Mes grades/.test(app.textContent)&&app.querySelectorAll(".grades li").length===GRADES.length,"10 page grades");
 ok(app.querySelector(".grades li.cur")&&/Chercheur/.test(app.querySelector(".grades li.cur").textContent),"10 grade actuel mis en avant");
-ok(/départ en 4e/.test(app.textContent)&&gradeOf(1850).name==="Virtuose"&&gradeOf(2300).name==="Légende","10 échelle jusqu'en 4e");
+ok(!/départ en/.test(app.textContent)&&gradeOf(1850).name==="Virtuose"&&gradeOf(2300).name==="Légende","10 échelle jusqu'en 4e");
 document.getElementById("back").click();ok(!!document.getElementById("eloband"),"10 retour accueil");
 // 11. changer de format sans redessiner l'accueil
 homeTab="today";screenHome();const band0=document.getElementById("eloband"),f0=Engine.todayFormat(state);document.getElementById("other").click();
-ok(document.getElementById("eloband")===band0,"11 accueil non redessiné");ok(Engine.todayFormat(state)!==f0&&app.querySelector(".fmt-box h3").textContent===FORMATS[Engine.todayFormat(state)].label,"11 nouveau format affiché");
+ok(document.getElementById("eloband")===band0,"11 accueil non redessiné");ok(Engine.todayFormat(state)!==f0&&app.querySelector(".fmt-lab").textContent===FORMATS[Engine.todayFormat(state)].label,"11 nouveau format affiché");
 }catch(e){fails.push("EXC "+e.message+" "+e.stack)}
 document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC\n"+fails.join("\n"):"OK")+"</pre>");
 </script>
