@@ -46,7 +46,7 @@ try{
  document.getElementById("cans").value="7";document.getElementById("cok").click();ok(sig.rep1==="7","1re réponse fausse notée");
  document.getElementById("cans").value=String(Curieux.build("vmoy",5).calc.value);document.getElementById("cok").click();ok(sig.issue==="ok2"&&sig.essais===2,"issue ok2 "+sig.issue+" "+sig.essais);
  screenCurious(Curieux.build("tva",3),back);ok(!sig,"pas de signal en consultation");
- homeTab="prob";state.placed=true;screenHome();ok(document.getElementById("curgo"),"carte dans l'onglet Problème");
+ homeTab="today";state.placed=true;screenHome();const cd=app.querySelector('.door[data-door="cur"]');ok(cd,"case Curieux sur l'accueil (22.11)");if(cd){cd.click();ok(document.getElementById("cbet"),"case Curieux → question curieuse");}
  document.body.insertAdjacentHTML("beforeend","<pre id=log>"+log.join("\n")+"</pre>");
 }catch(e){fails.push("EXC "+e.message+" "+e.stack)}
 document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC\n"+fails.join("\n"):"OK")+"</pre>");

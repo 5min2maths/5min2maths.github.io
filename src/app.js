@@ -389,7 +389,7 @@ function weekRecapCard() {
 const TOUR = [
   [".sess-card", "▶ Ta séance du jour", "En classe : au rythme de ton cours (choisis ton chapitre). Libre : tous les sujets, à ton rythme. Quelques minutes suffisent."],
   [".elo-band", "📈 Ton Mathélo", "Il monte quand tu réussis des questions de ton niveau. Touche-le pour voir tes grades."],
-  [".doors", "Les 4 cases", "Exploration (problème, questions curieuses, histoire), Mon test (révision jusqu'au jour J), ton carnet d'erreurs et tes progrès."],
+  [".doors", "Les 6 cases", "Le problème de la semaine, les questions curieuses, l'histoire des maths, ton test (révision jusqu'au jour J), ton carnet d'erreurs et tes progrès."],
 ];
 let tourK = 0;
 function tourShow() {
@@ -423,7 +423,7 @@ function screenHome() {
       : `<div class="card stack"><div class="eyebrow">🔍 Problème de la semaine${wpDone ? " · fait ✓" : ""}</div><h2>${NOTIONS.find((n) => n.id === wp).label}</h2>
         <p class="muted">Un problème en plusieurs étapes, avec des indices si tu bloques. Facultatif, et il rapporte gros.</p>
         <button class="btn-primary btn-big" id="wp">${wpDone ? "Le refaire" : "Relever le défi"}</button>
-        <p class="small muted">${wpDone ? "Bravo ! Un nouveau problème arrive la semaine prochaine." : "Un nouveau problème chaque semaine."}</p></div>`) + curiousCard() + (typeof Histoire !== "undefined" ? ((P) => Histoire.card(P.k, P.classe))(Histoire.pick(state)) : ""),
+        <p class="small muted">${wpDone ? "Bravo ! Un nouveau problème arrive la semaine prochaine." : "Un nouveau problème chaque semaine."}</p></div>`),
     test: () => prep ? prepPanel(left)
       : `<div class="card stack"><div class="eyebrow">Je prépare un test</div><h2>Un test approche ?</h2>
         <p class="muted">Dis-moi sa date et les notions : chaque jour, l'app te fait réviser juste ce qu'il faut, jusqu'au jour J. Tu pourras aussi t'entraîner sur un sujet de préparation, avec son corrigé.</p>
@@ -436,7 +436,7 @@ function screenHome() {
   if (!panels[homeTab]) homeTab = "today";
   const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted">${gradeName(state.profile)}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
   if (homeTab !== "today") {
-    const T = { prob: "Exploration", test: "Mon test", carnet: "Carnet d'erreurs", prog: "Progrès" };
+    const T = { prob: "Problème de la semaine", test: "Mon test", carnet: "Carnet d'erreurs", prog: "Progrès" };
     h(`${head}<button type="button" class="btn-ghost back-home" id="hb">← Accueil</button><h2 class="sub-title">${T[homeTab]}</h2>
     <div class="home-panel" data-tab="${homeTab}">${panels[homeTab]()}</div>`);
     document.getElementById("hb").onclick = () => { homeTab = "today"; screenHome(); };
@@ -446,25 +446,34 @@ function screenHome() {
     const nowLine = !Engine.nowActive(state) ? `<button type="button" class="btn-sec small" id="nowpick">📚 Choisir mon chapitre travaillé en classe</button>`
       : Engine.nowStale(state) ? `<div class="now-ask"><b>📚 Cette semaine en classe, tu travailles toujours :</b><span>${esc(state.now.ids.map(nLabel).join(" · "))} ?</span><div class="row now-ask-btns"><button type="button" class="btn-sec small" id="nowyes">Oui, toujours</button><button type="button" class="btn-sec small" id="nowpick">J'ai changé de chapitre</button></div></div>`
       : `<span class="small now-lab">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span><button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
-    const door = (id, ic, label, sub, badge) => `<button type="button" class="door" data-door="${id}">${badge ? `<span class="door-badge">${badge}</span>` : ""}<span class="door-sq">${ic}</span><b>${label}</b><small>${sub}</small></button>`;
+    const door = (id, ic, label, sub, badge) => `<button type="button" class="door" data-door="${id}">${badge ? `<span class="door-badge">${badge}</span>` : ""}<span class="door-sq">${ic}</span><b>${label}</b>${sub ? `<small>${sub}</small>` : ""}</button>`;
     const svgI = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`, TI = Object.fromEntries(HOME_TABS.map(([k, , ic]) => [k, ic]));
     h(`<div class="hub">${head}
     ${eloBanner()}
     ${banner}
     <div class="card stack sess-card">
       <div class="seg sess-seg" role="tablist"><button type="button" data-m="classe" aria-pressed="${mode === "classe"}">🎒 En classe</button><button type="button" data-m="libre" aria-pressed="${mode === "libre"}">🧭 Libre</button></div>
-      <p class="small muted sess-sub">${mode === "classe" ? "Suit ton chapitre en classe, avec des révisions." : "Tous les sujets, à ton rythme : le parcours s'adapte à toi."}</p>
-      ${mode === "classe" ? `<div class="sess-fmt"><span class="sess-fmt-t"><b class="fmt-lab">${FORMATS[fmt].label}</b><span class="small muted fmt-txt">${FORMATS[fmt].text}${done ? " · séance faite ✓" : ""}</span></span><button type="button" class="btn-sec small" id="other">🔁 Changer</button></div>
+      <p class="small muted sess-sub">${mode === "classe" ? "Suit ton chapitre en classe, avec révisions." : "Tous les sujets, à ton rythme."}</p>
+      ${mode === "classe" ? `<div class="sess-fmt"><span class="sess-fmt-t"><b class="fmt-lab">${FORMATS[fmt].label}</b><span class="small muted fmt-txt">${FORMATS[fmt].text}${done ? " · séance faite ✓" : ""}</span></span><button type="button" class="btn-sec small" id="other" aria-label="Changer de format">🔁<span class="chg-t"> Changer</span></button></div>
         <div class="now-line">${nowLine}</div>` : ""}
       <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${done ? "Encore une séance" : mode === "classe" ? "Ma séance du jour" : "Mon défi du jour"}</button>
     </div>
     <div class="doors">
-      ${door("prob", svgI(TI.prob), "Exploration", "problème, curieux, histoire", dots.prob ? "!" : "")}
-      ${door("test", svgI(TI.test), "Mon test", prep ? (left === 0 ? "aujourd'hui !" : left === 1 ? "demain" : "dans " + left + " jours") : "révision jusqu'au jour J", dots.test ? "!" : "")}
-      ${door("carnet", svgI('<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h10"/><path d="M9 8l4 4M13 8l-4 4"/>'), "Carnet d'erreurs", nC ? nC + " à effacer" : "vide, bravo", nC || "")}
-      ${door("prog", svgI(TI.prog), "Progrès", "compétences, badges", dots.prog ? "!" : "")}
+      ${door("prob", svgI(TI.prob), "Problème", "", dots.prob ? "!" : "")}
+      ${door("cur", svgI('<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>'), "Curieux", "", "")}
+      ${door("hist", svgI('<path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a3 3 0 0 1-3-3V6"/><path d="M4 6a2 2 0 1 0 4 0V4"/><path d="M9 9h7M9 13h7M9 17h4"/>'), "Histoire", "", "")}
+      ${door("test", svgI(TI.test), "Mon test", prep ? (left === 0 ? "aujourd'hui !" : left === 1 ? "demain" : "dans " + left + " j") : "", dots.test ? "!" : "")}
+      ${door("carnet", svgI('<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h10"/><path d="M9 8l4 4M13 8l-4 4"/>'), "Carnet", nC ? nC + " à effacer" : "", nC || "")}
+      ${door("prog", svgI(TI.prog), "Progrès", "", dots.prog ? "!" : "")}
     </div></div>`);
-    app.querySelectorAll(".door").forEach((b) => (b.onclick = () => { homeTab = b.dataset.door; screenHome(); }));
+    // 22.11 : 6 cases, un sujet chacune ; Curieux et Histoire ouvrent directement leur écran.
+    const backHome = () => { homeTab = "today"; screenHome(); };
+    app.querySelectorAll(".door").forEach((b) => (b.onclick = () => {
+      const d = b.dataset.door;
+      if (d === "cur") return screenCurious(typeof Curieux !== "undefined" ? Curieux.pick(state) : null, backHome, "onglet");
+      if (d === "hist") return screenHistory(Histoire.pick(state).k, backHome);
+      homeTab = d; screenHome();
+    }));
     app.querySelectorAll(".sess-seg button").forEach((b) => (b.onclick = () => { state.homeMode = b.dataset.m; save(); screenHome(); }));
   }
   const byId = (x) => document.getElementById(x), on = (x, f) => { if (byId(x)) byId(x).onclick = f; };

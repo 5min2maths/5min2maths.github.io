@@ -19,10 +19,13 @@ try{
  screenHistory(0,()=>{window._hb=1});ok(/Recorde/.test(app.textContent),"écran histoire");document.getElementById("hans").value="4";document.getElementById("hok").click();ok(/Juste/.test(app.textContent),"réponse juste acceptée");
  screenHistory(0,()=>{});document.getElementById("hans").value="5";document.getElementById("hok").click();document.getElementById("hans").value="6";document.getElementById("hok").click();ok(/Réponse : 4/.test(app.textContent),"deux essais puis réponse");
  state=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.autoInit(state);state.tourDone=true;
- homeTab="prob";screenHome();
- ok(/Exploration/.test(app.textContent),"onglet Exploration");ok(!!document.getElementById("hist"),"carte histoire");
- const t0=document.querySelector("#hist h3").textContent;document.getElementById("histnext").click();
- ok(document.querySelector("#hist h3").textContent!==t0,"une autre histoire");
+ // 22.11 : 6 cases ; Histoire ouvre directement un récit
+ homeTab="today";screenHome();ok(app.querySelectorAll(".door").length===6,"6 cases");
+ app.querySelector('.door[data-door="hist"]').click();ok(/Histoire des maths/.test(app.textContent)&&!!document.getElementById("hans"),"case Histoire → récit");
+ const t0=app.querySelector("h2").textContent;document.getElementById("hnext").click();
+ ok(app.querySelector("h2").textContent!==t0,"une autre histoire");
+ document.getElementById("hback").click();ok(!!app.querySelector(".hub"),"retour à l'accueil");
+ app.querySelector('.door[data-door="prob"]').click();ok(/Problème de la semaine/.test(app.textContent),"case Problème");
  state.elo.r=1420;state.gradeNo={Penseur:243};screenGrades();
  ok(!/départ en/.test(app.textContent),"plus de repères de classe");ok(/#243/.test(app.textContent),"numéro affiché");
  document.querySelector(".grade-now h2").click(); // clic sur le cadre, pas sur l'image

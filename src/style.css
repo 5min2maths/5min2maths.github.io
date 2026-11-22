@@ -599,3 +599,18 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .now-line .now-ask { flex: 1; }
 .elo-compact .num { justify-self: start; width: max-content; }
 .elo-compact .eb-gic { font-size: 1.05rem !important; }
+/* 6 cases (22.11) : 3 × 2, même hauteur que 2 × 2 */
+.doors { grid-template-columns: repeat(3, 1fr); gap: 12px 6px; }
+.door-sq { width: 66px; height: 66px; border-radius: 18px; }
+.door-sq svg { width: 34px; height: 34px; }
+.door b { font-size: 0.92rem; }
+.door-badge { left: calc(50% + 20px); }
+.sess-fmt .fmt-lab { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 380px) {
+  .sess-fmt .chg-t { display: none; }
+  .home-head .row > .small.muted { display: none; }
+  .home-head .brand b { font-size: 1rem; }
+  .elo-compact { gap: 8px; padding: 8px 10px; }
+  .elo-compact .eb-num .eyebrow { display: none; }
+  .door b { font-size: 0.85rem; }
+}
