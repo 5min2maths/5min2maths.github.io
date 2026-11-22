@@ -544,6 +544,15 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .collector .col-no { font-family: var(--font-mono); font-size: 3.2rem; font-weight: 800; color: var(--blue); }
 .grade-now, .grade-up, .grades li.ok, .grades li.cur { cursor: pointer; }
 .hist-card .hist-fig, .hist-story .hist-fig { max-height: 150px; }
+/* Statistiques de l'auteur (22.11) */
+.st-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+.st-tile { display: grid; gap: 2px; padding: 10px; border-radius: 12px; background: var(--blue-soft); }
+.st-tile b { font-family: var(--font-display); font-size: 1.6rem; color: var(--blue); }
+.st-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.st-table th, .st-table td { padding: 4px 6px; white-space: nowrap; border-bottom: 1px solid var(--line); text-align: right; }
+.st-table th:first-child, .st-table td:first-child { text-align: left; }
+.st-cmt { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.st-cmt li { padding: 8px 10px; border-radius: 10px; background: var(--paper); border: 1px solid var(--line); font-size: 0.9rem; }
 
 </style>
 <script>
@@ -19953,6 +19962,7 @@ function screenSettings() {
     <span class="small muted">Vibrer à chaque réponse (téléphone)</span><div class="seg" id="vib"><button aria-pressed="${UI.vib}" data-v="1">Oui</button><button aria-pressed="${!UI.vib}" data-v="0">Non</button></div></div>
   ${installCard("")}
   <button class="btn-sec" id="backup">💾 Sauvegarder ou transférer ma progression</button><button class="btn-sec" id="level">Changer de classe ou d'école</button><button class="btn-sec" id="privacy">🔒 Ce que l'app envoie</button>
+  ${isAuthor() ? '<button class="btn-primary" id="stats">📊 Statistiques d\'usage (auteur)</button>' : ""}
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div>
   <button class="btn-primary" id="back">Retour</button></div>`);
   document.getElementById("back").onclick = screenHome;
@@ -19960,6 +19970,7 @@ function screenSettings() {
   app.querySelectorAll("#fs button").forEach((b) => (b.onclick = () => { UI.fs = +b.dataset.v; uiSave(); uiApply(); screenSettings(); }));
   app.querySelectorAll("#vib button").forEach((b) => (b.onclick = () => { UI.vib = b.dataset.v === "1"; uiSave(); if (UI.vib) buzz(true); screenSettings(); }));
   document.getElementById("privacy").onclick = () => screenPrivacy(screenSettings);
+  if (document.getElementById("stats")) document.getElementById("stats").onclick = () => screenStats(screenSettings);
   document.getElementById("backup").onclick = screenBackup;
   document.getElementById("level").onclick = () => { draft = { ...state.profile }; screenLevel(); };
   document.getElementById("r1").onclick = () => {
@@ -20147,6 +20158,15 @@ function screenRestore(code) {
   if (code) check();
 }
 function restoreFromHash() {
+  // 22.11 : …/#auteur-cle=CLÉ enregistre la clé de lecture des statistiques sur l'appareil de l'auteur (jamais dans le dépôt),
+  // et le marque comme appareil de l'auteur. Ouvre ensuite l'écran des statistiques.
+  const ck = /^#auteur-cle=([A-Za-z0-9_-]{6,80})$/.exec(location.hash);
+  if (ck) {
+    try { localStorage.setItem("m2m-auteur", "1"); localStorage.setItem("m2m-cle", ck[1]); } catch (e) {}
+    history.replaceState(null, "", location.pathname);
+    screenStats(() => (state && state.placed ? screenHome() : screenWelcome()));
+    return true;
+  }
   const au = /^#auteur(-off)?$/.exec(location.hash);
   if (au) {
     try { if (au[1]) localStorage.removeItem("m2m-auteur"); else localStorage.setItem("m2m-auteur", "1"); } catch (e) {}
@@ -20162,6 +20182,44 @@ function restoreFromHash() {
   if (!m) return false;
   screenRestore(m[1]);
   return true;
+}
+
+// ---------------- Statistiques d'usage, appareil de l'auteur (22.11) ----------------
+// Mêmes sources que le point du jour (Apps Script) : testeurs (public), activité et commentaires (clé de lecture,
+// gardée seulement sur l'appareil de l'auteur). Les appareils de l'auteur n'envoient rien : ils ne sont pas comptés.
+function screenStats(back) {
+  const cle = (() => { try { return localStorage.getItem("m2m-cle") || ""; } catch (e) { return ""; } })();
+  const get = (q) => fetch(VOTE_ENDPOINT + "?" + q).then((r) => r.json());
+  const tile = (n, l) => `<div class="st-tile"><b>${n}</b><span class="small muted">${l}</span></div>`;
+  const fr = (d) => d.slice(8, 10) + "." + d.slice(5, 7);
+  h(`${brand}<div class="eyebrow">Appareil de l'auteur</div><h2>Statistiques d'usage</h2>
+  <div class="card stack" id="st1"><p class="small muted">Chargement…</p></div>
+  <div class="card stack" id="st2" ${cle ? "" : "hidden"}></div><div class="card stack" id="st3" ${cle ? "" : "hidden"}></div>
+  ${cle ? "" : '<div class="card flat"><p class="small">Pour voir l\'activité par jour et les commentaires, ouvre une fois le lien <code>…/#auteur-cle=CLÉ</code> sur cet appareil (clé de lecture de l\'Apps Script).</p></div>'}
+  <button class="btn-sec" id="streload">Actualiser</button><button class="btn-primary btn-big" id="stback">Retour</button>`);
+  const $ = (x) => document.getElementById(x);
+  $("stback").onclick = back; $("streload").onclick = () => screenStats(back);
+  if (!VOTE_ENDPOINT) { $("st1").innerHTML = "<p>Pas de point de collecte configuré.</p>"; return; }
+  get("testeurs=1").then((t) => {
+    $("st1").innerHTML = `<h3>Testeurs</h3><div class="st-tiles">${tile(t.testeurs_total, "appareils en tout")}${tile(t.actifs_7_jours, "actifs sur 7 jours")}${tile(t.actifs_aujourdhui, "aujourd'hui")}${tile(t.seances_terminees, "séances terminées")}</div>`;
+  }).catch(() => { $("st1").innerHTML = '<p class="small">Statistiques indisponibles (réseau ?).</p>'; });
+  if (!cle) return;
+  get("activite=" + encodeURIComponent(cle)).then((a) => {
+    if (a.erreur) { $("st2").innerHTML = `<p class="small">Clé refusée : ${esc(a.erreur)}</p>`; return; }
+    const J = (a.jours || []).slice(-14).reverse(), cl = {};
+    (a.jours || []).slice(-7).forEach((j) => Object.entries(j.classes || {}).forEach(([k, n]) => (cl[k] = (cl[k] || 0) + n)));
+    const pct = (x) => (x == null ? "–" : Math.round(x * 100) + " %"), mn = (x) => (x == null ? "–" : String(Math.round(x * 10) / 10).replace(".", ",") + " min");
+    $("st2").innerHTML = `<h3>Activité (14 derniers jours)</h3>
+      <div class="st-tiles">${tile(a.retention ? a.retention["2_jours_ou_plus"] : "–", "revenus 2 jours ou plus")}${tile(a.retention ? a.retention["5_jours_ou_plus"] : "–", "revenus 5 jours ou plus")}${tile(a.trop_facile ?? "–", "« trop facile »")}</div>
+      <table class="st-table"><thead><tr><th>Jour</th><th>Appareils</th><th>Séances</th><th>Réussite</th><th>Durée</th></tr></thead><tbody>
+      ${J.map((j) => `<tr><td>${fr(j.jour)}</td><td>${j.appareils}</td><td>${j.seances_terminees}/${j.seances_commencees}</td><td>${pct(j.reussite_moy)}</td><td>${mn(j.minutes_moy)}</td></tr>`).join("")}</tbody></table>
+      <p class="small muted">Séances : terminées / commencées. Classes sur 7 jours : ${Object.entries(cl).sort((x, y) => y[1] - x[1]).map(([k, n]) => esc(k) + " " + n).join(", ") || "aucune"}.</p>`;
+  }).catch(() => { $("st2").innerHTML = '<p class="small">Activité indisponible.</p>'; });
+  get("commentaires=" + encodeURIComponent(cle)).then((c) => {
+    if (!Array.isArray(c)) { $("st3").innerHTML = '<p class="small">Commentaires indisponibles.</p>'; return; }
+    const L = c.slice(-12).reverse();
+    $("st3").innerHTML = `<h3>Derniers commentaires (${c.length} en tout)</h3><ul class="st-cmt">${L.map((x) => `<li><span class="small muted">${fr(String(x.recu).slice(0, 10))} · ${esc(String(x.classe || ""))} · ${esc(String(x.code || ""))}</span><br>${esc(String(x.commentaire || ""))}</li>`).join("")}</ul>`;
+  }).catch(() => { $("st3").innerHTML = '<p class="small">Commentaires indisponibles.</p>'; });
 }
 
 // ---------------- En ce moment en classe (13.11) ----------------
