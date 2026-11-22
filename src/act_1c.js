@@ -13,7 +13,9 @@
   // Commentaire testeur du 17.11 : « les manipulations où on ne fait que toucher des curseurs n'apportent pas grand-chose ».
   // Mode réponse (o.ask) : l'élève calcule et tape sa réponse ; la figure se met à jour seulement après « Vérifier ».
   // Le curseur reste pour les vraies manipulations (colorier, descendre l'escalier) : o.ask absent.
-  const hunt = (o) => (box, onWin) => {
+  // o et mk gardés sur la fonction : actPrep (active.js) peut ne garder que 2 questions (22.11).
+  const hunt = (o) => Object.assign(hunt0(o), { o, mk: hunt0 });
+  const hunt0 = (o) => (box, onWin) => {
     let x = o.ask ? null : o.start, step = 0;
     const draw = () => {
       const s = Math.min(step, o.wins.length - 1), fig = x === null ? (o.blank ? o.blank(s) : "") : o.show(x, s);
@@ -50,7 +52,7 @@
   Object.assign(ACTIVE, {
     pct: {
       predict: { q: "Un prix augmente de 20 %, puis baisse de 20 %. Il est finalement…", choices: ["égal au prix de départ", "plus bas", "plus haut"], good: 1, why: "× 1,2 puis × 0,8 = × 0,96 : la baisse porte sur un prix déjà augmenté. Il baisse de 4 %." },
-      defis: ["Prix de départ 100 CHF : prix après +20 % puis −20 % ?", "Un prix passe de 50 à 60 CHF : hausse en % ?", "Après une hausse de 25 %, un objet coûte 100 CHF. Prix de départ ?"],
+      defis: ["Prix de départ 100 CHF : prix après +20 % puis −20 % ?", "Un prix passe de 50 à 60 CHF : hausse en % ?", "Après une hausse de 25 %, un objet coûte 100 CHF. Prix de départ ?"],  garde: [1, 2], // la 1re reprend le « Devine »
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["100 · 1,2 · 0,8", "(60 − 50) ÷ 50", "100 ÷ 1,25"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(96, "100 · 1,2 = 120, puis 120 · 0,8 = 96 CHF."), W(20, "10 ÷ 50 = 0,2 = 20 % : on divise par le prix de DÉPART."), W(80, "On divise par le coefficient 1,25 : 80 CHF (et non 100 − 25 % = 75).")] }),
     },
@@ -74,7 +76,7 @@
     },
     modaff: {
       predict: { q: "Taxi A : 6 CHF + 2 CHF/km. Taxi B : 3 CHF/km. Pour 10 km, le moins cher est…", choices: ["A", "B", "ils coûtent pareil"], good: 0, why: "A : 6 + 20 = 26 CHF ; B : 30 CHF. Au-delà de 6 km, la part fixe de A est « remboursée »." },
-      defis: ["Prix de A pour 10 km ?", "Pour combien de km les deux taxis coûtent-ils le même prix ?", "Prix commun à cette distance ?"],
+      defis: ["Prix de A pour 10 km ?", "Pour combien de km les deux taxis coûtent-ils le même prix ?", "Prix commun à cette distance ?"], garde: [1, 2],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(s === 1 ? "A(" + nb(x) + ") = " + nb(6 + 2 * x) + " ; B(" + nb(x) + ") = " + nb(3 * x) : "tu proposes <b>" + nb(x) + "</b> CHF"),
         wins: [W(26, "6 + 2 · 10 = 26 CHF."), W(6, "6 + 2x = 3x ⇔ x = 6 km."), W(18, "6 + 12 = 18 = 3 · 6 CHF.")] }),
     },
@@ -159,7 +161,7 @@
     },
     f2trois: {
       predict: { q: "Une parabole passe par (0 ; 7). Que vaut c dans ax² + bx + c ?", choices: ["7", "0", "on ne peut pas savoir"], good: 0, why: "f(0) = c : le point d'abscisse 0 donne directement c." },
-      defis: ["Points (0 ; 1), (1 ; 4), (−1 ; 0) : c ?", "a + b = ? (f(1) − c)", "a ?"],
+      defis: ["Points (0 ; 1), (1 ; 4), (−1 ; 0) : c ?", "a + b = ? (f(1) − c)", "a ?"], garde: [0, 1, 2], // calcul enchaîné : les trois étapes
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["f(0)", "4 − 1", "(a + b) + (a − b) = 3 + (−1)"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(1, "c = f(0) = 1."), W(3, "a + b = 3 (et a − b = −1)."), W(1, "2a = 2 : a = 1, b = 2 ; f(x) = x² + 2x + 1.")] }),
     },

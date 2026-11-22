@@ -16166,12 +16166,30 @@ Object.assign(ACTIVE, {
   },
 });
 
+// Trois modes pour l'étape 2 (22.11 : « Manipule » jugé redondant quand rien ne se manipule, commentaires des 17, 21 et 22.11) :
+// - manip  : curseur, figure à déplacer, balance… → « Manipule », tous les défis ;
+// - figure : réponse tapée qui fait réagir une figure (droitesinter, airepyr…) → « Essaie sur la figure », tous les défis ;
+// - guide  : réponse tapée sans figure → « À toi », 2 questions seulement, avec un coup de pouce après une erreur.
+function actPrep(A) {
+  const P = A.play, o = P && P.o;
+  if (!o || !o.ask) return { mode: "manip", titre: "Manipule", defis: A.defis, play: P, lab: (k) => "Défi " + (k + 1), fin: "Défis réussis !" };
+  let fig = !!o.blank;
+  if (!fig) try { fig = /<svg/.test(o.show(1, 0)); } catch (e) {}
+  if (fig || A.mode === "figure") return { mode: "figure", titre: "Essaie sur la figure", defis: A.defis, play: P, lab: (k) => "Défi " + (k + 1), fin: "Défis réussis !" };
+  const n = A.defis.length;
+  // La dernière question dépend parfois de la précédente (« Et… », « Même… ») : on garde alors les deux premières.
+  // A.garde : indices imposés (calcul enchaîné, question qui reprend la précédente).
+  const sel = A.garde ? A.garde : n <= 2 ? [...Array(n).keys()] : /^(Et|Même|Puis|Ensuite|Ce |Cette|Sur ce|Dans ce|Avec ce|Avec cette|Le même|La même)/.test(A.defis[n - 1]) ? [0, 1] : [0, n - 1];
+  const play = P.mk(Object.assign({}, o, { wins: sel.map((i) => o.wins[i]), show: (x, s) => '<div class="small act-cp"><b>💡 Coup de pouce</b></div>' + o.show(x, sel[s]), blank: undefined }));
+  return { mode: "guide", titre: "À toi : " + sel.length + " question" + (sel.length > 1 ? "s" : ""), defis: sel.map((i) => A.defis[i]), play, lab: (k) => "Question " + (k + 1) + " sur " + sel.length, fin: "Bravo, c'est compris !" };
+}
+
 // Message d'aide sous une manipulation (sans valider le défi).
 function $hint(box, t) { let el = box.querySelector(".act-hint"); if (!el) { el = document.createElement("div"); el.className = "small act-hint"; box.appendChild(el); } el.textContent = t; }
 
 // Écran de leçon active. cont : suite de la séance.
 function activeLesson(id, L, cont, review) {
-  const A = ACTIVE[id], P = A.predict;
+  const A0 = ACTIVE[id], P = A0.predict, X = actPrep(A0), A = Object.assign({}, A0, { defis: X.defis, play: X.play });
   const ss = sentences(L.regle);
   const rule = ss.length > 1 ? "<ul>" + ss.map((x) => "<li>" + x + "</li>").join("") + "</ul>" : " · " + L.regle;
   const tail = lessonBody(id), fb = tail.slice(tail.indexOf('<div class="lfb"'));
@@ -16179,9 +16197,9 @@ function activeLesson(id, L, cont, review) {
   <div class="card pop lesson-card stack"><h2>${L.titre}</h2>
     <div class="act-step"><div class="act-h"><span class="act-n">1</span> Devine</div><p>${P.q}</p>${P.fig ? `<div class="figwrap">${P.fig}</div>` : ""}
       <div class="seg" id="pc">${predOrder(P.choices.length).map((i) => `<button type="button" data-i="${i}">${P.choices[i]}</button>`).join("")}</div><div id="pfb"></div></div>
-    <div class="act-step" id="s2" hidden><div class="act-h"><span class="act-n">2</span> Manipule</div>
+    <div class="act-step" id="s2" hidden><div class="act-h"><span class="act-n">2</span> ${X.titre}</div>
       <p class="act-goal" id="goal"></p><div id="play" class="stack"></div><div id="gfb"></div>
-      <button type="button" class="btn-ghost small" id="skip">Passer les défis</button></div>
+      <button type="button" class="btn-ghost small" id="skip">${X.mode === "guide" ? "Passer" : "Passer les défis"}</button></div>
     <div class="act-step" id="s3" hidden><div class="act-h"><span class="act-n">3</span> Retiens</div>
       <div class="rule"><b>À retenir</b>${rule}</div>
       <div class="ex-list">${L.exemple.map((e) => `<div>${e}</div>`).join("")}</div>
@@ -16201,13 +16219,13 @@ function activeLesson(id, L, cont, review) {
     if (!ok) b.classList.add("act-wrong");
     $("pfb").innerHTML = `<div class="fb ${ok ? "ok" : "hint"}">${ok ? "Exact !" : "Pas tout à fait."} ${P.why}</div>`; typeset($("pfb"));
     if (started) return; started = true;
-    setGoal("Défi 1 · " + A.defis[0]);
+    setGoal(X.lab(0) + " · " + A.defis[0]);
     reveal($("s2"));
     A.play($("play"), (k, msg) => {
       $("gfb").innerHTML = `<div class="fb ok">✓ ${colonBreak(msg)}</div>`;
       if (typeof sig !== "undefined" && sig && sig.ev === "lecon") sigAide(sig, "f");
-      if (k + 1 < A.defis.length) setGoal("Défi " + (k + 2) + " · " + A.defis[k + 1]);
-      else { $("goal").textContent = "Défis réussis !"; burst(); finish(); }
+      if (k + 1 < A.defis.length) setGoal(X.lab(k + 1) + " · " + A.defis[k + 1]);
+      else { $("goal").textContent = X.fin; burst(); finish(); }
     });
   }));
   $("skip").onclick = () => { if (typeof sig !== "undefined" && sig && sig.ev === "lecon") sigAide(sig, "P"); finish(); };
@@ -16750,7 +16768,9 @@ function activeLesson(id, L, cont, review) {
   };
 
   // Chercheur de solutions : un curseur sur x, l'expression calculée en direct ; chaque défi vérifie (x, vus).
-  const hunt = (o) => (box, onWin) => {
+  // o et mk gardés sur la fonction : actPrep (active.js) peut ne garder que 2 questions (22.11).
+  const hunt = (o) => Object.assign(hunt0(o), { o, mk: hunt0 });
+  const hunt0 = (o) => (box, onWin) => {
     let x = o.start, step = 0; const seen = new Set();
     const draw = () => {
       box.innerHTML = actStepper(o.label || "x", nb(x), "x") + o.show(x, step) + (o.note ? `<div class="small muted">${o.note}</div>` : "");
@@ -16922,7 +16942,9 @@ function activeLesson(id, L, cont, review) {
 
   const nb = (v) => String(+(+v).toFixed(4)).replace(".", ",").replace("-", "−");
   const svg = (w, h, g, lab) => `<svg class="fig" viewBox="0 0 ${w} ${h}" role="img" aria-label="${lab}">${g}</svg>`;
-  const hunt = (o) => (box, onWin) => {
+  // o et mk gardés sur la fonction : actPrep (active.js) peut ne garder que 2 questions (22.11).
+  const hunt = (o) => Object.assign(hunt0(o), { o, mk: hunt0 });
+  const hunt0 = (o) => (box, onWin) => {
     let x = null, step = 0;
     const draw = () => {
       const s = Math.min(step, o.wins.length - 1);
@@ -17089,7 +17111,9 @@ function activeLesson(id, L, cont, review) {
   // Commentaire testeur du 17.11 : « les manipulations où on ne fait que toucher des curseurs n'apportent pas grand-chose ».
   // Mode réponse (o.ask) : l'élève calcule et tape sa réponse ; la figure se met à jour seulement après « Vérifier ».
   // Le curseur reste pour les vraies manipulations (colorier, descendre l'escalier) : o.ask absent.
-  const hunt = (o) => (box, onWin) => {
+  // o et mk gardés sur la fonction : actPrep (active.js) peut ne garder que 2 questions (22.11).
+  const hunt = (o) => Object.assign(hunt0(o), { o, mk: hunt0 });
+  const hunt0 = (o) => (box, onWin) => {
     let x = o.ask ? null : o.start, step = 0;
     const draw = () => {
       const s = Math.min(step, o.wins.length - 1), fig = x === null ? (o.blank ? o.blank(s) : "") : o.show(x, s);
@@ -17275,7 +17299,9 @@ function activeLesson(id, L, cont, review) {
   // Commentaire testeur du 17.11 : « les manipulations où on ne fait que toucher des curseurs n'apportent pas grand-chose ».
   // Mode réponse (o.ask) : l'élève calcule et tape sa réponse ; la figure se met à jour seulement après « Vérifier ».
   // Le curseur reste pour les vraies manipulations (colorier, descendre l'escalier) : o.ask absent.
-  const hunt = (o) => (box, onWin) => {
+  // o et mk gardés sur la fonction : actPrep (active.js) peut ne garder que 2 questions (22.11).
+  const hunt = (o) => Object.assign(hunt0(o), { o, mk: hunt0 });
+  const hunt0 = (o) => (box, onWin) => {
     let x = o.ask ? null : o.start, step = 0;
     const draw = () => {
       const s = Math.min(step, o.wins.length - 1), fig = x === null ? (o.blank ? o.blank(s) : "") : o.show(x, s);
@@ -17442,7 +17468,9 @@ function activeLesson(id, L, cont, review) {
   // Commentaire testeur du 17.11 : « les manipulations où on ne fait que toucher des curseurs n'apportent pas grand-chose ».
   // Mode réponse (o.ask) : l'élève calcule et tape sa réponse ; la figure se met à jour seulement après « Vérifier ».
   // Le curseur reste pour les vraies manipulations (colorier, descendre l'escalier) : o.ask absent.
-  const hunt = (o) => (box, onWin) => {
+  // o et mk gardés sur la fonction : actPrep (active.js) peut ne garder que 2 questions (22.11).
+  const hunt = (o) => Object.assign(hunt0(o), { o, mk: hunt0 });
+  const hunt0 = (o) => (box, onWin) => {
     let x = o.ask ? null : o.start, step = 0;
     const draw = () => {
       const s = Math.min(step, o.wins.length - 1), fig = x === null ? (o.blank ? o.blank(s) : "") : o.show(x, s);
@@ -17479,7 +17507,7 @@ function activeLesson(id, L, cont, review) {
   Object.assign(ACTIVE, {
     pct: {
       predict: { q: "Un prix augmente de 20 %, puis baisse de 20 %. Il est finalement…", choices: ["égal au prix de départ", "plus bas", "plus haut"], good: 1, why: "× 1,2 puis × 0,8 = × 0,96 : la baisse porte sur un prix déjà augmenté. Il baisse de 4 %." },
-      defis: ["Prix de départ 100 CHF : prix après +20 % puis −20 % ?", "Un prix passe de 50 à 60 CHF : hausse en % ?", "Après une hausse de 25 %, un objet coûte 100 CHF. Prix de départ ?"],
+      defis: ["Prix de départ 100 CHF : prix après +20 % puis −20 % ?", "Un prix passe de 50 à 60 CHF : hausse en % ?", "Après une hausse de 25 %, un objet coûte 100 CHF. Prix de départ ?"],  garde: [1, 2], // la 1re reprend le « Devine »
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["100 · 1,2 · 0,8", "(60 − 50) ÷ 50", "100 ÷ 1,25"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(96, "100 · 1,2 = 120, puis 120 · 0,8 = 96 CHF."), W(20, "10 ÷ 50 = 0,2 = 20 % : on divise par le prix de DÉPART."), W(80, "On divise par le coefficient 1,25 : 80 CHF (et non 100 − 25 % = 75).")] }),
     },
@@ -17503,7 +17531,7 @@ function activeLesson(id, L, cont, review) {
     },
     modaff: {
       predict: { q: "Taxi A : 6 CHF + 2 CHF/km. Taxi B : 3 CHF/km. Pour 10 km, le moins cher est…", choices: ["A", "B", "ils coûtent pareil"], good: 0, why: "A : 6 + 20 = 26 CHF ; B : 30 CHF. Au-delà de 6 km, la part fixe de A est « remboursée »." },
-      defis: ["Prix de A pour 10 km ?", "Pour combien de km les deux taxis coûtent-ils le même prix ?", "Prix commun à cette distance ?"],
+      defis: ["Prix de A pour 10 km ?", "Pour combien de km les deux taxis coûtent-ils le même prix ?", "Prix commun à cette distance ?"], garde: [1, 2],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(s === 1 ? "A(" + nb(x) + ") = " + nb(6 + 2 * x) + " ; B(" + nb(x) + ") = " + nb(3 * x) : "tu proposes <b>" + nb(x) + "</b> CHF"),
         wins: [W(26, "6 + 2 · 10 = 26 CHF."), W(6, "6 + 2x = 3x ⇔ x = 6 km."), W(18, "6 + 12 = 18 = 3 · 6 CHF.")] }),
     },
@@ -17588,7 +17616,7 @@ function activeLesson(id, L, cont, review) {
     },
     f2trois: {
       predict: { q: "Une parabole passe par (0 ; 7). Que vaut c dans ax² + bx + c ?", choices: ["7", "0", "on ne peut pas savoir"], good: 0, why: "f(0) = c : le point d'abscisse 0 donne directement c." },
-      defis: ["Points (0 ; 1), (1 ; 4), (−1 ; 0) : c ?", "a + b = ? (f(1) − c)", "a ?"],
+      defis: ["Points (0 ; 1), (1 ; 4), (−1 ; 0) : c ?", "a + b = ? (f(1) − c)", "a ?"], garde: [0, 1, 2], // calcul enchaîné : les trois étapes
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["f(0)", "4 − 1", "(a + b) + (a − b) = 3 + (−1)"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(1, "c = f(0) = 1."), W(3, "a + b = 3 (et a − b = −1)."), W(1, "2a = 2 : a = 1, b = 2 ; f(x) = x² + 2x + 1.")] }),
     },
@@ -17725,7 +17753,9 @@ function activeLesson(id, L, cont, review) {
   // Commentaire testeur du 17.11 : « les manipulations où on ne fait que toucher des curseurs n'apportent pas grand-chose ».
   // Mode réponse (o.ask) : l'élève calcule et tape sa réponse ; la figure se met à jour seulement après « Vérifier ».
   // Le curseur reste pour les vraies manipulations (colorier, descendre l'escalier) : o.ask absent.
-  const hunt = (o) => (box, onWin) => {
+  // o et mk gardés sur la fonction : actPrep (active.js) peut ne garder que 2 questions (22.11).
+  const hunt = (o) => Object.assign(hunt0(o), { o, mk: hunt0 });
+  const hunt0 = (o) => (box, onWin) => {
     let x = o.ask ? null : o.start, step = 0;
     const draw = () => {
       const s = Math.min(step, o.wins.length - 1), fig = x === null ? (o.blank ? o.blank(s) : "") : o.show(x, s);
@@ -19814,11 +19844,13 @@ function startInlineAct(root) {
     if (el.dataset.on) return;
     const A = ACTIVE[el.dataset.act]; if (!A) return;
     el.dataset.on = 1;
-    const goal = el.querySelector(".act-goal"), fb = el.querySelector(".act-fb");
-    goal.textContent = "Défi 1 · " + A.defis[0];
-    A.play(el.querySelector(".act-box"), (k, msg) => {
+    const X = actPrep(A), goal = el.querySelector(".act-goal"), fb = el.querySelector(".act-fb"), h = el.querySelector(".act-h");
+    if (h) h.innerHTML = '<span class="act-n">' + (X.mode === "guide" ? "✍" : "🖐") + "</span> " + X.titre;
+    const setG = (t) => { if (t.includes("\\(")) { goal.innerHTML = t; typeset(goal); } else goal.textContent = t; };
+    setG(X.lab(0) + " · " + X.defis[0]);
+    X.play(el.querySelector(".act-box"), (k, msg) => {
       fb.innerHTML = `<div class="fb ok">✓ ${msg}</div>`;
-      goal.textContent = k + 1 < A.defis.length ? "Défi " + (k + 2) + " · " + A.defis[k + 1] : "Défis réussis !";
+      if (k + 1 < X.defis.length) setG(X.lab(k + 1) + " · " + X.defis[k + 1]); else goal.textContent = X.fin;
     });
   });
 }

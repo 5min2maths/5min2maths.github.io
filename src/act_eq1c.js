@@ -99,7 +99,9 @@
   };
 
   // Chercheur de solutions : un curseur sur x, l'expression calculée en direct ; chaque défi vérifie (x, vus).
-  const hunt = (o) => (box, onWin) => {
+  // o et mk gardés sur la fonction : actPrep (active.js) peut ne garder que 2 questions (22.11).
+  const hunt = (o) => Object.assign(hunt0(o), { o, mk: hunt0 });
+  const hunt0 = (o) => (box, onWin) => {
     let x = o.start, step = 0; const seen = new Set();
     const draw = () => {
       box.innerHTML = actStepper(o.label || "x", nb(x), "x") + o.show(x, step) + (o.note ? `<div class="small muted">${o.note}</div>` : "");

@@ -75,7 +75,9 @@
   // Commentaire testeur du 17.11 : « les manipulations où on ne fait que toucher des curseurs n'apportent pas grand-chose ».
   // Mode réponse (o.ask) : l'élève calcule et tape sa réponse ; la figure se met à jour seulement après « Vérifier ».
   // Le curseur reste pour les vraies manipulations (colorier, descendre l'escalier) : o.ask absent.
-  const hunt = (o) => (box, onWin) => {
+  // o et mk gardés sur la fonction : actPrep (active.js) peut ne garder que 2 questions (22.11).
+  const hunt = (o) => Object.assign(hunt0(o), { o, mk: hunt0 });
+  const hunt0 = (o) => (box, onWin) => {
     let x = o.ask ? null : o.start, step = 0;
     const draw = () => {
       const s = Math.min(step, o.wins.length - 1), fig = x === null ? (o.blank ? o.blank(s) : "") : o.show(x, s);

@@ -271,12 +271,30 @@ Object.assign(ACTIVE, {
   },
 });
 
+// Trois modes pour l'étape 2 (22.11 : « Manipule » jugé redondant quand rien ne se manipule, commentaires des 17, 21 et 22.11) :
+// - manip  : curseur, figure à déplacer, balance… → « Manipule », tous les défis ;
+// - figure : réponse tapée qui fait réagir une figure (droitesinter, airepyr…) → « Essaie sur la figure », tous les défis ;
+// - guide  : réponse tapée sans figure → « À toi », 2 questions seulement, avec un coup de pouce après une erreur.
+function actPrep(A) {
+  const P = A.play, o = P && P.o;
+  if (!o || !o.ask) return { mode: "manip", titre: "Manipule", defis: A.defis, play: P, lab: (k) => "Défi " + (k + 1), fin: "Défis réussis !" };
+  let fig = !!o.blank;
+  if (!fig) try { fig = /<svg/.test(o.show(1, 0)); } catch (e) {}
+  if (fig || A.mode === "figure") return { mode: "figure", titre: "Essaie sur la figure", defis: A.defis, play: P, lab: (k) => "Défi " + (k + 1), fin: "Défis réussis !" };
+  const n = A.defis.length;
+  // La dernière question dépend parfois de la précédente (« Et… », « Même… ») : on garde alors les deux premières.
+  // A.garde : indices imposés (calcul enchaîné, question qui reprend la précédente).
+  const sel = A.garde ? A.garde : n <= 2 ? [...Array(n).keys()] : /^(Et|Même|Puis|Ensuite|Ce |Cette|Sur ce|Dans ce|Avec ce|Avec cette|Le même|La même)/.test(A.defis[n - 1]) ? [0, 1] : [0, n - 1];
+  const play = P.mk(Object.assign({}, o, { wins: sel.map((i) => o.wins[i]), show: (x, s) => '<div class="small act-cp"><b>💡 Coup de pouce</b></div>' + o.show(x, sel[s]), blank: undefined }));
+  return { mode: "guide", titre: "À toi : " + sel.length + " question" + (sel.length > 1 ? "s" : ""), defis: sel.map((i) => A.defis[i]), play, lab: (k) => "Question " + (k + 1) + " sur " + sel.length, fin: "Bravo, c'est compris !" };
+}
+
 // Message d'aide sous une manipulation (sans valider le défi).
 function $hint(box, t) { let el = box.querySelector(".act-hint"); if (!el) { el = document.createElement("div"); el.className = "small act-hint"; box.appendChild(el); } el.textContent = t; }
 
 // Écran de leçon active. cont : suite de la séance.
 function activeLesson(id, L, cont, review) {
-  const A = ACTIVE[id], P = A.predict;
+  const A0 = ACTIVE[id], P = A0.predict, X = actPrep(A0), A = Object.assign({}, A0, { defis: X.defis, play: X.play });
   const ss = sentences(L.regle);
   const rule = ss.length > 1 ? "<ul>" + ss.map((x) => "<li>" + x + "</li>").join("") + "</ul>" : " · " + L.regle;
   const tail = lessonBody(id), fb = tail.slice(tail.indexOf('<div class="lfb"'));
@@ -284,9 +302,9 @@ function activeLesson(id, L, cont, review) {
   <div class="card pop lesson-card stack"><h2>${L.titre}</h2>
     <div class="act-step"><div class="act-h"><span class="act-n">1</span> Devine</div><p>${P.q}</p>${P.fig ? `<div class="figwrap">${P.fig}</div>` : ""}
       <div class="seg" id="pc">${predOrder(P.choices.length).map((i) => `<button type="button" data-i="${i}">${P.choices[i]}</button>`).join("")}</div><div id="pfb"></div></div>
-    <div class="act-step" id="s2" hidden><div class="act-h"><span class="act-n">2</span> Manipule</div>
+    <div class="act-step" id="s2" hidden><div class="act-h"><span class="act-n">2</span> ${X.titre}</div>
       <p class="act-goal" id="goal"></p><div id="play" class="stack"></div><div id="gfb"></div>
-      <button type="button" class="btn-ghost small" id="skip">Passer les défis</button></div>
+      <button type="button" class="btn-ghost small" id="skip">${X.mode === "guide" ? "Passer" : "Passer les défis"}</button></div>
     <div class="act-step" id="s3" hidden><div class="act-h"><span class="act-n">3</span> Retiens</div>
       <div class="rule"><b>À retenir</b>${rule}</div>
       <div class="ex-list">${L.exemple.map((e) => `<div>${e}</div>`).join("")}</div>
@@ -306,13 +324,13 @@ function activeLesson(id, L, cont, review) {
     if (!ok) b.classList.add("act-wrong");
     $("pfb").innerHTML = `<div class="fb ${ok ? "ok" : "hint"}">${ok ? "Exact !" : "Pas tout à fait."} ${P.why}</div>`; typeset($("pfb"));
     if (started) return; started = true;
-    setGoal("Défi 1 · " + A.defis[0]);
+    setGoal(X.lab(0) + " · " + A.defis[0]);
     reveal($("s2"));
     A.play($("play"), (k, msg) => {
       $("gfb").innerHTML = `<div class="fb ok">✓ ${colonBreak(msg)}</div>`;
       if (typeof sig !== "undefined" && sig && sig.ev === "lecon") sigAide(sig, "f");
-      if (k + 1 < A.defis.length) setGoal("Défi " + (k + 2) + " · " + A.defis[k + 1]);
-      else { $("goal").textContent = "Défis réussis !"; burst(); finish(); }
+      if (k + 1 < A.defis.length) setGoal(X.lab(k + 1) + " · " + A.defis[k + 1]);
+      else { $("goal").textContent = X.fin; burst(); finish(); }
     });
   }));
   $("skip").onclick = () => { if (typeof sig !== "undefined" && sig && sig.ev === "lecon") sigAide(sig, "P"); finish(); };

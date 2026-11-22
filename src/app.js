@@ -572,11 +572,13 @@ function startInlineAct(root) {
     if (el.dataset.on) return;
     const A = ACTIVE[el.dataset.act]; if (!A) return;
     el.dataset.on = 1;
-    const goal = el.querySelector(".act-goal"), fb = el.querySelector(".act-fb");
-    goal.textContent = "Défi 1 · " + A.defis[0];
-    A.play(el.querySelector(".act-box"), (k, msg) => {
+    const X = actPrep(A), goal = el.querySelector(".act-goal"), fb = el.querySelector(".act-fb"), h = el.querySelector(".act-h");
+    if (h) h.innerHTML = '<span class="act-n">' + (X.mode === "guide" ? "✍" : "🖐") + "</span> " + X.titre;
+    const setG = (t) => { if (t.includes("\\(")) { goal.innerHTML = t; typeset(goal); } else goal.textContent = t; };
+    setG(X.lab(0) + " · " + X.defis[0]);
+    X.play(el.querySelector(".act-box"), (k, msg) => {
       fb.innerHTML = `<div class="fb ok">✓ ${msg}</div>`;
-      goal.textContent = k + 1 < A.defis.length ? "Défi " + (k + 2) + " · " + A.defis[k + 1] : "Défis réussis !";
+      if (k + 1 < X.defis.length) setG(X.lab(k + 1) + " · " + X.defis[k + 1]); else goal.textContent = X.fin;
     });
   });
 }

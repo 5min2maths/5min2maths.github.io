@@ -36,7 +36,9 @@
 
   const nb = (v) => String(+(+v).toFixed(4)).replace(".", ",").replace("-", "−");
   const svg = (w, h, g, lab) => `<svg class="fig" viewBox="0 0 ${w} ${h}" role="img" aria-label="${lab}">${g}</svg>`;
-  const hunt = (o) => (box, onWin) => {
+  // o et mk gardés sur la fonction : actPrep (active.js) peut ne garder que 2 questions (22.11).
+  const hunt = (o) => Object.assign(hunt0(o), { o, mk: hunt0 });
+  const hunt0 = (o) => (box, onWin) => {
     let x = null, step = 0;
     const draw = () => {
       const s = Math.min(step, o.wins.length - 1);

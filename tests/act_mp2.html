@@ -8,7 +8,7 @@ const C=["-1/3","-0.5","0.5","0.8","-0.6"];for(let v=-12;v<=360;v++)C.push(Strin
 const seek=()=>{const b=gfb();for(const v of C){const el=document.querySelector(".act-in");if(!el)return gfb()!==b;el.value=v;click("[data-go]");if(gfb()!==b)return true;}return false;};
 const run=(id)=>{ try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; screenLesson(id,()=>{});
   const A=ACTIVE[id]; if(!A){log.push(id+" : ÉCHEC pas de leçon active");return;} click('#pc button[data-i="'+A.predict.good+'"]'); const msgs=[];
-  for(let k=0;k<A.defis.length;k++){ if(!seek()) msgs.push("défi "+(k+1)+" non trouvé"); else msgs.push(gfb().slice(0,50)); }
+  for(let k=0;k<(typeof actPrep!=="undefined"?actPrep(A):A).defis.length;k++){ if(!seek()) msgs.push("défi "+(k+1)+" non trouvé"); else msgs.push(gfb().slice(0,50)); }
   const html=document.body.innerHTML.replace(/<script[\s\S]*?<\/script>/g,"").replace(/<pre id="log"[\s\S]*?<\/pre>/,""); const bad=/NaN|undefined|Infinity/.test(html);
   log.push(id+" : "+(document.getElementById("s3").hidden||bad?"ÉCHEC "+(bad?"(NaN/undefined) ":""):"OK")+" · "+msgs.join(" | "));
   }catch(e){log.push(id+" ERR "+e.stack)} };
