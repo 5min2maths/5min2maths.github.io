@@ -413,7 +413,7 @@ function screenHome() {
       : `<div class="card stack"><div class="eyebrow">🔍 Problème de la semaine${wpDone ? " · fait ✓" : ""}</div><h2>${NOTIONS.find((n) => n.id === wp).label}</h2>
         <p class="muted">Un problème en plusieurs étapes, avec des indices si tu bloques. Facultatif, et il rapporte gros.</p>
         <button class="btn-primary btn-big" id="wp">${wpDone ? "Le refaire" : "Relever le défi"}</button>
-        <p class="small muted">${wpDone ? "Bravo ! Un nouveau problème arrive la semaine prochaine." : "Un nouveau problème chaque semaine."}</p></div>`) + curiousCard() + (typeof Histoire !== "undefined" ? Histoire.card(Histoire.week()) : ""),
+        <p class="small muted">${wpDone ? "Bravo ! Un nouveau problème arrive la semaine prochaine." : "Un nouveau problème chaque semaine."}</p></div>`) + curiousCard() + (typeof Histoire !== "undefined" ? ((P) => Histoire.card(P.k, P.classe))(Histoire.pick(state)) : ""),
     test: () => prep ? prepPanel(left)
       : `<div class="card stack"><div class="eyebrow">Je prépare un test</div><h2>Un test approche ?</h2>
         <p class="muted">Dis-moi sa date et les notions : chaque jour, l'app te fait réviser juste ce qu'il faut, jusqu'au jour J. Tu pourras aussi t'entraîner sur un sujet de préparation, avec son corrigé.</p>
@@ -1732,6 +1732,7 @@ function screenCurious(q, back, from = "") {
 // Le récit, son illustration, puis « À toi » : une application directe, deux essais, puis la réponse expliquée.
 function screenHistory(k, back) {
   const H = HISTOIRE[k], E = H.ex(), spec = { kind: "value", value: E.value, final: true };
+  Histoire.seen(state, k); save();
   h(`${brand}<div class="eyebrow">📜 Histoire des maths · ${H.t}</div>
   <div class="card pop stack hist-story"><h2>${H.titre}</h2><div class="figwrap">${H.fig()}</div><p>${H.txt}</p>
     <div class="act-step"><div class="act-h"><span class="act-n">✍️</span> À toi</div><div class="qtext">${E.q}</div>

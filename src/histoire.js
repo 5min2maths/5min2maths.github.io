@@ -186,15 +186,38 @@
         return { q: `Une cordelette porte ${h} nœud${h > 1 ? "s" : ""} au niveau des centaines, ${t ? t + " nœud" + (t > 1 ? "s" : "") : "aucun nœud"} au niveau des dizaines et ${u} nœud${u > 1 ? "s" : ""} au niveau des unités. Quel nombre représente-t-elle ?`, value: 100 * h + 10 * t + u, sol: `\\(${h} \\cdot 100 + ${t} \\cdot 10 + ${u} = ${100 * h + 10 * t + u}\\).` }; } },
   ];
 
+  // Notions de l'app liées à chaque récit (même ordre que HISTOIRE ; 22.11) : en mode scolaire, la carte propose d'abord
+  // un récit lié au chapitre « en ce moment en classe ».
+  const IDS = [["eq1", "probeq"], ["eq1", "eq2", "eq2disc"], ["fracadd", "fracmul"], ["rel"], ["prio", "valnum"], ["disque"],
+    ["prop", "angles", "disque"], ["thales", "simil", "echelle"], ["valnum", "reduire", "distrib"], ["pyth"], ["arith"], ["vol", "volcone"],
+    ["cart", "affine", "droites"], ["fimg", "affine"], [], ["prio"], ["puiss", "sci"], ["vitesse", "gquot"], ["arith"], ["puiss"],
+    ["valnum", "prio"], ["eq1", "fracadd", "probeq"], ["puiss", "sci", "log", "expo"], ["proba"], ["polyreg", "simil"], ["puiss"],
+    ["vitesse", "gquot"], ["disque", "fracadd"], ["fracmul", "prop"], ["pct", "diagr", "stats"], ["echelle", "sci"], ["prio", "eq3"],
+    ["puiss"], ["puiss", "sci"], ["puiss"]];
+  HISTOIRE.forEach((H, i) => (H.ids = IDS[i] || []));
+
   window.HISTOIRE = HISTOIRE;
   window.Histoire = {
     // Récit de la semaine (le même pour tout le monde la même semaine).
     week() { return Math.floor(Date.now() / (7 * 864e5)) % HISTOIRE.length; },
+    // Récit proposé : d'abord un récit lié au chapitre en classe (state.now), pas encore lu ; sinon celui de la semaine,
+    // ou le prochain non lu. Renvoie { k, classe } (classe : lien avec le chapitre en cours).
+    pick(state) {
+      const seen = new Set((state && state.histSeen) || []), now = (state && state.now && state.now.ids) || [];
+      const liés = HISTOIRE.map((H, k) => k).filter((k) => HISTOIRE[k].ids.some((id) => now.includes(id) || now.some((n) => n.startsWith(id))));
+      const neuf = liés.filter((k) => !seen.has(HISTOIRE[k].titre));
+      if (neuf.length) return { k: neuf[Math.floor(Date.now() / 864e5) % neuf.length], classe: true };
+      let k = this.week();
+      for (let i = 0; i < HISTOIRE.length && seen.has(HISTOIRE[k].titre); i++) k = (k + 1) % HISTOIRE.length;
+      return { k, classe: false };
+    },
+    // Récit lu : retenu (par son titre) pour ne pas le reproposer tant qu'il en reste d'autres.
+    seen(state, k) { if (!state) return; state.histSeen = [...new Set([...(state.histSeen || []), HISTOIRE[k].titre])]; },
     other(k) { let j; do { j = Math.floor(Math.random() * HISTOIRE.length); } while (j === k && HISTOIRE.length > 1); return j; },
     // Carte de l'onglet Exploration : illustration, titre, première phrase du récit.
-    card(k) {
+    card(k, classe) {
       const H = HISTOIRE[k], debut = H.txt.replace(/<[^>]+>/g, "").split(/(?<=[.!?])\s/)[0];
-      return `<div class="card stack hist-card" id="hist"><div class="eyebrow">📜 Histoire des maths · ${H.t}</div>${H.fig()}<h3>${H.titre}</h3>
+      return `<div class="card stack hist-card" id="hist"><div class="eyebrow">📜 Histoire des maths · ${classe ? "en lien avec ton chapitre en classe" : H.t}</div>${H.fig()}<h3>${H.titre}</h3>
         <p class="small muted">${debut}</p><div class="row"><button type="button" class="btn-primary" id="histgo" data-k="${k}">Lire et essayer</button><button type="button" class="btn-sec" id="histnext" data-k="${k}">Une autre</button></div></div>`;
     },
     bind(root, open) {

@@ -10,6 +10,11 @@ try{
   ok(/<svg/.test(H.fig())&&!/NaN|undefined/.test(H.fig()),"illustration "+H.titre);
   for(let i=0;i<40;i++){const E=H.ex();ok(Number.isFinite(E.value)&&E.value!==0&&E.value!==1,"valeur "+H.titre+" "+E.value);ok(!/NaN|undefined|Infinity/.test(E.q+E.sol),"texte "+H.titre+" "+E.q+E.sol);
    ok(checkAnswer({kind:"value",value:E.value,final:true},String(E.value)).status==="correct","réponse refusée "+H.titre+" "+E.value);}}
+ // Récit lié au chapitre en classe (22.11)
+ state=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.autoInit(state);
+ ok(HISTOIRE.every(H=>Array.isArray(H.ids)),"ids pour chaque récit");ok(HISTOIRE.filter(H=>H.ids.length).length>=30,"récits liés");
+ state.now={ids:["thales"],since:day()};let P=Histoire.pick(state);ok(P.classe&&HISTOIRE[P.k].titre.includes("Thalès"),"récit Thalès proposé "+HISTOIRE[P.k].titre);
+ Histoire.seen(state,P.k);P=Histoire.pick(state);ok(!P.classe&&!HISTOIRE[P.k].titre.includes("Thalès"),"déjà lu : pas reproposé");state.now=null;
  // Écran de lecture : juste au premier essai
  screenHistory(0,()=>{window._hb=1});ok(/Recorde/.test(app.textContent),"écran histoire");document.getElementById("hans").value="4";document.getElementById("hok").click();ok(/Juste/.test(app.textContent),"réponse juste acceptée");
  screenHistory(0,()=>{});document.getElementById("hans").value="5";document.getElementById("hok").click();document.getElementById("hans").value="6";document.getElementById("hok").click();ok(/Réponse : 4/.test(app.textContent),"deux essais puis réponse");
