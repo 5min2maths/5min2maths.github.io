@@ -537,10 +537,13 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .grade-open:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
 .grades .g-no { font-family: var(--font-mono); color: var(--blue); font-weight: 700; }
 .collector-bg { position: fixed; inset: 0; background: rgba(16, 22, 42, 0.55); display: grid; place-items: center; z-index: 30; padding: 20px; }
-.collector { background: var(--card); border: 3px solid var(--blue); border-radius: 22px; padding: 26px 24px; text-align: center; max-width: 320px; width: 100%;
+.collector { background: var(--card); border: 4px solid var(--blue); border-radius: 26px; padding: 30px 24px; text-align: center; max-width: 420px; width: 100%; min-height: min(78vh, 620px); align-content: center;
   display: grid; gap: 8px; justify-items: center; box-shadow: 0 10px 0 var(--shadow); }
-.collector .col-ic { font-size: 6rem; line-height: 1.1; }
-.collector .col-no { font-family: var(--font-mono); font-size: 2rem; font-weight: 800; color: var(--blue); }
+.collector .col-ic { font-size: min(11rem, 42vw); line-height: 1.05; }
+.collector h2 { font-size: 2.2rem; }
+.collector .col-no { font-family: var(--font-mono); font-size: 3.2rem; font-weight: 800; color: var(--blue); }
+.grade-now, .grade-up, .grades li.ok, .grades li.cur { cursor: pointer; }
+.hist-card .hist-fig, .hist-story .hist-fig { max-height: 150px; }
 
 </style>
 <script>
@@ -14916,38 +14919,142 @@ const Curieux = {
   },
 };
 
-// Histoire des maths (22.11, idée de l'auteur) : un événement, une anecdote ou un portrait par semaine, dans l'onglet
-// « Exploration », sous les questions curieuses. Faits sobres et vérifiables ; une légende est présentée comme telle.
-// t : type (Événement, Anecdote, Portrait) ; lien : notion de l'app à laquelle le récit se rattache (affichée en bas).
-const HISTOIRE = [
-  { t: "Événement", titre: "Le signe « = » a été inventé en 1557", txt: "Le Gallois Robert Recorde en avait assez d'écrire « est égal à » dans ses calculs. Dans son livre <i>The Whetstone of Witte</i> (1557), il propose deux traits parallèles de même longueur, « parce que deux choses ne peuvent être plus égales ». Son signe était beaucoup plus long que le nôtre.", lien: "Équations" },
-  { t: "Portrait", titre: "Al-Khwârizmî, le mathématicien qui a donné son nom à l'algorithme", txt: "Savant de Bagdad au IX<sup>e</sup> siècle, il écrit un traité sur la résolution des équations. Le mot « algèbre » vient du titre de ce livre (<i>al-jabr</i>), et le mot « algorithme » vient de son nom, déformé en latin.", lien: "Équations" },
-  { t: "Anecdote", titre: "Les fractions des scribes égyptiens", txt: "Il y a plus de 3500 ans, les scribes égyptiens écrivaient presque toutes leurs fractions comme des sommes de fractions de numérateur 1. Par exemple, au lieu de 3/4, ils notaient 1/2 + 1/4. Le papyrus Rhind contient des tables entières de ces décompositions.", lien: "Fractions" },
-  { t: "Événement", titre: "Le zéro devient un nombre", txt: "En 628, le mathématicien indien Brahmagupta donne des règles de calcul avec zéro et avec les nombres négatifs (qu'il appelle des « dettes ») : une dette moins zéro est une dette, zéro moins zéro est zéro… Le zéro n'est plus seulement un emplacement vide, c'est un nombre.", lien: "Nombres relatifs" },
-  { t: "Portrait", titre: "Fibonacci et les chiffres « arabes »", txt: "En 1202, Léonard de Pise, dit Fibonacci, publie le <i>Liber Abaci</i>. Il y montre aux marchands européens comment calculer avec les chiffres indo-arabes (0 à 9) au lieu des chiffres romains. Il a appris ces méthodes en Afrique du Nord, où travaillait son père.", lien: "Calcul" },
-  { t: "Anecdote", titre: "Archimède encadre π", txt: "Vers 250 av. J.-C., Archimède dessine des polygones à 96 côtés à l'intérieur et à l'extérieur d'un cercle. Il en déduit que π est compris entre 3 + 10/71 et 3 + 1/7, soit environ entre 3,1408 et 3,1429. Sans calculatrice !", lien: "Cercle et disque" },
-  { t: "Événement", titre: "Ératosthène mesure la Terre", txt: "Vers 240 av. J.-C., Ératosthène remarque qu'à midi, le jour du solstice d'été, le Soleil éclaire le fond des puits à Syène, mais pas à Alexandrie, où les ombres font un angle d'environ 7°. Avec la distance entre les deux villes et la proportionnalité, il estime le tour de la Terre avec une précision étonnante pour l'époque.", lien: "Proportionnalité et angles" },
-  { t: "Anecdote", titre: "Thalès et la hauteur de la pyramide", txt: "Selon un récit rapporté par des auteurs grecs, Thalès aurait mesuré la hauteur d'une pyramide d'Égypte grâce à son ombre : au moment où l'ombre d'un bâton est égale à sa hauteur, l'ombre de la pyramide est aussi égale à sa hauteur. C'est sans doute une légende, mais l'idée est exactement celle des triangles semblables.", lien: "Théorème de Thalès" },
-  { t: "Anecdote", titre: "Le petit Gauss et la somme de 1 à 100", txt: "Selon une anecdote célèbre, l'instituteur du jeune Carl Friedrich Gauss aurait demandé à sa classe d'additionner les nombres de 1 à 100. Gauss aurait répondu presque aussitôt 5050 : 1 + 100, 2 + 99, 3 + 98… font 50 paires de 101.", lien: "Calcul littéral" },
-  { t: "Événement", titre: "Une tablette babylonienne et les triplets de Pythagore", txt: "La tablette d'argile Plimpton 322, écrite en Mésopotamie vers 1800 av. J.-C., contient des listes de nombres liés aux triangles rectangles, plus de mille ans avant Pythagore. Les mathématiciens discutent encore de la façon exacte dont elle était utilisée.", lien: "Théorème de Pythagore" },
-  { t: "Portrait", titre: "Sophie Germain, alias « Monsieur Le Blanc »", txt: "Au début du XIX<sup>e</sup> siècle, les femmes ne pouvaient pas étudier à l'École polytechnique. Sophie Germain se procure les cours et envoie ses travaux sous le nom d'un ancien élève, « M. Le Blanc ». Elle correspond même ainsi avec Gauss, qui découvre plus tard qui elle est et la félicite.", lien: "Nombres premiers" },
-  { t: "Portrait", titre: "Maryam Mirzakhani, médaille Fields 2014", txt: "Née à Téhéran, Maryam Mirzakhani est en 2014 la première femme à recevoir la médaille Fields, la plus haute récompense pour les jeunes mathématiciens. Elle travaillait sur la géométrie des surfaces courbes, et disait aimer dessiner sur de grandes feuilles pour réfléchir.", lien: "Géométrie" },
-  { t: "Événement", titre: "Descartes met la géométrie en équations", txt: "En 1637, René Descartes publie <i>La Géométrie</i>. Il y décrit les points par des nombres et les courbes par des équations. C'est aussi lui qui popularise l'habitude de noter les inconnues x, y, z et les nombres connus a, b, c.", lien: "Fonctions" },
-  { t: "Portrait", titre: "Leonhard Euler, le Bâlois prolifique", txt: "Né à Bâle en 1707, Leonhard Euler est l'un des mathématiciens les plus productifs de l'histoire. Devenu presque aveugle, il continue à publier en dictant ses calculs. On lui doit beaucoup de notations encore utilisées, comme f(x) pour une fonction.", lien: "Fonctions" },
-];
-const Histoire = {
-  // Récit de la semaine (même pour tout le monde la même semaine), puis « un autre » au hasard.
-  week() { const w = Math.floor(Date.now() / (7 * 864e5)); return w % HISTOIRE.length; },
-  card(k) {
-    const H = HISTOIRE[k];
-    return `<div class="card stack hist-card" id="hist"><div class="eyebrow">📜 Histoire des maths · ${H.t}</div><h3>${H.titre}</h3>
-      <p>${H.txt}</p><div class="spread"><span class="small muted">Lien avec : ${H.lien}</span><button type="button" class="btn-sec small" id="histnext" data-k="${k}">Une autre histoire</button></div></div>`;
-  },
-  bind(root) {
-    const b = root.querySelector("#histnext"); if (!b) return;
-    b.onclick = () => { let k; do { k = Math.floor(Math.random() * HISTOIRE.length); } while (k === +b.dataset.k); const c = root.querySelector("#hist"); c.outerHTML = Histoire.card(k); Histoire.bind(root); };
-  },
-};
+// Histoire des maths (22.11, idées de l'auteur) : un événement, une anecdote ou un portrait par semaine, dans l'onglet
+// « Exploration », sous les questions curieuses. Chaque récit a une illustration (SVG dessiné en code, jamais de
+// portrait ni d'image importée) et une application directe « À toi » (valeurs tirées au hasard quand c'est possible,
+// réponse vérifiée par checkAnswer). Faits sobres et vérifiables ; une légende est présentée comme telle.
+// t : type ; lien : notion travaillée ; fig() : illustration ; ex() : { q, value, sol } (q et sol en HTML, formules \( \)).
+(function () {
+  const ri = (a, b) => a + Math.floor(Math.random() * (b - a + 1)), pk = (a) => a[Math.floor(Math.random() * a.length)];
+  const mil = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+  const tm = (n) => mil(n).replace(/'/g, "\\,"); // milliers dans une formule
+  const svg = (w, h, g, lab) => `<svg class="fig hist-fig" viewBox="0 0 ${w} ${h}" role="img" aria-label="${lab}">${g}</svg>`;
+  const T = (x, y, t, o = "") => `<text x="${x}" y="${y}" class="f-txt" text-anchor="middle" font-size="13" ${o}>${t}</text>`;
+  const f1 = (v) => v.toFixed(1);
+
+  const HISTOIRE = [
+    { t: "Événement", titre: "Le signe « = » a été inventé en 1557", lien: "Équations",
+      txt: "Le Gallois Robert Recorde en avait assez d'écrire « est égal à » dans ses calculs. Dans son livre <i>The Whetstone of Witte</i> (1557), il propose deux traits parallèles de même longueur, « parce que deux choses ne peuvent être plus égales ». Son signe était beaucoup plus long que le nôtre. Sa toute première équation écrite avec ce signe : 14x + 15 = 71.",
+      fig: () => svg(300, 120, `<rect x="40" y="38" width="220" height="10" rx="3" class="f-fill"/><rect x="40" y="70" width="220" height="10" rx="3" class="f-fill"/>${T(150, 108, "« is equalle to » → =", 'font-style="italic"')}${T(150, 24, "1557")}`, "le long signe égal de Recorde"),
+      ex: () => ({ q: "Résous la toute première équation écrite avec le signe « = » : \\(14x + 15 = 71\\). Que vaut \\(x\\) ?", value: 4, sol: "\\(14x = 71 - 15 = 56\\), donc \\(x = 56 \\div 14 = 4\\)." }) },
+    { t: "Portrait", titre: "Al-Khwârizmî, qui a donné son nom à l'algorithme", lien: "Équations",
+      txt: "Savant de Bagdad au IX<sup>e</sup> siècle, al-Khwârizmî écrit un traité sur la résolution des équations, sans aucune lettre : tout est en phrases et en figures. Le mot « algèbre » vient du titre de ce livre (<i>al-jabr</i>) et le mot « algorithme » de son nom, déformé en latin. Pour résoudre « un carré et dix racines valent 39 », il complète un carré avec des rectangles.",
+      fig: () => svg(300, 150, `<rect x="105" y="45" width="60" height="60" class="f-shape"/>${T(135, 80, "x²")}<rect x="105" y="20" width="60" height="25" class="f-fill2"/><rect x="105" y="105" width="60" height="25" class="f-fill2"/><rect x="80" y="45" width="25" height="60" class="f-fill2"/><rect x="165" y="45" width="25" height="60" class="f-fill2"/>${T(135, 37, "2,5x", 'font-size="11"')}${T(135, 122, "2,5x", 'font-size="11"')}${[[80, 20], [165, 20], [80, 105], [165, 105]].map(([x, y]) => `<rect x="${x}" y="${y}" width="25" height="25" class="f-soft" stroke-dasharray="3 2"/>`).join("")}${T(245, 70, "39 + 4 · 6,25", 'font-size="12"')}${T(245, 88, "= 64 = 8²", 'font-size="12"')}`, "carré complété d'al-Khwârizmî"),
+      ex: () => ({ q: "Le problème d'al-Khwârizmî : \\(x^2 + 10x = 39\\), avec \\(x\\) positif. Que vaut \\(x\\) ? (Aide : le grand carré complété a une aire de 64.)", value: 3, sol: "Le grand carré a pour côté \\(\\sqrt{64} = 8 = x + 2{,}5 + 2{,}5\\), donc \\(x = 3\\). Vérification : \\(9 + 30 = 39\\)." }) },
+    { t: "Anecdote", titre: "Les fractions des scribes égyptiens", lien: "Fractions",
+      txt: "Il y a plus de 3500 ans, les scribes égyptiens écrivaient presque toutes leurs fractions comme des sommes de fractions de numérateur 1, toutes différentes. Au lieu de 3/4, ils notaient 1/2 + 1/4. Le papyrus Rhind contient des tables entières de ces décompositions.",
+      fig: () => svg(300, 110, `<rect x="30" y="20" width="240" height="26" class="f-soft"/><rect x="30" y="20" width="180" height="26" class="f-fill2"/>${T(120, 38, "3/4")}<rect x="30" y="62" width="120" height="26" class="f-fill2"/><rect x="150" y="62" width="60" height="26" class="f-shape"/><rect x="210" y="62" width="60" height="26" class="f-soft"/>${T(90, 80, "1/2")}${T(180, 80, "1/4")}`, "trois quarts égale un demi plus un quart"),
+      ex: () => { const [a, b, n] = pk([[2, 3, 6], [5, 6, 3], [7, 12, 12], [3, 5, 10], [5, 8, 8], [7, 10, 5]]);
+        return { q: `Écris comme un scribe : \\(\\dfrac{${a}}{${b}} = \\dfrac{1}{2} + \\dfrac{1}{n}\\). Que vaut \\(n\\) ?`, value: n, sol: `\\(\\dfrac{${a}}{${b}} - \\dfrac{1}{2} = \\dfrac{1}{${n}}\\), donc \\(n = ${n}\\).` }; } },
+    { t: "Événement", titre: "Le zéro devient un nombre", lien: "Nombres relatifs",
+      txt: "En 628, le mathématicien indien Brahmagupta donne des règles de calcul avec zéro et avec les nombres négatifs, qu'il appelle des « dettes » (les positifs sont des « fortunes ») : une dette moins zéro est une dette, zéro moins une dette est une fortune… Le zéro n'est plus seulement une place vide : c'est un nombre.",
+      fig: () => svg(300, 90, `<line x1="20" y1="45" x2="280" y2="45" class="f-line"/>${[-4, -3, -2, -1, 0, 1, 2, 3, 4].map((k) => `<line x1="${150 + k * 30}" y1="39" x2="${150 + k * 30}" y2="51" class="f-line"/>${T(150 + k * 30, 70, k < 0 ? "−" + -k : k)}`).join("")}<circle cx="150" cy="45" r="7" class="f-dot"/>${T(75, 24, "dettes", 'font-size="12"')}${T(225, 24, "fortunes", 'font-size="12"')}`, "droite des nombres avec zéro au centre"),
+      ex: () => { const a = ri(3, 9), b = ri(a + 2, 15);
+        return { q: `Une dette de ${a} moins une dette de ${b} : calcule \\(-${a} - (-${b})\\).`, value: b - a, sol: `\\(-${a} - (-${b}) = -${a} + ${b} = ${b - a}\\) : enlever une dette, c'est gagner.` }; } },
+    { t: "Portrait", titre: "Fibonacci et les chiffres « arabes »", lien: "Suites et calcul",
+      txt: "En 1202, Léonard de Pise, dit Fibonacci, publie le <i>Liber Abaci</i>. Il y montre aux marchands européens comment calculer avec les chiffres indo-arabes (0 à 9) au lieu des chiffres romains. Il a appris ces méthodes en Afrique du Nord, où travaillait son père. Dans ce livre, un problème de lapins donne la célèbre suite 1, 1, 2, 3, 5, 8…",
+      fig: () => svg(300, 110, `${[1, 1, 2, 3, 5, 8].map((v, i) => `<rect x="${18 + i * 46}" y="30" width="38" height="38" rx="8" class="${i > 1 ? "f-fill2" : "f-soft"}"/>${T(37 + i * 46, 55, v, 'font-size="15"')}`).join("")}${T(150, 96, "chaque nombre = somme des deux précédents", 'font-size="12"')}`, "suite de Fibonacci"),
+      ex: () => { const n = ri(9, 13), f = [1, 1]; while (f.length < n) f.push(f.at(-1) + f.at(-2));
+        return { q: `Dans la suite 1, 1, 2, 3, 5, 8, …, chaque nombre est la somme des deux précédents. Quel est le ${n}<sup>e</sup> nombre ?`, value: f[n - 1], sol: `La suite : ${f.join(", ")}. Le ${n}<sup>e</sup> nombre est ${f[n - 1]}.` }; } },
+    { t: "Anecdote", titre: "Archimède encadre π", lien: "Cercle et disque",
+      txt: "Vers 250 av. J.-C., Archimède dessine des polygones réguliers à l'intérieur et à l'extérieur d'un cercle, jusqu'à 96 côtés. Il en déduit que π est compris entre 3 + 10/71 et 3 + 1/7, soit environ entre 3,1408 et 3,1429. Sans calculatrice ! Son point de départ : l'hexagone inscrit, dont le périmètre vaut exactement 3 diamètres.",
+      fig: () => { const p = [...Array(6)].map((_, k) => f1(150 + 55 * Math.cos((k * Math.PI) / 3)) + "," + f1(70 + 55 * Math.sin((k * Math.PI) / 3))).join(" ");
+        return svg(300, 140, `<circle cx="150" cy="70" r="55" class="f-line"/><polygon points="${p}" class="f-fill2"/><line x1="150" y1="70" x2="205" y2="70" class="f-accent" stroke-width="2"/>${T(178, 64, "r", 'class="f-accent f-txt"')}`, "hexagone inscrit dans un cercle"); },
+      ex: () => { const r = ri(3, 12);
+        return { q: `Un hexagone régulier est inscrit dans un cercle de rayon ${r} cm (ses côtés mesurent aussi ${r} cm). Quel est son périmètre, en cm ?`, value: 6 * r, sol: `\\(6 \\cdot ${r} = ${6 * r}\\) cm, soit 3 diamètres. Le cercle, un peu plus long, mesure \\(2\\pi \\cdot ${r}\\) cm : donc \\(\\pi > 3\\).` }; } },
+    { t: "Événement", titre: "Ératosthène mesure la Terre", lien: "Proportionnalité et angles",
+      txt: "Vers 240 av. J.-C., Ératosthène apprend qu'à midi, le jour du solstice d'été, le Soleil éclaire le fond des puits à Syène. Au même moment, à Alexandrie, les ombres font un angle d'environ 7,2°, soit 1/50 du tour complet. La distance entre les deux villes vaut donc 1/50 du tour de la Terre : une estimation étonnamment précise pour l'époque.",
+      fig: () => svg(300, 150, `<circle cx="150" cy="150" r="110" class="f-shape2"/><line x1="150" y1="150" x2="150" y2="40" class="f-line" stroke-dasharray="4 3"/><line x1="150" y1="150" x2="${f1(150 + 110 * Math.sin(0.35))}" y2="${f1(150 - 110 * Math.cos(0.35))}" class="f-line" stroke-dasharray="4 3"/><path d="M150 120 A30 30 0 0 1 ${f1(150 + 30 * Math.sin(0.35))} ${f1(150 - 30 * Math.cos(0.35))}" class="f-accent" stroke-width="2"/>${T(150, 32, "Syène")}${T(215, 40, "Alexandrie")}<line x1="40" y1="8" x2="40" y2="34" class="f-blue" stroke-width="2"/><line x1="60" y1="8" x2="60" y2="34" class="f-blue" stroke-width="2"/>${T(50, 48, "Soleil", 'font-size="11"')}`, "deux villes et l'angle au centre de la Terre"),
+      ex: () => { const a = pk([6, 7.2, 9, 10, 12]), d = pk([700, 750, 800, 850, 900]), k = Math.round(360 / a), C = k * d, A = String(a).replace(".", ",");
+        return { q: `Si l'angle valait ${A}° et la distance entre les deux villes ${d} km, combien mesurerait le tour de la Terre, en km ?`, value: C, sol: `\\(360 \\div ${A.replace(",", "{,}")} = ${k}\\) : la distance vaut \\(\\tfrac{1}{${k}}\\) du tour. Tour : \\(${k} \\cdot ${d} = ${tm(C)}\\) km.` }; } },
+    { t: "Anecdote", titre: "Thalès et la hauteur de la pyramide", lien: "Théorème de Thalès",
+      txt: "Selon un récit rapporté par des auteurs grecs, Thalès aurait mesuré la hauteur d'une pyramide d'Égypte grâce à son ombre, en la comparant à l'ombre d'un bâton planté verticalement. C'est sans doute une légende, mais l'idée est exactement celle des triangles semblables : les rayons du Soleil sont parallèles.",
+      fig: () => svg(300, 130, `<line x1="10" y1="110" x2="290" y2="110" class="f-line"/><polygon points="40,110 110,30 180,110" class="f-shape"/><line x1="110" y1="30" x2="218" y2="110" class="f-accent" stroke-dasharray="4 3"/><line x1="232" y1="110" x2="232" y2="80" class="f-line" stroke-width="3"/><line x1="232" y1="80" x2="277" y2="110" class="f-accent" stroke-dasharray="4 3"/><line x1="110" y1="110" x2="218" y2="110" class="f-blue" stroke-width="3"/><line x1="232" y1="110" x2="277" y2="110" class="f-blue" stroke-width="3"/>${T(165, 126, "ombre", 'font-size="11"')}${T(232, 72, "bâton", 'font-size="11"')}`, "pyramide, bâton et leurs ombres"),
+      ex: () => { const [h, s] = pk([[2, 3], [1, 2], [2, 5], [3, 4]]), S = ri(20, 40) * s, H = (S * h) / s;
+        return { q: `Un bâton de ${h} m a une ombre de ${s} m. Au même moment, l'ombre de la pyramide (mesurée depuis son centre) fait ${S} m. Quelle est la hauteur de la pyramide, en m ?`, value: H, sol: `Mêmes proportions : \\(\\dfrac{H}{${S}} = \\dfrac{${h}}{${s}}\\), donc \\(H = ${S} \\cdot ${h} \\div ${s} = ${H}\\) m.` }; } },
+    { t: "Anecdote", titre: "Le petit Gauss et la somme de 1 à 100", lien: "Calcul littéral",
+      txt: "Selon une anecdote célèbre, l'instituteur du jeune Carl Friedrich Gauss aurait demandé à sa classe d'additionner les nombres de 1 à 100. Gauss aurait répondu presque aussitôt 5050 : 1 + 100, 2 + 99, 3 + 98… font 50 paires qui valent chacune 101.",
+      fig: () => svg(300, 110, `${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((v, i) => T(25 + i * 28, 80, v, 'font-size="15"')).join("")}${[0, 1, 2, 3, 4].map((i) => `<path d="M${25 + i * 28} 64 Q 151 ${16 + i * 8} ${277 - i * 28} 64" class="f-accent" stroke-width="1.6"/>`).join("")}${T(150, 104, "5 paires de 11", 'font-size="12"')}`, "nombres de 1 à 10 reliés par paires"),
+      ex: () => { const n = pk([20, 30, 40, 50, 60, 80]), v = (n * (n + 1)) / 2;
+        return { q: `Fais comme Gauss : calcule \\(1 + 2 + 3 + \\ldots + ${n}\\).`, value: v, sol: `${n / 2} paires qui valent chacune \\(${n + 1}\\) : \\(${n / 2} \\cdot ${n + 1} = ${tm(v)}\\).` }; } },
+    { t: "Événement", titre: "Une tablette babylonienne et les triangles rectangles", lien: "Théorème de Pythagore",
+      txt: "La tablette d'argile Plimpton 322, écrite en Mésopotamie vers 1800 av. J.-C., contient des listes de nombres liés aux triangles rectangles, plus de mille ans avant Pythagore. Sa première ligne contient 119 et 169 : avec 120, ils forment un triangle rectangle. Les spécialistes discutent encore de l'usage exact de la tablette.",
+      fig: () => svg(300, 120, `<rect x="30" y="15" width="240" height="90" rx="12" class="f-shape2"/>${[0, 1, 2].map((r) => [0, 1, 2, 3, 4, 5, 6].map((c) => `<path d="M${55 + c * 30} ${35 + r * 25} l9 4 l-9 4 z" class="f-head"/>`).join("")).join("")}`, "tablette d'argile couverte de signes cunéiformes"),
+      ex: () => { const [a, b, c] = pk([[119, 120, 169], [45, 60, 75]]);
+        return { q: `Un triangle rectangle a des côtés de l'angle droit de ${a} et ${b}. Quelle est la longueur de l'hypoténuse ?`, value: c, sol: `\\(${a}^2 + ${b}^2 = ${tm(a * a)} + ${tm(b * b)} = ${tm(c * c)} = ${c}^2\\), donc l'hypoténuse mesure ${c}.` }; } },
+    { t: "Portrait", titre: "Sophie Germain, alias « Monsieur Le Blanc »", lien: "Nombres premiers",
+      txt: "Au début du XIX<sup>e</sup> siècle, les femmes ne pouvaient pas étudier à l'École polytechnique. Sophie Germain se procure les cours et envoie ses travaux sous le nom d'un ancien élève, « M. Le Blanc ». Elle correspond même ainsi avec Gauss, qui découvre plus tard qui elle est et la félicite. On appelle aujourd'hui « nombre de Sophie Germain » un nombre premier p tel que 2p + 1 est aussi premier.",
+      fig: () => svg(300, 110, `<rect x="70" y="20" width="160" height="80" rx="6" class="f-shape2"/><path d="M70 20 L150 65 L230 20" class="f-line"/>${T(150, 92, "M. Le Blanc", 'font-style="italic"')}`, "lettre signée M. Le Blanc"),
+      ex: () => { const [m, p] = pk([[20, 23], [30, 41], [50, 53]]);
+        return { q: `Quel est le plus petit nombre premier \\(p\\) plus grand que ${m} tel que \\(2p + 1\\) soit aussi premier ?`, value: p, sol: m === 20 ? "\\(23\\) : \\(2 \\cdot 23 + 1 = 47\\), premier." : m === 30 ? "\\(31\\) donne 63 et \\(37\\) donne 75 (non premiers) ; \\(41\\) donne \\(83\\), premier." : "\\(53\\) : \\(2 \\cdot 53 + 1 = 107\\), premier." }; } },
+    { t: "Portrait", titre: "Maryam Mirzakhani, médaille Fields 2014", lien: "Géométrie dans l'espace",
+      txt: "Née à Téhéran, Maryam Mirzakhani est en 2014 la première femme à recevoir la médaille Fields, la plus haute récompense pour les jeunes mathématiciens. Elle étudiait la géométrie des surfaces courbes (sphères, bouées à un ou plusieurs trous…) et aimait réfléchir en dessinant sur de grandes feuilles.",
+      fig: () => svg(300, 120, `<ellipse cx="150" cy="60" rx="110" ry="42" class="f-shape"/><path d="M105 58 Q150 80 195 58" class="f-line"/><path d="M115 64 Q150 46 185 64" class="f-line"/>`, "surface en forme de bouée"),
+      ex: () => { const n = ri(5, 9);
+        return { q: `Un prisme a pour base un polygone à ${n} côtés. Combien a-t-il d'arêtes ?`, value: 3 * n, sol: `${n} arêtes en bas, ${n} en haut et ${n} verticales : \\(3 \\cdot ${n} = ${3 * n}\\).` }; } },
+    { t: "Événement", titre: "Descartes met la géométrie en équations", lien: "Repère et fonctions",
+      txt: "En 1637, René Descartes publie <i>La Géométrie</i>. Il y décrit les points par des nombres et les courbes par des équations. C'est aussi lui qui popularise l'habitude de noter les inconnues x, y, z et les nombres connus a, b, c.",
+      fig: () => svg(300, 140, `<line x1="30" y1="120" x2="280" y2="120" class="f-line"/><line x1="50" y1="135" x2="50" y2="10" class="f-line"/><line x1="50" y1="60" x2="170" y2="60" class="f-grid" stroke-dasharray="3 3"/><line x1="170" y1="60" x2="170" y2="120" class="f-grid" stroke-dasharray="3 3"/><circle cx="170" cy="60" r="5" class="f-dot"/>${T(200, 52, "P(x ; y)")}${T(275, 135, "x")}${T(40, 18, "y")}`, "repère avec un point"),
+      ex: () => { const [a, b, c] = pk([[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 6, 10]]), x = ri(-3, 3), y = ri(-3, 3);
+        return { q: `Dans un repère, A(${x} ; ${y}) et B(${x + a} ; ${y + b}). Quelle est la distance AB ?`, value: c, sol: `Écarts : \\(${a}\\) et \\(${b}\\). \\(AB = \\sqrt{${a}^2 + ${b}^2} = \\sqrt{${c * c}} = ${c}\\).` }; } },
+    { t: "Portrait", titre: "Leonhard Euler, le Bâlois prolifique", lien: "Fonctions",
+      txt: "Né à Bâle en 1707, Leonhard Euler est l'un des mathématiciens les plus productifs de l'histoire. Devenu presque aveugle, il continue à publier en dictant ses calculs. On lui doit beaucoup de notations encore utilisées, comme f(x) pour une fonction.",
+      fig: () => svg(300, 110, `<rect x="40" y="35" width="70" height="40" rx="8" class="f-soft"/>${T(75, 60, "x")}<line x1="110" y1="55" x2="140" y2="55" class="f-line"/><path d="M140 49 l10 6 l-10 6 z" class="f-head"/><rect x="150" y="30" width="50" height="50" rx="10" class="f-fill"/><text x="175" y="61" class="f-on" text-anchor="middle" font-size="16">f</text><line x1="200" y1="55" x2="222" y2="55" class="f-line"/><path d="M222 49 l10 6 l-10 6 z" class="f-head"/>${T(262, 60, "f(x)")}`, "machine fonction"),
+      ex: () => { const a = ri(2, 5), k = ri(2, 6), b = ri(1, Math.min(9, a * k * k - 2)); // résultat ≥ 2 (pas de 0 ni de 1)
+        return { q: `Avec la notation d'Euler : \\(f(x) = ${a}x^2 - ${b}\\). Calcule \\(f(${k})\\).`, value: a * k * k - b, sol: `\\(f(${k}) = ${a} \\cdot ${k}^2 - ${b} = ${a * k * k} - ${b} = ${a * k * k - b}\\).` }; } },
+    { t: "Événement", titre: "Les sept ponts de Königsberg", lien: "Raisonnement",
+      txt: "En 1736, Euler résout une énigme de la ville de Königsberg : peut-on se promener en traversant chacun des sept ponts une seule fois ? Il remplace la carte par des points (les quartiers) et des traits (les ponts), et montre que c'est impossible : trop de quartiers sont reliés par un nombre impair de ponts. C'est la naissance de la théorie des graphes.",
+      fig: () => svg(300, 140, `<path d="M20 52 Q150 40 280 52 L280 88 Q150 100 20 88 Z" class="f-soft"/><path d="M110 70 Q88 44 110 18 M110 70 Q132 44 110 18 M110 70 Q88 96 110 122 M110 70 Q132 96 110 122 M110 70 L230 70 M110 18 L230 70 M110 122 L230 70" class="f-blue" stroke-width="2"/><circle cx="110" cy="70" r="7" class="f-dot"/><circle cx="110" cy="18" r="7" class="f-dot"/><circle cx="110" cy="122" r="7" class="f-dot"/><circle cx="230" cy="70" r="7" class="f-dot"/>`, "graphe des sept ponts de Königsberg"),
+      ex: () => ({ q: "Sur le graphe, compte les ponts (traits bleus) de chaque quartier (points rouges) : le quartier du milieu en a 5. Combien de quartiers ont un nombre <b>impair</b> de ponts ?", value: 4, sol: "Les 4 quartiers ont 5, 3, 3 et 3 ponts. Euler a montré qu'une telle promenade demande au plus 2 quartiers impairs : ici, c'est impossible." }) },
+    { t: "Anecdote", titre: "La Pascaline, une calculatrice de 1642", lien: "Calcul",
+      txt: "À 19 ans, Blaise Pascal invente une machine à calculer pour aider son père, chargé de collecter les impôts en Normandie, qui passait ses nuits à additionner. Des roues dentées font les additions, et un mécanisme ingénieux reporte automatiquement les retenues d'une roue à la suivante.",
+      fig: () => svg(300, 110, `<rect x="30" y="20" width="240" height="70" rx="10" class="f-shape2"/>${[0, 1, 2, 3, 4].map((i) => `<circle cx="${70 + i * 40}" cy="55" r="16" class="f-shape"/><circle cx="${70 + i * 40}" cy="55" r="3" class="f-head"/>`).join("")}`, "machine à roues de Pascal"),
+      ex: () => { const a = ri(1200, 6999), b = ri(1200, 2999);
+        return { q: `Comme la Pascaline, additionne avec les retenues : \\(${tm(a)} + ${tm(b)}\\).`, value: a + b, sol: `\\(${tm(a)} + ${tm(b)} = ${tm(a + b)}\\).` }; } },
+    { t: "Anecdote", titre: "Les Mayas comptaient en base 20", lien: "Numération",
+      txt: "Les Mayas d'Amérique centrale écrivaient les nombres avec des points (1) et des barres (5), et un coquillage pour zéro : l'une des plus anciennes notations du zéro. Ils comptaient par vingtaines : un chiffre placé un étage plus haut vaut 20 fois plus.",
+      fig: () => svg(300, 130, `<rect x="100" y="12" width="100" height="50" rx="6" class="f-soft"/><circle cx="135" cy="37" r="6" class="f-head"/><circle cx="165" cy="37" r="6" class="f-head"/>${T(240, 42, "× 20", 'font-size="12"')}<rect x="100" y="70" width="100" height="50" rx="6" class="f-soft"/><circle cx="140" cy="84" r="5" class="f-head"/><circle cx="160" cy="84" r="5" class="f-head"/><rect x="118" y="94" width="64" height="9" rx="3" class="f-head"/><rect x="118" y="107" width="64" height="9" rx="3" class="f-head"/>${T(240, 100, "× 1", 'font-size="12"')}`, "nombre maya sur deux étages"),
+      ex: () => { const up = ri(2, 9), b = ri(1, 3), d = ri(0, 4), low = 5 * b + d;
+        return { q: `Un nombre maya : en haut, ${up} points (des vingtaines) ; en bas, ${b} barre${b > 1 ? "s" : ""}${d ? " et " + d + " point" + (d > 1 ? "s" : "") : ""}. Que vaut-il ?`, value: 20 * up + low, sol: `En bas : \\(${b} \\cdot 5${d ? " + " + d : ""} = ${low}\\). En haut : \\(${up} \\cdot 20 = ${20 * up}\\). Total : \\(${20 * up + low}\\).` }; } },
+    { t: "Événement", titre: "Pourquoi 60 minutes dans une heure ?", lien: "Numération et durées",
+      txt: "Les Babyloniens comptaient en base 60, il y a plus de 4000 ans. Nous en avons hérité les 60 minutes d'une heure, les 60 secondes d'une minute et les 360 degrés du cercle. Ils écrivaient par exemple « 1,20 » pour une soixantaine et vingt, c'est-à-dire 80.",
+      fig: () => svg(300, 130, `<circle cx="150" cy="65" r="52" class="f-shape2"/>${[...Array(12)].map((_, k) => { const s = Math.sin((k * Math.PI) / 6), c = Math.cos((k * Math.PI) / 6); return `<line x1="${f1(150 + 44 * s)}" y1="${f1(65 - 44 * c)}" x2="${f1(150 + 52 * s)}" y2="${f1(65 - 52 * c)}" class="f-line"/>`; }).join("")}<line x1="150" y1="65" x2="150" y2="25" class="f-line" stroke-width="3"/><line x1="150" y1="65" x2="180" y2="65" class="f-accent" stroke-width="3"/>`, "cadran d'horloge"),
+      ex: () => { const a = ri(2, 4), b = ri(11, 49);
+        return { q: `Un nombre babylonien s'écrit « ${a},${b} » (${a} soixantaines et ${b}). Que vaut-il ?`, value: 60 * a + b, sol: `\\(${a} \\cdot 60 + ${b} = ${60 * a + b}\\). Comme ${a} h ${b} min = ${60 * a + b} min.` }; } },
+    { t: "Anecdote", titre: "Euclide : les nombres premiers ne s'arrêtent jamais", lien: "Nombres premiers",
+      txt: "Vers 300 av. J.-C., dans ses <i>Éléments</i>, Euclide démontre qu'il existe une infinité de nombres premiers. L'idée : multiplie des nombres premiers et ajoute 1. Le résultat n'est divisible par aucun d'eux, donc il existe forcément un autre nombre premier.",
+      fig: () => svg(300, 100, `${[2, 3, 5, 7, 11, 13, 17, 19, 23].map((p, i) => `<circle cx="${25 + i * 31}" cy="45" r="13" class="${i % 2 ? "f-fill2" : "f-shape"}"/>${T(25 + i * 31, 50, p, 'font-size="12"')}`).join("")}${T(150, 88, "… et ainsi de suite, sans fin", 'font-size="12"')}`, "liste de nombres premiers"),
+      ex: () => { const L = pk([[2, 3, 5], [2, 3, 5, 7], [2, 3, 5, 7, 11]]), v = L.reduce((x, y) => x * y, 1) + 1;
+        return { q: `Calcule comme Euclide : \\(${L.join(" \\cdot ")} + 1\\).`, value: v, sol: `\\(${L.join(" \\cdot ")} = ${tm(v - 1)}\\), plus 1 : \\(${tm(v)}\\). Divisé par ${L.join(", ")}, il reste toujours 1 (et ici, c'est même un nombre premier).` }; } },
+    { t: "Anecdote", titre: "Ramanujan et le taxi 1729", lien: "Puissances",
+      txt: "Le mathématicien anglais G. H. Hardy rend visite à l'Indien Srinivasa Ramanujan, malade, et lui dit que le numéro de son taxi, 1729, est bien banal. Ramanujan répond aussitôt que non : c'est le plus petit nombre qui s'écrit de deux façons différentes comme somme de deux cubes.",
+      fig: () => svg(300, 110, `<path d="M95 40 L115 20 L185 20 L205 40" class="f-shape2"/><rect x="60" y="40" width="180" height="40" rx="10" class="f-fill2"/><circle cx="100" cy="82" r="12" class="f-head"/><circle cx="200" cy="82" r="12" class="f-head"/><rect x="118" y="48" width="64" height="22" rx="4" class="f-soft"/>${T(150, 64, "1729", 'font-size="15"')}`, "taxi numéro 1729"),
+      ex: () => ({ q: pk(["Calcule \\(9^3 + 10^3\\).", "Calcule \\(1^3 + 12^3\\)."]), value: 1729, sol: "\\(9^3 + 10^3 = 729 + 1000 = 1729\\) et \\(1^3 + 12^3 = 1 + 1728 = 1729\\) : les deux façons de Ramanujan." }) },
+    { t: "Portrait", titre: "Ada Lovelace, première programmeuse", lien: "Algorithmes",
+      txt: "En 1843, Ada Lovelace traduit et commente un article sur la « machine analytique » imaginée par Charles Babbage. Dans ses notes, elle décrit pas à pas comment la machine pourrait calculer une suite de nombres compliqués : on considère souvent que c'est le premier programme informatique publié.",
+      fig: () => svg(300, 110, `${["départ", "× 2", "+ 1", "répète"].map((s, i) => `<rect x="${12 + i * 72}" y="35" width="60" height="34" rx="8" class="${i === 3 ? "f-fill2" : "f-soft"}"/>${T(42 + i * 72, 57, s, 'font-size="12"')}${i < 3 ? `<path d="M${72 + i * 72} 52 l12 0" class="f-line"/>` : ""}`).join("")}<path d="M258 69 Q 186 100 114 69" class="f-accent" stroke-width="1.6"/>`, "programme en étapes"),
+      ex: () => { const s = ri(1, 3), n = ri(4, 6), t = [s]; for (let i = 0; i < n; i++) t.push(2 * t.at(-1) + 1);
+        return { q: `Un programme : pars de ${s}, puis répète ${n} fois « multiplie par 2, puis ajoute 1 ». Quel nombre obtiens-tu ?`, value: t.at(-1), sol: "Les étapes : " + t.join(" → ") + "." }; } },
+  ];
+
+  window.HISTOIRE = HISTOIRE;
+  window.Histoire = {
+    // Récit de la semaine (le même pour tout le monde la même semaine).
+    week() { return Math.floor(Date.now() / (7 * 864e5)) % HISTOIRE.length; },
+    other(k) { let j; do { j = Math.floor(Math.random() * HISTOIRE.length); } while (j === k && HISTOIRE.length > 1); return j; },
+    // Carte de l'onglet Exploration : illustration, titre, première phrase du récit.
+    card(k) {
+      const H = HISTOIRE[k], debut = H.txt.replace(/<[^>]+>/g, "").split(/(?<=[.!?])\s/)[0];
+      return `<div class="card stack hist-card" id="hist"><div class="eyebrow">📜 Histoire des maths · ${H.t}</div>${H.fig()}<h3>${H.titre}</h3>
+        <p class="small muted">${debut}</p><div class="row"><button type="button" class="btn-primary" id="histgo" data-k="${k}">Lire et essayer</button><button type="button" class="btn-sec" id="histnext" data-k="${k}">Une autre</button></div></div>`;
+    },
+    bind(root, open) {
+      const g = root.querySelector("#histgo"), b = root.querySelector("#histnext"); if (!b) return;
+      g.onclick = () => open(+g.dataset.k);
+      b.onclick = () => { root.querySelector("#hist").outerHTML = Histoire.card(Histoire.other(+b.dataset.k)); Histoire.bind(root, open); };
+    },
+  };
+})();
 
 // Badges (13.11) : régularité (pas de série qui se perd), maîtrise (notes de compétences), persévérance, curiosité.
 // Tout reste sur l'appareil ; un badge gagné ne se perd jamais. Compteurs dans state.bc, badges gagnés dans state.badges.
@@ -19779,7 +19886,7 @@ function screenHome() {
   if (!state.tourDone) tourShow();
   on("wp", () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); });
   on("curgo", () => screenCurious(Curieux.pick(state), () => { homeTab = "prob"; screenHome(); }, "onglet"));
-  if (typeof Histoire !== "undefined") Histoire.bind(app);
+  if (typeof Histoire !== "undefined") Histoire.bind(app, (k) => screenHistory(k, () => { homeTab = "prob"; screenHome(); }));
   on("comps", screenComps);
   on("prep", screenPrep); on("prepedit", screenPrep);
   if (typeof screenMock === "function") on("mock", screenMock);
@@ -20886,7 +20993,8 @@ function flushComments(except) {
   const sheet = document.getElementById("fabs"), fg = document.getElementById("fabg"), ft = document.getElementById("fabt");
   if (sheet && fg && ft && fg !== except && ft.value.trim()) fg.click();
 }
-document.addEventListener("click", (e) => { const g = e.target.closest && e.target.closest(".grade-open"); if (g) gradeCard(g.dataset.g); });
+// Carte collector (22.11) : un clic n'importe où sur le cadre d'un grade atteint l'ouvre, pas seulement sur l'image.
+document.addEventListener("click", (e) => { const g = e.target.closest && e.target.closest(".grade-open, .grade-now, .grade-up, .grades li.ok, .grades li.cur"); if (!g) return; const o = g.matches(".grade-open") ? g : g.querySelector(".grade-open"); if (o) gradeCard(o.dataset.g); });
 document.addEventListener("click", (e) => {
   const b = e.target.closest && e.target.closest("button");
   if (!b || b.matches(".cmt-s, #fabg, #fabx, #fabc") || b.closest("details.cmt, #fabs")) return;
@@ -21010,6 +21118,45 @@ function screenCurious(q, back, from = "") {
   $("cidk").onclick = () => finish(false, true);
   $("cnext").onclick = () => screenCurious(Curieux.pick(state), back, from);
   $("cback").onclick = back;
+}
+
+// ---------------- Histoire des maths (22.11) ----------------
+// Le récit, son illustration, puis « À toi » : une application directe, deux essais, puis la réponse expliquée.
+function screenHistory(k, back) {
+  const H = HISTOIRE[k], E = H.ex(), spec = { kind: "value", value: E.value, final: true };
+  h(`${brand}<div class="eyebrow">📜 Histoire des maths · ${H.t}</div>
+  <div class="card pop stack hist-story"><h2>${H.titre}</h2><div class="figwrap">${H.fig()}</div><p>${H.txt}</p>
+    <div class="act-step"><div class="act-h"><span class="act-n">✍️</span> À toi</div><div class="qtext">${E.q}</div>
+      <div class="answer"><input class="ans" id="hans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Ta réponse">
+      <div class="preview" id="hprev"></div>${keypadHtml(spec)}
+      <div class="actions"><button class="btn-primary" id="hok">Vérifier</button><button class="btn-sec" id="hidk">Voir la réponse</button></div></div><div id="hfb"></div></div>
+    <p class="small muted">Lien avec : ${H.lien}</p></div>
+  <button class="btn-primary btn-big" id="hnext">Une autre histoire</button>
+  <button class="btn-ghost" id="hback">Retour</button>`);
+  pageQ = "hist-" + k;
+  typeset(app);
+  const $ = (x) => document.getElementById(x), inp = $("hans"), prev = $("hprev");
+  let tries = 0;
+  const finish = (ok) => {
+    inp.disabled = true; ["kp", "hok", "hidk"].forEach((x) => $(x) && $(x).remove()); prev.remove();
+    $("hfb").innerHTML = `<div class="fb ${ok ? "ok" : "hint"} pop">${ok ? "✓ Juste !" : "Réponse : " + String(E.value).replace(/\B(?=(\d{3})+(?!\d))/g, "'")}<div class="sol">${E.sol}</div></div>`;
+    typeset($("hfb"));
+  };
+  const go = () => {
+    const v = inp.value.trim(); if (!v) return;
+    const r = checkAnswer(spec, v);
+    if (r.status === "correct") return finish(true);
+    if (r.status === "invalid" || r.status === "form") { $("hfb").innerHTML = `<div class="fb hint pop">${escT(r.message || "Écris un nombre.")}</div>`; return; }
+    if (++tries >= 2) return finish(false);
+    $("hfb").innerHTML = `<div class="fb hint pop">${r.status === "close" ? escT(r.message || "Presque !") : "Pas tout à fait. Encore un essai ?"}</div>`;
+  };
+  inp.oninput = () => previewOf(inp, prev, spec);
+  bindKeypad(() => inp, () => previewOf(inp, prev, spec));
+  $("hok").onclick = go; inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
+  $("hidk").onclick = () => finish(false);
+  $("hnext").onclick = () => screenHistory(Histoire.other(k), back);
+  $("hback").onclick = back;
+  window.scrollTo(0, 0);
 }
 
 // Bilan par notion (21.11, amélioration UX 6) : ce qui est acquis aujourd'hui, ce qui reviendra, au lieu d'une simple liste.

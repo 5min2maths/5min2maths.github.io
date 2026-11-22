@@ -449,7 +449,7 @@ function screenHome() {
   if (!state.tourDone) tourShow();
   on("wp", () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); });
   on("curgo", () => screenCurious(Curieux.pick(state), () => { homeTab = "prob"; screenHome(); }, "onglet"));
-  if (typeof Histoire !== "undefined") Histoire.bind(app);
+  if (typeof Histoire !== "undefined") Histoire.bind(app, (k) => screenHistory(k, () => { homeTab = "prob"; screenHome(); }));
   on("comps", screenComps);
   on("prep", screenPrep); on("prepedit", screenPrep);
   if (typeof screenMock === "function") on("mock", screenMock);
@@ -1556,7 +1556,8 @@ function flushComments(except) {
   const sheet = document.getElementById("fabs"), fg = document.getElementById("fabg"), ft = document.getElementById("fabt");
   if (sheet && fg && ft && fg !== except && ft.value.trim()) fg.click();
 }
-document.addEventListener("click", (e) => { const g = e.target.closest && e.target.closest(".grade-open"); if (g) gradeCard(g.dataset.g); });
+// Carte collector (22.11) : un clic n'importe où sur le cadre d'un grade atteint l'ouvre, pas seulement sur l'image.
+document.addEventListener("click", (e) => { const g = e.target.closest && e.target.closest(".grade-open, .grade-now, .grade-up, .grades li.ok, .grades li.cur"); if (!g) return; const o = g.matches(".grade-open") ? g : g.querySelector(".grade-open"); if (o) gradeCard(o.dataset.g); });
 document.addEventListener("click", (e) => {
   const b = e.target.closest && e.target.closest("button");
   if (!b || b.matches(".cmt-s, #fabg, #fabx, #fabc") || b.closest("details.cmt, #fabs")) return;
@@ -1680,6 +1681,45 @@ function screenCurious(q, back, from = "") {
   $("cidk").onclick = () => finish(false, true);
   $("cnext").onclick = () => screenCurious(Curieux.pick(state), back, from);
   $("cback").onclick = back;
+}
+
+// ---------------- Histoire des maths (22.11) ----------------
+// Le récit, son illustration, puis « À toi » : une application directe, deux essais, puis la réponse expliquée.
+function screenHistory(k, back) {
+  const H = HISTOIRE[k], E = H.ex(), spec = { kind: "value", value: E.value, final: true };
+  h(`${brand}<div class="eyebrow">📜 Histoire des maths · ${H.t}</div>
+  <div class="card pop stack hist-story"><h2>${H.titre}</h2><div class="figwrap">${H.fig()}</div><p>${H.txt}</p>
+    <div class="act-step"><div class="act-h"><span class="act-n">✍️</span> À toi</div><div class="qtext">${E.q}</div>
+      <div class="answer"><input class="ans" id="hans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Ta réponse">
+      <div class="preview" id="hprev"></div>${keypadHtml(spec)}
+      <div class="actions"><button class="btn-primary" id="hok">Vérifier</button><button class="btn-sec" id="hidk">Voir la réponse</button></div></div><div id="hfb"></div></div>
+    <p class="small muted">Lien avec : ${H.lien}</p></div>
+  <button class="btn-primary btn-big" id="hnext">Une autre histoire</button>
+  <button class="btn-ghost" id="hback">Retour</button>`);
+  pageQ = "hist-" + k;
+  typeset(app);
+  const $ = (x) => document.getElementById(x), inp = $("hans"), prev = $("hprev");
+  let tries = 0;
+  const finish = (ok) => {
+    inp.disabled = true; ["kp", "hok", "hidk"].forEach((x) => $(x) && $(x).remove()); prev.remove();
+    $("hfb").innerHTML = `<div class="fb ${ok ? "ok" : "hint"} pop">${ok ? "✓ Juste !" : "Réponse : " + String(E.value).replace(/\B(?=(\d{3})+(?!\d))/g, "'")}<div class="sol">${E.sol}</div></div>`;
+    typeset($("hfb"));
+  };
+  const go = () => {
+    const v = inp.value.trim(); if (!v) return;
+    const r = checkAnswer(spec, v);
+    if (r.status === "correct") return finish(true);
+    if (r.status === "invalid" || r.status === "form") { $("hfb").innerHTML = `<div class="fb hint pop">${escT(r.message || "Écris un nombre.")}</div>`; return; }
+    if (++tries >= 2) return finish(false);
+    $("hfb").innerHTML = `<div class="fb hint pop">${r.status === "close" ? escT(r.message || "Presque !") : "Pas tout à fait. Encore un essai ?"}</div>`;
+  };
+  inp.oninput = () => previewOf(inp, prev, spec);
+  bindKeypad(() => inp, () => previewOf(inp, prev, spec));
+  $("hok").onclick = go; inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
+  $("hidk").onclick = () => finish(false);
+  $("hnext").onclick = () => screenHistory(Histoire.other(k), back);
+  $("hback").onclick = back;
+  window.scrollTo(0, 0);
 }
 
 // Bilan par notion (21.11, amélioration UX 6) : ce qui est acquis aujourd'hui, ce qui reviendra, au lieu d'une simple liste.

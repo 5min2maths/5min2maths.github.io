@@ -522,7 +522,10 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .grade-open:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
 .grades .g-no { font-family: var(--font-mono); color: var(--blue); font-weight: 700; }
 .collector-bg { position: fixed; inset: 0; background: rgba(16, 22, 42, 0.55); display: grid; place-items: center; z-index: 30; padding: 20px; }
-.collector { background: var(--card); border: 3px solid var(--blue); border-radius: 22px; padding: 26px 24px; text-align: center; max-width: 320px; width: 100%;
+.collector { background: var(--card); border: 4px solid var(--blue); border-radius: 26px; padding: 30px 24px; text-align: center; max-width: 420px; width: 100%; min-height: min(78vh, 620px); align-content: center;
   display: grid; gap: 8px; justify-items: center; box-shadow: 0 10px 0 var(--shadow); }
-.collector .col-ic { font-size: 6rem; line-height: 1.1; }
-.collector .col-no { font-family: var(--font-mono); font-size: 2rem; font-weight: 800; color: var(--blue); }
+.collector .col-ic { font-size: min(11rem, 42vw); line-height: 1.05; }
+.collector h2 { font-size: 2.2rem; }
+.collector .col-no { font-family: var(--font-mono); font-size: 3.2rem; font-weight: 800; color: var(--blue); }
+.grade-now, .grade-up, .grades li.ok, .grades li.cur { cursor: pointer; }
+.hist-card .hist-fig, .hist-story .hist-fig { max-height: 150px; }
