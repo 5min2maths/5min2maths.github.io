@@ -6,6 +6,9 @@
  * Feuille « questions » (signaux muets, 20.11) : une ligne anonyme par question jouée ou leçon vue (issue, essais,
  * réponses illisibles, durée, aide, 1re réponse fausse — un mot y est remplacé par « [texte] » dans l'app).
  * Lecture : …/exec?questions=CLÉ&jours=60 (analyse : tools/signaux.py).
+ * Feuille « erreurs » (23.11) : erreurs JavaScript non rattrapées chez les testeurs (message, fichier court, ligne,
+ * pile réduite, écran, version, classe, appareil). Lecture : …/exec?erreurs=CLÉ&jours=7 (analyse : tools/erreurs.py).
+ * Feuille « visites » brute (23.11, rétention) : …/exec?visites=CLÉ&jours=120 → [appareil, jour] des ouvertures.
  * Feuille « commentaires » : commentaires libres des testeurs (question ou application), avec la classe déclarée.
  * Lecture des commentaires par l'URL …/exec?commentaires=CLÉ : la clé n'est PAS dans ce fichier (dépôt public) ;
  * la définir dans Apps Script > Paramètres du projet > Propriétés du script : CLE_LECTURE = (une suite de lettres au hasard).
@@ -58,6 +61,16 @@ function questions_() {
   return sh;
 }
 
+const ERREURS = ["reçu le", "appareil", "date élève", "classe", "version", "écran", "message", "fichier", "ligne", "colonne", "pile"];
+function erreurs_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName("erreurs");
+  if (!sh) { sh = ss.insertSheet("erreurs"); sh.appendRow(ERREURS); sh.setFrozenRows(1); }
+  return sh;
+}
+// Texte libre venu de l'app : jamais interprété comme une formule dans la feuille.
+const texte_ = (x, n) => { const t = String(x == null ? "" : x).slice(0, n).replace(/[\r\n]+/g, " "); return /^[=+\-@]/.test(t) ? "'" + t : t; };
+
 function chapters_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   let sh = ss.getSheetByName("chapitres");
@@ -86,6 +99,13 @@ function doPost(e) {
       questions_().appendRow([new Date(), d.ev, s(d.uid, 12), dev, s(d.date, 10), s(d.niveau, 30), s(d.fmt, 16), code,
         code.replace(/^lecon-/, "").split("-")[0], num_(d.d), s(d.kind, 12), s(d.issue, 10), num_(d.essais), num_(d.illis),
         num_(Math.min(+d.sec || 0, 3600)), s(d.aide, 30), rep, num_(d.diag), num_(d.redo)]);
+      return out_({ ok: true });
+    }
+    if (d.ev === "err") { // erreurs JavaScript (23.11) ; anti-déluge côté app (1 fois par message et par jour, 5 par jour)
+      const msg = texte_(d.msg, 200);
+      if (!msg) return out_({ ok: false });
+      erreurs_().appendRow([new Date(), dev, texte_(d.date, 10), texte_(d.niveau, 30), texte_(d.version, 12), texte_(d.ecran, 40), msg,
+        texte_(d.src, 40), num_(d.ligne), num_(d.col), texte_(d.pile, 400)]);
       return out_({ ok: true });
     }
     if (d.ev === "now") { // chapitre du moment : anonyme (pas d'identifiant d'appareil)
@@ -156,6 +176,20 @@ function doGet(e) {
     const lim = new Date(Date.now() - (+e.parameter.jours || 60) * 864e5);
     const rows = questions_().getDataRange().getValues().slice(1).filter((r) => new Date(r[0]) >= lim);
     return ContentService.createTextOutput(JSON.stringify({ colonnes: QUESTIONS, lignes: rows })).setMimeType(ContentService.MimeType.JSON);
+  }
+  if (e && e.parameter && e.parameter.erreurs) { // 23.11 : même clé que ?questions=
+    const cle = PropertiesService.getScriptProperties().getProperty("CLE_LECTURE");
+    if (!cle || e.parameter.erreurs !== cle) return out_({ erreur: "clé absente ou incorrecte" });
+    const lim = new Date(Date.now() - (+e.parameter.jours || 7) * 864e5);
+    const rows = erreurs_().getDataRange().getValues().slice(1).filter((r) => new Date(r[0]) >= lim);
+    return ContentService.createTextOutput(JSON.stringify({ colonnes: ERREURS, lignes: rows })).setMimeType(ContentService.MimeType.JSON);
+  }
+  if (e && e.parameter && e.parameter.visites) { // 23.11 : ouvertures brutes [appareil, jour] pour la rétention (tools/erreurs.py)
+    const cle = PropertiesService.getScriptProperties().getProperty("CLE_LECTURE");
+    if (!cle || e.parameter.visites !== cle) return out_({ erreur: "clé absente ou incorrecte" });
+    const lim = new Date(Date.now() - (+e.parameter.jours || 120) * 864e5);
+    const rows = visits_().getDataRange().getValues().slice(1).filter((r) => r[1] === "open" && r[2] && new Date(r[0]) >= lim).map((r) => [r[2], jour_(r)]);
+    return ContentService.createTextOutput(JSON.stringify({ colonnes: ["appareil", "jour"], lignes: rows })).setMimeType(ContentService.MimeType.JSON);
   }
   if (e && e.parameter && e.parameter.chapitres) {
     const cle = PropertiesService.getScriptProperties().getProperty("CLE_LECTURE");

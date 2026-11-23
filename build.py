@@ -23,6 +23,12 @@ window.MathJax = { tex: { inlineMath: [["\\\\(", "\\\\)"]] }, svg: { fontCache: 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
 """
 body = '<main id="app" aria-live="polite"></main>\n<script>\n' + "\n".join((SRC / f).read_text() for f in JS) + "\n</script>\n"
+# Version (23.11, erreurs JS) : empreinte du contenu, la même que celle du cache hors ligne (sw.js), injectée dans
+# const BUILD de src/app.js ; calculée avant l'injection pour rester stable d'une construction à l'autre.
+import hashlib
+version = hashlib.sha1((head + body).encode()).hexdigest()[:10]
+assert 'const BUILD = "dev";' in body
+body = body.replace('const BUILD = "dev";', f'const BUILD = "{version}";', 1)
 
 (ROOT / "dist").mkdir(exist_ok=True)
 (ROOT / "dist" / "5min2maths.html").write_text(head + body)
@@ -31,12 +37,11 @@ body = '<main id="app" aria-live="polite"></main>\n<script>\n' + "\n".join((SRC 
     '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
     + head + "</head>\n<body>\n" + body + "</body>\n</html>\n")
 # Version GitHub Pages : application installable (manifeste, icônes, cache hors ligne)
-import hashlib, shutil
+import shutil
 pwa_head = ('<link rel="manifest" href="manifest.webmanifest">\n<meta name="theme-color" content="#2457d6">\n'
             '<link rel="apple-touch-icon" href="icon-192.png">\n<meta name="apple-mobile-web-app-capable" content="yes">\n')
 (ROOT / "docs").mkdir(exist_ok=True)
 (ROOT / "docs" / "index.html").write_text((ROOT / "dist" / "index.html").read_text().replace("<title>", pwa_head + "<title>", 1))
-version = hashlib.sha1((head + body).encode()).hexdigest()[:10]
 (ROOT / "docs" / "sw.js").write_text((SRC / "pwa" / "sw.js").read_text().replace("__VERSION__", version))
 for f in ("manifest.webmanifest", "icon-192.png", "icon-512.png"):
     shutil.copy(SRC / "pwa" / f, ROOT / "docs" / f)

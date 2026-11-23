@@ -10,6 +10,7 @@ Usage : python3 tools/signaux.py            détail par notion et niveau
         python3 tools/signaux.py --point    4 à 6 lignes pour le point du jour (Calendrier/stats_5min2maths.py)
         python3 tools/signaux.py --jours 30 fenêtre (60 jours par défaut)
         python3 tools/signaux.py --fichier x.json   données locales (test)
+Avec --point, ajoute aussi les erreurs JS et la rétention J+1/J+7/J+30 (tools/erreurs.py, 23.11).
 """
 import json, re, statistics, sys, urllib.request
 from collections import defaultdict
@@ -142,6 +143,17 @@ def lien(code):
     return SITE + ("#l-" + code[6:] if code.startswith("lecon-") else "#q-" + code)
 
 
+def point_erreurs():
+    """Erreurs JS et rétention (tools/erreurs.py, 23.11) : jamais bloquant pour le point du jour."""
+    try:
+        sys.path.insert(0, str(ROOT / "tools"))
+        import erreurs
+        for l in erreurs.point():
+            print(l)
+    except Exception as e:
+        print(f"Erreurs JS : indisponibles ({e})")
+
+
 def main():
     a = sys.argv[1:]
     jours = int(a[a.index("--jours") + 1]) if "--jours" in a else 60
@@ -150,6 +162,8 @@ def main():
         lignes = charger(jours, fichier)
     except Exception as e:
         print(f"Signaux muets : indisponibles ({e})")
+        if "--point" in a:
+            point_erreurs()
         return
     stats, lstats, alertes, cstats = analyser(lignes)
     nq = sum(s["n"] for s in stats)
@@ -162,6 +176,7 @@ def main():
             print(f"    {al[1]} : {al[2]}{ex} → {lien(al[3][0])}")
         if len(alertes) > 5:
             print(f"    … et {len(alertes) - 5} autres (python3 tools/signaux.py)")
+        point_erreurs()
         return
     print(f"{len(lignes)} lignes ({jours} jours, appareils de l'auteur exclus)\n")
     print("ALERTES (à regarder, par ordre : l'app se trompe peut-être → décrochage → durée → leçons)")

@@ -1,0 +1,37 @@
+<!doctype html><meta charset="utf-8"><pre id="out"></pre>
+<script>
+// tools/votes.gs (23.11) : feuille « erreurs » (doPost ev:"err", protection contre les formules) et lectures ?erreurs= / ?visites=.
+// Services Google simulés : une feuille = tableau de lignes.
+const feuilles = {};
+const mkSheet = (n) => { const rows = []; feuilles[n] = rows; return { appendRow: (r) => rows.push(r), setFrozenRows() {}, getLastColumn: () => (rows[0] || []).length,
+  getRange: () => ({ setValues: (v) => (rows[0] = v[0]) }), getDataRange: () => ({ getValues: () => rows.map((r) => r.slice()) }) }; };
+const sheets = {};
+var SpreadsheetApp = { getActiveSpreadsheet: () => ({ getSheetByName: (n) => sheets[n] || null, insertSheet: (n) => (sheets[n] = mkSheet(n)) }) };
+var ContentService = { MimeType: { JSON: "json" }, createTextOutput: (t) => ({ t, setMimeType() { return this; } }) };
+var PropertiesService = { getScriptProperties: () => ({ getProperty: () => "cle123" }) };
+var Utilities = { formatDate: (d) => new Date(d).toISOString().slice(0, 10) };
+var LockService = { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) };
+</script>
+<script src="../tools/votes.gs"></script>
+<script>
+const fails = [], ok = (c, m) => { if (!c) fails.push(m); };
+const post = (d) => JSON.parse(doPost({ postData: { contents: JSON.stringify(d) } }).t);
+const get = (p) => JSON.parse(doGet({ parameter: p }).t);
+try {
+  ok(typeof doPost === "function", "votes.gs non chargé");
+  const today = new Date().toISOString().slice(0, 10);
+  ok(post({ ev: "err", msg: "=HYPERLINK(\"x\")\nsuite", src: "index.html", ligne: 12, col: 3, pile: "at f (index.html:12:3)", ecran: "prio-1-7", version: "abc", niveau: "11e", dev: "a1", date: today }).ok, "post err");
+  ok(!post({ ev: "err", msg: "", dev: "a1" }).ok, "message vide accepté");
+  const r = feuilles.erreurs[1];
+  ok(feuilles.erreurs[0][6] === "message" && r[6] === "'=HYPERLINK(\"x\") suite", "formule ou retour ligne " + r[6]);
+  ok(r[1] === "a1" && r[7] === "index.html" && r[8] === 12 && r[9] === 3 && r[5] === "prio-1-7" && r[4] === "abc", "colonnes " + JSON.stringify(r));
+  ok(get({ erreurs: "faux" }).erreur, "clé non vérifiée");
+  const e = get({ erreurs: "cle123", jours: "7" });
+  ok(e.colonnes[6] === "message" && e.lignes.length === 1, "lecture erreurs " + JSON.stringify(e).slice(0, 200));
+  post({ ev: "open", dev: "a1", date: "2026-11-20" }); post({ ev: "start", dev: "a1", date: "2026-11-20", niveau: "11e" }); post({ ev: "open", dev: "a2", date: "2026-11-21" });
+  const v = get({ visites: "cle123" });
+  ok(v.lignes.length === 2 && v.lignes[0][0] === "a1" && v.lignes[0][1] === "2026-11-20", "lecture visites " + JSON.stringify(v));
+  ok(get({ visites: "x" }).erreur, "clé visites non vérifiée");
+} catch (e) { fails.push("exception " + e.message + " " + e.stack); }
+document.getElementById("out").textContent = fails.length ? "ÉCHEC\n" + fails.join("\n") : "OK votes.gs";
+</script>

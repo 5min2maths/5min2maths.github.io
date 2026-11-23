@@ -2,6 +2,71 @@
 // Point de collecte des votes 👍 / 👎 : laisser vide tant qu'aucun n'est configuré (votes gardés sur l'appareil).
 const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7gqEVGIeAbBF0cML8VEDYtQfaOmO0743jRcmeHSQ-WglFVCb-dd/exec";
 
+// ---------------- Erreurs JavaScript des testeurs (23.11, chantier N) ----------------
+// Un bug invisible fait partir l'élève tout de suite : chaque erreur non rattrapée part, anonyme, vers la feuille
+// « erreurs » (tools/votes.gs ; lecture : tools/erreurs.py, une ligne dans le point du jour). Envoyé : message (200 car.
+// max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
+// identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
+// Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
+const BUILD = "dev"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const ERR_MAX = 5;
+var errMem = null; // repli en mémoire si localStorage est indisponible
+function errCanSend() {
+  try { return !!VOTE_ENDPOINT && location.protocol === "https:" && !/claude/.test(location.hostname) && !isAuthor() && !/^#auteur/.test(location.hash); }
+  catch (e) { return false; }
+}
+// Nom court d'un fichier : « https://x.github.io/app/index.html?v=2 » → « index.html » ; « https://x.github.io/ » (code
+// intégré à la page publiée) → « page ».
+const errFile = (u) => { const b = String(u || "").split(/[?#]/)[0]; return b ? (b.split("/").pop() || "page").slice(0, 40) : ""; };
+const errExt = (s) => /(chrome|moz|safari(-web)?)-extension:|webkit-masked-url:/i.test(String(s || ""));
+// Pile réduite à 3 lignes, chaque URL remplacée par son nom de fichier court.
+const errStack = (st) => String(st || "").split("\n").map((l) => l.trim()).filter((l) => l && !/^\w*Error\b.*:/.test(l)).slice(0, 3)
+  .map((l) => l.replace(/(?:https?|file|blob):\/\/[^\s)]*\/([^\s/)?#]*)(?:[?#][^\s):]*)?/g, "$1").slice(0, 120)).join(" | ");
+function errRecord(msg, src, ligne, col, stack) {
+  msg = String(msg || "").replace(/\s+/g, " ").trim();
+  if (!msg || errExt(src) || errExt(stack)) return null;
+  if (/^Script error\.?$/i.test(msg) && !src) return null; // script d'un autre domaine (extension, pub…) : rien d'exploitable
+  if (/ResizeObserver loop/.test(msg)) return null; // avertissement bénin des navigateurs
+  if (/^Promesse rejetée : (TypeError: )?(Failed to fetch|Load failed|NetworkError)/.test(msg)) return null; // hors ligne : pas un bug
+  let ecran = "", niveau = "";
+  try { ecran = String(pageCode() || "").slice(0, 40); } catch (e) {}
+  try { const p = state && state.profile; if (p) niveau = gradeName(p) + (p.track === "mp" ? " MP" : ""); } catch (e) {}
+  let dev = "", date = "";
+  try { dev = deviceId(); } catch (e) {}
+  try { date = day(); } catch (e) { date = new Date().toISOString().slice(0, 10); }
+  return { ev: "err", msg: msg.slice(0, 200), src: errFile(src), ligne: +ligne || 0, col: +col || 0, pile: errStack(stack), ecran, version: BUILD, niveau, dev, date };
+}
+// Anti-déluge : vrai si ce message peut partir aujourd'hui (et l'enregistre).
+function errGate(rec) {
+  let m = null;
+  try { m = JSON.parse(localStorage.getItem("m2m-err") || "null"); } catch (e) { m = errMem; }
+  if (!m || m.d !== rec.date) m = { d: rec.date, n: 0, m: [] };
+  const k = rec.msg.slice(0, 80);
+  if (m.n >= ERR_MAX || m.m.includes(k)) return false;
+  m.n++; m.m.push(k); errMem = m;
+  try { localStorage.setItem("m2m-err", JSON.stringify(m)); } catch (e) {}
+  return true;
+}
+// Renvoie la ligne envoyée (ou null). envoyer : remplaçable par les tests (tests/erreurs.html).
+function errReport(msg, src, ligne, col, stack, envoyer = errCanSend) {
+  try {
+    if (!envoyer()) return null;
+    const rec = errRecord(msg, src, ligne, col, stack);
+    if (!rec || !errGate(rec)) return null;
+    fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", keepalive: true, body: JSON.stringify(rec) }).catch(() => {});
+    return rec;
+  } catch (e) { return null; } // le rapporteur ne doit jamais provoquer d'erreur lui-même
+}
+window.addEventListener("error", (e) => {
+  if (!e || (e.target && e.target !== window)) return; // ressource qui ne charge pas (image, police) : pas une erreur JS
+  errReport(e.message, e.filename, e.lineno, e.colno, e.error && e.error.stack);
+});
+window.addEventListener("unhandledrejection", (e) => {
+  const r = e && e.reason, st = r && r.stack ? String(r.stack) : "";
+  const at = /(?:https?|file):\/\/[^\s)]+?:(\d+):(\d+)/.exec(st) || [];
+  errReport("Promesse rejetée : " + ((r && r.message) || String(r)), at[0] ? at[0].replace(/:\d+:\d+$/, "") : "", at[1], at[2], st);
+});
+
 const app = document.getElementById("app");
 let state = Store.load();
 if (state && state.profile && !SYSTEMS[state.profile.system]) state = null; // système masqué (France) : on repart de zéro
@@ -713,7 +778,8 @@ function screenPrivacy(back) {
   <li><b>Tes avis</b> 👍 / 👎, « trop facile » et « pas compris », avec le code de la question ou du rappel et le même identifiant.</li>
   <li><b>Tes commentaires</b>, si tu en écris, avec ta classe (par exemple « 10e ») et le même identifiant. N'y écris pas ton nom.</li>
   <li><b>Tes grades Mathélo</b>, quand tu en atteins un : le nom du grade et le même identifiant, pour te donner ton numéro de « collector ».</li>
-  <li><b>Ton chapitre du moment</b>, si tu en choisis un : les notions, ta classe et le mois, sans identifiant. Ça sert à proposer les notions dans l'ordre où elles se font vraiment en classe.</li></ul></div>
+  <li><b>Ton chapitre du moment</b>, si tu en choisis un : les notions, ta classe et le mois, sans identifiant. Ça sert à proposer les notions dans l'ordre où elles se font vraiment en classe.</li>
+  <li><b>Les erreurs techniques</b> de l'app, si elle plante : le message d'erreur, l'écran ou le code de la question, ta classe et le même identifiant (au plus 5 par jour). Ça sert à réparer les bugs qu'on ne voit pas.</li></ul></div>
   <p class="small muted">Identifiant tiré au hasard pour cet appareil : <code>${esc(deviceId() || "—")}</code></p>${isAuthor() ? '<p class="small"><b>Appareil de l\'auteur</b> : rien n\'est envoyé depuis cet appareil, sauf les commentaires 💬 (marqués « auteur »).</p>' : ""}
   <div class="card flat stack"><b>À savoir</b>
   <ul class="plain"><li>L'identifiant ne permet pas de savoir qui tu es : il n'est lié à aucun nom ni compte.</li>
