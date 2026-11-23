@@ -13,6 +13,7 @@
   const pv = (c, x) => c.reduce((s, a) => s * x + a, 0);
   const fac = (r, x = "x") => "(" + x + (r < 0 ? " + " + FR(-r) : " - " + FR(r)) + ")";
   const pt = (x, y) => "(" + FR(x) + " \\,;\\, " + FR(y) + ")";
+  const sh = (x, v) => (Math.abs(v) < 1e-12 ? x : "(" + x + sg(-v) + ")"); // (x - v), ou x si v = 0
 
   // ===================== 2e · 1. Équations cartésiennes =====================
   const EXC = [
@@ -23,10 +24,10 @@
       return X({ id: "cart", lv: 1, titre: "Le triangle et son cercle",
         q: "On donne " + M("A" + pt(xa, ya)) + ", " + M("B" + pt(B[0], B[1])) + " et " + M("C" + pt(C[0], C[1])) + ".",
         parts: [{ label: "Calcule les longueurs exactes " + M("AB") + ", " + M("AC") + " et " + M("BC") + ".", pts: 2 }, { label: "Montre que le triangle " + M("ABC") + " est rectangle. En quel sommet ?", pts: 1 }, { label: "Donne le centre, le rayon et l'équation du cercle circonscrit au triangle.", pts: 2 }, { label: "Le point " + M("D" + pt(Dp[0], Dp[1])) + " est-il sur ce cercle ? Justifie.", pts: 1 }],
-        sol: ul([M("AB = \\sqrt{" + (B[0] - xa) ** 2 + " + " + (B[1] - ya) ** 2 + "} = " + AB[0]) + ", " + M("AC = " + AC[0]) + ", " + M("BC = " + BC[0]) + ".", M("AC^2 + BC^2 = " + (p * p + q * q) + " + " + k * k * (p * p + q * q) + " = " + (1 + k * k) * (p * p + q * q) + " = AB^2") + " : rectangle en " + M("C") + " (réciproque de Pythagore).", "L'hypoténuse est un diamètre : centre " + M("\\Omega" + pt(O[0], O[1])) + " (milieu de " + M("[AB]") + "), rayon " + M("\\frac{AB}{2}") + ", " + M("r^2 = " + FR(r2)) + " : " + M("(x" + sg(-O[0]) + ")^2 + (y" + sg(-O[1]) + ")^2 = " + FR(r2)) + ".", M("(" + FR(Dp[0]) + sg(-O[0]) + ")^2 + (" + FR(Dp[1]) + sg(-O[1]) + ")^2 = " + FR(dd)) + (on ? " : oui, " + M("D") + " est sur le cercle (c'est le symétrique de " + M("C") + " par rapport à " + M("\\Omega") + ")." : " ≠ " + M(FR(r2)) + " : non.")]),
+        sol: ul([M("AB = \\sqrt{" + (1 + k * k) * (p * p + q * q) + "} = " + AB[0]) + ", " + M("AC = " + AC[0]) + ", " + M("BC = " + BC[0]) + ".", M("AC^2 + BC^2 = " + (p * p + q * q) + " + " + k * k * (p * p + q * q) + " = " + (1 + k * k) * (p * p + q * q) + " = AB^2") + " : rectangle en " + M("C") + " (réciproque de Pythagore).", "L'hypoténuse est un diamètre : centre " + M("\\Omega" + pt(O[0], O[1])) + " (milieu de " + M("[AB]") + "), rayon " + M("\\frac{AB}{2}") + ", " + M("r^2 = " + FR(r2)) + " : " + M(sh("x", O[0]) + "^2 + " + sh("y", O[1]) + "^2 = " + FR(r2)) + ".", M("(" + FR(Dp[0]) + sg(-O[0]) + ")^2 + (" + FR(Dp[1]) + sg(-O[1]) + ")^2 = " + FR(dd)) + (on ? " : oui, " + M("D") + " est sur le cercle (c'est le symétrique de " + M("C") + " par rapport à " + M("\\Omega") + ")." : " ≠ " + M(FR(r2)) + " : non.")]),
         chk: [[Math.hypot(B[0] - xa, B[1] - ya), AB[1]], [r2, FRp(r2)], [dd, FRp(dd)]] }); },
     // La route et la maison (perpendiculaire, intersection, distance point-droite)
-    () => { const [p, q] = pk([[2, 1], [1, 2], [-1, 2], [-2, 1], [1, 3], [3, 1], [-3, 1], [-1, 3]]), m = p / q, F = [R.int(-3, 3), R.int(-2, 3)], k = pk([1, 2]) * pk([1, -1]);
+    () => { const [p, q] = pk([[2, 1], [1, 2], [-1, 2], [-2, 1], [1, 3], [3, 1], [-3, 1], [-1, 3]]), m = p / q, F = [pk([-3, -2, -1, 1, 2, 3]), R.int(-2, 3)], k = pk([1, 2]) * pk([1, -1]);
       const R1 = [F[0] - q, F[1] - p], R2 = [F[0] + 2 * q, F[1] + 2 * p], H = [F[0] - k * p, F[1] + k * q], h = F[1] - m * F[0], mp = -1 / m, hp = H[1] - mp * H[0], dist = sq(k * k * (p * p + q * q)), cost = pk([80, 120, 150]);
       return X({ id: "droitesinter", lv: 2, titre: "La route et la maison",
         q: "Dans un repère (unité : 10 m), une route rectiligne passe par " + M("R_1" + pt(R1[0], R1[1])) + " et " + M("R_2" + pt(R2[0], R2[1])) + ". Une maison est en " + M("H" + pt(H[0], H[1])) + ". On veut la relier à la route par le chemin le plus court ; il coûte " + Q(cost, "CHF") + " par mètre.",
@@ -38,10 +39,10 @@
       return X({ id: "cercle", lv: 2, titre: "Un cercle déguisé",
         q: "On considère l'équation " + M("x^2 + y^2" + (a ? sg(-2 * a) + "x" : "") + sg(-2 * b) + "y" + sg(F) + " = 0") + " et la droite " + M("d : y = " + lin(1, h)) + ".",
         parts: [{ label: "Montre que c'est l'équation d'un cercle ; donne son centre et son rayon.", pts: 2 }, { label: "Le point " + M("P" + pt(Pq[0], Pq[1])) + " est-il à l'intérieur ou à l'extérieur du cercle ?", pts: 1 }, { label: "Calcule les points d'intersection du cercle et de " + M("d") + ".", pts: 2 }, { label: "Calcule la longueur de la corde obtenue.", pts: 1 }],
-        sol: ul(["On complète les carrés : " + M("(x" + sg(-a) + ")^2 + (y" + sg(-b) + ")^2 = " + (a * a) + " + " + (b * b) + sg(-F) + " = " + r2) + " : centre " + M(pt(a, b)) + ", rayon " + M(5 * s) + ".", "Distance au centre au carré : " + M(dq) + (dq < r2 ? " \\lt " : " > ") + M(r2) + " : " + (dq < r2 ? "à l'intérieur." : "à l'extérieur."), "On remplace " + M("y") + " : " + M("(x" + sg(-a) + ")^2 + (x" + sg(h - b) + ")^2 = " + r2) + ", soit " + M("2x^2" + sg(-2 * a + 2 * (h - b)) + "x" + sg(a * a + (h - b) ** 2 - r2) + " = 0") + " ; " + M("x = " + P1[0]) + " ou " + M("x = " + P2[0]) + " : " + M(pt(P1[0], P1[1])) + " et " + M(pt(P2[0], P2[1])) + ".", M("\\sqrt{" + (7 * s) ** 2 + " + " + (7 * s) ** 2 + "} = " + 7 * s + "\\sqrt{2}") + "."]),
+        sol: ul(["On complète les carrés : " + M("(x" + sg(-a) + ")^2 + (y" + sg(-b) + ")^2 = " + (a * a) + " + " + (b * b) + sg(-F) + " = " + r2) + " : centre " + M(pt(a, b)) + ", rayon " + M(5 * s) + ".", "Distance au centre au carré : " + M(dq) + (dq < r2 ? " \\lt " : " > ") + M(r2) + " : " + (dq < r2 ? "à l'intérieur." : "à l'extérieur."), "On remplace " + M("y") + " : " + M(sh("x", a) + "^2 + " + sh("x", b - h) + "^2 = " + r2) + ", soit " + M(poly([2, -2 * a + 2 * (h - b), a * a + (h - b) ** 2 - r2]) + " = 0") + " ; " + M("x = " + P1[0]) + " ou " + M("x = " + P2[0]) + " : " + M(pt(P1[0], P1[1])) + " et " + M(pt(P2[0], P2[1])) + ".", M("\\sqrt{" + (7 * s) ** 2 + " + " + (7 * s) ** 2 + "} = " + 7 * s + "\\sqrt{2}") + "."]),
         chk: [[Math.sqrt(a * a + b * b - F), String(5 * s)], [P1[0] + h, String(P1[1])], [P2[0] + h, String(P2[1])], [Math.hypot(P1[0] - P2[0], P1[1] - P2[1]), 7 * s + "√2"]] }); },
     // Tangentes à un cercle
-    () => { const a = pk([-2, -1, 1, 2, 3]), b = pk([-3, -1, 1, 2]), [u0, v0] = pk([[3, 4], [4, 3]]), u = u0 * pk([1, -1]), v = v0 * pk([1, -1]), T1 = [a + u, b + v], T2 = [a - u, b - v];
+    () => { const a = pk([-2, -1, 1, 2, 3]), [u0, v0] = pk([[3, 4], [4, 3]]), u = u0 * pk([1, -1]), v = v0 * pk([1, -1]), b = pk([-3, -1, 1, 2].filter((y) => y + v !== 0 && y - v !== 0)), T1 = [a + u, b + v], T2 = [a - u, b - v];
       const mt = -u / v, h1 = T1[1] - mt * T1[0], h2 = T2[1] - mt * T2[0];
       return X({ id: "cercletan", lv: 3, titre: "Deux tangentes parallèles",
         q: "Le cercle " + M("\\Gamma") + " a pour équation " + M("(x" + sg(-a) + ")^2 + (y" + sg(-b) + ")^2 = 25") + ". On considère le point " + M("T" + pt(T1[0], T1[1])) + ".",
@@ -50,7 +51,7 @@
         chk: [[(T1[0] - a) ** 2 + (T1[1] - b) ** 2, "25"], [mt * T2[0] + h2, String(T2[1])], [Math.abs(h1 - h2) / Math.sqrt(1 + mt * mt), "10"]] }); },
   ];
   const RAISONC = [
-    () => { const xa = R.int(-5, -1), ya = R.int(1, 6), xb = R.int(2, 8), yb = R.int(-4, 0), w = who();
+    () => { const xa = R.int(-5, -1), ya = R.int(1, 6), xb = pk([2, 3, 4, 6, 7, 8].filter((x) => x !== -xa)), yb = R.int(-4, -1), w = who();
       return X({ id: "cart", lv: 1, titre: "Trouve l'erreur",
         q: w + " calcule le milieu de " + M("[AB]") + " avec " + M("A" + pt(xa, ya)) + " et " + M("B" + pt(xb, yb)) + " : « " + M("M = \\left(\\frac{" + xb + " - " + par(xa) + "}{2} \\,;\\, \\frac{" + yb + " - " + ya + "}{2}\\right) = " + pt((xb - xa) / 2, (yb - ya) / 2)) + " ».",
         parts: [{ label: "Calcule " + M("AM") + " et " + M("MB") + " avec son point. Que constates-tu ?", pts: 1 }, { label: "Corrige.", pts: 1 }],
@@ -67,7 +68,7 @@
   // ===================== 2e · 3. Fonctions polynomiales =====================
   const EXP = [
     // Racine évidente, factorisation, inéquation
-    () => { let r1, r2, r3; do { r1 = pk([1, -1, 2]); r2 = R.int(-4, 4); r3 = R.int(-4, 4); } while (new Set([r1, r2, r3]).size < 3 || r2 * r3 === 0 || r1 + r2 + r3 === 0 || r1 * r2 + r1 * r3 + r2 * r3 === 0);
+    () => { let r1, r2, r3; do { r1 = pk([1, -1, 2]); r2 = R.int(-4, 4); r3 = R.int(-4, 4); } while (new Set([r1, r2, r3]).size < 3 || r2 * r3 === 0 || r2 + r3 === 0 || r1 + r2 + r3 === 0 || r1 * r2 + r1 * r3 + r2 * r3 === 0);
       const c = [1, -(r1 + r2 + r3), r1 * r2 + r1 * r3 + r2 * r3, -r1 * r2 * r3], [q1, q2, q3] = [r1, r2, r3].sort((x, y) => x - y);
       return X({ id: "polyfact", lv: 2, titre: "Une racine évidente",
         q: "Soit " + M("P(x) = " + poly(c)) + ".",
@@ -88,13 +89,13 @@
       return X({ id: "polyexpr", lv: 3, titre: "Retrouver le polynôme",
         q: "Le graphe ci-dessous est celui d'un polynôme " + M("P") + " de degré 3. Ses zéros et son ordonnée à l'origine sont des nombres entiers.", fig: FIG.plot([{ f }], [[r[0], 0, ""], [r[1], 0, ""], [r[2], 0, ""], [0, y0, ""]], { numbers: true, xr: [-5, 5], yr: [-8, 8], step: 2, squash: 0.6 }),
         parts: [{ label: "Lis les zéros et écris " + M("P(x)") + " sous forme factorisée avec un coefficient " + M("a") + " inconnu.", pts: 1 }, { label: "Détermine " + M("a") + " à l'aide de l'ordonnée à l'origine.", pts: 2 }, { label: "Écris " + M("P(x)") + " sous forme développée.", pts: 1 }, { label: "Résous " + M("P(x) \\lt 0") + ".", pts: 1 }],
-        sol: ul([M("P(x) = a" + fac(r[0]) + fac(r[1]) + fac(r[2])) + ".", M("P(0) = a \\cdot " + par(-r[0]) + " \\cdot " + par(-r[1]) + " \\cdot " + par(-r[2]) + " = " + y0) + " : " + M("a = " + FR(a)) + ".", M("P(x) = " + poly(c)) + ".", M("S = " + neg) + " (lu sur le graphe ou par le tableau de signes)."]),
+        sol: ul([M("P(x) = a" + fac(r[0]) + fac(r[1]) + fac(r[2])) + ".", M("P(0) = " + -r[0] * r[1] * r[2] + "a = " + y0) + " (produit des opposés des zéros)" + " : " + M("a = " + FR(a)) + ".", M("P(x) = " + poly(c)) + ".", M("S = " + neg) + " (lu sur le graphe ou par le tableau de signes)."]),
         chk: [[y0 / (-r[0] * r[1] * r[2]), FRp(a)], [pv(c, 0), String(y0)], [pv(c, r[1]) === 0 ? 7 : 0, "7"]] }); },
     // Paramètre : divisibilité, reste
     () => { let a, r2, r3, k; do { a = pk([2, -2, 3, -1]); r2 = R.int(-4, 4); r3 = R.int(-4, 4); k = -(a + r2 + r3); } while (new Set([a, r2, r3]).size < 3 || r2 * r3 === 0 || k === 0 || a * r2 + a * r3 + r2 * r3 === 0);
       const b = a * r2 + a * r3 + r2 * r3, c = -a * r2 * r3, t = pk([1, -3, 4].filter((x) => ![a, r2, r3].includes(x)).concat([5])), cP = [1, k, b, c], rest = pv(cP, t);
       return X({ id: "polydiv", lv: 2, titre: "Trouver le paramètre",
-        q: "Soit " + M("P(x) = x^3 + kx^2" + sg(b) + "x" + sg(c)) + ", où " + M("k") + " est un nombre réel.",
+        q: "Soit " + M("P(x) = x^3 + kx^2" + ((t2) => (t2.startsWith("-") ? " - " + t2.slice(1) : " + " + t2))(poly([b, c]))) + ", où " + M("k") + " est un nombre réel.",
         parts: [{ label: "Détermine " + M("k") + " pour que " + M("P(x)") + " soit divisible par " + M(fac(a).slice(1, -1)) + ".", pts: 2 }, { label: "Avec cette valeur, factorise " + M("P(x)") + " complètement.", pts: 2 }, { label: "Sans effectuer la division, donne le reste de la division de " + M("P(x)") + " par " + M(fac(t).slice(1, -1)) + ".", pts: 1 }],
         sol: ul(["Il faut " + M("P(" + a + ") = 0") + " : " + M(a ** 3 + " + " + a * a + "k" + sg(b * a) + sg(c) + " = 0") + " ⟺ " + M("k = " + k) + ".", M("P(x) = " + poly(cP)) + " ; division par " + M(fac(a)) + " : " + M(poly([1, -(r2 + r3), r2 * r3])) + ", d'où " + M("P(x) = " + fac(a) + fac(Math.min(r2, r3)) + fac(Math.max(r2, r3))) + ".", "Le reste est " + M("P(" + t + ") = " + rest) + "."]),
         chk: [[-(a ** 3 + b * a + c) / (a * a), String(k)], [rest, String(rest)]] }); },
@@ -117,11 +118,11 @@
   // ===================== 2e · 4. Fonctions rationnelles =====================
   const EXR = [
     // Le coût moyen (fonction homographique en situation)
-    () => { const F = pk([400, 600, 900, 1200]), c = pk([3, 4, 5, 8]), d = pk([1, 2, 3]), x1 = pk([50, 100]), x2 = pk([200, 300]), xs = F / d, mq = c + pk([0.5, 1.5]), xq = F / (mq - c);
+    () => { const F = pk([400, 600, 900, 1200]), c = pk([3, 4, 5, 8]), d = pk([1, 2, 3]), x1 = pk([50, 100]), x2 = pk([200, 300]), xs = F / d, mq = c + pk([0.5, 2.5]), xq = F / (mq - c);
       return X({ id: "homog", lv: 1, titre: "Le coût moyen",
         q: "Un artisan fabrique des tasses. Ses frais fixes sont de " + Q(F, "CHF") + " par mois et chaque tasse lui coûte " + Q(c, "CHF") + " de matière. Le coût moyen d'une tasse, quand il en fabrique " + M("x") + ", est " + M("m(x) = \\frac{" + F + " + " + c + "x}{x}") + ".",
         parts: [{ label: "Calcule " + M("m(" + x1 + ")") + " et " + M("m(" + x2 + ")") + ". Interprète.", pts: 1 }, { label: "Quelle est l'asymptote horizontale du graphe de " + M("m") + " ? Que signifie-t-elle pour l'artisan ?", pts: 2 }, { label: "Combien de tasses doit-il fabriquer pour que le coût moyen soit au plus de " + Q(c + d, "CHF") + " ?", pts: 1 }, { label: "Exprime " + M("x") + " en fonction de " + M("m") + " (fonction réciproque), puis calcule " + M("x") + " pour un coût moyen de " + Q(mq, "CHF") + ".", pts: 2 }],
-        sol: ul([M("m(" + x1 + ") = " + N(c + F / x1)) + " CHF, " + M("m(" + x2 + ") = " + N(c + F / x2)) + " CHF : plus il en fabrique, moins chaque tasse coûte.", M("m(x) = " + c + " + \\frac{" + F + "}{x}") + " : asymptote " + M("y = " + c) + ". Le coût moyen s'approche de " + c + " CHF (la matière) sans jamais l'atteindre.", M(c + " + \\frac{" + F + "}{x} \\le " + (c + d)) + " ⟺ " + M("x \\ge " + xs)) + " tasses.", M("m = " + c + " + \\frac{" + F + "}{x}") + " ⟺ " + M("x = \\frac{" + F + "}{m - " + c + "}") + " ; " + M("x = \\frac{" + F + "}{" + N(mq - c) + "} = " + N(xq)) + " tasses."]),
+        sol: ul([M("m(" + x1 + ") = " + N(c + F / x1)) + " CHF, " + M("m(" + x2 + ") = " + N(c + F / x2)) + " CHF : plus il en fabrique, moins chaque tasse coûte.", M("m(x) = " + c + " + \\frac{" + F + "}{x}") + " : asymptote " + M("y = " + c) + ". Le coût moyen s'approche de " + c + " CHF (la matière) sans jamais l'atteindre.", M(c + " + \\frac{" + F + "}{x} \\le " + (c + d)) + " ⟺ " + M("x \\ge " + xs) + " tasses.", M("m = " + c + " + \\frac{" + F + "}{x}") + " ⟺ " + M("x = \\frac{" + F + "}{m - " + c + "}") + " ; " + M("x = \\frac{" + F + "}{" + N(mq - c) + "} = " + N(xq)) + " tasses."]),
         chk: [[c + F / x1, N(c + F / x1)], [F / d, String(xs)], [F / (mq - c), N(xq)]] }); },
     // Le cycliste (équation rationnelle)
     () => { const [v, dv, dt, d] = pk([[20, 5, 1, 100], [15, 5, 1, 60], [24, 6, 1, 120], [30, 10, 0.5, 60], [40, 10, 0.5, 100]]), o = -v - dv;
@@ -129,14 +130,14 @@
         q: "Un cycliste parcourt " + Q(d, "km") + ". S'il roulait " + Q(dv, "km/h") + " plus vite, il mettrait " + (dt === 1 ? "1 heure" : "30 minutes") + " de moins. On note " + M("v") + " sa vitesse (km/h).",
         parts: [{ label: "Exprime la durée du trajet en fonction de " + M("v") + " dans les deux cas, puis écris une équation.", pts: 2 }, { label: "Quelles sont les valeurs interdites ?", pts: 1 }, { label: "Résous l'équation et conclus.", pts: 2 }],
         sol: ul(["Durées " + M("\\frac{" + d + "}{v}") + " et " + M("\\frac{" + d + "}{v + " + dv + "}") + " ; " + M("\\frac{" + d + "}{v} - \\frac{" + d + "}{v + " + dv + "} = " + N(dt)) + ".", M("v \\neq 0") + " et " + M("v \\neq -" + dv) + ".", "On multiplie par " + M("v(v + " + dv + ")") + " : " + M(d * dv + " = " + N(dt) + "v(v + " + dv + ")") + ", soit " + M(poly([dt, dt * dv, -d * dv], "v") + " = 0") + " ; " + M("v = " + v) + " ou " + M("v = " + o) + " (négative, rejetée). Il roule à " + v + " km/h et met " + M(N(d / v)) + " h."]),
-        chk: [[d / v - d / (v + dv), N(dt)], [dt * o * o + dt * dv * o - d * dv, "0", 1e-6]] }); },
+        chk: [[d / v - d / (v + dv), N(dt)], [v + o, String(-dv)]] }); },
     // Équation rationnelle, fraction à étages, simplification
     () => { const a = pk([2, 3, 4, 5]);
       return X({ id: "eqrat", lv: 2, titre: "Une solution de trop",
         q: "Soit " + M("a = " + a) + ". On considère l'équation " + M("\\frac{x}{x - " + a + "} + \\frac{" + a + "}{x + " + a + "} = \\frac{" + 2 * a * a + "}{x^2 - " + a * a + "}") + ".",
         parts: [{ label: "Donne les valeurs interdites.", pts: 1 }, { label: "Résous l'équation.", pts: 2 }, { label: "Simplifie " + M("\\frac{1 + \\frac{" + a + "}{x}}{1 - \\frac{" + a * a + "}{x^2}}") + " en précisant les conditions.", pts: 2 }, { label: "Simplifie " + M("\\frac{x^2 - " + a * a + "}{x^2 + " + a + "x}") + ".", pts: 1 }],
         sol: ul([M("x \\neq " + a) + " et " + M("x \\neq -" + a) + " (" + M("x^2 - " + a * a + " = (x - " + a + ")(x + " + a + ")") + ").", "Dénominateur commun : " + M("x(x + " + a + ") + " + a + "(x - " + a + ") = " + 2 * a * a) + " ⟺ " + M("x^2 + " + 2 * a + "x - " + 3 * a * a + " = 0") + " ⟺ " + M("(x - " + a + ")(x + " + 3 * a + ") = 0") + ". " + M("x = " + a) + " est interdite : " + M("S = \\{-" + 3 * a + "\\}") + ".", "On multiplie haut et bas par " + M("x^2") + " : " + M("\\frac{x^2 + " + a + "x}{x^2 - " + a * a + "} = \\frac{x(x + " + a + ")}{(x - " + a + ")(x + " + a + ")} = \\frac{x}{x - " + a + "}") + ", pour " + M("x \\neq 0") + ", " + M("x \\neq \\pm " + a) + ".", M("\\frac{(x - " + a + ")(x + " + a + ")}{x(x + " + a + ")} = \\frac{x - " + a + "}{x}") + " pour " + M("x \\neq 0") + ", " + M("x \\neq -" + a) + "."]),
-        chk: [[-3 * a, String(-3 * a)], [-3 * a / (-3 * a - a) + a / (-3 * a + a) - (2 * a * a) / (9 * a * a - a * a), "0", 1e-9]] }); },
+        chk: [[-3 * a, String(-3 * a)], [-3 * a * (-3 * a + a) + a * (-3 * a - a), String(2 * a * a)]] }); },
     // Inéquation fractionnaire
     () => { let p, q; do { p = R.int(-4, 5); q = R.int(-3, 3); } while (p + q <= 0 || q === 0 || p === 0 || p + 2 * q === 0);
       const z = p + 2 * q;
@@ -146,7 +147,7 @@
         sol: ul(["Son signe dépend de " + M("x") + " : s'il est négatif, le sens de l'inégalité change.", M("\\frac{x" + sg(p) + " - 2(x" + sg(-q) + ")}{x" + sg(-q) + "} = \\frac{" + lin(-1, z) + "}{x" + sg(-q) + "} \\le 0") + ".", "Le numérateur s'annule en " + M(z) + " (positif avant, négatif après), le dénominateur en " + M(q) + " (valeur interdite). " + M("S = \\,]-\\infty \\,;\\, " + q + "[ \\cup [" + z + " \\,;\\, +\\infty[") + "."]),
         chk: [[z, String(z)], [((z + 1 + p) / (z + 1 - q) <= 2 && (q - 0.5 + p) / (q - 0.5 - q) <= 2 && !((q + 0.5 + p) / (q + 0.5 - q) <= 2)) ? 1 : 0, "1"]] }); },
     // Fonction homographique et sa réciproque
-    () => { let a, b, c, x1; do { a = pk([2, 3, -2]); c = pk([-3, -1, 2, 4]); b = R.int(-6, 6); x1 = R.int(-5, 5); } while (b === a * c || b === 0 || x1 === -c || (a * x1 + b) % (x1 + c) !== 0 || a * x1 + b === 0);
+    () => { let a, b, c, x1; do { a = pk([2, 3, -2]); c = pk([-3, -1, 2, 4]); b = R.int(-6, 6); x1 = R.int(-5, 5); } while (b === a * c || b === 0 || x1 === 0 || x1 === -c || (a * x1 + b) % (x1 + c) !== 0 || a * x1 + b === 0);
       const k = (a * x1 + b) / (x1 + c), f = (x) => (a * x + b) / (x + c);
       return X({ id: "homogrec", lv: 2, titre: "Fonction homographique",
         q: "Soit " + M("f(x) = \\frac{" + lin(a, b) + "}{x" + sg(c) + "}") + ".", fig: FIG.plot([{ f }], [], { numbers: true, xr: [-8, 8], yr: [-8, 8], step: 2, squash: 0.7, vlines: [-c] }),
@@ -187,7 +188,7 @@
         q: "On place " + Q(C0, "CHF") + " à " + N(t).replace("{,}", ",") + " % d'intérêts composés par an (les intérêts s'ajoutent au capital chaque année).",
         parts: [{ label: "Exprime le capital " + M("C(n)") + " après " + M("n") + " années.", pts: 1 }, { label: "Calcule le capital après " + n + " ans (au centime).", pts: 1 }, { label: "Avec des intérêts simples (" + N(t).replace("{,}", ",") + " % du capital de départ chaque année), combien aurait-on après " + n + " ans ? Compare.", pts: 1 }, { label: "Par essais successifs, après combien d'années entières le capital aura-t-il doublé ?", pts: 2 }],
         sol: ul([M("C(n) = " + N(C0) + " \\cdot " + N(1 + t / 100) + "^n") + " (fonction exponentielle de base " + M(N(1 + t / 100)) + ").", M("C(" + n + ") \\approx " + A(Cn, 2)) + " CHF.", M(N(C0) + " + " + n + " \\cdot " + N((C0 * t) / 100) + " = " + N(Cs)) + " CHF : moins que les intérêts composés (les intérêts rapportent eux aussi des intérêts).", M("C(" + (nd - 1) + ") \\approx " + A(C0 * (1 + t / 100) ** (nd - 1), 2)) + " < " + N(2 * C0) + " et " + M("C(" + nd + ") \\approx " + A(C0 * (1 + t / 100) ** nd, 2)) + " ≥ " + N(2 * C0) + " : après " + nd + " ans."]),
-        chk: [[Cn, A(Cn, 2), 0.01], [Cs, N(Cs)], [Math.log(2) / Math.log(1 + t / 100), String(nd), 1]] }); },
+        chk: [[Cn, A(Cn, 2), 0.01], [Cs, N(Cs)], [(1 + t / 100) ** nd >= 2 && (1 + t / 100) ** (nd - 1) < 2 ? nd : -1, String(nd)]] }); },
     // Le médicament (décroissance, modèle à partir de deux mesures)
     () => { const D0 = pk([400, 500, 800]), p = pk([20, 25, 30]), b = 1 - p / 100, t1 = 2, t2 = 4, q1 = D0 * b ** t1, q2 = D0 * b ** t2, h = pk([3, 5]), qh = D0 * b ** h;
       return X({ id: "modexp", lv: 2, titre: "Le médicament",
@@ -207,8 +208,8 @@
       return X({ id: "expo", lv: 2, titre: "Lire une exponentielle",
         q: "Le graphe ci-dessous est celui de " + M("f(x) = a \\cdot b^x") + ". Il passe par deux points à coordonnées entières, en " + M("x = 0") + " et en " + M("x = 1") + ".", fig: FIG.plot([{ f }], [[0, a, ""], [1, f(1), ""]], { numbers: true, xr: [-4, 4], yr: [-1, 8], squash: 0.8 }),
         parts: [{ label: "Lis " + M("a") + " et " + M("b") + ". La fonction est-elle croissante ou décroissante ?", pts: 2 }, { label: "Quelle est l'asymptote du graphe ?", pts: 1 }, { label: "Résous " + M("f(x) = " + N(y3)) + " sans calculatrice.", pts: 1 }, { label: "Donne l'expression de la fonction dont le graphe est le symétrique de celui de " + M("f") + " par rapport à l'axe des ordonnées.", pts: 1 }],
-        sol: ul([M("f(0) = a = " + a) + ", " + M("f(1) = ab = " + N(f(1))) + " : " + M("b = " + N(b)) + " ; " + (b > 1 ? "croissante (" + M("b > 1") + ")." : "décroissante (" + M("0 \\lt b \\lt 1") + ")."), "L'axe des abscisses " + M("y = 0") + " (du côté " + (b > 1 ? "gauche" : "droit") + ").", M(a + " \\cdot " + N(b) + "^x = " + N(y3)) + " ⟺ " + M(N(b) + "^x = " + N(y3 / a)) + " ⟺ " + M("x = " + x3) + ".", M("g(x) = f(-x) = " + a + " \\cdot " + N(1 / b) + "^x") + "."]),
-        chk: [[f(x3), N(y3)], [1 / b, N(1 / b)]] }); },
+        sol: ul([M("f(0) = a = " + a) + ", " + M("f(1) = ab = " + N(f(1))) + " : " + M("b = " + N(b)) + " ; " + (b > 1 ? "croissante (" + M("b > 1") + ")." : "décroissante (" + M("0 \\lt b \\lt 1") + ")."), "L'axe des abscisses " + M("y = 0") + " (du côté " + (b > 1 ? "gauche" : "droit") + ").", M(a + " \\cdot " + N(b) + "^x = " + N(y3)) + " ⟺ " + M(N(b) + "^x = " + N(y3 / a)) + " ⟺ " + M("x = " + x3) + ".", M("g(x) = f(-x) = " + a + " \\cdot \\left(" + FR(1 / b) + "\\right)^x") + "."]),
+        chk: [[f(x3), N(y3)], [1 / b, FRp(1 / b)]] }); },
   ];
   const RAISONE = [
     () => { const a = pk([2, 3, 5]), b = pk([3, 4, 7]), x = pk([2, 3]), w = who();
@@ -228,14 +229,15 @@
   // ===================== 6. Composition et réciproque =====================
   const EXF = [
     // Composer
-    () => { const a = pk([2, 3, -2]), b = pk([-3, -1, 1, 4]), c = pk([-4, -1, 2, 5]), x1 = pk([-2, 2, 3]), gf = (x) => (a * x + b) ** 2 + c, fg = (x) => a * (x * x + c) + b, v = pk([1, 2, 3]), target = v * v + c, s1 = (v - b) / a, s2 = (-v - b) / a;
+    () => { let a, b, c, x1, v; do { a = pk([2, 3, -2]); b = pk([-3, -1, 1, 4]); c = pk([-4, -1, 2, 5]); x1 = pk([-2, 2, 3]); v = pk([1, 2, 3]); } while ((a * x1 + b) ** 2 + c === 0 || a * (x1 * x1 + c) + b === 0 || a * c + b === 0 || v * v + c === 0 || v === b || v === -b || a * x1 + b === 0 || x1 * x1 + c === 0);
+      const gf = (x) => (a * x + b) ** 2 + c, fg = (x) => a * (x * x + c) + b, target = v * v + c, s1 = (v - b) / a, s2 = (-v - b) / a;
       return X({ id: "compo", lv: 1, titre: "Composer deux fonctions",
         q: "Soit " + M("f(x) = " + lin(a, b)) + " et " + M("g(x) = x^2" + sg(c)) + ".",
         parts: [{ label: "Calcule " + M("(g \\circ f)(" + x1 + ")") + " et " + M("(f \\circ g)(" + x1 + ")") + ".", pts: 1 }, { label: "Donne les expressions de " + M("(g \\circ f)(x)") + " et " + M("(f \\circ g)(x)") + ". La composition est-elle commutative ?", pts: 2 }, { label: "Résous " + M("(g \\circ f)(x) = " + target) + ".", pts: 2 }],
         sol: ul([M("f(" + x1 + ") = " + (a * x1 + b)) + ", " + M("g(" + (a * x1 + b) + ") = " + gf(x1)) + " ; " + M("g(" + x1 + ") = " + (x1 * x1 + c)) + ", " + M("f(" + (x1 * x1 + c) + ") = " + fg(x1)) + ".", M("(g \\circ f)(x) = (" + lin(a, b) + ")^2" + sg(c)) + " ; " + M("(f \\circ g)(x) = " + a + "(x^2" + sg(c) + ")" + sg(b) + " = " + a + "x^2" + sg(a * c + b)) + ". Non : les résultats diffèrent.", M("(" + lin(a, b) + ")^2 = " + v * v) + " ⟺ " + M(lin(a, b) + " = \\pm " + v) + " : " + M("x = " + FR(s1)) + " ou " + M("x = " + FR(s2)) + "."]),
         chk: [[gf(x1), String(gf(x1))], [fg(x1), String(fg(x1))], [gf(s1), String(target), 1e-9], [s2, FRp(s2)]] }); },
     // Décomposer et domaine
-    () => { const a = pk([2, 3, 4]), b = pk([-8, -6, 6, 9]), c = pk([1, 2, 5]), x0 = -b / a, xv = pk([4, 5, 6]).find((x) => a * x + b >= 0) || 7, val = Math.sqrt(a * xv + b) - c;
+    () => { const a = pk([2, 3, 4]), b = pk([-8, -6, 6]), c = pk([1, 2, 5]), x0 = -b / a, xv = pk([5, 6, 7]), val = Math.sqrt(a * xv + b) - c;
       return X({ id: "decomp", lv: 2, titre: "Décomposer une fonction",
         q: "Soit " + M("h(x) = \\sqrt{" + lin(a, b) + "}" + sg(-c)) + ".",
         parts: [{ label: "Écris " + M("h") + " comme composée de deux fonctions " + M("f") + " et " + M("g") + " : " + M("h = g \\circ f") + ".", pts: 1 }, { label: "Détermine le domaine de " + M("h") + ".", pts: 1 }, { label: "Calcule " + M("h(" + xv + ")") + " (au centième).", pts: 1 }, { label: "Pour quel " + M("x") + " a-t-on " + M("h(x) = " + (2 * c)) + " ?", pts: 2 }],
@@ -256,7 +258,7 @@
         sol: ul([M("-" + N(e) + " \\le x - " + L + " \\le " + N(e)) + " ⟺ " + M("x \\in [" + N(L - e) + " \\,;\\, " + N(L + e) + "]") + ".", vals.map((v) => N(v).replace("{,}", ",") + (Math.abs(v - L) <= e + 1e-9 ? " oui" : " non")).join(" ; ") + " (on compare l'écart " + M("|x - " + L + "|") + " à " + N(e).replace("{,}", ",") + ").", M("|2x - " + 2 * L + "| = 2|x - " + L + "| = " + N(3 * e)) + " ⟺ " + M("|x - " + L + "| = " + N(1.5 * e)) + " : " + M("x = " + N(L - 1.5 * e)) + " ou " + M("x = " + N(L + 1.5 * e)) + " ; deux pièces à " + N(1.5 * e).replace("{,}", ",") + " mm de la cote, refusées."]),
         chk: [[L + 1.5 * e, N(L + 1.5 * e)], [L - e, N(L - e)]] }); },
     // Réciproque d'une restriction
-    () => { const a = pk([-2, 1, 2, 3]), b = pk([-4, -1, 3, 5]), y1 = b + pk([4, 9, 16]), x1 = a + Math.sqrt(y1 - b);
+    () => { let a, b, y1, x1; do { a = pk([-2, 1, 2, 3]); b = pk([-4, -1, 3, 5]); y1 = b + pk([4, 9, 16]); x1 = a + Math.sqrt(y1 - b); } while (x1 === 0 || y1 === 0 || b === -1);
       return X({ id: "recip", lv: 3, titre: "Restreindre pour inverser",
         q: "Soit " + M("f(x) = (x" + sg(-a) + ")^2" + sg(b)) + ".",
         parts: [{ label: "Montre que " + M("f") + " n'est pas injective sur " + M("\\mathbb{R}") + " (donne deux nombres qui ont la même image).", pts: 1 }, { label: "Sur quel intervalle " + M("[a \\,;\\, +\\infty[") + " la fonction est-elle bijective vers " + M("[" + b + " \\,;\\, +\\infty[") + " ?", pts: 1 }, { label: "Détermine la réciproque de cette restriction.", pts: 2 }, { label: "Calcule " + M("f^{-1}(" + y1 + ")") + " et vérifie.", pts: 1 }],
@@ -334,6 +336,7 @@
   const { N, A, Q, pk, FR, sg, par, X, ul, who, VF, D } = RX;
   const FRp = (v) => FR(v).replace(/\\frac\{(\d+)\}\{(\d+)\}/, "$1/$2");
   const pt = (x, y) => "(" + FR(x) + " \\,;\\, " + FR(y) + ")";
+  const sh = (x, v) => (Math.abs(v) < 1e-12 ? x : "(" + x + sg(-v) + ")"); // (x - v), ou x si v = 0
   const vec = (x, y) => "\\begin{pmatrix} " + FR(x) + " \\\\ " + FR(y) + " \\end{pmatrix}";
   const sq = (n) => { let k = 1; for (let d = 2; d * d <= n; d++) while (n % (d * d) === 0) { n /= d * d; k *= d; } return n === 1 ? [String(k), String(k)] : [(k === 1 ? "" : k) + "\\sqrt{" + n + "}", (k === 1 ? "" : k) + "√" + n]; };
 
@@ -418,11 +421,11 @@
         sol: ul([M("2u^2 " + (s ? "- u" : "+ u") + " - 1 = 0") + " : " + M("u = " + roots[0]) + " ou " + M("u = " + roots[1]) + ". Solutions " + sols.map((x) => M(x)).join(", ") + ".", M(k + "x = \\pm\\frac{\\pi}{3} + 2n\\pi") + ", " + M("x = \\pm\\frac{\\pi}{" + 3 * k + "} + \\frac{2n\\pi}{" + k + "}") + " : " + 2 * k + " solutions, " + Array.from({ length: k }, (_, n) => [1 + 6 * n, 6 * (n + 1) - 1]).flat().map((m) => M("\\frac{" + m + "\\pi}{" + 3 * k + "}")).join(", ") + "."]),
         chk: [...num.map((x) => [s ? 2 * Math.sin(x) ** 2 - Math.sin(x) : 2 * Math.cos(x) ** 2 + Math.cos(x), "1", 1e-9]), [Math.cos(k * (Math.PI / (3 * k))), "1/2", 1e-9]] }); },
     // Lire le graphe d'une fonction sinusoïdale
-    () => { const Am = pk([1, 2, 3]), b = pk([1, 2]), c = pk([-1, 1, 2]);
+    () => { const Am = pk([1, 2, 3]), b = pk([1, 2]), c = pk([-1, 1, 2].filter((y) => y + Am !== 0));
       return X({ id: "trigfn", lv: 2, titre: "Lire une sinusoïde",
         q: "Le graphe ci-dessous est celui de " + M("f(x) = A\\sin(bx) + c") + " sur " + M("[0 \\,;\\, 2\\pi]") + ", avec " + M("A > 0") + " et " + M("b > 0") + ".", fig: trigFig(Am, b, c),
         parts: [{ label: "Lis le maximum et le minimum de " + M("f") + ". Déduis-en " + M("A") + " et " + M("c") + ".", pts: 2 }, { label: "Lis la période et déduis-en " + M("b") + ".", pts: 1 }, { label: "Pour quels " + M("x") + " de " + M("[0 \\,;\\, 2\\pi]") + " la fonction atteint-elle son maximum ?", pts: 1 }],
-        sol: ul(["Max " + M(c + Am) + ", min " + M(c - Am) + " : " + M("A = \\frac{" + (c + Am) + " - " + par(c - Am) + "}{2} = " + Am) + ", " + M("c = \\frac{" + (c + Am) + " + " + par(c - Am) + "}{2} = " + c) + ".", "Période " + M(b === 1 ? "2\\pi" : "\\pi") + " ; " + M("\\frac{2\\pi}{b} = " + (b === 1 ? "2\\pi" : "\\pi")) + " : " + M("b = " + b) + ".", M(b + "x = \\frac{\\pi}{2} + 2n\\pi") + " : " + (b === 1 ? M("x = \\frac{\\pi}{2}") : M("x = \\frac{\\pi}{4}") + " et " + M("x = \\frac{5\\pi}{4}")) + "."]),
+        sol: ul(["Max " + M(c + Am) + ", min " + M(c - Am) + " : " + M("A = \\frac{" + (c + Am) + " - " + par(c - Am) + "}{2} = " + Am) + ", " + M("c = \\frac{" + (c + Am) + " + " + par(c - Am) + "}{2} = " + c) + ".", "Période " + M(b === 1 ? "2\\pi" : "\\pi") + " ; " + M("\\frac{2\\pi}{b} = " + (b === 1 ? "2\\pi" : "\\pi")) + " : " + M("b = " + b) + ".", M((b === 1 ? "" : b) + "x = \\frac{\\pi}{2} + 2n\\pi") + " : " + (b === 1 ? M("x = \\frac{\\pi}{2}") : M("x = \\frac{\\pi}{4}") + " et " + M("x = \\frac{5\\pi}{4}")) + "."]),
         chk: [[Am * Math.sin(b * (Math.PI / (2 * b))) + c, String(Am + c)], [Am, String(Am)]] }); },
     // Cercle trigonométrique et longueur d'arc
     () => { const [n, d] = pk([[5, 6], [3, 4], [2, 3], [7, 6], [5, 4], [5, 3], [11, 6]]), deg = (180 * n) / d, r = pk([3, 5, 12]), s = r * (n / d) * Math.PI;
@@ -450,7 +453,8 @@
   // ===================== Géométrie vectorielle =====================
   const EXV = [
     // Le parallélogramme
-    () => { const A0 = [R.int(-4, 0), R.int(-3, 1)], u = [pk([3, 4, 5]), pk([-1, 1, 2])], v = [pk([-2, -1, 1]), pk([3, 4])], B = [A0[0] + u[0], A0[1] + u[1]], Dd = [A0[0] + v[0], A0[1] + v[1]], C = [B[0] + v[0], B[1] + v[1]], ps = u[0] * v[0] + u[1] * v[1];
+    () => { let A0, u, v; do { A0 = [R.int(-4, 0), R.int(-3, 1)]; u = [pk([3, 4, 5]), pk([-1, 1, 2])]; v = [pk([-2, -1, 1]), pk([3, 4])]; } while (A0[0] + v[0] === 0 || A0[1] + v[1] === 0 || 2 * A0[0] + u[0] + v[0] === 0);
+      const B = [A0[0] + u[0], A0[1] + u[1]], Dd = [A0[0] + v[0], A0[1] + v[1]], C = [B[0] + v[0], B[1] + v[1]], ps = u[0] * v[0] + u[1] * v[1];
       return X({ id: "vecteurs", lv: 1, titre: "Compléter un parallélogramme",
         q: "On donne " + M("A" + pt(A0[0], A0[1])) + ", " + M("B" + pt(B[0], B[1])) + " et " + M("C" + pt(C[0], C[1])) + ".",
         parts: [{ label: "Calcule les composantes de " + M("\\vec{AB}") + " et " + M("\\vec{BC}") + ".", pts: 1 }, { label: "Détermine " + M("D") + " pour que " + M("ABCD") + " soit un parallélogramme.", pts: 2 }, { label: "Calcule le centre du parallélogramme.", pts: 1 }, { label: "Est-ce un rectangle ? Justifie avec un produit scalaire.", pts: 1 }],
@@ -472,9 +476,9 @@
         sol: ul([M("\\vec{v} = " + vec(res[0], res[1])) + ", " + M("\\|\\vec{v}\\| = \\sqrt{" + N(res[0] ** 2) + " + " + res[1] ** 2 + "} \\approx " + A(sp, 2)) + " m/s.", M("\\tan\\varphi = \\frac{" + N(c[0]) + "}{" + b[1] + "}") + ", " + M("\\varphi \\approx " + A(ang, 1) + "°") + ".", "Seule la composante perpendiculaire fait traverser : " + M(w + " : " + b[1] + " = " + N(t)) + " s ; déport " + M(N(c[0]) + " \\cdot " + N(t) + " = " + N(drift)) + " m."]),
         chk: [[sp, A(sp, 2), 0.01], [ang, A(ang, 1), 0.1], [drift, N(drift)]] }); },
     // Paramètre : colinéaires, perpendiculaires
-    () => { const k = pk([2, 3, 4]), p = pk([2, 3, 5]), q = pk([1, 3, 4]), mp = (2 * 1) / (p + 1);
+    () => { const k = pk([2, 3, 4]), p = pk([2, 3, 5]), q = pk([1, 3, 4]);
       return X({ id: "vecteurs", lv: 2, titre: "Choisir le paramètre",
-        q: "Soit " + M("\\vec{u} = " + vec("m", 2).replace("\\frac{m}", "m")) + " et " + M("\\vec{v} = " + "\\begin{pmatrix} " + 2 * k * k + " \\\\ m \\end{pmatrix}") + ", où " + M("m") + " est un réel.",
+        q: "Soit " + M("\\vec{u} = \\begin{pmatrix} m \\\\ 2 \\end{pmatrix}") + " et " + M("\\vec{v} = " + "\\begin{pmatrix} " + 2 * k * k + " \\\\ m \\end{pmatrix}") + ", où " + M("m") + " est un réel.",
         parts: [{ label: "Pour quelles valeurs de " + M("m") + " les vecteurs sont-ils colinéaires ?", pts: 2 }, { label: "Pour quelle valeur de " + M("m") + " le vecteur " + M("\\vec{u}") + " est-il perpendiculaire à " + M("\\vec{w} = " + vec(p, -q)) + " ?", pts: 1 }, { label: "Pour " + M("m = " + 2 * k) + ", calcule " + M("\\|\\vec{u} + \\vec{v}\\|") + " (valeur exacte).", pts: 2 }],
         sol: ul(["Déterminant nul : " + M("m \\cdot m - 2 \\cdot " + 2 * k * k + " = 0") + " ⟺ " + M("m^2 = " + 4 * k * k) + " ⟺ " + M("m = \\pm " + 2 * k) + ".", M(p + "m - 2 \\cdot " + q + " = 0") + " ⟺ " + M("m = " + FR((2 * q) / p)) + ".", M("\\vec{u} + \\vec{v} = " + vec(2 * k + 2 * k * k, 2 + 2 * k)) + " ; norme " + M("\\sqrt{" + ((2 * k + 2 * k * k) ** 2 + (2 + 2 * k) ** 2) + "} = " + sq((2 * k + 2 * k * k) ** 2 + (2 + 2 * k) ** 2)[0]) + "."]),
         chk: [[Math.sqrt(8 * k * k), String(2 * k)], [(2 * q) / p, FRp((2 * q) / p)], [Math.hypot(2 * k + 2 * k * k, 2 + 2 * k), sq((2 * k + 2 * k * k) ** 2 + (2 + 2 * k) ** 2)[1]]] }); },
