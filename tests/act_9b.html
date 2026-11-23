@@ -1,0 +1,37 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css"><body style="width:400px"><main id="app"></main><pre id="log" hidden></pre>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_manip.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script>
+// Leçons actives 9e, chapitres 7 à 12 (act_9b.js) : chaque leçon est jouée (devine juste, puis chaque défi gagné avec
+// la bonne réponse ou le bon geste) ; on vérifie que l'étape « Retiens » s'ouvre et qu'aucun NaN / undefined n'apparaît.
+const log=[];const click=(s)=>{const e=typeof s==="string"?document.querySelector(s):s;if(!e){log.push("MANQUE "+s);return false;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));return true;};
+const gfb=()=>document.querySelector('#gfb').textContent;
+// Réponses tapées (mode réponse), dans l'ordre des défis d'origine.
+const ANS={solides:[10,18,10],volpave:[24,120,150],fracper:[6,45,11],proptab:["3,5","3,2",25],prop:["8,4","67,2","17,5"],change:[57,80,399],agrand:["2,5","37,5",6],diagr:[15,"4,9",135]};
+// Erreurs typiques : elles ne doivent PAS valider le défi.
+const BAD={volpave:[16,125],proptab:[10,5],prop:[7,45],change:["63,16","72,2"],agrand:[15,30,5],diagr:[5,5,9],solides:[5,12,15],fracper:[2,"0,45",12]};
+const range=(v)=>{const el=document.querySelector('#play input[type=range]');el.value=String(v);el.dispatchEvent(new Event("input",{bubbles:true}));};
+const tapPt=(x,y)=>click(document.querySelector('#play .act-pt[data-x="'+x+'"][data-y="'+y+'"]'));
+// Gestes (manipulations), défi par défi ; le premier geste de chaque défi est volontairement faux.
+const MANIP={
+  fracrep:[()=>{range(4);range(7);},()=>{range(3);range(4);},()=>{range(9);range(10);}],
+  fracsimp:[()=>{click('[data-cut="2"]');click('[data-reset]');click('[data-cut="3"]');},()=>{click('[data-grp="5"]');click('[data-grp="2"]');click('[data-grp="3"]');},()=>{click('[data-grp="2"]');click('[data-cut="3"]');}],
+  symetries:[()=>{tapPt(2,3);tapPt(-2,-3);},()=>{tapPt(-3,2);tapPt(-3,-2);},()=>{tapPt(-1,1);tapPt(3,1);}],
+};
+const typeAns=(v)=>{const el=document.querySelector(".act-in");if(!el)return false;el.value=String(v);click("[data-go]");return true;};
+const run=(id)=>{ try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; screenLesson(id,()=>{});
+  const A=ACTIVE[id]; click('#pc button[data-i="'+A.predict.good+'"]'); const msgs=[]; const X=actPrep(A);
+  for(let k=0;k<X.defis.length;k++){ const o=A.defis.indexOf(X.defis[k]); const b=gfb();
+    if(MANIP[id]) MANIP[id][o]();
+    else { if(BAD[id]&&BAD[id][o]!==undefined){typeAns(BAD[id][o]); if(gfb()!==b){msgs.push("défi "+(o+1)+" validé par une MAUVAISE réponse ÉCHEC");continue;}} typeAns(ANS[id][o]); }
+    if(gfb()===b) msgs.push("défi "+(o+1)+" non gagné ÉCHEC"); else msgs.push((o+1)+":"+gfb().slice(1,40)); }
+  const html=document.body.innerHTML.replace(/<script[\s\S]*?<\/script>/g,"").replace(/<pre id="log"[\s\S]*?<\/pre>/,""); const bad=/NaN|undefined|Infinity/.test(html);
+  log.push(id+" ["+X.mode+"] : "+(document.getElementById("s3").hidden||bad?"ÉCHEC "+(bad?"(NaN/undefined) ":""):"OK")+" · "+msgs.join(" | "));
+  }catch(e){log.push(id+" ERR ÉCHEC "+e.stack)} };
+const IDS=["solides","volpave","fracrep","fracsimp","fracper","proptab","prop","change","agrand","symetries","diagr"];
+for(const id of IDS){ if(!ACTIVE[id]) log.push(id+" : ÉCHEC (pas de leçon active)"); else if(!LESSONS[id]) log.push(id+" : ÉCHEC (pas de LESSONS)"); else run(id); }
+// Textes : virgule décimale, pas de « : » de division entre deux nombres, pas de \frac à simple barre.
+const src=JSON.stringify(IDS.map(i=>[ACTIVE[i].predict.q,ACTIVE[i].predict.choices,ACTIVE[i].predict.why,ACTIVE[i].defis]));
+if(/\d\.\d/.test(src)) log.push("ÉCHEC point décimal dans les textes");
+if(/\d : \d/.test(src)) log.push("ÉCHEC « : » de division dans les textes");
+document.getElementById("log").hidden=false; document.getElementById("log").textContent=log.join("\n");</script>
