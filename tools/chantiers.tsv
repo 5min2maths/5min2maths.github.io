@@ -1,0 +1,43 @@
+Code	Chantier	Famille	Rang	État	Avancement	Mis à jour	Où en est-on	Prochaine étape
+A	Lots « notion complète » (pas à pas, erreurs typiques, contextes, valeurs)	Pédagogie	4	en cours	66 %	23.11	119 notions couvertes sur 179 (plan tools/plan_pas_a_pas.md)	lot suivant : aire3, disque, grandmanq, premiers, fracrep (10e)
+11e-P	11e Proportionnalité « nickel » + test de préparation	Pédagogie	4	à contrôler	90 %	15.11	cases 1 à 13 faites, test de préparation fait (tools/chantier_11e.md)	contrôle par l'enseignant avant le test 11LS du 04.12
+11e-CL	11e Calcul littéral « nickel » (CL1, CL2)	Pédagogie	4	à contrôler	80 %	16.11	notions et test de préparation faits	contrôle ; CL1 prêt pour le 11.12, CL2 pour le 15.01
+1C	1re Collège complète	Pédagogie	4	à contrôler	90 %	20.11	toutes les notions au standard (tirages réels)	contrôle par l'enseignant (colonne Contrôlé)
+V	Leçons actives (devine, manipule, retiens) pour chaque notion	Pédagogie	5	en cours	70 %	23.11	9e, 10e (partiel), 11e, 1re et 2e Collège, MP 2e faites ; voir % dans Synthèse	compléter 10e et MP 1re
+K	Figures à manipuler (bibliothèque tactile manip.js)	Pédagogie	5	en cours	40 %	23.11	15 leçons refaites en « glisse sur la figure » (tuiles, balance, fractions, droite, Thalès…)	étendre aux notions où un geste aide (tools/manipulation.md)
+U	Exercices riches et tests de préparation (pas du drill)	Pédagogie	4	en cours	70 %	23.11	9e, 10e, 11e, 1re Collège, 2e Collège (14 banques), MP 1re et MP 2e (partiel)	MP : chapitres restants ; contrôle d'un sujet par niveau
+I	« Trouve l'erreur »	Pédagogie	5	en cours	40 %	23.11	dans les tests de préparation et la 11e Proportionnalité	étendre au fil des lots
+J	Estimation, Fermi, questions curieuses	Pédagogie	6	fait	100 %	21.11	61 questions curieuses, 5 familles (src/curieux.js)	nouveaux lots si les élèves aiment
+W	Générateurs à réponses 0 ou ±1	Qualité	7	en cours	60 %	23.11	filtre de trivialité et corrections au fil des niveaux (relatifs, 2e Collège)	audit tests/trivial.html, polynômes et bijection
+X	Formes sur figure (repère, lecture de graphique)	Qualité	7	à faire	20 %	23.11	quelques lectures graphiques (suites FR)	variantes pour repere et lectgraph
+B	Vérification unique avant publication	Technique	1	fait	90 %	23.11	tools/run_tests.sh : 106 pages, verrou machine, 3 navigateurs au plus	(option) bloquer le push en cas d'échec
+N	Remontée anonyme des erreurs JavaScript	Technique	1	fait	100 %	23.11	envoi + feuille « erreurs », ligne dans le point ; Apps Script redéployé	surveiller le point
+F	Temps de chargement	Technique	1	en cours	70 %	23.11	mesuré (tools/mesure_chargement.py) : habitué 2,0 s → 0,7 s avec le code dans app.js à part	relancer les tests complets puis publier ; première visite en 4G lente encore ≈ 11 s
+ROB	Élève-robot (test nocturne de toute l'app)	Technique	1	en cours	70 %	23.11	réparé : une page par classe, 5 min max ; jamais abouti avant	vérifier le rapport de la nuit (suivi/robot/resume.txt)
+C	Mesure par question (signaux muets)	Données	2	fait	100 %	20.11	une ligne anonyme par question et leçon ; tools/signaux.py	analyser quand la 11LS sera ouverte
+T	Indicateurs de rétention (J+1, J+7, J+30)	Données	2	fait	100 %	23.11	dans le point : J+1 24 %, J+7 22 %	suivre ; vrai test = 11LS
+D	Routine des retours testeurs	Données	7	en cours	—	22.11	commentaires dans l'onglet Commentaires, 👎 dans le point	une fois par semaine
+P	Rappel de sauvegarde	Produit	3	fait	100 %	22.11	carte « code de sauvegarde » si aucun code ou code de plus de 30 jours	—
+R	Rappel quotidien (agenda .ics)	Produit	3	abandonné	—	21.11	retiré : trop compliqué pour les élèves	—
+S	Progression visible	Produit	5	à faire	10 %	23.11	—	mi-décembre (planning S50)
+E	Icônes de badges	Produit	6	abandonné	—	22.11	badges abandonnés le 22.11	—
+M	Récompenses visuelles	Produit	6	en partie	30 %	22.11	grades Mathélo « collector » numérotés	—
+O	Accessibilité (police dyslexie, taille du texte, contrastes)	Produit	7	à faire	10 %	23.11	—	1 séance
+Q	Captures automatiques des figures	Technique	7	à faire	10 %	23.11	galerie tests/gallery.html à la main	—
+L	Parcours d'examen (EVACOM 11e, épreuves communes, matu)	Produit	6	à faire	0 %	14.11	—	EVACOM prêt avant fin avril
+FICHE	« Ma fiche » (synthèse à compléter)	Produit	—	abandonné	—	23.11	retirée : plus-value pas convaincante ; code dans la branche archive/fiche	—
+CARN	Carnet d'erreurs et programme du test	Produit	—	fait	100 %	21.11	publiés le 20.11, installer fait le 21.11	—
+QCM	Autoévaluation « Je sais… » + test rapide	Produit	—	fait	100 %	21.11	modèle des champs (src/qcm.js)	—
+ACC	Accueil à 6 cases	Produit	—	fait	100 %	22.11	une page, pas d'onglets	—
+MOD	Deux modes (libre / scolaire)	Produit	—	fait	100 %	19.11	—	—
+AUT	Mode auteur et écran Statistiques	Données	—	fait	100 %	22.11	appareils de l'auteur exclus des stats	—
+VOIX	Lecture à voix haute	Produit	—	en réserve	0 %	21.11	idée (traducteur des formules)	—
+H	Comptes, étapes 2 et 3 (synchronisation, code classe)	Produit	8	en attente	—	14.11	étape 1 faite (code de sauvegarde)	selon l'usage et l'accord DIP
+G	Couverture : 3e et 4e Collège, MP3-MP4, repère 3D	Couverture	8	en cours	30 %	23.11	3e Collège : 9 notions de dérivation ; programme 3e–4e étudié	MP3-MP4, repère 3D
+FR	France : collège, seconde, 1re et Tle	Couverture	8	en cours	25 %	23.11	référentiels importés ; collège 5 notions, seconde 8, 1re-Tle 10	après la bêta (ROADMAP § 5)
+Y	Pays et programmes (BE, LU, QC…)	Long terme	—	études	5 %	22.11	notes tools/referentiels_belgique, _luxembourg, _quebec	2027-2028
+Z	Localisation légère (milliers, monnaie, vocabulaire)	Long terme	—	à faire	0 %	22.11	—	2027-2028
+AB	Primaire, cycle 2 (fin de primaire)	Long terme	—	études	5 %	23.11	référentiel PER 7P–8P et CM1–CM2 (tools/primaire.md)	pas avant juin 2027
+AC	Primaire, cycle 1	Long terme	—	à faire	0 %	22.11	—	2028 et après
+AD	Québec, Maghreb, Afrique francophone	Long terme	—	à faire	0 %	22.11	—	2028 et après
+DIP	Bêta : diffusion au-delà des testeurs (cadre DIP)	Diffusion	—	à décider	—	22.11	46 testeurs, vrai test = ouverture à la 11LS	décision de l'enseignant

@@ -180,6 +180,47 @@ def onglet_robot(wb, bold, head_fill):
     return len(d.get("problemes", []))
 
 
+def onglet_chantiers(wb, bold, head_fill):
+    """Onglet « Chantiers » (23.11) : tous les chantiers du projet et leur état (source : tools/chantiers.tsv, à tenir à
+    jour) ; la colonne « Remarque » de l'utilisateur est conservée d'une génération à l'autre."""
+    src = ROOT / "tools" / "chantiers.tsv"
+    if not src.exists():
+        return 0
+    rem = {}
+    if OUT.exists():
+        try:
+            old = load_workbook(OUT)
+            if "Chantiers" in old.sheetnames:
+                w = old["Chantiers"]
+                h = [c.value for c in w[1]]
+                if "Remarque" in h:
+                    for r in w.iter_rows(min_row=2, values_only=True):
+                        if r[0] and r[h.index("Remarque")]:
+                            rem[r[0]] = r[h.index("Remarque")]
+        except Exception:
+            pass
+    lignes = [l.split("\t") for l in src.read_text().splitlines() if l.strip()]
+    ws = wb.create_sheet("Chantiers", 1)
+    ws.append(lignes[0] + ["Remarque"])
+    for c in ws[1]:
+        c.font, c.fill = bold, head_fill
+    for l in lignes[1:]:
+        ws.append(l + [rem.get(l[0])])
+    couleurs = {"fait": "C6EFCE", "en cours": "DDEBF7", "à contrôler": "FFEB9C", "en partie": "DDEBF7", "à faire": "F2F2F2",
+                "abandonné": "D9D9D9", "en attente": "F2F2F2", "en réserve": "F2F2F2", "études": "F2F2F2", "à décider": "FFC7CE"}
+    n = ws.max_row
+    for st, col in couleurs.items():
+        ws.conditional_formatting.add(f"E2:E{n}", CellIsRule(operator="equal", formula=[f'"{st}"'], fill=PatternFill("solid", fgColor=col)))
+    for col, w in zip("ABCDEFGHIJ", [8, 48, 12, 6, 12, 11, 10, 60, 50, 30]):
+        ws.column_dimensions[col].width = w
+    for row in ws.iter_rows(min_row=2):
+        for c in row:
+            c.alignment = Alignment(wrap_text=True, vertical="top")
+    ws.freeze_panes = "C2"
+    ws.auto_filter.ref = f"A1:J{n}"
+    return n - 1
+
+
 def main():
     d = inventaire()
     votes, comms = retours()
@@ -280,6 +321,7 @@ def main():
 
     n_c, n_non = onglet_commentaires(wb, comms, bold, head_fill)
     n_r = onglet_robot(wb, bold, head_fill)
+    n_ch = onglet_chantiers(wb, bold, head_fill)
     # Synthèse : formules (se met à jour quand l'utilisateur change « Contrôlé »)
     syn.append(["Classe", "Notions", "Questions", "Leçons actives", "% notions actives", "Validées", "À corriger", "Vues", "% validé", "Questions à 1 forme", "Tests de qualité"])
     for c in syn[1]:
@@ -293,6 +335,7 @@ def main():
         syn[f"E{i}"].number_format = syn[f"I{i}"].number_format = "0%"
     syn.append([])
     syn.append([f"Commentaires des testeurs : {n_c}, dont {n_non} non traités (onglet Commentaires, lignes en jaune)."])
+    syn.append([f"Chantiers du projet : {n_ch} (onglet Chantiers, source tools/chantiers.tsv)."])
     syn.append([f"Élève-robot : {n_r} problème(s) dans le dernier rapport (onglet Robot ; nouveaux en jaune)."])
     syn.append(["Statuts « Contrôlé » : à faire → vu → à corriger → validé. Colonnes automatiques recalculées par tools/suivi.py ; Contrôlé et Remarque conservés."])
     for col, w in zip("ABCDEFGHIJK", [12, 9, 10, 14, 16, 9, 11, 7, 9, 18, 14]):

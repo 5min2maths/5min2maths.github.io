@@ -26,7 +26,7 @@ body = '<main id="app" aria-live="polite"></main>\n<script>\n' + "\n".join((SRC 
 # Version (23.11, erreurs JS) : empreinte du contenu, la même que celle du cache hors ligne (sw.js), injectée dans
 # const BUILD de src/app.js ; calculée avant l'injection pour rester stable d'une construction à l'autre.
 import hashlib
-version = hashlib.sha1((head + body).encode()).hexdigest()[:10]
+version = hashlib.sha1((head + body + (SRC / "pwa" / "sw.js").read_text()).encode()).hexdigest()[:10]
 assert 'const BUILD = "dev";' in body
 body = body.replace('const BUILD = "dev";', f'const BUILD = "{version}";', 1)
 
@@ -37,11 +37,24 @@ body = body.replace('const BUILD = "dev";', f'const BUILD = "{version}";', 1)
     '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
     + head + "</head>\n<body>\n" + body + "</body>\n</html>\n")
 # Version GitHub Pages : application installable (manifeste, icônes, cache hors ligne)
+# 23.11 (chantier F, chargement ; mesures : tools/mesure_chargement.py) : le code de l'app est servi à part
+# (docs/app.js?v=<version>) : le navigateur garde alors le code déjà compilé d'une ouverture à l'autre (cache de code
+# de V8, impossible pour un script en ligne de 4 Mo), et le service worker le met en cache dès l'installation.
+# Polices et MathJax inchangés (chargement bloquant) : les différer ferait « sauter » l'écran (police puis police,
+# formules en TeX brut un instant) pour un gain mesuré faible chez l'habitué (≈ 0,3 s à CPU ×4) ; voir tools/chargement.md.
 import shutil
 pwa_head = ('<link rel="manifest" href="manifest.webmanifest">\n<meta name="theme-color" content="#2457d6">\n'
             '<link rel="apple-touch-icon" href="icon-192.png">\n<meta name="apple-mobile-web-app-capable" content="yes">\n')
+docs_body = f'<main id="app" aria-live="polite"></main>\n<script src="app.js?v={version}"></script>\n'
 (ROOT / "docs").mkdir(exist_ok=True)
-(ROOT / "docs" / "index.html").write_text((ROOT / "dist" / "index.html").read_text().replace("<title>", pwa_head + "<title>", 1))
+(ROOT / "docs" / "index.html").write_text(
+    '<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n'
+    '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
+    + pwa_head + head + "</head>\n<body>\n" + docs_body + "</body>\n</html>\n")
+# Code de l'app = le script de body, BUILD compris (même contenu que dist/).
+PRE = '<main id="app" aria-live="polite"></main>\n<script>\n'
+assert body.startswith(PRE) and body.endswith("\n</script>\n")
+(ROOT / "docs" / "app.js").write_text(body[len(PRE):-len("</script>\n")])
 (ROOT / "docs" / "sw.js").write_text((SRC / "pwa" / "sw.js").read_text().replace("__VERSION__", version))
 for f in ("manifest.webmanifest", "icon-192.png", "icon-512.png"):
     shutil.copy(SRC / "pwa" / f, ROOT / "docs" / f)
