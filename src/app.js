@@ -442,7 +442,9 @@ function screenHome() {
     document.getElementById("hb").onclick = () => { homeTab = "today"; screenHome(); };
   } else {
     const mode = state.homeMode === "libre" ? "libre" : "classe", nC = (state.carnet || []).length;
-    const banner = [resumeCard(), prepTodayCard(), backupCard(), weekRecapCard(), streakNudge()].find((x) => x) || "";
+    // Une seule bannière ; le joker de série passe avant le bilan de la semaine (sinon la série est perdue le jour même).
+    const nudge = streakNudge(), joker = /Joker/.test(nudge);
+    const banner = [resumeCard(), prepTodayCard(), joker ? nudge : "", backupCard(), weekRecapCard(), joker ? "" : nudge].find((x) => x) || "";
     const nowLine = !Engine.nowActive(state) ? `<button type="button" class="btn-sec small" id="nowpick">📚 Choisir mon chapitre travaillé en classe</button>`
       : Engine.nowStale(state) ? `<div class="now-ask"><b>📚 Cette semaine en classe, tu travailles toujours :</b><span>${esc(state.now.ids.map(nLabel).join(" · "))} ?</span><div class="row now-ask-btns"><button type="button" class="btn-sec small" id="nowyes">Oui, toujours</button><button type="button" class="btn-sec small" id="nowpick">J'ai changé de chapitre</button></div></div>`
       : `<span class="small now-lab">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span><button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
@@ -1843,7 +1845,8 @@ function screenSummary() {
   const g0 = gradeOf(session.elo0), g1 = gradeOf(state.elo.r);
   if (g1.i > g0.i) gradeNumbers();
   const newGrade = g1.i > g0.i ? `<div class="card stack grade-up"><div class="eyebrow">Nouveau grade !</div><div class="ic-row"><button type="button" class="ic grade-ic grade-open" data-g="${g1.name}" aria-label="Voir la carte du grade ${g1.name}">${g1.ic}</button><div><h3>Tu es maintenant ${g1.name}</h3><div class="small muted">${g1.next ? "Prochain grade : " + g1.next.ic + " " + g1.next.name + ", à " + g1.next.at + "." : "Le plus haut grade : bravo !"}</div></div></div></div>` : "";
-  h(`${brand}<h2>${sc >= n * 0.8 ? "Excellente séance !" : sc >= n * 0.5 ? "Bonne séance." : "Séance faite : c'est en pratiquant qu'on progresse."}</h2>
+  // 22.11 : titre cohérent avec le Mathélo (« Excellente séance » alors que le Mathélo baissait).
+  h(`${brand}<h2>${sc >= n * 0.8 && d >= 0 ? "Excellente séance !" : sc >= n * 0.5 ? "Bonne séance." : "Séance faite : c'est en pratiquant qu'on progresse."}</h2>${d < 0 && sc >= n * 0.5 ? `<p class="small muted">Mathélo ${d} : une erreur sur une question de ton niveau coûte plus que ce que rapporte une réussite sur une question facile.</p>` : ""}
   <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span>${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ta série passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${FORMATS[Engine.tomorrowFormat(state)].label}</b></div></div></div>
   ${summaryByNotion()}
   <div class="card stack"><div class="spread"><span>Score</span><b>${String(sc).replace(".", ",")} / ${n}</b></div>

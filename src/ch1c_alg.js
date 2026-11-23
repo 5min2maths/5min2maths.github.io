@@ -33,7 +33,7 @@
   const TX = (e, m) => ({ e, m });
   const TR = TRAP;
   const P = (q, parts, hints, sol, fig) => ({ fig, q, parts: parts.map(([label, value]) => ({ label, spec: { kind: "value", value } })), hints, sol });
-  const DEV = "Développe et réduis : ", FAC = "Factorise au maximum : ";
+  const DEV = "Développe et réduis : ", FAC = "Factorise au maximum dans \\(\\mathbb{R}\\) : "; // 22.11 : dans R (retour de l auteur)
   const fx = (a, p, q) => co(a) + "(" + xm(p) + ")(" + xm(q) + ")";
 
   // ===================== polyop =====================

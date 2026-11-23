@@ -377,8 +377,10 @@ const Engine = {
   // Sauf les notions où l'écriture attendue contient elle-même une puissance.
   finalize(state, id, q) {
     const p = state && state.profile;
-    if (!q || !p || p.system !== "CH" || p.grade > 11 || ["sci", "scicalc", "puiss"].includes(id)) return q;
     const mark = (sp) => { if (sp && sp.kind === "value" && !sp.sci) sp.final = true; };
+    // 22.11 (retour de l'auteur, sec. II) : « sans calculatrice » = le résultat est exigé à tous les niveaux.
+    if (q && !["sci", "scicalc", "puiss"].includes(id) && /sans calculatrice/i.test(q.q || "")) { mark(q.spec); return q; }
+    if (!q || !p || p.system !== "CH" || p.grade > 11 || ["sci", "scicalc", "puiss"].includes(id)) return q;
     mark(q.spec); (q.parts || []).forEach((x) => mark(x.spec));
     return q;
   },

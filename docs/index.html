@@ -3234,7 +3234,7 @@ Object.assign(GEN, {
         sol = "Trinôme : discriminant (ou méthode « produit-somme »), racines " + M(ratT(-b / a)) + " et " + M(ratT(-e / c));
       }
     }
-    return { q: "Factorise au maximum : " + M(ex) + ".", spec: { kind: "expr", expr: fac, form: "product" }, canon: fac, sol: sol + " : " + M(fac.replace(/\*/g, "")) + "." };
+    return { q: "Factorise au maximum dans " + M("\\mathbb{R}") + " : " + M(ex) + ".", spec: { kind: "expr", expr: fac, form: "product" }, canon: fac, sol: sol + " : " + M(fac.replace(/\*/g, "")) + "." };
   },
 
   sys2(d) {
@@ -3411,7 +3411,7 @@ Object.assign(GEN, {
     }
     if (d === 2) {
       const qc = [R.nz(-3, 3), R.int(-5, 5), R.int(-6, 6)], a = R.nz(-4, 4), P = pmul(qc, [1, -a]);
-      return { q: "Sachant que " + M("P(x) = " + poly(P)) + " est divisible par " + M(xm(a)) + ", donne le quotient " + M("Q(x)") + ".", spec: { kind: "expr", expr: poly(qc), form: "expanded" }, canon: poly(qc), sol: (() => { const r = [P[0]]; for (let i = 1; i < P.length; i++) r.push(r[i - 1] * a + P[i]);
+      return { q: "Sachant que :<br>" + M("P(x) = " + poly(P)) + "<br>est divisible par " + M(xm(a)) + ", donne le quotient " + M("Q(x)") + ".", spec: { kind: "expr", expr: poly(qc), form: "expanded" }, canon: poly(qc), sol: (() => { const r = [P[0]]; for (let i = 1; i < P.length; i++) r.push(r[i - 1] * a + P[i]);
       return "Schéma de Horner avec " + M(a) + " : coefficients de " + M("P") + " : " + M(P.join(" \\;|\\; ")) + ". On abaisse " + M(P[0]) + ", puis à chaque colonne on multiplie par " + M(a) + " et on ajoute : " + M(r.join(" \\;|\\; ")) + ". Le dernier nombre est le reste (" + M(r[r.length - 1]) + "), les autres sont les coefficients du quotient : " + M("Q(x) = " + poly(qc)) + "."; })() };
     }
     const a = R.nz(-3, 3), b = R.int(-4, 4), c = R.int(-9, 9);
@@ -3425,7 +3425,7 @@ Object.assign(GEN, {
     if (d === 1) {
       const r = [R.nz(-4, 4), R.nz(-4, 4), R.nz(-5, 5)]; if (new Set(r).size < 3) return GEN.polyfact(1);
       const P = pmul(pmul([1, -r[0]], [1, -r[1]]), [1, -r[2]]);
-      return { q: "Sachant que " + M(r[0]) + " est racine de " + M("P(x) = " + poly(P)) + ", résous " + M("P(x) = 0") + ".", spec: { kind: "set", values: r }, sol: "Division par " + M(xm(r[0])) + " (Horner), puis le trinôme restant : " + M("S = \\{" + [...r].sort((u, v) => u - v).join(" ; ") + "\\}") + "." };
+      return { q: "Sachant que " + M(r[0]) + " est racine de :<br>" + M("P(x) = " + poly(P)) + "<br>résous " + M("P(x) = 0") + ".", spec: { kind: "set", values: r }, sol: "Division par " + M(xm(r[0])) + " (Horner), puis le trinôme restant : " + M("S = \\{" + [...r].sort((u, v) => u - v).join(" ; ") + "\\}") + "." };
     }
     if (d === 2) {
       const r = [R.nz(-3, 3), R.nz(-4, 4), R.nz(-5, 5)], a = R.pick([1, 2, -1]); if (new Set(r).size < 3) return GEN.polyfact(2);
@@ -10827,7 +10827,7 @@ function compNote(rec) {
   const TX = (e, m) => ({ e, m });
   const TR = TRAP;
   const P = (q, parts, hints, sol, fig) => ({ fig, q, parts: parts.map(([label, value]) => ({ label, spec: { kind: "value", value } })), hints, sol });
-  const DEV = "Développe et réduis : ", FAC = "Factorise au maximum : ";
+  const DEV = "Développe et réduis : ", FAC = "Factorise au maximum dans \\(\\mathbb{R}\\) : "; // 22.11 : dans R (retour de l auteur)
   const fx = (a, p, q) => co(a) + "(" + xm(p) + ")(" + xm(q) + ")";
 
   // ===================== polyop =====================
@@ -11396,6 +11396,8 @@ function compNote(rec) {
   const fT = (n, d) => (n < 0 ? "-" : "") + "\\frac{" + Math.abs(n) + "}{" + d + "}";
   const fP = (n, d) => (n < 0 ? "\\left(-\\frac{" + -n + "}{" + d + "}\\right)" : "\\frac{" + n + "}{" + d + "}");
   const irr = () => { let n, d; do { d = R.int(2, 9); n = R.int(1, 2 * d); } while (gcd2(n, d) !== 1 || n === d); return [n, d]; };
+  // 22.11 (« valeurs un peu hautes ») : fractions étagées et carrés avec de petits dénominateurs (2 à 6).
+  const irrS = () => { let n, d; do { d = R.int(2, 6); n = R.int(1, d + 2); } while (gcd2(n, d) !== 1 || n === d); return [n, d]; };
   const keep = (value, traps) => { const seen = new Set(); return (traps || []).filter((t) => t && isFinite(t.v) && Math.abs(t.v - value) > 1e-9 && !seen.has(r6(t.v)) && seen.add(r6(t.v))); };
   const Qv = (q, value, sol, o = {}) => { const x = { q, spec: Object.assign({ kind: "value", value }, o.radical ? { radical: true } : {}), sol, guide: o.guide, traps: keep(value, o.traps), ctx: o.ctx }; if (o.fig) x.fig = o.fig; if (o.canon) x.canon = o.canon; return x; };
   const TR = TRAP;
@@ -11487,10 +11489,10 @@ function compNote(rec) {
           { ctx: "div-entier", guide: [GS("Parenthèse" + FA + " ?", qv(qs([a, b], [c, d])), M(qT(qs([a, b], [c, d]))) + "."), GS("Divisée par " + M(par(k)) + FA + " ?", qv(x), M(qT(x)) + ".")], traps: [TR(qv(qm(qs([a, b], [c, d]), [k, 1])), "Diviser par " + k + ", c'est multiplier par 1/" + k + "."), TR(-qv(x), "Attention au signe.")] }); },
     ],
     3: [
-      () => { const [a, b] = irr(), [c, d] = irr(), [e, f] = irr(), [g, h] = irr(), num = qs([a, b], [c, d]), den = qa([e, f], [g, h]); if (num[0] === 0) return null; const x = qd(num, den);
+      () => { const [a, b] = irrS(), [c, d] = irrS(), [e, f] = irrS(), [g, h] = irrS(), num = qs([a, b], [c, d]), den = qa([e, f], [g, h]); if (num[0] === 0) return null; const x = qd(num, den); if (Math.abs(x[0]) > 60 || Math.abs(x[1]) > 60) return null;
         return Qv("Calcule et simplifie : " + M("\\dfrac{" + fT(a, b) + " - " + fT(c, d) + "}{" + fT(e, f) + " + " + fT(g, h) + "}") + FA, qv(x), "Numérateur " + M(qT(num)) + ", dénominateur " + M(qT(den)) + " ; quotient " + M(qT(x)) + ".",
           { ctx: "fraction-etagee", guide: [GS("Numérateur" + FA + " ?", qv(num), M(qT(num)) + "."), GS("Dénominateur" + FA + " ?", qv(den), M(qT(den)) + "."), GS("Quotient" + FA + " ?", qv(x), M(qT(x)) + ".")], traps: [TR(qv(qm(num, den)), "Une fraction de fractions est un quotient : multiplie par l'inverse du dénominateur.")] }); },
-      () => { const [a, b] = irr(), [c, d] = irr(), x = qs(qm([-a, b], [-a, b]), [c, d]);
+      () => { const [a, b] = irrS(), [c, d] = irrS(), x = qs(qm([-a, b], [-a, b]), [c, d]);
         return Qv("Calcule et simplifie : " + M("\\left(" + fT(-a, b) + "\\right)^2 - " + fT(c, d)) + FA, qv(x), M("\\left(" + fT(-a, b) + "\\right)^2 = " + fT(a * a, b * b)) + " (positif) ; puis " + M(qT(x)) + ".",
           { ctx: "carre", guide: [GS("Carré" + FA + " ?", (a * a) / (b * b), M(fT(a * a, b * b)) + "."), GS("Résultat" + FA + " ?", qv(x), M(qT(x)) + ".")], traps: [TR(qv(qs([-a * a, b * b], [c, d])), "Le carré d'un nombre négatif est positif."), TR(qv(qs([2 * a, b], [c, d])), "Au carré, on multiplie le nombre par lui-même (pas par 2).")] }); },
       () => { const [p1, q1] = pk([[1, 3], [1, 4], [2, 5], [1, 5]]), [p2, q2] = pk([[1, 2], [1, 3], [3, 4], [2, 3]]), rest = qm(qs([1, 1], [p1, q1]), qs([1, 1], [p2, q2])), V = pk([60, 120, 240, 300]), v = qv(rest) * V; if (!Number.isInteger(v)) return null;
@@ -15118,7 +15120,10 @@ const Curieux = {
     { t: "Anecdote", titre: "La Pascaline, une calculatrice de 1642", lien: "Calcul",
       txt: "À 19 ans, Blaise Pascal invente une machine à calculer pour aider son père, chargé de collecter les impôts en Normandie, qui passait ses nuits à additionner. Des roues dentées font les additions, et un mécanisme ingénieux reporte automatiquement les retenues d'une roue à la suivante.",
       fig: () => svg(300, 110, `<rect x="30" y="20" width="240" height="70" rx="10" class="f-shape2"/>${[0, 1, 2, 3, 4].map((i) => `<circle cx="${70 + i * 40}" cy="55" r="16" class="f-shape"/><circle cx="${70 + i * 40}" cy="55" r="3" class="f-head"/>`).join("")}`, "machine à roues de Pascal"),
-      ex: () => { const a = ri(1200, 6999), b = ri(1200, 2999);
+      ex: () => { // 22.11 (retour de l'auteur : pas de retenue dans l'exemple) : une retenue aux unités, dizaines et centaines
+        const da = [ri(1, 6), ri(2, 9), ri(2, 9), ri(2, 9)], db = [ri(1, 2), 0, 0, 0];
+        for (let i = 1; i < 4; i++) db[i] = ri(Math.max(1, 10 - da[i]), 9);
+        const a = +da.join(""), b = +db.join("");
         return { q: `Comme la Pascaline, additionne avec les retenues : \\(${tm(a)} + ${tm(b)}\\).`, value: a + b, sol: `\\(${tm(a)} + ${tm(b)} = ${tm(a + b)}\\).` }; } },
     { t: "Anecdote", titre: "Les Mayas comptaient en base 20", lien: "Numération",
       txt: "Les Mayas d'Amérique centrale écrivaient les nombres avec des points (1) et des barres (5), et un coquillage pour zéro : l'une des plus anciennes notations du zéro. Ils comptaient par vingtaines : un chiffre placé un étage plus haut vaut 20 fois plus.",
@@ -15212,8 +15217,10 @@ const Curieux = {
     { t: "Anecdote", titre: "Les quipus des Incas", lien: "Numération",
       txt: "L'Empire inca n'utilisait pas d'écriture, mais ses fonctionnaires tenaient des comptes très précis avec des quipus : des cordelettes à nœuds. Sur chaque cordelette, les nœuds sont groupés par position, comme nos chiffres : un groupe pour les centaines, un pour les dizaines, un pour les unités. C'est une numération en base 10.",
       fig: () => svg(300, 130, `<line x1="30" y1="15" x2="270" y2="15" class="f-line" stroke-width="3"/>${[60, 120, 180, 240].map((x, i) => `<line x1="${x}" y1="15" x2="${x}" y2="120" class="f-blue" stroke-width="2"/>${[...Array([3, 2, 4, 1][i])].map((_, k) => `<circle cx="${x}" cy="${35 + k * 9}" r="4" class="f-head"/>`).join("")}${[...Array([1, 5, 0, 3][i])].map((_, k) => `<circle cx="${x}" cy="${80 + k * 8}" r="4" class="f-dot"/>`).join("")}`).join("")}`, "quipu à cordelettes et nœuds"),
-      ex: () => { const h = ri(1, 9), t = ri(0, 9), u = ri(1, 9);
-        return { q: `Une cordelette porte ${h} nœud${h > 1 ? "s" : ""} au niveau des centaines, ${t ? t + " nœud" + (t > 1 ? "s" : "") : "aucun nœud"} au niveau des dizaines et ${u} nœud${u > 1 ? "s" : ""} au niveau des unités. Quel nombre représente-t-elle ?`, value: 100 * h + 10 * t + u, sol: `\\(${h} \\cdot 100 + ${t} \\cdot 10 + ${u} = ${100 * h + 10 * t + u}\\).` }; } },
+      ex: () => { // 22.11 (« un peu trop facile ») : deux cordelettes à lire puis additionner, avec retenue
+        const nb = (k) => (k ? k + " nœud" + (k > 1 ? "s" : "") : "aucun nœud"), A = [ri(1, 6), ri(0, 9), ri(5, 9)], Bc = [ri(1, 3), ri(3, 9), ri(10 - A[2], 9)];
+        const va = 100 * A[0] + 10 * A[1] + A[2], vb = 100 * Bc[0] + 10 * Bc[1] + Bc[2];
+        return { q: `Un fonctionnaire inca note les lamas de deux villages. Cordelette du village A : ${nb(A[0])} aux centaines, ${nb(A[1])} aux dizaines, ${nb(A[2])} aux unités. Cordelette du village B : ${nb(Bc[0])} aux centaines, ${nb(Bc[1])} aux dizaines, ${nb(Bc[2])} aux unités. Combien de lamas en tout ?`, value: va + vb, sol: `Village A : \\(${va}\\) ; village B : \\(${vb}\\). Total : \\(${va} + ${vb} = ${va + vb}\\). Une cordelette de résumé porterait ce total.` }; } },
   ];
 
   // Notions de l'app liées à chaque récit (même ordre que HISTOIRE ; 22.11) : en mode scolaire, la carte propose d'abord
@@ -15804,8 +15811,8 @@ const LESSONS_V2 = {
     ["\\((2x - 1)^2 - (x + 3)(x - 3)\\) : \\((4x^2 - 4x + 1) - (x^2 - 9)\\).", "On supprime les parenthèses : \\(4x^2 - 4x + 1 - x^2 + 9 = 3x^2 - 4x + 10\\)."],
     "Mets le produit entre parenthèses avant de soustraire : \\(-(x^2 - 9) = -x^2 + 9\\)."],
   factor2: ["Factoriser au maximum", "On cherche à écrire une somme comme un produit de facteurs les plus simples possible.",
-    "Étape 1 : mise en évidence d'un facteur commun. Étape 2 : identités remarquables (\\(a^2 - b^2\\), carrés parfaits). Étape 3 : trinôme \\(x^2 + sx + p\\) (deux nombres de somme \\(s\\) et de produit \\(p\\)). Étape 4 : groupements de termes. On recommence tant qu'un facteur peut encore se factoriser.",
-    ["\\(3x^2 - 12 = 3(x^2 - 4) = 3(x - 2)(x + 2)\\).",
+    "Étape 1 : mise en évidence d'un facteur commun. Étape 2 : identités remarquables (\\(a^2 - b^2\\), carrés parfaits). Étape 3 : trinôme, méthode \\(m\\) et \\(n\\) : pour \\(ax^2 + bx + c\\), on cherche deux nombres \\(m\\) et \\(n\\) tels que \\(m + n = b\\) et \\(m \\cdot n = a \\cdot c\\) ; on écrit \\(ax^2 + mx + nx + c\\) et on groupe (si \\(a = 1\\) : \\(x^2 + bx + c = (x + m)(x + n)\\)). Étape 4 : groupements de termes. On recommence tant qu'un facteur peut encore se factoriser.",
+    ["\\(3x^2 - 12 = 3(x^2 - 4) = 3(x - 2)(x + 2)\\).", "\\(2x^2 + 7x + 3\\) : \\(m + n = 7\\), \\(m \\cdot n = 2 \\cdot 3 = 6\\), donc \\(m = 1\\), \\(n = 6\\) : \\(2x^2 + x + 6x + 3 = x(2x + 1) + 3(2x + 1) = (2x + 1)(x + 3)\\).",
       "\\(x^3 + 2x^2 - 9x - 18 = x^2(x + 2) - 9(x + 2) = (x + 2)(x^2 - 9) = (x + 2)(x - 3)(x + 3)\\)."],
     "\\(3(x^2 - 4)\\) n'est pas fini : \\(x^2 - 4\\) se factorise encore."],
   eq3: ["Équations de degré 3", "On se ramène à un produit nul.",
@@ -19264,8 +19271,10 @@ const Engine = {
   // Sauf les notions où l'écriture attendue contient elle-même une puissance.
   finalize(state, id, q) {
     const p = state && state.profile;
-    if (!q || !p || p.system !== "CH" || p.grade > 11 || ["sci", "scicalc", "puiss"].includes(id)) return q;
     const mark = (sp) => { if (sp && sp.kind === "value" && !sp.sci) sp.final = true; };
+    // 22.11 (retour de l'auteur, sec. II) : « sans calculatrice » = le résultat est exigé à tous les niveaux.
+    if (q && !["sci", "scicalc", "puiss"].includes(id) && /sans calculatrice/i.test(q.q || "")) { mark(q.spec); return q; }
+    if (!q || !p || p.system !== "CH" || p.grade > 11 || ["sci", "scicalc", "puiss"].includes(id)) return q;
     mark(q.spec); (q.parts || []).forEach((x) => mark(x.spec));
     return q;
   },
@@ -20083,7 +20092,9 @@ function screenHome() {
     document.getElementById("hb").onclick = () => { homeTab = "today"; screenHome(); };
   } else {
     const mode = state.homeMode === "libre" ? "libre" : "classe", nC = (state.carnet || []).length;
-    const banner = [resumeCard(), prepTodayCard(), backupCard(), weekRecapCard(), streakNudge()].find((x) => x) || "";
+    // Une seule bannière ; le joker de série passe avant le bilan de la semaine (sinon la série est perdue le jour même).
+    const nudge = streakNudge(), joker = /Joker/.test(nudge);
+    const banner = [resumeCard(), prepTodayCard(), joker ? nudge : "", backupCard(), weekRecapCard(), joker ? "" : nudge].find((x) => x) || "";
     const nowLine = !Engine.nowActive(state) ? `<button type="button" class="btn-sec small" id="nowpick">📚 Choisir mon chapitre travaillé en classe</button>`
       : Engine.nowStale(state) ? `<div class="now-ask"><b>📚 Cette semaine en classe, tu travailles toujours :</b><span>${esc(state.now.ids.map(nLabel).join(" · "))} ?</span><div class="row now-ask-btns"><button type="button" class="btn-sec small" id="nowyes">Oui, toujours</button><button type="button" class="btn-sec small" id="nowpick">J'ai changé de chapitre</button></div></div>`
       : `<span class="small now-lab">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span><button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
@@ -21484,7 +21495,8 @@ function screenSummary() {
   const g0 = gradeOf(session.elo0), g1 = gradeOf(state.elo.r);
   if (g1.i > g0.i) gradeNumbers();
   const newGrade = g1.i > g0.i ? `<div class="card stack grade-up"><div class="eyebrow">Nouveau grade !</div><div class="ic-row"><button type="button" class="ic grade-ic grade-open" data-g="${g1.name}" aria-label="Voir la carte du grade ${g1.name}">${g1.ic}</button><div><h3>Tu es maintenant ${g1.name}</h3><div class="small muted">${g1.next ? "Prochain grade : " + g1.next.ic + " " + g1.next.name + ", à " + g1.next.at + "." : "Le plus haut grade : bravo !"}</div></div></div></div>` : "";
-  h(`${brand}<h2>${sc >= n * 0.8 ? "Excellente séance !" : sc >= n * 0.5 ? "Bonne séance." : "Séance faite : c'est en pratiquant qu'on progresse."}</h2>
+  // 22.11 : titre cohérent avec le Mathélo (« Excellente séance » alors que le Mathélo baissait).
+  h(`${brand}<h2>${sc >= n * 0.8 && d >= 0 ? "Excellente séance !" : sc >= n * 0.5 ? "Bonne séance." : "Séance faite : c'est en pratiquant qu'on progresse."}</h2>${d < 0 && sc >= n * 0.5 ? `<p class="small muted">Mathélo ${d} : une erreur sur une question de ton niveau coûte plus que ce que rapporte une réussite sur une question facile.</p>` : ""}
   <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span>${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ta série passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${FORMATS[Engine.tomorrowFormat(state)].label}</b></div></div></div>
   ${summaryByNotion()}
   <div class="card stack"><div class="spread"><span>Score</span><b>${String(sc).replace(".", ",")} / ${n}</b></div>

@@ -526,7 +526,7 @@ Object.assign(GEN, {
         sol = "Trinôme : discriminant (ou méthode « produit-somme »), racines " + M(ratT(-b / a)) + " et " + M(ratT(-e / c));
       }
     }
-    return { q: "Factorise au maximum : " + M(ex) + ".", spec: { kind: "expr", expr: fac, form: "product" }, canon: fac, sol: sol + " : " + M(fac.replace(/\*/g, "")) + "." };
+    return { q: "Factorise au maximum dans " + M("\\mathbb{R}") + " : " + M(ex) + ".", spec: { kind: "expr", expr: fac, form: "product" }, canon: fac, sol: sol + " : " + M(fac.replace(/\*/g, "")) + "." };
   },
 
   sys2(d) {
@@ -703,7 +703,7 @@ Object.assign(GEN, {
     }
     if (d === 2) {
       const qc = [R.nz(-3, 3), R.int(-5, 5), R.int(-6, 6)], a = R.nz(-4, 4), P = pmul(qc, [1, -a]);
-      return { q: "Sachant que " + M("P(x) = " + poly(P)) + " est divisible par " + M(xm(a)) + ", donne le quotient " + M("Q(x)") + ".", spec: { kind: "expr", expr: poly(qc), form: "expanded" }, canon: poly(qc), sol: (() => { const r = [P[0]]; for (let i = 1; i < P.length; i++) r.push(r[i - 1] * a + P[i]);
+      return { q: "Sachant que :<br>" + M("P(x) = " + poly(P)) + "<br>est divisible par " + M(xm(a)) + ", donne le quotient " + M("Q(x)") + ".", spec: { kind: "expr", expr: poly(qc), form: "expanded" }, canon: poly(qc), sol: (() => { const r = [P[0]]; for (let i = 1; i < P.length; i++) r.push(r[i - 1] * a + P[i]);
       return "Schéma de Horner avec " + M(a) + " : coefficients de " + M("P") + " : " + M(P.join(" \\;|\\; ")) + ". On abaisse " + M(P[0]) + ", puis à chaque colonne on multiplie par " + M(a) + " et on ajoute : " + M(r.join(" \\;|\\; ")) + ". Le dernier nombre est le reste (" + M(r[r.length - 1]) + "), les autres sont les coefficients du quotient : " + M("Q(x) = " + poly(qc)) + "."; })() };
     }
     const a = R.nz(-3, 3), b = R.int(-4, 4), c = R.int(-9, 9);
@@ -717,7 +717,7 @@ Object.assign(GEN, {
     if (d === 1) {
       const r = [R.nz(-4, 4), R.nz(-4, 4), R.nz(-5, 5)]; if (new Set(r).size < 3) return GEN.polyfact(1);
       const P = pmul(pmul([1, -r[0]], [1, -r[1]]), [1, -r[2]]);
-      return { q: "Sachant que " + M(r[0]) + " est racine de " + M("P(x) = " + poly(P)) + ", résous " + M("P(x) = 0") + ".", spec: { kind: "set", values: r }, sol: "Division par " + M(xm(r[0])) + " (Horner), puis le trinôme restant : " + M("S = \\{" + [...r].sort((u, v) => u - v).join(" ; ") + "\\}") + "." };
+      return { q: "Sachant que " + M(r[0]) + " est racine de :<br>" + M("P(x) = " + poly(P)) + "<br>résous " + M("P(x) = 0") + ".", spec: { kind: "set", values: r }, sol: "Division par " + M(xm(r[0])) + " (Horner), puis le trinôme restant : " + M("S = \\{" + [...r].sort((u, v) => u - v).join(" ; ") + "\\}") + "." };
     }
     if (d === 2) {
       const r = [R.nz(-3, 3), R.nz(-4, 4), R.nz(-5, 5)], a = R.pick([1, 2, -1]); if (new Set(r).size < 3) return GEN.polyfact(2);

@@ -88,7 +88,10 @@
     { t: "Anecdote", titre: "La Pascaline, une calculatrice de 1642", lien: "Calcul",
       txt: "À 19 ans, Blaise Pascal invente une machine à calculer pour aider son père, chargé de collecter les impôts en Normandie, qui passait ses nuits à additionner. Des roues dentées font les additions, et un mécanisme ingénieux reporte automatiquement les retenues d'une roue à la suivante.",
       fig: () => svg(300, 110, `<rect x="30" y="20" width="240" height="70" rx="10" class="f-shape2"/>${[0, 1, 2, 3, 4].map((i) => `<circle cx="${70 + i * 40}" cy="55" r="16" class="f-shape"/><circle cx="${70 + i * 40}" cy="55" r="3" class="f-head"/>`).join("")}`, "machine à roues de Pascal"),
-      ex: () => { const a = ri(1200, 6999), b = ri(1200, 2999);
+      ex: () => { // 22.11 (retour de l'auteur : pas de retenue dans l'exemple) : une retenue aux unités, dizaines et centaines
+        const da = [ri(1, 6), ri(2, 9), ri(2, 9), ri(2, 9)], db = [ri(1, 2), 0, 0, 0];
+        for (let i = 1; i < 4; i++) db[i] = ri(Math.max(1, 10 - da[i]), 9);
+        const a = +da.join(""), b = +db.join("");
         return { q: `Comme la Pascaline, additionne avec les retenues : \\(${tm(a)} + ${tm(b)}\\).`, value: a + b, sol: `\\(${tm(a)} + ${tm(b)} = ${tm(a + b)}\\).` }; } },
     { t: "Anecdote", titre: "Les Mayas comptaient en base 20", lien: "Numération",
       txt: "Les Mayas d'Amérique centrale écrivaient les nombres avec des points (1) et des barres (5), et un coquillage pour zéro : l'une des plus anciennes notations du zéro. Ils comptaient par vingtaines : un chiffre placé un étage plus haut vaut 20 fois plus.",
@@ -182,8 +185,10 @@
     { t: "Anecdote", titre: "Les quipus des Incas", lien: "Numération",
       txt: "L'Empire inca n'utilisait pas d'écriture, mais ses fonctionnaires tenaient des comptes très précis avec des quipus : des cordelettes à nœuds. Sur chaque cordelette, les nœuds sont groupés par position, comme nos chiffres : un groupe pour les centaines, un pour les dizaines, un pour les unités. C'est une numération en base 10.",
       fig: () => svg(300, 130, `<line x1="30" y1="15" x2="270" y2="15" class="f-line" stroke-width="3"/>${[60, 120, 180, 240].map((x, i) => `<line x1="${x}" y1="15" x2="${x}" y2="120" class="f-blue" stroke-width="2"/>${[...Array([3, 2, 4, 1][i])].map((_, k) => `<circle cx="${x}" cy="${35 + k * 9}" r="4" class="f-head"/>`).join("")}${[...Array([1, 5, 0, 3][i])].map((_, k) => `<circle cx="${x}" cy="${80 + k * 8}" r="4" class="f-dot"/>`).join("")}`).join("")}`, "quipu à cordelettes et nœuds"),
-      ex: () => { const h = ri(1, 9), t = ri(0, 9), u = ri(1, 9);
-        return { q: `Une cordelette porte ${h} nœud${h > 1 ? "s" : ""} au niveau des centaines, ${t ? t + " nœud" + (t > 1 ? "s" : "") : "aucun nœud"} au niveau des dizaines et ${u} nœud${u > 1 ? "s" : ""} au niveau des unités. Quel nombre représente-t-elle ?`, value: 100 * h + 10 * t + u, sol: `\\(${h} \\cdot 100 + ${t} \\cdot 10 + ${u} = ${100 * h + 10 * t + u}\\).` }; } },
+      ex: () => { // 22.11 (« un peu trop facile ») : deux cordelettes à lire puis additionner, avec retenue
+        const nb = (k) => (k ? k + " nœud" + (k > 1 ? "s" : "") : "aucun nœud"), A = [ri(1, 6), ri(0, 9), ri(5, 9)], Bc = [ri(1, 3), ri(3, 9), ri(10 - A[2], 9)];
+        const va = 100 * A[0] + 10 * A[1] + A[2], vb = 100 * Bc[0] + 10 * Bc[1] + Bc[2];
+        return { q: `Un fonctionnaire inca note les lamas de deux villages. Cordelette du village A : ${nb(A[0])} aux centaines, ${nb(A[1])} aux dizaines, ${nb(A[2])} aux unités. Cordelette du village B : ${nb(Bc[0])} aux centaines, ${nb(Bc[1])} aux dizaines, ${nb(Bc[2])} aux unités. Combien de lamas en tout ?`, value: va + vb, sol: `Village A : \\(${va}\\) ; village B : \\(${vb}\\). Total : \\(${va} + ${vb} = ${va + vb}\\). Une cordelette de résumé porterait ce total.` }; } },
   ];
 
   // Notions de l'app liées à chaque récit (même ordre que HISTOIRE ; 22.11) : en mode scolaire, la carte propose d'abord

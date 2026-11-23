@@ -19,6 +19,8 @@
   const fT = (n, d) => (n < 0 ? "-" : "") + "\\frac{" + Math.abs(n) + "}{" + d + "}";
   const fP = (n, d) => (n < 0 ? "\\left(-\\frac{" + -n + "}{" + d + "}\\right)" : "\\frac{" + n + "}{" + d + "}");
   const irr = () => { let n, d; do { d = R.int(2, 9); n = R.int(1, 2 * d); } while (gcd2(n, d) !== 1 || n === d); return [n, d]; };
+  // 22.11 (« valeurs un peu hautes ») : fractions étagées et carrés avec de petits dénominateurs (2 à 6).
+  const irrS = () => { let n, d; do { d = R.int(2, 6); n = R.int(1, d + 2); } while (gcd2(n, d) !== 1 || n === d); return [n, d]; };
   const keep = (value, traps) => { const seen = new Set(); return (traps || []).filter((t) => t && isFinite(t.v) && Math.abs(t.v - value) > 1e-9 && !seen.has(r6(t.v)) && seen.add(r6(t.v))); };
   const Qv = (q, value, sol, o = {}) => { const x = { q, spec: Object.assign({ kind: "value", value }, o.radical ? { radical: true } : {}), sol, guide: o.guide, traps: keep(value, o.traps), ctx: o.ctx }; if (o.fig) x.fig = o.fig; if (o.canon) x.canon = o.canon; return x; };
   const TR = TRAP;
@@ -110,10 +112,10 @@
           { ctx: "div-entier", guide: [GS("Parenthèse" + FA + " ?", qv(qs([a, b], [c, d])), M(qT(qs([a, b], [c, d]))) + "."), GS("Divisée par " + M(par(k)) + FA + " ?", qv(x), M(qT(x)) + ".")], traps: [TR(qv(qm(qs([a, b], [c, d]), [k, 1])), "Diviser par " + k + ", c'est multiplier par 1/" + k + "."), TR(-qv(x), "Attention au signe.")] }); },
     ],
     3: [
-      () => { const [a, b] = irr(), [c, d] = irr(), [e, f] = irr(), [g, h] = irr(), num = qs([a, b], [c, d]), den = qa([e, f], [g, h]); if (num[0] === 0) return null; const x = qd(num, den);
+      () => { const [a, b] = irrS(), [c, d] = irrS(), [e, f] = irrS(), [g, h] = irrS(), num = qs([a, b], [c, d]), den = qa([e, f], [g, h]); if (num[0] === 0) return null; const x = qd(num, den); if (Math.abs(x[0]) > 60 || Math.abs(x[1]) > 60) return null;
         return Qv("Calcule et simplifie : " + M("\\dfrac{" + fT(a, b) + " - " + fT(c, d) + "}{" + fT(e, f) + " + " + fT(g, h) + "}") + FA, qv(x), "Numérateur " + M(qT(num)) + ", dénominateur " + M(qT(den)) + " ; quotient " + M(qT(x)) + ".",
           { ctx: "fraction-etagee", guide: [GS("Numérateur" + FA + " ?", qv(num), M(qT(num)) + "."), GS("Dénominateur" + FA + " ?", qv(den), M(qT(den)) + "."), GS("Quotient" + FA + " ?", qv(x), M(qT(x)) + ".")], traps: [TR(qv(qm(num, den)), "Une fraction de fractions est un quotient : multiplie par l'inverse du dénominateur.")] }); },
-      () => { const [a, b] = irr(), [c, d] = irr(), x = qs(qm([-a, b], [-a, b]), [c, d]);
+      () => { const [a, b] = irrS(), [c, d] = irrS(), x = qs(qm([-a, b], [-a, b]), [c, d]);
         return Qv("Calcule et simplifie : " + M("\\left(" + fT(-a, b) + "\\right)^2 - " + fT(c, d)) + FA, qv(x), M("\\left(" + fT(-a, b) + "\\right)^2 = " + fT(a * a, b * b)) + " (positif) ; puis " + M(qT(x)) + ".",
           { ctx: "carre", guide: [GS("Carré" + FA + " ?", (a * a) / (b * b), M(fT(a * a, b * b)) + "."), GS("Résultat" + FA + " ?", qv(x), M(qT(x)) + ".")], traps: [TR(qv(qs([-a * a, b * b], [c, d])), "Le carré d'un nombre négatif est positif."), TR(qv(qs([2 * a, b], [c, d])), "Au carré, on multiplie le nombre par lui-même (pas par 2).")] }); },
       () => { const [p1, q1] = pk([[1, 3], [1, 4], [2, 5], [1, 5]]), [p2, q2] = pk([[1, 2], [1, 3], [3, 4], [2, 3]]), rest = qm(qs([1, 1], [p1, q1]), qs([1, 1], [p2, q2])), V = pk([60, 120, 240, 300]), v = qv(rest) * V; if (!Number.isInteger(v)) return null;
