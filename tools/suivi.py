@@ -61,7 +61,10 @@ def retours():
 def banques_riches():
     """Chapitres qui ont un test de préparation de qualité (src/riche.js, 15.11) : clé -> (notions, nb exercices, nb raisonnement)."""
     out = {}
-    for f in sorted((ROOT / "src").glob("riche*.js")):  # riche.js et riche_11b.js (17.11)
+    # Ordre de chargement de build.py (23.11) : comme richChapter (sujet), à égalité la première banque chargée l'emporte.
+    ordre = re.search(r'JS = \[(.*?)\]', (ROOT / "build.py").read_text(), re.S)
+    ordre = re.findall(r'"(riche[^"]*\.js)"', ordre.group(1)) if ordre else []
+    for f in sorted((ROOT / "src").glob("riche*.js"), key=lambda f: (ordre.index(f.name) if f.name in ordre else 99, f.name)):
         s = f.read_text()
         for m in re.finditer(r'RICH\.(\w+) = \{ ids: \[([^\]]*)\](, track: "(\w+)")?', s):
             out[m.group(1)] = re.findall(r'"([a-z0-9]+)"', m.group(2))
