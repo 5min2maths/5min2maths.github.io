@@ -339,14 +339,14 @@ const GEN = {
   prop(d) {
     if (d === 1) {
       const k = R.int(2, 6), u = R.int(2, 9), n = R.int(2, 12);
-      return { fig: FIG.items(k, k + " cahiers → " + k * u + " CHF"), q: M(k) + " cahiers coûtent " + M(k * u) + " CHF. Combien coûtent " + M(n) + " cahiers ?", spec: { kind: "value", value: n * u }, sol: "Un cahier coûte " + M(u) + " CHF, donc " + M(n + " \\cdot " + u + " = " + n * u) + " CHF." };
+      return { fig: FIG.items(k, k + " cahiers → " + k * u + " CHF"), guide: [GS("Prix d'un cahier : " + M(k * u + " : " + k) + " = ? (en CHF)", u, M(u) + " CHF."), GS("Prix de " + n + " cahiers ?", n * u, M(n + " \\cdot " + u + " = " + n * u) + " CHF.")], q: M(k) + " cahiers coûtent " + M(k * u) + " CHF. Combien coûtent " + M(n) + " cahiers ?", spec: { kind: "value", value: n * u }, sol: "Un cahier coûte " + M(u) + " CHF, donc " + M(n + " \\cdot " + u + " = " + n * u) + " CHF." };
     }
     if (d === 2) {
       const g = 25 * R.int(4, 16), p1 = R.pick([4, 6, 8]), p2 = R.pick([3, 5, 10, 12]);
-      return { fig: FIG.items(p1, p1 + " personnes → " + g + " g"), q: "Pour " + M(p1) + " personnes, une recette demande " + M(g) + " g de farine. Combien en faut-il pour " + M(p2) + " personnes ?", spec: { kind: "value", value: (g * p2) / p1 }, sol: M("\\frac{" + g + "}{" + p1 + "} \\cdot " + p2 + " = " + dec((g * p2) / p1)) + " g." };
+      return { fig: FIG.items(p1, p1 + " personnes → " + g + " g"), guide: [GS("Farine pour 1 personne : " + M(g + " : " + p1) + " = ? (en g)", g / p1, M(dec(g / p1)) + " g."), GS("Pour " + p2 + " personnes ?", (g * p2) / p1, M(dec(g / p1) + " \\cdot " + p2 + " = " + dec((g * p2) / p1)) + " g.")], q: "Pour " + M(p1) + " personnes, une recette demande " + M(g) + " g de farine. Combien en faut-il pour " + M(p2) + " personnes ?", spec: { kind: "value", value: (g * p2) / p1 }, sol: M("\\frac{" + g + "}{" + p1 + "} \\cdot " + p2 + " = " + dec((g * p2) / p1)) + " g." };
     }
     const rate = R.pick([0.92, 0.94, 0.95, 1.05, 1.08]), e = 10 * R.int(2, 30);
-    return { q: "1 euro vaut " + M(dec(rate)) + " CHF. Combien d'euros obtient-on pour " + M(dec(e * rate)) + " CHF ?", spec: { kind: "value", value: e }, sol: M(dec(e * rate) + " : " + dec(rate) + " = " + e) + " euros." };
+    return { guide: [GS("1 € = " + dec(rate) + " CHF : pour avoir des euros, on multiplie ou on divise par " + dec(rate) + " ? Calcule " + M(dec(e * rate) + " : " + dec(rate)) + ".", e, M(e) + " euros.")], q: "1 euro vaut " + M(dec(rate)) + " CHF. Combien d'euros obtient-on pour " + M(dec(e * rate)) + " CHF ?", spec: { kind: "value", value: e }, sol: M(dec(e * rate) + " : " + dec(rate) + " = " + e) + " euros." };
   },
 
   vitesse(d) {
@@ -365,14 +365,14 @@ const GEN = {
   echelle(d) {
     if (d === 1) {
       const k = R.pick([50, 200, 250, 500, 1000]), c = R.int(2, 12);
-      return { fig: FIG.scaling(k, "1:" + k), q: "Sur un plan à l'échelle " + M("1\\,:\\, " + k) + ", un mur mesure " + M(c) + " cm. Quelle est sa longueur réelle, en mètres ?", spec: { kind: "value", value: (c * k) / 100 }, sol: M(c + " \\cdot " + k + " = " + c * k) + " cm, soit " + M(dec((c * k) / 100)) + " m." };
+      return { fig: FIG.scaling(k, "1:" + k), guide: [GS("Longueur réelle en cm : " + M(c + " \\cdot " + k) + " = ?", c * k, M(c * k) + " cm."), GS("En mètres (: 100) ?", (c * k) / 100, M(dec((c * k) / 100)) + " m.")], q: "Sur un plan à l'échelle " + M("1\\,:\\, " + k) + ", un mur mesure " + M(c) + " cm. Quelle est sa longueur réelle, en mètres ?", spec: { kind: "value", value: (c * k) / 100 }, sol: M(c + " \\cdot " + k + " = " + c * k) + " cm, soit " + M(dec((c * k) / 100)) + " m." };
     }
     if (d === 2) {
       const k = R.int(2, 5), A = R.int(2, 12);
-      return { fig: FIG.scaling(k, ""), q: "On agrandit une figure de rapport " + M(k) + ". Son aire était de " + M(A) + " cm². Quelle est sa nouvelle aire (en cm²) ?", spec: { kind: "value", value: A * k * k }, sol: "Les aires sont multipliées par " + M(k + "^2 = " + k * k) + " : " + M(A * k * k) + " cm²." };
+      return { fig: FIG.scaling(k, ""), guide: [GS("Les longueurs sont multipliées par " + k + ". Les aires sont multipliées par " + M(k + "^2") + " = ?", k * k, M(k * k) + "."), GS("Nouvelle aire ?", A * k * k, M(A + " \\cdot " + k * k + " = " + A * k * k) + " cm².")], q: "On agrandit une figure de rapport " + M(k) + ". Son aire était de " + M(A) + " cm². Quelle est sa nouvelle aire (en cm²) ?", spec: { kind: "value", value: A * k * k }, sol: "Les aires sont multipliées par " + M(k + "^2 = " + k * k) + " : " + M(A * k * k) + " cm²." };
     }
     const k = R.int(2, 4), V = R.int(2, 9);
-    return { fig: FIG.scaling(k, ""), q: "Une maquette est " + M(k) + " fois plus petite que l'objet réel. Son volume est de " + M(V) + " dm³. Quel est le volume de l'objet réel (en dm³) ?", spec: { kind: "value", value: V * k ** 3 }, sol: "Les volumes sont multipliés par " + M(k + "^3 = " + k ** 3) + " : " + M(V * k ** 3) + " dm³." };
+    return { fig: FIG.scaling(k, ""), guide: [GS("Les volumes sont multipliés par " + M(k + "^3") + " = ?", k ** 3, M(k ** 3) + "."), GS("Volume réel ?", V * k ** 3, M(V + " \\cdot " + k ** 3 + " = " + V * k ** 3) + " dm³.")], q: "Une maquette est " + M(k) + " fois plus petite que l'objet réel. Son volume est de " + M(V) + " dm³. Quel est le volume de l'objet réel (en dm³) ?", spec: { kind: "value", value: V * k ** 3 }, sol: "Les volumes sont multipliés par " + M(k + "^3 = " + k ** 3) + " : " + M(V * k ** 3) + " dm³." };
   },
 
   aires(d) {
