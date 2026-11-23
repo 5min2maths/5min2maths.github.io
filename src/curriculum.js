@@ -93,6 +93,9 @@ const SYSTEMS = {
   CH: { label: "Suisse romande", grades: [[9, "9e"], [10, "10e"], [11, "11e"], [12, "1re (sec. II)"], [13, "2e (sec. II)"]] },
   // FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"]] }, // masqué (bêta genevoise)
 };
+// 22.11 : systèmes définis mais pas proposés dans l'interface (France : collège rendu jouable, ouverture à décider).
+// Sert au moteur (Mathélo, libellés de classe) et aux tests avec des profils { system: "FR", grade: 6…9 }.
+const SYSTEMS_HIDDEN = { FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"]] } };
 
 // Difficulté maximale (1 = bases, 3 = approfondi) : on ne demande pas la section à l'élève ;
 // c'est le Mathélo qui situe son niveau. Seules les petites classes (6e, 5e) plafonnent à 2.

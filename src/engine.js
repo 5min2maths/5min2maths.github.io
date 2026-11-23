@@ -94,7 +94,7 @@ function itemRating(profile, id, d) {
 // Échelle de référence (sans données partagées) : Mathélo typique en fin d'année par niveau HarmoS.
 const ELO_REF = [[8, 850], [9, 1000], [10, 1150], [11, 1300], [12, 1450], [13, 1600]];
 function eloLabel(profile, r) {
-  const sys = SYSTEMS[profile.system];
+  const sys = SYSTEMS[profile.system] || (typeof SYSTEMS_HIDDEN !== "undefined" && SYSTEMS_HIDDEN[profile.system]) || { grades: [] }; // 22.11 : France masquée dans l'interface
   const name = (h) => { const g = sys.grades.find(([gg]) => harmos(profile.system, gg) === h); return g ? g[1] : h === 12 ? (profile.system === "FR" ? "2nde" : "1re du Collège") : h === 13 ? (profile.system === "FR" ? "1re" : "2e du Collège") : h + "e"; };
   let lvl = ELO_REF[0];
   for (const ref of ELO_REF) if (r >= ref[1] - 75) lvl = ref;
@@ -187,7 +187,8 @@ const Engine = {
       const yr = "M" + (profile.grade - 11), sesa = profile.track !== "mp" && profile.grade >= 12 && typeof ORDRE_THEME !== "undefined" &&
         [(ORDRE_THEME.MATU || {})[n.id], (ORDRE_THEME.MATU_ALT || {})[n.id]].some((k) => (k || "").startsWith(yr));
       const coYear = this.coChap(profile, n.id, true);
-      const again = sesa || coYear || (profile.track !== "mp" && (n.again || []).includes(profile.grade));
+      // 22.11 : en France, les reprises sont dans againFR (n.again donne des années suisses).
+      const again = sesa || coYear || (profile.track !== "mp" && ((profile.system === "FR" ? n.againFR : n.again) || []).includes(profile.grade));
       return { ...n, theme: this.themeKey(profile, n.id), defaultStatus: g < profile.grade ? "vu" : "avenir", current: g === profile.grade || again, again };
     });
   },
@@ -231,6 +232,8 @@ const Engine = {
   },
   // Rang dans l'ordre du référentiel (CO, matu ou MP selon l'élève).
   rank(profile, id) {
+    // 22.11 : collège français (6e–3e) : progression propre (ORDRE.FR, défini dans fr_college.js), sinon l'ordre du CO.
+    if (profile.system === "FR" && profile.grade <= 9 && ORDRE.FR && ORDRE.FR[id] !== undefined) return ORDRE.FR[id];
     const ref = this.refOf(profile);
     const r = (ORDRE[ref] || {})[id] ?? ORDRE.CO[id];
     return r ?? 1000 + NOTIONS.findIndex((n) => n.id === id);

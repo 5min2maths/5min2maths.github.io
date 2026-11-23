@@ -1,0 +1,80 @@
+<meta charset="utf-8">
+<!-- Collège français (22.11) : pour chaque classe 6e–3e, catalogue non vide, sans notion masquée, ordonné (ORDRE.FR) ;
+     100 tirages par niveau des notions françaises : réponse acceptée par checkAnswer, guide cohérent (dernière étape = réponse),
+     pièges ≠ réponse, pas de NaN / undefined, pas de trivialité ; leçon, compétences, aide. tests/frcollege.html#progcalc,ratio -->
+<script>window.MathJax = { typesetPromise: () => Promise.resolve() };</script>
+<script>window.__errs=[];window.addEventListener("error",(e)=>window.__errs.push((e.filename||"").split("/").pop()+" : "+e.message));</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/fr_college.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/engine.js"></script>
+<pre id="out">en cours</pre>
+<script>
+const out = [], NEW = ["progcalc", "ratio", "milieux", "structexpr", "motifs", "automat"];
+const ids = location.hash ? location.hash.slice(1).split(",") : NEW.filter((id) => GEN[id]); let bad = 0;
+const fail = (m) => { bad++; if (bad < 400) out.push("ÉCHEC " + m); };
+for (const e of window.__errs) fail("chargement " + e);
+// 1. Catalogue par classe
+const CL = { 6: "6e", 7: "5e", 8: "4e", 9: "3e" };
+for (const g of [6, 7, 8, 9]) {
+  const p = { system: "FR", grade: g, track: "college", minutes: 5 }, cat = Engine.catalog(p);
+  if (cat.length < 20) fail(CL[g] + " : catalogue trop petit (" + cat.length + ")");
+  const masked = cat.filter((c) => FR_MASK.includes(c.id)); if (masked.length) fail(CL[g] + " : notions masquées présentes " + masked.map((c) => c.id).join(" "));
+  const swiss = cat.filter((c) => /CHF|PGDC|PPMC/.test(c.label)); if (swiss.length) fail(CL[g] + " : libellé suisse " + swiss.map((c) => c.id).join(" "));
+  const cur = cat.filter((c) => c.defaultStatus === "avenir"), noRank = cur.filter((c) => ORDRE.FR[c.id] === undefined);
+  if (!cur.length) fail(CL[g] + " : aucune notion de l'année");
+  if (noRank.length) fail(CL[g] + " : notions de l'année hors progression " + noRank.map((c) => c.id).join(" "));
+  const order = cur.map((c) => c.id).sort((a, b) => Engine.rank(p, a) - Engine.rank(p, b));
+  if (order.join() !== FR_PROGRESSION[g].filter((id) => cur.some((c) => c.id === id)).join()) fail(CL[g] + " : ordre ≠ progression");
+  const noGen = cat.filter((c) => !GEN[c.id]); if (noGen.length) fail(CL[g] + " : sans générateur " + noGen.map((c) => c.id).join(" "));
+  // ouverture à la rentrée : 3 premières notions de la progression
+  const st = Engine.newState(p); Engine.initNotions(st, Object.fromEntries(cat.map((c) => [c.id, c.defaultStatus]))); Engine.unlock(st, new Date("2026-09-10"));
+  const open = Object.entries(st.notions).filter(([, s]) => s.status === "encours").map(([id]) => id).sort((a, b) => Engine.rank(p, a) - Engine.rank(p, b));
+  if (open.join() !== FR_PROGRESSION[g].slice(0, 3).join()) fail(CL[g] + " : rentrée " + open.join(" "));
+  const again = cat.filter((c) => c.again).map((c) => c.id);
+  out.push(CL[g] + " : " + cat.length + " notions (" + cur.length + " de l'année, " + again.length + " reprises) ; rentrée : " + open.join(", ") + " ; Mathélo départ " + st.elo.r + " — " + eloLabel(p, st.elo.r));
+  for (const c of cat) for (const d of [1, 2, 3]) { const r = itemRating(p, c.id, d); if (!isFinite(r)) fail(CL[g] + " itemRating " + c.id); }
+}
+for (const id of Object.keys(FR_COLLEGE)) { const n = NOTIONS.find((x) => x.id === id); if (!n) fail("FR_COLLEGE : notion inconnue " + id); else if (!n.FR || n.FR[0] !== FR_COLLEGE[id][0]) fail("FR non appliqué " + id); }
+for (const id of FR_MASK) { const n = NOTIONS.find((x) => x.id === id); if (n && n.FR && n.FR[0] <= 9) fail("masquée mais au collège : " + id); }
+// 2. Notions françaises : 100 tirages par niveau
+const txt = (q) => [q.q, q.sol, ...(q.guide || []).flatMap((g) => [g.ask, g.sol]), ...(q.parts || []).map((p) => p.label), ...(q.hints || []), q.fig || ""].join(" | ");
+for (const id of ids) {
+  const line = [], n = NOTIONS.find((x) => x.id === id);
+  if (!n) { fail(id + " : notion absente"); continue; }
+  if (n.CH !== null) fail(id + " : CH devrait être null (notion française)");
+  const L = LESSONS[id]; if (!L || !L.titre || !L.intro || !L.regle || !L.exemple.length || !L.piege) fail(id + " : leçon incomplète");
+  if (!COMPS[id] || COMPS[id].length !== 3) fail(id + " : compétences"); if (!HINTS[id]) fail(id + " : aide");
+  for (const d of [1, 2, 3, 4]) {
+    if (d === 4 && !hasProb(id)) continue;
+    const forms = new Set(), ctx = new Set(); let nq = 0, triv = 0, samples = [];
+    for (let s = 1; s <= 100; s++) {
+      let q; try { q = Engine.build(id, d, s); } catch (e) { fail(id + "-" + d + "-" + s + " exception " + e.message); continue; }
+      if (!q) { fail(id + "-" + d + "-" + s + " question nulle"); continue; }
+      nq++; forms.add(qForm(q)); if (q.ctx) ctx.add(q.ctx);
+      const t = txt(q);
+      if (/undefined|NaN|Infinity|\[object|null/.test(t)) fail(q.code + " texte : " + t.match(/.{0,40}(undefined|NaN|Infinity|\[object|null).{0,20}/)[0]);
+      if (/\\cdot|CHF|Genève|'(?=\d{3})/.test(t)) fail(q.code + " usage suisse (·, CHF, ', Genève) : " + t.match(/.{0,30}(\\cdot|CHF|Genève|'(?=\d{3})).{0,10}/)[0]);
+      if (q.parts) { q.parts.forEach((p) => { const r = checkAnswer(p.spec, String(p.spec.value)); if (r.status !== "correct") fail(q.code + " partie refusée " + p.label); }); if (!q.hints || q.hints.length < 2) fail(q.code + " indices"); if (s <= 2) samples.push(q.q.replace(/<[^>]+>/g, " ").slice(0, 100) + " → " + q.parts.map((p) => p.spec.value).join(" ; ")); continue; }
+      const sp = q.spec, canon = sp.kind === "expr" ? sp.expr : sp.kind === "pair" || sp.kind === "set" ? sp.values.join(" ; ") : String(sp.value);
+      const r = checkAnswer(sp, canon); if (r.status !== "correct") fail(q.code + " réponse refusée : " + canon + " (" + r.status + " " + (r.message || "") + ")");
+      const fin = Engine.finalize({ profile: { system: "FR", grade: 8 } }, id, JSON.parse(JSON.stringify(q)));
+      if (sp.kind === "value") { const r2 = checkAnswer(fin.spec, String(+(+sp.value).toFixed(10)).replace(".", ",")); if (r2.status !== "correct") fail(q.code + " réponse décimale refusée " + sp.value + " " + r2.status); }
+      if (sp.kind === "value" && trivialQ(q, 0)) triv++;
+      if (!q.guide || !q.guide.length) fail(q.code + " sans guide"); else {
+        const last = q.guide[q.guide.length - 1].spec;
+        if (sp.kind === "expr" ? !(last.kind === "expr" && Expr.equivalent(Expr.parse(last.expr), Expr.parse(sp.expr))) : sp.kind === "value" ? Math.abs(last.value - sp.value) > 1e-9 : JSON.stringify(last.values) !== JSON.stringify(sp.values)) fail(q.code + " dernière étape ≠ réponse");
+        q.guide.forEach((x) => { const c = x.spec.kind === "expr" ? x.spec.expr : x.spec.values ? x.spec.values.join(" ; ") : String(x.spec.value); const rr = checkAnswer(x.spec, c); if (rr.status !== "correct") fail(q.code + " étape refuse sa réponse : " + c); });
+      }
+      if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+      (q.traps || []).forEach((tr) => { if (tr.e) { if (Expr.equivalent(Expr.parse(tr.e), Expr.parse(sp.expr))) fail(q.code + " piège = réponse"); } else if (sp.kind === "value" && Math.abs(tr.v - sp.value) < 1e-9) fail(q.code + " piège = réponse"); });
+      if (!q.ctx) fail(q.code + " sans ctx");
+      if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, " ").replace(/\\\(|\\\)/g, "").replace(/\s+/g, " ").slice(0, 110) + " → " + canon);
+    }
+    if (d < 4 && forms.size < 3) fail(id + " N" + d + " : " + forms.size + " forme(s)");
+    if (triv > 10) fail(id + " N" + d + " : " + triv + " questions triviales");
+    line.push("  N" + d + " : " + nq + " q., " + forms.size + " formes, " + ctx.size + " contextes, triviales " + triv);
+    samples.forEach((x) => line.push("     · " + x));
+  }
+  out.push(id + "\n" + line.join("\n"));
+}
+out.unshift(bad ? bad + " échec(s)" : "OK");
+document.getElementById("out").textContent = out.join("\n");
+</script>
