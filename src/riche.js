@@ -298,8 +298,16 @@ const RICH = {};
 })();
 
 // Chapitre du sujet de préparation : celui dont la banque couvre le plus de notions révisées (au moins la moitié).
-function richChapter(ids) {
+// 23.11 : une banque peut être réservée à une filière (track: "mp" = maturité professionnelle, "col" = Collège) ;
+// à couverture égale, la banque de la filière de l'élève passe devant (mêmes notions, niveaux très différents).
+function richChapter(ids, profile) {
+  if (profile === undefined) profile = typeof state !== "undefined" && state && state.profile;
+  const tr = profile && profile.track === "mp" && profile.grade >= 12 ? "mp" : profile && profile.grade >= 12 ? "col" : null;
   let best = null, n = 0;
-  for (const [k, c] of Object.entries(RICH)) { const m = ids.filter((id) => c.ids.includes(id)).length; if (m > n) { best = k; n = m; } }
-  return best && n * 2 >= ids.length ? best : null;
+  for (const [k, c] of Object.entries(RICH)) {
+    if ((c.track === "mp" && tr !== "mp") || (c.track === "col" && tr === "mp")) continue;
+    const m = ids.filter((id) => c.ids.includes(id)).length + (c.track && c.track === tr ? 0.5 : 0);
+    if (m > n) { best = k; n = m; }
+  }
+  return best && Math.floor(n) * 2 >= ids.length ? best : null;
 }

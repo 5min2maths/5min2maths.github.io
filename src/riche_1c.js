@@ -126,12 +126,23 @@
       return X({ id: "rac", lv: 2, titre: "Simplifier pour comparer", q: "On compare " + M("A = \\sqrt{" + 12 * k * k + "}") + " et " + M("B = " + k + "\\sqrt{3} + \\sqrt{" + 3 * k * k + "}") + ".",
         parts: [{ label: "Écris A sous la forme " + M("a\\sqrt{3}") + ".", pts: 1 }, { label: "Écris B sous la même forme.", pts: 1 }, { label: "Conclus.", pts: 1 }],
         sol: ul([M("A = " + 2 * k + "\\sqrt{3}") + ".", M("B = " + k + "\\sqrt{3} + " + k + "\\sqrt{3} = " + 2 * k + "\\sqrt{3}") + ".", "A = B."]) }); },
+    // 23.11 : racines carrées et cubiques (racprop, reprise de 11e en 1re)
+    () => { const k = pk([2, 3, 4]), n = pk([2, 3, 5]), V = k ** 3 * n, lo = Math.floor(k * Math.cbrt(n)), k2 = pk([3, 4, 5]), m = pk([3, 5, 7]), a = k2 * k2 * m;
+      return X({ id: "racprop", lv: 2, titre: "La boîte cubique", q: "Une boîte en forme de cube a un volume de " + Q(V, "cm^3") + ". Calculatrice non autorisée.",
+        parts: [{ label: "Écris la longueur exacte de l'arête sous la forme " + M("a\\sqrt[3]{b}") + ", " + M("b") + " le plus petit possible.", pts: 1 }, { label: "Encadre l'arête entre deux entiers consécutifs.", pts: 1 }, { label: "On double l'arête. Par combien le volume est-il multiplié ? Vérifie avec la racine cubique.", pts: 1 }, { label: "Le couvercle d'une autre boîte est un carré d'aire " + Q(a, "cm^2") + ". Écris son côté et sa diagonale sous forme exacte simplifiée.", pts: 2 }],
+        sol: ul([M("\\sqrt[3]{" + V + "} = \\sqrt[3]{" + k ** 3 + " \\cdot " + n + "} = " + k + "\\sqrt[3]{" + n + "}") + " cm.", M(lo + "^3 = " + lo ** 3 + " \\lt " + V + " \\lt " + (lo + 1) ** 3 + " = " + (lo + 1) + "^3") + " : l'arête est entre " + lo + " et " + (lo + 1) + " cm.", "Par " + M("2^3 = 8") + " : " + M("\\sqrt[3]{8 \\cdot " + V + "} = 2 \\cdot " + k + "\\sqrt[3]{" + n + "} = " + 2 * k + "\\sqrt[3]{" + n + "}") + ".", "Côté " + M("\\sqrt{" + a + "} = \\sqrt{" + k2 * k2 + " \\cdot " + m + "} = " + k2 + "\\sqrt{" + m + "}") + " cm ; diagonale " + M(k2 + "\\sqrt{" + m + "} \\cdot \\sqrt{2} = " + k2 + "\\sqrt{" + 2 * m + "}") + " cm."]),
+        chk: [[Math.cbrt(V), k + "*" + n + "^(1/3)"], [Math.sqrt(a), k2 + "√" + m], [Math.sqrt(a) * Math.SQRT2, k2 + "√" + 2 * m]] }); },
     () => { const [a, b, c, d] = pk([[1, 2, 1, 3], [2, 3, 1, 4], [3, 4, 1, 6]]);
       return X({ id: "fracops", lv: 3, titre: "Le dosage du sirop", q: "Un sirop se dilue : " + M("\\frac{" + a + "}{" + b + "}") + " de la bouteille pour un jus, et on en a déjà utilisé " + M("\\frac{" + c + "}{" + d + "}") + ". Il reste " + M("\\frac{" + (b * d - b * c - a * d) + "}{" + b * d + "}").replace(/\\frac\{-/, "-\\frac{") + " de la bouteille après le jus.",
         parts: [{ label: "Vérifie ce reste par un calcul.", pts: 2 }, { label: "Combien de jus identiques peut-on encore faire avec ce reste ?", pts: 1 }],
         sol: ul([M("1 - \\frac{" + c + "}{" + d + "} - \\frac{" + a + "}{" + b + "} = \\frac{" + (b * d - b * c - a * d) + "}{" + b * d + "}") + ".", (b * d - b * c - a * d) >= 0 ? M(Math.floor((b * d - b * c - a * d) / (a * d))) + " jus." : "Le reste est négatif : il n'y avait pas assez de sirop pour ce jus."]) }); },
   ];
   const RAISONN = [
+    () => { const [c, r] = pk([[-8, -2], [-27, -3], [-125, -5], [-64, -4]]), w = who();
+      return X({ id: "racprop", lv: 1, titre: "Trouve l'erreur", q: w + " affirme : « " + M("\\sqrt[3]{" + c + "}") + " n'existe pas, car on ne peut pas prendre la racine d'un nombre négatif ».",
+        parts: [{ label: "Calcule " + M("(" + r + ")^3") + ". Que peux-tu conclure ?", pts: 1 }, { label: "Pour quelle sorte de racine la remarque de " + w + " est-elle juste ? Donne un exemple.", pts: 1 }],
+        sol: ul([M("(" + r + ")^3 = " + c) + " : donc " + M("\\sqrt[3]{" + c + "} = " + r) + ". La racine cubique d'un nombre négatif existe.", "Pour la racine carrée : " + M("\\sqrt{" + -c + "}") + " existe, mais pas " + M("\\sqrt{" + c + "}") + " (un carré n'est jamais négatif)."]),
+        chk: [[Math.cbrt(c), String(r)]] }); },
     () => X({ id: "puiss", lv: 1, titre: "Trouve l'erreur", q: who() + " écrit : « " + M("2^3 \\cdot 2^4 = 4^7") + " ».", parts: [{ label: "Où est l'erreur ?", pts: 1 }, { label: "Calcule correctement.", pts: 1 }], sol: ul(["On garde la base 2 et on additionne les exposants.", M("2^7 = 128") + "."]) }),
     () => X({ id: "pct", lv: 2, titre: "Vrai ou faux ? Justifie", q: "Pour chaque affirmation, dis si elle est vraie ou fausse, et justifie.", parts: [{ label: "« Deux hausses de 10 % font une hausse de 21 %. »", pts: 1 }, { label: "« √(a + b) = √a + √b. »", pts: 1 }], sol: ul(["<b>Vrai</b> : " + M("1{,}1^2 = 1{,}21") + ".", "<b>Faux</b> : " + M("\\sqrt{9 + 16} = 5 \\ne 7") + "."]) }),
   ];
@@ -177,7 +188,7 @@
     () => X({ id: "tradexpr", lv: 2, titre: "Un exemple suffit-il ?", q: who() + " vérifie que " + M("n^2 + n + 41") + " est premier pour n = 1, 2, 3, 4 et conclut : « c'est toujours un nombre premier ».", parts: [{ label: "Un exemple peut-il prouver une propriété générale ?", pts: 1 }, { label: "Teste n = 41.", pts: 1 }], sol: ul(["Non : il faut une preuve ; un seul contre-exemple suffit à réfuter.", M("41^2 + 41 + 41 = 41 \\cdot 43") + " : pas premier."]) }),
   ];
 
-  RICH.no1c = { ids: ["arith", "fracops", "pct", "puiss", "rac", "racenc", "rel", "sci", "scicalc"], label: "Nombres", ex: EXN, raison: RAISONN, minutes: 45 };
+  RICH.no1c = { ids: ["arith", "fracops", "pct", "puiss", "rac", "racenc", "racprop", "rel", "sci", "scicalc"], label: "Nombres", ex: EXN, raison: RAISONN, minutes: 45 };
   RICH.ens1c = { ids: ["ensembles"], label: "Ensembles", ex: EXE, raison: RAISONE, minutes: 45 };
   RICH.arg1c = { ids: ["divcrit", "tradexpr"], label: "Argumenter", ex: EXR, raison: RAISONR, minutes: 45 };
 })();
