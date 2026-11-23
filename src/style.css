@@ -614,3 +614,5 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
   .elo-compact .eb-num .eyebrow { display: none; }
   .door b { font-size: 0.85rem; }
 }
+.elo-compact .eb-grade { min-width: 0; }
+.elo-compact .eb-next, .elo-compact .eb-grade b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }

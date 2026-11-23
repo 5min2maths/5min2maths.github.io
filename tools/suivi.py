@@ -151,6 +151,28 @@ def onglet_commentaires(wb, comms, bold, head_fill):
     return len(comms), n_non
 
 
+def onglet_robot(wb, bold, head_fill):
+    """Onglet « Robot » (22.11) : problèmes trouvés par l'élève-robot (tools/bot_eleve.py, suivi/robot/dernier.json)."""
+    f = ROOT / "suivi" / "robot" / "dernier.json"
+    if not f.exists():
+        return 0
+    d = json.loads(f.read_text())
+    ws = wb.create_sheet("Robot", 2)
+    ws.append(["Nouveau", "Type", "Classe", "Code", "Où", "Détail"])
+    for c in ws[1]:
+        c.font, c.fill = bold, head_fill
+    for p in sorted(d.get("problemes", []), key=lambda p: (not p.get("nouveau"), p["type"], p["classe"])):
+        ws.append(["oui" if p.get("nouveau") else "", p["type"], p["classe"], p["code"], p.get("ou", ""), p["detail"]])
+    ws.conditional_formatting.add(f"A2:F{max(2, ws.max_row)}", FormulaRule(formula=['$A2="oui"'], fill=PatternFill("solid", fgColor="FFF2CC")))
+    for col, w in zip("ABCDEF", [9, 26, 9, 22, 10, 90]):
+        ws.column_dimensions[col].width = w
+    ws.freeze_panes = "A2"
+    ws.auto_filter.ref = f"A1:F{max(1, ws.max_row)}"
+    ws.append([])
+    ws.append([f"Rapport du {d.get('date', '')[:10]} : " + ", ".join(f"{k} {v['questions'] + v['balayage']} q." for k, v in d.get("stats", {}).items())])
+    return len(d.get("problemes", []))
+
+
 def main():
     d = inventaire()
     votes, comms = retours()
@@ -247,6 +269,7 @@ def main():
                 ws.cell(r, 1).font = Font(color="999999")
 
     n_c, n_non = onglet_commentaires(wb, comms, bold, head_fill)
+    n_r = onglet_robot(wb, bold, head_fill)
     # Synthèse : formules (se met à jour quand l'utilisateur change « Contrôlé »)
     syn.append(["Classe", "Notions", "Questions", "Leçons actives", "% notions actives", "Validées", "À corriger", "Vues", "% validé", "Questions à 1 forme", "Tests de qualité"])
     for c in syn[1]:
@@ -260,6 +283,7 @@ def main():
         syn[f"E{i}"].number_format = syn[f"I{i}"].number_format = "0%"
     syn.append([])
     syn.append([f"Commentaires des testeurs : {n_c}, dont {n_non} non traités (onglet Commentaires, lignes en jaune)."])
+    syn.append([f"Élève-robot : {n_r} problème(s) dans le dernier rapport (onglet Robot ; nouveaux en jaune)."])
     syn.append(["Statuts « Contrôlé » : à faire → vu → à corriger → validé. Colonnes automatiques recalculées par tools/suivi.py ; Contrôlé et Remarque conservés."])
     for col, w in zip("ABCDEFGHIJK", [12, 9, 10, 14, 16, 9, 11, 7, 9, 18, 14]):
         syn.column_dimensions[col].width = w

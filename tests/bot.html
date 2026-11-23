@@ -1,0 +1,113 @@
+<link rel="stylesheet" href="../src/style.css"><!doctype html><meta charset="utf-8"><div id="app"></div><pre id="out"></pre>
+<script>window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_manip.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script>
+// Élève-robot (22.11, demande de l'auteur : « un agent qui utilise l'app en continu pour faire remonter des soucis »).
+// 1) Séances réelles par classe, via l'interface (comme un élève : juste, faux puis juste, « je ne sais pas »).
+// 2) Balayage : chaque notion de chaque classe, chaque niveau, plusieurs tirages, affichée dans l'interface.
+// Contrôles : erreurs JavaScript, textes cassés (undefined, NaN, « rac{ », \( non fermé), débordement en largeur
+// (app réduite à 360 px), réponse juste refusée, valeur triviale (0 ou 1), question répétée dans une séance,
+// écran sans issue. Résultat : JSON dans <pre id="out"> (lu par tools/bot_eleve.py).
+// Paramètres : bot.html#rapide (moins de tirages) ou #classes=9e,10e,11e
+document.getElementById("app").style.width = "360px";
+Element.prototype.scrollIntoView = function () {};
+window.confirm = () => true; window.alert = () => {};
+const ISSUES = [], seen = new Set(), STATS = {}, jsErr = [];
+window.addEventListener("error", (e) => jsErr.push(String(e.message)));
+const H = location.hash, RAPIDE = /rapide/.test(H), PROFILES = [["9e", { system: "CH", grade: 9, track: "college" }], ["10e", { system: "CH", grade: 10, track: "college" }], ["11e", { system: "CH", grade: 11, track: "college" }],
+  ["1re", { system: "CH", grade: 12, track: "college" }], ["2e", { system: "CH", grade: 13, track: "college" }], ["MP 1re", { system: "CH", grade: 12, track: "mp" }], ["MP 2e", { system: "CH", grade: 13, track: "mp" }]];
+const only = (/classes=([^&]+)/.exec(H) || [])[1];
+const PROF = only ? PROFILES.filter(([n]) => decodeURIComponent(only).split(",").includes(n)) : PROFILES;
+let CL = "", CTX = "";
+const issue = (type, code, detail) => { const k = type + "|" + code + "|" + CL; if (seen.has(k)) return; seen.add(k); ISSUES.push({ type, classe: CL, code: code || "", detail: String(detail || "").slice(0, 220), ou: CTX }); };
+// Réponse « d'élève » à partir de la spécification (même logique que les tests des générateurs).
+const CAND = []; for (const k of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12]) for (const d of [1, 2, 3, 4, 5, 6, 8, 10, 12]) for (const n of [2, 3, 5, 6, 7, 10, 11, 13]) for (const sg of ["", "-"]) CAND.push(sg + (k === 1 ? "" : k) + "√" + n + (d === 1 ? "" : "/" + d));
+const exact = (s2) => { for (const c of CAND) { try { if (checkAnswer(s2, c).status === "correct") return c; } catch (e) {} } return null; };
+const frx = (v) => { if (Math.abs(v * 1e6 - Math.round(v * 1e6)) < 1e-6) return String(+v.toFixed(6)); for (let d = 2; d <= 400; d++) { const n = Math.round(v * d); if (Math.abs(n / d - v) < 1e-9) return n + "/" + d; } return String(+v.toPrecision(8)); };
+const answerOf = (q, sp) => { sp = sp || q.spec; if (q && q.canon && sp === q.spec) return String(q.canon);
+  if (sp.kind === "value" && !sp.round && Math.abs(sp.value * 400 - Math.round(sp.value * 400)) > 1e-6 && !/\//.test(frx(sp.value))) { const e = exact(sp); if (e) return e; }
+  if (sp.kind === "value") return sp.radical ? exact(sp) || frx(sp.value) : sp.round ? String(+(+sp.value).toFixed(Math.max(0, -Math.floor(Math.log10(sp.round))))) : frx(sp.value);
+  if (sp.kind === "set") return sp.values.length ? sp.values.map(frx).join(";") : "aucune";
+  if (sp.kind === "pair") return sp.values.map(frx).join(" ; ");
+  if (sp.kind === "expr") return sp.expr;
+  if (sp.kind === "solset") return SolSet.show(sp.ivs, false);
+  if (sp.kind === "ineq") return "x " + sp.op + " " + frx(sp.value);
+  return null; };
+const wrongOf = (sp) => (sp.kind === "value" ? frx((sp.value || 0) + 7) : sp.kind === "expr" ? "x+12345" : "123");
+// Contrôles d'écran
+const scan = (code) => {
+  const t = app.textContent, html = app.innerHTML;
+  const m = t.match(/.{0,25}(\bundefined\b|\bNaN\b|\[object|Infinity).{0,25}/); if (m) issue("texte cassé", code, m[0]);
+  const r = t.match(/.{0,25}[^\\a-zA-Z]rac\{.{0,25}/) || (t.includes("\f") ? ["caractère \\f (\\frac mal échappé)"] : null); if (r) issue("formule cassée", code, r[0]);
+  app.querySelectorAll(".qtext, .sol, .fb, label").forEach((el) => { const s = el.textContent, o = (s.match(/\\\(/g) || []).length, c = (s.match(/\\\)/g) || []).length; if (o !== c) issue("formule non fermée", code, s.slice(0, 120)); });
+  const W = app.getBoundingClientRect().right + 4;
+  app.querySelectorAll("#app *").forEach((el) => { if (el.children.length || el.closest("mjx-container, svg, .preview, .keypad, #kp, .figwrap, table, .tabs, pre, code, .home-head, .brand")) return; const r2 = el.getBoundingClientRect(); if (r2.width && r2.right > W) issue("dépasse en largeur", code, (el.tagName + "." + el.className + " « " + el.textContent.slice(0, 50) + " » +" + Math.round(r2.right - W) + " px")); });
+  if (jsErr.length) { issue("erreur JavaScript", code, jsErr.join(" / ")); jsErr.length = 0; }
+};
+// Interception : la question affichée est connue du robot
+let Q = null; const DONE = new WeakSet(); const rq = renderQuestion, rp = renderProblem;
+renderQuestion = function (q, opt) { Q = q; return rq(q, opt); };
+renderProblem = function (q, opt) { Q = q; return rp(q, opt); };
+let SUM = false; const ss = screenSummary; screenSummary = function () { SUM = true; return ss(); };
+const click = (id) => { const b = document.getElementById(id); if (b && !b.disabled) { b.click(); return true; } return false; };
+// Répondre à la question affichée ; mode : "juste", "faux-juste", "idk"
+const play = (mode, cs) => {
+  const q = Q; if (!q) return false; const code = q.code || q.id; scan(code);
+  if (q.spec && q.spec.kind === "value" && !q.parts && [0, 1].includes(q.spec.value) && !/proba|\bp\b/i.test(q.id)) issue("valeur triviale", code, "réponse = " + q.spec.value);
+  if (cs) { if (cs.has(code)) issue("question répétée dans la séance", code, ""); cs.add(code); }
+  if (q.parts) {
+    q.parts.forEach((p, i) => { const inp = document.getElementById("p" + i), a = answerOf(null, p.spec); if (inp && a != null) inp.value = a; });
+    click("check"); const bad = [...app.querySelectorAll("[id^=mk]")].filter((x) => x.textContent === "✗"); if (bad.length) issue("réponse juste refusée (problème)", code, q.parts.map((p) => answerOf(null, p.spec)).join(" | "));
+    scan(code); return click("nx");
+  }
+  const inp = document.getElementById("ans"), a = answerOf(q); if (!inp) { issue("écran sans champ de réponse", code, ""); return false; }
+  if (a == null) { click("idk"); scan(code); return click("nx"); }
+  if (mode === "idk") { click("idk"); scan(code); return click("nx"); }
+  if (mode === "faux-juste") { inp.value = wrongOf(q.spec); click("check"); }
+  if (!document.getElementById("nx")) { inp.value = a; click("check"); }
+  const fb = app.querySelector("#fb .fb.ok, .fb.ok");
+  if (!fb && mode !== "idk" && !app.querySelector(".fb.bad")) issue("réponse juste refusée", code, "tapé « " + a + " » : " + ((app.querySelector(".fb") || {}).textContent || "").slice(0, 100));
+  else if (!fb && mode === "juste") issue("réponse juste refusée", code, "tapé « " + a + " » : " + ((app.querySelector(".fb") || {}).textContent || "").slice(0, 100));
+  scan(code); return click("nx");
+};
+// Écran autre qu'une question : leçon, leçon active, rappel… on avance comme un élève
+const advance = () => {
+  const pc = app.querySelector("#pc button:not([disabled])"); if (pc) pc.click();
+  if (click("skip")) {}
+  for (const id of ["go", "lok", "lgo", "aok", "cont", "nx", "ok"]) if (click(id)) return true;
+  const b = [...app.querySelectorAll("button.btn-primary")].find((x) => !x.disabled && x.offsetParent !== null); if (b) { b.click(); return true; }
+  return false;
+};
+const t0 = Date.now();
+for (const [nom, prof] of PROF) {
+  CL = nom; STATS[nom] = { seances: 0, questions: 0, ecrans: 0, balayage: 0 };
+  // 1) Séances réelles
+  for (let s = 0; s < (RAPIDE ? 2 : 5); s++) {
+    CTX = "séance";
+    try {
+      state = Engine.newState(prof); Engine.autoInit(state); state.placed = true; state.tourDone = true; state.homeMode = s % 3 === 2 ? "libre" : "classe"; save();
+      SUM = false; Q = null; const cs = new Set(); homeTab = "today"; screenHome(); scan("accueil");
+      click(state.homeMode === "libre" ? "freego" : "go");
+      for (let k = 0; k < 60 && !SUM; k++) {
+        STATS[nom].ecrans++;
+        const before = app.innerHTML.length + "|" + (Q && Q.code);
+        if (Q && !DONE.has(Q) && app.querySelector("#check")) { DONE.add(Q); STATS[nom].questions++; play(["juste", "juste", "faux-juste", "juste", "idk"][k % 5], cs); continue; }
+        if (!advance()) { issue("écran sans issue", "", app.textContent.replace(/\s+/g, " ").slice(0, 120)); break; }
+        if (app.innerHTML.length + "|" + (Q && Q.code) === before) { issue("écran figé", "", app.textContent.replace(/\s+/g, " ").slice(0, 120)); break; }
+      }
+      if (SUM) { STATS[nom].seances++; scan("bilan"); }
+    } catch (e) { issue("exception en séance", Q && Q.code, e.message + " " + (e.stack || "").split("\n")[1]); }
+  }
+  // 2) Balayage : chaque notion ouverte pour la classe, niveaux 1 à 3 (et 4 si problème), quelques tirages
+  CTX = "balayage";
+  state = Engine.newState(prof); Engine.autoInit(state); state.placed = true; state.tourDone = true; session = null;
+  const ids = Engine.catalog(prof).filter((c) => state.notions[c.id] && GEN[c.id]).map((c) => c.id);
+  for (const id of ids) for (const d of [1, 2, 3, 4]) for (let r = 0; r < (RAPIDE ? 1 : 3); r++) {
+    try { const q = Engine.make(state, id, d); if (!q) continue; q.d = q.d || d; STATS[nom].balayage++;
+      renderQuestion(q, { eyebrow: "robot", single: true, track: "robot", onDone() {}, onNext() {}, onNotYet() {} }); play("juste", null);
+    } catch (e) { issue("exception au balayage", id + "-" + d, e.message); }
+  }
+}
+const types = {}; ISSUES.forEach((x) => (types[x.type] = (types[x.type] || 0) + 1));
+document.getElementById("out").textContent = JSON.stringify({ date: new Date().toISOString(), secondes: Math.round((Date.now() - t0) / 1000), stats: STATS, types, problemes: ISSUES });
+</script>
