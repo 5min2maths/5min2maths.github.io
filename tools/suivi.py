@@ -63,9 +63,13 @@ def banques_riches():
     out = {}
     for f in sorted((ROOT / "src").glob("riche*.js")):  # riche.js et riche_11b.js (17.11)
         s = f.read_text()
-        for m in re.finditer(r'RICH\.(\w+) = \{ ids: \[([^\]]*)\]', s):
+        for m in re.finditer(r'RICH\.(\w+) = \{ ids: \[([^\]]*)\](, track: "(\w+)")?', s):
             out[m.group(1)] = re.findall(r'"([a-z0-9]+)"', m.group(2))
+            TRACK[m.group(1)] = m.group(4)  # 23.11 : banque réservée à une filière (mp / col)
     return out
+
+
+TRACK = {}
 
 
 def manuel():
@@ -237,7 +241,10 @@ def main():
             # Fin de chapitre : statut du test de préparation (évaluation d'entraînement, demande du 15.11).
             if k + 1 == len(rows) or rows[k + 1]["chap"] != row["chap"]:
                 ids = [r["id"] for r in rows if r["chap"] == row["chap"]]
-                ch = next((c for c, cids in RICH_B.items() if 2 * sum(i in cids for i in ids) >= len(ids)), None)
+                mp = cl["name"].startswith("MP")
+                cand = [c for c in RICH_B if not TRACK.get(c) or TRACK[c] == ("mp" if mp else "col")]
+                cand.sort(key=lambda c: (-sum(i in RICH_B[c] for i in ids), not TRACK.get(c)))
+                ch = next((c for c in cand if 2 * sum(i in RICH_B[c] for i in ids) >= len(ids)), None)
                 sid = "sujet:" + row["chap"][:20]
                 ctl, rem = keep.get((cl["name"], sid, "Test"), ("à faire", None))
                 ws.append([row["chap"], "Test de préparation (évaluation)", sid, "Test", "Sujet type test : automatismes, exercices en situation, raisonnement", "",
