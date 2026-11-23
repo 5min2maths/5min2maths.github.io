@@ -208,8 +208,12 @@ function screenWelcome() {
 
 function screenLevel() {
   const sys = SYSTEMS[draft.system];
-  if (!sys.grades.some(([g]) => g === draft.grade)) draft.grade = sys.grades[sys.grades.length - 2][0];
-  const sec2 = draft.system === "CH" && draft.grade >= 12;
+  if (!sys.grades.some(([g]) => g === draft.grade)) draft.grade = sys.grades.some(([g]) => g === 11) ? 11 : sys.grades[0][0];
+  // 22.11 : 3e et 4e du Collège seulement (pas de MP 3e–4e dans l'app) : pas de choix de voie.
+  // Voie imposée seulement en 3e–4e : en revenant en 1re–2e, le choix redevient obligatoire (règle du 20.11).
+  if (draft.system === "CH" && draft.grade >= 14) { if (draft.track !== "college") draft.autoTrack = true; draft.track = "college"; }
+  else if (draft.autoTrack) { draft.track = null; draft.autoTrack = false; }
+  const sec2 = draft.system === "CH" && draft.grade >= 12 && draft.grade <= 13;
   h(`${brand}<div class="eyebrow">Étape 1 sur 2</div><h2>Où en es-tu ?</h2>
   <div class="card flat stack">${Object.keys(SYSTEMS).length > 1 ? `<h3>Ton école</h3><div class="seg" id="sys">${Object.entries(SYSTEMS).map(([k, v]) => `<button aria-pressed="${k === draft.system}" data-v="${k}">${v.label}</button>`).join("")}</div>` : ""}
   <h3>Ta classe cette année</h3><div class="seg" id="grade">${sys.grades.map(([g, n]) => `<button aria-pressed="${g === draft.grade}" data-v="${g}">${n}</button>`).join("")}</div>

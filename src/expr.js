@@ -36,6 +36,8 @@ const Expr = (() => {
         else if (w === "cbrt") toks.push({ t: "fn", v: "cbrt" });
         else if (w === "ln") toks.push({ t: "fn", v: "ln" });
         else if (w === "log") toks.push({ t: "fn", v: "log" });
+        // 23.11 (dérivation, 3e Collège) : fonctions sin, cos, tan (radians) et exp.
+        else if (["sin", "cos", "tan", "exp"].includes(w)) toks.push({ t: "fn", v: w });
         else if (w === "e" && !/[a-z]/i.test(s[j] || "")) toks.push({ t: "const", v: "e" });
         else if (w === "pi") toks.push({ t: "const", v: "pi" });
         else for (const ch of w) toks.push({ t: "var", v: ch }); // xy = x·y
@@ -138,7 +140,7 @@ const Expr = (() => {
       case "mul": return evaluate(n.a, env) * evaluate(n.b, env);
       case "div": return evaluate(n.a, env) / evaluate(n.b, env);
       case "pow": return Math.pow(evaluate(n.a, env), evaluate(n.b, env));
-      case "fn": { const v = evaluate(n.a, env); return n.f === "sqrt" ? Math.sqrt(v) : n.f === "cbrt" ? Math.cbrt(v) : n.f === "ln" ? Math.log(v) : Math.log10(v); }
+      case "fn": { const v = evaluate(n.a, env); return n.f === "sqrt" ? Math.sqrt(v) : n.f === "cbrt" ? Math.cbrt(v) : n.f === "ln" ? Math.log(v) : n.f === "sin" ? Math.sin(v) : n.f === "cos" ? Math.cos(v) : n.f === "tan" ? Math.tan(v) : n.f === "exp" ? Math.exp(v) : Math.log10(v); }
       default: return NaN;
     }
   }

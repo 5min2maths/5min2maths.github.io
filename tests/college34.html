@@ -1,0 +1,111 @@
+<meta charset="utf-8">
+<!-- Contrôle des notions de 3e du Collège (23.11, src/ch3c_ana.js) : tests/college34.html#tangente,variations. Copié de ch1c.html ; plus : profil 3e / 4e, calculateur (sin, cos, exp), leçons et compétences. Réponses « set » (ensembles de solutions) contrôlées aussi. Pour chaque notion et niveau (1–3, et 4 = problèmes) :
+     pas d erreur, réponse finie, guide présent et dont la dernière étape = réponse, pièges ≠ réponse, pas de trivialité ni de réponse visible,
+     pas de « undefined » / « NaN » dans le texte ; nombre de formes et de contextes. -->
+<script>window.MathJax = { typesetPromise: () => Promise.resolve() };</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script>
+<script src="../src/expr.js"></script>
+<script src="../src/figures.js"></script><script src="../src/geo.js"></script>
+<script src="../src/generators.js"></script>
+<script src="../src/gen2.js"></script>
+<script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script>
+<script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script>
+<script src="../src/engine.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_manip.js"></script>
+<pre id="out">en cours</pre>
+<script>
+const out = [], ids = location.hash ? location.hash.slice(1).split(",") : ["tauxvar", "nbderive", "derivref", "derivregles", "derivprodquot", "derivcomp", "tangente", "variations", "optimderiv"]; let bad = 0;
+const fail = (m) => { bad++; if (bad < 3000) out.push("ÉCHEC " + m); };
+// Étapes du pas à pas (23.11) : chaque étape accepte sa propre réponse, quel que soit son type (nombre, expression, ensemble, couple, intervalle).
+const fS0 = (v) => { for (let d = 1; d <= 120; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return d === 1 ? String(Math.round(v)) : Math.round(v * d) + "/" + d; return String(v); };
+const canonAny = (sp) => sp.kind === "pair" ? sp.values.map(fS0).join(" ; ") : sp.kind === "set" ? (sp.values.length ? sp.values.map(fS0).join(" ; ") : "aucune") : sp.kind === "solset" ? SolSet.show(sp.ivs, false) : sp.kind === "expr" ? sp.expr : sp.kind === "ineq" ? "x " + sp.op + " " + fS0(sp.value) : String(sp.value);
+const checkSteps = (q) => q.guide.forEach((x) => { if (x.spec.kind === "value" && !isFinite(x.spec.value)) fail(q.code + " étape non finie"); const r = checkAnswer(x.spec, canonAny(x.spec)); if (r.status !== "correct") fail(q.code + " étape refuse sa propre réponse : " + canonAny(x.spec) + " " + (r.message || r.status)); });
+const txt = (q) => [q.q, q.sol, ...(q.guide || []).flatMap((g) => [g.ask, g.sol]), ...(q.parts || []).map((p) => p.label), ...(q.hints || [])].join(" | ");
+for (const id of ids) {
+  const line = [];
+  for (const d of [1, 2, 3, 4]) {
+    const forms = new Set(), ctx = new Set(); let n = 0, g = 0, triv = 0, shown = 0, samples = [];
+    for (let s = 1; s <= 300; s++) {
+      let q; try { q = Engine.build(id, d, s); } catch (e) { fail(id + "-" + d + "-" + s + " exception " + e.message); continue; }
+      n++; forms.add(qForm(q)); if (q.ctx) ctx.add(q.ctx);
+      const t = txt(q);
+      { const plainTxt = t.replace(/\\\(.*?\\\)/g, " "); const dv = [...plainTxt.matchAll(/.{0,25}(\d|\)) : (\d|\().{0,10}/g)].map((m) => m[0]).find((s) => !/h \d{1,2} : \d/.test(s)); if (dv) fail(q.code + " division « : » en texte simple (écrire ÷) : " + dv); }
+      { const pl = t.replace(/\\\(.*?\\\)/g, " "); const bad = pl.match(/.{0,30}(\{,\}|\\frac|\\cdot|\^\{).{0,10}/); if (bad) fail(q.code + " TeX hors formule : " + bad[0]); }
+      if (/undefined|NaN|Infinity|\[object/.test(t)) fail(q.code + " texte : " + t.match(/.{0,40}(undefined|NaN|Infinity|\[object).{0,20}/)[0]);
+      if (q.parts) { q.parts.forEach((p) => { if (!isFinite(p.spec.value)) fail(q.code + " partie non finie " + p.label); }); if (s <= 2) samples.push(q.q.replace(/<[^>]+>/g, "").slice(0, 90) + " → " + q.parts.map((p) => +(+p.spec.value).toFixed(4)).join(" ; ")); continue; }
+      if (q.spec.kind === "expr") { // réponse littérale (calcul littéral, 15.11)
+        const self = checkAnswer(q.spec, q.spec.expr); if (self.status !== "correct") fail(q.code + " la réponse attendue est refusée (" + self.status + " " + (self.message || "") + ") : " + q.spec.expr);
+        if (!q.guide) fail(q.code + " sans guide"); else { g++; const last = q.guide[q.guide.length - 1].spec;
+          if (last.kind === "expr" && !Expr.equivalent(Expr.parse(last.expr), Expr.parse(q.spec.expr), q.spec.pos)) fail(q.code + " dernière étape ≠ réponse : " + last.expr + " / " + q.spec.expr);
+          checkSteps(q); }
+        if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+        (q.traps || []).forEach((tr) => { if (tr.e) { let te; try { te = Expr.parse(tr.e); } catch (e) { fail(q.code + " piège illisible " + tr.e); return; } if (Expr.equivalent(te, Expr.parse(q.spec.expr))) fail(q.code + " piège = bonne réponse : " + tr.e); } });
+        if (!q.ctx) fail(q.code + " sans ctx");
+        if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 100) + " → " + q.spec.expr + (q.spec.form ? " [" + q.spec.form + (q.spec.minFactors ? " ≥" + q.spec.minFactors : "") + "]" : ""));
+        continue;
+      }
+      if (["pair", "ineq", "solset"].includes(q.spec.kind)) { // couples, inégalités, intervalles (systèmes, 18.11)
+        const fS = (v) => { for (let d = 1; d <= 120; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return d === 1 ? String(Math.round(v)) : Math.round(v * d) + "/" + d; return String(v); };
+        const canon = (sp) => sp.kind === "pair" ? sp.values.map(fS).join(" ; ") : sp.kind === "ineq" ? "x " + sp.op + " " + fS(sp.value) : sp.kind === "solset" ? SolSet.show(sp.ivs, false) : sp.kind === "expr" ? sp.expr : String(sp.value);
+        const c0 = canon(q.spec), self = checkAnswer(q.spec, c0); if (self.status !== "correct") fail(q.code + " la réponse attendue est refusée (" + self.status + " " + (self.message || "") + ") : " + c0);
+        if (q.spec.kind === "pair" && q.spec.values.some((v) => !isFinite(v))) fail(q.code + " valeur non finie");
+        if (!q.guide) fail(q.code + " sans guide"); else { g++; const last = q.guide[q.guide.length - 1].spec;
+          if (last.kind !== q.spec.kind || checkAnswer(q.spec, canon(last)).status !== "correct") fail(q.code + " dernière étape ≠ réponse : " + canon(last) + " / " + c0);
+          checkSteps(q); }
+        if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+        (q.traps || []).forEach((tr) => { if (!tr.spec) return; const ci = canon(tr.spec); if (checkAnswer(q.spec, ci).status === "correct") fail(q.code + " piège = bonne réponse : " + ci); else if (diagnose(q, ci) !== tr.m) fail(q.code + " piège non diagnostiqué : " + ci); });
+        if (!q.ctx) fail(q.code + " sans ctx");
+        if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 110) + " → " + c0);
+        continue;
+      }
+      if (q.spec.kind === "set") { // ensemble de solutions (équations, 16.11)
+        const canon = q.spec.all ? "tous" : q.spec.values.length ? q.spec.values.map((v) => { for (let d = 1; d <= 60; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return d === 1 ? String(Math.round(v)) : Math.round(v * d) + "/" + d; const r = Math.round(v * v * 1e6) / 1e6; return v; }).join(" ; ") : "aucune";
+        const self = checkAnswer(q.spec, canon); if (self.status !== "correct") fail(q.code + " la réponse attendue est refusée (" + self.status + ") : " + canon);
+        if (!q.spec.all && q.spec.values.some((v) => !isFinite(v))) fail(q.code + " solution non finie");
+        if (!q.guide) fail(q.code + " sans guide"); else { g++; const last = q.guide[q.guide.length - 1].spec;
+          if (last.kind !== "set" || !!last.all !== !!q.spec.all || last.values.length !== q.spec.values.length || last.values.some((v, i) => Math.abs(v - q.spec.values[i]) > 1e-9)) fail(q.code + " dernière étape ≠ réponse");
+          checkSteps(q); }
+        if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+        (q.traps || []).forEach((tr) => { if (tr.s && checkAnswer(q.spec, tr.s.join(";")).status === "correct") fail(q.code + " piège = bonne réponse"); if (tr.s && tr.s.some((v) => !isFinite(v))) fail(q.code + " piège non fini"); });
+        if (!q.ctx) fail(q.code + " sans ctx");
+        // le diagnostic retrouve chaque piège
+        (q.traps || []).forEach((tr) => { const inp = tr.none ? "aucune" : tr.all ? "tous" : tr.s ? tr.s.join(" ; ") : null; if (inp && diagnose(q, inp) !== tr.m && checkAnswer(q.spec, inp).status !== "correct") fail(q.code + " piège non diagnostiqué : " + inp); });
+        if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 110) + " → " + canon);
+        continue;
+      }
+      const ans = q.spec.value; if (!isFinite(ans)) fail(q.code + " réponse non finie");
+      if (trivialQ(q, 0)) triv++; if (answerShown(q)) shown++;
+      if (q.guide) { g++; const last = q.guide[q.guide.length - 1].spec.value, tol = Math.max(q.spec.round || 0, q.guide[q.guide.length - 1].spec.round || 0, 1e-9 * Math.max(1, Math.abs(ans)));
+        if (Math.abs(last - ans) > tol) fail(q.code + " dernière étape " + last + " ≠ " + ans);
+        checkSteps(q); }
+      else fail(q.code + " sans guide");
+      if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+      if (!q.ctx) fail(q.code + " sans ctx");
+      if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 110) + " → " + +(+ans).toFixed(4));
+    }
+    if (d < 4 && ctx.size < 3) fail(id + " N" + d + " : moins de 3 formes (ctx " + [...ctx].join(", ") + ")");
+    if (d < 4 && triv > n * 0.05) fail(id + " N" + d + " : " + triv + " questions triviales sur " + n);
+    line.push("  N" + d + " : " + n + " q., " + forms.size + " formes, " + ctx.size + " contextes" + (d < 4 ? ", guides " + Math.round(100 * g / n) + " %, triviales " + triv + ", réponse visible " + shown : ""));
+    samples.forEach((x) => line.push("     · " + x));
+  }
+  out.push(id + "\n" + line.join("\n"));
+}
+// Profils 3e et 4e du Collège (grade 14, 15) : catalogue, chapitre, Mathélo.
+const NEW = ["tauxvar", "nbderive", "derivref", "derivregles", "derivprodquot", "derivcomp", "tangente", "variations", "optimderiv"];
+for (const g of [14, 15]) {
+  const p = { system: "CH", grade: g, track: "college" }, cat = Engine.catalog(p), cur = cat.filter((c) => c.current).map((c) => c.id);
+  if (!SYSTEMS.CH.grades.some(([x]) => x === g)) fail("classe " + g + " absente de SYSTEMS");
+  if (g === 14) { NEW.forEach((id) => { if (!cur.includes(id)) fail(id + " pas « de l'année » en 3e"); const th = Engine.themeLabel(Engine.themeKey(p, id), p); if (th !== "3. Dérivation") fail(id + " chapitre " + th); }); }
+  if (cat.some((c) => c.id === "f2expr" && c.current)) fail("notion de 1re « de l'année » en " + (g - 11) + "e");
+  const st = Engine.newState(p); Engine.autoInit(st); if (!Object.keys(st.notions).length) fail("aucune notion en " + g);
+  out.push((g - 11) + "e : " + cat.length + " notions, " + cur.length + " de l'année (" + cur.join(", ") + ") ; Mathélo de départ " + st.elo.r + " · " + eloLabel(p, st.elo.r));
+}
+for (const id of ["tauxvar", "variations"]) if (Engine.rank({ system: "CH", grade: 14, track: "college" }, id) >= 1000) fail(id + " sans rang matu");
+// Calculateur : fonctions trigonométriques et exp (23.11)
+for (const [spec, inp, want] of [[{ kind: "expr", expr: "3*cos(3x)" }, "3cos(3x)", "correct"], [{ kind: "expr", expr: "-2*sin(x) + 6x" }, "6x - 2 sin(x)", "correct"], [{ kind: "expr", expr: "-2/x^3" }, "-2x^(-3)", "correct"], [{ kind: "expr", expr: "3x^2-4" }, "y = 3x^2 - 4", "correct"],
+  [{ kind: "value", value: Math.PI / 3 }, "pi/3", "correct"], [{ kind: "value", value: Math.sqrt(3) / 2 }, "√3/2", "correct"], [{ kind: "expr", expr: "x/sqrt(x^2+9)" }, "x/√(x^2+9)", "correct"], [{ kind: "expr", expr: "exp(2x)" }, "e^(2x)", "correct"], [{ kind: "expr", expr: "3*cos(3x)" }, "3cos(x)", "wrong"]])
+  { const r = checkAnswer(spec, inp); if (r.status !== want) fail("calculateur : « " + inp + " » → " + r.status + " (attendu " + want + ")"); }
+// Leçons, indices, compétences, problèmes
+for (const id of NEW) { if (!LESSONS[id]) fail(id + " sans leçon"); if (!HINTS[id]) fail(id + " sans indice"); if (!COMPS[id] || COMPS[id].length !== 3) fail(id + " : 3 compétences attendues"); if (!hasProb(id)) fail(id + " sans problème (niveau 4)"); if (!PREREQ[id]) fail(id + " sans prérequis"); }
+out.unshift(bad ? bad + " échec(s)" : "OK");
+document.getElementById("out").textContent = out.join("\n");
+</script>

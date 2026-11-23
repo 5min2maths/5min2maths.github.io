@@ -92,6 +92,7 @@ HORS = re.compile(r"Énoncer|Esquisser|Maîtriser une démonstration|Justifier|R
 
 def main():
     cur = (ROOT / "src/curriculum.js").read_text() + (ROOT / "src/gen3.js").read_text()
+    cur += (ROOT / "src/ch3c_ana.js").read_text()  # 23.11 : notions de 3e Collège (dérivation), codesMATU sur la ligne de l'id
     ids = re.findall(r'\{ id: "(\w+)"', cur)
     labels = dict(re.findall(r'\{ id: "(\w+)", theme: "\w+", label: "((?:[^"\\]|\\.)*)"', cur))
     # notions fines (src/gen3.js) : motifs déclarés avec la notion (codes = CO, codesMATU, codesMP)
@@ -149,7 +150,11 @@ SESA = {"M1C01": "1. Nombres", "M1C02": "2. Ensembles", "M1C03": "3. Argumenter"
         "M2C01": "1. Équations cartésiennes", "M2C02": "2. Raisonner en géométrie", "M2C03": "3. Fonctions polynomiales",
         "M2C04": "4. Fonctions rationnelles", "M2C05": "5. Exponentielles", "M2C06": "6. Composition et réciproque", "M2C07": "7. Logarithmes",
         "M2C08": "8. Trigonométrie du triangle quelconque", "M2C09": "9. Fonctions trigonométriques",
-        "M2C10": "Géométrie vectorielle"}  # pas de chapitre Sésamath en 2e (Ma3) ; enseignée en 2e chez pinkmaths
+        "M2C10": "Géométrie vectorielle",  # pas de chapitre Sésamath en 2e (Ma3) ; enseignée en 2e chez pinkmaths
+        # 23.11 : 3e et 4e du Collège (Sésamath Ma3, Ma4 ; tools/programme_3e_4e_college.md)
+        "M3C01": "1. Prérequis", "M3C02": "2. Limites et continuité", "M3C03": "3. Dérivation", "M3C04": "4. Dérivation (théorie)",
+        "M3C05": "5. Combinatoire et probabilités", "M3C06": "6. Géométrie vectorielle",
+        "M4C01": "1. Intégration", "M4C02": "2. Logarithme et exponentielle", "M4C03": "3. Algèbre linéaire", "M4C04": "4. Probabilités et statistique"}
 # Chapitre imposé : notions sans ligne Sésamath (reprises du CO en 1re) ou dont le premier chapitre trouvé n'est pas le bon.
 SESA_FIX = {"rel": "M1C01", "fracops": "M1C01", "puiss": "M1C01", "rac": "M1C01", "racenc": "M1C01", "sci": "M1C01", "scicalc": "M1C01",
             "pct": "M1C01", "arith": "M1C01", "ensembles": "M1C02", "divcrit": "M1C03", "tradexpr": "M1C03", "exactes": "M1C08",
