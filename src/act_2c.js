@@ -389,4 +389,103 @@
         wins: [W(3, "g(x) = 2x − 5, donc g(4) = 3 (et h(4) = 3³ = 27)."), W(1 / 8, "f(x) = 1 ÷ x, donc f(8) = 1/8 = 0,125."), W(5, "g(4) = 16 + 9 = 25, puis f(25) = √25 = 5.")] }),
     },
   });
+
+  // =====================================================================================================
+  // 6. Composition et réciproque · 7. Logarithmes · Géométrie vectorielle
+  // =====================================================================================================
+  // bijection : on règle le début m de l'ensemble de départ [m ; R].
+  const BIJ = [
+    { f: (x) => (x - 3) ** 2 + 1, h: 3, R: 7, min: -1, max: 6, m0: 0, xr: [-2, 8], yr: [-1, 18], gy: 1, ly: 4, up: true },
+    { f: (x) => (x + 2) ** 2 - 4, h: -2, R: 3, min: -6, max: 2, m0: -5, xr: [-7, 4], yr: [-5, 22], gy: 1, ly: 4, up: true },
+    { f: (x) => -((x - 1) ** 2) + 6, h: 1, R: 4, min: -3, max: 3.5, m0: -2, xr: [-4, 5], yr: [-11, 7], gy: 1, ly: 4, up: false },
+  ];
+  const bijPair = (B, m) => { const u = Math.max(m, 2 * B.h - B.R); return [u, 2 * B.h - u]; };
+  // recip : f et sa réciproque, symétriques par rapport à y = x.
+  const RC = [
+    { f: (x) => 2 * x + 1, xr: [-2, 12], yr: [-2, 12], nm: "f(x) = 2x + 1" },
+    { f: (x) => 3 * x - 4, xr: [-5, 8], yr: [-5, 8], nm: "f(x) = 3x − 4" },
+    { f: (x) => x ** 3 + 1, xr: [-2, 10], yr: [-2, 10], nm: "f(x) = x³ + 1" },
+  ];
+  const rcFig = (s, x) => {
+    const D = RC[s], o = { xr: D.xr, yr: D.yr, eq: true, lx: 2, fns: [{ f: (t) => t, cls: "f-line", w: 1.2, dash: true }, { f: D.f }], pts: [], lab: "graphe de f et droite y = x" };
+    let out = plain('<span class="small">en bleu : ' + D.nm + " ; en pointillés : la droite y = x</span>");
+    if (x !== null && s === 0) { o.pts.push([x, D.f(x), "(" + nb(x) + " ; " + nb(D.f(x)) + ")", "f-fill2"], [D.f(x), x, "", "f-dot"]); out = plain("f(" + nb(x) + ") = <b>" + nb(D.f(x)) + "</b> (on veut 11)"); }
+    if (x !== null && s === 1) { o.fns.push({ f: (t) => (t + x) / 3, cls: "f-accent", w: 2 }); out = plain("En rouge, (x + " + nb(x) + ") ÷ 3 : " + (x === 4 ? '<b class="act-ok">symétrique de f par rapport à y = x</b>' : "pas le symétrique de f")); }
+    if (x !== null && s === 2) { o.pts.push([x, 2, "(" + nb(x) + " ; 2)", "f-dot", "b"], [2, x, "", "f-fill2"]); out = plain("Le symétrique de (" + nb(x) + " ; 2) est (2 ; " + nb(x) + ") ; f(2) = 9 : " + (x === 9 ? '<b class="act-ok">il est sur le graphe de f</b>' : "il n'est pas sur le graphe de f")); }
+    return graph(o) + out;
+  };
+  const LOGT = [[32, 5], [0.125, -3], [Math.SQRT2, 0.5]];
+  const VA = [-2, -1], VB = [3, 3];
+  const vT = (x, y) => "(" + nb(x) + " ; " + nb(y) + ")";
+
+  Object.assign(ACTIVE, {
+    bijection: {
+      predict: { q: "f(x) = x². Combien de nombres ont pour image 9 ?", choices: ["deux", "un", "aucun"], good: 0,
+        why: "3² = 9 et (−3)² = 9 : deux nombres différents ont la même image. La fonction carré n'est donc pas injective sur ℝ : une droite horizontale coupe sa courbe deux fois." },
+      defis: ["f(x) = (x − 3)² + 1 sur [m ; 7]. Règle m pour que toute droite horizontale coupe la courbe au plus une fois, en gardant le plus de nombres possible.", "f(x) = (x + 2)² − 4 sur [m ; 3]. Même consigne.", "g(x) = −(x − 1)² + 6 sur [m ; 4] (parabole tournée vers le bas). Même consigne."],
+      play: slide({
+        ctl: (s) => [{ k: "m", lab: "Début m de l'ensemble de départ", min: BIJ[s].min, max: BIJ[s].max, step: 0.5 }],
+        init: (s) => ({ m: BIJ[s].m0 }),
+        fig: (st, s) => { const B = BIJ[s], o = { xr: B.xr, yr: B.yr, gy: B.gy, ly: B.ly, fns: [{ f: B.f, cls: "f-line", w: 1.2, dash: true }, { f: B.f, from: st.m, to: B.R }], pts: [[st.m, B.f(st.m), "", "f-fill2"], [B.R, B.f(B.R), "", "f-fill2"]], lab: "parabole restreinte à un intervalle" };
+          if (st.m < B.h) { const [u, w] = bijPair(B, st.m); o.hl = [[B.f(u), "f-accent"]]; o.pts.push([u, B.f(u), "", "f-dot"], [w, B.f(w), "", "f-dot"]); }
+          return graph(o); },
+        out: (st, s) => { const B = BIJ[s], ys = [B.f(st.m), B.f(B.R)].concat(st.m <= B.h ? [B.f(B.h)] : []), lo = Math.min(...ys), hi = Math.max(...ys);
+          let t = "Départ <b>[" + nb(st.m) + " ; " + B.R + "]</b> ; images de " + nb(lo) + " à " + nb(hi);
+          if (st.m < B.h) { const [u, w] = bijPair(B, st.m); t += '<br><span style="color:var(--margin)">' + nb(u) + " et " + nb(w) + " ont la même image " + nb(B.f(u)) + "</span>"; }
+          return t; },
+        goal: BIJ.map((B, s) => (st) => (st.m === B.h ? ["m = 3, le sommet : une seule branche, chaque image a une seule préimage. f est une bijection de [3 ; 7] sur [1 ; 17].", "m = −2, l'abscisse du sommet : il ne reste que la branche qui monte.", "m = 1, le sommet : il ne reste que la branche qui descend, encore injective."][s] : "")),
+        miss: (st, s) => (st.m > BIJ[s].h ? "Plus de double image, mais tu as enlevé des nombres pour rien : recule m jusqu'au sommet." : "La droite rouge coupe la courbe deux fois : deux nombres ont la même image."),
+        ask: [null, { q: "f(x) = (x + 2)² − 4 est alors une bijection de [−2 ; 3] sur [k ; 21]. Que vaut k ?", ans: -4, ok: "k = f(−2) = −4 : l'image du sommet est la plus petite image.", no: "La plus petite image est celle du sommet : calcule f(−2)." },
+          { q: "g est alors une bijection de [1 ; 4] sur [k ; 6]. Que vaut k ?", ans: -3, ok: "g(4) = −9 + 6 = −3 : la branche descend de 6 à −3.", no: "La branche descend : la plus petite image est g(4)." }] }),
+    },
+    recip: {
+      predict: { q: "f(x) = 2x + 1 transforme 3 en 7. Que fait la réciproque f⁻¹ avec 7 ?", choices: ["elle le renvoie sur 3", "elle donne 15", "elle donne 1/7"], good: 0,
+        why: "La réciproque défait ce que fait f : f⁻¹(7) = 3. (15 = f(7) ; 1/7 est l'inverse de 7, c'est autre chose.)" },
+      defis: ["f(x) = 2x + 1. Calcule f⁻¹(11), c'est-à-dire le nombre x tel que f(x) = 11.", "f(x) = 3x − 4. On écrit y = 3x − 4, on isole x, puis on échange les lettres : f⁻¹(x) = (x + p) ÷ 3. Que vaut p ?", "f(x) = x³ + 1 passe par (2 ; 9). Le point du graphe de f⁻¹ d'ordonnée 2 a quelle abscisse ?"],
+      play: hunt({ ask: true, label: "Ta réponse", blank: (s) => rcFig(s, null), show: (x, s) => rcFig(s, x),
+        miss: (x, s) => ["Résous 2x + 1 = 11.", "y = 3x − 4 donne 3x = y + 4.", "La réciproque échange les coordonnées : (2 ; 9) devient (9 ; 2)."][s],
+        wins: [W(5, "2x + 1 = 11 donne x = 5. Ainsi f⁻¹(11) = 5, et le point (5 ; 11) de f devient (11 ; 5) sur f⁻¹."), W(4, "x = (y + 4) ÷ 3 ; on échange les lettres, d'où f⁻¹(x) = (x + 4) ÷ 3. Vérification : f(2) = 2 et f⁻¹(2) = 2."), W(9, "(2 ; 9) sur f donne (9 ; 2) sur f⁻¹ : symétrie par rapport à la droite y = x.")] }),
+    },
+    log: {
+      predict: { q: "log₂ 8 répond à la question…", choices: ["2 à quelle puissance donne 8 ?", "combien vaut 8 ÷ 2 ?", "8 à quelle puissance donne 2 ?"], good: 0,
+        why: "log₂ 8 est l'exposant qu'il faut donner à 2 pour obtenir 8 : 2³ = 8, donc log₂ 8 = 3." },
+      defis: ["Fais glisser le point sur la courbe y = 2ˣ jusqu'à la hauteur 32. Tu lis alors log₂ 32 sur l'axe des x.", "Même courbe : trouve log₂(1/8), c'est-à-dire la hauteur 0,125.", "Et log₂ √2 (hauteur ≈ 1,41) ?"],
+      play: slide({
+        ctl: () => [{ k: "x", lab: "Exposant x", min: -4, max: 6, step: 0.5 }],
+        init: () => ({ x: 2 }),
+        fig: (st, s) => graph({ xr: [-4, 6], yr: [-2, 34], gy: 2, ly: 8, fns: [{ f: (x) => 2 ** x }], hl: [[LOGT[s][0], "f-accent"]], segs: [[st.x, 0, st.x, 2 ** st.x, "f-line", 1.2, "4 3"], [0, 2 ** st.x, st.x, 2 ** st.x, "f-line", 1.2, "4 3"]], pts: [[st.x, 2 ** st.x, "", "f-dot"]], lab: "courbe y = 2 puissance x" }),
+        out: (st, s) => pw("2", st.x) + " = <b>" + mil(2 ** st.x, 4) + "</b> (on veut " + ["32", "0,125", "√2 ≈ 1,4142"][s] + ")<br>donc log₂(" + mil(2 ** st.x, 4) + ") = " + nb(st.x),
+        goal: LOGT.map(([v, e], s) => (st) => (st.x === e ? ["2⁵ = 32, donc log₂ 32 = 5.", "2⁻³ = 1/2³ = 1/8 = 0,125, donc log₂(1/8) = −3 : un logarithme peut être négatif.", "2^0,5 = √2, donc log₂ √2 = 1/2."][s] : "")),
+        miss: (st, s) => (2 ** st.x < LOGT[s][0] ? "Pas assez haut : augmente l'exposant." : "Trop haut : diminue l'exposant."),
+        ask: [null, { q: "calcule \\(\\log_3 81\\).", ans: 4, ok: "3⁴ = 81, donc log₃ 81 = 4.", no: "3 à quelle puissance donne 81 ?" },
+          { q: "calcule \\(\\log 10\\,000 - \\log 0{,}1\\) (log sans base écrite : base 10).", ans: 5, ok: "log 10'000 = 4 et log 0,1 = −1 : 4 − (−1) = 5.", no: "10'000 = 10⁴ et 0,1 = 10⁻¹." }] }),
+    },
+    logbase: {
+      predict: { q: "La calculatrice n'a pas de touche log₂. Pour calculer log₂ 10, on tape…", choices: ["log 10 ÷ log 2", "log 10 − log 2", "log(10 ÷ 2)"], good: 0,
+        why: "Changement de base : log₂ 10 = log 10 ÷ log 2 ≈ 3,32. Vérification : 2^3,32 ≈ 10. (log 10 − log 2 = log 5, autre chose.)" },
+      defis: ["Valeur exacte de \\(\\log_4 8\\) (écris 4 et 8 comme puissances de 2).", "Valeur exacte de \\(\\log_{27} 9\\) (fraction).", "5000 bactéries triplent chaque heure. Après combien d'heures sont-elles 100'000 ? (au dixième)"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["4 = 2² et 8 = 2³ : log₄ 8 = ln 2³ ÷ ln 2²", "27 = 3³ et 9 = 3²", "5000 · 3ᵗ = 100'000, donc 3ᵗ = 20 et t = ln 20 ÷ ln 3"][s] + " ; " + tu(x)),
+        wins: [W(1.5, "ln 2³ ÷ ln 2² = 3 ln 2 ÷ (2 ln 2) = 3/2 : en effet 4^1,5 = 2³ = 8."), W(2 / 3, "ln 3² ÷ ln 3³ = 2/3 : en effet ∛27 = 3 et 3² = 9."), (x) => (Math.abs(x - 2.7) < 1e-9 || Math.abs(x - 2.73) < 1e-9 ? "3ᵗ = 20, t = ln 20 ÷ ln 3 ≈ 2,73 h, soit environ 2 h 44 min." : "")] }),
+    },
+    vecteurs: {
+      predict: { q: "A(1 ; 2) et B(4 ; 6). Le vecteur AB a pour composantes…", choices: ["(3 ; 4)", "(5 ; 8)", "(−3 ; −4)"], good: 0,
+        why: "Arrivée moins départ : 4 − 1 = 3 et 6 − 2 = 4. Le vecteur dit « avance de 3, monte de 4 ». (5 ; 8) est la somme des coordonnées ; (−3 ; −4) est le vecteur BA." },
+      defis: ["Règle les composantes du vecteur \\(\\vec{u}\\) pour qu'il aille de A(−2 ; −1) à B(3 ; 3).", "Produit scalaire : \\(\\vec{u} \\cdot \\vec{v} = x x' + y y'\\). Règle \\(\\vec{u}\\) perpendiculaire à \\(\\vec{v} = (2 \\, ; 3)\\) (produit scalaire nul), de norme \\(\\sqrt{13}\\).", "\\(\\vec{a} = (1 \\, ; 3)\\) et \\(\\vec{b} = (4 \\, ; 1)\\). Règle \\(\\vec{u} = 2\\vec{a} - \\vec{b}\\)."],
+      play: slide({
+        ctl: () => [{ k: "x", lab: "1re composante (horizontale)", min: -6, max: 6 }, { k: "y", lab: "2e composante (verticale)", min: -6, max: 6 }],
+        init: (s) => [{ x: 1, y: 2 }, { x: 2, y: 1 }, { x: 1, y: 1 }][s],
+        fig: (st, s) => { const o = { xr: [-7, 7], yr: [-6, 7], eq: true, arrows: [], pts: [], lab: "vecteurs dans un repère" };
+          if (s === 0) { o.arrows.push([VA[0], VA[1], VA[0] + st.x, VA[1] + st.y, "f-blue"]); o.pts.push([VA[0], VA[1], "A", "f-dot", "b"], [VB[0], VB[1], "B", "f-dot", "r"]); }
+          if (s === 1) o.arrows.push([0, 0, 2, 3, "f-accent"], [0, 0, st.x, st.y, "f-blue"]);
+          if (s === 2) o.arrows.push([0, 0, 1, 3, "f-accent"], [0, 0, 4, 1, "f-line"], [0, 0, st.x, st.y, "f-blue"]);
+          return graph(o) + (s ? plain('<span class="small">' + (s === 1 ? "en rouge v = (2 ; 3)" : "en rouge a = (1 ; 3), en noir b = (4 ; 1)") + ", en bleu u</span>") : ""); },
+        out: (st, s) => "u = <b>" + vT(st.x, st.y) + "</b>" + (s === 0 ? " ; extrémité " + vT(VA[0] + st.x, VA[1] + st.y) : "") + (s === 1 ? "<br>u · v = " + nb(st.x) + " · 2 + " + (st.y < 0 ? "(" + nb(st.y) + ")" : nb(st.y)) + " · 3 = <b>" + nb(2 * st.x + 3 * st.y) + "</b> ; norme √(" + nb(st.x) + "² + " + (st.y < 0 ? "(" + nb(st.y) + ")" : nb(st.y)) + "²) = √" + (st.x * st.x + st.y * st.y) : ""),
+        goal: [(st) => (st.x === 5 && st.y === 4 ? "AB = (3 − (−2) ; 3 − (−1)) = (5 ; 4) : arrivée moins départ." : ""),
+          (st) => (2 * st.x + 3 * st.y === 0 && st.x * st.x + st.y * st.y === 13 ? "u = " + vT(st.x, st.y) + " : 2 · " + (st.x < 0 ? "(" + nb(st.x) + ")" : nb(st.x)) + " + 3 · " + (st.y < 0 ? "(" + nb(st.y) + ")" : nb(st.y)) + " = 0 et √(9 + 4) = √13. On échange les composantes et on change un signe." : ""),
+          (st) => (st.x === -2 && st.y === 5 ? "2a = (2 ; 6), puis 2a − b = (2 − 4 ; 6 − 1) = (−2 ; 5) : composante par composante." : "")],
+        miss: (st, s) => (s === 1 && 2 * st.x + 3 * st.y === 0 ? "Perpendiculaire (produit scalaire nul), mais la norme n'est pas √13." : s === 1 && st.x * st.x + st.y * st.y === 13 ? "Bonne norme, mais le produit scalaire n'est pas nul." : ""),
+        ask: [null, { q: "\\(\\vec{u} = (4 \\, ; -1)\\) et \\(\\vec{w} = (1 \\, ; k)\\) sont perpendiculaires. Que vaut k ?", ans: 4, ok: "4 · 1 + (−1) · k = 0, donc k = 4.", no: "Écris le produit scalaire 4 · 1 + (−1) · k et égale-le à 0." },
+          { q: "norme du vecteur (−6 ; 8) ?", ans: 10, ok: "√(36 + 64) = √100 = 10.", no: "Norme : √(x² + y²)." }] }),
+    },
+  });
 })();
