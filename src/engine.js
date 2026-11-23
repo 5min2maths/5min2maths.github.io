@@ -190,12 +190,14 @@ const Engine = {
       const yr = "M" + (profile.grade - 11), sesa = profile.track !== "mp" && profile.grade >= 12 && typeof ORDRE_THEME !== "undefined" &&
         [(ORDRE_THEME.MATU || {})[n.id], (ORDRE_THEME.MATU_ALT || {})[n.id]].some((k) => (k || "").startsWith(yr));
       const coYear = this.coChap(profile, n.id, true);
-      // 22.11 : en France, les reprises sont dans againFR (n.again donne des années suisses).
+      // 22.11 (seconde FR) : « again » liste des années suisses ; pour la France, on lit againFR (sinon une notion reprise en 10e
+      // suisse devenait « de l'année » en 2nde, grade 10 aussi).
       const again = sesa || coYear || (profile.track !== "mp" && ((profile.system === "FR" ? n.againFR : n.again) || []).includes(profile.grade));
       return { ...n, theme: this.themeKey(profile, n.id), defaultStatus: g < profile.grade ? "vu" : "avenir", current: g === profile.grade || again, again };
     });
   },
-  refOf(profile) { return profile.track === "mp" ? "MP" : profile.grade >= 12 ? "MATU" : "CO"; },
+  // 22.11 : référentiel « FR » pour un profil français (ordre et chapitres dans ORDRE.FR / ORDRE_THEME.FR, src/fr_2nde.js).
+  refOf(profile) { return profile.system === "FR" ? "FR" : profile.track === "mp" ? "MP" : profile.grade >= 12 ? "MATU" : "CO"; },
   // Thème d'une notion selon le référentiel de l'élève (13.11) : matu = thèmes (Algèbre, Fonctions…), MP = chapitres ;
   // CO, ou notion absente du référentiel : les 4 thèmes du CO.
   // CO (élèves suisses, 9e–11e) : chapitre du plan de l'année ; pour une notion d'une année précédente, son dernier chapitre.
