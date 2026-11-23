@@ -1,0 +1,24 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css"><body style="width:400px"><main id="app"></main><pre id="log" hidden></pre>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_manip.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script>const log=[];const click=(s)=>{const e=document.querySelector(s);if(!e){log.push("MANQUE "+s);return false;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));return true;};
+// Leçons actives de 10e (act_10a.js) : devine, puis pour chaque défi une mauvaise réponse (aide sans valider) puis la bonne.
+const gfb=()=>document.querySelector('#gfb').textContent;
+const type=(v)=>{const el=document.querySelector(".act-in");if(!el)return false;el.value=v;click("[data-go]");return true;};
+const REP={disque:["12","225","27π"],grandmanq:["12","6","5"],airelat:["240","88","120"],voldecomp:["200","240","48'000"]};
+const run=(id)=>{ try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; screenLesson(id,()=>{});
+  const A=ACTIVE[id], X=actPrep(A); const msgs=[];
+  if(!document.querySelector(".act-step .figwrap svg.fig")&&A.predict.fig) msgs.push("figure du Devine absente");
+  click('#pc button[data-i="'+A.predict.good+'"]');
+  if(!/Exact/.test(document.getElementById("pfb").textContent)) msgs.push("devine non validé");
+  if(X.mode!=="figure") msgs.push("mode "+X.mode);
+  if(X.defis.length!==REP[id].length) msgs.push(X.defis.length+" défis");
+  REP[id].forEach((v,k)=>{ const b=gfb(); type("7777"); if(gfb()!==b) msgs.push("défi "+(k+1)+" validé à tort");
+    if(!/Pas encore/.test((document.querySelector(".act-hint")||{}).textContent||"")) msgs.push("défi "+(k+1)+" : pas d'aide");
+    type(v); if(gfb()===b) msgs.push("défi "+(k+1)+" non validé avec "+v); });
+  const html=document.body.innerHTML.replace(/<script[\s\S]*?<\/script>/g,"").replace(/<pre id="log"[\s\S]*?<\/pre>/,""); const bad=/NaN|undefined|Infinity/.test(html);
+  const fail=document.getElementById("s3").hidden||bad||msgs.length;
+  log.push(id+" : "+(fail?"ÉCHEC "+(bad?"(NaN/undefined) ":"")+msgs.join(" | "):"OK · "+gfb().slice(0,70)));
+  }catch(e){log.push(id+" EXC "+e.stack)} };
+for(const id of Object.keys(REP)) run(id);
+document.getElementById("log").hidden=false; document.getElementById("log").textContent=log.join("\n");</script>
