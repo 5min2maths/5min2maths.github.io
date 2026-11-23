@@ -18,7 +18,8 @@ print(('ÉCHEC ' if re.search(r'ÉCHEC|FAIL|EXC',t) else 'ok ')+t[:260].replace(
   echo "$f: $out"
 }
 export -f un
-if [ $# -gt 0 ]; then L=$(for t in "$@"; do echo "tests/$t.html"; done); else L=$(ls tests/*.html | grep -v "/_" | grep -v "/bot.html")  # bot.html = élève-robot complet (tools/bot_eleve.py), trop lourd pour la batterie; fi
+# bot.html = élève-robot complet (tools/bot_eleve.py) : trop lourd pour la batterie, lancé à part chaque nuit (23.11).
+if [ $# -gt 0 ]; then L=$(for t in "$@"; do echo "tests/$t.html"; done); else L=$(ls tests/*.html | grep -v "/_" | grep -v "/bot.html"); fi
 R=$(echo "$L" | xargs -P 3 -I{} bash -c 'un {}')
 echo "$R" | grep -c "" | xargs echo "pages testées :"
 echo "$R" | grep "ÉCHEC" || echo "aucun échec"
