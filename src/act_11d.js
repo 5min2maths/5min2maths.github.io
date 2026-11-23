@@ -56,7 +56,7 @@
   // Défi 2 : carré d'aire 72 (côté 120 = 6 côtés de carré d'aire 2) ; la réponse a le pave de a × a carrés d'aire 2.
   const sq72 = (x) => { const S = 120, u = S / 6, x0 = 90, y0 = 6; let g = R(x0, y0, S, S, "f-soft", 1.4);
     if (x !== null && Number.isInteger(x) && x >= 1 && x <= 7) {
-      for (let i = 0; i < x; i++) for (let j = 0; j < x; j++) g += `<rect x="${x0 + i * u}" y="${y0 + j * u}" width="${u}" height="${u}" class="f-fill" opacity="0.5" stroke="var(--ink)" stroke-width="0.5"/>`;
+      for (let i = 0; i < x; i++) for (let j = 0; j < x; j++) g += `<rect x="${x0 + i * u}" y="${y0 + j * u}" width="${u}" height="${u}" class="f-fill2" stroke-width="1"/>`;
       g += T(x0 + u / 2, y0 + u / 2 + 4, "2", "middle", 10); }
     return svg(320, 166, g + T(x0 + S / 2, y0 + S + 16, "aire 72") + T(x0 + S + 22, y0 + S / 2 + 4, "côté a√2", "start", 11), "carré d'aire 72"); };
   // Défi 3 : segments √12 et √27 bout à bout ; la réponse a trace a√3 en dessous, gradué en √3.
@@ -84,7 +84,7 @@
         why: "√9 · √16 = 3 · 4 = 12, et √144 = 12 aussi. Mais √9 + √16 = 7, alors que √25 = 5. La racine d'un produit est le produit des racines ; pour une somme, ça ne marche pas." },
       defis: ["Le rectangle a pour côtés √2 et √8. Calcule son aire √2 · √8.", "Un carré a une aire de 72. Son côté s'écrit a√2 : trouve a.", "√12 + √27 = a√3 : trouve a.", "Même règle du produit pour les racines cubiques : calcule ∛2 · ∛4."],
       play: hunt({ ask: true, label: "Ta réponse",
-        blank: (s) => [rect28(null), sq72(null), seg3(null), plain("∛2 · ∛4 = ∛(2 · 4)")][s],
+        blank: (s) => [rect28(null), sq72(null), seg3(null), plain("∛2 · ∛4 = ?")][s],
         show: (x, s) => [rect28(x) + plain("tu proposes " + nb(x) + " ; " + nb(x) + "² = " + nb(x * x) + " (il faut 2 · 8 = 16)"),
           sq72(x) + plain(nb(x) + " × " + nb(x) + " carrés d'aire 2 = " + nb(2 * x * x) + " (il faut 72)"),
           seg3(x) + plain("√12 + √27 ≈ 8,66 ; " + nb(x) + "√3 ≈ " + nb(+(x * Math.sqrt(3)).toFixed(2))),
