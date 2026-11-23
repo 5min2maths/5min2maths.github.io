@@ -1,0 +1,125 @@
+<link rel="stylesheet" href="../src/style.css"><!doctype html><meta charset="utf-8"><div id="app"></div><pre id="out"></pre>
+<script>window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_manip.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/fiche_data.js"></script><script src="../src/fiche.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script>
+// Ma fiche (22.11) : fiche de chaque chapitre traité (Je me teste, Je relis), carte, carte de mémoire, impression ;
+// pas de NaN/undefined, pas de débordement à 360 px, cases ✓ ~ ✗ partagées avec l'autoévaluation de Mon test.
+const fails=[], ok=(c,m)=>{if(!c)fails.push(m)}, log=[];
+const W=360;
+function noOverflow(tag){
+  const box=app.getBoundingClientRect();
+  for(const el of app.querySelectorAll(".fi-wrap *")){ if(el.closest("svg")&&el.tagName!=="svg") continue; const r=el.getBoundingClientRect(); if(!r.width) continue;
+    if(r.right>box.right+1||r.left<box.left-1){ fails.push(tag+" déborde : "+el.tagName+"."+el.className+" "+Math.round(r.left-box.left)+"→"+Math.round(r.right-box.left)+" « "+(el.textContent||"").slice(0,40)+" »"); return; } }
+  ok(document.documentElement.scrollWidth<=Math.max(W,innerWidth)+1,tag+" défilement horizontal");
+}
+function svgInside(tag){
+  for(const svg of app.querySelectorAll("svg.fi-map")){ const vb=svg.viewBox.baseVal;
+    for(const t of svg.querySelectorAll("text")){ const b=t.getBBox(); if(b.x<-1||b.x+b.width>vb.width+1) fails.push(tag+" texte hors de la carte : « "+t.textContent+" » "+Math.round(b.x)+"–"+Math.round(b.x+b.width)); }
+    const rs=[...svg.querySelectorAll("rect")].map(r=>r.getBBox());
+    for(let i=0;i<rs.length;i++)for(let j=i+1;j<rs.length;j++){const a=rs[i],c=rs[j]; if(a.x<c.x+c.width&&c.x<a.x+a.width&&a.y<c.y+c.height&&c.y<a.y+a.height) fails.push(tag+" cases superposées");}
+    // étiquettes des liens : pas sur une case
+    for(const t of svg.querySelectorAll(".fi-lk")){ const b=t.getBBox(); for(const a of rs) if(b.x<a.x+a.width&&a.x<b.x+b.width&&b.y<a.y+a.height&&a.y<b.y+b.height) fails.push(tag+" étiquette sur une case : « "+t.textContent+" »"); }
+  }
+}
+const bad=(tag)=>{ const t=app.innerHTML; ok(!/NaN|undefined|\[\[|\]\]/.test(t),tag+" NaN/undefined/[[ ]] : "+(t.match(/.{30}(NaN|undefined|\[\[).{30}/)||[""])[0]); };
+try{
+app.style.width=W+"px"; app.style.maxWidth=W+"px"; app.style.margin="0"; app.style.padding="0 12px"; app.style.boxSizing="border-box";
+state=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.autoInit(state);state.placed=true;state.tourDone=true;
+// une situation d'élève : niveaux variés, erreurs au carnet (avec et sans message)
+for(const [id,m,st] of [["litelab",.85,"vu"],["valnum",.8,"vu"],["parenth",.4,"encours"],["reduire",.65,"encours"],["distrib",.6,"encours"],["idrem",.3,"encours"],["vitesse",.55,"encours"],["ucomp",.2,"encours"]]) if(state.notions[id]) Object.assign(state.notions[id],{m,status:st,seen:5});
+carnetAdd("idrem",1,"c1","Il manque le double produit 2ab.","x^2+9");carnetAdd("parenth",2,"c2");carnetAdd("ucomp",1,"c3","Pour passer des km/h aux m/s, on divise par 3,6.","259,2");
+ok(state.carnet.find(e=>e.id==="idrem").m==="Il manque le double produit 2ab.","carnet : message gardé");
+ok(!state.carnet.find(e=>e.id==="parenth").m,"carnet : pas de message sans diagnostic");
+const chaps=ficheChapsOfYear(); ok(chaps.includes("11C04")&&chaps.includes("11C05"),"chapitres 11e : "+chaps);
+for(const c of Object.keys(FICHES)){
+  const F=FICHES[c];
+  // données : chaque notion a règle, carte, libellés ; trous bien fermés ; exemples de carte ≤ 18 caractères
+  for(const id of F.ids){ ok(F.regle[id]&&F.regle[id].some(l=>/\[\[.+?\]\]/.test(l)),c+" "+id+" : règle à trous"); ok(F.carte.pos[id]&&F.carte.txt[id],c+" "+id+" : case de carte");
+    ok(NOTIONS.find(n=>n.id===id),c+" "+id+" : notion inconnue"); ok(F.carte.txt[id][2].length<=18,c+" "+id+" : exemple de carte trop long");
+    for(const l of F.regle[id]) ok((l.match(/\[\[/g)||[]).length===(l.match(/\]\]/g)||[]).length,c+" "+id+" trous mal fermés"); }
+  ok(F.ess.length===3,c+" : essentiel en 3 lignes");
+  for(const [a,b] of F.carte.liens) ok(F.ids.includes(a)&&F.ids.includes(b),c+" lien inconnu "+a+"→"+b);
+  // écran Fiche, Je me teste
+  state.fiche=null; screenFiche({chap:c});
+  ok(!!app.querySelector(".fi-teste"),c+" mode Je me teste par défaut");
+  const gaps=app.querySelectorAll(".fi-gap"); ok(gaps.length>=F.ids.length,c+" trous : "+gaps.length);
+  gaps[0].click(); ok(gaps[0].classList.contains("shown"),c+" trou révélé");
+  ok(getComputedStyle(app.querySelectorAll(".fi-gap .fi-ans")[1]).visibility==="hidden",c+" trou caché en mode teste");
+  ok(app.querySelectorAll(".fi-card").length===F.ids.filter(i=>state.notions[i]).length,c+" une carte par notion");
+  ok(app.querySelectorAll(".fi-js .at-seg button[data-v]").length>=3*F.ids.length,c+" lignes Je sais…");
+  bad(c+" fiche teste"); noOverflow(c+" fiche teste");
+  // tri : à revoir en premier
+  const first=app.querySelector(".fi-card"); ok(ficheGroupOf(first.dataset.id)==="revoir"||!F.ids.some(i=>ficheGroupOf(i)==="revoir"),c+" à revoir d'abord");
+  // Je relis
+  app.querySelector('#fimode [data-m="relis"]').click();
+  ok(!!app.querySelector(".fi-relis")&&state.fiche.mode==="relis",c+" Je relis");
+  ok(getComputedStyle(app.querySelectorAll(".fi-gap .fi-ans")[1]).visibility==="visible",c+" tout visible en relis");
+  bad(c+" fiche relis"); noOverflow(c+" fiche relis");
+  app.querySelector('#fimode [data-m="teste"]').click();
+  // ouvrir les repliés pour mesurer
+  app.querySelectorAll("details.fi-mini").forEach(d=>d.open=true); noOverflow(c+" repliés ouverts");
+  // Carte
+  app.querySelector('[data-tab="carte"]').click();
+  const nodes=app.querySelectorAll(".fi-node"); ok(nodes.length===Object.keys(F.carte.pos).filter(i=>state.notions[i]).length,c+" cases de la carte : "+nodes.length);
+  ok(app.querySelectorAll(".fi-ar").length>=F.carte.liens.length-1,c+" liens");
+  ok(app.querySelectorAll(".fi-ess li").length===3,c+" essentiel");
+  bad(c+" carte"); noOverflow(c+" carte"); svgInside(c+" carte");
+  // Je refais la carte : une erreur, puis tout juste
+  app.querySelector(".fi-redo").click();
+  ok(app.querySelectorAll("[data-slot]").length===nodes.length&&app.querySelectorAll(".fi-chip").length===nodes.length,c+" carte de mémoire : cases vides et étiquettes");
+  bad(c+" carte de mémoire"); noOverflow(c+" carte de mémoire"); svgInside(c+" carte de mémoire");
+  { const ch=app.querySelector(".fi-chip"); ch.click(); const wrong=[...app.querySelectorAll("[data-slot]")].find(s=>s.dataset.slot!==ch.dataset.id); wrong.dispatchEvent(new MouseEvent("click",{bubbles:true})); }
+  for(let k=0;k<20&&app.querySelector(".fi-chip");k++){ const ch=app.querySelector(".fi-chip"); ch.click(); app.querySelector('[data-slot="'+ch.dataset.id+'"]').dispatchEvent(new MouseEvent("click",{bubbles:true})); }
+  ok(!!document.getElementById("fiok")&&state.fiche.map[c]&&state.fiche.map[c].err===1,c+" carte refaite, 1 erreur comptée : "+JSON.stringify(state.fiche.map[c]));
+  document.getElementById("fiok").click(); ok(!!app.querySelector(".fi-map")&&/dernière fois : 1 erreur/.test(app.textContent),c+" retour à la carte");
+  // Impression
+  let el=fichePrint({chap:c},false,true);
+  ok(el.querySelectorAll(".fp-blank").length>=F.ids.length&&!el.querySelector(".fp-ans"),c+" impression à compléter");
+  ok(!/NaN|undefined|\[\[/.test(el.innerHTML),c+" impression NaN/undefined");
+  ok(el.querySelectorAll(".fp-sec").length>=F.ids.length+2,c+" impression : sections");
+  ok(/Je sais…/.test(el.textContent)&&el.querySelector("svg.fi-map"),c+" impression : grille et carte");
+  el=fichePrint({chap:c},true,true);
+  ok(el.querySelectorAll(".fp-ans").length>=F.ids.length&&/corrigé/.test(el.textContent),c+" impression corrigé");
+  document.body.classList.remove("fiche-printing");
+}
+// erreurs personnelles à l'écran et à l'impression
+screenFiche({chap:"11C05"}); ok(/Ton erreur du/.test(app.textContent)&&/double produit/.test(app.textContent),"erreur personnelle affichée");
+ok(/2 erreurs? dans ton carnet|1 erreur dans ton carnet/.test(app.textContent),"erreur sans message : compteur");
+ok(!!app.querySelector("textarea[data-why]"),"question Explique");
+app.querySelector("textarea[data-why]").value="Il manque le double produit";app.querySelector("textarea[data-why]").dispatchEvent(new Event("input"));
+ok(Object.values(state.fiche.why).includes("Il manque le double produit"),"explication gardée");
+let pe=fichePrint({chap:"11C05"},false,true); ok(/Mon erreur du/.test(pe.textContent)&&/Mes explications/.test(pe.textContent),"impression : erreurs et explications");
+document.body.classList.remove("fiche-printing");
+ok(/A4 landscape/.test(document.getElementById("fiche-css").textContent)&&/column-count: 3/.test(document.getElementById("fiche-css").textContent),"feuille d'impression A4 paysage 3 colonnes");
+// Progrès : une case par chapitre
+homeTab="prog";screenHome(); const fb=app.querySelectorAll("[data-fiche]"); ok(fb.length===2,"Progrès : 2 fiches ("+fb.length+")");
+fb[0].click(); ok(!!app.querySelector(".fi-wrap"),"Progrès → fiche");
+document.getElementById("fiback").click(); ok(homeTab==="prog"&&!!app.querySelector("[data-fiche]"),"retour Progrès");
+// Accueil : toujours 6 cases
+homeTab="today";screenHome(); ok(app.querySelectorAll(".door").length===6&&!/Ma fiche/.test(app.textContent),"accueil : 6 cases, rien de plus");
+// Mon test : bouton, fiche limitée aux notions du test, cases ✓ ~ ✗ partagées avec l'autoévaluation
+state.prep={ids:["reduire","distrib","idrem","vitesse","eq1"],date:addDays(day(),4)}; state.autotest=null;
+homeTab="test";screenHome(); ok(!!document.getElementById("prepfiche"),"Mon test : bouton Ma fiche");
+document.getElementById("prepfiche").click();
+ok(app.querySelectorAll(".fi-card").length===5,"fiche du test : 5 notions ("+app.querySelectorAll(".fi-card").length+")");
+ok(!!app.querySelector(".fi-whole"),"notion sans trous (eq1) : règle entière à se rappeler");
+bad("fiche test"); noOverflow("fiche test");
+const A=state.autotest; ok(A&&A.rows.length>=4,"grille de Mon test créée");
+const cid=A.rows.find(r=>r.id==="distrib").cid;
+app.querySelector('.fi-js .at-seg[data-cid="'+cid+'"] button[data-v="2"]').click();
+ok(A.avant[cid]===2,"fiche → autoévaluation (Avant)");
+screenQcm(); ok(app.querySelector('.at-seg[data-cid="'+cid+'"] button[data-v="2"]').getAttribute("aria-pressed")==="true","l'autoévaluation affiche le ✓ coché dans la fiche");
+const cid2=A.rows.find(r=>r.id==="idrem").cid; app.querySelector('.at-seg[data-cid="'+cid2+'"] button[data-v="0"]').click();
+screenFiche({test:true}); ok(app.querySelector('.fi-js .at-seg[data-cid="'+cid2+'"] button[data-v="0"]').getAttribute("aria-pressed")==="true","autoévaluation → fiche (✗)");
+app.querySelector('[data-tab="carte"]').click(); ok(app.querySelectorAll("svg.fi-map").length===2,"test sur 2 chapitres : 2 cartes"); ok(app.querySelectorAll(".fi-dim").length>=3,"notions hors test grisées");
+bad("carte test"); noOverflow("carte test"); svgInside("carte test");
+pe=fichePrint({test:true},false,true); ok(/test le/.test(pe.textContent)&&pe.querySelectorAll(".fp-sec").length>=7&&!/NaN|undefined/.test(pe.innerHTML),"impression du test");
+document.body.classList.remove("fiche-printing");
+document.getElementById("fiback").click(); ok(homeTab==="test","retour Mon test");
+// S'entraîner
+screenFiche({chap:"11C05"}); document.getElementById("fitrain").click(); ok(session&&session.plan.length===5&&session.plan[0].startsWith("idrem")||session.plan[0].startsWith("parenth"),"S'entraîner : 5 questions, à revoir d'abord ("+session.plan.join()+")");
+// 1re Collège : pas de fiche (rien d'inventé)
+state=Engine.newState({system:"CH",grade:12,track:"college",minutes:5});Engine.autoInit(state);state.placed=true; ok(ficheProgCard()==="","1re : pas encore de fiche");
+}catch(e){fails.push("EXC "+e.message+" "+e.stack)}
+document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC "+fails.length+"\n"+[...new Set(fails)].slice(0,40).join("\n"):"OK")+"\n"+log.join("\n")+"</pre>");
+</script>
