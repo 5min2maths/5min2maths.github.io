@@ -45,7 +45,7 @@ const FICHES = {
         prop: ["Règle de trois", "passer par 1", "3 kg → 7,50 CHF"],
         utemps: ["Durées", "on compte par 60", "1,5 h = 1 h 30"],
         vitesse: ["Vitesse", "distance ÷ durée", "v = d ÷ t"],
-        ucomp: ["Unités composées", "km/h ↔ m/s", "72 km/h = 20 m/s"],
+        ucomp: ["Unités", "composées", "72 km/h = 20 m/s"],
         gquot: ["Masse vol., débit", "quantité par unité", "ρ = m ÷ V"],
       },
       liens: [["prop", "vitesse", "pour 1 h"], ["utemps", "vitesse", "t en h|décimales"], ["vitesse", "ucomp", "changer|d'unité"],

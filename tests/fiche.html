@@ -17,6 +17,8 @@ function svgInside(tag){
     for(const t of svg.querySelectorAll("text")){ const b=t.getBBox(); if(b.x<-1||b.x+b.width>vb.width+1) fails.push(tag+" texte hors de la carte : « "+t.textContent+" » "+Math.round(b.x)+"–"+Math.round(b.x+b.width)); }
     const rs=[...svg.querySelectorAll("rect")].map(r=>r.getBBox());
     for(let i=0;i<rs.length;i++)for(let j=i+1;j<rs.length;j++){const a=rs[i],c=rs[j]; if(a.x<c.x+c.width&&c.x<a.x+a.width&&a.y<c.y+c.height&&c.y<a.y+a.height) fails.push(tag+" cases superposées");}
+    for(const t of svg.querySelectorAll(".fi-t1")){ const b=t.getBBox(); if(b.width>104) fails.push(tag+" titre de case trop long (touche la pastille) : « "+t.textContent+" »"); }
+    for(const t of svg.querySelectorAll(".fi-t2,.fi-ex")){ const b=t.getBBox(); if(b.width>122) fails.push(tag+" texte de case trop long : « "+t.textContent+" »"); }
     // étiquettes des liens : pas sur une case
     for(const t of svg.querySelectorAll(".fi-lk")){ const b=t.getBBox(); for(const a of rs) if(b.x<a.x+a.width&&a.x<b.x+b.width&&b.y<a.y+a.height&&a.y<b.y+b.height) fails.push(tag+" étiquette sur une case : « "+t.textContent+" »"); }
   }
@@ -90,7 +92,7 @@ app.querySelector("textarea[data-why]").value="Il manque le double produit";app.
 ok(Object.values(state.fiche.why).includes("Il manque le double produit"),"explication gardée");
 let pe=fichePrint({chap:"11C05"},false,true); ok(/Mon erreur du/.test(pe.textContent)&&/Mes explications/.test(pe.textContent),"impression : erreurs et explications");
 document.body.classList.remove("fiche-printing");
-ok(/A4 landscape/.test(document.getElementById("fiche-css").textContent)&&/column-count: 3/.test(document.getElementById("fiche-css").textContent),"feuille d'impression A4 paysage 3 colonnes");
+ok(/A4 landscape/.test(document.getElementById("fiche-css").textContent)&&/fp-col \{ float: left/.test(document.getElementById("fiche-css").textContent)&&document.querySelectorAll("#fiche-print .fp-col").length===3,"feuille d'impression A4 paysage 3 colonnes");
 // Progrès : une case par chapitre
 homeTab="prog";screenHome(); const fb=app.querySelectorAll("[data-fiche]"); ok(fb.length===2,"Progrès : 2 fiches ("+fb.length+")");
 fb[0].click(); ok(!!app.querySelector(".fi-wrap"),"Progrès → fiche");

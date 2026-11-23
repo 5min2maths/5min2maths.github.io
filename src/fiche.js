@@ -58,7 +58,7 @@
     return parts(line).map((p, i) => (i % 2 ? `<button type="button" class="fi-gap" aria-label="Vérifier ce trou"><span class="fi-ans">${p}</span></button>` : p)).join("");
   }
   function printLine(line, corr) {
-    return parts(line).map((p, i) => (!(i % 2) ? p : corr ? `<b class="fp-ans">${p}</b>` : `<span class="fp-blank" style="min-width:${Math.min(16, Math.max(3, strip(p).length * 0.55)).toFixed(1)}em"></span>`)).join("");
+    return parts(line).map((p, i) => (!(i % 2) ? p : corr ? `<b class="fp-ans">${p}</b>` : `<span class="fp-blank" style="min-width:${Math.min(10, Math.max(3, strip(p).length * 0.5)).toFixed(1)}em"></span>`)).join("");
   }
 
   // ---------- Carte du chapitre (SVG) ----------
@@ -78,7 +78,11 @@
       const X1 = both ? x1 + ux * 2 : x1, Y1 = both ? y1 + uy * 2 : y1, X2 = x2 - ux * 2, Y2 = y2 - uy * 2;
       const L2 = String(lab || "").split("|"), mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
       const vert = pa[0] === pb[0], hor = pa[1] === pb[1];
-      const tx = vert ? mx + 8 : mx, anchor = vert ? "start" : "middle", ty0 = vert ? my - (L2.length - 1) * 6 + 3 : hor ? (y1 + 16) : my - (L2.length - 1) * 6 + 3;
+      // Étiquette : à droite d'un lien vertical, sous un lien horizontal ; lien en biais : du côté libre, à droite (sous la ligne
+      // si elle monte vers la droite, au-dessus si elle descend), pour ne jamais couvrir le trait.
+      const up = (x2 - x1) * (y2 - y1) < 0;
+      const tx = vert ? mx + 8 : hor ? mx : mx + 6, anchor = vert || !hor ? "start" : "middle";
+      const ty0 = vert ? my - (L2.length - 1) * 6 + 3 : hor ? y1 + 16 : up ? my + 11 : my - 4 - (L2.length - 1) * 11;
       return `<path class="fi-ar" d="M${r1(X1)} ${r1(Y1)} L${r1(X2)} ${r1(Y2)}" marker-end="url(#fi-ah)"${both ? ' marker-start="url(#fi-ah)"' : ""}/>` +
         L2.map((t, k) => `<text class="fi-lk" x="${r1(tx)}" y="${r1(ty0 + k * 11)}" text-anchor="${anchor}">${esc(t)}</text>`).join("") + (s ? "" : "");
     }).join("");
@@ -121,13 +125,13 @@
     const card = (id, g) => {
       const L = lessonOf(id), R = ruleOf(id), note = noteOf(id), nC = carnetOf(id), withM = nC.filter((e) => e.m).slice(-2);
       const rule = R ? R.map(ruleHtml).join("<br>") : L ? `<button type="button" class="fi-gap fi-whole" aria-label="Montrer la règle"><span class="fi-ans">${L.regle}</span></button>` : "";
-      const errs = withM.map((e) => `<div class="fi-mine"><b>Ton erreur du ${fmtD(e.date)}</b> · ${e.a ? "tu as répondu " + esc(e.a) + " : " : ""}${escT(e.m)}</div>`).join("")
+      const errs = withM.map((e) => `<div class="fi-mine"><b>Ton erreur du ${fmtD(e.date)}</b> · ${e.a ? "tu as répondu <span class=\"fi-code\">" + esc(e.a) + "</span> : " : ""}${escT(e.m)}</div>`).join("")
         + (nC.length > withM.length ? `<div class="fi-mine"><b>📕 ${nC.length} erreur${nC.length > 1 ? "s" : ""} dans ton carnet</b>${L && L.piege && !withM.length ? " · Piège : " + L.piege : " · refais-les pour les effacer."}</div>` : "");
       const why = id === whyId ? `<div class="fi-why"><span>💬 <b>Explique en une phrase</b> : ${whyOf(id)}</span><textarea data-why="${id}" rows="2" placeholder="Parce que…">${esc(F.why[id] || "")}</textarea></div>` : "";
-      const js = compsOf(id).map((c) => { const v = selfGet(c.cid); return `<div class="fi-js"><span class="fi-jl">Je sais ${esc(c.label.charAt(0).toLowerCase() + c.label.slice(1))}</span>
+      const js = compsOf(id).map((c) => { const v = selfGet(c.cid); return `<div class="fi-js"><span class="fi-jl">${esc(c.label)}</span>
         <span class="seg at-seg" data-cid="${c.cid}">${[2, 1, 0].map((x) => `<button type="button" data-v="${x}" aria-pressed="${v === x}" aria-label="${["pas encore", "à peu près", "je sais faire"][x]}">${AT_SYM[x]}</button>`).join("")}</span></div>`; }).join("");
       return `<div class="fi-card fi-${G[g][1]}" data-id="${id}"><h3><span>${esc(L ? L.titre : nLabel(id))}</span><span class="row" style="gap:4px">${nC.length ? `<span class="tag">📕 ${nC.length}</span>` : ""}${note !== null ? `<span class="note ${noteCls(note)}">${noteTxt(note)}</span>` : ""}</span></h3>
-        ${rule ? `<div class="rule fi-rule">${rule}</div>` : ""}${L && L.exemple && L.exemple[0] ? `<div class="fi-ex1">Exemple : ${L.exemple[0]}</div>` : ""}${errs}${why}${js}</div>`;
+        ${rule ? `<div class="rule fi-rule">${rule}</div>` : ""}${L && L.exemple && L.exemple[0] ? `<div class="fi-ex1">Exemple : ${L.exemple[0]}</div>` : ""}${errs}${why}${js ? '<div class="fi-jh">Je sais…</div>' + js : ""}</div>`;
     };
     const fiche = order.filter((g) => by[g]).map((g) => `<div class="fi-grp">${G[g][0]}${g === "revoir" && opt.test ? " · avant ton test" : ""}</div>` +
       by[g].map((id) => (g === "acquis" || g === "nonvu" ? `<details class="fi-mini"><summary><span>${esc((lessonOf(id) || {}).titre || nLabel(id))}</span>${noteOf(id) !== null ? `<span class="note ${noteCls(noteOf(id))}">${noteTxt(noteOf(id))}</span>` : `<span class="tag">${g === "nonvu" ? "plus tard" : "acquis"}</span>`}</summary>${card(id, g)}</details>` : card(id, g))).join("")).join("");
@@ -204,15 +208,24 @@
   function printHtml(opt, corr) {
     const test = opt.test && Engine.prepActive(state), ids = test ? state.prep.ids.filter(has) : FICHES[opt.chap].ids.filter(has), chaps = test ? chapsFor(ids) : [opt.chap];
     const title = test ? "Mon test" : chapLabel(opt.chap);
+    const W = (id) => (ruleOf(id) || [1, 1]).length + 2 + carnetOf(id).filter((e) => e.m).slice(-2).length * 1.5;
     const secs = ids.map((id, k) => {
       const L = lessonOf(id), R = ruleOf(id), nC = carnetOf(id).filter((e) => e.m).slice(-2);
       return `<div class="fp-sec"><h4 style="background:${PAL[k % PAL.length]}">${k + 1} ${esc(L ? L.titre : nLabel(id))}</h4>
         ${R ? R.map((l) => printLine(l, corr)).join("<br>") : L ? (corr ? L.regle : '<span class="fp-blank" style="min-width:100%"></span><br><span class="fp-blank" style="min-width:100%"></span>') : ""}
         ${L && L.exemple && L.exemple[0] ? `<div class="fp-ex">Exemple : ${L.exemple[0]}</div>` : ""}
-        ${nC.map((e) => `<div class="fp-pers"><b>Mon erreur du ${fmtD(e.date)}</b> : ${e.a ? "j'ai répondu " + esc(e.a) + ". " : ""}${escT(e.m)}</div>`).join("")}</div>`;
-    }).join("");
+        ${nC.map((e) => `<div class="fp-pers"><b>Mon erreur du ${fmtD(e.date)}</b> : ${e.a ? "j'ai répondu « " + esc(e.a) + " ». " : ""}${escT(e.m)}</div>`).join("")}</div>`;
+    });
     const maps = chaps.map((c) => `<div class="fp-sec"><h4 style="background:#4267ac">Carte · ${esc(chapLabel(c))}</h4><div class="fp-ess">${FICHES[c].ess.map((x, i) => `${i + 1}. ${x}`).join("<br>")}</div>
       ${mapSvg(c, { print: corr ? "plein" : "vide" })}${corr ? "" : `<div class="fp-place">À placer : ${Object.keys(FICHES[c].carte.pos).filter(has).map((i) => esc(FICHES[c].carte.txt[i][0])).sort().join(" · ")}</div>`}</div>`).join("");
+    // 3 colonnes comme synthese.typ : notions réparties sur les colonnes 1 et 2 (la carte à la fin de la 2e), « Je sais… » et erreurs en 3e.
+    // Sans colonnes CSS : Chrome rejette tout le bloc à la page suivante quand les colonnes équilibrées dépassent la page.
+    function cols(secs, maps) {
+      const w = ids.map(W), tot = w.reduce((x, y) => x + y, 0) + chaps.length * 9, c1 = [], c2 = [];
+      let acc = 0;
+      secs.forEach((h, k) => { if (acc + w[k] / 2 <= tot / 2 || !c1.length) { c1.push(h); acc += w[k]; } else c2.push(h); });
+      return [c1.join(""), c2.join("") + maps, ""];
+    }
     const rows = ids.flatMap((id) => compsOf(id)), sym = (v) => (v === null || v === undefined ? "" : AT_SYM[v]);
     const js = `<div class="fp-sec"><h4 style="background:#565aa0">Je sais…</h4><table class="fp-tab"><tr><th>Je sais…</th><th>Avant</th><th>Après</th></tr>${rows.map((c) => `<tr><td>${esc(c.label)}</td><td>${sym(selfGet(c.cid))}</td><td></td></tr>`).join("")}</table></div>`;
     const errs = ids.flatMap((id) => carnetOf(id).filter((e) => e.m)).slice(-5);
@@ -221,7 +234,7 @@
     const why = ws.length ? `<div class="fp-sec"><b>Mes explications</b><br>${ws.map(([id, t]) => `${whyOf(id) || ""}<br><i>${esc(t)}</i>`).join("<br>")}</div>` : "";
     const g = state.profile ? state.profile.grade + "e · " : "";
     return `<h1>${esc(title)} — ma fiche</h1><div class="fp-sub">${g}${corr ? "corrigé" : "version à compléter"} · imprimée le ${fmtD(day())}${test ? " · test le " + fmtD(state.prep.date) : ""}</div>
-      <div class="fp-cols">${secs}${maps}${js}${mine}${why}</div>`;
+      <div class="fp-cols">${cols(secs, maps).map((c, i) => `<div class="fp-col">${c}${i === 2 ? js + mine + why : ""}</div>`).join("")}</div>`;
   }
   function fichePrint(opt, corr, dry) {
     let el = document.getElementById("fiche-print");
@@ -273,6 +286,9 @@
   .fi-mine b { color: var(--bad); }
   .fi-why { background: var(--blue-soft); border-radius: 10px; padding: 8px 10px; font-size: .9rem; display: grid; gap: 6px; }
   .fi-why textarea { width: 100%; font: inherit; font-size: .9rem; border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; background: var(--card); color: var(--ink); resize: vertical; }
+  .fi-jh { font-size: .78rem; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .06em; border-top: 1px dashed var(--line); padding-top: 8px; margin-bottom: -4px; }
+  .fi-code { font-family: var(--font-mono); font-size: .85rem; }
+  .fi-jh + .fi-js { border-top: 0; padding-top: 0; }
   .fi-js { display: flex; align-items: center; gap: 8px; border-top: 1px dashed var(--line); padding-top: 8px; }
   .fi-jl { flex: 1; min-width: 0; font-size: .88rem; line-height: 1.3; }
   .fi-js .at-seg { flex: none; flex-wrap: nowrap; gap: 4px; }
@@ -312,25 +328,26 @@
   .tools2 .fiche-btn { grid-column: 1 / -1; }
   #fiche-print { display: none; }
   @media print {
-    @page { size: A4 landscape; margin: 13mm 7mm 4mm; }
+    @page { size: A4 landscape; margin: 12mm 7mm 4mm; } /* marge haute : perforation du classeur */
     body.fiche-printing { background: #fff !important; }
     body.fiche-printing > *:not(#fiche-print) { display: none !important; }
     body.fiche-printing #fiche-print { display: block; }
   }
   #fiche-print { --ink: #111; --ink-soft: #444; --card: #fff; --line: #999; --blue: #2457d6; --blue-soft: #fff; --bad: #c2413f; --ok: #1e8a5a; --warn: #b7791f; --margin: #c2413f;
     color: #111; background: #fff; font-family: "Atkinson Hyperlegible", system-ui, sans-serif; font-size: 9pt; line-height: 1.35; }
-  #fiche-print h1 { text-align: center; font-size: 18pt; margin: 0 0 2pt; }
-  #fiche-print .fp-sub { text-align: center; font-size: 9pt; color: #555; margin-bottom: 6pt; }
-  #fiche-print .fp-cols { column-count: 3; column-gap: 12pt; column-fill: balance; }
+  #fiche-print h1 { text-align: center; font-size: 15pt; margin: 0 0 1pt; }
+  #fiche-print .fp-sub { text-align: center; font-size: 8pt; color: #555; margin-bottom: 5pt; }
+  /* 3 colonnes en flottants (et non en grille) : Chrome sait couper un flottant entre deux pages, pas une ligne de grille. */
+  #fiche-print .fp-cols { display: flow-root; } #fiche-print .fp-col { float: left; width: calc((100% - 24pt) / 3); margin-right: 12pt; } #fiche-print .fp-col:last-child { margin-right: 0; }
   #fiche-print .fp-sec { break-inside: avoid; margin-bottom: 6pt; }
   #fiche-print h4 { color: #fff; margin: 0 0 3pt; padding: 2pt 5pt; border-radius: 3pt; font-size: 9pt; width: 92%; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   #fiche-print .fp-blank { display: inline-block; border-bottom: 1px solid #333; height: 1.1em; vertical-align: bottom; max-width: 100%; }
   #fiche-print .fp-ex { color: #444; }
   #fiche-print .fp-pers { border: 1.2pt solid #c2413f; border-radius: 4pt; padding: 3pt 5pt; margin-top: 3pt; }
-  #fiche-print .fp-tab { border-collapse: collapse; width: 100%; font-size: 8.5pt; }
-  #fiche-print .fp-tab td, #fiche-print .fp-tab th { border: 1px solid #888; padding: 2pt 3pt; }
+  #fiche-print .fp-tab { border-collapse: collapse; width: 100%; font-size: 8pt; line-height: 1.2; }
+  #fiche-print .fp-tab td, #fiche-print .fp-tab th { border: 1px solid #888; padding: 1pt 3pt; }
   #fiche-print .fp-tab td + td, #fiche-print .fp-tab th + th { width: 3.2em; text-align: center; }
-  #fiche-print .fi-map { width: 100%; max-height: 62mm; }
+  #fiche-print .fi-map { width: 100%; max-height: 50mm; }
   #fiche-print .fp-place, #fiche-print .fp-ess { font-size: 8.5pt; margin: 2pt 0; }
   `;
   if (typeof document !== "undefined" && !document.getElementById("fiche-css")) {
