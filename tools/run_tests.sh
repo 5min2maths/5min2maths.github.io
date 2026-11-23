@@ -10,7 +10,7 @@ exec 9>/tmp/5m2m_tests.lock
 flock 9
 un() {
   f=$1
-  out=$(timeout 120 chromium --headless --disable-gpu --no-sandbox --virtual-time-budget=15000 --dump-dom "file://$PWD/$f" 2>/dev/null | python3 -c "
+  out=$(timeout -k 5 120 chromium --headless --disable-gpu --no-sandbox --virtual-time-budget=15000 --dump-dom "file://$PWD/$f" 2>/dev/null | python3 -c "
 import sys,re,html
 s=sys.stdin.read(); m=re.findall(r'<pre[^>]*>(.*?)</pre>',s,re.S)
 t=html.unescape(m[-1]).strip() if m else ''

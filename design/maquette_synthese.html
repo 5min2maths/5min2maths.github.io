@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette — synthèse à façon (23.11)</title>
+<link rel="stylesheet" href="../src/style.css">
+<style>
+  /* Maquette seulement : rien n'est branché. Formules en Unicode ici ; dans l'app, MathJax comme ailleurs. */
+  body { max-width: none; margin: 0; padding: 16px; }
+  .frames { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; justify-content: center; }
+  .frame { width: 360px; flex: none; }
+  .frame > .cap { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 6px 4px; }
+  .phone { width: 360px; grid-template-columns: minmax(0, 1fr); border: 1px solid var(--line); border-radius: 22px; background: var(--paper); padding: 12px 12px 18px; display: grid; gap: 12px; overflow: hidden; }
+  .bar-top { display: flex; align-items: center; gap: 8px; }
+  .bar-top .back { font-size: 1.2rem; color: var(--blue); }
+  .bar-top h2 { margin: 0; font-size: 1.15rem; }
+  .ess { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; font-size: .9rem; }
+  .ess ol { margin: 6px 0 0; padding-left: 1.2em; display: grid; gap: 4px; line-height: 1.35; }
+  .map { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 6px 4px; }
+  .map svg { display: block; width: 100%; height: auto; }
+  .map svg text { font-family: var(--font-body); fill: var(--ink); }
+  .map svg .ex { font-family: var(--font-mono); font-size: 10.5px; fill: var(--ink-soft); }
+  .map svg .lk { font-size: 10px; fill: var(--ink-soft); font-style: italic; }
+  .map svg .nd { fill: var(--card); stroke: var(--line); stroke-width: 1.5; }
+  .map svg .nd.focus { stroke: var(--margin); stroke-width: 2.2; }
+  .map svg .ar { stroke: var(--ink-soft); stroke-width: 1.4; fill: none; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .78rem; color: var(--ink-soft); padding: 0 4px; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; vertical-align: -1px; margin-right: 3px; }
+  .d-ok { background: var(--ok); } .d-mid { background: var(--warn); } .d-bad { background: var(--bad); } .d-no { background: transparent; border: 2px solid var(--line); }
+  .sel-row { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+  .sel-row button { border: 0; border-radius: 0; padding: 8px 4px; font-weight: 700; background: transparent; color: var(--ink-soft); font-size: .92rem; }
+  .sel-row button[aria-pressed="true"] { background: var(--blue-soft); color: var(--blue); }
+  .grp { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); margin: 4px 2px -4px; }
+  .nc { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: grid; gap: 8px; }
+  .nc.prio { border-left: 5px solid var(--bad); }
+  .nc.mid { border-left: 5px solid var(--warn); }
+  .nc h3 { margin: 0; font-size: 1rem; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+  .nc .rule { font-size: .92rem; line-height: 1.55; }
+  .nc .rule .f { font-family: var(--font-mono); font-size: .84rem; }
+  .gap { display: inline-block; max-width: 100%; min-width: 3.2em; padding: 0 6px; border: 1.5px dashed var(--blue); border-radius: 6px; background: var(--card); color: transparent; cursor: pointer; text-align: center; line-height: 1.35; }
+  .gap::before { content: "?"; color: var(--blue); font-weight: 700; position: absolute; }
+  .gap { position: relative; }
+  .gap.shown { color: var(--ok); border-style: solid; border-color: var(--ok); background: var(--ok-soft); font-weight: 700; }
+  .gap.shown::before { content: none; }
+  .mode-relis .gap { color: var(--ink); border: 0; background: transparent; padding: 0; min-width: 0; font-weight: 700; }
+  .mode-relis .gap::before { content: none; }
+  .ex1 { font-size: .88rem; color: var(--ink-soft); }
+  .ex1 .f { font-family: var(--font-mono); color: var(--ink); }
+  .mine { background: var(--bad-soft); border-radius: 10px; padding: 8px 10px; font-size: .88rem; line-height: 1.4; }
+  .mine b { color: var(--bad); }
+  .jesais { display: flex; align-items: center; gap: 8px; border-top: 1px dashed var(--line); padding-top: 8px; }
+  .jesais .l { flex: 1; font-size: .88rem; line-height: 1.3; }
+  .jesais .l small { display: block; color: var(--ink-soft); font-size: .76rem; }
+  .jesais .at-seg button { min-width: 34px; padding: 5px 7px; }
+  .why { background: var(--blue-soft); border-radius: 10px; padding: 8px 10px; font-size: .88rem; display: grid; gap: 6px; }
+  .why textarea { width: 100%; min-height: 44px; font: inherit; font-size: .88rem; border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; background: var(--card); color: var(--ink); resize: none; }
+  .row-mini { display: flex; justify-content: space-between; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 9px 12px; font-size: .92rem; }
+  .row-mini .muted { font-size: .8rem; }
+  .acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .acts button { font-size: .88rem; padding: 10px 6px; }
+  .m-legend { font-size: .8rem; color: var(--ink-soft); border-top: 1px dashed var(--line); padding-top: 10px; line-height: 1.45; }
+  .m-legend b { color: var(--ink); }
+  /* Aperçu impression : A4 paysage rendu à 1123 × 794 px puis réduit (× 0,295). */
+  .a4wrap { width: 333px; height: 236px; overflow: hidden; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+  .a4 { width: 1123px; height: 794px; transform: scale(.295); transform-origin: 0 0; background: #fff; color: #111; padding: 46px 26px 10px; font-family: "Atkinson Hyperlegible", system-ui, sans-serif; font-size: 12.5px; line-height: 1.35; }
+  .a4 h1 { text-align: center; font-size: 26px; margin: 0 0 4px; }
+  .a4 .sub { text-align: center; font-size: 13px; color: #555; margin-bottom: 10px; }
+  .a4 .cols { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .a4 h4 { color: #fff; margin: 9px 0 5px; padding: 3px 6px; border-radius: 4px; font-size: 12.5px; width: 92%; }
+  .a4 .f { font-family: "JetBrains Mono", monospace; }
+  .a4 .blank { display: inline-block; min-width: 70px; border-bottom: 1.2px solid #333; }
+  .a4 .pers { border: 1.5px solid #c2413f; border-radius: 6px; padding: 5px 7px; margin-top: 6px; }
+  .a4 table { border-collapse: collapse; width: 100%; font-size: 11.5px; }
+  .a4 td, .a4 th { border: 1px solid #888; padding: 3px 4px; }
+  .a4 th { background: #eee; }
+</style></head>
+<body>
+<div class="frames">
+
+<!-- ============ 1. Carte du chapitre ============ -->
+<div class="frame">
+  <p class="cap">1 · Carte du chapitre (Mon test › Ma fiche)</p>
+  <div class="phone">
+    <div class="bar-top"><span class="back">‹</span><h2>Ma fiche · Calcul littéral</h2></div>
+    <div class="sel-row"><button aria-pressed="true">🗺 Carte</button><button aria-pressed="false">📝 Fiche</button></div>
+
+    <div class="ess"><b>L'essentiel en 3 lignes</b>
+      <ol>
+        <li>Une lettre remplace un nombre : on calcule avec les mêmes règles (priorités).</li>
+        <li>On ne réduit que des termes <b>semblables</b> : 3x + 2x = 5x, mais 3x + 2 reste.</li>
+        <li><b>Développer</b> : produit → somme. <b>Factoriser</b> : somme → produit. L'un vérifie l'autre.</li>
+      </ol>
+    </div>
+
+    <div class="map">
+      <svg viewBox="0 0 336 392" role="img" aria-label="Carte du chapitre Calcul littéral : sept notions reliées">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5b6687"/></marker>
+        </defs>
+        <!-- liens (dessinés d'abord) -->
+        <path class="ar" d="M144 39 H190" marker-end="url(#ah)"/>
+        <text class="lk" x="167" y="54" text-anchor="middle">on</text><text class="lk" x="167" y="65" text-anchor="middle">remplace</text>
+        <path class="ar" d="M76 70 V118" marker-end="url(#ah)"/>
+        <text class="lk" x="84" y="98">simplifier</text>
+        <path class="ar" d="M144 151 H190" marker-end="url(#ah)"/>
+        <text class="lk" x="167" y="144" text-anchor="middle">puis</text>
+        <path class="ar" d="M130 232 C150 210, 220 214, 252 184" marker-end="url(#ah)"/>
+        <text class="lk" x="262" y="206">on finit</text><text class="lk" x="262" y="218">par réduire</text>
+        <path class="ar" d="M144 263 H190" marker-end="url(#ah)" marker-start="url(#ah)"/>
+        <text class="lk" x="167" y="282" text-anchor="middle">contraires</text>
+        <path class="ar" d="M76 294 V306" marker-end="url(#ah)"/>
+        <text class="lk" x="84" y="304">cas particuliers</text>
+        <path class="ar" d="M190 346 C240 346, 260 330, 260 296" marker-end="url(#ah)"/>
+        <text class="lk" x="268" y="330">lues à</text><text class="lk" x="268" y="342">l'envers</text>
+
+        <!-- nœuds : largeur 136, hauteur 62 -->
+        <g><rect class="nd" x="8" y="8" width="136" height="62" rx="12"/>
+          <circle cx="130" cy="22" r="6" fill="var(--ok)"/>
+          <text x="18" y="28" font-weight="700" font-size="12.5">Écrire</text>
+          <text x="18" y="42" font-size="11">une expression</text>
+          <text class="ex" x="18" y="60">3(x + 5)</text></g>
+        <g><rect class="nd" x="192" y="8" width="136" height="62" rx="12"/>
+          <circle cx="314" cy="22" r="6" fill="var(--ok)"/>
+          <text x="202" y="28" font-weight="700" font-size="12.5">Calculer</text>
+          <text x="202" y="42" font-size="11">la valeur</text>
+          <text class="ex" x="202" y="60">x = −2 → (−2)² = 4</text></g>
+        <g><rect class="nd focus" x="8" y="120" width="136" height="62" rx="12"/>
+          <circle cx="130" cy="134" r="6" fill="var(--bad)"/>
+          <text x="18" y="140" font-weight="700" font-size="12.5">Supprimer ( )</text>
+          <text x="18" y="154" font-size="11">📕 2 dans ton carnet</text>
+          <text class="ex" x="18" y="172">−(a − b) = −a + b</text></g>
+        <g><rect class="nd" x="192" y="120" width="136" height="62" rx="12"/>
+          <circle cx="314" cy="134" r="6" fill="var(--warn)"/>
+          <text x="202" y="140" font-weight="700" font-size="12.5">Réduire</text>
+          <text x="202" y="154" font-size="11">termes semblables</text>
+          <text class="ex" x="202" y="172">3x + 2x = 5x</text></g>
+        <g><rect class="nd" x="8" y="232" width="136" height="62" rx="12"/>
+          <circle cx="130" cy="246" r="6" fill="var(--warn)"/>
+          <text x="18" y="252" font-weight="700" font-size="12.5">Développer</text>
+          <text x="18" y="266" font-size="11">produit → somme</text>
+          <text class="ex" x="18" y="284">k(a + b) = ka + kb</text></g>
+        <g opacity=".62"><rect class="nd" x="192" y="232" width="136" height="62" rx="12" stroke-dasharray="5 4"/>
+          <circle cx="314" cy="246" r="5" fill="none" stroke="var(--line)" stroke-width="2"/>
+          <text x="202" y="252" font-weight="700" font-size="12.5">Factoriser</text>
+          <text x="202" y="266" font-size="11">somme → produit</text>
+          <text class="ex" x="202" y="284">ka + kb = k(a + b)</text></g>
+        <g><rect class="nd focus" x="8" y="308" width="182" height="74" rx="12"/>
+          <circle cx="176" cy="322" r="6" fill="var(--bad)"/>
+          <text x="18" y="328" font-weight="700" font-size="12.5">Identités remarquables</text>
+          <text x="18" y="342" font-size="11">📕 1 dans ton carnet</text>
+          <text class="ex" x="18" y="360">(a + b)² = a² + 2ab + b²</text>
+          <text class="ex" x="18" y="373">(a + b)(a − b) = a² − b²</text></g>
+      </svg>
+    </div>
+    <div class="legend"><span><i class="dot d-ok"></i>acquis</span><span><i class="dot d-mid"></i>en progrès</span><span><i class="dot d-bad"></i>à revoir</span><span><i class="dot d-no"></i>pas encore vu</span></div>
+    <p class="small muted" style="margin:0">Touche une case pour ouvrir sa fiche. Bord rouge : à revoir avant ton test de vendredi.</p>
+    <div class="acts"><button class="btn-sec">🧠 Je refais la carte</button><button class="btn-sec">🖨 Imprimer</button></div>
+    <div class="m-legend"><b>Carte = vue d'ensemble.</b> Disposition et liens écrits à la main une fois par chapitre (≈ 5 liens), couleurs calculées
+      (state.notions[id].m, statut, carnet). « Je refais la carte » : les cases sont vides et mélangées en bas, l'élève les replace (récupération),
+      puis compare avec la carte.</div>
+  </div>
+</div>
+
+<!-- ============ 2. Fiche à compléter ============ -->
+<div class="frame">
+  <p class="cap">2 · Fiche à compléter, triée pour moi</p>
+  <div class="phone" id="fiche">
+    <div class="bar-top"><span class="back">‹</span><h2>Ma fiche · Calcul littéral</h2></div>
+    <div class="sel-row"><button aria-pressed="false">🗺 Carte</button><button aria-pressed="true">📝 Fiche</button></div>
+    <div class="sel-row" id="modes"><button aria-pressed="true" data-m="teste">🔎 Je me teste</button><button aria-pressed="false" data-m="relis">📖 Je relis</button></div>
+    <p class="small muted" style="margin:0">Dis la réponse dans ta tête, puis touche la case <b>?</b> pour vérifier. Ensuite, dis si tu savais.</p>
+
+    <div class="grp">À revoir d'abord · test vendredi</div>
+    <div class="nc prio">
+      <h3>Identités remarquables <span class="tag">📕 1</span></h3>
+      <div class="rule">
+        <span class="f">(a + b)² = a² <span class="gap">+ 2ab</span> + b²</span><br>
+        <span class="f">(a − b)² = a² <span class="gap">− 2ab</span> + b²</span><br>
+        <span class="f">(a + b)(a − b) = <span class="gap">a² − b²</span></span>
+      </div>
+      <div class="ex1">Exemple : <span class="f">(x + 4)² = x² + 8x + 16</span></div>
+      <div class="mine"><b>Ton erreur du 19.11</b> · tu as écrit <span class="f">(x + 3)² = x² + 9</span> : il manque le double produit <span class="f">6x</span>.</div>
+      <div class="why"><span>💬 <b>Explique en une phrase</b> : pourquoi (x + 3)² n'est pas x² + 9 ?</span><textarea placeholder="Parce que…"></textarea></div>
+      <div class="jesais"><span class="l">Je sais développer (a ± b)² et (a + b)(a − b)<small>Avant : ~ · Test rapide : ✗</small></span>
+        <span class="seg at-seg"><button data-v="2">✓</button><button data-v="1" aria-pressed="true">~</button><button data-v="0">✗</button></span></div>
+    </div>
+
+    <div class="nc prio">
+      <h3>Supprimer des parenthèses <span class="tag">📕 2</span></h3>
+      <div class="rule">Précédée de « + », la parenthèse disparaît sans rien changer.<br>
+        Précédée de « − », elle disparaît et <span class="gap">chaque terme change de signe</span>.</div>
+      <div class="ex1">Exemple : <span class="f">x − (3 − 2x) = 3x − 3</span></div>
+      <div class="mine"><b>Ton erreur du 20.11</b> · <span class="f">−(4x − 7) = −4x − 7</span> : le « − » change le signe de <b>tous</b> les termes.</div>
+      <div class="jesais"><span class="l">Je sais supprimer une parenthèse précédée de −<small>Note : 3,5</small></span>
+        <span class="seg at-seg"><button data-v="2">✓</button><button data-v="1">~</button><button data-v="0">✗</button></span></div>
+    </div>
+
+    <div class="grp">En progrès</div>
+    <div class="nc mid">
+      <h3>Développer <span class="note ok">4,5</span></h3>
+      <div class="rule"><span class="f">(a + b)(c + d) = <span class="gap">ac + ad + bc + bd</span></span><br>Chaque terme multiplie <span class="gap">chaque terme</span>, puis on réduit.</div>
+      <div class="jesais"><span class="l">Je sais développer avec la double distributivité</span>
+        <span class="seg at-seg"><button data-v="2">✓</button><button data-v="1">~</button><button data-v="0">✗</button></span></div>
+    </div>
+    <div class="row-mini"><span>Réduire</span><span class="note ok">4,5</span></div>
+
+    <div class="grp">Acquis</div>
+    <div class="row-mini"><span>Écrire une expression</span><span class="note good">5,5</span></div>
+    <div class="row-mini"><span>Calculer la valeur</span><span class="note good">5</span></div>
+    <div class="grp">Pas encore vu en classe</div>
+    <div class="row-mini"><span class="muted">Factoriser</span><span class="tag">plus tard</span></div>
+
+    <div class="acts"><button class="btn-primary">S'entraîner · 5 min</button><button class="btn-sec">🖨 Imprimer</button></div>
+    <div class="m-legend"><b>Fiche = règles + exemples + pièges.</b> Tout vient de l'existant : règle et exemple (lessons2.js, act_litt11.js), piège personnel
+      (carnet d'erreurs, s'il garde le message du diagnostic), « Je sais… » = libellés de competences.js, ✓ ~ ✗ partagés avec l'autoévaluation
+      de Mon test. Seules données nouvelles : les trous (≈ 2 par notion) et la phrase « L'essentiel ». Ordre : à revoir → en progrès → acquis (replié).</div>
+  </div>
+</div>
+
+<!-- ============ 3. Impression A4 ============ -->
+<div class="frame">
+  <p class="cap">3 · Version imprimée (A4 paysage, 3 colonnes)</p>
+  <div class="phone">
+    <div class="a4wrap"><div class="a4">
+      <h1>Calcul littéral — ma fiche</h1>
+      <div class="sub">11e · version à compléter · imprimée le 23.11 · test le 27.11</div>
+      <div class="cols">
+        <div>
+          <h4 style="background:#ff595e">1 Écrire une expression</h4>
+          Le début de la phrase donne l'opération faite en dernier.<br>« Le triple de la somme de x et 5 » : <span class="blank"></span><br>« La somme du triple de x et de 5 » : <span class="blank"></span>
+          <h4 style="background:#ff751f">2 Calculer la valeur</h4>
+          On remplace par la valeur <b>entre parenthèses</b>, puis priorités.<br><span class="f">3x² − 2x</span> pour x = −2 : <span class="blank"></span>
+          <h4 style="background:#E0A500">3 Supprimer des parenthèses</h4>
+          Précédée de « − » : <span class="blank" style="min-width:160px"></span><br><span class="f">x − (3 − 2x) =</span> <span class="blank"></span>
+          <h4 style="background:#B1B62B">4 Réduire</h4>
+          Termes semblables : mêmes lettres, mêmes exposants.<br><span class="f">3x² − 5x + 2x² + 7x =</span> <span class="blank"></span>
+        </div>
+        <div>
+          <h4 style="background:#82BC24">5 Développer</h4>
+          <span class="f">k(a + b) =</span> <span class="blank"></span><br><span class="f">(a + b)(c + d) =</span> <span class="blank" style="min-width:120px"></span><br>
+          <span class="f">(2x − 1)(x + 4) =</span> <span class="blank" style="min-width:120px"></span>
+          <h4 style="background:#36949d">6 Identités remarquables</h4>
+          <span class="f">(a + b)² =</span> <span class="blank" style="min-width:120px"></span><br>
+          <span class="f">(a − b)² =</span> <span class="blank" style="min-width:120px"></span><br>
+          <span class="f">(a + b)(a − b) =</span> <span class="blank"></span>
+          <div class="pers"><b>Mon piège</b> : (x + 3)² = x² + 9 ✗ → il manque <span class="blank"></span></div>
+          <h4 style="background:#1982c4">7 Factoriser</h4>
+          Contraire de développer. D'abord <span class="blank" style="min-width:120px"></span>, puis les identités à l'envers.<br>
+          <span class="f">x² − 49 =</span> <span class="blank"></span>
+        </div>
+        <div>
+          <h4 style="background:#4267ac">Carte du chapitre</h4>
+          <div style="height:150px;border:1px dashed #999;border-radius:6px;display:grid;place-items:center;color:#777">(même SVG que l'écran 1, cases vides à relier)</div>
+          <h4 style="background:#565aa0">Je sais…</h4>
+          <table><tr><th>Je sais…</th><th>Avant</th><th>Après</th></tr>
+            <tr><td>Traduire une phrase en expression</td><td>✓</td><td></td></tr>
+            <tr><td>Supprimer une ( ) précédée de −</td><td>~</td><td></td></tr>
+            <tr><td>Réduire un polynôme</td><td>~</td><td></td></tr>
+            <tr><td>Développer (double distributivité)</td><td>~</td><td></td></tr>
+            <tr><td>Développer (a ± b)², (a + b)(a − b)</td><td>✗</td><td></td></tr>
+            <tr><td>Factoriser par mise en évidence</td><td></td><td></td></tr></table>
+          <div class="pers"><b>Mes 3 erreurs à ne plus faire</b> (carnet) : 1. <span class="blank" style="min-width:200px"></span><br>2. <span class="blank" style="min-width:200px"></span><br>3. <span class="blank" style="min-width:200px"></span></div>
+        </div>
+      </div>
+    </div></div>
+    <div class="m-legend"><b>Impression = la fiche de l'enseignant, en version élève.</b> Mêmes couleurs de titres que synthese.typ (palette summy), A4 paysage,
+      marge haute pour la perforation. Générée par le navigateur (feuille de style @media print, window.print → « Enregistrer en PDF ») :
+      pas de serveur, pas de bibliothèque. Deux versions : <b>à compléter</b> (trous = ceux de la fiche) et <b>complète</b> (corrigé, pour vérifier).
+      Les encadrés rouges sont personnels (carnet, Avant).</div>
+  </div>
+</div>
+
+</div>
+<script>
+  // Maquette : basculer « Je me teste / Je relis », révéler un trou.
+  const fiche = document.getElementById("fiche");
+  document.querySelectorAll("#modes button").forEach((b) => b.onclick = () => {
+    document.querySelectorAll("#modes button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+    fiche.classList.toggle("mode-relis", b.dataset.m === "relis");
+  });
+  fiche.querySelectorAll(".gap").forEach((g) => g.onclick = () => g.classList.add("shown"));
+  fiche.querySelectorAll(".jesais .at-seg").forEach((s) => s.querySelectorAll("button").forEach((b) => b.onclick = () => s.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b))));
+  // Un trou déjà révélé pour montrer l'état « vérifié ».
+  fiche.querySelector(".gap").classList.add("shown");
+</script>
+</body></html>
