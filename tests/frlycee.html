@@ -1,0 +1,107 @@
+<meta charset="utf-8">
+<!-- 22.11 · Contrôle des notions du lycée français (src/fr_lycee.js), copié de ch1c.html : 100 tirages par niveau ; réponse acceptée,
+     guide dont la dernière étape = réponse, pièges ≠ réponse et diagnostiqués, pas de NaN / undefined, au moins 3 formes par niveau ;
+     usages français (× et pas ·, pas de CHF ni d'apostrophe de milliers) ; catalogue des profils FR 1re et Tle. tests/frlycee.html#suitegeo -->
+<script>window.MathJax = { typesetPromise: () => Promise.resolve() };</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script>
+<script src="../src/expr.js"></script>
+<script src="../src/figures.js"></script><script src="../src/geo.js"></script>
+<script src="../src/generators.js"></script>
+<script src="../src/gen2.js"></script>
+<script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script>
+<script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script>
+<script src="../src/engine.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_manip.js"></script>
+<pre id="out">en cours</pre>
+<script>
+const IDS1 = ["suitedef", "suitearith", "suitegeo", "suitesomme", "pscal", "expfn", "probtot", "vaesp"], IDS2 = ["suitelim", "binom"], IDS = IDS1.concat(IDS2);
+</script>
+<script>
+const out = [], ids = location.hash ? location.hash.slice(1).split(",") : IDS; let bad = 0;
+const fail = (m) => { bad++; if (bad < 3000) out.push("ÉCHEC " + m); };
+const txt = (q) => [q.q, q.sol, ...(q.guide || []).flatMap((g) => [g.ask, g.sol]), ...(q.parts || []).map((p) => p.label), ...(q.hints || [])].join(" | ");
+for (const id of ids) {
+  const line = [];
+  for (const d of [1, 2, 3]) {
+    const forms = new Set(), ctx = new Set(); let n = 0, g = 0, triv = 0, shown = 0, samples = [];
+    for (let s = 1; s <= 100; s++) {
+      let q; try { q = Engine.build(id, d, s); } catch (e) { fail(id + "-" + d + "-" + s + " exception " + e.message); continue; }
+      n++; forms.add(qForm(q)); if (q.ctx) ctx.add(q.ctx);
+      const t = txt(q);
+      { const plainTxt = t.replace(/\\\(.*?\\\)/g, " "); const dv = [...plainTxt.matchAll(/.{0,25}(\d|\)) : (\d|\().{0,10}/g)].map((m) => m[0]).find((s) => !/h \d{1,2} : \d/.test(s)); if (dv) fail(q.code + " division « : » en texte simple (écrire ÷) : " + dv); }
+      { const pl = t.replace(/\\\(.*?\\\)/g, " "); const bad = pl.match(/.{0,30}(\{,\}|\\frac|\\cdot|\^\{).{0,10}/); if (bad) fail(q.code + " TeX hors formule : " + bad[0]); }
+      if (/undefined|NaN|Infinity|\[object/.test(t)) fail(q.code + " texte : " + t.match(/.{0,40}(undefined|NaN|Infinity|\[object).{0,20}/)[0]);
+      if (q.parts) { q.parts.forEach((p) => { if (!isFinite(p.spec.value)) fail(q.code + " partie non finie " + p.label); }); if (s <= 2) samples.push(q.q.replace(/<[^>]+>/g, "").slice(0, 90) + " → " + q.parts.map((p) => +(+p.spec.value).toFixed(4)).join(" ; ")); continue; }
+      if (q.spec.kind === "expr") { // réponse littérale (calcul littéral, 15.11)
+        const self = checkAnswer(q.spec, q.spec.expr); if (self.status !== "correct") fail(q.code + " la réponse attendue est refusée (" + self.status + " " + (self.message || "") + ") : " + q.spec.expr);
+        if (!q.guide) fail(q.code + " sans guide"); else { g++; const last = q.guide[q.guide.length - 1].spec;
+          if (last.kind === "expr" && !Expr.equivalent(Expr.parse(last.expr), Expr.parse(q.spec.expr), q.spec.pos)) fail(q.code + " dernière étape ≠ réponse : " + last.expr + " / " + q.spec.expr);
+          q.guide.forEach((x) => { const r = checkAnswer(x.spec, x.spec.kind === "expr" ? x.spec.expr : String(x.spec.value)); if (r.status !== "correct") fail(q.code + " étape refuse sa propre réponse : " + (x.spec.expr || x.spec.value) + " " + (r.message || r.status)); }); }
+        if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+        (q.traps || []).forEach((tr) => { if (tr.e) { let te; try { te = Expr.parse(tr.e); } catch (e) { fail(q.code + " piège illisible " + tr.e); return; } if (Expr.equivalent(te, Expr.parse(q.spec.expr))) fail(q.code + " piège = bonne réponse : " + tr.e); } });
+        if (!q.ctx) fail(q.code + " sans ctx");
+        if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 100) + " → " + q.spec.expr + (q.spec.form ? " [" + q.spec.form + (q.spec.minFactors ? " ≥" + q.spec.minFactors : "") + "]" : ""));
+        continue;
+      }
+      if (["pair", "ineq", "solset"].includes(q.spec.kind)) { // couples, inégalités, intervalles (systèmes, 18.11)
+        const fS = (v) => { for (let d = 1; d <= 120; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return d === 1 ? String(Math.round(v)) : Math.round(v * d) + "/" + d; return String(v); };
+        const canon = (sp) => sp.kind === "pair" ? sp.values.map(fS).join(" ; ") : sp.kind === "ineq" ? "x " + sp.op + " " + fS(sp.value) : sp.kind === "solset" ? SolSet.show(sp.ivs, false) : sp.kind === "expr" ? sp.expr : String(sp.value);
+        const c0 = canon(q.spec), self = checkAnswer(q.spec, c0); if (self.status !== "correct") fail(q.code + " la réponse attendue est refusée (" + self.status + " " + (self.message || "") + ") : " + c0);
+        if (q.spec.kind === "pair" && q.spec.values.some((v) => !isFinite(v))) fail(q.code + " valeur non finie");
+        if (!q.guide) fail(q.code + " sans guide"); else { g++; const last = q.guide[q.guide.length - 1].spec;
+          if (last.kind !== q.spec.kind || checkAnswer(q.spec, canon(last)).status !== "correct") fail(q.code + " dernière étape ≠ réponse : " + canon(last) + " / " + c0);
+          q.guide.forEach((x) => { const r = checkAnswer(x.spec, canon(x.spec)); if (r.status !== "correct") fail(q.code + " étape refuse sa propre réponse : " + canon(x.spec) + " " + (r.message || r.status)); }); }
+        if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+        (q.traps || []).forEach((tr) => { if (!tr.spec) return; const ci = canon(tr.spec); if (checkAnswer(q.spec, ci).status === "correct") fail(q.code + " piège = bonne réponse : " + ci); else if (diagnose(q, ci) !== tr.m) fail(q.code + " piège non diagnostiqué : " + ci); });
+        if (!q.ctx) fail(q.code + " sans ctx");
+        if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 110) + " → " + c0);
+        continue;
+      }
+      if (q.spec.kind === "set") { // ensemble de solutions (équations, 16.11)
+        const canon = q.spec.all ? "tous" : q.spec.values.length ? q.spec.values.map((v) => { for (let d = 1; d <= 60; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return d === 1 ? String(Math.round(v)) : Math.round(v * d) + "/" + d; const r = Math.round(v * v * 1e6) / 1e6; return v; }).join(" ; ") : "aucune";
+        const self = checkAnswer(q.spec, canon); if (self.status !== "correct") fail(q.code + " la réponse attendue est refusée (" + self.status + ") : " + canon);
+        if (!q.spec.all && q.spec.values.some((v) => !isFinite(v))) fail(q.code + " solution non finie");
+        if (!q.guide) fail(q.code + " sans guide"); else { g++; const last = q.guide[q.guide.length - 1].spec;
+          if (last.kind !== "set" || !!last.all !== !!q.spec.all || last.values.length !== q.spec.values.length || last.values.some((v, i) => Math.abs(v - q.spec.values[i]) > 1e-9)) fail(q.code + " dernière étape ≠ réponse");
+          q.guide.forEach((x) => { if (x.spec.kind === "value" && !isFinite(x.spec.value)) fail(q.code + " étape non finie"); }); }
+        if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+        (q.traps || []).forEach((tr) => { if (tr.s && checkAnswer(q.spec, tr.s.join(";")).status === "correct") fail(q.code + " piège = bonne réponse"); if (tr.s && tr.s.some((v) => !isFinite(v))) fail(q.code + " piège non fini"); });
+        if (!q.ctx) fail(q.code + " sans ctx");
+        // le diagnostic retrouve chaque piège
+        (q.traps || []).forEach((tr) => { const inp = tr.none ? "aucune" : tr.all ? "tous" : tr.s ? tr.s.join(" ; ") : null; if (inp && diagnose(q, inp) !== tr.m && checkAnswer(q.spec, inp).status !== "correct") fail(q.code + " piège non diagnostiqué : " + inp); });
+        if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 110) + " → " + canon);
+        continue;
+      }
+      const ans = q.spec.value; if (!isFinite(ans)) fail(q.code + " réponse non finie");
+      if (trivialQ(q, 0)) triv++; if (answerShown(q)) shown++;
+      if (q.guide) { g++; const last = q.guide[q.guide.length - 1].spec.value, tol = Math.max(q.spec.round || 0, q.guide[q.guide.length - 1].spec.round || 0, 1e-9 * Math.max(1, Math.abs(ans)));
+        if (Math.abs(last - ans) > tol) fail(q.code + " dernière étape " + last + " ≠ " + ans);
+        q.guide.forEach((x) => { if (!isFinite(x.spec.value)) fail(q.code + " étape non finie"); }); }
+      else fail(q.code + " sans guide");
+      if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+      if (!q.ctx) fail(q.code + " sans ctx");
+      if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 110) + " → " + +(+ans).toFixed(4));
+    }
+    line.push("  N" + d + " : " + n + " q., " + forms.size + " formes, " + ctx.size + " contextes" + (d < 4 ? ", guides " + Math.round(100 * g / n) + " %, triviales " + triv + ", réponse visible " + shown : ""));
+    samples.forEach((x) => line.push("     · " + x));
+  }
+  out.push(id + "\n" + line.join("\n"));
+}
+
+// Formes, usages français
+for (const id of ids) for (const d of [1, 2, 3]) { const forms = new Set(); for (let s = 1; s <= 100; s++) { const q = Engine.build(id, d, s); forms.add(q.ctx + "|" + qForm(q).slice(0, 40)); const t = [q.q, q.sol].join(" ");
+  if (/\\cdot(?! \\vec| \\overrightarrow| \()|CHF|\d'\d/.test(t)) fail(q.code + " usage suisse (· , CHF ou 1'200) : " + t.match(/.{0,30}(\\cdot|CHF|\d'\d).{0,10}/)[0]); }
+  const ctxs = new Set([...forms].map((f) => f.split("|")[0])); if (ctxs.size < 3) fail(id + " N" + d + " : " + ctxs.size + " forme(s) seulement"); }
+// Catalogue : profils FR 1re et Tle, invisibles en Suisse
+{ const ids = (p) => Engine.catalog(p).map((c) => c.id);
+  const p1 = ids({ system: "FR", grade: 11 }), pT = ids({ system: "FR", grade: 12 }), ch = ids({ system: "CH", grade: 13, track: "college" }), mp = ids({ system: "CH", grade: 13, track: "mp" });
+  for (const id of IDS1) { if (!p1.includes(id)) fail("1re : " + id + " absent du catalogue"); }
+  for (const id of IDS2) { if (p1.includes(id)) fail("1re : " + id + " (Tle) présent"); if (!pT.includes(id)) fail("Tle : " + id + " absent"); }
+  for (const id of IDS) if (ch.includes(id) || mp.includes(id)) fail("Suisse : " + id + " visible");
+  for (const id of ["f2formes", "trinfact", "eq2disc", "ineq2", "modexp", "sinlaw", "trigcercle", "trigassoc", "expo", "cercle"]) if (!p1.includes(id)) fail("1re : rattachement " + id + " absent");
+  for (const id of ["trigeq", "trigfn", "compo", "denombr", "log"]) { if (p1.includes(id)) fail("1re : " + id + " devrait être en Tle"); if (!pT.includes(id)) fail("Tle : " + id + " absent"); }
+  const cur = Engine.catalog({ system: "FR", grade: 11 }).filter((c) => c.current).length;
+  out.push("Catalogue FR : 1re " + p1.length + " notions (" + cur + " de l'année), Tle " + pT.length + " ; Suisse 2e Collège " + ch.length);
+  for (const id of IDS) { const n = NOTIONS.find((x) => x.id === id); if (!LESSONS[id] || !COMPS[id] || COMPS[id].length !== 3 || !HINTS_EXTRA[id]) fail(id + " : leçon, compétences ou indice manquant"); } }
+out.unshift(bad ? bad + " échec(s)" : "OK");
+document.getElementById("out").textContent = out.join("\n");
+</script>
