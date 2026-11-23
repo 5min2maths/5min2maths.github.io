@@ -90,7 +90,8 @@ function placeOf(n, profile) {
 
 // Niveaux proposés à l'élève : clé interne (système + année) et libellé.
 const SYSTEMS = {
-  CH: { label: "Suisse romande", grades: [[9, "9e"], [10, "10e"], [11, "11e"], [12, "1re (sec. II)"], [13, "2e (sec. II)"]] },
+  CH: { label: "Suisse romande", grades: [[9, "9e"], [10, "10e"], [11, "11e"], [12, "1re (sec. II)"], [13, "2e (sec. II)"], [14, "3e (sec. II)"], [15, "4e (sec. II)"]] },
+  // 22.11 : 3e et 4e du Collège (grade 14, 15 ; Collège seulement, la MP s'arrête en 2e dans l'app). Programme : tools/programme_3e_4e_college.md.
   // FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"]] }, // masqué (bêta genevoise)
 };
 

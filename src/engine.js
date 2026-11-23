@@ -68,7 +68,10 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
   fracops: ["fracadd", "fracmul", "rel"], pyth: ["carres", "rac"], pythfig: ["pyth"], pythrec: ["pyth"], thales: ["prop"], affine: ["valnum", "rel"], factor: ["distrib"],
   idrem: ["distrib"], sys2: ["eq1"], trigo: ["prop"], pct: ["prop"], pctvar: ["pct"], ineq: ["eq1"], domaine: ["eq1"], f2: ["eq2"], probeq: ["eq1"], eqfrac: ["fracadd", "eq1"],
   reduire: ["rel"], distrib: ["rel"], sci: ["puiss"], scicalc: ["sci"], monomes: ["puiss"], racenc: ["rac"], valnum: ["prio", "rel"], rel: ["prio"], fracsimp: ["arith"],
-  sysineq: ["ineq"], ineqfrac: ["ineq"], eqirr: ["eq2disc"], absval: ["eq1"], trinfact: ["eq2disc"], vol: ["aire2"], echelle: ["prop"] };
+  sysineq: ["ineq"], ineqfrac: ["ineq"], eqirr: ["eq2disc"], absval: ["eq1"], trinfact: ["eq2disc"], vol: ["aire2"], echelle: ["prop"],
+  // 23.11 : dérivation (3e Collège, src/ch3c_ana.js)
+  tauxvar: ["fimg"], nbderive: ["tauxvar"], derivref: ["puiss"], derivregles: ["derivref"], derivprodquot: ["derivregles"], derivcomp: ["derivregles", "compo"],
+  tangente: ["nbderive", "droites"], variations: ["derivregles", "ineq2"], optimderiv: ["variations"] };
 // Programme du jour : le format change d'un jour à l'autre ; l'équilibre se fait sur 7 jours.
 // 22.11 : textes courts (une ligne sur téléphone : pas de saut quand on change de format).
 const FORMATS = {
@@ -92,10 +95,10 @@ function itemRating(profile, id, d) {
   return 700 + (harmos(profile.system, g) - 8) * 150 + 40 + (d - 1) * 130;
 }
 // Échelle de référence (sans données partagées) : Mathélo typique en fin d'année par niveau HarmoS.
-const ELO_REF = [[8, 850], [9, 1000], [10, 1150], [11, 1300], [12, 1450], [13, 1600]];
+const ELO_REF = [[8, 850], [9, 1000], [10, 1150], [11, 1300], [12, 1450], [13, 1600], [14, 1750], [15, 1900]]; // 22.11 : 3e et 4e du Collège
 function eloLabel(profile, r) {
   const sys = SYSTEMS[profile.system];
-  const name = (h) => { const g = sys.grades.find(([gg]) => harmos(profile.system, gg) === h); return g ? g[1] : h === 12 ? (profile.system === "FR" ? "2nde" : "1re du Collège") : h === 13 ? (profile.system === "FR" ? "1re" : "2e du Collège") : h + "e"; };
+  const name = (h) => { const g = sys.grades.find(([gg]) => harmos(profile.system, gg) === h); return g ? g[1] : h === 12 ? (profile.system === "FR" ? "2nde" : "1re du Collège") : h === 13 ? (profile.system === "FR" ? "1re" : "2e du Collège") : h === 14 || h === 15 ? (h - 11) + "e du Collège" : h + "e"; };
   let lvl = ELO_REF[0];
   for (const ref of ELO_REF) if (r >= ref[1] - 75) lvl = ref;
   const h = lvl[0], gap = r - lvl[1];
