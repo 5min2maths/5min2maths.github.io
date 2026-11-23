@@ -33,7 +33,7 @@ for(const ch of BANKS){const C=RICH[ch];if(!C){L.push(ch+" : absente");continue;
   const t=x.q+x.sol+x.parts.map(p=>p.label).join("")+(x.fig||"");
   if(/NaN|undefined|Infinity|\bnull\b|\[object/.test(t))bad(ch+" "+kind+k+" ("+x.titre+") graine "+s+" : "+t.match(/.{0,60}(NaN|undefined|Infinity|\bnull\b|\[object).{0,20}/)[0]);
   if(!C.ids.includes(x.id))bad(ch+" "+kind+k+" id "+x.id+" hors banque");
-  const m=t.replace(/<[^>]*>/g," ").match(/(^|[^\d{,.\w])[-+]?1x(?![\w])|[+-] 0(?![{,.\d°]| \\cdot)|[+-] -\d|\+ \+|- \+|\^\{?1\}?(?![\d])|\\frac\{0\}/);
+  const m=t.replace(/<[^>]*>/g," ").match(/(^|[^\d{,.\w])[-+]?1x(?![\w])|[+-] 0(?![{,.\d°^]| \\cdot)|[+-] -\d|\+ \+|- \+|\^\{?1\}?(?![\d])|\\frac\{0\}/);
   if(m)bad(ch+" "+kind+k+" ("+x.titre+") graine "+s+" écriture triviale « "+m[0]+" » : "+t.replace(/<[^>]*>/g," ").slice(Math.max(0,m.index-50),m.index+30));
   (x.chk||[]).forEach((c,j)=>{nc++;const [v,sh,tol]=c;if(!isFinite(v)){bad(ch+" "+kind+k+" chk"+j+" valeur non finie");return;}
    const sp={kind:"value",value:v};if(tol)sp.round=tol;let st;try{st=checkAnswer(sp,plainR(sh)).status;}catch(e){st="exc "+e.message;}
