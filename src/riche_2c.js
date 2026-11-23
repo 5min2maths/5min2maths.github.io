@@ -328,3 +328,179 @@
   RICH.compo2c = { ids: ["absval", "morceaux", "compo", "decomp", "bijection", "recip"], track: "col", label: "Composition et réciproque", ex: EXF, raison: RAISONF, minutes: 45 };
   RICH.log2c = { ids: ["log", "logbase"], track: "col", label: "Logarithmes", ex: EXL, raison: RAISONL, minutes: 45 };
 })();
+
+// 2e Collège · 8. Triangle quelconque, 9. Fonctions trigonométriques, Géométrie vectorielle (23.11).
+(function () {
+  const { N, A, Q, pk, FR, sg, par, X, ul, who, VF, D } = RX;
+  const FRp = (v) => FR(v).replace(/\\frac\{(\d+)\}\{(\d+)\}/, "$1/$2");
+  const pt = (x, y) => "(" + FR(x) + " \\,;\\, " + FR(y) + ")";
+  const vec = (x, y) => "\\begin{pmatrix} " + FR(x) + " \\\\ " + FR(y) + " \\end{pmatrix}";
+  const sq = (n) => { let k = 1; for (let d = 2; d * d <= n; d++) while (n % (d * d) === 0) { n /= d * d; k *= d; } return n === 1 ? [String(k), String(k)] : [(k === 1 ? "" : k) + "\\sqrt{" + n + "}", (k === 1 ? "" : k) + "√" + n]; };
+
+  // ===================== 8. Trigonométrie du triangle quelconque =====================
+  const EXT = [
+    // Trois côtés connus
+    () => { let a, b, c; do { a = R.int(5, 14); b = R.int(5, 14); c = R.int(5, 14); } while (a + b <= c + 2 || a + c <= b + 2 || b + c <= a + 2 || new Set([a, b, c]).size < 3);
+      const M3 = Math.max(a, b, c), [p, q] = [a, b, c].filter((x) => x !== M3), gm = Math.acos((p * p + q * q - M3 * M3) / (2 * p * q)) / D, S = 0.5 * p * q * Math.sin(gm * D), s = (a + b + c) / 2, H = Math.sqrt(s * (s - a) * (s - b) * (s - c));
+      return X({ id: "sinlaw", lv: 1, titre: "Un triangle de côtés connus",
+        q: "Un triangle a des côtés de " + Q(a, "cm") + ", " + Q(b, "cm") + " et " + Q(c, "cm") + ".",
+        parts: [{ label: "Calcule son plus grand angle (au centième de degré). Le triangle est-il obtusangle ?", pts: 2 }, { label: "Calcule son aire (au centième de cm²).", pts: 1 }, { label: "Vérifie l'aire avec la formule de Héron " + M("\\mathcal{A} = \\sqrt{s(s - a)(s - b)(s - c)}") + ", " + M("s") + " étant le demi-périmètre.", pts: 1 }],
+        sol: ul(["Il est opposé au plus grand côté (" + M3 + ") : " + M("\\cos\\gamma = \\frac{" + p + "^2 + " + q + "^2 - " + M3 + "^2}{2 \\cdot " + p + " \\cdot " + q + "}") + ", " + M("\\gamma \\approx " + A(gm, 2) + "°") + (gm > 90 ? " : obtusangle." : " : le triangle est acutangle (plus grand angle aigu)."), M("\\mathcal{A} = \\frac{1}{2} \\cdot " + p + " \\cdot " + q + " \\cdot \\sin\\gamma \\approx " + A(S, 2)) + " cm².", M("s = " + N(s)) + " ; " + M("\\sqrt{" + N(s) + " \\cdot " + N(s - a) + " \\cdot " + N(s - b) + " \\cdot " + N(s - c) + "} \\approx " + A(H, 2)) + " ✓."]),
+        chk: [[gm, A(gm, 2), 0.01], [S, A(S, 2), 0.01], [H, A(S, 2), 0.01]] }); },
+    // La tour inaccessible
+    () => { const al = R.int(20, 32), be = al + R.int(12, 25), d = pk([40, 50, 60, 80]), BS = (d * Math.sin(al * D)) / Math.sin((be - al) * D), h = BS * Math.sin(be * D), eye = 1.6;
+      return X({ id: "sinlaw", lv: 2, titre: "La tour inaccessible",
+        q: "Une tour se dresse au milieu d'un étang. D'un point " + M("A") + ", on voit son sommet sous un angle d'élévation de " + M(al + "°") + ". On avance de " + Q(d, "m") + " vers la tour jusqu'en " + M("B") + " : l'angle devient " + M(be + "°") + ". Les angles sont mesurés à " + Q(eye, "m") + " du sol.",
+        parts: [{ label: "Calcule les angles du triangle " + M("ABS") + " (" + M("S") + " = sommet).", pts: 1 }, { label: "Calcule " + M("BS") + " (au centimètre).", pts: 2 }, { label: "Calcule la hauteur de la tour (au centimètre).", pts: 2 }],
+        sol: ul([M("\\widehat{A} = " + al + "°") + ", " + M("\\widehat{ABS} = 180° - " + be + "° = " + (180 - be) + "°") + ", " + M("\\widehat{S} = " + be + "° - " + al + "° = " + (be - al) + "°") + ".", "Théorème du sinus : " + M("BS = \\frac{" + d + " \\cdot \\sin " + al + "°}{\\sin " + (be - al) + "°} \\approx " + A(BS, 2)) + " m.", M("BS \\cdot \\sin " + be + "° \\approx " + A(h, 2)) + " m au-dessus des yeux, soit " + M("\\approx " + A(h + eye, 2)) + " m."]),
+        chk: [[BS, A(BS, 2), 0.01], [h + eye, A(h + eye, 2), 0.01]] }); },
+    // Le cas ambigu
+    () => { const al = R.int(28, 45), b = pk([10, 12, 15]), lo = b * Math.sin(al * D), a = Math.round((lo + (b - lo) * pk([0.4, 0.6])) * 10) / 10, b1 = Math.asin((b * Math.sin(al * D)) / a) / D, b2 = 180 - b1, g1 = 180 - al - b1, g2 = 180 - al - b2, c1 = (a * Math.sin(g1 * D)) / Math.sin(al * D), c2 = (a * Math.sin(g2 * D)) / Math.sin(al * D);
+      return X({ id: "sinlaw", lv: 3, titre: "Deux triangles possibles",
+        q: "Dans un triangle " + M("ABC") + ", on connaît " + M("\\alpha = " + al + "°") + ", " + M("b = AC = " + b) + " cm et " + M("a = BC = " + N(a)) + " cm.",
+        parts: [{ label: "Calcule " + M("\\sin\\beta") + ". Pourquoi y a-t-il deux valeurs possibles de " + M("\\beta") + " ?", pts: 2 }, { label: "Calcule les deux valeurs de " + M("\\beta") + " et de " + M("\\gamma") + " (au centième de degré).", pts: 1 }, { label: "Calcule les deux longueurs possibles de " + M("c") + " (au centième).", pts: 2 }],
+        sol: ul([M("\\sin\\beta = \\frac{" + b + " \\sin " + al + "°}{" + N(a) + "} \\approx " + A(Math.sin(b1 * D), 4)) + ". Deux angles ont ce sinus (" + M("\\beta") + " et " + M("180° - \\beta") + ") ; les deux conviennent car " + M("\\alpha + 180° - \\beta \\lt 180°") + " (le côté " + M("a") + " est plus court que " + M("b") + ").", M("\\beta_1 \\approx " + A(b1, 2) + "°, \\gamma_1 \\approx " + A(g1, 2) + "°") + " ; " + M("\\beta_2 \\approx " + A(b2, 2) + "°, \\gamma_2 \\approx " + A(g2, 2) + "°") + ".", M("c = \\frac{a \\sin\\gamma}{\\sin\\alpha}") + " : " + M("c_1 \\approx " + A(c1, 2)) + " cm, " + M("c_2 \\approx " + A(c2, 2)) + " cm."]),
+        chk: [[b1, A(b1, 2), 0.01], [g2, A(g2, 2), 0.01], [c1, A(c1, 2), 0.01], [c2, A(c2, 2), 0.01]] }); },
+    // Le parallélogramme
+    () => { const a = pk([6, 8, 9, 12]), b = pk([4, 5, 7]), th = R.int(50, 75), d1 = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(th * D)), d2 = Math.sqrt(a * a + b * b + 2 * a * b * Math.cos(th * D)), S = a * b * Math.sin(th * D), S2 = Math.round(a * b * 0.6), t2 = Math.asin(S2 / (a * b)) / D;
+      return X({ id: "triaire", lv: 2, titre: "Le parallélogramme",
+        q: "Un parallélogramme a des côtés de " + Q(a, "cm") + " et " + Q(b, "cm") + " ; ils forment un angle de " + M(th + "°") + ".",
+        parts: [{ label: "Calcule les longueurs des deux diagonales (au centième).", pts: 2 }, { label: "Calcule son aire (au centième).", pts: 1 }, { label: "Quel angle faudrait-il entre les côtés pour une aire de " + Q(S2, "cm^2") + " ? (deux réponses)", pts: 2 }],
+        sol: ul(["Petite diagonale : " + M("d_1^2 = " + a + "^2 + " + b + "^2 - 2 \\cdot " + a + " \\cdot " + b + " \\cos " + th + "°") + ", " + M("d_1 \\approx " + A(d1, 2)) + " cm ; l'autre angle vaut " + M((180 - th) + "°") + " : " + M("d_2 \\approx " + A(d2, 2)) + " cm.", "Deux triangles égaux : " + M("\\mathcal{A} = " + a + " \\cdot " + b + " \\cdot \\sin " + th + "° \\approx " + A(S, 2)) + " cm².", M("\\sin\\theta = \\frac{" + S2 + "}{" + a * b + "}") + " : " + M("\\theta \\approx " + A(t2, 2) + "°") + " ou " + M(A(180 - t2, 2) + "°") + " (même parallélogramme vu de l'autre angle)."]),
+        chk: [[d1, A(d1, 2), 0.01], [d2, A(d2, 2), 0.01], [S, A(S, 2), 0.01], [t2, A(t2, 2), 0.01]] }); },
+  ];
+  const RAISONT = [
+    () => { const w = who();
+      return X({ id: "sinlaw", lv: 2, titre: "Trouve l'erreur",
+        q: "Dans un triangle, " + M("\\alpha = 30°") + ", " + M("a = 6") + " et " + M("b = 10") + ". " + w + " calcule " + M("\\sin\\beta = \\frac{10 \\sin 30°}{6} = \\frac{5}{6}") + " et conclut : « " + M("\\beta \\approx 56{,}44°") + ", c'est la seule possibilité ».",
+        parts: [{ label: "Montre que " + M("\\beta \\approx 123{,}56°") + " donne aussi un triangle.", pts: 1 }, { label: "Dans quel cas n'y a-t-il qu'une seule solution ?", pts: 1 }],
+        sol: ul([M("30° + 123{,}56° = 153{,}56° \\lt 180°") + " : il reste " + M("\\gamma \\approx 26{,}44°") + ", un vrai triangle.", "Quand le côté opposé à l'angle connu est le plus long (" + M("a \\ge b") + ") : l'angle obtus est alors impossible."]),
+        chk: [[180 - Math.asin(5 / 6) / D, "123,56", 0.01]] }); },
+    () => VF("triaire", 1, [["« Dans tout triangle, " + M("\\frac{a}{\\sin\\alpha} = \\frac{b}{\\sin\\beta}") + ". »", true, "Théorème du sinus."],
+      ["« L'aire d'un triangle vaut " + M("\\frac{1}{2}ab\\sin\\gamma") + ", où " + M("\\gamma") + " est l'angle entre " + M("a") + " et " + M("b") + ". »", true, "La hauteur relative à " + M("a") + " vaut " + M("b\\sin\\gamma") + "."],
+      ["« Si " + M("\\cos\\gamma \\lt 0") + ", le triangle est obtusangle. »", true, M("\\gamma > 90°") + "."],
+      ["« Deux côtés et un angle déterminent toujours un seul triangle. »", false, "Pas si l'angle n'est pas compris entre les côtés : cas ambigu."],
+      ["« Un triangle de côtés 3, 4 et 8 existe. »", false, M("3 + 4 \\lt 8") + " : inégalité triangulaire violée."]]),
+  ];
+
+  // ===================== 9. Fonctions trigonométriques =====================
+  // Graphe de A·sin(bx) + c sur [0 ; 2π], graduations en π/2 (SVG lisible à 360 px).
+  const trigFig = (Am, b, c) => {
+    const y0 = c - Am - 1, y1 = c + Am + 1, H = 30 + 24 * (y1 - y0), X0 = 36, W = 270, Xs = (x) => X0 + (x / (2 * Math.PI)) * W, Ys = (y) => 12 + ((y1 - y) / (y1 - y0)) * (H - 30);
+    const ln = (a, bb, e, f, k, x = "") => '<line x1="' + a + '" y1="' + bb + '" x2="' + e + '" y2="' + f + '" class="' + k + '" ' + x + "/>", tx = (x, y, s, an = "middle") => '<text x="' + x + '" y="' + y + '" class="f-txt f-tick" text-anchor="' + an + '" font-size="11">' + s + "</text>";
+    let g = "";
+    for (let y = Math.ceil(y0); y <= y1; y++) g += ln(X0, Ys(y), X0 + W, Ys(y), "f-grid") + tx(X0 - 6, Ys(y) + 4, y < 0 ? "−" + -y : y, "end");
+    ["", "π/2", "π", "3π/2", "2π"].forEach((s, i) => { const x = Xs((i * Math.PI) / 2); g += ln(x, Ys(y0), x, Ys(y1), "f-grid") + (s ? tx(x, Ys(y0) + 14, s) : ""); });
+    g += ln(X0, Ys(Math.max(y0, Math.min(0, y1))), X0 + W + 6, Ys(Math.max(y0, Math.min(0, y1))), "f-line") + ln(X0, Ys(y0), X0, Ys(y1), "f-line");
+    let d = ""; for (let i = 0; i <= 240; i++) { const x = (i / 240) * 2 * Math.PI; d += (i ? " L" : "M") + Xs(x).toFixed(1) + "," + Ys(Am * Math.sin(b * x) + c).toFixed(1); }
+    return '<svg class="fig" viewBox="0 0 320 ' + (H + 6) + '" role="img" aria-label="graphe d\'une fonction sinusoïdale" xmlns="http://www.w3.org/2000/svg">' + g + '<path d="' + d + '" class="f-accent" fill="none" stroke-width="2.4"/></svg>';
+  };
+  const EXG = [
+    // La grande roue (modèle, équation)
+    () => { const H = pk([20, 25, 30]), Rr = pk([16, 18, 20]), T = pk([12, 15, 24]), h = (t) => H - Rr * Math.cos((2 * Math.PI * t) / T);
+      return X({ id: "trigeq2", lv: 3, titre: "Un tour de grande roue",
+        q: "La hauteur (en m) d'une cabine de grande roue est " + M("h(t) = " + H + " - " + Rr + "\\cos\\left(\\frac{2\\pi t}{" + T + "}\\right)") + ", " + M("t") + " en minutes.",
+        parts: [{ label: "Donne la hauteur au départ, la hauteur maximale et la durée d'un tour.", pts: 2 }, { label: "Calcule la hauteur après " + T / 6 + " minutes (valeur exacte).", pts: 1 }, { label: "À quels instants du premier tour la cabine est-elle à " + Q(H + Rr / 2, "m") + " ?", pts: 2 }, { label: "Pendant combien de temps par tour est-elle au-dessus de " + Q(H + Rr / 2, "m") + " ?", pts: 1 }],
+        sol: ul([M("h(0) = " + H + " - " + Rr + " = " + (H - Rr)) + " m ; maximum " + M(H + " + " + Rr + " = " + (H + Rr)) + " m (quand le cosinus vaut −1) ; période " + M("\\frac{2\\pi}{2\\pi / " + T + "} = " + T) + " min.", M("h(" + T / 6 + ") = " + H + " - " + Rr + "\\cos\\frac{\\pi}{3} = " + (H - Rr / 2)) + " m.", M("\\cos\\left(\\frac{2\\pi t}{" + T + "}\\right) = -\\frac{1}{2}") + " ⟺ " + M("\\frac{2\\pi t}{" + T + "} = \\frac{2\\pi}{3}") + " ou " + M("\\frac{4\\pi}{3}") + " : " + M("t = " + T / 3) + " min ou " + M("t = " + (2 * T) / 3) + " min.", "Entre " + T / 3 + " et " + (2 * T) / 3 + " min : " + T / 3 + " minutes."]),
+        chk: [[h(T / 6), String(H - Rr / 2), 1e-9], [h(T / 3), N(H + Rr / 2), 1e-9], [h((2 * T) / 3), N(H + Rr / 2), 1e-9]] }); },
+    // Relations et angles associés
+    () => { const [p, q] = pk([[3, 5], [4, 5], [5, 13], [12, 13], [8, 17], [15, 17]]), r = Math.sqrt(q * q - p * p);
+      return X({ id: "trigrel", lv: 2, titre: "Un angle du 2e quadrant",
+        q: "On sait que " + M("\\sin\\alpha = \\frac{" + p + "}{" + q + "}") + " et que " + M("\\frac{\\pi}{2} \\lt \\alpha \\lt \\pi") + ".",
+        parts: [{ label: "Calcule la valeur exacte de " + M("\\cos\\alpha") + ". Justifie son signe.", pts: 2 }, { label: "Calcule " + M("\\tan\\alpha") + ".", pts: 1 }, { label: "Déduis-en " + M("\\sin(\\pi - \\alpha)") + ", " + M("\\cos(\\pi + \\alpha)") + " et " + M("\\sin\\left(\\frac{\\pi}{2} - \\alpha\\right)") + ".", pts: 2 }],
+        sol: ul([M("\\cos^2\\alpha = 1 - \\frac{" + p * p + "}{" + q * q + "} = \\frac{" + r * r + "}{" + q * q + "}") + " ; au 2e quadrant le cosinus est négatif : " + M("\\cos\\alpha = -\\frac{" + r + "}{" + q + "}") + ".", M("\\tan\\alpha = \\frac{\\sin\\alpha}{\\cos\\alpha} = -\\frac{" + p + "}{" + r + "}") + ".", M("\\sin(\\pi - \\alpha) = \\sin\\alpha = \\frac{" + p + "}{" + q + "}") + " ; " + M("\\cos(\\pi + \\alpha) = -\\cos\\alpha = \\frac{" + r + "}{" + q + "}") + " ; " + M("\\sin\\left(\\frac{\\pi}{2} - \\alpha\\right) = \\cos\\alpha = -\\frac{" + r + "}{" + q + "}") + "."]),
+        chk: [[-Math.sqrt(1 - (p / q) ** 2), "-" + r + "/" + q, 1e-9], [Math.tan(Math.PI - Math.asin(p / q)), "-" + p + "/" + r, 1e-9]] }); },
+    // Équation du second degré en sinus ou cosinus
+    () => { const s = R.rand() < 0.5, eq = s ? "2\\sin^2 x - \\sin x - 1 = 0" : "2\\cos^2 x + \\cos x - 1 = 0", u = s ? "\\sin x" : "\\cos x", roots = s ? ["1", "-\\frac{1}{2}"] : ["\\frac{1}{2}", "-1"], sols = s ? ["\\frac{\\pi}{2}", "\\frac{7\\pi}{6}", "\\frac{11\\pi}{6}"] : ["\\frac{\\pi}{3}", "\\pi", "\\frac{5\\pi}{3}"], num = s ? [Math.PI / 2, (7 * Math.PI) / 6, (11 * Math.PI) / 6] : [Math.PI / 3, Math.PI, (5 * Math.PI) / 3], k = pk([2, 3]);
+      return X({ id: "trigeq", lv: 2, titre: "Une équation qui se ramène au degré 2",
+        q: "Résous dans " + M("[0 \\,;\\, 2\\pi[") + " sans calculatrice.",
+        parts: [{ label: M(eq) + " (pose " + M("u = " + u) + ").", pts: 3 }, { label: M("\\cos(" + k + "x) = \\frac{1}{2}") + " : combien de solutions dans " + M("[0 \\,;\\, 2\\pi[") + " ? Donne-les.", pts: 2 }],
+        sol: ul([M("2u^2 " + (s ? "- u" : "+ u") + " - 1 = 0") + " : " + M("u = " + roots[0]) + " ou " + M("u = " + roots[1]) + ". Solutions " + sols.map((x) => M(x)).join(", ") + ".", M(k + "x = \\pm\\frac{\\pi}{3} + 2n\\pi") + ", " + M("x = \\pm\\frac{\\pi}{" + 3 * k + "} + \\frac{2n\\pi}{" + k + "}") + " : " + 2 * k + " solutions, " + Array.from({ length: k }, (_, n) => [1 + 6 * n, 6 * (n + 1) - 1]).flat().map((m) => M("\\frac{" + m + "\\pi}{" + 3 * k + "}")).join(", ") + "."]),
+        chk: [...num.map((x) => [s ? 2 * Math.sin(x) ** 2 - Math.sin(x) : 2 * Math.cos(x) ** 2 + Math.cos(x), "1", 1e-9]), [Math.cos(k * (Math.PI / (3 * k))), "1/2", 1e-9]] }); },
+    // Lire le graphe d'une fonction sinusoïdale
+    () => { const Am = pk([1, 2, 3]), b = pk([1, 2]), c = pk([-1, 1, 2]);
+      return X({ id: "trigfn", lv: 2, titre: "Lire une sinusoïde",
+        q: "Le graphe ci-dessous est celui de " + M("f(x) = A\\sin(bx) + c") + " sur " + M("[0 \\,;\\, 2\\pi]") + ", avec " + M("A > 0") + " et " + M("b > 0") + ".", fig: trigFig(Am, b, c),
+        parts: [{ label: "Lis le maximum et le minimum de " + M("f") + ". Déduis-en " + M("A") + " et " + M("c") + ".", pts: 2 }, { label: "Lis la période et déduis-en " + M("b") + ".", pts: 1 }, { label: "Pour quels " + M("x") + " de " + M("[0 \\,;\\, 2\\pi]") + " la fonction atteint-elle son maximum ?", pts: 1 }],
+        sol: ul(["Max " + M(c + Am) + ", min " + M(c - Am) + " : " + M("A = \\frac{" + (c + Am) + " - " + par(c - Am) + "}{2} = " + Am) + ", " + M("c = \\frac{" + (c + Am) + " + " + par(c - Am) + "}{2} = " + c) + ".", "Période " + M(b === 1 ? "2\\pi" : "\\pi") + " ; " + M("\\frac{2\\pi}{b} = " + (b === 1 ? "2\\pi" : "\\pi")) + " : " + M("b = " + b) + ".", M(b + "x = \\frac{\\pi}{2} + 2n\\pi") + " : " + (b === 1 ? M("x = \\frac{\\pi}{2}") : M("x = \\frac{\\pi}{4}") + " et " + M("x = \\frac{5\\pi}{4}")) + "."]),
+        chk: [[Am * Math.sin(b * (Math.PI / (2 * b))) + c, String(Am + c)], [Am, String(Am)]] }); },
+    // Cercle trigonométrique et longueur d'arc
+    () => { const [n, d] = pk([[5, 6], [3, 4], [2, 3], [7, 6], [5, 4], [5, 3], [11, 6]]), deg = (180 * n) / d, r = pk([3, 5, 12]), s = r * (n / d) * Math.PI;
+      const ex = { 30: ["\\frac{\\sqrt{3}}{2}", "\\frac{1}{2}"], 45: ["\\frac{\\sqrt{2}}{2}", "\\frac{\\sqrt{2}}{2}"], 60: ["\\frac{1}{2}", "\\frac{\\sqrt{3}}{2}"] }, ref = deg <= 90 ? deg : deg <= 180 ? 180 - deg : deg <= 270 ? deg - 180 : 360 - deg, cs = (deg > 90 && deg < 270 ? "-" : "") + ex[ref][0], sn = (deg > 180 ? "-" : "") + ex[ref][1];
+      return X({ id: "trigcercle", lv: 1, titre: "Sur le cercle trigonométrique",
+        q: "On considère l'angle " + M("\\theta = \\frac{" + n + "\\pi}{" + d + "}") + ".", fig: FIG.unitCircle(deg, ""),
+        parts: [{ label: "Convertis " + M("\\theta") + " en degrés et donne son quadrant.", pts: 1 }, { label: "Donne les coordonnées exactes du point du cercle trigonométrique associé à " + M("\\theta") + ".", pts: 2 }, { label: "Sur un cercle de rayon " + Q(r, "cm") + ", quelle est la longueur de l'arc intercepté par cet angle au centre (au centième) ?", pts: 1 }],
+        sol: ul([M("\\frac{" + n + " \\cdot 180°}{" + d + "} = " + deg + "°") + " ; " + (deg < 90 ? "1er" : deg < 180 ? "2e" : deg < 270 ? "3e" : "4e") + " quadrant.", "Angle de référence " + M(ref + "°") + " ; " + M("(\\cos\\theta \\,;\\, \\sin\\theta) = \\left(" + cs + " \\,;\\, " + sn + "\\right)") + ".", M("\\ell = r\\theta = " + r + " \\cdot \\frac{" + n + "\\pi}{" + d + "} \\approx " + A(s, 2)) + " cm."]),
+        chk: [[deg, String(deg)], [s, A(s, 2), 0.01]] }); },
+  ];
+  const RAISONG = [
+    () => { const w = who();
+      return X({ id: "trigrel", lv: 1, titre: "Trouve l'erreur",
+        q: w + " écrit : « " + M("\\sin(2x) = 2\\sin x") + " ».",
+        parts: [{ label: "Teste avec " + M("x = \\frac{\\pi}{2}") + ".", pts: 1 }, { label: "Quelle est la bonne formule ?", pts: 1 }],
+        sol: ul([M("\\sin\\pi = 0") + " mais " + M("2\\sin\\frac{\\pi}{2} = 2") + ".", M("\\sin(2x) = 2\\sin x\\cos x") + "."]),
+        chk: [[2 * Math.sin(Math.PI / 2), "2"]] }); },
+    () => VF("trigfn", 2, [["« " + M("\\sin^2 x + \\cos^2 x = 1") + " pour tout " + M("x") + ". »", true, "Pythagore dans le cercle trigonométrique."],
+      ["« " + M("\\cos(\\pi - x) = \\cos x") + ". »", false, "Symétrie par rapport à l'axe vertical : " + M("\\cos(\\pi - x) = -\\cos x") + "."],
+      ["« La période de " + M("\\sin(2x)") + " est " + M("\\pi") + ". »", true, M("\\frac{2\\pi}{2} = \\pi") + "."],
+      ["« La tangente est définie pour tout réel. »", false, "Pas en " + M("\\frac{\\pi}{2} + k\\pi") + " (cosinus nul)."],
+      ["« " + M("\\sin x = 2\\cos x") + " équivaut à " + M("\\tan x = 2") + ". »", true, "On divise par " + M("\\cos x") + ", qui n'est pas nul ici (sinon " + M("\\sin x") + " le serait aussi)."]]),
+  ];
+
+  // ===================== Géométrie vectorielle =====================
+  const EXV = [
+    // Le parallélogramme
+    () => { const A0 = [R.int(-4, 0), R.int(-3, 1)], u = [pk([3, 4, 5]), pk([-1, 1, 2])], v = [pk([-2, -1, 1]), pk([3, 4])], B = [A0[0] + u[0], A0[1] + u[1]], Dd = [A0[0] + v[0], A0[1] + v[1]], C = [B[0] + v[0], B[1] + v[1]], ps = u[0] * v[0] + u[1] * v[1];
+      return X({ id: "vecteurs", lv: 1, titre: "Compléter un parallélogramme",
+        q: "On donne " + M("A" + pt(A0[0], A0[1])) + ", " + M("B" + pt(B[0], B[1])) + " et " + M("C" + pt(C[0], C[1])) + ".",
+        parts: [{ label: "Calcule les composantes de " + M("\\vec{AB}") + " et " + M("\\vec{BC}") + ".", pts: 1 }, { label: "Détermine " + M("D") + " pour que " + M("ABCD") + " soit un parallélogramme.", pts: 2 }, { label: "Calcule le centre du parallélogramme.", pts: 1 }, { label: "Est-ce un rectangle ? Justifie avec un produit scalaire.", pts: 1 }],
+        sol: ul([M("\\vec{AB} = " + vec(u[0], u[1])) + ", " + M("\\vec{BC} = " + vec(v[0], v[1])) + ".", M("\\vec{AD} = \\vec{BC}") + " : " + M("D = A + \\vec{BC} = " + pt(Dd[0], Dd[1])) + ".", "Milieu de " + M("[AC]") + " : " + M(pt((A0[0] + C[0]) / 2, (A0[1] + C[1]) / 2)) + ".", M("\\vec{AB} \\cdot \\vec{BC} = " + u[0] + " \\cdot " + par(v[0]) + " + " + par(u[1]) + " \\cdot " + v[1] + " = " + ps) + (ps === 0 ? " : oui, angle droit." : " ≠ 0 : non.")]),
+        chk: [[Dd[0], String(Dd[0])], [Dd[1], String(Dd[1])], [(A0[0] + C[0]) / 2, FRp((A0[0] + C[0]) / 2)]] }); },
+    // Angle d'un triangle par le produit scalaire
+    () => { let A0, B, C, ps; do { A0 = [R.int(-3, 1), R.int(-3, 1)]; B = [A0[0] + R.int(2, 6), A0[1] + R.int(-2, 2)]; C = [A0[0] + R.int(-1, 3), A0[1] + R.int(3, 6)]; ps = (B[0] - A0[0]) * (C[0] - A0[0]) + (B[1] - A0[1]) * (C[1] - A0[1]); } while (ps === 0);
+      const u = [B[0] - A0[0], B[1] - A0[1]], v = [C[0] - A0[0], C[1] - A0[1]], nu = u[0] ** 2 + u[1] ** 2, nv = v[0] ** 2 + v[1] ** 2, ang = Math.acos(ps / Math.sqrt(nu * nv)) / D;
+      return X({ id: "vecteurs", lv: 2, titre: "L'angle en A",
+        q: "On donne le triangle " + M("A" + pt(A0[0], A0[1])) + ", " + M("B" + pt(B[0], B[1])) + ", " + M("C" + pt(C[0], C[1])) + ".",
+        parts: [{ label: "Calcule " + M("\\vec{AB}") + ", " + M("\\vec{AC}") + " et leurs normes (valeurs exactes).", pts: 2 }, { label: "Calcule le produit scalaire " + M("\\vec{AB} \\cdot \\vec{AC}") + ".", pts: 1 }, { label: "Calcule l'angle " + M("\\widehat{BAC}") + " (au centième de degré).", pts: 2 }],
+        sol: ul([M("\\vec{AB} = " + vec(u[0], u[1])) + ", " + M("\\|\\vec{AB}\\| = " + sq(nu)[0]) + " ; " + M("\\vec{AC} = " + vec(v[0], v[1])) + ", " + M("\\|\\vec{AC}\\| = " + sq(nv)[0]) + ".", M(u[0] + " \\cdot " + par(v[0]) + " + " + par(u[1]) + " \\cdot " + par(v[1]) + " = " + ps) + ".", M("\\cos\\widehat{A} = \\frac{" + ps + "}{" + sq(nu)[0] + " \\cdot " + sq(nv)[0] + "}") + ", " + M("\\widehat{A} \\approx " + A(ang, 2) + "°") + "."]),
+        chk: [[ps, String(ps)], [Math.sqrt(nu), sq(nu)[1]], [ang, A(ang, 2), 0.01]] }); },
+    // Le bateau et le courant
+    () => { const b = [0, pk([3, 4, 5])], c = [pk([1, 1.5, 2]), 0], w = 120 * pk([1, 2, 3]), res = [b[0] + c[0], b[1] + c[1]], sp = Math.hypot(res[0], res[1]), ang = Math.atan(c[0] / b[1]) / D, t = w / b[1], drift = c[0] * t;
+      return X({ id: "vecteurs", lv: 2, titre: "Traverser la rivière",
+        q: "Un bateau traverse une rivière de " + Q(w, "m") + " de large. Il vise la rive d'en face perpendiculairement, à " + Q(b[1], "m/s") + " (vecteur " + M(vec(b[0], b[1])) + "). Le courant le pousse à " + Q(c[0], "m/s") + " (vecteur " + M(vec(c[0], 0)) + ").",
+        parts: [{ label: "Calcule le vecteur vitesse réelle et la vitesse réelle (au centième).", pts: 2 }, { label: "Quel angle fait la trajectoire avec la direction visée (au dixième de degré) ?", pts: 1 }, { label: "Combien de temps dure la traversée ? De combien est-il déporté ?", pts: 2 }],
+        sol: ul([M("\\vec{v} = " + vec(res[0], res[1])) + ", " + M("\\|\\vec{v}\\| = \\sqrt{" + N(res[0] ** 2) + " + " + res[1] ** 2 + "} \\approx " + A(sp, 2)) + " m/s.", M("\\tan\\varphi = \\frac{" + N(c[0]) + "}{" + b[1] + "}") + ", " + M("\\varphi \\approx " + A(ang, 1) + "°") + ".", "Seule la composante perpendiculaire fait traverser : " + M(w + " : " + b[1] + " = " + N(t)) + " s ; déport " + M(N(c[0]) + " \\cdot " + N(t) + " = " + N(drift)) + " m."]),
+        chk: [[sp, A(sp, 2), 0.01], [ang, A(ang, 1), 0.1], [drift, N(drift)]] }); },
+    // Paramètre : colinéaires, perpendiculaires
+    () => { const k = pk([2, 3, 4]), p = pk([2, 3, 5]), q = pk([1, 3, 4]), mp = (2 * 1) / (p + 1);
+      return X({ id: "vecteurs", lv: 2, titre: "Choisir le paramètre",
+        q: "Soit " + M("\\vec{u} = " + vec("m", 2).replace("\\frac{m}", "m")) + " et " + M("\\vec{v} = " + "\\begin{pmatrix} " + 2 * k * k + " \\\\ m \\end{pmatrix}") + ", où " + M("m") + " est un réel.",
+        parts: [{ label: "Pour quelles valeurs de " + M("m") + " les vecteurs sont-ils colinéaires ?", pts: 2 }, { label: "Pour quelle valeur de " + M("m") + " le vecteur " + M("\\vec{u}") + " est-il perpendiculaire à " + M("\\vec{w} = " + vec(p, -q)) + " ?", pts: 1 }, { label: "Pour " + M("m = " + 2 * k) + ", calcule " + M("\\|\\vec{u} + \\vec{v}\\|") + " (valeur exacte).", pts: 2 }],
+        sol: ul(["Déterminant nul : " + M("m \\cdot m - 2 \\cdot " + 2 * k * k + " = 0") + " ⟺ " + M("m^2 = " + 4 * k * k) + " ⟺ " + M("m = \\pm " + 2 * k) + ".", M(p + "m - 2 \\cdot " + q + " = 0") + " ⟺ " + M("m = " + FR((2 * q) / p)) + ".", M("\\vec{u} + \\vec{v} = " + vec(2 * k + 2 * k * k, 2 + 2 * k)) + " ; norme " + M("\\sqrt{" + ((2 * k + 2 * k * k) ** 2 + (2 + 2 * k) ** 2) + "} = " + sq((2 * k + 2 * k * k) ** 2 + (2 + 2 * k) ** 2)[0]) + "."]),
+        chk: [[Math.sqrt(8 * k * k), String(2 * k)], [(2 * q) / p, FRp((2 * q) / p)], [Math.hypot(2 * k + 2 * k * k, 2 + 2 * k), sq((2 * k + 2 * k * k) ** 2 + (2 + 2 * k) ** 2)[1]]] }); },
+    // Le travail d'une force
+    () => { const F = [pk([30, 40, 60]), pk([10, 20, 30])], d = [pk([5, 8, 10]), 0], W = F[0] * d[0], nF = Math.hypot(F[0], F[1]), ang = Math.atan(F[1] / F[0]) / D, F2 = pk([50, 80]), a2 = pk([30, 45, 60]), W2 = F2 * d[0] * Math.cos(a2 * D);
+      return X({ id: "vecteurs", lv: 3, titre: "Tirer une luge",
+        q: "On tire une luge avec une force " + M("\\vec{F} = " + vec(F[0], F[1])) + " (en N) ; elle se déplace de " + M("\\vec{d} = " + vec(d[0], 0)) + " (en m). Le travail de la force est " + M("W = \\vec{F} \\cdot \\vec{d}") + " (en J).",
+        parts: [{ label: "Calcule le travail " + M("W") + ".", pts: 1 }, { label: "Calcule l'intensité de la force et l'angle entre la corde et le sol (au dixième).", pts: 2 }, { label: "Avec une force de " + Q(F2, "N") + " inclinée à " + M(a2 + "°") + ", quel serait le travail sur le même déplacement (au joule) ? Pourquoi la composante verticale ne travaille-t-elle pas ?", pts: 2 }],
+        sol: ul([M("W = " + F[0] + " \\cdot " + d[0] + " + " + F[1] + " \\cdot 0 = " + W) + " J.", M("\\|\\vec{F}\\| = \\sqrt{" + F[0] ** 2 + " + " + F[1] ** 2 + "} \\approx " + A(nF, 1)) + " N ; " + M("\\tan\\theta = \\frac{" + F[1] + "}{" + F[0] + "}") + ", " + M("\\theta \\approx " + A(ang, 1) + "°") + ".", M("W = " + F2 + " \\cdot " + d[0] + " \\cdot \\cos " + a2 + "° \\approx " + A(W2, 0)) + " J. La composante verticale est perpendiculaire au déplacement : produit scalaire nul."]),
+        chk: [[W, String(W)], [nF, A(nF, 1), 0.1], [W2, A(W2, 0), 1]] }); },
+  ];
+  const RAISONV = [
+    () => { const A0 = [R.int(-4, -1), R.int(1, 5)], B = [R.int(2, 6), R.int(-3, 0)], w = who();
+      return X({ id: "vecteurs", lv: 1, titre: "Trouve l'erreur",
+        q: "Avec " + M("A" + pt(A0[0], A0[1])) + " et " + M("B" + pt(B[0], B[1])) + ", " + w + " écrit : « " + M("\\vec{AB} = " + vec(A0[0] - B[0], A0[1] - B[1])) + " ».",
+        parts: [{ label: "Quelle est l'erreur ?", pts: 1 }, { label: "Donne le bon vecteur et vérifie avec " + M("A + \\vec{AB} = B") + ".", pts: 1 }],
+        sol: ul([w + " a calculé " + M("A - B") + " (c'est " + M("\\vec{BA}") + ").", M("\\vec{AB} = B - A = " + vec(B[0] - A0[0], B[1] - A0[1])) + " ; " + M(pt(A0[0], A0[1]) + " + " + vec(B[0] - A0[0], B[1] - A0[1]) + " = " + pt(B[0], B[1])) + " ✓."]),
+        chk: [[B[0] - A0[0], String(B[0] - A0[0])]] }); },
+    () => VF("vecteurs", 2, [["« " + M("\\|\\vec{u} + \\vec{v}\\| = \\|\\vec{u}\\| + \\|\\vec{v}\\|") + " pour tous vecteurs. »", false, "Contre-exemple : " + M(vec(1, 0)) + " et " + M(vec(0, 1)) + " : " + M("\\sqrt{2} \\neq 2") + "."],
+      ["« Deux vecteurs non nuls de produit scalaire nul sont perpendiculaires. »", true, M("\\cos\\theta = 0") + ", " + M("\\theta = 90°") + "."],
+      ["« Le produit scalaire de deux vecteurs est un vecteur. »", false, "C'est un nombre réel."],
+      ["« " + M(vec(2, 3)) + " et " + M(vec(4, 6)) + " sont colinéaires. »", true, "Le second est le double du premier."],
+      ["« " + M("\\vec{u} \\cdot \\vec{u} = \\|\\vec{u}\\|^2") + ". »", true, M("x^2 + y^2") + "."]]),
+  ];
+
+  RICH.tri2c = { ids: ["sinlaw", "triaire"], track: "col", label: "Trigonométrie du triangle quelconque", ex: EXT, raison: RAISONT, minutes: 45 };
+  RICH.trigfn2c = { ids: ["trigrel", "trigcercle", "trigassoc", "trigeq", "trigfn", "trigeq2"], track: "col", label: "Fonctions trigonométriques", ex: EXG, raison: RAISONG, minutes: 45 };
+  RICH.vec2c = { ids: ["vecteurs"], track: "col", label: "Géométrie vectorielle", ex: EXV, raison: RAISONV, minutes: 45 };
+})();
