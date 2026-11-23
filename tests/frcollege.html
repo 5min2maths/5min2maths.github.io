@@ -50,7 +50,7 @@ for (const id of ids) {
       if (!q) { fail(id + "-" + d + "-" + s + " question nulle"); continue; }
       nq++; forms.add(qForm(q)); if (q.ctx) ctx.add(q.ctx);
       const t = txt(q);
-      if (/undefined|NaN|Infinity|\[object|null/.test(t)) fail(q.code + " texte : " + t.match(/.{0,40}(undefined|NaN|Infinity|\[object|null).{0,20}/)[0]);
+      if (/undefined|NaN|Infinity|\[object|\bnull\b/.test(t)) fail(q.code + " texte : " + t.match(/.{0,40}(undefined|NaN|Infinity|\[object|null).{0,20}/)[0]);
       if (/\\cdot|CHF|Genève|'(?=\d{3})/.test(t)) fail(q.code + " usage suisse (·, CHF, ', Genève) : " + t.match(/.{0,30}(\\cdot|CHF|Genève|'(?=\d{3})).{0,10}/)[0]);
       if (q.parts) { q.parts.forEach((p) => { const r = checkAnswer(p.spec, String(p.spec.value)); if (r.status !== "correct") fail(q.code + " partie refusée " + p.label); }); if (!q.hints || q.hints.length < 2) fail(q.code + " indices"); if (s <= 2) samples.push(q.q.replace(/<[^>]+>/g, " ").slice(0, 100) + " → " + q.parts.map((p) => p.spec.value).join(" ; ")); continue; }
       const sp = q.spec, canon = sp.kind === "expr" ? sp.expr : sp.kind === "pair" || sp.kind === "set" ? sp.values.join(" ; ") : String(sp.value);
