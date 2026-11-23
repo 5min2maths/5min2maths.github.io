@@ -45,7 +45,7 @@ const NOTIONS = [
   { id: "factor", theme: "fa", label: "Factoriser", ex: "x^2 - 9 = (x - 3)(x + 3)", CH: [11], again: [12], MP: [12, "S1"], FR: [9, 4] },
   { id: "formule", theme: "fa", label: "Transformer une formule", ex: "v = \\frac{d}{t} \\iff t = \\frac{d}{v}", CH: [11], MP: [12, "S1"], FR: null },
   { id: "eq2", theme: "fa", label: "Équations produit nul", ex: "(x - 2)(x + 5) = 0", CH: [11], MP: [12, "S1"], FR: [9, 5] },
-  { id: "eq2disc", theme: "fa", label: "Équations du 2e degré (formule)", ex: "x = \\frac{-b \\pm \\sqrt{\\Delta}}{2a}", CH: [11], again: [12], MP: [12, "S1"], FR: [11, 2] },
+  { id: "eq2disc", theme: "fa", label: "Équations du 2e degré (formule)", ex: "x = \\frac{-b \\pm \\sqrt{\\Delta}}{2a}", CH: [11], again: [12], MP: [12, "S1"], FR: [11, 0] }, // 22.11 : FR 1re/Tle (tools/premiere_terminale_fr.md)
   { id: "sys2", theme: "fa", label: "Systèmes de deux équations", ex: "\\begin{cases} x + y = 7 \\\\ x - y = 1 \\end{cases}", CH: [11], again: [12], MP: [12, "S2"], FR: [10, 4] },
   { id: "angles", theme: "es", label: "Angles : parallèles, cercle", ex: "\\widehat{AOB} = 2\\,\\widehat{ACB}", CH: [11], again: [12], MP: [12, "S2"], FR: null },
   { id: "simil", theme: "es", label: "Homothéties et similitudes", ex: "\\text{aires} \\times k^2", CH: [11], again: [12], FR: null },
@@ -58,7 +58,7 @@ const NOTIONS = [
   { id: "f2", theme: "fa", label: "Parabole : zéros et sommet", ex: "f(x) = (x - 1)^2 - 4", CH: [12], MP: [13, "S1"], FR: [10, 6] },
   { id: "f2expr", theme: "fa", label: "Parabole : retrouver l'expression", ex: "f(x) = a(x - x_1)(x - x_2)", CH: [12], MP: [13, "S1"], FR: null },
   { id: "inter", theme: "fa", label: "Intersection de deux graphes", ex: "x^2 = x + 2", CH: [12], MP: [12, "S2"], FR: [10, 7] },
-  { id: "ineq2", theme: "fa", label: "Inéquations du 2e degré", ex: "f(x) \\le g(x)", CH: [12], MP: null, FR: null },
+  { id: "ineq2", theme: "fa", label: "Inéquations du 2e degré", ex: "f(x) \\le g(x)", CH: [12], MP: null, FR: [11, 1] }, // 22.11 : FR 1re/Tle (tools/premiere_terminale_fr.md)
   { id: "racinv", theme: "fa", label: "Fonctions racine carrée et inverse", ex: "\\sqrt{x} = x - 2", CH: [12], MP: null, FR: null },
   { id: "euclide", theme: "es", label: "Théorèmes d'Euclide et de la hauteur", ex: "h^2 = p \\cdot q", CH: [12], MP: [12, "S2"], FR: null },
   { id: "droitesrem", theme: "es", label: "Droites remarquables du triangle", ex: "CG = \\frac{2}{3}\\,CM", CH: [12], MP: null, FR: null },
@@ -71,15 +71,15 @@ const NOTIONS = [
   { id: "recip", theme: "fa", label: "Composition et réciproque", ex: "(f \\circ g)(x) = f(g(x))", CH: [13], MP: null, FR: [11, 3] },
   { id: "absval", theme: "fa", label: "Valeur absolue", ex: "|x - 3| = 5", CH: [12], MP: null, FR: [10, 6] },
   { id: "homog", theme: "fa", label: "Fonctions homographiques", ex: "f(x) = \\frac{2x + 1}{x - 3}", CH: [13], MP: null, FR: null },
-  { id: "trigfn", theme: "fa", label: "Fonctions trigonométriques", ex: "f(x) = 3\\sin(2x)", CH: [13], MP: null, FR: null },
-  { id: "expo", theme: "fa", label: "Exponentielles", ex: "2^x = 32 \\iff x = 5", CH: [13], MP: null, FR: [11, 5] },
+  { id: "trigfn", theme: "fa", label: "Fonctions trigonométriques", ex: "f(x) = 3\\sin(2x)", CH: [13], MP: null, FR: [12, 5] }, // 22.11 : FR 1re/Tle (tools/premiere_terminale_fr.md)
+  { id: "expo", theme: "fa", label: "Exponentielles", ex: "2^x = 32 \\iff x = 5", CH: [13], MP: null, FR: [11, 4] }, // 22.11 : FR 1re/Tle (tools/premiere_terminale_fr.md)
   { id: "log", theme: "fa", label: "Logarithmes", ex: "\\log_2 8 = 3", CH: [13], MP: null, FR: [12, 3] },
-  { id: "trigcercle", theme: "es", label: "Cercle trigonométrique, radians", ex: "180° = \\pi \\text{ rad}", CH: [13], MP: [13, "S2"], FR: [11, 6] },
-  { id: "trigeq", theme: "es", label: "Équations trigonométriques", ex: "\\sin x = \\frac{1}{2}", CH: [13], MP: [13, "S2"], FR: [11, 7] },
-  { id: "sinlaw", theme: "es", label: "Triangle quelconque (sinus, cosinus)", ex: "c^2 = a^2 + b^2 - 2ab\\cos\\gamma", CH: [13], MP: [13, "S2"], FR: null },
+  { id: "trigcercle", theme: "es", label: "Cercle trigonométrique, radians", ex: "180° = \\pi \\text{ rad}", CH: [13], MP: [13, "S2"], FR: [11, 5] }, // 22.11 : FR 1re/Tle (tools/premiere_terminale_fr.md)
+  { id: "trigeq", theme: "es", label: "Équations trigonométriques", ex: "\\sin x = \\frac{1}{2}", CH: [13], MP: [13, "S2"], FR: [12, 5] }, // 22.11 : FR 1re/Tle (tools/premiere_terminale_fr.md)
+  { id: "sinlaw", theme: "es", label: "Triangle quelconque (sinus, cosinus)", ex: "c^2 = a^2 + b^2 - 2ab\\cos\\gamma", CH: [13], MP: [13, "S2"], FR: [11, 3] }, // 22.11 : FR 1re/Tle (tools/premiere_terminale_fr.md)
   { id: "cart", theme: "es", label: "Distance et milieu", ex: "d(A,B) = \\sqrt{(x_B - x_A)^2 + (y_B - y_A)^2}", CH: [13], MP: null, FR: [10, 5] },
   { id: "droites", theme: "es", label: "Équations de droites", ex: "y = mx + h", CH: [13], MP: null, FR: null },
-  { id: "cercle", theme: "es", label: "Équations de cercles", ex: "(x - a)^2 + (y - b)^2 = r^2", CH: [13], MP: null, FR: null },
+  { id: "cercle", theme: "es", label: "Équations de cercles", ex: "(x - a)^2 + (y - b)^2 = r^2", CH: [13], MP: null, FR: [11, 8] }, // 22.11 : FR 1re/Tle (tools/premiere_terminale_fr.md)
   { id: "stats", theme: "no", label: "Statistiques (moyenne, médiane, écart-type)", ex: "\\bar{x}, \\text{ médiane}, \\sigma", CH: null, MP: [13, "S2"], FR: [10, 8] },
 ];
 
