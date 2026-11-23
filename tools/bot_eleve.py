@@ -5,7 +5,7 @@
 - Rapport : suivi/robot/rapport_AAAA-MM-JJ.json (complet) et suivi/robot/dernier.json (le plus récent),
   plus une ligne de résumé dans suivi/robot/resume.txt (lue par le point du matin) ; l'onglet « Robot » du suivi
   (tools/suivi.py) liste les problèmes, nouveaux ou déjà vus.
-- Lancé chaque nuit par cron (03h30), puis tools/suivi.py ; rattrapage chaque heure de 7h à 20h (--si-absent) si l'ordinateur était éteint. À la main : python3 tools/bot_eleve.py [--rapide] [--classes 9e,10e]
+- Lancé chaque nuit par cron (03h30), puis tools/suivi.py ; rattrapage chaque heure de 7h à 20h (--si-absent) si l'ordinateur était éteint. Une page Chromium par classe (23.11). À la main : python3 tools/bot_eleve.py [--rapide] [--classes 9e,10e]
 """
 import datetime, html, json, re, subprocess, sys
 from pathlib import Path
@@ -14,15 +14,40 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "suivi" / "robot"
 
 
-def run(rapide=False, classes=None):
-    h = "#" + "&".join(x for x in [("rapide" if rapide else ""), ("classes=" + classes if classes else "")] if x)
-    url = "file://" + str(ROOT / "tests" / "bot.html") + (h if h != "#" else "")
-    dom = subprocess.run(["chromium", "--headless", "--disable-gpu", "--no-sandbox", "--virtual-time-budget=1500000", "--dump-dom", url],
-                         capture_output=True, text=True, timeout=3000).stdout
+CLASSES = ["9e", "10e", "11e", "1re", "2e", "MP 1re", "MP 2e"]
+
+
+def run_page(rapide, classe, limite):
+    h = "#" + "&".join(x for x in [("rapide" if rapide else ""), "classes=" + classe.replace(" ", "%20")] if x)
+    url = "file://" + str(ROOT / "tests" / "bot.html") + h
+    try:
+        dom = subprocess.run(["timeout", "-k", "5", str(limite), "chromium", "--headless", "--disable-gpu", "--no-sandbox",
+                              "--virtual-time-budget=1500000", "--dump-dom", url],
+                             capture_output=True, text=True, timeout=limite + 30).stdout
+    except subprocess.TimeoutExpired:
+        return None
     m = re.findall(r'<pre id="out">(.*?)</pre>', dom, re.S)
-    if not m or not m[-1].strip():
-        raise SystemExit("robot : pas de résultat (page bloquée ?)")
-    return json.loads(html.unescape(m[-1]))
+    return json.loads(html.unescape(m[-1])) if m and m[-1].strip() else None
+
+
+def run(rapide=False, classes=None):
+    # 23.11 : une page Chromium par classe (tout dans une seule page dépassait 50 min et tout était perdu à la coupure).
+    # Limite de 5 min par classe ; si la version complète n'aboutit pas, on refait la classe en mode rapide ;
+    # si même le mode rapide échoue, la classe est signalée comme bloquée et les autres sont gardées.
+    d = {"date": datetime.datetime.now().isoformat(timespec="seconds"), "secondes": 0, "stats": {}, "types": {}, "problemes": []}
+    for c in (classes.split(",") if classes else CLASSES):
+        r = run_page(rapide, c, 300) or (None if rapide else run_page(True, c, 120))
+        if not r:
+            d["problemes"].append({"type": "robot bloqué", "classe": c, "code": "", "detail": "la page de la classe n'a pas abouti (5 min, puis 2 min en mode rapide)", "ou": "robot"})
+            continue
+        d["secondes"] += r["secondes"]
+        d["stats"].update(r["stats"])
+        d["problemes"] += r["problemes"]
+    for p in d["problemes"]:
+        d["types"][p["type"]] = d["types"].get(p["type"], 0) + 1
+    if not d["stats"]:
+        raise SystemExit("robot : aucune classe n'a abouti")
+    return d
 
 
 def main():

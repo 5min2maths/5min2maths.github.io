@@ -117,7 +117,8 @@ function addFab() {
   <textarea id="fabt" maxlength="500" rows="4" placeholder="Une erreur, une idée, une remarque générale… (n'écris pas ton nom)"></textarea>
   <div class="spread"><span class="small muted" id="fabo"></span><button type="button" class="btn-primary" id="fabg">Envoyer</button></div></div></div>`);
   const sheet = document.getElementById("fabs"), ta = document.getElementById("fabt"), ok = document.getElementById("fabo");
-  document.getElementById("fabc").onclick = () => { sheet.hidden = !sheet.hidden; ok.textContent = ""; if (!sheet.hidden) ta.focus(); };
+  // 23.11 : stopPropagation, sinon le clic remontait au bandeau (.brand → accueil) et la séance était quittée.
+  document.getElementById("fabc").onclick = (e) => { e.stopPropagation(); sheet.hidden = !sheet.hidden; ok.textContent = ""; if (!sheet.hidden) ta.focus(); };
   document.getElementById("fabx").onclick = () => (sheet.hidden = true);
   document.getElementById("fabg").onclick = () => {
     const text = ta.value.trim(); if (!text) { ok.textContent = "Écris d'abord ton commentaire."; return; }
