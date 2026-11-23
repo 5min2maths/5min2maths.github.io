@@ -301,6 +301,23 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .act-ladder { color: var(--ink-soft); text-align: center; font-size: 1.05rem; }
 .act-hint { color: var(--warn); text-align: center; }
 .fig .act-over { fill: var(--bad-soft, #fde2e1); stroke: var(--bad); stroke-dasharray: 3 3; }
+/* Manipulations tactiles (23.11, src/manip.js) : la figure prend toute la largeur, les objets saisissables se voient */
+.fig.manip2 { max-width: 360px; display: block; margin-inline: auto; }
+.manip2 .mh { cursor: grab; outline: none; }
+.manip2 .mh.mh-on { cursor: grabbing; }
+.manip2 .mh.mh-on .mh-c { filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.35)); }
+.manip2 .mh:focus-visible .mh-hit, .manip2 .mh.mh-sel .mh-hit { stroke: var(--blue); stroke-width: 2; stroke-dasharray: 4 3; }
+.manip2 .m-tile { stroke: var(--ink); stroke-width: 1.2; }
+.manip2 .m-pos { fill: var(--blue); }
+.manip2 .m-neg { fill: var(--bad-soft); stroke: var(--bad); stroke-dasharray: 3 2; }
+.manip2 .m-zone { fill: var(--grid); stroke: var(--line); stroke-width: 1.5; }
+.manip2 .m-zone-on { fill: var(--blue-soft); stroke: var(--blue); }
+.manip-hint { color: var(--warn); text-align: center; min-height: 1.2em; }
+.manip-btns { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.manip-btns:empty { display: none; }
+.manip-btns button { min-height: 44px; }
+.manip-btns button[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #fff; }
+.manip-note:empty { display: none; }
 
 /* Accueil en cadres (14.11, principe Etalon) : barre d'onglets fixe en bas */
 #app.has-tabs { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }

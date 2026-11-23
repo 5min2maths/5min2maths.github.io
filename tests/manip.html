@@ -1,0 +1,50 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css"><body style="width:360px"><main id="app"></main><pre id="log" hidden></pre>
+<script>window.__errs=[];window.addEventListener("error",(e)=>window.__errs.push((e.filename||"").split("/").pop()+":"+e.lineno+" "+e.message));</script><script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script>
+// Tests des manipulations tactiles (23.11) : vrais gestes (pointerdown / pointermove / pointerup) via MANIP.sim,
+// touchers (MANIP.simTap) et clavier (MANIP.simKey) ; chaque leçon doit se jouer jusqu'au bout (étape 3 « Retiens » visible).
+const log=[];window.scrollTo=()=>{};Element.prototype.scrollIntoView=function(){};
+const click=(s)=>{const e=document.querySelector(s);if(!e)throw new Error("MANQUE "+s);e.dispatchEvent(new MouseEvent("click",{bubbles:true}));};
+const B=()=>[...document.querySelectorAll("div")].find((d)=>d.__manip);
+const gfb=()=>document.querySelector("#gfb").textContent;
+const hint=()=>(document.querySelector(".manip-hint")||{}).textContent||"";
+const answer=(v)=>{const i=document.querySelector(".manip-ask input");if(!i)throw new Error("pas de question");i.value=String(v);click(".manip-ask [data-go]");};
+const drag=(k,x,y)=>MANIP.sim(B(),k,x,y), tap=(k)=>MANIP.simTap(B(),k), key=(k,c)=>MANIP.simKey(B(),k,c);
+const S=()=>B().__manip.st, step=()=>B().__manip.step;
+const LES={
+  reduire(){ const bins=[[58,214],[168,214],[270,214]], bi={x2:0,x:1,"1":2}; const ex=[];
+    // erreur volontaire : une barre x dans le bac des unités
+    const i0=S().tiles.findIndex((t)=>t.t==="x"); drag(3+i0,...bins[2]); ex.push(/semblables/.test(hint())?"refus ok":"REFUS ABSENT");
+    // toucher-toucher : une tuile puis son bac
+    const i1=S().tiles.findIndex((t)=>t.t==="1"&&t.bin<0); tap(3+i1); tap(2); ex.push(S().tiles[i1].bin===2?"tap ok":"TAP ÉCHEC");
+    for(let s=0;s<3;s++){ let guard=0; while(step()===s&&guard++<40){ const i=S().tiles.findIndex((t)=>t.bin<0&&!t.gone); if(i<0)break; drag(3+i,...bins[bi[S().tiles[i].t]]); } ex.push("défi "+(s+1)+(step()>s?" ✓":" ✗")); }
+    return ex; },
+  distrib(){ return area(true); }, idrem(){ return area(false,10); },
+  factor(){ const ex=[]; drag(0,160,46+2*26+12); ex.push(/partage|pareilles|rangée/.test(hint())?"aide ok":"AIDE ABSENTE:"+hint());
+    const G=[3,5,6]; for(let s=0;s<3;s++){ if(s===1){ for(let j=0;j<4;j++) key(0,"ArrowDown"); } else drag(0,160,46+G[s]*26+12); if(B().__manip.asking) answer(4); ex.push("défi "+(s+1)+(step()>s?" ✓":" ✗ k="+S().k)); } return ex; },
+  eq1(){ const ex=[]; for(let s=0;s<3;s++){ solveBal(); if(B().__manip.asking) answer(-4); ex.push("défi "+(s+1)+(step()>s?" ✓":" ✗ "+document.querySelector(".manip-out").textContent+" | "+hint())); } return ex; },
+};
+function area(useTap,ans){ const ex=[]; for(let s=0;s<3;s++){ const n=S().cells.length, src={x2:0,x:1,"1":2};
+    if(s===0){ // mauvaise tuile d'abord
+      const c=S().cells.find((c)=>c.t!=="x2"); drag(n+src.x2,c.x+c.w/2,c.y+c.h/2); ex.push(/il y faut/.test(hint())?"refus ok":"REFUS ABSENT:"+hint()); }
+    let last=null; S().cells.slice().sort((a,b)=>a.t<b.t?-1:1).forEach((c)=>{ const i=S().cells.indexOf(c); if(S().cells[i].on)return;
+      if(useTap&&last===c.t) tap(i); else { drag(n+src[c.t],c.x+c.w/2,c.y+c.h/2); last=c.t; } });
+    if(B().__manip.asking) answer(s===1?5:ans); ex.push("défi "+(s+1)+(step()>s?" ✓":" ✗ "+hint())); } return ex; }
+function solveBal(){ const s0=step(); const it=()=>step()===s0?S().items:[], on=(sd,t)=>it().map((I,k)=>[I,k]).filter(([I])=>I.side===sd&&!I.off&&I.t===t).map(([,k])=>k);
+  let flip=false; const rm=(k)=>{ if(k===undefined||step()!==s0)return; flip=!flip; if(flip) drag(k,80,225); else tap(k); };
+  const pair=(t)=>{ const a=on("L",t),b=on("R",t); rm(a[0]); rm(b[0]); };
+  let g=0; while(on("L","x").length&&on("R","x").length&&g++<9) pair("x");
+  g=0; while(on("L","1").length&&on("R","1").length&&g++<12) pair("1");
+  const sd=on("L","x").length?"L":"R", ot=sd==="L"?"R":"L"; g=0;
+  while(on(sd,"x").length>1&&g++<6){ rm(on(sd,"x")[0]); for(let j=0;j<S().X;j++) rm(on(ot,"1")[0]); } }
+const ids=(location.hash.slice(1)||Object.keys(LES).join(",")).split(",");
+for(const id of ids){ try{ screenLesson(id,()=>{}); click('#pc button[data-i="'+ACTIVE[id].predict.good+'"]');
+  if(!B()) throw new Error("pas de figure manipulable");
+  const ex=LES[id](); const html=document.getElementById("app").innerHTML;
+  const fin=!document.getElementById("s3").hidden;
+  log.push(id+" : "+(fin&&!/NaN|undefined/.test(html)?"OK":"ÉCHEC"+(/NaN|undefined/.test(html)?" (NaN/undefined)":""))+" · "+ex.join(" · "));
+  }catch(e){log.push(id+" EXC "+e.message+" "+(e.stack||"").split("\n")[1])} }
+if(window.__errs.length) log.push("ERREURS JS : "+window.__errs.join(" | "));
+document.getElementById("log").hidden=false;document.getElementById("log").textContent=log.join("\n");
+</script>
