@@ -128,10 +128,10 @@ Légende : ✅ couvert ; 🟡 couvert avec écart (vocabulaire, notation, niveau
   À régler : un filtre « CHF → € » au rendu pour le système FR suffirait pour la plupart des énoncés (ordres de grandeur
   voisins), les noms de lieux suisses restant rares.
 - **Milliers**. L'app écrit `1'200` (`\text{'}` dans les formules, codé en dur dans chaque générateur : `N()` de `ch10_no.js`,
-  `ch11_gm.js`, `ch1c_sys.js`, `riche.js`…). La France écrit **1 200** (espace fine). **Il manque un réglage par système** : je
-  propose un filtre au rendu, au même endroit que `divSign` (préfiltre MathJax de `build.py`), qui remplace `\text{'}` par
-  `\,` quand le profil est français (voir § 4). La saisie « 1 200 » est déjà acceptée par le correcteur (`expr.js`).
-  Les nouvelles notions évitent les nombres ≥ 10 000 ou écrivent l'espace fine directement.
+  `ch11_gm.js`, `ch1c_sys.js`, `riche.js`…). La France écrit **1 200** (espace fine). **Il manquait un réglage par système** :
+  ajouté le 23.11, `frThou()` dans `app.js`, appelé par le préfiltre MathJax (`divSign`), remplace `\text{'}` par `\,` quand le
+  profil est français. Reste à faire : les apostrophes écrites hors formules (texte simple, rares) et `qcm.js` (`thou`). La saisie
+  « 1 200 » est déjà acceptée par le correcteur (`expr.js`). Les nouvelles notions écrivent directement l'espace fine.
 - **Unités**. L'app met déjà une espace fine avant les unités dans les formules (`\,\%`, `\ \text{cm}`) : conforme.
 - **Multiplication**. Les notions suisses écrivent `\cdot` (point médian) ; la France écrit ×. Les nouvelles notions
   écrivent `\times`. Pour les anciennes : filtre au rendu possible (`\cdot` → `\times` entre deux nombres), à décider.
@@ -142,8 +142,14 @@ Légende : ✅ couvert ; 🟡 couvert avec écart (vocabulaire, notation, niveau
 - **Calculatrice**. Les automatismes sont sans calculatrice (épreuve anticipée) : le réglage « sans calculatrice » colle.
 - **Algorithmique**. Python au lycée. `algopy` affiche de courts programmes Python et demande ce qu'ils renvoient : la
   saisie reste un nombre.
-- **Systèmes d'équations** : supprimés du programme 2026 de seconde → `sys2` passe de `FR: [10, 4]` à `null` (masqué) ;
-  `eq3` (degré 3) passe de `[10, 3]` à `[12]` (terminale).
+- **Systèmes d'équations** : supprimés du programme 2026 de seconde → `sys2`, `sys3`, `sysprob`, `sysgraph` : `FR: null`
+  (masqués) ; `eq3` (degré 3) passe de `[10, 3]` à `[12]` (terminale) ; `vecteurs` (norme, **produit scalaire**) passe en 1re
+  (`[11]`) : la seconde a `vect3e`. Attention : la table de `couverture_fr.md` proposait `vecteurs` en 3e (programme 2026) ;
+  le produit scalaire n'y est pas, d'où ce choix (à harmoniser avec l'agent « collège »).
+- **Placement** : 12 notions existantes placées en seconde (`FR_2NDE` dans `fr_2nde.js` : ensembles, formule, ineq,
+  absval, racinv, affzero, inter, optim, cart, droites, droitesinter, stats) ; 33 notions du collège marquées « reprises en
+  seconde » (`againFR: [10]` : automatismes et rappels). Pour une notion sans place française, une classe d'origine par défaut
+  est mise (d'après `couverture_fr.md`), seulement si l'agent « collège » ne l'a pas déjà fixée.
 
 ## 3. Notions manquantes, par priorité (et ce qui a été fait)
 
@@ -165,7 +171,7 @@ Légende : ✅ couvert ; 🟡 couvert avec écart (vocabulaire, notation, niveau
 
 1. **Montrer la France** : `SYSTEMS.FR` reste commenté dans `curriculum.js` (bêta genevoise). Pour tester sans l'ouvrir au
    public, le profil `{ system: "FR", grade: 10 }` fonctionne dans le moteur (voir `tests/fr2nde.html`).
-2. **Milliers** : filtre au rendu proposé (non branché tant que la France est masquée).
+2. **Milliers** : filtre au rendu `frThou()` branché (sans effet tant que la France est masquée) ; texte simple et `qcm.js` à suivre.
 3. **CHF → €** et **préimage → antécédent** : filtre au rendu ou variantes d'énoncés.
 4. **`again` par système** : `again` (années suisses) était lu aussi pour un profil français (en seconde, grade 10, une
    notion avec `again: [10]` suisse devenait « de l'année ») ; corrigé : pour la France, l'app lit `againFR`.

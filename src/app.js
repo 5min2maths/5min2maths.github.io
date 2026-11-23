@@ -90,7 +90,10 @@ const pick = (a) => a[Math.floor(Math.random() * a.length)];
 
 // Signe de division (14.11, décision de l'utilisateur) : « : » devient ÷ dans toutes les formules, au rendu.
 // Restent « : » : le texte \text{…}, la ponctuation suivie de \; ou ;, et ce qui n'a pas d'espaces (échelle 1\,:\,200, f\colon).
-window.divSign = (t) => t.replace(/(\\text\{[^}]*\})|( : (?!\\;|;))/g, (m, txt) => txt || " \\div ");
+window.divSign = (t) => frThou(t.replace(/(\\text\{[^}]*\})|( : (?!\\;|;))/g, (m, txt) => txt || " \\div "));
+// Milliers par système (22.11, chantier seconde FR) : les générateurs écrivent 1\text{'}200 (usage suisse) ; pour un profil
+// français, la formule devient 1\,200 (espace fine). Sans effet tant que la France est masquée (SYSTEMS.FR commenté).
+function frThou(t) { return state && state.profile && state.profile.system === "FR" ? t.replace(/\\text\{'\}/g, "\\,") : t; }
 // Longues chaînes d'égalités (22.11, retour de l'auteur : la correction dépasse de l'écran sur téléphone) : MathJax ne
 // coupe pas une formule en ligne. Avant le rendu, \( A = B = C \) devient \(A\) \(= B\) \(= C\) : le navigateur peut
 // alors passer à la ligne entre deux morceaux. Seulement au niveau 0 (hors parenthèses, accolades, crochets, environnements).

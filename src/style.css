@@ -145,6 +145,8 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .vote button { padding: 6px 12px; font-size: 1rem; }
 .vote button[aria-pressed="true"] { background: var(--blue-soft); border-color: var(--blue); }
 .code { font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-soft); user-select: all; }
+/* 22.11 (seconde FR) : programmes Python dans les énoncés (algopy) ; lisible à 360 px, défilement si une ligne est longue. */
+.py { font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.45; background: var(--card); color: var(--ink); border: 1.5px solid var(--line); border-radius: 8px; padding: 8px 10px; margin: 8px 0; overflow-x: auto; white-space: pre; text-align: left; }
 
 /* Accueil */
 .elo { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; }

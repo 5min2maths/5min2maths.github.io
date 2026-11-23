@@ -1,0 +1,74 @@
+<meta charset="utf-8">
+<pre id="out">en cours</pre>
+<script>window.__errs=[];window.addEventListener("error",(e)=>window.__errs.push((e.filename||"").split("/").pop()+" : "+e.message));window.MathJax={typesetPromise:()=>Promise.resolve()};</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/engine.js"></script>
+<script>
+// Seconde (France), 23.11 : catalogue d'un profil « France · 2nde » et 100 tirages par niveau des notions de src/fr_2nde.js.
+const log = []; let fails = 0, n = 0;
+for (const e of window.__errs) { fails++; log.push("ÉCHEC chargement " + e); }
+const seen = {};
+const fail = (m) => { fails++; const k = m.replace(/[-\d.,]+/g, "#").slice(0, 60); if (!seen[k]) { seen[k] = 1; log.push("ÉCHEC " + m); } };
+const NEW = ["ineq1", "proba2", "tabsignes", "tauxevol", "vect3e", "fref", "probcond", "algopy"];
+function canonical(spec) {
+  if (spec.canon) return spec.canon;
+  if (spec.kind === "solset") return SolSet.show(spec.ivs, false);
+  if (spec.kind === "value") return String(spec.round ? spec.value.toFixed(Math.max(2, Math.round(-Math.log10(spec.round)))) : spec.value);
+  if (spec.kind === "set") return spec.values.length ? spec.values.join(" ; ") : "aucune";
+  if (spec.kind === "pair") return spec.values.join(" ; ");
+  if (spec.kind === "expr") return spec.expr;
+}
+try {
+  // 1. Catalogue « France · Seconde »
+  const P2 = { system: "FR", grade: 10, track: "lycee" }, cat = Engine.catalog(P2), ids = cat.map((c) => c.id), cur = cat.filter((c) => c.current).map((c) => c.id);
+  for (const id of NEW) { if (!ids.includes(id)) fail("catalogue 2nde sans " + id); if (!cur.includes(id) && placeOf(NOTIONS.find((x) => x.id === id), P2)[0] === 10) fail(id + " pas « de l'année » en 2nde"); }
+  for (const id of ["ensembles", "tabsignes", "probcond", "droites", "stats", "eq1", "pctvar", "fracops"]) if (!cur.includes(id)) fail("2nde : " + id + " devrait être de l'année");
+  for (const id of ["sys2", "sys3", "sysprob", "sysgraph", "eq3", "vecteurs"]) if (ids.includes(id)) fail("2nde : " + id + " ne devrait pas y être");
+  if (Engine.refOf(P2) !== "FR") fail("référentiel FR non utilisé");
+  const th = Engine.themeOrder(cat.filter((c) => c.current), P2).map((k) => Engine.themeLabel(k, P2));
+  if (!th.includes("Automatismes") || !th.includes("Statistiques et probabilités")) fail("chapitres de 2nde absents : " + th.join(", "));
+  // Suisse inchangée : aucune notion française dans les catalogues CH
+  for (const g of [9, 10, 11, 12, 13]) for (const tr of ["college", "mp"]) { const c = Engine.catalog({ system: "CH", grade: g, track: tr }).map((x) => x.id); for (const id of NEW) if (c.includes(id)) fail("notion FR " + id + " dans le catalogue CH " + g + " " + tr); }
+  // Mode libre / séance : un état FR se construit
+  const st = Engine.newState(P2); Engine.autoInit(st); if (!Object.keys(st.notions).length) fail("état FR vide");
+  // 2. Tirages
+  for (const id of NEW) {
+    if (!LESSONS[id] || !LESSONS[id].regle) fail("leçon manquante " + id);
+    if (!COMPS[id] || COMPS[id].length !== 3) fail("compétences " + id);
+    if (!HINTS_EXTRA[id]) fail("indice " + id);
+    for (const d of [1, 2, 3]) {
+      const forms = new Set(), ctx = new Set();
+      for (let s = 1; s <= 100; s++) {
+        let q; try { q = Engine.build(id, d, s); } catch (e) { fail(id + " d" + d + " lève " + e.message); continue; }
+        n++; ctx.add(q.ctx); forms.add(qForm(q));
+        const all = [q.q, q.sol, ...(q.guide || []).flatMap((g) => [g.ask, g.sol]), ...(q.traps || []).map((t) => t.m)].join(" ");
+        if (/NaN|undefined|Infinity|\[object/.test(all)) fail(id + " d" + d + " texte NaN/undefined : " + q.q.slice(0, 120));
+        if (/CHF|\\text\{'\}|\d'\d{3}/.test(all)) fail(id + " d" + d + " format suisse (CHF ou apostrophe) : " + q.q.slice(0, 100));
+        if (/\d\.\d/.test(q.q.replace(/<pre[\s\S]*?<\/pre>/g, "")) || /\d\.\d/.test(q.sol)) fail(id + " d" + d + " point décimal : " + q.q.slice(0, 100));
+        if (q.fig && (!/^<svg/.test(q.fig) || /NaN|undefined/.test(q.fig))) fail(id + " d" + d + " figure invalide");
+        if (!q.guide || !q.guide.length) fail(id + " d" + d + " sans pas à pas");
+        if (!q.ctx) fail(id + " d" + d + " sans ctx");
+        const tv = trivialQ(q, 3); if (tv) fail(id + " d" + d + " triviale (" + tv + ") : " + q.q.slice(0, 100));
+        const s0 = q.spec;
+        if (s0.kind === "value" && !isFinite(s0.value)) { fail(id + " d" + d + " valeur " + s0.value); continue; }
+        if (q.canon) s0.canon = q.canon;
+        const r = checkAnswer(s0, canonical(s0));
+        if (r.status !== "correct") fail(id + " d" + d + " réponse canonique refusée : " + canonical(s0) + " → " + r.status + " | " + q.q.slice(0, 100));
+        if (s0.kind === "value" && checkAnswer(s0, String(s0.value * 1.013 + 0.71)).status === "correct") fail(id + " d" + d + " accepte une valeur fausse");
+        // guide : chaque étape a une réponse acceptée ; la dernière étape donne la réponse de la question
+        (q.guide || []).forEach((g, k) => { const c = canonical(g.spec); if (checkAnswer(g.spec, c).status !== "correct") fail(id + " d" + d + " étape " + k + " refusée : " + c); });
+        const lastG = (q.guide || [])[q.guide.length - 1];
+        if (lastG && lastG.spec.kind === s0.kind && checkAnswer(s0, canonical(lastG.spec)).status !== "correct" && !["moyenne", "tarifs", "budget"].includes(q.ctx)) fail(id + " d" + d + " [" + q.ctx + "] dernière étape ≠ réponse : " + canonical(lastG.spec) + " vs " + canonical(s0));
+        // pièges : jamais la bonne réponse
+        for (const t of q.traps || []) {
+          if (t.spec) { if (checkAnswer(s0, canonical(t.spec)).status === "correct") fail(id + " d" + d + " piège = réponse"); }
+          else if (t.v !== undefined && s0.kind === "value" && checkAnswer(s0, String(t.v)).status === "correct") fail(id + " d" + d + " piège = réponse " + t.v);
+          if (!t.m) fail(id + " d" + d + " piège sans message");
+        }
+      }
+      if (ctx.size < 3) fail(id + " d" + d + " : " + ctx.size + " formes seulement");
+    }
+    if (hasProb(id)) for (const fn of probList(id)) { const p = fn(); p.parts.forEach((pt, k) => { if (checkAnswer(pt.spec, canonical(pt.spec)).status !== "correct") fail("PROB " + id + " partie " + k); }); if (/NaN|undefined/.test(p.q + p.sol)) fail("PROB " + id + " NaN"); }
+  }
+} catch (e) { fails++; log.push("EXC " + e.stack); }
+document.getElementById("out").textContent = (fails ? "" : "ok ") + n + " questions de seconde vérifiées, " + fails + " échec(s)\n" + log.join("\n");
+</script>

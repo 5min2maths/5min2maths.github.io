@@ -505,6 +505,55 @@ const LESSON_FIGS_V2 = {
   sys2: () => FIG.plot([{ f: (x) => 7 - x }, { f: (x) => x - 1, cls: "f-line" }], [[4, 3, "(4 ; 3)"]], { numbers: true, step: 2, xr: [-2, 8], yr: [-2, 8] , squash: 0.6}),
 };
 
+// 22.11 : seconde (France), notions de src/fr_2nde.js. Vocabulaire et notations français (antécédent, ×, euros).
+Object.assign(LESSONS_V2, {
+  ineq1: ["Inéquations du premier degré", "Une inéquation compare deux expressions avec <, >, ≤ ou ≥ : ses solutions forment en général un intervalle.",
+    "On la résout comme une équation : on ajoute ou on soustrait le même nombre des deux côtés. On peut multiplier ou diviser par un nombre positif sans rien changer. Si on multiplie ou divise par un nombre négatif, on change le sens de l'inégalité.",
+    ["\\(3x - 4 \\ge 5 \\iff 3x \\ge 9 \\iff x \\ge 3\\) : \\(S = [3 \\,;\\, +\\infty[\\).",
+      "\\(-2x + 1 > 7 \\iff -2x > 6 \\iff x < -3\\) (division par \\(-2\\) : le sens change) : \\(S = ]-\\infty \\,;\\, -3[\\)."],
+    "Le crochet est tourné vers l'intérieur si la borne est comprise (≤, ≥), vers l'extérieur si elle est exclue (<, >). Du côté de l'infini, il est toujours ouvert."],
+  proba2: ["Probabilités : contraire, deux épreuves, réunion", "Trois outils pour calculer une probabilité sans tout énumérer.",
+    "Évènement contraire : \\(P(\\bar{A}) = 1 - P(A)\\). Deux épreuves successives : on dessine un arbre ; le long d'une branche on multiplie, et on additionne les branches qui conviennent. « A ou B » : \\(P(A \\cup B) = P(A) + P(B) - P(A \\cap B)\\).",
+    ["Probabilité de pluie \\(0{,}3\\) : probabilité qu'il ne pleuve pas \\(1 - 0{,}3 = 0{,}7\\).",
+      "Urne de 3 rouges et 2 blanches, deux tirages sans remise : \\(P(\\text{deux rouges}) = \\frac{3}{5} \\times \\frac{2}{4} = \\frac{3}{10}\\).",
+      "Jeu de 32 cartes : \\(P(\\text{cœur ou roi}) = \\frac{8}{32} + \\frac{4}{32} - \\frac{1}{32} = \\frac{11}{32}\\)."],
+    "Le roi de cœur est à la fois un cœur et un roi : sans le « − P(A ∩ B) », on le compterait deux fois."],
+  tabsignes: ["Tableau de signes", "Pour savoir quand un produit ou un quotient est positif, on étudie le signe de chaque facteur.",
+    "\\(ax + b\\) s'annule en \\(x = -\\frac{b}{a}\\) ; à droite de ce zéro, il a le signe de \\(a\\), à gauche le signe contraire. Dans le tableau : une ligne pour les valeurs de \\(x\\) (zéros rangés dans l'ordre), une ligne par facteur, puis la règle des signes. Une valeur qui annule un dénominateur est interdite : double barre, toujours exclue.",
+    ["\\((x - 1)(x + 3) < 0\\) : zéros \\(-3\\) et \\(1\\) ; le produit est négatif entre eux, \\(S = ]-3 \\,;\\, 1[\\).",
+      "\\(\\frac{x - 2}{x + 1} \\ge 0\\) : \\(S = ]-\\infty \\,;\\, -1[ \\cup [2 \\,;\\, +\\infty[\\) (\\(-1\\) est interdite)."],
+    "Ne divise pas les deux membres par une expression en \\(x\\) : son signe change selon \\(x\\). On ramène tout à « … ≥ 0 » et on fait le tableau."],
+  tauxevol: ["Évolutions en pourcentage", "Une évolution en pourcentage revient toujours à une multiplication.",
+    "Augmenter de \\(t\\,\\%\\), c'est multiplier par \\(1 + \\frac{t}{100}\\) ; diminuer de \\(t\\,\\%\\), c'est multiplier par \\(1 - \\frac{t}{100}\\) : c'est le coefficient multiplicateur. Taux d'évolution : \\(\\frac{V_A - V_D}{V_D}\\). Évolutions successives : on multiplie les coefficients. Taux réciproque : on prend l'inverse du coefficient.",
+    ["\\(+20\\,\\%\\) puis \\(-10\\,\\%\\) : \\(1{,}2 \\times 0{,}9 = 1{,}08\\), soit \\(+8\\,\\%\\) (et non \\(+10\\,\\%\\)).",
+      "Après une hausse de \\(25\\,\\%\\) (coefficient \\(1{,}25\\)), le coefficient réciproque est \\(\\frac{1}{1{,}25} = 0{,}8\\) : il faut baisser de \\(20\\,\\%\\) pour revenir au départ."],
+    "Les pourcentages successifs ne s'additionnent pas, car le second porte sur une valeur déjà modifiée."],
+  vect3e: ["Vecteurs et coordonnées", "Un vecteur est un déplacement : une direction, un sens et une longueur.",
+    "Dans un repère, \\(\\overrightarrow{AB}\\) a pour coordonnées \\(\\begin{pmatrix} x_B - x_A \\\\ y_B - y_A \\end{pmatrix}\\). On additionne deux vecteurs coordonnée par coordonnée ; relation de Chasles : \\(\\overrightarrow{AB} + \\overrightarrow{BC} = \\overrightarrow{AC}\\). \\(\\vec{u}\\) et \\(\\vec{v}\\) sont colinéaires si et seulement si \\(\\det(\\vec{u}, \\vec{v}) = x_u y_v - y_u x_v = 0\\).",
+    ["\\(A(1 \\,;\\, 2)\\), \\(B(4 \\,;\\, -1)\\) : \\(\\overrightarrow{AB}\\begin{pmatrix} 3 \\\\ -3 \\end{pmatrix}\\).",
+      "\\(ABCD\\) est un parallélogramme si et seulement si \\(\\overrightarrow{AD} = \\overrightarrow{BC}\\).",
+      "\\(\\det\\left(\\begin{pmatrix} 2 \\\\ 3 \\end{pmatrix}, \\begin{pmatrix} 4 \\\\ 6 \\end{pmatrix}\\right) = 2 \\times 6 - 3 \\times 4 = 0\\) : colinéaires."],
+    "\\(\\overrightarrow{AB}\\), c'est « arrivée moins départ » : \\(B - A\\), pas \\(A - B\\)."],
+  fref: ["Fonctions de référence", "Carré, inverse, racine carrée : connaître leur courbe permet de comparer et de résoudre sans calculer.",
+    "Carré : décroissante sur \\(]-\\infty \\,;\\, 0]\\), croissante sur \\([0 \\,;\\, +\\infty[\\) ; \\(x^2 = k\\) a deux solutions \\(\\pm\\sqrt{k}\\) si \\(k > 0\\). Inverse : décroissante sur \\(]-\\infty \\,;\\, 0[\\) et sur \\(]0 \\,;\\, +\\infty[\\). Racine carrée : définie et croissante sur \\([0 \\,;\\, +\\infty[\\). Une fonction croissante conserve l'ordre ; une fonction décroissante l'inverse.",
+    ["\\(x^2 \\le 9 \\iff -3 \\le x \\le 3\\), et \\(x^2 > 9 \\iff x < -3\\) ou \\(x > 3\\).",
+      "\\(2 \\le x \\le 5 \\Rightarrow \\frac{1}{5} \\le \\frac{1}{x} \\le \\frac{1}{2}\\) (l'ordre s'inverse).",
+      "\\(-3 < -2\\), mais \\((-3)^2 > (-2)^2\\) : sur les négatifs, le carré inverse l'ordre."],
+    "Si \\(-2 \\le x \\le 3\\), alors \\(0 \\le x^2 \\le 9\\) (et non \\(4 \\le x^2 \\le 9\\)) : l'intervalle contient 0."],
+  probcond: ["Probabilités conditionnelles", "« Sachant A » : on ne regarde plus que les cas où A est réalisé.",
+    "\\(P_A(B) = \\frac{P(A \\cap B)}{P(A)}\\). Dans un tableau croisé, on se place dans la ligne (ou la colonne) de A et on divise par son total. Dans un arbre pondéré, les branches du second niveau portent des probabilités conditionnelles ; le long d'un chemin on multiplie, \\(P(A \\cap B) = P(A) \\times P_A(B)\\), et on additionne les chemins qui mènent au même évènement.",
+    ["Tableau : 40 filles dont 12 externes. \\(P_F(E) = \\frac{12}{40} = 0{,}3\\).",
+      "Arbre : \\(P(A) = 0{,}6\\), \\(P_A(B) = 0{,}5\\), \\(P_{\\bar{A}}(B) = 0{,}25\\) : \\(P(B) = 0{,}6 \\times 0{,}5 + 0{,}4 \\times 0{,}25 = 0{,}4\\)."],
+    "\\(P_A(B)\\) et \\(P_B(A)\\) sont différentes : un test positif chez 95 % des malades ne veut pas dire 95 % de malades parmi les tests positifs (faux positifs)."],
+  algopy: ["Lire un programme Python", "Pour savoir ce qu'affiche un programme, on l'exécute à la main, ligne par ligne.",
+    "On note la valeur de chaque variable après chaque ligne. Une affectation \\(\\texttt{a = b - a}\\) calcule d'abord à droite avec les anciennes valeurs. \\(\\texttt{if} \\dots \\texttt{elif} \\dots \\texttt{else}\\) : seule la première condition vraie est exécutée. \\(\\texttt{range(a, b)}\\) va de \\(a\\) à \\(b - 1\\) ; \\(\\texttt{while}\\) répète tant que la condition est vraie.",
+    ["\\(\\texttt{s = 0}\\), puis \\(\\texttt{for i in range(1, 4): s = s + i}\\) : \\(s\\) vaut \\(1 + 2 + 3 = 6\\).",
+      "\\(\\texttt{x**2}\\) est \\(x^2\\) ; \\(\\texttt{n \\% 2}\\) est le reste de la division par 2 ; \\(\\texttt{n // 2}\\) est le quotient entier."],
+    "\\(\\texttt{range(5)}\\) fait 5 tours (0, 1, 2, 3, 4) : la borne 5 n'est jamais atteinte."],
+});
+LESSON_FIGS_V2.vect3e = () => (typeof FR2NDE_FIG !== "undefined" ? FR2NDE_FIG.vecGrid([[1, 1, 3, 2, "u"], [4, 3, 2, -2, "v"], [1, 1, 5, 0, "u + v"]], [], [0, 7], [0, 4]) : "");
+LESSON_FIGS_V2.probcond = () => (typeof FR2NDE_FIG !== "undefined" ? FR2NDE_FIG.treeFig(["A", "B"], [0.6, 0.5, 0.25]) : "");
+LESSON_FIGS_V2.tabsignes = () => (typeof FR2NDE_FIG !== "undefined" ? FR2NDE_FIG.signTable([["x − 1", 1], ["x + 3", -3]], "produit", [["−", "−", "+"], ["−", "+", "+"], ["+", "−", "+"]]) : "");
 for (const [id, v] of Object.entries(LESSONS_V2)) LESSONS[id] = L_(...v);
 // Commentaires testeurs du 14.11 (traités le 15.11) :
 // « priorités : illustration incompréhensible » → étapes verticales, une flèche par opération, sous la ligne qu'elle transforme ;
