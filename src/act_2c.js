@@ -301,7 +301,92 @@
       defis: ["f(x) = 3 ÷ (x − 2). Calcule f⁻¹(6), c'est-à-dire le x tel que f(x) = 6.", "f(x) = (2x + 1) ÷ (x − 3). En isolant x dans y = f(x), on trouve f⁻¹(x) = (3x + 1) ÷ (x − c). Que vaut c ?", "f(x) = (4x − 1) ÷ (x + 2). L'asymptote horizontale de f⁻¹ est y = … ?"],
       play: hunt({ ask: true, label: "Ta réponse", blank: (s) => hrFig(s, null), show: (x, s) => hrFig(s, x),
         miss: (x, s) => ["3 ÷ (x − 2) = 6 donne x − 2 = 3 ÷ 6.", "y(x − 3) = 2x + 1, donc xy − 2x = 3y + 1 : mets x en évidence.", "Ce qui est vertical pour f devient horizontal pour f⁻¹ (symétrie par rapport à y = x)."][s],
-        wins: [W(2.5, "x − 2 = 0,5, donc f⁻¹(6) = 2,5 ; le point (2,5 ; 6) de f devient (6 ; 2,5) sur f⁻¹."), W(2, "x(y − 2) = 3y + 1, donc x = (3y + 1) ÷ (y − 2) ; on échange les lettres : c = 2."), W(-2, "f a pour asymptote verticale x = −2 ; par symétrie, f⁻¹ a pour asymptote horizontale y = −2.")] }),
+        wins: [W(2.5, "x − 2 = 0,5, donc f⁻¹(6) = 2,5 ; le point (2,5 ; 6) de f devient (6 ; 2,5) sur f⁻¹."), W(2, "x(y − 2) = 3y + 1, donc x = (3y + 1) ÷ (y − 2) ; on échange les lettres, donc c = 2."), W(-2, "f a pour asymptote verticale x = −2 ; par symétrie, f⁻¹ a pour asymptote horizontale y = −2.")] }),
+    },
+  });
+
+  // =====================================================================================================
+  // 5. Exponentielles
+  // =====================================================================================================
+  const EXPT = [[2, 9], [-2, 4], [3, 8]];
+  // modexp : trois modèles (intérêts, bactéries, radioactivité) ; le curseur fait avancer le temps.
+  const MOD = [
+    { f: (t) => 1000 * 1.05 ** t, max: 20, lab: "Années", seuil: 1500, xr: [-4, 20], yr: [0, 2800], gx: 1, lx: 4, gy: 250, ly: 1000, t0: 3, ok: 9,
+      txt: (t, v) => "Après " + t + " an" + (t > 1 ? "s" : "") + " : 1000 · " + pw("1,05", t) + " ≈ <b>" + mil(v) + " CHF</b>" },
+    { f: (t) => 1000 * 2 ** (t / 3), max: 21, lab: "Heures", seuil: 50000, xr: [-5, 21], yr: [0, 130000], gx: 1, lx: 3, gy: 10000, ly: 20000, t0: 6, ok: 17,
+      txt: (t, v) => "Après " + t + " h : 1000 · 2^(" + t + "/3) ≈ <b>" + mil(v, 0) + " bactéries</b>" },
+    { f: (t) => 80 * 0.5 ** (t / 8), max: 40, lab: "Jours", seuil: 10, xr: [-6, 40], yr: [0, 85], gx: 2, lx: 8, gy: 5, ly: 20, t0: 4, ok: 24,
+      txt: (t, v) => "Après " + t + " jour" + (t > 1 ? "s" : "") + " : 80 · 0,5^(" + t + "/8) ≈ <b>" + mil(v) + " g</b>" },
+  ];
+  // compo : machines enchaînées x → [1re] → [2e].
+  const mach = (y, inp, A, B, mid, out) => {
+    const box = (x0, nm, fx) => `<rect x="${x0}" y="${y}" width="84" height="38" rx="8" class="f-fill2"/>` + T(x0 + 42, y + 15, nm, "middle", 12, "f-txt f-blue") + T(x0 + 42, y + 31, fx, "middle", 12);
+    const ar = (x1, x2) => L(x1, y + 19, x2 - 6, y + 19, "f-line", 1.4) + `<polygon points="${x2},${y + 19} ${x2 - 7},${y + 15} ${x2 - 7},${y + 23}" class="f-head"/>`;
+    return T(14, y + 24, inp, "middle", 14) + ar(26, 46) + box(46, A[0], A[1]) + ar(130, 150) + T(166, y + 24, mid, "middle", 13, mid === "?" ? "f-txt" : "f-txt f-blue") + ar(182, 202) + box(202, B[0], B[1]) + ar(286, 300) + T(312, y + 24, out, "middle", 13, "f-txt f-accent");
+  };
+  const COMP = [
+    { inp: 3, A: ["g", "x²"], B: ["f", "2x + 1"], mid: 9, out: 19 },
+    { inp: 3, A: ["f", "2x + 1"], B: ["g", "x²"], mid: 7, out: 49 },
+  ];
+  const compoFig = (s, x) => {
+    if (s < 2) { const C = COMP[s], good = x === C.out; return svg(330, 50, mach(6, C.inp, C.A, C.B, good ? C.mid : "?", x === null ? "?" : nb(x)), "deux machines enchaînées") + (x === null ? "" : plain(good ? '<b class="act-ok">La sortie est juste.</b>' : "Sortie proposée " + nb(x) + " : refais passer " + C.inp + " dans la 1re machine, puis le résultat dans la 2e.")); }
+    const good = x === -52;
+    return svg(330, 104, T(4, 10, "f ∘ g : g d'abord", "start", 11) + mach(14, "−2", ["g", "x² + 1"], ["f", "3x − 2"], good ? "5" : "?", good ? "13" : "?") + T(4, 66, "g ∘ f : f d'abord", "start", 11) + mach(70, "−2", ["f", "3x − 2"], ["g", "x² + 1"], good ? "−8" : "?", good ? "65" : "?"), "deux enchaînements de machines") + (x === null ? "" : plain(tu(x)));
+  };
+
+  Object.assign(ACTIVE, {
+    expo: {
+      predict: { q: "On plie une feuille de papier en deux, puis encore en deux… 10 fois de suite. Combien d'épaisseurs obtient-on ?", choices: ["20", "100", "1024"], good: 2,
+        why: "Chaque pliage multiplie le nombre d'épaisseurs par 2 : 2¹⁰ = 1024. Multiplier par le même nombre à chaque étape, c'est une croissance exponentielle." },
+      defis: ["Règle la base b pour que la courbe y = bˣ passe par le point (2 ; 9).", "Règle b pour que la courbe passe par (−2 ; 4). Que fait-elle quand x augmente ?", "Règle b pour que la courbe passe par (3 ; 8)."],
+      play: slide({
+        ctl: () => [{ k: "b", lab: "Base b", min: 0.25, max: 4, step: 0.25 }],
+        init: () => ({ b: 1.5 }),
+        fig: (st, s) => graph({ xr: [-3, 4], yr: [-1, 10], fns: [{ f: (x) => st.b ** x }], pts: [[EXPT[s][0], EXPT[s][1], "(" + EXPT[s].map(nb).join(" ; ") + ")", "f-dot", "r"], [EXPT[s][0], st.b ** EXPT[s][0], "", "f-fill2"]], lab: "courbe exponentielle" }),
+        out: (st, s) => "y = " + nb(st.b) + "ˣ ; en x = " + nb(EXPT[s][0]) + " : " + pw(nb(st.b), EXPT[s][0]) + " = <b>" + nb(+(st.b ** EXPT[s][0]).toFixed(4)) + "</b> (on veut " + EXPT[s][1] + ")" + (st.b === 1 ? '<br><span class="small">Base 1 : 1ˣ = 1 pour tout x, la courbe est plate.</span>' : ""),
+        goal: [(st) => (st.b === 3 ? "3² = 9 : la base 3 multiplie y par 3 chaque fois que x avance de 1." : ""),
+          (st) => (st.b === 0.5 ? "0,5⁻² = 1 ÷ 0,5² = 1 ÷ 0,25 = 4. Base entre 0 et 1 : la courbe descend, c'est une décroissance." : ""),
+          (st) => (st.b === 2 ? "2³ = 8. Toutes ces courbes passent par (0 ; 1), car b⁰ = 1." : "")],
+        ask: [null, { q: "résous \\(2^x = \\dfrac{1}{8}\\).", ans: -3, ok: "1/8 = 1/2³ = 2⁻³, donc x = −3.", no: "Écris 1/8 comme une puissance de 2 (exposant négatif)." },
+          { q: "résous \\(4^x = 8\\) (écris 4 et 8 comme puissances de 2).", ans: 1.5, ok: "4ˣ = 2²ˣ et 8 = 2³ : 2x = 3, donc x = 1,5.", no: "4ˣ = (2²)ˣ = 2²ˣ ; et 8 = 2³. Égale les exposants." }] }),
+    },
+    expfrac: {
+      predict: { q: "Que vaut \\(9^{\\frac{1}{2}}\\) ?", choices: ["4,5", "3", "81"], good: 1,
+        why: "9^(1/2) · 9^(1/2) = 9^(1/2 + 1/2) = 9¹ = 9 : c'est le nombre positif qui, multiplié par lui-même, donne 9, donc √9 = 3. L'exposant 1/2 ne divise pas par 2 !" },
+      defis: ["Calcule \\(125^{\\frac{1}{3}}\\).", "Calcule \\(8^{\\frac{2}{3}}\\).", "Calcule \\(16^{-\\frac{3}{4}}\\) (fraction acceptée)."], garde: [1, 2], // la 1re reprend le « Devine »
+      play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["125^(1/3) : le nombre dont le cube vaut 125", "8^(2/3) = (8^(1/3))² : racine cubique, puis carré", "16^(−3/4) = 1 ÷ 16^(3/4) ; 16^(1/4) = 2 (car 2⁴ = 16)"][s] + " ; " + tu(x)),
+        wins: [W(5, "5³ = 125, donc 125^(1/3) = ∛125 = 5."), W(4, "∛8 = 2, puis 2² = 4."), W(1 / 8, "16^(1/4) = 2, 2³ = 8, et l'exposant négatif donne l'inverse : 1/8.")] }),
+    },
+    modexp: {
+      predict: { q: "On place 1000 CHF à 10 % d'intérêts composés. Après 2 ans, on a…", choices: ["1200 CHF", "1210 CHF", "1100 CHF"], good: 1,
+        why: "1re année : 1000 · 1,1 = 1100 CHF. 2e année, les intérêts portent aussi sur les 100 CHF déjà gagnés : 1100 · 1,1 = 1210 CHF. On multiplie par 1,1 chaque année : 1000 · 1,1²." },
+      defis: ["1000 CHF placés à 5 % par an : fais avancer le temps. Après combien d'années le capital dépasse-t-il 1500 CHF pour la première fois ?", "1000 bactéries doublent toutes les 3 heures. Après combien d'heures (entières) dépassent-elles 50'000 pour la première fois ?", "80 g d'iode 131 : la masse est divisée par 2 tous les 8 jours (demi-vie). Après combien de jours en reste-t-il 10 g ?"],
+      play: slide({
+        ctl: (s) => [{ k: "t", lab: MOD[s].lab, min: 0, max: MOD[s].max }],
+        init: (s) => ({ t: MOD[s].t0 }),
+        fig: (st, s) => { const M = MOD[s]; return graph({ xr: M.xr, yr: M.yr, gx: M.gx, lx: M.lx, gy: M.gy, ly: M.ly, fy: (v) => mil(v, 0), fns: [{ f: M.f, from: 0 }], hl: [[M.seuil, "f-accent"]], segs: [[st.t, 0, st.t, M.f(st.t), "f-line", 1.2, "4 3"]], pts: [[st.t, M.f(st.t), "", "f-dot"]], lab: "croissance ou décroissance exponentielle" }); },
+        out: (st, s) => MOD[s].txt(st.t, MOD[s].f(st.t)) + '<br><span class="small">ligne rouge : ' + mil(MOD[s].seuil, 0) + ["", " CHF", " bactéries", " g"][s + 1] + "</span>",
+        goal: [(st) => (st.t === 9 ? "1,05⁸ ≈ 1,477 (1477,46 CHF), mais 1,05⁹ ≈ 1,551 : 1551,33 CHF après 9 ans." : ""),
+          (st) => (st.t === 17 ? "Après 16 h : ≈ 40'317 ; après 17 h : ≈ 50'797. Le nombre double toutes les 3 h : 2^(t/3)." : ""),
+          (st) => (st.t === 24 ? "80 → 40 → 20 → 10 : trois demi-vies, 3 · 8 = 24 jours." : "")],
+        miss: (st, s) => { const M = MOD[s], v = M.f(st.t); return s === 2 ? (v > M.seuil ? "Il en reste encore trop : avance." : v < M.seuil ? "Trop tard : il en reste moins de 10 g, recule." : "") : v <= M.seuil ? "Pas encore au-dessus de la ligne rouge : avance." : st.t > M.ok ? "Ça dépasse, mais c'était déjà le cas plus tôt : recule." : ""; },
+        ask: [null, { q: "300 bactéries qui doublent toutes les 4 h : combien après 12 h ?", ans: 2400, ok: "12 h = 3 doublements : 300 · 2³ = 2400.", no: "Combien de doublements en 12 h ? Puis multiplie par 2 autant de fois." },
+          { q: "même iode (80 g, demi-vie 8 jours) : combien de grammes après 16 jours ?", ans: 20, ok: "Deux demi-vies : 80 · 0,5² = 20 g.", no: "16 jours = deux demi-vies : on divise deux fois par 2." }] }),
+    },
+    compo: {
+      predict: { q: "f(x) = x + 3 et g(x) = 2x. Pour calculer f(g(5)), on commence par…", choices: ["g, puis f", "f, puis g"], good: 0,
+        why: "On calcule d'abord ce qui est à l'intérieur : g(5) = 10, puis f(10) = 13. On note f ∘ g (« f rond g ») : g agit en premier, même si on l'écrit en second." },
+      defis: ["f(x) = 2x + 1 et g(x) = x². Calcule (f ∘ g)(3).", "Mêmes f et g : calcule (g ∘ f)(3).", "f(x) = 3x − 2 et g(x) = x² + 1. Calcule (f ∘ g)(−2) − (g ∘ f)(−2)."],
+      play: hunt({ ask: true, label: "Ta réponse", blank: (s) => compoFig(s, null), show: (x, s) => compoFig(s, x),
+        miss: (x, s) => ["(f ∘ g)(3) = f(g(3)) : g(3) = 9, puis f(9).", "(g ∘ f)(3) = g(f(3)) : f d'abord.", "Calcule séparément f(g(−2)) et g(f(−2)), puis la différence."][s],
+        wins: [W(19, "g(3) = 9, puis f(9) = 2 · 9 + 1 = 19."), W(49, "f(3) = 7, puis g(7) = 49. Donc f ∘ g et g ∘ f ne donnent pas la même chose."), W(-52, "f(g(−2)) = f(5) = 13 et g(f(−2)) = g(−8) = 65 : 13 − 65 = −52.")] }),
+    },
+    decomp: {
+      predict: { q: "h(x) = √(3x + 1). Pour calculer h(5), quelle opération fait-on en dernier ?", choices: ["la racine", "fois 3", "plus 1"], good: 0,
+        why: "3 · 5 + 1 = 16, puis √16 = 4 : la racine vient en dernier. C'est la fonction « extérieure » f(x) = √x ; l'« intérieure » est g(x) = 3x + 1, et h = f ∘ g." },
+      defis: ["h(x) = (2x − 5)³ = f(g(x)) avec f(x) = x³. Que vaut g(4) ?", "h(x) = 1 ÷ (x² + 4) = f(g(x)) avec g(x) = x² + 4. Que vaut f(8) ?", "h(x) = √(x² + 9) = f(g(x)). Calcule l'intérieur g(4), puis h(4) = f(g(4)). Que vaut h(4) ?"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["l'intérieur de (2x − 5)³ est g(x) = 2x − 5", "l'extérieur f prend l'inverse du nombre reçu", "g(x) = x² + 9 (intérieur), f(x) = √x (extérieur)"][s] + " ; " + tu(x)),
+        wins: [W(3, "g(x) = 2x − 5, donc g(4) = 3 (et h(4) = 3³ = 27)."), W(1 / 8, "f(x) = 1 ÷ x, donc f(8) = 1/8 = 0,125."), W(5, "g(4) = 16 + 9 = 25, puis f(25) = √25 = 5.")] }),
     },
   });
 })();
