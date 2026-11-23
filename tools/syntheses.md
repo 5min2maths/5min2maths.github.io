@@ -1,5 +1,7 @@
 # Synthèses de cours à façon (cartes mentales) — proposition du 23.11
 
+**23.11 soir : retirée de l'app** (décision de l'enseignant, plus-value pas convaincante : double le rappel de cours, les leçons actives et « Me tester » ; la théorie distribuée fait déjà le travail sur papier ; l'app doit maigrir). Code archivé dans la branche `archive/fiche` (src/fiche.js, src/fiche_data.js, tests/fiche.html). Les branchements de app.js sont inactifs sans ces fichiers (typeof). Le carnet garde le message d'erreur et la réponse (utile ailleurs).
+
 ## Décisions de l'enseignant (23.11) et réalisation
 
 1. **Nom** : « Ma fiche ».
