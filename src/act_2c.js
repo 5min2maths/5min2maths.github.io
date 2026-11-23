@@ -229,4 +229,79 @@
         ask: [null, { q: "zéros −1, 2 et 4, et f(0) = −24. Que vaut a ?", ans: -3, ok: "f(0) = a · 1 · (−2) · (−4) = 8a = −24, donc a = −3.", no: "f(x) = a(x + 1)(x − 2)(x − 4) : calcule f(0) en fonction de a." }, null] }),
     },
   });
+
+  // =====================================================================================================
+  // 4. Fonctions rationnelles
+  // =====================================================================================================
+  // homog : f(x) = (ax + 1)/(x + d) ; asymptotes en pointillés (l'horizontale seulement à partir du défi 2).
+  const homT = (a, d) => "(" + (a === 0 ? "1" : (a === 1 ? "" : a === -1 ? "−" : nb(a)) + "x + 1") + ") ÷ (x " + (d < 0 ? "− " + -d : "+ " + d) + ")";
+  // homogrec : f et f⁻¹ symétriques par rapport à la droite y = x.
+  const HR = [
+    { f: (x) => 3 / (x - 2), xr: [-3, 8], yr: [-3, 8] },
+    { f: (x) => (2 * x + 1) / (x - 3), xr: [-6, 10], yr: [-6, 10] },
+    { f: (x) => (4 * x - 1) / (x + 2), xr: [-10, 8], yr: [-8, 10] },
+  ];
+  const hrFig = (s, x) => {
+    const D = HR[s], o = { xr: D.xr, yr: D.yr, eq: true, gx: s ? 2 : 1, lx: s ? 4 : 2, fns: [{ f: (t) => t, cls: "f-line", w: 1.2, dash: true }, { f: D.f }], pts: [], lab: "fonction homographique et droite y = x" };
+    let out = "";
+    if (x !== null && s === 0) { o.pts.push([x, D.f(x), "(" + nb(x) + " ; " + nb(+D.f(x).toFixed(3)) + ")", "f-fill2"]); out = plain("f(" + nb(x) + ") = 3 ÷ (" + nb(x) + " − 2) = <b>" + (x === 2 ? "impossible" : nb(+D.f(x).toFixed(4))) + "</b> (on veut 6)"); }
+    if (x !== null && s === 1) { o.fns.push({ f: (t) => (3 * t + 1) / (t - x), cls: "f-accent", w: 2 }); out = plain("En rouge, (3x + 1) ÷ (x − " + nb(x) + ") : " + (x === 2 ? '<b class="act-ok">symétrique de f par rapport à y = x</b>' : "pas le symétrique de f")); }
+    if (x !== null && s === 2) { o.fns.push({ f: (t) => (2 * t + 1) / (4 - t), cls: "f-accent", w: 2 }); o.hl = [[x, "f-accent"]]; out = plain("En rouge, f⁻¹ ; ta droite y = " + nb(x) + (x === -2 ? ' <b class="act-ok">est bien son asymptote</b>' : " n'est pas son asymptote")); }
+    return graph(o) + out;
+  };
+
+  Object.assign(ACTIVE, {
+    fracetage: {
+      predict: { q: "Que vaut \\(\\dfrac{\;\\frac{1}{2}\;}{\;\\frac{1}{4}\;}\\) ?", choices: ["2", "1/8", "1/2"], good: 0,
+        why: "Diviser par 1/4, c'est multiplier par 4 : 1/2 · 4 = 2. Il y a bien deux quarts dans une moitié." },
+      defis: ["Calcule \\(\\dfrac{1 + \\frac{1}{3}}{1 - \\frac{1}{3}}\\).", "Pour \\(x = 4\\), calcule \\(\\dfrac{1 + \\frac{2}{x}}{1 - \\frac{2}{x}}\\).", "\\(\\dfrac{\;\\frac{6}{x}\;}{\;\\frac{2}{x^2}\;} = k \\cdot x\\). Que vaut \\(k\\) ?"],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["étage du haut : 1 + 1/3 = 4/3 ; étage du bas : 1 − 1/3 = 2/3", "on multiplie haut et bas par x : (x + 2) ÷ (x − 2)", "6/x · x²/2 (on multiplie par l'inverse du bas)"][s] + " ; " + tu(x)),
+        wins: [W(2, "(4/3) ÷ (2/3) = 4/3 · 3/2 = 2. Ou : on multiplie haut et bas par 3, (3 + 1) ÷ (3 − 1) = 2."), W(3, "(1 + 1/2) ÷ (1 − 1/2) = 1,5 ÷ 0,5 = 3 ; et (x + 2) ÷ (x − 2) = 6 ÷ 2 = 3."), W(3, "6/x · x²/2 = 6x²/(2x) = 3x, donc k = 3.")] }),
+    },
+    eqrat: {
+      predict: { q: "Pour résoudre 6 ÷ (x − 1) = 2, que vaut-il mieux dire de x = 1 ?", choices: ["il est interdit", "c'est la solution", "c'est une solution parmi d'autres"], good: 0,
+        why: "x = 1 annule le dénominateur : 6 ÷ 0 n'existe pas. On le note d'abord, puis on résout : 6 = 2(x − 1), x = 4, qui est permis." },
+      defis: ["Résous \\(\\dfrac{12}{x + 2} = 3\\).", "Résous \\(\\dfrac{x + 3}{x - 1} = \\dfrac{5}{2}\\) (fraction acceptée).", "Résous \\(\\dfrac{x^2}{x - 3} = \\dfrac{9}{x - 3}\\)."],
+      play: hunt({ ask: true, label: "x =", show: (x, s) => plain([x === -2 ? "x = −2 est interdit !" : "12 ÷ (" + nb(x) + " + 2) = " + nb(+(12 / (x + 2)).toFixed(4)) + " (on veut 3)",
+        x === 1 ? "x = 1 est interdit !" : "(" + nb(x) + " + 3) ÷ (" + nb(x) + " − 1) = " + nb(+((x + 3) / (x - 1)).toFixed(4)) + " (on veut 2,5)",
+        x === 3 ? "x = 3 annule le dénominateur : 9 ÷ 0 n'existe pas, cette valeur est interdite !" : "x² = " + nb(x * x) + " (on veut 9)"][s]),
+        miss: (x, s) => ["Multiplie les deux membres par (x + 2) : 12 = 3(x + 2).", "Produit en croix : 2(x + 3) = 5(x − 1).", x === 3 ? "3 est interdit : cherche l'autre solution de x² = 9." : "Multiplie par (x − 3) : x² = 9."][s],
+        wins: [W(2, "12 = 3x + 6, donc x = 2 (permis : seul −2 est interdit)."), W(11 / 3, "2x + 6 = 5x − 5, donc 3x = 11 et x = 11/3."), W(-3, "x² = 9 donne 3 ou −3 ; 3 est interdit : la seule solution est −3.")] }),
+    },
+    probrat: {
+      predict: { q: "Un robinet remplit une citerne en 3 h, un autre en 6 h. Ouverts ensemble, ils la remplissent en…", choices: ["2 h", "4 h 30", "9 h"], good: 0,
+        why: "En 1 h, le premier remplit 1/3 de la citerne, le second 1/6 : ensemble 1/3 + 1/6 = 1/2. Il faut donc 2 h. Ensemble, on va plus vite que le plus rapide !" },
+      defis: ["Anna repeint une clôture en 4 h, Ben en 12 h. Ensemble, en combien d'heures ?", "Deux imprimantes impriment ensemble un lot en 6 min ; la première, seule, en 10 min. Combien de minutes met la seconde, seule ?", "Un cycliste parcourt 60 km. S'il roulait 5 km/h plus vite, il mettrait 1 h de moins. Quelle est sa vitesse (km/h) ?"],
+      play: hunt({ ask: true, label: "Ta réponse",
+        show: (x, s) => plain([x > 0 ? "En 1 h : 1/4 + 1/12 de la clôture ; en " + nb(x) + " h ensemble, ils en feraient " + nb(+(x / 3).toFixed(3)) + " fois la clôture" : tu(x),
+          x > 0 ? "1/10 + 1/" + nb(x) + " = " + nb(+(1 / 10 + 1 / x).toFixed(4)) + " du lot par minute (il faut 1/6 ≈ 0,1667)" : tu(x),
+          x > 0 ? "à " + nb(x) + " km/h : " + nb(+(60 / x).toFixed(3)) + " h ; à " + nb(x + 5) + " km/h : " + nb(+(60 / (x + 5)).toFixed(3)) + " h ; écart " + nb(+(60 / x - 60 / (x + 5)).toFixed(3)) + " h" : tu(x)][s]),
+        miss: (x, s) => ["En 1 h : 1/4 + 1/12 = 1/t.", "1/10 + 1/t = 1/6, donc 1/t = 1/6 − 1/10.", "60/v − 60/(v + 5) = 1 ; essaie des vitesses et regarde l'écart."][s],
+        wins: [W(3, "1/4 + 1/12 = 3/12 + 1/12 = 4/12 = 1/3 de la clôture par heure : 3 h ensemble."), W(15, "1/t = 1/6 − 1/10 = 5/30 − 3/30 = 2/30 = 1/15 : 15 min."), W(15, "60/v − 60/(v + 5) = 1 donne v² + 5v − 300 = 0, soit (v − 15)(v + 20) = 0 : 15 km/h (4 h, contre 3 h à 20 km/h).")] }),
+    },
+    homog: {
+      predict: { q: "f(x) = (2x + 1) ÷ (x − 3). Pour quelle valeur de x la fonction n'existe-t-elle pas ?", choices: ["3", "−3", "−1/2"], good: 0,
+        why: "x = 3 annule le dénominateur. Près de 3, la courbe file vers le haut ou le bas : elle longe une droite verticale sans la toucher, l'asymptote verticale x = 3." },
+      defis: ["f(x) = (ax + 1) ÷ (x + d). Règle d pour placer l'asymptote verticale en x = 3.", "Quand x devient très grand, la courbe longe une droite horizontale : l'asymptote horizontale. Règle a pour qu'elle soit y = −2.", "Règle a et d pour que la courbe passe par (0 ; 0,5) et ait pour asymptote horizontale y = 3."],
+      play: slide({
+        ctl: () => [{ k: "a", lab: "a (devant x en haut)", min: -4, max: 4 }, { k: "d", lab: "d (en bas)", min: -4, max: 4 }],
+        init: (s) => [{ a: 1, d: 2 }, { a: 1, d: -3 }, { a: -2, d: -3 }][s],
+        fig: (st, s) => graph({ xr: [-7, 7], yr: [-7, 7], eq: true, fns: [{ f: (x) => (st.a * x + 1) / (x + st.d) }], vl: [[-st.d, "f-accent"]], hl: s ? [[st.a, "f-accent"]] : [],
+          pts: s === 2 ? [[0, 0.5, "(0 ; 0,5)", "f-dot", "r"]] : [], lab: "hyperbole et ses asymptotes" }),
+        out: (st, s) => "f(x) = " + homT(st.a, st.d) + "<br>asymptote verticale <b>x = " + nb(-st.d) + "</b>" + (s ? " ; asymptote horizontale <b>y = " + nb(st.a) + "</b>" : "") + (st.a * st.d === 1 ? '<br><span class="small">Cas particulier : le haut et le bas se simplifient, la courbe devient une droite.</span>' : st.d === 0 ? "" : s === 2 ? '<br><span class="small">f(0) = 1 ÷ ' + nb(st.d) + " = " + nb(+(1 / st.d).toFixed(3)) + "</span>" : ""),
+        goal: [(st) => (st.d === -3 && st.a * st.d !== 1 ? "d = −3 : le dénominateur x − 3 s'annule en 3, d'où l'asymptote x = 3." : ""),
+          (st) => (st.a === -2 && st.d === -3 ? "Pour x très grand, (−2x + 1) ÷ (x − 3) ≈ −2x ÷ x = −2 : le rapport des nombres devant x." : ""),
+          (st) => (st.a === 3 && st.d === 2 ? "f(0) = 1 ÷ d = 0,5 donne d = 2, et le rapport 3 ÷ 1 donne l'asymptote y = 3." : "")],
+        miss: (st, s) => (s === 2 && st.a === 3 ? "L'asymptote est bonne. Pour f(0) = 0,5, il faut 1 ÷ d = 0,5." : s === 2 && st.d === 2 ? "f(0) est bon. L'asymptote horizontale dépend de a." : ""),
+        ask: [null, { q: "f(x) = \\(\\dfrac{6x - 1}{2x + 4}\\). Asymptote horizontale : y = ?", ans: 3, ok: "6x ÷ 2x = 3 : asymptote y = 3 (les nombres −1 et 4 ne comptent pas).", no: "Pour x très grand, seuls les termes en x comptent : 6x ÷ 2x." }, null] }),
+    },
+    homogrec: {
+      predict: { q: "f(x) = 3 ÷ (x − 2). On sait que f(5) = 1. Que vaut f⁻¹(1) ?", choices: ["5", "1", "1/5"], good: 0,
+        why: "La réciproque défait ce que fait f : f envoie 5 sur 1, donc f⁻¹ renvoie 1 sur 5. Sur le graphe, (5 ; 1) devient (1 ; 5) : symétrie par rapport à la droite y = x." },
+      defis: ["f(x) = 3 ÷ (x − 2). Calcule f⁻¹(6), c'est-à-dire le x tel que f(x) = 6.", "f(x) = (2x + 1) ÷ (x − 3). En isolant x dans y = f(x), on trouve f⁻¹(x) = (3x + 1) ÷ (x − c). Que vaut c ?", "f(x) = (4x − 1) ÷ (x + 2). L'asymptote horizontale de f⁻¹ est y = … ?"],
+      play: hunt({ ask: true, label: "Ta réponse", blank: (s) => hrFig(s, null), show: (x, s) => hrFig(s, x),
+        miss: (x, s) => ["3 ÷ (x − 2) = 6 donne x − 2 = 3 ÷ 6.", "y(x − 3) = 2x + 1, donc xy − 2x = 3y + 1 : mets x en évidence.", "Ce qui est vertical pour f devient horizontal pour f⁻¹ (symétrie par rapport à y = x)."][s],
+        wins: [W(2.5, "x − 2 = 0,5, donc f⁻¹(6) = 2,5 ; le point (2,5 ; 6) de f devient (6 ; 2,5) sur f⁻¹."), W(2, "x(y − 2) = 3y + 1, donc x = (3y + 1) ÷ (y − 2) ; on échange les lettres : c = 2."), W(-2, "f a pour asymptote verticale x = −2 ; par symétrie, f⁻¹ a pour asymptote horizontale y = −2.")] }),
+    },
+  });
 })();
