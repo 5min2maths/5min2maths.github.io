@@ -1,17 +1,16 @@
 # Plan de l'aide pas à pas (généré par tools/plan_pas_a_pas.py — ne pas éditer à la main)
 
-Couverture : 139 notions complètes (3 niveaux), 0 partielles, 40 à faire, sur 179.
+Couverture : 144 notions complètes (3 niveaux), 0 partielles, 35 à faire, sur 179.
 Rythme visé : 1 lot de 5 notions par séance de travail, 2 séances par semaine → ≈ 4 semaines.
 
 Méthode par lot : GS() pour chaque niveau (2 à 4 étapes, la dernière = la réponse), q.traps pour les erreurs typiques ;
 problèmes à contexte : au moins 3 situations parlantes par niveau, étiquette ctx (règle du 14.11 : jamais le même contexte en boucle),
 puis tests/test.html (contrôle des guides) et tests/trivial.html, commit, push. Le point du jour affiche le prochain lot.
 
-- [ ] Lot 1 (10e CO) : dec10, proptab, decread, deccomp, decarr
-- [ ] Lot 2 (9e CO) : decprob, pow9, ulong, uaire, angtype
-- [ ] Lot 3 (9e CO) : quadri, multdiv, perim, aire1, aire2
-- [ ] Lot 4 (9e CO) : relrep, volpave, change, symetries, cart
-- [ ] Lot 5 (2e Collège) : cercle, cercletan, polydiv, polyfact, polyexpr
-- [ ] Lot 6 (2e Collège) : fracetage, eqrat, probrat, homog, homogrec
-- [ ] Lot 7 (2e Collège) : expo, expfrac, modexp, compo, decomp
-- [ ] Lot 8 (2e Collège) : bijection, recip, log, logbase, vecteurs
+- [ ] Lot 1 (9e CO) : decprob, pow9, ulong, uaire, angtype
+- [ ] Lot 2 (9e CO) : quadri, multdiv, perim, aire1, aire2
+- [ ] Lot 3 (9e CO) : relrep, volpave, change, symetries, cart
+- [ ] Lot 4 (2e Collège) : cercle, cercletan, polydiv, polyfact, polyexpr
+- [ ] Lot 5 (2e Collège) : fracetage, eqrat, probrat, homog, homogrec
+- [ ] Lot 6 (2e Collège) : expo, expfrac, modexp, compo, decomp
+- [ ] Lot 7 (2e Collège) : bijection, recip, log, logbase, vecteurs
