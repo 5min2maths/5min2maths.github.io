@@ -24,6 +24,28 @@ const LES={
   factor(){ const ex=[]; drag(0,160,46+2*26+12); ex.push(/partage|pareilles|rangée/.test(hint())?"aide ok":"AIDE ABSENTE:"+hint());
     const G=[3,5,6]; for(let s=0;s<3;s++){ if(s===1){ for(let j=0;j<4;j++) key(0,"ArrowDown"); } else drag(0,160,46+G[s]*26+12); if(B().__manip.asking) answer(4); ex.push("défi "+(s+1)+(step()>s?" ✓":" ✗ k="+S().k)); } return ex; },
   eq1(){ const ex=[]; for(let s=0;s<3;s++){ solveBal(); if(B().__manip.asking) answer(-4); ex.push("défi "+(s+1)+(step()>s?" ✓":" ✗ "+document.querySelector(".manip-out").textContent+" | "+hint())); } return ex; },
+  fracadd(){ const ex=[], DEN=[2,3,4,5,6,8,10,12], ry=117, chip=(d)=>S().row.length+DEN.indexOf(d);
+    drag(chip(4),150,ry); drag(chip(6),150,ry); ex.push(/pareilles/.test(hint())?"mélange refusé":"MÉLANGE ACCEPTÉ:"+hint()); tap(0); tap(0);
+    const need=[[12,5],[6,5],[12,7]]; for(let s=0;s<3;s++){ const [d,n]=need[s]; for(let i=0;i<n&&step()===s;i++){ if(i%2) tap(chip(d)); else drag(chip(d),160,ry); } if(B().__manip.asking) answer(13); ex.push("défi "+(s+1)+(step()>s?" ✓":" ✗ "+hint())); } return ex; },
+  rel(){ const ex=[], X=(v)=>160+v*14, W=[[-5,7],[3,-8],[-2,6]];
+    for(let s=0;s<3;s++){ if(s===2){ drag(0,X(-8),96); ex.push(/retourne/.test(hint())?"piège ok":"PIÈGE:"+hint()); } if(s===1){ for(let j=0;j<8;j++) key(0,"ArrowLeft"); } else drag(0,X(W[s][0]+W[s][1]),96); if(B().__manip.asking) answer(s===1?-3:3); ex.push("défi "+(s+1)+(step()>s?" ✓":" ✗ "+hint())); } return ex; },
+  thales(){ const ex=[], X=(u)=>30+u*21.5, Y=(v)=>204-v*21.5;
+    drag(0,X(6),Y(0)); ex.push("défi 1"+(step()>0?" ✓":" ✗")); drag(0,X(9),Y(0)); answer(6); ex.push("défi 2"+(step()>1?" ✓":" ✗"));
+    drag(0,X(4),Y(0)); ex.push(/Déforme/.test(hint())?"aide ok":"AIDE:"+hint()); drag(1,X(4),Y(6)); drag(0,X(5),Y(0)); drag(0,X(4),Y(0)); answer(10); ex.push("défi 3"+(step()>2?" ✓":" ✗ "+hint())); return ex; },
+  simil(){ const ex=[], C=(k)=>[34+30*k,262-30*k]; drag(0,...C(3)); answer(25); ex.push("défi 1"+(step()>0?" ✓":" ✗")); drag(0,...C(0.5)); ex.push("défi 2"+(step()>1?" ✓":" ✗")); drag(0,...C(2.5)); answer(8); ex.push("défi 3"+(step()>2?" ✓":" ✗")); return ex; },
+  angles(){ const ex=[], P=(a)=>[160+100*Math.cos(a*Math.PI/180),130-100*Math.sin(a*Math.PI/180)]; const t0=S().th; key(0,"ArrowUp"); ex.push(S().th===t0+5?"clavier ok":"CLAVIER "+S().th);
+    drag(0,...P(120)); answer(70); ex.push("défi 1"+(step()>0?" ✓":" ✗ "+S().th)); drag(0,...P(50)); answer(110); ex.push("défi 2"+(step()>1?" ✓":" ✗")); drag(0,...P(90)); answer(57); ex.push("défi 3"+(step()>2?" ✓":" ✗")); return ex; },
+  angtri(){ const ex=[], X=(u)=>10+u*20, Y=(v)=>190-v*20; drag(2,X(2),Y(1)); ex.push(!(S().P[2][0]===2&&S().P[2][1]===1)?"dégénéré refusé":"DÉGÉNÉRÉ ACCEPTÉ");
+    drag(2,X(2),Y(7)); answer(55); ex.push("défi 1"+(step()>0?" ✓":" ✗")); drag(1,X(10),Y(1)); ex.push("défi 2"+(step()>1?" ✓":" ✗")); drag(2,X(7),Y(2)); answer(360); ex.push("défi 3"+(step()>2?" ✓":" ✗")); return ex; },
+  diagr(){ const ex=[], BX=(i)=>52+i*54+18, y=(v)=>204-v*7; [12,18,9,21].forEach((v,i)=>{ if(i===2){ for(let j=0;j<4;j++) key(2,"ArrowUp"); } else drag(i,BX(i),y(v)); }); ex.push("défi 1"+(step()>0?" ✓":" ✗ "+hint()));
+    drag(0,296,y(12)); ex.push(/monte/.test(hint())?"aide ok":"AIDE:"+hint()); drag(0,296,y(15)); ex.push("défi 2"+(step()>1?" ✓":" ✗")); drag(0,BX(4),y(20)); answer(4.9); ex.push("défi 3"+(step()>2?" ✓":" ✗")); return ex; },
+  vol(){ const ex=[], P=(x,y,z)=>[150+(x-y)*13,114+(x+y)*7.5-z*15];
+    drag(2,P(2,1.5,0)[0],P(2,1.5,0)[1]-45-16); ex.push("défi 1"+(step()>0?" ✓":" ✗ "+JSON.stringify(S())));
+    drag(0,...P(4.8,0,0)); drag(1,...P(0,3.8,0)); drag(2,P(2,1.5,0)[0],P(2,1.5,0)[1]-30-16); ex.push("défi 2"+(step()>1?" ✓":" ✗ "+JSON.stringify(S())));
+    drag(0,...P(2.8,0,0)); drag(2,P(1,1.5,0)[0],P(1,1.5,0)[1]-60-16); answer(8); ex.push("défi 3"+(step()>2?" ✓":" ✗ "+JSON.stringify(S()))); return ex; },
+  sys2(){ const ex=[], X=(x)=>104+x*18, Y=(y)=>196-y*18; drag(0,X(0),Y(10)); ex.push(/une seule/.test(hint())?"aide ok":"AIDE:"+hint());
+    [[6,4],[2,5],[-2,1]].forEach(([x,y],s)=>{ drag(0,X(x),Y(y)); if(B().__manip.asking) answer(4); ex.push("défi "+(s+1)+(step()>s?" ✓":" ✗")); }); return ex; },
+  utemps(){ const ex=[], XM=(m)=>22+276*m/60; drag(0,XM(45),56); ex.push("défi 1"+(step()>0?" ✓":" ✗ "+S().m)); key(0,"ArrowRight"); key(0,"ArrowRight"); ex.push("défi 2"+(step()>1?" ✓":" ✗ "+S().m)); drag(0,XM(21),56); answer(1.4); ex.push("défi 3"+(step()>2?" ✓":" ✗")); return ex; },
 };
 function area(useTap,ans){ const ex=[]; for(let s=0;s<3;s++){ const n=S().cells.length, src={x2:0,x:1,"1":2};
     if(s===0){ // mauvaise tuile d'abord

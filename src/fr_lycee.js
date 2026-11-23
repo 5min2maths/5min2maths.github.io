@@ -56,10 +56,10 @@
   // Nuage des premiers termes d'une suite (registre graphique) : n en abscisse, u_n en ordonnée.
   const figSuite = (terms) => {
     const W = 320, H = 210, x0 = 40, y0 = 180, lo = Math.min(0, ...terms), hi = Math.max(0, ...terms), span = hi - lo || 1;
-    const raw = span / 5, mag = 10 ** Math.floor(Math.log10(raw)), step = [1, 2, 5, 10].map((k) => k * mag).find((s) => s >= raw);
+    const raw = span / 12, mag = 10 ** Math.floor(Math.log10(raw)), step = [1, 2, 5, 10].map((k) => k * mag).find((s) => s >= raw), lab = span / step > 8 ? 2 : 1;
     const a = Math.floor(lo / step) * step, b = Math.ceil(hi / step) * step, Y = (v) => y0 - ((v - a) / (b - a)) * 160, Xn = (n) => x0 + 16 + n * ((W - x0 - 30) / Math.max(terms.length - 1, 1));
     let g = "";
-    for (let v = a; v <= b + 1e-9; v += step) g += Ln(x0, Y(v), W - 8, Y(v), "f-grid", 1) + T(x0 - 6, Y(v) + 4, dTxt(v), { cls: "f-txt f-tick", a: "end", fs: 12 });
+    for (let v = a, i = 0; v <= b + 1e-9; v += step, i++) g += Ln(x0, Y(v), W - 8, Y(v), "f-grid", 1) + (Math.round(v / step) % lab === 0 ? T(x0 - 6, Y(v) + 4, dTxt(rnd(v, 6)), { cls: "f-txt f-tick", a: "end", fs: 12 }) : "");
     g += Ln(x0, Y(0), W - 8, Y(0), "f-line", 1.6) + Ln(x0, 12, x0, y0 + 4, "f-line", 1.6);
     terms.forEach((t, n) => (g += T(Xn(n), Math.min(H - 4, Y(a) + 18), n, { cls: "f-txt f-tick", fs: 12 }) + '<circle cx="' + Xn(n).toFixed(1) + '" cy="' + Y(t).toFixed(1) + '" r="4.5" class="f-dot"/>'));
     g += T(W - 10, Math.min(H - 4, Y(a) + 18), "n", { a: "end", fs: 13 }) + T(x0 + 6, 16, "uₙ", { a: "start", fs: 13 });
@@ -218,6 +218,12 @@
             traps: [TR(t - 3 * r + r, "De " + M("u_0") + " à " + M("u_3") + ", 3 pas : " + M("u_0 = u_3 - 3r") + "."), TR(s / 2 - 9 * r, "u_2 + u_7 = 2u_0 + 9r : divise aussi 9r par 2."), TR(r, "C'est la raison ; on demande " + M("u_0") + ".")] }); },
     ],
   };
+
+  SA[1].push(() => { const a = R.int(-4, 8), r = nz(-3, 3), k = R.int(9, 25), v = a + k * r, ts = [0, 1, 2, 3, 4, 5].map((n) => a + n * r); if (Math.abs(r) === 1 && R.rand() < 0.5) return null;
+    return QN("Le graphique représente les premiers termes d'une suite arithmétique " + M("(u_n)") + ". Lis " + M("u_0") + " et la raison, puis calcule " + M(u(k)) + ".", v,
+      "On lit " + M("u_0 = " + N(a)) + " et, d'un point au suivant, " + M(r > 0 ? "+" + r : N(r)) + " : " + M("r = " + N(r)) + ". " + M(u(k) + " = " + N(a) + " + " + k + X + NP(r) + " = " + N(v)) + ".",
+      { ctx: "graphique", fig: figSuite(ts), guide: [GS("Premier terme " + M("u_0") + " ?", a, M(N(a)) + "."), GS("Raison " + M("r") + " (écart vertical entre deux points voisins) ?", r, M(N(r)) + "."), GS(M(u(k)) + " = ?", v, M(N(v)) + ".")],
+        traps: [TR(a + (k - 1) * r, "Depuis " + M("u_0") + ", on ajoute la raison " + k + " fois."), TR(ts[5] + k * r, "On part de u_0, le premier point (n = 0)."), TR(a - k * r, "Regarde si les points montent ou descendent : signe de la raison.")] }); });
 
   // ===================== suitegeo =====================
   const SG = {
