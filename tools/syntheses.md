@@ -1,5 +1,21 @@
 # Synthèses de cours à façon (cartes mentales) — proposition du 23.11
 
+## Décisions de l'enseignant (23.11) et réalisation
+
+1. **Nom** : « Ma fiche ».
+2. **Mode par défaut** : « Je me teste » (règles à trous), bascule vers « Je relis ».
+3. **Emplacement** : derrière « Mon test » (bouton « 🗺 Ma fiche », limitée aux notions du test) et derrière « Progrès »
+   (carte « Mes fiches », une fiche par chapitre). Rien sur l'accueil (6 cases).
+4. **Erreurs personnelles** : oui, à l'écran et à l'impression (le carnet garde désormais le message de l'erreur reconnue
+   et la réponse donnée).
+5. **Carte du chapitre** : oui, avec « Je refais la carte ».
+6. **Périmètre** : 11e Calcul littéral et Proportionnalité d'abord, puis le reste de la 11e. Trous, « L'essentiel » et liens
+   de la carte rédigés par Claude, **à valider par l'enseignant** (`src/fiche_data.js`).
+
+Réalisé sur la branche `agent/fiche` : `src/fiche.js` (écran, carte SVG, carte de mémoire, impression A4 paysage
+3 colonnes à compléter / corrigé), `src/fiche_data.js` (chapitres 11C04 et 11C05), branchements minimaux dans `app.js`
+(commentés « 22.11 »), test `tests/fiche.html`.
+
 Maquette : `design/maquette_synthese.html` (3 écrans à 360 px, chapitre 11e « Calcul littéral », rien n'est branché).
 Statut : **à contrôler**, aucune ligne de code de l'app modifiée.
 

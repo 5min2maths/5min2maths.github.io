@@ -432,7 +432,8 @@ function screenHome() {
   };
   // 22.11 : accueil à cases (maquette design/maquette_accueil.html) ; chaque case ouvre une page « ← Accueil ».
   panels.carnet = () => carnetCard(true) || `<div class="card flat stack"><div class="eyebrow">📕 Carnet d'erreurs</div><p class="small muted">Vide : bravo ! Chaque question ratée viendra s'y ranger, pour que tu puisses la réussir plus tard.</p></div>`;
-  panels.prog = () => `${newBadgesCard()}${themeMapCard()}${compsCard()}`;
+  // 22.11 : « Ma fiche » (src/fiche.js) : une fiche par chapitre derrière Progrès.
+  panels.prog = () => `${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}`;
   if (!panels[homeTab]) homeTab = "today";
   const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted">${gradeName(state.profile)}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
   if (homeTab !== "today") {
@@ -509,6 +510,7 @@ function screenHome() {
   on("preptask", () => startPrepTask(prepKind()));
   on("preptab", () => { homeTab = "test"; screenHome(); });
   on("prepauto", () => screenQcm());
+  if (typeof screenFiche === "function") { on("prepfiche", () => screenFiche({ test: true })); app.querySelectorAll("[data-fiche]").forEach((b) => (b.onclick = () => screenFiche({ chap: b.dataset.fiche }))); } // 22.11 : Ma fiche
   app.querySelectorAll(".pday").forEach((b) => (b.onclick = () => { app.querySelectorAll(".pday").forEach((x) => x.classList.toggle("sel", x === b)); const i = document.getElementById("pdayinfo"); if (i) i.innerHTML = b.dataset.info; }));
   on("carnetgo", () => startCarnet());
 }
@@ -968,10 +970,12 @@ const FREE_THEMES = { no: "Nombres et opérations", fa: "Fonctions et algèbre",
 // Chaque question ratée en séance entre dans le carnet (une entrée par notion et niveau). « Effacer mes erreurs » la
 // repose avec d'autres nombres ; elle sort après deux réussites de suite du premier coup, un échec remet le compteur à 0.
 const CARNET_MAX = 40, CARNET_OK = 2;
-function carnetAdd(id, d, code) {
+// 22.11 : m = erreur reconnue (diagnostic), a = réponse donnée : affichées dans « Ma fiche ».
+function carnetAdd(id, d, code, m, a) {
   if (!state || !id || !d || d > 3) return false;
   const c = (state.carnet = state.carnet || []), e = c.find((x) => x.id === id && x.d === d);
   if (e) { e.ok = 0; e.code = code; e.date = day(); } else c.push({ id, d, code, date: day(), ok: 0 });
+  { const x = c.find((y) => y.id === id && y.d === d); if (m) { x.m = String(m).slice(0, 300); x.a = a ? String(a).slice(0, 60) : undefined; } else { delete x.m; delete x.a; } } // 22.11
   state.carnet = c.slice(-CARNET_MAX);
   return true;
 }
@@ -1084,7 +1088,7 @@ function prepPanel(left) {
     <p class="small muted">Touche un jour pour voir ce qu'on y fait.</p></div>
   <div class="card flat stack"><h3>En plus, quand tu veux</h3>
     <div class="tools2"><button class="btn-sec" id="prepauto">📋 ${A && A.runs.length ? "Ma grille" : "Autoévaluation"}<span class="small muted">${R0 ? okA + " juste" + (okA > 1 ? "s" : "") + " sur " + nA : "pas encore faite"}</span></button>
-    <button class="btn-sec" id="mock">📝 Sujet de préparation<span class="small muted">${mk ? (mk.n ? mk.juste + " juste" + (mk.juste > 1 ? "s" : "") + " sur " + mk.n : "fait") : "avec corrigé"}</span></button></div></div>`;
+    <button class="btn-sec" id="mock">📝 Sujet de préparation<span class="small muted">${mk ? (mk.n ? mk.juste + " juste" + (mk.juste > 1 ? "s" : "") + " sur " + mk.n : "fait") : "avec corrigé"}</span></button>${typeof screenFiche === "function" ? '<button class="btn-sec fiche-btn" id="prepfiche">🗺 Ma fiche<span class="small muted">carte et règles du test</span></button>' : ""}</div></div>`; // 22.11 : Ma fiche
 }
 function prepProgramHtml() {
   const J = (dt) => { const d = new Date(dt + "T12:00:00"); return ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."][d.getDay()] + " " + d.getDate() + "." + String(d.getMonth() + 1).padStart(2, "0"); };
@@ -1183,7 +1187,7 @@ function nextQuestion(redo) {
       const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
       // Carnet d'erreurs (20.11) : séance « carnet » → progression ; ailleurs, une question ratée y entre.
       if ((session.carnet || kind === "carnet") && !redo) { const r = carnetResult(id, q.d, res.solved && res.tries === 1); if (r === "efface") toast("📕 Effacée de ton carnet d'erreurs ✓"); else if (r === "encore") toast("📕 1 réussite sur 2 : encore une, du premier coup, et elle sort du carnet.", 4000); else if (r === "rate") toast("📕 Elle reste dans ton carnet : il faut 2 réussites de suite, du premier coup.", 4000); }
-      else if (!res.solved && !q.parts && !session.weekly && carnetAdd(id, q.d, q.code)) toast("📕 Rangée dans ton carnet d'erreurs : tu pourras la refaire.");
+      else if (!res.solved && !q.parts && !session.weekly && carnetAdd(id, q.d, q.code, res.diag, res.ans)) toast("📕 Rangée dans ton carnet d'erreurs : tu pourras la refaire.");
       // Deux échecs de suite : on glisse juste après une question sur une notion de base (une fois par notion et par séance).
       if (!session.weekly && !session.prep && !session.carnet && sc < 0.5) {
         session.remed = session.remed || new Set();
@@ -1420,7 +1424,7 @@ function renderQuestion(q, opt) {
   const stopBtn = document.getElementById("stop");
   if (stopBtn) stopBtn.onclick = screenSummary;
 
-  let lastDiag = null;
+  let lastDiag = null, lastAns = null; // 22.11 : lastAns pour le carnet
   const end = (solved, dontKnow) => {
     finished = true;
     inp.disabled = true;
@@ -1430,7 +1434,7 @@ function renderQuestion(q, opt) {
     app.querySelectorAll(".card .answer > .actions, .card .skips").forEach((el) => (el.style.display = "none"));
     buzz(solved);
     setTimeout(() => { const f = document.getElementById("fb"); if (f && f.getBoundingClientRect().top > innerHeight * 0.75) f.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80);
-    const res = { solved, tries, dontKnow };
+    const res = { solved, tries, dontKnow, diag: solved ? null : lastDiag, ans: solved ? null : lastAns }; // 22.11 : diag et réponse pour le carnet (Ma fiche)
     if (S) { S.issue = solved ? (tries === 1 ? "ok1" : "ok2") : dontKnow ? "idk" : "faux"; S.essais = tries; S.sec = sigSec(S); }
     if (solved) burst();
     const delta = opt.onDone(res);
@@ -1503,7 +1507,7 @@ function renderQuestion(q, opt) {
     const ez = document.getElementById("easy"); if (ez) ez.remove();
     const ny = document.getElementById("notyet"); if (ny) ny.remove();
     const diag = r.status === "wrong" || (r.status === "close" && q.spec.kind === "set") ? diagnose(q, v) : null;
-    lastDiag = diag;
+    lastDiag = diag; if (diag) lastAns = v;
     if (S && !S.rep1) { S.rep1 = sigRep(v); S.diag = diag ? 1 : 0; }
     if (opt.single || tries >= 2) return end(false);
     buzz(false);
