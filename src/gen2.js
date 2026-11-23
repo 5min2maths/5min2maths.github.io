@@ -267,18 +267,18 @@ Object.assign(GEN, {
     if (d === 1) {
       const n = R.pick([4, 5, 6]), xs = Array.from({ length: n }, () => R.int(2, 20)), sum = xs.reduce((a, b) => a + b, 0);
       if ((sum * 2) % n) return GEN.diagr(1);
-      return { fig: FIG.barChart(xs), q: "Calcule la moyenne de la série : " + M(xs.join(" ; ")) + ".", spec: { kind: "value", value: sum / n }, sol: M("\\frac{" + xs.join(" + ") + "}{" + n + "} = \\frac{" + sum + "}{" + n + "} = " + dec(sum / n)) + "." };
+      return { fig: FIG.barChart(xs), guide: [GS("Somme des valeurs ?", sum, M(xs.join(" + ") + " = " + sum) + "."), GS("Moyenne = somme : nombre de valeurs (" + n + ") ?", sum / n, M(sum + " : " + n + " = " + dec(sum / n)) + ".")], q: "Calcule la moyenne de la série : " + M(xs.join(" ; ")) + ".", spec: { kind: "value", value: sum / n }, sol: M("\\frac{" + xs.join(" + ") + "}{" + n + "} = \\frac{" + sum + "}{" + n + "} = " + dec(sum / n)) + "." };
     }
     if (d === 2) {
       const tot = R.pick([20, 25, 40, 50, 80]), k = R.pick([2, 3, 4, 5, 6, 8, 10]), part = Math.round((tot * k) / 20);
       const ang = (part / tot) * 360;
       if (!Number.isInteger(ang)) return GEN.diagr(2);
-      return { fig: FIG.sector("", ang, "?"), q: "Dans une classe de " + M(tot) + " élèves, " + M(part) + " viennent à vélo. Dans un diagramme circulaire, quel angle (en degrés) a le secteur « vélo » ?", spec: { kind: "value", value: ang }, sol: M("\\frac{" + part + "}{" + tot + "} \\cdot 360° = " + ang + "°") + "." };
+      return { fig: FIG.sector("", ang, "?"), guide: [GS("Quelle fraction de la classe vient à vélo ? " + M(part + " : " + tot) + " = ?", part / tot, M("\\frac{" + part + "}{" + tot + "} = " + dec(part / tot)) + "."), GS("Angle = fraction · 360° ?", ang, M(dec(part / tot) + " \\cdot 360° = " + ang + "°") + ".")], q: "Dans une classe de " + M(tot) + " élèves, " + M(part) + " viennent à vélo. Dans un diagramme circulaire, quel angle (en degrés) a le secteur « vélo » ?", spec: { kind: "value", value: ang }, sol: M("\\frac{" + part + "}{" + tot + "} \\cdot 360° = " + ang + "°") + "." };
     }
     const notes = [4, 4.5, 5, 5.5, 6], eff = notes.map(() => R.int(1, 6));
     const n = eff.reduce((a, b) => a + b, 0); if (n < 8) return GEN.diagr(3);
     const s = notes.reduce((a, v, i) => a + v * eff[i], 0), m = s / n;
-    return { fig: FIG.barChart(eff), q: "Notes d'un test : " + notes.map((v, i) => M(dec(v)) + " (" + eff[i] + " élève" + (eff[i] > 1 ? "s" : "") + ")").join(", ") + ". Calcule la moyenne de la classe, au centième.", spec: { kind: "value", value: m, round: 0.01 }, sol: "Somme pondérée " + M(dec(s)) + " pour " + M(n) + " élèves : " + M(dec(s) + " : " + n + " \\approx " + dec(m.toFixed(2))) + "." };
+    return { fig: FIG.barChart(eff), guide: [GS("Nombre d'élèves ?", n, M(eff.join(" + ") + " = " + n) + "."), GS("Somme pondérée (chaque note · son effectif) ?", s, M(notes.map((v, i) => dec(v) + " \\cdot " + eff[i]).join(" + ") + " = " + dec(s)) + "."), GS("Moyenne au centième ?", m, M(dec(s) + " : " + n + " \\approx " + dec(m.toFixed(2))) + ".", 0.01)], q: "Notes d'un test : " + notes.map((v, i) => M(dec(v)) + " (" + eff[i] + " élève" + (eff[i] > 1 ? "s" : "") + ")").join(", ") + ". Calcule la moyenne de la classe, au centième.", spec: { kind: "value", value: m, round: 0.01 }, sol: "Somme pondérée " + M(dec(s)) + " pour " + M(n) + " élèves : " + M(dec(s) + " : " + n + " \\approx " + dec(m.toFixed(2))) + "." };
   },
 
   aires(d) {
@@ -346,10 +346,10 @@ Object.assign(GEN, {
 
   polyreg(d) {
     const n = R.pick([5, 6, 8, 9, 10, 12]);
-    if (d === 1) return { fig: FIG.regPoly(n, "?"), q: "Quelle est la mesure de l'angle au centre d'un polygone régulier à " + M(n) + " côtés (en degrés) ?", spec: { kind: "value", value: 360 / n }, sol: M("\\frac{360°}{" + n + "} = " + dec(360 / n) + "°") + "." };
-    if (d === 2) return { fig: FIG.regPoly(n, "?", true), q: "Quelle est la mesure d'un angle intérieur d'un polygone régulier à " + M(n) + " côtés (l'angle entre deux côtés voisins, marqué sur la figure), en degrés ?", spec: { kind: "value", value: ((n - 2) * 180) / n }, sol: "Somme des angles : " + M("(" + n + " - 2) \\cdot 180° = " + (n - 2) * 180 + "°") + " ; un angle : " + M(dec(((n - 2) * 180) / n) + "°") + "." };
+    if (d === 1) return { fig: FIG.regPoly(n, "?"), guide: [GS("Les " + n + " angles au centre font le tour complet : combien de degrés en tout ?", 360, "360°."), GS("Un angle au centre : " + M("360 : " + n) + " = ?", 360 / n, M(dec(360 / n) + "°") + ".")], q: "Quelle est la mesure de l'angle au centre d'un polygone régulier à " + M(n) + " côtés (en degrés) ?", spec: { kind: "value", value: 360 / n }, sol: M("\\frac{360°}{" + n + "} = " + dec(360 / n) + "°") + "." };
+    if (d === 2) return { fig: FIG.regPoly(n, "?", true), guide: [GS("Somme des angles intérieurs " + M("(n - 2) \\cdot 180°") + " = ?", (n - 2) * 180, M("(" + n + " - 2) \\cdot 180° = " + (n - 2) * 180 + "°") + "."), GS("Un angle : " + M((n - 2) * 180 + " : " + n) + " = ?", ((n - 2) * 180) / n, M(dec(((n - 2) * 180) / n) + "°") + ".")], q: "Quelle est la mesure d'un angle intérieur d'un polygone régulier à " + M(n) + " côtés (l'angle entre deux côtés voisins, marqué sur la figure), en degrés ?", spec: { kind: "value", value: ((n - 2) * 180) / n }, sol: "Somme des angles : " + M("(" + n + " - 2) \\cdot 180° = " + (n - 2) * 180 + "°") + " ; un angle : " + M(dec(((n - 2) * 180) / n) + "°") + "." };
     const m = R.pick([5, 6, 8, 9, 10, 12, 15, 18, 20]), a = ((m - 2) * 180) / m;
-    return { q: "Un angle intérieur d'un polygone régulier mesure " + M(dec(a) + "°") + ". Combien le polygone a-t-il de côtés ?", spec: { kind: "value", value: m }, sol: "L'angle au centre vaut " + M("180° - " + dec(a) + "° = " + dec(180 - a) + "°") + " ; " + M("n = \\frac{360}{" + dec(180 - a) + "} = " + m) + "." };
+    return { guide: [GS("Angle au centre = 180° − angle intérieur = ?", 180 - a, M("180° - " + dec(a) + "° = " + dec(180 - a) + "°") + "."), GS("Nombre de côtés = " + M("360 : " + dec(180 - a)) + " = ?", m, M(m) + ".")], q: "Un angle intérieur d'un polygone régulier mesure " + M(dec(a) + "°") + ". Combien le polygone a-t-il de côtés ?", spec: { kind: "value", value: m }, sol: "L'angle au centre vaut " + M("180° - " + dec(a) + "° = " + dec(180 - a) + "°") + " ; " + M("n = \\frac{360}{" + dec(180 - a) + "} = " + m) + "." };
   },
 
   // ===== CO 11e =====
