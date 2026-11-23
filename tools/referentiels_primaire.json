@@ -1,0 +1,2600 @@
+{
+ "_meta": {
+  "titre": "Référentiel du primaire (fin de primaire) : PER 7P–8P et France CM1–CM2",
+  "genere_par": "tools/referentiels_primaire.py",
+  "date": "2026-11-23",
+  "perimetre": "Décision du 23.11 : fin de primaire seulement (7P–8P, CM1–CM2). 1P–6P et CP–CE2 non traités (app peu adaptée : voir tools/primaire.md).",
+  "sources": "~/DATA/Enseignement/Sources/Officiel/PER_Suisse_romande et ~/DATA/Enseignement/Sources/Officiel/France (README.md : URL, date, droits). Usage interne.",
+  "codes_CH": "MSNxx.78.nn : numérotation interne (le PER n'a pas de code par élément de progression) ; MSN = objectif d'apprentissage officiel ; 78 = demi-cycle 7e–8e (le PER ne distingue pas 7P et 8P).",
+  "codes_FR": "classe.domaine.rang, repris de tools/referentiels_fr.json (agent référentiels).",
+  "verifie": "true = texte résumé de l'extrait officiel du PER (ECR Vaud 8P 2023, p. 4) ; false = repris de mémoire du PER, à vérifier sur portail.ciip.ch.",
+  "notions": "ids des notions de l'app (src/curriculum.js, src/gen3.js), aujourd'hui en 9e, qui entraînent déjà l'attendu ou s'en approchent.",
+  "proximite": "direct = la notion de 9e convient presque telle quelle (niveau 1) ; adapter = notion proche, à simplifier (nombres, vocabulaire, représentation) ; nouveau = rien dans l'app ; hors_saisie = construction, mesure aux instruments, recueil de données.",
+  "fr_source": "/home/jj/Projets/5min2maths-wt/referentiels/tools/referentiels_fr.json"
+ },
+ "correspondance": [
+  {
+   "harmos": "1P",
+   "age": "4-5 ans",
+   "france": "MS (cycle 1)",
+   "per": "cycle 1"
+  },
+  {
+   "harmos": "2P",
+   "age": "5-6 ans",
+   "france": "GS (cycle 1)",
+   "per": "cycle 1"
+  },
+  {
+   "harmos": "3P",
+   "age": "6-7 ans",
+   "france": "CP (cycle 2)",
+   "per": "cycle 1"
+  },
+  {
+   "harmos": "4P",
+   "age": "7-8 ans",
+   "france": "CE1 (cycle 2)",
+   "per": "cycle 1"
+  },
+  {
+   "harmos": "5P",
+   "age": "8-9 ans",
+   "france": "CE2 (cycle 2)",
+   "per": "cycle 2"
+  },
+  {
+   "harmos": "6P",
+   "age": "9-10 ans",
+   "france": "CM1 (cycle 3)",
+   "per": "cycle 2"
+  },
+  {
+   "harmos": "7P",
+   "age": "10-11 ans",
+   "france": "CM2 (cycle 3)",
+   "per": "cycle 2"
+  },
+  {
+   "harmos": "8P",
+   "age": "11-12 ans",
+   "france": "6e (cycle 3)",
+   "per": "cycle 2"
+  },
+  {
+   "harmos": "9e",
+   "age": "12-13 ans",
+   "france": "5e (cycle 4)",
+   "per": "cycle 3"
+  }
+ ],
+ "systemes": {
+  "CH": {
+   "label": "Suisse romande (PER)",
+   "annees": {
+    "7P-8P": {
+     "label": "7P–8P (fin du cycle 2)",
+     "age": "10-12 ans",
+     "source": "PER_Suisse_romande/VD_ECR_MAT_8P_enseignant.pdf ; PER_Suisse_romande/cycle_2_webCIIP.pdf (thématiques)",
+     "evaluations": "GE : évaluation commune de 8P (maths, 20 % de la moyenne du 2e semestre ; 38 pts, seuil 27, 68,1 % de réussite en 2024-25, SRED n° 170) ; VD : ECR 8P (90 min, 1re partie sans calculatrice, 2e avec aide-mémoire et calculatrice).",
+     "themes": [
+      {
+       "objectif": "MSN 21",
+       "theme": "Espace",
+       "attendus": [
+        {
+         "code": "MSN21.78.01",
+         "element": "Figures planes",
+         "texte": "Reconnaître, décrire et nommer triangles, quadrilatères et cercle selon leurs propriétés (axes de symétrie, côtés parallèles, côtés égaux)",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "quadri"
+         ],
+         "proximite": "adapter"
+        },
+        {
+         "code": "MSN21.78.02",
+         "element": "Figures planes",
+         "texte": "Construire les figures planes courantes avec règle, équerre, compas et rapporteur",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [],
+         "proximite": "hors_saisie"
+        },
+        {
+         "code": "MSN21.78.03",
+         "element": "Figures planes",
+         "texte": "Construire des droites parallèles et perpendiculaires",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [],
+         "proximite": "hors_saisie"
+        },
+        {
+         "code": "MSN21.78.04",
+         "element": "Transformations",
+         "texte": "Construire l'image d'une figure par une translation ou une symétrie axiale",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "symetries"
+         ],
+         "proximite": "adapter"
+        },
+        {
+         "code": "MSN21.78.05",
+         "element": "Repérage",
+         "texte": "Repérer et communiquer des positions et des itinéraires dans un plan (système personnel ou conventionnel)",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "symetries"
+         ],
+         "proximite": "adapter"
+        },
+        {
+         "code": "MSN21.78.06",
+         "element": "Solides",
+         "texte": "Reconnaître et nommer des solides (cube, pavé, prisme, pyramide, cylindre, cône, boule) ; faces, arêtes, sommets",
+         "verifie": false,
+         "source": "PER (portail.ciip.ch), repris de mémoire : à vérifier",
+         "notions": [
+          "solides"
+         ],
+         "proximite": "direct"
+        },
+        {
+         "code": "MSN21.78.07",
+         "element": "Solides",
+         "texte": "Associer un solide à son développement (cube, pavé)",
+         "verifie": false,
+         "source": "PER (portail.ciip.ch), repris de mémoire : à vérifier",
+         "notions": [],
+         "proximite": "nouveau"
+        }
+       ]
+      },
+      {
+       "objectif": "MSN 22",
+       "theme": "Nombres",
+       "attendus": [
+        {
+         "code": "MSN22.78.01",
+         "element": "Comparaison et représentation",
+         "texte": "Comparer, ranger, encadrer et intercaler des nombres décimaux",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "deccomp",
+          "decarr"
+         ],
+         "proximite": "direct"
+        },
+        {
+         "code": "MSN22.78.02",
+         "element": "Comparaison et représentation",
+         "texte": "Extraire le nombre entier de dizaines, centaines, milliers, dixièmes, centièmes ou millièmes d'un nombre",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "decread"
+         ],
+         "proximite": "adapter"
+        },
+        {
+         "code": "MSN22.78.03",
+         "element": "Comparaison et représentation",
+         "texte": "Comparer et ranger des fractions unitaires ou de même dénominateur",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "fracrep"
+         ],
+         "proximite": "adapter"
+        },
+        {
+         "code": "MSN22.78.04",
+         "element": "Comparaison et représentation",
+         "texte": "Placer et lire des nombres sur une droite graduée",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [],
+         "proximite": "nouveau"
+        },
+        {
+         "code": "MSN22.78.05",
+         "element": "Écriture de nombres",
+         "texte": "Passer du mot-nombre (oral ou écrit) à sa décomposition en unités, dizaines… dixièmes, centièmes, millièmes, et inversement",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "decread"
+         ],
+         "proximite": "adapter"
+        },
+        {
+         "code": "MSN22.78.06",
+         "element": "Écriture de nombres",
+         "texte": "Reconnaître un nombre sous diverses écritures (1/2 = 0,5 = 5 dixièmes = 5/10)",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "fracconv",
+          "decread"
+         ],
+         "proximite": "adapter"
+        },
+        {
+         "code": "MSN22.78.07",
+         "element": "Écriture de nombres",
+         "texte": "Exprimer la moitié, le tiers, le quart, les trois quarts, le dixième d'une quantité",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "fractout"
+         ],
+         "proximite": "direct"
+        },
+        {
+         "code": "MSN22.78.08",
+         "element": "Écriture de nombres",
+         "texte": "Écrire des nombres à l'aide de puissances (8 = 2³)",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "pow9"
+         ],
+         "proximite": "direct"
+        },
+        {
+         "code": "MSN22.78.09",
+         "element": "Nombres naturels",
+         "texte": "Lire, écrire et décomposer les grands nombres naturels (au-delà du million)",
+         "verifie": false,
+         "source": "PER (portail.ciip.ch), repris de mémoire : à vérifier",
+         "notions": [],
+         "proximite": "nouveau"
+        }
+       ]
+      },
+      {
+       "objectif": "MSN 23",
+       "theme": "Opérations",
+       "attendus": [
+        {
+         "code": "MSN23.78.01",
+         "element": "Multiples, diviseurs, suites",
+         "texte": "Reconnaître et prolonger des suites numériques ; exprimer leur loi de formation (progressions, multiples, puissances)",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [],
+         "proximite": "nouveau"
+        },
+        {
+         "code": "MSN23.78.02",
+         "element": "Multiples, diviseurs, suites",
+         "texte": "Trouver des multiples et des diviseurs ; critères de divisibilité usuels",
+         "verifie": false,
+         "source": "PER (portail.ciip.ch), repris de mémoire : à vérifier",
+         "notions": [
+          "multdiv",
+          "divcrit"
+         ],
+         "proximite": "direct"
+        },
+        {
+         "code": "MSN23.78.03",
+         "element": "Calculs",
+         "texte": "Choisir l'outil de calcul : calcul réfléchi, algorithme, répertoire mémorisé, calculatrice",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "ordgr"
+         ],
+         "proximite": "adapter"
+        },
+        {
+         "code": "MSN23.78.04",
+         "element": "Calculs",
+         "texte": "Utiliser commutativité, associativité, distributivité et décompositions pour calculer efficacement et estimer",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "ordgr"
+         ],
+         "proximite": "adapter"
+        },
+        {
+         "code": "MSN23.78.05",
+         "element": "Calculs",
+         "texte": "Algorithmes : addition et soustraction de décimaux (au plus 2 décimales, < 10'000)",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "decadd"
+         ],
+         "proximite": "direct"
+        },
+        {
+         "code": "MSN23.78.06",
+         "element": "Calculs",
+         "texte": "Algorithme de la multiplication (facteurs et produit avec au plus 2 décimales)",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "decmul"
+         ],
+         "proximite": "direct"
+        },
+        {
+         "code": "MSN23.78.07",
+         "element": "Calculs",
+         "texte": "Division euclidienne (dividende < 10'000, diviseur < 100)",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [],
+         "proximite": "nouveau"
+        },
+        {
+         "code": "MSN23.78.08",
+         "element": "Calculs",
+         "texte": "Division décimale (dividende < 10'000 et diviseur < 100 avec au plus une décimale, quotient au plus 2 décimales)",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "decdiv"
+         ],
+         "proximite": "adapter"
+        },
+        {
+         "code": "MSN23.78.09",
+         "element": "Calculs",
+         "texte": "Répertoire mémorisé : tables, doubles et moitiés, multiplier et diviser par 10, 100, 1000",
+         "verifie": false,
+         "source": "PER (portail.ciip.ch), repris de mémoire : à vérifier",
+         "notions": [
+          "dec10"
+         ],
+         "proximite": "adapter"
+        },
+        {
+         "code": "MSN23.78.10",
+         "element": "Calculatrice",
+         "texte": "Utiliser la calculatrice quand le calcul est secondaire, pour vérifier ou pour des calculs complexes",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [],
+         "proximite": "hors_saisie"
+        }
+       ]
+      },
+      {
+       "objectif": "MSN 24",
+       "theme": "Grandeurs et mesures",
+       "attendus": [
+        {
+         "code": "MSN24.78.01",
+         "element": "Mesure",
+         "texte": "Doubler, tripler une grandeur ; en prendre la moitié, le tiers, le quart, les trois quarts",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "fractout"
+         ],
+         "proximite": "adapter"
+        },
+        {
+         "code": "MSN24.78.02",
+         "element": "Mesure",
+         "texte": "Mesurer une longueur (règle) et un angle (rapporteur) ; donner le résultat par un nombre ou un encadrement",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "angtype"
+         ],
+         "proximite": "adapter"
+        },
+        {
+         "code": "MSN24.78.03",
+         "element": "Calcul de grandeurs",
+         "texte": "Calculer des longueurs, des trajets et des périmètres",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "perim"
+         ],
+         "proximite": "direct"
+        },
+        {
+         "code": "MSN24.78.04",
+         "element": "Calcul de grandeurs",
+         "texte": "Aire (mesures entières) du carré et du rectangle",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "aire1"
+         ],
+         "proximite": "direct"
+        },
+        {
+         "code": "MSN24.78.05",
+         "element": "Calcul de grandeurs",
+         "texte": "Aire du triangle, du parallélogramme, du losange et de surfaces décomposables",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "aire1",
+          "aire2",
+          "aire3"
+         ],
+         "proximite": "direct"
+        },
+        {
+         "code": "MSN24.78.06",
+         "element": "Unités",
+         "texte": "Unités conventionnelles : longueurs (mm à km), aires (cm², dm², m²), angles (degrés)",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "ulong",
+          "uaire"
+         ],
+         "proximite": "direct"
+        },
+        {
+         "code": "MSN24.78.07",
+         "element": "Unités",
+         "texte": "Exprimer une grandeur dans une autre unité (km/m, m/cm, t/kg, kg/g, h/min, min/s, l/dl)",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "ulong",
+          "utemps",
+          "uvol"
+         ],
+         "proximite": "direct"
+        },
+        {
+         "code": "MSN24.78.08",
+         "element": "Unités",
+         "texte": "Durées : calculer une durée, une heure de début ou de fin",
+         "verifie": false,
+         "source": "PER (portail.ciip.ch), repris de mémoire : à vérifier",
+         "notions": [
+          "utemps"
+         ],
+         "proximite": "direct"
+        },
+        {
+         "code": "MSN24.78.09",
+         "element": "Unités",
+         "texte": "Capacités (l, dl, cl, ml) et volume par dénombrement de cubes unités",
+         "verifie": false,
+         "source": "PER (portail.ciip.ch), repris de mémoire : à vérifier",
+         "notions": [
+          "uvol",
+          "volpave"
+         ],
+         "proximite": "adapter"
+        }
+       ]
+      },
+      {
+       "objectif": "MSN 25",
+       "theme": "Modélisation",
+       "attendus": [
+        {
+         "code": "MSN25.78.01",
+         "element": "Résolution de problèmes",
+         "texte": "Trier et organiser les informations (liste, tableau, schéma, croquis), mettre en œuvre une démarche, vérifier et communiquer",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "decprob"
+         ],
+         "proximite": "adapter"
+        },
+        {
+         "code": "MSN25.78.02",
+         "element": "Résolution de problèmes",
+         "texte": "Traduire un problème en opérations, avec des parenthèses si besoin",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "tradexpr",
+          "prio"
+         ],
+         "proximite": "direct"
+        },
+        {
+         "code": "MSN25.78.03",
+         "element": "Résolution de problèmes",
+         "texte": "Lire, utiliser et élaborer des tableaux de valeurs ; lire des représentations graphiques",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "proptab",
+          "diagr"
+         ],
+         "proximite": "adapter"
+        },
+        {
+         "code": "MSN25.78.04",
+         "element": "Résolution de problèmes",
+         "texte": "Problèmes additifs et soustractifs (états, transformations, comparaisons : EEE, ECE, ETE, TTT)",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "decprob"
+         ],
+         "proximite": "adapter"
+        },
+        {
+         "code": "MSN25.78.05",
+         "element": "Résolution de problèmes",
+         "texte": "Problèmes multiplicatifs et divisifs : itération, produit cartésien, produit de mesures, proportionnalité",
+         "verifie": true,
+         "source": "VD_ECR_MAT_8P_enseignant.pdf, p. 4 (extrait officiel du PER, objectifs évalués)",
+         "notions": [
+          "prop",
+          "proptab"
+         ],
+         "proximite": "direct"
+        }
+       ]
+      }
+     ]
+    }
+   }
+  },
+  "FR": {
+   "CM1": {
+    "label": "CM1",
+    "age": "9-10 ans",
+    "harmos": "6P",
+    "cycle": "cycle 3",
+    "source": "France/c3_2025_programme_BO16.pdf",
+    "reference": "BO n° 16 du 17 avril 2025 (arrêté du 10 avril 2025) : CM1 et 6e dès 2025-2026, CM2 dès 2026-2027",
+    "themes": [
+     {
+      "domaine": "NC",
+      "domaine_label": "Nombres et calculs",
+      "theme": "Les nombres entiers",
+      "attendus": [
+       {
+        "code": "CM1.NC.01",
+        "texte": "Comparer et dénombrer des collections en les organisant",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.NC.02",
+        "texte": "Construire des collections de cardinal donné",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM1.NC.03",
+        "texte": "Connaître et utiliser les relations entre les unités de numération",
+        "notions": [
+         "decread"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.04",
+        "texte": "Connaître la suite écrite et la suite orale des nombres jusqu’à 999 999",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.NC.05",
+        "texte": "Connaître la valeur des chiffres en fonction de leur position dans un nombre",
+        "notions": [
+         "decread"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.06",
+        "texte": "Connaître et utiliser diverses représentations d’un nombre et passer de l’une à l’autre",
+        "notions": [
+         "decread"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.07",
+        "texte": "Comprendre et savoir utiliser les expressions « égal à », « supérieur à », « inférieur à », « compris entre … et … »",
+        "notions": [
+         "deccomp"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.08",
+        "texte": "Comparer, encadrer, intercaler des nombres entiers en utilisant les symboles =, < et >",
+        "notions": [
+         "deccomp"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.09",
+        "texte": "Ordonner des nombres dans l’ordre croissant ou décroissant",
+        "notions": [
+         "deccomp"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.10",
+        "texte": "Savoir placer des nombres et repérer des points sur une demi-droite graduée",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.NC.11",
+        "texte": "Savoir reconnaître les multiples de 2, de 5 et de 10 à partir de leur écriture chiffrée",
+        "notions": [
+         "multdiv",
+         "divcrit"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.NC.12",
+        "texte": "Savoir déterminer si un nombre entier donné est un multiple d’un nombre entier inférieur ou égal à 10",
+        "notions": [
+         "multdiv",
+         "divcrit"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.NC.13",
+        "texte": "Savoir déterminer si un nombre entier inférieur ou égal à 10 est un diviseur d’un nombre entier donné",
+        "notions": [
+         "multdiv",
+         "divcrit"
+        ],
+        "proximite": "direct"
+       }
+      ]
+     },
+     {
+      "domaine": "NC",
+      "domaine_label": "Nombres et calculs",
+      "theme": "Les fractions",
+      "attendus": [
+       {
+        "code": "CM1.NC.14",
+        "texte": "Savoir interpréter, représenter, écrire et lire des fractions",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.NC.15",
+        "texte": "Savoir écrire une fraction supérieure à 1 comme la somme d’un entier et d’une fraction inférieure à 1",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.NC.16",
+        "texte": "Savoir écrire la somme d’un entier et d’une fraction inférieure à 1 comme une unique fraction",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.NC.17",
+        "texte": "Savoir encadrer une fraction par deux nombres entiers consécutifs",
+        "notions": [
+         "fracrep"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.18",
+        "texte": "Savoir placer une fraction ou la somme d’un nombre entier et d’une fraction inférieure à un sur une demi-droite graduée",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.NC.19",
+        "texte": "Savoir repérer un point d’une demi-droite graduée par une fraction ou par la somme d’un nombre entier et d’une fraction",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.NC.20",
+        "texte": "Comparer des fractions",
+        "notions": [
+         "fracrep"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.21",
+        "texte": "Additionner et soustraire des fractions",
+        "notions": [
+         "fracadd"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.22",
+        "texte": "Déterminer une fraction d’une quantité ou d’une grandeur",
+        "notions": [
+         "fractout"
+        ],
+        "proximite": "direct"
+       }
+      ]
+     },
+     {
+      "domaine": "NC",
+      "domaine_label": "Nombres et calculs",
+      "theme": "Les nombres décimaux",
+      "attendus": [
+       {
+        "code": "CM1.NC.23",
+        "texte": "Interpréter, représenter, écrire et lire des fractions décimales",
+        "notions": [
+         "decread",
+         "fracconv"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.24",
+        "texte": "Connaître et utiliser les relations entre unités simples, dixièmes et centièmes",
+        "notions": [
+         "decread",
+         "fracconv"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.25",
+        "texte": "Placer une fraction décimale sur une demi-droite graduée et repérer un point d’une demi-droite graduée par une fraction décimale",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.NC.26",
+        "texte": "Écrire une fraction décimale supérieure à 1 comme la somme d’un nombre entier et d’une fraction décimale inférieure à 1",
+        "notions": [
+         "decread",
+         "fracconv"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.27",
+        "texte": "Écrire une fraction décimale supérieure à 1 comme la somme d’un nombre entier et de fractions décimales ayant un numérateur inférieur à 10",
+        "notions": [
+         "decread",
+         "fracconv"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.28",
+        "texte": "Comparer, encadrer, intercaler des fractions décimales en utilisant les symboles =, < et >",
+        "notions": [
+         "decread",
+         "fracconv"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.29",
+        "texte": "Ordonner des fractions décimales dans l’ordre croissant ou décroissant",
+        "notions": [
+         "decread",
+         "fracconv"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.30",
+        "texte": "Passer d’une écriture sous forme d’une fraction décimale ou d’une somme de fractions décimales à une écriture à virgule et réciproquement",
+        "notions": [
+         "decread",
+         "fracconv"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.31",
+        "texte": "Interpréter, représenter, écrire et lire des nombres décimaux (écriture à virgule)",
+        "notions": [
+         "decread",
+         "fracconv"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.32",
+        "texte": "Placer un nombre décimal en écriture à virgule sur une demi-droite graduée et repérer un point d’une demi-droite graduée par un nombre décimal",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.NC.33",
+        "texte": "Savoir donner la partie entière et l’arrondi à l’entier d’un nombre décimal",
+        "notions": [
+         "decarr"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.NC.34",
+        "texte": "Comparer, encadrer, intercaler, ordonner, par ordre croissant ou décroissant, des nombres décimaux donnés par leur écriture à virgule en utilisant les symboles =, < et >",
+        "notions": [
+         "decread",
+         "fracconv"
+        ],
+        "proximite": "adapter"
+       }
+      ]
+     },
+     {
+      "domaine": "NC",
+      "domaine_label": "Nombres et calculs",
+      "theme": "Le calcul mental",
+      "attendus": [
+       {
+        "code": "CM1.NC.35",
+        "texte": "Connaître des faits numériques usuels relatifs aux nombres entiers",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.NC.36",
+        "texte": "Connaître quelques relations entre des fractions usuelles",
+        "notions": [
+         "fracconv"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.NC.37",
+        "texte": "Connaître l’écriture décimale de fractions usuelles",
+        "notions": [
+         "fracconv"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.NC.38",
+        "texte": "Ajouter ou soustraire un nombre entier inférieur à 10, d’unités, de dizaines, de centaines, de dixièmes ou de centièmes à un nombre décimal, lorsqu’il n’y a pas de retenue",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.NC.39",
+        "texte": "Multiplier un nombre entier par 10, 100 ou 1 000",
+        "notions": [
+         "dec10"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.NC.40",
+        "texte": "Multiplier un nombre décimal par 10",
+        "notions": [
+         "dec10"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.NC.41",
+        "texte": "Diviser un nombre décimal par 10",
+        "notions": [
+         "dec10"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.NC.42",
+        "texte": "Ajouter ou soustraire 8, 9, 18, 19, 28, 29, 38 ou 39, à un nombre",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.NC.43",
+        "texte": "Multiplier un nombre entier inférieur à 10 par un nombre entier de dizaines ou de centaines",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.NC.44",
+        "texte": "Multiplier un nombre entier par 4 ou par 8",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.NC.45",
+        "texte": "Multiplier un nombre entier par 5",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.NC.46",
+        "texte": "Utiliser la distributivité de la multiplication par rapport à l’addition dans des cas simples",
+        "notions": [
+         "distrib"
+        ],
+        "proximite": "adapter"
+       }
+      ]
+     },
+     {
+      "domaine": "NC",
+      "domaine_label": "Nombres et calculs",
+      "theme": "Les quatre opérations",
+      "attendus": [
+       {
+        "code": "CM1.NC.47",
+        "texte": "Estimer le résultat d’une opération",
+        "notions": [
+         "ordgr"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.NC.48",
+        "texte": "Savoir effectuer un calcul contenant des parenthèses",
+        "notions": [
+         "prio"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.NC.49",
+        "texte": "Poser en colonnes et effectuer des additions et des soustractions de nombres décimaux",
+        "notions": [
+         "decadd"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.NC.50",
+        "texte": "Poser et effectuer des multiplications de deux nombres entiers",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.NC.51",
+        "texte": "Poser et effectuer des multiplications d’un nombre décimal par un nombre entier inférieur à 10",
+        "notions": [
+         "decmul"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.NC.52",
+        "texte": "Poser et effectuer des divisions euclidiennes avec un diviseur à un chiffre",
+        "notions": [],
+        "proximite": "nouveau"
+       }
+      ]
+     },
+     {
+      "domaine": "NC",
+      "domaine_label": "Nombres et calculs",
+      "theme": "La résolution de problèmes",
+      "attendus": [
+       {
+        "code": "CM1.NC.53",
+        "texte": "Résoudre des problèmes additifs en une étape des types « parties-tout » et « comparaison »",
+        "notions": [
+         "decprob"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.54",
+        "texte": "Résoudre des problèmes additifs en deux ou trois étapes",
+        "notions": [
+         "decprob"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.55",
+        "texte": "Résoudre des problèmes multiplicatifs de type « parties-tout » en une étape",
+        "notions": [
+         "decprob"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.56",
+        "texte": "Résoudre des problèmes de comparaison multiplicative",
+        "notions": [
+         "decprob"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.57",
+        "texte": "Résoudre des problèmes mixtes en deux ou trois étapes",
+        "notions": [
+         "decprob"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.58",
+        "texte": "Résoudre des problèmes de dénombrement",
+        "notions": [
+         "denombr"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.59",
+        "texte": "Résoudre des problèmes d’optimisation",
+        "notions": [],
+        "proximite": "nouveau"
+       }
+      ]
+     },
+     {
+      "domaine": "NC",
+      "domaine_label": "Nombres et calculs",
+      "theme": "Algèbre",
+      "attendus": [
+       {
+        "code": "CM1.NC.60",
+        "texte": "Trouver le nombre manquant dans une égalité à trous",
+        "notions": [
+         "eqverif",
+         "probeq"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.61",
+        "texte": "Déterminer la valeur d’un nombre inconnu en utilisant un symbole ou une lettre pour le représenter",
+        "notions": [
+         "eqverif",
+         "probeq"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.62",
+        "texte": "Résoudre des problèmes algébriques",
+        "notions": [
+         "eqverif",
+         "probeq"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.63",
+        "texte": "Exécuter un programme de calcul",
+        "notions": [
+         "tradexpr"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.NC.64",
+        "texte": "Identifier et formuler une règle de calcul pour poursuivre une suite de nombres",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.NC.65",
+        "texte": "Identifier des régularités et poursuivre une suite de motifs évolutive",
+        "notions": [],
+        "proximite": "nouveau"
+       }
+      ]
+     },
+     {
+      "domaine": "GM",
+      "domaine_label": "Grandeurs et mesures",
+      "theme": "Les longueurs",
+      "attendus": [
+       {
+        "code": "CM1.GM.01",
+        "texte": "Connaître et utiliser les unités de longueur du millimètre au kilomètre et les symboles associés",
+        "notions": [
+         "ulong"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.GM.02",
+        "texte": "Connaître les relations entre les unités de longueur",
+        "notions": [
+         "ulong"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.GM.03",
+        "texte": "Choisir une unité adaptée pour exprimer une longueur",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.GM.04",
+        "texte": "Comparer des longueurs",
+        "notions": [
+         "ulong"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.GM.05",
+        "texte": "Disposer de quelques longueurs de référence",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.GM.06",
+        "texte": "Estimer la longueur d’un objet ou d’une distance",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.GM.07",
+        "texte": "Savoir ce qu’est le périmètre d’une figure plane",
+        "notions": [
+         "perim"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.GM.08",
+        "texte": "Déterminer le périmètre d’un polygone en utilisant une règle graduée",
+        "notions": [
+         "perim"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.GM.09",
+        "texte": "Résoudre des problèmes mettant en jeu les longueurs des côtés d’un polygone et son périmètre",
+        "notions": [
+         "perim"
+        ],
+        "proximite": "direct"
+       }
+      ]
+     },
+     {
+      "domaine": "GM",
+      "domaine_label": "Grandeurs et mesures",
+      "theme": "Les masses",
+      "attendus": [
+       {
+        "code": "CM1.GM.10",
+        "texte": "Connaître et utiliser les unités de masse du milligramme au kilogramme et la tonne, et les symboles associés",
+        "notions": [
+         "ulong"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.GM.11",
+        "texte": "Connaître les relations entre les unités de masse",
+        "notions": [
+         "ulong"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.GM.12",
+        "texte": "Choisir une unité adaptée pour exprimer une masse",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.GM.13",
+        "texte": "Comparer des masses",
+        "notions": [
+         "ulong"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.GM.14",
+        "texte": "Disposer de quelques masses de référence",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.GM.15",
+        "texte": "Estimer la masse d’un objet",
+        "notions": [],
+        "proximite": "nouveau"
+       }
+      ]
+     },
+     {
+      "domaine": "GM",
+      "domaine_label": "Grandeurs et mesures",
+      "theme": "Les contenances",
+      "attendus": [
+       {
+        "code": "CM1.GM.16",
+        "texte": "Connaître et utiliser les unités de contenance du millilitre à l’hectolitre et les symboles associés",
+        "notions": [
+         "uvol"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.GM.17",
+        "texte": "Connaître les relations entre les unités de contenance",
+        "notions": [
+         "uvol"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.GM.18",
+        "texte": "Choisir une unité adaptée pour exprimer une contenance",
+        "notions": [
+         "uvol"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.GM.19",
+        "texte": "Comparer des contenances",
+        "notions": [
+         "uvol"
+        ],
+        "proximite": "adapter"
+       }
+      ]
+     },
+     {
+      "domaine": "GM",
+      "domaine_label": "Grandeurs et mesures",
+      "theme": "Les aires",
+      "attendus": [
+       {
+        "code": "CM1.GM.20",
+        "texte": "Comparer les aires de différentes figures planes",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.GM.21",
+        "texte": "Déterminer des aires",
+        "notions": [
+         "aire1"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.GM.22",
+        "texte": "Connaître et utiliser les centimètres carrés pour exprimer des aires",
+        "notions": [
+         "uaire"
+        ],
+        "proximite": "direct"
+       }
+      ]
+     },
+     {
+      "domaine": "GM",
+      "domaine_label": "Grandeurs et mesures",
+      "theme": "Les angles",
+      "attendus": [
+       {
+        "code": "CM1.GM.23",
+        "texte": "Utiliser le lexique spécifique associé aux angles",
+        "notions": [
+         "angtype"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.GM.24",
+        "texte": "Comprendre et utiliser les notations des angles",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.GM.25",
+        "texte": "Comparer des angles",
+        "notions": [
+         "angtype"
+        ],
+        "proximite": "adapter"
+       }
+      ]
+     },
+     {
+      "domaine": "GM",
+      "domaine_label": "Grandeurs et mesures",
+      "theme": "Le repérage dans le temps et les durées",
+      "attendus": [
+       {
+        "code": "CM1.GM.26",
+        "texte": "Lire l’heure sur une horloge à aiguilles",
+        "notions": [
+         "utemps"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.GM.27",
+        "texte": "Positionner les aiguilles d’une horloge correspondant à une heure donnée en heure et minute",
+        "notions": [
+         "utemps"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.GM.28",
+        "texte": "Comparer et mesurer des durées écoulées entre deux instants affichés sur une horloge (instants et durées sont exprimés en heure et minute)",
+        "notions": [
+         "utemps"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.GM.29",
+        "texte": "Résoudre des problèmes à une ou deux étapes impliquant des durées",
+        "notions": [
+         "utemps"
+        ],
+        "proximite": "adapter"
+       }
+      ]
+     },
+     {
+      "domaine": "EG",
+      "domaine_label": "Espace et géométrie",
+      "theme": "La géométrie plane",
+      "attendus": [
+       {
+        "code": "CM1.EG.01",
+        "texte": "Utiliser le vocabulaire géométrique approprié dans le contexte d’apprentissage des notions correspondantes",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM1.EG.02",
+        "texte": "Utiliser les outils géométriques usuels : règle, règle graduée, équerre et compas",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM1.EG.03",
+        "texte": "Connaître les codes usuels utilisés en géométrie",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM1.EG.04",
+        "texte": "Décrire et reconnaître un cercle et un disque comme un ensemble de points caractérisés par leur distance à un point donné",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.EG.05",
+        "texte": "Reconnaître et utiliser la notion de perpendicularité",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.EG.06",
+        "texte": "Reconnaître et utiliser la notion de parallélisme",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.EG.07",
+        "texte": "Reconnaître et nommer les figures suivantes en faisant référence à leur définition : triangle, triangle rectangle, triangle isocèle, triangle équilatéral, quadrilatère, carré, rectangle et losange",
+        "notions": [
+         "quadri"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.EG.08",
+        "texte": "Connaître les propriétés de parallélisme des côtés opposés, des égalités de longueurs et d’angles pour les figures usuelles : triangle rectangle, triangle isocèle, triangle équilatéral, carré, rectangle et losange",
+        "notions": [
+         "quadri"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.EG.09",
+        "texte": "Construire une figure géométrique composée de segments, de droites, de polygones usuels et de cercles",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM1.EG.10",
+        "texte": "Reconnaître si une figure possède un ou plusieurs axes de symétrie",
+        "notions": [
+         "symetries"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.EG.11",
+        "texte": "Compléter une figure pour la rendre symétrique par rapport à une droite donnée, horizontale ou verticale",
+        "notions": [
+         "symetries"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.EG.12",
+        "texte": "Construire, sur papier quadrillé, la figure symétrique d’une figure donnée par rapport à une droite horizontale ou verticale",
+        "notions": [],
+        "proximite": "hors_saisie"
+       }
+      ]
+     },
+     {
+      "domaine": "EG",
+      "domaine_label": "Espace et géométrie",
+      "theme": "Les solides",
+      "attendus": [
+       {
+        "code": "CM1.EG.13",
+        "texte": "Nommer un cube, une boule, un pavé, un cône, une pyramide, un cylindre et un prisme droit",
+        "notions": [
+         "solides"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.EG.14",
+        "texte": "Décrire un cube, un pavé, une pyramide et un prisme droit en faisant référence à des propriétés et en utilisant le vocabulaire approprié",
+        "notions": [
+         "solides"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.EG.15",
+        "texte": "Connaître le nombre et la nature des faces d’un cube ou d’un pavé",
+        "notions": [
+         "solides"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.EG.16",
+        "texte": "Connaître la nature des faces d’une pyramide",
+        "notions": [
+         "solides"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.EG.17",
+        "texte": "Connaître la nature des faces d’un prisme droit",
+        "notions": [
+         "solides"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.EG.18",
+        "texte": "Construire un cube, un pavé, une pyramide ou un prisme droit",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM1.EG.19",
+        "texte": "Reconnaître un patron d’un cube",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM1.EG.20",
+        "texte": "Construire un patron d’un cube",
+        "notions": [],
+        "proximite": "hors_saisie"
+       }
+      ]
+     },
+     {
+      "domaine": "EG",
+      "domaine_label": "Espace et géométrie",
+      "theme": "Le repérage dans l’espace",
+      "attendus": [
+       {
+        "code": "CM1.EG.21",
+        "texte": "Connaître et utiliser le vocabulaire lié aux déplacements",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM1.EG.22",
+        "texte": "Comprendre, utiliser et produire une suite d’instructions qui décrivent un déplacement en utilisant un vocabulaire spatial précis",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM1.EG.23",
+        "texte": "Résoudre des problèmes portant sur des assemblages de cubes",
+        "notions": [
+         "volpave"
+        ],
+        "proximite": "adapter"
+       }
+      ]
+     },
+     {
+      "domaine": "DP",
+      "domaine_label": "Organisation et gestion de données, probabilités",
+      "theme": "Organisation et gestion de données",
+      "attendus": [
+       {
+        "code": "CM1.DP.01",
+        "texte": "Recueillir des données et produire un tableau, un diagramme en barres ou un ensemble de points dans un repère pour les présenter",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM1.DP.02",
+        "texte": "Lire et interpréter les données d’un tableau à simple ou double entrée, d’un diagramme en barres ou d’une courbe",
+        "notions": [
+         "diagr"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.DP.03",
+        "texte": "Résoudre des problèmes en une ou plusieurs étapes en utilisant les données d’un tableau à simple ou double entrée, d’un diagramme en barres ou d’une courbe",
+        "notions": [
+         "diagr"
+        ],
+        "proximite": "adapter"
+       }
+      ]
+     },
+     {
+      "domaine": "DP",
+      "domaine_label": "Organisation et gestion de données, probabilités",
+      "theme": "Les probabilités",
+      "attendus": [
+       {
+        "code": "CM1.DP.04",
+        "texte": "Identifier des expériences aléatoires",
+        "notions": [
+         "proba"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.DP.05",
+        "texte": "Identifier toutes les issues possibles lors d’une expérience aléatoire simple",
+        "notions": [
+         "proba"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.DP.06",
+        "texte": "Comprendre et utiliser le vocabulaire approprié : « impossible », « possible », « certain », « probable », « peu probable », « une chance sur deux »",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM1.DP.07",
+        "texte": "Comparer des issues d’expériences aléatoires ou des évènements selon leur probabilité de réalisation",
+        "notions": [
+         "proba"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.DP.08",
+        "texte": "Comprendre que ce n’est pas parce qu’il y a deux issues possibles que chacune a une chance sur deux de se réaliser",
+        "notions": [
+         "proba"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM1.DP.09",
+        "texte": "Reconnaître des situations d’équiprobabilité",
+        "notions": [
+         "proba"
+        ],
+        "proximite": "adapter"
+       }
+      ]
+     },
+     {
+      "domaine": "PF",
+      "domaine_label": "Proportionnalité, fonctions",
+      "theme": "La proportionnalité",
+      "attendus": [
+       {
+        "code": "CM1.PF.01",
+        "texte": "Identifier une situation de proportionnalité",
+        "notions": [
+         "proptab",
+         "prop"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM1.PF.02",
+        "texte": "Savoir résoudre un problème de proportionnalité",
+        "notions": [
+         "proptab",
+         "prop"
+        ],
+        "proximite": "direct"
+       }
+      ]
+     }
+    ]
+   },
+   "CM2": {
+    "label": "CM2",
+    "age": "10-11 ans",
+    "harmos": "7P",
+    "cycle": "cycle 3",
+    "source": "France/c3_2025_programme_BO16.pdf",
+    "reference": "BO n° 16 du 17 avril 2025 (arrêté du 10 avril 2025) : CM1 et 6e dès 2025-2026, CM2 dès 2026-2027",
+    "themes": [
+     {
+      "domaine": "NC",
+      "domaine_label": "Nombres et calculs",
+      "theme": "Les nombres entiers",
+      "attendus": [
+       {
+        "code": "CM2.NC.01",
+        "texte": "Connaître et utiliser les relations entre les unités de numération",
+        "notions": [
+         "decread"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.02",
+        "texte": "Connaître la suite écrite et la suite orale des nombres jusqu’à 999 999 999",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.NC.03",
+        "texte": "Connaître et utiliser diverses représentations d’un nombre et passer de l’une à l’autre",
+        "notions": [
+         "decread"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.04",
+        "texte": "Connaître la valeur des chiffres en fonction de leur position dans un nombre",
+        "notions": [
+         "decread"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.05",
+        "texte": "Comparer, encadrer, intercaler des nombres entiers en utilisant les symboles =, < et >",
+        "notions": [
+         "deccomp"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.06",
+        "texte": "Ordonner des nombres dans l’ordre croissant ou décroissant",
+        "notions": [
+         "deccomp"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.07",
+        "texte": "Placer des nombres et repérer des points sur une demi-droite graduée",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.NC.08",
+        "texte": "Déterminer si un nombre entier inférieur ou égal à 10 est un diviseur d’un nombre entier donné ou si un nombre entier donné est un multiple d’un nombre entier inférieur ou égal à 10",
+        "notions": [
+         "multdiv",
+         "divcrit"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM2.NC.09",
+        "texte": "Déterminer des diviseurs d’un nombre entier inférieur ou égal à 100",
+        "notions": [
+         "multdiv",
+         "divcrit"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM2.NC.10",
+        "texte": "Déterminer tous les diviseurs d’un nombre entier inférieur ou égal à 30",
+        "notions": [
+         "multdiv",
+         "divcrit"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM2.NC.11",
+        "texte": "Déterminer les diviseurs communs à deux nombres entiers inférieurs ou égaux à 30",
+        "notions": [
+         "multdiv",
+         "divcrit"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM2.NC.12",
+        "texte": "Déterminer des multiples communs à deux nombres entiers inférieurs à 15",
+        "notions": [
+         "multdiv",
+         "arith"
+        ],
+        "proximite": "adapter"
+       }
+      ]
+     },
+     {
+      "domaine": "NC",
+      "domaine_label": "Nombres et calculs",
+      "theme": "Les fractions",
+      "attendus": [
+       {
+        "code": "CM2.NC.13",
+        "texte": "Interpréter, représenter, écrire et lire des fractions",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.NC.14",
+        "texte": "Écrire une fraction supérieure à 1 comme la somme d’un entier et d’une fraction inférieure à 1",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.NC.15",
+        "texte": "Écrire la somme d’un entier et d’une fraction inférieure à 1 comme une unique fraction",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.NC.16",
+        "texte": "Encadrer une fraction entre deux nombres entiers consécutifs",
+        "notions": [
+         "fracrep"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.17",
+        "texte": "Placer une fraction ou la somme d’un nombre entier et d’une fraction inférieure à un sur une demi-droite graduée",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.NC.18",
+        "texte": "Repérer un point d’une demi-droite graduée par une fraction ou par la somme d’un nombre entier et d’une fraction",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.NC.19",
+        "texte": "Comparer des fractions",
+        "notions": [
+         "fracrep"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.20",
+        "texte": "Additionner et soustraire des fractions",
+        "notions": [
+         "fracadd"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.21",
+        "texte": "Calculer le produit d’un entier et d’une fraction",
+        "notions": [
+         "fracadd"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.22",
+        "texte": "Déterminer une fraction d’une quantité ou d’une grandeur",
+        "notions": [
+         "fractout"
+        ],
+        "proximite": "direct"
+       }
+      ]
+     },
+     {
+      "domaine": "NC",
+      "domaine_label": "Nombres et calculs",
+      "theme": "Les nombres décimaux",
+      "attendus": [
+       {
+        "code": "CM2.NC.23",
+        "texte": "Interpréter, représenter, écrire et lire des fractions décimales",
+        "notions": [
+         "decread",
+         "fracconv"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.24",
+        "texte": "Connaître et utiliser les relations entre unités simples, dixièmes, centièmes et millièmes",
+        "notions": [
+         "decread",
+         "fracconv"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.25",
+        "texte": "Placer une fraction décimale sur une demi-droite graduée et repérer un point d’une demi-droite graduée par une fraction décimale",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.NC.26",
+        "texte": "Écrire une fraction décimale supérieure à 1 comme la somme d’un nombre entier et d’une fraction décimale inférieure à 1",
+        "notions": [
+         "decread",
+         "fracconv"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.27",
+        "texte": "Écrire une fraction décimale supérieure à 1 comme la somme d’un nombre entier et de fractions décimales ayant un numérateur inférieur à 10",
+        "notions": [
+         "decread",
+         "fracconv"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.28",
+        "texte": "Comparer, encadrer, intercaler des fractions décimales en utilisant les symboles =, < et >",
+        "notions": [
+         "decread",
+         "fracconv"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.29",
+        "texte": "Ordonner des fractions décimales dans l’ordre croissant ou décroissant",
+        "notions": [
+         "decread",
+         "fracconv"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.30",
+        "texte": "Passer d’une écriture sous forme d’une fraction décimale ou de la somme de fractions décimales à une écriture à virgule et réciproquement",
+        "notions": [
+         "decread",
+         "fracconv"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.31",
+        "texte": "Interpréter, représenter, écrire et lire des nombres décimaux (écriture à virgule)",
+        "notions": [
+         "decread",
+         "fracconv"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.32",
+        "texte": "Placer un nombre décimal en écriture à virgule sur une demi-droite graduée et repérer un point d’une demi-droite graduée par un nombre en écriture à virgule",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.NC.33",
+        "texte": "Savoir donner la partie entière et l’arrondi à l’entier d’un nombre décimal",
+        "notions": [
+         "decarr"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM2.NC.34",
+        "texte": "Comparer, encadrer, intercaler, ordonner par ordre croissant ou décroissant des nombres décimaux donnés par leur écriture à virgule en utilisant les symboles =, < et >",
+        "notions": [
+         "decread",
+         "fracconv"
+        ],
+        "proximite": "adapter"
+       }
+      ]
+     },
+     {
+      "domaine": "NC",
+      "domaine_label": "Nombres et calculs",
+      "theme": "Le calcul mental",
+      "attendus": [
+       {
+        "code": "CM2.NC.35",
+        "texte": "Connaître des faits numériques usuels avec des entiers",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.NC.36",
+        "texte": "Connaître la moitié des nombres impairs jusqu’à 15",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.NC.37",
+        "texte": "Connaître quelques relations entre des fractions usuelles",
+        "notions": [
+         "fracconv"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM2.NC.38",
+        "texte": "Connaître l’écriture décimale de fractions usuelles",
+        "notions": [
+         "fracconv"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM2.NC.39",
+        "texte": "Ajouter ou soustraire un nombre entier à un nombre décimal lorsqu’il n’y a pas de retenue",
+        "notions": [
+         "decadd"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM2.NC.40",
+        "texte": "Ajouter un nombre entier à un nombre décimal lorsqu’il y a une retenue",
+        "notions": [
+         "decadd"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM2.NC.41",
+        "texte": "Multiplier un nombre décimal par 10, 100 ou 1 000",
+        "notions": [
+         "dec10"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM2.NC.42",
+        "texte": "Diviser un nombre décimal par 10, 100 ou 1 000",
+        "notions": [
+         "dec10"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM2.NC.43",
+        "texte": "Ajouter deux nombres décimaux inférieurs à 10, s’écrivant avec au plus un chiffre après la virgule",
+        "notions": [
+         "decadd"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM2.NC.44",
+        "texte": "Ajouter ou soustraire 8, 9, 18, 19, 28, 29, …, 98 ou 99 à un nombre",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.NC.45",
+        "texte": "Multiplier un nombre entier, inférieur à 10, de dizaines, de centaines ou de milliers par un nombre entier, inférieur à 10, de dizaines, de centaines ou de milliers",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.NC.46",
+        "texte": "Utiliser la distributivité de la multiplication par rapport à l’addition dans des cas simples",
+        "notions": [
+         "distrib"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.47",
+        "texte": "Calculer le double d’un nombre décimal dans des cas simples",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.NC.48",
+        "texte": "Calculer la moitié d’un nombre décimal dans des cas simples",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.NC.49",
+        "texte": "Diviser un nombre entier par 4 ou par 8",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.NC.50",
+        "texte": "Multiplier un nombre décimal par 5",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.NC.51",
+        "texte": "Multiplier un nombre décimal par 50",
+        "notions": [],
+        "proximite": "nouveau"
+       }
+      ]
+     },
+     {
+      "domaine": "NC",
+      "domaine_label": "Nombres et calculs",
+      "theme": "Les quatre opérations",
+      "attendus": [
+       {
+        "code": "CM2.NC.52",
+        "texte": "Estimer le résultat d’une opération",
+        "notions": [
+         "ordgr"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM2.NC.53",
+        "texte": "Savoir réaliser un calcul contenant une ou deux paires de parenthèses",
+        "notions": [
+         "prio"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM2.NC.54",
+        "texte": "Poser et effectuer la multiplication d’un nombre décimal par un nombre entier",
+        "notions": [
+         "decmul"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM2.NC.55",
+        "texte": "Poser et effectuer des divisions décimales avec un dividende entier et un diviseur à un chiffre",
+        "notions": [
+         "decdiv"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.56",
+        "texte": "Poser et effectuer des divisions décimales avec un dividende décimal et un diviseur à un chiffre",
+        "notions": [
+         "decdiv"
+        ],
+        "proximite": "adapter"
+       }
+      ]
+     },
+     {
+      "domaine": "NC",
+      "domaine_label": "Nombres et calculs",
+      "theme": "La résolution de problèmes",
+      "attendus": [
+       {
+        "code": "CM2.NC.57",
+        "texte": "Résoudre des problèmes additifs en une ou plusieurs étapes",
+        "notions": [
+         "decprob"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.58",
+        "texte": "Résoudre des problèmes multiplicatifs de type « parties-tout » en une étape",
+        "notions": [
+         "decprob"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.59",
+        "texte": "Résoudre des problèmes mixtes en plusieurs étapes",
+        "notions": [
+         "decprob"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.60",
+        "texte": "Résoudre des problèmes de comparaison multiplicative",
+        "notions": [
+         "decprob"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.61",
+        "texte": "Résoudre des problèmes de dénombrement",
+        "notions": [
+         "denombr"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.62",
+        "texte": "Résoudre des problèmes d’optimisation",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.NC.63",
+        "texte": "Résoudre des problèmes préparant à l’utilisation d’algorithmes",
+        "notions": [],
+        "proximite": "hors_saisie"
+       }
+      ]
+     },
+     {
+      "domaine": "NC",
+      "domaine_label": "Nombres et calculs",
+      "theme": "Algèbre",
+      "attendus": [
+       {
+        "code": "CM2.NC.64",
+        "texte": "Trouver le nombre manquant dans une égalité à trous",
+        "notions": [
+         "eqverif",
+         "probeq"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.65",
+        "texte": "Résoudre des problèmes algébriques",
+        "notions": [
+         "eqverif",
+         "probeq"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.66",
+        "texte": "Exécuter ou produire un programme de calcul",
+        "notions": [
+         "tradexpr"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.NC.67",
+        "texte": "Identifier et formuler une règle de calcul pour poursuivre une suite de nombres",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.NC.68",
+        "texte": "Identifier des régularités et poursuivre une suite de motifs évolutive",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.NC.69",
+        "texte": "Trouver le nombre d’éléments pour une étape donnée dans une suite de motifs évolutive",
+        "notions": [],
+        "proximite": "nouveau"
+       }
+      ]
+     },
+     {
+      "domaine": "GM",
+      "domaine_label": "Grandeurs et mesures",
+      "theme": "Les aires",
+      "attendus": [
+       {
+        "code": "CM2.GM.01",
+        "texte": "Comparer les aires de différentes figures planes",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.GM.02",
+        "texte": "Déterminer des aires",
+        "notions": [
+         "aire1"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM2.GM.03",
+        "texte": "Connaître et utiliser les unités centimètre carré, décimètre carré et mètre carré pour exprimer des aires",
+        "notions": [
+         "uaire"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM2.GM.04",
+        "texte": "Convertir des aires entre différentes unités",
+        "notions": [
+         "uaire"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM2.GM.05",
+        "texte": "Déterminer l’aire d’un carré ou d’un rectangle",
+        "notions": [
+         "aire1"
+        ],
+        "proximite": "direct"
+       }
+      ]
+     },
+     {
+      "domaine": "GM",
+      "domaine_label": "Grandeurs et mesures",
+      "theme": "Les angles",
+      "attendus": [
+       {
+        "code": "CM2.GM.06",
+        "texte": "Utiliser le lexique spécifique associé aux angles",
+        "notions": [
+         "angtype"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.GM.07",
+        "texte": "Comprendre et utiliser les notations des angles",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.GM.08",
+        "texte": "Comparer des angles",
+        "notions": [
+         "angtype"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.GM.09",
+        "texte": "Construire un angle égal à la somme de deux angles donnés ou un angle multiple d’un angle donné",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM2.GM.10",
+        "texte": "Construire par pliage la moitié d’un angle donné",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM2.GM.11",
+        "texte": "Savoir qu’un angle droit mesure 90°",
+        "notions": [
+         "angtype"
+        ],
+        "proximite": "adapter"
+       }
+      ]
+     },
+     {
+      "domaine": "GM",
+      "domaine_label": "Grandeurs et mesures",
+      "theme": "Le repérage dans le temps et les durées",
+      "attendus": [
+       {
+        "code": "CM2.GM.12",
+        "texte": "Lire l’heure sur une horloge à aiguilles",
+        "notions": [
+         "utemps"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.GM.13",
+        "texte": "Positionner les aiguilles d’une horloge correspondant à une heure donnée en heure, minute et seconde",
+        "notions": [
+         "utemps"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.GM.14",
+        "texte": "Comparer et mesurer des durées écoulées entre deux instants affichés sur une horloge (instants et durées sont exprimés en heure, minute et seconde)",
+        "notions": [
+         "utemps"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.GM.15",
+        "texte": "Résoudre des problèmes à une ou plusieurs étapes impliquant des durées",
+        "notions": [
+         "utemps"
+        ],
+        "proximite": "adapter"
+       }
+      ]
+     },
+     {
+      "domaine": "EG",
+      "domaine_label": "Espace et géométrie",
+      "theme": "La géométrie plane",
+      "attendus": [
+       {
+        "code": "CM2.EG.01",
+        "texte": "Utiliser le vocabulaire géométrique approprié dans le contexte d’apprentissage des notions correspondantes",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM2.EG.02",
+        "texte": "Utiliser les outils géométriques usuels : règle, règle graduée, équerre et compas",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM2.EG.03",
+        "texte": "Connaître les notations et les codes usuels utilisés en géométrie",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM2.EG.04",
+        "texte": "Reconnaître et utiliser la notion de perpendicularité",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.EG.05",
+        "texte": "Reconnaître et utiliser la notion de parallélisme",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.EG.06",
+        "texte": "Décrire et reconnaître un cercle et un disque comme un ensemble de points caractérisés par leur distance à un point donné",
+        "notions": [],
+        "proximite": "nouveau"
+       },
+       {
+        "code": "CM2.EG.07",
+        "texte": "Construire une figure géométrique composée de segments, de droites, de polygones usuels et de cercles",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM2.EG.08",
+        "texte": "Élaborer un programme de construction",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM2.EG.09",
+        "texte": "Construire, sur papier quadrillé, la figure symétrique d’une figure donnée par rapport à une droite verticale, horizontale ou une diagonale du quadrillage",
+        "notions": [],
+        "proximite": "hors_saisie"
+       }
+      ]
+     },
+     {
+      "domaine": "EG",
+      "domaine_label": "Espace et géométrie",
+      "theme": "Les solides",
+      "attendus": [
+       {
+        "code": "CM2.EG.10",
+        "texte": "Nommer un cube, une boule, un pavé, un cône, une pyramide, un cylindre ou un prisme droit",
+        "notions": [
+         "solides"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM2.EG.11",
+        "texte": "Décrire un cube, un pavé, une pyramide ou un prisme droit en faisant référence à des propriétés et en utilisant le vocabulaire approprié",
+        "notions": [
+         "solides"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM2.EG.12",
+        "texte": "Reconnaître un patron d’un cube",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM2.EG.13",
+        "texte": "Construire un patron d’un cube",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM2.EG.14",
+        "texte": "Reconnaître un patron d’un pavé",
+        "notions": [],
+        "proximite": "hors_saisie"
+       }
+      ]
+     },
+     {
+      "domaine": "EG",
+      "domaine_label": "Espace et géométrie",
+      "theme": "Déplacements dans l’espace",
+      "attendus": [
+       {
+        "code": "CM2.EG.15",
+        "texte": "Connaître et utiliser le vocabulaire lié aux déplacements",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM2.EG.16",
+        "texte": "Comprendre, utiliser et produire une suite d’instructions qui décrivent un déplacement en utilisant un vocabulaire spatial précis",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM2.EG.17",
+        "texte": "Résoudre des problèmes portant sur des assemblages de cubes",
+        "notions": [
+         "volpave"
+        ],
+        "proximite": "adapter"
+       }
+      ]
+     },
+     {
+      "domaine": "DP",
+      "domaine_label": "Organisation et gestion de données, probabilités",
+      "theme": "Organisation et gestion de données",
+      "attendus": [
+       {
+        "code": "CM2.DP.01",
+        "texte": "Recueillir des données et produire un tableau, un diagramme en barres ou un ensemble de points dans un repère pour présenter des données recueillies",
+        "notions": [],
+        "proximite": "hors_saisie"
+       },
+       {
+        "code": "CM2.DP.02",
+        "texte": "Lire et interpréter les données d’un tableau, d’un diagramme en barres, d’un diagramme circulaire ou d’une courbe",
+        "notions": [
+         "diagr"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.DP.03",
+        "texte": "Résoudre des problèmes en une ou deux étapes en utilisant les données d’un tableau, d’un diagramme en barres, d’un diagramme circulaire ou d’une courbe",
+        "notions": [
+         "diagr"
+        ],
+        "proximite": "adapter"
+       }
+      ]
+     },
+     {
+      "domaine": "DP",
+      "domaine_label": "Organisation et gestion de données, probabilités",
+      "theme": "Les probabilités",
+      "attendus": [
+       {
+        "code": "CM2.DP.04",
+        "texte": "Identifier toutes les issues possibles lors d’une expérience aléatoire simple",
+        "notions": [
+         "proba"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.DP.05",
+        "texte": "Identifier toutes les issues réalisant un évènement dans une expérience aléatoire simple",
+        "notions": [
+         "proba"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.DP.06",
+        "texte": "Dans une situation d’équiprobabilité, lors d’une expérience aléatoire simple, exprimer la probabilité d’un évènement sous la forme « a chances sur b »",
+        "notions": [
+         "proba"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.DP.07",
+        "texte": "Comparer des probabilités dans des cas simples",
+        "notions": [
+         "proba"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.DP.08",
+        "texte": "Comprendre la notion d’indépendance lors de la répétition de la même expérience aléatoire",
+        "notions": [
+         "proba"
+        ],
+        "proximite": "adapter"
+       },
+       {
+        "code": "CM2.DP.09",
+        "texte": "Dans des situations d’équiprobabilité, recenser toutes les issues possibles d’une expérience aléatoire en deux étapes dans un tableau ou dans un arbre afin de déterminer des probabilités",
+        "notions": [
+         "proba"
+        ],
+        "proximite": "adapter"
+       }
+      ]
+     },
+     {
+      "domaine": "PF",
+      "domaine_label": "Proportionnalité, fonctions",
+      "theme": "La proportionnalité",
+      "attendus": [
+       {
+        "code": "CM2.PF.01",
+        "texte": "Identifier une situation de proportionnalité",
+        "notions": [
+         "proptab",
+         "prop"
+        ],
+        "proximite": "direct"
+       },
+       {
+        "code": "CM2.PF.02",
+        "texte": "Savoir résoudre un problème de proportionnalité",
+        "notions": [
+         "proptab",
+         "prop"
+        ],
+        "proximite": "direct"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ }
+}
