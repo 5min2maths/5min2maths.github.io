@@ -479,14 +479,16 @@
   
   const dP = (v) => N(rnd(v, 6));
   const ev = (c) => "Évènements : " + M(c[0]) + " « " + c[1] + " » et " + M(c[2]) + " « " + c[3] + " ». ";
+  // 23.11 : la réponse ne doit pas figurer parmi les probabilités des branches de l'arbre (sinon on retire).
+  const revele = (p, q, r, v) => [p, 1 - p, q, 1 - q, r, 1 - r].some((x) => Math.abs(x - v) < 1e-9);
   const PT = {
     1: [
-      () => { const c = pk(PCTX), pA = pk(c[6][0]), pBA = pk(c[6][1]), pBn = pk(c[6][2]), v = rnd(pA * pBA);
+      () => { const c = pk(PCTX), pA = pk(c[6][0]), pBA = pk(c[6][1]), pBn = pk(c[6][2]), v = rnd(pA * pBA); if (revele(pA, pBA, pBn, v)) return null;
         return QN(c[4] + " " + ev(c) + "On a " + M("P(" + c[0] + ") = " + dP(pA)) + " et " + M("P_{" + c[0] + "}(" + c[2] + ") = " + dP(pBA)) + ". Calcule " + M("P(" + c[0] + " \\cap " + c[2] + ")") + ".", v,
           "On suit la branche " + M(c[0]) + " puis " + M(c[2]) + " : " + M("P(" + c[0] + " \\cap " + c[2] + ") = P(" + c[0] + ")" + X + "P_{" + c[0] + "}(" + c[2] + ") = " + dP(pA) + X + dP(pBA) + " = " + dP(v)) + ".",
           { ctx: c[5], fig: figTree([pA, pBA, pBn], c[0], c[2], [2, 5]), guide: [GS(M("P(" + c[0] + " \\cap " + c[2] + ")") + " = ?", v, M(dP(pA) + X + dP(pBA) + " = " + dP(v)) + ".")],
             traps: [TR(rnd(pA + pBA), "Le long d'une branche, on multiplie."), TR(pBA, "P_" + c[0] + "(" + c[2] + ") est une probabilité sachant " + c[0] + " : il faut encore multiplier par P(" + c[0] + ")."), TR(rnd(pA * pBn), "Prends la branche " + c[2] + " issue de " + c[0] + ".")] }); },
-      () => { const c = pk(PCTX), pA = pk(c[6][0]), pBA = pk(c[6][1]), pBn = pk(c[6][2]), v = rnd((1 - pA) * pBn);
+      () => { const c = pk(PCTX), pA = pk(c[6][0]), pBA = pk(c[6][1]), pBn = pk(c[6][2]), v = rnd((1 - pA) * pBn); if (revele(pA, pBA, pBn, v)) return null;
         return QN(c[4] + " " + ev(c) + "Calcule " + M("P(\\overline{" + c[0] + "} \\cap " + c[2] + ")") + " à l'aide de l'arbre.", v,
           M("P(\\overline{" + c[0] + "}) = 1 - " + dP(pA) + " = " + dP(1 - pA)) + ", puis " + M("P(\\overline{" + c[0] + "} \\cap " + c[2] + ") = " + dP(1 - pA) + X + dP(pBn) + " = " + dP(v)) + ".",
           { ctx: c[5], fig: figTree([pA, pBA, pBn], c[0], c[2], [3]), guide: [GS(M("P(\\overline{" + c[0] + "})") + " = ?", rnd(1 - pA), M(dP(1 - pA)) + "."), GS(M("P(\\overline{" + c[0] + "} \\cap " + c[2] + ")") + " = ?", v, M(dP(v)) + ".")],
@@ -498,12 +500,12 @@
             traps: [TR(rnd(inter * pA), "On divise par P(" + c[0] + "), on ne multiplie pas."), TR(rnd(pA / inter), "C'est P(" + c[0] + " ∩ " + c[2] + ") divisé par P(" + c[0] + ")."), TR(inter, "P(" + c[0] + " ∩ " + c[2] + ") n'est pas P_" + c[0] + "(" + c[2] + ").")] }); },
     ],
     2: [
-      () => { const c = pk(PCTX), pA = pk(c[6][0]), pBA = pk(c[6][1]), pBn = pk(c[6][2]), i1 = rnd(pA * pBA), i2 = rnd((1 - pA) * pBn), v = rnd(i1 + i2); if (pBA === pBn) return null;
+      () => { const c = pk(PCTX), pA = pk(c[6][0]), pBA = pk(c[6][1]), pBn = pk(c[6][2]), i1 = rnd(pA * pBA), i2 = rnd((1 - pA) * pBn), v = rnd(i1 + i2); if (revele(pA, pBA, pBn, v)) return null; if (pBA === pBn) return null;
         return QN(c[4] + " " + ev(c) + "Calcule " + M("P(" + c[2] + ")") + " (formule des probabilités totales).", v,
           M("P(" + c[2] + ") = P(" + c[0] + " \\cap " + c[2] + ") + P(\\overline{" + c[0] + "} \\cap " + c[2] + ") = " + dP(pA) + X + dP(pBA) + " + " + dP(1 - pA) + X + dP(pBn) + " = " + dP(v)) + ".",
           { ctx: c[5] + "-totales", fig: figTree([pA, pBA, pBn], c[0], c[2], [3, 4, 5]), guide: [GS(M("P(" + c[0] + " \\cap " + c[2] + ")") + " = ?", i1, M(dP(i1)) + "."), GS(M("P(\\overline{" + c[0] + "} \\cap " + c[2] + ")") + " = ?", i2, M(dP(i2)) + "."), GS(M("P(" + c[2] + ")") + " = ?", v, M(dP(v)) + ".")],
             traps: [TR(i1, "Il y a deux chemins qui mènent à " + c[2] + " : on additionne."), TR(rnd(pBA + pBn), "Chaque chemin se pondère par la première branche."), TR(rnd(pA * pBA + pA * pBn), "La deuxième branche part de " + c[0] + "̄, de probabilité " + dTxt(1 - pA) + ".")] }); },
-      () => { const c = pk(PCTX), pA = pk(c[6][0]), pBA = pk(c[6][1]), pBn = pk(c[6][2]), i1 = pA * pBA, pB = i1 + (1 - pA) * pBn, v = i1 / pB; if (pBA === pBn) return null;
+      () => { const c = pk(PCTX), pA = pk(c[6][0]), pBA = pk(c[6][1]), pBn = pk(c[6][2]), i1 = pA * pBA, pB = i1 + (1 - pA) * pBn, v = i1 / pB; if (revele(pA, pBA, pBn, v)) return null; if (pBA === pBn) return null;
         return QR(c[4] + " " + ev(c) + "Sachant que " + M(c[2]) + " est réalisé, quelle est la probabilité de " + M(c[0]) + " ? Calcule " + M("P_{" + c[2] + "}(" + c[0] + ")") + " (arrondi au millième).", v, 0.001,
           M("P(" + c[2] + ") = " + dP(rnd(pB))) + " (probabilités totales) puis " + M("P_{" + c[2] + "}(" + c[0] + ") = \\frac{P(" + c[0] + " \\cap " + c[2] + ")}{P(" + c[2] + ")} = \\frac{" + dP(rnd(i1)) + "}{" + dP(rnd(pB)) + "} \\approx " + N(rnd(v, 3))) + ".",
           { ctx: c[5] + "-inverse", fig: figTree([pA, pBA, pBn], c[0], c[2], [3, 4, 5]), guide: [GS(M("P(" + c[0] + " \\cap " + c[2] + ")") + " = ?", rnd(i1), M(dP(rnd(i1))) + "."), GS(M("P(" + c[2] + ")") + " = ?", rnd(pB), M(dP(rnd(pB))) + "."), GR(M("P_{" + c[2] + "}(" + c[0] + ")") + " au millième ?", v, M("\\approx " + N(rnd(v, 3))) + ".", 0.001)],

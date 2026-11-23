@@ -1,5 +1,5 @@
 <meta charset="utf-8">
-<!-- Collège français (22.11) : pour chaque classe 6e–3e, catalogue non vide, sans notion masquée, ordonné (ORDRE.FR) ;
+<!-- Collège français (22.11) : pour chaque classe 6e–3e, catalogue non vide, sans notion masquée, ordonné (ORDRE.FR_COL) ;
      100 tirages par niveau des notions françaises : réponse acceptée par checkAnswer, guide cohérent (dernière étape = réponse),
      pièges ≠ réponse, pas de NaN / undefined, pas de trivialité ; leçon, compétences, aide. tests/frcollege.html#progcalc,ratio -->
 <script>window.MathJax = { typesetPromise: () => Promise.resolve() };</script>
@@ -18,7 +18,7 @@ for (const g of [6, 7, 8, 9]) {
   if (cat.length < 20) fail(CL[g] + " : catalogue trop petit (" + cat.length + ")");
   const masked = cat.filter((c) => FR_MASK.includes(c.id)); if (masked.length) fail(CL[g] + " : notions masquées présentes " + masked.map((c) => c.id).join(" "));
   const swiss = cat.filter((c) => /CHF|PGDC|PPMC/.test(c.label)); if (swiss.length) fail(CL[g] + " : libellé suisse " + swiss.map((c) => c.id).join(" "));
-  const cur = cat.filter((c) => c.defaultStatus === "avenir"), noRank = cur.filter((c) => ORDRE.FR[c.id] === undefined);
+  const cur = cat.filter((c) => c.defaultStatus === "avenir"), noRank = cur.filter((c) => ORDRE.FR_COL[c.id] === undefined);
   if (!cur.length) fail(CL[g] + " : aucune notion de l'année");
   if (noRank.length) fail(CL[g] + " : notions de l'année hors progression " + noRank.map((c) => c.id).join(" "));
   const order = cur.map((c) => c.id).sort((a, b) => Engine.rank(p, a) - Engine.rank(p, b));

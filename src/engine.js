@@ -237,8 +237,8 @@ const Engine = {
   },
   // Rang dans l'ordre du référentiel (CO, matu ou MP selon l'élève).
   rank(profile, id) {
-    // 22.11 : collège français (6e–3e) : progression propre (ORDRE.FR, défini dans fr_college.js), sinon l'ordre du CO.
-    if (profile.system === "FR" && profile.grade <= 9 && ORDRE.FR && ORDRE.FR[id] !== undefined) return ORDRE.FR[id];
+    // 22.11 : collège français (6e–3e) : progression propre (ORDRE.FR_COL, défini dans fr_college.js), sinon l'ordre du CO.
+    if (profile.system === "FR" && profile.grade <= 9 && ORDRE.FR_COL && ORDRE.FR_COL[id] !== undefined) return ORDRE.FR_COL[id];
     const ref = this.refOf(profile);
     const r = (ORDRE[ref] || {})[id] ?? ORDRE.CO[id];
     return r ?? 1000 + NOTIONS.findIndex((n) => n.id === id);

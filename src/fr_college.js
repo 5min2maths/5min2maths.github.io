@@ -54,8 +54,9 @@ const FR_PROGRESSION = {
   9: ["idrem", "eq2", "eq2fact", "rac", "scicalc", "thales", "thalesrec", "trigo", "tabval", "fimg", "affine", "modaff", "pctvar",
     "gquot", "volcomp", "rotation", "simil"],
 };
-ORDRE.FR = {};
-[6, 7, 8, 9].flatMap((g) => FR_PROGRESSION[g]).forEach((id, i) => { ORDRE.FR[id] = i; });
+// 23.11 : table propre au collège (ORDRE.FR = 2nde, 1re, Tle) ; les mêmes notions ont un autre rang au lycée.
+ORDRE.FR_COL = {};
+[6, 7, 8, 9].flatMap((g) => FR_PROGRESSION[g]).forEach((id, i) => { ORDRE.FR_COL[id] = i; });
 
 // Application (en fin de fichier, après la création des notions françaises) : seules les classes 6e–3e sont touchées ;
 // une notion rattachée à la 2nde ou au-delà (FR ≥ 10) garde sa valeur (chantier lycée).

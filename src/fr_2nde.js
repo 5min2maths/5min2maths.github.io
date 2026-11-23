@@ -136,6 +136,8 @@
     ["Dans un magasin de Marseille,", "des clients ont un article non payé dans leur sac. Le portique sonne pour", "de ces clients et, par erreur, pour", "des clients honnêtes. Le portique sonne. Quelle est la probabilité que le client ait vraiment un article non payé ?", "fraude", "portique sonne"],
     ["Parmi les courriels reçus par une mairie,", "sont des courriels frauduleux. Le filtre bloque", "des courriels frauduleux et, par erreur,", "des courriels normaux. Un courriel est bloqué. Quelle est la probabilité qu'il soit frauduleux ?", "frauduleux", "bloqué"],
   ];
+  // 23.11 : la réponse ne doit pas figurer parmi les probabilités des branches de l'arbre (sinon on retire).
+  const revele = (p, q, r, v) => [p, 1 - p, q, 1 - q, r, 1 - r].some((x) => Math.abs(x - v) < 1e-9);
   const PCOND = {
     1: [
       () => { const T = crois(), { c, a, b, N } = T, v = (a + b) / N;
@@ -156,17 +158,17 @@
         return QN("Dans " + c.lieu + ", on choisit au hasard " + c.un + ". " + tab(T) + " " + evts(c) + " Calcule " + M("P_{" + c.A + "}(" + c.B + ")") + "." + FA, v, M("P_{" + c.A + "}(" + c.B + ")") + " : probabilité de " + M(c.B) + " sachant " + M(c.A) + ". On se place dans la ligne « " + c.rA[0] + " » : " + M("\\frac{" + nf(a) + "}{" + nf(a + b) + "} = " + fT(v)) + ".",
           { ctx: "pab-tableau", guide: [GS("On sait que " + M(c.A) + " est réalisé : combien de " + c.pop + " restent possibles ?", a + b, M(nf(a + b)) + " (ligne « " + c.rA[0] + " »)."), GS(M("P_{" + c.A + "}(" + c.B + ")") + " = ?", v, M("\\frac{" + nf(a) + "}{" + nf(a + b) + "} = " + fT(v)) + ".")],
             traps: [TR(a / (a + cc), "Ça, c'est " + "P_" + c.B + "(" + c.A + ") : sachant " + c.A + ", on divise par l'effectif de " + c.A + "."), TR(a / N, "Ça, c'est P(" + c.A + " ∩ " + c.B + ") : « sachant " + c.A + " » réduit l'univers à " + c.A + ".")] }); },
-      () => { const c = pk(CROIS), p = pk(pr()), q = pk(pr()), r = pk(pr(q)), v = r9(p * q);
+      () => { const c = pk(CROIS), p = pk(pr()), q = pk(pr()), r = pk(pr(q)), v = r9(p * q); if (revele(p, q, r, v)) return null;
         return QN("On choisit au hasard " + c.un + " (" + c.lieu + "). " + evts(c) + " L'arbre pondéré décrit la situation. Calcule " + M("P(" + c.A + " \\cap " + c.B + ")") + ".", v, "Produit des probabilités le long du chemin " + M(c.A) + " puis " + M(c.B) + " : " + M(nf(p) + " \\times " + nf(q) + " = " + nf(v)) + ".",
           { ctx: "arbre-inter", fig: treeFig([c.A, c.B], [p, q, r]), guide: [GS("Probabilité de la première branche, " + M("P(" + c.A + ")") + " ?", p, M(nf(p)) + "."), GS("Puis " + M("P_{" + c.A + "}(" + c.B + ")") + " ?", q, M(nf(q)) + " (branche de " + c.A + " vers " + c.B + ")."), GS("On multiplie : " + M("P(" + c.A + " \\cap " + c.B + ")") + " = ?", v, M(nf(v)) + ".")],
             traps: [TR(r9(p + q), "Le long d'un chemin, on multiplie les probabilités (on n'additionne pas)."), TR(q, "Ça, c'est P_" + c.A + "(" + c.B + ") ; il faut encore multiplier par P(" + c.A + ").")] }); },
-      () => { const c = pk(CROIS), p = pk(pr()), q = pk(pr()), r = pk(pr(q)), v = r9(p * q + (1 - p) * r);
+      () => { const c = pk(CROIS), p = pk(pr()), q = pk(pr()), r = pk(pr(q)), v = r9(p * q + (1 - p) * r); if (revele(p, q, r, v)) return null;
         return QN("On choisit au hasard " + c.un + " (" + c.lieu + "). " + evts(c) + " L'arbre pondéré décrit la situation. Calcule " + M("P(" + c.B + ")") + ".", v, "Deux chemins mènent à " + M(c.B) + " (formule des probabilités totales) : " + M(nf(p) + " \\times " + nf(q) + " + " + nf(r9(1 - p)) + " \\times " + nf(r) + " = " + nf(v)) + ".",
           { ctx: "arbre-totale", fig: treeFig([c.A, c.B], [p, q, r]), guide: [GS("Chemin " + M(c.A) + " puis " + M(c.B) + " : probabilité ?", r9(p * q), M(nf(p) + " \\times " + nf(q) + " = " + nf(r9(p * q))) + "."), GS("Chemin " + M("\\bar{" + c.A + "}") + " puis " + M(c.B) + " : probabilité ?", r9((1 - p) * r), M(nf(r9(1 - p)) + " \\times " + nf(r) + " = " + nf(r9((1 - p) * r))) + "."), GS(M("P(" + c.B + ")") + " = ?", v, "On additionne les deux chemins : " + M(nf(v)) + ".")],
             traps: [TR(r9(p * q), "Il y a un second chemin qui mène à " + c.B + " : en passant par " + c.A + "̅."), TR(r9(q + r), "On multiplie le long de chaque chemin avant d'additionner."), TR(r9(q * r), "On additionne les probabilités des deux chemins.")] }); },
     ],
     3: [
-      () => { const D = pk(DEPIST), p = pk([0.01, 0.02, 0.05, 0.1]), s = pk([0.9, 0.95, 0.99]), f = pk([0.02, 0.05, 0.1]), num = r9(p * s), tot = r9(p * s + (1 - p) * f), v = num / tot;
+      () => { const D = pk(DEPIST), p = pk([0.01, 0.02, 0.05, 0.1]), s = pk([0.9, 0.95, 0.99]), f = pk([0.02, 0.05, 0.1]), num = r9(p * s), tot = r9(p * s + (1 - p) * f), v = num / tot; if (revele(p, s, f, v)) return null;
         return QN(D[0] + " " + PC(p * 100) + " " + D[1] + " " + PC(s * 100) + " " + D[2] + " " + PC(f * 100) + " " + D[3] + " (arrondie au centième)", v, "On note M : « " + D[4] + " » et T : « " + D[5] + " ». " + M("P(M \\cap T) = " + nf(p) + " \\times " + nf(s) + " = " + nf(num)) + " ; " + M("P(T) = " + nf(num) + " + " + nf(r9(1 - p)) + " \\times " + nf(f) + " = " + nf(tot)) + " ; " + M("P_T(M) = \\frac{" + nf(num) + "}{" + nf(tot) + "} \\approx " + nf(+v.toFixed(2))) + ".",
           { ctx: "faux-positifs", round: 0.01, fig: treeFig(["M", "T"], [p, s, f]), guide: [GS(M("P(M \\cap T)") + " = ?", num, M(nf(p) + " \\times " + nf(s) + " = " + nf(num)) + "."), GS(M("P(T)") + " (deux chemins) = ?", tot, M(nf(num) + " + " + nf(r9(1 - p)) + " \\times " + nf(f) + " = " + nf(tot)) + "."), GS(M("P_T(M) = \\frac{P(M \\cap T)}{P(T)}") + " ≈ ? (au centième)", v, M("\\approx " + nf(+v.toFixed(2))) + ".", 0.01)],
             traps: [TR(s, "Ça, c'est P_M(T) (le test chez les malades). On demande l'inverse : P_T(M), malade sachant le test positif."), TR(num, "Ça, c'est P(M ∩ T) ; il faut diviser par P(T)."), TR(1 - f, "Les faux positifs comptent, mais il faut passer par P(T).")] }); },
@@ -575,7 +577,7 @@
     "2SP": ["tauxevol", "statfreq", "diagr", "stats", "quartiles", "proba", "proba2", "probcond"],
     "2AP": ["algopy"],
   };
-  ORDRE.FR = {}; ORDRE_THEME.FR = {};
+  ORDRE.FR = ORDRE.FR || {}; ORDRE_THEME.FR = ORDRE_THEME.FR || {}; // 23.11 : ne pas effacer 1re/Tle (ordre.js, rangs ≥ 1000)
   let rk = 0;
   for (const [ch, ids] of Object.entries(CHAP)) for (const id of ids) { ORDRE.FR[id] = rk++; ORDRE_THEME.FR[id] = ch; }
   THEME_LABEL.FR = { "2AU": "Automatismes", "2NC": "Nombres et calculs", "2GE": "Géométrie", "2AN": "Fonctions", "2SP": "Statistiques et probabilités", "2AP": "Algorithmique et programmation" };
