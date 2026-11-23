@@ -61,7 +61,10 @@ def retours():
 def banques_riches():
     """Chapitres qui ont un test de préparation de qualité (src/riche.js, 15.11) : clé -> (notions, nb exercices, nb raisonnement)."""
     out = {}
-    for f in sorted((ROOT / "src").glob("riche*.js")):  # riche.js et riche_11b.js (17.11)
+    # Ordre de chargement de build.py (23.11) : comme richChapter (sujet), à égalité la première banque chargée l'emporte.
+    ordre = re.search(r'JS = \[(.*?)\]', (ROOT / "build.py").read_text(), re.S)
+    ordre = re.findall(r'"(riche[^"]*\.js)"', ordre.group(1)) if ordre else []
+    for f in sorted((ROOT / "src").glob("riche*.js"), key=lambda f: (ordre.index(f.name) if f.name in ordre else 99, f.name)):
         s = f.read_text()
         for m in re.finditer(r'RICH\.(\w+) = \{ ids: \[([^\]]*)\]', s):
             out[m.group(1)] = re.findall(r'"([a-z0-9]+)"', m.group(2))
@@ -237,7 +240,10 @@ def main():
             # Fin de chapitre : statut du test de préparation (évaluation d'entraînement, demande du 15.11).
             if k + 1 == len(rows) or rows[k + 1]["chap"] != row["chap"]:
                 ids = [r["id"] for r in rows if r["chap"] == row["chap"]]
-                ch = next((c for c, cids in RICH_B.items() if 2 * sum(i in cids for i in ids) >= len(ids)), None)
+                # Banque qui couvre le plus de notions (au moins la moitié), comme richChapter dans l'app (23.11).
+                ch = max(RICH_B, key=lambda c: sum(i in RICH_B[c] for i in ids), default=None)
+                if ch and 2 * sum(i in RICH_B[ch] for i in ids) < len(ids):
+                    ch = None
                 sid = "sujet:" + row["chap"][:20]
                 ctl, rem = keep.get((cl["name"], sid, "Test"), ("à faire", None))
                 ws.append([row["chap"], "Test de préparation (évaluation)", sid, "Test", "Sujet type test : automatismes, exercices en situation, raisonnement", "",
