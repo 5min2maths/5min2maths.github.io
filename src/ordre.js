@@ -23,3 +23,9 @@ Object.assign(ORDRE_THEME.MATU, {"limites":"M3C02","limitinf":"M3C02","asymptote
 // 25.11 (agent c4plus) : intégration par parties et par substitution (M4C01), étude ln/exp et équations différentielles (M4C02). Ajouté à la main.
 Object.assign(ORDRE.MATU, {"intparties":204,"intsubst":205,"etudelnexp":212,"eqdiff":213});
 Object.assign(ORDRE_THEME.MATU, {"intparties":"M4C01","intsubst":"M4C01","etudelnexp":"M4C02","eqdiff":"M4C02"});
+// 24.11 (agent niv1c, audit de niveau 1re Collège : tools/niveau_1c.md) : rac, racenc, pct, scicalc, divcrit, tradexpr (niveau 9e–10e)
+// ne sont plus des notions du programme de 1re (elles restent des révisions du CO) ; 1. Nombres reçoit racprop, ratden, fracper ;
+// 3. Argumenter reçoit tradalg, contrex, demoalg, implication (src/ch1c_arg.js). Reporté dans tools/referentiels.py (SESA_FIX).
+["rac", "racenc", "pct", "scicalc", "divcrit", "tradexpr"].forEach((id) => { delete ORDRE_THEME.MATU[id]; });
+Object.assign(ORDRE.MATU, {"fracper":3.5,"racprop":4.1,"ratden":4.2,"tradalg":10.1,"contrex":10.2,"demoalg":10.3,"implication":10.4});
+Object.assign(ORDRE_THEME.MATU, {"fracper":"M1C01","racprop":"M1C01","ratden":"M1C01","tradalg":"M1C03","contrex":"M1C03","demoalg":"M1C03","implication":"M1C03"});

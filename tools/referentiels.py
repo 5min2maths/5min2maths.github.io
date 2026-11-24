@@ -95,6 +95,7 @@ def main():
     cur += (ROOT / "src/ch3c_ana.js").read_text()  # 23.11 : notions de 3e Collège (dérivation), codesMATU sur la ligne de l'id
     cur += (ROOT / "src/ch4c_ana.js").read_text()  # 24.11 : notions de 4e Collège (intégration, ln-exp, probabilités 2)
     cur += (ROOT / "src/ch3c_geo.js").read_text()  # 24.11 : notions de 3e Collège (géométrie vectorielle de l'espace)
+    cur += (ROOT / "src/ch1c_arg.js").read_text()  # 24.11 (agent niv1c) : 1re Collège, chapitre « Argumenter » (sans ligne au référentiel : SESA_FIX)
     ids = re.findall(r'\{ id: "(\w+)"', cur)
     labels = dict(re.findall(r'\{ id: "(\w+)", theme: "\w+", label: "((?:[^"\\]|\\.)*)"', cur))
     # notions fines (src/gen3.js) : motifs déclarés avec la notion (codes = CO, codesMATU, codesMP)
@@ -158,8 +159,10 @@ SESA = {"M1C01": "1. Nombres", "M1C02": "2. Ensembles", "M1C03": "3. Argumenter"
         "M3C05": "5. Combinatoire et probabilités", "M3C06": "6. Géométrie vectorielle",
         "M4C01": "1. Intégration", "M4C02": "2. Logarithme et exponentielle", "M4C03": "3. Algèbre linéaire", "M4C04": "4. Probabilités et statistique"}
 # Chapitre imposé : notions sans ligne Sésamath (reprises du CO en 1re) ou dont le premier chapitre trouvé n'est pas le bon.
-SESA_FIX = {"rel": "M1C01", "fracops": "M1C01", "puiss": "M1C01", "rac": "M1C01", "racenc": "M1C01", "sci": "M1C01", "scicalc": "M1C01",
-            "pct": "M1C01", "arith": "M1C01", "ensembles": "M1C02", "divcrit": "M1C03", "tradexpr": "M1C03", "exactes": "M1C08",
+# 24.11 (audit de niveau 1re, tools/niveau_1c.md) : rac, racenc, pct, scicalc, divcrit, tradexpr (niveau 9e–10e) ne sont plus des
+# notions de 1re (révisions du CO) ; Nombres de 1re = racprop, ratden, fracper en plus ; Argumenter = tradalg, contrex, demoalg, implication.
+SESA_FIX = {"rel": "M1C01", "fracops": "M1C01", "puiss": "M1C01", "sci": "M1C01", "fracper": "M1C01", "racprop": "M1C01", "ratden": "M1C01",
+            "arith": "M1C01", "ensembles": "M1C02", "tradalg": "M1C03", "contrex": "M1C03", "demoalg": "M1C03", "implication": "M1C03", "exactes": "M1C08",
             "droitesrem": "M1C08", "inter": "M1C07", "ineq2": "M1C07", "interpar": "M1C07", "optim": "M1C07", "log": "M2C07", "logbase": "M2C07",
             "trigeq2": "M2C09", "absval": "M2C06", "droites": "M2C01", "modexp": "M2C05",
             # notions ajoutées le 13.11 d'après les cours pinkmaths 2026-27
