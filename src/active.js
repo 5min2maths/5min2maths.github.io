@@ -19,12 +19,14 @@ function predOrder(n) { const o = [...Array(n).keys()]; if (n < 3) return o; for
 // Leçons actives (14.11, demande de l'utilisateur : « l'élève doit être actif ») : trois temps.
 // 1. Devine : une question à toucher avant toute règle. 2. Manipule : des défis à réussir avec les doigts.
 // 3. Retiens : la règle, les exemples et le piège arrivent après. Prototype : fractout, prio.
-// ACTIVE[id] = { predict: { q, choices, good, why }, defis: [texte…], play(box, onWin) }.
+// ACTIVE[id] = { predict: { q, choices, good, why }, defis: [texte…], play(box, onWin), retiens? (voir actRetiens) }.
 // play dessine la manipulation dans box et appelle onWin(i) quand le défi i est réussi (dans l'ordre).
 // Pas de TeX dans ce qui est redessiné à chaque geste (pas de MathJax à relancer).
 
 const ACTIVE = {
   fractout: {
+    /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+    retiens: { regle: "Pour calculer les \\(\\frac{a}{b}\\) de \\(n\\), on divise \\(n\\) par \\(b\\) (une part), puis on multiplie par \\(a\\). En une ligne, cela donne \\(n \\div b \\cdot a\\).", exemple: ["Les \\(\\frac{3}{4}\\) de \\(20\\) valent \\(20 \\div 4 \\cdot 3 = 15\\).", "Les \\(\\frac{2}{3}\\) de 24 valent \\(24 \\div 3 \\cdot 2 = 16\\).", "Les \\(\\frac{3}{4}\\) de 24 valent 18."], piege: "Divise d'abord par le dénominateur (une part), puis multiplie par le numérateur." },
     predict: { q: "Les trois quarts de 20, ça fait combien ?", choices: ["5", "15", "23"], good: 1,
       why: "On partage 20 en 4 parts égales de 5, et on en prend 3 : 15." },
     defis: ["Colorie les 2/3 de 24.", "Trouve une fraction de 24 qui vaut 18."],
@@ -57,6 +59,10 @@ const ACTIVE = {
   },
 
   prio: {
+
+    /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+
+    retiens: { regle: "D'abord les calculs entre parenthèses. Puis les multiplications et les divisions. Enfin les additions et les soustractions.", exemple: ["\\(2 + 3 \\cdot 4 - 1\\) : d'abord \\(3 \\cdot 4 = 12\\), puis \\(2 + 12 - 1 = 13\\).", "\\((2 + 3) \\cdot 4 - 1 = 20 - 1 = 19\\).", "\\(2 + 3 \\cdot (4 - 1) = 2 + 9 = 11\\)."], piege: "Sans parenthèses, la multiplication passe avant l'addition : \\(2 + 3 \\cdot 4 = 14\\), pas \\(20\\)." },
     predict: { q: "Combien fait 2 + 3 · 4 ?", choices: ["20", "14"], good: 1,
       why: "La multiplication passe avant l'addition : 3 · 4 = 12, puis 2 + 12 = 14." },
     defis: ["Sans parenthèses, 2 + 3 · 4 − 1 vaut 13. Place des parenthèses pour obtenir 19.", "Et maintenant pour obtenir 11."],
@@ -98,6 +104,8 @@ const actBindStepper = (box, id, get, set, min, max) => box.querySelectorAll('[d
 
 Object.assign(ACTIVE, {
   multdiv: {
+    /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+    retiens: { exemple: ["Diviseurs de 12 : 1, 2, 3, 4, 6, 12", "Diviseurs de 18 : 1, 2, 3, 6, 9, 18"] },
     predict: { q: "7 est-il un diviseur de 84 ?", choices: ["Oui", "Non"], good: 0, why: "84 = 7 · 12 : la division de 84 par 7 tombe juste, donc 7 divise 84." },
     defis: ["Range 12 jetons en rectangle de toutes les façons possibles.", "Même jeu avec 18 jetons : trouve tous ses diviseurs."],
     play(box, onWin) {
@@ -124,6 +132,10 @@ Object.assign(ACTIVE, {
   },
 
   divcrit: {
+
+    /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+
+    retiens: { regle: "Par 2 : chiffre des unités pair. Par 5 : 0 ou 5. Par 3 : somme des chiffres divisible par 3. Par 9 : somme divisible par 9.", exemple: ["\\(471\\) : \\(4 + 7 + 1 = 12\\), divisible par 3, pas par 9", "\\(477\\) : \\(4 + 7 + 7 = 18\\), divisible par 9", "Par 2, 3 et 5 : finit par 0, somme des chiffres divisible par 3 (30, 120…)"] },
     predict: { q: "471 est-il divisible par 3 ?", choices: ["Oui", "Non"], good: 0, why: "4 + 7 + 1 = 12, et 12 est divisible par 3 : 471 = 3 · 157." },
     defis: ["Change un seul chiffre de 472 pour qu'il devienne divisible par 9.", "Fabrique un nombre divisible à la fois par 2, 3 et 5."],
     play(box, onWin) {
@@ -222,6 +234,8 @@ Object.assign(ACTIVE, {
 // ---- 2e · Cercles et tangentes (14.11, retour testeur « Je ne comprends pas la pente ») ----
 Object.assign(ACTIVE, {
   cercletan: {
+    /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+    retiens: { regle: "La tangente en un point \\(T\\) du cercle de centre \\(C\\) est perpendiculaire au rayon \\([CT]\\) : sa pente est l'inverse de celle du rayon, avec le signe opposé. Rayon vertical : tangente horizontale.", exemple: ["Cercle de centre \\(O\\), \\(T(3 \\, ; 4)\\) : le rayon \\([OT]\\) a pour pente \\(\\frac{4}{3}\\), donc la tangente a pour pente \\(-\\frac{3}{4}\\).", "Tangente horizontale : \\(T\\) tout en haut ou tout en bas du cercle, où le rayon est vertical."], piege: "La pente de la tangente est \\(-\\frac{3}{4}\\), pas \\(\\frac{3}{4}\\) : le produit des deux pentes vaut \\(-1\\)." },
     predict: { q: "Cercle de centre O(0 ; 0), point T(3 ; 4). De O à T, on avance de 3 et on monte de 4. La tangente en T (la droite qui touche le cercle en T sans le traverser)…", choices: ["monte", "descend", "est horizontale"], good: 1,
       fig: (() => { const X = (u) => 130 + u * 18, Y = (v) => 120 - v * 18;
       return `<svg class="fig" viewBox="0 0 260 230" role="img" aria-label="cercle de centre O, rayon OT vers T(3 ; 4)"><line x1="${X(-6.5)}" y1="${Y(0)}" x2="${X(6.5)}" y2="${Y(0)}" class="f-line" stroke-width="1"/><line x1="${X(0)}" y1="${Y(-6)}" x2="${X(0)}" y2="${Y(6)}" class="f-line" stroke-width="1"/>
@@ -293,8 +307,21 @@ function actPrep(A) {
 function $hint(box, t) { let el = box.querySelector(".act-hint"); if (!el) { el = document.createElement("div"); el.className = "small act-hint"; box.appendChild(el); } el.textContent = t; }
 
 // Écran de leçon active. cont : suite de la séance.
-function activeLesson(id, L, cont, review) {
-  const A0 = ACTIVE[id], P = A0.predict, X = actPrep(A0), A = Object.assign({}, A0, { defis: X.defis, play: X.play });
+// « Retiens » propre à la leçon active (24.11, règle du 15.11 : n'afficher que ce que les défis ont présenté, avec le
+// vocabulaire exact). A.retiens = { regle, exemple: […], piege } ou fonction (L) → objet : chaque champ donné remplace
+// celui de la leçon générale LESSONS[id] (titre et intro inchangés) ; sans ce champ, la leçon générale. Les « : » sont
+// traités comme dans LESSONS (colonBreak, engine.js).
+function actRetiens(A, L) {
+  if (!A || !A.retiens) return L;
+  const r = typeof A.retiens === "function" ? A.retiens(L) : A.retiens, cb = typeof colonBreak === "function" ? colonBreak : (x) => x, o = Object.assign({}, L);
+  if (typeof r.regle === "string") o.regle = cb(r.regle);
+  if (Array.isArray(r.exemple)) o.exemple = r.exemple.map(cb);
+  if (typeof r.piege === "string") o.piege = cb(r.piege);
+  return o;
+}
+
+function activeLesson(id, L0, cont, review) {
+  const A0 = ACTIVE[id], P = A0.predict, X = actPrep(A0), A = Object.assign({}, A0, { defis: X.defis, play: X.play }), L = actRetiens(A0, L0);
   const ss = sentences(L.regle);
   const rule = ss.length > 1 ? "<ul>" + ss.map((x) => "<li>" + x + "</li>").join("") + "</ul>" : " · " + L.regle;
   const tail = lessonBody(id), fb = tail.slice(tail.indexOf('<div class="lfb"'));

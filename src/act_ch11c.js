@@ -61,6 +61,8 @@
         wins: [W(3, "Soustraire un négatif, c'est ajouter son opposé : −5 + 8 = 3."), W(-3, "On recule de 7 puis on avance de 4 : on arrive à −3."), W(12, "Moins fois moins donne plus : (−3) · (−4) = 12.")] }),
     },
     fracops: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "On détermine le signe, puis on calcule. Un nombre pair de signes − donne un résultat positif, un nombre impair un résultat négatif. Multiplier : numérateurs entre eux, dénominateurs entre eux. Diviser : multiplier par l'inverse.", exemple: ["\\(\\left(-\\frac{3}{4}\\right) \\cdot 8 = -6\\)", "\\(\\left(-\\frac{6}{5}\\right) : \\left(-\\frac{3}{10}\\right) = \\frac{6}{5} \\cdot \\frac{10}{3} = 4\\)"], piege: "Trois facteurs négatifs donnent un résultat négatif : \\(\\left(-\\frac{2}{3}\\right) \\cdot \\left(-\\frac{3}{4}\\right) \\cdot \\left(-\\frac{1}{2}\\right) = -\\frac{1}{4}\\)." },
       predict: { q: "Quel est le signe de (−2/3) · (−3/4) · (−1/2) ?", choices: ["positif", "négatif"], good: 1, why: "Trois facteurs négatifs : un nombre impair de signes − donne un résultat négatif (ici −1/4)." },
       defis: ["Calcule (−3/4) · 8.", "Calcule 1/2 − 3/4 · 2/3.", "Calcule (−6/5) : (−3/10)."],
       play: hunt({ ask: true, label: "Résultat (entier)",
@@ -132,6 +134,8 @@
         wins: [W(3, "k = 3 : aire × 9 (k²)."), W(4, "k = 4 : aire × 16."), (x) => (x === 2 ? "k = 2 : volume × 2³ = 8 (k³)." : "")] }),
     },
     denombr: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Si on choisit d'abord parmi \\(a\\) possibilités, puis parmi \\(b\\), il y a \\(a \\cdot b\\) possibilités (c'est un arbre) : on multiplie, on n'additionne pas.", exemple: ["3 t-shirts et 4 pantalons : \\(3 \\cdot 4 = 12\\) tenues.", "6 personnes : \\(\\frac{6 \\cdot 5}{2} = 15\\) poignées de main."] },
       predict: { q: "3 t-shirts et 4 pantalons : combien de tenues différentes ?", choices: ["7", "12", "34"], good: 1, why: "Chaque t-shirt se combine avec chacun des 4 pantalons : 3 · 4 = 12 (arbre). On multiplie, on n'additionne pas." },
       defis: ["3 t-shirts, 4 pantalons : nombre de tenues ?", "5 coureurs : nombre de podiums (or, argent, bronze) ?", "6 personnes se serrent toutes la main : nombre de poignées ?"],
       play: hunt({ ask: true, label: "Nombre",
@@ -147,6 +151,8 @@
         wins: [W(36, "6 · 6 = 36 issues."), W(6, "6 façons sur 36 : P(7) = 6/36 = 1/6."), W(3, "4+6, 5+5, 6+4 : 3 façons, P(10) = 3/36 = 1/12.")] }),
     },
     carres: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Élever au carré, c'est multiplier un nombre par lui-même. Carrés à connaître : \\(11^2 = 121\\), \\(12^2 = 144\\), \\(13^2 = 169\\), \\(14^2 = 196\\), \\(15^2 = 225\\).", exemple: ["\\(\\sqrt{144} = 12\\)", "\\(0{,}3^2 = 0{,}09\\)", "\\(14^2 = 196 < 200 < 225 = 15^2\\)"] },
       predict: { q: "Combien vaut 0,3² ?", choices: ["0,9", "0,09", "0,6"], good: 1, why: "0,3 · 0,3 = 0,09 : deux chiffres après la virgule. Élever au carré, c'est multiplier par lui-même, pas par 2 ni par 3." },
       defis: ["Quel nombre positif a pour carré 144 ?", "Quel nombre positif a pour carré 121 ?", "Quel est le plus grand entier dont le carré est inférieur à 200 ?"],
       play: hunt({ ask: true, label: "Ta réponse",

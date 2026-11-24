@@ -70,6 +70,8 @@
         wins: [W(6, "−x + 10 = x − 2, 2x = 12, x = 6 ; y = 4. Solution (6 ; 4)."), W(2, "2x + 1 = −x + 7, 3x = 6, x = 2 ; y = 5. Solution (2 ; 5)."), W(-2, "x + 3 = −2x − 3, 3x = −6, x = −2 ; y = 1. Solution (−2 ; 1).")] }),
     },
     sysprob: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["10 têtes et 28 pattes : si tout était des poules, 20 pattes ; il en manque 8, soit 4 lapins.", "35 têtes et 94 pattes : \\(p + \\ell = 35\\), \\(2p + 4\\ell = 94\\), donc 12 lapins et 23 poules."] },
       predict: { q: "Dans une ferme : 10 têtes et 28 pattes (poules et lapins). Combien de lapins ?", choices: ["4", "6", "5"], good: 0, why: "Si tous étaient des poules : 20 pattes. Il en manque 8, et chaque lapin ajoute 2 pattes : 4 lapins (et 6 poules)." },
       defis: ["10 têtes, 28 pattes : combien de lapins ?", "20 têtes, 56 pattes : combien de lapins ?", "35 têtes, 94 pattes : combien de lapins ?"],
       play: hunt({ label: "Lapins :",
@@ -80,6 +82,8 @@
         wins: [W(4, "4 lapins, 6 poules : 16 + 12 = 28."), W(8, "8 lapins, 12 poules : 32 + 24 = 56."), W(12, "Si tout était des poules : 70 pattes ; il en manque 24, soit 12 lapins.")] }),
     },
     sysgraph: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["\\(y = 2x + 1\\) et \\(y = 2x - 3\\) : parallèles, aucune solution.", "\\(x + y = 4\\) et \\(y = -x + 4\\) : confondues, une infinité.", "\\(y = x + 1\\) et \\(y = -x + 5\\) : sécantes en \\((2 \\,;\\, 3)\\)."] },
       predict: { q: "Le système y = 2x + 1 et y = 2x − 3 a…", choices: ["une solution", "aucune solution", "une infinité de solutions"], good: 1, why: "Même pente 2, ordonnées à l'origine différentes : droites parallèles, jamais de point commun." },
       defis: ["Quelle pente m rend y = mx + 1 parallèle à y = 3x − 2 ?", "Quelle valeur de b rend y = −x + b confondue avec la droite x + y = 4 ?", "Quelle pente m fait couper y = mx et y = 2x + 4 en x = 2 ?"],
       play: hunt({ label: "Valeur :",
@@ -90,6 +94,8 @@
         wins: [W(3, "Même pente 3 : parallèles (ordonnées 1 et −2 différentes), aucune solution."), W(4, "x + y = 4 s'écrit y = −x + 4 : avec b = 4, les droites sont confondues."), W(4, "2m = 2 · 2 + 4 = 8, donc m = 4.")] }),
     },
     sys3: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Un système « en escalier » (triangulaire) se résout de bas en haut : on trouve \\(z\\), puis on remonte pour \\(y\\), puis pour \\(x\\). Quand chaque ligne est la somme de deux inconnues, on additionne les trois lignes : on obtient \\(2(x + y + z)\\).", exemple: ["\\(\\begin{cases} x + y + z = 9 \\\\ y + z = 7 \\\\ z = 3 \\end{cases}\\) : \\(z = 3\\), \\(y = 4\\), \\(x = 2\\).", "\\(\\begin{cases} x + y = 7 \\\\ y + z = 9 \\\\ x + z = 8 \\end{cases}\\) : la somme des lignes donne \\(2x + 2y + 2z = 24\\), donc \\(x + y + z = 12\\)."] },
       predict: { q: "x + y + z = 6, y + z = 5 et z = 2. Que vaut x ?", choices: ["1", "3", "4"], good: 0, why: "On remonte : z = 2, puis y = 5 − 2 = 3, puis x = 6 − 3 − 2 = 1." },
       defis: ["Système x + y + z = 9, y + z = 7, z = 3 : que vaut y ?", "Même système : que vaut x ?", "x + y = 7, y + z = 9, x + z = 8 : additionne les trois lignes. Que vaut x + y + z ?"],
       play: hunt({ label: "Ta réponse :",
@@ -106,6 +112,8 @@
         wins: [W(2, "a = (5 − 1) ÷ (2 − 0) = 2."), W(-2, "b = 1 − 3 · 1 = −2 : f(x) = 3x − 2."), W(-0.5, "a = (2 − 4) ÷ (2 − (−2)) = −2 ÷ 4 = −0,5 : la droite descend.")] }),
     },
     affzero: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Zéro : on résout \\(ax + b = 0\\), \\(x = -\\frac{b}{a}\\). Si \\(a > 0\\), la fonction est négative avant le zéro et positive après ; si \\(a < 0\\), c'est l'inverse." },
       predict: { q: "f(x) = 2x − 6. Son zéro est…", choices: ["−6", "3", "6"], good: 1, why: "2x − 6 = 0 donne x = 3 : la droite coupe l'axe horizontal en 3. −6 est l'ordonnée à l'origine." },
       defis: ["Zéro de f(x) = 2x − 6 ?", "Zéro de f(x) = −3x + 12 ?", "Zéro de f(x) = 0,5x + 2 ?"],
       play: hunt({ label: "x =",

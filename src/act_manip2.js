@@ -50,6 +50,8 @@
     const want = (step) => { const s = { x2: 0, x: 0, 1: 0 }; E[step].e.forEach(([c, t]) => (s[t] += c)); return s; };
     const res = (s) => poly([[s.x2, "x²"], [s.x, "x"], [s[1], ""]]);
     set("reduire", {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["\\(3x + 4 - x - 2 = 2x + 2\\).", "\\(2x^2 + 3x - x^2 - x - 3 = x^2 + 2x - 3\\).", "\\(-x^2 + 2x + 2x^2 - 3x + 1 = x^2 - x + 1\\)."] },
       predict: { q: "3x + 2x² se réduit en…", choices: ["5x³", "5x²", "on ne peut pas réduire"], good: 2, why: "x et x² ne sont pas semblables (comme des carrés et des barres de tailles différentes) : on ne peut pas les additionner." },
       defis: ["Range les tuiles de 3x + 4 − x − 2 dans les bacs : chaque tuile avec celles de même forme.", "Range celles de 2x² + 3x − x² − x − 3.", "Et celles de −x² + 2x + 2x² − 3x + 1."],
       play: manipLesson({ W: 320, H: 276, aria: "tuiles algébriques à ranger dans trois bacs",
@@ -112,6 +114,8 @@
       { top: ["x", "1", "1", "1"], left: ["x", "1", "1"], txt: "(x + 2)(x + 3)", msg: "Quatre morceaux : x², 3x, 2x et 6, qu'on réduit en x² + 5x + 6." },
       { top: ["x", "1", "1", "1"], left: ["x", "x"], txt: "2x(x + 3)", msg: "2x · x = 2x² et 2x · 3 = 6x." }];
     set("distrib", {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["\\(3(x + 2) = 3x + 6\\).", "\\((x + 2)(x + 3) = x^2 + 3x + 2x + 6 = x^2 + 5x + 6\\).", "\\(2x(x + 3) = 2x^2 + 6x\\)."], piege: "Dans \\((x + 2)(x + 3)\\), il y a 4 produits (4 morceaux du rectangle) : n'oublie pas les produits « croisés »." },
       predict: { q: "3(2x + 5) = ?", choices: ["6x + 5", "6x + 15", "5x + 8"], good: 1, why: "Le 3 multiplie les deux termes : 3 · 2x = 6x et 3 · 5 = 15. Comme l'aire d'un rectangle coupé en deux." },
       defis: ["Remplis le rectangle 3 sur (x + 2) avec des tuiles : quelle est son aire ?", "Remplis le rectangle (x + 2) sur (x + 3).", "Remplis le rectangle 2x sur (x + 3)."],
       play: mk(D1, [null, { q: "Développe (x + 4)(x + 1) et réduis : tape le coefficient de x.", ans: 5, ok: "(x + 4)(x + 1) = x² + x + 4x + 4 = x² + 5x + 4.", no: "Quatre produits : x · x, x · 1, 4 · x et 4 · 1 ; puis regroupe les x." }, null]),
@@ -120,6 +124,8 @@
       { top: ["x", "1", "1"], left: ["x", "1", "1"], txt: "(x + 2)²", msg: "Deux rectangles de 2x (le double produit 4x), plus 2² = 4 : x² + 4x + 4." },
       { top: ["x", "1", "1", "1"], left: ["x", "1", "1", "1"], txt: "(x + 3)²", msg: "x² + 6x + 9 : sans les deux rectangles 3x, il manquerait le double produit." }];
     set("idrem", {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\((a + b)^2 = a^2 + 2ab + b^2\\). Le carré de côté \\(a + b\\) se découpe en \\(a^2\\), deux rectangles \\(ab\\) et \\(b^2\\) : le terme du milieu, \\(2ab\\), s'appelle le double produit.", exemple: ["\\((x + 1)^2 = x^2 + 2x + 1\\).", "\\((x + 2)^2 = x^2 + 4x + 4\\).", "\\((x + 3)^2 = x^2 + 6x + 9\\)."] },
       predict: { q: "(x + 3)² = ?", choices: ["x² + 9", "x² + 6x + 9", "x² + 3x + 9"], good: 1, why: "(x + 3)² = (x + 3)(x + 3) : 4 morceaux, x², 3x, 3x et 9. Le terme du milieu est le double produit 6x." },
       defis: ["Remplis le carré de côté x + 1.", "Remplis le carré de côté x + 2.", "Remplis le carré de côté x + 3. Compte les barres x."],
       play: mk(D2, [null, null, { q: "Sans la figure : (x + 5)² = x² + ?x + 25. Tape le coefficient de x.", ans: 10, ok: "Deux rectangles 5x : le double produit vaut 2 · 5 · x = 10x.", no: "Dans le carré, il y a DEUX rectangles 5 sur x." }]),
@@ -131,6 +137,8 @@
     const E = [[6, 9], [10, -15], [12, 18]], RX = 44, RY = 46, RH = 26, KMAX = 6;
     const txt = (p, q) => poly([[p, "x"], [q, ""]]);
     set("factor", {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Factoriser, c'est écrire un produit : l'inverse de développer. Mise en évidence : on cherche le facteur commun et on l'écrit devant, \\(ka + kb = k(a + b)\\). Factoriser au maximum : on prend le plus grand facteur commun. On vérifie en développant.", exemple: ["\\(6x + 9 = 3(2x + 3)\\).", "\\(10x - 15 = 5(2x - 3)\\).", "\\(12x + 18 = 6(2x + 3)\\)."], piege: "\\(12x + 18 = 2(6x + 9)\\) n'est pas fini : le plus grand facteur commun est 6." },
       predict: { q: "Factoriser 6x + 9, c'est l'écrire…", choices: ["comme un produit", "comme une somme plus courte"], good: 0, why: "Factoriser = écrire un produit : 6x + 9 = 3(2x + 3). C'est l'inverse de développer." },
       defis: ["Range les tuiles de 6x + 9 en rectangle : tire le bord pour choisir le nombre de rangées. Fais le plus de rangées possible.", "Même chose avec 10x − 15.", "Et avec 12x + 18, au maximum."],
       play: manipLesson({ W: 320, H: RY + KMAX * RH + 40, aria: "tuiles rangées en rectangle",
@@ -184,6 +192,8 @@
     const cube = (off) => `<rect x="-6.5" y="-6.5" width="13" height="13" rx="2" fill="${off ? "var(--grid)" : "var(--blue)"}" stroke="var(--ink)" stroke-width="1"/>`;
     const solved = (st) => { for (const [a, b] of [["L", "R"], ["R", "L"]]) if (count(st, a, "x") === 1 && count(st, a, "1") === 0 && count(st, b, "x") === 0 && weight(st, "L") === weight(st, "R")) return true; return false; };
     set("eq1", {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["\\(2x + 3 = 11\\), \\(2x = 8\\), \\(x = 4\\).", "\\(3x + 2 = x + 8\\), \\(2x = 6\\), \\(x = 3\\). Contrôle : \\(11 = 11\\).", "\\(4x + 1 = 2x + 7\\), \\(2x = 6\\), \\(x = 3\\)."] },
       predict: { q: "Dans 3x + 5 = 20, on « fait passer » le 5 de l'autre côté. Que fait-on vraiment ?", choices: ["On soustrait 5 des deux côtés", "On efface le 5", "On divise par 5"], good: 0, why: "Une équation est une balance : on retire 5 des deux plateaux, 3x = 15. Le 5 ne « saute » pas : il est soustrait des deux côtés." },
       defis: ["La balance montre 2x + 3 = 11. Enlève des objets, sans la déséquilibrer, jusqu'à ce qu'un sac x reste seul : combien pèse-t-il ?", "Même jeu avec 3x + 2 = x + 8.", "Et avec 4x + 1 = 2x + 7."],
       play: manipLesson({ W: 320, H: 250, aria: "balance à deux plateaux",
@@ -235,6 +245,8 @@
     const chipSvg = (d) => `<rect x="-32" y="-18" width="64" height="36" rx="8" fill="var(--card)" stroke="var(--blue)" stroke-width="1.5"/><text y="1" text-anchor="middle" font-size="14" font-weight="700" style="fill:var(--ink)">1/${d}</text><rect x="-26" y="7" width="${(52 / d).toFixed(1)}" height="6" fill="var(--ok-soft)" stroke="var(--ink)" stroke-width=".8"/>`;
     const fr = (n, d) => n + "/" + d;
     set("fracadd", {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "On cherche le plus petit multiple commun des dénominateurs. On écrit chaque fraction avec ce dénominateur (des parts toutes pareilles), on additionne les numérateurs, puis on simplifie.", exemple: ["\\(\\frac{1}{4} + \\frac{1}{6} = \\frac{3}{12} + \\frac{2}{12} = \\frac{5}{12}\\).", "\\(\\frac{2}{3} + \\frac{1}{6} = \\frac{4}{6} + \\frac{1}{6} = \\frac{5}{6}\\).", "\\(\\frac{1}{3} + \\frac{1}{4} = \\frac{4}{12} + \\frac{3}{12} = \\frac{7}{12}\\)."] },
       predict: { q: "Combien font 1/4 + 1/6 ?", choices: ["2/10", "5/12", "2/24"], good: 1, why: "Un quart et un sixième ne sont pas des parts de même taille : on les découpe en douzièmes, 3/12 + 2/12 = 5/12. Additionner les dénominateurs donnerait 2/10 = 1/5, moins qu'un quart seul !" },
       defis: ["Sous 1/4 + 1/6, pose des pièces TOUTES PAREILLES qui font exactement la même longueur.", "Même chose sous 2/3 + 1/6.", "Et sous 1/3 + 1/4."],
       play: manipLesson({ W: 320, H: 240, aria: "barres de fractions",
@@ -273,6 +285,8 @@
     const sg = (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v);
     const arrow = (x0, x1, y, col, dash) => { if (x0 === x1) return ""; const d = x1 > x0 ? -1 : 1; return `<line x1="${x0}" y1="${y}" x2="${x1 + d * 6}" y2="${y}" stroke="${col}" stroke-width="3"${dash ? ' stroke-dasharray="5 4"' : ""}/><path d="M${x1},${y} L${x1 + d * 10},${y - 6} L${x1 + d * 10},${y + 6} Z" fill="${col}"/>`; };
     set("rel", {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Sur la droite graduée, ajouter un nombre positif, c'est avancer ; ajouter un nombre négatif, c'est reculer. Soustraire un nombre, c'est additionner son opposé.", exemple: ["\\(-5 + 7 = 2\\).", "\\(3 - 8 = -5\\).", "\\((-2) - (-6) = -2 + 6 = 4\\)."], piege: "Soustraire \\(-6\\), c'est ajouter 6 : \\((-2) - (-6) = 4\\), pas \\(-8\\)." },
       predict: { q: "Combien font (−5) − (−8) ?", choices: ["−13", "3", "−3"], good: 1, why: "Soustraire −8, c'est ajouter 8 : −5 + 8 = 3. Sur la droite, on part de −5 et on avance de 8." },
       defis: ["Calcule −5 + 7 : étire la flèche depuis −5 (glisse le point rouge).", "Calcule 3 − 8.", "Calcule (−2) − (−6). La flèche grise montre « ajouter −6 » : soustraire, c'est faire le contraire."],
       play: manipLesson({ W: 320, H: 172, aria: "droite graduée avec une flèche", // 24.11 : H 160 → 172, « départ » était coupé
@@ -333,6 +347,8 @@
   {
     const O = { x: 34, y: 262 }, S0 = 30;
     set("simil", {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Si les longueurs sont multipliées par \\(k\\), les aires sont multipliées par \\(k^2\\).", exemple: ["Rapport \\(k = 3\\) : aire multipliée par 9.", "Aire divisée par 4 : longueurs divisées par 2.", "Aire multipliée par 6,25 : \\(k = 2{,}5\\)."] },
       predict: { q: "On double tous les côtés d'un carré. Son aire est multipliée par…", choices: ["2", "4", "8"], good: 1, why: "Longueurs × 2, donc aire × 2 · 2 = 4 : on voit 4 copies du petit carré dans le grand." },
       defis: ["Tire le coin rouge pour que l'aire du carré soit multipliée par 9.", "Réduis le carré pour que son aire soit divisée par 4.", "Trouve le rapport k qui multiplie l'aire par 6,25."],
       play: manipLesson({ W: 320, H: 276, aria: "carré agrandi depuis le centre O",
@@ -362,6 +378,8 @@
     const Mx = 160, My = 130, Y1 = 80, Y2 = 180, R = 100;
     const PQ = (th) => { const t = (My - Y1) / Math.sin((th * Math.PI) / 180), c = Math.cos((th * Math.PI) / 180); return { P: [Mx + t * c, Y1], Q: [Mx - t * c, Y2] }; };
     set("angles", {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Deux droites parallèles coupées par une sécante : les angles alternes-internes sont égaux ; deux angles co-intérieurs (du même côté, entre les parallèles) sont supplémentaires, leur somme vaut \\(180°\\). Une sécante perpendiculaire à l'une des parallèles l'est aussi à l'autre.", exemple: ["Un angle de 70° : son alterne-interne mesure 70°, son co-intérieur 110°.", "Triangle avec des angles de 48° et 75° : \\(180° - 48° - 75° = 57°\\) (la parallèle menée par le sommet le montre)."], piege: "Alternes-internes : de part et d'autre de la sécante, égaux ; co-intérieurs : du même côté, supplémentaires." },
       predict: { q: "Deux droites parallèles sont coupées par une sécante ; un angle mesure 70°. L'angle alterne-interne mesure…", choices: ["70°", "110°", "20°"], good: 0, why: "Avec des parallèles, les angles alternes-internes sont égaux : 70°. Les angles du même côté (co-intérieurs) sont supplémentaires : 70° + 110° = 180°." },
       defis: ["Fais tourner la sécante (glisse le point rouge) pour que l'angle bleu en P mesure 60°. Regarde l'angle bleu en Q.", "Fais en sorte que l'angle orange mesure 50°.", "Rends la sécante perpendiculaire aux deux parallèles."],
       play: manipLesson({ W: 320, H: 226, aria: "deux parallèles coupées par une sécante",
@@ -400,6 +418,8 @@
     const dot2 = (P, i) => { const p = P[i], a = P[(i + 1) % 3], b = P[(i + 2) % 3]; return (a[0] - p[0]) * (b[0] - p[0]) + (a[1] - p[1]) * (b[1] - p[1]); };
     const d2 = (p, q) => (p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2;
     set("angtri", {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Dans un triangle, la somme des trois angles vaut \\(180°\\) : si un angle grandit, les deux autres rétrécissent. Dans un triangle isocèle, les deux angles à la base sont égaux." },
       predict: { q: "Un triangle très aplati a un angle de 170°. La somme de ses trois angles vaut…", choices: ["180°", "plus de 180°", "ça dépend du triangle"], good: 0, why: "Quelle que soit sa forme, un triangle a 180° d'angles en tout : si un angle grandit, les deux autres rétrécissent. Ici, ils se partagent 10°." },
       defis: ["Déplace un sommet pour obtenir un angle droit.", "Fais un triangle qui a deux angles égaux.", "Fais un angle de plus de 120°. Que reste-t-il pour les deux autres ?"],
       play: manipLesson({ W: 320, H: 300, aria: "triangle dont on déplace les sommets",
@@ -432,6 +452,8 @@
     const pill = (txt) => `<rect x="-20" y="-11" width="40" height="22" rx="11" fill="var(--margin)"/><text y="4" text-anchor="middle" font-size="11" font-weight="700" style="fill:#fff">${txt}</text>`;
     const bars = (st) => st.v.concat(st.v5 === null ? [] : [st.v5]);
     set("diagr", {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Moyenne : on additionne toutes les valeurs et on divise par leur nombre. Sur un diagramme en barres, c'est la hauteur où ce qui dépasse comble exactement les trous.", exemple: ["12, 18, 9, 21 : moyenne \\(\\frac{60}{4} = 15\\).", "Pour 16 de moyenne en 5 matchs : \\(5 \\cdot 16 = 80\\), donc \\(80 - 60 = 20\\) points."], piege: "Notes 6 ; 6 ; 3 : le 6 compte deux fois, la moyenne est 5, pas \\((6 + 3) \\div 2 = 4{,}5\\)." },
       predict: { q: "Trois notes : 6 ; 6 ; 3. Quelle est la moyenne ?", choices: ["4,5", "5", "6"], good: 1, why: "(6 + 6 + 3) ÷ 3 = 15 ÷ 3 = 5. Le 6 compte deux fois : ce n'est pas (6 + 3) ÷ 2 = 4,5." },
       defis: ["Une joueuse de basket marque 12, 18, 9 et 21 points en 4 matchs. Tire les barres à la bonne hauteur.", "Glisse la ligne rouge à la hauteur où ce qui dépasse comble exactement les trous : c'est la moyenne.", "Un 5e match : combien doit-elle marquer pour que sa moyenne monte à 16 ?"],
       play: manipLesson({ W: 320, H: 236, aria: "diagramme en barres",
@@ -471,6 +493,8 @@
     const ln = (a, b) => { const [x1, y1] = P(...a), [x2, y2] = P(...b); return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="var(--ink)" stroke-width=".7"/>`; };
     const arrowSvg = (a) => `<circle r="12" fill="var(--margin)" stroke="var(--paper)" stroke-width="2.5"/><path d="M-6,0 L6,0 M-6,0 L-3,-3 M-6,0 L-3,3 M6,0 L3,-3 M6,0 L3,3" stroke="#fff" stroke-width="1.8" fill="none" transform="rotate(${a})"/>`;
     set("vol", {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "On empile des couches identiques à la base : volume = aire de la base × hauteur. Pavé : \\(a \\cdot b \\cdot c\\).", exemple: ["Base 4 × 3 : 12 cubes par couche, 3 couches, \\(36\\ \\text{cm}^3\\).", "\\(24\\ \\text{cm}^3\\) de hauteur 2 : base de 12, par exemple 4 × 3.", "Autre pavé de \\(24\\ \\text{cm}^3\\) : \\(2 \\cdot 3 \\cdot 4\\) ou \\(6 \\cdot 4 \\cdot 1\\)."], piege: "Un même volume peut avoir plusieurs formes : \\(24 = 4 \\cdot 3 \\cdot 2 = 6 \\cdot 4 \\cdot 1\\)." },
       predict: { q: "Combien de cubes de 1 cm³ faut-il pour remplir un pavé de 4 cm × 3 cm × 2 cm ?", choices: ["9", "24", "14"], good: 1, why: "Une couche de 4 · 3 = 12 cubes, et 2 couches : 24 cm³. Volume = aire de la base × hauteur." },
       defis: ["Base 4 × 3 : monte le pavé jusqu'à 36 cm³.", "Fabrique un pavé de 24 cm³ de hauteur 2.", "Fabrique un autre pavé de 24 cm³, qui n'a pas une hauteur de 2."],
       play: manipLesson({ W: 320, H: 214, aria: "pavé formé de petits cubes",
@@ -510,6 +534,8 @@
     const val = ([m, p], x) => m * x + p;
     const COLS = ["var(--blue)", "var(--warn)"];
     set("sys2", {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "La solution d'un système de deux équations est un couple \\((x ; y)\\) qui vérifie les deux équations : c'est le point d'intersection des deux droites. En additionnant les deux équations, une inconnue peut disparaître.", exemple: ["\\(\\begin{cases} x + y = 10 \\\\ x - y = 2 \\end{cases}\\) En additionnant, \\(2x = 12\\), \\(x = 6\\), \\(y = 4\\).", "\\(y = -x + 10\\) et \\(y = x - 2\\) se coupent en \\((6 ; 4)\\).", "\\(y = 2x + 1\\) et \\(y = -x + 7\\) se coupent en \\((2 ; 5)\\)."] },
       predict: { q: "x + y = 10 et x − y = 2. Que vaut x ?", choices: ["6", "5", "4"], good: 0, why: "En additionnant les deux équations, les y disparaissent : 2x = 12, donc x = 6 (et y = 4). 5 et 5 font bien 10, mais 5 − 5 ne fait pas 2." },
       defis: ["y = −x + 10 et y = x − 2 : place le point P pour que ses coordonnées vérifient les DEUX équations.", "Même chose pour y = 2x + 1 et y = −x + 7.", "Et pour y = x + 3 et y = −2x − 3."],
       play: manipLesson({ W: 320, H: 290, aria: "deux droites et un point à placer",
@@ -537,6 +563,8 @@
   {
     const X0 = 22, W = 276, XM = (m) => X0 + (W * m) / 60;
     set("utemps", {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(1\\ \\text{h} = 60\\ \\text{min}\\) : une heure n'a pas 100 minutes. Pour passer des minutes aux heures décimales, on divise par 60. Pour passer des heures décimales aux minutes, on multiplie la partie décimale par 60.", exemple: ["\\(45\\ \\text{min} = \\frac{45}{60}\\ \\text{h} = 0{,}75\\ \\text{h}\\).", "\\(0{,}2\\ \\text{h} = 0{,}2 \\cdot 60 = 12\\ \\text{min}\\).", "\\(0{,}35\\ \\text{h} = 21\\ \\text{min}\\)."] },
       predict: { q: "Un film dure 1,5 h. Combien de temps est-ce ?", choices: ["1 h 50 min", "1 h 30 min", "1 h 05 min"], good: 1, why: "0,5 h, c'est une demi-heure : la moitié de 60 min, donc 30 min. Une heure n'a pas 100 minutes." },
       defis: ["Tire la barre jusqu'à 0,75 h.", "Combien de minutes font 0,2 h ? Tire la barre.", "Trouve la durée qui s'écrit 0,35 h."],
       play: manipLesson({ W: 320, H: 128, aria: "barre d'une heure",
@@ -563,6 +591,8 @@
     const PHI = (p) => { let a = (Math.atan2(O.y - p.y, p.x - O.x) * 180) / Math.PI; if (a < 0) a = a < -90 ? 180 : 0; return clamp(Math.round(a / 2) * 2, 6, 174); };
     const unit = (P, Q) => { const dx = Q[0] - P[0], dy = Q[1] - P[1], l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; };
     set("cercthales", {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Si \\([AB]\\) est un diamètre et \\(C\\) un point du cercle, le triangle \\(ABC\\) est rectangle en \\(C\\) (cercle de Thalès). L'angle au centre vaut le double de l'angle inscrit qui intercepte le même arc.", exemple: ["\\([AB]\\) diamètre et \\(\\widehat{A} = 35°\\) : l'angle en \\(C\\) est droit, donc \\(\\widehat{B} = 90° - 35° = 55°\\).", "Angle au centre \\(\\widehat{BOC} = 100°\\) : l'angle en \\(A\\) mesure 50°.", "Angle au centre 140° : angle inscrit 70°."], piege: "L'angle droit est en \\(C\\), sur le cercle, pas au centre." },
       predict: { q: "Le triangle ABC est inscrit dans un cercle de diamètre [AB]. L'angle en C mesure…", choices: ["90°", "60°", "ça dépend de C"], good: 0, why: "C'est le cercle de Thalès : où que soit C sur le cercle, l'angle ACB est droit." },
       defis: ["[AB] est un diamètre. Glisse C sur le cercle pour que l'angle en A mesure 35°. Regarde l'angle en C.", "Place C pour que le triangle ABC soit isocèle en C (CA = CB).", "Place C pour que l'angle au centre BOC mesure 100°. Compare-le à l'angle en A."],
       play: manipLesson({ W: 320, H: 236, aria: "triangle ABC inscrit dans un cercle de diamètre AB",
@@ -610,6 +640,8 @@
     const ball = (c, r = 13) => `<circle r="${r}" fill="${COL[c]}" stroke="var(--paper)" stroke-width="2"/><text y="4.5" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" style="pointer-events:none">${LET[c]}</text>`;
     const add = (st, c) => { if (st.balls.length >= MAXB) { st.msg = "L'urne est pleine (12 boules) : enlève des boules."; return; } st.balls.push(c); st.msg = ""; };
     set("proba", {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Quand toutes les issues ont la même chance, \\(P = \\frac{\\text{nombre de cas favorables}}{\\text{nombre de cas possibles}}\\).", exemple: ["3 rouges et 3 autres boules : \\(P(\\text{rouge}) = \\frac{3}{6} = \\frac{1}{2}\\).", "2 rouges sur 5 boules : \\(P(\\text{rouge}) = \\frac{2}{5}\\).", "3 rouges, 1 verte, 2 bleues : \\(P(\\text{rouge}) = \\frac{1}{2}\\), \\(P(\\text{verte}) = \\frac{1}{6}\\)."], piege: "Ajouter une boule d'une autre couleur change le nombre de cas possibles : \\(\\frac{2}{3}\\) devient \\(\\frac{2}{4}\\)." },
       predict: { q: "Une urne contient 2 boules rouges et 1 bleue. On ajoute une boule bleue. La probabilité de tirer une rouge…", choices: ["augmente", "diminue", "ne change pas"], good: 1, why: "Avant : 2 rouges sur 3 boules, 2/3. Après : 2 rouges sur 4 boules, 2/4 = 1/2. Les rouges n'ont pas changé, mais le nombre de cas possibles a augmenté." },
       defis: ["L'urne contient 3 rouges. Ajoute ou enlève des boules pour que P(rouge) = 1/2.", "Nouvelle urne : obtiens P(rouge) = 2/5.", "Avec trois couleurs : obtiens P(rouge) = 1/2 et P(verte) = 1/6."],
       play: manipLesson({ W: 320, H: 236, aria: "urne à remplir de boules de couleur",
@@ -659,6 +691,8 @@
     const line2 = (st, s) => { const col = s === 2 ? "var(--margin)" : "var(--blue)";
       return [{ x: X(0), y: Y(st.p), label: "ordonnée à l'origine : " + st.p + " CHF", role: "slider", svg: sq(col) }, { x: X(st.Q[0]), y: Y(st.Q[1]), label: "point de la droite : " + st.Q[0] + " km, " + st.Q[1] + " CHF", svg: dot(col, "") }]; };
     set("modaff", {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["Taxi A : \\(C(n) = 6 + 2n\\) ; taxi B : \\(C(n) = 3n\\).", "\\(6 + 2n = 3n \\iff n = 6\\) : même prix pour 6 km."] },
       predict: { q: "Taxi A : 6 CHF + 2 CHF/km. Taxi B : 3 CHF/km. Pour 10 km, le moins cher est…", choices: ["A", "B", "ils coûtent pareil"], good: 0, why: "A : 6 + 20 = 26 CHF ; B : 30 CHF. Au-delà de 6 km, la part fixe de A est « remboursée »." },
       defis: ["Règle la droite du taxi A : 6 CHF de prise en charge, puis 2 CHF par km.", "Glisse le repère : pour combien de km les deux taxis coûtent-ils le même prix ?", "Taxi C : 12 CHF de prise en charge, et le même prix que B pour 8 km. Règle sa droite."],
       play: manipLesson({ W: 320, H: 236, aria: "graphique prix en fonction des kilomètres",

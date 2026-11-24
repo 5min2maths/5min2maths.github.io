@@ -121,6 +121,8 @@
   Object.assign(ACTIVE, {
     // ---------- 7. 3D ----------
     solides: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Prisme droit de base à \\(n\\) côtés : \\(n + 2\\) faces (dont les 2 bases), \\(2n\\) sommets, \\(3n\\) arêtes.", exemple: ["Prisme à base triangulaire : 5 faces, 6 sommets, 9 arêtes", "Base à 5 côtés : 10 sommets ; 30 arêtes : base à 10 côtés"] },
       predict: { q: "Une tente a la forme d'un prisme couché, à base triangulaire. Combien de faces a ce solide ?", choices: ["3", "5", "6"], good: 1,
         why: "3 faces rectangulaires (les deux pans du toit et le sol), plus les 2 bases triangulaires (l'avant et l'arrière) : 5 faces. On oublie souvent les bases." },
       defis: ["Ce prisme droit a une base à 5 côtés (un pentagone). Combien a-t-il de sommets ?", "Ce prisme droit a une base à 6 côtés (un hexagone). Combien a-t-il d'arêtes ?", "Un prisme droit a 30 arêtes. Combien de côtés a sa base ?"],
@@ -131,6 +133,8 @@
         wins: [W(10, "5 sommets en haut, 5 en bas : 10 sommets (2 · 5)."), W(18, "6 arêtes en haut, 6 en bas, 6 verticales : 18 arêtes (3 · 6)."), W(10, "30 = 3 · 10 : la base a 10 côtés (10 en haut, 10 en bas, 10 verticales).")] }),
     },
     volpave: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Pavé : \\(V = a \\cdot b \\cdot c\\) (le nombre de cubes-unités). Cube : \\(V = a^3\\), aire totale \\(6a^2\\) (6 faces carrées).", exemple: ["Pavé 8 × 5 × 3 cm : \\(V = 120\\ \\text{cm}^3\\)", "Cube d'arête 5 cm : aire \\(6 \\cdot 25 = 150\\ \\text{cm}^2\\)"] },
       predict: { q: "Combien de petits cubes de 1 cm d'arête faut-il pour construire un cube de 2 cm d'arête ?", choices: ["4", "6", "8"], good: 2,
         why: "Deux étages de 2 · 2 = 4 cubes : 2 · 2 · 2 = 8. Le cube a 6 faces, mais il est fait de 8 petits cubes." },
       defis: ["Combien de cubes-unités forment ce pavé ?", "Un pavé mesure 8 cm × 5 cm × 3 cm. Quel est son volume (en cm³) ?", "Un cube a des arêtes de 5 cm. Quelle est l'aire totale de ses 6 faces (en cm²) ?"],
@@ -143,6 +147,8 @@
 
     // ---------- 8. Écriture fractionnaire ----------
     fracrep: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Même dénominateur : la plus grande a le plus grand numérateur. Dénominateurs différents : on amplifie pour avoir le même dénominateur.", exemple: ["\\(\\frac{2}{3} = \\frac{4}{6}\\)", "\\(\\frac{3}{4} = \\frac{9}{12} < \\frac{10}{12} = \\frac{5}{6}\\)"] },
       predict: { q: "Quelle fraction est la plus grande : 1/3 ou 1/4 ?", choices: ["1/3", "1/4", "elles sont égales"], good: 0,
         why: "Partager en 3 donne de plus grosses parts que partager en 4 : 1/3 > 1/4, même si 4 est plus grand que 3." },
       defis: ["Place \\(\\frac{7}{4}\\) sur la droite graduée.", "La droite est maintenant graduée en sixièmes. Place \\(\\frac{2}{3}\\).", "En douzièmes, place la plus grande des deux fractions \\(\\frac{3}{4}\\) et \\(\\frac{5}{6}\\)."],
@@ -171,6 +177,8 @@
       },
     },
     fracsimp: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["\\(\\frac{3}{4} = \\frac{9}{12}\\) (amplifiée par 3)", "\\(\\frac{12}{18} = \\frac{2}{3}\\) (simplifiée par 6)"], piege: "\\(\\frac{12}{18} = \\frac{6}{9}\\) est simplifiée, mais pas encore irréductible." },
       predict: { q: "Compare 2/3 et 4/6.", choices: ["2/3 est plus grand", "elles sont égales", "4/6 est plus grand"], good: 1,
         fig: svg(320, 64, (() => { let g = ""; for (const [a, b, y] of [[2, 3, 6], [4, 6, 36]]) for (let i = 0; i < b; i++) g += `<rect x="${20 + (i * 280) / b}" y="${y}" width="${280 / b}" height="22" class="${i < a ? "f-fill" : "f-soft"}" style="stroke:var(--ink);stroke-width:1.2"/>`; return g; })(), "barres 2 sur 3 et 4 sur 6"),
         why: "Si on coupe chaque tiers en 2, on obtient des sixièmes : 2 tiers = 4 sixièmes. Même quantité, autre écriture." },
@@ -202,6 +210,8 @@
       },
     },
     fracper: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["\\(\\frac{8}{3} = 2{,}666\\ldots\\)", "\\(1{,}222\\ldots = 1 + \\frac{2}{9} = \\frac{11}{9}\\)"] },
       garde: [0, 2],
       predict: { q: "Combien vaut 1 ÷ 3 ?", choices: ["0,3", "0,33", "0,333… (des 3 sans fin)"], good: 2,
         why: "En posant 1 ÷ 3, le reste 1 revient à chaque étape : le chiffre 3 se répète sans fin. 0,33 = 33/100 est un peu plus petit que 1/3." },
@@ -225,6 +235,8 @@
         wins: [W(3.5, "14 ÷ 4 = 3,5 ; vérifie : 6 · 3,5 = 21 et 10 · 3,5 = 35. Le coefficient est 3,5."), W(3.2, "8 · 0,4 = 3,2 km (et 5 · 0,4 = 2 km)."), W(25, "6 + 4 = 10 cahiers, donc 15 + 10 = 25 CHF : dans un tableau proportionnel, on peut additionner des colonnes.")] }),
     },
     prop: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { piege: "Deux croissants de plus ne coûtent pas 2 CHF de plus : passe par le prix d'un croissant." },
       predict: { q: "4 croissants coûtent 6 CHF. Combien coûtent 6 croissants ?", choices: ["8 CHF", "9 CHF", "12 CHF"], good: 1,
         why: "1 croissant coûte 6 ÷ 4 = 1,50 CHF, donc 6 croissants : 6 · 1,50 = 9 CHF. Deux croissants de plus ne coûtent pas 2 CHF de plus." },
       defis: ["5 m de tissu coûtent 42 CHF. Combien coûte 1 m ?", "Combien coûtent 8 m de ce tissu ?", "Une voiture consomme 6,3 L d'essence pour 90 km. Combien pour 250 km ?"],

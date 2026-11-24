@@ -69,6 +69,8 @@
     let lastC = null;
     const right = (C) => near((A[0] - C[0]) * (B[0] - C[0]) + (A[1] - C[1]) * (B[1] - C[1]), 0);
     ACTIVE.pyth = {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "L'hypoténuse est le plus grand côté, en face de l'angle droit. Dans un triangle rectangle, l'aire du carré construit sur l'hypoténuse est la somme des aires des carrés construits sur les deux autres côtés : \\(c^2 = a^2 + b^2\\). L'égalité n'est vraie que pour un angle droit : si l'angle est obtus, \\(c^2 > a^2 + b^2\\).", exemple: ["Cathètes 6 et 8 : \\(c^2 = 36 + 64 = 100\\), \\(c = 10\\)."] },
       predict: { q: "Un triangle rectangle a des cathètes de 6 cm et 8 cm. Son hypoténuse mesure…", choices: ["14 cm", "10 cm", "48 cm"], good: 1, why: "6² + 8² = 36 + 64 = 100, et √100 = 10. Ce sont les carrés qui s'additionnent, pas les côtés : tu vas le voir avec les aires des carrés." },
       defis: ["Déplace le sommet C pour que l'angle en C soit droit. Compare l'aire du grand carré à celle des deux autres.", "Trouve une autre position de C où l'angle en C est droit.", "Place C pour que l'angle en C soit plus grand qu'un angle droit (obtus). Que devient l'égalité ?"],
       play: manip({ W: 320, H: 300,
@@ -106,6 +108,8 @@
     const slope = (st) => (st.Q[0] === st.P[0] ? NaN : (st.Q[1] - st.P[1]) / (st.Q[0] - st.P[0]));
     const mv = (st, k, x, y) => { const p = [snap(x, 1, -6, 6), snap(y, 1, -5, 5)]; const o = k ? st.P : st.Q; if (p[0] === o[0]) return; if (k) st.Q = p; else st.P = p; };
     ACTIVE.affine = {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "La pente se calcule avec deux points : \\(a = \\frac{f(x_2) - f(x_1)}{x_2 - x_1}\\) : de combien on monte quand on avance de 1. Si la droite descend, la pente est négative. L'ordonnée à l'origine est \\(b = f(0)\\).", exemple: ["Par \\((0 ; 1)\\) et \\((2 ; 5)\\) : \\(a = \\frac{4}{2} = 2\\), \\(b = 1\\).", "\\(f(x) = -x + 3\\) : pente \\(-1\\), ordonnée à l'origine 3."] },
       predict: { q: "Une droite passe par (0 ; 1) et (2 ; 5). Sa pente vaut…", choices: ["2", "4", "5"], good: 0, why: "En avançant de 2, on monte de 4 : la pente est 4 ÷ 2 = 2. La pente dit de combien on monte quand on avance de 1." },
       defis: ["Place les deux points pour obtenir une droite de pente 2.", "Obtiens une droite qui descend, de pente −1/2.", "Obtiens exactement la droite f(x) = −x + 3."],
       play: manip({ W: 320, H: 240,
@@ -141,6 +145,8 @@
     const SETS = [[["1/2", 0.5], ["1/4", 0.25], ["3/4", 0.75]], [["0,6", 0.6], ["35 %", 0.35], ["4/5", 0.8]], [["3/8", 0.375], ["0,45", 0.45], ["1/5", 0.2]]];
     const lane = (k) => LY - 30 - k * 34;
     ACTIVE.fracconv = {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Fraction → décimal : on divise le numérateur par le dénominateur. Pourcentage : « pour cent », donc sur 100. Pour comparer, on écrit tout de la même manière.", exemple: ["\\(\\frac{3}{8} = 3 : 8 = 0{,}375 = 37{,}5\\,\\%\\).", "\\(\\frac{4}{5} = 0{,}8 = 80\\,\\%\\) ; \\(35\\,\\% = 0{,}35\\).", "\\(\\frac{1}{5} = 0{,}2 < \\frac{3}{8} < 0{,}45\\)."], piege: "Un nombre plus long n'est pas plus grand : \\(0{,}375 < 0{,}4\\)." },
       predict: { q: "Lequel est le plus grand : 3/8, 0,4 ou 35 % ?", choices: ["3/8", "0,4", "35 %"], good: 1, why: "3/8 = 0,375 et 35 % = 0,35 : en écriture décimale, 0,4 est le plus grand. Pour comparer, on écrit tout de la même manière." },
       defis: ["Place 1/2, 1/4 et 3/4 sur la droite.", "Place 0,6, 35 % et 4/5.", "Place 3/8, 0,45 et 1/5."],
       play: manip({ W: 320, H: 190,
@@ -171,6 +177,8 @@
       { txt: "2x − 1 > 3 et x + 4 ≤ 9", L: 2, Lc: false, R: 5, Rc: true, rays: false },
       { txt: "−2x > 4 et x ≥ −5", L: -5, Lc: true, R: -2, Rc: false, rays: false }];
     ACTIVE.sysineq = {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "On résout chaque inéquation, on représente les solutions sur une même droite graduée et on garde la partie commune (l'intersection). Crochet fermé pour ≤ et ≥ (borne comprise), ouvert pour < et >.", exemple: ["\\(x > 2\\) et \\(x \\le 5\\) : \\(S = \\,]2 \\,;\\, 5]\\).", "\\(2x - 1 > 3\\) et \\(x + 4 \\le 9\\) : \\(x > 2\\) et \\(x \\le 5\\).", "\\(-2x > 4\\) donne \\(x < -2\\) (sens retourné)."] },
       predict: { q: "x > 2 et x ≤ 5. Le nombre 5 est-il solution ?", choices: ["Oui", "Non"], good: 0, why: "5 > 2 et 5 ≤ 5 : les deux conditions sont vraies. Le crochet est fermé en 5 : S = ]2 ; 5]." },
       defis: ["Système x > −1 et x ≤ 4 : place les deux crochets de l'ensemble des solutions.", "Système 2x − 1 > 3 et x + 4 ≤ 9 : résous chaque ligne, puis pose les crochets.", "Système −2x > 4 et x ≥ −5 : attention au sens de la première ligne."],
       play: manip({ W: 320, H: 150,

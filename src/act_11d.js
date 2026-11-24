@@ -82,6 +82,8 @@
           W(7, "7² = 49 < 50 < 64 = 8² : donc √50 est entre 7 et 8.")] }),
     },
     racprop: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(\\sqrt{a \\cdot b} = \\sqrt{a} \\cdot \\sqrt{b}\\) (\\(a, b\\) positifs). Pour simplifier, on sort le plus grand carré parfait : \\(\\sqrt{72} = \\sqrt{36 \\cdot 2} = 6\\sqrt{2}\\). On additionne seulement des racines semblables : \\(2\\sqrt{3} + 3\\sqrt{3} = 5\\sqrt{3}\\). La racine cubique suit la même règle pour le produit : \\(\\sqrt[3]{a} \\cdot \\sqrt[3]{b} = \\sqrt[3]{ab}\\).", exemple: ["\\(\\sqrt{2} \\cdot \\sqrt{8} = \\sqrt{16} = 4\\).", "\\(\\sqrt{12} + \\sqrt{27} = 2\\sqrt{3} + 3\\sqrt{3} = 5\\sqrt{3}\\).", "\\(\\sqrt[3]{2} \\cdot \\sqrt[3]{4} = \\sqrt[3]{8} = 2\\)."] },
       predict: { q: "Laquelle de ces égalités est vraie ?", choices: ["√9 · √16 = √(9 · 16)", "√9 + √16 = √(9 + 16)", "les deux"], good: 0,
         why: "√9 · √16 = 3 · 4 = 12, et √144 = 12 aussi. Mais √9 + √16 = 7, alors que √25 = 5. La racine d'un produit est le produit des racines ; pour une somme, ça ne marche pas." },
       defis: ["Le rectangle a pour côtés √2 et √8. Calcule son aire √2 · √8.", "Un carré a une aire de 72. Son côté s'écrit a√2 : trouve a.", "√12 + √27 = a√3 : trouve a.", "Même règle du produit pour les racines cubiques : calcule ∛2 · ∛4."],

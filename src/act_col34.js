@@ -235,6 +235,8 @@
           { q: "Une pierre tombe : elle a parcouru s(t) = 5t² mètres après t secondes. Sa vitesse instantanée (en m/s) à t = 2 s ?", ans: 20, ok: "(s(2 + h) − s(2)) ÷ h = (20h + 5h²) ÷ h = 20 + 5h, qui tend vers 20, donc s'(2) = 20 m/s.", no: "Calcule (s(2 + h) − s(2)) ÷ h, simplifie par h, puis fais tendre h vers 0." }] }),
     },
     derivref: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\((x^n)' = n x^{n - 1}\\), aussi pour un exposant négatif ou fractionnaire. Ainsi \\(\\left(\\frac{1}{x}\\right)' = (x^{-1})' = -\\frac{1}{x^2}\\) et \\((\\sqrt{x})' = \\left(x^{\\frac{1}{2}}\\right)' = \\frac{1}{2\\sqrt{x}}\\). En radians : \\((\\sin x)' = \\cos x\\). \\(f'(a)\\) est la pente de la tangente au point d'abscisse \\(a\\).", exemple: ["\\((x^3)' = 3x^2\\), donc la pente en 2 vaut \\(3 \\cdot 4 = 12\\).", "\\(\\left(\\frac{1}{x}\\right)' = -\\frac{1}{x^2}\\), donc \\(f'(2) = -\\frac{1}{4}\\).", "\\((\\sin x)' = \\cos x\\), donc \\(f'\\left(\\frac{\\pi}{3}\\right) = \\frac{1}{2}\\)."], piege: "Racines et inverses : écris d'abord une puissance de \\(x\\) (\\(\\sqrt{x} = x^{\\frac{1}{2}}\\), \\(\\frac{1}{x} = x^{-1}\\)), puis applique la règle." },
       predict: { q: "La dérivée de x² est 2x. Quelle est celle de x³ ?", choices: ["3x²", "2x³", "3x³"], good: 0,
         why: "On descend l'exposant devant et on le diminue de 1 : (x³)' = 3x². Règle générale : (xⁿ)' = n·xⁿ⁻¹. Une constante a pour dérivée 0." },
       defis: ["f(x) = x³. Tape la pente de la tangente au point d'abscisse 2, c'est-à-dire f'(2).", "f(x) = 1/x = x⁻¹. Tape f'(2).", "f(x) = √x = x^(1/2). Tape f'(4).", "f(x) = sin x (x en radians). Tape f'(π/3)."],
@@ -243,6 +245,8 @@
         wins: [W(12, "f'(x) = 3x², donc f'(2) = 3 · 4 = 12."), W(-0.25, "(x⁻¹)' = −x⁻² = −1/x², donc f'(2) = −1/4 : la courbe descend."), W(0.25, "(√x)' = 1/(2√x), donc f'(4) = 1/(2 · 2) = 1/4."), W(0.5, "(sin x)' = cos x, donc f'(π/3) = cos(π/3) = 1/2. De même, (cos x)' = −sin x.")] }),
     },
     derivregles: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\((u + v)' = u' + v'\\) et \\((k u)' = k u'\\). Pour un polynôme, chaque terme \\(a x^n\\) devient \\(n a x^{n - 1}\\) et la constante disparaît. Un produit peut d'abord être développé. La tangente est horizontale là où \\(f'(x) = 0\\)." },
       predict: { q: "Quelle est la dérivée de x³ + x² ?", choices: ["3x² + 2x", "6x", "3x² · 2x"], good: 0,
         why: "On dérive terme par terme : (x³)' + (x²)' = 3x² + 2x. La dérivée d'une somme est la somme des dérivées." },
       defis: ["f(x) = 2x³ − 5x² + 4x − 7. Tape la pente de la tangente en x = 2, c'est-à-dire f'(2).", "f(x) = (x + 1)(x − 3). Développe, puis tape f'(4).", "f(x) = x² − 6x + 1. En quelle abscisse la tangente est-elle horizontale ?"],
@@ -251,6 +255,8 @@
         wins: [W(8, "f'(x) = 6x² − 10x + 4 (le −7 disparaît), donc f'(2) = 24 − 20 + 4 = 8."), W(6, "(x + 1)(x − 3) = x² − 2x − 3, donc f'(x) = 2x − 2 et f'(4) = 6. (Le produit des dérivées, 1 · 1 = 1, serait faux.)"), W(3, "f'(x) = 2x − 6 = 0 pour x = 3 : la tangente est horizontale au sommet (3 ; −8).")] }),
     },
     derivprodquot: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\((uv)' = u'v + uv'\\). \\(\\left(\\frac{u}{v}\\right)' = \\frac{u'v - uv'}{v^2}\\) (là où \\(v \\neq 0\\)) ; cas particulier \\(\\left(\\frac{1}{v}\\right)' = -\\frac{v'}{v^2}\\)." },
       predict: { q: "Vrai ou faux : la dérivée de x · x est (x)' · (x)' = 1 · 1 = 1.", choices: ["Vrai", "Faux"], good: 1,
         why: "Faux : x · x = x², dont la dérivée est 2x. La dérivée d'un produit n'est pas le produit des dérivées : (uv)' = u'v + uv' = 1 · x + x · 1 = 2x." },
       defis: ["f(x) = x²(3x + 1). Avec (uv)' = u'v + uv', tape f'(1).", "f(x) = (2x + 1) ÷ (x − 1). Avec (u/v)' = (u'v − uv') ÷ v², tape f'(3).", "f(x) = 1 ÷ (x² + 1). Avec (1/v)' = −v' ÷ v², tape f'(1)."],
@@ -259,6 +265,8 @@
         wins: [W(11, "f'(x) = 2x(3x + 1) + x² · 3 = 9x² + 2x, donc f'(1) = 11."), W(-0.75, "f'(x) = (2(x − 1) − (2x + 1)) ÷ (x − 1)² = −3 ÷ (x − 1)², donc f'(3) = −3/4."), W(-0.5, "f'(x) = −2x ÷ (x² + 1)², donc f'(1) = −2/4 = −1/2.")] }),
     },
     derivcomp: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\((f(u(x)))' = f'(u(x)) \\cdot u'(x)\\) : on dérive l'extérieur en gardant l'intérieur, puis on multiplie par la dérivée de l'intérieur. Cas fréquents : \\((u^n)' = n u^{n - 1} u'\\), \\((\\sqrt{u})' = \\frac{u'}{2\\sqrt{u}}\\), \\((\\cos u)' = -u' \\sin u\\).", exemple: ["\\(\\left((x^2 + 1)^3\\right)' = 3(x^2 + 1)^2 \\cdot 2x = 6x(x^2 + 1)^2\\)", "\\((\\cos(2x))' = -2\\sin(2x)\\)", "\\(\\left(\\sqrt{2x + 5}\\right)' = \\frac{2}{2\\sqrt{2x + 5}} = \\frac{1}{\\sqrt{2x + 5}}\\)"] },
       predict: { q: "Pour dériver (3x + 1)⁵, on écrit 5(3x + 1)⁴, puis…", choices: ["on multiplie par 3", "c'est fini", "on ajoute 3"], good: 0,
         why: "On dérive l'extérieur (la puissance 5) en gardant l'intérieur, puis on multiplie par la dérivée de l'intérieur, 3 : 15(3x + 1)⁴." },
       defis: ["f(x) = (2x − 5)³. Tape f'(4).", "f(x) = √(2x + 5). Tape f'(2).", "f(x) = cos(2x). Tape f'(π/4).", "f(x) = (x² + 1)³. Tape f'(1)."],
@@ -286,6 +294,8 @@
         ask: [{ q: "La tangente à f(x) = √x en 100 a pour pente f'(100) = 1/20. Donne une valeur approchée de √104 avec cette tangente.", ans: 10.2, tol: 1e-6, ok: "√104 ≈ f(100) + f'(100) · 4 = 10 + 4/20 = 10,2 (la calculatrice donne 10,198…) : c'est l'approximation affine.", no: "f(100) = 10 : avance de 4 le long de la tangente, de pente 1/20." }, null] }),
     },
     variations: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Sur un intervalle, si \\(f' > 0\\), \\(f\\) est croissante ; si \\(f' < 0\\), décroissante. Méthode : calculer \\(f'(x)\\), trouver ses zéros, regarder le signe de \\(f'\\) de part et d'autre. Si \\(f'\\) passe de + à − en \\(a\\), \\(f(a)\\) est un maximum local ; de − à +, un minimum local." },
       predict: { q: "Sur un intervalle, f'(x) > 0. Alors f est…", choices: ["croissante", "positive", "décroissante"], good: 0,
         why: "Le signe de la dérivée donne le sens de variation : f' > 0, la courbe monte. (Une fonction peut être négative et croissante.)" },
       defis: ["f(x) = x³ − 3x. Déplace le point jusqu'au maximum local : tangente horizontale, et f' passe de + à −.", "f(x) = x³. Place le point là où f'(x) = 0. Est-ce un extremum ?"],
@@ -342,6 +352,8 @@
 
   Object.assign(ACTIVE, {
     primitives: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(F\\) est une primitive de \\(f\\) si \\(F'(x) = f(x)\\). On primitive terme à terme : \\(x^n \\to \\frac{x^{n + 1}}{n + 1}\\), \\(\\cos x \\to \\sin x\\). Toutes les primitives diffèrent d'une constante \\(C\\) ; une condition (\\(F(a) = b\\)) la fixe." },
       predict: { q: "Quelle fonction a pour dérivée 2x ?", choices: ["x²", "2", "2x²"], good: 0,
         why: "(x²)' = 2x : x² est une primitive de 2x. Mais x² + 3 aussi ! Toutes les primitives diffèrent d'une constante." },
       defis: ["f(x) = 6x² − 4x + 1 a pour primitives F(x) = 2x³ − 2x² + x + C. Règle C pour que F(1) = 5.", "f(x) = cos x a pour primitives F(x) = sin x + C. Règle C pour que F(π/2) = −1."],
@@ -360,6 +372,8 @@
           { q: "Une primitive de (2x + 1)³ s'écrit (2x + 1)⁴ ÷ k. Que vaut k ?", ans: 8, ok: "La dérivée de (2x + 1)⁴ est 4 · 2 · (2x + 1)³ = 8(2x + 1)³ : il faut diviser par k = 8 (par 4 et par 2).", no: "Dérive (2x + 1)⁴ : 4(2x + 1)³ · 2. Par quoi faut-il diviser pour retrouver (2x + 1)³ ?" }] }),
     },
     integrale: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Théorème fondamental : \\(\\int_a^b f(x)\\,dx = F(b) - F(a)\\) où \\(F\\) est une primitive de \\(f\\). Si \\(f \\geq 0\\), c'est l'aire sous la courbe ; les parties sous l'axe comptent négativement. Valeur moyenne : \\(\\frac{1}{b - a}\\int_a^b f(x)\\,dx\\)." },
       predict: { q: "Une primitive de 2x est x². Quelle est l'aire sous la droite y = 2x entre x = 1 et x = 3 ?", choices: ["8", "4", "9"], good: 0,
         why: "x² vaut 9 en 3 et 1 en 1 : 9 − 1 = 8 (borne du haut moins borne du bas). C'est le théorème fondamental : ∫ f = F(b) − F(a)." },
       defis: ["Règle la borne b pour que \\(\\int_1^b 2x\\,dx = 8\\).", "Règle b pour que \\(\\int_0^b (x - 2)\\,dx = 0\\)."],
@@ -417,6 +431,8 @@
           { q: "Un tube : le domaine entre R(x) = 2 et r(x) = 1, de x = 0 à x = 5, tourne autour de l'axe des x. Volume divisé par π ?", ans: 15, ok: "Solide creux : π ∫₀⁵ (2² − 1²) dx = π · 3 · 5 = 15π.", no: "Solide creux : π ∫ (R² − r²) dx, ici (4 − 1) sur une longueur 5." }] }),
     },
     lnexp: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(e^x\\) et \\(\\ln\\) sont réciproques : \\(e^x = a \\iff x = \\ln a\\) (\\(a > 0\\)). \\(\\ln(a^n) = n\\ln a\\) et \\(\\ln 1 = 0\\). Dérivées : \\((e^x)' = e^x\\), \\((e^{u})' = u'e^{u}\\), \\((\\ln x)' = \\frac{1}{x}\\). Une primitive de \\(\\frac{1}{x}\\) est \\(\\ln x\\).", exemple: ["\\(e^{2x - 1} = 5 \\iff 2x - 1 = \\ln 5 \\iff x = \\frac{\\ln 5 + 1}{2}\\)", "\\((x\\ln x)' = \\ln x + 1\\)", "\\(\\int_1^{e^4} \\frac{dx}{x} = \\ln(e^4) - \\ln 1 = 4\\)"] },
       predict: { q: "La dérivée de eˣ est…", choices: ["eˣ", "x · eˣ⁻¹", "e"], good: 0,
         why: "eˣ est sa propre dérivée : en chaque point, la pente de la courbe égale sa hauteur. Ce n'est pas une puissance de x." },
       defis: ["Résous e^(2x − 1) = 5 (au centième).", "f(x) = x · ln x. Tape la pente de la tangente en x = e².", "f(x) = e^(x²). Tape f'(1) (au centième).", "Calcule l'intégrale de 1/x entre 1 et e⁴."],
@@ -425,6 +441,8 @@
         wins: [W((Math.log(5) + 1) / 2, "2x − 1 = ln 5, donc x = (ln 5 + 1) ÷ 2 ≈ 1,30.", 0.006), W(3, "(x · ln x)' = ln x + 1 ; en x = e² : 2 + 1 = 3."), W(2 * E, "f'(x) = 2x · e^(x²), donc f'(1) = 2e ≈ 5,44.", 0.006), W(4, "∫₁^(e⁴) dx/x = ln(e⁴) − ln 1 = 4 − 0 = 4.")] }),
     },
     croissance: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Modèle \\(N(t) = N_0 e^{kt}\\) : croissance si \\(k > 0\\), décroissance si \\(k < 0\\). Pour trouver \\(t\\) : isoler \\(e^{kt}\\), puis appliquer \\(\\ln\\). Demi-vie \\(T\\) : \\(k = \\frac{\\ln 2}{T}\\) ; après 3 demi-vies, il reste \\(\\frac{1}{8}\\)." },
       predict: { q: "Une quantité double toutes les 3 heures. Après 9 heures, elle a été multipliée par…", choices: ["8", "3", "6"], good: 0,
         why: "9 heures = 3 doublements : × 2 × 2 × 2 = × 8. Une croissance exponentielle multiplie, elle n'additionne pas." },
       defis: ["Des bactéries suivent N(t) = 400 · e^(0,25t) (t en heures). Règle t pour que la population ait doublé.", "Un isotope a une demi-vie de 5 ans : Q(t) = 800 · e^(−kt) grammes, avec k = ln 2 ÷ 5. Règle t pour qu'il n'en reste que 100 g."],
@@ -477,6 +495,8 @@
 
   Object.assign(ACTIVE, {
     matrices: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Produit \\(AB\\) : chaque coefficient est « ligne de \\(A\\) × colonne de \\(B\\) » ; en général \\(AB \\neq BA\\). Déterminant \\(\\det\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix} = ad - bc\\). Si \\(\\det A \\neq 0\\), \\(A\\) est inversible et \\(A^{-1} = \\frac{1}{\\det A}\\begin{pmatrix} d & -b \\\\ -c & a \\end{pmatrix}\\). Système \\(A\\binom{x}{y} = \\binom{e}{f}\\) : \\(x = \\frac{D_x}{D}\\), \\(y = \\frac{D_y}{D}\\) (Cramer), où \\(D = \\det A\\) et \\(D_x\\) remplace la colonne des x par le second membre.", exemple: ["\\(\\det\\begin{pmatrix} 3 & 2 \\\\ 4 & 5 \\end{pmatrix} = 15 - 8 = 7\\), inverse \\(\\frac{1}{7}\\begin{pmatrix} 5 & -2 \\\\ -4 & 3 \\end{pmatrix}\\)"] },
       predict: { q: "Pour multiplier deux matrices, on…", choices: ["combine une ligne de la première avec une colonne de la seconde", "multiplie les coefficients placés au même endroit"], good: 0,
         why: "Chaque coefficient du produit AB vient d'une ligne de A et d'une colonne de B : on multiplie terme à terme et on additionne. Ce n'est pas coefficient par coefficient." },
       defis: ["\\(A = \\begin{pmatrix} 3 & 2 \\\\ 4 & 5 \\end{pmatrix}\\) et \\(B = \\begin{pmatrix} 1 & 4 \\\\ 2 & -1 \\end{pmatrix}\\). Calcule le coefficient de AB en ligne 1, colonne 2.", "Calcule le déterminant de \\(A = \\begin{pmatrix} 3 & 2 \\\\ 4 & 5 \\end{pmatrix}\\).", "Que vaut le coefficient en haut à droite de l'inverse \\(A^{-1}\\) ?", "Résous \\(3x + 2y = 12\\) et \\(4x + 5y = 23\\) avec Cramer : que vaut x ?"],
@@ -485,6 +505,8 @@
         wins: [W(10, "3 · 4 + 2 · (−1) = 10. (BA donnerait 1 · 2 + 4 · 5 = 22 à cette place : AB ≠ BA.)"), W(7, "det A = 3 · 5 − 2 · 4 = 15 − 8 = 7 ≠ 0 : A est inversible."), W(-2 / 7, "A⁻¹ = (1/7) · (5 −2 ; −4 3) : en haut à droite, −2/7. On échange a et d, on change le signe de b et c, on divise par det A."), W(2, "Dx = 12 · 5 − 2 · 23 = 14, donc x = 14 ÷ 7 = 2 ; de même y = (3 · 23 − 12 · 4) ÷ 7 = 3.")] }),
     },
     translin: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "L'image de \\(P(x ; y)\\) par l'application de matrice \\(A\\) est \\(A\\binom{x}{y}\\). Les colonnes de \\(A\\) sont les images de \\((1 ; 0)\\) et \\((0 ; 1)\\). Rotation de 90° autour de O \\(\\begin{pmatrix} 0 & -1 \\\\ 1 & 0 \\end{pmatrix}\\), symétrie d'axe Ox \\(\\begin{pmatrix} 1 & 0 \\\\ 0 & -1 \\end{pmatrix}\\), homothétie de centre O et de rapport k \\(\\begin{pmatrix} k & 0 \\\\ 0 & k \\end{pmatrix}\\). Les aires sont multipliées par \\(|\\det A|\\). Appliquer \\(f\\) (matrice A) puis \\(g\\) (matrice B) : matrice \\(BA\\)." },
       predict: { q: "La matrice (2 0 ; 0 2) agit sur tous les points du plan. Elle…", choices: ["agrandit tout du double depuis O", "fait tourner de 90°", "ne change rien"], good: 0,
         why: "(x ; y) ↦ (2x ; 2y) : c'est l'homothétie de centre O et de rapport 2. Les aires sont multipliées par det = 4." },
       defis: ["Rotation de 90° autour de O, de matrice \\(\\begin{pmatrix} 0 & -1 \\\\ 1 & 0 \\end{pmatrix}\\). Abscisse de l'image de P(4 ; 2) ?", "Matrice \\(A = \\begin{pmatrix} 2 & 1 \\\\ 1 & 3 \\end{pmatrix}\\). Aire de l'image du carré unité ?", "f = symétrie d'axe Ox, g = homothétie de centre O et de rapport 3. Ordonnée de l'image de P(1 ; 2) par g ∘ f (d'abord f) ?", "Matrice \\(\\begin{pmatrix} 1 & 3 \\\\ 2 & -1 \\end{pmatrix}\\). Un triangle d'aire 4 a pour image un triangle d'aire… ?"],
@@ -537,6 +559,8 @@
           { q: "Autre cas : P(A) = 0,4 et P(A ∩ B) = 0,1. Que vaut P_A(B) ?", ans: 0.25, ok: "P_A(B) = P(A ∩ B) ÷ P(A) = 0,1 ÷ 0,4 = 0,25.", no: "Définition : P_A(B) = P(A ∩ B) ÷ P(A)." }] }),
     },
     varalea: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Loi de \\(X\\) : valeurs \\(x_i\\) et probabilités \\(p_i\\) (somme 1). Espérance (moyenne à long terme) \\(E(X) = \\sum x_i p_i\\) ; un jeu est équitable si l'espérance du gain est nulle. Variance \\(V(X) = E(X^2) - E(X)^2\\)." },
       predict: { q: "On lance un dé : sur un 6, tu gagnes 12 CHF, sinon rien. En moyenne, une partie rapporte…", choices: ["2 CHF", "6 CHF", "12 CHF"], good: 0,
         why: "12 · 1/6 + 0 · 5/6 = 2 CHF : l'espérance pondère chaque gain par sa probabilité." },
       defis: ["On paie un prix d'entrée, puis on lance deux pièces : deux piles → on reçoit 6 CHF, un seul pile → 2 CHF, aucun → rien. Règle le prix pour que le jeu soit équitable (espérance du gain net nulle).", "X prend les valeurs 1, 2 et 3 avec les probabilités 0,2 ; 0,45 et p. Règle p pour que ce soit une loi de probabilité."],
@@ -554,6 +578,8 @@
           { q: "Avec cette loi, calcule V(X) = E(X²) − E(X)² (au centième).", ans: 0.5275, tol: 0.006, ok: "E(X²) = 0,2 + 1,8 + 3,15 = 5,15 ; V = 5,15 − 2,15² = 0,5275 ≈ 0,53 ; écart-type σ ≈ 0,73.", no: "E(X²) = 1² · 0,2 + 2² · 0,45 + 3² · 0,35 ; puis retire E(X)² = 2,15²." }] }),
     },
     binomiale: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Schéma de Bernoulli : \\(n\\) épreuves identiques et indépendantes, chacune un succès avec la probabilité \\(p\\). \\(X\\) = nombre de succès suit \\(B(n \\,;\\, p)\\) : \\(P(X = k) = \\binom{n}{k} p^k (1 - p)^{n - k}\\), où \\(\\binom{n}{k}\\) compte les chemins de l'arbre avec \\(k\\) succès. \\(E(X) = np\\)." },
       predict: { q: "On lance 3 fois une pièce. Combien de chemins de l'arbre donnent exactement 2 piles ?", choices: ["3", "2", "6"], good: 0,
         why: "PPF, PFP et FPP : 3 chemins, c'est le coefficient binomial (3 ; 2). Chacun a la probabilité 0,5³, donc P(X = 2) = 3 · 0,125 = 3/8." },
       defis: ["X suit la loi binomiale B(5 ; 0,3) : 5 épreuves, succès avec la probabilité 0,3. Sélectionne la valeur de k la plus probable.", "On lance un dé n fois. Règle n pour que P(au moins un 6) dépasse 50 %, avec n le plus petit possible."],
@@ -571,6 +597,8 @@
           { q: "12 passagers, chacun présent avec la probabilité 0,8, indépendamment. Espérance du nombre de présents ?", ans: 9.6, ok: "E(X) = n · p = 12 · 0,8 = 9,6 ; variance n · p · (1 − p) = 1,92.", no: "Pour une loi binomiale, E(X) = n · p." }] }),
     },
     normale: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Si \\(X\\) suit une loi normale de moyenne \\(\\mu\\) et d'écart-type \\(\\sigma\\) : \\(P(\\mu - \\sigma \\le X \\le \\mu + \\sigma) \\approx 68\\,\\%\\), \\(P(\\mu - 2\\sigma \\le X \\le \\mu + 2\\sigma) \\approx 95\\,\\%\\), \\(P(\\mu - 3\\sigma \\le X \\le \\mu + 3\\sigma) \\approx 99{,}7\\,\\%\\). Par symétrie, chaque moitié d'intervalle vaut la moitié (34 %, 47,5 %, 49,85 %) et chaque « queue » la moitié du reste (16 %, 2,5 %, 0,15 %)." },
       predict: { q: "Tailles d'adultes : moyenne 170 cm, écart-type 8 cm, loi normale. Quelle proportion mesure entre 162 et 178 cm ?", choices: ["environ 68 %", "environ 50 %", "environ 95 %"], good: 0,
         why: "162 et 178 sont à un écart-type de la moyenne : environ 68 % des personnes (règle 68-95-99,7)." },
       defis: ["Même modèle (μ = 170 cm, σ = 8 cm). Règle l'intervalle [a ; b] centré sur la moyenne qui contient environ 95 % des personnes.", "Règle maintenant un intervalle [a ; b] qui contient environ 81,5 % des personnes."],

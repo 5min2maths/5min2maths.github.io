@@ -45,6 +45,8 @@
   Object.assign(ACTIVE, {
     // =============================== MP 3e · A. Équations avancées ===============================
     eqbic: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Bicarrée \\(ax^4 + bx^2 + c = 0\\) : on pose \\(X = x^2\\), on résout \\(aX^2 + bX + c = 0\\), puis on revient à \\(x\\) (\\(x^2 = X\\)). Une valeur \\(X < 0\\) est rejetée : un carré n'est jamais négatif.", exemple: ["\\(x^4 - 10x^2 + 9 = 0\\) : \\(X = 1\\) ou \\(9\\), \\(S = \\{-3 ; -1 ; 1 ; 3\\}\\)", "\\(x^4 + 3x^2 - 4 = 0\\) : \\(X = 1\\) ou \\(X = -4\\) (rejetée), \\(S = \\{-1 ; 1\\}\\)"], piege: "N'oublie pas de revenir à \\(x\\) : \\(X = 9\\) donne deux solutions, \\(x = 3\\) et \\(x = -3\\)." },
       predict: { q: "Dans \\(x^4 - 13x^2 + 36 = 0\\), on pose \\(X = x^2\\). On obtient…", choices: ["\\(X^2 - 13X + 36 = 0\\)", "\\(X - 13X + 36 = 0\\)", "\\(X^4 - 13X + 36 = 0\\)"], good: 0,
         why: "x⁴ = (x²)² = X² : l'équation de degré 4 devient une équation du 2e degré en X, qu'on sait résoudre." },
       defis: ["\\(x^4 - 10x^2 + 9 = 0\\) : avec \\(X = x^2\\), on trouve \\(X = 1\\) ou \\(X = 9\\). Quelle est la plus grande solution \\(x\\) ?", "\\(x^4 + 3x^2 - 4 = 0\\) : combien de solutions réelles \\(x\\) ?"],
@@ -53,6 +55,8 @@
           W(2, "X = 1 donne x = 1 ou x = −1 ; X = −4 est rejetée, car un carré x² n'est jamais négatif. Deux solutions.")]),
     },
     eqirrmp: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "1. Isoler la racine. 2. Élever au carré et résoudre. 3. Vérifier chaque solution dans l'équation de départ : élever au carré peut ajouter des solutions parasites.", exemple: ["\\(\\sqrt{2x + 1} = 5\\) : \\(2x + 1 = 25\\), \\(x = 12\\)", "\\(\\sqrt{x + 7} = x + 1\\) : \\(x^2 + x - 6 = 0\\), \\(x = 2\\) ou \\(x = -3\\) (parasite) ; \\(S = \\{2\\}\\)"], piege: "Une solution de l'équation élevée au carré n'est pas forcément une solution : \\(x = -3\\) donne \\(\\sqrt{4} = 2\\), mais \\(-3 + 1 = -2\\)." },
       predict: { q: "\\(\\sqrt{x + 3} = x - 3\\). En élevant au carré, on trouve \\(x = 1\\) ou \\(x = 6\\). Les solutions de l'équation sont…", choices: ["6 seulement", "1 et 6", "1 seulement"], good: 0,
         why: "On vérifie dans l'équation de départ : x = 6 donne √9 = 3 et 6 − 3 = 3 ✓ ; x = 1 donne √4 = 2, mais 1 − 3 = −2 ✗. Élever au carré a ajouté une solution parasite, 1." },
       defis: ["Résous \\(\\sqrt{2x + 1} = 5\\).", "Résous \\(\\sqrt{x + 7} = x + 1\\) : élève au carré, résous, puis vérifie. Quelle est la solution ?"],
@@ -61,6 +65,8 @@
           W(2, "x = 2 : √9 = 3 et 2 + 1 = 3 ✓. x = −3 : √4 = 2, mais −3 + 1 = −2 ✗ (solution parasite). S = {2}.")]),
     },
     eqratmp: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "1. Valeurs interdites : celles qui annulent un dénominateur. 2. Multiplier les deux membres par le dénominateur. 3. Résoudre l'équation obtenue. 4. Rejeter les solutions interdites.", exemple: ["\\(\\frac{6}{x - 1} = 3\\) : \\(6 = 3(x - 1)\\), \\(x = 3\\) (pas interdite)", "Robinets : \\(\\frac{1}{6} + \\frac{1}{t} = \\frac{1}{4}\\), donc \\(t = 12\\) h"] },
       predict: { q: "\\(\\dfrac{x}{x - 2} = \\dfrac{2}{x - 2}\\). Le nombre \\(x = 2\\) est-il solution ?", choices: ["Non : 2 est une valeur interdite", "Oui", "Oui, c'est la seule solution"], good: 0,
         why: "Pour x = 2, le dénominateur x − 2 vaut 0 : les fractions n'existent pas. En multipliant, on trouve x = 2, mais il faut la rejeter : l'équation n'a pas de solution." },
       defis: ["Résous \\(\\dfrac{6}{x - 1} = 3\\).", "Le robinet A remplit un bassin en 6 h. Avec le robinet B, les deux ensemble le remplissent en 4 h. Combien d'heures faut-il au robinet B seul ?"],
@@ -70,6 +76,8 @@
     },
     // =============================== MP 3e · B. Puissances et logarithmes ===============================
     puisrat: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(\\sqrt[q]{a} = a^{\\frac{1}{q}}\\) et \\(\\sqrt[q]{a^p} = a^{\\frac{p}{q}}\\) (\\(a > 0\\)) : on prend la racine, puis la puissance. \\(a^{-r} = \\frac{1}{a^r}\\).", exemple: ["\\(8^{\\frac{1}{3}} = \\sqrt[3]{8} = 2\\)", "\\(16^{\\frac{3}{4}} = 2^3 = 8\\)", "\\(9^{-\\frac{1}{2}} = \\frac{1}{\\sqrt{9}} = \\frac{1}{3}\\)"] },
       predict: { q: "\\(8^{\\frac{1}{3}}\\) vaut…", choices: ["2", "8/3", "24"], good: 0,
         why: "L'exposant 1/3 est la racine cubique : 8 puissance 1/3 = ∛8 = 2, car 2³ = 8. Ce n'est ni 8 ÷ 3, ni 8 · 3." },
       defis: ["Calcule \\(16^{\\frac{3}{4}}\\).", "Calcule \\(9^{-\\frac{1}{2}}\\) (fraction acceptée)."],
@@ -78,6 +86,8 @@
           W(1 / 3, "√9 = 3, puis l'inverse : 1/3. Un exposant négatif donne un inverse, pas un nombre négatif.")]),
     },
     logdef: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Pour \\(b > 0\\), \\(b \\ne 1\\) et \\(N > 0\\) : \\(\\log_b N = x \\iff b^x = N\\) (« \\(b\\) à quelle puissance donne \\(N\\) ? »). \\(\\log\\) (sans base) est le logarithme en base 10. Un logarithme peut être négatif, mais pas son argument.", exemple: ["\\(\\log_3 81 = 4\\) car \\(3^4 = 81\\)", "\\(\\log 0{,}001 = -3\\) car \\(0{,}001 = 10^{-3}\\)"] },
       predict: { q: "\\(\\log_2 8\\) vaut…", choices: ["3", "4", "16"], good: 0,
         why: "log₂ 8 répond à la question « 2 à quelle puissance donne 8 ? » : 2³ = 8, donc log₂ 8 = 3. (4, c'est 8 ÷ 2 : le logarithme est un exposant.)" },
       defis: ["Calcule \\(\\log_3 81\\).", "Calcule \\(\\log 0{,}001\\) (logarithme en base 10)."],
@@ -86,6 +96,8 @@
           W(-3, "0,001 = 10⁻³, donc log 0,001 = −3. Un logarithme peut être négatif (mais pas son argument).")]),
     },
     logprop: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(\\log(ab) = \\log a + \\log b\\) et \\(\\log(a^n) = n \\log a\\).", exemple: ["\\(\\log 50 + \\log 2 = \\log 100 = 2\\)", "\\(\\log 8 + 3\\log 5 = \\log 8 + \\log 125 = \\log 1000 = 3\\)", "\\(\\log 16 = 4\\log 2 \\approx 1{,}204\\)"] },
       predict: { q: "\\(\\log 50 + \\log 2\\) vaut…", choices: ["2", "\\(\\log 52\\)", "100"], good: 0,
         why: "log a + log b = log(ab) : log 50 + log 2 = log(50 · 2) = log 100 = 2. La somme des logarithmes est le logarithme du produit, pas de la somme." },
       defis: ["Calcule \\(\\log 8 + 3\\log 5\\) (indice : \\(3\\log 5 = \\log 5^3\\)).", "On sait que \\(\\log 2 \\approx 0{,}301\\). Calcule \\(\\log 16\\) avec cette valeur."],
@@ -95,6 +107,8 @@
     },
     // =============================== MP 3e · C. Exponentielles et logarithmes ===============================
     eqexp: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Si les deux membres s'écrivent avec la même base : \\(b^A = b^B \\iff A = B\\). Sinon, on prend le logarithme : \\(b^x = c \\iff x = \\frac{\\log c}{\\log b}\\).", piege: "Écris d'abord les deux membres avec la même base (\\(27 = 3^3\\), \\(16 = 2^4\\)) avant d'égaler les exposants." },
       predict: { q: "\\(2^{x + 1} = 16\\). Que vaut \\(x\\) ?", choices: ["3", "7", "8"], good: 0,
         why: "16 = 2⁴ : les deux membres ont la même base 2, donc les exposants sont égaux : x + 1 = 4 et x = 3." },
       defis: ["Résous \\(3^{2x - 1} = 27\\).", "Résous \\(2^x = 5\\) : \\(x = \\dfrac{\\log 5}{\\log 2}\\). Donne \\(x\\) au centième."],
@@ -103,6 +117,8 @@
           W(2.32, "log 5 ÷ log 2 ≈ 0,699 ÷ 0,301 ≈ 2,32. Vérification : 2 puissance 2,32 ≈ 5 ✓.")]),
     },
     eqlog: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "1. Domaine : chaque argument de logarithme doit être strictement positif. 2. Se ramener à \\(\\log_b A = k\\) (avec \\(\\log a + \\log b = \\log(ab)\\)), puis \\(A = b^k\\). 3. Résoudre et garder les solutions du domaine.", exemple: ["\\(\\log(2x + 4) = 2\\) : \\(2x + 4 = 100\\), \\(x = 48\\)", "\\(\\log x + \\log(x - 3) = 1\\) : \\(x(x - 3) = 10\\), \\(x = 5\\) (\\(-2\\) rejetée)"] },
       predict: { q: "\\(\\log_2(x - 1) = 3\\). Que vaut \\(x\\) ?", choices: ["9", "7", "4"], good: 0,
         why: "log₂ A = 3 signifie A = 2³ = 8 : x − 1 = 8, donc x = 9. Et 9 − 1 = 8 > 0 : x = 9 est dans le domaine." },
       defis: ["Résous \\(\\log(2x + 4) = 2\\).", "Résous \\(\\log x + \\log(x - 3) = 1\\) (domaine : \\(x > 3\\))."],
@@ -111,6 +127,8 @@
           W(5, "x² − 3x − 10 = (x − 5)(x + 2) : x = 5 ou x = −2. Le domaine impose x > 3 : seule 5 convient.")]),
     },
     croissexp: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Modèle exponentiel \\(f(n) = f_0 \\cdot q^n\\) : à chaque période, on multiplie par \\(q\\) (hausse de 10 % : \\(q = 1{,}1\\)). Doublement toutes les \\(T\\) heures : \\(f_0 \\cdot 2^{t/T}\\). Pour trouver la durée, on résout \\(q^n = k\\).", exemple: ["100 bactéries, doublement toutes les 3 h : après 12 h, \\(100 \\cdot 2^4 = 1\\text{'}600\\)", "\\(100 \\cdot 2^{t/3} = 6\\text{'}400\\) : \\(2^{t/3} = 64 = 2^6\\), \\(t = 18\\) h"], piege: "Ce n'est pas linéaire : deux hausses de 10 % font \\(1{,}1^2 = 1{,}21\\), soit +21 %, pas +20 %." },
       predict: { q: "Un prix augmente de 10 % par an pendant 2 ans. Au total, il a augmenté de…", choices: ["21 %", "20 %", "12 %"], good: 0,
         why: "Chaque année, on multiplie par 1,1 : 1,1 · 1,1 = 1,21, soit +21 %. Les pourcentages successifs ne s'additionnent pas." },
       defis: ["Une population de 100 bactéries double toutes les 3 heures. Combien y en a-t-il après 12 heures ?", "Après combien d'heures y en a-t-il 6'400 ?"],
@@ -120,6 +138,8 @@
     },
     // =============================== MP 3e · D. Volumes et similitude ===============================
     volmp: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Cylindre : \\(V = A_{\\text{base}} \\cdot h = \\pi r^2 h\\). Cône : \\(V = \\frac{A_{\\text{base}} \\cdot h}{3}\\), le tiers du cylindre de même base et de même hauteur.", exemple: ["Cylindre \\(r = 2\\), \\(h = 5\\) : \\(V = \\pi \\cdot 4 \\cdot 5 = 20\\pi\\) cm³", "Cône \\(r = 3\\), \\(V = 12\\pi\\) : \\(\\frac{9\\pi h}{3} = 12\\pi\\), \\(h = 4\\) cm"], piege: "Pour le cône, n'oublie pas de diviser par 3." },
       predict: { q: "Un cône et un cylindre ont la même base et la même hauteur. Le volume du cône est…", choices: ["le tiers de celui du cylindre", "la moitié de celui du cylindre", "le même"], good: 0,
         why: "Cylindre : A_base · h ; cône : A_base · h ÷ 3. Il faut trois cônes pleins pour remplir le cylindre." },
       defis: ["Cylindre de rayon 2 cm et de hauteur 5 cm. Son volume vaut k · π cm³ : que vaut k ?", "Un cône a un volume de 12π cm³ et un rayon de 3 cm. Quelle est sa hauteur (en cm) ?"],
@@ -129,6 +149,8 @@
     },
     // =============================== MP 4e · E–G. Coordonnées, vecteurs, droites ===============================
     coordmp: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Distance \\(AB = \\sqrt{(x_B - x_A)^2 + (y_B - y_A)^2}\\) (Pythagore sur les écarts). Milieu : la moyenne des coordonnées \\(\\left(\\frac{x_A + x_B}{2} ; \\frac{y_A + y_B}{2}\\right)\\). Coordonnées polaires \\((r ; \\theta)\\) : \\(x = r\\cos\\theta\\), \\(y = r\\sin\\theta\\).", exemple: ["\\(A(1 ; 2)\\), \\(B(4 ; 6)\\) : \\(AB = \\sqrt{3^2 + 4^2} = 5\\)", "Milieu de \\(A(-2 ; 5)\\) et \\(B(6 ; 1)\\) : abscisse \\(\\frac{-2 + 6}{2} = 2\\)", "\\((6 ; 60°)\\) : \\(x = 6\\cos 60° = 3\\)"], piege: "\\(AB = \\sqrt{3^2 + 4^2} = 5\\), pas \\(3 + 4 = 7\\)." },
       predict: { q: "Distance entre \\(A(1 \\,;\\, 2)\\) et \\(B(4 \\,;\\, 6)\\) ?", choices: ["5", "7", "25"], good: 0,
         why: "On applique Pythagore aux écarts : Δx = 3, Δy = 4, AB = √(3² + 4²) = √25 = 5. (7 = 3 + 4 et 25 = AB².)" },
       defis: ["Milieu de \\(A(-2 \\,;\\, 5)\\) et \\(B(6 \\,;\\, 1)\\) : quelle est son abscisse ?", "Le point de coordonnées polaires \\((6 \\,;\\, 60°)\\) : que vaut son abscisse \\(x = r\\cos\\theta\\) ?"],
@@ -137,6 +159,8 @@
           W(3, "x = 6 · 0,5 = 3 ; et y = 6 · sin 60° ≈ 5,2.")]),
     },
     scalmp: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(\\vec{u} \\cdot \\vec{v} = x_1 x_2 + y_1 y_2 = \\|\\vec{u}\\| \\, \\|\\vec{v}\\| \\cos\\alpha\\) : c'est un nombre. Nul : vecteurs orthogonaux. Angle : \\(\\cos\\alpha = \\frac{\\vec{u} \\cdot \\vec{v}}{\\|\\vec{u}\\| \\, \\|\\vec{v}\\|}\\)." },
       predict: { q: "\\(\\vec{u} = (2 \\,;\\, 1)\\) et \\(\\vec{v} = (-1 \\,;\\, 2)\\). Le produit scalaire \\(\\vec{u} \\cdot \\vec{v}\\) vaut…", choices: ["0", "4", "(−2 ; 2)"], good: 0,
         why: "x avec x, y avec y, puis on additionne : 2 · (−1) + 1 · 2 = 0. Les vecteurs sont orthogonaux. Le produit scalaire est un nombre, pas un vecteur." },
       defis: ["\\(\\vec{u} = (6 \\,;\\, k)\\) et \\(\\vec{v} = (2 \\,;\\, -3)\\) sont orthogonaux. Que vaut \\(k\\) ?", "\\(\\vec{u} = (2 \\,;\\, 1)\\), \\(\\vec{v} = (1 \\,;\\, 3)\\). Angle entre \\(\\vec{u}\\) et \\(\\vec{v}\\), en degrés ?"],
@@ -146,6 +170,8 @@
     },
     // Ajouts du 24.11 (agent mp4plus) : projmp, pvectmp, posdroites, fratmp (À toi, 2 questions).
     projmp: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Projection scalaire de \\(\\vec{u}\\) sur la direction de \\(\\vec{v}\\) : \\(\\frac{\\vec{u} \\cdot \\vec{v}}{\\|\\vec{v}\\|}\\) (la longueur de l'« ombre »). Vecteur projeté : \\(\\vec{p} = \\frac{\\vec{u} \\cdot \\vec{v}}{\\|\\vec{v}\\|^2}\\,\\vec{v}\\) ; la partie \\(\\vec{u} - \\vec{p}\\) est orthogonale à \\(\\vec{v}\\).", exemple: ["\\(\\vec{u} = (4 ; 7)\\), \\(\\vec{v} = (3 ; 4)\\) : \\(\\vec{u} \\cdot \\vec{v} = 40\\), projection \\(40 \\div 5 = 8\\)", "\\(\\vec{u} = (7 ; 1)\\), \\(\\vec{v} = (1 ; 1)\\) : \\(\\vec{p} = \\frac{8}{2}(1 ; 1) = (4 ; 4)\\)"] },
       predict: { q: "L'« ombre » du vecteur \\(\\vec{u} = (3 \\,;\\, 4)\\) sur l'axe des x, quand la lumière tombe à angle droit, est…", choices: ["(3 ; 0)", "(0 ; 4)", "(3 ; 4)"], good: 0,
         why: "On garde seulement la partie de u dans la direction de l'axe : (3 ; 0). Le reste, (0 ; 4), est orthogonal à l'axe. C'est la projection orthogonale." },
       defis: ["\\(\\vec{u} = (4 \\,;\\, 7)\\) et \\(\\vec{v} = (3 \\,;\\, 4)\\). Projection scalaire de \\(\\vec{u}\\) sur \\(\\vec{v}\\), \\(\\frac{\\vec{u} \\cdot \\vec{v}}{\\|\\vec{v}\\|}\\) ?", "Vecteur projeté de \\(\\vec{u} = (7 \\,;\\, 1)\\) sur \\(\\vec{v} = (1 \\,;\\, 1)\\) : que vaut sa première composante ?"],
@@ -154,6 +180,8 @@
           W(4, "Coefficient 8 ÷ 2 = 4, donc p = 4 · (1 ; 1) = (4 ; 4). Et u − p = (3 ; −3) est bien orthogonal à v : 3 − 3 = 0.")]),
     },
     pvectmp: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Dans l'espace, \\(\\vec{u} \\times \\vec{v} = \\begin{pmatrix} u_2 v_3 - u_3 v_2 \\\\ u_3 v_1 - u_1 v_3 \\\\ u_1 v_2 - u_2 v_1 \\end{pmatrix}\\) (on « croise » les composantes). C'est un vecteur orthogonal à \\(\\vec{u}\\) et à \\(\\vec{v}\\). Sa norme \\(\\|\\vec{u} \\times \\vec{v}\\|\\) est l'aire du parallélogramme construit sur \\(\\vec{u}\\) et \\(\\vec{v}\\) ; le triangle en est la moitié.", exemple: ["\\((1 ; 2 ; 2) \\times (2 ; -1 ; 2)\\) : première composante \\(2 \\cdot 2 - 2 \\cdot (-1) = 6\\)", "\\(\\vec{u} \\times \\vec{v} = (2 ; 3 ; 6)\\) : aire \\(\\sqrt{4 + 9 + 36} = 7\\), triangle 3,5"], piege: "Le produit scalaire donne un nombre ; le produit vectoriel donne un vecteur." },
       predict: { q: "Le produit vectoriel \\(\\vec{u} \\times \\vec{v}\\) de deux vecteurs de l'espace est…", choices: ["un vecteur orthogonal à u et à v", "un nombre", "un vecteur parallèle à u"], good: 0,
         why: "Contrairement au produit scalaire (un nombre), le produit vectoriel est un vecteur, perpendiculaire à u et à v. Sa longueur est l'aire du parallélogramme construit sur u et v." },
       defis: ["\\(\\vec{u} = (1 \\,;\\, 2 \\,;\\, 2)\\) et \\(\\vec{v} = (2 \\,;\\, -1 \\,;\\, 2)\\). Première composante de \\(\\vec{u} \\times \\vec{v}\\), c'est-à-dire \\(u_2 v_3 - u_3 v_2\\) ?", "On a trouvé \\(\\vec{u} \\times \\vec{v} = (2 \\,;\\, 3 \\,;\\, 6)\\). Aire du parallélogramme construit sur \\(\\vec{u}\\) et \\(\\vec{v}\\) ?"],
@@ -170,6 +198,8 @@
           W(6, "7 = m + 1, donc m = 6 : point commun (3 ; 0 ; 7). Pour toute autre valeur de m, les droites seraient gauches.")]),
     },
     fratmp: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(f(x) = \\frac{ax + b}{cx + d}\\) n'existe pas quand \\(cx + d = 0\\) : valeur interdite, asymptote verticale \\(x = -\\frac{d}{c}\\). Zéro : \\(ax + b = 0\\). Pour x très grand, \\(f(x) \\approx \\frac{ax}{cx} = \\frac{a}{c}\\) : asymptote horizontale \\(y = \\frac{a}{c}\\). Pour résoudre \\(f(x) = k\\), on multiplie par le dénominateur, puis on vérifie que la solution n'est pas interdite." },
       predict: { q: "\\(f(x) = \\frac{2x - 6}{x + 4}\\). Où est l'asymptote verticale ?", choices: ["x = −4", "x = 3", "y = 2"], good: 0,
         why: "Le dénominateur s'annule en x = −4 : c'est la valeur interdite, la courbe s'envole près de cette droite verticale. x = 3 est le zéro (numérateur) ; y = 2 est l'asymptote horizontale." },
       defis: ["\\(f(x) = \\frac{3x + 6}{x - 1}\\). Asymptote horizontale \\(y = \\ldots\\) ?", "Résous \\(\\frac{2x + 1}{x - 2} = 3\\)."],
@@ -187,6 +217,8 @@
           W(4, "S = ]−4 ; 1[ (crochets ouverts, car l'inégalité est stricte) : les entiers −3, −2, −1 et 0, soit 4 nombres.")]),
     },
     fctmp: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Réciproque : si \\(f(a) = b\\), alors \\(f^{-1}(b) = a\\). Composition : \\((f \\circ g)(x) = f(g(x))\\), d'abord \\(g\\), puis \\(f\\) ; l'ordre compte. Le graphe de \\(f(x - 2)\\) est celui de \\(f\\) décalé de 2 vers la droite ; \\(f(x) + 2\\), vers le haut.", exemple: ["\\(f(x) = 2x + 6\\) : \\(2x + 6 = 10\\), donc \\(f^{-1}(10) = 2\\)", "\\(f(x) = x^2\\), \\(g(x) = x + 3\\) : \\((f \\circ g)(1) = f(4) = 16\\), mais \\((g \\circ f)(1) = 4\\)"] },
       predict: { q: "Le graphe de \\(f(x - 2)\\) est celui de \\(f\\), décalé…", choices: ["de 2 vers la droite", "de 2 vers la gauche", "de 2 vers le haut"], good: 0,
         why: "f(x − 2) prend en x la valeur que f prenait en x − 2 : tout arrive 2 unités plus tard, donc plus à droite. (Vers le haut, ce serait f(x) + 2.)" },
       defis: ["\\(f(x) = 2x + 6\\). Que vaut \\(f^{-1}(10)\\) ?", "\\(f(x) = x^2\\) et \\(g(x) = x + 3\\). Que vaut \\((f \\circ g)(1)\\) ?"],
@@ -195,6 +227,8 @@
           W(16, "g(1) = 4, puis f(4) = 16. (Dans l'autre ordre, (g ∘ f)(1) = 4 : l'ordre compte.)")]),
     },
     polymp: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Si \\(P(a) = 0\\), \\(a\\) est un zéro et \\(P\\) est divisible par \\((x - a)\\). Le reste de la division de \\(P\\) par \\((x - a)\\) est \\(P(a)\\) (théorème du reste). Une fois \\(P\\) factorisé, on lit ses zéros sur chaque facteur.", exemple: ["\\(x^3 + 2x^2 - 5\\) divisé par \\((x - 2)\\) : reste \\(P(2) = 11\\)", "\\(x^3 - 7x + 6 = (x - 1)(x + 3)(x - 2)\\) : zéros \\(1\\), \\(2\\), \\(-3\\)"] },
       predict: { q: "\\(P(x) = x^3 - 2x^2 - 5x + 6\\). Que vaut \\(P(1)\\) ?", choices: ["0", "6", "−2"], good: 0,
         why: "P(1) = 1 − 2 − 5 + 6 = 0 : 1 est un zéro de P, donc P est divisible par (x − 1)." },
       defis: ["Quel est le reste de la division de \\(P(x) = x^3 + 2x^2 - 5\\) par \\((x - 2)\\) ?", "\\(x^3 - 7x + 6 = (x - 1)(x^2 + x - 6)\\). Quel est le plus petit zéro ?"],
@@ -203,6 +237,8 @@
           W(-3, "x² + x − 6 = (x + 3)(x − 2) : les zéros sont 1, 2 et −3. Le plus petit : −3.")]),
     },
     explogfn: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(f(x) = a \\cdot b^x\\) (\\(b > 0\\)) : \\(f(0) = a\\), et \\(f(x)\\) est multiplié par \\(b\\) quand x augmente de 1. \\(\\log_b(x - h)\\) n'existe que pour \\(x > h\\) ; il s'annule quand \\(x - h = 1\\).", exemple: ["Par \\((0 ; 5)\\) et \\((1 ; 15)\\) : \\(a = 5\\), \\(b = 15 \\div 5 = 3\\)", "\\(\\log_2(x - 3) = 0\\) quand \\(x - 3 = 1\\) : zéro \\(x = 4\\)"] },
       predict: { q: "\\(f(x) = 3 \\cdot 2^x\\). Quand \\(x\\) augmente de 1, \\(f(x)\\) est…", choices: ["multiplié par 2", "augmenté de 2", "multiplié par 3"], good: 0,
         why: "f(x + 1) = 3 · 2 puissance (x + 1) = 2 · f(x) : la base b = 2 est le facteur multiplicatif. Le 3 est la valeur de départ, f(0)." },
       defis: ["\\(f(x) = a \\cdot b^x\\) passe par \\((0 \\,;\\, 5)\\) et \\((1 \\,;\\, 15)\\). Que vaut \\(b\\) ?", "\\(g(x) = \\log_2(x - 3)\\). Quel est son zéro ?"],
@@ -235,6 +271,8 @@
       return svg(Wd, Hd, g, "droite paramétrique dans un repère") + out;
     };
     ACTIVE.droiteparam = {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "La droite passant par \\(A\\) de vecteur directeur \\(\\vec{d}\\) : \\(x = x_A + t\\,d_x\\), \\(y = y_A + t\\,d_y\\). Chaque valeur de \\(t\\) donne un point. Un point est sur la droite s'il existe un même \\(t\\) pour toutes les coordonnées. Pour couper l'axe des x, on pose \\(y = 0\\) ; l'axe des y, \\(x = 0\\).", exemple: ["\\(d : x = -3 + 2t\\), \\(y = 4 - t\\) : \\(P(3 ; 1)\\) pour \\(t = 3\\)", "\\(y = 0\\) pour \\(t = 4\\) : \\(d\\) coupe l'axe des x en \\((5 ; 0)\\)"], piege: "Trouve \\(t\\) avec une coordonnée, puis vérifie qu'il donne aussi l'autre." },
       predict: { q: "La droite \\(x = 1 + 2t\\), \\(y = 3 - t\\). Pour \\(t = 2\\), on obtient le point…", choices: ["(5 ; 1)", "(3 ; 2)", "(2 ; 2)"], good: 0,
         why: "On remplace t par 2 dans les deux coordonnées : x = 1 + 2 · 2 = 5 et y = 3 − 2 = 1. (Le point (3 ; 2), c'est t = 1.)" },
       defis: ["La droite d : x = −3 + 2t, y = 4 − t. Quelle valeur de t donne le point P(3 ; 1) ?", "Pour quel t la droite d coupe-t-elle l'axe des x (y = 0) ?", "Pour quel t coupe-t-elle l'axe des y (x = 0) ?"],
@@ -267,6 +305,8 @@
       return svg(W0, H0, g, "courbe de la marée sur 24 heures") + out;
     };
     ACTIVE.sinusmp = {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(f(x) = a\\sin(b(x - c)) + d\\) : amplitude \\(|a|\\), période \\(\\frac{2\\pi}{b}\\), déphasage \\(c\\) (si \\(a > 0\\), la courbe coupe l'axe en montant en \\(x = c\\)), axe \\(y = d\\). Valeurs entre \\(d - |a|\\) et \\(d + |a|\\). Le maximum arrive un quart de période après \\(c\\).", exemple: ["Marée \\(h(t) = 2{,}5\\sin\\left(\\frac{\\pi}{6}(t - 2)\\right) + 3{,}5\\) : max 6 m, période 12 h, marée haute en \\(t = 2 + 3 = 5\\) h"] },
       predict: { q: "\\(f(x) = 3\\sin x + 2\\). La plus grande valeur de \\(f\\) est…", choices: ["5", "3", "6"], good: 0,
         why: "sin x est entre −1 et 1, donc 3 sin x est entre −3 et 3 : f est entre 2 − 3 = −1 et 2 + 3 = 5. Amplitude 3, axe y = 2." },
       defis: ["Marée : h(t) = 2,5 sin(π/6 · (t − 2)) + 3,5 (h en m, t en heures). Hauteur maximale de l'eau ?", "Période de la marée, en heures (période = 2π ÷ b) ?", "À quel instant (t > 0) a lieu la première marée haute ?"],
@@ -286,6 +326,8 @@
     const E = [{ c: 3, d: 5, txt: "|x − 3| = 5" }, { c: 3, d: 5, txt: "|x − 3| = 5" }, { c: -2, d: 4, txt: "|x + 2| = 4" }];
     const ex = (x, c) => "|" + n0(x) + (c < 0 ? " + " + -c : " − " + c) + "| = |" + n0(x - c) + "| = " + Math.abs(x - c);
     ACTIVE.eqabs = {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(|a - b|\\) est la distance entre \\(a\\) et \\(b\\) ; \\(|x + 2| = |x - (-2)|\\) est la distance entre \\(x\\) et \\(-2\\). \\(|A| = c\\) avec \\(c > 0\\) : \\(A = c\\) ou \\(A = -c\\), deux solutions. Avec \\(c < 0\\) : aucune solution.", exemple: ["\\(|x - 3| = 5\\) : \\(x = 8\\) ou \\(x = -2\\)", "\\(|x + 2| = 4\\) : \\(x = 2\\) ou \\(x = -6\\)", "\\(|2x - 1| = 7\\) : \\(2x - 1 = 7\\) ou \\(2x - 1 = -7\\), \\(x = 4\\) ou \\(x = -3\\)"] },
       predict: { q: "Combien de solutions a l'équation \\(|x - 1| = 4\\) ?", choices: ["2", "1", "aucune"], good: 0,
         why: "|x − 1| est la distance entre x et 1. Deux nombres sont à distance 4 de 1 : 5 (à droite) et −3 (à gauche)." },
       defis: ["|x − 3| est la distance entre x et 3. Glisse le point x pour que cette distance vaille 5.", "Trouve l'autre solution de |x − 3| = 5.", "|x + 2| = |x − (−2)| est la distance entre x et −2. Place x sur une solution de |x + 2| = 4."],
@@ -322,6 +364,8 @@
     const r1 = (v) => nb(Math.round(v * 10) / 10);
     const TG = [80, 270, 10];
     ACTIVE.similmp = {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Deux solides sont semblables si toutes les longueurs sont multipliées par le même rapport \\(k\\). Alors les volumes sont multipliés par \\(k^3\\).", exemple: ["Verre conique rempli à mi-hauteur : \\(\\left(\\frac{1}{2}\\right)^3 = \\frac{1}{8}\\) du volume", "Rempli à mi-hauteur, il contient 30 mL : plein, \\(8 \\cdot 30 = 240\\) mL"] },
       predict: { q: "Un verre conique est rempli jusqu'à la moitié de sa hauteur. Il contient…", choices: ["la moitié de son volume", "le quart de son volume", "le huitième de son volume"], good: 2,
         why: "Le liquide forme un petit cône semblable au verre, de rapport k = 1/2 : les longueurs sont divisées par 2, le volume par 2³ = 8." },
       defis: ["Le verre plein (12 cm de haut) contient 640 mL. Tire la surface du liquide pour qu'il contienne 80 mL.", "Remplis-le pour qu'il contienne 270 mL.", "Et pour qu'il ne contienne que 10 mL."],
@@ -361,6 +405,8 @@
     const cp = (v) => "(" + n0(v[0]) + " ; " + n0(v[1]) + ")";
     const norm = (v) => { const q = v[0] * v[0] + v[1] * v[1], r = Math.sqrt(q); return Number.isInteger(r) ? String(r) : "√" + q + " ≈ " + nb(Math.round(r * 100) / 100); };
     ACTIVE.vectmp = {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(\\overrightarrow{AB}\\) a pour composantes \\(B - A\\) (arrivée moins départ). Norme \\(\\|\\vec{u}\\| = \\sqrt{x^2 + y^2}\\). ABCD parallélogramme \\(\\iff \\overrightarrow{AD} = \\overrightarrow{BC}\\)." },
       predict: { q: "\\(A(1 \\,;\\, 2)\\) et \\(B(4 \\,;\\, 6)\\). Les composantes du vecteur \\(\\overrightarrow{AB}\\) sont…", choices: ["(3 ; 4)", "(−3 ; −4)", "(5 ; 8)"], good: 0,
         why: "AB = B − A, arrivée moins départ : (4 − 1 ; 6 − 2) = (3 ; 4). Pour aller de A à B : 3 vers la droite, 4 vers le haut." },
       defis: ["A(1 ; 1) est fixe. Glisse la pointe B pour que le vecteur AB ait les composantes (3 ; −2).", "Place B pour que la norme de AB vaille 5, sans aller tout droit (deux composantes non nulles).", "Voici A(0 ; 0), B(5 ; 1) et C(7 ; 4). Place D pour que ABCD soit un parallélogramme."],

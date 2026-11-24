@@ -79,12 +79,16 @@
   };
   Object.assign(ACTIVE, {
     droites: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Pente par deux points : \\(m = \\frac{y_B - y_A}{x_B - x_A}\\) (variation verticale ÷ variation horizontale) : quand x augmente de 1, y augmente de \\(m\\). Deux droites perpendiculaires ont des pentes dont le produit vaut \\(-1\\).", exemple: ["Par \\((0 \\, ; 1)\\) et \\((2 \\, ; 5)\\) : \\(m = \\frac{4}{2} = 2\\)", "Perpendiculaire à \\(y = 3x - 1\\) : pente \\(-\\frac{1}{3}\\)"], piege: "Perpendiculaire à une pente 3 : pente \\(-\\frac{1}{3}\\) (produit \\(-1\\)), pas \\(-3\\)." },
       predict: { q: "Une droite passe par (0 ; 1) et (2 ; 5). Sa pente vaut…", choices: ["2", "4", "1/2"], good: 0, why: "Pente = variation verticale ÷ variation horizontale = (5 − 1) ÷ (2 − 0) = 4 ÷ 2 = 2 : quand x augmente de 1, y augmente de 2." },
       defis: ["Pente de la droite qui passe par (1 ; 3) et (4 ; 9) ?", "La droite y = 2x + h passe par (3 ; 4). Que vaut h ?", "Pente d'une droite perpendiculaire à y = 3x − 1 ? (fraction)"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["(9 − 3) ÷ (4 − 1)", "4 = 2 · 3 + h", "pente · 3 = −1"][s] + tu(x)),
         wins: [W(2, "6 ÷ 3 = 2."), W(-2, "4 = 6 + h, donc h = −2."), W(-1 / 3, "Perpendiculaires : produit des pentes = −1, donc −1/3.")] }),
     },
     droitesinter: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Intersection de deux droites : au point commun, les deux \\(y\\) sont égaux. On égale les deux expressions, on résout en \\(x\\), puis on calcule \\(y\\).", exemple: ["\\(y = x + 1\\) et \\(y = -x + 5\\) : \\(x + 1 = -x + 5\\), donc \\(x = 2\\) et \\(y = 3\\).", "Offres \\(20 + 2x\\) et \\(50 + x\\) : \\(20 + 2x = 50 + x\\), même prix pour 30 km."], piege: "Le point d'intersection a deux coordonnées : une fois \\(x\\) trouvé, calcule \\(y\\)." },
       predict: { q: "Les droites y = x + 1 et y = −x + 5 se coupent pour x = …", choices: ["2", "3", "1"], good: 0, why: "Au point d'intersection, les deux y sont égaux : x + 1 = −x + 5, donc 2x = 4 et x = 2 (puis y = 3)." },
       // Défis repris le 22.11 (« les défis, c'est confusing ») : toujours la même tâche (l'abscisse du point commun),
       // avec le graphique des deux droites ; la réponse tapée place une verticale qui montre les deux y.
@@ -93,12 +97,16 @@
         wins: [W(4, "2 · 4 − 1 = 7 et 4 + 3 = 7 : les droites se coupent en (4 ; 7)."), W(2, "3 · 2 − 2 = 4 et −2 + 6 = 4 : point commun (2 ; 4)."), W(30, "20 + 2 · 30 = 80 CHF et 50 + 30 = 80 CHF : pour 30 km, même prix ; au-delà, B est moins chère.")] }),
     },
     recipaff: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Si \\(f(a) = b\\), alors \\(f^{-1}(b) = a\\) : \\(f^{-1}(b)\\) est le nombre dont l'image vaut \\(b\\), on résout \\(f(x) = b\\). Le point \\((a ; b)\\) du graphique de \\(f\\) devient \\((b ; a)\\) sur celui de \\(f^{-1}\\).", exemple: ["\\(f(x) = 2x + 3\\) : \\(2x + 3 = 11\\), donc \\(f^{-1}(11) = 4\\)", "\\(f(x) = 3x - 6\\) : \\(3x - 6 = 0\\), donc \\(f^{-1}(0) = 2\\)", "\\((2 ; 9)\\) sur \\(f\\) donne \\((9 ; 2)\\) sur \\(f^{-1}\\)"] },
       predict: { q: "f(x) = 2x + 3. Que vaut f⁻¹(11) ?", choices: ["4", "25", "1/11"], good: 0, why: "f⁻¹(11) est le nombre dont l'image vaut 11 : 2x + 3 = 11, donc x = 4. (25, c'est f(11) ; 1/11 n'a rien à voir.)" },
       defis: ["f(x) = 3x − 6. Que vaut f⁻¹(0) ?", "f(x) = 5x + 2. Que vaut f⁻¹(27) ?", "Le point (2 ; 9) est sur le graphique de f. Le point de f⁻¹ d'ordonnée 2 a quelle abscisse ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["3x − 6 = 0", "5x + 2 = 27", "on échange x et y"][s] + tu(x)),
         wins: [W(2, "3x = 6, donc x = 2."), W(5, "5x = 25, donc x = 5."), W(9, "La réciproque échange les coordonnées : (9 ; 2).")] }),
     },
     trigcercle: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Un tour complet mesure \\(2\\pi\\) radians, donc \\(180° = \\pi\\) rad. Le point associé à l'angle \\(\\alpha\\) a pour coordonnées \\((\\cos\\alpha \\, ; \\sin\\alpha)\\). Pour un angle du 2e quadrant, on part de l'angle de référence (120° → 60°) et on met le signe du quadrant.", exemple: ["\\(\\frac{\\pi}{6}\\) rad \\(= \\frac{180°}{6} = 30°\\)", "\\(\\cos 120° = -\\cos 60° = -0{,}5\\)"] },
       predict: { q: "Un demi-tour (180°) vaut combien de radians ?", choices: ["π", "2π", "180"], good: 0, why: "Un tour complet mesure 2π radians (le périmètre du cercle de rayon 1), donc un demi-tour vaut π." },
       defis: ["Combien de degrés vaut π/6 rad ?", "135° = k · π/4. Que vaut k ?", "cos 120° (en décimal) ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["π = 180°, donc π/6 = 180° ÷ 6", "π/4 = 45°", "120° : quadrant 2, angle de référence 60°"][s] + tu(x)),
@@ -123,30 +131,40 @@
         wins: [W(150, "180° − 30° = 150°."), W(120, "180° − 60° = 120° (l'autre est 240°)."), W(225, "45° + 180° = 225°.")] }),
     },
     trigassoc: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(\\sin(180° - \\alpha) = \\sin \\alpha\\) (symétrie par rapport à l'axe vertical : même ordonnée). \\(\\cos(-\\alpha) = \\cos \\alpha\\) (même abscisse). Toujours : \\(\\sin^2 \\alpha + \\cos^2 \\alpha = 1\\).", exemple: ["\\(\\sin \\alpha = 0{,}6\\) : \\(\\sin(180° - \\alpha) = 0{,}6\\)", "\\(\\cos \\alpha = 0{,}8\\) : \\(\\cos(-\\alpha) = 0{,}8\\)", "\\(\\sin \\alpha = 0{,}6\\), \\(\\alpha\\) aigu : \\(\\cos^2 \\alpha = 1 - 0{,}36 = 0{,}64\\), \\(\\cos \\alpha = 0{,}8\\)"], piege: "Avec \\(\\sin^2 \\alpha + \\cos^2 \\alpha = 1\\), choisis le signe selon le quadrant : positif pour un angle aigu." },
       predict: { q: "Si sin α = 0,6, alors sin(180° − α) vaut…", choices: ["0,6", "−0,6", "0,8"], good: 0, why: "α et 180° − α sont symétriques par rapport à l'axe vertical : même ordonnée, donc même sinus." },
       defis: ["cos α = 0,8. Que vaut cos(−α) ?", "sin α = 0,6. Que vaut sin(180° + α) ?", "sin α = 0,6 et α aigu. Que vaut cos α ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["−α : symétrie par rapport à l'axe horizontal", "180° + α : symétrie par rapport au centre", "cos² α = 1 − sin² α"][s] + tu(x)),
         wins: [W(0.8, "Même abscisse, donc cos(−α) = cos α = 0,8."), W(-0.6, "Point opposé : ordonnée opposée, −0,6."), W(0.8, "cos² α = 1 − 0,36 = 0,64, donc cos α = 0,8 (positif, angle aigu).")] }),
     },
     trigeq2: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(h(t) = d + a\\sin(bt)\\) : hauteur moyenne \\(d\\), amplitude \\(a\\) ; maximum \\(d + a\\), minimum \\(d - a\\). Période : \\(\\frac{360°}{b}\\). Le premier maximum arrive quand \\(bt = 90°\\).", exemple: ["\\(h(t) = 4 + 2\\sin(30t)\\) : maximum 6 m, période \\(360 \\div 30 = 12\\) h", "Marée haute : \\(30t = 90\\), donc \\(t = 3\\) h"], piege: "4 m est la hauteur moyenne et 2 m l'amplitude : le maximum est \\(4 + 2 = 6\\) m." },
       predict: { q: "La marée d'un port : h(t) = 4 + 2 sin(30t) (en m). La hauteur maximale est…", choices: ["6 m", "4 m", "2 m"], good: 0, why: "sin vaut au plus 1 : 4 + 2 · 1 = 6 m. (4 m, c'est la hauteur moyenne ; 2 m, l'amplitude.)" },
       defis: ["Période de h, en heures (le sinus fait un tour pour 30t = 360) ?", "Hauteur minimale (en m) ?", "À quelle heure la marée est-elle haute pour la première fois ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["30t = 360", "sin vaut au moins −1", "30t = 90"][s] + tu(x)),
         wins: [W(12, "t = 12 h : deux marées hautes par jour."), W(2, "4 − 2 = 2 m."), W(3, "t = 3 h.")] }),
     },
     triaire: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Aire du triangle : \\(\\frac{1}{2} \\cdot a \\cdot b \\cdot \\sin\\gamma\\), où \\(\\gamma\\) est l'angle entre les côtés \\(a\\) et \\(b\\). Un parallélogramme est fait de deux tels triangles : aire \\(a \\cdot b \\cdot \\sin\\gamma\\).", exemple: ["\\(a = 6\\), \\(b = 8\\), \\(\\gamma = 30°\\) : aire \\(= \\frac{1}{2} \\cdot 48 \\cdot \\frac{1}{2} = 12\\).", "Angle droit : \\(\\sin 90° = 1\\), aire \\(\\frac{1}{2} \\cdot 10 \\cdot 4 = 20\\).", "Parallélogramme 5 et 8, angle 30° : \\(5 \\cdot 8 \\cdot 0{,}5 = 20\\)."] },
       predict: { q: "Un triangle a deux côtés de 6 cm et 8 cm qui forment un angle de 30°. Son aire vaut…", choices: ["12 cm²", "24 cm²", "48 cm²"], good: 0, why: "Aire = ½ · 6 · 8 · sin 30° = ½ · 48 · 0,5 = 12 cm². La hauteur sur le côté 8 vaut 6 · sin 30° = 3." },
       defis: ["Côtés 10 et 4, angle de 90° entre eux : aire ?", "Côtés 6 et 6, angle de 150° : aire ? (sin 150° = 0,5)", "Parallélogramme de côtés 5 et 8, angle de 30° : aire ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["½ · 10 · 4 · sin 90°", "½ · 6 · 6 · 0,5", "5 · 8 · sin 30° (deux triangles)"][s] + tu(x)),
         wins: [W(20, "sin 90° = 1 : on retrouve base × hauteur ÷ 2 = 20."), W(9, "½ · 36 · 0,5 = 9."), W(20, "40 · 0,5 = 20.")] }),
     },
     statfreq: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Fréquence \\(= \\frac{\\text{effectif}}{\\text{effectif total}}\\) (souvent en \\(\\%\\)). Diagramme circulaire : angle \\(= \\text{fréquence} \\cdot 360°\\).", exemple: ["10 sur 40 : \\(25\\,\\%\\), angle \\(0{,}25 \\cdot 360° = 90°\\)", "Secteur de 72° : \\(\\frac{72}{360} = 20\\,\\%\\)"] },
       predict: { q: "Sur 40 personnes, 10 répondent « oui ». La fréquence de « oui » est…", choices: ["25 %", "10 %", "40 %"], good: 0, why: "Fréquence = effectif ÷ total = 10 ÷ 40 = 0,25 = 25 %." },
       defis: ["Angle du secteur « oui » (10 sur 40) dans un diagramme circulaire ?", "30 % de 60 personnes, c'est combien de personnes ?", "Un secteur mesure 72° : quel pourcentage ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["0,25 · 360°", "0,3 · 60", "72 ÷ 360"][s] + tu(x)),
         wins: [W(90, "Un quart du tour : 90°."), W(18, "0,3 · 60 = 18."), W(20, "72 ÷ 360 = 0,2 = 20 %.")] }),
     },
     stats: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Moyenne : la somme des valeurs divisée par l'effectif. Médiane : la valeur du milieu de la série triée. Une valeur extrême tire la moyenne, pas la médiane.", exemple: ["Série 2 ; 3 ; 100 : moyenne 35, médiane 3.", "Notes 4 et 5, moyenne visée 5 : somme \\(3 \\cdot 5 = 15\\), 3e note 6."] },
       predict: { q: "Série 2 ; 3 ; 100. Quel nombre représente le mieux une valeur « typique » ?", choices: ["la médiane, 3", "la moyenne, 35", "l'étendue, 98"], good: 0, why: "La valeur extrême 100 tire la moyenne vers le haut (35) ; la médiane (3) n'est pas influencée." },
       defis: ["Moyenne de 4 ; 5 ; 9 ?", "Médiane de 7 ; 1 ; 4 ; 10 ; 3 ?", "Notes 4 et 5 : quelle 3e note pour une moyenne de 5 ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["(4 + 5 + 9) ÷ 3", "on trie : 1 ; 3 ; 4 ; 7 ; 10", "il faut une somme de 3 · 5 = 15"][s] + tu(x)),

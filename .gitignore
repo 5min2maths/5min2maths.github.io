@@ -18,3 +18,4 @@ tools/chantier_*.md
 !src/pwa/icon-*.png
 tests/_syntaxe.html
 tests/_defis.html
+tests/_retiens_audit.html
