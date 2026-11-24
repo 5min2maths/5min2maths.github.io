@@ -1,0 +1,54 @@
+<link rel="stylesheet" href="../src/style.css"><!doctype html><meta charset="utf-8"><div id="app"></div><pre id="o"></pre>
+<script>window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}
+/* Téléphone simulé dans le cadre : pas de pointeur fin, donc clavier de l'app, pas de focus automatique. */
+if (location.search) { const mm = window.matchMedia.bind(window); window.matchMedia = (q) => (/pointer: *fine/.test(q) ? { matches: false, addEventListener() {}, addListener() {} } : mm(q)); }</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script>
+<script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script>
+/* 25.11 (commentaire de l'enseignant : « la calculatrice saute après la première touche ») : le clavier de l'app ne doit
+   pas bouger (plus de 2 px) après la 1re, la 2e et la 5e touche, à 380 × 700 et 360 × 640, pour chaque sorte de clavier
+   (calcul, liste de solutions avec ∅, intervalles, résultat seul) et dans un problème en plusieurs parties. */
+const W = (ms) => new Promise((r) => setTimeout(r, ms));
+if (!location.search) {
+  const res = {}, o = document.getElementById("o"); o.textContent = "en cours";
+  const sizes = [[380, 700], [360, 640]];
+  addEventListener("message", (e) => {
+    if (!e.data || !e.data.kpStable) return; res[e.data.size] = e.data.lines;
+    if (Object.keys(res).length === sizes.length) { const all = [].concat(...Object.values(res)); const bad = all.filter((l) => /ÉCHEC/.test(l)); o.textContent = (bad.length ? "ÉCHEC " + bad.length + " clavier(s) qui bougent" : "ok clavier immobile pendant la saisie (" + all.length + " cas)") + "\n" + all.join("\n"); }
+  });
+  for (const [w, h] of sizes) { const f = document.createElement("iframe"); f.width = w; f.height = h; f.style.border = "0"; f.src = location.pathname.split("/").pop() + "?" + w + "x" + h; document.body.appendChild(f); }
+} else {
+  const size = location.search.slice(1), lines = [];
+  const findQ = (ids, lv, ok) => { for (const id of ids) for (let s = 1; s < 400; s++) { let q; try { q = Engine.build(id, lv, s); } catch (e) { continue; } if (ok(q)) return q; } return null; };
+  (async () => {
+    state = Engine.newState({ system: "CH", grade: 13, track: "college", minutes: 5 }); Engine.autoInit(state);
+    /* Codes fixes (rapide) ; recherche seulement si le générateur a changé. */
+    const code = (c, ok, ids, lv) => { const q = Engine.fromCode(c); return q && ok(q) ? q : findQ(ids, lv, ok); };
+    const cases = [
+      ["calcul", Engine.fromCode("fracmul-3-7"), ["1", "/", "2", "+", "4", "/"]],
+      ["liste ∅", code("eq2fact-1-1", (q) => q.spec.kind === "set" && !q.parts, ["eq2fact", "eq2"], 1), ["3", ";", "-", "2", "∅"]],
+      ["intervalles", code("ineq-2-1", (q) => (q.spec.kind === "solset" || q.spec.kind === "ineq") && !q.parts, ["ineq", "domaine", "sysineq"], 2), ["[", "2", ";", "5", "]"]],
+      ["résultat", code("puiss-1-1", (q) => q.spec.final && !q.parts, ["puiss"], 1), ["1", "2", "3", "4", "5"]],
+      ["problème", code("fracmul-4-1", (q) => q.parts && q.parts.length > 1, ["fracmul", "fracadd", "eq1", "prio"], 4), ["1", "2", "/", "3", "4"]],
+    ];
+    for (const [nom, q, keys] of cases) {
+      if (!q) { lines.push(size + " " + nom + " : ÉCHEC question introuvable"); continue; }
+      scrollTo(0, 0);
+      renderQuestion(q, { eyebrow: "Test", onDone: () => 0, onNext: () => 0, onNotYet: () => 0, onEasy: () => 0 });
+      await W(120);
+      const inp = document.getElementById("ans") || document.getElementById("p0");
+      inp.scrollIntoView({ block: "center" }); await W(120); /* l'élève a touché le champ : il est à l'écran */
+      const kp = document.getElementById("kp"), top = () => kp.getBoundingClientRect().top, t0 = top(), d = [];
+      for (let i = 0; i < 5; i++) {
+        const b = kp.querySelector('button[data-k="' + keys[i] + '"]');
+        if (!b) { d.push("touche " + keys[i] + " absente"); break; }
+        b.click(); await W(i === 0 || i === 1 || i === 4 ? 210 : 20);
+        if (i === 0 || i === 1 || i === 4) d.push(Math.round((top() - t0) * 10) / 10);
+      }
+      const bad = d.some((x) => typeof x !== "number" || Math.abs(x) > 2);
+      lines.push(size + " " + nom + " (" + q.code + ") : " + (bad ? "ÉCHEC " : "") + "écarts après 1, 2, 5 touches = " + d.join(" / ") + " px");
+    }
+    parent.postMessage({ kpStable: 1, size, lines }, "*");
+  })().catch((e) => parent.postMessage({ kpStable: 1, size, lines: [size + " EXC " + e.message] }, "*"));
+}
+</script>
