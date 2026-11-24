@@ -794,6 +794,42 @@ details.solfull summary { padding: 11px 0; margin-top: 0; }
 .grades li.todo .g-ic { filter: grayscale(1); opacity: .5; }
 .grades li.todo .g-n, .grades li.todo .g-at { color: var(--ink-soft); }
 .keypad .k-sub { opacity: 1; color: var(--ink-soft); }
+/* 24.11 : accueil « Séance d'abord » — bouton en premier, format en une ligne, mode en petit interrupteur avec ⓘ */
+.sess-first .sess-go { order: -1; }
+.sess-first .sess-modes { display: flex; align-items: center; gap: 6px; }
+.sess-first .sess-modes .sess-seg { flex: 1; }
+.sess-first .sess-modes .sess-seg button { padding: 6px 10px; font-size: 0.85rem; min-height: 36px; }
+.sess-first .sess-info { min-width: 40px; min-height: 40px; }
+.sess-first .sess-fmt { font-size: 0.9rem; }
+.sess-first .sess-subs[hidden] { display: none; }
+.sess-first .now-line #nowpick { background: none; border: none; box-shadow: none; padding: 2px 0; min-height: 32px; text-align: left; text-decoration: underline; font-weight: 600; color: var(--blue); }
+
+/* ---------------- Espace parent (24.11, src/parents.js) ---------------- */
+.par-list { margin: 4px 0 8px; padding: 0; list-style: none; display: grid; gap: 4px; }
+.par-list li { overflow-wrap: anywhere; }
+.par-row { flex-wrap: wrap; gap: 8px; }
+.par-kids { flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.par-kids button { padding: 6px 14px; min-height: 36px; font-size: 0.95rem; box-shadow: none; transform: none; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.par-input { width: 100%; box-sizing: border-box; font: inherit; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--card); color: var(--ink); }
+.par-old { border-left: 6px solid var(--warn); }
+.par-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; max-width: 320px; }
+.par-days span { display: flex; align-items: center; justify-content: center; aspect-ratio: 1; border-radius: 8px; border: 1.5px solid var(--line); font-weight: 700; font-size: 0.85em; color: var(--ink-soft, var(--ink)); }
+.par-days span.on { background: var(--ok); border-color: var(--ok); color: #fff; }
+.par-fete { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 10px; background: var(--ok-soft, transparent); border: 1.5px solid var(--ok); }
+.par-fete > span { font-size: 1.4em; line-height: 1; }
+.par-pb > summary { cursor: pointer; list-style: revert; }
+.par-pb[open] > summary { margin-bottom: 8px; }
+.par-step { display: grid; gap: 6px; margin-top: 8px; }
+.par-hints { display: grid; gap: 8px; }
+.par-hint { padding: 8px 10px; border-left: 3px solid var(--blue); background: var(--blue-soft, transparent); border-radius: 6px; overflow-wrap: anywhere; }
+.par-diag { padding: 8px 10px; border-radius: 8px; border: 1.5px dashed var(--warn); }
+.par-fold > summary { cursor: pointer; font-weight: 700; }
+.par-fold[open] > summary { margin-bottom: 6px; }
+.par-bets { display: flex; flex-wrap: wrap; gap: 6px; }
+.par-bets span { padding: 4px 10px; border: 1.5px solid var(--line); border-radius: 999px; }
+.par-week .figwrap, .par-solve .figwrap, .par-fun .figwrap { max-width: 100%; overflow-x: auto; }
+.par-solve, .par-fun, .par-week { min-width: 0; }
+.par-qr > summary { cursor: pointer; font-weight: 700; }
 
 </style>
 <script>
@@ -803,12 +839,12 @@ window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "glo
 </head>
 <body>
 <main id="app" aria-live="polite"></main>
-<script src="app.js?v=0d4a322bac"></script>
+<script src="app.js?v=abe57eb26d"></script>
 <script>
 (function () {
   // Chargement par niveau (24.11). Paquets requis : le niveau de l'élève et les niveaux inférieurs de sa filière ;
   // France et liens de consultation (#q-, #l-, #auteur) : tout. Puis le reste en arrière-plan (hors ligne complet).
-  var V = "0d4a322bac", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
+  var V = "abe57eb26d", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
   window.__packs = loaded; // pour les tests (tools/test_paquets.py)
   function need(p) {
     if (!p || p.system === "FR") return K.slice();

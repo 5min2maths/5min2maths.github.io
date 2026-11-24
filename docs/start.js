@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "0d4a322bac"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "abe57eb26d"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -19,7 +19,7 @@ function statsAsked() { try { return !!localStorage.getItem("m2m-stats"); } catc
 function statsSet(v) { try { localStorage.setItem("m2m-stats", v ? "oui" : "non"); } catch (e) {} }
 function errCanSend() {
   if (!statsOk()) return false; /* 24.11 : accord */
-  try { return !!VOTE_ENDPOINT && location.protocol === "https:" && !/claude/.test(location.hostname) && !isAuthor() && !/^#auteur/.test(location.hash); }
+  try { return !!VOTE_ENDPOINT && location.protocol === "https:" && !/claude/.test(location.hostname) && !isAuthor() && !/^#(auteur|parent)/.test(location.hash); }
   catch (e) { return false; }
 }
 // Nom court d'un fichier : « https://x.github.io/app/index.html?v=2 » → « index.html » ; « https://x.github.io/ » (code
@@ -567,7 +567,7 @@ function screenHome() {
   // 22.11 : accueil à cases (maquette design/maquette_accueil.html) ; chaque case ouvre une page « ← Accueil ».
   panels.carnet = () => carnetCard(true) || `<div class="card flat stack"><div class="eyebrow">📕 Carnet d'erreurs</div><p class="small muted">Vide : bravo ! Chaque question ratée viendra s'y ranger, pour que tu puisses la réussir plus tard.</p></div>`;
   // 22.11 : « Ma fiche » (src/fiche.js) : une fiche par chapitre derrière Progrès. Retirée le 23.11 (branche archive/fiche) : inactif sans fiche.js.
-  panels.prog = () => `${weekCard()}${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${typeof evacomCard === "function" ? evacomCard() : ""}${themeMapCard()}${compsCard()}`;
+  panels.prog = () => `${weekCard()}${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${typeof evacomCard === "function" ? evacomCard() : ""}${themeMapCard()}${compsCard()}${typeof parentCard === "function" ? parentCard() : ""}`; /* 24.11 : espace parent (src/parents.js) */
   if (!panels[homeTab]) homeTab = "today";
   const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted">${gradeName(state.profile)}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
   if (homeTab !== "today") {
@@ -591,12 +591,12 @@ function screenHome() {
     h(`<div class="hub">${head}
     ${eloBanner()}
     ${statsCard()}${banner}
-    <div class="card stack sess-card">
-      <div class="seg sess-seg" role="tablist"><button type="button" data-m="classe" aria-pressed="${mode === "classe"}">🎒 En classe</button><button type="button" data-m="libre" aria-pressed="${mode === "libre"}">🧭 Libre</button></div>
-      <div class="small muted sess-sub sess-subs"><span class="${mode === "classe" ? "on" : ""}">Suit le chapitre que tu travailles en classe, avec des révisions.</span><span class="${mode === "libre" ? "on" : ""}">Tous les sujets de ton année, à ton rythme.</span></div>
+    <div class="card stack sess-card sess-first"> <!-- 24.11 : « Séance d'abord » (choix de l'enseignant) : le bouton en premier, le reste discret -->
+      <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${paused ? "Nouvelle séance" : done ? "Encore une séance" : mode === "classe" ? "Ma séance du jour" : "Mon défi du jour"}</button>
       ${mode === "classe" ? `<div class="sess-fmt"><span class="sess-fmt-t"><b class="fmt-lab">${FORMATS[fmt].label}</b><span class="small muted fmt-txt">${FORMATS[fmt].text}${doneLab ? " · séance faite ✓" : ""}</span></span><button type="button" class="btn-sec small" id="other" aria-label="Changer de format">🔁<span class="chg-t"> Changer</span></button></div>
         <div class="now-line">${nowLine}</div>` : ""}
-      <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${paused ? "Nouvelle séance" : done ? "Encore une séance" : mode === "classe" ? "Ma séance du jour" : "Mon défi du jour"}</button>
+      <div class="sess-modes"><div class="seg sess-seg" role="tablist"><button type="button" data-m="classe" aria-pressed="${mode === "classe"}">🎒 En classe</button><button type="button" data-m="libre" aria-pressed="${mode === "libre"}">🧭 Libre</button></div><button type="button" class="btn-ghost small sess-info" id="sessinfo" aria-label="En classe ou Libre : explication" aria-expanded="false">ⓘ</button></div>
+      <div class="small muted sess-sub sess-subs" hidden id="sessexp"><span class="${mode === "classe" ? "on" : ""}">Suit le chapitre que tu travailles en classe, avec des révisions.</span><span class="${mode === "libre" ? "on" : ""}">Tous les sujets de ton année, à ton rythme.</span></div>
     </div>
     <div class="doors">
       ${door("prob", svgI(TI.prob), "Problème", "", dots.prob ? "!" : "")}
@@ -636,6 +636,7 @@ function screenHome() {
   on("resno", () => { delete state.resume; save(); screenHome(); });
   on("bkgo", screenBackup);
   on("bkno", () => { UI.backupLater = day(); uiSave(); screenHome(); });
+  on("sessinfo", () => { const e = document.getElementById("sessexp"), b = document.getElementById("sessinfo"); if (!e) return; e.hidden = !e.hidden; b.setAttribute("aria-expanded", String(!e.hidden)); });
   on("statsoui", () => { statsSet(true); toast("Merci ! Tu peux changer d'avis dans les Réglages."); screenHome(); });
   on("statsnon", () => { statsSet(false); toast("C'est noté : rien n'est envoyé. Modifiable dans les Réglages."); screenHome(); });
   on("statsplus", () => screenPrivacy(screenHome));
@@ -1904,7 +1905,7 @@ function deviceId() {
 }
 function ping(ev, extra = {}) {
   try {
-    if (!VOTE_ENDPOINT || location.protocol !== "https:" || /claude/.test(location.hostname) || isAuthor() || location.hash === "#auteur" || !statsOk()) return;
+    if (!VOTE_ENDPOINT || location.protocol !== "https:" || /claude/.test(location.hostname) || isAuthor() || location.hash === "#auteur" || /^#parent/.test(location.hash) || !statsOk()) return; /* 24.11 : rien depuis l'espace parent */
     if (ev === "open") { if (localStorage.getItem("m2m-ping") === day()) return; localStorage.setItem("m2m-ping", day()); }
     fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ ev, dev: deviceId(), date: day(), ...extra }) }).catch(() => {});
   } catch (e) {}
@@ -2283,6 +2284,7 @@ function screenSummary() {
 // Consultation d'une question par son code : adresse …/#q-eq2disc-2-k3f (rien n'est enregistré).
 function showCode() {
   /* Mentions légales (24.11) : lien direct …/#confidentialite, à donner aux parents */
+  if (typeof parentRoute === "function" && parentRoute()) return true; /* 24.11 : espace parent, …/#parent=<code> (src/parents.js) */
   if (location.hash === "#confidentialite") { screenLegal(() => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); }); return true; }
   // Consultation d'une leçon (active ou rappel) : …/#l-vitesse (lien du tableau de suivi, 15.11).
   const ml = /^#l-([a-z0-9]+)$/.exec(location.hash);
