@@ -5,7 +5,7 @@
 # Une page de test écrit son résultat dans un <pre> ; « ÉCHEC », « FAIL » ou « EXC » = échec.
 cd "$(dirname "$0")/.." || exit 1
 # 23.11 (machine saturée : plusieurs agents lançaient leurs tests en même temps) : une seule série de tests à la fois
-# sur toute la machine (verrou partagé par tous les worktrees), et 3 navigateurs en parallèle au plus.
+# sur toute la machine (verrou partagé par tous les worktrees), et 2 navigateurs en parallèle au plus (24.11 : 4 cœurs, charge 9 avec les agents).
 # 24.11 : la série de la nuit est restée bloquée 7 h. Un Chromium (snap) qui ne répond plus ne se laisse pas tuer
 # (AppArmor refuse le signal), donc « timeout » attendait sans fin ; et ce Chromium avait hérité du verrou, ce qui
 # bloquait aussi toutes les séries suivantes. Désormais : Chromium ne reçoit pas le verrou (9>&-), une page sans
@@ -44,7 +44,7 @@ s = open("build.py").read(); JS = eval(re.search(r"JS = (\[.*?\])", s, re.S).gro
 open("tests/_syntaxe.html", "w").write('<!doctype html><meta charset="utf-8"><main id="app"></main><script>window.MathJax={typesetPromise:()=>Promise.resolve()};</script>' + "".join('<script src="../src/%s"></script>' % f for f in JS) + '<pre id="log">fin</pre>')
 PY
 SYN=$(timeout -k 5 90 chromium --headless --disable-gpu --no-sandbox --enable-logging=stderr --v=0 --virtual-time-budget=8000 --dump-dom "file://$PWD/tests/_syntaxe.html" 2>&1 >/dev/null 9>&- | grep -o '"Uncaught [^"]*", source: [^ ]* ([0-9]*)' | sed 's#file://[^ ]*/src/##')
-R=$(echo "$L" | xargs -P 3 -I{} bash -c 'un {}' 9>&-)
+R=$(echo "$L" | xargs -P 2 -I{} bash -c 'un {}' 9>&-)
 [ -n "$SYN" ] && R=$(printf '%s\n%s' "$R" "$(echo "$SYN" | sed 's/^/syntaxe : ÉCHEC /')")
 echo "$R" | grep -c "" | xargs echo "pages testées :"
 echo "$R" | grep "ÉCHEC" || echo "aucun échec"
