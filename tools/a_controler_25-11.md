@@ -66,9 +66,14 @@ Registre : tools/niveau.json ; colonne « Audit de niveau » du suivi.
   (plan LS, hors EVACOM) ? ; ∜1250 du test 1.2 au programme ? ; manquent : nommer un solide d'après son patron,
   expressions équivalentes. **À relire avant l'ouverture à la 11LS** (colonne Contrôlé).
 
-### Tes 3 commentaires d'hier soir (agent en cours)
+### Tes 3 commentaires d'hier soir — traités
 
-- fracmul-3-3an (valeurs mal choisies), clavier qui « saute » après la 1re touche, ensemble vide (touche ∅).
+- **fracmul-3-3an** : 4/5 + 5/4 · 5/6 = 221/120 (rien ne se simplifie) ; maintenant le produit se simplifie en croix,
+  dénominateur commun ≤ 12, résultat lisible (ex. 1/2 + 8/5 · 5/3 = 19/6) ; deux autres formes de niveau 3 nettoyées.
+- **Clavier qui saute** : l'aperçu apparaissait à la 1re touche et poussait le clavier de 44–46 px ; sa place est
+  maintenant réservée (≈ 17 px de hauteur utile en moins, mais plus aucun saut). Test kp_stable (0 px).
+- **Ensemble vide** : touche ∅ sur le clavier des listes de solutions ; ∅, { }, « aucune » acceptés ; consignes
+  « touche ∅ (ou écris « aucune ») » ; test vide.html sur les 16 notions concernées.
 ### MP 3e–4e — fait (tools/niveau_mp34.md)
 
 - Étalon : examen genevois MP TASV, domaine spécifique, sessions 2021–2024 (champ = chapitres A–J).
