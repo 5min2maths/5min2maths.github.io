@@ -108,7 +108,7 @@ Même standard (valeurs tirées, 2 à 4 parts enchaînées, 2 indices, corrigé 
 `factor` v2 (11e) : la part « combien d'entiers avec E(x) > 0 » (tableau de signes à trois facteurs, hors programme
 de 11e) est remplacée par un paramètre : pour quel c l'équation n'a plus que deux solutions (c = m²p²).
 
-## 3e lot (24.11 soir) : 36 notions de plus
+## 3e lot (24.11 soir) : 41 notions de plus
 
 Même standard. Toutes à valeurs tirées ; parts vérifiées par `tools/audit_defis.py`.
 
@@ -150,14 +150,19 @@ Même standard. Toutes à valeurs tirées ; parts vérifiées par `tools/audit_d
 | reladd (10e) | randonnée fixe | 4 étapes tirées : point le plus haut, altitude finale, dénivelé positif, variation |
 | rel (11e) | −6 / 9 / −11 fixe | températures tirées : hausse, minuit, moyenne (fraction), écart |
 | fracops (11e) | 1/2 − 3/4 · 2/3 fixe | A = a/b − c/d · e/f et B = (a/b − c/d) · e/f tirés, A − B |
+| puiss (11e) | pliages 0,1 mm fixe | pliages : épaisseur tirée, pliages pour dépasser une porte / le Jet d'eau / la tour Eiffel / le Cervin ; 2ᵃ · 4ᵇ ÷ 8ᶜ = 2ᵐ et 9ᵖ · 27ᵠ ÷ 3ʳ = 3ⁿ |
+| sci (11e) | hydrogène, rayon terrestre | distance d'une planète : exposant en m, durée du trajet de la lumière (s, min) |
+| divcrit (1re) | 74■■ fixe | ab■■ tiré : nombres divisibles par 45 (combien, le plus grand), par 36 |
+| racenc (1re) | √70 fixe | √n tiré : entier inférieur, valeur au dixième par encadrement, entiers m avec k < √m < k + g |
+| tradexpr (1re) | x = 4 fixe | x tiré (négatif possible) : double de la somme, somme du double, carré de la différence, différence des carrés |
 
 ## Ce qui reste (valeurs fixes, à reprendre)
 
-Environ 30 notions gardent un défi à valeurs fixes : `croissance`, `lnexp`,
+Environ 25 notions gardent un défi à valeurs fixes : `croissance`, `lnexp`,
 `translin`, `absval`, `domaine`, `ensembles`, `morceaux`, `transf`, `racinv`, `fracrat`, MP (`pvectmp`, `eqparam`,
 `ratden`, `vabs`, `valint`), et 9e–10e
-(`divcrit`, `monomes`, `ordgr`, `puiss`, `racenc`,
-`reduire`, `sci`, `tabval`, `tradexpr`, `valnum`), plus `algopy`, `proba2`, `probcond`, `tauxevol`,
+(`monomes`, `ordgr`,
+`reduire`, `tabval`, `valnum`), plus `algopy`, `proba2`, `probcond`, `tauxevol`,
 `vect3e` (sans classe). Liste à jour : relancer `tools/audit_defis.py`.
 
 ## À contrôler

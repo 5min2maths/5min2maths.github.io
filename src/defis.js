@@ -1694,6 +1694,76 @@ const DEFIS = (() => {
           "a) " + M("A = " + F(a, b) + " - " + fx((c * e) / (d * f)) + " = " + fx(A)) + ". b) " + M("B = " + fx(a / b - c / d) + " \\cdot " + F(e, f) + " = " + fx(B)) + ". c) " + M(fx(A) + " - \\left(" + fx(B) + "\\right) = " + fx(A - B)) + ".");
       },
     ],
+    /* ---------- 11e : puissances ---------- */
+    puiss: [
+      () => { /* pliages : croissance exponentielle */
+        const e = pk([0.05, 0.08, 0.1, 0.12, 0.2]), n = ri(4, 7), m = ri(9, 12), [nom, H] = pk([["la hauteur d'une porte (2 m)", 2], ["le Jet d'eau de Genève (140 m)", 140], ["la tour Eiffel (330 m)", 330], ["le Cervin (4'478 m)", 4478]]);
+        let k = 0; while (2 ** k * e <= H * 1000) k++;
+        return P("Une feuille de " + M(D(e) + " \\text{ mm}") + " d'épaisseur double d'épaisseur à chaque pliage (on imagine qu'on peut la plier autant qu'on veut).",
+          [["a) Nombre de couches après " + n + " pliages", 2 ** n], ["b) Épaisseur après " + m + " pliages (mm, au dixième)", 2 ** m * e, 0.1], ["c) Combien de pliages pour dépasser " + nom + " ?", k]],
+          ["Après n pliages : 2ⁿ couches, donc une épaisseur de 2ⁿ · " + T(e) + " mm.",
+           "c) Convertis en mm : il faut 2ⁿ · " + T(e) + " > " + nbT(H * 1000) + ", soit 2ⁿ > " + T(r1((H * 1000) / e)) + ". Essaie des puissances de 2 (2¹⁰ = 1'024)."],
+          "a) " + M("2^{" + n + "} = " + 2 ** n) + ". b) " + M("2^{" + m + "} \\cdot " + D(e) + " = " + nb(2 ** m) + " \\cdot " + D(e) + " \\approx " + D(r1(2 ** m * e))) + " mm. c) " + M("2^{" + (k - 1) + "} \\cdot " + D(e) + " \\approx " + nb(r1(2 ** (k - 1) * e)) + " \\le " + nb(H * 1000)) + " mais " + M("2^{" + k + "} \\cdot " + D(e) + " \\approx " + nb(r1(2 ** k * e)) + " > " + nb(H * 1000)) + " mm : " + M(k) + " pliages.");
+      },
+      () => { /* tout écrire avec la même base */
+        let a, b, c, p, q, r;
+        do { a = ri(2, 9); b = ri(2, 6); c = ri(2, 6); p = ri(2, 7); q = ri(1, 5); r = ri(3, 12); } while (a + 2 * b - 3 * c === 0 || Math.abs(a + 2 * b - 3 * c) === 1 || 2 * p + 3 * q - r === 0 || Math.abs(2 * p + 3 * q - r) === 1 || a + 2 * b - 3 * c === 2 * p + 3 * q - r);
+        const e1 = a + 2 * b - 3 * c, e2 = 2 * p + 3 * q - r;
+        return P("On écrit chaque nombre comme une puissance d'un nombre premier : " + M("A = \\frac{2^{" + a + "} \\cdot 4^{" + b + "}}{8^{" + c + "}} = 2^m") + " et " + M("B = \\frac{9^{" + p + "} \\cdot 27^{" + q + "}}{3^{" + r + "}} = 3^n") + ".",
+          [["a) " + M("m") + " (négatif possible)", e1], ["b) " + M("n"), e2]],
+          ["4 = 2², 8 = 2³, 9 = 3², 27 = 3³. (aᵖ)^q = a^(p·q).",
+           "Produit : on additionne les exposants ; quotient : on soustrait."],
+          "a) " + M("\\frac{2^{" + a + "} \\cdot 2^{" + 2 * b + "}}{2^{" + 3 * c + "}} = 2^{" + e1 + "}") + ". b) " + M("\\frac{3^{" + 2 * p + "} \\cdot 3^{" + 3 * q + "}}{3^{" + r + "}} = 3^{" + e2 + "}")+ ".");
+      },
+    ],
+    /* ---------- 11e : notation scientifique (vitesse de la lumière) ---------- */
+    sci: [
+      () => {
+        const [pl, man, ex] = pk([["Mars", 2.28, 8], ["Jupiter", 7.78, 8], ["Saturne", 1.43, 9], ["Uranus", 2.87, 9], ["Neptune", 4.5, 9], ["Mercure", 5.79, 7], ["Vénus", 1.08, 8]]);
+        const dkm = man * 10 ** ex, t = dkm / 3e5;
+        return P("La planète " + pl + " est à environ " + M(D(man) + " \\cdot 10^{" + ex + "} \\text{ km}") + " du Soleil. La lumière parcourt " + M("3 \\cdot 10^5 \\text{ km}") + " par seconde.",
+          [["a) Cette distance en m s'écrit " + M("a \\cdot 10^n") + " : que vaut " + M("n") + " ?", ex + 3], ["b) Durée du trajet de la lumière du Soleil à " + pl + " (s, à l'unité)", t, 1], ["c) Cette durée en minutes (au dixième)", t / 60, 0.1]],
+          ["1 km = 10³ m : multiplie par 10³, donc ajoute 3 à l'exposant.",
+           "Temps = distance ÷ vitesse : divise les nombres devant (" + T(man) + " ÷ 3) et soustrais les exposants (" + ex + " − 5)."],
+          "a) " + M(D(man) + " \\cdot 10^{" + ex + "} \\cdot 10^3 = " + D(man) + " \\cdot 10^{" + (ex + 3) + "}") + " m. b) " + M("\\frac{" + D(man) + " \\cdot 10^{" + ex + "}}{3 \\cdot 10^5} \\approx " + D(r2c((man / 3) * 10 ** (ex - 5 - Math.floor(Math.log10(t))))) + " \\cdot 10^{" + Math.floor(Math.log10(t)) + "} \\approx " + nb(Math.round(t))) + " s. c) " + M(nb(Math.round(t)) + " \\div 60 \\approx " + D(r1(t / 60))) + " min.");
+      },
+    ],
+    /* ---------- 1re Collège : critères de divisibilité ---------- */
+    divcrit: [
+      () => {
+        let a, b; do { a = ri(1, 9); b = ri(0, 9); } while ((a + b) % 9 === 0);
+        const ok45 = [], ok36 = [];
+        for (let x = 0; x <= 9; x++) for (let y = 0; y <= 9; y++) { const N = 1000 * a + 100 * b + 10 * x + y; if (N % 45 === 0) ok45.push(N); if (N % 36 === 0) ok36.push(N); }
+        return P("On cherche les nombres de quatre chiffres " + M(a + "\\," + b + "\\,■\\,■") + " (les deux derniers chiffres sont à trouver).",
+          [["a) Combien de ces nombres sont divisibles par 45 ?", ok45.length], ["b) Le plus grand d'entre eux", Math.max(...ok45)], ["c) Combien sont divisibles par 36 ?", ok36.length]],
+          ["45 = 5 · 9 (5 et 9 n'ont pas de diviseur commun) : le nombre doit finir par 0 ou 5 ET la somme de ses chiffres doit être un multiple de 9.",
+           "36 = 4 · 9 : les deux derniers chiffres forment un multiple de 4, et la somme des chiffres est un multiple de 9. Teste les multiples de 4 de 00 à 96."],
+          "a) Unités 0 ou 5, puis somme des chiffres multiple de 9 : " + ok45.map(nb).join(" ; ") + ", soit " + M(ok45.length) + ". b) " + M(nb(Math.max(...ok45))) + ". c) " + ok36.map(nb).join(" ; ") + " : " + M(ok36.length) + " nombres.");
+      },
+    ],
+    /* ---------- 1re Collège : encadrer une racine ---------- */
+    racenc: [
+      () => {
+        let n; do { n = ri(20, 300); } while (Number.isInteger(Math.sqrt(n)) || Math.abs(Math.sqrt(n) * 10 - Math.round(Math.sqrt(n) * 10) - 0.5) < 0.05);
+        const k = Math.floor(Math.sqrt(n)), g = ri(2, 4);
+        return P("On étudie " + M("\\sqrt{" + n + "}") + " sans calculatrice.",
+          [["a) Entier juste en dessous de " + M("\\sqrt{" + n + "}"), k], ["b) " + M("\\sqrt{" + n + "}") + " au dixième (encadre avec les carrés de " + k + ",1 ; " + k + ",2…)", Math.sqrt(n), 0.1], ["c) Combien d'entiers " + M("m") + " vérifient " + M(k + " < \\sqrt{m} < " + (k + g)) + " ?", (k + g) ** 2 - k * k - 1]],
+          [k + "² = " + k * k + " et " + (k + 1) + "² = " + (k + 1) ** 2 + ". Pour le dixième, calcule les carrés des nombres " + k + ",1 ; " + k + ",2 ; … jusqu'à dépasser " + n + ".",
+           "Au dixième : compare aussi " + n + " au carré du nombre « du milieu » (…,…5) pour savoir s'il faut arrondir vers le haut. c) Élève au carré : " + k * k + " < m < " + (k + g) ** 2 + "."],
+          "a) " + M(k * k + " < " + n + " < " + (k + 1) ** 2) + " : " + M(k) + ". b) " + M("\\sqrt{" + n + "} \\approx " + D(r1(Math.sqrt(n)))) + " (" + M(D(r1(Math.sqrt(n)) - 0.05) + "^2 < " + n + " < " + D(r1(Math.sqrt(n)) + 0.05) + "^2") + "). c) " + M(k * k + " < m < " + (k + g) ** 2) + " : de " + M(k * k + 1) + " à " + M((k + g) ** 2 - 1) + ", soit " + M((k + g) ** 2 - k * k - 1) + " entiers.");
+      },
+    ],
+    /* ---------- 1re Collège : traduire une phrase en expression ---------- */
+    tradexpr: [
+      () => {
+        let x, a, b; do { x = R.nz(-6, 9); a = ri(2, 9); b = ri(2, 9); } while (x === b || x === a || x === -a || Math.abs(x) === b);
+        return P("Un nombre " + M("x") + " vaut " + M(x) + ".",
+          [["a) Le double de la somme de " + M("x") + " et " + M(a), 2 * (x + a)], ["b) La somme du double de " + M("x") + " et de " + M(a), 2 * x + a], ["c) Le carré de la différence entre " + M("x") + " et " + M(b), (x - b) ** 2], ["d) La différence entre le carré de " + M("x") + " et le carré de " + M(b), x * x - b * b]],
+          ["Le premier mot de la phrase dit la DERNIÈRE opération : « le double de la somme » = 2 · ( … + … ).",
+           "« Le carré de la différence » = ( … − … )² ; « la différence des carrés » = …² − …². Attention aux parenthèses autour de " + x + (x < 0 ? " (négatif)" : "") + "."],
+          "a) " + M("2 \\cdot (" + x + " + " + a + ") = " + 2 * (x + a)) + ". b) " + M("2 \\cdot " + pr(x) + " + " + a + " = " + (2 * x + a)) + ". c) " + M("(" + x + " - " + b + ")^2 = " + pr(x - b) + "^2 = " + (x - b) ** 2) + ". d) " + M(pr(x) + "^2 - " + b + "^2 = " + x * x + " - " + b * b + " = " + (x * x - b * b)) + ".");
+      },
+    ],
   };
 })();
 // Texte simple : milliers avec ' (indices et étiquettes).
