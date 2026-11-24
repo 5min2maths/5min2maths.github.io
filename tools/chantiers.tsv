@@ -6,7 +6,7 @@ A	Lots « notion complète » (pas à pas, erreurs typiques, contextes, valeurs)
 V	Leçons actives (devine, manipule, retiens) pour chaque notion	Pédagogie	5	en cours	70 %	23.11	9e, 10e (partiel), 11e, 1re et 2e Collège, MP 2e faites ; voir % dans Synthèse	compléter 10e et MP 1re
 K	Figures à manipuler (bibliothèque tactile manip.js)	Pédagogie	5	en cours	55 %	24.11	20 leçons en « glisse sur la figure » (+ cercle de Thalès, urne, taxis, sommet de parabole, pente)	étendre selon les retours ; contrôle du rendu
 U	Exercices riches et tests de préparation (pas du drill)	Pédagogie	4	en cours	70 %	23.11	9e, 10e, 11e, 1re Collège, 2e Collège (14 banques), MP 1re et MP 2e (partiel)	MP : chapitres restants ; contrôle d'un sujet par niveau
-I	« Trouve l'erreur »	Pédagogie	5	en cours	60 %	24.11	+ 8 formes : 11e Thalès, Pythagore, puissances, probabilités, pente ; 1re trigonométrie, systèmes, sommet	étendre aux autres chapitres des testeurs
+I	« Trouve l'erreur »	Pédagogie	5	fait	90 %	24.11	≈ 50 formes « trouve l'erreur » de la 9e à la 2e Collège (liste : tools/trouve_erreur.md)	relecture des formulations ; éviter le doublon avec les « trouve l'erreur » des exercices riches
 J	Estimation, Fermi, questions curieuses	Pédagogie	6	fait	100 %	21.11	61 questions curieuses, 5 familles (src/curieux.js)	nouveaux lots si les élèves aiment
 W	Générateurs à réponses 0 ou ±1	Qualité	7	en cours	60 %	23.11	filtre de trivialité et corrections au fil des niveaux (relatifs, 2e Collège)	audit tests/trivial.html, polynômes et bijection
 X	Formes sur figure (repère, lecture de graphique)	Qualité	7	fait	90 %	24.11	45 formes « lecture sur figure » (repère, tableaux, graphiques, systèmes, affine, 2e degré, fonctions de référence)	contrôle de quelques figures dans la galerie
