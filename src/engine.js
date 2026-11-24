@@ -476,10 +476,12 @@ const Engine = {
        niveau 1 est un automatisme de 9e–11e (« (−4) · 2 », « 3/4 = 24/? », « (x − 8)(x + 1) = 0 », « f(5) pour f(x) = −2x + 3 ») ;
        les épreuves CFPT (base Maurizio) commencent au niveau 2 (chaînes de fractions, puissances à changer de base, systèmes
        à coefficients quelconques). En MP, le niveau 1 tire le niveau 2 ; le niveau 2 ne monte pas (la MP n'est pas le
-       Collège, UPC ci-dessous ne s'applique pas à la filière mp). Les notions propres au PEE MP gardent leur niveau 1. */
+       Collège, UPC ci-dessous ne s'applique pas à la filière mp). Les notions propres au PEE MP gardent leur niveau 1,
+       de même que reduire, idrem, factor, sci, scicalc et racprop : leurs questions de niveau 1 sont celles qui ouvrent les épreuves
+       CFPT de MP 1re (Test S1.1 Q7, Test S1.3 Q1 « factorisations directes », Récit 2 ex. 1). */
     const UPMP = {
-      12: ["rel", "arith", "fracadd", "fracmul", "fracsimp", "fracops", "puiss", "rac", "premiers", "divcrit", "pctvar", "reduire", "distrib",
-        "parenth", "idrem", "factor", "formule", "eq1", "eqfrac", "probeq", "eq2", "eq2fact", "sys2", "sysprob", "pyth", "pythfig", "pythrec",
+      12: ["prio", "rel", "arith", "fracadd", "fracmul", "fracsimp", "fracconv", "fracops", "puiss", "rac", "premiers", "divcrit", "pctvar",
+        "monomes", "distrib", "parenth", "formule", "eq1", "eqfrac", "probeq", "eq2", "eq2fact", "sys2", "sysprob", "pyth", "pythfig", "pythrec",
         "thales", "angles", "cercthales", "geocomb"],
       13: ["affine", "modaff", "affzero", "droitesinter"],
     };
