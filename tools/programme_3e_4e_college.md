@@ -150,8 +150,8 @@ Restent pour la 4e : `normale`, `stats`/`quartiles` au Collège (M4C04), algèbr
 4. **Combinatoire et probabilités (3e, M3C05)** : `combi`, `probaxiomes`, `probarbre`.
 5. **Intégration (4e, M4C01)** — fait le 24.11 : `primitives`, `integrale`, `aireint`, `volrev` ; R : `intparties`, `intsubst`.
 6. **ln et exp (4e, M4C02)** — fait le 24.11 : `lnexp` (avec tangente et extremum, une partie de `etudelnexp`), `croissance` ; R : `eqdiff`.
-7. **Probabilités 2 et statistique (4e, M4C04)** — fait le 24.11 : `condbayes` (conditionnelles et Bayes), `varalea`, `binomiale` ; reste `normale`, ouvrir `stats`, `quartiles` au Collège.
-8. **Algèbre linéaire (4e, M4C03)** : `matrices`, `translin`, `syslin`, `appllin`, `bases`.
+7. **Probabilités 2 et statistique (4e, M4C04)** — fait le 24.11 : `condbayes` (conditionnelles et Bayes), `varalea`, `binomiale` ; puis (agent greste) `normale` (sans table, règle 68-95-99,7) et `stats`, `quartiles` ouverts à la 4e (`CH: [15]`).
+8. **Algèbre linéaire (4e, M4C03)** — fait le 24.11 (agent greste) : `matrices` (avec Cramer, donc `syslin` inclus), `translin` ; reste `appllin`, `bases`.
 9. **Renforcé (4e)** : `cplxalg`, `cplxtrig`, `cplxeq`, `suitearith`, `suitegeom`, `serie`.
 
 Outils à prévoir : le calculateur (`src/expr.js`) comprend depuis le 23.11 `sin`, `cos`, `tan`, `exp` (réponses du type « 3cos(3x) ») ; il faudra des réponses vectorielles (triplets : déjà possibles avec `pair` à 3 valeurs), des matrices (à créer) et des nombres complexes (à créer : `i`).

@@ -79,7 +79,9 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
   eqabs: ["eq1"], eqbic: ["eq2disc"], eqirrmp: ["eq2disc"], eqratmp: ["fracrat", "eq2disc"], puisrat: ["puiss", "rac"], logdef: ["puiss"], logprop: ["logdef"],
   eqexp: ["logdef"], eqlog: ["logprop"], croissexp: ["eqexp"], volmp: ["pyth"], similmp: ["volmp"],
   coordmp: ["pyth"], vectmp: ["coordmp"], scalmp: ["vectmp"], droiteparam: ["vectmp"], ineqmp: ["eq1", "eq2disc"], fctmp: ["fimg"], polymp: ["factor", "eq2disc"],
-  sinusmp: ["trigfn"], explogfn: ["eqexp", "logdef"] };
+  sinusmp: ["trigfn"], explogfn: ["eqexp", "logdef"],
+  // 24.11 (chantier G, agent greste) : MP 4e (projection, position de droites, fonctions rationnelles) ; 4e Collège (algèbre linéaire, loi normale)
+  projmp: ["scalmp"], posdroites: ["droiteparam"], fratmp: ["fracrat", "ineqmp"], matrices: ["sys2"], translin: ["matrices"], normale: ["varalea", "stats"], stats: ["diagr"], quartiles: ["diagr"] };
 // Programme du jour : le format change d'un jour à l'autre ; l'équilibre se fait sur 7 jours.
 // 22.11 : textes courts (une ligne sur téléphone : pas de saut quand on change de format).
 const FORMATS = {
@@ -98,7 +100,8 @@ const harmos = (system, grade) => (system === "FR" ? grade + 2 : grade);
 function itemRating(profile, id, d) {
   const n = NOTIONS.find((x) => x.id === id);
   // Niveau propre à la notion : l'année où elle apparaît au CO / Collège. Reprise plus tard en MP : demi-écart en plus.
-  const pl = placeOf(n, profile) || n.CH || n.MP || n.FR, base = profile.system === "CH" && n.CH ? n.CH[0] : pl[0];
+  /* 24.11 : Math.min, pour une notion ouverte au Collège après la MP (stats, quartiles : 4e Collège, MP 2e) */
+  const pl = placeOf(n, profile) || n.CH || n.MP || n.FR, base = profile.system === "CH" && n.CH ? Math.min(n.CH[0], pl[0]) : pl[0];
   const g = base + Math.max(0, pl[0] - base) / 2;
   return 700 + (harmos(profile.system, g) - 8) * 150 + 40 + (d - 1) * 130;
 }
