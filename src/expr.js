@@ -40,6 +40,8 @@ const Expr = (() => {
         else if (["sin", "cos", "tan", "exp"].includes(w)) toks.push({ t: "fn", v: w });
         else if (w === "e" && !/[a-z]/i.test(s[j] || "")) toks.push({ t: "const", v: "e" });
         else if (w === "pi") toks.push({ t: "const", v: "pi" });
+        // 24.11 (4e Collège, ln et exp) : dans un mot fait seulement de x et de e (« xe^x »), e est la constante e.
+        else if (/^[xe]+$/.test(w) && w.includes("x")) for (const ch of w) toks.push(ch === "e" ? { t: "const", v: "e" } : { t: "var", v: ch });
         else for (const ch of w) toks.push({ t: "var", v: ch }); // xy = x·y
         i = j; continue;
       }

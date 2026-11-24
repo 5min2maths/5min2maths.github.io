@@ -6,3 +6,7 @@ const THEME_LABEL = {"CO":{"9C01":"1. Écritures décimale et fractionnaire déc
 // 22.11 : ordre des notions propres au lycée français (src/fr_lycee.js), 1re puis Tle spécialité. Ajouté à la main :
 // à reporter dans tools/referentiels.py si ce fichier est régénéré.
 ORDRE.FR = {"suitedef":1000,"suitearith":1001,"suitegeo":1002,"suitesomme":1003,"pscal":1004,"expfn":1005,"probtot":1006,"vaesp":1007,"suitelim":1008,"binom":1009}; // 23.11 : 1re/Tle après la 2nde (fr_2nde.js)
+// 24.11 : 4e du Collège (src/ch4c_ana.js), chapitres Sésamath Ma4. Ajouté à la main (comme ORDRE.FR ci-dessus) : à reporter
+// dans tools/referentiels.py si ce fichier est régénéré (le script lit déjà ch4c_ana.js et ses codesMATU).
+Object.assign(ORDRE.MATU, {"primitives":200,"integrale":201,"aireint":202,"volrev":203,"lnexp":210,"croissance":211,"condbayes":230,"varalea":231,"binomiale":232});
+Object.assign(ORDRE_THEME.MATU, {"primitives":"M4C01","integrale":"M4C01","aireint":"M4C01","volrev":"M4C01","lnexp":"M4C02","croissance":"M4C02","condbayes":"M4C04","varalea":"M4C04","binomiale":"M4C04"});

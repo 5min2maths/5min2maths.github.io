@@ -124,15 +124,33 @@ Fichier unique `src/ch3c_ana.js` (chargé après `ch_mp2.js`, avant `riche.js` e
 
 Pour l'agent France : programme de 1re spécialité (taux de variation, nombre dérivé, tangente, dérivées usuelles, somme / produit / quotient, variations, extremums) = `tauxvar`, `nbderive`, `derivref`, `derivregles`, `derivprodquot`, `tangente`, `variations` ; Tle = `derivcomp`, `optimderiv`. Il suffit d'ajouter `FR: [année, …]` à ces notions (dans `ch3c_ana.js`, tableau `NEW`).
 
+### Notions de 4e créées le 24.11 (agent college4)
+
+Fichier `src/ch4c_ana.js` (paquet de chargement « 15 », chargé après `ch3c_ana.js`). Même standard que la 3e. Rangement : `ORDRE.MATU` et `ORDRE_THEME.MATU` complétés à la main en fin de `src/ordre.js` (chapitres M4C01, M4C02, M4C04) ; `tools/referentiels.py` lit déjà le fichier.
+
+| id | Libellé | Chapitre | Compétences (matu) |
+|---|---|---|---|
+| `primitives` | Primitives | M4C01 | 4.AN.01a–c |
+| `integrale` | Intégrale définie | M4C01 | 4.AN.02a–c, 4.AN.03a |
+| `aireint` | Aires avec une intégrale | M4C01 | 4.AN.05a, 05b |
+| `volrev` | Volume d'un corps de révolution | M4C01 | 4.AN.05c |
+| `lnexp` | Logarithme et exponentielle | M4C02 | 4.AN.06a–d |
+| `croissance` | Modèles de croissance exponentielle | M4C02 | 4.AN.07a–c |
+| `condbayes` | Probabilités conditionnelles et Bayes (id ≠ `probcond` du lycée français) | M4C04 | 4.PS.02a–d |
+| `varalea` | Variable aléatoire : espérance, variance | M4C04 | 4.PS.03a, 03b |
+| `binomiale` | Loi binomiale (id ≠ `binom` du lycée français) | M4C04 | 4.PS.03c, 03d |
+
+Restent pour la 4e : `normale`, `stats`/`quartiles` au Collège (M4C04), algèbre linéaire (M4C03, réponses matricielles à créer), et le renforcé (MA2).
+
 ## 5. Liste priorisée des notions à créer
 
 1. **Dérivation (3e, M3C03)** — fait le 23.11 : `tauxvar`, `nbderive`, `derivref`, `derivregles`, `derivprodquot`, `derivcomp`, `tangente`, `variations`, `optimderiv`.
 2. **Limites et asymptotes (3e, M3C02)** : `limites`, `limitinf`, `asymptotes`, `continuite` — prérequis du nombre dérivé et de l'étude de fonctions rationnelles ; puis `etudefct`, `derivseconde` (R), `derivth`.
 3. **Géométrie vectorielle de l'espace (3e, M3C06)** : `vect3d`, `droiteparam`, `plans`, `posrel`, `pscal`, `distances`, `normal` ; R : `colin`, `pvect`. Gros chapitre (120 exercices Sésamath) : figures 3D en SVG à prévoir (perspective cavalière, comme `solides` au CO).
 4. **Combinatoire et probabilités (3e, M3C05)** : `combi`, `probaxiomes`, `probarbre`.
-5. **Intégration (4e, M4C01)** : `primitives`, `integrale`, `aireint`, `volrev` ; R : `intparties`, `intsubst`.
-6. **ln et exp (4e, M4C02)** : `lnexp`, `etudelnexp`, `croissance` ; R : `eqdiff`.
-7. **Probabilités 2 et statistique (4e, M4C04)** : `probcond`, `bayes`, `varalea`, `binomiale`, `normale` ; ouvrir `stats`, `quartiles` au Collège.
+5. **Intégration (4e, M4C01)** — fait le 24.11 : `primitives`, `integrale`, `aireint`, `volrev` ; R : `intparties`, `intsubst`.
+6. **ln et exp (4e, M4C02)** — fait le 24.11 : `lnexp` (avec tangente et extremum, une partie de `etudelnexp`), `croissance` ; R : `eqdiff`.
+7. **Probabilités 2 et statistique (4e, M4C04)** — fait le 24.11 : `condbayes` (conditionnelles et Bayes), `varalea`, `binomiale` ; reste `normale`, ouvrir `stats`, `quartiles` au Collège.
 8. **Algèbre linéaire (4e, M4C03)** : `matrices`, `translin`, `syslin`, `appllin`, `bases`.
 9. **Renforcé (4e)** : `cplxalg`, `cplxtrig`, `cplxeq`, `suitearith`, `suitegeom`, `serie`.
 

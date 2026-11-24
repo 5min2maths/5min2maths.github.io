@@ -93,6 +93,7 @@ HORS = re.compile(r"Énoncer|Esquisser|Maîtriser une démonstration|Justifier|R
 def main():
     cur = (ROOT / "src/curriculum.js").read_text() + (ROOT / "src/gen3.js").read_text()
     cur += (ROOT / "src/ch3c_ana.js").read_text()  # 23.11 : notions de 3e Collège (dérivation), codesMATU sur la ligne de l'id
+    cur += (ROOT / "src/ch4c_ana.js").read_text()  # 24.11 : notions de 4e Collège (intégration, ln-exp, probabilités 2)
     ids = re.findall(r'\{ id: "(\w+)"', cur)
     labels = dict(re.findall(r'\{ id: "(\w+)", theme: "\w+", label: "((?:[^"\\]|\\.)*)"', cur))
     # notions fines (src/gen3.js) : motifs déclarés avec la notion (codes = CO, codesMATU, codesMP)

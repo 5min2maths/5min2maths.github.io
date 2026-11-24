@@ -7,7 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent
 SRC = ROOT / "src"
-JS = ["curriculum.js", "ordre.js", "expr.js", "figures.js", "geo.js", "generators.js", "gen2.js", "gen3.js", "variantes.js", "competences.js", "ch11_prop.js", "ch11_litt.js", "ch1c_eq.js", "ch1c_sys.js", "ch11_no.js", "ch11_gm.js", "ch11_ang.js", "ch11_thales.js", "ch11_proba.js", "ch1c_no.js", "ch1c_fct.js", "ch1c_alg.js", "ch1c_f2b.js", "ch11_no2.js", "ch1c_geo.js", "ch1c_trig.js", "ch_mp1.js", "ch11_fct.js", "ch10_no.js", "ch_mp2.js", "fr_lycee.js", "fr_2nde.js", "ch3c_ana.js", "fr_college.js", "riche.js", "riche_11b.js", "riche_11c.js", "riche_1c.js", "riche_sys1c.js", "riche_9.js", "riche_10.js", "riche_mp2.js", "riche_mp1.js", "riche_2c.js", "curieux.js", "histoire.js", "badges.js", "backup.js", "qr.js", "lessons.js", "lessons2.js", "dyn.js", "manip.js", "active.js", "act_prop11.js", "act_litt11.js", "act_eq1c.js", "act_sys1c.js", "act_ch11b.js", "act_ch11c.js", "act_9a.js", "act_9b.js", "act_10a.js", "act_10b.js", "act_11d.js", "act_1c.js", "act_mp2.js", "act_2c.js", "act_manip.js", "act_manip2.js", "sujet.js", "qcm.js", "engine.js", "app.js"]
+JS = ["curriculum.js", "ordre.js", "expr.js", "figures.js", "geo.js", "generators.js", "gen2.js", "gen3.js", "variantes.js", "competences.js", "ch11_prop.js", "ch11_litt.js", "ch1c_eq.js", "ch1c_sys.js", "ch11_no.js", "ch11_gm.js", "ch11_ang.js", "ch11_thales.js", "ch11_proba.js", "ch1c_no.js", "ch1c_fct.js", "ch1c_alg.js", "ch1c_f2b.js", "ch11_no2.js", "ch1c_geo.js", "ch1c_trig.js", "ch_mp1.js", "ch11_fct.js", "ch10_no.js", "ch_mp2.js", "fr_lycee.js", "fr_2nde.js", "ch3c_ana.js", "ch4c_ana.js", "fr_college.js", "riche.js", "riche_11b.js", "riche_11c.js", "riche_1c.js", "riche_sys1c.js", "riche_9.js", "riche_10.js", "riche_mp2.js", "riche_mp1.js", "riche_2c.js", "curieux.js", "histoire.js", "badges.js", "backup.js", "qr.js", "lessons.js", "lessons2.js", "dyn.js", "manip.js", "active.js", "act_prop11.js", "act_litt11.js", "act_eq1c.js", "act_sys1c.js", "act_ch11b.js", "act_ch11c.js", "act_9a.js", "act_9b.js", "act_10a.js", "act_10b.js", "act_11d.js", "act_1c.js", "act_mp2.js", "act_2c.js", "act_manip.js", "act_manip2.js", "sujet.js", "qcm.js", "engine.js", "app.js"]
 
 head = """<title>5minutes2mathsparjour</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -51,6 +51,7 @@ pwa_head = ('<link rel="manifest" href="manifest.webmanifest">\n<meta name="them
 def paquet(f):
     if f.startswith("fr_"): return "fr"
     if f == "ch3c_ana.js": return "14"
+    if f.startswith("ch4c"): return "15"  # 24.11 : 4e du Collège
     if f == "riche_mp2.js": return ""  # définit RX, outils communs aussi utilisés par riche_2c et riche_mp1
     if f.startswith(("ch_mp", "riche_mp")) or f == "act_mp2.js": return "mp"
     if f.startswith(("ch1c", "riche_1c", "riche_sys1c")) or f in ("act_1c.js", "act_eq1c.js", "act_sys1c.js"): return "12"
@@ -59,7 +60,7 @@ def paquet(f):
     if f in ("riche_9.js", "act_9a.js", "act_9b.js"): return "9"
     if f in ("riche_10.js", "act_10a.js", "act_10b.js", "ch10_no.js"): return "10"
     return ""
-ORDRE_P = ["9", "10", "11", "12", "13", "14", "mp", "fr"]
+ORDRE_P = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"]
 PAQ = {k: [f for f in JS if paquet(f) == k] for k in ORDRE_P}
 app_js = (SRC / "app.js").read_text()
 assert 'const BUILD = "dev";' in app_js
@@ -73,7 +74,7 @@ loader = """<script src="app.js?v=%(v)s"></script>
   function need(p) {
     if (!p || p.system === "FR") return K.slice();
     var g = +p.grade || 9, r = [];
-    ["9", "10", "11", "12", "13", "14"].forEach(function (k) { if (+k <= g) r.push(k); });
+    ["9", "10", "11", "12", "13", "14", "15"].forEach(function (k) { if (+k <= g) r.push(k); });
     if (p.track === "mp") r.push("mp");
     return r;
   }

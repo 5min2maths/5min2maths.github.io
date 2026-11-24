@@ -49,10 +49,10 @@ async def scenario(port, url):
         tous = None
         for _ in range(100):
             tous = val(await ev("Object.keys(window.__packs).sort().join(',')"))
-            if tous and len(tous.split(",")) == 8:
+            if tous and len(tous.split(",")) == 9:
                 break
             await asyncio.sleep(0.2)
-        ok(tous and len(tous.split(",")) == 8, "nouvel élève : les 8 paquets chargés en arrière-plan (" + str(tous) + ")")
+        ok(tous and len(tous.split(",")) == 9, "nouvel élève : les 9 paquets chargés en arrière-plan (" + str(tous) + ")")  # 24.11 : paquet 15 (4e Collège)
 
         # 2. élève de 11e
         await ev(mc.ETAT_HABITUE)
@@ -66,6 +66,9 @@ async def scenario(port, url):
         # 3. changement de classe (2e Collège)
         r = val(await ev("ensurePacks({ system: 'CH', grade: 13, track: 'college' }).then(() => { const ids = ['expo', 'eqrat', 'polydiv']; return ids.map((id) => { const q = Engine.build(id, 2, 5); return q && (q.q || q.parts) ? 1 : 0; }).join(''); })"))
         ok(r == "111", "changement de classe : questions de 2e Collège construites (" + str(r) + ")")
+        # 24.11 : 4e du Collège (paquet 15)
+        r4 = val(await ev("ensurePacks({ system: 'CH', grade: 15, track: 'college' }).then(() => { const ids = ['primitives', 'lnexp', 'binomiale']; return ids.map((id) => { const q = Engine.build(id, 2, 5); return q && (q.q || q.parts) ? 1 : 0; }).join('') + (window.__packs['15'] ? 'p' : ''); })"))
+        ok(r4 == "111p", "4e Collège : paquet 15 chargé, questions construites (" + str(r4) + ")")
 
         # 4. lien vers une question d'un autre niveau
         await ev("localStorage.clear(), 1")
