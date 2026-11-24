@@ -20,3 +20,6 @@ Object.assign(ORDRE_THEME.MATU, {"vect3d":"M3C06","colin":"M3C06","droite3d":"M3
 // fonctions (M3C03), combinatoire et probabilités (M3C05). Ajouté à la main : à reporter dans tools/referentiels.py si régénéré.
 Object.assign(ORDRE.MATU, {"limites":105.1,"limitinf":105.2,"asymptotes":105.3,"continuite":105.4,"derivseconde":114.1,"etudefct":114.2,"combi":120,"probaxiomes":121,"probarbre":122});
 Object.assign(ORDRE_THEME.MATU, {"limites":"M3C02","limitinf":"M3C02","asymptotes":"M3C02","continuite":"M3C02","derivseconde":"M3C03","etudefct":"M3C03","combi":"M3C05","probaxiomes":"M3C05","probarbre":"M3C05"});
+// 25.11 (agent c4plus) : intégration par parties et par substitution (M4C01), étude ln/exp et équations différentielles (M4C02). Ajouté à la main.
+Object.assign(ORDRE.MATU, {"intparties":204,"intsubst":205,"etudelnexp":212,"eqdiff":213});
+Object.assign(ORDRE_THEME.MATU, {"intparties":"M4C01","intsubst":"M4C01","etudelnexp":"M4C02","eqdiff":"M4C02"});
