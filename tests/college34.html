@@ -13,7 +13,7 @@
 <script src="../src/engine.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_manip.js"></script>
 <pre id="out">en cours</pre>
 <script>
-const out = [], ids = location.hash ? location.hash.slice(1).split(",") : ["tauxvar", "nbderive", "derivref", "derivregles", "derivprodquot", "derivcomp", "tangente", "variations", "optimderiv"]; let bad = 0;
+const out = [], ids = location.hash ? location.hash.slice(1).split(",") : ["tauxvar", "nbderive", "derivref", "derivregles", "derivprodquot", "derivcomp", "tangente", "variations", "optimderiv", "limites", "limitinf", "asymptotes", "continuite", "derivseconde", "etudefct", "combi", "probaxiomes", "probarbre"]; let bad = 0;
 const fail = (m) => { bad++; if (bad < 3000) out.push("ÉCHEC " + m); };
 // Étapes du pas à pas (23.11) : chaque étape accepte sa propre réponse, quel que soit son type (nombre, expression, ensemble, couple, intervalle).
 const fS0 = (v) => { for (let d = 1; d <= 120; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return d === 1 ? String(Math.round(v)) : Math.round(v * d) + "/" + d; return String(v); };
@@ -91,10 +91,13 @@ for (const id of ids) {
 }
 // Profils 3e et 4e du Collège (grade 14, 15) : catalogue, chapitre, Mathélo.
 const NEW = ["tauxvar", "nbderive", "derivref", "derivregles", "derivprodquot", "derivcomp", "tangente", "variations", "optimderiv"];
+// 24.11 soir : notions de 3e hors dérivation (limites, étude, combinatoire, probabilités) et leur chapitre Sésamath Ma3.
+const NEW2 = { limites: "2. Limites et continuité", limitinf: "2. Limites et continuité", asymptotes: "2. Limites et continuité", continuite: "2. Limites et continuité", derivseconde: "3. Dérivation", etudefct: "3. Dérivation", combi: "5. Combinatoire et probabilités", probaxiomes: "5. Combinatoire et probabilités", probarbre: "5. Combinatoire et probabilités" };
+NEW.push(...Object.keys(NEW2));
 for (const g of [14, 15]) {
   const p = { system: "CH", grade: g, track: "college" }, cat = Engine.catalog(p), cur = cat.filter((c) => c.current).map((c) => c.id);
   if (!SYSTEMS.CH.grades.some(([x]) => x === g)) fail("classe " + g + " absente de SYSTEMS");
-  if (g === 14) { NEW.forEach((id) => { if (!cur.includes(id)) fail(id + " pas « de l'année » en 3e"); const th = Engine.themeLabel(Engine.themeKey(p, id), p); if (th !== "3. Dérivation") fail(id + " chapitre " + th); }); }
+  if (g === 14) { NEW.forEach((id) => { if (!cur.includes(id)) fail(id + " pas « de l'année » en 3e"); const th = Engine.themeLabel(Engine.themeKey(p, id), p); if (th !== (NEW2[id] || "3. Dérivation")) fail(id + " chapitre " + th); }); }
   if (cat.some((c) => c.id === "f2expr" && c.current)) fail("notion de 1re « de l'année » en " + (g - 11) + "e");
   const st = Engine.newState(p); Engine.autoInit(st); if (!Object.keys(st.notions).length) fail("aucune notion en " + g);
   out.push((g - 11) + "e : " + cat.length + " notions, " + cur.length + " de l'année (" + cur.join(", ") + ") ; Mathélo de départ " + st.elo.r + " · " + eloLabel(p, st.elo.r));

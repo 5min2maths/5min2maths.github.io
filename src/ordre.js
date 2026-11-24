@@ -13,3 +13,7 @@ Object.assign(ORDRE_THEME.MATU, {"primitives":"M4C01","integrale":"M4C01","airei
 // 24.11 (agent greste) : algèbre linéaire (M4C03), loi normale, et statistique descriptive ouverte à la 4e (M4C04). Ajouté à la main.
 Object.assign(ORDRE.MATU, {"matrices":220,"translin":221,"appllin":222,"stats":233,"quartiles":234,"normale":235});
 Object.assign(ORDRE_THEME.MATU, {"matrices":"M4C03","translin":"M4C03","appllin":"M4C03","stats":"M4C04","quartiles":"M4C04","normale":"M4C04"});
+// 24.11 soir (agent c3ana) : 3e du Collège (src/ch3c_ana.js), limites et continuité (M3C02), dérivée seconde et étude de
+// fonctions (M3C03), combinatoire et probabilités (M3C05). Ajouté à la main : à reporter dans tools/referentiels.py si régénéré.
+Object.assign(ORDRE.MATU, {"limites":105.1,"limitinf":105.2,"asymptotes":105.3,"continuite":105.4,"derivseconde":114.1,"etudefct":114.2,"combi":120,"probaxiomes":121,"probarbre":122});
+Object.assign(ORDRE_THEME.MATU, {"limites":"M3C02","limitinf":"M3C02","asymptotes":"M3C02","continuite":"M3C02","derivseconde":"M3C03","etudefct":"M3C03","combi":"M3C05","probaxiomes":"M3C05","probarbre":"M3C05"});

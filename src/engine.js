@@ -72,6 +72,9 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
   // 23.11 : dérivation (3e Collège, src/ch3c_ana.js)
   tauxvar: ["fimg"], nbderive: ["tauxvar"], derivref: ["puiss"], derivregles: ["derivref"], derivprodquot: ["derivregles"], derivcomp: ["derivregles", "compo"],
   tangente: ["nbderive", "droites"], variations: ["derivregles", "ineq2"], optimderiv: ["variations"],
+  // 24.11 soir : limites, asymptotes, continuité, dérivée seconde, étude, combinatoire, probabilités (3e Collège, src/ch3c_ana.js)
+  limites: ["fracrat", "factor"], limitinf: ["limites"], asymptotes: ["limitinf", "fracrat"], continuite: ["limites", "morceaux"],
+  derivseconde: ["derivregles"], etudefct: ["variations", "asymptotes"], combi: ["denombr"], probaxiomes: ["proba"], probarbre: ["probaxiomes"],
   // 24.11 : 4e Collège (src/ch4c_ana.js) : intégration, ln et exp, probabilités 2
   primitives: ["derivregles"], integrale: ["primitives"], aireint: ["integrale"], volrev: ["integrale"], lnexp: ["log", "derivcomp"], croissance: ["expo", "log"],
   condbayes: ["proba"], varalea: ["proba"], binomiale: ["varalea"],
