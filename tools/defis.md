@@ -108,15 +108,56 @@ Même standard (valeurs tirées, 2 à 4 parts enchaînées, 2 indices, corrigé 
 `factor` v2 (11e) : la part « combien d'entiers avec E(x) > 0 » (tableau de signes à trois facteurs, hors programme
 de 11e) est remplacée par un paramètre : pour quel c l'équation n'a plus que deux solutions (c = m²p²).
 
+## 3e lot (24.11 soir) : 36 notions de plus
+
+Même standard. Toutes à valeurs tirées ; parts vérifiées par `tools/audit_defis.py`.
+
+| Notion | Avant | Après |
+|---|---|---|
+| ineq (1re) | rectangle x / x + 7, 60 cm fixe | rectangle : largeur max (décimale), nombre de largeurs entières, aire max ; location de vélo : seuil où B est moins chère, budget, durées qui vérifient les deux |
+| ineqfrac (1re) | (x − 2)/(x + 3) fixe | 1/(x − a) ≥ 1/(x − b) (piège : pas de produit en croix ; numérateur constant, intervalles) ; coût moyen (F + cn)/n ≤ t : nombre minimal de pièces, deux seuils |
+| exactes (1re) | carré de côté 4 fixe | cube : diagonale de face a√2, diagonale a√3, section a²√2 ; hexagone régulier : distance entre côtés, aire, disque inscrit |
+| modaff (1re) | fitness fixe | trois offres (unité, carte, illimité) : égalité A = B, seuil C < B, nombre d'entrées où B est la moins chère |
+| affzero (1re) | club 60/5/9 et 3x − 7 fixes | deux bougies : même hauteur, hauteur commune, écart des extinctions ; f et g affines : zéro fractionnaire, intersection, entiers où f > 0 et g > 0 |
+| quartiles (MP 2e) | série triée fixe | série de 11 valeurs NON triée : médiane, EIQ, nombre de valeurs extrêmes, médiane sans la valeur aberrante (10 valeurs) |
+| statfreq (MP 2e) | sondage fixe | fréquence, angle, puis équation (c + x)/(n + x) = p % |
+| trigcercle (MP 2e) | 150° fixe | θ tiré : kπ/d, cos θ exact, autre angle de même sinus, de même cosinus |
+| trigassoc (MP 2e) | sin α = 0,6, aigu | sin α = p/h (triplets), quadrant 2–4 : cos α, tan α, sin(180° + α) + cos(180° − α) |
+| trigfn (MP 2e) | 3 sin(2x) + 1 | A sin(bx) + d : période, deux premières solutions de f(x) = d + A/2, nombre de solutions sur [0° ; 360°[ |
+| normale (4e) | 500 g / 5 g fixe | P(μ − k₁σ ≤ X ≤ μ + k₂σ), nombre de paquets au-dessus d'un seuil, nouvelle moyenne pour 2,5 % sous un seuil |
+| binomiale (4e) | 12 billets / 0,8 fixe | n billets, n − 2 places, p tiré : E(X), P(X = n), risque de surréservation (deux termes) |
+| matrices (4e) | 2x + y = 7 fixe | système tiré : det, x et y par Cramer, paramètre m qui annule le déterminant |
+| optimderiv (3e) | feuille 30 × 30 | feuille rectangulaire a × b (x entier) puis feuille carrée de même périmètre ; boîte de conserve de volume V : r, h = 2r, surface |
+| fctmp (MP 4e) | f = 2x + 3, g = x² | (f ∘ g)(x₀), f⁻¹(y₀) fractionnaire, (g ∘ f)(x) = K (deux solutions) |
+| fratmp (MP 4e) | (2x − 6)/(x + 4) | zéro fractionnaire, f(x) = k, entiers où f(x) > a (f − a = constante ÷ dénominateur) |
+| projmp (MP 4e) | u = (4 ; 7), v = (3 ; 4) | triangle ABC : AB · AC, AH, distance CH à (AB), aire |
+| posdroites (MP 4e) | d, g fixes | droites tirées : t, s, m pour qu'elles soient sécantes, cote du point commun |
+| coordmp (MP) | A(1 ; 2), B(4 ; 6) | triangle rectangle (réciproque de Pythagore), centre du cercle circonscrit, aire |
+| volmp (MP 3e) | silo 3 m / 8 m / 4 m | silo tiré : volume, hauteur du grain, gain si demi-boule au lieu du cône |
+| similmp (MP 3e) | verre 12 cm / 0,3 L | verre conique tiré : volume à une hauteur, nombre de verres avec 1 L, hauteur à moitié plein (∛0,5) |
+| euclide (1re) | 9 / 16 cm fixe | hauteur + une projection → autre projection, cathète, périmètre ; cathète + projection → hypoténuse, hauteur, autre cathète (triplets agrandis) |
+| geocomb (1re) | tente 2,5 / 4 / 3 m | tente tirée (triplets × 0,2 à 0,3 m) : hauteur, volume, surface de toile |
+| droitesrem (1re) | 6 / 8 cm fixe | triangle rectangle tiré : rayon circonscrit, distance de C au centre de gravité (c/3), hauteur |
+| droitesinter (MP 2e) | 20 + 1,50/km fixe | agence A donnée par deux courses (pente, ordonnée), agence B : km et prix communs |
+| recipaff (MP 2e) | 0,5x + 12 fixe | forfait par deux factures, f⁻¹(y₀), intersection des graphes de f et f⁻¹ (sur y = x) |
+| condbayes (4e) | détecteur fixe | dépistage : P(+), P(M \| +), puis après un second test positif |
+| varalea (4e) | jeu à deux pièces fixe | dé : P(G > 0), E(G), somme pour un 6 qui rend le jeu équitable |
+| angtri (1re) | pentagone fixe | polygone régulier tiré : angle intérieur, angle BAC, angle entre les diagonales AC et BD (360°/n) |
+| carres (11e) | 196 dalles fixe | n² dalles tirées : côté, aire, dalles à ajouter pour agrandir |
+| decdiv (10e) | repas 67,60 fixe | repas tiré : part, part sans boisson, nombre de boissons (quotient non entier) |
+| decmul (10e) | 4,5 × 3,2 fixe | pièce et prix tirés : aire, prix, prix avec 10 % de chutes |
+| decadd (10e) | Mia 50 CHF fixe | budget, achats et jeu tirés |
+| reladd (10e) | randonnée fixe | 4 étapes tirées : point le plus haut, altitude finale, dénivelé positif, variation |
+| rel (11e) | −6 / 9 / −11 fixe | températures tirées : hausse, minuit, moyenne (fraction), écart |
+| fracops (11e) | 1/2 − 3/4 · 2/3 fixe | A = a/b − c/d · e/f et B = (a/b − c/d) · e/f tirés, A − B |
+
 ## Ce qui reste (valeurs fixes, à reprendre)
 
-Environ 65 notions gardent un défi à valeurs fixes : `ineq`, `ineqfrac`, `euclide`, `exactes`, `geocomb`,
-`droitesinter`, `droitesrem`, `modaff`, `affzero`, `recipaff`, `trigassoc`, `trigcercle`, `trigfn`, `quartiles`,
-`statfreq`, `varalea`, `normale`, `binomiale`, `condbayes`, `optimderiv`, `croissance`, `lnexp`, `matrices`,
-`translin`, `absval`, `domaine`, `ensembles`, `morceaux`, `transf`, `racinv`, `fracrat`, MP (`fctmp`, `fratmp`,
-`projmp`, `pvectmp`, `posdroites`, `coordmp`, `similmp`, `volmp`, `eqparam`, `ratden`, `vabs`, `valint`), et 9e–10e
-(`angtri`, `carres`, `decadd`, `decdiv`, `decmul`, `divcrit`, `fracops`, `monomes`, `ordgr`, `puiss`, `racenc`,
-`reduire`, `rel`, `reladd`, `sci`, `tabval`, `tradexpr`, `valnum`), plus `algopy`, `proba2`, `probcond`, `tauxevol`,
+Environ 30 notions gardent un défi à valeurs fixes : `croissance`, `lnexp`,
+`translin`, `absval`, `domaine`, `ensembles`, `morceaux`, `transf`, `racinv`, `fracrat`, MP (`pvectmp`, `eqparam`,
+`ratden`, `vabs`, `valint`), et 9e–10e
+(`divcrit`, `monomes`, `ordgr`, `puiss`, `racenc`,
+`reduire`, `sci`, `tabval`, `tradexpr`, `valnum`), plus `algopy`, `proba2`, `probcond`, `tauxevol`,
 `vect3e` (sans classe). Liste à jour : relancer `tools/audit_defis.py`.
 
 ## À contrôler
@@ -133,3 +174,8 @@ Environ 65 notions gardent un défi à valeurs fixes : `ineq`, `ineqfrac`, `eucl
 - `trigeq` : solutions en degrés sur [0° ; 360°[ (programme MP en degrés ? sinon passer en radians).
 - `thalesrec` v1 : rapport AE ÷ AC au centième ; avec un décalage de 1 cm sur 120 cm, les deux rapports diffèrent de
   moins d'un centième seulement dans de rares cas (r = 0,25 : 0,25 et 0,26).
+- 3e lot : `trigcercle` a) demande k dans kπ/6 même quand la fraction se simplifie (300° = 10π/6) ; `trigassoc`,
+  `exactes` : réponses exactes (fractions, √) ; `quartiles` : convention Q1 = 3e valeur, Q3 = 9e (comme le niveau 3) ;
+  `binomiale` c) et `optimderiv` (boîte de conserve) : arrondis au dixième à partir des valeurs non arrondies ;
+  `posdroites` : coordonnées parfois grandes (jusqu'à ± 30) ; `condbayes` c) et `recipaff` c) (intersection de f et
+  f⁻¹, parfois négative, hors contexte) : exigeants, à juger ; montants en CHF affichés avec deux décimales (`CHF`).
