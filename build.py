@@ -83,6 +83,7 @@ loader = """<script src="app.js?v=%(v)s"></script>
   function sync() { // recopies faites au chargement par lessons.js et engine.js (rappels et indices des paquets)
     try { if (typeof HINTS_EXTRA !== "undefined") Object.assign(HINTS, HINTS_EXTRA); } catch (e) {}
     try { if (typeof LESSONS_EXTRA !== "undefined") Object.keys(LESSONS_EXTRA).forEach(function (k) { if (typeof LESSONS_V2 === "undefined" || !LESSONS_V2[k]) LESSONS[k] = L_.apply(null, LESSONS_EXTRA[k]); }); } catch (e) {}
+    try { window.dispatchEvent(new Event("m2m-pack")); } catch (e) {} // 24.11 : l'app met à jour une leçon ouverte trop tôt
   }
   window.loadPack = function (k) {
     if (loaded[k]) return Promise.resolve();
