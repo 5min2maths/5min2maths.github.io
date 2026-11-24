@@ -326,7 +326,16 @@
   "plan": "M1C01 · Ma1 Ch1 : PGDC, PPMC, division euclidienne (consolider le CO)",
   "etalon": "tools/niveau_1c.md E1.1",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "9e": {
+    "classe": "9e",
+    "plan": "9C04 · Arithmétique",
+    "etalon": "tools/niveau_910.md § 2, chapitre 4 (9e)",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "rel": {
   "classe": "1re Collège",
@@ -341,6 +350,13 @@
     "etalon": "tools/niveau_11.md § 2, E-1-1",
     "audit": "25.11.2026",
     "verdict": "à valider"
+   },
+   "10e": {
+    "classe": "10e",
+    "plan": "10C01 · Nombres relatifs (4 opérations dans ℤ)",
+    "etalon": "tools/niveau_910.md § 2, chapitre 1 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
    }
   }
  },
@@ -357,6 +373,13 @@
     "etalon": "tools/niveau_11.md § 2, E-1-1",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "10e": {
+    "classe": "10e",
+    "plan": "10C03 · Écriture fractionnaire",
+    "etalon": "tools/niveau_910.md § 2, chapitre 3 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
    }
   }
  },
@@ -365,7 +388,16 @@
   "plan": "CO 10e (pourcentages) : plus au programme de 1re",
   "etalon": "—",
   "audit": "24.11.2026",
-  "verdict": "hors programme"
+  "verdict": "hors programme",
+  "par_classe": {
+   "10e": {
+    "classe": "10e",
+    "plan": "10C03 · Écriture fractionnaire",
+    "etalon": "tools/niveau_910.md § 2, chapitre 3 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "rac": {
   "classe": "1re Collège",
@@ -380,6 +412,13 @@
     "etalon": "tools/niveau_11.md § 2, E-1-4",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "10e": {
+    "classe": "10e",
+    "plan": "10C06 · Puissances et racines",
+    "etalon": "tools/niveau_910.md § 2, chapitre 6 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
    }
   }
  },
@@ -388,7 +427,16 @@
   "plan": "CO 10e (encadrer des racines)",
   "etalon": "—",
   "audit": "24.11.2026",
-  "verdict": "hors programme"
+  "verdict": "hors programme",
+  "par_classe": {
+   "10e": {
+    "classe": "10e",
+    "plan": "10C06 · Puissances et racines",
+    "etalon": "tools/niveau_910.md § 2, chapitre 6 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "à valider"
+   }
+  }
  },
  "sci": {
   "classe": "1re Collège",
@@ -403,6 +451,13 @@
     "etalon": "tools/niveau_11.md § 2, E-1-3",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "10e": {
+    "classe": "10e",
+    "plan": "10C06 · Puissances et racines",
+    "etalon": "tools/niveau_910.md § 2, chapitre 6 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
    }
   }
  },
@@ -419,6 +474,13 @@
     "etalon": "tools/niveau_11.md § 2, E-1-2",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "10e": {
+    "classe": "10e",
+    "plan": "10C06 · Puissances et racines",
+    "etalon": "tools/niveau_910.md § 2, chapitre 6 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "à valider"
    }
   }
  },
@@ -435,6 +497,13 @@
     "etalon": "tools/niveau_11.md § 2, E-1-3",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "10e": {
+    "classe": "10e",
+    "plan": "10C06 · Puissances et racines",
+    "etalon": "tools/niveau_910.md § 2, chapitre 6 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
    }
   }
  },
@@ -466,7 +535,16 @@
   "plan": "M1C01 · Ma1 Ch1 : nombres rationnels, période, fraction ↔ décimal",
   "etalon": "tools/niveau_1c.md E1.5",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "9e": {
+    "classe": "9e",
+    "plan": "9C08 · Écriture fractionnaire dans ℚ⁺",
+    "etalon": "tools/niveau_910.md § 2, chapitre 8 (9e)",
+    "audit": "25.11.2026",
+    "verdict": "corrigé"
+   }
+  }
  },
  "ensembles": {
   "classe": "1re Collège",
@@ -480,14 +558,32 @@
   "plan": "CO 9e (9NO3.03) : prérequis du chapitre Argumenter",
   "etalon": "—",
   "audit": "24.11.2026",
-  "verdict": "hors programme"
+  "verdict": "hors programme",
+  "par_classe": {
+   "9e": {
+    "classe": "9e",
+    "plan": "9C01 · Écritures décimale et fractionnaire",
+    "etalon": "tools/niveau_910.md § 2, chapitre 1 (9e)",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "divcrit": {
   "classe": "1re Collège",
   "plan": "CO 9e (9NO4.02) : prérequis du chapitre Argumenter",
   "etalon": "—",
   "audit": "24.11.2026",
-  "verdict": "hors programme"
+  "verdict": "hors programme",
+  "par_classe": {
+   "9e": {
+    "classe": "9e",
+    "plan": "9C04 · Arithmétique",
+    "etalon": "tools/niveau_910.md § 2, chapitre 4 (9e)",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "tradalg": {
   "classe": "1re Collège",
@@ -551,6 +647,13 @@
     "etalon": "tools/niveau_11.md § 2, E-10-2",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "10e": {
+    "classe": "10e",
+    "plan": "10C11 · Fonctions",
+    "etalon": "tools/niveau_910.md § 2, chapitre 11 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
    }
   }
  },
@@ -609,6 +712,13 @@
     "etalon": "tools/niveau_11.md § 2, E-6-1",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "10e": {
+    "classe": "10e",
+    "plan": "10C09 · Équations",
+    "etalon": "tools/niveau_910.md § 2, chapitre 9 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "corrigé"
    }
   }
  },
@@ -625,6 +735,13 @@
     "etalon": "tools/niveau_11.md § 2, E-6-1",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "10e": {
+    "classe": "10e",
+    "plan": "10C09 · Équations",
+    "etalon": "tools/niveau_910.md § 2, chapitre 9 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
    }
   }
  },
@@ -664,6 +781,13 @@
     "etalon": "tools/niveau_11.md § 2, E-6-2",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "10e": {
+    "classe": "10e",
+    "plan": "10C09 · Équations",
+    "etalon": "tools/niveau_910.md § 2, chapitre 9 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
    }
   }
  },
@@ -726,6 +850,13 @@
     "etalon": "tools/niveau_11.md § 2, E-10-1",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "10e": {
+    "classe": "10e",
+    "plan": "10C11 · Fonctions",
+    "etalon": "tools/niveau_910.md § 2, chapitre 11 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "corrigé"
    }
   }
  },
@@ -756,6 +887,13 @@
     "etalon": "tools/niveau_11.md § 2, E-5-3",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "10e": {
+    "classe": "10e",
+    "plan": "10C07 · Calcul littéral (simple distributivité)",
+    "etalon": "tools/niveau_910.md § 2, chapitre 7 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "corrigé"
    }
   }
  },
@@ -772,6 +910,13 @@
     "etalon": "tools/niveau_11.md § 2, E-5-3",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "10e": {
+    "classe": "10e",
+    "plan": "10C07 · Calcul littéral (simple distributivité)",
+    "etalon": "tools/niveau_910.md § 2, chapitre 7 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "à valider"
    }
   }
  },
@@ -811,6 +956,13 @@
     "etalon": "tools/niveau_11.md § 2, E-5-4",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "10e": {
+    "classe": "10e",
+    "plan": "10C07 · Calcul littéral (simple distributivité)",
+    "etalon": "tools/niveau_910.md § 2, chapitre 7 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "corrigé"
    }
   }
  },
@@ -1053,6 +1205,13 @@
     "etalon": "tools/niveau_11.md § 2, E-2-1",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "10e": {
+    "classe": "10e",
+    "plan": "10C08 · Théorème de Pythagore (sans réciproque)",
+    "etalon": "tools/niveau_910.md § 2, chapitre 8 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "corrigé"
    }
   }
  },
@@ -1069,6 +1228,13 @@
     "etalon": "tools/niveau_11.md § 2, E-2-2",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "10e": {
+    "classe": "10e",
+    "plan": "10C08 · Théorème de Pythagore (sans réciproque)",
+    "etalon": "tools/niveau_910.md § 2, chapitre 8 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "corrigé"
    }
   }
  },
@@ -1137,7 +1303,16 @@
   "plan": "M1C09 · 1.GE.01b : somme des angles",
   "etalon": "tools/niveau_1c.md E9.1",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "9e": {
+    "classe": "9e",
+    "plan": "9C03 · Géométrie du plan",
+    "etalon": "tools/niveau_910.md § 2, chapitre 3 (9e)",
+    "audit": "25.11.2026",
+    "verdict": "corrigé"
+   }
+  }
  },
  "cercthales": {
   "classe": "1re Collège",
@@ -1412,42 +1587,96 @@
   "plan": "11C01 · 11NO, priorités (EVACOM)",
   "etalon": "tools/niveau_11.md § 2, E-1-1",
   "audit": "25.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "9e": {
+    "classe": "9e",
+    "plan": "9C01 · Écritures décimale et fractionnaire",
+    "etalon": "tools/niveau_910.md § 2, chapitre 1 (9e)",
+    "audit": "25.11.2026",
+    "verdict": "corrigé"
+   }
+  }
  },
  "fracadd": {
   "classe": "11e",
   "plan": "11C01 · 4 opérations dans ℚ",
   "etalon": "tools/niveau_11.md § 2, E-1-1",
   "audit": "25.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "9e": {
+    "classe": "9e",
+    "plan": "9C08 · Écriture fractionnaire dans ℚ⁺",
+    "etalon": "tools/niveau_910.md § 2, chapitre 8 (9e)",
+    "audit": "25.11.2026",
+    "verdict": "corrigé"
+   }
+  }
  },
  "fracconv": {
   "classe": "11e",
   "plan": "11C01 · écritures d'un même nombre",
   "etalon": "tools/niveau_11.md § 2, E-1-1",
   "audit": "25.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "9e": {
+    "classe": "9e",
+    "plan": "9C08 · Écriture fractionnaire dans ℚ⁺",
+    "etalon": "tools/niveau_910.md § 2, chapitre 8 (9e)",
+    "audit": "25.11.2026",
+    "verdict": "corrigé"
+   }
+  }
  },
  "fracmul": {
   "classe": "11e",
   "plan": "11C01 · 4 opérations dans ℚ",
   "etalon": "tools/niveau_11.md § 2, E-1-1",
   "audit": "25.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "10e": {
+    "classe": "10e",
+    "plan": "10C03 · Écriture fractionnaire",
+    "etalon": "tools/niveau_910.md § 2, chapitre 3 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "carres": {
   "classe": "11e",
   "plan": "10C06 (révision 10e en 11e)",
   "etalon": "tools/niveau_11.md § 2, E-1-4",
   "audit": "25.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "10e": {
+    "classe": "10e",
+    "plan": "10C06 · Puissances et racines",
+    "etalon": "tools/niveau_910.md § 2, chapitre 6 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "vol": {
   "classe": "11e",
   "plan": "11C03 · volume du cylindre (CT), prisme",
   "etalon": "tools/niveau_11.md § 2, E-3-1",
   "audit": "25.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "10e": {
+    "classe": "10e",
+    "plan": "10C04 · 3D (ES et GM)",
+    "etalon": "tools/niveau_910.md § 2, chapitre 4 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "volcone": {
   "classe": "11e",
@@ -1482,7 +1711,16 @@
   "plan": "11C04 · vitesse moyenne",
   "etalon": "tools/niveau_11.md § 2, E-4-1, E-4-2",
   "audit": "25.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "10e": {
+    "classe": "10e",
+    "plan": "10C05 · Unités (temps et vitesses, sensibilisation)",
+    "etalon": "tools/niveau_910.md § 2, chapitre 5 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "corrigé"
+   }
+  }
  },
  "gquot": {
   "classe": "11e",
@@ -1503,14 +1741,32 @@
   "plan": "11C05 · substitution",
   "etalon": "tools/niveau_11.md § 2, E-5-1",
   "audit": "25.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "9e": {
+    "classe": "9e",
+    "plan": "9C10 · Calcul littéral (R2/R3)",
+    "etalon": "tools/niveau_910.md § 2, chapitre 10 (9e)",
+    "audit": "25.11.2026",
+    "verdict": "corrigé"
+   }
+  }
  },
  "litelab": {
   "classe": "11e",
   "plan": "11C05 · élaboration d'expressions",
   "etalon": "tools/niveau_11.md § 2, E-5-2",
   "audit": "25.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "9e": {
+    "classe": "9e",
+    "plan": "9C10 · Calcul littéral (R2/R3)",
+    "etalon": "tools/niveau_910.md § 2, chapitre 10 (9e)",
+    "audit": "25.11.2026",
+    "verdict": "corrigé"
+   }
+  }
  },
  "thalesrec": {
   "classe": "11e",
@@ -1524,14 +1780,32 @@
   "plan": "11C10 · repère (révision)",
   "etalon": "tools/niveau_11.md § 2, E-10-1",
   "audit": "25.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "10e": {
+    "classe": "10e",
+    "plan": "10C11 · Fonctions",
+    "etalon": "tools/niveau_910.md § 2, chapitre 11 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "pctvar": {
   "classe": "11e",
   "plan": "10C10 (révision en 11e)",
   "etalon": "tools/niveau_11.md § 2, E-4-1",
   "audit": "25.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "10e": {
+    "classe": "10e",
+    "plan": "10C10 · Proportionnalité (échelle, %, pente)",
+    "etalon": "tools/niveau_910.md § 2, chapitre 10 (10e)",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "proba": {
   "classe": "11e",
@@ -1721,5 +1995,313 @@
   "etalon": "tools/niveau_mp34.md § 2, E-J-4",
   "audit": "25.11.2026",
   "verdict": "au niveau (facultatif dans le PEE) ; à valider"
+ },
+ "decread": {
+  "classe": "9e",
+  "plan": "9C01 · Écritures décimale et fractionnaire",
+  "etalon": "tools/niveau_910.md § 2, chapitre 1 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "remonté"
+ },
+ "deccomp": {
+  "classe": "9e",
+  "plan": "9C01 · Écritures décimale et fractionnaire",
+  "etalon": "tools/niveau_910.md § 2, chapitre 1 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "remonté"
+ },
+ "decarr": {
+  "classe": "9e",
+  "plan": "9C01 · Écritures décimale et fractionnaire",
+  "etalon": "tools/niveau_910.md § 2, chapitre 1 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "ordgr": {
+  "classe": "9e",
+  "plan": "9C01 · Écritures décimale et fractionnaire",
+  "etalon": "tools/niveau_910.md § 2, chapitre 1 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "decadd": {
+  "classe": "9e",
+  "plan": "9C01 · Écritures décimale et fractionnaire",
+  "etalon": "tools/niveau_910.md § 2, chapitre 1 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "dec10": {
+  "classe": "9e",
+  "plan": "9C01 · Écritures décimale et fractionnaire",
+  "etalon": "tools/niveau_910.md § 2, chapitre 1 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "à valider"
+ },
+ "decmul": {
+  "classe": "9e",
+  "plan": "9C01 · Écritures décimale et fractionnaire",
+  "etalon": "tools/niveau_910.md § 2, chapitre 1 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "decdiv": {
+  "classe": "9e",
+  "plan": "9C01 · Écritures décimale et fractionnaire",
+  "etalon": "tools/niveau_910.md § 2, chapitre 1 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "decprob": {
+  "classe": "9e",
+  "plan": "9C01 · Écritures décimale et fractionnaire",
+  "etalon": "tools/niveau_910.md § 2, chapitre 1 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "pow9": {
+  "classe": "9e",
+  "plan": "9C01 · Écritures décimale et fractionnaire",
+  "etalon": "tools/niveau_910.md § 2, chapitre 1 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "ulong": {
+  "classe": "9e",
+  "plan": "9C02 · Unités et mesures",
+  "etalon": "tools/niveau_910.md § 2, chapitre 2 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "uaire": {
+  "classe": "9e",
+  "plan": "9C02 · Unités et mesures",
+  "etalon": "tools/niveau_910.md § 2, chapitre 2 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "uvol": {
+  "classe": "9e",
+  "plan": "9C02 · Unités et mesures",
+  "etalon": "tools/niveau_910.md § 2, chapitre 2 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "utemps": {
+  "classe": "9e",
+  "plan": "9C02 · Unités et mesures",
+  "etalon": "tools/niveau_910.md § 2, chapitre 2 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "angtype": {
+  "classe": "9e",
+  "plan": "9C03 · Géométrie du plan",
+  "etalon": "tools/niveau_910.md § 2, chapitre 3 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "quadri": {
+  "classe": "9e",
+  "plan": "9C03 · Géométrie du plan",
+  "etalon": "tools/niveau_910.md § 2, chapitre 3 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "remonté"
+ },
+ "multdiv": {
+  "classe": "9e",
+  "plan": "9C04 · Arithmétique",
+  "etalon": "tools/niveau_910.md § 2, chapitre 4 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "premiers": {
+  "classe": "9e",
+  "plan": "9C04 · Arithmétique",
+  "etalon": "tools/niveau_910.md § 2, chapitre 4 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "perim": {
+  "classe": "9e",
+  "plan": "9C05 · Aires et périmètres",
+  "etalon": "tools/niveau_910.md § 2, chapitre 5 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "remonté"
+ },
+ "aire1": {
+  "classe": "9e",
+  "plan": "9C05 · Aires et périmètres",
+  "etalon": "tools/niveau_910.md § 2, chapitre 5 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "remonté"
+ },
+ "aire2": {
+  "classe": "9e",
+  "plan": "9C05 · Aires et périmètres",
+  "etalon": "tools/niveau_910.md § 2, chapitre 5 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "aire3": {
+  "classe": "9e",
+  "plan": "9C05 · Aires et périmètres",
+  "etalon": "tools/niveau_910.md § 2, chapitre 5 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "relrep": {
+  "classe": "9e",
+  "plan": "9C06 · Nombres relatifs",
+  "etalon": "tools/niveau_910.md § 2, chapitre 6 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "reladd": {
+  "classe": "9e",
+  "plan": "9C06 · Nombres relatifs",
+  "etalon": "tools/niveau_910.md § 2, chapitre 6 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "solides": {
+  "classe": "9e",
+  "plan": "9C07 · 3D (ES et GM)",
+  "etalon": "tools/niveau_910.md § 2, chapitre 7 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "remonté"
+ },
+ "volpave": {
+  "classe": "9e",
+  "plan": "9C07 · 3D (ES et GM)",
+  "etalon": "tools/niveau_910.md § 2, chapitre 7 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "fracrep": {
+  "classe": "9e",
+  "plan": "9C08 · Écriture fractionnaire dans ℚ⁺",
+  "etalon": "tools/niveau_910.md § 2, chapitre 8 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "à valider"
+ },
+ "fracsimp": {
+  "classe": "9e",
+  "plan": "9C08 · Écriture fractionnaire dans ℚ⁺",
+  "etalon": "tools/niveau_910.md § 2, chapitre 8 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "fractout": {
+  "classe": "9e",
+  "plan": "9C08 · Écriture fractionnaire dans ℚ⁺",
+  "etalon": "tools/niveau_910.md § 2, chapitre 8 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "proptab": {
+  "classe": "9e",
+  "plan": "9C09 · Proportionnalité",
+  "etalon": "tools/niveau_910.md § 2, chapitre 9 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "prop": {
+  "classe": "9e",
+  "plan": "9C09 · Proportionnalité",
+  "etalon": "tools/niveau_910.md § 2, chapitre 9 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "change": {
+  "classe": "9e",
+  "plan": "9C09 · Proportionnalité",
+  "etalon": "tools/niveau_910.md § 2, chapitre 9 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "agrand": {
+  "classe": "9e",
+  "plan": "9C09 · Proportionnalité",
+  "etalon": "tools/niveau_910.md § 2, chapitre 9 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "symetries": {
+  "classe": "9e",
+  "plan": "9C11 · Transformations du plan",
+  "etalon": "tools/niveau_910.md § 2, chapitre 11 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "diagr": {
+  "classe": "9e",
+  "plan": "9C12 · Diagrammes",
+  "etalon": "tools/niveau_910.md § 2, chapitre 12 (9e)",
+  "audit": "25.11.2026",
+  "verdict": "à valider"
+ },
+ "disque": {
+  "classe": "10e",
+  "plan": "10C02 · Aires et périmètres",
+  "etalon": "tools/niveau_910.md § 2, chapitre 2 (10e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "grandmanq": {
+  "classe": "10e",
+  "plan": "10C02 · Aires et périmètres",
+  "etalon": "tools/niveau_910.md § 2, chapitre 2 (10e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "airelat": {
+  "classe": "10e",
+  "plan": "10C04 · 3D (ES et GM)",
+  "etalon": "tools/niveau_910.md § 2, chapitre 4 (10e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "voldecomp": {
+  "classe": "10e",
+  "plan": "10C04 · 3D (ES et GM)",
+  "etalon": "tools/niveau_910.md § 2, chapitre 4 (10e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "eqverif": {
+  "classe": "10e",
+  "plan": "10C09 · Équations",
+  "etalon": "tools/niveau_910.md § 2, chapitre 9 (10e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "echelle": {
+  "classe": "10e",
+  "plan": "10C10 · Proportionnalité (échelle, %, pente)",
+  "etalon": "tools/niveau_910.md § 2, chapitre 10 (10e)",
+  "audit": "25.11.2026",
+  "verdict": "corrigé"
+ },
+ "pente": {
+  "classe": "10e",
+  "plan": "10C10 · Proportionnalité (échelle, %, pente)",
+  "etalon": "tools/niveau_910.md § 2, chapitre 10 (10e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "polyreg": {
+  "classe": "10e",
+  "plan": "10C12 · Figures planes (polygones réguliers)",
+  "etalon": "tools/niveau_910.md § 2, chapitre 12 (10e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "rotation": {
+  "classe": "10e",
+  "plan": "10C13 · Transformations du plan",
+  "etalon": "tools/niveau_910.md § 2, chapitre 13 (10e)",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
  }
 }

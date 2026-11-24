@@ -1264,8 +1264,11 @@ VA("domaine", 2,
 /* VARX : comme VAR, mais lu en plus de VAR par Engine.build ; les modules de chapitre (ch11_litt.js, ch11_no.js…) vident
    VAR[id] pour leurs notions, pas VARX. */
 const VARX = {};
+const PROBX = {}; /* défis (niveau 4) ajoutés, lus en plus de PROB et PROB_EXTRA par Engine.build */
 (() => {
-  const VA = (id, lv, ...fns) => { for (const l of lv === 3 ? [3, 4] : [lv]) { VARX[id] = VARX[id] || {}; VARX[id][l] = (VARX[id][l] || []).concat(fns); } };
+  /* g = classes du CO (grades) où la forme est proposée : ailleurs elle est écartée au tirage (q.co, horsCO dans engine.js),
+     pour ne pas abaisser le niveau des autres classes (11e, Collège, MP). */
+  const VA = (id, lv, g, ...fns) => { const w = fns.map((f) => () => { const q = f(); if (q) q.co = g; return q; }); for (const l of lv === 3 ? [3, 4] : [lv]) { VARX[id] = VARX[id] || {}; VARX[id][l] = (VARX[id][l] || []).concat(w); } };
   const who = () => R.pick(["Lina", "Noé", "Inès", "Yanis", "Mia", "Sam", "Léa", "Tom"]);
   const cx = (c, v) => (c === 1 ? v : c === -1 ? "-" + v : c + v); /* coefficient devant une lettre, en TeX */
   const sg = (c, v) => (c < 0 ? " - " + cx(-c, v) : " + " + cx(c, v)); /* terme suivant, avec son signe */
@@ -1275,7 +1278,7 @@ const VARX = {};
   const GE = (ask, e, sol) => ({ ask, spec: { kind: "expr", expr: e, form: "reduced" }, sol });
 
   // --- 9e : valnum, niveau 3 (décimaux positifs) ---
-  VA("valnum", 3,
+  VA("valnum", 3, [9, 10],
     () => clean(() => { const a = R.pick([0.5, 1.5, 2.5, 1.2]), b = R.int(2, 9), c1 = R.int(2, 4), c2 = R.int(2, 5), a2 = r6(a * a), v = r6(c1 * a2 + c2 * a * b);
       return QV("Calcule " + M(c1 + "a^2 + " + c2 + "ab") + " pour " + M("a = " + dec(a)) + " et " + M("b = " + b) + ".", v,
         M(c1 + " \\cdot " + dec(a) + "^2 + " + c2 + " \\cdot " + dec(a) + " \\cdot " + b + " = " + c1 + " \\cdot " + dec(a2) + " + " + dec(r6(c2 * a * b)) + " = " + dec(v)) + ".",
@@ -1293,7 +1296,7 @@ const VARX = {};
           traps: [TRAP(r6((k * x) ** 2 + m * m - n * x), "Le carré d'une somme n'est pas la somme des carrés : calcule d'abord la parenthèse."), TRAP(r6(2 * in1 - n * x), "Le carré : la parenthèse multipliée par elle-même, pas par 2.")] }); }),
   );
   // --- 9e : prio, niveau 3 (sans produit de relatifs ; puissances de décimaux positifs) ---
-  VA("prio", 3,
+  VA("prio", 3, [9, 10],
     () => clean(() => { let a, b, c; do { a = R.int(30, 90); b = R.int(5, 9); c = R.int(2, 4); } while (a <= (b - c) ** 2); const v = a - (b - c) ** 2;
       return QV("Calcule : " + M(a + " - (" + b + " - " + c + ")^2"), v, M(a + " - " + (b - c) + "^2 = " + a + " - " + (b - c) ** 2 + " = " + v) + ".",
         { ctx: "carre-pos", guide: [GS("La parenthèse : " + M(b + " - " + c) + " = ?", b - c, M(b - c) + "."), GS("Son carré ?", (b - c) ** 2, M((b - c) + "^2 = " + (b - c) ** 2) + "."), GS("Résultat ?", v, M(v) + ".")],
@@ -1308,7 +1311,7 @@ const VARX = {};
           traps: [TRAP(r6((c * x) ** 2 + d * (e - y)), "La puissance ne porte que sur " + M(dec(x)) + " : calcule " + M(dec(x) + "^2") + " puis multiplie par " + c + "."), TRAP(r6(c * 2 * x + d * (e - y)), M(dec(x) + "^2 = " + dec(x) + " \\cdot " + dec(x)) + ", pas " + M("2 \\cdot " + dec(x)) + ".")] }); }),
   );
   // --- 9e : angtri, niveau 3 (triangles et quadrilatères ; polygones réguliers en 10e) ---
-  VA("angtri", 3,
+  VA("angtri", 3, [9],
     () => { let a; do a = R.int(55, 125); while (a === 90); return QV("Un trapèze rectangle a deux angles droits. Un autre de ses angles mesure " + a + "°. Combien mesure le quatrième (en degrés) ?", 180 - a, M("360° - 90° - 90° - " + a + "° = " + (180 - a) + "°") + ".",
       { ctx: "trapeze", guide: [GS("Somme des angles d'un quadrilatère (en degrés) ?", 360, "360°."), GS("Quatrième angle ?", 180 - a, M("360° - 180° - " + a + "° = " + (180 - a) + "°") + ".")], traps: [TRAP(360 - a, "Il y a aussi les deux angles droits à retirer."), TRAP(90 - a > 0 ? 90 - a : 270 - a, "Somme des angles d'un quadrilatère : 360°.")] }); },
     () => { let a; do a = R.int(72, 98); while (a === 90); return QV("Un quadrilatère a trois angles égaux de " + a + "° chacun. Combien mesure le quatrième (en degrés) ?", 360 - 3 * a, M("360° - 3 \\cdot " + a + "° = " + (360 - 3 * a) + "°") + ".",
@@ -1318,7 +1321,7 @@ const VARX = {};
         { ctx: "ecarts", guide: [GS("Retire les écarts à 180° : " + M("180 - " + d + " - " + e) + " = ?", 180 - d - e, M(180 - d - e) + "°."), GS("Partage en trois angles égaux : le plus petit ?", x, M((180 - d - e) + " : 3 = " + x) + "°.")], traps: [TRAP(60, "Les trois angles ne sont pas égaux : retire d'abord les écarts."), TRAP(x + e, "C'est le plus grand angle.")] }); },
   );
   // --- 9e : fracadd, niveau 3 (dans Q+) ---
-  VA("fracadd", 3,
+  VA("fracadd", 3, [9, 10],
     () => clean(() => { let b, d, f, a, c, g, n, D; do { [b, d, f] = R.pick([[6, 4, 3], [4, 6, 12], [3, 4, 6], [5, 10, 4], [8, 6, 3], [9, 6, 4]]); a = R.int(1, b - 1); c = R.int(1, d - 1); g = R.int(1, f - 1); D = b * d * f / gcd(b * d * f, 1); n = a / b - c / d + g / f; } while (n <= 0 || gcd(a, b) !== 1 || gcd(c, d) !== 1 || gcd(g, f) !== 1);
       const L = [b, d, f].reduce((p, q) => (p * q) / gcd(p, q)), N = Math.round(n * L), G = gcd(N, L);
       return QV("Calcule et donne le résultat sous forme de fraction irréductible : " + M("\\frac{" + a + "}{" + b + "} - \\frac{" + c + "}{" + d + "} + \\frac{" + g + "}{" + f + "}"), n,
@@ -1331,22 +1334,54 @@ const VARX = {};
         { ctx: "entier-moins", guide: [GS("Dénominateur commun ?", L, M(L) + "."), GS(M(e) + " écrit sur " + L + " : numérateur ?", e * L, M(e * L) + "."), GS("Résultat (fraction irréductible) ?", v, M(G > 1 ? "\\frac{" + N / G + "}{" + L / G + "}" : "\\frac{" + N + "}{" + L + "}") + ".")],
           traps: [TRAP((e - a - c) / L, "L'entier " + e + " s'écrit aussi sur " + L + " : " + M("\\frac{" + e * L + "}{" + L + "}") + "."), TRAP(e - a / b + c / d, "Les deux fractions sont retirées.")] }); }),
   );
+  // --- 9e : quadri, niveau 3 (propriétés des diagonales et somme des angles ; « axes de symétrie d'un carré » = primaire) ---
+  VA("quadri", 3, [9],
+    () => { const x = 2 * R.int(19, 41), v = (180 - x) / 2;
+      return QV("Dans un rectangle " + M("ABCD") + ", les diagonales se coupent en " + M("O") + " et l'angle " + M("\\widehat{AOB}") + " mesure " + x + "°. Combien mesure l'angle " + M("\\widehat{OAB}") + " (en degrés) ?", v,
+        "Les diagonales d'un rectangle ont la même longueur et se coupent en leur milieu : " + M("OA = OB") + ", le triangle " + M("AOB") + " est isocèle. " + M("\\widehat{OAB} = (180° - " + x + "°) : 2 = " + v + "°") + ".",
+        { ctx: "rect-diag", guide: [GS("Le triangle AOB est isocèle en O. Somme de ses deux angles à la base (en degrés) ?", 180 - x, M("180° - " + x + "° = " + (180 - x) + "°") + "."), GS(M("\\widehat{OAB}") + " = ?", v, M((180 - x) + "° : 2 = " + v + "°") + ".")],
+          traps: [TRAP(180 - x, "Les deux angles à la base se partagent ce reste : divise par 2."), TRAP(90 - x / 2 === v ? x / 2 : 90 - x / 2, "Utilise le triangle isocèle AOB.")] }); },
+    () => { const a = 2 * R.int(28, 62), v = (180 - a) / 2;
+      return QV("Dans un losange " + M("ABCD") + ", l'angle " + M("\\widehat{ABC}") + " mesure " + a + "°. Combien mesure l'angle " + M("\\widehat{BAC}") + " entre le côté " + M("[AB]") + " et la diagonale " + M("[AC]") + " (en degrés) ?", v,
+        "Les côtés d'un losange sont égaux : " + M("BA = BC") + ", le triangle " + M("ABC") + " est isocèle en " + M("B") + ". " + M("\\widehat{BAC} = (180° - " + a + "°) : 2 = " + v + "°") + ".",
+        { ctx: "losange-diag", guide: [GS("Le triangle ABC est isocèle en B. Que mesurent ensemble ses deux autres angles (en degrés) ?", 180 - a, M("180° - " + a + "° = " + (180 - a) + "°") + "."), GS(M("\\widehat{BAC}") + " = ?", v, M((180 - a) + "° : 2 = " + v + "°") + ".")],
+          traps: [TRAP(a / 2, "C'est la moitié de l'angle en B ; l'angle cherché est en A, dans le triangle isocèle ABC."), TRAP(180 - a, "Les deux angles à la base se partagent ce reste : divise par 2.")] }); },
+  );
   // --- 9e : litelab, niveau 3 (écrire sans réduire) ---
-  VA("litelab", 3,
+  VA("litelab", 3, [9, 10],
     () => { const k = R.int(2, 7), m = R.int(3, 9), e = m + "*x*(x+" + k + ")";
       return QXt("Un pavé droit a pour dimensions " + M("x") + ", " + M("x + " + k) + " et " + M(m) + " (en cm). Écris son volume.", e, M("V = " + m + "x(x + " + k + ")") + " cm³ (ou, développé, " + M(m + "x^2 + " + m * k + "x") + ").",
         { ctx: "pave", guide: [{ ask: "Volume = produit des trois dimensions. Écris-le (avec des parenthèses autour de " + M("x + " + k) + ").", spec: { kind: "expr", expr: e }, sol: M(m + "x(x + " + k + ")") + "." }], traps: [{ e: "x+x+" + k + "+" + m, m: "Le volume est un produit, pas une somme." }, { e: m + "*x*x+" + k, m: "Il faut des parenthèses : c'est toute la longueur " + M("x + " + k) + " qui est multipliée." }] }); },
   );
 
+  // --- Défis (niveau 4) de la classe : remplacent ceux d'une année supérieure écartés en 9e (polygones réguliers) et en 10e
+  // (double distributivité, aires et volumes agrandis) ---
+  const PX = (id, g, f) => { (PROBX[id] = PROBX[id] || []).push(() => Object.assign(f(), { co: g })); };
+  const PB = (q, parts, hints, sol) => ({ q, parts: parts.map(([label, value]) => ({ label, spec: { kind: "value", value } })), hints, sol });
+  PX("angtri", [9], () => { const a = R.pick([20, 28, 36, 44, 52, 68, 76, 84, 92, 100]), b = (180 - a) / 2, h = b / 2, d = 180 - a - h;
+    return PB("Le triangle " + M("ABC") + " est isocèle en " + M("A") + " et l'angle au sommet " + M("\\widehat{BAC}") + " mesure " + a + "°. La bissectrice de l'angle " + M("\\widehat{ABC}") + " coupe le côté " + M("[AC]") + " en " + M("D") + ".",
+      [["a) Angle " + M("\\widehat{ABC}") + " (en degrés)", b], ["b) Angle " + M("\\widehat{ABD}") + " (en degrés)", h], ["c) Angle " + M("\\widehat{ADB}") + " (en degrés)", d]],
+      ["Isocèle en A : les angles en B et en C sont égaux ; ensemble, ils font 180° − " + a + "°.", "La bissectrice partage l'angle en B en deux angles égaux ; puis somme des angles du triangle ABD."],
+      "a) " + M("(180° - " + a + "°) : 2 = " + b + "°") + ". b) " + M(b + "° : 2 = " + h + "°") + ". c) Dans le triangle " + M("ABD") + " : " + M("180° - " + a + "° - " + h + "° = " + d + "°") + "."); });
+  PX("distrib", [10], () => { const a = R.int(2, 7), b = R.int(3, 6), c = R.int(2, 5), n = R.int(3, 8), A1 = b * (n + a), T = n * n + (b + c) * n + a * b;
+    return PB("Une figure est formée de deux rectangles accolés : le premier mesure " + M("x + " + a) + " sur " + M(b) + ", le second " + M("x") + " sur " + M("x + " + c) + " (en m).",
+      [["a) Aire du premier rectangle pour " + M("x = " + n) + " (m²)", A1], ["b) L'aire totale, développée et réduite, s'écrit " + M("x^2 + \\ldots x + \\ldots") + " : coefficient de " + M("x"), b + c], ["c) Terme constant de cette aire totale", a * b], ["d) Aire totale pour " + M("x = " + n) + " (m²)", T]],
+      ["Premier rectangle : " + b + "(x + " + a + ") ; second : x(x + " + c + "). Développe chacun (simple distributivité).", "Additionne et regroupe les termes semblables, puis remplace x par " + n + "."],
+      M(b + "(x + " + a + ") + x(x + " + c + ") = " + b + "x + " + a * b + " + x^2 + " + c + "x = x^2 + " + (b + c) + "x + " + a * b) + ". a) " + M(b + " \\cdot " + (n + a) + " = " + A1) + " m². d) " + M(n * n + " + " + (b + c) * n + " + " + a * b + " = " + T) + " m²."); });
+  PX("echelle", [10], () => { const E = R.pick([25000, 50000, 20000]), t = [R.int(21, 69) / 10, R.int(21, 69) / 10, R.int(11, 49) / 10], L = r6(t[0] + t[1] + t[2]), km = r6((L * E) / 100000), E2 = E === 50000 ? 25000 : 50000, L2 = r6((L * E) / E2);
+    return PB("Sur une carte au " + M("1\\,:\\," + mille(E)) + ", un itinéraire de randonnée compte trois tronçons de " + M(dec(t[0])) + " cm, " + M(dec(t[1])) + " cm et " + M(dec(t[2])) + " cm.",
+      [["a) Longueur de l'itinéraire sur la carte (cm)", L], ["b) Longueur réelle (km)", km], ["c) Longueur de cet itinéraire sur une carte au " + M("1\\,:\\," + mille(E2)) + " (cm)", L2]],
+      ["Longueur réelle en cm = longueur sur la carte · " + mille(E) + ", puis 1 km = 100'000 cm.", "Sur l'autre carte : longueur réelle en cm divisée par " + mille(E2) + "."],
+      "a) " + M(dec(L)) + " cm. b) " + M(dec(L) + " \\cdot " + mille(E) + " = " + mille(r6(L * E))) + " cm = " + M(dec(km)) + " km. c) " + M(mille(r6(L * E)) + " \\div " + mille(E2) + " = " + dec(L2)) + " cm."); });
   // --- 10e : distrib (simple distributivité seulement) ---
-  VA("distrib", 2,
+  VA("distrib", 2, [10],
     () => { let a, b, c, d, e, f; do { a = R.int(2, 6); b = R.int(2, 5); c = R.int(1, 9); d = R.int(2, 6); e = R.int(1, 5); f = R.int(1, 9); } while (a * b === d * e || d * f === a * c);
       const A = a * b - d * e, B = d * f - a * c;
       return QXt("Développe et réduis : " + M(a + "(" + b + "x - " + c + ") - " + d + "(" + cx(e, "x") + " - " + f + ")") + ".", ex1(A, B), M(cx(a * b, "x") + " - " + a * c + " - " + cx(d * e, "x") + " + " + d * f + " = " + cx(A, "x") + (B < 0 ? " - " + -B : " + " + B)) + ".",
         { form: "reduced", ctx: "deuxsimples", guide: [GE("Développe " + M(a + "(" + b + "x - " + c + ")") + " :", ex1(a * b, -a * c), M(cx(a * b, "x") + " - " + a * c) + "."), GE("Développe " + M("-" + d + "(" + cx(e, "x") + " - " + f + ")") + " (attention au signe −) :", ex1(-d * e, d * f), M(cx(-d * e, "x") + " + " + d * f) + "."), GE("Réduis le tout :", ex1(A, B), M(cx(A, "x") + (B < 0 ? " - " + -B : " + " + B)) + ".")],
           traps: [{ e: ex1(A, -a * c - d * f), m: "Le signe − devant " + M(d) + " porte sur tout le contenu de la parenthèse : " + M("-" + d + " \\cdot (-" + f + ") = +" + d * f) + "." }] }); },
   );
-  VA("distrib", 3,
+  VA("distrib", 3, [10],
     () => { let a, b, c, d, e, f, g, A, B; do { a = R.int(2, 4); b = R.int(2, 5); c = R.int(1, 6); d = R.int(1, 3); e = R.int(1, 4); f = R.int(1, 6); g = R.int(2, 9); A = a * b - d * e; B = -a * c - d * f + g; } while (A === 0 || B === 0);
       const t = cx(a, "x") + "(" + b + "x - " + c + ") - " + cx(d, "x") + "(" + cx(e, "x") + " + " + f + ") + " + g + "x";
       return QXt("Développe et réduis : " + M(t) + ".", ex(A, B), M(a * b + "x^2 - " + a * c + "x - " + cx(d * e, "x^2") + " - " + cx(d * f, "x") + " + " + g + "x = " + cx(A, "x^2") + sg(B, "x")) + ".",
@@ -1355,7 +1390,7 @@ const VARX = {};
   );
 
   // --- 10e : eq1, niveau 3 (parenthèses des deux côtés, décimaux) ---
-  VA("eq1", 3,
+  VA("eq1", 3, [10],
     () => { let a, b, c, d, e, f, x0, g, k; do { a = R.int(3, 8); b = R.int(1, 6); c = R.int(2, 5); d = R.int(1, 6); e = R.int(2, 4); f = R.int(1, 6); x0 = R.pick([-7, -5, -4, -3, -2, 2, 3, 4, 5, 6, 8]); k = a - c - e; g = a * (x0 - b) - c * (x0 + d) - e * (x0 - f); } while (k === 0 || g === 0 || Math.abs(g) > 60 || a === c);
       const L0 = -a * b - c * d, R0 = -e * f + g, xw = (-e * f + g + a * b - c * d) / (a - c - e);
       return QV("Résous : " + M(a + "(x - " + b + ") - " + c + "(x + " + d + ") = " + e + "(x - " + f + ")" + (g < 0 ? " - " + -g : " + " + g)) + ".", x0,
@@ -1371,7 +1406,7 @@ const VARX = {};
   );
 
   // --- 10e : echelle (longueurs) ---
-  VA("echelle", 2,
+  VA("echelle", 2, [10],
     () => { const E = R.pick([25000, 50000, 20000, 100000]), c = R.pick([3.4, 4.6, 7.2, 5.8, 9.5, 12.4]), v = r6((c * E) / 100000);
       return QV("Sur une carte au " + M("1\\,:\\," + mille(E)) + ", un lac mesure " + M(dec(c)) + " cm de long. Quelle est sa longueur réelle, en km ?", v, M(dec(c) + " \\cdot " + mille(E) + " = " + mille(r6(c * E))) + " cm = " + M(dec(v)) + " km.",
         { ctx: "carte-reel", guide: [GS("Longueur réelle en cm ?", r6(c * E), M(mille(r6(c * E))) + " cm."), GS("En km (1 km = 100'000 cm) ?", v, M(dec(v)) + " km.")], traps: [TRAP(r6((c * E) / 1000), "1 km = 100'000 cm, pas 1'000 cm."), TRAP(r6((c * E) / 100), "Ça, ce sont des mètres.")] }); },
@@ -1379,7 +1414,7 @@ const VARX = {};
       return QV("Un sentier de " + M(dec(km)) + " km mesure " + M(c) + " cm sur une carte. L'échelle de la carte est " + M("1\\,:\\,n") + ". Que vaut " + M("n") + " ?", E, M(dec(km) + " \\text{ km} = " + mille(r6(km * 100000)) + "\\text{ cm}") + " ; " + M(mille(r6(km * 100000)) + " \\div " + c + " = " + mille(E)) + ".",
         { ctx: "trouver-n", guide: [GS("Longueur réelle en cm ?", r6(km * 100000), M(mille(r6(km * 100000))) + " cm."), GS(M("n") + " = ?", E, M(mille(r6(km * 100000)) + " \\div " + c + " = " + mille(E)) + ".")], traps: [TRAP(r6((km * 1000) / c), "Convertis d'abord les km en cm (même unité sur la carte et en réalité)."), TRAP(r6(E / 100), "1 km = 100'000 cm.")] }); },
   );
-  VA("echelle", 3,
+  VA("echelle", 3, [10],
     () => { let E1, E2, c, v; do { [E1, E2] = R.pick([[25000, 50000], [50000, 25000], [20000, 50000], [50000, 20000], [10000, 25000], [25000, 10000], [100000, 25000]]); c = R.pick([4, 6, 8, 10, 12, 14]); v = r6((c * E1) / E2); } while (Math.abs(v * 10 - Math.round(v * 10)) > 1e-9);
       return QV("Sur une carte au " + M("1\\,:\\," + mille(E1)) + ", deux refuges sont à " + M(c) + " cm l'un de l'autre. À quelle distance sont-ils sur une carte au " + M("1\\,:\\," + mille(E2)) + " (en cm) ?", v,
         "Distance réelle : " + M(c + " \\cdot " + mille(E1) + " = " + mille(c * E1)) + " cm ; sur l'autre carte : " + M(mille(c * E1) + " \\div " + mille(E2) + " = " + dec(v)) + " cm.",

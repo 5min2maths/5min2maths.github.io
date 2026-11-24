@@ -111,6 +111,7 @@ const HORS_CO = {
     litelab: ["perim", "magie", "age", "taxi"],
     fracconv: ["per2", "permixte"],
     fracper: [/seul le \d se répète|\{,\}(\d)(?!\1)(\d)\1\2/],
+    quadri: [/axes? de symétrie/], /* primaire (trop facile), remplacé par diagonales et triangles isocèles */
   },
   /* 10e : simple distributivité seulement (double distributivité, identités : 11e), pas de fractions algébriques ni de
      formules à transformer, pas d'inéquations, pas de cône (11e), aires × k² et volumes × k³ en 11e, vitesse moyenne sur deux trajets en 11e. */
@@ -120,12 +121,13 @@ const HORS_CO = {
     eq1: ["identites", "carres-elimines", "lit-a", "lit-b", "lit-c", "lit-d", "lit-e"],
     affine: ["f-sup-g-droites"],
     pythfig: ["conehaut", "conegen"],
-    echelle: [/aire|volume|cube|m³|dm³/],
+    echelle: [/\baires?\b|volume|cube|m³|dm³/],
     vitesse: [/aller de|aller-retour|, puis [^.]*km\/h/], /* vitesse moyenne sur deux trajets : 11e (10e = sensibilisation) */
   },
 };
 function horsCO(state, id, q) {
   const p = state && state.profile;
+  if (q && q.co && p && !(p.system === "CH" && p.track !== "mp" && q.co.includes(p.grade))) return true; /* forme réservée à certaines classes du CO (VARX) */
   if (!q || !p || p.system !== "CH" || p.track === "mp") return false;
   const L = HORS_CO[p.grade] && HORS_CO[p.grade][id];
   if (!L) return false;
@@ -517,6 +519,11 @@ const Engine = {
     const UP11 = ["prio", "fracadd", "fracconv", "fracmul", "fracops", "puiss", "sci", "scicalc", "rac", "carres", "pyth", "pythfig", "vol",
       "vitesse", "valnum", "litelab", "reduire", "monomes", "distrib", "eq1", "eqfrac", "probeq", "affine", "repere", "tabval", "pctvar"];
     if (level === 1 && UP11.includes(id) && state && state.profile && state.profile.system === "CH" && state.profile.track !== "mp" && state.profile.grade === 11) level = 2;
+    /* 25.11 (audit de niveau 9e–10e, tools/niveau_910.md) : en 9e, le niveau 1 de ces notions était un automatisme du
+       primaire (« chiffre des unités de 98,245 », « le plus grand de 5,9 et 5,96 », périmètre d'un triangle 3-7-9, aire d'un
+       carré de côté 9, faces d'un pavé, périmètre d'un losange) : il tire les formes du niveau 2. La 10e et la 11e ne changent pas. */
+    const UP9 = ["decread", "deccomp", "perim", "aire1", "solides", "quadri"];
+    if (level === 1 && UP9.includes(id) && state && state.profile && state.profile.system === "CH" && state.profile.track !== "mp" && state.profile.grade === 9) level = 2;
     // Notions de révision trop faciles au niveau 2 pour les grandes classes (21.11, « relève le niveau 2 pour la 11e ») :
     // dès la classe indiquée, le niveau 2 tire les formes du niveau 3 (le code de la question reste reproductible : …-3-…).
     const UP2 = { rel: 11 };
@@ -560,7 +567,8 @@ const Engine = {
     seed = seed || Math.floor(Math.random() * 46655) + 1;
     R.seed(seed * 7919 + level * 104729 + [...id].reduce((a, c) => a + c.charCodeAt(0), 0));
     const code = id + "-" + level + "-" + seed.toString(36);
-    if (level === 4 && hasProb(id)) { const p = probFor(id)(); return { ...p, id, d: 4, seed, code, spec: { kind: "multi" }, hint: p.hints[0] }; }
+    /* 25.11 : PROBX (variantes.js, audit 9e–10e) = défis ajoutés, réservés à certaines classes (p.co). */
+    if (level === 4 && hasProb(id)) { const p = R.pick(probList(id).concat((typeof PROBX !== "undefined" && PROBX[id]) || []))(); return { ...p, id, d: 4, seed, code, spec: { kind: "multi" }, hint: p.hints[0] }; }
     // Écritures maladroites des générateurs (audit 13.11) : « 1x » → « x », « + -2 » → « - 2 », « - -3 » → « + 3 ».
     const tidy = (t) => typeof t !== "string" ? t : t.replace(/([(=+\-\s{]|\\\()(-?)1([a-z])(?![a-z{])/g, "$1$2$3").replace(/\+\s*-\s*(?=[\da-z(\\])/g, "- ").replace(/-\s*-\s*(?=[\da-z(\\])/g, "+ ");
     // Pas de question triviale (règle du 14.11 : la trivialité fait décrocher) : tirage refait, de façon
