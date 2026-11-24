@@ -75,6 +75,12 @@ def main():
         resume += f" · {nv} réponses exactes non vérifiées"
     (OUT / "resume.txt").write_text(resume + "\n")
     print(resume)
+    # Galerie des figures (24.11, chantier Q) : suivi/galerie/galerie_AAAA-MM-JJ.html, figures signalées par le robot
+    # encadrées en rouge. Jamais bloquant pour le robot.
+    try:
+        subprocess.run([sys.executable, str(ROOT / "tools" / "galerie.py")], timeout=420)
+    except Exception as e:
+        print(f"galerie : non générée ({e})")
 
 
 if __name__ == "__main__":
