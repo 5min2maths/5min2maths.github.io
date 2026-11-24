@@ -1,0 +1,84 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../src/style.css"><body><main id="app"></main><pre id="log"></pre>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/fr_college.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script>
+if (window === top) {
+  document.body.innerHTML = '<iframe src="trouve_erreur.html#cadre" style="width:360px;height:740px;border:0"></iframe><pre id="log">en cours</pre>';
+  window.addEventListener("message", (e) => { if (typeof e.data === "string" && e.data.startsWith("te:")) document.getElementById("log").textContent = e.data.slice(3); });
+} else window.addEventListener("load", () => {
+document.head.insertAdjacentHTML("beforeend", "<style>html { scrollbar-width: none; }</style>");
+// « Trouve l'erreur » (24.11, chantier I, suite ; liste : tools/trouve_erreur.md) : chaque nouvelle forme tirée 50 fois
+// (générateur brut, R.seed) : textes sans NaN/undefined, guide de 1 à 3 étapes, la réponse et chaque étape acceptées
+// par checkAnswer, dernière étape = réponse, piège du camarade ≠ réponse, pas de trivialité ni de réponse visible,
+// pas de « : » entre nombres en texte simple ; 10 tirages rendus (question et correction) sans débordement à 360 px ;
+// enfin la forme sort bien par Engine.build (pas effacée par un fichier chargé ensuite).
+const FORMS = [["prio", 2], ["reladd", 2], ["fracadd", 2], ["decmul", 2], ["pow9", 2], ["aire1", 2], ["fractout", 2], ["dec10", 2], ["uaire", 2], ["perim", 2],
+  ["fracmul", 2], ["scicalc", 2], ["rac", 2], ["pctvar", 2], ["monomes", 2], ["distrib", 2], ["pct", 2], ["disque", 2], ["echelle", 2],
+  ["idrem", 2], ["volcone", 2], ["simil", 2], ["eq2", 2], ["formule", 2],
+  ["polyop", 2], ["fimg", 2], ["ineq", 2], ["ineq2", 2],
+  ["sinlaw", 2], ["expo", 2], ["log", 2], ["modexp", 2]];
+const OUT = []; let nbF = 0;
+const fail = (m) => { nbF++; if (nbF < 400) OUT.push("ÉCHEC " + m); };
+const showSpec = (sp, canon) => sp.kind === "value" ? (sp.sci && canon ? canon : String(sp.value)) : sp.kind === "expr" ? sp.expr : sp.kind === "set" ? sp.values.map(String).join(" ; ") : sp.kind === "solset" ? SolSet.show(sp.ivs, false) : sp.kind === "ineq" ? "x " + sp.op + " " + sp.value : sp.kind === "pair" ? sp.values.join(" ; ") : "?";
+const ok = (sp, inp) => { try { return checkAnswer(sp, inp).status === "correct"; } catch (e) { return false; } };
+const sameAns = (a, b) => { if (a.kind !== b.kind) return false; if (a.kind === "value") return Math.abs(a.value - b.value) <= Math.max(a.round || 0, b.round || 0, 1e-9 * Math.max(1, Math.abs(a.value))); return ok(a, showSpec(b)); };
+const txt = (q) => [q.q, q.sol, ...(q.guide || []).flatMap((g) => [g.ask, g.sol]), ...(q.traps || []).map((t) => t.m)].join(" | ");
+let app0;
+try {
+  Element.prototype.scrollIntoView = function () {};
+  state = Engine.newState({ system: "CH", grade: 12, track: "college", minutes: 5 }); Engine.autoInit(state); state.placed = true; state.tourDone = true; session = null;
+  const scan = (where) => {
+    const right = app.getBoundingClientRect().right + 1, bad = [];
+    if (app.scrollWidth > app.clientWidth + 1) bad.push("#app défile en largeur (" + app.scrollWidth + " px)");
+    app.querySelectorAll("*").forEach((el) => {
+      if (el.closest("svg, mjx-container, .tabs, .fab-cmt:not(.brand .fab-cmt)") || getComputedStyle(el).position === "fixed") return;
+      for (let p = el.parentElement; p && p !== app; p = p.parentElement) { const o = getComputedStyle(p).overflowX; if (o === "auto" || o === "scroll" || o === "hidden") return; }
+      const r = el.getBoundingClientRect(); if (r.width && r.right > right) bad.push(el.tagName.toLowerCase() + " « " + el.textContent.trim().slice(0, 30) + " » +" + Math.round(r.right - right) + " px");
+    });
+    if (bad.length) fail(where + " déborde : " + bad.slice(0, 2).join(" ; "));
+  };
+  for (const [id, lv] of FORMS) {
+    const srcs = [() => GEN[id](lv), ...((VAR[id] || {})[lv] || [])];
+    const got = []; let triv = 0, shown = 0;
+    for (let s = 1; s <= 4000 && got.length < 50; s++) for (const f of srcs) { R.seed(s * 31 + 7); let q; try { q = f(); } catch (e) { fail(id + " exception " + e.message); continue; } if (q && q.ctx === "erreur" && got.length < 50) got.push([s, q]); }
+    if (got.length < 50) fail(id + "-" + lv + " : " + got.length + " tirages « erreur » seulement");
+    const forms = new Set(); let sample = "";
+    got.forEach(([s, q], i) => {
+      const c = id + "-" + lv + " s" + s, t = txt(q);
+      forms.add(qForm(q));
+      if (!/Trouve l.erreur/.test(q.q)) fail(c + " sans « Trouve l'erreur »");
+      if (!/Sam|Lina|Noé|Inès|Yanis|Léa/.test(q.q)) fail(c + " sans camarade");
+      if (/undefined|NaN|Infinity|\[object/.test(t)) fail(c + " texte : " + t.match(/.{0,40}(undefined|NaN|Infinity|\[object).{0,20}/)[0]);
+      { const pl = t.replace(/\\\(.*?\\\)/g, " "); const dv = pl.match(/.{0,25}(\d|\)) : (\d|\().{0,10}/); if (dv) fail(c + " « : » entre nombres en texte simple : " + dv[0]); }
+      if (!q.guide || q.guide.length < 1 || q.guide.length > 3) fail(c + " guide de " + (q.guide ? q.guide.length : 0) + " étapes");
+      if (!q.traps || !q.traps.length) fail(c + " sans piège");
+      const ans = showSpec(q.spec, q.canon);
+      if (!ok(q.spec, ans)) fail(c + " réponse refusée : " + ans);
+      (q.guide || []).forEach((g, k) => { const a = showSpec(g.spec, g.spec.sci ? (() => { const v = g.spec.value, e = Math.floor(Math.log10(Math.abs(v)) + 1e-9); return String(+(v / 10 ** e).toFixed(8)).replace(".", ",") + "*10^" + e; })() : null); if (!ok(g.spec, a)) fail(c + " étape " + (k + 1) + " refuse sa réponse : " + a); });
+      if (q.guide && q.guide.length && !sameAns(q.spec, q.guide[q.guide.length - 1].spec)) fail(c + " dernière étape ≠ réponse");
+      (q.traps || []).forEach((tr) => {
+        if (tr.v !== undefined) { if (!isFinite(tr.v) || Math.abs(tr.v - q.spec.value) <= Math.max(q.spec.round || 0, 1e-9)) fail(c + " piège = réponse : " + tr.v); }
+        else if (tr.e) { if (ok(q.spec, tr.e)) fail(c + " piège = réponse : " + tr.e); }
+        else if (tr.spec) { if (ok(q.spec, showSpec(tr.spec))) fail(c + " piège = réponse"); }
+        else if (tr.s) { if (ok(q.spec, tr.s.join(" ; "))) fail(c + " piège = réponse"); }
+      });
+      if (trivialQ(q, 0)) { triv++; fail(c + " triviale (" + trivialQ(q, 0) + ") : " + q.q.replace(/<[^>]+>/g, "").slice(0, 80)); }
+      if (answerShown(q)) { shown++; fail(c + " réponse visible dans l'énoncé : " + q.q.replace(/<[^>]+>/g, "").slice(0, 80)); }
+      if (i < 10) {
+        const qq = Object.assign({}, q, { id, d: lv, seed: s, code: id + "-" + lv + "-t" + s, hint: q.hint || HINTS[id] });
+        renderQuestion(qq, { eyebrow: "test", single: true, track: "test", onDone() {}, onNext() {}, onNotYet() {} });
+        scan(c + " question");
+        const idk = document.getElementById("idk"); if (idk) { idk.click(); scan(c + " correction"); }
+      }
+      if (i === 0) sample = q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 110) + " → " + ans;
+    });
+    // Par le moteur : la forme sort bien (elle n'est pas effacée par un fichier chargé plus tard).
+    let viaEngine = 0; for (let s = 1; s <= 1500 && !viaEngine; s++) { const q = Engine.build(id, lv, s); if (q.ctx === "erreur" && /Trouve l.erreur/.test(q.q)) viaEngine = s; }
+    if (!viaEngine) fail(id + "-" + lv + " : jamais tirée par Engine.build (1500 graines)");
+    OUT.push(id + "-" + lv + " : " + got.length + " tirages, " + forms.size + " écritures, moteur graine " + viaEngine + " · " + sample);
+  }
+} catch (e) { fail("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }
+OUT.unshift((nbF ? nbF + " échec(s)" : "tout est bon") + " · " + FORMS.length + " formes « Trouve l'erreur »");
+parent.postMessage("te:" + OUT.join("\n"), "*");
+});
+</script>

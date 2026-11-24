@@ -597,6 +597,35 @@
       "Erreur : " + M(a + "^{" + m + "}") + " compte " + m + " facteurs " + a + " et " + M(a + "^{" + n + "}") + " en compte " + n + " : en tout " + M(m + " + " + n + " = " + (m + n)) + " facteurs, donc " + M(a + "^{" + (m + n) + "}") + ". On multiplie les exposants pour une puissance de puissance, " + M("(" + a + "^{" + m + "})^{" + n + "}") + ".",
       { ctx: "erreur", guide: [GS("Combien de facteurs " + a + " dans " + M(a + "^{" + m + "}") + " ?", m, M(m) + "."), GS("Et dans " + M(a + "^{" + n + "}") + " ?", n, M(n) + "."), GS("En tout (le bon exposant) ?", m + n, M(m + n) + ".")],
         traps: [TRAP(m * n, "C'est l'exposant de " + w + " : on additionne les exposants quand on multiplie deux puissances de même base.")] }); });
+  // « Trouve l'erreur » (24.11, chantier I, suite) : priorités, fractions (addition, division), notation scientifique.
+  const camarade = () => pk(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+  // prio : la soustraction faite avant la multiplication par la parenthèse.
+  PRIO[2].push(() => { const b = R.int(2, 5), c = R.int(2, 6), d = R.int(2, 7), v = R.int(3, 15), a = b * (c + d) + v, faux = (a - b) * (c + d), w = camarade();
+    if ([a, b, c, d, c + d, a - b, faux].includes(v)) return null;
+    return Qv(w + " écrit : « " + M(a + " - " + b + " \\cdot (" + c + " + " + d + ") = " + (a - b) + " \\cdot " + (c + d) + " = " + faux) + " ». Trouve l'erreur, puis calcule correctement.", v,
+      "Erreur : " + w + " a soustrait avant de multiplier. Parenthèses d'abord, puis la multiplication, enfin la soustraction : " + M(a + " - " + b + " \\cdot " + (c + d) + " = " + a + " - " + b * (c + d) + " = " + v) + ".",
+      { ctx: "erreur", guide: [GS("Parenthèses d'abord : " + M(c + " + " + d) + " = ?", c + d, M(c + d) + "."), GS("Puis la multiplication : " + M(b + " \\cdot " + (c + d)) + " = ?", b * (c + d), M(b * (c + d)) + "."), GS("Enfin " + M(a + " - " + b * (c + d)) + " = ?", v, M(v) + ".")],
+        traps: [TR(faux, "C'est le calcul de " + w + " : la multiplication passe avant la soustraction.")] }); });
+  // fracadd : numérateurs et dénominateurs additionnés entre eux.
+  FADD[2].push(() => { const [b, e] = pk(PAIRS), a = cop(1, b), c = cop(1, e), res = qa([a, b], [c, e]), w = camarade(), f = rq(a + c, b + e), L = lcm(b, e);
+    return Qv(w + " écrit : « " + M(fT(a, b) + " + " + fT(c, e) + " = " + fT(a + c, b + e)) + " ». Trouve l'erreur, puis donne le bon résultat (fraction irréductible).", qv(res),
+      "Erreur : on n'additionne pas les dénominateurs (sinon " + M(fT(1, 2) + " + " + fT(1, 2)) + " ferait " + M(fT(2, 4)) + ", une demie !). Même dénominateur d'abord : " + M(fT(a * L / b, L) + " + " + fT(c * L / e, L) + " = " + qT(res)) + ".",
+      { ctx: "erreur", guide: [GS("Plus petit dénominateur commun de " + M(b) + " et " + M(e) + " ?", L, M(L) + "."), GS("Numérateur de la somme : " + M(a + " \\cdot " + L / b + " + " + c + " \\cdot " + L / e) + " = ?", (a * L) / b + (c * L) / e, M((a * L) / b + (c * L) / e) + ", sur " + M(L) + "."), GS("Résultat (fraction irréductible) ?", qv(res), M(fT((a * L) / b + (c * L) / e, L) + (gcd2((a * L) / b + (c * L) / e, L) > 1 ? " = " + qT(res) : "")) + ".")], traps: [TR(qv(f), "C'est le résultat de " + w + " : on met les fractions au même dénominateur, puis on additionne les numérateurs seulement.")] }); });
+  // fracmul : division sans passer par l'inverse.
+  FMUL[2].push(() => { let a, b, c, e; do { b = R.int(2, 9); e = R.int(2, 9); a = irr(b, 9); c = irr(e, 9); } while (a * e === b * c || c === e || a * c === b * e);
+    const res = rq(a * e, b * c), f = rq(a * c, b * e), w = camarade();
+    return Qv(w + " écrit : « " + M(fT(a, b) + " : " + fT(c, e) + " = " + fT(a, b) + " \\cdot " + fT(c, e) + " = " + qT(f)) + " ». Trouve l'erreur, puis donne le bon quotient (fraction irréductible).", qv(res),
+      "Erreur : diviser par " + M(fT(c, e)) + ", c'est multiplier par son <b>inverse</b> " + M(fT(e, c)) + " : " + M(fT(a, b) + " \\cdot " + fT(e, c) + " = " + qT(res)) + ".",
+      { ctx: "erreur", guide: [GS("L'inverse de " + M(fT(c, e)) + " ? (tape la fraction)", e / c, M(fT(e, c)) + "."), GS("Calcule " + M(fT(a, b) + " \\cdot " + fT(e, c)) + " (fraction irréductible) :", qv(res), M(qT(res)) + ".")],
+        traps: [TR(qv(f), "C'est le résultat de " + w + " : il a multiplié par " + M(fT(c, e)) + " au lieu de son inverse.")] }); });
+  // scicalc : quotient de puissances de 10, exposant négatif mal soustrait.
+  SCALC[2].push(() => { const [a, b] = pk([[8, 2], [6, 3], [9, 3], [8, 4], [7.5, 2.5], [6, 2], [9, 2], [4.8, 1.6]]), m = R.int(3, 8), n = -R.int(2, 6), k = r12(a / b), w = camarade();
+    if (m + n === 0 || m + n === 1) return null;
+    const v = sv(k, m - n), f = sv(k, m + n);
+    return Qv(w + " écrit : « " + M("\\frac{" + S(a, m) + "}{" + S(b, n) + "} = " + S(k, m + n)) + " ». Trouve l'erreur, puis donne le bon résultat en notation scientifique.", v,
+      "Erreur : pour un quotient, on <b>soustrait</b> les exposants : " + M(m + " - (" + n + ") = " + (m - n)) + ". " + M(N(a) + " : " + N(b) + " = " + N(k)) + ", donc " + M(S(k, m - n)) + ".",
+      { sci: true, ctx: "erreur", guide: [GS("Nombres devant : " + M(N(a) + " : " + N(b)) + " = ?", k, M(N(k)) + "."), GS("Exposant : " + M(m + " - (" + n + ")") + " = ?", m - n, M(m - n) + " (soustraire un négatif, c'est ajouter)."), GSci("Résultat en notation scientifique ?", v, M(S(k, m - n)) + ".")],
+        traps: [TR(f, "C'est le résultat de " + w + " : " + M("10^{" + m + "} : 10^{" + n + "} = 10^{" + m + " - (" + n + ")}") + ".")] }); });
   const ALL = { prio: PRIO, fracadd: FADD, fracmul: FMUL, fracconv: FCONV, puiss: PUISS, sci: SCI, scicalc: SCALC };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);

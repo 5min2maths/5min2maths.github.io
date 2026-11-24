@@ -794,6 +794,21 @@
         ["b) Résous √(200d) = " + v2 + " : élève au carré.", "c) √(200 · 4d) = 2√(200d)."], "a) " + M("\\sqrt{" + 200 * d1 + "} = " + Math.sqrt(200 * d1)) + " km/h. b) " + M("200d = " + v2 * v2 + " \\iff d = " + tn((v2 * v2) / 200)) + " m. c) 2, car " + M("\\sqrt{4} = 2") + "."); }],
   };
 
+  // « Trouve l'erreur » (24.11, chantier I, suite) : division par x (solution perdue), formule mal retournée.
+  const camarade = () => pk(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+  EPN[2].push(() => { const a = pk([1, 1, 2, 3]), r = pk([-9, -8, -7, -6, -5, -4, -3, -2, 2, 3, 4, 5, 6, 7, 8, 9]), w = camarade(), ax = (a === 1 ? "" : a) + "x";
+    return Qs(w + " résout " + M(ax + "^2 = " + a * r + "x") + " : « je divise les deux membres par " + M("x") + " : " + M(ax + " = " + a * r) + ", donc " + M("x = " + r) + " ». Trouve l'erreur, puis donne toutes les solutions." + ASK, [0, r],
+      "Erreur : on ne peut pas diviser par " + M("x") + " sans savoir s'il est nul, et justement " + M("x = 0") + " est solution. On ramène tout à gauche et on factorise : " + M(ax + "^2 " + sgn(-a * r) + "x = 0 \\iff x(" + ax + sgn(-a * r) + ") = 0") + ", donc " + SS([0, r]) + ".",
+      { ctx: "erreur", guide: [GS("Tout à gauche et factorisé : " + M("x(" + ax + sgn(-a * r) + ") = 0") + ". Premier facteur nul : " + M("x") + " = ?", 0, M("x = 0") + "."), GSet("Toutes les solutions ?", [0, r], SS([0, r]) + ".")],
+        traps: [TS([r], "C'est la réponse de " + w + " : en divisant par " + M("x") + ", on a perdu la solution " + M("x = 0") + ".")] }); });
+  FORMULE[2].push(() => { const w = camarade(), c = pk([
+      ["v = \\frac{d}{t}", "t", "d/v", "\\frac{d}{v}", "v*d", "v \\cdot d", [["Multiplie les deux membres par " + M("t") + " : " + M("v \\cdot t") + " = ?", "d", "d"], ["Divise par " + M("v") + " : " + M("t") + " = ?", "d/v", "\\frac{d}{v}"]], "vitesse"],
+      ["A = \\frac{b \\cdot h}{2}", "h", "2*a/b", "\\frac{2A}{b}", "a/(2*b)", "\\frac{A}{2b}", [["Multiplie les deux membres par 2 : " + M("2A") + " = ?", "b*h", "b \\cdot h"], ["Divise par " + M("b") + " : " + M("h") + " = ?", "2*a/b", "\\frac{2A}{b}"]], "triangle"],
+      ["I = \\frac{U}{R}", "R", "u/i", "\\frac{U}{I}", "u*i", "U \\cdot I", [["Multiplie les deux membres par " + M("R") + " : " + M("I \\cdot R") + " = ?", "u", "U"], ["Divise par " + M("I") + " : " + M("R") + " = ?", "u/i", "\\frac{U}{I}"]], "ohm"]]);
+    return Qx("Dans la formule " + M(c[0]) + ", " + w + " isole " + M(c[1]) + " : « " + M(c[1] + " = " + c[5]) + " ». Trouve l'erreur, puis exprime correctement " + M(c[1]) + " (écris par exemple « " + c[1] + " = … » ou seulement l'expression).", c[2],
+      "Erreur : " + M(c[1]) + " est au dénominateur ; on ne peut pas simplement « faire passer » les lettres. On multiplie d'abord par le dénominateur, puis on divise : " + M(c[1] + " = " + c[3]) + ". Contrôle : en remplaçant dans " + M(c[0]) + ", on retrouve une égalité vraie.",
+      { ctx: "erreur", guide: c[6].map(([ask, e, t]) => GX(ask, e, M(t) + ".")), traps: [TX(c[4], "C'est la formule de " + w + " : vérifie avec des nombres, elle ne redonne pas " + M(c[0]) + ".")] }); });
+
   // ===================== Enregistrement =====================
   const ALL = { eq1: EQ1, eqfrac: EQF, eqspec: SPE, formule: FORMULE, probeq: PRQ, eq2fact: E2F, eq2: EPN, eq2disc: DIS, probeq2: PRQ2, eq3: EQ3, bicarre: BIC, eqirr: IRR };
   for (const [id, lv] of Object.entries(ALL)) {

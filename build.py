@@ -52,6 +52,7 @@ def paquet(f):
     if f.startswith("fr_"): return "fr"
     if f == "ch3c_ana.js": return "14"
     if f.startswith("ch4c"): return "15"  # 24.11 : 4e du Collège
+    if f in ("ch_mp1.js", "ch_mp2.js"): return "12"  # 24.11 : versions récentes de notions partagées avec le Collège (sinlaw, trigfn, stats…) : chargées dès la 1re, toutes filières
     if f == "riche_mp2.js": return ""  # définit RX, outils communs aussi utilisés par riche_2c et riche_mp1
     if f.startswith(("ch_mp", "riche_mp")) or f == "act_mp2.js": return "mp"
     if f.startswith(("ch1c", "riche_1c", "riche_sys1c")) or f in ("act_1c.js", "act_eq1c.js", "act_sys1c.js"): return "12"

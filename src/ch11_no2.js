@@ -347,6 +347,18 @@
     racprop: [() => P("Un carré a une aire de 50 cm².", [["a) Son côté vaut a√2 : a ?", 5], ["b) Sa diagonale (cm)", 10], ["c) Aire du carré construit sur la diagonale (cm²)", 100]], ["√50 = √(25 · 2).", "Diagonale = côté · √2."], "a) " + M("5\\sqrt{2}") + " ; b) " + M("5\\sqrt{2} \\cdot \\sqrt{2} = 10") + " ; c) " + M("100") + ".")],
   };
 
+  // « Trouve l'erreur » (24.11, chantier I, suite) : racine d'une somme, pourcentages successifs.
+  const camarade = () => pk(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+  RA[2].push(() => { let [a, b, c] = pk([[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 15, 17], [9, 12, 15], [12, 16, 20], [7, 24, 25]]); if (R.rand() < 0.5) [a, b] = [b, a]; const w = camarade();
+    return Qv(w + " écrit : « " + M("\\sqrt{" + a * a + " + " + b * b + "} = \\sqrt{" + a * a + "} + \\sqrt{" + b * b + "} = " + a + " + " + b + " = " + (a + b)) + " ». Trouve l'erreur, puis calcule correctement " + M("\\sqrt{" + a * a + " + " + b * b + "}") + ".", c,
+      "Erreur : la racine d'une somme n'est pas la somme des racines. On calcule d'abord sous la racine : " + M("\\sqrt{" + a * a + " + " + b * b + "} = \\sqrt{" + c * c + "} = " + c) + ". (Contrôle : " + M(c + "^2 = " + c * c) + ", alors que " + M((a + b) + "^2 = " + (a + b) * (a + b)) + ".)",
+      { ctx: "erreur", guide: [GS("D'abord sous la racine : " + M(a * a + " + " + b * b) + " = ?", c * c, M(c * c) + "."), GS(M("\\sqrt{" + c * c + "}") + " = ?", c, M(c) + ", car " + M(c + "^2 = " + c * c) + ".")],
+        traps: [TR(a + b, "C'est le résultat de " + w + " : " + M("\\sqrt{a + b} \\neq \\sqrt{a} + \\sqrt{b}") + ".")] }); });
+  PV[2].push(() => { const t = pk([10, 20, 30, 40, 50]), p = pk([80, 120, 160, 200, 240, 400, 480]), p1 = r6(p * (1 + t / 100)), red = r6(p1 * t / 100), v = r6(p1 - red), w = camarade(), c = pk([["Le prix d'un vélo", "velo"], ["Le prix d'une trottinette", "trottinette"], ["Le prix d'un abonnement", "abonnement"]]);
+    return Qv(c[0] + " de " + M(p) + " CHF augmente de " + M(t + "\\,\\%") + ", puis baisse de " + M(t + "\\,\\%") + ". " + w + " affirme : « +" + t + " % puis −" + t + " %, ça s'annule : on revient à " + M(p) + " CHF ». Trouve l'erreur, puis donne le prix final (en CHF).", v,
+      "Erreur : la baisse se calcule sur le <b>nouveau</b> prix, plus grand. Hausse : " + M(p + " \\cdot " + N(1 + t / 100) + " = " + N(p1)) + " CHF ; baisse : " + M(N(p1) + " \\cdot " + N(1 - t / 100) + " = " + N(v)) + " CHF, moins que le prix de départ.",
+      { ctx: "erreur", guide: [GS("Prix après la hausse de " + M(t + "\\,\\%") + " ?", p1, M(p + " \\cdot " + N(1 + t / 100) + " = " + N(p1)) + " CHF."), GS("Montant de la baisse : " + M(t + "\\,\\%") + " de " + M(N(p1)) + " ?", red, M(N(red)) + " CHF (plus que la hausse de " + M(N(r6(p * t / 100))) + " CHF)."), GS("Prix final ?", v, M(N(p1) + " - " + N(red) + " = " + N(v)) + " CHF.")],
+        traps: [TR(p, "C'est l'affirmation de " + w + " : les deux " + t + " % ne portent pas sur le même prix."), TR(p1, "C'est le prix après la hausse ; il reste la baisse.")] }); });
   const ALL = { rel: RE, fracops: FO, rac: RA, racprop: RP, carres: CA, pctvar: PV };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);

@@ -794,6 +794,21 @@
         ["b) Résous √(200d) = " + v2 + " : élève au carré.", "c) √(200 · 4d) = 2√(200d)."], "a) " + M("\\sqrt{" + 200 * d1 + "} = " + Math.sqrt(200 * d1)) + " km/h. b) " + M("200d = " + v2 * v2 + " \\iff d = " + tn((v2 * v2) / 200)) + " m. c) 2, car " + M("\\sqrt{4} = 2") + "."); }],
   };
 
+  // « Trouve l'erreur » (24.11, chantier I, suite) : division par x (solution perdue), formule mal retournée.
+  const camarade = () => pk(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+  EPN[2].push(() => { const a = pk([1, 1, 2, 3]), r = pk([-9, -8, -7, -6, -5, -4, -3, -2, 2, 3, 4, 5, 6, 7, 8, 9]), w = camarade(), ax = (a === 1 ? "" : a) + "x";
+    return Qs(w + " résout " + M(ax + "^2 = " + a * r + "x") + " : « je divise les deux membres par " + M("x") + " : " + M(ax + " = " + a * r) + ", donc " + M("x = " + r) + " ». Trouve l'erreur, puis donne toutes les solutions." + ASK, [0, r],
+      "Erreur : on ne peut pas diviser par " + M("x") + " sans savoir s'il est nul, et justement " + M("x = 0") + " est solution. On ramène tout à gauche et on factorise : " + M(ax + "^2 " + sgn(-a * r) + "x = 0 \\iff x(" + ax + sgn(-a * r) + ") = 0") + ", donc " + SS([0, r]) + ".",
+      { ctx: "erreur", guide: [GS("Tout à gauche et factorisé : " + M("x(" + ax + sgn(-a * r) + ") = 0") + ". Premier facteur nul : " + M("x") + " = ?", 0, M("x = 0") + "."), GSet("Toutes les solutions ?", [0, r], SS([0, r]) + ".")],
+        traps: [TS([r], "C'est la réponse de " + w + " : en divisant par " + M("x") + ", on a perdu la solution " + M("x = 0") + ".")] }); });
+  FORMULE[2].push(() => { const w = camarade(), c = pk([
+      ["v = \\frac{d}{t}", "t", "d/v", "\\frac{d}{v}", "v*d", "v \\cdot d", [["Multiplie les deux membres par " + M("t") + " : " + M("v \\cdot t") + " = ?", "d", "d"], ["Divise par " + M("v") + " : " + M("t") + " = ?", "d/v", "\\frac{d}{v}"]], "vitesse"],
+      ["A = \\frac{b \\cdot h}{2}", "h", "2*a/b", "\\frac{2A}{b}", "a/(2*b)", "\\frac{A}{2b}", [["Multiplie les deux membres par 2 : " + M("2A") + " = ?", "b*h", "b \\cdot h"], ["Divise par " + M("b") + " : " + M("h") + " = ?", "2*a/b", "\\frac{2A}{b}"]], "triangle"],
+      ["I = \\frac{U}{R}", "R", "u/i", "\\frac{U}{I}", "u*i", "U \\cdot I", [["Multiplie les deux membres par " + M("R") + " : " + M("I \\cdot R") + " = ?", "u", "U"], ["Divise par " + M("I") + " : " + M("R") + " = ?", "u/i", "\\frac{U}{I}"]], "ohm"]]);
+    return Qx("Dans la formule " + M(c[0]) + ", " + w + " isole " + M(c[1]) + " : « " + M(c[1] + " = " + c[5]) + " ». Trouve l'erreur, puis exprime correctement " + M(c[1]) + " (écris par exemple « " + c[1] + " = … » ou seulement l'expression).", c[2],
+      "Erreur : " + M(c[1]) + " est au dénominateur ; on ne peut pas simplement « faire passer » les lettres. On multiplie d'abord par le dénominateur, puis on divise : " + M(c[1] + " = " + c[3]) + ". Contrôle : en remplaçant dans " + M(c[0]) + ", on retrouve une égalité vraie.",
+      { ctx: "erreur", guide: c[6].map(([ask, e, t]) => GX(ask, e, M(t) + ".")), traps: [TX(c[4], "C'est la formule de " + w + " : vérifie avec des nombres, elle ne redonne pas " + M(c[0]) + ".")] }); });
+
   // ===================== Enregistrement =====================
   const ALL = { eq1: EQ1, eqfrac: EQF, eqspec: SPE, formule: FORMULE, probeq: PRQ, eq2fact: E2F, eq2: EPN, eq2disc: DIS, probeq2: PRQ2, eq3: EQ3, bicarre: BIC, eqirr: IRR };
   for (const [id, lv] of Object.entries(ALL)) {
@@ -1422,6 +1437,12 @@
         { ctx: "expression-fraction", fig: PLT([{ f: (x) => a * x + b }]), guide: [GN("Pente : en avançant de 2, de combien la droite monte-t-elle (négatif si elle descend) ? Divise par 2 :", a, M("a = " + fT(a)) + "."), GN("Ordonnée à l'origine " + M("b") + " (à mi-chemin entre deux graduations, ou calcule-la avec un point) ?", b, M("b = " + fT(b)) + "."), GX(M("f(x)") + " = ?", linP(a, b), M("f(x) = " + lin(a, b)) + ".")],
           traps: [TX(linP(2 / p, b), "Pente = variation verticale ÷ variation horizontale (pas l'inverse)."), TX(linP(a, Math.round(b)), "L'ordonnée à l'origine n'est pas entière : elle est à mi-chemin entre deux graduations."), TX(linP(-a, b), "Vérifie si la droite monte ou descend.")] }); },
   );
+  // « Trouve l'erreur » (24.11, chantier I, suite) : division par un négatif sans retourner le sens.
+  IQ[2].push(() => { const a = R.int(2, 6), x0 = nz(-6, 6), b = nz(-9, 9), op = pk(ops), c = -a * x0 + b, rs = flip[op], I = [ivOp(rs, x0)], w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+    return QS(w + " résout " + M(lin(-a, b) + " " + opT[op] + " " + c) + " : « " + M("-" + a + "x " + opT[op] + " " + (c - b)) + ", je divise par " + M("-" + a) + " : " + SX(op, x0) + " ». Trouve l'erreur, puis donne les solutions." + ANI, I,
+      "Erreur : en divisant (ou multipliant) par un nombre <b>négatif</b>, on retourne le sens de l'inégalité. " + M("-" + a + "x " + opT[op] + " " + (c - b)) + " donne " + SX(rs, x0) + ". Contrôle avec " + M("x = " + (x0 + (rs[0] === ">" ? 1 : -1))) + " : " + M(lin(-a, b) + " = " + (-a * (x0 + (rs[0] === ">" ? 1 : -1)) + b)) + ", ça marche.",
+      { ctx: "erreur", guide: [GN("On retire " + M(fT(b)) + " des deux côtés : " + M("-" + a + "x " + opT[op]) + " ?", c - b, M(c + sg(-b) + " = " + (c - b)) + "."), GSS("On divise par " + M("-" + a) + " (négatif : le sens se retourne). Solutions ?", I, SX(rs, x0) + ".")],
+        traps: [TS([ivOp(op, x0)], "C'est la réponse de " + w + " : il a oublié de retourner le sens en divisant par " + M("-" + a) + ".")] }); });
   const ALL = { sys2: SYS2, sysprob: SPROB, sysgraph: SGRAPH, sys3: SYS3, affine: AFF, affzero: AZ, sysineq: SI, ineq: IQ };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
@@ -2135,6 +2156,13 @@
         { ctx: "f-de-f", fig: PL([{ f }]), guide: [GS("Première lecture : " + M("f(" + k + ")") + " ?", y1, M(y1) + "."), GS("Deuxième lecture : " + M("f(" + y1 + ")") + " ? (pars de " + M(y1) + " sur l'axe HORIZONTAL)", y2, M(y2) + ".")],
           traps: [TR(y1, "Ça, c'est f(" + k + ") ; il faut encore lire l'image de " + y1 + "."), TR(y1 * y1, "f(f(x)) n'est pas f(x)² : on relit l'image de " + y1 + " sur la courbe.")] }); },
   );
+  // « Trouve l'erreur » (24.11, chantier I, suite) : -(-k)^2 calculé comme +k^2.
+  FI[2].push(() => { for (let essai = 0; ; essai++) { const k = R.int(2, 5), b = nz(-6, 6), c = nz(-9, 9), x = -k, v = -k * k + b * x + c, faux = k * k + b * x + c, w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+    const q = QN("Soit " + M("f(x) = " + tri(-1, b, c)) + ". " + w + " calcule : « " + M("f(" + x + ") = " + k * k + sg(b * x) + sg(c) + " = " + faux) + " ». Trouve l'erreur, puis donne " + M("f(" + x + ")") + ".", v,
+      "Erreur : " + M("-x^2") + " vaut " + M("-(" + x + ")^2 = -" + k * k) + " : on élève au carré <b>avant</b> d'appliquer le signe moins. " + M("f(" + x + ") = -" + k * k + sg(b * x) + sg(c) + " = " + v) + ".",
+      { ctx: "erreur", guide: [GS(M("(" + x + ")^2") + " = ?", k * k, M(k * k) + "."), GS(M("-(" + x + ")^2") + " = ?", -k * k, M(-k * k) + " (le moins reste devant le carré)."), GS(M("f(" + x + ")") + " = ?", v, M(-k * k + sg(b * x) + sg(c) + " = " + v) + ".")],
+        traps: [TR(faux, "C'est le résultat de " + w + " : " + M("-(" + x + ")^2 = -" + k * k) + ", pas " + M("+" + k * k) + ".")] });
+    if (essai >= 20 || (Math.abs(v) > 1 && !trivialQ(q, 0) && !answerShown(q))) return q; } });
   const ALL = { fimg: FI, lectgraph: LG, racinv: RI, modaff: MA, transf: TF, absval: AV, morceaux: MO };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
@@ -2445,6 +2473,13 @@
         { ctx: "a-zeros-f0", fig: PLf([{ f: (x) => a * (x - p) * (x - q) }], [[0, f0, ""]], { yr: [-8, 8], squash: 0.8 }), guide: [GSet("Zéros lus ?", [p, q], M(p) + " et " + M(q) + "."), GS("Ordonnée à l'origine " + M("f(0)") + " (point marqué) ?", f0, M(f0) + "."), GS(M("f(0) = a \\cdot (0 - x_1)(0 - x_2) = " + p * q + "a") + ". Donc " + M("a") + " = ?", a, M(fT(a)) + ".")],
           traps: [TR(f0, "f(0) n'est pas a : f(0) = a · x₁ · x₂."), TR(-a, "La parabole est tournée vers le " + (a > 0 ? "haut : a > 0." : "bas : a < 0.")), TR(f0 / (p + q), "f(0) = a · x₁ · x₂ : on divise par le PRODUIT des zéros.")] }); },
   );
+  // « Trouve l'erreur » (24.11, chantier I, suite) : le signe moins devant un carré ne change que le premier terme.
+  PO[2].push(() => { let a, b; do { a = R.int(2, 7); b = R.int(2, 7); } while (a === b); const w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+    const sq = P2([1, -2 * b, b * b]), op = P2([-1, 2 * b, -b * b]), ans = P2([2 * (a + b), a * a - b * b]), faux = P2([2 * (a - b), a * a + b * b]);
+    return QX(w + " écrit : « " + M("(x + " + a + ")^2 - (x - " + b + ")^2 = x^2 + " + 2 * a + "x + " + a * a + " - x^2 - " + 2 * b + "x + " + b * b + " = " + faux) + " ». Trouve l'erreur, puis développe et réduis correctement.", ans, "expanded",
+      "Erreur : le signe moins s'applique à <b>tout</b> le carré. On développe d'abord " + M("(x - " + b + ")^2 = " + sq) + " entre parenthèses, puis on change tous les signes : " + M("-(" + sq + ") = " + op) + ". Donc " + M("x^2 + " + 2 * a + "x + " + a * a + " - x^2 + " + 2 * b + "x - " + b * b + " = " + ans) + ".",
+      { ctx: "erreur", guide: [GX("Développe " + M("(x - " + b + ")^2") + " :", sq, M(sq) + "."), GX("Change tous les signes : " + M("-(x - " + b + ")^2") + " = ?", op, M(op) + "."), GX("Ajoute " + M("(x + " + a + ")^2 = x^2 + " + 2 * a + "x + " + a * a) + " et réduis :", ans, M(ans) + ".")],
+        traps: [TX(faux, "C'est le résultat de " + w + " : le moins change le signe des trois termes du carré.")] }); });
   const ALL = { polyop: PO, factor2: FC, trinfact: TF, f2: F2, f2formes: FF };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
@@ -2763,6 +2798,13 @@
     ineq2: [() => P("On résout x² − 2x − 8 ≤ 0.", [["a) Plus petit zéro", -2], ["b) Plus grand zéro", 4], ["c) Nombre d'entiers solutions", 7]], ["(x − 4)(x + 2).", "Solution [−2 ; 4]."], "a) −2 ; b) 4 ; c) de −2 à 4 : 7 entiers.")],
   };
 
+  // « Trouve l'erreur » (24.11, chantier I, suite) : x^2 > k^2 « donc x > k » (solutions négatives oubliées).
+  IQ[2].push(() => { const op = pk(["<", "<=", ">", ">="]), k = R.int(2, 9), f = (x) => x * x - k * k, ivs = signSet(f, [-k, k], [], op), w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]),
+      faux = op[0] === "<" ? [[-Infinity, false, k, op === "<="]] : [[k, op === ">=", Infinity, false]];
+    return QS(w + " résout " + M("x^2 " + opLabel(op) + " " + k * k) + " : « je prends la racine : " + M("x " + opLabel(op) + " " + k) + " ». Trouve l'erreur, puis donne l'ensemble des solutions.", ivs,
+      "Erreur : " + w + " oublie les nombres négatifs ; par exemple " + M("(-" + (k + 1) + ")^2 = " + (k + 1) * (k + 1)) + (op[0] === "<" ? " ne vérifie pas l'inéquation, alors que " + M("-" + (k + 1) + " " + opLabel(op) + " " + k) + "." : " vérifie l'inéquation.") + " " + M("x^2 - " + k * k + " = (x - " + k + ")(x + " + k + ")") + ", zéros " + M(-k) + " et " + M(k) + " : " + M("S = " + IT(ivs)) + ".",
+      { ctx: "erreur", guide: [GSet("Zéros de " + M("x^2 - " + k * k) + " ?", [-k, k], M(-k) + " et " + M(k) + "."), GSS("Solution ? (parabole tournée vers le haut)", ivs, M(IT(ivs)) + ".")],
+        traps: [TS(faux, "C'est la réponse de " + w + " : " + M("\\sqrt{x^2} = |x|") + ", il y a aussi des solutions négatives" + (op[0] === "<" ? " et une borne à gauche." : "."))] }); });
   const ALL = { f2expr: FE, f2trois: T3, inter: IN, interpar: IP, ineq2: IQ, ineqfrac: IFQ };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);

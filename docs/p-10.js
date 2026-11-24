@@ -237,6 +237,21 @@
     reladd: [() => P("Un randonneur part d'un lac à l'altitude 372 m. Il monte de 1'140 m, redescend de 385 m, puis remonte de 210 m.", [["a) Altitude après la première montée (m)", 1512], ["b) Altitude finale (m)", 1337], ["c) Dénivelé total à la montée (m)", 1350]], ["372 + 1'140.", "Montées : 1'140 + 210."], "a) " + M("1\\text{'}512") + " ; b) " + M("1\\text{'}512 - 385 + 210 = 1\\text{'}337") + " ; c) " + M("1\\text{'}140 + 210 = 1\\text{'}350") + " m.")],
   };
 
+  // « Trouve l'erreur » (24.11, chantier I, suite) : décimales d'un produit, soustraction d'un négatif.
+  const camarade = () => pk(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+  DM[2].push(() => { const u = R.int(0, 3), a = R.int(1, 9), b = R.int(2, 9), x = r6(u + a / 10), y = r6(b / 10), n = (10 * u + a) * b, v = r6(n / 100), faux = r6(n / 10), w = camarade();
+    if (n % 10 === 0) return null;
+    return Qv(w + " écrit : « " + M(N(x) + " \\cdot " + N(y) + " = " + N(faux)) + " ». Trouve l'erreur, puis donne le bon produit.", v,
+      "Erreur : " + w + " n'a gardé qu'une décimale, comme pour une addition. Pour un produit, on compte les décimales des <b>deux</b> facteurs : 1 + 1 = 2. " + M((10 * u + a) + " \\cdot " + b + " = " + n) + ", donc " + M(N(x) + " \\cdot " + N(y) + " = " + N(v)) + ". Contrôle : multiplier par " + M(N(y)) + " (moins que 1) rend le nombre plus petit.",
+      { ctx: "erreur", guide: [G("Sans les virgules : " + M((10 * u + a) + " \\cdot " + b) + " = ?", n, M(n) + "."), G("Nombre total de décimales des deux facteurs ?", 2, "1 + 1 = 2."), G("Le bon produit ?", v, M(N(v)) + ".")],
+        traps: [TR(faux, "C'est le résultat de " + w + " : " + M(N(x) + " \\cdot " + N(y)) + " a deux décimales, une par facteur.")] }); });
+  RA[2].push(() => { const a = nz(-12, 12), b = R.int(2, 12), c = R.int(2, 12), v = a + b - c, faux = a - b - c, w = camarade();
+    if (Math.abs(v) < 2 || [a, b, c, faux, a - b, a + b].some((t) => Math.abs(t) === Math.abs(v))) return null;
+    return Qv(w + " écrit : « " + M(N(a) + " - (-" + b + ") + (-" + c + ") = " + N(a) + " - " + b + " - " + c + " = " + N(faux)) + " ». Trouve l'erreur, puis calcule correctement.", v,
+      "Erreur : soustraire " + M("(-" + b + ")") + ", c'est ajouter son opposé " + M(b) + ". " + M(N(a) + " - (-" + b + ") + (-" + c + ") = " + N(a) + " + " + b + " - " + c + " = " + N(v)) + ".",
+      { ctx: "erreur", guide: [G("Soustraire " + M("(-" + b + ")") + ", c'est ajouter " + M(b) + " : " + M(N(a) + " + " + b) + " = ?", a + b, M(N(a + b)) + "."), G("Puis ajouter " + M("(-" + c + ")") + " : " + M(par(a + b) + " - " + c) + " = ?", v, M(N(v)) + ".")],
+        traps: [TR(faux, "C'est le résultat de " + w + " : moins par moins, " + M("-(-" + b + ") = +" + b) + ".")] }); });
+
   const ALL = { ordgr: OG, decadd: DA, decmul: DM, decdiv: DD, reladd: RA };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
