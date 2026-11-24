@@ -17,3 +17,4 @@ tools/chantier_*.md
 !docs/icon-*.png
 !src/pwa/icon-*.png
 tests/_syntaxe.html
+tests/_retiens_audit.html

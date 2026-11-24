@@ -19,7 +19,7 @@ function predOrder(n) { const o = [...Array(n).keys()]; if (n < 3) return o; for
 // Leçons actives (14.11, demande de l'utilisateur : « l'élève doit être actif ») : trois temps.
 // 1. Devine : une question à toucher avant toute règle. 2. Manipule : des défis à réussir avec les doigts.
 // 3. Retiens : la règle, les exemples et le piège arrivent après. Prototype : fractout, prio.
-// ACTIVE[id] = { predict: { q, choices, good, why }, defis: [texte…], play(box, onWin) }.
+// ACTIVE[id] = { predict: { q, choices, good, why }, defis: [texte…], play(box, onWin), retiens? (voir actRetiens) }.
 // play dessine la manipulation dans box et appelle onWin(i) quand le défi i est réussi (dans l'ordre).
 // Pas de TeX dans ce qui est redessiné à chaque geste (pas de MathJax à relancer).
 
@@ -293,8 +293,21 @@ function actPrep(A) {
 function $hint(box, t) { let el = box.querySelector(".act-hint"); if (!el) { el = document.createElement("div"); el.className = "small act-hint"; box.appendChild(el); } el.textContent = t; }
 
 // Écran de leçon active. cont : suite de la séance.
-function activeLesson(id, L, cont, review) {
-  const A0 = ACTIVE[id], P = A0.predict, X = actPrep(A0), A = Object.assign({}, A0, { defis: X.defis, play: X.play });
+// « Retiens » propre à la leçon active (24.11, règle du 15.11 : n'afficher que ce que les défis ont présenté, avec le
+// vocabulaire exact). A.retiens = { regle, exemple: […], piege } ou fonction (L) → objet : chaque champ donné remplace
+// celui de la leçon générale LESSONS[id] (titre et intro inchangés) ; sans ce champ, la leçon générale. Les « : » sont
+// traités comme dans LESSONS (colonBreak, engine.js).
+function actRetiens(A, L) {
+  if (!A || !A.retiens) return L;
+  const r = typeof A.retiens === "function" ? A.retiens(L) : A.retiens, cb = typeof colonBreak === "function" ? colonBreak : (x) => x, o = Object.assign({}, L);
+  if (typeof r.regle === "string") o.regle = cb(r.regle);
+  if (Array.isArray(r.exemple)) o.exemple = r.exemple.map(cb);
+  if (typeof r.piege === "string") o.piege = cb(r.piege);
+  return o;
+}
+
+function activeLesson(id, L0, cont, review) {
+  const A0 = ACTIVE[id], P = A0.predict, X = actPrep(A0), A = Object.assign({}, A0, { defis: X.defis, play: X.play }), L = actRetiens(A0, L0);
   const ss = sentences(L.regle);
   const rule = ss.length > 1 ? "<ul>" + ss.map((x) => "<li>" + x + "</li>").join("") + "</ul>" : " · " + L.regle;
   const tail = lessonBody(id), fb = tail.slice(tail.indexOf('<div class="lfb"'));

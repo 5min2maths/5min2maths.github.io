@@ -1,0 +1,33 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css"><body style="width:400px"><main id="app"></main><pre id="log" hidden></pre>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/fr_college.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script>
+// « Retiens » des leçons actives (24.11) : champ facultatif retiens (actRetiens, active.js). Pour chaque leçon active,
+// sans retiens, l'étape 3 reçoit la leçon générale LESSONS[id] inchangée ; avec, elle affiche la règle, les exemples et
+// le piège du retiens, qui doit être bien formé (regle, piege : texte ; exemple : liste non vide ; \\( \\) appariés).
+const log=[];let bad=0,own=0,n=0;
+window.scrollTo=()=>{};Element.prototype.scrollIntoView=function(){};
+for(const id of Object.keys(ACTIVE)){ const A=ACTIVE[id],L=LESSONS[id]; if(!L) continue; n++;
+  try{
+    let E=L;
+    if(A.retiens){own++; const r=typeof A.retiens==="function"?A.retiens(L):A.retiens;
+      for(const k of Object.keys(r)) if(!["regle","exemple","piege"].includes(k)) {bad++;log.push(id+" : ÉCHEC champ inconnu "+k);}
+      if(r.regle!==undefined&&!(typeof r.regle==="string"&&r.regle.trim())) {bad++;log.push(id+" : ÉCHEC regle vide");}
+      if(r.piege!==undefined&&!(typeof r.piege==="string"&&r.piege.trim())) {bad++;log.push(id+" : ÉCHEC piege vide");}
+      if(r.exemple!==undefined&&!(Array.isArray(r.exemple)&&r.exemple.length)) {bad++;log.push(id+" : ÉCHEC exemple vide");}
+      E=Object.assign({},L,{regle:r.regle!==undefined?colonBreak(r.regle):L.regle,exemple:r.exemple?r.exemple.map(colonBreak):L.exemple,piege:r.piege!==undefined?colonBreak(r.piege):L.piege});
+      const fe=(x)=>(x.match(/\\\(/g)||[]).length===(x.match(/\\\)/g)||[]).length;
+      if(![E.regle,E.piege,...E.exemple].every(fe)) {bad++;log.push(id+" : ÉCHEC \\( \\) déséquilibrés");}
+    }
+    if(!A.retiens){ if(actRetiens(A,L)!==L){bad++;log.push(id+" : ÉCHEC leçon sans retiens modifiée");} continue; }
+    /* dyn.js peut réécrire les nombres des exemples : on compare le texte hors formules du début de la règle et du piège */
+    screenLesson(id,()=>{});
+    const s3=document.getElementById("s3"); if(!s3){bad++;log.push(id+" : ÉCHEC pas d'étape Retiens");continue;}
+    const plain=(x)=>{const d=document.createElement("div");d.innerHTML=x.replace(/\\\(.*?\\\)/g," ");return d.textContent.replace(/[\s,;:.]+/g,"").slice(0,25);};
+    const nt=(el)=>el.textContent.replace(/\\\(.*?\\\)/g," ").replace(/[\s,;:.]+/g,""), rt=nt(s3.querySelector(".rule")), tt=nt(s3.querySelector(".trap"));
+    if(!rt.includes(plain(E.regle))||!tt.includes(plain(E.piege))||s3.querySelectorAll(".ex-list > div").length!==E.exemple.length||/undefined|NaN/.test(s3.innerHTML)){bad++;log.push(id+" : ÉCHEC Retiens propre non affiché ["+plain(E.regle)+"] dans ["+rt.slice(0,60)+"] / ["+plain(E.piege)+"] dans ["+tt.slice(0,60)+"]");}
+  }catch(e){bad++;log.push(id+" : EXC "+e.message);}
+}
+log.unshift((bad?"ÉCHEC ":"OK ")+n+" leçons actives, dont "+own+" avec un Retiens propre ; "+bad+" écart(s)");
+document.getElementById("log").hidden=false;document.getElementById("log").textContent=log.join("\n");
+</script>
