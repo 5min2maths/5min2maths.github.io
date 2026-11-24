@@ -248,7 +248,7 @@ function screenWelcome() {
   const q = demoQuestion(), n = NOTIONS.find((x) => x.id === q.id), fine = window.matchMedia("(pointer: fine)").matches;
   h(`${brand}
   <div class="stack"><h1>Chaque jour, <span class="mark">5 minutes</span> de maths, à ton niveau.</h1>
-  <p class="muted">Une question du jour choisie pour toi, une figure, une correction immédiate. Ton Mathélo monte quand tu progresses. Pas de compte : tout reste sur ton téléphone.</p></div>
+  <p class="muted">Une question du jour choisie pour toi, une figure, une correction immédiate. Ton Mathélo monte quand tu progresses. Pas de compte, pas de nom : ta progression reste sur ton téléphone ; seules des statistiques anonymes sont envoyées pour améliorer l'app (<a href="#" id="envoie-lien">ce que l'app envoie</a>).</p></div>
   <div class="stack"><span class="small muted">Je suis en :</span><div class="seg" id="dgrade">${[[9, "9e"], [10, "10e"], [11, "11e"], [12, "Sec. II"]].map(([g, l]) => `<button aria-pressed="${g === demoGrade}" data-v="${g}">${l}</button>`).join("")}</div></div>
   <div class="card tilt" id="demo"><div class="qmeta"><span class="chip">Essaie · ${n ? n.label : "exemple"}</span><span class="dots"><i class="on"></i><i></i><i></i></span></div>
   <div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
@@ -290,6 +290,7 @@ function screenWelcome() {
   document.getElementById("dskip").onclick = () => { demoSkip.push(q.id); redraw(); };
   app.querySelectorAll("#dgrade button").forEach((b) => (b.onclick = () => { demoGrade = +b.dataset.v; demoSkip = []; draft.grade = demoGrade; redraw(); }));
   document.getElementById("privacy").onclick = () => screenPrivacy(screenWelcome);
+  document.getElementById("envoie-lien").onclick = (e) => { e.preventDefault(); screenPrivacy(screenWelcome); }; /* 24.11 : promesse exacte, lien vers le détail */
   document.getElementById("restore").onclick = () => screenRestore();
 }
 
