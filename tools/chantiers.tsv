@@ -4,7 +4,7 @@ A	Lots « notion complète » (pas à pas, erreurs typiques, contextes, valeurs)
 11e-CL	11e Calcul littéral « nickel » (CL1, CL2)	Pédagogie	4	à contrôler	80 %	16.11	notions et test de préparation faits	contrôle ; CL1 prêt pour le 11.12, CL2 pour le 15.01
 1C	1re Collège complète	Pédagogie	4	à contrôler	90 %	20.11	toutes les notions au standard (tirages réels)	contrôle par l'enseignant (colonne Contrôlé)
 V	Leçons actives (devine, manipule, retiens) pour chaque notion	Pédagogie	5	en cours	70 %	23.11	9e, 10e (partiel), 11e, 1re et 2e Collège, MP 2e faites ; voir % dans Synthèse	compléter 10e et MP 1re
-K	Figures à manipuler (bibliothèque tactile manip.js)	Pédagogie	5	en cours	40 %	23.11	15 leçons refaites en « glisse sur la figure » (tuiles, balance, fractions, droite, Thalès…)	étendre aux notions où un geste aide (tools/manipulation.md)
+K	Figures à manipuler (bibliothèque tactile manip.js)	Pédagogie	5	en cours	55 %	24.11	20 leçons en « glisse sur la figure » (+ cercle de Thalès, urne, taxis, sommet de parabole, pente)	étendre selon les retours ; contrôle du rendu
 U	Exercices riches et tests de préparation (pas du drill)	Pédagogie	4	en cours	70 %	23.11	9e, 10e, 11e, 1re Collège, 2e Collège (14 banques), MP 1re et MP 2e (partiel)	MP : chapitres restants ; contrôle d'un sujet par niveau
 I	« Trouve l'erreur »	Pédagogie	5	en cours	60 %	24.11	+ 8 formes : 11e Thalès, Pythagore, puissances, probabilités, pente ; 1re trigonométrie, systèmes, sommet	étendre aux autres chapitres des testeurs
 J	Estimation, Fermi, questions curieuses	Pédagogie	6	fait	100 %	21.11	61 questions curieuses, 5 familles (src/curieux.js)	nouveaux lots si les élèves aiment
@@ -23,7 +23,7 @@ S	Progression visible	Produit	5	à contrôler	90 %	24.11	ligne « Cette semaine 
 E	Icônes de badges	Produit	6	abandonné	—	22.11	badges abandonnés le 22.11	—
 M	Récompenses visuelles	Produit	6	en partie	30 %	22.11	grades Mathélo « collector » numérotés	—
 O	Accessibilité (police dyslexie, taille du texte, contrastes)	Produit	7	à contrôler	90 %	24.11	Réglages « Affichage » : taille du texte (3), police plus lisible, contraste renforcé ; couleurs ≥ 4,5:1 (WCAG AA) ; focus clavier, zones tactiles	contrôle sur téléphone (rendu réel des polices, thème sombre)
-Q	Captures automatiques des figures	Technique	7	à faire	10 %	23.11	galerie tests/gallery.html à la main	—
+Q	Captures automatiques des figures	Technique	7	fait	90 %	24.11	galerie de 604 figures (2 Mo, hors ligne), régénérée chaque nuit avec le robot : suivi/galerie/	corriger les ≈ 60 figures relevées (2 agents en cours)
 L	Parcours d'examen (EVACOM 11e, épreuves communes, matu)	Produit	6	à faire	0 %	14.11	—	EVACOM prêt avant fin avril
 FICHE	« Ma fiche » (synthèse à compléter)	Produit	—	abandonné	—	23.11	retirée : plus-value pas convaincante ; code dans la branche archive/fiche	—
 CARN	Carnet d'erreurs et programme du test	Produit	—	fait	100 %	21.11	publiés le 20.11, installer fait le 21.11	—
@@ -42,3 +42,4 @@ AC	Primaire, cycle 1	Long terme	—	à faire	0 %	22.11	—	2028 et après
 AD	Québec, Maghreb, Afrique francophone	Long terme	—	à faire	0 %	22.11	—	2028 et après
 DIP	Bêta : diffusion au-delà des testeurs (cadre DIP)	Diffusion	—	à décider	—	22.11	46 testeurs, vrai test = ouverture à la 11LS	décision de l'enseignant
 F2	Chargement par niveau (un élève ne télécharge que ses notions)	Technique	1	fait	90 %	24.11	paquets par niveau + chargeur ; MathJax géré par le chargeur ; polices non bloquantes. Première visite 4G lente 10,9 s → 5,1 s ; habitué 0,46 s	découper le commun (40 %) ; test de bout en bout : tools/test_paquets.py
+FIG	Figures fidèles à l'énoncé (relevé de la galerie du 24.11)	Qualité	4	en cours	10 %	24.11	≈ 60 figures relevées : triangles de trigo identiques, angles faux, solides pas à l'échelle, points hors cadre, étiquettes	2 agents : géométrie/solides et graphiques/étiquettes
