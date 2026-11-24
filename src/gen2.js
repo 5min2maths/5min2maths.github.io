@@ -76,8 +76,12 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
     if (o.grid !== false) for (let y = Math.ceil(y0); y <= y1; y++) g += L(X(x0), Y(y), X(x1), Y(y), "f-grid");
     g += L(X(x0), Y(0), X(x1), Y(0)) + L(X(0), Y(y0), X(0), Y(y1));
     if (o.numbers) {
-      for (let x = Math.ceil(x0); x <= x1; x++) if (x && x % (o.step || 1) === 0) g += t(X(x), Y(0) + 13, x, "f-txt f-tick", "middle", 10);
-      for (let y = Math.ceil(y0); y <= y1; y++) if (y && y % (o.step || 1) === 0) g += t(X(0) - 4, Y(y) + 4, y, "f-txt f-tick", "end", 10);
+      /* 24.11 (agent MP 4e : chiffres de l'axe sur la courbe là où elle coupe l'axe) : si la courbe passe sur le chiffre,
+         il passe de l'autre côté de l'axe (au-dessus pour x, à droite pour y). */
+      const Xi = (px) => x0 + ((px - 10) / (W - 20)) * (x1 - x0);
+      const near = (cx, cy) => fns.some((F) => { for (let px = cx - 7; px <= cx + 7; px += 1.5) { const v = F.f(Xi(px)); if (isFinite(v) && Math.abs(Y(v) - cy) < 7) return true; } return false; });
+      for (let x = Math.ceil(x0); x <= x1; x++) if (x && x % (o.step || 1) === 0) { const up = near(X(x), Y(0) + 9) && !near(X(x), Y(0) - 9); g += t(X(x), up ? Y(0) - 5 : Y(0) + 13, x, "f-txt f-tick", "middle", 10); }
+      for (let y = Math.ceil(y0); y <= y1; y++) if (y && y % (o.step || 1) === 0) { const rt = near(X(0) - 10, Y(y)) && !near(X(0) + 10, Y(y)); g += t(rt ? X(0) + 4 : X(0) - 4, Y(y) + 4, y, "f-txt f-tick", rt ? "start" : "end", 10); }
     } else if (o.ticks !== false) {
       for (let x = Math.ceil(x0); x <= x1; x++) g += L(X(x), Y(0) - 3, X(x), Y(0) + 3);
       for (let y = Math.ceil(y0); y <= y1; y++) g += L(X(0) - 3, Y(y), X(0) + 3, Y(y));
