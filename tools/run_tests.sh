@@ -35,6 +35,16 @@ print(('ÉCHEC ' if re.search(r'ÉCHEC|FAIL|EXC',t) else 'ok ')+t[:260].replace(
 export -f un
 # bot.html = élève-robot complet (tools/bot_eleve.py) : trop lourd pour la batterie, lancé à part chaque nuit (23.11).
 if [ $# -gt 0 ]; then L=$(for t in "$@"; do echo "tests/$t.html"; done); else L=$(ls tests/*.html | grep -v "/_" | grep -v "/bot.html"); fi
+# 24.11 : contrôle de syntaxe de tous les fichiers de l'app (une erreur de syntaxe fait disparaître un fichier entier
+# sans qu'une page de test le voie forcément : act_ch11c.js, 24.11). Page générée d'après la liste JS de build.py ;
+# les erreurs sont lues dans la console de Chromium (nom du fichier et ligne).
+python3 - <<'PY'
+import re
+s = open("build.py").read(); JS = eval(re.search(r"JS = (\[.*?\])", s, re.S).group(1))
+open("tests/_syntaxe.html", "w").write('<!doctype html><meta charset="utf-8"><main id="app"></main><script>window.MathJax={typesetPromise:()=>Promise.resolve()};</script>' + "".join('<script src="../src/%s"></script>' % f for f in JS) + '<pre id="log">fin</pre>')
+PY
+SYN=$(timeout -k 5 90 chromium --headless --disable-gpu --no-sandbox --enable-logging=stderr --v=0 --virtual-time-budget=8000 --dump-dom "file://$PWD/tests/_syntaxe.html" 2>&1 >/dev/null 9>&- | grep -o '"Uncaught [^"]*", source: [^ ]* ([0-9]*)' | sed 's#file://[^ ]*/src/##')
 R=$(echo "$L" | xargs -P 3 -I{} bash -c 'un {}' 9>&-)
+[ -n "$SYN" ] && R=$(printf '%s\n%s' "$R" "$(echo "$SYN" | sed 's/^/syntaxe : ÉCHEC /')")
 echo "$R" | grep -c "" | xargs echo "pages testées :"
 echo "$R" | grep "ÉCHEC" || echo "aucun échec"

@@ -34,7 +34,7 @@ async def scenario(port, url):
         cdp = mc.CDP(ws)
         for d in ("Page", "Runtime"):
             await cdp.call(d + ".enable")
-        await cdp.call("Page.addScriptToEvaluateOnNewDocument", source="window.__err = []; addEventListener('error', (e) => __err.push(String(e.message)));")
+        await cdp.call("Page.addScriptToEvaluateOnNewDocument", source="window.__err = []; addEventListener('error', (e) => __err.push((e.filename || '').split('/').pop() + ':' + e.lineno + ' ' + String(e.message)));")
         ev = lambda js: cdp.call("Runtime.evaluate", expression=js, awaitPromise=True, returnByValue=True)
         val = lambda r: (r.get("result", {}).get("result") or r.get("result", {})).get("value")
 
