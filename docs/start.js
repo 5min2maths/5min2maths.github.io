@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "778b678f90"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "27efea842b"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 function errCanSend() {
@@ -88,7 +88,7 @@ const addTabs = () => {
   if (br && !app.querySelector(".hub")) { br.classList.add("brand-home"); br.title = "Accueil";
     /* 24.11 (« la bulle nous renvoie à l'accueil ») : seul le nom de l'app ramène à l'accueil, pas tout le bandeau ;
        un toucher à côté du 💬 (petit bouton logé dans le bandeau) ne quitte plus la page. */
-    br.onclick = (e) => { if (e.target.closest("#fabc, #fabs") || !e.target.closest(".brand > b, .brand > span")) return; goHome(); }; }
+    br.onclick = (e) => { if (e.target.closest("#fabc, #fabs") || !e.target.closest(".brand > b")) return; goHome(); }; }
   if (!app.querySelector(".hub") && !(history.state && history.state.m2m)) history.pushState({ m2m: 1 }, "");
 };
 window.addEventListener("popstate", () => {

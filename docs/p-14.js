@@ -981,8 +981,10 @@
     for (let v = Math.ceil(yr[0] / gy) * gy; v <= yr[1] + 1e-9; v += gy) g += L(X(xr[0]), Y(v), X(xr[1]), Y(v), "f-grid", 0.7);
     const y0 = Math.min(Math.max(0, yr[0]), yr[1]), x0 = Math.min(Math.max(0, xr[0]), xr[1]);
     g += L(X(xr[0]), Y(y0), X(xr[1]), Y(y0), "f-line", 1.2) + L(X(x0), Y(yr[0]), X(x0), Y(yr[1]), "f-line", 1.2);
-    for (let v = Math.ceil(xr[0] / lx) * lx; v <= xr[1] + 1e-9; v += lx) if (Math.abs(v) > 1e-9 && v < xr[1] - 1e-9) g += T(X(v), Math.min(Y(y0) + 13, H - 2), fx(+v.toFixed(6)), "middle", 10);
-    for (let v = Math.ceil(yr[0] / ly) * ly; v <= yr[1] + 1e-9; v += ly) if (Math.abs(v) > 1e-9 && v < yr[1] - 1e-9) g += T(Math.max(X(x0) - 4, o.pad ? ml - 3 : 24), Y(v) + 3.5, fy(+v.toFixed(6)), "end", 10);
+    /* 24.11 soir (galerie : « 2 » pâli sous l'aire colorée) : graduations dessinées après les surfaces et les courbes, avec liseré */
+    let tk = "";
+    for (let v = Math.ceil(xr[0] / lx) * lx; v <= xr[1] + 1e-9; v += lx) if (Math.abs(v) > 1e-9 && v < xr[1] - 1e-9) tk += T(X(v), Math.min(Y(y0) + 13, H - 2), fx(+v.toFixed(6)), "middle", 10, "f-txt f-tick");
+    for (let v = Math.ceil(yr[0] / ly) * ly; v <= yr[1] + 1e-9; v += ly) if (Math.abs(v) > 1e-9 && v < yr[1] - 1e-9) tk += T(Math.max(X(x0) - 4, o.pad ? ml - 3 : 24), Y(v) + 3.5, fy(+v.toFixed(6)), "end", 10, "f-txt f-tick");
     /* polys : surfaces colorées [[points [x, y]…], classe] (aires sous une courbe), dessinées sous les courbes */
     for (const [P, cls] of o.polys || []) c += `<polygon points="${P.map(([x, y]) => X(x) + "," + Y(Math.max(yr[0], Math.min(yr[1], y)))).join(" ")}" class="${cls || "f-fill2"}" style="stroke:none;opacity:0.7"/>`;
     const span = yr[1] - yr[0];
@@ -1008,7 +1010,7 @@
       p += `<circle cx="${X(x)}" cy="${Y(y)}" r="5" class="${cls || "f-dot"}"/>`;
       if (lab) { const left = pos === "l" || (pos !== "r" && X(x) > W - 90); p += T(X(x) + (left ? -8 : 8), Y(y) + (pos === "b" ? 16 : -7), lab, left ? "end" : "start", 12); }
     }
-    return svg(W, H, `<defs><clipPath id="${id}"><rect x="${ml}" y="${m}" width="${W - m - ml}" height="${H - 2 * m}"/></clipPath></defs>${g}<g clip-path="url(#${id})">${c}</g>${p}`, o.lab || "repère");
+    return svg(W, H, `<defs><clipPath id="${id}"><rect x="${ml}" y="${m}" width="${W - m - ml}" height="${H - 2 * m}"/></clipPath></defs>${g}<g clip-path="url(#${id})">${c}</g>${tk}${p}`, o.lab || "repère");
   };
 
   // ---------- brique « hunt » (réponse tapée) ----------
@@ -1371,9 +1373,9 @@
         ctl: (s) => [{ k: "r", lab: "Rayon r", min: s ? 1 : 0.5, max: s ? 5 : 4, step: 0.5 }],
         init: (s) => ({ r: s ? 2 : 1 }),
         fig: (st, s) => { const r = st.r;
-          if (!s) { const f = (x) => (r / 3) * x; return graph({ xr: [-0.5, 4], yr: [-4.5, 4.5], eq: true, fns: [{ f, from: 0, to: 3 }, { f: (x) => -f(x), from: 0, to: 3, cls: "f-line", w: 1.4, dash: true }], polys: [[shade(f, (x) => -f(x), 0, 3), "f-fill2"]], segs: [[3, -r, 3, r, "f-line", 1.4, "4 3"]], lab: "profil du cône" }); }
+          if (!s) { const f = (x) => (r / 3) * x; return graph({ xr: [-0.5, 4], yr: [-4.5, 4.5], H: 250 /* 24.11 soir : en repère orthonormé, la figure faisait 600 px de haut */, fns: [{ f, from: 0, to: 3 }, { f: (x) => -f(x), from: 0, to: 3, cls: "f-line", w: 1.4, dash: true }], polys: [[shade(f, (x) => -f(x), 0, 3), "f-fill2"]], segs: [[3, -r, 3, r, "f-line", 1.4, "4 3"]], lab: "profil du cône" }); }
           const f = (x) => Math.sqrt(Math.max(0, r * r - x * x));
-          return graph({ xr: [-5.5, 5.5], yr: [-5.5, 5.5], eq: true, H: 220, fns: [{ f, from: -r, to: r }, { f: (x) => -f(x), from: -r, to: r, cls: "f-line", w: 1.4, dash: true }], polys: [[shade(f, (x) => -f(x), -r, r), "f-fill2"]], lab: "profil de la boule" }); },
+          return graph({ xr: [-5.5, 5.5], yr: [-5.5, 5.5], eq: true /* 24.11 soir : H 220 retiré, la boule était dessinée en ellipse */, fns: [{ f, from: -r, to: r }, { f: (x) => -f(x), from: -r, to: r, cls: "f-line", w: 1.4, dash: true }], polys: [[shade(f, (x) => -f(x), -r, r), "f-fill2"]], lab: "profil de la boule" }); },
         out: (st, s) => (s ? "V = π ∫₋ᵣʳ (r² − x²) dx = (4/3)π r³ = <b>" + nb(+((4 / 3) * st.r ** 3).toFixed(2)) + " π</b>" : "V = π ∫₀³ (r x ÷ 3)² dx = π · r² ÷ 9 · 9 = <b>" + nb(st.r * st.r) + " π</b>"),
         goal: [(st) => (st.r === 2 ? "r = 2 : V = π ∫₀³ (2x/3)² dx = π · (4/9) · 9 = 4π, comme la formule du cône (1/3)π r² h = (1/3)π · 4 · 3." : ""),
           (st) => (st.r === 3 ? "r = 3 : (4/3)π · 27 = 36π. La formule de la boule vient de π ∫ (r² − x²) dx." : "")],
@@ -1438,7 +1440,7 @@
   };
   // translin : figures dans un repère (image d'un point, du carré unité, d'un triangle).
   const tlFig = (s, x) => {
-    const o = { xr: [-7, 7], yr: [-7, 7], eq: true, H: 250, polys: [], pts: [], arrows: [], lab: "transformation linéaire du plan" };
+    const o = { xr: [-7, 7], yr: [-7, 7], eq: true /* 24.11 soir : H 250 retiré (repère déformé, une rotation n'était plus une rotation) */, polys: [], pts: [], arrows: [], lab: "transformation linéaire du plan" };
     let t = "";
     if (s === 0) { o.arrows.push([0, 0, 4, 2, "f-line"]); o.pts.push([4, 2, "P", "f-dot", "r"]); if (x !== null) { o.pts.push([x, 4, "P' ?", "f-fill2", "r"]); o.arrows.push([0, 0, x, 4, "f-blue"]); } t = x === null ? "rotation de 90° autour de O" : x === -2 ? '<b class="act-ok">OP\' est bien OP tourné d\'un quart de tour</b>' : "OP' n'est pas OP tourné d'un quart de tour"; }
     if (s === 1) { o.polys.push([[[0, 0], [1, 0], [1, 1], [0, 1]], "f-soft"], [[[0, 0], [2, 1], [3, 4], [1, 3]], "f-fill2"]); o.xr = [-1, 5]; o.yr = [-1, 5]; t = "carré unité (gris) et son image (bleu) : (1 ; 0) ↦ (2 ; 1), (0 ; 1) ↦ (1 ; 3)" + (x === null ? "" : " ; aire proposée " + nb(x)); }

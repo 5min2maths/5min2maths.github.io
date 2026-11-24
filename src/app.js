@@ -88,7 +88,7 @@ const addTabs = () => {
   if (br && !app.querySelector(".hub")) { br.classList.add("brand-home"); br.title = "Accueil";
     /* 24.11 (« la bulle nous renvoie à l'accueil ») : seul le nom de l'app ramène à l'accueil, pas tout le bandeau ;
        un toucher à côté du 💬 (petit bouton logé dans le bandeau) ne quitte plus la page. */
-    br.onclick = (e) => { if (e.target.closest("#fabc, #fabs") || !e.target.closest(".brand > b, .brand > span")) return; goHome(); }; }
+    br.onclick = (e) => { if (e.target.closest("#fabc, #fabs") || !e.target.closest(".brand > b")) return; goHome(); }; }
   if (!app.querySelector(".hub") && !(history.state && history.state.m2m)) history.pushState({ m2m: 1 }, "");
 };
 window.addEventListener("popstate", () => {

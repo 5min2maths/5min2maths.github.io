@@ -129,6 +129,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .fig .f-accent { stroke: var(--margin); fill: none; }
 .fig text.f-accent, .fig .f-accent.f-txt { fill: var(--margin); stroke: none; font-weight: 700; }
 .fig .f-txt { fill: var(--ink); font-family: var(--font-body); }
+.fig text.f-tick { paint-order: stroke; stroke: var(--card); stroke-width: 3px; stroke-linejoin: round; } /* 24.11 : chiffres d'axe lisibles sur une courbe */
 .fig .f-on { fill: #fff; font-family: var(--font-body); font-weight: 700; }
 .fig text.f-on { fill: var(--on-blue); } /* texte sur aplat bleu : encre foncée en thème sombre (24.11) */
 .fig .f-dot { fill: var(--margin); }
@@ -611,7 +612,7 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: v
 .door-badge { position: absolute; top: -4px; left: calc(50% + 24px); background: var(--margin); color: var(--on-margin); border-radius: 999px; padding: 1px 8px; font-size: 0.8rem; font-weight: 800; }
 .back-home { display: block; margin: 0 0 4px; padding: 6px 0; text-align: left; }
 .sub-title { margin-bottom: 10px; }
-.brand-home { cursor: default; } .brand-home > b, .brand-home > span { cursor: pointer; }
+.brand-home { cursor: default; } .brand-home > b { cursor: pointer; }
 .tour-hi { outline: 3px solid var(--fluo); outline-offset: 3px; border-radius: 14px; }
 .sess-mode { margin: 0; padding: 8px 10px; border-radius: 10px; background: var(--paper); border: 1px solid var(--line); }
 .fmt-box2 { display: grid; gap: 4px; padding: 10px 12px; border-radius: 12px; background: var(--blue-soft); }
@@ -681,7 +682,7 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: v
 /* ---- Accessibilité (24.11, chantier O) ---- */
 /* Zones tactiles : petits boutons d'icône agrandis à ≥ 44 px sans changer la mise en page (zone invisible autour). */
 .gear, .brand .fab-cmt, .ctest, #fabx { position: relative; }
-.brand .fab-cmt { inset: auto; } /* 24.11 : en relative, le bottom: 86px du bouton flottant le sortait de l écran (💬 disparu) */
+.brand .fab-cmt { inset: auto; margin-left: 12px; } /* 24.11 soir : un peu d air ; « par jour » ne ramène plus à l accueil, seul le titre */ /* 24.11 : en relative, le bottom: 86px du bouton flottant le sortait de l écran (💬 disparu) */
 .gear::after, .ctest::after { content: ""; position: absolute; inset: -5px 0; } /* verticalement seulement : rien ne dépasse à droite */
 .brand .fab-cmt::after, #fabx::after { content: ""; position: absolute; inset: -6px -4px; }
 /* Le logo garde sa taille quelle que soit la taille du texte choisie (c'est une image, pas un texte à lire) : le bandeau
@@ -723,6 +724,7 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: v
 .pm-sq.on { outline: 2px solid var(--blue); outline-offset: 1px; }
 .pm-info { margin-top: 4px; padding: 4px 8px; border-radius: 8px; background: var(--soft, rgba(0,0,0,.05)); }
 
+
 </style>
 <script>
 window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "global" }, startup: { typeset: false, ready() { MathJax.startup.defaultReady(); MathJax.startup.input[0].preFilters.add(({ math }) => { if (window.divSign) math.math = window.divSign(math.math); }); } } };
@@ -731,12 +733,12 @@ window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "glo
 </head>
 <body>
 <main id="app" aria-live="polite"></main>
-<script src="app.js?v=778b678f90"></script>
+<script src="app.js?v=27efea842b"></script>
 <script>
 (function () {
   // Chargement par niveau (24.11). Paquets requis : le niveau de l'élève et les niveaux inférieurs de sa filière ;
   // France et liens de consultation (#q-, #l-, #auteur) : tout. Puis le reste en arrière-plan (hors ligne complet).
-  var V = "778b678f90", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
+  var V = "27efea842b", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
   window.__packs = loaded; // pour les tests (tools/test_paquets.py)
   function need(p) {
     if (!p || p.system === "FR") return K.slice();
