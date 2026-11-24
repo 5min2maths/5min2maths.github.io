@@ -119,6 +119,10 @@ const THEME_LABEL = {"CO":{"9C01":"1. Écritures décimale et fractionnaire déc
 // 22.11 : ordre des notions propres au lycée français (src/fr_lycee.js), 1re puis Tle spécialité. Ajouté à la main :
 // à reporter dans tools/referentiels.py si ce fichier est régénéré.
 ORDRE.FR = {"suitedef":1000,"suitearith":1001,"suitegeo":1002,"suitesomme":1003,"pscal":1004,"expfn":1005,"probtot":1006,"vaesp":1007,"suitelim":1008,"binom":1009}; // 23.11 : 1re/Tle après la 2nde (fr_2nde.js)
+// 24.11 : 4e du Collège (src/ch4c_ana.js), chapitres Sésamath Ma4. Ajouté à la main (comme ORDRE.FR ci-dessus) : à reporter
+// dans tools/referentiels.py si ce fichier est régénéré (le script lit déjà ch4c_ana.js et ses codesMATU).
+Object.assign(ORDRE.MATU, {"primitives":200,"integrale":201,"aireint":202,"volrev":203,"lnexp":210,"croissance":211,"condbayes":230,"varalea":231,"binomiale":232});
+Object.assign(ORDRE_THEME.MATU, {"primitives":"M4C01","integrale":"M4C01","aireint":"M4C01","volrev":"M4C01","lnexp":"M4C02","croissance":"M4C02","condbayes":"M4C04","varalea":"M4C04","binomiale":"M4C04"});
 
 // Calculateur d'expressions : lecture souple de la réponse de l'élève, calcul, mise en forme TeX,
 // équivalence d'expressions (par évaluation en plusieurs points) et contrôle de forme.
@@ -162,6 +166,8 @@ const Expr = (() => {
         else if (["sin", "cos", "tan", "exp"].includes(w)) toks.push({ t: "fn", v: w });
         else if (w === "e" && !/[a-z]/i.test(s[j] || "")) toks.push({ t: "const", v: "e" });
         else if (w === "pi") toks.push({ t: "const", v: "pi" });
+        // 24.11 (4e Collège, ln et exp) : dans un mot fait seulement de x et de e (« xe^x »), e est la constante e.
+        else if (/^[xe]+$/.test(w) && w.includes("x")) for (const ch of w) toks.push(ch === "e" ? { t: "const", v: "e" } : { t: "var", v: ch });
         else for (const ch of w) toks.push({ t: "var", v: ch }); // xy = x·y
         i = j; continue;
       }
@@ -10196,7 +10202,10 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
   sysineq: ["ineq"], ineqfrac: ["ineq"], eqirr: ["eq2disc"], absval: ["eq1"], trinfact: ["eq2disc"], vol: ["aire2"], echelle: ["prop"],
   // 23.11 : dérivation (3e Collège, src/ch3c_ana.js)
   tauxvar: ["fimg"], nbderive: ["tauxvar"], derivref: ["puiss"], derivregles: ["derivref"], derivprodquot: ["derivregles"], derivcomp: ["derivregles", "compo"],
-  tangente: ["nbderive", "droites"], variations: ["derivregles", "ineq2"], optimderiv: ["variations"] };
+  tangente: ["nbderive", "droites"], variations: ["derivregles", "ineq2"], optimderiv: ["variations"],
+  // 24.11 : 4e Collège (src/ch4c_ana.js) : intégration, ln et exp, probabilités 2
+  primitives: ["derivregles"], integrale: ["primitives"], aireint: ["integrale"], volrev: ["integrale"], lnexp: ["log", "derivcomp"], croissance: ["expo", "log"],
+  condbayes: ["proba"], varalea: ["proba"], binomiale: ["varalea"] };
 // Programme du jour : le format change d'un jour à l'autre ; l'équilibre se fait sur 7 jours.
 // 22.11 : textes courts (une ligne sur téléphone : pas de saut quand on change de format).
 const FORMATS = {
