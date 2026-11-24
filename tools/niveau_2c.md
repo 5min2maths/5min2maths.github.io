@@ -108,7 +108,7 @@ guidées, nombres simples »), partagés avec le Collège.
 | 1 | droitesinter | trop facile (droite horizontale) | trop facile (location de voiture, 11e) | au niveau (médiatrice, hauteur) | à valider | partagée avec MP 2e S1 : non modifiée |
 | 1 | cercletan | au niveau | au niveau | au niveau | au niveau | — |
 | 2 | (aucune) | — | — | — | à valider | chapitre Sésamath hors programme CdG de 2e : créer ou non ? |
-| 3 | polydiv | au niveau | au niveau | au niveau | au niveau | manque la division par un diviseur de degré 2 avec reste (E3.1) |
+| 3 | polydiv | au niveau | au niveau | au niveau | remonté (variantes) | N3 + division par un diviseur de degré 2 avec reste (E3.1), a et b pour la divisibilité par un trinôme |
 | 3 | polyfact | au niveau | au niveau | au niveau (E3.2) | au niveau | — |
 | 3 | polyexpr | au niveau | au niveau | trop facile (volume d'une boîte pour x donné) | remonté | N3 = polynôme sous conditions, forme développée (E3.3) |
 | 3 | ineq | niveau 1re | niveau 1re | niveau 1re | retiré de l'année | reste en 1re (M1C05) ; en 2e : ineqpoly, ineqfrac |
@@ -150,4 +150,4 @@ d'années inférieures (le chapitre 2 reste vide, voir ci-dessous).
 5. **morceaux, absval** (notions de 1re reprises en 2e) : garder en 2e ?
 6. **France** : cart (2nde), recip (1re), compo et modexp (lycée) utilisent les mêmes générateurs ; les nouveaux niveaux
    y restent au programme, mais à vérifier.
-7. Restent à faire : division par un polynôme de degré 2 avec reste (polydiv, E3.1), trigfn en radians (E9.2–E9.3).
+7. Reste à faire : trigfn en radians (E9.2–E9.3) ; « vrai ou faux, justifier » (E3.5, E6.3, E9.4, E10.2) n'a pas de forme de réponse dans l'app.
