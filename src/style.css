@@ -749,3 +749,11 @@ details.solfull summary { padding: 11px 0; margin-top: 0; }
 /* Police plus lisible proposée à la 1re question du calibrage */
 .font-hint { align-self: flex-start; font-size: 0.85rem; }
 .goal { margin-top: 4px; }
+
+/* 24.11 : visite guidée en haut quand l'élément présenté est en bas (elle ne couvre plus les boutons) */
+.tour.tour-top { top: 70px; bottom: auto; }
+
+/* 24.11 (retour testeur) : identifiant de question invisible pour les élèves (il part toujours avec les commentaires) ;
+   visible en mode auteur (…/#auteur). */
+.vote .code, p.cur-code { display: none; }
+.auteur .vote .code, .auteur p.cur-code { display: block; } .auteur .vote .code { display: inline; }

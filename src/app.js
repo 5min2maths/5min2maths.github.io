@@ -11,7 +11,14 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 const BUILD = "dev"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
+// Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
+// (visites, séances, signaux, votes, erreurs techniques) sans un « Oui » explicite ; les commentaires 💬, écrits
+// volontairement, partent toujours. Le choix se change dans les Réglages.
+function statsOk() { try { return localStorage.getItem("m2m-stats") === "oui"; } catch (e) { return false; } }
+function statsAsked() { try { return !!localStorage.getItem("m2m-stats"); } catch (e) { return true; } }
+function statsSet(v) { try { localStorage.setItem("m2m-stats", v ? "oui" : "non"); } catch (e) {} }
 function errCanSend() {
+  if (!statsOk()) return false; /* 24.11 : accord */
   try { return !!VOTE_ENDPOINT && location.protocol === "https:" && !/claude/.test(location.hostname) && !isAuthor() && !/^#auteur/.test(location.hash); }
   catch (e) { return false; }
 }
@@ -262,7 +269,8 @@ function screenWelcome() {
   <p class="small muted">Un autre sujet à chaque visite. Tape ta réponse comme tu veux : fractions, racines, π… le calculateur comprend.</p></div>
   <button class="btn-primary btn-big" id="go">Commencer</button>
   <button class="btn-ghost" id="restore">J'ai déjà un code de sauvegarde</button>
-  <button class="btn-ghost small" id="privacy">🔒 Ce que l'app envoie</button>`);
+  <button class="btn-ghost small" id="privacy">🔒 Ce que l'app envoie</button>
+  <p class="small muted"><a href="#" id="legal-lien">Mentions légales et confidentialité</a></p>`);
   const inp = document.getElementById("dans"), prev = document.getElementById("dprev"), fb = document.getElementById("dfb");
   const show = () => previewOf(inp, prev, q.spec);
   inp.oninput = show;
@@ -293,7 +301,8 @@ function screenWelcome() {
   document.getElementById("dskip").onclick = () => { demoSkip.push(q.id); redraw(); };
   app.querySelectorAll("#dgrade button").forEach((b) => (b.onclick = () => { demoGrade = +b.dataset.v; demoSkip = []; draft.grade = demoGrade; redraw(); }));
   document.getElementById("privacy").onclick = () => screenPrivacy(screenWelcome);
-  document.getElementById("envoie-lien").onclick = (e) => { e.preventDefault(); screenPrivacy(screenWelcome); }; /* 24.11 : promesse exacte, lien vers le détail */
+  document.getElementById("envoie-lien").onclick = (e) => { e.preventDefault(); screenPrivacy(screenWelcome); };
+  document.getElementById("legal-lien").onclick = (e) => { e.preventDefault(); screenLegal(screenWelcome); }; /* 24.11 : mentions légales, lien discret */ /* 24.11 : promesse exacte, lien vers le détail */
   document.getElementById("restore").onclick = () => screenRestore();
 }
 
@@ -345,7 +354,7 @@ function startPlacement() {
     const id = plan[i], q = Engine.make(state, id, Math.min(2, difficultyCap(state.profile)));
     renderQuestion(q, {
       eyebrow: "Étape 2 sur 2 · question " + (i + 1) + " sur " + plan.length + (plan.length - i > 1 ? " · encore " + (plan.length - i - 1) + " après celle-ci · environ " + Math.max(1, Math.round((plan.length - i) * 0.5)) + " min" : " · la dernière !") + `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((i / plan.length) * 100)}%"></i></span>`, single: true, track: "positionnement",
-      onDone: (res) => { Engine.placementResult(state, id, res.solved ? true : res.dontKnow ? null : false, q.d); save(); },
+      onDone: (res) => { Engine.placementResult(state, id, res.solved ? true : res.dontKnow ? null : false, q.d); if (!res.solved && !res.dontKnow) carnetAdd(id, q.d, q.code, res.diag, res.ans); /* 24.11 : erreur du calibrage aussi dans le carnet (retour testeur) */ save(); },
       onNext: () => { i++; next(); },
       onNotYet: () => { Engine.notYet(state, id); save(); toast("Noté : cette notion reviendra plus tard."); i++; next(); },
     });
@@ -509,6 +518,11 @@ function tourShow() {
     <div class="row"><button class="btn-ghost small" id="tourskip">Passer</button><button class="btn-primary" id="tournext">${tourK + 1 < TOUR.length ? "Suivant" : "C'est parti !"}</button></div></div></div>`);
   app.querySelectorAll(".tour-hi").forEach((x) => x.classList.remove("tour-hi"));
   const el = app.querySelector(sel); if (el) el.classList.add("tour-hi");
+  /* 24.11 (retour testeur : « visite guidée bloquante ») : la carte se place du côté opposé à l'élément présenté, et
+     un toucher ailleurs ferme la visite sans bloquer ce toucher (le bouton touché fonctionne). */
+  const tw = document.getElementById("tour"); if (el && tw) { const r = el.getBoundingClientRect(); if (r.top + r.height / 2 > window.innerHeight / 2) tw.classList.add("tour-top"); }
+  const outside = (ev) => { if (!ev.target.closest || ev.target.closest(".tour-card")) return; document.removeEventListener("click", outside, true); end(); };
+  setTimeout(() => document.addEventListener("click", outside, true), 0);
   const end = () => { state.tourDone = true; save(); tourK = 0; app.querySelectorAll(".tour-hi").forEach((x) => x.classList.remove("tour-hi")); const t = document.getElementById("tour"); if (t) t.remove(); };
   document.getElementById("tourskip").onclick = end;
   document.getElementById("tournext").onclick = () => { if (++tourK >= TOUR.length) return end(); tourShow(); };
@@ -523,7 +537,7 @@ function screenHome() {
   const dots = { prob: !!wp && !wpDone, test: prep && left <= 3, prog: (state.badgesNew || []).length > 0 };
   save();
   const panels = {
-    today: () => `${resumeCard()}${weekRecapCard()}${backupCard()}${streakNudge()}${prepTodayCard()}${carnetCard(false)}<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire · au rythme de ton cours en classe${done ? " · séance faite, tu peux en refaire une" : ""}</div>
+    today: () => `${statsCard()}${resumeCard()}${weekRecapCard()}${backupCard()}${streakNudge()}${prepTodayCard()}${carnetCard(false)}<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire · au rythme de ton cours en classe${done ? " · séance faite, tu peux en refaire une" : ""}</div>
       <div class="fmt-box stack"><div class="spread"><span class="eyebrow">Aujourd'hui</span><button class="btn-ghost small" id="other">🔁 Changer de format</button></div>
         <h3>${FORMATS[fmt].label}</h3><p class="small muted">${FORMATS[fmt].text}</p></div>
       <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>${nowCard()}</div>
@@ -558,7 +572,7 @@ function screenHome() {
     const paused = !!resumeCard(), doneLab = done && !paused;
     // Une seule bannière ; le joker de série passe avant le bilan de la semaine (sinon la série est perdue le jour même).
     const nudge = streakNudge(), joker = /Joker/.test(nudge);
-    const banner = [resumeCard(), prepTodayCard(), joker ? nudge : "", backupCard(), weekRecapCard(), joker ? "" : nudge].find((x) => x) || "";
+    const banner = [statsCard(), resumeCard(), prepTodayCard(), joker ? nudge : "", backupCard(), weekRecapCard(), joker ? "" : nudge].find((x) => x) || "";
     const nowLine = !Engine.nowActive(state) ? `<button type="button" class="btn-sec small" id="nowpick">📚 Choisir mon chapitre travaillé en classe</button>`
       : Engine.nowStale(state) ? `<div class="now-ask"><b>📚 Cette semaine en classe, tu travailles toujours :</b><span>${esc(state.now.ids.map(nLabel).join(" · "))} ?</span><div class="row now-ask-btns"><button type="button" class="btn-sec small" id="nowyes">Oui, toujours</button><button type="button" class="btn-sec small" id="nowpick">J'ai changé de chapitre</button></div></div>`
       : `<span class="small now-lab">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span><button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
@@ -610,6 +624,9 @@ function screenHome() {
   on("resno", () => { delete state.resume; save(); screenHome(); });
   on("bkgo", screenBackup);
   on("bkno", () => { UI.backupLater = day(); uiSave(); screenHome(); });
+  on("statsoui", () => { statsSet(true); toast("Merci ! Tu peux changer d'avis dans les Réglages."); screenHome(); });
+  on("statsnon", () => { statsSet(false); toast("C'est noté : rien n'est envoyé. Modifiable dans les Réglages."); screenHome(); });
+  on("statsplus", () => screenPrivacy(screenHome));
   on("recapok", () => { state.recapSeen = weekKey(); save(); screenHome(); });
   if (!state.tourDone) tourShow();
   on("wp", () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); });
@@ -700,9 +717,10 @@ function screenSettings() {
     <span class="small muted" id="fs-l">Taille du texte</span><div class="seg" id="fs" role="group" aria-labelledby="fs-l">${A11Y_FS.map(([v, l]) => `<button aria-pressed="${A.fs === v}" data-v="${v}">${l}</button>`).join("")}</div>
     <span class="small muted" id="font-l">Police</span><div class="seg" id="font" role="group" aria-labelledby="font-l"><button aria-pressed="${!A.font}" data-v="0">Habituelle</button><button aria-pressed="${!!A.font}" data-v="1">Plus lisible</button></div>
     <span class="small muted" id="hc-l">Contraste</span><div class="seg" id="hc" role="group" aria-labelledby="hc-l"><button aria-pressed="${!A.hc}" data-v="0">Normal</button><button aria-pressed="${!!A.hc}" data-v="1">Renforcé</button></div>
+    <span class="small muted" id="st-l">Statistiques anonymes pour améliorer l'app</span><div class="seg" id="statsset" role="group" aria-labelledby="st-l"><button aria-pressed="${statsOk()}" data-v="1">J'aide</button><button aria-pressed="${!statsOk()}" data-v="0">Ne rien envoyer</button></div>
     <span class="small muted">Vibrer à chaque réponse (téléphone)</span><div class="seg" id="vib"><button aria-pressed="${UI.vib}" data-v="1">Oui</button><button aria-pressed="${!UI.vib}" data-v="0">Non</button></div></div>
   ${installCard("")}
-  <button class="btn-sec" id="backup">💾 Sauvegarder ou transférer ma progression</button><button class="btn-sec" id="level">Changer de classe ou d'école</button><button class="btn-sec" id="privacy">🔒 Ce que l'app envoie</button>
+  <button class="btn-sec" id="backup">💾 Sauvegarder ou transférer ma progression</button><button class="btn-sec" id="level">Changer de classe ou d'école</button><button class="btn-sec" id="privacy">🔒 Ce que l'app envoie</button><button class="btn-ghost small" id="legal">Mentions légales et confidentialité</button>
   ${isAuthor() ? '<button class="btn-primary" id="stats">📊 Statistiques d\'usage (auteur)</button>' : ""}
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div>
   <button class="btn-primary" id="back">Retour</button></div>`);
@@ -713,7 +731,9 @@ function screenSettings() {
   app.querySelectorAll("#font button").forEach((b) => (b.onclick = () => setA("font", +b.dataset.v)));
   app.querySelectorAll("#hc button").forEach((b) => (b.onclick = () => setA("hc", +b.dataset.v)));
   app.querySelectorAll("#vib button").forEach((b) => (b.onclick = () => { UI.vib = b.dataset.v === "1"; uiSave(); if (UI.vib) buzz(true); screenSettings(); }));
+  app.querySelectorAll("#statsset button").forEach((b) => (b.onclick = () => { statsSet(b.dataset.v === "1"); screenSettings(); }));
   document.getElementById("privacy").onclick = () => screenPrivacy(screenSettings);
+  document.getElementById("legal").onclick = () => screenLegal(screenSettings);
   if (document.getElementById("stats")) document.getElementById("stats").onclick = () => screenStats(screenSettings);
   document.getElementById("backup").onclick = screenBackup;
   document.getElementById("level").onclick = () => { draft = { ...state.profile }; screenLevel(); };
@@ -836,10 +856,17 @@ function startInlineAct(root) {
   });
 }
 
+// Carte d'accord (24.11) : une seule fois, en tête de l'accueil, tant que l'élève n'a pas répondu.
+const statsCard = () => statsAsked() ? "" : `<div class="card stack" id="statscard"><div class="eyebrow">📊 Aider à améliorer l'app ?</div>
+  <p class="small">Si tu acceptes, l'app envoie des statistiques <b>anonymes</b> (sans nom) : ta classe, tes résultats, le temps passé, les erreurs techniques. Elles servent seulement à améliorer les questions. Tu peux changer d'avis à tout moment dans les Réglages.</p>
+  <div class="row"><button class="btn-primary" id="statsoui">Oui, j'aide</button><button class="btn-sec" id="statsnon">Non merci</button></div>
+  <button class="btn-ghost small" id="statsplus">🔒 Le détail de ce qui est envoyé</button></div>`;
+
 // ---------------- Ce que l'app envoie (13.11) ----------------
 function screenPrivacy(back) {
   h(`${brand}<h2>Ce que l'app <span class="mark">envoie</span></h2>
   <p class="muted">Pas de compte, pas de nom, pas d'adresse e-mail. Ta progression reste sur ton appareil.</p>
+  <div class="card flat"><b>Ton choix :</b> ${statsAsked() ? (statsOk() ? "tu aides à améliorer l'app (statistiques anonymes envoyées)." : "rien n'est envoyé (sauf les commentaires 💬 que tu écris toi-même).") : "pas encore choisi : rien n'est envoyé tant que tu n'as pas dit oui."} Modifiable dans les Réglages.</div>
   <div class="card flat stack"><b>Ce qui reste sur ton appareil</b>
   <ul class="plain"><li>Ta progression : tes notes de compétences, tes badges, ton Mathélo, l'historique de tes réponses.</li>
   <li>Rien de tout cela n'est envoyé (sauf ce qui est décrit ci-dessous, question par question, sans rien qui te désigne). Le code de sauvegarde, lui aussi, n'est envoyé nulle part : c'est toi qui le gardes.</li></ul></div>
@@ -852,14 +879,68 @@ function screenPrivacy(back) {
   <li><b>Tes commentaires</b>, si tu en écris, avec ta classe (par exemple « 10e ») et le même identifiant. N'y écris pas ton nom.</li>
   <li><b>Tes grades Mathélo</b>, quand tu en atteins un : le nom du grade et le même identifiant, pour te donner ton numéro de « collector ».</li>
   <li><b>Ton chapitre du moment</b>, si tu en choisis un : les notions, ta classe et le mois, sans identifiant. Ça sert à proposer les notions dans l'ordre où elles se font vraiment en classe.</li>
-  <li><b>Les erreurs techniques</b> de l'app, si elle plante : le message d'erreur, l'écran ou le code de la question, ta classe et le même identifiant (au plus 5 par jour). Ça sert à réparer les bugs qu'on ne voit pas.</li></ul></div>
+  <li><b>Les erreurs techniques</b> de l'app, si elle plante : le message d'erreur, l'endroit dans le code, la version de l'app, l'écran ou le code de la question, ta classe et le même identifiant (au plus 5 par jour). Ça sert à réparer les bugs qu'on ne voit pas.</li></ul></div>
   <p class="small muted">Identifiant tiré au hasard pour cet appareil : <code>${esc(deviceId() || "—")}</code></p>${isAuthor() ? '<p class="small"><b>Appareil de l\'auteur</b> : rien n\'est envoyé depuis cet appareil, sauf les commentaires 💬 (marqués « auteur »).</p>' : ""}
   <div class="card flat stack"><b>À savoir</b>
   <ul class="plain"><li>L'identifiant ne permet pas de savoir qui tu es : il n'est lié à aucun nom ni compte.</li>
-  <li>Comme pour tout site, les services qui hébergent l'app (GitHub) et chargent ses polices et ses formules (Google Fonts, Cloudflare) voient passer la connexion. L'auteur de l'app n'y a pas accès.</li>
-  <li>« Tout effacer » (en bas de l'accueil) supprime ta progression et l'identifiant de cet appareil. Les avis et commentaires déjà envoyés ne contiennent rien qui te désigne.</li></ul></div>
+  <li>Comme pour tout site, GitHub, qui héberge l'app, voit passer la connexion (adresse IP, type de navigateur) ; Google aussi, à chaque envoi vers le tableau. L'auteur de l'app n'a pas accès à ces adresses, et elles ne sont pas inscrites dans le tableau.</li>
+  <li>Les polices et les formules mathématiques sont fournies par le site de l'app lui-même : aucun autre service n'est contacté.</li>
+  <li>« Tout effacer » (dans les Réglages) supprime ta progression et l'identifiant de cet appareil. Ce qui a déjà été envoyé reste dans le tableau : pour le faire effacer, note d'abord ton identifiant (voir les mentions légales).</li></ul></div>
+  <button class="btn-ghost small" id="legal">Mentions légales et confidentialité</button>
   <button class="btn-primary btn-big" id="back">Retour</button>`);
   document.getElementById("back").onclick = back;
+  document.getElementById("legal").onclick = () => screenLegal(() => screenPrivacy(back));
+}
+
+/* ---------------- Mentions légales et confidentialité (24.11, projet à faire valider) ----------------
+   Les champs [À COMPLÉTER] sont à remplir par l'enseignant (responsable, base légale, durée) : aucune donnée personnelle
+   ici. Accès : Réglages, écran d'entrée (lien discret), « Ce que l'app envoie », lien direct …/#confidentialite. */
+const AC = (t) => `<mark>[À COMPLÉTER par l'enseignant : ${t}]</mark>`;
+function screenLegal(back) {
+  let id = "";
+  try { id = localStorage.getItem("m2m-device") || ""; } catch (e) {}
+  const sec = (titre, corps) => `<div class="card flat stack"><h3>${titre}</h3>${corps}</div>`;
+  h(`${brand}<h2>Mentions légales <span class="mark">et confidentialité</span></h2>
+  <div class="card flat stack"><b>Projet — à faire valider</b><span class="small muted">Ce texte est une première version. Les parties marquées « À COMPLÉTER » doivent encore être remplies et le tout vérifié avant une diffusion large.</span></div>
+  <p class="muted">« 5 minutes de maths par jour » est une application d'exercices de mathématiques, gratuite, sans compte et sans publicité. Cette page explique, pour les élèves et leurs parents, quelles données elle utilise, pourquoi, et comment exercer vos droits.</p>
+  ${sec("1. Qui est responsable ?", `<ul class="plain"><li>Éditeur de l'app et responsable du traitement des données : ${AC("nom")}.</li>
+  <li>Adresse : ${AC("adresse postale")}.</li>
+  <li>Contact pour toute question ou demande sur les données : ${AC("adresse e-mail de contact")}.</li>
+  <li>Cadre : ${AC("projet personnel ou projet lié à un établissement scolaire")}.</li></ul>`)}
+  ${sec("2. À quoi servent les données ?", `<p>Uniquement à améliorer l'app pendant sa phase de test : compter combien de personnes l'utilisent, repérer les questions mal posées, trop difficiles ou mal corrigées, ajuster la durée des séances, réparer les erreurs techniques, proposer les notions dans l'ordre où elles se font en classe.</p>
+  <p class="small muted">Pas de publicité, pas de revente, pas d'évaluation des élèves : les données ne servent pas à noter ni à juger qui que ce soit.</p>`)}
+  ${sec("3. Quelles données ?", `<p><b>Jamais demandé :</b> nom, prénom, adresse e-mail, numéro de téléphone, école, compte. Il n'y a pas d'inscription.</p>
+  <p><b>Gardé seulement sur l'appareil</b> (stockage local du navigateur) : la progression (notions, compétences, badges, Mathélo, historique des réponses), les réglages d'affichage, et un identifiant tiré au hasard, propre à l'appareil.</p>
+  <p><b>Envoyé vers un tableau tenu par l'éditeur</b> (Google Sheets), avec cet identifiant :</p>
+  <ul class="plain"><li>l'ouverture de l'app (au plus une fois par jour), le début et la fin de chaque séance, avec la date, la classe (par exemple « 10e »), le format, le nombre de questions, le score et la durée ;</li>
+  <li>pour chaque question ou rappel de cours : son code, le résultat (trouvé ou non, du premier coup ou non, quitté), le temps passé, l'aide utilisée et la première réponse fausse (un nombre ou un calcul ; des mots sont remplacés par « [texte] ») ;</li>
+  <li>les avis (👍 / 👎, « trop facile », « pas compris ») et les commentaires écrits librement (500 caractères au plus ; il est demandé de ne pas y écrire de nom) ;</li>
+  <li>les grades Mathélo atteints ;</li>
+  <li>les erreurs techniques de l'app (message, endroit dans le code, version, écran), 5 par jour au plus.</li></ul>
+  <p>Envoyé <b>sans identifiant</b> : le chapitre du moment choisi par l'élève (notions, classe, mois).</p>
+  <p class="small muted">Le détail, écran par écran, est dans « Ce que l'app envoie ». Ces données ne permettent pas, à elles seules, de savoir qui est l'élève. Elles concernent toutefois un appareil précis : elles sont donc traitées comme des données personnelles.</p>`)}
+  ${sec("4. Sur quelle base ?", `<p>Base légale du traitement : ${AC("par exemple intérêt légitime à améliorer un outil pédagogique, consentement, ou mission d'intérêt public si l'app est utilisée dans le cadre de l'école ; à déterminer avec l'établissement")}.</p>
+  <p class="small muted">Lois applicables : loi fédérale suisse sur la protection des données (LPD) ; règlement européen (RGPD) pour les utilisateurs de l'Union européenne ; ${AC("loi cantonale, si l'app est utilisée par une école publique")}.</p>`)}
+  ${sec("5. Combien de temps ?", `<ul class="plain"><li>Données envoyées : conservées ${AC("durée, par exemple jusqu'à la fin de la phase de test et au plus 12 mois")}, puis effacées ou rendues entièrement anonymes (totaux sans identifiant).</li>
+  <li>Données sur l'appareil : jusqu'à ce que l'élève les efface (Réglages → « Tout effacer ») ou vide les données du site dans son navigateur.</li></ul>`)}
+  ${sec("6. Qui reçoit les données ?", `<ul class="plain"><li>L'éditeur de l'app, seul à avoir accès au tableau.</li>
+  <li><b>Google LLC</b> (États-Unis), qui fournit le tableau (Google Sheets) et le petit programme qui reçoit les envois (Google Apps Script) : il agit comme sous-traitant. Les données sont donc stockées <b>hors de Suisse et de l'Union européenne</b>. Garanties pour ce transfert : ${AC("par exemple certification Data Privacy Framework de Google, clauses contractuelles types")}.</li>
+  <li><b>GitHub</b> (GitHub Inc., filiale de Microsoft, États-Unis) héberge l'app (GitHub Pages) : comme tout hébergeur, il reçoit l'adresse IP et le type de navigateur des visiteurs pour leur servir les pages, et peut les garder dans ses journaux techniques.</li>
+  <li>Les polices de caractères et l'outil d'affichage des formules (MathJax) sont fournis par le site de l'app lui-même : aucun autre service n'est contacté.</li>
+  <li>Aucune donnée n'est vendue ni transmise à des fins publicitaires.</li></ul>`)}
+  ${sec("7. Vos droits", `<p>Vous pouvez demander à consulter les données envoyées depuis un appareil, à les faire corriger ou effacer, ou vous opposer à leur envoi.</p>
+  <p><b>Comment :</b> écrire à ${AC("adresse e-mail de contact")} en indiquant l'identifiant de l'appareil. C'est le seul moyen de retrouver ses données, puisqu'elles ne sont liées à aucun nom. Les données envoyées sans identifiant (chapitre du moment) ne peuvent pas être retrouvées.</p>
+  <p>Identifiant de cet appareil : ${id ? `<code>${esc(id)}</code>` : "aucun pour l'instant (rien n'a encore été envoyé depuis cet appareil)"}</p>
+  <p class="small muted">Notez cet identifiant <b>avant</b> d'utiliser « Tout effacer » : l'effacement supprime la progression et l'identifiant sur l'appareil, mais pas ce qui a déjà été envoyé. En cas de désaccord, vous pouvez vous adresser à ${AC("autorité de protection des données compétente, par exemple le Préposé fédéral à la protection des données et à la transparence (PFPDT)")}.</p>`)}
+  ${sec("8. Élèves mineurs", `<p>L'app s'adresse à des élèves, en général mineurs. C'est pourquoi elle ne demande aucune donnée qui permette de les identifier, ne montre pas de publicité et ne contient pas de messagerie. Les parents peuvent exercer les droits décrits ci-dessus pour leur enfant.</p>
+  <p class="small muted">${AC("préciser si un accord des parents ou de l'établissement est demandé avant l'utilisation en classe")}</p>`)}
+  ${sec("9. Cookies et stockage local", `<p>L'app n'utilise <b>aucun cookie</b> ni traceur publicitaire. Elle utilise le stockage local du navigateur pour garder la progression, les réglages et l'identifiant de l'appareil, ainsi qu'un cache hors ligne (pour fonctionner sans connexion). Ces informations restent sur l'appareil, sauf les envois décrits au point 3.</p>`)}
+  ${sec("10. Hébergement et licences", `<ul class="plain"><li>Hébergement : GitHub Pages, GitHub Inc., San Francisco, États-Unis.</li>
+  <li>Composants libres inclus : MathJax (licence Apache 2.0) ; polices Atkinson Hyperlegible, Bricolage Grotesque et JetBrains Mono (licence SIL Open Font License 1.1). <a href="vendor/LICENCES.txt" target="_blank" rel="noopener">Textes des licences</a>.</li></ul>`)}
+  <p class="small muted">Version du ${AC("date de validation")}.</p>
+  <button class="btn-primary btn-big" id="back">Retour</button>`);
+  document.getElementById("back").onclick = back;
+  try { window.scrollTo(0, 0); } catch (e) {}
 }
 
 // ---------------- Sauvegarde ----------------
@@ -1768,7 +1849,7 @@ function deviceId() {
 }
 function ping(ev, extra = {}) {
   try {
-    if (!VOTE_ENDPOINT || location.protocol !== "https:" || /claude/.test(location.hostname) || isAuthor() || location.hash === "#auteur") return;
+    if (!VOTE_ENDPOINT || location.protocol !== "https:" || /claude/.test(location.hostname) || isAuthor() || location.hash === "#auteur" || !statsOk()) return;
     if (ev === "open") { if (localStorage.getItem("m2m-ping") === day()) return; localStorage.setItem("m2m-ping", day()); }
     fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ ev, dev: deviceId(), date: day(), ...extra }) }).catch(() => {});
   } catch (e) {}
@@ -1802,11 +1883,12 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
 
 // Commentaire libre (facultatif) : envoyé avec le code de la question, la classe et l'identifiant anonyme de l'appareil.
 // Envois vers la feuille Google : seulement depuis le site publié (jamais depuis les pages de test ni claude.ai).
-const canSend = () => VOTE_ENDPOINT && location.protocol === "https:" && !/claude/.test(location.hostname) && !isAuthor();
+const canSend = () => VOTE_ENDPOINT && location.protocol === "https:" && !/claude/.test(location.hostname) && !isAuthor() && statsOk();
 // Appareil de l'auteur (20.11) : …/#auteur le marque une fois pour toutes (…/#auteur-off pour annuler). Il n'envoie alors
 // plus ni visites, ni séances, ni signaux muets, ni votes, ni chapitre du moment : les statistiques ne comptent que les
 // élèves. Ses commentaires 💬 partent toujours, étiquetés « auteur ».
 function isAuthor() { try { return localStorage.getItem("m2m-auteur") === "1"; } catch (e) { return false; } }
+try { if (isAuthor()) document.documentElement.classList.add("auteur"); } catch (e) {} /* 24.11 : affiche les identifiants de question */
 const commentBox = (title = "💬 Un commentaire sur cette question ?", ph = "Une erreur, une consigne pas claire, une idée… (n'écris pas ton nom)", code = "") =>
   `<details class="cmt"${code ? ` data-code="${code}"` : ""}><summary>${title}</summary><textarea class="cmt-t" maxlength="500" rows="3" placeholder="${ph}"></textarea>
   <div class="spread"><span class="small muted cmt-ok"></span><button class="small cmt-s">Envoyer</button></div></details>`;
@@ -1908,7 +1990,7 @@ function screenCurious(q, back, from = "") {
       <div class="preview" id="cprev"></div>${keypadHtml(spec)}
       <div class="actions"><button class="btn-primary" id="cok">Vérifier</button><button class="btn-sec" id="cidk">Voir la réponse</button></div></div><div id="cfb"></div></div>
     <div class="act-step" id="cs3" hidden><div class="act-h"><span class="act-n">3</span> Le fin mot</div><div class="sol">${q.reveal}</div>
-      <div class="rule"><b>🧠 Ici, tu as utilisé</b> ${q.outil}</div><p class="small muted code">${q.code}</p></div>
+      <div class="rule"><b>🧠 Ici, tu as utilisé</b> ${q.outil}</div><p class="small muted code cur-code">${q.code}</p></div>
   </div>
   <button class="btn-primary btn-big" id="cnext" hidden>Une autre question curieuse</button>
   <button class="btn-ghost" id="cback">Retour</button>`);
@@ -2129,8 +2211,11 @@ function screenSummary() {
   ${returnCard()}
   ${typeof Curieux !== "undefined" && Curieux.available(state).length ? '<button class="btn-primary" id="curbonus">🤔 Bonus : une question curieuse</button>' : ""}
   <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)", "app")}</div>
+  ${n <= 2 && !session.weekly && !session.carnet && !session.prep ? `<div class="card flat stack"><p class="small">${n === 1 ? "Une seule question aujourd'hui : c'était le défi du jour." : "Séance courte aujourd'hui."} Tu peux continuer autant que tu veux.</p><button class="btn-sec" id="again">➕ Encore une séance</button></div>` : ""}
   <button class="btn-primary btn-big" id="home">Retour à l'accueil</button>`);
   bindComment(app, "app"); bindInstall(screenHome);
+  /* 24.11 (retour testeur : « séance très courte, l'élève peut croire qu'il a fini trop vite ») */
+  if (document.getElementById("again")) document.getElementById("again").onclick = () => { if (n === 1) Engine.otherFormat(state); session = null; save(); startSession(); };
   if (nb || newGrade) setTimeout(burst, 250);
   document.getElementById("home").onclick = screenHome;
   if (document.getElementById("curbonus")) document.getElementById("curbonus").onclick = () => screenCurious(Curieux.pick(state), screenHome, "bilan");
@@ -2140,6 +2225,8 @@ function screenSummary() {
 
 // Consultation d'une question par son code : adresse …/#q-eq2disc-2-k3f (rien n'est enregistré).
 function showCode() {
+  /* Mentions légales (24.11) : lien direct …/#confidentialite, à donner aux parents */
+  if (location.hash === "#confidentialite") { screenLegal(() => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); }); return true; }
   // Consultation d'une leçon (active ou rappel) : …/#l-vitesse (lien du tableau de suivi, 15.11).
   const ml = /^#l-([a-z0-9]+)$/.exec(location.hash);
   if (ml && typeof LESSONS !== "undefined" && LESSONS[ml[1]]) { screenLesson(ml[1], () => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); }, false, false); return true; }

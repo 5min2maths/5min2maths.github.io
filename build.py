@@ -30,19 +30,33 @@ version = hashlib.sha1((head + body + (SRC / "pwa" / "sw.js").read_text()).encod
 assert 'const BUILD = "dev";' in body
 body = body.replace('const BUILD = "dev";', f'const BUILD = "{version}";', 1)
 
+# 24.11 (confidentialité) : polices et MathJax hébergés avec l'app (docs/vendor/, licences dans docs/vendor/LICENCES.txt) :
+# plus aucune requête vers Google Fonts ni Cloudflare depuis le site publié. Seule dist/5min2maths.html (aperçu claude.ai,
+# un seul fichier sans dossier à côté) garde les adresses externes.
+import re, shutil
+VENDOR = ROOT / "docs" / "vendor"
+assert (VENDOR / "mathjax" / "tex-svg.js").exists() and (VENDOR / "fonts" / "fonts.css").exists(), "docs/vendor incomplet"
+GF = re.search(r'<link rel="preconnect" href="https://fonts\.googleapis\.com">.*?\n<link rel="stylesheet" href="https://fonts\.googleapis\.com/[^"]+">\n', head, re.S).group(0)
+MJ_CDN = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"
+MJ = "vendor/mathjax/tex-svg.js"
+fonts_css = re.sub(r"/\*.*?\*/\n?", "", (VENDOR / "fonts" / "fonts.css").read_text(), flags=re.S).replace("url(", "url(vendor/fonts/")
+fonts_local = ('<link rel="preload" as="font" type="font/woff2" href="vendor/fonts/atkinson-400.woff2" crossorigin>\n'
+               "<style>\n" + fonts_css + "</style>\n")
+head_local = head.replace(GF, fonts_local).replace(MJ_CDN, MJ)
+assert "googleapis" not in head_local and "cdnjs" not in head_local
 (ROOT / "dist").mkdir(exist_ok=True)
 (ROOT / "dist" / "5min2maths.html").write_text(head + body)
 (ROOT / "dist" / "index.html").write_text(
     '<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n'
     '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
-    + head + "</head>\n<body>\n" + body + "</body>\n</html>\n")
+    + head_local + "</head>\n<body>\n" + body + "</body>\n</html>\n")
+shutil.copytree(VENDOR, ROOT / "dist" / "vendor", dirs_exist_ok=True)
 # Version GitHub Pages : application installable (manifeste, icônes, cache hors ligne)
 # 23.11 (chantier F, chargement ; mesures : tools/mesure_chargement.py) : le code de l'app est servi à part
 # (docs/app.js?v=<version>) : le navigateur garde alors le code déjà compilé d'une ouverture à l'autre (cache de code
 # de V8, impossible pour un script en ligne de 4 Mo), et le service worker le met en cache dès l'installation.
-# Polices et MathJax inchangés (chargement bloquant) : les différer ferait « sauter » l'écran (police puis police,
-# formules en TeX brut un instant) pour un gain mesuré faible chez l'habitué (≈ 0,3 s à CPU ×4) ; voir tools/chargement.md.
-import re, shutil
+# Polices : @font-face en ligne (docs/vendor/fonts, font-display: swap), police du texte préchargée ; MathJax :
+# docs/vendor/mathjax, chargé par le chargeur ci-dessous (24.11) ; voir tools/chargement.md.
 pwa_head = ('<link rel="manifest" href="manifest.webmanifest">\n<meta name="theme-color" content="#2457d6">\n'
             '<link rel="apple-touch-icon" href="icon-192.png">\n<meta name="apple-mobile-web-app-capable" content="yes">\n')
 # 24.11 (chantier F2, chargement par niveau ; plan : tools/chargement.md) : docs/app.js = code commun ; un paquet par
@@ -115,10 +129,8 @@ loader = """<script src="app.js?v=%(v)s"></script>
 })();
 </script>
 """
-MJ = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"
-head_docs = head.replace('<script src="' + MJ + '"></script>', "")
-assert head_docs != head, "balise MathJax introuvable dans head"
-head_docs = re.sub(r'<link rel="stylesheet" href="(https://fonts\.googleapis\.com/[^"]+)"\s*/?>', r'<link rel="preload" as="style" href="\1" onload="this.onload=null;this.rel=&quot;stylesheet&quot;"><noscript><link rel="stylesheet" href="\1"></noscript>', head_docs)
+head_docs = head_local.replace('<script src="' + MJ + '"></script>', "")
+assert head_docs != head_local, "balise MathJax introuvable dans head"
 docs_body = '<main id="app" aria-live="polite"></main>\n' + loader % {"v": version, "keys": str(ORDRE_P).replace("'", '"'), "mj": MJ}
 (ROOT / "docs").mkdir(exist_ok=True)
 (ROOT / "docs" / "index.html").write_text(
