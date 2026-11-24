@@ -18,7 +18,7 @@ const Backup = {
       e: [s.elo.r, s.elo.n, (s.elo.log || []).slice(-8).map(([d, r]) => [off(d), r])],
       k: [s.streak.count, off(s.streak.last)].concat(s.streak.best || s.streak.jokerWk ? [s.streak.best || 0] : []).concat(s.streak.jokerWk ? [off(s.streak.jokerWk)] : []),
       h: (s.history || []).slice(-14).map((x) => [off(x.date), x.n, r2(x.score)]),
-      b, pr: s.prep || null, nw: s.now || null, g: Object.fromEntries(Object.entries(s.badges || {}).map(([k, d]) => [k, off(d)])),
+      b, pr: s.prep || null, nw: s.now || null, a: s.a11y && (s.a11y.fs !== 1 || s.a11y.font || s.a11y.hc) ? s.a11y : undefined, g: Object.fromEntries(Object.entries(s.badges || {}).map(([k, d]) => [k, off(d)])),
     };
   },
   unpack(o) {
@@ -47,6 +47,7 @@ const Backup = {
     s.badges = Object.fromEntries(Object.entries(o.g || {}).map(([k, d]) => [k, on(d)]));
     if (o.pr) s.prep = o.pr;
     if (o.nw) s.now = o.nw;
+    if (o.a) s.a11y = { fs: +o.a.fs || 1, font: o.a.font ? 1 : 0, hc: o.a.hc ? 1 : 0 }; // réglages de lecture (24.11)
     s.placed = true;
     Engine.migrate(s);
     return s;

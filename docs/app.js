@@ -19373,7 +19373,7 @@ const Backup = {
       e: [s.elo.r, s.elo.n, (s.elo.log || []).slice(-8).map(([d, r]) => [off(d), r])],
       k: [s.streak.count, off(s.streak.last)].concat(s.streak.best || s.streak.jokerWk ? [s.streak.best || 0] : []).concat(s.streak.jokerWk ? [off(s.streak.jokerWk)] : []),
       h: (s.history || []).slice(-14).map((x) => [off(x.date), x.n, r2(x.score)]),
-      b, pr: s.prep || null, nw: s.now || null, g: Object.fromEntries(Object.entries(s.badges || {}).map(([k, d]) => [k, off(d)])),
+      b, pr: s.prep || null, nw: s.now || null, a: s.a11y && (s.a11y.fs !== 1 || s.a11y.font || s.a11y.hc) ? s.a11y : undefined, g: Object.fromEntries(Object.entries(s.badges || {}).map(([k, d]) => [k, off(d)])),
     };
   },
   unpack(o) {
@@ -19402,6 +19402,7 @@ const Backup = {
     s.badges = Object.fromEntries(Object.entries(o.g || {}).map(([k, d]) => [k, on(d)]));
     if (o.pr) s.prep = o.pr;
     if (o.nw) s.now = o.nw;
+    if (o.a) s.a11y = { fs: +o.a.fs || 1, font: o.a.font ? 1 : 0, hc: o.a.hc ? 1 : 0 }; // réglages de lecture (24.11)
     s.placed = true;
     Engine.migrate(s);
     return s;
@@ -25908,7 +25909,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "59c4c85a9f"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "6dac6689a9"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 function errCanSend() {
@@ -26195,9 +26196,10 @@ function screenLevel() {
   // Plus de questionnaire sur les notions : celles de l'année s'ouvrent dans l'ordre du référentiel.
   document.getElementById("next").onclick = () => {
     if (draft.system === "CH" && draft.grade >= 12 && !draft.track) { document.getElementById("trackerr").textContent = "Choisis d'abord ta voie : Collège ou maturité professionnelle."; document.getElementById("track").scrollIntoView({ behavior: "smooth", block: "center" }); return; }
-    const keep = state && state.comps;
+    const keep = state && state.comps, keepA = state && state.a11y;
     state = Engine.newState({ system: draft.system, grade: draft.grade, track: draft.system === "CH" && draft.grade >= 12 ? draft.track : "college", minutes: draft.minutes });
     if (keep) state.comps = keep; // changement de classe : les notes des compétences restent
+    if (keepA) state.a11y = keepA; // et les réglages de lecture
     Engine.autoInit(state);
     save(); startPlacement();
   };
@@ -26503,10 +26505,27 @@ function screenHome() {
 })();
 // Activité en cours : le navigateur demande confirmation avant de recharger ou de quitter la page (22.11).
 window.addEventListener("beforeunload", (e) => { if (typeof session !== "undefined" && session && session.i < session.plan.length && session.answered > 0) { e.preventDefault(); e.returnValue = ""; } });
-// Réglages d'interface (21.11, propositions UI 8 et 10) : propres à l'appareil, gardés hors de la progression.
+// Réglages d'interface (21.11, propositions UI 8 et 10) : propres à l'appareil, gardés hors de la progression
+// (vibration, installation) ; les réglages de lecture sont dans le state depuis le 24.11 (voir a11yOf).
 const UI = (() => { let u = {}; try { u = JSON.parse(localStorage.getItem("m2m-ui") || "{}"); } catch (e) {} return Object.assign({ fs: 1, vib: true }, u); })();
 const uiSave = () => { try { localStorage.setItem("m2m-ui", JSON.stringify(UI)); } catch (e) {} };
-const uiApply = () => { document.documentElement.style.fontSize = 16 * UI.fs + "px"; document.body.style.fontSize = 17 * UI.fs + "px"; };
+// Accessibilité (24.11, chantier O) : taille du texte, police plus lisible, contraste renforcé. Gardés dans le state
+// (donc dans le code de sauvegarde) ; un state ancien sans « a11y » prend les valeurs par défaut. La taille passe par la
+// variable CSS --fs (racine) : textes, formules MathJax (en em) et figures suivent.
+const A11Y_FS = [[1, "Normale"], [1.15, "Grande"], [1.3, "Très grande"]];
+const a11yOf = (s) => {
+  const a = Object.assign({ fs: 1, font: 0, hc: 0 }, s && s.a11y), f = +a.fs || 1;
+  return { fs: A11Y_FS.map((x) => x[0]).reduce((b, v) => (Math.abs(v - f) < Math.abs(b - f) ? v : b), 1), font: a.font ? 1 : 0, hc: a.hc ? 1 : 0 };
+};
+// Ancien réglage de taille propre à l'appareil (21.11, 1 / 1,12 / 1,25) : repris une fois dans le state.
+if (state && !state.a11y && UI.fs && UI.fs !== 1) { state.a11y = a11yOf({ a11y: { fs: UI.fs } }); save(); }
+const uiApply = () => {
+  const a = a11yOf(state), r = document.documentElement;
+  r.style.removeProperty("font-size"); document.body.style.removeProperty("font-size");
+  r.style.setProperty("--fs", a.fs);
+  if (a.font) r.dataset.font = "lisible"; else delete r.dataset.font;
+  if (a.hc) r.dataset.hc = "1"; else delete r.dataset.hc;
+};
 uiApply();
 // Vibration courte : une pour juste, deux pour faux (Android ; sans effet ailleurs).
 const buzz = (ok) => { if (UI.vib && navigator.vibrate) try { navigator.vibrate(ok ? 35 : [40, 70, 40]); } catch (e) {} };
@@ -26536,9 +26555,12 @@ function returnCard() {
   return "";
 }
 function screenSettings() {
+  const A = a11yOf(state);
   h(`${brand}<h2>Réglages</h2><div class="stack">
   <div class="card flat stack"><h3>Affichage</h3>
-    <span class="small muted">Taille du texte</span><div class="seg" id="fs">${[[1, "A"], [1.12, "A+"], [1.25, "A++"]].map(([v, l]) => `<button aria-pressed="${UI.fs === v}" data-v="${v}" style="font-size:${v}em">${l}</button>`).join("")}</div>
+    <span class="small muted" id="fs-l">Taille du texte</span><div class="seg" id="fs" role="group" aria-labelledby="fs-l">${A11Y_FS.map(([v, l]) => `<button aria-pressed="${A.fs === v}" data-v="${v}">${l}</button>`).join("")}</div>
+    <span class="small muted" id="font-l">Police</span><div class="seg" id="font" role="group" aria-labelledby="font-l"><button aria-pressed="${!A.font}" data-v="0">Habituelle</button><button aria-pressed="${!!A.font}" data-v="1">Plus lisible</button></div>
+    <span class="small muted" id="hc-l">Contraste</span><div class="seg" id="hc" role="group" aria-labelledby="hc-l"><button aria-pressed="${!A.hc}" data-v="0">Normal</button><button aria-pressed="${!!A.hc}" data-v="1">Renforcé</button></div>
     <span class="small muted">Vibrer à chaque réponse (téléphone)</span><div class="seg" id="vib"><button aria-pressed="${UI.vib}" data-v="1">Oui</button><button aria-pressed="${!UI.vib}" data-v="0">Non</button></div></div>
   ${installCard("")}
   <button class="btn-sec" id="backup">💾 Sauvegarder ou transférer ma progression</button><button class="btn-sec" id="level">Changer de classe ou d'école</button><button class="btn-sec" id="privacy">🔒 Ce que l'app envoie</button>
@@ -26547,7 +26569,10 @@ function screenSettings() {
   <button class="btn-primary" id="back">Retour</button></div>`);
   document.getElementById("back").onclick = screenHome;
   bindInstall(screenSettings);
-  app.querySelectorAll("#fs button").forEach((b) => (b.onclick = () => { UI.fs = +b.dataset.v; uiSave(); uiApply(); screenSettings(); }));
+  const setA = (k, v) => { state.a11y = { ...a11yOf(state), [k]: v }; save(); uiApply(); screenSettings(); const f = document.querySelector(`#${k} button[data-v="${v}"]`); if (f) f.focus(); };
+  app.querySelectorAll("#fs button").forEach((b) => (b.onclick = () => setA("fs", +b.dataset.v)));
+  app.querySelectorAll("#font button").forEach((b) => (b.onclick = () => setA("font", +b.dataset.v)));
+  app.querySelectorAll("#hc button").forEach((b) => (b.onclick = () => setA("hc", +b.dataset.v)));
   app.querySelectorAll("#vib button").forEach((b) => (b.onclick = () => { UI.vib = b.dataset.v === "1"; uiSave(); if (UI.vib) buzz(true); screenSettings(); }));
   document.getElementById("privacy").onclick = () => screenPrivacy(screenSettings);
   if (document.getElementById("stats")) document.getElementById("stats").onclick = () => screenStats(screenSettings);
@@ -26555,7 +26580,7 @@ function screenSettings() {
   document.getElementById("level").onclick = () => { draft = { ...state.profile }; screenLevel(); };
   document.getElementById("r1").onclick = () => {
     document.getElementById("reset").innerHTML = '<span class="small">Effacer ta progression et ton Mathélo ?</span><button id="r2">Oui, effacer</button><button class="btn-ghost" id="r3">Non</button>';
-    document.getElementById("r2").onclick = () => { Store.clear(); try { localStorage.removeItem("m2m-device"); localStorage.removeItem("m2m-ping"); } catch (e) {} state = null; screenWelcome(); };
+    document.getElementById("r2").onclick = () => { Store.clear(); try { localStorage.removeItem("m2m-device"); localStorage.removeItem("m2m-ping"); } catch (e) {} state = null; uiApply(); screenWelcome(); };
     document.getElementById("r3").onclick = screenSettings;
   };
 }
@@ -26733,7 +26758,7 @@ function screenRestore(code) {
     box.innerHTML = `<div class="card flat stack"><b>Progression trouvée</b><span>${SYSTEMS[s.profile.system].label} · ${gradeName(s.profile)} · Mathélo ${s.elo.r} · ${days} jour${days > 1 ? "s" : ""} d'entraînement · ${nb} badge${nb > 1 ? "s" : ""}</span>
     ${state && state.placed ? '<span class="small">Elle remplacera la progression de cet appareil.</span>' : ""}<button class="btn-primary" id="ok">Reprendre cette progression</button></div>`;
     document.getElementById("check").style.display = "none";
-    document.getElementById("ok").onclick = () => { state = s; save(); history.replaceState(null, "", location.pathname); toast("Progression reprise."); screenHome(); };
+    document.getElementById("ok").onclick = () => { if (!s.a11y && state && state.a11y) s.a11y = state.a11y; state = s; save(); uiApply(); history.replaceState(null, "", location.pathname); toast("Progression reprise."); screenHome(); };
   };
   document.getElementById("check").onclick = check;
   if (code) check();
