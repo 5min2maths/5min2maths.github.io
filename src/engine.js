@@ -546,6 +546,18 @@ const Engine = {
   },
 
   // Séance du jour : notions dues et fragiles d'abord, puis « en cours », puis rappels espacés.
+  // Notions anciennes (avant l'année précédente) que le parcours de l'élève demande de remobiliser (24.11) :
+  // 1) une notion ancienne travaillée dans l'app et ratée ; 2) les prérequis anciens d'une notion de l'année qui coince ;
+  // 3) un Mathélo en forte baisse (au moins 120 points sous son meilleur des 30 derniers jours) : toutes les anciennes.
+  oldNeed(state) {
+    const el = this.eligible(state), old = el.filter((id) => !this.isRecent(state, id)), need = new Set();
+    const coince = (s) => s.seen > 0 && (s.m < 0.45 || (s.fails || 0) >= 2);
+    for (const id of old) if (coince(state.notions[id])) need.add(id);
+    for (const id of el) if (!old.includes(id) && state.notions[id].seen >= 2 && coince(state.notions[id])) for (const p of PREREQ[id] || []) if (old.includes(p)) need.add(p);
+    if (this.eloDrop(state)) old.forEach((id) => need.add(id));
+    return need;
+  },
+  eloDrop(state) { const lim = addDays(day(), -30), peak = Math.max(state.elo.r, ...((state.elo.log || []).filter((x) => x[0] >= lim).map((x) => x[1]))); return peak - state.elo.r >= 120; },
   // Notion « actuelle » : année en cours ou précédente. Les plus anciennes ne reviennent qu'en remédiation.
   isRecent(state, id) {
     const pl = placeOf(NOTIONS.find((n) => n.id === id), state.profile);
@@ -559,7 +571,7 @@ const Engine = {
   // Notion ancienne : jamais triviale. Niveau 3 ou problème, assez proche de la cible ;
   // ou niveau ≥ 2 si l'élève l'a ratée (fragile), car alors elle n'est pas triviale pour lui.
   oldLevels(state, id, levels, target) {
-    const s = state.notions[id], weak = s.m < 0.45;
+    const s = state.notions[id], weak = s.m < 0.45 || this.eloDrop(state); /* 24.11 : baisse du Mathélo = remédiation, niveau 2 permis */
     return levels.filter((d) => weak ? d >= 2 : d >= 3 && itemRating(state.profile, id, d) >= target - 150);
   },
 
@@ -619,8 +631,10 @@ const Engine = {
     let old = 0;
     // Créneau « Rappel » : une notion ancienne, jamais triviale. Une séance sur trois environ ;
     // en révision, chaque fois qu'une notion ancienne est fragile. Sans candidate valable : créneau normal.
-    const weakOld = this.eligible(state).some((id) => !this.isRecent(state, id) && state.notions[id].m < 0.45);
-    const wantRappel = slots.length > 1 && ((slots.includes("rev") && weakOld) || Math.random() < 0.35);
+    // 24.11 (règle de l'auteur : « c'est le parcours de l'élève qui dicte s'il y a besoin de remobiliser des compétences
+    // antérieures ») : plus de rappel tiré au hasard ; une notion ancienne ne revient que si le parcours le justifie.
+    const need = [...this.oldNeed(state)];
+    const wantRappel = slots.length > 1 && need.length > 0;
     const rappelAt = wantRappel ? slots.length - 1 - Math.floor(Math.random() * Math.min(2, slots.length)) : -1;
     // « En ce moment en classe » : environ 2 créneaux sur 3 portent sur le chapitre choisi par l'élève.
     const nowIds = this.nowActive(state) ? state.now.ids.filter((id) => state.notions[id] && ["vu", "encours"].includes(state.notions[id].status)) : [];
@@ -658,7 +672,7 @@ const Engine = {
         const b = choose(kind, base, false, nowIds);
         if (b) { used.add(b.id); usedPair.add(b.id + "|" + b.d); nowPart.push(b.id + "|" + b.d + "|" + base); continue; }
       }
-      let best = si === rappelAt && old < maxOld ? choose(kind, base, true) : null;
+      let best = si === rappelAt && old < maxOld ? choose(kind, base, true, need) : null;
       if (best) old++; else best = choose(kind, base, false);
       if (!best) best = choose(kind, base, true); // aucune notion de l'année disponible
       if (!best) continue;
