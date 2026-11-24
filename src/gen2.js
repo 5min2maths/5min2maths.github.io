@@ -101,7 +101,7 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
     (o.vlines || []).forEach((x) => (g += L(X(x), Y(y0), X(x), Y(y1), "f-line", 'stroke-dasharray="4 4"')));
     (o.hlines || []).forEach((y) => (g += L(X(x0), Y(y), X(x1), Y(y), "f-line", 'stroke-dasharray="4 4"')));
     // 24.11 (robot : « C » sortait du cadre à droite) : l'étiquette passe à gauche du point près du bord droit, en dessous près du haut.
-    pts.forEach(([x, y, s]) => (g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="4" class="f-dot"/>' + (s ? (X(x) > W - 24 ? t(X(x) - 7, Y(y) < 18 ? Y(y) + 16 : Y(y) - 7, s, "f-txt", "end", 12) : t(X(x) + 7, Y(y) < 18 ? Y(y) + 16 : Y(y) - 7, s, "f-txt", "start", 12)) : "")));
+    pts.forEach(([x, y, s]) => (g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="4" class="f-dot"/>' + (s ? (X(x) > W - 24 || (o.numbers && x < 0 && X(0) - X(x) < 34) ? t(X(x) - 7, Y(y) < 18 ? Y(y) + 16 : Y(y) - 7, s, "f-txt", "end", 12) : t(X(x) + 7, Y(y) < 18 ? Y(y) + 16 : Y(y) - 7, s, "f-txt", "start", 12)) /* 24.11 : point juste à gauche de l'axe : nom à gauche (sinon sur les graduations, robot) */ : "")));
     return svg(W, H, g, o.label || "graphique");
   };
   // Triangle avec étiquettes d'angles (aux sommets A, B, C) et de côtés.

@@ -385,11 +385,14 @@ const FIG = (() => {
     return '<path d="M' + f1(V[0] + r * Math.cos(a1)) + "," + f1(V[1] + r * Math.sin(a1)) + " A" + r + "," + r + " 0 0," + (d > 0 ? 1 : 0) + " " + f1(V[0] + r * Math.cos(a2)) + "," + f1(V[1] + r * Math.sin(a2)) + '" class="f-accent" fill="none" stroke-width="2"/>';
   }
   // Étiquette d'un côté [P, Q] placée à l'extérieur (loin du point G intérieur).
-  function sideLab(P1, Q1, G, s, cls = "f-txt", size = 14) {
+  function sideLab(P1, Q1, G, s, cls = "f-txt", size = 14, W = 300) {
     if (!s) return "";
     const M = [(P1[0] + Q1[0]) / 2, (P1[1] + Q1[1]) / 2]; let nx = Q1[1] - P1[1], ny = -(Q1[0] - P1[0]); const d = Math.hypot(nx, ny); nx /= d; ny /= d;
     if (nx * (M[0] - G[0]) + ny * (M[1] - G[1]) < 0) { nx = -nx; ny = -ny; }
-    return t(f1(M[0] + nx * 12), f1(M[1] + ny * 12 + (ny > 0.5 ? 6 : 4)), s, cls, nx > 0.35 ? "start" : nx < -0.35 ? "end" : "middle", size);
+    // 24.11 (robot : « a = 4 » sortait du cadre à droite) : largeur estimée, l'étiquette reste dans le cadre (≥ 300 px de large).
+    let x = M[0] + nx * 12, an = nx > 0.35 ? "start" : nx < -0.35 ? "end" : "middle"; const w = String(s).length * size * 0.56;
+    if (an === "start" && x + w > W - 4) { an = "end"; x = W - 4; } else if (an === "end" && x - w < 4) { an = "start"; x = 4; } else if (an === "middle") x = Math.min(Math.max(x, 4 + w / 2), W - 4 - w / 2);
+    return t(f1(x), f1(M[1] + ny * 12 + (ny > 0.5 ? 6 : 4)), s, cls, an, size);
   }
   // Triangle quelconque avec étiquettes [a, b, c, angle(s), sommet de l'angle].
   // 24.11 (galerie : 90° dessiné aigu, 120° dessiné aigu, longueurs non respectées) : les angles et côtés donnés
@@ -398,11 +401,11 @@ const FIG = (() => {
     const g = [null, null, null], nm = { "α": 0, "β": 1, "γ": 2 };
     String(lab[3] || "").replace(/([αβγ])\s*=\s*(\d+(?:[.,]\d+)?)\s*°/g, (_, l, v) => (g[nm[l]] = +v.replace(",", ".")));
     const sol = solveTri([0, 1, 2].map((i) => num(lab[i]) || null), g) || [54, 31.4];
-    const [A, B, C] = triPts(sol[0], sol[1], 34, 30, 252, 108), G = [(A[0] + B[0] + C[0]) / 3, (A[1] + B[1] + C[1]) / 3], V = [A, B, C];
+    const [A, B, C] = triPts(sol[0], sol[1], 44, 30, 216, 108), /* 24.11 : marges pour les étiquettes de côté (robot : « a = 4 » hors cadre) */ G = [(A[0] + B[0] + C[0]) / 3, (A[1] + B[1] + C[1]) / 3], V = [A, B, C];
     let gg = P([A, B, C].map((p) => p.map(f1)), "f-shape") + t(f1(A[0] - 12), f1(A[1] + 6), "A") + t(f1(B[0] + 12), f1(B[1] + 6), "B") + t(f1(C[0]), f1(C[1] - 8), "C");
     const ang = [sol[0], sol[1], 180 - sol[0] - sol[1]];
     ang.forEach((a, i) => { if (Math.abs(a - 90) < 0.5 && g[i] != null) gg += rightMark(V[i], V[(i + 1) % 3], V[(i + 2) % 3]); });
-    gg += sideLab(B, C, G, lab[0]) + sideLab(A, C, G, lab[1]) + sideLab(A, B, G, lab[2]);
+    gg += sideLab(B, C, G, lab[0], "f-txt", 14, 320) + sideLab(A, C, G, lab[1], "f-txt", 14, 320) + sideLab(A, B, G, lab[2], "f-txt", 14, 320);
     if (lab[3]) {
       // Arc à l'angle nommé ; étiquette dans l'angle (A, B) ou vers le centre du triangle (C, souvent étroit).
       const i = lab[4] === "C" ? 2 : lab[4] === "B" ? 1 : 0, P1 = V[i];
