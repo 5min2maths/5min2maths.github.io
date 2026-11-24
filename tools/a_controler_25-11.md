@@ -55,5 +55,18 @@ Registre : tools/niveau.json ; colonne « Audit de niveau » du suivi.
 - À trancher : chapitre « Raisonner en géométrie » (vide, hors programme officiel) ; passer la trigonométrie du
   Collège en radians ; séparer les générateurs Collège et MP.
 
-### 11e — en cours (agent)
+### 11e — fait (tools/niveau_11.md)
+
+- Au niveau : la plupart des chapitres ; banques riches de proportionnalité et de calcul littéral au niveau des dossiers 11LS.
+- Corrigé : en 11e, le niveau 1 de 26 notions de 9e–10e prend les questions du niveau 2 (liste UP11) ; racprop au
+  niveau du test 1.2 (√968, ∛−72'000, sommes de 3 termes) ; reduire N3 (fractions à numérateur binôme, dossier Ex. 17) ;
+  idrem N3 (a√m − b√n)(a√m + b√n) (Ex. 20) ; angles N1 (alternes-externes au lieu de « autour d'un point ») ;
+  automatismes des sujets de préparation de 11e au moins au niveau 2.
+- À trancher : remontée du niveau 1 en 11e (d'accord ?) ; rac et carres encore utiles en 11e ? ; eq2disc dès l'année
+  (plan LS, hors EVACOM) ? ; ∜1250 du test 1.2 au programme ? ; manquent : nommer un solide d'après son patron,
+  expressions équivalentes. **À relire avant l'ouverture à la 11LS** (colonne Contrôlé).
+
+### Tes 3 commentaires d'hier soir (agent en cours)
+
+- fracmul-3-3an (valeurs mal choisies), clavier qui « saute » après la 1re touche, ensemble vide (touche ∅).
 ### MP 3e–4e — en cours (agent)

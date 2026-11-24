@@ -8207,8 +8207,8 @@ const RICH = {};
         sol: ul([M("(" + xE(p) + ")(" + xE(q) + ") = 0") + ", soit " + M(poly([1, -(p + q), p * q]) + " = 0") + ".", "Par exemple " + M("2(" + xE(p) + ")(" + xE(q) + ") = 0") + " (n'importe quel facteur non nul).", M("(" + xE(p) + ")^2 = 0") + ".", M("x^2 + 1 = 0") + " (un carré plus 1 n'est jamais nul)."]) }); },
   ];
   RICH.eq1c = { ids: ["eq1", "eqfrac", "eqspec", "formule", "probeq", "eq2fact", "eq2", "eq2disc", "probeq2", "eq3", "bicarre", "eqirr"], label: "Équations", ex: EXE, raison: RAISONE, minutes: 45 };
-  RICH.litt11 = { ids: ["litelab", "valnum", "reduire", "monomes", "parenth", "distrib", "idrem", "factor"], label: "Calcul littéral", ex: EXL, raison: RAISONL, minutes: 45 };
-  RICH.prop11 = { ids: ["utemps", "ucomp", "vitesse", "gquot"], label: "Proportionnalité, grandeurs quotients et unités", ex: EX, raison: RAISON, minutes: 45 };
+  RICH.litt11 = { ids: ["litelab", "valnum", "reduire", "monomes", "parenth", "distrib", "idrem", "factor"], label: "Calcul littéral", ex: EXL, raison: RAISONL, minutes: 45, minA: 2 }; /* 25.11 : automatismes au niveau 2 (audit de niveau 11e) */
+  RICH.prop11 = { ids: ["utemps", "ucomp", "vitesse", "gquot"], label: "Proportionnalité, grandeurs quotients et unités", ex: EX, raison: RAISON, minutes: 45, minA: 2 }; /* 25.11 : automatismes au niveau 2 (audit de niveau 11e) */
 })();
 
 // Chapitre du sujet de préparation : celui dont la banque couvre le plus de notions révisées (au moins la moitié).
@@ -12371,7 +12371,8 @@ const MOCK_LV = {
 // (questions liées, donnée inutile, estimation, interprétation), C. raisonnement (trouve l'erreur, vrai ou faux, deux méthodes).
 function richPlan(ch, ids, level) {
   const C = RICH[ch], items = [], mine = C.ids.filter((id) => ids.includes(id));
-  const dA = { facile: [1, 1, 1, 1], standard: [1, 2, 1, 2], exigeant: [2, 2, 3, 2] }[level] || [1, 2, 1, 2];
+  /* 25.11 (audit de niveau 11e) : minA = niveau minimal des automatismes (banques de 11e dont les notions viennent de 9e-10e ; voir UP11 dans engine.js). */
+  const dA = ({ facile: [1, 1, 1, 1], standard: [1, 2, 1, 2], exigeant: [2, 2, 3, 2] }[level] || [1, 2, 1, 2]).map((d) => Math.max(d, C.minA || 1));
   // Automatismes tirés parmi toutes les notions révisées (16.11 : avec 8 ou 12 notions, les 4 premières revenaient toujours).
   R.seed(mockSeed()); const pickA = mine.length > dA.length ? shuffle(mine.slice()).slice(0, dA.length).sort((a, b) => mine.indexOf(a) - mine.indexOf(b)) : mine;
   dA.forEach((d, k) => items.push({ part: "A", id: pickA[k % pickA.length], d, seed: mockSeed() }));
@@ -13237,6 +13238,16 @@ const Engine = {
   },
   make(state, id, d, seed) {
     let level = d || this.difficulty(state, id);
+    const asked = level; /* 25.11 : niveau demandé (carnet, baisse après erreur) ; le contenu peut être remonté ci-dessous */
+    const keep = (q) => { if (q && typeof q === "object" && q.d && q.d !== 4 && asked !== 4) q.d = asked; return q; };
+    /* 25.11 (audit de niveau 11e, tools/niveau_11.md ; règle de l'enseignant du 24.11 : le niveau 1 = automatismes de
+       l'année, jamais ceux d'une année inférieure) : notions de 9e-10e reprises en 11e (CO). Leur niveau 1 est un
+       automatisme de 9e-10e (« 3x + 9 = 33 », « calcule 4 - 5x pour x = -4 », « 3/4 de 200 CHF ») : en 11e, le niveau 1
+       tire les formes du niveau 2 (le code de la question reste reproductible : …-2-…). La 9e et la 10e ne changent pas.
+       rel n'y est pas : son niveau 2 tire déjà le niveau 3 en 11e (UP2 ci-dessous). */
+    const UP11 = ["prio", "fracadd", "fracconv", "fracmul", "fracops", "puiss", "sci", "scicalc", "rac", "carres", "pyth", "pythfig", "vol",
+      "vitesse", "valnum", "litelab", "reduire", "monomes", "distrib", "eq1", "eqfrac", "probeq", "affine", "repere", "tabval", "pctvar"];
+    if (level === 1 && UP11.includes(id) && state && state.profile && state.profile.system === "CH" && state.profile.track !== "mp" && state.profile.grade === 11) level = 2;
     // Notions de révision trop faciles au niveau 2 pour les grandes classes (21.11, « relève le niveau 2 pour la 11e ») :
     // dès la classe indiquée, le niveau 2 tire les formes du niveau 3 (le code de la question reste reproductible : …-3-…).
     const UP2 = { rel: 11 };
@@ -13247,7 +13258,7 @@ const Engine = {
     if (level < 3 && state && state.profile && state.profile.system === "CH" && state.profile.track !== "mp" && state.profile.grade >= 12) {
       if (UPC_MIN[id]) level = Math.max(level, UPC_MIN[id]); else if (UPC.includes(id)) level += 1;
     }
-    if (seed) return this.finalize(state, id, this.build(id, level, seed));
+    if (seed) return keep(this.finalize(state, id, this.build(id, level, seed)));
     const rec = ((state.recentQ = state.recentQ || {})[id] = (state.recentQ[id] || []));
     const key = (q) => { let h = 0; for (const c of String(q.q) + JSON.stringify(q.spec)) h = (h * 31 + c.charCodeAt(0)) | 0; return h; };
     let q;
@@ -13267,7 +13278,7 @@ const Engine = {
     rec.push(key(q)); state.recentQ[id] = rec.slice(-15);
     if (q.ctx) state.recentCtx[id] = [...ctxs, q.ctx].slice(-2);
     state.recentForm[id] = [...forms, qForm(q)].slice(-2);
-    return this.finalize(state, id, q);
+    return keep(this.finalize(state, id, q));
   },
   // Question reproductible : même notion, niveau et graine → même question.
   build(id, level, seed) {

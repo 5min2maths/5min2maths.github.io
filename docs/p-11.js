@@ -598,6 +598,21 @@
           "Erreur : " + M("x") + " et " + M("x^2") + " ne sont pas semblables ; on ne peut pas les additionner. " + M(a + "x + " + c + "x = " + (a + c) + "x") + ", donc " + M(tex(L)) + ".",
           { ...red, ctx: "erreur", guide: [GX("Quels termes sont semblables ? Additionne-les :", X1(a + c), M(a + "x + " + c + "x = " + (a + c) + "x") + ".", "reduced"), GX("Écris le résultat réduit et ordonné :", L, M(tex(L)) + ".", "reduced")],
             traps: [TX((a + b + c) + "*x^3", "C'est l'erreur de " + w + " : " + M("x") + " et " + M("x^2") + " ne s'additionnent pas.")] }); },
+      /* 25.11 (audit de niveau 11e, tools/niveau_11.md) : fractions à numérateur binôme, comme le dossier de calcul
+         littéral de la 11LS (Ex. 17 : (x + 5)/3 − (x − 1)/2) ; le niveau 3 n'avait que x/4 + x/6. */
+      () => { let p, q, a1, b1, a2, b2, op, L, cx, c0;
+        do { [p, q] = pk([[2, 3], [3, 4], [2, 5], [4, 6], [3, 5], [6, 4], [5, 10], [3, 6]]); a1 = pk([1, 1, 2, 3]); a2 = pk([1, 1, 2, 3]); b1 = nz(-7, 7); b2 = nz(-7, 7); op = pk([1, -1]);
+          L = (p * q) / gcd2(p, q); cx = (L / p) * a1 + op * (L / q) * a2; c0 = (L / p) * b1 + op * (L / q) * b2; }
+        while (cx === 0 || c0 === 0 || gcd2(gcd2(cx, c0), L) !== 1);
+        const num = (a, b) => (a === 1 ? "" : a) + "x" + (b < 0 ? " - " + -b : " + " + b), N = norm([[cx, { x: 1 }], [c0, {}]]), e = "(" + plain(N) + ")/" + L;
+        const k1 = L / p, k2 = L / q, mul = (k, a, b) => (k === 1 ? "(" + num(a, b) + ")" : k + "(" + num(a, b) + ")");
+        const wrong = norm([[cx, { x: 1 }], [k1 * b1 + k2 * b2, {}]]);
+        return Qx("Réduis et écris en une seule fraction : " + M("\\frac{" + num(a1, b1) + "}{" + p + "} " + (op > 0 ? "+" : "-") + " \\frac{" + num(a2, b2) + "}{" + q + "}") + ".", e,
+          "Dénominateur commun " + M(L) + " : " + M("\\frac{" + mul(k1, a1, b1) + (op > 0 ? " + " : " - ") + mul(k2, a2, b2) + "}{" + L + "} = \\frac{" + tex(N) + "}{" + L + "}") + (op < 0 ? " (le « − » s'applique à tout le second numérateur)." : "."),
+          { form: "onefrac", ctx: "fractions-binomes",
+            guide: [GS("Quel est le plus petit dénominateur commun ?", L, M(L) + "."), GX("Numérateur, une fois les parenthèses enlevées et réduit :", N, M(tex(N)) + ".", "reduced"), GX("Résultat en une seule fraction :", e, M("\\frac{" + tex(N) + "}{" + L + "}") + ".", "onefrac")],
+            traps: [...(op < 0 ? [TX("(" + plain(wrong) + ")/" + L, "Le « − » devant la seconde fraction change le signe de TOUT son numérateur : " + M("-" + mul(k2, a2, b2)) + ".")] : []),
+              TX("(" + plain(norm([[a1 + op * a2, { x: 1 }], [b1 + op * b2, {}]])) + ")/" + (p + q), "On n'additionne pas les dénominateurs : on met d'abord les fractions au même dénominateur.")] }); },
     ],
   };
 
@@ -787,6 +802,14 @@
         return Qn("Calcule mentalement " + M(n + "^2") + " avec une identité remarquable.", v, M("(" + r + (d < 0 ? " - " : " + ") + Math.abs(d) + ")^2 = " + r * r + (d < 0 ? " - " : " + ") + 2 * r * Math.abs(d) + " + " + d * d + " = " + v) + ".",
           { ctx: "mental", guide: [GS("Écris " + n + " comme " + r + (d < 0 ? " − " : " + ") + Math.abs(d) + ". Calcule " + M(r + "^2") + ".", r * r, M(r * r) + "."), GS("Double produit " + M("2 \\cdot " + r + " \\cdot " + Math.abs(d)) + " :", 2 * r * Math.abs(d), M(2 * r * Math.abs(d)) + "."), GS("Résultat :", v, M(r * r + (d < 0 ? " - " : " + ") + 2 * r * Math.abs(d) + " + " + d * d + " = " + v) + ".")],
             traps: [{ v: r * r + d * d, m: "Il manque le double produit " + M("2 \\cdot " + r + " \\cdot " + Math.abs(d)) + "." }] }); },
+      /* 25.11 (audit de niveau 11e, tools/niveau_11.md) : 3e identité avec des racines, comme le dossier de la 11LS
+         (Ex. 20 : (5√3 − 4√2)(5√3 + 4√2)) et l'EVACOM (racines et calcul littéral). */
+      () => { let a, b, m, n, v; do { a = R.int(2, 6); b = R.int(2, 5); [m, n] = pk([[3, 2], [2, 3], [5, 2], [5, 3], [7, 2], [7, 3], [6, 5], [3, 5], [2, 7]]); v = a * a * m - b * b * n; } while (Math.abs(v) < 2);
+        const A = a + "\\sqrt{" + m + "}", B = b + "\\sqrt{" + n + "}";
+        return Qn("Calcule avec une identité remarquable : " + M("(" + A + " - " + B + ")(" + A + " + " + B + ")") + ".", v,
+          M("(" + A + ")^2 - (" + B + ")^2 = " + a * a + " \\cdot " + m + " - " + b * b + " \\cdot " + n + " = " + a * a * m + " - " + b * b * n + " = " + v) + ".",
+          { ctx: "racines", guide: [GS("C'est " + M("(u - v)(u + v) = u^2 - v^2") + ". Calcule " + M("(" + A + ")^2") + " :", a * a * m, M(a + "^2 \\cdot " + m + " = " + a * a * m) + "."), GS("Calcule " + M("(" + B + ")^2") + " :", b * b * n, M(b + "^2 \\cdot " + n + " = " + b * b * n) + "."), GS("Résultat :", v, M(a * a * m + " - " + b * b * n + " = " + v) + ".")],
+            traps: [{ v: a * a * m + b * b * n, m: "C'est une <b>différence</b> de carrés : " + M("u^2 - v^2") + "." }, { v: a * m - b * n, m: M("(" + A + ")^2 = " + a + "^2 \\cdot (\\sqrt{" + m + "})^2") + " : le " + a + " est aussi élevé au carré." }].filter((t) => t.v !== v) }); },
     ],
   };
 
@@ -2148,10 +2171,16 @@
         return Qv("Les droites " + M("d_1") + " et " + M("d_2") + " sont parallèles. Un angle mesure " + deg(rv(a, r)) + ". Combien mesure l'angle marqué « ? » ?", rv(a, r), "Les deux angles sont correspondants (même position aux deux intersections) : avec des parallèles, ils sont égaux, " + deg(rv(a, r)) + ".",
           { ctx: "correspondants", fig: par(a, [[0, r, rv(a, r) + "°"], [1, r, "?"]]), guide: [GS("Les deux angles occupent la même position aux deux intersections : ce sont des angles correspondants. Avec des parallèles, ils sont égaux. Mesure de « ? » ?", rv(a, r), deg(rv(a, r)) + ".")],
             traps: [TR(180 - rv(a, r), "Correspondants : même position, même mesure (pas supplémentaires).")] }); },
-      () => { const a = R.int(70, 140), b = R.int(60, 150); if (a + b >= 330) return null;
-        return Qv("Trois angles se partagent le tour complet d'un point. Deux mesurent " + deg(a) + " et " + deg(b) + ". Combien mesure le troisième ?", 360 - a - b, "Le tour complet fait 360° : " + M("360° - " + a + "° - " + b + "° = " + (360 - a - b) + "°") + ".",
-          { ctx: "tour", fig: GF.around(a, b, a + "°", b + "°", "?"), guide: [GS("Combien de degrés fait un tour complet ?", 360, "360°."), GS("Somme des deux angles connus ?", a + b, deg(a + b) + "."), GS("Le troisième ?", 360 - a - b, deg(360 - a - b) + ".")],
-            traps: [TR(180 - a - b, "Autour d'un point, la somme fait 360° (180°, c'est un angle plat).")] }); },
+      /* 25.11 (audit de niveau 11e) : « trois angles autour d'un point » (tour complet, 9e) remplacé par les angles
+         internes du même côté (supplémentaires) et alternes-externes (égaux), au programme de 11e (plan de cheminement, 7. Angles). */
+      () => { const a = R.int(32, 72), co = R.rand() < 0.55, [r1, r2] = co ? pk([[1, 4], [2, 3]]) : pk([[3, 1], [4, 2]]), g = rv(a, r1), v = rv(a, r2);
+        return Qv("Les droites " + M("d_1") + " et " + M("d_2") + " sont parallèles. Un angle mesure " + deg(g) + ". Combien mesure l'angle marqué « ? » ?", v,
+          co ? "Les deux angles sont entre les parallèles, du même côté de la sécante (angles internes du même côté) : ils sont supplémentaires, " + M("180° - " + g + "° = " + v + "°") + "."
+            : "Les deux angles sont à l'extérieur des parallèles, de part et d'autre de la sécante (alternes-externes) : ils sont égaux, " + deg(v) + ".",
+          { ctx: co ? "co-internes" : "alternes-externes", fig: par(a, [[0, r1, g + "°"], [1, r2, "?"]]),
+            guide: co ? [GS("Les deux angles sont entre les parallèles, du même côté de la sécante. Quelle est leur somme ?", 180, "180° : ils sont supplémentaires."), GS("Mesure de « ? » ?", v, deg(v) + ".")]
+              : [GS("Les deux angles sont à l'extérieur des parallèles, de part et d'autre de la sécante : alternes-externes, donc égaux. Mesure de « ? » ?", v, deg(v) + ".")],
+            traps: [TR(co ? g : 180 - g, co ? "Internes du même côté : les angles ne sont pas égaux, ils sont supplémentaires (somme 180°)." : "Alternes-externes : les angles sont égaux (pas supplémentaires).")] }); },
     ],
     2: [
       () => { const a = R.int(30, 70), [r1, r2] = pk([[1, 3], [2, 4]]);
@@ -2887,6 +2916,54 @@
     2: [RA0[2][2], RA0[2][4], RA0[2][1], RA0[2][0]],
     3: [RA0[3][0], RA0[3][2], RA0[3][3], RA0[3][4]],
   };
+  /* 25.11 (audit de niveau 11e, tools/niveau_11.md ; étalon : test 1.2 « Calcul numérique et racines » de la 11LS) : le
+     niveau 3 s'arrêtait à √(a²m) + √(b²m) avec a, b ≤ 5, loin du test (√968, ∛−72000, −6√28 − 7√175 + 3√700,
+     √300 · √112, quotients). Formes ajoutées au niveau du test ; les anciennes restent. */
+  const SQF = [2, 3, 5, 6, 7, 10, 11];
+  const twoP = () => { const p = pk([2, 3, 5, 7]); let q; do q = pk([2, 3, 5, 7, 11]); while (q === p); return [p, q]; };
+  const rT = (k, m) => (k === 1 ? "" : k === -1 ? "-" : k) + "\\sqrt{" + m + "}"; /* k√m en TeX */
+  RP[2].push(() => { let k, m; do { k = R.int(8, 22); m = pk(SQF); } while (k * k * m > 3000);
+    const n = k * k * m;
+    return Qv("Écris " + M("\\sqrt{" + TH(n) + "}") + " sous la forme " + M("a\\sqrt{b}") + ", avec " + M("b") + " le plus petit possible (touche √).", k * Math.sqrt(m), M("\\sqrt{" + TH(n) + "} = \\sqrt{" + k * k + " \\cdot " + m + "} = " + k + "\\sqrt{" + m + "}") + ".",
+      { ctx: "extraire-grand", radical: true, canon: k + "√" + m,
+        guide: [GS("Plus grand carré parfait qui divise " + M(TH(n)) + " ?", k * k, M(TH(n) + " = " + k * k + " \\cdot " + m) + "."), GS("Racine de ce carré parfait ?", k, M("\\sqrt{" + k * k + "} = " + k) + "."), GSR("Résultat ?", k * Math.sqrt(m), M(k + "\\sqrt{" + m + "}") + ".")],
+        traps: [TR(k * k * Math.sqrt(m), "On sort la racine du carré parfait : " + M("\\sqrt{" + k * k + "} = " + k) + ", pas " + k * k + "."), TR(m * k, "Le facteur qui sort est la racine du carré parfait ; " + m + " reste sous la racine.")] }); });
+  RP[2].push(() => { let c, m; do { c = pk([2, 3, 4, 5, 6, 10, 20]); m = pk([2, 3, 4, 5, 6, 7, 9]); } while (c ** 3 * m > 100000);
+    const s = R.rand() < 0.5 ? -1 : 1, n = s * c ** 3 * m, a = s * c;
+    return Qv("On écrit " + M("\\sqrt[3]{" + TH(n) + "} = a\\sqrt[3]{" + m + "}") + ". Que vaut " + M("a") + " ?", a,
+      M("\\sqrt[3]{" + TH(n) + "} = \\sqrt[3]{" + (s < 0 ? "(" + TH(-(c ** 3)) + ")" : TH(c ** 3)) + " \\cdot " + m + "} = " + a + "\\sqrt[3]{" + m + "}") + (s < 0 ? " : la racine cubique d'un nombre négatif est négative." : "."),
+      { ctx: s < 0 ? "extraire-cubique-neg" : "extraire-cubique-grand",
+        guide: [GS("Plus grand cube parfait qui divise " + M(TH(c ** 3 * m)) + " ?", c ** 3, M(TH(c ** 3 * m) + " = " + TH(c ** 3) + " \\cdot " + m) + "."), GS("Racine cubique de ce cube, avec le signe ?", a, M(a) + ".")],
+        traps: [TR(-a, s < 0 ? "La racine cubique d'un nombre négatif est négative." : "Le nombre est positif : sa racine cubique aussi."), TR(s * c * c, "On cherche un cube parfait (" + c + " · " + c + " · " + c + "), pas un carré.")] }); });
+  RP[3].push(() => { const m = pk([2, 3, 5, 6, 7]); let ks, cs, tot;
+    do { ks = [R.int(2, 10), R.int(2, 10), R.int(2, 10)]; cs = [0, 1, 2].map(() => pk([2, 3, 4, 5, 6, 7]) * (R.rand() < 0.5 ? -1 : 1)); tot = cs[0] * ks[0] + cs[1] * ks[1] + cs[2] * ks[2]; }
+    while (new Set(ks).size < 3 || ks.some((k) => k * k * m > 1000) || Math.abs(tot) < 2);
+    const term = (i) => (i ? (cs[i] < 0 ? " - " : " + ") : cs[i] < 0 ? "-" : "") + Math.abs(cs[i]) + "\\sqrt{" + ks[i] * ks[i] * m + "}";
+    const simp = (i) => (i ? (cs[i] * ks[i] < 0 ? " - " : " + ") : cs[i] * ks[i] < 0 ? "-" : "") + Math.abs(cs[i] * ks[i]) + "\\sqrt{" + m + "}";
+    const E = term(0) + term(1) + term(2);
+    return Qv("Écris " + M(E) + " sous la forme " + M("a\\sqrt{b}") + ", avec " + M("b") + " le plus petit possible.", tot * Math.sqrt(m),
+      M(E + " = " + simp(0) + simp(1) + simp(2) + " = " + rT(tot, m)) + " : on simplifie chaque racine, puis on additionne les racines semblables.",
+      { ctx: "somme-coef", radical: true, canon: tot + "√" + m,
+        guide: [GSR("Simplifie le premier terme " + M(term(0)) + " :", cs[0] * ks[0] * Math.sqrt(m), M(rT(cs[0] * ks[0], m)) + "."),
+          GS("Les trois termes sont des multiples de " + M("\\sqrt{" + m + "}") + ". Somme des nombres devant " + M("\\sqrt{" + m + "}") + " ?", tot, M(cs[0] * ks[0] + (cs[1] * ks[1] < 0 ? " - " : " + ") + Math.abs(cs[1] * ks[1]) + (cs[2] * ks[2] < 0 ? " - " : " + ") + Math.abs(cs[2] * ks[2]) + " = " + tot) + "."),
+          GSR("Résultat ?", tot * Math.sqrt(m), M(rT(tot, m)) + ".")],
+        traps: [TR((cs[0] + ks[0] + cs[1] + ks[1] + cs[2] + ks[2]) * Math.sqrt(m), "Le nombre qui sort de la racine se MULTIPLIE par le coefficient : " + M(Math.abs(cs[0]) + "\\sqrt{" + ks[0] * ks[0] * m + "} = " + Math.abs(cs[0]) + " \\cdot " + ks[0] + "\\sqrt{" + m + "}") + "."),
+          TR((Math.abs(cs[0] * ks[0]) + Math.abs(cs[1] * ks[1]) + Math.abs(cs[2] * ks[2])) * Math.sqrt(m), "Attention aux signes « − » devant les termes.")] }); });
+  RP[3].push(() => { const [p, q] = twoP(), a = R.int(2, 6), b = R.int(2, 6), c = pk([1, 2, 3]), A = a * a * p, B = b * b * q, k = c * a * b;
+    return Qv("Calcule " + M(rT(c, A) + " \\cdot \\sqrt{" + B + "}") + " et écris le résultat sous la forme " + M("a\\sqrt{b}") + ", avec " + M("b") + " le plus petit possible.", k * Math.sqrt(p * q),
+      M("\\sqrt{" + A + "} = " + a + "\\sqrt{" + p + "}") + " et " + M("\\sqrt{" + B + "} = " + b + "\\sqrt{" + q + "}") + " ; " + M((c > 1 ? c + " \\cdot " : "") + a + " \\cdot " + b + " \\cdot \\sqrt{" + p + " \\cdot " + q + "} = " + k + "\\sqrt{" + p * q + "}") + ".",
+      { ctx: "produit-radicaux", radical: true, canon: k + "√" + p * q,
+        guide: [GSR("Simplifie " + M("\\sqrt{" + A + "}") + " :", a * Math.sqrt(p), M(a + "\\sqrt{" + p + "}") + "."), GSR("Simplifie " + M("\\sqrt{" + B + "}") + " :", b * Math.sqrt(q), M(b + "\\sqrt{" + q + "}") + "."),
+          GSR("Multiplie les nombres devant, et les racines entre elles :", k * Math.sqrt(p * q), M(k + "\\sqrt{" + p * q + "}") + ".")],
+        traps: [TR(k * p * q, M("\\sqrt{" + p + "} \\cdot \\sqrt{" + q + "} = \\sqrt{" + p * q + "}") + " : la racine reste."), TR(k * (Math.sqrt(p) + Math.sqrt(q)), "On multiplie les racines, on ne les additionne pas.")] }); });
+  RP[3].push(() => { let p, q, a, N0; do { [p, q] = twoP(); a = R.int(2, 5); N0 = a * a * p * q; } while (N0 > 1500);
+    const [c, d] = pk([[1, 1], [2, 1], [6, 2], [4, 2], [6, 3], [9, 3], [10, 5]]), f = c / d;
+    return Qv("Écris " + M("\\frac{" + rT(c, N0) + "}{" + rT(d, p) + "}") + " sous la forme " + M("a\\sqrt{b}") + ", avec " + M("b") + " le plus petit possible.", f * a * Math.sqrt(q),
+      M("\\frac{" + rT(c, N0) + "}{" + rT(d, p) + "} = " + (f !== 1 ? f + " \\cdot " : "") + "\\sqrt{\\frac{" + N0 + "}{" + p + "}} = " + (f !== 1 ? f + " \\cdot " : "") + "\\sqrt{" + a * a * q + "} = " + f * a + "\\sqrt{" + q + "}") + ".",
+      { ctx: "quotient-radicaux", radical: true, canon: f * a + "√" + q,
+        guide: [...(f !== 1 ? [GS("Quotient des nombres devant les racines " + M(c + " \\div " + d) + " ?", f, M(f) + ".")] : []), GS("Quotient sous la racine " + M(N0 + " \\div " + p) + " ?", a * a * q, M(a * a * q) + "."),
+          GSR("Simplifie et termine :", f * a * Math.sqrt(q), M(f * a + "\\sqrt{" + q + "}") + ".")],
+        traps: [TR(f * a * q, "La racine de " + q + " reste : " + M("\\sqrt{" + a * a * q + "} = " + a + "\\sqrt{" + q + "}") + "."), TR(f * a * a * Math.sqrt(q), "On sort la racine de " + a * a + ", soit " + a + ".")] }); });
 
   // ===================== carres : carrés parfaits, cubes, racines exactes (20.11, révision de 10e en 11e) =====================
   const TH = (v) => { let [i, f] = String(r6(v)).split("."); if (i.replace("-", "").length >= 4) i = i.replace(/\B(?=(\d{3})+(?!\d))/g, "\\text{'}"); return i + (f ? "{,}" + f : ""); };
@@ -3040,7 +3117,7 @@
     rel: ["Additionner, soustraire, multiplier", "Priorités, puissances, écarts", "Expressions, moyennes, enchaînements"],
     fracops: ["Différence négative, produit, quotient", "Priorités, parenthèses", "Fractions étagées, carrés, problèmes"],
     rac: ["Carrés parfaits, décimaux, côté d'un carré, cubes parfaits", "Encadrer, périmètre à partir de l'aire, arête d'un cube", "Même aire, somme d'aires, aire d'un cube"],
-    racprop: ["Racine cubique (aussi négative), produits, carré d'une racine", "Extraire, quotients, extraire une racine cubique, encadrer", "Sommes de racines, longueurs exactes, produits de racines cubiques, √ + ∛"],
+    racprop: ["Racine cubique (aussi négative), produits, carré d'une racine", "Extraire (aussi de grands nombres), quotients, racine cubique (aussi négative), encadrer", "Sommes de racines (avec coefficients), produits et quotients de radicaux, longueurs exactes, √ + ∛"],
     carres: ["Racines, carrés, cubes, côté d'un carré", "Décimaux, sommes de carrés, carrés à 3 chiffres", "Encadrer, aire d'un cube, racine d'une somme"],
     pctvar: ["Hausse, réduction, coefficient", "Taux de variation, prix avant hausse, quotidien", "Variations successives, prix avant baisse, TVA"],
   });
@@ -3474,9 +3551,9 @@
         sol: ul(["L'apothème : c'est la hauteur des faces triangulaires, pas celle de la pyramide.", M("a = \\sqrt{8^2 + 6^2} = 10") + " cm ; aire latérale " + M("4 \\cdot \\frac{12 \\cdot 10}{2} = 240") + " cm²."]) }),
   ];
 
-  RICH.no11 = { ids: ["prio", "fracadd", "fracmul", "fracconv", "puiss", "sci", "scicalc"], label: "Nombres et opérations", ex: EXN, raison: RAISONN, minutes: 45 };
-  RICH.pyth11 = { ids: ["pyth", "pythfig", "pythrec"], label: "Théorème de Pythagore", ex: EXP, raison: RAISONP, minutes: 45 };
-  RICH.gm3d11 = { ids: ["vol", "volcone", "airepyr", "volcomp", "volmanq"], label: "Volumes et aires (3D)", ex: EX3, raison: RAISON3, minutes: 45 };
+  RICH.no11 = { ids: ["prio", "fracadd", "fracmul", "fracconv", "puiss", "sci", "scicalc"], label: "Nombres et opérations", ex: EXN, raison: RAISONN, minutes: 45, minA: 2 }; /* 25.11 : automatismes au niveau 2 (audit de niveau 11e) */
+  RICH.pyth11 = { ids: ["pyth", "pythfig", "pythrec"], label: "Théorème de Pythagore", ex: EXP, raison: RAISONP, minutes: 45, minA: 2 }; /* 25.11 : automatismes au niveau 2 (audit de niveau 11e) */
+  RICH.gm3d11 = { ids: ["vol", "volcone", "airepyr", "volcomp", "volmanq"], label: "Volumes et aires (3D)", ex: EX3, raison: RAISON3, minutes: 45, minA: 2 }; /* 25.11 : automatismes au niveau 2 (audit de niveau 11e) */
 })();
 
 // Chantier 11e (19.11) : exercices riches et raisonnements du test de préparation pour 7. Angles, 8. Thalès,
@@ -3773,7 +3850,7 @@
   RICH.pct10 = { ids: ["pctvar"], label: "Pourcentages (révision de 10e)", ex: EXV, raison: RAISONV, minutes: 45 };
   RICH.ang11 = { ids: ["angles", "cercthales"], label: "Angles", ex: EXA, raison: RAISONA, minutes: 45 };
   RICH.thal11 = { ids: ["thales", "thalesrec"], label: "Théorème de Thalès", ex: EXT, raison: RAISONT, minutes: 45 };
-  RICH.fct11 = { ids: ["repere", "tabval", "affine"], label: "Fonctions", ex: EXF, raison: RAISONF, minutes: 45 };
+  RICH.fct11 = { ids: ["repere", "tabval", "affine"], label: "Fonctions", ex: EXF, raison: RAISONF, minutes: 45, minA: 2 }; /* 25.11 : automatismes au niveau 2 (audit de niveau 11e) */
   RICH.simil11 = { ids: ["simil"], label: "Homothéties et similitudes", ex: EXS, raison: RAISONS, minutes: 45 };
   RICH.proba11 = { ids: ["denombr", "proba"], label: "Probabilités", ex: EXP, raison: RAISONP2, minutes: 45 };
 })();
