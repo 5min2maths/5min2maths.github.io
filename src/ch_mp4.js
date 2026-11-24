@@ -119,6 +119,11 @@
             traps: [TP([B[0] + C[0] - A[0], B[1] + C[1] - A[1]], "Dans ABCD, AD = BC : D = A + BC."), TP([A[0] + B[0] - C[0], A[1] + B[1] - C[1]], "Respecte l'ordre des sommets : ABCD.")] }); },
     ],
     3: [
+      () => { /* audit niveau 25.11 : « exprimer w comme combinaison linéaire de u et v » (examen TASV spécifique 2024 p. 2, 2023 p. 7) */
+        const u = [nz(-5, 5), nz(-5, 5)], v = [nz(-5, 5), nz(-5, 5)], det = u[0] * v[1] - u[1] * v[0], a = nz(-4, 4), b = nz(-4, 4); if (!det || Math.abs(a) === Math.abs(b) || (Math.abs(a) === 1 && Math.abs(b) === 1)) return null; const w = [a * u[0] + b * v[0], a * u[1] + b * v[1]];
+        return QP("Avec " + M("\\vec{u} = " + v2(...u)) + ", " + M("\\vec{v} = " + v2(...v)) + " et " + M("\\vec{w} = " + v2(...w)) + ", trouve les nombres " + M("a") + " et " + M("b") + " tels que " + M("\\vec{w} = a\\,\\vec{u} + b\\,\\vec{v}") + ". Réponds « a ; b ».", [a, b], "On résout le système " + M("\\begin{cases} " + u[0] + "a" + sg(v[0]) + "b = " + w[0] + " \\\\ " + u[1] + "a" + sg(v[1]) + "b = " + w[1] + " \\end{cases}") + " : " + M("a = " + a) + ", " + M("b = " + b) + ". Donc " + M("\\vec{w} = " + fT(a) + "\\,\\vec{u}" + (b < 0 ? " - " + (b === -1 ? "" : -b) : " + " + (b === 1 ? "" : b)) + "\\,\\vec{v}") + ".",
+          { ctx: "combinaison-lineaire", guide: [G("Système : " + M(u[0] + "a" + sg(v[0]) + "b = " + w[0]) + " et " + M(u[1] + "a" + sg(v[1]) + "b = " + w[1]) + ". Que vaut " + M("a") + " ?", a, M("a = " + a) + "."), G("Que vaut " + M("b") + " ?", b, M("b = " + b) + "."), GP("Réponse « a ; b » ?", [a, b], M("a = " + a) + ", " + M("b = " + b) + ".")],
+            traps: [TP([b, a], "a multiplie u et b multiplie v : respecte l'ordre."), TP([-a, -b], "Vérifie les signes en recalculant a·u + b·v.")] }); },
       () => { const A = [R.int(-5, 5), R.int(-5, 5)], u = [nz(-4, 4), nz(-4, 4)], k = pk([2, 3, -1, -2, 1.5, 0.5]), Cc = [A[0] + k * u[0], A[1] + k * u[1]]; if (!Number.isInteger(Cc[0] * 2) || !Number.isInteger(Cc[1] * 2)) return null; const B = [A[0] + u[0], A[1] + u[1]];
         return QP("Avec " + ptN("A", ...A) + " et " + ptN("B", ...B) + ", trouve le point " + M("C") + " tel que " + M("\\overrightarrow{AC} = " + fT(k) + "\\,\\overrightarrow{AB}") + "." + PAIR, Cc, M("\\overrightarrow{AB} = " + v2(u[0], u[1])) + ", " + M("\\overrightarrow{AC} = " + v2(fT(k * u[0]), fT(k * u[1]))) + ", " + ptN("C", ...Cc) + ".",
           { ctx: "point-vecteur", guide: [GP("Composantes de " + M("\\overrightarrow{AB}") + " ?", u, M(v2(u[0], u[1])) + "."), GP("Composantes de " + M("\\overrightarrow{AC}") + " ?", [k * u[0], k * u[1]], M(v2(fT(k * u[0]), fT(k * u[1]))) + "."), GP("Point " + M("C = A + \\overrightarrow{AC}") + " ?", Cc, ptN("C", ...Cc) + ".")],
@@ -188,6 +193,11 @@
   const eqP = (A, d, s = "t") => M("\\begin{cases} x = " + cT1(A[0], d[0], s) + " \\\\ y = " + cT1(A[1], d[1], s) + (A.length > 2 ? " \\\\ z = " + cT1(A[2], d[2], s) : "") + " \\end{cases}");
   const DP = {
     1: [
+      () => { /* audit niveau 25.11 : « équations paramétriques de la droite passant par A et B » (examen TASV spécifique 2024 p. 4c) */
+        const A = [R.int(-5, 5), R.int(-5, 5), R.int(-5, 5)], d = [nz(-4, 4), nz(-4, 4), nz(-4, 4)], B = A.map((x, i) => x + d[i]), t = pk([2, 3, -2, -1]), P = A.map((x, i) => x + t * d[i]);
+        return QP("On écrit la droite " + M("(AB)") + " avec " + ptN("A", ...A) + " comme point de départ et " + M("\\overrightarrow{AB}") + " comme vecteur directeur, pour " + ptN("B", ...B) + ". Quel point obtient-on pour " + M("t = " + t) + " ?" + TRIP, P, M("\\overrightarrow{AB} = " + v3(...d)) + ", donc " + eqP(A, d) + " ; pour " + M("t = " + t) + " : " + pt(...P) + ".",
+          { ctx: "deux-points", guide: [GP("Vecteur directeur " + M("\\overrightarrow{AB}") + " (« x ; y ; z ») ?", d, M(v3(...d)) + "."), G(M("x = " + A[0] + " + " + pT(d[0]) + "t") + " pour " + M("t = " + t) + " ?", P[0], M(P[0]) + "."), GP("Point ?", P, pt(...P) + ".")],
+            traps: [TP(B.map((x, i) => x + t * d[i]), "Le point de départ est A (pour t = 0), pas B."), TP(A.map((x, i) => x + t * B[i]), "Le vecteur directeur est AB = B − A, pas les coordonnées de B."), TP(A.map((x, i) => x - t * d[i]), "AB = B − A (arrivée − départ).")] }); },
       () => { const A = [R.int(-5, 5), R.int(-5, 5)], d = [nz(-4, 4), nz(-4, 4)], t = pk([2, 3, -1, -2, 4]), P = [A[0] + t * d[0], A[1] + t * d[1]];
         return QP("La droite " + M("d") + " a pour équations paramétriques " + eqP(A, d) + ". Donne le point de " + M("d") + " obtenu pour " + M("t = " + t) + "." + PAIR, P, M("x = " + A[0] + sg(d[0]) + " \\cdot " + pT(t) + " = " + P[0]) + ", " + M("y = " + A[1] + sg(d[1]) + " \\cdot " + pT(t) + " = " + P[1]) + " : " + pt(...P) + ".",
           { ctx: "point-t", guide: [G(M("x") + " pour " + M("t = " + t) + " ?", P[0], M(P[0]) + "."), G(M("y") + " ?", P[1], M(P[1]) + "."), GP("Point ?", P, pt(...P) + ".")],
@@ -300,14 +310,17 @@
   // ===================================== I1. fctmp : réciproque, parité, transformations, composition =====================================
   const FC = {
     1: [
-      () => { const v = R.int(2, 9), x0 = R.int(2, 6), par = R.rand() < 0.5; if (v === x0) return null;
-        return QN("La fonction " + M("f") + " est " + (par ? "paire" : "impaire") + " et " + M("f(" + x0 + ") = " + v) + ". Que vaut " + M("f(-" + x0 + ")") + " ?", par ? v : -v, (par ? "Paire : " + M("f(-x) = f(x)") : "Impaire : " + M("f(-x) = -f(x)")) + ", donc " + M("f(-" + x0 + ") = " + (par ? v : -v)) + ".",
-          { ctx: "parite", shownOk: true, guide: [G("Rappel : " + (par ? "paire, " + M("f(-x) = f(x)") : "impaire, " + M("f(-x) = -f(x)")) + ". " + M("f(-" + x0 + ")") + " = ?", par ? v : -v, M(par ? v : -v) + ".")],
-            traps: [TR(par ? -v : v, par ? "Paire : symétrie par rapport à l'axe vertical, f(−x) = f(x)." : "Impaire : symétrie par rapport à l'origine, f(−x) = −f(x)."), TR(-x0, "On demande l'image f(−" + x0 + ").")] }); },
-      () => { const a = pk([2, 3, 4, 5, -2, -3]), b = nz(-9, 9), x0 = nz(-6, 6), y = a * x0 + b;
-        return QN("Soit " + M("f(x) = " + lin(a, b)) + ". Calcule " + M("f^{-1}(" + y + ")") + ".", x0, M("f^{-1}(" + y + ")") + " est le nombre dont l'image vaut " + M(y) + " : " + M(lin(a, b) + " = " + y) + ", " + M("x = " + x0) + ".",
-          { ctx: "reciproque-valeur", guide: [G("On résout " + M(lin(a, b) + " = " + y) + " : " + M(a + "x") + " = ?", y - b, M(y - b) + "."), G(M("x") + " = ?", x0, M(x0) + ".")],
-            traps: [TR(a * y + b, "C'est f(" + y + ") ; la réciproque fait le chemin inverse."), TR(r6((y + b) / a), "On retire " + b + ", puis on divise.")] }); },
+      () => { /* audit niveau 25.11 : « f paire, f(2) = 8, f(−2) ? » (parité facultative, réponse lue dans l'énoncé) -> réciproque d'une fonction bijective restreinte (examen TASV 2023, p. 6) */
+        const c = nz(-9, 12), s0 = R.int(2, 7), neg = R.rand() < 0.5, v = neg ? c - s0 * s0 : s0 * s0 + c, x0 = neg ? -s0 : s0;
+        const fx = neg ? c + " - x^2" : "x^2" + sg(c), dom = neg ? "]-\\infty \\,;\\, 0]" : "[0 \\,;\\, +\\infty[", img = neg ? "]-\\infty \\,;\\, " + c + "]" : "[" + c + " \\,;\\, +\\infty[";
+        return QN("La fonction " + M("f(x) = " + fx) + " est bijective de " + M(dom) + " vers " + M(img) + ". Calcule " + M("f^{-1}(" + v + ")") + ".", x0, M("f^{-1}(" + v + ")") + " est le nombre " + M("x") + " de " + M(dom) + " tel que " + M(fx + " = " + v) + " : " + M("x^2 = " + s0 * s0) + ", " + M("x = \\pm " + s0) + " ; on garde " + M("x = " + x0) + (neg ? " (négatif)" : " (positif)") + ".",
+          { ctx: "reciproque-restreinte", guide: [G("On résout " + M(fx + " = " + v) + " : " + M("x^2") + " = ?", s0 * s0, M("x^2 = " + s0 * s0) + "."), G(M("x") + " dans " + M(dom) + " ?", x0, M("x = " + x0) + " (" + M("-" + s0) + " et " + M(s0) + " ont la même image ; seul " + M(x0) + " est dans l'ensemble de départ).")],
+            traps: [TR(-x0, "Les deux nombres ±" + s0 + " ont la même image ; f est définie sur " + (neg ? "les négatifs" : "les positifs") + " seulement."), TR(neg ? c - v * v : v * v + c, "C'est f(" + v + ") ; la réciproque fait le chemin inverse."), TR(s0 * s0, "On cherche x, pas x².")] }); },
+      () => { /* audit niveau 25.11 : réciproque d'une fonction affine = MP 2e (S3.FA.06) -> fonction cubique bijective de ℝ vers ℝ (S8.FP.03) */
+        const a = pk([2, 3, 4, -2, -1]), b = nz(-9, 9), x0 = pk([-3, -2, 2, 3]), y = a * x0 ** 3 + b, ax = a === 1 ? "" : a === -1 ? "-" : a;
+        return QN("La fonction " + M("f(x) = " + ax + "x^3" + sg(b)) + " est bijective de " + M("\\mathbb{R}") + " vers " + M("\\mathbb{R}") + ". Calcule " + M("f^{-1}(" + y + ")") + ".", x0, "On résout " + M(ax + "x^3" + sg(b) + " = " + y) + " : " + M(a + "x^3 = " + (y - b)) + ", " + M("x^3 = " + x0 ** 3) + ", " + M("x = \\sqrt[3]{" + x0 ** 3 + "} = " + x0) + ".",
+          { ctx: "reciproque-cube-valeur", guide: [G("On isole : " + M("x^3") + " = ?", x0 ** 3, M("x^3 = " + (y - b) + " \\div " + pT(a) + " = " + x0 ** 3) + "."), G(M("x") + " (racine cubique) ?", x0, M("\\sqrt[3]{" + x0 ** 3 + "} = " + x0) + ".")],
+            traps: [TR(a * y ** 3 + b, "C'est f(" + y + ") ; la réciproque fait le chemin inverse."), TR(x0 ** 3, "On cherche x : prends encore la racine cubique de x³."), TR(-x0, "Une racine cubique garde le signe : ∛(" + x0 ** 3 + ") = " + x0 + ".")] }); },
       () => { const h = nz(-4, 4), k = nz(-5, 5), x1 = R.int(-3, 3), v1 = nz(-6, 6), x = x1 + h, val = v1 + k; if (!val) return null;
         return QN("On sait que " + M("f(" + x1 + ") = " + v1) + ". Soit " + M("g(x) = f(" + lin(1, -h) + ")" + sg(k)) + ". Que vaut " + M("g(" + x + ")") + " ?", val, M("g(" + x + ") = f(" + x + sg(-h) + ")" + sg(k) + " = f(" + x1 + ")" + sg(k) + " = " + val) + ". (Le graphe de f est translaté de " + M(h) + " horizontalement et de " + M(k) + " verticalement.)",
           { ctx: "translation", guide: [G("Argument de f, " + M(x + sg(-h)) + " ?", x1, M(x1) + "."), G(M("g(" + x + ")") + " = ?", val, M(v1 + sg(k) + " = " + val) + ".")],
@@ -340,10 +353,12 @@
         return QI("Quel est l'ensemble de définition de " + M("f(x) = \\sqrt{" + lin(a, b) + "}") + " ? Réponds par exemple « x >= 3 ».", op, x0, "Il faut " + M(lin(a, b) + " \\ge 0") + ", soit " + M("x " + opT[op] + " " + fT(x0)) + (a < 0 ? " (on divise par un négatif : le sens change)" : "") + ".",
           { ctx: "domaine-racine", guide: [G("Pour quelle valeur de x le radicand s'annule-t-il ?", x0, M(fT(x0)) + "."), GI("On résout " + M(lin(a, b) + " \\ge 0") + " : solution ?", op, x0, M("x " + opT[op] + " " + fT(x0)) + ".")],
             traps: [TI(a > 0 ? ">" : "<", x0, "La racine de 0 existe : l'inégalité est large."), TI(flip[op], x0, a < 0 ? "On divise par " + a + " (négatif) : le sens change." : "Le radicand doit être positif ou nul.")] }); },
-      () => { const r1 = nz(-4, 4), r2 = nz(-4, 4); if (r1 === r2) return null; const m = r1 + r2, h = -r1 * r2, sol = [r1, r2];
-        return QS("Trouve les abscisses des points d'intersection des graphes de " + M("f(x) = x^2") + " et " + M("g(x) = " + lin(m, h)) + ".", sol, M("x^2 = " + lin(m, h)) + " donne " + M(polyT([1, -m, -h]) + " = 0") + ", " + M("x = " + Math.min(r1, r2)) + " ou " + M("x = " + Math.max(r1, r2)) + ".",
-          { ctx: "intersection-graphes", guide: [G("On résout " + M(polyT([1, -m, -h]) + " = 0") + ". Discriminant ?", m * m + 4 * h, M(m * m + 4 * h) + "."), GSet("Abscisses des points d'intersection ?", sol, M(setT(sol)) + ".")],
-            traps: [TS([-r1, -r2], "Attention aux signes des solutions."), TS([r1 * r1, r2 * r2], "On demande les abscisses x, pas les ordonnées.")] }); },
+      () => { /* audit niveau 25.11 : intersection parabole-droite = MP 2e (S3.FQ.06) -> racine et droite, solution parasite (examens TASV spécifique 2022 p. 4, 2024 p. 5) */
+        const x0 = R.int(-3, 8), s0 = R.int(1, 6), q = s0 - x0, pp = s0 * s0 - x0, x1 = 1 - 2 * q - x0; if (x1 === x0 || x1 + q >= 0 || x1 + pp < 0 || !pp || !q) return null;
+        const rad = "\\sqrt{" + lin(1, pp) + "}", gx = lin(1, q);
+        return QP("Détermine les coordonnées du point d'intersection des graphes de " + M("f(x) = " + rad) + " et " + M("g(x) = " + gx) + "." + PAIR, [x0, s0], "On résout " + M(rad + " = " + gx) + " : au carré, " + M(lin(1, pp) + " = (" + gx + ")^2") + ", soit " + M(polyT([1, 2 * q - 1, q * q - pp]) + " = 0") + ", d'où " + M("x = " + x0) + " ou " + M("x = " + x1) + ". Vérification : pour " + M("x = " + x1) + ", " + M("g(" + x1 + ") = " + (x1 + q) + " < 0") + " alors qu'une racine est positive : solution parasite. Point " + pt(x0, s0) + ".",
+          { ctx: "intersection-racine", guide: [GSet("Après élévation au carré : solutions de " + M(polyT([1, 2 * q - 1, q * q - pp]) + " = 0") + " ?", [x0, x1], M(setT([x0, x1])) + "."), G("Abscisse retenue (vérifie " + M("g(x) \\ge 0") + ") ?", x0, M("x = " + x0) + " ; " + M("x = " + x1) + " est parasite."), GP("Point d'intersection ?", [x0, s0], pt(x0, s0) + ".")],
+            traps: [TP([x1, x1 + q], "Vérifie dans l'équation de départ : pour x = " + x1 + ", la droite est sous l'axe, la racine non (solution parasite)."), TP([s0, x0], "Un point s'écrit (abscisse ; ordonnée)."), TP([x0, s0 * s0], "L'ordonnée est f(" + x0 + ") = √" + (x0 + pp) + " = " + s0 + ".")] }); },
     ],
   };
 
