@@ -5,6 +5,8 @@
 //   scalmp (produit scalaire, angle, orthogonalité, travail) ; G. droiteparam (droites paramétriques) ;
 //   H. ineqmp (inéquations, tableau des signes) ; I. fctmp (réciproque, parité, transformations, composition),
 //   polymp (polynômes : zéros, division, signe) ; J. sinusmp (fonctions sinusoïdales), explogfn (fonctions exp. et log.).
+// Ajout du 24.11 (agent mp4plus) : pvectmp (produit vectoriel, « facultatif » dans le polycopié MP4, chap. F, leçon 5) ;
+//   question avec graphique « signe lu sur la courbe » dans ineqmp (N2) et polymp (N3).
 // Ajouts du 24.11 (agent greste) : projmp (projection orthogonale), posdroites (position relative de deux droites),
 //   fratmp (fonctions rationnelles simples) ; questions avec graphique (sinusoïde, exponentielle, hyperbole : FIG.plot).
 // Même standard que src/ch_mp3.js, dont il reprend les outils (MP34H).
@@ -230,6 +232,13 @@
   };
 
   // ===================================== H. ineqmp : inéquations et tableau des signes =====================================
+  // Signe lu sur un graphique (24.11, agent mp4plus) : intervalles où a(x − r₁)(x − r₂)… vérifie « op 0 » (zéros simples, triés).
+  const sgnIv = (rs, a, op) => { const b = [-INF].concat(rs, [INF]), pos = op[0] === ">", inc = op.length === 2, out = [];
+    for (let i = 0; i < b.length - 1; i++) { const s = Math.sign(a) * (((rs.length - i) % 2) ? -1 : 1); if ((s > 0) === pos) out.push([b[i], isFinite(b[i]) && inc, b[i + 1], isFinite(b[i + 1]) && inc]); }
+    return out; };
+  const sgnFig = (f, rs, lab) => { let lo = 0, hi = 0; for (let x = -6; x <= 6; x += 0.05) { const y = f(x); if (x > rs[0] - 1.2 && x < rs[rs.length - 1] + 1.2) { lo = Math.min(lo, y); hi = Math.max(hi, y); } }
+    const yr = [Math.max(-9, Math.floor(lo) - 1), Math.min(9, Math.ceil(hi) + 1)]; return FIG.plot([{ f }], [], { xr: [-6, 6], yr, numbers: true, step: yr[1] - yr[0] > 12 ? 2 : 1, maxH: 300, label: lab }); };
+  const bel = { ">": "strictement au-dessus de", ">=": "au-dessus de (ou sur)", "<": "strictement au-dessous de", "<=": "au-dessous de (ou sur)" };
   const IQ = {
     1: [
       () => { const a = nz(-5, 5), b = nz(-9, 9), x0 = nz(-6, 6), c = a * x0 + b, op = pk(["<", "<=", ">", ">="]), fop = a < 0 ? flip[op] : op;
@@ -262,6 +271,12 @@
         return QSS("Résous " + M(polyT([1, -(r1 + r2), r1 * r2]) + " " + op + " 0") + ".", ivs, M(polyT([1, -(r1 + r2), r1 * r2]) + " = (x" + sg(-lo) + ")(x" + sg(-hi) + ")") + ", donc " + M("S = " + ivT(ivs)) + ".",
           { ctx: "trinome", guide: [G("Plus petit zéro du trinôme ?", lo, M(lo) + "."), G("Plus grand ?", hi, M(hi) + "."), GSS("Ensemble des solutions ?", ivs, M(ivT(ivs)) + ".")],
             traps: [TSS(inside ? [[-INF, false, lo, false], [hi, false, INF, false]] : [[lo, false, hi, false]], "Le trinôme (a > 0) est négatif entre ses zéros, positif à l'extérieur."), TSS(inside ? [[lo, true, hi, true]] : [[-INF, false, lo, true], [hi, true, INF, false]], "Inégalité stricte : les zéros sont exclus.")] }); },
+      () => { const r1 = nz(-5, 5), r2 = nz(-5, 5); if (Math.abs(r1 - r2) < 2) return null; const rs = [Math.min(r1, r2), Math.max(r1, r2)], a = pk([1, -1, 0.5, -0.5]), vy = (-a * (rs[1] - rs[0]) ** 2) / 4; if (Math.abs(vy) > 8 || Math.abs(vy) < 1) return null;
+        const op = pk(["<", "<=", ">", ">="]), f = (x) => a * (x - rs[0]) * (x - rs[1]), ivs = sgnIv(rs, a, op), other = sgnIv(rs, -a, op), fig = sgnFig(f, rs, "parabole");
+        return QSS("Le graphique montre la parabole d'une fonction " + M("f") + ". Sans calcul, résous " + M("f(x) " + opT[op] + " 0") + " en lisant le signe sur le graphique, et écris la solution avec des intervalles.", ivs,
+          "La parabole coupe l'axe des x en " + M(rs[0]) + " et " + M(rs[1]) + " ; elle est tournée vers le " + (a > 0 ? "haut" : "bas") + ", donc " + (a > 0 ? "négative entre les zéros et positive à l'extérieur" : "positive entre les zéros et négative à l'extérieur") + ". On garde les x où la courbe est " + bel[op] + " l'axe : " + M("S = " + ivT(ivs)) + ".",
+          { ctx: "signe-graphe-parabole", fig, guide: [G("Plus petit zéro (où la courbe coupe l'axe des x) ?", rs[0], M(rs[0]) + "."), G("Plus grand zéro ?", rs[1], M(rs[1]) + "."), GSS("Où la courbe est-elle " + bel[op] + " l'axe des x ?", ivs, M(ivT(ivs)) + ".")],
+            traps: [TSS(other, "Relis le graphique : f(x) " + (op[0] === ">" ? "> 0" : "< 0") + " là où la courbe est " + (op[0] === ">" ? "au-dessus" : "au-dessous") + " de l'axe."), TSS(sgnIv(rs, a, op.length === 2 ? op[0] : op + "="), op.length === 2 ? "Avec ≤ ou ≥, les zéros sont compris (crochets fermés)." : "Inégalité stricte : les zéros sont exclus (crochets ouverts)."), TSS(sgnIv([-rs[1], -rs[0]], a, op), "Lis les zéros sur l'axe horizontal : attention aux signes.")] }); },
     ],
     3: [
       () => { const a = pk([1, 2, 3]), b = nz(-6, 6), c = pk([1, 2]), d = nz(-6, 6), z = r6(-b / a), p = r6(-d / c); if (z === p || den(z) > 3 || den(p) > 2) return null; const op = pk([">=", "<="]), lo = Math.min(z, p), hi = Math.max(z, p), zl = z < p;
@@ -379,6 +394,13 @@
         return QN("Un polynôme de degré 3 a pour zéros " + M(rs.join(" \\,;\\, ")) + " et son graphe coupe l'axe vertical en " + M(fT(y0)) + ". Il s'écrit " + M("P(x) = a(" + rs.map((r) => lin(1, -r)).join(")(") + ")") + ". Que vaut " + M("a") + " ? (fraction acceptée)", a, M("P(0) = a \\cdot " + rs.map((r) => pT(-r)).join(" \\cdot ") + " = " + fT(pr) + "a") + " ; " + M(fT(pr) + "a = " + fT(y0)) + ", " + M("a = " + fT(a)) + ".",
           { ctx: "depuis-graphe", guide: [G("Produit " + M(rs.map((r) => pT(-r)).join(" \\cdot ")) + " ?", pr, M(fT(pr)) + "."), G(M("a") + " = ?", a, M(fT(y0) + " \\div " + pT(pr) + " = " + fT(a)) + ".")],
             traps: [TR(y0, "C'est P(0) ; divise par le produit."), TR(-a, "Attention aux signes : P(0) = a · (−r₁)(−r₂)(−r₃).")] }); },
+      () => { const rs = sortU([nz(-4, 4), nz(-4, 4), nz(-4, 4)]); if (rs.length < 3 || rs[1] - rs[0] < 2 && rs[2] - rs[1] < 2) return null; const a = pk([0.5, 1, -0.5, -1]), op = pk(["<", "<=", ">", ">="]), f = (x) => a * (x - rs[0]) * (x - rs[1]) * (x - rs[2]);
+        if ([0, 1].some((i) => Math.abs(f((rs[i] + rs[i + 1]) / 2)) < 0.8 || Math.abs(f((rs[i] + rs[i + 1]) / 2)) > 9)) return null;
+        const ivs = sgnIv(rs, a, op), other = sgnIv(rs, -a, op), fig = sgnFig(f, rs, "courbe d'un polynôme de degré 3"), sgL = (a > 0 ? ["−", "+", "−", "+"] : ["+", "−", "+", "−"]).join(" ");
+        return QSS("Le graphique montre la courbe d'un polynôme " + M("P") + " de degré 3. Dresse son tableau des signes à partir du graphique, puis résous " + M("P(x) " + opT[op] + " 0") + " (avec des intervalles).", ivs,
+          "Zéros lus sur l'axe des x : " + M(rs.join(" \\,;\\, ")) + ". Signes de gauche à droite : " + sgL + ". On garde les x où la courbe est " + bel[op] + " l'axe : " + M("S = " + ivT(ivs)) + ".",
+          { ctx: "signe-graphe-degre3", fig, guide: [G("Plus petit zéro ?", rs[0], M(rs[0]) + "."), G("Signe de " + M("P(x)") + " tout à gauche (−1 ou 1) ?", a > 0 ? -1 : 1, a > 0 ? "Négatif : la courbe arrive d'en bas." : "Positif : la courbe arrive d'en haut."), GSS("Ensemble des solutions ?", ivs, M(ivT(ivs)) + ".")],
+            traps: [TSS(other, "Relis le tableau des signes : la courbe " + (a > 0 ? "arrive d'en bas (négative tout à gauche)." : "arrive d'en haut (positive tout à gauche).")), TSS(sgnIv(rs, a, op.length === 2 ? op[0] : op + "="), op.length === 2 ? "Avec ≤ ou ≥, les zéros sont compris (crochets fermés)." : "Inégalité stricte : les zéros sont exclus."), TSS(ivs.slice(0, 1), "Il y a deux intervalles : le signe change à chaque zéro.")] }); },
     ],
   };
 
@@ -621,6 +643,75 @@
     ],
   };
 
+  // ===================================== F4. pvectmp : produit vectoriel (S7.VE, 24.11 ; « facultatif » dans le polycopié MP4, chap. F, leçon 5) =====================================
+  const nrm = (w) => Math.hypot(...w);
+  const ok2 = (v) => den(v) === 1 || den(v) === 2; /* valeur exacte (entière ou demi-entière) */
+  const eqv = (v) => (ok2(v) ? "= " + N(v) : "\\approx " + D(v, 0.01));
+  const rnd = (v) => (ok2(v) ? undefined : 0.01);
+  const add3 = (a, b, k = 1) => a.map((x, i) => x + k * b[i]);
+  const crT = (u, v) => v3(pT(u[1]) + " \\cdot " + pT(v[2]) + " - " + pT(u[2]) + " \\cdot " + pT(v[1]), pT(u[2]) + " \\cdot " + pT(v[0]) + " - " + pT(u[0]) + " \\cdot " + pT(v[2]), pT(u[0]) + " \\cdot " + pT(v[1]) + " - " + pT(u[1]) + " \\cdot " + pT(v[0]));
+  const sq3 = (w) => w.map((x) => pT(x) + "^2").join(" + ");
+  const PV = {
+    1: [
+      () => { const u = [nz(-4, 4), nz(-4, 4), nz(-4, 4)], v = [nz(-4, 4), nz(-4, 4), nz(-4, 4)], w = cross(u, v); if (w.includes(0)) return null;
+        return QP("Calcule le produit vectoriel " + M("\\vec{u} \\times \\vec{v}") + " avec " + M("\\vec{u} = " + v3(...u)) + " et " + M("\\vec{v} = " + v3(...v)) + "." + TRIP, w,
+          M("\\vec{u} \\times \\vec{v} = " + crT(u, v) + " = " + v3(...w)) + ".",
+          { ctx: "composantes", guide: [G("Première composante " + M("u_2 v_3 - u_3 v_2") + " ?", w[0], M(pT(u[1]) + " \\cdot " + pT(v[2]) + " - " + pT(u[2]) + " \\cdot " + pT(v[1]) + " = " + w[0]) + "."), G("Deuxième composante " + M("u_3 v_1 - u_1 v_3") + " ?", w[1], M(w[1]) + "."), G("Troisième composante " + M("u_1 v_2 - u_2 v_1") + " ?", w[2], M(w[2]) + "."), GP("Produit vectoriel ?", w, M(v3(...w)) + ".")],
+            traps: [TP(w.map((x) => -x), "L'ordre compte : v × u = −(u × v). Première composante : u₂v₃ − u₃v₂, dans cet ordre."), TP(u.map((x, i) => x * v[i]), "Ce n'est pas un produit composante par composante : on croise les composantes (u₂v₃ − u₃v₂, …)."), TP([w[0], -w[1], w[2]], "Deuxième composante : u₃v₁ − u₁v₃ (attention à l'ordre des produits).")] }); },
+      () => { const [a, b, c, d] = pk(TRI3), w = perm([a, b, c]).map((x) => x * sgn()), tri = R.rand() < 0.5, ar = tri ? d / 2 : d;
+        return QN("On a calculé " + M("\\vec{u} \\times \\vec{v} = " + v3(...w)) + ". Quelle est l'aire du " + (tri ? "triangle" : "parallélogramme") + " construit sur " + M("\\vec{u}") + " et " + M("\\vec{v}") + " ?" + (tri ? " (décimal accepté)" : ""), ar,
+          "L'aire du parallélogramme est la norme du produit vectoriel : " + M("\\sqrt{" + sq3(w) + "} = \\sqrt{" + d * d + "} = " + d) + (tri ? " ; le triangle en est la moitié, " + M(N(ar)) : "") + ".",
+          { ctx: tri ? "aire-triangle-norme" : "aire-para-norme", guide: [G("Somme des carrés des composantes ?", d * d, M(w.map((x) => x * x).join(" + ") + " = " + d * d) + "."), G("Norme " + M("\\|\\vec{u} \\times \\vec{v}\\|") + " ?", d, M("\\sqrt{" + d * d + "} = " + d) + ".")].concat(tri ? [G("Aire du triangle ?", ar, M(d + " \\div 2 = " + N(ar)) + ".")] : []),
+            traps: [TR(d * d, "N'oublie pas la racine carrée."), TR(tri ? d : d / 2, tri ? "Le triangle est la moitié du parallélogramme." : "C'est l'aire du triangle ; le parallélogramme vaut la norme entière."), TR(Math.abs(w[0]) + Math.abs(w[1]) + Math.abs(w[2]), "Norme : √(x² + y² + z²), pas la somme des composantes.")] }); },
+      () => { const a = nz(-6, 6), b = nz(-6, 6), c = nz(-6, 6), e = nz(-6, 6), det = a * e - b * c, ar = Math.abs(det); if (ar < 2 || [a, b, c, e].map(Math.abs).includes(ar)) return null;
+        const it = pk([["Une terrasse", "m"], ["Une parcelle de jardin", "dam"], ["Un vitrail", "dm"], ["Le tablier d'un petit pont", "m"]]);
+        return QN(it[0] + " a la forme d'un parallélogramme construit sur " + M("\\vec{u} = " + v2(a, b)) + " et " + M("\\vec{v} = " + v2(c, e)) + " (en " + it[1] + "). On les écrit dans l'espace avec " + M("z = 0") + " : " + M("\\vec{u} \\times \\vec{v}") + " n'a qu'une composante non nulle. Calcule l'aire (en " + M("\\text{" + it[1] + "}^2") + ").", ar,
+          M("\\vec{u} \\times \\vec{v} = " + v3(0, 0, pT(a) + " \\cdot " + pT(e) + " - " + pT(b) + " \\cdot " + pT(c) + " = " + det)) + " ; aire " + M("|" + det + "| = " + ar + "\\ \\text{" + it[1] + "}^2") + ".",
+          { ctx: "aire-plan", guide: [G("Troisième composante " + M("u_1 v_2 - u_2 v_1") + " ?", det, M(pT(a) + " \\cdot " + pT(e) + " - " + pT(b) + " \\cdot " + pT(c) + " = " + det) + "."), G("Aire (une aire est positive) ?", ar, M(ar) + ".")],
+            traps: [TR(Math.abs(a * c + b * e), "C'est le produit scalaire ; l'aire vient du produit vectoriel."), TR(Math.abs(a * e + b * c), "u₁v₂ − u₂v₁ : on soustrait les deux produits."), TR(ar / 2, "Pour le parallélogramme, on prend la norme entière (le triangle en serait la moitié)."), TR(det, "Une aire est positive : prends la valeur absolue.")] }); },
+    ],
+    2: [
+      () => { const A = [R.int(-3, 3), R.int(-3, 3), R.int(-3, 3)], u = [nz(-3, 3), nz(-3, 3), R.int(-3, 3)], v = [R.int(-3, 3), nz(-3, 3), nz(-3, 3)], w = cross(u, v); if (w.filter((x) => x).length < 2) return null;
+        const B = add3(A, u), C = add3(A, v), n = nrm(w), ar = n / 2, ro = rnd(ar);
+        return QN("Calcule l'aire du triangle " + ptN("A", ...A) + ", " + ptN("B", ...B) + ", " + ptN("C", ...C) + " dans l'espace" + (ro ? " (au centième)." : ". (décimal accepté)"), ar,
+          M("\\overrightarrow{AB} = " + v3(...u)) + ", " + M("\\overrightarrow{AC} = " + v3(...v)) + ", " + M("\\overrightarrow{AB} \\times \\overrightarrow{AC} = " + v3(...w)) + " ; aire " + M("\\frac{1}{2}\\sqrt{" + n * n + "} " + eqv(ar)) + ".",
+          Object.assign({ ctx: "aire-triangle-espace", guide: [GP("Composantes de " + M("\\overrightarrow{AB}") + " ?" + TRIP, u, M(v3(...u)) + "."), GP("Composantes de " + M("\\overrightarrow{AC}") + " ?" + TRIP, v, M(v3(...v)) + "."), GP(M("\\overrightarrow{AB} \\times \\overrightarrow{AC}") + " ?" + TRIP, w, M(v3(...w)) + "."), G("Aire " + M("\\frac{1}{2}\\|\\overrightarrow{AB} \\times \\overrightarrow{AC}\\|") + (ro ? " (au centième)" : "") + " ?", ar, M(eqv(ar).replace(/^= /, "")) + ".", ro)],
+            traps: [TR(n, "Pour le triangle, on prend la moitié de la norme."), TR((n * n) / 2, "N'oublie pas la racine carrée."), TR((nrm(u) * nrm(v)) / 2, "AB · AC ÷ 2 ne vaut que si l'angle en A est droit : passe par le produit vectoriel.")] }, ro ? { round: ro } : {})); },
+      () => { const A = [R.int(0, 4), R.int(0, 4), R.int(0, 3)], u = [nz(-3, 3), nz(-3, 3), R.int(-2, 2)], v = [nz(-3, 3), R.int(-3, 3), nz(-2, 2)], w = cross(u, v); if (w.filter((x) => x).length < 2) return null;
+        const B = add3(A, u), C = add3(A, v), it = pk([["Un panneau solaire triangulaire", "panneau"], ["Une voile d'ombrage tendue", "voile"], ["Un pan de toit triangulaire", "toit"]]);
+        return QP(it[0] + " a ses coins en " + ptN("A", ...A) + ", " + ptN("B", ...B) + " et " + ptN("C", ...C) + " (en m). Calcule le vecteur normal " + M("\\vec{n} = \\overrightarrow{AB} \\times \\overrightarrow{AC}") + ", perpendiculaire à la surface." + TRIP, w,
+          M("\\overrightarrow{AB} = " + v3(...u)) + ", " + M("\\overrightarrow{AC} = " + v3(...v)) + ", " + M("\\vec{n} = " + crT(u, v) + " = " + v3(...w)) + ". Vérification : " + M("\\vec{n} \\cdot \\overrightarrow{AB} = 0") + " et " + M("\\vec{n} \\cdot \\overrightarrow{AC} = 0") + ".",
+          { ctx: "normal-" + it[1], guide: [GP("Composantes de " + M("\\overrightarrow{AB}") + " ?" + TRIP, u, M(v3(...u)) + "."), GP("Composantes de " + M("\\overrightarrow{AC}") + " ?" + TRIP, v, M(v3(...v)) + "."), GP("Vecteur normal " + M("\\overrightarrow{AB} \\times \\overrightarrow{AC}") + " ?" + TRIP, w, M(v3(...w)) + ".")],
+            traps: [TP(w.map((x) => -x), "C'est AC × AB : l'ordre compte, AC × AB = −(AB × AC)."), TP(u.map((x, i) => x * v[i]), "On ne multiplie pas composante par composante : formule « en croix »."), TP(cross(B, C), "Calcule d'abord les vecteurs AB et AC (pas les coordonnées des points).")] }); },
+      () => { const it = pk([["On serre un écrou avec une clé", "clé"], ["On pousse une porte", "porte"], ["Un cycliste appuie sur sa pédale", "pedale"]]), rx = pk([0.2, 0.25, 0.3, 0.4]), ry = pk([0.1, 0.15, 0.2]), fx = pk([-40, -30, -20, 20, 30, 50]), fy = pk([60, 80, 100, 120, -60, -80]);
+        const mz = r6(rx * fy - ry * fx), am = Math.abs(mz); if (am < 2 || [fx, fy].map(Math.abs).includes(am)) return null;
+        return QN(it[0] + " : le bras de levier est " + M("\\vec{r} = " + v3(N(rx), N(ry), 0)) + " (en m) et la force " + M("\\vec{F} = " + v3(fx, fy, 0)) + " (en N). Calcule la norme du moment " + M("\\vec{M} = \\vec{r} \\times \\vec{F}") + " (en N·m).", am,
+          M("\\vec{r} \\times \\vec{F} = " + v3(0, 0, N(rx) + " \\cdot " + pT(fy) + " - " + N(ry) + " \\cdot " + pT(fx) + " = " + N(mz))) + " ; norme " + M(N(am)) + " N·m.",
+          { ctx: "moment-" + it[1], guide: [G("Troisième composante " + M("r_x F_y - r_y F_x") + " ?", mz, M(N(rx) + " \\cdot " + pT(fy) + " - " + N(ry) + " \\cdot " + pT(fx) + " = " + N(mz)) + "."), G("Norme du moment (positive) ?", am, M(N(am)) + " N·m.")],
+            traps: [TR(Math.abs(r6(rx * fx + ry * fy)), "C'est le produit scalaire (le travail) ; le moment vient du produit vectoriel."), TR(Math.abs(r6(rx * fy + ry * fx)), "r_x F_y − r_y F_x : on soustrait."), TR(nrm([rx, ry]) * nrm([fx, fy]), "‖r‖ · ‖F‖ seulement si la force est perpendiculaire au bras de levier.")] }); },
+    ],
+    3: [
+      () => { const [a, b, c, dn] = pk(TRI3.filter((t) => t[3] > 3 && t[3] < 10)), d = perm([a, b, c]).map((x) => x * sgn()), e = [nz(-1, 1), nz(-1, 1), nz(-1, 1)], wv = cross(d, e); if (wv.filter((x) => x).length < 2) return null;
+        const A = [R.int(-3, 3), R.int(-3, 3), R.int(-3, 3)], lam = pk([1, 2, -1, -2]), P = add3(add3(A, d, lam), wv), AP = P.map((x, i) => x - A[i]), cr = cross(AP, d), nc = nrm(cr), dist = nc / dn, ro = rnd(dist);
+        return QN("Calcule la distance du point " + ptN("P", ...P) + " à la droite " + eqP(A, d) + (ro ? " (au centième)." : "."), dist,
+          M("\\overrightarrow{AP} = " + v3(...AP)) + ", " + M("\\overrightarrow{AP} \\times \\vec{d} = " + v3(...cr)) + " ; distance " + M("\\frac{\\|\\overrightarrow{AP} \\times \\vec{d}\\|}{\\|\\vec{d}\\|} = \\frac{\\sqrt{" + r6(nc * nc) + "}}{" + dn + "} " + eqv(dist)) + ".",
+          Object.assign({ ctx: "distance-point-droite", guide: [GP("Composantes de " + M("\\overrightarrow{AP}") + " (A, point de départ de la droite) ?" + TRIP, AP, M(v3(...AP)) + "."), GP(M("\\overrightarrow{AP} \\times \\vec{d}") + " ?" + TRIP, cr, M(v3(...cr)) + "."), G(M("\\|\\vec{d}\\|") + " ?", dn, M("\\sqrt{" + dn * dn + "} = " + dn) + "."), G("Distance " + M("\\frac{\\|\\overrightarrow{AP} \\times \\vec{d}\\|}{\\|\\vec{d}\\|}") + (ro ? " (au centième)" : "") + " ?", dist, M(eqv(dist).replace(/^= /, "")) + ".", ro)],
+            traps: [TR(nrm(AP), "AP est oblique : la distance se mesure perpendiculairement à la droite."), TR(nc, "Divise encore par la norme de d."), TR(nc / (dn * dn), "On divise par ‖d‖, pas par ‖d‖².")] }, ro ? { round: ro } : {})); },
+      () => { const u = [nz(-3, 3), nz(-3, 3), nz(-3, 3)], A = [R.int(-4, 4), R.int(-4, 4), R.int(-4, 4)], t = pk([2, 3, -1, -2, 0.5, 1.5]), C = add3(A, u, t); if (!C.every(Number.isInteger)) return null; const B = add3(A, u), k = C[2];
+        if ([0, 1, -1].includes(k) || A.includes(k) || B.includes(k) || C[0] === k || C[1] === k) return null;
+        return QN("On donne " + ptN("A", ...A) + ", " + ptN("B", ...B) + " et " + M("C(" + fT(C[0]) + " \\,;\\, " + fT(C[1]) + " \\,;\\, k)") + ". Trouve " + M("k") + " pour que les trois points soient alignés, c'est-à-dire " + M("\\overrightarrow{AB} \\times \\overrightarrow{AC} = \\vec{0}") + ".", k,
+          "Le produit vectoriel est nul quand les vecteurs sont colinéaires : " + M("\\overrightarrow{AC} = t \\, \\overrightarrow{AB}") + " avec " + M("\\overrightarrow{AB} = " + v3(...u)) + ". En x : " + M(pT(C[0] - A[0]) + " = " + pT(u[0]) + " t") + ", " + M("t = " + fT(t)) + " ; en z : " + M("k = " + fT(A[2]) + " + " + pT(t) + " \\cdot " + pT(u[2]) + " = " + k) + ".",
+          { ctx: "alignement", guide: [GP("Composantes de " + M("\\overrightarrow{AB}") + " ?" + TRIP, u, M(v3(...u)) + "."), G("Facteur " + M("t") + " tel que " + M("\\overrightarrow{AC} = t \\, \\overrightarrow{AB}") + " (lis-le sur les abscisses) ?", t, M(fT(C[0] - A[0]) + " \\div " + pT(u[0]) + " = " + fT(t)) + "."), G(M("k = z_A + t \\cdot u_z") + " ?", k, M(k) + ".")],
+            traps: [TR(B[2], "C'est la cote de B : multiplie le vecteur AB par t = " + T(t) + "."), TR(r6(A[2] - t * u[2]), "Attention au signe : k = z_A + t · (z_B − z_A)."), TR(r6(t * u[2]), "Ajoute la cote de A.")] }); },
+      () => { const A = [R.int(-2, 3), R.int(-2, 3), R.int(0, 3)], u = [nz(-3, 3), nz(-3, 3), R.int(-2, 2)], v = [R.int(-3, 3), nz(-3, 3), nz(-2, 2)], w = cross(u, v); if (w.filter((x) => x).length < 2) return null;
+        const B = add3(A, u), C = add3(B, v), n = nrm(w), ro = rnd(n), it = pk(["Une rampe d'accès", "Un pare-soleil", "Une plaque de verre"]);
+        return QN(it + " a la forme d'un parallélogramme " + M("ABCD") + " avec " + ptN("A", ...A) + ", " + ptN("B", ...B) + " et " + ptN("C", ...C) + " (en m). Calcule son aire (en m²" + (ro ? ", au centième" : "") + ").", n,
+          "Dans " + M("ABCD") + ", " + M("\\overrightarrow{AD} = \\overrightarrow{BC}") + ". " + M("\\overrightarrow{AB} = " + v3(...u)) + ", " + M("\\overrightarrow{BC} = " + v3(...v)) + ", " + M("\\overrightarrow{AB} \\times \\overrightarrow{BC} = " + v3(...w)) + " ; aire " + M("\\sqrt{" + r6(n * n) + "} " + eqv(n)) + " m².",
+          Object.assign({ ctx: "aire-parallelogramme", guide: [GP("Composantes de " + M("\\overrightarrow{AB}") + " ?" + TRIP, u, M(v3(...u)) + "."), GP("Composantes de " + M("\\overrightarrow{BC}") + " (égal à " + M("\\overrightarrow{AD}") + ") ?" + TRIP, v, M(v3(...v)) + "."), GP(M("\\overrightarrow{AB} \\times \\overrightarrow{BC}") + " ?" + TRIP, w, M(v3(...w)) + "."), G("Aire" + (ro ? " (au centième)" : "") + " ?", n, M(eqv(n).replace(/^= /, "")) + ".", ro)],
+            traps: [TR(n / 2, "C'est l'aire du triangle ABC ; le parallélogramme vaut le double."), TR(nrm(u) * nrm(v), "AB · BC ne vaut que pour un rectangle : passe par le produit vectoriel."), TR(n * n, "N'oublie pas la racine carrée.")] }, ro ? { round: ro } : {})); },
+    ],
+  };
+
   // ===================================== J3. fratmp : fonctions rationnelles simples (S8.FS.06, 24.11) =====================================
   const fracT = (a, b, c, d) => "\\frac{" + lin(a, b) + "}{" + lin(c, d) + "}";
   const hyp = (k, h, v) => (x) => k / (x - h) + v;
@@ -679,6 +770,7 @@
   const PROBS = {
     posdroites: () => P("d : x = 1 + t, y = 2 − t, z = 3 + 2t ; g : x = 5 + 2s, y = 1 + s, z = m − s.", [["a) t obtenu avec les équations en x et y", 2], ["b) s obtenu avec les mêmes équations", -1], ["c) m pour que les droites soient sécantes", 6]], ["1 + t = 5 + 2s et 2 − t = 1 + s.", "En z : 3 + 2 · 2 = m − (−1)."], "a) " + M("t = 2") + " ; b) " + M("s = -1") + " ; c) " + M("7 = m + 1") + ", " + M("m = 6") + " : point commun " + M("(3 \\,;\\, 0 \\,;\\, 7)") + ". Pour une autre valeur de m, les droites seraient gauches."),
     projmp: () => P("On donne u = (4 ; 7) et v = (3 ; 4).", [["a) u · v", 40], ["b) Projection scalaire de u sur v", 8], ["c) Première composante du vecteur projeté de u sur v", 4.8]], ["4 · 3 + 7 · 4.", "40 ÷ ‖v‖ = 40 ÷ 5."], "a) 40 ; b) " + M("\\frac{40}{5} = 8") + " ; c) " + M("\\frac{40}{25} \\cdot 3 = 4{,}8") + " (projeté " + M("(4{,}8 \\,;\\, 6{,}4)") + ")."),
+    pvectmp: () => P("On donne u = (1 ; 2 ; 2) et v = (2 ; −1 ; 2).", [["a) Première composante de u × v", 6], ["b) Troisième composante de u × v", -5], ["c) Aire du parallélogramme construit sur u et v (au centième)", Math.sqrt(65), 0.01]], ["u₂v₃ − u₃v₂ = 2 · 2 − 2 · (−1).", "u₁v₂ − u₂v₁ = 1 · (−1) − 2 · 2."], "a) 6 ; b) −5 (u × v = (6 ; 2 ; −5), orthogonal à u : 6 + 4 − 10 = 0) ; c) " + M("\\sqrt{36 + 4 + 25} = \\sqrt{65} \\approx 8{,}06") + "."),
     fratmp: () => P("Soit f(x) = (2x − 6) ÷ (x + 4).", [["a) Valeur interdite", -4], ["b) Zéro de f", 3], ["c) Asymptote horizontale y = …", 2]], ["x + 4 = 0.", "Pour x très grand : 2x ÷ x."], "a) −4 (asymptote verticale " + M("x = -4") + ") ; b) " + M("2x - 6 = 0") + ", " + M("x = 3") + " ; c) " + M("y = 2") + "."),
     coordmp: () => P("On donne A(1 ; 2) et B(4 ; 6).", [["a) Distance AB", 5], ["b) Abscisse du milieu de [AB]", 2.5], ["c) Rayon polaire r du point B (au centième)", Math.hypot(4, 6), 0.01]], ["√(3² + 4²).", "(1 + 4) ÷ 2."], "a) 5 ; b) 2,5 (milieu (2,5 ; 4)) ; c) " + M("\\sqrt{52} \\approx 7{,}21") + "."),
     vectmp: () => P("On donne u = (3 ; −4) et v = (1 ; 2).", [["a) Norme de u", 5], ["b) Première composante de 2u − v", 5], ["c) Seconde composante de 2u − v", -10]], ["√(9 + 16).", "2 · 3 − 1."], "a) 5 ; b) 5 ; c) " + M("2 \\cdot (-4) - 2 = -10") + "."),
@@ -712,6 +804,11 @@
       lesson: ["Projection orthogonale", "L'ombre d'un vecteur sur une direction, quand la lumière tombe à angle droit.", "Projection scalaire de \\(\\vec{u}\\) sur la direction de \\(\\vec{v}\\) : \\(\\frac{\\vec{u} \\cdot \\vec{v}}{\\|\\vec{v}\\|} = \\|\\vec{u}\\|\\cos\\alpha\\). Vecteur projeté : \\(\\vec{p} = \\frac{\\vec{u} \\cdot \\vec{v}}{\\|\\vec{v}\\|^2}\\,\\vec{v}\\) ; la partie \\(\\vec{u} - \\vec{p}\\) est orthogonale à \\(\\vec{v}\\). Projeté orthogonal d'un point \\(P\\) sur la droite passant par \\(A\\) de direction \\(\\vec{d}\\) : \\(H = A + t\\,\\vec{d}\\) avec \\(t = \\frac{\\overrightarrow{AP} \\cdot \\vec{d}}{\\|\\vec{d}\\|^2}\\) ; la distance de \\(P\\) à la droite est \\(PH\\).",
         ["\\(\\vec{u} = (4 ; 7)\\), \\(\\vec{v} = (3 ; 4)\\) : \\(\\vec{u} \\cdot \\vec{v} = 40\\), projection 8, projeté \\(\\frac{40}{25}(3 ; 4) = (4{,}8 ; 6{,}4)\\)"], "Pour le vecteur projeté, on divise par \\(\\|\\vec{v}\\|^2\\) ; pour la longueur projetée, par \\(\\|\\vec{v}\\|\\)."],
       comps: ["Projection scalaire, vecteur projeté, composante d'une force", "Projeté d'un point sur une droite ; distance point-droite", "Projection dans l'espace ; hauteur et aire d'un triangle"] },
+    { id: "pvectmp", th: "VE", sem: "S7", theme: "es", label: "Produit vectoriel", ex: "\\vec{u} \\times \\vec{v} = \\begin{pmatrix} u_2 v_3 - u_3 v_2 \\\\ u_3 v_1 - u_1 v_3 \\\\ u_1 v_2 - u_2 v_1 \\end{pmatrix}", lv: PV,
+      hint: "u × v = (u₂v₃ − u₃v₂ ; u₃v₁ − u₁v₃ ; u₁v₂ − u₂v₁) : un vecteur orthogonal à u et à v. Sa norme = aire du parallélogramme construit sur u et v (triangle : la moitié). L'ordre compte : v × u = −(u × v).",
+      lesson: ["Produit vectoriel", "Un vecteur perpendiculaire à deux vecteurs de l'espace, dont la longueur mesure une aire.", "Dans l'espace, \\(\\vec{u} \\times \\vec{v} = \\begin{pmatrix} u_2 v_3 - u_3 v_2 \\\\ u_3 v_1 - u_1 v_3 \\\\ u_1 v_2 - u_2 v_1 \\end{pmatrix}\\) (on « croise » les composantes). C'est un vecteur orthogonal à \\(\\vec{u}\\) et à \\(\\vec{v}\\) : un vecteur normal au plan qu'ils engendrent. Sa norme \\(\\|\\vec{u} \\times \\vec{v}\\|\\) est l'aire du parallélogramme construit sur \\(\\vec{u}\\) et \\(\\vec{v}\\) ; le triangle en est la moitié. Il est nul si et seulement si les vecteurs sont colinéaires. L'ordre compte : \\(\\vec{v} \\times \\vec{u} = -\\vec{u} \\times \\vec{v}\\).",
+        ["\\((1 ; 2 ; 2) \\times (2 ; -1 ; 2) = (6 ; 2 ; -5)\\) ; vérification : \\(6 + 4 - 10 = 0\\)", "Aire du parallélogramme : \\(\\sqrt{36 + 4 + 25} = \\sqrt{65} \\approx 8{,}06\\)"], "Le produit scalaire donne un nombre (angle, travail) ; le produit vectoriel donne un vecteur (normale, aire, moment)."],
+      comps: ["Calculer les composantes d'un produit vectoriel ; aire à partir de sa norme", "Aire d'un triangle dans l'espace ; vecteur normal ; moment d'une force", "Distance d'un point à une droite ; alignement ; aire d'un parallélogramme dans l'espace"] },
     { id: "droiteparam", th: "DP", sem: "S7", theme: "es", label: "Droites paramétriques", ex: "\\begin{cases} x = 2 + 3t \\\\ y = -1 + 4t \\end{cases}", lv: DP,
       hint: "Point de départ A, vecteur directeur d : (x ; y) = A + t · d. Un point est sur la droite si le même t convient pour toutes les coordonnées. Intersection : égalise les coordonnées (deux paramètres t et s).",
       lesson: ["Droites paramétriques", "Une droite décrite par un point et une direction.", "La droite passant par \\(A\\) de vecteur directeur \\(\\vec{d}\\) : \\(x = x_A + t\\,d_x\\), \\(y = y_A + t\\,d_y\\) (\\(+ z\\) dans l'espace). Chaque valeur de \\(t\\) donne un point. Un point est sur la droite s'il existe un même \\(t\\) pour toutes les coordonnées. Angle entre deux droites : angle aigu entre leurs vecteurs directeurs.",

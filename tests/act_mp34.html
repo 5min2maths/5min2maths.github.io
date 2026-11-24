@@ -17,7 +17,7 @@ const MAN={
   similmp:[[(st)=>{st.h=6;},240],[(st)=>{st.h=9;},null],[(st)=>{st.h=3;},"9,5"]],
   vectmp:[[(st)=>{st.B=[4,-1];},null],[(st)=>{st.B=[4,5];},10],[(st)=>{st.D=[2,3];},5]],
 };
-const IDS=["eqabs","eqbic","eqirrmp","eqratmp","puisrat","logdef","logprop","eqexp","eqlog","croissexp","volmp","similmp","coordmp","vectmp","scalmp","droiteparam","ineqmp","fctmp","polymp","sinusmp","explogfn"];
+const IDS=["eqabs","eqbic","eqirrmp","eqratmp","puisrat","logdef","logprop","eqexp","eqlog","croissexp","volmp","similmp","coordmp","vectmp","scalmp","droiteparam","ineqmp","fctmp","polymp","sinusmp","explogfn","projmp","pvectmp","posdroites","fratmp"];
 const run=(id)=>{ try{ screenLesson(id,()=>{});
   const A=ACTIVE[id]; if(!A){log.push(id+" : ÉCHEC pas de leçon active");return;}
   if(!document.getElementById("s3")){log.push(id+" : ÉCHEC pas d'écran de leçon active (leçon absente ?)");return;}

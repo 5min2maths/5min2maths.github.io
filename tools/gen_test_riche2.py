@@ -29,6 +29,9 @@ CHAPS = [
     ("volmp similmp", "volmp3", "mp"),
     ("coordmp vectmp scalmp droiteparam", "vecmp4", "mp"),
     ("ineqmp fctmp polymp sinusmp explogfn", "fctmp4", "mp"),
+    # 24.11 (agent mp4plus) : notions ajoutées aux banques MP 4e
+    ("projmp pvectmp posdroites", "vecmp4", "mp"),
+    ("fratmp", "fctmp4", "mp"),
 ]
 JSCODE = r"""
 const L=[];let fails=0;const seenK={};const bad=(m)=>{fails++;const k=m.replace(/graine \d+/,"").slice(0,48);seenK[k]=(seenK[k]||0)+1;if(seenK[k]<=1&&fails<400)L.push("ÉCHEC "+m);};
