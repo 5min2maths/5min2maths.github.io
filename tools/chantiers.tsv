@@ -24,7 +24,7 @@ E	Icônes de badges	Produit	6	abandonné	—	22.11	badges abandonnés le 22.11	�
 M	Récompenses visuelles	Produit	6	en partie	30 %	22.11	grades Mathélo « collector » numérotés	—
 O	Accessibilité (police dyslexie, taille du texte, contrastes)	Produit	7	à contrôler	90 %	24.11	Réglages « Affichage » : taille du texte (3), police plus lisible, contraste renforcé ; couleurs ≥ 4,5:1 (WCAG AA) ; focus clavier, zones tactiles	contrôle sur téléphone (rendu réel des polices, thème sombre)
 Q	Captures automatiques des figures	Technique	7	fait	90 %	24.11	galerie de 604 figures (2 Mo, hors ligne), régénérée chaque nuit avec le robot : suivi/galerie/	corriger les ≈ 60 figures relevées (2 agents en cours)
-L	Parcours d'examen (EVACOM 11e, épreuves communes, matu)	Produit	6	à faire	0 %	14.11	—	EVACOM prêt avant fin avril
+L	Parcours d'examen (EVACOM 11e, épreuves communes, matu)	Produit	6	à contrôler	60 %	24.11	EVACOM 11e (LS) fait : sujets blancs 95 min, 14 questions, 42 formes, corrigé + auto-correction + bilan (tools/evacom.md)	contrôle par l'enseignant ; puis épreuves communes / matu
 FICHE	« Ma fiche » (synthèse à compléter)	Produit	—	abandonné	—	23.11	retirée : plus-value pas convaincante ; code dans la branche archive/fiche	—
 CARN	Carnet d'erreurs et programme du test	Produit	—	fait	100 %	21.11	publiés le 20.11, installer fait le 21.11	—
 QCM	Autoévaluation « Je sais… » + test rapide	Produit	—	fait	100 %	21.11	modèle des champs (src/qcm.js)	—

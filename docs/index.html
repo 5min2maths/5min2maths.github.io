@@ -406,6 +406,13 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 @media print { .mock-ex h4, .mock-part > h3 { break-after: avoid; page-break-after: avoid; } .mock-ex { break-inside: auto; } }
 
 /* Tableau de données dans un exercice riche (riche.js, 15.11) */
+/* Parcours EVACOM (24.11) */
+.evc-opts { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 4px; }
+.evc-opt { display: inline-block; max-width: 100%; }
+.evc-rules { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+.evc-weak { padding-left: 1.1em; display: grid; gap: 4px; }
+.evc-weak li span { margin-right: 6px; }
+.evc-end { text-align: right; font-style: italic; }
 .mtab { border-collapse: collapse; margin: .5em 0; font-size: .95em; }
 .mtab th, .mtab td { border: 1px solid var(--line, #999); padding: .25em .6em; text-align: center; }
 
@@ -715,12 +722,12 @@ window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "glo
 </head>
 <body>
 <main id="app" aria-live="polite"></main>
-<script src="app.js?v=792cce21ba"></script>
+<script src="app.js?v=b24d8ecfa9"></script>
 <script>
 (function () {
   // Chargement par niveau (24.11). Paquets requis : le niveau de l'élève et les niveaux inférieurs de sa filière ;
   // France et liens de consultation (#q-, #l-, #auteur) : tout. Puis le reste en arrière-plan (hors ligne complet).
-  var V = "792cce21ba", K = ["9", "10", "11", "12", "13", "14", "mp", "fr"], loaded = {}, pending = {};
+  var V = "b24d8ecfa9", K = ["9", "10", "11", "12", "13", "14", "mp", "fr"], loaded = {}, pending = {};
   window.__packs = loaded; // pour les tests (tools/test_paquets.py)
   function need(p) {
     if (!p || p.system === "FR") return K.slice();
