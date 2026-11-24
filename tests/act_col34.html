@@ -1,0 +1,39 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css"><body style="width:400px"><main id="app"></main><pre id="log" hidden></pre>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_manip.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script>
+// Leçons actives de la 3e et de la 4e Collège (act_col34.js, 24.11 ; copie de act_2c.html) : on joue chaque leçon. Devine, puis chaque défi :
+// une réponse fausse (9999, ou la position de départ des curseurs) ne doit pas valider ; ensuite on cherche la bonne.
+const log=[];const click=(s)=>{const e=document.querySelector(s);if(!e){log.push("MANQUE "+s);return false;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));return true;};
+const gfb=()=>document.querySelector('#gfb').textContent;
+// Réponses candidates : entiers, fractions simples, quelques décimaux et grands nombres.
+const C=[];for(let v=-100;v<=300;v++)C.push(String(v));
+for(let q=2;q<=8;q++)for(let p=-40;p<=40;p++){if(p%q)C.push(p+"/"+q);}
+for(let k=-2000;k<=2000;k++)if(k%100)C.push(String(k/100));for(let k=-999;k<=999;k++)if(k%10)C.push((k/1000).toFixed(3));
+const typeAns=(sel,v)=>{const el=document.querySelector(sel+" .act-in");if(!el)return false;el.value=v;const b=el.closest(".act-ans").querySelector("[data-go]");b.dispatchEvent(new MouseEvent("click",{bubbles:true}));return true;};
+let wrongOk=true;
+const answer=(sel,b)=>{ // sel : zone qui contient le champ
+  typeAns(sel,"9999"); if(gfb()!==b){wrongOk=false;return true;}
+  for(const v of C){if(!document.querySelector(sel+" .act-in"))return gfb()!==b;typeAns(sel,v);if(gfb()!==b)return true;}return false;};
+const ranges=()=>[...document.querySelectorAll('#play input[type=range]')];
+const vals=(r)=>{const a=[];for(let v=+r.min;v<=+r.max+1e-9;v+=+r.step)a.push(+v.toFixed(6));return a;};
+const setR=(i,v)=>{const r=ranges()[i];if(!r)return;r.value=v;r.dispatchEvent(new Event("input"));r.dispatchEvent(new Event("change"));};
+const askIn=()=>document.querySelector('#play .s2c-ask .act-in');
+const seek=()=>{const b=gfb();
+  if(ranges().length){
+    const rs=ranges();setR(0,rs[0].value); if(gfb()!==b||askIn()){wrongOk=false;return true;}
+    const V=rs.map(vals),n=V.length;
+    const rec=(i)=>{if(i===n)return false;for(const v of V[i]){setR(i,v);if(gfb()!==b||askIn())return true;if(rec(i+1))return true;}return false;};
+    rec(0); if(gfb()!==b) return true; if(askIn()) return answer("#play .s2c-ask",b); return false;}
+  if(document.querySelector("#play .act-in")) return answer("#play",b);
+  return false;};
+const run=(id)=>{ try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; wrongOk=true; screenLesson(id,()=>{});
+  const A=ACTIVE[id]; click('#pc button[data-i="'+A.predict.good+'"]'); const msgs=[];const X=actPrep(A);
+  for(let k=0;k<X.defis.length;k++){ if(!seek()) msgs.push("défi "+(k+1)+" non trouvé"); else msgs.push(gfb().slice(2,50)); }
+  const html=document.body.innerHTML.replace(/<script[\s\S]*?<\/script>/g,"").replace(/<pre id="log"[\s\S]*?<\/pre>/,""); const bad=/NaN|undefined|Infinity/.test(html);
+  const ok=!document.getElementById("s3").hidden&&!bad&&wrongOk&&!msgs.some(m=>/non trouvé/.test(m));
+  log.push(id+" ["+X.mode+"] : "+(ok?"OK":"ÉCHEC "+(bad?"(NaN/undefined) ":"")+(wrongOk?"":"(réponse fausse acceptée) "))+" · "+msgs.join(" | "));
+  }catch(e){log.push(id+" ERR ÉCHEC "+e.stack)} };
+const IDS=["tauxvar","nbderive","derivref","derivregles","derivprodquot","derivcomp","tangente","variations","optimderiv","primitives","integrale","aireint","volrev","lnexp","croissance","matrices","translin","condbayes","varalea","binomiale","normale"];
+for(const id of IDS){ if(ACTIVE[id]&&LESSONS[id]) run(id); else log.push(id+" : ÉCHEC (leçon active ou leçon absente)"); }
+document.getElementById("log").hidden=false; document.getElementById("log").textContent=log.join("\n");</script>
