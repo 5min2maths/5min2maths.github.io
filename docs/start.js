@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "f1bb84ad83"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "0d4a322bac"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -169,6 +169,9 @@ const h = (html) => { const tr = document.getElementById("tour"); if (tr) tr.rem
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 // Textes de l'app (indices, erreurs typiques) : échappés, sauf <b>, <i>, <br> (16.11 : les balises s'affichaient telles quelles).
 const escT = (s) => esc(s).replace(/&lt;(\/?)(b|i|br)&gt;/g, "<$1$2>");
+/* 24.11 (audit ergonomie) : écrans longs (grades, réglages, compétences, curieux, histoire) : leur « Retour » n'était
+   qu'en bas, après tout le défilement ; même bouton en haut, comme le « ← Accueil » des pages de l'accueil. */
+const backTop = (id = "backtop") => `<button type="button" class="btn-ghost back-home" id="${id}">← Retour</button>`;
 const gradeName = (p) => (SYSTEMS[p.system].grades.find(([g]) => g === p.grade) || [0, ""])[1];
 const brand = '<div class="brand"><b>5 minutes de maths</b><span>par jour</span></div>';
 const PRAISE = ["Juste !", "Bien vu !", "Exact !", "Parfait.", "C'est ça !", "Bravo !"];
@@ -350,11 +353,17 @@ function startPlacement() {
     if (i >= plan.length) { state.placed = true; delete state.placement; save(); return screenPlacementDone(); }
     const id = plan[i], q = Engine.make(state, id, Math.min(2, difficultyCap(state.profile)));
     renderQuestion(q, {
-      eyebrow: "Étape 2 sur 2 · question " + (i + 1) + " sur " + plan.length + (plan.length - i > 1 ? " · encore " + (plan.length - i - 1) + " après celle-ci" : " · la dernière !") + `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((i / plan.length) * 100)}%"></i></span>`, single: true, track: "positionnement",
+      eyebrow: "Étape 2 sur 2 · question " + (i + 1) + " sur " + plan.length + (plan.length - i > 1 ? " · encore " + (plan.length - i - 1) + " après celle-ci · environ " + Math.max(1, Math.round((plan.length - i) * 0.5)) + " min" : " · la dernière !") + `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((i / plan.length) * 100)}%"></i></span>`, single: true, track: "positionnement",
       onDone: (res) => { Engine.placementResult(state, id, res.solved ? true : res.dontKnow ? null : false, q.d); if (!res.solved && !res.dontKnow) carnetAdd(id, q.d, q.code, res.diag, res.ans); /* 24.11 : erreur du calibrage aussi dans le carnet (retour testeur) */ save(); },
       onNext: () => { i++; next(); },
       onNotYet: () => { Engine.notYet(state, id); save(); toast("Noté : cette notion reviendra plus tard."); i++; next(); },
     });
+    /* 24.11 (revue d'un testeur) : la police plus lisible se découvre dès la première question, pas seulement dans les Réglages. */
+    if (i === 0 && typeof a11yOf === "function") {
+      const eb = app.querySelector(".eyebrow"), f = a11yOf(state).font; /* le réglage reste modifiable dans ⚙️ Réglages */
+      if (eb) { eb.insertAdjacentHTML("afterend", `<button type="button" class="btn-ghost small font-hint" id="fonthint" aria-pressed="${!!f}">Aa ${f ? "Police habituelle" : "Lettres difficiles à lire ? Police plus lisible"}</button>`);
+        document.getElementById("fonthint").onclick = (e) => { const on = !a11yOf(state).font; state.a11y = { ...a11yOf(state), font: on ? 1 : 0 }; save(); uiApply(); e.currentTarget.setAttribute("aria-pressed", on); e.currentTarget.textContent = "Aa " + (on ? "Police habituelle" : "Lettres difficiles à lire ? Police plus lisible"); }; }
+    }
   };
   next();
 }
@@ -422,8 +431,10 @@ function gradeOf(r) {
 }
 // Page « Mes grades » (21.11) : l'échelle complète, le grade actuel mis en avant, la courbe du Mathélo.
 function screenGrades() {
+  if (!state.eloSeen) { state.eloSeen = true; save(); }
   const r = state.elo.r, g = gradeOf(r), best = Math.max(r, ...((state.elo.log || []).map((x) => x[1])));
-  h(`${brand}<div class="eyebrow">Mathélo</div><h2>Mes grades</h2>
+  h(`${brand}${backTop()}<div class="eyebrow">Mathélo</div><h2>Mes grades</h2>
+  <p class="small muted">Le <b>Mathélo</b> est ton score de maths : il monte quand tu réussis des questions de ton niveau ou plus difficiles, et baisse un peu après une erreur. Chaque palier de 75 points donne un <b>grade</b> (Chercheur, Stratège…).</p>
   <div class="card stack grade-now"><div class="ic-row"><button type="button" class="ic grade-big grade-open" data-g="${g.name}" aria-label="Voir la carte du grade ${g.name}">${g.ic}</button><div><div class="eyebrow">Mon grade</div><h2>${g.name}</h2><div class="small muted">Mathélo ${r}${best > r ? " · meilleur : " + best : ""}</div></div></div>
     ${g.next ? `<div class="stack" style="gap:4px"><span class="pbar"><i style="width:${g.pct}%"></i></span><span class="small">Prochain grade : <b>${g.next.ic} ${g.next.name}</b>, à ${g.next.at} (encore ${g.next.at - r} points).</span></div>` : '<p class="small">Le plus haut grade : bravo !</p>'}</div>
   <div class="card">${eloBlock()}</div>
@@ -432,7 +443,7 @@ function screenGrades() {
       const no = st !== "todo" && at && (isAuthor() ? "0" : (state.gradeNo || {})[name]);
       return `<li class="${st}"><span class="g-ic">${st !== "todo" && at ? `<button type="button" class="grade-open" data-g="${name}" aria-label="Voir la carte du grade ${name}">${ic}</button>` : ic}</span><span class="g-n">${name}${st === "cur" ? " <span class=\"badge\">toi</span>" : ""}${no ? ` <small class="g-no" title="${no}e utilisateur à obtenir ce grade">#${no}</small>` : ""}</span><span class="g-at">${at ? at : "–"}</span></li>`; }).join("")}</ol></div>
   <button class="btn-primary btn-big" id="back">Retour</button>`);
-  document.getElementById("back").onclick = screenHome;
+  document.getElementById("back").onclick = screenHome; document.getElementById("backtop").onclick = screenHome;
   gradeNumbers();
   const cur = app.querySelector(".grades li.cur"); if (cur) cur.scrollIntoView({ block: "center" });
   window.scrollTo(0, 0);
@@ -477,6 +488,14 @@ function backupCard() {
   return `<div class="card flat stack backup-card"><div class="ic-row"><span class="ic">💾</span><div><b>Sauvegarde ta progression</b><div class="small muted">${days} jours de pratique, et tout est sur ce téléphone : un téléphone changé ou un cache vidé, et tout est perdu. Un code suffit pour tout récupérer.</div></div></div>
     <div class="row"><button class="btn-primary" id="bkgo">Faire mon code de sauvegarde</button><button class="btn-ghost small" id="bkno">Plus tard</button></div></div>`;
 }
+// Mathélo et grades expliqués (24.11, revue d'un testeur : « Mathélo », « Arpenteur »… ne disent rien au premier passage).
+// Pour qui a passé la visite guidée avant la bulle du Mathélo : une petite carte, une seule fois, fermée par « Compris ».
+function eloHintCard() {
+  if (state.eloSeen || !state.tourDone) return "";
+  const g = gradeOf(state.elo.r);
+  return `<div class="card flat stack elo-hint"><p class="small"><b>📈 Mathélo</b> = ton score de maths. Il monte quand tu réussis des questions de ton niveau. Tous les 75 points, un nouveau <b>grade</b> : tu es ${g.ic} ${g.name}${g.next ? `, le prochain est ${g.next.ic} ${g.next.name}` : ""}.</p>
+    <div class="row"><button class="btn-ghost small" id="elohok">Compris</button><button class="btn-ghost small" id="elohmore">Voir tous les grades</button></div></div>`;
+}
 // Bilan de la semaine passée (21.11) : du lundi au mercredi, une fois par semaine, si l'élève a pratiqué.
 function weekRecapCard() {
   const now = new Date(day() + "T12:00:00"), dow = (now.getDay() + 6) % 7; // 0 = lundi
@@ -496,7 +515,7 @@ function weekRecapCard() {
 // Visite guidée (21.11 ; 22.11 : adaptée à l'accueil à cases) : 3 bulles sur l'accueil, l'élément concerné surligné.
 const TOUR = [
   [".sess-card", "▶ Ta séance du jour", "En classe : au rythme de ton cours (choisis ton chapitre). Libre : tous les sujets, à ton rythme. Quelques minutes suffisent."],
-  [".elo-band", "📈 Ton Mathélo", "Il monte quand tu réussis des questions de ton niveau. Touche-le pour voir tes grades."],
+  [".elo-band", "📈 Ton Mathélo", "Ton score de maths : il monte quand tu réussis des questions de ton niveau. Tous les 75 points, un nouveau grade (Pousse, Apprenti, Arpenteur…). Touche-le pour voir l'échelle."],
   [".doors", "🧭 Tes rubriques", "Le problème de la semaine, les questions curieuses, l'histoire des maths, ton test (révision jusqu'au jour J), ton carnet d'erreurs et tes progrès."],
 ];
 let tourK = 0;
@@ -504,6 +523,7 @@ function tourShow() {
   const old = document.getElementById("tour"); if (old) old.remove();
   if (homeTab !== "today") return;
   const [sel, title, text] = TOUR[tourK];
+  if (sel === ".elo-band" && !state.eloSeen) { state.eloSeen = true; save(); } /* Mathélo expliqué : plus de carte « C'est quoi ? » */
   document.body.insertAdjacentHTML("beforeend", `<div id="tour" class="tour" role="dialog" aria-label="Visite guidée"><div class="tour-card"><div class="spread"><b>${title}</b><span class="small muted">${tourK + 1} / ${TOUR.length}</span></div><p class="small">${text}</p>
     <div class="row"><button class="btn-ghost small" id="tourskip">Passer</button><button class="btn-primary" id="tournext">${tourK + 1 < TOUR.length ? "Suivant" : "C'est parti !"}</button></div></div></div>`);
   app.querySelectorAll(".tour-hi").forEach((x) => x.classList.remove("tour-hi"));
@@ -557,9 +577,12 @@ function screenHome() {
     document.getElementById("hb").onclick = () => { homeTab = "today"; screenHome(); };
   } else {
     const mode = state.homeMode === "libre" ? "libre" : "classe", nC = (state.carnet || []).length;
+    /* 24.11 (audit ergonomie) : séance interrompue à reprendre → le grand bouton n'annonce plus « Encore une séance »
+       ni « séance faite ✓ » (la séance n'est pas finie ; « Reprendre ma séance » est juste au-dessus). */
+    const paused = !!resumeCard(), doneLab = done && !paused;
     // Une seule bannière ; le joker de série passe avant le bilan de la semaine (sinon la série est perdue le jour même).
     const nudge = streakNudge(), joker = /Joker/.test(nudge);
-    const banner = [resumeCard(), prepTodayCard(), joker ? nudge : "", backupCard(), weekRecapCard(), joker ? "" : nudge].find((x) => x) || "";
+    const banner = [resumeCard(), prepTodayCard(), joker ? nudge : "", backupCard(), weekRecapCard(), joker ? "" : nudge, eloHintCard()].find((x) => x) || "";
     const nowLine = !Engine.nowActive(state) ? `<button type="button" class="btn-sec small" id="nowpick">📚 Choisir mon chapitre travaillé en classe</button>`
       : Engine.nowStale(state) ? `<div class="now-ask"><b>📚 Cette semaine en classe, tu travailles toujours :</b><span>${esc(state.now.ids.map(nLabel).join(" · "))} ?</span><div class="row now-ask-btns"><button type="button" class="btn-sec small" id="nowyes">Oui, toujours</button><button type="button" class="btn-sec small" id="nowpick">J'ai changé de chapitre</button></div></div>`
       : `<span class="small now-lab">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span><button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
@@ -570,10 +593,10 @@ function screenHome() {
     ${statsCard()}${banner}
     <div class="card stack sess-card">
       <div class="seg sess-seg" role="tablist"><button type="button" data-m="classe" aria-pressed="${mode === "classe"}">🎒 En classe</button><button type="button" data-m="libre" aria-pressed="${mode === "libre"}">🧭 Libre</button></div>
-      <p class="small muted sess-sub">${mode === "classe" ? "Suit ton chapitre en classe, avec révisions." : "Tous les sujets, à ton rythme."}</p>
-      ${mode === "classe" ? `<div class="sess-fmt"><span class="sess-fmt-t"><b class="fmt-lab">${FORMATS[fmt].label}</b><span class="small muted fmt-txt">${FORMATS[fmt].text}${done ? " · séance faite ✓" : ""}</span></span><button type="button" class="btn-sec small" id="other" aria-label="Changer de format">🔁<span class="chg-t"> Changer</span></button></div>
+      <div class="small muted sess-sub sess-subs"><span class="${mode === "classe" ? "on" : ""}">Suit le chapitre que tu travailles en classe, avec des révisions.</span><span class="${mode === "libre" ? "on" : ""}">Tous les sujets de ton année, à ton rythme.</span></div>
+      ${mode === "classe" ? `<div class="sess-fmt"><span class="sess-fmt-t"><b class="fmt-lab">${FORMATS[fmt].label}</b><span class="small muted fmt-txt">${FORMATS[fmt].text}${doneLab ? " · séance faite ✓" : ""}</span></span><button type="button" class="btn-sec small" id="other" aria-label="Changer de format">🔁<span class="chg-t"> Changer</span></button></div>
         <div class="now-line">${nowLine}</div>` : ""}
-      <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${done ? "Encore une séance" : mode === "classe" ? "Ma séance du jour" : "Mon défi du jour"}</button>
+      <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${paused ? "Nouvelle séance" : done ? "Encore une séance" : mode === "classe" ? "Ma séance du jour" : "Mon défi du jour"}</button>
     </div>
     <div class="doors">
       ${door("prob", svgI(TI.prob), "Problème", "", dots.prob ? "!" : "")}
@@ -596,6 +619,8 @@ function screenHome() {
   const byId = (x) => document.getElementById(x), on = (x, f) => { if (byId(x)) byId(x).onclick = f; };
   on("settings", screenSettings);
   on("eloband", screenGrades);
+  on("elohok", () => { state.eloSeen = true; save(); screenHome(); });
+  on("elohmore", screenGrades);
   on("go", startSession);
   on("freego", startFree);
   // Changer de format (21.11, « l'écran saute ») : on ne remplace que le titre et le texte de l'encadré, sans redessiner l'accueil.
@@ -699,7 +724,7 @@ function returnCard() {
 }
 function screenSettings() {
   const A = a11yOf(state);
-  h(`${brand}<h2>Réglages</h2><div class="stack">
+  h(`${brand}${backTop()}<h2>Réglages</h2><div class="stack">
   <div class="card flat stack"><h3>Affichage</h3>
     <span class="small muted" id="fs-l">Taille du texte</span><div class="seg" id="fs" role="group" aria-labelledby="fs-l">${A11Y_FS.map(([v, l]) => `<button aria-pressed="${A.fs === v}" data-v="${v}">${l}</button>`).join("")}</div>
     <span class="small muted" id="font-l">Police</span><div class="seg" id="font" role="group" aria-labelledby="font-l"><button aria-pressed="${!A.font}" data-v="0">Habituelle</button><button aria-pressed="${!!A.font}" data-v="1">Plus lisible</button></div>
@@ -711,7 +736,7 @@ function screenSettings() {
   ${isAuthor() ? '<button class="btn-primary" id="stats">📊 Statistiques d\'usage (auteur)</button>' : ""}
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div>
   <button class="btn-primary" id="back">Retour</button></div>`);
-  document.getElementById("back").onclick = screenHome;
+  document.getElementById("back").onclick = screenHome; document.getElementById("backtop").onclick = screenHome;
   bindInstall(screenSettings);
   const setA = (k, v) => { state.a11y = { ...a11yOf(state), [k]: v }; save(); uiApply(); screenSettings(); const f = document.querySelector(`#${k} button[data-v="${v}"]`); if (f) f.focus(); };
   app.querySelectorAll("#fs button").forEach((b) => (b.onclick = () => setA("fs", +b.dataset.v)));
@@ -768,7 +793,7 @@ function screenComps() {
   }).join("");
   const sc = compStats(cat.map((c) => c.id));
   Badges.check(state); state.badgesNew = []; save();
-  h(`${brand}<h2>Mes <span class="mark">compétences</span></h2>
+  h(`${brand}${backTop()}<h2>Mes <span class="mark">compétences</span></h2>
   <p class="muted">Chaque compétence reçoit une note de 1 à 6 dès que tu y as répondu 3 fois. La note suit tes 8 dernières réponses : elle monte quand tu progresses.</p>
   ${badgesSection()}
   ${co ? `<div class="card flat"><div class="spread"><span>Cycle 3 · jusqu'en ${state.profile.grade}e</span><b>${sc.tested} / ${sc.total} notées${sc.avg !== null ? " · moyenne " + String(Math.round(sc.avg * 10) / 10).replace(".", ",") : ""}</b></div></div>
@@ -788,7 +813,7 @@ function screenComps() {
       ctest: { label: b.dataset.label, cid, before: compNote((state.comps || {})[cid]) } };
     nextQuestion();
   }));
-  document.getElementById("back").onclick = screenHome;
+  document.getElementById("back").onclick = screenHome; document.getElementById("backtop").onclick = screenHome;
 }
 
 // ---------------- Badges ----------------
@@ -1072,7 +1097,7 @@ function screenNow() {
   <p class="muted">Choisis 1 à 5 notions que tu travailles en classe en ce moment. Tes séances s'y concentreront, avec le rappel de cours la première fois.</p>
   ${groups.map(([th, l]) => `<div class="card flat"><h3>${Engine.themeLabel(th, state.profile)}</h3><div class="checks">${l.map(box).join("")}</div></div>`).join("")}
   <p class="small muted" id="nerr"></p>
-  <button class="btn-primary btn-big" id="save">C'est ça</button>
+  <button class="btn-primary btn-big save-sticky" id="save">C'est ça</button>
   <div class="row"><button class="btn-ghost" id="back">Annuler</button>${chosen.size ? '<button class="btn-ghost" id="none">Rien de particulier en ce moment</button>' : ""}</div>`);
   const inputs = [...app.querySelectorAll(".check input")];
   inputs.forEach((i) => (i.onchange = () => {
@@ -1115,7 +1140,7 @@ function screenPrep() {
   ${Object.keys(groups).length ? "" : '<div class="card flat"><p class="muted">Rien à cocher : tout ce qui te concerne vient des années précédentes.</p></div>'}
   ${Object.entries(groups).map(([th, list]) => `<div class="card flat"><h3>${Engine.themeLabel(th, state.profile)}</h3><div class="checks">${list.map((c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${c.label}</span></label>`).join("")}</div></div>`).join("")}
   <p class="small muted" id="perr"></p>
-  <button class="btn-primary btn-big" id="save">Enregistrer mon test</button>
+  <button class="btn-primary btn-big save-sticky" id="save">Enregistrer mon test</button>
   <div class="row"><button class="btn-ghost" id="back">Annuler</button>${chosen.size ? '<button class="btn-ghost" id="del">Supprimer ce test</button>' : ""}</div>`);
   document.getElementById("save").onclick = () => {
     const ids = [...app.querySelectorAll(".check input:checked")].map((i) => i.value), dt = document.getElementById("pdate").value;
@@ -1403,11 +1428,12 @@ function nextQuestion(redo) {
   // application, pente trop raide) : la première question sur cette notion est toujours de niveau 1.
   const easy = !redo && !session.weekly && !forceProb && session.lessonShown === id && !session.eased;
   if (easy) session.eased = true;
+  /* 24.11 (ergonomie) : le type de question n'est rappelé que s'il change dans la séance (« Révision · 1 sur 4 · Révision » doublait le titre). */
   const q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : easy ? 1 : level);
   q.kind = kind;
   renderQuestion(q, {
     track: sessionInfo().fmt || "seance", redo: !!redo,
-    eyebrow: ((s) => s + (session.plan.length > 1 && !session.weekly ? `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((Math.min(session.i, session.plan.length) / session.plan.length) * 100)}%"></i></span>` : ""))((session.carnet ? "Carnet d'erreurs · " + (session.i + 1) + " sur " + session.plan.length : session.free ? "Mon défi du jour · " + (session.i + 1) + " sur " + session.plan.length : session.weekly ? "🔍 Problème de la semaine" : session.ctest ? "Me tester · " + session.ctest.label + " · " + (session.i + 1) + " sur " + session.plan.length : session.prep ? "Révision du test · " + (session.i + 1) + " sur " + session.plan.length : session.plan.length === 1 ? (session.fmt ? FORMATS[session.fmt].label : "Question du jour") : (session.fmt ? FORMATS[session.fmt].label + " · " : "") + (session.i + 1) + " sur " + session.plan.length) + (kind && KIND_LABEL[kind] ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo ? " · nouvelles valeurs" : "")),
+    eyebrow: ((s) => s + (session.plan.length > 1 && !session.weekly ? `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((Math.min(session.i, session.plan.length) / session.plan.length) * 100)}%"></i></span>` : ""))((session.carnet ? "Carnet d'erreurs · " + (session.i + 1) + " sur " + session.plan.length : session.free ? "Mon défi du jour · " + (session.i + 1) + " sur " + session.plan.length : session.weekly ? "🔍 Problème de la semaine" : session.ctest ? "Me tester · " + session.ctest.label + " · " + (session.i + 1) + " sur " + session.plan.length : session.prep ? "Révision du test · " + (session.i + 1) + " sur " + session.plan.length : session.plan.length === 1 ? (session.fmt ? FORMATS[session.fmt].label : "Question du jour") : (session.fmt ? FORMATS[session.fmt].label + " · " : "") + (session.i + 1) + " sur " + session.plan.length) + (kind && KIND_LABEL[kind] && !(session.fmt && FORMATS[session.fmt] && FORMATS[session.fmt].slots.every((x) => x.replace(/\d+$/, "") === kind)) ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo ? " · nouvelles valeurs" : "")),
     onDone: (res) => {
       const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
       // Carnet d'erreurs (20.11) : séance « carnet » → progression ; ailleurs, une question ratée y entre.
@@ -1518,6 +1544,62 @@ function bindKeypad(getInput, after) {
   }));
 }
 
+// Indice après une erreur (24.11, audit ergonomie) : sur un téléphone, il s'affichait sous le clavier et les boutons,
+// hors de l'écran ; l'élève ne voyait pas « Pas encore. Réessaie ! ». On défile juste assez pour le montrer.
+function fbInView(el, ms = 60) {
+  setTimeout(() => { if (!el || !el.isConnected) return; const r = el.getBoundingClientRect(); if (r.height && r.bottom > innerHeight) el.scrollIntoView({ behavior: "smooth", block: "nearest" }); }, ms);
+}
+// Champ de réponse toujours visible au clavier de l'app (24.11, revue d'un testeur, écran 360 × 640) : au toucher du champ,
+// on montre d'un coup le champ, le clavier et « Valider » s'ils tiennent dans l'écran ; à chaque touche, le champ revient
+// à l'écran s'il en était sorti (défilement pendant la saisie).
+function ansInView(inp, all) {
+  if (!inp || !inp.isConnected) return;
+  const vh = window.visualViewport ? visualViewport.height : innerHeight, r = inp.getBoundingClientRect();
+  if (all && imOf(inp) === "none") {
+    const box = inp.closest(".answer"), b = box ? box.getBoundingClientRect() : r;
+    if (b.bottom > vh - 4 && b.bottom - r.top < vh - 16) { window.scrollBy({ top: b.bottom - vh + 12, behavior: "smooth" }); return; }
+  }
+  const rc = document.getElementById("qrecap"), top = rc && !rc.hidden ? rc.getBoundingClientRect().bottom : 0; /* rappel d'énoncé collé en haut */
+  if (r.top < top + 4) window.scrollBy({ top: r.top - top - 12, behavior: "smooth" });
+  else if (r.bottom > vh - 4) inp.scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+const imOf = (inp) => inp.getAttribute("inputmode") || "text";
+// Clavier du téléphone ouvert (⌨, ou appareil sans clavier de l'app) : la fenêtre visible rétrécit ; si le champ de
+// réponse passe dessous, on le recentre (24.11, revue d'un testeur, écran 360 × 640).
+if (window.visualViewport) visualViewport.addEventListener("resize", () => {
+  const a = document.activeElement;
+  if (!a || !a.matches || !a.matches("input.ans, input#ans, textarea")) return;
+  const r = a.getBoundingClientRect(), vh = visualViewport.height;
+  if (r.bottom > vh - 8 || r.top < 0) a.scrollIntoView({ block: "center", behavior: "smooth" });
+});
+// Corrigé progressif (24.11) : étapes de splitSol dévoilées une à une sous un bouton « Voir l'étape suivante ».
+// onStep(k) est appelé avant d'afficher l'étape k (0 = affichée d'office) ; onEnd quand tout est affiché.
+function solStepper(box, btn, steps, onStep, onEnd) {
+  let k = 0;
+  const show = () => {
+    if (onStep) onStep(k);
+    box.insertAdjacentHTML("beforeend", `<div class="gstep"><span class="small muted">Étape ${k + 1} sur ${steps.length}</span><div class="sol">${steps[k]}</div></div>`);
+    typeset(box); k++;
+    if (k < steps.length) { btn.textContent = "Voir l'étape suivante (" + (k + 1) + " sur " + steps.length + ")"; if (k > 1) fbInView(btn, 120); }
+    else { btn.remove(); if (onEnd) onEnd(); }
+  };
+  btn.onclick = show; show(); btn.focus({ preventScroll: true });
+}
+// Problème en plusieurs parties (24.11, revue d'un testeur) : quand l'énoncé est sorti de l'écran (en bas, parties b, c…),
+// un rappel compact sur deux lignes reste collé en haut ; le toucher le déplie (le toucher encore le replie).
+function bindRecap() {
+  const rc = document.getElementById("qrecap"), qt = app.querySelector(".qtext"), card = app.querySelector(".card");
+  if (!rc || !qt || !card) return;
+  const upd = () => {
+    if (!rc.isConnected) { removeEventListener("scroll", onScroll); return; }
+    const on = qt.getBoundingClientRect().bottom < 0 && card.getBoundingClientRect().bottom > 90;
+    if (rc.hidden === !on) return;
+    rc.hidden = !on; if (!on) { rc.classList.remove("open"); rc.setAttribute("aria-expanded", "false"); }
+  };
+  const onScroll = () => upd(); /* deux mesures par défilement : léger, et sûr même sans images (rAF) */
+  addEventListener("scroll", onScroll, { passive: true });
+  rc.onclick = () => { const o = !rc.classList.contains("open"); rc.classList.toggle("open", o); rc.setAttribute("aria-expanded", String(o)); };
+}
 // Problème en plusieurs parties : 3 essais, indices progressifs (outil, puis calcul), score partiel.
 function renderProblem(q, opt) {
   const notion = NOTIONS.find((n) => n.id === q.id);
@@ -1533,7 +1615,9 @@ function renderProblem(q, opt) {
     <input id="p${i}" class="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…"><div class="preview" id="pv${i}"></div></div>`).join("")}
   ${keypadHtml(q.parts[0].spec)}
   <div class="actions"><button class="btn-primary" id="check">Valider</button><button class="btn-sec" id="idk">Voir le corrigé</button></div>
-  <div id="fb"></div></div>`);
+  <div id="fb"></div></div>
+  <button type="button" class="qrecap" id="qrecap" hidden aria-expanded="false"><span class="qr-tag">📌 Énoncé</span><span class="qr-txt">${boldData(q.q)}</span></button>`);
+  bindRecap();
   const S = opt.track ? sigOpen({ ev: "q", code, d: q.d, kind: q.kind || "", fmt: opt.track, redo: opt.redo ? 1 : 0 }) : null;
   sigWatchLesson(S); pageQ = code; bindScratch(S);
   const fb = document.getElementById("fb");
@@ -1555,7 +1639,7 @@ function renderProblem(q, opt) {
   const placeKp = (inp) => { const kp = document.getElementById("kp"), part = inp.closest(".part"); if (!kp || !part || kp.previousElementSibling === part) return; part.after(kp); setTimeout(() => kp.scrollIntoView({ behavior: "smooth", block: "nearest" }), 40); };
   active = document.getElementById("p0");
   placeKp(active);
-  const bindKp = () => bindKeypad(() => active, (inp) => previewOf(inp, document.getElementById("pv" + inp.id.slice(1)), q.parts[+inp.id.slice(1)].spec));
+  const bindKp = () => bindKeypad(() => active, (inp) => { previewOf(inp, document.getElementById("pv" + inp.id.slice(1)), q.parts[+inp.id.slice(1)].spec); ansInView(inp); });
   bindKp();
   const end = (giveUp) => {
     finished = true;
@@ -1568,7 +1652,8 @@ function renderProblem(q, opt) {
     buzz(frac === 1);
     const delta = opt.onDone({ solved: frac === 1, tries, partial: score });
     const d = typeof delta === "number" && delta !== 0 ? `<span class="delta ${delta > 0 ? "up" : "down"}">Mathélo ${delta > 0 ? "+" : ""}${delta}</span>` : "";
-    fb.innerHTML = `<div class="fb ${frac === 1 ? "ok" : "bad"} pop"><div class="spread"><b>${frac === 1 ? (tries === 1 ? "Problème résolu du premier coup !" : "Problème résolu.") : ok.filter(Boolean).length + " partie(s) juste(s) sur " + q.parts.length + "."}</b>${d}</div><div class="sol">${q.sol}</div></div>
+    const pSteps = frac < 1 && splitSol(q.sol); /* 24.11 : corrigé progressif aussi pour les problèmes */
+    fb.innerHTML = `<div class="fb ${frac === 1 ? "ok" : "bad"} pop"><div class="spread"><b>${frac === 1 ? (tries === 1 ? "Problème résolu du premier coup !" : "Problème résolu.") : ok.filter(Boolean).length + " partie(s) juste(s) sur " + q.parts.length + "."}</b>${d}</div>${pSteps ? `<div id="ssteps" class="stack"></div><button class="btn-primary" id="solstep">Voir l'étape suivante</button><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : `<div class="sol">${q.sol}</div>`}</div>
       <div class="vote"><span>Ce problème était… <button data-v="up" aria-label="Bon problème">👍</button> <button data-v="down" aria-label="Problème à revoir">👎</button></span><span class="code">${code}</span></div>${commentBox()}
       <div class="actions">${frac === 1 ? "" : '<button class="btn-sec" id="redo">Refaire avec d\'autres valeurs</button>'}<button class="btn-primary" id="nx">Continuer</button></div>`;
     typeset(fb);
@@ -1576,6 +1661,7 @@ function renderProblem(q, opt) {
     bindComment(fb, code);
     document.getElementById("nx").onclick = () => opt.onNext(false);
     const r = document.getElementById("redo"); if (r) r.onclick = () => { sigAide(S, "x"); opt.onNext(true); };
+    if (pSteps) { const sf = fb.querySelector("details.solfull"); if (sf) sf.addEventListener("toggle", () => { if (sf.open) sigAide(S, "s"); }); solStepper(document.getElementById("ssteps"), document.getElementById("solstep"), pSteps, (k) => { if (k > 0) sigAide(S, "e"); }, () => { const sf2 = fb.querySelector("details.solfull"); if (sf2) sf2.remove(); document.getElementById("nx").focus({ preventScroll: true }); }); }
   };
   const check = () => {
     if (finished) return;
@@ -1589,7 +1675,7 @@ function renderProblem(q, opt) {
       else ok[i] = r.status === "correct";
       if (S && !S.rep1 && !ok[i] && r.status !== "invalid" && r.status !== "form") S.rep1 = "p" + (i + 1) + ":" + sigRep(v);
     });
-    if (invalid) { if (S) S.illis = (S.illis || 0) + 1; fb.innerHTML = `<div class="fb hint pop"><b>Je n'arrive pas à lire une réponse</b><span>${esc(invalid)}</span></div>`; return; }
+    if (invalid) { if (S) S.illis = (S.illis || 0) + 1; fb.innerHTML = `<div class="fb hint pop"><b>Je n'arrive pas à lire une réponse</b><span>${esc(invalid)}</span></div>`; fbInView(fb); return; }
     tries++;
     q.parts.forEach((p, i) => {
       document.getElementById("mk" + i).textContent = ok[i] ? "✓" : "✗";
@@ -1597,7 +1683,7 @@ function renderProblem(q, opt) {
     });
     if (ok.every(Boolean) || tries >= 3) return end(false);
     const nx = ok.findIndex((v) => !v); if (nx >= 0) { active = document.getElementById("p" + nx); placeKp(active); }
-    fb.innerHTML = `<div class="fb hint pop"><b>${ok.some(Boolean) ? "En partie juste. Continue !" : "Pas encore."}</b><span><b>Indice ${tries}</b> · ${escT(q.hints[tries - 1])}</span></div>`;
+    fb.innerHTML = `<div class="fb hint pop"><b>${ok.some(Boolean) ? "En partie juste. Continue !" : "Pas encore."}</b><span><b>Indice ${tries}</b> · ${escT(q.hints[tries - 1])}</span></div>`; fbInView(fb, 120);
   };
   document.getElementById("check").onclick = check;
   document.getElementById("idk").onclick = () => { if (!finished) end(true); };
@@ -1644,8 +1730,9 @@ function renderQuestion(q, opt) {
     const k = b.dataset.k;
     if (k === "⌨") { inputMode = inputMode === "none" ? "text" : "none"; inp.setAttribute("inputmode", inputMode); inp.blur(); inp.focus(); return; }
     typeKey(inp, k);
-    showPreview();
+    showPreview(); ansInView(inp);
   }));
+  if (!window.matchMedia("(pointer: fine)").matches) inp.addEventListener("focus", () => ansInView(inp, true));
   const stopBtn = document.getElementById("stop");
   if (stopBtn) stopBtn.onclick = screenSummary;
 
@@ -1677,7 +1764,7 @@ function renderQuestion(q, opt) {
     const solSteps = !solved && !guided && splitSol(q.sol);
     fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><div class="spread"><b>${solved ? (tries === 1 ? pick(PRAISE) : "Juste au deuxième essai.") : dontKnow ? "Voici la méthode." : "Pas cette fois."}</b>${d}</div>
       ${!solved && lastDiag ? `<div class="diag">🔎 ${esc(lastDiag)}</div>` : ""}
-      ${guided ? `<button class="btn-primary" id="guide">🪜 On le fait ensemble, pas à pas</button><div id="gsteps" class="stack"></div><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : solSteps ? `<button class="btn-primary" id="solstep">🪜 Voir la correction étape par étape</button><div id="ssteps" class="stack"></div><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : `<div class="sol">${q.sol}</div>`}</div>
+      ${guided ? `<button class="btn-primary" id="guide">🪜 On le fait ensemble, pas à pas</button><div id="gsteps" class="stack"></div><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : solSteps ? `<div id="ssteps" class="stack"></div><button class="btn-primary" id="solstep">Voir l'étape suivante</button><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : `<div class="sol">${q.sol}</div>`}</div>
       <div class="vote"><span>Cette question était… <button data-v="up" aria-label="Bonne question">👍</button> <button data-v="down" aria-label="Question à revoir">👎</button></span><span class="code" title="Code de la question">${code}</span></div>${commentBox()}
       <div class="actions">${solved ? "" : `<button id="redo" class="${!guided && !solSteps ? "btn-primary" : "btn-sec"}">${q.d > 1 && q.d < 4 ? "💪 Une plus facile pour repartir" : "Refaire avec d'autres valeurs"}</button>`}<button class="${solved ? "btn-primary" : ""}" id="nx">Continuer</button></div>`;
     typeset(fb);
@@ -1704,15 +1791,10 @@ function renderQuestion(q, opt) {
     if (gb) { gb.onclick = () => { sigAide(S, "g"); gb.remove(); fold(document.getElementById("gsteps")); runGuide(q, document.getElementById("gsteps"), () => { const rd = document.getElementById("redo"); if (rd) { rd.classList.add("btn-primary"); rd.textContent = q.d > 1 && q.d < 4 ? "À toi : la même, un cran plus facile" : "À toi : une question du même type"; rd.focus(); } }); }; gb.focus(); }
     else if (solSteps) {
       const sb = document.getElementById("solstep"), box = document.getElementById("ssteps");
-      let k = 0, folded = false;
-      const more = () => {
-        if (!folded) { folded = true; fold(box); }
-        box.insertAdjacentHTML("beforeend", `<div class="gstep"><span class="small muted">Étape ${k + 1} sur ${solSteps.length}</span><div class="sol">${solSteps[k]}</div></div>`);
-        typeset(box); k++; sigAide(S, "e");
-        if (k < solSteps.length) { sb.textContent = "Étape suivante (essaie d'abord de la trouver)"; sb.focus(); }
-        else { sb.remove(); fb.querySelector("details.solfull").remove(); const rd = document.getElementById("redo"); if (rd) { rd.classList.add("btn-primary"); rd.textContent = q.d > 1 && q.d < 4 ? "À toi : la même, un cran plus facile" : "À toi : une question du même type"; rd.focus(); } }
-      };
-      sb.onclick = more; sb.focus();
+      /* 24.11 (revue d'un testeur) : corrigé progressif. La 1re étape s'affiche tout de suite, sans rien replier ;
+         « Voir l'étape suivante » dévoile les autres (l'énoncé remonte alors au-dessus des étapes). */
+      let folded = false;
+      solStepper(box, sb, solSteps, (k) => { if (k > 0 && !folded) { folded = true; fold(box); } if (k > 0) sigAide(S, "e"); }, () => { const sf2 = fb.querySelector("details.solfull"); if (sf2) sf2.remove(); const rd = document.getElementById("redo"); if (rd) { rd.classList.add("btn-primary"); rd.textContent = q.d > 1 && q.d < 4 ? "À toi : la même, un cran plus facile" : "À toi : une question du même type"; rd.focus(); } });
     }
     else document.getElementById("nx").focus();
   };
@@ -1726,7 +1808,7 @@ function renderQuestion(q, opt) {
     if (r.status === "invalid" || r.status === "form") {
       if (S) S.illis = (S.illis || 0) + 1;
       fb.innerHTML = `<div class="fb hint pop"><b>${r.status === "form" ? "Presque" : "Je n'arrive pas à lire ta réponse"}</b><span>${esc(r.message || "")}</span></div>`;
-      return;
+      fbInView(fb); return;
     }
     tries++;
     const ez = document.getElementById("easy"); if (ez) ez.remove();
@@ -1738,7 +1820,7 @@ function renderQuestion(q, opt) {
     buzz(false);
     fb.innerHTML = `<div class="fb hint pop"><b>${r.status === "close" ? "Presque !" : "Pas encore. Réessaie !"}</b><span>${escT(diag || r.message || "")}</span><span><b>Indice</b> · ${escT(q.hint)}</span></div>`;
     typeset(fb);
-    inp.select();
+    inp.select(); fbInView(fb);
   };
   document.getElementById("check").onclick = check;
   document.getElementById("idk").onclick = () => { if (!finished) end(false, true); };
@@ -1954,14 +2036,14 @@ function screenCurious(q, back, from = "") {
   if (state) { state.curSeen = [...(state.curSeen || []).filter((k) => k !== q.key), q.key].slice(-20); save(); }
   const F = CUR_FAM[q.fam] || { label: "Question curieuse", ic: "🤔" };
   const spec = { kind: "value", value: q.calc.value, ...(q.calc.round ? { round: q.calc.round } : {}) }; // calcul tapé accepté (commentaire du 21.11), même au CO
-  h(`${brand}<div class="eyebrow">${F.ic} Question curieuse · ${F.label}</div>
+  h(`${brand}${backTop("cback0")}<div class="eyebrow">${F.ic} Question curieuse · ${F.label}</div>
   <div class="card pop stack"><h2>${q.titre}</h2><div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
     <div class="act-step"><div class="act-h"><span class="act-n">1</span> Ton pari</div><p>${q.bet.q}</p>
       <div class="seg" id="cbet">${q.bet.choices.map((c, i) => `<button type="button" data-i="${i}">${c}</button>`).join("")}</div><div id="cbfb"></div></div>
     <div class="act-step" id="cs2" hidden><div class="act-h"><span class="act-n">2</span> On vérifie</div><p>${q.calc.label}</p>
       <div class="answer"><input class="ans" id="cans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Ta réponse">
       <div class="preview" id="cprev"></div>${keypadHtml(spec)}
-      <div class="actions"><button class="btn-primary" id="cok">Vérifier</button><button class="btn-ghost" id="cidk">Voir la réponse</button></div></div><div id="cfb"></div></div>
+      <div class="actions"><button class="btn-primary" id="cok">Vérifier</button><button class="btn-sec" id="cidk">Voir la réponse</button></div></div><div id="cfb"></div></div>
     <div class="act-step" id="cs3" hidden><div class="act-h"><span class="act-n">3</span> Le fin mot</div><div class="sol">${q.reveal}</div>
       <div class="rule"><b>🧠 Ici, tu as utilisé</b> ${q.outil}</div><p class="small muted code cur-code">${q.code}</p></div>
   </div>
@@ -2012,7 +2094,7 @@ function screenCurious(q, back, from = "") {
   $("cok").onclick = go; inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
   $("cidk").onclick = () => finish(false, true);
   $("cnext").onclick = () => screenCurious(Curieux.pick(state), back, from);
-  $("cback").onclick = back;
+  $("cback").onclick = back; $("cback0").onclick = back;
 }
 
 // ---------------- Histoire des maths (22.11) ----------------
@@ -2020,7 +2102,7 @@ function screenCurious(q, back, from = "") {
 function screenHistory(k, back) {
   const H = HISTOIRE[k], E = H.ex(), spec = { kind: "value", value: E.value, final: true };
   Histoire.seen(state, k); save();
-  h(`${brand}<div class="eyebrow">📜 Histoire des maths · ${H.t}</div>
+  h(`${brand}${backTop("hback0")}<div class="eyebrow">📜 Histoire des maths · ${H.t}</div>
   <div class="card pop stack hist-story"><h2>${H.titre}</h2><div class="figwrap">${H.fig()}</div><p>${H.txt}</p>
     <div class="act-step"><div class="act-h"><span class="act-n">✍️</span> À toi</div><div class="qtext">${E.q}</div>
       <div class="answer"><input class="ans" id="hans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Ta réponse">
@@ -2052,7 +2134,7 @@ function screenHistory(k, back) {
   $("hok").onclick = go; inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
   $("hidk").onclick = () => finish(false);
   $("hnext").onclick = () => screenHistory(Histoire.other(k), back);
-  $("hback").onclick = back;
+  $("hback").onclick = back; $("hback0").onclick = back;
   window.scrollTo(0, 0);
 }
 
@@ -2153,6 +2235,14 @@ function summaryByNotion() {
   const line = (ic, t, arr, note) => arr.length ? `<div class="sum-line"><span>${ic}</span><div><b>${t}</b><div class="small">${arr.map(lab).join(" · ")}</div>${note ? `<div class="small muted">${note}</div>` : ""}</div></div>` : "";
   return `<div class="card flat stack sum-notions">${line("✅", ok.length > 1 ? "Réussies" : "Réussie", ok)}${line("📈", "En progrès", mid, "Une partie juste : encore une ou deux séances.")}${line("🔁", ko.length > 1 ? "Reviendront bientôt" : "Reviendra bientôt", ko, (state.carnet || []).length ? "Rangées dans ton carnet d'erreurs, à refaire quand tu veux." : "L'app te les reproposera dans les prochains jours.")}</div>`;
 }
+// Objectif concret pour la prochaine fois (24.11, revue d'un testeur) : points jusqu'au grade suivant, notion à consolider.
+function sumGoal(g) {
+  /* Notion à consolider : ratée dans cette séance, sinon la plus récente du carnet d'erreurs pas encore effacée. */
+  const r = session.res || {}, weak = [...(session.ids || [])].find((id) => r[id] && r[id].ok < r[id].n)
+    || ((state.carnet || []).filter((x) => !x.ok).slice(-1)[0] || {}).id;
+  const parts = [g && g.next ? `encore <b>${g.next.at - state.elo.r} points</b> avant ${g.next.ic} ${g.next.name}` : "", weak ? `consolider <b>${esc(nLab(weak))}</b>` : ""].filter(Boolean);
+  return parts.length ? `<div class="small goal">🎯 Objectif pour demain : ${parts.join(" · ")}</div>` : "";
+}
 function screenSummary() {
   if (state) { delete state.resume; save(); }
   if (session && session.weekly && state) { state.weeklyDone = weekKey(); save(); }
@@ -2166,7 +2256,7 @@ function screenSummary() {
   const newGrade = g1.i > g0.i ? `<div class="card stack grade-up"><div class="eyebrow">Nouveau grade !</div><div class="ic-row"><button type="button" class="ic grade-ic grade-open" data-g="${g1.name}" aria-label="Voir la carte du grade ${g1.name}">${g1.ic}</button><div><h3>Tu es maintenant ${g1.name}</h3><div class="small muted">${g1.next ? "Prochain grade : " + g1.next.ic + " " + g1.next.name + ", à " + g1.next.at + "." : "Le plus haut grade : bravo !"}</div></div></div></div>` : "";
   // 22.11 : titre cohérent avec le Mathélo (« Excellente séance » alors que le Mathélo baissait).
   h(`${brand}<h2>${sc >= n * 0.8 && d >= 0 ? "Excellente séance !" : sc >= n * 0.5 ? "Bonne séance." : "Séance faite : c'est en pratiquant qu'on progresse."}</h2>${d < 0 && sc >= n * 0.5 ? `<p class="small muted">Mathélo ${d} : une erreur sur une question de ton niveau coûte plus que ce que rapporte une réussite sur une question facile.</p>` : ""}
-  <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span>${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ta série passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${FORMATS[Engine.tomorrowFormat(state)].label}</b></div></div></div>
+  <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span>${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ta série passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${FORMATS[Engine.tomorrowFormat(state)].label}</b></div>${sumGoal(g1)}</div></div>
   ${summaryByNotion()}
   ${weekLine()}
   <div class="card stack"><div class="spread"><span>Score</span><b>${String(sc).replace(".", ",")} / ${n}</b></div>
