@@ -194,4 +194,16 @@
     valint: ["Une ou deux valeurs", "Trinôme, sommes, mise en évidence", "Degré 3, Δ < 0, fraction étagée"],
     eqparam: ["Aucune solution, paramètre par une solution", "Δ = 0, infinité, degré 2", "Infinité, écart des solutions, seuil"],
   });
+  /* 25.11 (audit de niveau MP 1re–2e, tools/niveau_mp12.md) : notions du PEE de MP 1re qui n'étaient pas dans l'année
+     (sans champ MP, donc traitées comme des notions antérieures du CO) alors que le PEE les demande et que les épreuves CFPT
+     les évaluent : hiérarchie des opérations (S1.CN.06), écritures fractionnaire, décimale et en pourcentage (S1.CN.04),
+     notation scientifique et calcul en notation scientifique (S1.CN.04, Test S1.1 Q6–Q8), propriétés des racines
+     (S1.CN.14, Test S1.1 Q9 « √12 + 7√3 − 2√27 »), monômes (S1.CA.01–02, Récit 2 ex. 1–2). Rang et chapitre MP ajoutés. */
+  [["fracconv", 1.5, "CN"], ["sci", 1.6, "CN"], ["prio", 3, "CN"], ["scicalc", 7.5, "CN"], ["racprop", 8.5, "CN"], ["monomes", 10.5, "CA"]].forEach(([id, rk, ch]) => {
+    const n = NOTIONS.find((x) => x.id === id);
+    if (!n || n.MP !== undefined) return;
+    n.MP = [12, "S1"];
+    if (typeof ORDRE !== "undefined" && ORDRE.MP && ORDRE.MP[id] === undefined) ORDRE.MP[id] = rk;
+    if (typeof ORDRE_THEME !== "undefined" && ORDRE_THEME.MP && !ORDRE_THEME.MP[id]) ORDRE_THEME.MP[id] = ch;
+  });
 })();

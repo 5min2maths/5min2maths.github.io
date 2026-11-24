@@ -312,21 +312,48 @@
   "plan": "4.PS.01b (retirée de la 4e : niveau CO)",
   "etalon": "tools/niveau_34c.md § 2, E-4.4-5",
   "audit": "24.11.2026",
-  "verdict": "hors programme"
+  "verdict": "hors programme",
+  "par_classe": {
+   "MP 2e": {
+    "classe": "MP 2e",
+    "plan": "S4.AD.05, S4.AD.07 : mode, médiane, moyenne, écart-type",
+    "etalon": "tools/niveau_mp12.md § 2, E-AD-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "quartiles": {
   "classe": "4e Collège",
   "plan": "4.PS.01c (retirée de la 4e : niveau CO)",
   "etalon": "tools/niveau_34c.md § 2, E-4.4-5",
   "audit": "24.11.2026",
-  "verdict": "hors programme"
+  "verdict": "hors programme",
+  "par_classe": {
+   "MP 2e": {
+    "classe": "MP 2e",
+    "plan": "S4.AD.06, S4.AD.08 : quartiles, boîte",
+    "etalon": "tools/niveau_mp12.md § 2, E-AD-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "arith": {
   "classe": "1re Collège",
   "plan": "M1C01 · Ma1 Ch1 : PGDC, PPMC, division euclidienne (consolider le CO)",
   "etalon": "tools/niveau_1c.md E1.1",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CN.09 (*) : PGDC et PPMC",
+    "etalon": "tools/niveau_mp12.md § 2, E-CN-4",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "rel": {
   "classe": "1re Collège",
@@ -341,6 +368,13 @@
     "etalon": "tools/niveau_11.md § 2, E-1-1",
     "audit": "25.11.2026",
     "verdict": "à valider"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CN.05–06 : règle des signes, hiérarchie",
+    "etalon": "tools/niveau_mp12.md § 2, E-CN-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
    }
   }
  },
@@ -355,6 +389,13 @@
     "classe": "11e",
     "plan": "11C01 · 4 opérations dans ℚ",
     "etalon": "tools/niveau_11.md § 2, E-1-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CN.11 : fractions relatives et priorités",
+    "etalon": "tools/niveau_mp12.md § 2, E-CN-1",
     "audit": "25.11.2026",
     "verdict": "remonté"
    }
@@ -380,6 +421,13 @@
     "etalon": "tools/niveau_11.md § 2, E-1-4",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CN.14 : racines carrées",
+    "etalon": "tools/niveau_mp12.md § 2, E-CN-4",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
    }
   }
  },
@@ -403,6 +451,13 @@
     "etalon": "tools/niveau_11.md § 2, E-1-3",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CN.04 : notation scientifique (ajoutée à l'année)",
+    "etalon": "tools/niveau_mp12.md § 2, E-CN-3",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
    }
   }
  },
@@ -417,6 +472,13 @@
     "classe": "11e",
     "plan": "11C01 · propriétés des puissances (LC/LS)",
     "etalon": "tools/niveau_11.md § 2, E-1-2",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CN.12–13 : puissances à exposant entier",
+    "etalon": "tools/niveau_mp12.md § 2, E-CN-3",
     "audit": "25.11.2026",
     "verdict": "remonté"
    }
@@ -435,6 +497,13 @@
     "etalon": "tools/niveau_11.md § 2, E-1-3",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CN.04, S1.CN.13 : calcul en notation scientifique (ajoutée à l'année)",
+    "etalon": "tools/niveau_mp12.md § 2, E-CN-3",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
    }
   }
  },
@@ -451,6 +520,13 @@
     "etalon": "tools/niveau_11.md § 2, E-1-4, E-1-5",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CN.14 : propriétés des racines, simplifier (ajoutée à l'année)",
+    "etalon": "tools/niveau_mp12.md § 2, E-CN-4",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
    }
   }
  },
@@ -459,7 +535,16 @@
   "plan": "M1C01 · Ma1 Ch1 : rendre rationnel le dénominateur",
   "etalon": "tools/niveau_1c.md E1.4",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CN.15 (*) : rendre rationnel un dénominateur",
+    "etalon": "tools/niveau_mp12.md § 2, E-CN-4",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "fracper": {
   "classe": "1re Collège",
@@ -473,7 +558,16 @@
   "plan": "M1C02 · Ma1 Ch2 : ensembles de nombres, ∪, ∩, \\, intervalles",
   "etalon": "tools/niveau_1c.md E2.1–E2.3",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CN.01, S1.CN.03 : ensembles, intervalles",
+    "etalon": "tools/niveau_mp12.md § 2, E-CN-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "tradexpr": {
   "classe": "1re Collège",
@@ -487,7 +581,16 @@
   "plan": "CO 9e (9NO4.02) : prérequis du chapitre Argumenter",
   "etalon": "—",
   "audit": "24.11.2026",
-  "verdict": "hors programme"
+  "verdict": "hors programme",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CN.07 (*) : critères de divisibilité",
+    "etalon": "tools/niveau_mp12.md § 2, E-CN-4",
+    "audit": "25.11.2026",
+    "verdict": "à valider"
+   }
+  }
  },
  "tradalg": {
   "classe": "1re Collège",
@@ -536,7 +639,16 @@
   "plan": "M1C04 · 1.FO.01a–c : domaine de définition",
   "etalon": "tools/niveau_1c.md E4.1",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S2.FO.02 : ensemble de définition",
+    "etalon": "tools/niveau_mp12.md § 2, E-FO-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "tabval": {
   "classe": "1re Collège",
@@ -559,14 +671,32 @@
   "plan": "M1C04 · 1.FO.03a–c : images, préimages",
   "etalon": "tools/niveau_1c.md E4.2",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S2.FO.03 : images et préimages",
+    "etalon": "tools/niveau_mp12.md § 2, E-FO-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "lectgraph": {
   "classe": "1re Collège",
   "plan": "M1C04 · 1.FO.04a–d : lecture graphique",
   "etalon": "tools/niveau_1c.md E4.2",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S2.FO.04–05 : lecture graphique",
+    "etalon": "tools/niveau_mp12.md § 2, E-FO-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "racinv": {
   "classe": "1re Collège",
@@ -580,7 +710,16 @@
   "plan": "M1C04 · 1.FO.12a : modéliser par une fonction du 1er degré",
   "etalon": "tools/niveau_1c.md E5.3",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 2e": {
+    "classe": "MP 2e",
+    "plan": "S3.FA.05 : modéliser (affine)",
+    "etalon": "tools/niveau_mp12.md § 2, E-FA-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "transf": {
   "classe": "1re Collège",
@@ -609,6 +748,13 @@
     "etalon": "tools/niveau_11.md § 2, E-6-1",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.EQ.01 : équations linéaires (coefficients irrationnels)",
+    "etalon": "tools/niveau_mp12.md § 2, E-EQ-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
    }
   }
  },
@@ -625,6 +771,13 @@
     "etalon": "tools/niveau_11.md § 2, E-6-1",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.EQ.01 : équations à fractions",
+    "etalon": "tools/niveau_mp12.md § 2, E-EQ-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
    }
   }
  },
@@ -633,7 +786,16 @@
   "plan": "M1C05 · 1.AL.04c : équations impossibles, identités",
   "etalon": "tools/niveau_1c.md E5.1",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.EQ.01 : aucune solution, infinité",
+    "etalon": "tools/niveau_mp12.md § 2, E-EQ-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "formule": {
   "classe": "1re Collège",
@@ -648,6 +810,13 @@
     "etalon": "tools/niveau_11.md § 2, E-6-3",
     "audit": "25.11.2026",
     "verdict": "au niveau"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CA.14 : transformer une formule",
+    "etalon": "tools/niveau_mp12.md § 2, E-CA-4",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
    }
   }
  },
@@ -662,6 +831,13 @@
     "classe": "11e",
     "plan": "11C06 · mise en équation",
     "etalon": "tools/niveau_11.md § 2, E-6-2",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.EQ.03 : problèmes du 1er degré",
+    "etalon": "tools/niveau_mp12.md § 2, E-EQ-2",
     "audit": "25.11.2026",
     "verdict": "remonté"
    }
@@ -680,6 +856,13 @@
     "etalon": "tools/niveau_11.md § 2, E-9-1",
     "audit": "25.11.2026",
     "verdict": "au niveau"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S2.SY.01–02 : systèmes 2 × 2",
+    "etalon": "tools/niveau_mp12.md § 2, E-SY-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
    }
   }
  },
@@ -688,14 +871,32 @@
   "plan": "M1C05 · 1.AL.07c : interprétation graphique",
   "etalon": "tools/niveau_1c.md E5.5",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S2.SY.04 : interprétation graphique",
+    "etalon": "tools/niveau_mp12.md § 2, E-SY-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "sys3": {
   "classe": "1re Collège",
   "plan": "M1C05 · 1.AL.07d : systèmes 3×3",
   "etalon": "tools/niveau_1c.md E5.5",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S2.SY.03 : systèmes 3 × 3",
+    "etalon": "tools/niveau_mp12.md § 2, E-SY-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "sysprob": {
   "classe": "1re Collège",
@@ -710,6 +911,13 @@
     "etalon": "tools/niveau_11.md § 2, E-9-2",
     "audit": "25.11.2026",
     "verdict": "au niveau"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S2.SY.05 : problèmes à deux inconnues",
+    "etalon": "tools/niveau_mp12.md § 2, E-SY-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
    }
   }
  },
@@ -726,6 +934,13 @@
     "etalon": "tools/niveau_11.md § 2, E-10-1",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "MP 2e": {
+    "classe": "MP 2e",
+    "plan": "ancien PEE S3 / S3.FA.01–03 : fonctions affines",
+    "etalon": "tools/niveau_mp12.md § 2, E-FA-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
    }
   }
  },
@@ -734,7 +949,16 @@
   "plan": "M1C05 · 1.FO.05d : zéro et signe",
   "etalon": "tools/niveau_1c.md E5.2",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 2e": {
+    "classe": "MP 2e",
+    "plan": "S3.FA.01 : zéro et signe",
+    "etalon": "tools/niveau_mp12.md § 2, E-FA-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "sysineq": {
   "classe": "1re Collège",
@@ -756,6 +980,13 @@
     "etalon": "tools/niveau_11.md § 2, E-5-3",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CA.01, S1.CA.03 : réduire et ordonner",
+    "etalon": "tools/niveau_mp12.md § 2, E-CA-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
    }
   }
  },
@@ -772,6 +1003,13 @@
     "etalon": "tools/niveau_11.md § 2, E-5-3",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CA.01–02 : monômes (ajoutée à l'année)",
+    "etalon": "tools/niveau_mp12.md § 2, E-CA-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
    }
   }
  },
@@ -780,7 +1018,16 @@
   "plan": "M1C06 · 1.AL.01c–d : développer des polynômes",
   "etalon": "tools/niveau_1c.md E6.1",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CA.03–05 : développer et réduire",
+    "etalon": "tools/niveau_mp12.md § 2, E-CA-2",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "parenth": {
   "classe": "1re Collège",
@@ -795,6 +1042,13 @@
     "etalon": "tools/niveau_11.md § 2, E-5-3",
     "audit": "25.11.2026",
     "verdict": "au niveau"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CA.03–04 : parenthèses et crochets",
+    "etalon": "tools/niveau_mp12.md § 2, E-CA-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
    }
   }
  },
@@ -809,6 +1063,13 @@
     "classe": "11e",
     "plan": "11C05 · distributivité double (LC/LS)",
     "etalon": "tools/niveau_11.md § 2, E-5-4",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CA.04 : multiplier des polynômes",
+    "etalon": "tools/niveau_mp12.md § 2, E-CA-1",
     "audit": "25.11.2026",
     "verdict": "remonté"
    }
@@ -827,6 +1088,13 @@
     "etalon": "tools/niveau_11.md § 2, E-5-5",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CA.05 : identités remarquables",
+    "etalon": "tools/niveau_mp12.md § 2, E-CA-2",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
    }
   }
  },
@@ -843,6 +1111,13 @@
     "etalon": "tools/niveau_11.md § 2, E-5-6",
     "audit": "25.11.2026",
     "verdict": "au niveau"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CA.07–08 : mise en évidence, identités",
+    "etalon": "tools/niveau_mp12.md § 2, E-CA-3",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
    }
   }
  },
@@ -851,7 +1126,16 @@
   "plan": "M1C06 · 1.AL.03c–e : factoriser au maximum",
   "etalon": "tools/niveau_1c.md E6.2",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CA.06–09 : factoriser au maximum, groupements",
+    "etalon": "tools/niveau_mp12.md § 2, E-CA-3",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "ineqfrac": {
   "classe": "1re Collège",
@@ -873,6 +1157,13 @@
     "etalon": "tools/niveau_11.md § 2, E-6-4",
     "audit": "25.11.2026",
     "verdict": "au niveau"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.EQ.04 : 2e degré par factorisation",
+    "etalon": "tools/niveau_mp12.md § 2, E-EQ-3",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
    }
   }
  },
@@ -889,6 +1180,13 @@
     "etalon": "tools/niveau_11.md § 2, E-6-4",
     "audit": "25.11.2026",
     "verdict": "au niveau"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.EQ.04 : équations produit nul",
+    "etalon": "tools/niveau_mp12.md § 2, E-EQ-3",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
    }
   }
  },
@@ -905,6 +1203,13 @@
     "etalon": "tools/niveau_11.md § 2, E-6-4",
     "audit": "25.11.2026",
     "verdict": "à valider"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.EQ.05, S1.EQ.08 : formule du discriminant",
+    "etalon": "tools/niveau_mp12.md § 2, E-EQ-3",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
    }
   }
  },
@@ -913,7 +1218,16 @@
   "plan": "M1C07 · 1.AL.05d : factoriser par les zéros",
   "etalon": "tools/niveau_1c.md E6.2",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.EQ.07 (*) : a(x − x₁)(x − x₂)",
+    "etalon": "tools/niveau_mp12.md § 2, E-EQ-3",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "probeq2": {
   "classe": "1re Collège",
@@ -950,35 +1264,80 @@
   "plan": "M1C07 · 1.FO.07a–d : parabole",
   "etalon": "tools/niveau_1c.md E7.1",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 2e": {
+    "classe": "MP 2e",
+    "plan": "S3.FQ.03–04 : zéros, sommet",
+    "etalon": "tools/niveau_mp12.md § 2, E-FQ-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "f2formes": {
   "classe": "1re Collège",
   "plan": "M1C07 · 1.FO.07c : formes",
   "etalon": "tools/niveau_1c.md E7.1",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 2e": {
+    "classe": "MP 2e",
+    "plan": "S3.FQ.01–02 : formes d'une fonction quadratique",
+    "etalon": "tools/niveau_mp12.md § 2, E-FQ-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "f2expr": {
   "classe": "1re Collège",
   "plan": "M1C07 · 1.FO.08a–b : expression depuis le graphe",
   "etalon": "tools/niveau_1c.md E7.4",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 2e": {
+    "classe": "MP 2e",
+    "plan": "S3.FQ.05 : expression depuis le graphe",
+    "etalon": "tools/niveau_mp12.md § 2, E-FQ-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "f2trois": {
   "classe": "1re Collège",
   "plan": "M1C07 · 1.FO.08c : trois points",
   "etalon": "tools/niveau_1c.md E7.4",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 2e": {
+    "classe": "MP 2e",
+    "plan": "S3.FQ.05 : parabole par trois points",
+    "etalon": "tools/niveau_mp12.md § 2, E-FQ-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "inter": {
   "classe": "1re Collège",
   "plan": "M1C07 · 1.FO.09a–b : intersections",
   "etalon": "tools/niveau_1c.md E7.4",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S2.FO.06 : intersection de deux fonctions",
+    "etalon": "tools/niveau_mp12.md § 2, E-FO-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "interpar": {
   "classe": "1re Collège",
@@ -999,7 +1358,16 @@
   "plan": "M1C07 · 1.FO.12c : optimisation",
   "etalon": "tools/niveau_1c.md E7.1",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 2e": {
+    "classe": "MP 2e",
+    "plan": "S3.FQ.07–08 : optimisation, applications",
+    "etalon": "tools/niveau_mp12.md § 2, E-FQ-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "eqirr": {
   "classe": "1re Collège",
@@ -1037,6 +1405,13 @@
     "etalon": "tools/niveau_11.md § 2, E-8-1",
     "audit": "25.11.2026",
     "verdict": "au niveau"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S2.GE.06 : Thalès, triangles semblables",
+    "etalon": "tools/niveau_mp12.md § 2, E-GE-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
    }
   }
  },
@@ -1051,6 +1426,13 @@
     "classe": "11e",
     "plan": "11C02 · application directe (CT)",
     "etalon": "tools/niveau_11.md § 2, E-2-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S2.GE.04 : Pythagore",
+    "etalon": "tools/niveau_mp12.md § 2, E-GE-1",
     "audit": "25.11.2026",
     "verdict": "remonté"
    }
@@ -1069,6 +1451,13 @@
     "etalon": "tools/niveau_11.md § 2, E-2-2",
     "audit": "25.11.2026",
     "verdict": "remonté"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S2.GE.04 : Pythagore dans les figures et l'espace",
+    "etalon": "tools/niveau_mp12.md § 2, E-GE-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
    }
   }
  },
@@ -1085,6 +1474,13 @@
     "etalon": "tools/niveau_11.md § 2, E-2-3",
     "audit": "25.11.2026",
     "verdict": "au niveau"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S2.GE.05 : réciproque de Pythagore",
+    "etalon": "tools/niveau_mp12.md § 2, E-GE-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
    }
   }
  },
@@ -1093,14 +1489,32 @@
   "plan": "M1C08 · 1.GE.02b, 03e : Euclide, hauteur",
   "etalon": "tools/niveau_1c.md E8.3",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S2.GE.07 : Euclide et hauteur",
+    "etalon": "tools/niveau_mp12.md § 2, E-GE-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "geocomb": {
   "classe": "1re Collège",
   "plan": "M1C08 · 1.GE.03f : problèmes combinés",
   "etalon": "tools/niveau_1c.md E8.1, E8.2",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S2.GE.04–09 : problèmes combinés",
+    "etalon": "tools/niveau_mp12.md § 2, E-GE-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "droitesrem": {
   "classe": "1re Collège",
@@ -1114,7 +1528,16 @@
   "plan": "M1C08 · valeurs exactes (Ma1 Ch8)",
   "etalon": "tools/niveau_1c.md E8.2",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S2.GE.09 : longueurs et aires exactes",
+    "etalon": "tools/niveau_mp12.md § 2, E-GE-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "angles": {
   "classe": "1re Collège",
@@ -1127,6 +1550,13 @@
     "classe": "11e",
     "plan": "11C07 · alternes-internes, inscrits, au centre",
     "etalon": "tools/niveau_11.md § 2, E-7-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S2.GE.01, S2.GE.08 : angles, angle au centre",
+    "etalon": "tools/niveau_mp12.md § 2, E-GE-2",
     "audit": "25.11.2026",
     "verdict": "remonté"
    }
@@ -1152,6 +1582,13 @@
     "etalon": "tools/niveau_11.md § 2, E-7-2",
     "audit": "25.11.2026",
     "verdict": "au niveau"
+   },
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S2.GE.03, S2.GE.08 : cercle de Thalès, tangente",
+    "etalon": "tools/niveau_mp12.md § 2, E-GE-2",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
    }
   }
  },
@@ -1167,14 +1604,32 @@
   "plan": "M1C10 · 1.GE.05–06",
   "etalon": "tools/niveau_1c.md E10.1",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S2.TR.01–05 : trigonométrie du triangle rectangle",
+    "etalon": "tools/niveau_mp12.md § 2, E-TR-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "trigexact": {
   "classe": "1re Collège",
   "plan": "M1C10 · 1.GE.05e, 06b : valeurs exactes, pente",
   "etalon": "tools/niveau_1c.md E10.3",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S2.TR.02–05 : valeurs exactes, pente",
+    "etalon": "tools/niveau_mp12.md § 2, E-TR-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "bijection": {
   "audit": "24.11.2026",
@@ -1223,14 +1678,32 @@
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E1.2",
   "plan": "Équations de droites, parallélisme, perpendicularité (CdG 2e)",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "MP 2e": {
+    "classe": "MP 2e",
+    "plan": "S3.FA.03–04 : équation de droite, parallèles, perpendiculaires",
+    "etalon": "tools/niveau_mp12.md § 2, E-FA-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "droitesinter": {
   "audit": "24.11.2026",
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E1.2",
   "plan": "Intersections de droites (CdG 2e)",
-  "verdict": "à valider"
+  "verdict": "à valider",
+  "par_classe": {
+   "MP 2e": {
+    "classe": "MP 2e",
+    "plan": "S3.FA : intersection de droites",
+    "etalon": "tools/niveau_mp12.md § 2, E-FA-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "eqrat": {
   "audit": "24.11.2026",
@@ -1265,7 +1738,16 @@
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E4.4",
   "plan": "Fractions rationnelles : simplifier, opérations (CdG 2e)",
-  "verdict": "à valider"
+  "verdict": "à valider",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CA.11–13 : fractions rationnelles",
+    "etalon": "tools/niveau_mp12.md § 2, E-CA-4",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "homog": {
   "audit": "24.11.2026",
@@ -1349,56 +1831,128 @@
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E8.1",
   "plan": "Trigonométrie du triangle quelconque (CdG 2e)",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 2e": {
+    "classe": "MP 2e",
+    "plan": "S4.TG.04–06 : sinus, cosinus",
+    "etalon": "tools/niveau_mp12.md § 2, E-TG-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "triaire": {
   "audit": "24.11.2026",
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E8.2",
   "plan": "Triangle quelconque : problèmes (CdG 2e)",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 2e": {
+    "classe": "MP 2e",
+    "plan": "S4.TG.06 : aire, triangle quelconque",
+    "etalon": "tools/niveau_mp12.md § 2, E-TG-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "trigassoc": {
   "audit": "24.11.2026",
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E9.1",
   "plan": "Angles associés (CdG 2e)",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 2e": {
+    "classe": "MP 2e",
+    "plan": "S4.TG.03 : angles associés, relations",
+    "etalon": "tools/niveau_mp12.md § 2, E-TG-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "trigcercle": {
   "audit": "24.11.2026",
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E9.1",
   "plan": "Fonctions trigonométriques : cercle (CdG 2e)",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 2e": {
+    "classe": "MP 2e",
+    "plan": "S4.TG.01–03 : radian, cercle trigonométrique",
+    "etalon": "tools/niveau_mp12.md § 2, E-TG-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "trigeq": {
   "audit": "24.11.2026",
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E9.1",
   "plan": "Équations sin(f(x)) = constante (CdG 2e)",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "MP 2e": {
+    "classe": "MP 2e",
+    "plan": "S4.TG.07–08 : équations trigonométriques",
+    "etalon": "tools/niveau_mp12.md § 2, E-TG-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "trigeq2": {
   "audit": "24.11.2026",
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E9.2",
   "plan": "Modèles trigonométriques (CdG 2e)",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 2e": {
+    "classe": "MP 2e",
+    "plan": "S4.TG.08 : équations et modèles",
+    "etalon": "tools/niveau_mp12.md § 2, E-TG-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "trigfn": {
   "audit": "24.11.2026",
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E9.2",
   "plan": "Fonctions trigonométriques : période, amplitude, zéros (CdG 2e)",
-  "verdict": "à valider"
+  "verdict": "à valider",
+  "par_classe": {
+   "MP 2e": {
+    "classe": "MP 2e",
+    "plan": "S4.TG (cours CFPT) : fonctions sinus et cosinus",
+    "etalon": "tools/niveau_mp12.md § 2, E-TG-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "valint": {
   "audit": "24.11.2026",
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E4.1",
   "plan": "Fractions rationnelles : domaine (CdG 2e)",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CA.10 : valeurs interdites",
+    "etalon": "tools/niveau_mp12.md § 2, E-CA-4",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "vecteurs": {
   "audit": "24.11.2026",
@@ -1412,28 +1966,64 @@
   "plan": "11C01 · 11NO, priorités (EVACOM)",
   "etalon": "tools/niveau_11.md § 2, E-1-1",
   "audit": "25.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CN.05–06 : règle des signes, hiérarchie des opérations (ajoutée à l'année)",
+    "etalon": "tools/niveau_mp12.md § 2, E-CN-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "fracadd": {
   "classe": "11e",
   "plan": "11C01 · 4 opérations dans ℚ",
   "etalon": "tools/niveau_11.md § 2, E-1-1",
   "audit": "25.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CN.11 : 4 opérations sur les fractions",
+    "etalon": "tools/niveau_mp12.md § 2, E-CN-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "fracconv": {
   "classe": "11e",
   "plan": "11C01 · écritures d'un même nombre",
   "etalon": "tools/niveau_11.md § 2, E-1-1",
   "audit": "25.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CN.04 : écritures fractionnaire, décimale, pourcentage (ajoutée à l'année)",
+    "etalon": "tools/niveau_mp12.md § 2, E-CN-3",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "fracmul": {
   "classe": "11e",
   "plan": "11C01 · 4 opérations dans ℚ",
   "etalon": "tools/niveau_11.md § 2, E-1-1",
   "audit": "25.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CN.11 : 4 opérations sur les fractions",
+    "etalon": "tools/niveau_mp12.md § 2, E-CN-1, E-CN-2",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "carres": {
   "classe": "11e",
@@ -1531,7 +2121,16 @@
   "plan": "10C10 (révision en 11e)",
   "etalon": "tools/niveau_11.md § 2, E-4-1",
   "audit": "25.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S1.CN.04 : pourcentages",
+    "etalon": "tools/niveau_mp12.md § 2, E-CN-2",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "proba": {
   "classe": "11e",
@@ -1721,5 +2320,47 @@
   "etalon": "tools/niveau_mp34.md § 2, E-J-4",
   "audit": "25.11.2026",
   "verdict": "au niveau (facultatif dans le PEE) ; à valider"
+ },
+ "vabs": {
+  "classe": "MP 1re",
+  "plan": "S1.CN.02 : valeur absolue",
+  "etalon": "tools/niveau_mp12.md § 2, E-CN-1",
+  "audit": "25.11.2026",
+  "verdict": "à valider"
+ },
+ "premiers": {
+  "classe": "MP 1re",
+  "plan": "S1.CN.07–08 (*) : nombres premiers, décomposition",
+  "etalon": "tools/niveau_mp12.md § 2, E-CN-4",
+  "audit": "25.11.2026",
+  "verdict": "à valider"
+ },
+ "fracsimp": {
+  "classe": "MP 1re",
+  "plan": "S1.CN.10 (*) : fraction irréductible",
+  "etalon": "tools/niveau_mp12.md § 2, E-CN-1",
+  "audit": "25.11.2026",
+  "verdict": "à valider"
+ },
+ "eqparam": {
+  "classe": "MP 1re",
+  "plan": "S1.EQ.02, S1.EQ.06 : équations avec paramètre",
+  "etalon": "tools/niveau_mp12.md § 2, E-EQ-4",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "recipaff": {
+  "classe": "MP 2e",
+  "plan": "S3.FA.06 (*) : réciproque d'une fonction affine",
+  "etalon": "tools/niveau_mp12.md § 2, E-FA-1",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "statfreq": {
+  "classe": "MP 2e",
+  "plan": "S4.AD.01–04 : effectifs, fréquences",
+  "etalon": "tools/niveau_mp12.md § 2, E-AD-1",
+  "audit": "25.11.2026",
+  "verdict": "à valider"
  }
 }
