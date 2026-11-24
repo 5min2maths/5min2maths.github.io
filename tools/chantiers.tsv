@@ -19,7 +19,7 @@ T	Indicateurs de rétention (J+1, J+7, J+30)	Données	2	fait	100 %	23.11	dans le
 D	Routine des retours testeurs	Données	7	en cours	—	22.11	commentaires dans l'onglet Commentaires, 👎 dans le point	une fois par semaine
 P	Rappel de sauvegarde	Produit	3	fait	100 %	22.11	carte « code de sauvegarde » si aucun code ou code de plus de 30 jours	—
 R	Rappel quotidien (agenda .ics)	Produit	3	abandonné	—	21.11	retiré : trop compliqué pour les élèves	—
-S	Progression visible	Produit	5	à faire	10 %	23.11	—	mi-décembre (planning S50)
+S	Progression visible	Produit	5	à contrôler	90 %	24.11	ligne « Cette semaine » au bilan de séance, carte « Ma semaine » en tête de Progrès (instantané quotidien state.snaps, tests/progression.html)	contrôle des phrases par l'auteur ; rien sur l'accueil
 E	Icônes de badges	Produit	6	abandonné	—	22.11	badges abandonnés le 22.11	—
 M	Récompenses visuelles	Produit	6	en partie	30 %	22.11	grades Mathélo « collector » numérotés	—
 O	Accessibilité (police dyslexie, taille du texte, contrastes)	Produit	7	à faire	10 %	23.11	—	1 séance

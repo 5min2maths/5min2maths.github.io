@@ -635,3 +635,12 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 }
 .elo-compact .eb-grade { min-width: 0; }
 .elo-compact .eb-next, .elo-compact .eb-grade b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+/* Progression visible (24.11, chantier S) : carte « Ma semaine » (Progrès) et ligne du bilan de séance. */
+.week-card .week-days { display: flex; justify-content: space-between; gap: 8px; }
+.week-list { list-style: none; margin: 4px 0 0; padding: 0; }
+.week-list li { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 4px 0; border-top: 1px solid var(--line); font-size: 0.92rem; }
+.week-list li:first-child { border-top: 0; }
+.week-list li > span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.week-notes { display: inline-flex; align-items: center; gap: 4px; flex: none; white-space: nowrap; }
+.week-notes .note { min-width: 2.6em; padding: 2px 6px; }
+.week-line b { font-weight: 600; }

@@ -277,8 +277,50 @@ const Engine = {
     s.status = "nonvu"; s.retry = addDays(day(), 21); s.due = s.retry;
     this.unlock(state);
   },
+  // Progression visible (24.11, chantier S) : instantané léger pris au début de chaque jour d'activité, AVANT la
+  // première modification (appelé par record, tooEasy, updateElo, recordComp et au chargement). Contenu : notes des
+  // compétences (en demi-points, entiers) et notions maîtrisées (vues, m ≥ 0,7, même critère que la carte des thèmes).
+  // Comme l'état ne change que les jours d'activité, et que chacun commence par un instantané, l'état « il y a 7 jours »
+  // est le premier instantané de la fenêtre : on ne garde que ceux des 7 derniers jours (7 au plus).
+  // Ancien state sans instantané : rien à migrer, le premier est pris au chargement (la semaine part de ce jour-là).
+  snap(state, today = day()) {
+    if (!state || !state.notions) return;
+    const S = Array.isArray(state.snaps) ? state.snaps : [];
+    if (S.length && S[S.length - 1] && S[S.length - 1].d === today) return;
+    const c = {};
+    for (const [cid, rec] of Object.entries(state.comps || {})) { const n = compNote(rec); if (n !== null) c[cid] = Math.round(n * 2); }
+    const k = Object.keys(state.notions).filter((id) => { const s = state.notions[id]; return s && s.seen > 0 && s.m >= 0.7; });
+    const lim = addDays(today, -6);
+    state.snaps = [...S.filter((x) => x && x.d >= lim && x.d < today), { d: today, c, k }];
+  },
+  // Bilan des 7 derniers jours (aujourd'hui compris), comparé à soi-même seulement.
+  // ups : compétences dont la note a monté [{ cid, label, b, a }], de la plus forte hausse à la plus faible ;
+  // first : compétences notées pour la première fois ; cons : notions devenues maîtrisées ; fixed : erreurs effacées du
+  // carnet ; days / n : jours actifs et questions ; since : date de départ si la fenêtre est partielle (sinon null).
+  week(state, today = day()) {
+    const lim = addDays(today, -6), S = (Array.isArray(state.snaps) ? state.snaps : []).filter((x) => x && x.d >= lim && x.d <= today);
+    const ref = S[0] || null, H = (state.history || []).filter((x) => x && x.date >= lim && x.date <= today && x.n > 0);
+    const out = { ups: [], first: [], cons: [], fixed: 0, days: H.length, n: H.reduce((a, x) => a + (x.n || 0), 0), since: null };
+    out.fixed = (Array.isArray(state.carnetOut) ? state.carnetOut : []).filter((d) => d >= lim && d <= today).length;
+    if (!ref) return out;
+    // Activité dans la fenêtre avant le premier instantané (state d'avant le 24.11) : on dit « depuis le … ».
+    if (H.some((x) => x.date < ref.d)) out.since = ref.d;
+    const lab = (cid) => { const [id, i] = cid.split(":"), L = COMPS[id]; return (L && L[+i]) || (NOTIONS.find((x) => x.id === id) || {}).label || id; };
+    for (const [cid, rec] of Object.entries(state.comps || {})) {
+      const a = compNote(rec);
+      if (a === null) continue;
+      const b = ref.c && ref.c[cid] != null ? ref.c[cid] / 2 : null;
+      if (b === null) out.first.push({ cid, label: lab(cid), a });
+      else if (a > b) out.ups.push({ cid, label: lab(cid), b, a });
+    }
+    out.ups.sort((x, y) => y.a - y.b - (x.a - x.b) || y.a - x.a);
+    const had = new Set(ref.k || []);
+    out.cons = Object.keys(state.notions || {}).filter((id) => { const s = state.notions[id]; return s && s.seen > 0 && s.m >= 0.7 && !had.has(id); });
+    return out;
+  },
   // Compétence : les 8 dernières réponses (1, 0,5 ou 0).
   recordComp(state, id, d, score) {
+    this.snap(state);
     state.comps = state.comps || {};
     const cid = compOf(id, d), rec = (state.comps[cid] = state.comps[cid] || { r: [], n: 0 }), before = compNote(rec);
     rec.r.push(score); rec.r = rec.r.slice(-8); rec.n++; rec.last = day();
@@ -368,6 +410,7 @@ const Engine = {
 
   // Mise à jour du Mathélo. score : 1, 0,5 ou 0. K plus grand au début (positionnement rapide).
   updateElo(state, id, d, score, weight = 1) {
+    this.snap(state);
     const e = state.elo, q = itemRating(state.profile, id, d);
     const expected = 1 / (1 + Math.pow(10, (q - e.r) / 400));
     const K = (e.n < 20 ? 48 : e.n < 60 ? 32 : 20) * weight; // calibrage progressif : provisoire tant que n < 20
@@ -618,6 +661,7 @@ const Engine = {
   // « Trop facile » : l'élève passe la question. Demi-victoire au Mathélo (sans répondre, on ne compte pas plein),
   // la notion monte, et son niveau visé est relevé (décalage par notion, qui retombe si l'élève échoue ensuite).
   tooEasy(state, id, d, kind) {
+    this.snap(state);
     const s = state.notions[id];
     s.easy = Math.min(3, (s.easy || 0) + 1);
     s.m = Math.min(1, s.m + (1 - s.m) * 0.25);
@@ -633,6 +677,7 @@ const Engine = {
 
   // Score Moodle : 1 au premier essai, 0,5 au deuxième, 0 ensuite.
   record(state, id, d, tries, solved, partial) {
+    this.snap(state);
     const s = state.notions[id];
     s.fails = (partial !== undefined ? partial < 0.5 : !solved) ? (s.fails || 0) + 1 : solved && tries === 1 ? 0 : s.fails || 0;
     if (typeof Badges !== "undefined") Badges.onAnswer(state, id, d, tries, solved, partial);

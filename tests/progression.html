@@ -1,0 +1,66 @@
+<link rel="stylesheet" href="../src/style.css"><!doctype html><meta charset="utf-8"><div id="app" style="width:360px;max-width:360px;box-sizing:border-box"></div><pre id="out"></pre>
+<script>window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_manip.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script>
+// Progression visible (24.11, chantier S) : state simulé sur 10 jours ; ligne du bilan et carte « Ma semaine ».
+const fails=[], ok=(c,m)=>{if(!c)fails.push(m)}, T=day(), D=(k)=>addDays(T,k), out=[];
+const bad=(el)=>/NaN|undefined|null/.test(el.textContent);
+const over=(root)=>[...root.querySelectorAll("*")].filter((e)=>e.scrollWidth>e.clientWidth+1&&getComputedStyle(e).overflowX!=="auto"&&getComputedStyle(e).overflowX!=="scroll"&&e.clientWidth>0).map((e)=>e.className||e.tagName);
+const fresh=()=>{const s=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.autoInit(s);s.placed=true;return s;};
+const hist=(s,ks)=>{s.history=ks.map((k)=>({date:D(k),n:5,score:4}));};
+const show=(tag)=>{app.innerHTML=weekLine();const t=app.textContent.replace(/\s+/g," ").trim();out.push(tag+" | "+t);ok(!bad(app),tag+" NaN/undefined : "+t);ok(!over(app).length,tag+" débordement ligne "+over(app));
+  app.innerHTML=weekCard();ok(!bad(app),tag+" carte NaN/undefined");ok(!over(app).length,tag+" débordement carte "+over(app).join());ok(app.scrollWidth<=360,tag+" largeur carte "+app.scrollWidth);return t;};
+try{
+// ---- Cas 1 : progrès réels sur la semaine ----
+state=fresh();
+state.comps={"prio:0":{r:[0,0,1],n:3},"fracadd:1":{r:[1,0,0],n:3}};
+Object.assign(state.notions.prio,{seen:3,m:0.5});Object.assign(state.notions.fracadd,{seen:4,m:0.75});
+Engine.snap(state,D(-9));                          // hors fenêtre : sera écarté
+Engine.snap(state,D(-5));                          // point de départ de la semaine
+ok(state.snaps.length===2,"1 deux instantanés "+JSON.stringify(state.snaps.map(x=>x.d)));
+ok(state.snaps[1].c["prio:0"]===5&&state.snaps[0].k.includes("fracadd")&&!state.snaps[0].k.includes("prio"),"1 contenu de l'instantané "+JSON.stringify(state.snaps[0]));
+Engine.snap(state,D(-5));ok(state.snaps.length===2,"1 un seul instantané par jour");
+state.comps["prio:0"].r=[0,0,1,1,1,1];state.comps["fracadd:1"].r=[1,0,0,1,1,1,1,1];state.comps["puiss:0"]={r:[1,1,1],n:3};
+Object.assign(state.notions.prio,{seen:6,m:0.8});Object.assign(state.notions.puiss,{seen:3,m:0.72});
+Engine.snap(state,D(-3));Engine.snap(state,D(0));
+ok(state.snaps.length===3&&state.snaps[0].d===D(-5),"1 instantanés gardés "+state.snaps.map(x=>x.d));
+state.carnetOut=[D(-8),D(-3),D(-1)];hist(state,[-9,-5,-3,0]);
+let w=Engine.week(state);
+ok(w.ups.length===2&&w.ups[0].cid==="fracadd:1"&&w.ups[0].b===2.5&&w.ups[0].a===5&&w.ups[1].b===2.5&&w.ups[1].a===4.5,"1 compétences montées "+JSON.stringify(w.ups));
+ok(w.cons.length===2&&w.cons.includes("prio")&&w.cons.includes("puiss"),"1 notions consolidées "+w.cons);
+ok(w.fixed===2&&w.days===3&&w.n===15&&w.first.length===1&&w.since===null,"1 carnet/jours "+JSON.stringify({f:w.fixed,d:w.days,n:w.n,fi:w.first.length,s:w.since}));
+let t=show("cas 1");
+ok(t.includes("Cette semaine : 2 compétences ont monté, 2 notions consolidées et 2 erreurs effacées du carnet.")&&t.includes("Plus belle progression : "+COMPS.fracadd[1]+" (2,5 → 5)."),"1 phrase : "+t);
+app.innerHTML=weekCard();const ct=app.textContent;
+ok(/Jours actifs\s*3 \/ 7/.test(ct)&&/2 compétences en hausse/.test(ct)&&/2,5→5/.test(ct.replace(/\s/g,""))&&/2 notions consolidées/.test(ct)&&/2 erreurs effacées/.test(ct)&&/1 première note/.test(ct),"1 carte : "+ct.replace(/\s+/g," "));
+// Carte en tête de Progrès
+homeTab="prog";screenHome();const panel=app.querySelector(".home-panel");ok(panel&&panel.firstElementChild&&panel.firstElementChild.classList.contains("week-card"),"1 carte en tête de Progrès");
+ok(!over(panel).length,"1 débordement Progrès "+over(panel).join());
+homeTab="today";screenHome();ok(!app.querySelector(".week-card")&&!app.querySelector(".week-line"),"1 rien sur l'accueil");
+// Bilan de séance réel
+session={plan:[],i:0,score:4,answered:5,start:Date.now(),elo0:state.elo.r,ids:new Set(),pinged:true};screenSummary();
+ok(!!app.querySelector(".week-line")&&/2 compétences ont monté/.test(app.querySelector(".week-line").textContent),"1 ligne dans le bilan de séance");
+// Code de sauvegarde : le point de départ et le carnet suivent ; ancien code (sans w ni co) : pas d'erreur
+const pk=Backup.pack(state),s2=Backup.unpack(JSON.parse(JSON.stringify(pk))),w2=Engine.week(s2);
+ok(w2.ups.length===2&&w2.cons.length===2&&w2.fixed===2,"1 sauvegarde aller-retour "+JSON.stringify({u:w2.ups.length,c:w2.cons.length,f:w2.fixed}));
+delete pk.w;delete pk.co;const s3=Backup.unpack(pk),w3=Engine.week(s3);ok(Array.isArray(w3.ups)&&w3.fixed===0,"1 ancien code sans instantané");
+// Carnet : une erreur effacée est datée
+state.carnet=[{id:"prio",d:1,code:"x",date:T,ok:1}];state.carnetOut=[];ok(carnetResult("prio",1,true)==="efface"&&state.carnetOut.length===1&&state.carnetOut[0]===T,"1 carnetOut daté");
+// ---- Cas 2 : pratique sans note en hausse ----
+state=fresh();state.comps={"prio:0":{r:[1,1,0],n:3}};Engine.snap(state,D(-2));hist(state,[-2,0]);
+w=Engine.week(state);ok(!w.ups.length&&!w.cons.length&&!w.fixed&&!w.first.length,"2 rien n'a bougé "+JSON.stringify(w));
+t=show("cas 2");ok(t.includes("Cette semaine : 2 jours de pratique, 10 questions.")&&t.includes("chaque séance compte"),"2 phrase : "+t);
+state.comps["prio:0"].r=[1,1,0,0];w=Engine.week(state);ok(!w.ups.length,"2 note en baisse : pas comptée");
+// ---- Cas 3 : ancien state (sans instantané), pratique cette semaine ----
+state=fresh();state.comps={"prio:0":{r:[0,1,0],n:3}};hist(state,[-4,-1,0]);delete state.snaps;delete state.carnetOut;
+w=Engine.week(state);ok(w.days===3&&!w.ups.length,"3 sans instantané : pas d'erreur");show("cas 3a sans instantané");
+Engine.snap(state);ok(state.snaps.length===1&&state.snaps[0].d===T,"3 premier instantané au chargement");
+t=show("cas 3b");ok(t.includes("Cette semaine : 3 jours de pratique, 15 questions."),"3 phrase : "+t);
+state.comps["prio:0"].r=[0,1,0,1,1,1];t=show("cas 3c après une séance");ok(t.includes("Depuis le "+T.slice(8,10)+"."+T.slice(5,7)+" : 1 compétence a monté."),"3 depuis : "+t);
+app.innerHTML=weekCard();ok(/Notes comparées depuis le/.test(app.textContent),"3 carte : début du suivi");
+// ---- Cas 4 : state vide (aucune activité) et instantanés corrompus ----
+state=fresh();state.snaps=[null,{d:D(-1)}];w=Engine.week(state);t=show("cas 4");ok(/Une séance de quelques minutes/.test(t),"4 phrase : "+t);
+Engine.snap(state);ok(state.snaps.length===2,"4 instantané malgré entrée corrompue");
+}catch(e){fails.push("EXC "+e.message+" "+e.stack)}
+document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC\n"+fails.join("\n"):"OK\n"+out.join("\n"))+"</pre>");
+</script>
