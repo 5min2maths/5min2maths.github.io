@@ -44,7 +44,8 @@ avec son enfant** et **encourager l'effort**, jamais un relevé de notes minute 
 - **Chargement par niveau** : la page charge les paquets du niveau de l'enfant (ensurePacks) avant de régénérer.
 - **Tests** : tests/parents.html (aller-retour du code, transparence, aperçu, lecture seule, paquets, contenus,
   problème identique, 2 enfants, mise à jour, ancien code, code abîmé, aucun envoi, largeur 360 px). Captures :
-  tests/parents.html?shot=share|parent|kids|old ; images dans design/parents/.
+  tests/parents.html?shot=share|parent|solve|fun|kids|old ; images dans design/parents/ (enfant_envoyer, parent_semaine,
+  parent_resoudre, parent_ensemble, parent_enfants, parent_ancien .png).
 
 ### Limites du prototype
 

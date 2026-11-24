@@ -83,12 +83,12 @@ async function screenParentShare() {
   const url = Parents.url(code), qr = url.length <= 2000 && typeof QR !== "undefined" ? QR.svg(url) : "";
   const nC = Math.min(3, (state.carnet || []).length);
   h(`${brand}<h2>Envoyer à <span class="mark">mes parents</span></h2>
-  <p class="muted">Tes parents recevront un lien. Il s'ouvre sur leur téléphone, sans compte, et rien ne passe par Internet : tout est dans le lien.</p>
+  <p class="muted">Tes parents recevront un lien. Il s'ouvre sur leur téléphone, sans compte. Rien n'est gardé sur un serveur : tout est dans le lien.</p>
   <div class="card flat stack par-see"><b>👀 Ce qu'ils verront</b><ul class="plain par-list">
     <li>✅ Combien de jours tu t'es entraîné·e cette semaine</li>
     <li>✅ Les notions que tu as travaillées (leur nom, pas tes résultats)</li>
     <li>✅ Une réussite à fêter</li>
-    <li>✅ ${nC ? (nC > 1 ? nC + " problèmes" : "1 problème") + " de ton carnet d'erreurs, pour le résoudre avec toi (avec des indices, pas la réponse d'abord)" : "Ton carnet d'erreurs est vide : pas de problème à résoudre ensemble"}</li>
+    <li>✅ ${nC ? (nC > 1 ? nC + " problèmes de ton carnet d'erreurs, pour les résoudre" : "1 problème de ton carnet d'erreurs, pour le résoudre") + " avec toi (avec des indices, pas la réponse d'abord)" : "Ton carnet d'erreurs est vide : pas de problème à résoudre ensemble"}</li>
     <li>✅ Une question curieuse à faire en famille, et des conseils pour t'aider</li></ul>
     <b>🙈 Ce qu'ils ne verront pas</b><ul class="plain par-list">
     <li>✖ Ton Mathélo ni tes notes de compétences</li>
