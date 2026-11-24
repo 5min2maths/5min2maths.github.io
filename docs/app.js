@@ -125,8 +125,8 @@ ORDRE.FR = {"suitedef":1000,"suitearith":1001,"suitegeo":1002,"suitesomme":1003,
 Object.assign(ORDRE.MATU, {"primitives":200,"integrale":201,"aireint":202,"volrev":203,"lnexp":210,"croissance":211,"condbayes":230,"varalea":231,"binomiale":232});
 Object.assign(ORDRE_THEME.MATU, {"primitives":"M4C01","integrale":"M4C01","aireint":"M4C01","volrev":"M4C01","lnexp":"M4C02","croissance":"M4C02","condbayes":"M4C04","varalea":"M4C04","binomiale":"M4C04"});
 // 24.11 (agent greste) : algèbre linéaire (M4C03), loi normale, et statistique descriptive ouverte à la 4e (M4C04). Ajouté à la main.
-Object.assign(ORDRE.MATU, {"matrices":220,"translin":221,"stats":233,"quartiles":234,"normale":235});
-Object.assign(ORDRE_THEME.MATU, {"matrices":"M4C03","translin":"M4C03","stats":"M4C04","quartiles":"M4C04","normale":"M4C04"});
+Object.assign(ORDRE.MATU, {"matrices":220,"translin":221,"appllin":222,"stats":233,"quartiles":234,"normale":235});
+Object.assign(ORDRE_THEME.MATU, {"matrices":"M4C03","translin":"M4C03","appllin":"M4C03","stats":"M4C04","quartiles":"M4C04","normale":"M4C04"});
 
 // Calculateur d'expressions : lecture souple de la réponse de l'élève, calcul, mise en forme TeX,
 // équivalence d'expressions (par évaluation en plusieurs points) et contrôle de forme.
@@ -11125,7 +11125,7 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
   coordmp: ["pyth"], vectmp: ["coordmp"], scalmp: ["vectmp"], droiteparam: ["vectmp"], ineqmp: ["eq1", "eq2disc"], fctmp: ["fimg"], polymp: ["factor", "eq2disc"],
   sinusmp: ["trigfn"], explogfn: ["eqexp", "logdef"],
   // 24.11 (chantier G, agent greste) : MP 4e (projection, position de droites, fonctions rationnelles) ; 4e Collège (algèbre linéaire, loi normale)
-  projmp: ["scalmp"], pvectmp: ["scalmp"], posdroites: ["droiteparam"], fratmp: ["fracrat", "ineqmp"], matrices: ["sys2"], translin: ["matrices"], normale: ["varalea", "stats"], stats: ["diagr"], quartiles: ["diagr"] };
+  projmp: ["scalmp"], pvectmp: ["scalmp"], posdroites: ["droiteparam"], fratmp: ["fracrat", "ineqmp"], matrices: ["sys2"], translin: ["matrices"], appllin: ["translin"], normale: ["varalea", "stats"], stats: ["diagr"], quartiles: ["diagr"] };
 // Programme du jour : le format change d'un jour à l'autre ; l'équilibre se fait sur 7 jours.
 // 22.11 : textes courts (une ligne sur téléphone : pas de saut quand on change de format).
 const FORMATS = {

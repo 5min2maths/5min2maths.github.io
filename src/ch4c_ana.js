@@ -956,7 +956,7 @@
           { ctx: "image-appartient", guide: [GS("Pente de la droite image ?", m, M("y = " + m + "x") + "."), GS(M("k") + " ?", k, M(k) + ".")], traps: [TR(y * m, "Sur la droite y = mx : k = y ÷ m."), TR(-k, "Vérifie le signe.")] })); },
     ],
     3: [
-      () => { const a = nz(-4, 4), m = pk([-3, -2, 2, 3]), b = -a / m; if (!Number.isInteger(b) || b === 0) return null; const k = pk([-3, -2, 2, 3]), c = k * a, t = k * b;
+      () => { const b = nz(-3, 3), m = pk([-3, -2, 2, 3]), a = -b * m, k = pk([-3, -2, 2, 3]), c = k * a, t = k * b;
         return chk(QN("On considère " + M("\\begin{pmatrix} " + fT(a) + " & " + fT(b) + " \\\\ " + fT(c) + " & t \\end{pmatrix}") + ". Pour la valeur de " + M("t") + " qui rend la matrice non inversible, le noyau est engendré par " + M("(1 \\,;\\, m)") + ". Que vaut " + M("m") + " ?", m,
           M("\\det = " + fT(a) + "t - " + par(b) + " \\cdot " + par(c) + " = 0") + " donne " + M("t = " + t) + ". Puis " + M(fT(a) + " + " + par(b) + "m = 0") + " : " + M("m = " + m) + ".",
           { ctx: "parametre-noyau", guide: [GS(M("t") + " (déterminant nul) ?", t, M(t) + "."), GS(M("m") + " ?", m, M(m) + ".")], traps: [TR(t, "Ça, c'est t ; on demande ensuite le noyau."), TR(-m, "Vérifie le signe : " + fT(a) + " + " + par(b) + "·m = 0.")] })); },
