@@ -115,7 +115,9 @@
         move: (st, k, px, py) => mv(st, k, (px - OX) / U, (OY - py) / U),
         nudge: (st, k, dx, dy) => { const p = k ? st.Q : st.P; mv(st, k, p[0] + dx, p[1] + dy); },
         draw: (st) => { const a = slope(st), b = st.P[1] - a * st.P[0], f = (x) => a * x + b;
-          return grid(X, Y, -6, 6, -5, 5) + `<line x1="${X(-7)}" y1="${Y(f(-7))}" x2="${X(7)}" y2="${Y(f(7))}" stroke="var(--margin)" stroke-width="2.6"/>
+          // 24.11 (galerie : la droite dépassait le quadrillage) : tracée seulement dans le cadre −6…6 × −5…5.
+          const xa = a ? (-5 - b) / a : -6, xb = a ? (5 - b) / a : 6, lo = Math.max(-6, Math.min(xa, xb)), hi = Math.min(6, Math.max(xa, xb));
+          return grid(X, Y, -6, 6, -5, 5) + `<line x1="${X(lo)}" y1="${Y(f(lo))}" x2="${X(hi)}" y2="${Y(f(hi))}" stroke="var(--margin)" stroke-width="2.6"/>
             <polyline points="${X(st.P[0])},${Y(st.P[1])} ${X(st.Q[0])},${Y(st.P[1])} ${X(st.Q[0])},${Y(st.Q[1])}" fill="none" stroke="var(--blue)" stroke-width="2" stroke-dasharray="5 3"/>
             <text x="${(X(st.P[0]) + X(st.Q[0])) / 2}" y="${Y(st.P[1]) + (st.Q[1] >= st.P[1] ? 15 : -6)}" text-anchor="middle" class="f-txt" font-size="12" fill="var(--blue)">avance ${nb(st.Q[0] - st.P[0])}</text>
             <text x="${X(st.Q[0]) + 6}" y="${(Y(st.P[1]) + Y(st.Q[1])) / 2 + 4}" class="f-txt" font-size="12" fill="var(--blue)">monte ${nb(st.Q[1] - st.P[1])}</text>`; },

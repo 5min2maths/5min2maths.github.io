@@ -51,7 +51,15 @@ function GEO() {
           return T.txt(T.X(mid) + nx * 14, T.Y(mid) - ny * 14 + 4, str);
         },
       };
-      return '<svg class="fig" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="' + label + '" xmlns="http://www.w3.org/2000/svg">' + back.concat(ops).map((f) => f(T)).join("") + "</svg>";
+      const body = back.concat(ops).map((f) => f(T)).join("");
+      // 24.11 (galerie : « dénivelé » coupé au bord) : le cadre s'élargit pour contenir toutes les étiquettes (largeur estimée).
+      let vx0 = 0, vx1 = W, vy0 = 0, vy1 = H;
+      for (const m of body.matchAll(/<text x="([-\d.]+)" y="([-\d.]+)"[^>]*text-anchor="(\w+)" font-size="(\d+)">([^<]*)<\/text>/g)) {
+        const x = +m[1], y = +m[2], fs = +m[4], w = m[5].length * fs * 0.58, a0 = m[3] === "start" ? x : m[3] === "end" ? x - w : x - w / 2;
+        vx0 = Math.min(vx0, a0 - 3); vx1 = Math.max(vx1, a0 + w + 3); vy0 = Math.min(vy0, y - fs - 2); vy1 = Math.max(vy1, y + 4);
+      }
+      const vb = [vx0, vy0, vx1 - vx0, vy1 - vy0].map((v) => +v.toFixed(1)).join(" ");
+      return '<svg class="fig" viewBox="' + vb + '" role="img" aria-label="' + label + '" xmlns="http://www.w3.org/2000/svg">' + body + "</svg>";
     },
   };
   return g;
