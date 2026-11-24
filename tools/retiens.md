@@ -10,6 +10,46 @@ Règle de l'enseignant (15.11) : l'étape « Retiens » d'une leçon active n'af
 
 Bilan : 149 leçons corrigées par un Retiens propre, sur 225 leçons actives relues. Aucun défi ajouté (les générateurs et les jeux n'ont pas été touchés) : les règles non présentées ont été retirées du Retiens, pas ajoutées aux défis.
 
+## Défis courts ajoutés (24.11, 2e passe)
+
+**Mécanisme** : champ facultatif `plus: [{ d, ans, ok, no }]` dans `ACTIVE[id]` (`actPlus`, src/active.js). Après le dernier défi de la leçon, chaque entrée devient une question tapée de plus (consigne `d`, TeX permis ; réponse numérique `ans`, virgule ou fraction acceptées ; message de réussite `ok` ; coup de pouce `no` après une erreur). Valable dans les trois modes (Manipule, Essaie sur la figure, À toi : le titre compte alors toutes les questions). Les générateurs et les manipulations ne sont pas touchés. Tests : les pages act_* concernées et tests/manip.html répondent aux questions ajoutées (réponse fausse refusée, puis bonne réponse).
+
+Une règle essentielle de la notion, retirée faute de défi, est revenue dans le Retiens quand un défi court la présente :
+
+| Leçon | Fichier | Défis ajoutés (réponse) | Remis dans le Retiens |
+|---|---|---|---|
+| rel | act_manip2.js | (−6) · (−7) (42) ; (−48) ÷ 6 (−8) ; (−2) · 5 − (−3) · 4 (2) | règle des signes de × et ÷, priorités |
+| angles | act_manip2.js | angle inscrit 38° → au centre (76) ; au centre 130° → inscrit (65) | angle au centre = double de l'angle inscrit |
+| idrem | act_manip2.js | (x − 4)² : coefficient de x (−8) ; (x + 6)(x − 6) : terme constant (−36) | (a − b)², (a + b)(a − b) ; piège du double produit |
+| simil | act_manip2.js | cube agrandi k = 3 : volume × ? (27) | volumes × k³ |
+| sys2 | act_manip2.js | combinaison (x = 7) ; substitution (x = 5) | méthodes par combinaison et par substitution |
+| proba | act_manip2.js | deux tirages sans remise, P(deux rouges) = a/10 (3) | arbre, produit le long d'une branche, sans remise |
+| fracadd | act_manip2.js | 5/6 − 3/8 = a/24 (11) | soustraction |
+| vol | act_manip2.js | cylindre r = 2, h = 5 (20π) ; prisme à base triangulaire (120) | prisme droit et cylindre |
+| utemps | act_manip2.js | durée de 8 h 47 à 10 h 15 (88 min) | durée entre deux horaires |
+| pyth | act_manip.js | cathète : hypoténuse 13, cathète 5 (12) | b² = c² − a² |
+| puiss | act_ch11b.js | 2⁵ · 2³ (8) ; 7⁹ ÷ 7⁴ (5) ; (5³)⁴ (12) ; −3² (−9) | aᵐ · aⁿ, aᵐ ÷ aⁿ, (aᵐ)ⁿ ; piège −3² ≠ (−3)² |
+| volcone | act_ch11b.js | boule de rayon 3 : V = kπ (36) | V = 4/3 πr³ |
+| airepyr | act_ch11b.js | aire latérale c = 6, a = 5 (60) ; aire totale (96) | aire latérale et totale |
+| fracmul | act_ch11b.js | 3/4 ÷ 1/8 (6) ; 2/3 ÷ 4/9 = a/2 (3) | diviser = multiplier par l'inverse |
+| eq2disc | act_eq1c.js | x² − 4x − 12 = 0 : solutions 6 et −2 | x = (−b ± √Δ)/2a |
+| droitesinter | act_mp2.js | pente d'une perpendiculaire à y = 3x − 2 (−1/3) | m · m' = −1 |
+| fctmp | act_mp34.js | parité (7) ; 3f(x) (15) ; f(2x) (3) | paire / impaire, k · f(x), f(kx) |
+| lnexp | act_col34.js | ln(ab) (7) ; ln(b/a) (3) | ln(ab) = ln a + ln b, ln(a/b) |
+| matrices | act_col34.js | det(AB) (−12) ; det(3A) (45) | det(AB) = det A · det B, det(kA) = k² det A |
+| derivref | act_col34.js | (cos x)' en π/2 (−1) | (cos x)' = −sin x |
+| primitives | act_col34.js | F = −cos x + C, F(0) = 3 (4) ; F = −1/x + C, F(1) = 2 (3) | sin → −cos, 1/x² → −1/x |
+| integrale | act_col34.js | Chasles (7) ; bornes échangées (−7) ; linéarité (21) | Chasles, bornes, linéarité |
+| varalea | act_col34.js | E(3X + 2) (14) ; V(3X + 2) (45) ; σ si V = 6,25 (2,5) | écart-type, E(aX + b), V(aX + b) |
+
+**Titres corrigés** (la notion réelle d'après curriculum.js, les générateurs et les défis) :
+
+- **angles** : la notion est « Angles : parallèles, cercle » (curriculum, ch11_ang.js : parallèles, angle inscrit et angle au centre). Titre de LESSONS (lessons2.js) « Angle au centre, angle inscrit » → « Angles : parallèles, cercle », règle et exemples complétés par les parallèles ; deux défis courts sur l'angle au centre ajoutés à la leçon active (voir plus haut).
+- **ineq** : la notion est celle des inéquations du 1er degré (générateurs ch1c_sys.js du 20.11 ; le tableau des signes relève de ineqfrac et ineq2). Titre « Tableau des signes » → « Inéquations du 1er degré » (lessons2.js et LESSONS_EXTRA de gen2.js, règle et exemples réécrits) ; libellé du curriculum « Inéquations, tableau des signes » → « Inéquations du 1er degré » (exemple −2x + 5 ≤ 11) ; niveaux de competences.js alignés sur ceux de ch1c_sys.js.
+- **rel** : même cas (titre « Calculer avec les nombres relatifs », notion « multiplier, diviser, priorités », défis d'addition et de soustraction, qui sont la notion reladd) : corrigé par les trois défis courts ci-dessus.
+
+Autres leçons dont la notion dépasse les défis, laissées en l'état (règles secondaires ou calcul trop long pour un défi court) : binomiale (V = np(1 − p)), normale (z), logprop (log(a/b)), echelle (aires × k²), stats (écart-type), factor (identités, vues dans idrem et factor2), diagr (moyenne pondérée), droitesrem, cercletan.
+
 ## act_col34.js
 
 | Leçon | Écart | Correction |
@@ -283,9 +323,7 @@ Relues, sans écart retenu : f2formes, pente, thales.
 
 ## Points à contrôler
 
-- **angles** (act_manip2.js) : la leçon s'intitule « Angle au centre, angle inscrit » mais les défis portent sur deux parallèles et une sécante. Le Retiens suit les défis ; le titre (LESSONS) et le rattachement de la notion sont à revoir.
-- **ineq** (act_1c.js) : titre « Tableau des signes », défis d'inéquations du 1er degré ; même question.
-- **rel** (act_manip2.js) : la règle des signes de la multiplication n'est plus dans le Retiens (défis : additions et soustractions) ; à ajouter en défi si la notion doit la couvrir.
-- Leçons où la notion est plus large que les défis (lnexp, matrices, derivref, primitives, varalea, puiss, volcone, fctmp…) : si ces règles doivent être apprises ici, il faut ajouter des défis courts (générateurs à modifier, non fait : autre agent sur les générateurs).
+- **angles**, **ineq** : titres et libellés corrigés (voir « Titres corrigés ») ; le libellé du curriculum de ineq a changé (affiché dans le choix des notions).
+- **Défis courts ajoutés** : relire les consignes, réponses et messages (calculs refaits à la main) ; le défi d'airepyr reprend la pyramide du Devine (base 6, apothème 5) ; celui de droitesinter attend une fraction (−1/3).
 - Exemples réécrits avec les nombres des défis : vérifier l'exactitude (calculs refaits à la main, pas par un test).
 - Après correction, l'audit passe de 184 leçons signalées (score 1'597) à 104 (score 660), presque tous des écarts de vocabulaire de méthode (« repérer », « tableau », « vérifier ») relus et gardés. Restent avec la leçon générale : les leçons listées « sans écart retenu » ci-dessus ; écarts mineurs de vocabulaire possibles (ex. nbderive : notation lim jamais écrite dans les défis).

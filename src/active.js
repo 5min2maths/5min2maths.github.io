@@ -289,7 +289,47 @@ Object.assign(ACTIVE, {
 // - manip  : curseur, figure à déplacer, balance… → « Manipule », tous les défis ;
 // - figure : réponse tapée qui fait réagir une figure (droitesinter, airepyr…) → « Essaie sur la figure », tous les défis ;
 // - guide  : réponse tapée sans figure → « À toi », 2 questions seulement, avec un coup de pouce après une erreur.
-function actPrep(A) {
+function actPrep(A) { return actPlus(A, actPrep0(A)); }
+
+// Défis courts ajoutés après ceux de la leçon (24.11, tools/retiens.md) : une règle essentielle de la notion que la
+// manipulation ne présente pas (ln(ab), det(AB), règle des signes…) devient une question tapée, posée après le dernier
+// défi, pour que « Retiens » puisse la donner. A.plus = [{ d: consigne (TeX permis), ans: nombre, ok: message de
+// réussite, no: coup de pouce après une erreur }]. Valable dans les trois modes (manip, figure, guide).
+const actParse = (s) => { const t = String(s).replace(/,/g, ".").replace(/−/g, "-").replace(/\s|'/g, ""); const m = t.match(/^(-?\d+(?:\.\d+)?)\/(-?\d+(?:\.\d+)?)$/); return t === "" ? NaN : m ? +m[1] / +m[2] : Number(t); };
+function actPlus(A, X) {
+  const Q = A.plus;
+  if (!Array.isArray(Q) || !Q.length || !X.play) return X;
+  const n0 = X.defis.length, N = n0 + Q.length;
+  const play = (box, onWin) => {
+    /* zone de la question ajoutée AU-DESSUS de la leçon : certaines leçons redessinent leur zone de réponse après le
+       dernier défi ; une fois les défis finis, la classe act-plus-on la masque (style.css) */
+    box.innerHTML = '<div class="stack act-plus"></div><div class="stack act-sub"></div>';
+    const pb = box.firstChild, sub = box.lastChild;
+    const ask = (j) => {
+      pb.innerHTML = actAnswerHtml("Ta réponse");
+      const inp = pb.querySelector("input");
+      actAnswerBind(pb, () => {
+        const v = actParse(inp.value);
+        if (!isFinite(v)) { $hint(pb, "Tape un nombre."); return; }
+        if (Math.abs(v - Q[j].ans) > 1e-9 * Math.max(1, Math.abs(Q[j].ans))) { $hint(pb, Q[j].no || "Pas encore : reprends la règle des défis."); return; }
+        pb.innerHTML = ""; onWin(n0 + j, Q[j].ok);
+        if (j + 1 < Q.length) ask(j + 1);
+      });
+      setTimeout(() => pb.scrollIntoView && pb.scrollIntoView({ behavior: "smooth", block: "nearest" }), 60);
+    };
+    X.play(sub, (k, msg) => {
+      onWin(k, msg);
+      /* fin des défis de la leçon : sa zone de réponse disparaît, la question ajoutée prend le relais */
+      if (k === n0 - 1) { box.classList.add("act-plus-on"); sub.querySelectorAll(".act-ans").forEach((e) => e.remove()); ask(0); }
+    });
+  };
+  const guide = X.mode === "guide";
+  return Object.assign({}, X, { defis: X.defis.concat(Q.map((q) => q.d)), play,
+    titre: guide ? "À toi : " + N + " questions" : X.titre,
+    lab: (k) => (guide ? "Question " + (k + 1) + " sur " + N : "Défi " + (k + 1)) });
+}
+
+function actPrep0(A) {
   const P = A.play, o = P && P.o;
   if (!o || !o.ask) return { mode: "manip", titre: "Manipule", defis: A.defis, play: P, lab: (k) => "Défi " + (k + 1), fin: "Défis réussis !" };
   let fig = !!o.blank;

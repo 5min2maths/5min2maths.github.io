@@ -122,8 +122,11 @@
         wins: [W(12, "12 : 3/12 + 2/12 = 5/12. 24 marcherait aussi, mais 12 est le plus petit."), W(15, "15 : 10/15 + 9/15 = 19/15."), W(24, "24 : 9/24 + 10/24 = 19/24. Inutile d'aller jusqu'à 8 · 12 = 96.")] }),
     },
     fracmul: {
+      /* 24.11 : la division fait partie de la notion (« multiplier, diviser ») : deux défis courts */
+      plus: [{ d: "Calcule \\(\\frac{3}{4} \\div \\frac{1}{8}\\) : combien de huitièmes dans trois quarts ?", ans: 6, ok: "Diviser par 1/8, c'est multiplier par 8 (son inverse) : 3/4 · 8 = 24/4 = 6. Il y a 6 huitièmes dans 3/4.", no: "3/4 = 6/8 : compte les huitièmes." },
+        { d: "\\(\\frac{2}{3} \\div \\frac{4}{9} = \\frac{a}{2}\\). Tape \\(a\\).", ans: 3, ok: "On multiplie par l'inverse 9/4 : 2/3 · 9/4 = 18/12 = 3/2.", no: "Multiplie 2/3 par l'inverse de 4/9, puis simplifie." }],
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
-      retiens: { regle: "On multiplie les numérateurs entre eux et les dénominateurs entre eux. Prendre une fraction d'une fraction, c'est multiplier : « de » veut dire « fois ».", exemple: ["Les \\(\\frac{2}{3}\\) de \\(\\frac{3}{4}\\) : \\(\\frac{2}{3} \\cdot \\frac{3}{4} = \\frac{6}{12} = \\frac{1}{2}\\).", "La moitié de \\(\\frac{4}{5}\\) : \\(\\frac{1}{2} \\cdot \\frac{4}{5} = \\frac{4}{10} = \\frac{2}{5}\\).", "Les \\(\\frac{3}{4}\\) de \\(\\frac{2}{5}\\) : \\(\\frac{6}{20} = \\frac{3}{10}\\)."], piege: "Pour multiplier, pas de dénominateur commun : on multiplie en haut et en bas." },
+      retiens: { regle: "On multiplie les numérateurs entre eux et les dénominateurs entre eux. Prendre une fraction d'une fraction, c'est multiplier : « de » veut dire « fois ». Diviser par une fraction, c'est multiplier par son inverse.", exemple: ["Les \\(\\frac{2}{3}\\) de \\(\\frac{3}{4}\\) : \\(\\frac{2}{3} \\cdot \\frac{3}{4} = \\frac{6}{12} = \\frac{1}{2}\\).", "La moitié de \\(\\frac{4}{5}\\) : \\(\\frac{1}{2} \\cdot \\frac{4}{5} = \\frac{4}{10} = \\frac{2}{5}\\).", "Les \\(\\frac{3}{4}\\) de \\(\\frac{2}{5}\\) : \\(\\frac{6}{20} = \\frac{3}{10}\\).", "\\(\\frac{3}{4} \\div \\frac{1}{8} = \\frac{3}{4} \\cdot \\frac{8}{1} = 6\\) ; \\(\\frac{2}{3} \\div \\frac{4}{9} = \\frac{2}{3} \\cdot \\frac{9}{4} = \\frac{3}{2}\\)."], piege: "Pour multiplier, pas de dénominateur commun : on multiplie en haut et en bas." },
       predict: { q: "Les 2/3 de 3/4 d'une tablette de chocolat, c'est…", choices: ["5/7 de la tablette", "1/2 de la tablette", "6/7 de la tablette"], good: 1, why: "On prend 2 tiers d'une part de 3 quarts : 2/3 · 3/4 = 6/12 = 1/2. « De » veut dire « fois »." },
       defis: ["Colorie les 2/3 de 3/4 du carré (règle les lignes).", "Colorie la moitié de 4/5.", "Colorie les 3/4 de 2/5."],
       play: hunt({ label: "Lignes coloriées", start: 0, min: 0, max: 4,
@@ -142,7 +145,12 @@
     },
     puiss: {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
-      retiens: { regle: "Chaque fois que l'exposant baisse de 1, on divise par \\(a\\). Ainsi \\(a^0 = 1\\) et \\(a^{-n} = \\frac{1}{a^n}\\).", exemple: ["\\(2^3 = 8\\), \\(2^2 = 4\\), \\(2^1 = 2\\), \\(2^0 = 1\\)", "\\(2^{-1} = \\frac{1}{2}\\), \\(2^{-3} = \\frac{1}{8}\\)"] },
+      retiens: { regle: "Chaque fois que l'exposant baisse de 1, on divise par \\(a\\). Ainsi \\(a^0 = 1\\) et \\(a^{-n} = \\frac{1}{a^n}\\). Même base : \\(a^m \\cdot a^n = a^{m + n}\\), \\(a^m \\div a^n = a^{m - n}\\) et \\((a^m)^n = a^{m \\cdot n}\\).", exemple: ["\\(2^3 = 8\\), \\(2^2 = 4\\), \\(2^1 = 2\\), \\(2^0 = 1\\)", "\\(2^{-1} = \\frac{1}{2}\\), \\(2^{-3} = \\frac{1}{8}\\)", "\\(2^5 \\cdot 2^3 = 2^8\\), \\(7^9 \\div 7^4 = 7^5\\), \\((5^3)^4 = 5^{12}\\)"], piege: "\\(-3^2 = -9\\) : le carré ne porte que sur 3. Mais \\((-3)^2 = 9\\)." },
+      /* 24.11 : règles de calcul et −3², essentielles à la notion, en défis courts */
+      plus: [{ d: "\\(2^5 \\cdot 2^3 = 2^n\\). Tape \\(n\\).", ans: 8, ok: "5 facteurs 2, puis 3 autres : 8 facteurs. On garde la base et on additionne les exposants : 2⁸.", no: "Compte les facteurs 2 : 5, puis encore 3." },
+        { d: "\\(7^9 \\div 7^4 = 7^n\\). Tape \\(n\\).", ans: 5, ok: "4 facteurs 7 se simplifient : il en reste 9 − 4 = 5. On soustrait les exposants : 7⁵.", no: "Diviser par 7⁴ enlève 4 facteurs 7." },
+        { d: "\\((5^3)^4 = 5^n\\). Tape \\(n\\).", ans: 12, ok: "(5³)⁴ = 5³ · 5³ · 5³ · 5³ : 4 fois 3 facteurs, soit 5¹². On multiplie les exposants.", no: "C'est 5³ écrit 4 fois." },
+        { d: "Calcule \\(-3^2\\).", ans: -9, ok: "Le carré ne porte que sur 3 : −3² = −(3 · 3) = −9. Avec des parenthèses, (−3)² = 9.", no: "Sans parenthèses, l'exposant ne s'applique pas au signe −." }],
       predict: { q: "Que vaut 2⁻³ ?", choices: ["−8", "1/8", "−6"], good: 1, why: "Chaque fois que l'exposant baisse de 1, on divise par 2 : 2³ = 8, 2² = 4, 2¹ = 2, 2⁰ = 1, 2⁻¹ = 1/2, 2⁻² = 1/4, 2⁻³ = 1/8." },
       defis: ["Descends l'escalier jusqu'à 2⁰. Que vaut-il ?", "Trouve l'exposant qui donne 1/2.", "Trouve l'exposant qui donne 1/8."],
       play: hunt({ label: "Exposant", start: 4, min: -4, max: 6,
@@ -215,7 +223,9 @@
     },
     volcone: {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
-      retiens: { regle: "Pyramide et cône : \\(V = \\frac{1}{3} \\cdot A_{\\text{base}} \\cdot h\\) : il en faut 3 pour remplir le prisme (ou le cylindre) de même base et de même hauteur. Deux fois moins haut : deux fois moins de volume.", exemple: ["Pyramide base 6 × 6, hauteur 5 : \\(\\frac{36 \\cdot 5}{3} = 60\\).", "Cône \\(r = 3\\), \\(h = 4\\) : \\(\\frac{9\\pi \\cdot 4}{3} = 12\\pi\\).", "Cônes deux fois moins hauts : 6 pour remplir le cylindre."], piege: "N'oublie pas le facteur \\(\\frac{1}{3}\\)." },
+      retiens: { regle: "Pyramide et cône : \\(V = \\frac{1}{3} \\cdot A_{\\text{base}} \\cdot h\\) : il en faut 3 pour remplir le prisme (ou le cylindre) de même base et de même hauteur. Deux fois moins haut : deux fois moins de volume. Boule de rayon \\(r\\) : \\(V = \\frac{4}{3}\\pi r^3\\).", exemple: ["Pyramide base 6 × 6, hauteur 5 : \\(\\frac{36 \\cdot 5}{3} = 60\\).", "Cône \\(r = 3\\), \\(h = 4\\) : \\(\\frac{9\\pi \\cdot 4}{3} = 12\\pi\\).", "Cônes deux fois moins hauts : 6 pour remplir le cylindre.", "Boule de rayon 3 : \\(V = \\frac{4}{3}\\pi \\cdot 27 = 36\\pi\\)."], piege: "N'oublie pas le facteur \\(\\frac{1}{3}\\) (et \\(\\frac{4}{3}\\) pour la boule)." },
+      /* 24.11 : la boule fait partie de la notion (« Pyramide, cône, boule ») */
+      plus: [{ d: "Une boule de rayon 3 cm a pour volume \\(V = \\frac{4}{3}\\pi r^3 = k\\pi\\ \\text{cm}^3\\). Tape \\(k\\).", ans: 36, ok: "r³ = 27, et 4/3 · 27 = 36 : V = 36π cm³, environ 113 cm³.", no: "Calcule d'abord r³ = 3 · 3 · 3, puis multiplie par 4/3." }],
       predict: { q: "Combien de pyramides (même base, même hauteur) faut-il pour remplir un prisme ?", choices: ["2", "3", "4"], good: 1, why: "Une pyramide vaut exactement le tiers du prisme de même base et même hauteur : V = ⅓ · base · hauteur." },
       defis: ["Combien de cônes (même base, même hauteur) pour remplir le cylindre ?", "Combien de pyramides (même base, même hauteur) pour remplir le pavé ?", "Des cônes de même base, mais deux fois moins hauts : combien pour le cylindre ?"],
       play: hunt({ ask: true, label: "Nombre de solides versés", start: 1, min: 1, max: 8,
@@ -232,7 +242,10 @@
     },
     airepyr: {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
-      retiens: { regle: "Pyramide régulière à base carrée de côté \\(c\\) : la hauteur \\(h\\), le demi-côté \\(\\frac{c}{2}\\) et l'apothème \\(a\\) (la hauteur d'une face) forment un triangle rectangle : \\(a^2 = h^2 + \\left(\\frac{c}{2}\\right)^2\\).", exemple: ["\\(c = 6\\), \\(h = 4\\) : \\(a = \\sqrt{16 + 9} = 5\\).", "\\(c = 10\\), \\(h = 12\\) : \\(a = \\sqrt{144 + 25} = 13\\)."] },
+      retiens: { regle: "Pyramide régulière à base carrée de côté \\(c\\) : la hauteur \\(h\\), le demi-côté \\(\\frac{c}{2}\\) et l'apothème \\(a\\) (la hauteur d'une face) forment un triangle rectangle : \\(a^2 = h^2 + \\left(\\frac{c}{2}\\right)^2\\). Aire latérale : 4 triangles de base \\(c\\) et de hauteur \\(a\\) ; aire totale : on ajoute la base \\(c^2\\).", exemple: ["\\(c = 6\\), \\(h = 4\\) : \\(a = \\sqrt{16 + 9} = 5\\).", "\\(c = 10\\), \\(h = 12\\) : \\(a = \\sqrt{144 + 25} = 13\\).", "\\(c = 6\\), \\(a = 5\\) : aire latérale \\(4 \\cdot \\frac{6 \\cdot 5}{2} = 60\\), aire totale \\(60 + 36 = 96\\)."] },
+      /* 24.11 : aire latérale et aire totale (notion « Aire d'une pyramide, apothème ») */
+      plus: [{ d: "Pyramide du « Devine » : base carrée de 6 cm, apothème 5 cm. Aire latérale (les 4 faces triangulaires), en cm² ?", ans: 60, ok: "Une face : 6 · 5 ÷ 2 = 15 cm². Quatre faces : 4 · 15 = 60 cm². L'apothème est la hauteur de chaque face.", no: "Chaque face est un triangle de base 6 et de hauteur 5 (l'apothème)." },
+        { d: "Même pyramide : aire totale (avec la base), en cm² ?", ans: 96, ok: "Aire latérale 60 cm², plus la base 6 · 6 = 36 cm² : 96 cm².", no: "Ajoute l'aire de la base carrée à l'aire latérale." }],
       predict: { q: "Une pyramide à base carrée de 6 cm a une hauteur de 4 cm. Son apothème a (la hauteur d'une face triangulaire, en bleu) mesure…", fig: pyrFig(6, 4), choices: ["4 cm", "5 cm", "7 cm"], good: 1, why: "Hauteur, demi-côté et apothème forment un triangle rectangle : √(4² + 3²) = √25 = 5. L'apothème est plus long que la hauteur." },
       // Défis (22.11) : même tâche à chaque fois (trouver l'apothème), sans reprendre la pyramide du « Devine » ; l'aire latérale n'apparaît qu'une fois l'apothème juste.
       defis: ["Nouvelle pyramide : base 10 cm, hauteur 12 cm. Tape l'apothème.", "Base 16 cm, hauteur 6 cm. Tape l'apothème.", "Base 8 cm, hauteur 3 cm. Tape l'apothème."],

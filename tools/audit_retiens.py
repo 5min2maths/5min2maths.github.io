@@ -37,7 +37,7 @@ const strs=(o,d)=>{const r=[];if(d>4||o==null)return r;if(typeof o==="string")r.
 for(const id of Object.keys(ACTIVE)){try{const A=ACTIVE[id],L=LESSONS[id];if(!L){out[id]={file:__F[id],nolesson:true};continue;}
  const R=actRetiens(A,L),X=actPrep(A);
  out[id]={file:__F[id],titre:L.titre,own:!!A.retiens,regle:R.regle,exemple:R.exemple,piege:R.piege,mode:X.mode,
-  predict:[A.predict.q,...A.predict.choices,A.predict.why],defis:A.defis,shown:X.defis,ostr:strs(A.play&&A.play.o,0)};}
+  predict:[A.predict.q,...A.predict.choices,A.predict.why],defis:A.defis,shown:X.defis,ostr:strs(A.play&&A.play.o,0).concat(strs(A.plus,0))};}
  catch(e){out[(id)]={file:__F[id],err:String(e)};}}
 document.getElementById("log").textContent=JSON.stringify(out);
 </script>""")

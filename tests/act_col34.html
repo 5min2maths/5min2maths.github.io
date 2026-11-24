@@ -20,6 +20,7 @@ const vals=(r)=>{const a=[];for(let v=+r.min;v<=+r.max+1e-9;v+=+r.step)a.push(+v
 const setR=(i,v)=>{const r=ranges()[i];if(!r)return;r.value=v;r.dispatchEvent(new Event("input"));r.dispatchEvent(new Event("change"));};
 const askIn=()=>document.querySelector('#play .s2c-ask .act-in');
 const seek=()=>{const b=gfb();
+  if(document.querySelector("#play .act-plus .act-in")) return answer("#play .act-plus",b); /* question ajoutée (A.plus) : les curseurs de la leçon restent affichés */
   if(ranges().length){
     const rs=ranges();setR(0,rs[0].value); if(gfb()!==b||askIn()){wrongOk=false;return true;}
     const V=rs.map(vals),n=V.length;

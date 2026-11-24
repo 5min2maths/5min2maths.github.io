@@ -152,7 +152,7 @@ const COMPS = {
   trigrel: ["Calculer cos à partir de sin", "Calculer tan à partir de cos", "Calculer une valeur exacte avec sin² + cos² = 1"],
   expfrac: ["Calculer une puissance à exposant fractionnaire", "Calculer une puissance à exposant fractionnaire négatif", "Écrire un produit de racines comme une puissance"],
   vecteurs: ["Calculer les composantes d'un vecteur", "Calculer une norme ou une combinaison de vecteurs", "Utiliser le produit scalaire"],
-  ineq: ["Résoudre une inéquation du 1er degré", "Résoudre une inéquation avec un quotient", "Résoudre avec un tableau des signes"],
+  ineq: ["Résoudre une inéquation du 1er degré", "Résoudre avec x des deux côtés, des parenthèses ou des fractions", "Résoudre une double inégalité, comparer des offres"],
   recip: ["Calculer avec une réciproque", "Calculer avec une composée", "Trouver l'expression d'une réciproque"],
   absval: ["Résoudre une équation avec valeur absolue", "Résoudre une équation avec valeur absolue", "Reconnaître une équation sans solution"],
   homog: ["Trouver l'asymptote verticale", "Trouver l'asymptote horizontale", "Trouver la réciproque d'une homographique"],
