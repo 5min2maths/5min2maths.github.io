@@ -32,7 +32,7 @@
     1: [
       () => { let a, b; do { a = nz(-12, 12); b = nz(-12, 12); } while (a > 0 && b > 0); const A = Math.abs(a), B = Math.abs(b), same = a * b > 0; // au moins un négatif (21.11)
         return Qv("Calcule : " + M(par(a) + " + " + par(b)), a + b, M(par(a) + " + " + par(b) + " = " + (a + b)) + ".",
-          { ctx: "addition", fig: FIG.numberLine(a, []), guide: [same ? GS("Même signe : on additionne les distances à zéro. " + M(A + " + " + B) + " = ?", A + B, M(A + B) + ".") : GS("Signes contraires : la plus grande distance moins la plus petite. " + M(Math.max(A, B) + " - " + Math.min(A, B)) + " = ?", Math.abs(A - B), M(Math.abs(A - B)) + "."), GS("Résultat (avec son signe) ?", a + b, M(a + b) + ".")],
+          { ctx: "addition", fig: FIG.numberLine(a, [], { span: [a + b] }), guide: [same ? GS("Même signe : on additionne les distances à zéro. " + M(A + " + " + B) + " = ?", A + B, M(A + B) + ".") : GS("Signes contraires : la plus grande distance moins la plus petite. " + M(Math.max(A, B) + " - " + Math.min(A, B)) + " = ?", Math.abs(A - B), M(Math.abs(A - B)) + "."), GS("Résultat (avec son signe) ?", a + b, M(a + b) + ".")],
             traps: [TR(-(a + b), "Signe du résultat : celui du nombre le plus loin de zéro."), TR(A + B === Math.abs(a + b) ? a - b : (a < 0 ? -1 : 1) * (A + B), "Signes contraires : on soustrait les distances.")] }); },
       () => { const a = nz(-12, 12), b = -R.int(2, 12);
         return Qv("Calcule : " + M(par(a) + " - " + par(b)), a - b, "Soustraire un nombre négatif, c'est ajouter son opposé : " + M(par(a) + " + " + -b + " = " + (a - b)) + ".",

@@ -104,7 +104,7 @@ const GEN = {
     if (d === 1) {
       const a = R.nz(-12, 12), b = R.nz(-12, 12);
       const same = a * b > 0, big = Math.abs(a) >= Math.abs(b) ? a : b, A = Math.abs(a), B = Math.abs(b);
-      return { fig: FIG.numberLine(a, []), q: "Calcule : " + M(par(a) + " + " + par(b)), spec: { kind: "value", value: a + b }, sol: M(par(a) + " + " + par(b) + " = " + (a + b)),
+      return { fig: FIG.numberLine(a, [], { span: [a + b] }), q: "Calcule : " + M(par(a) + " + " + par(b)), spec: { kind: "value", value: a + b }, sol: M(par(a) + " + " + par(b) + " = " + (a + b)),
         guide: [same ? GS("Même signe : on additionne les distances à zéro. " + M(A + " + " + B) + " = ?", A + B, M(A + " + " + B + " = " + (A + B)) + ".")
           : GS("Signes contraires : on soustrait les distances à zéro (la grande moins la petite). " + M(Math.max(A, B) + " - " + Math.min(A, B)) + " = ?", Math.abs(A - B), M(Math.max(A, B) + " - " + Math.min(A, B) + " = " + Math.abs(A - B)) + "."),
           GS(same ? "Le résultat garde le signe commun : résultat ?" : "Le résultat prend le signe du nombre le plus loin de zéro (" + M(par(big)) + ") : résultat ?", a + b, M(par(a) + " + " + par(b) + " = " + (a + b)) + ".")] };
@@ -518,7 +518,7 @@ Object.assign(GEN, {
     if (d === 1) {
       const p = R.int(-3, 0), q = R.int(1, 4);
       // x² = (p + q) x - p q
-      return { fig: FIG.parabola((x) => x * x / 3, [], (x) => ((p + q) * x - p * q) / 3, false), q: "Pour quelles valeurs de " + M("x") + " les graphes de " + M("f(x) = x^2") + " et " + M("g(x) = " + poly([p + q, -p * q])) + " se coupent-ils ?", spec: { kind: "set", values: [...new Set([p, q])] }, sol: M("x^2 = " + poly([p + q, -p * q]) + " \\iff " + poly([1, -(p + q), p * q]) + " = 0") + " : " + M("x = " + p) + " ou " + M("x = " + q) + "." };
+      return { fig: FIG.plot([{ f: (x) => x * x }, { f: (x) => (p + q) * x - p * q }], [], { xr: [Math.min(p, -1) - 2, Math.max(q, 1) + 2], yr: [-2, Math.max(p * p, q * q, 1) + 2], grid: false, ticks: false, minH: 170, maxH: 260, label: "parabole et droite" }), q: "Pour quelles valeurs de " + M("x") + " les graphes de " + M("f(x) = x^2") + " et " + M("g(x) = " + poly([p + q, -p * q])) + " se coupent-ils ?", spec: { kind: "set", values: [...new Set([p, q])] }, sol: M("x^2 = " + poly([p + q, -p * q]) + " \\iff " + poly([1, -(p + q), p * q]) + " = 0") + " : " + M("x = " + p) + " ou " + M("x = " + q) + "." };
     }
     // f(x) = x² + B x + c et g(x) = m x + k, choisis pour que f(x) - g(x) = (x - p)(x - q)
     const p = R.nz(-4, 3), q = p + R.int(1, 5), m = R.nz(-3, 3), c = R.int(-5, 5);
@@ -637,7 +637,7 @@ Object.assign(GEN, {
 
   absval(d) {
     const a = R.nz(-6, 6), b = R.int(1, 8);
-    if (d === 1) return { fig: FIG.numberLine(a, []), q: "Résous : " + M("|x " + (a < 0 ? "+ " + -a : "- " + a) + "| = " + b) + ".", spec: { kind: "set", values: [a - b, a + b] }, sol: M("x " + (a < 0 ? "+ " + -a : "- " + a) + " = " + b) + " ou " + M("= -" + b) + " : " + M("x = " + (a + b)) + " ou " + M("x = " + (a - b)) + "." };
+    if (d === 1) return { fig: FIG.numberLine(a, [], { span: [a - b, a + b] }), q: "Résous : " + M("|x " + (a < 0 ? "+ " + -a : "- " + a) + "| = " + b) + ".", spec: { kind: "set", values: [a - b, a + b] }, sol: M("x " + (a < 0 ? "+ " + -a : "- " + a) + " = " + b) + " ou " + M("= -" + b) + " : " + M("x = " + (a + b)) + " ou " + M("x = " + (a - b)) + "." };
     if (d === 2) {
       const k = R.pick([2, 3]), c = R.nz(-6, 6);
       return { q: "Résous : " + M("|" + k + "x " + (c < 0 ? "- " + -c : "+ " + c) + "| = " + b) + ".", spec: { kind: "set", values: [(b - c) / k, (-b - c) / k] }, sol: M(k + "x " + (c < 0 ? "- " + -c : "+ " + c) + " = \\pm " + b) + " : " + M("x = " + frac(b - c, k)) + " ou " + M("x = " + frac(-b - c, k)) + "." };

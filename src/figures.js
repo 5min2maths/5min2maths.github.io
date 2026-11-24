@@ -11,11 +11,14 @@ const FIG = (() => {
   const fmt = (v) => String(+(+v).toFixed(3)).replace(".", ",");
 
   // Droite graduée avec flèches de saut (nombres relatifs).
-  function numberLine(start, jumps) {
+  // opt.pts : autres points marqués (ex. second point d'une distance) ; opt.span : valeurs que la droite doit contenir sans
+  // les marquer (ex. résultat d'un calcul, jamais montré) — 24.11, galerie : droite trop courte, point hors de la droite.
+  function numberLine(start, jumps, opt = {}) {
     const vals = [start];
     jumps.forEach((j) => vals.push(vals[vals.length - 1] + j));
-    let lo = Math.min(...vals, 0) - 1, hi = Math.max(...vals, 0) + 1;
-    if (hi - lo > 30) { lo = Math.min(...vals) - 1; hi = Math.max(...vals) + 1; }
+    const pts = (opt.pts || []).filter(isFinite), all = [...vals, ...pts, ...(opt.span || []).filter(isFinite)];
+    let lo = Math.min(...all, 0) - 1, hi = Math.max(...all, 0) + 1;
+    if (hi - lo > 30) { lo = Math.min(...all) - 1; hi = Math.max(...all) + 1; }
     const W = 340, X = (v) => 16 + ((v - lo) / (hi - lo)) * (W - 32);
     let b = L(8, 70, W - 8, 70, "f-line", 'marker-end="url(#arr)"');
     const step = hi - lo > 20 ? 5 : hi - lo > 10 ? 2 : 1;
@@ -29,6 +32,7 @@ const FIG = (() => {
       b += t(mid, up - 22, (jumps[i] > 0 ? "+" : "") + jumps[i], "f-accent f-txt", "middle", 12);
     });
     b += '<circle cx="' + X(start) + '" cy="70" r="5" class="f-dot"/>';
+    pts.forEach((v) => { b += '<circle cx="' + X(v) + '" cy="70" r="5" class="f-dot"/>'; });
     return svg(W, 104, defs() + b, "droite graduée");
   }
   const defs = () => '<defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="f-head"/></marker><marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="f-headacc"/></marker></defs>';
@@ -78,7 +82,9 @@ const FIG = (() => {
   function percentBar(p, total, unit = "") {
     const W = 340, w = 300 * p / 100;
     let b = '<rect x="16" y="24" width="300" height="28" rx="6" class="f-soft"/>' + '<rect x="16" y="24" width="' + w + '" height="28" rx="6" class="f-fill"/>';
-    b += t(16 + w / 2, 43, p + " %", "f-on", "middle", 13) + t(316, 16, fmt(total) + unit, "f-txt", "end", 12) + t(16, 16, "0", "f-txt", "start", 12);
+    // 24.11 (galerie : « 10 % » débordait d'une barre trop courte) : étiquette à droite de la partie colorée si elle n'y tient pas.
+    const lab = fmt(p) + " %", inside = w >= lab.length * 8 + 8;
+    b += (inside ? t(16 + w / 2, 43, lab, "f-on", "middle", 13) : t(16 + w + 6, 43, lab, "f-txt", "start", 13)) + t(316, 16, fmt(total) + unit, "f-txt", "end", 12) + t(16, 16, "0", "f-txt", "start", 12);
     return svg(W, 62, b, "pourcentage");
   }
 
@@ -115,14 +121,15 @@ const FIG = (() => {
   }
   function triangleFig(lb, lh) {
     let b = P([[40, 130], [260, 130], [180, 30]], "f-shape") + L(180, 30, 180, 130, "f-accent", 'stroke-dasharray="5 4"');
-    return svg(300, 152, b + t(150, 148, lb) + t(190, 86, lh, "f-accent f-txt", "start"), "triangle");
+    // 24.11 (galerie : l'étiquette de hauteur, à droite, coupait le côté oblique) : à gauche de la hauteur, où il y a la place.
+    return svg(300, 152, b + t(150, 148, lb) + t(172, 92, lh, "f-accent f-txt", "end"), "triangle");
   }
   function trapezoid(lB, lb, lh) {
     let b = P([[30, 130], [270, 130], [210, 40], [90, 40]], "f-shape") + L(90, 40, 90, 130, "f-accent", 'stroke-dasharray="5 4"');
-    return svg(300, 152, b + t(150, 148, lB) + t(150, 32, lb) + t(82, 90, lh, "f-accent f-txt", "end"), "trapèze");
+    return svg(300, 152, b + t(150, 148, lB) + t(150, 32, lb) + t(98, 94, lh, "f-accent f-txt", "start"), "trapèze"); // 24.11 : hauteur cotée à l'intérieur (à gauche, elle coupait le côté oblique)
   }
   function disk(lr) {
-    return svg(300, 150, '<circle cx="150" cy="75" r="62" class="f-shape"/>' + L(150, 75, 212, 75, "f-accent", 'stroke-width="2"') + '<circle cx="150" cy="75" r="3" class="f-dot"/>' + t(181, 68, lr, "f-accent f-txt"), "disque");
+    return svg(300, 150, '<circle cx="150" cy="75" r="62" class="f-shape"/>' + L(150, 75, 212, 75, "f-accent", 'stroke-width="2"') + '<circle cx="150" cy="75" r="3" class="f-dot"/>' + (String(lr).length * 7.5 > 56 ? t(219, 80, lr, "f-accent f-txt", "start") : t(181, 68, lr, "f-accent f-txt")), "disque"); // 24.11 : étiquette longue hors du disque (elle coupait le cercle)
   }
   function square(ls) {
     return svg(300, 160, '<rect x="80" y="14" width="130" height="130" class="f-shape"/>' + L(80, 144, 210, 14, "f-accent", 'stroke-dasharray="6 4"') + t(145, 158, ls) + t(158, 74, "?", "f-accent f-txt", "start", 16), "carré");
@@ -153,7 +160,8 @@ const FIG = (() => {
   }
   function pyramid(lc, lh) {
     const b = P([[60, 140], [200, 140], [250, 110], [110, 110]], "f-shape2") + P([[60, 140], [200, 140], [150, 20]], "f-shape") + P([[200, 140], [250, 110], [150, 20]], "f-shape2") + L(155, 125, 150, 20, "f-accent", 'stroke-dasharray="5 4"');
-    return svg(300, 162, b + t(130, 158, lc) + t(160, 80, lh, "f-accent f-txt", "start"), "pyramide");
+    // 24.11 (galerie : « h = … » coupait l'arête de droite) : à gauche de la hauteur, dans le bas de la face avant.
+    return svg(300, 162, b + t(130, 158, lc) + t(147, 112, lh, "f-accent f-txt", "end"), "pyramide");
   }
   function cone(lr, lh) {
     const b = '<ellipse cx="150" cy="130" rx="80" ry="18" class="f-shape2"/>' + P([[70, 130], [230, 130], [150, 20]], "f-shape") + L(150, 130, 150, 20, "f-accent", 'stroke-dasharray="5 4"') + L(150, 130, 230, 130, "f-accent");
@@ -186,10 +194,13 @@ const FIG = (() => {
     return svg(340, 74, b + t(16, 68, label, "f-txt", "start", 12), "objets");
   }
   // Agrandissement : petite et grande figure.
+  // kind : "" ou "rect" (forme, jamais affichée : « (rect) » apparaissait dans la figure, galerie 24.11), « 1:200 »
+  // (échelle, affichée seule) ou « ? » (facteur demandé : la figure ne le donne pas, taille indicative).
   function scaling(k, kind) {
-    const s = 30, S = 30 * Math.min(k, 4);
+    const ask = kind === "?", s = 30, S = 30 * Math.min(ask ? (k > 1 ? 2.2 : 0.6) : k, 4);
+    const lab = ask ? "× ?" : /^1\s*:/.test(kind || "") ? "échelle " + kind : "× " + String(k).replace(".", ",");
     let b = '<rect x="16" y="' + (130 - s) + '" width="' + s + '" height="' + s + '" class="f-shape"/>' + '<rect x="' + (80) + '" y="' + (130 - S) + '" width="' + S + '" height="' + S + '" class="f-fill2"/>';
-    return svg(340, 140, b + t(31, 124 - s, "1") + t(80 + S + 10, 130 - S / 2, "× " + String(k).replace(".", ",") + (kind ? " (" + kind + ")" : ""), "f-accent f-txt", "start"), "agrandissement");
+    return svg(340, 140, b + t(31, 124 - s, "1") + t(80 + S + 10, 130 - S / 2, lab, "f-accent f-txt", "start"), "agrandissement");
   }
   // Repère avec une droite (fonctions affines).
   // Repère quadrillé à l'échelle (même unité en x et en y, 22.11 : quadrillage demandé, triangles non déformés) :
@@ -295,10 +306,12 @@ const FIG = (() => {
     return svg(320, 168, g, "triangle quelconque");
   }
   // Diagramme en bâtons d'une petite série.
-  function barChart(values) {
-    const max = Math.max(...values), w = 280 / values.length;
+  // labels (24.11, galerie : sous les barres, les effectifs au lieu des notes) : valeurs de la série sous les barres,
+  // effectifs (hauteurs) écrits au-dessus des barres. Sans labels : la valeur sous chaque barre (série brute).
+  function barChart(values, labels) {
+    const max = Math.max(...values), w = 280 / values.length, top = labels ? 16 : 0;
     let g = L(20, 140, 300, 140);
-    values.forEach((v, i) => { const hh = (v / max) * 110; g += '<rect x="' + (24 + i * w) + '" y="' + (140 - hh) + '" width="' + (w - 8) + '" height="' + hh + '" rx="3" class="' + (i % 2 ? "f-fill2" : "f-fill") + '"/>' + t(24 + i * w + (w - 8) / 2, 156, String(v).replace(".", ","), "f-txt", "middle", 11); });
+    values.forEach((v, i) => { const hh = (v / max) * (110 - top), cx = 24 + i * w + (w - 8) / 2; g += '<rect x="' + (24 + i * w) + '" y="' + (140 - hh) + '" width="' + (w - 8) + '" height="' + hh + '" rx="3" class="' + (i % 2 ? "f-fill2" : "f-fill") + '"/>' + t(cx, 156, String(labels ? labels[i] : v).replace(".", ","), "f-txt", "middle", 11) + (labels ? t(cx, 136 - hh, String(v).replace(".", ","), "f-accent f-txt", "middle", 11) : ""); });
     return svg(320, 164, g, "série statistique");
   }
 
