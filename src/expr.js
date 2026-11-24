@@ -361,7 +361,7 @@ function diagnose(q, input) {
   }
   // Ensemble de solutions (équations, 16.11) : pièges { s: [valeurs] }, { none } (« aucune »), { all } (« tous »).
   if (spec && spec.kind === "set") {
-    const raw = setInput(input), none = NONE_RE.test(raw), all = ALL_RE.test(raw);
+    const raw = setInput(input), none = NONE_RE.test(String(input)), all = ALL_RE.test(raw);
     let got = null;
     if (!none && !all) { try { const t = Expr.parse(raw); const items = t.t === "list" ? t.items : [t]; if (items.some((i) => Expr.vars(i).size)) return null; got = items.map((i) => Expr.evaluate(i)); } catch (e) { return null; } }
     const same = (A, B) => A.every((x) => B.some((y) => Expr.sameValue(x, y))) && B.every((y) => A.some((x) => Expr.sameValue(x, y)));
@@ -387,7 +387,8 @@ function diagnose(q, input) {
 }
 
 // Saisie d'un ensemble de solutions (16.11) : « x = 3 ou x = -2 », « x1 = 3 ; x2 = -2 », « S = {3 ; -2} » sont lus comme « 3 ; -2 ».
-const NONE_RE = /aucun|∅|vide|pas de solution|impossible/i, ALL_RE = /\btou[st]e?s?\b|ℝ|\bR\b|infinit/;
+/* 25.11 : Ø, ø, ⌀ (sosies de ∅) et { } acceptés pour « aucune ». */
+const NONE_RE = /aucun|∅|Ø|ø|⌀|vide|pas de solution|impossible|\{\s*\}/i, ALL_RE = /\btou[st]e?s?\b|ℝ|\bR\b|infinit/;
 const setInput = (input) => String(input).replace(/\bou\b/gi, ";").replace(/\b[a-zA-Z]\w*\s*=(?!=)/g, " ").replace(/[{}]/g, " ").replace(/^\s*;|;\s*$/g, "").trim();
 // Vérifie la réponse de l'élève selon la spécification de la question.
 // spec.kind : "value" (valeur numérique, round = précision demandée), "expr" (expression en x,

@@ -1,0 +1,48 @@
+<link rel="stylesheet" href="../src/style.css"><!doctype html><meta charset="utf-8"><div id="app"></div><pre id="o"></pre>
+<script>window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script>
+<script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script>
+/* 25.11 (commentaire de l'enseignant : « comment j'écris aucune ? ») : réponse « pas de solution » aux listes de solutions.
+   Touche ∅ du clavier, acceptée par checkAnswer, montrée dans l'aperçu, et consigne qui dit comment répondre. */
+const out = [], T = (c, m) => out.push((c ? "ok " : "ÉCHEC ") + m);
+try {
+  const vide = { kind: "set", values: [] }, deux = { kind: "set", values: [-2, 3] };
+  for (const a of ["∅", "aucune", "Aucune solution", "{}", "{ }", "S = {}", "S = ∅", "Ø", "ø", "pas de solution"]) T(checkAnswer(vide, a).status === "correct", "vide accepte « " + a + " »");
+  for (const a of ["∅", "aucune", "{}"]) T(checkAnswer(deux, a).status === "wrong", "non vide refuse « " + a + " »");
+  T(checkAnswer(deux, "3 ; -2").status === "correct", "non vide accepte 3 ; -2");
+  T(checkAnswer(vide, "0").status === "wrong", "vide refuse 0");
+  T(SolSet.parse("∅").length === 0, "intervalles : ∅ = ensemble vide");
+  state = Engine.newState({ system: "CH", grade: 13, track: "college", minutes: 5 }); Engine.autoInit(state);
+  /* Toutes les notions dont une question peut attendre l'ensemble vide : clavier avec ∅ et consigne. */
+  const ids = NOTIONS.map((n) => n.id).filter((id) => GEN[id]), found = {};
+  for (const id of ids) for (let lv = 1; lv <= 3; lv++) for (let sd = 1; sd <= 60; sd++) {
+    let q; try { q = Engine.build(id, lv, sd); } catch (e) { continue; }
+    if (q.parts || !q.spec) continue;
+    const empty = (q.spec.kind === "set" && !q.spec.all && q.spec.values.length === 0) || (q.spec.kind === "solset" && q.spec.ivs.length === 0);
+    if (empty && !found[id]) found[id] = q;
+  }
+  const L = Object.keys(found);
+  T(L.length >= 3, "notions à réponse vide trouvées : " + L.join(", "));
+  for (const id of L) {
+    const q = found[id];
+    renderQuestion(q, { eyebrow: "Test", onDone: () => 0, onNext: () => 0 });
+    const key = document.querySelector('#kp button[data-k="∅"]');
+    T(!!key, q.code + " : touche ∅ au clavier");
+    const txt = (document.querySelector(".qtext").textContent + " " + ((document.querySelector(".exact-note") || {}).textContent || ""));
+    T(/∅/.test(txt), q.code + " : la consigne dit d'écrire ∅");
+    if (key) { key.click(); const inp = document.getElementById("ans"); T(inp.value === "∅", q.code + " : la touche écrit ∅");
+      T(checkAnswer(q.spec, inp.value).status === "correct", q.code + " : ∅ accepté");
+      try { const p = previewHtml(inp.value, q.spec); T(/varnothing|emptyset|∅/.test(p), q.code + " : aperçu de ∅"); } catch (e) { T(false, q.code + " : aperçu de ∅ (" + e.message + ")"); } }
+  }
+  /* Une liste de solutions non vide a aussi la touche et la consigne (sinon elles trahiraient la réponse). */
+  let q2 = null; for (let sd = 1; sd < 200 && !q2; sd++) { const q = Engine.build("eq2fact", 1, sd); if (q.spec.kind === "set" && q.spec.values.length) q2 = q; }
+  renderQuestion(q2, { eyebrow: "Test", onDone: () => 0, onNext: () => 0 });
+  T(!!document.querySelector('#kp button[data-k="∅"]') && /∅/.test(document.querySelector(".card").textContent), q2.code + " (non vide) : touche et consigne ∅ aussi");
+  /* Clavier de calcul ordinaire : pas de ∅. */
+  renderQuestion(Engine.build("fracmul", 3, 7), { eyebrow: "Test", onDone: () => 0, onNext: () => 0 });
+  T(!document.querySelector('#kp button[data-k="∅"]'), "calcul : pas de touche ∅");
+} catch (e) { out.push("EXC " + e.message); }
+const bad = out.filter((l) => /^ÉCHEC/.test(l));
+document.getElementById("o").textContent = (bad.length ? "ÉCHEC " + bad.length + "\n" + bad.join("\n") + "\n" : "ok ensemble vide (" + out.length + " contrôles)\n") + out.join("\n");
+</script>
