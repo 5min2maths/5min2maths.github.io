@@ -108,7 +108,7 @@ Même standard (valeurs tirées, 2 à 4 parts enchaînées, 2 indices, corrigé 
 `factor` v2 (11e) : la part « combien d'entiers avec E(x) > 0 » (tableau de signes à trois facteurs, hors programme
 de 11e) est remplacée par un paramètre : pour quel c l'équation n'a plus que deux solutions (c = m²p²).
 
-## 3e lot (24.11 soir) : 45 notions de plus
+## 3e lot (24.11 soir) : 51 notions de plus
 
 Même standard. Toutes à valeurs tirées ; parts vérifiées par `tools/audit_defis.py`.
 
@@ -159,13 +159,18 @@ Même standard. Toutes à valeurs tirées ; parts vérifiées par `tools/audit_d
 | lnexp (4e) | x − 2 ln x fixe | bx − a ln x : f'(x₁), minimum (abscisse, valeur), ordonnée à l'origine de la tangente en 1 |
 | vabs (MP 1re) | A = −3, B = 5 fixe | distance, milieu (forme \|x − m\| ≤ r), entiers avec c < \|x − m\| ≤ r (deux morceaux) |
 | pvectmp (MP 4e) | u, v fixes | u × v (1re et 3e composantes), aire du triangle, volume (produit mixte) |
+| domaine (1re) | √(x + 3)/(x − 2) fixe | √(x + a) ÷ trinôme : borne de la racine, valeurs interdites qui comptent, entiers du domaine |
+| ensembles (1re) | [−4 ; 6[ et ]1 ; 10] fixes | intervalles tirés : entiers de A, A ∩ B, A ∪ B, A \ B |
+| tabval (11e) | bougie, x² − 4x fixes | x² − sx + c : image d'un négatif, autre antécédent (symétrie), plus petite image |
+| monomes (11e) | cube 3x | pavé ax, bx, cx : volume kx³, aire kx², valeur, effet du doublement |
+| reduire (11e) | x, 2x + 1, 3x − 2 | côtés tirés : périmètre réduit, x pour un périmètre, x pour deux côtés égaux |
+| valnum (11e) | v²/200, v = 40/50/60 | v²/k tiré : distance, effet d'un facteur m sur la vitesse, vitesse pour une distance donnée |
 
 ## Ce qui reste (valeurs fixes, à reprendre)
 
-Environ 20 notions gardent un défi à valeurs fixes :
-`translin`, `absval`, `domaine`, `ensembles`, `morceaux`, `transf`, `racinv`, `fracrat`, MP (`eqparam`, `ratden`, `valint`), et 9e–10e
-(`monomes`, `ordgr`,
-`reduire`, `tabval`, `valnum`), plus `algopy`, `proba2`, `probcond`, `tauxevol`,
+Environ 14 notions gardent un défi à valeurs fixes :
+`translin`, `absval`, `morceaux`, `transf`, `racinv`, `fracrat`, MP (`eqparam`, `ratden`, `valint`), et 9e–10e
+(`ordgr`), plus `algopy`, `proba2`, `probcond`, `tauxevol`,
 `vect3e` (sans classe). Liste à jour : relancer `tools/audit_defis.py`.
 
 ## À contrôler

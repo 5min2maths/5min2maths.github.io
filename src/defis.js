@@ -1816,6 +1816,82 @@ const DEFIS = (() => {
           "a) et b) " + M("\\vec u \\times \\vec v = " + vec(cr)) + ". c) " + M("\\frac{\\sqrt{" + (cr[0] ** 2 + cr[1] ** 2 + cr[2] ** 2) + "}}{2} \\approx " + D(r2c(A / 2))) + ". d) " + M("|" + pr(cr[0]) + " \\cdot " + pr(w[0]) + " + " + pr(cr[1]) + " \\cdot " + pr(w[1]) + " + " + pr(cr[2]) + " \\cdot " + pr(w[2]) + "| = " + vol) + ".");
       },
     ],
+    /* ---------- 1re Collège : domaine de définition (racine et trinôme) ---------- */
+    domaine: [
+      () => {
+        let a, r1, r2; do { a = ri(-4, 6); r1 = ri(-9, 6); r2 = ri(r1 + 1, 9); } while (r1 === -a || r2 === -a || r2 < -a || r1 + r2 === 0 || r1 * r2 === 0);
+        const s = r1 + r2, pp = r1 * r2, inter = [r1, r2].filter((r) => r >= -a), cnt = cntInt((x) => x >= -a && x !== r1 && x !== r2);
+        return P("On étudie " + M("f(x) = \\frac{\\sqrt{" + xm(-a) + "}}{" + poly([1, -s, pp]) + "}") + ".",
+          [["a) Plus petite valeur de " + M("x") + " permise par la racine", -a], ["b) Combien de valeurs interdites par le dénominateur sont dans cette zone ?", inter.length], ["c) Combien d'entiers de " + M("-10") + " à " + M("10") + " sont dans le domaine ?", cnt]],
+          ["Racine : il faut " + xmT(-a) + " ≥ 0. Dénominateur : il ne doit pas s'annuler ; factorise le trinôme (somme " + s + ", produit " + pp + ").",
+           "Une valeur interdite par le dénominateur ne compte que si elle est déjà permise par la racine. c) Compte les entiers à partir de " + -a + " jusqu'à 10, sans les valeurs interdites."],
+          "a) " + M(xm(-a) + " \\geq 0 \\iff x \\geq " + -a) + ". b) " + M(poly([1, -s, pp]) + " = (" + xm(r1) + ")(" + xm(r2) + ")") + " : valeurs " + M(r1) + " et " + M(r2) + ", dont " + M(inter.length) + " dans " + M("[" + -a + " ; +\\infty[") + ". c) De " + M(-a) + " à " + M(10) + " : " + M(11 + a) + " entiers, moins " + M(inter.filter((r) => r <= 10).length) + " : " + M(cnt) + ".");
+      },
+    ],
+    /* ---------- 1re Collège : intervalles, intersection, réunion, différence ---------- */
+    ensembles: [
+      () => {
+        let a, b, c, d; do { a = ri(-9, 0); c = ri(a + 2, 5); b = ri(c + 2, 9); d = ri(b + 1, 14); } while (b - c < 2);
+        const inA = (x) => x >= a && x < b, inB = (x) => x > c && x <= d;
+        const nA = cntInt(inA, -20, 20), nI = cntInt((x) => inA(x) && inB(x), -20, 20), nU = cntInt((x) => inA(x) || inB(x), -20, 20), nD = cntInt((x) => inA(x) && !inB(x), -20, 20);
+        return P("On donne " + M("A = [" + a + " ; " + b + "[") + " et " + M("B = \\,]" + c + " ; " + d + "]") + ".",
+          [["a) Nombre d'entiers de " + M("A"), nA], ["b) Nombre d'entiers de " + M("A \\cap B"), nI], ["c) Nombre d'entiers de " + M("A \\cup B"), nU], ["d) Nombre d'entiers de " + M("A \\setminus B") + " (dans A mais pas dans B)", nD]],
+          ["Dessine les deux intervalles sur une même droite. Crochet tourné vers l'intérieur : borne comprise ; vers l'extérieur : exclue.",
+           "A ∩ B = ]" + c + " ; " + b + "[ ; A ∪ B = [" + a + " ; " + d + "] ; A \\ B = [" + a + " ; " + c + "]."],
+          "a) De " + M(a) + " à " + M(b - 1) + " : " + M(nA) + ". b) " + M("A \\cap B = \\,]" + c + " ; " + b + "[") + " : de " + M(c + 1) + " à " + M(b - 1) + ", " + M(nI) + ". c) " + M("A \\cup B = [" + a + " ; " + d + "]") + " : " + M(nU) + ". d) " + M("A \\setminus B = [" + a + " ; " + c + "]") + " : " + M(nD) + ".");
+      },
+    ],
+    /* ---------- 11e : tableau de valeurs, images et antécédents ---------- */
+    tabval: [
+      () => {
+        let s, c, x0; do { s = 2 * R.nz(-4, 4); c = R.nz(-9, 9); x0 = R.nz(-5, 5); } while (x0 === s / 2 || s - x0 === x0);
+        const f = (x) => x * x - s * x + c;
+        return P("Soit " + M("f(x) = " + poly([1, -s, c])) + ".",
+          [["a) " + M("f(" + x0 + ")"), f(x0)], ["b) Un autre nombre que " + M(x0) + " qui a la même image", s - x0], ["c) Plus petite image possible (calcule un tableau de valeurs autour de " + M(s / 2) + ")", f(s / 2)]],
+          ["Remplace x par " + x0 + " (avec des parenthèses s'il est négatif) : les puissances d'abord.",
+           "Le tableau de valeurs est symétrique autour de x = " + s / 2 + " : f(" + s / 2 + " − k) = f(" + s / 2 + " + k). La plus petite image est au centre."],
+          "a) " + M("f(" + x0 + ") = " + pr(x0) + "^2" + sgD(-s) + " \\cdot " + pr(x0) + sgD(c) + " = " + f(x0)) + ". b) Symétrie autour de " + M(s / 2) + " : " + M("f(" + (s - x0) + ") = " + f(s - x0)) + ". c) " + M("f(" + s / 2 + ") = " + f(s / 2)) + ".");
+      },
+    ],
+    /* ---------- 11e : monômes (pavé) ---------- */
+    monomes: [
+      () => {
+        let a, b, c; do { a = ri(1, 5); b = ri(2, 6); c = ri(2, 7); } while (a === b || b === c || a === c);
+        const v = ri(2, 5), V = a * b * c, S = 2 * (a * b + b * c + a * c);
+        const cf = (k) => (k === 1 ? "" : k);
+        return P("Un pavé droit a pour dimensions " + M(cf(a) + "x") + ", " + M(b + "x") + " et " + M(c + "x") + " (en cm).",
+          [["a) Coefficient du volume écrit sous forme de monôme " + M("kx^3"), V], ["b) Coefficient de l'aire totale (6 faces) écrite " + M("kx^2"), S], ["c) Volume pour " + M("x = " + v) + " (cm³)", V * v ** 3], ["d) Si " + M("x") + " double, le volume est multiplié par…", 8]],
+          ["Multiplie les coefficients entre eux et les x entre eux : x · x · x = x³.",
+           "Aire : trois paires de faces, 2(" + cf(a) + "x · " + b + "x + " + b + "x · " + c + "x + " + cf(a) + "x · " + c + "x). d) (2x)³ = 8x³."],
+          "a) " + M(cf(a) + "x \\cdot " + b + "x \\cdot " + c + "x = " + V + "x^3") + ". b) " + M("2(" + a * b + "x^2 + " + b * c + "x^2 + " + a * c + "x^2) = " + S + "x^2") + ". c) " + M(V + " \\cdot " + v + "^3 = " + nb(V * v ** 3)) + " cm³. d) " + M(V + "(2x)^3 = 8 \\cdot " + V + "x^3") + " : multiplié par 8.");
+      },
+    ],
+    /* ---------- 11e : réduire (périmètre d'un triangle) ---------- */
+    reduire: [
+      () => {
+        let a1, b1, a2, b2, a3, b3, xi, xp, Pp;
+        do { a1 = ri(1, 4); b1 = ri(1, 9); a2 = ri(2, 5); b2 = ri(1, 9); a3 = ri(2, 6); b3 = ri(1, 9); xi = (b1 + b3) / (a3 - a1); xp = ri(3, 9); Pp = (a1 + a2 + a3) * xp + b1 + b2 - b3; }
+        while (a3 <= a1 || !Number.isInteger(xi) || xi < 2 || xi > 12 || b1 + b2 === b3 || a3 * xp - b3 <= 0 || a3 * xi - b3 <= 0);
+        const A = a1 + a2 + a3, B = b1 + b2 - b3, cf = (k) => (k === 1 ? "" : k);
+        return P("Un triangle a des côtés de " + M(cf(a1) + "x + " + b1) + ", " + M(a2 + "x + " + b2) + " et " + M(a3 + "x - " + b3) + " (en cm).",
+          [["a) Coefficient de " + M("x") + " dans le périmètre réduit", A], ["b) Terme constant du périmètre réduit", B], ["c) Valeur de " + M("x") + " pour un périmètre de " + M(Pp) + " cm", xp], ["d) Valeur de " + M("x") + " pour laquelle le premier et le troisième côté sont égaux", xi]],
+          ["Additionne les trois côtés, puis regroupe les termes en x et les nombres (attention au « − " + b3 + " »).",
+           "c) Résous " + A + "x " + (B < 0 ? "− " + -B : "+ " + B) + " = " + Pp + ". d) Résous " + cf(a1) + "x + " + b1 + " = " + a3 + "x − " + b3 + "."],
+          "a) et b) " + M("P = " + poly([A, B])) + ". c) " + M(poly([A, B]) + " = " + Pp + " \\iff " + A + "x = " + (Pp - B) + " \\iff x = " + xp) + ". d) " + M(cf(a1) + "x + " + b1 + " = " + a3 + "x - " + b3 + " \\iff " + (b1 + b3) + " = " + cfD(a3 - a1) + "x \\iff x = " + xi) + ".");
+      },
+    ],
+    /* ---------- 11e : valeur numérique (distance de freinage) ---------- */
+    valnum: [
+      () => {
+        const k = pk([100, 150, 200, 250]), v1 = pk([30, 40, 50, 60]), m = pk([2, 3]), v3 = pk([70, 80, 90, 100, 110, 120].filter((v) => v !== v1 * m && Number.isInteger((v * v * 100) / k)));
+        const d = (v) => (v * v) / k, D3 = d(v3);
+        return P("La distance de freinage d'une voiture (en m) vaut environ " + M("d = \\frac{v^2}{" + k + "}") + ", avec " + M("v") + " en km/h.",
+          [["a) " + M("d") + " pour " + M("v = " + v1) + " km/h (m, au dixième)", d(v1), 0.1], ["b) Si la vitesse est multipliée par " + m + ", la distance est multipliée par…", m * m], ["c) Vitesse (km/h) pour laquelle la distance de freinage vaut " + M(D(r2c(D3))) + " m", v3]],
+          ["Remplace v par sa valeur, calcule le carré, puis divise par " + k + ".",
+           "b) (" + m + "v)² = " + m * m + "v². c) v² = " + k + " · " + T(r2c(D3)) + " : cherche le nombre dont le carré vaut ce résultat."],
+          "a) " + M("\\frac{" + v1 + "^2}{" + k + "} = \\frac{" + nb(v1 * v1) + "}{" + k + "} " + (Number.isInteger(d(v1) * 10) ? "= " : "\\approx ") + D(r1(d(v1)))) + " m. b) " + M("(" + m + "v)^2 = " + m * m + "v^2") + " : multipliée par " + M(m * m) + ". c) " + M("v^2 = " + k + " \\cdot " + D(r2c(D3)) + " = " + nb(v3 * v3)) + ", " + M("v = " + v3) + " km/h.");
+      },
+    ],
   };
 })();
 // Texte simple : milliers avec ' (indices et étiquettes).
