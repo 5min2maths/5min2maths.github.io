@@ -16,3 +16,6 @@ Object.assign(ORDRE_THEME.MATU, {"matrices":"M4C03","translin":"M4C03","appllin"
 // 24.11 (agent c3geo) : géométrie vectorielle de l'espace, 3e Collège (src/ch3c_geo.js, chapitre M3C06). Ajouté à la main.
 Object.assign(ORDRE.MATU, {"vect3d":150,"colin":151,"droite3d":152,"plans":153,"posrel":154,"pscal3d":155,"distances":156,"sphere":157});
 Object.assign(ORDRE_THEME.MATU, {"vect3d":"M3C06","colin":"M3C06","droite3d":"M3C06","plans":"M3C06","posrel":"M3C06","pscal3d":"M3C06","distances":"M3C06","sphere":"M3C06"});
+// 25.11 (agent c4plus) : intégration par parties et par substitution (M4C01), étude ln/exp et équations différentielles (M4C02). Ajouté à la main.
+Object.assign(ORDRE.MATU, {"intparties":204,"intsubst":205,"etudelnexp":212,"eqdiff":213});
+Object.assign(ORDRE_THEME.MATU, {"intparties":"M4C01","intsubst":"M4C01","etudelnexp":"M4C02","eqdiff":"M4C02"});

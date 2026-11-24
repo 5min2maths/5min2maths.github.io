@@ -74,11 +74,11 @@ Code des compétences : référentiel matu (`3.AN.03a` = 3e, analyse, groupe 03,
 | | `integrale` — intégrale définie (théorème fondamental), propriétés, valeur moyenne | N+R | 4.AN.02a–c, 03a |
 | | `aires` (nom à éviter : déjà pris au CO) → `aireint` — aire sous une courbe, entre deux courbes | N+R | 4.AN.05a, 05b |
 | | `volrev` — volume d'un corps de révolution | N+R | 4.AN.05c |
-| | `intparties` — intégration par parties ; `intsubst` — par substitution | **R** | 4.AN.04a, 04b |
+| | **`intparties`** — intégration par parties ; **`intsubst`** — par substitution | **R** | 4.AN.04a, 04b (**créées le 25.11**) |
 | 2. ln et exp | `lnexp` — propriétés, dérivées et primitives de ln et exp | N+R | 4.AN.06a–c |
-| | `etudelnexp` — étude de fonctions avec ln, exp (croissances comparées) | N+R | 4.AN.06d |
+| | **`etudelnexp`** — étude de fonctions avec ln, exp (croissances comparées) | N+R | 4.AN.06d (**créée le 25.11**) |
 | | `modexp` (2e) étendu → `croissance` — N(t) = N₀·e^(kt), doublement, demi-vie, croissance limitée | N+R | 4.AN.07a–c |
-| | `eqdiff` — équations différentielles à variables séparables | **R** | 4.AN.08a–c, 09a–b |
+| | **`eqdiff`** — équations différentielles à variables séparables | **R** | 4.AN.08a–c, 09a–b (**créée le 25.11**) |
 | 3. Algèbre linéaire | `matrices` — opérations, produit, déterminant, inverse | N+R | 4.GV.02b, 02c |
 | | `translin` — matrice d'une transformation (rotation, symétrie, projection, homothétie), composition, déterminant = rapport d'aires | N+R | 4.GV.01a–d |
 | | `syslin` — systèmes par les matrices (Cramer, inverse) | N+R | 4.GV.02e |
@@ -139,6 +139,12 @@ Fichier `src/ch4c_ana.js` (paquet de chargement « 15 », chargé après `ch3c_a
 | `condbayes` | Probabilités conditionnelles et Bayes (id ≠ `probcond` du lycée français) | M4C04 | 4.PS.02a–d |
 | `varalea` | Variable aléatoire : espérance, variance | M4C04 | 4.PS.03a, 03b |
 | `binomiale` | Loi binomiale (id ≠ `binom` du lycée français) | M4C04 | 4.PS.03c, 03d |
+| `intparties` (R, 25.11) | Intégration par parties (x·eˣ, ln x, x·cos x, x²eˣ, eˣ·sin x, xⁿ·ln x) | M4C01 | 4.AN.04a |
+| `intsubst` (R, 25.11) | Intégration par substitution (ax + b, x² + c, sin x, ln x, eˣ + c, racines) | M4C01 | 4.AN.04b |
+| `etudelnexp` (25.11) | Étude de fonctions avec ln et exp : domaine, zéro, extremum, croissances comparées | M4C02 | 4.AN.06d |
+| `eqdiff` (R, 25.11) | Équations différentielles : y' = ky, y' = ay + b, variables séparables, modèles | M4C02 | 4.AN.08–09 |
+
+Ajouts du 25.11 (agent c4plus) : réponses = valeur d'une intégrale (exacte : ln, e, π acceptés ; ou arrondie) ou expression (primitive avec condition F(a) = 0, solution y(x) avec condition initiale). Champ `niv: "R"` posé sur `intparties`, `intsubst`, `eqdiff` (pas encore lu par le moteur, décision § 6.1). Rangs `ORDRE.MATU` 204, 205, 212, 213 (fin de `src/ordre.js`, à la main).
 
 Restent pour la 4e : `normale`, `stats`/`quartiles` au Collège (M4C04), algèbre linéaire (M4C03, réponses matricielles à créer), et le renforcé (MA2).
 
@@ -167,8 +173,8 @@ Restent pour ce chapitre : `pvect` (produit vectoriel, produit mixte : MA2), fig
 2. **Limites et asymptotes (3e, M3C02)** : `limites`, `limitinf`, `asymptotes`, `continuite` — prérequis du nombre dérivé et de l'étude de fonctions rationnelles ; puis `etudefct`, `derivseconde` (R), `derivth`.
 3. **Géométrie vectorielle de l'espace (3e, M3C06)** — fait le 24.11 : `vect3d`, `droite3d`, `plans`, `posrel`, `pscal3d`, `distances`, `sphere` ; R : `colin` (fait), `pvect` (à faire). Gros chapitre (120 exercices Sésamath) : figures 3D en SVG à prévoir (perspective cavalière, comme `solides` au CO).
 4. **Combinatoire et probabilités (3e, M3C05)** : `combi`, `probaxiomes`, `probarbre`.
-5. **Intégration (4e, M4C01)** — fait le 24.11 : `primitives`, `integrale`, `aireint`, `volrev` ; R : `intparties`, `intsubst`.
-6. **ln et exp (4e, M4C02)** — fait le 24.11 : `lnexp` (avec tangente et extremum, une partie de `etudelnexp`), `croissance` ; R : `eqdiff`.
+5. **Intégration (4e, M4C01)** — fait le 24.11 : `primitives`, `integrale`, `aireint`, `volrev` ; R : `intparties`, `intsubst` (fait le 25.11).
+6. **ln et exp (4e, M4C02)** — fait le 24.11 : `lnexp` (avec tangente et extremum, une partie de `etudelnexp`), `croissance` ; `etudelnexp` et R : `eqdiff` (faits le 25.11).
 7. **Probabilités 2 et statistique (4e, M4C04)** — fait le 24.11 : `condbayes` (conditionnelles et Bayes), `varalea`, `binomiale` ; puis (agent greste) `normale` (sans table, règle 68-95-99,7) et `stats`, `quartiles` ouverts à la 4e (`CH: [15]`).
 8. **Algèbre linéaire (4e, M4C03)** — fait le 24.11 (agent greste) : `matrices` (avec Cramer, donc `syslin` inclus), `translin` ; reste `appllin`, `bases`.
 9. **Renforcé (4e)** : `cplxalg`, `cplxtrig`, `cplxeq`, `suitearith`, `suitegeom`, `serie`.
