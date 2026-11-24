@@ -89,6 +89,11 @@ sommet, la propriété reste vraie), diagrammes qu'on construit en tirant les ba
 | angtri (9e) | réponse tapée | déplacer les sommets d'un triangle : les trois angles mis bout à bout forment toujours un angle plat |
 | diagr (9e) | réponse tapée | tirer les barres d'un diagramme, puis la ligne de la moyenne jusqu'à ce que ce qui dépasse comble les trous |
 | vol (9e–11e) | réponse tapée | étirer un pavé de cubes (longueur, largeur, hauteur) ; volume = couches × cubes par couche |
+| cercthales (11e, 24.11) | réponse tapée | glisser C sur le cercle de diamètre [AB] : l'angle en C reste droit ; isocèle en C ; l'angle au centre BOC vaut le double de l'angle en A |
+| proba (11e, 24.11) | réponse tapée (deux dés) | remplir une urne (glisser ou toucher des boules rouges, bleues, vertes ; les sortir pour les enlever) jusqu'à P(rouge) = 1/2, 2/5, puis P(rouge) = 1/2 et P(verte) = 1/6 ; barre des chances ; piège « 2 rouges pour 5 bleues » |
+| modaff (1re Collège, 24.11) | réponse tapée | régler la droite du taxi A avec deux poignées (ordonnée à l'origine, un point), glisser un repère jusqu'au croisement avec B, construire la droite d'un taxi C qui passe par un point de B |
+| f2formes (1re Collège, 24.11) | réponse tapée | tirer le sommet d'une parabole y = (x − h)² + k pour la poser sur une parabole cible ; la forme développée suit ; puis viser deux zéros donnés |
+| pente (10e, 24.11) | réponse tapée | tirer le bout de la route (hauteur, puis longueur d'une rampe) ; repères tous les 100 m (« 6 % = 6 m par 100 m »), hauteurs dessinées 5 fois plus grandes |
 
 Chaque défi garde une question « à toi, sans la figure » quand c'est utile (calcul tapé après le geste).
 

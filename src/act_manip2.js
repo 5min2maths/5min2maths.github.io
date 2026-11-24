@@ -3,7 +3,9 @@
 // Remplace la partie « Manipule » (predict, defis, play) des leçons : reduire, distrib, idrem, factor (tuiles
 // algébriques), eq1 (balance), fracadd (barres de fractions), rel (flèches sur la droite graduée), thales (parallèle
 // qu'on glisse), simil (homothétie), angles (sécante qu'on fait tourner), angtri (triangle déformable), diagr (barres et
-// moyenne), vol (pavé de cubes), sys2 (point à placer sur deux droites), utemps (barre d'une heure à double échelle). Le rappel de cours (LESSONS) ne change pas. Chargé après act_manip.js.
+// moyenne), vol (pavé de cubes), sys2 (point à placer sur deux droites), utemps (barre d'une heure à double échelle).
+// 24.11 : cercthales (C glisse sur le cercle), proba (urne qu'on remplit), modaff (droite réglée par deux poignées),
+// f2formes (parabole dont on tire le sommet), pente (bout de la route qu'on tire). Le rappel de cours (LESSONS) ne change pas. Chargé après act_manip.js.
 (function () {
   if (typeof manipLesson === "undefined" || typeof ACTIVE === "undefined") return;
   const M = MANIP, nb = M.nb, esc = M.esc, clamp = M.clamp;
@@ -552,6 +554,230 @@
         hint: (st, s) => (s === 0 && st.m === 50 ? "0,75 h, ce n'est pas 50 min : ce sont les trois quarts de 60 minutes." : ""),
         goal: [(st) => (st.m === 45 ? "45 min = 45 ÷ 60 = 0,75 h : trois quarts d'heure." : ""), (st) => (st.m === 12 ? "0,2 h = 0,2 · 60 = 12 min (deux dixièmes d'heure, de 6 min chacun)." : ""), (st) => (st.m === 21 ? "0,35 h = 0,35 · 60 = 21 min. Des heures vers les minutes, on multiplie par 60." : "")],
         ask: [null, null, { q: "Écris 1 h 24 min en heures décimales.", ans: 1.4, ok: "24 ÷ 60 = 0,4 : 1 h 24 min = 1,4 h.", no: "Divise les minutes par 60, puis ajoute l'heure entière." }] }),
+    });
+  }
+  // ===================== Cercle de Thalès : le point C qu'on promène sur le cercle (24.11) =====================
+  // [AB] diamètre ; C glisse sur le demi-cercle : l'angle en C reste droit, l'angle en A vaut la moitié de l'angle au centre BOC.
+  {
+    const O = { x: 160, y: 128 }, R = 100, A = [60, 128], B = [260, 128];
+    const PHI = (p) => { let a = (Math.atan2(O.y - p.y, p.x - O.x) * 180) / Math.PI; if (a < 0) a = a < -90 ? 180 : 0; return clamp(Math.round(a / 2) * 2, 6, 174); };
+    const unit = (P, Q) => { const dx = Q[0] - P[0], dy = Q[1] - P[1], l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; };
+    set("cercthales", {
+      predict: { q: "Le triangle ABC est inscrit dans un cercle de diamètre [AB]. L'angle en C mesure…", choices: ["90°", "60°", "ça dépend de C"], good: 0, why: "C'est le cercle de Thalès : où que soit C sur le cercle, l'angle ACB est droit." },
+      defis: ["[AB] est un diamètre. Glisse C sur le cercle pour que l'angle en A mesure 35°. Regarde l'angle en C.", "Place C pour que le triangle ABC soit isocèle en C (CA = CB).", "Place C pour que l'angle au centre BOC mesure 100°. Compare-le à l'angle en A."],
+      play: manipLesson({ W: 320, H: 236, aria: "triangle ABC inscrit dans un cercle de diamètre AB",
+        note: "Glisse le point C le long du cercle (ou flèches du clavier, 2° par appui). A et B restent aux deux bouts du diamètre ; AB = 10.",
+        init: (s) => ({ phi: [130, 40, 60][s] }),
+        handles: (st) => { const [x, y] = pt(O.x, O.y, R, st.phi); return [{ x, y, label: "point C, angle en A " + st.phi / 2 + "°", role: "slider", svg: dot("var(--margin)", "C") }]; },
+        move: (st, k, p) => { st.phi = PHI(p); },
+        nudge: (st, k, dx, dy) => { st.phi = clamp(st.phi + 2 * (dy - dx), 6, 174); },
+        draw: (st, s) => { const a = st.phi / 2, b = 90 - a, C = pt(O.x, O.y, R, st.phi), u = unit(C, A), v = unit(C, B), q = 11;
+          let g = `<circle cx="${O.x}" cy="${O.y}" r="${R}" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/>`;
+          g += `<polygon points="${A.join(",")} ${C[0].toFixed(1)},${C[1].toFixed(1)} ${B.join(",")}" fill="var(--blue)" fill-opacity="0.08" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/>`;
+          if (s === 2) { const [lx, ly] = pt(O.x, O.y, 46, st.phi / 2); g += sector(O.x, O.y, 30, 0, st.phi, "var(--warn)") + `<line x1="${O.x}" y1="${O.y}" x2="${C[0].toFixed(1)}" y2="${C[1].toFixed(1)}" stroke="var(--warn)" stroke-width="2"/>` + T(lx, ly + 4, st.phi + "°", "middle", 12, ' font-weight="800" fill="var(--warn)"'); }
+          g += sector(A[0], A[1], 34, 0, a, "var(--blue)") + sector(B[0], B[1], 34, 180 - b, 180, "var(--ok)");
+          g += `<path d="M${(C[0] + u[0] * q).toFixed(1)},${(C[1] + u[1] * q).toFixed(1)} L${(C[0] + (u[0] + v[0]) * q).toFixed(1)},${(C[1] + (u[1] + v[1]) * q).toFixed(1)} L${(C[0] + v[0] * q).toFixed(1)},${(C[1] + v[1] * q).toFixed(1)}" fill="none" stroke="var(--margin)" stroke-width="2"/>`;
+          const [ax, ay] = pt(A[0], A[1], 50, a / 2), [bx, by] = pt(B[0], B[1], 50, 180 - b / 2), w = Math.hypot(u[0] + v[0], u[1] + v[1]) || 1;
+          g += T(ax, ay + 4, a + "°", "middle", 12, ' font-weight="800" fill="var(--blue)"') + T(bx, by + 4, b + "°", "middle", 12, ' font-weight="800" fill="var(--ok)"');
+          g += T(C[0] + ((u[0] + v[0]) / w) * 30, C[1] + ((u[1] + v[1]) / w) * 30 + 4, "90°", "middle", 12, ' font-weight="800" fill="var(--margin)"');
+          g += `<circle cx="${O.x}" cy="${O.y}" r="3" fill="var(--ink)"/>` + T(O.x, O.y + 17, "O", "middle", 12, ' font-weight="700"');
+          return g + T(A[0] - 8, A[1] + 5, "A", "end", 13, ' font-weight="700"') + T(B[0] + 8, B[1] + 5, "B", "start", 13, ' font-weight="700"'); },
+        out: (st, s) => { const a = st.phi / 2, b = 90 - a, r = (Math.PI * a) / 180;
+          return `Angle en A : <b style="color:var(--blue)">${a}°</b> · en B : <b style="color:var(--ok)">${b}°</b> · en C : <b style="color:var(--margin)">90°</b><br>CA ≈ ${r1(10 * Math.cos(r))} · CB ≈ ${r1(10 * Math.sin(r))}` + (s === 2 ? `<br>Angle au centre BOC : <b style="color:var(--warn)">${st.phi}°</b> = 2 · ${a}°` : ""); },
+        hint: (st, s) => (s === 0 ? (st.phi === 110 ? "C'est l'angle en B qui mesure 35° : l'angle en A est l'angle bleu, au bout gauche du diamètre." : "L'angle en C reste à 90°, où que soit C. Il faut que l'angle bleu, en A, mesure 35°.")
+          : s === 1 ? "Isocèle en C : CA = CB, donc les angles en A et en B sont égaux. Combien chacun, si ensemble ils font 90° ?"
+          : "L'angle orange, au centre, vaut toujours le double de l'angle bleu en A : ici " + st.phi + "° = 2 · " + st.phi / 2 + "°."),
+        goal: [(st) => (st.phi === 70 ? "Angle en A 35°, angle en C toujours 90° : l'angle en B vaut 90 − 35 = 55°. Où que soit C sur le cercle, l'angle ACB est droit (cercle de Thalès)." : ""),
+          (st) => (st.phi === 90 ? "C en haut du cercle : CA = CB ≈ 7,1 et deux angles de 45°. Le triangle est rectangle ET isocèle en C." : ""),
+          (st) => (st.phi === 100 ? "Angle au centre 100°, angle en A 50° : l'angle inscrit vaut la moitié de l'angle au centre qui intercepte le même arc BC." : "")],
+        ask: [{ q: "[AB] est un diamètre, C est sur le cercle et l'angle en A mesure 25°. Combien mesure l'angle en B ?", ans: 65, ok: "Angle droit en C : 90 − 25 = 65°.", no: "L'angle en C vaut 90°, donc A + B = 90°." },
+          { q: "Diamètre AB = 10 et AC = 6 : calcule BC.", ans: 8, ok: "Le triangle est rectangle en C : BC² = 10² − 6² = 64, BC = 8.", no: "Rectangle en C, d'hypoténuse [AB] : Pythagore." },
+          { q: "Un angle au centre mesure 140°. Combien mesure l'angle inscrit qui intercepte le même arc ?", ans: 70, ok: "La moitié de l'angle au centre : 70°.", no: "L'angle inscrit vaut la moitié de l'angle au centre." }] }),
+    });
+  }
+
+  // ===================== Probabilités : l'urne qu'on remplit (24.11) =====================
+  // On glisse (ou touche) des boules de couleur dans l'urne ; la barre des chances et P(rouge) = rouges ÷ toutes les boules suivent.
+  {
+    const COL = { r: "var(--bad)", b: "var(--blue)", v: "var(--ok)" }, NOM = { r: "rouge", b: "bleue", v: "verte" }, LET = { r: "R", b: "B", v: "V" };
+    const URN = { x: 16, y: 44, w: 160, h: 160 }, MAXB = 12, GX = 16, GW = 288, GY = 216;
+    const STEPS = [{ c: ["r", "b"], start: ["r", "r", "r"] }, { c: ["r", "b"], start: ["r", "r", "b", "b", "b", "b"] }, { c: ["r", "b", "v"], start: ["r", "b", "v"] }];
+    const cnt = (st, c) => st.balls.filter((x) => x === c).length;
+    const fr = (n, d) => { const g = gcd(n, d) || 1; return n + "/" + d + (g > 1 ? " = " + n / g + "/" + d / g : ""); };
+    const pl = (n, c) => n + " " + NOM[c] + (n > 1 ? "s" : "");
+    const slot = (i) => ({ x: URN.x + 26 + (i % 4) * 36, y: URN.y + URN.h - 24 - Math.floor(i / 4) * 34 });
+    const src = (j) => ({ x: 252, y: 72 + j * 52 });
+    const ball = (c, r = 13) => `<circle r="${r}" fill="${COL[c]}" stroke="var(--paper)" stroke-width="2"/><text y="4.5" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" style="pointer-events:none">${LET[c]}</text>`;
+    const add = (st, c) => { if (st.balls.length >= MAXB) { st.msg = "L'urne est pleine (12 boules) : enlève des boules."; return; } st.balls.push(c); st.msg = ""; };
+    set("proba", {
+      predict: { q: "Une urne contient 2 boules rouges et 1 bleue. On ajoute une boule bleue. La probabilité de tirer une rouge…", choices: ["augmente", "diminue", "ne change pas"], good: 1, why: "Avant : 2 rouges sur 3 boules, 2/3. Après : 2 rouges sur 4 boules, 2/4 = 1/2. Les rouges n'ont pas changé, mais le nombre de cas possibles a augmenté." },
+      defis: ["L'urne contient 3 rouges. Ajoute ou enlève des boules pour que P(rouge) = 1/2.", "Nouvelle urne : obtiens P(rouge) = 2/5.", "Avec trois couleurs : obtiens P(rouge) = 1/2 et P(verte) = 1/6."],
+      play: manipLesson({ W: 320, H: 236, aria: "urne à remplir de boules de couleur",
+        note: "Glisse une boule de droite dans l'urne (ou touche-la) pour l'ajouter ; glisse une boule hors de l'urne (ou touche-la) pour l'enlever. On tire une boule au hasard.",
+        init: (s) => ({ balls: STEPS[s].start.slice(), drag: -1, dx: 0, dy: 0, msg: "" }),
+        handles: (st, s) => { const cs = STEPS[s].c;
+          return cs.map((c, j) => { const P = src(j), d = st.drag === j; return { x: d ? st.dx : P.x, y: d ? st.dy : P.y, label: "ajouter une boule " + NOM[c], svg: ball(c, 15), hit: { x: -26, y: -24, w: 52, h: 48 } }; })
+            .concat(st.balls.map((c, i) => { const P = slot(i), d = st.drag === cs.length + i; return { x: d ? st.dx : P.x, y: d ? st.dy : P.y, label: "boule " + NOM[c] + " dans l'urne : la toucher pour l'enlever", svg: ball(c), hit: { x: -17, y: -17, w: 34, h: 34 } }; })); },
+        grab: (st, k, s) => { st.msg = ""; st.drag = k; const cs = STEPS[s].c, P = k < cs.length ? src(k) : slot(k - cs.length); st.dx = P.x; st.dy = P.y; },
+        move: (st, k, p) => { st.dx = clamp(p.x, 10, 310); st.dy = clamp(p.y, 10, 230); },
+        drop: (st, k, p, s) => { st.drag = -1; const cs = STEPS[s].c, inUrn = M.zoneAt([URN], p, 6) === 0;
+          if (k < cs.length) { if (inUrn) add(st, cs[k]); else st.msg = "Pour l'ajouter, lâche la boule dans l'urne (ou touche-la simplement)."; }
+          else if (!inUrn) st.balls.splice(k - cs.length, 1); },
+        tap: (st, k, s) => { st.drag = -1; const cs = STEPS[s].c; if (k < cs.length) add(st, cs[k]); else { st.balls.splice(k - cs.length, 1); st.msg = ""; } },
+        draw: (st, s) => { const n = st.balls.length, cs = STEPS[s].c;
+          let g = `<path d="M${URN.x},${URN.y} L${URN.x},${URN.y + URN.h - 8} Q${URN.x},${URN.y + URN.h} ${URN.x + 8},${URN.y + URN.h} L${URN.x + URN.w - 8},${URN.y + URN.h} Q${URN.x + URN.w},${URN.y + URN.h} ${URN.x + URN.w},${URN.y + URN.h - 8} L${URN.x + URN.w},${URN.y}" fill="var(--grid)" stroke="var(--ink)" stroke-width="2.5"/>`;
+          g += T(URN.x + URN.w / 2, 30, "urne : " + n + " boule" + (n > 1 ? "s" : ""), "middle", 13, ' font-weight="700"');
+          cs.forEach((c, j) => { g += T(src(j).x, src(j).y + 30, "+ " + NOM[c], "middle", 11, ' fill="var(--ink-soft)"'); });
+          g += T(252, 30, "réserve", "middle", 12, ' fill="var(--ink-soft)"');
+          let x = GX; g += `<rect x="${GX}" y="${GY}" width="${GW}" height="14" rx="3" fill="var(--grid)" stroke="var(--line)"/>`;
+          if (n) cs.forEach((c) => { const w = (GW * cnt(st, c)) / n; if (w > 0) g += `<rect x="${x.toFixed(1)}" y="${GY}" width="${w.toFixed(1)}" height="14" fill="${COL[c]}" stroke="var(--paper)"/>`; x += w; });
+          return g; },
+        out: (st, s) => { const n = st.balls.length, cs = STEPS[s].c; if (!n) return "L'urne est vide : ajoute des boules.";
+          return "Dans l'urne : " + cs.map((c) => pl(cnt(st, c), c)).join(", ") + " (" + n + " boules)<br>" + cs.filter((c) => c !== "b" || s < 2).map((c) => `P(${NOM[c]}) = <b>${fr(cnt(st, c), n)}</b>`).join(" · "); },
+        hint: (st, s) => { if (st.msg) return st.msg; const n = st.balls.length, r = cnt(st, "r"), b = cnt(st, "b"), v = cnt(st, "v"); if (!n) return "Ajoute des boules dans l'urne.";
+          if (s === 1 && 5 * r === 2 * b && r) return r + " rouges pour " + b + " bleues, cela fait " + n + " boules : P(rouge) = " + r + "/" + n + ". Il faut 2 rouges sur 5 boules EN TOUT.";
+          const t = [1 / 2, 2 / 5, 1 / 2][s], pr = r / n;
+          if (Math.abs(pr - t) > 1e-9) return pr > t ? "P(rouge) est trop grande : trop de rouges par rapport au total. Ajoute d'autres couleurs (ou enlève des rouges)." : "P(rouge) est trop petite : ajoute des rouges (ou enlève d'autres boules).";
+          return "P(rouge) = 1/2 est atteinte. Pour P(verte) = 1/6, il faut 1 verte pour 6 boules en tout" + (v * 6 > n ? " : il y a trop de vertes." : " : il manque des vertes (ou il y a trop d'autres boules)."); },
+        goal: [(st) => { const n = st.balls.length, r = cnt(st, "r"); return n && 2 * r === n ? r + " rouges sur " + n + " boules : P(rouge) = " + fr(r, n) + ". Une chance sur deux : autant de rouges que d'autres boules." : ""; },
+          (st) => { const n = st.balls.length, r = cnt(st, "r"); return n && 5 * r === 2 * n ? "P(rouge) = " + fr(r, n) + " : " + r + " rouges sur " + n + " boules. On compare les rouges à TOUTES les boules, pas aux bleues seulement." : ""; },
+          (st) => { const n = st.balls.length, r = cnt(st, "r"), v = cnt(st, "v"); return n && 2 * r === n && 6 * v === n ? "P(rouge) = 1/2, P(verte) = 1/6, donc P(bleue) = 1 − 1/2 − 1/6 = 1/3 (" + cnt(st, "b") + " sur " + n + ") : la somme des probabilités vaut 1." : ""; }],
+        ask: [{ q: "Une urne contient 4 rouges et 6 bleues. Probabilité de tirer une bleue ? (fraction ou nombre décimal)", ans: 0.6, ok: "6 bleues sur 10 boules : 6/10 = 0,6.", no: "Cas favorables (les bleues) sur cas possibles (toutes les boules)." }, null,
+          { q: "Urne de 3 rouges et 2 bleues : on tire deux boules sans remise. P(deux rouges) ? (fraction)", ans: 0.3, ok: "3/5 · 2/4 = 6/20 = 3/10.", no: "Au premier tirage 3/5 ; au deuxième, il reste 2 rouges sur 4 boules : multiplie." }] }),
+    });
+  }
+
+  // ===================== Modéliser (premier degré) : la droite qu'on règle avec deux poignées (24.11) =====================
+  // Taxi A = 6 + 2x contre taxi B = 3x : on règle la droite de A (ordonnée à l'origine, puis un point), on cherche où elles se croisent, puis on construit un taxi C.
+  {
+    const X = (x) => 36 + x * 22, Y = (y) => 200 - y * 5.5, YM = 32, KX = 214;
+    const slope = (st) => (st.Q[1] - st.p) / st.Q[0];
+    const seg = (m, p, col, w, dash) => { let lo = 0, hi = 12; if (m) { const a = -p / m, b = (YM - p) / m; lo = Math.max(0, Math.min(a, b)); hi = Math.min(12, Math.max(a, b)); } else if (p < 0 || p > YM) return "";
+      return lo < hi ? `<line x1="${X(lo).toFixed(1)}" y1="${Y(m * lo + p).toFixed(1)}" x2="${X(hi).toFixed(1)}" y2="${Y(m * hi + p).toFixed(1)}" stroke="${col}" stroke-width="${w}"${dash ? ' stroke-dasharray="6 4"' : ""}/>` : ""; };
+    const eqn = (m, p) => "y = " + poly([[+m.toFixed(2), "x"], [p, ""]]).replace(".", ",");
+    const sq = (col) => `<rect x="-9" y="-9" width="18" height="18" rx="4" fill="${col}" stroke="var(--paper)" stroke-width="2.5"/>`;
+    const line2 = (st, s) => { const col = s === 2 ? "var(--margin)" : "var(--blue)";
+      return [{ x: X(0), y: Y(st.p), label: "ordonnée à l'origine : " + st.p + " CHF", role: "slider", svg: sq(col) }, { x: X(st.Q[0]), y: Y(st.Q[1]), label: "point de la droite : " + st.Q[0] + " km, " + st.Q[1] + " CHF", svg: dot(col, "") }]; };
+    set("modaff", {
+      predict: { q: "Taxi A : 6 CHF + 2 CHF/km. Taxi B : 3 CHF/km. Pour 10 km, le moins cher est…", choices: ["A", "B", "ils coûtent pareil"], good: 0, why: "A : 6 + 20 = 26 CHF ; B : 30 CHF. Au-delà de 6 km, la part fixe de A est « remboursée »." },
+      defis: ["Règle la droite du taxi A : 6 CHF de prise en charge, puis 2 CHF par km.", "Glisse le repère : pour combien de km les deux taxis coûtent-ils le même prix ?", "Taxi C : 12 CHF de prise en charge, et le même prix que B pour 8 km. Règle sa droite."],
+      play: manipLesson({ W: 320, H: 236, aria: "graphique prix en fonction des kilomètres",
+        note: (st, s) => (s === 1 ? "Glisse le repère rouge le long de l'axe des km (ou flèches du clavier)." : "Glisse le carré sur l'axe vertical (prise en charge) et le point rond (un autre point de la droite) ; flèches du clavier aussi."),
+        init: (s) => (s === 1 ? { x: 2 } : s === 0 ? { p: 2, Q: [4, 8] } : { p: 3, Q: [5, 10] }),
+        handles: (st, s) => (s === 1 ? [{ x: X(st.x), y: KX, label: "repère à " + st.x + " km", role: "slider", svg: `<rect x="-26" y="-11" width="52" height="22" rx="11" fill="var(--margin)"/><text y="5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">⇔ ${st.x} km</text>`, hit: { x: -34, y: -22, w: 68, h: 44 } }] : line2(st, s)),
+        move: (st, k, p, s) => { if (s === 1) { st.x = clamp(Math.round((p.x - 36) / 22), 0, 12); return; }
+          const y = clamp(Math.round((200 - p.y) / 5.5), 0, YM); if (k === 0) st.p = Math.min(y, 30); else st.Q = [clamp(Math.round((p.x - 36) / 22), 1, 12), y]; },
+        nudge: (st, k, dx, dy, s) => { if (s === 1) { st.x = clamp(st.x + dx + dy, 0, 12); return; } if (k === 0) st.p = clamp(st.p + dy, 0, 30); else st.Q = [clamp(st.Q[0] + dx, 1, 12), clamp(st.Q[1] + dy, 0, YM)]; },
+        draw: (st, s) => { let g = "";
+          for (let x = 0; x <= 12; x++) g += `<line x1="${X(x)}" y1="${Y(0)}" x2="${X(x)}" y2="${Y(YM)}" stroke="var(--line)" stroke-width="${x ? 0.6 : 1.6}"${x ? "" : ' style="stroke:var(--ink)"'}/>` + (x % 2 === 0 ? T(X(x), Y(0) + 13, String(x), "middle", 10) : "");
+          for (let y = 0; y <= YM; y += 2) g += `<line x1="${X(0)}" y1="${Y(y)}" x2="${X(12)}" y2="${Y(y)}" stroke="var(--line)" stroke-width="${y ? (y % 10 ? 0.4 : 0.9) : 1.6}"${y ? "" : ' style="stroke:var(--ink)"'}/>` + (y % 10 === 0 ? T(X(0) - 5, Y(y) + 4, String(y), "end", 10) : "");
+          g += T(X(12), Y(0) + 26, "km", "end", 10, ' fill="var(--ink-soft)"') + T(X(0) + 4, 12, "prix (CHF)", "start", 10, ' fill="var(--ink-soft)"');
+          g += seg(3, 0, "var(--warn)", 2.6) + T(X(10.3), Y(31), "B : 3x", "end", 11, ' font-weight="700" fill="var(--warn)"');
+          if (s === 0) { const m = slope(st); g += seg(m, st.p, "var(--blue)", 2.8);
+            const ty = Y(st.p + m); if (m >= 0 && st.p + m <= YM) g += `<path d="M${X(0)},${Y(st.p)} L${X(1)},${Y(st.p)} L${X(1)},${ty.toFixed(1)}" fill="none" stroke="var(--margin)" stroke-width="1.6" stroke-dasharray="3 2"/>` + T(X(1) + 4, (Y(st.p) + ty) / 2 + 4, "+" + nb(Math.round(m * 100) / 100), "start", 11, ' font-weight="700" fill="var(--margin)"');
+            return g; }
+          g += seg(2, 6, "var(--blue)", s === 2 ? 1.8 : 2.8) + T(X(12), Y(30) + 14, "A : 2x + 6", "end", 11, ' font-weight="700" fill="var(--blue)"');
+          if (s === 1) { const a = 6 + 2 * st.x, b = 3 * st.x;
+            g += `<line x1="${X(st.x)}" y1="${Y(0)}" x2="${X(st.x)}" y2="${Y(YM)}" stroke="var(--margin)" stroke-dasharray="4 3"/>`;
+            g += `<circle cx="${X(st.x)}" cy="${Y(a)}" r="5" fill="var(--blue)"/><circle cx="${X(st.x)}" cy="${Y(b)}" r="5" fill="var(--warn)"/>`;
+            g += T(X(st.x) - 7, Y(a) + (a >= b ? -6 : 14), a + " CHF", "end", 11, ' font-weight="700" fill="var(--blue)"') + T(X(st.x) + 7, Y(b) + (b > a ? -6 : 14), b + " CHF", "start", 11, ' font-weight="700" fill="var(--warn)"');
+            return g; }
+          return g + seg(slope(st), st.p, "var(--margin)", 2.8) + `<circle cx="${X(8)}" cy="${Y(24)}" r="4" fill="none" stroke="var(--warn)" stroke-width="2"/>`; },
+        out: (st, s) => { if (s === 1) { const a = 6 + 2 * st.x, b = 3 * st.x; return `À <b>${st.x} km</b> : A = 6 + 2 · ${st.x} = <b style="color:var(--blue)">${a} CHF</b> · B = 3 · ${st.x} = <b style="color:var(--warn)">${b} CHF</b>`; }
+          const m = slope(st), ex = Math.abs(m * 100 - Math.round(m * 100)) < 1e-9;
+          return `Prise en charge : <b>${st.p} CHF</b> · par km : <b>${ex ? "" : "≈ "}${nb(Math.round(m * 100) / 100)} CHF</b><br>Taxi ${s === 2 ? "C" : "A"} : ${eqn(Math.round(m * 100) / 100, st.p)}`; },
+        hint: (st, s) => { if (s === 1) { const d = 6 - st.x; return "À " + st.x + " km, A − B = " + nb(d) + " CHF. La part fixe de A (6 CHF) est « remboursée » de 1 CHF par km, car B coûte 1 CHF de plus par km."; }
+          const m = slope(st);
+          if (s === 0) return st.p !== 6 ? "La prise en charge se paie même pour 0 km : c'est le point de la droite sur l'axe vertical." : "Pente actuelle : " + nb(Math.round(m * 100) / 100) + " CHF par km. Chaque km de plus doit ajouter 2 CHF : place le point rond en conséquence.";
+          return st.p !== 12 ? "La prise en charge de C (12 CHF) se lit à 0 km, sur l'axe vertical." : "C doit coûter autant que B à 8 km : B(8) = 3 · 8 = 24 CHF. Fais passer la droite par ce point (cercle orange)."; },
+        goal: [(st) => (st.p === 6 && Math.abs(slope(st) - 2) < 1e-9 ? "y = 2x + 6 : l'ordonnée à l'origine 6 est la prise en charge (prix pour 0 km), la pente 2 est le prix de chaque km." : ""),
+          (st) => (st.x === 6 ? "À 6 km, les deux droites se croisent : 6 + 2 · 6 = 18 = 3 · 6 CHF. Avant, B est moins cher ; après, c'est A. Par le calcul : 6 + 2x = 3x, donc x = 6." : ""),
+          (st) => (st.p === 12 && Math.abs(8 * slope(st) + 12 - 24) < 1e-9 ? "Taxi C : y = 1,5x + 12. Par (0 ; 12) et (8 ; 24) : pente = (24 − 12) ÷ 8 = 1,5 CHF par km." : "")],
+        ask: [{ q: "Avec le taxi A (6 CHF + 2 CHF/km), combien coûtent 15 km (en CHF) ?", ans: 36, ok: "6 + 2 · 15 = 36 CHF.", no: "Prise en charge + prix du km × nombre de km." },
+          { q: "Taxi D : 10 CHF + 1 CHF/km. Pour combien de km coûte-t-il autant que B (3 CHF/km) ?", ans: 5, ok: "10 + x = 3x, donc 2x = 10 et x = 5 km.", no: "Écris 10 + x = 3x, puis isole x." },
+          { q: "Un taxi prend 8 CHF de prise en charge et coûte autant que B (3 CHF/km) pour 4 km. Combien coûte chaque km (en CHF) ?", ans: 1, ok: "B(4) = 12 CHF : 8 + 4m = 12, donc m = 1 CHF par km.", no: "Prix de B pour 4 km, moins la prise en charge, divisé par 4." }] }),
+    });
+  }
+
+  // ===================== Formes du 2e degré : la parabole dont on tire le sommet (24.11) =====================
+  // y = (x − h)² + k : on déplace le sommet S(h ; k), la forme développée x² − 2hx + (h² + k) suit ; on fait coïncider avec une parabole cible.
+  {
+    const X = (x) => 160 + x * 20, Y = (y) => 150 - y * 12, XR = 7, YB = -5, YT = 11;
+    const TG = [{ S: [4, 4], txt: "y = x² − 8x + 20" }, { S: [-3, -4], txt: "y = x² + 6x + 5" }, { S: [3, -4], txt: "zéros : 1 et 5" }];
+    const sg = (v) => (v < 0 ? "− " + -v : "+ " + v);
+    const canon = (h, k) => "y = " + (h ? "(x " + sg(-h) + ")²" : "x²") + (k ? " " + sg(k) : "");
+    const devel = (h, k) => "y = " + poly([[1, "x²"], [-2 * h, "x"], [h * h + k, ""]]);
+    const curve = (h, k, col, w, dash) => { const d = Math.sqrt(YT + 0.5 - k), a = Math.max(-XR - 0.5, h - d), b = Math.min(XR + 0.5, h + d), P = [];
+      for (let i = 0; i <= 60; i++) { const x = a + ((b - a) * i) / 60, y = (x - h) ** 2 + k; if (y >= YB - 0.5) P.push(X(x).toFixed(1) + "," + Y(y).toFixed(1)); }
+      return `<polyline points="${P.join(" ")}" fill="none" stroke="${col}" stroke-width="${w}"${dash ? ' stroke-dasharray="7 5"' : ""}/>`; };
+    set("f2formes", {
+      predict: { q: "(x − 2)² + 3 a pour sommet…", choices: ["(2 ; 3)", "(−2 ; 3)", "(3 ; 2)"], good: 0, why: "Forme canonique a(x − h)² + k : sommet (h ; k) = (2 ; 3)." },
+      defis: ["Tire le sommet de la parabole bleue pour la poser exactement sur la parabole pointillée y = x² − 8x + 20.", "Même chose avec y = x² + 6x + 5.", "Place le sommet pour que la parabole coupe l'axe des x en 1 et en 5."],
+      play: manipLesson({ W: 320, H: 226, aria: "parabole dont on déplace le sommet",
+        note: "Glisse le sommet S (ou flèches du clavier) : toute la parabole se déplace sans changer de forme. Sous la figure, les deux écritures de la même fonction.",
+        init: (s) => ({ S: [[0, 0], [1, 2], [0, -2]][s] }),
+        handles: (st) => [{ x: X(st.S[0]), y: Y(st.S[1]), label: "sommet S (" + st.S.join(" ; ") + ")", svg: dot("var(--margin)", "S") }],
+        move: (st, k, p) => { st.S = [clamp(Math.round((p.x - 160) / 20), -6, 6), clamp(Math.round((150 - p.y) / 12), YB, 10)]; },
+        nudge: (st, k, dx, dy) => { st.S = [clamp(st.S[0] + dx, -6, 6), clamp(st.S[1] + dy, YB, 10)]; },
+        draw: (st, s) => { let g = "";
+          for (let x = -XR; x <= XR; x++) g += `<line x1="${X(x)}" y1="${Y(YB)}" x2="${X(x)}" y2="${Y(YT)}" stroke="var(--line)" stroke-width="${x ? 0.5 : 1.5}"${x ? "" : ' style="stroke:var(--ink)"'}/>` + (x && x % 2 === 0 ? T(X(x), Y(0) + 12, String(x).replace("-", "−"), "middle", 9) : "");
+          for (let y = YB; y <= YT; y++) g += `<line x1="${X(-XR)}" y1="${Y(y)}" x2="${X(XR)}" y2="${Y(y)}" stroke="var(--line)" stroke-width="${y ? 0.5 : 1.5}"${y ? "" : ' style="stroke:var(--ink)"'}/>` + (y && y % 2 === 0 ? T(X(0) - 4, Y(y) + 3, String(y).replace("-", "−"), "end", 9) : "");
+          const t = TG[s];
+          if (s < 2) g += curve(t.S[0], t.S[1], "var(--ink-soft)", 3, true);
+          else g += [1, 5].map((z) => `<circle cx="${X(z)}" cy="${Y(0)}" r="6" fill="none" stroke="var(--warn)" stroke-width="2.5"/>`).join("");
+          const [h, k] = st.S; g += `<line x1="${X(h)}" y1="${Y(YB)}" x2="${X(h)}" y2="${Y(YT)}" stroke="var(--margin)" stroke-width="1" stroke-dasharray="3 3"/>` + curve(h, k, "var(--blue)", 2.6);
+          return g + `<rect x="${X(XR) - 150}" y="2" width="150" height="17" rx="4" fill="var(--paper)" opacity="0.85"/>` + T(X(XR) - 4, 15, (s < 2 ? "cible : " : "") + t.txt, "end", 11, ` font-weight="700" fill="${s < 2 ? "var(--ink-soft)" : "var(--warn)"}"`); },
+        out: (st) => { const [h, k] = st.S; return `Sommet <b>S(${String(h).replace("-", "−")} ; ${String(k).replace("-", "−")})</b><br>${canon(h, k)}<br>= <b>${devel(h, k)}</b>`; },
+        hint: (st, s) => { const [h, k] = st.S, [H, K] = TG[s].S;
+          if (s === 2) return h !== 3 ? "L'axe de symétrie (pointillé rouge) passe au milieu des deux zéros 1 et 5." : "Bon axe de symétrie : monte ou descends le sommet jusqu'à ce que la parabole passe par 1 et par 5.";
+          if (h === H) return "Bon coefficient de x (−2h) : il reste à monter ou descendre le sommet. Compare la constante à celle de la cible.";
+          if (k === K) return "Bonne hauteur du sommet : déplace-le vers la gauche ou la droite. Le coefficient de x vaut −2h.";
+          return "Les deux paraboles ont la même forme : fais coïncider les sommets. Compare la forme développée à la cible."; },
+        goal: [(st) => (st.S[0] === 4 && st.S[1] === 4 ? "Les deux paraboles coïncident : x² − 8x + 20 = (x − 4)² + 4. Sommet (4 ; 4) : h = 8 ÷ 2 et k = 20 − 4²." : ""),
+          (st) => (st.S[0] === -3 && st.S[1] === -4 ? "x² + 6x + 5 = (x + 3)² − 4 : sommet (−3 ; −4). Avec h = −3, (x − h)² s'écrit (x + 3)²." : ""),
+          (st) => (st.S[0] === 3 && st.S[1] === -4 ? "(x − 3)² − 4 = x² − 6x + 5 = (x − 1)(x − 5) : le sommet est au milieu des zéros (x = 3), et f(3) = −4." : "")],
+        ask: [{ q: "Sans la figure : x² − 10x + 27 = (x − h)² + k. Tape k.", ans: 2, ok: "h = 10 ÷ 2 = 5 ; (x − 5)² = x² − 10x + 25, donc k = 27 − 25 = 2.", no: "h est la moitié de 10 ; développe (x − h)² et compare sa constante à 27." },
+          { q: "Développe (x + 2)² − 7 : tape la constante.", ans: -3, ok: "(x + 2)² = x² + 4x + 4 ; 4 − 7 = −3.", no: "(x + 2)² = x² + 4x + 4 : il reste à enlever 7." },
+          { q: "La parabole y = (x − 2)² − 9 coupe l'axe des x en −1 et en… ?", ans: 5, ok: "Les zéros sont symétriques autour de x = 2 : 2 − 3 = −1 et 2 + 3 = 5.", no: "Le sommet est au milieu des zéros : −1 est à 3 unités à gauche de 2." }] }),
+    });
+  }
+
+  // ===================== Pente en pourcentage : le bout de la route qu'on tire (24.11) =====================
+  // Montée ÷ distance horizontale ; repères tous les 100 m (« 6 % = 6 m pour chaque 100 m ») ; hauteurs dessinées 5 fois plus grandes.
+  {
+    const X0 = 24, BASE = 196, LPX = 270, EX = 5;
+    const SPEC = [{ L: 300, H: 40 }, { L: 250, H: 34 }, { h: 0.9, LM: 25 }];
+    const sx = (s, st) => (s < 2 ? LPX / SPEC[s].L : LPX / SPEC[2].LM);
+    const dims = (st, s) => (s < 2 ? { L: SPEC[s].L, h: st.h } : { L: st.L, h: 0.9 });
+    const pc = (h, L) => Math.round((h / L) * 10000) / 100;
+    set("pente", {
+      predict: { q: "Un panneau indique une pente de 100 %. La route est…", choices: ["verticale", "inclinée à 45°", "impossible à construire"], good: 1, why: "100 % : on monte de 100 m pour 100 m à l'horizontale. Dénivelé = distance horizontale : c'est la diagonale d'un carré, un angle de 45°." },
+      defis: ["Sur 300 m à l'horizontale, tire le bout de la route pour faire une pente de 6 %.", "Sur 250 m à l'horizontale, fais une pente de 12 %.", "Une rampe monte de 0,9 m. Tire son bout pour que sa pente soit de 6 %."],
+      play: manipLesson({ W: 320, H: 230, aria: "route en pente dont on tire le bout",
+        note: (st, s) => (s < 2 ? "Glisse le bout de la route vers le haut ou le bas (ou flèches du clavier, 1 m par appui)." : "Glisse le bout de la rampe vers la gauche ou la droite (ou flèches du clavier, 0,5 m par appui).") + " Les hauteurs sont dessinées 5 fois plus grandes.",
+        init: (s) => (s < 2 ? { h: 10 } : { L: 8 }),
+        handles: (st, s) => { const { L, h } = dims(st, s), k = sx(s); return [{ x: X0 + L * k, y: BASE - h * k * EX, label: s < 2 ? "montée : " + h + " m" : "longueur horizontale : " + nb(L) + " m", role: "slider", svg: dot("var(--margin)", "") }]; },
+        move: (st, k, p, s) => { const q = sx(s); if (s < 2) st.h = clamp(Math.round((BASE - p.y) / (q * EX)), 0, SPEC[s].H); else st.L = clamp(Math.round(((p.x - X0) / q) * 2) / 2, 2, SPEC[2].LM); },
+        nudge: (st, k, dx, dy, s) => { if (s < 2) st.h = clamp(st.h + dy + dx, 0, SPEC[s].H); else st.L = clamp(st.L + 0.5 * (dx + dy), 2, SPEC[2].LM); },
+        draw: (st, s) => { const { L, h } = dims(st, s), k = sx(s), xe = X0 + L * k, ye = BASE - h * k * EX;
+          let g = `<line x1="4" y1="${BASE}" x2="316" y2="${BASE}" stroke="var(--ink-soft)" stroke-width="1.5"/>`;
+          g += `<polygon points="${X0},${BASE} ${xe.toFixed(1)},${BASE} ${xe.toFixed(1)},${ye.toFixed(1)}" fill="var(--grid)"/>`;
+          if (s < 2) for (let d = 100; d < L; d += 100) { const yd = BASE - ((h * d) / L) * k * EX; g += `<line x1="${X0 + d * k}" y1="${BASE}" x2="${X0 + d * k}" y2="${yd.toFixed(1)}" stroke="var(--ok)" stroke-width="1.5" stroke-dasharray="3 2"/>` + T(X0 + d * k, BASE + 12, d + " m", "middle", 9, ' fill="var(--ok)"') + (h ? T(X0 + d * k - 3, yd - 5, "+" + r1((h * d) / L) + " m", "end", 10, ' font-weight="700" fill="var(--ok)"') : ""); }
+          g += `<line x1="${X0}" y1="${BASE}" x2="${xe.toFixed(1)}" y2="${ye.toFixed(1)}" stroke="var(--ink)" stroke-width="5" stroke-linecap="round"/>`;
+          g += `<line x1="${xe.toFixed(1)}" y1="${BASE}" x2="${xe.toFixed(1)}" y2="${ye.toFixed(1)}" stroke="var(--margin)" stroke-width="2" stroke-dasharray="4 3"/>`;
+          g += T(xe > 250 ? xe - 10 : xe + 10, (BASE + ye) / 2 + 4, nb(h) + " m", xe > 250 ? "end" : "start", 12, ' font-weight="800" fill="var(--margin)"');
+          g += T((X0 + xe) / 2, BASE + 26, nb(L) + " m à l'horizontale", "middle", 11, ' font-weight="700"');
+          return g + T(X0, 16, "pente : " + nb(pc(h, L)) + " %", "start", 14, ' font-weight="800"'); },
+        out: (st, s) => { const { L, h } = dims(st, s), p = pc(h, L), ex = Math.abs((h / L) * 10000 - Math.round((h / L) * 10000)) < 1e-6;
+          return `Montée <b>${nb(h)} m</b> pour <b>${nb(L)} m</b> : pente = ${nb(h)} ÷ ${nb(L)} ${ex ? "=" : "≈"} ${nb(p / 100)} = <b>${nb(p)} %</b><br><span class="small muted">angle réel ≈ ${r1((Math.atan(h / L) * 180) / Math.PI)}°</span>`; },
+        hint: (st, s) => { if (s === 0) return st.h === 6 ? "6 m pour 300 m, c'est 2 % seulement : 6 % veut dire 6 m pour CHAQUE 100 m (repères verts)." : "Regarde les repères verts tous les 100 m : la route doit y monter de 6 m de plus.";
+          if (s === 1) return st.h === 12 ? "12 m pour 250 m, c'est 4,8 % : 12 % veut dire 12 m pour chaque 100 m, donc plus de 12 m sur 250 m." : "Pente 12 % : 12 m de montée par 100 m à l'horizontale. Combien pour 250 m ?";
+          return "Pente = montée ÷ horizontale : 0,9 ÷ " + nb(st.L) + " doit valoir 0,06." + (st.L < 15 ? " Ta rampe est trop raide : allonge-la." : " Ta rampe est trop douce : raccourcis-la."); },
+        goal: [(st) => (st.h === 18 ? "18 ÷ 300 = 0,06 = 6 % : la route monte de 6 m pour chaque 100 m à l'horizontale." : ""),
+          (st) => (st.h === 30 ? "12 % de 250 m : 0,12 · 250 = 30 m de montée (12 m par 100 m)." : ""),
+          (st) => (st.L === 15 ? "0,9 ÷ 15 = 0,06 = 6 % : une rampe peu pentue doit être longue." : "")],
+        ask: [{ q: "Une route monte de 45 m pour 900 m à l'horizontale. Sa pente, en % ?", ans: 5, ok: "45 ÷ 900 = 0,05 = 5 %.", no: "Montée ÷ distance horizontale, puis en pour cent (× 100)." }, null,
+          { q: "Une pente de 100 % fait un angle de combien de degrés avec l'horizontale ?", ans: 45, ok: "100 % : on monte d'autant qu'on avance, c'est la diagonale d'un carré : 45°.", no: "100 % : montée = distance horizontale. Quel triangle est-ce ?" }] }),
     });
   }
 })();
