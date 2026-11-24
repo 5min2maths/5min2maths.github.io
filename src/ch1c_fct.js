@@ -49,7 +49,7 @@
         return QN("Soit " + M("f(x) = " + lin(a, b)) + ". Détermine la préimage de " + M(y) + ".", x, M(lin(a, b) + " = " + y + " \\iff " + a + "x = " + (y - b) + " \\iff x = " + x) + ".",
           { ctx: "preimage-aff", guide: [GS("On résout " + M(lin(a, b) + " = " + y) + ". D'abord " + M(a + "x") + " = ?", y - b, M(y - b) + "."), GS(M("x") + " = ?", x, M(x) + ".")],
             traps: [TR(a * y + b, "Ça, c'est l'image de " + y + " ; on cherche x tel que f(x) = " + y + "."), TR((y + b) / a, "On soustrait " + b + " des deux côtés.")] }); },
-      () => { const a = pk([0.5, 1, -1, -0.5]), p = R.int(-3, 0), q = p + R.int(2, 4), f = (x) => a * (x - p) * (x - q), xs = [-3, -2, -1, 0, 1, 2, 3, 4].filter((x) => Number.isInteger(f(x)) && Math.abs(f(x)) <= 5 && x !== p && x !== q && x !== 0); if (!xs.length) return null; const x = pk(xs);
+      () => { const a = pk([0.5, 1, -1, -0.5]), p = R.int(-3, 0), q = p + R.int(2, 4), f = (x) => a * (x - p) * (x - q), xs = [-3, -2, -1, 0, 1, 2, 3, 4].filter((x) => Number.isInteger(f(x)) && Math.abs(f(x)) <= 5 && Math.abs(f(x)) !== 1 && x !== p && x !== q && x !== 0); if (!xs.length) return null; const x = pk(xs);
         return QN("La courbe représente une fonction " + M("f") + ". Lis " + M("f(" + x + ")") + " sur le graphique.", f(x), "On part de " + M("x = " + x) + " sur l'axe horizontal, on monte (ou descend) jusqu'à la courbe, puis on lit l'ordonnée : " + M("f(" + x + ") = " + f(x)) + ".",
           { ctx: "lire-image", fig: PL([{ f }]), guide: [GS("Ordonnée du point de la courbe d'abscisse " + M(x) + " ?", f(x), M(f(x)) + ".")], traps: [TR(x, "f(" + x + ") est une ordonnée (hauteur), pas une abscisse."), TR(-f(x), "Vérifie si le point est au-dessus ou en dessous de l'axe.")] }); },
     ],

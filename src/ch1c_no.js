@@ -87,7 +87,7 @@
       () => { let a, c; do { a = R.int(1, 9); c = R.int(0, 9); } while ((a + c) % 3 === 0); const x = (3 - ((a + c) % 3)) % 3;
         return QN("Quel est le plus petit chiffre à écrire à la place de ■ pour que " + M(a + "\\,■\\," + c) + " soit divisible par " + M(3) + " ?", x, "Somme " + M(a + " + " + c + " + ■") + " multiple de 3 : le plus petit chiffre est " + M(x) + " (" + M(a + c + x) + ").",
           { ctx: "chiffre-3", guide: [GS("Somme des chiffres connus ?", a + c, M(a + c) + "."), GS("Plus petit chiffre ■ ?", x, M(x) + ".")], traps: [TR(x + 3, "Ça marche aussi, mais on demande le plus petit."), TR((3 - (c % 3)) % 3, "C'est la somme de TOUS les chiffres qui doit être un multiple de 3.")] }); },
-      () => { let a, c; do { a = R.int(1, 9); c = R.int(0, 9); } while ((a + c) % 9 === 0); const x = 9 - ((a + c) % 9);
+      () => { let a, c; do { a = R.int(1, 9); c = R.int(0, 9); } while ((a + c) % 9 === 0 || (a + c) % 9 === 8); const x = 9 - ((a + c) % 9); /* 24.11 : chiffre jamais 1 */
         return QN("Quel chiffre faut-il écrire à la place de ■ pour que " + M(a + "\\,■\\," + c) + " soit divisible par " + M(9) + " ?", x, "La somme des chiffres doit être un multiple de 9 : " + M(a + " + " + c + " + " + x + " = " + (a + c + x)) + ".",
           { ctx: "chiffre-9", guide: [GS("Somme des chiffres connus ?", a + c, M(a + c) + "."), GS("Chiffre ■ ?", x, M(x) + ".")], traps: [TR(x > 3 ? x - 3 : x + 3, "Pour 9, il faut un multiple de 9 (pas seulement de 3).")] }); },
     ],
