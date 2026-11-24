@@ -167,6 +167,7 @@ const GEN = {
     if (d === 1) {
       const p = R.pick([10, 20, 25, 50, 75]), n = 20 * R.int(2, 15);
       return { fig: FIG.percentBar(p, n), q: "Calcule " + M(p + "\\,\\%") + " de " + M(n) + ".", spec: { kind: "value", value: (p * n) / 100 }, sol: M("\\frac{" + p + "}{100} \\cdot " + n + " = " + dec((p * n) / 100)),
+        traps: [TRAP(n / p, "Tu as divisé " + n + " par " + p + ". Or " + p + " % de " + n + ", c'est " + p + " centièmes de " + n + " : " + M("\\frac{" + p + "}{100} \\cdot " + n) + "."), TRAP(n - (p * n) / 100, "Ça, c'est ce qui reste après avoir retiré " + p + " %. On demande seulement " + p + " % de " + n + ".")],
         guide: [GS("Combien vaut " + M("1\\,\\%") + " de " + M(n) + " ? (on divise par 100)", n / 100, M(n + " : 100 = " + dec(n / 100)) + "."), GS("Et " + M(p + "\\,\\%") + ", c'est " + M(p) + " fois plus : combien ?", (p * n) / 100, M(p + " \\cdot " + dec(n / 100) + " = " + dec((p * n) / 100)) + ".")] };
     }
     if (d === 2) {
@@ -339,14 +340,15 @@ const GEN = {
   prop(d) {
     if (d === 1) {
       const k = R.int(2, 6), u = R.int(2, 9), n = R.int(2, 12);
-      return { fig: FIG.items(k, k + " cahiers → " + k * u + " CHF"), guide: [GS("Prix d'un cahier : " + M(k * u + " : " + k) + " = ? (en CHF)", u, M(u) + " CHF."), GS("Prix de " + n + " cahiers ?", n * u, M(n + " \\cdot " + u + " = " + n * u) + " CHF.")], q: M(k) + " cahiers coûtent " + M(k * u) + " CHF. Combien coûtent " + M(n) + " cahiers ?", spec: { kind: "value", value: n * u }, sol: "Un cahier coûte " + M(u) + " CHF, donc " + M(n + " \\cdot " + u + " = " + n * u) + " CHF." };
+      return { fig: FIG.items(k, k + " cahiers → " + k * u + " CHF"), guide: [GS("Prix d'un cahier : " + M(k * u + " : " + k) + " = ? (en CHF)", u, M(u) + " CHF."), GS("Prix de " + n + " cahiers ?", n * u, M(n + " \\cdot " + u + " = " + n * u) + " CHF.")], q: M(k) + " cahiers coûtent " + M(k * u) + " CHF. Combien coûtent " + M(n) + " cahiers ?", spec: { kind: "value", value: n * u },
+        traps: [TRAP(k * u * n, "Tu as multiplié le prix de " + k + " cahiers par " + n + ". Cherche d'abord le prix d'un seul cahier."), TRAP(k * u + n - k, "En proportionnalité, on ne rajoute pas la différence de quantité : on passe par le prix d'un cahier.")], sol: "Un cahier coûte " + M(u) + " CHF, donc " + M(n + " \\cdot " + u + " = " + n * u) + " CHF." };
     }
     if (d === 2) {
       const g = 25 * R.int(4, 16), p1 = R.pick([4, 6, 8]), p2 = R.pick([3, 5, 10, 12]);
-      return { fig: FIG.items(p1, p1 + " personnes → " + g + " g"), guide: [GS("Farine pour 1 personne : " + M(g + " : " + p1) + " = ? (en g)", g / p1, M(dec(g / p1)) + " g."), GS("Pour " + p2 + " personnes ?", (g * p2) / p1, M(dec(g / p1) + " \\cdot " + p2 + " = " + dec((g * p2) / p1)) + " g.")], q: "Pour " + M(p1) + " personnes, une recette demande " + M(g) + " g de farine. Combien en faut-il pour " + M(p2) + " personnes ?", spec: { kind: "value", value: (g * p2) / p1 }, sol: M("\\frac{" + g + "}{" + p1 + "} \\cdot " + p2 + " = " + dec((g * p2) / p1)) + " g." };
+      return { fig: FIG.items(p1, p1 + " personnes → " + g + " g"), guide: [GS("Farine pour 1 personne : " + M(g + " : " + p1) + " = ? (en g)", g / p1, M(dec(g / p1)) + " g."), GS("Pour " + p2 + " personnes ?", (g * p2) / p1, M(dec(g / p1) + " \\cdot " + p2 + " = " + dec((g * p2) / p1)) + " g.")], q: "Pour " + M(p1) + " personnes, une recette demande " + M(g) + " g de farine. Combien en faut-il pour " + M(p2) + " personnes ?", spec: { kind: "value", value: (g * p2) / p1 }, traps: [TRAP((g * p1) / p2, "Tu as inversé le rapport : " + (p2 > p1 ? "plus" : "moins") + " de personnes, donc " + (p2 > p1 ? "plus" : "moins") + " de farine."), TRAP(g * p2, "Tu as oublié de diviser par " + p1 + " : cherche d'abord la farine pour une personne.")], sol: M("\\frac{" + g + "}{" + p1 + "} \\cdot " + p2 + " = " + dec((g * p2) / p1)) + " g." };
     }
     const rate = R.pick([0.92, 0.94, 0.95, 1.05, 1.08]), e = 10 * R.int(2, 30);
-    return { guide: [GS("1 € = " + dec(rate) + " CHF : pour avoir des euros, on multiplie ou on divise par " + dec(rate) + " ? Calcule " + M(dec(e * rate) + " : " + dec(rate)) + ".", e, M(e) + " euros.")], q: "1 euro vaut " + M(dec(rate)) + " CHF. Combien d'euros obtient-on pour " + M(dec(e * rate)) + " CHF ?", spec: { kind: "value", value: e }, sol: M(dec(e * rate) + " : " + dec(rate) + " = " + e) + " euros." };
+    return { guide: [GS("1 € = " + dec(rate) + " CHF : pour avoir des euros, on multiplie ou on divise par " + dec(rate) + " ? Calcule " + M(dec(e * rate) + " : " + dec(rate)) + ".", e, M(e) + " euros.")], q: "1 euro vaut " + M(dec(rate)) + " CHF. Combien d'euros obtient-on pour " + M(dec(e * rate)) + " CHF ?", spec: { kind: "value", value: e }, traps: [TRAP(+(e * rate * rate).toFixed(4), "Tu as multiplié par " + dec(rate) + " : ça convertit des euros en francs. Pour passer des francs aux euros, on divise.")], sol: M(dec(e * rate) + " : " + dec(rate) + " = " + e) + " euros." };
   },
 
   vitesse(d) {
@@ -365,14 +367,14 @@ const GEN = {
   echelle(d) {
     if (d === 1) {
       const k = R.pick([50, 200, 250, 500, 1000]), c = R.int(2, 12);
-      return { fig: FIG.scaling(k, "1:" + k), guide: [GS("Longueur réelle en cm : " + M(c + " \\cdot " + k) + " = ?", c * k, M(c * k) + " cm."), GS("En mètres (: 100) ?", (c * k) / 100, M(dec((c * k) / 100)) + " m.")], q: "Sur un plan à l'échelle " + M("1\\,:\\, " + k) + ", un mur mesure " + M(c) + " cm. Quelle est sa longueur réelle, en mètres ?", spec: { kind: "value", value: (c * k) / 100 }, sol: M(c + " \\cdot " + k + " = " + c * k) + " cm, soit " + M(dec((c * k) / 100)) + " m." };
+      return { fig: FIG.scaling(k, "1:" + k), guide: [GS("Longueur réelle en cm : " + M(c + " \\cdot " + k) + " = ?", c * k, M(c * k) + " cm."), GS("En mètres (: 100) ?", (c * k) / 100, M(dec((c * k) / 100)) + " m.")], q: "Sur un plan à l'échelle " + M("1\\,:\\, " + k) + ", un mur mesure " + M(c) + " cm. Quelle est sa longueur réelle, en mètres ?", spec: { kind: "value", value: (c * k) / 100 }, traps: [TRAP(c * k, "C'est la longueur réelle en centimètres ; convertis-la en mètres (1 m = 100 cm)."), TRAP((c * k) / 1000, "1 m = 100 cm (et non 1000) : divise par 100.")], sol: M(c + " \\cdot " + k + " = " + c * k) + " cm, soit " + M(dec((c * k) / 100)) + " m." };
     }
     if (d === 2) {
       const k = R.int(2, 5), A = R.int(2, 12);
-      return { fig: FIG.scaling(k, ""), guide: [GS("Les longueurs sont multipliées par " + k + ". Les aires sont multipliées par " + M(k + "^2") + " = ?", k * k, M(k * k) + "."), GS("Nouvelle aire ?", A * k * k, M(A + " \\cdot " + k * k + " = " + A * k * k) + " cm².")], q: "On agrandit une figure de rapport " + M(k) + ". Son aire était de " + M(A) + " cm². Quelle est sa nouvelle aire (en cm²) ?", spec: { kind: "value", value: A * k * k }, sol: "Les aires sont multipliées par " + M(k + "^2 = " + k * k) + " : " + M(A * k * k) + " cm²." };
+      return { fig: FIG.scaling(k, ""), guide: [GS("Les longueurs sont multipliées par " + k + ". Les aires sont multipliées par " + M(k + "^2") + " = ?", k * k, M(k * k) + "."), GS("Nouvelle aire ?", A * k * k, M(A + " \\cdot " + k * k + " = " + A * k * k) + " cm².")], q: "On agrandit une figure de rapport " + M(k) + ". Son aire était de " + M(A) + " cm². Quelle est sa nouvelle aire (en cm²) ?", spec: { kind: "value", value: A * k * k }, traps: [TRAP(A * k, "Les longueurs sont multipliées par " + k + ", mais les aires par " + k + "² = " + k * k + ".")], sol: "Les aires sont multipliées par " + M(k + "^2 = " + k * k) + " : " + M(A * k * k) + " cm²." };
     }
     const k = R.int(2, 4), V = R.int(2, 9);
-    return { fig: FIG.scaling(k, ""), guide: [GS("Les volumes sont multipliés par " + M(k + "^3") + " = ?", k ** 3, M(k ** 3) + "."), GS("Volume réel ?", V * k ** 3, M(V + " \\cdot " + k ** 3 + " = " + V * k ** 3) + " dm³.")], q: "Une maquette est " + M(k) + " fois plus petite que l'objet réel. Son volume est de " + M(V) + " dm³. Quel est le volume de l'objet réel (en dm³) ?", spec: { kind: "value", value: V * k ** 3 }, sol: "Les volumes sont multipliés par " + M(k + "^3 = " + k ** 3) + " : " + M(V * k ** 3) + " dm³." };
+    return { fig: FIG.scaling(k, ""), guide: [GS("Les volumes sont multipliés par " + M(k + "^3") + " = ?", k ** 3, M(k ** 3) + "."), GS("Volume réel ?", V * k ** 3, M(V + " \\cdot " + k ** 3 + " = " + V * k ** 3) + " dm³.")], q: "Une maquette est " + M(k) + " fois plus petite que l'objet réel. Son volume est de " + M(V) + " dm³. Quel est le volume de l'objet réel (en dm³) ?", spec: { kind: "value", value: V * k ** 3 }, traps: [TRAP(V * k, "Les longueurs sont multipliées par " + k + ", mais les volumes par " + k + "³ = " + k ** 3 + "."), TRAP(V * k * k, k + "², c'est pour les aires. Les volumes sont multipliés par " + k + "³ = " + k ** 3 + ".")], sol: "Les volumes sont multipliés par " + M(k + "^3 = " + k ** 3) + " : " + M(V * k ** 3) + " dm³." };
   },
 
   aires(d) {
