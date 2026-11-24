@@ -243,7 +243,7 @@
         q: "L'application linéaire " + M("f") + " a pour matrice " + M(mX(Am)) + ".",
         parts: [{ label: "Calcule " + M("\\det A") + ". Que peut-on en conclure ?", pts: 1 }, { label: "Le noyau est engendré par " + M("(1 \\,;\\, m)") + ". Trouve " + M("m") + ".", pts: 1 }, { label: "L'image est la droite " + M("y = px") + ". Trouve " + M("p") + ".", pts: 1 }, { label: "Calcule " + M("f" + pt(u[0], u[1])) + " et vérifie que ce point est sur la droite image.", pts: 1 }],
         sol: ul([M("\\det A = " + FR(a) + " \\cdot " + par(k * b) + " - " + par(b) + " \\cdot " + par(k * a) + " = 0") + " : " + M("f") + " n'est pas inversible ; elle écrase le plan sur une droite.", M(FR(a) + " + " + par(b) + "m = 0") + " : " + M("m = " + m) + ".", "Image engendrée par la première colonne " + M(pt(a, k * a)) + " : " + M("p = " + k) + ".", M("f" + pt(u[0], u[1]) + " = " + pt(fu[0], fu[1])) + " ; " + M(FR(fu[1]) + " = " + k + " \\cdot " + par(fu[0])) + " : il est bien sur " + M("y = " + k + "x") + "."]),
-        chk: [[0, "0"], [m, N(m)], [k, N(k)], [fu[0], N(fu[0])], [fu[1], N(fu[1])]] }); },
+        chk: [[m, N(m)], [k, N(k)], [fu[0], N(fu[0])], [fu[1], N(fu[1])]] }); },
   ];
   const RAISONA = [
     () => { let P, Q; do { P = nzm(-3, 4); Q = nzm(-3, 4); } while (mul(P, Q)[0][0] === P[0][0] * Q[0][0] || !mul(P, Q)[0][0]); const w = who(), PQ = mul(P, Q);
