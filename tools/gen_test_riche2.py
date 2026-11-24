@@ -5,7 +5,7 @@ ROOT = Path(__file__).resolve().parent.parent
 JS = re.search(r"JS = \[(.*?)\]", (ROOT / "build.py").read_text()).group(1)
 files = re.findall(r'"([^"]+)"', JS)
 scripts = "".join(f'<script src="../src/{f}"></script>' for f in files)
-BANKS = ["affmp2", "trigmp2", "statmp2", "cnmp1", "no1c", "cart2c", "poly2c", "rat2c", "exp2c", "compo2c", "log2c", "tri2c", "trigfn2c", "vec2c"]
+BANKS = ["affmp2", "trigmp2", "statmp2", "cnmp1", "no1c", "cart2c", "poly2c", "rat2c", "exp2c", "compo2c", "log2c", "tri2c", "trigfn2c", "vec2c", "eqmp3", "logmp3", "volmp3", "vecmp4", "fctmp4"]
 # chapitre (ids) -> banque attendue, profil
 CHAPS = [
     ("affine droites recipaff affzero modaff droitesinter", "affmp2", "mp"),
@@ -22,6 +22,13 @@ CHAPS = [
     ("sinlaw triaire", "tri2c", "col"),
     ("trigrel trigcercle trigassoc trigeq trigfn trigeq2", "trigfn2c", "col"),
     ("vecteurs", "vec2c", "col"),
+    # MP 3e et MP 4e (24.11, src/riche_mp34.js)
+    ("eqabs eqbic eqirrmp eqratmp", "eqmp3", "mp"),
+    ("puisrat logdef logprop", "logmp3", "mp"),
+    ("eqexp eqlog croissexp", "logmp3", "mp"),
+    ("volmp similmp", "volmp3", "mp"),
+    ("coordmp vectmp scalmp droiteparam", "vecmp4", "mp"),
+    ("ineqmp fctmp polymp sinusmp explogfn", "fctmp4", "mp"),
 ]
 JSCODE = r"""
 const L=[];let fails=0;const seenK={};const bad=(m)=>{fails++;const k=m.replace(/graine \d+/,"").slice(0,48);seenK[k]=(seenK[k]||0)+1;if(seenK[k]<=1&&fails<400)L.push("ÉCHEC "+m);};
