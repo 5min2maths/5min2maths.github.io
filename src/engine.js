@@ -462,6 +462,8 @@ const Engine = {
   },
   make(state, id, d, seed) {
     let level = d || this.difficulty(state, id);
+    const asked = level; /* 25.11 : niveau demandé (carnet, baisse après erreur) ; le contenu peut être remonté ci-dessous */
+    const keep = (q) => { if (q && typeof q === "object" && q.d && q.d !== 4 && asked !== 4) q.d = asked; return q; };
     /* 25.11 (audit de niveau 11e, tools/niveau_11.md ; règle de l'enseignant du 24.11 : le niveau 1 = automatismes de
        l'année, jamais ceux d'une année inférieure) : notions de 9e-10e reprises en 11e (CO). Leur niveau 1 est un
        automatisme de 9e-10e (« 3x + 9 = 33 », « calcule 4 - 5x pour x = -4 », « 3/4 de 200 CHF ») : en 11e, le niveau 1
@@ -480,7 +482,7 @@ const Engine = {
     if (level < 3 && state && state.profile && state.profile.system === "CH" && state.profile.track !== "mp" && state.profile.grade >= 12) {
       if (UPC_MIN[id]) level = Math.max(level, UPC_MIN[id]); else if (UPC.includes(id)) level += 1;
     }
-    if (seed) return this.finalize(state, id, this.build(id, level, seed));
+    if (seed) return keep(this.finalize(state, id, this.build(id, level, seed)));
     const rec = ((state.recentQ = state.recentQ || {})[id] = (state.recentQ[id] || []));
     const key = (q) => { let h = 0; for (const c of String(q.q) + JSON.stringify(q.spec)) h = (h * 31 + c.charCodeAt(0)) | 0; return h; };
     let q;
@@ -500,7 +502,7 @@ const Engine = {
     rec.push(key(q)); state.recentQ[id] = rec.slice(-15);
     if (q.ctx) state.recentCtx[id] = [...ctxs, q.ctx].slice(-2);
     state.recentForm[id] = [...forms, qForm(q)].slice(-2);
-    return this.finalize(state, id, q);
+    return keep(this.finalize(state, id, q));
   },
   // Question reproductible : même notion, niveau et graine → même question.
   build(id, level, seed) {
