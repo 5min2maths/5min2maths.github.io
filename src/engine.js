@@ -87,7 +87,7 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
   coordmp: ["pyth"], vectmp: ["coordmp"], scalmp: ["vectmp"], droiteparam: ["vectmp"], ineqmp: ["eq1", "eq2disc"], fctmp: ["fimg"], polymp: ["factor", "eq2disc"],
   sinusmp: ["trigfn"], explogfn: ["eqexp", "logdef"],
   // 24.11 (chantier G, agent greste) : MP 4e (projection, position de droites, fonctions rationnelles) ; 4e Collège (algèbre linéaire, loi normale)
-  projmp: ["scalmp"], pvectmp: ["scalmp"], posdroites: ["droiteparam"], fratmp: ["fracrat", "ineqmp"], matrices: ["sys2"], translin: ["matrices"], appllin: ["translin"], normale: ["varalea", "stats"], stats: ["diagr"], quartiles: ["diagr"] };
+  projmp: ["scalmp"], pvectmp: ["scalmp"], posdroites: ["droiteparam"], fratmp: ["fracrat", "ineqmp"], matrices: ["sys2"], translin: ["matrices"], appllin: ["translin"], normale: ["varalea", "statdesc"], statdesc: ["varalea"], stats: ["diagr"], quartiles: ["diagr"] };
 // Programme du jour : le format change d'un jour à l'autre ; l'équilibre se fait sur 7 jours.
 // 22.11 : textes courts (une ligne sur téléphone : pas de saut quand on change de format).
 const FORMATS = {

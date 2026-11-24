@@ -23,3 +23,6 @@ Object.assign(ORDRE_THEME.MATU, {"limites":"M3C02","limitinf":"M3C02","asymptote
 // 25.11 (agent c4plus) : intégration par parties et par substitution (M4C01), étude ln/exp et équations différentielles (M4C02). Ajouté à la main.
 Object.assign(ORDRE.MATU, {"intparties":204,"intsubst":205,"etudelnexp":212,"eqdiff":213});
 Object.assign(ORDRE_THEME.MATU, {"intparties":"M4C01","intsubst":"M4C01","etudelnexp":"M4C02","eqdiff":"M4C02"});
+// 25.11 (agent niv34, audit niveau) : statistique descriptive de 4e (src/ch4c_ana.js) à la place de stats et quartiles (niveau CO). Ajouté à la main.
+Object.assign(ORDRE.MATU, {"statdesc":233.5});
+Object.assign(ORDRE_THEME.MATU, {"statdesc":"M4C04"});
