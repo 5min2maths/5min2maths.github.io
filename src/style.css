@@ -391,6 +391,13 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 @media print { .mock-ex h4, .mock-part > h3 { break-after: avoid; page-break-after: avoid; } .mock-ex { break-inside: auto; } }
 
 /* Tableau de données dans un exercice riche (riche.js, 15.11) */
+/* Parcours EVACOM (24.11) */
+.evc-opts { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 4px; }
+.evc-opt { display: inline-block; max-width: 100%; }
+.evc-rules { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+.evc-weak { padding-left: 1.1em; display: grid; gap: 4px; }
+.evc-weak li span { margin-right: 6px; }
+.evc-end { text-align: right; font-style: italic; }
 .mtab { border-collapse: collapse; margin: .5em 0; font-size: .95em; }
 .mtab th, .mtab td { border: 1px solid var(--line, #999); padding: .25em .6em; text-align: center; }
 
