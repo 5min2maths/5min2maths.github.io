@@ -81,6 +81,11 @@ def main():
         subprocess.run([sys.executable, str(ROOT / "tools" / "galerie.py")], timeout=420)
     except Exception as e:
         print(f"galerie : non générée ({e})")
+    # Largeur réelle des formules (24.11) : le robot ne met pas les formules en forme ; vrai MathJax, 328 px utiles.
+    try:
+        subprocess.run([sys.executable, str(ROOT / "tools" / "largeur_formules.py"), "2"], timeout=960)
+    except Exception as e:
+        print(f"formules : non contrôlées ({e})")
 
 
 if __name__ == "__main__":
