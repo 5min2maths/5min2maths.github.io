@@ -23,3 +23,9 @@ Object.assign(ORDRE_THEME.MATU, {"limites":"M3C02","limitinf":"M3C02","asymptote
 // 25.11 (agent c4plus) : intégration par parties et par substitution (M4C01), étude ln/exp et équations différentielles (M4C02). Ajouté à la main.
 Object.assign(ORDRE.MATU, {"intparties":204,"intsubst":205,"etudelnexp":212,"eqdiff":213});
 Object.assign(ORDRE_THEME.MATU, {"intparties":"M4C01","intsubst":"M4C01","etudelnexp":"M4C02","eqdiff":"M4C02"});
+// 24.11 (agent niv2c, audit de niveau 2e Collège, tools/niveau_2c.md) : inéquations polynomiales (src/ch2c.js, Ma2 Ch3).
+// ineq (1er degré) et trigrel (angle aigu) sont des notions de 1re : elles ne sont plus « de l'année » en 2e (le niveau
+// 2e est couvert par ineqpoly, ineqfrac et trigassoc). Reporté dans tools/referentiels.py (SESA_FIX, SESA_ALSO).
+Object.assign(ORDRE.MATU, {"ineqpoly":81.5});
+Object.assign(ORDRE_THEME.MATU, {"ineqpoly":"M2C03","ineq":"M1C05","trigrel":"M1C10"});
+delete ORDRE_THEME.MATU_ALT.ineq; delete ORDRE_THEME.MATU_ALT.trigrel;

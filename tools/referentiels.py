@@ -161,13 +161,14 @@ SESA = {"M1C01": "1. Nombres", "M1C02": "2. Ensembles", "M1C03": "3. Argumenter"
 SESA_FIX = {"rel": "M1C01", "fracops": "M1C01", "puiss": "M1C01", "rac": "M1C01", "racenc": "M1C01", "sci": "M1C01", "scicalc": "M1C01",
             "pct": "M1C01", "arith": "M1C01", "ensembles": "M1C02", "divcrit": "M1C03", "tradexpr": "M1C03", "exactes": "M1C08",
             "droitesrem": "M1C08", "inter": "M1C07", "ineq2": "M1C07", "interpar": "M1C07", "optim": "M1C07", "log": "M2C07", "logbase": "M2C07",
-            "trigeq2": "M2C09", "absval": "M2C06", "droites": "M2C01", "modexp": "M2C05",
+            "trigeq2": "M2C09", "absval": "M2C06", "ineq": "M1C05", "droites": "M2C01", "modexp": "M2C05",
             # notions ajoutées le 13.11 d'après les cours pinkmaths 2026-27
-            "sysineq": "M1C05", "ineqfrac": "M2C04", "eqirr": "M1C07", "morceaux": "M2C06", "transf": "M1C04", "trigrel": "M2C09",
+            "sysineq": "M1C05", "ineqfrac": "M2C04", "eqirr": "M1C07", "morceaux": "M2C06", "transf": "M1C04", "trigrel": "M1C10",
             "expfrac": "M2C05", "vecteurs": "M2C10"}
 
 # Notions enseignées sur deux années (cours réels du Collège, ex. pinkmaths 2026-27) : chapitre de 1re en plus du chapitre principal.
-SESA_ALSO = {"ineq": "M1C05", "absval": "M1C04", "ineqfrac": "M1C07", "morceaux": "M1C04", "trigrel": "M1C10"}
+# 24.11 (audit niv2c) : ineq et trigrel retirés (notions de 1re ; en 2e : ineqpoly, ineqfrac, trigassoc).
+SESA_ALSO = {"absval": "M1C04", "ineqfrac": "M1C07", "morceaux": "M1C04"}
 
 def write_order():
     """src/ordre.js : rang de chaque notion dans l'ordre du référentiel (seulement des numéros, aucun libellé).
