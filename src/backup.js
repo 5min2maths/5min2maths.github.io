@@ -19,7 +19,7 @@ const Backup = {
       e: [s.elo.r, s.elo.n, (s.elo.log || []).slice(-8).map(([d, r]) => [off(d), r])],
       k: [s.streak.count, off(s.streak.last)].concat(s.streak.best || s.streak.jokerWk ? [s.streak.best || 0] : []).concat(s.streak.jokerWk ? [off(s.streak.jokerWk)] : []),
       h: (s.history || []).slice(-14).map((x) => [off(x.date), x.n, r2(x.score)]),
-      b, pr: s.prep || null, nw: s.now || null, g: Object.fromEntries(Object.entries(s.badges || {}).map(([k, d]) => [k, off(d)])),
+      b, pr: s.prep || null, nw: s.now || null, a: s.a11y && (s.a11y.fs !== 1 || s.a11y.font || s.a11y.hc) ? s.a11y : undefined, g: Object.fromEntries(Object.entries(s.badges || {}).map(([k, d]) => [k, off(d)])),
       // 24.11 (facultatif, codes plus anciens sans) : point de départ de « Ma semaine » (premier instantané des 7 jours)
       // et dates des erreurs effacées du carnet.
       ...(ws ? { w: [off(ws.d), ws.c || {}, ws.k || []] } : {}), ...(co.length ? { co: co.map(off) } : {}),
@@ -53,6 +53,7 @@ const Backup = {
     if (o.nw) s.now = o.nw;
     if (Array.isArray(o.w) && o.w.length === 3) s.snaps = [{ d: on(o.w[0]), c: o.w[1] || {}, k: o.w[2] || [] }];
     if (Array.isArray(o.co)) s.carnetOut = o.co.map(on);
+    if (o.a) s.a11y = { fs: +o.a.fs || 1, font: o.a.font ? 1 : 0, hc: o.a.hc ? 1 : 0 }; // réglages de lecture (24.11)
     s.placed = true;
     Engine.migrate(s);
     return s;

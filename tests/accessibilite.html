@@ -1,0 +1,91 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../src/style.css"><body><main id="app"></main><pre id="log"></pre>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_manip.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script>
+if (window === top) {
+  document.body.innerHTML = '<iframe src="accessibilite.html#cadre" style="width:360px;height:740px;border:0"></iframe><pre id="log">en cours</pre>';
+  window.addEventListener("message", (e) => { if (typeof e.data === "string" && e.data.startsWith("a11y:")) document.getElementById("log").textContent = e.data.slice(5); });
+} else window.addEventListener("load", () => {
+document.head.insertAdjacentHTML("beforeend", "<style>html { scrollbar-width: none; }</style>"); // barre de défilement superposée, comme sur un téléphone
+
+// Accessibilité (24.11, chantier O) : pour chaque taille de texte (et la police plus lisible), pas de débordement
+// horizontal sur un téléphone de 360 px (app de 328 px = 360 − 2 × 16 px de marge) : accueil (4 cadres), question,
+// correction, Réglages ; contrastes des couleurs de texte principales ≥ 4,5 (WCAG AA), thèmes clair, sombre, renforcé ;
+// state ancien sans réglages → valeurs par défaut ; réglages gardés par le code de sauvegarde.
+const OUT = []; let nbF = 0;
+const ok = (c, m) => { if (!c) { nbF++; OUT.push("ÉCHEC " + m); } };
+try {
+  ok(innerWidth === 360, "largeur du cadre " + innerWidth + " px (360 attendus)");
+  Element.prototype.scrollIntoView = function () {};
+  const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  // 1) State ancien et code de sauvegarde
+  const DEF = { fs: 1, font: 0, hc: 0 };
+  const old = Engine.newState({ system: "CH", grade: 11, track: "college", minutes: 5 }); Engine.autoInit(old); delete old.a11y;
+  ok(eq(a11yOf(old), DEF), "state ancien → défauts : " + JSON.stringify(a11yOf(old)));
+  ok(eq(a11yOf(null), DEF), "pas de state → défauts");
+  ok(a11yOf({ a11y: { fs: 1.12 } }).fs === 1.15 && a11yOf({ a11y: { fs: 1.25 } }).fs === 1.3 && a11yOf({ a11y: { fs: "x" } }).fs === 1, "anciennes tailles (1,12 / 1,25) ramenées aux nouvelles");
+  const rt = (s) => Backup.unpack(JSON.parse(JSON.stringify(Backup.pack(s))));
+  ok(!("a" in JSON.parse(JSON.stringify(Backup.pack(old)))) && eq(a11yOf(rt(old)), DEF), "code de sauvegarde sans réglages : inchangé, défauts à la reprise");
+  old.a11y = { fs: 1.3, font: 1, hc: 1 };
+  ok(eq(a11yOf(rt(old)), old.a11y), "code de sauvegarde : réglages repris " + JSON.stringify(a11yOf(rt(old))));
+  // 2) Débordements
+  const R = document.documentElement;
+  const scan = (where) => {
+    const right = app.getBoundingClientRect().right + 1, bad = [];
+    if (app.scrollWidth > app.clientWidth + 1) bad.push("#app défile en largeur (" + app.scrollWidth + " px)");
+    app.querySelectorAll("*").forEach((el) => {
+      if (el.closest("svg, mjx-container, .tabs, .fab-cmt:not(.brand .fab-cmt)") || getComputedStyle(el).position === "fixed") return;
+      // Contenu dans un cadre qui défile lui-même (aperçu de saisie, tableaux larges) : accepté.
+      for (let p = el.parentElement; p && p !== app; p = p.parentElement) { const o = getComputedStyle(p).overflowX; if (o === "auto" || o === "scroll" || o === "hidden") return; }
+      const r = el.getBoundingClientRect(); if (r.width && r.right > right) bad.push(el.tagName.toLowerCase() + "." + String(el.className).split(" ")[0] + " « " + el.textContent.trim().slice(0, 30) + " » +" + Math.round(r.right - right) + " px");
+    });
+    ok(!bad.length, where + " : " + bad.slice(0, 3).join(" ; "));
+    return bad.length;
+  };
+  const PROFS = [{ system: "CH", grade: 11, track: "college" }, { system: "CH", grade: 12, track: "college" }];
+  let vus = 0;
+  for (const fs of A11Y_FS.map((x) => x[0])) for (const font of [0, 1]) {
+    const tag = "taille " + fs + (font ? " lisible" : "");
+    for (const prof of PROFS) {
+      state = Engine.newState({ ...prof, minutes: 5 }); Engine.autoInit(state); state.placed = true; state.tourDone = true; session = null;
+      state.a11y = { fs, font, hc: 0 }; uiApply();
+      ok(Math.abs(parseFloat(getComputedStyle(R).fontSize) - 16 * fs) < 0.1, tag + " : taille racine " + getComputedStyle(R).fontSize);
+      ok(Math.abs(parseFloat(getComputedStyle(document.body).fontSize) - 17 * fs) < 0.1, tag + " : taille du texte " + getComputedStyle(document.body).fontSize);
+      for (const [t] of HOME_TABS) { homeTab = t; screenHome(); scan(tag + " " + prof.grade + "e accueil " + t); vus++; }
+      screenSettings(); scan(tag + " Réglages"); vus++;
+      ok(app.querySelectorAll("#fs button, #font button, #hc button").length === 7, tag + " : 7 boutons de lecture dans Réglages");
+      const ids = Engine.catalog(state.profile).filter((c) => state.notions[c.id] && GEN[c.id]).map((c) => c.id);
+      const pick = ids.filter((_, i) => i % Math.max(1, Math.floor(ids.length / 8)) === 0).slice(0, 8);
+      for (const id of pick) for (const d of [1, 3]) {
+        let q; try { q = Engine.make(state, id, d); } catch (e) { continue; } if (!q) continue;
+        renderQuestion(q, { eyebrow: "test", single: true, track: "test", onDone() {}, onNext() {}, onNotYet() {} });
+        scan(tag + " question " + id + "-" + d); vus++;
+        const idk = document.getElementById("idk"); if (idk) { idk.click(); scan(tag + " correction " + id + "-" + d); vus++; }
+      }
+    }
+  }
+  // Réglages par l'interface : le bouton change le state et la racine.
+  state.a11y = undefined; uiApply(); screenSettings();
+  document.querySelector('#hc button[data-v="1"]').click(); document.querySelector('#font button[data-v="1"]').click(); document.querySelector('#fs button[data-v="1.3"]').click();
+  ok(eq(state.a11y, { fs: 1.3, font: 1, hc: 1 }) && R.dataset.hc === "1" && R.dataset.font === "lisible" && R.style.getPropertyValue("--fs").trim() === "1.3", "Réglages : clics → state " + JSON.stringify(state.a11y));
+  // 3) Contrastes (WCAG AA ≥ 4,5)
+  const rgb = (c) => { c = c.trim(); if (c[0] === "#") { let h = c.slice(1); if (h.length === 3) h = [...h].map((x) => x + x).join(""); return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)); } return (c.match(/[\d.]+/g) || []).slice(0, 3).map(Number); };
+  const lum = (c) => { const v = rgb(c).map((x) => { x /= 255; return x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; }); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; };
+  const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+  const PAIRS = [["ink", "paper"], ["ink", "card"], ["ink-soft", "paper"], ["ink-soft", "card"], ["ink-soft", "blue-soft"], ["ink-soft", "grid"], ["blue", "card"], ["blue", "paper"], ["blue", "blue-soft"],
+    ["on-blue", "blue"], ["ok", "ok-soft"], ["ok", "card"], ["warn", "warn-soft"], ["warn", "card"], ["bad", "bad-soft"], ["bad", "card"], ["margin", "card"], ["on-margin", "margin"], ["on-ok", "ok"], ["on-ok", "bad"], ["paper", "ink"], ["fluo-ink", "fluo"]];
+  const themes = [["clair", "light", 0], ["sombre", "dark", 0], ["clair renforcé", "light", 1], ["sombre renforcé", "dark", 1]];
+  const mins = [];
+  for (const [nom, th, hc] of themes) {
+    R.dataset.theme = th; if (hc) R.dataset.hc = "1"; else delete R.dataset.hc;
+    const cs = getComputedStyle(R), v = (k) => cs.getPropertyValue("--" + k);
+    let mn = 99, worst = "";
+    for (const [a, b] of PAIRS) { const r = ratio(v(a), v(b)); if (r < mn) { mn = r; worst = a + "/" + b; } ok(r >= 4.5, "contraste " + nom + " " + a + " sur " + b + " = " + r.toFixed(2)); }
+    mins.push(nom + " min " + mn.toFixed(2) + " (" + worst + ")");
+  }
+  delete R.dataset.theme; delete R.dataset.hc;
+  OUT.unshift((nbF ? nbF + " échec(s)" : "tout est bon") + " · " + vus + " écrans à 328 px · " + mins.join(" · "));
+} catch (e) { OUT.push("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }
+parent.postMessage("a11y:" + OUT.join("\n"), "*");
+});
+</script>
