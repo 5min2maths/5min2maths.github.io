@@ -18,14 +18,14 @@
   const fS = (v) => { v = r6(v); const d = den(v); if (d === 1) return String(Math.round(v)); if (!d) return String(v); return Math.round(v * d) + "/" + d; };
   // nombre décimal en TeX (virgule, séparateur de milliers)
   const N = (v) => { v = r6(v); let s = Math.abs(v).toFixed(9).replace(/\.?0+$/, ""); let [i, f] = s.split("."); if (i.length >= 5) i = i.replace(/\B(?=(\d{3})+(?!\d))/g, "\\text{'}"); return (v < 0 ? "-" : "") + i + (f ? "{,}" + f : ""); };
-  const T = (v) => N(v).replace("{,}", ",").replace(/\\text\{'\}/g, "'"); // texte simple
+  const T = (v) => N(v).replace("{,}", ",").replace(/\\text\{'\}/g, "'"); /* texte simple */
   const fT = (v) => { const d = den(v); v = r6(v); if (d === 1 || !d || d > 60) return N(v); const n = Math.round(v * d); return (n < 0 ? "-" : "") + "\\frac{" + Math.abs(n) + "}{" + d + "}"; };
   const pT = (v) => (v < 0 ? "(" + fT(v) + ")" : fT(v));
   const sg = (v) => (v < 0 ? " - " + fT(-v) : " + " + fT(v));
   const tm = (c, v, first) => { if (!c) return ""; const a = Math.abs(c), s = c < 0 ? (first ? "-" : " - ") : first ? "" : " + "; return s + (v && a === 1 ? "" : fT(a)) + v; };
   const polyT = (cs, x = "x") => { const d = cs.length - 1; let o = ""; cs.forEach((c, i) => { const p = d - i; o += tm(c, p === 0 ? "" : p === 1 ? x : x + "^{" + p + "}", o === ""); }); return o || "0"; };
   const lin = (a, b, x = "x") => polyT([a, b], x);
-  const D = (v, s) => N(Math.round(v / s) * s); // valeur arrondie au pas s, en TeX
+  const D = (v, s) => N(Math.round(v / s) * s); /* valeur arrondie au pas s, en TeX */
   const uniq = (vals) => vals.filter((v, i) => vals.findIndex((w) => Math.abs(w - v) < 1e-9) === i);
   const sortU = (vals) => uniq(vals).sort((a, b) => a - b);
   const setT = (vals) => (vals.length ? "S = \\{" + sortU(vals).map(fT).join(" \\,;\\, ") + "\\}" : "S = \\varnothing");
@@ -96,6 +96,11 @@
             traps: [TS([a, b], "Ce sont les deux points ; on cherche le point à égale distance."), TS([(a - b) / 2], "2x = " + a + " + " + b + " : on additionne.")] }); },
     ],
     3: [
+      () => { /* audit niveau 25.11 : forme de l'examen TASV spécifique 2024 (« 3x² − 2|x| − 1 = 0 ») : on pose X = |x| ≥ 0 */
+        const a = pk([1, 2, 3, 4]), p = R.int(1, 5), n = R.int(1, 5), b = n - a * p, c = -n * p; if (!b || (a === 1 && n === p)) return null; const X2 = -n / a, sol = [-p, p];
+        return QS("Résous " + M((a === 1 ? "" : a) + "x^2" + (b === 1 ? " + " : b === -1 ? " - " : sg(b)) + "|x|" + sg(c) + " = 0") + ".", sol, "On pose " + M("X = |x| \\ge 0") + " (et " + M("x^2 = X^2") + ") : " + M(polyT([a, b, c], "X") + " = 0") + " donne " + M("X = " + p) + " ou " + M("X = " + fT(X2)) + " (rejetée : " + M("|x|") + " n'est jamais négatif). " + M("|x| = " + p) + " : " + M(setT(sol)) + ".",
+          { ctx: "carre-abs", guide: [G("On pose " + M("X = |x|") + " : " + M(polyT([a, b, c], "X") + " = 0") + ". Solution positive " + M("X") + " ?", p, M("X = " + p) + " (l'autre, " + M(fT(X2)) + ", est négative : rejetée)."), GSet("Ensemble des solutions en " + M("x") + " ?", sol, M("|x| = " + p) + " : " + M(setT(sol)) + ".")],
+            traps: [TS([p, X2], "Ce sont les valeurs de X = |x| ; X négatif est impossible, puis |x| = " + p + " donne deux solutions."), TS([p], "|x| = " + p + " donne x = " + p + " ou x = −" + p + "."), TS([-p, p, X2, -X2], "X = " + fS(X2) + " est négatif : |x| ne peut pas valoir ce nombre.")] }); },
       () => { let p, a, c, sol;
         if (R.rand() < 0.6) { p = R.int(2, 5); const q = R.int(1, p - 1); if ((p * p + q * q) % 2) return null; a = (p * p + q * q) / 2; c = (p * p - q * q) / 2; sol = [p, -p, q, -q]; }
         else { p = R.int(2, 5); a = R.int(1, Math.ceil(p * p / 2) - 1); c = p * p - a; sol = [p, -p]; }
@@ -273,10 +278,12 @@
         const g = [G("Racine " + rootW(q) + " de " + M(b) + " ?", r, M(rootT(q, b) + " = " + r) + ".")]; if (p > 1) g.push(G("À la puissance " + M(p) + " ?", v, M(r + "^{" + p + "} = " + v) + "."));
         return QN("Calcule sans calculatrice " + M(b + "^{\\frac{" + p + "}{" + q + "}}") + ".", v, M(b + "^{\\frac{" + p + "}{" + q + "}} = \\left(" + rootT(q, b) + "\\right)^{" + p + "} = " + r + (p > 1 ? "^{" + p + "} = " + v : "")) + ".",
           { ctx: "calcul", guide: g, traps: [TR(r6(b * p / q), "L'exposant n'est pas un facteur : b^(p/q) = (racine q-ième de b)^p."), TR(r6(b ** (q / p)), "Le dénominateur de l'exposant est l'indice de la racine."), TR(r * p, "On élève à la puissance " + p + ", on ne multiplie pas par " + p + ".")] }); },
-      () => { const b = pk([2, 3, 4, 5, 10]), n = pk([2, 3]), bn = b ** n;
-        return QN("Calcule " + M(b + "^{-" + n + "}") + ". (fraction)", 1 / bn, "Un exposant négatif donne l'inverse : " + M(b + "^{-" + n + "} = \\frac{1}{" + b + "^{" + n + "}} = \\frac{1}{" + bn + "}") + ".",
-          { ctx: "negatif", guide: [G("On écrit " + M("\\frac{1}{" + b + "^{" + n + "}}") + ". Que vaut " + M(b + "^{" + n + "}") + " ?", bn, M(bn) + "."), G("Résultat (fraction) ?", 1 / bn, M("\\frac{1}{" + bn + "}") + ".")],
-            traps: [TR(-bn, "Exposant négatif ne veut pas dire nombre négatif : c'est l'inverse."), TR(-b * n, "b^(−n) = 1 ÷ b^n."), TR(bn, "Il faut prendre l'inverse.")] }); },
+      () => { /* audit niveau 25.11 : remplace 5^(-3) (exposant entier négatif : MP 1re, S1.CN.12) par un exposant décimal (S5.PL.03) */
+        const [e, p, q] = pk([["0{,}5", 1, 2], ["1{,}5", 3, 2], ["2{,}5", 5, 2], ["0{,}25", 1, 4], ["0{,}75", 3, 4], ["1{,}25", 5, 4], ["0{,}2", 1, 5], ["0{,}4", 2, 5], ["0{,}6", 3, 5]]);
+        const r = pk(q === 2 ? [3, 4, 5, 6, 7, 9] : q === 4 ? [2, 3] : [2, 3]), b = r ** q, v = r ** p; if (v > 1000 || b > 300) return null; const ed = e.replace("{,}", ",");
+        return QN("Calcule sans calculatrice " + M(b + "^{" + e + "}") + ".", v, "On écrit l'exposant en fraction : " + M(e + " = \\frac{" + p + "}{" + q + "}") + ", puis " + M(b + "^{\\frac{" + p + "}{" + q + "}} = \\left(" + rootT(q, b) + "\\right)^{" + p + "} = " + r + (p > 1 ? "^{" + p + "} = " + v : "")) + ".",
+          { ctx: "exposant-decimal", guide: [G("Exposant " + M(e) + " en fraction : dénominateur (indice de la racine) ?", q, M(e + " = \\frac{" + p + "}{" + q + "}") + "."), G("Racine " + rootW(q) + " de " + M(b) + " ?", r, M(rootT(q, b) + " = " + r) + "."), G("Résultat ?", v, M(r + "^{" + p + "} = " + v) + ".")],
+            traps: [TR(r6(b * p / q), "L'exposant " + ed + " n'est pas un facteur : b^(p/q) = (racine q-ième de b)^p."), TR(r, "Exposant " + ed + " = " + p + "/" + q + " : on élève encore la racine à la puissance " + p + "."), TR(r6(b ** (q / p)), "Le dénominateur de l'exposant est l'indice de la racine.")] }); },
       () => { const t = R.int(0, 2), n = pk([2, 3, 4, 5]), m = R.int(1, 4); if (m === n || (t === 0 && m === 1 && n === 2 && R.rand() < 0.5)) return null;
         if (t === 0) return QN("Écris " + M(rootT(n, xp(m))) + " sous la forme " + M("x^k") + " (avec " + M("x > 0") + ") : que vaut " + M("k") + " ? (fraction)", m / n, "L'indice de la racine va au dénominateur : " + M(rootT(n, xp(m)) + " = x^{\\frac{" + m + "}{" + n + "}}") + ".",
           { ctx: "racine", guide: [G("L'exposant " + M(m) + " va au numérateur, l'indice " + M(n) + " au dénominateur : " + M("k") + " = ?", m / n, M(fT(m / n)) + ".")], traps: [TR(n / m, "L'indice de la racine va au dénominateur."), TR(m * n, "C'est une fraction : exposant ÷ indice.")] });
@@ -519,10 +526,11 @@
         return QN("Un capital de " + M(N(C0)) + " CHF est placé à " + M(N(t) + "\\,\\%") + " d'intérêts composés par an. Que vaut-il après " + M(n) + " ans (au centime) ?", C, M("C = " + N(C0) + " \\cdot " + N(f) + "^{" + n + "} \\approx " + CHF(C)) + " CHF.",
           { ctx: "capital", round: 0.01, guide: [G("Facteur annuel " + M("1 + \\frac{" + N(t) + "}{100}") + " ?", f, M(N(f)) + "."), G("Capital après " + n + " ans (au centime) ?", C, M(N(C0) + " \\cdot " + N(f) + "^{" + n + "} \\approx " + CHF(C)) + " CHF.", 0.01)],
             traps: [TR(C0 * (1 + (n * t) / 100), "Intérêts composés : on multiplie chaque année par " + T(f) + " (les intérêts rapportent aussi)."), TR(C0 * f * n, "On multiplie " + n + " fois par " + T(f) + " : c'est une puissance."), TR(C0 * (t / 100) ** n, "Le facteur annuel est 1 + t, pas t.")] }); },
-      () => { const N0 = pk([100, 200, 250, 500, 50]), Tt = pk([2, 3, 4, 5, 6]), k = R.int(3, 6), t = k * Tt, Nt = N0 * 2 ** k;
-        return QN("Une population de " + M(N0) + " bactéries double toutes les " + M(Tt) + " heures. Combien y en a-t-il après " + M(t) + " heures ?", Nt, M(t + " \\div " + Tt + " = " + k) + " doublements : " + M(N0 + " \\cdot 2^{" + k + "} = " + N(Nt)) + ".",
-          { ctx: "doublement", guide: [G("Nombre de doublements (" + M(t + " \\div " + Tt) + ") ?", k, M(k) + "."), G("Population ?", Nt, M(N0 + " \\cdot 2^{" + k + "} = " + N(Nt)) + ".")],
-            traps: [TR(N0 * 2 * k, "Doubler " + k + " fois, c'est multiplier par 2^" + k + ", pas par 2 · " + k + "."), TR(N0 * 2 ** t, "Il y a un doublement toutes les " + Tt + " h, pas chaque heure."), TR(N0 * (k + 1), "Chaque doublement multiplie par 2.")] }); },
+      () => { /* audit niveau 25.11 : « double toutes les T h, après k·T h » (2^k, niveau CO) -> durée non multiple de T, modèle N0 · 2^(t/T) (S6.EL.03, S5.PL.03) */
+        const N0 = pk([120, 200, 250, 400, 500, 800]), Tt = pk([3, 4, 5, 6, 8]), t = R.int(Tt + 1, 4 * Tt); if (t % Tt === 0) return null; const e = t / Tt, Nt = N0 * 2 ** e;
+        return QN("Une culture de " + M(N0) + " bactéries double toutes les " + M(Tt) + " heures : " + M("N(t) = " + N0 + " \\cdot 2^{\\frac{t}{" + Tt + "}}") + " (t en heures). Combien y a-t-il de bactéries après " + M(t) + " heures (à l'unité) ?", Nt, "Exposant " + M("\\frac{" + t + "}{" + Tt + "}" + (den(e) <= 10 && den(e) > 1 ? "" : " \\approx " + D(e, 0.001))) + " : " + M("N(" + t + ") = " + N0 + " \\cdot 2^{\\frac{" + t + "}{" + Tt + "}} \\approx " + N(Math.round(Nt))) + " bactéries.",
+          { ctx: "doublement", round: 1, guide: [G("Exposant " + M("\\frac{" + t + "}{" + Tt + "}") + " (nombre de doublements, au centième) ?", e, M("\\frac{" + t + "}{" + Tt + "} \\approx " + D(e, 0.01)) + ".", 0.01), G("Facteur " + M("2^{\\frac{" + t + "}{" + Tt + "}}") + " (au centième) ?", 2 ** e, M("\\approx " + D(2 ** e, 0.01)) + ".", 0.01), G("Nombre de bactéries (à l'unité) ?", Nt, M(N0 + " \\cdot 2^{\\frac{" + t + "}{" + Tt + "}} \\approx " + N(Math.round(Nt))) + ".", 1)],
+            traps: [TR(N0 * 2 * e, "Doubler " + T(r6(Math.round(e * 100) / 100)) + " fois, c'est multiplier par 2 à la puissance " + t + "/" + Tt + ", pas par 2 · " + t + "/" + Tt + "."), TR(N0 * 2 ** Math.floor(e), "Le modèle est continu : l'exposant " + t + "/" + Tt + " n'est pas arrondi."), TR(N0 * 2 ** (Tt / t), "L'exposant est t ÷ " + Tt + " (temps écoulé ÷ temps de doublement).")] }); },
       () => { const V0 = pk([18000, 20000, 25000, 30000, 40000]), p = pk([10, 12, 15, 20]), n = R.int(2, 6), f = 1 - p / 100, V = V0 * f ** n;
         return QN("Une voiture achetée " + M(N(V0)) + " CHF perd " + M(p + "\\,\\%") + " de sa valeur chaque année. Que vaut-elle après " + M(n) + " ans (au franc près) ?", V, M(N(V0) + " \\cdot " + N(f) + "^{" + n + "} \\approx " + N(Math.round(V))) + " CHF.",
           { ctx: "depreciation", round: 1, guide: [G("Facteur annuel " + M("1 - \\frac{" + p + "}{100}") + " ?", f, M(N(f)) + "."), G("Valeur après " + n + " ans (au franc près) ?", V, M(N(Math.round(V))) + " CHF.", 1)],
@@ -562,10 +570,11 @@
   // ===================================== D1. volmp : volumes =====================================
   const VO = {
     1: [
-      () => { const r = R.int(2, 9), h = R.int(3, 15), dia = R.rand() < 0.4; if (h === r) return null; const V = PI * r * r * h;
-        return QN("Calcule le volume d'un cylindre de " + (dia ? "diamètre " + M(2 * r + "\\text{ cm}") : "rayon " + M(r + "\\text{ cm}")) + " et de hauteur " + M(h + "\\text{ cm}") + " (au centième).", V, M("V = \\pi r^2 h = \\pi \\cdot " + r + "^2 \\cdot " + h + " = " + r * r * h + "\\pi \\approx " + D(V, 0.01) + cm3) + ".",
-          { ctx: "cylindre", round: 0.01, guide: [G((dia ? "Rayon ? Puis aire" : "Aire") + " de la base " + M("\\pi r^2") + " (au centième) ?", PI * r * r, M(r * r + "\\pi \\approx " + D(PI * r * r, 0.01)) + ".", 0.01), G("Volume (au centième) ?", V, M(D(V, 0.01) + cm3) + ".", 0.01)],
-            traps: [TR(2 * PI * r * h, "2πrh est l'aire latérale ; le volume est πr²h."), TR(V / 3, "Le ÷ 3, c'est pour le cône."), dia ? TR(PI * 4 * r * r * h, "Le rayon est la moitié du diamètre.") : null] }); },
+      () => { /* audit niveau 25.11 : la formule seule est du niveau 11e ; on demande la capacité en litres (conversion, examen TASV 2023) */
+        const r = pk([15, 20, 25, 30, 35, 40, 45, 60]), h = 10 * R.int(4, 15), dia = R.rand() < 0.5; const V = PI * r * r * h, L = V / 1000;
+        return QN("Un réservoir cylindrique a un " + (dia ? "diamètre de " + M(2 * r + "\\text{ cm}") : "rayon de " + M(r + "\\text{ cm}")) + " et une hauteur de " + M(h + "\\text{ cm}") + ". Quelle est sa capacité en litres (au dixième) ?", L, M("V = \\pi r^2 h = \\pi \\cdot " + r + "^2 \\cdot " + h + " \\approx " + D(V, 1) + cm3) + " et " + M("1\\text{ L} = 1\\text{'}000" + cm3) + " : " + M("\\approx " + D(L, 0.1) + "\\text{ L}") + ".",
+          { ctx: "cylindre", round: 0.1, guide: [G("Volume en " + M("\\text{cm}^3") + " (à l'unité) ?", V, M("\\pi \\cdot " + r + "^2 \\cdot " + h + " \\approx " + D(V, 1) + cm3) + ".", 1), G("Capacité en litres (" + M("1\\text{ L} = 1\\text{ dm}^3 = 1\\text{'}000" + cm3) + ", au dixième) ?", L, M(D(L, 0.1) + "\\text{ L}") + ".", 0.1)],
+            traps: [TR(V, "La réponse est demandée en litres : divise par 1'000."), TR(V / 100, "1 L = 1'000 cm³ (1 dm³), pas 100 cm³."), dia ? TR(4 * V / 1000, "Le rayon est la moitié du diamètre.") : TR(2 * PI * r * h / 1000, "2πrh est l'aire latérale ; le volume est πr²h.")] }); },
       () => { const c = R.int(3, 12), h = 3 * R.int(1, 5), V = (c * c * h) / 3;
         return QN("Calcule le volume d'une pyramide à base carrée de côté " + M(c + "\\text{ cm}") + " et de hauteur " + M(h + "\\text{ cm}") + ".", V, M("V = \\frac{A_{\\text{base}} \\cdot h}{3} = \\frac{" + c * c + " \\cdot " + h + "}{3} = " + N(V) + cm3) + ".",
           { ctx: "pyramide", guide: [G("Aire de la base ?", c * c, M(c + "^2 = " + c * c + cm2) + "."), G("Volume ?", V, M(N(V) + cm3) + ".")],
@@ -574,10 +583,11 @@
         return QN("Calcule le volume d'un cône de rayon " + M(r + "\\text{ cm}") + " et de hauteur " + M(h + "\\text{ cm}") + " (au centième).", V, M("V = \\frac{\\pi r^2 h}{3} = \\frac{" + r * r * h + "\\pi}{3} \\approx " + D(V, 0.01) + cm3) + ".",
           { ctx: "cone", round: 0.01, guide: [G("Aire de la base " + M("\\pi r^2") + " (au centième) ?", PI * r * r, M(D(PI * r * r, 0.01)) + ".", 0.01), G("Volume (au centième) ?", V, M(D(V, 0.01) + cm3) + ".", 0.01)],
             traps: [TR(PI * r * r * h, "Cône : on divise par 3."), TR((PI * r * h) / 3, "La base est un disque : aire πr².")] }); },
-      () => { const d = pk([4, 6, 8, 10, 12, 20, 30]), r = d / 2, V = (4 / 3) * PI * r ** 3;
-        return QN("Calcule le volume d'une boule de diamètre " + M(d + "\\text{ cm}") + " (au centième).", V, "Rayon " + M(r) + " cm : " + M("V = \\frac{4}{3}\\pi \\cdot " + r + "^3 \\approx " + D(V, 0.01) + cm3) + ".",
-          { ctx: "boule", round: 0.01, guide: [G("Rayon ?", r, M(r + "\\text{ cm}") + "."), G("Volume " + M("\\frac{4}{3}\\pi r^3") + " (au centième) ?", V, M(D(V, 0.01) + cm3) + ".", 0.01)],
-            traps: [TR((4 / 3) * PI * d ** 3, "Le rayon est la moitié du diamètre."), TR(4 * PI * r * r, "4πr² est l'aire de la sphère ; le volume est 4/3 πr³."), TR(PI * r ** 3, "N'oublie pas le facteur 4/3.")] }); },
+      () => { /* audit niveau 25.11 : boule -> capacité en litres (conversion) */
+        const d = pk([16, 20, 24, 30, 36, 40, 50]), r = d / 2, V = (4 / 3) * PI * r ** 3, L = V / 1000;
+        return QN("Un ballon sphérique a un diamètre de " + M(d + "\\text{ cm}") + ". Quel volume d'air contient-il, en litres (au dixième) ?", L, "Rayon " + M(r) + " cm : " + M("V = \\frac{4}{3}\\pi \\cdot " + r + "^3 \\approx " + D(V, 1) + cm3 + " \\approx " + D(L, 0.1) + "\\text{ L}") + ".",
+          { ctx: "boule", round: 0.1, guide: [G("Rayon (cm) ?", r, M(r + "\\text{ cm}") + "."), G("Volume " + M("\\frac{4}{3}\\pi r^3") + " en " + M("\\text{cm}^3") + " (à l'unité) ?", V, M(D(V, 1) + cm3) + ".", 1), G("En litres (au dixième) ?", L, M(D(L, 0.1) + "\\text{ L}") + ".", 0.1)],
+            traps: [TR((4 / 3) * PI * d ** 3 / 1000, "Le rayon est la moitié du diamètre."), TR(4 * PI * r * r / 1000, "4πr² est l'aire de la sphère ; le volume est 4/3 πr³."), TR(V, "La réponse est demandée en litres : divise par 1'000.")] }); },
     ],
     2: [
       () => { const r = R.int(2, 6), h = R.int(2, 12); if (h === r) return null; const k = r * r * h;
@@ -622,10 +632,11 @@
   // ===================================== D2. similmp : similitude =====================================
   const SI = {
     1: [
-      () => { const k = pk([1.5, 2, 2.5, 3, 4, 1.2]), L1 = R.int(2, 10), m = R.int(2, 12), L2 = r6(k * L1); if (m === L1 || !Number.isInteger(L2 * 10) || !Number.isInteger(r6(m * k * 10))) return null;
-        return QN("Deux triangles sont semblables. Un côté mesure " + M(L1 + "\\text{ cm}") + " sur le petit et " + M(N(L2) + "\\text{ cm}") + " sur le grand. Un autre côté du petit mesure " + M(m + "\\text{ cm}") + " : combien mesure le côté correspondant du grand ?", m * k, "Rapport " + M("k = " + N(L2) + " \\div " + L1 + " = " + N(k)) + " ; " + M(m + " \\cdot " + N(k) + " = " + N(m * k)) + " cm.",
-          { ctx: "longueur", guide: [G("Rapport de similitude " + M("k") + " (grand ÷ petit) ?", k, M(N(k)) + "."), G("Longueur cherchée ?", m * k, M(N(m * k)) + " cm.")],
-            traps: [TR(m + L2 - L1, "Agrandissement : on multiplie par k, on n'ajoute pas."), TR(m / k, "Le grand est plus grand : on multiplie par k.")] }); },
+      () => { /* audit niveau 25.11 : « triangles semblables, côté correspondant » (Thalès, MP 1re S2.GE.06) -> rapport des aires connu, longueur cherchée (S6.VS.05) */
+        const k = pk([1.5, 2, 2.5, 3, 4]), A1 = 4 * R.int(2, 9), A2 = r6(A1 * k * k), m = R.int(3, 12); if (!Number.isInteger(A2) || !Number.isInteger(r6(m * k * 10))) return null;
+        return QN("Deux figures semblables ont des aires de " + M(A1 + cm2) + " et " + M(A2 + cm2) + ". Un côté de la petite mesure " + M(m + "\\text{ cm}") + " : combien mesure le côté correspondant de la grande ?", m * k, "Rapport des aires " + M("k^2 = " + A2 + " \\div " + A1 + " = " + N(k * k)) + ", donc " + M("k = \\sqrt{" + N(k * k) + "} = " + N(k)) + " ; " + M(m + " \\cdot " + N(k) + " = " + N(m * k)) + " cm.",
+          { ctx: "aires-vers-longueur", guide: [G("Rapport des aires " + M("k^2") + " (grande ÷ petite) ?", k * k, M(A2 + " \\div " + A1 + " = " + N(k * k)) + "."), G("Rapport des longueurs " + M("k") + " ?", k, M("\\sqrt{" + N(k * k) + "} = " + N(k)) + "."), G("Longueur cherchée (cm) ?", m * k, M(N(m * k)) + " cm.")],
+            traps: [TR(m * k * k, "Les aires sont multipliées par k², les longueurs seulement par k = √(" + T(k * k) + ")."), TR(m / k, "La grande figure a des côtés plus longs : on multiplie par k."), TR(m + A2 - A1, "Agrandissement : on multiplie, on n'ajoute pas.")] }); },
       () => { const k = pk([2, 3, 4, 5, 1.5, 0.5]), A1 = R.int(3, 20), A2 = A1 * k * k;
         return QN("On " + (k > 1 ? "agrandit" : "réduit") + " une figure d'aire " + M(A1 + cm2) + " : toutes ses longueurs sont multipliées par " + M(N(k)) + ". Quelle est l'aire de la nouvelle figure ?", A2, "Les aires sont multipliées par " + M("k^2 = " + N(k * k)) + " : " + M(A1 + " \\cdot " + N(k * k) + " = " + N(A2) + cm2) + ".",
           { ctx: "aire", guide: [G("Facteur des aires " + M("k^2") + " ?", k * k, M(N(k * k)) + "."), G("Nouvelle aire ?", A2, M(N(A2) + cm2) + ".")],
@@ -887,6 +898,11 @@
             traps: [TP([B[0] + C[0] - A[0], B[1] + C[1] - A[1]], "Dans ABCD, AD = BC : D = A + BC."), TP([A[0] + B[0] - C[0], A[1] + B[1] - C[1]], "Respecte l'ordre des sommets : ABCD.")] }); },
     ],
     3: [
+      () => { /* audit niveau 25.11 : « exprimer w comme combinaison linéaire de u et v » (examen TASV spécifique 2024 p. 2, 2023 p. 7) */
+        const u = [nz(-5, 5), nz(-5, 5)], v = [nz(-5, 5), nz(-5, 5)], det = u[0] * v[1] - u[1] * v[0], a = nz(-4, 4), b = nz(-4, 4); if (!det || Math.abs(a) === Math.abs(b) || (Math.abs(a) === 1 && Math.abs(b) === 1)) return null; const w = [a * u[0] + b * v[0], a * u[1] + b * v[1]];
+        return QP("Avec " + M("\\vec{u} = " + v2(...u)) + ", " + M("\\vec{v} = " + v2(...v)) + " et " + M("\\vec{w} = " + v2(...w)) + ", trouve les nombres " + M("a") + " et " + M("b") + " tels que " + M("\\vec{w} = a\\,\\vec{u} + b\\,\\vec{v}") + ". Réponds « a ; b ».", [a, b], "On résout le système " + M("\\begin{cases} " + u[0] + "a" + sg(v[0]) + "b = " + w[0] + " \\\\ " + u[1] + "a" + sg(v[1]) + "b = " + w[1] + " \\end{cases}") + " : " + M("a = " + a) + ", " + M("b = " + b) + ". Donc " + M("\\vec{w} = " + fT(a) + "\\,\\vec{u}" + (b < 0 ? " - " + (b === -1 ? "" : -b) : " + " + (b === 1 ? "" : b)) + "\\,\\vec{v}") + ".",
+          { ctx: "combinaison-lineaire", guide: [G("Système : " + M(u[0] + "a" + sg(v[0]) + "b = " + w[0]) + " et " + M(u[1] + "a" + sg(v[1]) + "b = " + w[1]) + ". Que vaut " + M("a") + " ?", a, M("a = " + a) + "."), G("Que vaut " + M("b") + " ?", b, M("b = " + b) + "."), GP("Réponse « a ; b » ?", [a, b], M("a = " + a) + ", " + M("b = " + b) + ".")],
+            traps: [TP([b, a], "a multiplie u et b multiplie v : respecte l'ordre."), TP([-a, -b], "Vérifie les signes en recalculant a·u + b·v.")] }); },
       () => { const A = [R.int(-5, 5), R.int(-5, 5)], u = [nz(-4, 4), nz(-4, 4)], k = pk([2, 3, -1, -2, 1.5, 0.5]), Cc = [A[0] + k * u[0], A[1] + k * u[1]]; if (!Number.isInteger(Cc[0] * 2) || !Number.isInteger(Cc[1] * 2)) return null; const B = [A[0] + u[0], A[1] + u[1]];
         return QP("Avec " + ptN("A", ...A) + " et " + ptN("B", ...B) + ", trouve le point " + M("C") + " tel que " + M("\\overrightarrow{AC} = " + fT(k) + "\\,\\overrightarrow{AB}") + "." + PAIR, Cc, M("\\overrightarrow{AB} = " + v2(u[0], u[1])) + ", " + M("\\overrightarrow{AC} = " + v2(fT(k * u[0]), fT(k * u[1]))) + ", " + ptN("C", ...Cc) + ".",
           { ctx: "point-vecteur", guide: [GP("Composantes de " + M("\\overrightarrow{AB}") + " ?", u, M(v2(u[0], u[1])) + "."), GP("Composantes de " + M("\\overrightarrow{AC}") + " ?", [k * u[0], k * u[1]], M(v2(fT(k * u[0]), fT(k * u[1]))) + "."), GP("Point " + M("C = A + \\overrightarrow{AC}") + " ?", Cc, ptN("C", ...Cc) + ".")],
@@ -956,6 +972,11 @@
   const eqP = (A, d, s = "t") => M("\\begin{cases} x = " + cT1(A[0], d[0], s) + " \\\\ y = " + cT1(A[1], d[1], s) + (A.length > 2 ? " \\\\ z = " + cT1(A[2], d[2], s) : "") + " \\end{cases}");
   const DP = {
     1: [
+      () => { /* audit niveau 25.11 : « équations paramétriques de la droite passant par A et B » (examen TASV spécifique 2024 p. 4c) */
+        const A = [R.int(-5, 5), R.int(-5, 5), R.int(-5, 5)], d = [nz(-4, 4), nz(-4, 4), nz(-4, 4)], B = A.map((x, i) => x + d[i]), t = pk([2, 3, -2, -1]), P = A.map((x, i) => x + t * d[i]);
+        return QP("On écrit la droite " + M("(AB)") + " avec " + ptN("A", ...A) + " comme point de départ et " + M("\\overrightarrow{AB}") + " comme vecteur directeur, pour " + ptN("B", ...B) + ". Quel point obtient-on pour " + M("t = " + t) + " ?" + TRIP, P, M("\\overrightarrow{AB} = " + v3(...d)) + ", donc " + eqP(A, d) + " ; pour " + M("t = " + t) + " : " + pt(...P) + ".",
+          { ctx: "deux-points", guide: [GP("Vecteur directeur " + M("\\overrightarrow{AB}") + " (« x ; y ; z ») ?", d, M(v3(...d)) + "."), G(M("x = " + A[0] + " + " + pT(d[0]) + "t") + " pour " + M("t = " + t) + " ?", P[0], M(P[0]) + "."), GP("Point ?", P, pt(...P) + ".")],
+            traps: [TP(B.map((x, i) => x + t * d[i]), "Le point de départ est A (pour t = 0), pas B."), TP(A.map((x, i) => x + t * B[i]), "Le vecteur directeur est AB = B − A, pas les coordonnées de B."), TP(A.map((x, i) => x - t * d[i]), "AB = B − A (arrivée − départ).")] }); },
       () => { const A = [R.int(-5, 5), R.int(-5, 5)], d = [nz(-4, 4), nz(-4, 4)], t = pk([2, 3, -1, -2, 4]), P = [A[0] + t * d[0], A[1] + t * d[1]];
         return QP("La droite " + M("d") + " a pour équations paramétriques " + eqP(A, d) + ". Donne le point de " + M("d") + " obtenu pour " + M("t = " + t) + "." + PAIR, P, M("x = " + A[0] + sg(d[0]) + " \\cdot " + pT(t) + " = " + P[0]) + ", " + M("y = " + A[1] + sg(d[1]) + " \\cdot " + pT(t) + " = " + P[1]) + " : " + pt(...P) + ".",
           { ctx: "point-t", guide: [G(M("x") + " pour " + M("t = " + t) + " ?", P[0], M(P[0]) + "."), G(M("y") + " ?", P[1], M(P[1]) + "."), GP("Point ?", P, pt(...P) + ".")],
@@ -1068,14 +1089,17 @@
   // ===================================== I1. fctmp : réciproque, parité, transformations, composition =====================================
   const FC = {
     1: [
-      () => { const v = R.int(2, 9), x0 = R.int(2, 6), par = R.rand() < 0.5; if (v === x0) return null;
-        return QN("La fonction " + M("f") + " est " + (par ? "paire" : "impaire") + " et " + M("f(" + x0 + ") = " + v) + ". Que vaut " + M("f(-" + x0 + ")") + " ?", par ? v : -v, (par ? "Paire : " + M("f(-x) = f(x)") : "Impaire : " + M("f(-x) = -f(x)")) + ", donc " + M("f(-" + x0 + ") = " + (par ? v : -v)) + ".",
-          { ctx: "parite", shownOk: true, guide: [G("Rappel : " + (par ? "paire, " + M("f(-x) = f(x)") : "impaire, " + M("f(-x) = -f(x)")) + ". " + M("f(-" + x0 + ")") + " = ?", par ? v : -v, M(par ? v : -v) + ".")],
-            traps: [TR(par ? -v : v, par ? "Paire : symétrie par rapport à l'axe vertical, f(−x) = f(x)." : "Impaire : symétrie par rapport à l'origine, f(−x) = −f(x)."), TR(-x0, "On demande l'image f(−" + x0 + ").")] }); },
-      () => { const a = pk([2, 3, 4, 5, -2, -3]), b = nz(-9, 9), x0 = nz(-6, 6), y = a * x0 + b;
-        return QN("Soit " + M("f(x) = " + lin(a, b)) + ". Calcule " + M("f^{-1}(" + y + ")") + ".", x0, M("f^{-1}(" + y + ")") + " est le nombre dont l'image vaut " + M(y) + " : " + M(lin(a, b) + " = " + y) + ", " + M("x = " + x0) + ".",
-          { ctx: "reciproque-valeur", guide: [G("On résout " + M(lin(a, b) + " = " + y) + " : " + M(a + "x") + " = ?", y - b, M(y - b) + "."), G(M("x") + " = ?", x0, M(x0) + ".")],
-            traps: [TR(a * y + b, "C'est f(" + y + ") ; la réciproque fait le chemin inverse."), TR(r6((y + b) / a), "On retire " + b + ", puis on divise.")] }); },
+      () => { /* audit niveau 25.11 : « f paire, f(2) = 8, f(−2) ? » (parité facultative, réponse lue dans l'énoncé) -> réciproque d'une fonction bijective restreinte (examen TASV 2023, p. 6) */
+        const c = nz(-9, 12), s0 = R.int(2, 7), neg = R.rand() < 0.5, v = neg ? c - s0 * s0 : s0 * s0 + c, x0 = neg ? -s0 : s0;
+        const fx = neg ? c + " - x^2" : "x^2" + sg(c), dom = neg ? "]-\\infty \\,;\\, 0]" : "[0 \\,;\\, +\\infty[", img = neg ? "]-\\infty \\,;\\, " + c + "]" : "[" + c + " \\,;\\, +\\infty[";
+        return QN("La fonction " + M("f(x) = " + fx) + " est bijective de " + M(dom) + " vers " + M(img) + ". Calcule " + M("f^{-1}(" + v + ")") + ".", x0, M("f^{-1}(" + v + ")") + " est le nombre " + M("x") + " de " + M(dom) + " tel que " + M(fx + " = " + v) + " : " + M("x^2 = " + s0 * s0) + ", " + M("x = \\pm " + s0) + " ; on garde " + M("x = " + x0) + (neg ? " (négatif)" : " (positif)") + ".",
+          { ctx: "reciproque-restreinte", guide: [G("On résout " + M(fx + " = " + v) + " : " + M("x^2") + " = ?", s0 * s0, M("x^2 = " + s0 * s0) + "."), G(M("x") + " dans " + M(dom) + " ?", x0, M("x = " + x0) + " (" + M("-" + s0) + " et " + M(s0) + " ont la même image ; seul " + M(x0) + " est dans l'ensemble de départ).")],
+            traps: [TR(-x0, "Les deux nombres ±" + s0 + " ont la même image ; f est définie sur " + (neg ? "les négatifs" : "les positifs") + " seulement."), TR(neg ? c - v * v : v * v + c, "C'est f(" + v + ") ; la réciproque fait le chemin inverse."), TR(s0 * s0, "On cherche x, pas x².")] }); },
+      () => { /* audit niveau 25.11 : réciproque d'une fonction affine = MP 2e (S3.FA.06) -> fonction cubique bijective de ℝ vers ℝ (S8.FP.03) */
+        const a = pk([2, 3, 4, -2, -1]), b = nz(-9, 9), x0 = pk([-3, -2, 2, 3]), y = a * x0 ** 3 + b, ax = a === 1 ? "" : a === -1 ? "-" : a;
+        return QN("La fonction " + M("f(x) = " + ax + "x^3" + sg(b)) + " est bijective de " + M("\\mathbb{R}") + " vers " + M("\\mathbb{R}") + ". Calcule " + M("f^{-1}(" + y + ")") + ".", x0, "On résout " + M(ax + "x^3" + sg(b) + " = " + y) + " : " + M(a + "x^3 = " + (y - b)) + ", " + M("x^3 = " + x0 ** 3) + ", " + M("x = \\sqrt[3]{" + x0 ** 3 + "} = " + x0) + ".",
+          { ctx: "reciproque-cube-valeur", guide: [G("On isole : " + M("x^3") + " = ?", x0 ** 3, M("x^3 = " + (y - b) + " \\div " + pT(a) + " = " + x0 ** 3) + "."), G(M("x") + " (racine cubique) ?", x0, M("\\sqrt[3]{" + x0 ** 3 + "} = " + x0) + ".")],
+            traps: [TR(a * y ** 3 + b, "C'est f(" + y + ") ; la réciproque fait le chemin inverse."), TR(x0 ** 3, "On cherche x : prends encore la racine cubique de x³."), TR(-x0, "Une racine cubique garde le signe : ∛(" + x0 ** 3 + ") = " + x0 + ".")] }); },
       () => { const h = nz(-4, 4), k = nz(-5, 5), x1 = R.int(-3, 3), v1 = nz(-6, 6), x = x1 + h, val = v1 + k; if (!val) return null;
         return QN("On sait que " + M("f(" + x1 + ") = " + v1) + ". Soit " + M("g(x) = f(" + lin(1, -h) + ")" + sg(k)) + ". Que vaut " + M("g(" + x + ")") + " ?", val, M("g(" + x + ") = f(" + x + sg(-h) + ")" + sg(k) + " = f(" + x1 + ")" + sg(k) + " = " + val) + ". (Le graphe de f est translaté de " + M(h) + " horizontalement et de " + M(k) + " verticalement.)",
           { ctx: "translation", guide: [G("Argument de f, " + M(x + sg(-h)) + " ?", x1, M(x1) + "."), G(M("g(" + x + ")") + " = ?", val, M(v1 + sg(k) + " = " + val) + ".")],
@@ -1108,10 +1132,12 @@
         return QI("Quel est l'ensemble de définition de " + M("f(x) = \\sqrt{" + lin(a, b) + "}") + " ? Réponds par exemple « x >= 3 ».", op, x0, "Il faut " + M(lin(a, b) + " \\ge 0") + ", soit " + M("x " + opT[op] + " " + fT(x0)) + (a < 0 ? " (on divise par un négatif : le sens change)" : "") + ".",
           { ctx: "domaine-racine", guide: [G("Pour quelle valeur de x le radicand s'annule-t-il ?", x0, M(fT(x0)) + "."), GI("On résout " + M(lin(a, b) + " \\ge 0") + " : solution ?", op, x0, M("x " + opT[op] + " " + fT(x0)) + ".")],
             traps: [TI(a > 0 ? ">" : "<", x0, "La racine de 0 existe : l'inégalité est large."), TI(flip[op], x0, a < 0 ? "On divise par " + a + " (négatif) : le sens change." : "Le radicand doit être positif ou nul.")] }); },
-      () => { const r1 = nz(-4, 4), r2 = nz(-4, 4); if (r1 === r2) return null; const m = r1 + r2, h = -r1 * r2, sol = [r1, r2];
-        return QS("Trouve les abscisses des points d'intersection des graphes de " + M("f(x) = x^2") + " et " + M("g(x) = " + lin(m, h)) + ".", sol, M("x^2 = " + lin(m, h)) + " donne " + M(polyT([1, -m, -h]) + " = 0") + ", " + M("x = " + Math.min(r1, r2)) + " ou " + M("x = " + Math.max(r1, r2)) + ".",
-          { ctx: "intersection-graphes", guide: [G("On résout " + M(polyT([1, -m, -h]) + " = 0") + ". Discriminant ?", m * m + 4 * h, M(m * m + 4 * h) + "."), GSet("Abscisses des points d'intersection ?", sol, M(setT(sol)) + ".")],
-            traps: [TS([-r1, -r2], "Attention aux signes des solutions."), TS([r1 * r1, r2 * r2], "On demande les abscisses x, pas les ordonnées.")] }); },
+      () => { /* audit niveau 25.11 : intersection parabole-droite = MP 2e (S3.FQ.06) -> racine et droite, solution parasite (examens TASV spécifique 2022 p. 4, 2024 p. 5) */
+        const x0 = R.int(-3, 8), s0 = R.int(1, 6), q = s0 - x0, pp = s0 * s0 - x0, x1 = 1 - 2 * q - x0; if (x1 === x0 || x1 + q >= 0 || x1 + pp < 0 || !pp || !q) return null;
+        const rad = "\\sqrt{" + lin(1, pp) + "}", gx = lin(1, q);
+        return QP("Détermine les coordonnées du point d'intersection des graphes de " + M("f(x) = " + rad) + " et " + M("g(x) = " + gx) + "." + PAIR, [x0, s0], "On résout " + M(rad + " = " + gx) + " : au carré, " + M(lin(1, pp) + " = (" + gx + ")^2") + ", soit " + M(polyT([1, 2 * q - 1, q * q - pp]) + " = 0") + ", d'où " + M("x = " + x0) + " ou " + M("x = " + x1) + ". Vérification : pour " + M("x = " + x1) + ", " + M("g(" + x1 + ") = " + (x1 + q) + " < 0") + " alors qu'une racine est positive : solution parasite. Point " + pt(x0, s0) + ".",
+          { ctx: "intersection-racine", guide: [GSet("Après élévation au carré : solutions de " + M(polyT([1, 2 * q - 1, q * q - pp]) + " = 0") + " ?", [x0, x1], M(setT([x0, x1])) + "."), G("Abscisse retenue (vérifie " + M("g(x) \\ge 0") + ") ?", x0, M("x = " + x0) + " ; " + M("x = " + x1) + " est parasite."), GP("Point d'intersection ?", [x0, s0], pt(x0, s0) + ".")],
+            traps: [TP([x1, x1 + q], "Vérifie dans l'équation de départ : pour x = " + x1 + ", la droite est sous l'axe, la racine non (solution parasite)."), TP([s0, x0], "Un point s'écrit (abscisse ; ordonnée)."), TP([x0, s0 * s0], "L'ordonnée est f(" + x0 + ") = √" + (x0 + pp) + " = " + s0 + ".")] }); },
     ],
   };
 
@@ -1121,10 +1147,11 @@
   const pE = (cs) => polyT(cs).replace(/\^\{(\d+)\}/g, "^$1").replace(/(\d)x/g, "$1*x").replace(/\s+/g, "");
   const PO = {
     1: [
-      () => { const cs = [pk([1, 2, -1]), R.int(-4, 4), R.int(-6, 6), nz(-9, 9)], x0 = nz(-3, 3), v = pv(cs, x0); if ([0, 1, -1].includes(v)) return null;
-        return QN("Soit " + M("P(x) = " + polyT(cs)) + ". Calcule " + M("P(" + x0 + ")") + ".", v, M("P(" + x0 + ") = " + v) + ".",
-          { ctx: "valeur", guide: [G("Terme en " + M("x^3") + " pour " + M("x = " + x0) + " (avec son coefficient) ?", cs[0] * x0 ** 3, M(cs[0] * x0 ** 3) + "."), G(M("P(" + x0 + ")") + " ?", v, M(v) + ".")],
-            traps: [TR(pv(cs, -x0), "Remplace x par " + x0 + " (attention au signe)."), TR(cs[0] * 3 * x0 + cs[1] * 2 * x0 + cs[2] * x0 + cs[3], "x³ = x · x · x, pas 3x.")] }); },
+      () => { /* audit niveau 25.11 : « calcule P(2) » (substitution : niveau CO) -> mise en évidence de x puis trinôme (S8.FP.07) */
+        const r1 = nz(-6, 6), r2 = nz(-6, 6), a = pk([1, 1, 2, -1]); if (r1 === r2 || r1 === -r2) return null; const cs = [a, -a * (r1 + r2), a * r1 * r2, 0], sol = [0, r1, r2];
+        return QS("Trouve les zéros de " + M("P(x) = " + polyT(cs)) + ".", sol, "Mise en évidence : " + M("P(x) = x\\left(" + polyT([a, -a * (r1 + r2), a * r1 * r2]) + "\\right)") + ", puis le trinôme : " + M("x = " + r1) + " ou " + M("x = " + r2) + ". " + M(setT(sol)) + ".",
+          { ctx: "mise-en-evidence", guide: [GSet("On met " + M("x") + " en évidence ; zéros du trinôme " + M(polyT([a, -a * (r1 + r2), a * r1 * r2])) + " ?", [r1, r2], M(setT([r1, r2])) + "."), GSet("Tous les zéros de " + M("P") + " ?", sol, M(setT(sol)) + " (n'oublie pas " + M("x = 0") + ").")],
+            traps: [TS([r1, r2], "La mise en évidence donne aussi le zéro x = 0."), TS([0, -r1, -r2], "Attention aux signes : (x − a) s'annule en x = a.")] }); },
       () => { const a = nz(-5, 5), b = nz(-5, 5), k = pk([2, 3]), c = nz(-5, 5), z3 = r6(c / k); if (a === b || z3 === a || z3 === b || Number.isInteger(z3)) return null; const sol = [a, b, z3];
         return QS("Donne les zéros de " + M("P(x) = (" + lin(1, -a) + ")(" + lin(1, -b) + ")(" + lin(k, -c) + ")") + ". (fractions acceptées)", sol, "Un produit est nul si un facteur est nul : " + M(setT(sol)) + ".",
           { ctx: "produit-nul", guide: [G("Zéro du troisième facteur " + M(lin(k, -c)) + " ?", z3, M(fT(z3)) + "."), GSet("Tous les zéros ?", sol, M(setT(sol)) + ".")],
@@ -1301,12 +1328,13 @@
           "Parallèles : vecteurs directeurs colinéaires. " + M(v2(k * u[0], "m") + " = " + fT(k) + " \\cdot " + v2(u[0], u[1])) + " (car " + M(k * u[0] + " = " + fT(k) + " \\cdot " + pT(u[0])) + "), donc " + M("m = " + fT(k) + " \\cdot " + pT(u[1]) + " = " + m) + ".",
           { ctx: "parallele-m", guide: [G("Rapport " + M("k") + " entre les premières composantes des vecteurs directeurs, " + M(k * u[0] + " \\div " + pT(u[0])) + " ?", k, M(fT(k)) + "."), G(M("m = k \\cdot " + pT(u[1])) + " = ?", m, M(m) + ".")],
             traps: [TR(u[1], "Le vecteur de g est " + k + " fois celui de d : multiplie aussi la seconde composante."), TR(r6(u[1] / k), "On multiplie par k, on ne divise pas."), TR(-m, "Attention au signe de k.")] })); },
-      () => { const a = nz(-5, 5), b = nz(-5, 5), k = pk([2, 3, -2, -3]), p = k * a, m = k * b, c = nz(-9, 9), r = nz(-9, 9); if (Math.abs(m) < 2 || Math.abs(a) === Math.abs(b) || r === k * c) return null;
-        const e1 = tm(a, "x", true) + tm(b, "y") + " = " + c, e2 = tm(p, "x", true) + " + my = " + r;
-        return chk(QN("Pour quelle valeur de " + M("m") + " les droites " + M(e1) + " et " + M(e2) + " sont-elles parallèles ?", m,
-          "Parallèles : coefficients de x et de y proportionnels. " + M(p + " = " + fT(k) + " \\cdot " + pT(a)) + ", donc " + M("m = " + fT(k) + " \\cdot " + pT(b) + " = " + m) + ".",
-          { ctx: "parallele-cartesienne", guide: [G("Rapport des coefficients de " + M("x") + ", " + M(p + " \\div " + pT(a)) + " ?", k, M(fT(k)) + "."), G(M("m") + " = ?", m, M(fT(k) + " \\cdot " + pT(b) + " = " + m) + ".")],
-            traps: [TR(b, "Les coefficients doivent être proportionnels : multiplie b par le même rapport."), TR(r6(b / k), "On multiplie par le rapport, on ne divise pas."), TR(r6((r * b) / c), "Les termes constants ne comptent pas : seules les directions décident.")] })); },
+      () => { /* audit niveau 25.11 : « deux droites cartésiennes parallèles » (pentes égales : MP 2e, S3.FA) -> droite paramétrique parallèle à une droite cartésienne (vecteur directeur (b ; −a), S7.DP.03) */
+        const a = nz(-5, 5), b = nz(-5, 5), k = pk([2, 3, -2, -1, 0.5]), A = [R.int(-5, 5), R.int(-5, 5)], c = nz(-9, 9), u1 = k * b, m = k * -a; if (Math.abs(a) === Math.abs(b) || !Number.isInteger(u1) || !Number.isInteger(m) || Math.abs(m) < 2) return null;
+        const e = tm(a, "x", true) + tm(b, "y") + " = " + c;
+        return chk(QN("Pour quelle valeur de " + M("m") + " la droite " + M("d") + " : " + eqS(A, [u1, "m"], "t") + " est-elle parallèle à la droite " + M("g : " + e) + " ?", m,
+          "Un vecteur directeur de " + M("g : ax + by = c") + " est " + M(v2("b", "-a") + " = " + v2(b, -a)) + ". " + M(v2(u1, "m")) + " doit lui être colinéaire : " + M(fT(u1) + " = " + fT(k) + " \\cdot " + pT(b)) + ", donc " + M("m = " + fT(k) + " \\cdot " + pT(-a) + " = " + m) + ".",
+          { ctx: "parallele-param-cartesienne", guide: [GP("Vecteur directeur de " + M("g") + " (" + M(v2("b", "-a")) + ", « x ; y ») ?", [b, -a], M(v2(b, -a)) + "."), G("Rapport " + M(fT(u1) + " \\div " + pT(b)) + " ?", k, M(fT(k)) + "."), G(M("m") + " = ?", m, M(fT(k) + " \\cdot " + pT(-a) + " = " + m) + ".")],
+            traps: [TR(k * a, "Le vecteur directeur de ax + by = c est (b ; −a) : attention au signe."), TR(r6(u1 * b / a), "(a ; b) est un vecteur normal de g (perpendiculaire) ; le vecteur directeur est (b ; −a)."), TR(-a, "Multiplie −a par le même rapport que b.")] })); },
       () => { const A = [R.int(-5, 5), R.int(-5, 5)], u = [nz(-3, 3), nz(-3, 3)], t0 = pk([2, -2, 3, -3]), P = [A[0] + t0 * u[0], A[1] + t0 * u[1]], m = pk([2, 3, -2, -3, 4]), p = P[1] - m * P[0]; if (u[1] === m * u[0] || !p) return null;
         return QP("La droite " + M("d") + " : " + eqP(A, u) + " coupe la droite " + M("g") + " : " + M("y = " + lin(m, p)) + ". Donne leur point d'intersection." + PAIR, P,
           "On remplace x et y de d dans l'équation de g : " + M(cT1(A[1], u[1], "t") + " = " + m + "(" + cT1(A[0], u[0], "t") + ")" + sg(p)) + ", d'où " + M("t = " + t0) + " et le point " + pt(...P) + ".",

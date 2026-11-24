@@ -69,4 +69,14 @@ Registre : tools/niveau.json ; colonne « Audit de niveau » du suivi.
 ### Tes 3 commentaires d'hier soir (agent en cours)
 
 - fracmul-3-3an (valeurs mal choisies), clavier qui « saute » après la 1re touche, ensemble vide (touche ∅).
-### MP 3e–4e — en cours (agent)
+### MP 3e–4e — fait (tools/niveau_mp34.md)
+
+- Étalon : examen genevois MP TASV, domaine spécifique, sessions 2021–2024 (champ = chapitres A–J).
+- Au niveau : la plupart. Remontés (N1) : puisrat, croissexp, volmp, similmp, posdroites, fctmp (N1 et N3), polymp ;
+  formes d'examen ajoutées : eqabs N3, vectmp N3 (w = a·u + b·v), droiteparam N1. Aucune notion trop difficile.
+- À trancher : pvectmp et fratmp (facultatifs au PEE, absents de l'examen) à garder ? ; volmp N1 (formule seule pour
+  pyramide et cône) ; ineqmp N1 (−x + 8 > 11, niveau CO mais au PEE) ; puisrat N1 en exposant décimal (le polycopié
+  n'écrit que des fractions) ; sinusmp (au PEE, pas à l'examen spécifique).
+
+### MP 1re–2e — en cours (agent)
+### 9e–10e — à faire
