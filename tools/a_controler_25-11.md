@@ -83,5 +83,15 @@ Registre : tools/niveau.json ; colonne « Audit de niveau » du suivi.
   pyramide et cône) ; ineqmp N1 (−x + 8 > 11, niveau CO mais au PEE) ; puisrat N1 en exposant décimal (le polycopié
   n'écrit que des fractions) ; sinusmp (au PEE, pas à l'examen spécifique).
 
-### MP 1re–2e — en cours (agent)
+### MP 1re–2e — fait (tools/niveau_mp12.md)
+
+- Étalons : tests Maurizio MP1/MP2 (2022–2025) et tes Tests S1.1 et S1.3 (2026).
+- Niveau 1 des notions du CO reprises en MP remonté au niveau 2 (liste UPMP : 31 notions en MP 1re, 4 en MP 2e) ;
+  le niveau 2 ne monte pas (tes épreuves = niveau 2–3 de l'app). Ex. de N1 trop faciles : « (−4) · 2 », « 3/4 = 24/? ».
+- Calcul numérique de MP 1re complété : priorités, notation scientifique, simplification des racines ajoutées à
+  l'année (elles étaient traitées comme du CO alors que ton Test S1.1 les évalue).
+- À trancher : fracsimp, divcrit, premiers (PEE *) encore niveau 9e — garder ou sortir ? ; reduire, idrem, factor
+  gardent leur N1 (tes tests s'ouvrent sur des factorisations directes) — OK ? ; vabs N1, recipaff N1, statfreq N1
+  très courts ; domaine N3 (inéquation du 2e degré, hors PEE 2026) ; défis manquants (arith, rac, premiers,
+  fracsimp) ; droitesinter N1 en 2e Collège donne encore la réponse dans l'énoncé (corrigé pour la MP seulement).
 ### 9e–10e — à faire
