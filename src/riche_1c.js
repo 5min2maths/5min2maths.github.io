@@ -168,27 +168,30 @@
     () => X({ id: "ensembles", lv: 2, titre: "Vrai ou faux ? Justifie", q: "Pour chaque affirmation, dis si elle est vraie ou fausse, et justifie.", parts: [{ label: "« ℕ ⊂ ℤ ⊂ ℚ ⊂ ℝ. »", pts: 1 }, { label: "« [1 ; 3] ∩ [3 ; 5] est vide. »", pts: 1 }], sol: ul(["<b>Vrai</b>.", "<b>Faux</b> : il contient 3."]) }),
   ];
   // ===================== 3. Argumenter =====================
+  // 24.11 (agent niv1c, audit de niveau : tools/niveau_1c.md) : exercices de 1re (implication, contre-exemple, démonstration),
+  // rattachés aux notions de src/ch1c_arg.js ; divcrit et tradexpr (niveau 9e) ne sont plus le contenu du chapitre.
   const EXR = [
-    () => X({ id: "divcrit", lv: 1, titre: "Le code du cadenas", q: "Le code d'un cadenas est un nombre de 3 chiffres " + M("4\\,■\\,■") + ", divisible par 5 et par 9.",
-      parts: [{ label: "Quel peut être le chiffre des unités ?", pts: 1 }, { label: "Trouve toutes les possibilités pour le code.", pts: 2 }],
-      sol: ul(["0 ou 5 (divisible par 5).", "Somme des chiffres multiple de 9 : 450 (4 + 5 + 0), 405 (4 + 0 + 5), 495 (4 + 9 + 5)."]) }),
+    () => { const [a, b] = pk([[12, 4], [18, 6], [15, 5], [20, 4]]);
+      return X({ id: "implication", lv: 1, titre: "Réciproque et contraposée", q: "On considère l'implication « si " + M("n") + " est un multiple de " + M(a) + ", alors " + M("n") + " est un multiple de " + M(b) + " » (" + M("n") + " entier).",
+        parts: [{ label: "Est-elle vraie ? Justifie.", pts: 1 }, { label: "Énonce sa réciproque. Est-elle vraie ?", pts: 2 }, { label: "Énonce sa contraposée. Est-elle vraie ?", pts: 2 }],
+        sol: ul(["Vraie : " + M("n = " + a + "k = " + b + " \\cdot " + a / b + "k") + ".", "« Si " + M("n") + " est un multiple de " + M(b) + ", alors c'est un multiple de " + M(a) + " » : fausse, contre-exemple " + M(b) + ".", "« Si " + M("n") + " n'est pas un multiple de " + M(b) + ", alors ce n'est pas un multiple de " + M(a) + " » : vraie, comme l'implication."]) }); },
     () => { const n = pk([3, 4, 5]);
-      return X({ id: "tradexpr", lv: 2, titre: "Le tour de magie", q: "Pense à un nombre. Ajoute " + n + ", multiplie par 2, soustrais " + 2 * n + ", puis divise par 2.",
+      return X({ id: "tradalg", lv: 2, titre: "Le tour de magie", q: "Pense à un nombre. Ajoute " + n + ", multiplie par 2, soustrais " + 2 * n + ", puis divise par 2.",
         parts: [{ label: "Essaie avec deux nombres. Que remarques-tu ?", pts: 1 }, { label: "Prouve-le en appelant " + M("x") + " le nombre de départ.", pts: 2 }],
         sol: ul(["On retrouve le nombre de départ.", M("\\frac{2(x + " + n + ") - " + 2 * n + "}{2} = \\frac{2x}{2} = x") + "."]) }); },
-    () => X({ id: "divcrit", lv: 2, titre: "Trois entiers consécutifs", q: "On additionne trois nombres entiers consécutifs.",
-      parts: [{ label: "Essaie avec 4, 5, 6 puis 10, 11, 12. Que remarques-tu ?", pts: 1 }, { label: "Prouve que la somme est toujours divisible par 3.", pts: 2 }],
-      sol: ul(["15 et 33 : des multiples de 3.", M("n + (n + 1) + (n + 2) = 3n + 3 = 3(n + 1)") + "."]) }),
-    () => X({ id: "tradexpr", lv: 3, titre: "Pair ou impair ?", q: "On s'intéresse à la somme de deux nombres impairs.",
-      parts: [{ label: "Écris un nombre impair à l'aide d'un entier " + M("n") + ".", pts: 1 }, { label: "Prouve que la somme de deux impairs est paire.", pts: 2 }, { label: "Le produit de deux impairs est-il pair ou impair ? Justifie.", pts: 1 }],
-      sol: ul([M("2n + 1") + ".", M("(2n + 1) + (2m + 1) = 2(n + m + 1)") + " : pair.", "Impair : " + M("(2n + 1)(2m + 1) = 2(2nm + n + m) + 1") + "."]) }),
+    () => X({ id: "demoalg", lv: 2, titre: "Cinq entiers consécutifs", q: "On additionne cinq nombres entiers consécutifs.",
+      parts: [{ label: "Essaie avec deux exemples. Que remarques-tu ?", pts: 1 }, { label: "Démontre que la somme est toujours un multiple de 5.", pts: 2 }, { label: "Et pour quatre entiers consécutifs ? Justifie.", pts: 2 }],
+      sol: ul(["1 + 2 + 3 + 4 + 5 = 15, 10 + … + 14 = 60 : des multiples de 5.", M("n + (n + 1) + (n + 2) + (n + 3) + (n + 4) = 5n + 10 = 5(n + 2)") + ".", "Faux : " + M("1 + 2 + 3 + 4 = 10") + " n'est pas un multiple de 4 (" + M("4n + 6") + ")."]) }),
+    () => X({ id: "demoalg", lv: 3, titre: "Pair ou impair ?", q: "On s'intéresse aux nombres impairs.",
+      parts: [{ label: "Écris un nombre impair à l'aide d'un entier " + M("k") + ".", pts: 1 }, { label: "Démontre que le carré d'un impair est impair.", pts: 2 }, { label: "Démontre que la différence des carrés de deux impairs consécutifs est un multiple de 8.", pts: 2 }],
+      sol: ul([M("2k + 1") + ".", M("(2k + 1)^2 = 2(2k^2 + 2k) + 1") + " : impair.", M("(2k + 3)^2 - (2k + 1)^2 = 8k + 8 = 8(k + 1)") + "."]) }),
   ];
   const RAISONR = [
-    () => X({ id: "divcrit", lv: 1, titre: "Trouve l'erreur", q: who() + " dit : « 7 + 9 = 16 et 16 n'est pas divisible par 3, donc 79 n'est pas divisible par 3, mais 81 non plus car il finit par 1 ».", parts: [{ label: "Où est l'erreur pour 81 ?", pts: 1 }, { label: "81 est-il divisible par 3 ?", pts: 1 }], sol: ul(["Pour 3, on regarde la somme des chiffres, pas le dernier chiffre.", "Oui : 8 + 1 = 9."]) }),
-    () => X({ id: "tradexpr", lv: 2, titre: "Un exemple suffit-il ?", q: who() + " vérifie que " + M("n^2 + n + 41") + " est premier pour n = 1, 2, 3, 4 et conclut : « c'est toujours un nombre premier ».", parts: [{ label: "Un exemple peut-il prouver une propriété générale ?", pts: 1 }, { label: "Teste n = 41.", pts: 1 }], sol: ul(["Non : il faut une preuve ; un seul contre-exemple suffit à réfuter.", M("41^2 + 41 + 41 = 41 \\cdot 43") + " : pas premier."]) }),
+    () => X({ id: "implication", lv: 1, titre: "Trouve l'erreur", q: who() + " dit : « tout multiple de 6 est un multiple de 3, donc tout multiple de 3 est un multiple de 6 ».", parts: [{ label: "Quelle erreur de logique commet-on ?", pts: 1 }, { label: "Donne un contre-exemple.", pts: 1 }], sol: ul(["On confond une implication et sa réciproque.", "9 est un multiple de 3 mais pas de 6."]) }),
+    () => X({ id: "contrex", lv: 2, titre: "Un exemple suffit-il ?", q: who() + " vérifie que " + M("n^2 + n + 41") + " est premier pour n = 1, 2, 3, 4 et conclut : « c'est toujours un nombre premier ».", parts: [{ label: "Des exemples peuvent-ils prouver une propriété générale ?", pts: 1 }, { label: "Teste n = 40.", pts: 1 }], sol: ul(["Non : il faut une démonstration ; un seul contre-exemple suffit à réfuter.", M("40^2 + 40 + 41 = 1681 = 41^2") + " : pas premier."]) }),
   ];
 
-  RICH.no1c = { ids: ["arith", "fracops", "pct", "puiss", "rac", "racenc", "racprop", "rel", "sci", "scicalc"], label: "Nombres", ex: EXN, raison: RAISONN, minutes: 45 };
+  RICH.no1c = { ids: ["arith", "fracops", "pct", "puiss", "rac", "racenc", "racprop", "ratden", "fracper", "rel", "sci", "scicalc"], label: "Nombres", ex: EXN, raison: RAISONN, minutes: 45 };
   RICH.ens1c = { ids: ["ensembles"], label: "Ensembles", ex: EXE, raison: RAISONE, minutes: 45 };
-  RICH.arg1c = { ids: ["divcrit", "tradexpr"], label: "Argumenter", ex: EXR, raison: RAISONR, minutes: 45 };
+  RICH.arg1c = { ids: ["tradalg", "contrex", "demoalg", "implication"], label: "Argumenter", ex: EXR, raison: RAISONR, minutes: 45 };
 })();

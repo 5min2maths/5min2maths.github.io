@@ -320,5 +320,572 @@
   "etalon": "tools/niveau_34c.md § 2, E-4.4-5",
   "audit": "24.11.2026",
   "verdict": "hors programme"
+ },
+ "arith": {
+  "classe": "1re Collège",
+  "plan": "M1C01 · Ma1 Ch1 : PGDC, PPMC, division euclidienne (consolider le CO)",
+  "etalon": "tools/niveau_1c.md E1.1",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "rel": {
+  "classe": "1re Collège",
+  "plan": "M1C01 · Ma1 Ch1 : calculs à parenthèses imbriquées, ordre des opérations",
+  "etalon": "tools/niveau_1c.md E1.1",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "fracops": {
+  "classe": "1re Collège",
+  "plan": "M1C01 · Ma1 Ch1 : opérations sur les fractions, fraction irréductible",
+  "etalon": "tools/niveau_1c.md E1.1",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "pct": {
+  "classe": "1re Collège",
+  "plan": "CO 10e (pourcentages) : plus au programme de 1re",
+  "etalon": "—",
+  "audit": "24.11.2026",
+  "verdict": "hors programme"
+ },
+ "rac": {
+  "classe": "1re Collège",
+  "plan": "CO 10e (racines carrées) : remplacé en 1re par racprop, ratden",
+  "etalon": "—",
+  "audit": "24.11.2026",
+  "verdict": "hors programme"
+ },
+ "racenc": {
+  "classe": "1re Collège",
+  "plan": "CO 10e (encadrer des racines)",
+  "etalon": "—",
+  "audit": "24.11.2026",
+  "verdict": "hors programme"
+ },
+ "sci": {
+  "classe": "1re Collège",
+  "plan": "M1C01 · Ma1 Ch1 : puissances de 10, écriture scientifique",
+  "etalon": "tools/niveau_1c.md E1.2",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "puiss": {
+  "classe": "1re Collège",
+  "plan": "M1C01 · Ma1 Ch1 : puissances entières positives, nulles et négatives",
+  "etalon": "tools/niveau_1c.md E1.2",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "scicalc": {
+  "classe": "1re Collège",
+  "plan": "CO 10e–11e (calculer en notation scientifique)",
+  "etalon": "—",
+  "audit": "24.11.2026",
+  "verdict": "hors programme"
+ },
+ "racprop": {
+  "classe": "1re Collège",
+  "plan": "M1C01 · Ma1 Ch1 : extraire les facteurs carrés, simplifier",
+  "etalon": "tools/niveau_1c.md E1.3",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "ratden": {
+  "classe": "1re Collège",
+  "plan": "M1C01 · Ma1 Ch1 : rendre rationnel le dénominateur",
+  "etalon": "tools/niveau_1c.md E1.4",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "fracper": {
+  "classe": "1re Collège",
+  "plan": "M1C01 · Ma1 Ch1 : nombres rationnels, période, fraction ↔ décimal",
+  "etalon": "tools/niveau_1c.md E1.5",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "ensembles": {
+  "classe": "1re Collège",
+  "plan": "M1C02 · Ma1 Ch2 : ensembles de nombres, ∪, ∩, \\, intervalles",
+  "etalon": "tools/niveau_1c.md E2.1–E2.3",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "tradexpr": {
+  "classe": "1re Collège",
+  "plan": "CO 9e (9NO3.03) : prérequis du chapitre Argumenter",
+  "etalon": "—",
+  "audit": "24.11.2026",
+  "verdict": "hors programme"
+ },
+ "divcrit": {
+  "classe": "1re Collège",
+  "plan": "CO 9e (9NO4.02) : prérequis du chapitre Argumenter",
+  "etalon": "—",
+  "audit": "24.11.2026",
+  "verdict": "hors programme"
+ },
+ "tradalg": {
+  "classe": "1re Collège",
+  "plan": "M1C03 · Ma1 Ch3 th. 1–2 : traduire en langage algébrique (pair, impair, multiple, consécutifs)",
+  "etalon": "tools/niveau_1c.md E3.2, E3.4",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "contrex": {
+  "classe": "1re Collège",
+  "plan": "M1C03 · Ma1 Ch3 th. 3–5 : conjecture, contre-exemple",
+  "etalon": "tools/niveau_1c.md E3.3, E3.5",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "demoalg": {
+  "classe": "1re Collège",
+  "plan": "M1C03 · Ma1 Ch3 th. 5 : démonstration directe ; cours 1MA2 : absurde",
+  "etalon": "tools/niveau_1c.md E3.2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "implication": {
+  "classe": "1re Collège",
+  "plan": "M1C03 · Ma1 Ch3 th. 4 et 6 : implication, réciproque, contraposée ; cours 1MA2 : négation",
+  "etalon": "tools/niveau_1c.md E3.1, E3.5",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "absval": {
+  "classe": "1re Collège",
+  "plan": "M1C04 · Ma1 Ch4 : fonctions élémentaires (valeur absolue)",
+  "etalon": "tools/niveau_1c.md E4.2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "morceaux": {
+  "classe": "1re Collège",
+  "plan": "M1C04 · Ma1 Ch4 : modéliser (fonctions par morceaux)",
+  "etalon": "tools/niveau_1c.md E4.2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "domaine": {
+  "classe": "1re Collège",
+  "plan": "M1C04 · 1.FO.01a–c : domaine de définition",
+  "etalon": "tools/niveau_1c.md E4.1",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "tabval": {
+  "classe": "1re Collège",
+  "plan": "M1C04 · 1.FO.02b : tableau de valeurs",
+  "etalon": "tools/niveau_1c.md E4.2",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "fimg": {
+  "classe": "1re Collège",
+  "plan": "M1C04 · 1.FO.03a–c : images, préimages",
+  "etalon": "tools/niveau_1c.md E4.2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "lectgraph": {
+  "classe": "1re Collège",
+  "plan": "M1C04 · 1.FO.04a–d : lecture graphique",
+  "etalon": "tools/niveau_1c.md E4.2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "racinv": {
+  "classe": "1re Collège",
+  "plan": "M1C04 · 1.FO.10–11 : racine carrée et inverse",
+  "etalon": "tools/niveau_1c.md E4.3, E4.4",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "modaff": {
+  "classe": "1re Collège",
+  "plan": "M1C04 · 1.FO.12a : modéliser par une fonction du 1er degré",
+  "etalon": "tools/niveau_1c.md E5.3",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "transf": {
+  "classe": "1re Collège",
+  "plan": "M1C04 · Ma1 Ch4 : fonctions élémentaires, translations",
+  "etalon": "tools/niveau_1c.md E4.2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "ineq": {
+  "classe": "1re Collège",
+  "plan": "M1C05 · inéquations du 1er degré",
+  "etalon": "tools/niveau_1c.md E5.2",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "eq1": {
+  "classe": "1re Collège",
+  "plan": "M1C05 · 1.AL.04a–b : équations du 1er degré",
+  "etalon": "tools/niveau_1c.md E5.1",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "eqfrac": {
+  "classe": "1re Collège",
+  "plan": "M1C05 · 1.AL.04b : coefficients fractionnaires",
+  "etalon": "tools/niveau_1c.md E5.1",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "eqspec": {
+  "classe": "1re Collège",
+  "plan": "M1C05 · 1.AL.04c : équations impossibles, identités",
+  "etalon": "tools/niveau_1c.md E5.1",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "formule": {
+  "classe": "1re Collège",
+  "plan": "M1C05 · 1.AL.04d : transformer une formule",
+  "etalon": "tools/niveau_1c.md E5.1",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "probeq": {
+  "classe": "1re Collège",
+  "plan": "M1C05 · 1.AL.04e : problèmes du 1er degré",
+  "etalon": "tools/niveau_1c.md E5.4",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "sys2": {
+  "classe": "1re Collège",
+  "plan": "M1C05 · 1.AL.07a–b : systèmes 2×2",
+  "etalon": "tools/niveau_1c.md E5.5",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "sysgraph": {
+  "classe": "1re Collège",
+  "plan": "M1C05 · 1.AL.07c : interprétation graphique",
+  "etalon": "tools/niveau_1c.md E5.5",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "sys3": {
+  "classe": "1re Collège",
+  "plan": "M1C05 · 1.AL.07d : systèmes 3×3",
+  "etalon": "tools/niveau_1c.md E5.5",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "sysprob": {
+  "classe": "1re Collège",
+  "plan": "M1C05 · 1.AL.07e : problèmes à plusieurs inconnues",
+  "etalon": "tools/niveau_1c.md E5.4",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "affine": {
+  "classe": "1re Collège",
+  "plan": "M1C05 · 1.FO.05–06 : fonctions du 1er degré",
+  "etalon": "tools/niveau_1c.md E5.3, E5.5",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "affzero": {
+  "classe": "1re Collège",
+  "plan": "M1C05 · 1.FO.05d : zéro et signe",
+  "etalon": "tools/niveau_1c.md E5.2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "sysineq": {
+  "classe": "1re Collège",
+  "plan": "M1C05 · systèmes d'inéquations",
+  "etalon": "tools/niveau_1c.md E5.2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "reduire": {
+  "classe": "1re Collège",
+  "plan": "M1C06 · 1.AL.01a–b : réduire",
+  "etalon": "tools/niveau_1c.md E6.1",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "monomes": {
+  "classe": "1re Collège",
+  "plan": "M1C06 · 1.AL.01a : monômes",
+  "etalon": "tools/niveau_1c.md E6.1",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "polyop": {
+  "classe": "1re Collège",
+  "plan": "M1C06 · 1.AL.01c–d : développer des polynômes",
+  "etalon": "tools/niveau_1c.md E6.1",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "parenth": {
+  "classe": "1re Collège",
+  "plan": "M1C06 · 1.AL.01b : suppression de parenthèses",
+  "etalon": "tools/niveau_1c.md E6.1",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "distrib": {
+  "classe": "1re Collège",
+  "plan": "M1C06 · 1.AL.01c : distributivité",
+  "etalon": "tools/niveau_1c.md E6.1",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "idrem": {
+  "classe": "1re Collège",
+  "plan": "M1C06 · 1.AL.02a–c : identités remarquables",
+  "etalon": "tools/niveau_1c.md E6.1",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "factor": {
+  "classe": "1re Collège",
+  "plan": "M1C06 · 1.AL.03a–b : factoriser",
+  "etalon": "tools/niveau_1c.md E6.2",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "factor2": {
+  "classe": "1re Collège",
+  "plan": "M1C06 · 1.AL.03c–e : factoriser au maximum",
+  "etalon": "tools/niveau_1c.md E6.2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "ineqfrac": {
+  "classe": "1re Collège",
+  "plan": "Programme 2021 : inéquations = 2e ; pratiquées en 1re (épreuves Sismondi, tableau de signes)",
+  "etalon": "tools/niveau_1c.md E7.3, E7.4",
+  "audit": "24.11.2026",
+  "verdict": "à valider"
+ },
+ "eq2fact": {
+  "classe": "1re Collège",
+  "plan": "M1C07 · 1.AL.05a–b",
+  "etalon": "tools/niveau_1c.md E7.2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "eq2": {
+  "classe": "1re Collège",
+  "plan": "M1C07 · 1.AL.05b : produit nul",
+  "etalon": "tools/niveau_1c.md E7.2",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "eq2disc": {
+  "classe": "1re Collège",
+  "plan": "M1C07 · 1.AL.05c : formule",
+  "etalon": "tools/niveau_1c.md E7.2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "trinfact": {
+  "classe": "1re Collège",
+  "plan": "M1C07 · 1.AL.05d : factoriser par les zéros",
+  "etalon": "tools/niveau_1c.md E6.2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "probeq2": {
+  "classe": "1re Collège",
+  "plan": "M1C07 · 1.AL.05e : problèmes du 2e degré",
+  "etalon": "tools/niveau_1c.md E7.5",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "eq3": {
+  "classe": "1re Collège",
+  "plan": "M1C07 · 1.AL.06a–b : degré > 2",
+  "etalon": "tools/niveau_1c.md E7.3",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "bicarre": {
+  "classe": "1re Collège",
+  "plan": "M1C07 · 1.AL.06c : bicarrées",
+  "etalon": "tools/niveau_1c.md E7.2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "f2": {
+  "classe": "1re Collège",
+  "plan": "M1C07 · 1.FO.07a–d : parabole",
+  "etalon": "tools/niveau_1c.md E7.1",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "f2formes": {
+  "classe": "1re Collège",
+  "plan": "M1C07 · 1.FO.07c : formes",
+  "etalon": "tools/niveau_1c.md E7.1",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "f2expr": {
+  "classe": "1re Collège",
+  "plan": "M1C07 · 1.FO.08a–b : expression depuis le graphe",
+  "etalon": "tools/niveau_1c.md E7.4",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "f2trois": {
+  "classe": "1re Collège",
+  "plan": "M1C07 · 1.FO.08c : trois points",
+  "etalon": "tools/niveau_1c.md E7.4",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "inter": {
+  "classe": "1re Collège",
+  "plan": "M1C07 · 1.FO.09a–b : intersections",
+  "etalon": "tools/niveau_1c.md E7.4",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "interpar": {
+  "classe": "1re Collège",
+  "plan": "M1C07 · 1.FO.09c : deux paraboles",
+  "etalon": "tools/niveau_1c.md E7.4",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "ineq2": {
+  "classe": "1re Collège",
+  "plan": "M1C07 · 1.FO.09d : inéquations du 2e degré",
+  "etalon": "tools/niveau_1c.md E7.3",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "optim": {
+  "classe": "1re Collège",
+  "plan": "M1C07 · 1.FO.12c : optimisation",
+  "etalon": "tools/niveau_1c.md E7.1",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "eqirr": {
+  "classe": "1re Collège",
+  "plan": "M1C07 · 1.FO.11a : √x = ax + b",
+  "etalon": "tools/niveau_1c.md E4.4",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "simil": {
+  "classe": "1re Collège",
+  "plan": "M1C08 · 1.GE.03a, 03c : similitude",
+  "etalon": "tools/niveau_1c.md E8.1",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "thales": {
+  "classe": "1re Collège",
+  "plan": "M1C08 · 1.GE.03b : Thalès",
+  "etalon": "tools/niveau_1c.md E8.1",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "pyth": {
+  "classe": "1re Collège",
+  "plan": "M1C08 · 1.GE.03d : Pythagore",
+  "etalon": "tools/niveau_1c.md E8.2",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "pythfig": {
+  "classe": "1re Collège",
+  "plan": "M1C08 · 1.GE.03d, 03f",
+  "etalon": "tools/niveau_1c.md E8.2",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "pythrec": {
+  "classe": "1re Collège",
+  "plan": "M1C08 · 1.GE.02a, 03d : réciproque",
+  "etalon": "tools/niveau_1c.md E8.2",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "euclide": {
+  "classe": "1re Collège",
+  "plan": "M1C08 · 1.GE.02b, 03e : Euclide, hauteur",
+  "etalon": "tools/niveau_1c.md E8.3",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "geocomb": {
+  "classe": "1re Collège",
+  "plan": "M1C08 · 1.GE.03f : problèmes combinés",
+  "etalon": "tools/niveau_1c.md E8.1, E8.2",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "droitesrem": {
+  "classe": "1re Collège",
+  "plan": "M1C08 · 1.GE.04a–d : droites remarquables",
+  "etalon": "tools/niveau_1c.md E8.3",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "exactes": {
+  "classe": "1re Collège",
+  "plan": "M1C08 · valeurs exactes (Ma1 Ch8)",
+  "etalon": "tools/niveau_1c.md E8.2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "angles": {
+  "classe": "1re Collège",
+  "plan": "M1C09 · 1.GE.01a, 01c : angles, angle inscrit",
+  "etalon": "tools/niveau_1c.md E9.1",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "angtri": {
+  "classe": "1re Collège",
+  "plan": "M1C09 · 1.GE.01b : somme des angles",
+  "etalon": "tools/niveau_1c.md E9.1",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "cercthales": {
+  "classe": "1re Collège",
+  "plan": "M1C09 · 1.GE.01d : cercle de Thalès, tangente",
+  "etalon": "tools/niveau_1c.md E9.2",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "trigrel": {
+  "classe": "1re Collège",
+  "plan": "M1C10 · Ma1 Ch10 : relations trigonométriques",
+  "etalon": "tools/niveau_1c.md E10.2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "trigo": {
+  "classe": "1re Collège",
+  "plan": "M1C10 · 1.GE.05–06",
+  "etalon": "tools/niveau_1c.md E10.1",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "trigexact": {
+  "classe": "1re Collège",
+  "plan": "M1C10 · 1.GE.05e, 06b : valeurs exactes, pente",
+  "etalon": "tools/niveau_1c.md E10.3",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
  }
 }

@@ -81,6 +81,8 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
   primitives: ["derivregles"], integrale: ["primitives"], aireint: ["integrale"], volrev: ["integrale"], lnexp: ["log", "derivcomp"], croissance: ["expo", "log"],
   condbayes: ["proba"], varalea: ["proba"], binomiale: ["varalea"],
   intparties: ["integrale", "derivprodquot"], intsubst: ["integrale", "derivcomp"], etudelnexp: ["lnexp", "variations"], eqdiff: ["croissance", "primitives"],
+  // 24.11 (agent niv1c) : 1re Collège, chapitre Argumenter (src/ch1c_arg.js) ; divcrit et tradexpr deviennent des prérequis
+  tradalg: ["tradexpr", "valnum"], contrex: ["divcrit", "premiers"], demoalg: ["tradalg", "distrib"], implication: ["contrex", "divcrit"], ratden: ["rac", "idrem"], racprop: ["rac"], fracper: ["fracops"],
   // 24.11 : MP 3e (src/ch_mp3.js) et MP 4e (src/ch_mp4.js)
   eqabs: ["eq1"], eqbic: ["eq2disc"], eqirrmp: ["eq2disc"], eqratmp: ["fracrat", "eq2disc"], puisrat: ["puiss", "rac"], logdef: ["puiss"], logprop: ["logdef"],
   eqexp: ["logdef"], eqlog: ["logprop"], croissexp: ["eqexp"], volmp: ["pyth"], similmp: ["volmp"],
@@ -88,6 +90,11 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
   sinusmp: ["trigfn"], explogfn: ["eqexp", "logdef"],
   // 24.11 (chantier G, agent greste) : MP 4e (projection, position de droites, fonctions rationnelles) ; 4e Collège (algèbre linéaire, loi normale)
   projmp: ["scalmp"], pvectmp: ["scalmp"], posdroites: ["droiteparam"], fratmp: ["fracrat", "ineqmp"], matrices: ["sys2"], translin: ["matrices"], appllin: ["translin"], normale: ["varalea", "statdesc"], statdesc: ["varalea"], stats: ["diagr"], quartiles: ["diagr"] };
+  projmp: ["scalmp"], pvectmp: ["scalmp"], posdroites: ["droiteparam"], fratmp: ["fracrat", "ineqmp"], matrices: ["sys2"], translin: ["matrices"], appllin: ["translin"], normale: ["varalea", "stats"], stats: ["diagr"], quartiles: ["diagr"] };
+// 24.11 (audit de niveau 1re Collège, tools/niveau_1c.md) : notions du CO dont le niveau 1 est trop facile au Collège (voir make).
+const UPC = ["arith", "rel", "fracops", "puiss", "sci", "racprop", "tabval", "eq1", "eqfrac", "formule", "probeq", "affine", "ineq", "sysprob",
+  "reduire", "monomes", "parenth", "distrib", "idrem", "factor", "eq2", "simil", "thales", "pyth", "pythfig", "pythrec", "geocomb", "angles", "angtri", "cercthales"];
+const UPC_MIN = { fracper: 3 };
 // Programme du jour : le format change d'un jour à l'autre ; l'équilibre se fait sur 7 jours.
 // 22.11 : textes courts (une ligne sur téléphone : pas de saut quand on change de format).
 const FORMATS = {
@@ -458,6 +465,12 @@ const Engine = {
     // dès la classe indiquée, le niveau 2 tire les formes du niveau 3 (le code de la question reste reproductible : …-3-…).
     const UP2 = { rel: 11 };
     if (level === 2 && UP2[id] && state && state.profile && state.profile.grade >= UP2[id]) level = 3;
+    /* 24.11 (audit de niveau 1re Collège, tools/niveau_1c.md ; alerte de l'enseignant : « on demande à un élève de 1re ce qu'on
+       demanderait à un élève de 9e ») : notions du CO reprises au Collège (1re–4e, filière gymnasiale). Leur niveau 1 est un
+       automatisme de 9e–10e : au Collège, le niveau 1 tire le niveau 2 et le niveau 2 le niveau 3 ; UPC_MIN impose un niveau minimal. */
+    if (level < 3 && state && state.profile && state.profile.system === "CH" && state.profile.track !== "mp" && state.profile.grade >= 12) {
+      if (UPC_MIN[id]) level = Math.max(level, UPC_MIN[id]); else if (UPC.includes(id)) level += 1;
+    }
     if (seed) return this.finalize(state, id, this.build(id, level, seed));
     const rec = ((state.recentQ = state.recentQ || {})[id] = (state.recentQ[id] || []));
     const key = (q) => { let h = 0; for (const c of String(q.q) + JSON.stringify(q.spec)) h = (h * 31 + c.charCodeAt(0)) | 0; return h; };
