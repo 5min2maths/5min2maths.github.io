@@ -33,7 +33,7 @@ MOD	Deux modes (libre / scolaire)	Produit	—	fait	100 %	19.11	—	—
 AUT	Mode auteur et écran Statistiques	Données	—	fait	100 %	22.11	appareils de l'auteur exclus des stats	—
 VOIX	Lecture à voix haute	Produit	—	en réserve	0 %	21.11	idée (traducteur des formules)	—
 H	Comptes, étapes 2 et 3 (synchronisation, code classe)	Produit	8	en attente	—	14.11	étape 1 faite (code de sauvegarde)	selon l'usage et l'accord DIP
-G	Couverture : 3e et 4e Collège, MP3-MP4, repère 3D	Couverture	8	en cours	30 %	23.11	3e Collège : 9 notions de dérivation ; programme 3e–4e étudié	MP3-MP4, repère 3D
+G	Couverture : 3e et 4e Collège, MP3-MP4, repère 3D	Couverture	8	en cours	70 %	24.11	4e Collège (9 notions), MP 3e (12), MP 4e (9) ; 3e Collège (9) depuis le 23.11	reste : loi normale, stats Collège, algèbre linéaire, MA2 ; MP : position de droites, fonctions rationnelles (tools/couverture.md, programme_3e_4e_college.md)
 FR	France : collège, seconde, 1re et Tle	Couverture	8	en cours	25 %	23.11	référentiels importés ; collège 5 notions, seconde 8, 1re-Tle 10	après la bêta (ROADMAP § 5)
 Y	Pays et programmes (BE, LU, QC…)	Long terme	—	études	5 %	22.11	notes tools/referentiels_belgique, _luxembourg, _quebec	2027-2028
 Z	Localisation légère (milliers, monnaie, vocabulaire)	Long terme	—	à faire	0 %	22.11	—	2027-2028
