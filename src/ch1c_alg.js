@@ -244,6 +244,43 @@
       "Erreur : la formule est " + M("x_S = -\\frac{b}{2a}") + ". Ici " + M("x_S = -\\frac{" + b + "}{" + 2 * a + "} = " + xs) + ".",
       { ctx: "erreur", guide: [GS("Formule " + M("x_S = -\\frac{b}{2a}") + " : combien vaut " + M("\\frac{b}{2a}") + " ?", -xs, M(-xs) + "."), GS("Avec le signe moins, " + M("x_S") + " = ?", xs, M(xs) + ".")],
         traps: [TRAP(-xs, "C'est le calcul de " + w + " : il manque le signe moins de la formule.")] }); });
+  // ===================== Chantier X (24.11) : f2, lecture sur figure (zéros, sommet, axe de symétrie, forme
+  // canonique, coefficient a lus sur la parabole tracée) ; valeurs sur des nœuds du quadrillage.
+  const PLf = (fns, pts = [], o = {}) => FIG.plot(fns, pts, Object.assign({ numbers: true, xr: [-6, 6], yr: [-6, 6] }, o));
+  const dC = (v) => String(v).replace(".", "{,}");
+  const sqE = (s, h, k) => (s === -1 ? "-" : s === 1 ? "" : s + "*") + "(x" + (h < 0 ? "+" + -h : "-" + h) + ")^2" + (k < 0 ? "-" + -k : "+" + k);
+  F2[1].push(
+    () => { const s = pk([1, -1, 0.5, -0.5]), p = R.int(-5, 3), q = p + R.int(2, 6), vy = -s * (q - p) ** 2 / 4; if (q > 5 || Math.abs(vy) > 6 || !p || !q || p === -q) return null;
+      return QSet("La parabole représente une fonction " + M("f") + ". Lis ses zéros sur le graphique.", [p, q], "La parabole coupe l'axe horizontal en " + M("x = " + p) + " et " + M("x = " + q) + " : ce sont les zéros de " + M("f") + ".",
+        { ctx: "zeros-lus", fig: PLf([{ f: (x) => s * (x - p) * (x - q) }], [], { yr: [-7, 7] }), guide: [GS("Les zéros sont les abscisses des points où la courbe coupe l'axe HORIZONTAL. Le plus petit ?", p, M(p) + "."), GSet("Les deux zéros ?", [p, q], M(p) + " et " + M(q) + ".")],
+          traps: [TSet([-p, -q], "Lis les abscisses avec leur signe : à gauche de l'axe vertical, elles sont négatives."), TSet([s * p * q], "Ça, c'est l'ordonnée à l'origine f(0) (axe vertical). Les zéros se lisent sur l'axe horizontal."), TSet([q], "Il y a deux zéros.")] }); },
+    () => { const s = pk([1, -1, 0.5, -0.5, 2, -2]), h = nz(-4, 4), k = nz(-5, 5); if (Math.abs(h) === Math.abs(k) || (s > 0 && k > 3) || (s < 0 && k < -3)) return null;
+      return QP("La parabole représente une fonction " + M("f") + ". Lis les coordonnées de son sommet. Réponds « x ; y ».", [h, k], "Le sommet est le point " + (s > 0 ? "le plus bas" : "le plus haut") + " de la parabole : " + M("S(" + h + " ; " + k + ")") + ".",
+        { ctx: "sommet-lu", fig: PLf([{ f: (x) => s * (x - h) ** 2 + k }]), guide: [GS("Sommet = point " + (s > 0 ? "le plus bas" : "le plus haut") + ". Son abscisse (axe horizontal) ?", h, M(h) + "."), GP("Son ordonnée, puis le sommet « x ; y » ?", [h, k], M("(" + h + " ; " + k + ")") + ".")],
+          traps: [TP([k, h], "Abscisse d'abord (axe horizontal), puis ordonnée."), TP([-h, k], "Le sommet est " + (h < 0 ? "à gauche" : "à droite") + " de l'axe vertical : vérifie le signe de l'abscisse."), TP([h, -k], "Le sommet est " + (k < 0 ? "sous" : "au-dessus de") + " l'axe horizontal.")] }); },
+  );
+  F2[2].push(
+    () => { const s = pk([1, -1]), h = nz(-3, 3), k = s > 0 ? R.int(-5, -1) : R.int(1, 5), e = sqE(s, h, k);
+      return QX("La parabole a pour expression " + M("f(x) = (x - h)^2 + k") + " ou " + M("f(x) = -(x - h)^2 + k") + ". Lis son sommet et son orientation, puis écris " + M("f(x)") + ".", e, null, "Sommet lu " + M("S(" + h + " ; " + k + ")") + ", parabole tournée vers le " + (s > 0 ? "haut (signe +)" : "bas (signe −)") + " : " + M("f(x) = " + (s < 0 ? "-" : "") + "(" + xm(h) + ")^2" + sg(k)) + ".",
+        { ctx: "canonique-lue", fig: PLf([{ f: (x) => s * (x - h) ** 2 + k }]), guide: [GS("Abscisse du sommet ?", h, M(h) + "."), GS("Ordonnée du sommet ?", k, M(k) + "."), GX("Tournée vers le " + (s > 0 ? "haut" : "bas") + " : " + M("f(x)") + " = ?", e, M("f(x) = " + (s < 0 ? "-" : "") + "(" + xm(h) + ")^2" + sg(k)) + ".")],
+          traps: [TX(sqE(s, -h, k), "Dans (x − h)², h est l'abscisse du sommet : sommet en " + h + " donne (" + xm(h) + ")²."), TX(sqE(-s, h, k), "La parabole est tournée vers le " + (s > 0 ? "haut : coefficient positif." : "bas : signe − devant la parenthèse.")), TX(sqE(s, h, -k), "k est l'ordonnée du sommet, avec son signe.")] }); },
+    () => { const s = pk([1, -1, 0.5, -0.5]); let p, q; do { p = R.int(-5, 2); q = p + pk([1, 3, 5]); } while (q > 5); const ax = (p + q) / 2, vy = -s * ((q - p) / 2) ** 2; if (Math.abs(vy) > 6.5) return null;
+      return QN("Lis les deux zéros de la parabole, puis donne l'abscisse de son axe de symétrie (nombre décimal).", ax, "Zéros lus : " + M(p) + " et " + M(q) + ". L'axe de symétrie passe au milieu : " + M("x = \\frac{" + p + " + " + (q < 0 ? "(" + q + ")" : q) + "}{2} = " + dC(ax)) + ".",
+        { ctx: "axe-sym", fig: PLf([{ f: (x) => s * (x - p) * (x - q) }], [], { yr: [-7, 7] }), guide: [GS("Plus petit zéro ?", p, M(p) + "."), GS("Plus grand zéro ?", q, M(q) + "."), GS("Milieu des deux (moyenne) ?", ax, M(dC(ax)) + ".")],
+          traps: [TR(p + q, "Divise la somme des zéros par 2 (milieu)."), TR(vy, "Ça, c'est l'ordonnée du sommet ; l'axe de symétrie est vertical, on donne son abscisse."), TR((q - p) / 2, "Le milieu, c'est la moyenne (somme ÷ 2), pas la demi-différence.")] }); },
+  );
+  F2[3].push(
+    () => { const a = pk([2, -2, 3, -3, 0.5, -0.5]), d = Math.abs(a) === 0.5 ? 2 : Math.abs(a) === 3 ? 1 : pk([1, 2]), h = R.int(-3, 2), k = a > 0 ? R.int(-5, -1) : R.int(1, 5), P = [h + d, k + a * d * d]; if (Math.abs(P[1]) > 6 || P[0] > 5) return null;
+      return QN("La parabole a pour sommet " + M("S") + " et passe par le point " + M("P") + " (marqués). Elle a pour expression " + M("f(x) = a(x - h)^2 + k") + ". Lis les coordonnées de " + M("S") + " et " + M("P") + ", puis trouve " + M("a") + (Number.isInteger(a) ? "." : " (fraction ou décimal accepté)."), a,
+        "Sommet lu " + M("S(" + h + " ; " + k + ")") + ", point " + M("P(" + P[0] + " ; " + P[1] + ")") + ". " + M(P[1] + " = a(" + P[0] + " - " + par(h) + ")^2 + " + par(k)) + ", soit " + M((P[1] - k) + " = " + d * d + "a") + " et " + M("a = " + fT(a)) + ".",
+        { ctx: "a-sommet-point", fig: PLf([{ f: (x) => a * (x - h) ** 2 + k }], [[h, k, "S"], [P[0], P[1], "P"]]), guide: [GS("Écart horizontal entre " + M("S") + " et " + M("P") + " ?", d, M(d) + "."), GS("Écart vertical (de " + M("S") + " à " + M("P") + ", négatif si on descend) ?", a * d * d, M(a * d * d) + "."), GS(M("a") + " = écart vertical ÷ (écart horizontal)² ?", a, M(fT(a)) + ".")],
+          traps: d > 1 ? [TR(a * d * d, "Il faut diviser par (écart horizontal)² = " + d * d + "."), TR(a * d, "On divise par le CARRÉ de l'écart horizontal : " + d * d + "."), TR(-a, "La parabole est tournée vers le " + (a > 0 ? "haut : a > 0." : "bas : a < 0."))] : [TR(-a, "La parabole est tournée vers le " + (a > 0 ? "haut : a > 0." : "bas : a < 0.")), TR(P[1], "Ça, c'est l'ordonnée de P ; a se calcule avec l'écart à partir du sommet."), TR(1 / a, "a = écart vertical ÷ (écart horizontal)², pas l'inverse.")] }); },
+    () => { const a = pk([2, -2, 0.5, -0.5, 1.5, -1.5]); let p, q; do { p = nz(-4, 3); q = nz(-3, 4); } while (p >= q); const f0 = a * p * q, vy = -a * ((q - p) / 2) ** 2; if (!Number.isInteger(f0) || Math.abs(f0) < 2 || Math.abs(f0) > 6 || Math.abs(vy) > 8) return null;
+      return QN("La parabole a pour expression " + M("f(x) = a(x - x_1)(x - x_2)") + ". Lis ses zéros " + M("x_1") + ", " + M("x_2") + " et son ordonnée à l'origine (point marqué), puis trouve " + M("a") + (Number.isInteger(a) ? "." : " (fraction ou décimal accepté)."), a,
+        "Zéros lus : " + M(p) + " et " + M(q) + " ; " + M("f(0) = " + f0) + ". Or " + M("f(0) = a \\cdot " + par(-p) + " \\cdot " + par(-q) + " = " + p * q + "a") + ", donc " + M("a = \\frac{" + f0 + "}{" + p * q + "} = " + fT(a)) + ".",
+        { ctx: "a-zeros-f0", fig: PLf([{ f: (x) => a * (x - p) * (x - q) }], [[0, f0, ""]], { yr: [-8, 8], squash: 0.8 }), guide: [GSet("Zéros lus ?", [p, q], M(p) + " et " + M(q) + "."), GS("Ordonnée à l'origine " + M("f(0)") + " (point marqué) ?", f0, M(f0) + "."), GS(M("f(0) = a \\cdot (0 - x_1)(0 - x_2) = " + p * q + "a") + ". Donc " + M("a") + " = ?", a, M(fT(a)) + ".")],
+          traps: [TR(f0, "f(0) n'est pas a : f(0) = a · x₁ · x₂."), TR(-a, "La parabole est tournée vers le " + (a > 0 ? "haut : a > 0." : "bas : a < 0.")), TR(f0 / (p + q), "f(0) = a · x₁ · x₂ : on divise par le PRODUIT des zéros.")] }); },
+  );
   const ALL = { polyop: PO, factor2: FC, trinfact: TF, f2: F2, f2formes: FF };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
