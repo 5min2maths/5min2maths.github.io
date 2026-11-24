@@ -1,1 +1,324 @@
-{}
+{
+ "limites": {
+  "classe": "3e Collège",
+  "plan": "3.AN.01a–b",
+  "etalon": "tools/niveau_34c.md § 2, E-3.2-1, E-3.2-2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "limitinf": {
+  "classe": "3e Collège",
+  "plan": "3.AN.01c",
+  "etalon": "tools/niveau_34c.md § 2, E-3.2-3, E-3.2-5",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "asymptotes": {
+  "classe": "3e Collège",
+  "plan": "3.AN.01d–e",
+  "etalon": "tools/niveau_34c.md § 2, E-3.2-3",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "continuite": {
+  "classe": "3e Collège",
+  "plan": "3.AN.02a–b",
+  "etalon": "tools/niveau_34c.md § 2, E-3.2-4",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "tauxvar": {
+  "classe": "3e Collège",
+  "plan": "3.AN.03a",
+  "etalon": "tools/niveau_34c.md § 2, E-3.3-1",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "nbderive": {
+  "classe": "3e Collège",
+  "plan": "3.AN.03b, 3.AN.04a",
+  "etalon": "tools/niveau_34c.md § 2, E-3.3-1",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "derivref": {
+  "classe": "3e Collège",
+  "plan": "3.AN.04b–c",
+  "etalon": "tools/niveau_34c.md § 2, E-3.3-2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "derivregles": {
+  "classe": "3e Collège",
+  "plan": "3.AN.05a",
+  "etalon": "tools/niveau_34c.md § 2, E-3.3-2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "derivprodquot": {
+  "classe": "3e Collège",
+  "plan": "3.AN.05b–c",
+  "etalon": "tools/niveau_34c.md § 2, E-3.3-2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "derivcomp": {
+  "classe": "3e Collège",
+  "plan": "3.AN.05d–e",
+  "etalon": "tools/niveau_34c.md § 2, E-3.3-2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "tangente": {
+  "classe": "3e Collège",
+  "plan": "3.AN.03c–d",
+  "etalon": "tools/niveau_34c.md § 2, E-3.3-1",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "variations": {
+  "classe": "3e Collège",
+  "plan": "3.AN.07a–b",
+  "etalon": "tools/niveau_34c.md § 2, E-3.3-3",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "etudefct": {
+  "classe": "3e Collège",
+  "plan": "3.AN.07c–d",
+  "etalon": "tools/niveau_34c.md § 2, E-3.3-3",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "derivseconde": {
+  "classe": "3e Collège",
+  "plan": "3.AN.08a–b (MA2)",
+  "etalon": "tools/niveau_34c.md § 2, E-3.3-5",
+  "audit": "24.11.2026",
+  "verdict": "à valider"
+ },
+ "optimderiv": {
+  "classe": "3e Collège",
+  "plan": "3.AN.10a–c",
+  "etalon": "tools/niveau_34c.md § 2, E-3.3-4",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "combi": {
+  "classe": "3e Collège",
+  "plan": "3.PS.01a–e",
+  "etalon": "tools/niveau_34c.md § 2, E-3.5-1",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "probaxiomes": {
+  "classe": "3e Collège",
+  "plan": "3.PS.02a–c",
+  "etalon": "tools/niveau_34c.md § 2, E-3.5-2, E-3.5-3",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "probarbre": {
+  "classe": "3e Collège",
+  "plan": "3.PS.02d",
+  "etalon": "tools/niveau_34c.md § 2, E-3.5-3",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "vect3d": {
+  "classe": "3e Collège",
+  "plan": "3.GV.01a–d",
+  "etalon": "tools/niveau_34c.md § 2, E-3.6-4",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "colin": {
+  "classe": "3e Collège",
+  "plan": "3.GV.02a–b (MA2)",
+  "etalon": "tools/niveau_34c.md § 2, E-3.6-4",
+  "audit": "24.11.2026",
+  "verdict": "à valider"
+ },
+ "droite3d": {
+  "classe": "3e Collège",
+  "plan": "3.GV.03a–b",
+  "etalon": "tools/niveau_34c.md § 2, E-3.6-4",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "plans": {
+  "classe": "3e Collège",
+  "plan": "3.GV.03c, 3.GV.03e",
+  "etalon": "tools/niveau_34c.md § 2, E-3.6-3",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "posrel": {
+  "classe": "3e Collège",
+  "plan": "3.GV.03d",
+  "etalon": "tools/niveau_34c.md § 2, E-3.6-4",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "pscal3d": {
+  "classe": "3e Collège",
+  "plan": "3.GV.04a–c",
+  "etalon": "tools/niveau_34c.md § 2, E-3.6-1",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "distances": {
+  "classe": "3e Collège",
+  "plan": "3.GV.04d–e",
+  "etalon": "tools/niveau_34c.md § 2, E-3.6-2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "sphere": {
+  "classe": "3e Collège",
+  "plan": "3.GV.05a–d",
+  "etalon": "tools/niveau_34c.md § 2, E-3.6-4",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "primitives": {
+  "classe": "4e Collège",
+  "plan": "4.AN.01a–c",
+  "etalon": "tools/niveau_34c.md § 2, E-4.1-1, E-4.1-2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "integrale": {
+  "classe": "4e Collège",
+  "plan": "4.AN.02a–c, 4.AN.03a",
+  "etalon": "tools/niveau_34c.md § 2, E-4.1-2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "aireint": {
+  "classe": "4e Collège",
+  "plan": "4.AN.05a–b",
+  "etalon": "tools/niveau_34c.md § 2, E-4.1-3",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "volrev": {
+  "classe": "4e Collège",
+  "plan": "4.AN.05c",
+  "etalon": "tools/niveau_34c.md § 2, E-4.1-4",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "intparties": {
+  "classe": "4e Collège",
+  "plan": "4.AN.04a (MA2)",
+  "etalon": "tools/niveau_34c.md § 2, E-4.1-5",
+  "audit": "24.11.2026",
+  "verdict": "à valider"
+ },
+ "intsubst": {
+  "classe": "4e Collège",
+  "plan": "4.AN.04b (MA2)",
+  "etalon": "tools/niveau_34c.md § 2, E-4.1-5",
+  "audit": "24.11.2026",
+  "verdict": "à valider"
+ },
+ "lnexp": {
+  "classe": "4e Collège",
+  "plan": "4.AN.06a–c",
+  "etalon": "tools/niveau_34c.md § 2, E-4.2-1",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "etudelnexp": {
+  "classe": "4e Collège",
+  "plan": "4.AN.06d",
+  "etalon": "tools/niveau_34c.md § 2, E-4.2-1, E-4.2-2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "croissance": {
+  "classe": "4e Collège",
+  "plan": "4.AN.07a–c",
+  "etalon": "tools/niveau_34c.md § 2, E-4.2-4",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "eqdiff": {
+  "classe": "4e Collège",
+  "plan": "4.AN.08–09 (MA2)",
+  "etalon": "tools/niveau_34c.md § 2, S4B (épreuve 4MA2)",
+  "audit": "24.11.2026",
+  "verdict": "à valider"
+ },
+ "matrices": {
+  "classe": "4e Collège",
+  "plan": "4.GV.02b–c, 4.GV.02e",
+  "etalon": "tools/niveau_34c.md § 2, E-4.3-1, E-4.3-4",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "translin": {
+  "classe": "4e Collège",
+  "plan": "4.GV.01a–d",
+  "etalon": "tools/niveau_34c.md § 2, E-4.3-2",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "appllin": {
+  "classe": "4e Collège",
+  "plan": "4.GV.02a, 4.GV.02d, 4.GV.03a–d",
+  "etalon": "tools/niveau_34c.md § 2, E-4.3-2",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "condbayes": {
+  "classe": "4e Collège",
+  "plan": "4.PS.02a–d",
+  "etalon": "tools/niveau_34c.md § 2, E-4.4-1, E-4.4-3",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "varalea": {
+  "classe": "4e Collège",
+  "plan": "4.PS.03a–b",
+  "etalon": "tools/niveau_34c.md § 2, E-4.4-3",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "binomiale": {
+  "classe": "4e Collège",
+  "plan": "4.PS.03c–d",
+  "etalon": "tools/niveau_34c.md § 2, E-4.4-2, E-4.4-4",
+  "audit": "24.11.2026",
+  "verdict": "au niveau"
+ },
+ "normale": {
+  "classe": "4e Collège",
+  "plan": "4.PS.04a–c",
+  "etalon": "tools/niveau_34c.md § 2, REF 4.PS.04 (sans table)",
+  "audit": "24.11.2026",
+  "verdict": "à valider"
+ },
+ "statdesc": {
+  "classe": "4e Collège",
+  "plan": "4.PS.01a–d",
+  "etalon": "tools/niveau_34c.md § 2, E-4.4-5",
+  "audit": "24.11.2026",
+  "verdict": "remonté"
+ },
+ "stats": {
+  "classe": "4e Collège",
+  "plan": "4.PS.01b (retirée de la 4e : niveau CO)",
+  "etalon": "tools/niveau_34c.md § 2, E-4.4-5",
+  "audit": "24.11.2026",
+  "verdict": "hors programme"
+ },
+ "quartiles": {
+  "classe": "4e Collège",
+  "plan": "4.PS.01c (retirée de la 4e : niveau CO)",
+  "etalon": "tools/niveau_34c.md § 2, E-4.4-5",
+  "audit": "24.11.2026",
+  "verdict": "hors programme"
+ }
+}

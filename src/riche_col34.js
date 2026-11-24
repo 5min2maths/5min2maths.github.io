@@ -293,7 +293,7 @@
         chk: [[Ex, FRp(Ex)], [Math.sqrt(V), A(Math.sqrt(V), 2), 0.01], [jf, N(jf)], [30 * Ex, FRp(30 * Ex)]] }); },
     // Les temps de trajet (24.11 : statistiques ouvertes en 4e)
     () => { let xs, m, sd, k; do { xs = Array.from({ length: 10 }, () => R.int(12, 45)); m = xs.reduce((a, b) => a + b, 0) / 10; sd = Math.sqrt(xs.reduce((a, b) => a + (b - m) ** 2, 0) / 10); k = xs.filter((x) => x >= m - sd && x <= m + sd).length; } while (sd < 4 || new Set(xs).size < 8);
-      return X({ id: "stats", lv: 2, titre: "Les temps de trajet",
+      return X({ id: "statdesc", lv: 2, titre: "Les temps de trajet",
         q: who() + " note ses temps de trajet (en minutes) pendant deux semaines d'école : " + xs.join(" ; ") + ".",
         parts: [{ label: "Calcule la moyenne " + M("\\bar x") + ".", pts: 1 }, { label: "Calcule l'écart-type " + M("\\sigma") + " (au centième).", pts: 2 }, { label: "Combien de trajets sont dans l'intervalle " + M("[\\bar x - \\sigma \\,;\\, \\bar x + \\sigma]") + " ? Quel pourcentage cela représente-t-il ?", pts: 1 }],
         sol: ul([M("\\bar x = \\frac{" + xs.reduce((a, b) => a + b, 0) + "}{10} = " + N(m)) + " min.", M("\\sigma = \\sqrt{\\frac{1}{10}\\sum (x_i - \\bar x)^2} \\approx " + A(sd, 2)) + " min (racine de la moyenne des carrés des écarts).", "Intervalle " + M("[" + A(m - sd, 2) + " \\,;\\, " + A(m + sd, 2) + "]") + " : " + M(k) + " trajets, soit " + M(10 * k + "\\,\\%") + " (pour une loi normale, on en attendrait environ 68 %)."]),
@@ -301,7 +301,7 @@
     // Deux classes, deux boîtes (quartiles)
     () => { const mk11 = () => Array.from({ length: 11 }, () => R.int(20, 60)).sort((a, b) => a - b); let s1, s2; do { s1 = mk11(); s2 = mk11(); } while (s1[8] - s1[2] === s2[8] - s2[2] || s1[5] === s2[5]);
       const iq1 = s1[8] - s1[2], iq2 = s2[8] - s2[2];
-      return X({ id: "quartiles", lv: 2, titre: "Deux classes, deux boîtes",
+      return X({ id: "statdesc", lv: 2, titre: "Deux classes, deux boîtes",
         q: "Points obtenus à un même test (sur 60) dans deux classes de 11 élèves, séries triées. Classe A : " + s1.join(" ; ") + ". Classe B : " + s2.join(" ; ") + ".",
         parts: [{ label: "Donne la médiane, " + M("Q_1") + " et " + M("Q_3") + " de la classe A.", pts: 1 }, { label: "Calcule l'écart interquartile de chaque classe.", pts: 1 }, { label: "Dessine les deux boîtes à moustaches sur un même axe. Quelle classe est la plus homogène ?", pts: 2 }],
         sol: ul(["Classe A : médiane " + M(s1[5]) + " (6e valeur), " + M("Q_1 = " + s1[2]) + ", " + M("Q_3 = " + s1[8]) + " (médianes des 5 premières et des 5 dernières valeurs).", "A : " + M(s1[8] + " - " + s1[2] + " = " + iq1) + " ; B : " + M("Q_1 = " + s2[2]) + ", " + M("Q_3 = " + s2[8]) + ", " + M(s2[8] + " - " + s2[2] + " = " + iq2) + ".", "Boîtes : min, " + M("Q_1") + ", médiane, " + M("Q_3") + ", max. La classe " + (iq1 < iq2 ? "A" : "B") + " a le plus petit écart interquartile : la moitié centrale de ses notes est plus resserrée."]),
@@ -326,5 +326,5 @@
   RICH.int4c = { ids: ["primitives", "integrale", "aireint", "volrev"], track: "col", label: "Intégration", ex: EXI, raison: RAISONI, minutes: 45 };
   RICH.exp4c = { ids: ["lnexp", "croissance"], track: "col", label: "Logarithme et exponentielle", ex: EXL, raison: RAISONL, minutes: 45 };
   RICH.alg4c = { ids: ["matrices", "translin", "appllin"], track: "col", label: "Algèbre linéaire", ex: EXA, raison: RAISONA, minutes: 45 };
-  RICH.proba4c = { ids: ["condbayes", "varalea", "binomiale", "normale", "stats", "quartiles"], track: "col", label: "Probabilités", ex: EXP, raison: RAISONP, minutes: 45 };
+  RICH.proba4c = { ids: ["condbayes", "varalea", "binomiale", "statdesc", "normale"], track: "col", label: "Probabilités", ex: EXP, raison: RAISONP, minutes: 45 };
 })();
