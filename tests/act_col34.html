@@ -35,6 +35,6 @@ const run=(id)=>{ try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=
   const ok=!document.getElementById("s3").hidden&&!bad&&wrongOk&&!msgs.some(m=>/non trouvé/.test(m));
   log.push(id+" ["+X.mode+"] : "+(ok?"OK":"ÉCHEC "+(bad?"(NaN/undefined) ":"")+(wrongOk?"":"(réponse fausse acceptée) "))+" · "+msgs.join(" | "));
   }catch(e){log.push(id+" ERR ÉCHEC "+e.stack)} };
-const IDS=["tauxvar","nbderive","derivref","derivregles","derivprodquot","derivcomp","tangente","variations","optimderiv","primitives","integrale","aireint","volrev","lnexp","croissance","matrices","translin","appllin","condbayes","varalea","binomiale","normale"];
+const IDS=["tauxvar","nbderive","derivref","derivregles","derivprodquot","derivcomp","tangente","variations","optimderiv","limites","limitinf","asymptotes","continuite","etudefct","derivseconde","combi","probaxiomes","probarbre","primitives","integrale","aireint","volrev","lnexp","croissance","matrices","translin","appllin","condbayes","varalea","binomiale","normale"];
 for(const id of IDS){ if(ACTIVE[id]&&LESSONS[id]) run(id); else log.push(id+" : ÉCHEC (leçon active ou leçon absente)"); }
 document.getElementById("log").hidden=false; document.getElementById("log").textContent=log.join("\n");</script>

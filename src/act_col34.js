@@ -1,6 +1,7 @@
 // Chantier 3e et 4e Collège (24.11) : leçons actives (devine / manipule ou essaie sur la figure / retiens) pour les
 // notions de src/ch3c_ana.js (3e, dérivation : tauxvar, nbderive, derivref, derivregles, derivprodquot, derivcomp,
-// tangente, variations, optimderiv) et de src/ch4c_ana.js (4e : primitives, integrale, aireint, volrev, lnexp,
+// tangente, variations, optimderiv ; 24.11 soir : limites, limitinf, asymptotes, continuite, etudefct, derivseconde,
+// combi, probaxiomes, probarbre, en « À toi : 2 questions ») et de src/ch4c_ana.js (4e : primitives, integrale, aireint, volrev, lnexp,
 // croissance, matrices, translin, condbayes, varalea, binomiale, normale). Programme : tools/programme_3e_4e_college.md.
 // Même moteur que act_2c.js (briques hunt et slide recopiées : fichier autonome), avec en plus des surfaces colorées
 // (o.polys, aires sous une courbe) et un format des graduations x (o.fx). Le « Retiens » vient de LESSONS[id]
@@ -645,6 +646,85 @@
         miss: (st, s) => (st.a >= st.b ? "" : s ? "On peut couper à la moyenne : 34 % d'un côté (1σ), 47,5 % de l'autre (2σ)." : (st.a + st.b) / 2 !== 170 ? "L'intervalle doit être centré sur 170." : "Centré, mais pas la bonne largeur : 95 % correspond à 2 écarts-types."),
         ask: [{ q: "Quel pourcentage de personnes mesure moins de 154 cm ?", ans: 2.5, ok: "Hors de [154 ; 186], il reste 5 %, partagé également : 2,5 % de chaque côté.", no: "Ce qui reste hors de l'intervalle à 95 % se partage en deux queues égales." },
           { q: "Sur 400 personnes, combien mesurent plus de 186 cm (environ) ?", ans: 10, ok: "P(X > 186) = 2,5 %, et 400 · 0,025 = 10 personnes.", no: "186 = μ + 2σ : au-dessus, il reste 2,5 %." }] }),
+    },
+  });
+  // =====================================================================================================
+  // 3e Collège · Limites, étude de fonctions, combinatoire et probabilités (24.11 soir, agent c3ana)
+  // « À toi : 2 questions » (réponse tapée, coup de pouce après une erreur), sans figure.
+  // =====================================================================================================
+  const toi = (cp, wins) => hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(cp[s] + "<br>" + tu(x)), wins });
+  Object.assign(ACTIVE, {
+    limites: {
+      retiens: { regle: "Si le dénominateur ne s'annule pas en \\(a\\), on remplace \\(x\\) par \\(a\\). Forme \\(\\frac{0}{0}\\) : on factorise le numérateur par \\((x - a)\\), on simplifie, puis on remplace \\(x\\) par \\(a\\).", exemple: ["\\(\\lim_{x \\to 3} \\frac{x^2 - 9}{x - 3} = \\lim_{x \\to 3} (x + 3) = 6\\)", "\\(\\lim_{x \\to 2} \\frac{x^2 + x - 6}{x - 2} = \\lim_{x \\to 2} (x + 3) = 5\\)"], piege: "\\(\\frac{0}{0}\\) n'est pas un résultat : c'est le signal qu'il faut simplifier." },
+      predict: { q: "Que vaut \\(\\frac{x^2 - 9}{x - 3}\\) pour \\(x = 3{,}001\\) ?", choices: ["environ 6", "environ 0", "on ne peut pas le calculer"], good: 0,
+        why: "Pour x ≠ 3, (x² − 9) ÷ (x − 3) = x + 3 : en 3,001, elle vaut 6,001. En x = 3, on obtient 0 ÷ 0, mais la limite vaut 6." },
+      defis: ["Calcule \\(\\lim_{x \\to 3} \\frac{x^2 - 9}{x - 3}\\).", "Calcule \\(\\lim_{x \\to 2} \\frac{x^2 + x - 6}{x - 2}\\)."],
+      play: toi(["x² − 9 = (x − 3)(x + 3) : simplifie par (x − 3), puis remplace x par 3", "x² + x − 6 = (x − 2)(x + 3) : simplifie, puis remplace x par 2"],
+        [W(6, "(x − 3)(x + 3) ÷ (x − 3) = x + 3, qui vaut 6 en x = 3."), W(5, "x² + x − 6 = (x − 2)(x + 3) : il reste x + 3, qui vaut 5 en x = 2.")]),
+    },
+    limitinf: {
+      retiens: { regle: "À l'infini, une fraction rationnelle se comporte comme le quotient de ses termes de plus haut degré. Mêmes degrés en haut et en bas : la limite est le quotient des coefficients dominants.", exemple: ["\\(\\lim_{x \\to +\\infty} \\frac{6x^2 + x - 1}{2x^2 + 5} = \\frac{6}{2} = 3\\)", "\\(\\lim_{x \\to -\\infty} \\frac{3x - 4}{4x + 7} = \\frac{3}{4}\\)"] },
+      predict: { q: "Que devient \\(\\frac{6x^2 + 1}{2x^2 - 5}\\) quand \\(x\\) devient très grand (1'000, 1'000'000…) ?", choices: ["elle s'approche de 3", "elle devient énorme", "elle s'approche de 0"], good: 0,
+        why: "Pour x très grand, le + 1 et le − 5 ne comptent presque plus : 6x² ÷ 2x² = 3." },
+      defis: ["Calcule \\(\\lim_{x \\to +\\infty} \\frac{6x^2 + x - 1}{2x^2 + 5}\\).", "Calcule \\(\\lim_{x \\to -\\infty} \\frac{3x - 4}{4x + 7}\\) (fraction acceptée)."],
+      play: toi(["Garde seulement les termes de plus haut degré : 6x² en haut, 2x² en bas", "Termes dominants : 3x en haut, 4x en bas"],
+        [W(3, "6x² ÷ 2x² = 3 : les autres termes deviennent négligeables."), W(0.75, "3x ÷ 4x = 3/4, aussi en −∞ : les x se simplifient.")]),
+    },
+    asymptotes: {
+      retiens: { regle: "Asymptote verticale \\(x = a\\) : le dénominateur s'annule en \\(a\\) (et pas le numérateur). Asymptote horizontale \\(y = b\\) : \\(b\\) est la limite de \\(f(x)\\) à l'infini.", exemple: ["\\(f(x) = \\frac{2x + 1}{x - 3}\\) : asymptotes \\(x = 3\\) et \\(y = 2\\)."] },
+      predict: { q: "\\(f(x) = \\frac{2x + 1}{x - 3}\\). Que fait la courbe près de \\(x = 3\\) ?", choices: ["elle part vers l'infini", "elle passe par 0", "elle vaut 7"], good: 0,
+        why: "En x = 3, le dénominateur vaut 0 et le numérateur 7 : f(x) = 7 ÷ (très petit) devient énorme. La droite x = 3 est une asymptote verticale." },
+      defis: ["\\(f(x) = \\frac{2x + 1}{x - 3}\\). Son asymptote verticale a pour équation \\(x = a\\). Que vaut \\(a\\) ?", "Même fonction : son asymptote horizontale a pour équation \\(y = b\\). Que vaut \\(b\\) ?"],
+      play: toi(["Cherche où le dénominateur x − 3 s'annule", "Limite à l'infini : 2x ÷ x"],
+        [W(3, "x − 3 = 0 pour x = 3, où le numérateur vaut 7 : asymptote verticale x = 3."), W(2, "À l'infini, (2x + 1) ÷ (x − 3) ≈ 2x ÷ x = 2 : asymptote horizontale y = 2.")]),
+    },
+    continuite: {
+      retiens: { regle: "\\(f\\) est continue en \\(a\\) si \\(\\lim_{x \\to a} f(x) = f(a)\\). Pour une fonction par morceaux, les deux formules doivent donner la même valeur au point de raccord.", exemple: ["\\(x + 1\\) si \\(x < 2\\), \\(x^2 + k\\) si \\(x \\ge 2\\) : \\(3 = 4 + k\\), donc \\(k = -1\\).", "\\(g(x) = \\frac{x^2 - 16}{x - 4} = x + 4\\) pour \\(x \\neq 4\\) : on pose \\(g(4) = 8\\)."] },
+      predict: { q: "\\(f(x) = x + 1\\) si \\(x < 2\\), et \\(f(x) = x^2 + k\\) si \\(x \\ge 2\\). Pour que la courbe ne fasse pas de saut en 2…", choices: ["les deux formules doivent donner la même valeur en 2", "il faut k = 0", "c'est impossible"], good: 0,
+        why: "À gauche, la courbe arrive à la hauteur 2 + 1 = 3 ; à droite, elle part de 4 + k. Sans saut : 4 + k = 3." },
+      defis: ["\\(f(x) = x + 1\\) si \\(x < 2\\), et \\(f(x) = x^2 + k\\) si \\(x \\ge 2\\). Pour quelle valeur de \\(k\\) est-elle continue ?", "\\(g(x) = \\frac{x^2 - 16}{x - 4}\\) pour \\(x \\neq 4\\). Quelle valeur faut-il donner à \\(g(4)\\) pour que \\(g\\) soit continue ?"],
+      play: toi(["Valeur à gauche en 2 : 2 + 1 = 3 ; valeur à droite : 4 + k", "x² − 16 = (x − 4)(x + 4) : simplifie, puis prends la limite en 4"],
+        [W(-1, "4 + k = 3, donc k = −1 : les deux morceaux se rejoignent au point (2 ; 3)."), W(8, "g(x) = x + 4 pour x ≠ 4, de limite 8 : on pose g(4) = 8.")]),
+    },
+    etudefct: {
+      retiens: { regle: "Les extremums se cherchent là où \\(f'\\) s'annule en changeant de signe : de + à −, maximum local ; de − à +, minimum local. La valeur de l'extremum est \\(f(a)\\), pas \\(a\\).", exemple: ["\\(f(x) = x^3 - 12x\\) : \\(f'(x) = 3(x - 2)(x + 2)\\), maximum local \\(f(-2) = 16\\).", "\\(g(x) = x + \\frac{9}{x}\\) (\\(x > 0\\)) : \\(g'(x) = 1 - \\frac{9}{x^2}\\), minimum \\(g(3) = 6\\)."] },
+      predict: { q: "\\(f(x) = x^3 - 12x\\). Où chercher ses extremums ?", choices: ["là où f'(x) = 0", "là où f(x) = 0", "en x = 0"], good: 0,
+        why: "Un extremum est un sommet ou un creux : la tangente y est horizontale, donc f'(x) = 0 (et f' change de signe)." },
+      defis: ["\\(f(x) = x^3 - 12x\\). Quelle est la valeur de son maximum local ?", "\\(g(x) = x + \\frac{9}{x}\\) pour \\(x > 0\\). Quelle est la valeur de son minimum ?"],
+      play: toi(["f'(x) = 3x² − 12 = 3(x − 2)(x + 2) : f' passe de + à − en −2. Calcule f(−2)", "g'(x) = 1 − 9 ÷ x² s'annule en x = 3. Calcule g(3)"],
+        [W(16, "f(−2) = −8 + 24 = 16 : maximum local au point (−2 ; 16)."), W(6, "g(3) = 3 + 3 = 6 : minimum au point (3 ; 6).")]),
+    },
+    derivseconde: {
+      retiens: { regle: "Point d'inflexion : la courbe change de concavité, \\(f''\\) s'annule en changeant de signe. \\(f'' > 0\\) : courbe tournée vers le haut (convexe) ; \\(f'' < 0\\) : vers le bas (concave).", exemple: ["\\(f(x) = x^3 - 6x^2 + 5x\\) : \\(f''(x) = 6x - 12\\), inflexion en \\(x = 2\\).", "\\(f(x) = x^4 - 6x^2\\) : \\(f''(x) = 12x^2 - 12\\), inflexions en \\(x = \\pm 1\\)."] },
+      predict: { q: "La courbe de \\(f(x) = x^3\\) est tournée vers le bas pour \\(x < 0\\) et vers le haut pour \\(x > 0\\). Que vaut \\(f''(0)\\) ?", choices: ["0", "3", "6"], good: 0,
+        why: "f'(x) = 3x², f''(x) = 6x : f''(0) = 0, et f'' passe de − à + en 0. C'est un point d'inflexion." },
+      defis: ["\\(f(x) = x^3 - 6x^2 + 5x\\). En quelle abscisse a-t-elle un point d'inflexion ?", "\\(f(x) = x^4 - 6x^2\\). Quelle est la plus grande abscisse d'un point d'inflexion ?"],
+      play: toi(["f'(x) = 3x² − 12x + 5, puis f''(x) = 6x − 12 : résous f''(x) = 0", "f''(x) = 12x² − 12 : résous f''(x) = 0"],
+        [W(2, "f''(x) = 6x − 12 s'annule en 2 et change de signe : inflexion en x = 2."), W(1, "12x² − 12 = 0 pour x = −1 ou x = 1 (f'' change de signe en chacun) : la plus grande est 1.")]),
+    },
+    combi: {
+      retiens: { regle: "L'ordre compte (podium) : \\(n(n - 1)(n - 2) \\ldots\\). L'ordre ne compte pas (groupe) : on divise par le nombre d'ordres d'un même groupe, \\(k!\\) : \\(\\binom{n}{k}\\).", exemple: ["Podium avec 6 finalistes : \\(6 \\cdot 5 \\cdot 4 = 120\\).", "3 délégués parmi 7 : \\(\\binom{7}{3} = \\frac{7 \\cdot 6 \\cdot 5}{3!} = 35\\)."] },
+      predict: { q: "Trois coureurs A, B et C. Combien d'ordres d'arrivée sont possibles ?", choices: ["6", "3", "9"], good: 0,
+        why: "ABC, ACB, BAC, BCA, CAB, CBA : 3 choix pour la 1re place, 2 pour la 2e, 1 pour la 3e, soit 3 · 2 · 1 = 6." },
+      defis: ["6 athlètes disputent une finale. Combien de podiums (or, argent, bronze) sont possibles ?", "Combien de groupes de 3 délégués (sans rôle particulier) peut-on former dans un groupe de 7 élèves ?"],
+      play: toi(["6 choix pour l'or, puis 5 pour l'argent, puis 4 pour le bronze", "Si l'ordre comptait : 7 · 6 · 5. Chaque groupe est compté 3! = 6 fois"],
+        [W(120, "6 · 5 · 4 = 120 : ici l'ordre compte."), W(35, "7 · 6 · 5 = 210 ordres, divisés par 3! = 6 : 35 groupes.")]),
+    },
+    probaxiomes: {
+      retiens: { regle: "Issues équiprobables : \\(P(A) = \\frac{\\text{cas favorables}}{\\text{cas possibles}}\\). Réunion : \\(P(A \\cup B) = P(A) + P(B) - P(A \\cap B)\\).", exemple: ["Deux dés, somme 7 : 6 couples sur 36, \\(P = \\frac{1}{6}\\).", "\\(P(A \\cup B) = 0{,}5 + 0{,}4 - 0{,}2 = 0{,}7\\)"] },
+      predict: { q: "On lance deux dés et on additionne. Quelle somme est la plus probable ?", choices: ["7", "12", "elles sont toutes aussi probables"], good: 0,
+        why: "7 s'obtient de 6 façons (1 + 6, 2 + 5, …, 6 + 1) ; 12 d'une seule (6 + 6). Les 36 couples sont équiprobables, pas les sommes." },
+      defis: ["On lance deux dés. Probabilité d'obtenir une somme de 7 ? (fraction acceptée)", "\\(P(A) = 0{,}5\\), \\(P(B) = 0{,}4\\) et \\(P(A \\cap B) = 0{,}2\\). Que vaut \\(P(A \\cup B)\\) ?"],
+      play: toi(["Compte les couples (dé 1 ; dé 2) de somme 7 parmi les 36", "P(A ∪ B) = P(A) + P(B) − P(A ∩ B)"],
+        [W(1 / 6, "6 couples sur 36 : (1 ; 6), (2 ; 5), (3 ; 4), (4 ; 3), (5 ; 2), (6 ; 1). P = 6/36 = 1/6."), W(0.7, "0,5 + 0,4 − 0,2 = 0,7 : l'intersection est retirée une fois.")]),
+    },
+    probarbre: {
+      retiens: { regle: "Le long d'un chemin de l'arbre, on multiplie les probabilités. Avec remise, l'urne est la même au 2e tirage ; sans remise, il y a un objet de moins.", exemple: ["3 rouges, 2 bleues, avec remise : \\(P(RR) = \\frac{3}{5} \\cdot \\frac{3}{5} = 0{,}36\\).", "Sans remise : \\(P(RR) = \\frac{3}{5} \\cdot \\frac{2}{4} = 0{,}3\\)."] },
+      predict: { q: "Une urne contient 3 boules rouges et 2 bleues. On tire deux boules avec remise. La probabilité de tirer deux rouges vaut…", choices: ["3/5 · 3/5 = 0,36", "3/5 + 3/5", "3/5"], good: 0,
+        why: "Sur l'arbre, le chemin rouge puis rouge a la probabilité 3/5 · 3/5 : le long d'un chemin, on multiplie." },
+      defis: ["Urne : 3 boules rouges et 2 bleues. Deux tirages avec remise : probabilité de tirer deux rouges ?", "Même urne, deux tirages sans remise : probabilité de tirer deux rouges ?"],
+      play: toi(["Avec remise, chaque tirage donne rouge avec la probabilité 3/5", "Sans remise : 3/5 au 1er tirage, puis il reste 2 rouges sur 4"],
+        [W(0.36, "3/5 · 3/5 = 9/25 = 0,36."), W(0.3, "3/5 · 2/4 = 6/20 = 0,3 : moins qu'avec remise.")]),
     },
   });
 })();
