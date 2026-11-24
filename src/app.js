@@ -114,6 +114,9 @@ function pageCode() {
 }
 function addFab() {
   if (document.getElementById("fabc")) return;
+  /* 24.11 : le bouton, rangé dans l'en-tête, disparaît avec l'écran ; la fenêtre reste : on ne recrée que le bouton
+     (avant, une nouvelle fenêtre s'ajoutait à chaque écran). */
+  const old = document.getElementById("fabs"); if (old) old.remove();
   document.body.insertAdjacentHTML("beforeend", `<button type="button" id="fabc" class="fab-cmt" aria-label="Envoyer un commentaire sur cette page">💬</button>
   <div id="fabs" class="fab-sheet" hidden><div class="card stack"><div class="spread"><b>Un commentaire sur cette page ?</b><button type="button" class="btn-ghost small" id="fabx" aria-label="Fermer">✕</button></div>
   <div class="fab-sujet small" id="fabw" hidden>À propos de : <label><input type="radio" name="fabw" value="page" checked> <span id="fabwl">cette question</span></label> <label><input type="radio" name="fabw" value="app"> l'application en général</label></div>
@@ -172,14 +175,19 @@ function frThou(t) { return state && state.profile && state.profile.system === "
 // alors passer à la ligne entre deux morceaux. Seulement au niveau 0 (hors parenthèses, accolades, crochets, environnements).
 function splitEq(tex) {
   if (tex.length < 26 || /\\begin|\\\\/.test(tex)) return null;
-  const pos = []; let d2 = 0;
+  const pos = [], semi = [], plus = []; let d2 = 0;
   for (let i = 0; i < tex.length; i++) {
     const c = tex[i];
-    if (c === "\\") { const m = tex.slice(i).match(/^\\(approx|leq|geq|neq|iff|Rightarrow|Leftrightarrow)(?![a-zA-Z])/); if (m && d2 === 0) pos.push(i); i += m ? m[0].length - 1 : 1; continue; }
+    if (c === "\\") { const m = tex.slice(i).match(/^\\(approx|leq|geq|neq|iff|Rightarrow|Leftrightarrow|to)(?![a-zA-Z])/); if (m && d2 === 0) pos.push(i); i += m ? m[0].length - 1 : 1; continue; }
     if ("({[".includes(c)) d2++; else if (")}]".includes(c)) d2--;
     else if (d2 === 0 && (c === "=" || c === "<" || c === ">")) pos.push(i);
+    /* 24.11 : listes « a ; b ; c » coupées après le point-virgule ; longues sommes coupées avant « + » (contrôle de largeur) */
+    else if (d2 === 0 && c === ";") { const m = tex.slice(i + 1).match(/^\s*(\\[,;]\s*)?/); semi.push(i + 1 + m[0].length); }
+    else if (d2 === 0 && c === "+") plus.push(i);
   }
-  const P = pos.filter((i) => i > 0);
+  if (!pos.length && semi.length >= 4) pos.push(...semi.filter((_, k) => k % 3 === 2));
+  if (!pos.length && plus.length >= 4 && tex.length >= 40) pos.push(...plus.filter((_, k) => k % 3 === 2));
+  const P = pos.filter((i) => i > 0 && i < tex.length).sort((a, b) => a - b);
   if (!P.length) return null;
   const parts = []; let last = 0;
   for (const i of P) { parts.push(tex.slice(last, i).trim()); last = i; }

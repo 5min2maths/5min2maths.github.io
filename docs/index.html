@@ -441,7 +441,7 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 
 /* Bouton « commentaire » présent sur tous les écrans (20.11) */
 .fab-cmt { position: fixed; right: 14px; bottom: 86px; z-index: 40; width: 46px; height: 46px; border-radius: 50%; padding: 0; font-size: 1.3rem; background: var(--card, #fff); border: 1px solid var(--line); box-shadow: 0 3px 10px rgba(0,0,0,.15); }
-.brand .fab-cmt { position: static; align-self: center; width: 32px; height: 32px; font-size: 0.95rem; box-shadow: none; margin-left: 2px; flex: none; }
+.brand .fab-cmt { position: static; align-self: center; width: 32px; height: 32px; font-size: 0.95rem; box-shadow: none; margin-left: 2px; flex: none; top: auto; bottom: auto; right: auto; left: auto; }
 .fab-sheet.top { top: 64px; bottom: auto; }
 .fab-sheet { position: fixed; left: 12px; right: 12px; bottom: 140px; z-index: 41; max-width: 460px; margin: 0 auto; }
 .fab-sujet label { white-space: nowrap; margin-right: 6px; }
@@ -680,6 +680,7 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: v
 /* ---- Accessibilité (24.11, chantier O) ---- */
 /* Zones tactiles : petits boutons d'icône agrandis à ≥ 44 px sans changer la mise en page (zone invisible autour). */
 .gear, .brand .fab-cmt, .ctest, #fabx { position: relative; }
+.brand .fab-cmt { inset: auto; } /* 24.11 : en relative, le bottom: 86px du bouton flottant le sortait de l écran (💬 disparu) */
 .gear::after, .ctest::after { content: ""; position: absolute; inset: -5px 0; } /* verticalement seulement : rien ne dépasse à droite */
 .brand .fab-cmt::after, #fabx::after { content: ""; position: absolute; inset: -6px -4px; }
 /* Le logo garde sa taille quelle que soit la taille du texte choisie (c'est une image, pas un texte à lire) : le bandeau
@@ -723,12 +724,12 @@ window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "glo
 </head>
 <body>
 <main id="app" aria-live="polite"></main>
-<script src="app.js?v=69a5b66b44"></script>
+<script src="app.js?v=ac8fbb918d"></script>
 <script>
 (function () {
   // Chargement par niveau (24.11). Paquets requis : le niveau de l'élève et les niveaux inférieurs de sa filière ;
   // France et liens de consultation (#q-, #l-, #auteur) : tout. Puis le reste en arrière-plan (hors ligne complet).
-  var V = "69a5b66b44", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
+  var V = "ac8fbb918d", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
   window.__packs = loaded; // pour les tests (tools/test_paquets.py)
   function need(p) {
     if (!p || p.system === "FR") return K.slice();
