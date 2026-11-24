@@ -484,6 +484,12 @@
   };
 
   // ===================== Enregistrement =====================
+  // « Trouve l'erreur » (24.11, chantier I) : cathète calculée avec une somme de carrés au lieu d'une différence.
+  PYTH[2].push(() => { const [p, q, r] = R.pick([[3, 4, 5], [5, 12, 13], [6, 8, 10], [8, 15, 17]]), k = R.pick([1, 2]), a = p * k, b = q * k, c = r * k, w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+    return Qv("Un triangle est rectangle ; son hypoténuse mesure " + M(c) + " cm et une cathète " + M(a) + " cm. " + w + " écrit : « " + M("b = \\sqrt{" + c + "^2 + " + a + "^2}") + " ». Trouve l'erreur, puis calcule l'autre cathète " + M("b") + " (en cm).", b,
+      "Erreur : l'hypoténuse est le plus grand côté ; " + M("c^2 = a^2 + b^2") + " donne " + M("b^2 = c^2 - a^2 = " + c * c + " - " + a * a + " = " + b * b) + ", donc " + M("b = " + b) + " cm.",
+      { ctx: "erreur", guide: [GS(M("b^2 = c^2 - a^2") + " : " + M(c * c + " - " + a * a) + " = ?", b * b, M(b * b) + "."), GS(M("b = \\sqrt{" + b * b + "}") + " = ?", b, M(b) + " cm.")],
+        traps: [TRAP(+Math.sqrt(c * c + a * a).toFixed(2), "C'est le calcul de " + w + " : une cathète est plus courte que l'hypoténuse, on soustrait les carrés.")] }); });
   const ALL = { pyth: PYTH, pythfig: PFIG, pythrec: PREC, vol: VOL, volcone: VCONE, airepyr: APYR, volcomp: VCOMP, volmanq: VMAN };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);

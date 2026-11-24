@@ -37,7 +37,7 @@ function GEO() {
         X: (p) => +(ox + (p[0] - x0) * s).toFixed(1),
         Y: (p) => +(H - m - (p[1] - y0) * s).toFixed(1),
         dir(V, A, len) { const dx = (A[0] - V[0]) * s, dy = -(A[1] - V[1]) * s, l = Math.hypot(dx, dy) || 1; return [(dx / l) * len, (dy / l) * len]; },
-        txt: (x, y, str, anchor = "middle") => '<text x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" class="' + (/\?/.test(str) ? "f-accent f-txt" : "f-txt") + '" text-anchor="' + anchor + '" font-size="13">' + str + "</text>",
+        txt: (x, y, str, anchor = "middle") => '<text x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" class="' + (/\?/.test(str) ? "f-accent f-txt" : "f-txt") + '" text-anchor="' + anchor + '" font-size="13">' + String(str).replace(/\{,\}/g, ",") + "</text>",
         name: (nm, p) => { const dx = p[0] - cx, dy = p[1] - cy, l = Math.hypot(dx, dy) || 1; return T.txt(T.X(p) + (dx / l) * 13, T.Y(p) - (dy / l) * 13 + 4, nm); },
         lab(mid, str, A, B, inside) {
           if (!str) return "";

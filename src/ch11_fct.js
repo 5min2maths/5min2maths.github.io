@@ -83,7 +83,7 @@
           { ctx: "location", guide: [GS("Partie variable pour " + xs[k] + " h ?", p * xs[k], M(String(p * xs[k]).replace(".", "{,}")) + " CHF."), GS("Prix total ?", pc + p * xs[k], M(String(pc + p * xs[k]).replace(".", "{,}")) + " CHF.")], traps: [TR(p * xs[k], "N'oublie pas les " + pc + " CHF de base."), TR((pc + p) * xs[k], "La partie fixe ne se paie qu'une fois.")] }); },
     ],
     3: [
-      () => { const a = nz(-4, 4), b = R.int(-6, 6), xs = [-2, 1, 3, 6], ys = xs.map((x) => a * x + b);
+      () => { const a = R.pick([-4, -3, -2, 2, 3, 4]), b = R.int(-6, 6), xs = [-2, 1, 3, 6], ys = xs.map((x) => a * x + b); // 24.11 : pente ≠ ±1 (robot)
         return Qv("Ce tableau est celui d'une fonction affine " + M("f(x) = ax + b") + ". " + table(xs, ys) + " Que vaut la pente " + M("a") + " ?", a, "Entre " + M("x = 1") + " et " + M("x = 3") + " : " + M("a = \\frac{" + ys[2] + " - " + pr(ys[1]) + "}{3 - 1} = " + a) + ".",
           { ctx: "pente", guide: [GS("Écart des images entre " + M("x = 1") + " et " + M("x = 3") + " ?", ys[2] - ys[1], M(ys[2] - ys[1]) + "."), GS("Divisé par l'écart des " + M("x") + " (2) : " + M("a") + " = ?", a, M(a) + ".")], traps: [TR(ys[2] - ys[1], "Divise par l'écart des x (ici 2) : les colonnes ne sont pas espacées de 1."), TR(ys[1], "C'est une image, pas la pente.")] }); },
       () => { const a = nz(-4, 4), b = nz(-6, 6), xs = [-2, 1, 3], ys = xs.map((x) => a * x + b);
@@ -106,6 +106,12 @@
     ],
   };
 
+  // « Trouve l'erreur » (24.11, chantier I) : pente calculée « horizontal sur vertical ».
+  TAB[2].push(() => { const a = R.pick([2, 3, -2, -3, 4]), x1 = R.int(-3, 1), dx = R.int(1, 3), y1 = R.int(-4, 4), x2 = x1 + dx, y2 = y1 + a * dx, w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+    return Qv("Une droite passe par " + M("A(" + x1 + " ; " + y1 + ")") + " et " + M("B(" + x2 + " ; " + y2 + ")") + ". " + w + " calcule sa pente : « " + M("\\frac{" + x2 + " - " + par(x1) + "}{" + y2 + " - " + par(y1) + "} = " + frac(dx, a * dx)) + " ». Trouve l'erreur, puis donne la bonne pente.", a,
+      "Erreur : la pente, c'est la variation <b>verticale</b> divisée par la variation <b>horizontale</b> : " + M("\\frac{" + y2 + " - " + par(y1) + "}{" + x2 + " - " + par(x1) + "} = \\frac{" + a * dx + "}{" + dx + "} = " + a) + ".",
+      { ctx: "erreur", guide: [GS("Variation verticale " + M("y_B - y_A") + " ?", a * dx, M(a * dx) + "."), GS("Variation horizontale " + M("x_B - x_A") + " ?", dx, M(dx) + "."), GS("Pente = vertical : horizontal ?", a, M(a) + ".")],
+        traps: [TRAP(1 / a, "C'est le calcul de " + w + " : le quotient est à l'envers.")] }); });
   const ALL = { repere: REP, tabval: TAB };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);

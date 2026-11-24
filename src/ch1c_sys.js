@@ -501,6 +501,13 @@
   };
 
   // ===================== Enregistrement =====================
+  // « Trouve l'erreur » (24.11, chantier I) : addition des équations mal faite (signe de y).
+  SYS2[2].push(() => { const x = R.nz(-5, 6), y = R.nz(-5, 6), s = x + y, d = x - y, w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+    if (s === d || s + d === s - d) return SYS2[2][0]();
+    return QN("Pour résoudre " + M("\\begin{cases} x + y = " + s + " \\\\ x - y = " + d + " \\end{cases}") + ", " + w + " écrit : « j'additionne : " + M("2x = " + s + " - " + par(d) + " = " + (s - d)) + " ». Trouve l'erreur, puis donne la valeur de " + M("x") + ".", x,
+      "Erreur : en additionnant, les " + M("y") + " s'éliminent et les seconds membres s'<b>additionnent</b> : " + M("2x = " + s + " + " + par(d) + " = " + 2 * x) + ", donc " + M("x = " + x) + ".",
+      { ctx: "erreur", guide: [GS("On additionne les deux équations : " + M(s + " + " + par(d)) + " = ? (c'est 2x)", 2 * x, M("2x = " + 2 * x) + "."), GS("x = ?", x, M("x = " + x) + ".")],
+        traps: [TRAP((s - d) / 2, "C'est le calcul de " + w + " : on additionne aussi les seconds membres.")] }); });
   const ALL = { sys2: SYS2, sysprob: SPROB, sysgraph: SGRAPH, sys3: SYS3, affine: AFF, affzero: AZ, sysineq: SI, ineq: IQ };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);

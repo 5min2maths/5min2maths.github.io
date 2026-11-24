@@ -172,6 +172,12 @@
     ],
   };
 
+  // « Trouve l'erreur » (24.11, chantier I) : rapport AD/DB au lieu de AD/AB.
+  TH[2].push(() => { const k = R.pick([2, 3]), ad = R.int(2, 5), ab = ad * k, db = ab - ad, de = R.int(2, 6), bc = de * k, w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]), faux = r6((de * db) / ad);
+    return Qv("Dans un triangle " + M("ABC") + ", " + cfg + ", avec " + M("AD = " + ad) + ", " + M("DB = " + db) + " et " + M("DE = " + de) + " (en cm). " + w + " écrit : « " + M("\\frac{AD}{DB} = \\frac{DE}{BC}") + ", donc " + M("BC = " + de + " \\cdot \\frac{" + db + "}{" + ad + "}") + " ». Trouve l'erreur, puis calcule " + M("BC") + ".", bc,
+      "Erreur : Thalès compare le petit triangle " + M("ADE") + " au grand " + M("ABC") + " : " + M("\\frac{AD}{AB} = \\frac{DE}{BC}") + ", avec " + M("AB = AD + DB = " + ab) + ". Donc " + M("BC = " + de + " \\cdot \\frac{" + ab + "}{" + ad + "} = " + bc) + " cm.",
+      { ctx: "erreur", fig: GF.thales(1 / k, { AD: ad + "", DB: db + "", DE: de + "", BC: "?" }), guide: [GS("Le grand triangle a pour côté " + M("AB = AD + DB") + " = ?", ab, M(ab) + " cm."), GS("Rapport d'agrandissement " + M("AB : AD") + " ?", k, M(k) + "."), GS(M("BC = DE \\cdot " + k) + " = ?", bc, M(bc) + " cm.")],
+        traps: [TRAP(faux, "C'est le calcul de " + w + " : " + M("DB") + " n'est pas un côté du grand triangle, c'est " + M("AB") + " qu'il faut.")] }); });
   const ALL = { thales: TH, thalesrec: REC, simil: SIM };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);

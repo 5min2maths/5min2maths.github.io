@@ -199,7 +199,7 @@
       () => { const a = pk([1, 2, -1, -2, 3]), h = nz(-4, 4), k = nz(-6, 6), cs = [a, -2 * a * h, a * h * h + k];
         return QX(DEV + M(co(a) + "(" + xm(h) + ")^2" + sg(k)) + ".", P2(cs), "expanded", M("(" + xm(h) + ")^2 = " + P2([1, -2 * h, h * h])) + ", fois " + M(a) + ", plus " + M(k) + " : " + M(P2(cs)) + ".",
           { ctx: "canon-dev", guide: [GX("Développe " + M("(" + xm(h) + ")^2"), P2([1, -2 * h, h * h]), M(P2([1, -2 * h, h * h])) + "."), GX("Résultat", P2(cs), M(P2(cs)) + ".")], traps: [TX(P2([a, -2 * a * h, a * h * h + a * k]), "Le " + k + " est hors de la parenthèse : il n'est pas multiplié par " + a + "."), TX(P2([a, 0, a * h * h + k]), "(x − h)² contient le double produit −2hx.")] }); },
-      () => { const h = nz(-5, 5), k = nz(-6, 6);
+      () => { const h = R.pick([-5, -4, -3, -2, 2, 3, 4, 5]), k = nz(-6, 6); // 24.11 : h ≠ ±1 (robot)
         return QN("Pour " + M("f(x) = (" + xm(h) + ")^2" + sg(k)) + ", que vaut " + M("h") + " dans la forme " + M("(x - h)^2 + k") + " ?", h, M(xm(h) + " = x - " + par(h)) + " : " + M("h = " + h) + ".",
           { ctx: "lire-h", guide: [GS(M("h") + " ?", h, M(h) + ".")], traps: [TR(-h, M(xm(h)) + " = x − (" + h + ")."), TR(k, "Ça, c'est k.")] }); },
       () => { const h = nz(-5, 5), k = nz(-8, 8);
@@ -238,6 +238,12 @@
     f2formes: [() => P("f(x) = x² − 8x + 12.", [["a) h de la forme canonique", 4], ["b) k de la forme canonique", -4], ["c) Plus petit zéro", 2]], ["(x − 4)² = x² − 8x + 16.", "(x − 4)² = 4 ⇔ x − 4 = ±2."], "a) 4 ; b) " + M("12 - 16 = -4") + " ; c) 2 (et 6).")],
   };
 
+  // « Trouve l'erreur » (24.11, chantier I) : abscisse du sommet sans le signe moins.
+  F2[2].push(() => { const a = R.pick([1, 2, -1, -2]), xs = R.pick([-3, -2, 2, 3, 4]), b = -2 * a * xs, c = R.int(-6, 6), w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+    return QN("Pour " + M("f(x) = " + P2([a, b, c])) + ", " + w + " calcule l'abscisse du sommet : « " + M("x_S = \\frac{b}{2a} = \\frac{" + b + "}{" + 2 * a + "} = " + -xs) + " ». Trouve l'erreur, puis donne " + M("x_S") + ".", xs,
+      "Erreur : la formule est " + M("x_S = -\\frac{b}{2a}") + ". Ici " + M("x_S = -\\frac{" + b + "}{" + 2 * a + "} = " + xs) + ".",
+      { ctx: "erreur", guide: [GS("Formule " + M("x_S = -\\frac{b}{2a}") + " : combien vaut " + M("\\frac{b}{2a}") + " ?", -xs, M(-xs) + "."), GS("Avec le signe moins, " + M("x_S") + " = ?", xs, M(xs) + ".")],
+        traps: [TRAP(-xs, "C'est le calcul de " + w + " : il manque le signe moins de la formule.")] }); });
   const ALL = { polyop: PO, factor2: FC, trinfact: TF, f2: F2, f2formes: FF };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);

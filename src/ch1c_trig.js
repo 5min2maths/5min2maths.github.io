@@ -147,6 +147,12 @@
     trigexact: [() => P("Un triangle rectangle a une hypoténuse de 12 cm et un angle de 30°.", [["a) Côté opposé à 30° (cm)", 6], ["b) Côté adjacent (cm, valeur exacte : tape 6√3)", 6 * Math.sqrt(3)], ["c) Aire (cm², valeur exacte : tape 18√3)", 18 * Math.sqrt(3)]], ["sin 30° = 1/2.", "cos 30° = √3/2."], "a) 6 ; b) " + M("6\\sqrt{3}") + " ; c) " + M("\\frac{6 \\cdot 6\\sqrt{3}}{2} = 18\\sqrt{3}") + ".")],
   };
 
+  // « Trouve l'erreur » (24.11, chantier I) : cosinus au lieu de sinus pour le côté opposé.
+  TG[2].push(() => { const al = R.pick([25, 35, 40, 50, 55, 65]), c = R.int(6, 15), v = +(c * Math.sin((al * Math.PI) / 180)).toFixed(2), faux = +(c * Math.cos((al * Math.PI) / 180)).toFixed(2), w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+    return Qv("Dans un triangle rectangle, l'hypoténuse mesure " + M(c) + " cm et un angle aigu " + M("\\alpha") + " vaut " + M(al + "°") + ". Pour le côté <b>opposé</b> à " + M("\\alpha") + ", " + w + " écrit : « " + M(c + " \\cdot \\cos " + al + "° \\approx " + dec(faux)) + " cm ». Trouve l'erreur, puis calcule ce côté (au centième, en cm).", v,
+      "Erreur : le cosinus relie le côté <b>adjacent</b> et l'hypoténuse. Pour le côté opposé : " + M("\\sin \\alpha = \\frac{\\text{opposé}}{\\text{hypoténuse}}") + ", donc " + M(c + " \\cdot \\sin " + al + "° \\approx " + dec(v)) + " cm.",
+      { round: 0.01, ctx: "erreur", guide: [GS("Quelle fonction relie l'opposé et l'hypoténuse ? Donne " + M("\\sin " + al + "°") + " (au millième).", Math.sin((al * Math.PI) / 180), M("\\sin " + al + "° \\approx " + dec(+Math.sin((al * Math.PI) / 180).toFixed(3))) + ".", 0.001), GS("Côté opposé : " + M(c + " \\cdot \\sin " + al + "°") + " ≈ ? (au centième)", v, M(dec(v)) + " cm.", 0.01)],
+        traps: [TRAP(faux, "C'est le calcul de " + w + " : " + M("c \\cdot \\cos \\alpha") + " donne le côté adjacent.")] }); });
   const ALL = { trigo: TG, trigexact: TE, trigrel: TRL };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);

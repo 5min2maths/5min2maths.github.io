@@ -591,6 +591,12 @@
   };
 
   // ===================== Enregistrement =====================
+  // « Trouve l'erreur » (24.11, chantier I) : on multiplie les exposants au lieu de les additionner.
+  PUISS[2].push(() => { const a = R.pick([2, 3, 5, 10]), m = R.int(2, 5), n = R.int(3, 6), w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+    return Qv(w + " écrit : « " + M(a + "^{" + m + "} \\cdot " + a + "^{" + n + "} = " + a + "^{" + m * n + "}") + " ». Trouve l'erreur, puis donne le bon exposant.", m + n,
+      "Erreur : " + M(a + "^{" + m + "}") + " compte " + m + " facteurs " + a + " et " + M(a + "^{" + n + "}") + " en compte " + n + " : en tout " + M(m + " + " + n + " = " + (m + n)) + " facteurs, donc " + M(a + "^{" + (m + n) + "}") + ". On multiplie les exposants pour une puissance de puissance, " + M("(" + a + "^{" + m + "})^{" + n + "}") + ".",
+      { ctx: "erreur", guide: [GS("Combien de facteurs " + a + " dans " + M(a + "^{" + m + "}") + " ?", m, M(m) + "."), GS("Et dans " + M(a + "^{" + n + "}") + " ?", n, M(n) + "."), GS("En tout (le bon exposant) ?", m + n, M(m + n) + ".")],
+        traps: [TRAP(m * n, "C'est l'exposant de " + w + " : on additionne les exposants quand on multiplie deux puissances de même base.")] }); });
   const ALL = { prio: PRIO, fracadd: FADD, fracmul: FMUL, fracconv: FCONV, puiss: PUISS, sci: SCI, scicalc: SCALC };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);

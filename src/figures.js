@@ -5,7 +5,7 @@ const FIG = (() => {
   const svg = (w, h, body, label) =>
     '<svg class="fig" viewBox="0 0 ' + w + " " + h + '" role="img" aria-label="' + (label || "figure") + '" xmlns="http://www.w3.org/2000/svg">' + body + "</svg>";
   const t = (x, y, s, cls = "f-txt", anchor = "middle", size = 14) =>
-    '<text x="' + x + '" y="' + y + '" class="' + cls + '" text-anchor="' + anchor + '" font-size="' + size + '">' + s + "</text>";
+    '<text x="' + x + '" y="' + y + '" class="' + cls + '" text-anchor="' + anchor + '" font-size="' + size + '">' + String(s).replace(/\{,\}/g, ",") + "</text>"; // 24.11 : « {,} » (virgule TeX) affiché tel quel dans les figures (robot)
   const L = (x1, y1, x2, y2, cls = "f-line", extra = "") => '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" class="' + cls + '" ' + extra + "/>";
   const P = (pts, cls = "f-line") => '<polygon points="' + pts.map((p) => p.join(",")).join(" ") + '" class="' + cls + '"/>';
   const fmt = (v) => String(+(+v).toFixed(3)).replace(".", ",");

@@ -15,7 +15,7 @@ document.getElementById("app").style.width = "360px";
 (() => { let css = ""; for (const sh of document.styleSheets) { let rs; try { rs = sh.cssRules; } catch (e) { continue; } for (const r of rs) { const m = r.media && /max-width:\s*(\d+)px/.exec(r.media.mediaText); if (m && +m[1] >= 360) for (const x of r.cssRules) css += x.cssText + "\n"; } } const st = document.createElement("style"); st.textContent = css; document.head.appendChild(st); })();
 Element.prototype.scrollIntoView = function () {};
 window.confirm = () => true; window.alert = () => {};
-const ISSUES = [], seen = new Set(), STATS = {}, jsErr = [];
+const ISSUES = [], seen = new Set(), STATS = {}, jsErr = [], SVG_SEEN = new WeakSet();
 window.addEventListener("error", (e) => jsErr.push(String(e.message)));
 const H = location.hash, RAPIDE = /rapide/.test(H), PROFILES = [["9e", { system: "CH", grade: 9, track: "college" }], ["10e", { system: "CH", grade: 10, track: "college" }], ["11e", { system: "CH", grade: 11, track: "college" }],
   ["1re", { system: "CH", grade: 12, track: "college" }], ["2e", { system: "CH", grade: 13, track: "college" }], ["MP 1re", { system: "CH", grade: 12, track: "mp" }], ["MP 2e", { system: "CH", grade: 13, track: "mp" }]];
@@ -48,9 +48,10 @@ const scan = (code) => {
   if (jsErr.length) { issue("erreur JavaScript", code, jsErr.join(" / ")); jsErr.length = 0; }
   // Cohérence énoncé / figure (24.11, demande de l'auteur : « un polygone annoncé comme un parallélogramme qui n'en est
   // pas un sur le dessin », « un angle pas complètement tracé ») : formes des polygones et arcs d'angle mesurés.
-  app.querySelectorAll("svg").forEach((svg) => { try { geoCheck(svg, code); } catch (e) {} });
+  app.querySelectorAll("svg").forEach((svg) => { if (SVG_SEEN.has(svg)) return; try { geoCheck(svg, code); } catch (e) {} }); // 24.11 : chaque figure une seule fois
   // Figures (24.11, demande de l'auteur : « figures mal tracées ? ») : coordonnées NaN, étiquettes hors du cadre, étiquettes superposées.
   app.querySelectorAll("svg").forEach((svg) => {
+    if (SVG_SEEN.has(svg)) return; SVG_SEEN.add(svg);
     if (svg.closest(".keypad, #kp, .brand, .home-head, button")) return;
     if (/NaN|Infinity/.test(svg.innerHTML)) issue("figure cassée (NaN)", code, (svg.getAttribute("aria-label") || svg.getAttribute("class") || "svg").slice(0, 60));
     const vb = svg.viewBox && svg.viewBox.baseVal; if (!vb || !vb.width) return;

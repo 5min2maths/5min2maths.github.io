@@ -169,6 +169,12 @@
     ],
   };
 
+  // « Trouve l'erreur » (24.11, chantier I) : issue comptée deux fois dans « A ou B ».
+  PB[2].push(() => { const s = R.pick([4, 5]), w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]), A = [2, 4, 6], Bv = [1, 2, 3, 4, 5, 6].filter((x) => x >= s), U = [...new Set([...A, ...Bv])].sort((x, y) => x - y);
+    return Qv("On lance un dé équilibré à 6 faces. " + w + " calcule la probabilité d'obtenir un nombre pair <b>ou</b> au moins " + s + " : « " + M("\\frac{3}{6} + \\frac{" + Bv.length + "}{6} = \\frac{" + (3 + Bv.length) + "}{6}") + " ». Trouve l'erreur, puis donne la bonne probabilité (fraction).", U.length / 6,
+      "Erreur : " + A.filter((x) => x >= s).join(" et ") + (A.filter((x) => x >= s).length > 1 ? " sont" : " est") + " à la fois pair" + (A.filter((x) => x >= s).length > 1 ? "s" : "") + " et au moins " + s + " : " + w + " les a comptés deux fois. Issues favorables : " + U.join(", ") + ", soit " + M("\\frac{" + U.length + "}{6} = " + frac(U.length, 6)) + ".",
+      { ctx: "erreur", guide: [GS("Liste les issues paires ou au moins " + s + ", sans répéter : combien y en a-t-il ?", U.length, U.join(", ") + "."), GS("Probabilité ?", U.length / 6, M(frac(U.length, 6)) + ".")],
+        traps: [TRAP((3 + Bv.length) / 6, "C'est le calcul de " + w + " : les issues communes aux deux événements sont comptées deux fois.")] }); });
   const ALL = { denombr: DN, proba: PB };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);

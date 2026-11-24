@@ -107,7 +107,7 @@
       () => { const a = pk([1, 2, -1, -2]), b = nz(-3, 3), c = R.int(-4, 4), cs = [a, b, c], f = quad(cs);
         return QX("Une parabole passe par " + pts3([-1, 1, 2], cs) + ". Détermine l'expression développée de " + M("f(x)") + ".", EX(cs), "Système : " + M("a - b + c = " + f(-1)) + ", " + M("a + b + c = " + f(1)) + ", " + M("4a + 2b + c = " + f(2)) + " : " + M("b = " + b) + ", puis " + M("a = " + a) + ", " + M("c = " + c) + ".",
           { ctx: "expr-sans-0", guide: [GS(M("b") + " (soustrais les deux premières) ?", b, M("2b = " + (f(1) - f(-1))) + "."), GS(M("a") + " ?", a, M(a) + "."), GX("Expression", EX(cs), M(P2(cs)) + ".")], traps: [TX(P2([a, -b, c]), "(a + b + c) − (a − b + c) = 2b.")] }); },
-      () => { const a = pk([1, 2, -1, 3]), b = nz(-4, 4), c = R.int(-4, 4), cs = [a, b, c], f = quad(cs);
+      () => { const a = pk([2, -2, 3, -3]), b = nz(-4, 4), c = R.int(-4, 4), cs = [a, b, c], f = quad(cs); // 24.11 : a ≠ ±1 (robot)
         return QN("Une parabole " + M("f(x) = ax^2 + bx + c") + " passe par " + pts3([1, 2, 3], cs) + ". Que vaut " + M("a") + " ?", a, M("f(2) - f(1) = 3a + b = " + (f(2) - f(1))) + " ; " + M("f(3) - f(2) = 5a + b = " + (f(3) - f(2))) + " ; donc " + M("2a = " + 2 * a) + ".",
           { ctx: "a-1-3", guide: [GS(M("3a + b = f(2) - f(1)") + " ?", 3 * a + b, M(3 * a + b) + "."), GS(M("5a + b = f(3) - f(2)") + " ?", 5 * a + b, M(5 * a + b) + "."), GS(M("a") + " ?", a, M(a) + ".")], traps: [TR(2 * a, "On obtient 2a : divise par 2."), TR(f(2) - f(1), "Différences successives : il faut en faire deux.")] }); },
       () => { const a = pk([1, -1, 2]), h = nz(-3, 3), k = R.int(-4, 4), cs = [a, -2 * a * h, a * h * h + k], xs = [h - 1, h + 1, h + 2];
