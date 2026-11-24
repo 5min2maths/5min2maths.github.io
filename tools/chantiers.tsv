@@ -3,12 +3,12 @@ A	Lots « notion complète » (pas à pas, erreurs typiques, contextes, valeurs)
 11e-P	11e Proportionnalité « nickel » + test de préparation	Pédagogie	4	à contrôler	90 %	15.11	cases 1 à 13 faites, test de préparation fait (tools/chantier_11e.md)	contrôle par l'enseignant avant le test 11LS du 04.12
 11e-CL	11e Calcul littéral « nickel » (CL1, CL2)	Pédagogie	4	à contrôler	80 %	16.11	notions et test de préparation faits	contrôle ; CL1 prêt pour le 11.12, CL2 pour le 15.01
 1C	1re Collège complète	Pédagogie	4	à contrôler	90 %	20.11	toutes les notions au standard (tirages réels)	contrôle par l'enseignant (colonne Contrôlé)
-V	Leçons actives (devine, manipule, retiens) pour chaque notion	Pédagogie	5	en cours	70 %	23.11	9e, 10e (partiel), 11e, 1re et 2e Collège, MP 2e faites ; voir % dans Synthèse	compléter 10e et MP 1re
+V	Leçons actives (devine, manipule, retiens) pour chaque notion	Pédagogie	5	en cours	85 %	24.11	9e, 10e (partiel), 11e, 1re et 2e Collège, MP 2e ; MP 3e–4e (25 notions) et 3e–4e Collège (21) faites le 24.11	« Retiens » fidèle aux défis (agent en cours) ; compléter 10e
 K	Figures à manipuler (bibliothèque tactile manip.js)	Pédagogie	5	en cours	55 %	24.11	20 leçons en « glisse sur la figure » (+ cercle de Thalès, urne, taxis, sommet de parabole, pente)	étendre selon les retours ; contrôle du rendu
-U	Exercices riches et tests de préparation (pas du drill)	Pédagogie	4	en cours	70 %	23.11	9e, 10e, 11e, 1re Collège, 2e Collège (14 banques), MP 1re et MP 2e (partiel)	MP : chapitres restants ; contrôle d'un sujet par niveau
+U	Exercices riches et tests de préparation (pas du drill)	Pédagogie	4	en cours	85 %	24.11	+ MP 3e–4e (5 banques, 50 exercices) et 3e–4e Collège (5 banques) le 24.11	problèmes de niveau 4 plus exigeants (agent en cours) ; stats 4e Collège
 I	« Trouve l'erreur »	Pédagogie	5	fait	90 %	24.11	≈ 50 formes « trouve l'erreur » de la 9e à la 2e Collège (liste : tools/trouve_erreur.md)	relecture des formulations ; éviter le doublon avec les « trouve l'erreur » des exercices riches
 J	Estimation, Fermi, questions curieuses	Pédagogie	6	fait	100 %	21.11	61 questions curieuses, 5 familles (src/curieux.js)	nouveaux lots si les élèves aiment
-W	Générateurs à réponses 0 ou ±1	Qualité	7	en cours	60 %	23.11	filtre de trivialité et corrections au fil des niveaux (relatifs, 2e Collège)	audit tests/trivial.html, polynômes et bijection
+W	Générateurs à réponses 0 ou ±1	Qualité	7	en cours	70 %	24.11	robot du 24.11 : Thalès, divisibilité, lecture f(x) corrigés ; bijection corrigée	suivre le robot chaque nuit
 X	Formes sur figure (repère, lecture de graphique)	Qualité	7	fait	90 %	24.11	45 formes « lecture sur figure » (repère, tableaux, graphiques, systèmes, affine, 2e degré, fonctions de référence)	contrôle de quelques figures dans la galerie
 B	Vérification unique avant publication	Technique	1	fait	98 %	24.11	run_tests.sh : 109 pages + contrôle de syntaxe de tous les fichiers (console Chromium) ; test de bout en bout du chargement (tools/test_paquets.py)	bloquer le push en cas d'échec
 N	Remontée anonyme des erreurs JavaScript	Technique	1	fait	100 %	23.11	envoi + feuille « erreurs », ligne dans le point ; Apps Script redéployé	surveiller le point
@@ -33,7 +33,7 @@ MOD	Deux modes (libre / scolaire)	Produit	—	fait	100 %	19.11	—	—
 AUT	Mode auteur et écran Statistiques	Données	—	fait	100 %	22.11	appareils de l'auteur exclus des stats	—
 VOIX	Lecture à voix haute	Produit	—	en réserve	0 %	21.11	idée (traducteur des formules)	—
 H	Comptes, étapes 2 et 3 (synchronisation, code classe)	Produit	8	en attente	—	14.11	étape 1 faite (code de sauvegarde)	selon l'usage et l'accord DIP
-G	Couverture : 3e et 4e Collège, MP3-MP4, repère 3D	Couverture	8	en cours	85 %	24.11	4e Collège (9 notions), MP 3e (12), MP 4e (9) ; 3e Collège (9) depuis le 23.11 ; 24.11 soir : MP 4e +3 (projmp, posdroites, fratmp, figures), 4e Collège +3 (matrices, translin, normale) et stats/quartiles ouverts	reste : appllin, bases, MA2 (niveau N/R à décider), produit vectoriel MP, résolution graphique MP ; leçons actives des nouvelles notions
+G	Couverture : 3e et 4e Collège, MP3-MP4, repère 3D	Couverture	8	en cours	90 %	24.11	MP 4e : projection, position de droites, fonctions rationnelles, produit vectoriel, signe sur graphique ; 4e Collège : loi normale, matrices, transformations, stats	4e Collège : applications linéaires (noyau, image) ; MA2 renforcé (à décider)
 FR	France : collège, seconde, 1re et Tle	Couverture	8	en cours	25 %	23.11	référentiels importés ; collège 5 notions, seconde 8, 1re-Tle 10	après la bêta (ROADMAP § 5)
 Y	Pays et programmes (BE, LU, QC…)	Long terme	—	études	5 %	22.11	notes tools/referentiels_belgique, _luxembourg, _quebec	2027-2028
 Z	Localisation légère (milliers, monnaie, vocabulaire)	Long terme	—	à faire	0 %	22.11	—	2027-2028
@@ -43,3 +43,5 @@ AD	Québec, Maghreb, Afrique francophone	Long terme	—	à faire	0 %	22.11	—	2
 DIP	Bêta : diffusion au-delà des testeurs (cadre DIP)	Diffusion	—	à décider	—	22.11	46 testeurs, vrai test = ouverture à la 11LS	décision de l'enseignant
 F2	Chargement par niveau (un élève ne télécharge que ses notions)	Technique	1	fait	90 %	24.11	paquets par niveau + chargeur ; MathJax géré par le chargeur ; polices non bloquantes. Première visite 4G lente 10,9 s → 5,1 s ; habitué 0,46 s	découper le commun (40 %) ; test de bout en bout : tools/test_paquets.py
 FIG	Figures fidèles à l'énoncé (relevé de la galerie du 24.11)	Qualité	4	à contrôler	95 %	24.11	≈ 60 figures corrigées + 2 défauts du robot	parcourir la galerie
+HIS	Histoires des maths : applications poussées	Pédagogie	5	à contrôler	90 %	24.11	41 récits ; « Pour aller plus loin » (36) et « Défi expert » dès la 1re sec. II (19)	relire les 6 nouveaux récits et le niveau des défis
+PB	Problème de la semaine vraiment exigeant	Pédagogie	4	en cours	50 %	24.11	choix au-dessus du Mathélo, notions de l'année ; audit des problèmes de niveau 4 (agent)	réécriture des problèmes trop simples
