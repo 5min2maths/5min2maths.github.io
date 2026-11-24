@@ -19,6 +19,7 @@ const ISSUES = [], seen = new Set(), STATS = {}, jsErr = [], SVG_SEEN = new Weak
 window.addEventListener("error", (e) => jsErr.push(String(e.message)));
 const H = location.hash, RAPIDE = /rapide/.test(H), PROFILES = [["9e", { system: "CH", grade: 9, track: "college" }], ["10e", { system: "CH", grade: 10, track: "college" }], ["11e", { system: "CH", grade: 11, track: "college" }],
   ["1re", { system: "CH", grade: 12, track: "college" }], ["2e", { system: "CH", grade: 13, track: "college" }], ["MP 1re", { system: "CH", grade: 12, track: "mp" }], ["MP 2e", { system: "CH", grade: 13, track: "mp" }],
+  ["3e", { system: "CH", grade: 14, track: "college" }], ["4e", { system: "CH", grade: 15, track: "college" }], ["MP 3e", { system: "CH", grade: 14, track: "mp" }], ["MP 4e", { system: "CH", grade: 15, track: "mp" }], /* 24.11 */
   ["MP 3e", { system: "CH", grade: 14, track: "mp" }], ["MP 4e", { system: "CH", grade: 15, track: "mp" }]]; // 24.11 : MP 3e et 4e (src/ch_mp3.js, ch_mp4.js)
 const only = (/classes=([^&]+)/.exec(H) || [])[1];
 const PROF = only ? PROFILES.filter(([n]) => decodeURIComponent(only).split(",").includes(n)) : PROFILES;

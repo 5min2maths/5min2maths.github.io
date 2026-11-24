@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "suivi" / "robot"
 
 
-CLASSES = ["9e", "10e", "11e", "1re", "2e", "MP 1re", "MP 2e"]
+CLASSES = ["9e", "10e", "11e", "1re", "2e", "MP 1re", "MP 2e", "3e", "4e", "MP 3e", "MP 4e"]  # 24.11 : 3e et 4e
 
 
 def run_page(rapide, classe, limite):
