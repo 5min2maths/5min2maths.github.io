@@ -108,7 +108,7 @@ Même standard (valeurs tirées, 2 à 4 parts enchaînées, 2 indices, corrigé 
 `factor` v2 (11e) : la part « combien d'entiers avec E(x) > 0 » (tableau de signes à trois facteurs, hors programme
 de 11e) est remplacée par un paramètre : pour quel c l'équation n'a plus que deux solutions (c = m²p²).
 
-## 3e lot (24.11 soir) : 51 notions de plus
+## 3e lot (24.11 soir) : 57 notions de plus
 
 Même standard. Toutes à valeurs tirées ; parts vérifiées par `tools/audit_defis.py`.
 
@@ -165,11 +165,17 @@ Même standard. Toutes à valeurs tirées ; parts vérifiées par `tools/audit_d
 | monomes (11e) | cube 3x | pavé ax, bx, cx : volume kx³, aire kx², valeur, effet du doublement |
 | reduire (11e) | x, 2x + 1, 3x − 2 | côtés tirés : périmètre réduit, x pour un périmètre, x pour deux côtés égaux |
 | valnum (11e) | v²/200, v = 40/50/60 | v²/k tiré : distance, effet d'un facteur m sur la vitesse, vitesse pour une distance donnée |
+| morceaux (1re) | parking 4 / 2,50 / 20 fixe | parking tiré : prix pour t h, heure du maximum, heures pour un budget |
+| transf (1re) | (x − 3)² − 5 fixe | gestes décrits en mots (décalages, facteur a, retournement) → sommet, plus grand zéro, g(0) |
+| racinv (1re) | 12/x et x + 1 fixes | P/x et x + c tirés : image fractionnaire, préimage, intersections |
+| fracrat (MP 1re) | (x² − 9)/(x² + 3x) fixe | (x² − a²)/(x² + ax) : valeurs interdites, F(x₁), F(x) = k |
+| eqparam (MP 1re) | x² − 6x + m fixe | x² − 2sx + m : m pour une solution, plus grand m entier pour deux, m pour qu'un t soit solution, autre solution |
+| valint (MP 1re) | 1/(x² − 4x) fixe | 1/trinôme tiré : valeurs interdites, f(x₀), entiers où f < 0 |
 
 ## Ce qui reste (valeurs fixes, à reprendre)
 
-Environ 14 notions gardent un défi à valeurs fixes :
-`translin`, `absval`, `morceaux`, `transf`, `racinv`, `fracrat`, MP (`eqparam`, `ratden`, `valint`), et 9e–10e
+Environ 8 notions gardent un défi à valeurs fixes :
+`translin`, `absval`, MP `ratden`, et 9e–10e
 (`ordgr`), plus `algopy`, `proba2`, `probcond`, `tauxevol`,
 `vect3e` (sans classe). Liste à jour : relancer `tools/audit_defis.py`.
 

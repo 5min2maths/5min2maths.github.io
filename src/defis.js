@@ -1892,6 +1892,80 @@ const DEFIS = (() => {
           "a) " + M("\\frac{" + v1 + "^2}{" + k + "} = \\frac{" + nb(v1 * v1) + "}{" + k + "} " + (Number.isInteger(d(v1) * 10) ? "= " : "\\approx ") + D(r1(d(v1)))) + " m. b) " + M("(" + m + "v)^2 = " + m * m + "v^2") + " : multipliée par " + M(m * m) + ". c) " + M("v^2 = " + k + " \\cdot " + D(r2c(D3)) + " = " + nb(v3 * v3)) + ", " + M("v = " + v3) + " km/h.");
       },
     ],
+    /* ---------- 1re Collège : fonction définie par morceaux (tarif de parking) ---------- */
+    morceaux: [
+      () => {
+        let B, h0, p, Mx, tM, t1, Bud;
+        do { B = ri(3, 6); h0 = pk([1, 2]); p = pk([1.5, 2, 2.5, 3]); Mx = ri(15, 30); tM = Math.ceil(h0 + (Mx - B) / p - 1e-9); t1 = ri(h0 + 2, tM - 1); Bud = ri(B + 4, Mx - 2); }
+        while (tM - h0 < 4 || Number.isInteger((Mx - B) / p) || Number.isInteger((Bud - B) / p) || t1 <= h0);
+        const pr1 = B + p * (t1 - h0), hb = h0 + Math.floor((Bud - B) / p + 1e-9);
+        return P("Un parking coûte " + M(B) + " CHF pour " + (h0 === 1 ? "la première heure" : "les " + h0 + " premières heures") + " (ou moins), puis " + M(CHF(p)) + " CHF par heure supplémentaire commencée, avec un maximum de " + M(Mx) + " CHF par jour.",
+          [["a) Prix pour " + t1 + " heures (CHF)", pr1], ["b) À partir de combien d'heures paie-t-on le maximum ?", tM], ["c) Avec " + Bud + " CHF, combien d'heures entières peut-on rester au plus ?", hb]],
+          ["Pour t heures (t > " + h0 + ") : prix = " + B + " + " + CHFT(p) + " · (t − " + h0 + "), tant qu'il ne dépasse pas " + Mx + " CHF.",
+           "b) Résous " + B + " + " + CHFT(p) + "(t − " + h0 + ") ≥ " + Mx + " et prends l'entier suivant. c) " + B + " + " + CHFT(p) + "(t − " + h0 + ") ≤ " + Bud + "."],
+          "a) " + M(B + " + " + CHF(p) + " \\cdot " + (t1 - h0) + " = " + CHF(pr1)) + " CHF. b) " + M("t - " + h0 + " \\geq \\frac{" + (Mx - B) + "}{" + CHF(p) + "} \\approx " + D(r2c((Mx - B) / p))) + " : dès " + M(tM) + " h. c) " + M("t - " + h0 + " \\leq \\frac{" + (Bud - B) + "}{" + CHF(p) + "} \\approx " + D(r2c((Bud - B) / p))) + " : " + M(hb) + " h.");
+      },
+    ],
+    /* ---------- 1re Collège : transformations de la parabole ---------- */
+    transf: [
+      () => {
+        let a, h, s; do { a = pk([-2, -1, 2, 3]); h = R.nz(-5, 5); s = ri(1, 4); } while (h === s || h === -s);
+        const k = -a * s * s, g = (x) => a * (x - h) ** 2 + k;
+        return P("On obtient le graphe de " + M("g") + " à partir de celui de " + M("f(x) = x^2") + " : on le décale de " + M(Math.abs(h)) + " vers la " + (h > 0 ? "droite" : "gauche") + ", on multiplie les ordonnées par " + M(a) + ", puis on le décale de " + M(Math.abs(k)) + " vers le " + (k > 0 ? "haut" : "bas") + ".",
+          [["a) Sommet de " + M("g") + " : ordonnée", k], ["b) Plus grand zéro de " + M("g"), h + s], ["c) " + M("g(0)"), g(0)]],
+          ["Chaque geste se traduit dans l'expression : décalage horizontal → (x − h)², facteur a devant, décalage vertical → + k. Écris g(x) = a(x − h)² + k.",
+           "b) g(x) = 0 donne (x − h)² = " + T(-k / a) + " : deux solutions h ± " + s + ". c) Remplace x par 0."],
+          M("g(x) = " + a + "(" + xm(h) + ")^2" + sgD(k)) + ". a) " + M(k) + ". b) " + M("(" + xm(h) + ")^2 = " + s * s + " \\iff x = " + h + " \\pm " + s) + " : " + M(h + s) + ". c) " + M(a + " \\cdot " + pr(-h) + "^2" + sgD(k) + " = " + g(0)) + ".");
+      },
+    ],
+    /* ---------- 1re Collège : fonction inverse et droite ---------- */
+    racinv: [
+      () => {
+        let r1, r2; do { r1 = ri(2, 7); r2 = -ri(2, 8); } while (r1 === -r2);
+        const Pq = -r1 * r2, c = -(r1 + r2), x0 = pk([2, 3, 4, 5, 6, 8, 9].filter((v) => Pq % v !== 0)), yl = [2, 3, 4, 6, 7].filter((v) => Pq % v === 0 && Pq / v !== r1 && Pq / v !== v), y0 = yl.length ? pk(yl) : 1;
+        return P("On donne " + M("f(x) = \\frac{" + Pq + "}{x}") + " et " + M("g(x) = x" + sgD(c)) + ".",
+          [["a) " + M("f(" + x0 + ")") + " (fraction)", Pq / x0], ["b) Préimage de " + M(y0) + " par " + M("f"), Pq / y0], ["c) Plus grande abscisse d'intersection des graphes", r1], ["d) Ordonnée de l'autre point d'intersection", r2 + c]],
+          ["Préimage de " + y0 + " : résous " + Pq + "/x = " + y0 + ". Intersection : " + Pq + "/x = x" + (c < 0 ? " − " + -c : " + " + c) + ", multiplie par x (x ≠ 0).",
+           "x² " + (c < 0 ? "− " + -c : "+ " + c) + "x − " + Pq + " = 0 : deux nombres de produit −" + Pq + " et de somme " + -c + ". L'ordonnée se lit sur g (ou f)."],
+          "a) " + M(fx(Pq / x0)) + ". b) " + M("x = \\frac{" + Pq + "}{" + y0 + "} = " + Pq / y0) + ". c) " + M(poly([1, c, -Pq]) + " = (" + xm(r1) + ")(" + xm(r2) + ") = 0") + " : " + M("x = " + r1) + " ou " + M("x = " + r2) + ". d) " + M("g(" + r2 + ") = " + (r2 + c)) + ".");
+      },
+    ],
+    /* ---------- MP 1re : fraction rationnelle à simplifier ---------- */
+    fracrat: [
+      () => {
+        let a, k, x1, xs; do { a = ri(2, 9); k = R.nz(-4, 4); x1 = R.nz(-6, 6); xs = a / (1 - k); } while (k === 1 || x1 === a || x1 === -a || !Number.isInteger(xs) || xs === 0 || xs === -a || xs === a);
+        const F = (x) => (x - a) / x;
+        return P("On étudie " + M("F(x) = \\frac{x^2 - " + a * a + "}{x^2 + " + a + "x}") + ".",
+          [["a) Somme des valeurs interdites", -a], ["b) " + M("F(" + x1 + ")") + " (fraction)", F(x1)], ["c) Solution de " + M("F(x) = " + k), xs]],
+          ["Factorise le numérateur (différence de carrés) et le dénominateur (mise en évidence de x) ; les valeurs interdites annulent le dénominateur de DÉPART.",
+           "Après simplification, F(x) = (x − " + a + ")/x pour x ≠ −" + a + ". c) (x − " + a + ")/x = " + k + " : multiplie par x, puis vérifie que la solution n'est pas interdite."],
+          M("F(x) = \\frac{(x - " + a + ")(x + " + a + ")}{x(x + " + a + ")} = \\frac{x - " + a + "}{x}") + " (" + M("x \\neq 0") + ", " + M("x \\neq -" + a) + "). a) " + M("0 + (-" + a + ") = -" + a) + ". b) " + M("\\frac{" + x1 + " - " + a + "}{" + x1 + "} = " + fx(F(x1))) + ". c) " + M("x - " + a + " = " + cfD(k) + "x \\iff " + (1 - k) + "x = " + a + " \\iff x = " + xs) + ".");
+      },
+    ],
+    /* ---------- MP 1re : équation du 2e degré à paramètre ---------- */
+    eqparam: [
+      () => {
+        let s, t; do { s = R.nz(-6, 6); t = R.nz(-8, 8); } while (Math.abs(s) < 2 || t === s || 2 * s - t === 0 || t === 2 * s - t);
+        const mt = t * (2 * s - t);
+        return P("On étudie l'équation " + M("x^2 " + (s > 0 ? "- " + 2 * s : "+ " + -2 * s) + "x + m = 0") + ".",
+          [["a) Valeur de " + M("m") + " pour une seule solution", s * s], ["b) Plus grand entier " + M("m") + " pour lequel il y a deux solutions", s * s - 1], ["c) Valeur de " + M("m") + " pour que " + M(t) + " soit solution", mt], ["d) L'autre solution dans ce cas", 2 * s - t]],
+          ["Δ = " + 4 * s * s + " − 4m. Une solution : Δ = 0 ; deux solutions : Δ > 0.",
+           "c) Remplace x par " + t + " et résous en m. d) La somme des deux solutions vaut " + 2 * s + " (ou factorise)."],
+          M("\\Delta = " + 4 * s * s + " - 4m") + ". a) " + M("\\Delta = 0 \\iff m = " + s * s) + ". b) " + M("\\Delta > 0 \\iff m < " + s * s) + " : " + M(s * s - 1) + ". c) " + M(pr(t) + "^2 " + (s > 0 ? "- " + 2 * s : "+ " + -2 * s) + " \\cdot " + pr(t) + " + m = 0 \\iff m = " + mt) + ". d) " + M(2 * s + " - " + pr(t) + " = " + (2 * s - t)) + ".");
+      },
+    ],
+    /* ---------- MP 1re : valeurs interdites et signe ---------- */
+    valint: [
+      () => {
+        let r1, r2, x0; do { r1 = ri(-7, 3); r2 = ri(r1 + 2, 8); x0 = R.nz(-6, 6); } while (x0 === r1 || x0 === r2 || r1 + r2 === 0 || r1 * r2 === 0);
+        const s = r1 + r2, p = r1 * r2, f0 = 1 / ((x0 - r1) * (x0 - r2));
+        return P("On étudie " + M("f(x) = \\frac{1}{" + poly([1, -s, p]) + "}") + ".",
+          [["a) Valeurs interdites (séparées par « ; »)", SET([r1, r2])], ["b) " + M("f(" + x0 + ")") + " (fraction)", f0], ["c) Combien d'entiers " + M("x") + " vérifient " + M("f(x) < 0") + " ?", r2 - r1 - 1]],
+          ["Factorise le dénominateur : deux nombres de produit " + p + " et de somme " + s + ".",
+           "c) Le numérateur 1 est positif : f(x) < 0 quand le dénominateur est négatif, c'est-à-dire strictement entre les deux valeurs interdites."],
+          M(poly([1, -s, p]) + " = (" + xm(r1) + ")(" + xm(r2) + ")") + ". a) " + M(r1) + " et " + M(r2) + ". b) " + M("\\frac{1}{(" + x0 + sgD(-r1) + ")(" + x0 + sgD(-r2) + ")} = " + (f0 < 0 ? "-" : "") + "\\frac{1}{" + Math.abs((x0 - r1) * (x0 - r2)) + "}") + ". c) Entre " + M(r1) + " et " + M(r2) + " (exclus) : " + M(r2 - r1 - 1) + " entiers.");
+      },
+    ],
   };
 })();
 // Texte simple : milliers avec ' (indices et étiquettes).
