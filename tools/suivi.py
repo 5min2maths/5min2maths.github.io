@@ -95,9 +95,9 @@ def manuel():
 
 TRAITES = ROOT / "tools" / "commentaires_traites.txt"
 try:
-    NIV = json.loads((ROOT / "tools" / "niveau.json").read_text())  # 24.11 : registre des audits de niveau
+    NIVREG = json.loads((ROOT / "tools" / "niveau.json").read_text())  # 24.11 : registre des audits de niveau
 except Exception:
-    NIV = {}
+    NIVREG = {}
 C_COLS = ["Reçu le", "Classe", "Code", "Commentaire", "Traité", "Ce qui a été fait", "Remarque"]
 
 
@@ -287,7 +287,7 @@ def main():
                 if n["lesson"]:
                     c = ws.cell(r, 21, "leçon"); c.hyperlink = f"{SITE}#l-{row['id']}"; c.font = Font(color="1F4FD8", underline="single")
                 # 24.11 : agents robustesse (/audit-niveau) : verdict du registre tools/niveau.json, sinon « à auditer »
-                au = NIV.get(row["id"]) or {}
+                au = NIVREG.get(row["id"]) or {}
                 ws.cell(r, 22, (au.get("verdict", "") + " (" + au.get("audit", "") + ")") if au else "à auditer")
             # Fin de chapitre : statut du test de préparation (évaluation d'entraînement, demande du 15.11).
             if k + 1 == len(rows) or rows[k + 1]["chap"] != row["chap"]:
