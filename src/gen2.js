@@ -699,39 +699,40 @@ Object.assign(GEN, {
   polydiv(d) {
     if (d === 1) {
       const cs = [R.nz(-3, 3), R.int(-5, 5), R.int(-5, 5), R.int(-9, 9)], a = R.nz(-3, 3);
-      return { q: "Quel est le reste de la division de " + M("P(x) = " + poly(cs)) + " par " + M(xm(a)) + " ?", spec: { kind: "value", value: peval(cs, a) }, sol: "Théorème du reste : " + M("P(" + a + ") = " + peval(cs, a)) + "." };
+      const hr = [cs[0]]; for (let i = 1; i < cs.length; i++) hr.push(hr[i - 1] * a + cs[i]);
+      return { guide: [GS("Horner avec " + M(a) + " : on abaisse " + M(cs[0]) + ", on multiplie par " + M(a) + " et on ajoute " + M(cs[1]) + ". Résultat ?", hr[1], M(hr[1]) + "."), GS("Colonne suivante (· " + par(a) + " + " + par(cs[2]) + ") ?", hr[2], M(hr[2]) + "."), GS("Dernière colonne : le reste ?", hr[3], "Reste " + M(hr[3]) + " = " + M("P(" + a + ")") + ".")], q: "Quel est le reste de la division de " + M("P(x) = " + poly(cs)) + " par " + M(xm(a)) + " ?", spec: { kind: "value", value: peval(cs, a) }, sol: "Théorème du reste : " + M("P(" + a + ") = " + peval(cs, a)) + "." };
     }
     if (d === 2) {
       const qc = [R.nz(-3, 3), R.int(-5, 5), R.int(-6, 6)], a = R.nz(-4, 4), P = pmul(qc, [1, -a]);
-      return { q: "Sachant que :<br>" + M("P(x) = " + poly(P)) + "<br>est divisible par " + M(xm(a)) + ", donne le quotient " + M("Q(x)") + ".", spec: { kind: "expr", expr: poly(qc), form: "expanded" }, canon: poly(qc), sol: (() => { const r = [P[0]]; for (let i = 1; i < P.length; i++) r.push(r[i - 1] * a + P[i]);
+      return { guide: [GS("Horner avec " + M(a) + " : premier coefficient du quotient (on abaisse) ?", qc[0], M(qc[0]) + "."), GS("Deuxième coefficient (· " + par(a) + " + " + par(P[1]) + ") ?", qc[1], M(qc[1]) + "."), GS("Troisième coefficient ?", qc[2], M(qc[2]) + " (puis le reste vaut 0)."), { ask: "Quotient " + M("Q(x)") + " ?", spec: { kind: "expr", expr: poly(qc), form: "expanded" }, sol: M("Q(x) = " + poly(qc)) + "." }], q: "Sachant que :<br>" + M("P(x) = " + poly(P)) + "<br>est divisible par " + M(xm(a)) + ", donne le quotient " + M("Q(x)") + ".", spec: { kind: "expr", expr: poly(qc), form: "expanded" }, canon: poly(qc), sol: (() => { const r = [P[0]]; for (let i = 1; i < P.length; i++) r.push(r[i - 1] * a + P[i]);
       return "Schéma de Horner avec " + M(a) + " : coefficients de " + M("P") + " : " + M(P.join(" \\;|\\; ")) + ". On abaisse " + M(P[0]) + ", puis à chaque colonne on multiplie par " + M(a) + " et on ajoute : " + M(r.join(" \\;|\\; ")) + ". Le dernier nombre est le reste (" + M(r[r.length - 1]) + "), les autres sont les coefficients du quotient : " + M("Q(x) = " + poly(qc)) + "."; })() };
     }
     const a = R.nz(-3, 3), b = R.int(-4, 4), c = R.int(-9, 9);
     // x³ + b x² + k x + c divisible par (x - a) ⇔ a³ + b a² + k a + c = 0
     const k = -(a ** 3 + b * a * a + c) / a;
     if (!Number.isInteger(k)) return GEN.polydiv(3);
-    return { q: "Détermine " + M("k") + " pour que " + M("P(x) = x^3" + (b ? " " + sg(b).trim().replace(/ 1$/, " ") + "x^2" : "") + " + kx" + sg(c)) + " soit divisible par " + M(xm(a)) + ".", spec: { kind: "value", value: k }, sol: "Il faut " + M("P(" + a + ") = 0") + " : " + M(a ** 3 + b * a * a + c + " + " + par(a) + "k = 0 \\iff k = " + k) + "." };
+    return { guide: [GS("Il faut " + M("P(" + a + ") = 0") + ". Sans le terme en k : " + M(par(a) + "^3" + (b ? sg(b) + " \\cdot " + par(a) + "^2" : "") + sg(c)) + " = ?", a ** 3 + b * a * a + c, M(a ** 3 + b * a * a + c) + "."), GS("Alors " + M((a ** 3 + b * a * a + c) + " + " + par(a) + "k = 0") + " : k = ?", k, M("k = " + k) + ".")], q: "Détermine " + M("k") + " pour que " + M("P(x) = x^3" + (b ? " " + sg(b).trim().replace(/ 1$/, " ") + "x^2" : "") + " + kx" + sg(c)) + " soit divisible par " + M(xm(a)) + ".", spec: { kind: "value", value: k }, sol: "Il faut " + M("P(" + a + ") = 0") + " : " + M(a ** 3 + b * a * a + c + " + " + par(a) + "k = 0 \\iff k = " + k) + "." };
   },
 
   polyfact(d) {
     if (d === 1) {
       const r = [R.nz(-4, 4), R.nz(-4, 4), R.nz(-5, 5)]; if (new Set(r).size < 3) return GEN.polyfact(1);
       const P = pmul(pmul([1, -r[0]], [1, -r[1]]), [1, -r[2]]);
-      return { q: "Sachant que " + M(r[0]) + " est racine de :<br>" + M("P(x) = " + poly(P)) + "<br>résous " + M("P(x) = 0") + ".", spec: { kind: "set", values: r }, sol: "Division par " + M(xm(r[0])) + " (Horner), puis le trinôme restant : " + M("S = \\{" + [...r].sort((u, v) => u - v).join(" ; ") + "\\}") + "." };
+      return { guide: [GS("Après la division par " + M(xm(r[0])) + " (Horner), il reste " + M("x^2 + px + q") + ". p = ?", -(r[1] + r[2]), M(-(r[1] + r[2])) + "."), GS("q = ?", r[1] * r[2], M(r[1] * r[2]) + "."), { ask: "Ensemble des solutions ? (sépare par « ; »)", spec: { kind: "set", values: r }, sol: M("S = \\{" + [...r].sort((u, v) => u - v).join(" ; ") + "\\}") + "." }], q: "Sachant que " + M(r[0]) + " est racine de :<br>" + M("P(x) = " + poly(P)) + "<br>résous " + M("P(x) = 0") + ".", spec: { kind: "set", values: r }, sol: "Division par " + M(xm(r[0])) + " (Horner), puis le trinôme restant : " + M("S = \\{" + [...r].sort((u, v) => u - v).join(" ; ") + "\\}") + "." };
     }
     if (d === 2) {
       const r = [R.nz(-3, 3), R.nz(-4, 4), R.nz(-5, 5)], a = R.pick([1, 2, -1]); if (new Set(r).size < 3) return GEN.polyfact(2);
       const P = pscale(pmul(pmul([1, -r[0]], [1, -r[1]]), [1, -r[2]]), a);
-      return { q: "Résous " + M(poly(P) + " = 0") + ". Cherche d'abord une racine évidente.", spec: { kind: "set", values: r }, sol: "Racine évidente : " + M("x = " + r[0]) + " (diviseur du terme constant, " + M("P(" + r[0] + ") = 0") + "). Horner par " + M(xm(r[0])) + ", puis le trinôme restant : " + M("S = \\{" + [...r].sort((u, v) => u - v).join(" ; ") + "\\}") + "." };
+      return { guide: [GS("Essaie les diviseurs du terme constant. Avec " + M("x = " + r[0]) + ", combien vaut " + M("P(" + r[0] + ")") + " ?", 0, "0 : " + M(r[0]) + " est racine."), GS("Après Horner par " + M(xm(r[0])) + ", le trinôme a deux racines. Leur produit ?", r[1] * r[2], M(r[1] * r[2]) + "."), { ask: "Ensemble des solutions ? (sépare par « ; »)", spec: { kind: "set", values: r }, sol: M("S = \\{" + [...r].sort((u, v) => u - v).join(" ; ") + "\\}") + "." }], q: "Résous " + M(poly(P) + " = 0") + ". Cherche d'abord une racine évidente.", spec: { kind: "set", values: r }, sol: "Racine évidente : " + M("x = " + r[0]) + " (diviseur du terme constant, " + M("P(" + r[0] + ") = 0") + "). Horner par " + M(xm(r[0])) + ", puis le trinôme restant : " + M("S = \\{" + [...r].sort((u, v) => u - v).join(" ; ") + "\\}") + "." };
     }
     if (R.rand() < 0.5) {
       const a = R.int(1, 3), b = R.int(a + 1, 5);
-      return { q: "Résous " + M("x^4 - " + (a * a + b * b) + "x^2 + " + a * a * b * b + " = 0") + ".", spec: { kind: "set", values: [a, -a, b, -b] }, sol: "On pose " + M("t = x^2") + " : " + M("t^2 - " + (a * a + b * b) + "t + " + a * a * b * b + " = 0") + ", " + M("t = " + a * a) + " ou " + M(b * b) + " ; " + M("x = \\pm " + a) + " ou " + M("\\pm " + b) + "." };
+      return { guide: [GS("On pose " + M("t = x^2") + ". Plus petite solution en t ?", a * a, M("t = " + a * a) + "."), GS("Plus grande solution en t ?", b * b, M("t = " + b * b) + "."), { ask: "Ensemble des solutions ? (sépare par « ; »)", spec: { kind: "set", values: [a, -a, b, -b] }, sol: M("x = \\pm " + a) + " ou " + M("\\pm " + b) + "." }], q: "Résous " + M("x^4 - " + (a * a + b * b) + "x^2 + " + a * a * b * b + " = 0") + ".", spec: { kind: "set", values: [a, -a, b, -b] }, sol: "On pose " + M("t = x^2") + " : " + M("t^2 - " + (a * a + b * b) + "t + " + a * a * b * b + " = 0") + ", " + M("t = " + a * a) + " ou " + M(b * b) + " ; " + M("x = \\pm " + a) + " ou " + M("\\pm " + b) + "." };
     }
     const r1 = R.nz(-3, 3), r2 = R.nz(-3, 3), num = R.pick([1, -1, 3, -3]), den = 2;
     if (r1 === r2) return GEN.polyfact(3);
     const P = pmul(pmul([1, -r1], [1, -r2]), [den, -num]);
-    return { q: "Résous " + M(poly(P) + " = 0") + ".", spec: { kind: "set", values: [r1, r2, num / den] }, sol: "Racines entières " + M(r1) + " et " + M(r2) + " (Horner), puis " + M("2x" + sg(-num) + " = 0") + " : " + M("x = " + ratT(num / den)) + "." };
+    return { guide: [GS("Racines entières : la plus petite ?", Math.min(r1, r2), M(Math.min(r1, r2)) + "."), GS("L'autre racine entière ?", Math.max(r1, r2), M(Math.max(r1, r2)) + "."), GS("Le facteur restant " + M("2x" + sg(-num) + " = 0") + " : x = ?", num / den, M("x = " + ratT(num / den)) + "."), { ask: "Ensemble des solutions ? (sépare par « ; »)", spec: { kind: "set", values: [r1, r2, num / den] }, sol: M("S = \\{" + [r1, r2, num / den].sort((u, v) => u - v).map(ratT).join(" ; ") + "\\}") + "." }], q: "Résous " + M(poly(P) + " = 0") + ".", spec: { kind: "set", values: [r1, r2, num / den] }, sol: "Racines entières " + M(r1) + " et " + M(r2) + " (Horner), puis " + M("2x" + sg(-num) + " = 0") + " : " + M("x = " + ratT(num / den)) + "." };
   },
 
   fracrat(d) {
@@ -830,17 +831,17 @@ Object.assign(GEN, {
   cercle(d) {
     const a = R.int(-5, 5), b = R.int(-5, 5), r = R.int(1, 7);
     const sq = (v, n) => (v === 0 ? n + "^2" : "(" + n + sg(-v) + ")^2");
-    if (d === 1) return { fig: GEO().circle([0, 0], 1, "f-shape").pt("C", 0, 0, false).dot("C").text("C", "C(a ; b)", 0, 18).side("C", [0.8, 0.6], "r", { draw: true, cls: "f-accent", w: 2 }).svg("cercle de centre C et de rayon r"), q: "Le cercle " + M(sq(a, "x") + " + " + sq(b, "y") + " = " + r * r) + " a pour centre " + M("C(a ; b)") + " et pour rayon " + M("r") + ". Réponds « a ; b ; r ».", spec: { kind: "pair", values: [a, b, r] }, sol: "Forme " + M("(x - a)^2 + (y - b)^2 = r^2") + " : " + M("C(" + a + " ; " + b + ")") + ", " + M("r = " + r) + "." };
+    if (d === 1) return { fig: GEO().circle([0, 0], 1, "f-shape").pt("C", 0, 0, false).dot("C").text("C", "C(a ; b)", 0, 18).side("C", [0.8, 0.6], "r", { draw: true, cls: "f-accent", w: 2 }).svg("cercle de centre C et de rayon r"), guide: [GS("Forme " + M("(x - a)^2 + (y - b)^2 = r^2") + " : a = ? (attention au signe)", a, M("a = " + a) + "."), GS("b = ?", b, M("b = " + b) + "."), GS("r = la racine de " + r * r + " ?", r, M("r = " + r) + "."), { ask: "Réponds « a ; b ; r ».", spec: { kind: "pair", values: [a, b, r] }, sol: M("C(" + a + " ; " + b + ")") + ", " + M("r = " + r) + "." }], q: "Le cercle " + M(sq(a, "x") + " + " + sq(b, "y") + " = " + r * r) + " a pour centre " + M("C(a ; b)") + " et pour rayon " + M("r") + ". Réponds « a ; b ; r ».", spec: { kind: "pair", values: [a, b, r] }, sol: "Forme " + M("(x - a)^2 + (y - b)^2 = r^2") + " : " + M("C(" + a + " ; " + b + ")") + ", " + M("r = " + r) + "." };
     if (d === 2) {
       const D = -2 * a, E = -2 * b, F = a * a + b * b - r * r;
       const T = "x^2 + y^2" + (D ? sg(D) + "x" : "") + (E ? sg(E) + "y" : "") + (F ? sg(F) : "") + " = 0";
-      return { q: "Détermine le rayon du cercle " + M(T) + ".", spec: { kind: "value", value: r }, sol: "On complète les carrés : " + M(sq(a, "x") + " + " + sq(b, "y") + " = " + r * r) + ", donc " + M("r = " + r) + "." };
+      return { guide: [GS("Compléter le carré en x : " + M("x^2" + (D ? sg(D) + "x" : "")) + " = " + M(sq(a, "x")) + " − ? (le nombre à retrancher)", a * a, M(a * a) + "."), GS("En y : nombre à retrancher ?", b * b, M(b * b) + "."), GS(M(sq(a, "x") + " + " + sq(b, "y")) + " = ? (r²)", r * r, M(a * a + " + " + b * b + sg(-F) + " = " + r * r) + "."), GS("Rayon ?", r, M("r = " + r) + ".")], q: "Détermine le rayon du cercle " + M(T) + ".", spec: { kind: "value", value: r }, sol: "On complète les carrés : " + M(sq(a, "x") + " + " + sq(b, "y") + " = " + r * r) + ", donc " + M("r = " + r) + "." };
     }
     const pts = [[3, 4], [4, 3], [5, 0], [0, 5], [-3, 4], [-4, 3], [-5, 0], [0, -5], [3, -4], [4, -3], [-3, -4], [-4, -3]];
     let P, Q; do { P = R.pick(pts); Q = R.pick(pts); } while (P[0] === Q[0]);
     const A = Q[1] - P[1], B = -(Q[0] - P[0]), C = A * P[0] + B * P[1], g = gcd(gcd(Math.abs(A), Math.abs(B)), Math.abs(C)) || 1;
     const a2 = A / g, b2 = B / g, c2 = C / g;
-    return { q: "Détermine les abscisses des points d'intersection du cercle " + M("x^2 + y^2 = 25") + " et de la droite " + M((a2 === 1 ? "" : a2 === -1 ? "-" : a2) + "x " + (b2 < 0 ? "- " + (b2 === -1 ? "" : -b2) : "+ " + (b2 === 1 ? "" : b2)) + "y = " + c2) + ".", spec: { kind: "set", values: [P[0], Q[0]] }, sol: "On isole une inconnue dans l'équation de la droite et on substitue : équation du 2e degré, " + M("x = " + P[0]) + " ou " + M("x = " + Q[0]) + " (points " + M("(" + P.join(" ; ") + ")") + " et " + M("(" + Q.join(" ; ") + ")") + ")." };
+    return { guide: [GS("Vérifie un point du cercle sur la droite : la plus petite abscisse ?", Math.min(P[0], Q[0]), "Point " + M("(" + (P[0] < Q[0] ? P : Q).join(" ; ") + ")") + " : il est sur le cercle (" + M("x^2 + y^2 = 25") + ") et sur la droite."), GS("L'autre abscisse ?", Math.max(P[0], Q[0]), "Point " + M("(" + (P[0] < Q[0] ? Q : P).join(" ; ") + ")") + "."), { ask: "Les deux abscisses ? (sépare par « ; »)", spec: { kind: "set", values: [P[0], Q[0]] }, sol: M("x = " + P[0]) + " ou " + M("x = " + Q[0]) + "." }], q: "Détermine les abscisses des points d'intersection du cercle " + M("x^2 + y^2 = 25") + " et de la droite " + M((a2 === 1 ? "" : a2 === -1 ? "-" : a2) + "x " + (b2 < 0 ? "- " + (b2 === -1 ? "" : -b2) : "+ " + (b2 === 1 ? "" : b2)) + "y = " + c2) + ".", spec: { kind: "set", values: [P[0], Q[0]] }, sol: "On isole une inconnue dans l'équation de la droite et on substitue : équation du 2e degré, " + M("x = " + P[0]) + " ou " + M("x = " + Q[0]) + " (points " + M("(" + P.join(" ; ") + ")") + " et " + M("(" + Q.join(" ; ") + ")") + ")." };
   },
 });
 
