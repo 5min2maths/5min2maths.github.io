@@ -431,6 +431,7 @@ function gradeOf(r) {
 }
 // Page « Mes grades » (21.11) : l'échelle complète, le grade actuel mis en avant, la courbe du Mathélo.
 function screenGrades() {
+  if (!state.eloSeen) { state.eloSeen = true; save(); }
   const r = state.elo.r, g = gradeOf(r), best = Math.max(r, ...((state.elo.log || []).map((x) => x[1])));
   h(`${brand}${backTop()}<div class="eyebrow">Mathélo</div><h2>Mes grades</h2>
   <p class="small muted">Le <b>Mathélo</b> est ton score de maths : il monte quand tu réussis des questions de ton niveau ou plus difficiles, et baisse un peu après une erreur. Chaque palier de 75 points donne un <b>grade</b> (Chercheur, Stratège…).</p>
@@ -487,6 +488,14 @@ function backupCard() {
   return `<div class="card flat stack backup-card"><div class="ic-row"><span class="ic">💾</span><div><b>Sauvegarde ta progression</b><div class="small muted">${days} jours de pratique, et tout est sur ce téléphone : un téléphone changé ou un cache vidé, et tout est perdu. Un code suffit pour tout récupérer.</div></div></div>
     <div class="row"><button class="btn-primary" id="bkgo">Faire mon code de sauvegarde</button><button class="btn-ghost small" id="bkno">Plus tard</button></div></div>`;
 }
+// Mathélo et grades expliqués (24.11, revue d'un testeur : « Mathélo », « Arpenteur »… ne disent rien au premier passage).
+// Pour qui a passé la visite guidée avant la bulle du Mathélo : une petite carte, une seule fois, fermée par « Compris ».
+function eloHintCard() {
+  if (state.eloSeen || !state.tourDone) return "";
+  const g = gradeOf(state.elo.r);
+  return `<div class="card flat stack elo-hint"><p class="small"><b>📈 Mathélo</b> = ton score de maths. Il monte quand tu réussis des questions de ton niveau. Tous les 75 points, un nouveau <b>grade</b> : tu es ${g.ic} ${g.name}${g.next ? `, le prochain est ${g.next.ic} ${g.next.name}` : ""}.</p>
+    <div class="row"><button class="btn-ghost small" id="elohok">Compris</button><button class="btn-ghost small" id="elohmore">Voir tous les grades</button></div></div>`;
+}
 // Bilan de la semaine passée (21.11) : du lundi au mercredi, une fois par semaine, si l'élève a pratiqué.
 function weekRecapCard() {
   const now = new Date(day() + "T12:00:00"), dow = (now.getDay() + 6) % 7; // 0 = lundi
@@ -506,7 +515,7 @@ function weekRecapCard() {
 // Visite guidée (21.11 ; 22.11 : adaptée à l'accueil à cases) : 3 bulles sur l'accueil, l'élément concerné surligné.
 const TOUR = [
   [".sess-card", "▶ Ta séance du jour", "En classe : au rythme de ton cours (choisis ton chapitre). Libre : tous les sujets, à ton rythme. Quelques minutes suffisent."],
-  [".elo-band", "📈 Ton Mathélo", "Il monte quand tu réussis des questions de ton niveau. Touche-le pour voir tes grades."],
+  [".elo-band", "📈 Ton Mathélo", "Ton score de maths : il monte quand tu réussis des questions de ton niveau. Tous les 75 points, un nouveau grade (Pousse, Apprenti, Arpenteur…). Touche-le pour voir l'échelle."],
   [".doors", "🧭 Tes rubriques", "Le problème de la semaine, les questions curieuses, l'histoire des maths, ton test (révision jusqu'au jour J), ton carnet d'erreurs et tes progrès."],
 ];
 let tourK = 0;
@@ -514,6 +523,7 @@ function tourShow() {
   const old = document.getElementById("tour"); if (old) old.remove();
   if (homeTab !== "today") return;
   const [sel, title, text] = TOUR[tourK];
+  if (sel === ".elo-band" && !state.eloSeen) { state.eloSeen = true; save(); } /* Mathélo expliqué : plus de carte « C'est quoi ? » */
   document.body.insertAdjacentHTML("beforeend", `<div id="tour" class="tour" role="dialog" aria-label="Visite guidée"><div class="tour-card"><div class="spread"><b>${title}</b><span class="small muted">${tourK + 1} / ${TOUR.length}</span></div><p class="small">${text}</p>
     <div class="row"><button class="btn-ghost small" id="tourskip">Passer</button><button class="btn-primary" id="tournext">${tourK + 1 < TOUR.length ? "Suivant" : "C'est parti !"}</button></div></div></div>`);
   app.querySelectorAll(".tour-hi").forEach((x) => x.classList.remove("tour-hi"));
@@ -572,7 +582,7 @@ function screenHome() {
     const paused = !!resumeCard(), doneLab = done && !paused;
     // Une seule bannière ; le joker de série passe avant le bilan de la semaine (sinon la série est perdue le jour même).
     const nudge = streakNudge(), joker = /Joker/.test(nudge);
-    const banner = [statsCard(), resumeCard(), prepTodayCard(), joker ? nudge : "", backupCard(), weekRecapCard(), joker ? "" : nudge].find((x) => x) || "";
+    const banner = [statsCard(), resumeCard(), prepTodayCard(), joker ? nudge : "", backupCard(), weekRecapCard(), joker ? "" : nudge, eloHintCard()].find((x) => x) || "";
     const nowLine = !Engine.nowActive(state) ? `<button type="button" class="btn-sec small" id="nowpick">📚 Choisir mon chapitre travaillé en classe</button>`
       : Engine.nowStale(state) ? `<div class="now-ask"><b>📚 Cette semaine en classe, tu travailles toujours :</b><span>${esc(state.now.ids.map(nLabel).join(" · "))} ?</span><div class="row now-ask-btns"><button type="button" class="btn-sec small" id="nowyes">Oui, toujours</button><button type="button" class="btn-sec small" id="nowpick">J'ai changé de chapitre</button></div></div>`
       : `<span class="small now-lab">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span><button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
@@ -609,6 +619,8 @@ function screenHome() {
   const byId = (x) => document.getElementById(x), on = (x, f) => { if (byId(x)) byId(x).onclick = f; };
   on("settings", screenSettings);
   on("eloband", screenGrades);
+  on("elohok", () => { state.eloSeen = true; save(); screenHome(); });
+  on("elohmore", screenGrades);
   on("go", startSession);
   on("freego", startFree);
   // Changer de format (21.11, « l'écran saute ») : on ne remplace que le titre et le texte de l'encadré, sans redessiner l'accueil.
@@ -1537,6 +1549,21 @@ function bindKeypad(getInput, after) {
 function fbInView(el, ms = 60) {
   setTimeout(() => { if (!el || !el.isConnected) return; const r = el.getBoundingClientRect(); if (r.height && r.bottom > innerHeight) el.scrollIntoView({ behavior: "smooth", block: "nearest" }); }, ms);
 }
+// Champ de réponse toujours visible au clavier de l'app (24.11, revue d'un testeur, écran 360 × 640) : au toucher du champ,
+// on montre d'un coup le champ, le clavier et « Valider » s'ils tiennent dans l'écran ; à chaque touche, le champ revient
+// à l'écran s'il en était sorti (défilement pendant la saisie).
+function ansInView(inp, all) {
+  if (!inp || !inp.isConnected) return;
+  const vh = window.visualViewport ? visualViewport.height : innerHeight, r = inp.getBoundingClientRect();
+  if (all && imOf(inp) === "none") {
+    const box = inp.closest(".answer"), b = box ? box.getBoundingClientRect() : r;
+    if (b.bottom > vh - 4 && b.bottom - r.top < vh - 16) { window.scrollBy({ top: b.bottom - vh + 12, behavior: "smooth" }); return; }
+  }
+  const rc = document.getElementById("qrecap"), top = rc && !rc.hidden ? rc.getBoundingClientRect().bottom : 0; /* rappel d'énoncé collé en haut */
+  if (r.top < top + 4) window.scrollBy({ top: r.top - top - 12, behavior: "smooth" });
+  else if (r.bottom > vh - 4) inp.scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+const imOf = (inp) => inp.getAttribute("inputmode") || "text";
 // Clavier du téléphone ouvert (⌨, ou appareil sans clavier de l'app) : la fenêtre visible rétrécit ; si le champ de
 // réponse passe dessous, on le recentre (24.11, revue d'un testeur, écran 360 × 640).
 if (window.visualViewport) visualViewport.addEventListener("resize", () => {
@@ -1545,6 +1572,34 @@ if (window.visualViewport) visualViewport.addEventListener("resize", () => {
   const r = a.getBoundingClientRect(), vh = visualViewport.height;
   if (r.bottom > vh - 8 || r.top < 0) a.scrollIntoView({ block: "center", behavior: "smooth" });
 });
+// Corrigé progressif (24.11) : étapes de splitSol dévoilées une à une sous un bouton « Voir l'étape suivante ».
+// onStep(k) est appelé avant d'afficher l'étape k (0 = affichée d'office) ; onEnd quand tout est affiché.
+function solStepper(box, btn, steps, onStep, onEnd) {
+  let k = 0;
+  const show = () => {
+    if (onStep) onStep(k);
+    box.insertAdjacentHTML("beforeend", `<div class="gstep"><span class="small muted">Étape ${k + 1} sur ${steps.length}</span><div class="sol">${steps[k]}</div></div>`);
+    typeset(box); k++;
+    if (k < steps.length) { btn.textContent = "Voir l'étape suivante (" + (k + 1) + " sur " + steps.length + ")"; if (k > 1) fbInView(btn, 120); }
+    else { btn.remove(); if (onEnd) onEnd(); }
+  };
+  btn.onclick = show; show(); btn.focus({ preventScroll: true });
+}
+// Problème en plusieurs parties (24.11, revue d'un testeur) : quand l'énoncé est sorti de l'écran (en bas, parties b, c…),
+// un rappel compact sur deux lignes reste collé en haut ; le toucher le déplie (le toucher encore le replie).
+function bindRecap() {
+  const rc = document.getElementById("qrecap"), qt = app.querySelector(".qtext"), card = app.querySelector(".card");
+  if (!rc || !qt || !card || !("IntersectionObserver" in window)) return;
+  let qOut = false, cardIn = true;
+  const upd = () => { const on = qOut && cardIn && rc.isConnected; rc.hidden = !on; if (!on) { rc.classList.remove("open"); rc.setAttribute("aria-expanded", "false"); } };
+  const io = new IntersectionObserver((es) => {
+    if (!rc.isConnected) { io.disconnect(); return; }
+    es.forEach((e) => { if (e.target === qt) qOut = !e.isIntersecting && e.boundingClientRect.top < 0; else cardIn = e.isIntersecting; });
+    upd();
+  });
+  io.observe(qt); io.observe(card);
+  rc.onclick = () => { const o = !rc.classList.contains("open"); rc.classList.toggle("open", o); rc.setAttribute("aria-expanded", String(o)); };
+}
 // Problème en plusieurs parties : 3 essais, indices progressifs (outil, puis calcul), score partiel.
 function renderProblem(q, opt) {
   const notion = NOTIONS.find((n) => n.id === q.id);
@@ -1560,7 +1615,9 @@ function renderProblem(q, opt) {
     <input id="p${i}" class="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…"><div class="preview" id="pv${i}"></div></div>`).join("")}
   ${keypadHtml(q.parts[0].spec)}
   <div class="actions"><button class="btn-primary" id="check">Valider</button><button class="btn-sec" id="idk">Voir le corrigé</button></div>
-  <div id="fb"></div></div>`);
+  <div id="fb"></div></div>
+  <button type="button" class="qrecap" id="qrecap" hidden aria-expanded="false"><span class="qr-tag">📌 Énoncé</span><span class="qr-txt">${boldData(q.q)}</span></button>`);
+  bindRecap();
   const S = opt.track ? sigOpen({ ev: "q", code, d: q.d, kind: q.kind || "", fmt: opt.track, redo: opt.redo ? 1 : 0 }) : null;
   sigWatchLesson(S); pageQ = code; bindScratch(S);
   const fb = document.getElementById("fb");
@@ -1582,7 +1639,7 @@ function renderProblem(q, opt) {
   const placeKp = (inp) => { const kp = document.getElementById("kp"), part = inp.closest(".part"); if (!kp || !part || kp.previousElementSibling === part) return; part.after(kp); setTimeout(() => kp.scrollIntoView({ behavior: "smooth", block: "nearest" }), 40); };
   active = document.getElementById("p0");
   placeKp(active);
-  const bindKp = () => bindKeypad(() => active, (inp) => previewOf(inp, document.getElementById("pv" + inp.id.slice(1)), q.parts[+inp.id.slice(1)].spec));
+  const bindKp = () => bindKeypad(() => active, (inp) => { previewOf(inp, document.getElementById("pv" + inp.id.slice(1)), q.parts[+inp.id.slice(1)].spec); ansInView(inp); });
   bindKp();
   const end = (giveUp) => {
     finished = true;
@@ -1595,7 +1652,8 @@ function renderProblem(q, opt) {
     buzz(frac === 1);
     const delta = opt.onDone({ solved: frac === 1, tries, partial: score });
     const d = typeof delta === "number" && delta !== 0 ? `<span class="delta ${delta > 0 ? "up" : "down"}">Mathélo ${delta > 0 ? "+" : ""}${delta}</span>` : "";
-    fb.innerHTML = `<div class="fb ${frac === 1 ? "ok" : "bad"} pop"><div class="spread"><b>${frac === 1 ? (tries === 1 ? "Problème résolu du premier coup !" : "Problème résolu.") : ok.filter(Boolean).length + " partie(s) juste(s) sur " + q.parts.length + "."}</b>${d}</div><div class="sol">${q.sol}</div></div>
+    const pSteps = frac < 1 && splitSol(q.sol); /* 24.11 : corrigé progressif aussi pour les problèmes */
+    fb.innerHTML = `<div class="fb ${frac === 1 ? "ok" : "bad"} pop"><div class="spread"><b>${frac === 1 ? (tries === 1 ? "Problème résolu du premier coup !" : "Problème résolu.") : ok.filter(Boolean).length + " partie(s) juste(s) sur " + q.parts.length + "."}</b>${d}</div>${pSteps ? `<div id="ssteps" class="stack"></div><button class="btn-primary" id="solstep">Voir l'étape suivante</button><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : `<div class="sol">${q.sol}</div>`}</div>
       <div class="vote"><span>Ce problème était… <button data-v="up" aria-label="Bon problème">👍</button> <button data-v="down" aria-label="Problème à revoir">👎</button></span><span class="code">${code}</span></div>${commentBox()}
       <div class="actions">${frac === 1 ? "" : '<button class="btn-sec" id="redo">Refaire avec d\'autres valeurs</button>'}<button class="btn-primary" id="nx">Continuer</button></div>`;
     typeset(fb);
@@ -1603,6 +1661,7 @@ function renderProblem(q, opt) {
     bindComment(fb, code);
     document.getElementById("nx").onclick = () => opt.onNext(false);
     const r = document.getElementById("redo"); if (r) r.onclick = () => { sigAide(S, "x"); opt.onNext(true); };
+    if (pSteps) { const sf = fb.querySelector("details.solfull"); if (sf) sf.addEventListener("toggle", () => { if (sf.open) sigAide(S, "s"); }); solStepper(document.getElementById("ssteps"), document.getElementById("solstep"), pSteps, (k) => { if (k > 0) sigAide(S, "e"); }, () => { const sf2 = fb.querySelector("details.solfull"); if (sf2) sf2.remove(); document.getElementById("nx").focus({ preventScroll: true }); }); }
   };
   const check = () => {
     if (finished) return;
@@ -1671,8 +1730,9 @@ function renderQuestion(q, opt) {
     const k = b.dataset.k;
     if (k === "⌨") { inputMode = inputMode === "none" ? "text" : "none"; inp.setAttribute("inputmode", inputMode); inp.blur(); inp.focus(); return; }
     typeKey(inp, k);
-    showPreview();
+    showPreview(); ansInView(inp);
   }));
+  if (!window.matchMedia("(pointer: fine)").matches) inp.addEventListener("focus", () => ansInView(inp, true));
   const stopBtn = document.getElementById("stop");
   if (stopBtn) stopBtn.onclick = screenSummary;
 
@@ -1704,7 +1764,7 @@ function renderQuestion(q, opt) {
     const solSteps = !solved && !guided && splitSol(q.sol);
     fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><div class="spread"><b>${solved ? (tries === 1 ? pick(PRAISE) : "Juste au deuxième essai.") : dontKnow ? "Voici la méthode." : "Pas cette fois."}</b>${d}</div>
       ${!solved && lastDiag ? `<div class="diag">🔎 ${esc(lastDiag)}</div>` : ""}
-      ${guided ? `<button class="btn-primary" id="guide">🪜 On le fait ensemble, pas à pas</button><div id="gsteps" class="stack"></div><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : solSteps ? `<button class="btn-primary" id="solstep">🪜 Voir la correction étape par étape</button><div id="ssteps" class="stack"></div><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : `<div class="sol">${q.sol}</div>`}</div>
+      ${guided ? `<button class="btn-primary" id="guide">🪜 On le fait ensemble, pas à pas</button><div id="gsteps" class="stack"></div><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : solSteps ? `<div id="ssteps" class="stack"></div><button class="btn-primary" id="solstep">Voir l'étape suivante</button><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : `<div class="sol">${q.sol}</div>`}</div>
       <div class="vote"><span>Cette question était… <button data-v="up" aria-label="Bonne question">👍</button> <button data-v="down" aria-label="Question à revoir">👎</button></span><span class="code" title="Code de la question">${code}</span></div>${commentBox()}
       <div class="actions">${solved ? "" : `<button id="redo" class="${!guided && !solSteps ? "btn-primary" : "btn-sec"}">${q.d > 1 && q.d < 4 ? "💪 Une plus facile pour repartir" : "Refaire avec d'autres valeurs"}</button>`}<button class="${solved ? "btn-primary" : ""}" id="nx">Continuer</button></div>`;
     typeset(fb);
@@ -1731,15 +1791,10 @@ function renderQuestion(q, opt) {
     if (gb) { gb.onclick = () => { sigAide(S, "g"); gb.remove(); fold(document.getElementById("gsteps")); runGuide(q, document.getElementById("gsteps"), () => { const rd = document.getElementById("redo"); if (rd) { rd.classList.add("btn-primary"); rd.textContent = q.d > 1 && q.d < 4 ? "À toi : la même, un cran plus facile" : "À toi : une question du même type"; rd.focus(); } }); }; gb.focus(); }
     else if (solSteps) {
       const sb = document.getElementById("solstep"), box = document.getElementById("ssteps");
-      let k = 0, folded = false;
-      const more = () => {
-        if (!folded) { folded = true; fold(box); }
-        box.insertAdjacentHTML("beforeend", `<div class="gstep"><span class="small muted">Étape ${k + 1} sur ${solSteps.length}</span><div class="sol">${solSteps[k]}</div></div>`);
-        typeset(box); k++; sigAide(S, "e");
-        if (k < solSteps.length) { sb.textContent = "Étape suivante (essaie d'abord de la trouver)"; sb.focus(); }
-        else { sb.remove(); fb.querySelector("details.solfull").remove(); const rd = document.getElementById("redo"); if (rd) { rd.classList.add("btn-primary"); rd.textContent = q.d > 1 && q.d < 4 ? "À toi : la même, un cran plus facile" : "À toi : une question du même type"; rd.focus(); } }
-      };
-      sb.onclick = more; sb.focus();
+      /* 24.11 (revue d'un testeur) : corrigé progressif. La 1re étape s'affiche tout de suite, sans rien replier ;
+         « Voir l'étape suivante » dévoile les autres (l'énoncé remonte alors au-dessus des étapes). */
+      let folded = false;
+      solStepper(box, sb, solSteps, (k) => { if (k > 0 && !folded) { folded = true; fold(box); } if (k > 0) sigAide(S, "e"); }, () => { const sf2 = fb.querySelector("details.solfull"); if (sf2) sf2.remove(); const rd = document.getElementById("redo"); if (rd) { rd.classList.add("btn-primary"); rd.textContent = q.d > 1 && q.d < 4 ? "À toi : la même, un cran plus facile" : "À toi : une question du même type"; rd.focus(); } });
     }
     else document.getElementById("nx").focus();
   };
@@ -2182,9 +2237,11 @@ function summaryByNotion() {
 }
 // Objectif concret pour la prochaine fois (24.11, revue d'un testeur) : points jusqu'au grade suivant, notion à consolider.
 function sumGoal(g) {
-  const r = session.res || {}, weak = [...(session.ids || [])].find((id) => r[id] && r[id].ok < r[id].n);
-  const parts = [g && g.next ? `encore <b>${g.next.at - state.elo.r} points</b> avant ${g.next.ic} ${g.next.name}` : "", weak ? `à consolider : <b>${esc(nLab(weak))}</b>` : ""].filter(Boolean);
-  return parts.length ? `<div class="small goal">🎯 Prochain objectif : ${parts.join(" · ")}</div>` : "";
+  /* Notion à consolider : ratée dans cette séance, sinon la plus récente du carnet d'erreurs pas encore effacée. */
+  const r = session.res || {}, weak = [...(session.ids || [])].find((id) => r[id] && r[id].ok < r[id].n)
+    || ((state.carnet || []).filter((x) => !x.ok).slice(-1)[0] || {}).id;
+  const parts = [g && g.next ? `encore <b>${g.next.at - state.elo.r} points</b> avant ${g.next.ic} ${g.next.name}` : "", weak ? `consolider <b>${esc(nLab(weak))}</b>` : ""].filter(Boolean);
+  return parts.length ? `<div class="small goal">🎯 Objectif pour demain : ${parts.join(" · ")}</div>` : "";
 }
 function screenSummary() {
   if (state) { delete state.resume; save(); }

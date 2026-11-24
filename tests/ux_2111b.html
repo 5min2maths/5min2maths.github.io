@@ -5,7 +5,7 @@
 // Améliorations élèves du 21.11 (lot 2) : reprise de séance, visite guidée, paliers, bilan de la semaine, format de demain, données en gras.
 const fails=[], ok=(c,m)=>{if(!c)fails.push(m)};
 try{
-state=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.autoInit(state);state.placed=true;
+state=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.autoInit(state);statsSet(false);/* 24.11 : carte des statistiques déjà répondue, sinon elle prend la place des autres cartes */state.placed=true;
 for(const id in state.notions)state.notions[id].lessonSeen=true;
 // 2. visite guidée
 homeTab="today";screenHome();ok(!!document.getElementById("tour")&&/séance du jour/.test(document.getElementById("tour").textContent)&&app.querySelector(".sess-card.tour-hi"),"2 bulle 1 (accueil à cases, 22.11)");
