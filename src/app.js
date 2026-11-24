@@ -162,6 +162,9 @@ const h = (html) => { const tr = document.getElementById("tour"); if (tr) tr.rem
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 // Textes de l'app (indices, erreurs typiques) : échappés, sauf <b>, <i>, <br> (16.11 : les balises s'affichaient telles quelles).
 const escT = (s) => esc(s).replace(/&lt;(\/?)(b|i|br)&gt;/g, "<$1$2>");
+/* 24.11 (audit ergonomie) : écrans longs (grades, réglages, compétences, curieux, histoire) : leur « Retour » n'était
+   qu'en bas, après tout le défilement ; même bouton en haut, comme le « ← Accueil » des pages de l'accueil. */
+const backTop = (id = "backtop") => `<button type="button" class="btn-ghost back-home" id="${id}">← Retour</button>`;
 const gradeName = (p) => (SYSTEMS[p.system].grades.find(([g]) => g === p.grade) || [0, ""])[1];
 const brand = '<div class="brand"><b>5 minutes de maths</b><span>par jour</span></div>';
 const PRAISE = ["Juste !", "Bien vu !", "Exact !", "Parfait.", "C'est ça !", "Bravo !"];
@@ -341,11 +344,17 @@ function startPlacement() {
     if (i >= plan.length) { state.placed = true; delete state.placement; save(); return screenPlacementDone(); }
     const id = plan[i], q = Engine.make(state, id, Math.min(2, difficultyCap(state.profile)));
     renderQuestion(q, {
-      eyebrow: "Étape 2 sur 2 · question " + (i + 1) + " sur " + plan.length + (plan.length - i > 1 ? " · encore " + (plan.length - i - 1) + " après celle-ci" : " · la dernière !") + `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((i / plan.length) * 100)}%"></i></span>`, single: true, track: "positionnement",
+      eyebrow: "Étape 2 sur 2 · question " + (i + 1) + " sur " + plan.length + (plan.length - i > 1 ? " · encore " + (plan.length - i - 1) + " après celle-ci · environ " + Math.max(1, Math.round((plan.length - i) * 0.5)) + " min" : " · la dernière !") + `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((i / plan.length) * 100)}%"></i></span>`, single: true, track: "positionnement",
       onDone: (res) => { Engine.placementResult(state, id, res.solved ? true : res.dontKnow ? null : false, q.d); save(); },
       onNext: () => { i++; next(); },
       onNotYet: () => { Engine.notYet(state, id); save(); toast("Noté : cette notion reviendra plus tard."); i++; next(); },
     });
+    /* 24.11 (revue d'un testeur) : la police plus lisible se découvre dès la première question, pas seulement dans les Réglages. */
+    if (i === 0 && typeof a11yOf === "function") {
+      const eb = app.querySelector(".eyebrow"), f = a11yOf(state).font; /* le réglage reste modifiable dans ⚙️ Réglages */
+      if (eb) { eb.insertAdjacentHTML("afterend", `<button type="button" class="btn-ghost small font-hint" id="fonthint" aria-pressed="${!!f}">Aa ${f ? "Police habituelle" : "Lettres difficiles à lire ? Police plus lisible"}</button>`);
+        document.getElementById("fonthint").onclick = (e) => { const on = !a11yOf(state).font; state.a11y = { ...a11yOf(state), font: on ? 1 : 0 }; save(); uiApply(); e.currentTarget.setAttribute("aria-pressed", on); e.currentTarget.textContent = "Aa " + (on ? "Police habituelle" : "Lettres difficiles à lire ? Police plus lisible"); }; }
+    }
   };
   next();
 }
@@ -414,7 +423,8 @@ function gradeOf(r) {
 // Page « Mes grades » (21.11) : l'échelle complète, le grade actuel mis en avant, la courbe du Mathélo.
 function screenGrades() {
   const r = state.elo.r, g = gradeOf(r), best = Math.max(r, ...((state.elo.log || []).map((x) => x[1])));
-  h(`${brand}<div class="eyebrow">Mathélo</div><h2>Mes grades</h2>
+  h(`${brand}${backTop()}<div class="eyebrow">Mathélo</div><h2>Mes grades</h2>
+  <p class="small muted">Le <b>Mathélo</b> est ton score de maths : il monte quand tu réussis des questions de ton niveau ou plus difficiles, et baisse un peu après une erreur. Chaque palier de 75 points donne un <b>grade</b> (Chercheur, Stratège…).</p>
   <div class="card stack grade-now"><div class="ic-row"><button type="button" class="ic grade-big grade-open" data-g="${g.name}" aria-label="Voir la carte du grade ${g.name}">${g.ic}</button><div><div class="eyebrow">Mon grade</div><h2>${g.name}</h2><div class="small muted">Mathélo ${r}${best > r ? " · meilleur : " + best : ""}</div></div></div>
     ${g.next ? `<div class="stack" style="gap:4px"><span class="pbar"><i style="width:${g.pct}%"></i></span><span class="small">Prochain grade : <b>${g.next.ic} ${g.next.name}</b>, à ${g.next.at} (encore ${g.next.at - r} points).</span></div>` : '<p class="small">Le plus haut grade : bravo !</p>'}</div>
   <div class="card">${eloBlock()}</div>
@@ -423,7 +433,7 @@ function screenGrades() {
       const no = st !== "todo" && at && (isAuthor() ? "0" : (state.gradeNo || {})[name]);
       return `<li class="${st}"><span class="g-ic">${st !== "todo" && at ? `<button type="button" class="grade-open" data-g="${name}" aria-label="Voir la carte du grade ${name}">${ic}</button>` : ic}</span><span class="g-n">${name}${st === "cur" ? " <span class=\"badge\">toi</span>" : ""}${no ? ` <small class="g-no" title="${no}e utilisateur à obtenir ce grade">#${no}</small>` : ""}</span><span class="g-at">${at ? at : "–"}</span></li>`; }).join("")}</ol></div>
   <button class="btn-primary btn-big" id="back">Retour</button>`);
-  document.getElementById("back").onclick = screenHome;
+  document.getElementById("back").onclick = screenHome; document.getElementById("backtop").onclick = screenHome;
   gradeNumbers();
   const cur = app.querySelector(".grades li.cur"); if (cur) cur.scrollIntoView({ block: "center" });
   window.scrollTo(0, 0);
@@ -543,6 +553,9 @@ function screenHome() {
     document.getElementById("hb").onclick = () => { homeTab = "today"; screenHome(); };
   } else {
     const mode = state.homeMode === "libre" ? "libre" : "classe", nC = (state.carnet || []).length;
+    /* 24.11 (audit ergonomie) : séance interrompue à reprendre → le grand bouton n'annonce plus « Encore une séance »
+       ni « séance faite ✓ » (la séance n'est pas finie ; « Reprendre ma séance » est juste au-dessus). */
+    const paused = !!resumeCard(), doneLab = done && !paused;
     // Une seule bannière ; le joker de série passe avant le bilan de la semaine (sinon la série est perdue le jour même).
     const nudge = streakNudge(), joker = /Joker/.test(nudge);
     const banner = [resumeCard(), prepTodayCard(), joker ? nudge : "", backupCard(), weekRecapCard(), joker ? "" : nudge].find((x) => x) || "";
@@ -556,10 +569,10 @@ function screenHome() {
     ${banner}
     <div class="card stack sess-card">
       <div class="seg sess-seg" role="tablist"><button type="button" data-m="classe" aria-pressed="${mode === "classe"}">🎒 En classe</button><button type="button" data-m="libre" aria-pressed="${mode === "libre"}">🧭 Libre</button></div>
-      <p class="small muted sess-sub">${mode === "classe" ? "Suit ton chapitre en classe, avec révisions." : "Tous les sujets, à ton rythme."}</p>
-      ${mode === "classe" ? `<div class="sess-fmt"><span class="sess-fmt-t"><b class="fmt-lab">${FORMATS[fmt].label}</b><span class="small muted fmt-txt">${FORMATS[fmt].text}${done ? " · séance faite ✓" : ""}</span></span><button type="button" class="btn-sec small" id="other" aria-label="Changer de format">🔁<span class="chg-t"> Changer</span></button></div>
+      <div class="small muted sess-sub sess-subs"><span class="${mode === "classe" ? "on" : ""}">Suit le chapitre que tu travailles en classe, avec des révisions.</span><span class="${mode === "libre" ? "on" : ""}">Tous les sujets de ton année, à ton rythme.</span></div>
+      ${mode === "classe" ? `<div class="sess-fmt"><span class="sess-fmt-t"><b class="fmt-lab">${FORMATS[fmt].label}</b><span class="small muted fmt-txt">${FORMATS[fmt].text}${doneLab ? " · séance faite ✓" : ""}</span></span><button type="button" class="btn-sec small" id="other" aria-label="Changer de format">🔁<span class="chg-t"> Changer</span></button></div>
         <div class="now-line">${nowLine}</div>` : ""}
-      <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${done ? "Encore une séance" : mode === "classe" ? "Ma séance du jour" : "Mon défi du jour"}</button>
+      <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${paused ? "Nouvelle séance" : done ? "Encore une séance" : mode === "classe" ? "Ma séance du jour" : "Mon défi du jour"}</button>
     </div>
     <div class="doors">
       ${door("prob", svgI(TI.prob), "Problème", "", dots.prob ? "!" : "")}
@@ -682,7 +695,7 @@ function returnCard() {
 }
 function screenSettings() {
   const A = a11yOf(state);
-  h(`${brand}<h2>Réglages</h2><div class="stack">
+  h(`${brand}${backTop()}<h2>Réglages</h2><div class="stack">
   <div class="card flat stack"><h3>Affichage</h3>
     <span class="small muted" id="fs-l">Taille du texte</span><div class="seg" id="fs" role="group" aria-labelledby="fs-l">${A11Y_FS.map(([v, l]) => `<button aria-pressed="${A.fs === v}" data-v="${v}">${l}</button>`).join("")}</div>
     <span class="small muted" id="font-l">Police</span><div class="seg" id="font" role="group" aria-labelledby="font-l"><button aria-pressed="${!A.font}" data-v="0">Habituelle</button><button aria-pressed="${!!A.font}" data-v="1">Plus lisible</button></div>
@@ -693,7 +706,7 @@ function screenSettings() {
   ${isAuthor() ? '<button class="btn-primary" id="stats">📊 Statistiques d\'usage (auteur)</button>' : ""}
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div>
   <button class="btn-primary" id="back">Retour</button></div>`);
-  document.getElementById("back").onclick = screenHome;
+  document.getElementById("back").onclick = screenHome; document.getElementById("backtop").onclick = screenHome;
   bindInstall(screenSettings);
   const setA = (k, v) => { state.a11y = { ...a11yOf(state), [k]: v }; save(); uiApply(); screenSettings(); const f = document.querySelector(`#${k} button[data-v="${v}"]`); if (f) f.focus(); };
   app.querySelectorAll("#fs button").forEach((b) => (b.onclick = () => setA("fs", +b.dataset.v)));
@@ -748,7 +761,7 @@ function screenComps() {
   }).join("");
   const sc = compStats(cat.map((c) => c.id));
   Badges.check(state); state.badgesNew = []; save();
-  h(`${brand}<h2>Mes <span class="mark">compétences</span></h2>
+  h(`${brand}${backTop()}<h2>Mes <span class="mark">compétences</span></h2>
   <p class="muted">Chaque compétence reçoit une note de 1 à 6 dès que tu y as répondu 3 fois. La note suit tes 8 dernières réponses : elle monte quand tu progresses.</p>
   ${badgesSection()}
   ${co ? `<div class="card flat"><div class="spread"><span>Cycle 3 · jusqu'en ${state.profile.grade}e</span><b>${sc.tested} / ${sc.total} notées${sc.avg !== null ? " · moyenne " + String(Math.round(sc.avg * 10) / 10).replace(".", ",") : ""}</b></div></div>
@@ -768,7 +781,7 @@ function screenComps() {
       ctest: { label: b.dataset.label, cid, before: compNote((state.comps || {})[cid]) } };
     nextQuestion();
   }));
-  document.getElementById("back").onclick = screenHome;
+  document.getElementById("back").onclick = screenHome; document.getElementById("backtop").onclick = screenHome;
 }
 
 // ---------------- Badges ----------------
@@ -991,7 +1004,7 @@ function screenNow() {
   <p class="muted">Choisis 1 à 5 notions que tu travailles en classe en ce moment. Tes séances s'y concentreront, avec le rappel de cours la première fois.</p>
   ${groups.map(([th, l]) => `<div class="card flat"><h3>${Engine.themeLabel(th, state.profile)}</h3><div class="checks">${l.map(box).join("")}</div></div>`).join("")}
   <p class="small muted" id="nerr"></p>
-  <button class="btn-primary btn-big" id="save">C'est ça</button>
+  <button class="btn-primary btn-big save-sticky" id="save">C'est ça</button>
   <div class="row"><button class="btn-ghost" id="back">Annuler</button>${chosen.size ? '<button class="btn-ghost" id="none">Rien de particulier en ce moment</button>' : ""}</div>`);
   const inputs = [...app.querySelectorAll(".check input")];
   inputs.forEach((i) => (i.onchange = () => {
@@ -1034,7 +1047,7 @@ function screenPrep() {
   ${Object.keys(groups).length ? "" : '<div class="card flat"><p class="muted">Rien à cocher : tout ce qui te concerne vient des années précédentes.</p></div>'}
   ${Object.entries(groups).map(([th, list]) => `<div class="card flat"><h3>${Engine.themeLabel(th, state.profile)}</h3><div class="checks">${list.map((c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${c.label}</span></label>`).join("")}</div></div>`).join("")}
   <p class="small muted" id="perr"></p>
-  <button class="btn-primary btn-big" id="save">Enregistrer mon test</button>
+  <button class="btn-primary btn-big save-sticky" id="save">Enregistrer mon test</button>
   <div class="row"><button class="btn-ghost" id="back">Annuler</button>${chosen.size ? '<button class="btn-ghost" id="del">Supprimer ce test</button>' : ""}</div>`);
   document.getElementById("save").onclick = () => {
     const ids = [...app.querySelectorAll(".check input:checked")].map((i) => i.value), dt = document.getElementById("pdate").value;
@@ -1322,11 +1335,12 @@ function nextQuestion(redo) {
   // application, pente trop raide) : la première question sur cette notion est toujours de niveau 1.
   const easy = !redo && !session.weekly && !forceProb && session.lessonShown === id && !session.eased;
   if (easy) session.eased = true;
+  /* 24.11 (ergonomie) : le type de question n'est rappelé que s'il change dans la séance (« Révision · 1 sur 4 · Révision » doublait le titre). */
   const q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : easy ? 1 : level);
   q.kind = kind;
   renderQuestion(q, {
     track: sessionInfo().fmt || "seance", redo: !!redo,
-    eyebrow: ((s) => s + (session.plan.length > 1 && !session.weekly ? `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((Math.min(session.i, session.plan.length) / session.plan.length) * 100)}%"></i></span>` : ""))((session.carnet ? "Carnet d'erreurs · " + (session.i + 1) + " sur " + session.plan.length : session.free ? "Mon défi du jour · " + (session.i + 1) + " sur " + session.plan.length : session.weekly ? "🔍 Problème de la semaine" : session.ctest ? "Me tester · " + session.ctest.label + " · " + (session.i + 1) + " sur " + session.plan.length : session.prep ? "Révision du test · " + (session.i + 1) + " sur " + session.plan.length : session.plan.length === 1 ? (session.fmt ? FORMATS[session.fmt].label : "Question du jour") : (session.fmt ? FORMATS[session.fmt].label + " · " : "") + (session.i + 1) + " sur " + session.plan.length) + (kind && KIND_LABEL[kind] ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo ? " · nouvelles valeurs" : "")),
+    eyebrow: ((s) => s + (session.plan.length > 1 && !session.weekly ? `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((Math.min(session.i, session.plan.length) / session.plan.length) * 100)}%"></i></span>` : ""))((session.carnet ? "Carnet d'erreurs · " + (session.i + 1) + " sur " + session.plan.length : session.free ? "Mon défi du jour · " + (session.i + 1) + " sur " + session.plan.length : session.weekly ? "🔍 Problème de la semaine" : session.ctest ? "Me tester · " + session.ctest.label + " · " + (session.i + 1) + " sur " + session.plan.length : session.prep ? "Révision du test · " + (session.i + 1) + " sur " + session.plan.length : session.plan.length === 1 ? (session.fmt ? FORMATS[session.fmt].label : "Question du jour") : (session.fmt ? FORMATS[session.fmt].label + " · " : "") + (session.i + 1) + " sur " + session.plan.length) + (kind && KIND_LABEL[kind] && !(session.fmt && FORMATS[session.fmt] && FORMATS[session.fmt].slots.every((x) => x.replace(/\d+$/, "") === kind)) ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo ? " · nouvelles valeurs" : "")),
     onDone: (res) => {
       const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
       // Carnet d'erreurs (20.11) : séance « carnet » → progression ; ailleurs, une question ratée y entre.
@@ -1437,6 +1451,19 @@ function bindKeypad(getInput, after) {
   }));
 }
 
+// Indice après une erreur (24.11, audit ergonomie) : sur un téléphone, il s'affichait sous le clavier et les boutons,
+// hors de l'écran ; l'élève ne voyait pas « Pas encore. Réessaie ! ». On défile juste assez pour le montrer.
+function fbInView(el, ms = 60) {
+  setTimeout(() => { if (!el || !el.isConnected) return; const r = el.getBoundingClientRect(); if (r.height && r.bottom > innerHeight) el.scrollIntoView({ behavior: "smooth", block: "nearest" }); }, ms);
+}
+// Clavier du téléphone ouvert (⌨, ou appareil sans clavier de l'app) : la fenêtre visible rétrécit ; si le champ de
+// réponse passe dessous, on le recentre (24.11, revue d'un testeur, écran 360 × 640).
+if (window.visualViewport) visualViewport.addEventListener("resize", () => {
+  const a = document.activeElement;
+  if (!a || !a.matches || !a.matches("input.ans, input#ans, textarea")) return;
+  const r = a.getBoundingClientRect(), vh = visualViewport.height;
+  if (r.bottom > vh - 8 || r.top < 0) a.scrollIntoView({ block: "center", behavior: "smooth" });
+});
 // Problème en plusieurs parties : 3 essais, indices progressifs (outil, puis calcul), score partiel.
 function renderProblem(q, opt) {
   const notion = NOTIONS.find((n) => n.id === q.id);
@@ -1508,7 +1535,7 @@ function renderProblem(q, opt) {
       else ok[i] = r.status === "correct";
       if (S && !S.rep1 && !ok[i] && r.status !== "invalid" && r.status !== "form") S.rep1 = "p" + (i + 1) + ":" + sigRep(v);
     });
-    if (invalid) { if (S) S.illis = (S.illis || 0) + 1; fb.innerHTML = `<div class="fb hint pop"><b>Je n'arrive pas à lire une réponse</b><span>${esc(invalid)}</span></div>`; return; }
+    if (invalid) { if (S) S.illis = (S.illis || 0) + 1; fb.innerHTML = `<div class="fb hint pop"><b>Je n'arrive pas à lire une réponse</b><span>${esc(invalid)}</span></div>`; fbInView(fb); return; }
     tries++;
     q.parts.forEach((p, i) => {
       document.getElementById("mk" + i).textContent = ok[i] ? "✓" : "✗";
@@ -1516,7 +1543,7 @@ function renderProblem(q, opt) {
     });
     if (ok.every(Boolean) || tries >= 3) return end(false);
     const nx = ok.findIndex((v) => !v); if (nx >= 0) { active = document.getElementById("p" + nx); placeKp(active); }
-    fb.innerHTML = `<div class="fb hint pop"><b>${ok.some(Boolean) ? "En partie juste. Continue !" : "Pas encore."}</b><span><b>Indice ${tries}</b> · ${escT(q.hints[tries - 1])}</span></div>`;
+    fb.innerHTML = `<div class="fb hint pop"><b>${ok.some(Boolean) ? "En partie juste. Continue !" : "Pas encore."}</b><span><b>Indice ${tries}</b> · ${escT(q.hints[tries - 1])}</span></div>`; fbInView(fb, 120);
   };
   document.getElementById("check").onclick = check;
   document.getElementById("idk").onclick = () => { if (!finished) end(true); };
@@ -1645,7 +1672,7 @@ function renderQuestion(q, opt) {
     if (r.status === "invalid" || r.status === "form") {
       if (S) S.illis = (S.illis || 0) + 1;
       fb.innerHTML = `<div class="fb hint pop"><b>${r.status === "form" ? "Presque" : "Je n'arrive pas à lire ta réponse"}</b><span>${esc(r.message || "")}</span></div>`;
-      return;
+      fbInView(fb); return;
     }
     tries++;
     const ez = document.getElementById("easy"); if (ez) ez.remove();
@@ -1657,7 +1684,7 @@ function renderQuestion(q, opt) {
     buzz(false);
     fb.innerHTML = `<div class="fb hint pop"><b>${r.status === "close" ? "Presque !" : "Pas encore. Réessaie !"}</b><span>${escT(diag || r.message || "")}</span><span><b>Indice</b> · ${escT(q.hint)}</span></div>`;
     typeset(fb);
-    inp.select();
+    inp.select(); fbInView(fb);
   };
   document.getElementById("check").onclick = check;
   document.getElementById("idk").onclick = () => { if (!finished) end(false, true); };
@@ -1872,14 +1899,14 @@ function screenCurious(q, back, from = "") {
   if (state) { state.curSeen = [...(state.curSeen || []).filter((k) => k !== q.key), q.key].slice(-20); save(); }
   const F = CUR_FAM[q.fam] || { label: "Question curieuse", ic: "🤔" };
   const spec = { kind: "value", value: q.calc.value, ...(q.calc.round ? { round: q.calc.round } : {}) }; // calcul tapé accepté (commentaire du 21.11), même au CO
-  h(`${brand}<div class="eyebrow">${F.ic} Question curieuse · ${F.label}</div>
+  h(`${brand}${backTop("cback0")}<div class="eyebrow">${F.ic} Question curieuse · ${F.label}</div>
   <div class="card pop stack"><h2>${q.titre}</h2><div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
     <div class="act-step"><div class="act-h"><span class="act-n">1</span> Ton pari</div><p>${q.bet.q}</p>
       <div class="seg" id="cbet">${q.bet.choices.map((c, i) => `<button type="button" data-i="${i}">${c}</button>`).join("")}</div><div id="cbfb"></div></div>
     <div class="act-step" id="cs2" hidden><div class="act-h"><span class="act-n">2</span> On vérifie</div><p>${q.calc.label}</p>
       <div class="answer"><input class="ans" id="cans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Ta réponse">
       <div class="preview" id="cprev"></div>${keypadHtml(spec)}
-      <div class="actions"><button class="btn-primary" id="cok">Vérifier</button><button class="btn-ghost" id="cidk">Voir la réponse</button></div></div><div id="cfb"></div></div>
+      <div class="actions"><button class="btn-primary" id="cok">Vérifier</button><button class="btn-sec" id="cidk">Voir la réponse</button></div></div><div id="cfb"></div></div>
     <div class="act-step" id="cs3" hidden><div class="act-h"><span class="act-n">3</span> Le fin mot</div><div class="sol">${q.reveal}</div>
       <div class="rule"><b>🧠 Ici, tu as utilisé</b> ${q.outil}</div><p class="small muted code">${q.code}</p></div>
   </div>
@@ -1930,7 +1957,7 @@ function screenCurious(q, back, from = "") {
   $("cok").onclick = go; inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
   $("cidk").onclick = () => finish(false, true);
   $("cnext").onclick = () => screenCurious(Curieux.pick(state), back, from);
-  $("cback").onclick = back;
+  $("cback").onclick = back; $("cback0").onclick = back;
 }
 
 // ---------------- Histoire des maths (22.11) ----------------
@@ -1938,7 +1965,7 @@ function screenCurious(q, back, from = "") {
 function screenHistory(k, back) {
   const H = HISTOIRE[k], E = H.ex(), spec = { kind: "value", value: E.value, final: true };
   Histoire.seen(state, k); save();
-  h(`${brand}<div class="eyebrow">📜 Histoire des maths · ${H.t}</div>
+  h(`${brand}${backTop("hback0")}<div class="eyebrow">📜 Histoire des maths · ${H.t}</div>
   <div class="card pop stack hist-story"><h2>${H.titre}</h2><div class="figwrap">${H.fig()}</div><p>${H.txt}</p>
     <div class="act-step"><div class="act-h"><span class="act-n">✍️</span> À toi</div><div class="qtext">${E.q}</div>
       <div class="answer"><input class="ans" id="hans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Ta réponse">
@@ -1970,7 +1997,7 @@ function screenHistory(k, back) {
   $("hok").onclick = go; inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
   $("hidk").onclick = () => finish(false);
   $("hnext").onclick = () => screenHistory(Histoire.other(k), back);
-  $("hback").onclick = back;
+  $("hback").onclick = back; $("hback0").onclick = back;
   window.scrollTo(0, 0);
 }
 
@@ -2071,6 +2098,12 @@ function summaryByNotion() {
   const line = (ic, t, arr, note) => arr.length ? `<div class="sum-line"><span>${ic}</span><div><b>${t}</b><div class="small">${arr.map(lab).join(" · ")}</div>${note ? `<div class="small muted">${note}</div>` : ""}</div></div>` : "";
   return `<div class="card flat stack sum-notions">${line("✅", ok.length > 1 ? "Réussies" : "Réussie", ok)}${line("📈", "En progrès", mid, "Une partie juste : encore une ou deux séances.")}${line("🔁", ko.length > 1 ? "Reviendront bientôt" : "Reviendra bientôt", ko, (state.carnet || []).length ? "Rangées dans ton carnet d'erreurs, à refaire quand tu veux." : "L'app te les reproposera dans les prochains jours.")}</div>`;
 }
+// Objectif concret pour la prochaine fois (24.11, revue d'un testeur) : points jusqu'au grade suivant, notion à consolider.
+function sumGoal(g) {
+  const r = session.res || {}, weak = [...(session.ids || [])].find((id) => r[id] && r[id].ok < r[id].n);
+  const parts = [g && g.next ? `encore <b>${g.next.at - state.elo.r} points</b> avant ${g.next.ic} ${g.next.name}` : "", weak ? `à consolider : <b>${esc(nLab(weak))}</b>` : ""].filter(Boolean);
+  return parts.length ? `<div class="small goal">🎯 Prochain objectif : ${parts.join(" · ")}</div>` : "";
+}
 function screenSummary() {
   if (state) { delete state.resume; save(); }
   if (session && session.weekly && state) { state.weeklyDone = weekKey(); save(); }
@@ -2084,7 +2117,7 @@ function screenSummary() {
   const newGrade = g1.i > g0.i ? `<div class="card stack grade-up"><div class="eyebrow">Nouveau grade !</div><div class="ic-row"><button type="button" class="ic grade-ic grade-open" data-g="${g1.name}" aria-label="Voir la carte du grade ${g1.name}">${g1.ic}</button><div><h3>Tu es maintenant ${g1.name}</h3><div class="small muted">${g1.next ? "Prochain grade : " + g1.next.ic + " " + g1.next.name + ", à " + g1.next.at + "." : "Le plus haut grade : bravo !"}</div></div></div></div>` : "";
   // 22.11 : titre cohérent avec le Mathélo (« Excellente séance » alors que le Mathélo baissait).
   h(`${brand}<h2>${sc >= n * 0.8 && d >= 0 ? "Excellente séance !" : sc >= n * 0.5 ? "Bonne séance." : "Séance faite : c'est en pratiquant qu'on progresse."}</h2>${d < 0 && sc >= n * 0.5 ? `<p class="small muted">Mathélo ${d} : une erreur sur une question de ton niveau coûte plus que ce que rapporte une réussite sur une question facile.</p>` : ""}
-  <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span>${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ta série passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${FORMATS[Engine.tomorrowFormat(state)].label}</b></div></div></div>
+  <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span>${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ta série passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${FORMATS[Engine.tomorrowFormat(state)].label}</b></div>${sumGoal(g1)}</div></div>
   ${summaryByNotion()}
   ${weekLine()}
   <div class="card stack"><div class="spread"><span>Score</span><b>${String(sc).replace(".", ",")} / ${n}</b></div>

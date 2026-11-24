@@ -712,3 +712,40 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: v
 /* 24.11 soir : fenêtre 💬 — la croix reste en haut à droite même quand le titre passe à la ligne */
 .fab-sheet > .card { position: relative; padding-right: 44px; }
 .fab-sheet #fabx { position: absolute; top: 8px; right: 8px; }
+
+/* ---- Ergonomie téléphone (24.11, audit tools/ergonomie.md) ---- */
+/* Cases de l'accueil : le nom reste aligné sur sa rangée même quand une case a une ligne de plus (« 2 à effacer »). */
+.door { align-content: start; }
+/* Zones tactiles d'au moins 44 px : boutons discrets, choix à pastilles, titres repliables (rappel, correction, commentaire). */
+.btn-ghost, .seg button { min-height: 44px; }
+details.lesson { padding: 2px 12px; }
+details.lesson summary, details.cmt summary { padding: 11px 0; }
+details.solfull summary { padding: 11px 0; margin-top: 0; }
+/* Clavier : colonnes égales (les chiffres, les plus touchés, étaient plus étroits que les touches à légende). */
+.keypad { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.keypad.k-num { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.keypad button { min-width: 0; overflow: hidden; }
+.keypad .k-sub { white-space: nowrap; font-size: .62rem; }
+/* Carnet d'erreurs ouvert depuis l'accueil : le titre de la page suffit, pas de surtitre identique juste en dessous. */
+.home-panel[data-tab="carnet"] > .card > .eyebrow:first-child { display: none; }
+/* Fenêtre 💬 : les deux choix « cette question / l'application » se touchent sur toute la ligne, pas seulement sur le rond. */
+.fab-sujet label { display: flex; align-items: center; gap: 8px; min-height: 40px; margin-right: 0; cursor: pointer; }
+.fab-sujet input[type="radio"] { width: 20px; height: 20px; margin: 0; flex: none; }
+/* Listes à cocher longues (Je prépare un test : jusqu'à 4 400 px en 11e ; chapitre en classe) : le bouton d'enregistrement
+   reste visible en bas de l'écran pendant le défilement, au lieu d'attendre tout en bas de la liste. */
+.save-sticky { position: sticky; bottom: 12px; z-index: 5; }
+/* Message d'erreur de ces listes (« Coche au moins une notion », « 5 notions au plus ») : collé juste au-dessus du bouton,
+   sinon il s'affichait tout en bas de la liste, hors de l'écran. */
+#nerr:not(:empty), #perr:not(:empty) { position: sticky; bottom: calc(26px + 3.5rem); z-index: 5; background: var(--warn-soft); color: var(--warn); border: 1px solid var(--warn); padding: 6px 10px; border-radius: 10px; }
+/* Mes grades : icônes de grade à toucher (30 × 36 px) agrandies à 44 px par une zone invisible, sans changer l'échelle. */
+.grades .grade-open { position: relative; }
+.grades .grade-open::after { content: ""; position: absolute; inset: -4px -7px; }
+/* 👍 / 👎 sous la correction : 46 × 38 px → 44 px de haut. */
+.vote button { min-height: 44px; min-width: 44px; }
+/* En classe / Libre (24.11, revue d'un testeur) : une phrase sous chaque choix ; celle du mode choisi en encre normale. */
+.sess-subs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; line-height: 1.3; }
+.sess-subs span { padding: 0 4px; text-align: center; }
+.sess-subs span.on { color: var(--ink); }
+/* Police plus lisible proposée à la 1re question du calibrage */
+.font-hint { align-self: flex-start; font-size: 0.85rem; }
+.goal { margin-top: 4px; }
