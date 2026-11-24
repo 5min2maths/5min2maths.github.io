@@ -743,6 +743,8 @@ const RICHU = (() => {
         wins: [W(9.25, "6,80 + 2,45 = 9,25 CHF."), W(1.65, "2,40 − 0,75 = 1,65 m."), W(4.65, "20,00 − 15,35 = 4,65 CHF. Vérifie : 15,35 + 4,65 = 20.")] }),
     },
     dec10: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(\\cdot\\,10\\) : la virgule avance d'un rang vers la droite ; \\(: 10\\) : elle recule d'un rang. Avec 100, deux rangs ; avec 1000, trois rangs. On complète avec des zéros si besoin.", exemple: ["\\(3{,}47 \\cdot 100 = 347\\)", "\\(0{,}806 \\cdot 100 = 80{,}6\\)", "\\(52{,}6 : 1000 = 0{,}0526\\)"], piege: "\\(4{,}5 : 100 = 0{,}045\\) : on complète avec un zéro pour reculer de deux rangs." },
       predict: { q: "3,47 · 100 = ?", choices: ["34,7", "347", "3,4700"], good: 1, why: "Multiplier par 100, c'est rendre chaque chiffre 100 fois plus grand : chaque chiffre avance de deux rangs. 3 unités → 3 centaines." },
       defis: ["Transforme 0,806 en 80,6.", "Transforme 52,6 en 0,0526.", "Transforme 4,5 en 0,045."],
       play: hunt({ label: "Opération", start: 0, min: -3, max: 3, fmt: (x) => (x === 0 ? "aucune" : x > 0 ? "· " + nb(10 ** x) : "÷ " + nb(10 ** -x)),
@@ -775,6 +777,8 @@ const RICHU = (() => {
         wins: [W(186, "4 · 46,50 = 186 CHF."), W(6.9, "27,60 ÷ 4 = 6,90 CHF."), W(0.95, "3 · 1,35 = 4,05 m, puis 5 − 4,05 = 0,95 m.")] }),
     },
     pow9: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(a^n\\) est le produit de \\(n\\) facteurs égaux à \\(a\\).", exemple: ["\\(0{,}3^2 = 0{,}3 \\cdot 0{,}3 = 0{,}09\\)", "\\(2^4 + 3^2 = 16 + 9 = 25\\)"] },
       predict: { q: "2³ = ?", choices: ["6", "8", "9"], good: 1, why: "2³ = 2 · 2 · 2 = 8 : trois facteurs égaux à 2. Ce n'est pas 2 · 3." },
       garde: [1, 2],
       defis: ["Calcule 5³.", "Calcule 0,3².", "Calcule 2⁴ + 3²."],
@@ -793,6 +797,8 @@ const RICHU = (() => {
         wins: [W(3250, "3,25 · 1'000 = 3'250 m."), W(0.8, "8 mm = 8 ÷ 10 = 0,8 cm : vers une unité plus grande, on divise."), W(3150, "2300 + 850 = 3'150 kg : on additionne dans la même unité.")] }),
     },
     uaire: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "D'une unité d'aire à la suivante : \\(\\cdot\\,100\\). \\(1\\ \\text{m}^2 = 100\\ \\text{dm}^2 = 10'000\\ \\text{cm}^2\\). \\(1\\ \\text{ha} = 10'000\\ \\text{m}^2\\)." },
       predict: { q: "1 m² = … cm² ?", choices: ["100 cm²", "1'000 cm²", "10'000 cm²"], good: 2, why: "Un carré de 1 m de côté, c'est 100 cm sur 100 cm : 100 · 100 = 10'000 carrés de 1 cm²." },
       defis: ["Une feuille A4 mesure environ 6,2 dm². Combien de cm² ?", "Un appartement mesure 85 m². Combien de dm² ?", "Un champ mesure 3,5 ha. Combien de m² ?"],
       play: hunt({ ask: true, label: "Ta réponse",
@@ -801,6 +807,8 @@ const RICHU = (() => {
         wins: [W(620, "6,2 · 100 = 620 cm² : d'une unité d'aire à la suivante, · 100."), W(8500, "85 · 100 = 8'500 dm²."), W(35000, "3,5 · 10'000 = 35'000 m².")] }),
     },
     uvol: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Capacités : \\(1\\ \\text{L} = 10\\ \\text{dL} = 100\\ \\text{cL} = 1000\\ \\text{mL}\\). Un cube de 1 dm de côté contient 1 L : \\(1\\ \\text{dm}^3 = 1\\ \\text{L}\\).", exemple: ["\\(75\\ \\text{cL} = 750\\ \\text{mL}\\)", "\\(4{,}5\\ \\text{L} = 450\\ \\text{cL}\\), et \\(450 : 15 = 30\\) verres"], piege: "Mets les deux mesures dans la même unité avant de diviser : \\(4{,}5\\ \\text{L} = 450\\ \\text{cL}\\)." },
       predict: { q: "Un cube de 1 dm de côté, rempli d'eau, contient…", choices: ["1 L", "1 dL", "10 L"], good: 0, why: "1 dm³ = 1 L : c'est la définition du litre. Une brique de lait de 1 L est presque un cube de 1 dm de côté." },
       defis: ["Une bouteille contient 75 cL. Combien de mL ?", "Un aquarium a un volume de 0,12 m³. Combien de litres ?", "Combien de verres de 15 cL remplit-on avec un bidon de 4,5 L ?"],
       play: hunt({ ask: true, label: "Ta réponse",
@@ -818,6 +826,8 @@ const RICHU = (() => {
         wins: [W(115, "65° + 115° = 180° : l'angle plat."), W(125, "140° + 95° + 125° = 360° : l'angle plein."), W(120, "360° ÷ 12 = 30° par heure ; 4 · 30° = 120°, un angle obtus.")] }),
     },
     quadri: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Parallélogramme : côtés opposés parallèles et égaux, angles consécutifs de somme \\(180°\\), diagonales qui se coupent en leur milieu. Losange : 4 côtés égaux. Rectangle : 4 angles droits, diagonales égales. Carré : losange et rectangle.", exemple: ["Losange de périmètre 36 cm : côté 9 cm", "Parallélogramme : un angle de 70°, le suivant de 110°", "Rectangle, \\(AC = 13\\) cm : \\(OB = 6{,}5\\) cm"] },
       predict: { q: "Un carré est-il un losange ?", choices: ["Oui", "Non"], good: 0, why: "Un losange a 4 côtés égaux : le carré aussi. Le carré est à la fois un losange et un rectangle." },
       defis: ["Un losange a un périmètre de 36 cm. Longueur d'un côté (en cm) ?", "Dans un parallélogramme, un angle mesure 70°. Combien mesure l'angle voisin (consécutif) ?", "Les diagonales du rectangle ABCD se coupent en O ; AC = 13 cm. Longueur OB (en cm) ?"],
       play: hunt({ ask: true, label: "Ta réponse",
@@ -1042,6 +1052,8 @@ const RICHU = (() => {
   Object.assign(ACTIVE, {
     // ---------- 7. 3D ----------
     solides: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Prisme droit de base à \\(n\\) côtés : \\(n + 2\\) faces (dont les 2 bases), \\(2n\\) sommets, \\(3n\\) arêtes.", exemple: ["Prisme à base triangulaire : 5 faces, 6 sommets, 9 arêtes", "Base à 5 côtés : 10 sommets ; 30 arêtes : base à 10 côtés"] },
       predict: { q: "Une tente a la forme d'un prisme couché, à base triangulaire. Combien de faces a ce solide ?", choices: ["3", "5", "6"], good: 1,
         why: "3 faces rectangulaires (les deux pans du toit et le sol), plus les 2 bases triangulaires (l'avant et l'arrière) : 5 faces. On oublie souvent les bases." },
       defis: ["Ce prisme droit a une base à 5 côtés (un pentagone). Combien a-t-il de sommets ?", "Ce prisme droit a une base à 6 côtés (un hexagone). Combien a-t-il d'arêtes ?", "Un prisme droit a 30 arêtes. Combien de côtés a sa base ?"],
@@ -1052,6 +1064,8 @@ const RICHU = (() => {
         wins: [W(10, "5 sommets en haut, 5 en bas : 10 sommets (2 · 5)."), W(18, "6 arêtes en haut, 6 en bas, 6 verticales : 18 arêtes (3 · 6)."), W(10, "30 = 3 · 10 : la base a 10 côtés (10 en haut, 10 en bas, 10 verticales).")] }),
     },
     volpave: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Pavé : \\(V = a \\cdot b \\cdot c\\) (le nombre de cubes-unités). Cube : \\(V = a^3\\), aire totale \\(6a^2\\) (6 faces carrées).", exemple: ["Pavé 8 × 5 × 3 cm : \\(V = 120\\ \\text{cm}^3\\)", "Cube d'arête 5 cm : aire \\(6 \\cdot 25 = 150\\ \\text{cm}^2\\)"] },
       predict: { q: "Combien de petits cubes de 1 cm d'arête faut-il pour construire un cube de 2 cm d'arête ?", choices: ["4", "6", "8"], good: 2,
         why: "Deux étages de 2 · 2 = 4 cubes : 2 · 2 · 2 = 8. Le cube a 6 faces, mais il est fait de 8 petits cubes." },
       defis: ["Combien de cubes-unités forment ce pavé ?", "Un pavé mesure 8 cm × 5 cm × 3 cm. Quel est son volume (en cm³) ?", "Un cube a des arêtes de 5 cm. Quelle est l'aire totale de ses 6 faces (en cm²) ?"],
@@ -1064,6 +1078,8 @@ const RICHU = (() => {
 
     // ---------- 8. Écriture fractionnaire ----------
     fracrep: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Même dénominateur : la plus grande a le plus grand numérateur. Dénominateurs différents : on amplifie pour avoir le même dénominateur.", exemple: ["\\(\\frac{2}{3} = \\frac{4}{6}\\)", "\\(\\frac{3}{4} = \\frac{9}{12} < \\frac{10}{12} = \\frac{5}{6}\\)"] },
       predict: { q: "Quelle fraction est la plus grande : 1/3 ou 1/4 ?", choices: ["1/3", "1/4", "elles sont égales"], good: 0,
         why: "Partager en 3 donne de plus grosses parts que partager en 4 : 1/3 > 1/4, même si 4 est plus grand que 3." },
       defis: ["Place \\(\\frac{7}{4}\\) sur la droite graduée.", "La droite est maintenant graduée en sixièmes. Place \\(\\frac{2}{3}\\).", "En douzièmes, place la plus grande des deux fractions \\(\\frac{3}{4}\\) et \\(\\frac{5}{6}\\)."],
@@ -1092,6 +1108,8 @@ const RICHU = (() => {
       },
     },
     fracsimp: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["\\(\\frac{3}{4} = \\frac{9}{12}\\) (amplifiée par 3)", "\\(\\frac{12}{18} = \\frac{2}{3}\\) (simplifiée par 6)"], piege: "\\(\\frac{12}{18} = \\frac{6}{9}\\) est simplifiée, mais pas encore irréductible." },
       predict: { q: "Compare 2/3 et 4/6.", choices: ["2/3 est plus grand", "elles sont égales", "4/6 est plus grand"], good: 1,
         fig: svg(320, 64, (() => { let g = ""; for (const [a, b, y] of [[2, 3, 6], [4, 6, 36]]) for (let i = 0; i < b; i++) g += `<rect x="${20 + (i * 280) / b}" y="${y}" width="${280 / b}" height="22" class="${i < a ? "f-fill" : "f-soft"}" style="stroke:var(--ink);stroke-width:1.2"/>`; return g; })(), "barres 2 sur 3 et 4 sur 6"),
         why: "Si on coupe chaque tiers en 2, on obtient des sixièmes : 2 tiers = 4 sixièmes. Même quantité, autre écriture." },
@@ -1123,6 +1141,8 @@ const RICHU = (() => {
       },
     },
     fracper: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["\\(\\frac{8}{3} = 2{,}666\\ldots\\)", "\\(1{,}222\\ldots = 1 + \\frac{2}{9} = \\frac{11}{9}\\)"] },
       garde: [0, 2],
       predict: { q: "Combien vaut 1 ÷ 3 ?", choices: ["0,3", "0,33", "0,333… (des 3 sans fin)"], good: 2,
         why: "En posant 1 ÷ 3, le reste 1 revient à chaque étape : le chiffre 3 se répète sans fin. 0,33 = 33/100 est un peu plus petit que 1/3." },
@@ -1146,6 +1166,8 @@ const RICHU = (() => {
         wins: [W(3.5, "14 ÷ 4 = 3,5 ; vérifie : 6 · 3,5 = 21 et 10 · 3,5 = 35. Le coefficient est 3,5."), W(3.2, "8 · 0,4 = 3,2 km (et 5 · 0,4 = 2 km)."), W(25, "6 + 4 = 10 cahiers, donc 15 + 10 = 25 CHF : dans un tableau proportionnel, on peut additionner des colonnes.")] }),
     },
     prop: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { piege: "Deux croissants de plus ne coûtent pas 2 CHF de plus : passe par le prix d'un croissant." },
       predict: { q: "4 croissants coûtent 6 CHF. Combien coûtent 6 croissants ?", choices: ["8 CHF", "9 CHF", "12 CHF"], good: 1,
         why: "1 croissant coûte 6 ÷ 4 = 1,50 CHF, donc 6 croissants : 6 · 1,50 = 9 CHF. Deux croissants de plus ne coûtent pas 2 CHF de plus." },
       defis: ["5 m de tissu coûtent 42 CHF. Combien coûte 1 m ?", "Combien coûtent 8 m de ce tissu ?", "Une voiture consomme 6,3 L d'essence pour 90 km. Combien pour 250 km ?"],

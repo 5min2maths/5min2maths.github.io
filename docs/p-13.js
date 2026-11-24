@@ -591,12 +591,16 @@
   };
   Object.assign(ACTIVE, {
     droites: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Pente par deux points : \\(m = \\frac{y_B - y_A}{x_B - x_A}\\) (variation verticale ÷ variation horizontale) : quand x augmente de 1, y augmente de \\(m\\). Deux droites perpendiculaires ont des pentes dont le produit vaut \\(-1\\).", exemple: ["Par \\((0 \\, ; 1)\\) et \\((2 \\, ; 5)\\) : \\(m = \\frac{4}{2} = 2\\)", "Perpendiculaire à \\(y = 3x - 1\\) : pente \\(-\\frac{1}{3}\\)"], piege: "Perpendiculaire à une pente 3 : pente \\(-\\frac{1}{3}\\) (produit \\(-1\\)), pas \\(-3\\)." },
       predict: { q: "Une droite passe par (0 ; 1) et (2 ; 5). Sa pente vaut…", choices: ["2", "4", "1/2"], good: 0, why: "Pente = variation verticale ÷ variation horizontale = (5 − 1) ÷ (2 − 0) = 4 ÷ 2 = 2 : quand x augmente de 1, y augmente de 2." },
       defis: ["Pente de la droite qui passe par (1 ; 3) et (4 ; 9) ?", "La droite y = 2x + h passe par (3 ; 4). Que vaut h ?", "Pente d'une droite perpendiculaire à y = 3x − 1 ? (fraction)"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["(9 − 3) ÷ (4 − 1)", "4 = 2 · 3 + h", "pente · 3 = −1"][s] + tu(x)),
         wins: [W(2, "6 ÷ 3 = 2."), W(-2, "4 = 6 + h, donc h = −2."), W(-1 / 3, "Perpendiculaires : produit des pentes = −1, donc −1/3.")] }),
     },
     droitesinter: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Intersection de deux droites : au point commun, les deux \\(y\\) sont égaux. On égale les deux expressions, on résout en \\(x\\), puis on calcule \\(y\\).", exemple: ["\\(y = x + 1\\) et \\(y = -x + 5\\) : \\(x + 1 = -x + 5\\), donc \\(x = 2\\) et \\(y = 3\\).", "Offres \\(20 + 2x\\) et \\(50 + x\\) : \\(20 + 2x = 50 + x\\), même prix pour 30 km."], piege: "Le point d'intersection a deux coordonnées : une fois \\(x\\) trouvé, calcule \\(y\\)." },
       predict: { q: "Les droites y = x + 1 et y = −x + 5 se coupent pour x = …", choices: ["2", "3", "1"], good: 0, why: "Au point d'intersection, les deux y sont égaux : x + 1 = −x + 5, donc 2x = 4 et x = 2 (puis y = 3)." },
       // Défis repris le 22.11 (« les défis, c'est confusing ») : toujours la même tâche (l'abscisse du point commun),
       // avec le graphique des deux droites ; la réponse tapée place une verticale qui montre les deux y.
@@ -605,12 +609,16 @@
         wins: [W(4, "2 · 4 − 1 = 7 et 4 + 3 = 7 : les droites se coupent en (4 ; 7)."), W(2, "3 · 2 − 2 = 4 et −2 + 6 = 4 : point commun (2 ; 4)."), W(30, "20 + 2 · 30 = 80 CHF et 50 + 30 = 80 CHF : pour 30 km, même prix ; au-delà, B est moins chère.")] }),
     },
     recipaff: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Si \\(f(a) = b\\), alors \\(f^{-1}(b) = a\\) : \\(f^{-1}(b)\\) est le nombre dont l'image vaut \\(b\\), on résout \\(f(x) = b\\). Le point \\((a ; b)\\) du graphique de \\(f\\) devient \\((b ; a)\\) sur celui de \\(f^{-1}\\).", exemple: ["\\(f(x) = 2x + 3\\) : \\(2x + 3 = 11\\), donc \\(f^{-1}(11) = 4\\)", "\\(f(x) = 3x - 6\\) : \\(3x - 6 = 0\\), donc \\(f^{-1}(0) = 2\\)", "\\((2 ; 9)\\) sur \\(f\\) donne \\((9 ; 2)\\) sur \\(f^{-1}\\)"] },
       predict: { q: "f(x) = 2x + 3. Que vaut f⁻¹(11) ?", choices: ["4", "25", "1/11"], good: 0, why: "f⁻¹(11) est le nombre dont l'image vaut 11 : 2x + 3 = 11, donc x = 4. (25, c'est f(11) ; 1/11 n'a rien à voir.)" },
       defis: ["f(x) = 3x − 6. Que vaut f⁻¹(0) ?", "f(x) = 5x + 2. Que vaut f⁻¹(27) ?", "Le point (2 ; 9) est sur le graphique de f. Le point de f⁻¹ d'ordonnée 2 a quelle abscisse ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["3x − 6 = 0", "5x + 2 = 27", "on échange x et y"][s] + tu(x)),
         wins: [W(2, "3x = 6, donc x = 2."), W(5, "5x = 25, donc x = 5."), W(9, "La réciproque échange les coordonnées : (9 ; 2).")] }),
     },
     trigcercle: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Un tour complet mesure \\(2\\pi\\) radians, donc \\(180° = \\pi\\) rad. Le point associé à l'angle \\(\\alpha\\) a pour coordonnées \\((\\cos\\alpha \\, ; \\sin\\alpha)\\). Pour un angle du 2e quadrant, on part de l'angle de référence (120° → 60°) et on met le signe du quadrant.", exemple: ["\\(\\frac{\\pi}{6}\\) rad \\(= \\frac{180°}{6} = 30°\\)", "\\(\\cos 120° = -\\cos 60° = -0{,}5\\)"] },
       predict: { q: "Un demi-tour (180°) vaut combien de radians ?", choices: ["π", "2π", "180"], good: 0, why: "Un tour complet mesure 2π radians (le périmètre du cercle de rayon 1), donc un demi-tour vaut π." },
       defis: ["Combien de degrés vaut π/6 rad ?", "135° = k · π/4. Que vaut k ?", "cos 120° (en décimal) ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["π = 180°, donc π/6 = 180° ÷ 6", "π/4 = 45°", "120° : quadrant 2, angle de référence 60°"][s] + tu(x)),
@@ -635,30 +643,40 @@
         wins: [W(150, "180° − 30° = 150°."), W(120, "180° − 60° = 120° (l'autre est 240°)."), W(225, "45° + 180° = 225°.")] }),
     },
     trigassoc: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(\\sin(180° - \\alpha) = \\sin \\alpha\\) (symétrie par rapport à l'axe vertical : même ordonnée). \\(\\cos(-\\alpha) = \\cos \\alpha\\) (même abscisse). Toujours : \\(\\sin^2 \\alpha + \\cos^2 \\alpha = 1\\).", exemple: ["\\(\\sin \\alpha = 0{,}6\\) : \\(\\sin(180° - \\alpha) = 0{,}6\\)", "\\(\\cos \\alpha = 0{,}8\\) : \\(\\cos(-\\alpha) = 0{,}8\\)", "\\(\\sin \\alpha = 0{,}6\\), \\(\\alpha\\) aigu : \\(\\cos^2 \\alpha = 1 - 0{,}36 = 0{,}64\\), \\(\\cos \\alpha = 0{,}8\\)"], piege: "Avec \\(\\sin^2 \\alpha + \\cos^2 \\alpha = 1\\), choisis le signe selon le quadrant : positif pour un angle aigu." },
       predict: { q: "Si sin α = 0,6, alors sin(180° − α) vaut…", choices: ["0,6", "−0,6", "0,8"], good: 0, why: "α et 180° − α sont symétriques par rapport à l'axe vertical : même ordonnée, donc même sinus." },
       defis: ["cos α = 0,8. Que vaut cos(−α) ?", "sin α = 0,6. Que vaut sin(180° + α) ?", "sin α = 0,6 et α aigu. Que vaut cos α ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["−α : symétrie par rapport à l'axe horizontal", "180° + α : symétrie par rapport au centre", "cos² α = 1 − sin² α"][s] + tu(x)),
         wins: [W(0.8, "Même abscisse, donc cos(−α) = cos α = 0,8."), W(-0.6, "Point opposé : ordonnée opposée, −0,6."), W(0.8, "cos² α = 1 − 0,36 = 0,64, donc cos α = 0,8 (positif, angle aigu).")] }),
     },
     trigeq2: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(h(t) = d + a\\sin(bt)\\) : hauteur moyenne \\(d\\), amplitude \\(a\\) ; maximum \\(d + a\\), minimum \\(d - a\\). Période : \\(\\frac{360°}{b}\\). Le premier maximum arrive quand \\(bt = 90°\\).", exemple: ["\\(h(t) = 4 + 2\\sin(30t)\\) : maximum 6 m, période \\(360 \\div 30 = 12\\) h", "Marée haute : \\(30t = 90\\), donc \\(t = 3\\) h"], piege: "4 m est la hauteur moyenne et 2 m l'amplitude : le maximum est \\(4 + 2 = 6\\) m." },
       predict: { q: "La marée d'un port : h(t) = 4 + 2 sin(30t) (en m). La hauteur maximale est…", choices: ["6 m", "4 m", "2 m"], good: 0, why: "sin vaut au plus 1 : 4 + 2 · 1 = 6 m. (4 m, c'est la hauteur moyenne ; 2 m, l'amplitude.)" },
       defis: ["Période de h, en heures (le sinus fait un tour pour 30t = 360) ?", "Hauteur minimale (en m) ?", "À quelle heure la marée est-elle haute pour la première fois ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["30t = 360", "sin vaut au moins −1", "30t = 90"][s] + tu(x)),
         wins: [W(12, "t = 12 h : deux marées hautes par jour."), W(2, "4 − 2 = 2 m."), W(3, "t = 3 h.")] }),
     },
     triaire: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Aire du triangle : \\(\\frac{1}{2} \\cdot a \\cdot b \\cdot \\sin\\gamma\\), où \\(\\gamma\\) est l'angle entre les côtés \\(a\\) et \\(b\\). Un parallélogramme est fait de deux tels triangles : aire \\(a \\cdot b \\cdot \\sin\\gamma\\).", exemple: ["\\(a = 6\\), \\(b = 8\\), \\(\\gamma = 30°\\) : aire \\(= \\frac{1}{2} \\cdot 48 \\cdot \\frac{1}{2} = 12\\).", "Angle droit : \\(\\sin 90° = 1\\), aire \\(\\frac{1}{2} \\cdot 10 \\cdot 4 = 20\\).", "Parallélogramme 5 et 8, angle 30° : \\(5 \\cdot 8 \\cdot 0{,}5 = 20\\)."] },
       predict: { q: "Un triangle a deux côtés de 6 cm et 8 cm qui forment un angle de 30°. Son aire vaut…", choices: ["12 cm²", "24 cm²", "48 cm²"], good: 0, why: "Aire = ½ · 6 · 8 · sin 30° = ½ · 48 · 0,5 = 12 cm². La hauteur sur le côté 8 vaut 6 · sin 30° = 3." },
       defis: ["Côtés 10 et 4, angle de 90° entre eux : aire ?", "Côtés 6 et 6, angle de 150° : aire ? (sin 150° = 0,5)", "Parallélogramme de côtés 5 et 8, angle de 30° : aire ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["½ · 10 · 4 · sin 90°", "½ · 6 · 6 · 0,5", "5 · 8 · sin 30° (deux triangles)"][s] + tu(x)),
         wins: [W(20, "sin 90° = 1 : on retrouve base × hauteur ÷ 2 = 20."), W(9, "½ · 36 · 0,5 = 9."), W(20, "40 · 0,5 = 20.")] }),
     },
     statfreq: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Fréquence \\(= \\frac{\\text{effectif}}{\\text{effectif total}}\\) (souvent en \\(\\%\\)). Diagramme circulaire : angle \\(= \\text{fréquence} \\cdot 360°\\).", exemple: ["10 sur 40 : \\(25\\,\\%\\), angle \\(0{,}25 \\cdot 360° = 90°\\)", "Secteur de 72° : \\(\\frac{72}{360} = 20\\,\\%\\)"] },
       predict: { q: "Sur 40 personnes, 10 répondent « oui ». La fréquence de « oui » est…", choices: ["25 %", "10 %", "40 %"], good: 0, why: "Fréquence = effectif ÷ total = 10 ÷ 40 = 0,25 = 25 %." },
       defis: ["Angle du secteur « oui » (10 sur 40) dans un diagramme circulaire ?", "30 % de 60 personnes, c'est combien de personnes ?", "Un secteur mesure 72° : quel pourcentage ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["0,25 · 360°", "0,3 · 60", "72 ÷ 360"][s] + tu(x)),
         wins: [W(90, "Un quart du tour : 90°."), W(18, "0,3 · 60 = 18."), W(20, "72 ÷ 360 = 0,2 = 20 %.")] }),
     },
     stats: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Moyenne : la somme des valeurs divisée par l'effectif. Médiane : la valeur du milieu de la série triée. Une valeur extrême tire la moyenne, pas la médiane.", exemple: ["Série 2 ; 3 ; 100 : moyenne 35, médiane 3.", "Notes 4 et 5, moyenne visée 5 : somme \\(3 \\cdot 5 = 15\\), 3e note 6."] },
       predict: { q: "Série 2 ; 3 ; 100. Quel nombre représente le mieux une valeur « typique » ?", choices: ["la médiane, 3", "la moyenne, 35", "l'étendue, 98"], good: 0, why: "La valeur extrême 100 tire la moyenne vers le haut (35) ; la médiane (3) n'est pas influencée." },
       defis: ["Moyenne de 4 ; 5 ; 9 ?", "Médiane de 7 ; 1 ; 4 ; 10 ; 3 ?", "Notes 4 et 5 : quelle 3e note pour une moyenne de 5 ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["(4 + 5 + 9) ÷ 3", "on trie : 1 ; 3 ; 4 ; 7 ; 10", "il faut une somme de 3 · 5 = 15"][s] + tu(x)),
@@ -852,6 +870,8 @@
 
   Object.assign(ACTIVE, {
     cart: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Distance : \\(AB = \\sqrt{(x_B - x_A)^2 + (y_B - y_A)^2}\\) (Pythagore dans le repère). Milieu \\(M\\) de \\([AB]\\) : la moyenne des abscisses et la moyenne des ordonnées.", piege: "Pour la distance, on élève les écarts au carré avant d'additionner : \\(\\sqrt{8^2 + 6^2} = 10\\), pas \\(8 + 6\\)." },
       predict: { q: "A(1 ; 2) et B(7 ; 10). Le milieu du segment [AB] est…", choices: ["(4 ; 6)", "(3 ; 4)", "(8 ; 12)"], good: 0,
         why: "On fait la moyenne des abscisses, (1 + 7) ÷ 2 = 4, et celle des ordonnées, (2 + 10) ÷ 2 = 6. (3 ; 4), c'est la moitié du déplacement de A vers B ; (8 ; 12), la somme des coordonnées." },
       defis: ["A(−1 ; 2) et B(7 ; 8) : quelle est l'abscisse du milieu M de [AB] ?", "Même segment : on avance de 8 et on monte de 6 (pointillés). Quelle est la longueur AB ?", "Un drone vole en ligne droite de P(−3 ; −2) à Q(9 ; 3) (1 unité = 100 m). Combien d'unités parcourt-il ?"],
@@ -884,6 +904,8 @@
         wins: [W(3, "P(−2) = −8 + 4 + 7 = 3. Attention au signe : (x + 2) = (x − (−2))."), W(-2, "−4 + 2 = −2 ; puis −2 · 2 = −4 et 7 − 4 = 3 : quotient 2x² + x − 2, reste 3 (= P(2))."), W(-3, "P(2) = 8 − 12 + 2k + 10 = 6 + 2k = 0, donc k = −3.")] }),
     },
     polyfact: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { piege: "On ne teste que les diviseurs du terme constant : pour 6, ce sont \\(\\pm 1\\), \\(\\pm 2\\), \\(\\pm 3\\), \\(\\pm 6\\) (ni 4, ni 5)." },
       predict: { q: "P(x) = x³ − 2x² − 5x + 6. Lequel de ces nombres a une chance d'être une racine entière de P ?", choices: ["4", "3", "5"], good: 1,
         why: "Une racine entière divise le terme constant 6 : on ne teste que ±1, ±2, ±3, ±6. 4 et 5 ne divisent pas 6. Et en effet P(3) = 27 − 18 − 15 + 6 = 0." },
       defis: ["P(x) = x³ − 4x² + x + 6. Teste les diviseurs de 6 : quelle est la plus petite racine positive ?", "On divise par (x − 2) : le quotient est x² − 2x − 3. Quelle est la plus grande racine de P ?", "Résous x³ − 7x + 6 = 0 : quelle est la racine négative ?"],
@@ -892,6 +914,8 @@
         wins: [W(2, "P(1) = 4, mais P(2) = 8 − 16 + 2 + 6 = 0 : 2 est une racine évidente."), W(3, "x² − 2x − 3 = (x − 3)(x + 1) : P(x) = (x − 2)(x − 3)(x + 1), racines −1, 2 et 3."), W(-3, "P(1) = 0 ; quotient x² + x − 6 = (x − 2)(x + 3) : racines 1, 2 et −3.")] }),
     },
     polyexpr: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["Zéros \\(-1, 1, 2\\) et \\(f(0) = 4\\) : \\(a \\cdot 1 \\cdot (-1) \\cdot (-2) = 4\\), donc \\(a = 2\\)", "Zéro double en 1 : \\(f(x) = a(x - 1)^2(x + 2)\\), \\(f(0) = 2a = 1\\), donc \\(a = 0{,}5\\)"] },
       predict: { q: "Une fonction polynomiale de degré 3 s'annule en −1, en 1 et en 2. Son expression peut être…", choices: ["(x + 1)(x − 1)(x − 2)", "(x − 1)(x + 1)(x + 2)", "x³ − 2"], good: 0,
         why: "Chaque zéro z donne un facteur (x − z) : −1 donne (x + 1), 1 donne (x − 1) et 2 donne (x − 2). Il peut encore y avoir un nombre a devant : a(x + 1)(x − 1)(x − 2)." },
       defis: ["f(x) = a(x + 1)(x − 1)(x − 2). Règle a pour que la courbe passe par le point (0 ; 4).", "f(x) = a(x + 2)(x − 1)(x − 3). Règle a pour que la courbe passe par (0 ; −3).", "Zéro double en 1 : f(x) = a(x − 1)²(x + 2). Règle a pour que la courbe passe par (0 ; 1)."],
@@ -956,6 +980,8 @@
         wins: [W(3, "1/4 + 1/12 = 3/12 + 1/12 = 4/12 = 1/3 de la clôture par heure : 3 h ensemble."), W(15, "1/t = 1/6 − 1/10 = 5/30 − 3/30 = 2/30 = 1/15 : 15 min."), W(15, "60/v − 60/(v + 5) = 1 donne v² + 5v − 300 = 0, soit (v − 15)(v + 20) = 0 : 15 km/h (4 h, contre 3 h à 20 km/h).")] }),
     },
     homog: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Asymptote verticale : là où le dénominateur s'annule, \\(x = -\\frac{d}{c}\\). Asymptote horizontale : pour x très grand, seuls les termes en \\(x\\) comptent, \\(y = \\frac{a}{c}\\).", exemple: ["\\(f(x) = \\frac{2x + 1}{x - 3}\\) : asymptote verticale \\(x = 3\\), horizontale \\(y = 2\\)."] },
       predict: { q: "f(x) = (2x + 1) ÷ (x − 3). Pour quelle valeur de x la fonction n'existe-t-elle pas ?", choices: ["3", "−3", "−1/2"], good: 0,
         why: "x = 3 annule le dénominateur. Près de 3, la courbe file vers le haut ou le bas : elle longe une droite verticale sans la toucher, l'asymptote verticale x = 3." },
       defis: ["f(x) = (ax + 1) ÷ (x + d). Règle d pour placer l'asymptote verticale en x = 3.", "Quand x devient très grand, la courbe longe une droite horizontale : l'asymptote horizontale. Règle a pour qu'elle soit y = −2.", "Règle a et d pour que la courbe passe par (0 ; 0,5) et ait pour asymptote horizontale y = 3."],
@@ -1012,6 +1038,8 @@
 
   Object.assign(ACTIVE, {
     expo: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(y = b^x\\) : quand x augmente de 1, on multiplie par \\(b\\). Si \\(b > 1\\), la courbe monte ; si \\(0 < b < 1\\), elle descend. Pour résoudre \\(b^{\\ldots} = b^{\\ldots}\\), on écrit les deux membres avec la même base et on égale les exposants.", exemple: ["\\(y = b^x\\) passe par \\((2 ; 9)\\) : \\(b^2 = 9\\), \\(b = 3\\)", "\\(4^x = 8\\) : \\(2^{2x} = 2^3\\), donc \\(x = \\frac{3}{2}\\)"], piege: "Écris d'abord les deux membres avec la même base : \\(4^x = (2^2)^x = 2^{2x}\\)." },
       predict: { q: "On plie une feuille de papier en deux, puis encore en deux… 10 fois de suite. Combien d'épaisseurs obtient-on ?", choices: ["20", "100", "1'024"], good: 2,
         why: "Chaque pliage multiplie le nombre d'épaisseurs par 2 : 2¹⁰ = 1'024. Multiplier par le même nombre à chaque étape, c'est une croissance exponentielle." },
       defis: ["Règle la base b pour que la courbe y = bˣ passe par le point (2 ; 9).", "Règle b pour que la courbe passe par (−2 ; 4). Que fait-elle quand x augmente ?", "Règle b pour que la courbe passe par (3 ; 8)."],
@@ -1027,6 +1055,8 @@
           { q: "résous \\(4^x = 8\\) (écris 4 et 8 comme puissances de 2).", ans: 1.5, ok: "4ˣ = 2²ˣ et 8 = 2³ : 2x = 3, donc x = 1,5.", no: "4ˣ = (2²)ˣ = 2²ˣ ; et 8 = 2³. Égale les exposants." }] }),
     },
     expfrac: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(a^{\\frac{1}{n}} = \\sqrt[n]{a}\\) et \\(a^{\\frac{p}{n}} = \\left(\\sqrt[n]{a}\\right)^p\\) (pour \\(a > 0\\)) : la racine, puis la puissance. Les règles restent vraies : \\(a^r \\cdot a^s = a^{r + s}\\), \\(a^{-r} = \\frac{1}{a^r}\\).", exemple: ["\\(9^{\\frac{1}{2}} = \\sqrt{9} = 3\\)", "\\(8^{\\frac{2}{3}} = (\\sqrt[3]{8})^2 = 4\\)", "\\(16^{-\\frac{3}{4}} = \\frac{1}{(\\sqrt[4]{16})^3} = \\frac{1}{8}\\)"] },
       predict: { q: "Que vaut \\(9^{\\frac{1}{2}}\\) ?", choices: ["4,5", "3", "81"], good: 1,
         why: "9^(1/2) · 9^(1/2) = 9^(1/2 + 1/2) = 9¹ = 9 : c'est le nombre positif qui, multiplié par lui-même, donne 9, donc √9 = 3. L'exposant 1/2 ne divise pas par 2 !" },
       defis: ["Calcule \\(125^{\\frac{1}{3}}\\).", "Calcule \\(8^{\\frac{2}{3}}\\).", "Calcule \\(16^{-\\frac{3}{4}}\\) (fraction acceptée)."], garde: [1, 2], // la 1re reprend le « Devine »
@@ -1034,6 +1064,8 @@
         wins: [W(5, "5³ = 125, donc 125^(1/3) = ∛125 = 5."), W(4, "∛8 = 2, puis 2² = 4."), W(1 / 8, "16^(1/4) = 2, 2³ = 8, et l'exposant négatif donne l'inverse : 1/8.")] }),
     },
     modexp: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(N(t) = N_0 \\cdot a^t\\) : on multiplie par le même nombre à chaque période. Intérêts composés : \\(C_n = C_0 (1 + \\frac{t}{100})^n\\). Doublement tous les \\(T\\) : \\(N = N_0 \\cdot 2^{t/T}\\) ; demi-vie \\(T\\) : \\(N = N_0 \\cdot 0{,}5^{t/T}\\).", exemple: ["1'000 CHF à \\(10\\,\\%\\) pendant 2 ans : \\(1\\text{'}000 \\cdot 1{,}1^2 = 1\\text{'}210\\) CHF", "Doublement toutes les 3 h : en 12 h, \\(\\cdot\\,2^4 = 16\\)", "80 g, demi-vie 8 jours : après 16 jours, \\(80 \\cdot 0{,}5^2 = 20\\) g"] },
       predict: { q: "On place 1'000 CHF à 10 % d'intérêts composés. Après 2 ans, on a…", choices: ["1'200 CHF", "1'210 CHF", "1'100 CHF"], good: 1,
         why: "1re année : 1'000 · 1,1 = 1'100 CHF. 2e année, les intérêts portent aussi sur les 100 CHF déjà gagnés : 1'100 · 1,1 = 1'210 CHF. On multiplie par 1,1 chaque année : 1'000 · 1,1²." },
       defis: ["1'000 CHF placés à 5 % par an : fais avancer le temps. Après combien d'années le capital dépasse-t-il 1'500 CHF pour la première fois ?", "1'000 bactéries doublent toutes les 3 heures. Après combien d'heures (entières) dépassent-elles 50'000 pour la première fois ?", "80 g d'iode 131 : la masse est divisée par 2 tous les 8 jours (demi-vie). Après combien de jours en reste-t-il 10 g ?"],
@@ -1058,6 +1090,8 @@
         wins: [W(19, "g(3) = 9, puis f(9) = 2 · 9 + 1 = 19."), W(49, "f(3) = 7, puis g(7) = 49. Donc f ∘ g et g ∘ f ne donnent pas la même chose."), W(-52, "f(g(−2)) = f(5) = 13 et g(f(−2)) = g(−8) = 65 : 13 − 65 = −52.")] }),
     },
     decomp: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["\\(\\sqrt{3x + 1}\\) : \\(g(x) = 3x + 1\\), \\(f(x) = \\sqrt{x}\\)", "\\((2x - 5)^3\\) : \\(g(x) = 2x - 5\\), \\(f(x) = x^3\\)"] },
       predict: { q: "h(x) = √(3x + 1). Pour calculer h(5), quelle opération fait-on en dernier ?", choices: ["la racine", "fois 3", "plus 1"], good: 0,
         why: "3 · 5 + 1 = 16, puis √16 = 4 : la racine vient en dernier. C'est la fonction « extérieure » f(x) = √x ; l'« intérieure » est g(x) = 3x + 1, et h = f ∘ g." },
       defis: ["h(x) = (2x − 5)³ = f(g(x)) avec f(x) = x³. Que vaut g(4) ?", "h(x) = 1 ÷ (x² + 4) = f(g(x)) avec g(x) = x² + 4. Que vaut f(8) ?", "h(x) = √(x² + 9) = f(g(x)). Calcule l'intérieur g(4), puis h(4) = f(g(4)). Que vaut h(4) ?"],
@@ -1096,6 +1130,8 @@
 
   Object.assign(ACTIVE, {
     bijection: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["\\(x^2\\) n'est pas injective sur \\(\\mathbb{R}\\) : \\(3^2 = (-3)^2 = 9\\)", "\\((x - 3)^2 + 1\\) : bijection de \\([3 \\, ; +\\infty[\\) vers \\([1 \\, ; +\\infty[\\)"] },
       predict: { q: "f(x) = x². Combien de nombres ont pour image 9 ?", choices: ["deux", "un", "aucun"], good: 0,
         why: "3² = 9 et (−3)² = 9 : deux nombres différents ont la même image. La fonction carré n'est donc pas injective sur ℝ : une droite horizontale coupe sa courbe deux fois." },
       defis: ["f(x) = (x − 3)² + 1 sur [m ; 7]. Règle m pour que toute droite horizontale coupe la courbe au plus une fois, en gardant le plus de nombres possible.", "f(x) = (x + 2)² − 4 sur [m ; 3]. Même consigne.", "g(x) = −(x − 1)² + 6 sur [m ; 4] (parabole tournée vers le bas). Même consigne."],
@@ -1123,6 +1159,8 @@
         wins: [W(5, "2x + 1 = 11 donne x = 5. Ainsi f⁻¹(11) = 5, et le point (5 ; 11) de f devient (11 ; 5) sur f⁻¹."), W(4, "x = (y + 4) ÷ 3 ; on échange les lettres, d'où f⁻¹(x) = (x + 4) ÷ 3. Vérification : f(2) = 2 et f⁻¹(2) = 2."), W(9, "(2 ; 9) sur f donne (9 ; 2) sur f⁻¹ : symétrie par rapport à la droite y = x.")] }),
     },
     log: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(\\log_b x = y\\) signifie \\(b^y = x\\) : le logarithme est un exposant. Sur la courbe \\(y = 2^x\\), on lit \\(\\log_2\\) d'une hauteur sur l'axe des x. Un logarithme peut être négatif.", exemple: ["\\(\\log_2 8 = 3\\), car \\(2^3 = 8\\) ; \\(\\log_2 32 = 5\\)", "\\(\\log_2 \\frac{1}{8} = -3\\), car \\(2^{-3} = \\frac{1}{8}\\)", "\\(\\log_2 \\sqrt{2} = \\frac{1}{2}\\)"], piege: "\\(\\log_2 8 = 3\\), l'exposant, et non \\(8 \\div 2 = 4\\)." },
       predict: { q: "log₂ 8 répond à la question…", choices: ["2 à quelle puissance donne 8 ?", "combien vaut 8 ÷ 2 ?", "8 à quelle puissance donne 2 ?"], good: 0,
         why: "log₂ 8 est l'exposant qu'il faut donner à 2 pour obtenir 8 : 2³ = 8, donc log₂ 8 = 3." },
       defis: ["Fais glisser le point sur la courbe y = 2ˣ jusqu'à la hauteur 32. Tu lis alors log₂ 32 sur l'axe des x.", "Même courbe : trouve log₂(1/8), c'est-à-dire la hauteur 0,125.", "Et log₂ √2 (hauteur ≈ 1,41) ?"],
@@ -1137,6 +1175,8 @@
           { q: "calcule \\(\\log 10\\,000 - \\log 0{,}1\\) (log sans base écrite : base 10).", ans: 5, ok: "log 10'000 = 4 et log 0,1 = −1 : 4 − (−1) = 5.", no: "10'000 = 10⁴ et 0,1 = 10⁻¹." }] }),
     },
     logbase: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(\\log_a b = \\frac{\\ln b}{\\ln a} = \\frac{\\log b}{\\log a}\\) (changement de base, pour la calculatrice).", piege: "\\(\\log_2 10 = \\log 10 \\div \\log 2\\), pas \\(\\log 10 - \\log 2\\) (qui vaut \\(\\log 5\\))." },
       predict: { q: "La calculatrice n'a pas de touche log₂. Pour calculer log₂ 10, on tape…", choices: ["log 10 ÷ log 2", "log 10 − log 2", "log(10 ÷ 2)"], good: 0,
         why: "Changement de base : log₂ 10 = log 10 ÷ log 2 ≈ 3,32. Vérification : 2^3,32 ≈ 10. (log 10 − log 2 = log 5, autre chose.)" },
       defis: ["Valeur exacte de \\(\\log_4 8\\) (écris 4 et 8 comme puissances de 2).", "Valeur exacte de \\(\\log_{27} 9\\) (fraction).", "5'000 bactéries triplent chaque heure. Après combien d'heures sont-elles 100'000 ? (au dixième)"],

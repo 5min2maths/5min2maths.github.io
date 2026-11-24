@@ -918,6 +918,8 @@
           (x) => (x === 2 || x === 3 ? "x = " + x + " : " + x + "² + 6 = " + (x * x + 6) + " et 5 · " + x + " = " + 5 * x + ". L'autre solution est " + (5 - x) + " (" + (5 - x) + "² + 6 = " + ((5 - x) ** 2 + 6) + " = 5 · " + (5 - x) + ")." : "")] }),
     },
     echelle: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Échelle \\(1\\,:\\,200\\) : 1 cm sur le plan représente 200 cm en réalité. On multiplie, puis on convertit les unités (100 cm = 1 m, 100'000 cm = 1 km).", exemple: ["Échelle \\(1\\,:\\,200\\), 7 cm sur le plan : \\(7 \\cdot 200 = 1\\text{'}400\\) cm, soit 14 m.", "3 km au \\(1\\,:\\,25\\text{'}000\\) : \\(300\\text{'}000 : 25\\text{'}000 = 12\\) cm.", "Pièce de 4 cm sur 3 cm au \\(1\\,:\\,100\\) : 4 m sur 3 m, aire 12 m²."], piege: "Le piège, c'est la conversion des unités : \\(100\\text{'}000\\) cm = 1 km." },
       predict: { q: "Sur une carte au 1 : 25'000, deux points sont à 4 cm l'un de l'autre. En vrai, ils sont à…", choices: ["1 km", "100 m", "10 km"], good: 0, why: "1 cm sur la carte = 25'000 cm en vrai. 4 · 25'000 = 100'000 cm = 1'000 m = 1 km. Le piège, c'est la conversion des unités." },
       defis: ["Sur ce plan au 1 : 200, le mur du haut mesure 7 cm. Sa longueur réelle, en m ?", "Le village et la ferme sont à 3 km l'un de l'autre. Distance sur la carte au 1 : 25'000, en cm ?", "Sur ce plan au 1 : 100, la pièce mesure 4 cm sur 3 cm. Son aire réelle, en m² ?"],
       play: hunt({ ask: true, label: "Ta réponse",
@@ -942,6 +944,8 @@
         wins: [W(6, "18 ÷ 300 = 0,06 = 6 % : 6 m de montée pour 100 m à l'horizontale."), W(30, "12 % = 0,12 ; 0,12 · 250 = 30 m."), W(15, "0,9 ÷ 0,06 = 15 m : une pente faible demande une longue rampe.")] }),
     },
     polyreg: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { piege: "L'angle au centre et l'angle intérieur ne sont pas le même angle : 72° et 108° pour le pentagone régulier." },
       predict: { q: "Chaque angle d'un hexagone régulier mesure…", choices: ["60°", "120°", "135°"], good: 1, why: "Du centre, l'hexagone se découpe en 6 triangles équilatéraux (angles de 60°). À chaque sommet, deux angles de 60° se rejoignent : 120°." },
       defis: ["Pentagone régulier : mesure de l'angle au centre ?", "Même pentagone : mesure de chaque angle intérieur ?", "Chaque angle intérieur d'un polygone régulier mesure 140°. Combien a-t-il de côtés ?"],
       play: hunt({ ask: true, label: "Ta réponse",

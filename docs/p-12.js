@@ -4533,6 +4533,8 @@
       play: balance([[3, 5, 0, 20], [5, -3, 2, 9], [-2, 7, 0, 15]]),
     },
     eqfrac: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Fractions : on multiplie chaque terme des deux membres par le plus petit dénominateur commun (un multiple de tous les dénominateurs). Un nombre seul est lui aussi multiplié. Il reste une équation sans fraction, qu'on résout.", exemple: ["\\(\\frac{x}{2} + \\frac{x}{3} = 5\\) ; fois 6 : \\(3x + 2x = 30\\), \\(x = 6\\).", "\\(\\frac{x}{4} - 1 = \\frac{x}{6}\\) ; fois 12 : \\(3x - 12 = 2x\\), \\(x = 12\\).", "\\(\\frac{x + 1}{2} = \\frac{x - 3}{3} + 2\\) ; fois 6 : \\(3(x + 1) = 2(x - 3) + 12\\), \\(x = 3\\)."] },
       predict: { q: "Pour faire disparaître les fractions de x/2 + x/3 = 5, on multiplie les deux membres par…", choices: ["5", "6", "2 + 3"], good: 1, why: "6 est un multiple de 2 et de 3 : 6 · x/2 = 3x et 6 · x/3 = 2x. Et le 5 devient 30." },
       defis: ["Résous x/2 + x/3 = 5 : multiplie d'abord par 6.", "Résous x/4 − 1 = x/6.", "Résous (x + 1)/2 = (x − 3)/3 + 2."],
       play: balance([[1 / 2 + 1 / 3, 0, 0, 5, "x/2 + x/3 = 5"], [1 / 4, -1, 1 / 6, 0, "x/4 − 1 = x/6"], [1 / 2, 1 / 2, 1 / 3, 1, "(x + 1)/2 = (x − 3)/3 + 2"]]),
@@ -4543,6 +4545,8 @@
       play: balance([[2, 3, 2, 5], [3, 3, 3, 3, "3(x + 1) = 3x + 3"], [4, 1, 1, 1, "4x + 1 = x + 1", "x = 0 : c'est une vraie solution, pas « aucune solution »."]]),
     },
     formule: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Les autres lettres se traitent comme des nombres. On défait les opérations qui entourent la lettre cherchée, de l'extérieur vers l'intérieur, en faisant la même opération des deux côtés.", exemple: ["\\(P = 4c\\), \\(c = \\frac{P}{4}\\).", "\\(v = \\frac{d}{t}\\), \\(vt = d\\), \\(t = \\frac{d}{v}\\).", "\\(A = \\frac{(B + b)h}{2}\\), \\(B + b = \\frac{2A}{h}\\), \\(B = \\frac{2A}{h} - b\\)."], piege: "Dans \\(A = \\frac{(B + b)h}{2}\\), on défait d'abord \\(: 2\\) et \\(\\cdot h\\), puis on soustrait \\(b\\) en dernier." },
       predict: { q: "Dans v = d/t, pour isoler t, la première opération est…", choices: ["× t des deux côtés", "÷ v des deux côtés", "− d des deux côtés"], good: 0, why: "t est au dénominateur : on le fait remonter en multipliant par t, v · t = d ; puis on divise par v." },
       defis: ["Isole c dans P = 4c.", "Isole t dans v = d/t.", "Isole B dans A = (B + b) · h / 2."],
       play: chooser([
@@ -4552,6 +4556,8 @@
       ]),
     },
     probeq: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["Trois entiers consécutifs de somme 48 : \\(n + (n + 1) + (n + 2) = 48\\), \\(n = 15\\).", "Somme 75 : \\(3n + 3 = 75\\), \\(n = 24\\) (24, 25, 26).", "Quatre consécutifs de somme 98 : \\(4n + 6 = 98\\), \\(n = 23\\)."], piege: "Écris ce que représente l'inconnue : ici \\(n\\) est le plus petit, celui du milieu est \\(n + 1\\)." },
       predict: { q: "Trois entiers consécutifs ont pour somme 48. Le plus petit est…", choices: ["16", "15", "14"], good: 1, why: "n + (n + 1) + (n + 2) = 3n + 3 = 48, donc n = 15 : 15 + 16 + 17 = 48. 16 est celui du milieu." },
       defis: ["Trouve trois entiers consécutifs de somme 48.", "Trouve trois entiers consécutifs de somme 75.", "Avec 4 nombres : trouve quatre entiers consécutifs de somme 98."],
       play(box, onWin) {
@@ -4569,6 +4575,8 @@
       },
     },
     eq2fact: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Méthode directe : \\(x^2 = a\\) a deux solutions \\(\\pm\\sqrt{a}\\) si \\(a > 0\\). Sinon : on ramène tout à gauche (\\(\\ldots = 0\\)), on met en évidence et on annule chaque facteur.", exemple: ["\\(x^2 = 16\\), \\(x = 4\\) ou \\(x = -4\\).", "\\(x^2 = 3x\\), \\(x(x - 3) = 0\\) : \\(x = 0\\) ou \\(x = 3\\)."] },
       predict: { q: "x² = 3x : combien de solutions ?", choices: ["Une : x = 3", "Deux : 0 et 3", "Aucune"], good: 1, why: "0² = 3 · 0 = 0 et 3² = 3 · 3 = 9 : deux solutions. Diviser par x aurait fait perdre x = 0." },
       defis: ["Trouve un nombre x tel que x² = 3x.", "Trouves-en un autre !", "Mode x² = 16 : trouve la solution négative."],
       play: hunt({ start: 1, min: -6, max: 6, show: (x, st) => st < 2
@@ -4577,12 +4585,16 @@
         wins: [(x, s) => (x * x === 3 * x ? (s.add(x), "x = " + nb(x) + " : " + sq(x) + " = " + nb(3 * x) + ".") : null), (x, s) => (x * x === 3 * x && !s.has(x) ? "Deux solutions : 0 et 3. x(x − 3) = 0." : null), (x) => (x === -4 ? "x = −4 : (−4)² = 16. x² = 16 a deux solutions, ±4." : null)] }),
     },
     eq2: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(A \\cdot B = 0 \\iff A = 0\\) ou \\(B = 0\\). On écrit l'équation sous forme « produit \\(= 0\\) », puis on résout chaque facteur \\(= 0\\).", exemple: ["\\((x - 2)(x + 5) = 0\\) : \\(x = 2\\) ou \\(x = -5\\).", "\\((x - 2)(x + 5) = -6\\) : on développe d'abord, \\(x^2 + 3x - 4 = 0\\), puis \\((x + 4)(x - 1) = 0\\)."] },
       predict: { q: "(x − 2)(x + 5) = 0. Une solution est…", choices: ["x = −2", "x = 2", "x = 5"], good: 1, why: "Si x = 2, le premier facteur vaut 0, donc le produit vaut 0. L'autre solution est x = −5." },
       defis: ["Trouve un x qui rend (x − 2)(x + 5) nul.", "Trouve l'autre.", "Trouve un x tel que (x − 2)(x + 5) = −6."],
       play: hunt({ start: 0, min: -8, max: 6, show: (x) => `<div class="act-out">(${nb(x)} − 2) · (${nb(x)} + 5) = ${nb(x - 2)} · ${nb(x + 5)} = <b>${nb((x - 2) * (x + 5))}</b></div>`,
         wins: [(x, s) => ((x - 2) * (x + 5) === 0 ? (s.add(x), "x = " + nb(x) + " : un facteur vaut 0, donc le produit aussi.") : null), (x, s) => ((x - 2) * (x + 5) === 0 && !s.has(x) ? "Les deux solutions : 2 et −5, une par facteur." : null), (x) => ((x - 2) * (x + 5) === -6 ? "x = " + nb(x) + " convient, mais ni x − 2 ni x + 5 ne vaut −6 : le produit nul ne marche qu'avec 0. Il faut développer : x² + 3x − 4 = 0, soit x = 1 ou x = −4." : null)] }),
     },
     eq2disc: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Pour \\(ax^2 + bx + c = 0\\), on calcule le discriminant \\(\\Delta = b^2 - 4ac\\). Si \\(\\Delta > 0\\) : deux solutions. Si \\(\\Delta = 0\\) : une solution. Si \\(\\Delta < 0\\) : aucune solution réelle (la parabole ne touche pas l'axe des x).", exemple: ["\\(x^2 - 4x + c = 0\\) : \\(\\Delta = 16 - 4c\\).", "\\(c = 4\\) : \\(\\Delta = 0\\), une solution ; \\(c > 4\\) : aucune ; \\(c < 0\\) : deux."], piege: "Dans \\(\\Delta = b^2 - 4ac\\), \\(b^2\\) est toujours positif : avec \\(b = -4\\), \\(b^2 = 16\\)." },
       predict: { q: "x² − 4x + c = 0. Si c devient très grand, le nombre de solutions…", choices: ["augmente", "devient 0", "reste 2"], good: 1, why: "La parabole monte : elle ne touche plus l'axe des x. Δ = 16 − 4c devient négatif dès que c > 4." },
       defis: ["Choisis c pour que l'équation ait exactement une solution.", "Choisis c pour qu'elle n'en ait aucune.", "Choisis c négatif : combien de solutions ?"],
       play(box, onWin) {
@@ -4605,12 +4617,16 @@
       },
     },
     probeq2: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["Rectangle de largeur \\(x\\), longueur \\(x + 3\\), aire 40 : \\(x^2 + 3x - 40 = 0\\), \\(x = 5\\) (on écarte \\(-8\\)).", "Aire 70 : \\(x^2 + 3x - 70 = 0\\), \\(x = 7\\) (on écarte \\(-10\\))."] },
       predict: { q: "Un rectangle a une longueur égale à sa largeur + 3 et une aire de 40. Sa largeur est…", choices: ["5", "8", "10"], good: 0, why: "5 · 8 = 40. L'équation x(x + 3) = 40 a aussi la solution −8, qu'on écarte : une largeur est positive." },
       defis: ["Trouve la largeur pour une aire de 40.", "Trouve la largeur pour une aire de 70.", "Et pour une aire de 28 ?"],
       play: hunt({ start: 2, min: 1, max: 12, label: "largeur x", show: (x) => `<svg class="fig" viewBox="0 0 320 ${Math.round(20 + x * 9)}" role="img" aria-label="rectangle"><rect x="10" y="10" width="${(x + 3) * 18}" height="${x * 9}" class="f-shape"/></svg><div class="act-out">Largeur ${nb(x)}, longueur ${nb(x + 3)}<br>Aire : ${nb(x)} · ${nb(x + 3)} = <b>${nb(x * (x + 3))}</b></div>`,
         wins: [(x) => (x * (x + 3) === 40 ? "x = 5 : x² + 3x − 40 = (x − 5)(x + 8) = 0 ; −8 est écarté." : null), (x) => (x * (x + 3) === 70 ? "x = 7 : 7 · 10 = 70." : null), (x) => (x * (x + 3) === 28 ? "x = 4 : (x − 4)(x + 7) = 0." : null)] }),
     },
     eq3: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "On ramène tout à gauche, on met en évidence \\(x\\), on factorise ce qui reste, puis on annule chaque facteur. Une équation de degré 3 a au plus trois solutions.", exemple: ["\\(x^3 - 4x = 0\\), \\(x(x - 2)(x + 2) = 0\\) : \\(-2\\), \\(0\\), \\(2\\).", "\\(x^3 - 9x = 0\\), \\(x(x - 3)(x + 3) = 0\\) : \\(-3\\), \\(0\\), \\(3\\)."] },
       predict: { q: "x³ − 4x = 0 : combien de solutions au plus ?", choices: ["1", "2", "3"], good: 2, why: "x(x − 2)(x + 2) = 0 : trois facteurs, trois solutions : −2, 0 et 2." },
       defis: ["Trouve une solution positive de x³ − 4x = 0.", "Trouve une solution négative.", "Trouve la troisième."],
       play: hunt({ start: 1, min: -4, max: 4, show: (x) => `<div class="act-out">${nb(x)}³ − 4 · ${nb(x)} = ${nb(x ** 3)} − ${nb(4 * x).replace("−", "(−") + (x < 0 ? ")" : "")} = <b>${nb(x ** 3 - 4 * x)}</b></div>`,
@@ -4703,6 +4719,8 @@
         wins: [W(6, "−x + 10 = x − 2, 2x = 12, x = 6 ; y = 4. Solution (6 ; 4)."), W(2, "2x + 1 = −x + 7, 3x = 6, x = 2 ; y = 5. Solution (2 ; 5)."), W(-2, "x + 3 = −2x − 3, 3x = −6, x = −2 ; y = 1. Solution (−2 ; 1).")] }),
     },
     sysprob: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["10 têtes et 28 pattes : si tout était des poules, 20 pattes ; il en manque 8, soit 4 lapins.", "35 têtes et 94 pattes : \\(p + \\ell = 35\\), \\(2p + 4\\ell = 94\\), donc 12 lapins et 23 poules."] },
       predict: { q: "Dans une ferme : 10 têtes et 28 pattes (poules et lapins). Combien de lapins ?", choices: ["4", "6", "5"], good: 0, why: "Si tous étaient des poules : 20 pattes. Il en manque 8, et chaque lapin ajoute 2 pattes : 4 lapins (et 6 poules)." },
       defis: ["10 têtes, 28 pattes : combien de lapins ?", "20 têtes, 56 pattes : combien de lapins ?", "35 têtes, 94 pattes : combien de lapins ?"],
       play: hunt({ label: "Lapins :",
@@ -4713,6 +4731,8 @@
         wins: [W(4, "4 lapins, 6 poules : 16 + 12 = 28."), W(8, "8 lapins, 12 poules : 32 + 24 = 56."), W(12, "Si tout était des poules : 70 pattes ; il en manque 24, soit 12 lapins.")] }),
     },
     sysgraph: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["\\(y = 2x + 1\\) et \\(y = 2x - 3\\) : parallèles, aucune solution.", "\\(x + y = 4\\) et \\(y = -x + 4\\) : confondues, une infinité.", "\\(y = x + 1\\) et \\(y = -x + 5\\) : sécantes en \\((2 \\,;\\, 3)\\)."] },
       predict: { q: "Le système y = 2x + 1 et y = 2x − 3 a…", choices: ["une solution", "aucune solution", "une infinité de solutions"], good: 1, why: "Même pente 2, ordonnées à l'origine différentes : droites parallèles, jamais de point commun." },
       defis: ["Quelle pente m rend y = mx + 1 parallèle à y = 3x − 2 ?", "Quelle valeur de b rend y = −x + b confondue avec la droite x + y = 4 ?", "Quelle pente m fait couper y = mx et y = 2x + 4 en x = 2 ?"],
       play: hunt({ label: "Valeur :",
@@ -4723,6 +4743,8 @@
         wins: [W(3, "Même pente 3 : parallèles (ordonnées 1 et −2 différentes), aucune solution."), W(4, "x + y = 4 s'écrit y = −x + 4 : avec b = 4, les droites sont confondues."), W(4, "2m = 2 · 2 + 4 = 8, donc m = 4.")] }),
     },
     sys3: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Un système « en escalier » (triangulaire) se résout de bas en haut : on trouve \\(z\\), puis on remonte pour \\(y\\), puis pour \\(x\\). Quand chaque ligne est la somme de deux inconnues, on additionne les trois lignes : on obtient \\(2(x + y + z)\\).", exemple: ["\\(\\begin{cases} x + y + z = 9 \\\\ y + z = 7 \\\\ z = 3 \\end{cases}\\) : \\(z = 3\\), \\(y = 4\\), \\(x = 2\\).", "\\(\\begin{cases} x + y = 7 \\\\ y + z = 9 \\\\ x + z = 8 \\end{cases}\\) : la somme des lignes donne \\(2x + 2y + 2z = 24\\), donc \\(x + y + z = 12\\)."] },
       predict: { q: "x + y + z = 6, y + z = 5 et z = 2. Que vaut x ?", choices: ["1", "3", "4"], good: 0, why: "On remonte : z = 2, puis y = 5 − 2 = 3, puis x = 6 − 3 − 2 = 1." },
       defis: ["Système x + y + z = 9, y + z = 7, z = 3 : que vaut y ?", "Même système : que vaut x ?", "x + y = 7, y + z = 9, x + z = 8 : additionne les trois lignes. Que vaut x + y + z ?"],
       play: hunt({ label: "Ta réponse :",
@@ -4739,6 +4761,8 @@
         wins: [W(2, "a = (5 − 1) ÷ (2 − 0) = 2."), W(-2, "b = 1 − 3 · 1 = −2 : f(x) = 3x − 2."), W(-0.5, "a = (2 − 4) ÷ (2 − (−2)) = −2 ÷ 4 = −0,5 : la droite descend.")] }),
     },
     affzero: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Zéro : on résout \\(ax + b = 0\\), \\(x = -\\frac{b}{a}\\). Si \\(a > 0\\), la fonction est négative avant le zéro et positive après ; si \\(a < 0\\), c'est l'inverse." },
       predict: { q: "f(x) = 2x − 6. Son zéro est…", choices: ["−6", "3", "6"], good: 1, why: "2x − 6 = 0 donne x = 3 : la droite coupe l'axe horizontal en 3. −6 est l'ordonnée à l'origine." },
       defis: ["Zéro de f(x) = 2x − 6 ?", "Zéro de f(x) = −3x + 12 ?", "Zéro de f(x) = 0,5x + 2 ?"],
       play: hunt({ label: "x =",
@@ -4814,6 +4838,8 @@
 
   Object.assign(ACTIVE, {
     pct: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Une hausse de \\(p\\,\\%\\) multiplie par \\(1 + \\frac{p}{100}\\) ; une baisse de \\(p\\,\\%\\), par \\(1 - \\frac{p}{100}\\). Hausse en % : l'augmentation divisée par le prix de départ. Pour retrouver le prix de départ, on divise par le coefficient.", exemple: ["De 50 à 60 CHF : \\(\\frac{10}{50} = 20\\,\\%\\) de hausse.", "Après \\(+25\\,\\%\\), 100 CHF : départ \\(100 \\div 1{,}25 = 80\\) CHF.", "\\(+20\\,\\%\\) puis \\(-20\\,\\%\\) : \\(\\cdot 1{,}2 \\cdot 0{,}8 = \\cdot 0{,}96\\), soit \\(-4\\,\\%\\)."], piege: "\\(+20\\,\\%\\) puis \\(-20\\,\\%\\) ne ramène pas au prix de départ : la baisse porte sur un prix déjà augmenté." },
       predict: { q: "Un prix augmente de 20 %, puis baisse de 20 %. Il est finalement…", choices: ["égal au prix de départ", "plus bas", "plus haut"], good: 1, why: "× 1,2 puis × 0,8 = × 0,96 : la baisse porte sur un prix déjà augmenté. Il baisse de 4 %." },
       defis: ["Prix de départ 100 CHF : prix après +20 % puis −20 % ?", "Un prix passe de 50 à 60 CHF : hausse en % ?", "Après une hausse de 25 %, un objet coûte 100 CHF. Prix de départ ?"],  garde: [1, 2], // la 1re reprend le « Devine »
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["100 · 1,2 · 0,8", "(60 − 50) ÷ 50", "100 ÷ 1,25"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
@@ -4850,6 +4876,8 @@
         wins: [W(3, "x_S = 6 ÷ 2 = 3."), W(-4, "f(3) = 9 − 18 + 5 = −4."), W(5, "(x − 1)(x − 5) = 0 : zéros 1 et 5.")] }),
     },
     optim: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["Rectangle de périmètre 20 : aire \\(x(10 - x)\\), maximale au sommet \\(x = 5\\) : un carré de 25 m²."] },
       predict: { q: "Avec 20 m de clôture, quel rectangle a la plus grande aire ?", choices: ["2 m × 8 m", "5 m × 5 m", "1 m × 9 m"], good: 1, why: "Aire x(10 − x), maximale au sommet x = 5 : un carré de 25 m²." },
       defis: ["Règle la largeur pour une aire de 21 m².", "Puis pour 24 m².", "Trouve l'aire maximale (largeur 5)."],
       play: hunt({ label: "Largeur (m)", start: 1, min: 1, max: 9,
@@ -4857,6 +4885,8 @@
         wins: [(x) => (x * (10 - x) === 21 ? "3 × 7 = 21 (ou 7 × 3)." : ""), (x) => (x * (10 - x) === 24 ? "4 × 6 = 24." : ""), W(5, "5 × 5 = 25 m² : le sommet de la parabole x(10 − x).")] }),
     },
     euclide: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Théorème de la hauteur : dans un triangle rectangle, la hauteur issue de l'angle droit coupe l'hypoténuse en deux segments \\(p\\) et \\(q\\), et \\(h^2 = p \\cdot q\\).", exemple: ["\\(p = 4\\) et \\(q = 9\\) : \\(h^2 = 36\\), donc \\(h = 6\\).", "\\(p = 2\\) et \\(q = 8\\) : \\(h^2 = 16\\), donc \\(h = 4\\)."], piege: "\\(h^2 = p \\cdot q\\) : la hauteur n'est pas la moyenne des deux segments (6, pas 6,5)." },
       predict: { q: "Triangle rectangle : la hauteur coupe l'hypoténuse en 4 cm et 9 cm. La hauteur mesure…", choices: ["6,5 cm", "6 cm", "13 cm"], good: 1, why: "Théorème de la hauteur : h² = 4 · 9 = 36, h = 6 (et non la moyenne 6,5)." },
       defis: ["h pour des segments de 4 et 9 ?", "Cathète a (projection 4, hypoténuse 13) au carré : a² = ?", "h pour des segments de 2 et 8 ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["h² = 4 · 9", "a² = p · c = 4 · 13", "h² = 2 · 8"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
@@ -4875,6 +4905,8 @@
         wins: [W(6, "sin 30° = 1/2 : 6."), W(100, "tan 45° = 1 : 100 %."), W(10, "cos 60° = 1/2 : 10.")] }),
     },
     ensembles: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\([a \\, ; b]\\) : bornes comprises. \\(]a \\, ; b[\\) : bornes exclues. \\([a \\, ; b[\\) : \\(a\\) compris, \\(b\\) exclu. Le crochet tourné vers l'extérieur exclut la borne." },
       predict: { q: "Combien de nombres entiers l'intervalle ]2 ; 5] contient-il ?", choices: ["4", "3", "2"], good: 1, why: "Crochet tourné vers l'extérieur en 2 : 2 est exclu ; 5 est compris. Il reste 3, 4, 5." },
       defis: ["Nombre d'entiers de [−3 ; 4] ?", "Nombre d'entiers de [−3 ; 4] ∩ ]0 ; 9[ ?", "Plus petit entier de ]−2 ; 7] ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["de −3 à 4, bornes comprises", "partie commune : ]0 ; 4]", "−2 est exclu"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
@@ -4887,12 +4919,16 @@
         wins: [W(7, "x − 7 = 0 pour x = 7."), W(-5, "x + 5 ≥ 0 ⇔ x ≥ −5."), W(4, "x² = 16 : ±4 interdits.")] }),
     },
     racinv: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(\\sqrt{x}\\) n'existe que pour \\(x \\ge 0\\) ; \\(\\frac{1}{x}\\) n'existe que pour \\(x \\ne 0\\). Avec \\(f(x) = \\frac{12}{x}\\), quand \\(x\\) double, \\(f(x)\\) est divisé par 2. Pour résoudre \\(\\sqrt{x} = a\\) (\\(a \\ge 0\\)), on élève au carré : \\(x = a^2\\).", exemple: ["\\(f(x) = \\frac{12}{x}\\) : \\(f(3) = 4\\)", "\\(\\sqrt{x} = 9\\) : \\(x = 81\\)"], piege: "\\(\\sqrt{x} = 9\\) donne \\(x = 81\\), pas \\(x = 3\\) : on élève au carré." },
       predict: { q: "Quand x double, que devient f(x) = 12/x ?", choices: ["il double", "il est divisé par 2", "il ne change pas"], good: 1, why: "12/(2x) = (12/x) ÷ 2 : la fonction inverse « fait l'inverse »." },
       defis: ["f(x) = 12/x : f(3) ?", "Préimage de 4 par f ?", "√x = 9 : x ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(s < 2 ? "12 ÷ " + nb(x) + " = " + nb(12 / x) : "√" + nb(x) + " ≈ " + nb(Math.sqrt(Math.max(0, x)))),
         wins: [W(4, "12 ÷ 3 = 4."), W(3, "12/x = 4 ⇔ x = 3."), W(81, "On élève au carré : x = 81.")] }),
     },
     transf: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(g(x) = f(x - a) + b\\) : translation de \\(a\\) horizontalement et de \\(b\\) verticalement. Le point \\((p ; q)\\) devient \\((p + a ; q + b)\\) ; le sommet de \\((x - a)^2 + b\\) est \\((a ; b)\\)." },
       predict: { q: "Le graphe de (x − 3)² est celui de x² déplacé de…", choices: ["3 vers la gauche", "3 vers la droite", "3 vers le haut"], good: 1, why: "(x − 3)² vaut 0 en x = 3 : le sommet passe de 0 à 3, vers la DROITE (signe inversé dans la parenthèse)." },
       defis: ["g(x) = (x − 3)² + 2 : abscisse du sommet ?", "Son ordonnée ?", "g(x) = (x + 4)² − 1 : abscisse du sommet ?"],
       play: hunt({ ask: true, label: "Ta réponse", blank: (s) => FIG.plot([{ f: (t) => t * t, dash: true }, { f: s < 2 ? (t) => (t - 3) ** 2 + 2 : (t) => (t + 4) ** 2 - 1 }], [], { numbers: true, xr: [-7, 7], yr: [-3, 8] }), show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
@@ -4905,12 +4941,16 @@
         wins: [W(7, "2 + 5 = 7."), W(-3, "2 − 5 = −3."), W(10, "|−10| = 10.")] }),
     },
     ineq: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "On résout une inéquation du 1er degré comme une équation, en isolant \\(x\\). En multipliant ou en divisant par un nombre négatif, on retourne le sens de l'inégalité.", exemple: ["\\(-2x > 6\\) : on divise par \\(-2\\), donc \\(x < -3\\).", "\\(5 - x < 2\\) : \\(-x < -3\\), donc \\(x > 3\\) ; plus petit entier : 4."], piege: "\\(-2x > 6\\) donne \\(x < -3\\), pas \\(x > -3\\) : le sens se retourne." },
       predict: { q: "−2x > 6 donne…", choices: ["x > −3", "x < −3", "x > 3"], good: 1, why: "En divisant par −2 (négatif), on RETOURNE le sens : x < −3." },
       defis: ["−2x > 6 : x < … ?", "3x − 4 ≤ 11 : x ≤ … ?", "Plus petit entier solution de 5 − x < 2 ?"],
       play: hunt({ ask: true, label: "Borne", show: (x, s) => plain(["6 ÷ (−2)", "3x ≤ 15", "−x < −3 ⇔ x > 3"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(-3, "x < −3 (sens retourné)."), W(5, "x ≤ 5."), W(4, "x > 3 : le plus petit entier est 4.")] }),
     },
     trinfact: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Si \\(x_1\\) et \\(x_2\\) sont les zéros de \\(x^2 + bx + c\\), alors \\(x^2 + bx + c = (x - x_1)(x - x_2)\\). On cherche deux nombres de somme \\(-b\\) et de produit \\(c\\).", exemple: ["\\(x^2 - 5x + 6 = (x - 2)(x - 3)\\)", "\\(x^2 - 7x + 10 = (x - 2)(x - 5)\\) : zéros 2 et 5", "\\(x^2 + x - 12 = (x + 4)(x - 3)\\) : zéros \\(-4\\) et 3"], piege: "Les zéros ont le signe contraire du nombre dans la parenthèse : \\((x + 4)\\) s'annule en \\(-4\\)." },
       predict: { q: "x² − 5x + 6 se factorise en…", choices: ["(x − 2)(x − 3)", "(x + 2)(x + 3)", "(x − 1)(x − 6)"], good: 0, why: "Deux nombres de somme 5 et de produit 6 : 2 et 3. Zéros 2 et 3, donc (x − 2)(x − 3)." },
       defis: ["x² − 7x + 10 : plus petit zéro ?", "Plus grand zéro ?", "x² + x − 12 : zéro positif ?"],
       play: hunt({ ask: true, label: "Zéro", show: (x, s) => plain(s < 2 ? nb(x) + "² − 7·" + nb(x) + " + 10 = " + nb(x * x - 7 * x + 10) : nb(x) + "² + " + nb(x) + " − 12 = " + nb(x * x + x - 12)),
@@ -4935,18 +4975,24 @@
         wins: [W(3, "x² − x − 6 = (x − 3)(x + 2)."), W(-2, "x = −2."), W(9, "3² = 9 = 3 + 6.")] }),
     },
     geocomb: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "On repère les triangles rectangles cachés dans la figure, puis on applique Pythagore. Losange : les diagonales se coupent en leur milieu à angle droit. Pavé : on calcule d'abord la diagonale d'une face, puis celle du pavé.", exemple: ["Losange de diagonales 6 et 8 : côté \\(\\sqrt{3^2 + 4^2} = 5\\).", "Pavé \\(2 \\times 3 \\times 6\\) : diagonale \\(\\sqrt{4 + 9 + 36} = 7\\)."] },
       predict: { q: "Un losange a des diagonales de 6 et 8 cm. Son côté mesure…", choices: ["7 cm", "5 cm", "10 cm"], good: 1, why: "Les diagonales se coupent en leur milieu à angle droit : √(3² + 4²) = 5." },
       defis: ["Côté du losange de diagonales 6 et 8 ?", "Hauteur d'un triangle isocèle de côtés 10, 10 et base 12 ?", "Diagonale d'un pavé 2 × 3 × 6 ?"],
       play: hunt({ ask: true, label: "Longueur", show: (x, s) => plain(["√(3² + 4²)", "√(10² − 6²)", "√(4 + 9 + 36)"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(5, "Demi-diagonales 3 et 4 : 5."), W(8, "Demi-base 6 : √64 = 8."), W(7, "√49 = 7.")] }),
     },
     droitesrem: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Les médianes (sommet → milieu du côté opposé) se coupent au centre de gravité \\(G\\), situé aux \\(\\frac{2}{3}\\) de chaque médiane depuis le sommet. Dans un triangle rectangle, le centre du cercle circonscrit est le milieu de l'hypoténuse.", exemple: ["Médiane de 12 cm : \\(AG = \\frac{2}{3} \\cdot 12 = 8\\) cm.", "Hypoténuse 10 : rayon du cercle circonscrit 5."], piege: "\\(G\\) est aux deux tiers depuis le sommet, pas au milieu de la médiane." },
       predict: { q: "Le centre de gravité G partage la médiane [AM] en…", choices: ["deux moitiés", "AG = 2/3 de AM", "AG = 1/3 de AM"], good: 1, why: "G est aux deux tiers de chaque médiane en partant du sommet." },
       defis: ["Médiane de 12 cm : AG ?", "GM ?", "Triangle rectangle d'hypoténuse 10 : rayon du cercle circonscrit ?"],
       play: hunt({ ask: true, label: "Longueur", show: (x, s) => plain(["2/3 de 12", "1/3 de 12", "milieu de l'hypoténuse"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(8, "AG = 8."), W(4, "GM = 4."), W(5, "Rayon = 10 ÷ 2 = 5.")] }),
     },
     lectgraph: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Zéros : abscisses des points sur l'axe des \\(x\\). Les solutions de \\(f(x) = k\\) sont les abscisses des points d'intersection avec la droite horizontale \\(y = k\\)." },
       predict: { q: "Pour lire les solutions de f(x) = 2 sur un graphique, on regarde…", choices: ["où la courbe coupe l'axe des y", "où la courbe croise la droite horizontale y = 2", "la valeur f(2)"], good: 1, why: "f(x) = 2 : on cherche les x dont l'image vaut 2, donc les points de la courbe à la hauteur 2." },
       defis: ["f(x) = (x − 1)² − 4 : plus petit zéro ?", "Plus grand zéro ?", "Nombre de solutions de f(x) = −4 ?"],
       play: hunt({ ask: true, label: "Ta réponse", blank: () => FIG.plot([{ f: (t) => (t - 1) ** 2 - 4 }], [], { numbers: true, xr: [-4, 6], yr: [-5, 6], hlines: [-4] }), show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
@@ -4959,48 +5005,64 @@
         wins: [W(2, "1er morceau : 2."), W(5, "2e morceau : 5."), W(7, "x = 3 est dans le 2e morceau : 7.")] }),
     },
     polyop: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Chaque terme de la première parenthèse multiplie chaque terme de la seconde. \\((a + b)^2 = a^2 + 2ab + b^2\\) : le double produit ne disparaît pas. Pour finir, on réduit.", exemple: ["\\((x + 3)^2 = x^2 + 6x + 9\\)", "\\((2x + 1)(x - 4) = 2x^2 - 8x + x - 4 = 2x^2 - 7x - 4\\)"], piege: "\\((x + 3)^2\\) n'est pas \\(x^2 + 9\\) : il manque \\(2 \\cdot x \\cdot 3 = 6x\\)." },
       predict: { q: "(x + 3)² = …", choices: ["x² + 9", "x² + 6x + 9", "x² + 3x + 9"], good: 1, why: "(a + b)² = a² + 2ab + b² : le double produit 2 · x · 3 = 6x ne disparaît pas." },
       defis: ["Coefficient de x dans (x + 3)² ?", "Terme constant de (x − 3)(x + 3) ?", "Coefficient de x dans (2x + 1)(x − 4) ?"],
       play: hunt({ ask: true, label: "Coefficient", show: (x, s) => plain(["2 · x · 3", "−3 · 3", "2x · (−4) + 1 · x"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(6, "x² + 6x + 9."), W(-9, "x² − 9."), W(-7, "2x² − 7x − 4.")] }),
     },
     factor2: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Étape 1 : mise en évidence d'un facteur commun. Étape 2 : identités remarquables (\\(a^2 - b^2 = (a - b)(a + b)\\), carrés parfaits \\(a^2 + 2ab + b^2 = (a + b)^2\\)). On recommence tant qu'un facteur peut encore se factoriser.", exemple: ["\\(2x^2 - 18 = 2(x^2 - 9) = 2(x - 3)(x + 3)\\)", "\\(x^2 + 10x + 25 = (x + 5)^2\\)"], piege: "\\(2(x^2 - 9)\\) n'est pas fini : \\(x^2 - 9\\) se factorise encore." },
       predict: { q: "2x² − 18 factorisé au maximum, c'est…", choices: ["2(x² − 9)", "2(x − 3)(x + 3)", "(2x − 6)(x + 3)"], good: 1, why: "On met 2 en évidence, puis x² − 9 est une différence de carrés : 2(x − 3)(x + 3)." },
       defis: ["Facteur mis en évidence dans 2x² − 18 ?", "Racine du carré parfait 9 ?", "x² + 10x + 25 = (x + ?)²"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(2, "2(x² − 9)."), W(3, "(x − 3)(x + 3)."), W(5, "(x + 5)² = x² + 10x + 25.")] }),
     },
     f2expr: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Si on connaît les zéros \\(x_1\\) et \\(x_2\\) : \\(f(x) = a(x - x_1)(x - x_2)\\). Un point de plus permet de calculer \\(a\\).", exemple: ["Zéros 1 et 5, \\(f(0) = 10\\) : \\(a(0 - 1)(0 - 5) = 5a = 10\\), donc \\(a = 2\\).", "Alors \\(f(3) = 2(3 - 1)(3 - 5) = -8\\)."] },
       predict: { q: "Une parabole a pour zéros 1 et 5 et passe par (0 ; 10). Son coefficient a vaut…", choices: ["1", "2", "10"], good: 1, why: "f(x) = a(x − 1)(x − 5) ; f(0) = 5a = 10, donc a = 2." },
       defis: ["Produit (0 − 1)(0 − 5) ?", "Valeur de a ?", "f(3) = a(3 − 1)(3 − 5) ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(5, "(−1)(−5) = 5."), W(2, "5a = 10."), W(-8, "2 · 2 · (−2) = −8 (sommet).")] }),
     },
     interpar: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "On résout \\(f(x) = g(x)\\). Pour deux paraboles, si les \\(x^2\\) s'annulent, il reste une équation du 1er degré.", exemple: ["\\(x^2 + 1 = x^2 + 2x - 5 \\iff 1 = 2x - 5\\), donc \\(x = 3\\)", "\\(x^2 = -x^2 + 8 \\iff x^2 = 4\\), donc \\(x = 2\\) ou \\(x = -2\\)"] },
       predict: { q: "Deux paraboles y = x² + 1 et y = x² + 2x − 5 se coupent en…", choices: ["deux points", "un point", "aucun"], good: 1, why: "Les x² s'annulent : 1 = 2x − 5, une équation du 1er degré, x = 3." },
       defis: ["Abscisse du point commun ?", "Son ordonnée ?", "y = x² et y = −x² + 8 : abscisse positive ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(3, "2x = 6."), W(10, "3² + 1 = 10."), W(2, "2x² = 8, x = ±2.")] }),
     },
     ineq2: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { piege: "\\(x^2 \\le 16\\) donne \\(-4 \\le x \\le 4\\), pas seulement \\(x \\le 4\\)." },
       predict: { q: "(x − 1)(x − 5) < 0 est vrai…", choices: ["entre 1 et 5", "en dehors de [1 ; 5]", "jamais"], good: 0, why: "Parabole tournée vers le haut : négative entre ses zéros." },
       defis: ["Nombre d'entiers avec (x − 1)(x − 5) < 0 ?", "Et avec ≤ 0 ?", "x² ≤ 16 : plus grand entier ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["entre 1 et 5 exclus", "bornes comprises", "−4 ≤ x ≤ 4"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(3, "2, 3, 4."), W(5, "1 à 5."), W(4, "x ∈ [−4 ; 4].")] }),
     },
     ineqfrac: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["\\(\\frac{x - 2}{x + 3} \\ge 0\\) : \\(S = \\,]-\\infty ; -3[ \\cup [2 ; +\\infty[\\)"], piege: "Le zéro du dénominateur est toujours exclu, même avec \\(\\ge\\) : \\(-3\\) n'est jamais solution." },
       predict: { q: "Pour résoudre \\(\\dfrac{x - 2}{x + 3} \\ge 0\\), \\(x = -3\\) est…", choices: ["solution", "interdit", "la seule solution"], good: 1, why: "−3 annule le dénominateur : valeur interdite, jamais dans la solution." },
       defis: ["Valeur interdite ?", "Zéro du numérateur ?", "Combien d'entiers de [−5 ; 5] vérifient \\(\\dfrac{x - 2}{x + 3} \\ge 0\\) ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(-3, "x + 3 = 0."), W(2, "x − 2 = 0."), W(6, "x < −3 : −5, −4 ; x ≥ 2 : 2, 3, 4, 5.")] }),
     },
     exactes: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Carré de côté \\(a\\) : diagonale \\(a\\sqrt{2}\\). Triangle équilatéral de côté \\(a\\) : hauteur \\(\\frac{a\\sqrt{3}}{2}\\).", exemple: ["Carré de côté 5 : diagonale \\(\\sqrt{25 + 25} = \\sqrt{50} = 5\\sqrt{2}\\).", "Triangle équilatéral de côté 6 : hauteur \\(\\sqrt{36 - 9} = \\sqrt{27} = 3\\sqrt{3}\\)."] },
       predict: { q: "La diagonale d'un carré de côté 5 mesure exactement…", choices: ["5√2", "10", "7,07"], good: 0, why: "√(25 + 25) = √50 = 5√2. 7,07 n'est qu'une valeur approchée." },
       defis: ["(5√2)² = ?", "Hauteur² d'un équilatéral de côté 6 ?", "(3√3)² = ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(50, "25 · 2 = 50."), W(27, "36 − 9 = 27 : h = 3√3."), W(27, "9 · 3 = 27.")] }),
     },
     trigo: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["Hypoténuse 10 et angle 30° : côté opposé \\(= 10 \\cdot \\sin 30° = 5\\).", "Hypoténuse 50 et \\(\\cos\\alpha = 0{,}6\\) : côté adjacent \\(= 50 \\cdot 0{,}6 = 30\\)."], piege: "Choisis le rapport selon les côtés en jeu : opposé et hypoténuse → sinus (SOH)." },
       predict: { q: "Hypoténuse connue, on cherche le côté opposé à l'angle : on utilise…", choices: ["le sinus", "le cosinus", "la tangente"], good: 0, why: "SOH : sin = opposé / hypoténuse." },
       defis: ["Hypoténuse 10, angle 30° : opposé ?", "Adjacent 8, angle 45° : opposé ?", "Hypoténuse 50, cos α = 0,6 : adjacent ?"],
       play: hunt({ ask: true, label: "Longueur", show: (x, s) => plain(["10 · sin 30°", "8 · tan 45°", "50 · 0,6"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
@@ -5019,12 +5081,16 @@
         wins: [W(5, "|−5| = 5."), W(11, "|−4 − 7| = 11."), W(-4, "2 − 6 = −4 (et 8).")] }),
     },
     ratden: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(\\frac{a}{\\sqrt{b}} = \\frac{a\\sqrt{b}}{b}\\) : on multiplie le numérateur et le dénominateur par \\(\\sqrt{b}\\).", exemple: ["\\(\\frac{6}{\\sqrt{3}} = \\frac{6\\sqrt{3}}{3} = 2\\sqrt{3}\\)", "\\(\\frac{10}{\\sqrt{5}} = \\frac{10\\sqrt{5}}{5} = 2\\sqrt{5}\\)"] },
       predict: { q: "6/√3 s'écrit aussi…", choices: ["2√3", "6√3", "√2"], good: 0, why: "On multiplie haut et bas par √3 : 6√3/3 = 2√3." },
       defis: ["(6/√3)² = ?", "(2 + √3)(2 − √3) = ?", "(10/√5)² = ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(12, "36/3 = 12."), W(1, "4 − 3 = 1 : le conjugué fait disparaître la racine."), W(20, "100/5 = 20.")] }),
     },
     fracrat: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Pour simplifier, on factorise le numérateur et le dénominateur, puis on supprime les facteurs communs. On note les valeurs interdites (dénominateur nul).", exemple: ["\\(\\frac{x^2 - 9}{x - 3} = \\frac{(x - 3)(x + 3)}{x - 3} = x + 3\\) (pour \\(x \\ne 3\\)).", "\\(\\frac{3 - x}{x - 3} = -1\\) (pour \\(x \\ne 3\\))."] },
       predict: { q: "(x² − 9)/(x − 3), pour x ≠ 3, se simplifie en…", choices: ["x − 3", "x + 3", "x² − 3"], good: 1, why: "x² − 9 = (x − 3)(x + 3) : on simplifie le FACTEUR x − 3, jamais terme à terme." },
       defis: ["Valeur de (x² − 9)/(x − 3) pour x = 5 ?", "Pour x = 10 ?", "(3 − x)/(x − 3) pour x = 7 ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),

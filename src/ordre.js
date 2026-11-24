@@ -11,5 +11,5 @@ ORDRE.FR = {"suitedef":1000,"suitearith":1001,"suitegeo":1002,"suitesomme":1003,
 Object.assign(ORDRE.MATU, {"primitives":200,"integrale":201,"aireint":202,"volrev":203,"lnexp":210,"croissance":211,"condbayes":230,"varalea":231,"binomiale":232});
 Object.assign(ORDRE_THEME.MATU, {"primitives":"M4C01","integrale":"M4C01","aireint":"M4C01","volrev":"M4C01","lnexp":"M4C02","croissance":"M4C02","condbayes":"M4C04","varalea":"M4C04","binomiale":"M4C04"});
 // 24.11 (agent greste) : algèbre linéaire (M4C03), loi normale, et statistique descriptive ouverte à la 4e (M4C04). Ajouté à la main.
-Object.assign(ORDRE.MATU, {"matrices":220,"translin":221,"stats":233,"quartiles":234,"normale":235});
-Object.assign(ORDRE_THEME.MATU, {"matrices":"M4C03","translin":"M4C03","stats":"M4C04","quartiles":"M4C04","normale":"M4C04"});
+Object.assign(ORDRE.MATU, {"matrices":220,"translin":221,"appllin":222,"stats":233,"quartiles":234,"normale":235});
+Object.assign(ORDRE_THEME.MATU, {"matrices":"M4C03","translin":"M4C03","appllin":"M4C03","stats":"M4C04","quartiles":"M4C04","normale":"M4C04"});

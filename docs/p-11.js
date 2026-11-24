@@ -4228,6 +4228,8 @@ function screenEvacomResult() {
 
     // ---- Unités composées : le convertisseur à la main ----
     ucomp: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "En une heure (3600 s), on parcourt 3600 fois la distance d'une seconde. Comme 1 km = 1000 m, \\(1\\ \\text{m/s} = 3{,}6\\ \\text{km/h}\\). Des m/s vers les km/h, on multiplie par 3,6. Des km/h vers les m/s, on divise par 3,6.", exemple: ["\\(30\\ \\text{m/s}\\) : en 1 h, 108'000 m, soit \\(108\\ \\text{km/h}\\).", "\\(90\\ \\text{km/h} = 90 : 3{,}6 = 25\\ \\text{m/s}\\)."] },
       predict: { q: "Un guépard court à 30 m/s. Va-t-il plus vite qu'une voiture à 100 km/h ?", choices: ["Oui", "Non"], good: 0,
         why: "En une heure (3600 s), il parcourrait 30 · 3600 = 108'000 m = 108 km : 30 m/s = 108 km/h, plus que 100 km/h." },
       defis: ["Trouve la vitesse en m/s qui fait exactement 36 km/h.", "Une voiture roule à 90 km/h : combien de m/s ?", "Quelle est la plus petite vitesse en m/s (nombre entier) qui dépasse 100 km/h ?"],
@@ -4289,6 +4291,8 @@ function screenEvacomResult() {
 
     // ---- Masse volumique : fabrique un bloc ----
     gquot: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Masse volumique : \\(\\rho = \\frac{m}{V}\\), donc \\(m = \\rho \\cdot V\\) et \\(V = \\frac{m}{\\rho}\\). Avant de calculer, on met les unités d'accord (g et cm³).", exemple: ["Or : \\(19{,}3\\ \\text{g/cm}^3\\). 6 cm³ pèsent \\(19{,}3 \\cdot 6 = 115{,}8\\ \\text{g}\\).", "Glace : \\(0{,}92\\ \\text{g/cm}^3\\). Un glaçon de 46 g : \\(V = 46 : 0{,}92 = 50\\ \\text{cm}^3\\)."] },
       predict: { q: "Qu'est-ce qui pèse le plus : 1 kg de plomb ou 1 kg de plumes ?", choices: ["Le plomb", "Les plumes", "C'est pareil"], good: 2,
         why: "Les deux pèsent 1 kg ! Les plumes prennent beaucoup plus de place : leur masse volumique est bien plus petite." },
       defis: ["Fabrique un bloc d'or de plus de 100 g avec le moins de cm³ possible.", "Avec de l'aluminium, approche au mieux la masse d'un seul cm³ d'or (19,3 g).", "Un glaçon pèse 46 g : trouve son volume."],
@@ -4388,6 +4392,8 @@ function screenEvacomResult() {
   Object.assign(ACTIVE, {
     // ---- Écrire une expression : deux machines ----
     litelab: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Le début de la phrase donne l'opération qu'on fait en dernier, donc la forme de l'expression. « Le triple de la somme de x et 5 » : on fait d'abord la somme, puis on la triple, c'est \\(3(x + 5)\\). « La somme du triple de x et de 5 » : on triple d'abord x, puis on ajoute 5, c'est \\(3x + 5\\).", exemple: ["Machine A « × 3, puis + 5 » : \\(3x + 5\\) ; 5 donne 20.", "Machine B « + 5, puis × 3 » : \\(3(x + 5) = 3x + 15\\) ; 5 donne 30.", "Toujours \\(B - A = 3x + 15 - (3x + 5) = 10\\)."] },
       predict: { q: "« Le triple de la somme de x et 5 » s'écrit…", choices: ["3x + 5", "3(x + 5)"], good: 1, why: "La phrase commence par « le triple de… » : c'est l'opération qu'on fait en dernier. On calcule d'abord la somme x + 5, puis on la triple. Il faut des parenthèses." },
       defis: ["Voici la machine A : « × 3, puis + 5 ». Trouve le nombre qui donne 20.", "Voici la machine B : « + 5, puis × 3 ». Trouve le nombre qui donne 30.", "Compare les deux machines : essaie trois nombres. Que vaut toujours B − A ?"],
       play(box, onWin) {
@@ -4413,6 +4419,8 @@ function screenEvacomResult() {
     },
     // ---- Valeur numérique : curseur ----
     valnum: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["\\(2x^2 - 3x\\) pour \\(x = 3\\) : \\(2 \\cdot 9 - 9 = 9\\).", "Pour \\(x = -2\\) : \\(2 \\cdot (-2)^2 - 3 \\cdot (-2) = 8 + 6 = 14\\).", "Pour \\(x = 1{,}5\\) : \\(2 \\cdot 2{,}25 - 4{,}5 = 0\\)."] },
       predict: { q: "Combien vaut x² pour x = −3 ?", choices: ["−9", "9", "−6"], good: 1, why: "(−3)² = (−3) · (−3) = 9 : le carré d'un nombre négatif est positif." },
       defis: ["Trouve un nombre x qui donne 9 pour 2x² − 3x.", "Trouve un nombre négatif x qui donne 14.", "Trouve un nombre x non nul qui donne 0."],
       play(box, onWin) {
@@ -4465,6 +4473,8 @@ function screenEvacomResult() {
     },
     // ---- Monômes : empiler les facteurs x ----
     monomes: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Pour multiplier des puissances d'une même lettre, on additionne les exposants : \\(x^m \\cdot x^n = x^{m + n}\\), car on compte les facteurs \\(x\\).", exemple: ["\\(x^2 \\cdot x^3 = (x \\cdot x) \\cdot (x \\cdot x \\cdot x) = x^5\\).", "\\(x^3 \\cdot x^4 = x^7\\).", "\\(x^4 \\cdot x^4 = x^8\\)."] },
       predict: { q: "x² · x³ = ?", choices: ["x⁶", "x⁵", "2x⁵"], good: 1, why: "x² · x³ = (x · x) · (x · x · x) : cinq facteurs x, donc x⁵. On additionne les exposants." },
       defis: ["Obtiens x⁷ avec xᵐ · xⁿ, où m = 3.", "Obtiens x⁵ avec m = n + 1.", "Obtiens x⁸ avec m = n."],
       play(box, onWin) {
@@ -4486,6 +4496,8 @@ function screenEvacomResult() {
     },
     // ---- Parenthèses : retourner les signes ----
     parenth: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Précédée de « + », une parenthèse disparaît sans rien changer. Précédée de « − », elle disparaît et chaque terme à l'intérieur change de signe.", exemple: ["\\(7 - (2x - 5 + y) = 7 - 2x + 5 - y\\).", "\\(4x + (3 - x) = 4x + 3 - x = 3x + 3\\).", "\\(-(-a + 2b - 6) = a - 2b + 6\\)."] },
       predict: { q: "x − (3 − 2x) = ?", choices: ["x − 3 − 2x", "x − 3 + 2x"], good: 1, why: "Le « − » devant la parenthèse change le signe de chaque terme : −(3 − 2x) = −3 + 2x." },
       defis: ["Enlève la parenthèse de 7 − (2x − 5 + y) : touche les termes dont le signe change.", "Même chose avec 4x + (3 − x).", "Et avec −(−a + 2b − 6)."],
       play(box, onWin) {
@@ -4725,6 +4737,8 @@ function screenEvacomResult() {
         wins: [W(12, "12 : 3/12 + 2/12 = 5/12. 24 marcherait aussi, mais 12 est le plus petit."), W(15, "15 : 10/15 + 9/15 = 19/15."), W(24, "24 : 9/24 + 10/24 = 19/24. Inutile d'aller jusqu'à 8 · 12 = 96.")] }),
     },
     fracmul: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "On multiplie les numérateurs entre eux et les dénominateurs entre eux. Prendre une fraction d'une fraction, c'est multiplier : « de » veut dire « fois ».", exemple: ["Les \\(\\frac{2}{3}\\) de \\(\\frac{3}{4}\\) : \\(\\frac{2}{3} \\cdot \\frac{3}{4} = \\frac{6}{12} = \\frac{1}{2}\\).", "La moitié de \\(\\frac{4}{5}\\) : \\(\\frac{1}{2} \\cdot \\frac{4}{5} = \\frac{4}{10} = \\frac{2}{5}\\).", "Les \\(\\frac{3}{4}\\) de \\(\\frac{2}{5}\\) : \\(\\frac{6}{20} = \\frac{3}{10}\\)."], piege: "Pour multiplier, pas de dénominateur commun : on multiplie en haut et en bas." },
       predict: { q: "Les 2/3 de 3/4 d'une tablette de chocolat, c'est…", choices: ["5/7 de la tablette", "1/2 de la tablette", "6/7 de la tablette"], good: 1, why: "On prend 2 tiers d'une part de 3 quarts : 2/3 · 3/4 = 6/12 = 1/2. « De » veut dire « fois »." },
       defis: ["Colorie les 2/3 de 3/4 du carré (règle les lignes).", "Colorie la moitié de 4/5.", "Colorie les 3/4 de 2/5."],
       play: hunt({ label: "Lignes coloriées", start: 0, min: 0, max: 4,
@@ -4742,6 +4756,8 @@ function screenEvacomResult() {
         wins: [W(75, "75 % = 75/100 = 3/4 = 0,75."), W(20, "20 % = 20/100 = 1/5 = 0,2."), W(35, "35 % = 35/100 = 7/20 = 0,35 (on simplifie par 5).")] }),
     },
     puiss: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Chaque fois que l'exposant baisse de 1, on divise par \\(a\\). Ainsi \\(a^0 = 1\\) et \\(a^{-n} = \\frac{1}{a^n}\\).", exemple: ["\\(2^3 = 8\\), \\(2^2 = 4\\), \\(2^1 = 2\\), \\(2^0 = 1\\)", "\\(2^{-1} = \\frac{1}{2}\\), \\(2^{-3} = \\frac{1}{8}\\)"] },
       predict: { q: "Que vaut 2⁻³ ?", choices: ["−8", "1/8", "−6"], good: 1, why: "Chaque fois que l'exposant baisse de 1, on divise par 2 : 2³ = 8, 2² = 4, 2¹ = 2, 2⁰ = 1, 2⁻¹ = 1/2, 2⁻² = 1/4, 2⁻³ = 1/8." },
       defis: ["Descends l'escalier jusqu'à 2⁰. Que vaut-il ?", "Trouve l'exposant qui donne 1/2.", "Trouve l'exposant qui donne 1/8."],
       play: hunt({ label: "Exposant", start: 4, min: -4, max: 6,
@@ -4750,6 +4766,8 @@ function screenEvacomResult() {
         wins: [W(0, "2⁰ = 1 : c'est 2¹ ÷ 2. Toute puissance d'exposant 0 vaut 1."), W(-1, "2⁻¹ = 1 ÷ 2 = 1/2 : un exposant négatif donne l'inverse."), W(-3, "2⁻³ = 1/2³ = 1/8 : positif, mais plus petit que 1.")] }),
     },
     sci: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "On place la virgule après le premier chiffre non nul : c'est \\(a\\), entre 1 et 10. L'exposant \\(n\\) compte de combien de rangs on a déplacé la virgule : positif pour un nombre plus grand que 10, négatif pour un nombre plus petit que 1.", exemple: ["\\(4\\text{'}500\\text{'}000 = 4{,}5 \\cdot 10^6\\).", "\\(450 = 4{,}5 \\cdot 10^2\\).", "\\(0{,}00052 = 5{,}2 \\cdot 10^{-4}\\)."] },
       predict: { q: "0,00052 en notation scientifique, c'est…", choices: ["5,2 · 10⁴", "5,2 · 10⁻⁴", "52 · 10⁻⁵"], good: 1, why: "La virgule recule de 4 rangs pour arriver à 5,2 : le nombre est plus petit que 1, l'exposant est négatif, −4. 52 · 10⁻⁵ est juste en valeur, mais 52 n'est pas entre 1 et 10." },
       defis: ["Écris 4'500'000 sous la forme 4,5 · 10ⁿ.", "Écris 0,00045 sous la forme 4,5 · 10ⁿ.", "Écris 450 sous la forme 4,5 · 10ⁿ."],
       play: hunt({ ask: true, label: "Exposant n", start: 0, min: -8, max: 9,
@@ -4759,6 +4777,8 @@ function screenEvacomResult() {
         wins: [W(6, "4'500'000 = 4,5 · 10⁶ : la virgule avance de 6 rangs."), W(-4, "0,00045 = 4,5 · 10⁻⁴ : plus petit que 1, exposant négatif."), W(2, "450 = 4,5 · 10² : deux rangs.")] }),
     },
     scicalc: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Produit : on multiplie les nombres devant et on additionne les exposants. À la fin, on remet le nombre devant entre 1 et 10, en corrigeant l'exposant.", exemple: ["\\((3 \\cdot 10^4) \\cdot (2 \\cdot 10^5) = 6 \\cdot 10^9\\).", "\\((5 \\cdot 10^6) \\cdot (4 \\cdot 10^2) = 20 \\cdot 10^8 = 2 \\cdot 10^9\\)."] },
       predict: { q: "(2 · 10³) · (4 · 10⁵) = ?", choices: ["8 · 10⁸", "8 · 10¹⁵", "6 · 10⁸"], good: 0, why: "On multiplie les nombres (2 · 4 = 8) et on additionne les exposants (3 + 5 = 8) : 10³ · 10⁵, c'est 3 + 5 facteurs 10." },
       defis: ["(3 · 10⁴) · (2 · 10⁵) = 6 · 10ⁿ : trouve n.", "(4 · 10³) ÷ (8 · 10⁻²) = 5 · 10ⁿ : trouve n.", "(5 · 10⁶) · (4 · 10²) = 2 · 10ⁿ : trouve n."],
       play: hunt({ ask: true, label: "n", start: 5, min: -4, max: 14,
@@ -4780,6 +4800,8 @@ function screenEvacomResult() {
         wins: [W(10, "6² + 8² = 100 = 10² : l'hypoténuse mesure 10."), W(13, "5² + 12² = 169 = 13²."), W(12, "15² − 9² = 225 − 81 = 144 = 12² : pour une cathète, on soustrait.")] }),
     },
     pythfig: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Diagonale d'un rectangle : les deux côtés et la diagonale forment un triangle rectangle. Grande diagonale d'un pavé : \\(d^2 = a^2 + b^2 + c^2\\).", exemple: ["Rectangle 9 × 12 : \\(d = \\sqrt{81 + 144} = 15\\).", "Pavé 2 × 3 × 6 : \\(d = \\sqrt{4 + 9 + 36} = 7\\)."], piege: "La diagonale est l'hypoténuse : on additionne les carrés, puis on prend la racine." },
       predict: { q: "Un rectangle mesure 9 cm sur 12 cm. Sa diagonale mesure…", choices: ["21 cm", "15 cm", "108 cm"], good: 1, why: "La diagonale coupe le rectangle en deux triangles rectangles : √(81 + 144) = √225 = 15." },
       defis: ["Rectangle 9 × 12 : trouve la diagonale.", "Triangle isocèle de côtés 10, 10 et de base 12 : trouve la hauteur.", "Pavé 2 × 3 × 6 : trouve la grande diagonale."],
       play: hunt({ ask: true, label: "Longueur", start: 5, min: 1, max: 20,
@@ -4788,6 +4810,8 @@ function screenEvacomResult() {
         wins: [W(15, "√225 = 15."), W(8, "La hauteur coupe la base en deux : 10² − 6² = 64, h = 8."), W(7, "4 + 9 + 36 = 49 = 7² : d = 7.")] }),
     },
     pythrec: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "On calcule le carré du plus grand côté et la somme des carrés des deux autres. S'ils sont égaux, le triangle est rectangle (réciproque) ; sinon, il ne l'est pas.", exemple: ["5, 7, 9 : \\(25 + 49 = 74 \\neq 81\\), pas rectangle.", "6, 8, 10 : \\(36 + 64 = 100 = 10^2\\), rectangle.", "20, 21, 29 : \\(400 + 441 = 841 = 29^2\\), rectangle."] },
       predict: { q: "Un triangle de côtés 5, 7 et 9 est-il rectangle ?", choices: ["Oui", "Non", "On ne peut pas savoir"], good: 1, why: "5² + 7² = 25 + 49 = 74, mais 9² = 81. Pas d'égalité : il n'est pas rectangle." },
       defis: ["Côtés 6, 8 et x (le plus grand) : trouve x pour que le triangle soit rectangle.", "Côtés 7, x et 25 (25 le plus grand) : trouve x.", "Côtés 20, 21 et x (le plus grand) : trouve x."],
       play: hunt({ ask: true, label: "x", start: 10, min: 1, max: 40,
@@ -4805,6 +4829,8 @@ function screenEvacomResult() {
         wins: [W(3, "12 · 3 = 36 cm³."), W(7, "10 · 7 = 70 cm³."), W(8, "6 · 8 = 48 cm³ : même règle pour un prisme, aire de la base × longueur.")] }),
     },
     volcone: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Pyramide et cône : \\(V = \\frac{1}{3} \\cdot A_{\\text{base}} \\cdot h\\) : il en faut 3 pour remplir le prisme (ou le cylindre) de même base et de même hauteur. Deux fois moins haut : deux fois moins de volume.", exemple: ["Pyramide base 6 × 6, hauteur 5 : \\(\\frac{36 \\cdot 5}{3} = 60\\).", "Cône \\(r = 3\\), \\(h = 4\\) : \\(\\frac{9\\pi \\cdot 4}{3} = 12\\pi\\).", "Cônes deux fois moins hauts : 6 pour remplir le cylindre."], piege: "N'oublie pas le facteur \\(\\frac{1}{3}\\)." },
       predict: { q: "Combien de pyramides (même base, même hauteur) faut-il pour remplir un prisme ?", choices: ["2", "3", "4"], good: 1, why: "Une pyramide vaut exactement le tiers du prisme de même base et même hauteur : V = ⅓ · base · hauteur." },
       defis: ["Combien de cônes (même base, même hauteur) pour remplir le cylindre ?", "Combien de pyramides (même base, même hauteur) pour remplir le pavé ?", "Des cônes de même base, mais deux fois moins hauts : combien pour le cylindre ?"],
       play: hunt({ ask: true, label: "Nombre de solides versés", start: 1, min: 1, max: 8,
@@ -4820,6 +4846,8 @@ function screenEvacomResult() {
         wins: [W(3, "3 cônes : un cône vaut le tiers du cylindre, V = ⅓ π r² h."), W(3, "3 pyramides : V = ⅓ · base · hauteur."), W(6, "Deux fois moins haut, deux fois moins de volume : chaque cône vaut 1/6 du cylindre.")] }),
     },
     airepyr: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Pyramide régulière à base carrée de côté \\(c\\) : la hauteur \\(h\\), le demi-côté \\(\\frac{c}{2}\\) et l'apothème \\(a\\) (la hauteur d'une face) forment un triangle rectangle : \\(a^2 = h^2 + \\left(\\frac{c}{2}\\right)^2\\).", exemple: ["\\(c = 6\\), \\(h = 4\\) : \\(a = \\sqrt{16 + 9} = 5\\).", "\\(c = 10\\), \\(h = 12\\) : \\(a = \\sqrt{144 + 25} = 13\\)."] },
       predict: { q: "Une pyramide à base carrée de 6 cm a une hauteur de 4 cm. Son apothème a (la hauteur d'une face triangulaire, en bleu) mesure…", fig: pyrFig(6, 4), choices: ["4 cm", "5 cm", "7 cm"], good: 1, why: "Hauteur, demi-côté et apothème forment un triangle rectangle : √(4² + 3²) = √25 = 5. L'apothème est plus long que la hauteur." },
       // Défis (22.11) : même tâche à chaque fois (trouver l'apothème), sans reprendre la pyramide du « Devine » ; l'aire latérale n'apparaît qu'une fois l'apothème juste.
       defis: ["Nouvelle pyramide : base 10 cm, hauteur 12 cm. Tape l'apothème.", "Base 16 cm, hauteur 6 cm. Tape l'apothème.", "Base 8 cm, hauteur 3 cm. Tape l'apothème."],
@@ -4831,6 +4859,8 @@ function screenEvacomResult() {
         wins: [W(13, "√(144 + 25) = 13 ; aire latérale 2 · 10 · 13 = 260 cm²."), W(10, "√(36 + 64) = 10 ; aire latérale 2 · 16 · 10 = 320 cm²."), W(5, "√(9 + 16) = 5 ; aire latérale 2 · 8 · 5 = 80 cm².")] }),
     },
     volcomp: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "On repère les solides, on calcule chaque volume avec ses propres dimensions, puis on additionne. On garde \\(\\pi\\) en facteur jusqu'au bout.", exemple: ["Cube de 3 cm d'arête + pyramide de hauteur 3 : \\(27 + 9 = 36\\).", "Pour 39 en tout : pyramide de \\(39 - 27 = 12\\), donc \\(\\frac{9h}{3} = 12\\), \\(h = 4\\).", "Cylindre \\(r = 1\\), \\(h = 4\\) (\\(4\\pi\\)) + cône : \\(\\frac{\\pi h}{3} = 2\\pi\\), \\(h = 6\\)."], piege: "Le cône ou la pyramide n'a que le tiers du volume d'un cylindre ou d'un prisme de même base et de même hauteur." },
       predict: { q: "Un cube de 3 cm d'arête est surmonté d'une pyramide de même base, haute de 3 cm. Volume total du solide ?", choices: ["36 cm³", "54 cm³", "30 cm³"], good: 0, why: "Cube : 3 · 3 · 3 = 27. Pyramide : ⅓ · 9 · 3 = 9. Total : 36 cm³. On additionne les volumes des parties." },
       defis: ["On change la hauteur de la pyramide (même cube de 3 cm d'arête). Quelle hauteur donne 39 cm³ en tout ?", "Même cube : quelle hauteur de pyramide donne 45 cm³ en tout ?", "Cylindre (r = 1, h = 4) et cône de même base : quelle hauteur de cône pour 6π en tout ?"],
       play: hunt({ ask: true, label: "Hauteur du toit", start: 1, min: 1, max: 12,
@@ -4839,6 +4869,8 @@ function screenEvacomResult() {
         wins: [W(4, "27 + ⅓ · 9 · 4 = 27 + 12 = 39."), W(6, "27 + 18 = 45 : chaque cm de pyramide ajoute 3 cm³."), W(6, "4π + 2π = 6π : le cône de hauteur 6 vaut un cylindre de hauteur 2.")] }),
     },
     volmanq: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "On écrit la formule, on remplace ce qu'on connaît, puis on isole la dimension cherchée.", exemple: ["Cylindre \\(r = 3\\), \\(V = 36\\pi\\) : \\(9\\pi h = 36\\pi\\), \\(h = 4\\).", "Pavé de base 5 × 4, \\(V = 140\\) : \\(20h = 140\\), \\(h = 7\\)."], piege: "\\(\\pi \\cdot 3^2 \\cdot h = 36\\pi\\) : on divise par \\(9\\pi\\), pas par 3." },
       predict: { q: "Un cylindre de rayon 3 cm a un volume de 36π cm³. Sa hauteur mesure…", choices: ["4 cm", "12 cm", "6 cm"], good: 0, why: "π · 3² · h = 36π, donc 9h = 36 et h = 4. On remplace ce qu'on connaît, puis on isole h." },
       defis: ["Cylindre de rayon 3 et de volume 36π : calcule la hauteur.", "Cône de rayon 3 et de volume 18π : calcule la hauteur.", "Pavé de base 5 × 4 et de volume 140 cm³ : calcule la hauteur."],
       play: hunt({ ask: true, label: "Hauteur", start: 1, min: 1, max: 12,
@@ -4912,6 +4944,8 @@ function screenEvacomResult() {
         wins: [W(3, "Soustraire un négatif, c'est ajouter son opposé : −5 + 8 = 3."), W(-3, "On recule de 7 puis on avance de 4 : on arrive à −3."), W(12, "Moins fois moins donne plus : (−3) · (−4) = 12.")] }),
     },
     fracops: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "On détermine le signe, puis on calcule. Un nombre pair de signes − donne un résultat positif, un nombre impair un résultat négatif. Multiplier : numérateurs entre eux, dénominateurs entre eux. Diviser : multiplier par l'inverse.", exemple: ["\\(\\left(-\\frac{3}{4}\\right) \\cdot 8 = -6\\)", "\\(\\left(-\\frac{6}{5}\\right) : \\left(-\\frac{3}{10}\\right) = \\frac{6}{5} \\cdot \\frac{10}{3} = 4\\)"], piege: "Trois facteurs négatifs donnent un résultat négatif : \\(\\left(-\\frac{2}{3}\\right) \\cdot \\left(-\\frac{3}{4}\\right) \\cdot \\left(-\\frac{1}{2}\\right) = -\\frac{1}{4}\\)." },
       predict: { q: "Quel est le signe de (−2/3) · (−3/4) · (−1/2) ?", choices: ["positif", "négatif"], good: 1, why: "Trois facteurs négatifs : un nombre impair de signes − donne un résultat négatif (ici −1/4)." },
       defis: ["Calcule (−3/4) · 8.", "Calcule 1/2 − 3/4 · 2/3.", "Calcule (−6/5) : (−3/10)."],
       play: hunt({ ask: true, label: "Résultat (entier)",
@@ -4983,6 +5017,8 @@ function screenEvacomResult() {
         wins: [W(3, "k = 3 : aire × 9 (k²)."), W(4, "k = 4 : aire × 16."), (x) => (x === 2 ? "k = 2 : volume × 2³ = 8 (k³)." : "")] }),
     },
     denombr: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Si on choisit d'abord parmi \\(a\\) possibilités, puis parmi \\(b\\), il y a \\(a \\cdot b\\) possibilités (c'est un arbre) : on multiplie, on n'additionne pas.", exemple: ["3 t-shirts et 4 pantalons : \\(3 \\cdot 4 = 12\\) tenues.", "6 personnes : \\(\\frac{6 \\cdot 5}{2} = 15\\) poignées de main."] },
       predict: { q: "3 t-shirts et 4 pantalons : combien de tenues différentes ?", choices: ["7", "12", "34"], good: 1, why: "Chaque t-shirt se combine avec chacun des 4 pantalons : 3 · 4 = 12 (arbre). On multiplie, on n'additionne pas." },
       defis: ["3 t-shirts, 4 pantalons : nombre de tenues ?", "5 coureurs : nombre de podiums (or, argent, bronze) ?", "6 personnes se serrent toutes la main : nombre de poignées ?"],
       play: hunt({ ask: true, label: "Nombre",
@@ -4998,6 +5034,8 @@ function screenEvacomResult() {
         wins: [W(36, "6 · 6 = 36 issues."), W(6, "6 façons sur 36 : P(7) = 6/36 = 1/6."), W(3, "4+6, 5+5, 6+4 : 3 façons, P(10) = 3/36 = 1/12.")] }),
     },
     carres: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Élever au carré, c'est multiplier un nombre par lui-même. Carrés à connaître : \\(11^2 = 121\\), \\(12^2 = 144\\), \\(13^2 = 169\\), \\(14^2 = 196\\), \\(15^2 = 225\\).", exemple: ["\\(\\sqrt{144} = 12\\)", "\\(0{,}3^2 = 0{,}09\\)", "\\(14^2 = 196 < 200 < 225 = 15^2\\)"] },
       predict: { q: "Combien vaut 0,3² ?", choices: ["0,9", "0,09", "0,6"], good: 1, why: "0,3 · 0,3 = 0,09 : deux chiffres après la virgule. Élever au carré, c'est multiplier par lui-même, pas par 2 ni par 3." },
       defis: ["Quel nombre positif a pour carré 144 ?", "Quel nombre positif a pour carré 121 ?", "Quel est le plus grand entier dont le carré est inférieur à 200 ?"],
       play: hunt({ ask: true, label: "Ta réponse",
@@ -5104,6 +5142,8 @@ function screenEvacomResult() {
           W(7, "7² = 49 < 50 < 64 = 8² : donc √50 est entre 7 et 8.")] }),
     },
     racprop: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(\\sqrt{a \\cdot b} = \\sqrt{a} \\cdot \\sqrt{b}\\) (\\(a, b\\) positifs). Pour simplifier, on sort le plus grand carré parfait : \\(\\sqrt{72} = \\sqrt{36 \\cdot 2} = 6\\sqrt{2}\\). On additionne seulement des racines semblables : \\(2\\sqrt{3} + 3\\sqrt{3} = 5\\sqrt{3}\\). La racine cubique suit la même règle pour le produit : \\(\\sqrt[3]{a} \\cdot \\sqrt[3]{b} = \\sqrt[3]{ab}\\).", exemple: ["\\(\\sqrt{2} \\cdot \\sqrt{8} = \\sqrt{16} = 4\\).", "\\(\\sqrt{12} + \\sqrt{27} = 2\\sqrt{3} + 3\\sqrt{3} = 5\\sqrt{3}\\).", "\\(\\sqrt[3]{2} \\cdot \\sqrt[3]{4} = \\sqrt[3]{8} = 2\\)."] },
       predict: { q: "Laquelle de ces égalités est vraie ?", choices: ["√9 · √16 = √(9 · 16)", "√9 + √16 = √(9 + 16)", "les deux"], good: 0,
         why: "√9 · √16 = 3 · 4 = 12, et √144 = 12 aussi. Mais √9 + √16 = 7, alors que √25 = 5. La racine d'un produit est le produit des racines ; pour une somme, ça ne marche pas." },
       defis: ["Le rectangle a pour côtés √2 et √8. Calcule son aire √2 · √8.", "Un carré a une aire de 72. Son côté s'écrit a√2 : trouve a.", "√12 + √27 = a√3 : trouve a.", "Même règle du produit pour les racines cubiques : calcule ∛2 · ∛4."],
