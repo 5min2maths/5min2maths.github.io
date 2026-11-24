@@ -136,13 +136,39 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
     g += L(150, 90, 220, 90, "f-accent") + t(185, 84, lr, "f-accent f-txt");
     return svg(300, 180, g, "boule");
   };
-  // Prisme droit à base triangulaire.
-  FIG.prism = function (lb, lh, lH) {
-    const A = [40, 150], B = [170, 150], C = [70, 90], d = [110, -50];
-    const sh = (p) => [p[0] + d[0], p[1] + d[1]];
-    let g = P([A, B, sh(B), sh(A)], "f-shape") + P([A, B, C], "f-fill2") + L(B[0], B[1], sh(B)[0], sh(B)[1]) + L(C[0], C[1], sh(C)[0], sh(C)[1], "f-line", 'stroke-dasharray="4 4"') + P([sh(A), sh(B), sh(C)], "f-shape");
-    g += t(105, 168, lb) + t(62, 128, lh, "f-accent f-txt", "end") + t(250, 128, lH, "f-txt", "start");
-    return svg(320, 180, g, "prisme");
+  // Prisme droit à base triangulaire : lb = base du triangle, lh = sa hauteur, lH = longueur du prisme.
+  // 24.11 (galerie) : à l'échelle des valeurs données ; o.right : triangle rectangle (cathètes lb et lh, équerre en A) ;
+  // o.b, o.h : dimensions du triangle quand elles ne sont pas affichées. Arêtes cachées en pointillé d'après les faces
+  // réellement vues (avant : l'arête du haut, visible, était en pointillé).
+  FIG.prism = function (lb, lh, lH, o = {}) {
+    const N = FIG.num, b0 = N(lb) || o.b || 4, h0 = N(lh) || o.h || 2.6, H0 = N(lH) || 5, right = !!o.right, phi = Math.PI / 6, kz = 0.5;
+    const cx0 = right ? 0 : 0.3 * b0, ez = [kz * Math.cos(phi), kz * Math.sin(phi)];
+    let u = Math.min(200 / (b0 + H0 * ez[0]), 130 / (h0 + H0 * ez[1])), forced = false;
+    const T = [[0, 0], [b0, 0], [cx0, h0]];
+    const scr = (p, z, ox, oy) => [ox + p[0] * u + z * u * ez[0], oy - p[1] * u - z * u * ez[1]];
+    // minimums lisibles
+    const sx = Math.max(1, 30 / (b0 * u)), sy = Math.max(1, 24 / (h0 * u)), sz = Math.max(1, 26 / (H0 * u * kz));
+    if (Math.max(sx, sy, sz) > 1.45) forced = true;
+    const b1 = b0 * sx, h1 = h0 * sy, H1 = H0 * sz; T[1][0] = b1; T[2][0] = cx0 * sx; T[2][1] = h1;
+    u = Math.min(u, 200 / (b1 + H1 * ez[0]), 130 / (h1 + H1 * ez[1]));
+    const ox = right && lh ? 76 : 40, oy = 16 + h1 * u + H1 * u * ez[1];
+    const F = T.map((p) => scr(p, 0, ox, oy)), B = T.map((p) => scr(p, H1, ox, oy));
+    // Face latérale du côté i → i+1 vue si sa normale sortante pointe vers l'observateur (direction de fuite).
+    const vis = [0, 1, 2].map((i) => { const P1 = T[i], Q1 = T[(i + 1) % 3]; return (Q1[1] - P1[1]) * Math.cos(phi) - (Q1[0] - P1[0]) * Math.sin(phi) > 1e-9; });
+    const D = 'stroke-dasharray="4 4"';
+    let g = "";
+    [0, 1, 2].forEach((i) => { if (vis[i]) g += P([F[i], F[(i + 1) % 3], B[(i + 1) % 3], B[i]], "f-shape2"); });
+    g += P(F, "f-fill2");
+    [0, 1, 2].forEach((i) => { const j = (i + 1) % 3; g += L(B[i][0].toFixed(1), B[i][1].toFixed(1), B[j][0].toFixed(1), B[j][1].toFixed(1), "f-line", vis[i] ? "" : D); });
+    [0, 1, 2].forEach((i) => { const vv = vis[i] || vis[(i + 2) % 3]; g += L(F[i][0].toFixed(1), F[i][1].toFixed(1), B[i][0].toFixed(1), B[i][1].toFixed(1), "f-line", vv ? "" : D); });
+    g += '<polygon points="' + F.map((p) => p.map((v) => v.toFixed(1)).join(",")).join(" ") + '" class="f-line" fill="none"/>';
+    if (right) g += FIG.rightMark(F[0], F[1], F[2], 10);
+    else if (lh) { const foot = scr([T[2][0], 0], 0, ox, oy); g += L(F[2][0].toFixed(1), F[2][1].toFixed(1), foot[0].toFixed(1), foot[1].toFixed(1), "f-accent", 'stroke-dasharray="5 4"'); }
+    g += t(((F[0][0] + F[1][0]) / 2).toFixed(1), (F[0][1] + 18).toFixed(1), lb);
+    g += right ? t((F[0][0] - 8).toFixed(1), ((F[0][1] + F[2][1]) / 2 + 4).toFixed(1), lh, "f-accent f-txt", "end") : t((F[2][0] + 6).toFixed(1), ((F[0][1] + F[2][1]) / 2 + 10).toFixed(1), lh, "f-accent f-txt", "start");
+    g += t(((F[1][0] + B[1][0]) / 2 + 8).toFixed(1), ((F[1][1] + B[1][1]) / 2 + 14).toFixed(1), lH, "f-txt", "start");
+    if (forced) g += t(316, (oy + 26).toFixed(0), "(pas à l'échelle)", "f-txt", "end", 10);
+    return svg(320, Math.round(oy + 32), g, right ? "prisme droit à base triangle rectangle" : "prisme");
   };
   // Polygone régulier à n côtés.
   FIG.regPoly = function (n, lab, interior) {
@@ -165,13 +191,21 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
     g += '<circle cx="' + cx + '" cy="' + cy + '" r="3" class="f-dot"/>' + (lt ? t(cx + 40 * Math.cos(am), cy + 40 * Math.sin(am) + 5, lt, "f-accent f-txt", "middle", 13) : "");
     return svg(300, 180, g, "polygone régulier");
   };
-  // Deux triangles semblables (le petit et le grand), étiquettes de côtés.
+  // Deux triangles semblables (le petit et le grand), étiquettes de côtés [base, côté droit, côté gauche].
+  // 24.11 (galerie : côté 3 aussi long que le côté 7) : forme tirée des trois côtés du petit quand ils sont donnés,
+  // grand triangle au vrai rapport (lu sur une paire de côtés correspondants, borné à 1,2–3 pour rester lisible).
   FIG.simTri = function (small, big) {
-    const tri = (ox, k) => [[ox, 150], [ox + 90 * k, 150], [ox + 30 * k, 150 - 70 * k]];
-    const a = tri(20, 0.8), b = tri(130, 1.6);
-    let g = P(a) + P(b);
-    const lab = (T, ls) => t((T[0][0] + T[1][0]) / 2, 166, ls[0]) + t((T[1][0] + T[2][0]) / 2 + 8, (T[1][1] + T[2][1]) / 2, ls[1], "f-txt", "start") + t((T[0][0] + T[2][0]) / 2 - 6, (T[0][1] + T[2][1]) / 2, ls[2], "f-txt", "end");
-    return svg(320, 176, g + lab(a, small) + lab(b, big), "triangles semblables");
+    const N = FIG.num, sv = small.map(N);
+    let ang = sv.every((v) => v) ? FIG.solveTri([sv[1], sv[2], sv[0]], [null, null, null]) : null;
+    if (!ang) ang = [Math.atan2(70, 30) * 180 / Math.PI, Math.atan2(70, 60) * 180 / Math.PI];
+    let k = 2; for (let i = 0; i < 3; i++) if (sv[i] && N(big[i])) { k = N(big[i]) / sv[i]; break; }
+    k = Math.max(1.2, Math.min(3, k));
+    const a = FIG.triPts(ang[0], ang[1], 0, 0, 1, 1e6), lo = Math.min(a[0][0], a[2][0]), wd = Math.max(a[1][0], a[2][0]) - lo, ht = a[0][1] - a[2][1];
+    const u = Math.min(250 / (wd * (1 + k)), 125 / (k * ht)), place = (ox, kk) => a.map((p) => [ox + (p[0] - lo) * u * kk, 150 - (a[0][1] - p[1]) * u * kk]);
+    const A1 = place(20, 1), A2 = place(20 + wd * u + 34, k);
+    let g = P(A1) + P(A2);
+    const lab = (T, ls) => { const G = [(T[0][0] + T[1][0] + T[2][0]) / 3, (T[0][1] + T[1][1] + T[2][1]) / 3]; return FIG.sideLab(T[0], T[1], G, ls[0], "f-txt", 13) + FIG.sideLab(T[1], T[2], G, ls[1], "f-txt", 13) + FIG.sideLab(T[0], T[2], G, ls[2], "f-txt", 13); };
+    return svg(320, 176, g + lab(A1, small) + lab(A2, big), "triangles semblables");
   };
   // Urne : boules colorées (sans indication du résultat).
   FIG.urn = function (counts) {
@@ -186,7 +220,9 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
   };
   // Triangle avec ses droites remarquables (sans valeurs).
   FIG.triLines = function (kind, labs = {}) {
-    const A = [30, 150], B = [290, 150], C = [120, 30], Mb = [(A[0] + C[0]) / 2, (A[1] + C[1]) / 2], Ma = [(B[0] + C[0]) / 2, (B[1] + C[1]) / 2], Mc = [(A[0] + B[0]) / 2, (A[1] + B[1]) / 2];
+    // 24.11 (galerie : Â = 82° dessiné ≈ 50°) : avec un angle en A donné, le triangle est tracé avec cet angle.
+    const aA = labs.A ? /^\s*(\d+(?:[.,]\d+)?)\s*°/.exec(labs.A) : null, al = aA ? +aA[1].replace(",", ".") : null;
+    const [A, B, C] = al && al > 5 && al < 170 ? FIG.triPts(al, (180 - al) * 0.4, 30, 30, 260, 120) : [[30, 150], [290, 150], [120, 30]], Mb = [(A[0] + C[0]) / 2, (A[1] + C[1]) / 2], Ma = [(B[0] + C[0]) / 2, (B[1] + C[1]) / 2], Mc = [(A[0] + B[0]) / 2, (A[1] + B[1]) / 2];
     let g = P([A, B, C]) + t(A[0] - 10, A[1] + 14, "A") + t(B[0] + 10, B[1] + 14, "B") + t(C[0], C[1] - 8, "C");
     if (kind === "medianes") {
       g += L(A[0], A[1], Ma[0], Ma[1], "f-line", 'stroke-dasharray="4 4"') + L(B[0], B[1], Mb[0], Mb[1], "f-line", 'stroke-dasharray="4 4"') + L(C[0], C[1], Mc[0], Mc[1], "f-line", 'stroke-dasharray="4 4"');
@@ -194,11 +230,11 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
       g += '<circle cx="' + G[0] + '" cy="' + G[1] + '" r="4" class="f-dot"/>' + t(G[0] + 8, G[1] - 6, "G", "f-txt", "start") + t(Mc[0], Mc[1] + 16, "M");
       if (labs.m) g += t((C[0] + Mc[0]) / 2 - 8, (C[1] + Mc[1]) / 2, labs.m, "f-accent f-txt", "end", 12);
     } else {
-      const a = 260, b = Math.hypot(C[0] - A[0], C[1] - A[1]), c = Math.hypot(B[0] - C[0], B[1] - C[1]);
+      const a = Math.hypot(B[0] - A[0], B[1] - A[1]), b = Math.hypot(C[0] - A[0], C[1] - A[1]), c = Math.hypot(B[0] - C[0], B[1] - C[1]);
       const I = [(c * A[0] + b * B[0] + a * C[0]) / (a + b + c), (c * A[1] + b * B[1] + a * C[1]) / (a + b + c)];
       g += L(B[0], B[1], I[0], I[1], "f-line", 'stroke-dasharray="4 4"') + L(C[0], C[1], I[0], I[1], "f-line", 'stroke-dasharray="4 4"') + L(A[0], A[1], I[0], I[1], "f-line", 'stroke-dasharray="4 4"');
       g += '<circle cx="' + I[0] + '" cy="' + I[1] + '" r="4" class="f-dot"/>' + t(I[0], I[1] + 18, "I");
-      if (labs.A) g += t(A[0] + 40, A[1] - 8, labs.A, "f-accent f-txt", "start");
+      if (labs.A) { const r = al ? (al * Math.PI) / 720 : 0.1; g += (al ? FIG.arcMark(A, B, C, 20) : "") + (al > 60 ? t((A[0] - 8).toFixed(1), (A[1] - 12).toFixed(1), labs.A, "f-accent f-txt", "end") : t((A[0] + 44 * Math.cos(r)).toFixed(1), (A[1] - 44 * Math.sin(r) + 4).toFixed(1), labs.A, "f-accent f-txt", "start")); }
     }
     return svg(320, 176, g, "droites remarquables");
   };

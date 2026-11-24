@@ -9,6 +9,12 @@ const FIG = (() => {
   const L = (x1, y1, x2, y2, cls = "f-line", extra = "") => '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" class="' + cls + '" ' + extra + "/>";
   const P = (pts, cls = "f-line") => '<polygon points="' + pts.map((p) => p.join(",")).join(" ") + '" class="' + cls + '"/>';
   const fmt = (v) => String(+(+v).toFixed(3)).replace(".", ",");
+  // 24.11 (galerie) : figures fidèles à l'énoncé. Valeur numérique d'une étiquette (« 8 », « r = 8 », « 2,5 m », « AB = 40 m ») ;
+  // null si inconnue (« ? », « h », « »). Sert à dessiner à l'échelle sans jamais rien afficher de plus que l'étiquette.
+  const num = (s) => { const m = /(?:^|=)\s*(\d+(?:[.,]\d+)?)\s*(?:mm|cm|dm|m|km)?\s*$/.exec(String(s == null ? "" : s).replace(/\{,\}/g, ",").trim()); return m ? +m[1].replace(",", ".") : null; };
+  const f1 = (v) => (+v).toFixed(1);
+  // Note discrète quand les proportions ont dû être forcées pour rester lisibles.
+  const noScale = (x, y) => t(x, y, "(pas à l'échelle)", "f-txt", "end", 10);
 
   // Droite graduée avec flèches de saut (nombres relatifs).
   function numberLine(start, jumps) {
@@ -121,18 +127,29 @@ const FIG = (() => {
     let b = P([[30, 130], [270, 130], [210, 40], [90, 40]], "f-shape") + L(90, 40, 90, 130, "f-accent", 'stroke-dasharray="5 4"');
     return svg(300, 152, b + t(150, 148, lB) + t(150, 32, lb) + t(82, 90, lh, "f-accent f-txt", "end"), "trapèze");
   }
+  // Disque : rayon marqué, ou diamètre entier quand l'étiquette est « d = … » (24.11 : diamètre annoncé, rayon dessiné).
   function disk(lr) {
+    if (/^\s*d\b/.test(String(lr || ""))) return svg(300, 150, '<circle cx="150" cy="75" r="62" class="f-shape"/>' + L(88, 75, 212, 75, "f-accent", 'stroke-width="2"') + '<circle cx="150" cy="75" r="3" class="f-dot"/>' + t(150, 68, lr, "f-accent f-txt"), "disque et son diamètre");
     return svg(300, 150, '<circle cx="150" cy="75" r="62" class="f-shape"/>' + L(150, 75, 212, 75, "f-accent", 'stroke-width="2"') + '<circle cx="150" cy="75" r="3" class="f-dot"/>' + t(181, 68, lr, "f-accent f-txt"), "disque");
   }
   function square(ls) {
     return svg(300, 160, '<rect x="80" y="14" width="130" height="130" class="f-shape"/>' + L(80, 144, 210, 14, "f-accent", 'stroke-dasharray="6 4"') + t(145, 158, ls) + t(158, 74, "?", "f-accent f-txt", "start", 16), "carré");
   }
-  // Pavé droit en perspective cavalière.
+  // Pavé droit en perspective cavalière ; la = largeur (devant), lb = profondeur, lc = hauteur.
+  // 24.11 (galerie) : à l'échelle des trois dimensions quand elles sont toutes données (un cube a l'air d'un cube,
+  // l'arête de 1 cm est la plus courte) ; arête mini 22 px, avec « pas à l'échelle » si on a dû forcer. Sinon forme d'origine.
   function box(la, lb, lc) {
-    const x = 60, y = 60, w = 150, h = 80, dx = 50, dy = -36;
-    let b = '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" class="f-shape"/>';
-    b += P([[x, y], [x + dx, y + dy], [x + w + dx, y + dy], [x + w, y]], "f-shape2") + P([[x + w, y], [x + w + dx, y + dy], [x + w + dx, y + h + dy], [x + w, y + h]], "f-shape2");
-    return svg(300, 170, b + t(x + w / 2, y + h + 18, la) + t(x + w + dx / 2 + 14, y + h + dy / 2 + 6, lb, "f-txt", "start") + t(x - 8, y + h / 2, lc, "f-txt", "end"), "pavé");
+    const va = num(la), vb = num(lb), vc = num(lc);
+    let w = 150, h = 80, dx = 50, dy = -36, forced = false;
+    if (va && vb && vc) {
+      const k = 0.5 * Math.SQRT1_2, u = Math.min(190 / (va + vb * k), 110 / (vc + vb * k)), mn = 22, cl = (v) => { if (v < mn) { forced = forced || v < mn * 0.7; return mn; } return v; };
+      w = cl(va * u); h = cl(vc * u); const d = cl(vb * u * 0.5 * 1.414) / 1.414; dx = d; dy = -d;
+    }
+    const x = 60, y = 14 - dy;
+    let b = '<rect x="' + x + '" y="' + f1(y) + '" width="' + f1(w) + '" height="' + f1(h) + '" class="f-shape"/>';
+    b += P([[x, y], [x + dx, y + dy], [x + w + dx, y + dy], [x + w, y]].map((p) => p.map(f1)), "f-shape2") + P([[x + w, y], [x + w + dx, y + dy], [x + w + dx, y + h + dy], [x + w, y + h]].map((p) => p.map(f1)), "f-shape2");
+    b += t(f1(x + w / 2), f1(y + h + 18), la) + t(f1(x + w + dx / 2 + 10), f1(y + h + dy / 2 + 6), lb, "f-txt", "start") + t(x - 8, f1(y + h / 2 + 4), lc, "f-txt", "end");
+    return svg(300, Math.round(y + h + 28), b + (forced ? noScale(296, Math.round(y + h + 24)) : ""), "pavé");
   }
   // Cube en perspective cavalière (face avant carrée, fuyantes à 45°, réduction 0,5) ; arêtes cachées en pointillé.
   // withPyr : pyramide inscrite (base = face du dessous, sommet = centre de la face du dessus). Commentaire testeur du 21.11.
@@ -155,9 +172,20 @@ const FIG = (() => {
     const b = P([[60, 140], [200, 140], [250, 110], [110, 110]], "f-shape2") + P([[60, 140], [200, 140], [150, 20]], "f-shape") + P([[200, 140], [250, 110], [150, 20]], "f-shape2") + L(155, 125, 150, 20, "f-accent", 'stroke-dasharray="5 4"');
     return svg(300, 162, b + t(130, 158, lc) + t(160, 80, lh, "f-accent f-txt", "start"), "pyramide");
   }
+  // Cône (24.11, galerie) : proportions réelles rayon / hauteur quand elles sont connues (« r = 8 », « h = 3 » ; « g = … »
+  // donne la hauteur par Pythagore ; « d = … » : diamètre dessiné en entier). Inconnue (« ? », « h ») : forme d'origine.
   function cone(lr, lh) {
-    const b = '<ellipse cx="150" cy="130" rx="80" ry="18" class="f-shape2"/>' + P([[70, 130], [230, 130], [150, 20]], "f-shape") + L(150, 130, 150, 20, "f-accent", 'stroke-dasharray="5 4"') + L(150, 130, 230, 130, "f-accent");
-    return svg(300, 160, b + t(190, 124, lr, "f-accent f-txt") + t(158, 80, lh, "f-accent f-txt", "start"), "cône");
+    const isD = /^\s*d\b/.test(String(lr || "")), v = num(lr), r0 = v == null ? null : isD ? v / 2 : v;
+    let hv = /^\s*g\b/.test(String(lh || "")) ? (num(lh) && r0 && num(lh) > r0 ? Math.sqrt(num(lh) ** 2 - r0 ** 2) : null) : num(lh);
+    let R = 80, H = 110, forced = false;
+    if (r0 && hv) { const u = Math.min(100 / r0, 120 / hv); R = r0 * u; H = hv * u; if (R < 30) { forced = R < 21; R = 30; } if (H < 40) { forced = forced || H < 28; H = 40; } }
+    const by = 20 + H, ry = Math.max(8, R * 0.22);
+    let b = '<ellipse cx="150" cy="' + f1(by) + '" rx="' + f1(R) + '" ry="' + f1(ry) + '" class="f-shape2"/>' + P([[150 - R, by], [150 + R, by], [150, 20]].map((p) => p.map(f1)), "f-shape") + L(150, f1(by), 150, 20, "f-accent", 'stroke-dasharray="5 4"') + L(f1(isD ? 150 - R : 150), f1(by), f1(150 + R), f1(by), "f-accent");
+    const flat = H < 75, thin = R < 75; // cône aplati ou étroit : étiquettes hors des flancs
+    b += isD || flat || thin ? t(f1(isD ? 150 : 150 + R / 2), f1(by + ry + 16), lr, "f-accent f-txt") : t(f1(150 + R / 2), f1(by - 6), lr, "f-accent f-txt");
+    const cx = 150 - R - 14; // cône étroit : hauteur en cote à gauche
+    const lhT = thin && !flat ? L(f1(cx), 20, f1(cx), f1(by)) + L(f1(cx - 5), 20, f1(cx + 5), 20) + L(f1(cx - 5), f1(by), f1(cx + 5), f1(by)) + t(f1(cx - 8), f1(20 + H / 2 + 5), lh, "f-accent f-txt", "end") : t(156, f1(20 + H * (flat ? 0.72 : 0.45) + 4), lh, "f-accent f-txt", "start", flat ? 12 : 14);
+    return svg(300, Math.round(by + ry + (isD || flat || thin ? 24 : 12)), b + lhT + (forced ? noScale(296, Math.round(by + ry + 8)) : ""), "cône");
   }
   // Route et chronomètre (vitesse).
   // Véhicule dessiné selon le contexte (commentaire testeur du 16.11 : « mettre un vélo » quand c'est une cycliste).
@@ -245,19 +273,37 @@ const FIG = (() => {
     pts.forEach(([x, y, s]) => (g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="4.5" class="f-dot"/>' + t(X(x) + 8, Y(y) - 8, s, "f-txt", "start", 12)));
     return svg(W, H, g, "parabole");
   }
-  // Triangle rectangle avec angle marqué en A (trigonométrie).
-  function trigTriangle(lab, angle) {
-    const A = [40, 130], B = [260, 130], C = [260, 40];
-    let b = P([A, B, C], "f-shape") + '<rect x="248" y="118" width="12" height="12" class="f-line" fill="none"/>';
-    b += '<path d="M80,130 A40,40 0 0,0 77,115" class="f-accent" fill="none" stroke-width="2"/>' + t(92, 124, angle, "f-accent f-txt", "start", 13);
-    b += t(150, 150, lab[0]) + t(272, 88, lab[1], "f-txt", "start") + t(138, 74, lab[2], "f-txt", "end");
-    return svg(320, 160, b, "triangle rectangle et angle");
+  // Triangle rectangle avec angle marqué en A (trigonométrie) ; labels : [adjacent (horizontal), opposé (vertical), hypoténuse].
+  // 24.11 (galerie) : le triangle était toujours le même (≈ 22°) ; il est maintenant construit avec l'angle réel,
+  // lu dans l'étiquette (« 55° ») ou, si l'angle est inconnu (« α ? »), déduit de deux côtés numériques.
+  // deg (facultatif) impose l'angle. Bornes 12°–78° pour rester lisible.
+  function trigTriangle(lab, angle, deg) {
+    const num = (s) => { const m = /^\s*(\d+(?:[.,]\d+)?)\s*(?:mm|cm|dm|m|km)?\s*$/.exec(String(s || "")); return m ? +m[1].replace(",", ".") : null; };
+    let th = deg;
+    if (th == null) { const m = /^\s*(\d+(?:[.,]\d+)?)\s*°\s*$/.exec(String(angle || "")); if (m) th = +m[1].replace(",", "."); }
+    if (th == null) {
+      const [a, o, h] = (lab || []).map(num), R = 180 / Math.PI;
+      if (a && o) th = Math.atan(o / a) * R; else if (a && h && a < h) th = Math.acos(a / h) * R; else if (o && h && o < h) th = Math.asin(o / h) * R;
+    }
+    th = th == null || !isFinite(th) ? 22.25 : Math.max(12, Math.min(78, th));
+    const r = (th * Math.PI) / 180, tn = Math.tan(r), W = Math.min(220, 130 / tn), H = W * tn;
+    const x0 = Math.round(160 - W / 2 - 10), A = [x0, H + 22], B = [x0 + W, H + 22], C = [x0 + W, 22], f1 = (v) => v.toFixed(1);
+    const ra = Math.min(40, W * 0.45), ex = A[0] + ra * Math.cos(r), ey = A[1] - ra * Math.sin(r), lr = ra + 8, lx = A[0] + lr * Math.cos(r / 2), ly = A[1] - lr * Math.sin(r / 2);
+    let b = P([A, B, C].map((p) => p.map(f1)), "f-shape") + '<rect x="' + f1(B[0] - 12) + '" y="' + f1(B[1] - 12) + '" width="12" height="12" class="f-line" fill="none"/>';
+    b += '<path d="M' + f1(A[0] + ra) + "," + f1(A[1]) + " A" + ra + "," + ra + " 0 0,0 " + f1(ex) + "," + f1(ey) + '" class="f-accent" fill="none" stroke-width="2"/>' + (th > 55 ? t(f1(A[0] - 8), f1(A[1] - 2), angle, "f-accent f-txt", "end", 13) : t(f1(lx + 2), f1(ly + 5), angle, "f-accent f-txt", "start", 13)); // angle raide : étiquette à gauche du sommet
+    b += t(f1(A[0] + W / 2), f1(A[1] + 20), lab[0]) + t(f1(B[0] + 12), f1(22 + H / 2 + 4), lab[1], "f-txt", "start") + t(f1(A[0] + W / 2 - 10), f1(22 + H / 2 - 6), lab[2], "f-txt", "end");
+    return svg(320, Math.round(H + 52), b, "triangle rectangle et angle");
   }
   // Cercle, angle au centre et angle inscrit.
   function circleAngles(lCenter, lInscribed) {
     // Angles marqués par un secteur (commentaire testeur du 21.11) : bleu au centre O, rouge au point C du cercle.
     const cx = 150, cy = 92, r = 74, pt = (deg) => [cx + r * Math.cos((deg * Math.PI) / 180), cy - r * Math.sin((deg * Math.PI) / 180)];
-    const A = pt(210), B = pt(330), C = pt(95), O = [cx, cy];
+    // 24.11 (galerie : angle au centre de 90° dessiné à 120°) : A et B placés pour que l'angle au centre soit le vrai
+    // (lu dans l'une ou l'autre étiquette : « 90° » au centre, ou le double de l'angle inscrit), borné à 30°–170°.
+    const deg = (s) => { const m = /^\s*(\d+(?:[.,]\d+)?)\s*°\s*$/.exec(String(s || "")); return m ? +m[1].replace(",", ".") : null; };
+    let th = deg(lCenter) != null ? deg(lCenter) : deg(lInscribed) != null ? 2 * deg(lInscribed) : 120;
+    th = Math.max(30, Math.min(170, th));
+    const A = pt(270 - th / 2), B = pt(270 + th / 2), C = pt(95), O = [cx, cy];
     const wedge = (V, P1, P2, rr, style) => {
       const a1 = Math.atan2(P1[1] - V[1], P1[0] - V[0]), a2 = Math.atan2(P2[1] - V[1], P2[0] - V[0]);
       let d = a2 - a1; while (d <= -Math.PI) d += 2 * Math.PI; while (d > Math.PI) d -= 2 * Math.PI;
@@ -286,13 +332,73 @@ const FIG = (() => {
     g += '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="5" class="f-dot"/>' + t(cx + 30, cy - 8, label || deg + "°", "f-accent f-txt", "start", 12) + t(cx + r + 8, cy + 14, "1", "f-txt", "start", 11);
     return svg(300, 190, g, "cercle trigonométrique");
   }
-  // Triangle quelconque avec étiquettes [a, b, c, angle].
+  // Triangle ABC tracé avec ses vrais angles (24.11, galerie) : [AB] horizontal en bas, C au-dessus, cadré dans la boîte
+  // [x0, x0 + W] × [y0, y0 + H]. Angles en degrés aux sommets A et B. Renvoie les trois sommets.
+  function triPts(al, be, x0 = 30, y0 = 30, W = 260, H = 110) {
+    const ra = (al * Math.PI) / 180, rb = (be * Math.PI) / 180, b = Math.sin(rb) / Math.sin(ra + rb);
+    const C = [b * Math.cos(ra), b * Math.sin(ra)], xs = [0, 1, C[0]], lo = Math.min(...xs), wd = Math.max(...xs) - lo;
+    const u = Math.min(W / wd, H / C[1]), ox = x0 + (W - wd * u) / 2 - lo * u, oy = y0 + C[1] * u;
+    return [[ox, oy], [ox + u, oy], [ox + C[0] * u, oy - C[1] * u]];
+  }
+  // Angles d'un triangle à partir de ce qu'on connaît : côtés s = [a, b, c] (a opposé à A…) et angles g = [α, β, γ] (null si inconnus).
+  // Renvoie [α, β] ou null.
+  function solveTri(s, g) {
+    s = s.slice(); g = g.slice();
+    const R = 180 / Math.PI, D = Math.PI / 180;
+    for (let it = 0; it < 4; it++) {
+      const ka = g.filter((x) => x != null).length;
+      if (ka === 2) { const i = g.indexOf(null); g[i] = 180 - g.reduce((a, x) => a + (x || 0), 0); }
+      if (g.every((x) => x != null)) break;
+      if (s.every((x) => x)) { for (let i = 0; i < 3; i++) { const [p, q] = [s[(i + 1) % 3], s[(i + 2) % 3]], c = (p * p + q * q - s[i] * s[i]) / (2 * p * q); if (Math.abs(c) > 1) return null; g[i] = Math.acos(c) * R; } break; }
+      for (let i = 0; i < 3; i++) if (g[i] != null) {
+        const j = (i + 1) % 3, k = (i + 2) % 3;
+        if (!s[i] && s[j] && s[k]) s[i] = Math.sqrt(s[j] ** 2 + s[k] ** 2 - 2 * s[j] * s[k] * Math.cos(g[i] * D)); // angle entre deux côtés connus
+        else if (s[i]) [j, k].forEach((m) => { if (g[m] == null && s[m] && g.filter((x) => x != null).length < 2) { const v = (s[m] * Math.sin(g[i] * D)) / s[i]; if (v <= 1) g[m] = Math.asin(v) * R; } });
+      }
+    }
+    if (g[0] == null || g[1] == null) {
+      const i = g.findIndex((x) => x != null); if (i < 0) return null;
+      const rest = (180 - g[i]) / 2; g = g.map((x, m) => (m === i ? x : m === (i + 1) % 3 ? rest * 1.15 : rest * 0.85));
+    }
+    return g[0] > 0 && g[1] > 0 && g[0] + g[1] < 180 ? [g[0], g[1]] : null;
+  }
+  // Marque d'angle droit au sommet V entre les directions vers P et Q.
+  function rightMark(V, P1, Q1, s = 11) {
+    const u = (P) => { const d = Math.hypot(P[0] - V[0], P[1] - V[1]); return [(P[0] - V[0]) / d, (P[1] - V[1]) / d]; }, a = u(P1), b = u(Q1);
+    return '<polyline points="' + [[V[0] + a[0] * s, V[1] + a[1] * s], [V[0] + (a[0] + b[0]) * s, V[1] + (a[1] + b[1]) * s], [V[0] + b[0] * s, V[1] + b[1] * s]].map((p) => p.map(f1).join(",")).join(" ") + '" class="f-line" fill="none"/>';
+  }
+  // Arc d'angle au sommet V entre les directions vers P et Q (le plus petit des deux arcs).
+  function arcMark(V, P1, Q1, r = 16) {
+    const a1 = Math.atan2(P1[1] - V[1], P1[0] - V[0]), a2 = Math.atan2(Q1[1] - V[1], Q1[0] - V[0]);
+    let d = a2 - a1; while (d <= -Math.PI) d += 2 * Math.PI; while (d > Math.PI) d -= 2 * Math.PI;
+    return '<path d="M' + f1(V[0] + r * Math.cos(a1)) + "," + f1(V[1] + r * Math.sin(a1)) + " A" + r + "," + r + " 0 0," + (d > 0 ? 1 : 0) + " " + f1(V[0] + r * Math.cos(a2)) + "," + f1(V[1] + r * Math.sin(a2)) + '" class="f-accent" fill="none" stroke-width="2"/>';
+  }
+  // Étiquette d'un côté [P, Q] placée à l'extérieur (loin du point G intérieur).
+  function sideLab(P1, Q1, G, s, cls = "f-txt", size = 14) {
+    if (!s) return "";
+    const M = [(P1[0] + Q1[0]) / 2, (P1[1] + Q1[1]) / 2]; let nx = Q1[1] - P1[1], ny = -(Q1[0] - P1[0]); const d = Math.hypot(nx, ny); nx /= d; ny /= d;
+    if (nx * (M[0] - G[0]) + ny * (M[1] - G[1]) < 0) { nx = -nx; ny = -ny; }
+    return t(f1(M[0] + nx * 12), f1(M[1] + ny * 12 + (ny > 0.5 ? 6 : 4)), s, cls, nx > 0.35 ? "start" : nx < -0.35 ? "end" : "middle", size);
+  }
+  // Triangle quelconque avec étiquettes [a, b, c, angle(s), sommet de l'angle].
+  // 24.11 (galerie : 90° dessiné aigu, 120° dessiné aigu, longueurs non respectées) : les angles et côtés donnés
+  // (« a = 10 », « γ = 120° », « α = 40°, β = 60° ») fixent la forme ; angle droit marqué d'une équerre.
   function anyTriangle(lab) {
-    const A = [30, 140], B = [290, 140], C = [110, 30];
-    let g = P([A, B, C], "f-shape") + t(A[0] - 12, A[1] + 6, "A") + t(B[0] + 12, B[1] + 6, "B") + t(C[0], C[1] - 8, "C");
-    g += t(160, 158, lab[2] || "", "f-txt") + t(215, 80, lab[0] || "", "f-txt", "start") + t(58, 80, lab[1] || "", "f-txt", "end");
-    if (lab[3]) g += t(lab[4] === "C" ? C[0] + 6 : lab[4] === "B" ? B[0] - 40 : A[0] + 26, lab[4] === "C" ? C[1] + 30 : 132, lab[3], "f-accent f-txt", "start", 12);
-    return svg(320, 168, g, "triangle quelconque");
+    const g = [null, null, null], nm = { "α": 0, "β": 1, "γ": 2 };
+    String(lab[3] || "").replace(/([αβγ])\s*=\s*(\d+(?:[.,]\d+)?)\s*°/g, (_, l, v) => (g[nm[l]] = +v.replace(",", ".")));
+    const sol = solveTri([0, 1, 2].map((i) => num(lab[i]) || null), g) || [54, 31.4];
+    const [A, B, C] = triPts(sol[0], sol[1], 34, 30, 252, 108), G = [(A[0] + B[0] + C[0]) / 3, (A[1] + B[1] + C[1]) / 3], V = [A, B, C];
+    let gg = P([A, B, C].map((p) => p.map(f1)), "f-shape") + t(f1(A[0] - 12), f1(A[1] + 6), "A") + t(f1(B[0] + 12), f1(B[1] + 6), "B") + t(f1(C[0]), f1(C[1] - 8), "C");
+    const ang = [sol[0], sol[1], 180 - sol[0] - sol[1]];
+    ang.forEach((a, i) => { if (Math.abs(a - 90) < 0.5 && g[i] != null) gg += rightMark(V[i], V[(i + 1) % 3], V[(i + 2) % 3]); });
+    gg += sideLab(B, C, G, lab[0]) + sideLab(A, C, G, lab[1]) + sideLab(A, B, G, lab[2]);
+    if (lab[3]) {
+      // Arc à l'angle nommé ; étiquette dans l'angle (A, B) ou vers le centre du triangle (C, souvent étroit).
+      const i = lab[4] === "C" ? 2 : lab[4] === "B" ? 1 : 0, P1 = V[i];
+      if (!(Math.abs(ang[i] - 90) < 0.5 && g[i] != null)) gg += arcMark(P1, V[(i + 1) % 3], V[(i + 2) % 3], 16);
+      gg += i === 2 ? t(f1(G[0]), f1(G[1] + 8), lab[3], "f-accent f-txt", "middle", 12) : t(f1(i === 0 ? P1[0] + 24 : P1[0] - 24), f1(P1[1] - 7), lab[3], "f-accent f-txt", i === 0 ? "start" : "end", 12);
+    }
+    return svg(320, 168, gg, "triangle quelconque");
   }
   // Diagramme en bâtons d'une petite série.
   function barChart(values) {
@@ -304,13 +410,19 @@ const FIG = (() => {
 
   // Cylindre (13.11, retour testeur) : base arrière en pointillés, rayon sur la face du haut avec son étiquette
   // au-dessus du bord (sans chevauchement), hauteur en cote à droite.
+  // 24.11 (galerie : « cylindres tous identiques ») : proportions réelles rayon / hauteur quand les deux sont donnés.
   function cylinder(lr, lh) {
-    const A = (sw, cls, extra = "") => '<path d="M80 140 A70 16 0 0 ' + sw + ' 220 140" class="' + cls + '" fill="none" ' + extra + "/>";
-    let g = '<path d="M80 40 L80 140 A70 16 0 0 0 220 140 L220 40 Z" fill="var(--blue-soft)" stroke="none"/>';
-    g += A(1, "f-line", 'stroke-dasharray="5 4"') + A(0, "f-line") + L(80, 40, 80, 140) + L(220, 40, 220, 140);
-    g += '<ellipse cx="150" cy="40" rx="70" ry="16" class="f-shape2"/>' + '<circle cx="150" cy="40" r="2.5" fill="var(--ink)"/>' + L(150, 40, 220, 40, "f-accent", 'stroke-width="2.2"');
-    g += L(240, 40, 240, 140) + L(235, 40, 245, 40) + L(235, 140, 245, 140);
-    return svg(300, 166, g + t(185, 17, lr, "f-accent f-txt") + t(250, 95, lh, "f-txt", "start"), "cylindre");
+    const r0 = num(lr), h0 = num(lh), X0 = 135;
+    let R = 70, H = 100, forced = false;
+    if (r0 && h0) { const u = Math.min(80 / r0, 120 / h0); R = r0 * u; H = h0 * u; if (R < 26) { forced = R < 18; R = 26; } if (H < 30) { forced = forced || H < 20; H = 30; } }
+    const ry = Math.max(7, R * 0.23), top = 22 + ry, bot = top + H, xl = X0 - R, xr = X0 + R;
+    const A = (sw, cls, extra = "") => '<path d="M' + f1(xl) + " " + f1(bot) + " A" + f1(R) + " " + f1(ry) + " 0 0 " + sw + " " + f1(xr) + " " + f1(bot) + '" class="' + cls + '" fill="none" ' + extra + "/>";
+    let g = '<path d="M' + f1(xl) + " " + f1(top) + " L" + f1(xl) + " " + f1(bot) + " A" + f1(R) + " " + f1(ry) + " 0 0 0 " + f1(xr) + " " + f1(bot) + " L" + f1(xr) + " " + f1(top) + ' Z" fill="var(--blue-soft)" stroke="none"/>';
+    g += A(1, "f-line", 'stroke-dasharray="5 4"') + A(0, "f-line") + L(f1(xl), f1(top), f1(xl), f1(bot)) + L(f1(xr), f1(top), f1(xr), f1(bot));
+    g += '<ellipse cx="' + X0 + '" cy="' + f1(top) + '" rx="' + f1(R) + '" ry="' + f1(ry) + '" class="f-shape2"/>' + '<circle cx="' + X0 + '" cy="' + f1(top) + '" r="2.5" fill="var(--ink)"/>' + L(X0, f1(top), f1(xr), f1(top), "f-accent", 'stroke-width="2.2"');
+    const cx = xr + 20;
+    g += L(f1(cx), f1(top), f1(cx), f1(bot)) + L(f1(cx - 5), f1(top), f1(cx + 5), f1(top)) + L(f1(cx - 5), f1(bot), f1(cx + 5), f1(bot));
+    return svg(300, Math.round(bot + ry + 12), g + t(f1(X0 + R / 2), f1(top - ry - 5), lr, "f-accent f-txt") + t(f1(cx + 10), f1((top + bot) / 2 + 5), lh, "f-txt", "start") + (forced ? noScale(296, Math.round(bot + ry + 8)) : ""), "cylindre");
   }
 
   function unitLine(axis, v, label) {
@@ -321,5 +433,5 @@ const FIG = (() => {
     return svg(320, 190, g + t(cx + r + 8, cy + 14, "1", "f-txt", "start", 11), "cercle trigonométrique");
   }
 
-  return { unitLine, cylinder, unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, cube, pyramid, cone, road, items, scaling, lineGraph, blocks, fractionOf, prioSteps, sciScale, areaSquare, tiles, fmt };
+  return { num, triPts, solveTri, rightMark, arcMark, sideLab, unitLine, cylinder, unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, cube, pyramid, cone, road, items, scaling, lineGraph, blocks, fractionOf, prioSteps, sciScale, areaSquare, tiles, fmt };
 })();
