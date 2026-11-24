@@ -54,7 +54,8 @@ def paquet(f):
     if f.startswith("ch4c"): return "15"  # 24.11 : 4e du Collège
     if f in ("ch_mp1.js", "ch_mp2.js"): return "12"  # 24.11 : versions récentes de notions partagées avec le Collège (sinlaw, trigfn, stats…) : chargées dès la 1re, toutes filières
     if f == "riche_mp2.js": return ""  # définit RX, outils communs aussi utilisés par riche_2c et riche_mp1
-    if f.startswith(("ch_mp", "riche_mp")) or f in ("act_mp2.js", "act_mp34.js"): return "mp"
+    if f == "act_mp2.js": return "13"  # 24.11 : leçons aussi utiles au Collège (droites, trigonométrie en 2e ; stats, quartiles en 4e)
+    if f.startswith(("ch_mp", "riche_mp")) or f == "act_mp34.js": return "mp"
     if f.startswith(("ch1c", "riche_1c", "riche_sys1c")) or f in ("act_1c.js", "act_eq1c.js", "act_sys1c.js"): return "12"
     if f.startswith("riche_2c") or f == "act_2c.js": return "13"
     if f.startswith(("ch11", "riche_11", "act_ch11")) or f in ("act_prop11.js", "act_litt11.js", "act_11d.js"): return "11"
