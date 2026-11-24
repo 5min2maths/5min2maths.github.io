@@ -608,3 +608,738 @@
     LESSON_FIGS.tangente = () => PL([{ f: fq }, { f: (x) => 2 * (x - 2) + 1, cls: "f-line", dash: true }], [[2, 1, "(a ; f(a))"]], { xr: [-3, 5], yr: [-2, 6], label: "tangente au point d'abscisse a" });
   }
 })();
+
+// =====================================================================================================================
+// 24.11 soir (agent c3ana) : neuf notions de plus pour la 3e du Collège (programme : tools/programme_3e_4e_college.md).
+// M3C02 Limites et continuité : limites, limitinf, asymptotes, continuite. M3C03 : derivseconde, etudefct.
+// M3C05 Combinatoire et probabilités : combi, probaxiomes, probarbre. Même standard que les notions ci-dessus
+// (3 niveaux, au moins 3 formes, pas à pas, pièges, ctx, leçon, indice, 3 compétences, problème de niveau 4 aux
+// valeurs tirées au hasard). Réponses : nombre, ensemble (« ; »), couple « x ; y » ou intervalle ; jamais de mots.
+// Bloc autonome (ses propres outils) : il s'ajoute sans toucher aux neuf notions de dérivation.
+(function () {
+  if (typeof NOTIONS === "undefined" || typeof GEN === "undefined") return;
+  // ---------- outils ----------
+  const pk = (a) => a[Math.floor(R.rand() * a.length)];
+  const nz = (a, b) => { let v; do v = R.int(a, b); while (v === 0); return v; };
+  const ri = R.int;
+  const r6 = (v) => +(+v).toFixed(9);
+  const den = (v) => { for (let d = 1; d <= 1000; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-7) return d; return 0; };
+  /* nombres : virgule décimale, ' pour les milliers dès 1'000 ; D en TeX, T en texte simple */
+  const grp = (v, sep, dp) => { const [i, f] = String(+(+v).toFixed(8)).split("."); return (Math.abs(+i) >= 1000 ? i.replace(/\B(?=(\d{3})+(?!\d))/g, sep) : i) + (f ? dp + f : ""); };
+  const D = (v) => grp(v, "\\text{'}", "{,}");
+  const T = (v) => grp(v, "'", ",").replace(/^-/, "−");
+  /* fraction exacte en TeX (sinon décimal), fraction tapée a/b, fraction en texte simple */
+  const fT = (v) => { v = r6(v); const d = den(v); if (d === 1 || !d || d > 400) return D(v); const n = Math.round(v * d); return (n < 0 ? "-" : "") + "\\frac{" + Math.abs(n) + "}{" + d + "}"; };
+  const fS = (v) => { v = r6(v); const d = den(v); if (d === 1) return String(Math.round(v)); if (!d) return String(v); return Math.round(v * d) + "/" + d; };
+  const fX = (v) => fS(v).replace(/^-/, "−");
+  const par = (v) => (v < 0 ? "(" + fT(v) + ")" : fT(v));
+  const sg = (v) => (v < 0 ? " - " + fT(-v) : " + " + fT(v));
+  const lt = (c) => (c === 1 ? " + x" : c === -1 ? " - x" : sg(c) + "x"); /* terme en x précédé de son signe */
+  const P2 = (cs, x = "x") => poly(ptrim(cs), x);
+  const pv = (cs, x) => cs.reduce((a, c) => a * x + c, 0);
+  const dP = (cs) => cs.slice(0, -1).map((c, i) => c * (cs.length - 1 - i));
+  const xm = (p, x = "x") => (p === 0 ? x : p > 0 ? x + " - " + fT(p) : x + " + " + fT(-p)); /* x − p en TeX */
+  const xmT = (p) => (p === 0 ? "x" : p > 0 ? "x − " + fX(p) : "x + " + fX(-p));
+  const pT = (cs) => poly(ptrim(cs)).replace(/\^\{?2\}?/g, "²").replace(/\^\{?3\}?/g, "³").replace(/\^\{?4\}?/g, "⁴").replace(/\\frac\{(\d+)\}\{(\d+)\}/g, "$1/$2").replace(/-/g, "−");
+  const setT = (vs) => "\\{" + [...vs].sort((a, b) => a - b).map(fT).join(" \\,;\\, ") + "\\}";
+  const cases = (e1, c1, e2, c2) => "f(x) = \\begin{cases} " + e1 + " & \\text{si } " + c1 + " \\\\ " + e2 + " & \\text{si } " + c2 + " \\end{cases}";
+  const fact = (n) => (n <= 1 ? 1 : n * fact(n - 1));
+  const Cb = (n, k) => { let r = 1; for (let i = 1; i <= k; i++) r = (r * (n - k + i)) / i; return Math.round(r); };
+  const bn = (n, k) => "\\binom{" + n + "}{" + k + "}";
+  const PL = (fns, pts, o = {}) => { const yr = o.yr || [-6, 6]; return FIG.plot(fns, pts || [], Object.assign({ numbers: true, xr: [-6, 6], yr: [-6, 6], maxH: 300 }, yr[1] - yr[0] > 11 ? { step: 2 } : {}, o)); };
+  /* Téléphone 360 px : formule longue découpée aux « = », « ⟺ », « ≈ » de premier niveau (comme ch4c_ana.js) */
+  const vis = (t) => t.replace(/\\frac\{([^{}]*)\}\{([^{}]*)\}/g, (m, a, b) => (a.length > b.length ? a : b)).replace(/\\[a-zA-Z]+/g, "x").replace(/\\[,;!]|[{}\s]/g, "");
+  const cut = (t) => { const out = []; let d = 0, last = 0;
+    for (let i = 0; i < t.length; i++) { const c = t[i];
+      if (c === "{") d++; else if (c === "}") d--; else if (t.startsWith("\\left", i)) d++; else if (t.startsWith("\\right", i)) d--;
+      else if (d === 0 && i > last + 1) { const m = /^ (=|\\iff|\\approx) /.exec(t.slice(i)); if (m) { out.push(t.slice(last, i)); last = i + 1; i += m[0].length - 2; } } }
+    out.push(t.slice(last)); return out; };
+  const wrapM = (h) => (typeof h !== "string" ? h : h.replace(/\\\((.*?)\\\)/g, (m, t) => { if (/\\begin/.test(t) || vis(t).length <= 22) return m; const ps = cut(t); if (ps.length < 2) return m;
+    const ch = []; let cur = ""; for (const p of ps) { if (cur && vis(cur + p).length > 22) { ch.push(cur); cur = p; } else cur = cur ? cur + " " + p : p; } ch.push(cur);
+    return ch.map((c) => "\\(" + c + "\\)").join(" "); }));
+  // ---------- constructeurs ----------
+  const keepT = (spec, traps) => { const seen = new Set(), tol = Math.max(spec.round || 0, 1e-9); return (traps || []).filter((tr) => {
+    if (!tr) return false;
+    if (tr.s) { if (spec.kind !== "set" || !tr.s.every(isFinite)) return false; const k = tr.s.map(r6).sort((a, b) => a - b).join(";"); if (seen.has(k) || checkAnswer(spec, tr.s.map(fS).join(" ; ")).status === "correct") return false; seen.add(k); return true; }
+    if (tr.spec) { const c = tr.spec.kind === "pair" ? tr.spec.values.map(fS).join(" ; ") : SolSet.show(tr.spec.ivs, false); if (seen.has(c) || checkAnswer(spec, c).status === "correct" || checkAnswer(tr.spec, c).status !== "correct") return false; seen.add(c); return true; }
+    if (spec.kind !== "value") return false;
+    const k = spec.round ? Math.round(tr.v / spec.round) : r6(tr.v);
+    if (!isFinite(tr.v) || Math.abs(tr.v - spec.value) <= tol || seen.has(k)) return false; seen.add(k); return true; }); };
+  const mk = (q, spec, sol, o) => { const x = { q: wrapM(q), spec, sol: wrapM(sol), guide: (o.guide || []).map((g) => Object.assign({}, g, { ask: wrapM(g.ask), sol: wrapM(g.sol) })), ctx: o.ctx, traps: keepT(spec, o.traps) }; if (o.fig) x.fig = o.fig; if (o.canon) x.canon = o.canon; return x; };
+  const QN = (q, value, sol, o) => mk(q, { kind: "value", value: r6(value) }, sol, o);
+  const QSet = (q, vals, sol, o) => mk(q, { kind: "set", values: [...new Set(vals.map(r6))].sort((a, b) => a - b) }, sol, o);
+  const QP = (q, vals, sol, o) => mk(q, { kind: "pair", values: vals.map(r6) }, sol, Object.assign({ canon: vals.map(fS).join(" ; ") }, o));
+  const QS = (q, ivs, sol, o) => mk(q, solsetSpec(ivs), sol, Object.assign({ canon: SolSet.show(ivs, false) }, o));
+  const G = (ask, value, sol) => GS(ask, r6(value), sol);
+  const GSet = (ask, vals, sol) => ({ ask, spec: { kind: "set", values: [...new Set(vals.map(r6))].sort((a, b) => a - b) }, sol });
+  const GP = (ask, vals, sol) => ({ ask, spec: { kind: "pair", values: vals.map(r6) }, sol });
+  const GSS = (ask, ivs, sol) => ({ ask, spec: solsetSpec(ivs), sol });
+  const TR = (v, m) => TRAP(r6(v), m);
+  const TSt = (s, m) => ({ s, m });
+  const TP = (vals, m) => ({ spec: { kind: "pair", values: vals.map(r6) }, m });
+  const TS = (ivs, m) => ({ spec: solsetSpec(ivs), m });
+  /* problème en plusieurs étapes : parts [libellé, valeur ou spec, arrondi] */
+  const P = (q, parts, hints, sol, fig) => ({ fig, q: wrapM(q), sol: wrapM(sol), hints, parts: parts.map(([label, v, round]) => ({ label, spec: v && typeof v === "object" ? v : Object.assign({ kind: "value", value: r6(v) }, round ? { round } : {}) })) });
+  const SET = (vals) => ({ kind: "set", values: [...new Set(vals.map(r6))].sort((a, b) => a - b) });
+  const lim = (to) => "\\lim_{x \\to " + to + "}";
+  const ITEMS = [["boules", "rouges", "bleues", "rouge", "bleue"], ["billes", "vertes", "jaunes", "verte", "jaune"], ["perles", "noires", "blanches", "noire", "blanche"]];
+
+  // ======================= limites : lecture, calcul direct, forme 0/0 (3.AN.01a, 3.AN.01b) =======================
+  const LI = {
+    1: [
+      () => { const x0 = ri(-2, 2), V = [-4, -3, -2, 2, 3, 4], L1 = pk(V), L2 = pk(V), m1 = pk([1, -1, 0.5, -0.5]), m2 = pk([1, -1, 0.5, -0.5]), g = R.rand() < 0.5, v = g ? L1 : L2;
+        if (Math.abs(L1 - L2) < 2 || v === x0) return null;
+        const f1 = (x) => L1 + m1 * (x - x0), f2 = (x) => L2 + m2 * (x - x0), cond = g ? "x < " + x0 : "x > " + x0;
+        return QN("Le graphique représente une fonction " + M("f") + " (le point plein donne " + M("f(" + x0 + ")") + "). Que vaut " + M("\\lim_{x \\to " + x0 + ",\\; " + cond + "} f(x)") + " ?", v,
+          "Quand " + M("x") + " s'approche de " + M(x0) + (g ? " par la gauche" : " par la droite") + ", la courbe se dirige vers la hauteur " + M(v) + ". " + (g ? "Ici, la limite à gauche (" + M(L1) + ") n'est pas égale à la limite à droite (" + M(L2) + ") : la courbe fait un saut." : "Ici, la limite à droite est égale à " + M("f(" + x0 + ")") + "."),
+          { ctx: g ? "lecture-gauche" : "lecture-droite", fig: PL([{ f: f1, to: x0, cls: "f-accent" }, { f: f2, from: x0, cls: "f-accent" }], [[x0, L2, ""]]),
+            guide: [G("Suis la courbe " + (g ? "à gauche" : "à droite") + " de " + M("x = " + x0) + " en te rapprochant de cette abscisse : vers quelle hauteur va-t-elle ?", v, M(v) + ".")],
+            traps: [TR(g ? L2 : L1, g ? "C'est la limite à droite (et f(" + T(x0) + ")) : on demande x < " + T(x0) + ", à gauche." : "C'est la limite à gauche : on demande x > " + T(x0) + ", à droite."), TR(-v, "Vérifie le signe de la hauteur lue."), TR(x0, "C'est l'abscisse ; la limite se lit sur l'axe vertical.")] }); },
+      () => { const a = nz(-4, 4), p = pk([1, 2, -1, 3, -2]), q = nz(-6, 6), r = ri(-6, 6), cs = [p, q, r], v = pv(cs, a); if (Math.abs(v) <= 1) return null;
+        return QN("Calcule " + M(lim(a) + " \\left(" + P2(cs) + "\\right)") + ".", v, "Un polynôme est continu : sa limite en " + M(a) + " est sa valeur en " + M(a) + ". " + M(fT(p) + " \\cdot " + par(a) + "^2" + (q < 0 ? " - " : " + ") + Math.abs(q) + " \\cdot " + par(a) + (r ? sg(r) : "") + " = " + v) + ".",
+          { ctx: "polynome", guide: [G("Valeur de " + M(P2([p, 0, 0])) + " en " + M("x = " + a) + " ?", p * a * a, M(p * a * a) + "."), G("Valeur de " + M(P2([q, 0])) + " en " + M("x = " + a) + " ?", q * a, M(q * a) + "."), G("Limite ?", v, M(v) + ".")],
+            traps: [TR(pv(cs, -a), "Remplace x par " + T(a) + " avec son signe."), TR(2 * p * a + q * a + r, "x² = x · x, pas 2x."), TR(p * a * a + q + r, "Le terme en x se multiplie aussi par " + T(a) + ".")] }); },
+      () => { const a = nz(-4, 4), b = nz(-5, 5), c = ri(-6, 6), d = pk([1, 2, 3, -1, -2]), e = ri(-6, 6), N = b * a + c, Dn = d * a + e; if (!Dn || !N || Math.abs(N) === Math.abs(Dn) || b * Dn === d * N) return null; const v = N / Dn;
+        return QN("Calcule " + M(lim(a) + " \\frac{" + P2([b, c]) + "}{" + P2([d, e]) + "}") + ".", v, "Le dénominateur ne s'annule pas en " + M(a) + " : on remplace " + M("x") + " par " + M(a) + ". " + M("\\frac{" + N + "}{" + Dn + "}" + (den(v) < Math.abs(Dn) ? " = " + fT(v) : "")) + ".",
+          { ctx: "rationnelle-directe", guide: [G("Numérateur en " + M("x = " + a) + " ?", N, M(N) + "."), G("Dénominateur en " + M("x = " + a) + " ?", Dn, M(Dn) + " : il n'est pas nul, on peut diviser."), G("Limite ?", v, M(fT(v)) + ".")],
+            traps: [TR(Dn / N, "Numérateur divisé par dénominateur, pas l'inverse."), TR(b / d, "C'est la limite à l'infini ; ici x tend vers " + T(a) + "."), TR(-v, "Attention aux signes.")] }); },
+    ],
+    2: [
+      () => { const a = nz(-5, 5), b = ri(-6, 6); if (Math.abs(a - b) < 2) return null; const v = a - b, num = [1, -(a + b), a * b];
+        return QN("Calcule " + M(lim(a) + " \\frac{" + P2(num) + "}{" + xm(a) + "}") + ".", v,
+          "En " + M(a) + " : forme " + M("\\frac{0}{0}") + ". " + M(P2(num) + " = (" + xm(a) + ")(" + xm(b) + ")") + ", donc le quotient vaut " + M(xm(b)) + " pour " + M("x \\neq " + a) + " ; limite " + M(a + " - " + par(b) + " = " + v) + ".",
+          { ctx: "factorisation", guide: [G("Le numérateur s'annule en " + M(a) + " : il se factorise en " + M("(" + xm(a) + ")(x - b)") + ". Que vaut " + M("b") + " ?", b, M(b) + "."), G("Après simplification, il reste " + M(xm(b)) + ". Limite en " + M(a) + " ?", v, M(v) + ".")],
+            traps: [TR(0, "0 ÷ 0 n'est pas un résultat : simplifie d'abord par (" + xmT(a) + ")."), TR(b - a, "Il reste " + xmT(b) + " : en x = " + T(a) + ", cela donne " + T(a) + " − (" + T(b) + ")."), TR(a + b, "Factorise le numérateur, simplifie, puis remplace x.")] }); },
+      () => { const a = nz(-4, 4), c = ri(-5, 5); if (c === a || c === -a) return null; const v = (2 * a) / (a - c); if (Math.abs(v) === 1) return null; const num = [1, 0, -a * a], dn = [1, -(a + c), a * c];
+        return QN("Calcule " + M(lim(a) + " \\frac{" + P2(num) + "}{" + P2(dn) + "}") + ".", v,
+          "Forme " + M("\\frac{0}{0}") + ". " + M(P2(num) + " = (" + xm(a) + ")(" + xm(-a) + ")") + " et " + M(P2(dn) + " = (" + xm(a) + ")(" + xm(c) + ")") + ". On simplifie : " + M("\\frac{" + xm(-a) + "}{" + xm(c) + "}") + ", qui tend vers " + M("\\frac{" + 2 * a + "}{" + (a - c) + "}" + (den(v) < Math.abs(a - c) ? " = " + fT(v) : "")) + ".",
+          { ctx: "deux-factorisations", guide: [G("Après simplification par " + M("(" + xm(a) + ")") + ", le numérateur devient " + M(xm(-a)) + ". Sa valeur en " + M(a) + " ?", 2 * a, M(2 * a) + "."), G("Le dénominateur devient " + M(xm(c)) + ". Sa valeur en " + M(a) + " ?", a - c, M(a - c) + "."), G("Limite ?", v, M(fT(v)) + ".")],
+            traps: [TR(0, "0 ÷ 0 n'est pas un résultat : factorise et simplifie."), TR((a - c) / (2 * a), "Numérateur divisé par dénominateur, pas l'inverse."), a + c ? TR((2 * a) / (a + c), "Le dénominateur se factorise en (x − " + T(a) + ")(" + xmT(c) + ").") : null] }); },
+      () => { const a = pk([2, 3, -2, -3, 4]), v = 3 * a * a;
+        return QN("Calcule " + M(lim(a) + " \\frac{" + P2([1, 0, 0, -(a ** 3)]) + "}{" + xm(a) + "}") + ".", v,
+          "Forme " + M("\\frac{0}{0}") + ". " + M(P2([1, 0, 0, -(a ** 3)]) + " = (" + xm(a) + ")(" + P2([1, a, a * a]) + ")") + " : le quotient vaut " + M(P2([1, a, a * a])) + ", qui tend vers " + M(a * a + sg(a * a) + sg(a * a) + " = " + v) + ".",
+          { ctx: "cube", guide: [G("On factorise : " + M(P2([1, 0, 0, -(a ** 3)]) + " = (" + xm(a) + ")(" + P2([1, a, a * a]) + ")") + ". Valeur de " + M(P2([1, a, a * a])) + " en " + M("x = " + a) + " ?", v, M(v) + ".")],
+            traps: [TR(a * a, "Les trois termes valent chacun " + T(a * a) + " en x = " + T(a) + "."), TR(3 * a, "En x = " + T(a) + ", x² vaut " + T(a * a) + "."), TR(0, "0 ÷ 0 n'est pas un résultat : factorise d'abord.")] }); },
+    ],
+    3: [
+      () => { const c = ri(2, 5), a = nz(-4, 6), b = c * c - a, v = 1 / (2 * c), rt = "\\sqrt{" + P2([1, b]) + "}";
+        return QN("Calcule " + M(lim(a) + " \\frac{" + rt + " - " + c + "}{" + xm(a) + "}") + ".", v,
+          "Forme " + M("\\frac{0}{0}") + ". On multiplie par la quantité conjuguée " + M(rt + " + " + c) + " : le numérateur devient " + M(P2([1, b]) + " - " + c * c + " = " + xm(a)) + ", d'où " + M("\\frac{1}{" + rt + " + " + c + "}") + ", qui tend vers " + M("\\frac{1}{" + 2 * c + "}") + ".",
+          { ctx: "conjuguee", guide: [G("Après multiplication par la quantité conjuguée et simplification, il reste " + M("\\frac{1}{" + rt + " + " + c + "}") + ". Valeur du dénominateur en " + M(a) + " ?", 2 * c, M(c + " + " + c + " = " + 2 * c) + "."), G("Limite ?", v, M("\\frac{1}{" + 2 * c + "}") + ".")],
+            traps: [TR(1 / c, "Le dénominateur tend vers " + c + " + " + c + " = " + 2 * c + "."), TR(2 * c, "C'est le dénominateur : la limite est son inverse."), TR(0, "0 ÷ 0 n'est pas un résultat : utilise la quantité conjuguée.")] }); },
+      () => { const a = pk([2, 3, 4, 5, -2, -3, -4]), v = -1 / (a * a), fr = "\\frac{1}{x}" + (a > 0 ? " - \\frac{1}{" + a + "}" : " + \\frac{1}{" + -a + "}");
+        return QN("Calcule " + M(lim(a) + " \\frac{" + fr + "}{" + xm(a) + "}") + ".", v,
+          M(fr + " = \\frac{" + a + " - x}{" + a + "x} = \\frac{-(" + xm(a) + ")}{" + a + "x}") + " ; après division par " + M("(" + xm(a) + ")") + ", il reste " + M("\\frac{-1}{" + a + "x}") + ", qui tend vers " + M("\\frac{-1}{" + a * a + "}") + ".",
+          { ctx: "fractions-etagees", guide: [G("Au même dénominateur, puis après division par (" + xmT(a) + "), il reste −1 ÷ (" + T(a) + "x). Valeur de " + M(a + "x") + " en " + M("x = " + a) + " ?", a * a, M(a * a) + "."), G("Limite ?", v, M(fT(v)) + ".")],
+            traps: [TR(1 / (a * a), "Signe : 1/x − 1/a = (a − x) ÷ (ax), et a − x = −(x − a)."), TR(-1 / a, "Le dénominateur " + T(a) + "x tend vers " + T(a * a) + "."), TR(0, "0 ÷ 0 n'est pas un résultat : réduis au même dénominateur.")] }); },
+      () => { const a = nz(-4, 4), b = nz(-5, 5); if (b === a || Math.abs(a + b) < 2) return null; const c = a * b, k = -(a + b), ka = a === 1 ? " + k" : a === -1 ? " - k" : (a < 0 ? " - " + -a : " + " + a) + "k";
+        return QN("Pour quelle valeur de " + M("k") + " la limite " + M(lim(a) + " \\frac{x^2 + kx" + sg(c) + "}{" + xm(a) + "}") + " est-elle un nombre (finie) ?", k,
+          "Le dénominateur s'annule en " + M(a) + " : il faut que le numérateur s'annule aussi (forme " + M("\\frac{0}{0}") + "). " + M(a * a + ka + sg(c) + " = 0") + ", donc " + M("k = " + k) + ". Alors " + M("x^2" + lt(k) + sg(c) + " = (" + xm(a) + ")(" + xm(b) + ")") + " et la limite vaut " + M(a - b) + ".",
+          { ctx: "parametre", guide: [G("Il faut que le numérateur s'annule en " + M("x = " + a) + " : " + M(a * a + ka + sg(c) + " = 0") + ". Que vaut " + M(a + " \\cdot k") + " ?", -(a * a + c), M(-(a * a + c)) + "."), G(M("k") + " ?", k, M(k) + ".")],
+            traps: [TR(a + b, "Vérifie le signe : " + T(a * a) + (a < 0 ? " − " + T(-a) : " + " + T(a)) + "k + " + T(c) + " = 0."), Math.abs(a) > 1 ? TR(-(a * a + c), "C'est " + T(a) + "k : divise encore par " + T(a) + ".") : null, TR(b, "C'est l'autre racine du numérateur, pas k.")] }); },
+    ],
+  };
+
+  // ======================= limitinf : limites à l'infini (3.AN.01c) =======================
+  const LF = {
+    1: [
+      () => { const a = nz(-6, 6), d = pk([2, 3, 4, 5, -2, -3]), b = ri(-5, 5), c = nz(-7, 7), e = nz(-7, 7), v = a / d, inf = pk(["+\\infty", "-\\infty"]); if (Math.abs(v) === 1) return null;
+        return QN("Calcule " + M(lim(inf) + " \\frac{" + P2([a, b, c]) + "}{" + P2([d, 0, e]) + "}") + ".", v, "À l'infini, seuls les termes de plus haut degré comptent : " + M("\\frac{" + P2([a, 0, 0]) + "}{" + P2([d, 0, 0]) + "} = " + fT(v)) + ".",
+          { ctx: "degres-egaux", guide: [G("Terme dominant du numérateur : son coefficient ?", a, M(P2([a, 0, 0])) + "."), G("Terme dominant du dénominateur : son coefficient ?", d, M(P2([d, 0, 0])) + "."), G("Limite ?", v, M(fT(v)) + ".")],
+            traps: [TR(c / e, "C'est la valeur en x = 0 ; à l'infini, ce sont les termes de plus haut degré qui comptent."), TR(d / a, "Numérateur divisé par dénominateur, pas l'inverse."), TR(-v, "Les deux termes dominants sont en x² : le signe de x ne change rien.")] }); },
+      () => { const k = pk([-5, -4, -3, -2, 2, 3, 4, 5]), m = pk([2, 3, 5, 7, -2, -3, -5, -7]), xs = [10, 100, 1000, 10000], ys = xs.map((x) => r6(k + m / x));
+        return QN("Voici quelques valeurs d'une fonction " + M("f") + " :<br>" + M("\\begin{array}{c|c|c|c|c} x & 10 & 100 & 1\\text{'}000 & 10\\text{'}000 \\\\ \\hline f(x) & " + ys.map(D).join(" & ") + " \\end{array}") + "<br>Quelle est, vraisemblablement, " + M(lim("+\\infty") + " f(x)") + " ?", k,
+          "Quand " + M("x") + " grandit, " + M("f(x)") + " se rapproche de " + M(k) + " : l'écart (" + M(D(ys[0] - k)) + ", puis " + M(D(r6(ys[1] - k))) + ", …) est divisé par 10 à chaque fois. " + M(lim("+\\infty") + " f(x) = " + k) + ".",
+          { ctx: "tableau-valeurs", guide: [G("Les valeurs se rapprochent d'un nombre entier quand " + M("x") + " grandit. Lequel ?", k, M(k) + ".")],
+            traps: [TR(ys[0], "C'est f(10) : regarde ce que deviennent les valeurs pour x très grand."), TR(0, "f(x) ne devient pas petit : c'est l'écart à " + T(k) + " qui tend vers 0."), TR(-k, "Vérifie le signe des valeurs.")] }); },
+      () => { const C = pk([["Après une injection, la concentration d'un médicament dans le sang vaut", "C(t)", "mg/L", "heures", "concentration", [3, 4, 5, 6, 8, 12]], ["Le nombre d'abonnés à une nouvelle application vaut", "N(t)", "milliers d'abonnés", "mois", "abonnes", [12, 15, 24, 40, 45]], ["La vitesse d'un parachutiste, parachute fermé, vaut", "v(t)", "m/s", "secondes", "parachutiste", [48, 50, 52, 54, 55]]]);
+        const L = pk(C[5]), k = pk([2, 3, 4]), b = ri(2, 9), a = k * L; if (b === L) return null;
+        return QN(C[0] + " " + M(C[1] + " = \\frac{" + a + "t}{" + k + "t + " + b + "}") + " (" + M("t") + " en " + C[3] + "). Vers quelle valeur (en " + C[2] + ") tend-elle quand " + M("t") + " devient très grand ?", L,
+          "Pour " + M("t") + " très grand, " + M(k + "t + " + b + " \\approx " + k + "t") + " : " + M("\\frac{" + a + "t}{" + k + "t} = " + L) + ". " + M("\\lim_{t \\to +\\infty} " + C[1] + " = " + L) + " " + C[2] + ".",
+          { ctx: C[4], guide: [G("Pour t très grand, " + k + "t + " + b + " ≈ " + k + "t. Simplifie " + M("\\frac{" + a + "t}{" + k + "t}") + " :", L, M(L) + ".")],
+            traps: [TR(a, "Divise par " + k + " : au dénominateur, " + k + "t + " + b + " ≈ " + k + "t."), TR(a / b, "Le terme " + b + " ne compte plus quand t est très grand."), TR(0, "Le numérateur grandit aussi : la limite n'est pas 0.")] }); },
+    ],
+    2: [
+      () => { const a = pk([2, 3, -2, -3, 4]), c = pk([2, 3, 5, 6, 8, 12]), b = nz(-5, 5), d = nz(-9, 9), v = (a * a) / c, inf = pk(["+\\infty", "-\\infty"]); if (Math.abs(v) === 1) return null;
+        return QN("Calcule " + M(lim(inf) + " \\frac{(" + P2([a, b]) + ")^2}{" + P2([c, 0, d]) + "}") + ".", v, "Développé, le numérateur commence par " + M("(" + a + "x)^2 = " + a * a + "x^2") + ". Termes dominants : " + M("\\frac{" + a * a + "x^2}{" + c + "x^2} = " + fT(v)) + ".",
+          { ctx: "carre", guide: [G("Terme de plus haut degré du numérateur : son coefficient ?", a * a, M("(" + a + "x)^2 = " + a * a + "x^2") + "."), G("Limite ?", v, M(fT(v)) + ".")],
+            traps: [TR(a / c, "Le carré porte aussi sur " + T(a) + "x : (" + T(a) + "x)² = " + T(a * a) + "x²."), TR((2 * a) / c, "Le terme en x² vient de (" + T(a) + "x)², pas du double produit."), TR(-v, "Un carré est positif, et " + c + "x² aussi.")] }); },
+      () => { const a = pk([1, 2, 3, -2, -1]), c = nz(-5, 5), b = nz(-9, 9), v = -a * c; if (Math.abs(v) < 2) return null;
+        const ax = a > 0 ? " - " + (a === 1 ? "" : a) + "x" : " + " + (a === -1 ? "" : -a) + "x";
+        return QN("Calcule " + M(lim("+\\infty") + " \\left(\\frac{" + P2([a, 0, b]) + "}{" + xm(-c) + "}" + ax + "\\right)") + ".", v,
+          "Forme « ∞ − ∞ ». Au même dénominateur : " + M("\\frac{" + P2([a, 0, b]) + " - " + (a === 1 ? "" : a === -1 ? "-" : a) + "x(" + xm(-c) + ")}{" + xm(-c) + "} = \\frac{" + P2([-a * c, b]) + "}{" + xm(-c) + "}") + ", qui tend vers " + M("\\frac{" + (-a * c) + "x}{x} = " + v) + ".",
+          { ctx: "difference", guide: [G("Au même dénominateur, le numérateur devient un polynôme de degré 1 : " + M(P2([-a * c, b])) + ". Son coefficient de " + M("x") + " ?", -a * c, M(-a * c) + "."), G("Limite ?", v, M(v) + ".")],
+            traps: [TR(a * c, "Signe : le terme " + T(a) + "x(" + xmT(-c) + ") se soustrait en entier."), TR(0, "« ∞ − ∞ » n'est pas 0 : réduis au même dénominateur."), TR(b, "Le terme constant ne compte plus à l'infini ; c'est le coefficient de x qui donne la limite.")] }); },
+      () => { const a = nz(-6, 6), c = pk([1, 2, 3, -1, -2]), e = pk([2, 3, 4, -2]), d = nz(-5, 5), f = nz(-5, 5), b = ri(-5, 5), v = a / (c * e), inf = pk(["+\\infty", "-\\infty"]); if (Math.abs(v) === 1) return null;
+        return QN("Calcule " + M(lim(inf) + " \\frac{" + P2([a, b, 0]) + "}{(" + P2([c, d]) + ")(" + P2([e, f]) + ")}") + ".", v, "Le dénominateur développé commence par " + M(P2([c * e, 0, 0])) + ". Termes dominants : " + M("\\frac{" + P2([a, 0, 0]) + "}{" + P2([c * e, 0, 0]) + "} = " + fT(v)) + ".",
+          { ctx: "produit", guide: [G("Terme dominant du dénominateur (produit des deux termes en x) : son coefficient ?", c * e, M(P2([c * e, 0, 0])) + "."), G("Limite ?", v, M(fT(v)) + ".")],
+            traps: [c + e ? TR(a / (c + e), "Les termes en x se multiplient : (" + pT([c, 0]) + ")(" + pT([e, 0]) + ") = " + pT([c * e, 0, 0]) + ".") : null, TR(a / c, "Le second facteur compte aussi."), TR(-v, "Les deux termes dominants sont en x² : le signe de x ne change rien.")] }); },
+    ],
+    3: [
+      () => { const a = pk([3, 4, 5, 6, 7, 8, -3, -4, -5, -6, -7, -8]), v = a / 2;
+        return QN("Calcule " + M(lim("+\\infty") + " \\left(\\sqrt{" + P2([1, a, 0]) + "} - x\\right)") + ".", v,
+          "Forme « ∞ − ∞ ». Quantité conjuguée : " + M("\\frac{(" + P2([1, a, 0]) + ") - x^2}{\\sqrt{" + P2([1, a, 0]) + "} + x} = \\frac{" + P2([a, 0]) + "}{\\sqrt{" + P2([1, a, 0]) + "} + x}") + ". Pour " + M("x") + " très grand, le dénominateur vaut environ " + M("2x") + " : " + M("\\frac{" + P2([a, 0]) + "}{2x} = " + fT(v)) + ".",
+          { ctx: "conjuguee-infini", guide: [G("Après multiplication par la quantité conjuguée, le numérateur devient " + M("kx") + ". Que vaut " + M("k") + " ?", a, M(P2([a, 0])) + "."), G("Le dénominateur " + M("\\sqrt{" + P2([1, a, 0]) + "} + x") + " vaut environ combien de fois " + M("x") + " ?", 2, M("x + x = 2x") + "."), G("Limite ?", v, M(fT(v)) + ".")],
+            traps: [TR(a, "Le dénominateur √(x² + …) + x vaut environ 2x, pas x."), TR(0, "« ∞ − ∞ » n'est pas 0 : multiplie par la quantité conjuguée."), TR(-v, "Vérifie le signe.")] }); },
+      () => { const a = pk([2, 3, 4, 5, -2, -3, -4, -5]), b = nz(-6, 6), c = pk([1, 3, 4, 5, 9]), v = -a;
+        return QN("Calcule " + M(lim("-\\infty") + " \\frac{" + P2([a, b]) + "}{\\sqrt{" + P2([1, 0, c]) + "}}") + ".", v,
+          "Pour " + M("x") + " très négatif, " + M("\\sqrt{" + P2([1, 0, c]) + "} \\approx \\sqrt{x^2} = |x| = -x") + ". Donc " + M("\\frac{" + P2([a, 0]) + "}{-x} = " + v) + ".",
+          { ctx: "racine-moins-infini", guide: [G("Pour " + M("x < 0") + ", " + M("\\sqrt{x^2} = |x| = kx") + ". Que vaut " + M("k") + " ?", -1, M("|x| = -x") + " pour " + M("x < 0") + "."), G("Limite ?", v, M(v) + ".")],
+            traps: [TR(a, "Pour x < 0, √(x²) = |x| = −x, pas x."), TR(0, "Numérateur et dénominateur sont tous deux « de degré 1 »."), TR(b, "Le terme constant ne compte plus à l'infini.")] }); },
+      () => { const c = pk([2, 3, 4, 5]), L = pk([2, 3, -2, -3, 1.5, -1.5, 2.5, 0.5, -0.5]), k = r6(c * L); if (!Number.isInteger(k) || Math.abs(k) < 2) return null; const b = nz(-6, 6), d = nz(-9, 9);
+        return QN("Pour quelle valeur de " + M("k") + " a-t-on " + M(lim("+\\infty") + " \\frac{kx^2" + lt(b) + "}{" + P2([c, 0, d]) + "} = " + fT(L)) + " ?", k,
+          "La limite vaut " + M("\\frac{k}{" + c + "}") + " (termes dominants). " + M("\\frac{k}{" + c + "} = " + fT(L) + " \\iff k = " + k) + ".",
+          { ctx: "parametre-infini", guide: [G("La limite est le quotient des coefficients dominants : " + M("\\frac{k}{" + c + "}") + ". Résous " + M("\\frac{k}{" + c + "} = " + fT(L)) + " : " + M("k") + " ?", k, M(k) + ".")],
+            traps: [TR(L, "La limite vaut k ÷ " + c + " : multiplie par " + c + "."), TR(L / c, "On multiplie par " + c + ", on ne divise pas."), TR(-k, "Vérifie le signe.")] }); },
+    ],
+  };
+
+  // ======================= asymptotes : verticales, horizontales, obliques (3.AN.01d, 3.AN.01e) =======================
+  const AS = {
+    1: [
+      () => { const a = nz(-5, 5), b = ri(-6, 6), k = pk([2, 3, 4, -2]), c = pk([-5, -4, -3, -2, 2, 3, 4, 5]); if (a * c + b === 0) return null;
+        return QN("Soit " + M("f(x) = \\frac{" + P2([a, b]) + "}{" + P2([k, -k * c]) + "}") + ". Son asymptote verticale a pour équation " + M("x = c") + ". Que vaut " + M("c") + " ?", c,
+          "Le dénominateur s'annule en " + M("x = " + c) + ", et le numérateur n'y vaut pas 0 (" + M(a * c + b) + ") : asymptote verticale " + M("x = " + c) + ".",
+          { ctx: "verticale", guide: [G("Résous " + M(P2([k, -k * c]) + " = 0") + " : " + M("x") + " ?", c, M("x = " + c) + ".")],
+            traps: [TR(-c, "Résous " + pT([k, -k * c]) + " = 0 : vérifie le signe."), b ? TR(-b / a, "C'est là que le numérateur s'annule (f vaut 0) ; l'asymptote vient du dénominateur.") : null, TR(-k * c, "Résous l'équation : divise par " + T(k) + ".")] }); },
+      () => { const a = nz(-6, 6), c = pk([2, 3, 4, 5, -2, -3]), b = ri(-6, 6), d = nz(-6, 6), v = a / c; if (Math.abs(v) === 1 || a * d === b * c) return null;
+        return QN("L'asymptote horizontale de " + M("f(x) = \\frac{" + P2([a, b]) + "}{" + P2([c, d]) + "}") + " a pour équation " + M("y = k") + ". Que vaut " + M("k") + " ?", v,
+          "À l'infini, " + M("f(x) \\approx \\frac{" + P2([a, 0]) + "}{" + P2([c, 0]) + "} = " + fT(v)) + " : asymptote horizontale " + M("y = " + fT(v)) + ".",
+          { ctx: "horizontale", guide: [G("Limite de " + M("f(x)") + " à l'infini (quotient des coefficients de " + M("x") + ") ?", v, M(fT(v)) + ".")],
+            traps: [b ? TR(b / d, "C'est f(0) ; l'asymptote horizontale est la limite à l'infini.") : null, TR(c / a, "Numérateur divisé par dénominateur, pas l'inverse."), TR(-d / c, "C'est l'asymptote verticale (x = …).")] }); },
+      () => { const V = [-4, -3, -2, 2, 3, 4], c = pk(V), k = pk(V), m = pk([1, 2, -1, -2, 3, -3]), askV = R.rand() < 0.5, v = askV ? c : k;
+        return QN("La courbe de " + M("f") + " a deux asymptotes (en pointillés). " + (askV ? "L'asymptote verticale a pour équation " + M("x = a") + ". Que vaut " + M("a") : "L'asymptote horizontale a pour équation " + M("y = b") + ". Que vaut " + M("b")) + " ?", v,
+          "Asymptote verticale " + M("x = " + c) + " (la courbe file vers l'infini près de cette droite) ; asymptote horizontale " + M("y = " + k) + " (la courbe s'en approche quand " + M("x") + " devient très grand).",
+          { ctx: askV ? "lecture-verticale" : "lecture-horizontale", fig: PL([{ f: (x) => k + m / (x - c) }], [], { vlines: [c], hlines: [k] }),
+            guide: [G(askV ? "La droite verticale en pointillés coupe l'axe horizontal en ?" : "La droite horizontale en pointillés coupe l'axe vertical en ?", v, M(v) + ".")],
+            traps: [TR(askV ? k : c, askV ? "C'est l'asymptote horizontale (y = …)." : "C'est l'asymptote verticale (x = …)."), TR(-v, "Lis le signe sur l'axe.")] }); },
+    ],
+    2: [
+      () => { const r1 = nz(-5, 5), r2 = nz(-5, 5), a = nz(-4, 4), b = ri(-6, 6); if (r1 === r2 || r1 === -r2 || a * r1 + b === 0 || a * r2 + b === 0) return null; const dn = [1, -(r1 + r2), r1 * r2];
+        return QSet("Quelles sont les asymptotes verticales de " + M("f(x) = \\frac{" + P2([a, b]) + "}{" + P2(dn) + "}") + " ? Donne les nombres " + M("a") + " des équations " + M("x = a") + ", séparés par « ; ».", [r1, r2],
+          M(P2(dn) + " = (" + xm(r1) + ")(" + xm(r2) + ")") + " s'annule en " + M(r1) + " et en " + M(r2) + ", où le numérateur n'est pas nul : asymptotes " + M("x = " + Math.min(r1, r2)) + " et " + M("x = " + Math.max(r1, r2)) + ".",
+          { ctx: "deux-verticales", guide: [GSet("Zéros du dénominateur " + M(P2(dn)) + " ?", [r1, r2], M(setT([r1, r2])) + ".")],
+            traps: [TSt([-r1, -r2], "Les zéros de (x − a)(x − b) sont a et b : attention aux signes."), TSt([r1], "Le dénominateur a deux zéros : deux asymptotes."), TSt([r2], "Le dénominateur a deux zéros : deux asymptotes.")] }); },
+      () => { const a = nz(-4, 4), b = nz(-4, 4), c = ri(-5, 5); if (a === b || c === a || c === b) return null; const num = [1, -(a + c), a * c], dn = [1, -(a + b), a * b];
+        return QSet("Quelles sont les asymptotes verticales de " + M("f(x) = \\frac{" + P2(num) + "}{" + P2(dn) + "}") + " ? Donne les nombres " + M("a") + " des équations " + M("x = a") + " (séparés par « ; » s'il y en a plusieurs).", [b],
+          M("f(x) = \\frac{(" + xm(a) + ")(" + xm(c) + ")}{(" + xm(a) + ")(" + xm(b) + ")}") + ". En " + M(a) + ", on simplifie : la courbe a un « trou », pas d'asymptote. Seule asymptote verticale : " + M("x = " + b) + ".",
+          { ctx: "trou", guide: [GSet("Zéros du dénominateur ?", [a, b], M(setT([a, b])) + "."), GSet("Lesquels n'annulent pas aussi le numérateur ?", [b], M(b) + " (en " + M(a) + ", on simplifie).")],
+            traps: [TSt([a, b], "En x = " + T(a) + ", numérateur et dénominateur s'annulent : après simplification, la limite est finie (un « trou »)."), TSt([a], "En x = " + T(a) + ", on simplifie par (" + xmT(a) + ") : pas d'asymptote là."), TSt([-b], "x − b = 0 donne x = b : attention au signe.")] }); },
+      () => { const x0 = nz(-4, 4), c = pk([1, 2, 3, -1, -2]), a = nz(-6, 6), d = -c * x0, b = ri(-6, 6), y0 = a / c; if (a * d === b * c) return null;
+        return QP("Les deux asymptotes de " + M("f(x) = \\frac{" + P2([a, b]) + "}{" + P2([c, d]) + "}") + " se coupent en un point. Donne ses coordonnées « x ; y ».", [x0, y0],
+          "Asymptote verticale " + M("x = " + x0) + " (le dénominateur s'annule), asymptote horizontale " + M("y = " + fT(y0)) + " (quotient des coefficients de " + M("x") + ") : point " + M("(" + x0 + " \\,;\\, " + fT(y0) + ")") + ".",
+          { ctx: "centre", guide: [G("Asymptote verticale : " + M("x") + " = ?", x0, M(x0) + "."), G("Asymptote horizontale : " + M("y") + " = ?", y0, M(fT(y0)) + "."), GP("Point « x ; y » ?", [x0, y0], M("(" + x0 + " \\,;\\, " + fT(y0) + ")") + ".")],
+            traps: [TP([y0, x0], "Abscisse d'abord : celle de l'asymptote verticale."), TP([-x0, y0], "Résous " + pT([c, d]) + " = 0 : vérifie le signe de l'abscisse."), TP([x0, b / d], "L'ordonnée est la limite à l'infini, pas f(0).")] }); },
+    ],
+    3: [
+      () => { const a = pk([1, 2, 3, -1, -2]), d = pk([1, 2, 3, 4, 5]), b = nz(-4, 4), x0 = pk([-4, -3, -2, 2, 3, 4, 5]), c = a * d - b * x0;
+        return QN("La courbe de " + M("f(x) = \\frac{" + P2([a, b, c]) + "}{" + P2([1, 0, d]) + "}") + " coupe son asymptote horizontale en un point. Quelle est son abscisse ?", x0,
+          "Asymptote horizontale " + M("y = " + a) + ". " + M("f(x) = " + a + " \\iff " + P2([a, b, c]) + " = " + P2([a, 0, a * d]) + " \\iff " + P2([b, c - a * d]) + " = 0 \\iff x = " + x0) + ".",
+          { ctx: "croise", guide: [G("Asymptote horizontale : " + M("y") + " = ?", a, M("y = " + a) + "."), G("Résous " + M("f(x) = " + a) + " (multiplie par " + M(P2([1, 0, d])) + ") : " + M("x") + " ?", x0, M("x = " + x0) + ".")],
+            traps: [TR(-x0, "Vérifie le signe en résolvant " + pT([b, c - a * d]) + " = 0."), TR(a, "C'est l'ordonnée (l'asymptote y = " + T(a) + ") ; on demande l'abscisse."), c ? TR(-c / b, "Le terme " + T(a * d) + " (le dénominateur multiplié par " + T(a) + ") compte aussi.") : null] }); },
+      () => { const a = pk([1, 2, -1, 3, -2]), d = nz(-4, 4), b = ri(-5, 5), c = ri(-6, 6), p = b + a * d, rem = a * d * d + b * d + c; if (!rem || !p) return null;
+        return QP("Soit " + M("f(x) = \\frac{" + P2([a, b, c]) + "}{" + xm(d) + "}") + ". Son asymptote oblique a pour équation " + M("y = mx + p") + ". Réponds « m ; p ».", [a, p],
+          "Division : " + M(P2([a, b, c]) + " = (" + xm(d) + ")(" + P2([a, p]) + ")" + sg(rem)) + ", donc " + M("f(x) = " + P2([a, p]) + " + \\frac{" + rem + "}{" + xm(d) + "}") + ". La fraction tend vers 0 : asymptote " + M("y = " + P2([a, p])) + ".",
+          { ctx: "oblique", guide: [G("Division de " + M(P2([a, b, c])) + " par " + M(xm(d)) + " : coefficient " + M("m") + " du quotient ?", a, M(a) + "."), G("Terme constant " + M("p") + " du quotient ?", p, M(p) + "."), GP("« m ; p » ?", [a, p], M("y = " + P2([a, p])) + ".")],
+            traps: [TP([a, b], "Il faut diviser : p n'est pas le coefficient de x du numérateur (p = " + T(b) + " + " + T(a) + " · " + T(d) + ")."), TP([a, b - a * d], "Signe : on divise par (" + xmT(d) + ")."), TP([p, a], "Dans l'ordre : m (la pente) puis p.")] }); },
+      () => { const m = ri(2, 6), a = pk([-9, -7, -5, -3, -2, 2, 3, 4, 5, 7]);
+        return QSet("Pour quelles valeurs de " + M("k") + " la fonction " + M("f(x) = \\frac{" + a + "}{x^2 + kx + " + m * m + "}") + " a-t-elle une seule asymptote verticale ? (valeurs séparées par « ; »)", [-2 * m, 2 * m],
+          "Une seule asymptote : le dénominateur a une seule racine (double), donc " + M("\\Delta = k^2 - " + 4 * m * m + " = 0") + ", " + M("k = \\pm " + 2 * m) + ". (Pour " + M("k = " + 2 * m) + ", " + M("x^2 + " + 2 * m + "x + " + m * m + " = (x + " + m + ")^2") + ".)",
+          { ctx: "une-seule-verticale", guide: [G("Discriminant du dénominateur : " + M("\\Delta = k^2 - c") + ". Que vaut " + M("c") + " ?", 4 * m * m, M("4 \\cdot " + m * m + " = " + 4 * m * m) + "."), GSet(M("\\Delta = 0") + " : " + M("k") + " ?", [-2 * m, 2 * m], M("k = \\pm " + 2 * m) + ".")],
+            traps: [TSt([2 * m], "k² = " + T(4 * m * m) + " a deux solutions."), TSt([-m, m], "k² = 4 · " + T(m * m) + " : k = ±" + T(2 * m) + "."), TSt([-4 * m * m, 4 * m * m], "C'est k² : prends la racine.")] }); },
+    ],
+  };
+
+  // ======================= continuite : continuité en un point, fonction par morceaux (3.AN.02a, 3.AN.02b) =======================
+  const CO = {
+    1: [
+      () => { const x0 = nz(-3, 4), a = nz(-4, 4), b = ri(-6, 6), c = nz(-4, 4); if (c === a) return null; const k = (a - c) * x0 + b; if (Math.abs(k) <= 1) return null;
+        return QN("Pour quelle valeur de " + M("k") + " la fonction " + M(cases(P2([a, b]), "x < " + x0, P2([c, 0]) + " + k", "x \\ge " + x0)) + " est-elle continue en " + M(x0) + " ?", k,
+          "Les deux morceaux doivent se rejoindre en " + M(x0) + " : " + M(pv([a, b], x0) + " = " + c * x0 + " + k") + ", donc " + M("k = " + k) + ".",
+          { ctx: "affine-morceaux", guide: [G("Valeur du 1er morceau en " + M("x = " + x0) + " ?", a * x0 + b, M(a * x0 + b) + "."), G("Valeur de " + M(P2([c, 0])) + " en " + M("x = " + x0) + " ?", c * x0, M(c * x0) + "."), G(M("k") + " ?", k, M(k) + ".")],
+            traps: [TR(a * x0 + b, "C'est la valeur du 1er morceau ; il faut encore retirer " + T(c * x0) + "."), TR(a * x0 + b + c * x0, "On retire " + T(c * x0) + ", on ne l'ajoute pas."), TR(-k, "Vérifie le signe.")] }); },
+      () => { const x0 = pk([-3, -2, 2, 3]), V = [-4, -3, -2, 2, 3, 4], L1 = pk(V), L2 = pk(V), m1 = pk([0.5, -0.5, 1, -1]), m2 = pk([0.5, -0.5, 1, -1]), ask = pk(["abs", "saut"]); if (Math.abs(L1 - L2) < 2) return null;
+        const fig = PL([{ f: (x) => L1 + m1 * (x - x0), to: x0, cls: "f-accent" }, { f: (x) => L2 + m2 * (x - x0), from: x0, cls: "f-accent" }], [[x0, L2, ""]]);
+        if (ask === "abs") return QN("Le graphique représente une fonction " + M("f") + " définie sur " + M("\\mathbb{R}") + " (le point plein est sur la courbe). En quelle abscisse " + M("f") + " n'est-elle pas continue ?", x0,
+          "En " + M("x = " + x0) + ", la courbe fait un saut : la limite à gauche (" + M(L1) + ") n'est pas égale à " + M("f(" + x0 + ") = " + L2) + ". On ne peut pas la tracer sans lever le crayon.",
+          { ctx: "lecture-saut", fig, guide: [G("Où faut-il lever le crayon pour tracer la courbe ? Abscisse :", x0, M(x0) + ".")],
+            traps: [TR(L2, "C'est une ordonnée ; on demande l'abscisse du saut."), TR(L1, "C'est une ordonnée ; on demande l'abscisse du saut."), TR(-x0, "Lis le signe sur l'axe horizontal.")] });
+        return QN("Le graphique représente une fonction " + M("f") + " (le point plein donne " + M("f(" + x0 + ")") + "). En " + M("x = " + x0) + ", elle fait un saut. Que vaut " + M("f(" + x0 + ") - \\lim_{x \\to " + x0 + ",\\; x < " + x0 + "} f(x)") + " (la hauteur du saut, avec son signe) ?", L2 - L1,
+          "Limite à gauche " + M(L1) + ", " + M("f(" + x0 + ") = " + L2) + " : saut " + M(L2 + " - " + par(L1) + " = " + (L2 - L1)) + ".",
+          { ctx: "lecture-hauteur", fig, guide: [G("Limite à gauche (hauteur où arrive la courbe de gauche) ?", L1, M(L1) + "."), G(M("f(" + x0 + ")") + " (le point plein) ?", L2, M(L2) + "."), G("Saut ?", L2 - L1, M(L2 - L1) + ".")],
+            traps: [TR(L1 - L2, "Dans l'ordre : f(" + T(x0) + ") moins la limite à gauche."), TR(L2, "C'est f(" + T(x0) + ") ; retire la limite à gauche."), TR(L1, "C'est la limite à gauche.")] }); },
+      () => { const a = nz(-5, 5), b = ri(-6, 6), m = pk([2, 3, -2]); if (Math.abs(a - b) < 1) return null; const num = [m, -m * (a + b), m * a * b], k = m * (a - b);
+        return QN("On pose " + M("f(x) = \\frac{" + P2(num) + "}{" + xm(a) + "}") + " pour " + M("x \\neq " + a) + ", et " + M("f(" + a + ") = k") + ". Quelle valeur de " + M("k") + " rend " + M("f") + " continue en " + M(a) + " ?", k,
+          "Pour " + M("x \\neq " + a) + ", " + M("f(x) = \\frac{" + m + "(" + xm(a) + ")(" + xm(b) + ")}{" + xm(a) + "} = " + m + "(" + xm(b) + ")") + ". Continuité : " + M("k = " + lim(a) + " f(x) = " + m + "(" + a + " - " + par(b) + ") = " + k) + ".",
+          { ctx: "prolongement", guide: [G("Le numérateur se factorise en " + M(m + "(" + xm(a) + ")(x - b)") + ". Que vaut " + M("b") + " ?", b, M(b) + "."), G(M("k") + " = la limite en " + M(a) + " ?", k, M(m + "(" + a + " - " + par(b) + ") = " + k) + ".")],
+            traps: [TR(0, "0 ÷ 0 n'est pas une valeur : simplifie d'abord par (" + xmT(a) + ")."), TR(m * (b - a), "Il reste " + T(m) + "(" + xmT(b) + ") : en x = " + T(a) + ", vérifie le signe."), TR(a - b, "N'oublie pas le facteur " + T(m) + ".")] }); },
+    ],
+    2: [
+      () => { const x0 = nz(-3, 3), p = nz(-5, 5), m = nz(-4, 4), k = x0 * x0 + p * x0 - m * x0; if (Math.abs(k) <= 1) return null;
+        return QN("Pour quelle valeur de " + M("k") + " la fonction " + M(cases(P2([1, p, 0]), "x \\le " + x0, P2([m, 0]) + " + k", "x > " + x0)) + " est-elle continue ?", k,
+          "Chaque morceau est continu ; il reste le raccord en " + M(x0) + " : " + M(par(x0) + "^2" + (p < 0 ? " - " : " + ") + Math.abs(p) + " \\cdot " + par(x0) + " = " + m * x0 + " + k") + ", donc " + M("k = " + (x0 * x0 + p * x0) + " - " + par(m * x0) + " = " + k) + ".",
+          { ctx: "parabole-droite", guide: [G("Valeur de " + M(P2([1, p, 0])) + " en " + M("x = " + x0) + " ?", x0 * x0 + p * x0, M(x0 * x0 + p * x0) + "."), G("Valeur de " + M(P2([m, 0])) + " en " + M("x = " + x0) + " ?", m * x0, M(m * x0) + "."), G(M("k") + " ?", k, M(k) + ".")],
+            traps: [TR(x0 * x0 + p * x0, "C'est la valeur du 1er morceau ; retire encore " + T(m * x0) + "."), TR(x0 * x0 + p * x0 + m * x0, "On retire " + T(m * x0) + ", on ne l'ajoute pas."), TR(-x0 * x0 + p * x0 - m * x0, "(" + T(x0) + ")² = " + T(x0 * x0) + " : un carré est positif.")] }); },
+      () => { const x0 = pk([2, 3, 4, -3, -4]), k = pk([-5, -4, -3, -2, 2, 3, 4, 5]), b = x0 * x0 - k - k * x0; if (!b) return null;
+        return QN("Pour quelle valeur de " + M("k") + " la fonction " + M(cases("kx" + sg(b), "x < " + x0, "x^2 - k", "x \\ge " + x0)) + " est-elle continue en " + M(x0) + " ?", k,
+          "Les deux morceaux se rejoignent : " + M(par(x0) + "k" + sg(b) + " = " + x0 * x0 + " - k") + ", donc " + M((x0 + 1) + "k = " + (x0 * x0 - b)) + " et " + M("k = " + k) + ".",
+          { ctx: "parametre-deux-cotes", guide: [G("On écrit " + M(par(x0) + "k" + sg(b) + " = " + x0 * x0 + " - k") + " et on regroupe les " + M("k") + " à gauche : coefficient de " + M("k") + " ?", x0 + 1, M(x0 + " + 1 = " + (x0 + 1)) + "."), G("Membre de droite (" + M(x0 * x0 + " - " + par(b)) + ") ?", x0 * x0 - b, M(x0 * x0 - b) + "."), G(M("k") + " ?", k, M(k) + ".")],
+            traps: [TR((x0 * x0 - b) / x0, "k apparaît aussi à droite (x² − k) : regroupe les k."), TR(-k, "Vérifie le signe."), TR((x0 * x0 + b) / (x0 + 1), "On isole k : " + T(x0 * x0) + " − (" + T(b) + ").")] }); },
+      () => { const C = pk([["Un parking facture", "h", "heures", [2, 3, 4], [[3, 2], [4, 2.5], [2.5, 1.5], [3.5, 2]]], ["Un fournisseur d'électricité facture", "kWh", "kWh", [100, 200, 300], [[0.3, 0.2], [0.35, 0.25], [0.4, 0.3]]], ["Un forfait de données mobiles coûte", "Go", "Go", [5, 10, 20], [[2, 1.5], [1.6, 1.2], [3, 2]]], ["Une compagnie de taxis facture", "km", "km", [10, 15, 20], [[3.5, 2.5], [4, 3], [3.2, 2.4]]]]);
+        const s = pk(C[3]), [a, b] = pk(C[4]), as = r6(a * s), bs = r6(b * s), k = r6(as - bs);
+        return QN(C[0] + " " + M("P(x) = " + D(a) + "x") + " CHF pour " + M("x \\le " + D(s)) + " " + C[2] + ", puis " + M("P(x) = " + D(b) + "x + k") + " CHF au-delà. Quelle valeur de " + M("k") + " (en CHF) évite un saut du prix en " + M(D(s)) + " " + C[1] + " ?", k,
+          "Les deux formules doivent donner le même prix en " + M(D(s)) + " : " + M(D(a) + " \\cdot " + D(s) + " = " + D(b) + " \\cdot " + D(s) + " + k") + ", donc " + M("k = " + D(as) + " - " + D(bs) + " = " + D(k)) + " CHF.",
+          { ctx: "tarif-" + C[1], guide: [G("Prix en " + M(D(s)) + " " + C[1] + " avec la 1re formule ?", as, M(D(as)) + " CHF."), G(M(D(b) + " \\cdot " + D(s)) + " ?", bs, M(D(bs)) + "."), G(M("k") + " ?", k, M(D(k)) + " CHF.")],
+            traps: [TR(as, "C'est le prix en " + T(s) + " " + C[1] + " ; retire " + T(bs) + "."), TR(bs, "C'est b · s ; k = a · s − b · s."), TR(-k, "Vérifie le signe : le second tarif par unité est plus bas, k est positif.")] }); },
+    ],
+    3: [
+      () => { const x1 = nz(-3, 1), dd = pk([1, 2, 3]), x2 = x1 + dd, u = ri(-3, 3), a = pk([-3, -2, 2, 3]), y1 = x1 * x1 + u, v = y1 + a * dd, b = v - a * x2;
+        return QP("Trouve " + M("a") + " et " + M("b") + " pour que " + M("f(x) = \\begin{cases} " + P2([1, 0, u]) + " & \\text{si } x < " + x1 + " \\\\ ax + b & \\text{si } " + x1 + " \\le x \\le " + x2 + " \\\\ " + v + " & \\text{si } x > " + x2 + " \\end{cases}") + " soit continue sur " + M("\\mathbb{R}") + ". Réponds « a ; b ».", [a, b],
+          "Raccord en " + M(x1) + " : la droite passe par " + M("(" + x1 + " \\,;\\, " + y1 + ")") + ". Raccord en " + M(x2) + " : par " + M("(" + x2 + " \\,;\\, " + v + ")") + ". Pente " + M("a = \\frac{" + v + " - " + par(y1) + "}{" + dd + "} = " + a) + ", puis " + M("b = " + v + " - " + par(a) + " \\cdot " + par(x2) + " = " + b) + ".",
+          { ctx: "trois-morceaux", guide: [G("Valeur de " + M(P2([1, 0, u])) + " en " + M("x = " + x1) + " ?", y1, M(y1) + "."), G("La droite passe par " + M("(" + x1 + " \\,;\\, " + y1 + ")") + " et " + M("(" + x2 + " \\,;\\, " + v + ")") + ". Pente " + M("a") + " ?", a, M(a) + "."), G(M("b") + " ?", b, M(b) + "."), GP("« a ; b » ?", [a, b], M("(" + a + " \\,;\\, " + b + ")") + ".")],
+            traps: [TP([b, a], "Dans l'ordre : a (la pente), puis b."), TP([a, v], "b n'est pas la valeur en " + T(x2) + " : b = " + T(v) + " − a · (" + T(x2) + ")."), TP([-a, v + a * x2], "Pente = (valeur en " + T(x2) + " − valeur en " + T(x1) + ") ÷ (" + T(x2) + " − (" + T(x1) + ")), dans cet ordre.")] }); },
+      () => { const c = ri(2, 5), a = nz(-4, 6), b = c * c - a, v = 1 / (2 * c), rt = "\\sqrt{" + P2([1, b]) + "}";
+        return QN("On pose " + M("f(x) = \\frac{" + rt + " - " + c + "}{" + xm(a) + "}") + " pour " + M("x \\neq " + a) + ". Quelle valeur faut-il donner à " + M("f(" + a + ")") + " pour que " + M("f") + " soit continue en " + M(a) + " ?", v,
+          "Il faut " + M("f(" + a + ") = " + lim(a) + " f(x)") + ". Quantité conjuguée : " + M("f(x) = \\frac{" + xm(a) + "}{(" + xm(a) + ")(" + rt + " + " + c + ")} = \\frac{1}{" + rt + " + " + c + "}") + ", qui tend vers " + M("\\frac{1}{" + 2 * c + "}") + ".",
+          { ctx: "prolongement-racine", guide: [G("Après multiplication par " + M(rt + " + " + c) + " et simplification, " + M("f(x) = \\frac{1}{" + rt + " + " + c + "}") + ". Valeur du dénominateur en " + M(a) + " ?", 2 * c, M(2 * c) + "."), G(M("f(" + a + ")") + " ?", v, M("\\frac{1}{" + 2 * c + "}") + ".")],
+            traps: [TR(1 / c, "Le dénominateur tend vers " + c + " + " + c + " = " + 2 * c + "."), TR(0, "0 ÷ 0 n'est pas une valeur : utilise la quantité conjuguée."), TR(2 * c, "C'est le dénominateur : prends l'inverse.")] }); },
+      () => { const x0 = pk([2, 3, -1, -2]), k = pk([-4, -3, -2, 2, 3, 4]), c = k * x0 * x0 - k * x0 - x0 * x0; if (!c) return null;
+        return QN("Pour quelle valeur de " + M("k") + " la fonction " + M(cases("x^2 + kx", "x \\le " + x0, "kx^2" + sg(-c), "x > " + x0)) + " est-elle continue en " + M(x0) + " ?", k,
+          "Raccord en " + M(x0) + " : " + M(x0 * x0 + " + " + par(x0) + "k = " + x0 * x0 + "k" + sg(-c)) + ", donc " + M((x0 * x0 - x0) + "k = " + (x0 * x0 + c)) + " et " + M("k = " + k) + ".",
+          { ctx: "parametre-carres", guide: [G("On regroupe les " + M("k") + " : coefficient de " + M("k") + " (" + M(x0 * x0 + " - " + par(x0)) + ") ?", x0 * x0 - x0, M(x0 * x0 - x0) + "."), G("Autre membre (" + M(x0 * x0 + sg(c)) + ") ?", x0 * x0 + c, M(x0 * x0 + c) + "."), G(M("k") + " ?", k, M(k) + ".")],
+            traps: [TR((x0 * x0 + c) / (x0 * x0), "k apparaît des deux côtés : regroupe-les."), TR(-k, "Vérifie le signe."), TR((x0 * x0 - c) / (x0 * x0 - x0), "Le terme −" + T(c) + " passe de l'autre côté : il change de signe.")] }); },
+    ],
+  };
+
+  // ======================= etudefct : étude complète d'une fonction (3.AN.07c, 3.AN.07d) =======================
+  const EF = {
+    1: [
+      () => { const a = nz(-5, 5), b = ri(2, 4); if (Math.abs(a) === b) return null; const cs = [1, -a, -b * b, a * b * b];
+        return QSet("Quels sont les zéros de " + M("f(x) = " + P2(cs)) + " ? (séparés par « ; »)", [a, -b, b],
+          "Groupement : " + M("f(x) = x^2(" + xm(a) + ") - " + b * b + "(" + xm(a) + ") = (" + xm(a) + ")(x^2 - " + b * b + ")") + ". Zéros : " + M(setT([a, -b, b])) + ".",
+          { ctx: "zeros-cubique", guide: [G("Groupe les termes deux à deux : " + M("f(x) = (x - a)(x^2 - c)") + ". Que vaut " + M("c") + " ?", b * b, M(b * b) + "."), GSet("Zéros de " + M("f") + " ?", [a, -b, b], M(setT([a, -b, b])) + ".")],
+            traps: [TSt([a], "x² − " + T(b * b) + " s'annule aussi."), TSt([a, b], "x² = " + T(b * b) + " a deux solutions : " + T(b) + " et −" + T(b) + "."), TSt([-a, -b, b], "x − a = 0 donne x = a : vérifie le signe.")] }); },
+      () => { const k = ri(2, 6), a = nz(-5, 5), b = ri(-6, 6); if (b === 0 || [k, -k].some((z) => a * z + b === 0)) return null;
+        return QSet("Quelles valeurs faut-il exclure de l'ensemble de définition de " + M("f(x) = \\frac{" + P2([a, b]) + "}{" + P2([1, 0, -k * k, 0]) + "}") + " ? (séparées par « ; »)", [-k, 0, k],
+          "On exclut les zéros du dénominateur : " + M(P2([1, 0, -k * k, 0]) + " = x(x^2 - " + k * k + ") = x(" + xm(k) + ")(" + xm(-k) + ")") + ". Valeurs interdites : " + M(setT([-k, 0, k])) + ".",
+          { ctx: "domaine", guide: [G("Mets " + M("x") + " en évidence : " + M(P2([1, 0, -k * k, 0]) + " = x(x^2 - c)") + ". Que vaut " + M("c") + " ?", k * k, M(k * k) + "."), GSet("Valeurs interdites ?", [-k, 0, k], M(setT([-k, 0, k])) + ".")],
+            traps: [TSt([-k, k], "Le facteur x s'annule aussi : 0 est interdit."), TSt([k], "x² = " + T(k * k) + " a deux solutions, et 0 est aussi interdit."), TSt([0, k * k], "x² = " + T(k * k) + " donne x = ±" + T(k) + ".")] }); },
+      () => { const k = ri(1, 3), d = ri(-6, 6), cs = [1, 0, -3 * k * k, d], ym = 2 * k ** 3 + d;
+        return QP("Donne les coordonnées « x ; y » du maximum local de " + M("f(x) = " + P2(cs)) + ".", [-k, ym],
+          M("f'(x) = " + P2([3, 0, -3 * k * k]) + " = 3(" + xm(-k) + ")(" + xm(k) + ")") + " : " + M("f'") + " passe de + à − en " + M(-k) + ". Maximum local " + M("f(" + -k + ") = " + ym) + ", au point " + M("(" + -k + " \\,;\\, " + ym + ")") + ".",
+          { ctx: "maximum-cubique", guide: [GSet("Zéros de " + M("f'(x) = " + P2([3, 0, -3 * k * k])) + " ?", [-k, k], M(setT([-k, k])) + "."), G("En quelle abscisse " + M("f'") + " passe-t-elle de + à − ?", -k, M(-k) + "."), G(M("f(" + -k + ")") + " ?", ym, M(ym) + "."), GP("« x ; y » ?", [-k, ym], M("(" + -k + " \\,;\\, " + ym + ")") + ".")],
+            traps: [TP([k, d - 2 * k ** 3], "C'est le minimum local (f' passe de − à +)."), TP([-k, d], "L'ordonnée est f(−" + T(k) + "), pas f(0)."), TP([ym, -k], "Dans l'ordre : x, puis y.")] }); },
+    ],
+    2: [
+      () => { const k = ri(2, 7), c = k * k, v = 2 * k;
+        return QN("Soit " + M("f(x) = \\frac{x^2 + " + c + "}{x}") + " pour " + M("x > 0") + ". Quelle est la valeur de son minimum ?", v,
+          M("f(x) = x + \\frac{" + c + "}{x}") + ", " + M("f'(x) = 1 - \\frac{" + c + "}{x^2}") + " s'annule en " + M("x = " + k) + " (de − à +). Minimum " + M("f(" + k + ") = " + k + " + " + k + " = " + v) + ".",
+          { ctx: "x-plus-inverse", guide: [G(M("f'(x) = 1 - \\frac{" + c + "}{x^2}") + ". Zéro positif ?", k, M(k) + "."), G(M("f(" + k + ")") + " ?", v, M(v) + ".")],
+            traps: [TR(k, "C'est l'abscisse du minimum ; calcule f(" + T(k) + ")."), TR(2 * c, "f(" + T(k) + ") = (" + T(c) + " + " + T(c) + ") ÷ " + T(k) + " : divise par " + T(k) + "."), TR(c + 1, "C'est f(1) : le minimum est là où f' s'annule.")] }); },
+      () => { const k = ri(1, 4), a = pk([2, 4, 6, 8, 3, 5]), y = a / (2 * k);
+        return QP("Donne les coordonnées « x ; y » du maximum de " + M("f(x) = \\frac{" + a + "x}{x^2 + " + k * k + "}") + ".", [k, y],
+          M("f'(x) = \\frac{" + a + "(" + k * k + " - x^2)}{(x^2 + " + k * k + ")^2}") + " : positive entre " + M(-k) + " et " + M(k) + ", négative ensuite. Maximum en " + M("x = " + k) + " : " + M("f(" + k + ") = \\frac{" + a * k + "}{" + 2 * k * k + "} = " + fT(y)) + ".",
+          { ctx: "rationnelle-bosse", guide: [G("Le numérateur de " + M("f'(x)") + " est " + M(a + "(" + k * k + " - x^2)") + ". Son zéro positif ?", k, M(k) + "."), G(M("f(" + k + ")") + " ?", y, M(fT(y)) + "."), GP("« x ; y » ?", [k, y], M("(" + k + " \\,;\\, " + fT(y) + ")") + ".")],
+            traps: [TP([-k, -y], "C'est le minimum (f' passe de − à +)."), TP([k, a / k], "Au dénominateur : " + T(k * k) + " + " + T(k * k) + " = " + T(2 * k * k) + "."), TP([y, k], "Dans l'ordre : x, puis y.")] }); },
+      () => { const a = ri(1, 3), b = ri(a + 1, 5), cs = [1, 0, -(a * a + b * b), 0, a * a * b * b];
+        return QSet("Quels sont les zéros de " + M("f(x) = " + P2(cs)) + " ? (séparés par « ; »)", [-b, -a, a, b],
+          "On pose " + M("X = x^2") + " : " + M("X^2 - " + (a * a + b * b) + "X + " + a * a * b * b + " = (X - " + a * a + ")(X - " + b * b + ")") + ". " + M("x^2 = " + a * a) + " ou " + M("x^2 = " + b * b) + " : " + M(setT([-b, -a, a, b])) + ".",
+          { ctx: "bicarree", guide: [GSet("Avec " + M("X = x^2") + ", résous " + M("X^2 - " + (a * a + b * b) + "X + " + a * a * b * b + " = 0") + " : " + M("X") + " ?", [a * a, b * b], M(setT([a * a, b * b])) + "."), GSet("Zéros " + M("x") + " ?", [-b, -a, a, b], M(setT([-b, -a, a, b])) + ".")],
+            traps: [TSt([a * a, b * b], "Ce sont les valeurs de X = x² : prends les racines."), TSt([a, b], "x² = " + T(a * a) + " donne aussi x = −" + T(a) + "."), TSt([-b, b], "x² = " + T(a * a) + " donne aussi deux zéros.")] }); },
+    ],
+    3: [
+      () => { let r1, r2; do { r1 = nz(-5, 3); r2 = r1 + pk([2, 4, 6]); } while (r2 === 0); const b = (r1 + r2) / 2, c = -r1 * r2, ask = pk(["min", "max"]), v = ask === "min" ? 2 * r2 : 2 * r1, x = ask === "min" ? r2 : r1;
+        return QN("Soit " + M("f(x) = \\frac{x^2" + sg(c) + "}{" + xm(b) + "}") + ". Quelle est la valeur de son " + (ask === "min" ? "minimum" : "maximum") + " local ?", v,
+          M("f'(x) = \\frac{2x(" + xm(b) + ") - (x^2" + sg(c) + ")}{(" + xm(b) + ")^2} = \\frac{" + P2([1, -2 * b, -c]) + "}{(" + xm(b) + ")^2}") + ", nulle en " + M(r1) + " et " + M(r2) + ". Maximum local " + M("f(" + r1 + ") = " + 2 * r1) + ", minimum local " + M("f(" + r2 + ") = " + 2 * r2) + " (ils sont sur les deux branches, de part et d'autre de l'asymptote " + M("x = " + b) + ").",
+          { ctx: "rationnelle-oblique-" + ask, guide: [GSet("Zéros du numérateur de " + M("f'(x)") + ", " + M(P2([1, -2 * b, -c])) + " ?", [r1, r2], M(setT([r1, r2])) + "."), G("Le " + (ask === "min" ? "minimum (f' passe de − à +)" : "maximum (f' passe de + à −)") + " est en " + M("x") + " = ?", x, M(x) + "."), G("Valeur ?", v, M("f(" + x + ") = " + v) + ".")],
+            traps: [TR(x, "C'est l'abscisse ; calcule f en ce point."), TR(ask === "min" ? 2 * r1 : 2 * r2, "C'est l'autre extremum (le " + (ask === "min" ? "maximum" : "minimum") + " local)."), TR(-v, "Vérifie le signe.")] }); },
+      () => { const k = ri(1, 3), d = ri(-6, 6), hi = 2 * k ** 3 + d, lo = d - 2 * k ** 3, cs = [1, 0, -3 * k * k, d], iv = [[lo, false, hi, false]];
+        return QS("Pour quelles valeurs de " + M("m") + " l'équation " + M(P2(cs) + " = m") + " a-t-elle trois solutions ? (intervalle)", iv,
+          "Maximum local " + M("f(" + -k + ") = " + hi) + ", minimum local " + M("f(" + k + ") = " + lo) + " ; " + M("f") + " va de " + M("-\\infty") + " à " + M("+\\infty") + ". La droite " + M("y = m") + " coupe trois fois la courbe exactement quand " + M(lo + " < m < " + hi) + " : " + M(SolSet.show(iv)) + ".",
+          { ctx: "nombre-solutions", guide: [G("Valeur du maximum local ?", hi, M("f(" + -k + ") = " + hi) + "."), G("Valeur du minimum local ?", lo, M("f(" + k + ") = " + lo) + "."), GSS("Valeurs de " + M("m") + " ?", iv, M(SolSet.show(iv)) + ".")],
+            traps: [TS([[lo, true, hi, true]], "Pour m = " + T(hi) + " ou m = " + T(lo) + ", la droite est tangente à la courbe : deux solutions seulement."), TS([[-k, false, k, false]], "Ce sont les abscisses des extremums ; m est une valeur de f (sur l'axe vertical).")] }); },
+      () => { const a = pk([2, 3, -2, -3]), d = ri(-9, 9), cs = [3, -4 * a, 0, 0, d], v = d - a ** 4;
+        return QN("Quelle est la valeur minimale de " + M("f(x) = " + P2(cs)) + " ?", v,
+          M("f'(x) = " + P2([12, -12 * a, 0, 0]) + " = 12x^2(" + xm(a) + ")") + ". En " + M(0) + ", " + M("f'") + " s'annule sans changer de signe (palier) ; en " + M(a) + ", elle passe de − à + : minimum " + M("f(" + a + ") = " + v) + ".",
+          { ctx: "quartique-palier", guide: [GSet("Zéros de " + M("f'(x) = " + P2([12, -12 * a, 0, 0])) + " ?", [0, a], M(setT([0, a])) + "."), G("En quelle abscisse " + M("f'") + " passe-t-elle de − à + ?", a, M(a) + " (en 0, " + M("12x^2 \\ge 0") + " ne change pas de signe)."), G(M("f(" + a + ")") + " ?", v, M(v) + ".")],
+            traps: [TR(d, "En 0, f' s'annule sans changer de signe : ce n'est pas un extremum."), TR(a, "C'est l'abscisse du minimum ; calcule f(" + T(a) + ")."), TR(d + a ** 4, "f(" + T(a) + ") = 3 · " + T(a ** 4) + " − 4 · " + T(a ** 4) + " + " + T(d) + ".")] }); },
+    ],
+  };
+
+  // ======================= derivseconde : concavité, points d'inflexion (3.AN.08a, 3.AN.08b) =======================
+  const DS = {
+    1: [
+      () => { const a = pk([1, 2, -1, 3, -2]), p = pk([-4, -3, -2, 2, 3, 4]), b = -3 * a * p, c = ri(-8, 8), d = ri(-6, 6), cs = [a, b, c, d];
+        return QN("En quelle abscisse la courbe de " + M("f(x) = " + P2(cs)) + " a-t-elle un point d'inflexion ?", p,
+          M("f'(x) = " + P2(dP(cs))) + ", " + M("f''(x) = " + P2([6 * a, 2 * b])) + " s'annule en changeant de signe en " + M("x = " + p) + ".",
+          { ctx: "inflexion-cubique", guide: [G(M("f''(x) = " + P2([6 * a, 0]) + " + c") + ". Que vaut " + M("c") + " ?", 2 * b, M(2 * b) + "."), G("Zéro de " + M("f''") + " ?", p, M(p) + ".")],
+            traps: [TR(-p, "Résous " + pT([6 * a, 2 * b]) + " = 0 : vérifie le signe."), TR(3 * p, "f''(x) = " + pT([6 * a, 2 * b]) + " : divise par " + T(6 * a) + "."), TR(1.5 * p, "C'est le zéro de " + pT([2 * a, b]) + " ; f''(x) = 6ax + 2b.")] }); },
+      () => { const a = pk([1, -1, 2]), b = nz(-3, 3), c = nz(-5, 5), e = ri(-6, 6), x0 = nz(-3, 3), cs = [a, b, c, e, 0], v = 12 * a * x0 * x0 + 6 * b * x0 + 2 * c; if (Math.abs(v) <= 1) return null;
+        return QN("Soit " + M("f(x) = " + P2(cs)) + ". Calcule " + M("f''(" + x0 + ")") + ".", v,
+          M("f'(x) = " + P2(dP(cs))) + ", " + M("f''(x) = " + P2(dP(dP(cs)))) + ", donc " + M("f''(" + x0 + ") = " + v) + ".",
+          { ctx: "valeur-seconde", guide: [G("Dans " + M("f''(x)") + ", coefficient de " + M("x^2") + " ?", 12 * a, M(12 * a) + "."), G(M("f''(" + x0 + ")") + " ?", v, M(v) + ".")],
+            traps: [TR(pv(dP(cs), x0), "C'est f'(" + T(x0) + ") : dérive encore une fois."), TR(12 * a * x0 * x0 + 6 * b * x0 + c, "Le terme " + T(c) + "x² donne " + T(2 * c) + "x, puis " + T(2 * c) + "."), TR(pv(cs, x0), "C'est f(" + T(x0) + ").")] }); },
+      () => { const p = pk([-4, -3, -2, 2, 3, 4]), m = pk([1, -1, 2, -2, 0.5, -0.5]);
+        return QN("Le graphique représente la dérivée seconde " + M("f''") + " d'une fonction " + M("f") + ". En quelle abscisse la courbe de " + M("f") + " a-t-elle un point d'inflexion ?", p,
+          M("f''") + " s'annule en changeant de signe en " + M("x = " + p) + " : la courbe de " + M("f") + " passe de " + (m > 0 ? "concave (tournée vers le bas) à convexe (tournée vers le haut)" : "convexe à concave") + ".",
+          { ctx: "lecture-seconde", fig: PL([{ f: (x) => m * (x - p) }], []), guide: [G("Où la droite coupe-t-elle l'axe horizontal ?", p, M(p) + ".")],
+            traps: [TR(-m * p, "C'est l'ordonnée à l'origine de f'' ; cherche où f''(x) = 0."), TR(-p, "Lis le signe sur l'axe horizontal.")] }); },
+    ],
+    2: [
+      () => { const a = pk([1, -1, 2, -2]), p = nz(-4, 4), b = -3 * a * p, c = ri(-6, 6), d = ri(-6, 6), cs = [a, b, c, d], ask = pk(["convexe", "concave"]);
+        const right = (ask === "convexe") === (a > 0), R1 = [[p, true, Infinity, false]], L1 = [[-Infinity, false, p, true]], iv = right ? R1 : L1;
+        return QS("Sur quel intervalle " + M("f(x) = " + P2(cs)) + " est-elle " + ask + " (courbe tournée vers " + (ask === "convexe" ? "le haut" : "le bas") + ") ?", iv,
+          M("f''(x) = " + P2([6 * a, 2 * b]) + " = " + 6 * a + "(" + xm(p) + ")") + ". " + (ask === "convexe" ? M("f'' \\ge 0") : M("f'' \\le 0")) + " sur " + M(SolSet.show(iv)) + ".",
+          { ctx: ask + "-cubique", guide: [G("Zéro de " + M("f''(x) = " + P2([6 * a, 2 * b])) + " ?", p, M(p) + "."), GSS("Intervalle où " + (ask === "convexe" ? M("f'' \\ge 0") : M("f'' \\le 0")) + " ?", iv, M(SolSet.show(iv)) + ".")],
+            traps: [TS(right ? L1 : R1, "C'est l'intervalle où f est " + (ask === "convexe" ? "concave" : "convexe") + " : regarde le signe de " + T(6 * a) + " devant (" + xmT(p) + ")."), TS(right ? [[-p, true, Infinity, false]] : [[-Infinity, false, -p, true]], "Le zéro de f'' est " + T(p) + " : vérifie le signe.")] }); },
+      () => { const p = ri(-3, 2), q = p + ri(1, 4), e = ri(-5, 5), g = ri(-5, 5), cs = [1, -2 * (p + q), 6 * p * q, e, g];
+        return QSet("Quelles sont les abscisses des points d'inflexion de " + M("f(x) = " + P2(cs)) + " ? (séparées par « ; »)", [p, q],
+          M("f''(x) = " + P2([12, -12 * (p + q), 12 * p * q]) + " = 12(" + xm(p) + ")(" + xm(q) + ")") + " : elle change de signe en " + M(p) + " et en " + M(q) + ".",
+          { ctx: "inflexion-quartique", guide: [G("Dans " + M("f''(x)") + ", coefficient de " + M("x") + " ?", -12 * (p + q), M(-12 * (p + q)) + "."), GSet("Zéros de " + M("f''(x) = " + P2([12, -12 * (p + q), 12 * p * q])) + " ?", [p, q], M(setT([p, q])) + ".")],
+            traps: [TSt([-p, -q], "Les zéros de 12(x − p)(x − q) sont p et q : vérifie les signes."), Number.isInteger((p + q) / 2) ? TSt([(p + q) / 2], "C'est le milieu des deux zéros : résous f''(x) = 0.") : null, TSt([p], "f'' a deux zéros, et elle change de signe en chacun.")] }); },
+      () => { const p = nz(-3, 3), c = ri(-6, 6), d = ri(-6, 6), cs = [1, -3 * p, c, d], y = pv(cs, p);
+        return QP("Donne les coordonnées « x ; y » du point d'inflexion de " + M("f(x) = " + P2(cs)) + ".", [p, y],
+          M("f''(x) = " + P2([6, -6 * p]) + "") + " s'annule en " + M(p) + " ; " + M("f(" + p + ") = " + y) + " : point " + M("(" + p + " \\,;\\, " + y + ")") + ".",
+          { ctx: "point-inflexion", guide: [G("Zéro de " + M("f''(x) = " + P2([6, -6 * p])) + " ?", p, M(p) + "."), G(M("f(" + p + ")") + " ?", y, M(y) + "."), GP("« x ; y » ?", [p, y], M("(" + p + " \\,;\\, " + y + ")") + ".")],
+            traps: [TP([p, pv(dP(cs), p)], "L'ordonnée est f(" + T(p) + "), pas f'(" + T(p) + ")."), TP([-p, pv(cs, -p)], "Résous 6x − " + T(6 * p) + " = 0 : vérifie le signe."), TP([y, p], "Dans l'ordre : x, puis y.")] }); },
+    ],
+    3: [
+      () => { const a = pk([1, 2, -1, 3]), p = nz(-3, 3), k = -3 * a * p, c = nz(-6, 6);
+        return QN("Pour quelle valeur de " + M("k") + " la courbe de " + M("f(x) = " + P2([a, 0, 0, 0]) + " + kx^2" + lt(c)) + " a-t-elle un point d'inflexion en " + M("x = " + p) + " ?", k,
+          M("f''(x) = " + P2([6 * a, 0]) + " + 2k") + " ; " + M("f''(" + p + ") = " + 6 * a * p + " + 2k = 0") + ", donc " + M("k = " + k) + ".",
+          { ctx: "parametre-inflexion", guide: [G(M("f''(x) = " + P2([6 * a, 0]) + " + 2k") + ". Que vaut " + M(P2([6 * a, 0])) + " en " + M("x = " + p) + " ?", 6 * a * p, M(6 * a * p) + "."), G(M("k") + " ?", k, M(k) + ".")],
+            traps: [TR(-6 * a * p, "f''(x) = " + T(6 * a) + "x + 2k : divise encore par 2."), TR(-a * p, "La dérivée seconde de " + pT([a, 0, 0, 0]) + " est " + T(6 * a) + "x."), TR(3 * a * p, "Vérifie le signe.")] }); },
+      () => { const p = nz(-3, 3), c = ri(-6, 6), d = ri(-6, 6), cs = [1, -3 * p, c, d], fp = pv(cs, p), m = c - 3 * p * p, n = p ** 3 + d; if (Math.abs(n) <= 1) return null;
+        return QN("Soit " + M("f(x) = " + P2(cs)) + ". La tangente à sa courbe au point d'inflexion a pour équation " + M("y = mx + n") + ". Que vaut " + M("n") + " ?", n,
+          "Inflexion en " + M("x = " + p) + " (" + M("f''(x) = " + P2([6, -6 * p])) + "). " + M("f(" + p + ") = " + fp) + ", " + M("f'(" + p + ") = " + m) + ". Tangente " + M("y = " + m + "(" + xm(p) + ")" + sg(fp)) + ", ordonnée à l'origine " + M(fp + " - " + par(p) + " \\cdot " + par(m) + " = " + n) + ".",
+          { ctx: "tangente-inflexion", guide: [G("Abscisse du point d'inflexion ?", p, M(p) + "."), G(M("f(" + p + ")") + " ?", fp, M(fp) + "."), G("Pente " + M("f'(" + p + ")") + " ?", m, M(m) + "."), G(M("n = f(" + p + ") - " + par(p) + " \\cdot f'(" + p + ")") + " ?", n, M(n) + ".")],
+            traps: [TR(fp, "C'est f(" + T(p) + ") : développe y = f'(" + T(p) + ")(" + xmT(p) + ") + f(" + T(p) + ")."), TR(m, "C'est la pente m."), TR(fp + p * m, "n = f(p) − p · f'(p) : vérifie le signe.")] }); },
+      () => { const m = ri(1, 4), a = pk([2, 3, 4, 6, 12, -6]), k = 3 * m * m;
+        return QSet("Quelles sont les abscisses des points d'inflexion de " + M("f(x) = \\frac{" + a + "}{x^2 + " + k + "}") + " ? (séparées par « ; »)", [-m, m],
+          M("f'(x) = \\frac{" + -2 * a + "x}{(x^2 + " + k + ")^2}") + ", " + M("f''(x) = \\frac{" + a + "(6x^2 - " + 2 * k + ")}{(x^2 + " + k + ")^3}") + " s'annule et change de signe quand " + M("x^2 = " + m * m) + " : " + M("x = \\pm " + m) + ".",
+          { ctx: "inflexion-cloche", guide: [G(M("f''(x)") + " a le signe de " + (a > 0 ? "" : "l'opposé de ") + M("6x^2 - " + 2 * k) + ". Elle s'annule pour " + M("x^2") + " = ?", m * m, M(m * m) + "."), GSet("Abscisses ?", [-m, m], M("\\pm " + m) + ".")],
+            traps: [TSt([0], "En 0, f'(0) = 0 : c'est le sommet de la courbe, pas une inflexion."), TSt([m], "x² = " + T(m * m) + " a deux solutions."), TSt([-m * m, m * m], "C'est x² : prends la racine.")] }); },
+    ],
+  };
+
+  // ======================= combi : dénombrement (3.PS.01a–e) =======================
+  const WORDS = ["ANANAS", "BANANE", "PAPAYE", "RADAR", "CERISE", "POMME", "GENEVE", "BALLON", "ARBRE", "ELEVE", "ALGEBRE", "CITRON", "MATHS"];
+  const KO = {
+    1: [
+      () => { const C = pk([["Une cantine propose", ["entrées", "plats", "desserts"], "menus complets (une entrée, un plat, un dessert)", "menu"], ["Dans son armoire, Léa a", ["t-shirts", "pantalons", "paires de baskets"], "tenues (un habit de chaque sorte)", "tenue"], ["Un glacier propose", ["parfums", "sauces", "décorations"], "coupes (un parfum, une sauce, une décoration)", "glace"]]);
+        const n1 = ri(3, 6), n2 = ri(3, 7), n3 = ri(2, 5), v = n1 * n2 * n3;
+        return QN(C[0] + " " + n1 + " " + C[1][0] + ", " + n2 + " " + C[1][1] + " et " + n3 + " " + C[1][2] + ". Combien de " + C[2] + " différents peut-on composer ?", v,
+          "Principe multiplicatif : chaque choix se combine avec tous les autres. " + M(n1 + " \\cdot " + n2 + " \\cdot " + n3 + " = " + D(v)) + ".",
+          { ctx: C[3], guide: [G("Nombre de choix pour les deux premiers éléments ?", n1 * n2, M(n1 + " \\cdot " + n2 + " = " + n1 * n2) + "."), G("Total ?", v, M(D(v)) + ".")],
+            traps: [TR(n1 + n2 + n3, "On multiplie : chaque choix se combine avec tous les autres."), TR(n1 * n2, "Il manque le 3e choix.")] }); },
+      () => { const n = ri(4, 7), C = pk([["De combien de façons peut-on ranger " + n + " livres différents sur une étagère ?", "etagere"], [n + " coureuses participent à une course (sans ex æquo). Combien d'ordres d'arrivée sont possibles ?", "course"], [n + " amis posent en ligne pour une photo. Combien d'ordres différents sont possibles ?", "photo"]]), v = fact(n);
+        return QN(C[0], v, "Permutations : " + M(n + " \\cdot " + (n - 1) + " \\cdot \\ldots \\cdot 2 \\cdot 1 = " + n + "! = " + D(v)) + ".",
+          { ctx: C[1], guide: [G("Choix pour la 1re place ?", n, M(n) + "."), G("Choix pour la 2e place ?", n - 1, M(n - 1) + "."), G("Total " + M(n + "!") + " ?", v, M(D(v)) + ".")],
+            traps: [TR(n ** n, "Ce qui est déjà placé ne peut pas l'être une 2e fois : " + n + " · " + (n - 1) + " · …"), TR(n * (n - 1), "Continue jusqu'à 1 : " + n + " · " + (n - 1) + " · … · 1."), TR((n * (n + 1)) / 2, "On multiplie, on n'additionne pas.")] }); },
+      () => { const n = ri(6, 12), C = pk([[n + " athlètes disputent une finale. Combien de podiums (or, argent, bronze) sont possibles ?", "podium"], ["Un club de " + n + " membres élit un président, un vice-président et un caissier (trois personnes différentes). Combien de bureaux sont possibles ?", "bureau"], [n + " chevaux prennent le départ. Un pari « tiercé dans l'ordre » désigne le 1er, le 2e et le 3e. Combien de paris différents ?", "tierce"]]), v = n * (n - 1) * (n - 2);
+        return QN(C[0], v, "L'ordre compte et les trois sont différents : " + M(n + " \\cdot " + (n - 1) + " \\cdot " + (n - 2) + " = " + D(v)) + ".",
+          { ctx: C[1], guide: [G("Choix pour la 1re place ?", n, M(n) + "."), G("Pour la 2e (une personne de moins) ?", n - 1, M(n - 1) + "."), G("Total ?", v, M(n + " \\cdot " + (n - 1) + " \\cdot " + (n - 2) + " = " + D(v)) + ".")],
+            traps: [TR(Cb(n, 3), "Ici l'ordre compte (1er ≠ 2e) : on ne divise pas par 3!."), TR(n ** 3, "Une même personne ne peut pas occuper deux places."), TR(n * (n - 1), "Il y a trois places à attribuer.")] }); },
+    ],
+    2: [
+      () => { const t = pk(["deleg", "mains", "pizza"]); let n, k, txt;
+        if (t === "deleg") { n = ri(15, 25); k = pk([2, 3]); txt = "Une classe de " + n + " élèves choisit " + k + " délégués (sans rôle particulier). Combien de groupes de délégués sont possibles ?"; }
+        else if (t === "mains") { n = ri(8, 30); k = 2; txt = n + " personnes se saluent : chacune serre la main de chaque autre, une seule fois. Combien de poignées de main ?"; }
+        else { n = ri(8, 12); k = pk([2, 3, 4]); txt = "Une pizzeria propose " + n + " garnitures. Combien de pizzas différentes peut-on composer avec " + k + " garnitures différentes ?"; }
+        const A = Cb(n, k) * fact(k), v = Cb(n, k);
+        return QN(txt, v, "L'ordre ne compte pas : " + M(bn(n, k) + " = \\frac{" + D(A) + "}{" + k + "!} = " + D(v)) + ".",
+          { ctx: "combinaisons-" + t, guide: [G("Si l'ordre comptait (" + M(Array.from({ length: k }, (_, i) => n - i).join(" \\cdot ")) + ") ?", A, M(D(A)) + "."), G("Nombre d'ordres d'un même groupe, " + M(k + "!") + " ?", fact(k), M(fact(k)) + "."), G("Nombre de groupes ?", v, M(D(v)) + ".")],
+            traps: [TR(A, "L'ordre ne compte pas : divise par " + k + "! = " + fact(k) + "."), TR(n ** k, "On ne choisit pas deux fois le même élément, et l'ordre ne compte pas."), TR(n * k, "Ce n'est pas n · k : compte les groupes.")] }); },
+      () => { const t = pk(["qcm", "cadenas", "code"]); let b, e, txt;
+        if (t === "qcm") { e = ri(5, 8); b = pk([3, 4]); txt = "Un QCM a " + e + " questions, chacune avec " + b + " réponses possibles. Combien de grilles de réponses différentes peut-on remplir (une réponse par question) ?"; }
+        else if (t === "cadenas") { e = ri(3, 5); b = pk([6, 8, 12]); txt = "Un cadenas a " + e + " roues de " + b + " symboles chacune. Combien de combinaisons différentes ?"; }
+        else { e = 3; b = 26; txt = "Combien de codes de 3 lettres (de A à Z, répétitions permises) peut-on former ?"; }
+        const v = b ** e;
+        return QN(txt, v, "Chaque position a " + M(b) + " possibilités, indépendamment des autres : " + M(b + "^" + e + " = " + D(v)) + ".",
+          { ctx: "puissance-" + t, guide: [G("Nombre de possibilités pour chaque position ?", b, M(b) + "."), G("Total " + M(b + "^" + e) + " ?", v, M(D(v)) + ".")],
+            traps: [TR(b * e, "On multiplie " + b + " par lui-même " + e + " fois : " + b + "^" + e + "."), TR(e ** b, "C'est (possibilités par position) puissance (nombre de positions)."), TR(Cb(b, e) * fact(e), "Les répétitions sont permises.")] }); },
+      () => { const w = pk(WORDS), cnt = {}; for (const ch of w) cnt[ch] = (cnt[ch] || 0) + 1; const reps = Object.values(cnt).filter((c) => c > 1), prod = reps.reduce((s, c) => s * fact(c), 1), n = w.length, v = fact(n) / prod;
+        return QN("Combien de « mots » différents (même sans signification) peut-on écrire avec toutes les lettres du mot " + w + " ?", v,
+          M(n) + " lettres : " + M(n + "! = " + D(fact(n))) + " ordres. " + (reps.length ? "Échanger des lettres identiques ne change pas le mot : on divise par " + M(reps.map((c) => c + "!").join(" \\cdot ") + " = " + prod) + ". " + M("\\frac{" + D(fact(n)) + "}{" + prod + "} = " + D(v)) + "." : "Toutes les lettres sont différentes : " + M(D(v)) + " mots."),
+          { ctx: "anagramme", guide: [G("Nombre de lettres " + M("n") + " ; que vaut " + M("n!") + " ?", fact(n), M(n + "! = " + D(fact(n))) + "."), G("Produit des factorielles des lettres répétées (1 s'il n'y en a pas) ?", prod, M(prod) + "."), G("Nombre de mots ?", v, M(D(v)) + ".")],
+            traps: [TR(fact(n), "Des lettres identiques échangées donnent le même mot : divise par les factorielles des répétitions."), reps.length > 1 ? TR(fact(n) / fact(reps[0]), "Toutes les lettres répétées comptent : divise par le produit de leurs factorielles.") : null, TR(n ** n, "Chaque lettre n'est utilisée qu'une fois.")] }); },
+    ],
+    3: [
+      () => { const g = ri(4, 9), b = ri(4, 9), k = pk([3, 4]), j = ri(1, k - 1), v = Cb(g, j) * Cb(b, k - j);
+        return QN("Une classe compte " + g + " filles et " + b + " garçons. On forme un comité de " + k + " élèves. Combien de comités comptent exactement " + j + " fille" + (j > 1 ? "s" : "") + " ?", v,
+          "On choisit les filles ET les garçons : " + M(bn(g, j) + " \\cdot " + bn(b, k - j) + " = " + Cb(g, j) + " \\cdot " + Cb(b, k - j) + " = " + D(v)) + ".",
+          { ctx: "comite-exact", guide: [G("Choix des " + j + " fille" + (j > 1 ? "s" : "") + ", " + M(bn(g, j)) + " ?", Cb(g, j), M(Cb(g, j)) + "."), G("Choix des " + (k - j) + " garçon" + (k - j > 1 ? "s" : "") + " ?", Cb(b, k - j), M(Cb(b, k - j)) + "."), G("Total ?", v, M(D(v)) + ".")],
+            traps: [TR(Cb(g + b, k), "Ce sont tous les comités, sans condition."), TR(Cb(g, j) + Cb(b, k - j), "Filles ET garçons : on multiplie les choix."), TR(Cb(g, j) * Cb(b, k - j) * fact(k), "Dans un comité, l'ordre ne compte pas.")] }); },
+      () => { const g = ri(3, 8), b = ri(4, 9), k = pk([3, 4]), n = g + b, v = Cb(n, k) - Cb(b, k);
+        return QN("Une classe compte " + g + " filles et " + b + " garçons. On forme un comité de " + k + " élèves. Combien de comités comptent au moins une fille ?", v,
+          "Par le contraire : tous les comités moins ceux sans fille. " + M(bn(n, k) + " - " + bn(b, k) + " = " + D(Cb(n, k)) + " - " + D(Cb(b, k)) + " = " + D(v)) + ".",
+          { ctx: "au-moins-une", guide: [G("Nombre total de comités ?", Cb(n, k), M(bn(n, k) + " = " + D(Cb(n, k))) + "."), G("Comités sans fille (que des garçons) ?", Cb(b, k), M(bn(b, k) + " = " + D(Cb(b, k))) + "."), G("Au moins une fille ?", v, M(D(v)) + ".")],
+            traps: [TR(Cb(n, k), "Retire les comités sans fille."), TR(g * Cb(n - 1, k - 1), "Ce calcul compte plusieurs fois les comités à plusieurs filles : passe par le contraire."), TR(Cb(b, k), "C'est le nombre de comités sans fille.")] }); },
+      () => { const n = ri(6, 24), H = (n * (n - 1)) / 2;
+        return QN("Lors d'une fête, chaque invité serre la main de chaque autre invité, une seule fois. On compte " + T(H) + " poignées de main. Combien y a-t-il d'invités ?", n,
+          M("\\frac{n(n - 1)}{2} = " + D(H) + " \\iff n(n - 1) = " + D(2 * H)) + " ; or " + M(n + " \\cdot " + (n - 1) + " = " + D(2 * H)) + ", donc " + M("n = " + n) + ".",
+          { ctx: "poignees-inverse", guide: [G("Avec " + M("n") + " invités, il y a " + M("\\frac{n(n - 1)}{2}") + " poignées. Que vaut " + M("n(n - 1)") + " ?", 2 * H, M(D(2 * H)) + "."), G(M("n") + " (deux entiers consécutifs dont le produit vaut " + M(D(2 * H)) + ") ?", n, M(n) + ".")],
+            traps: [TR(n - 1, "n(n − 1) : n est le plus grand des deux facteurs."), TR(2 * H, "C'est n(n − 1) ; il faut encore trouver n."), TR(n + 1, "Vérifie : " + (n + 1) + " · " + n + " ≠ " + T(2 * H) + ".")] }); },
+      () => { const n = ri(4, 7), v = 2 * fact(n - 1);
+        return QN(n + " amis, dont Alix et Bao, s'assoient sur un banc de " + n + " places. De combien de façons peuvent-ils s'asseoir si Alix et Bao veulent être côte à côte ?", v,
+          "On colle Alix et Bao en un bloc : " + M(n - 1) + " « objets » à ranger, " + M((n - 1) + "! = " + D(fact(n - 1))) + " façons ; dans le bloc, 2 ordres. " + M("2 \\cdot " + D(fact(n - 1)) + " = " + D(v)) + ".",
+          { ctx: "cote-a-cote", guide: [G("Alix et Bao forment un bloc : combien d'« objets » à ranger ?", n - 1, M(n - 1) + "."), G("Nombre de rangements de ces objets ?", fact(n - 1), M((n - 1) + "! = " + D(fact(n - 1))) + "."), G("Total (2 ordres dans le bloc) ?", v, M(D(v)) + ".")],
+            traps: [TR(fact(n - 1), "Alix et Bao peuvent échanger leurs places : multiplie par 2."), TR(fact(n), "Ce sont toutes les dispositions, sans contrainte."), TR(2 * fact(n - 2), "Le bloc compte comme un objet : " + (n - 1) + " objets.")] }); },
+      () => { const k = pk([3, 4]), v = k === 3 ? 648 : 4536;
+        return QN("Combien de nombres de " + k + " chiffres (le premier n'est pas 0) ont tous leurs chiffres différents ?", v,
+          "1er chiffre : 9 choix (pas 0). 2e : 9 choix (0 redevient possible, mais pas le 1er chiffre). Puis 8" + (k === 4 ? ", puis 7" : "") + ". " + M("9 \\cdot 9 \\cdot 8" + (k === 4 ? " \\cdot 7" : "") + " = " + D(v)) + ".",
+          { ctx: "chiffres-distincts", guide: [G("Choix du 1er chiffre ?", 9, M(9) + " (de 1 à 9)."), G("Choix du 2e chiffre ?", 9, M(9) + " : le 0 est permis, pas le 1er chiffre."), G("Total ?", v, M(D(v)) + ".")],
+            traps: [TR(k === 3 ? 720 : 5040, "Le premier chiffre ne peut pas être 0 : 9 choix."), TR(k === 3 ? 504 : 3024, "Pour le 2e chiffre, le 0 redevient possible : encore 9 choix."), TR(k === 3 ? 900 : 9000, "Les chiffres doivent être différents.")] }); },
+    ],
+  };
+
+  // ======================= probaxiomes : équiprobabilité, contraire, réunion (3.PS.02a–c) =======================
+  const PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37];
+  const PA = {
+    1: [
+      () => { const N = ri(20, 40), ev = pk(["mult", "prem", "carre"]); let cnt, txt, tr;
+        if (ev === "mult") { const k = ri(3, 7); cnt = Math.floor(N / k); txt = "un multiple de " + k; tr = TR(1 / k, "Il y a " + cnt + " multiples de " + k + " entre 1 et " + N + " : compte-les."); }
+        else if (ev === "prem") { cnt = PRIMES.filter((p) => p <= N).length; txt = "un nombre premier"; tr = TR((cnt + 1) / N, "1 n'est pas un nombre premier."); }
+        else { cnt = Math.floor(Math.sqrt(N)); txt = "un carré parfait (comme 4, 9 ou 16)"; tr = TR((cnt - 1) / N, "1 = 1² est aussi un carré parfait."); }
+        const v = cnt / N;
+        return QN("Une urne contient " + N + " boules numérotées de 1 à " + N + ". On en tire une au hasard. Quelle est la probabilité d'obtenir " + txt + " ?", v,
+          "Équiprobabilité : " + M(cnt) + " cas favorables sur " + M(N) + " : " + M("\\frac{" + cnt + "}{" + N + "}" + (den(v) < N ? " = " + fT(v) : "")) + ".",
+          { ctx: "urne-" + ev, guide: [G("Nombre de cas favorables ?", cnt, M(cnt) + "."), G("Probabilité ?", v, M(fT(v)) + ".")],
+            traps: [TR(cnt, "C'est le nombre de cas favorables : divise par " + N + "."), tr, TR(cnt / (N - cnt), "On divise par le nombre total de cas (" + N + "), pas par les cas défavorables.")] }); },
+      () => { const C = pk([["La probabilité qu'il pleuve demain à Genève est", "qu'il ne pleuve pas", "meteo"], ["La probabilité que le bus du matin soit en retard est", "qu'il ne soit pas en retard", "bus"], ["La probabilité qu'une ampoule tombe en panne avant un an est", "qu'elle fonctionne encore après un an", "ampoule"]]);
+        const dec = R.rand() < 0.6, p = dec ? pk([0.15, 0.35, 0.42, 0.08, 0.27, 0.65]) : pk([2 / 7, 3 / 8, 5 / 12, 4 / 9, 2 / 9]), v = r6(1 - p);
+        return QN(C[0] + " " + M(dec ? D(p) : fT(p)) + ". Quelle est la probabilité " + C[1] + " ?", v,
+          "Événement contraire : " + M("P(\\overline{A}) = 1 - P(A) = 1 - " + (dec ? D(p) : fT(p)) + " = " + (dec ? D(v) : fT(v))) + ".",
+          { ctx: "contraire-" + C[2], guide: [G(M("P(\\overline{A}) = 1 - P(A)") + " ?", v, M(dec ? D(v) : fT(v)) + ".")],
+            traps: [TR(p, "C'est P(A) : l'événement contraire a la probabilité 1 − P(A)."), TR(100 * v, "Une probabilité est comprise entre 0 et 1 (pas en %)."), TR(1 + p, "On soustrait : 1 − P(A).")] }); },
+      () => { const s = pk([3, 4, 5, 6, 8, 9, 10, 11, 7]), cnt = 6 - Math.abs(7 - s), v = cnt / 36;
+        return QN("On lance deux dés équilibrés (un rouge et un bleu) et on additionne les points. Quelle est la probabilité d'obtenir une somme de " + s + " ?", v,
+          "36 couples (rouge ; bleu) équiprobables, dont " + M(cnt) + " de somme " + M(s) + " : " + M("\\frac{" + cnt + "}{36}" + (den(v) < 36 ? " = " + fT(v) : "")) + ".",
+          { ctx: "deux-des-somme", guide: [G("Nombre de couples (rouge ; bleu) de somme " + s + " ?", cnt, M(cnt) + "."), G("Probabilité ?", v, M(fT(v)) + ".")],
+            traps: [TR(1 / 11, "Les 11 sommes possibles ne sont pas équiprobables : compte les 36 couples."), TR(cnt, "C'est le nombre de cas favorables : divise par 36."), TR(Math.ceil(cnt / 2) / 21, "Les dés sont distincts : (2 ; 5) et (5 ; 2) sont deux issues différentes.")] }); },
+    ],
+    2: [
+      () => { const a = pk([0.3, 0.4, 0.45, 0.5, 0.25, 0.6]), b = pk([0.2, 0.35, 0.4, 0.15, 0.3]), i = pk([0.05, 0.1, 0.15]), ask = pk(["union", "inter"]), u = r6(a + b - i); if (i >= Math.min(a, b) || u > 1) return null;
+        if (ask === "union") return QN("On sait que " + M("P(A) = " + D(a)) + ", " + M("P(B) = " + D(b)) + " et " + M("P(A \\cap B) = " + D(i)) + ". Calcule " + M("P(A \\cup B)") + ".", u,
+          M("P(A \\cup B) = P(A) + P(B) - P(A \\cap B) = " + D(a) + " + " + D(b) + " - " + D(i) + " = " + D(u)) + ".",
+          { ctx: "reunion", guide: [G(M("P(A) + P(B)") + " ?", r6(a + b), M(D(r6(a + b))) + "."), G(M("P(A \\cup B)") + " ?", u, M(D(u)) + ".")],
+            traps: [TR(r6(a + b), "A ∩ B est compté deux fois : retire-le une fois."), TR(r6(a + b + i), "On retire P(A ∩ B), on ne l'ajoute pas."), TR(r6(a * b), "C'est un produit ; pour « A ou B », on additionne et on retire P(A ∩ B).")] });
+        return QN("On sait que " + M("P(A) = " + D(a)) + ", " + M("P(B) = " + D(b)) + " et " + M("P(A \\cup B) = " + D(u)) + ". Calcule " + M("P(A \\cap B)") + ".", i,
+          M("P(A \\cap B) = P(A) + P(B) - P(A \\cup B) = " + D(a) + " + " + D(b) + " - " + D(u) + " = " + D(i)) + ".",
+          { ctx: "intersection", guide: [G(M("P(A) + P(B)") + " ?", r6(a + b), M(D(r6(a + b))) + "."), G(M("P(A \\cap B)") + " ?", i, M(D(i)) + ".")],
+            traps: [TR(r6(a * b), "A et B ne sont pas forcément indépendants : utilise P(A ∪ B) = P(A) + P(B) − P(A ∩ B)."), TR(r6(u - a), "C'est P(B) − P(A ∩ B) : retire encore."), TR(r6(a + b + u), "P(A ∩ B) = P(A) + P(B) − P(A ∪ B).")] }); },
+      () => { const S = pk(["un cœur", "un pique", "un trèfle", "un carreau"]), Gp = pk([["un as", 4], ["une figure (valet, dame ou roi)", 12], ["un 6, un 7 ou un 8", 12], ["un dix ou un as", 8]]), both = Gp[1] / 4, cnt = 9 + Gp[1] - both, v = cnt / 36;
+        return QN("On tire une carte au hasard dans un jeu de jass de 36 cartes (4 couleurs de 9 cartes : 6, 7, 8, 9, 10, valet, dame, roi, as). Quelle est la probabilité de tirer " + S + " ou " + Gp[0] + " ?", v,
+          M("P(A \\cup B) = \\frac{9}{36} + \\frac{" + Gp[1] + "}{36} - \\frac{" + both + "}{36} = \\frac{" + cnt + "}{36}" + (den(v) < 36 ? " = " + fT(v) : "")) + " (les " + both + " cartes qui sont les deux sont comptées une seule fois).",
+          { ctx: "jass", guide: [G("Nombre de cartes de la couleur ?", 9, M(9) + "."), G("Nombre de cartes « " + Gp[0] + " » ?", Gp[1], M(Gp[1]) + "."), G("Cartes qui sont les deux à la fois ?", both, M(both) + "."), G("Probabilité ?", v, M(fT(v)) + ".")],
+            traps: [TR((9 + Gp[1]) / 36, "Les " + both + " cartes qui sont les deux à la fois sont comptées deux fois."), TR(both / 36, "C'est « et » ; on demande « ou »."), TR((9 * Gp[1]) / 36 / 36, "Pour « ou », on additionne et on retire l'intersection.")] }); },
+      () => { const N = pk([24, 25, 28, 30]), a = ri(8, 15), b = ri(6, 12), c = ri(2, Math.min(a, b) - 2), nn = N - a - b + c; if (nn <= 1) return null; const v = nn / N, act = pk([["font du football", "jouent d'un instrument", "ne fasse ni football ni musique", "sondage-loisirs"], ["ont un chat", "ont un chien", "n'ait ni chat ni chien", "sondage-animaux"], ["lisent des mangas", "lisent des BD", "ne lise ni mangas ni BD", "sondage-lecture"]]);
+        return QN("Dans une classe de " + N + " élèves, " + a + " " + act[0] + ", " + b + " " + act[1] + " et " + c + " font les deux. On choisit un élève au hasard. Quelle est la probabilité qu'il " + act[2] + " ?", v,
+          "Au moins l'un des deux : " + M(a + " + " + b + " - " + c + " = " + (a + b - c)) + " élèves. Ni l'un ni l'autre : " + M(N + " - " + (a + b - c) + " = " + nn) + ". Probabilité " + M("\\frac{" + nn + "}{" + N + "}" + (den(v) < N ? " = " + fT(v) : "")) + ".",
+          { ctx: act[3], guide: [G("Élèves concernés par au moins l'un des deux (" + a + " + " + b + " − " + c + ") ?", a + b - c, M(a + b - c) + "."), G("Ni l'un ni l'autre ?", nn, M(nn) + "."), G("Probabilité ?", v, M(fT(v)) + ".")],
+            traps: [TR((N - a - b) / N, "Les " + c + " élèves qui font les deux ont été retirés deux fois."), TR(c / N, "C'est la probabilité de « les deux »."), TR(nn, "C'est un nombre d'élèves : divise par " + N + ".")] }); },
+    ],
+    3: [
+      () => { const a = pk([0.4, 0.5, 0.45, 0.6, 0.35]), b = pk([0.3, 0.25, 0.4, 0.2]), i = pk([0.1, 0.15, 0.05]), u = r6(a + b - i), v = r6(a - i); if (u > 1 || i >= b) return null;
+        return QN("On sait que " + M("P(A) = " + D(a)) + ", " + M("P(B) = " + D(b)) + " et " + M("P(A \\cup B) = " + D(u)) + ". Quelle est la probabilité que " + M("A") + " se réalise, mais pas " + M("B") + " ?", v,
+          M("P(A \\cap B) = " + D(a) + " + " + D(b) + " - " + D(u) + " = " + D(i)) + ", puis " + M("P(A \\cap \\overline{B}) = P(A) - P(A \\cap B) = " + D(a) + " - " + D(i) + " = " + D(v)) + ".",
+          { ctx: "a-seulement", guide: [G(M("P(A \\cap B)") + " ?", i, M(D(i)) + "."), G(M("P(A) - P(A \\cap B)") + " ?", v, M(D(v)) + ".")],
+            traps: [TR(i, "C'est P(A ∩ B) : A et B ensemble."), TR(r6(a - b), "On retire la partie commune P(A ∩ B), pas P(B)."), TR(r6(a * (1 - b)), "A et B ne sont pas forcément indépendants : passe par P(A ∩ B).")] }); },
+      () => { const m = ri(2, 5), ask = pk(["six", "pair", "petit"]), tot = 5 + m, v = ask === "six" ? m / tot : ask === "pair" ? (2 + m) / tot : 3 / tot, ev = { six: "un 6", pair: "un nombre pair", petit: "un nombre inférieur ou égal à 3" }[ask];
+        return QN("Un dé est truqué : le 6 sort " + m + " fois plus souvent que chacune des autres faces (qui sont équiprobables entre elles). Quelle est la probabilité d'obtenir " + ev + " ?", v,
+          "Si une face ordinaire a la probabilité " + M("p") + " : " + M("5p + " + m + "p = 1") + ", " + M("p = \\frac{1}{" + tot + "}") + ". " + (ask === "six" ? M("P(6) = \\frac{" + m + "}{" + tot + "}") : ask === "pair" ? M("P(\\text{pair}) = p + p + " + m + "p = \\frac{" + (2 + m) + "}{" + tot + "}") : M("P(\\le 3) = 3p = \\frac{3}{" + tot + "}")) + (den(v) < tot ? " " + M("= " + fT(v)) : "") + ".",
+          { ctx: "de-truque-" + ask, guide: [G("Probabilité " + M("p") + " d'une face ordinaire (" + M("5p + " + m + "p = 1") + ") ?", 1 / tot, M("\\frac{1}{" + tot + "}") + "."), G("Probabilité demandée ?", v, M(fT(v)) + ".")],
+            traps: [TR(ask === "six" ? m / 6 : ask === "pair" ? 1 / 2 : 1 / 2, "Le dé est truqué : les faces ne sont pas équiprobables."), TR(ask === "six" ? 1 / 6 : ask === "pair" ? (2 + m) / 6 : 3 / (6 + m), "La somme des six probabilités vaut 1 : 5p + " + m + "p = 1."), TR(ask === "six" ? 1 / tot : (ask === "pair" ? 3 : 2) / tot, ask === "six" ? "C'est p, la probabilité d'une face ordinaire : le 6 vaut " + m + "p." : "Compte bien les faces : le 6 vaut " + m + "p.")] }); },
+      () => { const k = pk(["produit", "six", "ecart", "somme"]); let cnt, txt, trs;
+        if (k === "produit") { cnt = 27; txt = "un produit pair"; trs = [TR(1 / 2, "Le produit est pair dès qu'un des deux dés est pair."), TR(1 / 4, "C'est la probabilité que les deux soient pairs.")]; }
+        else if (k === "six") { cnt = 11; txt = "au moins un 6"; trs = [TR(12 / 36, "Le couple (6 ; 6) est compté deux fois."), TR(1 / 36, "C'est la probabilité de deux 6.")]; }
+        else if (k === "ecart") { const d = ri(1, 4); cnt = 2 * (6 - d); txt = "un écart de " + d + " entre les deux résultats (le plus grand moins le plus petit)"; trs = [TR((6 - d) / 36, "Deux ordres : par exemple (1 ; " + (1 + d) + ") et (" + (1 + d) + " ; 1)."), TR(1 / 6, "Les écarts ne sont pas équiprobables : compte les couples.")]; }
+        else { const s = ri(9, 11); cnt = [0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 6, 3][s]; txt = "une somme d'au moins " + s; trs = [TR((6 - Math.abs(7 - s)) / 36, "« Au moins " + s + " » : additionne les sommes " + s + ", " + (s + 1) + ", …, 12."), TR((13 - s) / 11, "Les sommes ne sont pas équiprobables : compte les 36 couples.")]; }
+        const v = cnt / 36;
+        return QN("On lance deux dés équilibrés (un rouge et un bleu). Quelle est la probabilité d'obtenir " + txt + " ?", v,
+          "On compte dans le tableau des 36 couples (rouge ; bleu) : " + M(cnt) + " cas favorables. " + M("\\frac{" + cnt + "}{36}" + (den(v) < 36 ? " = " + fT(v) : "")) + "." + (k === "produit" ? " (Par le contraire : produit impair quand les deux sont impairs, " + M("\\frac{9}{36}") + ".)" : k === "six" ? " (Par le contraire : " + M("1 - \\frac{25}{36}") + ".)" : ""),
+          { ctx: "deux-des-" + k, guide: [G("Nombre de couples favorables (sur 36) ?", cnt, M(cnt) + "."), G("Probabilité ?", v, M(fT(v)) + ".")], traps: trs.concat([TR(cnt, "C'est le nombre de cas : divise par 36.")]) }); },
+    ],
+  };
+
+  // ======================= probarbre : expériences successives, arbres (3.PS.02d) =======================
+  const PT = {
+    1: [
+      () => { const r = ri(2, 7), b = ri(2, 7), n = r + b, it = pk(ITEMS), v = (r / n) ** 2;
+        return QN("Une urne contient " + r + " " + it[0] + " " + it[1] + " et " + b + " " + it[0] + " " + it[2] + ". On en tire une, on la remet, puis on en tire une deuxième. Quelle est la probabilité d'obtenir deux " + it[0] + " " + it[1] + " ?", v,
+          "Avec remise, l'urne est la même aux deux tirages. On multiplie le long du chemin : " + M("\\frac{" + r + "}{" + n + "} \\cdot \\frac{" + r + "}{" + n + "} = " + fT(v)) + ".",
+          { ctx: "urne-remise", guide: [G("Probabilité au 1er tirage ?", r / n, M(fT(r / n)) + "."), G("Deux " + it[1] + " (produit le long du chemin) ?", v, M(fT(v)) + ".")],
+            traps: [TR(r / n, "Il y a deux tirages : multiplie les probabilités le long du chemin."), TR((2 * r) / n, "Le long d'un chemin, on multiplie, on n'additionne pas."), TR((r * (r - 1)) / (n * (n - 1)), "Avec remise : l'urne est la même au 2e tirage.")] }); },
+      () => { const C = pk([["Sur son trajet, Noé passe deux feux indépendants. Le premier est vert avec la probabilité", "le second avec la probabilité", "que les deux feux soient verts", "qu'aucun des deux ne soit vert", "feux"], ["Une élève passe deux examens indépendants. Elle réussit le premier avec la probabilité", "le second avec la probabilité", "qu'elle réussisse les deux", "qu'elle n'en réussisse aucun", "examens"], ["Un ordinateur a deux composants indépendants. Le premier fonctionne un an sans panne avec la probabilité", "le second avec la probabilité", "que les deux fonctionnent un an", "que les deux tombent en panne", "composants"]]);
+        const p = pk([0.6, 0.7, 0.8, 0.9, 0.75]), q = pk([0.5, 0.6, 0.4, 0.85, 0.65]), ask = pk(["deux", "aucun"]), v = ask === "deux" ? r6(p * q) : r6((1 - p) * (1 - q));
+        return QN(C[0] + " " + M(D(p)) + ", " + C[1] + " " + M(D(q)) + ". Quelle est la probabilité " + (ask === "deux" ? C[2] : C[3]) + " ?", v,
+          "On multiplie le long du chemin : " + (ask === "deux" ? M(D(p) + " \\cdot " + D(q) + " = " + D(v)) : M(D(r6(1 - p)) + " \\cdot " + D(r6(1 - q)) + " = " + D(v))) + ".",
+          { ctx: C[4] + "-" + ask, guide: ask === "deux" ? [G("Produit des deux probabilités ?", v, M(D(v)) + ".")] : [G("Probabilité que le premier échoue ?", 1 - p, M(D(r6(1 - p))) + "."), G("Que le second échoue ?", 1 - q, M(D(r6(1 - q))) + "."), G("Les deux (produit) ?", v, M(D(v)) + ".")],
+            traps: [TR(r6(p + q), "Le long d'un chemin de l'arbre, on multiplie."), ask === "deux" ? TR(r6((1 - p) * (1 - q)), "C'est la probabilité qu'aucun des deux ne réussisse.") : TR(r6(1 - p * q), "Le contraire de « les deux » n'est pas « aucun »."), ask === "aucun" ? TR(r6(p * q), "C'est la probabilité que les deux réussissent.") : TR(p, "Il faut aussi le second : multiplie par " + T(q) + ".")] }); },
+      () => { const s = ri(3, 5), e2 = pk([["un nombre pair", 3], ["un multiple de 3", 2], ["un 6", 1], ["un nombre inférieur à 3", 2]]), p1 = (7 - s) / 6, p2 = e2[1] / 6, v = p1 * p2;
+        return QN("On lance un dé deux fois. Quelle est la probabilité d'obtenir au moins " + s + " au premier lancer, puis " + e2[0] + " au second ?", v,
+          "Au moins " + M(s) + " : " + M(7 - s) + " faces sur 6. " + e2[0].charAt(0).toUpperCase() + e2[0].slice(1) + " : " + M(e2[1]) + " face" + (e2[1] > 1 ? "s" : "") + " sur 6. Les lancers sont indépendants : " + M("\\frac{" + (7 - s) + "}{6} \\cdot \\frac{" + e2[1] + "}{6} = " + fT(v)) + ".",
+          { ctx: "de-deux-fois", guide: [G("Probabilité d'obtenir au moins " + s + " ?", p1, M(fT(p1)) + "."), G("Probabilité du second événement ?", p2, M(fT(p2)) + "."), G("Produit ?", v, M(fT(v)) + ".")],
+            traps: [TR(p1 + p2, "Le long d'un chemin, on multiplie."), TR(((6 - s) / 6) * p2, "« Au moins " + s + " » comprend " + s + " : faces " + s + " à 6."), TR(p2, "Il faut aussi le premier lancer : multiplie par " + fX(p1) + ".")] }); },
+    ],
+    2: [
+      () => { const r = ri(3, 7), b = ri(2, 6), n = r + b, it = pk(ITEMS), v = (r * (r - 1)) / (n * (n - 1));
+        return QN("Une urne contient " + r + " " + it[0] + " " + it[1] + " et " + b + " " + it[0] + " " + it[2] + ". On en tire deux, l'une après l'autre, sans remise. Quelle est la probabilité d'obtenir deux " + it[0] + " " + it[1] + " ?", v,
+          "Sans remise : au 2e tirage, il reste " + M(r - 1) + " " + it[1] + " sur " + M(n - 1) + ". " + M("\\frac{" + r + "}{" + n + "} \\cdot \\frac{" + (r - 1) + "}{" + (n - 1) + "} = " + fT(v)) + ".",
+          { ctx: "urne-sans-remise", guide: [G("Probabilité au 1er tirage ?", r / n, M(fT(r / n)) + "."), G("Au 2e tirage, sachant que la 1re était " + it[3] + " ?", (r - 1) / (n - 1), M(fT((r - 1) / (n - 1))) + "."), G("Produit ?", v, M(fT(v)) + ".")],
+            traps: [TR((r / n) ** 2, "Sans remise : au 2e tirage, il reste " + (r - 1) + " " + it[1] + " sur " + (n - 1) + "."), TR((r - 1) / (n - 1), "C'est seulement la 2e branche : multiplie par la 1re."), TR((r * (r - 1)) / (n * n), "Le dénominateur aussi diminue : " + (n - 1) + " au 2e tirage.")] }); },
+      () => { const r = ri(2, 7), b = ri(2, 7), n = r + b, it = pk(ITEMS), v = (2 * r * b) / (n * n);
+        return QN("Une urne contient " + r + " " + it[0] + " " + it[1] + " et " + b + " " + it[0] + " " + it[2] + ". On en tire une, on la remet, puis on en tire une deuxième. Quelle est la probabilité d'obtenir deux couleurs différentes ?", v,
+          "Deux chemins : " + it[3] + " puis " + it[4] + ", ou " + it[4] + " puis " + it[3] + ". " + M("\\frac{" + r + "}{" + n + "} \\cdot \\frac{" + b + "}{" + n + "} + \\frac{" + b + "}{" + n + "} \\cdot \\frac{" + r + "}{" + n + "} = " + fT(v)) + ".",
+          { ctx: "urne-deux-couleurs", guide: [G("Chemin " + it[3] + " puis " + it[4] + " ?", (r * b) / (n * n), M(fT((r * b) / (n * n))) + "."), G("Total (deux chemins) ?", v, M(fT(v)) + ".")],
+            traps: [TR((r * b) / (n * n), "Il y a deux ordres : " + it[3] + " puis " + it[4] + ", et l'inverse."), TR((2 * r * b) / (n * (n - 1)), "Avec remise : l'urne est la même au 2e tirage."), TR((r + b) / (n * n), "Le long d'un chemin, on multiplie.")] }); },
+      () => { const C = pk([[(p, k) => "Un archer touche la cible avec la probabilité " + M(D(p)) + " à chaque tir, indépendamment. Il tire " + k + " fois. Quelle est la probabilité qu'il touche la cible au moins une fois ?", "archer"], [(p, k) => "Sur son trajet, Mia passe " + k + " feux indépendants ; chacun est rouge avec la probabilité " + M(D(p)) + ". Quelle est la probabilité qu'elle rencontre au moins un feu rouge ?", "feux-rouges"], [(p, k) => "Une graine germe avec la probabilité " + M(D(p)) + ". On plante " + k + " graines (indépendantes). Quelle est la probabilité qu'au moins une graine germe ?", "graines"]]);
+        const p = pk([0.1, 0.2, 0.3, 0.4, 0.6]), k = ri(2, 4), none = r6((1 - p) ** k), v = r6(1 - none);
+        return QN(C[0](p, k), v,
+          "Par le contraire : « aucun » a la probabilité " + M(D(r6(1 - p)) + "^" + k + " = " + D(none)) + ", donc " + M("1 - " + D(none) + " = " + D(v)) + ".",
+          { ctx: "au-moins-un-" + C[1], guide: [G("Probabilité d'un échec à un essai ?", 1 - p, M(D(r6(1 - p))) + "."), G("Probabilité de « aucun » sur les " + k + " essais ?", none, M(D(r6(1 - p)) + "^" + k + " = " + D(none)) + "."), G("Au moins un ?", v, M(D(v)) + ".")],
+            traps: [TR(r6(k * p), "On ne peut pas additionner : passe par le contraire « aucun »."), TR(r6(p ** k), "C'est la probabilité que tous réussissent."), TR(none, "C'est la probabilité de « aucun » : prends le contraire.")] }); },
+    ],
+    3: [
+      () => { const r = ri(3, 6), b = ri(3, 6), n = r + b, it = pk(ITEMS), dn = n * (n - 1) * (n - 2), pr = (r * (r - 1) * (r - 2)) / dn, pb = (b * (b - 1) * (b - 2)) / dn, v = pr + pb;
+        return QN("Une urne contient " + r + " " + it[0] + " " + it[1] + " et " + b + " " + it[0] + " " + it[2] + ". On en tire trois, l'une après l'autre, sans remise. Quelle est la probabilité qu'elles soient toutes de la même couleur ?", v,
+          "Deux chemins : trois " + it[1] + " " + M("\\frac{" + r + " \\cdot " + (r - 1) + " \\cdot " + (r - 2) + "}{" + n + " \\cdot " + (n - 1) + " \\cdot " + (n - 2) + "} = " + fT(pr)) + ", ou trois " + it[2] + " " + M("= " + fT(pb)) + ". Total " + M(fT(v)) + ".",
+          { ctx: "trois-meme-couleur", guide: [G("Probabilité de trois " + it[1] + " ?", pr, M(fT(pr)) + "."), G("Probabilité de trois " + it[2] + " ?", pb, M(fT(pb)) + "."), G("Total ?", v, M(fT(v)) + ".")],
+            traps: [TR(pr, "Il y a deux couleurs possibles : additionne les deux chemins."), TR((r ** 3 + b ** 3) / n ** 3, "Sans remise : l'urne change à chaque tirage."), TR(pr * pb, "Ce sont deux chemins différents : on les additionne.")] }); },
+      () => { const r1 = ri(1, 5), n1 = r1 + ri(1, 5), r2 = ri(1, 5), n2 = r2 + ri(1, 5), cho = pk(["piece", "de"]), pU = cho === "piece" ? 1 / 2 : 1 / 3; if (r1 * n2 === r2 * n1) return null; const v = pU * (r1 / n1) + (1 - pU) * (r2 / n2);
+        return QN("L'urne U₁ contient " + r1 + " boule" + (r1 > 1 ? "s" : "") + " rouge" + (r1 > 1 ? "s" : "") + " et " + (n1 - r1) + " bleue" + (n1 - r1 > 1 ? "s" : "") + " ; l'urne U₂, " + r2 + " rouge" + (r2 > 1 ? "s" : "") + " et " + (n2 - r2) + " bleue" + (n2 - r2 > 1 ? "s" : "") + ". " + (cho === "piece" ? "On lance une pièce : pile, on tire une boule dans U₁ ; face, dans U₂." : "On lance un dé : avec 1 ou 2, on tire une boule dans U₁ ; sinon, dans U₂.") + " Quelle est la probabilité de tirer une boule rouge ?", v,
+          "Deux chemins dans l'arbre : " + M(fT(pU) + " \\cdot \\frac{" + r1 + "}{" + n1 + "} + " + fT(1 - pU) + " \\cdot \\frac{" + r2 + "}{" + n2 + "} = " + fT(v)) + ".",
+          { ctx: "deux-urnes-" + cho, guide: [G("Chemin U₁ puis rouge ?", pU * (r1 / n1), M(fT(pU * (r1 / n1))) + "."), G("Chemin U₂ puis rouge ?", (1 - pU) * (r2 / n2), M(fT((1 - pU) * (r2 / n2))) + "."), G("Total ?", v, M(fT(v)) + ".")],
+            traps: [TR((r1 + r2) / (n1 + n2), "On ne mélange pas les urnes : suis les deux chemins de l'arbre."), TR(r1 / n1 + r2 / n2, "Chaque chemin se multiplie par la probabilité de choisir l'urne."), TR((r1 / n1) * (r2 / n2), "On ne tire qu'une boule : les deux chemins s'additionnent.")] }); },
+      () => { const r = ri(2, 7), b = ri(2, 7), n = r + b, it = pk(ITEMS), rr = (r * (r - 1)) / (n * (n - 1)), br = (b * r) / (n * (n - 1)), v = r / n;
+        return QN("Une urne contient " + r + " " + it[0] + " " + it[1] + " et " + b + " " + it[0] + " " + it[2] + ". On en tire deux, l'une après l'autre, sans remise, sans regarder la première. Quelle est la probabilité que la deuxième soit " + it[3] + " ?", v,
+          "Deux chemins : " + M("\\frac{" + r + "}{" + n + "} \\cdot \\frac{" + (r - 1) + "}{" + (n - 1) + "} + \\frac{" + b + "}{" + n + "} \\cdot \\frac{" + r + "}{" + (n - 1) + "} = \\frac{" + r * (r - 1) + " + " + b * r + "}{" + n * (n - 1) + "} = " + fT(v)) + " : la même probabilité qu'au premier tirage !",
+          { ctx: "second-tirage", guide: [G("Chemin " + it[3] + " puis " + it[3] + " ?", rr, M(fT(rr)) + "."), G("Chemin " + it[4] + " puis " + it[3] + " ?", br, M(fT(br)) + "."), G("Total ?", v, M(fT(v)) + ".")],
+            traps: [TR((r - 1) / (n - 1), "On ne sait pas ce qu'a donné le 1er tirage : il y a deux chemins."), TR(rr, "C'est « deux " + it[1] + " » ; il faut aussi le chemin " + it[4] + " puis " + it[3] + "."), TR(br, "Il manque le chemin " + it[3] + " puis " + it[3] + ".")] }); },
+    ],
+  };
+
+  // ---------- problèmes en plusieurs étapes (niveau 4), valeurs tirées au hasard ----------
+  const PROBS = {
+    limites: [() => { let a, r, m; do { a = nz(-4, 4); r = nz(-5, 5); m = pk([2, 3, -2]); } while (r === a || r === -a);
+      const num = [m, -m * (a + r), m * a * r], v1 = (m * (a - r)) / (2 * a);
+      return P("Soit " + M("f(x) = \\frac{" + P2(num) + "}{" + P2([1, 0, -a * a]) + "}") + ".",
+        [["a) " + M(lim(a) + " f(x)") + " (fraction acceptée)", v1], ["b) " + M(lim("+\\infty") + " f(x)"), m], ["c) Abscisse de la seule asymptote verticale", -a]],
+        ["Numérateur et dénominateur s'annulent tous deux en x = " + T(a) + " : factorise-les.", "Après simplification par (" + xmT(a) + "), f(x) = " + T(m) + "(" + xmT(r) + ") ÷ (" + xmT(-a) + ")."],
+        "a) " + M("f(x) = \\frac{" + m + "(" + xm(a) + ")(" + xm(r) + ")}{(" + xm(a) + ")(" + xm(-a) + ")} = \\frac{" + m + "(" + xm(r) + ")}{" + xm(-a) + "}") + " pour " + M("x \\neq " + a) + " ; limite " + M("\\frac{" + m * (a - r) + "}{" + 2 * a + "} = " + fT(v1)) + ". b) Termes dominants : " + M("\\frac{" + m + "x^2}{x^2} = " + m) + ". c) En " + M(a) + ", on simplifie (un « trou ») ; en " + M(-a) + ", seul le dénominateur s'annule : " + M("x = " + -a) + ".");
+    }],
+    limitinf: [() => { const a = pk([12, 20, 30, 8, 40]), b = ri(2, 6);
+      return P("Après une injection, la concentration d'un médicament dans le sang vaut " + M("C(t) = \\frac{" + a + "t}{t + " + b + "}") + " mg/L, " + M("t") + " en heures.",
+        [["a) " + M("C(" + b + ")") + " (mg/L)", a / 2], ["b) " + M("\\lim_{t \\to +\\infty} C(t)") + " (mg/L)", a], ["c) Après combien d'heures la concentration atteint-elle 90 % de cette limite ?", 9 * b]],
+        ["En t = " + b + ", le numérateur vaut " + T(a * b) + " et le dénominateur " + 2 * b + ". À l'infini, t + " + b + " ≈ t.", "c) Résous " + a + "t ÷ (t + " + b + ") = " + T(r6(0.9 * a)) + " : multiplie les deux membres par (t + " + b + ")."],
+        "a) " + M("\\frac{" + a * b + "}{" + 2 * b + "} = " + fT(a / 2)) + " mg/L. b) " + M("\\frac{" + a + "t}{t} = " + a) + " mg/L. c) " + M(a + "t = " + D(r6(0.9 * a)) + "(t + " + b + ") \\iff " + D(r6(0.1 * a)) + "t = " + D(r6(0.9 * a * b)) + " \\iff t = " + 9 * b) + " h.");
+    }],
+    asymptotes: [() => { let a, b, c, d, p, rem; do { a = pk([1, 2, -1]); d = nz(-4, 4); b = ri(-5, 5); c = nz(-6, 6); p = b + a * d; rem = a * d * d + b * d + c; } while (!rem || !p);
+      return P("Soit " + M("f(x) = \\frac{" + P2([a, b, c]) + "}{" + xm(d) + "}") + ".",
+        [["a) Abscisse de l'asymptote verticale", d], ["b) Asymptote oblique " + M("y = mx + p") + " : réponds « m ; p »", { kind: "pair", values: [a, p] }], ["c) " + M("f(0)") + " (fraction acceptée)", -c / d]],
+        ["Le dénominateur s'annule en x = " + T(d) + " (pas le numérateur).", "Divise " + pT([a, b, c]) + " par (" + xmT(d) + ") : le quotient est la droite asymptote."],
+        "a) " + M("x = " + d) + ". b) " + M(P2([a, b, c]) + " = (" + xm(d) + ")(" + P2([a, p]) + ")" + sg(rem)) + " : " + M("y = " + P2([a, p])) + ". c) " + M("f(0) = \\frac{" + c + "}{" + -d + "} = " + fT(-c / d)) + ".");
+    }],
+    continuite: [() => { const [a, b] = pk([[3, 2], [4, 2.5], [3.5, 2], [4, 3], [2.5, 1.5]]), h = pk([2, 3, 4]), k = r6((a - b) * h), x2 = h + ri(2, 5); let x3; do x3 = h + ri(1, 6); while (x3 === x2);
+      const P2v = r6(b * x2 + k), S = r6(b * x3 + k);
+      return P("Un parking facture " + M("P(x) = " + D(a) + "x") + " CHF pour une durée " + M("x \\le " + h) + " heures, puis " + M("P(x) = " + D(b) + "x + k") + " CHF au-delà.",
+        [["a) Valeur de k pour que le prix ne fasse pas de saut (CHF)", k], ["b) Prix pour " + x2 + " heures (CHF)", P2v], ["c) Durée de stationnement (h) pour un prix de " + M(D(S)) + " CHF", x3]],
+        ["Les deux formules donnent le même prix en x = " + h + ".", "c) Le prix dépasse " + T(r6(a * h)) + " CHF : utilise la 2e formule et résous " + T(b) + "x + k = " + T(S) + "."],
+        "a) " + M(D(a) + " \\cdot " + h + " = " + D(b) + " \\cdot " + h + " + k \\iff k = " + D(k)) + ". b) " + M(D(b) + " \\cdot " + x2 + " + " + D(k) + " = " + D(P2v)) + " CHF. c) " + M(D(b) + "x + " + D(k) + " = " + D(S) + " \\iff x = " + x3) + " h.");
+    }],
+    etudefct: [() => { const k = ri(1, 3), d = nz(-6, 6), cs = [1, 0, -3 * k * k, d], hi = 2 * k ** 3 + d, lo = d - 2 * k ** 3;
+      return P("Soit " + M("f(x) = " + P2(cs)) + ".",
+        [["a) Abscisse du maximum local", -k], ["b) Valeur du maximum local", hi], ["c) Valeurs de " + M("m") + " pour lesquelles " + M("f(x) = m") + " a trois solutions (intervalle)", { kind: "solset", ivs: [[lo, false, hi, false]] }]],
+        ["f'(x) = 3x² − " + 3 * k * k + " = 3(x − " + k + ")(x + " + k + ").", "c) Trace la droite horizontale y = m : elle coupe la courbe trois fois entre le minimum local et le maximum local."],
+        "a) " + M("f'") + " passe de + à − en " + M(-k) + ". b) " + M("f(" + -k + ") = " + hi) + ". c) Minimum local " + M("f(" + k + ") = " + lo) + " : " + M(SolSet.show([[lo, false, hi, false]])) + ".");
+    }],
+    derivseconde: [() => { const p = nz(-3, 3), c = ri(-6, 6), d = ri(-6, 6), cs = [1, -3 * p, c, d], fp = pv(cs, p), m = c - 3 * p * p, n = p ** 3 + d;
+      return P("Soit " + M("f(x) = " + P2(cs)) + ".",
+        [["a) Abscisse du point d'inflexion", p], ["b) Ordonnée du point d'inflexion", fp], ["c) Ordonnée à l'origine de la tangente au point d'inflexion", n]],
+        ["f''(x) = 6x " + (p > 0 ? "− " + 6 * p : "+ " + -6 * p) + ".", "c) Tangente : y = f'(p)(x − p) + f(p) ; prends x = 0."],
+        "a) " + M("f''(x) = " + P2([6, -6 * p]) + " = 0 \\iff x = " + p) + ". b) " + M("f(" + p + ") = " + fp) + ". c) " + M("f'(" + p + ") = " + m) + ", " + M("y = " + m + "(" + xm(p) + ")" + sg(fp)) + " ; en " + M("x = 0") + " : " + M(n) + ".");
+    }],
+    combi: [() => { const g = ri(5, 9), b = ri(5, 9), n = g + b, v1 = Cb(n, 4), v2 = Cb(g, 2) * Cb(b, 2), v3 = Cb(n, 4) - Cb(b, 4);
+      return P("Une classe compte " + g + " filles et " + b + " garçons. On forme un comité de 4 élèves (sans rôle particulier).",
+        [["a) Nombre de comités possibles", v1], ["b) Nombre de comités avec exactement 2 filles", v2], ["c) Nombre de comités avec au moins une fille", v3]],
+        ["L'ordre ne compte pas : combinaisons.", "c) Passe par le contraire : les comités sans fille."],
+        "a) " + M(bn(n, 4) + " = " + D(v1)) + ". b) " + M(bn(g, 2) + " \\cdot " + bn(b, 2) + " = " + Cb(g, 2) + " \\cdot " + Cb(b, 2) + " = " + D(v2)) + ". c) " + M(D(v1) + " - " + bn(b, 4) + " = " + D(v1) + " - " + D(Cb(b, 4)) + " = " + D(v3)) + ".");
+    }],
+    probaxiomes: [() => { const s = pk([4, 5, 6, 8, 9, 10]), cnt = 6 - Math.abs(7 - s), dbl = s % 2 === 0 ? 1 : 0, u = cnt + 6 - dbl;
+      return P("On lance deux dés équilibrés (un rouge et un bleu). A : « la somme vaut " + s + " » ; B : « on obtient un double ».",
+        [["a) P(A) (fraction acceptée)", cnt / 36], ["b) P(B)", 1 / 6], ["c) P(A ∪ B)", u / 36]],
+        ["Compte les couples (rouge ; bleu) parmi les 36.", "c) P(A ∪ B) = P(A) + P(B) − P(A ∩ B) : " + (dbl ? "le double (" + s / 2 + " ; " + s / 2 + ") est dans A et dans B." : "une somme impaire n'est jamais un double.")],
+        "a) " + M("\\frac{" + cnt + "}{36}") + ". b) " + M("\\frac{6}{36} = \\frac{1}{6}") + ". c) " + M("\\frac{" + cnt + "}{36} + \\frac{6}{36} - \\frac{" + dbl + "}{36} = \\frac{" + u + "}{36}" + (den(u / 36) < 36 ? " = " + fT(u / 36) : "")) + ".");
+    }],
+    probarbre: [() => { const r = ri(3, 6), b = ri(2, 5), n = r + b, it = pk(ITEMS), dd = n * (n - 1), p1 = (r * (r - 1)) / dd, p2 = (2 * r * b) / dd;
+      return P("Une urne contient " + r + " " + it[0] + " " + it[1] + " et " + b + " " + it[0] + " " + it[2] + ". On en tire deux, l'une après l'autre, sans remise.",
+        [["a) Probabilité de tirer deux " + it[0] + " " + it[1] + " (fraction acceptée)", p1], ["b) Probabilité de tirer deux couleurs différentes", p2], ["c) Probabilité qu'au moins une des deux soit " + it[4], 1 - p1]],
+        ["Dessine l'arbre : au 2e tirage, il reste " + (n - 1) + " " + it[0] + ".", "c) Le contraire de « au moins une " + it[4] + " » est « deux " + it[1] + " »."],
+        "a) " + M("\\frac{" + r + "}{" + n + "} \\cdot \\frac{" + (r - 1) + "}{" + (n - 1) + "} = " + fT(p1)) + ". b) " + M("2 \\cdot \\frac{" + r + "}{" + n + "} \\cdot \\frac{" + b + "}{" + (n - 1) + "} = " + fT(p2)) + ". c) " + M("1 - " + fT(p1) + " = " + fT(1 - p1)) + ".");
+    }],
+  };
+
+  // ---------- catalogue ----------
+  const NEW = [
+    { id: "limites", theme: "fa", label: "Limites : lecture, calcul, forme 0/0", ex: "\\lim_{x \\to 3} \\frac{x^2 - 9}{x - 3} = 6", CH: [14], codesMATU: "3\\.AN\\.01[ab]", lv: LI,
+      hint: "Si on peut remplacer x par a (dénominateur non nul), la limite est la valeur obtenue. Forme 0/0 : factorise par (x − a), simplifie, puis remplace.",
+      lesson: ["Limites", "Vers quelle valeur f(x) se dirige-t-elle quand x s'approche de a ?", "\\(\\lim_{x \\to a} f(x) = L\\) : \\(f(x)\\) devient aussi proche de \\(L\\) qu'on veut quand \\(x\\) s'approche de \\(a\\), sans forcément l'atteindre. Pour un polynôme, ou une fraction dont le dénominateur ne s'annule pas en \\(a\\), on remplace \\(x\\) par \\(a\\). Forme \\(\\frac{0}{0}\\) : on factorise par \\((x - a)\\) et on simplifie (avec une racine : quantité conjuguée), puis on remplace. Sur un graphique, on lit la limite à gauche (\\(x < a\\)) et la limite à droite (\\(x > a\\)).",
+        ["\\(\\lim_{x \\to 2} (x^2 + 3x) = 4 + 6 = 10\\)", "\\(\\lim_{x \\to 3} \\frac{x^2 - 9}{x - 3} = \\lim_{x \\to 3} (x + 3) = 6\\)", "\\(\\lim_{x \\to 4} \\frac{\\sqrt{x} - 2}{x - 4} = \\lim_{x \\to 4} \\frac{1}{\\sqrt{x} + 2} = \\frac{1}{4}\\)"], "\\(\\frac{0}{0}\\) n'est pas un résultat (ni 0, ni 1) : c'est le signal qu'il faut simplifier."],
+      comps: ["Lire une limite sur un graphique ; calculer une limite par remplacement", "Lever une forme 0/0 en factorisant", "Quantité conjuguée, fractions étagées ; paramètre pour une limite finie"] },
+    { id: "limitinf", theme: "fa", label: "Limites à l'infini", ex: "\\lim_{x \\to +\\infty} \\frac{6x^2 + 1}{2x^2 - 5} = 3", CH: [14], codesMATU: "3\\.AN\\.01c", lv: LF,
+      hint: "À l'infini, seuls les termes de plus haut degré comptent. Forme ∞ − ∞ : réduis au même dénominateur ou multiplie par la quantité conjuguée.",
+      lesson: ["Limites à l'infini", "Que devient f(x) quand x devient très grand, ou très négatif ?", "Pour un polynôme ou une fraction rationnelle, seuls les termes de plus haut degré comptent à l'infini. Mêmes degrés en haut et en bas : la limite est le quotient des coefficients dominants ; degré du haut plus petit : la limite est 0. Forme « \\(\\infty - \\infty\\) » : réduire au même dénominateur, ou multiplier par la quantité conjuguée. Pour \\(x < 0\\), \\(\\sqrt{x^2} = |x| = -x\\).",
+        ["\\(\\lim_{x \\to +\\infty} \\frac{6x^2 + x}{2x^2 - 5} = \\frac{6}{2} = 3\\)", "\\(\\lim_{x \\to +\\infty} \\frac{4}{x + 1} = 0\\)", "\\(\\sqrt{x^2 + 6x} - x = \\frac{6x}{\\sqrt{x^2 + 6x} + x}\\), qui tend vers \\(\\frac{6x}{2x} = 3\\)"], "On ne remplace pas \\(x\\) par « l'infini » terme à terme : \\(\\infty - \\infty\\) et \\(\\frac{\\infty}{\\infty}\\) ne sont pas des résultats."],
+      comps: ["Limite à l'infini d'une fraction rationnelle ; lecture dans un tableau ; modèle concret", "Termes dominants (carré, produit) ; forme ∞ − ∞", "Quantité conjuguée ; √(x²) = |x| ; paramètre"] },
+    { id: "asymptotes", theme: "fa", label: "Asymptotes", ex: "f(x) = \\frac{2x + 1}{x - 3} : x = 3, \\ y = 2", CH: [14], codesMATU: "3\\.AN\\.01[de]", lv: AS,
+      hint: "Verticale x = a : le dénominateur s'annule en a (pas le numérateur). Horizontale y = b : b est la limite à l'infini. Oblique : divise le numérateur par le dénominateur.",
+      lesson: ["Asymptotes", "Des droites dont la courbe s'approche sans fin.", "Asymptote verticale \\(x = a\\) : \\(f(x)\\) part vers \\(\\pm\\infty\\) quand \\(x\\) s'approche de \\(a\\) (le dénominateur s'annule en \\(a\\), pas le numérateur). Asymptote horizontale \\(y = b\\) : \\(\\lim_{x \\to \\pm\\infty} f(x) = b\\). Asymptote oblique \\(y = mx + p\\) (degré du haut = degré du bas + 1) : on divise, \\(f(x) = mx + p + \\frac{r}{x - d}\\), et la fraction tend vers 0.",
+        ["\\(f(x) = \\frac{2x + 1}{x - 3}\\) : verticale \\(x = 3\\), horizontale \\(y = 2\\).", "\\(f(x) = \\frac{x^2 + 1}{x - 1} = x + 1 + \\frac{2}{x - 1}\\) : oblique \\(y = x + 1\\)."], "Si numérateur et dénominateur s'annulent tous deux en \\(a\\), on simplifie d'abord : souvent un « trou », pas une asymptote."],
+      comps: ["Trouver une asymptote verticale ou horizontale ; lecture graphique", "Plusieurs asymptotes ; trou ou asymptote ; point d'intersection", "Asymptote oblique ; courbe qui coupe son asymptote ; paramètre"] },
+    { id: "continuite", theme: "fa", label: "Continuité", ex: "\\lim_{x \\to a} f(x) = f(a)", CH: [14], codesMATU: "3\\.AN\\.02[ab]", lv: CO,
+      hint: "f est continue en a si la limite en a existe et vaut f(a). Pour une fonction par morceaux, égale les valeurs des deux formules au point de raccord.",
+      lesson: ["Continuité", "Peut-on tracer la courbe sans lever le crayon ?", "\\(f\\) est continue en \\(a\\) si \\(\\lim_{x \\to a} f(x) = f(a)\\) : la limite à gauche, la limite à droite et \\(f(a)\\) sont égales. Polynômes, fractions rationnelles (là où elles sont définies) et racines sont continus. Fonction par morceaux : chaque morceau est continu ; on vérifie le raccord en égalant les valeurs des deux formules au point de jonction.",
+        ["\\(f(x) = 2x + 1\\) si \\(x < 1\\), \\(x^2 + k\\) si \\(x \\ge 1\\) : \\(3 = 1 + k\\), donc \\(k = 2\\).", "\\(f(x) = \\frac{x^2 - 4}{x - 2}\\) et \\(f(2) = 4\\) : continue, car \\(\\lim_{x \\to 2} (x + 2) = 4\\)."], "Au raccord, on utilise les deux formules au même point, même si l'une est écrite avec « < » et l'autre avec « ≥ »."],
+      comps: ["Raccorder deux morceaux affines ; repérer un saut sur un graphique ; prolonger par continuité", "Raccord parabole-droite ; paramètre des deux côtés ; tarif sans saut", "Trois morceaux (deux paramètres) ; prolongement avec une racine ; paramètre au carré"] },
+    { id: "derivseconde", theme: "fa", label: "Dérivée seconde, points d'inflexion", ex: "f''(x) = 0 \\text{ et change de signe}", CH: [14], codesMATU: "3\\.AN\\.08[ab]", lv: DS,
+      hint: "f'' > 0 : f convexe (tournée vers le haut) ; f'' < 0 : concave. Point d'inflexion : f'' s'annule en changeant de signe.",
+      lesson: ["Dérivée seconde, concavité", "Dans quel sens la courbe tourne-t-elle ?", "\\(f''\\) est la dérivée de \\(f'\\). Si \\(f'' > 0\\) sur un intervalle, \\(f\\) est convexe (courbe tournée vers le haut) ; si \\(f'' < 0\\), concave (tournée vers le bas). Un point d'inflexion est un point où la courbe change de concavité : \\(f''\\) s'y annule en changeant de signe. Pour \\(ax^3 + bx^2 + cx + d\\), il est en \\(x = -\\frac{b}{3a}\\).",
+        ["\\(f(x) = x^3 - 6x^2\\) : \\(f''(x) = 6x - 12\\), inflexion en \\(x = 2\\) ; concave sur \\(]-\\infty \\,;\\, 2]\\), convexe sur \\([2 \\,;\\, +\\infty[\\)."], "\\(f''(a) = 0\\) ne suffit pas : il faut un changement de signe (\\(x^4\\) en 0 n'a pas de point d'inflexion)."],
+      comps: ["Trouver un point d'inflexion (degré 3, lecture de f'') ; calculer f''", "Intervalles de concavité ; inflexions d'un polynôme de degré 4", "Paramètre ; tangente d'inflexion ; inflexions d'une fonction rationnelle"] },
+    { id: "etudefct", theme: "fa", label: "Étude complète d'une fonction", ex: "D_f, \\text{ zéros}, f', \\text{ extremums}", CH: [14], codesMATU: "3\\.AN\\.07[cd]", lv: EF,
+      hint: "Ensemble de définition, zéros, limites et asymptotes, signe de f' et extremums (là où f' change de signe), puis f'' pour la concavité.",
+      lesson: ["Étude complète d'une fonction", "Tout savoir d'une fonction avant d'en tracer la courbe.", "1. Ensemble de définition (valeurs interdites). 2. Zéros et signe. 3. Limites aux bornes, asymptotes. 4. Dérivée, son signe, tableau de variations, extremums (là où \\(f'\\) change de signe). 5. Éventuellement \\(f''\\) : concavité, inflexions. 6. Tableau récapitulatif, puis la courbe.",
+        ["\\(f(x) = x^3 - 3x\\) : zéros \\(0\\) et \\(\\pm\\sqrt{3}\\) ; \\(f'(x) = 3(x - 1)(x + 1)\\) ; maximum local \\(f(-1) = 2\\), minimum local \\(f(1) = -2\\).", "\\(f(x) = x + \\frac{4}{x}\\) pour \\(x > 0\\) : \\(f'(x) = 1 - \\frac{4}{x^2}\\), minimum \\(f(2) = 4\\)."], "Un zéro de \\(f'\\) n'est un extremum que si \\(f'\\) y change de signe (\\(3x^4 - 8x^3\\) en 0 : palier, pas d'extremum)."],
+      comps: ["Zéros, valeurs interdites, extremum d'un polynôme de degré 3", "Extremums d'une fonction rationnelle ; zéros d'une bicarrée", "Extremums sur deux branches ; nombre de solutions de f(x) = m ; palier"] },
+    { id: "combi", theme: "no", label: "Dénombrement : permutations, combinaisons", ex: "\\binom{n}{k} = \\frac{n!}{k!\\,(n - k)!}", CH: [14], codesMATU: "3\\.PS\\.01[a-e]", lv: KO,
+      hint: "Principe multiplicatif. L'ordre compte : n(n − 1)… ; il ne compte pas : divise par k!. Répétitions permises : nᵏ.",
+      lesson: ["Dénombrement", "Compter sans tout écrire.", "Principe multiplicatif : des choix successifs de \\(n_1, n_2, \\ldots\\) possibilités donnent \\(n_1 \\cdot n_2 \\cdot \\ldots\\) issues. Permutations de \\(n\\) objets : \\(n! = n(n - 1) \\ldots 2 \\cdot 1\\). Arrangements (\\(k\\) objets parmi \\(n\\), l'ordre compte) : \\(n(n - 1) \\ldots (n - k + 1)\\). Combinaisons (l'ordre ne compte pas) : \\(\\binom{n}{k} = \\frac{n(n - 1) \\ldots (n - k + 1)}{k!}\\). Avec répétitions : \\(n^k\\).",
+        ["Podium avec 8 coureurs : \\(8 \\cdot 7 \\cdot 6 = 336\\)", "3 délégués parmi 20 : \\(\\binom{20}{3} = \\frac{20 \\cdot 19 \\cdot 18}{6} = 1\\text{'}140\\)", "Mots avec ANANAS : \\(\\frac{6!}{3! \\cdot 2!} = 60\\)"], "Demande-toi toujours si l'ordre compte (podium : oui ; comité : non) et si les répétitions sont permises."],
+      comps: ["Principe multiplicatif, permutations, arrangements", "Combinaisons ; répétitions (nᵏ) ; anagrammes", "Comités avec contraintes ; « au moins un » ; problèmes inverses"] },
+    { id: "probaxiomes", theme: "no", label: "Probabilités : contraire, réunion", ex: "P(A \\cup B) = P(A) + P(B) - P(A \\cap B)", CH: [14], codesMATU: "3\\.PS\\.02[abc]", lv: PA,
+      hint: "Équiprobabilité : cas favorables ÷ cas possibles. P(contraire) = 1 − P(A). P(A ∪ B) = P(A) + P(B) − P(A ∩ B).",
+      lesson: ["Probabilités : règles de calcul", "Calculer une probabilité sans tout recompter.", "Issues équiprobables : \\(P(A) = \\frac{\\text{cas favorables}}{\\text{cas possibles}}\\). Toujours \\(0 \\le P(A) \\le 1\\). Contraire : \\(P(\\overline{A}) = 1 - P(A)\\). Réunion : \\(P(A \\cup B) = P(A) + P(B) - P(A \\cap B)\\) ; si \\(A\\) et \\(B\\) sont incompatibles, \\(P(A \\cup B) = P(A) + P(B)\\).",
+        ["Deux dés, somme 7 : 6 couples sur 36, \\(P = \\frac{1}{6}\\).", "\\(P(A) = 0{,}5\\), \\(P(B) = 0{,}4\\), \\(P(A \\cap B) = 0{,}2\\) : \\(P(A \\cup B) = 0{,}7\\)."], "Avec deux dés, les sommes ne sont pas équiprobables : on compte les 36 couples. Et dans \\(A \\cup B\\), l'intersection n'est comptée qu'une fois."],
+      comps: ["Équiprobabilité ; événement contraire ; deux dés", "Réunion et intersection ; jeu de cartes ; tableau d'effectifs", "A sans B ; dé truqué ; événements sur deux dés"] },
+    { id: "probarbre", theme: "no", label: "Expériences successives, arbres", ex: "P(RR) = \\frac{3}{5} \\cdot \\frac{2}{4}", CH: [14], codesMATU: "3\\.PS\\.02d", lv: PT,
+      hint: "Le long d'un chemin de l'arbre, on multiplie ; entre chemins, on additionne. Sans remise, l'urne change. « Au moins un » : 1 − P(aucun).",
+      lesson: ["Expériences successives", "Un arbre pour organiser les étapes.", "Sur un arbre, la probabilité d'un chemin est le produit des probabilités de ses branches ; la probabilité d'un événement est la somme des probabilités de ses chemins. Avec remise, les tirages se répètent à l'identique ; sans remise, l'urne change (un objet de moins au 2e tirage). « Au moins un » : on passe par le contraire « aucun », \\(1 - (1 - p)^n\\).",
+        ["3 rouges, 2 bleues, deux tirages sans remise : \\(P(RR) = \\frac{3}{5} \\cdot \\frac{2}{4} = \\frac{3}{10}\\)", "Au moins un 6 en 3 lancers : \\(1 - \\left(\\frac{5}{6}\\right)^3 = \\frac{91}{216}\\)"], "Le long d'un chemin, on multiplie ; entre chemins, on additionne. Pas l'inverse."],
+      comps: ["Deux étapes indépendantes ; tirages avec remise", "Tirages sans remise ; deux chemins ; « au moins un »", "Trois tirages ; deux urnes ; second tirage"] },
+  ];
+
+  // ---------- enregistrement (additif) ----------
+  for (const n of NEW) {
+    if (!NOTIONS.some((x) => x.id === n.id)) NOTIONS.push({ id: n.id, theme: n.theme, label: n.label, ex: n.ex, CH: n.CH, MP: null, FR: null });
+    GEN[n.id] = (d) => pickForm(n.lv[Math.min(Math.max(d, 1), 3)]);
+    HINTS_EXTRA[n.id] = n.hint;
+    LESSONS_EXTRA[n.id] = n.lesson;
+    if (typeof COMPS !== "undefined") COMPS[n.id] = n.comps;
+    if (typeof PROB_EXTRA !== "undefined") PROB_EXTRA[n.id] = PROBS[n.id];
+  }
+  // Figures de leçon : asymptotes d'une hyperbole ; point d'inflexion d'une cubique.
+  if (typeof LESSON_FIGS !== "undefined") {
+    LESSON_FIGS.asymptotes = () => PL([{ f: (x) => 2 + 1 / (x - 1) }], [], { vlines: [1], hlines: [2], label: "f(x) = 2 + 1/(x − 1) : asymptotes x = 1 et y = 2" });
+    LESSON_FIGS.derivseconde = () => PL([{ f: (x) => 0.25 * (x - 1) ** 3 - (x - 1) + 1 }], [[1, 1, "I"]], { label: "point d'inflexion I : la courbe change de concavité" });
+  }
+})();

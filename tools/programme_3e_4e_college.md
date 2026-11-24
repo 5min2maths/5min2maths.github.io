@@ -36,10 +36,10 @@ Code des compétences : référentiel matu (`3.AN.03a` = 3e, analyse, groupe 03,
 | Chapitre (Sésamath Ma3) | Notion de l'app (id) | Niv. | Compétences | Existe ? |
 |---|---|---|---|---|
 | 1. Prérequis | reprises de 2e : `polyfact`, `fracrat`, `homog`, `trigfn`, `expo`, `log`, `compo`, `decomp`, `ineq`, `ineqfrac` | N+R | (2e) | oui (CH 12–13, « vues ») |
-| 2. Limites et continuité | `limites` — limite par lecture / calcul direct, forme 0/0 | N+R | 3.AN.01a, 01b | **à créer** |
-| | `limitinf` — limite à l'infini (polynôme, rationnelle) | N+R | 3.AN.01c | à créer |
-| | `asymptotes` — asymptotes verticales, horizontales (obliques : R) | N+R / R | 3.AN.01d, 01e | à créer |
-| | `continuite` — continuité en un point, fonction par morceaux | N+R | 3.AN.02a, 02b | à créer (s'appuie sur `morceaux`) |
+| 2. Limites et continuité | **`limites`** — limite par lecture / calcul direct, forme 0/0 | N+R | 3.AN.01a, 01b | **créée le 24.11** |
+| | **`limitinf`** — limite à l'infini (polynôme, rationnelle) | N+R | 3.AN.01c | **créée** |
+| | **`asymptotes`** — asymptotes verticales, horizontales (obliques : R) | N+R / R | 3.AN.01d, 01e | **créée** |
+| | **`continuite`** — continuité en un point, fonction par morceaux | N+R | 3.AN.02a, 02b | **créée** (prérequis `morceaux`) |
 | 3. Dérivation | **`tauxvar`** — taux de variation moyen, pente d'une sécante | N+R | 3.AN.03a | **créée le 23.11** |
 | | **`nbderive`** — nombre dérivé : limite du taux d'accroissement, pente de la tangente lue | N+R | 3.AN.03b, 04a | **créée** |
 | | **`derivref`** — fonction dérivée des fonctions de référence (xⁿ, √x, 1/x, sin, cos) | N+R | 3.AN.04b, 04c | **créée** |
@@ -48,13 +48,13 @@ Code des compétences : référentiel matu (`3.AN.03a` = 3e, analyse, groupe 03,
 | | **`derivcomp`** — fonction composée, puissance d'une fonction | N+R (R : démonstrations) | 3.AN.05d, 05e | **créée** |
 | | **`tangente`** — équation de la tangente, approximation affine | N+R | 3.AN.03c, 03d | **créée** |
 | | **`variations`** — signe de f′, tableau de variations, extrema locaux | N+R | 3.AN.07a, 07b | **créée** |
-| | `etudefct` — étude complète (polynomiale, rationnelle) | N+R | 3.AN.07c, 07d | à créer |
-| | `derivseconde` — concavité, points d'inflexion | **R** | 3.AN.08a, 08b | à créer |
+| | **`etudefct`** — étude complète (polynomiale, rationnelle) | N+R | 3.AN.07c, 07d | **créée le 24.11** |
+| | **`derivseconde`** — concavité, points d'inflexion | **R** | 3.AN.08a, 08b | **créée le 24.11** |
 | | **`optimderiv`** — problèmes d'extremum (géométrie, économie) | N+R | 3.AN.10a–c | **créée** |
 | 4. Dérivation (théorie) | `derivth` — dérivable ⇒ continue, points anguleux, Rolle, Lagrange (interprétation graphique) | N+R | 3.AN.06a, 06b, 09a | à créer (démonstrations 09b–c : hors saisie) |
-| 5. Combinatoire et probabilités | `combi` — principe multiplicatif, permutations, arrangements, combinaisons | N+R | 3.PS.01a–e | à créer (`denombr` 11e = bases) |
-| | `probaxiomes` — vocabulaire, équiprobabilité, contraire, réunion | N+R | 3.PS.02a–c | à créer (`proba` 11e = bases) |
-| | `probarbre` — expériences successives (arbres, tableaux) | N+R | 3.PS.02d | à créer |
+| 5. Combinatoire et probabilités | **`combi`** — principe multiplicatif, permutations, arrangements, combinaisons | N+R | 3.PS.01a–e | **créée le 24.11** (`denombr` 11e = bases) |
+| | **`probaxiomes`** — vocabulaire, équiprobabilité, contraire, réunion | N+R | 3.PS.02a–c | **créée** (`proba` 11e = bases) |
+| | **`probarbre`** — expériences successives (arbres, tableaux) | N+R | 3.PS.02d | **créée** |
 | 6. Géométrie vectorielle | `vecteurs` (2e) — composantes, norme, produit scalaire dans le plan | N+R | 3.GV.01a–d (plan) | oui (CH 13) ; à étendre à l'espace |
 | | **`vect3d`** — vecteurs de l'espace, milieu, norme, Chasles | N+R | 3.GV.01a–d | **créée le 24.11** |
 | | **`colin`** — colinéarité, coplanarité | **R** | 3.GV.02a, 02b | **créée** |
@@ -167,6 +167,9 @@ Restent pour ce chapitre : `pvect` (produit vectoriel, produit mixte : MA2), fig
 2. **Limites et asymptotes (3e, M3C02)** : `limites`, `limitinf`, `asymptotes`, `continuite` — prérequis du nombre dérivé et de l'étude de fonctions rationnelles ; puis `etudefct`, `derivseconde` (R), `derivth`.
 3. **Géométrie vectorielle de l'espace (3e, M3C06)** — fait le 24.11 : `vect3d`, `droite3d`, `plans`, `posrel`, `pscal3d`, `distances`, `sphere` ; R : `colin` (fait), `pvect` (à faire). Gros chapitre (120 exercices Sésamath) : figures 3D en SVG à prévoir (perspective cavalière, comme `solides` au CO).
 4. **Combinatoire et probabilités (3e, M3C05)** : `combi`, `probaxiomes`, `probarbre`.
+2. **Limites et asymptotes (3e, M3C02)** — fait le 24.11 soir (agent c3ana, src/ch3c_ana.js) : `limites`, `limitinf`, `asymptotes`, `continuite` ; et en M3C03 `etudefct`, `derivseconde` (R). Reste `derivth` (M3C04). Leçons actives « À toi : 2 questions » dans src/act_col34.js.
+3. **Géométrie vectorielle de l'espace (3e, M3C06)** : `vect3d`, `droiteparam`, `plans`, `posrel`, `pscal`, `distances`, `normal` ; R : `colin`, `pvect`. Gros chapitre (120 exercices Sésamath) : figures 3D en SVG à prévoir (perspective cavalière, comme `solides` au CO).
+4. **Combinatoire et probabilités (3e, M3C05)** — fait le 24.11 soir (agent c3ana) : `combi`, `probaxiomes`, `probarbre`.
 5. **Intégration (4e, M4C01)** — fait le 24.11 : `primitives`, `integrale`, `aireint`, `volrev` ; R : `intparties`, `intsubst`.
 6. **ln et exp (4e, M4C02)** — fait le 24.11 : `lnexp` (avec tangente et extremum, une partie de `etudelnexp`), `croissance` ; R : `eqdiff`.
 7. **Probabilités 2 et statistique (4e, M4C04)** — fait le 24.11 : `condbayes` (conditionnelles et Bayes), `varalea`, `binomiale` ; puis (agent greste) `normale` (sans table, règle 68-95-99,7) et `stats`, `quartiles` ouverts à la 4e (`CH: [15]`).
