@@ -8,8 +8,9 @@ Tout est publié sur le site, sauf mention contraire. Mode auteur : …/#auteur 
    ne ramène plus à l'accueil ; seul le nom « 5 minutes de maths » ramène à l'accueil. Choix « cette question /
    l'application en général » dans la fenêtre 💬.
 2. **Problème de la semaine** — il est retiré (nouveau choix) : au-dessus du Mathélo, notions de l'année. Les défis
-   de 27 notions sont réécrits (tools/defis.md). Question : « combien d'entiers entre −10 et 10 rendent E(x) > 0 »
-   (tableau de signes à 3 facteurs) est-ce au programme de 11e ? Sinon je le retire de factor.
+   de 70 notions sont réécrits (27 + 43, tools/defis.md) ; ≈ 65 gardent des valeurs fixes. En 11e, factor n'a plus
+   de tableau de signes à 3 facteurs ; factor2 et polymp (1re–4e, MP) le gardent : au programme ?
+   trigeq / trigeq2 en degrés sur [0° ; 360°[ (radians en MP ?). lectgraph a maintenant une figure (lisibilité).
 3. **Histoires** (Exploration) — 6 nouvelles (Zénon, Dürer, Galilée, Kepler, Marie Curie, John Snow) : faits et
    données ; « Pour aller plus loin » et « Défi expert » (expert visible dès la 1re sec. II).
 4. **EVACOM 11e** — relire 2–3 sujets + corrigés en mode auteur ; si OK : `EVACOM_OUVERT = true`
