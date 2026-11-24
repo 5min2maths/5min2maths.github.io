@@ -10,6 +10,12 @@ try{
   ok(/<svg/.test(H.fig())&&!/NaN|undefined/.test(H.fig()),"illustration "+H.titre);
   for(let i=0;i<40;i++){const E=H.ex();ok(Number.isFinite(E.value)&&E.value!==0&&E.value!==1,"valeur "+H.titre+" "+E.value);ok(!/NaN|undefined|Infinity/.test(E.q+E.sol),"texte "+H.titre+" "+E.q+E.sol);
    ok(checkAnswer({kind:"value",value:E.value,final:true},String(E.value)).status==="correct","réponse refusée "+H.titre+" "+E.value);}}
+ // 24.11 : applications poussées (plus / expert) : toutes les étapes calculables, réponse attendue acceptée
+ ok(HISTOIRE.length>=41,"41 histoires "+HISTOIRE.length);ok(HISTOIRE.filter(H=>H.plus).length>=36,"plus "+HISTOIRE.filter(H=>H.plus).length);ok(HISTOIRE.filter(H=>H.expert).length>=17,"expert "+HISTOIRE.filter(H=>H.expert).length);
+ for(const H of HISTOIRE)for(const k of ["plus","expert"])if(H[k])for(let i=0;i<20;i++){const P=H[k]();ok(P.intro&&P.steps.length>=2,"étapes "+H.titre);
+  for(const E of P.steps){ok(Number.isFinite(E.value)&&!/NaN|undefined|Infinity/.test(P.intro+E.q+E.sol),k+" texte "+H.titre+" "+E.q);
+   const sp=E.round?{kind:"value",value:E.value,round:E.round}:{kind:"value",value:E.value,final:true};const a=E.round?String(Math.round(E.value/E.round)*E.round).replace(/(\.\d{0,6})\d*$/,"$1"):String(+E.value.toFixed(10));
+   ok(checkAnswer(sp,a).status==="correct",k+" réponse refusée "+H.titre+" : "+E.q.slice(0,50)+" → "+a);}}
  // Récit lié au chapitre en classe (22.11)
  state=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.autoInit(state);
  ok(HISTOIRE.every(H=>Array.isArray(H.ids)),"ids pour chaque récit");ok(HISTOIRE.filter(H=>H.ids.length).length>=30,"récits liés");
@@ -37,7 +43,7 @@ try{
  /* 24.11 : 💬 visible dans l'en-tête (le bottom du bouton flottant le sortait de l'écran) et une seule fenêtre */
  homeTab="today";screenHome();screenHome();{const r=document.getElementById("fabc").getBoundingClientRect();ok(r.top>=0&&r.width>0,"💬 visible "+r.top);ok(document.querySelectorAll("#fabs").length===1,"une seule fenêtre 💬");}
  /* 24.11 : toucher le bandeau à côté du 💬 ne ramène pas à l'accueil ; le nom de l'app, si */
- app.querySelector('.door[data-door="prob"]').click();{const br=app.querySelector(".brand");br.click();ok(!app.querySelector(".hub"),"bandeau hors du nom : on reste");br.querySelector("b").click();ok(!!app.querySelector(".hub"),"nom de l'app : accueil");}
+ state.placed=true;homeTab="today";screenHome();app.querySelector('.door[data-door="prob"]').click();{const br=app.querySelector(".brand");br.click();ok(!app.querySelector(".hub"),"bandeau hors du nom : on reste");br.querySelector("b").click();ok(!!app.querySelector(".hub"),"nom de l'app : accueil");}
  homeTab="prog";screenHome();const cb=document.getElementById("comps");ok(cb&&cb.classList.contains("btn-primary"),"bouton compétences bleu");
 }catch(e){fails.push("EXC "+e.message+" "+e.stack)}
 document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHECS\n"+fails.join("\n"):"OK")+"</pre>");

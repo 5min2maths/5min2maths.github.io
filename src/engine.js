@@ -789,12 +789,16 @@ const Engine = {
     const d = new Date(), week = d.getFullYear() + "-" + Math.floor((d - new Date(d.getFullYear(), 0, 1)) / 6048e5);
     const ids = this.eligible(state).filter((id) => hasProb(id));
     if (!ids.length) return null;
-    if (state.weeklyPick && state.weeklyPick.week === week && ids.includes(state.weeklyPick.id)) return state.weeklyPick.id;
+    if (state.weeklyPick && state.weeklyPick.week === week && state.weeklyPick.v === 2 && ids.includes(state.weeklyPick.id)) return state.weeklyPick.id; /* v2 (24.11) : nouveau choix */
     const r = state.elo.r, m = (id) => (state.notions[id] || {}).m || 0;
-    const score = (id) => Math.abs(itemRating(state.profile, id, 4) - r) + (m(id) < 0.3 ? 400 : 0);
+    // 24.11 (auteur en 4e : « une factorisation vraiment simple ») : un vrai défi. Notions de l'année ou de l'année
+    // précédente d'abord (les plus anciennes pénalisées) ; difficulté visée au-dessus du Mathélo (+150), plus faciles pénalisées.
+    const g = state.profile.grade, yr = (id) => { try { const p = placeOf(NOTIONS.find((n) => n.id === id), state.profile); return p ? p[0] : g; } catch (e) { return g; } };
+    const score = (id) => { const it = itemRating(state.profile, id, 4), gap = g - yr(id);
+      return Math.abs(it - (r + 150)) + (it < r ? 150 : 0) + (gap >= 2 ? 250 * (gap - 1) : 0) + (m(id) < 0.3 ? 400 : 0); };
     const best = ids.slice().sort((a, b) => score(a) - score(b)).slice(0, 3);
     const n = +week.split("-")[1], id = best[n % best.length];
-    state.weeklyPick = { week, id };
+    state.weeklyPick = { week, id, v: 2 };
     return id;
   },
 
