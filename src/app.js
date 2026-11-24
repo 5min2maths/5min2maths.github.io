@@ -73,6 +73,8 @@ if (state && state.profile && !SYSTEMS[state.profile.system]) state = null; // s
 // Voie MP gardée en revenant au CO (bug 14.11 : « 9e MP » sans critères de divisibilité, nombres premiers ni PGDC) : la voie n'existe qu'au sec. II.
 if (state && state.profile && state.profile.track === "mp" && state.profile.grade < 12) { state.profile.track = "college"; Store.save(state); }
 if (state && state.profile && state.notions && Object.keys(state.notions).length && Engine.migrate(state)) Store.save(state);
+// 24.11 (progression visible) : instantané du jour avant toute activité (ancien state : la semaine part d'aujourd'hui).
+if (state && state.placed && state.notions) { const k = (state.snaps || []).length; Engine.snap(state); if ((state.snaps || []).length !== k) Store.save(state); }
 const save = () => Store.save(state);
 // Barre d'onglets du bas (19.11 : visible partout, même pendant une activité, pour pouvoir interrompre).
 const navTabs = (cur, dots = {}) => `<nav class="tabs" aria-label="Sections"><div class="tabs-inner" role="tablist">${HOME_TABS.map(([id, label, ic]) => `<button class="tab" role="tab" data-tab="${id}" aria-selected="${id === cur}"><span class="tab-ic"><svg viewBox="0 0 24 24">${ic}</svg>${dots[id] && id !== cur ? '<i class="tab-dot"></i>' : ""}</span>${label}</button>`).join("")}</div></nav>`;
@@ -506,7 +508,7 @@ function screenHome() {
   // 22.11 : accueil à cases (maquette design/maquette_accueil.html) ; chaque case ouvre une page « ← Accueil ».
   panels.carnet = () => carnetCard(true) || `<div class="card flat stack"><div class="eyebrow">📕 Carnet d'erreurs</div><p class="small muted">Vide : bravo ! Chaque question ratée viendra s'y ranger, pour que tu puisses la réussir plus tard.</p></div>`;
   // 22.11 : « Ma fiche » (src/fiche.js) : une fiche par chapitre derrière Progrès. Retirée le 23.11 (branche archive/fiche) : inactif sans fiche.js.
-  panels.prog = () => `${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}`;
+  panels.prog = () => `${weekCard()}${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}`;
   if (!panels[homeTab]) homeTab = "today";
   const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted">${gradeName(state.profile)}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
   if (homeTab !== "today") {
@@ -1057,7 +1059,12 @@ function carnetResult(id, d, firstTry) {
   const c = state.carnet || [], e = c.find((x) => x.id === id && x.d === d);
   if (!e) return null;
   e.ok = firstTry ? e.ok + 1 : 0;
-  if (e.ok >= CARNET_OK) { state.carnet = c.filter((x) => x !== e); return "efface"; }
+  if (e.ok >= CARNET_OK) {
+    state.carnet = c.filter((x) => x !== e);
+    // 24.11 : dates des erreurs effacées (carte « Ma semaine »), 7 derniers jours seulement.
+    state.carnetOut = [...(Array.isArray(state.carnetOut) ? state.carnetOut : []).filter((d) => d >= addDays(day(), -6)), day()];
+    return "efface";
+  }
   return firstTry ? "encore" : "rate";
 }
 // Plan d'une séance « carnet » : d'abord celles à moitié effacées, puis les plus anciennes ; filtre optionnel de notions.
@@ -1903,6 +1910,42 @@ function screenHistory(k, back) {
   window.scrollTo(0, 0);
 }
 
+// ---------------- Progression visible (24.11, chantier S) ----------------
+// Comparaison avec soi-même seulement (aucun classement), sur les 7 derniers jours : Engine.week (instantanés quotidiens).
+const plur = (n, one, many) => n + " " + (n > 1 ? many : one);
+const ddmm = (d) => d.slice(8, 10) + "." + d.slice(5, 7);
+// Ligne courte du bilan de séance. Rien n'a bougé : phrase sobre et vraie (jours et questions de la semaine).
+function weekText(w) {
+  const parts = [];
+  if (w.ups.length) parts.push(plur(w.ups.length, "compétence a monté", "compétences ont monté"));
+  if (w.cons.length) parts.push(plur(w.cons.length, "notion consolidée", "notions consolidées"));
+  if (w.fixed) parts.push(plur(w.fixed, "erreur effacée du carnet", "erreurs effacées du carnet"));
+  if (!parts.length && w.first.length) parts.push(plur(w.first.length, "première note de compétence", "premières notes de compétences"));
+  // Jours et questions : toujours sur 7 jours (historique) ; comparaisons de notes : depuis le premier instantané.
+  if (!parts.length && !w.n) return { main: "Une séance de quelques minutes suffit pour reprendre le fil.", sub: "" };
+  if (!parts.length) return { main: `Cette semaine : ${plur(w.days, "jour", "jours")} de pratique, ${plur(w.n, "question", "questions")}.`, sub: "Les notes bougent au fil des réponses : chaque séance compte pour la suite." };
+  const last = parts.pop(), main = `${w.since ? "Depuis le " + ddmm(w.since) : "Cette semaine"} : ${parts.length ? parts.join(", ") + " et " : ""}${last}.`;
+  const top = w.ups[0];
+  return { main, sub: top ? `Plus belle progression : ${top.label} (${noteTxt(top.b)} → ${noteTxt(top.a)}).` : "" };
+}
+function weekLine() {
+  if (!state) return "";
+  const w = Engine.week(state), t = weekText(w);
+  return `<div class="card flat week-line"><div class="sum-line"><span>📈</span><div><b>${esc(t.main)}</b>${t.sub ? `<div class="small muted">${esc(t.sub)}</div>` : ""}</div></div></div>`;
+}
+// Carte « Ma semaine » en tête de Progrès : compétences montées (avant → après), notions consolidées, carnet, jours actifs.
+function weekCard() {
+  const w = Engine.week(state), MAX = 5;
+  const more = (n) => (n > MAX ? `<li class="small muted">et ${n - MAX} autre${n - MAX > 1 ? "s" : ""}</li>` : "");
+  const ups = w.ups.length ? `<div><b>${plur(w.ups.length, "compétence en hausse", "compétences en hausse")}</b><ul class="week-list">${w.ups.slice(0, MAX).map((x) => `<li><span>${esc(x.label)}</span><span class="week-notes"><span class="note ${noteCls(x.b)}">${noteTxt(x.b)}</span>→<span class="note ${noteCls(x.a)}">${noteTxt(x.a)}</span></span></li>`).join("")}${more(w.ups.length)}</ul></div>` : "";
+  const cons = w.cons.length ? `<div><b>${plur(w.cons.length, "notion consolidée", "notions consolidées")}</b><ul class="week-list">${w.cons.slice(0, MAX).map((id) => `<li><span>✅ ${esc(nLab(id))}</span></li>`).join("")}${more(w.cons.length)}</ul></div>` : "";
+  const first = w.first.length ? `<div class="small">🆕 ${plur(w.first.length, "première note de compétence", "premières notes de compétences")}</div>` : "";
+  const fixed = w.fixed ? `<div class="small">📕 ${plur(w.fixed, "erreur effacée", "erreurs effacées")} de ton carnet</div>` : "";
+  const calm = !ups && !cons && !first && !fixed ? `<p class="small muted">${w.days ? "Pas encore de note en hausse : les notes bougent au fil des réponses, chaque séance compte." : "Pas encore de séance ces 7 derniers jours : une séance de quelques minutes suffit pour reprendre."}</p>` : "";
+  return `<div class="card stack week-card"><div class="spread"><span class="eyebrow">📈 Ma semaine</span><span class="small muted">7 derniers jours</span></div>
+    <div class="week-days"><span>Jours actifs</span><b>${w.days} / 7</b></div>${ups}${cons}${first}${fixed}${calm}${w.since ? `<p class="small muted">Notes comparées depuis le ${ddmm(w.since)}, début du suivi.</p>` : ""}</div>`;
+}
+
 // Bilan par notion (21.11, amélioration UX 6) : ce qui est acquis aujourd'hui, ce qui reviendra, au lieu d'une simple liste.
 function summaryByNotion() {
   const r = session.res || {}, ids = [...session.ids].filter((id) => r[id]);
@@ -1927,6 +1970,7 @@ function screenSummary() {
   h(`${brand}<h2>${sc >= n * 0.8 && d >= 0 ? "Excellente séance !" : sc >= n * 0.5 ? "Bonne séance." : "Séance faite : c'est en pratiquant qu'on progresse."}</h2>${d < 0 && sc >= n * 0.5 ? `<p class="small muted">Mathélo ${d} : une erreur sur une question de ton niveau coûte plus que ce que rapporte une réussite sur une question facile.</p>` : ""}
   <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span>${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ta série passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${FORMATS[Engine.tomorrowFormat(state)].label}</b></div></div></div>
   ${summaryByNotion()}
+  ${weekLine()}
   <div class="card stack"><div class="spread"><span>Score</span><b>${String(sc).replace(".", ",")} / ${n}</b></div>
   <div class="spread"><span>Mathélo</span><b>${state.elo.r} <span class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</span></b></div>
 </div>

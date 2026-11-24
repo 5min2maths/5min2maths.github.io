@@ -10,6 +10,7 @@ const Backup = {
       if (!x.seen && !x.placed && !x.lessonSeen && !x.easy && !x.retry && x.m === def.m && x.box === def.box) { if (x.status !== defs[id]) n[id] = [this.ST[x.status]]; continue; }
       n[id] = [this.ST[x.status] || "v", r2(x.m), x.box, off(x.due), x.seen, x.ok, (x.placed ? 1 : 0) | (x.lessonSeen ? 2 : 0), x.easy || 0, off(x.retry), x.fails ?? null];
     }
+    const ws = (Array.isArray(s.snaps) ? s.snaps : []).find((x) => x && x.d >= addDays(t, -6)), co = (Array.isArray(s.carnetOut) ? s.carnetOut : []).filter((d) => d >= addDays(t, -6));
     const c = {};
     for (const [cid, x] of Object.entries(s.comps || {})) c[cid] = [x.r.map((v) => Math.round(v * 4)).join(""), x.n, off(x.last)];
     const b = s.bc ? { ...s.bc, last: off(s.bc.last), weeks: Object.fromEntries(Object.entries(s.bc.weeks).map(([k, v]) => [off(k), v])) } : null;
@@ -19,6 +20,9 @@ const Backup = {
       k: [s.streak.count, off(s.streak.last)].concat(s.streak.best || s.streak.jokerWk ? [s.streak.best || 0] : []).concat(s.streak.jokerWk ? [off(s.streak.jokerWk)] : []),
       h: (s.history || []).slice(-14).map((x) => [off(x.date), x.n, r2(x.score)]),
       b, pr: s.prep || null, nw: s.now || null, g: Object.fromEntries(Object.entries(s.badges || {}).map(([k, d]) => [k, off(d)])),
+      // 24.11 (facultatif, codes plus anciens sans) : point de départ de « Ma semaine » (premier instantané des 7 jours)
+      // et dates des erreurs effacées du carnet.
+      ...(ws ? { w: [off(ws.d), ws.c || {}, ws.k || []] } : {}), ...(co.length ? { co: co.map(off) } : {}),
     };
   },
   unpack(o) {
@@ -47,6 +51,8 @@ const Backup = {
     s.badges = Object.fromEntries(Object.entries(o.g || {}).map(([k, d]) => [k, on(d)]));
     if (o.pr) s.prep = o.pr;
     if (o.nw) s.now = o.nw;
+    if (Array.isArray(o.w) && o.w.length === 3) s.snaps = [{ d: on(o.w[0]), c: o.w[1] || {}, k: o.w[2] || [] }];
+    if (Array.isArray(o.co)) s.carnetOut = o.co.map(on);
     s.placed = true;
     Engine.migrate(s);
     return s;
