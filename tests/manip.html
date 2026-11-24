@@ -46,6 +46,40 @@ const LES={
   sys2(){ const ex=[], X=(x)=>104+x*18, Y=(y)=>196-y*18; drag(0,X(0),Y(10)); ex.push(/une seule/.test(hint())?"aide ok":"AIDE:"+hint());
     [[6,4],[2,5],[-2,1]].forEach(([x,y],s)=>{ drag(0,X(x),Y(y)); if(B().__manip.asking) answer(4); ex.push("défi "+(s+1)+(step()>s?" ✓":" ✗")); }); return ex; },
   utemps(){ const ex=[], XM=(m)=>22+276*m/60; drag(0,XM(45),56); ex.push("défi 1"+(step()>0?" ✓":" ✗ "+S().m)); key(0,"ArrowRight"); key(0,"ArrowRight"); ex.push("défi 2"+(step()>1?" ✓":" ✗ "+S().m)); drag(0,XM(21),56); answer(1.4); ex.push("défi 3"+(step()>2?" ✓":" ✗")); return ex; },
+  // 24.11 : cinq manipulations de plus (cercthales, proba, modaff, f2formes, pente)
+  cercthales(){ const ex=[], P=(f)=>[160+100*Math.cos(f*Math.PI/180),128-100*Math.sin(f*Math.PI/180)];
+    drag(0,...P(110)); ex.push(/angle en B/.test(hint())?"piège ok":"PIÈGE:"+hint());
+    drag(0,...P(70)); answer(65); ex.push("défi 1"+(step()>0?" ✓":" ✗ "+S().phi));
+    const f0=S().phi; key(0,"ArrowLeft"); ex.push(S().phi===f0+2?"clavier ok":"CLAVIER "+S().phi);
+    drag(0,...P(90)); answer(8); ex.push("défi 2"+(step()>1?" ✓":" ✗ "+S().phi));
+    drag(0,...P(100)); answer(70); ex.push("défi 3"+(step()>2?" ✓":" ✗ "+S().phi)); return ex; },
+  proba(){ const ex=[], U=[96,124], OUT=[250,215], nc=()=>step()===2?3:2, idx=(c)=>nc()+S().balls.indexOf(c);
+    drag(0,250,200); ex.push(/lâche/.test(hint())?"hors urne ok":"HORS URNE:"+hint());
+    tap(0); tap(1); drag(1,...U); key(1,"Enter"); ex.push(S().balls.length===7&&/trop grande/.test(hint())?"aide ok":"AIDE:"+S().balls.join("")+" "+hint());
+    drag(1,...U); if(B().__manip.asking) answer(0.6); ex.push("défi 1"+(step()>0?" ✓":" ✗ "+S().balls.join("")));
+    drag(1,...U); ex.push(/EN TOUT/.test(hint())?"piège ok":"PIÈGE:"+hint());
+    drag(idx("b"),...OUT); tap(idx("b")); ex.push("défi 2"+(step()>1?" ✓":" ✗ "+S().balls.join("")));
+    drag(0,...U); tap(0); tap(1); answer("3/10"); ex.push("défi 3"+(step()>2?" ✓":" ✗ "+S().balls.join("")+" "+hint())); return ex; },
+  modaff(){ const ex=[], X=(x)=>36+x*22, Y=(y)=>200-y*5.5;
+    drag(0,X(0),Y(6)); ex.push(/point rond/.test(hint())?"aide ok":"AIDE:"+hint());
+    drag(1,X(5),Y(16)); answer(36); ex.push("défi 1"+(step()>0?" ✓":" ✗ "+JSON.stringify(S())));
+    drag(0,X(3),214); ex.push(/remboursée/.test(hint())?"aide ok":"AIDE:"+hint());
+    for(let j=0;j<3;j++) key(0,"ArrowRight"); answer(5); ex.push("défi 2"+(step()>1?" ✓":" ✗ "+S().x));
+    drag(0,X(0),Y(12)); ex.push(/24/.test(hint())?"aide ok":"AIDE:"+hint());
+    drag(1,X(8),Y(24)); answer(1); ex.push("défi 3"+(step()>2?" ✓":" ✗ "+JSON.stringify(S()))); return ex; },
+  f2formes(){ const ex=[], X=(x)=>160+x*20, Y=(y)=>150-y*12;
+    drag(0,X(4),Y(1)); ex.push(/Bon coefficient/.test(hint())?"aide ok":"AIDE:"+hint());
+    drag(0,X(4),Y(4)); answer(2); ex.push("défi 1"+(step()>0?" ✓":" ✗ "+S().S));
+    key(0,"ArrowDown"); ex.push(S().S[1]===1?"clavier ok":"CLAVIER "+S().S);
+    drag(0,X(-3),Y(-4)); answer(-3); ex.push("défi 2"+(step()>1?" ✓":" ✗ "+S().S));
+    drag(0,X(0),Y(-4)); ex.push(/milieu/.test(hint())?"aide ok":"AIDE:"+hint());
+    drag(0,X(3),Y(-4)); answer(5); ex.push("défi 3"+(step()>2?" ✓":" ✗ "+S().S)); return ex; },
+  pente(){ const ex=[], k0=0.9*5, k2=10.8;
+    drag(0,294,196-6*k0); ex.push(/2 %/.test(hint())?"piège ok":"PIÈGE:"+hint());
+    drag(0,294,196-18*k0); answer(5); ex.push("défi 1"+(step()>0?" ✓":" ✗ "+S().h));
+    for(let j=0;j<20;j++) key(0,"ArrowUp"); ex.push("défi 2"+(step()>1?" ✓":" ✗ "+S().h));
+    drag(0,24+11*k2,196-0.9*k2*5); ex.push(/raide/.test(hint())?"aide ok":"AIDE:"+hint());
+    drag(0,24+15*k2,196-0.9*k2*5); answer(45); ex.push("défi 3"+(step()>2?" ✓":" ✗ "+S().L)); return ex; },
 };
 function area(useTap,ans){ const ex=[]; for(let s=0;s<3;s++){ const n=S().cells.length, src={x2:0,x:1,"1":2};
     if(s===0){ // mauvaise tuile d'abord
@@ -65,8 +99,13 @@ for(const id of ids){ try{ screenLesson(id,()=>{}); click('#pc button[data-i="'+
   if(!B()) throw new Error("pas de figure manipulable");
   const ex=LES[id](); const html=document.getElementById("app").innerHTML;
   const fin=!document.getElementById("s3").hidden;
-  log.push(id+" : "+(fin&&!/NaN|undefined/.test(html)?"OK":"ÉCHEC"+(/NaN|undefined/.test(html)?" (NaN/undefined)":""))+" · "+ex.join(" · "));
+  // pas de débordement à 360 px (24.11)
+  const app=document.getElementById("app"), R=document.body.getBoundingClientRect().right+1, ov=app.scrollWidth>app.clientWidth+1||[...app.querySelectorAll("*")].some((e)=>{const r=e.getBoundingClientRect();return r.width&&r.right>R;});
+  const bad=/✗|[A-ZÉÈ]{4,}[ :]/.test(ex.join(" · ")); // une vérification intermédiaire ratée (aide absente, clavier…) compte comme un échec (24.11)
+  log.push(id+" : "+(fin&&!ov&&!bad&&!/NaN|undefined/.test(html)?"OK":"ÉCHEC"+(/NaN|undefined/.test(html)?" (NaN/undefined)":"")+(ov?" (débordement à 360 px)":"")+(bad?" (vérification ratée)":""))+" · "+ex.join(" · "));
   }catch(e){log.push(id+" EXC "+e.message+" "+(e.stack||"").split("\n")[1])} }
 if(window.__errs.length) log.push("ERREURS JS : "+window.__errs.join(" | "));
+// échecs en tête (tools/run_tests.sh n'affiche que le début du journal)
+log.sort((a,b)=>(/ÉCHEC|EXC|ERREURS/.test(b)?1:0)-(/ÉCHEC|EXC|ERREURS/.test(a)?1:0));
 document.getElementById("log").hidden=false;document.getElementById("log").textContent=log.join("\n");
 </script>
