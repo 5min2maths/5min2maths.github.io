@@ -5,7 +5,7 @@ ROOT = Path(__file__).resolve().parent.parent
 JS = re.search(r"JS = \[(.*?)\]", (ROOT / "build.py").read_text()).group(1)
 files = re.findall(r'"([^"]+)"', JS)
 scripts = "".join(f'<script src="../src/{f}"></script>' for f in files)
-BANKS = ["affmp2", "trigmp2", "statmp2", "cnmp1", "no1c", "cart2c", "poly2c", "rat2c", "exp2c", "compo2c", "log2c", "tri2c", "trigfn2c", "vec2c", "eqmp3", "logmp3", "volmp3", "vecmp4", "fctmp4"]
+BANKS = ["affmp2", "trigmp2", "statmp2", "cnmp1", "no1c", "cart2c", "poly2c", "rat2c", "exp2c", "compo2c", "log2c", "tri2c", "trigfn2c", "vec2c", "eqmp3", "logmp3", "volmp3", "vecmp4", "fctmp4", "deriv3c", "int4c", "exp4c", "alg4c", "proba4c"]
 # chapitre (ids) -> banque attendue, profil
 CHAPS = [
     ("affine droites recipaff affzero modaff droitesinter", "affmp2", "mp"),
@@ -32,6 +32,11 @@ CHAPS = [
     # 24.11 (agent mp4plus) : notions ajoutées aux banques MP 4e
     ("projmp pvectmp posdroites", "vecmp4", "mp"),
     ("fratmp", "fctmp4", "mp"),
+    ("tauxvar nbderive derivref derivregles derivprodquot derivcomp tangente variations optimderiv", "deriv3c", "col"),  # 24.11 : 3e–4e Collège
+    ("primitives integrale aireint volrev", "int4c", "col"),
+    ("lnexp croissance", "exp4c", "col"),
+    ("matrices translin", "alg4c", "col"),
+    ("condbayes varalea binomiale normale", "proba4c", "col"),
 ]
 JSCODE = r"""
 const L=[];let fails=0;const seenK={};const bad=(m)=>{fails++;const k=m.replace(/graine \d+/,"").slice(0,48);seenK[k]=(seenK[k]||0)+1;if(seenK[k]<=1&&fails<400)L.push("ÉCHEC "+m);};
