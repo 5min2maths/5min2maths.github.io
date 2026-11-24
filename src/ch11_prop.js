@@ -229,7 +229,7 @@
       () => { const m = pickBy(MET), V = R.int(12, 80), mass = r6(m[1] * V);
         return Qv("Un cube " + m[0] + " a un volume de " + Q(V, "cm^3") + " et une masse de " + Q(mass, "g") + ". Calcule sa masse volumique (en " + M("\\text{g/cm}^3") + ").", m[1],
           M("\\rho = \\frac{m}{V} = \\frac{" + N(mass) + "}{" + V + "} = " + N(m[1])) + " g/cm³ : chaque cm³ pèse " + N(m[1]).replace("{,}", ",") + " g.",
-          { ctx: m[2], fig: FIG.box("", "", ""), guide: [GS("La masse volumique est la masse d'un cm³ : " + M("\\rho = \\frac{m}{V}") + ". Calcule " + M(N(mass) + " : " + V) + ".", m[1], M(N(mass) + " : " + V + " = " + N(m[1])) + " g/cm³.")],
+          { ctx: m[2], fig: FIG.cube(""), guide: [GS("La masse volumique est la masse d'un cm³ : " + M("\\rho = \\frac{m}{V}") + ". Calcule " + M(N(mass) + " : " + V) + ".", m[1], M(N(mass) + " : " + V + " = " + N(m[1])) + " g/cm³.")],
             traps: [TRAP(r6(V / mass), "C'est l'inverse : masse divisée par volume."), TRAP(r6(mass * V), "On divise la masse par le volume.")] }); },
       () => { const c = pickBy([["L'huile d'olive", 0.92, "L", "kg", "Quelle est la masse de", "huile"], ["Le lait", 1.03, "L", "kg", "Quelle est la masse de", "lait"], ["L'essence", 0.75, "L", "kg", "Quelle est la masse de", "essence"], ["Le miel", 1.4, "L", "kg", "Quelle est la masse de", "miel"]]), V = pickBy([5, 12, 20, 25, 8]), mass = r6(c[1] * V);
         return Qv(c[0] + " a une masse volumique de " + M(N(c[1]) + u("kg/L")) + ". " + c[4] + " " + Q(V, "L") + " (en kg) ?", mass, M("m = \\rho \\cdot V = " + N(c[1]) + " \\cdot " + V + " = " + N(mass)) + " kg.",
