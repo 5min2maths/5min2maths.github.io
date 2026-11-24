@@ -7,7 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent
 SRC = ROOT / "src"
-JS = ["curriculum.js", "ordre.js", "expr.js", "figures.js", "geo.js", "generators.js", "gen2.js", "gen3.js", "variantes.js", "competences.js", "ch11_prop.js", "ch11_litt.js", "ch1c_eq.js", "ch1c_sys.js", "ch11_no.js", "ch11_gm.js", "ch11_ang.js", "ch11_thales.js", "ch11_proba.js", "ch1c_no.js", "ch1c_fct.js", "ch1c_alg.js", "ch1c_f2b.js", "ch11_no2.js", "ch1c_geo.js", "ch1c_trig.js", "ch_mp1.js", "ch11_fct.js", "ch10_no.js", "ch_mp2.js", "ch_mp3.js", "ch_mp4.js", "fr_lycee.js", "fr_2nde.js", "ch3c_ana.js", "ch4c_ana.js", "fr_college.js", "riche.js", "riche_11b.js", "riche_11c.js", "riche_1c.js", "riche_sys1c.js", "riche_9.js", "riche_10.js", "riche_mp2.js", "riche_mp1.js", "riche_2c.js", "riche_mp34.js", "curieux.js", "histoire.js", "badges.js", "backup.js", "qr.js", "lessons.js", "lessons2.js", "dyn.js", "manip.js", "active.js", "act_prop11.js", "act_litt11.js", "act_eq1c.js", "act_sys1c.js", "act_ch11b.js", "act_ch11c.js", "act_9a.js", "act_9b.js", "act_10a.js", "act_10b.js", "act_11d.js", "act_1c.js", "act_mp2.js", "act_mp34.js", "act_2c.js", "act_manip.js", "act_manip2.js", "sujet.js", "qcm.js", "engine.js", "app.js"]
+JS = ["curriculum.js", "ordre.js", "expr.js", "figures.js", "geo.js", "generators.js", "gen2.js", "gen3.js", "variantes.js", "competences.js", "ch11_prop.js", "ch11_litt.js", "ch1c_eq.js", "ch1c_sys.js", "ch11_no.js", "ch11_gm.js", "ch11_ang.js", "ch11_thales.js", "ch11_proba.js", "ch1c_no.js", "ch1c_fct.js", "ch1c_alg.js", "ch1c_f2b.js", "ch11_no2.js", "ch1c_geo.js", "ch1c_trig.js", "ch_mp1.js", "ch11_fct.js", "ch10_no.js", "ch_mp2.js", "ch_mp3.js", "ch_mp4.js", "fr_lycee.js", "fr_2nde.js", "ch3c_ana.js", "ch4c_ana.js", "fr_college.js", "riche.js", "riche_11b.js", "riche_11c.js", "riche_1c.js", "riche_sys1c.js", "riche_9.js", "riche_10.js", "riche_mp2.js", "riche_mp1.js", "riche_2c.js", "riche_col34.js", "riche_mp34.js", "curieux.js", "histoire.js", "badges.js", "backup.js", "qr.js", "lessons.js", "lessons2.js", "dyn.js", "manip.js", "active.js", "act_prop11.js", "act_litt11.js", "act_eq1c.js", "act_sys1c.js", "act_ch11b.js", "act_ch11c.js", "act_9a.js", "act_9b.js", "act_10a.js", "act_10b.js", "act_11d.js", "act_1c.js", "act_mp2.js", "act_mp34.js", "act_2c.js", "act_col34.js", "act_manip.js", "act_manip2.js", "sujet.js", "qcm.js", "engine.js", "app.js"]
 
 head = """<title>5minutes2mathsparjour</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -50,7 +50,7 @@ pwa_head = ('<link rel="manifest" href="manifest.webmanifest">\n<meta name="them
 # le profil (son niveau et les niveaux inférieurs de sa filière), démarre l'app, puis charge les autres en arrière-plan.
 def paquet(f):
     if f.startswith("fr_"): return "fr"
-    if f == "ch3c_ana.js": return "14"
+    if f in ("ch3c_ana.js", "act_col34.js", "riche_col34.js"): return "14"  # 24.11 : leçons actives et séries riches de 3e–4e Collège (paquet 14 : chargé en 3e et en 4e)
     if f.startswith("ch4c"): return "15"  # 24.11 : 4e du Collège
     if f in ("ch_mp1.js", "ch_mp2.js"): return "12"  # 24.11 : versions récentes de notions partagées avec le Collège (sinlaw, trigfn, stats…) : chargées dès la 1re, toutes filières
     if f == "riche_mp2.js": return ""  # définit RX, outils communs aussi utilisés par riche_2c et riche_mp1
