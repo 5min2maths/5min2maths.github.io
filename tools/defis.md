@@ -108,7 +108,7 @@ Même standard (valeurs tirées, 2 à 4 parts enchaînées, 2 indices, corrigé 
 `factor` v2 (11e) : la part « combien d'entiers avec E(x) > 0 » (tableau de signes à trois facteurs, hors programme
 de 11e) est remplacée par un paramètre : pour quel c l'équation n'a plus que deux solutions (c = m²p²).
 
-## 3e lot (24.11 soir) : 57 notions de plus
+## 3e lot (24.11 soir) : 61 notions de plus
 
 Même standard. Toutes à valeurs tirées ; parts vérifiées par `tools/audit_defis.py`.
 
@@ -171,12 +171,15 @@ Même standard. Toutes à valeurs tirées ; parts vérifiées par `tools/audit_d
 | fracrat (MP 1re) | (x² − 9)/(x² + 3x) fixe | (x² − a²)/(x² + ax) : valeurs interdites, F(x₁), F(x) = k |
 | eqparam (MP 1re) | x² − 6x + m fixe | x² − 2sx + m : m pour une solution, plus grand m entier pour deux, m pour qu'un t soit solution, autre solution |
 | valint (MP 1re) | 1/(x² − 4x) fixe | 1/trinôme tiré : valeurs interdites, f(x₀), entiers où f < 0 |
+| absval (1re) | bornes 12 et 30 fixes | bornes et somme tirées : distance, deux solutions, entiers de l'inéquation |
+| translin (4e) | rotation 90° + homothétie 3 fixes | rotation ±90° ou symétrie, homothétie de rapport tiré (négatif possible) : image de B, déterminant (signe), aire image |
+| ratden (MP 1re) | 6/√3 et 1/(2 − √3) | tm/√m et c/(p − √q) tirés : A², dénominateur après conjugué, partie rationnelle |
+| ordgr (10e) | course 23 élèves fixe | n, car, entrée tirés : estimations, coût exact, participation arrondie au franc supérieur |
 
 ## Ce qui reste (valeurs fixes, à reprendre)
 
-Environ 8 notions gardent un défi à valeurs fixes :
-`translin`, `absval`, MP `ratden`, et 9e–10e
-(`ordgr`), plus `algopy`, `proba2`, `probcond`, `tauxevol`,
+Toutes les notions de la liste du 24.11 ont maintenant un défi à valeurs tirées. Restent à valeurs fixes (sans classe) :
+`algopy`, `proba2`, `probcond`, `tauxevol`,
 `vect3e` (sans classe). Liste à jour : relancer `tools/audit_defis.py`.
 
 ## À contrôler

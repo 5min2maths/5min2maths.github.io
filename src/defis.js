@@ -1966,6 +1966,55 @@ const DEFIS = (() => {
           M(poly([1, -s, p]) + " = (" + xm(r1) + ")(" + xm(r2) + ")") + ". a) " + M(r1) + " et " + M(r2) + ". b) " + M("\\frac{1}{(" + x0 + sgD(-r1) + ")(" + x0 + sgD(-r2) + ")} = " + (f0 < 0 ? "-" : "") + "\\frac{1}{" + Math.abs((x0 - r1) * (x0 - r2)) + "}") + ". c) Entre " + M(r1) + " et " + M(r2) + " (exclus) : " + M(r2 - r1 - 1) + " entiers.");
       },
     ],
+    /* ---------- 1re Collège : valeur absolue (somme de distances) ---------- */
+    absval: [
+      () => {
+        let p, q, e; do { p = ri(2, 30); q = p + ri(6, 25); e = ri(2, 9); } while (q > 60 || p - e < 1);
+        const d = q - p, L = d + 2 * e;
+        return P("Sur une route droite, deux bornes sont aux kilomètres " + M(p) + " et " + M(q) + ". On cherche les points (kilomètre " + M("x") + ") dont la somme des distances aux deux bornes vaut " + M(L) + " km : " + M("|x - " + p + "| + |x - " + q + "| = " + L) + ".",
+          [["a) Distance entre les deux bornes (km)", d], ["b) Plus petite solution " + M("x"), p - e], ["c) Plus grande solution " + M("x"), q + e], ["d) Combien de kilomètres entiers " + M("x") + " vérifient " + M("|x - " + p + "| + |x - " + q + "| \\leq " + L) + " ?", d + 2 * e + 1]],
+          ["Entre les deux bornes, la somme des distances vaut toujours " + d + " km : les solutions sont à l'extérieur.",
+           "À gauche de " + p + " : (" + p + " − x) + (" + q + " − x) = " + L + ". À droite de " + q + " : (x − " + p + ") + (x − " + q + ") = " + L + ". d) Les solutions de l'inéquation vont de l'une à l'autre."],
+          "a) " + M(q + " - " + p + " = " + d) + ". b) " + M(p + q + " - 2x = " + L + " \\iff x = " + (p - e)) + ". c) " + M("2x - " + (p + q) + " = " + L + " \\iff x = " + (q + e)) + ". d) De " + M(p - e) + " à " + M(q + e) + " : " + M(d + 2 * e + 1) + " valeurs.");
+      },
+    ],
+    /* ---------- 4e Collège : transformations linéaires (matrices) ---------- */
+    translin: [
+      () => {
+        const [nom, fm, df] = pk([["la rotation de 90° autour de O (sens trigonométrique)", (x, y) => [-y, x], 1], ["la rotation de −90° autour de O", (x, y) => [y, -x], 1], ["la symétrie d'axe Ox", (x, y) => [x, -y], -1], ["la symétrie d'axe y = x", (x, y) => [y, x], -1]]);
+        const k = pk([-3, -2, 2, 3, 4]);
+        let A, B, C, ar; do { A = [ri(-3, 3), ri(-3, 3)]; B = [ri(-4, 5), ri(-4, 5)]; C = [ri(-4, 5), ri(-4, 5)]; ar = Math.abs((B[0] - A[0]) * (C[1] - A[1]) - (C[0] - A[0]) * (B[1] - A[1])) / 2; } while (ar < 2 || B[0] === 0 || B[1] === 0 || Math.abs(B[0]) === Math.abs(B[1]));
+        const fB = fm(...B), gfB = fB.map((v) => k * v), det = k * k * df;
+        return P(M("f") + " est " + nom + ", puis " + M("g") + " l'homothétie de centre O et de rapport " + M(k) + ". On considère le triangle " + M("A(" + A.join(" ; ") + ")") + ", " + M("B(" + B.join(" ; ") + ")") + ", " + M("C(" + C.join(" ; ") + ")") + ".",
+          [["a) Abscisse de " + M("(g \\circ f)(B)"), gfB[0]], ["b) Déterminant de la matrice de " + M("g \\circ f"), det], ["c) Aire de l'image du triangle par " + M("g \\circ f"), Math.abs(det) * ar]],
+          ["Écris la matrice de f (images de (1 ; 0) et (0 ; 1)), celle de g (" + k + " · identité), puis applique f d'abord, g ensuite.",
+           "det(g ∘ f) = det g · det f. L'aire est multipliée par |det| ; aire de ABC : |det(AB→, AC→)| ÷ 2."],
+          "a) " + M("f(B) = (" + fB.join(" ; ") + ")") + ", " + M("(g \\circ f)(B) = (" + gfB.join(" ; ") + ")") + ". b) " + M(k * k + " \\cdot " + pr(df) + " = " + det)  + ". c) Aire de " + M("ABC") + " : " + M(D(ar)) + " ; image : " + M(Math.abs(det) + " \\cdot " + D(ar) + " = " + D(Math.abs(det) * ar)) + ".");
+      },
+    ],
+    /* ---------- MP 1re : rendre rationnel un dénominateur ---------- */
+    ratden: [
+      () => {
+        const m = pk([2, 3, 5, 6, 7]), t = ri(2, 5), [p, q] = pk([[2, 3], [3, 7], [3, 8], [4, 13], [4, 15], [5, 23], [3, 5], [5, 21]]), r = p * p - q, u = ri(1, 3), c = r * u;
+        return P("On donne " + M("A = \\frac{" + t * m + "}{\\sqrt{" + m + "}}") + " et " + M("B = \\frac{" + c + "}{" + p + " - \\sqrt{" + q + "}}") + ".",
+          [["a) " + M("A^2"), t * t * m], ["b) Dénominateur de " + M("B") + " après multiplication par le conjugué " + M(p + " + \\sqrt{" + q + "}"), r], ["c) " + M("B - " + (u === 1 ? "" : u) + "\\sqrt{" + q + "}"), u * p]],
+          ["A : multiplie le numérateur et le dénominateur par √" + m + ". B : (a − √b)(a + √b) = a² − b.",
+           "Le dénominateur de B devient " + p + "² − " + q + " = " + r + " ; simplifie ensuite la fraction."],
+          "a) " + M("A = \\frac{" + t * m + "\\sqrt{" + m + "}}{" + m + "} = " + t + "\\sqrt{" + m + "}") + ", " + M("A^2 = " + t * t + " \\cdot " + m + " = " + t * t * m) + ". b) " + M("(" + p + " - \\sqrt{" + q + "})(" + p + " + \\sqrt{" + q + "}) = " + p * p + " - " + q + " = " + r) + ". c) " + M("B = \\frac{" + c + "(" + p + " + \\sqrt{" + q + "})}{" + r + "} = " + (u === 1 ? "" : u) + "(" + p + " + \\sqrt{" + q + "})") + ", donc " + M(u * p) + ".");
+      },
+    ],
+    /* ---------- 10e : ordres de grandeur (course d'école) ---------- */
+    ordgr: [
+      () => {
+        let n, Cc, e; do { n = ri(17, 27); Cc = 10 * ri(95, 160); e = ri(12, 28); } while (n % 10 === 0 || e % 10 === 0 || Cc % 100 === 0);
+        const n10 = Math.round(n / 10) * 10, e10 = Math.round(e / 10) * 10, C100 = Math.round(Cc / 100) * 100, tot = Cc + n * e, pe = Math.ceil(tot / n);
+        return P("Une classe de " + M(n) + " élèves part en course d'école. Le car coûte " + M(nb(Cc)) + " CHF et l'entrée au musée " + M(e) + " CHF par élève.",
+          [["a) Estimation du prix des entrées (" + n10 + " élèves à " + e10 + " CHF)", n10 * e10], ["b) Estimation du coût total (car arrondi à la centaine)", C100 + n10 * e10], ["c) Coût exact (CHF)", tot], ["d) Participation par élève, arrondie au franc supérieur (CHF)", pe]],
+          ["Arrondis chaque nombre à un nombre « rond » avant de calculer de tête ; puis compare l'estimation au calcul exact.",
+           "d) Coût exact ÷ " + n + ", arrondi vers le haut pour que tout soit payé."],
+          "a) " + M(n10 + " \\cdot " + e10 + " = " + nb(n10 * e10)) + ". b) " + M(nb(C100) + " + " + nb(n10 * e10) + " = " + nb(C100 + n10 * e10)) + ". c) " + M(nb(Cc) + " + " + n + " \\cdot " + e + " = " + nb(tot)) + ". d) " + M(nb(tot) + " \\div " + n + " \\approx " + D(r2c(tot / n))) + " : " + M(pe) + " CHF.");
+      },
+    ],
   };
 })();
 // Texte simple : milliers avec ' (indices et étiquettes).
