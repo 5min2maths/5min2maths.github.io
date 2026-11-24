@@ -1,5 +1,5 @@
 Code	Chantier	Famille	Rang	État	Avancement	Mis à jour	Où en est-on	Prochaine étape
-A	Lots « notion complète » (pas à pas, erreurs typiques, contextes, valeurs)	Pédagogie	4	en cours	94 %	24.11	169 notions complètes sur 179 ; QX transmet aussi les guides ; probrat : données du cycliste corrigées	2e Collège : expo, expfrac, modexp, compo, decomp
+A	Lots « notion complète » (pas à pas, erreurs typiques, contextes, valeurs)	Pédagogie	4	en cours	97 %	24.11	174 notions complètes sur 179	dernier lot : bijection, recip, log, logbase, vecteurs
 11e-P	11e Proportionnalité « nickel » + test de préparation	Pédagogie	4	à contrôler	90 %	15.11	cases 1 à 13 faites, test de préparation fait (tools/chantier_11e.md)	contrôle par l'enseignant avant le test 11LS du 04.12
 11e-CL	11e Calcul littéral « nickel » (CL1, CL2)	Pédagogie	4	à contrôler	80 %	16.11	notions et test de préparation faits	contrôle ; CL1 prêt pour le 11.12, CL2 pour le 15.01
 1C	1re Collège complète	Pédagogie	4	à contrôler	90 %	20.11	toutes les notions au standard (tirages réels)	contrôle par l'enseignant (colonne Contrôlé)
@@ -13,7 +13,7 @@ X	Formes sur figure (repère, lecture de graphique)	Qualité	7	à faire	20 %	23.
 B	Vérification unique avant publication	Technique	1	fait	95 %	24.11	run_tests.sh : 107 pages, ne bloque plus (page abandonnée après 120 s) ; gardien cron tue les Chromium > 10 min	(option) bloquer le push en cas d'échec
 N	Remontée anonyme des erreurs JavaScript	Technique	1	fait	100 %	23.11	envoi + feuille « erreurs », ligne dans le point ; Apps Script redéployé	surveiller le point
 F	Temps de chargement	Technique	1	fait	90 %	23.11	code dans docs/app.js à part, publié : habitué 2,0 s → 0,7 s (CPU ×4), 2,9 s → 1,2 s (CPU ×6, 4G lente)	première visite en 4G lente ≈ 11 s (1,1 Mo) : chargement par niveau si besoin
-ROB	Élève-robot (test nocturne de toute l'app)	Technique	1	en cours	70 %	23.11	réparé : une page par classe, 5 min max ; jamais abouti avant	vérifier le rapport de la nuit (suivi/robot/resume.txt)
+ROB	Élève-robot (test nocturne de toute l'app)	Technique	1	en cours	85 %	24.11	tourne chaque nuit (9'808 questions en 6 min) ; fausses alertes retirées ; nouveau : cohérence énoncé/figure (formes, arcs d'angle), étiquettes hors cadre ou superposées	traiter les vrais problèmes trouvés ; vérifier le rapport de la nuit
 C	Mesure par question (signaux muets)	Données	2	fait	100 %	20.11	une ligne anonyme par question et leçon ; tools/signaux.py	analyser quand la 11LS sera ouverte
 T	Indicateurs de rétention (J+1, J+7, J+30)	Données	2	fait	100 %	23.11	dans le point : J+1 24 %, J+7 22 %	suivre ; vrai test = 11LS
 D	Routine des retours testeurs	Données	7	en cours	—	22.11	commentaires dans l'onglet Commentaires, 👎 dans le point	une fois par semaine

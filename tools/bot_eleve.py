@@ -69,6 +69,9 @@ def main():
     q = sum(s["questions"] + s["balayage"] for s in d["stats"].values())
     types = ", ".join(f"{k} {v}" for k, v in sorted(d["types"].items(), key=lambda kv: -kv[1])[:4])
     resume = f"Robot {jour[8:10]}.{jour[5:7]} : {q} questions jouées, {n} problème{'s' if n > 1 else ''} ({nouv} nouveau{'x' if nouv > 1 else ''})" + (f" — {types}" if types else "")
+    nv = sum(s.get("nonverif", 0) for s in d["stats"].values())  # 24.11 : réponses approchées (forme exacte exigée), non vérifiables
+    if nv:
+        resume += f" · {nv} réponses exactes non vérifiées"
     (OUT / "resume.txt").write_text(resume + "\n")
     print(resume)
 
