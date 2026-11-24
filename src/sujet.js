@@ -18,7 +18,8 @@ const MOCK_LV = {
 // (questions liées, donnée inutile, estimation, interprétation), C. raisonnement (trouve l'erreur, vrai ou faux, deux méthodes).
 function richPlan(ch, ids, level) {
   const C = RICH[ch], items = [], mine = C.ids.filter((id) => ids.includes(id));
-  const dA = { facile: [1, 1, 1, 1], standard: [1, 2, 1, 2], exigeant: [2, 2, 3, 2] }[level] || [1, 2, 1, 2];
+  /* 25.11 (audit de niveau 11e) : minA = niveau minimal des automatismes (banques de 11e dont les notions viennent de 9e-10e ; voir UP11 dans engine.js). */
+  const dA = ({ facile: [1, 1, 1, 1], standard: [1, 2, 1, 2], exigeant: [2, 2, 3, 2] }[level] || [1, 2, 1, 2]).map((d) => Math.max(d, C.minA || 1));
   // Automatismes tirés parmi toutes les notions révisées (16.11 : avec 8 ou 12 notions, les 4 premières revenaient toujours).
   R.seed(mockSeed()); const pickA = mine.length > dA.length ? shuffle(mine.slice()).slice(0, dA.length).sort((a, b) => mine.indexOf(a) - mine.indexOf(b)) : mine;
   dA.forEach((d, k) => items.push({ part: "A", id: pickA[k % pickA.length], d, seed: mockSeed() }));

@@ -225,6 +225,54 @@
     2: [RA0[2][2], RA0[2][4], RA0[2][1], RA0[2][0]],
     3: [RA0[3][0], RA0[3][2], RA0[3][3], RA0[3][4]],
   };
+  /* 25.11 (audit de niveau 11e, tools/niveau_11.md ; étalon : test 1.2 « Calcul numérique et racines » de la 11LS) : le
+     niveau 3 s'arrêtait à √(a²m) + √(b²m) avec a, b ≤ 5, loin du test (√968, ∛−72000, −6√28 − 7√175 + 3√700,
+     √300 · √112, quotients). Formes ajoutées au niveau du test ; les anciennes restent. */
+  const SQF = [2, 3, 5, 6, 7, 10, 11];
+  const twoP = () => { const p = pk([2, 3, 5, 7]); let q; do q = pk([2, 3, 5, 7, 11]); while (q === p); return [p, q]; };
+  const rT = (k, m) => (k === 1 ? "" : k === -1 ? "-" : k) + "\\sqrt{" + m + "}"; /* k√m en TeX */
+  RP[2].push(() => { let k, m; do { k = R.int(8, 22); m = pk(SQF); } while (k * k * m > 3000);
+    const n = k * k * m;
+    return Qv("Écris " + M("\\sqrt{" + TH(n) + "}") + " sous la forme " + M("a\\sqrt{b}") + ", avec " + M("b") + " le plus petit possible (touche √).", k * Math.sqrt(m), M("\\sqrt{" + TH(n) + "} = \\sqrt{" + k * k + " \\cdot " + m + "} = " + k + "\\sqrt{" + m + "}") + ".",
+      { ctx: "extraire-grand", radical: true, canon: k + "√" + m,
+        guide: [GS("Plus grand carré parfait qui divise " + M(TH(n)) + " ?", k * k, M(TH(n) + " = " + k * k + " \\cdot " + m) + "."), GS("Racine de ce carré parfait ?", k, M("\\sqrt{" + k * k + "} = " + k) + "."), GSR("Résultat ?", k * Math.sqrt(m), M(k + "\\sqrt{" + m + "}") + ".")],
+        traps: [TR(k * k * Math.sqrt(m), "On sort la racine du carré parfait : " + M("\\sqrt{" + k * k + "} = " + k) + ", pas " + k * k + "."), TR(m * k, "Le facteur qui sort est la racine du carré parfait ; " + m + " reste sous la racine.")] }); });
+  RP[2].push(() => { let c, m; do { c = pk([2, 3, 4, 5, 6, 10, 20]); m = pk([2, 3, 4, 5, 6, 7, 9]); } while (c ** 3 * m > 100000);
+    const s = R.rand() < 0.5 ? -1 : 1, n = s * c ** 3 * m, a = s * c;
+    return Qv("On écrit " + M("\\sqrt[3]{" + TH(n) + "} = a\\sqrt[3]{" + m + "}") + ". Que vaut " + M("a") + " ?", a,
+      M("\\sqrt[3]{" + TH(n) + "} = \\sqrt[3]{" + (s < 0 ? "(" + TH(-(c ** 3)) + ")" : TH(c ** 3)) + " \\cdot " + m + "} = " + a + "\\sqrt[3]{" + m + "}") + (s < 0 ? " : la racine cubique d'un nombre négatif est négative." : "."),
+      { ctx: s < 0 ? "extraire-cubique-neg" : "extraire-cubique-grand",
+        guide: [GS("Plus grand cube parfait qui divise " + M(TH(c ** 3 * m)) + " ?", c ** 3, M(TH(c ** 3 * m) + " = " + TH(c ** 3) + " \\cdot " + m) + "."), GS("Racine cubique de ce cube, avec le signe ?", a, M(a) + ".")],
+        traps: [TR(-a, s < 0 ? "La racine cubique d'un nombre négatif est négative." : "Le nombre est positif : sa racine cubique aussi."), TR(s * c * c, "On cherche un cube parfait (" + c + " · " + c + " · " + c + "), pas un carré.")] }); });
+  RP[3].push(() => { const m = pk([2, 3, 5, 6, 7]); let ks, cs, tot;
+    do { ks = [R.int(2, 10), R.int(2, 10), R.int(2, 10)]; cs = [0, 1, 2].map(() => pk([2, 3, 4, 5, 6, 7]) * (R.rand() < 0.5 ? -1 : 1)); tot = cs[0] * ks[0] + cs[1] * ks[1] + cs[2] * ks[2]; }
+    while (new Set(ks).size < 3 || ks.some((k) => k * k * m > 1000) || Math.abs(tot) < 2);
+    const term = (i) => (i ? (cs[i] < 0 ? " - " : " + ") : cs[i] < 0 ? "-" : "") + Math.abs(cs[i]) + "\\sqrt{" + ks[i] * ks[i] * m + "}";
+    const simp = (i) => (i ? (cs[i] * ks[i] < 0 ? " - " : " + ") : cs[i] * ks[i] < 0 ? "-" : "") + Math.abs(cs[i] * ks[i]) + "\\sqrt{" + m + "}";
+    const E = term(0) + term(1) + term(2);
+    return Qv("Écris " + M(E) + " sous la forme " + M("a\\sqrt{b}") + ", avec " + M("b") + " le plus petit possible.", tot * Math.sqrt(m),
+      M(E + " = " + simp(0) + simp(1) + simp(2) + " = " + rT(tot, m)) + " : on simplifie chaque racine, puis on additionne les racines semblables.",
+      { ctx: "somme-coef", radical: true, canon: tot + "√" + m,
+        guide: [GSR("Simplifie le premier terme " + M(term(0)) + " :", cs[0] * ks[0] * Math.sqrt(m), M(rT(cs[0] * ks[0], m)) + "."),
+          GS("Les trois termes sont des multiples de " + M("\\sqrt{" + m + "}") + ". Somme des nombres devant " + M("\\sqrt{" + m + "}") + " ?", tot, M(cs[0] * ks[0] + (cs[1] * ks[1] < 0 ? " - " : " + ") + Math.abs(cs[1] * ks[1]) + (cs[2] * ks[2] < 0 ? " - " : " + ") + Math.abs(cs[2] * ks[2]) + " = " + tot) + "."),
+          GSR("Résultat ?", tot * Math.sqrt(m), M(rT(tot, m)) + ".")],
+        traps: [TR((cs[0] + ks[0] + cs[1] + ks[1] + cs[2] + ks[2]) * Math.sqrt(m), "Le nombre qui sort de la racine se MULTIPLIE par le coefficient : " + M(Math.abs(cs[0]) + "\\sqrt{" + ks[0] * ks[0] * m + "} = " + Math.abs(cs[0]) + " \\cdot " + ks[0] + "\\sqrt{" + m + "}") + "."),
+          TR((Math.abs(cs[0] * ks[0]) + Math.abs(cs[1] * ks[1]) + Math.abs(cs[2] * ks[2])) * Math.sqrt(m), "Attention aux signes « − » devant les termes.")] }); });
+  RP[3].push(() => { const [p, q] = twoP(), a = R.int(2, 6), b = R.int(2, 6), c = pk([1, 2, 3]), A = a * a * p, B = b * b * q, k = c * a * b;
+    return Qv("Calcule " + M(rT(c, A) + " \\cdot \\sqrt{" + B + "}") + " et écris le résultat sous la forme " + M("a\\sqrt{b}") + ", avec " + M("b") + " le plus petit possible.", k * Math.sqrt(p * q),
+      M("\\sqrt{" + A + "} = " + a + "\\sqrt{" + p + "}") + " et " + M("\\sqrt{" + B + "} = " + b + "\\sqrt{" + q + "}") + " ; " + M((c > 1 ? c + " \\cdot " : "") + a + " \\cdot " + b + " \\cdot \\sqrt{" + p + " \\cdot " + q + "} = " + k + "\\sqrt{" + p * q + "}") + ".",
+      { ctx: "produit-radicaux", radical: true, canon: k + "√" + p * q,
+        guide: [GSR("Simplifie " + M("\\sqrt{" + A + "}") + " :", a * Math.sqrt(p), M(a + "\\sqrt{" + p + "}") + "."), GSR("Simplifie " + M("\\sqrt{" + B + "}") + " :", b * Math.sqrt(q), M(b + "\\sqrt{" + q + "}") + "."),
+          GSR("Multiplie les nombres devant, et les racines entre elles :", k * Math.sqrt(p * q), M(k + "\\sqrt{" + p * q + "}") + ".")],
+        traps: [TR(k * p * q, M("\\sqrt{" + p + "} \\cdot \\sqrt{" + q + "} = \\sqrt{" + p * q + "}") + " : la racine reste."), TR(k * (Math.sqrt(p) + Math.sqrt(q)), "On multiplie les racines, on ne les additionne pas.")] }); });
+  RP[3].push(() => { let p, q, a, N0; do { [p, q] = twoP(); a = R.int(2, 5); N0 = a * a * p * q; } while (N0 > 1500);
+    const [c, d] = pk([[1, 1], [2, 1], [6, 2], [4, 2], [6, 3], [9, 3], [10, 5]]), f = c / d;
+    return Qv("Écris " + M("\\frac{" + rT(c, N0) + "}{" + rT(d, p) + "}") + " sous la forme " + M("a\\sqrt{b}") + ", avec " + M("b") + " le plus petit possible.", f * a * Math.sqrt(q),
+      M("\\frac{" + rT(c, N0) + "}{" + rT(d, p) + "} = " + (f !== 1 ? f + " \\cdot " : "") + "\\sqrt{\\frac{" + N0 + "}{" + p + "}} = " + (f !== 1 ? f + " \\cdot " : "") + "\\sqrt{" + a * a * q + "} = " + f * a + "\\sqrt{" + q + "}") + ".",
+      { ctx: "quotient-radicaux", radical: true, canon: f * a + "√" + q,
+        guide: [...(f !== 1 ? [GS("Quotient des nombres devant les racines " + M(c + " \\div " + d) + " ?", f, M(f) + ".")] : []), GS("Quotient sous la racine " + M(N0 + " \\div " + p) + " ?", a * a * q, M(a * a * q) + "."),
+          GSR("Simplifie et termine :", f * a * Math.sqrt(q), M(f * a + "\\sqrt{" + q + "}") + ".")],
+        traps: [TR(f * a * q, "La racine de " + q + " reste : " + M("\\sqrt{" + a * a * q + "} = " + a + "\\sqrt{" + q + "}") + "."), TR(f * a * a * Math.sqrt(q), "On sort la racine de " + a * a + ", soit " + a + ".")] }); });
 
   // ===================== carres : carrés parfaits, cubes, racines exactes (20.11, révision de 10e en 11e) =====================
   const TH = (v) => { let [i, f] = String(r6(v)).split("."); if (i.replace("-", "").length >= 4) i = i.replace(/\B(?=(\d{3})+(?!\d))/g, "\\text{'}"); return i + (f ? "{,}" + f : ""); };
@@ -378,7 +426,7 @@
     rel: ["Additionner, soustraire, multiplier", "Priorités, puissances, écarts", "Expressions, moyennes, enchaînements"],
     fracops: ["Différence négative, produit, quotient", "Priorités, parenthèses", "Fractions étagées, carrés, problèmes"],
     rac: ["Carrés parfaits, décimaux, côté d'un carré, cubes parfaits", "Encadrer, périmètre à partir de l'aire, arête d'un cube", "Même aire, somme d'aires, aire d'un cube"],
-    racprop: ["Racine cubique (aussi négative), produits, carré d'une racine", "Extraire, quotients, extraire une racine cubique, encadrer", "Sommes de racines, longueurs exactes, produits de racines cubiques, √ + ∛"],
+    racprop: ["Racine cubique (aussi négative), produits, carré d'une racine", "Extraire (aussi de grands nombres), quotients, racine cubique (aussi négative), encadrer", "Sommes de racines (avec coefficients), produits et quotients de radicaux, longueurs exactes, √ + ∛"],
     carres: ["Racines, carrés, cubes, côté d'un carré", "Décimaux, sommes de carrés, carrés à 3 chiffres", "Encadrer, aire d'un cube, racine d'une somme"],
     pctvar: ["Hausse, réduction, coefficient", "Taux de variation, prix avant hausse, quotidien", "Variations successives, prix avant baisse, TVA"],
   });

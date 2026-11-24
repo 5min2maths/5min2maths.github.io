@@ -462,6 +462,14 @@ const Engine = {
   },
   make(state, id, d, seed) {
     let level = d || this.difficulty(state, id);
+    /* 25.11 (audit de niveau 11e, tools/niveau_11.md ; règle de l'enseignant du 24.11 : le niveau 1 = automatismes de
+       l'année, jamais ceux d'une année inférieure) : notions de 9e-10e reprises en 11e (CO). Leur niveau 1 est un
+       automatisme de 9e-10e (« 3x + 9 = 33 », « calcule 4 - 5x pour x = -4 », « 3/4 de 200 CHF ») : en 11e, le niveau 1
+       tire les formes du niveau 2 (le code de la question reste reproductible : …-2-…). La 9e et la 10e ne changent pas.
+       rel n'y est pas : son niveau 2 tire déjà le niveau 3 en 11e (UP2 ci-dessous). */
+    const UP11 = ["prio", "fracadd", "fracconv", "fracmul", "fracops", "puiss", "sci", "scicalc", "rac", "carres", "pyth", "pythfig", "vol",
+      "vitesse", "valnum", "litelab", "reduire", "monomes", "distrib", "eq1", "eqfrac", "probeq", "affine", "repere", "tabval", "pctvar"];
+    if (level === 1 && UP11.includes(id) && state && state.profile && state.profile.system === "CH" && state.profile.track !== "mp" && state.profile.grade === 11) level = 2;
     // Notions de révision trop faciles au niveau 2 pour les grandes classes (21.11, « relève le niveau 2 pour la 11e ») :
     // dès la classe indiquée, le niveau 2 tire les formes du niveau 3 (le code de la question reste reproductible : …-3-…).
     const UP2 = { rel: 11 };

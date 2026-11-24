@@ -184,6 +184,21 @@
           "Erreur : " + M("x") + " et " + M("x^2") + " ne sont pas semblables ; on ne peut pas les additionner. " + M(a + "x + " + c + "x = " + (a + c) + "x") + ", donc " + M(tex(L)) + ".",
           { ...red, ctx: "erreur", guide: [GX("Quels termes sont semblables ? Additionne-les :", X1(a + c), M(a + "x + " + c + "x = " + (a + c) + "x") + ".", "reduced"), GX("Écris le résultat réduit et ordonné :", L, M(tex(L)) + ".", "reduced")],
             traps: [TX((a + b + c) + "*x^3", "C'est l'erreur de " + w + " : " + M("x") + " et " + M("x^2") + " ne s'additionnent pas.")] }); },
+      /* 25.11 (audit de niveau 11e, tools/niveau_11.md) : fractions à numérateur binôme, comme le dossier de calcul
+         littéral de la 11LS (Ex. 17 : (x + 5)/3 − (x − 1)/2) ; le niveau 3 n'avait que x/4 + x/6. */
+      () => { let p, q, a1, b1, a2, b2, op, L, cx, c0;
+        do { [p, q] = pk([[2, 3], [3, 4], [2, 5], [4, 6], [3, 5], [6, 4], [5, 10], [3, 6]]); a1 = pk([1, 1, 2, 3]); a2 = pk([1, 1, 2, 3]); b1 = nz(-7, 7); b2 = nz(-7, 7); op = pk([1, -1]);
+          L = (p * q) / gcd2(p, q); cx = (L / p) * a1 + op * (L / q) * a2; c0 = (L / p) * b1 + op * (L / q) * b2; }
+        while (cx === 0 || c0 === 0 || gcd2(gcd2(cx, c0), L) !== 1);
+        const num = (a, b) => (a === 1 ? "" : a) + "x" + (b < 0 ? " - " + -b : " + " + b), N = norm([[cx, { x: 1 }], [c0, {}]]), e = "(" + plain(N) + ")/" + L;
+        const k1 = L / p, k2 = L / q, mul = (k, a, b) => (k === 1 ? "(" + num(a, b) + ")" : k + "(" + num(a, b) + ")");
+        const wrong = norm([[cx, { x: 1 }], [k1 * b1 + k2 * b2, {}]]);
+        return Qx("Réduis et écris en une seule fraction : " + M("\\frac{" + num(a1, b1) + "}{" + p + "} " + (op > 0 ? "+" : "-") + " \\frac{" + num(a2, b2) + "}{" + q + "}") + ".", e,
+          "Dénominateur commun " + M(L) + " : " + M("\\frac{" + mul(k1, a1, b1) + (op > 0 ? " + " : " - ") + mul(k2, a2, b2) + "}{" + L + "} = \\frac{" + tex(N) + "}{" + L + "}") + (op < 0 ? " (le « − » s'applique à tout le second numérateur)." : "."),
+          { form: "onefrac", ctx: "fractions-binomes",
+            guide: [GS("Quel est le plus petit dénominateur commun ?", L, M(L) + "."), GX("Numérateur, une fois les parenthèses enlevées et réduit :", N, M(tex(N)) + ".", "reduced"), GX("Résultat en une seule fraction :", e, M("\\frac{" + tex(N) + "}{" + L + "}") + ".", "onefrac")],
+            traps: [...(op < 0 ? [TX("(" + plain(wrong) + ")/" + L, "Le « − » devant la seconde fraction change le signe de TOUT son numérateur : " + M("-" + mul(k2, a2, b2)) + ".")] : []),
+              TX("(" + plain(norm([[a1 + op * a2, { x: 1 }], [b1 + op * b2, {}]])) + ")/" + (p + q), "On n'additionne pas les dénominateurs : on met d'abord les fractions au même dénominateur.")] }); },
     ],
   };
 
@@ -373,6 +388,14 @@
         return Qn("Calcule mentalement " + M(n + "^2") + " avec une identité remarquable.", v, M("(" + r + (d < 0 ? " - " : " + ") + Math.abs(d) + ")^2 = " + r * r + (d < 0 ? " - " : " + ") + 2 * r * Math.abs(d) + " + " + d * d + " = " + v) + ".",
           { ctx: "mental", guide: [GS("Écris " + n + " comme " + r + (d < 0 ? " − " : " + ") + Math.abs(d) + ". Calcule " + M(r + "^2") + ".", r * r, M(r * r) + "."), GS("Double produit " + M("2 \\cdot " + r + " \\cdot " + Math.abs(d)) + " :", 2 * r * Math.abs(d), M(2 * r * Math.abs(d)) + "."), GS("Résultat :", v, M(r * r + (d < 0 ? " - " : " + ") + 2 * r * Math.abs(d) + " + " + d * d + " = " + v) + ".")],
             traps: [{ v: r * r + d * d, m: "Il manque le double produit " + M("2 \\cdot " + r + " \\cdot " + Math.abs(d)) + "." }] }); },
+      /* 25.11 (audit de niveau 11e, tools/niveau_11.md) : 3e identité avec des racines, comme le dossier de la 11LS
+         (Ex. 20 : (5√3 − 4√2)(5√3 + 4√2)) et l'EVACOM (racines et calcul littéral). */
+      () => { let a, b, m, n, v; do { a = R.int(2, 6); b = R.int(2, 5); [m, n] = pk([[3, 2], [2, 3], [5, 2], [5, 3], [7, 2], [7, 3], [6, 5], [3, 5], [2, 7]]); v = a * a * m - b * b * n; } while (Math.abs(v) < 2);
+        const A = a + "\\sqrt{" + m + "}", B = b + "\\sqrt{" + n + "}";
+        return Qn("Calcule avec une identité remarquable : " + M("(" + A + " - " + B + ")(" + A + " + " + B + ")") + ".", v,
+          M("(" + A + ")^2 - (" + B + ")^2 = " + a * a + " \\cdot " + m + " - " + b * b + " \\cdot " + n + " = " + a * a * m + " - " + b * b * n + " = " + v) + ".",
+          { ctx: "racines", guide: [GS("C'est " + M("(u - v)(u + v) = u^2 - v^2") + ". Calcule " + M("(" + A + ")^2") + " :", a * a * m, M(a + "^2 \\cdot " + m + " = " + a * a * m) + "."), GS("Calcule " + M("(" + B + ")^2") + " :", b * b * n, M(b + "^2 \\cdot " + n + " = " + b * b * n) + "."), GS("Résultat :", v, M(a * a * m + " - " + b * b * n + " = " + v) + ".")],
+            traps: [{ v: a * a * m + b * b * n, m: "C'est une <b>différence</b> de carrés : " + M("u^2 - v^2") + "." }, { v: a * m - b * n, m: M("(" + A + ")^2 = " + a + "^2 \\cdot (\\sqrt{" + m + "})^2") + " : le " + a + " est aussi élevé au carré." }].filter((t) => t.v !== v) }); },
     ],
   };
 
