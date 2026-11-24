@@ -595,7 +595,7 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: v
 .door-badge { position: absolute; top: -4px; left: calc(50% + 24px); background: var(--margin); color: var(--on-margin); border-radius: 999px; padding: 1px 8px; font-size: 0.8rem; font-weight: 800; }
 .back-home { display: block; margin: 0 0 4px; padding: 6px 0; text-align: left; }
 .sub-title { margin-bottom: 10px; }
-.brand-home { cursor: pointer; }
+.brand-home { cursor: default; } .brand-home > b, .brand-home > span { cursor: pointer; }
 .tour-hi { outline: 3px solid var(--fluo); outline-offset: 3px; border-radius: 14px; }
 .sess-mode { margin: 0; padding: 8px 10px; border-radius: 10px; background: var(--paper); border: 1px solid var(--line); }
 .fmt-box2 { display: grid; gap: 4px; padding: 10px 12px; border-radius: 12px; background: var(--blue-soft); }
@@ -700,3 +700,9 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: v
 .home-head .gear { font-size: calc(1.2rem / var(--fs)); }
 /* « Choisir mon chapitre travaillé en classe » seul sur sa ligne : passe à la ligne en grand texte au lieu de déborder. */
 .now-line > .btn-sec:only-child { flex-shrink: 1; min-width: 0; text-align: left; }
+
+/* Carte de progression (24.11) : cases touchables, notion affichée sous la rangée */
+.pm-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.pm-sq { width: 18px; height: 18px; min-height: 0; border-radius: 4px; padding: 0; border: 0; box-shadow: none; cursor: pointer; display: inline-block; }
+.pm-sq.on { outline: 2px solid var(--blue); outline-offset: 1px; }
+.pm-info { margin-top: 4px; padding: 4px 8px; border-radius: 8px; background: var(--soft, rgba(0,0,0,.05)); }

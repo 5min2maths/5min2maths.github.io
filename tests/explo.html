@@ -36,6 +36,8 @@ try{
  const n0=(state.comments||[]).length;document.getElementById("nxt").click();ok((state.comments||[]).length===n0+1&&state.comments.at(-1).text==="test oubli","commentaire envoyé par Continuer");
  /* 24.11 : 💬 visible dans l'en-tête (le bottom du bouton flottant le sortait de l'écran) et une seule fenêtre */
  homeTab="today";screenHome();screenHome();{const r=document.getElementById("fabc").getBoundingClientRect();ok(r.top>=0&&r.width>0,"💬 visible "+r.top);ok(document.querySelectorAll("#fabs").length===1,"une seule fenêtre 💬");}
+ /* 24.11 : toucher le bandeau à côté du 💬 ne ramène pas à l'accueil ; le nom de l'app, si */
+ app.querySelector('.door[data-door="prob"]').click();{const br=app.querySelector(".brand");br.click();ok(!app.querySelector(".hub"),"bandeau hors du nom : on reste");br.querySelector("b").click();ok(!!app.querySelector(".hub"),"nom de l'app : accueil");}
  homeTab="prog";screenHome();const cb=document.getElementById("comps");ok(cb&&cb.classList.contains("btn-primary"),"bouton compétences bleu");
 }catch(e){fails.push("EXC "+e.message+" "+e.stack)}
 document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHECS\n"+fails.join("\n"):"OK")+"</pre>");

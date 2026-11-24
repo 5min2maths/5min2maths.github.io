@@ -85,7 +85,10 @@ const goHome = () => { if (homeBusy() && !confirm("Interrompre l'activité en co
 const addTabs = () => {
   if (typeof state === "undefined" || !state || !state.placed) return;
   const br = app.querySelector(".brand");
-  if (br && !app.querySelector(".hub")) { br.classList.add("brand-home"); br.title = "Accueil"; br.onclick = goHome; }
+  if (br && !app.querySelector(".hub")) { br.classList.add("brand-home"); br.title = "Accueil";
+    /* 24.11 (« la bulle nous renvoie à l'accueil ») : seul le nom de l'app ramène à l'accueil, pas tout le bandeau ;
+       un toucher à côté du 💬 (petit bouton logé dans le bandeau) ne quitte plus la page. */
+    br.onclick = (e) => { if (e.target.closest("#fabc, #fabs") || !e.target.closest(".brand > b, .brand > span")) return; goHome(); }; }
   if (!app.querySelector(".hub") && !(history.state && history.state.m2m)) history.pushState({ m2m: 1 }, "");
 };
 window.addEventListener("popstate", () => {
@@ -1232,16 +1235,22 @@ function startFree() {
   session = { free: true, plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set() };
   nextQuestion();
 }
+document.addEventListener("click", (e) => { const b = e.target.closest && e.target.closest(".pm-sq"); if (!b) return;
+  const box = b.parentNode.nextElementSibling, on = b.classList.contains("on");
+  document.querySelectorAll(".pm-sq.on").forEach((x) => x.classList.remove("on")); document.querySelectorAll(".pm-info").forEach((x) => (x.hidden = true));
+  if (!on && box) { b.classList.add("on"); box.textContent = b.dataset.i; box.hidden = false; } });
 // Carte de progression par thème : une case par notion, colorée selon la maîtrise (grise : jamais travaillée).
 function themeMapCard() {
   const by = {};
   for (const [id, s] of Object.entries(state.notions)) { const n = NOTIONS.find((x) => x.id === id); if (!n || !GEN[id]) continue; (by[n.theme] = by[n.theme] || []).push([n, s]); }
   const col = (s) => (!s.seen ? "var(--line)" : s.m >= 0.7 ? "var(--ok)" : s.m >= 0.45 ? "var(--warn)" : "var(--bad)");
+  /* 24.11 (demande de l'auteur) : sur téléphone, title ne s'affiche pas ; un toucher sur la case montre la notion sous la rangée. */
+  const etat = (s) => (!s.seen ? "pas encore essayée" : s.m >= 0.7 ? "maîtrisée" : s.m >= 0.45 ? "en route" : "à travailler");
   const rows = Object.keys(FREE_THEMES).filter((k) => by[k]).map((k) => { const L = by[k], done = L.filter(([, s]) => s.seen && s.m >= 0.7).length;
     return `<div style="margin:8px 0"><div class="spread small"><b>${FREE_THEMES[k]}</b><span class="muted">${done} / ${L.length} maîtrisées</span></div>
-      <div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px">${L.map(([n, s]) => `<span title="${esc(n.label)}" aria-label="${esc(n.label)}" style="width:14px;height:14px;border-radius:3px;background:${col(s)};display:inline-block"></span>`).join("")}</div></div>`; }).join("");
+      <div class="pm-row">${L.map(([n, s]) => `<button type="button" class="pm-sq" title="${esc(n.label)}" aria-label="${esc(n.label)} : ${etat(s)}" data-i="${esc(n.label)} — ${etat(s)}" style="background:${col(s)}"></button>`).join("")}</div><div class="pm-info small" hidden></div></div>`; }).join("");
   return `<div class="card stack"><div class="eyebrow">Ma carte de progression</div>${rows}
-    <p class="small muted">Vert : maîtrisé · orange : en route · rouge : à travailler · gris : pas encore essayé.</p></div>`;
+    <p class="small muted">Vert : maîtrisé · orange : en route · rouge : à travailler · gris : pas encore essayé. Touche une case pour voir la notion.</p></div>`;
 }
 function startSession() {
   const fmt = Engine.todayFormat(state), plan = Engine.planSession(state, fmt);
@@ -1925,7 +1934,7 @@ function screenHistory(k, back) {
     <div class="act-step"><div class="act-h"><span class="act-n">✍️</span> À toi</div><div class="qtext">${E.q}</div>
       <div class="answer"><input class="ans" id="hans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Ta réponse">
       <div class="preview" id="hprev"></div>${keypadHtml(spec)}
-      <div class="actions"><button class="btn-primary" id="hok">Vérifier</button><button class="btn-sec" id="hidk">Voir la réponse</button></div></div><div id="hfb"></div></div>
+      <div class="actions"><button class="btn-primary" id="hok">Vérifier</button><button class="btn-sec" id="hidk">Voir la réponse</button></div></div><div id="hfb"></div></div><div id="hmore"></div>
     <p class="small muted">Lien avec : ${H.lien}</p></div>
   <button class="btn-primary btn-big" id="hnext">Une autre histoire</button>
   <button class="btn-ghost" id="hback">Retour</button>`);
@@ -1937,6 +1946,7 @@ function screenHistory(k, back) {
     inp.disabled = true; ["kp", "hok", "hidk"].forEach((x) => $(x) && $(x).remove()); prev.remove();
     $("hfb").innerHTML = `<div class="fb ${ok ? "ok" : "hint"} pop">${ok ? "✓ Juste !" : "Réponse : " + String(E.value).replace(/\B(?=(\d{3})+(?!\d))/g, "'")}<div class="sol">${E.sol}</div></div>`;
     typeset($("hfb"));
+    histMore(H, $("hmore"));
   };
   const go = () => {
     const v = inp.value.trim(); if (!v) return;
@@ -1953,6 +1963,58 @@ function screenHistory(k, back) {
   $("hnext").onclick = () => screenHistory(Histoire.other(k), back);
   $("hback").onclick = back;
   window.scrollTo(0, 0);
+}
+
+// Histoires, applications poussées (24.11, demande de l'auteur : « les applications restent très simples », surtout pour
+// les plus âgés) : après l'application directe, « 🚀 Pour aller plus loin » (problème en 2–3 étapes, tous) et, dès la
+// 1re du sec. II (grade ≥ 12), « 🎓 Défi expert ». H.plus() / H.expert() : { intro, steps: [{ q, value, sol, round? }] }.
+const histFmt = (v) => String(v).replace(".", ",").replace(/^(-?\d+)/, (m) => m.replace(/\B(?=(\d{3})+(?!\d))/g, "'"));
+function histMore(H, box) {
+  if (!box) return;
+  const adv = state && state.profile && (state.profile.grade >= 12 || state.profile.system === "FR" && state.profile.grade >= 12);
+  const opts = [H.plus && ["plus", "🚀 Pour aller plus loin"], H.expert && adv && ["expert", "🎓 Défi expert"]].filter(Boolean);
+  if (!opts.length) return;
+  box.innerHTML = `<div class="row hist-more">${opts.map(([k, t]) => `<button type="button" class="btn-sec" data-more="${k}">${t}</button>`).join("")}</div>`;
+  box.querySelectorAll("[data-more]").forEach((b) => (b.onclick = () => {
+    const P = H[b.dataset.more](), steps = P.steps; let i = 0, juste = 0;
+    box.innerHTML = `<div class="act-step hist-plus"><div class="act-h"><span class="act-n">${b.dataset.more === "expert" ? "🎓" : "🚀"}</span> ${b.dataset.more === "expert" ? "Défi expert" : "Pour aller plus loin"}</div><p>${P.intro}</p><div id="hsteps"></div></div>`;
+    const list = box.querySelector("#hsteps");
+    const next = () => {
+      if (i >= steps.length) { list.insertAdjacentHTML("beforeend", `<p class="small"><b>${juste} / ${steps.length}</b> du premier coup${juste === steps.length ? " : bravo !" : "."}</p>`); return; }
+      const holder = document.createElement("div"); holder.className = "hist-step"; list.appendChild(holder);
+      histStep(holder, steps[i], i + 1, steps.length, (ok) => { if (ok) juste++; i++; next(); });
+    };
+    next(); typeset(box);
+  }));
+}
+function histStep(holder, E, n, tot, done) {
+  const spec = E.round ? { kind: "value", value: E.value, round: E.round } : { kind: "value", value: E.value, final: true };
+  holder.innerHTML = `<div class="qtext"><b>${tot > 1 ? "Étape " + n + " sur " + tot + ". " : ""}</b>${E.q}</div>
+    <div class="answer"><input class="ans" id="hsin" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Ta réponse">
+    <div class="preview" id="hsprev"></div>${keypadHtml(spec)}
+    <div class="actions"><button class="btn-primary" id="hsok">Vérifier</button><button class="btn-sec" id="hsidk">Voir la réponse</button></div></div><div class="hsfb"></div>`;
+  typeset(holder);
+  const inp = holder.querySelector("#hsin"), prev = holder.querySelector("#hsprev"), fb = holder.querySelector(".hsfb");
+  let tries = 0;
+  const finish = (ok) => {
+    inp.disabled = true; ["#kp", "#hsok", "#hsidk", "#hsprev"].forEach((x) => { const e = holder.querySelector(x); if (e) e.remove(); });
+    inp.removeAttribute("id");
+    fb.innerHTML = `<div class="fb ${ok ? "ok" : "hint"} pop">${ok ? "✓ Juste !" : "Réponse : " + histFmt(E.value)}<div class="sol">${E.sol}</div></div>`;
+    typeset(fb); done(ok);
+  };
+  const go = () => {
+    const v = inp.value.trim(); if (!v) return;
+    const r = checkAnswer(spec, v);
+    if (r.status === "correct") return finish(tries === 0);
+    if (r.status === "invalid" || r.status === "form") { fb.innerHTML = `<div class="fb hint pop">${escT(r.message || "Écris un nombre.")}</div>`; return; }
+    if (++tries >= 2) return finish(false);
+    fb.innerHTML = `<div class="fb hint pop">${r.status === "close" ? escT(r.message || "Presque !") : "Pas tout à fait. Encore un essai ?"}</div>`;
+  };
+  inp.oninput = () => previewOf(inp, prev, spec);
+  bindKeypad(() => inp, () => previewOf(inp, prev, spec));
+  holder.querySelector("#hsok").onclick = go; inp.onkeydown = (e) => { if (e.key === "Enter") go(); };
+  holder.querySelector("#hsidk").onclick = () => finish(false);
+  inp.focus({ preventScroll: true });
 }
 
 // ---------------- Progression visible (24.11, chantier S) ----------------
