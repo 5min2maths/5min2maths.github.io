@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "0cbf79f7e3"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "562fadbd53"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 function errCanSend() {
@@ -507,16 +507,17 @@ function screenHome() {
         <p class="muted">Un problème en plusieurs étapes, avec des indices si tu bloques. Facultatif, et il rapporte gros.</p>
         <button class="btn-primary btn-big" id="wp">${wpDone ? "Le refaire" : "Relever le défi"}</button>
         <p class="small muted">${wpDone ? "Bravo ! Un nouveau problème arrive la semaine prochaine." : "Un nouveau problème chaque semaine."}</p></div>`),
-    test: () => prep ? prepPanel(left)
+    // 24.11 (chantier L) : parcours EVACOM (11e seulement, src/riche_11c.js) sous le test, et dans Progrès.
+    test: () => (prep ? prepPanel(left)
       : `<div class="card stack"><div class="eyebrow">Je prépare un test</div><h2>Un test approche ?</h2>
         <p class="muted">Dis-moi sa date et les notions : chaque jour, l'app te fait réviser juste ce qu'il faut, jusqu'au jour J. Tu pourras aussi t'entraîner sur un sujet de préparation, avec son corrigé.</p>
-        <button class="btn-primary btn-big" id="prep">Je prépare un test</button></div>`,
+        <button class="btn-primary btn-big" id="prep">Je prépare un test</button></div>`) + (typeof evacomCard === "function" ? evacomCard() : ""),
     prog: () => `${newBadgesCard()}${carnetCard(true)}${themeMapCard()}${compsCard()}`,
   };
   // 22.11 : accueil à cases (maquette design/maquette_accueil.html) ; chaque case ouvre une page « ← Accueil ».
   panels.carnet = () => carnetCard(true) || `<div class="card flat stack"><div class="eyebrow">📕 Carnet d'erreurs</div><p class="small muted">Vide : bravo ! Chaque question ratée viendra s'y ranger, pour que tu puisses la réussir plus tard.</p></div>`;
   // 22.11 : « Ma fiche » (src/fiche.js) : une fiche par chapitre derrière Progrès. Retirée le 23.11 (branche archive/fiche) : inactif sans fiche.js.
-  panels.prog = () => `${weekCard()}${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}`;
+  panels.prog = () => `${weekCard()}${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${typeof evacomCard === "function" ? evacomCard() : ""}${themeMapCard()}${compsCard()}`;
   if (!panels[homeTab]) homeTab = "today";
   const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted">${gradeName(state.profile)}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
   if (homeTab !== "today") {
@@ -589,6 +590,7 @@ function screenHome() {
   on("prep", screenPrep); on("prepedit", screenPrep);
   if (typeof screenMock === "function") on("mock", screenMock);
   if (typeof screenQcm === "function") on("qcm", screenQcm);
+  if (typeof screenEvacom === "function") { on("evacom", () => screenEvacom()); on("evcbilan", screenEvacomResult); }
   on("prepgo", () => startPrepTask(prepKind()));
   on("preptask", () => startPrepTask(prepKind()));
   on("preptab", () => { homeTab = "test"; screenHome(); });
