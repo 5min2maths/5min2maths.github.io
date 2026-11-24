@@ -636,11 +636,14 @@ const FIG = (() => {
   const noScale = (x, y) => t(x, y, "(pas à l'échelle)", "f-txt", "end", 10);
 
   // Droite graduée avec flèches de saut (nombres relatifs).
-  function numberLine(start, jumps) {
+  // opt.pts : autres points marqués (ex. second point d'une distance) ; opt.span : valeurs que la droite doit contenir sans
+  // les marquer (ex. résultat d'un calcul, jamais montré) — 24.11, galerie : droite trop courte, point hors de la droite.
+  function numberLine(start, jumps, opt = {}) {
     const vals = [start];
     jumps.forEach((j) => vals.push(vals[vals.length - 1] + j));
-    let lo = Math.min(...vals, 0) - 1, hi = Math.max(...vals, 0) + 1;
-    if (hi - lo > 30) { lo = Math.min(...vals) - 1; hi = Math.max(...vals) + 1; }
+    const pts = (opt.pts || []).filter(isFinite), all = [...vals, ...pts, ...(opt.span || []).filter(isFinite)];
+    let lo = Math.min(...all, 0) - 1, hi = Math.max(...all, 0) + 1;
+    if (hi - lo > 30) { lo = Math.min(...all) - 1; hi = Math.max(...all) + 1; }
     const W = 340, X = (v) => 16 + ((v - lo) / (hi - lo)) * (W - 32);
     let b = L(8, 70, W - 8, 70, "f-line", 'marker-end="url(#arr)"');
     const step = hi - lo > 20 ? 5 : hi - lo > 10 ? 2 : 1;
@@ -654,6 +657,7 @@ const FIG = (() => {
       b += t(mid, up - 22, (jumps[i] > 0 ? "+" : "") + jumps[i], "f-accent f-txt", "middle", 12);
     });
     b += '<circle cx="' + X(start) + '" cy="70" r="5" class="f-dot"/>';
+    pts.forEach((v) => { b += '<circle cx="' + X(v) + '" cy="70" r="5" class="f-dot"/>'; });
     return svg(W, 104, defs() + b, "droite graduée");
   }
   const defs = () => '<defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="f-head"/></marker><marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="f-headacc"/></marker></defs>';
@@ -703,7 +707,9 @@ const FIG = (() => {
   function percentBar(p, total, unit = "") {
     const W = 340, w = 300 * p / 100;
     let b = '<rect x="16" y="24" width="300" height="28" rx="6" class="f-soft"/>' + '<rect x="16" y="24" width="' + w + '" height="28" rx="6" class="f-fill"/>';
-    b += t(16 + w / 2, 43, p + " %", "f-on", "middle", 13) + t(316, 16, fmt(total) + unit, "f-txt", "end", 12) + t(16, 16, "0", "f-txt", "start", 12);
+    // 24.11 (galerie : « 10 % » débordait d'une barre trop courte) : étiquette à droite de la partie colorée si elle n'y tient pas.
+    const lab = fmt(p) + " %", inside = w >= lab.length * 8 + 8;
+    b += (inside ? t(16 + w / 2, 43, lab, "f-on", "middle", 13) : t(16 + w + 6, 43, lab, "f-txt", "start", 13)) + t(316, 16, fmt(total) + unit, "f-txt", "end", 12) + t(16, 16, "0", "f-txt", "start", 12);
     return svg(W, 62, b, "pourcentage");
   }
 
@@ -740,16 +746,17 @@ const FIG = (() => {
   }
   function triangleFig(lb, lh) {
     let b = P([[40, 130], [260, 130], [180, 30]], "f-shape") + L(180, 30, 180, 130, "f-accent", 'stroke-dasharray="5 4"');
-    return svg(300, 152, b + t(150, 148, lb) + t(190, 86, lh, "f-accent f-txt", "start"), "triangle");
+    // 24.11 (galerie : l'étiquette de hauteur, à droite, coupait le côté oblique) : à gauche de la hauteur, où il y a la place.
+    return svg(300, 152, b + t(150, 148, lb) + t(172, 92, lh, "f-accent f-txt", "end"), "triangle");
   }
   function trapezoid(lB, lb, lh) {
     let b = P([[30, 130], [270, 130], [210, 40], [90, 40]], "f-shape") + L(90, 40, 90, 130, "f-accent", 'stroke-dasharray="5 4"');
-    return svg(300, 152, b + t(150, 148, lB) + t(150, 32, lb) + t(82, 90, lh, "f-accent f-txt", "end"), "trapèze");
+    return svg(300, 152, b + t(150, 148, lB) + t(150, 32, lb) + t(98, 94, lh, "f-accent f-txt", "start"), "trapèze"); // 24.11 : hauteur cotée à l'intérieur (à gauche, elle coupait le côté oblique)
   }
   // Disque : rayon marqué, ou diamètre entier quand l'étiquette est « d = … » (24.11 : diamètre annoncé, rayon dessiné).
   function disk(lr) {
     if (/^\s*d\b/.test(String(lr || ""))) return svg(300, 150, '<circle cx="150" cy="75" r="62" class="f-shape"/>' + L(88, 75, 212, 75, "f-accent", 'stroke-width="2"') + '<circle cx="150" cy="75" r="3" class="f-dot"/>' + t(150, 68, lr, "f-accent f-txt"), "disque et son diamètre");
-    return svg(300, 150, '<circle cx="150" cy="75" r="62" class="f-shape"/>' + L(150, 75, 212, 75, "f-accent", 'stroke-width="2"') + '<circle cx="150" cy="75" r="3" class="f-dot"/>' + t(181, 68, lr, "f-accent f-txt"), "disque");
+    return svg(300, 150, '<circle cx="150" cy="75" r="62" class="f-shape"/>' + L(150, 75, 212, 75, "f-accent", 'stroke-width="2"') + '<circle cx="150" cy="75" r="3" class="f-dot"/>' + (String(lr).length * 7.5 > 56 ? t(219, 80, lr, "f-accent f-txt", "start") : t(181, 68, lr, "f-accent f-txt")), "disque"); // 24.11 : étiquette longue hors du disque (elle coupait le cercle)
   }
   function square(ls) {
     return svg(300, 160, '<rect x="80" y="14" width="130" height="130" class="f-shape"/>' + L(80, 144, 210, 14, "f-accent", 'stroke-dasharray="6 4"') + t(145, 158, ls) + t(158, 74, "?", "f-accent f-txt", "start", 16), "carré");
@@ -789,7 +796,8 @@ const FIG = (() => {
   }
   function pyramid(lc, lh) {
     const b = P([[60, 140], [200, 140], [250, 110], [110, 110]], "f-shape2") + P([[60, 140], [200, 140], [150, 20]], "f-shape") + P([[200, 140], [250, 110], [150, 20]], "f-shape2") + L(155, 125, 150, 20, "f-accent", 'stroke-dasharray="5 4"');
-    return svg(300, 162, b + t(130, 158, lc) + t(160, 80, lh, "f-accent f-txt", "start"), "pyramide");
+    // 24.11 (galerie : « h = … » coupait l'arête de droite) : à gauche de la hauteur, dans le bas de la face avant.
+    return svg(300, 162, b + t(130, 158, lc) + t(147, 112, lh, "f-accent f-txt", "end"), "pyramide");
   }
   // Cône (24.11, galerie) : proportions réelles rayon / hauteur quand elles sont connues (« r = 8 », « h = 3 » ; « g = … »
   // donne la hauteur par Pythagore ; « d = … » : diamètre dessiné en entier). Inconnue (« ? », « h ») : forme d'origine.
@@ -833,10 +841,13 @@ const FIG = (() => {
     return svg(340, 74, b + t(16, 68, label, "f-txt", "start", 12), "objets");
   }
   // Agrandissement : petite et grande figure.
+  // kind : "" ou "rect" (forme, jamais affichée : « (rect) » apparaissait dans la figure, galerie 24.11), « 1:200 »
+  // (échelle, affichée seule) ou « ? » (facteur demandé : la figure ne le donne pas, taille indicative).
   function scaling(k, kind) {
-    const s = 30, S = 30 * Math.min(k, 4);
+    const ask = kind === "?", s = 30, S = 30 * Math.min(ask ? (k > 1 ? 2.2 : 0.6) : k, 4);
+    const lab = ask ? "× ?" : /^1\s*:/.test(kind || "") ? "échelle " + kind : "× " + String(k).replace(".", ",");
     let b = '<rect x="16" y="' + (130 - s) + '" width="' + s + '" height="' + s + '" class="f-shape"/>' + '<rect x="' + (80) + '" y="' + (130 - S) + '" width="' + S + '" height="' + S + '" class="f-fill2"/>';
-    return svg(340, 140, b + t(31, 124 - s, "1") + t(80 + S + 10, 130 - S / 2, "× " + String(k).replace(".", ",") + (kind ? " (" + kind + ")" : ""), "f-accent f-txt", "start"), "agrandissement");
+    return svg(340, 140, b + t(31, 124 - s, "1") + t(80 + S + 10, 130 - S / 2, lab, "f-accent f-txt", "start"), "agrandissement");
   }
   // Repère avec une droite (fonctions affines).
   // Repère quadrillé à l'échelle (même unité en x et en y, 22.11 : quadrillage demandé, triangles non déformés) :
@@ -1020,10 +1031,12 @@ const FIG = (() => {
     return svg(320, 168, gg, "triangle quelconque");
   }
   // Diagramme en bâtons d'une petite série.
-  function barChart(values) {
-    const max = Math.max(...values), w = 280 / values.length;
+  // labels (24.11, galerie : sous les barres, les effectifs au lieu des notes) : valeurs de la série sous les barres,
+  // effectifs (hauteurs) écrits au-dessus des barres. Sans labels : la valeur sous chaque barre (série brute).
+  function barChart(values, labels) {
+    const max = Math.max(...values), w = 280 / values.length, top = labels ? 16 : 0;
     let g = L(20, 140, 300, 140);
-    values.forEach((v, i) => { const hh = (v / max) * 110; g += '<rect x="' + (24 + i * w) + '" y="' + (140 - hh) + '" width="' + (w - 8) + '" height="' + hh + '" rx="3" class="' + (i % 2 ? "f-fill2" : "f-fill") + '"/>' + t(24 + i * w + (w - 8) / 2, 156, String(v).replace(".", ","), "f-txt", "middle", 11); });
+    values.forEach((v, i) => { const hh = (v / max) * (110 - top), cx = 24 + i * w + (w - 8) / 2; g += '<rect x="' + (24 + i * w) + '" y="' + (140 - hh) + '" width="' + (w - 8) + '" height="' + hh + '" rx="3" class="' + (i % 2 ? "f-fill2" : "f-fill") + '"/>' + t(cx, 156, String(labels ? labels[i] : v).replace(".", ","), "f-txt", "middle", 11) + (labels ? t(cx, 136 - hh, String(v).replace(".", ","), "f-accent f-txt", "middle", 11) : ""); });
     return svg(320, 164, g, "série statistique");
   }
 
@@ -1083,6 +1096,8 @@ function GEO() {
     circle(c, r, cls = "f-shape") { const C = P(c); pts.push([C[0] - r, C[1] - r], [C[0] + r, C[1] + r]); back.push((T) => '<circle cx="' + T.X(C) + '" cy="' + T.Y(C) + '" r="' + r * T.s + '" class="' + cls + '"/>'); return g; },
     dot(p) { const A = P(p); ops.push((T) => '<circle cx="' + T.X(A) + '" cy="' + T.Y(A) + '" r="3" class="f-dot"/>'); return g; },
     text(p, s, dx = 0, dy = 0) { const A = P(p); ops.push((T) => T.txt(T.X(A) + dx, T.Y(A) + dy, s)); return g; },
+    // Élément dessiné avec l'échelle connue (T : X, Y, s, txt) — placements qui dépendent de la taille à l'écran.
+    raw(fn) { ops.push(fn); return g; },
     svg(label = "figure", W = 300, Hmax = 190) {
       const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]), m = 24, mx = 44;
       const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
@@ -1106,7 +1121,15 @@ function GEO() {
           return T.txt(T.X(mid) + nx * 14, T.Y(mid) - ny * 14 + 4, str);
         },
       };
-      return '<svg class="fig" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="' + label + '" xmlns="http://www.w3.org/2000/svg">' + back.concat(ops).map((f) => f(T)).join("") + "</svg>";
+      const body = back.concat(ops).map((f) => f(T)).join("");
+      // 24.11 (galerie : « dénivelé » coupé au bord) : le cadre s'élargit pour contenir toutes les étiquettes (largeur estimée).
+      let vx0 = 0, vx1 = W, vy0 = 0, vy1 = H;
+      for (const m of body.matchAll(/<text x="([-\d.]+)" y="([-\d.]+)"[^>]*text-anchor="(\w+)" font-size="(\d+)">([^<]*)<\/text>/g)) {
+        const x = +m[1], y = +m[2], fs = +m[4], w = m[5].length * fs * 0.58, a0 = m[3] === "start" ? x : m[3] === "end" ? x - w : x - w / 2;
+        vx0 = Math.min(vx0, a0 - 3); vx1 = Math.max(vx1, a0 + w + 3); vy0 = Math.min(vy0, y - fs - 2); vy1 = Math.max(vy1, y + 4);
+      }
+      const vb = [vx0, vy0, vx1 - vx0, vy1 - vy0].map((v) => +v.toFixed(1)).join(" ");
+      return '<svg class="fig" viewBox="' + vb + '" role="img" aria-label="' + label + '" xmlns="http://www.w3.org/2000/svg">' + body + "</svg>";
     },
   };
   return g;
@@ -1161,13 +1184,17 @@ const GF = {
   },
   rect(w, h, { lw = "", lh = "", diag = "" } = {}) {
     const g = GEO().pt("A", 0, 0, false).pt("B", w, 0, false).pt("C", w, h, false).pt("D", 0, h, false).poly(["A", "B", "C", "D"]).side("A", "B", lw).side("B", "C", lh);
-    if (diag) g.seg("A", "C", { dash: true }).seg("B", "D", { dash: true }).text([w / 2, h / 2], diag, 0, -8);
+    // 24.11 (galerie : l'étiquette était sur l'intersection des diagonales) : le long de [AC], au quart, côté [AD].
+    if (diag) g.seg("A", "C", { dash: true }).seg("B", "D", { dash: true }).raw((T) => { const l = Math.hypot(w, h); return T.txt(T.X([w * 0.3, h * 0.3]) - (h / l) * 10, T.Y([w * 0.3, h * 0.3]) - (w / l) * 10, diag, "end"); });
     return g.svg("rectangle");
   },
   // Rectangle a × b privé d'un coin c × e.
   notch(a, b, c, e, { la = "", lb = "", lc = "", le = "" } = {}) {
     const g = GEO().pt("A", 0, 0, false).pt("B", a, 0, false).pt("C", a, b - e, false).pt("D", a - c, b - e, false).pt("E", a - c, b, false).pt("F", 0, b, false).poly(["A", "B", "C", "D", "E", "F"]);
-    g.side("A", "B", la).side("F", "A", lb).side("D", "C", lc, { inside: true }).side("E", "D", le, { inside: true });
+    // 24.11 (galerie : « 2 cm » sous la marche chevauchait le bord droit) : cote de la marche [DC] au-dessus, dans
+    // l'entaille, à droite de [ED] ; cote de [ED] à gauche, dans la figure — les deux ne se touchent jamais.
+    g.side("A", "B", la).side("F", "A", lb).side("E", "D", le, { inside: true });
+    if (lc) g.raw((T) => { const x = T.X([a - c, 0]), wt = String(lc).length * 7.5; return T.txt(Math.max((x + T.X([a, 0])) / 2, x + 5 + wt / 2), T.Y([0, b - e]) - 7, lc); });
     return g.svg("rectangle découpé");
   },
   // Rectangle a × b, avec à droite un rectangle c × e posé sur la même base.
@@ -1391,7 +1418,7 @@ const GEN = {
     if (d === 1) {
       const a = R.nz(-12, 12), b = R.nz(-12, 12);
       const same = a * b > 0, big = Math.abs(a) >= Math.abs(b) ? a : b, A = Math.abs(a), B = Math.abs(b);
-      return { fig: FIG.numberLine(a, []), q: "Calcule : " + M(par(a) + " + " + par(b)), spec: { kind: "value", value: a + b }, sol: M(par(a) + " + " + par(b) + " = " + (a + b)),
+      return { fig: FIG.numberLine(a, [], { span: [a + b] }), q: "Calcule : " + M(par(a) + " + " + par(b)), spec: { kind: "value", value: a + b }, sol: M(par(a) + " + " + par(b) + " = " + (a + b)),
         guide: [same ? GS("Même signe : on additionne les distances à zéro. " + M(A + " + " + B) + " = ?", A + B, M(A + " + " + B + " = " + (A + B)) + ".")
           : GS("Signes contraires : on soustrait les distances à zéro (la grande moins la petite). " + M(Math.max(A, B) + " - " + Math.min(A, B)) + " = ?", Math.abs(A - B), M(Math.max(A, B) + " - " + Math.min(A, B) + " = " + Math.abs(A - B)) + "."),
           GS(same ? "Le résultat garde le signe commun : résultat ?" : "Le résultat prend le signe du nombre le plus loin de zéro (" + M(par(big)) + ") : résultat ?", a + b, M(par(a) + " + " + par(b) + " = " + (a + b)) + ".")] };
@@ -1805,7 +1832,7 @@ Object.assign(GEN, {
     if (d === 1) {
       const p = R.int(-3, 0), q = R.int(1, 4);
       // x² = (p + q) x - p q
-      return { fig: FIG.parabola((x) => x * x / 3, [], (x) => ((p + q) * x - p * q) / 3, false), q: "Pour quelles valeurs de " + M("x") + " les graphes de " + M("f(x) = x^2") + " et " + M("g(x) = " + poly([p + q, -p * q])) + " se coupent-ils ?", spec: { kind: "set", values: [...new Set([p, q])] }, sol: M("x^2 = " + poly([p + q, -p * q]) + " \\iff " + poly([1, -(p + q), p * q]) + " = 0") + " : " + M("x = " + p) + " ou " + M("x = " + q) + "." };
+      return { fig: FIG.plot([{ f: (x) => x * x }, { f: (x) => (p + q) * x - p * q }], [], { xr: [Math.min(p, -1) - 2, Math.max(q, 1) + 2], yr: [-2, Math.max(p * p, q * q, 1) + 2], grid: false, ticks: false, minH: 170, maxH: 260, label: "parabole et droite" }), q: "Pour quelles valeurs de " + M("x") + " les graphes de " + M("f(x) = x^2") + " et " + M("g(x) = " + poly([p + q, -p * q])) + " se coupent-ils ?", spec: { kind: "set", values: [...new Set([p, q])] }, sol: M("x^2 = " + poly([p + q, -p * q]) + " \\iff " + poly([1, -(p + q), p * q]) + " = 0") + " : " + M("x = " + p) + " ou " + M("x = " + q) + "." };
     }
     // f(x) = x² + B x + c et g(x) = m x + k, choisis pour que f(x) - g(x) = (x - p)(x - q)
     const p = R.nz(-4, 3), q = p + R.int(1, 5), m = R.nz(-3, 3), c = R.int(-5, 5);
@@ -1924,7 +1951,7 @@ Object.assign(GEN, {
 
   absval(d) {
     const a = R.nz(-6, 6), b = R.int(1, 8);
-    if (d === 1) return { fig: FIG.numberLine(a, []), q: "Résous : " + M("|x " + (a < 0 ? "+ " + -a : "- " + a) + "| = " + b) + ".", spec: { kind: "set", values: [a - b, a + b] }, sol: M("x " + (a < 0 ? "+ " + -a : "- " + a) + " = " + b) + " ou " + M("= -" + b) + " : " + M("x = " + (a + b)) + " ou " + M("x = " + (a - b)) + "." };
+    if (d === 1) return { fig: FIG.numberLine(a, [], { span: [a - b, a + b] }), q: "Résous : " + M("|x " + (a < 0 ? "+ " + -a : "- " + a) + "| = " + b) + ".", spec: { kind: "set", values: [a - b, a + b] }, sol: M("x " + (a < 0 ? "+ " + -a : "- " + a) + " = " + b) + " ou " + M("= -" + b) + " : " + M("x = " + (a + b)) + " ou " + M("x = " + (a - b)) + "." };
     if (d === 2) {
       const k = R.pick([2, 3]), c = R.nz(-6, 6);
       return { q: "Résous : " + M("|" + k + "x " + (c < 0 ? "- " + -c : "+ " + c) + "| = " + b) + ".", spec: { kind: "set", values: [(b - c) / k, (-b - c) / k] }, sol: M(k + "x " + (c < 0 ? "- " + -c : "+ " + c) + " = \\pm " + b) + " : " + M("x = " + frac(b - c, k)) + " ou " + M("x = " + frac(-b - c, k)) + "." };
@@ -2257,7 +2284,10 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
     let [x0, x1] = o.xr || [-6, 6], [y0, y1] = o.yr || [-5, 5];
     // 24.11 (robot : point B dessiné hors du graphique, cadre fixe −8 à 8) : le cadre s'agrandit pour contenir tous les points.
     for (const p of pts) { if (!isFinite(p[0]) || !isFinite(p[1])) continue; x0 = Math.min(x0, Math.floor(p[0]) - 1); x1 = Math.max(x1, Math.ceil(p[0]) + 1); y0 = Math.min(y0, Math.floor(p[1]) - 1); y1 = Math.max(y1, Math.ceil(p[1]) + 1); }
-    const W = 300, H = Math.round(W * (y1 - y0) / (x1 - x0) * (o.squash || 1));
+    // 24.11 (galerie : hyperbole ou droite hors du cadre) : o.fit = abscisses à montrer (ex. intersections) ; le cadre
+    // s'agrandit pour contenir chaque courbe en ces abscisses. o.minH / o.maxH bornent la hauteur (axes non orthonormés).
+    for (const x of o.fit || []) for (const F of fns) { const y = F.f(x); if (!isFinite(x) || !isFinite(y)) continue; x0 = Math.min(x0, Math.floor(x) - 1); x1 = Math.max(x1, Math.ceil(x) + 1); y0 = Math.min(y0, Math.floor(y) - 1); y1 = Math.max(y1, Math.ceil(y) + 1); }
+    const W = 300, H = Math.min(o.maxH || Infinity, Math.max(o.minH || 0, Math.round(W * (y1 - y0) / (x1 - x0) * (o.squash || 1))));
     const X = (x) => 10 + ((x - x0) / (x1 - x0)) * (W - 20), Y = (y) => H - 10 - ((y - y0) / (y1 - y0)) * (H - 20);
     let g = "";
     if (o.grid !== false) for (let x = Math.ceil(x0); x <= x1; x++) g += L(X(x), Y(y0), X(x), Y(y1), "f-grid");
@@ -2509,7 +2539,7 @@ Object.assign(GEN, {
     const notes = [4, 4.5, 5, 5.5, 6], eff = notes.map(() => R.int(1, 6));
     const n = eff.reduce((a, b) => a + b, 0); if (n < 8) return GEN.diagr(3);
     const s = notes.reduce((a, v, i) => a + v * eff[i], 0), m = s / n;
-    return { fig: FIG.barChart(eff), guide: [GS("Nombre d'élèves ?", n, M(eff.join(" + ") + " = " + n) + "."), GS("Somme pondérée (chaque note · son effectif) ?", s, M(notes.map((v, i) => dec(v) + " \\cdot " + eff[i]).join(" + ") + " = " + dec(s)) + "."), GS("Moyenne au centième ?", m, M(dec(s) + " : " + n + " \\approx " + dec(m.toFixed(2))) + ".", 0.01)], q: "Notes d'un test : " + notes.map((v, i) => M(dec(v)) + " (" + eff[i] + " élève" + (eff[i] > 1 ? "s" : "") + ")").join(", ") + ". Calcule la moyenne de la classe, au centième.", spec: { kind: "value", value: m, round: 0.01 }, sol: "Somme pondérée " + M(dec(s)) + " pour " + M(n) + " élèves : " + M(dec(s) + " : " + n + " \\approx " + dec(m.toFixed(2))) + "." };
+    return { fig: FIG.barChart(eff, notes), guide: [GS("Nombre d'élèves ?", n, M(eff.join(" + ") + " = " + n) + "."), GS("Somme pondérée (chaque note · son effectif) ?", s, M(notes.map((v, i) => dec(v) + " \\cdot " + eff[i]).join(" + ") + " = " + dec(s)) + "."), GS("Moyenne au centième ?", m, M(dec(s) + " : " + n + " \\approx " + dec(m.toFixed(2))) + ".", 0.01)], q: "Notes d'un test : " + notes.map((v, i) => M(dec(v)) + " (" + eff[i] + " élève" + (eff[i] > 1 ? "s" : "") + ")").join(", ") + ". Calcule la moyenne de la classe, au centième.", spec: { kind: "value", value: m, round: 0.01 }, sol: "Somme pondérée " + M(dec(s)) + " pour " + M(n) + " élèves : " + M(dec(s) + " : " + n + " \\approx " + dec(m.toFixed(2))) + "." };
   },
 
   aires(d) {
@@ -2878,7 +2908,7 @@ Object.assign(GEN, {
     }
     let p, q; do { p = R.nz(-5, 5); q = R.nz(-5, 5); } while (p === q || p + q === 0);
     const k = p * q, m = -(p + q); // k/x = x + m  ⇔ x² + m x - k = 0 → racines p, q ⇔ p+q = -m, pq = -k
-    return { fig: FIG.plot([{ f: (x) => -k / x }, { f: (x) => x + m }], [], { grid: false, ticks: false }), q: "Pour quelles valeurs de " + M("x") + " les graphes de " + M("f(x) = \\frac{" + -k + "}{x}") + " et " + M("g(x) = " + lin(1, m)) + " se coupent-ils ?", spec: { kind: "set", values: [p, q] }, sol: M("\\frac{" + -k + "}{x} = " + lin(1, m) + " \\iff " + poly([1, m, k]) + " = 0") + " ; " + M("x = " + p) + " ou " + M("x = " + q) + "." };
+    return { fig: FIG.plot([{ f: (x) => -k / x }, { f: (x) => x + m }], [], { grid: false, ticks: false, fit: [p, q, 2 * p, 2 * q, p / 2, q / 2], maxH: 280 }), q: "Pour quelles valeurs de " + M("x") + " les graphes de " + M("f(x) = \\frac{" + -k + "}{x}") + " et " + M("g(x) = " + lin(1, m)) + " se coupent-ils ?", spec: { kind: "set", values: [p, q] }, sol: M("\\frac{" + -k + "}{x} = " + lin(1, m) + " \\iff " + poly([1, m, k]) + " = 0") + " ; " + M("x = " + p) + " ou " + M("x = " + q) + "." };
   },
 
   ineq2(d) {
@@ -3283,14 +3313,14 @@ FINE.push(
     lesson: ["Repérer et comparer des relatifs", "Les nombres négatifs sont à gauche de zéro.", "De deux nombres, le plus petit est le plus à gauche sur la droite graduée. La distance entre deux nombres est toujours positive.", ["\\(-7 < -3 < 0 < 2\\)", "Distance entre \\(-4\\) et \\(3\\) : \\(4 + 3 = 7\\)"], "\\(-7 < -3\\), bien que \\(7 > 3\\)."],
     g: [
       () => { let ns; do ns = pickN([-15, -12, -9, -8, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 5, 7, 9, 11], 4); while (ns.filter((n) => n < 0).length < 2); const big = R.rand() < 0.4, s = ns.slice().sort((x, y) => x - y); return QV("Quel est le plus " + (big ? "grand" : "petit") + " de ces nombres ? " + lst(ns.map(String)), big ? s[3] : s[0], "Dans l'ordre croissant : " + M(s.join(" < ")) + ".", { guide: [GS("Le plus petit est le négatif le plus loin de zéro. Le plus petit ?", s[0], M(s[0]) + "."), ...(big ? [GS("Le plus grand ?", s[3], M(s.join(" < ")) + ".")] : [])], traps: [TRAP(big ? s[0] : s[3], "C'est le plus " + (big ? "petit" : "grand") + "."), TRAP(big ? NaN : ns.filter((n) => n < 0).sort((x, y) => y - x)[0], "Parmi les négatifs, le plus petit est le plus loin de zéro : −15 < −2.")] }); },
-      () => { const a = R.int(2, 12), b = R.int(1, 12); return QV("Sur une droite graduée, quelle est la distance entre les points d'abscisses " + M(-a) + " et " + M(b) + " ?", a + b, "De " + M(-a) + " à " + M(0) + " : " + M(a) + " ; de " + M(0) + " à " + M(b) + " : " + M(b) + ". Distance : " + M(a + " + " + b + " = " + (a + b)) + ".", { guide: [GS("Distance de " + M(-a) + " à 0 ?", a, M(a) + "."), GS("Plus la distance de 0 à " + M(b) + " : distance totale ?", a + b, M(a + " + " + b + " = " + (a + b)) + ".")], traps: [TRAP(Math.abs(b - a), "De " + (-a) + " à 0, puis de 0 à " + b + " : on additionne les deux distances."), TRAP(-(a + b), "Une distance est toujours positive.")], fig: FIG.numberLine(-a, []) }); },
+      () => { const a = R.int(2, 12), b = R.int(1, 12); return QV("Sur une droite graduée, quelle est la distance entre les points d'abscisses " + M(-a) + " et " + M(b) + " ?", a + b, "De " + M(-a) + " à " + M(0) + " : " + M(a) + " ; de " + M(0) + " à " + M(b) + " : " + M(b) + ". Distance : " + M(a + " + " + b + " = " + (a + b)) + ".", { guide: [GS("Distance de " + M(-a) + " à 0 ?", a, M(a) + "."), GS("Plus la distance de 0 à " + M(b) + " : distance totale ?", a + b, M(a + " + " + b + " = " + (a + b)) + ".")], traps: [TRAP(Math.abs(b - a), "De " + (-a) + " à 0, puis de 0 à " + b + " : on additionne les deux distances."), TRAP(-(a + b), "Une distance est toujours positive.")], fig: FIG.numberLine(-a, [], { pts: [b] }) }); },
       () => { const a = R.int(3, 13), b = a % 2 ? R.pick([1, 3, 5, 7, 9]) : R.pick([2, 4, 6, 8]); if (a === b) return GEN.relrep(3); return QV("Quel nombre est à égale distance de " + M(-a) + " et de " + M(b) + " sur la droite graduée ?", (b - a) / 2, "La distance entre les deux nombres est " + M(a + b) + " ; la moitié est " + M((a + b) / 2) + " : " + M(-a + " + " + (a + b) / 2 + " = " + (b - a) / 2) + ".", { guide: [GS("Distance entre " + M(-a) + " et " + M(b) + " ?", a + b, M(a + b) + "."), GS("La moitié ?", (a + b) / 2, M((a + b) / 2) + "."), GS("Pars de " + M(-a) + " et avance de " + (a + b) / 2 + " : ?", (b - a) / 2, M(-a + " + " + (a + b) / 2 + " = " + (b - a) / 2) + ".")], traps: [TRAP((a + b) / 2, "C'est la moitié de la distance ; il faut partir de " + (-a) + " et avancer de " + (a + b) / 2 + "."), TRAP((a - b) / 2, "Attention aux signes : partir de " + (-a) + " et avancer de la moitié de la distance.")] }); },
     ] },
   { id: "reladd", theme: "no", label: "Additionner et soustraire des relatifs", ex: "(-3) - (-5) = (-3) + 5 = 2", CH: [9], again: [10], codes: "9NO5\\.0[34]|10NO1\\.0[34]",
     hint: "Soustraire un nombre, c'est ajouter son opposé : a − (−b) = a + b.",
     lesson: ["Additionner, soustraire des relatifs", "On avance ou on recule sur la droite graduée.", "Même signe : on additionne les distances à zéro et on garde le signe. Signes contraires : on soustrait, et on garde le signe du plus éloigné de zéro. Soustraire, c'est ajouter l'opposé.", ["\\((-3) + (-5) = -8\\)", "\\((-3) + 5 = 2\\)", "\\(4 - (-6) = 4 + 6 = 10\\)"], "\\(-3 - 5 = -8\\) et non \\(-2\\) : on recule encore de 5."],
     g: [
-      () => { const a = R.nz(-12, 12), b = R.nz(-12, 12); return QV("Calcule : " + M(par(a) + " + " + par(b)), a + b, M(par(a) + " + " + par(b) + " = " + (a + b)), { fig: FIG.numberLine(a, []) }); },
+      () => { const a = R.nz(-12, 12), b = R.nz(-12, 12); return QV("Calcule : " + M(par(a) + " + " + par(b)), a + b, M(par(a) + " + " + par(b) + " = " + (a + b)), { fig: FIG.numberLine(a, [], { span: [a + b] }) }); },
       () => { const a = R.nz(-12, 12), b = R.int(-12, -1); return QV("Calcule : " + M(par(a) + " - " + par(b)), a - b, "Soustraire " + M(b) + ", c'est ajouter " + M(-b) + " : " + M(par(a) + " + " + -b + " = " + (a - b)) + "."); },
       () => { const ts = [R.nz(-15, 15), R.nz(-15, 15), R.nz(-15, 15), R.nz(-15, 15), R.nz(-15, 15)], s = ts.reduce((x, y) => x + y, 0), pos = ts.filter((t) => t > 0).reduce((x, y) => x + y, 0); return QV("Calcule : " + M(ts.map((t, i) => (i === 0 ? String(t) : (t < 0 ? "- " + -t : "+ " + t))).join(" ")), s, "On regroupe : les positifs font " + M(pos) + ", les négatifs " + M(s - pos) + ". Somme : " + M(s) + "."); },
     ] },
@@ -3434,7 +3464,7 @@ FINE.push(
     hint: "Dans un agrandissement, toutes les longueurs sont multipliées par le même nombre : image ÷ départ.",
     lesson: ["Agrandir, réduire", "Un agrandissement garde la forme : toutes les longueurs sont multipliées par le même nombre.", "Facteur \\(= \\frac{\\text{longueur image}}{\\text{longueur de départ}}\\). Plus grand que 1 : agrandissement ; plus petit que 1 : réduction.", ["\\(4\\ \\text{cm} \\to 10\\ \\text{cm}\\) : facteur \\(2{,}5\\)", "Avec ce facteur, \\(6\\ \\text{cm} \\to 15\\ \\text{cm}\\)"], "On multiplie, on n'ajoute pas : ajouter 6 cm à chaque côté déforme la figure."],
     g: [
-      () => { const k = R.pick([1.5, 2, 2.5, 3, 0.5, 4]), a = 2 * R.int(2, 8); return QV("Sur une photocopie, une longueur de " + M(a) + " cm devient " + M(dec(fx(a * k))) + " cm. Par quel nombre les longueurs ont-elles été multipliées ?", k, M(dec(fx(a * k)) + " : " + a + " = " + dec(k)) + ".", { guide: [GS("Facteur = nouvelle longueur : ancienne longueur = " + M(dec(fx(a * k)) + " : " + a) + " = ?", k, M(dec(k)) + ".")], traps: [TRAP(fx(a * k - a), "On cherche un facteur (on divise), pas une différence."), TRAP(fx(1 / k), "Dans l'autre sens : nouvelle longueur : ancienne longueur.")], fig: FIG.scaling(Math.max(1.5, k), "rect") }); },
+      () => { const k = R.pick([1.5, 2, 2.5, 3, 0.5, 4]), a = 2 * R.int(2, 8); return QV("Sur une photocopie, une longueur de " + M(a) + " cm devient " + M(dec(fx(a * k))) + " cm. Par quel nombre les longueurs ont-elles été multipliées ?", k, M(dec(fx(a * k)) + " : " + a + " = " + dec(k)) + ".", { guide: [GS("Facteur = nouvelle longueur : ancienne longueur = " + M(dec(fx(a * k)) + " : " + a) + " = ?", k, M(dec(k)) + ".")], traps: [TRAP(fx(a * k - a), "On cherche un facteur (on divise), pas une différence."), TRAP(fx(1 / k), "Dans l'autre sens : nouvelle longueur : ancienne longueur.")], fig: FIG.scaling(k, "?") }); },
       () => { const k = R.pick([1.5, 2.5, 3, 4]), a = 2 * R.int(2, 6), b = a + 2 * R.int(1, 4); return QV("On agrandit une photo de " + M(a) + " cm sur " + M(b) + " cm : sa largeur passe de " + M(a) + " cm à " + M(fx(a * k)) + " cm. Quelle est sa nouvelle longueur (en cm) ?", fx(b * k), "Facteur : " + M(fx(a * k) + " : " + a + " = " + dec(k)) + ". Longueur : " + M(b + " \\cdot " + dec(k) + " = " + dec(fx(b * k))) + " cm.", { guide: [GS("Facteur : " + M(fx(a * k) + " : " + a) + " = ?", k, M(dec(k)) + "."), GS("Nouvelle longueur : " + M(b + " \\cdot " + dec(k)) + " = ?", fx(b * k), M(dec(fx(b * k))) + " cm.")], traps: [TRAP(fx(b + (a * k - a)), "Agrandir, c'est multiplier toutes les longueurs par le même nombre, pas ajouter."), TRAP(fx(b * k * k), "Calcule d'abord le facteur : " + fx(a * k) + " : " + a + ".")] }); },
       () => { const [n, d] = R.pick([[3, 4], [2, 3], [3, 5], [2, 5], [5, 4], [4, 3]]), a = d * R.int(2, 5), b = d * R.int(6, 9); return QV("On transforme un plan : un segment de " + M(a) + " cm devient un segment de " + M(a * n / d) + " cm. Que devient un segment de " + M(b) + " cm (en cm) ?", b * n / d, "Facteur : " + M("\\frac{" + a * n / d + "}{" + a + "} = \\frac{" + n + "}{" + d + "}") + ". " + M(b + " \\cdot \\frac{" + n + "}{" + d + "} = " + b * n / d) + " cm.", { guide: [GS("Facteur (nouveau : ancien) " + M(a * n / d + " : " + a) + " = ? (fraction)", n / d, M("\\frac{" + n + "}{" + d + "}") + "."), GS("Nouveau segment : " + M(b + " \\cdot \\frac{" + n + "}{" + d + "}") + " = ?", b * n / d, M(b * n / d) + " cm.")], traps: [TRAP(b + (a * n / d - a), "On multiplie toutes les longueurs par le même nombre, on n'ajoute pas."), TRAP(b * d / n, "Le facteur est " + n + "/" + d + " (nouveau : ancien), pas l'inverse.")] }); },
     ] },
@@ -3844,7 +3874,7 @@ FINE.push(
     lesson: ["Effectifs et fréquences", "La fréquence est la part d'une valeur dans l'ensemble.", "Fréquence \\(= \\frac{\\text{effectif}}{\\text{effectif total}}\\) (souvent en \\(\\%\\)). Effectif cumulé : somme des effectifs jusqu'à la valeur. Diagramme circulaire : angle \\(= \\text{fréquence} \\cdot 360°\\).", ["8 élèves sur 25 : \\(32\\,\\%\\)", "6 sur 24 : angle \\(\\frac{6}{24} \\cdot 360° = 90°\\)"], "La somme des fréquences vaut toujours \\(100\\,\\%\\)."],
     g: [
       () => { const N = R.pick([20, 25, 40, 50]), k = R.int(2, N / 2); return QV("Dans une classe de " + M(N) + " apprentis, " + M(k) + " viennent en train. Quelle est la fréquence de cette modalité, en pour cent (donne seulement le nombre) ?", fx(100 * k / N), M("\\frac{" + k + "}{" + N + "} = " + dec(k / N) + " = " + dec(fx(100 * k / N)) + "\\,\\%") + "."); },
-      () => { const es = [0, 0, 0, 0, 0].map(() => R.int(1, 9)), v = R.int(1, 3), s = es.slice(0, v + 1).reduce((x, y) => x + y, 0); return QV("Nombre de retards relevés dans une classe : " + es.map((e, i) => M(i) + " retard" + (i > 1 ? "s" : "") + " : " + M(e) + " apprentis").join(" ; ") + ". Combien d'apprentis ont eu au plus " + M(v) + " retard" + (v > 1 ? "s" : "") + " (effectif cumulé) ?", s, M(es.slice(0, v + 1).join(" + ") + " = " + s) + ".", { fig: FIG.barChart(es) }); },
+      () => { const es = [0, 0, 0, 0, 0].map(() => R.int(1, 9)), v = R.int(1, 3), s = es.slice(0, v + 1).reduce((x, y) => x + y, 0); return QV("Nombre de retards relevés dans une classe : " + es.map((e, i) => M(i) + " retard" + (i > 1 ? "s" : "") + " : " + M(e) + " apprentis").join(" ; ") + ". Combien d'apprentis ont eu au plus " + M(v) + " retard" + (v > 1 ? "s" : "") + " (effectif cumulé) ?", s, M(es.slice(0, v + 1).join(" + ") + " = " + s) + ".", { fig: FIG.barChart(es, es.map((e, i) => i)) }); },
       () => { const N = R.pick([24, 30, 36, 40, 60, 72]), u = 360 / N, k = R.int(2, N / 3); return QV("Sur " + M(N) + " personnes interrogées, " + M(k) + " ont choisi la réponse A. Dans un diagramme circulaire, quel est l'angle du secteur A (en degrés) ?", k * u, M("\\frac{" + k + "}{" + N + "} \\cdot 360° = " + dec(k * u) + "°") + "."); },
     ] },
   { id: "quartiles", theme: "no", label: "Étendue, médiane, quartiles", ex: "Q_3 - Q_1", CH: null, MP: [13, "S2"], codesMP: "S4\\.AD\\.0[68]",
@@ -8061,7 +8091,7 @@ const LESSON_FIGS_V2 = {
   racinv: () => FIG.plot([{ f: (x) => (x >= 0 ? Math.sqrt(x) : NaN) }, { f: (x) => (x !== 0 ? 1 / x : NaN), cls: "f-line" }], [], { numbers: true, xr: [-4, 5], yr: [-4, 4] , squash: 0.7}),
   homog: () => FIG.plot([{ f: (x) => (Math.abs(x - 3) > 0.02 ? (2 * x + 1) / (x - 3) : NaN) }], [], { numbers: true, step: 2, xr: [-6, 10], yr: [-6, 10], vlines: [3], hlines: [2] , squash: 0.6}),
   trigfn: () => FIG.plot([{ f: (x) => 3 * Math.sin(2 * x) }], [], { numbers: true, xr: [-1, 7], yr: [-4, 4] , squash: 0.6}),
-  expo: () => FIG.plot([{ f: (x) => 2 ** x }], [[5, 32, ""]], { numbers: true, step: 1, xr: [-2, 4], yr: [-1, 10] , squash: 0.35}),
+  expo: () => FIG.plot([{ f: (x) => 2 ** x }], [[3, 8, "(3 ; 8)"]], { numbers: true, step: 2, xr: [-3, 4], yr: [-1, 11], squash: 0.6 }), // 24.11 : le point (5 ; 32) étirait le repère jusqu'à 33, courbe écrasée
   trigcercle: () => GF.assoc(30, 150, "30°", "150°"),
   sinlaw: () => GF.sas(5, 8, 60, { la: "a", lb: "b", lc: "c", lg: "γ" }),
   triaire: () => GF.sas(6, 8, 30, { la: "a", lb: "b", lg: "γ" }),
@@ -8598,7 +8628,7 @@ Object.assign(ACTIVE, {
             '<text x="' + X(x + ax / 2) + '" y="' + (Y(y) + (ay > 0 ? 15 : -6)) + '" class="f-accent f-txt" text-anchor="middle" font-size="12">+' + ax + "</text>" +
             '<text x="' + (X(x + ax) + 5) + '" y="' + Y(y + ay / 2) + '" class="f-accent f-txt" font-size="12">' + (ay > 0 ? "+" : "−") + Math.abs(ay) + "</text>"; }
         g += '<circle cx="' + X(0) + '" cy="' + Y(0) + '" r="3.5" class="f-dot"/><text x="' + (X(0) + (x < 0 ? 7 : -7)) + '" y="' + (Y(0) + (y > 0 ? 16 : -7)) + '" class="f-txt" text-anchor="' + (x < 0 ? "start" : "end") + '" font-size="13">O</text>';
-        g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="6" class="f-dot"/><text x="' + (X(x) + (x >= 0 ? 10 : -10)) + '" y="' + (Y(y) + (y >= 0 ? -8 : 18)) + '" class="f-txt" text-anchor="' + (x >= 0 ? "start" : "end") + '" font-size="13">T(' + x + " ; " + y + ")</text>";
+        g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="6" class="f-dot"/><text x="' + (X(x) + (x >= 0 ? 10 : -10)) + '" y="' + (Y(y) + (y >= 0 ? -22 : 32)) /* 24.11 : au-dessus de la cote de la tangente (« T(3 ; 4) » et « +4 » se chevauchaient) */ + '" class="f-txt" text-anchor="' + (x >= 0 ? "start" : "end") + '" font-size="13">T(' + x + " ; " + y + ")</text>";
         const mr = fr(y, x), mt = fr(-x, y);
         box.innerHTML = `<svg class="fig" viewBox="0 0 ${W} ${H}" role="img" aria-label="cercle, rayon OT et tangente en T(${x} ; ${y})">${g}</svg>
           <label class="dyn-ctl"><input type="range" min="0" max="${P.length - 1}" step="1" value="${i}" aria-label="déplacer T sur le cercle"><span class="small muted">Fais glisser pour déplacer T sur le cercle.</span></label>
@@ -8803,7 +8833,9 @@ function activeLesson(id, L, cont, review) {
         move: (st, k, px, py) => mv(st, k, (px - OX) / U, (OY - py) / U),
         nudge: (st, k, dx, dy) => { const p = k ? st.Q : st.P; mv(st, k, p[0] + dx, p[1] + dy); },
         draw: (st) => { const a = slope(st), b = st.P[1] - a * st.P[0], f = (x) => a * x + b;
-          return grid(X, Y, -6, 6, -5, 5) + `<line x1="${X(-7)}" y1="${Y(f(-7))}" x2="${X(7)}" y2="${Y(f(7))}" stroke="var(--margin)" stroke-width="2.6"/>
+          // 24.11 (galerie : la droite dépassait le quadrillage) : tracée seulement dans le cadre −6…6 × −5…5.
+          const xa = a ? (-5 - b) / a : -6, xb = a ? (5 - b) / a : 6, lo = Math.max(-6, Math.min(xa, xb)), hi = Math.min(6, Math.max(xa, xb));
+          return grid(X, Y, -6, 6, -5, 5) + `<line x1="${X(lo)}" y1="${Y(f(lo))}" x2="${X(hi)}" y2="${Y(f(hi))}" stroke="var(--margin)" stroke-width="2.6"/>
             <polyline points="${X(st.P[0])},${Y(st.P[1])} ${X(st.Q[0])},${Y(st.P[1])} ${X(st.Q[0])},${Y(st.Q[1])}" fill="none" stroke="var(--blue)" stroke-width="2" stroke-dasharray="5 3"/>
             <text x="${(X(st.P[0]) + X(st.Q[0])) / 2}" y="${Y(st.P[1]) + (st.Q[1] >= st.P[1] ? 15 : -6)}" text-anchor="middle" class="f-txt" font-size="12" fill="var(--blue)">avance ${nb(st.Q[0] - st.P[0])}</text>
             <text x="${X(st.Q[0]) + 6}" y="${(Y(st.P[1]) + Y(st.Q[1])) / 2 + 4}" class="f-txt" font-size="12" fill="var(--blue)">monte ${nb(st.Q[1] - st.P[1])}</text>`; },
@@ -9159,7 +9191,7 @@ function activeLesson(id, L, cont, review) {
     set("rel", {
       predict: { q: "Combien font (−5) − (−8) ?", choices: ["−13", "3", "−3"], good: 1, why: "Soustraire −8, c'est ajouter 8 : −5 + 8 = 3. Sur la droite, on part de −5 et on avance de 8." },
       defis: ["Calcule −5 + 7 : étire la flèche depuis −5 (glisse le point rouge).", "Calcule 3 − 8.", "Calcule (−2) − (−6). La flèche grise montre « ajouter −6 » : soustraire, c'est faire le contraire."],
-      play: manipLesson({ W: 320, H: 160, aria: "droite graduée avec une flèche",
+      play: manipLesson({ W: 320, H: 172, aria: "droite graduée avec une flèche", // 24.11 : H 160 → 172, « départ » était coupé
         note: "Glisse le point rouge le long de la droite (ou flèches du clavier). On vérifie quand tu le lâches.",
         init: (s) => ({ tip: D[s].a }),
         handles: (st) => [{ x: X(st.tip), y: AY, label: "bout de la flèche, sur " + sg(st.tip), role: "slider", svg: dot("var(--margin)", ""), R: 24 }],
@@ -9229,7 +9261,7 @@ function activeLesson(id, L, cont, review) {
           g += `<rect x="${O.x}" y="${O.y - s}" width="${s}" height="${s}" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2"/>`;
           for (let i = 1; i * S0 < s - 0.1; i++) g += `<line x1="${O.x + i * S0}" y1="${O.y}" x2="${O.x + i * S0}" y2="${O.y - s}" stroke="var(--blue)" stroke-width=".8" stroke-dasharray="3 3"/><line x1="${O.x}" y1="${O.y - i * S0}" x2="${O.x + s}" y2="${O.y - i * S0}" stroke="var(--blue)" stroke-width=".8" stroke-dasharray="3 3"/>`;
           g += `<rect x="${O.x}" y="${O.y - S0}" width="${S0}" height="${S0}" fill="var(--warn)" fill-opacity=".75" stroke="var(--ink)" stroke-width="1.5"/>` + T(O.x + S0 / 2, O.y - S0 / 2 + 4, "1", "middle", 12, ' font-weight="700"');
-          g += `<circle cx="${O.x}" cy="${O.y}" r="4" fill="var(--ink)"/>` + T(O.x - 6, O.y + 12, "O", "end", 13, ' font-weight="700"') + T(O.x + s / 2, O.y + 14, "côté × " + nb(k), "middle", 12, ' fill="var(--margin)" font-weight="700"');
+          g += `<circle cx="${O.x}" cy="${O.y}" r="4" fill="var(--ink)"/>` + T(O.x - 6, O.y + 12, "O", "end", 13, ' font-weight="700"') + T(Math.max(O.x + 6, O.x + s / 2 - 26), O.y + 14, "côté × " + nb(k), "start", 12, /* 24.11 : jamais sur « O » */ ' fill="var(--margin)" font-weight="700"');
           return g; },
         out: (st) => { const k = st.k; return `k = <b>${nb(k)}</b> : longueurs × ${nb(k)}, aire × ${nb(k)}² = <b>${nb(k * k)}</b>` + (Number.isInteger(k) ? ` <span class="small muted">(${k * k} copie${k > 1 ? "s" : ""} du petit carré)</span>` : ""); },
         goal: [(st) => (st.k === 3 ? "k = 3 : on compte 3 · 3 = 9 copies du petit carré. Longueurs × 3, aire × 3² = 9." : ""),

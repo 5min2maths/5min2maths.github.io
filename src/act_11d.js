@@ -31,8 +31,10 @@
   const R = (x, y, w, h, cls, sw = 0.8) => `<rect x="${+x.toFixed(1)}" y="${+y.toFixed(1)}" width="${+w.toFixed(1)}" height="${+h.toFixed(1)}" class="${cls}" stroke="var(--ink)" stroke-width="${sw}"/>`;
 
   // ---------- rac : carré, cube ----------
-  const square = (n, cls) => { const u = 14, x0 = Math.round(160 - (n * u) / 2); let g = "";
-    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) g += `<rect x="${x0 + i * u}" y="${5 + j * u}" width="${u}" height="${u}" class="${cls}" stroke="var(--ink)" stroke-width="0.4"/>`;
+  // 24.11 (galerie : carré de départ minuscule, perdu en haut) : cadre du plus grand carré (côté 8) en pointillé, le carré
+  // grandit depuis son coin inférieur gauche.
+  const square = (n, cls) => { const u = 14, x0 = 104, yb = 117; let g = `<rect x="${x0}" y="${yb - 8 * u}" width="${8 * u}" height="${8 * u}" fill="none" stroke="var(--ink-soft)" stroke-dasharray="3 3"/>`;
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) g += `<rect x="${x0 + i * u}" y="${yb - (j + 1) * u}" width="${u}" height="${u}" class="${cls}" stroke="var(--ink)" stroke-width="0.4"/>`;
     return svg(320, 122, g, "carré de côté " + n); };
   // Cube d'arête n en perspective cavalière, faces visibles quadrillées en cubes unités.
   const cube = (n, cls) => { const u = 11, dx = 5.5, dy = -4.4, x0 = Math.round(160 - (n * (u + dx)) / 2), y0 = Math.round(66 + (n * (u - dy)) / 2), a = n * u, top = y0 - a;

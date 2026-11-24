@@ -494,7 +494,7 @@ const LESSON_FIGS_V2 = {
   racinv: () => FIG.plot([{ f: (x) => (x >= 0 ? Math.sqrt(x) : NaN) }, { f: (x) => (x !== 0 ? 1 / x : NaN), cls: "f-line" }], [], { numbers: true, xr: [-4, 5], yr: [-4, 4] , squash: 0.7}),
   homog: () => FIG.plot([{ f: (x) => (Math.abs(x - 3) > 0.02 ? (2 * x + 1) / (x - 3) : NaN) }], [], { numbers: true, step: 2, xr: [-6, 10], yr: [-6, 10], vlines: [3], hlines: [2] , squash: 0.6}),
   trigfn: () => FIG.plot([{ f: (x) => 3 * Math.sin(2 * x) }], [], { numbers: true, xr: [-1, 7], yr: [-4, 4] , squash: 0.6}),
-  expo: () => FIG.plot([{ f: (x) => 2 ** x }], [[5, 32, ""]], { numbers: true, step: 1, xr: [-2, 4], yr: [-1, 10] , squash: 0.35}),
+  expo: () => FIG.plot([{ f: (x) => 2 ** x }], [[3, 8, "(3 ; 8)"]], { numbers: true, step: 2, xr: [-3, 4], yr: [-1, 11], squash: 0.6 }), // 24.11 : le point (5 ; 32) étirait le repère jusqu'à 33, courbe écrasée
   trigcercle: () => GF.assoc(30, 150, "30°", "150°"),
   sinlaw: () => GF.sas(5, 8, 60, { la: "a", lb: "b", lc: "c", lg: "γ" }),
   triaire: () => GF.sas(6, 8, 30, { la: "a", lb: "b", lg: "γ" }),

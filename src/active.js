@@ -253,7 +253,7 @@ Object.assign(ACTIVE, {
             '<text x="' + X(x + ax / 2) + '" y="' + (Y(y) + (ay > 0 ? 15 : -6)) + '" class="f-accent f-txt" text-anchor="middle" font-size="12">+' + ax + "</text>" +
             '<text x="' + (X(x + ax) + 5) + '" y="' + Y(y + ay / 2) + '" class="f-accent f-txt" font-size="12">' + (ay > 0 ? "+" : "−") + Math.abs(ay) + "</text>"; }
         g += '<circle cx="' + X(0) + '" cy="' + Y(0) + '" r="3.5" class="f-dot"/><text x="' + (X(0) + (x < 0 ? 7 : -7)) + '" y="' + (Y(0) + (y > 0 ? 16 : -7)) + '" class="f-txt" text-anchor="' + (x < 0 ? "start" : "end") + '" font-size="13">O</text>';
-        g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="6" class="f-dot"/><text x="' + (X(x) + (x >= 0 ? 10 : -10)) + '" y="' + (Y(y) + (y >= 0 ? -8 : 18)) + '" class="f-txt" text-anchor="' + (x >= 0 ? "start" : "end") + '" font-size="13">T(' + x + " ; " + y + ")</text>";
+        g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="6" class="f-dot"/><text x="' + (X(x) + (x >= 0 ? 10 : -10)) + '" y="' + (Y(y) + (y >= 0 ? -22 : 32)) /* 24.11 : au-dessus de la cote de la tangente (« T(3 ; 4) » et « +4 » se chevauchaient) */ + '" class="f-txt" text-anchor="' + (x >= 0 ? "start" : "end") + '" font-size="13">T(' + x + " ; " + y + ")</text>";
         const mr = fr(y, x), mt = fr(-x, y);
         box.innerHTML = `<svg class="fig" viewBox="0 0 ${W} ${H}" role="img" aria-label="cercle, rayon OT et tangente en T(${x} ; ${y})">${g}</svg>
           <label class="dyn-ctl"><input type="range" min="0" max="${P.length - 1}" step="1" value="${i}" aria-label="déplacer T sur le cercle"><span class="small muted">Fais glisser pour déplacer T sur le cercle.</span></label>

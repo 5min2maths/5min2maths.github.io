@@ -275,7 +275,7 @@
     set("rel", {
       predict: { q: "Combien font (−5) − (−8) ?", choices: ["−13", "3", "−3"], good: 1, why: "Soustraire −8, c'est ajouter 8 : −5 + 8 = 3. Sur la droite, on part de −5 et on avance de 8." },
       defis: ["Calcule −5 + 7 : étire la flèche depuis −5 (glisse le point rouge).", "Calcule 3 − 8.", "Calcule (−2) − (−6). La flèche grise montre « ajouter −6 » : soustraire, c'est faire le contraire."],
-      play: manipLesson({ W: 320, H: 160, aria: "droite graduée avec une flèche",
+      play: manipLesson({ W: 320, H: 172, aria: "droite graduée avec une flèche", // 24.11 : H 160 → 172, « départ » était coupé
         note: "Glisse le point rouge le long de la droite (ou flèches du clavier). On vérifie quand tu le lâches.",
         init: (s) => ({ tip: D[s].a }),
         handles: (st) => [{ x: X(st.tip), y: AY, label: "bout de la flèche, sur " + sg(st.tip), role: "slider", svg: dot("var(--margin)", ""), R: 24 }],
@@ -345,7 +345,7 @@
           g += `<rect x="${O.x}" y="${O.y - s}" width="${s}" height="${s}" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2"/>`;
           for (let i = 1; i * S0 < s - 0.1; i++) g += `<line x1="${O.x + i * S0}" y1="${O.y}" x2="${O.x + i * S0}" y2="${O.y - s}" stroke="var(--blue)" stroke-width=".8" stroke-dasharray="3 3"/><line x1="${O.x}" y1="${O.y - i * S0}" x2="${O.x + s}" y2="${O.y - i * S0}" stroke="var(--blue)" stroke-width=".8" stroke-dasharray="3 3"/>`;
           g += `<rect x="${O.x}" y="${O.y - S0}" width="${S0}" height="${S0}" fill="var(--warn)" fill-opacity=".75" stroke="var(--ink)" stroke-width="1.5"/>` + T(O.x + S0 / 2, O.y - S0 / 2 + 4, "1", "middle", 12, ' font-weight="700"');
-          g += `<circle cx="${O.x}" cy="${O.y}" r="4" fill="var(--ink)"/>` + T(O.x - 6, O.y + 12, "O", "end", 13, ' font-weight="700"') + T(O.x + s / 2, O.y + 14, "côté × " + nb(k), "middle", 12, ' fill="var(--margin)" font-weight="700"');
+          g += `<circle cx="${O.x}" cy="${O.y}" r="4" fill="var(--ink)"/>` + T(O.x - 6, O.y + 12, "O", "end", 13, ' font-weight="700"') + T(Math.max(O.x + 6, O.x + s / 2 - 26), O.y + 14, "côté × " + nb(k), "start", 12, /* 24.11 : jamais sur « O » */ ' fill="var(--margin)" font-weight="700"');
           return g; },
         out: (st) => { const k = st.k; return `k = <b>${nb(k)}</b> : longueurs × ${nb(k)}, aire × ${nb(k)}² = <b>${nb(k * k)}</b>` + (Number.isInteger(k) ? ` <span class="small muted">(${k * k} copie${k > 1 ? "s" : ""} du petit carré)</span>` : ""); },
         goal: [(st) => (st.k === 3 ? "k = 3 : on compte 3 · 3 = 9 copies du petit carré. Longueurs × 3, aire × 3² = 9." : ""),

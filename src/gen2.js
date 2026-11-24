@@ -66,7 +66,10 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
     let [x0, x1] = o.xr || [-6, 6], [y0, y1] = o.yr || [-5, 5];
     // 24.11 (robot : point B dessiné hors du graphique, cadre fixe −8 à 8) : le cadre s'agrandit pour contenir tous les points.
     for (const p of pts) { if (!isFinite(p[0]) || !isFinite(p[1])) continue; x0 = Math.min(x0, Math.floor(p[0]) - 1); x1 = Math.max(x1, Math.ceil(p[0]) + 1); y0 = Math.min(y0, Math.floor(p[1]) - 1); y1 = Math.max(y1, Math.ceil(p[1]) + 1); }
-    const W = 300, H = Math.round(W * (y1 - y0) / (x1 - x0) * (o.squash || 1));
+    // 24.11 (galerie : hyperbole ou droite hors du cadre) : o.fit = abscisses à montrer (ex. intersections) ; le cadre
+    // s'agrandit pour contenir chaque courbe en ces abscisses. o.minH / o.maxH bornent la hauteur (axes non orthonormés).
+    for (const x of o.fit || []) for (const F of fns) { const y = F.f(x); if (!isFinite(x) || !isFinite(y)) continue; x0 = Math.min(x0, Math.floor(x) - 1); x1 = Math.max(x1, Math.ceil(x) + 1); y0 = Math.min(y0, Math.floor(y) - 1); y1 = Math.max(y1, Math.ceil(y) + 1); }
+    const W = 300, H = Math.min(o.maxH || Infinity, Math.max(o.minH || 0, Math.round(W * (y1 - y0) / (x1 - x0) * (o.squash || 1))));
     const X = (x) => 10 + ((x - x0) / (x1 - x0)) * (W - 20), Y = (y) => H - 10 - ((y - y0) / (y1 - y0)) * (H - 20);
     let g = "";
     if (o.grid !== false) for (let x = Math.ceil(x0); x <= x1; x++) g += L(X(x), Y(y0), X(x), Y(y1), "f-grid");
@@ -318,7 +321,7 @@ Object.assign(GEN, {
     const notes = [4, 4.5, 5, 5.5, 6], eff = notes.map(() => R.int(1, 6));
     const n = eff.reduce((a, b) => a + b, 0); if (n < 8) return GEN.diagr(3);
     const s = notes.reduce((a, v, i) => a + v * eff[i], 0), m = s / n;
-    return { fig: FIG.barChart(eff), guide: [GS("Nombre d'élèves ?", n, M(eff.join(" + ") + " = " + n) + "."), GS("Somme pondérée (chaque note · son effectif) ?", s, M(notes.map((v, i) => dec(v) + " \\cdot " + eff[i]).join(" + ") + " = " + dec(s)) + "."), GS("Moyenne au centième ?", m, M(dec(s) + " : " + n + " \\approx " + dec(m.toFixed(2))) + ".", 0.01)], q: "Notes d'un test : " + notes.map((v, i) => M(dec(v)) + " (" + eff[i] + " élève" + (eff[i] > 1 ? "s" : "") + ")").join(", ") + ". Calcule la moyenne de la classe, au centième.", spec: { kind: "value", value: m, round: 0.01 }, sol: "Somme pondérée " + M(dec(s)) + " pour " + M(n) + " élèves : " + M(dec(s) + " : " + n + " \\approx " + dec(m.toFixed(2))) + "." };
+    return { fig: FIG.barChart(eff, notes), guide: [GS("Nombre d'élèves ?", n, M(eff.join(" + ") + " = " + n) + "."), GS("Somme pondérée (chaque note · son effectif) ?", s, M(notes.map((v, i) => dec(v) + " \\cdot " + eff[i]).join(" + ") + " = " + dec(s)) + "."), GS("Moyenne au centième ?", m, M(dec(s) + " : " + n + " \\approx " + dec(m.toFixed(2))) + ".", 0.01)], q: "Notes d'un test : " + notes.map((v, i) => M(dec(v)) + " (" + eff[i] + " élève" + (eff[i] > 1 ? "s" : "") + ")").join(", ") + ". Calcule la moyenne de la classe, au centième.", spec: { kind: "value", value: m, round: 0.01 }, sol: "Somme pondérée " + M(dec(s)) + " pour " + M(n) + " élèves : " + M(dec(s) + " : " + n + " \\approx " + dec(m.toFixed(2))) + "." };
   },
 
   aires(d) {
@@ -687,7 +690,7 @@ Object.assign(GEN, {
     }
     let p, q; do { p = R.nz(-5, 5); q = R.nz(-5, 5); } while (p === q || p + q === 0);
     const k = p * q, m = -(p + q); // k/x = x + m  ⇔ x² + m x - k = 0 → racines p, q ⇔ p+q = -m, pq = -k
-    return { fig: FIG.plot([{ f: (x) => -k / x }, { f: (x) => x + m }], [], { grid: false, ticks: false }), q: "Pour quelles valeurs de " + M("x") + " les graphes de " + M("f(x) = \\frac{" + -k + "}{x}") + " et " + M("g(x) = " + lin(1, m)) + " se coupent-ils ?", spec: { kind: "set", values: [p, q] }, sol: M("\\frac{" + -k + "}{x} = " + lin(1, m) + " \\iff " + poly([1, m, k]) + " = 0") + " ; " + M("x = " + p) + " ou " + M("x = " + q) + "." };
+    return { fig: FIG.plot([{ f: (x) => -k / x }, { f: (x) => x + m }], [], { grid: false, ticks: false, fit: [p, q, 2 * p, 2 * q, p / 2, q / 2], maxH: 280 }), q: "Pour quelles valeurs de " + M("x") + " les graphes de " + M("f(x) = \\frac{" + -k + "}{x}") + " et " + M("g(x) = " + lin(1, m)) + " se coupent-ils ?", spec: { kind: "set", values: [p, q] }, sol: M("\\frac{" + -k + "}{x} = " + lin(1, m) + " \\iff " + poly([1, m, k]) + " = 0") + " ; " + M("x = " + p) + " ou " + M("x = " + q) + "." };
   },
 
   ineq2(d) {

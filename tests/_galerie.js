@@ -62,7 +62,7 @@
       const box = document.createElement("div"); document.body.appendChild(box);
       try {
         // Leçon active : la manipulation remplace la figure dans le rappel (lessonBody) ; la figure fixe est montrée à part.
-        if (hasL && hasA) { const fb = document.createElement("div"); fb.innerHTML = LESSON_FIGS[n.id](); const f0 = svgsOf(fb); if (f0) { nL++; add(cl, ch, card({ code: "lecon-" + n.id, kind: "figure de leçon", label: lab, fig: f0, q: LESSONS[n.id] ? LESSONS[n.id].intro : "" })); } }
+        if (hasL && hasA) { const fb = document.createElement("div"); fb.innerHTML = LESSON_FIGS[n.id](); const f0 = fb.querySelector(".figstack") ? fb.innerHTML : svgsOf(fb); /* 24.11 : figures empilées gardées en colonne (sinon côte à côte, minuscules) */ if (f0) { nL++; add(cl, ch, card({ code: "lecon-" + n.id, kind: "figure de leçon", label: lab, fig: f0, q: LESSONS[n.id] ? LESSONS[n.id].intro : "" })); } }
         box.innerHTML = LESSONS[n.id] ? lessonBody(n.id) : `<div class="figwrap">${LESSON_FIGS[n.id]()}</div>`;
         try { startInlineAct(box); } catch (e) { errs.push("leçon active " + n.id + " : " + String(e).slice(0, 80)); }
         try { if (typeof bindDyn === "function") bindDyn(box); } catch (e) {}

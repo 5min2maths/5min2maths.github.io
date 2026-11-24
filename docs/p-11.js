@@ -2633,7 +2633,7 @@
     1: [
       () => { let a, b; do { a = nz(-12, 12); b = nz(-12, 12); } while (a > 0 && b > 0); const A = Math.abs(a), B = Math.abs(b), same = a * b > 0; // au moins un négatif (21.11)
         return Qv("Calcule : " + M(par(a) + " + " + par(b)), a + b, M(par(a) + " + " + par(b) + " = " + (a + b)) + ".",
-          { ctx: "addition", fig: FIG.numberLine(a, []), guide: [same ? GS("Même signe : on additionne les distances à zéro. " + M(A + " + " + B) + " = ?", A + B, M(A + B) + ".") : GS("Signes contraires : la plus grande distance moins la plus petite. " + M(Math.max(A, B) + " - " + Math.min(A, B)) + " = ?", Math.abs(A - B), M(Math.abs(A - B)) + "."), GS("Résultat (avec son signe) ?", a + b, M(a + b) + ".")],
+          { ctx: "addition", fig: FIG.numberLine(a, [], { span: [a + b] }), guide: [same ? GS("Même signe : on additionne les distances à zéro. " + M(A + " + " + B) + " = ?", A + B, M(A + B) + ".") : GS("Signes contraires : la plus grande distance moins la plus petite. " + M(Math.max(A, B) + " - " + Math.min(A, B)) + " = ?", Math.abs(A - B), M(Math.abs(A - B)) + "."), GS("Résultat (avec son signe) ?", a + b, M(a + b) + ".")],
             traps: [TR(-(a + b), "Signe du résultat : celui du nombre le plus loin de zéro."), TR(A + B === Math.abs(a + b) ? a - b : (a < 0 ? -1 : 1) * (A + B), "Signes contraires : on soustrait les distances.")] }); },
       () => { const a = nz(-12, 12), b = -R.int(2, 12);
         return Qv("Calcule : " + M(par(a) + " - " + par(b)), a - b, "Soustraire un nombre négatif, c'est ajouter son opposé : " + M(par(a) + " + " + -b + " = " + (a - b)) + ".",
@@ -4415,7 +4415,7 @@
       predict: { q: "Où se trouve le point (−3 ; 2) ?", choices: ["en haut à gauche", "en bas à droite", "en haut à droite"], good: 0, why: "La 1re coordonnée (abscisse) se lit horizontalement : −3, à gauche. La 2e (ordonnée) verticalement : 2, en haut." },
       defis: ["A(−4 ; 2) et B(6 ; 2) : abscisse du milieu de [AB] ?", "Distance entre C(1 ; 1) et D(1 ; −6) ?", "Symétrique de P(3 ; −5) par rapport à l'axe des abscisses : son ordonnée ?"],
       play: hunt({ ask: true, label: "Ta réponse",
-        blank: (s) => { const X = (v) => 160 + v * 20, Y = (v) => 80 - v * 10; let g = L(20, 80, 300, 80) + L(160, 5, 160, 155); const pts = [[[-4, 2, "A"], [6, 2, "B"]], [[1, 1, "C"], [1, -6, "D"]], [[3, -5, "P"]]][s]; for (const [a, b, n] of pts) g += `<circle cx="${X(a)}" cy="${Y(b)}" r="4" class="f-dot"/>` + T(X(a) + 8, Y(b) - 6, (n + "(" + a + " ; " + b + ")").replace(/-/g, "−"), "start", 11); return svg(320, 160, g, "repère"); },
+        blank: (s) => { const X = (v) => 160 + v * 20, Y = (v) => 80 - v * 10; let g = L(20, 80, 300, 80) + L(160, 5, 160, 155); const pts = [[[-4, 2, "A"], [6, 2, "B"]], [[1, 1, "C"], [1, -6, "D"]], [[3, -5, "P"]]][s]; for (const [a, b, n] of pts) g += `<circle cx="${X(a)}" cy="${Y(b)}" r="4" class="f-dot"/>` + (X(a) > 230 ? T(X(a) - 8, Y(b) - 6, (n + "(" + a + " ; " + b + ")").replace(/-/g, "−"), "end", 11) : T(X(a) + 8, Y(b) - 6, (n + "(" + a + " ; " + b + ")").replace(/-/g, "−"), "start", 11)); // 24.11 : près du bord droit, étiquette à gauche (« B(6 ; 2 » coupé) return svg(320, 160, g, "repère"); },
         show: (x, s) => plain(["milieu : (−4 + 6) ÷ 2", "même abscisse : on compte de 1 à −6", "symétrie par rapport à l'axe horizontal : l'abscisse reste, l'ordonnée change de signe"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(1, "(−4 + 6) ÷ 2 = 1."), W(7, "1 − (−6) = 7."), W(5, "Le symétrique est (3 ; 5).")] }),
     },
@@ -4506,8 +4506,10 @@
   const R = (x, y, w, h, cls, sw = 0.8) => `<rect x="${+x.toFixed(1)}" y="${+y.toFixed(1)}" width="${+w.toFixed(1)}" height="${+h.toFixed(1)}" class="${cls}" stroke="var(--ink)" stroke-width="${sw}"/>`;
 
   // ---------- rac : carré, cube ----------
-  const square = (n, cls) => { const u = 14, x0 = Math.round(160 - (n * u) / 2); let g = "";
-    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) g += `<rect x="${x0 + i * u}" y="${5 + j * u}" width="${u}" height="${u}" class="${cls}" stroke="var(--ink)" stroke-width="0.4"/>`;
+  // 24.11 (galerie : carré de départ minuscule, perdu en haut) : cadre du plus grand carré (côté 8) en pointillé, le carré
+  // grandit depuis son coin inférieur gauche.
+  const square = (n, cls) => { const u = 14, x0 = 104, yb = 117; let g = `<rect x="${x0}" y="${yb - 8 * u}" width="${8 * u}" height="${8 * u}" fill="none" stroke="var(--ink-soft)" stroke-dasharray="3 3"/>`;
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) g += `<rect x="${x0 + i * u}" y="${yb - (j + 1) * u}" width="${u}" height="${u}" class="${cls}" stroke="var(--ink)" stroke-width="0.4"/>`;
     return svg(320, 122, g, "carré de côté " + n); };
   // Cube d'arête n en perspective cavalière, faces visibles quadrillées en cubes unités.
   const cube = (n, cls) => { const u = 11, dx = 5.5, dy = -4.4, x0 = Math.round(160 - (n * (u + dx)) / 2), y0 = Math.round(66 + (n * (u - dy)) / 2), a = n * u, top = y0 - a;

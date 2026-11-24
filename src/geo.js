@@ -26,6 +26,8 @@ function GEO() {
     circle(c, r, cls = "f-shape") { const C = P(c); pts.push([C[0] - r, C[1] - r], [C[0] + r, C[1] + r]); back.push((T) => '<circle cx="' + T.X(C) + '" cy="' + T.Y(C) + '" r="' + r * T.s + '" class="' + cls + '"/>'); return g; },
     dot(p) { const A = P(p); ops.push((T) => '<circle cx="' + T.X(A) + '" cy="' + T.Y(A) + '" r="3" class="f-dot"/>'); return g; },
     text(p, s, dx = 0, dy = 0) { const A = P(p); ops.push((T) => T.txt(T.X(A) + dx, T.Y(A) + dy, s)); return g; },
+    // Élément dessiné avec l'échelle connue (T : X, Y, s, txt) — placements qui dépendent de la taille à l'écran.
+    raw(fn) { ops.push(fn); return g; },
     svg(label = "figure", W = 300, Hmax = 190) {
       const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]), m = 24, mx = 44;
       const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
@@ -49,7 +51,15 @@ function GEO() {
           return T.txt(T.X(mid) + nx * 14, T.Y(mid) - ny * 14 + 4, str);
         },
       };
-      return '<svg class="fig" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="' + label + '" xmlns="http://www.w3.org/2000/svg">' + back.concat(ops).map((f) => f(T)).join("") + "</svg>";
+      const body = back.concat(ops).map((f) => f(T)).join("");
+      // 24.11 (galerie : « dénivelé » coupé au bord) : le cadre s'élargit pour contenir toutes les étiquettes (largeur estimée).
+      let vx0 = 0, vx1 = W, vy0 = 0, vy1 = H;
+      for (const m of body.matchAll(/<text x="([-\d.]+)" y="([-\d.]+)"[^>]*text-anchor="(\w+)" font-size="(\d+)">([^<]*)<\/text>/g)) {
+        const x = +m[1], y = +m[2], fs = +m[4], w = m[5].length * fs * 0.58, a0 = m[3] === "start" ? x : m[3] === "end" ? x - w : x - w / 2;
+        vx0 = Math.min(vx0, a0 - 3); vx1 = Math.max(vx1, a0 + w + 3); vy0 = Math.min(vy0, y - fs - 2); vy1 = Math.max(vy1, y + 4);
+      }
+      const vb = [vx0, vy0, vx1 - vx0, vy1 - vy0].map((v) => +v.toFixed(1)).join(" ");
+      return '<svg class="fig" viewBox="' + vb + '" role="img" aria-label="' + label + '" xmlns="http://www.w3.org/2000/svg">' + body + "</svg>";
     },
   };
   return g;
@@ -104,13 +114,17 @@ const GF = {
   },
   rect(w, h, { lw = "", lh = "", diag = "" } = {}) {
     const g = GEO().pt("A", 0, 0, false).pt("B", w, 0, false).pt("C", w, h, false).pt("D", 0, h, false).poly(["A", "B", "C", "D"]).side("A", "B", lw).side("B", "C", lh);
-    if (diag) g.seg("A", "C", { dash: true }).seg("B", "D", { dash: true }).text([w / 2, h / 2], diag, 0, -8);
+    // 24.11 (galerie : l'étiquette était sur l'intersection des diagonales) : le long de [AC], au quart, côté [AD].
+    if (diag) g.seg("A", "C", { dash: true }).seg("B", "D", { dash: true }).raw((T) => { const l = Math.hypot(w, h); return T.txt(T.X([w * 0.3, h * 0.3]) - (h / l) * 10, T.Y([w * 0.3, h * 0.3]) - (w / l) * 10, diag, "end"); });
     return g.svg("rectangle");
   },
   // Rectangle a × b privé d'un coin c × e.
   notch(a, b, c, e, { la = "", lb = "", lc = "", le = "" } = {}) {
     const g = GEO().pt("A", 0, 0, false).pt("B", a, 0, false).pt("C", a, b - e, false).pt("D", a - c, b - e, false).pt("E", a - c, b, false).pt("F", 0, b, false).poly(["A", "B", "C", "D", "E", "F"]);
-    g.side("A", "B", la).side("F", "A", lb).side("D", "C", lc, { inside: true }).side("E", "D", le, { inside: true });
+    // 24.11 (galerie : « 2 cm » sous la marche chevauchait le bord droit) : cote de la marche [DC] au-dessus, dans
+    // l'entaille, à droite de [ED] ; cote de [ED] à gauche, dans la figure — les deux ne se touchent jamais.
+    g.side("A", "B", la).side("F", "A", lb).side("E", "D", le, { inside: true });
+    if (lc) g.raw((T) => { const x = T.X([a - c, 0]), wt = String(lc).length * 7.5; return T.txt(Math.max((x + T.X([a, 0])) / 2, x + 5 + wt / 2), T.Y([0, b - e]) - 7, lc); });
     return g.svg("rectangle découpé");
   },
   // Rectangle a × b, avec à droite un rectangle c × e posé sur la même base.
