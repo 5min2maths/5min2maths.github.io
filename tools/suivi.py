@@ -24,7 +24,7 @@ INV = ROOT / "suivi" / "inventaire.json"
 STATUTS = ["à faire", "vu", "à corriger", "validé"]
 NIV = {1: "N1", 2: "N2", 3: "N3", 4: "Défi"}
 COLS = ["Chapitre", "Notion", "id", "Question", "Compétence", "Révision", "Générateur", "Formes", "Figure", "Leçon",
-        "Leçon active", "Retours leçon", "👍", "👎", "💬", "Contrôlé", "Remarque", "Ex. 1", "Ex. 2", "Ex. 3", "Voir la leçon"]
+        "Leçon active", "Retours leçon", "👍", "👎", "💬", "Contrôlé", "Remarque", "Ex. 1", "Ex. 2", "Ex. 3", "Voir la leçon", "Audit de niveau"]
 SITE = "https://5min2maths.github.io/"
 WIDTH = [30, 30, 10, 9, 42, 9, 11, 8, 9, 9, 13, 13, 5, 5, 5, 12, 40, 7, 7, 7, 12]
 
@@ -94,6 +94,10 @@ def manuel():
 
 
 TRAITES = ROOT / "tools" / "commentaires_traites.txt"
+try:
+    NIV = json.loads((ROOT / "tools" / "niveau.json").read_text())  # 24.11 : registre des audits de niveau
+except Exception:
+    NIV = {}
 C_COLS = ["Reçu le", "Classe", "Code", "Commentaire", "Traité", "Ce qui a été fait", "Remarque"]
 
 
@@ -282,6 +286,9 @@ def main():
                     c = ws.cell(r, 18 + j, f"ex. {j + 1}"); c.hyperlink = f"{SITE}#q-{row['id']}-{lv}-{seed}"; c.font = Font(color="1F4FD8", underline="single")
                 if n["lesson"]:
                     c = ws.cell(r, 21, "leçon"); c.hyperlink = f"{SITE}#l-{row['id']}"; c.font = Font(color="1F4FD8", underline="single")
+                # 24.11 : agents robustesse (/audit-niveau) : verdict du registre tools/niveau.json, sinon « à auditer »
+                au = NIV.get(row["id"]) or {}
+                ws.cell(r, 22, (au.get("verdict", "") + " (" + au.get("audit", "") + ")") if au else "à auditer")
             # Fin de chapitre : statut du test de préparation (évaluation d'entraînement, demande du 15.11).
             if k + 1 == len(rows) or rows[k + 1]["chap"] != row["chap"]:
                 ids = [r["id"] for r in rows if r["chap"] == row["chap"]]
