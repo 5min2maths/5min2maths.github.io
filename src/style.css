@@ -114,6 +114,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .fig .f-accent { stroke: var(--margin); fill: none; }
 .fig text.f-accent, .fig .f-accent.f-txt { fill: var(--margin); stroke: none; font-weight: 700; }
 .fig .f-txt { fill: var(--ink); font-family: var(--font-body); }
+.fig text.f-tick { paint-order: stroke; stroke: var(--card); stroke-width: 3px; stroke-linejoin: round; } /* 24.11 : chiffres d'axe lisibles sur une courbe */
 .fig .f-on { fill: #fff; font-family: var(--font-body); font-weight: 700; }
 .fig text.f-on { fill: var(--on-blue); } /* texte sur aplat bleu : encre foncée en thème sombre (24.11) */
 .fig .f-dot { fill: var(--margin); }

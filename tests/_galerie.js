@@ -10,6 +10,8 @@
   const P = new URLSearchParams(location.hash.slice(1));
   const SEED = +(P.get("seed") || new Date().toISOString().slice(0, 10).replace(/-/g, ""));
   const NT = Math.max(1, +(P.get("n") || 2));
+  const ONLY = (P.get("only") || "").split(",").filter(Boolean); /* only=id1,id2,histoire : galerie restreinte (contrôle ciblé) */
+  const keep = (id) => !ONLY.length || ONLY.includes(id);
   const FLAG = (P.get("codes") || "").split(",").map((s) => s.trim()).filter(Boolean);
   const PROFILES = [["9e", { system: "CH", grade: 9, track: "college" }], ["10e", { system: "CH", grade: 10, track: "college" }], ["11e", { system: "CH", grade: 11, track: "college" }],
     ["1re", { system: "CH", grade: 12, track: "college" }], ["2e", { system: "CH", grade: 13, track: "college" }], ["MP 1re", { system: "CH", grade: 12, track: "mp" }], ["MP 2e", { system: "CH", grade: 13, track: "mp" }]];
@@ -44,6 +46,7 @@
 
   // 2. Questions : N tirages avec figure par niveau.
   for (const n of NOTIONS) {
+    if (!keep(n.id)) continue;
     const [cl, ch] = place[n.id] || ["Autres", THEMES[n.theme] || n.theme || "Divers"];
     const lab = n.label + (also[n.id] ? " · aussi " + also[n.id].join(", ") : "");
     for (let d = 1; d <= 4; d++) {
@@ -73,8 +76,8 @@
     }
   }
   // 4. Questions curieuses et histoire des maths.
-  if (typeof CURIEUX !== "undefined") CURIEUX.forEach((c) => { try { const q = c.make(); if (q && q.fig) { nO++; add("Autres", "Questions curieuses", card({ code: "curieux-" + c.key, kind: c.fam, label: q.titre, fig: q.fig, q: q.q })); } } catch (e) { errs.push("curieux " + c.key + " : " + String(e).slice(0, 80)); } });
-  if (typeof Histoire !== "undefined") for (let k = 0; k < 200; k++) {
+  if (typeof CURIEUX !== "undefined" && keep("curieux")) CURIEUX.forEach((c) => { try { const q = c.make(); if (q && q.fig) { nO++; add("Autres", "Questions curieuses", card({ code: "curieux-" + c.key, kind: c.fam, label: q.titre, fig: q.fig, q: q.q })); } } catch (e) { errs.push("curieux " + c.key + " : " + String(e).slice(0, 80)); } });
+  if (typeof Histoire !== "undefined" && keep("histoire")) for (let k = 0; k < 200; k++) {
     let h; try { h = Histoire.card(k, false); } catch (e) { break; }
     const box = document.createElement("div"); box.innerHTML = h; const f = svgsOf(box), t = box.querySelector("h3");
     if (f) { nO++; add("Autres", "Histoire des maths", card({ code: "histoire-" + k, kind: "histoire", label: t ? t.textContent : "", fig: f, q: "" })); }

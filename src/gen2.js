@@ -75,13 +75,25 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
     if (o.grid !== false) for (let x = Math.ceil(x0); x <= x1; x++) g += L(X(x), Y(y0), X(x), Y(y1), "f-grid");
     if (o.grid !== false) for (let y = Math.ceil(y0); y <= y1; y++) g += L(X(x0), Y(y), X(x1), Y(y), "f-grid");
     g += L(X(x0), Y(0), X(x1), Y(0)) + L(X(0), Y(y0), X(0), Y(y1));
+    const Xi = (px) => x0 + ((px - 10) / (W - 20)) * (x1 - x0);
+    /* 24.11 soir (galerie : « 10 » et « −1 » sur une courbe raide) : test plus fin, y compris quand la courbe traverse la
+       boîte du chiffre entre deux échantillons (courbe presque verticale). */
+    const near = (cx, cy, hw = 9) => fns.some((F) => { let prev = null; for (let px = cx - hw; px <= cx + hw; px += 0.5) { const v = F.f(Xi(px)); if (!isFinite(v)) { prev = null; continue; } const d = Y(v) - cy; if (Math.abs(d) < 8 || (prev !== null && prev * d < 0 && Math.abs(prev - d) < 400)) return true; prev = d; } return false; });
+    let tk = ""; /* chiffres des axes : dessinés après les courbes, avec un liseré (classe f-tick) pour rester lisibles */
     if (o.numbers) {
       /* 24.11 (agent MP 4e : chiffres de l'axe sur la courbe là où elle coupe l'axe) : si la courbe passe sur le chiffre,
          il passe de l'autre côté de l'axe (au-dessus pour x, à droite pour y). */
-      const Xi = (px) => x0 + ((px - 10) / (W - 20)) * (x1 - x0);
-      const near = (cx, cy) => fns.some((F) => { for (let px = cx - 7; px <= cx + 7; px += 1.5) { const v = F.f(Xi(px)); if (isFinite(v) && Math.abs(Y(v) - cy) < 7) return true; } return false; });
-      for (let x = Math.ceil(x0); x <= x1; x++) if (x && x % (o.step || 1) === 0) { const up = near(X(x), Y(0) + 9) && !near(X(x), Y(0) - 9); g += t(X(x), up ? Y(0) - 5 : Y(0) + 13, x, "f-txt f-tick", "middle", 10); }
-      for (let y = Math.ceil(y0); y <= y1; y++) if (y && y % (o.step || 1) === 0) { const rt = near(X(0) - 10, Y(y)) && !near(X(0) + 10, Y(y)); g += t(rt ? X(0) + 4 : X(0) - 4, Y(y) + 4, y, "f-txt f-tick", rt ? "start" : "end", 10); }
+      for (let x = Math.ceil(x0); x <= x1; x++) if (x && x % (o.step || 1) === 0) {
+        /* 24.11 soir (galerie : zéro de la courbe juste sur une graduation) : sous l'axe, sinon au-dessus ; si la courbe passe des
+           deux côtés, sous l'axe avec un liseré (le point de passage sur l'axe reste visible). Pas de décalage latéral : le
+           chiffre deviendrait ambigu (essayé, « 1 2 3 » serrés). */
+        const hw = 3 + 3 * String(x).length;
+        const c = [[0, 9], [0, -9]].find(([dx, dy]) => !near(X(x) + dx, Y(0) + dy, hw)) || [0, 9];
+        tk += t(X(x) + c[0], c[1] > 0 ? Y(0) + 13 : Y(0) - 5, x, "f-txt f-tick", "middle", 10); }
+      for (let y = Math.ceil(y0); y <= y1; y++) if (y && y % (o.step || 1) === 0) {
+        const c = [[-10, 0], [10, 0]].find(([dx, dy]) => !near(X(0) + dx, Y(y) + dy)) || [-10, 0];
+        const dot = pts.some((p) => p[0] === 0 && Math.abs(p[1] - y) < 0.5) ? 4 : 0; /* point posé sur l'axe à cette hauteur : chiffre écarté du disque */
+        tk += t(c[0] > 0 ? X(0) + 4 + dot : X(0) - 4 - dot, Y(y) + 4 + c[1], y, "f-txt f-tick", c[0] > 0 ? "start" : "end", 10); }
     } else if (o.ticks !== false) {
       for (let x = Math.ceil(x0); x <= x1; x++) g += L(X(x), Y(0) - 3, X(x), Y(0) + 3);
       for (let y = Math.ceil(y0); y <= y1; y++) g += L(X(0) - 3, Y(y), X(0) + 3, Y(y));
@@ -104,8 +116,17 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
     (o.segs || []).forEach(([xa, ya, xb, yb, cls]) => (g += L(X(xa), Y(ya), X(xb), Y(yb), cls || "f-line", 'stroke-width="2"')));
     (o.vlines || []).forEach((x) => (g += L(X(x), Y(y0), X(x), Y(y1), "f-line", 'stroke-dasharray="4 4"')));
     (o.hlines || []).forEach((y) => (g += L(X(x0), Y(y), X(x1), Y(y), "f-line", 'stroke-dasharray="4 4"')));
+    g += tk; /* 24.11 soir : après les asymptotes aussi (le « 1 » disparaissait sous x = 1 en traitillé) */
     // 24.11 (robot : « C » sortait du cadre à droite) : l'étiquette passe à gauche du point près du bord droit, en dessous près du haut.
-    pts.forEach(([x, y, s]) => (g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="4" class="f-dot"/>' + (s ? (X(x) > W - 24 || (o.numbers && x < 0 && X(0) - X(x) < 34) ? t(X(x) - 7, Y(y) < 18 ? Y(y) + 16 : Y(y) - 7, s, "f-txt", "end", 12) : t(X(x) + 7, Y(y) < 18 ? Y(y) + 16 : Y(y) - 7, s, "f-txt", "start", 12)) /* 24.11 : point juste à gauche de l'axe : nom à gauche (sinon sur les graduations, robot) */ : "")));
+    /* 24.11 soir (galerie : « P » posé sur la courbe) : nom du point dans le premier coin libre (haut droite, haut gauche, bas droite,
+       bas gauche), en restant dans le cadre et hors des chiffres de l'axe des y. */
+    pts.forEach(([x, y, s]) => {
+      g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="4" class="f-dot"/>';
+      if (!s) return;
+      const px = X(x), py = Y(y), cand = [[1, -1], [-1, -1], [1, 1], [-1, 1]].filter(([sx, sy]) => (sx > 0 ? px < W - 24 : px > 24) && (sy < 0 ? py > 18 : py < H - 18) && !(o.numbers && sx < 0 && x >= 0 && px - X(0) < 34) && !(o.numbers && sx > 0 && x < 0 && X(0) - px < 34));
+      const ok = cand.find(([sx, sy]) => !near(px + sx * 11, py + sy * 11, 6)) || cand[0] || [px > W - 24 ? -1 : 1, py < 18 ? 1 : -1];
+      g += t(px + ok[0] * 7, ok[1] < 0 ? py - 7 : py + 16, s, "f-txt", ok[0] > 0 ? "start" : "end", 12);
+    });
     return svg(W, H, g, o.label || "graphique");
   };
   // Triangle avec étiquettes d'angles (aux sommets A, B, C) et de côtés.
