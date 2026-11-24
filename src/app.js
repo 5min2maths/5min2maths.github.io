@@ -11,7 +11,14 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 const BUILD = "dev"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
+// Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
+// (visites, séances, signaux, votes, erreurs techniques) sans un « Oui » explicite ; les commentaires 💬, écrits
+// volontairement, partent toujours. Le choix se change dans les Réglages.
+function statsOk() { try { return localStorage.getItem("m2m-stats") === "oui"; } catch (e) { return false; } }
+function statsAsked() { try { return !!localStorage.getItem("m2m-stats"); } catch (e) { return true; } }
+function statsSet(v) { try { localStorage.setItem("m2m-stats", v ? "oui" : "non"); } catch (e) {} }
 function errCanSend() {
+  if (!statsOk()) return false; /* 24.11 : accord */
   try { return !!VOTE_ENDPOINT && location.protocol === "https:" && !/claude/.test(location.hostname) && !isAuthor() && !/^#auteur/.test(location.hash); }
   catch (e) { return false; }
 }
@@ -520,7 +527,7 @@ function screenHome() {
   const dots = { prob: !!wp && !wpDone, test: prep && left <= 3, prog: (state.badgesNew || []).length > 0 };
   save();
   const panels = {
-    today: () => `${resumeCard()}${weekRecapCard()}${backupCard()}${streakNudge()}${prepTodayCard()}${carnetCard(false)}<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire · au rythme de ton cours en classe${done ? " · séance faite, tu peux en refaire une" : ""}</div>
+    today: () => `${statsCard()}${resumeCard()}${weekRecapCard()}${backupCard()}${streakNudge()}${prepTodayCard()}${carnetCard(false)}<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire · au rythme de ton cours en classe${done ? " · séance faite, tu peux en refaire une" : ""}</div>
       <div class="fmt-box stack"><div class="spread"><span class="eyebrow">Aujourd'hui</span><button class="btn-ghost small" id="other">🔁 Changer de format</button></div>
         <h3>${FORMATS[fmt].label}</h3><p class="small muted">${FORMATS[fmt].text}</p></div>
       <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>${nowCard()}</div>
@@ -552,7 +559,7 @@ function screenHome() {
     const mode = state.homeMode === "libre" ? "libre" : "classe", nC = (state.carnet || []).length;
     // Une seule bannière ; le joker de série passe avant le bilan de la semaine (sinon la série est perdue le jour même).
     const nudge = streakNudge(), joker = /Joker/.test(nudge);
-    const banner = [resumeCard(), prepTodayCard(), joker ? nudge : "", backupCard(), weekRecapCard(), joker ? "" : nudge].find((x) => x) || "";
+    const banner = [statsCard(), resumeCard(), prepTodayCard(), joker ? nudge : "", backupCard(), weekRecapCard(), joker ? "" : nudge].find((x) => x) || "";
     const nowLine = !Engine.nowActive(state) ? `<button type="button" class="btn-sec small" id="nowpick">📚 Choisir mon chapitre travaillé en classe</button>`
       : Engine.nowStale(state) ? `<div class="now-ask"><b>📚 Cette semaine en classe, tu travailles toujours :</b><span>${esc(state.now.ids.map(nLabel).join(" · "))} ?</span><div class="row now-ask-btns"><button type="button" class="btn-sec small" id="nowyes">Oui, toujours</button><button type="button" class="btn-sec small" id="nowpick">J'ai changé de chapitre</button></div></div>`
       : `<span class="small now-lab">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span><button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
@@ -604,6 +611,9 @@ function screenHome() {
   on("resno", () => { delete state.resume; save(); screenHome(); });
   on("bkgo", screenBackup);
   on("bkno", () => { UI.backupLater = day(); uiSave(); screenHome(); });
+  on("statsoui", () => { statsSet(true); toast("Merci ! Tu peux changer d'avis dans les Réglages."); screenHome(); });
+  on("statsnon", () => { statsSet(false); toast("C'est noté : rien n'est envoyé. Modifiable dans les Réglages."); screenHome(); });
+  on("statsplus", () => screenPrivacy(screenHome));
   on("recapok", () => { state.recapSeen = weekKey(); save(); screenHome(); });
   if (!state.tourDone) tourShow();
   on("wp", () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); });
@@ -694,6 +704,7 @@ function screenSettings() {
     <span class="small muted" id="fs-l">Taille du texte</span><div class="seg" id="fs" role="group" aria-labelledby="fs-l">${A11Y_FS.map(([v, l]) => `<button aria-pressed="${A.fs === v}" data-v="${v}">${l}</button>`).join("")}</div>
     <span class="small muted" id="font-l">Police</span><div class="seg" id="font" role="group" aria-labelledby="font-l"><button aria-pressed="${!A.font}" data-v="0">Habituelle</button><button aria-pressed="${!!A.font}" data-v="1">Plus lisible</button></div>
     <span class="small muted" id="hc-l">Contraste</span><div class="seg" id="hc" role="group" aria-labelledby="hc-l"><button aria-pressed="${!A.hc}" data-v="0">Normal</button><button aria-pressed="${!!A.hc}" data-v="1">Renforcé</button></div>
+    <span class="small muted" id="st-l">Statistiques anonymes pour améliorer l'app</span><div class="seg" id="statsset" role="group" aria-labelledby="st-l"><button aria-pressed="${statsOk()}" data-v="1">J'aide</button><button aria-pressed="${!statsOk()}" data-v="0">Ne rien envoyer</button></div>
     <span class="small muted">Vibrer à chaque réponse (téléphone)</span><div class="seg" id="vib"><button aria-pressed="${UI.vib}" data-v="1">Oui</button><button aria-pressed="${!UI.vib}" data-v="0">Non</button></div></div>
   ${installCard("")}
   <button class="btn-sec" id="backup">💾 Sauvegarder ou transférer ma progression</button><button class="btn-sec" id="level">Changer de classe ou d'école</button><button class="btn-sec" id="privacy">🔒 Ce que l'app envoie</button><button class="btn-ghost small" id="legal">Mentions légales et confidentialité</button>
@@ -707,6 +718,7 @@ function screenSettings() {
   app.querySelectorAll("#font button").forEach((b) => (b.onclick = () => setA("font", +b.dataset.v)));
   app.querySelectorAll("#hc button").forEach((b) => (b.onclick = () => setA("hc", +b.dataset.v)));
   app.querySelectorAll("#vib button").forEach((b) => (b.onclick = () => { UI.vib = b.dataset.v === "1"; uiSave(); if (UI.vib) buzz(true); screenSettings(); }));
+  app.querySelectorAll("#statsset button").forEach((b) => (b.onclick = () => { statsSet(b.dataset.v === "1"); screenSettings(); }));
   document.getElementById("privacy").onclick = () => screenPrivacy(screenSettings);
   document.getElementById("legal").onclick = () => screenLegal(screenSettings);
   if (document.getElementById("stats")) document.getElementById("stats").onclick = () => screenStats(screenSettings);
@@ -831,10 +843,17 @@ function startInlineAct(root) {
   });
 }
 
+// Carte d'accord (24.11) : une seule fois, en tête de l'accueil, tant que l'élève n'a pas répondu.
+const statsCard = () => statsAsked() ? "" : `<div class="card stack" id="statscard"><div class="eyebrow">📊 Aider à améliorer l'app ?</div>
+  <p class="small">Si tu acceptes, l'app envoie des statistiques <b>anonymes</b> (sans nom) : ta classe, tes résultats, le temps passé, les erreurs techniques. Elles servent seulement à améliorer les questions. Tu peux changer d'avis à tout moment dans les Réglages.</p>
+  <div class="row"><button class="btn-primary" id="statsoui">Oui, j'aide</button><button class="btn-sec" id="statsnon">Non merci</button></div>
+  <button class="btn-ghost small" id="statsplus">🔒 Le détail de ce qui est envoyé</button></div>`;
+
 // ---------------- Ce que l'app envoie (13.11) ----------------
 function screenPrivacy(back) {
   h(`${brand}<h2>Ce que l'app <span class="mark">envoie</span></h2>
   <p class="muted">Pas de compte, pas de nom, pas d'adresse e-mail. Ta progression reste sur ton appareil.</p>
+  <div class="card flat"><b>Ton choix :</b> ${statsAsked() ? (statsOk() ? "tu aides à améliorer l'app (statistiques anonymes envoyées)." : "rien n'est envoyé (sauf les commentaires 💬 que tu écris toi-même).") : "pas encore choisi : rien n'est envoyé tant que tu n'as pas dit oui."} Modifiable dans les Réglages.</div>
   <div class="card flat stack"><b>Ce qui reste sur ton appareil</b>
   <ul class="plain"><li>Ta progression : tes notes de compétences, tes badges, ton Mathélo, l'historique de tes réponses.</li>
   <li>Rien de tout cela n'est envoyé (sauf ce qui est décrit ci-dessous, question par question, sans rien qui te désigne). Le code de sauvegarde, lui aussi, n'est envoyé nulle part : c'est toi qui le gardes.</li></ul></div>
@@ -1803,7 +1822,7 @@ function deviceId() {
 }
 function ping(ev, extra = {}) {
   try {
-    if (!VOTE_ENDPOINT || location.protocol !== "https:" || /claude/.test(location.hostname) || isAuthor() || location.hash === "#auteur") return;
+    if (!VOTE_ENDPOINT || location.protocol !== "https:" || /claude/.test(location.hostname) || isAuthor() || location.hash === "#auteur" || !statsOk()) return;
     if (ev === "open") { if (localStorage.getItem("m2m-ping") === day()) return; localStorage.setItem("m2m-ping", day()); }
     fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ ev, dev: deviceId(), date: day(), ...extra }) }).catch(() => {});
   } catch (e) {}
@@ -1837,7 +1856,7 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
 
 // Commentaire libre (facultatif) : envoyé avec le code de la question, la classe et l'identifiant anonyme de l'appareil.
 // Envois vers la feuille Google : seulement depuis le site publié (jamais depuis les pages de test ni claude.ai).
-const canSend = () => VOTE_ENDPOINT && location.protocol === "https:" && !/claude/.test(location.hostname) && !isAuthor();
+const canSend = () => VOTE_ENDPOINT && location.protocol === "https:" && !/claude/.test(location.hostname) && !isAuthor() && statsOk();
 // Appareil de l'auteur (20.11) : …/#auteur le marque une fois pour toutes (…/#auteur-off pour annuler). Il n'envoie alors
 // plus ni visites, ni séances, ni signaux muets, ni votes, ni chapitre du moment : les statistiques ne comptent que les
 // élèves. Ses commentaires 💬 partent toujours, étiquetés « auteur ».
