@@ -373,6 +373,14 @@
         return QS("Trouve les zéros de " + M("P(x) = " + polyT(cs)) + ".", sol, "Mise en évidence : " + M("P(x) = x\\left(" + polyT([a, -a * (r1 + r2), a * r1 * r2]) + "\\right)") + ", puis le trinôme : " + M("x = " + r1) + " ou " + M("x = " + r2) + ". " + M(setT(sol)) + ".",
           { ctx: "mise-en-evidence", guide: [GSet("On met " + M("x") + " en évidence ; zéros du trinôme " + M(polyT([a, -a * (r1 + r2), a * r1 * r2])) + " ?", [r1, r2], M(setT([r1, r2])) + "."), GSet("Tous les zéros de " + M("P") + " ?", sol, M(setT(sol)) + " (n'oublie pas " + M("x = 0") + ").")],
             traps: [TS([r1, r2], "La mise en évidence donne aussi le zéro x = 0."), TS([0, -r1, -r2], "Attention aux signes : (x − a) s'annule en x = a.")] }); },
+      () => { const a = nz(-5, 5), b = nz(-5, 5), k = pk([2, 3]), c = nz(-5, 5), z3 = r6(c / k); if (a === b || z3 === a || z3 === b || Number.isInteger(z3)) return null; const sol = [a, b, z3];
+        return QS("Donne les zéros de " + M("P(x) = (" + lin(1, -a) + ")(" + lin(1, -b) + ")(" + lin(k, -c) + ")") + ". (fractions acceptées)", sol, "Un produit est nul si un facteur est nul : " + M(setT(sol)) + ".",
+          { ctx: "produit-nul", guide: [G("Zéro du troisième facteur " + M(lin(k, -c)) + " ?", z3, M(fT(z3)) + "."), GSet("Tous les zéros ?", sol, M(setT(sol)) + ".")],
+            traps: [TS([-a, -b, -z3], "x − a = 0 donne x = a : attention aux signes."), TS([a, b, c], k + "x − " + c + " = 0 donne x = " + c + " ÷ " + k + ".")] }); },
+      () => { const r = nz(-3, 3), b = R.int(-4, 4), d = nz(-9, 9), s0 = r ** 3 + b * r * r + d, c = r6(-s0 / r); if (!Number.isInteger(c) || !c || Math.abs(r) === 1 && Math.abs(c) > 12) return null;
+        return QN("Le nombre " + M(r) + " est un zéro de " + M("P(x) = x^3" + tm(b, "x^{2}") + " + cx" + sg(d)) + ". Que vaut " + M("c") + " ?", c, M("P(" + r + ") = 0") + " : " + M(pT(r) + "^3" + (b ? sg(b) + " \\cdot " + pT(r) + "^2" : "") + " + " + pT(r) + " c" + sg(d) + " = 0") + ", " + M("c = " + c) + ".",
+          { ctx: "coefficient", guide: [G("Valeur de " + M("P(" + r + ")") + " sans le terme en c ?", s0, M(s0) + "."), G(M("c") + " = ?", c, M(c) + ".")],
+            traps: [TR(-c, "Attention au signe en isolant c."), TR(-s0, "Divise par " + r + ".")] }); },
     ],
     2: [
       () => { const a = nz(-4, 4), q = [1, R.int(-4, 4), R.int(-6, 6)], rest = nz(-6, 6), Pcs = [q[0], q[1] - a * q[0], q[2] - a * q[1], -a * q[2] + rest];
