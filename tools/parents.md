@@ -14,6 +14,57 @@ avec son enfant** et **encourager l'effort**, jamais un relevé de notes minute 
 - Limite : photo du moment, renvoyée par l'enfant (rythme hebdomadaire = rituel de 2 min) ; un suivi automatique
   demandera un serveur.
 
+## 0 bis. Prototype fait (24.11 soir, branche agent/parents, à contrôler)
+
+- **Côté enfant** : Progrès → carte « 👪 Mes parents » → « Envoyer à mes parents » (pas de case sur l'accueil). Écran de
+  transparence : « Ce qu'ils verront » / « Ce qu'ils ne verront pas » (ni Mathélo, ni notes, ni liste d'erreurs, ni
+  réponses, ni heures), partage natif (WhatsApp, SMS…), copie du lien, QR si le lien est assez court, et « Voir la page
+  de mes parents » (aperçu exact, rien n'est enregistré).
+- **Lien** : …/#parent=<code de sauvegarde>. Le code contient désormais (src/backup.js, champs facultatifs, anciens codes
+  toujours lus) le **carnet d'erreurs** (codes exacts des questions ; erreur repérée et réponse pour les 8 plus récentes)
+  et un **identifiant d'enfant** aléatoire (pid, créé au premier envoi, suit la sauvegarde d'un appareil à l'autre).
+  Effet de bord utile : la sauvegarde ordinaire garde maintenant aussi le carnet (il était perdu avant).
+- **Côté parent** (src/parents.js, src/parents.css) : page en **lecture seule** (la progression de l'appareil n'est
+  jamais lue ni remplacée), dates comptées depuis le jour de la photo :
+  - « Sa semaine » : 7 cases (jours de pratique), phrase bienveillante, notions travaillées en mots, chapitre en
+    classe, une réussite à fêter (notion maîtrisée, erreur effacée, progrès, ou l'effort) ;
+  - « Résoudre ensemble » : les 3 dernières erreurs du carnet, régénérées à l'identique (Engine.fromCode) : énoncé et
+    figure, 3 questions à poser, indices dévoilables un par un (pas à pas guidé ou étapes de la correction), erreur
+    repérée par l'app (sinon piège fréquent), rappel de cours, solution repliée « pour vous » ;
+  - « À faire ensemble » : la question curieuse de la semaine (paris de chacun, fin mot replié) et une histoire des
+    maths à raconter ; 3 conseils (valoriser l'effort, laisser expliquer, ne pas donner la réponse) ;
+  - « Photo du jj.mm.aaaa » ; avertissement au-delà de 10 jours (« demandez-lui un nouveau lien »).
+- **Plusieurs enfants** : codes gardés sur l'appareil du parent (localStorage « m2m-parents », jamais la progression),
+  sous un surnom saisi par le parent ; boutons d'un enfant à l'autre ; un nouveau code du même enfant (même pid) met
+  à jour sans question ; une photo plus ancienne ne remplace pas une plus récente ; code sans pid (avant le 24.11) :
+  « nouvel enfant » ou « mettre à jour » un enfant existant. Renommer, retirer, coller un lien reçu. …/#parent seul
+  rouvre le dernier enfant vu (à mettre en favori).
+- **Rien n'est envoyé** depuis #parent (ping « open » et rapport d'erreurs coupés dans app.js). Seul le bouton 💬
+  (commentaire écrit volontairement) reste actif, comme partout : décision à prendre.
+- **Chargement par niveau** : la page charge les paquets du niveau de l'enfant (ensurePacks) avant de régénérer.
+- **Tests** : tests/parents.html (aller-retour du code, transparence, aperçu, lecture seule, paquets, contenus,
+  problème identique, 2 enfants, mise à jour, ancien code, code abîmé, aucun envoi, largeur 360 px). Captures :
+  tests/parents.html?shot=share|parent|solve|fun|kids|old ; images dans design/parents/ (enfant_envoyer, parent_semaine,
+  parent_resoudre, parent_ensemble, parent_enfants, parent_ancien .png).
+
+### Limites du prototype
+
+- Photo du moment, renvoyée par l'enfant : pas de suivi automatique (il faudrait un serveur).
+- Le lien est long (plusieurs ko) : il passe par WhatsApp, SMS ou mail, mais le QR n'apparaît que pour les petits codes.
+- Le lien contient toute la progression (c'est le code de sauvegarde) : l'enfant doit savoir qu'il ne l'envoie qu'à ses parents.
+- Pas encore d'entrée « Je suis parent » visible : il faut un lien reçu ou …/#parent.
+
+### Prochaines étapes proposées
+
+1. **Contrat de la semaine** décidé ensemble (ex. 4 séances de 5 min, préparer le test de vendredi) : affiché côté
+   enfant et dans la page parent (effort tenu, pas les notes).
+2. **Encouragements du parent visibles chez l'enfant** : sans serveur, le parent renvoie un petit lien
+   (…/#bravo=<message court>) que l'enfant ouvre ; l'app l'affiche à l'accueil une fois.
+3. **Entrée « Je suis parent »** (accueil de bienvenue et mentions légales) : ce que ça apporte en 30 s, installation
+   sur le téléphone de l'enfant, ouverture de …/#parent.
+4. **Palier avec appairage** (serveur) : mise à jour automatique de la page parent, historique des semaines, relances
+   douces ; suppose l'accord écrit de l'employeur et le choix du service de données.
+
 ## 1. Sans compte : la « carte de la semaine » partagée par l'élève (faisable vite)
 
 - C'est l'élève qui décide de partager : bouton « Montrer ma semaine à mes parents » (Progrès). L'app produit un lien

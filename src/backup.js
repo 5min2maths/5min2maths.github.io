@@ -23,11 +23,18 @@ const Backup = {
       // 24.11 (facultatif, codes plus anciens sans) : point de départ de « Ma semaine » (premier instantané des 7 jours)
       // et dates des erreurs effacées du carnet.
       ...(ws ? { w: [off(ws.d), ws.c || {}, ws.k || []] } : {}), ...(co.length ? { co: co.map(off) } : {}),
+      /* 24.11 (espace parent, src/parents.js) : carnet d'erreurs (codes exacts des questions ; erreur repérée et réponse
+         pour les 8 plus récentes seulement, pour garder un code court) et identifiant d'enfant (aléatoire, sert à
+         reconnaître le même enfant quand le parent reçoit un nouveau code). */
+      ...(Array.isArray(s.carnet) && s.carnet.length ? { cn: s.carnet.map((x, i, A) => [x.id, x.d, x.code, off(x.date), x.ok || 0].concat(i >= A.length - 8 && x.m ? [x.m, x.a || ""] : [])) } : {}),
+      ...(s.pid ? { pid: s.pid } : {}),
     };
   },
-  unpack(o) {
+  /* base (24.11, espace parent) : date de référence des dates relatives (o.t = jour de la photo) ; par défaut
+     aujourd'hui (reprise de la progression). */
+  unpack(o, base) {
     if (!o || o.v !== 1 || !o.p || !o.n) throw new Error("code");
-    const t = day(), on = (k) => (k === null || k === undefined ? null : addDays(t, k)), ST = Object.fromEntries(Object.entries(this.ST).map(([a, b]) => [b, a]));
+    const t = base || day(), on = (k) => (k === null || k === undefined ? null : addDays(t, k)), ST = Object.fromEntries(Object.entries(this.ST).map(([a, b]) => [b, a]));
     const s = Engine.newState(o.p);
     s.created = on(o.cr) || t;
     Engine.initNotions(s, Object.fromEntries(Engine.catalog(o.p).map((c) => [c.id, c.defaultStatus])));
@@ -53,6 +60,8 @@ const Backup = {
     if (o.nw) s.now = o.nw;
     if (Array.isArray(o.w) && o.w.length === 3) s.snaps = [{ d: on(o.w[0]), c: o.w[1] || {}, k: o.w[2] || [] }];
     if (Array.isArray(o.co)) s.carnetOut = o.co.map(on);
+    if (Array.isArray(o.cn)) s.carnet = o.cn.filter((x) => Array.isArray(x) && x[0] && x[2]).map(([id, d, code, dt, ok, m, a]) => ({ id, d, code, date: on(dt) || t, ok: ok || 0, ...(m ? { m, a: a || undefined } : {}) }));
+    if (o.pid) s.pid = o.pid;
     if (o.a) s.a11y = { fs: +o.a.fs || 1, font: o.a.font ? 1 : 0, hc: o.a.hc ? 1 : 0 }; // réglages de lecture (24.11)
     s.placed = true;
     Engine.migrate(s);
@@ -67,11 +76,13 @@ const Backup = {
     if (typeof CompressionStream !== "undefined") { try { return "1" + this.b64(await this.pipe(raw, CompressionStream, "deflate-raw")); } catch (e) {} }
     return "0" + this.b64(raw);
   },
-  async decode(code) {
-    code = String(code).trim().replace(/^.*#r=/, "").replace(/\s+/g, "");
+  /* Code (ou lien …#r=… / …#parent=…) → objet compact, sans le transformer en progression (24.11, espace parent). */
+  async read(code) {
+    code = String(code).trim().replace(/^.*#(r|parent)=/, "").replace(/\s+/g, "");
     const bytes = this.unb64(code.slice(1));
     const raw = code[0] === "1" ? await this.pipe(bytes, DecompressionStream, "deflate-raw") : bytes;
-    return this.unpack(JSON.parse(new TextDecoder().decode(raw)));
+    return JSON.parse(new TextDecoder().decode(raw));
   },
+  async decode(code) { return this.unpack(await this.read(code)); },
   url(code) { return location.origin + location.pathname + "#r=" + code; },
 };
