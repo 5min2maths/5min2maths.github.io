@@ -624,7 +624,7 @@ const FIG = (() => {
   const svg = (w, h, body, label) =>
     '<svg class="fig" viewBox="0 0 ' + w + " " + h + '" role="img" aria-label="' + (label || "figure") + '" xmlns="http://www.w3.org/2000/svg">' + body + "</svg>";
   const t = (x, y, s, cls = "f-txt", anchor = "middle", size = 14) =>
-    '<text x="' + x + '" y="' + y + '" class="' + cls + '" text-anchor="' + anchor + '" font-size="' + size + '">' + s + "</text>";
+    '<text x="' + x + '" y="' + y + '" class="' + cls + '" text-anchor="' + anchor + '" font-size="' + size + '">' + String(s).replace(/\{,\}/g, ",") + "</text>"; // 24.11 : « {,} » (virgule TeX) affiché tel quel dans les figures (robot)
   const L = (x1, y1, x2, y2, cls = "f-line", extra = "") => '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" class="' + cls + '" ' + extra + "/>";
   const P = (pts, cls = "f-line") => '<polygon points="' + pts.map((p) => p.join(",")).join(" ") + '" class="' + cls + '"/>';
   const fmt = (v) => String(+(+v).toFixed(3)).replace(".", ",");
@@ -982,7 +982,7 @@ function GEO() {
         X: (p) => +(ox + (p[0] - x0) * s).toFixed(1),
         Y: (p) => +(H - m - (p[1] - y0) * s).toFixed(1),
         dir(V, A, len) { const dx = (A[0] - V[0]) * s, dy = -(A[1] - V[1]) * s, l = Math.hypot(dx, dy) || 1; return [(dx / l) * len, (dy / l) * len]; },
-        txt: (x, y, str, anchor = "middle") => '<text x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" class="' + (/\?/.test(str) ? "f-accent f-txt" : "f-txt") + '" text-anchor="' + anchor + '" font-size="13">' + str + "</text>",
+        txt: (x, y, str, anchor = "middle") => '<text x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" class="' + (/\?/.test(str) ? "f-accent f-txt" : "f-txt") + '" text-anchor="' + anchor + '" font-size="13">' + String(str).replace(/\{,\}/g, ",") + "</text>",
         name: (nm, p) => { const dx = p[0] - cx, dy = p[1] - cy, l = Math.hypot(dx, dy) || 1; return T.txt(T.X(p) + (dx / l) * 13, T.Y(p) - (dy / l) * 13 + 4, nm); },
         lab(mid, str, A, B, inside) {
           if (!str) return "";
@@ -3917,7 +3917,7 @@ FINE.push(
     lesson: ["Cercles et tangentes", "Trois réflexes pour les cercles dans un repère.", "Le cercle de centre \\(C(a \\, ; b)\\) et de rayon \\(r\\) a pour équation \\((x - a)^2 + (y - b)^2 = r^2\\). Une droite est tangente au cercle quand sa distance au centre est égale au rayon. La tangente en un point \\(T\\) est perpendiculaire au rayon \\([CT]\\) ; sa pente est l'inverse de celle du rayon, avec le signe opposé.", ["Diamètre \\([AB]\\) avec \\(A(0 \\, ; 0)\\) et \\(B(6 \\, ; 8)\\) : le centre est le milieu, \\(C(3 \\, ; 4)\\) ; le rayon vaut la moitié de \\(AB = 10\\), soit \\(5\\). Équation : \\((x - 3)^2 + (y - 4)^2 = 25\\).", "Tangente au cercle \\(x^2 + y^2 = 25\\) en \\(T(3 \\, ; 4)\\) : le rayon \\([OT]\\) a pour pente \\(\\frac{4}{3}\\), donc la tangente a pour pente \\(-\\frac{3}{4}\\). Vérification : \\(\\frac{4}{3} \\cdot \\left(-\\frac{3}{4}\\right) = -1\\).", "Distance de \\(C(1 \\, ; 2)\\) à la droite \\(3x + 4y - 1 = 0\\) : \\(\\frac{|3 \\cdot 1 + 4 \\cdot 2 - 1|}{\\sqrt{3^2 + 4^2}} = \\frac{10}{5} = 2\\). La droite est tangente au cercle de centre \\(C\\) et de rayon \\(2\\) (plus petite : elle le coupe ; plus grande : elle ne le touche pas)."], "Dans \\((x - 3)^2 + (y - 4)^2 = 25\\), le rayon est \\(5\\) et non \\(25\\) : le second membre est \\(r^2\\)."],
     g: [
       () => { const x1 = R.int(-5, 3), y1 = R.int(-5, 3), p = R.int(1, 4), q = R.int(1, 4); return QV("Le cercle de diamètre " + M("[AB]") + ", avec " + M("A(" + x1 + " \\, ; " + y1 + ")") + " et " + M("B(" + (x1 + 2 * p) + " \\, ; " + (y1 + 2 * q) + ")") + ", a pour équation " + M("(x - a)^2 + (y - b)^2 = r^2") + ". Que vaut " + M("r^2") + " ?", p * p + q * q, "Centre : " + M("(" + (x1 + p) + " \\, ; " + (y1 + q) + ")") + ". " + M("r^2 = " + p + "^2 + " + q + "^2 = " + (p * p + q * q)) + ".", { guide: [GS("Centre = milieu de [AB] : abscisse ?", x1 + p, M(x1 + p) + "."), GS("Ordonnée du centre ?", y1 + q, M(y1 + q) + "."), GS(M("r^2") + " = (écart horizontal)² + (écart vertical)² entre le centre et A : ?", p * p + q * q, M(p + "^2 + " + q + "^2 = " + (p * p + q * q)) + ".")], fig: ((cx, cy, r) => { const lo = Math.floor(Math.min(cx - r, cy - r, 0)) - 1, hi = Math.ceil(Math.max(cx + r, cy + r, 0)) + 1; return FIG.plot([], [[x1, y1, "A"], [x1 + 2 * p, y1 + 2 * q, "B"], [cx, cy, ""]], { numbers: true, step: hi - lo > 14 ? 2 : 1, xr: [lo, hi], yr: [lo, hi], circles: [[cx, cy, r]], segs: [[x1, y1, x1 + 2 * p, y1 + 2 * q, "f-accent"]], label: "cercle de diamètre [AB]" }); })(x1 + p, y1 + q, Math.hypot(p, q)) }); },
-      () => { const a = R.int(-4, 4), b = R.int(-4, 4), k = R.int(1, 5); if (R.rand() < 0.5) { const y = b + R.pick([-1, 1]) * k; return QV("Pour quel rayon le cercle de centre " + M("(" + a + " \\, ; " + b + ")") + " est-il tangent à la droite " + M("y = " + y) + " ?", k, "La distance du centre à la droite est " + M("|" + b + " - " + par(y) + "| = " + k) + " : c'est le rayon.", { guide: [GS("Droite horizontale : distance du centre à la droite = écart des ordonnées " + M("|" + b + " - " + par(y) + "|") + " = ?", k, M(k) + " : c'est le rayon.")] }); } const c = R.pick([-1, 1]) * 5 * k - 3 * a - 4 * b; return QV("Pour quel rayon le cercle de centre " + M("(" + a + " \\, ; " + b + ")") + " est-il tangent à la droite " + M("3x + 4y" + sg(c) + " = 0") + " ?", k, "Distance du centre à la droite : " + M("\\frac{|3 \\cdot " + par(a) + " + 4 \\cdot " + par(b) + sg(c) + "|}{\\sqrt{3^2 + 4^2}} = \\frac{" + 5 * k + "}{5} = " + k) + ".", { guide: [GS("Numérateur : " + M("|3 \\cdot " + par(a) + " + 4 \\cdot " + par(b) + sg(c) + "|") + " = ?", 5 * k, M(5 * k) + "."), GS("Dénominateur " + M("\\sqrt{3^2 + 4^2}") + " = ?", 5, "5."), GS("Distance = rayon ?", k, M(5 * k + " : 5 = " + k) + ".")] }); },
+      () => { const a = R.int(-4, 4), b = R.int(-4, 4), k = R.int(2, 6); /* 24.11 : rayon ≠ 1 (robot) */ if (R.rand() < 0.5) { const y = b + R.pick([-1, 1]) * k; return QV("Pour quel rayon le cercle de centre " + M("(" + a + " \\, ; " + b + ")") + " est-il tangent à la droite " + M("y = " + y) + " ?", k, "La distance du centre à la droite est " + M("|" + b + " - " + par(y) + "| = " + k) + " : c'est le rayon.", { guide: [GS("Droite horizontale : distance du centre à la droite = écart des ordonnées " + M("|" + b + " - " + par(y) + "|") + " = ?", k, M(k) + " : c'est le rayon.")] }); } const c = R.pick([-1, 1]) * 5 * k - 3 * a - 4 * b; return QV("Pour quel rayon le cercle de centre " + M("(" + a + " \\, ; " + b + ")") + " est-il tangent à la droite " + M("3x + 4y" + sg(c) + " = 0") + " ?", k, "Distance du centre à la droite : " + M("\\frac{|3 \\cdot " + par(a) + " + 4 \\cdot " + par(b) + sg(c) + "|}{\\sqrt{3^2 + 4^2}} = \\frac{" + 5 * k + "}{5} = " + k) + ".", { guide: [GS("Numérateur : " + M("|3 \\cdot " + par(a) + " + 4 \\cdot " + par(b) + sg(c) + "|") + " = ?", 5 * k, M(5 * k) + "."), GS("Dénominateur " + M("\\sqrt{3^2 + 4^2}") + " = ?", 5, "5."), GS("Distance = rayon ?", k, M(5 * k + " : 5 = " + k) + ".")] }); },
       () => { const [p0, q0, r] = R.pick([[3, 4, 5], [4, 3, 5], [5, 12, 13], [12, 5, 13], [6, 8, 10], [8, 6, 10], [8, 15, 17]]), p = p0 * R.pick([-1, 1]), q = q0 * R.pick([-1, 1]); return QV("Quelle est la pente de la tangente au cercle " + M("x^2 + y^2 = " + r * r) + " au point " + M("(" + p + " \\, ; " + q + ")") + " ? Donne la valeur exacte.", -p / q, "Le rayon a pour pente " + M(frac(q, p)) + " ; la tangente lui est perpendiculaire : pente " + M(frac(-p, q)) + ".", { guide: [GS("Pente du rayon OP : " + M("\\frac{" + q + "}{" + p + "}") + " = ?", q / p, M(frac(q, p)) + "."), GS("Tangente perpendiculaire : pente = −1 : pente du rayon ?", -p / q, M(frac(-p, q)) + ".")], fig: FIG.plot([{ f: (x) => q - (p / q) * (x - p), cls: "f-accent" }], [[0, 0, "O"], [p, q, "P"]], { grid: false, ticks: false, xr: [-r - 4, r + 4], yr: [-r - 4, r + 4], circles: [[0, 0, r]], segs: [[0, 0, p, q, "f-line"]], label: "cercle, rayon OP et tangente en P" }) }); },
     ] },
 );
@@ -7791,6 +7791,13 @@ function compNote(rec) {
   };
 
   // ===================== Enregistrement =====================
+  // « Trouve l'erreur » (24.11, chantier I) : addition des équations mal faite (signe de y).
+  SYS2[2].push(() => { const x = R.nz(-5, 6), y = R.nz(-5, 6), s = x + y, d = x - y, w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+    if (s === d || s + d === s - d) return SYS2[2][0]();
+    return QN("Pour résoudre " + M("\\begin{cases} x + y = " + s + " \\\\ x - y = " + d + " \\end{cases}") + ", " + w + " écrit : « j'additionne : " + M("2x = " + s + " - " + par(d) + " = " + (s - d)) + " ». Trouve l'erreur, puis donne la valeur de " + M("x") + ".", x,
+      "Erreur : en additionnant, les " + M("y") + " s'éliminent et les seconds membres s'<b>additionnent</b> : " + M("2x = " + s + " + " + par(d) + " = " + 2 * x) + ", donc " + M("x = " + x) + ".",
+      { ctx: "erreur", guide: [GS("On additionne les deux équations : " + M(s + " + " + par(d)) + " = ? (c'est 2x)", 2 * x, M("2x = " + 2 * x) + "."), GS("x = ?", x, M("x = " + x) + ".")],
+        traps: [TRAP((s - d) / 2, "C'est le calcul de " + w + " : on additionne aussi les seconds membres.")] }); });
   const ALL = { sys2: SYS2, sysprob: SPROB, sysgraph: SGRAPH, sys3: SYS3, affine: AFF, affzero: AZ, sysineq: SI, ineq: IQ };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
@@ -8413,6 +8420,12 @@ function compNote(rec) {
   };
 
   // ===================== Enregistrement =====================
+  // « Trouve l'erreur » (24.11, chantier I) : on multiplie les exposants au lieu de les additionner.
+  PUISS[2].push(() => { const a = R.pick([2, 3, 5, 10]), m = R.int(2, 5), n = R.int(3, 6), w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+    return Qv(w + " écrit : « " + M(a + "^{" + m + "} \\cdot " + a + "^{" + n + "} = " + a + "^{" + m * n + "}") + " ». Trouve l'erreur, puis donne le bon exposant.", m + n,
+      "Erreur : " + M(a + "^{" + m + "}") + " compte " + m + " facteurs " + a + " et " + M(a + "^{" + n + "}") + " en compte " + n + " : en tout " + M(m + " + " + n + " = " + (m + n)) + " facteurs, donc " + M(a + "^{" + (m + n) + "}") + ". On multiplie les exposants pour une puissance de puissance, " + M("(" + a + "^{" + m + "})^{" + n + "}") + ".",
+      { ctx: "erreur", guide: [GS("Combien de facteurs " + a + " dans " + M(a + "^{" + m + "}") + " ?", m, M(m) + "."), GS("Et dans " + M(a + "^{" + n + "}") + " ?", n, M(n) + "."), GS("En tout (le bon exposant) ?", m + n, M(m + n) + ".")],
+        traps: [TRAP(m * n, "C'est l'exposant de " + w + " : on additionne les exposants quand on multiplie deux puissances de même base.")] }); });
   const ALL = { prio: PRIO, fracadd: FADD, fracmul: FMUL, fracconv: FCONV, puiss: PUISS, sci: SCI, scicalc: SCALC };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
@@ -8926,6 +8939,12 @@ function compNote(rec) {
   };
 
   // ===================== Enregistrement =====================
+  // « Trouve l'erreur » (24.11, chantier I) : cathète calculée avec une somme de carrés au lieu d'une différence.
+  PYTH[2].push(() => { const [p, q, r] = R.pick([[3, 4, 5], [5, 12, 13], [6, 8, 10], [8, 15, 17]]), k = R.pick([1, 2]), a = p * k, b = q * k, c = r * k, w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+    return Qv("Un triangle est rectangle ; son hypoténuse mesure " + M(c) + " cm et une cathète " + M(a) + " cm. " + w + " écrit : « " + M("b = \\sqrt{" + c + "^2 + " + a + "^2}") + " ». Trouve l'erreur, puis calcule l'autre cathète " + M("b") + " (en cm).", b,
+      "Erreur : l'hypoténuse est le plus grand côté ; " + M("c^2 = a^2 + b^2") + " donne " + M("b^2 = c^2 - a^2 = " + c * c + " - " + a * a + " = " + b * b) + ", donc " + M("b = " + b) + " cm.",
+      { ctx: "erreur", guide: [GS(M("b^2 = c^2 - a^2") + " : " + M(c * c + " - " + a * a) + " = ?", b * b, M(b * b) + "."), GS(M("b = \\sqrt{" + b * b + "}") + " = ?", b, M(b) + " cm.")],
+        traps: [TRAP(+Math.sqrt(c * c + a * a).toFixed(2), "C'est le calcul de " + w + " : une cathète est plus courte que l'hypoténuse, on soustrait les carrés.")] }); });
   const ALL = { pyth: PYTH, pythfig: PFIG, pythrec: PREC, vol: VOL, volcone: VCONE, airepyr: APYR, volcomp: VCOMP, volmanq: VMAN };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
@@ -9287,6 +9306,12 @@ function compNote(rec) {
     ],
   };
 
+  // « Trouve l'erreur » (24.11, chantier I) : rapport AD/DB au lieu de AD/AB.
+  TH[2].push(() => { const k = R.pick([2, 3]), ad = R.int(2, 5), ab = ad * k, db = ab - ad, de = R.int(2, 6), bc = de * k, w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]), faux = r6((de * db) / ad);
+    return Qv("Dans un triangle " + M("ABC") + ", " + cfg + ", avec " + M("AD = " + ad) + ", " + M("DB = " + db) + " et " + M("DE = " + de) + " (en cm). " + w + " écrit : « " + M("\\frac{AD}{DB} = \\frac{DE}{BC}") + ", donc " + M("BC = " + de + " \\cdot \\frac{" + db + "}{" + ad + "}") + " ». Trouve l'erreur, puis calcule " + M("BC") + ".", bc,
+      "Erreur : Thalès compare le petit triangle " + M("ADE") + " au grand " + M("ABC") + " : " + M("\\frac{AD}{AB} = \\frac{DE}{BC}") + ", avec " + M("AB = AD + DB = " + ab) + ". Donc " + M("BC = " + de + " \\cdot \\frac{" + ab + "}{" + ad + "} = " + bc) + " cm.",
+      { ctx: "erreur", fig: GF.thales(1 / k, { AD: ad + "", DB: db + "", DE: de + "", BC: "?" }), guide: [GS("Le grand triangle a pour côté " + M("AB = AD + DB") + " = ?", ab, M(ab) + " cm."), GS("Rapport d'agrandissement " + M("AB : AD") + " ?", k, M(k) + "."), GS(M("BC = DE \\cdot " + k) + " = ?", bc, M(bc) + " cm.")],
+        traps: [TRAP(faux, "C'est le calcul de " + w + " : " + M("DB") + " n'est pas un côté du grand triangle, c'est " + M("AB") + " qu'il faut.")] }); });
   const ALL = { thales: TH, thalesrec: REC, simil: SIM };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
@@ -9477,6 +9502,12 @@ function compNote(rec) {
     ],
   };
 
+  // « Trouve l'erreur » (24.11, chantier I) : issue comptée deux fois dans « A ou B ».
+  PB[2].push(() => { const s = R.pick([4, 5]), w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]), A = [2, 4, 6], Bv = [1, 2, 3, 4, 5, 6].filter((x) => x >= s), U = [...new Set([...A, ...Bv])].sort((x, y) => x - y);
+    return Qv("On lance un dé équilibré à 6 faces. " + w + " calcule la probabilité d'obtenir un nombre pair <b>ou</b> au moins " + s + " : « " + M("\\frac{3}{6} + \\frac{" + Bv.length + "}{6} = \\frac{" + (3 + Bv.length) + "}{6}") + " ». Trouve l'erreur, puis donne la bonne probabilité (fraction).", U.length / 6,
+      "Erreur : " + A.filter((x) => x >= s).join(" et ") + (A.filter((x) => x >= s).length > 1 ? " sont" : " est") + " à la fois pair" + (A.filter((x) => x >= s).length > 1 ? "s" : "") + " et au moins " + s + " : " + w + " les a comptés deux fois. Issues favorables : " + U.join(", ") + ", soit " + M("\\frac{" + U.length + "}{6} = " + frac(U.length, 6)) + ".",
+      { ctx: "erreur", guide: [GS("Liste les issues paires ou au moins " + s + ", sans répéter : combien y en a-t-il ?", U.length, U.join(", ") + "."), GS("Probabilité ?", U.length / 6, M(frac(U.length, 6)) + ".")],
+        traps: [TRAP((3 + Bv.length) / 6, "C'est le calcul de " + w + " : les issues communes aux deux événements sont comptées deux fois.")] }); });
   const ALL = { denombr: DN, proba: PB };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
@@ -10370,7 +10401,7 @@ function compNote(rec) {
       () => { const a = pk([1, 2, -1, -2, 3]), h = nz(-4, 4), k = nz(-6, 6), cs = [a, -2 * a * h, a * h * h + k];
         return QX(DEV + M(co(a) + "(" + xm(h) + ")^2" + sg(k)) + ".", P2(cs), "expanded", M("(" + xm(h) + ")^2 = " + P2([1, -2 * h, h * h])) + ", fois " + M(a) + ", plus " + M(k) + " : " + M(P2(cs)) + ".",
           { ctx: "canon-dev", guide: [GX("Développe " + M("(" + xm(h) + ")^2"), P2([1, -2 * h, h * h]), M(P2([1, -2 * h, h * h])) + "."), GX("Résultat", P2(cs), M(P2(cs)) + ".")], traps: [TX(P2([a, -2 * a * h, a * h * h + a * k]), "Le " + k + " est hors de la parenthèse : il n'est pas multiplié par " + a + "."), TX(P2([a, 0, a * h * h + k]), "(x − h)² contient le double produit −2hx.")] }); },
-      () => { const h = nz(-5, 5), k = nz(-6, 6);
+      () => { const h = R.pick([-5, -4, -3, -2, 2, 3, 4, 5]), k = nz(-6, 6); // 24.11 : h ≠ ±1 (robot)
         return QN("Pour " + M("f(x) = (" + xm(h) + ")^2" + sg(k)) + ", que vaut " + M("h") + " dans la forme " + M("(x - h)^2 + k") + " ?", h, M(xm(h) + " = x - " + par(h)) + " : " + M("h = " + h) + ".",
           { ctx: "lire-h", guide: [GS(M("h") + " ?", h, M(h) + ".")], traps: [TR(-h, M(xm(h)) + " = x − (" + h + ")."), TR(k, "Ça, c'est k.")] }); },
       () => { const h = nz(-5, 5), k = nz(-8, 8);
@@ -10409,6 +10440,12 @@ function compNote(rec) {
     f2formes: [() => P("f(x) = x² − 8x + 12.", [["a) h de la forme canonique", 4], ["b) k de la forme canonique", -4], ["c) Plus petit zéro", 2]], ["(x − 4)² = x² − 8x + 16.", "(x − 4)² = 4 ⇔ x − 4 = ±2."], "a) 4 ; b) " + M("12 - 16 = -4") + " ; c) 2 (et 6).")],
   };
 
+  // « Trouve l'erreur » (24.11, chantier I) : abscisse du sommet sans le signe moins.
+  F2[2].push(() => { const a = R.pick([1, 2, -1, -2]), xs = R.pick([-3, -2, 2, 3, 4]), b = -2 * a * xs, c = R.int(-6, 6), w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+    return QN("Pour " + M("f(x) = " + P2([a, b, c])) + ", " + w + " calcule l'abscisse du sommet : « " + M("x_S = \\frac{b}{2a} = \\frac{" + b + "}{" + 2 * a + "} = " + -xs) + " ». Trouve l'erreur, puis donne " + M("x_S") + ".", xs,
+      "Erreur : la formule est " + M("x_S = -\\frac{b}{2a}") + ". Ici " + M("x_S = -\\frac{" + b + "}{" + 2 * a + "} = " + xs) + ".",
+      { ctx: "erreur", guide: [GS("Formule " + M("x_S = -\\frac{b}{2a}") + " : combien vaut " + M("\\frac{b}{2a}") + " ?", -xs, M(-xs) + "."), GS("Avec le signe moins, " + M("x_S") + " = ?", xs, M(xs) + ".")],
+        traps: [TRAP(-xs, "C'est le calcul de " + w + " : il manque le signe moins de la formule.")] }); });
   const ALL = { polyop: PO, factor2: FC, trinfact: TF, f2: F2, f2formes: FF };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
@@ -10541,7 +10578,7 @@ function compNote(rec) {
       () => { const a = pk([1, 2, -1, -2]), b = nz(-3, 3), c = R.int(-4, 4), cs = [a, b, c], f = quad(cs);
         return QX("Une parabole passe par " + pts3([-1, 1, 2], cs) + ". Détermine l'expression développée de " + M("f(x)") + ".", EX(cs), "Système : " + M("a - b + c = " + f(-1)) + ", " + M("a + b + c = " + f(1)) + ", " + M("4a + 2b + c = " + f(2)) + " : " + M("b = " + b) + ", puis " + M("a = " + a) + ", " + M("c = " + c) + ".",
           { ctx: "expr-sans-0", guide: [GS(M("b") + " (soustrais les deux premières) ?", b, M("2b = " + (f(1) - f(-1))) + "."), GS(M("a") + " ?", a, M(a) + "."), GX("Expression", EX(cs), M(P2(cs)) + ".")], traps: [TX(P2([a, -b, c]), "(a + b + c) − (a − b + c) = 2b.")] }); },
-      () => { const a = pk([1, 2, -1, 3]), b = nz(-4, 4), c = R.int(-4, 4), cs = [a, b, c], f = quad(cs);
+      () => { const a = pk([2, -2, 3, -3]), b = nz(-4, 4), c = R.int(-4, 4), cs = [a, b, c], f = quad(cs); // 24.11 : a ≠ ±1 (robot)
         return QN("Une parabole " + M("f(x) = ax^2 + bx + c") + " passe par " + pts3([1, 2, 3], cs) + ". Que vaut " + M("a") + " ?", a, M("f(2) - f(1) = 3a + b = " + (f(2) - f(1))) + " ; " + M("f(3) - f(2) = 5a + b = " + (f(3) - f(2))) + " ; donc " + M("2a = " + 2 * a) + ".",
           { ctx: "a-1-3", guide: [GS(M("3a + b = f(2) - f(1)") + " ?", 3 * a + b, M(3 * a + b) + "."), GS(M("5a + b = f(3) - f(2)") + " ?", 5 * a + b, M(5 * a + b) + "."), GS(M("a") + " ?", a, M(a) + ".")], traps: [TR(2 * a, "On obtient 2a : divise par 2."), TR(f(2) - f(1), "Différences successives : il faut en faire deux.")] }); },
       () => { const a = pk([1, -1, 2]), h = nz(-3, 3), k = R.int(-4, 4), cs = [a, -2 * a * h, a * h * h + k], xs = [h - 1, h + 1, h + 2];
@@ -11504,6 +11541,12 @@ function compNote(rec) {
     trigexact: [() => P("Un triangle rectangle a une hypoténuse de 12 cm et un angle de 30°.", [["a) Côté opposé à 30° (cm)", 6], ["b) Côté adjacent (cm, valeur exacte : tape 6√3)", 6 * Math.sqrt(3)], ["c) Aire (cm², valeur exacte : tape 18√3)", 18 * Math.sqrt(3)]], ["sin 30° = 1/2.", "cos 30° = √3/2."], "a) 6 ; b) " + M("6\\sqrt{3}") + " ; c) " + M("\\frac{6 \\cdot 6\\sqrt{3}}{2} = 18\\sqrt{3}") + ".")],
   };
 
+  // « Trouve l'erreur » (24.11, chantier I) : cosinus au lieu de sinus pour le côté opposé.
+  TG[2].push(() => { const al = R.pick([25, 35, 40, 50, 55, 65]), c = R.int(6, 15), v = +(c * Math.sin((al * Math.PI) / 180)).toFixed(2), faux = +(c * Math.cos((al * Math.PI) / 180)).toFixed(2), w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+    return Qv("Dans un triangle rectangle, l'hypoténuse mesure " + M(c) + " cm et un angle aigu " + M("\\alpha") + " vaut " + M(al + "°") + ". Pour le côté <b>opposé</b> à " + M("\\alpha") + ", " + w + " écrit : « " + M(c + " \\cdot \\cos " + al + "° \\approx " + dec(faux)) + " cm ». Trouve l'erreur, puis calcule ce côté (au centième, en cm).", v,
+      "Erreur : le cosinus relie le côté <b>adjacent</b> et l'hypoténuse. Pour le côté opposé : " + M("\\sin \\alpha = \\frac{\\text{opposé}}{\\text{hypoténuse}}") + ", donc " + M(c + " \\cdot \\sin " + al + "° \\approx " + dec(v)) + " cm.",
+      { round: 0.01, ctx: "erreur", guide: [GS("Quelle fonction relie l'opposé et l'hypoténuse ? Donne " + M("\\sin " + al + "°") + " (au millième).", Math.sin((al * Math.PI) / 180), M("\\sin " + al + "° \\approx " + dec(+Math.sin((al * Math.PI) / 180).toFixed(3))) + ".", 0.001), GS("Côté opposé : " + M(c + " \\cdot \\sin " + al + "°") + " ≈ ? (au centième)", v, M(dec(v)) + " cm.", 0.01)],
+        traps: [TRAP(faux, "C'est le calcul de " + w + " : " + M("c \\cdot \\cos \\alpha") + " donne le côté adjacent.")] }); });
   const ALL = { trigo: TG, trigexact: TE, trigrel: TRL };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
@@ -11804,7 +11847,7 @@ function compNote(rec) {
           { ctx: "location", guide: [GS("Partie variable pour " + xs[k] + " h ?", p * xs[k], M(String(p * xs[k]).replace(".", "{,}")) + " CHF."), GS("Prix total ?", pc + p * xs[k], M(String(pc + p * xs[k]).replace(".", "{,}")) + " CHF.")], traps: [TR(p * xs[k], "N'oublie pas les " + pc + " CHF de base."), TR((pc + p) * xs[k], "La partie fixe ne se paie qu'une fois.")] }); },
     ],
     3: [
-      () => { const a = nz(-4, 4), b = R.int(-6, 6), xs = [-2, 1, 3, 6], ys = xs.map((x) => a * x + b);
+      () => { const a = R.pick([-4, -3, -2, 2, 3, 4]), b = R.int(-6, 6), xs = [-2, 1, 3, 6], ys = xs.map((x) => a * x + b); // 24.11 : pente ≠ ±1 (robot)
         return Qv("Ce tableau est celui d'une fonction affine " + M("f(x) = ax + b") + ". " + table(xs, ys) + " Que vaut la pente " + M("a") + " ?", a, "Entre " + M("x = 1") + " et " + M("x = 3") + " : " + M("a = \\frac{" + ys[2] + " - " + pr(ys[1]) + "}{3 - 1} = " + a) + ".",
           { ctx: "pente", guide: [GS("Écart des images entre " + M("x = 1") + " et " + M("x = 3") + " ?", ys[2] - ys[1], M(ys[2] - ys[1]) + "."), GS("Divisé par l'écart des " + M("x") + " (2) : " + M("a") + " = ?", a, M(a) + ".")], traps: [TR(ys[2] - ys[1], "Divise par l'écart des x (ici 2) : les colonnes ne sont pas espacées de 1."), TR(ys[1], "C'est une image, pas la pente.")] }); },
       () => { const a = nz(-4, 4), b = nz(-6, 6), xs = [-2, 1, 3], ys = xs.map((x) => a * x + b);
@@ -11827,6 +11870,12 @@ function compNote(rec) {
     ],
   };
 
+  // « Trouve l'erreur » (24.11, chantier I) : pente calculée « horizontal sur vertical ».
+  TAB[2].push(() => { const a = R.pick([2, 3, -2, -3, 4]), x1 = R.int(-3, 1), dx = R.int(1, 3), y1 = R.int(-4, 4), x2 = x1 + dx, y2 = y1 + a * dx, w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+    return Qv("Une droite passe par " + M("A(" + x1 + " ; " + y1 + ")") + " et " + M("B(" + x2 + " ; " + y2 + ")") + ". " + w + " calcule sa pente : « " + M("\\frac{" + x2 + " - " + par(x1) + "}{" + y2 + " - " + par(y1) + "} = " + frac(dx, a * dx)) + " ». Trouve l'erreur, puis donne la bonne pente.", a,
+      "Erreur : la pente, c'est la variation <b>verticale</b> divisée par la variation <b>horizontale</b> : " + M("\\frac{" + y2 + " - " + par(y1) + "}{" + x2 + " - " + par(x1) + "} = \\frac{" + a * dx + "}{" + dx + "} = " + a) + ".",
+      { ctx: "erreur", guide: [GS("Variation verticale " + M("y_B - y_A") + " ?", a * dx, M(a * dx) + "."), GS("Variation horizontale " + M("x_B - x_A") + " ?", dx, M(dx) + "."), GS("Pente = vertical : horizontal ?", a, M(a) + ".")],
+        traps: [TRAP(1 / a, "C'est le calcul de " + w + " : le quotient est à l'envers.")] }); });
   const ALL = { repere: REP, tabval: TAB };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
@@ -19365,6 +19414,7 @@ const Backup = {
       if (!x.seen && !x.placed && !x.lessonSeen && !x.easy && !x.retry && x.m === def.m && x.box === def.box) { if (x.status !== defs[id]) n[id] = [this.ST[x.status]]; continue; }
       n[id] = [this.ST[x.status] || "v", r2(x.m), x.box, off(x.due), x.seen, x.ok, (x.placed ? 1 : 0) | (x.lessonSeen ? 2 : 0), x.easy || 0, off(x.retry), x.fails ?? null];
     }
+    const ws = (Array.isArray(s.snaps) ? s.snaps : []).find((x) => x && x.d >= addDays(t, -6)), co = (Array.isArray(s.carnetOut) ? s.carnetOut : []).filter((d) => d >= addDays(t, -6));
     const c = {};
     for (const [cid, x] of Object.entries(s.comps || {})) c[cid] = [x.r.map((v) => Math.round(v * 4)).join(""), x.n, off(x.last)];
     const b = s.bc ? { ...s.bc, last: off(s.bc.last), weeks: Object.fromEntries(Object.entries(s.bc.weeks).map(([k, v]) => [off(k), v])) } : null;
@@ -19374,6 +19424,9 @@ const Backup = {
       k: [s.streak.count, off(s.streak.last)].concat(s.streak.best || s.streak.jokerWk ? [s.streak.best || 0] : []).concat(s.streak.jokerWk ? [off(s.streak.jokerWk)] : []),
       h: (s.history || []).slice(-14).map((x) => [off(x.date), x.n, r2(x.score)]),
       b, pr: s.prep || null, nw: s.now || null, a: s.a11y && (s.a11y.fs !== 1 || s.a11y.font || s.a11y.hc) ? s.a11y : undefined, g: Object.fromEntries(Object.entries(s.badges || {}).map(([k, d]) => [k, off(d)])),
+      // 24.11 (facultatif, codes plus anciens sans) : point de départ de « Ma semaine » (premier instantané des 7 jours)
+      // et dates des erreurs effacées du carnet.
+      ...(ws ? { w: [off(ws.d), ws.c || {}, ws.k || []] } : {}), ...(co.length ? { co: co.map(off) } : {}),
     };
   },
   unpack(o) {
@@ -19402,6 +19455,8 @@ const Backup = {
     s.badges = Object.fromEntries(Object.entries(o.g || {}).map(([k, d]) => [k, on(d)]));
     if (o.pr) s.prep = o.pr;
     if (o.nw) s.now = o.nw;
+    if (Array.isArray(o.w) && o.w.length === 3) s.snaps = [{ d: on(o.w[0]), c: o.w[1] || {}, k: o.w[2] || [] }];
+    if (Array.isArray(o.co)) s.carnetOut = o.co.map(on);
     if (o.a) s.a11y = { fs: +o.a.fs || 1, font: o.a.font ? 1 : 0, hc: o.a.hc ? 1 : 0 }; // réglages de lecture (24.11)
     s.placed = true;
     Engine.migrate(s);
@@ -25414,8 +25469,50 @@ const Engine = {
     s.status = "nonvu"; s.retry = addDays(day(), 21); s.due = s.retry;
     this.unlock(state);
   },
+  // Progression visible (24.11, chantier S) : instantané léger pris au début de chaque jour d'activité, AVANT la
+  // première modification (appelé par record, tooEasy, updateElo, recordComp et au chargement). Contenu : notes des
+  // compétences (en demi-points, entiers) et notions maîtrisées (vues, m ≥ 0,7, même critère que la carte des thèmes).
+  // Comme l'état ne change que les jours d'activité, et que chacun commence par un instantané, l'état « il y a 7 jours »
+  // est le premier instantané de la fenêtre : on ne garde que ceux des 7 derniers jours (7 au plus).
+  // Ancien state sans instantané : rien à migrer, le premier est pris au chargement (la semaine part de ce jour-là).
+  snap(state, today = day()) {
+    if (!state || !state.notions) return;
+    const S = Array.isArray(state.snaps) ? state.snaps : [];
+    if (S.length && S[S.length - 1] && S[S.length - 1].d === today) return;
+    const c = {};
+    for (const [cid, rec] of Object.entries(state.comps || {})) { const n = compNote(rec); if (n !== null) c[cid] = Math.round(n * 2); }
+    const k = Object.keys(state.notions).filter((id) => { const s = state.notions[id]; return s && s.seen > 0 && s.m >= 0.7; });
+    const lim = addDays(today, -6);
+    state.snaps = [...S.filter((x) => x && x.d >= lim && x.d < today), { d: today, c, k }];
+  },
+  // Bilan des 7 derniers jours (aujourd'hui compris), comparé à soi-même seulement.
+  // ups : compétences dont la note a monté [{ cid, label, b, a }], de la plus forte hausse à la plus faible ;
+  // first : compétences notées pour la première fois ; cons : notions devenues maîtrisées ; fixed : erreurs effacées du
+  // carnet ; days / n : jours actifs et questions ; since : date de départ si la fenêtre est partielle (sinon null).
+  week(state, today = day()) {
+    const lim = addDays(today, -6), S = (Array.isArray(state.snaps) ? state.snaps : []).filter((x) => x && x.d >= lim && x.d <= today);
+    const ref = S[0] || null, H = (state.history || []).filter((x) => x && x.date >= lim && x.date <= today && x.n > 0);
+    const out = { ups: [], first: [], cons: [], fixed: 0, days: H.length, n: H.reduce((a, x) => a + (x.n || 0), 0), since: null };
+    out.fixed = (Array.isArray(state.carnetOut) ? state.carnetOut : []).filter((d) => d >= lim && d <= today).length;
+    if (!ref) return out;
+    // Activité dans la fenêtre avant le premier instantané (state d'avant le 24.11) : on dit « depuis le … ».
+    if (H.some((x) => x.date < ref.d)) out.since = ref.d;
+    const lab = (cid) => { const [id, i] = cid.split(":"), L = COMPS[id]; return (L && L[+i]) || (NOTIONS.find((x) => x.id === id) || {}).label || id; };
+    for (const [cid, rec] of Object.entries(state.comps || {})) {
+      const a = compNote(rec);
+      if (a === null) continue;
+      const b = ref.c && ref.c[cid] != null ? ref.c[cid] / 2 : null;
+      if (b === null) out.first.push({ cid, label: lab(cid), a });
+      else if (a > b) out.ups.push({ cid, label: lab(cid), b, a });
+    }
+    out.ups.sort((x, y) => y.a - y.b - (x.a - x.b) || y.a - x.a);
+    const had = new Set(ref.k || []);
+    out.cons = Object.keys(state.notions || {}).filter((id) => { const s = state.notions[id]; return s && s.seen > 0 && s.m >= 0.7 && !had.has(id); });
+    return out;
+  },
   // Compétence : les 8 dernières réponses (1, 0,5 ou 0).
   recordComp(state, id, d, score) {
+    this.snap(state);
     state.comps = state.comps || {};
     const cid = compOf(id, d), rec = (state.comps[cid] = state.comps[cid] || { r: [], n: 0 }), before = compNote(rec);
     rec.r.push(score); rec.r = rec.r.slice(-8); rec.n++; rec.last = day();
@@ -25505,6 +25602,7 @@ const Engine = {
 
   // Mise à jour du Mathélo. score : 1, 0,5 ou 0. K plus grand au début (positionnement rapide).
   updateElo(state, id, d, score, weight = 1) {
+    this.snap(state);
     const e = state.elo, q = itemRating(state.profile, id, d);
     const expected = 1 / (1 + Math.pow(10, (q - e.r) / 400));
     const K = (e.n < 20 ? 48 : e.n < 60 ? 32 : 20) * weight; // calibrage progressif : provisoire tant que n < 20
@@ -25755,6 +25853,7 @@ const Engine = {
   // « Trop facile » : l'élève passe la question. Demi-victoire au Mathélo (sans répondre, on ne compte pas plein),
   // la notion monte, et son niveau visé est relevé (décalage par notion, qui retombe si l'élève échoue ensuite).
   tooEasy(state, id, d, kind) {
+    this.snap(state);
     const s = state.notions[id];
     s.easy = Math.min(3, (s.easy || 0) + 1);
     s.m = Math.min(1, s.m + (1 - s.m) * 0.25);
@@ -25770,6 +25869,7 @@ const Engine = {
 
   // Score Moodle : 1 au premier essai, 0,5 au deuxième, 0 ensuite.
   record(state, id, d, tries, solved, partial) {
+    this.snap(state);
     const s = state.notions[id];
     s.fails = (partial !== undefined ? partial < 0.5 : !solved) ? (s.fails || 0) + 1 : solved && tries === 1 ? 0 : s.fails || 0;
     if (typeof Badges !== "undefined") Badges.onAnswer(state, id, d, tries, solved, partial);
@@ -25909,7 +26009,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "6dac6689a9"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "46358d389f"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 function errCanSend() {
@@ -25974,6 +26074,8 @@ if (state && state.profile && !SYSTEMS[state.profile.system]) state = null; // s
 // Voie MP gardée en revenant au CO (bug 14.11 : « 9e MP » sans critères de divisibilité, nombres premiers ni PGDC) : la voie n'existe qu'au sec. II.
 if (state && state.profile && state.profile.track === "mp" && state.profile.grade < 12) { state.profile.track = "college"; Store.save(state); }
 if (state && state.profile && state.notions && Object.keys(state.notions).length && Engine.migrate(state)) Store.save(state);
+// 24.11 (progression visible) : instantané du jour avant toute activité (ancien state : la semaine part d'aujourd'hui).
+if (state && state.placed && state.notions) { const k = (state.snaps || []).length; Engine.snap(state); if ((state.snaps || []).length !== k) Store.save(state); }
 const save = () => Store.save(state);
 // Barre d'onglets du bas (19.11 : visible partout, même pendant une activité, pour pouvoir interrompre).
 const navTabs = (cur, dots = {}) => `<nav class="tabs" aria-label="Sections"><div class="tabs-inner" role="tablist">${HOME_TABS.map(([id, label, ic]) => `<button class="tab" role="tab" data-tab="${id}" aria-selected="${id === cur}"><span class="tab-ic"><svg viewBox="0 0 24 24">${ic}</svg>${dots[id] && id !== cur ? '<i class="tab-dot"></i>' : ""}</span>${label}</button>`).join("")}</div></nav>`;
@@ -26408,7 +26510,7 @@ function screenHome() {
   // 22.11 : accueil à cases (maquette design/maquette_accueil.html) ; chaque case ouvre une page « ← Accueil ».
   panels.carnet = () => carnetCard(true) || `<div class="card flat stack"><div class="eyebrow">📕 Carnet d'erreurs</div><p class="small muted">Vide : bravo ! Chaque question ratée viendra s'y ranger, pour que tu puisses la réussir plus tard.</p></div>`;
   // 22.11 : « Ma fiche » (src/fiche.js) : une fiche par chapitre derrière Progrès. Retirée le 23.11 (branche archive/fiche) : inactif sans fiche.js.
-  panels.prog = () => `${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}`;
+  panels.prog = () => `${weekCard()}${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}`;
   if (!panels[homeTab]) homeTab = "today";
   const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted">${gradeName(state.profile)}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
   if (homeTab !== "today") {
@@ -26982,7 +27084,12 @@ function carnetResult(id, d, firstTry) {
   const c = state.carnet || [], e = c.find((x) => x.id === id && x.d === d);
   if (!e) return null;
   e.ok = firstTry ? e.ok + 1 : 0;
-  if (e.ok >= CARNET_OK) { state.carnet = c.filter((x) => x !== e); return "efface"; }
+  if (e.ok >= CARNET_OK) {
+    state.carnet = c.filter((x) => x !== e);
+    // 24.11 : dates des erreurs effacées (carte « Ma semaine »), 7 derniers jours seulement.
+    state.carnetOut = [...(Array.isArray(state.carnetOut) ? state.carnetOut : []).filter((d) => d >= addDays(day(), -6)), day()];
+    return "efface";
+  }
   return firstTry ? "encore" : "rate";
 }
 // Plan d'une séance « carnet » : d'abord celles à moitié effacées, puis les plus anciennes ; filtre optionnel de notions.
@@ -27828,6 +27935,42 @@ function screenHistory(k, back) {
   window.scrollTo(0, 0);
 }
 
+// ---------------- Progression visible (24.11, chantier S) ----------------
+// Comparaison avec soi-même seulement (aucun classement), sur les 7 derniers jours : Engine.week (instantanés quotidiens).
+const plur = (n, one, many) => n + " " + (n > 1 ? many : one);
+const ddmm = (d) => d.slice(8, 10) + "." + d.slice(5, 7);
+// Ligne courte du bilan de séance. Rien n'a bougé : phrase sobre et vraie (jours et questions de la semaine).
+function weekText(w) {
+  const parts = [];
+  if (w.ups.length) parts.push(plur(w.ups.length, "compétence a monté", "compétences ont monté"));
+  if (w.cons.length) parts.push(plur(w.cons.length, "notion consolidée", "notions consolidées"));
+  if (w.fixed) parts.push(plur(w.fixed, "erreur effacée du carnet", "erreurs effacées du carnet"));
+  if (!parts.length && w.first.length) parts.push(plur(w.first.length, "première note de compétence", "premières notes de compétences"));
+  // Jours et questions : toujours sur 7 jours (historique) ; comparaisons de notes : depuis le premier instantané.
+  if (!parts.length && !w.n) return { main: "Une séance de quelques minutes suffit pour reprendre le fil.", sub: "" };
+  if (!parts.length) return { main: `Cette semaine : ${plur(w.days, "jour", "jours")} de pratique, ${plur(w.n, "question", "questions")}.`, sub: "Les notes bougent au fil des réponses : chaque séance compte pour la suite." };
+  const last = parts.pop(), main = `${w.since ? "Depuis le " + ddmm(w.since) : "Cette semaine"} : ${parts.length ? parts.join(", ") + " et " : ""}${last}.`;
+  const top = w.ups[0];
+  return { main, sub: top ? `Plus belle progression : ${top.label} (${noteTxt(top.b)} → ${noteTxt(top.a)}).` : "" };
+}
+function weekLine() {
+  if (!state) return "";
+  const w = Engine.week(state), t = weekText(w);
+  return `<div class="card flat week-line"><div class="sum-line"><span>📈</span><div><b>${esc(t.main)}</b>${t.sub ? `<div class="small muted">${esc(t.sub)}</div>` : ""}</div></div></div>`;
+}
+// Carte « Ma semaine » en tête de Progrès : compétences montées (avant → après), notions consolidées, carnet, jours actifs.
+function weekCard() {
+  const w = Engine.week(state), MAX = 5;
+  const more = (n) => (n > MAX ? `<li class="small muted">et ${n - MAX} autre${n - MAX > 1 ? "s" : ""}</li>` : "");
+  const ups = w.ups.length ? `<div><b>${plur(w.ups.length, "compétence en hausse", "compétences en hausse")}</b><ul class="week-list">${w.ups.slice(0, MAX).map((x) => `<li><span>${esc(x.label)}</span><span class="week-notes"><span class="note ${noteCls(x.b)}">${noteTxt(x.b)}</span>→<span class="note ${noteCls(x.a)}">${noteTxt(x.a)}</span></span></li>`).join("")}${more(w.ups.length)}</ul></div>` : "";
+  const cons = w.cons.length ? `<div><b>${plur(w.cons.length, "notion consolidée", "notions consolidées")}</b><ul class="week-list">${w.cons.slice(0, MAX).map((id) => `<li><span>✅ ${esc(nLab(id))}</span></li>`).join("")}${more(w.cons.length)}</ul></div>` : "";
+  const first = w.first.length ? `<div class="small">🆕 ${plur(w.first.length, "première note de compétence", "premières notes de compétences")}</div>` : "";
+  const fixed = w.fixed ? `<div class="small">📕 ${plur(w.fixed, "erreur effacée", "erreurs effacées")} de ton carnet</div>` : "";
+  const calm = !ups && !cons && !first && !fixed ? `<p class="small muted">${w.days ? "Pas encore de note en hausse : les notes bougent au fil des réponses, chaque séance compte." : "Pas encore de séance ces 7 derniers jours : une séance de quelques minutes suffit pour reprendre."}</p>` : "";
+  return `<div class="card stack week-card"><div class="spread"><span class="eyebrow">📈 Ma semaine</span><span class="small muted">7 derniers jours</span></div>
+    <div class="week-days"><span>Jours actifs</span><b>${w.days} / 7</b></div>${ups}${cons}${first}${fixed}${calm}${w.since ? `<p class="small muted">Notes comparées depuis le ${ddmm(w.since)}, début du suivi.</p>` : ""}</div>`;
+}
+
 // Bilan par notion (21.11, amélioration UX 6) : ce qui est acquis aujourd'hui, ce qui reviendra, au lieu d'une simple liste.
 function summaryByNotion() {
   const r = session.res || {}, ids = [...session.ids].filter((id) => r[id]);
@@ -27852,6 +27995,7 @@ function screenSummary() {
   h(`${brand}<h2>${sc >= n * 0.8 && d >= 0 ? "Excellente séance !" : sc >= n * 0.5 ? "Bonne séance." : "Séance faite : c'est en pratiquant qu'on progresse."}</h2>${d < 0 && sc >= n * 0.5 ? `<p class="small muted">Mathélo ${d} : une erreur sur une question de ton niveau coûte plus que ce que rapporte une réussite sur une question facile.</p>` : ""}
   <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span>${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ta série passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${FORMATS[Engine.tomorrowFormat(state)].label}</b></div></div></div>
   ${summaryByNotion()}
+  ${weekLine()}
   <div class="card stack"><div class="spread"><span>Score</span><b>${String(sc).replace(".", ",")} / ${n}</b></div>
   <div class="spread"><span>Mathélo</span><b>${state.elo.r} <span class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</span></b></div>
 </div>

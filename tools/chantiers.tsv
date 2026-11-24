@@ -6,23 +6,23 @@ A	Lots « notion complète » (pas à pas, erreurs typiques, contextes, valeurs)
 V	Leçons actives (devine, manipule, retiens) pour chaque notion	Pédagogie	5	en cours	70 %	23.11	9e, 10e (partiel), 11e, 1re et 2e Collège, MP 2e faites ; voir % dans Synthèse	compléter 10e et MP 1re
 K	Figures à manipuler (bibliothèque tactile manip.js)	Pédagogie	5	en cours	40 %	23.11	15 leçons refaites en « glisse sur la figure » (tuiles, balance, fractions, droite, Thalès…)	étendre aux notions où un geste aide (tools/manipulation.md)
 U	Exercices riches et tests de préparation (pas du drill)	Pédagogie	4	en cours	70 %	23.11	9e, 10e, 11e, 1re Collège, 2e Collège (14 banques), MP 1re et MP 2e (partiel)	MP : chapitres restants ; contrôle d'un sujet par niveau
-I	« Trouve l'erreur »	Pédagogie	5	en cours	40 %	23.11	dans les tests de préparation et la 11e Proportionnalité	étendre au fil des lots
+I	« Trouve l'erreur »	Pédagogie	5	en cours	60 %	24.11	+ 8 formes : 11e Thalès, Pythagore, puissances, probabilités, pente ; 1re trigonométrie, systèmes, sommet	étendre aux autres chapitres des testeurs
 J	Estimation, Fermi, questions curieuses	Pédagogie	6	fait	100 %	21.11	61 questions curieuses, 5 familles (src/curieux.js)	nouveaux lots si les élèves aiment
 W	Générateurs à réponses 0 ou ±1	Qualité	7	en cours	60 %	23.11	filtre de trivialité et corrections au fil des niveaux (relatifs, 2e Collège)	audit tests/trivial.html, polynômes et bijection
 X	Formes sur figure (repère, lecture de graphique)	Qualité	7	à faire	20 %	23.11	quelques lectures graphiques (suites FR)	variantes pour repere et lectgraph
 B	Vérification unique avant publication	Technique	1	fait	95 %	24.11	run_tests.sh : 107 pages, ne bloque plus (page abandonnée après 120 s) ; gardien cron tue les Chromium > 10 min	(option) bloquer le push en cas d'échec
 N	Remontée anonyme des erreurs JavaScript	Technique	1	fait	100 %	23.11	envoi + feuille « erreurs », ligne dans le point ; Apps Script redéployé	surveiller le point
 F	Temps de chargement	Technique	1	en cours	70 %	24.11	habitué 0,7 s (CPU ×4) ; première visite en 4G lente ≈ 11 s (1,1 Mo à télécharger)	chargement par niveau (demande du 24.11) : un élève ne télécharge que les notions de son année ; minification
-ROB	Élève-robot (test nocturne de toute l'app)	Technique	1	en cours	85 %	24.11	tourne chaque nuit (9'808 questions en 6 min) ; fausses alertes retirées ; nouveau : cohérence énoncé/figure (formes, arcs d'angle), étiquettes hors cadre ou superposées	traiter les vrais problèmes trouvés ; vérifier le rapport de la nuit
+ROB	Élève-robot (test nocturne de toute l'app)	Technique	1	en cours	90 %	24.11	9'800 questions par nuit ; contrôles figures/énoncé ; plus de fausses alertes d'affichage	accélérer (≈ 14 min avec les contrôles de figures)
 C	Mesure par question (signaux muets)	Données	2	fait	100 %	20.11	une ligne anonyme par question et leçon ; tools/signaux.py	analyser quand la 11LS sera ouverte
 T	Indicateurs de rétention (J+1, J+7, J+30)	Données	2	fait	100 %	23.11	dans le point : J+1 24 %, J+7 22 %	suivre ; vrai test = 11LS
 D	Routine des retours testeurs	Données	7	en cours	—	22.11	commentaires dans l'onglet Commentaires, 👎 dans le point	une fois par semaine
 P	Rappel de sauvegarde	Produit	3	fait	100 %	22.11	carte « code de sauvegarde » si aucun code ou code de plus de 30 jours	—
 R	Rappel quotidien (agenda .ics)	Produit	3	abandonné	—	21.11	retiré : trop compliqué pour les élèves	—
-S	Progression visible	Produit	5	à contrôler	90 %	24.11	ligne « Cette semaine » au bilan de séance, carte « Ma semaine » en tête de Progrès (instantané quotidien state.snaps, tests/progression.html)	contrôle des phrases par l'auteur ; rien sur l'accueil
+S	Progression visible	Produit	5	à contrôler	90 %	24.11	ligne « Cette semaine » au bilan de séance, carte « Ma semaine » en tête de Progrès (7 derniers jours, jamais de baisse affichée)	contrôle des formulations par l'enseignant
 E	Icônes de badges	Produit	6	abandonné	—	22.11	badges abandonnés le 22.11	—
 M	Récompenses visuelles	Produit	6	en partie	30 %	22.11	grades Mathélo « collector » numérotés	—
-O	Accessibilité (police dyslexie, taille du texte, contrastes)	Produit	7	à faire	10 %	23.11	—	1 séance
+O	Accessibilité (police dyslexie, taille du texte, contrastes)	Produit	7	à contrôler	90 %	24.11	Réglages « Affichage » : taille du texte (3), police plus lisible, contraste renforcé ; couleurs ≥ 4,5:1 (WCAG AA) ; focus clavier, zones tactiles	contrôle sur téléphone (rendu réel des polices, thème sombre)
 Q	Captures automatiques des figures	Technique	7	à faire	10 %	23.11	galerie tests/gallery.html à la main	—
 L	Parcours d'examen (EVACOM 11e, épreuves communes, matu)	Produit	6	à faire	0 %	14.11	—	EVACOM prêt avant fin avril
 FICHE	« Ma fiche » (synthèse à compléter)	Produit	—	abandonné	—	23.11	retirée : plus-value pas convaincante ; code dans la branche archive/fiche	—
