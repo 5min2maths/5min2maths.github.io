@@ -10,7 +10,14 @@ const DEFIS = (() => {
     parts: parts.map(([label, v, o]) => ({ label, spec: v && typeof v === "object" ? v : Object.assign({ kind: "value", value: v }, typeof o === "number" ? { round: o } : {}) })) });
   const SET = (values) => ({ kind: "set", values: [...values].sort((a, b) => a - b) });
   const pk = R.pick, ri = R.int;
-  const D = (v) => dec(+(+v).toFixed(10)), T = (v) => decTxt(+(+v).toFixed(10));
+  /* Nombres : virgule décimale et ' pour les milliers dès 1'000 (24.11 : « 7500 CHF » s'affichait sans séparateur,
+     le nb() global ne groupe qu'à partir de 10'000). D et nb : en TeX ; T : en texte simple (signe moins typographique). */
+  const grp = (v, sep, dp) => { const [i, f] = String(+(+v).toFixed(10)).split("."); return (Math.abs(+i) >= 1000 ? i.replace(/\B(?=(\d{3})+(?!\d))/g, sep) : i) + (f ? dp + f : ""); };
+  const D = (v) => grp(v, "\\text{'}", "{,}"), T = (v) => grp(v, "'", ",").replace(/^-/, "−"), nb = (v) => grp(+(+v).toFixed(6), "\\text{'}", "{,}");
+  const sgD = (v) => (v < 0 ? " - " + D(-v) : " + " + D(v)), tT = (v) => (v < 0 ? "(" + T(v) + ")" : T(v));
+  const PAIR = (x, y) => ({ kind: "pair", values: [x, y] }), SOLS = (ivs) => ({ kind: "solset", ivs }), RAD = (v) => ({ kind: "value", value: v, radical: true });
+  const cfD = (v) => (v === 1 ? "" : v === -1 ? "-" : D(v));
+  const pl = (n, w) => n + " " + w + (n > 1 ? "s" : "");
   const r1 = (v) => Math.round(v * 10) / 10, r2c = (v) => Math.round(v * 100) / 100;
   const fx = (v) => { if (Number.isInteger(v)) return String(v); for (let d = 2; d <= 12; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return frac(Math.round(v * d), d); return D(v); };
   const fxT = (v) => { if (Number.isInteger(v)) return String(v); for (let d = 2; d <= 12; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return (v < 0 ? "−" : "") + Math.abs(Math.round(v * d)) + "/" + d; return T(v); };
@@ -38,17 +45,17 @@ const DEFIS = (() => {
            "Produit nul : chaque facteur peut valoir 0. Pour c) : k > 0, et un produit (x − p)(x − q) est négatif seulement quand x est ENTRE les deux solutions (un facteur positif, l'autre négatif)."],
           M("E(x) = (" + bin + " - " + c + ")(" + bin + " + " + c + ") = (" + a + "x" + sg(b - c) + ")(" + a + "x" + sg(b + c) + ") = " + k + "(" + xm(z1) + ")(" + xm(z2) + ")") + ". a) " + M("k = " + a + " \\cdot " + a + " = " + k) + " (piège : ne garder qu'un seul " + a + "). b) " + M("x = " + z1) + " ou " + M("x = " + z2) + ". c) " + M("E(x) < 0") + " entre " + M(lo) + " et " + M(hi) + " (exclus) : " + M(neg) + " entiers.");
       },
-      () => { /* facteur commun binôme, puis différence de carrés : trois facteurs, tableau de signes */
+      () => { /* facteur commun binôme, puis différence de carrés ; puis paramètre pour une solution double (24.11 : plus de tableau de signes à trois facteurs en 11e) */
         let m, n, p;
         do { m = pk([1, 2, 3]); n = ri(1, 7); p = R.nz(-6, 6); } while (gcd(m, n) !== 1 || (m === 1 && n < 2) || n === Math.abs(p) * m || n % m === 0 && Math.abs(n / m) === Math.abs(p));
-        const E = (x) => (m * m * x * x - n * n) * (x - p), pos = cntInt((x) => E(x) > 0), zs = [p, n / m, -n / m];
+        const zs = [p, n / m, -n / m], cc = m * m * p * p;
         const c2 = m * m === 1 ? "" : m * m;
         return P("On considère " + M("E(x) = " + c2 + "x^2(" + xm(p) + ") - " + n * n + "(" + xm(p) + ")") + ".",
           [["a) Solutions de " + M("E(x) = 0") + " (séparées par « ; », fractions acceptées)", SET(zs)],
-           ["b) Combien d'entiers " + M("x") + " de " + M("-10") + " à " + M("10") + " vérifient " + M("E(x) > 0") + " ?", pos]],
+           ["b) On remplace " + M(n * n) + " par un nombre " + M("c > 0") + " : " + M(c2 + "x^2(" + xm(p) + ") - c(" + xm(p) + ") = 0") + ". Pour quelle valeur de " + M("c") + " cette équation n'a-t-elle plus que deux solutions ?", cc]],
           ["Mets le facteur commun (" + xmT(p) + ") en évidence : E(x) = (" + xmT(p) + ")(" + c2 + "x² − " + n * n + "). Le second facteur est une différence de deux carrés.",
-           "Trois facteurs du 1er degré, trois solutions. Pour b) : tableau de signes ; le signe de E(x) change à chaque solution. Teste une valeur dans chaque zone."],
-          M("E(x) = (" + xm(p) + ")(" + c2 + "x^2 - " + n * n + ") = (" + xm(p) + ")(" + (m === 1 ? "" : m) + "x - " + n + ")(" + (m === 1 ? "" : m) + "x + " + n + ")") + ". a) " + M("x \\in \\{" + [...zs].sort((u, v) => u - v).map(fx).join(" ; ") + "\\}") + ". b) Signe : " + M("E(x) > 0") + " à droite de la plus grande solution et entre les deux plus petites ; " + M(pos) + " entiers de " + M("-10") + " à " + M("10") + ".");
+           "Trois facteurs du 1er degré, trois solutions (produit nul). Pour b) : les solutions sont " + p + " et ± √c" + (m === 1 ? "" : " ÷ " + m) + " ; il n'en reste que deux si l'une d'elles est égale à " + p + "."],
+          M("E(x) = (" + xm(p) + ")(" + c2 + "x^2 - " + n * n + ") = (" + xm(p) + ")(" + (m === 1 ? "" : m) + "x - " + n + ")(" + (m === 1 ? "" : m) + "x + " + n + ")") + ". a) " + M("x \\in \\{" + [...zs].sort((u, v) => u - v).map(fx).join(" ; ") + "\\}") + ". b) " + M(c2 + "x^2 = c") + " donne " + M("x = \\pm" + (m === 1 ? "\\sqrt{c}" : "\\frac{\\sqrt{c}}{" + m + "}")) + " ; deux solutions seulement si l'une vaut " + M(p) + " : " + M("c = " + (m === 1 ? "" : m * m + " \\cdot ") + pr(p) + "^2 = " + cc) + ".");
       },
     ],
     // ---------- 1re–4e Collège : factorisation au maximum (plusieurs étapes) ----------
@@ -413,6 +420,741 @@ const DEFIS = (() => {
           [["a) Plus petit zéro de P", Math.min(r0, p, q)], ["b) Plus grand zéro de P", Math.max(r0, p, q)], ["c) Combien d'entiers x de −10 à 10 vérifient " + M("P(x) < 0") + " ?", neg]],
           ["Cherche un zéro « évident » parmi ±1, ±2 (diviseurs du terme constant), puis divise P par (x − ce zéro) (Horner).", "Le quotient est un trinôme : factorise-le. Pour b) : tableau de signes avec les trois zéros."],
           M("P(" + r0 + ") = 0") + ", " + M("P(x) = (" + xm(r0) + ")(" + poly([1, -(p + q), p * q]) + ") = (" + xm(r0) + ")(" + xm(p) + ")(" + xm(q) + ")") + ". a) et b) Zéros " + M([r0, p, q].sort((u, v) => u - v).join(" \\,;\\, ")) + ". c) " + M("P(x) < 0") + " à gauche du plus petit zéro et entre les deux autres : " + M(neg) + " entiers.");
+      },
+    ],
+    // ===================== 2e lot (24.11) : 1re–4e Collège et MP =====================
+    // ---------- 1re Collège, MP : fonctions du 2e degré ----------
+    f2expr: [
+      () => { /* arche parabolique : choisir le repère, trouver a, puis calculer et résoudre */
+        let p, q, H, d, d1;
+        do { p = pk([4, 5, 6, 8, 10, 12]); q = pk([2, 4, 5, 8, 10]); H = (p * p) / q; d = ri(1, p - 2); d1 = ri(1, p - 1); } while (!Number.isInteger(H) || H < 4 || H > 36 || d === d1);
+        const hd = H - (d * d) / q, h1 = H - (d1 * d1) / q;
+        return P("Une arche de pont a la forme d'une parabole. Ses deux pieds sont au sol, à " + M(2 * p) + " m l'un de l'autre, et son sommet est à " + M(H) + " m de haut. On place l'origine au sol, au milieu des deux pieds.",
+          [["a) Dans " + M("f(x) = a(x - " + p + ")(x + " + p + ")") + ", que vaut " + M("a") + " ? (fraction acceptée)", -1 / q],
+           ["b) Un camion large de " + M(2 * d) + " m passe au milieu. Hauteur de l'arche au-dessus de ses bords (m)", hd],
+           ["c) À quelle distance du milieu l'arche est-elle à " + M(D(h1)) + " m de haut ? (m)", d1]],
+          ["Les pieds sont les zéros de f : x = −" + p + " et x = " + p + ". Le sommet est sur l'axe de symétrie, au point (0 ; " + H + ") : f(0) = " + H + " donne a.",
+           "b) Les bords du camion sont à " + d + " m du milieu : calcule f(" + d + "). c) Résous f(x) = " + T(h1) + " : isole x², puis garde la distance positive."],
+          M("f(0) = a \\cdot (-" + p + ") \\cdot " + p + " = -" + p * p + "a = " + H) + ", donc " + M("a = " + frac(-1, q)) + ". b) " + M("f(" + d + ") = " + frac(-1, q) + "(" + d + " - " + p + ")(" + d + " + " + p + ") = " + D(hd)) + " m. c) " + M(frac(-1, q) + "(x^2 - " + p * p + ") = " + D(h1) + " \\iff x^2 = " + d1 * d1) + " : " + M("x = " + d1) + " m de chaque côté du milieu.");
+      },
+      () => { /* sommet + un point → a, puis zéros, puis ordonnée à l'origine */
+        let a, h, d, x1;
+        do { a = pk([2, 3, -2, -3, 0.5, -0.5]); h = R.nz(-5, 5); d = ri(1, 4); x1 = h + R.nz(-3, 3); } while (Math.abs(x1 - h) === d || x1 === 0 || Math.abs(h) === d);
+        const k = -a * d * d, y1 = a * (x1 - h) ** 2 + k, f0 = a * h * h + k;
+        return P("Une parabole a pour sommet " + M("S(" + h + " \\,;\\, " + D(k) + ")") + " et passe par le point " + M("(" + x1 + " \\,;\\, " + D(y1) + ")") + ".",
+          [["a) Coefficient " + M("a") + " de " + M("f(x) = a(x - h)^2 + k"), a],
+           ["b) Zéros de " + M("f") + " (séparés par « ; »)", SET([h - d, h + d])],
+           ["c) Ordonnée à l'origine " + M("f(0)"), f0]],
+          ["Forme canonique avec le sommet : f(x) = a(" + xmT(h) + ")² " + (k < 0 ? "− " + T(-k) : "+ " + T(k)) + ". Remplace x et f(x) par les coordonnées du point pour trouver a.",
+           "b) f(x) = 0 ⇔ (" + xmT(h) + ")² = " + T(-k) + " ÷ " + tT(a) + " : isole le carré, puis « ± ». c) Remplace x par 0."],
+          "a) " + M("a \\cdot (" + x1 + " - " + pr(h) + ")^2" + sgD(k) + " = " + D(y1)) + ", soit " + M(D(a) + " \\cdot " + (x1 - h) ** 2 + sgD(k) + " = " + D(y1)) + " : " + M("a = " + D(a)) + ". b) " + M("(" + xm(h) + ")^2 = " + d * d) + ", " + M("x = " + h + " \\pm " + d) + " : " + M(h - d) + " et " + M(h + d) + ". c) " + M("f(0) = " + D(a) + " \\cdot " + pr(h) + "^2" + sgD(k) + " = " + D(f0)) + ".");
+      },
+    ],
+    f2trois: [
+      () => { /* trois points sans abscisse 0 : système 3 × 3, puis sommet */
+        let a, h, k, xs;
+        do { a = pk([1, 2, 3, -1, -2, -3]); h = R.nz(-4, 4); k = R.nz(-9, 9); xs = [...new Set([R.nz(-3, 4), R.nz(-3, 4), R.nz(-3, 4)])]; } while (xs.length < 3 || a * h * h + k === 0);
+        xs.sort((u, v) => u - v);
+        const b = -2 * a * h, c = a * h * h + k, f = (x) => a * x * x + b * x + c;
+        const eq = (x) => M((x * x === 1 ? "" : x * x) + "a" + (x < 0 ? " - " + (x === -1 ? "" : -x) : " + " + (x === 1 ? "" : x)) + "b + c = " + f(x));
+        return P("Une parabole " + M("f(x) = ax^2 + bx + c") + " passe par les points " + xs.map((x) => M("(" + x + " \\,;\\, " + f(x) + ")")).join(", ") + ".",
+          [["a) " + M("a"), a], ["b) " + M("b"), b], ["c) " + M("c"), c], ["d) Ordonnée du sommet (valeur extrême de " + M("f") + ")", k]],
+          ["Chaque point donne une équation a · x² + b · x + c = y. Aucune abscisse ne vaut 0 : c ne se lit pas directement. Soustrais les équations deux à deux pour éliminer c.",
+           "Il reste un système 2 × 2 en a et b. Puis le sommet : x = −b ÷ (2a), et son ordonnée est f(−b ÷ (2a))."],
+          xs.map(eq).join(" ; ") + ". En éliminant " + M("c") + " puis " + M("b") + " : a) " + M("a = " + a) + ", b) " + M("b = " + b) + ", c) " + M("c = " + c) + " : " + M("f(x) = " + poly([a, b, c])) + ". d) Sommet en " + M("x = \\frac{" + -b + "}{" + 2 * a + "} = " + h) + " : " + M("f(" + h + ") = " + k) + ".");
+      },
+      () => { /* pierre lancée depuis une falaise : trois mesures → modèle, puis zéro et sommet */
+        const T0 = pk([4, 5, 6]), s = pk([0.2, 0.4, 0.6, 0.8]);
+        const b = 5 * (T0 - s), c = 5 * T0 * s, h = (t) => -5 * t * t + b * t + c, tm = (T0 - s) / 2, hm = (5 * (T0 + s) ** 2) / 4;
+        return P("Depuis le haut d'une falaise, on lance une pierre vers le haut ; elle retombe dans la mer. Sa hauteur au-dessus de la mer vaut " + M(D(h(1))) + " m après 1 s, " + M(D(h(2))) + " m après 2 s et " + M(D(h(3))) + " m après 3 s. On modélise par " + M("h(t) = at^2 + bt + c") + ".",
+          [["a) Hauteur de la falaise (m)", c], ["b) Instant où la pierre touche la mer (s)", T0], ["c) Hauteur maximale atteinte (m, au centième)", hm, 0.01]],
+          ["Trois équations : a + b + c = " + T(h(1)) + ", 4a + 2b + c = " + T(h(2)) + ", 9a + 3b + c = " + T(h(3)) + ". Soustrais-les deux à deux : c s'élimine, puis b. La hauteur de la falaise est h(0) = c.",
+           "b) Résous h(t) = 0 (Δ) et garde la solution positive. c) Le sommet de la parabole est en t = −b ÷ (2a)."],
+          M("a = -5") + ", " + M("b = " + D(b)) + ", " + M("c = " + D(c)) + ". a) " + M(D(c)) + " m. b) " + M("-5t^2 + " + D(b) + "t + " + D(c) + " = -5(t - " + T0 + ")(t + " + D(s) + ") = 0") + " : " + M("t = " + T0) + " s (" + M("-" + D(s)) + " est rejeté). c) " + M("t = \\frac{" + D(b) + "}{10} = " + D(tm)) + " s, " + M("h(" + D(tm) + ") = " + D(hm)) + " m.");
+      },
+    ],
+    fimg: [
+      () => { /* préimages (2e degré), image d'une image, nombre à une seule préimage, comptage */
+        let p, q, e, x0, fx0;
+        do { p = 2 * R.nz(-4, 4); q = R.nz(-9, 9); e = ri(2, 5); x0 = R.nz(-3, 3); fx0 = x0 * x0 + p * x0 + q; } while (Math.abs(fx0) > 12 || fx0 === x0 || fx0 === 0 || q === (p * p) / 4);
+        const h = -p / 2, k = q - (p * p) / 4, v = k + e * e, f = (x) => x * x + p * x + q;
+        return P("Soit " + M("f(x) = " + poly([1, p, q])) + ".",
+          [["a) Préimages de " + M(v) + " (séparées par « ; »)", SET([h - e, h + e])], ["b) " + M("f(f(" + x0 + "))"), f(fx0)],
+           ["c) Quel nombre a exactement une préimage par " + M("f") + " ?", k], ["d) Combien de nombres entiers " + M("x") + " ont une image strictement inférieure à " + M(v) + " ?", 2 * e - 1]],
+          ["a) Résous f(x) = " + v + " : ramène tout d'un côté, puis factorise (ou Δ). b) Calcule d'abord f(" + x0 + "), puis l'image de ce résultat.",
+           "c) Forme canonique f(x) = (" + xmT(h) + ")² " + (k < 0 ? "− " + -k : "+ " + k) + " : un nombre a une seule préimage s'il est atteint au sommet seulement. d) f(x) < " + v + " entre les deux préimages de " + v + " (parabole tournée vers le haut)."],
+          "a) " + M(poly([1, p, q - v]) + " = 0 \\iff (" + xm(h - e) + ")(" + xm(h + e) + ") = 0") + " : " + M(h - e) + " et " + M(h + e) + ". b) " + M("f(" + x0 + ") = " + fx0) + ", " + M("f(" + fx0 + ") = " + f(fx0)) + ". c) " + M("f(x) = (" + xm(h) + ")^2" + sg(k)) + " : le minimum " + M(k) + " n'est atteint qu'en " + M("x = " + h) + ". d) Entiers strictement entre " + M(h - e) + " et " + M(h + e) + " : " + M(2 * e - 1) + ".");
+      },
+    ],
+    lectgraph: [
+      () => { /* lire le sommet et un point → expression, calculer hors du dessin, résoudre f = g et f < g */
+        let a, h, k, p, q, f, m, n0;
+        do { a = pk([1, -1, 0.5, -0.5]); h = ri(-3, 3); k = ri(-4, 4); p = ri(-5, 3); q = ri(p + 2, 5);
+          f = (x) => a * (x - h) ** 2 + k; m = (f(q) - f(p)) / (q - p); n0 = f(p) - m * p;
+        } while (Math.abs(f(p)) > 5 || Math.abs(f(q)) > 5 || !Number.isInteger(f(p)) || !Number.isInteger(f(q)) || Math.abs(m) > 4 || (p === h && q === h) || a * k > 0 && Math.abs(k) > 3);
+        const xp = q !== h ? q : p, g = (x) => m * x + n0, f10 = f(10), ivs = a > 0 ? [[p, false, q, false]] : [[-Infinity, false, p, false], [q, false, Infinity, false]];
+        const fig = FIG.plot([{ f }, { f: g }], [], { numbers: true, xr: [-6, 6], yr: [-6, 6] });
+        return P("Le graphique montre une parabole (fonction " + M("f") + ") et une droite (fonction " + M("g") + "). Le sommet et les points d'intersection sont sur le quadrillage.",
+          [["a) " + M("f(x) = a(x - h)^2 + k") + " : que vaut " + M("a") + " ?", a], ["b) " + M("f(10)") + " (hors du dessin)", f10],
+           ["c) Solutions de " + M("f(x) = g(x)") + " (séparées par « ; »)", SET([p, q])], ["d) Solutions de " + M("f(x) < g(x)") + " (intervalle)", SOLS(ivs)]],
+          ["Lis le sommet S(h ; k), puis un autre point de la parabole sur le quadrillage (par exemple un point d'intersection) : remplace ses coordonnées dans f(x) = a(x − h)² + k pour trouver a.",
+           "b) Avec l'expression trouvée, calcule f(10). c) Lis les abscisses des points d'intersection. d) f(x) < g(x) là où la parabole est SOUS la droite (bornes exclues)."],
+          "Sommet " + M("S(" + h + " \\,;\\, " + k + ")") + ", point " + M("(" + xp + " \\,;\\, " + f(xp) + ")") + " : " + M(f(xp) + " = a \\cdot " + (xp - h) ** 2 + sg(k)) + ", a) " + M("a = " + D(a)) + ". b) " + M("f(10) = " + D(a) + " \\cdot " + (10 - h) ** 2 + sg(k) + " = " + D(f10)) + ". c) " + M(p) + " et " + M(q) + ". d) " + M(SolSet.show(ivs, true)) + ".", fig);
+      },
+    ],
+    interpar: [
+      () => { /* deux paraboles : intersections, écart vertical maximal, décalage pour un seul point commun */
+        let x1, x2, b, c;
+        do { x1 = ri(-5, 2); x2 = ri(x1 + 2, 5); b = R.nz(-6, 6); c = R.nz(-8, 8); } while (x1 === 0 || x2 === 0 || b + 2 * (x1 + x2) === 0 || c - 2 * x1 * x2 === 0);
+        const d = b + 2 * (x1 + x2), e = c - 2 * x1 * x2, gap = (x2 - x1) ** 2 / 2;
+        return P("On donne " + M("f(x) = " + poly([1, b, c])) + " et " + M("g(x) = " + poly([-1, d, e])) + ".",
+          [["a) Abscisses des points d'intersection des deux paraboles (séparées par « ; »)", SET([x1, x2])],
+           ["b) Entre ces deux abscisses, plus grand écart vertical " + M("g(x) - f(x)"), gap],
+           ["c) On décale " + M("g") + " verticalement : " + M("g(x) + t") + ". Pour quelle valeur de " + M("t") + " les deux courbes n'ont-elles plus qu'un seul point commun ?", -gap]],
+          ["f(x) = g(x) : ramène tout d'un côté, tu obtiens 2x² … = 0 ; divise par 2 et factorise (ou Δ).",
+           "b) g(x) − f(x) = −2(" + xmT(x1) + ")(" + xmT(x2) + ") : parabole tournée vers le bas, maximum au milieu des deux zéros. c) f(x) = g(x) + t ⇔ 2(" + xmT(x1) + ")(" + xmT(x2) + ") = t : un seul point quand t est la valeur minimale du membre de gauche (Δ = 0)."],
+          "a) " + M(poly([2, -2 * (x1 + x2), 2 * x1 * x2]) + " = 0 \\iff 2(" + xm(x1) + ")(" + xm(x2) + ") = 0") + " : " + M(x1) + " et " + M(x2) + ". b) Au milieu, " + M("x = " + D((x1 + x2) / 2)) + " : " + M("-2 \\cdot " + pr(D((x1 - x2) / 2)) + " \\cdot " + D((x2 - x1) / 2) + " = " + D(gap)) + ". c) Minimum de " + M("2(" + xm(x1) + ")(" + xm(x2) + ")") + " : " + M("-" + D(gap)) + ", donc " + M("t = -" + D(gap)) + ".");
+      },
+    ],
+    eqirr: [
+      () => { /* √(x + a) = x − b : solution parasite, puis la même équation avec b − x */
+        let b, j; do { b = ri(-2, 7); j = ri(1, 4); } while (b === 0 || j * j + j - b === 0);
+        const a = j * j + j - b, s1 = b - j, s2 = b + 1 + j;
+        return P("On résout " + M("\\sqrt{x" + sg(a) + "} = " + xm(b)) + ".",
+          [["a) Solutions de l'équation obtenue en élevant les deux membres au carré (séparées par « ; »)", SET([s1, s2])],
+           ["b) Solution(s) de l'équation de départ", SET([s2])],
+           ["c) Solution(s) de " + M("\\sqrt{x" + sg(a) + "} = " + b + " - x"), SET([s1])]],
+          ["Élève au carré : x " + (a < 0 ? "− " + -a : "+ " + a) + " = (" + xmT(b) + ")². Développe, ramène tout d'un côté et résous.",
+           "Une racine carrée n'est jamais négative : il faut " + xmT(b) + " ≥ 0. Vérifie chaque solution dans l'équation de départ. c) Même équation au carré, mais il faut cette fois " + b + " − x ≥ 0."],
+          "a) " + M("x" + sg(a) + " = " + poly([1, -2 * b, b * b]) + " \\iff " + poly([1, -(2 * b + 1), b * b - a]) + " = 0 \\iff (" + xm(s1) + ")(" + xm(s2) + ") = 0") + ". b) En " + M("x = " + s1) + ", " + M(s1 + " - " + pr(b) + " = " + (s1 - b) + " < 0") + " : solution parasite. Seul " + M(s2) + " convient (" + M("\\sqrt{" + (s2 + a) + "} = " + (s2 - b)) + "). c) Cette fois, " + M(s1) + " convient (" + M("\\sqrt{" + (s1 + a) + "} = " + (b - s1)) + ") et " + M(s2) + " est rejeté.");
+      },
+    ],
+    sys3: [
+      () => { /* trois groupes au cinéma : système 3 × 3 */
+        const d3 = (m) => m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+        let A, E, K, rows;
+        do { K = ri(12, 24) / 2; E = K + ri(2, 8) / 2; A = E + ri(2, 8) / 2;
+          rows = [[ri(1, 3), ri(1, 3), ri(1, 4)], [ri(1, 3), 0, ri(1, 4)], [0, ri(1, 4), ri(1, 4)]]; } while (d3(rows) === 0);
+        const tot = rows.map((r) => r[0] * A + r[1] * E + r[2] * K);
+        const grp_ = (r) => [r[0] ? pl(r[0], "adulte") : "", r[1] ? pl(r[1], "étudiant") : "", r[2] ? pl(r[2], "enfant") : ""].filter(Boolean).join(", ");
+        return P("Au cinéma, trois groupes ont payé : " + rows.map((r, i) => grp_(r) + " pour " + M(D(tot[i])) + " CHF").join(" ; ") + ". On cherche les prix " + M("a") + " (adulte), " + M("e") + " (étudiant) et " + M("k") + " (enfant).",
+          [["a) Prix adulte (CHF)", A], ["b) Prix étudiant (CHF)", E], ["c) Prix enfant (CHF)", K]],
+          ["Écris une équation par groupe. Le 2e groupe n'a pas d'étudiant, le 3e pas d'adulte : exprime a (2e équation) et e (3e équation) en fonction de k.",
+           "Remplace a et e dans la 1re équation : il ne reste que k. Puis remonte."],
+          rows.map((r, i) => M([[r[0], "a"], [r[1], "e"], [r[2], "k"]].filter(([c]) => c).map(([c, v]) => (c === 1 ? "" : c) + v).join(" + ") + " = " + D(tot[i]))).join(" ; ") + ". On trouve " + M("k = " + D(K)) + ", puis " + M("a = " + D(A)) + " et " + M("e = " + D(E)) + " (vérifie dans les trois équations).");
+      },
+      () => { /* nombre de trois chiffres : trois conditions */
+        let a, b, c, k;
+        do { a = ri(2, 9); c = ri(1, a - 1); k = ri(1, 6); b = a + c - k; } while (b < 0 || b > 9 || b === a || b === c);
+        const s = a + b + c, Dd = 99 * (a - c), N = 100 * a + 10 * b + c;
+        return P("Un nombre s'écrit avec trois chiffres. La somme de ses chiffres vaut " + M(s) + ". Le chiffre des dizaines est égal à la somme des deux autres chiffres diminuée de " + M(k) + ". Si on écrit ses chiffres dans l'ordre inverse, le nombre diminue de " + M(Dd) + ".",
+          [["a) Chiffre des centaines", a], ["b) Chiffre des dizaines", b], ["c) Le nombre", N]],
+          ["Avec c le chiffre des centaines, d celui des dizaines, u celui des unités : le nombre vaut 100c + 10d + u, et le nombre inversé 100u + 10d + c.",
+           "La différence vaut 99(c − u) = " + Dd + ", donc c − u = " + Dd / 99 + ". La 2e condition, d = c + u − " + k + ", dans la 1re donne c + u."],
+          M("c + d + u = " + s) + ", " + M("d = c + u - " + k) + ", " + M("99(c - u) = " + Dd) + ". Donc " + M("2(c + u) - " + k + " = " + s) + " : " + M("c + u = " + (a + c)) + " et " + M("c - u = " + (a - c)) + ". a) " + M("c = " + a) + ", " + M("u = " + c) + ". b) " + M("d = " + b) + ". c) " + M(N) + ".");
+      },
+    ],
+    // ---------- 2e Collège, MP : équations trigonométriques ----------
+    trigeq: [
+      () => { /* équation du 2e degré en sin x ou cos x, une valeur parfois impossible */
+        const V = [0.5, -0.5, 1, -1, 2, -2, 1.5, -1.5];
+        let u1, u2, fn, sc, cs;
+        do { u1 = pk(V); u2 = pk(V); fn = pk(["sin", "cos"]); } while (u1 === u2 || (Math.abs(u1) > 1 && Math.abs(u2) > 1));
+        for (sc of [1, 2, 4]) { cs = [sc, -sc * (u1 + u2), sc * u1 * u2]; if (cs.every(Number.isInteger)) break; }
+        const sol = (u) => (fn === "sin" ? { 1: [90], "-1": [270], 0.5: [30, 150], "-0.5": [210, 330] } : { 1: [0], "-1": [180], 0.5: [60, 300], "-0.5": [120, 240] })[u] || [];
+        const xs = [...sol(u1), ...sol(u2)], F = "\\" + fn;
+        const eqT = (cs[0] === 1 ? "" : cs[0]) + F + "^2 x" + (cs[1] ? (cs[1] < 0 ? " - " : " + ") + (Math.abs(cs[1]) === 1 ? "" : Math.abs(cs[1])) + F + " x" : "") + (cs[2] ? sg(cs[2]) : "") + " = 0";
+        return P("On résout " + M(eqT) + " pour " + M("0° \\leq x < 360°") + ".",
+          [["a) Solutions de l'équation en " + M("X = " + F + " x") + " (séparées par « ; », fractions acceptées)", SET([u1, u2])],
+           ["b) Nombre de solutions " + M("x") + " dans " + M("[0° \\,;\\, 360°["), xs.length],
+           ["c) Les solutions " + M("x") + " en degrés (séparées par « ; »)", SET(xs)]],
+          ["Pose X = " + fn + " x : l'équation devient " + pT(cs).replace(/x/g, "X") + " = 0, du 2e degré. Résous-la (Δ ou factorisation).",
+           "Puis " + fn + " x = X : impossible si X > 1 ou X < −1. Sinon, cercle trigonométrique : " + (fn === "sin" ? "sin x = X a deux solutions x et 180° − x (une seule si X = ±1)." : "cos x = X a deux solutions x et 360° − x (une seule si X = ±1).")],
+          M(poly(cs, "X") + " = 0") + " : " + M("X = " + fx(Math.min(u1, u2))) + " ou " + M("X = " + fx(Math.max(u1, u2))) + ". " + [u1, u2].map((u) => Math.abs(u) > 1 ? M(F + " x = " + fx(u)) + " est impossible" : M(F + " x = " + fx(u)) + " donne " + sol(u).map((x) => M(x + "°")).join(" et ")).join(" ; ") + ". b) " + M(xs.length) + " solution" + (xs.length > 1 ? "s" : "") + ".");
+      },
+      () => { /* 2cos²x + K sin x + m = 0 : identité sin² + cos² = 1, puis 2e degré */
+        const [u1, u2] = pk([[0.5, -2], [0.5, -1], [-0.5, 2], [-0.5, 1], [1, -1.5], [-1, 1.5]]), fn = pk(["sin", "cos"]), other = fn === "sin" ? "cos" : "sin";
+        const K = 2 * (u1 + u2), m = -2 - 2 * u1 * u2;
+        const sol = (u) => (fn === "sin" ? { 1: [90], "-1": [270], 0.5: [30, 150], "-0.5": [210, 330] } : { 1: [0], "-1": [180], 0.5: [60, 300], "-0.5": [120, 240] })[u] || [];
+        const xs = [...sol(u1), ...sol(u2)], F = "\\" + fn;
+        const eqT = "2\\" + other + "^2 x" + (K < 0 ? " - " : " + ") + (Math.abs(K) === 1 ? "" : Math.abs(K)) + F + " x" + (m ? sg(m) : "") + " = 0";
+        return P("On résout " + M(eqT) + " pour " + M("0° \\leq x < 360°") + ".",
+          [["a) Solutions de l'équation en " + M("X = " + F + " x") + " (séparées par « ; », fractions acceptées)", SET([u1, u2])],
+           ["b) Nombre de solutions " + M("x") + " dans " + M("[0° \\,;\\, 360°["), xs.length],
+           ["c) Les solutions " + M("x") + " en degrés (séparées par « ; »)", SET(xs)]],
+          ["Deux fonctions différentes : remplace " + other + "² x par 1 − " + fn + "² x (car sin² x + cos² x = 1). Il ne reste que " + fn + " x.",
+           "Pose X = " + fn + " x : 2X² " + (K > 0 ? "− " + K : "+ " + -K) + "X " + (2 + m > 0 ? "− " + (2 + m) : "+ " + -(2 + m)) + " = 0. Une des solutions en X peut être impossible (hors de [−1 ; 1])."],
+          M("2(1 - " + F + "^2 x)" + (K < 0 ? " - " : " + ") + (Math.abs(K) === 1 ? "" : Math.abs(K)) + F + " x" + (m ? sg(m) : "") + " = 0 \\iff " + poly([2, -K, -(2 + m)], "X") + " = 0") + " : " + M("X = " + fx(u1)) + " ou " + M("X = " + fx(u2)) + ". " + [u1, u2].map((u) => Math.abs(u) > 1 ? M(F + " x = " + fx(u)) + " est impossible" : M(F + " x = " + fx(u)) + " donne " + sol(u).map((x) => M(x + "°")).join(" et ")).join(" ; ") + ".");
+      },
+    ],
+    trigeq2: [
+      () => { /* grande roue : modèle, hauteur, premier passage, durée au-dessus d'une hauteur */
+        let r, d, Tp, t0, H2;
+        do { r = pk([15, 20, 25, 30, 40]); d = r + ri(2, 6); Tp = pk([6, 8, 10, 12, 15, 20]); t0 = ri(1, Tp - 1); H2 = ri(d - r + 3, d + r - 3); } while (((360 * t0) / Tp) % 90 === 0 || H2 === d);
+        const w = 360 / Tp, ht = d - r * Math.cos(rad(w * t0)), th = deg(Math.acos((d - H2) / r)), tb = th / w, dur = (360 - 2 * th) / w;
+        return P("Une grande roue a un rayon de " + M(r) + " m ; son axe est à " + M(d) + " m du sol et elle fait un tour en " + M(Tp) + " min. Une cabine part du point le plus bas à " + M("t = 0") + ". Sa hauteur vaut " + M("h(t) = " + d + " - " + r + "\\cos(\\omega t)") + " (m, " + M("t") + " en min, angle en degrés).",
+          [["a) " + M("\\omega") + " (degrés par minute)", w], ["b) Hauteur de la cabine à " + M("t = " + t0) + " min (m, au dixième)", ht, 0.1],
+           ["c) Premier instant où la cabine atteint " + M(H2) + " m (min, au dixième)", tb, 0.1], ["d) Pendant un tour, durée passée au-dessus de " + M(H2) + " m (min, au dixième)", dur, 0.1]],
+          ["Un tour complet (360°) dure " + Tp + " min : ω = 360 ÷ " + Tp + ". Puis remplace t dans h(t).",
+           "c) h(t) = " + H2 + " ⇔ cos(ωt) = (" + d + " − " + H2 + ") ÷ " + r + " : l'angle vaut arccos(…), puis t = angle ÷ ω. d) La cabine est au-dessus entre les angles θ et 360° − θ."],
+          "a) " + M("\\omega = 360 \\div " + Tp + " = " + D(w)) + ". b) " + M("h(" + t0 + ") = " + d + " - " + r + "\\cos(" + D(w * t0) + "°) \\approx " + D(r1(ht))) + " m. c) " + M("\\cos\\theta = " + frac(d - H2, r)) + ", " + M("\\theta \\approx " + D(r2c(th)) + "°") + ", " + M("t \\approx " + D(r2c(th)) + " \\div " + D(w) + " \\approx " + D(r1(tb))) + " min. d) " + M("(360° - 2\\theta) \\div " + D(w) + " \\approx " + D(r1(dur))) + " min.");
+      },
+      () => { /* marée : modèle cosinus, durée où le bateau peut passer */
+        let hn, hm, th, p;
+        do { hn = ri(4, 20) / 10; hm = hn + ri(20, 60) / 10; th = ri(1, 9); p = ri(Math.round(hn * 10) + 3, Math.round(hm * 10) - 3) / 10; } while (Math.abs(p - (hm + hn) / 2) < 0.05);
+        const d = (hm + hn) / 2, A = (hm - hn) / 2, c = (p - d) / A, ang = deg(Math.acos(c)), dur = (2 * ang) / 30, tq = th + ang / 30;
+        return P("Dans un port, la marée haute (" + M(D(hm)) + " m d'eau) a lieu à " + M(th) + " h, la marée basse (" + M(D(hn)) + " m) six heures plus tard. On modélise la hauteur d'eau par " + M("h(t) = d + A\\cos\\big(30(t - " + th + ")\\big)") + " (m, " + M("t") + " en heures, angle en degrés). Un bateau a besoin d'au moins " + M(D(p)) + " m d'eau.",
+          [["a) " + M("d") + " (m)", d], ["b) " + M("A") + " (m)", A], ["c) Durée (h, au centième) pendant laquelle le bateau peut naviguer, entre deux marées basses", dur, 0.01], ["d) Heure (au centième) à laquelle il doit être sorti, après la marée haute de " + th + " h", tq, 0.01]],
+          ["d est le niveau moyen, A la moitié de l'écart entre marée haute et marée basse.",
+           "h(t) ≥ " + T(p) + " ⇔ cos(30(t − " + th + ")) ≥ (" + T(p) + " − d) ÷ A. Avec θ = arccos(…), il faut −θ ≤ 30(t − " + th + ") ≤ θ."],
+          "a) " + M("d = \\frac{" + D(hm) + " + " + D(hn) + "}{2} = " + D(d)) + ". b) " + M("A = \\frac{" + D(hm) + " - " + D(hn) + "}{2} = " + D(A)) + ". c) " + M("\\cos\\theta = \\frac{" + D(p) + " - " + D(d) + "}{" + D(A) + "}") + ", " + M("\\theta \\approx " + D(r2c(ang)) + "°") + " : durée " + M("\\frac{2\\theta}{30} \\approx " + D(r2c(dur))) + " h. d) " + M(th + " + \\frac{\\theta}{30} \\approx " + D(r2c(tq))) + " h.");
+      },
+    ],
+    // ---------- 3e Collège : dérivées ----------
+    derivregles: [
+      () => { /* tangentes parallèles à une droite, tangente, pente minimale */
+        let a1, a2, m, d0; do { a1 = ri(-4, 2); a2 = ri(a1 + 2, 5); m = R.nz(-6, 6); d0 = R.nz(-9, 9); } while ((a1 + a2) % 2 !== 0 || 3 * a1 * a2 + m === 0 || a1 + a2 === 0 || a1 * a2 === 0 || m === 3 * ((a2 - a1) / 2) ** 2);
+        const B = -1.5 * (a1 + a2), C = 3 * a1 * a2 + m, f = (x) => x ** 3 + B * x * x + C * x + d0, mn = m - 3 * ((a2 - a1) / 2) ** 2, n2 = f(a2) - m * a2;
+        return P("Soit " + M("f(x) = " + poly([1, B, C, d0])) + ".",
+          [["a) Abscisses des points où la tangente est parallèle à la droite " + M("y = " + poly([m, 0])) + " (séparées par « ; »)", SET([a1, a2])],
+           ["b) Ordonnée à l'origine de la tangente au point d'abscisse " + M(a2), n2], ["c) Plus petite pente possible d'une tangente au graphe de " + M("f"), mn]],
+          ["Deux droites parallèles ont la même pente : résous f'(x) = " + m + ", avec f'(x) = 3x² " + (2 * B < 0 ? "− " + -2 * B : "+ " + 2 * B) + "x " + (C < 0 ? "− " + -C : "+ " + C) + ".",
+           "b) Tangente : y = f'(" + a2 + ")(x − " + tT(a2) + ") + f(" + a2 + "), puis x = 0. c) f'(x) est un trinôme tourné vers le haut : sa plus petite valeur est à son sommet."],
+          "a) " + M(poly([3, 2 * B, C]) + " = " + m + " \\iff " + poly([3, 2 * B, 3 * a1 * a2]) + " = 0 \\iff 3(" + xm(a1) + ")(" + xm(a2) + ") = 0") + ". b) " + M("f(" + a2 + ") = " + f(a2)) + ", " + M("y = " + m + "(" + xm(a2) + ")" + sg(f(a2)) + " = " + poly([m, n2])) + " : " + M(n2) + ". c) Sommet de " + M("f'") + " en " + M("x = " + D((a1 + a2) / 2)) + " : " + M("f'(" + D((a1 + a2) / 2) + ") = " + D(mn)) + ".");
+      },
+    ],
+    derivcomp: [
+      () => { /* dérivée de √(ax + b) : pente, tangente, point de pente donnée */
+        let a, b, xs;
+        do { a = ri(2, 6); b = R.nz(-9, 9); xs = []; for (let x = -4; x <= 20; x++) { const v = a * x + b, s = Math.round(Math.sqrt(Math.max(v, 0))); if (v > 0 && s * s === v && x !== 0) xs.push([x, s]); } } while (xs.length < 2);
+        let i, j; do { i = ri(0, xs.length - 1); j = ri(0, xs.length - 1); } while (i === j || 2 * xs[i][1] ** 2 === a * xs[i][0] || a === 2 * xs[i][1]);
+        const [x0, q] = xs[i], [x1, m] = xs[j], n0 = q - (a * x0) / (2 * q);
+        return P("Soit " + M("f(x) = \\sqrt{" + poly([a, b]) + "}") + ".",
+          [["a) " + M("f'(" + x0 + ")") + " (fraction acceptée)", a / (2 * q)], ["b) Ordonnée à l'origine de la tangente au point d'abscisse " + M(x0) + " (fraction acceptée)", n0],
+           ["c) Abscisse du point où la tangente a une pente de " + M(frac(a, 2 * m)), x1]],
+          ["Dérivée d'une composée : (√u)' = u' ÷ (2√u), avec u = " + pT([a, b]) + " et u' = " + a + ".",
+           "b) Tangente : y = f'(" + x0 + ")(x − " + tT(x0) + ") + f(" + x0 + "), puis x = 0. c) Résous " + a + " ÷ (2√(" + pT([a, b]) + ")) = " + a / gcd(a, 2 * m) + "/" + (2 * m) / gcd(a, 2 * m) + " : d'abord √(…) = " + m + "."],
+          M("f'(x) = \\frac{" + a + "}{2\\sqrt{" + poly([a, b]) + "}}") + ". a) " + M("f(" + x0 + ") = \\sqrt{" + q * q + "} = " + q) + ", " + M("f'(" + x0 + ") = \\frac{" + a + "}{" + 2 * q + "}" + (gcd(a, 2 * q) > 1 ? " = " + frac(a, 2 * q) : "")) + ". b) " + M("y = " + frac(a, 2 * q) + "(" + xm(x0) + ") + " + q) + " : en " + M("x = 0") + ", " + M("y = " + frac(2 * q * q - a * x0, 2 * q)) + ". c) " + M("\\sqrt{" + poly([a, b]) + "} = " + m + " \\iff " + poly([a, b]) + " = " + m * m + " \\iff x = " + x1) + ".");
+      },
+    ],
+    derivprodquot: [
+      () => { /* (x² + c) ÷ (x − p) : extremums, et maximum local plus petit que le minimum local */
+        let a1, a2; do { a1 = ri(-5, 3); a2 = ri(a1 + 2, 7); } while ((a1 + a2) % 2 !== 0 || a1 * a2 === 0 || a1 + a2 === 0);
+        const p = (a1 + a2) / 2, c = -a1 * a2;
+        return P("Soit " + M("f(x) = \\frac{x^2" + sg(c) + "}{" + xm(p) + "}") + ", pour " + M("x \\neq " + p) + ".",
+          [["a) Abscisses où " + M("f'(x) = 0") + " (séparées par « ; »)", SET([a1, a2])], ["b) Valeur du maximum local", 2 * a1], ["c) Valeur du minimum local", 2 * a2]],
+          ["Dérivée d'un quotient : (u ÷ v)' = (u'v − uv') ÷ v². Le dénominateur (" + xmT(p) + ")² est positif : le signe de f' est celui du numérateur.",
+           "Numérateur : 2x(" + xmT(p) + ") − (x² " + (c < 0 ? "− " + -c : "+ " + c) + ") = x² " + (p > 0 ? "− " + 2 * p : "+ " + -2 * p) + "x " + (c > 0 ? "− " + c : "+ " + -c) + ". Tableau de signes, sans oublier la valeur interdite " + p + "."],
+          M("f'(x) = \\frac{" + poly([1, -2 * p, -c]) + "}{(" + xm(p) + ")^2} = \\frac{(" + xm(a1) + ")(" + xm(a2) + ")}{(" + xm(p) + ")^2}") + ". a) " + M(a1) + " et " + M(a2) + ". " + M("f'") + " est positive, négative, (valeur interdite " + M(p) + "), négative, positive. b) Maximum local " + M("f(" + a1 + ") = \\frac{" + (a1 * a1 + c) + "}{" + (a1 - p) + "} = " + 2 * a1) + ". c) Minimum local " + M("f(" + a2 + ") = \\frac{" + (a2 * a2 + c) + "}{" + (a2 - p) + "} = " + 2 * a2) + " : le maximum local est plus petit que le minimum local (deux branches séparées par la valeur interdite).");
+      },
+      () => { /* concentration d'un médicament : maximum, puis durée au-dessus d'un seuil */
+        const [b, t1, t2] = pk([[6, 4, 9], [6, 3, 12], [6, 2, 18], [4, 2, 8], [10, 5, 20], [10, 4, 25], [12, 8, 18], [12, 9, 16], [12, 6, 24], [8, 4, 16], [9, 3, 27]]), k = ri(2, 6);
+        const a = k * (t1 + t2), Cm = a / (2 * b);
+        return P("Après une prise de médicament, la concentration dans le sang vaut " + M("C(t) = \\frac{" + a + "t}{t^2 + " + b * b + "}") + " (mg/L, " + M("t") + " en heures). Le traitement est efficace tant que " + M("C(t) \\geq " + k) + " mg/L.",
+          [["a) Instant où la concentration est maximale (h)", b], ["b) Concentration maximale (mg/L, au centième)", Cm, 0.01], ["c) Pendant combien d'heures le traitement est-il efficace ?", t2 - t1]],
+          ["Dérivée d'un quotient : le numérateur de C'(t) vaut " + a + "(t² + " + b * b + ") − " + a + "t · 2t = " + a + "(" + b * b + " − t²).",
+           "c) Le dénominateur est positif : C(t) ≥ " + k + " ⇔ " + a + "t ≥ " + k + "(t² + " + b * b + "). Ramène tout d'un côté, divise par " + k + ", factorise."],
+          "a) " + M("C'(t) = \\frac{" + a + "(" + b * b + " - t^2)}{(t^2 + " + b * b + ")^2}") + " s'annule en " + M("t = " + b) + " (positive avant, négative après). b) " + M("C(" + b + ") = \\frac{" + a * b + "}{" + 2 * b * b + "} \\approx " + D(r2c(Cm))) + " mg/L. c) " + M("t^2 - " + (t1 + t2) + "t + " + b * b + " \\leq 0 \\iff (t - " + t1 + ")(t - " + t2 + ") \\leq 0") + " : de " + M(t1) + " h à " + M(t2) + " h, soit " + M(t2 - t1) + " h.");
+      },
+    ],
+    derivref: [
+      () => { /* B(x) = a√x − bx : maximum, pente, zéro */
+        let b, m, n; do { b = ri(1, 4); m = ri(2, 6); n = ri(1, 7); } while (n === m);
+        const a = 2 * b * m;
+        return P("Le bénéfice d'une petite entreprise (milliers de CHF) dépend de son budget de publicité " + M("x") + " (milliers de CHF) : " + M("B(x) = " + a + "\\sqrt{x}" + (b === 1 ? " - x" : " - " + b + "x")) + ".",
+          [["a) Budget qui donne le plus grand bénéfice", m * m], ["b) Bénéfice maximal", b * m * m], ["c) " + M("B'(" + n * n + ")") + " (fraction acceptée)", (b * (m - n)) / n], ["d) Budget non nul pour lequel le bénéfice est nul", 4 * m * m]],
+          ["(√x)' = 1 ÷ (2√x), donc B'(x) = " + a + " ÷ (2√x) − " + b + " = " + a / 2 + " ÷ √x − " + b + ".",
+           "B'(x) = 0 ⇔ √x = " + a / 2 + " ÷ " + b + ". d) " + a + "√x = " + b + "x : divise par √x (x ≠ 0)."],
+          M("B'(x) = \\frac{" + a / 2 + "}{\\sqrt{x}} - " + b) + ". a) " + M("\\sqrt{x} = " + m) + ", " + M("x = " + m * m) + " (B' positive avant, négative après). b) " + M("B(" + m * m + ") = " + a + " \\cdot " + m + " - " + b * m * m + " = " + b * m * m) + ". c) " + M("\\frac{" + a / 2 + "}{" + n + "} - " + b + " = " + frac(b * (m - n), n)) + ". d) " + M("\\sqrt{x} = " + 2 * m) + ", " + M("x = " + 4 * m * m) + ".");
+      },
+    ],
+    tangente: [
+      () => { /* tangente, puis triangle formé avec les axes */
+        let a, b, c, x0, s, n;
+        do { a = pk([1, -1, 2, -2, 0.5]); b = R.nz(-6, 6); c = R.nz(-8, 8); x0 = R.nz(-3, 3); s = 2 * a * x0 + b; n = c - a * x0 * x0; } while (s === 0 || n === 0);
+        const y0 = a * x0 * x0 + b * x0 + c, A = (n * n) / (2 * Math.abs(s));
+        return P("On trace la tangente à la courbe de " + M("f(x) = " + poly([a, b, c])) + " au point d'abscisse " + M(x0) + ".",
+          [["a) Pente de la tangente", s], ["b) Ordonnée à l'origine de la tangente", n], ["c) Aire du triangle formé par la tangente et les deux axes (fraction acceptée)", A]],
+          ["Pente = f'(" + x0 + "). Tangente : y = f'(" + x0 + ")(x − " + tT(x0) + ") + f(" + x0 + ").",
+           "c) La tangente coupe l'axe vertical en son ordonnée à l'origine et l'axe horizontal là où y = 0 : triangle rectangle, aire = ½ · base · hauteur (longueurs positives)."],
+          "a) " + M("f'(x) = " + poly([2 * a, b]) + "") + ", " + M("f'(" + x0 + ") = " + s) + ". b) " + M("f(" + x0 + ") = " + D(y0)) + ", " + M("y = " + s + "(" + xm(x0) + ")" + sgD(y0) + " = " + poly([s, n])) + ". c) Zéro : " + M("x = \\frac{" + D(-n) + "}{" + s + "}") + " ; aire " + M("\\frac{1}{2} \\cdot " + D(Math.abs(n)) + " \\cdot \\frac{" + D(Math.abs(n)) + "}{" + Math.abs(s) + "} = \\frac{" + D(n * n) + "}{" + 2 * Math.abs(s) + "}" + (Number.isInteger(n * n) && gcd(n * n, 2 * Math.abs(s)) > 1 ? " = " + frac(n * n, 2 * Math.abs(s)) : "")) + ".");
+      },
+      () => { /* deux tangentes issues d'un point extérieur */
+        let a, c, t1, t2; do { a = pk([1, 2, -1, 0.5]); c = ri(-5, 5); t1 = ri(-4, 2); t2 = ri(t1 + 1, 5); } while (false);
+        const p = (t1 + t2) / 2, q = c + a * t1 * t2, s1 = 2 * a * t1, s2 = 2 * a * t2;
+        let ang = Math.abs(deg(Math.atan(s1)) - deg(Math.atan(s2))); if (ang > 90) ang = 180 - ang;
+        return P("Par le point " + M("P(" + D(p) + " \\,;\\, " + D(q) + ")") + ", on mène les deux tangentes à la courbe de " + M("f(x) = " + poly([a, 0, c])) + ".",
+          [["a) Abscisses des points de contact (séparées par « ; »)", SET([t1, t2])], ["b) Pente de la tangente au point de contact le plus à droite", s2], ["c) Angle aigu entre les deux tangentes (°, au dixième)", ang, 0.1]],
+          ["Appelle t l'abscisse du point de contact : la tangente a pour équation y = f'(t)(x − t) + f(t). Elle doit passer par P.",
+           "Remplace x et y par les coordonnées de P : équation du 2e degré en t. c) L'angle d'une droite de pente s avec l'axe horizontal vaut arctan s ; fais la différence."],
+          "Tangente en " + M("t") + " : " + M("y = " + cfD(2 * a) + "t(x - t)" + (a < 0 ? " - " : " + ") + cfD(Math.abs(a)) + "t^2" + (c ? sg(c) : "")) + ". Par " + M("P") + " : " + M(poly([a, -2 * a * p, a * t1 * t2], "t") + " = 0") + ", a) " + M("t = " + t1) + " ou " + M("t = " + t2) + ". b) " + M("f'(" + t2 + ") = " + s2) + ". c) Pentes " + M(D(s1)) + " et " + M(D(s2)) + " : " + M("|\\arctan(" + D(s1) + ") - \\arctan(" + D(s2) + ")|") + ", angle aigu " + M("\\approx " + D(r1(ang)) + "°") + ".");
+      },
+    ],
+    variations: [
+      () => { /* extremums d'une cubique, puis nombre de k pour trois solutions */
+        let a1, a2, sgn, d0; do { a1 = ri(-4, 2); a2 = ri(a1 + 2, 4); sgn = pk([1, -1]); d0 = R.nz(-9, 9); } while ((a1 + a2) % 2 !== 0);
+        const cs = [sgn, -1.5 * sgn * (a1 + a2), 3 * sgn * a1 * a2, d0], f = (x) => cs[0] * x ** 3 + cs[1] * x * x + cs[2] * x + cs[3];
+        const xM = sgn > 0 ? a1 : a2, xm_ = sgn > 0 ? a2 : a1, vM = f(xM), vm = f(xm_);
+        return P("Soit " + M("f(x) = " + poly(cs)) + ".",
+          [["a) Abscisse du maximum local", xM], ["b) Valeur du maximum local", vM], ["c) Pour combien de nombres entiers " + M("k") + " l'équation " + M("f(x) = k") + " a-t-elle trois solutions ?", vM - vm - 1]],
+          ["f'(x) = " + pT([3 * cs[0], 2 * cs[1], cs[2]]) + " : factorise, puis tableau de signes de f' et des variations de f.",
+           "c) Une droite horizontale y = k coupe la courbe trois fois quand k est strictement entre le minimum local et le maximum local."],
+          M("f'(x) = " + poly([3 * cs[0], 2 * cs[1], cs[2]]) + " = " + (sgn > 0 ? "" : "-") + "3(" + xm(a1) + ")(" + xm(a2) + ")") + ". a) Maximum local en " + M("x = " + xM) + ". b) " + M("f(" + xM + ") = " + vM) + ". c) Minimum local " + M("f(" + xm_ + ") = " + vm) + " : trois solutions pour " + M(vm + " < k < " + vM) + ", soit " + M(vM - vm - 1) + " entiers.");
+      },
+    ],
+    nbderive: [
+      () => { /* quotient de Newton d'un trinôme : valeur, limite, et h pour une valeur donnée */
+        let a, b, c, x0, h1, h2; do { a = pk([1, 2, 3, -1, -2]); b = R.nz(-6, 6); c = ri(-5, 5); x0 = R.nz(-3, 4); h1 = pk([0.1, 0.2, 0.5, -0.1]); h2 = pk([0.25, 0.5, 2, 3, -0.5]); } while (2 * a * x0 + b === 0);
+        const fp = 2 * a * x0 + b, Qt = fp + a * h2;
+        return P("On étudie " + M("f(x) = " + poly([a, b, c])) + " au point d'abscisse " + M(x0) + ", avec le quotient " + M("Q(h) = \\frac{f(" + x0 + " + h) - f(" + x0 + ")}{h}") + ".",
+          [["a) " + M("Q(" + D(h1) + ")"), fp + a * h1], ["b) " + M("f'(" + x0 + ")") + " (limite de " + M("Q(h)") + " quand " + M("h \\to 0") + ")", fp], ["c) Pour quelle valeur de " + M("h") + " a-t-on " + M("Q(h) = " + D(Qt)) + " ?", h2]],
+          ["Développe f(" + x0 + " + h) − f(" + x0 + ") : tous les termes sans h s'éliminent. Divise par h (h ≠ 0).",
+           "Tu dois obtenir Q(h) = " + fp + (a < 0 ? " − " : " + ") + (Math.abs(a) === 1 ? "" : Math.abs(a)) + "h. b) Fais tendre h vers 0. c) Résous Q(h) = " + T(Qt) + "."],
+          M("f(" + x0 + " + h) - f(" + x0 + ") = " + poly([a, fp, 0], "h")) + ", donc " + M("Q(h) = " + poly([a, fp], "h")) + ". a) " + M(D(fp + a * h1)) + ". b) " + M(fp) + ". c) " + M(poly([a, fp], "h") + " = " + D(Qt) + " \\iff h = " + D(h2)) + ".");
+      },
+      () => { /* quotient de Newton de k ÷ x */
+        let k, x0, h1, N; do { k = ri(2, 12); x0 = ri(1, 5); h1 = ri(1, 3); N = x0 + ri(2, 7); } while (N === x0 + h1);
+        return P("On étudie " + M("f(x) = \\frac{" + k + "}{x}") + " au point d'abscisse " + M(x0) + ", avec le quotient " + M("Q(h) = \\frac{f(" + x0 + " + h) - f(" + x0 + ")}{h}") + ". (fractions acceptées)",
+          [["a) " + M("Q(" + h1 + ")"), -k / (x0 * (x0 + h1))], ["b) " + M("f'(" + x0 + ")"), -k / (x0 * x0)], ["c) Pour quelle valeur de " + M("h") + " a-t-on " + M("Q(h) = " + frac(-k, x0 * N)) + " ?", N - x0]],
+          ["Mets " + k + " ÷ (" + x0 + " + h) − " + k + " ÷ " + x0 + " au même dénominateur, puis divise par h.",
+           "Q(h) = −" + k + " ÷ (" + x0 + " · (" + x0 + " + h)). b) Fais tendre h vers 0. c) Compare les dénominateurs : " + x0 + "(" + x0 + " + h) = " + x0 * N + "."],
+          M("\\frac{" + k + "}{" + x0 + " + h} - \\frac{" + k + "}{" + x0 + "} = \\frac{-" + k + "h}{" + x0 + "(" + x0 + " + h)}") + ", donc " + M("Q(h) = \\frac{-" + k + "}{" + x0 + "(" + x0 + " + h)}") + ". a) " + M(frac(-k, x0 * (x0 + h1))) + ". b) " + M(frac(-k, x0 * x0)) + ". c) " + M(x0 + " + h = " + N) + ", " + M("h = " + (N - x0)) + ".");
+      },
+    ],
+    tauxvar: [
+      () => { /* vitesse moyenne, instant où la vitesse instantanée l'égale, vitesse moyenne depuis le départ */
+        let a, b, t1, t2, Tm; do { a = pk([0.5, 1, 1.5, 2, 2.5, 3]); b = ri(1, 9); t1 = ri(1, 5); t2 = t1 + ri(2, 7); Tm = ri(5, 15); } while (Tm === t2 || Tm === t1);
+        const vm = a * (t1 + t2) + b, V = a * Tm + b, d = (t) => a * t * t + b * t;
+        return P("Une voiture démarre ; elle a parcouru " + M("d(t) = " + poly([a, b, 0], "t")) + " mètres après " + M("t") + " secondes.",
+          [["a) Vitesse moyenne entre " + M(t1) + " s et " + M(t2) + " s (m/s)", vm], ["b) À quel instant la vitesse instantanée est-elle égale à cette vitesse moyenne ? (s)", (t1 + t2) / 2],
+           ["c) Après combien de secondes la vitesse moyenne depuis le départ atteint-elle " + M(D(V)) + " m/s ?", Tm]],
+          ["Vitesse moyenne = (d(" + t2 + ") − d(" + t1 + ")) ÷ (" + t2 + " − " + t1 + "). Vitesse instantanée = d'(t).",
+           "b) Résous d'(t) = vitesse moyenne trouvée. c) Vitesse moyenne entre 0 et T : d(T) ÷ T ; simplifie par T, puis résous."],
+          "a) " + M("\\frac{" + D(d(t2)) + " - " + D(d(t1)) + "}{" + (t2 - t1) + "} = " + D(vm)) + " m/s. b) " + M("d'(t) = " + poly([2 * a, b], "t") + " = " + D(vm) + " \\iff t = " + D((t1 + t2) / 2)) + " s, le milieu de l'intervalle. c) " + M("\\frac{d(T)}{T} = " + poly([a, b], "T") + " = " + D(V) + " \\iff T = " + Tm) + " s.");
+      },
+    ],
+    // ---------- 4e Collège : intégrales ----------
+    integrale: [
+      () => { /* débit d'une source : volume, débit moyen, instant où débit instantané = débit moyen */
+        let k, Tt; do { k = pk([1, 2, 3, 0.5]); Tt = pk([3, 6, 9, 12]); } while (k * Tt ** 3 / 6 > 900);
+        const V = (k * Tt ** 3) / 6, dm = V / Tt, t1 = Tt / 2 - (Tt * Math.sqrt(3)) / 6;
+        return P("Pendant un orage, un ruisseau a un débit de " + M("r(t) = " + poly([-k, k * Tt, 0], "t")) + " litres par minute, pour " + M("t") + " de " + M(0) + " à " + M(Tt) + " min.",
+          [["a) Volume d'eau écoulé pendant ces " + Tt + " minutes (L)", V], ["b) Débit moyen (L/min)", dm], ["c) Premier instant où le débit est égal au débit moyen (min, au centième)", t1, 0.01]],
+          ["Volume = intégrale du débit de 0 à " + Tt + ". Primitive de " + pT([-k, k * Tt, 0]).replace(/x/g, "t") + " : " + fxT(-k / 3) + " t³ + " + fxT((k * Tt) / 2) + " t².",
+           "Débit moyen = volume ÷ durée. c) Résous r(t) = débit moyen : équation du 2e degré, garde la plus petite solution."],
+          "a) " + M("\\int_0^{" + Tt + "} r(t)\\,dt = \\Big[-" + (k === 3 ? "" : fx(k / 3)) + "t^3 + " + fx((k * Tt) / 2) + "t^2\\Big]_0^{" + Tt + "} = " + D(V)) + " L. b) " + M(D(V) + " \\div " + Tt + " = " + D(dm)) + " L/min. c) " + M(poly([-k, k * Tt, -dm], "t") + " = 0") + " : " + M("t = \\frac{" + Tt + "}{2} - \\frac{" + Tt + "\\sqrt{3}}{6} \\approx " + D(r2c(t1))) + " min.");
+      },
+      () => { /* freinage : durée, distance, décélération pour une distance donnée */
+        let v0, a, a2, D2; do { v0 = ri(12, 30); a = pk([4, 5, 6, 8]); a2 = pk([3, 3.5, 4, 4.5, 5, 6, 6.5, 7, 7.5, 9]); D2 = (v0 * v0) / (2 * a2); } while (a2 === a || Math.abs(D2 * 100 - Math.round(D2 * 100)) > 1e-9);
+        const tf = v0 / a, dist = (v0 * v0) / (2 * a);
+        return P("Une voiture roule à " + M(v0) + " m/s et freine : sa vitesse vaut " + M("v(t) = " + v0 + " - " + a + "t") + " (m/s) jusqu'à l'arrêt.",
+          [["a) Durée du freinage (s, au centième)", tf, 0.01], ["b) Distance de freinage (m, au centième)", dist, 0.01], ["c) Quelle décélération (m/s²) faudrait-il pour s'arrêter en " + M(D(D2)) + " m ?", a2]],
+          ["Arrêt : v(t) = 0. Distance = intégrale de la vitesse, de 0 jusqu'à l'arrêt.",
+           "c) Avec v(t) = " + v0 + " − ct : arrêt en " + v0 + " ÷ c, distance " + v0 + "² ÷ (2c). Résous " + v0 * v0 + " ÷ (2c) = " + T(D2) + "."],
+          "a) " + M(v0 + " - " + a + "t = 0 \\iff t = " + fx(tf)) + " s. b) " + M("\\int_0^{" + fx(tf) + "} (" + v0 + " - " + a + "t)\\,dt = \\Big[" + v0 + "t - " + fx(a / 2) + "t^2\\Big]_0^{" + fx(tf) + "} = " + frac(v0 * v0, 2 * a) + " \\approx " + D(r2c(dist))) + " m. c) " + M("\\frac{" + v0 * v0 + "}{2c} = " + D(D2) + " \\iff c = " + D(a2)) + " m/s².");
+      },
+    ],
+    primitives: [
+      () => { /* accélération → vitesse → position */
+        const m = ri(1, 3), v0 = 3 * m * m + ri(2, 12), Tt = pk([m + 1, m + 3, m + 4].filter((t) => t !== 2 * m));
+        const vT = 3 * Tt * Tt - 6 * m * Tt + v0, xT = Tt ** 3 - 3 * m * Tt * Tt + v0 * Tt;
+        return P("Un chariot roule sur un rail. Son accélération vaut " + M("a(t) = 6t - " + 6 * m) + " (m/s²), sa vitesse au départ " + M(v0) + " m/s ; il part de la position " + M(0) + ".",
+          [["a) Vitesse à " + M("t = " + Tt) + " s (m/s)", vT], ["b) Position à " + M("t = " + Tt) + " s (m)", xT], ["c) Vitesse minimale du chariot (m/s)", v0 - 3 * m * m]],
+          ["La vitesse est une primitive de l'accélération, avec v(0) = " + v0 + ". La position est une primitive de la vitesse, avec x(0) = 0.",
+           "v(t) = 3t² − " + 6 * m + "t + " + v0 + ". c) La vitesse est minimale quand sa dérivée, a(t), s'annule."],
+          M("v(t) = 3t^2 - " + 6 * m + "t + " + v0) + ", " + M("x(t) = t^3 - " + 3 * m + "t^2 + " + v0 + "t") + ". a) " + M("v(" + Tt + ") = " + vT) + " m/s. b) " + M("x(" + Tt + ") = " + xT) + " m. c) " + M("a(t) = 0") + " pour " + M("t = " + m) + " : " + M("v(" + m + ") = " + (v0 - 3 * m * m)) + " m/s.");
+      },
+    ],
+    aireint: [
+      () => { /* aire entre parabole et droite, puis part de l'aire sous la parabole */
+        let R0, x1, x2; do { R0 = ri(3, 5); x1 = ri(-R0 + 1, R0 - 4); x2 = ri(x1 + 3, R0 - 1); } while (false);
+        const A = (x2 - x1) ** 3 / 6, Atot = (4 * R0 ** 3) / 3, pc = (100 * A) / Atot;
+        return P("On donne " + M("f(x) = " + R0 * R0 + " - x^2") + " et " + M("g(x) = " + poly([-(x1 + x2), R0 * R0 + x1 * x2])) + ".",
+          [["a) Abscisses des points d'intersection (séparées par « ; »)", SET([x1, x2])], ["b) Aire du domaine compris entre les deux courbes (fraction acceptée)", A],
+           ["c) Quel pourcentage de l'aire comprise entre la parabole et l'axe des abscisses cela représente-t-il ? (%, au dixième)", pc, 0.1]],
+          ["f(x) = g(x) : ramène à un trinôme et factorise. Entre les deux abscisses, la parabole est au-dessus de la droite.",
+           "b) Intègre f(x) − g(x) entre les deux abscisses. c) La parabole coupe l'axe en ±" + R0 + " : intègre f de −" + R0 + " à " + R0 + "."],
+          "a) " + M(poly([1, -(x1 + x2), x1 * x2]) + " = 0 \\iff (" + xm(x1) + ")(" + xm(x2) + ") = 0") + ". b) " + M("\\int_{" + x1 + "}^{" + x2 + "} \\big(" + poly([-1, x1 + x2, -x1 * x2]) + "\\big)\\,dx = " + fx(A)) + ". c) " + M("\\int_{-" + R0 + "}^{" + R0 + "} (" + R0 * R0 + " - x^2)\\,dx = " + frac(4 * R0 ** 3, 3)) + " ; " + M(fx(A) + " \\div " + frac(4 * R0 ** 3, 3) + " \\approx " + D(r1(pc)) + "\\,\\%") + ".");
+      },
+    ],
+    volrev: [
+      () => { /* verre de révolution y = √(kx) : volume, hauteur de liquide, verre à moitié plein */
+        let k, H, V, V0; do { k = pk([2, 3, 4, 5, 6]); H = ri(6, 12); V = (Math.PI * k * H * H) / 2; V0 = 10 * ri(Math.ceil(V / 50), Math.floor((0.85 * V) / 10)); } while (Math.abs(V0 - V / 2) < 5);
+        const h0 = Math.sqrt((2 * V0) / (Math.PI * k)), hm = H / Math.SQRT2;
+        return P("Un verre a la forme du solide obtenu en faisant tourner la courbe " + M("y = \\sqrt{" + k + "x}") + " autour de l'axe des abscisses, pour " + M("x") + " de " + M(0) + " (le fond) à " + M(H) + " cm (le bord).",
+          [["a) Contenance du verre (cm³, à l'unité)", V, 1], ["b) Hauteur du liquide quand on y verse " + M(V0) + " cm³ (cm, au dixième)", h0, 0.1], ["c) Hauteur du liquide quand le verre est à moitié plein (cm, au dixième)", hm, 0.1]],
+          ["Volume de révolution : V = π ∫ y² dx. Ici y² = " + k + "x.",
+           "Rempli jusqu'à la hauteur h : V(h) = π · " + k + "h² ÷ 2. b) et c) Résous V(h) = le volume voulu (garde h > 0)."],
+          "a) " + M("\\pi \\int_0^{" + H + "} " + k + "x\\,dx = \\pi \\cdot " + fx((k * H * H) / 2) + " \\approx " + nb(Math.round(V))) + " cm³. b) " + M("\\frac{" + k + "\\pi h^2}{2} = " + V0 + " \\iff h = \\sqrt{\\frac{" + 2 * V0 + "}{" + k + "\\pi}} \\approx " + D(r1(h0))) + " cm. c) " + M("h^2 = \\frac{" + H * H + "}{2}") + ", " + M("h = \\frac{" + H + "}{\\sqrt{2}} \\approx " + D(r1(hm))) + " cm (et non " + M(D(H / 2)) + " : le verre s'évase).");
+      },
+    ],
+    // ---------- MP 3e–4e ----------
+    eqabs: [
+      () => { /* |ax + b| = cx + d : condition sur le membre de droite, une solution parfois rejetée */
+        let a, c, s1, s2, b, d, ok;
+        do { a = pk([2, 3, 4]); c = pk([1, -1, 2, -2]); s1 = ri(-6, 6); s2 = ri(-6, 6);
+          d = ((a - c) * s1 - (a + c) * s2) / 2; b = (-(a - c) * s1 - (a + c) * s2) / 2; ok = [s1, s2].filter((x) => c * x + d >= 0);
+        } while (Math.abs(c) === a || s1 === s2 || !Number.isInteger(d) || !Number.isInteger(b) || b === 0 || d === 0 || ok.length === 0);
+        const lim = -d / c;
+        return P("On résout " + M("|" + poly([a, b]) + "| = " + poly([c, d])) + ".",
+          [["a) Une valeur absolue n'est jamais négative : il faut " + M(poly([c, d]) + " \\geq 0") + ", c'est-à-dire " + M("x " + (c > 0 ? "\\geq" : "\\leq") + " \\ldots") + " Donne la borne (fraction acceptée).", lim],
+           ["b) Solution(s) de l'équation (séparées par « ; »)", SET(ok)]],
+          ["|A| = B ⇔ (A = B ou A = −B), à condition que B ≥ 0. Résous les deux équations du 1er degré.",
+           "Puis garde seulement les solutions qui vérifient la condition de a) (le membre de droite positif ou nul)."],
+          "a) " + M(poly([c, d]) + " \\geq 0 \\iff x " + (c > 0 ? "\\geq " : "\\leq ") + fx(lim)) + ". b) " + M(poly([a, b]) + " = " + poly([c, d])) + " donne " + M("x = " + s1) + (ok.includes(s1) ? " (convient)" : " (rejeté)") + " ; " + M(poly([a, b]) + " = " + poly([-c, -d])) + " donne " + M("x = " + s2) + (ok.includes(s2) ? " (convient)" : " (rejeté)") + ".");
+      },
+      () => { /* |x − p| + |x − q| = L : somme de deux distances */
+        let p, q, L; do { p = ri(0, 15); q = p + ri(3, 12); L = q - p + ri(1, 12); } while (false);
+        const xs = [(p + q - L) / 2, (p + q + L) / 2];
+        return P("Sur une route rectiligne, le village A est au km " + M(p) + " et le village B au km " + M(q) + ". On veut construire une station au km " + M("x") + " de sorte que " + M("|x - " + p + "| + |x - " + q + "| = " + L) + " (somme des distances aux deux villages).",
+          [["a) Plus petite somme possible des deux distances (km)", q - p], ["b) Positions " + M("x") + " possibles (séparées par « ; »)", SET(xs)]],
+          ["Entre les deux villages, la somme vaut toujours " + (q - p) + " km. Pour " + L + " km, la station est donc à l'extérieur de [" + p + " ; " + q + "].",
+           "À droite de B : (x − " + p + ") + (x − " + q + ") = " + L + ". À gauche de A : (" + p + " − x) + (" + q + " − x) = " + L + "."],
+          "a) Si " + M(p + " \\leq x \\leq " + q) + ", " + M("(x - " + p + ") + (" + q + " - x) = " + (q - p)) + ". b) " + M("2x - " + (p + q) + " = " + L) + " : " + M("x = " + D(xs[1])) + " ; " + M((p + q) + " - 2x = " + L) + " : " + M("x = " + D(xs[0])) + ".");
+      },
+    ],
+    logprop: [
+      () => { /* simplifier une somme de logarithmes, puis équation avec domaine */
+        const n = pk([3, 5, 6, 7]); let i, j; do { i = ri(0, 4); j = ri(0, 4); } while (i === j || i + j < 2);
+        const m1 = n * 2 ** i, k1 = n * 2 ** j;
+        const pairs = []; for (let u = 2; u <= 40; u++) for (let v = u + 1; v <= 40; v++) if ((u * v) % (u + v) === 0) pairs.push([u, v]);
+        const [x1, x2] = pk(pairs), a = (x1 * x2) / (x1 + x2), b = x1 + x2;
+        return P("Deux calculs avec les propriétés des logarithmes.",
+          [["a) " + M("A = \\log_2 " + m1 + " + \\log_2 " + k1 + " - 2\\log_2 " + n) + " (sans calculatrice)", i + j],
+           ["b) On résout " + M("2\\log x - \\log(x - " + a + ") = \\log " + b) + ". Domaine : " + M("x") + " doit être plus grand que", a],
+           ["c) Solutions de cette équation (séparées par « ; »)", SET([x1, x2])]],
+          ["log u + log v = log(uv), log u − log v = log(u ÷ v), k · log u = log(uᵏ). a) Regroupe tout en un seul log₂.",
+           "b) Les deux logarithmes doivent exister. c) log(x² ÷ (x − " + a + ")) = log " + b + " ⇔ x² = " + b + "(x − " + a + "). Équation du 2e degré ; vérifie ensuite le domaine."],
+          "a) " + M("A = \\log_2 \\frac{" + m1 + " \\cdot " + k1 + "}{" + n * n + "} = \\log_2 " + 2 ** (i + j) + " = " + (i + j)) + ". b) " + M("x > 0") + " et " + M("x > " + a) + ". c) " + M("x^2 = " + b + "x - " + a * b + " \\iff (x - " + x1 + ")(x - " + x2 + ") = 0") + " : les deux sont plus grandes que " + M(a) + ", " + M("S = \\{" + x1 + " \\,;\\, " + x2 + "\\}") + ".");
+      },
+    ],
+    logdef: [
+      () => { /* décibels : sources qui s'ajoutent */
+        let L1, N, dl, j; do { L1 = ri(50, 85); N = ri(3, 12); dl = pk([4, 6, 7, 8, 9, 12, 13, 14]); j = ri(2, 4); } while (N === 10);
+        const LN = L1 + 10 * Math.log10(N), Nreq = Math.ceil(10 ** (dl / 10));
+        return P("Le niveau sonore vaut " + M("L = 10\\log\\frac{I}{I_0}") + " (en dB), où " + M("I") + " est l'intensité du son. Une machine produit " + M(L1) + " dB ; des machines identiques ajoutent leurs intensités.",
+          [["a) Niveau sonore de " + M(N) + " machines (dB, au dixième)", LN, 0.1], ["b) Nombre minimal de machines pour atteindre " + M(L1 + dl) + " dB", Nreq],
+           ["c) Un son de " + M(L1 + 10 * j) + " dB est combien de fois plus intense qu'une machine ?", 10 ** j]],
+          ["N machines : intensité N · I, donc L = 10 log(N · I ÷ I₀) = " + L1 + " + 10 log N.",
+           "b) " + L1 + " + 10 log N ≥ " + (L1 + dl) + " ⇔ log N ≥ " + T(dl / 10) + " ⇔ N ≥ 10^" + T(dl / 10) + " ; prends l'entier supérieur. c) +10 dB = intensité × 10."],
+          "a) " + M(L1 + " + 10\\log " + N + " \\approx " + D(r1(LN))) + " dB. b) " + M("N \\geq 10^{" + D(dl / 10) + "} \\approx " + D(r2c(10 ** (dl / 10)))) + " : " + M(Nreq) + " machines. c) " + M("10\\log k = " + 10 * j + " \\iff k = 10^{" + j + "} = " + nb(10 ** j)) + ".");
+      },
+      () => { /* pH : définition, dilution, comparaison */
+        let c, n, F, dp; do { c = pk([2, 3, 4, 5, 6, 8]); n = ri(2, 6); F = pk([4, 20, 50, 200]); dp = pk([0.5, 1.5, 2.5]); } while (false);
+        const ph = n - Math.log10(c), ph2 = ph + Math.log10(F);
+        return P("Le pH d'une solution vaut " + M("\\text{pH} = -\\log[\\text{H}_3\\text{O}^+]") + " (concentration en mol/L). Une solution contient " + M(c + " \\cdot 10^{-" + n + "}") + " mol/L d'ions " + M("\\text{H}_3\\text{O}^+") + ".",
+          [["a) pH de la solution (au centième)", ph, 0.01], ["b) pH après l'avoir diluée " + M(F) + " fois (au centième)", ph2, 0.01],
+           ["c) Une solution est plus acide de " + M(D(dp)) + " unité de pH : sa concentration est combien de fois plus grande ? (au dixième)", 10 ** dp, 0.1]],
+          ["log(a · 10⁻ⁿ) = log a − n. Diluer " + F + " fois divise la concentration par " + F + ".",
+           "b) −log(c ÷ " + F + ") = −log c + log " + F + " : le pH augmente de log " + F + ". c) pH plus petit de " + T(dp) + " : concentration multipliée par 10^" + T(dp) + "."],
+          "a) " + M("-\\log(" + c + " \\cdot 10^{-" + n + "}) = " + n + " - \\log " + c + " \\approx " + D(r2c(ph))) + ". b) " + M(D(r2c(ph)) + " + \\log " + F + " \\approx " + D(r2c(ph2))) + ". c) " + M("10^{" + D(dp) + "} \\approx " + D(r1(10 ** dp))) + ".");
+      },
+    ],
+    vectmp: [
+      () => { /* parallélogramme : quatrième sommet, centre, diagonale, colinéarité */
+        let A, B, C, u, v, q0;
+        do { A = [ri(-5, 5), ri(-5, 5)]; B = [ri(-5, 6), ri(-5, 6)]; C = [ri(-5, 6), ri(-5, 6)]; u = [B[0] - A[0], B[1] - A[1]]; v = [C[0] - B[0], C[1] - B[1]]; q0 = R.nz(-6, 6); }
+        while (u[0] * v[1] - u[1] * v[0] === 0 || u[0] === 0 || u[1] === 0 || Math.hypot(...u) < 3 || Math.hypot(...v) < 3 || Math.abs(q0) === Math.abs(u[1]));
+        const Dp = [A[0] + C[0] - B[0], A[1] + C[1] - B[1]], Ct = [(A[0] + C[0]) / 2, (A[1] + C[1]) / 2], BD = Math.hypot(Dp[0] - B[0], Dp[1] - B[1]), k = (q0 * u[0]) / u[1];
+        return P("On donne " + M("A(" + A[0] + " \\,;\\, " + A[1] + ")") + ", " + M("B(" + B[0] + " \\,;\\, " + B[1] + ")") + " et " + M("C(" + C[0] + " \\,;\\, " + C[1] + ")") + ". On veut que " + M("ABCD") + " soit un parallélogramme.",
+          [["a) Coordonnées de " + M("D") + " (« x ; y »)", PAIR(Dp[0], Dp[1])], ["b) Coordonnées du centre du parallélogramme (« x ; y »)", PAIR(Ct[0], Ct[1])],
+           ["c) Longueur de la diagonale " + M("BD") + " (au centième)", BD, 0.01], ["d) Pour quelle valeur de " + M("k") + " le vecteur " + M("\\vec{w} = \\begin{pmatrix} k \\\\ " + q0 + " \\end{pmatrix}") + " est-il colinéaire à " + M("\\overrightarrow{AB}") + " ? (fraction acceptée)", k]],
+          ["ABCD parallélogramme ⇔ vecteur AD = vecteur BC (attention à l'ordre des sommets). Le centre est le milieu des diagonales.",
+           "c) Norme du vecteur BD. d) Deux vecteurs (a ; b) et (a' ; b') sont colinéaires ⇔ ab' − ba' = 0."],
+          M("\\overrightarrow{BC} = \\begin{pmatrix} " + v[0] + " \\\\ " + v[1] + " \\end{pmatrix}") + ", a) " + M("D = A + \\overrightarrow{BC} = (" + Dp[0] + " \\,;\\, " + Dp[1] + ")") + ". b) Milieu de " + M("[AC]") + " : " + M("(" + D(Ct[0]) + " \\,;\\, " + D(Ct[1]) + ")") + ". c) " + M("\\sqrt{" + (Dp[0] - B[0]) ** 2 + " + " + (Dp[1] - B[1]) ** 2 + "} \\approx " + D(r2c(BD))) + ". d) " + M("\\overrightarrow{AB} = \\begin{pmatrix} " + u[0] + " \\\\ " + u[1] + " \\end{pmatrix}") + " : " + M(u[1] + "k - " + pr(u[0]) + " \\cdot " + pr(q0) + " = 0") + ", " + M("k = " + fx(k)) + ".");
+      },
+    ],
+    droiteparam: [
+      () => { /* deux droites paramétriques : intersection et angle */
+        let I, u, v, t0, s0;
+        do { I = [ri(-4, 4), ri(-4, 4)]; u = [R.nz(-3, 3), R.nz(-3, 3)]; v = [R.nz(-3, 3), ri(-3, 3)]; t0 = R.nz(-3, 3); s0 = R.nz(-3, 3); } while (u[0] * v[1] - u[1] * v[0] === 0);
+        const A = [I[0] - t0 * u[0], I[1] - t0 * u[1]], B = [I[0] - s0 * v[0], I[1] - s0 * v[1]];
+        const ang = deg(Math.acos(Math.abs(u[0] * v[0] + u[1] * v[1]) / (Math.hypot(...u) * Math.hypot(...v))));
+        const lt = (P0, w, t) => { const tt = (Math.abs(w) === 1 ? "" : Math.abs(w)) + t; if (w === 0) return String(P0); if (P0 === 0) return (w < 0 ? "-" : "") + tt; return P0 + (w < 0 ? " - " : " + ") + tt; };
+        const eqp = (P0, w, t) => M("\\begin{cases} x = " + lt(P0[0], w[0], t) + " \\\\ y = " + lt(P0[1], w[1], t) + " \\end{cases}");
+        return P("On donne les droites " + M("d_1") + " : " + eqp(A, u, "t") + " et " + M("d_2") + " : " + eqp(B, v, "s") + ".",
+          [["a) Valeur de " + M("t") + " au point d'intersection", t0], ["b) Point d'intersection (« x ; y »)", PAIR(I[0], I[1])], ["c) Angle aigu entre les deux droites (°, au dixième)", ang, 0.1]],
+          ["Un point commun a les mêmes x et y sur les deux droites : égale les x, puis les y. Système de deux équations en t et s.",
+           "b) Remplace t dans d₁. c) L'angle entre les droites est celui de leurs vecteurs directeurs : cos θ = |u · v| ÷ (‖u‖ · ‖v‖)."],
+          M(lt(A[0], u[0], "t") + " = " + lt(B[0], v[0], "s")) + " et " + M(lt(A[1], u[1], "t") + " = " + lt(B[1], v[1], "s")) + " : a) " + M("t = " + t0) + " (et " + M("s = " + s0) + "). b) " + M("(" + I[0] + " \\,;\\, " + I[1] + ")") + ". c) " + M("\\cos\\theta = \\frac{|" + (u[0] * v[0] + u[1] * v[1]) + "|}{\\sqrt{" + (u[0] ** 2 + u[1] ** 2) + "}\\sqrt{" + (v[0] ** 2 + v[1] ** 2) + "}}") + ", " + M("\\theta \\approx " + D(r1(ang)) + "°") + ".");
+      },
+    ],
+    sinusmp: [
+      () => { /* température annuelle : modèle cosinus, valeur, durée au-dessus d'un seuil */
+        let Tn, Tx, mo, x1, S; do { Tn = ri(-8, 6); Tx = Tn + ri(12, 26); mo = pk([7, 8]); x1 = ri(1, 12); S = ri(Tn + 3, Tx - 3); } while ((((x1 - mo) % 3) + 3) % 3 === 0 || Math.abs(S - (Tx + Tn) / 2) < 1);
+        const A = (Tx - Tn) / 2, d = (Tx + Tn) / 2, Tv = d + A * Math.cos((Math.PI * (x1 - mo)) / 6), dur = (12 / Math.PI) * Math.acos((S - d) / A);
+        const MO = ["", "janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+        return P("Dans une ville, la température moyenne varie entre " + M(Tn + "\\,°\\text{C}") + " et " + M(Tx + "\\,°\\text{C}") + ", avec le maximum en " + MO[mo] + " (mois " + M(mo) + "). On modélise par " + M("T(x) = d + A\\cos\\left(\\frac{\\pi}{6}(x - " + mo + ")\\right)") + ", " + M("x") + " en mois (radians).",
+          [["a) Amplitude " + M("A"), A], ["b) Température prévue au mois " + M(x1) + " (" + MO[x1] + ", °C, au dixième)", Tv, 0.1], ["c) Pendant combien de mois par an la température dépasse-t-elle " + M(S + "\\,°\\text{C}") + " ? (au dixième)", dur, 0.1]],
+          ["A = la moitié de l'écart entre maximum et minimum ; d = la moyenne des deux.",
+           "c) T(x) ≥ " + S + " ⇔ cos(π(x − " + mo + ") ÷ 6) ≥ (" + S + " − d) ÷ A. Avec θ = arccos(…), il faut −θ ≤ π(x − " + mo + ") ÷ 6 ≤ θ : la durée vaut 2θ · 6 ÷ π."],
+          "a) " + M("A = \\frac{" + Tx + " - " + pr(Tn) + "}{2} = " + D(A)) + ", " + M("d = " + D(d)) + ". b) " + M("T(" + x1 + ") = " + D(d) + " + " + D(A) + "\\cos\\left(\\frac{\\pi}{6} \\cdot " + pr(x1 - mo) + "\\right) \\approx " + D(r1(Tv))) + " °C. c) " + M("\\cos\\theta = \\frac{" + S + " - " + D(d) + "}{" + D(A) + "}") + ", " + M("\\theta \\approx " + D(+Math.acos((S - d) / A).toFixed(3))) + " : " + M("\\frac{12\\theta}{\\pi} \\approx " + D(r1(dur))) + " mois.");
+      },
+    ],
+    explogfn: [
+      () => { /* f(x) = a · b^x par deux points sans abscisse 0, puis équation exponentielle */
+        let a, b, x1, x2, Y, xY; do { a = pk([2, 3, 5, 1.5, 4]); b = pk([2, 3, 1.5, 0.5]); x1 = ri(1, 3); x2 = x1 + ri(1, 3); Y = ri(5, 300); xY = Math.log(Y / a) / Math.log(b); } while (Math.abs(xY - Math.round(xY)) < 0.05 || Math.abs(xY) > 15 || (a * b ** x2) * 1000 % 1 !== 0);
+        const y1 = a * b ** x1, y2 = a * b ** x2;
+        return P("Une fonction " + M("f(x) = a \\cdot b^x") + " passe par les points " + M("(" + x1 + " \\,;\\, " + D(y1) + ")") + " et " + M("(" + x2 + " \\,;\\, " + D(y2) + ")") + ".",
+          [["a) " + M("b"), b], ["b) " + M("a"), a], ["c) Solution de " + M("f(x) = " + Y) + " (au centième)", xY, 0.01]],
+          ["Divise les deux égalités : a s'élimine et b^" + (x2 - x1) + " = " + T(y2) + " ÷ " + T(y1) + ".",
+           "b) a = " + T(y1) + " ÷ b^" + x1 + ". c) a · b^x = " + Y + " ⇔ b^x = " + Y + " ÷ a ⇔ x = log(" + Y + " ÷ a) ÷ log b."],
+          "a) " + M("b^{" + (x2 - x1) + "} = \\frac{" + D(y2) + "}{" + D(y1) + "} = " + D(b ** (x2 - x1))) + ", " + M("b = " + D(b)) + ". b) " + M("a = \\frac{" + D(y1) + "}{" + D(b) + "^{" + x1 + "}} = " + D(a)) + ". c) " + M(D(b) + "^x = \\frac{" + Y + "}{" + D(a) + "}") + ", " + M("x = \\frac{\\log(" + Y + " \\div " + D(a) + ")}{\\log " + D(b) + "} \\approx " + D(r2c(xY))) + ".");
+      },
+    ],
+    eqbic: [
+      () => { /* rectangle : diagonale et aire donnent une équation bicarrée */
+        const [p, q, r] = pk([[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [20, 21, 29], [9, 40, 41]]), k = r < 20 ? ri(1, 3) : 1;
+        const dg = k * r, A = k * k * p * q;
+        return P("Un écran rectangulaire a une diagonale de " + M(dg) + " cm et une aire de " + M(nb(A)) + " cm². On note " + M("x") + " un de ses côtés (en cm).",
+          [["a) En posant " + M("X = x^2") + ", solutions de l'équation en " + M("X") + " (séparées par « ; »)", SET([(k * p) ** 2, (k * q) ** 2])], ["b) Longueur (le plus grand côté, cm)", k * q], ["c) Périmètre de l'écran (cm)", 2 * k * (p + q)]],
+          ["L'autre côté vaut " + nbT(A) + " ÷ x. Pythagore : x² + (" + nbT(A) + " ÷ x)² = " + dg + "². Multiplie par x².",
+           "x⁴ − " + nbT(dg * dg) + "x² + " + nbT(A * A) + " = 0 : équation bicarrée. Avec X = x², trouve X, puis x = √X (x > 0) : les deux valeurs sont les deux côtés."],
+          M("x^4 - " + nb(dg * dg) + "x^2 + " + nb(A * A) + " = 0") + ", a) " + M("X^2 - " + nb(dg * dg) + "X + " + nb(A * A) + " = 0") + " : " + M("X = " + nb((k * p) ** 2)) + " ou " + M("X = " + nb((k * q) ** 2)) + ". b) " + M("x = " + k * p) + " ou " + M(k * q) + " : les côtés mesurent " + M(k * p) + " et " + M(k * q) + " cm. c) " + M("2(" + k * p + " + " + k * q + ") = " + 2 * k * (p + q)) + " cm.");
+      },
+    ],
+    eqirrmp: [
+      () => { /* √(2x + a) = 1 + √(x + b) : isoler, élever deux fois au carré, vérifier */
+        let m, x0, a, b, c, x1, okF;
+        const chk = (x) => 2 * x + a >= 0 && x + b >= 0 && Math.abs(Math.sqrt(2 * x + a) - 1 - Math.sqrt(x + b)) < 1e-9;
+        do { m = ri(2, 7); x0 = ri(-3, 10); a = m * m - 2 * x0; b = (m - 1) ** 2 - x0; c = a - b - 1; x1 = 4 - 2 * c - x0; } while (a === 0 || b === 0 || x1 === x0 || c === 0 || Math.abs(x1) > 40);
+        okF = [x0, x1].filter(chk);
+        return P("On résout " + M("\\sqrt{2x" + sg(a) + "} = 1 + \\sqrt{x" + sg(b) + "}") + ".",
+          [["a) Après une première élévation au carré, l'équation s'écrit " + M("x + c = 2\\sqrt{x" + sg(b) + "}") + ". Que vaut " + M("c") + " ?", c],
+           ["b) Solutions de l'équation du 2e degré obtenue après la seconde élévation au carré (séparées par « ; »)", SET([x0, x1])],
+           ["c) Solution(s) de l'équation de départ", SET(okF)]],
+          ["(1 + √u)² = 1 + 2√u + u. Isole la racine qui reste, puis élève à nouveau au carré.",
+           "Élever au carré peut ajouter des solutions : remplace chaque solution dans l'équation de DÉPART (les deux racines doivent exister, et l'égalité doit être vraie)."],
+          M("2x" + sg(a) + " = 1 + 2\\sqrt{x" + sg(b) + "} + x" + sg(b)) + ", a) " + M(poly([1, c]) + " = 2\\sqrt{x" + sg(b) + "}") + ". b) " + M("(" + poly([1, c]) + ")^2 = 4(x" + sg(b) + ") \\iff " + poly([1, 2 * c - 4, c * c - 4 * b]) + " = 0") + " : " + M(Math.min(x0, x1)) + " et " + M(Math.max(x0, x1)) + ". c) " + [x0, x1].map((x) => M("x = " + x) + (chk(x) ? " convient" : " ne convient pas")).join(", ") + ".");
+      },
+    ],
+    eqratmp: [
+      () => { /* deux robinets : équation rationnelle */
+        const L = []; for (let x = 2; x <= 12; x++) for (let d = 1; d <= 10; d++) { const t = (x * (x + d)) / (2 * x + d); if (Math.abs(t * 10 - Math.round(t * 10)) < 1e-9) L.push([x, d, t]); }
+        const [x, d, Tt] = pk(L);
+        return P("Deux robinets remplissent ensemble une cuve en " + M(D(Tt)) + " h. Seul, le premier robinet met " + M(d) + " h de moins que le second.",
+          [["a) Temps du premier robinet seul (h)", x], ["b) Temps du second robinet seul (h)", x + d], ["c) Quelle fraction de la cuve le premier robinet a-t-il remplie, quand ils travaillent ensemble ?", (x + d) / (2 * x + d)]],
+          ["Avec x le temps du premier : en 1 h, il remplit 1/x de la cuve, le second 1/(x + " + d + "), les deux 1/" + T(Tt) + ".",
+           "1/x + 1/(x + " + d + ") = 1/" + T(Tt) + " : multiplie par x(x + " + d + ") · " + T(Tt) + ", garde la solution positive. c) Le premier travaille " + T(Tt) + " h à la vitesse 1/x."],
+          M("\\frac{1}{x} + \\frac{1}{x + " + d + "} = \\frac{1}{" + D(Tt) + "} \\iff " + D(Tt) + "(2x + " + d + ") = x(x + " + d + ") \\iff x^2" + (d - 2 * Tt ? sgD(d - 2 * Tt) + "x" : "") + sgD(-d * Tt) + " = 0") + " : a) " + M("x = " + x) + " h (l'autre solution est négative). b) " + M(x + d) + " h. c) " + M("\\frac{" + D(Tt) + "}{" + x + "} = " + frac(x + d, 2 * x + d)) + ".");
+      },
+    ],
+    ineqmp: [
+      () => { /* (ax + b) ÷ (x − p) ≥ k : tout d'un côté, puis tableau de signes */
+        let a, k, p, z, b, op;
+        do { a = ri(1, 5); k = ri(1, 4); p = R.nz(-5, 5); z = ri(-6, 6); op = pk([">=", "<="]); b = -(a - k) * z - k * p; } while (a === k || z === p || b === 0);
+        const al = a - k, lo = Math.min(z, p), hi = Math.max(z, p), pos = op === ">=", outside = (al > 0) === pos;
+        const ivs = outside ? [[-Infinity, false, lo, lo === z], [hi, hi === z, Infinity, false]] : [[lo, lo === z, hi, hi === z]];
+        return P("On résout " + M("\\frac{" + poly([a, b]) + "}{" + xm(p) + "} " + (pos ? "\\geq " : "\\leq ") + k) + ".",
+          [["a) Valeur interdite", p], ["b) En ramenant tout d'un côté : " + M("\\frac{" + "\\ldots" + "}{" + xm(p) + "} " + (pos ? "\\geq" : "\\leq") + " 0") + ". Zéro du nouveau numérateur", z], ["c) Ensemble des solutions (intervalles)", SOLS(ivs)]],
+          ["Ne multiplie pas par (" + xmT(p) + ") : son signe change ! Soustrais " + k + " et mets au même dénominateur.",
+           "Numérateur : " + pT([a, b]) + " − " + k + "(" + xmT(p) + "). Puis tableau de signes du quotient ; la valeur interdite est toujours exclue."],
+          M("\\frac{" + poly([a, b]) + " - " + k + "(" + xm(p) + ")}{" + xm(p) + "} = \\frac{" + poly([al, -al * z]) + "}{" + xm(p) + "} " + (pos ? "\\geq" : "\\leq") + " 0") + ". a) " + M(p) + ". b) " + M(z) + ". c) " + M("S = " + SolSet.show(ivs, true)) + ".");
+      },
+    ],
+    puisrat: [
+      () => { /* équation exponentielle par la même base, puis 3e loi de Kepler */
+        const [B, e1, e2] = pk([[2, 2, 3], [3, 2, 3], [2, 3, 4], [5, 2, 3], [2, 2, 5], [3, 3, 2], [2, 4, 3]]);
+        let a, b, aU, T0; do { a = R.nz(-5, 5); b = R.nz(-5, 5); aU = ri(11, 96) / 10; T0 = ri(2, 30); } while (e1 * a + e2 * b === 0 || [8, 27].includes(T0) || Math.abs(aU - Math.round(aU)) < 1e-9 && [1, 4, 9].includes(Math.round(aU)));
+        const xs = (e1 * a + e2 * b) / (e2 - e1), Tp = aU ** 1.5, ap = T0 ** (2 / 3);
+        return P("Exposants fractionnaires. D'après la 3e loi de Kepler, une planète à la distance moyenne " + M("a") + " du Soleil (en unités astronomiques) en fait le tour en " + M("T = a^{3/2}") + " années.",
+          [["a) Solution de " + M(B ** e1 + "^{x" + sg(a) + "} = " + B ** e2 + "^{x" + sg(-b) + "}") + " (fraction acceptée)", xs],
+           ["b) Durée de révolution d'une planète à " + M(D(aU)) + " UA (années, au centième)", Tp, 0.01], ["c) Distance d'une planète qui fait le tour du Soleil en " + M(T0) + " ans (UA, au centième)", ap, 0.01]],
+          ["a) " + B ** e1 + " = " + B + "^" + e1 + " et " + B ** e2 + " = " + B + "^" + e2 + " : écris tout en base " + B + ", puis égale les exposants.",
+           "b) a^(3/2) = (√a)³. c) T = a^(3/2) ⇔ a = T^(2/3) (élève les deux membres à la puissance 2/3)."],
+          "a) " + M(B + "^{" + e1 + "(x" + sg(a) + ")} = " + B + "^{" + e2 + "(x" + sg(-b) + ")} \\iff " + e1 + "x" + sg(e1 * a) + " = " + e2 + "x" + sg(-e2 * b) + " \\iff x = " + fx(xs)) + ". b) " + M(D(aU) + "^{3/2} \\approx " + D(r2c(Tp))) + " ans. c) " + M(T0 + "^{2/3} \\approx " + D(r2c(ap))) + " UA.");
+      },
+    ],
+    // ---------- 11e ----------
+    thalesrec: [
+      () => { /* étagère pas tout à fait parallèle : réciproque, puis correction */
+        let r, AB, AC, dl; do { r = pk([0.25, 0.4, 0.6, 0.75, 0.8, 0.3, 0.7]); AB = 20 * ri(2, 6); AC = 20 * ri(2, 6); dl = R.nz(-4, 4); } while (AB === AC);
+        const AD = r * AB, AEp = r * AC, AE = AEp + dl;
+        return P("Une étagère " + M("[DE]") + " relie deux montants " + M("[AB]") + " et " + M("[AC]") + " issus du même point " + M("A") + ". On mesure " + M("AD = " + AD) + " cm, " + M("AB = " + AB) + " cm, " + M("AE = " + AE) + " cm et " + M("AC = " + AC) + " cm. On voudrait " + M("(DE) \\parallel (BC)") + ".",
+          [["a) " + M("AD \\div AB") + " (décimal)", r], ["b) " + M("AE \\div AC") + " (au centième)", AE / AC, 0.01], ["c) Longueur " + M("AE") + " qui rendrait l'étagère parallèle à " + M("(BC)") + " (cm)", AEp], ["d) De combien de cm faut-il déplacer " + M("E") + " ?", Math.abs(dl)]],
+          ["Réciproque de Thalès : (DE) ∥ (BC) si et seulement si AD ÷ AB = AE ÷ AC (points dans le même ordre).",
+           "c) Il faut AE ÷ " + AC + " = " + T(r) + ", donc AE = " + T(r) + " · " + AC + ". d) Compare avec la mesure actuelle."],
+          "a) " + M(frac(AD, AB) + " = " + D(r)) + ". b) " + M(frac(AE, AC) + " \\approx " + D(Math.round((AE / AC) * 10000) / 10000)) + " : rapports différents, l'étagère n'est pas parallèle. c) " + M("AE = " + D(r) + " \\cdot " + AC + " = " + AEp) + " cm. d) " + M("|" + AE + " - " + AEp + "| = " + Math.abs(dl)) + " cm (" + (dl > 0 ? "vers A" : "vers C") + ").");
+      },
+      () => { /* triangle coupé par une parallèle : vérifier, puis périmètre du trapèze */
+        let k, AB, AC, BC; do { k = pk([0.25, 0.4, 0.6, 0.75, 0.8]); AB = 20 * ri(2, 7); AC = 20 * ri(2, 7); BC = 20 * ri(2, 8); } while (AB + AC <= BC || AB + BC <= AC || AC + BC <= AB || AB === AC);
+        const AD = k * AB, AE = k * AC, DE = k * BC, per = (1 - k) * AB + BC + (1 - k) * AC + DE;
+        return P("Dans le triangle " + M("ABC") + ", " + M("AB = " + AB) + " mm, " + M("AC = " + AC) + " mm et " + M("BC = " + BC) + " mm. " + M("D") + " est sur " + M("[AB]") + " avec " + M("AD = " + AD) + " mm, " + M("E") + " sur " + M("[AC]") + " avec " + M("AE = " + AE) + " mm.",
+          [["a) " + M("AD \\div AB") + " (décimal)", k], ["b) Longueur " + M("DE") + " (mm)", DE], ["c) Périmètre du trapèze " + M("DBCE") + " (mm)", per]],
+          ["Compare AD ÷ AB et AE ÷ AC : s'ils sont égaux, (DE) ∥ (BC) (réciproque de Thalès).",
+           "Puis Thalès : DE ÷ BC = AD ÷ AB. Le trapèze a pour côtés DB, BC, CE et ED, avec DB = AB − AD et CE = AC − AE."],
+          "a) " + M("\\frac{" + AD + "}{" + AB + "} = \\frac{" + AE + "}{" + AC + "} = " + D(k)) + " : " + M("(DE) \\parallel (BC)") + ". b) " + M("DE = " + D(k) + " \\cdot " + BC + " = " + D(DE)) + " mm. c) " + M((AB - AD) + " + " + BC + " + " + (AC - AE) + " + " + D(DE) + " = " + D(per)) + " mm.");
+      },
+    ],
+    volcone: [
+      () => { /* cornet de glace : cône + demi-boule, cône équivalent */
+        const r = ri(2, 4), h = ri(8, 14), Vc = (Math.PI * r * r * h) / 3, Vt = (Math.PI * r * r * (h + 2 * r)) / 3;
+        return P("Un cornet de glace est formé d'un cône (rayon " + M(r) + " cm, hauteur " + M(h) + " cm) rempli de glace, surmonté d'une demi-boule de glace de même rayon.",
+          [["a) Volume du cône (cm³, au dixième)", Vc, 0.1], ["b) Volume total de glace (cm³, au dixième)", Vt, 0.1], ["c) Hauteur d'un cône de même rayon qui contiendrait toute cette glace (cm)", h + 2 * r]],
+          ["Cône : π r² h ÷ 3. Boule : 4πr³ ÷ 3, donc demi-boule : 2πr³ ÷ 3.",
+           "c) π · " + r * r + " · H ÷ 3 = volume total : divise par π · " + r * r + " ÷ 3 (garde π dans les calculs, sans arrondir)."],
+          "a) " + M("\\frac{\\pi \\cdot " + r + "^2 \\cdot " + h + "}{3} \\approx " + D(r1(Vc))) + " cm³. b) Demi-boule " + M("\\frac{2\\pi \\cdot " + r + "^3}{3}") + " ; total " + M("\\frac{\\pi \\cdot " + r * r + "(" + h + " + " + 2 * r + ")}{3} \\approx " + D(r1(Vt))) + " cm³. c) " + M("H = " + h + " + 2 \\cdot " + r + " = " + (h + 2 * r)) + " cm : la demi-boule vaut un cône de hauteur " + M(2 * r) + ".");
+      },
+      () => { /* boule fondue en petits cônes */
+        let R0, r, h, ratio; do { R0 = ri(4, 10); r = ri(1, 3); h = ri(3, 8); ratio = (4 * R0 ** 3) / (r * r * h); } while (Number.isInteger(ratio) || ratio > 2000);
+        const Vs = (4 * Math.PI * R0 ** 3) / 3, Vk = (Math.PI * r * r * h) / 3;
+        return P("Une boule de pâte à modeler de rayon " + M(R0) + " cm sert à fabriquer de petits cônes pleins de rayon " + M(r) + " cm et de hauteur " + M(h) + " cm.",
+          [["a) Volume de la boule (cm³, au dixième)", Vs, 0.1], ["b) Volume d'un cône (cm³, au dixième)", Vk, 0.1], ["c) Nombre maximal de cônes complets", Math.floor(ratio)]],
+          ["Boule : 4πR³ ÷ 3. Cône : π r² h ÷ 3.", "c) Divise les volumes non arrondis (π se simplifie), puis prends l'entier inférieur."],
+          "a) " + M("\\frac{4\\pi \\cdot " + R0 + "^3}{3} \\approx " + D(r1(Vs))) + " cm³. b) " + M("\\frac{\\pi \\cdot " + r + "^2 \\cdot " + h + "}{3} \\approx " + D(r1(Vk))) + " cm³. c) " + M("\\frac{4 \\cdot " + R0 ** 3 + "}{" + r * r * h + "} \\approx " + D(r2c(ratio))) + " : " + M(Math.floor(ratio)) + " cônes.");
+      },
+    ],
+    volmanq: [
+      () => { /* boîte de conserve : hauteur, puis aire de l'étiquette */
+        let d, V; do { d = pk([6, 7, 8, 10]); V = pk([33, 40, 50, 75, 100]); } while (false);
+        const r = d / 2, Vc = 10 * V, h = Vc / (Math.PI * r * r), Al = (2 * Vc) / r;
+        return P("Une boîte de conserve cylindrique de " + M(d) + " cm de diamètre doit contenir " + M(V) + " cL. Une étiquette recouvre toute sa surface latérale.",
+          [["a) Contenance en cm³", Vc], ["b) Hauteur de la boîte (cm, au dixième)", h, 0.1], ["c) Aire de l'étiquette (cm², à l'unité)", Al, 1]],
+          ["1 cL = 10 cm³. Volume d'un cylindre : π r² h ; ici r = " + T(r) + " cm.",
+           "b) Isole h. c) Aire latérale = périmètre du disque × hauteur = 2π r h (avec h non arrondie)."],
+          "a) " + M(V + " \\cdot 10 = " + Vc) + " cm³. b) " + M("h = \\frac{" + Vc + "}{\\pi \\cdot " + D(r) + "^2} \\approx " + D(r1(h))) + " cm. c) " + M("2\\pi \\cdot " + D(r) + " \\cdot h = \\frac{2 \\cdot " + Vc + "}{" + D(r) + "} \\approx " + nb(Math.round(Al))) + " cm².");
+      },
+      () => { /* verre conique : rayon, volume à mi-hauteur, hauteur pour la moitié du volume */
+        let h, V; do { h = ri(8, 14); V = pk([10, 12, 15, 20]); } while (false);
+        const rr = Math.sqrt((3 * 10 * V) / (Math.PI * h)), hm = h / Math.cbrt(2);
+        return P("Un verre a la forme d'un cône (pointe en bas) de " + M(h) + " cm de profondeur. Plein, il contient " + M(V) + " cL.",
+          [["a) Rayon de l'ouverture (cm, au dixième)", rr, 0.1], ["b) Volume (cL) quand le verre est rempli jusqu'à mi-hauteur", V / 8], ["c) Hauteur du liquide quand le verre contient la moitié de " + M(V) + " cL (cm, au dixième)", hm, 0.1]],
+          ["V = π r² h ÷ 3, avec V = " + 10 * V + " cm³. Isole r² puis r.",
+           "Le liquide forme un petit cône, réduction du grand : si les longueurs sont multipliées par k, le volume l'est par k³. b) k = 1/2. c) k³ = 1/2, donc k = ∛(1/2)."],
+          "a) " + M("r = \\sqrt{\\frac{3 \\cdot " + 10 * V + "}{\\pi \\cdot " + h + "}} \\approx " + D(r1(rr))) + " cm. b) " + M(V + " \\cdot \\left(\\frac{1}{2}\\right)^3 = " + D(V / 8)) + " cL. c) " + M("k = \\sqrt[3]{0{,}5} \\approx 0{,}794") + ", " + M("h \\approx " + D(r1(hm))) + " cm (bien plus que la moitié de la profondeur).");
+      },
+    ],
+    simil: [
+      () => { /* agrandissement d'une photo : rapport, longueur, prix proportionnel à l'aire */
+        const [w, l] = pk([[10, 15], [9, 13], [13, 18], [20, 30], [12, 16]]), k = pk([1.5, 2, 2.5, 3, 4]), Pp = pk([0.6, 0.8, 1.2, 1.5, 2.4]);
+        return P("Une photo de " + M(w) + " cm sur " + M(l) + " cm est agrandie : sa largeur passe à " + M(D(k * w)) + " cm. Le prix d'un tirage est proportionnel à son aire ; l'original coûte " + M(D(Pp)) + " CHF.",
+          [["a) Rapport d'agrandissement", k], ["b) Nouvelle longueur (cm)", k * l], ["c) Prix du tirage agrandi (CHF, au centime)", Pp * k * k, 0.01]],
+          ["Rapport = nouvelle longueur ÷ ancienne longueur (même côté). Toutes les longueurs sont multipliées par ce rapport.",
+           "Les aires sont multipliées par le CARRÉ du rapport : le prix aussi."],
+          "a) " + M(D(k * w) + " \\div " + w + " = " + D(k)) + ". b) " + M(D(k) + " \\cdot " + l + " = " + D(k * l)) + " cm. c) Aire " + M("\\times " + D(k * k)) + " : " + M(D(Pp) + " \\cdot " + D(k * k) + " = " + D(r2c(Pp * k * k))) + " CHF.");
+      },
+      () => { /* maquette à l'échelle 1 : n : longueur, aire, volume réels */
+        const n = pk([50, 100, 200, 250]), h = ri(8, 40), A = 2 * ri(10, 90), V = 50 * ri(4, 60);
+        return P("La maquette d'un bâtiment est à l'échelle " + M("1 : " + n) + ". Sur la maquette : hauteur " + M(h) + " cm, aire au sol " + M(A) + " cm², volume " + M(nb(V)) + " cm³.",
+          [["a) Hauteur réelle (m)", (h * n) / 100], ["b) Aire au sol réelle (m²)", (A * n * n) / 10000], ["c) Volume réel (m³)", (V * n ** 3) / 1e6]],
+          ["Les longueurs sont multipliées par " + n + ", les aires par " + n + "², les volumes par " + n + "³.",
+           "Conversions : 1 m = 100 cm, 1 m² = 10'000 cm², 1 m³ = 1'000'000 cm³."],
+          "a) " + M(h + " \\cdot " + n + " = " + nb(h * n)) + " cm " + M("= " + D((h * n) / 100)) + " m. b) " + M(A + " \\cdot " + n + "^2 = " + nb(A * n * n)) + " cm² " + M("= " + D((A * n * n) / 10000)) + " m². c) " + M(nb(V) + " \\cdot " + n + "^3 = " + nb(V * n ** 3)) + " cm³ " + M("= " + D((V * n ** 3) / 1e6)) + " m³.");
+      },
+    ],
+    sys2: [
+      () => { /* billets : système, puis nouveau prix */
+        let N, pa, pc, na, dl; do { N = 10 * ri(8, 30); pa = pk([12, 15, 18, 20, 25]); pc = pk([5, 6, 8, 10]); na = ri(20, N - 20); dl = pk([1, 2, 3, 5]); } while (pc >= pa);
+        const nc = N - na, Rr = na * pa + nc * pc, R2 = Rr + na * dl;
+        return P("Un spectacle a vendu " + M(N) + " billets : des billets adultes à " + M(pa) + " CHF et des billets enfants à " + M(pc) + " CHF. La recette vaut " + M(nb(Rr)) + " CHF.",
+          [["a) Nombre de billets adultes", na], ["b) Nombre de billets enfants", nc], ["c) Avec la même fréquentation, quel prix adulte aurait donné " + M(nb(R2)) + " CHF ?", pa + dl]],
+          ["Deux inconnues (adultes a, enfants e), deux équations : une pour le nombre de billets, une pour la recette.",
+           "a + e = " + N + " et " + pa + "a + " + pc + "e = " + nbT(Rr) + ". Substitution : e = " + N + " − a. c) Les billets enfants rapportent toujours la même somme."],
+          M("a + e = " + N) + ", " + M(pa + "a + " + pc + "e = " + nb(Rr)) + " : " + M(pa + "a + " + pc + "(" + N + " - a) = " + nb(Rr) + " \\iff " + (pa - pc) + "a = " + nb(Rr - pc * N)) + ", a) " + M(na) + ", b) " + M(nc) + ". c) " + M("\\frac{" + nb(R2) + " - " + nb(nc * pc) + "}{" + na + "} = " + (pa + dl)) + " CHF.");
+      },
+      () => { /* rectangle dont l'aire ne change pas */
+        let l, a, b, L; do { l = ri(6, 20); a = ri(2, 6); b = ri(1, 5); L = (a * (l - b)) / b; } while (!Number.isInteger(L) || L <= l || L > 60 || a === b);
+        return P("Un rectangle a un périmètre de " + M(2 * (L + l)) + " cm. Si on allonge sa longueur de " + M(a) + " cm et qu'on raccourcit sa largeur de " + M(b) + " cm, son aire ne change pas.",
+          [["a) Longueur (cm)", L], ["b) Largeur (cm)", l], ["c) Aire (cm²)", L * l]],
+          ["Avec L et l : L + l = " + (L + l) + " (demi-périmètre) et (L + " + a + ")(l − " + b + ") = L · l.",
+           "Développe la 2e équation : le produit L · l s'élimine, il reste une équation du 1er degré. Système de deux équations du 1er degré."],
+          M("(L + " + a + ")(l - " + b + ") = Ll \\iff -" + b + "L + " + a + "l = " + a * b) + " et " + M("L + l = " + (L + l)) + ". Substitution : " + M("-" + b + "(" + (L + l) + " - l) + " + a + "l = " + a * b + " \\iff " + (a + b) + "l = " + (a * b + b * (L + l))) + ", b) " + M("l = " + l) + ", a) " + M("L = " + L) + ". c) " + M(L * l) + " cm².");
+      },
+    ],
+    formule: [
+      () => { /* IMC : calculer, puis isoler une lettre (dont une racine) */
+        let m, t, I2, m3, I3; do { m = ri(45, 95); t = ri(150, 195) / 100; I2 = pk([20, 22, 24, 25]); I3 = pk([19, 21, 23]); m3 = Math.round(I3 * (ri(155, 192) / 100) ** 2); } while (m / (t * t) < 17 || m / (t * t) > 32);
+        const I = m / (t * t), m2 = I2 * t * t, t3 = Math.sqrt(m3 / I3);
+        return P("L'indice de masse corporelle vaut " + M("I = \\frac{m}{t^2}") + " (" + M("m") + " : masse en kg, " + M("t") + " : taille en m).",
+          [["a) " + M("I") + " pour " + M(m) + " kg et " + M(D(t)) + " m (au dixième)", I, 0.1], ["b) Masse (kg, au dixième) d'une personne de " + M(D(t)) + " m dont l'indice vaut " + M(I2), m2, 0.1],
+           ["c) Taille (m, au centième) d'une personne de " + M(m3) + " kg dont l'indice vaut " + M(I3), t3, 0.01]],
+          ["b) Isole m : multiplie les deux membres par t².", "c) Isole t² (t² = m ÷ I), puis prends la racine carrée (t > 0)."],
+          "a) " + M("\\frac{" + m + "}{" + D(t) + "^2} \\approx " + D(r1(I))) + ". b) " + M("m = I \\cdot t^2 = " + I2 + " \\cdot " + D(t) + "^2 \\approx " + D(r1(m2))) + " kg. c) " + M("t = \\sqrt{\\frac{m}{I}} = \\sqrt{\\frac{" + m3 + "}{" + I3 + "}} \\approx " + D(r2c(t3))) + " m.");
+      },
+      () => { /* énergie cinétique : calculer, isoler v (racine), isoler m */
+        let m1, v1, m2, v3; do { m1 = ri(40, 120); v1 = ri(4, 15); m2 = ri(40, 120); v3 = ri(4, 15); } while (m1 === m2 || v1 === v3);
+        const E = (m1 * v1 * v1) / 2, v2 = Math.sqrt((2 * E) / m2), m3 = (2 * E) / (v3 * v3);
+        return P("L'énergie cinétique vaut " + M("E = \\frac{m v^2}{2}") + " (en J, " + M("m") + " en kg, " + M("v") + " en m/s). Un cycliste et son vélo ont une masse de " + M(m1) + " kg et roulent à " + M(v1) + " m/s.",
+          [["a) Énergie cinétique (J)", E], ["b) Vitesse (m/s, au dixième) d'un objet de " + M(m2) + " kg qui a la même énergie", v2, 0.1], ["c) Masse (kg, au dixième) d'un objet à " + M(v3) + " m/s qui a la même énergie", m3, 0.1]],
+          ["b) Isole v² : v² = 2E ÷ m, puis la racine carrée.", "c) Isole m : m = 2E ÷ v²."],
+          "a) " + M("\\frac{" + m1 + " \\cdot " + v1 + "^2}{2} = " + nb(E)) + " J. b) " + M("v = \\sqrt{\\frac{2 \\cdot " + nb(E) + "}{" + m2 + "}} \\approx " + D(r1(v2))) + " m/s. c) " + M("m = \\frac{2 \\cdot " + nb(E) + "}{" + v3 + "^2} \\approx " + D(r1(m3))) + " kg.");
+      },
+    ],
+    racprop: [
+      () => { /* carré d'aire a²k : côté, diagonale et périmètre en valeur exacte */
+        const k = pk([2, 3, 5, 6, 7]), a = ri(2, 6), A = a * a * k, s = a * Math.sqrt(k);
+        const dg = k === 2 ? String(2 * a) : k === 6 ? 2 * a + "\\sqrt{3}" : a + "\\sqrt{" + 2 * k + "}";
+        return P("Un carré a une aire de " + M(A) + " cm². Donne les réponses en valeur exacte simplifiée (par exemple " + M("3\\sqrt{5}") + ").",
+          [["a) Côté (cm)", RAD(s)], ["b) Diagonale (cm)", RAD(s * Math.SQRT2)], ["c) Périmètre (cm)", RAD(4 * s)]],
+          ["Côté = √" + A + " ; décompose " + A + " = " + a * a + " · " + k + " pour sortir le carré de la racine.",
+           "Diagonale = côté · √2 (Pythagore). Simplifie √" + 2 * k + " si possible."],
+          "a) " + M("\\sqrt{" + A + "} = \\sqrt{" + a * a + "}\\sqrt{" + k + "} = " + a + "\\sqrt{" + k + "}") + " cm. b) " + M(a + "\\sqrt{" + k + "} \\cdot \\sqrt{2} = " + a + "\\sqrt{" + 2 * k + "}" + (k === 2 || k === 6 ? " = " + dg : "")) + " cm. c) " + M("4 \\cdot " + a + "\\sqrt{" + k + "} = " + 4 * a + "\\sqrt{" + k + "}") + " cm.");
+      },
+      () => { /* triangle rectangle à cathètes p√s et q√s */
+        const [p, q, r] = pk([[3, 4, 5], [5, 12, 13], [8, 15, 17], [6, 8, 10]]), s = pk([2, 3, 5, 7]), hgt = (p * q * Math.sqrt(s)) / r;
+        return P("Un triangle rectangle a des cathètes de " + M(p + "\\sqrt{" + s + "}") + " cm et " + M(q + "\\sqrt{" + s + "}") + " cm. Réponses en valeur exacte simplifiée.",
+          [["a) Hypoténuse (cm)", RAD(r * Math.sqrt(s))], ["b) Aire (cm²)", (p * q * s) / 2], ["c) Hauteur relative à l'hypoténuse (cm, par exemple " + M("\\frac{12\\sqrt{3}}{5}") + ")", RAD(hgt)]],
+          ["Pythagore : (" + p + "√" + s + ")² = " + p * p + " · " + s + " = " + p * p * s + ".", "c) L'aire vaut aussi ½ · hypoténuse · hauteur : hauteur = 2 · aire ÷ hypoténuse ; puis rends le dénominateur entier."],
+          "a) " + M("\\sqrt{" + p * p * s + " + " + q * q * s + "} = \\sqrt{" + r * r * s + "} = " + r + "\\sqrt{" + s + "}") + ". b) " + M("\\frac{" + p + "\\sqrt{" + s + "} \\cdot " + q + "\\sqrt{" + s + "}}{2} = " + fx((p * q * s) / 2)) + " cm². c) " + M("\\frac{" + p * q * s + "}{" + r + "\\sqrt{" + s + "}} = " + (Number.isInteger((p * q) / r) ? (p * q) / r + "\\sqrt{" + s + "}" : "\\frac{" + (p * q) / gcd(p * q, r) + "\\sqrt{" + s + "}}{" + r / gcd(p * q, r) + "}")) + " cm.");
+      },
+    ],
+    denombr: [
+      () => { /* codes : total, sans répétition, avec au moins une répétition */
+        const [s, w] = pk([[10, "chiffres (0 à 9)"], [9, "touches (1 à 9)"], [6, "couleurs"], [8, "symboles"]]), n = pk([3, 4, 5]);
+        let arr = 1; for (let i = 0; i < n; i++) arr *= s - i;
+        return P("Un code est formé de " + M(n) + " symboles choisis parmi " + s + " " + w + " ; l'ordre compte.",
+          [["a) Nombre de codes possibles", s ** n], ["b) Nombre de codes dont tous les symboles sont différents", arr], ["c) Nombre de codes avec au moins une répétition", s ** n - arr]],
+          ["a) Chaque position a " + s + " possibilités : principe multiplicatif. b) Chaque position a une possibilité de moins que la précédente.",
+           "c) « Au moins une répétition » est le contraire de « tous différents » : soustrais."],
+          "a) " + M(s + "^" + n + " = " + nb(s ** n)) + ". b) " + M(Array.from({ length: n }, (_, i) => s - i).join(" \\cdot ") + " = " + nb(arr)) + ". c) " + M(nb(s ** n) + " - " + nb(arr) + " = " + nb(s ** n - arr)) + ".");
+      },
+      () => { /* club : bureau, poignées de main, et l'inverse */
+        let N, N2; do { N = ri(8, 20); N2 = ri(9, 30); } while (N === N2);
+        const P2 = (N2 * (N2 - 1)) / 2;
+        return P("Un club de " + M(N) + " membres élit son bureau, puis tout le monde se serre la main.",
+          [["a) Nombre de façons d'élire un président, un secrétaire et un caissier (trois personnes différentes)", N * (N - 1) * (N - 2)], ["b) Nombre de poignées de main (chaque paire une fois)", (N * (N - 1)) / 2],
+           ["c) Dans un autre club, on a compté " + M(nb(P2)) + " poignées de main. Combien de membres a-t-il ?", N2]],
+          ["a) Les postes sont différents : l'ordre compte. b) Chacun serre " + (N - 1) + " mains, mais chaque poignée est comptée deux fois.",
+           "c) n(n − 1) ÷ 2 = " + nbT(P2) + " ⇔ n(n − 1) = " + nbT(2 * P2) + " : cherche deux nombres entiers consécutifs dont le produit vaut " + nbT(2 * P2) + "."],
+          "a) " + M(N + " \\cdot " + (N - 1) + " \\cdot " + (N - 2) + " = " + nb(N * (N - 1) * (N - 2))) + ". b) " + M("\\frac{" + N + " \\cdot " + (N - 1) + "}{2} = " + (N * (N - 1)) / 2) + ". c) " + M("n(n - 1) = " + nb(2 * P2) + " = " + N2 + " \\cdot " + (N2 - 1)) + " : " + M(N2) + " membres.");
+      },
+    ],
+    cercthales: [
+      () => { /* deux tangentes depuis un point : longueur, aire, corde de contact */
+        const [p, q, c] = pk([[3, 4, 5], [5, 12, 13], [8, 15, 17], [6, 8, 10], [9, 12, 15], [7, 24, 25]]), k = c <= 10 ? ri(1, 3) : 1, sw = R.rand() < 0.5;
+        const r = k * (sw ? q : p), PT = k * (sw ? p : q), OP = k * c, TT = (2 * r * PT) / OP;
+        return P("D'un point " + M("P") + " situé à " + M(OP) + " cm du centre " + M("O") + " d'un cercle de rayon " + M(r) + " cm, on trace les deux tangentes " + M("[PT]") + " et " + M("[PT']") + ".",
+          [["a) Longueur " + M("PT") + " (cm)", PT], ["b) Aire du quadrilatère " + M("OTPT'") + " (cm²)", r * PT], ["c) Longueur de la corde " + M("TT'") + " (cm, au dixième)", TT, 0.1]],
+          ["Une tangente est perpendiculaire au rayon au point de contact : le triangle OTP est rectangle en T.",
+           "b) Le quadrilatère est formé de deux triangles rectangles identiques. c) [TT'] est perpendiculaire à (OP) ; sa moitié est la hauteur du triangle OTP issue de T : aire = ½ · OP · hauteur."],
+          "a) " + M("PT = \\sqrt{" + OP + "^2 - " + r + "^2} = " + PT) + " cm. b) " + M("2 \\cdot \\frac{" + r + " \\cdot " + PT + "}{2} = " + r * PT) + " cm². c) Hauteur " + M("\\frac{" + r + " \\cdot " + PT + "}{" + OP + "} = " + D(r2c((r * PT) / OP))) + ", " + M("TT' = 2 \\cdot " + D(r2c((r * PT) / OP)) + " \\approx " + D(r1(TT))) + " cm.");
+      },
+      () => { /* triangle inscrit dans un demi-cercle : côté, aire, hauteur */
+        const [a, b, c] = pk([[6, 8, 10], [10, 24, 26], [12, 16, 20], [16, 30, 34], [9, 12, 15], [5, 12, 13], [8, 15, 17]]), k = c < 15 ? ri(1, 2) : 1;
+        const AB = k * c, AC = k * a, BC = k * b, hh = (AC * BC) / AB;
+        return P("Le point " + M("C") + " est sur le cercle de diamètre " + M("[AB]") + ", de rayon " + M(D(AB / 2)) + " cm. On sait que " + M("AC = " + AC) + " cm.",
+          [["a) Longueur " + M("BC") + " (cm)", BC], ["b) Aire du triangle " + M("ABC") + " (cm²)", (AC * BC) / 2], ["c) Distance de " + M("C") + " au diamètre " + M("[AB]") + " (cm, au centième)", hh, 0.01]],
+          ["Un triangle inscrit dans un demi-cercle (un côté = diamètre) est rectangle : en quel sommet ? Le diamètre mesure " + T(AB) + " cm.",
+           "b) Aire = ½ · produit des cathètes. c) Cette distance est la hauteur relative à l'hypoténuse [AB] : aire = ½ · AB · hauteur."],
+          "Triangle rectangle en " + M("C") + ", " + M("AB = " + AB) + ". a) " + M("BC = \\sqrt{" + AB + "^2 - " + AC + "^2} = " + BC) + " cm. b) " + M("\\frac{" + AC + " \\cdot " + BC + "}{2} = " + (AC * BC) / 2) + " cm². c) " + M("\\frac{" + AC * BC + "}{" + AB + "} \\approx " + D(r2c(hh))) + " cm.");
+      },
+    ],
+    angles: [
+      () => { /* polygone régulier : nombre de côtés, somme des angles, angle entre diagonales */
+        const n = pk([5, 6, 8, 9, 10, 12, 15, 18, 20, 24, 36]), al = 180 - 360 / n;
+        return P("Chaque angle intérieur d'un polygone régulier mesure " + M(D(al) + "°") + ".",
+          [["a) Nombre de côtés", n], ["b) Somme des angles intérieurs (°)", (n - 2) * 180], ["c) Angle entre deux diagonales voisines issues d'un même sommet (°)", 180 / n]],
+          ["L'angle extérieur vaut 180° − " + T(al) + "° et les angles extérieurs d'un polygone font un tour complet (360°).",
+           "c) Le polygone est inscrit dans un cercle : les diagonales issues d'un sommet partagent l'angle intérieur en " + (n - 2) + " angles inscrits égaux, qui interceptent chacun un côté."],
+          "a) Angle extérieur " + M(D(360 / n) + "°") + ", " + M("n = 360 \\div " + D(360 / n) + " = " + n) + ". b) " + M("(" + n + " - 2) \\cdot 180° = " + nb((n - 2) * 180) + "°") + ". c) " + M(D(al) + "° \\div " + (n - 2) + " = " + D(180 / n) + "°") + ".");
+      },
+      () => { /* angles inscrits et au centre */
+        const al = ri(20, 80);
+        return P("Les points " + M("A") + ", " + M("B") + ", " + M("C") + " et " + M("D") + " sont sur un cercle de centre " + M("O") + " ; " + M("C") + " et " + M("O") + " sont du même côté de " + M("(AB)") + ", " + M("D") + " de l'autre côté. " + M("\\widehat{ACB} = " + al + "°") + ".",
+          [["a) " + M("\\widehat{AOB}") + " (°)", 2 * al], ["b) " + M("\\widehat{OAB}") + " (°)", 90 - al], ["c) " + M("\\widehat{ADB}") + " (°)", 180 - al]],
+          ["L'angle au centre vaut le double de l'angle inscrit qui intercepte le même arc. Le triangle AOB est isocèle (OA = OB = rayon).",
+           "c) D est sur l'autre arc : ACBD est un quadrilatère inscrit, ses angles opposés sont supplémentaires (somme 180°)."],
+          "a) " + M("2 \\cdot " + al + "° = " + 2 * al + "°") + ". b) " + M("\\frac{180° - " + 2 * al + "°}{2} = " + (90 - al) + "°") + ". c) " + M("180° - " + al + "° = " + (180 - al) + "°") + ".");
       },
     ],
   };
