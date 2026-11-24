@@ -7,7 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent
 SRC = ROOT / "src"
-JS = ["curriculum.js", "ordre.js", "expr.js", "figures.js", "geo.js", "generators.js", "gen2.js", "gen3.js", "variantes.js", "competences.js", "ch11_prop.js", "ch11_litt.js", "ch1c_eq.js", "ch1c_sys.js", "ch11_no.js", "ch11_gm.js", "ch11_ang.js", "ch11_thales.js", "ch11_proba.js", "ch1c_no.js", "ch1c_fct.js", "ch1c_alg.js", "ch1c_f2b.js", "ch11_no2.js", "ch1c_geo.js", "ch1c_trig.js", "ch_mp1.js", "ch11_fct.js", "ch10_no.js", "ch_mp2.js", "ch_mp3.js", "ch_mp4.js", "fr_lycee.js", "fr_2nde.js", "ch3c_ana.js", "ch3c_geo.js", "ch4c_ana.js", "ch1c_arg.js", "fr_college.js", "defis.js", "riche.js", "riche_11b.js", "riche_11c.js", "riche_1c.js", "riche_sys1c.js", "riche_9.js", "riche_10.js", "riche_mp2.js", "riche_mp1.js", "riche_2c.js", "riche_col34.js", "riche_mp34.js", "curieux.js", "histoire.js", "badges.js", "backup.js", "qr.js", "lessons.js", "lessons2.js", "dyn.js", "manip.js", "active.js", "act_prop11.js", "act_litt11.js", "act_eq1c.js", "act_sys1c.js", "act_ch11b.js", "act_ch11c.js", "act_9a.js", "act_9b.js", "act_10a.js", "act_10b.js", "act_11d.js", "act_1c.js", "act_mp2.js", "act_mp34.js", "act_2c.js", "act_col34.js", "act_manip.js", "act_manip2.js", "sujet.js", "qcm.js", "engine.js", "parents.js", "app.js"]
+JS = ["curriculum.js", "ordre.js", "expr.js", "figures.js", "geo.js", "generators.js", "gen2.js", "gen3.js", "variantes.js", "competences.js", "ch11_prop.js", "ch11_litt.js", "ch1c_eq.js", "ch1c_sys.js", "ch11_no.js", "ch11_gm.js", "ch11_ang.js", "ch11_thales.js", "ch11_proba.js", "ch1c_no.js", "ch1c_fct.js", "ch1c_alg.js", "ch1c_f2b.js", "ch11_no2.js", "ch1c_geo.js", "ch1c_trig.js", "ch_mp1.js", "ch11_fct.js", "ch10_no.js", "ch_mp2.js", "ch_mp3.js", "ch_mp4.js", "fr_lycee.js", "fr_2nde.js", "ch3c_ana.js", "ch3c_geo.js", "ch4c_ana.js", "ch2c.js", "ch1c_arg.js", "fr_college.js", "defis.js", "riche.js", "riche_11b.js", "riche_11c.js", "riche_1c.js", "riche_sys1c.js", "riche_9.js", "riche_10.js", "riche_mp2.js", "riche_mp1.js", "riche_2c.js", "riche_col34.js", "riche_mp34.js", "curieux.js", "histoire.js", "badges.js", "backup.js", "qr.js", "lessons.js", "lessons2.js", "dyn.js", "manip.js", "active.js", "act_prop11.js", "act_litt11.js", "act_eq1c.js", "act_sys1c.js", "act_ch11b.js", "act_ch11c.js", "act_9a.js", "act_9b.js", "act_10a.js", "act_10b.js", "act_11d.js", "act_1c.js", "act_mp2.js", "act_mp34.js", "act_2c.js", "act_col34.js", "act_manip.js", "act_manip2.js", "sujet.js", "qcm.js", "engine.js", "parents.js", "app.js"]
 
 head = """<title>5minutes2mathsparjour</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -73,6 +73,7 @@ def paquet(f):
     if f.startswith(("ch_mp", "riche_mp")) or f == "act_mp34.js": return "mp"
     if f.startswith(("ch1c", "riche_1c", "riche_sys1c")) or f in ("act_1c.js", "act_eq1c.js", "act_sys1c.js"): return "12"
     if f.startswith("riche_2c") or f == "act_2c.js": return "13"
+    if f == "ch2c.js": return "13"  # 24.11 (agent niv2c) : niveaux de 2e Collège ; après le paquet 12 (ch_mp2.js redéfinit droites et trigeq)
     if f.startswith(("ch11", "riche_11", "act_ch11")) or f in ("act_prop11.js", "act_litt11.js", "act_11d.js"): return "11"
     if f in ("riche_9.js", "act_9a.js", "act_9b.js"): return "9"
     if f in ("riche_10.js", "act_10a.js", "act_10b.js", "ch10_no.js"): return "10"

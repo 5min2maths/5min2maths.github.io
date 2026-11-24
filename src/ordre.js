@@ -32,3 +32,9 @@ Object.assign(ORDRE_THEME.MATU, {"statdesc":"M4C04"});
 ["rac", "racenc", "pct", "scicalc", "divcrit", "tradexpr"].forEach((id) => { delete ORDRE_THEME.MATU[id]; });
 Object.assign(ORDRE.MATU, {"fracper":3.5,"racprop":4.1,"ratden":4.2,"tradalg":10.1,"contrex":10.2,"demoalg":10.3,"implication":10.4});
 Object.assign(ORDRE_THEME.MATU, {"fracper":"M1C01","racprop":"M1C01","ratden":"M1C01","tradalg":"M1C03","contrex":"M1C03","demoalg":"M1C03","implication":"M1C03"});
+// 24.11 (agent niv2c, audit de niveau 2e Collège, tools/niveau_2c.md) : inéquations polynomiales (src/ch2c.js, Ma2 Ch3).
+// ineq (1er degré) et trigrel (angle aigu) sont des notions de 1re : elles ne sont plus « de l'année » en 2e (le niveau
+// 2e est couvert par ineqpoly, ineqfrac et trigassoc). Reporté dans tools/referentiels.py (SESA_FIX, SESA_ALSO).
+Object.assign(ORDRE.MATU, {"ineqpoly":81.5});
+Object.assign(ORDRE_THEME.MATU, {"ineqpoly":"M2C03","ineq":"M1C05","trigrel":"M1C10"});
+delete ORDRE_THEME.MATU_ALT.ineq; delete ORDRE_THEME.MATU_ALT.trigrel;

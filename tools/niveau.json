@@ -887,5 +887,236 @@
   "etalon": "tools/niveau_1c.md E10.3",
   "audit": "24.11.2026",
   "verdict": "au niveau"
+ },
+ "bijection": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E6.2",
+  "plan": "Bijection : ensembles A et B (CdG 2e)",
+  "verdict": "au niveau"
+ },
+ "cart": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E1.1",
+  "plan": "Géométrie cartésienne (CdG 2e)",
+  "verdict": "remonté"
+ },
+ "cercle": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E1.3",
+  "plan": "Équations de cercles, intersections (CdG 2e)",
+  "verdict": "au niveau"
+ },
+ "cercletan": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E1.4",
+  "plan": "Cercles et tangentes (CdG 2e)",
+  "verdict": "au niveau"
+ },
+ "compo": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E6.1",
+  "plan": "Composition de fonctions (CdG 2e)",
+  "verdict": "remonté"
+ },
+ "decomp": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E6.1",
+  "plan": "Décomposer en fonctions élémentaires (CdG 2e)",
+  "verdict": "au niveau"
+ },
+ "droites": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E1.2",
+  "plan": "Équations de droites, parallélisme, perpendicularité (CdG 2e)",
+  "verdict": "remonté"
+ },
+ "droitesinter": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E1.2",
+  "plan": "Intersections de droites (CdG 2e)",
+  "verdict": "à valider"
+ },
+ "eqrat": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E4.1",
+  "plan": "Équations rationnelles (CdG 2e)",
+  "verdict": "au niveau"
+ },
+ "expfrac": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E5.3",
+  "plan": "Puissances à exposant rationnel (CdG 2e)",
+  "verdict": "au niveau"
+ },
+ "expo": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E5.1",
+  "plan": "Fonction exponentielle, équations (CdG 2e)",
+  "verdict": "au niveau"
+ },
+ "fracetage": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E4.4",
+  "plan": "Fractions rationnelles : opérations (CdG 2e)",
+  "verdict": "au niveau"
+ },
+ "fracrat": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E4.4",
+  "plan": "Fractions rationnelles : simplifier, opérations (CdG 2e)",
+  "verdict": "à valider"
+ },
+ "homog": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E4.3",
+  "plan": "Fonctions homographiques (CdG 2e)",
+  "verdict": "au niveau"
+ },
+ "homogrec": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E4.3",
+  "plan": "Fonctions homographiques : réciproque (CdG 2e)",
+  "verdict": "au niveau"
+ },
+ "ineqpoly": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E3.4",
+  "plan": "Inéquations à une inconnue, tableau des signes (CdG 2e)",
+  "verdict": "remonté"
+ },
+ "log": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E7.1",
+  "plan": "Fonction logarithme, équations (CdG 2e)",
+  "verdict": "au niveau"
+ },
+ "logbase": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E7.2",
+  "plan": "Logarithmes : propriétés (CdG 2e)",
+  "verdict": "au niveau"
+ },
+ "modexp": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E5.2",
+  "plan": "Fonctions exponentielles : modèles (CdG 2e)",
+  "verdict": "remonté"
+ },
+ "polydiv": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E3.1",
+  "plan": "Polynômes : diviser (division avec reste) (CdG 2e)",
+  "verdict": "remonté"
+ },
+ "polyexpr": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E3.3",
+  "plan": "Fonctions polynomiales (CdG 2e)",
+  "verdict": "remonté"
+ },
+ "polyfact": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E3.2",
+  "plan": "Polynômes : factoriser (CdG 2e)",
+  "verdict": "au niveau"
+ },
+ "probrat": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E4.1",
+  "plan": "Résolution de problèmes (CdG 2e)",
+  "verdict": "au niveau"
+ },
+ "recip": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E6.2",
+  "plan": "Bijection et réciproque (CdG 2e)",
+  "verdict": "remonté"
+ },
+ "sinlaw": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E8.1",
+  "plan": "Trigonométrie du triangle quelconque (CdG 2e)",
+  "verdict": "au niveau"
+ },
+ "triaire": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E8.2",
+  "plan": "Triangle quelconque : problèmes (CdG 2e)",
+  "verdict": "au niveau"
+ },
+ "trigassoc": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E9.1",
+  "plan": "Angles associés (CdG 2e)",
+  "verdict": "au niveau"
+ },
+ "trigcercle": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E9.1",
+  "plan": "Fonctions trigonométriques : cercle (CdG 2e)",
+  "verdict": "au niveau"
+ },
+ "trigeq": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E9.1",
+  "plan": "Équations sin(f(x)) = constante (CdG 2e)",
+  "verdict": "remonté"
+ },
+ "trigeq2": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E9.2",
+  "plan": "Modèles trigonométriques (CdG 2e)",
+  "verdict": "au niveau"
+ },
+ "trigfn": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E9.2",
+  "plan": "Fonctions trigonométriques : période, amplitude, zéros (CdG 2e)",
+  "verdict": "à valider"
+ },
+ "valint": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E4.1",
+  "plan": "Fractions rationnelles : domaine (CdG 2e)",
+  "verdict": "au niveau"
+ },
+ "vecteurs": {
+  "audit": "24.11.2026",
+  "classe": "2e Collège",
+  "etalon": "tools/niveau_2c.md E10.1",
+  "plan": "Vecteurs du plan (2e, épreuve 2MA1)",
+  "verdict": "remonté"
  }
 }
