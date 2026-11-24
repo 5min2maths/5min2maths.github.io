@@ -456,6 +456,12 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .keypad button { position: relative; }
 .keypad .k-sub { display: block; font-size: .58rem; line-height: 1; opacity: .7; font-family: system-ui, sans-serif; letter-spacing: 0; margin-top: 2px; }
 .preview:empty { display: none; }
+/* 25.11 (commentaire de l'enseignant : « la calculatrice saute après la première touche ») : l'aperçu, masqué tant que le
+   champ est vide, apparaissait à la 1re touche et poussait le clavier de 44 px vers le bas ; puis une fraction le faisait
+   encore grandir. Hauteur fixe, et place réservée (invisible) quand le clavier suit l'aperçu : le clavier ne bouge plus. */
+.preview { height: 3.2em; min-height: 0; overflow-y: auto; flex-shrink: 0; }
+.preview .err { line-height: 1.2; }
+.preview:empty:has(+ .keypad), .part:has(+ .keypad) > .preview:empty { display: flex; visibility: hidden; }
 .card.streak { flex-direction: row; align-items: center; justify-content: flex-start; text-align: left; gap: 12px; }
 .card.streak .flame { margin: 0; }
 .streak-nudge { display: flex; gap: 8px; align-items: center; padding: 8px 12px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); }
