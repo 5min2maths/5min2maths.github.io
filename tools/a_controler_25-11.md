@@ -28,6 +28,32 @@ Registre : tools/niveau.json ; colonne « Audit de niveau » du suivi.
   4. Loi normale : les épreuves utilisent la table ; l'app reste sur 68-95-99,7.
   5. derivcomp : ajouter des formes d'épreuve (sin²(7x), quotient à simplifier) ?
 
-### 1re Collège — en cours
-### 2e Collège — en cours
-### 11e — en cours
+### 1re Collège — fait (tools/niveau_1c.md)
+
+- **Argumenter refait** : 4 notions de 1re (src/ch1c_arg.js) : tradalg (traduire en algèbre), contrex (conjecture et
+  contre-exemple), demoalg (démonstration algébrique, divisibilité, √d irrationnel), implication (réciproque,
+  contraposée, négation). divcrit et tradexpr deviennent des prérequis.
+- Retirées du programme de 1re (restent révision CO) : rac, racenc, pct, scicalc, divcrit, tradexpr.
+  Ajoutées à « 1. Nombres » : racprop, ratden, fracper (niveau 3 minimum).
+- **Notions du CO partagées remontées au Collège** (grade ≥ 12, voie gymnasiale) : niveau 1 → questions de niveau 2,
+  niveau 2 → niveau 3, pour 30 notions (eq1, distrib, pyth, thales, factor…) ; le CO et la MP ne changent pas.
+- Étalons : programme du Collège 2021 (p. 80–83), PEC 2024, épreuves communes Sismondi 1MA2 (déc.) et 1MA1 (juin),
+  Sésamath Ma1, cours de logique d'un collègue (Collegues/Friedli).
+- À trancher : portée de la remontée (aussi en révision 2e–4e ?) ; ineqfrac en 1re ou en 2e ; négation et preuve
+  par l'absurde (cours MA2) acceptables en MA1 ? ; notions manquantes : longueur d'arc et secteur, milieu / distance /
+  pente (Ma1 ch. 4 et 9).
+
+### 2e Collège — fait (tools/niveau_2c.md)
+
+- Notion manquante créée : **ineqpoly** (inéquations par tableau des signes). ineq et trigrel (1re) ne comptent plus
+  comme notions de 2e.
+- Remontées : cart, droites N1, polyexpr N3, modexp (N1–N3 étaient de niveau 11e), recip N3, compo N3, vecteurs N3 ;
+  formes de niveau 3 ajoutées : trigeq, absval, polydiv.
+- Étalons : épreuves regroupées Sismondi 2MA1 (11.12.2023) et 2MA2 (10.06.2024), brochure 2MA, Sésamath Ma2.
+- **Découverte** : les générateurs de trigonométrie et de droites de 2e sont ceux de la MP (ch_mp2.js, « méthodes
+  guidées, nombres simples ») et l'app travaille en degrés alors que les épreuves de 2e sont en radians.
+- À trancher : chapitre « Raisonner en géométrie » (vide, hors programme officiel) ; passer la trigonométrie du
+  Collège en radians ; séparer les générateurs Collège et MP.
+
+### 11e — en cours (agent)
+### MP 3e–4e — en cours (agent)

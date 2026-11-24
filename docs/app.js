@@ -22,10 +22,10 @@ const NOTIONS = [
   { id: "valnum", theme: "fa", label: "Expressions littérales", ex: "3x^2 \\text{ pour } x = -2 \\text{ vaut } 12", CH: [9], again: [10,11], FR: [7, 5] },
   { id: "angtri", theme: "es", label: "Angles des triangles et quadrilatères", ex: "\\alpha + \\beta + \\gamma = 180°", CH: [9], FR: null },
   { id: "fracmul", theme: "no", label: "Fractions : multiplier, diviser", ex: "\\frac{2}{3} \\cdot \\frac{9}{4} = \\frac{3}{2}", CH: [10], again: [11], MP: [12, "S1"], FR: [8, 2] },
-  { id: "pct", theme: "no", label: "Pourcentages", ex: "15\\,\\% \\text{ de } 80 = 12", CH: [10], again: [12], FR: [6, 6] },
+  { id: "pct", theme: "no", label: "Pourcentages", ex: "15\\,\\% \\text{ de } 80 = 12", CH: [10], /* 24.11 : plus reprise en 1re (tools/niveau_1c.md) */ FR: [6, 6] },
   { id: "puiss", theme: "no", label: "Puissances", ex: "2^3 \\cdot 2^4 = 2^7", CH: [10], again: [11,12], MP: [12, "S1"], FR: [8, 3] },
   { id: "sci", theme: "no", label: "Notation scientifique", ex: "0{,}0042 = 4{,}2 \\cdot 10^{-3}", CH: [10], again: [11,12], FR: [8, 4] },
-  { id: "rac", theme: "no", label: "Racines carrées", ex: "\\sqrt{72} = 6\\sqrt{2}", CH: [10], again: [11,12], MP: [12, "S1"], FR: [9, 2] },
+  { id: "rac", theme: "no", label: "Racines carrées", ex: "\\sqrt{72} = 6\\sqrt{2}", CH: [10], again: [11], /* 24.11 : 1re = racprop, ratden */ MP: [12, "S1"], FR: [9, 2] },
   { id: "racprop", theme: "no", label: "Racines : propriétés (carrées et cubiques)", ex: "\\sqrt{72} = 6\\sqrt{2}", CH: [11], again: [12] }, // 22.11 : propriétés en 11e seulement
   { id: "disque", theme: "gm", label: "Cercle et disque", ex: "A = \\pi r^2", CH: [10], FR: null },
   { id: "vitesse", theme: "gm", label: "Vitesse, distance, durée", ex: "150 \\text{ km en } 2 \\text{ h} \\to 75 \\text{ km/h}", CH: [10], again: [11], FR: [8, 7] },
@@ -140,6 +140,18 @@ Object.assign(ORDRE_THEME.MATU, {"intparties":"M4C01","intsubst":"M4C01","etudel
 // 25.11 (agent niv34, audit niveau) : statistique descriptive de 4e (src/ch4c_ana.js) à la place de stats et quartiles (niveau CO). Ajouté à la main.
 Object.assign(ORDRE.MATU, {"statdesc":233.5});
 Object.assign(ORDRE_THEME.MATU, {"statdesc":"M4C04"});
+// 24.11 (agent niv1c, audit de niveau 1re Collège : tools/niveau_1c.md) : rac, racenc, pct, scicalc, divcrit, tradexpr (niveau 9e–10e)
+// ne sont plus des notions du programme de 1re (elles restent des révisions du CO) ; 1. Nombres reçoit racprop, ratden, fracper ;
+// 3. Argumenter reçoit tradalg, contrex, demoalg, implication (src/ch1c_arg.js). Reporté dans tools/referentiels.py (SESA_FIX).
+["rac", "racenc", "pct", "scicalc", "divcrit", "tradexpr"].forEach((id) => { delete ORDRE_THEME.MATU[id]; });
+Object.assign(ORDRE.MATU, {"fracper":3.5,"racprop":4.1,"ratden":4.2,"tradalg":10.1,"contrex":10.2,"demoalg":10.3,"implication":10.4});
+Object.assign(ORDRE_THEME.MATU, {"fracper":"M1C01","racprop":"M1C01","ratden":"M1C01","tradalg":"M1C03","contrex":"M1C03","demoalg":"M1C03","implication":"M1C03"});
+// 24.11 (agent niv2c, audit de niveau 2e Collège, tools/niveau_2c.md) : inéquations polynomiales (src/ch2c.js, Ma2 Ch3).
+// ineq (1er degré) et trigrel (angle aigu) sont des notions de 1re : elles ne sont plus « de l'année » en 2e (le niveau
+// 2e est couvert par ineqpoly, ineqfrac et trigassoc). Reporté dans tools/referentiels.py (SESA_FIX, SESA_ALSO).
+Object.assign(ORDRE.MATU, {"ineqpoly":81.5});
+Object.assign(ORDRE_THEME.MATU, {"ineqpoly":"M2C03","ineq":"M1C05","trigrel":"M1C10"});
+delete ORDRE_THEME.MATU_ALT.ineq; delete ORDRE_THEME.MATU_ALT.trigrel;
 
 // Calculateur d'expressions : lecture souple de la réponse de l'élève, calcul, mise en forme TeX,
 // équivalence d'expressions (par évaluation en plusieurs points) et contrôle de forme.
@@ -3336,7 +3348,7 @@ FINE.push(
       () => { const t = R.int(0, 2); if (t === 0) { const a = R.int(2, 9) / 10; return QV("Calcule : " + M(dec(a) + "^2"), fx(a * a), M(dec(a) + " \\cdot " + dec(a) + " = " + dec(fx(a * a))), { guide: [GS("Sans la virgule : " + M(Math.round(a * 10) + "^2") + " = ?", Math.round(a * 10) ** 2, M(Math.round(a * 10) ** 2) + "."), GS("Une décimale dans chaque facteur : deux en tout. Résultat ?", fx(a * a), M(dec(fx(a * a))) + ".")], traps: [TRAP(fx(2 * a), dec(a) + "² = " + dec(a) + " · " + dec(a) + ", pas 2 · " + dec(a) + "."), TRAP(fx(a * a * 10), "Deux décimales dans chaque facteur : le résultat en a deux.")] }); } if (t === 1) { const n = R.int(3, 6); return QV("Calcule : " + M("10^" + n), 10 ** n, M("10^" + n) + " s'écrit 1 suivi de " + n + " zéros : " + M(nb(10 ** n)) + ".", { guide: [GS("Combien de zéros après le 1 ?", n, n + " zéros."), GS(M("10^" + n) + " = ?", 10 ** n, M(nb(10 ** n)) + ".")], traps: [TRAP(10 * n, "10^" + n + " s'écrit 1 suivi de " + n + " zéros, pas 10 · " + n + "."), TRAP(10 ** (n - 1), "10^" + n + " : 1 suivi de " + n + " zéros.")] }); } const a = R.int(11, 15) / 10; return QV("Calcule : " + M(dec(a) + "^2"), fx(a * a), M(dec(a) + " \\cdot " + dec(a) + " = " + dec(fx(a * a))), { guide: [GS("Sans la virgule : " + M(Math.round(a * 10) + "^2") + " = ?", Math.round(a * 10) ** 2, M(Math.round(a * 10) ** 2) + "."), GS("Une décimale dans chaque facteur : deux en tout. Résultat ?", fx(a * a), M(dec(fx(a * a))) + ".")], traps: [TRAP(fx(2 * a), dec(a) + "² = " + dec(a) + " · " + dec(a) + ", pas 2 · " + dec(a) + "."), TRAP(fx(a * a * 10), "Deux décimales dans chaque facteur : le résultat en a deux.")] }); },
       () => { const a = R.int(4, 9), b = R.int(2, 3), c = b === 2 ? R.int(4, 5) : R.int(2, 5), v = a * a - b ** 3 + 2 ** c; return QV("Calcule : " + M(a + "^2 - " + b + "^3 + 2^" + c), v, M(a * a + " - " + b ** 3 + " + " + 2 ** c + " = " + v), { guide: [GS(M(a + "^2") + " = ?", a * a, M(a * a) + "."), GS(M(b + "^3") + " = ?", b ** 3, M(b ** 3) + "."), GS(M("2^" + c) + " = ?", 2 ** c, M(2 ** c) + "."), GS("Résultat : " + M(a * a + " - " + b ** 3 + " + " + 2 ** c) + " = ?", v, M(v) + ".")], traps: [TRAP(2 * a - 3 * b + 2 * c, "Une puissance n'est pas un produit par l'exposant."), TRAP(a * a - b ** 3 - 2 ** c, "Attention au signe devant " + "2^" + c + ".")] }); },
     ] },
-  { id: "tradexpr", theme: "no", label: "Traduire un énoncé en calcul", ex: "\\text{le double de la somme de 3 et 4} = 2 \\cdot (3 + 4)", CH: [9], again: [12], codes: "9NO3\\.03",
+  { id: "tradexpr", theme: "no", label: "Traduire un énoncé en calcul", ex: "\\text{le double de la somme de 3 et 4} = 2 \\cdot (3 + 4)", CH: [9], /* 24.11 : plus reprise en 1re (niveau 9e ; tools/niveau_1c.md) */ codes: "9NO3\\.03",
     hint: "Somme : +, différence : −, produit : ×, quotient : ÷. Le premier mot de la phrase dit quelle opération on fait en dernier : « le double de la somme de 3 et 5 » = 2 · (3 + 5).",
     lesson: ["Du français au calcul", "Une phrase décrit un calcul, avec son ordre.", "Somme (+), différence (−), produit (·), quotient (:). « Le double de la somme » : on calcule d'abord la somme, donc on met des parenthèses.", ["Le double de la somme de 3 et 4 : \\(2 \\cdot (3 + 4) = 14\\)", "La somme de 3 et du double de 4 : \\(3 + 2 \\cdot 4 = 11\\)"], "« Le produit de 2 par la somme de 3 et 4 » n'est pas \\(2 \\cdot 3 + 4\\)."],
     g: [
@@ -3352,7 +3364,7 @@ FINE.push(
       () => { const n = R.pick([12, 18, 20, 24, 28, 30, 36, 40, 42, 45, 48, 50, 60, 64, 72]), ds = divisors(n); return QV("Combien de diviseurs le nombre " + M(n) + " possède-t-il ?", ds.length, "Diviseurs : " + ds.join(", ") + ". Il y en a " + M(ds.length) + ".", { guide: [GS("Liste les diviseurs par paires (1 et " + n + ", 2 et " + n / 2 + "…). Le plus grand diviseur qui est au plus " + M("\\sqrt{" + n + "}") + " ?", ds.filter((x) => x * x <= n).pop(), "Paires : " + ds.filter((x) => x * x <= n).map((x) => x + " · " + n / x).join(", ") + "."), GS("Nombre total de diviseurs ?", ds.length, ds.join(", ") + ".")], traps: [TRAP(ds.length - 2, "N'oublie pas 1 et le nombre lui-même."), TRAP(ds.length - 1, "Fais la liste par paires : 1 et " + n + ", 2 et " + n / 2 + "… sans en oublier.")] }); },
       () => { const a = R.int(3, 9), L = R.int(10, 40), H = L + R.int(30, 60), c = Math.floor(H / a) - Math.ceil(L / a) + 1; return QV("Combien y a-t-il de multiples de " + M(a) + " entre " + M(L) + " et " + M(H) + " (bornes comprises) ?", c, "Du premier, " + M(Math.ceil(L / a) * a + " = " + a + " \\cdot " + Math.ceil(L / a)) + ", au dernier, " + M(Math.floor(H / a) * a + " = " + a + " \\cdot " + Math.floor(H / a)) + " : " + M(Math.floor(H / a) + " - " + Math.ceil(L / a) + " + 1 = " + c) + ".", { guide: [GS("Premier multiple de " + a + " à partir de " + L + " : " + M(a + " \\cdot ?") + " (rang)", Math.ceil(L / a), M(a + " \\cdot " + Math.ceil(L / a) + " = " + Math.ceil(L / a) * a) + "."), GS("Dernier multiple jusqu'à " + H + " : rang ?", Math.floor(H / a), M(a + " \\cdot " + Math.floor(H / a) + " = " + Math.floor(H / a) * a) + "."), GS("Nombre de multiples : dernier rang − premier rang + 1 ?", c, M(Math.floor(H / a) + " - " + Math.ceil(L / a) + " + 1 = " + c) + ".")], traps: [TRAP(c - 1, "Compte le premier et le dernier multiple : dernier rang − premier rang + 1."), TRAP(c + 1, "Vérifie le premier et le dernier multiple de l'intervalle.")] }); },
     ] },
-  { id: "divcrit", theme: "no", label: "Critères de divisibilité", ex: "471 : \\; 4 + 7 + 1 = 12 \\Rightarrow \\text{divisible par } 3", CH: [9], again: [12], MP: [12, "S1"], codes: "9NO4\\.02",
+  { id: "divcrit", theme: "no", label: "Critères de divisibilité", ex: "471 : \\; 4 + 7 + 1 = 12 \\Rightarrow \\text{divisible par } 3", CH: [9], /* 24.11 : plus reprise en 1re */ MP: [12, "S1"], codes: "9NO4\\.02",
     hint: "Par 2 : dernier chiffre pair. Par 5 : finit par 0 ou 5. Par 3 (ou 9) : la somme des chiffres est divisible par 3 (ou 9).",
     lesson: ["Critères de divisibilité", "On peut savoir si une division tombe juste sans la faire.", "Par 2 : chiffre des unités pair. Par 5 : 0 ou 5. Par 10 : 0. Par 3 : somme des chiffres divisible par 3. Par 9 : somme divisible par 9. Par 25 : finit par 00, 25, 50, 75.", ["\\(471\\) : \\(4 + 7 + 1 = 12\\), divisible par 3, pas par 9", "\\(1350\\) : divisible par 2, 3, 5, 9, 10, 25"], "Pour 3 et 9, c'est la somme des chiffres qui compte, pas le dernier chiffre : 13 n'est pas divisible par 3."],
     g: [
@@ -3613,7 +3625,7 @@ FINE.push(
       () => { if (R.rand() < 0.5) { const k = R.pick([2, 3, 4, 5, 10]); return QV("Calcule : " + M("\\sqrt[3]{" + k ** 3 + "}"), k, M(k + "^3 = " + k ** 3) + ", donc " + M("\\sqrt[3]{" + k ** 3 + "} = " + k) + "."); } const k = R.pick([3, 4, 5, 6, 7, 8, 9, 11, 12]); return QV("Calcule : " + M("\\sqrt{" + dec(k * k / 100) + "}"), k / 10, M(dec(k / 10) + "^2 = " + dec(k * k / 100)) + ", donc " + M("\\sqrt{" + dec(k * k / 100) + "} = " + dec(k / 10)) + "."); },
       () => { if (R.rand() < 0.5) { const [a, b, c] = R.pick(TRIPLES); return QV("Calcule : " + M("\\sqrt{" + a + "^2 + " + b + "^2}"), c, M("\\sqrt{" + a * a + " + " + b * b + "} = \\sqrt{" + c * c + "} = " + c) + "."); } const a = R.pick([4, 9, 16, 25]), b = R.pick([4, 9, 16, 25, 36, 49]); return QV("Calcule : " + M("\\sqrt{" + a + " \\cdot " + b + "}"), Math.sqrt(a * b), M("\\sqrt{" + a + "} \\cdot \\sqrt{" + b + "} = " + Math.sqrt(a) + " \\cdot " + Math.sqrt(b) + " = " + Math.sqrt(a * b)) + "."); },
     ] },
-  { id: "racenc", theme: "no", label: "Encadrer et comparer des racines", ex: "7 < \\sqrt{50} < 8", CH: [10], again: [12], codes: "10NO3\\.0[34]",
+  { id: "racenc", theme: "no", label: "Encadrer et comparer des racines", ex: "7 < \\sqrt{50} < 8", CH: [10], /* 24.11 : plus reprise en 1re */ codes: "10NO3\\.0[34]",
     hint: "Encadre le nombre sous la racine par deux carrés parfaits consécutifs : 49 < 50 < 64, donc 7 < √50 < 8.",
     lesson: ["Encadrer une racine", "La plupart des racines ne tombent pas juste.", "On encadre le nombre sous la racine par deux carrés parfaits consécutifs. Pour comparer une racine et un entier, on compare les carrés.", ["\\(49 < 50 < 64\\), donc \\(7 < \\sqrt{50} < 8\\)", "\\(\\sqrt{50} > 7\\) car \\(50 > 49\\)"], "\\(\\sqrt{50}\\) n'est pas \\(25\\) : la racine n'est pas la moitié."],
     g: [
@@ -3621,7 +3633,7 @@ FINE.push(
       () => { const k = R.int(3, 12), n = k * k + R.pick([-3, -2, -1, 1, 2, 3]), big = R.rand() < 0.5, rootBigger = n > k * k; return QV("Quel est le plus " + (big ? "grand" : "petit") + " de ces deux nombres : " + M(k) + " ou " + M("\\sqrt{" + n + "}") + " ?", rootBigger === big ? Math.sqrt(n) : k, M(k + " = \\sqrt{" + k * k + "}") + " et " + M(k * k + (rootBigger ? " < " : " > ") + n) + ", donc " + M(k + (rootBigger ? " < " : " > ") + "\\sqrt{" + n + "}") + "."); },
       () => { const a = R.int(3, 12); return QV("Combien y a-t-il de nombres entiers " + M("n") + " tels que " + M(a + " < \\sqrt{n} < " + (a + 1)) + " ?", 2 * a, "Il faut " + M(a * a + " < n < " + (a + 1) ** 2) + " : de " + M(a * a + 1) + " à " + M((a + 1) ** 2 - 1) + ", soit " + M(2 * a) + " entiers."); },
     ] },
-  { id: "scicalc", theme: "no", label: "Calculer en notation scientifique", ex: "(2 \\cdot 10^3) \\cdot (4 \\cdot 10^5) = 8 \\cdot 10^8", CH: [10], again: [11,12], codes: "10NO3\\.08|11NO1\\.09",
+  { id: "scicalc", theme: "no", label: "Calculer en notation scientifique", ex: "(2 \\cdot 10^3) \\cdot (4 \\cdot 10^5) = 8 \\cdot 10^8", CH: [10], again: [11], /* 24.11 : plus reprise en 1re */ codes: "10NO3\\.08|11NO1\\.09",
     hint: "Multiplie les nombres entre eux et additionne les exposants de 10 (soustrais-les pour une division).",
     lesson: ["Calculer en notation scientifique", "On traite séparément les nombres et les puissances de 10.", "\\((a \\cdot 10^m) \\cdot (b \\cdot 10^n) = (a \\cdot b) \\cdot 10^{m+n}\\) ; pour un quotient, \\(10^{m-n}\\). Si le premier facteur n'est plus entre 1 et 10, on le réécrit.", ["\\((2 \\cdot 10^3) \\cdot (4 \\cdot 10^5) = 8 \\cdot 10^8\\)", "\\((4 \\cdot 10^3) \\cdot (5 \\cdot 10^4) = 20 \\cdot 10^7 = 2 \\cdot 10^8\\)"], "\\(20 \\cdot 10^7\\) n'est pas une notation scientifique : il faut \\(2 \\cdot 10^8\\)."],
     g: [
@@ -3821,7 +3833,7 @@ FINE.push(
       () => { const a = R.int(1, 9), b = a + R.int(2, 9), c = R.int(1, 9); return QV("Calcule : " + M("|" + a + " - " + b + "| - |-" + c + "|"), b - a - c, M("|" + (a - b) + "| - " + c + " = " + (b - a) + " - " + c + " = " + (b - a - c))); },
       () => { const a = R.int(1, 6), b = a + R.int(1, 6), c = R.int(2, 5), e = R.int(2, 4); return QV("Calcule : " + M("|" + a + " - " + b + "| \\cdot |-" + c + "| - |-" + e + "|^2"), (b - a) * c - e * e, M((b - a) + " \\cdot " + c + " - " + e * e + " = " + ((b - a) * c - e * e))); },
     ] },
-  { id: "ratden", theme: "no", label: "Rendre rationnel un dénominateur", ex: "\\frac{6}{\\sqrt{3}} = 2\\sqrt{3}", CH: null, MP: [12, "S1"], codesMP: "S1\\.CN\\.15",
+  { id: "ratden", theme: "no", label: "Rendre rationnel un dénominateur", ex: "\\frac{6}{\\sqrt{3}} = 2\\sqrt{3}", CH: [12], /* 24.11 : aussi 1re Collège (Sésamath Ma1 Ch1) */ MP: [12, "S1"], codesMP: "S1\\.CN\\.15",
     hint: "Multiplie numérateur et dénominateur par la racine (ou par l'expression conjuguée) : √b · √b = b.",
     lesson: ["Dénominateur rationnel", "On évite de laisser une racine au dénominateur.", "\\(\\frac{a}{\\sqrt{b}} = \\frac{a\\sqrt{b}}{b}\\). Avec une somme : on multiplie par l'expression conjuguée, \\((\\sqrt{b} - c)(\\sqrt{b} + c) = b - c^2\\).", ["\\(\\frac{6}{\\sqrt{3}} = \\frac{6\\sqrt{3}}{3} = 2\\sqrt{3}\\)", "\\(\\frac{2}{\\sqrt{5} - 2} = 2(\\sqrt{5} + 2)\\)"], "On multiplie le numérateur ET le dénominateur : la valeur ne change pas."],
     g: [
@@ -12835,6 +12847,8 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
   // 23.11 : dérivation (3e Collège, src/ch3c_ana.js)
   tauxvar: ["fimg"], nbderive: ["tauxvar"], derivref: ["puiss"], derivregles: ["derivref"], derivprodquot: ["derivregles"], derivcomp: ["derivregles", "compo"],
   tangente: ["nbderive", "droites"], variations: ["derivregles", "ineq2"], optimderiv: ["variations"],
+  // 24.11 (agent niv2c) : inéquations polynomiales, 2e Collège (src/ch2c.js)
+  ineqpoly: ["polyfact", "ineqfrac"],
   // 24.11 (agent c3geo) : géométrie vectorielle de l'espace, 3e Collège (src/ch3c_geo.js)
   vect3d: ["vecteurs"], colin: ["vect3d"], droite3d: ["vect3d"], plans: ["droite3d"], posrel: ["plans"], pscal3d: ["vect3d"], distances: ["pscal3d", "plans"], sphere: ["plans", "pscal3d"],
   // 24.11 soir : limites, asymptotes, continuité, dérivée seconde, étude, combinatoire, probabilités (3e Collège, src/ch3c_ana.js)
@@ -12844,6 +12858,8 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
   primitives: ["derivregles"], integrale: ["primitives"], aireint: ["integrale"], volrev: ["integrale"], lnexp: ["log", "derivcomp"], croissance: ["expo", "log"],
   condbayes: ["proba"], varalea: ["proba"], binomiale: ["varalea"],
   intparties: ["integrale", "derivprodquot"], intsubst: ["integrale", "derivcomp"], etudelnexp: ["lnexp", "variations"], eqdiff: ["croissance", "primitives"],
+  // 24.11 (agent niv1c) : 1re Collège, chapitre Argumenter (src/ch1c_arg.js) ; divcrit et tradexpr deviennent des prérequis
+  tradalg: ["tradexpr", "valnum"], contrex: ["divcrit", "premiers"], demoalg: ["tradalg", "distrib"], implication: ["contrex", "divcrit"], ratden: ["rac", "idrem"], racprop: ["rac"], fracper: ["fracops"],
   // 24.11 : MP 3e (src/ch_mp3.js) et MP 4e (src/ch_mp4.js)
   eqabs: ["eq1"], eqbic: ["eq2disc"], eqirrmp: ["eq2disc"], eqratmp: ["fracrat", "eq2disc"], puisrat: ["puiss", "rac"], logdef: ["puiss"], logprop: ["logdef"],
   eqexp: ["logdef"], eqlog: ["logprop"], croissexp: ["eqexp"], volmp: ["pyth"], similmp: ["volmp"],
@@ -12851,6 +12867,10 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
   sinusmp: ["trigfn"], explogfn: ["eqexp", "logdef"],
   // 24.11 (chantier G, agent greste) : MP 4e (projection, position de droites, fonctions rationnelles) ; 4e Collège (algèbre linéaire, loi normale)
   projmp: ["scalmp"], pvectmp: ["scalmp"], posdroites: ["droiteparam"], fratmp: ["fracrat", "ineqmp"], matrices: ["sys2"], translin: ["matrices"], appllin: ["translin"], normale: ["varalea", "statdesc"], statdesc: ["varalea"], stats: ["diagr"], quartiles: ["diagr"] };
+// 24.11 (audit de niveau 1re Collège, tools/niveau_1c.md) : notions du CO dont le niveau 1 est trop facile au Collège (voir make).
+const UPC = ["arith", "rel", "fracops", "puiss", "sci", "racprop", "tabval", "eq1", "eqfrac", "formule", "probeq", "affine", "ineq", "sysprob",
+  "reduire", "monomes", "parenth", "distrib", "idrem", "factor", "eq2", "simil", "thales", "pyth", "pythfig", "pythrec", "geocomb", "angles", "angtri", "cercthales"];
+const UPC_MIN = { fracper: 3 };
 // Programme du jour : le format change d'un jour à l'autre ; l'équilibre se fait sur 7 jours.
 // 22.11 : textes courts (une ligne sur téléphone : pas de saut quand on change de format).
 const FORMATS = {
@@ -13221,6 +13241,12 @@ const Engine = {
     // dès la classe indiquée, le niveau 2 tire les formes du niveau 3 (le code de la question reste reproductible : …-3-…).
     const UP2 = { rel: 11 };
     if (level === 2 && UP2[id] && state && state.profile && state.profile.grade >= UP2[id]) level = 3;
+    /* 24.11 (audit de niveau 1re Collège, tools/niveau_1c.md ; alerte de l'enseignant : « on demande à un élève de 1re ce qu'on
+       demanderait à un élève de 9e ») : notions du CO reprises au Collège (1re–4e, filière gymnasiale). Leur niveau 1 est un
+       automatisme de 9e–10e : au Collège, le niveau 1 tire le niveau 2 et le niveau 2 le niveau 3 ; UPC_MIN impose un niveau minimal. */
+    if (level < 3 && state && state.profile && state.profile.system === "CH" && state.profile.track !== "mp" && state.profile.grade >= 12) {
+      if (UPC_MIN[id]) level = Math.max(level, UPC_MIN[id]); else if (UPC.includes(id)) level += 1;
+    }
     if (seed) return this.finalize(state, id, this.build(id, level, seed));
     const rec = ((state.recentQ = state.recentQ || {})[id] = (state.recentQ[id] || []));
     const key = (q) => { let h = 0; for (const c of String(q.q) + JSON.stringify(q.spec)) h = (h * 31 + c.charCodeAt(0)) | 0; return h; };
