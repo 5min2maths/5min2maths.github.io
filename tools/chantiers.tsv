@@ -9,7 +9,7 @@ U	Exercices riches et tests de préparation (pas du drill)	Pédagogie	4	en cours
 I	« Trouve l'erreur »	Pédagogie	5	en cours	60 %	24.11	+ 8 formes : 11e Thalès, Pythagore, puissances, probabilités, pente ; 1re trigonométrie, systèmes, sommet	étendre aux autres chapitres des testeurs
 J	Estimation, Fermi, questions curieuses	Pédagogie	6	fait	100 %	21.11	61 questions curieuses, 5 familles (src/curieux.js)	nouveaux lots si les élèves aiment
 W	Générateurs à réponses 0 ou ±1	Qualité	7	en cours	60 %	23.11	filtre de trivialité et corrections au fil des niveaux (relatifs, 2e Collège)	audit tests/trivial.html, polynômes et bijection
-X	Formes sur figure (repère, lecture de graphique)	Qualité	7	à faire	20 %	23.11	quelques lectures graphiques (suites FR)	variantes pour repere et lectgraph
+X	Formes sur figure (repère, lecture de graphique)	Qualité	7	fait	90 %	24.11	45 formes « lecture sur figure » (repère, tableaux, graphiques, systèmes, affine, 2e degré, fonctions de référence)	contrôle de quelques figures dans la galerie
 B	Vérification unique avant publication	Technique	1	fait	98 %	24.11	run_tests.sh : 109 pages + contrôle de syntaxe de tous les fichiers (console Chromium) ; test de bout en bout du chargement (tools/test_paquets.py)	bloquer le push en cas d'échec
 N	Remontée anonyme des erreurs JavaScript	Technique	1	fait	100 %	23.11	envoi + feuille « erreurs », ligne dans le point ; Apps Script redéployé	surveiller le point
 F	Temps de chargement	Technique	1	fait	100 %	24.11	voir F2	—
@@ -24,7 +24,7 @@ E	Icônes de badges	Produit	6	abandonné	—	22.11	badges abandonnés le 22.11	�
 M	Récompenses visuelles	Produit	6	en partie	30 %	22.11	grades Mathélo « collector » numérotés	—
 O	Accessibilité (police dyslexie, taille du texte, contrastes)	Produit	7	à contrôler	90 %	24.11	Réglages « Affichage » : taille du texte (3), police plus lisible, contraste renforcé ; couleurs ≥ 4,5:1 (WCAG AA) ; focus clavier, zones tactiles	contrôle sur téléphone (rendu réel des polices, thème sombre)
 Q	Captures automatiques des figures	Technique	7	fait	90 %	24.11	galerie de 604 figures (2 Mo, hors ligne), régénérée chaque nuit avec le robot : suivi/galerie/	corriger les ≈ 60 figures relevées (2 agents en cours)
-L	Parcours d'examen (EVACOM 11e, épreuves communes, matu)	Produit	6	à contrôler	60 %	24.11	EVACOM 11e (LS) fait : sujets blancs 95 min, 14 questions, 42 formes, corrigé + auto-correction + bilan (tools/evacom.md)	contrôle par l'enseignant ; puis épreuves communes / matu
+L	Parcours d'examen (EVACOM 11e, épreuves communes, matu)	Produit	6	à contrôler	70 %	24.11	parcours EVACOM 11e : sujets blancs au format de l'épreuve (31.05.2027, 95 min, 2 parties), corrigé, bilan ; visible en mode auteur seulement	relecture de 2-3 sujets par l'enseignant, puis EVACOM_OUVERT = true (src/riche_11c.js)
 FICHE	« Ma fiche » (synthèse à compléter)	Produit	—	abandonné	—	23.11	retirée : plus-value pas convaincante ; code dans la branche archive/fiche	—
 CARN	Carnet d'erreurs et programme du test	Produit	—	fait	100 %	21.11	publiés le 20.11, installer fait le 21.11	—
 QCM	Autoévaluation « Je sais… » + test rapide	Produit	—	fait	100 %	21.11	modèle des champs (src/qcm.js)	—
@@ -42,4 +42,4 @@ AC	Primaire, cycle 1	Long terme	—	à faire	0 %	22.11	—	2028 et après
 AD	Québec, Maghreb, Afrique francophone	Long terme	—	à faire	0 %	22.11	—	2028 et après
 DIP	Bêta : diffusion au-delà des testeurs (cadre DIP)	Diffusion	—	à décider	—	22.11	46 testeurs, vrai test = ouverture à la 11LS	décision de l'enseignant
 F2	Chargement par niveau (un élève ne télécharge que ses notions)	Technique	1	fait	90 %	24.11	paquets par niveau + chargeur ; MathJax géré par le chargeur ; polices non bloquantes. Première visite 4G lente 10,9 s → 5,1 s ; habitué 0,46 s	découper le commun (40 %) ; test de bout en bout : tools/test_paquets.py
-FIG	Figures fidèles à l'énoncé (relevé de la galerie du 24.11)	Qualité	4	à contrôler	85 %	24.11	figures à l'échelle (trigo, triangles, cercle, solides, similitude), droites graduées et graphiques recadrés, diagrammes, étiquettes, figures de leçons ; agrandissement : la figure n'affiche plus la réponse	2 défauts restants signalés par le robot (droites-1, sinlaw-2) ; parcourir la galerie
+FIG	Figures fidèles à l'énoncé (relevé de la galerie du 24.11)	Qualité	4	à contrôler	95 %	24.11	≈ 60 figures corrigées + 2 défauts du robot	parcourir la galerie
