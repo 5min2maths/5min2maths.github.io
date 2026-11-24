@@ -3,7 +3,8 @@
 //   - Manipule (vrai geste, manipLesson de manip.js) : eqabs (le point qu'on promène sur la droite graduée),
 //     similmp (le niveau du liquide dans un verre conique), vectmp (la flèche qu'on tire sur le quadrillage) ;
 //   - Essaie sur la figure (réponse tapée qui fait réagir un graphique) : droiteparam, sinusmp ;
-//   - À toi : 2 questions (réponse tapée, coup de pouce après une erreur) : les 16 autres.
+//   - À toi : 2 questions (réponse tapée, coup de pouce après une erreur) : les 16 autres, plus projmp, pvectmp,
+//     posdroites et fratmp (ajoutés le 24.11, agent mp4plus).
 // Le rappel de cours (« Retiens ») est la leçon de la notion (LESSONS, dans ch_mp3.js / ch_mp4.js).
 // Pas de TeX dans ce qui est redessiné à chaque geste ni dans les messages de réussite.
 (function () {
@@ -142,6 +143,39 @@
       play: guide(["Orthogonaux : produit scalaire nul, 6 · 2 + k · (−3) = 0", "u · v = 5, ‖u‖ = √5, ‖v‖ = √10 : cos α = 5 ÷ (√5 · √10) = 5 ÷ √50"],
         [W(4, "12 − 3k = 0, donc k = 4."),
           W(45, "cos α = 5 ÷ √50 ≈ 0,707, donc α = 45°.")]),
+    },
+    // Ajouts du 24.11 (agent mp4plus) : projmp, pvectmp, posdroites, fratmp (À toi, 2 questions).
+    projmp: {
+      predict: { q: "L'« ombre » du vecteur \\(\\vec{u} = (3 \\,;\\, 4)\\) sur l'axe des x, quand la lumière tombe à angle droit, est…", choices: ["(3 ; 0)", "(0 ; 4)", "(3 ; 4)"], good: 0,
+        why: "On garde seulement la partie de u dans la direction de l'axe : (3 ; 0). Le reste, (0 ; 4), est orthogonal à l'axe. C'est la projection orthogonale." },
+      defis: ["\\(\\vec{u} = (4 \\,;\\, 7)\\) et \\(\\vec{v} = (3 \\,;\\, 4)\\). Projection scalaire de \\(\\vec{u}\\) sur \\(\\vec{v}\\), \\(\\frac{\\vec{u} \\cdot \\vec{v}}{\\|\\vec{v}\\|}\\) ?", "Vecteur projeté de \\(\\vec{u} = (7 \\,;\\, 1)\\) sur \\(\\vec{v} = (1 \\,;\\, 1)\\) : que vaut sa première composante ?"],
+      play: guide(["u · v = 4 · 3 + 7 · 4 = 40 et ‖v‖ = √(9 + 16) = 5", "u · v = 8 et ‖v‖² = 2 : coefficient 8 ÷ 2, puis on multiplie v par ce coefficient"],
+        [W(8, "40 ÷ 5 = 8 : l'ombre de u sur la direction de v mesure 8."),
+          W(4, "Coefficient 8 ÷ 2 = 4, donc p = 4 · (1 ; 1) = (4 ; 4). Et u − p = (3 ; −3) est bien orthogonal à v : 3 − 3 = 0.")]),
+    },
+    pvectmp: {
+      predict: { q: "Le produit vectoriel \\(\\vec{u} \\times \\vec{v}\\) de deux vecteurs de l'espace est…", choices: ["un vecteur orthogonal à u et à v", "un nombre", "un vecteur parallèle à u"], good: 0,
+        why: "Contrairement au produit scalaire (un nombre), le produit vectoriel est un vecteur, perpendiculaire à u et à v. Sa longueur est l'aire du parallélogramme construit sur u et v." },
+      defis: ["\\(\\vec{u} = (1 \\,;\\, 2 \\,;\\, 2)\\) et \\(\\vec{v} = (2 \\,;\\, -1 \\,;\\, 2)\\). Première composante de \\(\\vec{u} \\times \\vec{v}\\), c'est-à-dire \\(u_2 v_3 - u_3 v_2\\) ?", "On a trouvé \\(\\vec{u} \\times \\vec{v} = (2 \\,;\\, 3 \\,;\\, 6)\\). Aire du parallélogramme construit sur \\(\\vec{u}\\) et \\(\\vec{v}\\) ?"],
+      play: guide(["u₂v₃ − u₃v₂ = 2 · 2 − 2 · (−1)", "L'aire est la norme du produit vectoriel : √(2² + 3² + 6²)"],
+        [W(6, "4 + 2 = 6. En entier, u × v = (6 ; 2 ; −5), et (6 ; 2 ; −5) · (1 ; 2 ; 2) = 6 + 4 − 10 = 0 : orthogonal à u ✓."),
+          W(7, "√(4 + 9 + 36) = √49 = 7. Le triangle construit sur u et v aurait une aire de 3,5.")]),
+    },
+    posdroites: {
+      predict: { q: "Dans l'espace, deux droites qui n'ont aucun point commun sont…", choices: ["parallèles ou gauches", "forcément parallèles", "forcément confondues"], good: 0,
+        why: "Dans le plan, pas de point commun veut dire parallèles. Dans l'espace, il y a aussi les droites gauches : ni parallèles, ni sécantes (une route et un pont qui passe au-dessus en biais)." },
+      defis: ["\\(d\\) a pour vecteur directeur \\((2 \\,;\\, -1)\\) et \\(g\\) a pour vecteur directeur \\((-6 \\,;\\, m)\\). Pour quelle valeur de \\(m\\) les droites sont-elles parallèles ?", "Dans l'espace, \\(d : x = 1 + t,\\ y = 2 - t,\\ z = 3 + 2t\\) et \\(g : x = 5 + 2s,\\ y = 1 + s,\\ z = m - s\\). Les équations en x et en y donnent \\(t = 2\\) et \\(s = -1\\). Pour quelle valeur de \\(m\\) les droites sont-elles sécantes ?"],
+      play: guide(["Parallèles : (−6 ; m) = k · (2 ; −1). La première composante donne k = −3", "Point commun : les cotes doivent aussi être égales, 3 + 2 · 2 = m − (−1)"],
+        [W(3, "k = −3, donc m = −3 · (−1) = 3 : (−6 ; 3) = −3 · (2 ; −1), les droites sont parallèles (ou confondues)."),
+          W(6, "7 = m + 1, donc m = 6 : point commun (3 ; 0 ; 7). Pour toute autre valeur de m, les droites seraient gauches.")]),
+    },
+    fratmp: {
+      predict: { q: "\\(f(x) = \\frac{2x - 6}{x + 4}\\). Où est l'asymptote verticale ?", choices: ["x = −4", "x = 3", "y = 2"], good: 0,
+        why: "Le dénominateur s'annule en x = −4 : c'est la valeur interdite, la courbe s'envole près de cette droite verticale. x = 3 est le zéro (numérateur) ; y = 2 est l'asymptote horizontale." },
+      defis: ["\\(f(x) = \\frac{3x + 6}{x - 1}\\). Asymptote horizontale \\(y = \\ldots\\) ?", "Résous \\(\\frac{2x + 1}{x - 2} = 3\\)."],
+      play: guide(["Pour x très grand, f(x) ≈ 3x ÷ x", "On multiplie les deux membres par (x − 2) : 2x + 1 = 3(x − 2)"],
+        [W(3, "3x ÷ x = 3 : asymptote y = 3. (Valeur interdite 1, zéro −2.)"),
+          W(7, "2x + 1 = 3x − 6, donc x = 7, qui n'est pas la valeur interdite 2. Vérification : 15 ÷ 5 = 3 ✓.")]),
     },
     // =============================== MP 4e · H–J. Inéquations, fonctions ===============================
     ineqmp: {
