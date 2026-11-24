@@ -1,0 +1,5 @@
+/* Polices hébergées avec l'app (24.11, plus de Google Fonts) : sous-ensemble latin, licence OFL (vendor/LICENCES.txt). */
+@font-face { font-family: 'Atkinson Hyperlegible'; font-style: normal; font-weight: 400; font-display: swap; src: url(atkinson-400.woff2) format('woff2'); }
+@font-face { font-family: 'Atkinson Hyperlegible'; font-style: normal; font-weight: 700; font-display: swap; src: url(atkinson-700.woff2) format('woff2'); }
+@font-face { font-family: 'Bricolage Grotesque'; font-style: normal; font-weight: 700 800; font-stretch: 100%; font-display: swap; src: url(bricolage-var.woff2) format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400 600; font-display: swap; src: url(jetbrainsmono-var.woff2) format('woff2'); }

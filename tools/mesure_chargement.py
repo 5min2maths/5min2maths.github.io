@@ -10,8 +10,8 @@ Usage :
 Comment : un petit serveur local sert docs/ (compressé en gzip, comme GitHub Pages) ; Chromium sans interface est
 piloté par le protocole DevTools (module websockets) : CPU ralenti (×1, ×4, ×6 ≈ téléphone d'entrée de gamme) et
 réseau émulé (« 4G lente » = préréglage « Slow 4G » de DevTools : 562,5 ms de latence, 1,6 Mbit/s). Les envois de
-statistiques (script.google.com) sont bloqués. Les ressources externes (MathJax, polices Google) sont réellement
-téléchargées : il faut une connexion.
+statistiques (script.google.com) sont bloqués. Depuis le 24.11, MathJax et les polices sont servis avec l'app
+(docs/vendor/) et comptés dans « Ko reçus » ; une ancienne construction les télécharge encore sur Internet (non comptés).
 
 Mesures (depuis le début de la navigation) :
   accueil = première fois que #app contient l'écran (accueil pour un habitué, écran d'entrée pour un nouveau) ;
