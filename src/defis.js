@@ -1430,7 +1430,7 @@ const DEFIS = (() => {
         const num = b + a * p, cnt = cntInt((x) => x !== p && (a * x + b) / (x - p) > a);
         return P("On étudie " + M("f(x) = \\frac{" + poly([a, b]) + "}{" + xm(p) + "}") + ".",
           [["a) Zéro de " + M("f") + " (fraction)", -b / a], ["b) Solution de " + M("f(x) = " + k), xk], ["c) Asymptote horizontale : " + M("y = a") + ". Combien d'entiers " + M("x") + " de " + M("-10") + " à " + M("10") + " vérifient " + M("f(x) > " + a) + " ?", cnt]],
-          ["b) Multiplie par (" + xmT(p) + ") (x ≠ " + p + ") : " + pT([a, b]) + " = " + k + "(" + xmT(p) + "). c) L'asymptote horizontale est y = " + a + " (rapport des coefficients de x).",
+          ["b) Multiplie par (" + xmT(p) + ") (x ≠ " + p + "), ce qui donne " + pT([a, b]) + " = " + k + "(" + xmT(p) + "). c) L'asymptote horizontale est y = " + a + " (rapport des coefficients de x).",
            "c) f(x) − " + a + " = (" + pT([a, b]) + " − " + a + "(" + xmT(p) + ")) ÷ (" + xmT(p) + ") = " + num + " ÷ (" + xmT(p) + ") : son signe ne dépend que du dénominateur."],
           "a) " + M(poly([a, b]) + " = 0 \\iff x = " + fx(-b / a)) + ". b) " + M(poly([a, b]) + " = " + cfD(k) + "(" + xm(p) + ") \\iff " + cfD(a - k) + "x = " + (-k * p - b) + " \\iff x = " + xk) + ". c) " + M("f(x) - " + pr(a) + " = \\frac{" + num + "}{" + xm(p) + "} > 0 \\iff x " + (num > 0 ? ">" : "<") + " " + p) + " : " + M(cnt) + " entiers.");
       },
@@ -1762,6 +1762,58 @@ const DEFIS = (() => {
           ["Le premier mot de la phrase dit la DERNIÈRE opération : « le double de la somme » = 2 · ( … + … ).",
            "« Le carré de la différence » = ( … − … )² ; « la différence des carrés » = …² − …². Attention aux parenthèses autour de " + x + (x < 0 ? " (négatif)" : "") + "."],
           "a) " + M("2 \\cdot (" + x + " + " + a + ") = " + 2 * (x + a)) + ". b) " + M("2 \\cdot " + pr(x) + " + " + a + " = " + (2 * x + a)) + ". c) " + M("(" + x + " - " + b + ")^2 = " + pr(x - b) + "^2 = " + (x - b) ** 2) + ". d) " + M(pr(x) + "^2 - " + b + "^2 = " + x * x + " - " + b * b + " = " + (x * x - b * b)) + ".");
+      },
+    ],
+    /* ---------- 4e Collège : croissance exponentielle (base e) ---------- */
+    croissance: [
+      () => {
+        const N0 = 50 * ri(4, 20), k = pk([0.15, 0.2, 0.25, 0.3, 0.35, 0.4]), t1 = ri(5, 12), M_ = N0 * pk([10, 20, 50]);
+        const Td = Math.log(2) / k, N1 = N0 * Math.exp(k * t1), tM = Math.log(M_ / N0) / k;
+        return P("Une population de bactéries suit " + M("N(t) = " + N0 + " \\cdot e^{" + D(k) + "t}") + " (" + M("t") + " en heures).",
+          [["a) Temps de doublement (h, au centième)", Td, 0.01], ["b) Population après " + t1 + " heures (à l'unité)", N1, 1], ["c) Après combien d'heures dépasse-t-elle " + nbT(M_) + " bactéries ? (h, au centième)", tM, 0.01]],
+          ["Doublement : N(T) = 2 · " + N0 + ", donc e^(" + T(k) + "T) = 2, puis applique ln aux deux membres.",
+           "c) " + N0 + " · e^(" + T(k) + "t) = " + nbT(M_) + " donne e^(" + T(k) + "t) = " + M_ / N0 + ", puis t = ln(" + M_ / N0 + ") ÷ " + T(k) + "."],
+          "a) " + M("T = \\frac{\\ln 2}{" + D(k) + "} \\approx " + D(r2c(Td))) + " h. b) " + M(N0 + " \\cdot e^{" + D(r2c(k * t1)) + "} \\approx " + nb(Math.round(N1))) + ". c) " + M("t = \\frac{\\ln " + M_ / N0 + "}{" + D(k) + "} \\approx " + D(r2c(tM))) + " h.");
+      },
+    ],
+    /* ---------- 4e Collège : étude de x − a ln x ---------- */
+    lnexp: [
+      () => {
+        const a = pk([2, 3, 4, 5, 6]), b = pk([1, 2, 3]);
+        const f = (x) => b * x - a * Math.log(x), mn = f(a / b), x1 = pk([2, 3, 4, 5, 6, 8].filter((v) => v * b !== a));
+        return P("Soit " + M("f(x) = " + (b === 1 ? "" : b) + "x - " + a + "\\ln x") + " pour " + M("x > 0") + ".",
+          [["a) " + M("f'(" + x1 + ")") + " (fraction)", b - a / x1], ["b) Abscisse du minimum (fraction)", a / b], ["c) Valeur du minimum (au centième)", mn, 0.01], ["d) Équation de la tangente en " + M("x = 1") + " : " + M("y = mx + p") + ". Que vaut " + M("p") + " ?", f(1) - (b - a)]],
+          ["(ln x)' = 1/x, donc f'(x) = " + b + " − " + a + "/x. Le minimum est atteint où f' s'annule (f' négative avant, positive après).",
+           "d) La tangente en 1 a pour équation y = f'(1)(x − 1) + f(1), avec f(1) = " + b + " (ln 1 = 0)."],
+          M("f'(x) = " + b + " - \\frac{" + a + "}{x}") + ". a) " + M("f'(" + x1 + ") = " + fx(b - a / x1)) + ". b) " + M("f'(x) = 0 \\iff x = " + fx(a / b)) + ". c) " + M("f\\left(" + fx(a / b) + "\\right) = " + a + " - " + a + "\\ln " + fx(a / b) + " \\approx " + D(r2c(mn))) + ". d) " + M("f'(1) = " + (b - a) + ", \\; f(1) = " + b + ", \\; y = " + (b - a) + "(x - 1) + " + b) + " : " + M("p = " + (f(1) - (b - a))) + ".");
+      },
+    ],
+    /* ---------- MP 1re : valeur absolue et distance ---------- */
+    vabs: [
+      () => {
+        let a, b, c; do { a = ri(-9, 2); b = ri(a + 3, 12); c = ri(1, 6); } while ((a + b) % 2 !== 0 || a === 0 || b === 0 || c >= (b - a) / 2 - 1);
+        const m = (a + b) / 2, r = (b - a) / 2;
+        const cnt = cntInt((x) => Math.abs(x - m) <= r && Math.abs(x - m) > c, -20, 20);
+        return P("Sur la droite des nombres, " + M("A = " + a) + " et " + M("B = " + b) + ".",
+          [["a) Distance " + M("AB"), b - a], ["b) Les points de " + M("[AB]") + " sont les " + M("x") + " tels que " + M("|x - m| \\leq r") + ". Que vaut " + M("m") + " ?", m], ["c) Combien d'entiers " + M("x") + " vérifient à la fois " + M("|x - " + pr(m) + "| \\leq " + r) + " et " + M("|x - " + pr(m) + "| > " + c) + " ?", cnt]],
+          ["|x − m| est la distance entre x et m. Le segment [AB] est l'ensemble des points à distance au plus (AB ÷ 2) de son milieu.",
+           "c) Les entiers à distance au plus " + r + " de " + m + " mais à distance strictement plus grande que " + c + " : deux morceaux, de chaque côté de " + m + "."],
+          "a) " + M("|" + b + " - (" + a + ")| = " + (b - a)) + ". b) Milieu " + M("m = \\frac{" + a + " + " + b + "}{2} = " + m) + ", rayon " + M("r = " + r) + ". c) " + (c >= r ? "Aucun entier : " + M(c + " \\geq " + r) : M("x \\in [" + a + " ; " + (m - c) + "[ \\cup ]" + (m + c) + " ; " + b + "]") + " : " + M(cnt) + " entiers") + ".");
+      },
+    ],
+    /* ---------- MP 4e : produit vectoriel (aire, volume) ---------- */
+    pvectmp: [
+      () => {
+        let u, v, w, cr, vol;
+        do { u = [ri(-3, 3), ri(-3, 3), ri(-3, 3)]; v = [ri(-3, 3), ri(-3, 3), ri(-3, 3)]; w = [ri(-3, 3), ri(-3, 3), R.nz(1, 4)];
+          cr = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]]; vol = Math.abs(cr[0] * w[0] + cr[1] * w[1] + cr[2] * w[2]); }
+        while (cr.filter((c) => c !== 0).length < 3 || vol === 0 || u.filter((c) => c === 0).length > 1 || v.filter((c) => c === 0).length > 1);
+        const A = Math.hypot(...cr), vec = (z) => "(" + z.join(" ; ") + ")";
+        return P("On donne " + M("\\vec u = " + vec(u)) + ", " + M("\\vec v = " + vec(v)) + " et " + M("\\vec w = " + vec(w)) + ".",
+          [["a) Première composante de " + M("\\vec u \\times \\vec v"), cr[0]], ["b) Troisième composante de " + M("\\vec u \\times \\vec v"), cr[2]], ["c) Aire du triangle construit sur " + M("\\vec u") + " et " + M("\\vec v") + " (au centième)", A / 2, 0.01], ["d) Volume du parallélépipède construit sur " + M("\\vec u") + ", " + M("\\vec v") + " et " + M("\\vec w"), vol]],
+          ["u × v = (u₂v₃ − u₃v₂ ; u₃v₁ − u₁v₃ ; u₁v₂ − u₂v₁). Sa norme est l'aire du parallélogramme ; le triangle en est la moitié.",
+           "c) Volume = |(u × v) · w| (produit mixte)."],
+          "a) et b) " + M("\\vec u \\times \\vec v = " + vec(cr)) + ". c) " + M("\\frac{\\sqrt{" + (cr[0] ** 2 + cr[1] ** 2 + cr[2] ** 2) + "}}{2} \\approx " + D(r2c(A / 2))) + ". d) " + M("|" + pr(cr[0]) + " \\cdot " + pr(w[0]) + " + " + pr(cr[1]) + " \\cdot " + pr(w[1]) + " + " + pr(cr[2]) + " \\cdot " + pr(w[2]) + "| = " + vol) + ".");
       },
     ],
   };

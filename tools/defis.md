@@ -108,7 +108,7 @@ Même standard (valeurs tirées, 2 à 4 parts enchaînées, 2 indices, corrigé 
 `factor` v2 (11e) : la part « combien d'entiers avec E(x) > 0 » (tableau de signes à trois facteurs, hors programme
 de 11e) est remplacée par un paramètre : pour quel c l'équation n'a plus que deux solutions (c = m²p²).
 
-## 3e lot (24.11 soir) : 41 notions de plus
+## 3e lot (24.11 soir) : 45 notions de plus
 
 Même standard. Toutes à valeurs tirées ; parts vérifiées par `tools/audit_defis.py`.
 
@@ -155,12 +155,15 @@ Même standard. Toutes à valeurs tirées ; parts vérifiées par `tools/audit_d
 | divcrit (1re) | 74■■ fixe | ab■■ tiré : nombres divisibles par 45 (combien, le plus grand), par 36 |
 | racenc (1re) | √70 fixe | √n tiré : entier inférieur, valeur au dixième par encadrement, entiers m avec k < √m < k + g |
 | tradexpr (1re) | x = 4 fixe | x tiré (négatif possible) : double de la somme, somme du double, carré de la différence, différence des carrés |
+| croissance (4e) | 400 · e^(0,25t) fixe | N₀ et k tirés : doublement, N(t₁), instant où N dépasse un seuil (ln) |
+| lnexp (4e) | x − 2 ln x fixe | bx − a ln x : f'(x₁), minimum (abscisse, valeur), ordonnée à l'origine de la tangente en 1 |
+| vabs (MP 1re) | A = −3, B = 5 fixe | distance, milieu (forme \|x − m\| ≤ r), entiers avec c < \|x − m\| ≤ r (deux morceaux) |
+| pvectmp (MP 4e) | u, v fixes | u × v (1re et 3e composantes), aire du triangle, volume (produit mixte) |
 
 ## Ce qui reste (valeurs fixes, à reprendre)
 
-Environ 25 notions gardent un défi à valeurs fixes : `croissance`, `lnexp`,
-`translin`, `absval`, `domaine`, `ensembles`, `morceaux`, `transf`, `racinv`, `fracrat`, MP (`pvectmp`, `eqparam`,
-`ratden`, `vabs`, `valint`), et 9e–10e
+Environ 20 notions gardent un défi à valeurs fixes :
+`translin`, `absval`, `domaine`, `ensembles`, `morceaux`, `transf`, `racinv`, `fracrat`, MP (`eqparam`, `ratden`, `valint`), et 9e–10e
 (`monomes`, `ordgr`,
 `reduire`, `tabval`, `valnum`), plus `algopy`, `proba2`, `probcond`, `tauxevol`,
 `vect3e` (sans classe). Liste à jour : relancer `tools/audit_defis.py`.
