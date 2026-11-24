@@ -94,10 +94,14 @@ function solveBal(){ const s0=step(); const it=()=>step()===s0?S().items:[], on=
   g=0; while(on("L","1").length&&on("R","1").length&&g++<12) pair("1");
   const sd=on("L","x").length?"L":"R", ot=sd==="L"?"R":"L"; g=0;
   while(on(sd,"x").length>1&&g++<6){ rm(on(sd,"x")[0]); for(let j=0;j<S().X;j++) rm(on(ot,"1")[0]); } }
+// 24.11 : questions ajoutées après les défis (A.plus, actPlus dans active.js) : une réponse fausse est refusée, la bonne valide.
+const plusAns=(id,msgs)=>{(ACTIVE[id].plus||[]).forEach((p,j)=>{const go=(v)=>{const i=document.querySelector(".act-plus .act-in");if(!i)return false;i.value=v;i.closest(".act-ans").querySelector("[data-go]").dispatchEvent(new MouseEvent("click",{bubbles:true}));return true;};
+  const b=document.querySelector("#gfb").textContent;if(!go("9999")){msgs.push("✗ question ajoutée "+(j+1)+" absente");return;}if(document.querySelector("#gfb").textContent!==b)msgs.push("✗ réponse fausse acceptée");
+  go(String(p.ans));msgs.push(document.querySelector("#gfb").textContent!==b?"✓ question ajoutée "+(j+1):"✗ question ajoutée "+(j+1)+" refusée");});};
 const ids=(location.hash.slice(1)||Object.keys(LES).join(",")).split(",");
 for(const id of ids){ try{ screenLesson(id,()=>{}); click('#pc button[data-i="'+ACTIVE[id].predict.good+'"]');
   if(!B()) throw new Error("pas de figure manipulable");
-  const ex=LES[id](); const html=document.getElementById("app").innerHTML;
+  const ex=LES[id](); plusAns(id,ex); const html=document.getElementById("app").innerHTML;
   const fin=!document.getElementById("s3").hidden;
   // pas de débordement à 360 px (24.11)
   const app=document.getElementById("app"), R=document.body.getBoundingClientRect().right+1, ov=app.scrollWidth>app.clientWidth+1||[...app.querySelectorAll("*")].some((e)=>{const r=e.getBoundingClientRect();return r.width&&r.right>R;});

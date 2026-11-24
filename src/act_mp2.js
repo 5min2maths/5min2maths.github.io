@@ -87,8 +87,10 @@
         wins: [W(2, "6 ÷ 3 = 2."), W(-2, "4 = 6 + h, donc h = −2."), W(-1 / 3, "Perpendiculaires : produit des pentes = −1, donc −1/3.")] }),
     },
     droitesinter: {
+      /* 24.11 : perpendiculaires (notion « Intersection de droites, médiatrice, hauteur »), en défi court */
+      plus: [{ d: "La droite d : \\(y = 3x - 2\\). Deux droites (non verticales) sont perpendiculaires quand le produit de leurs pentes vaut \\(-1\\). Tape la pente \\(m\\) d'une perpendiculaire à d.", ans: -1 / 3, ok: "3 · m = −1, donc m = −1/3 : on inverse la pente et on change son signe.", no: "Cherche m tel que 3 · m = −1 (fraction acceptée)." }],
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
-      retiens: { regle: "Intersection de deux droites : au point commun, les deux \\(y\\) sont égaux. On égale les deux expressions, on résout en \\(x\\), puis on calcule \\(y\\).", exemple: ["\\(y = x + 1\\) et \\(y = -x + 5\\) : \\(x + 1 = -x + 5\\), donc \\(x = 2\\) et \\(y = 3\\).", "Offres \\(20 + 2x\\) et \\(50 + x\\) : \\(20 + 2x = 50 + x\\), même prix pour 30 km."], piege: "Le point d'intersection a deux coordonnées : une fois \\(x\\) trouvé, calcule \\(y\\)." },
+      retiens: { regle: "Intersection de deux droites : au point commun, les deux \\(y\\) sont égaux. On égale les deux expressions, on résout en \\(x\\), puis on calcule \\(y\\). Deux droites de pentes \\(m\\) et \\(m'\\) sont perpendiculaires si \\(m \\cdot m' = -1\\).", exemple: ["Perpendiculaire à \\(y = 3x - 2\\) : pente \\(-\\frac{1}{3}\\).", "\\(y = x + 1\\) et \\(y = -x + 5\\) : \\(x + 1 = -x + 5\\), donc \\(x = 2\\) et \\(y = 3\\).", "Offres \\(20 + 2x\\) et \\(50 + x\\) : \\(20 + 2x = 50 + x\\), même prix pour 30 km."], piege: "Le point d'intersection a deux coordonnées : une fois \\(x\\) trouvé, calcule \\(y\\)." },
       predict: { q: "Les droites y = x + 1 et y = −x + 5 se coupent pour x = …", choices: ["2", "3", "1"], good: 0, why: "Au point d'intersection, les deux y sont égaux : x + 1 = −x + 5, donc 2x = 4 et x = 2 (puis y = 3)." },
       // Défis repris le 22.11 (« les défis, c'est confusing ») : toujours la même tâche (l'abscisse du point commun),
       // avec le graphique des deux droites ; la réponse tapée place une verticale qui montre les deux y.
