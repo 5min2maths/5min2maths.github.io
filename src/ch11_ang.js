@@ -43,10 +43,16 @@
         return Qv("Les droites " + M("d_1") + " et " + M("d_2") + " sont parallèles. Un angle mesure " + deg(rv(a, r)) + ". Combien mesure l'angle marqué « ? » ?", rv(a, r), "Les deux angles sont correspondants (même position aux deux intersections) : avec des parallèles, ils sont égaux, " + deg(rv(a, r)) + ".",
           { ctx: "correspondants", fig: par(a, [[0, r, rv(a, r) + "°"], [1, r, "?"]]), guide: [GS("Les deux angles occupent la même position aux deux intersections : ce sont des angles correspondants. Avec des parallèles, ils sont égaux. Mesure de « ? » ?", rv(a, r), deg(rv(a, r)) + ".")],
             traps: [TR(180 - rv(a, r), "Correspondants : même position, même mesure (pas supplémentaires).")] }); },
-      () => { const a = R.int(70, 140), b = R.int(60, 150); if (a + b >= 330) return null;
-        return Qv("Trois angles se partagent le tour complet d'un point. Deux mesurent " + deg(a) + " et " + deg(b) + ". Combien mesure le troisième ?", 360 - a - b, "Le tour complet fait 360° : " + M("360° - " + a + "° - " + b + "° = " + (360 - a - b) + "°") + ".",
-          { ctx: "tour", fig: GF.around(a, b, a + "°", b + "°", "?"), guide: [GS("Combien de degrés fait un tour complet ?", 360, "360°."), GS("Somme des deux angles connus ?", a + b, deg(a + b) + "."), GS("Le troisième ?", 360 - a - b, deg(360 - a - b) + ".")],
-            traps: [TR(180 - a - b, "Autour d'un point, la somme fait 360° (180°, c'est un angle plat).")] }); },
+      /* 25.11 (audit de niveau 11e) : « trois angles autour d'un point » (tour complet, 9e) remplacé par les angles
+         internes du même côté (supplémentaires) et alternes-externes (égaux), au programme de 11e (plan de cheminement, 7. Angles). */
+      () => { const a = R.int(32, 72), co = R.rand() < 0.55, [r1, r2] = co ? pk([[1, 4], [2, 3]]) : pk([[3, 1], [4, 2]]), g = rv(a, r1), v = rv(a, r2);
+        return Qv("Les droites " + M("d_1") + " et " + M("d_2") + " sont parallèles. Un angle mesure " + deg(g) + ". Combien mesure l'angle marqué « ? » ?", v,
+          co ? "Les deux angles sont entre les parallèles, du même côté de la sécante (angles internes du même côté) : ils sont supplémentaires, " + M("180° - " + g + "° = " + v + "°") + "."
+            : "Les deux angles sont à l'extérieur des parallèles, de part et d'autre de la sécante (alternes-externes) : ils sont égaux, " + deg(v) + ".",
+          { ctx: co ? "co-internes" : "alternes-externes", fig: par(a, [[0, r1, g + "°"], [1, r2, "?"]]),
+            guide: co ? [GS("Les deux angles sont entre les parallèles, du même côté de la sécante. Quelle est leur somme ?", 180, "180° : ils sont supplémentaires."), GS("Mesure de « ? » ?", v, deg(v) + ".")]
+              : [GS("Les deux angles sont à l'extérieur des parallèles, de part et d'autre de la sécante : alternes-externes, donc égaux. Mesure de « ? » ?", v, deg(v) + ".")],
+            traps: [TR(co ? g : 180 - g, co ? "Internes du même côté : les angles ne sont pas égaux, ils sont supplémentaires (somme 180°)." : "Alternes-externes : les angles sont égaux (pas supplémentaires).")] }); },
     ],
     2: [
       () => { const a = R.int(30, 70), [r1, r2] = pk([[1, 3], [2, 4]]);
