@@ -56,14 +56,14 @@ Code des compétences : référentiel matu (`3.AN.03a` = 3e, analyse, groupe 03,
 | | `probaxiomes` — vocabulaire, équiprobabilité, contraire, réunion | N+R | 3.PS.02a–c | à créer (`proba` 11e = bases) |
 | | `probarbre` — expériences successives (arbres, tableaux) | N+R | 3.PS.02d | à créer |
 | 6. Géométrie vectorielle | `vecteurs` (2e) — composantes, norme, produit scalaire dans le plan | N+R | 3.GV.01a–d (plan) | oui (CH 13) ; à étendre à l'espace |
-| | `vect3d` — vecteurs de l'espace, milieu, norme, Chasles | N+R | 3.GV.01a–d | à créer |
-| | `colin` — colinéarité, coplanarité | **R** | 3.GV.02a, 02b | à créer |
-| | `droiteparam` — équations paramétriques de droites (plan, espace) | N+R | 3.GV.03a, 03b | à créer |
-| | `plans` — équations paramétriques et cartésienne d'un plan, traces | N+R | 3.GV.03c, 03e | à créer |
-| | `posrel` — positions relatives, intersections | N+R | 3.GV.03d | à créer |
-| | `pscal` — produit scalaire dans l'espace : angle, orthogonalité, projection | N+R | 3.GV.04a–c | à créer |
-| | `distances` — distance point-droite, point-plan ; aire d'un triangle | N+R | 3.GV.04d, 04e | à créer |
-| | `normal` — vecteur normal, médiatrice, plan médiateur, sphère, plan tangent | N+R | 3.GV.05a–d | à créer (`cercle`, `cercletan` 2e = plan) |
+| | **`vect3d`** — vecteurs de l'espace, milieu, norme, Chasles | N+R | 3.GV.01a–d | **créée le 24.11** |
+| | **`colin`** — colinéarité, coplanarité | **R** | 3.GV.02a, 02b | **créée** |
+| | **`droite3d`** — équations paramétriques de droites de l'espace (`droiteparam` reste MP : paquet « mp ») | N+R | 3.GV.03a, 03b | **créée** |
+| | **`plans`** — équations paramétriques et cartésienne d'un plan, traces | N+R | 3.GV.03c, 03e | **créée** |
+| | **`posrel`** — positions relatives, intersections | N+R | 3.GV.03d | **créée** |
+| | **`pscal3d`** — produit scalaire dans l'espace : angle, orthogonalité, projection (id ≠ `pscal` du lycée français) | N+R | 3.GV.04a–c | **créée** |
+| | **`distances`** — distance point-droite, point-plan ; aire d'un triangle | N+R | 3.GV.04d, 04e | **créée** |
+| | **`sphere`** — vecteur normal, plan médiateur, sphère, plan tangent | N+R | 3.GV.05a–d | **créée** (`cercle`, `cercletan` 2e = plan) |
 | | `pvect` — produit vectoriel, produit mixte, distances dans l'espace | **R** | 3.GV.06a–d | à créer |
 
 ### 4e année
@@ -142,11 +142,30 @@ Fichier `src/ch4c_ana.js` (paquet de chargement « 15 », chargé après `ch3c_a
 
 Restent pour la 4e : `normale`, `stats`/`quartiles` au Collège (M4C04), algèbre linéaire (M4C03, réponses matricielles à créer), et le renforcé (MA2).
 
+### Notions de géométrie vectorielle de l'espace créées le 24.11 (agent c3geo)
+
+Fichier `src/ch3c_geo.js` (paquet de chargement « 14 », chargé après `ch3c_ana.js`). Même standard que la dérivation ; problèmes de niveau 4 à valeurs tirées. Rangement : `ORDRE.MATU` (150–157) et `ORDRE_THEME.MATU` (M3C06) complétés à la main en fin de `src/ordre.js` ; `tools/referentiels.py` lit le fichier ; prérequis dans `PREREQ` (engine.js).
+
+| id | Libellé | Compétences (matu) | Réponse attendue |
+|---|---|---|---|
+| `vect3d` | Vecteurs de l'espace | 3.GV.01a–d | triplet « x ; y ; z », nombre |
+| `colin` | Colinéarité et coplanarité (MA2) | 3.GV.02a, 02b | nombre, couple « α ; β » / « m ; n » |
+| `droite3d` | Droites de l'espace | 3.GV.03a, 03b | triplet, nombre, expression (z en fonction de t) |
+| `plans` | Équations d'un plan | 3.GV.03c, 03e | triplet (point, « b ; c ; d »), nombre, expression (y = …) |
+| `posrel` | Positions relatives, intersections | 3.GV.03d | triplet, nombre |
+| `pscal3d` | Produit scalaire dans l'espace | 3.GV.04a–c | nombre (angles au dixième), triplet |
+| `distances` | Distances et aires dans l'espace | 3.GV.04d, 04e | nombre (fractions acceptées ; aire au centième), ensemble |
+| `sphere` | Vecteur normal, plan médiateur, sphère | 3.GV.05a–d | nombre, triplet, ensemble (valeurs de t) |
+
+Choix : `droiteparam` (MP 4e, `src/ch_mp4.js`) n'est pas ouverte au Collège, car son générateur est dans le paquet « mp », non chargé pour un élève de 3e (il faudrait déplacer tout `ch_mp4.js`) : notion Collège `droite3d` à la place. Équation cartésienne : la réponse est un triplet « b ; c ; d » (coefficient de x imposé) ou la valeur de d (coefficients donnés), pour une réponse unique.
+
+Restent pour ce chapitre : `pvect` (produit vectoriel, produit mixte : MA2), figures 3D (perspective cavalière) pour les leçons et quelques questions, leçons actives, séries riches et défis de géométrie de l'espace.
+
 ## 5. Liste priorisée des notions à créer
 
 1. **Dérivation (3e, M3C03)** — fait le 23.11 : `tauxvar`, `nbderive`, `derivref`, `derivregles`, `derivprodquot`, `derivcomp`, `tangente`, `variations`, `optimderiv`.
 2. **Limites et asymptotes (3e, M3C02)** : `limites`, `limitinf`, `asymptotes`, `continuite` — prérequis du nombre dérivé et de l'étude de fonctions rationnelles ; puis `etudefct`, `derivseconde` (R), `derivth`.
-3. **Géométrie vectorielle de l'espace (3e, M3C06)** : `vect3d`, `droiteparam`, `plans`, `posrel`, `pscal`, `distances`, `normal` ; R : `colin`, `pvect`. Gros chapitre (120 exercices Sésamath) : figures 3D en SVG à prévoir (perspective cavalière, comme `solides` au CO).
+3. **Géométrie vectorielle de l'espace (3e, M3C06)** — fait le 24.11 : `vect3d`, `droite3d`, `plans`, `posrel`, `pscal3d`, `distances`, `sphere` ; R : `colin` (fait), `pvect` (à faire). Gros chapitre (120 exercices Sésamath) : figures 3D en SVG à prévoir (perspective cavalière, comme `solides` au CO).
 4. **Combinatoire et probabilités (3e, M3C05)** : `combi`, `probaxiomes`, `probarbre`.
 5. **Intégration (4e, M4C01)** — fait le 24.11 : `primitives`, `integrale`, `aireint`, `volrev` ; R : `intparties`, `intsubst`.
 6. **ln et exp (4e, M4C02)** — fait le 24.11 : `lnexp` (avec tangente et extremum, une partie de `etudelnexp`), `croissance` ; R : `eqdiff`.

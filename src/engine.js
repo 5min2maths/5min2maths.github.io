@@ -72,6 +72,8 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
   // 23.11 : dérivation (3e Collège, src/ch3c_ana.js)
   tauxvar: ["fimg"], nbderive: ["tauxvar"], derivref: ["puiss"], derivregles: ["derivref"], derivprodquot: ["derivregles"], derivcomp: ["derivregles", "compo"],
   tangente: ["nbderive", "droites"], variations: ["derivregles", "ineq2"], optimderiv: ["variations"],
+  // 24.11 (agent c3geo) : géométrie vectorielle de l'espace, 3e Collège (src/ch3c_geo.js)
+  vect3d: ["vecteurs"], colin: ["vect3d"], droite3d: ["vect3d"], plans: ["droite3d"], posrel: ["plans"], pscal3d: ["vect3d"], distances: ["pscal3d", "plans"], sphere: ["plans", "pscal3d"],
   // 24.11 : 4e Collège (src/ch4c_ana.js) : intégration, ln et exp, probabilités 2
   primitives: ["derivregles"], integrale: ["primitives"], aireint: ["integrale"], volrev: ["integrale"], lnexp: ["log", "derivcomp"], croissance: ["expo", "log"],
   condbayes: ["proba"], varalea: ["proba"], binomiale: ["varalea"],
