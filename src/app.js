@@ -1478,8 +1478,10 @@ function exactNote(spec, text) {
   if (!spec) return "";
   const t = text || "", notes = [];
   // Consigne de saisie quand l'énoncé ne la donne pas (audit 13.11).
-  if (spec.kind === "set" && !/« ; »|sépare|aucune/i.test(t)) notes.push("Plusieurs solutions : sépare-les par « ; » ; « aucune » s'il n'y en a pas.");
-  if (spec.kind === "solset" && !/intervalle|« x|aucune/i.test(t)) notes.push("Réponds avec des intervalles (par exemple ]-∞ ; 2] ∪ [5 ; +∞[), « x ≥ 3 » ou « aucune ».");
+  if (spec.kind === "set" && !/« ; »|sépare/i.test(t)) notes.push("Plusieurs solutions : sépare-les par « ; ».");
+  /* 25.11 : dire partout comment écrire « pas de solution » (sur toutes les listes de solutions, pour ne rien trahir). */
+  if ((spec.kind === "set" || spec.kind === "solset") && !/∅/.test(t) && !notes.some((n) => /∅/.test(n))) notes.push(/aucune/i.test(t) ? "« aucune » : touche ∅ du clavier." : "Pas de solution : touche ∅ (ou écris « aucune »).");
+  if (spec.kind === "solset" && !/intervalle|« x|aucune|∅/i.test(t)) notes.push("Réponds avec des intervalles (par exemple ]-∞ ; 2] ∪ [5 ; +∞[), « x ≥ 3 », ou ∅ (« aucune ») s'il n'y a pas de solution.");
   // Commentaire testeur du 20.11 (« comment on tape infini ? ») : la touche ∞ existait, mais rien ne la signalait.
   if (spec.kind === "solset" && spec.ivs.some(([lo, , hi]) => !isFinite(lo) || !isFinite(hi))) notes.push("Infini : touche ∞ du clavier de l'app (−∞ : touche − puis ∞), ou tape « inf ».");
   if (!spec.round && !spec.plain && !/exact|fraction|arrondi|au centième|au dixième/i.test(t)) {
@@ -1497,7 +1499,7 @@ const KEY_SUB = { "/": "fraction", "⌨": "clavier", "^": "puissance" };
 const KEY_NAME = { "/": "barre de fraction", "⌨": "afficher le clavier du téléphone", "^": "puissance", "⌫": "effacer", "√": "racine carrée", "*": "fois", ";": "séparer deux réponses", "∪": "union", "∞": "infini", "∅": "aucune solution" };
 const keyIn = (k) => (KEY_LABEL[k] || k) + (KEY_SUB[k] ? `<small class="k-sub">${KEY_SUB[k]}</small>` : "");
 const keyAttr = (k) => (KEY_NAME[k] ? ` title="${KEY_NAME[k]}" aria-label="${KEY_NAME[k]}"` : "");
-const keyBtn = (k, set) => `<button type="button" class="${/^[\d,]$/.test(k) ? "" : "k-op"}${k === "0" || (k === "⌨" && !set) || k === "ℝ \\ {|}" || (k === "⌨" && set) ? " k-wide" : ""}" data-k="${esc(k)}"${keyAttr(k)}>${keyIn(k)}</button>`;
+const keyBtn = (k, narrowKb) => `<button type="button" class="${/^[\d,]$/.test(k) ? "" : "k-op"}${k === "0" || (k === "⌨" && !narrowKb) || k === "ℝ \\ {|}" ? " k-wide" : ""}" data-k="${esc(k)}"${keyAttr(k)}>${keyIn(k)}</button>`;
 const isSetSpec = (spec) => !!spec && (spec.kind === "solset" || spec.kind === "ineq");
 // Clavier « résultat » (14.11) : chiffres seulement, pas de calculatrice ; √ si la réponse exacte en a besoin.
 // 19.11 (urgent, testeur) : touche π quand la réponse exacte est un multiple simple de π (volumes « en fonction de π »).
@@ -1507,8 +1509,13 @@ const numKeys = (spec) => { const ex = exactKeys(spec); return ["7", "8", "9", "
   .map((k) => `<button type="button" class="${/^[\d,]$/.test(k) ? "" : "k-op"}${k === "0" && !ex.length ? " k-wide" : ""}" data-k="${esc(k)}"${keyAttr(k)}>${keyIn(k)}</button>`).join(""); };
 // Lettres du clavier (15.11) : celles de l'expression attendue (a, b, n…) remplacent x et y ; une 3e lettre prend la place de « = ».
 const keyLetters = (spec) => { let L = []; try { if (spec && spec.kind === "expr") L = [...Expr.vars(Expr.parse(spec.expr))].sort(); } catch (e) {} if (!L.length || (L.length <= 2 && L.every((v) => v === "x" || v === "y"))) return KEYS; const k = KEYS.slice(); k[k.indexOf("x")] = L[0]; k[k.indexOf("y")] = L[1] || (L[0] === "x" ? "y" : "x"); if (L[2]) k[k.indexOf("=")] = L[2]; return k; };
-const keysFor = (spec) => (spec && spec.final ? numKeys(spec) : isSetSpec(spec) ? SET_KEYS.map((k) => keyBtn(k, true)).join("") : keyLetters(spec).map((k) => keyBtn(k)).join(""));
-const keypadHtml = (spec) => { const kind = spec && spec.final ? "k-num" : isSetSpec(spec) ? "k-set" : ""; return `<div class="keypad${kind ? " " + kind : ""}" id="kp" data-kind="${kind + (kind === "k-num" && exactKeys(spec).length ? "r" : "")}">${keysFor(spec)}</div>`; };
+/* 25.11 (commentaire de l'enseignant : « comment j'écris aucune ? ») : touche ∅ sur le clavier des listes de solutions
+   (kind "set", classe k-list) ; « ⌨ » y prend une seule case pour lui faire place. */
+const keysFor = (spec) => (spec && spec.final ? numKeys(spec) : isSetSpec(spec) ? SET_KEYS.map((k) => keyBtn(k)).join("")
+  : spec && spec.kind === "set" ? keyLetters(spec).flatMap((k) => (k === "⌨" ? ["∅", k] : [k])).map((k) => keyBtn(k, true)).join("") : keyLetters(spec).map((k) => keyBtn(k)).join(""));
+const kpKind = (spec) => (spec && spec.final ? "k-num" : isSetSpec(spec) ? "k-set" : spec && spec.kind === "set" ? "k-list" : "");
+const kpKey = (spec) => { const kind = kpKind(spec); return kind + (kind === "k-num" && exactKeys(spec).length ? "r" : ""); };
+const keypadHtml = (spec) => { const kind = kpKind(spec); return `<div class="keypad${kind ? " " + kind : ""}" id="kp" data-kind="${kpKey(spec)}">${keysFor(spec)}</div>`; };
 // Insère une touche dans le champ (avec « | » : place du curseur), ou efface.
 function typeKey(inp, k) {
   const s = inp.selectionStart ?? inp.value.length, e = inp.selectionEnd ?? inp.value.length;
@@ -1525,7 +1532,9 @@ function previewHtml(v, spec) {
     const nt = (x) => SolSet.show([[x, true, x, true]]).replace(/^\\\{|\\\}$/g, "");
     return "\\(S = " + (holes ? "\\mathbb{R}" + (holes.length ? " \\setminus \\{" + holes.map(nt).join(" ; ") + "\\}" : "") : SolSet.show(ivs)) + "\\)";
   }
-  const t = Expr.parse(v), val = Expr.vars(t).size || t.t === "list" ? "" : Expr.evaluate(t);
+  /* 25.11 : liste de solutions vide (∅, « aucune », { }) */
+  if (spec && spec.kind === "set" && NONE_RE.test(v)) return "\\(S = \\varnothing\\)";
+  const t = Expr.parse(spec && spec.kind === "set" ? setInput(v) : v), val = Expr.vars(t).size || t.t === "list" ? "" : Expr.evaluate(t);
   return "\\(" + Expr.tex(t) + "\\)" + (val !== "" && isFinite(val) && !(spec && spec.final) ? `<span class="val">≈ ${String(+val.toPrecision(8)).replace(".", ",")}</span>` : "");
 }
 function previewOf(inp, prev, spec) {
@@ -1612,7 +1621,7 @@ function renderProblem(q, opt) {
   <div class="qtext">${boldData(q.q)}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
   ${scratchHtml()}
   ${lessonDetails(q.id)}
-  ${q.parts.map((p, i) => `<div class="answer part" data-i="${i}"><label for="p${i}"><b>${p.label}</b>${exactNote(p.spec, p.label) ? ` <span class="small muted">(valeur exacte)</span>` : ""} <span class="mk" id="mk${i}"></span></label>
+  ${q.parts.map((p, i) => `<div class="answer part" data-i="${i}"><label for="p${i}"><b>${p.label}</b>${exactNote(p.spec, p.label) ? ` <span class="small muted">${p.spec.kind === "set" ? "(« ; » entre les solutions, ∅ s'il n'y en a pas)" : "(valeur exacte)"}</span>` : ""} <span class="mk" id="mk${i}"></span></label>
     <input id="p${i}" class="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…"><div class="preview" id="pv${i}"></div></div>`).join("")}
   ${keypadHtml(q.parts[0].spec)}
   <div class="actions"><button class="btn-primary" id="check">Valider</button><button class="btn-sec" id="idk">Voir le corrigé</button></div>
@@ -1627,10 +1636,10 @@ function renderProblem(q, opt) {
     // Clavier adapté à la partie active (intervalles ou calcul).
     inp.onfocus = () => {
       active = inp;
-      const kp = document.getElementById("kp"), kind = p.spec && p.spec.final ? "k-num" : isSetSpec(p.spec) ? "k-set" : "";
-      if ((kp.dataset.kind || "") !== kind + (kind === "k-num" && !isTerm(p.spec.value) ? "r" : "")) {
-        kp.classList.remove("k-set", "k-num"); if (kind) kp.classList.add(kind);
-        kp.dataset.kind = kind + (kind === "k-num" && !isTerm(p.spec.value) ? "r" : ""); kp.innerHTML = keysFor(p.spec); bindKp(); }
+      const kp = document.getElementById("kp"), kind = kpKind(p.spec);
+      if ((kp.dataset.kind || "") !== kpKey(p.spec)) {
+        kp.classList.remove("k-set", "k-num", "k-list"); if (kind) kp.classList.add(kind);
+        kp.dataset.kind = kpKey(p.spec); kp.innerHTML = keysFor(p.spec); bindKp(); }
       placeKp(inp);
     };
     let tm; inp.oninput = () => { clearTimeout(tm); tm = setTimeout(() => previewOf(inp, pv, p.spec), 180); };

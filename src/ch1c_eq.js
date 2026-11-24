@@ -30,8 +30,8 @@
   const GSet = (ask, values, sol, all) => ({ ask, spec: Object.assign({ kind: "set", values: all ? [] : uq(values) }, all ? { all: true } : {}), sol });
   const GX = (ask, expr, sol, pos) => ({ ask, spec: Object.assign({ kind: "expr", expr }, pos ? { pos: true } : {}), sol });
   const TS = (s, m) => ({ s, m }), TN = (m) => ({ none: true, m }), TA = (m) => ({ all: true, m }), TV = (v, m) => ({ v, m }), TX = (e, m) => ({ e, m });
-  const ASK = " Donne toutes les solutions, séparées par « ; » (« aucune » s'il n'y en a pas).";
-  const ASKS = " Écris les solutions séparées par « ; », « aucune » s'il n'y en a pas, « tous » si tout nombre est solution.";
+  const ASK = " Donne toutes les solutions, séparées par « ; » (∅ ou « aucune » s'il n'y en a pas).";
+  const ASKS = " Écris les solutions séparées par « ; », ∅ ou « aucune » s'il n'y en a pas, « tous » si tout nombre est solution.";
   const WHO = ["Léa", "Noé", "Inès", "Yanis", "Mia", "Sam", "Lina", "Léo"];
   const sq = (n) => { for (let k = 2; k * k <= n; k++) if (n % (k * k) === 0) return [k * sq(n / (k * k))[0], sq(n / (k * k))[1]]; return [1, n]; }; // n = a²·b
   const rt = (n) => { const [a, b] = sq(n); return b === 1 ? String(a) : (a > 1 ? a : "") + "\\sqrt{" + b + "}"; };

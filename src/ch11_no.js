@@ -233,19 +233,40 @@
             traps: [TR((N0 * a) / b, "Tu as multiplié par " + M(fT(a, b)) + " : on cherche combien de fois la portion entre dans le total, c'est une division.")] }); },
     ],
     3: [
-      () => { const [b, e] = pk([[4, 3], [6, 4], [2, 5], [3, 5], [6, 9], [4, 6]]), a = cop(1, b), c = cop(1, e), g = R.int(2, 7), h = irr(g, 9), inner = qs([a, b], [c, e]);
-        if (inner[0] === 0 || h === 1) return null;
-        const res = qd(inner, [g, h]);
+      () => { /* 24.11 (commentaire fracmul-3-3an) : la division doit se simplifier et le résultat rester lisible (ex. 65/126 refusé). */
+        let b, e, a, c, g, h, inner, res, ok = false;
+        for (let t = 0; t < 300 && !ok; t++) {
+          [b, e] = pk([[4, 3], [6, 4], [2, 5], [3, 5], [6, 9], [4, 6]]); a = cop(1, b); c = cop(1, e); g = R.int(2, 7); h = irr(g, 9); inner = qs([a, b], [c, e]);
+          if (inner[0] === 0 || h === 1) continue;
+          res = qd(inner, [g, h]);
+          ok = (gcd2(inner[0], g) > 1 || gcd2(h, inner[1]) > 1) && res[1] <= 12 && Math.abs(res[0]) <= 20 && Math.abs(res[0]) !== res[1];
+        }
+        if (!ok) return null;
         return Qv(FI + M("\\left(" + fT(a, b) + " - " + fT(c, e) + "\\right) : " + fT(g, h)), qv(res), M(qT(inner) + " \\cdot " + fT(h, g) + " = " + qT(res)) + ".",
           { ctx: "parendiv", guide: [GS("La parenthèse : " + M(fT(a, b) + " - " + fT(c, e)) + " = ?", qv(inner), M(qT(inner)) + "."), GS("L'inverse de " + M(fT(g, h)) + " ?", h / g, M(fT(h, g)) + "."), GS("Le produit : résultat ?", qv(res), M(qT(res)) + ".")],
             traps: [TR(qv(qm(inner, [g, h])), "Diviser par " + M(fT(g, h)) + ", c'est multiplier par son inverse " + M(fT(h, g)) + ".")] }); },
-      () => { const b = R.int(2, 6), a = cop(1, b), c = R.int(1, 5), e = R.int(2, 7), g = R.int(2, 9), h = R.int(2, 9); if (gcd2(c, e) > 1 || gcd2(g, h) > 1 || c * g === e * h) return null;
-        const prod = qm([c, e], [g, h]), res = qa([a, b], prod);
+      () => { /* 24.11 (commentaire de l'enseignant sur fracmul-3-3an, « valeurs pas très bien choisies » : 4/5 + 5/4 · 5/6 = 221/120) :
+           le produit se simplifie en croix, son dénominateur reste petit et s'accorde avec celui de a/b (dénominateur commun ≤ 12),
+           le résultat est une fraction lisible. */
+        let b, a, c, e, g, h, prod, res, ok = false;
+        for (let t = 0; t < 400 && !ok; t++) {
+          b = R.int(2, 6); a = cop(1, b); e = R.int(2, 9); c = R.int(1, 8); h = R.int(2, 9); g = R.int(2, 9);
+          if (gcd2(c, e) > 1 || gcd2(g, h) > 1 || c === e || g === h || c * g === e * h) continue;
+          if (gcd2(c, h) === 1 && gcd2(g, e) === 1) continue;
+          prod = qm([c, e], [g, h]); res = qa([a, b], prod);
+          ok = prod[1] > 1 && prod[1] <= 8 && lcm(b, prod[1]) <= 12 && res[1] > 1 && res[0] <= 30;
+        }
+        if (!ok) return null;
         return Qv(FI + M(fT(a, b) + " + " + fT(c, e) + " \\cdot " + fT(g, h)), qv(res), "La multiplication d'abord : " + M(fT(a, b) + " + " + qT(prod) + " = " + qT(res)) + ".",
           { ctx: "priofrac", guide: [GS("D'abord le produit : " + M(fT(c, e) + " \\cdot " + fT(g, h)) + " = ?", qv(prod), M(qT(prod)) + "."), GS("Puis " + M(fT(a, b) + " + " + qT(prod)) + " = ?", qv(res), M(qT(res)) + ".")],
             traps: [TR(qv(qm(qa([a, b], [c, e]), [g, h])), "La multiplication passe avant l'addition, avec des fractions aussi.")] }); },
-      () => { const n = R.int(1, 3), b = R.int(2, 6), a = cop(1, b), e = R.int(2, 7), c = cop(1, e);
-        const top = rq(n * b + a, b), res = qd(top, [c, e]);
+      () => { /* 24.11 : la division se simplifie et le résultat reste lisible (ex. 49/30 refusé). */
+        let n, b, a, e, c, top, res, ok = false;
+        for (let t = 0; t < 300 && !ok; t++) {
+          n = R.int(1, 3); b = R.int(2, 6); a = cop(1, b); e = R.int(3, 7); c = cop(2, e); /* c ≥ 2 : pas de « : 1/2 » ni d'inverse « 6/1 » */ top = rq(n * b + a, b); res = qd(top, [c, e]);
+          ok = (gcd2(top[0], c) > 1 || gcd2(e, b) > 1) && res[1] <= 10 && res[0] <= 30;
+        }
+        if (!ok) return null;
         return Qv(FI + M("\\frac{" + n + " + " + fT(a, b) + "}{" + fT(c, e) + "}"), qv(res), M("\\frac{" + qT(top) + "}{" + fT(c, e) + "} = " + qT(top) + " \\cdot " + fT(e, c) + " = " + qT(res)) + ".",
           { ctx: "etagee", guide: [GS("Le numérateur : " + M(n + " + " + fT(a, b)) + " = ?", qv(top), M(qT(top)) + "."), GS("Puis on divise par " + M(fT(c, e)) + " (on multiplie par " + M(fT(e, c)) + ") : résultat ?", qv(res), M(qT(res)) + ".")],
             traps: [TR(qv(qm(top, [c, e])), "La grande barre est une division : on multiplie par l'inverse " + M(fT(e, c)) + "."), TR(qv(qd([n + a, b], [c, e])), M(n) + " vaut " + M(fT(n * b, b)) + " : écris-le sur " + M(b) + " avant d'additionner.")] }); },
