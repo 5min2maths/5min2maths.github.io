@@ -1118,5 +1118,180 @@
   "etalon": "tools/niveau_2c.md E10.1",
   "plan": "Vecteurs du plan (2e, épreuve 2MA1)",
   "verdict": "remonté"
+ },
+ "eqabs": {
+  "classe": "MP 3e",
+  "plan": "S5.EA.01",
+  "etalon": "tools/niveau_mp34.md § 2, E-A-1, E-A-2",
+  "audit": "25.11.2026",
+  "verdict": "au niveau ; forme d'examen ajoutée (N3, ax² + b|x| + c = 0)"
+ },
+ "eqbic": {
+  "classe": "MP 3e",
+  "plan": "S5.EA.03",
+  "etalon": "tools/niveau_mp34.md § 2, E-A-3",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "eqirrmp": {
+  "classe": "MP 3e",
+  "plan": "S5.EA.05",
+  "etalon": "tools/niveau_mp34.md § 2, E-A-4",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "eqratmp": {
+  "classe": "MP 3e",
+  "plan": "S5.EA.06–07",
+  "etalon": "tools/niveau_mp34.md § 2, E-A-5",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "puisrat": {
+  "classe": "MP 3e",
+  "plan": "S5.PL.01–03",
+  "etalon": "tools/niveau_mp34.md § 2, E-B-1",
+  "audit": "25.11.2026",
+  "verdict": "remonté (N1 : 5⁻³, exposant entier négatif = MP 1re → exposant décimal)"
+ },
+ "logdef": {
+  "classe": "MP 3e",
+  "plan": "S5.PL.04–05",
+  "etalon": "tools/niveau_mp34.md § 2, E-B-2",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "logprop": {
+  "classe": "MP 3e",
+  "plan": "S5.PL.06",
+  "etalon": "tools/niveau_mp34.md § 2, E-B-3",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "eqexp": {
+  "classe": "MP 3e",
+  "plan": "S6.EL.01",
+  "etalon": "tools/niveau_mp34.md § 2, E-C-1",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "eqlog": {
+  "classe": "MP 3e",
+  "plan": "S6.EL.02",
+  "etalon": "tools/niveau_mp34.md § 2, E-C-2",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "croissexp": {
+  "classe": "MP 3e",
+  "plan": "S6.EL.03",
+  "etalon": "tools/niveau_mp34.md § 2, E-C-3, E-C-4",
+  "audit": "25.11.2026",
+  "verdict": "remonté (N1 : doublements entiers 2^k, niveau CO → modèle N0·2^(t/T))"
+ },
+ "volmp": {
+  "classe": "MP 3e",
+  "plan": "S6.VS.01–03",
+  "etalon": "tools/niveau_mp34.md § 2, E-D-1",
+  "audit": "25.11.2026",
+  "verdict": "remonté (N1 : formule seule = 11e → capacité en litres) ; à valider"
+ },
+ "similmp": {
+  "classe": "MP 3e",
+  "plan": "S6.VS.04–06",
+  "etalon": "tools/niveau_mp34.md § 2, E-D-2",
+  "audit": "25.11.2026",
+  "verdict": "remonté (N1 : côté de triangles semblables = MP 1re → longueur depuis le rapport des aires)"
+ },
+ "coordmp": {
+  "classe": "MP 4e",
+  "plan": "S7.CO.01–03",
+  "etalon": "tools/niveau_mp34.md § 2, E-E-1",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "vectmp": {
+  "classe": "MP 4e",
+  "plan": "S7.VE.01–06",
+  "etalon": "tools/niveau_mp34.md § 2, E-F-1, E-F-2",
+  "audit": "25.11.2026",
+  "verdict": "au niveau ; forme d'examen ajoutée (N3, combinaison linéaire)"
+ },
+ "scalmp": {
+  "classe": "MP 4e",
+  "plan": "S7.VE.07–09",
+  "etalon": "tools/niveau_mp34.md § 2, E-F-3",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "projmp": {
+  "classe": "MP 4e",
+  "plan": "S7.VE.07",
+  "etalon": "tools/niveau_mp34.md § 2, E-F-4",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "pvectmp": {
+  "classe": "MP 4e",
+  "plan": "S7.VE.10 (facultatif)",
+  "etalon": "tools/niveau_mp34.md § 2, E-F-4",
+  "audit": "25.11.2026",
+  "verdict": "hors programme PEC (facultatif) ; à valider"
+ },
+ "droiteparam": {
+  "classe": "MP 4e",
+  "plan": "S7.DP.01, 02, 04, 05",
+  "etalon": "tools/niveau_mp34.md § 2, E-G-1",
+  "audit": "25.11.2026",
+  "verdict": "au niveau ; forme d'examen ajoutée (N1, droite par deux points)"
+ },
+ "posdroites": {
+  "classe": "MP 4e",
+  "plan": "S7.DP.03",
+  "etalon": "tools/niveau_mp34.md § 2, E-G-2",
+  "audit": "25.11.2026",
+  "verdict": "remonté (N1 : deux droites cartésiennes parallèles = MP 2e → droite paramétrique parallèle à une cartésienne)"
+ },
+ "ineqmp": {
+  "classe": "MP 4e",
+  "plan": "S8.IN.01–03",
+  "etalon": "tools/niveau_mp34.md § 2, E-H-1",
+  "audit": "25.11.2026",
+  "verdict": "au niveau (N1 linéaire : limite, à valider)"
+ },
+ "fctmp": {
+  "classe": "MP 4e",
+  "plan": "S8.FP.01–06",
+  "etalon": "tools/niveau_mp34.md § 2, E-I-1, E-I-2",
+  "audit": "25.11.2026",
+  "verdict": "remonté (N1 : parité triviale et réciproque affine = MP 2e ; N3 : intersection parabole-droite = MP 2e)"
+ },
+ "polymp": {
+  "classe": "MP 4e",
+  "plan": "S8.FP.07–09",
+  "etalon": "tools/niveau_mp34.md § 2, E-I-3, E-I-4",
+  "audit": "25.11.2026",
+  "verdict": "remonté (N1 : calcul de P(2), niveau CO → mise en évidence et zéros)"
+ },
+ "sinusmp": {
+  "classe": "MP 4e",
+  "plan": "S8.FS.01–02, 05",
+  "etalon": "tools/niveau_mp34.md § 2, E-J-1",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "explogfn": {
+  "classe": "MP 4e",
+  "plan": "S8.FS.03–05",
+  "etalon": "tools/niveau_mp34.md § 2, E-J-2, E-J-3",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "fratmp": {
+  "classe": "MP 4e",
+  "plan": "S8.FS.06 (facultatif)",
+  "etalon": "tools/niveau_mp34.md § 2, E-J-4",
+  "audit": "25.11.2026",
+  "verdict": "au niveau (facultatif dans le PEE) ; à valider"
  }
 }

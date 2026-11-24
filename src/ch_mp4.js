@@ -368,18 +368,11 @@
   const pE = (cs) => polyT(cs).replace(/\^\{(\d+)\}/g, "^$1").replace(/(\d)x/g, "$1*x").replace(/\s+/g, "");
   const PO = {
     1: [
-      () => { const cs = [pk([1, 2, -1]), R.int(-4, 4), R.int(-6, 6), nz(-9, 9)], x0 = nz(-3, 3), v = pv(cs, x0); if ([0, 1, -1].includes(v)) return null;
-        return QN("Soit " + M("P(x) = " + polyT(cs)) + ". Calcule " + M("P(" + x0 + ")") + ".", v, M("P(" + x0 + ") = " + v) + ".",
-          { ctx: "valeur", guide: [G("Terme en " + M("x^3") + " pour " + M("x = " + x0) + " (avec son coefficient) ?", cs[0] * x0 ** 3, M(cs[0] * x0 ** 3) + "."), G(M("P(" + x0 + ")") + " ?", v, M(v) + ".")],
-            traps: [TR(pv(cs, -x0), "Remplace x par " + x0 + " (attention au signe)."), TR(cs[0] * 3 * x0 + cs[1] * 2 * x0 + cs[2] * x0 + cs[3], "x³ = x · x · x, pas 3x.")] }); },
-      () => { const a = nz(-5, 5), b = nz(-5, 5), k = pk([2, 3]), c = nz(-5, 5), z3 = r6(c / k); if (a === b || z3 === a || z3 === b || Number.isInteger(z3)) return null; const sol = [a, b, z3];
-        return QS("Donne les zéros de " + M("P(x) = (" + lin(1, -a) + ")(" + lin(1, -b) + ")(" + lin(k, -c) + ")") + ". (fractions acceptées)", sol, "Un produit est nul si un facteur est nul : " + M(setT(sol)) + ".",
-          { ctx: "produit-nul", guide: [G("Zéro du troisième facteur " + M(lin(k, -c)) + " ?", z3, M(fT(z3)) + "."), GSet("Tous les zéros ?", sol, M(setT(sol)) + ".")],
-            traps: [TS([-a, -b, -z3], "x − a = 0 donne x = a : attention aux signes."), TS([a, b, c], k + "x − " + c + " = 0 donne x = " + c + " ÷ " + k + ".")] }); },
-      () => { const r = nz(-3, 3), b = R.int(-4, 4), d = nz(-9, 9), s0 = r ** 3 + b * r * r + d, c = r6(-s0 / r); if (!Number.isInteger(c) || !c || Math.abs(r) === 1 && Math.abs(c) > 12) return null;
-        return QN("Le nombre " + M(r) + " est un zéro de " + M("P(x) = x^3" + tm(b, "x^{2}") + " + cx" + sg(d)) + ". Que vaut " + M("c") + " ?", c, M("P(" + r + ") = 0") + " : " + M(pT(r) + "^3" + (b ? sg(b) + " \\cdot " + pT(r) + "^2" : "") + " + " + pT(r) + " c" + sg(d) + " = 0") + ", " + M("c = " + c) + ".",
-          { ctx: "coefficient", guide: [G("Valeur de " + M("P(" + r + ")") + " sans le terme en c ?", s0, M(s0) + "."), G(M("c") + " = ?", c, M(c) + ".")],
-            traps: [TR(-c, "Attention au signe en isolant c."), TR(-s0, "Divise par " + r + ".")] }); },
+      () => { /* audit niveau 25.11 : « calcule P(2) » (substitution : niveau CO) -> mise en évidence de x puis trinôme (S8.FP.07) */
+        const r1 = nz(-6, 6), r2 = nz(-6, 6), a = pk([1, 1, 2, -1]); if (r1 === r2 || r1 === -r2) return null; const cs = [a, -a * (r1 + r2), a * r1 * r2, 0], sol = [0, r1, r2];
+        return QS("Trouve les zéros de " + M("P(x) = " + polyT(cs)) + ".", sol, "Mise en évidence : " + M("P(x) = x\\left(" + polyT([a, -a * (r1 + r2), a * r1 * r2]) + "\\right)") + ", puis le trinôme : " + M("x = " + r1) + " ou " + M("x = " + r2) + ". " + M(setT(sol)) + ".",
+          { ctx: "mise-en-evidence", guide: [GSet("On met " + M("x") + " en évidence ; zéros du trinôme " + M(polyT([a, -a * (r1 + r2), a * r1 * r2])) + " ?", [r1, r2], M(setT([r1, r2])) + "."), GSet("Tous les zéros de " + M("P") + " ?", sol, M(setT(sol)) + " (n'oublie pas " + M("x = 0") + ").")],
+            traps: [TS([r1, r2], "La mise en évidence donne aussi le zéro x = 0."), TS([0, -r1, -r2], "Attention aux signes : (x − a) s'annule en x = a.")] }); },
     ],
     2: [
       () => { const a = nz(-4, 4), q = [1, R.int(-4, 4), R.int(-6, 6)], rest = nz(-6, 6), Pcs = [q[0], q[1] - a * q[0], q[2] - a * q[1], -a * q[2] + rest];
@@ -548,12 +541,13 @@
           "Parallèles : vecteurs directeurs colinéaires. " + M(v2(k * u[0], "m") + " = " + fT(k) + " \\cdot " + v2(u[0], u[1])) + " (car " + M(k * u[0] + " = " + fT(k) + " \\cdot " + pT(u[0])) + "), donc " + M("m = " + fT(k) + " \\cdot " + pT(u[1]) + " = " + m) + ".",
           { ctx: "parallele-m", guide: [G("Rapport " + M("k") + " entre les premières composantes des vecteurs directeurs, " + M(k * u[0] + " \\div " + pT(u[0])) + " ?", k, M(fT(k)) + "."), G(M("m = k \\cdot " + pT(u[1])) + " = ?", m, M(m) + ".")],
             traps: [TR(u[1], "Le vecteur de g est " + k + " fois celui de d : multiplie aussi la seconde composante."), TR(r6(u[1] / k), "On multiplie par k, on ne divise pas."), TR(-m, "Attention au signe de k.")] })); },
-      () => { const a = nz(-5, 5), b = nz(-5, 5), k = pk([2, 3, -2, -3]), p = k * a, m = k * b, c = nz(-9, 9), r = nz(-9, 9); if (Math.abs(m) < 2 || Math.abs(a) === Math.abs(b) || r === k * c) return null;
-        const e1 = tm(a, "x", true) + tm(b, "y") + " = " + c, e2 = tm(p, "x", true) + " + my = " + r;
-        return chk(QN("Pour quelle valeur de " + M("m") + " les droites " + M(e1) + " et " + M(e2) + " sont-elles parallèles ?", m,
-          "Parallèles : coefficients de x et de y proportionnels. " + M(p + " = " + fT(k) + " \\cdot " + pT(a)) + ", donc " + M("m = " + fT(k) + " \\cdot " + pT(b) + " = " + m) + ".",
-          { ctx: "parallele-cartesienne", guide: [G("Rapport des coefficients de " + M("x") + ", " + M(p + " \\div " + pT(a)) + " ?", k, M(fT(k)) + "."), G(M("m") + " = ?", m, M(fT(k) + " \\cdot " + pT(b) + " = " + m) + ".")],
-            traps: [TR(b, "Les coefficients doivent être proportionnels : multiplie b par le même rapport."), TR(r6(b / k), "On multiplie par le rapport, on ne divise pas."), TR(r6((r * b) / c), "Les termes constants ne comptent pas : seules les directions décident.")] })); },
+      () => { /* audit niveau 25.11 : « deux droites cartésiennes parallèles » (pentes égales : MP 2e, S3.FA) -> droite paramétrique parallèle à une droite cartésienne (vecteur directeur (b ; −a), S7.DP.03) */
+        const a = nz(-5, 5), b = nz(-5, 5), k = pk([2, 3, -2, -1, 0.5]), A = [R.int(-5, 5), R.int(-5, 5)], c = nz(-9, 9), u1 = k * b, m = k * -a; if (Math.abs(a) === Math.abs(b) || !Number.isInteger(u1) || !Number.isInteger(m) || Math.abs(m) < 2) return null;
+        const e = tm(a, "x", true) + tm(b, "y") + " = " + c;
+        return chk(QN("Pour quelle valeur de " + M("m") + " la droite " + M("d") + " : " + eqS(A, [u1, "m"], "t") + " est-elle parallèle à la droite " + M("g : " + e) + " ?", m,
+          "Un vecteur directeur de " + M("g : ax + by = c") + " est " + M(v2("b", "-a") + " = " + v2(b, -a)) + ". " + M(v2(u1, "m")) + " doit lui être colinéaire : " + M(fT(u1) + " = " + fT(k) + " \\cdot " + pT(b)) + ", donc " + M("m = " + fT(k) + " \\cdot " + pT(-a) + " = " + m) + ".",
+          { ctx: "parallele-param-cartesienne", guide: [GP("Vecteur directeur de " + M("g") + " (" + M(v2("b", "-a")) + ", « x ; y ») ?", [b, -a], M(v2(b, -a)) + "."), G("Rapport " + M(fT(u1) + " \\div " + pT(b)) + " ?", k, M(fT(k)) + "."), G(M("m") + " = ?", m, M(fT(k) + " \\cdot " + pT(-a) + " = " + m) + ".")],
+            traps: [TR(k * a, "Le vecteur directeur de ax + by = c est (b ; −a) : attention au signe."), TR(r6(u1 * b / a), "(a ; b) est un vecteur normal de g (perpendiculaire) ; le vecteur directeur est (b ; −a)."), TR(-a, "Multiplie −a par le même rapport que b.")] })); },
       () => { const A = [R.int(-5, 5), R.int(-5, 5)], u = [nz(-3, 3), nz(-3, 3)], t0 = pk([2, -2, 3, -3]), P = [A[0] + t0 * u[0], A[1] + t0 * u[1]], m = pk([2, 3, -2, -3, 4]), p = P[1] - m * P[0]; if (u[1] === m * u[0] || !p) return null;
         return QP("La droite " + M("d") + " : " + eqP(A, u) + " coupe la droite " + M("g") + " : " + M("y = " + lin(m, p)) + ". Donne leur point d'intersection." + PAIR, P,
           "On remplace x et y de d dans l'équation de g : " + M(cT1(A[1], u[1], "t") + " = " + m + "(" + cT1(A[0], u[0], "t") + ")" + sg(p)) + ", d'où " + M("t = " + t0) + " et le point " + pt(...P) + ".",
