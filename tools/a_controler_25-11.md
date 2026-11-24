@@ -94,4 +94,19 @@ Registre : tools/niveau.json ; colonne « Audit de niveau » du suivi.
   gardent leur N1 (tes tests s'ouvrent sur des factorisations directes) — OK ? ; vabs N1, recipaff N1, statfreq N1
   très courts ; domaine N3 (inéquation du 2e degré, hors PEE 2026) ; défis manquants (arith, rac, premiers,
   fracsimp) ; droitesinter N1 en 2e Collège donne encore la réponse dans l'énoncé (corrigé pour la MP seulement).
-### 9e–10e — à faire
+### 9e–10e — fait (tools/niveau_910.md)
+
+- Références : plan de cheminement 9e/10e 2026-27, prescriptions cantonales CO 2023 (annexe PER), MER 2024. Les MER 9e
+  enseignent la multiplication des relatifs, mais le plan genevois la place en 10e : l'app suit Genève.
+- Formes hors programme écartées par classe (HORS_CO) et ~20 formes du programme ajoutées ; 3 défis (bissectrice dans
+  un triangle isocèle, rectangles accolés, itinéraire sur carte). 9e : niveau 1 de 6 notions de niveau primaire remonté
+  (UP9 : decread, deccomp, perim, aire1, solides, quadri). Défaut corrigé : défi des bougies (hauteur commune 0 cm).
+- À trancher : UP9 d'accord ? ; référence R3 en 9e et LS en 10e (l'app ne distingue pas les regroupements) ; vitesse
+  moyenne sur deux trajets écartée en 10e ; affine (pente par deux points, parallèle) en 10e ou en 11e ? ; racenc,
+  puiss, monomes (formes LS) en 10e ? ; diagr en 9e (secteur circulaire, moyenne pondérée) ; défis propres de 9e à écrire.
+
+## Bilan de la nuit
+
+Toutes les classes ont été auditées (9e → 11e, 1re → 4e Collège, MP 1re → 4e) ; registre tools/niveau.json
+(253 notions) et colonne « Audit de niveau » du suivi. Décision transversale la plus importante : **niveau normal /
+renforcé** (MA2 montré à tous en 3e–4e) et **radians au Collège** (trigonométrie de 2e en degrés, générateurs MP).

@@ -756,7 +756,7 @@
   // ===================== Défis : problèmes en plusieurs étapes (réponses numériques) =====================
   const Pb = (q, parts, hints, sol, fig) => ({ fig, q, parts: parts.map(([label, value]) => ({ label, spec: { kind: "value", value } })), hints, sol });
   const PROBS = {
-    eq1: [() => { const h1 = pk([24, 30, 36]), a = pk([3, 4, 6]), b = pk([1, 1.5, 2]), t = pk([4, 5, 6]), h2 = h1 - (a - b) * t; if (h2 <= 0 || h2 >= h1) return PROBS.eq1[0]();
+    eq1: [() => { const h1 = pk([24, 30, 36]), a = pk([3, 4, 6]), b = pk([1, 1.5, 2]), t = pk([4, 5, 6]), h2 = h1 - (a - b) * t; if (h2 <= 0 || h2 >= h1 || h1 - a * t < 3) return PROBS.eq1[0](); /* 25.11 : hauteur commune non nulle (sinon les bougies sont consumées) */
       return Pb("Deux bougies sont allumées en même temps. La bougie A mesure " + h1 + " cm et raccourcit de " + a + " cm par heure ; la bougie B mesure " + M(dec(h2)) + " cm et raccourcit de " + M(dec(b)) + " cm par heure.", [["a) Hauteur de A après 2 h (cm)", h1 - 2 * a], ["b) Au bout de combien d'heures ont-elles la même hauteur ?", t], ["c) Quelle est alors cette hauteur (cm) ?", h1 - a * t]],
         ["Hauteur de A : " + h1 + " − " + a + "t ; de B : " + decTxt(h2) + " − " + (b === 1 ? "" : decTxt(b)) + "t.", "Résous " + h1 + " − " + a + "t = " + decTxt(h2) + " − " + (b === 1 ? "" : decTxt(b)) + "t."], "a) " + M(h1 + " - " + 2 * a + " = " + (h1 - 2 * a)) + " cm. b) " + M(h1 + " - " + a + "t = " + dec(h2) + " - " + (b === 1 ? "" : dec(b)) + "t") + " donne " + M(dec(a - b) + "t = " + dec(h1 - h2)) + ", " + M("t = " + t) + " h. c) " + M(h1 + " - " + a * t + " = " + (h1 - a * t)) + " cm."); }],
     eqfrac: [() => { const [a, b] = pk([[3, 6], [4, 12], [2, 3], [6, 3], [10, 15], [4, 6]]), t = (a * b) / (a + b);
