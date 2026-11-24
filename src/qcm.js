@@ -86,7 +86,7 @@ function qcmMake(id, d) {
     const g = q.spec.value, good = qcmFmt(g, q.spec, q.q), seen = new Set([good]), wrong = [];
     const tol = Math.max(q.spec.round ? q.spec.round : 0, 1e-9 * Math.max(1, Math.abs(g)));
     const negOk = qcmNegOk(q, g);
-    const take = (v, m) => { if (wrong.length >= 3 || !qcmPlausible(v, g, q.spec) || Math.abs(v - g) <= tol || (v < 0 && !negOk)) return; const f = qcmLike(v, good, q); if (seen.has(f) || /NaN|undefined|Infinity/.test(f) || (/approx/.test(f) && !/approx/.test(good))) return; seen.add(f); wrong.push({ f, m }); };
+    const take = (v, m) => { if (wrong.length >= 3 || !qcmPlausible(v, g, q.spec) || !qcmPlausible(+(+v).toFixed(2), g, q.spec) /* 24.11 : à la limite, l arrondi affiché doit rester plausible */ || Math.abs(v - g) <= tol || (v < 0 && !negOk)) return; const f = qcmLike(v, good, q); if (seen.has(f) || /NaN|undefined|Infinity/.test(f) || (/approx/.test(f) && !/approx/.test(good))) return; seen.add(f); wrong.push({ f, m }); };
     for (const tr of q.traps || []) take(tr.v, tr.m);
     if (!wrong.length) continue; // au moins une vraie erreur typique, avec son diagnostic
     for (const v of qcmNear(g, good, q)) take(v, "");
