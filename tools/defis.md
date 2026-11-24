@@ -53,22 +53,83 @@ les valeurs sont tirées au hasard, 2 à 4 parts qui s'enchaînent, 2 indices (o
 | scalmp (MP 4e) | u = (2 ; 1), v = (1 ; 3) fixe | triangle ABC : produit scalaire, angle en A, aire |
 | polymp (MP 4e) | `x³ − 7x + 6` fixe | zéro évident + Horner + trinôme, puis signe sur [−10 ; 10] |
 
+## 2e lot (24.11) : 43 notions de plus
+
+Même standard (valeurs tirées, 2 à 4 parts enchaînées, 2 indices, corrigé complet). Nombres : `D`, `nb` (TeX) et
+`T` (texte) de `src/defis.js` mettent désormais l'apostrophe des milliers dès 1'000 (avant : « 7500 CHF » dans
+`croissexp`, `pctvar`… car le `nb()` global ne groupe qu'à partir de 10'000).
+
+| Notion | Avant | Après |
+|---|---|---|
+| f2expr (1re, MP) | sommet (1 ; −4) fixe | arche de pont : choisir le repère, a (fraction), hauteur au-dessus d'un camion, distance pour une hauteur ; sommet + point → a, zéros, f(0) |
+| f2trois (1re, MP) | points d'abscisses 0, ±1 fixes | trois points SANS abscisse 0 (système 3 × 3) puis ordonnée du sommet ; pierre lancée d'une falaise : 3 mesures → falaise, instant d'arrivée, hauteur max |
+| fimg (1re, MP) | `x² − 2x − 3` fixe | préimages d'une valeur, f(f(x₀)), nombre à une seule préimage (sommet), nombre d'entiers d'image < v |
+| lectgraph (1re, MP) | texte, sommet fixe | **figure** (parabole + droite) : a lu sur le quadrillage, f(10) hors du dessin, f = g, f < g (intervalle) |
+| interpar (1re) | `x² − 4` et `−x² + 2x` fixes | intersections, écart vertical maximal, décalage t pour un seul point commun |
+| eqirr (1re) | traces de freinage | √(x + a) = x − b : solution parasite, puis √(x + a) = b − x (c'est l'autre qui convient) |
+| sys3 (1re, MP) | économies A, B, C fixes | cinéma (3 groupes, prix au demi-franc) ; nombre de trois chiffres (somme, relation, chiffres inversés) |
+| trigeq (2e, MP) | 2 sin x = 1 | 2e degré en sin x ou cos x (une valeur parfois impossible) ; 2cos²x + K sin x + m = 0 avec sin² + cos² = 1 |
+| trigeq2 (2e, MP) | marée fixe | grande roue (ω, hauteur, premier passage, durée au-dessus d'une hauteur) ; marée : d, A, durée navigable, heure de sortie |
+| derivregles (3e) | `x³ − 6x² + 9x + 1` | tangentes parallèles à y = mx, ordonnée de la tangente, plus petite pente (sommet de f') |
+| derivcomp (3e) | `(x² − 3)⁴` | √(ax + b) : f'(x₀), tangente, point de pente donnée |
+| derivprodquot (3e) | `(2x + 1)/(x − 1)` | (x² + c)/(x − p) : extremums, max local < min local ; concentration at/(t² + b²) : max, durée d'efficacité |
+| derivref (3e) | `2√x + x³` | bénéfice a√x − bx : budget optimal, maximum, B'(n²), zéro non nul |
+| tangente (3e) | x² − 4x + 5 en 3 | tangente puis triangle avec les axes ; deux tangentes issues d'un point (contacts, pente, angle) |
+| variations (3e) | `x³ − 3x² − 9x + 2` | extremums d'une cubique (a = ±1), nombre d'entiers k avec 3 solutions |
+| nbderive (3e) | x² − 3x en 2 | quotient de Newton : Q(h), limite, h pour Q(h) donné ; idem pour k/x |
+| tauxvar (3e) | 2t² + 5t | vitesse moyenne, instant où la vitesse instantanée l'égale (milieu), T pour une vitesse moyenne donnée |
+| integrale (4e) | débit fixe | débit kt(T − t) : volume, débit moyen, instant où débit = moyenne ; freinage : durée, distance, décélération |
+| primitives (4e) | ballon fixe | accélération → vitesse → position, vitesse minimale |
+| aireint (4e) | 4 − x² et x + 2 | aire entre R² − x² et une corde, pourcentage de l'aire sous la parabole |
+| volrev (4e) | verre √(2x) fixe | verre √(kx) : contenance, hauteur pour un volume, hauteur à moitié plein (H/√2) |
+| eqabs (MP 3e) | \|2x − 3\| = 7 | \|ax + b\| = cx + d : condition, solution parfois rejetée ; somme de distances \|x − p\| + \|x − q\| = L |
+| logprop (MP 3e) | log 2 ≈ 0,301 | somme de log₂ à simplifier ; 2 log x − log(x − a) = log b avec domaine |
+| logdef (MP 3e) | log₂ 32… | décibels (N machines, nombre pour un niveau) ; pH (dilution, comparaison) |
+| eqbic (MP 3e) | x⁴ − 10x² + 9 | écran : diagonale + aire → équation bicarrée, côtés, périmètre |
+| eqirrmp (MP 3e) | √(x + 7) = x + 1 | √(2x + a) = 1 + √(x + b) : deux élévations au carré, vérification |
+| eqratmp (MP 3e) | 5/(x + 2) + 4/(x − 1) = 0 | deux robinets (temps ensemble, écart) : équation rationnelle, fraction remplie |
+| puisrat (MP 3e) | 27^(2/3), 16^(−3/4) | 4^(x + a) = 8^(x − b) (même base), Kepler T = a^(3/2) et a = T^(2/3) |
+| vectmp (MP 4e) | u, v fixes | parallélogramme : D, centre, diagonale, colinéarité |
+| droiteparam (MP 4e) | A(2 ; −1), B(5 ; 3) | deux droites paramétriques : t, intersection, angle |
+| sinusmp (MP 4e) | −2 °C / 24 °C | température : A, T(x) au dixième, durée au-dessus d'un seuil |
+| explogfn (MP 4e) | (0 ; 3), (2 ; 12) | a · bˣ par deux points sans abscisse 0, puis f(x) = Y (log) |
+| ineqmp (MP 4e) | (2x − 1)/(x + 3) ≥ 0 | (ax + b)/(x − p) ≥ k : tout d'un côté, zéro, ensemble des solutions (intervalles) |
+| thalesrec (11e) | étagère 30/75/32/80 | étagère pas parallèle : rapports, AE corrigée, déplacement ; triangle coupé : vérifier, DE, périmètre du trapèze |
+| volcone (11e) | cône = cylindre fixe | cornet (cône + demi-boule) et cône équivalent ; boule fondue en cônes |
+| volmanq (11e) | verre 20 cL fixe | conserve : hauteur, étiquette (2V ÷ r) ; verre conique : rayon, volume à mi-hauteur (÷ 8), hauteur pour la moitié (∛) |
+| simil (11e) | photo 10 × 15 | photo : rapport, longueur, prix ∝ aire ; maquette 1 : n : longueur, aire, volume réels |
+| sys2 (11e, MP) | droite par A et B | billets (système, nouveau prix) ; rectangle dont l'aire ne change pas |
+| formule (11e, MP) | Fahrenheit (c = −40 toujours) | IMC (calculer, isoler m, isoler t avec √) ; énergie cinétique (isoler v, isoler m) |
+| racprop (11e) | carré de 50 cm² | carré d'aire a²k : côté, diagonale, périmètre exacts ; triangle à cathètes p√s, q√s : hypoténuse, aire, hauteur |
+| denombr (11e) | club de 10 | codes (total, sans répétition, au moins une) ; club : bureau, poignées, et l'inverse (n(n − 1)/2 = P) |
+| cercthales (11e, MP) | P à 13 cm, r = 5 | tangentes : PT, aire, corde TT' ; triangle dans un demi-cercle : côté, aire, hauteur |
+| angles (11e, MP) | inscrit 35° fixe | polygone régulier : n, somme, angle entre diagonales voisines (180°/n) ; inscrit / au centre / quadrilatère inscrit |
+
+`factor` v2 (11e) : la part « combien d'entiers avec E(x) > 0 » (tableau de signes à trois facteurs, hors programme
+de 11e) est remplacée par un paramètre : pour quel c l'équation n'a plus que deux solutions (c = m²p²).
+
 ## Ce qui reste (valeurs fixes, à reprendre)
 
-Environ 100 notions gardent un défi à valeurs fixes, notamment : `f2expr`, `f2trois`, `fimg`, `lectgraph`,
-`interpar`, `ineq`, `ineqfrac`, `eqirr`, `euclide`, `exactes`, `geocomb`, `droitesinter`, `modaff`, `affzero`,
-`recipaff`, `trigassoc`, `trigcercle`, `trigeq`, `trigeq2`, `trigfn`, `sys3`, `quartiles`, `statfreq`, `varalea`,
-`normale`, `matrices`, `translin`, dérivées (`derivregles`, `derivcomp`, `derivprodquot`, `derivref`, `tangente`,
-`variations`, `nbderive`, `tauxvar`), intégrales (`integrale`, `primitives`, `aireint`, `volrev`), MP 3e–4e
-(`eqabs`, `eqbic`, `eqirrmp`, `eqratmp`, `logdef`, `logprop`, `puisrat`, `fctmp`, `fratmp`, `ineqmp`, `sinusmp`,
-`vectmp`, `projmp`, `pvectmp`, `posdroites`, `droiteparam`, `coordmp`, `explogfn`, `similmp`, `volmp`),
-et la plupart des notions de 9e–10e. Liste complète : relancer `tools/audit_defis.py`.
+Environ 65 notions gardent un défi à valeurs fixes : `ineq`, `ineqfrac`, `euclide`, `exactes`, `geocomb`,
+`droitesinter`, `droitesrem`, `modaff`, `affzero`, `recipaff`, `trigassoc`, `trigcercle`, `trigfn`, `quartiles`,
+`statfreq`, `varalea`, `normale`, `binomiale`, `condbayes`, `optimderiv`, `croissance`, `lnexp`, `matrices`,
+`translin`, `absval`, `domaine`, `ensembles`, `morceaux`, `transf`, `racinv`, `fracrat`, MP (`fctmp`, `fratmp`,
+`projmp`, `pvectmp`, `posdroites`, `coordmp`, `similmp`, `volmp`, `eqparam`, `ratden`, `vabs`, `valint`), et 9e–10e
+(`angtri`, `carres`, `decadd`, `decdiv`, `decmul`, `divcrit`, `fracops`, `monomes`, `ordgr`, `puiss`, `racenc`,
+`reduire`, `rel`, `reladd`, `sci`, `tabval`, `tradexpr`, `valnum`), plus `algopy`, `proba2`, `probcond`, `tauxevol`,
+`vect3e` (sans classe). Liste à jour : relancer `tools/audit_defis.py`.
 
 ## À contrôler
 
-- `factor`, `factor2`, `polymp` : la part « combien d'entiers vérifient E(x) > 0 sur [−10 ; 10] » demande un tableau
-  de signes à trois facteurs ; vérifier que c'est au programme de la classe (11e pour `factor` v2).
-- `trigexact` : réponses exactes « 6√3 » (le clavier propose √) ; décimal refusé.
-- `triaire` c) et `sinlaw` c) : l'arrondi des étapes intermédiaires peut décaler le dixième ; l'indice demande les
-  valeurs non arrondies.
+- `factor2`, `polymp` (1re–4e, MP 4e) : « combien d'entiers vérifient E(x) > 0 » demande un tableau de signes à trois
+  facteurs (au programme dès la 1re Collège ?).
+- `trigexact`, `racprop` : réponses exactes « 6√3 » (le clavier propose √) ; décimal accepté pour `racprop`.
+- `triaire` c), `sinlaw` c), `trigeq2`, `sinusmp`, `volmanq` : l'arrondi des étapes intermédiaires peut décaler la
+  dernière décimale ; les indices demandent les valeurs non arrondies.
 - `stats` : notes au demi-point, note visée entre 3,5 et 6.
+- `lectgraph` : figure tracée par `FIG.plot` (repère −6 à 6) ; vérifier la lisibilité du sommet et des intersections.
+- `eqabs` v1 : la part a) demande la borne de la condition (« x ≥ … » ou « x ≤ … » selon le signe de c).
+- `ineqmp` : réponse en intervalles (`solset`), comme au niveau 3.
+- `trigeq` : solutions en degrés sur [0° ; 360°[ (programme MP en degrés ? sinon passer en radians).
+- `thalesrec` v1 : rapport AE ÷ AC au centième ; avec un décalage de 1 cm sur 120 cm, les deux rapports diffèrent de
+  moins d'un centième seulement dans de rares cas (r = 0,25 : 0,25 et 0,26).
