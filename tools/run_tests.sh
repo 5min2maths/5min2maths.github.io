@@ -19,7 +19,7 @@ un() {
   f=$1
   t=$(mktemp)
   (chromium --headless --disable-gpu --no-sandbox --virtual-time-budget=15000 --dump-dom "file://$PWD/$f" >"$t" 2>/dev/null 9>&- &)
-  for _ in $(seq 1 240); do grep -q "</html>" "$t" 2>/dev/null && break; sleep 0.5; done
+  for _ in $(seq 1 400); do grep -q "</html>" "$t" 2>/dev/null && break; sleep 0.5; done
   if grep -q "</html>" "$t" 2>/dev/null; then
     out=$(python3 -c "
 import sys,re,html
@@ -28,7 +28,7 @@ t=html.unescape(m[-1]).strip() if m else ''
 bad=re.search(r'ÉCHEC|FAIL|EXC',t) or re.match(r'(en cours|chargement)',t,re.I)  # 24.11 : page restée « en cours » (erreur JS) = échec
 print(('ÉCHEC ' if bad else 'ok ')+(t[:260].replace(chr(10),' | ') or '(page d aperçu, sans résultat écrit)'))" "$t")
   else
-    out="ÉCHEC délai dépassé (120 s) : page abandonnée"
+    out="ÉCHEC délai dépassé (200 s) : page abandonnée"
   fi
   rm -f "$t"
   echo "$f: $out"

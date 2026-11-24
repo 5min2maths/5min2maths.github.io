@@ -712,3 +712,11 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: v
 /* 24.11 soir : fenêtre 💬 — la croix reste en haut à droite même quand le titre passe à la ligne */
 .fab-sheet > .card { position: relative; padding-right: 44px; }
 .fab-sheet #fabx { position: absolute; top: 8px; right: 8px; }
+
+/* 24.11 : visite guidée en haut quand l'élément présenté est en bas (elle ne couvre plus les boutons) */
+.tour.tour-top { top: 70px; bottom: auto; }
+
+/* 24.11 (retour testeur) : identifiant de question invisible pour les élèves (il part toujours avec les commentaires) ;
+   visible en mode auteur (…/#auteur). */
+.vote .code, p.cur-code { display: none; }
+.auteur .vote .code, .auteur p.cur-code { display: block; } .auteur .vote .code { display: inline; }

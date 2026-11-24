@@ -342,7 +342,7 @@ function startPlacement() {
     const id = plan[i], q = Engine.make(state, id, Math.min(2, difficultyCap(state.profile)));
     renderQuestion(q, {
       eyebrow: "Étape 2 sur 2 · question " + (i + 1) + " sur " + plan.length + (plan.length - i > 1 ? " · encore " + (plan.length - i - 1) + " après celle-ci" : " · la dernière !") + `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((i / plan.length) * 100)}%"></i></span>`, single: true, track: "positionnement",
-      onDone: (res) => { Engine.placementResult(state, id, res.solved ? true : res.dontKnow ? null : false, q.d); save(); },
+      onDone: (res) => { Engine.placementResult(state, id, res.solved ? true : res.dontKnow ? null : false, q.d); if (!res.solved && !res.dontKnow) carnetAdd(id, q.d, q.code, res.diag, res.ans); /* 24.11 : erreur du calibrage aussi dans le carnet (retour testeur) */ save(); },
       onNext: () => { i++; next(); },
       onNotYet: () => { Engine.notYet(state, id); save(); toast("Noté : cette notion reviendra plus tard."); i++; next(); },
     });
@@ -499,6 +499,11 @@ function tourShow() {
     <div class="row"><button class="btn-ghost small" id="tourskip">Passer</button><button class="btn-primary" id="tournext">${tourK + 1 < TOUR.length ? "Suivant" : "C'est parti !"}</button></div></div></div>`);
   app.querySelectorAll(".tour-hi").forEach((x) => x.classList.remove("tour-hi"));
   const el = app.querySelector(sel); if (el) el.classList.add("tour-hi");
+  /* 24.11 (retour testeur : « visite guidée bloquante ») : la carte se place du côté opposé à l'élément présenté, et
+     un toucher ailleurs ferme la visite sans bloquer ce toucher (le bouton touché fonctionne). */
+  const tw = document.getElementById("tour"); if (el && tw) { const r = el.getBoundingClientRect(); if (r.top + r.height / 2 > window.innerHeight / 2) tw.classList.add("tour-top"); }
+  const outside = (ev) => { if (!ev.target.closest || ev.target.closest(".tour-card")) return; document.removeEventListener("click", outside, true); end(); };
+  setTimeout(() => document.addEventListener("click", outside, true), 0);
   const end = () => { state.tourDone = true; save(); tourK = 0; app.querySelectorAll(".tour-hi").forEach((x) => x.classList.remove("tour-hi")); const t = document.getElementById("tour"); if (t) t.remove(); };
   document.getElementById("tourskip").onclick = end;
   document.getElementById("tournext").onclick = () => { if (++tourK >= TOUR.length) return end(); tourShow(); };
@@ -1780,6 +1785,7 @@ const canSend = () => VOTE_ENDPOINT && location.protocol === "https:" && !/claud
 // plus ni visites, ni séances, ni signaux muets, ni votes, ni chapitre du moment : les statistiques ne comptent que les
 // élèves. Ses commentaires 💬 partent toujours, étiquetés « auteur ».
 function isAuthor() { try { return localStorage.getItem("m2m-auteur") === "1"; } catch (e) { return false; } }
+try { if (isAuthor()) document.documentElement.classList.add("auteur"); } catch (e) {} /* 24.11 : affiche les identifiants de question */
 const commentBox = (title = "💬 Un commentaire sur cette question ?", ph = "Une erreur, une consigne pas claire, une idée… (n'écris pas ton nom)", code = "") =>
   `<details class="cmt"${code ? ` data-code="${code}"` : ""}><summary>${title}</summary><textarea class="cmt-t" maxlength="500" rows="3" placeholder="${ph}"></textarea>
   <div class="spread"><span class="small muted cmt-ok"></span><button class="small cmt-s">Envoyer</button></div></details>`;
@@ -1881,7 +1887,7 @@ function screenCurious(q, back, from = "") {
       <div class="preview" id="cprev"></div>${keypadHtml(spec)}
       <div class="actions"><button class="btn-primary" id="cok">Vérifier</button><button class="btn-ghost" id="cidk">Voir la réponse</button></div></div><div id="cfb"></div></div>
     <div class="act-step" id="cs3" hidden><div class="act-h"><span class="act-n">3</span> Le fin mot</div><div class="sol">${q.reveal}</div>
-      <div class="rule"><b>🧠 Ici, tu as utilisé</b> ${q.outil}</div><p class="small muted code">${q.code}</p></div>
+      <div class="rule"><b>🧠 Ici, tu as utilisé</b> ${q.outil}</div><p class="small muted code cur-code">${q.code}</p></div>
   </div>
   <button class="btn-primary btn-big" id="cnext" hidden>Une autre question curieuse</button>
   <button class="btn-ghost" id="cback">Retour</button>`);
@@ -2096,8 +2102,11 @@ function screenSummary() {
   ${returnCard()}
   ${typeof Curieux !== "undefined" && Curieux.available(state).length ? '<button class="btn-primary" id="curbonus">🤔 Bonus : une question curieuse</button>' : ""}
   <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)", "app")}</div>
+  ${n <= 2 && !session.weekly && !session.carnet && !session.prep ? `<div class="card flat stack"><p class="small">${n === 1 ? "Une seule question aujourd'hui : c'était le défi du jour." : "Séance courte aujourd'hui."} Tu peux continuer autant que tu veux.</p><button class="btn-sec" id="again">➕ Encore une séance</button></div>` : ""}
   <button class="btn-primary btn-big" id="home">Retour à l'accueil</button>`);
   bindComment(app, "app"); bindInstall(screenHome);
+  /* 24.11 (retour testeur : « séance très courte, l'élève peut croire qu'il a fini trop vite ») */
+  if (document.getElementById("again")) document.getElementById("again").onclick = () => { if (n === 1) Engine.otherFormat(state); session = null; save(); startSession(); };
   if (nb || newGrade) setTimeout(burst, 250);
   document.getElementById("home").onclick = screenHome;
   if (document.getElementById("curbonus")) document.getElementById("curbonus").onclick = () => screenCurious(Curieux.pick(state), screenHome, "bilan");
