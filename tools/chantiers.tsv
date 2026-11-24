@@ -12,7 +12,7 @@ W	Générateurs à réponses 0 ou ±1	Qualité	7	en cours	60 %	23.11	filtre de t
 X	Formes sur figure (repère, lecture de graphique)	Qualité	7	à faire	20 %	23.11	quelques lectures graphiques (suites FR)	variantes pour repere et lectgraph
 B	Vérification unique avant publication	Technique	1	fait	95 %	24.11	run_tests.sh : 107 pages, ne bloque plus (page abandonnée après 120 s) ; gardien cron tue les Chromium > 10 min	(option) bloquer le push en cas d'échec
 N	Remontée anonyme des erreurs JavaScript	Technique	1	fait	100 %	23.11	envoi + feuille « erreurs », ligne dans le point ; Apps Script redéployé	surveiller le point
-F	Temps de chargement	Technique	1	en cours	70 %	24.11	habitué 0,7 s (CPU ×4) ; première visite en 4G lente ≈ 11 s (1,1 Mo à télécharger)	chargement par niveau (demande du 24.11) : un élève ne télécharge que les notions de son année ; minification
+F	Temps de chargement	Technique	1	fait	100 %	24.11	voir F2	—
 ROB	Élève-robot (test nocturne de toute l'app)	Technique	1	en cours	90 %	24.11	9'800 questions par nuit ; contrôles figures/énoncé ; plus de fausses alertes d'affichage	accélérer (≈ 14 min avec les contrôles de figures)
 C	Mesure par question (signaux muets)	Données	2	fait	100 %	20.11	une ligne anonyme par question et leçon ; tools/signaux.py	analyser quand la 11LS sera ouverte
 T	Indicateurs de rétention (J+1, J+7, J+30)	Données	2	fait	100 %	23.11	dans le point : J+1 24 %, J+7 22 %	suivre ; vrai test = 11LS
@@ -41,4 +41,4 @@ AB	Primaire, cycle 2 (fin de primaire)	Long terme	—	études	5 %	23.11	référe
 AC	Primaire, cycle 1	Long terme	—	à faire	0 %	22.11	—	2028 et après
 AD	Québec, Maghreb, Afrique francophone	Long terme	—	à faire	0 %	22.11	—	2028 et après
 DIP	Bêta : diffusion au-delà des testeurs (cadre DIP)	Diffusion	—	à décider	—	22.11	46 testeurs, vrai test = ouverture à la 11LS	décision de l'enseignant
-F2	Chargement par niveau (un élève ne télécharge que ses notions)	Technique	1	à faire	0 %	24.11	demandé le 24.11 : gain attendu 2 à 3× sur la première visite en 4G lente	découper les générateurs par année, charger le reste à la demande ; mesurer avant / après
+F2	Chargement par niveau (un élève ne télécharge que ses notions)	Technique	1	fait	90 %	24.11	paquets par niveau + chargeur ; MathJax géré par le chargeur ; polices non bloquantes. Première visite 4G lente 10,9 s → 5,1 s ; habitué 0,46 s	découper le commun (40 %) ; test de bout en bout : tools/test_paquets.py

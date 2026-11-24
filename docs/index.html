@@ -11,7 +11,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Chaque jour, quelques minutes de maths, à ton niveau.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap" onload="this.onload=null;this.rel=&quot;stylesheet&quot;"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap"></noscript>
 <style>
 /* Concept : une page de cahier à petits carreaux ; encre bleue, marge rouge, une carte = une question. */
 :root {
@@ -711,10 +711,55 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: v
 <script>
 window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "global" }, startup: { typeset: false, ready() { MathJax.startup.defaultReady(); MathJax.startup.input[0].preFilters.add(({ math }) => { if (window.divSign) math.math = window.divSign(math.math); }); } } };
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
+
 </head>
 <body>
 <main id="app" aria-live="polite"></main>
-<script src="app.js?v=46358d389f"></script>
+<script src="app.js?v=dc66272019"></script>
+<script>
+(function () {
+  // Chargement par niveau (24.11). Paquets requis : le niveau de l'élève et les niveaux inférieurs de sa filière ;
+  // France et liens de consultation (#q-, #l-, #auteur) : tout. Puis le reste en arrière-plan (hors ligne complet).
+  var V = "dc66272019", K = ["9", "10", "11", "12", "13", "14", "mp", "fr"], loaded = {}, pending = {};
+  window.__packs = loaded; // pour les tests (tools/test_paquets.py)
+  function need(p) {
+    if (!p || p.system === "FR") return K.slice();
+    var g = +p.grade || 9, r = [];
+    ["9", "10", "11", "12", "13", "14"].forEach(function (k) { if (+k <= g) r.push(k); });
+    if (p.track === "mp") r.push("mp");
+    return r;
+  }
+  function sync() { // recopies faites au chargement par lessons.js et engine.js (rappels et indices des paquets)
+    try { if (typeof HINTS_EXTRA !== "undefined") Object.assign(HINTS, HINTS_EXTRA); } catch (e) {}
+    try { if (typeof LESSONS_EXTRA !== "undefined") Object.keys(LESSONS_EXTRA).forEach(function (k) { if (typeof LESSONS_V2 === "undefined" || !LESSONS_V2[k]) LESSONS[k] = L_.apply(null, LESSONS_EXTRA[k]); }); } catch (e) {}
+  }
+  window.loadPack = function (k) {
+    if (loaded[k]) return Promise.resolve();
+    if (pending[k]) return pending[k];
+    return (pending[k] = new Promise(function (ok, ko) {
+      var s = document.createElement("script"); s.src = "p-" + k + ".js?v=" + V;
+      s.onload = function () { loaded[k] = 1; sync(); ok(); };
+      s.onerror = function () { delete pending[k]; ko(new Error("paquet " + k)); };
+      document.body.appendChild(s);
+    }));
+  };
+  window.ensurePacks = function (p) { return need(p).reduce(function (pr, k) { return pr.then(function () { return loadPack(k); }); }, Promise.resolve()); };
+  var st = null; try { st = JSON.parse(localStorage.getItem("5m2m.v1")); } catch (e) {}
+  var first = /^#(q-|l-|auteur)/.test(location.hash) ? K.slice() : st && st.profile ? need(st.profile) : [];
+  // MathJax (24.11) : chez un habitué il est en cache, on le charge tout de suite et l'app attend qu'il soit prêt
+  // (pas de TeX brut à l'écran) ; pour une première visite, il vient après l'affichage (il ne prend pas la bande passante du code).
+  function mathjax() { if (window.__mj) return; window.__mj = 1; var m = document.createElement("script"); m.src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"; m.async = true; document.head.appendChild(m); }
+  function mjReady(cb) { var t0 = Date.now(); (function w() { if ((window.MathJax && MathJax.typesetPromise) || Date.now() - t0 > 1500) cb(); else setTimeout(w, 30); })(); }
+  if (st && st.profile) mathjax();
+  function start() {
+    window.__packsAtStart = Object.keys(loaded);
+    var s = document.createElement("script"); s.src = "start.js?v=" + V;
+    s.onload = function () { var rest = function () { K.reduce(function (pr, k) { return pr.then(function () { return loadPack(k).catch(function () {}); }); }, Promise.resolve()); };
+      if ("requestIdleCallback" in window) requestIdleCallback(rest, { timeout: 3000 }); else setTimeout(rest, 1500); };
+    if (st && st.profile) mjReady(function () { document.body.appendChild(s); }); else { document.body.appendChild(s); setTimeout(mathjax, 0); }
+  }
+  first.reduce(function (pr, k) { return pr.then(function () { return loadPack(k); }); }, Promise.resolve()).then(start, start);
+})();
+</script>
 </body>
 </html>

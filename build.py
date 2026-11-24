@@ -42,19 +42,91 @@ body = body.replace('const BUILD = "dev";', f'const BUILD = "{version}";', 1)
 # de V8, impossible pour un script en ligne de 4 Mo), et le service worker le met en cache dès l'installation.
 # Polices et MathJax inchangés (chargement bloquant) : les différer ferait « sauter » l'écran (police puis police,
 # formules en TeX brut un instant) pour un gain mesuré faible chez l'habitué (≈ 0,3 s à CPU ×4) ; voir tools/chargement.md.
-import shutil
+import re, shutil
 pwa_head = ('<link rel="manifest" href="manifest.webmanifest">\n<meta name="theme-color" content="#2457d6">\n'
             '<link rel="apple-touch-icon" href="icon-192.png">\n<meta name="apple-mobile-web-app-capable" content="yes">\n')
-docs_body = f'<main id="app" aria-live="polite"></main>\n<script src="app.js?v={version}"></script>\n'
+# 24.11 (chantier F2, chargement par niveau ; plan : tools/chargement.md) : docs/app.js = code commun ; un paquet par
+# niveau (docs/p-<niveau>.js) ; docs/start.js = app.js (démarrage). Le chargeur en ligne charge les paquets requis pour
+# le profil (son niveau et les niveaux inférieurs de sa filière), démarre l'app, puis charge les autres en arrière-plan.
+def paquet(f):
+    if f.startswith("fr_"): return "fr"
+    if f == "ch3c_ana.js": return "14"
+    if f == "riche_mp2.js": return ""  # définit RX, outils communs aussi utilisés par riche_2c et riche_mp1
+    if f.startswith(("ch_mp", "riche_mp")) or f == "act_mp2.js": return "mp"
+    if f.startswith(("ch1c", "riche_1c", "riche_sys1c")) or f in ("act_1c.js", "act_eq1c.js", "act_sys1c.js"): return "12"
+    if f.startswith("riche_2c") or f == "act_2c.js": return "13"
+    if f.startswith(("ch11", "riche_11", "act_ch11")) or f in ("act_prop11.js", "act_litt11.js", "act_11d.js"): return "11"
+    if f in ("riche_9.js", "act_9a.js", "act_9b.js"): return "9"
+    if f in ("riche_10.js", "act_10a.js", "act_10b.js", "ch10_no.js"): return "10"
+    return ""
+ORDRE_P = ["9", "10", "11", "12", "13", "14", "mp", "fr"]
+PAQ = {k: [f for f in JS if paquet(f) == k] for k in ORDRE_P}
+app_js = (SRC / "app.js").read_text()
+assert 'const BUILD = "dev";' in app_js
+loader = """<script src="app.js?v=%(v)s"></script>
+<script>
+(function () {
+  // Chargement par niveau (24.11). Paquets requis : le niveau de l'élève et les niveaux inférieurs de sa filière ;
+  // France et liens de consultation (#q-, #l-, #auteur) : tout. Puis le reste en arrière-plan (hors ligne complet).
+  var V = "%(v)s", K = %(keys)s, loaded = {}, pending = {};
+  window.__packs = loaded; // pour les tests (tools/test_paquets.py)
+  function need(p) {
+    if (!p || p.system === "FR") return K.slice();
+    var g = +p.grade || 9, r = [];
+    ["9", "10", "11", "12", "13", "14"].forEach(function (k) { if (+k <= g) r.push(k); });
+    if (p.track === "mp") r.push("mp");
+    return r;
+  }
+  function sync() { // recopies faites au chargement par lessons.js et engine.js (rappels et indices des paquets)
+    try { if (typeof HINTS_EXTRA !== "undefined") Object.assign(HINTS, HINTS_EXTRA); } catch (e) {}
+    try { if (typeof LESSONS_EXTRA !== "undefined") Object.keys(LESSONS_EXTRA).forEach(function (k) { if (typeof LESSONS_V2 === "undefined" || !LESSONS_V2[k]) LESSONS[k] = L_.apply(null, LESSONS_EXTRA[k]); }); } catch (e) {}
+  }
+  window.loadPack = function (k) {
+    if (loaded[k]) return Promise.resolve();
+    if (pending[k]) return pending[k];
+    return (pending[k] = new Promise(function (ok, ko) {
+      var s = document.createElement("script"); s.src = "p-" + k + ".js?v=" + V;
+      s.onload = function () { loaded[k] = 1; sync(); ok(); };
+      s.onerror = function () { delete pending[k]; ko(new Error("paquet " + k)); };
+      document.body.appendChild(s);
+    }));
+  };
+  window.ensurePacks = function (p) { return need(p).reduce(function (pr, k) { return pr.then(function () { return loadPack(k); }); }, Promise.resolve()); };
+  var st = null; try { st = JSON.parse(localStorage.getItem("5m2m.v1")); } catch (e) {}
+  var first = /^#(q-|l-|auteur)/.test(location.hash) ? K.slice() : st && st.profile ? need(st.profile) : [];
+  // MathJax (24.11) : chez un habitué il est en cache, on le charge tout de suite et l'app attend qu'il soit prêt
+  // (pas de TeX brut à l'écran) ; pour une première visite, il vient après l'affichage (il ne prend pas la bande passante du code).
+  function mathjax() { if (window.__mj) return; window.__mj = 1; var m = document.createElement("script"); m.src = "%(mj)s"; m.async = true; document.head.appendChild(m); }
+  function mjReady(cb) { var t0 = Date.now(); (function w() { if ((window.MathJax && MathJax.typesetPromise) || Date.now() - t0 > 1500) cb(); else setTimeout(w, 30); })(); }
+  if (st && st.profile) mathjax();
+  function start() {
+    window.__packsAtStart = Object.keys(loaded);
+    var s = document.createElement("script"); s.src = "start.js?v=" + V;
+    s.onload = function () { var rest = function () { K.reduce(function (pr, k) { return pr.then(function () { return loadPack(k).catch(function () {}); }); }, Promise.resolve()); };
+      if ("requestIdleCallback" in window) requestIdleCallback(rest, { timeout: 3000 }); else setTimeout(rest, 1500); };
+    if (st && st.profile) mjReady(function () { document.body.appendChild(s); }); else { document.body.appendChild(s); setTimeout(mathjax, 0); }
+  }
+  first.reduce(function (pr, k) { return pr.then(function () { return loadPack(k); }); }, Promise.resolve()).then(start, start);
+})();
+</script>
+"""
+MJ = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"
+head_docs = head.replace('<script src="' + MJ + '"></script>', "")
+assert head_docs != head, "balise MathJax introuvable dans head"
+head_docs = re.sub(r'<link rel="stylesheet" href="(https://fonts\.googleapis\.com/[^"]+)"\s*/?>', r'<link rel="preload" as="style" href="\1" onload="this.onload=null;this.rel=&quot;stylesheet&quot;"><noscript><link rel="stylesheet" href="\1"></noscript>', head_docs)
+docs_body = '<main id="app" aria-live="polite"></main>\n' + loader % {"v": version, "keys": str(ORDRE_P).replace("'", '"'), "mj": MJ}
 (ROOT / "docs").mkdir(exist_ok=True)
 (ROOT / "docs" / "index.html").write_text(
     '<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n'
     '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
-    + pwa_head + head + "</head>\n<body>\n" + docs_body + "</body>\n</html>\n")
+    + pwa_head + head_docs + "</head>\n<body>\n" + docs_body + "</body>\n</html>\n")
 # Code de l'app = le script de body, BUILD compris (même contenu que dist/).
 PRE = '<main id="app" aria-live="polite"></main>\n<script>\n'
 assert body.startswith(PRE) and body.endswith("\n</script>\n")
-(ROOT / "docs" / "app.js").write_text(body[len(PRE):-len("</script>\n")])
+(ROOT / "docs" / "app.js").write_text("\n".join((SRC / f).read_text() for f in JS if not paquet(f) and f != "app.js") + "\n")
+for k, fs in PAQ.items():
+    (ROOT / "docs" / f"p-{k}.js").write_text("\n".join((SRC / f).read_text() for f in fs) + "\n")
+(ROOT / "docs" / "start.js").write_text(app_js.replace('const BUILD = "dev";', f'const BUILD = "{version}";', 1))
 (ROOT / "docs" / "sw.js").write_text((SRC / "pwa" / "sw.js").read_text().replace("__VERSION__", version))
 for f in ("manifest.webmanifest", "icon-192.png", "icon-512.png"):
     shutil.copy(SRC / "pwa" / f, ROOT / "docs" / f)

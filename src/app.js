@@ -297,12 +297,19 @@ function screenLevel() {
   // Plus de questionnaire sur les notions : celles de l'année s'ouvrent dans l'ordre du référentiel.
   document.getElementById("next").onclick = () => {
     if (draft.system === "CH" && draft.grade >= 12 && !draft.track) { document.getElementById("trackerr").textContent = "Choisis d'abord ta voie : Collège ou maturité professionnelle."; document.getElementById("track").scrollIntoView({ behavior: "smooth", block: "center" }); return; }
-    const keep = state && state.comps, keepA = state && state.a11y;
-    state = Engine.newState({ system: draft.system, grade: draft.grade, track: draft.system === "CH" && draft.grade >= 12 ? draft.track : "college", minutes: draft.minutes });
-    if (keep) state.comps = keep; // changement de classe : les notes des compétences restent
-    if (keepA) state.a11y = keepA; // et les réglages de lecture
-    Engine.autoInit(state);
-    save(); startPlacement();
+    const prof = { system: draft.system, grade: draft.grade, track: draft.system === "CH" && draft.grade >= 12 ? draft.track : "college", minutes: draft.minutes };
+    const go = () => {
+      const keep = state && state.comps, keepA = state && state.a11y;
+      state = Engine.newState(prof);
+      if (keep) state.comps = keep; // changement de classe : les notes des compétences restent
+      if (keepA) state.a11y = keepA; // et les réglages de lecture
+      Engine.autoInit(state);
+      save(); startPlacement();
+    };
+    // 24.11 (chargement par niveau) : les notions de la classe choisie sont chargées d'abord si besoin (docs/ seulement).
+    if (typeof ensurePacks !== "function") return go();
+    const b = document.getElementById("next"); b.disabled = true; b.textContent = "Chargement…";
+    ensurePacks(prof).then(go, () => { b.disabled = false; b.textContent = "Réessayer"; toast("Pas de connexion : les notions de cette classe ne sont pas encore sur ton téléphone. Réessaie une fois connecté."); });
   };
 }
 

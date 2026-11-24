@@ -11,7 +11,9 @@
   const T = (x, y, s, a = "middle", sz = 12, ex = "") => (ex = ex.replace(/ fill="([^"]+)"/, ' style="fill:$1"'), `<text x="${(+x).toFixed(1)}" y="${(+y).toFixed(1)}" class="f-txt" text-anchor="${a}" font-size="${sz}"${ex}>${s}</text>`);
   const term = (c, l, first) => { const s = c < 0 ? (first ? "−" : " − ") : first ? "" : " + "; const a = Math.abs(c); return s + (l ? (a === 1 ? "" : a) + l : a); };
   const poly = (ts) => { const f = ts.filter(([c]) => c !== 0); return f.length ? f.map(([c, l], i) => term(c, l, i === 0)).join("") : "0"; };
-  const set = (id, o) => { ACTIVE[id] = o; };
+  // 24.11 (chargement par niveau) : les paquets de niveau peuvent être chargés après ce fichier et feraient
+  // Object.assign(ACTIVE, …) sur ces leçons : l'accesseur garde la version « manipulation » et ignore l'écriture.
+  const set = (id, o) => { Object.defineProperty(ACTIVE, id, { get: () => o, set: () => {}, enumerable: true, configurable: true }); };
 
   // ---------- tuiles algébriques ----------
   // x² : grand carré, x : barre, 1 : petit carré. Positif : bleu plein ; négatif : rouge clair en pointillé.
