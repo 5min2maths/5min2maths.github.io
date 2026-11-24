@@ -19,7 +19,7 @@ function statsAsked() { try { return !!localStorage.getItem("m2m-stats"); } catc
 function statsSet(v) { try { localStorage.setItem("m2m-stats", v ? "oui" : "non"); } catch (e) {} }
 function errCanSend() {
   if (!statsOk()) return false; /* 24.11 : accord */
-  try { return !!VOTE_ENDPOINT && location.protocol === "https:" && !/claude/.test(location.hostname) && !isAuthor() && !/^#auteur/.test(location.hash); }
+  try { return !!VOTE_ENDPOINT && location.protocol === "https:" && !/claude/.test(location.hostname) && !isAuthor() && !/^#(auteur|parent)/.test(location.hash); }
   catch (e) { return false; }
 }
 // Nom court d'un fichier : « https://x.github.io/app/index.html?v=2 » → « index.html » ; « https://x.github.io/ » (code
@@ -547,7 +547,7 @@ function screenHome() {
   // 22.11 : accueil à cases (maquette design/maquette_accueil.html) ; chaque case ouvre une page « ← Accueil ».
   panels.carnet = () => carnetCard(true) || `<div class="card flat stack"><div class="eyebrow">📕 Carnet d'erreurs</div><p class="small muted">Vide : bravo ! Chaque question ratée viendra s'y ranger, pour que tu puisses la réussir plus tard.</p></div>`;
   // 22.11 : « Ma fiche » (src/fiche.js) : une fiche par chapitre derrière Progrès. Retirée le 23.11 (branche archive/fiche) : inactif sans fiche.js.
-  panels.prog = () => `${weekCard()}${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${typeof evacomCard === "function" ? evacomCard() : ""}${themeMapCard()}${compsCard()}`;
+  panels.prog = () => `${weekCard()}${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${typeof evacomCard === "function" ? evacomCard() : ""}${themeMapCard()}${compsCard()}${typeof parentCard === "function" ? parentCard() : ""}`; /* 24.11 : espace parent (src/parents.js) */
   if (!panels[homeTab]) homeTab = "today";
   const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted">${gradeName(state.profile)}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
   if (homeTab !== "today") {
@@ -1822,7 +1822,7 @@ function deviceId() {
 }
 function ping(ev, extra = {}) {
   try {
-    if (!VOTE_ENDPOINT || location.protocol !== "https:" || /claude/.test(location.hostname) || isAuthor() || location.hash === "#auteur" || !statsOk()) return;
+    if (!VOTE_ENDPOINT || location.protocol !== "https:" || /claude/.test(location.hostname) || isAuthor() || location.hash === "#auteur" || /^#parent/.test(location.hash) || !statsOk()) return; /* 24.11 : rien depuis l'espace parent */
     if (ev === "open") { if (localStorage.getItem("m2m-ping") === day()) return; localStorage.setItem("m2m-ping", day()); }
     fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ ev, dev: deviceId(), date: day(), ...extra }) }).catch(() => {});
   } catch (e) {}
@@ -2193,6 +2193,7 @@ function screenSummary() {
 // Consultation d'une question par son code : adresse …/#q-eq2disc-2-k3f (rien n'est enregistré).
 function showCode() {
   /* Mentions légales (24.11) : lien direct …/#confidentialite, à donner aux parents */
+  if (typeof parentRoute === "function" && parentRoute()) return true; /* 24.11 : espace parent, …/#parent=<code> (src/parents.js) */
   if (location.hash === "#confidentialite") { screenLegal(() => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); }); return true; }
   // Consultation d'une leçon (active ou rappel) : …/#l-vitesse (lien du tableau de suivi, 15.11).
   const ml = /^#l-([a-z0-9]+)$/.exec(location.hash);

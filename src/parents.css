@@ -1,0 +1,27 @@
+
+/* ---------------- Espace parent (24.11, src/parents.js) ---------------- */
+.par-list { margin: 4px 0 8px; padding: 0; list-style: none; display: grid; gap: 4px; }
+.par-list li { overflow-wrap: anywhere; }
+.par-row { flex-wrap: wrap; gap: 8px; }
+.par-kids { flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.par-kids button { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.par-input { width: 100%; box-sizing: border-box; font: inherit; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--card); color: var(--ink); }
+.par-old { border-left: 6px solid var(--warn); }
+.par-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; max-width: 320px; }
+.par-days span { display: flex; align-items: center; justify-content: center; aspect-ratio: 1; border-radius: 8px; border: 1.5px solid var(--line); font-weight: 700; font-size: 0.85em; color: var(--ink-soft, var(--ink)); }
+.par-days span.on { background: var(--ok); border-color: var(--ok); color: #fff; }
+.par-fete { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 10px; background: var(--ok-soft, transparent); border: 1.5px solid var(--ok); }
+.par-fete > span { font-size: 1.4em; line-height: 1; }
+.par-pb > summary { cursor: pointer; list-style: revert; }
+.par-pb[open] > summary { margin-bottom: 8px; }
+.par-step { display: grid; gap: 6px; }
+.par-hints { display: grid; gap: 8px; }
+.par-hint { padding: 8px 10px; border-left: 3px solid var(--blue); background: var(--blue-soft, transparent); border-radius: 6px; overflow-wrap: anywhere; }
+.par-diag { padding: 8px 10px; border-radius: 8px; border: 1.5px dashed var(--warn); }
+.par-fold > summary { cursor: pointer; font-weight: 700; }
+.par-fold[open] > summary { margin-bottom: 6px; }
+.par-bets { display: flex; flex-wrap: wrap; gap: 6px; }
+.par-bets span { padding: 4px 10px; border: 1.5px solid var(--line); border-radius: 999px; }
+.par-week .figwrap, .par-solve .figwrap, .par-fun .figwrap { max-width: 100%; overflow-x: auto; }
+.par-solve, .par-fun, .par-week { min-width: 0; }
+.par-qr > summary { cursor: pointer; font-weight: 700; }

@@ -1,0 +1,130 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css"><link rel="stylesheet" href="../src/parents.css">
+<style>body{margin:0}#app{width:360px;max-width:360px;box-sizing:border-box}</style>
+<main id="app"></main><pre id="out">en cours</pre>
+<script>window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}
+/* Aucun envoi réseau depuis l'espace parent : fetch et sendBeacon espionnés. */
+window.__net = []; const _f = window.fetch; window.fetch = (...a) => { window.__net.push(String(a[0])); return Promise.resolve(new Response("{}")); };
+if (navigator.sendBeacon) navigator.sendBeacon = (u) => { window.__net.push(String(u)); return true; };
+window.__packs = []; window.ensurePacks = (p) => { window.__packs.push(JSON.stringify(p)); return Promise.resolve(); };
+</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/fr_college.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/parents.js"></script><script src="../src/app.js"></script>
+<script>
+// Espace parent (24.11) : état d'élève simulé → code → page parent en lecture seule ; plusieurs enfants ; ancien code.
+// ?shot=share|parent|kids|old : laisse l'écran affiché pour une capture (sans faire les tests).
+const fails = [], ok = (c, m) => { if (!c) fails.push(m); }, T = day(), D = (k) => addDays(T, k), log = [];
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+async function until(f, ms = 4000) { const t0 = Date.now(); while (Date.now() - t0 < ms) { try { const v = f(); if (v) return v; } catch (e) {} await wait(30); } return null; }
+const over = (root) => [...root.querySelectorAll("*")].filter((e) => e.scrollWidth > e.clientWidth + 1 && !["auto", "scroll"].includes(getComputedStyle(e).overflowX) && e.clientWidth > 0 && !e.closest("mjx-container, .figwrap")).map((e) => e.className || e.tagName);
+const txt = () => app.textContent.replace(/\s+/g, " ");
+function child(grade, seed) {
+  const s = Engine.newState({ system: "CH", grade, track: "college", minutes: 5 }); Engine.autoInit(s); s.placed = true;
+  const ids = Object.keys(s.notions).filter((id) => ["vu", "encours"].includes(s.notions[id].status) && GEN[id]).slice(0, 6);
+  s.history = [-5, -3, -2, 0].map((k) => ({ date: D(k), n: 5, score: 3 }));
+  s.comps = {}; ids.slice(0, 3).forEach((id, i) => { s.comps[id + ":0"] = { r: [0, 1, 1], n: 3, last: D(-i) }; });
+  Engine.snap(s, D(-5));
+  ids.slice(0, 3).forEach((id) => { s.comps[id + ":0"].r = [0, 1, 1, 1, 1, 1]; Object.assign(s.notions[id], { seen: 6, m: 0.8 }); });
+  s.carnet = ids.slice(3, 6).map((id, i) => { const q = Engine.make(s, id, 2); return { id, d: 2, code: q.code, date: D(-i), ok: 0, ...(i === 0 ? { m: "Tu as peut-être additionné au lieu de multiplier.", a: "12" } : {}) }; });
+  s.carnetOut = [D(-1)]; s.elo = { r: 1234 + seed, n: 40, log: [] };
+  return s;
+}
+async function importAs(code, nick) {
+  parentImport(code);
+  const inp = await until(() => document.getElementById("pnick") || app.querySelector(".par-week"));
+  if (inp && inp.id === "pnick") { if (nick !== undefined) { inp.value = nick; document.getElementById("pnew").click(); } else return "choix"; }
+  return await until(() => app.querySelector(".par-week") && !/Ouverture/.test(app.textContent) ? "vue" : null);
+}
+(async () => {
+  try {
+    const shot = (location.search.match(/shot=(\w+)/) || [])[1];
+    /* Appareil du parent : il a sa propre progression (9e), qui ne doit jamais être touchée. */
+    state = Engine.newState({ system: "CH", grade: 9, track: "college", minutes: 5 }); Engine.autoInit(state); state.placed = true; save();
+    const own = localStorage.getItem("5m2m.v1"), ownState = JSON.stringify(state);
+    const A = child(11, 1); A.pid = "enfantA1"; A.now = { ids: Object.keys(A.comps).slice(0, 1).map((c) => c.split(":")[0]), d: T };
+    const B = child(10, 2); B.pid = "enfantB2";
+    const codeA = await Backup.encode(A), codeB = await Backup.encode(B);
+    /* Aller-retour du code : carnet (codes, erreur repérée) et identifiant d'enfant */
+    const rA = await Backup.read(codeA), uA = Backup.unpack(rA, rA.t);
+    ok(uA.carnet && uA.carnet.length === 3 && uA.carnet.every((x, i) => x.code === A.carnet[i].code && x.date === A.carnet[i].date) && uA.carnet[0].m === A.carnet[0].m, "carnet dans le code " + JSON.stringify(uA.carnet));
+    ok(uA.pid === "enfantA1", "identifiant d'enfant dans le code");
+    ok(Backup.read("x#parent=" + codeA).then, "lien #parent= accepté");
+    if (shot === "share") { state = A; save(); homeTab = "prog"; screenHome(); document.getElementById("parentgo").click(); return; }
+    /* 1. Côté enfant : bouton dans Progrès, écran de transparence */
+    { const keep = state; state = A; homeTab = "prog"; screenHome();
+      const b = app.querySelector("#parentgo"); ok(!!b, "bouton « Envoyer à mes parents » dans Progrès");
+      homeTab = "today"; screenHome(); ok(!app.querySelector("#parentgo"), "pas de case ni de bouton sur l'accueil");
+      homeTab = "prog"; screenHome(); app.querySelector("#parentgo").click();
+      await until(() => /Ce qu'ils verront/.test(app.textContent));
+      ok(/Ce qu'ils verront/.test(txt()) && /Ce qu'ils ne verront pas/.test(txt()) && /3 problèmes de ton carnet/.test(txt()), "écran de transparence : " + txt().slice(0, 200));
+      ok(!over(app).length, "débordement écran enfant " + over(app));
+      document.getElementById("ppreview").click(); await until(() => app.querySelector(".par-week"));
+      ok(/aperçu/.test(txt()) && /La semaine de votre enfant/.test(txt()), "aperçu de la page parent");
+      ok(!Parents.load().kids.length, "l'aperçu n'enregistre rien");
+      state = keep; save(); }
+    const own2 = localStorage.getItem("5m2m.v1");
+    /* 2. Côté parent : premier enfant */
+    window.__packs = []; window.__net = [];
+    const r1 = await importAs(codeA, "Léa"); ok(r1 === "vue", "vue parent ouverte (enfant 1) " + r1);
+    if (shot === "parent") return;
+    ok(window.__packs.length && JSON.parse(window.__packs[0]).grade === 11, "paquets du profil chargés " + window.__packs);
+    ok(localStorage.getItem("5m2m.v1") === own2 && JSON.stringify(state) === JSON.stringify(JSON.parse(own2)), "progression de l'appareil intacte");
+    let t = txt();
+    ok(/La semaine de Léa/.test(t) && /4 jours de pratique sur 7/.test(t), "semaine : " + t.slice(0, 260));
+    ok(/Ce qui a été travaillé/.test(t) && Object.keys(A.comps).every((c) => t.includes(Parents.label(c.split(":")[0]))), "notions en mots");
+    ok(!Object.keys(A.comps).some((c) => new RegExp("\\b" + c.split(":")[0] + "\\b").test(app.querySelector(".par-week").textContent)), "pas d'identifiant de notion");
+    ok(/À fêter/.test(t), "réussite à fêter");
+    ok(!/Mathélo/.test(t) && !t.includes("1235"), "pas de Mathélo");
+    ok(/Photo du \d\d\.\d\d\.\d{4}/.test(t) && !app.querySelector(".par-old"), "date de la photo, pas d'avertissement");
+    ok(/En classe en ce moment/.test(t), "chapitre en classe");
+    const pbs = [...app.querySelectorAll(".par-pb")]; ok(pbs.length === 3, "3 problèmes à résoudre ensemble : " + pbs.length);
+    /* problème régénéré à l'identique */
+    const last = A.carnet[A.carnet.length - 1], q1 = Parents.problem(last.code), q2 = Engine.fromCode(last.code);
+    ok(q1 && q2 && q1.q === q2.q && q1.sol === q2.sol && q1.code === last.code, "problème régénéré identique " + last.code);
+    ok(pbs[0].querySelector(".qtext") && pbs[0].querySelector(".par-sol") && !pbs[0].querySelector(".par-sol").open, "énoncé, solution repliée");
+    ok(/Commencez par lui demander/.test(pbs[0].textContent), "questions à poser");
+    ok(app.querySelector(".par-diag") && /additionné au lieu de multiplier/.test(app.textContent), "erreur repérée affichée");
+    const nb = pbs[0].querySelector(".par-next");
+    if (nb) { nb.click(); ok(pbs[0].querySelectorAll(".par-hint").length === 1, "un indice dévoilé"); } else log.push("problème 1 sans étapes");
+    ok(/Pour l'accompagner/.test(t) && /Ne donnez pas la réponse/.test(t), "conseils");
+    ok(/À faire ensemble/.test(t), "activité à faire ensemble");
+    ok(!over(app).length && app.scrollWidth <= 360, "débordement page parent " + over(app).join() + " " + app.scrollWidth);
+    log.push("vue 1 : " + t.slice(0, 160));
+    /* 3. Deuxième enfant */
+    const r2 = await importAs(codeB, "Tom"); ok(r2 === "vue", "vue enfant 2 " + r2);
+    let L = Parents.load(); ok(L.kids.length === 2 && L.kids.map((k) => k.nick).join() === "Léa,Tom", "deux enfants " + JSON.stringify(L.kids.map((k) => k.nick)));
+    ok(app.querySelectorAll(".par-kids [data-kid]").length === 2 && /La semaine de Tom/.test(txt()), "onglets des enfants");
+    if (shot === "kids") return;
+    app.querySelector('.par-kids [data-kid="' + L.kids[0].id + '"]').click(); await until(() => /La semaine de Léa/.test(txt()) && app.querySelector(".par-week"));
+    ok(/La semaine de Léa/.test(txt()), "passage d'un enfant à l'autre");
+    /* 4. Nouveau code du même enfant : mise à jour sans question */
+    A.history.push({ date: D(-1), n: 4, score: 4 });
+    const codeA2 = await Backup.encode(A), r3 = await importAs(codeA2);
+    ok(r3 === "vue" && Parents.load().kids.length === 2 && Parents.load().kids[0].code === codeA2, "mise à jour du même enfant " + r3);
+    ok(/5 jours de pratique/.test(txt()), "semaine mise à jour");
+    /* 5. Ancien code (plus de 10 jours) */
+    const old = Backup.pack(B); old.t = D(-15); old.pid = "enfantC3";
+    const codeOld = "0" + Backup.b64(new TextEncoder().encode(JSON.stringify(old)));
+    const r4 = await importAs(codeOld, "Zoé"); ok(r4 === "vue", "vue ancien code " + r4);
+    ok(app.querySelector(".par-old") && /15 jours/.test(app.querySelector(".par-old").textContent), "ancien code signalé");
+    if (shot === "old") return;
+    /* 6. Code plus ancien que celui déjà reçu : le récent est gardé */
+    const olderA = Backup.pack(A); olderA.t = D(-3);
+    await importAs("0" + Backup.b64(new TextEncoder().encode(JSON.stringify(olderA))));
+    ok(Parents.load().kids.find((k) => k.pid === "enfantA1").code === codeA2, "photo plus récente gardée");
+    /* 7. Code sans identifiant (avant le 24.11) : choix d'un enfant existant */
+    const noPid = Backup.pack(B); delete noPid.pid; delete noPid.cn;
+    const r5 = await importAs("0" + Backup.b64(new TextEncoder().encode(JSON.stringify(noPid))));
+    ok(r5 === "choix" && app.querySelectorAll("[data-kid]").length === 0 || r5 === "choix", "code sans identifiant : question " + r5);
+    document.getElementById("pnick").value = "Ancien"; document.getElementById("pnew").click(); await until(() => app.querySelector(".par-week"));
+    ok(Parents.load().kids.length === 4 && /carnet d'erreurs est vide/.test(txt()), "ancien code sans carnet : pas d'erreur");
+    /* 8. Code abîmé */
+    parentImport("1abc"); await until(() => /incomplet/.test(txt())); ok(/Ce lien est incomplet/.test(txt()), "code abîmé");
+    /* 9. Route : #parent seul → dernier enfant vu ; rien n'est écrasé, rien n'est envoyé */
+    history.replaceState(null, "", "#parent"); ok(parentRoute() === true, "route #parent"); await until(() => app.querySelector(".par-week"));
+    ok(app.querySelector(".par-week"), "#parent ouvre le dernier enfant");
+    ok(localStorage.getItem("5m2m.v1") === own2, "progression de l'appareil intacte à la fin");
+    ping("open"); ok(!window.__net.length, "aucun envoi réseau : " + window.__net.join());
+    history.replaceState(null, "", location.pathname);
+  } catch (e) { fails.push("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }
+  document.getElementById("out").textContent = fails.length ? "ÉCHEC " + fails.join("\n") : "ok espace parent : " + log.join(" | ");
+})();
+</script>
