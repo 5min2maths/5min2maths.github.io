@@ -402,6 +402,13 @@
         { ctx: "f-de-f", fig: PL([{ f }]), guide: [GS("Première lecture : " + M("f(" + k + ")") + " ?", y1, M(y1) + "."), GS("Deuxième lecture : " + M("f(" + y1 + ")") + " ? (pars de " + M(y1) + " sur l'axe HORIZONTAL)", y2, M(y2) + ".")],
           traps: [TR(y1, "Ça, c'est f(" + k + ") ; il faut encore lire l'image de " + y1 + "."), TR(y1 * y1, "f(f(x)) n'est pas f(x)² : on relit l'image de " + y1 + " sur la courbe.")] }); },
   );
+  // « Trouve l'erreur » (24.11, chantier I, suite) : -(-k)^2 calculé comme +k^2.
+  FI[2].push(() => { for (let essai = 0; ; essai++) { const k = R.int(2, 5), b = nz(-6, 6), c = nz(-9, 9), x = -k, v = -k * k + b * x + c, faux = k * k + b * x + c, w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+    const q = QN("Soit " + M("f(x) = " + tri(-1, b, c)) + ". " + w + " calcule : « " + M("f(" + x + ") = " + k * k + sg(b * x) + sg(c) + " = " + faux) + " ». Trouve l'erreur, puis donne " + M("f(" + x + ")") + ".", v,
+      "Erreur : " + M("-x^2") + " vaut " + M("-(" + x + ")^2 = -" + k * k) + " : on élève au carré <b>avant</b> d'appliquer le signe moins. " + M("f(" + x + ") = -" + k * k + sg(b * x) + sg(c) + " = " + v) + ".",
+      { ctx: "erreur", guide: [GS(M("(" + x + ")^2") + " = ?", k * k, M(k * k) + "."), GS(M("-(" + x + ")^2") + " = ?", -k * k, M(-k * k) + " (le moins reste devant le carré)."), GS(M("f(" + x + ")") + " = ?", v, M(-k * k + sg(b * x) + sg(c) + " = " + v) + ".")],
+        traps: [TR(faux, "C'est le résultat de " + w + " : " + M("-(" + x + ")^2 = -" + k * k) + ", pas " + M("+" + k * k) + ".")] });
+    if (essai >= 20 || (Math.abs(v) > 1 && !trivialQ(q, 0) && !answerShown(q))) return q; } });
   const ALL = { fimg: FI, lectgraph: LG, racinv: RI, modaff: MA, transf: TF, absval: AV, morceaux: MO };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);

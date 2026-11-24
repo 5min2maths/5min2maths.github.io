@@ -281,6 +281,13 @@
         { ctx: "a-zeros-f0", fig: PLf([{ f: (x) => a * (x - p) * (x - q) }], [[0, f0, ""]], { yr: [-8, 8], squash: 0.8 }), guide: [GSet("Zéros lus ?", [p, q], M(p) + " et " + M(q) + "."), GS("Ordonnée à l'origine " + M("f(0)") + " (point marqué) ?", f0, M(f0) + "."), GS(M("f(0) = a \\cdot (0 - x_1)(0 - x_2) = " + p * q + "a") + ". Donc " + M("a") + " = ?", a, M(fT(a)) + ".")],
           traps: [TR(f0, "f(0) n'est pas a : f(0) = a · x₁ · x₂."), TR(-a, "La parabole est tournée vers le " + (a > 0 ? "haut : a > 0." : "bas : a < 0.")), TR(f0 / (p + q), "f(0) = a · x₁ · x₂ : on divise par le PRODUIT des zéros.")] }); },
   );
+  // « Trouve l'erreur » (24.11, chantier I, suite) : le signe moins devant un carré ne change que le premier terme.
+  PO[2].push(() => { let a, b; do { a = R.int(2, 7); b = R.int(2, 7); } while (a === b); const w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+    const sq = P2([1, -2 * b, b * b]), op = P2([-1, 2 * b, -b * b]), ans = P2([2 * (a + b), a * a - b * b]), faux = P2([2 * (a - b), a * a + b * b]);
+    return QX(w + " écrit : « " + M("(x + " + a + ")^2 - (x - " + b + ")^2 = x^2 + " + 2 * a + "x + " + a * a + " - x^2 - " + 2 * b + "x + " + b * b + " = " + faux) + " ». Trouve l'erreur, puis développe et réduis correctement.", ans, "expanded",
+      "Erreur : le signe moins s'applique à <b>tout</b> le carré. On développe d'abord " + M("(x - " + b + ")^2 = " + sq) + " entre parenthèses, puis on change tous les signes : " + M("-(" + sq + ") = " + op) + ". Donc " + M("x^2 + " + 2 * a + "x + " + a * a + " - x^2 + " + 2 * b + "x - " + b * b + " = " + ans) + ".",
+      { ctx: "erreur", guide: [GX("Développe " + M("(x - " + b + ")^2") + " :", sq, M(sq) + "."), GX("Change tous les signes : " + M("-(x - " + b + ")^2") + " = ?", op, M(op) + "."), GX("Ajoute " + M("(x + " + a + ")^2 = x^2 + " + 2 * a + "x + " + a * a) + " et réduis :", ans, M(ans) + ".")],
+        traps: [TX(faux, "C'est le résultat de " + w + " : le moins change le signe des trois termes du carré.")] }); });
   const ALL = { polyop: PO, factor2: FC, trinfact: TF, f2: F2, f2formes: FF };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);

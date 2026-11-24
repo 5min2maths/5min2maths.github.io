@@ -490,6 +490,12 @@
       "Erreur : l'hypoténuse est le plus grand côté ; " + M("c^2 = a^2 + b^2") + " donne " + M("b^2 = c^2 - a^2 = " + c * c + " - " + a * a + " = " + b * b) + ", donc " + M("b = " + b) + " cm.",
       { ctx: "erreur", guide: [GS(M("b^2 = c^2 - a^2") + " : " + M(c * c + " - " + a * a) + " = ?", b * b, M(b * b) + "."), GS(M("b = \\sqrt{" + b * b + "}") + " = ?", b, M(b) + " cm.")],
         traps: [TRAP(+Math.sqrt(c * c + a * a).toFixed(2), "C'est le calcul de " + w + " : une cathète est plus courte que l'hypoténuse, on soustrait les carrés.")] }); });
+  // « Trouve l'erreur » (24.11, chantier I, suite) : volume du cône sans le tiers.
+  VCONE[2].push(() => { const r = R.int(2, 8), h = R.int(4, 15), v = (Math.PI * r * r * h) / 3, faux = Math.PI * r * r * h, base = Math.PI * r * r, w = pk(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+    return Qv("Un cône a un rayon de " + cm(r) + " et une hauteur de " + cm(h) + ". " + w + " calcule son volume : « " + M("V = \\pi \\cdot " + r + "^2 \\cdot " + h + " \\approx " + N(Math.round(faux))) + " cm³ ». Trouve l'erreur, puis donne le bon volume (au cm³ près).", v,
+      "Erreur : " + w + " a calculé le volume du <b>cylindre</b> de même base et même hauteur. Un cône (comme une pyramide) en contient le tiers : " + M("V = \\frac{\\pi \\cdot " + r + "^2 \\cdot " + h + "}{3} \\approx " + N(Math.round(v))) + " cm³.",
+      { round: 1, ctx: "erreur", guide: [GS("Aire de la base " + M("\\pi \\cdot " + r + "^2") + " ≈ ? (au dixième, en cm²)", base, M("\\approx " + N(Math.round(base * 10) / 10)) + " cm².", 0.1), GS("Volume : aire de la base · hauteur, divisé par 3 ≈ ? (au cm³ près)", v, M("\\approx " + N(Math.round(v))) + " cm³.", 1)],
+        traps: [TR(faux, "C'est le résultat de " + w + " : c'est le volume du cylindre ; celui du cône est 3 fois plus petit."), TR((2 * Math.PI * r * h) / 3, "La base est un disque : son aire est " + M("\\pi r^2") + ".")] }); });
   const ALL = { pyth: PYTH, pythfig: PFIG, pythrec: PREC, vol: VOL, volcone: VCONE, airepyr: APYR, volcomp: VCOMP, volmanq: VMAN };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);

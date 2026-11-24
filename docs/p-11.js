@@ -871,6 +871,26 @@
         ["a² − b² = (a − b)(a + b).", c + " · " + d + " = (100 " + (c > 100 ? "+ " : "− ") + Math.abs(c - 100) + ")(100 " + (c > 100 ? "− " : "+ ") + Math.abs(c - 100) + ")."], "a) " + M("(" + a + " - " + b + ")(" + a + " + " + b + ") = " + (a - b) + " \\cdot 100 = " + (a * a - b * b)) + ". b) " + M("100^2 - " + (c - 100) ** 2 + " = " + c * d) + ". c) " + M("(30 - 1)^2 = 900 - 60 + 1 = 841") + "."); }],
   };
 
+  // « Trouve l'erreur » (24.11, chantier I, suite) : exposants d'un produit, signe devant la parenthèse, carré d'une somme.
+  const camarade = () => pk(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+  MON[2].push(() => { let m, n; do { m = R.int(2, 5); n = R.int(2, 5); } while (m * n === m + n); const a = R.int(2, 6), b = R.int(2, 6), w = camarade();
+    const L = X1(a * b, { x: m + n });
+    return Qx(w + " écrit : « " + M(a + "x^{" + m + "} \\cdot " + b + "x^{" + n + "} = " + a * b + "x^{" + m * n + "}") + " ». Trouve l'erreur, puis donne le bon produit.", L,
+      "Erreur : " + M("x^{" + m + "} \\cdot x^{" + n + "}") + " compte " + m + " + " + n + " facteurs " + M("x") + " : on <b>additionne</b> les exposants. " + M(a + " \\cdot " + b + " = " + a * b) + ", donc " + M(tex(L)) + ".",
+      { ...red, ctx: "erreur", guide: [GS("Coefficient : " + M(a + " \\cdot " + b) + " = ?", a * b, M(a * b) + "."), GS("Exposant de " + M("x") + " : " + M(m + " + " + n) + " = ?", m + n, M(m + n) + "."), GX("Le bon produit :", L, M(tex(L)) + ".", "reduced")],
+        traps: [TX(X1(a * b, { x: m * n }), "C'est le résultat de " + w + " : on multiplie les exposants seulement pour une puissance de puissance.")] }); });
+  DIS[2].push(() => { const k = R.int(2, 7), a = R.int(2, 6), b = R.int(2, 9), L = lin(-k * a, k * b), F = lin(-k * a, -k * b), w = camarade();
+    return Qx(w + " écrit : « " + M("-" + k + "(" + a + "x - " + b + ") = " + tex(F)) + " ». Trouve l'erreur, puis développe correctement.", L,
+      "Erreur : le facteur " + M("-" + k) + " multiplie aussi " + M("-" + b) + ", et moins par moins donne plus : " + M("(-" + k + ") \\cdot (-" + b + ") = +" + k * b) + ". Donc " + M(tex(L)) + ".",
+      { ...red, ctx: "erreur", guide: [GX("Premier terme : " + M("(-" + k + ") \\cdot " + a + "x") + " = ?", X1(-k * a), M(-k * a + "x") + ".", "reduced"), GS("Deuxième terme : " + M("(-" + k + ") \\cdot (-" + b + ")") + " = ?", k * b, M("+" + k * b) + "."), GX("Le bon développement :", L, M(tex(L)) + ".", "reduced")],
+        traps: [TX(F, "C'est le résultat de " + w + " : attention au signe du deuxième produit.")] }); });
+  IDR[2].push(() => { const b = pk([1, 1, 2, 3]), a = R.int(2, 9), s = pk([1, -1]), w = camarade(), bx = (b === 1 ? "" : b) + "x";
+    const L = norm([[b * b, { x: 2 }], [2 * s * a * b, { x: 1 }], [a * a, {}]]), F = norm([[b * b, { x: 2 }], [a * a, {}]]);
+    return Qx(w + " écrit : « " + M("(" + bx + (s > 0 ? " + " : " - ") + a + ")^2 = " + tex(F)) + " ». Trouve l'erreur, puis développe correctement.", L,
+      "Erreur : un carré, c'est un produit : " + M("(" + bx + (s > 0 ? " + " : " - ") + a + ")(" + bx + (s > 0 ? " + " : " - ") + a + ")") + ". Il manque le double produit " + M((s > 0 ? "" : "-") + "2 \\cdot " + bx + " \\cdot " + a + " = " + 2 * s * a * b + "x") + ". Donc " + M(tex(L)) + ".",
+      { ...red, ctx: "erreur", guide: [GS("Double produit : " + M("2 \\cdot " + bx + " \\cdot " + (s > 0 ? a : "(-" + a + ")")) + " ; coefficient de " + M("x") + " ?", 2 * s * a * b, M(2 * s * a * b + "x") + "."), GX("Le bon développement :", L, M(tex(L)) + ".", "reduced")],
+        traps: [TX(F, "C'est le résultat de " + w + " : " + M("(a + b)^2 \\neq a^2 + b^2") + ", il manque le double produit.")] }); });
+
   // ===================== Enregistrement =====================
   const ALL = { litelab: LIT, valnum: VAL, reduire: RED, monomes: MON, parenth: PAR, distrib: DIS, idrem: IDR, factor: FAC };
   for (const [id, lv] of Object.entries(ALL)) {
@@ -1500,6 +1520,35 @@
       "Erreur : " + M(a + "^{" + m + "}") + " compte " + m + " facteurs " + a + " et " + M(a + "^{" + n + "}") + " en compte " + n + " : en tout " + M(m + " + " + n + " = " + (m + n)) + " facteurs, donc " + M(a + "^{" + (m + n) + "}") + ". On multiplie les exposants pour une puissance de puissance, " + M("(" + a + "^{" + m + "})^{" + n + "}") + ".",
       { ctx: "erreur", guide: [GS("Combien de facteurs " + a + " dans " + M(a + "^{" + m + "}") + " ?", m, M(m) + "."), GS("Et dans " + M(a + "^{" + n + "}") + " ?", n, M(n) + "."), GS("En tout (le bon exposant) ?", m + n, M(m + n) + ".")],
         traps: [TRAP(m * n, "C'est l'exposant de " + w + " : on additionne les exposants quand on multiplie deux puissances de même base.")] }); });
+  // « Trouve l'erreur » (24.11, chantier I, suite) : priorités, fractions (addition, division), notation scientifique.
+  const camarade = () => pk(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+  // prio : la soustraction faite avant la multiplication par la parenthèse.
+  PRIO[2].push(() => { const b = R.int(2, 5), c = R.int(2, 6), d = R.int(2, 7), v = R.int(3, 15), a = b * (c + d) + v, faux = (a - b) * (c + d), w = camarade();
+    if ([a, b, c, d, c + d, a - b, faux].includes(v)) return null;
+    return Qv(w + " écrit : « " + M(a + " - " + b + " \\cdot (" + c + " + " + d + ") = " + (a - b) + " \\cdot " + (c + d) + " = " + faux) + " ». Trouve l'erreur, puis calcule correctement.", v,
+      "Erreur : " + w + " a soustrait avant de multiplier. Parenthèses d'abord, puis la multiplication, enfin la soustraction : " + M(a + " - " + b + " \\cdot " + (c + d) + " = " + a + " - " + b * (c + d) + " = " + v) + ".",
+      { ctx: "erreur", guide: [GS("Parenthèses d'abord : " + M(c + " + " + d) + " = ?", c + d, M(c + d) + "."), GS("Puis la multiplication : " + M(b + " \\cdot " + (c + d)) + " = ?", b * (c + d), M(b * (c + d)) + "."), GS("Enfin " + M(a + " - " + b * (c + d)) + " = ?", v, M(v) + ".")],
+        traps: [TR(faux, "C'est le calcul de " + w + " : la multiplication passe avant la soustraction.")] }); });
+  // fracadd : numérateurs et dénominateurs additionnés entre eux.
+  FADD[2].push(() => { const [b, e] = pk(PAIRS), a = cop(1, b), c = cop(1, e), res = qa([a, b], [c, e]), w = camarade(), f = rq(a + c, b + e), L = lcm(b, e);
+    return Qv(w + " écrit : « " + M(fT(a, b) + " + " + fT(c, e) + " = " + fT(a + c, b + e)) + " ». Trouve l'erreur, puis donne le bon résultat (fraction irréductible).", qv(res),
+      "Erreur : on n'additionne pas les dénominateurs (sinon " + M(fT(1, 2) + " + " + fT(1, 2)) + " ferait " + M(fT(2, 4)) + ", une demie !). Même dénominateur d'abord : " + M(fT(a * L / b, L) + " + " + fT(c * L / e, L) + " = " + qT(res)) + ".",
+      { ctx: "erreur", guide: [GS("Plus petit dénominateur commun de " + M(b) + " et " + M(e) + " ?", L, M(L) + "."), GS("Numérateur de la somme : " + M(a + " \\cdot " + L / b + " + " + c + " \\cdot " + L / e) + " = ?", (a * L) / b + (c * L) / e, M((a * L) / b + (c * L) / e) + ", sur " + M(L) + "."), GS("Résultat (fraction irréductible) ?", qv(res), M(fT((a * L) / b + (c * L) / e, L) + (gcd2((a * L) / b + (c * L) / e, L) > 1 ? " = " + qT(res) : "")) + ".")], traps: [TR(qv(f), "C'est le résultat de " + w + " : on met les fractions au même dénominateur, puis on additionne les numérateurs seulement.")] }); });
+  // fracmul : division sans passer par l'inverse.
+  FMUL[2].push(() => { let a, b, c, e; do { b = R.int(2, 9); e = R.int(2, 9); a = irr(b, 9); c = irr(e, 9); } while (a * e === b * c || c === e || a * c === b * e);
+    const res = rq(a * e, b * c), f = rq(a * c, b * e), w = camarade();
+    return Qv(w + " écrit : « " + M(fT(a, b) + " : " + fT(c, e) + " = " + fT(a, b) + " \\cdot " + fT(c, e) + " = " + qT(f)) + " ». Trouve l'erreur, puis donne le bon quotient (fraction irréductible).", qv(res),
+      "Erreur : diviser par " + M(fT(c, e)) + ", c'est multiplier par son <b>inverse</b> " + M(fT(e, c)) + " : " + M(fT(a, b) + " \\cdot " + fT(e, c) + " = " + qT(res)) + ".",
+      { ctx: "erreur", guide: [GS("L'inverse de " + M(fT(c, e)) + " ? (tape la fraction)", e / c, M(fT(e, c)) + "."), GS("Calcule " + M(fT(a, b) + " \\cdot " + fT(e, c)) + " (fraction irréductible) :", qv(res), M(qT(res)) + ".")],
+        traps: [TR(qv(f), "C'est le résultat de " + w + " : il a multiplié par " + M(fT(c, e)) + " au lieu de son inverse.")] }); });
+  // scicalc : quotient de puissances de 10, exposant négatif mal soustrait.
+  SCALC[2].push(() => { const [a, b] = pk([[8, 2], [6, 3], [9, 3], [8, 4], [7.5, 2.5], [6, 2], [9, 2], [4.8, 1.6]]), m = R.int(3, 8), n = -R.int(2, 6), k = r12(a / b), w = camarade();
+    if (m + n === 0 || m + n === 1) return null;
+    const v = sv(k, m - n), f = sv(k, m + n);
+    return Qv(w + " écrit : « " + M("\\frac{" + S(a, m) + "}{" + S(b, n) + "} = " + S(k, m + n)) + " ». Trouve l'erreur, puis donne le bon résultat en notation scientifique.", v,
+      "Erreur : pour un quotient, on <b>soustrait</b> les exposants : " + M(m + " - (" + n + ") = " + (m - n)) + ". " + M(N(a) + " : " + N(b) + " = " + N(k)) + ", donc " + M(S(k, m - n)) + ".",
+      { sci: true, ctx: "erreur", guide: [GS("Nombres devant : " + M(N(a) + " : " + N(b)) + " = ?", k, M(N(k)) + "."), GS("Exposant : " + M(m + " - (" + n + ")") + " = ?", m - n, M(m - n) + " (soustraire un négatif, c'est ajouter)."), GSci("Résultat en notation scientifique ?", v, M(S(k, m - n)) + ".")],
+        traps: [TR(f, "C'est le résultat de " + w + " : " + M("10^{" + m + "} : 10^{" + n + "} = 10^{" + m + " - (" + n + ")}") + ".")] }); });
   const ALL = { prio: PRIO, fracadd: FADD, fracmul: FMUL, fracconv: FCONV, puiss: PUISS, sci: SCI, scicalc: SCALC };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
@@ -2019,6 +2068,12 @@
       "Erreur : l'hypoténuse est le plus grand côté ; " + M("c^2 = a^2 + b^2") + " donne " + M("b^2 = c^2 - a^2 = " + c * c + " - " + a * a + " = " + b * b) + ", donc " + M("b = " + b) + " cm.",
       { ctx: "erreur", guide: [GS(M("b^2 = c^2 - a^2") + " : " + M(c * c + " - " + a * a) + " = ?", b * b, M(b * b) + "."), GS(M("b = \\sqrt{" + b * b + "}") + " = ?", b, M(b) + " cm.")],
         traps: [TRAP(+Math.sqrt(c * c + a * a).toFixed(2), "C'est le calcul de " + w + " : une cathète est plus courte que l'hypoténuse, on soustrait les carrés.")] }); });
+  // « Trouve l'erreur » (24.11, chantier I, suite) : volume du cône sans le tiers.
+  VCONE[2].push(() => { const r = R.int(2, 8), h = R.int(4, 15), v = (Math.PI * r * r * h) / 3, faux = Math.PI * r * r * h, base = Math.PI * r * r, w = pk(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+    return Qv("Un cône a un rayon de " + cm(r) + " et une hauteur de " + cm(h) + ". " + w + " calcule son volume : « " + M("V = \\pi \\cdot " + r + "^2 \\cdot " + h + " \\approx " + N(Math.round(faux))) + " cm³ ». Trouve l'erreur, puis donne le bon volume (au cm³ près).", v,
+      "Erreur : " + w + " a calculé le volume du <b>cylindre</b> de même base et même hauteur. Un cône (comme une pyramide) en contient le tiers : " + M("V = \\frac{\\pi \\cdot " + r + "^2 \\cdot " + h + "}{3} \\approx " + N(Math.round(v))) + " cm³.",
+      { round: 1, ctx: "erreur", guide: [GS("Aire de la base " + M("\\pi \\cdot " + r + "^2") + " ≈ ? (au dixième, en cm²)", base, M("\\approx " + N(Math.round(base * 10) / 10)) + " cm².", 0.1), GS("Volume : aire de la base · hauteur, divisé par 3 ≈ ? (au cm³ près)", v, M("\\approx " + N(Math.round(v))) + " cm³.", 1)],
+        traps: [TR(faux, "C'est le résultat de " + w + " : c'est le volume du cylindre ; celui du cône est 3 fois plus petit."), TR((2 * Math.PI * r * h) / 3, "La base est un disque : son aire est " + M("\\pi r^2") + ".")] }); });
   const ALL = { pyth: PYTH, pythfig: PFIG, pythrec: PREC, vol: VOL, volcone: VCONE, airepyr: APYR, volcomp: VCOMP, volmanq: VMAN };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
@@ -2386,6 +2441,12 @@
       "Erreur : Thalès compare le petit triangle " + M("ADE") + " au grand " + M("ABC") + " : " + M("\\frac{AD}{AB} = \\frac{DE}{BC}") + ", avec " + M("AB = AD + DB = " + ab) + ". Donc " + M("BC = " + de + " \\cdot \\frac{" + ab + "}{" + ad + "} = " + bc) + " cm.",
       { ctx: "erreur", fig: GF.thales(1 / k, { AD: ad + "", DB: db + "", DE: de + "", BC: "?" }), guide: [GS("Le grand triangle a pour côté " + M("AB = AD + DB") + " = ?", ab, M(ab) + " cm."), GS("Rapport d'agrandissement " + M("AB : AD") + " ?", k, M(k) + "."), GS(M("BC = DE \\cdot " + k) + " = ?", bc, M(bc) + " cm.")],
         traps: [TRAP(faux, "C'est le calcul de " + w + " : " + M("DB") + " n'est pas un côté du grand triangle, c'est " + M("AB") + " qu'il faut.")] }); });
+  // « Trouve l'erreur » (24.11, chantier I, suite) : aire multipliée par k au lieu de k².
+  SIM[2].push(() => { const k = pk([2, 3, 1.5, 2.5, 4]), A = 2 * R.int(3, 15), v = r6(A * k * k), faux = r6(A * k), w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]), c = pk([["Un logo", "logo"], ["Une photo", "photo"], ["Le dessin d'un jardin", "jardin"], ["Un panneau", "panneau"]]);
+    return Qv(c[0] + " a une aire de " + M(A) + " cm². On l'agrandit : toutes les longueurs sont multipliées par " + M(N(k)) + ". " + w + " écrit : « nouvelle aire : " + M(A + " \\cdot " + N(k) + " = " + N(faux)) + " cm² ». Trouve l'erreur, puis donne la nouvelle aire (en cm²).", v,
+      "Erreur : une aire est un produit de deux longueurs, et chacune est multipliée par " + M(N(k)) + " : l'aire est multipliée par " + M(N(k) + "^2 = " + N(k * k)) + ". " + M(A + " \\cdot " + N(k * k) + " = " + N(v)) + " cm².",
+      { ctx: "erreur", guide: [GS("Par combien l'aire est-elle multipliée ? (" + M("k^2") + ")", k * k, M(N(k) + "^2 = " + N(k * k)) + "."), GS("Nouvelle aire ?", v, M(A + " \\cdot " + N(k * k) + " = " + N(v)) + " cm².")],
+        traps: [TR(faux, "C'est le résultat de " + w + " : longueurs × " + N(k).replace("{,}", ",") + ", mais aires × " + N(k * k).replace("{,}", ",") + ".")] }); });
   const ALL = { thales: TH, thalesrec: REC, simil: SIM };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
@@ -2948,6 +3009,18 @@
     racprop: [() => P("Un carré a une aire de 50 cm².", [["a) Son côté vaut a√2 : a ?", 5], ["b) Sa diagonale (cm)", 10], ["c) Aire du carré construit sur la diagonale (cm²)", 100]], ["√50 = √(25 · 2).", "Diagonale = côté · √2."], "a) " + M("5\\sqrt{2}") + " ; b) " + M("5\\sqrt{2} \\cdot \\sqrt{2} = 10") + " ; c) " + M("100") + ".")],
   };
 
+  // « Trouve l'erreur » (24.11, chantier I, suite) : racine d'une somme, pourcentages successifs.
+  const camarade = () => pk(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+  RA[2].push(() => { let [a, b, c] = pk([[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 15, 17], [9, 12, 15], [12, 16, 20], [7, 24, 25]]); if (R.rand() < 0.5) [a, b] = [b, a]; const w = camarade();
+    return Qv(w + " écrit : « " + M("\\sqrt{" + a * a + " + " + b * b + "} = \\sqrt{" + a * a + "} + \\sqrt{" + b * b + "} = " + a + " + " + b + " = " + (a + b)) + " ». Trouve l'erreur, puis calcule correctement " + M("\\sqrt{" + a * a + " + " + b * b + "}") + ".", c,
+      "Erreur : la racine d'une somme n'est pas la somme des racines. On calcule d'abord sous la racine : " + M("\\sqrt{" + a * a + " + " + b * b + "} = \\sqrt{" + c * c + "} = " + c) + ". (Contrôle : " + M(c + "^2 = " + c * c) + ", alors que " + M((a + b) + "^2 = " + (a + b) * (a + b)) + ".)",
+      { ctx: "erreur", guide: [GS("D'abord sous la racine : " + M(a * a + " + " + b * b) + " = ?", c * c, M(c * c) + "."), GS(M("\\sqrt{" + c * c + "}") + " = ?", c, M(c) + ", car " + M(c + "^2 = " + c * c) + ".")],
+        traps: [TR(a + b, "C'est le résultat de " + w + " : " + M("\\sqrt{a + b} \\neq \\sqrt{a} + \\sqrt{b}") + ".")] }); });
+  PV[2].push(() => { const t = pk([10, 20, 30, 40, 50]), p = pk([80, 120, 160, 200, 240, 400, 480]), p1 = r6(p * (1 + t / 100)), red = r6(p1 * t / 100), v = r6(p1 - red), w = camarade(), c = pk([["Le prix d'un vélo", "velo"], ["Le prix d'une trottinette", "trottinette"], ["Le prix d'un abonnement", "abonnement"]]);
+    return Qv(c[0] + " de " + M(p) + " CHF augmente de " + M(t + "\\,\\%") + ", puis baisse de " + M(t + "\\,\\%") + ". " + w + " affirme : « +" + t + " % puis −" + t + " %, ça s'annule : on revient à " + M(p) + " CHF ». Trouve l'erreur, puis donne le prix final (en CHF).", v,
+      "Erreur : la baisse se calcule sur le <b>nouveau</b> prix, plus grand. Hausse : " + M(p + " \\cdot " + N(1 + t / 100) + " = " + N(p1)) + " CHF ; baisse : " + M(N(p1) + " \\cdot " + N(1 - t / 100) + " = " + N(v)) + " CHF, moins que le prix de départ.",
+      { ctx: "erreur", guide: [GS("Prix après la hausse de " + M(t + "\\,\\%") + " ?", p1, M(p + " \\cdot " + N(1 + t / 100) + " = " + N(p1)) + " CHF."), GS("Montant de la baisse : " + M(t + "\\,\\%") + " de " + M(N(p1)) + " ?", red, M(N(red)) + " CHF (plus que la hausse de " + M(N(r6(p * t / 100))) + " CHF)."), GS("Prix final ?", v, M(N(p1) + " - " + N(red) + " = " + N(v)) + " CHF.")],
+        traps: [TR(p, "C'est l'affirmation de " + w + " : les deux " + t + " % ne portent pas sur le même prix."), TR(p1, "C'est le prix après la hausse ; il reste la baisse.")] }); });
   const ALL = { rel: RE, fracops: FO, rac: RA, racprop: RP, carres: CA, pctvar: PV };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);

@@ -178,6 +178,12 @@
       "Erreur : Thalès compare le petit triangle " + M("ADE") + " au grand " + M("ABC") + " : " + M("\\frac{AD}{AB} = \\frac{DE}{BC}") + ", avec " + M("AB = AD + DB = " + ab) + ". Donc " + M("BC = " + de + " \\cdot \\frac{" + ab + "}{" + ad + "} = " + bc) + " cm.",
       { ctx: "erreur", fig: GF.thales(1 / k, { AD: ad + "", DB: db + "", DE: de + "", BC: "?" }), guide: [GS("Le grand triangle a pour côté " + M("AB = AD + DB") + " = ?", ab, M(ab) + " cm."), GS("Rapport d'agrandissement " + M("AB : AD") + " ?", k, M(k) + "."), GS(M("BC = DE \\cdot " + k) + " = ?", bc, M(bc) + " cm.")],
         traps: [TRAP(faux, "C'est le calcul de " + w + " : " + M("DB") + " n'est pas un côté du grand triangle, c'est " + M("AB") + " qu'il faut.")] }); });
+  // « Trouve l'erreur » (24.11, chantier I, suite) : aire multipliée par k au lieu de k².
+  SIM[2].push(() => { const k = pk([2, 3, 1.5, 2.5, 4]), A = 2 * R.int(3, 15), v = r6(A * k * k), faux = r6(A * k), w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]), c = pk([["Un logo", "logo"], ["Une photo", "photo"], ["Le dessin d'un jardin", "jardin"], ["Un panneau", "panneau"]]);
+    return Qv(c[0] + " a une aire de " + M(A) + " cm². On l'agrandit : toutes les longueurs sont multipliées par " + M(N(k)) + ". " + w + " écrit : « nouvelle aire : " + M(A + " \\cdot " + N(k) + " = " + N(faux)) + " cm² ». Trouve l'erreur, puis donne la nouvelle aire (en cm²).", v,
+      "Erreur : une aire est un produit de deux longueurs, et chacune est multipliée par " + M(N(k)) + " : l'aire est multipliée par " + M(N(k) + "^2 = " + N(k * k)) + ". " + M(A + " \\cdot " + N(k * k) + " = " + N(v)) + " cm².",
+      { ctx: "erreur", guide: [GS("Par combien l'aire est-elle multipliée ? (" + M("k^2") + ")", k * k, M(N(k) + "^2 = " + N(k * k)) + "."), GS("Nouvelle aire ?", v, M(A + " \\cdot " + N(k * k) + " = " + N(v)) + " cm².")],
+        traps: [TR(faux, "C'est le résultat de " + w + " : longueurs × " + N(k).replace("{,}", ",") + ", mais aires × " + N(k * k).replace("{,}", ",") + ".")] }); });
   const ALL = { thales: TH, thalesrec: REC, simil: SIM };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);

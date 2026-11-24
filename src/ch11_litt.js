@@ -457,6 +457,26 @@
         ["a² − b² = (a − b)(a + b).", c + " · " + d + " = (100 " + (c > 100 ? "+ " : "− ") + Math.abs(c - 100) + ")(100 " + (c > 100 ? "− " : "+ ") + Math.abs(c - 100) + ")."], "a) " + M("(" + a + " - " + b + ")(" + a + " + " + b + ") = " + (a - b) + " \\cdot 100 = " + (a * a - b * b)) + ". b) " + M("100^2 - " + (c - 100) ** 2 + " = " + c * d) + ". c) " + M("(30 - 1)^2 = 900 - 60 + 1 = 841") + "."); }],
   };
 
+  // « Trouve l'erreur » (24.11, chantier I, suite) : exposants d'un produit, signe devant la parenthèse, carré d'une somme.
+  const camarade = () => pk(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+  MON[2].push(() => { let m, n; do { m = R.int(2, 5); n = R.int(2, 5); } while (m * n === m + n); const a = R.int(2, 6), b = R.int(2, 6), w = camarade();
+    const L = X1(a * b, { x: m + n });
+    return Qx(w + " écrit : « " + M(a + "x^{" + m + "} \\cdot " + b + "x^{" + n + "} = " + a * b + "x^{" + m * n + "}") + " ». Trouve l'erreur, puis donne le bon produit.", L,
+      "Erreur : " + M("x^{" + m + "} \\cdot x^{" + n + "}") + " compte " + m + " + " + n + " facteurs " + M("x") + " : on <b>additionne</b> les exposants. " + M(a + " \\cdot " + b + " = " + a * b) + ", donc " + M(tex(L)) + ".",
+      { ...red, ctx: "erreur", guide: [GS("Coefficient : " + M(a + " \\cdot " + b) + " = ?", a * b, M(a * b) + "."), GS("Exposant de " + M("x") + " : " + M(m + " + " + n) + " = ?", m + n, M(m + n) + "."), GX("Le bon produit :", L, M(tex(L)) + ".", "reduced")],
+        traps: [TX(X1(a * b, { x: m * n }), "C'est le résultat de " + w + " : on multiplie les exposants seulement pour une puissance de puissance.")] }); });
+  DIS[2].push(() => { const k = R.int(2, 7), a = R.int(2, 6), b = R.int(2, 9), L = lin(-k * a, k * b), F = lin(-k * a, -k * b), w = camarade();
+    return Qx(w + " écrit : « " + M("-" + k + "(" + a + "x - " + b + ") = " + tex(F)) + " ». Trouve l'erreur, puis développe correctement.", L,
+      "Erreur : le facteur " + M("-" + k) + " multiplie aussi " + M("-" + b) + ", et moins par moins donne plus : " + M("(-" + k + ") \\cdot (-" + b + ") = +" + k * b) + ". Donc " + M(tex(L)) + ".",
+      { ...red, ctx: "erreur", guide: [GX("Premier terme : " + M("(-" + k + ") \\cdot " + a + "x") + " = ?", X1(-k * a), M(-k * a + "x") + ".", "reduced"), GS("Deuxième terme : " + M("(-" + k + ") \\cdot (-" + b + ")") + " = ?", k * b, M("+" + k * b) + "."), GX("Le bon développement :", L, M(tex(L)) + ".", "reduced")],
+        traps: [TX(F, "C'est le résultat de " + w + " : attention au signe du deuxième produit.")] }); });
+  IDR[2].push(() => { const b = pk([1, 1, 2, 3]), a = R.int(2, 9), s = pk([1, -1]), w = camarade(), bx = (b === 1 ? "" : b) + "x";
+    const L = norm([[b * b, { x: 2 }], [2 * s * a * b, { x: 1 }], [a * a, {}]]), F = norm([[b * b, { x: 2 }], [a * a, {}]]);
+    return Qx(w + " écrit : « " + M("(" + bx + (s > 0 ? " + " : " - ") + a + ")^2 = " + tex(F)) + " ». Trouve l'erreur, puis développe correctement.", L,
+      "Erreur : un carré, c'est un produit : " + M("(" + bx + (s > 0 ? " + " : " - ") + a + ")(" + bx + (s > 0 ? " + " : " - ") + a + ")") + ". Il manque le double produit " + M((s > 0 ? "" : "-") + "2 \\cdot " + bx + " \\cdot " + a + " = " + 2 * s * a * b + "x") + ". Donc " + M(tex(L)) + ".",
+      { ...red, ctx: "erreur", guide: [GS("Double produit : " + M("2 \\cdot " + bx + " \\cdot " + (s > 0 ? a : "(-" + a + ")")) + " ; coefficient de " + M("x") + " ?", 2 * s * a * b, M(2 * s * a * b + "x") + "."), GX("Le bon développement :", L, M(tex(L)) + ".", "reduced")],
+        traps: [TX(F, "C'est le résultat de " + w + " : " + M("(a + b)^2 \\neq a^2 + b^2") + ", il manque le double produit.")] }); });
+
   // ===================== Enregistrement =====================
   const ALL = { litelab: LIT, valnum: VAL, reduire: RED, monomes: MON, parenth: PAR, distrib: DIS, idrem: IDR, factor: FAC };
   for (const [id, lv] of Object.entries(ALL)) {

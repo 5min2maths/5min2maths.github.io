@@ -588,6 +588,12 @@
         { ctx: "expression-fraction", fig: PLT([{ f: (x) => a * x + b }]), guide: [GN("Pente : en avançant de 2, de combien la droite monte-t-elle (négatif si elle descend) ? Divise par 2 :", a, M("a = " + fT(a)) + "."), GN("Ordonnée à l'origine " + M("b") + " (à mi-chemin entre deux graduations, ou calcule-la avec un point) ?", b, M("b = " + fT(b)) + "."), GX(M("f(x)") + " = ?", linP(a, b), M("f(x) = " + lin(a, b)) + ".")],
           traps: [TX(linP(2 / p, b), "Pente = variation verticale ÷ variation horizontale (pas l'inverse)."), TX(linP(a, Math.round(b)), "L'ordonnée à l'origine n'est pas entière : elle est à mi-chemin entre deux graduations."), TX(linP(-a, b), "Vérifie si la droite monte ou descend.")] }); },
   );
+  // « Trouve l'erreur » (24.11, chantier I, suite) : division par un négatif sans retourner le sens.
+  IQ[2].push(() => { const a = R.int(2, 6), x0 = nz(-6, 6), b = nz(-9, 9), op = pk(ops), c = -a * x0 + b, rs = flip[op], I = [ivOp(rs, x0)], w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+    return QS(w + " résout " + M(lin(-a, b) + " " + opT[op] + " " + c) + " : « " + M("-" + a + "x " + opT[op] + " " + (c - b)) + ", je divise par " + M("-" + a) + " : " + SX(op, x0) + " ». Trouve l'erreur, puis donne les solutions." + ANI, I,
+      "Erreur : en divisant (ou multipliant) par un nombre <b>négatif</b>, on retourne le sens de l'inégalité. " + M("-" + a + "x " + opT[op] + " " + (c - b)) + " donne " + SX(rs, x0) + ". Contrôle avec " + M("x = " + (x0 + (rs[0] === ">" ? 1 : -1))) + " : " + M(lin(-a, b) + " = " + (-a * (x0 + (rs[0] === ">" ? 1 : -1)) + b)) + ", ça marche.",
+      { ctx: "erreur", guide: [GN("On retire " + M(fT(b)) + " des deux côtés : " + M("-" + a + "x " + opT[op]) + " ?", c - b, M(c + sg(-b) + " = " + (c - b)) + "."), GSS("On divise par " + M("-" + a) + " (négatif : le sens se retourne). Solutions ?", I, SX(rs, x0) + ".")],
+        traps: [TS([ivOp(op, x0)], "C'est la réponse de " + w + " : il a oublié de retourner le sens en divisant par " + M("-" + a) + ".")] }); });
   const ALL = { sys2: SYS2, sysprob: SPROB, sysgraph: SGRAPH, sys3: SYS3, affine: AFF, affzero: AZ, sysineq: SI, ineq: IQ };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);

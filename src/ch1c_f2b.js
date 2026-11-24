@@ -293,6 +293,13 @@
     ineq2: [() => P("On résout x² − 2x − 8 ≤ 0.", [["a) Plus petit zéro", -2], ["b) Plus grand zéro", 4], ["c) Nombre d'entiers solutions", 7]], ["(x − 4)(x + 2).", "Solution [−2 ; 4]."], "a) −2 ; b) 4 ; c) de −2 à 4 : 7 entiers.")],
   };
 
+  // « Trouve l'erreur » (24.11, chantier I, suite) : x^2 > k^2 « donc x > k » (solutions négatives oubliées).
+  IQ[2].push(() => { const op = pk(["<", "<=", ">", ">="]), k = R.int(2, 9), f = (x) => x * x - k * k, ivs = signSet(f, [-k, k], [], op), w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]),
+      faux = op[0] === "<" ? [[-Infinity, false, k, op === "<="]] : [[k, op === ">=", Infinity, false]];
+    return QS(w + " résout " + M("x^2 " + opLabel(op) + " " + k * k) + " : « je prends la racine : " + M("x " + opLabel(op) + " " + k) + " ». Trouve l'erreur, puis donne l'ensemble des solutions.", ivs,
+      "Erreur : " + w + " oublie les nombres négatifs ; par exemple " + M("(-" + (k + 1) + ")^2 = " + (k + 1) * (k + 1)) + (op[0] === "<" ? " ne vérifie pas l'inéquation, alors que " + M("-" + (k + 1) + " " + opLabel(op) + " " + k) + "." : " vérifie l'inéquation.") + " " + M("x^2 - " + k * k + " = (x - " + k + ")(x + " + k + ")") + ", zéros " + M(-k) + " et " + M(k) + " : " + M("S = " + IT(ivs)) + ".",
+      { ctx: "erreur", guide: [GSet("Zéros de " + M("x^2 - " + k * k) + " ?", [-k, k], M(-k) + " et " + M(k) + "."), GSS("Solution ? (parabole tournée vers le haut)", ivs, M(IT(ivs)) + ".")],
+        traps: [TS(faux, "C'est la réponse de " + w + " : " + M("\\sqrt{x^2} = |x|") + ", il y a aussi des solutions négatives" + (op[0] === "<" ? " et une borne à gauche." : "."))] }); });
   const ALL = { f2expr: FE, f2trois: T3, inter: IN, interpar: IP, ineq2: IQ, ineqfrac: IFQ };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);

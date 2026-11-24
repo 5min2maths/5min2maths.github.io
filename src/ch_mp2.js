@@ -635,6 +635,13 @@
   const tf = NOTIONS.find((n) => n.id === "trigfn");
   if (tf && tf.MP == null) { tf.MP = [13, "S2"]; if (typeof ORDRE !== "undefined") ORDRE.MP.trigfn = (ORDRE.MP.trigcercle ?? 43) + 0.5; if (typeof ORDRE_THEME !== "undefined") ORDRE_THEME.MP.trigfn = "TG"; }
 
+  // « Trouve l'erreur » (24.11, chantier I, suite) : théorème du cosinus, racine oubliée.
+  SL[2].push(() => { const a = R.int(4, 12), b = R.int(4, 12), ga = pk([35, 40, 50, 55, 65, 70, 80, 100, 110, 120]), c2 = a * a + b * b - 2 * a * b * Math.cos(ga * D2R), c = Math.sqrt(c2), w = R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+    if (c2 < 4) return null;
+    return QRd("Dans le triangle " + M("ABC") + ", " + M("a = " + a) + " cm, " + M("b = " + b) + " cm et " + M("\\gamma = " + ga + "°") + ". " + w + " écrit : « " + M("c = " + a + "^2 + " + b + "^2 - 2 \\cdot " + a + " \\cdot " + b + " \\cdot \\cos " + ga + "° \\approx " + N(Math.round(c2 * 100) / 100)) + " cm ». Trouve l'erreur, puis calcule " + M("c") + " (au centième, en cm).", c,
+      "Erreur : le théorème du cosinus donne " + M("c^2") + ", pas " + M("c") + " : " + M("c^2 = a^2 + b^2 - 2ab\\cos\\gamma \\approx " + N(Math.round(c2 * 100) / 100)) + ", donc " + M("c \\approx \\sqrt{" + N(Math.round(c2 * 100) / 100) + "} \\approx " + N(Math.round(c * 100) / 100)) + " cm. (Contrôle : " + M("c") + " doit être plus petit que " + M("a + b = " + (a + b)) + ".)",
+      0.01, { ctx: "erreur", guide: [Gd(M("c^2 = " + a + "^2 + " + b + "^2 - 2 \\cdot " + a + " \\cdot " + b + " \\cdot \\cos " + ga + "°") + " ≈ ? (au centième)", c2, M("\\approx " + N(Math.round(c2 * 100) / 100)) + ".", 0.01), Gd(M("c = \\sqrt{c^2}") + " ≈ ? (au centième)", c, M("\\approx " + N(Math.round(c * 100) / 100)) + " cm.", 0.01)],
+        traps: [TR(c2, "C'est la valeur de " + w + " : c'est " + M("c^2") + " ; il reste la racine carrée.")] }); });
   const ALL = { droites: DR, droitesinter: DI, recipaff: RF, trigcercle: TC, trigfn: TF, sinlaw: SL, trigeq: TQ, trigassoc: TA, trigeq2: T2, triaire: TAi, statfreq: SF, stats: ST, quartiles: QU };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);

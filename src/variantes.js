@@ -1172,3 +1172,87 @@ VA("domaine", 2,
   () => { const a = R.int(1, 9); return { q: "Détermine le domaine de définition de " + M("f(x) = \\frac{1}{\\sqrt{x - " + a + "}}") + ".", spec: { kind: "solset", ivs: [[a, false, Infinity, false]] }, sol: "Sous la racine : " + M("x - " + a + " \\ge 0") + ", et la racine ne doit pas être nulle (dénominateur) : " + M("x > " + a) + ", soit " + M("]" + a + " \\,;\\, +\\infty[") + "." }; },
   () => { const a = R.int(1, 9); return { q: "Détermine le domaine de définition de " + M("f(x) = \\frac{\\sqrt{x}}{x - " + a + "}") + ".", spec: { kind: "solset", ivs: [[0, true, a, false], [a, false, Infinity, false]] }, sol: M("x \\ge 0") + " (racine) et " + M("x \\ne " + a) + " (dénominateur) : " + M("[0 \\,;\\, " + a + "[ \\cup ]" + a + " \\,;\\, +\\infty[") + "." }; },
 );
+
+// ======================= « Trouve l'erreur » (24.11, chantier I, suite) =======================
+// Un camarade a fait une faute typique ; l'élève la repère et donne le bon résultat (ctx "erreur", piège = le résultat
+// faux du camarade). Liste et erreurs visées : tools/trouve_erreur.md.
+(function () {
+  const who = () => R.pick(["Sam", "Lina", "Noé", "Inès", "Yanis", "Léa"]);
+  const nT = (v) => { const [i, f] = String(r6(v)).split("."); return (i.replace("-", "").length >= 4 ? i.replace(/\B(?=(\d{3})+(?!\d))/g, "\\text{'}") : i) + (f ? "{,}" + f : ""); };
+  const r2 = (v) => Math.round(v * 100) / 100;
+  // pow9 : la puissance passe avant la multiplication.
+  VA("pow9", 2, () => { const a = R.int(2, 5), b = R.int(3, 9), v = a * b * b, f = (a * b) ** 2, w = who();
+    return QV(w + " écrit : « " + M(a + " \\cdot " + b + "^2 = " + a * b + "^2 = " + f) + " ». Trouve l'erreur, puis calcule correctement " + M(a + " \\cdot " + b + "^2") + ".", v,
+      "Erreur : la puissance passe <b>avant</b> la multiplication ; l'exposant 2 ne porte que sur " + M(b) + ". " + M(a + " \\cdot " + b + "^2 = " + a + " \\cdot " + b * b + " = " + v) + ".",
+      { ctx: "erreur", guide: [GS("D'abord la puissance : " + M(b + "^2") + " = ?", b * b, M(b * b) + "."), GS("Puis " + M(a + " \\cdot " + b * b) + " = ?", v, M(v) + ".")],
+        traps: [TRAP(f, "C'est le résultat de " + w + " : il a multiplié avant d'élever au carré ; ce serait " + M("(" + a + " \\cdot " + b + ")^2") + ".")] }); });
+  // aire1 : aire du triangle sans la division par 2.
+  VA("aire1", 2, () => clean(() => { const b = R.int(4, 15), h = R.int(3, 12), v = r6((b * h) / 2), w = who(), c = R.pick(["d'un triangle", "d'une voile triangulaire", "d'un fanion triangulaire"]);
+    return QV("La base " + c + " mesure " + M(b) + " cm et la hauteur correspondante " + M(h) + " cm. " + w + " calcule l'aire : « " + M(b + " \\cdot " + h + " = " + b * h) + " cm² ». Trouve l'erreur, puis donne l'aire (en cm²).", v,
+      "Erreur : " + M(b + " \\cdot " + h) + " est l'aire du <b>rectangle</b> de mêmes dimensions ; le triangle en occupe la moitié. " + M("A = \\frac{" + b + " \\cdot " + h + "}{2} = " + dec(v)) + " cm².",
+      { ctx: "erreur", guide: [GS("Aire du rectangle de mêmes base et hauteur ?", b * h, M(b * h) + " cm²."), GS("Le triangle en est la moitié : aire ?", v, M(b * h + " : 2 = " + dec(v)) + " cm².")],
+        traps: [TRAP(b * h, "C'est le résultat de " + w + " : il manque la division par 2."), TRAP(b + h, "L'aire est un produit, divisé par 2.")] }); }));
+  // fractout : fraction d'une quantité, division et multiplication inversées.
+  VA("fractout", 2, () => { const [a, b] = R.pick([[2, 3], [3, 4], [2, 5], [3, 5], [5, 6], [3, 8], [5, 8], [4, 5]]), m = R.int(2, 9), N = a * b * m, v = (N * a) / b, f = (N * b) / a, w = who(),
+      c = R.pick([["Un livre a " + N + " pages. Lina en a lu les", "pages lues"], ["Un trajet fait " + N + " km. On en a parcouru les", "km parcourus"], ["Une cagnotte contient " + N + " CHF. On en dépense les", "CHF dépensés"]]);
+    return QV(c[0] + " " + M("\\frac{" + a + "}{" + b + "}") + ". " + w + " calcule : « " + M(N + " : " + a + " \\cdot " + b + " = " + f) + " ». Trouve l'erreur, puis donne le bon nombre de " + c[1] + ".", v,
+      "Erreur : " + w + " a inversé les rôles. Le dénominateur " + M(b) + " dit en combien de parts on partage, le numérateur " + M(a) + " combien de parts on prend : " + M(N + " : " + b + " \\cdot " + a + " = " + v) + ". (Une fraction plus petite que 1 donne moins que " + N + ".)",
+      { ctx: "erreur", guide: [GS("Une part : " + M(N + " : " + b) + " = ?", N / b, M(N / b) + "."), GS(a + " parts : " + M(N / b + " \\cdot " + a) + " = ?", v, M(v) + ".")],
+        traps: [TRAP(f, "C'est le résultat de " + w + " : on divise par le dénominateur " + b + " et on multiplie par le numérateur " + a + "."), TRAP(N / b, "Ça, c'est une seule part ; il en faut " + a + ".")] }); });
+  // dec10 : « on ajoute des zéros » après la virgule.
+  VA("dec10", 2, () => { const z = R.int(1, 3), k = 10 ** z, d = R.pick([1, 2]); let x; do x = R.int(11, 99 * 10 ** (d - 1) + 9) / 10 ** d; while (Math.round(x * 10 ** d) % 10 === 0); x = r6(x);
+    const v = r6(x * k), w = who();
+    return QV(w + " écrit : « " + M((k >= 1000 ? nT(k) + " \\cdot " + dec(x) : dec(x) + " \\cdot " + k) + " = " + dec(x) + "0".repeat(z)) + " ». Trouve l'erreur, puis donne le bon résultat.", v,
+      "Erreur : ajouter des zéros <b>après la virgule</b> ne change pas le nombre (" + M(dec(x) + "0".repeat(z) + " = " + dec(x)) + "). Multiplier par " + M(nT(k)) + ", c'est déplacer la virgule de " + z + " rang" + (z > 1 ? "s" : "") + " vers la droite : " + M(nT(v)) + ".",
+      { plain: true, ctx: "erreur", guide: [GS("De combien de rangs la virgule se déplace-t-elle vers la droite ?", z, z + " rang" + (z > 1 ? "s" : "") + " (autant que de zéros dans " + nT(k).replace("\\text{'}", "'") + ")."), GS("Résultat ?", v, M(nT(v)) + ".")],
+        traps: [TRAP(x, "C'est le nombre de " + w + " : il vaut toujours " + dec(x).replace("{,}", ",") + ", il n'a pas été multiplié."), TRAP(r6(x * 10 ** (z + 1)), "Un rang par zéro de " + k + ".")] }); });
+  // uaire : conversion d'aire avec le facteur des longueurs. La forme d'origine est remise dans la liste pour que l'erreur reste une forme parmi d'autres.
+  VA("uaire", 2, () => GEN.uaire(2), () => { const [u1, u2, f] = R.pick([["m", "cm", 100], ["dm", "mm", 100], ["km", "m", 1000], ["m", "dm", 10], ["cm", "mm", 10], ["dm", "cm", 10]]), x = R.int(12, 95) / 10, v = r6(x * f * f), faux = r6(x * f), w = who();
+    return QV(w + " convertit " + M(dec(x) + tu(u1 + "^2")) + " en " + u2 + "² : « " + M("1" + tu(u1) + " = " + nT(f) + tu(u2)) + ", donc " + M(dec(x) + tu(u1 + "^2") + " = " + nT(faux) + tu(u2 + "^2")) + " ». Trouve l'erreur, puis donne la bonne mesure en " + u2 + "².", v,
+      "Erreur : un carré de 1 " + u1 + " de côté contient " + M(nT(f) + " \\cdot " + nT(f) + " = " + nT(f * f)) + " carrés de 1 " + u2 + " de côté. Pour les aires, le facteur est " + M(nT(f * f)) + " : " + M(dec(x) + " \\cdot " + nT(f * f) + " = " + nT(v)) + " " + u2 + "².",
+      { plain: true, ctx: "erreur", guide: [GS("1 " + u1 + "² = combien de " + u2 + "² ? (" + nT(f).replace("\\text{'}", "'") + " · " + nT(f).replace("\\text{'}", "'") + ")", f * f, M("1" + tu(u1 + "^2") + " = " + nT(f * f) + tu(u2 + "^2")) + "."), GS(dec(x).replace("{,}", ",") + " " + u1 + "² en " + u2 + "² ?", v, M(nT(v) + tu(u2 + "^2")) + ".")],
+        traps: [TRAP(faux, "C'est le résultat de " + w + " : " + nT(f).replace("\\text{'}", "'") + " est le facteur des longueurs ; pour les aires, c'est " + nT(f * f).replace(/\\text\{'\}/g, "'") + ".")] }); });
+  // perim : périmètre confondu avec l'aire.
+  VA("perim", 2, () => clean(() => { let L, l; do { L = R.int(5, 25); l = R.int(3, L - 1); } while ([L, l, L * l].includes(2 * (L + l))); const v = 2 * (L + l), w = who(), c = R.pick([["un jardin", "de clôture"], ["un terrain de jeu", "de barrière"], ["une nappe", "de ruban pour la border"]]);
+    return QV("Pour " + c[0] + " rectangulaire de " + M(L) + " m sur " + M(l) + " m, " + w + " calcule la longueur " + c[1] + " : « " + M(L + " \\cdot " + l + " = " + L * l) + " m ». Trouve l'erreur, puis donne la bonne longueur (en m).", v,
+      "Erreur : " + M(L + " \\cdot " + l) + " est l'<b>aire</b> (en m²), la surface. La clôture fait le tour : c'est le périmètre, " + M(L + " + " + l + " + " + L + " + " + l + " = " + v) + " m.",
+      { ctx: "erreur", guide: [GS("Le tour du rectangle : " + M(L + " + " + l + " + " + L + " + " + l) + " = ?", v, M(v) + " m.")],
+        traps: [TRAP(L * l, "C'est le calcul de " + w + " : c'est l'aire (m²), pas la longueur du tour."), TRAP(L + l, "Ça, c'est un demi-tour : il y a deux longueurs et deux largeurs.")] }); }));
+  // pct : retrouver le tout à partir d'une partie (on prend le pourcentage de la partie).
+  VA("pct", 2, () => { const t = R.pick([5, 10, 15, 20, 25, 40]), X = 20 * R.int(3, 30), N = (X * t) / 100, f = r6((N * t) / 100), w = who(), c = R.pick([["Un acompte de " + N + " CHF représente " + t + " % du prix d'un voyage.", "le prix du voyage (en CHF)"], ["Une remise de " + N + " CHF correspond à " + t + " % du prix d'un vélo.", "le prix du vélo avant la remise (en CHF)"]]);
+    return QV(c[0] + " " + w + " calcule : « " + M(t + "\\,\\%") + " de " + M(N) + ", c'est " + M(nT(f)) + " CHF ». Trouve l'erreur, puis donne " + c[1] + ".", X,
+      "Erreur : " + M(N) + " CHF est déjà la partie ; on cherche le tout (100 %). " + M("1\\,\\%") + " vaut " + M(N + " : " + t + " = " + nT(N / t)) + " CHF, donc 100 % valent " + M(nT(N / t) + " \\cdot 100 = " + nT(X)) + " CHF.",
+      { ctx: "erreur", guide: [GS("Combien vaut 1 % du prix ? (" + M(N + " : " + t) + ")", N / t, M(nT(N / t)) + " CHF."), GS("Le prix entier (100 %) ?", X, M(nT(N / t) + " \\cdot 100 = " + nT(X)) + " CHF.")],
+        traps: [TRAP(f, "C'est le calcul de " + w + " : " + N + " CHF est la partie, pas le tout."), TRAP(N + t, "On ne mélange pas des CHF et des pourcents.")] }); });
+  // disque : aire calculée avec le diamètre.
+  VA("disque", 2, () => { const d = R.int(4, 16), r = d / 2, v = Math.PI * r * r, f = Math.PI * d * d, w = who(), c = R.pick(["d'un disque", "d'une pizza", "d'un tapis rond", "d'une table ronde"]);
+    return QV("Le diamètre " + c + " mesure " + M(d) + " cm. " + w + " calcule son aire : « " + M("\\pi \\cdot " + d + "^2 \\approx " + dec(Math.round(f * 10) / 10)) + " cm² ». Trouve l'erreur, puis donne l'aire (au dixième, en cm²).", v,
+      "Erreur : la formule " + M("A = \\pi r^2") + " utilise le <b>rayon</b>, la moitié du diamètre : " + M("r = " + dec(r)) + " cm. " + M("A = \\pi \\cdot " + dec(r) + "^2 \\approx " + dec(Math.round(v * 10) / 10)) + " cm² (4 fois moins que le calcul de " + w + ").",
+      { round: 0.1, ctx: "erreur", guide: [GS("Rayon (en cm) ?", r, M(dec(r)) + " cm."), GS("Aire " + M("\\pi r^2") + " ≈ ? (au dixième)", v, M("\\approx " + dec(Math.round(v * 10) / 10)) + " cm².", 0.1)],
+        traps: [TRAP(f, "C'est le résultat de " + w + " : il faut le rayon, pas le diamètre."), TRAP(Math.PI * d, "Ça, c'est le périmètre du cercle.")] }); });
+  // echelle : conversion cm → km avec 1 km = 1000 cm.
+  VA("echelle", 2, () => clean(() => { const E = R.pick([10000, 20000, 25000, 50000]), c = R.int(5, 24) / 2, cm = r6(c * E), v = r6(cm / 100000), f = r6(cm / 1000), w = who();
+    return QV("Sur une carte à l'échelle " + M("1\\,:\\," + nT(E)) + ", deux villages sont à " + M(dec(c)) + " cm l'un de l'autre. " + w + " écrit : « " + M(dec(c) + " \\cdot " + nT(E) + " = " + nT(cm)) + " cm, donc " + M(nT(f)) + " km ». Trouve l'erreur, puis donne la vraie distance en km.", v,
+      "Erreur : " + M("1" + tu("km") + " = 1000" + tu("m") + " = 100\\text{'}000" + tu("cm")) + ", pas 1000 cm. " + M(nT(cm) + " : 100\\text{'}000 = " + nT(v)) + " km.",
+      { ctx: "erreur", guide: [GS("Distance réelle en cm ?", cm, M(dec(c) + " \\cdot " + nT(E) + " = " + nT(cm)) + " cm."), GS("1 km = combien de cm ?", 100000, M("1000 \\cdot 100 = 100\\text{'}000") + " cm."), GS("Distance en km ?", v, M(nT(v)) + " km.")],
+        traps: [TRAP(f, "C'est le résultat de " + w + " : 1 km = 100'000 cm."), TRAP(r6(cm / 100), "Ça, ce sont des mètres.")] }); }));
+  // expo : a · b^x écrit (ab)^x.
+  VA("expo", 2, () => { let a, b, n; do { a = R.pick([2, 3, 5]); b = R.pick([2, 3, 4, 5]); n = R.int(2, 4); } while (a === b || a * b ** n > 2000 || [a, b, a * b].includes(n)); const K = a * b ** n, f = Math.log(K) / Math.log(a * b), w = who();
+    return QV(w + " résout " + M(a + " \\cdot " + b + "^x = " + nT(K)) + " : « " + M(a + " \\cdot " + b + "^x = " + a * b + "^x") + ", donc " + M("x = \\frac{\\log " + nT(K) + "}{\\log " + a * b + "} \\approx " + dec(r2(f))) + " ». Trouve l'erreur, puis résous correctement.", n,
+      "Erreur : la puissance passe avant la multiplication, l'exposant " + M("x") + " ne porte que sur " + M(b) + " : " + M(a + " \\cdot " + b + "^x \\neq " + a * b + "^x") + ". On divise d'abord par " + M(a) + " : " + M(b + "^x = " + b ** n + " = " + b + "^{" + n + "}") + ", donc " + M("x = " + n) + ".",
+      { ctx: "erreur", guide: [GS("Divise par " + M(a) + " : " + M(b + "^x") + " = ?", b ** n, M(nT(K) + " : " + a + " = " + b ** n) + "."), GS(M(b ** n) + " est quelle puissance de " + M(b) + " ? x = ?", n, M(b ** n + " = " + b + "^{" + n + "}") + ", donc " + M("x = " + n) + ".")],
+        traps: [TRAP(r2(f), "C'est le résultat de " + w + " : " + M(a + " \\cdot " + b + "^x") + " n'est pas " + M(a * b + "^x") + ".")] }); });
+  // log : log d'un produit pris comme produit des log.
+  VA("log", 2, () => { const L = { 2: 0.301, 3: 0.477, 5: 0.699, 7: 0.845 }, [p, q] = R.pick([[2, 3], [2, 7], [3, 5], [3, 7], [5, 7], [2, 2], [3, 3]]), n = p * q, v = Math.log10(n), f = Math.round(L[p] * L[q] * 1000) / 1000, w = who();
+    return QV("On donne " + M("\\log " + p + " \\approx " + dec(L[p])) + (p === q ? "" : " et " + M("\\log " + q + " \\approx " + dec(L[q]))) + ". " + w + " calcule : « " + M("\\log " + n + " = \\log " + p + " \\cdot \\log " + q + " \\approx " + dec(f)) + " ». Trouve l'erreur, puis donne " + M("\\log " + n) + " (au millième).", v,
+      "Erreur : le logarithme d'un produit est la <b>somme</b> des logarithmes : " + M("\\log(" + p + " \\cdot " + q + ") = \\log " + p + " + \\log " + q + " \\approx " + dec(L[p]) + " + " + dec(L[q]) + " = " + dec(r6(L[p] + L[q]))) + ". Contrôle : " + M("10^{" + dec(r6(L[p] + L[q])) + "} \\approx " + n) + ".",
+      { round: 0.001, ctx: "erreur", guide: [GS(M("\\log(" + p + " \\cdot " + q + ") = \\log " + p + " + \\log " + q) + " ≈ ? (au millième)", v, M("\\approx " + dec(r6(L[p] + L[q]))) + ".", 0.001)],
+        traps: [TRAP(f, "C'est le résultat de " + w + " : " + M("\\log(ab) = \\log a + \\log b") + ", pas " + M("\\log a \\cdot \\log b") + ".")] }); });
+  // modexp : pourcentages successifs additionnés (intérêts simples au lieu de composés).
+  VA("modexp", 2, () => { const C = R.pick([800, 1000, 2000, 5000]), t = R.pick([2, 3, 4, 5]), n = R.int(5, 12), v = C * (1 + t / 100) ** n, f = r6(C * (1 + (n * t) / 100)), w = who(),
+      c = R.pick([["Un capital de " + nT(C) + " CHF est placé à " + t + " % d'intérêts par an ; les intérêts s'ajoutent au capital chaque année.", "le capital"], ["Le loyer d'un local, " + nT(C) + " CHF par mois, augmente de " + t + " % chaque année.", "le loyer"]]);
+    return QV(c[0] + " " + w + " calcule " + c[1] + " après " + n + " ans : « " + M(n + " \\cdot " + t + "\\,\\% = " + n * t + "\\,\\%") + ", donc " + M(nT(C) + " \\cdot " + dec(r6(1 + (n * t) / 100)) + " = " + nT(f)) + " CHF ». Trouve l'erreur, puis donne la bonne valeur (au centime).", v,
+      "Erreur : chaque hausse de " + t + " % porte sur la valeur de l'année précédente, déjà augmentée : on multiplie " + n + " fois par " + M(dec(1 + t / 100)) + ". " + M(nT(C) + " \\cdot " + dec(1 + t / 100) + "^{" + n + "} \\approx " + nT(r2(v))) + " CHF.",
+      { round: 0.01, ctx: "erreur", guide: [GS("Coefficient multiplicateur pour une année ?", 1 + t / 100, M("1 + " + dec(t / 100) + " = " + dec(1 + t / 100)) + "."), GS("Valeur après " + n + " ans : " + M(nT(C) + " \\cdot " + dec(1 + t / 100) + "^{" + n + "}") + " ≈ ? (au centime)", v, M("\\approx " + nT(r2(v))) + " CHF.", 0.01)],
+        traps: [TRAP(f, "C'est le résultat de " + w + " : les pourcentages successifs ne s'additionnent pas, ils se multiplient.")] }); });
+})();
