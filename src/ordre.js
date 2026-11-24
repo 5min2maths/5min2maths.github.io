@@ -13,3 +13,6 @@ Object.assign(ORDRE_THEME.MATU, {"primitives":"M4C01","integrale":"M4C01","airei
 // 24.11 (agent greste) : algèbre linéaire (M4C03), loi normale, et statistique descriptive ouverte à la 4e (M4C04). Ajouté à la main.
 Object.assign(ORDRE.MATU, {"matrices":220,"translin":221,"appllin":222,"stats":233,"quartiles":234,"normale":235});
 Object.assign(ORDRE_THEME.MATU, {"matrices":"M4C03","translin":"M4C03","appllin":"M4C03","stats":"M4C04","quartiles":"M4C04","normale":"M4C04"});
+// 24.11 (agent c3geo) : géométrie vectorielle de l'espace, 3e Collège (src/ch3c_geo.js, chapitre M3C06). Ajouté à la main.
+Object.assign(ORDRE.MATU, {"vect3d":150,"colin":151,"droite3d":152,"plans":153,"posrel":154,"pscal3d":155,"distances":156,"sphere":157});
+Object.assign(ORDRE_THEME.MATU, {"vect3d":"M3C06","colin":"M3C06","droite3d":"M3C06","plans":"M3C06","posrel":"M3C06","pscal3d":"M3C06","distances":"M3C06","sphere":"M3C06"});
