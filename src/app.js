@@ -591,12 +591,12 @@ function screenHome() {
     h(`<div class="hub">${head}
     ${eloBanner()}
     ${statsCard()}${banner}
-    <div class="card stack sess-card">
-      <div class="seg sess-seg" role="tablist"><button type="button" data-m="classe" aria-pressed="${mode === "classe"}">🎒 En classe</button><button type="button" data-m="libre" aria-pressed="${mode === "libre"}">🧭 Libre</button></div>
-      <div class="small muted sess-sub sess-subs"><span class="${mode === "classe" ? "on" : ""}">Suit le chapitre que tu travailles en classe, avec des révisions.</span><span class="${mode === "libre" ? "on" : ""}">Tous les sujets de ton année, à ton rythme.</span></div>
+    <div class="card stack sess-card sess-first"> <!-- 24.11 : « Séance d'abord » (choix de l'enseignant) : le bouton en premier, le reste discret -->
+      <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${paused ? "Nouvelle séance" : done ? "Encore une séance" : mode === "classe" ? "Ma séance du jour" : "Mon défi du jour"}</button>
       ${mode === "classe" ? `<div class="sess-fmt"><span class="sess-fmt-t"><b class="fmt-lab">${FORMATS[fmt].label}</b><span class="small muted fmt-txt">${FORMATS[fmt].text}${doneLab ? " · séance faite ✓" : ""}</span></span><button type="button" class="btn-sec small" id="other" aria-label="Changer de format">🔁<span class="chg-t"> Changer</span></button></div>
         <div class="now-line">${nowLine}</div>` : ""}
-      <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${paused ? "Nouvelle séance" : done ? "Encore une séance" : mode === "classe" ? "Ma séance du jour" : "Mon défi du jour"}</button>
+      <div class="sess-modes"><div class="seg sess-seg" role="tablist"><button type="button" data-m="classe" aria-pressed="${mode === "classe"}">🎒 En classe</button><button type="button" data-m="libre" aria-pressed="${mode === "libre"}">🧭 Libre</button></div><button type="button" class="btn-ghost small sess-info" id="sessinfo" aria-label="En classe ou Libre : explication" aria-expanded="false">ⓘ</button></div>
+      <div class="small muted sess-sub sess-subs" hidden id="sessexp"><span class="${mode === "classe" ? "on" : ""}">Suit le chapitre que tu travailles en classe, avec des révisions.</span><span class="${mode === "libre" ? "on" : ""}">Tous les sujets de ton année, à ton rythme.</span></div>
     </div>
     <div class="doors">
       ${door("prob", svgI(TI.prob), "Problème", "", dots.prob ? "!" : "")}
@@ -636,6 +636,7 @@ function screenHome() {
   on("resno", () => { delete state.resume; save(); screenHome(); });
   on("bkgo", screenBackup);
   on("bkno", () => { UI.backupLater = day(); uiSave(); screenHome(); });
+  on("sessinfo", () => { const e = document.getElementById("sessexp"), b = document.getElementById("sessinfo"); if (!e) return; e.hidden = !e.hidden; b.setAttribute("aria-expanded", String(!e.hidden)); });
   on("statsoui", () => { statsSet(true); toast("Merci ! Tu peux changer d'avis dans les Réglages."); screenHome(); });
   on("statsnon", () => { statsSet(false); toast("C'est noté : rien n'est envoyé. Modifiable dans les Réglages."); screenHome(); });
   on("statsplus", () => screenPrivacy(screenHome));
