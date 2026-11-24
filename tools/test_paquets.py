@@ -70,6 +70,10 @@ async def scenario(port, url):
         r4 = val(await ev("ensurePacks({ system: 'CH', grade: 15, track: 'college' }).then(() => { const ids = ['primitives', 'lnexp', 'binomiale']; return ids.map((id) => { const q = Engine.build(id, 2, 5); return q && (q.q || q.parts) ? 1 : 0; }).join('') + (window.__packs['15'] ? 'p' : ''); })"))
         ok(r4 == "111p", "4e Collège : paquet 15 chargé, questions construites (" + str(r4) + ")")
 
+        # 3 bis. élève de MP 3e (24.11, src/ch_mp3.js et ch_mp4.js dans le paquet « mp ») : notions de l'année et questions
+        r = val(await ev("ensurePacks({ system: 'CH', grade: 14, track: 'mp' }).then(() => { const p = { system: 'CH', grade: 14, track: 'mp' }, cur = Engine.catalog(p).filter((c) => c.current).map((c) => c.id); return (cur.includes('eqabs') && cur.includes('similmp') && !cur.includes('tauxvar') ? 'c' : '-') + ['eqabs', 'logdef', 'volmp', 'coordmp', 'sinusmp'].map((id) => { const q = Engine.build(id, 2, 7); return q && (q.q || q.parts) ? 1 : 0; }).join(''); })"))
+        ok(r == "c11111", "élève de MP 3e : notions MP 3e de l'année, questions MP 3e et 4e construites (" + str(r) + ")")
+
         # 4. lien vers une question d'un autre niveau
         await ev("localStorage.clear(), 1")
         await cdp.call("Page.navigate", url=url + "#q-expo-2-3")
