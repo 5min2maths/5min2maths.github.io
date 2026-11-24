@@ -709,3 +709,6 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: v
 .pm-sq.on { outline: 2px solid var(--blue); outline-offset: 1px; }
 .pm-info { margin-top: 4px; padding: 4px 8px; border-radius: 8px; background: var(--soft, rgba(0,0,0,.05)); }
 
+/* 24.11 soir : fenêtre 💬 — la croix reste en haut à droite même quand le titre passe à la ligne */
+.fab-sheet > .card { position: relative; padding-right: 44px; }
+.fab-sheet #fabx { position: absolute; top: 8px; right: 8px; }
