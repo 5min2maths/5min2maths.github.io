@@ -46,6 +46,8 @@
   Object.assign(ACTIVE, {
     // ---- Écrire une expression : deux machines ----
     litelab: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Le début de la phrase donne l'opération qu'on fait en dernier, donc la forme de l'expression. « Le triple de la somme de x et 5 » : on fait d'abord la somme, puis on la triple, c'est \\(3(x + 5)\\). « La somme du triple de x et de 5 » : on triple d'abord x, puis on ajoute 5, c'est \\(3x + 5\\).", exemple: ["Machine A « × 3, puis + 5 » : \\(3x + 5\\) ; 5 donne 20.", "Machine B « + 5, puis × 3 » : \\(3(x + 5) = 3x + 15\\) ; 5 donne 30.", "Toujours \\(B - A = 3x + 15 - (3x + 5) = 10\\)."] },
       predict: { q: "« Le triple de la somme de x et 5 » s'écrit…", choices: ["3x + 5", "3(x + 5)"], good: 1, why: "La phrase commence par « le triple de… » : c'est l'opération qu'on fait en dernier. On calcule d'abord la somme x + 5, puis on la triple. Il faut des parenthèses." },
       defis: ["Voici la machine A : « × 3, puis + 5 ». Trouve le nombre qui donne 20.", "Voici la machine B : « + 5, puis × 3 ». Trouve le nombre qui donne 30.", "Compare les deux machines : essaie trois nombres. Que vaut toujours B − A ?"],
       play(box, onWin) {
@@ -71,6 +73,8 @@
     },
     // ---- Valeur numérique : curseur ----
     valnum: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["\\(2x^2 - 3x\\) pour \\(x = 3\\) : \\(2 \\cdot 9 - 9 = 9\\).", "Pour \\(x = -2\\) : \\(2 \\cdot (-2)^2 - 3 \\cdot (-2) = 8 + 6 = 14\\).", "Pour \\(x = 1{,}5\\) : \\(2 \\cdot 2{,}25 - 4{,}5 = 0\\)."] },
       predict: { q: "Combien vaut x² pour x = −3 ?", choices: ["−9", "9", "−6"], good: 1, why: "(−3)² = (−3) · (−3) = 9 : le carré d'un nombre négatif est positif." },
       defis: ["Trouve un nombre x qui donne 9 pour 2x² − 3x.", "Trouve un nombre négatif x qui donne 14.", "Trouve un nombre x non nul qui donne 0."],
       play(box, onWin) {
@@ -123,6 +127,8 @@
     },
     // ---- Monômes : empiler les facteurs x ----
     monomes: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Pour multiplier des puissances d'une même lettre, on additionne les exposants : \\(x^m \\cdot x^n = x^{m + n}\\), car on compte les facteurs \\(x\\).", exemple: ["\\(x^2 \\cdot x^3 = (x \\cdot x) \\cdot (x \\cdot x \\cdot x) = x^5\\).", "\\(x^3 \\cdot x^4 = x^7\\).", "\\(x^4 \\cdot x^4 = x^8\\)."] },
       predict: { q: "x² · x³ = ?", choices: ["x⁶", "x⁵", "2x⁵"], good: 1, why: "x² · x³ = (x · x) · (x · x · x) : cinq facteurs x, donc x⁵. On additionne les exposants." },
       defis: ["Obtiens x⁷ avec xᵐ · xⁿ, où m = 3.", "Obtiens x⁵ avec m = n + 1.", "Obtiens x⁸ avec m = n."],
       play(box, onWin) {
@@ -144,6 +150,8 @@
     },
     // ---- Parenthèses : retourner les signes ----
     parenth: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Précédée de « + », une parenthèse disparaît sans rien changer. Précédée de « − », elle disparaît et chaque terme à l'intérieur change de signe.", exemple: ["\\(7 - (2x - 5 + y) = 7 - 2x + 5 - y\\).", "\\(4x + (3 - x) = 4x + 3 - x = 3x + 3\\).", "\\(-(-a + 2b - 6) = a - 2b + 6\\)."] },
       predict: { q: "x − (3 − 2x) = ?", choices: ["x − 3 − 2x", "x − 3 + 2x"], good: 1, why: "Le « − » devant la parenthèse change le signe de chaque terme : −(3 − 2x) = −3 + 2x." },
       defis: ["Enlève la parenthèse de 7 − (2x − 5 + y) : touche les termes dont le signe change.", "Même chose avec 4x + (3 − x).", "Et avec −(−a + 2b − 6)."],
       play(box, onWin) {

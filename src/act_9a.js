@@ -105,6 +105,8 @@
         wins: [W(9.25, "6,80 + 2,45 = 9,25 CHF."), W(1.65, "2,40 − 0,75 = 1,65 m."), W(4.65, "20,00 − 15,35 = 4,65 CHF. Vérifie : 15,35 + 4,65 = 20.")] }),
     },
     dec10: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(\\cdot\\,10\\) : la virgule avance d'un rang vers la droite ; \\(: 10\\) : elle recule d'un rang. Avec 100, deux rangs ; avec 1000, trois rangs. On complète avec des zéros si besoin.", exemple: ["\\(3{,}47 \\cdot 100 = 347\\)", "\\(0{,}806 \\cdot 100 = 80{,}6\\)", "\\(52{,}6 : 1000 = 0{,}0526\\)"], piege: "\\(4{,}5 : 100 = 0{,}045\\) : on complète avec un zéro pour reculer de deux rangs." },
       predict: { q: "3,47 · 100 = ?", choices: ["34,7", "347", "3,4700"], good: 1, why: "Multiplier par 100, c'est rendre chaque chiffre 100 fois plus grand : chaque chiffre avance de deux rangs. 3 unités → 3 centaines." },
       defis: ["Transforme 0,806 en 80,6.", "Transforme 52,6 en 0,0526.", "Transforme 4,5 en 0,045."],
       play: hunt({ label: "Opération", start: 0, min: -3, max: 3, fmt: (x) => (x === 0 ? "aucune" : x > 0 ? "· " + nb(10 ** x) : "÷ " + nb(10 ** -x)),
@@ -137,6 +139,8 @@
         wins: [W(186, "4 · 46,50 = 186 CHF."), W(6.9, "27,60 ÷ 4 = 6,90 CHF."), W(0.95, "3 · 1,35 = 4,05 m, puis 5 − 4,05 = 0,95 m.")] }),
     },
     pow9: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(a^n\\) est le produit de \\(n\\) facteurs égaux à \\(a\\).", exemple: ["\\(0{,}3^2 = 0{,}3 \\cdot 0{,}3 = 0{,}09\\)", "\\(2^4 + 3^2 = 16 + 9 = 25\\)"] },
       predict: { q: "2³ = ?", choices: ["6", "8", "9"], good: 1, why: "2³ = 2 · 2 · 2 = 8 : trois facteurs égaux à 2. Ce n'est pas 2 · 3." },
       garde: [1, 2],
       defis: ["Calcule 5³.", "Calcule 0,3².", "Calcule 2⁴ + 3²."],
@@ -155,6 +159,8 @@
         wins: [W(3250, "3,25 · 1'000 = 3'250 m."), W(0.8, "8 mm = 8 ÷ 10 = 0,8 cm : vers une unité plus grande, on divise."), W(3150, "2300 + 850 = 3'150 kg : on additionne dans la même unité.")] }),
     },
     uaire: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "D'une unité d'aire à la suivante : \\(\\cdot\\,100\\). \\(1\\ \\text{m}^2 = 100\\ \\text{dm}^2 = 10'000\\ \\text{cm}^2\\). \\(1\\ \\text{ha} = 10'000\\ \\text{m}^2\\)." },
       predict: { q: "1 m² = … cm² ?", choices: ["100 cm²", "1'000 cm²", "10'000 cm²"], good: 2, why: "Un carré de 1 m de côté, c'est 100 cm sur 100 cm : 100 · 100 = 10'000 carrés de 1 cm²." },
       defis: ["Une feuille A4 mesure environ 6,2 dm². Combien de cm² ?", "Un appartement mesure 85 m². Combien de dm² ?", "Un champ mesure 3,5 ha. Combien de m² ?"],
       play: hunt({ ask: true, label: "Ta réponse",
@@ -163,6 +169,8 @@
         wins: [W(620, "6,2 · 100 = 620 cm² : d'une unité d'aire à la suivante, · 100."), W(8500, "85 · 100 = 8'500 dm²."), W(35000, "3,5 · 10'000 = 35'000 m².")] }),
     },
     uvol: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Capacités : \\(1\\ \\text{L} = 10\\ \\text{dL} = 100\\ \\text{cL} = 1000\\ \\text{mL}\\). Un cube de 1 dm de côté contient 1 L : \\(1\\ \\text{dm}^3 = 1\\ \\text{L}\\).", exemple: ["\\(75\\ \\text{cL} = 750\\ \\text{mL}\\)", "\\(4{,}5\\ \\text{L} = 450\\ \\text{cL}\\), et \\(450 : 15 = 30\\) verres"], piege: "Mets les deux mesures dans la même unité avant de diviser : \\(4{,}5\\ \\text{L} = 450\\ \\text{cL}\\)." },
       predict: { q: "Un cube de 1 dm de côté, rempli d'eau, contient…", choices: ["1 L", "1 dL", "10 L"], good: 0, why: "1 dm³ = 1 L : c'est la définition du litre. Une brique de lait de 1 L est presque un cube de 1 dm de côté." },
       defis: ["Une bouteille contient 75 cL. Combien de mL ?", "Un aquarium a un volume de 0,12 m³. Combien de litres ?", "Combien de verres de 15 cL remplit-on avec un bidon de 4,5 L ?"],
       play: hunt({ ask: true, label: "Ta réponse",
@@ -180,6 +188,8 @@
         wins: [W(115, "65° + 115° = 180° : l'angle plat."), W(125, "140° + 95° + 125° = 360° : l'angle plein."), W(120, "360° ÷ 12 = 30° par heure ; 4 · 30° = 120°, un angle obtus.")] }),
     },
     quadri: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Parallélogramme : côtés opposés parallèles et égaux, angles consécutifs de somme \\(180°\\), diagonales qui se coupent en leur milieu. Losange : 4 côtés égaux. Rectangle : 4 angles droits, diagonales égales. Carré : losange et rectangle.", exemple: ["Losange de périmètre 36 cm : côté 9 cm", "Parallélogramme : un angle de 70°, le suivant de 110°", "Rectangle, \\(AC = 13\\) cm : \\(OB = 6{,}5\\) cm"] },
       predict: { q: "Un carré est-il un losange ?", choices: ["Oui", "Non"], good: 0, why: "Un losange a 4 côtés égaux : le carré aussi. Le carré est à la fois un losange et un rectangle." },
       defis: ["Un losange a un périmètre de 36 cm. Longueur d'un côté (en cm) ?", "Dans un parallélogramme, un angle mesure 70°. Combien mesure l'angle voisin (consécutif) ?", "Les diagonales du rectangle ABCD se coupent en O ; AC = 13 cm. Longueur OB (en cm) ?"],
       play: hunt({ ask: true, label: "Ta réponse",

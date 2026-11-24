@@ -60,6 +60,8 @@
 
     // ---- Unités composées : le convertisseur à la main ----
     ucomp: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "En une heure (3600 s), on parcourt 3600 fois la distance d'une seconde. Comme 1 km = 1000 m, \\(1\\ \\text{m/s} = 3{,}6\\ \\text{km/h}\\). Des m/s vers les km/h, on multiplie par 3,6. Des km/h vers les m/s, on divise par 3,6.", exemple: ["\\(30\\ \\text{m/s}\\) : en 1 h, 108'000 m, soit \\(108\\ \\text{km/h}\\).", "\\(90\\ \\text{km/h} = 90 : 3{,}6 = 25\\ \\text{m/s}\\)."] },
       predict: { q: "Un guépard court à 30 m/s. Va-t-il plus vite qu'une voiture à 100 km/h ?", choices: ["Oui", "Non"], good: 0,
         why: "En une heure (3600 s), il parcourrait 30 · 3600 = 108'000 m = 108 km : 30 m/s = 108 km/h, plus que 100 km/h." },
       defis: ["Trouve la vitesse en m/s qui fait exactement 36 km/h.", "Une voiture roule à 90 km/h : combien de m/s ?", "Quelle est la plus petite vitesse en m/s (nombre entier) qui dépasse 100 km/h ?"],
@@ -121,6 +123,8 @@
 
     // ---- Masse volumique : fabrique un bloc ----
     gquot: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Masse volumique : \\(\\rho = \\frac{m}{V}\\), donc \\(m = \\rho \\cdot V\\) et \\(V = \\frac{m}{\\rho}\\). Avant de calculer, on met les unités d'accord (g et cm³).", exemple: ["Or : \\(19{,}3\\ \\text{g/cm}^3\\). 6 cm³ pèsent \\(19{,}3 \\cdot 6 = 115{,}8\\ \\text{g}\\).", "Glace : \\(0{,}92\\ \\text{g/cm}^3\\). Un glaçon de 46 g : \\(V = 46 : 0{,}92 = 50\\ \\text{cm}^3\\)."] },
       predict: { q: "Qu'est-ce qui pèse le plus : 1 kg de plomb ou 1 kg de plumes ?", choices: ["Le plomb", "Les plumes", "C'est pareil"], good: 2,
         why: "Les deux pèsent 1 kg ! Les plumes prennent beaucoup plus de place : leur masse volumique est bien plus petite." },
       defis: ["Fabrique un bloc d'or de plus de 100 g avec le moins de cm³ possible.", "Avec de l'aluminium, approche au mieux la masse d'un seul cm³ d'or (19,3 g).", "Un glaçon pèse 46 g : trouve son volume."],

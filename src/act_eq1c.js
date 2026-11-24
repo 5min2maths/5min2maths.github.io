@@ -137,6 +137,8 @@
       play: balance([[3, 5, 0, 20], [5, -3, 2, 9], [-2, 7, 0, 15]]),
     },
     eqfrac: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Fractions : on multiplie chaque terme des deux membres par le plus petit dénominateur commun (un multiple de tous les dénominateurs). Un nombre seul est lui aussi multiplié. Il reste une équation sans fraction, qu'on résout.", exemple: ["\\(\\frac{x}{2} + \\frac{x}{3} = 5\\) ; fois 6 : \\(3x + 2x = 30\\), \\(x = 6\\).", "\\(\\frac{x}{4} - 1 = \\frac{x}{6}\\) ; fois 12 : \\(3x - 12 = 2x\\), \\(x = 12\\).", "\\(\\frac{x + 1}{2} = \\frac{x - 3}{3} + 2\\) ; fois 6 : \\(3(x + 1) = 2(x - 3) + 12\\), \\(x = 3\\)."] },
       predict: { q: "Pour faire disparaître les fractions de x/2 + x/3 = 5, on multiplie les deux membres par…", choices: ["5", "6", "2 + 3"], good: 1, why: "6 est un multiple de 2 et de 3 : 6 · x/2 = 3x et 6 · x/3 = 2x. Et le 5 devient 30." },
       defis: ["Résous x/2 + x/3 = 5 : multiplie d'abord par 6.", "Résous x/4 − 1 = x/6.", "Résous (x + 1)/2 = (x − 3)/3 + 2."],
       play: balance([[1 / 2 + 1 / 3, 0, 0, 5, "x/2 + x/3 = 5"], [1 / 4, -1, 1 / 6, 0, "x/4 − 1 = x/6"], [1 / 2, 1 / 2, 1 / 3, 1, "(x + 1)/2 = (x − 3)/3 + 2"]]),
@@ -147,6 +149,8 @@
       play: balance([[2, 3, 2, 5], [3, 3, 3, 3, "3(x + 1) = 3x + 3"], [4, 1, 1, 1, "4x + 1 = x + 1", "x = 0 : c'est une vraie solution, pas « aucune solution »."]]),
     },
     formule: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Les autres lettres se traitent comme des nombres. On défait les opérations qui entourent la lettre cherchée, de l'extérieur vers l'intérieur, en faisant la même opération des deux côtés.", exemple: ["\\(P = 4c\\), \\(c = \\frac{P}{4}\\).", "\\(v = \\frac{d}{t}\\), \\(vt = d\\), \\(t = \\frac{d}{v}\\).", "\\(A = \\frac{(B + b)h}{2}\\), \\(B + b = \\frac{2A}{h}\\), \\(B = \\frac{2A}{h} - b\\)."], piege: "Dans \\(A = \\frac{(B + b)h}{2}\\), on défait d'abord \\(: 2\\) et \\(\\cdot h\\), puis on soustrait \\(b\\) en dernier." },
       predict: { q: "Dans v = d/t, pour isoler t, la première opération est…", choices: ["× t des deux côtés", "÷ v des deux côtés", "− d des deux côtés"], good: 0, why: "t est au dénominateur : on le fait remonter en multipliant par t, v · t = d ; puis on divise par v." },
       defis: ["Isole c dans P = 4c.", "Isole t dans v = d/t.", "Isole B dans A = (B + b) · h / 2."],
       play: chooser([
@@ -156,6 +160,8 @@
       ]),
     },
     probeq: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["Trois entiers consécutifs de somme 48 : \\(n + (n + 1) + (n + 2) = 48\\), \\(n = 15\\).", "Somme 75 : \\(3n + 3 = 75\\), \\(n = 24\\) (24, 25, 26).", "Quatre consécutifs de somme 98 : \\(4n + 6 = 98\\), \\(n = 23\\)."], piege: "Écris ce que représente l'inconnue : ici \\(n\\) est le plus petit, celui du milieu est \\(n + 1\\)." },
       predict: { q: "Trois entiers consécutifs ont pour somme 48. Le plus petit est…", choices: ["16", "15", "14"], good: 1, why: "n + (n + 1) + (n + 2) = 3n + 3 = 48, donc n = 15 : 15 + 16 + 17 = 48. 16 est celui du milieu." },
       defis: ["Trouve trois entiers consécutifs de somme 48.", "Trouve trois entiers consécutifs de somme 75.", "Avec 4 nombres : trouve quatre entiers consécutifs de somme 98."],
       play(box, onWin) {
@@ -173,6 +179,8 @@
       },
     },
     eq2fact: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Méthode directe : \\(x^2 = a\\) a deux solutions \\(\\pm\\sqrt{a}\\) si \\(a > 0\\). Sinon : on ramène tout à gauche (\\(\\ldots = 0\\)), on met en évidence et on annule chaque facteur.", exemple: ["\\(x^2 = 16\\), \\(x = 4\\) ou \\(x = -4\\).", "\\(x^2 = 3x\\), \\(x(x - 3) = 0\\) : \\(x = 0\\) ou \\(x = 3\\)."] },
       predict: { q: "x² = 3x : combien de solutions ?", choices: ["Une : x = 3", "Deux : 0 et 3", "Aucune"], good: 1, why: "0² = 3 · 0 = 0 et 3² = 3 · 3 = 9 : deux solutions. Diviser par x aurait fait perdre x = 0." },
       defis: ["Trouve un nombre x tel que x² = 3x.", "Trouves-en un autre !", "Mode x² = 16 : trouve la solution négative."],
       play: hunt({ start: 1, min: -6, max: 6, show: (x, st) => st < 2
@@ -181,12 +189,16 @@
         wins: [(x, s) => (x * x === 3 * x ? (s.add(x), "x = " + nb(x) + " : " + sq(x) + " = " + nb(3 * x) + ".") : null), (x, s) => (x * x === 3 * x && !s.has(x) ? "Deux solutions : 0 et 3. x(x − 3) = 0." : null), (x) => (x === -4 ? "x = −4 : (−4)² = 16. x² = 16 a deux solutions, ±4." : null)] }),
     },
     eq2: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "\\(A \\cdot B = 0 \\iff A = 0\\) ou \\(B = 0\\). On écrit l'équation sous forme « produit \\(= 0\\) », puis on résout chaque facteur \\(= 0\\).", exemple: ["\\((x - 2)(x + 5) = 0\\) : \\(x = 2\\) ou \\(x = -5\\).", "\\((x - 2)(x + 5) = -6\\) : on développe d'abord, \\(x^2 + 3x - 4 = 0\\), puis \\((x + 4)(x - 1) = 0\\)."] },
       predict: { q: "(x − 2)(x + 5) = 0. Une solution est…", choices: ["x = −2", "x = 2", "x = 5"], good: 1, why: "Si x = 2, le premier facteur vaut 0, donc le produit vaut 0. L'autre solution est x = −5." },
       defis: ["Trouve un x qui rend (x − 2)(x + 5) nul.", "Trouve l'autre.", "Trouve un x tel que (x − 2)(x + 5) = −6."],
       play: hunt({ start: 0, min: -8, max: 6, show: (x) => `<div class="act-out">(${nb(x)} − 2) · (${nb(x)} + 5) = ${nb(x - 2)} · ${nb(x + 5)} = <b>${nb((x - 2) * (x + 5))}</b></div>`,
         wins: [(x, s) => ((x - 2) * (x + 5) === 0 ? (s.add(x), "x = " + nb(x) + " : un facteur vaut 0, donc le produit aussi.") : null), (x, s) => ((x - 2) * (x + 5) === 0 && !s.has(x) ? "Les deux solutions : 2 et −5, une par facteur." : null), (x) => ((x - 2) * (x + 5) === -6 ? "x = " + nb(x) + " convient, mais ni x − 2 ni x + 5 ne vaut −6 : le produit nul ne marche qu'avec 0. Il faut développer : x² + 3x − 4 = 0, soit x = 1 ou x = −4." : null)] }),
     },
     eq2disc: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "Pour \\(ax^2 + bx + c = 0\\), on calcule le discriminant \\(\\Delta = b^2 - 4ac\\). Si \\(\\Delta > 0\\) : deux solutions. Si \\(\\Delta = 0\\) : une solution. Si \\(\\Delta < 0\\) : aucune solution réelle (la parabole ne touche pas l'axe des x).", exemple: ["\\(x^2 - 4x + c = 0\\) : \\(\\Delta = 16 - 4c\\).", "\\(c = 4\\) : \\(\\Delta = 0\\), une solution ; \\(c > 4\\) : aucune ; \\(c < 0\\) : deux."], piege: "Dans \\(\\Delta = b^2 - 4ac\\), \\(b^2\\) est toujours positif : avec \\(b = -4\\), \\(b^2 = 16\\)." },
       predict: { q: "x² − 4x + c = 0. Si c devient très grand, le nombre de solutions…", choices: ["augmente", "devient 0", "reste 2"], good: 1, why: "La parabole monte : elle ne touche plus l'axe des x. Δ = 16 − 4c devient négatif dès que c > 4." },
       defis: ["Choisis c pour que l'équation ait exactement une solution.", "Choisis c pour qu'elle n'en ait aucune.", "Choisis c négatif : combien de solutions ?"],
       play(box, onWin) {
@@ -209,12 +221,16 @@
       },
     },
     probeq2: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { exemple: ["Rectangle de largeur \\(x\\), longueur \\(x + 3\\), aire 40 : \\(x^2 + 3x - 40 = 0\\), \\(x = 5\\) (on écarte \\(-8\\)).", "Aire 70 : \\(x^2 + 3x - 70 = 0\\), \\(x = 7\\) (on écarte \\(-10\\))."] },
       predict: { q: "Un rectangle a une longueur égale à sa largeur + 3 et une aire de 40. Sa largeur est…", choices: ["5", "8", "10"], good: 0, why: "5 · 8 = 40. L'équation x(x + 3) = 40 a aussi la solution −8, qu'on écarte : une largeur est positive." },
       defis: ["Trouve la largeur pour une aire de 40.", "Trouve la largeur pour une aire de 70.", "Et pour une aire de 28 ?"],
       play: hunt({ start: 2, min: 1, max: 12, label: "largeur x", show: (x) => `<svg class="fig" viewBox="0 0 320 ${Math.round(20 + x * 9)}" role="img" aria-label="rectangle"><rect x="10" y="10" width="${(x + 3) * 18}" height="${x * 9}" class="f-shape"/></svg><div class="act-out">Largeur ${nb(x)}, longueur ${nb(x + 3)}<br>Aire : ${nb(x)} · ${nb(x + 3)} = <b>${nb(x * (x + 3))}</b></div>`,
         wins: [(x) => (x * (x + 3) === 40 ? "x = 5 : x² + 3x − 40 = (x − 5)(x + 8) = 0 ; −8 est écarté." : null), (x) => (x * (x + 3) === 70 ? "x = 7 : 7 · 10 = 70." : null), (x) => (x * (x + 3) === 28 ? "x = 4 : (x − 4)(x + 7) = 0." : null)] }),
     },
     eq3: {
+      /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
+      retiens: { regle: "On ramène tout à gauche, on met en évidence \\(x\\), on factorise ce qui reste, puis on annule chaque facteur. Une équation de degré 3 a au plus trois solutions.", exemple: ["\\(x^3 - 4x = 0\\), \\(x(x - 2)(x + 2) = 0\\) : \\(-2\\), \\(0\\), \\(2\\).", "\\(x^3 - 9x = 0\\), \\(x(x - 3)(x + 3) = 0\\) : \\(-3\\), \\(0\\), \\(3\\)."] },
       predict: { q: "x³ − 4x = 0 : combien de solutions au plus ?", choices: ["1", "2", "3"], good: 2, why: "x(x − 2)(x + 2) = 0 : trois facteurs, trois solutions : −2, 0 et 2." },
       defis: ["Trouve une solution positive de x³ − 4x = 0.", "Trouve une solution négative.", "Trouve la troisième."],
       play: hunt({ start: 1, min: -4, max: 4, show: (x) => `<div class="act-out">${nb(x)}³ − 4 · ${nb(x)} = ${nb(x ** 3)} − ${nb(4 * x).replace("−", "(−") + (x < 0 ? ")" : "")} = <b>${nb(x ** 3 - 4 * x)}</b></div>`,
