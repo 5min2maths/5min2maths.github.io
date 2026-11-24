@@ -82,6 +82,7 @@ function qcmNear(g, good, q) {
 function qcmMake(id, d) {
   for (let t = 0; t < 30; t++) {
     let q; try { q = Engine.build(id, d, 1 + Math.floor(Math.random() * 46655)); q = Engine.finalize(state, id, q); } catch (e) { continue; }
+    if (Engine.horsCO && Engine.horsCO(state, id, q)) continue; /* 25.11 : forme hors programme de la classe (9e–10e) */
     if (!q || q.parts || !q.spec || q.spec.kind !== "value" || !isFinite(q.spec.value)) continue;
     const g = q.spec.value, good = qcmFmt(g, q.spec, q.q), seen = new Set([good]), wrong = [];
     const tol = Math.max(q.spec.round ? q.spec.round : 0, 1e-9 * Math.max(1, Math.abs(g)));

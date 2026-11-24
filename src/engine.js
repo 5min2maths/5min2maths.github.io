@@ -96,6 +96,50 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
 const UPC = ["arith", "rel", "fracops", "puiss", "sci", "racprop", "tabval", "eq1", "eqfrac", "formule", "probeq", "affine", "ineq", "sysprob",
   "reduire", "monomes", "parenth", "distrib", "idrem", "factor", "eq2", "simil", "thales", "pyth", "pythfig", "pythrec", "geocomb", "angles", "angtri", "cercthales"];
 const UPC_MIN = { fracper: 3 };
+/* 25.11 (audit de niveau 9e–10e, tools/niveau_910.md ; plans de cheminement CO 2026-27) : formes d'une année supérieure
+   qui se glissaient dans les notions de 9e et de 10e. Au tirage (Engine.make, sujets, QCM), une question dont le contexte
+   (q.ctx), l'énoncé (RegExp) ou la réponse (fonction) est listé ici pour la classe est refaite ; les autres classes
+   (11e, Collège, MP) ne changent pas. */
+const HORS_CO = {
+  /* 9e : relatifs sans multiplication ni division, fractions dans Q+ (addition, soustraction), périodes d'un chiffre
+     (tiers, neuvièmes) ; réduction d'expressions et polygones réguliers en 10e. */
+  9: {
+    prio: ["rel", "puiss", "carre", "frac"],
+    valnum: ["frac", /=\s*-/],
+    fracadd: ["negatif", "parmoins", "rel3", (q) => !!(q.spec && q.spec.kind === "value" && q.spec.value < 0)],
+    angtri: ["polygone", "nb-cotes", /polygone régulier/],
+    litelab: ["perim", "magie", "age", "taxi"],
+    fracconv: ["per2", "permixte"],
+    fracper: [/seul le \d se répète|\{,\}(\d)(?!\1)(\d)\1\2/],
+  },
+  /* 10e : simple distributivité seulement (double distributivité, identités : 11e), pas de fractions algébriques ni de
+     formules à transformer, pas d'inéquations, pas de cône (11e), aires × k² et volumes × k³ en 11e, vitesse moyenne sur deux trajets en 11e. */
+  10: {
+    distrib: ["double", "double2", "degre3", "difference", /on retire un carré/],
+    reduire: ["fractions-binomes"],
+    eq1: ["identites", "carres-elimines", "lit-a", "lit-b", "lit-c", "lit-d", "lit-e"],
+    affine: ["f-sup-g-droites"],
+    pythfig: ["conehaut", "conegen"],
+    echelle: [/aire|volume|cube|m³|dm³/],
+    vitesse: [/aller de|aller-retour|, puis [^.]*km\/h/], /* vitesse moyenne sur deux trajets : 11e (10e = sensibilisation) */
+  },
+};
+function horsCO(state, id, q) {
+  const p = state && state.profile;
+  if (!q || !p || p.system !== "CH" || p.track === "mp") return false;
+  const L = HORS_CO[p.grade] && HORS_CO[p.grade][id];
+  if (!L) return false;
+  const txt = String(q.q || "") + " " + (q.parts || []).map((x) => x.label || "").join(" ");
+  return L.some((r) => (typeof r === "string" ? q.ctx === r : r instanceof RegExp ? r.test(txt) : r(q)));
+}
+/* 25.11 : en 9e–10e, une racine exacte s'écrit √n (la simplification a√b est au programme de 11e) : la forme a√b
+   n'est plus exigée et la consigne propose √13. */
+function racineCO(q) {
+  const un = (sp) => { if (sp && sp.radical) delete sp.radical; };
+  un(q.spec); (q.guide || []).forEach((g) => { un(g.spec); if (g.ask) g.ask = g.ask.replace(" : simplifie", ""); }); (q.parts || []).forEach((x) => un(x.spec));
+  if (q.q) q.q = q.q.replace(/écris par exemple \\\(3\\sqrt\{5\}\\\)/g, "écris par exemple \\(\\sqrt{13}\\)");
+  return q;
+}
 // Programme du jour : le format change d'un jour à l'autre ; l'équilibre se fait sur 7 jours.
 // 22.11 : textes courts (une ligne sur téléphone : pas de saut quand on change de format).
 const FORMATS = {
@@ -453,6 +497,7 @@ const Engine = {
   // Sauf les notions où l'écriture attendue contient elle-même une puissance.
   finalize(state, id, q) {
     const p = state && state.profile;
+    if (q && p && p.system === "CH" && p.track !== "mp" && p.grade <= 10) racineCO(q);
     const mark = (sp) => { if (sp && sp.kind === "value" && !sp.sci) sp.final = true; };
     // 22.11 (retour de l'auteur, sec. II) : « sans calculatrice » = le résultat est exigé à tous les niveaux.
     if (q && !["sci", "scicalc", "puiss"].includes(id) && /sans calculatrice/i.test(q.q || "")) { mark(q.spec); return q; }
@@ -491,14 +536,20 @@ const Engine = {
     // Formes variées (14.11, « les questions doivent absolument être variées ») : la forme d'une question
     // (son énoncé aux nombres près) vue dans les 2 dernières questions de la notion est évitée quand c'est possible.
     const forms = ((state.recentForm = state.recentForm || {})[id] = (state.recentForm[id] || []));
-    let found = false, fresh1 = null;
-    for (let k = 0; k < 16 && !found; k++) {
-      q = this.build(id, level);
+    let found = false, fresh1 = null, lastOk = null, lv = level;
+    /* 25.11 : une forme hors programme de la classe (HORS_CO, 9e–10e) est refaite ; si le niveau n'a plus aucune forme
+       du programme (défi d'une autre année), on descend d'un niveau. */
+    for (let k = 0, t = 0; k < 16 && !found && t < 60; t++) {
+      if (t === 30 && !lastOk && lv > 1) lv -= 1;
+      q = this.build(id, lv);
+      if (horsCO(state, id, q)) continue;
+      k++; lastOk = q;
       const fresh = !rec.includes(key(q)) && !(q.ctx && ctxs.includes(q.ctx));
       if (fresh && !forms.includes(qForm(q))) found = true;
       else if (fresh && !fresh1) fresh1 = q;
     }
     if (!found && fresh1) q = fresh1; // une seule forme possible : au moins une question jamais vue
+    else if (!found && lastOk) q = lastOk;
     rec.push(key(q)); state.recentQ[id] = rec.slice(-15);
     if (q.ctx) state.recentCtx[id] = [...ctxs, q.ctx].slice(-2);
     state.recentForm[id] = [...forms, qForm(q)].slice(-2);
@@ -518,7 +569,8 @@ const Engine = {
     for (let k = 0; k < 6; k++) {
       if (k) R.seed(seed * 7919 + level * 104729 + [...id].reduce((a, c) => a + c.charCodeAt(0), 0) + k * 15485863);
       // Variantes (variantes.js) : la forme d'origine ou une forme ajoutée, au hasard.
-      const vs = typeof VAR !== "undefined" && VAR[id] && VAR[id][level], vk = vs && vs.length ? Math.floor(R.rand() * (vs.length + 1)) : 0;
+      /* 25.11 : VARX (variantes.js, audit 9e–10e) = formes ajoutées qui survivent aux modules de chapitre (ils vident VAR[id]). */
+      const vs = [].concat((typeof VAR !== "undefined" && VAR[id] && VAR[id][level]) || [], (typeof VARX !== "undefined" && VARX[id] && VARX[id][level]) || []), vk = vs.length ? Math.floor(R.rand() * (vs.length + 1)) : 0;
       q = vk ? vs[vk - 1]() : GEN[id](level);
       q.q = tidy(q.q); q.sol = tidy(q.sol);
       if (trivialQ(q, k)) continue;
@@ -539,6 +591,8 @@ const Engine = {
     }
     return { ...q, id, d: level, seed, code, hint: q.hint || HINTS[id] };
   },
+  // 25.11 : forme hors programme pour la classe de l'élève (HORS_CO, 9e–10e) ; utilisé aussi par les sujets et les QCM.
+  horsCO(state, id, q) { return horsCO(state, id, q); },
   // Lecture d'un code « eq2disc-2-k3f » → question exacte (ou null).
   fromCode(code) {
     const m = /^([a-z0-9]+)-([1-4])-([a-z0-9]+)$/.exec(String(code).trim().toLowerCase());
