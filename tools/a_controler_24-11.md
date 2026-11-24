@@ -41,6 +41,21 @@ Tout est publié sur le site, sauf mention contraire. Mode auteur : …/#auteur 
 - Robot de cette nuit : 10 alertes, toutes corrigées ou expliquées.
 - Leçons de MP 2e (droites, trigonométrie, stats, quartiles) maintenant chargées aussi au Collège.
 
+## Ajouts du soir (après 20h)
+
+- **Remobilisation** : une notion des années antérieures ne revient que si le parcours le demande (notion ancienne
+  ratée, prérequis d'une notion de l'année qui coince, Mathélo ≥ 120 points sous son meilleur des 30 derniers jours).
+  À trancher : l'année précédente compte encore comme « actuelle » (ex. dérivées de 3e en 4e) ; seuil 120 ?
+- **3e Collège** : géométrie vectorielle de l'espace (8 notions : vect3d, colin, droite3d, plans, posrel, pscal3d,
+  distances, sphere) — contrôler plans N3 (trois points) et posrel N3 (trois plans). En cours : limites, continuité,
+  étude de fonction, dérivée seconde, combinatoire, probabilités (agent).
+- **4e Collège** : en cours (agent) : intégration par parties / substitution, étude ln-exp, équations différentielles.
+- **Défis de niveau 4** : 131 notions réécrites en tout (3 lots) ; points à contrôler dans tools/defis.md
+  (trigcercle kπ/6 non simplifié, condbayes c), recipaff c), posdroites grandes coordonnées).
+- **💬** : seul le titre « 5 minutes de maths » ramène à l'accueil ; croix de la fenêtre en haut à droite.
+  Si la bulle ramène encore à l'accueil : fermer complètement l'app et la rouvrir (ancienne version en mémoire).
+- **Tests** : une page bloquée compte désormais comme un échec ; 5 pages d'aperçu rangées dans tests/manuel/.
+
 ## Ta décision
 
 - MA2 (renforcé) : comment l'app distingue-t-elle niveau normal et renforcé en 3e–4e ?

@@ -10,8 +10,13 @@
 <title>5minutes2mathsparjour</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Chaque jour, quelques minutes de maths, à ton niveau.">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap" onload="this.onload=null;this.rel=&quot;stylesheet&quot;"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap"></noscript>
+<link rel="preload" as="font" type="font/woff2" href="vendor/fonts/atkinson-400.woff2" crossorigin>
+<style>
+@font-face { font-family: 'Atkinson Hyperlegible'; font-style: normal; font-weight: 400; font-display: swap; src: url(vendor/fonts/atkinson-400.woff2) format('woff2'); }
+@font-face { font-family: 'Atkinson Hyperlegible'; font-style: normal; font-weight: 700; font-display: swap; src: url(vendor/fonts/atkinson-700.woff2) format('woff2'); }
+@font-face { font-family: 'Bricolage Grotesque'; font-style: normal; font-weight: 700 800; font-stretch: 100%; font-display: swap; src: url(vendor/fonts/bricolage-var.woff2) format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400 600; font-display: swap; src: url(vendor/fonts/jetbrainsmono-var.woff2) format('woff2'); }
+</style>
 <style>
 /* Concept : une page de cahier à petits carreaux ; encre bleue, marge rouge, une carte = une question. */
 :root {
@@ -724,6 +729,17 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: v
 .pm-sq.on { outline: 2px solid var(--blue); outline-offset: 1px; }
 .pm-info { margin-top: 4px; padding: 4px 8px; border-radius: 8px; background: var(--soft, rgba(0,0,0,.05)); }
 
+/* 24.11 soir : fenêtre 💬 — la croix reste en haut à droite même quand le titre passe à la ligne */
+.fab-sheet > .card { position: relative; padding-right: 44px; }
+.fab-sheet #fabx { position: absolute; top: 8px; right: 8px; }
+
+/* 24.11 : visite guidée en haut quand l'élément présenté est en bas (elle ne couvre plus les boutons) */
+.tour.tour-top { top: 70px; bottom: auto; }
+
+/* 24.11 (retour testeur) : identifiant de question invisible pour les élèves (il part toujours avec les commentaires) ;
+   visible en mode auteur (…/#auteur). */
+.vote .code, p.cur-code { display: none; }
+.auteur .vote .code, .auteur p.cur-code { display: block; } .auteur .vote .code { display: inline; }
 
 </style>
 <script>
@@ -733,12 +749,12 @@ window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "glo
 </head>
 <body>
 <main id="app" aria-live="polite"></main>
-<script src="app.js?v=27efea842b"></script>
+<script src="app.js?v=f1bb84ad83"></script>
 <script>
 (function () {
   // Chargement par niveau (24.11). Paquets requis : le niveau de l'élève et les niveaux inférieurs de sa filière ;
   // France et liens de consultation (#q-, #l-, #auteur) : tout. Puis le reste en arrière-plan (hors ligne complet).
-  var V = "27efea842b", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
+  var V = "f1bb84ad83", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
   window.__packs = loaded; // pour les tests (tools/test_paquets.py)
   function need(p) {
     if (!p || p.system === "FR") return K.slice();
@@ -767,7 +783,7 @@ window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "glo
   var first = /^#(q-|l-|auteur)/.test(location.hash) ? K.slice() : st && st.profile ? need(st.profile) : [];
   // MathJax (24.11) : chez un habitué il est en cache, on le charge tout de suite et l'app attend qu'il soit prêt
   // (pas de TeX brut à l'écran) ; pour une première visite, il vient après l'affichage (il ne prend pas la bande passante du code).
-  function mathjax() { if (window.__mj) return; window.__mj = 1; var m = document.createElement("script"); m.src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"; m.async = true; document.head.appendChild(m); }
+  function mathjax() { if (window.__mj) return; window.__mj = 1; var m = document.createElement("script"); m.src = "vendor/mathjax/tex-svg.js"; m.async = true; document.head.appendChild(m); }
   function mjReady(cb) { var t0 = Date.now(); (function w() { if ((window.MathJax && MathJax.typesetPromise) || Date.now() - t0 > 1500) cb(); else setTimeout(w, 30); })(); }
   if (st && st.profile) mathjax();
   function start() {

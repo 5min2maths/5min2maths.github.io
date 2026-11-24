@@ -127,6 +127,16 @@ Object.assign(ORDRE_THEME.MATU, {"primitives":"M4C01","integrale":"M4C01","airei
 // 24.11 (agent greste) : algèbre linéaire (M4C03), loi normale, et statistique descriptive ouverte à la 4e (M4C04). Ajouté à la main.
 Object.assign(ORDRE.MATU, {"matrices":220,"translin":221,"appllin":222,"stats":233,"quartiles":234,"normale":235});
 Object.assign(ORDRE_THEME.MATU, {"matrices":"M4C03","translin":"M4C03","appllin":"M4C03","stats":"M4C04","quartiles":"M4C04","normale":"M4C04"});
+// 24.11 (agent c3geo) : géométrie vectorielle de l'espace, 3e Collège (src/ch3c_geo.js, chapitre M3C06). Ajouté à la main.
+Object.assign(ORDRE.MATU, {"vect3d":150,"colin":151,"droite3d":152,"plans":153,"posrel":154,"pscal3d":155,"distances":156,"sphere":157});
+Object.assign(ORDRE_THEME.MATU, {"vect3d":"M3C06","colin":"M3C06","droite3d":"M3C06","plans":"M3C06","posrel":"M3C06","pscal3d":"M3C06","distances":"M3C06","sphere":"M3C06"});
+// 24.11 soir (agent c3ana) : 3e du Collège (src/ch3c_ana.js), limites et continuité (M3C02), dérivée seconde et étude de
+// fonctions (M3C03), combinatoire et probabilités (M3C05). Ajouté à la main : à reporter dans tools/referentiels.py si régénéré.
+Object.assign(ORDRE.MATU, {"limites":105.1,"limitinf":105.2,"asymptotes":105.3,"continuite":105.4,"derivseconde":114.1,"etudefct":114.2,"combi":120,"probaxiomes":121,"probarbre":122});
+Object.assign(ORDRE_THEME.MATU, {"limites":"M3C02","limitinf":"M3C02","asymptotes":"M3C02","continuite":"M3C02","derivseconde":"M3C03","etudefct":"M3C03","combi":"M3C05","probaxiomes":"M3C05","probarbre":"M3C05"});
+// 25.11 (agent c4plus) : intégration par parties et par substitution (M4C01), étude ln/exp et équations différentielles (M4C02). Ajouté à la main.
+Object.assign(ORDRE.MATU, {"intparties":204,"intsubst":205,"etudelnexp":212,"eqdiff":213});
+Object.assign(ORDRE_THEME.MATU, {"intparties":"M4C01","intsubst":"M4C01","etudelnexp":"M4C02","eqdiff":"M4C02"});
 
 // Calculateur d'expressions : lecture souple de la réponse de l'élève, calcul, mise en forme TeX,
 // équivalence d'expressions (par évaluation en plusieurs points) et contrôle de forme.
@@ -2650,7 +2660,9 @@ Object.assign(GEN, {
   polyreg(d) {
     const n = R.pick([5, 6, 8, 9, 10, 12]);
     if (d === 1) return { fig: FIG.regPoly(n, "?"), guide: [GS("Les " + n + " angles au centre font le tour complet : combien de degrés en tout ?", 360, "360°."), GS("Un angle au centre : " + M("360 : " + n) + " = ?", 360 / n, M(dec(360 / n) + "°") + ".")], q: "Quelle est la mesure de l'angle au centre d'un polygone régulier à " + M(n) + " côtés (en degrés) ?", spec: { kind: "value", value: 360 / n }, sol: M("\\frac{360°}{" + n + "} = " + dec(360 / n) + "°") + "." };
-    if (d === 2) return { fig: FIG.regPoly(n, "?", true), guide: [GS("Somme des angles intérieurs " + M("(n - 2) \\cdot 180°") + " = ?", (n - 2) * 180, M("(" + n + " - 2) \\cdot 180° = " + (n - 2) * 180 + "°") + "."), GS("Un angle : " + M((n - 2) * 180 + " : " + n) + " = ?", ((n - 2) * 180) / n, M(dec(((n - 2) * 180) / n) + "°") + ".")], q: "Quelle est la mesure d'un angle intérieur d'un polygone régulier à " + M(n) + " côtés (l'angle entre deux côtés voisins, marqué sur la figure), en degrés ?", spec: { kind: "value", value: ((n - 2) * 180) / n }, sol: "Somme des angles : " + M("(" + n + " - 2) \\cdot 180° = " + (n - 2) * 180 + "°") + " ; un angle : " + M(dec(((n - 2) * 180) / n) + "°") + "." };
+    if (d === 2) return { fig: FIG.regPoly(n, "?", true), guide: [GS("Somme des angles intérieurs " + M("(n - 2) \\cdot 180°") + " = ?", (n - 2) * 180, M("(" + n + " - 2) \\cdot 180° = " + (n - 2) * 180 + "°") + "."), GS("Un angle : " + M((n - 2) * 180 + " : " + n) + " = ?", ((n - 2) * 180) / n, M(dec(((n - 2) * 180) / n) + "°") + ".")], q: "Quelle est la mesure d'un angle intérieur d'un polygone régulier à " + M(n) + " côtés (l'angle entre deux côtés voisins, marqué sur la figure), en degrés ?", spec: { kind: "value", value: ((n - 2) * 180) / n }, sol: "Somme des angles : " + M("(" + n + " - 2) \\cdot 180° = " + (n - 2) * 180 + "°") + " ; un angle : " + M(dec(((n - 2) * 180) / n) + "°") + ".",
+      /* 24.11 (retour testeur : 40° pour l'ennéagone, sans message) : erreurs fréquentes */
+      traps: [TRAP(360 / n, "C'est l'angle au centre (ou l'angle extérieur) : 360° ÷ " + n + ". L'angle intérieur vaut 180° − " + dec(360 / n) + "°."), TRAP((n - 2) * 180, "C'est la somme de tous les angles ; divise-la par " + n + ".")] };
     const m = R.pick([5, 6, 8, 9, 10, 12, 15, 18, 20]), a = ((m - 2) * 180) / m;
     return { guide: [GS("Angle au centre = 180° − angle intérieur = ?", 180 - a, M("180° - " + dec(a) + "° = " + dec(180 - a) + "°") + "."), GS("Nombre de côtés = " + M("360 : " + dec(180 - a)) + " = ?", m, M(m) + ".")], q: "Un angle intérieur d'un polygone régulier mesure " + M(dec(a) + "°") + ". Combien le polygone a-t-il de côtés ?", spec: { kind: "value", value: m }, sol: "L'angle au centre vaut " + M("180° - " + dec(a) + "° = " + dec(180 - a) + "°") + " ; " + M("n = \\frac{360}{" + dec(180 - a) + "} = " + m) + "." };
   },
@@ -12806,9 +12818,15 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
   // 23.11 : dérivation (3e Collège, src/ch3c_ana.js)
   tauxvar: ["fimg"], nbderive: ["tauxvar"], derivref: ["puiss"], derivregles: ["derivref"], derivprodquot: ["derivregles"], derivcomp: ["derivregles", "compo"],
   tangente: ["nbderive", "droites"], variations: ["derivregles", "ineq2"], optimderiv: ["variations"],
+  // 24.11 (agent c3geo) : géométrie vectorielle de l'espace, 3e Collège (src/ch3c_geo.js)
+  vect3d: ["vecteurs"], colin: ["vect3d"], droite3d: ["vect3d"], plans: ["droite3d"], posrel: ["plans"], pscal3d: ["vect3d"], distances: ["pscal3d", "plans"], sphere: ["plans", "pscal3d"],
+  // 24.11 soir : limites, asymptotes, continuité, dérivée seconde, étude, combinatoire, probabilités (3e Collège, src/ch3c_ana.js)
+  limites: ["fracrat", "factor"], limitinf: ["limites"], asymptotes: ["limitinf", "fracrat"], continuite: ["limites", "morceaux"],
+  derivseconde: ["derivregles"], etudefct: ["variations", "asymptotes"], combi: ["denombr"], probaxiomes: ["proba"], probarbre: ["probaxiomes"],
   // 24.11 : 4e Collège (src/ch4c_ana.js) : intégration, ln et exp, probabilités 2
   primitives: ["derivregles"], integrale: ["primitives"], aireint: ["integrale"], volrev: ["integrale"], lnexp: ["log", "derivcomp"], croissance: ["expo", "log"],
   condbayes: ["proba"], varalea: ["proba"], binomiale: ["varalea"],
+  intparties: ["integrale", "derivprodquot"], intsubst: ["integrale", "derivcomp"], etudelnexp: ["lnexp", "variations"], eqdiff: ["croissance", "primitives"],
   // 24.11 : MP 3e (src/ch_mp3.js) et MP 4e (src/ch_mp4.js)
   eqabs: ["eq1"], eqbic: ["eq2disc"], eqirrmp: ["eq2disc"], eqratmp: ["fracrat", "eq2disc"], puisrat: ["puiss", "rac"], logdef: ["puiss"], logprop: ["logdef"],
   eqexp: ["logdef"], eqlog: ["logprop"], croissexp: ["eqexp"], volmp: ["pyth"], similmp: ["volmp"],
