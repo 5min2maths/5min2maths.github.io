@@ -326,6 +326,7 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .act-prime { display: inline-grid; place-items: center; min-width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--ok); color: var(--ok); font-weight: 800; font-size: 1.3rem; padding: 0 4px; }
 .act-ladder { color: var(--ink-soft); text-align: center; font-size: 1.05rem; }
 .act-hint { color: var(--warn); text-align: center; }
+.act-plus-on > .act-sub .act-ans { display: none; } /* questions ajoutées (actPlus) : la zone de réponse de la leçon finie est masquée */
 .fig .act-over { fill: var(--bad-soft, #fde2e1); stroke: var(--bad); stroke-dasharray: 3 3; }
 /* Manipulations tactiles (23.11, src/manip.js) : la figure prend toute la largeur, les objets saisissables se voient */
 .fig.manip2 { max-width: 360px; display: block; margin-inline: auto; }
@@ -730,12 +731,12 @@ window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "glo
 </head>
 <body>
 <main id="app" aria-live="polite"></main>
-<script src="app.js?v=fdefdb9413"></script>
+<script src="app.js?v=ab46e5244e"></script>
 <script>
 (function () {
   // Chargement par niveau (24.11). Paquets requis : le niveau de l'élève et les niveaux inférieurs de sa filière ;
   // France et liens de consultation (#q-, #l-, #auteur) : tout. Puis le reste en arrière-plan (hors ligne complet).
-  var V = "fdefdb9413", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
+  var V = "ab46e5244e", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
   window.__packs = loaded; // pour les tests (tools/test_paquets.py)
   function need(p) {
     if (!p || p.system === "FR") return K.slice();

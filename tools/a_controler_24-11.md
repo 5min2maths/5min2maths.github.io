@@ -27,9 +27,11 @@ Tout est publié sur le site, sauf mention contraire. Mode auteur : …/#auteur 
 - **3e–4e Collège** : 21 leçons actives, 5 banques riches type maturité ; loi normale (règle 68-95-99,7 : 81,5 %
   et non 81,9 %), matrices, transformations, **applications linéaires (noyau, image, bases, nouveau ce soir)**,
   stats et quartiles ouverts en 4e (placés en fin de chapitre 4 : l'écart-type plus tôt ?).
-- **« Retiens »** des leçons actives limité à ce que les défis présentent (149 leçons, tools/retiens.md). Titres
-  incohérents en cours de correction : `angles` (« angle au centre » mais défis sur parallèles), `ineq`
-  (« tableau des signes » mais inéquations du 1er degré).
+- **« Retiens »** des leçons actives limité à ce que les défis présentent (149 leçons, tools/retiens.md).
+  23 règles importantes retrouvent un défi court en fin de leçon (règle des signes, ln(ab), det(AB), primitives,
+  (−b ± √Δ)/2a, m·m' = −1…). Titres corrigés : `angles` → « Angles : parallèles, cercle », `ineq` →
+  « Inéquations du 1er degré » (visible dans le choix des notions), `rel` : défis de multiplication ajoutés.
+  À relire : consignes et réponses des défis ajoutés (tableau dans tools/retiens.md).
 
 ## Technique (rien à faire)
 

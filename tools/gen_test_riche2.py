@@ -37,6 +37,7 @@ CHAPS = [
     ("lnexp croissance", "exp4c", "col"),
     ("matrices translin", "alg4c", "col"),
     ("condbayes varalea binomiale normale", "proba4c", "col"),
+    ("matrices translin appllin", "alg4c", "col"),
 ]
 JSCODE = r"""
 const L=[];let fails=0;const seenK={};const bad=(m)=>{fails++;const k=m.replace(/graine \d+/,"").slice(0,48);seenK[k]=(seenK[k]||0)+1;if(seenK[k]<=1&&fails<400)L.push("ÉCHEC "+m);};

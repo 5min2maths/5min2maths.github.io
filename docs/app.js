@@ -67,7 +67,7 @@ const NOTIONS = [
   { id: "polyfact", theme: "fa", label: "Factoriser un polynôme, racine évidente", ex: "x^3 - 7x + 6 = 0", CH: [13], MP: null, FR: null },
   { id: "fracrat", theme: "fa", label: "Fractions rationnelles", ex: "\\frac{1}{x-2} + \\frac{1}{x+2}", CH: [13], MP: [12, "S1"], FR: null },
   { id: "eqrat", theme: "fa", label: "Équations rationnelles", ex: "\\frac{3}{x - 1} = \\frac{2}{x + 4}", CH: [13], MP: null, FR: null },
-  { id: "ineq", theme: "fa", label: "Inéquations, tableau des signes", ex: "\\frac{x - 1}{x + 2} \\le 0", CH: [12], MP: null, FR: [10, 7] },
+  { id: "ineq", theme: "fa", label: "Inéquations du 1er degré", ex: "-2x + 5 \\le 11", CH: [12], MP: null, FR: [10, 7] },
   { id: "recip", theme: "fa", label: "Composition et réciproque", ex: "(f \\circ g)(x) = f(g(x))", CH: [13], MP: null, FR: [11, 3] },
   { id: "absval", theme: "fa", label: "Valeur absolue", ex: "|x - 3| = 5", CH: [12], MP: null, FR: [10, 6] },
   { id: "homog", theme: "fa", label: "Fonctions homographiques", ex: "f(x) = \\frac{2x + 1}{x - 3}", CH: [13], MP: null, FR: null },
@@ -3190,7 +3190,7 @@ const LESSONS_EXTRA = {
   polyfact: ["Racine évidente", "Une racine entière divise le terme constant.", "Tester \\(\\pm 1, \\pm 2, \\dots\\) parmi les diviseurs du terme constant, diviser par \\((x - a)\\), recommencer avec le quotient.", ["\\(x^3 - 7x + 6\\) : \\(P(1) = 0\\), puis \\(x^2 + x - 6 = (x - 2)(x + 3)\\)"], "Équation bicarrée : pose \\(t = x^2\\)."],
   fracrat: ["Fractions rationnelles", "Des fractions dont les termes sont des polynômes.", "Simplifier : factoriser puis supprimer les facteurs communs. Additionner : dénominateur commun.", ["\\(\\frac{x^2 - 9}{x + 3} = x - 3\\)", "\\(\\frac{1}{x - 2} + \\frac{1}{x + 2} = \\frac{2x}{x^2 - 4}\\)"], "On simplifie des facteurs, jamais des termes : \\(\\frac{x + 3}{x} \\ne 3\\)."],
   eqrat: ["Équations rationnelles", "L'inconnue est au dénominateur.", "1. Valeurs interdites. 2. Multiplier par le dénominateur commun. 3. Résoudre. 4. Écarter les solutions interdites.", ["\\(\\frac{6}{x - 1} = 2 \\Rightarrow x = 4\\)"], "Une solution égale à une valeur interdite doit être rejetée."],
-  ineq: ["Tableau des signes", "Le signe d'un produit ou d'un quotient se lit facteur par facteur.", "Une ligne par facteur, les zéros dans l'ordre, puis la règle des signes. Les zéros du dénominateur sont exclus.", ["\\(\\frac{x - 1}{x + 2} \\le 0\\) : \\(S = ]-2 ; 1]\\)"], "Ne multiplie jamais une inéquation par une expression dont tu ne connais pas le signe."],
+  ineq: ["Inéquations du 1er degré", "Comme une équation, avec un sens à respecter.", "On isole \\(x\\). En multipliant ou en divisant par un nombre négatif, on retourne le sens de l'inégalité.", ["\\(3x - 4 \\le 11 \\iff x \\le 5\\)", "\\(-2x > 6 \\iff x < -3\\)"], "Diviser par un nombre négatif retourne le sens de l'inégalité."],
   homog: ["Fonctions homographiques", "\\(f(x) = \\frac{ax + b}{cx + d}\\) : son graphe est une hyperbole.", "Asymptote verticale : \\(x = -\\frac{d}{c}\\). Asymptote horizontale : \\(y = \\frac{a}{c}\\). Zéro : \\(x = -\\frac{b}{a}\\).", ["\\(f(x) = \\frac{2x + 1}{x - 3}\\) : AV \\(x = 3\\), AH \\(y = 2\\)"], "La réciproque d'une fonction homographique est encore homographique."],
   trigfn: ["Fonctions trigonométriques", "\\(f(x) = A \\sin(kx) + m\\) est une sinusoïde.", "Amplitude \\(|A|\\), période \\(\\frac{2\\pi}{k}\\), valeurs entre \\(m - |A|\\) et \\(m + |A|\\).", ["\\(3\\sin(2x)\\) : amplitude 3, période \\(\\pi\\)"], "Plus \\(k\\) est grand, plus la période est courte."],
   droites: ["Équations de droites", "\\(y = mx + h\\) : pente \\(m\\), ordonnée à l'origine \\(h\\).", "\\(m = \\frac{y_B - y_A}{x_B - x_A}\\). Parallèles : même pente. Perpendiculaires : \\(m \\cdot m' = -1\\).", ["Par \\(A(0 ; 1)\\) et \\(B(2 ; 5)\\) : \\(y = 2x + 1\\)", "Perpendiculaire à \\(y = 2x\\) : pente \\(-\\frac{1}{2}\\)"], "Une droite verticale n'a pas de pente : son équation est \\(x = c\\)."],
@@ -5777,7 +5777,7 @@ const COMPS = {
   trigrel: ["Calculer cos à partir de sin", "Calculer tan à partir de cos", "Calculer une valeur exacte avec sin² + cos² = 1"],
   expfrac: ["Calculer une puissance à exposant fractionnaire", "Calculer une puissance à exposant fractionnaire négatif", "Écrire un produit de racines comme une puissance"],
   vecteurs: ["Calculer les composantes d'un vecteur", "Calculer une norme ou une combinaison de vecteurs", "Utiliser le produit scalaire"],
-  ineq: ["Résoudre une inéquation du 1er degré", "Résoudre une inéquation avec un quotient", "Résoudre avec un tableau des signes"],
+  ineq: ["Résoudre une inéquation du 1er degré", "Résoudre avec x des deux côtés, des parenthèses ou des fractions", "Résoudre une double inégalité, comparer des offres"],
   recip: ["Calculer avec une réciproque", "Calculer avec une composée", "Trouver l'expression d'une réciproque"],
   absval: ["Résoudre une équation avec valeur absolue", "Résoudre une équation avec valeur absolue", "Reconnaître une équation sans solution"],
   homog: ["Trouver l'asymptote verticale", "Trouver l'asymptote horizontale", "Trouver la réciproque d'une homographique"],
@@ -8501,9 +8501,11 @@ const LESSONS_V2 = {
     "Méthode par combinaison : on additionne ou on soustrait les deux équations pour faire disparaître une inconnue. Méthode par substitution : on isole une inconnue dans une équation et on la remplace dans l'autre. On termine en vérifiant le couple dans les deux équations.",
     ["\\(x + y = 7\\) et \\(x - y = 1\\) : en additionnant, \\(2x = 8\\), donc \\(x = 4\\), puis \\(y = 7 - 4 = 3\\)."],
     "On répond par un couple : \\(x\\) d'abord, puis \\(y\\)."],
-  angles: ["Angle au centre, angle inscrit", "Dans un cercle, un angle au centre et un angle inscrit peuvent « regarder » le même arc.",
-    "L'angle au centre vaut le double de l'angle inscrit qui intercepte le même arc. Deux angles inscrits qui interceptent le même arc sont égaux. Un angle inscrit dans un demi-cercle est droit.",
-    ["Angle inscrit de 35° : l'angle au centre qui intercepte le même arc mesure 70°.",
+  /* 24.11 : la notion angles couvre les parallèles et le cercle (curriculum « Angles : parallèles, cercle », ch11_ang.js) */
+  angles: ["Angles : parallèles, cercle", "Avec deux parallèles et une sécante, ou dans un cercle, certains angles sont égaux ou liés.",
+    "Deux parallèles coupées par une sécante : les angles alternes-internes (et les angles correspondants) sont égaux ; deux angles co-intérieurs sont supplémentaires, leur somme vaut 180°. Dans un cercle, l'angle au centre vaut le double de l'angle inscrit qui intercepte le même arc. Deux angles inscrits qui interceptent le même arc sont égaux. Un angle inscrit dans un demi-cercle est droit.",
+    ["Parallèles et sécante : un angle de 70° a un alterne-interne de 70° et un co-intérieur de 110°.",
+      "Angle inscrit de 35° : l'angle au centre qui intercepte le même arc mesure 70°.",
       "Si \\([AB]\\) est un diamètre et \\(C\\) un point du cercle, l'angle en \\(C\\) est droit. Avec \\(\\widehat{CAB} = 60°\\), on trouve \\(\\widehat{CBA} = 180° - 90° - 60° = 30°\\) (2e figure)."],
     "Vérifie que les deux angles interceptent bien le même arc."],
   simil: ["Agrandir, réduire", "Deux figures semblables ont la même forme : l'une est un agrandissement de l'autre.",
@@ -8665,10 +8667,11 @@ const LESSONS_V2 = {
     "Étape 1 : on note les valeurs interdites. Étape 2 : on multiplie par le dénominateur commun. Étape 3 : on résout l'équation obtenue. Étape 4 : on écarte les solutions interdites.",
     ["\\(\\frac{6}{x - 1} = 2\\) : valeur interdite 1. On multiplie : \\(6 = 2(x - 1)\\), donc \\(x = 4\\) (permis)."],
     "Une solution égale à une valeur interdite doit être rejetée."],
-  ineq: ["Tableau des signes", "Le signe d'un produit ou d'un quotient se lit facteur par facteur.",
-    "On ramène tout d'un côté (« … \\(\\le 0\\) »). On cherche le zéro de chaque facteur. Dans le tableau, une ligne par facteur et les zéros rangés dans l'ordre. La dernière ligne donne le signe du tout (règle des signes). Les zéros d'un dénominateur sont toujours exclus.",
-    ["\\(\\frac{x - 1}{x + 2} \\le 0\\) : zéros 1 et \\(-2\\). Le quotient est négatif entre les deux.", "Comme \\(-2\\) annule le dénominateur, il est exclu : \\(S = ]-2 \\, ; 1]\\)."],
-    "Ne multiplie jamais une inéquation par une expression dont tu ne connais pas le signe."],
+  /* 24.11 : ineq = inéquations du 1er degré (ch1c_sys.js, défis de la leçon active) ; le tableau des signes relève de ineqfrac et ineq2 */
+  ineq: ["Inéquations du 1er degré", "Comme une équation, avec un sens à respecter.",
+    "On isole \\(x\\) avec les mêmes opérations que pour une équation. En multipliant ou en divisant les deux membres par un nombre négatif, on retourne le sens de l'inégalité. La solution s'écrit « \\(x \\le 5\\) » ou avec un intervalle.",
+    ["\\(3x - 4 \\le 11\\) : \\(3x \\le 15\\), donc \\(x \\le 5\\), soit \\(S = ]-\\infty \\, ; 5]\\).", "\\(-2x > 6\\) : on divise par \\(-2\\) et on retourne le sens, donc \\(x < -3\\)."],
+    "\\(-2x > 6\\) donne \\(x < -3\\), pas \\(x > -3\\) : diviser par un nombre négatif retourne le sens."],
   recip: ["Réciproque et composition", "Deux façons d'enchaîner des fonctions.",
     "Composée : \\((f \\circ g)(x) = f(g(x))\\), on calcule d'abord \\(g\\). Réciproque : \\(f^{-1}\\) défait ce que fait \\(f\\). Pour la trouver, on écrit \\(y = f(x)\\), on isole \\(x\\), puis on échange les lettres.",
     ["\\(f(x) = 2x + 1\\) : \\(y = 2x + 1\\) donne \\(x = \\frac{y - 1}{2}\\), donc \\(f^{-1}(x) = \\frac{x - 1}{2}\\).", "Vérification : \\(f(3) = 7\\) et \\(f^{-1}(7) = 3\\)."],
@@ -9517,7 +9520,47 @@ Object.assign(ACTIVE, {
 // - manip  : curseur, figure à déplacer, balance… → « Manipule », tous les défis ;
 // - figure : réponse tapée qui fait réagir une figure (droitesinter, airepyr…) → « Essaie sur la figure », tous les défis ;
 // - guide  : réponse tapée sans figure → « À toi », 2 questions seulement, avec un coup de pouce après une erreur.
-function actPrep(A) {
+function actPrep(A) { return actPlus(A, actPrep0(A)); }
+
+// Défis courts ajoutés après ceux de la leçon (24.11, tools/retiens.md) : une règle essentielle de la notion que la
+// manipulation ne présente pas (ln(ab), det(AB), règle des signes…) devient une question tapée, posée après le dernier
+// défi, pour que « Retiens » puisse la donner. A.plus = [{ d: consigne (TeX permis), ans: nombre, ok: message de
+// réussite, no: coup de pouce après une erreur }]. Valable dans les trois modes (manip, figure, guide).
+const actParse = (s) => { const t = String(s).replace(/,/g, ".").replace(/−/g, "-").replace(/\s|'/g, ""); const m = t.match(/^(-?\d+(?:\.\d+)?)\/(-?\d+(?:\.\d+)?)$/); return t === "" ? NaN : m ? +m[1] / +m[2] : Number(t); };
+function actPlus(A, X) {
+  const Q = A.plus;
+  if (!Array.isArray(Q) || !Q.length || !X.play) return X;
+  const n0 = X.defis.length, N = n0 + Q.length;
+  const play = (box, onWin) => {
+    /* zone de la question ajoutée AU-DESSUS de la leçon : certaines leçons redessinent leur zone de réponse après le
+       dernier défi ; une fois les défis finis, la classe act-plus-on la masque (style.css) */
+    box.innerHTML = '<div class="stack act-plus"></div><div class="stack act-sub"></div>';
+    const pb = box.firstChild, sub = box.lastChild;
+    const ask = (j) => {
+      pb.innerHTML = actAnswerHtml("Ta réponse");
+      const inp = pb.querySelector("input");
+      actAnswerBind(pb, () => {
+        const v = actParse(inp.value);
+        if (!isFinite(v)) { $hint(pb, "Tape un nombre."); return; }
+        if (Math.abs(v - Q[j].ans) > 1e-9 * Math.max(1, Math.abs(Q[j].ans))) { $hint(pb, Q[j].no || "Pas encore : reprends la règle des défis."); return; }
+        pb.innerHTML = ""; onWin(n0 + j, Q[j].ok);
+        if (j + 1 < Q.length) ask(j + 1);
+      });
+      setTimeout(() => pb.scrollIntoView && pb.scrollIntoView({ behavior: "smooth", block: "nearest" }), 60);
+    };
+    X.play(sub, (k, msg) => {
+      onWin(k, msg);
+      /* fin des défis de la leçon : sa zone de réponse disparaît, la question ajoutée prend le relais */
+      if (k === n0 - 1) { box.classList.add("act-plus-on"); sub.querySelectorAll(".act-ans").forEach((e) => e.remove()); ask(0); }
+    });
+  };
+  const guide = X.mode === "guide";
+  return Object.assign({}, X, { defis: X.defis.concat(Q.map((q) => q.d)), play,
+    titre: guide ? "À toi : " + N + " questions" : X.titre,
+    lab: (k) => (guide ? "Question " + (k + 1) + " sur " + N : "Défi " + (k + 1)) });
+}
+
+function actPrep0(A) {
   const P = A.play, o = P && P.o;
   if (!o || !o.ask) return { mode: "manip", titre: "Manipule", defis: A.defis, play: P, lab: (k) => "Défi " + (k + 1), fin: "Défis réussis !" };
   let fig = !!o.blank;
@@ -9668,7 +9711,9 @@ function activeLesson(id, L0, cont, review) {
     const right = (C) => near((A[0] - C[0]) * (B[0] - C[0]) + (A[1] - C[1]) * (B[1] - C[1]), 0);
     ACTIVE.pyth = {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
-      retiens: { regle: "L'hypoténuse est le plus grand côté, en face de l'angle droit. Dans un triangle rectangle, l'aire du carré construit sur l'hypoténuse est la somme des aires des carrés construits sur les deux autres côtés : \\(c^2 = a^2 + b^2\\). L'égalité n'est vraie que pour un angle droit : si l'angle est obtus, \\(c^2 > a^2 + b^2\\).", exemple: ["Cathètes 6 et 8 : \\(c^2 = 36 + 64 = 100\\), \\(c = 10\\)."] },
+      retiens: { regle: "L'hypoténuse est le plus grand côté, en face de l'angle droit. Dans un triangle rectangle, l'aire du carré construit sur l'hypoténuse est la somme des aires des carrés construits sur les deux autres côtés : \\(c^2 = a^2 + b^2\\). L'égalité n'est vraie que pour un angle droit : si l'angle est obtus, \\(c^2 > a^2 + b^2\\). Pour trouver une cathète, on soustrait : \\(b^2 = c^2 - a^2\\).", exemple: ["Cathètes 6 et 8 : \\(c^2 = 36 + 64 = 100\\), \\(c = 10\\).", "Hypoténuse 13, cathète 5 : \\(b^2 = 169 - 25 = 144\\), \\(b = 12\\)."] },
+      /* 24.11 : calcul d'une cathète, en défi court */
+      plus: [{ d: "Triangle rectangle : l'hypoténuse mesure 13 cm et une cathète 5 cm. Longueur de l'autre cathète, en cm ?", ans: 12, ok: "Le carré de l'hypoténuse est la somme des deux autres : b² = 13² − 5² = 169 − 25 = 144, donc b = 12 cm.", no: "Cette fois, on soustrait : 13² − 5², puis la racine carrée." }],
       predict: { q: "Un triangle rectangle a des cathètes de 6 cm et 8 cm. Son hypoténuse mesure…", choices: ["14 cm", "10 cm", "48 cm"], good: 1, why: "6² + 8² = 36 + 64 = 100, et √100 = 10. Ce sont les carrés qui s'additionnent, pas les côtés : tu vas le voir avec les aires des carrés." },
       defis: ["Déplace le sommet C pour que l'angle en C soit droit. Compare l'aire du grand carré à celle des deux autres.", "Trouve une autre position de C où l'angle en C est droit.", "Place C pour que l'angle en C soit plus grand qu'un angle droit (obtus). Que devient l'égalité ?"],
       play: manip({ W: 320, H: 300,
@@ -9928,8 +9973,11 @@ function activeLesson(id, L0, cont, review) {
       { top: ["x", "1", "1"], left: ["x", "1", "1"], txt: "(x + 2)²", msg: "Deux rectangles de 2x (le double produit 4x), plus 2² = 4 : x² + 4x + 4." },
       { top: ["x", "1", "1", "1"], left: ["x", "1", "1", "1"], txt: "(x + 3)²", msg: "x² + 6x + 9 : sans les deux rectangles 3x, il manquerait le double produit." }];
     set("idrem", {
+      /* 24.11 : les deux autres identités remarquables, en défis courts */
+      plus: [{ d: "Développe \\((x - 4)^2 = x^2 + bx + 16\\). Tape \\(b\\).", ans: -8, ok: "(a − b)² = a² − 2ab + b² : le double produit est soustrait, (x − 4)² = x² − 8x + 16.", no: "Le double produit vaut 2 · x · 4, et il est précédé du signe −." },
+        { d: "Développe \\((x + 6)(x - 6) = x^2 + c\\). Tape \\(c\\).", ans: -36, ok: "(a + b)(a − b) = a² − b² : les produits +6x et −6x s'annulent, il reste x² − 36.", no: "Développe : x · x, x · (−6), 6 · x et 6 · (−6). Les deux termes en x s'annulent." }],
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
-      retiens: { regle: "\\((a + b)^2 = a^2 + 2ab + b^2\\). Le carré de côté \\(a + b\\) se découpe en \\(a^2\\), deux rectangles \\(ab\\) et \\(b^2\\) : le terme du milieu, \\(2ab\\), s'appelle le double produit.", exemple: ["\\((x + 1)^2 = x^2 + 2x + 1\\).", "\\((x + 2)^2 = x^2 + 4x + 4\\).", "\\((x + 3)^2 = x^2 + 6x + 9\\)."] },
+      retiens: { regle: "\\((a + b)^2 = a^2 + 2ab + b^2\\). Le carré de côté \\(a + b\\) se découpe en \\(a^2\\), deux rectangles \\(ab\\) et \\(b^2\\) : le terme du milieu, \\(2ab\\), s'appelle le double produit. De même, \\((a - b)^2 = a^2 - 2ab + b^2\\) et \\((a + b)(a - b) = a^2 - b^2\\).", exemple: ["\\((x + 1)^2 = x^2 + 2x + 1\\).", "\\((x + 3)^2 = x^2 + 6x + 9\\).", "\\((x - 4)^2 = x^2 - 8x + 16\\).", "\\((x + 6)(x - 6) = x^2 - 36\\)."], piege: "\\((x - 4)^2 \\neq x^2 - 16\\) : il manque le double produit \\(-8x\\)." },
       predict: { q: "(x + 3)² = ?", choices: ["x² + 9", "x² + 6x + 9", "x² + 3x + 9"], good: 1, why: "(x + 3)² = (x + 3)(x + 3) : 4 morceaux, x², 3x, 3x et 9. Le terme du milieu est le double produit 6x." },
       defis: ["Remplis le carré de côté x + 1.", "Remplis le carré de côté x + 2.", "Remplis le carré de côté x + 3. Compte les barres x."],
       play: mk(D2, [null, null, { q: "Sans la figure : (x + 5)² = x² + ?x + 25. Tape le coefficient de x.", ans: 10, ok: "Deux rectangles 5x : le double produit vaut 2 · 5 · x = 10x.", no: "Dans le carré, il y a DEUX rectangles 5 sur x." }]),
@@ -10050,7 +10098,9 @@ function activeLesson(id, L0, cont, review) {
     const fr = (n, d) => n + "/" + d;
     set("fracadd", {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
-      retiens: { regle: "On cherche le plus petit multiple commun des dénominateurs. On écrit chaque fraction avec ce dénominateur (des parts toutes pareilles), on additionne les numérateurs, puis on simplifie.", exemple: ["\\(\\frac{1}{4} + \\frac{1}{6} = \\frac{3}{12} + \\frac{2}{12} = \\frac{5}{12}\\).", "\\(\\frac{2}{3} + \\frac{1}{6} = \\frac{4}{6} + \\frac{1}{6} = \\frac{5}{6}\\).", "\\(\\frac{1}{3} + \\frac{1}{4} = \\frac{4}{12} + \\frac{3}{12} = \\frac{7}{12}\\)."] },
+      retiens: { regle: "On cherche le plus petit multiple commun des dénominateurs. On écrit chaque fraction avec ce dénominateur (des parts toutes pareilles), on additionne les numérateurs, puis on simplifie. Pour soustraire, même méthode.", exemple: ["\\(\\frac{1}{4} + \\frac{1}{6} = \\frac{3}{12} + \\frac{2}{12} = \\frac{5}{12}\\).", "\\(\\frac{2}{3} + \\frac{1}{6} = \\frac{4}{6} + \\frac{1}{6} = \\frac{5}{6}\\).", "\\(\\frac{1}{3} + \\frac{1}{4} = \\frac{4}{12} + \\frac{3}{12} = \\frac{7}{12}\\).", "\\(\\frac{5}{6} - \\frac{3}{8} = \\frac{20}{24} - \\frac{9}{24} = \\frac{11}{24}\\)."] },
+      /* 24.11 : la soustraction (notion « additionner, soustraire »), en défi court */
+      plus: [{ d: "Calcule \\(\\frac{5}{6} - \\frac{3}{8} = \\frac{a}{24}\\). Tape \\(a\\).", ans: 11, ok: "5/6 = 20/24 et 3/8 = 9/24 : 20/24 − 9/24 = 11/24. Pour soustraire, même méthode que pour additionner.", no: "Écris chaque fraction en vingt-quatrièmes : 24 ÷ 6 = 4 et 24 ÷ 8 = 3." }],
       predict: { q: "Combien font 1/4 + 1/6 ?", choices: ["2/10", "5/12", "2/24"], good: 1, why: "Un quart et un sixième ne sont pas des parts de même taille : on les découpe en douzièmes, 3/12 + 2/12 = 5/12. Additionner les dénominateurs donnerait 2/10 = 1/5, moins qu'un quart seul !" },
       defis: ["Sous 1/4 + 1/6, pose des pièces TOUTES PAREILLES qui font exactement la même longueur.", "Même chose sous 2/3 + 1/6.", "Et sous 1/3 + 1/4."],
       play: manipLesson({ W: 320, H: 240, aria: "barres de fractions",
@@ -10089,8 +10139,12 @@ function activeLesson(id, L0, cont, review) {
     const sg = (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v);
     const arrow = (x0, x1, y, col, dash) => { if (x0 === x1) return ""; const d = x1 > x0 ? -1 : 1; return `<line x1="${x0}" y1="${y}" x2="${x1 + d * 6}" y2="${y}" stroke="${col}" stroke-width="3"${dash ? ' stroke-dasharray="5 4"' : ""}/><path d="M${x1},${y} L${x1 + d * 10},${y - 6} L${x1 + d * 10},${y + 6} Z" fill="${col}"/>`; };
     set("rel", {
+      /* 24.11 : la notion rel est « multiplier, diviser, priorités » (l'addition seule est reladd) : trois défis courts */
+      plus: [{ d: "Calcule \\((-6) \\cdot (-7)\\).", ans: 42, ok: "Deux facteurs négatifs : le produit est positif. (−6) · (−7) = 42.", no: "Même signe : le produit est positif." },
+        { d: "Calcule \\((-48) \\div 6\\).", ans: -8, ok: "Signes contraires : le quotient est négatif. (−48) ÷ 6 = −8.", no: "Un négatif divisé par un positif : le quotient est négatif." },
+        { d: "Calcule \\((-2) \\cdot 5 - (-3) \\cdot 4\\).", ans: 2, ok: "D'abord les produits : (−2) · 5 = −10 et (−3) · 4 = −12. Puis −10 − (−12) = −10 + 12 = 2.", no: "Calcule d'abord les deux produits, puis la soustraction." }],
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
-      retiens: { regle: "Sur la droite graduée, ajouter un nombre positif, c'est avancer ; ajouter un nombre négatif, c'est reculer. Soustraire un nombre, c'est additionner son opposé.", exemple: ["\\(-5 + 7 = 2\\).", "\\(3 - 8 = -5\\).", "\\((-2) - (-6) = -2 + 6 = 4\\)."], piege: "Soustraire \\(-6\\), c'est ajouter 6 : \\((-2) - (-6) = 4\\), pas \\(-8\\)." },
+      retiens: { regle: "Sur la droite graduée, ajouter un nombre positif, c'est avancer ; ajouter un nombre négatif, c'est reculer. Soustraire un nombre, c'est additionner son opposé. Pour multiplier ou diviser : deux nombres de même signe donnent un résultat positif, deux nombres de signes contraires un résultat négatif. Les multiplications et les divisions passent avant les additions et les soustractions.", exemple: ["\\(-5 + 7 = 2\\).", "\\(3 - 8 = -5\\).", "\\((-2) - (-6) = -2 + 6 = 4\\).", "\\((-6) \\cdot (-7) = 42\\) et \\((-48) \\div 6 = -8\\).", "\\((-2) \\cdot 5 - (-3) \\cdot 4 = -10 - (-12) = -10 + 12 = 2\\)."], piege: "Soustraire \\(-6\\), c'est ajouter 6 : \\((-2) - (-6) = 4\\), pas \\(-8\\)." },
       predict: { q: "Combien font (−5) − (−8) ?", choices: ["−13", "3", "−3"], good: 1, why: "Soustraire −8, c'est ajouter 8 : −5 + 8 = 3. Sur la droite, on part de −5 et on avance de 8." },
       defis: ["Calcule −5 + 7 : étire la flèche depuis −5 (glisse le point rouge).", "Calcule 3 − 8.", "Calcule (−2) − (−6). La flèche grise montre « ajouter −6 » : soustraire, c'est faire le contraire."],
       play: manipLesson({ W: 320, H: 172, aria: "droite graduée avec une flèche", // 24.11 : H 160 → 172, « départ » était coupé
@@ -10151,8 +10205,10 @@ function activeLesson(id, L0, cont, review) {
   {
     const O = { x: 34, y: 262 }, S0 = 30;
     set("simil", {
+      /* 24.11 : volumes × k³ (notion « Homothéties et similitudes ») */
+      plus: [{ d: "Un cube est agrandi avec le rapport \\(k = 3\\). Par combien son volume est-il multiplié ?", ans: 27, ok: "Longueur, largeur et hauteur sont multipliées par 3 : le volume est multiplié par 3 · 3 · 3 = 3³ = 27.", no: "Trois dimensions sont multipliées par 3." }],
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
-      retiens: { regle: "Si les longueurs sont multipliées par \\(k\\), les aires sont multipliées par \\(k^2\\).", exemple: ["Rapport \\(k = 3\\) : aire multipliée par 9.", "Aire divisée par 4 : longueurs divisées par 2.", "Aire multipliée par 6,25 : \\(k = 2{,}5\\)."] },
+      retiens: { regle: "Si les longueurs sont multipliées par \\(k\\), les aires sont multipliées par \\(k^2\\) et les volumes par \\(k^3\\).", exemple: ["Rapport \\(k = 3\\) : aire multipliée par 9, volume par 27.", "Aire divisée par 4 : longueurs divisées par 2.", "Aire multipliée par 6,25 : \\(k = 2{,}5\\)."] },
       predict: { q: "On double tous les côtés d'un carré. Son aire est multipliée par…", choices: ["2", "4", "8"], good: 1, why: "Longueurs × 2, donc aire × 2 · 2 = 4 : on voit 4 copies du petit carré dans le grand." },
       defis: ["Tire le coin rouge pour que l'aire du carré soit multipliée par 9.", "Réduis le carré pour que son aire soit divisée par 4.", "Trouve le rapport k qui multiplie l'aire par 6,25."],
       play: manipLesson({ W: 320, H: 276, aria: "carré agrandi depuis le centre O",
@@ -10182,8 +10238,11 @@ function activeLesson(id, L0, cont, review) {
     const Mx = 160, My = 130, Y1 = 80, Y2 = 180, R = 100;
     const PQ = (th) => { const t = (My - Y1) / Math.sin((th * Math.PI) / 180), c = Math.cos((th * Math.PI) / 180); return { P: [Mx + t * c, Y1], Q: [Mx - t * c, Y2] }; };
     set("angles", {
+      /* 24.11 : la notion couvre aussi le cercle (curriculum « Angles : parallèles, cercle ») : deux défis courts */
+      plus: [{ d: "Dans un cercle de centre O, l'angle inscrit \\(\\widehat{ACB}\\) mesure 38°. Combien mesure l'angle au centre \\(\\widehat{AOB}\\) qui intercepte le même arc ?", ans: 76, ok: "L'angle au centre vaut le double de l'angle inscrit qui intercepte le même arc : 2 · 38° = 76°.", no: "L'angle au centre est le double de l'angle inscrit." },
+        { d: "L'angle au centre \\(\\widehat{AOB}\\) mesure 130°. Combien mesure un angle inscrit \\(\\widehat{ADB}\\) qui intercepte le même arc ?", ans: 65, ok: "La moitié de l'angle au centre : 130° ÷ 2 = 65°. Tous les angles inscrits qui interceptent cet arc mesurent 65°.", no: "L'angle inscrit est la moitié de l'angle au centre." }],
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
-      retiens: { regle: "Deux droites parallèles coupées par une sécante : les angles alternes-internes sont égaux ; deux angles co-intérieurs (du même côté, entre les parallèles) sont supplémentaires, leur somme vaut \\(180°\\). Une sécante perpendiculaire à l'une des parallèles l'est aussi à l'autre.", exemple: ["Un angle de 70° : son alterne-interne mesure 70°, son co-intérieur 110°.", "Triangle avec des angles de 48° et 75° : \\(180° - 48° - 75° = 57°\\) (la parallèle menée par le sommet le montre)."], piege: "Alternes-internes : de part et d'autre de la sécante, égaux ; co-intérieurs : du même côté, supplémentaires." },
+      retiens: { regle: "Deux droites parallèles coupées par une sécante : les angles alternes-internes sont égaux ; deux angles co-intérieurs (du même côté, entre les parallèles) sont supplémentaires, leur somme vaut \\(180°\\). Une sécante perpendiculaire à l'une des parallèles l'est aussi à l'autre. Dans un cercle, l'angle au centre vaut le double d'un angle inscrit qui intercepte le même arc.", exemple: ["Un angle de 70° : son alterne-interne mesure 70°, son co-intérieur 110°.", "Triangle avec des angles de 48° et 75° : \\(180° - 48° - 75° = 57°\\) (la parallèle menée par le sommet le montre).", "Angle inscrit de 38° : l'angle au centre qui intercepte le même arc mesure \\(2 \\cdot 38° = 76°\\) ; angle au centre de 130° : angle inscrit de 65°."], piege: "Alternes-internes : de part et d'autre de la sécante, égaux ; co-intérieurs : du même côté, supplémentaires." },
       predict: { q: "Deux droites parallèles sont coupées par une sécante ; un angle mesure 70°. L'angle alterne-interne mesure…", choices: ["70°", "110°", "20°"], good: 0, why: "Avec des parallèles, les angles alternes-internes sont égaux : 70°. Les angles du même côté (co-intérieurs) sont supplémentaires : 70° + 110° = 180°." },
       defis: ["Fais tourner la sécante (glisse le point rouge) pour que l'angle bleu en P mesure 60°. Regarde l'angle bleu en Q.", "Fais en sorte que l'angle orange mesure 50°.", "Rends la sécante perpendiculaire aux deux parallèles."],
       play: manipLesson({ W: 320, H: 226, aria: "deux parallèles coupées par une sécante",
@@ -10297,8 +10356,11 @@ function activeLesson(id, L0, cont, review) {
     const ln = (a, b) => { const [x1, y1] = P(...a), [x2, y2] = P(...b); return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="var(--ink)" stroke-width=".7"/>`; };
     const arrowSvg = (a) => `<circle r="12" fill="var(--margin)" stroke="var(--paper)" stroke-width="2.5"/><path d="M-6,0 L6,0 M-6,0 L-3,-3 M-6,0 L-3,3 M6,0 L3,-3 M6,0 L3,3" stroke="#fff" stroke-width="1.8" fill="none" transform="rotate(${a})"/>`;
     set("vol", {
+      /* 24.11 : prisme et cylindre (notion « Volumes : prisme droit et cylindre »), en défis courts */
+      plus: [{ d: "Cylindre de rayon 2 cm et de hauteur 5 cm : \\(V = A_{\\text{base}} \\cdot h = k\\pi\\ \\text{cm}^3\\). Tape \\(k\\).", ans: 20, ok: "La base est un disque d'aire π · 2² = 4π cm² ; 4π · 5 = 20π cm³, environ 62,8 cm³.", no: "Aire du disque : π · r², puis multiplie par la hauteur." },
+        { d: "Prisme droit : sa base est un triangle de base 6 cm et de hauteur 4 cm, et il est long de 10 cm. Volume, en cm³ ?", ans: 120, ok: "Aire de la base : 6 · 4 ÷ 2 = 12 cm² ; 12 · 10 = 120 cm³. Toujours aire de la base × hauteur.", no: "Aire du triangle : base · hauteur ÷ 2, puis multiplie par 10." }],
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
-      retiens: { regle: "On empile des couches identiques à la base : volume = aire de la base × hauteur. Pavé : \\(a \\cdot b \\cdot c\\).", exemple: ["Base 4 × 3 : 12 cubes par couche, 3 couches, \\(36\\ \\text{cm}^3\\).", "\\(24\\ \\text{cm}^3\\) de hauteur 2 : base de 12, par exemple 4 × 3.", "Autre pavé de \\(24\\ \\text{cm}^3\\) : \\(2 \\cdot 3 \\cdot 4\\) ou \\(6 \\cdot 4 \\cdot 1\\)."], piege: "Un même volume peut avoir plusieurs formes : \\(24 = 4 \\cdot 3 \\cdot 2 = 6 \\cdot 4 \\cdot 1\\)." },
+      retiens: { regle: "On empile des couches identiques à la base : volume = aire de la base × hauteur. Pavé : \\(a \\cdot b \\cdot c\\). Même formule pour un prisme droit et pour un cylindre, dont la base est un disque d'aire \\(\\pi r^2\\).", exemple: ["Cylindre \\(r = 2\\), \\(h = 5\\) : \\(V = \\pi \\cdot 4 \\cdot 5 = 20\\pi \\approx 62{,}8\\ \\text{cm}^3\\).", "Prisme à base triangulaire (6 sur 4), long de 10 : \\(V = 12 \\cdot 10 = 120\\ \\text{cm}^3\\).", "Base 4 × 3 : 12 cubes par couche, 3 couches, \\(36\\ \\text{cm}^3\\).", "\\(24\\ \\text{cm}^3\\) de hauteur 2 : base de 12, par exemple 4 × 3.", "Autre pavé de \\(24\\ \\text{cm}^3\\) : \\(2 \\cdot 3 \\cdot 4\\) ou \\(6 \\cdot 4 \\cdot 1\\)."], piege: "Un même volume peut avoir plusieurs formes : \\(24 = 4 \\cdot 3 \\cdot 2 = 6 \\cdot 4 \\cdot 1\\)." },
       predict: { q: "Combien de cubes de 1 cm³ faut-il pour remplir un pavé de 4 cm × 3 cm × 2 cm ?", choices: ["9", "24", "14"], good: 1, why: "Une couche de 4 · 3 = 12 cubes, et 2 couches : 24 cm³. Volume = aire de la base × hauteur." },
       defis: ["Base 4 × 3 : monte le pavé jusqu'à 36 cm³.", "Fabrique un pavé de 24 cm³ de hauteur 2.", "Fabrique un autre pavé de 24 cm³, qui n'a pas une hauteur de 2."],
       play: manipLesson({ W: 320, H: 214, aria: "pavé formé de petits cubes",
@@ -10338,8 +10400,11 @@ function activeLesson(id, L0, cont, review) {
     const val = ([m, p], x) => m * x + p;
     const COLS = ["var(--blue)", "var(--warn)"];
     set("sys2", {
+      /* 24.11 : les deux méthodes de calcul (combinaison, substitution), en défis courts */
+      plus: [{ d: "Système \\(x + y = 11\\) et \\(x - y = 3\\) : additionne les deux équations pour faire disparaître \\(y\\). Que vaut \\(x\\) ?", ans: 7, ok: "(x + y) + (x − y) = 11 + 3, soit 2x = 14 : x = 7, puis y = 11 − 7 = 4. C'est la méthode par combinaison.", no: "Les y s'annulent : il reste 2x = 11 + 3." },
+        { d: "Système \\(y = 2x\\) et \\(x + y = 15\\) : remplace \\(y\\) par \\(2x\\) dans la 2e équation. Que vaut \\(x\\) ?", ans: 5, ok: "x + 2x = 15, donc 3x = 15 et x = 5 ; puis y = 2 · 5 = 10. C'est la méthode par substitution.", no: "x + 2x = 15 : résous cette équation." }],
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
-      retiens: { regle: "La solution d'un système de deux équations est un couple \\((x ; y)\\) qui vérifie les deux équations : c'est le point d'intersection des deux droites. En additionnant les deux équations, une inconnue peut disparaître.", exemple: ["\\(\\begin{cases} x + y = 10 \\\\ x - y = 2 \\end{cases}\\) En additionnant, \\(2x = 12\\), \\(x = 6\\), \\(y = 4\\).", "\\(y = -x + 10\\) et \\(y = x - 2\\) se coupent en \\((6 ; 4)\\).", "\\(y = 2x + 1\\) et \\(y = -x + 7\\) se coupent en \\((2 ; 5)\\)."] },
+      retiens: { regle: "La solution d'un système de deux équations est un couple \\((x ; y)\\) qui vérifie les deux équations : c'est le point d'intersection des deux droites. En additionnant les deux équations, une inconnue peut disparaître (méthode par combinaison). Si une équation donne une inconnue isolée, on la remplace dans l'autre (méthode par substitution).", exemple: ["\\(y = 2x\\) et \\(x + y = 15\\) : \\(x + 2x = 15\\), donc \\(x = 5\\) et \\(y = 10\\).", "\\(\\begin{cases} x + y = 10 \\\\ x - y = 2 \\end{cases}\\) En additionnant, \\(2x = 12\\), \\(x = 6\\), \\(y = 4\\).", "\\(y = -x + 10\\) et \\(y = x - 2\\) se coupent en \\((6 ; 4)\\).", "\\(y = 2x + 1\\) et \\(y = -x + 7\\) se coupent en \\((2 ; 5)\\)."] },
       predict: { q: "x + y = 10 et x − y = 2. Que vaut x ?", choices: ["6", "5", "4"], good: 0, why: "En additionnant les deux équations, les y disparaissent : 2x = 12, donc x = 6 (et y = 4). 5 et 5 font bien 10, mais 5 − 5 ne fait pas 2." },
       defis: ["y = −x + 10 et y = x − 2 : place le point P pour que ses coordonnées vérifient les DEUX équations.", "Même chose pour y = 2x + 1 et y = −x + 7.", "Et pour y = x + 3 et y = −2x − 3."],
       play: manipLesson({ W: 320, H: 290, aria: "deux droites et un point à placer",
@@ -10368,7 +10433,9 @@ function activeLesson(id, L0, cont, review) {
     const X0 = 22, W = 276, XM = (m) => X0 + (W * m) / 60;
     set("utemps", {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
-      retiens: { regle: "\\(1\\ \\text{h} = 60\\ \\text{min}\\) : une heure n'a pas 100 minutes. Pour passer des minutes aux heures décimales, on divise par 60. Pour passer des heures décimales aux minutes, on multiplie la partie décimale par 60.", exemple: ["\\(45\\ \\text{min} = \\frac{45}{60}\\ \\text{h} = 0{,}75\\ \\text{h}\\).", "\\(0{,}2\\ \\text{h} = 0{,}2 \\cdot 60 = 12\\ \\text{min}\\).", "\\(0{,}35\\ \\text{h} = 21\\ \\text{min}\\)."] },
+      retiens: { regle: "\\(1\\ \\text{h} = 60\\ \\text{min}\\) : une heure n'a pas 100 minutes. Pour passer des minutes aux heures décimales, on divise par 60. Pour passer des heures décimales aux minutes, on multiplie la partie décimale par 60. Pour une durée entre deux horaires, on passe par l'heure ronde.", exemple: ["\\(45\\ \\text{min} = \\frac{45}{60}\\ \\text{h} = 0{,}75\\ \\text{h}\\).", "\\(0{,}2\\ \\text{h} = 0{,}2 \\cdot 60 = 12\\ \\text{min}\\).", "\\(0{,}35\\ \\text{h} = 21\\ \\text{min}\\).", "De 8 h 47 à 10 h 15 : 13 min jusqu'à 9 h, puis 1 h 15 min, soit 88 min."] },
+      /* 24.11 : durée entre deux horaires (notion « Durées et horaires »), en défi court */
+      plus: [{ d: "Un train part à 8 h 47 et arrive à 10 h 15. Durée du trajet, en minutes ?", ans: 88, ok: "De 8 h 47 à 9 h : 13 min ; de 9 h à 10 h 15 : 75 min. 13 + 75 = 88 min, soit 1 h 28 min.", no: "Passe par 9 h : combien de minutes de 8 h 47 à 9 h, puis de 9 h à 10 h 15 ?" }],
       predict: { q: "Un film dure 1,5 h. Combien de temps est-ce ?", choices: ["1 h 50 min", "1 h 30 min", "1 h 05 min"], good: 1, why: "0,5 h, c'est une demi-heure : la moitié de 60 min, donc 30 min. Une heure n'a pas 100 minutes." },
       defis: ["Tire la barre jusqu'à 0,75 h.", "Combien de minutes font 0,2 h ? Tire la barre.", "Trouve la durée qui s'écrit 0,35 h."],
       play: manipLesson({ W: 320, H: 128, aria: "barre d'une heure",
@@ -10444,8 +10511,10 @@ function activeLesson(id, L0, cont, review) {
     const ball = (c, r = 13) => `<circle r="${r}" fill="${COL[c]}" stroke="var(--paper)" stroke-width="2"/><text y="4.5" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" style="pointer-events:none">${LET[c]}</text>`;
     const add = (st, c) => { if (st.balls.length >= MAXB) { st.msg = "L'urne est pleine (12 boules) : enlève des boules."; return; } st.balls.push(c); st.msg = ""; };
     set("proba", {
+      /* 24.11 : arbre et tirages sans remise (notion « Probabilités », 11e), en défi court */
+      plus: [{ d: "Urne : 3 rouges et 2 bleues. On tire deux boules l'une après l'autre, sans remise ; sur l'arbre, on multiplie le long d'une branche. \\(P(\\text{deux rouges}) = \\frac{a}{10}\\) : tape \\(a\\).", ans: 3, ok: "1er tirage : 3/5. Il reste 2 rouges sur 4 boules : 2/4. 3/5 · 2/4 = 6/20 = 3/10.", no: "Après une rouge, il reste 4 boules, dont 2 rouges." }],
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
-      retiens: { regle: "Quand toutes les issues ont la même chance, \\(P = \\frac{\\text{nombre de cas favorables}}{\\text{nombre de cas possibles}}\\).", exemple: ["3 rouges et 3 autres boules : \\(P(\\text{rouge}) = \\frac{3}{6} = \\frac{1}{2}\\).", "2 rouges sur 5 boules : \\(P(\\text{rouge}) = \\frac{2}{5}\\).", "3 rouges, 1 verte, 2 bleues : \\(P(\\text{rouge}) = \\frac{1}{2}\\), \\(P(\\text{verte}) = \\frac{1}{6}\\)."], piege: "Ajouter une boule d'une autre couleur change le nombre de cas possibles : \\(\\frac{2}{3}\\) devient \\(\\frac{2}{4}\\)." },
+      retiens: { regle: "Quand toutes les issues ont la même chance, \\(P = \\frac{\\text{nombre de cas favorables}}{\\text{nombre de cas possibles}}\\). Pour deux tirages successifs, on multiplie les probabilités le long d'une branche de l'arbre ; sans remise, il reste une boule de moins.", exemple: ["3 rouges et 3 autres boules : \\(P(\\text{rouge}) = \\frac{3}{6} = \\frac{1}{2}\\).", "3 rouges et 2 bleues, deux tirages sans remise : \\(P(\\text{deux rouges}) = \\frac{3}{5} \\cdot \\frac{2}{4} = \\frac{3}{10}\\).", "2 rouges sur 5 boules : \\(P(\\text{rouge}) = \\frac{2}{5}\\).", "3 rouges, 1 verte, 2 bleues : \\(P(\\text{rouge}) = \\frac{1}{2}\\), \\(P(\\text{verte}) = \\frac{1}{6}\\)."], piege: "Ajouter une boule d'une autre couleur change le nombre de cas possibles : \\(\\frac{2}{3}\\) devient \\(\\frac{2}{4}\\)." },
       predict: { q: "Une urne contient 2 boules rouges et 1 bleue. On ajoute une boule bleue. La probabilité de tirer une rouge…", choices: ["augmente", "diminue", "ne change pas"], good: 1, why: "Avant : 2 rouges sur 3 boules, 2/3. Après : 2 rouges sur 4 boules, 2/4 = 1/2. Les rouges n'ont pas changé, mais le nombre de cas possibles a augmenté." },
       defis: ["L'urne contient 3 rouges. Ajoute ou enlève des boules pour que P(rouge) = 1/2.", "Nouvelle urne : obtiens P(rouge) = 2/5.", "Avec trois couleurs : obtiens P(rouge) = 1/2 et P(verte) = 1/6."],
       play: manipLesson({ W: 320, H: 236, aria: "urne à remplir de boules de couleur",
