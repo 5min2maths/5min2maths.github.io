@@ -559,7 +559,7 @@ function screenHome() {
     const mode = state.homeMode === "libre" ? "libre" : "classe", nC = (state.carnet || []).length;
     // Une seule bannière ; le joker de série passe avant le bilan de la semaine (sinon la série est perdue le jour même).
     const nudge = streakNudge(), joker = /Joker/.test(nudge);
-    const banner = [statsCard(), resumeCard(), prepTodayCard(), joker ? nudge : "", backupCard(), weekRecapCard(), joker ? "" : nudge].find((x) => x) || "";
+    const banner = [resumeCard(), prepTodayCard(), joker ? nudge : "", backupCard(), weekRecapCard(), joker ? "" : nudge].find((x) => x) || "";
     const nowLine = !Engine.nowActive(state) ? `<button type="button" class="btn-sec small" id="nowpick">📚 Choisir mon chapitre travaillé en classe</button>`
       : Engine.nowStale(state) ? `<div class="now-ask"><b>📚 Cette semaine en classe, tu travailles toujours :</b><span>${esc(state.now.ids.map(nLabel).join(" · "))} ?</span><div class="row now-ask-btns"><button type="button" class="btn-sec small" id="nowyes">Oui, toujours</button><button type="button" class="btn-sec small" id="nowpick">J'ai changé de chapitre</button></div></div>`
       : `<span class="small now-lab">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span><button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
@@ -567,7 +567,7 @@ function screenHome() {
     const svgI = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`, TI = Object.fromEntries(HOME_TABS.map(([k, , ic]) => [k, ic]));
     h(`<div class="hub">${head}
     ${eloBanner()}
-    ${banner}
+    ${statsCard()}${banner}
     <div class="card stack sess-card">
       <div class="seg sess-seg" role="tablist"><button type="button" data-m="classe" aria-pressed="${mode === "classe"}">🎒 En classe</button><button type="button" data-m="libre" aria-pressed="${mode === "libre"}">🧭 Libre</button></div>
       <p class="small muted sess-sub">${mode === "classe" ? "Suit ton chapitre en classe, avec révisions." : "Tous les sujets, à ton rythme."}</p>
