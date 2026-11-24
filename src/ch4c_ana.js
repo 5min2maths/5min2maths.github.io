@@ -3,6 +3,8 @@
 // compétences 4.AN.01 à 4.AN.07 et 4.PS.02 à 4.PS.03 du référentiel matu, communes aux niveaux normal (MA1) et avancé (MA2).
 // Neuf notions : primitives, integrale, aireint, volrev (M4C01) ; lnexp, croissance (M4C02) ; condbayes, varalea,
 // binomiale (M4C04). Identifiants choisis pour ne pas heurter ceux du lycée français (probcond, binom, vaesp, expfn).
+// Ajouts du 24.11 (agent greste, chantier G) : matrices, translin (M4C03, algèbre linéaire) ; normale (M4C04, loi normale
+// sans table, règle 68-95-99,7) ; stats et quartiles (MP 2e) ouverts à la 4e du Collège (curriculum.js, gen3.js).
 // Standard : 3 niveaux, au moins 3 formes par niveau, pas à pas, erreurs typiques, étiquette ctx, leçon, indice,
 // 3 compétences, problème en plusieurs étapes (niveau 4). Paquet de chargement « 15 » (build.py).
 (function () {
@@ -735,8 +737,195 @@
     ],
   };
 
+
+  // ======================= Ajouts du 24.11 (chantier G, agent greste) : loi normale, algèbre linéaire =======================
+  /* réponses en couple (ligne d'une matrice, image d'un point) : keepT ne garde que les pièges numériques, d'où ce constructeur */
+  const canP = (vals) => vals.map(fS).join(" ; ");
+  const QP2 = (q, vals, sol, o) => { const spec = { kind: "pair", values: vals.slice() }, x = mk(q, spec, sol, Object.assign({}, o, { traps: [] })), seen = new Set();
+    x.traps = (o.traps || []).filter((tr) => { if (!tr || !tr.spec || tr.spec.values.length !== vals.length || !tr.spec.values.every(isFinite)) return false; const c = canP(tr.spec.values); if (seen.has(c)) return false;
+      try { if (checkAnswer(spec, c).status !== "wrong") return false; } catch (e) { return false; } seen.add(c); return true; });
+    return x; };
+  const GP2 = (ask, vals, sol) => ({ ask, spec: { kind: "pair", values: vals.slice() }, sol });
+  const TP2 = (vals, m) => ({ spec: { kind: "pair", values: vals.slice() }, m });
+  const PAIR2 = " Réponds « x ; y ».";
+  /* réponse lisible dans l'énoncé ou triviale : nouveau tirage */
+  const chk = (q) => (q && typeof answerShown === "function" && (answerShown(q) || trivialQ(q, 0)) ? null : q);
+
+  // ======================= normale : loi normale, règle 68-95-99,7 (4.PS.04a–c) =======================
+  const PCT = { 1: 68, 2: 95, 3: 99.7 }, HALF = { 1: 34, 2: 47.5, 3: 49.85 }, TAIL = { 1: 16, 2: 2.5, 3: 0.15 };
+  const NCTX = [["la taille (en cm) d'un élève de 4e pris au hasard", [168, 170, 172, 175], [6, 7, 8], "taille"],
+    ["la durée de vie (en heures) d'une ampoule", [800, 900, 1200], [40, 50, 60], "ampoule"],
+    ["la masse (en g) d'un paquet de pâtes", [500, 750], [4, 5, 6], "pates"],
+    ["le temps de trajet (en minutes) d'une pendulaire", [30, 35, 42], [3, 4, 5], "trajet"],
+    ["le QI d'une personne prise au hasard", [100], [15], "qi"],
+    ["la note (sur 100) d'un candidat à un examen", [60, 62, 65], [8, 10], "examen"]];
+  const nPick = () => { const c = pk(NCTX); return { c, mu: pk(c[1]), s: pk(c[2]) }; };
+  const nIntro = (o, noParam) => "On note " + M("X") + " " + o.c[0] + (noParam ? " ; " + M("X") + " suit une loi normale. " : " ; " + M("X") + " suit une loi normale de moyenne " + M("\\mu = " + nb(o.mu)) + " et d'écart-type " + M("\\sigma = " + nb(o.s)) + ". ");
+  const pc = (v) => M(nb(v) + "\\,\\%");
+  const kS = (k) => (k === 1 ? "un écart-type" : k + " écarts-types");
+  const NO = {
+    1: [
+      () => { const o = nPick(), k = pk([1, 2, 3]), a = o.mu - k * o.s, b = o.mu + k * o.s;
+        return QN(nIntro(o) + "Quelle est la probabilité, en %, que " + M(nb(a) + " \\le X \\le " + nb(b)) + " ?", PCT[k], M(nb(a)) + " et " + M(nb(b)) + " sont à " + kS(k) + " de la moyenne, de part et d'autre : " + M("P(\\mu - " + (k === 1 ? "" : k) + "\\sigma \\le X \\le \\mu + " + (k === 1 ? "" : k) + "\\sigma) \\approx " + nb(PCT[k]) + "\\,\\%") + ".",
+          { ctx: "intervalle-centre-" + o.c[3], guide: [GS("À combien d'écarts-types de la moyenne se trouve " + M(nb(b)) + " ?", k, M("(" + nb(b) + " - " + nb(o.mu) + ") \\div " + nb(o.s) + " = " + k) + "."), GS("Probabilité de l'intervalle centré (en %) ?", PCT[k], pc(PCT[k]) + ".")],
+            traps: [TR(HALF[k], "C'est un seul côté : l'intervalle s'étend des deux côtés de la moyenne."), TR(100 - PCT[k], "C'est la probabilité d'être en dehors de l'intervalle."), TR(PCT[k === 3 ? 2 : k + 1], "Compte les écarts-types : " + k + " de chaque côté.")] }); },
+      () => { const o = nPick(), k = pk([1, 2]), up = R.rand() < 0.5, x = up ? o.mu + k * o.s : o.mu - k * o.s;
+        return QN(nIntro(o) + "Quelle est la probabilité, en %, que " + M("X " + (up ? "\\ge " : "\\le ") + nb(x)) + " ?", TAIL[k], M(nb(x)) + " est à " + kS(k) + " de la moyenne. Hors de l'intervalle centré : " + pc(100 - PCT[k]) + ", partagé également des deux côtés (symétrie) : " + pc(TAIL[k]) + ".",
+          { ctx: "queue", guide: [GS("À combien d'écarts-types de la moyenne se trouve " + M(nb(x)) + " ?", k, M(k) + "."), GS("Probabilité d'être en dehors de l'intervalle centré, des deux côtés (en %) ?", 100 - PCT[k], pc(100 - PCT[k]) + "."), GS("D'un seul côté (en %) ?", TAIL[k], pc(TAIL[k]) + " (symétrie).")],
+            traps: [TR(100 - PCT[k], "Ce sont les deux côtés : par symétrie, divise par 2."), TR(PCT[k], "C'est la probabilité d'être dans l'intervalle centré."), TR(HALF[k], "C'est entre la moyenne et " + nb(x) + " ; on demande au-delà.")] }); },
+      () => { const o = nPick(), k = pk([1, 2, 3]), up = R.rand() < 0.5, x = up ? o.mu + k * o.s : o.mu - k * o.s;
+        return QN(nIntro(o) + "Quelle est la probabilité, en %, que " + M(up ? nb(o.mu) + " \\le X \\le " + nb(x) : nb(x) + " \\le X \\le " + nb(o.mu)) + " ?", HALF[k], "De la moyenne à " + kS(k) + " d'un seul côté : la moitié de " + pc(PCT[k]) + ", soit " + pc(HALF[k]) + ".",
+          { ctx: "demi-intervalle", guide: [GS("À combien d'écarts-types de la moyenne se trouve " + M(nb(x)) + " ?", k, M(k) + "."), GS("Probabilité de l'intervalle centré correspondant (en %) ?", PCT[k], pc(PCT[k]) + "."), GS("La moitié (en %) ?", HALF[k], pc(HALF[k]) + ".")],
+            traps: [TR(PCT[k], "L'intervalle commence à la moyenne : un seul côté, divise par 2."), TR(TAIL[k], "C'est au-delà de " + nb(x) + " ; on demande entre la moyenne et " + nb(x) + "."), TR(50, "La moitié des valeurs dépasse la moyenne, mais pas toutes jusqu'à " + nb(x) + ".")] }); },
+    ],
+    2: [
+      () => { const o = nPick(), [a, b] = pk([[1, 2], [2, 1], [1, 3], [3, 1], [2, 3], [3, 2]]), lo = o.mu - a * o.s, hi = o.mu + b * o.s, v = r6(HALF[a] + HALF[b]);
+        return QN(nIntro(o) + "Quelle est la probabilité, en %, que " + M(nb(lo) + " \\le X \\le " + nb(hi)) + " ?", v, "On coupe à la moyenne : " + pc(HALF[a]) + " à gauche (" + kS(a) + ") et " + pc(HALF[b]) + " à droite (" + kS(b) + "), en tout " + pc(v) + ".",
+          { ctx: "intervalle-asymetrique", guide: [GS("Partie gauche, de " + M(nb(lo)) + " à la moyenne (en %) ?", HALF[a], pc(HALF[a]) + "."), GS("Partie droite, de la moyenne à " + M(nb(hi)) + " (en %) ?", HALF[b], pc(HALF[b]) + "."), GS("Total (en %) ?", v, pc(v) + ".")],
+            traps: [TR(PCT[Math.max(a, b)], "L'intervalle n'est pas centré : coupe-le à la moyenne."), TR(PCT[Math.min(a, b)], "L'intervalle n'est pas centré : coupe-le à la moyenne."), TR(PCT[a] + PCT[b], "Chaque côté ne compte que la moitié de l'intervalle centré.")] }); },
+      () => { const o = nPick(), N = pk([200, 400, 600, 800]), kd = pk([["en dehors de l'intervalle", 5, (o2) => M("X < " + nb(o2.mu - 2 * o2.s)) + " ou " + M("X > " + nb(o2.mu + 2 * o2.s))], ["au-dessus", 16, (o2) => M("X > " + nb(o2.mu + o2.s))], ["très au-dessus", 2.5, (o2) => M("X > " + nb(o2.mu + 2 * o2.s))], ["dans l'intervalle", 68, (o2) => M(nb(o2.mu - o2.s) + " \\le X \\le " + nb(o2.mu + o2.s))]]), p = kd[1], cnt = (N * p) / 100;
+        return chk(QN(nIntro(o) + "Sur " + M(N) + " observations indépendantes, combien de fois attend-on " + kd[2](o) + " ?", cnt, "Probabilité " + pc(p) + " (règle 68-95-99,7) ; " + M(N + " \\cdot " + nb(p / 100) + " = " + cnt) + ".",
+          { ctx: "effectif", guide: [GS("Probabilité correspondante (en %) ?", p, pc(p) + "."), GS("Effectif attendu ?", cnt, M(N + " \\cdot " + nb(p / 100) + " = " + cnt) + ".")],
+            traps: [TR((N * (100 - p)) / 100, "C'est l'effectif de l'événement contraire."), TR(p, "Multiplie la probabilité par le nombre d'observations."), TR((N * p) / 200, "La probabilité est déjà celle de l'événement demandé : ne divise pas par 2.")] })); },
+      () => { const o = nPick(), k = pk([1, 2, 3]), a = o.mu - k * o.s, b = o.mu + k * o.s;
+        return chk(QN("On note " + M("X") + " " + o.c[0] + " ; " + M("X") + " suit une loi normale. Environ " + pc(PCT[k]) + " des valeurs se trouvent entre " + M(nb(a)) + " et " + M(nb(b)) + ", un intervalle centré sur la moyenne. Que vaut l'écart-type " + M("\\sigma") + " ?", o.s, "Moyenne au milieu : " + M("\\mu = " + nb(o.mu)) + ". " + pc(PCT[k]) + " correspond à " + M("\\mu \\pm " + (k === 1 ? "" : k) + "\\sigma") + " : " + M((k === 1 ? "" : k) + "\\sigma = " + nb(b - o.mu)) + ", " + M("\\sigma = " + nb(o.s)) + ".",
+          { ctx: "trouver-sigma", guide: [GS("Moyenne " + M("\\mu") + " (milieu de l'intervalle) ?", o.mu, M(nb(o.mu)) + "."), GS("Demi-largeur de l'intervalle ?", k * o.s, M(nb(b) + " - " + nb(o.mu) + " = " + nb(k * o.s)) + "."), GS("Combien d'écarts-types dans cette demi-largeur ?", k, M(k) + "."), GS(M("\\sigma") + " ?", o.s, M(nb(o.s)) + ".")],
+            traps: [TR(k * o.s, "C'est " + kS(k) + " : divise par " + k + "."), TR(b - a, "C'est la largeur totale."), TR(((b - a) / 2) / (k === 2 ? 1 : 2), "Pour " + nb(PCT[k]) + " %, la demi-largeur vaut " + k + "σ.")] })); },
+      () => { const o = nPick(), z = pk([1.5, -1.5, 2.5, -2.5, 0.5, -0.5, 2, -2, 3]), x = o.mu + z * o.s; if (!Number.isInteger(x)) return null;
+        return chk(QN(nIntro(o) + "Calcule la valeur centrée réduite " + M("z = \\frac{x - \\mu}{\\sigma}") + " de " + M("x = " + nb(x)) + ". (décimal accepté)", z, M("z = \\frac{" + nb(x) + " - " + nb(o.mu) + "}{" + nb(o.s) + "} = \\frac{" + nb(x - o.mu) + "}{" + nb(o.s) + "} = " + nb(z)) + " : " + M(nb(x)) + " est à " + dS(Math.abs(z)) + " écart(s)-type(s) " + (z > 0 ? "au-dessus" : "en dessous") + " de la moyenne.",
+          { ctx: "centrer-reduire", guide: [GS(M("x - \\mu") + " ?", x - o.mu, M(nb(x - o.mu)) + "."), GS(M("z") + " ?", z, M(nb(z)) + ".")],
+            traps: [TR(x - o.mu, "Divise encore par l'écart-type."), TR(-z, "Attention au signe : x − μ."), TR(r6(x / o.s - o.mu), "On centre d'abord (x − μ), puis on divise par σ.")] })); },
+    ],
+    3: [
+      () => { const o = nPick(), [a, b] = pk([[1, 2], [2, 1], [1, 3], [3, 1], [2, 3], [3, 2]]), lo = o.mu - a * o.s, hi = o.mu + b * o.s, v = r6(TAIL[a] + TAIL[b]);
+        return QN(nIntro(o) + "Quelle est la probabilité, en %, que " + M("X \\le " + nb(lo)) + " ou " + M("X \\ge " + nb(hi)) + " ?", v, "Deux queues séparées : " + pc(TAIL[a]) + " sous " + M(nb(lo)) + " (" + kS(a) + ") et " + pc(TAIL[b]) + " au-dessus de " + M(nb(hi)) + " (" + kS(b) + "), en tout " + pc(v) + ".",
+          { ctx: "union-queues", guide: [GS("Probabilité sous " + M(nb(lo)) + " (en %) ?", TAIL[a], pc(TAIL[a]) + "."), GS("Probabilité au-dessus de " + M(nb(hi)) + " (en %) ?", TAIL[b], pc(TAIL[b]) + "."), GS("Total (en %) ?", v, pc(v) + ".")],
+            traps: [TR(2 * TAIL[a], "Les deux bornes ne sont pas à la même distance de la moyenne."), TR(2 * TAIL[b], "Les deux bornes ne sont pas à la même distance de la moyenne."), TR(r6(HALF[a] + HALF[b]), "C'est la probabilité d'être entre les deux bornes : on demande en dehors.")] }); },
+      () => { const o = nPick(), k = pk([1, 2]), up = R.rand() < 0.5, x = up ? o.mu + k * o.s : o.mu - k * o.s;
+        return chk(QN("On note " + M("X") + " " + o.c[0] + " ; " + M("X") + " suit une loi normale d'écart-type " + M("\\sigma = " + nb(o.s)) + ". Environ " + pc(TAIL[k]) + " des valeurs sont " + (up ? "supérieures" : "inférieures") + " à " + M(nb(x)) + ". Que vaut la moyenne " + M("\\mu") + " ?", o.mu, pc(TAIL[k]) + " d'un seul côté correspond à " + kS(k) + " : " + M(nb(x) + " = \\mu " + (up ? "+" : "-") + " " + (k === 1 ? "" : k) + "\\sigma") + ", donc " + M("\\mu = " + nb(o.mu)) + ".",
+          { ctx: "trouver-mu", guide: [GS("À combien d'écarts-types de la moyenne se trouve " + M(nb(x)) + " ?", k, M(k) + "."), GS("Moyenne " + M("\\mu") + " ?", o.mu, M(nb(x) + (up ? " - " : " + ") + nb(k * o.s) + " = " + nb(o.mu)) + ".")],
+            traps: [TR(up ? x + k * o.s : x - k * o.s, up ? "Les valeurs supérieures à " + nb(x) + " sont rares : la moyenne est en dessous." : "Les valeurs inférieures à " + nb(x) + " sont rares : la moyenne est au-dessus."), TR(up ? x - (3 - k) * o.s : x + (3 - k) * o.s, nb(TAIL[k]) + " % d'un côté correspond à " + kS(k) + ".")] })); },
+      () => { const o = nPick(), k = pk([1, 2, 3]), up = R.rand() < 0.5, x = up ? o.mu + k * o.s : o.mu - k * o.s;
+        return chk(QN(nIntro(o) + (up ? "Au-dessus de quelle valeur se trouvent les " + pc(TAIL[k]) + " des valeurs les plus grandes ?" : "En dessous de quelle valeur se trouvent les " + pc(TAIL[k]) + " des valeurs les plus petites ?"), x, pc(TAIL[k]) + " d'un seul côté : " + kS(k) + " de la moyenne, " + M(nb(o.mu) + (up ? " + " : " - ") + nb(k * o.s) + " = " + nb(x)) + ".",
+          { ctx: "seuil", guide: [GS("Combien d'écarts-types correspondent à " + pc(TAIL[k]) + " d'un seul côté ?", k, M(k) + "."), GS("Seuil ?", x, M(nb(x)) + ".")],
+            traps: [TR(up ? o.mu - k * o.s : o.mu + k * o.s, "Les valeurs " + (up ? "les plus grandes" : "les plus petites") + " sont " + (up ? "au-dessus" : "en dessous") + " de la moyenne."), TR(up ? o.mu + (k === 1 ? 2 : 1) * o.s : o.mu - (k === 1 ? 2 : 1) * o.s, nb(TAIL[k]) + " % d'un côté correspond à " + kS(k) + ".")] })); },
+      () => { const o = nPick(), cs = pk([[1, 0, 16, 50, 32], [2, 0, 2.5, 50, 5], [2, 1, 2.5, 16, 15.625]]), [kn, kd, pn, pd, v] = cs, xn = o.mu + kn * o.s, xd = o.mu + kd * o.s;
+        return QR(nIntro(o) + "Sachant que " + M("X \\ge " + nb(xd)) + ", quelle est la probabilité, en %, que " + M("X \\ge " + nb(xn)) + " ? (" + RND[0.1] + ")", v, 0.1, M("P(X \\ge " + nb(xn) + " \\mid X \\ge " + nb(xd) + ") = \\frac{P(X \\ge " + nb(xn) + ")}{P(X \\ge " + nb(xd) + ")} = \\frac{" + nb(pn) + "}{" + nb(pd) + "}") + " ≈ " + pc(rd(v, 0.1)) + ".",
+          { ctx: "conditionnelle", guide: [GS(M("P(X \\ge " + nb(xn) + ")") + " (en %) ?", pn, pc(pn) + "."), GS(M("P(X \\ge " + nb(xd) + ")") + " (en %) ?", pd, pc(pd) + "."), GS("Quotient, en % (" + RND[0.1] + ") ?", v, pc(rd(v, 0.1)) + ".", 0.1)],
+            traps: [TR(pn, "Sachant que… : divise par la probabilité de la condition."), TR(r6((pn * pd) / 100), "Probabilité conditionnelle : on divise, on ne multiplie pas.")] }); },
+    ],
+  };
+
+  // ======================= matrices : calcul matriciel 2 × 2 (4.GV.02b, 02c, 02e) =======================
+  const mat = (a, b, c, d) => "\\begin{pmatrix} " + fT(a) + " & " + fT(b) + " \\\\ " + fT(c) + " & " + fT(d) + " \\end{pmatrix}";
+  const col = (x, y) => "\\begin{pmatrix} " + fT(x) + " \\\\ " + fT(y) + " \\end{pmatrix}";
+  const mm = (A, B) => [A[0] * B[0] + A[1] * B[2], A[0] * B[1] + A[1] * B[3], A[2] * B[0] + A[3] * B[2], A[2] * B[1] + A[3] * B[3]];
+  const mv = (A, v) => [A[0] * v[0] + A[1] * v[1], A[2] * v[0] + A[3] * v[1]];
+  const dt = (A) => A[0] * A[3] - A[1] * A[2];
+  const mX = (A) => mat(...A);
+  const rnd4 = (lo = -5, hi = 5) => [nz(lo, hi), nz(lo, hi), nz(lo, hi), nz(lo, hi)];
+  const MA = {
+    1: [
+      () => { const A = rnd4(-6, 6), d = dt(A); if (Math.abs(d) < 2) return null;
+        return chk(QN("Calcule le déterminant de " + M("A = " + mX(A)) + ".", d, M("\\det A = " + par(A[0]) + " \\cdot " + par(A[3]) + " - " + par(A[1]) + " \\cdot " + par(A[2]) + " = " + (A[0] * A[3]) + " - " + par(A[1] * A[2]) + " = " + d) + ".",
+          { ctx: "determinant", guide: [GS("Produit de la diagonale principale " + M("a \\cdot d") + " ?", A[0] * A[3], M(A[0] * A[3]) + "."), GS("Produit de l'autre diagonale " + M("b \\cdot c") + " ?", A[1] * A[2], M(A[1] * A[2]) + "."), GS(M("\\det A = ad - bc") + " ?", d, M(d) + ".")],
+            traps: [TR(A[0] * A[3] + A[1] * A[2], "On soustrait les deux produits : ad − bc."), TR(A[1] * A[2] - A[0] * A[3], "Diagonale principale moins l'autre : ad − bc."), TR(A[0] * A[1] - A[2] * A[3], "On multiplie en diagonale (a avec d, b avec c).")] })); },
+      () => { const A = rnd4(), B = rnd4(), al = pk([2, 3, -2]), be = pk([2, -3, 3]), r = R.int(0, 1), C = A.map((x, i) => al * x + be * B[i]), row = [C[2 * r], C[2 * r + 1]], nm = al + "A " + (be < 0 ? "- " + -be : "+ " + be) + "B";
+        return QP2("Avec " + M("A = " + mX(A)) + " et " + M("B = " + mX(B)) + ", donne la " + (r ? "deuxième" : "première") + " ligne de " + M(nm) + ". Réponds « a ; b ».", row, "Coefficient par coefficient : " + M(nm + " = " + mX(C)) + ".",
+          { ctx: "combinaison", guide: [GS("Premier coefficient de la ligne ?", row[0], M(al + " \\cdot " + par(A[2 * r]) + " + " + par(be) + " \\cdot " + par(B[2 * r]) + " = " + row[0]) + "."), GS("Second coefficient ?", row[1], M(row[1]) + "."), GP2("Ligne ?", row, M("(" + row[0] + " \\,;\\, " + row[1] + ")") + ".")],
+            traps: [TP2([al * A[2 * r] + B[2 * r], al * A[2 * r + 1] + B[2 * r + 1]], "Le coefficient " + be + " multiplie aussi B."), TP2([C[2 * (1 - r)], C[2 * (1 - r) + 1]], "C'est l'autre ligne."), TP2([A[2 * r] + B[2 * r], A[2 * r + 1] + B[2 * r + 1]], "Multiplie d'abord A par " + al + " et B par " + be + ".")] }); },
+      () => { const A = rnd4(), v = [nz(-5, 5), nz(-5, 5)], w = mv(A, v); if (Math.abs(v[0]) === Math.abs(v[1])) return null;
+        return QP2("Calcule " + M(mX(A) + col(...v)) + "." + PAIR2, w, "Ligne par colonne : " + M(par(A[0]) + " \\cdot " + par(v[0]) + " + " + par(A[1]) + " \\cdot " + par(v[1]) + " = " + w[0]) + " et " + M(par(A[2]) + " \\cdot " + par(v[0]) + " + " + par(A[3]) + " \\cdot " + par(v[1]) + " = " + w[1]) + ".",
+          { ctx: "matrice-vecteur", guide: [GS("Première ligne × vecteur ?", w[0], M(w[0]) + "."), GS("Seconde ligne × vecteur ?", w[1], M(w[1]) + "."), GP2("Résultat ?", w, M(col(...w)) + ".")],
+            traps: [TP2([A[0] * v[0] + A[2] * v[1], A[1] * v[0] + A[3] * v[1]], "On multiplie chaque ligne de la matrice par la colonne (pas les colonnes)."), TP2([A[0] * v[0], A[3] * v[1]], "Chaque ligne donne une somme de deux produits."), TP2([A[0] * v[0] + A[1] * v[0], A[2] * v[1] + A[3] * v[1]], "La première composante du vecteur va avec la première colonne.")] }); },
+    ],
+    2: [
+      () => { const A = rnd4(-4, 4), B = rnd4(-4, 4), r = R.int(0, 1), C = mm(A, B), D = mm(B, A), row = [C[2 * r], C[2 * r + 1]]; if (row.includes(0) || (D[2 * r] === row[0] && D[2 * r + 1] === row[1])) return null;
+        return QP2("Avec " + M("A = " + mX(A)) + " et " + M("B = " + mX(B)) + ", donne la " + (r ? "deuxième" : "première") + " ligne du produit " + M("AB") + ". Réponds « a ; b ».", row, "Ligne " + (r + 1) + " de A par chaque colonne de B : " + M(par(A[2 * r]) + " \\cdot " + par(B[0]) + " + " + par(A[2 * r + 1]) + " \\cdot " + par(B[2]) + " = " + row[0]) + " et " + M(par(A[2 * r]) + " \\cdot " + par(B[1]) + " + " + par(A[2 * r + 1]) + " \\cdot " + par(B[3]) + " = " + row[1]) + ".",
+          { ctx: "produit", guide: [GS("Ligne " + (r + 1) + " de A × colonne 1 de B ?", row[0], M(row[0]) + "."), GS("Ligne " + (r + 1) + " de A × colonne 2 de B ?", row[1], M(row[1]) + "."), GP2("Ligne de " + M("AB") + " ?", row, M("(" + row[0] + " \\,;\\, " + row[1] + ")") + ".")],
+            traps: [TP2([D[2 * r], D[2 * r + 1]], "C'est BA : en général AB ≠ BA."), TP2([A[2 * r] * B[2 * r], A[2 * r + 1] * B[2 * r + 1]], "Le produit matriciel ne se fait pas coefficient par coefficient : ligne × colonne."), TP2([A[2 * r] * B[0] + A[2 * r + 1] * B[1], A[2 * r] * B[2] + A[2 * r + 1] * B[3]], "Ligne de A par colonne de B (pas ligne par ligne).")] }); },
+      () => { const D = pk([1, -1, 2, -2, 3]), a = nz(-5, 5), b = nz(-5, 5), c = nz(-5, 5); if ((D + b * c) % a) return null; const d = (D + b * c) / a; if (!d) return null; const A = [a, b, c, d], row = [r6(d / D), r6(-b / D)]; if (row.some((x) => !x || den(x) > 3)) return null;
+        return QP2("Donne la première ligne de l'inverse de " + M("A = " + mX(A)) + ". Réponds « a ; b » (fractions acceptées).", row, M("\\det A = " + D) + " ; " + M("A^{-1} = \\frac{1}{" + D + "}" + mat(d, -b, -c, a) + " = " + mat(row[0], row[1], r6(-c / D), r6(a / D))) + ".",
+          { ctx: "inverse", guide: [GS(M("\\det A") + " ?", D, M(D) + "."), GP2("Première ligne de " + M("\\begin{pmatrix} d & -b \\\\ -c & a \\end{pmatrix}") + " ?", [d, -b], M("(" + d + " \\,;\\, " + -b + ")") + "."), GP2("Divisée par le déterminant ?", row, M("(" + fT(row[0]) + " \\,;\\, " + fT(row[1]) + ")") + ".")],
+            traps: [TP2([d, -b], "Divise encore par le déterminant."), TP2([r6(a / D), r6(-b / D)], "On échange a et d (et on change le signe de b et c)."), TP2([r6(1 / a), r6(1 / b)], "L'inverse d'une matrice ne se calcule pas coefficient par coefficient.")] }); },
+      () => { const b = nz(-6, 6), c = nz(-6, 6), d = nz(-6, 6); if ((b * c) % d) return null; const m = (b * c) / d; if (Math.abs(m) < 2) return null;
+        return chk(QN("Pour quelle valeur de " + M("m") + " la matrice " + M("\\begin{pmatrix} m & " + fT(b) + " \\\\ " + fT(c) + " & " + fT(d) + " \\end{pmatrix}") + " n'est-elle pas inversible ?", m, "Pas inversible quand le déterminant est nul : " + M(fT(d) + "m - " + par(b) + " \\cdot " + par(c) + " = 0") + ", " + M(fT(d) + "m = " + b * c) + ", " + M("m = " + m) + ".",
+          { ctx: "non-inversible", guide: [GS(M("\\det = " + (d === 1 ? "" : d === -1 ? "-" : d) + "m - " + par(b) + " \\cdot " + par(c)) + " ; que vaut " + M(par(b) + " \\cdot " + par(c)) + " ?", b * c, M(b * c) + "."), GS(M("m") + " (déterminant nul) ?", m, M(b * c + " \\div " + par(d) + " = " + m) + ".")],
+            traps: [TR(-m, "Attention au signe : dm − bc = 0 donne dm = bc."), TR(b * c, "Divise encore par " + d + "."), TR(r6(d / (b * c)), "m = bc ÷ d.")] })); },
+    ],
+    3: [
+      () => { const A = rnd4(-5, 5), D = dt(A), x0 = nz(-5, 5), y0 = nz(-5, 5); if (Math.abs(D) < 2 || x0 === y0) return null; const [e, f] = mv(A, [x0, y0]), Dx = e * A[3] - A[1] * f, Dy = A[0] * f - e * A[2];
+        return QP2("Résous avec les déterminants (Cramer) : " + M("\\begin{cases} " + tp([A[0], 0]) + (A[1] < 0 ? " - " : " + ") + (Math.abs(A[1]) === 1 ? "" : Math.abs(A[1])) + "y = " + e + " \\\\ " + tp([A[2], 0]) + (A[3] < 0 ? " - " : " + ") + (Math.abs(A[3]) === 1 ? "" : Math.abs(A[3])) + "y = " + f + " \\end{cases}") + "." + PAIR2, [x0, y0],
+          M("D = " + D) + ", " + M("D_x = " + Dx) + ", " + M("D_y = " + Dy) + " : " + M("x = \\frac{" + Dx + "}{" + D + "} = " + x0) + ", " + M("y = \\frac{" + Dy + "}{" + D + "} = " + y0) + ".",
+          { ctx: "cramer", guide: [GS("Déterminant " + M("D") + " de la matrice des coefficients ?", D, M(D) + "."), GS(M("D_x") + " (colonne des x remplacée par le second membre) ?", Dx, M(Dx) + "."), GS(M("D_y") + " ?", Dy, M(Dy) + "."), GP2("Solution ?", [x0, y0], M("x = " + x0) + ", " + M("y = " + y0) + ".")],
+            traps: [TP2([Dx, Dy], "Divise D_x et D_y par D."), TP2([y0, x0], "D_x donne x, D_y donne y."), TP2([-x0, -y0], "Attention aux signes des déterminants.")] }); },
+      () => { const D = nz(-6, 6), k = pk([2, 3, -2]), t = R.int(0, 2), E = pk([2, 3, -2, 4]); if (Math.abs(D) < 2) return null; const v = [k * k * D, D * E, r6(1 / D)][t];
+        const q = ["On sait que " + M("\\det A = " + D) + " (matrice 2 × 2). Que vaut " + M("\\det(" + k + "A)") + " ?", "On sait que " + M("\\det A = " + D) + " et " + M("\\det B = " + E) + ". Que vaut " + M("\\det(AB)") + " ?", "On sait que " + M("\\det A = " + D) + ". Que vaut " + M("\\det(A^{-1})") + " ? (fraction acceptée)"][t];
+        const sol = [M("k A") + " multiplie les deux lignes par " + k + " : " + M("\\det(" + k + "A) = " + par(k) + "^2 \\cdot " + par(D) + " = " + v), M("\\det(AB) = \\det A \\cdot \\det B = " + par(D) + " \\cdot " + par(E) + " = " + v), M("\\det(A^{-1}) = \\frac{1}{\\det A} = " + fT(v))][t] + ".";
+        return chk(QN(q, v, sol, { ctx: ["det-multiple", "det-produit", "det-inverse"][t], guide: [GS(["Facteur " + M("k^2") + " ?", "Produit des déterminants ?", "Inverse de " + M("\\det A") + " ?"][t], [k * k, D * E, v][t], M(fT([k * k, D * E, v][t])) + "."), GS("Réponse ?", v, M(fT(v)) + ".")].slice(t ? 1 : 0),
+          traps: [[TR(k * D, "Chaque ligne est multipliée par " + dS(k) + " : le déterminant est multiplié par " + (k < 0 ? "(" + dS(k) + ")" : k) + "²."), TR(k + D, "On multiplie, on n'additionne pas.")], [TR(D + E, "Le déterminant d'un produit est le produit des déterminants."), TR(D, "N'oublie pas det B.")], [TR(-D, "C'est l'inverse, pas l'opposé."), TR(D, "det(A⁻¹) = 1 ÷ det A.")]][t] })); },
+      () => { const A = rnd4(-4, 4), C = mm(A, A), r = R.int(0, 1), row = [C[2 * r], C[2 * r + 1]]; if (row.includes(0)) return null;
+        return QP2("Avec " + M("A = " + mX(A)) + ", donne la " + (r ? "deuxième" : "première") + " ligne de " + M("A^2 = A \\cdot A") + ". Réponds « a ; b ».", row, M("A^2 = " + mX(C)) + " (ligne par colonne).",
+          { ctx: "carre", guide: [GS("Ligne " + (r + 1) + " de A × colonne 1 de A ?", row[0], M(row[0]) + "."), GS("Ligne " + (r + 1) + " de A × colonne 2 de A ?", row[1], M(row[1]) + "."), GP2("Ligne de " + M("A^2") + " ?", row, M("(" + row[0] + " \\,;\\, " + row[1] + ")") + ".")],
+            traps: [TP2([A[2 * r] ** 2, A[2 * r + 1] ** 2], "On n'élève pas chaque coefficient au carré : A² = A · A, ligne × colonne."), TP2([2 * A[2 * r], 2 * A[2 * r + 1]], "A² n'est pas 2A.")] }); },
+    ],
+  };
+
+  // ======================= translin : transformations linéaires du plan (4.GV.01a–d) =======================
+  const TU = [["la rotation de 90° (sens trigonométrique) autour de l'origine", [0, -1, 1, 0], "rot90"], ["la rotation de −90° (sens horaire) autour de l'origine", [0, 1, -1, 0], "rot-90"],
+    ["la symétrie d'axe Ox (l'axe des abscisses)", [1, 0, 0, -1], "symx"], ["la symétrie d'axe Oy (l'axe des ordonnées)", [-1, 0, 0, 1], "symy"], ["la symétrie d'axe la droite y = x", [0, 1, 1, 0], "symdiag"]];
+  const TL = {
+    1: [
+      () => { const A = rnd4(), P = [nz(-4, 4), nz(-4, 4)], Q = mv(A, P); if (Math.abs(P[0]) === Math.abs(P[1])) return null;
+        return QP2("La transformation linéaire " + M("f") + " a pour matrice " + M(mX(A)) + ". Donne l'image du point " + M("P(" + P[0] + " \\,;\\, " + P[1] + ")") + "." + PAIR2, Q, M(mX(A) + col(...P) + " = " + col(...Q)) + " : " + M("f(P) = (" + Q[0] + " \\,;\\, " + Q[1] + ")") + ".",
+          { ctx: "image-point", guide: [GS("Abscisse de l'image (ligne 1 × coordonnées) ?", Q[0], M(par(A[0]) + " \\cdot " + par(P[0]) + " + " + par(A[1]) + " \\cdot " + par(P[1]) + " = " + Q[0]) + "."), GS("Ordonnée (ligne 2) ?", Q[1], M(Q[1]) + "."), GP2("Image ?", Q, M("(" + Q[0] + " \\,;\\, " + Q[1] + ")") + ".")],
+            traps: [TP2([A[0] * P[0] + A[2] * P[1], A[1] * P[0] + A[3] * P[1]], "Ligne de la matrice × colonne des coordonnées."), TP2([A[0] * P[0], A[3] * P[1]], "Chaque coordonnée de l'image est une somme de deux produits.")] }); },
+      () => { const t = pk(TU), k = R.rand() < 0.25 ? pk([2, 3, -2]) : 0, Mx = k ? [k, 0, 0, k] : t[1], P = [nz(-5, 5), nz(-5, 5)], Q = mv(Mx, P); if (Math.abs(P[0]) === Math.abs(P[1])) return null;
+        const nm = k ? "l'homothétie de centre O et de rapport " + k : t[0];
+        return QP2("Quelle est l'image du point " + M("P(" + P[0] + " \\,;\\, " + P[1] + ")") + " par " + nm + " ?" + PAIR2, Q, "Matrice " + M(mX(Mx)) + " (colonnes : images de " + M("(1 \\,;\\, 0)") + " et de " + M("(0 \\,;\\, 1)") + ") : image " + M("(" + Q[0] + " \\,;\\, " + Q[1] + ")") + ".",
+          { ctx: k ? "homothetie" : t[2], guide: [GP2("Image de " + M("(1 \\,;\\, 0)") + " (première colonne de la matrice) ?", [Mx[0], Mx[2]], M("(" + Mx[0] + " \\,;\\, " + Mx[2] + ")") + "."), GP2("Image de " + M("(0 \\,;\\, 1)") + " (seconde colonne) ?", [Mx[1], Mx[3]], M("(" + Mx[1] + " \\,;\\, " + Mx[3] + ")") + "."), GP2("Image de " + M("P") + " ?", Q, M("(" + Q[0] + " \\,;\\, " + Q[1] + ")") + ".")],
+            traps: [TP2([-Q[0], -Q[1]], "Vérifie le sens : c'est l'image par la transformation opposée (ou la symétrie centrale)."), TP2([P[1], P[0]], "Échanger les coordonnées, c'est la symétrie d'axe y = x."), TP2([-P[0], -P[1]], "C'est la symétrie centrale (rotation de 180°)."), TP2([-P[1], P[0]], "C'est la rotation de 90° dans le sens trigonométrique.")] }); },
+      () => { const A = rnd4(-5, 5), d = dt(A), S = pk([3, 4, 5, 6, 2.5, 7.5]); if (Math.abs(d) < 2) return null; const v = Math.abs(d) * S, fig = pk(["un triangle", "un carré", "un parallélogramme", "un logo"]);
+        return chk(QN(fig[0].toUpperCase() + fig.slice(1) + " d'aire " + M(nb(S)) + " unités² est transformé par l'application linéaire de matrice " + M(mX(A)) + ". Quelle est l'aire de son image ?", v, "Les aires sont multipliées par " + M("|\\det| = |" + d + "| = " + Math.abs(d)) + " : " + M(Math.abs(d) + " \\cdot " + nb(S) + " = " + nb(v)) + " unités².",
+          { ctx: "aire-image", guide: [GS("Déterminant de la matrice ?", d, M(d) + "."), GS("Facteur des aires " + M("|\\det|") + " ?", Math.abs(d), M(Math.abs(d)) + "."), GS("Aire de l'image ?", v, M(nb(v)) + ".")],
+            traps: [TR(d * S, "Une aire est positive : on multiplie par la valeur absolue du déterminant."), TR(S * Math.abs(A[0] + A[3]), "Le facteur des aires est |det| = |ad − bc|."), TR(S / Math.abs(d), "L'aire est multipliée par |det| (pas divisée).")] })); },
+    ],
+    2: [
+      () => { const A = rnd4(-4, 4), d = dt(A), P = [nz(-5, 5), nz(-5, 5)], Q = mv(A, P); if (Math.abs(d) < 1 || Math.abs(P[0]) === Math.abs(P[1])) return null;
+        return QP2("La transformation de matrice " + M(mX(A)) + " envoie le point " + M("P") + " sur " + M("Q(" + Q[0] + " \\,;\\, " + Q[1] + ")") + ". Retrouve " + M("P") + "." + PAIR2, P, "On résout " + M(mX(A) + "\\begin{pmatrix} x \\\\ y \\end{pmatrix}" + " = " + col(...Q)) + " (ou " + M("P = A^{-1}Q") + ", " + M("\\det A = " + d) + ") : " + M("P(" + P[0] + " \\,;\\, " + P[1] + ")") + ".",
+          { ctx: "antecedent", guide: [GS(M("\\det A") + " ?", d, M(d) + "."), GS(M("x") + " (Cramer : " + M("\\frac{D_x}{D}") + ") ?", P[0], M(P[0]) + "."), GP2("Point " + M("P") + " ?", P, M("(" + P[0] + " \\,;\\, " + P[1] + ")") + ".")],
+            traps: [TP2(mv(A, Q), "C'est l'image de Q ; on cherche l'antécédent : P = A⁻¹Q."), TP2([P[1], P[0]], "Attention à l'ordre : x puis y.")] }); },
+      () => { const A = rnd4(-3, 3), B = rnd4(-3, 3), P = [nz(-3, 3), nz(-3, 3)], Q1 = mv(A, P), Q = mv(B, Q1), W = mv(A, mv(B, P)); if (Q.includes(0) || (W[0] === Q[0] && W[1] === Q[1])) return null;
+        return QP2("On applique d'abord " + M("f") + " de matrice " + M(mX(A)) + ", puis " + M("g") + " de matrice " + M(mX(B)) + ". Image de " + M("P(" + P[0] + " \\,;\\, " + P[1] + ")") + " par " + M("g \\circ f") + " ?" + PAIR2, Q, M("f(P) = (" + Q1[0] + " \\,;\\, " + Q1[1] + ")") + ", puis " + M("g(f(P)) = (" + Q[0] + " \\,;\\, " + Q[1] + ")") + ". (Matrice de " + M("g \\circ f") + " : " + M("BA") + ".)",
+          { ctx: "composition", guide: [GP2("Image " + M("f(P)") + " ?", Q1, M("(" + Q1[0] + " \\,;\\, " + Q1[1] + ")") + "."), GP2("Puis " + M("g(f(P))") + " ?", Q, M("(" + Q[0] + " \\,;\\, " + Q[1] + ")") + ".")],
+            traps: [TP2(W, "L'ordre compte : d'abord f, puis g (matrice BA, pas AB)."), TP2(Q1, "C'est f(P) : applique encore g.")] }); },
+      () => { const c1 = [nz(-4, 4), nz(-4, 4)], c2 = [nz(-4, 4), nz(-4, 4)], A = [c1[0], c2[0], c1[1], c2[1]], P = [nz(-4, 4), nz(-4, 4)], Q = mv(A, P); if (dt(A) === 0 || Math.abs(P[0]) === Math.abs(P[1])) return null;
+        return QP2("Une application linéaire " + M("f") + " envoie " + M("(1 \\,;\\, 0)") + " sur " + M("(" + c1[0] + " \\,;\\, " + c1[1] + ")") + " et " + M("(0 \\,;\\, 1)") + " sur " + M("(" + c2[0] + " \\,;\\, " + c2[1] + ")") + ". Image de " + M("P(" + P[0] + " \\,;\\, " + P[1] + ")") + " ?" + PAIR2, Q, "Les images sont les colonnes de la matrice " + M(mX(A)) + " : " + M("f(P) = " + par(P[0]) + col(...c1) + " + " + par(P[1]) + col(...c2) + " = " + col(...Q)) + ".",
+          { ctx: "colonnes", guide: [GS("Abscisse de " + M("f(P)") + " ?", Q[0], M(par(P[0]) + " \\cdot " + par(c1[0]) + " + " + par(P[1]) + " \\cdot " + par(c2[0]) + " = " + Q[0]) + "."), GP2("Image ?", Q, M("(" + Q[0] + " \\,;\\, " + Q[1] + ")") + ".")],
+            traps: [TP2([P[0] * c1[0] + P[1] * c1[1], P[0] * c2[0] + P[1] * c2[1]], "Les images de (1 ; 0) et (0 ; 1) sont les colonnes (pas les lignes) de la matrice."), TP2([c1[0] + c2[0], c1[1] + c2[1]], "Multiplie chaque colonne par la coordonnée correspondante de P.")] }); },
+    ],
+    3: [
+      () => { const th = pk([30, 45, 60, 120, 135, 150, 210, 300]), P = [nz(-4, 4), nz(-4, 4)], c = Math.cos(th / (180 / Math.PI)), s = Math.sin(th / (180 / Math.PI)), xr = P[0] * c - P[1] * s, yr = P[0] * s + P[1] * c, askX = R.rand() < 0.5, v = askX ? xr : yr; if (Math.abs(v) < 0.05) return null;
+        return QR("Par la rotation de centre O et d'angle " + M(th + "°") + ", quelle est " + (askX ? "l'abscisse" : "l'ordonnée") + " de l'image de " + M("P(" + P[0] + " \\,;\\, " + P[1] + ")") + " ? (" + RND[0.01] + ")", v, 0.01,
+          "Matrice " + M("\\begin{pmatrix} \\cos\\theta & -\\sin\\theta \\\\ \\sin\\theta & \\cos\\theta \\end{pmatrix}") + " : " + (askX ? M("x' = x\\cos\\theta - y\\sin\\theta") : M("y' = x\\sin\\theta + y\\cos\\theta")) + " " + M("\\approx " + dT(v, 2)) + ".",
+          { ctx: "rotation-angle", guide: [GS(M("\\cos " + th + "°") + " (" + RND[0.001] + ") ?", c, M(dT(c, 3)) + ".", 0.001), GS(M("\\sin " + th + "°") + " (" + RND[0.001] + ") ?", s, M(dT(s, 3)) + ".", 0.001), GS((askX ? M("x' = x\\cos\\theta - y\\sin\\theta") : M("y' = x\\sin\\theta + y\\cos\\theta")) + " (" + RND[0.01] + ") ?", v, M(dT(v, 2)) + ".", 0.01)],
+            traps: [TR(askX ? P[0] * c + P[1] * s : P[0] * s - P[1] * c, "Matrice de rotation : (cos θ ; −sin θ) sur la première ligne, (sin θ ; cos θ) sur la seconde."), TR(askX ? yr : xr, askX ? "C'est l'ordonnée de l'image." : "C'est l'abscisse de l'image.")] }); },
+      () => { const b = nz(-4, 4), c = nz(-4, 4), d = pk([2, 3, 4, -2]), k = pk([2, 3, 4, 5, -2, -3]), det = k * d - b * c, S = pk([2, 3, 4, 5]); if (det <= 1 || det === k) return null; const T = det * S;
+        return chk(QN("La matrice " + M("\\begin{pmatrix} k & " + fT(b) + " \\\\ " + fT(c) + " & " + fT(d) + " \\end{pmatrix}") + " a un déterminant positif. Elle transforme un carré d'aire " + M(S) + " en une figure d'aire " + M(T) + ". Que vaut " + M("k") + " ?", k, "Facteur des aires : " + M("\\det = " + T + " \\div " + S + " = " + det) + " ; " + M(fT(d) + "k - " + par(b) + " \\cdot " + par(c) + " = " + det) + ", " + M("k = " + k) + ".",
+          { ctx: "aire-parametre", guide: [GS("Déterminant (rapport des aires) ?", det, M(T + " \\div " + S + " = " + det) + "."), GS(M("k") + " ?", k, M("(" + det + sg(b * c) + ") \\div " + par(d) + " = " + k) + ".")],
+            traps: [TR(r6((T + b * c) / d), "Le déterminant est le rapport des aires : divise d'abord " + T + " par " + S + "."), TR(r6((det - b * c) / d), "det = dk − bc : on ajoute bc avant de diviser.")] })); },
+      () => { const A = rnd4(-4, 4), B = rnd4(-4, 4), dA = dt(A), dB = dt(B), S = pk([2, 3, 1.5, 4]); if (Math.abs(dA) < 2 || Math.abs(dB) < 2) return null; const v = Math.abs(dA * dB) * S;
+        return chk(QN("Un triangle d'aire " + M(nb(S)) + " subit la transformation de matrice " + M(mX(A)) + ", puis celle de matrice " + M(mX(B)) + ". Quelle est l'aire de l'image finale ?", v, M("|\\det A| = " + Math.abs(dA)) + ", " + M("|\\det B| = " + Math.abs(dB)) + " : les aires sont multipliées par " + M(Math.abs(dA * dB)) + ", aire " + M(nb(v)) + ".",
+          { ctx: "aire-composee", guide: [GS(M("\\det A") + " ?", dA, M(dA) + "."), GS(M("\\det B") + " ?", dB, M(dB) + "."), GS("Aire finale ?", v, M(Math.abs(dA * dB) + " \\cdot " + nb(S) + " = " + nb(v)) + ".")],
+            traps: [TR(Math.abs(dA + dB) * S, "Les facteurs des aires se multiplient (det(BA) = det B · det A)."), TR(Math.abs(dA) * S, "Applique aussi la seconde transformation."), TR(dA * dB * S, "Une aire est positive : valeur absolue.")] })); },
+    ],
+  };
+
   // ---------- problèmes en plusieurs étapes (niveau 4) ----------
   const PROBS = {
+    normale: [() => P("La masse des paquets de pâtes remplis par une machine suit une loi normale de moyenne 500 g et d'écart-type 5 g. On contrôle 400 paquets.", [["a) P(495 ≤ X ≤ 505), en %", 68], ["b) P(X < 490), en %", 2.5], ["c) Nombre de paquets attendus sous 490 g", 10]], ["495 et 505 sont à un écart-type de la moyenne.", "490 est à deux écarts-types : (100 − 95) ÷ 2."], "a) 68 % ; b) " + M("\\frac{100 - 95}{2} = 2{,}5") + " % ; c) " + M("400 \\cdot 0{,}025 = 10") + " paquets.")],
+    matrices: [() => P("On résout le système 2x + y = 7 et 5x + 3y = 19 ; sa matrice est A = (2 1 ; 5 3).", [["a) det A", 1], ["b) x", 2], ["c) y", 3]], ["det A = 2 · 3 − 1 · 5.", "Cramer : x = (7 · 3 − 1 · 19) ÷ det A."], "a) 1 (A est inversible) ; b) " + M("x = \\frac{21 - 19}{1} = 2") + " ; c) " + M("y = \\frac{2 \\cdot 19 - 7 \\cdot 5}{1} = 3") + ".")],
+    translin: [() => P("f est la rotation de 90° autour de O (sens trigonométrique), puis g l'homothétie de centre O et de rapport 3. Le triangle A(1 ; 0), B(4 ; 0), C(1 ; 2) a une aire de 3.", [["a) Ordonnée de f(B)", 4], ["b) Déterminant de la matrice de g ∘ f", 9], ["c) Aire de l'image du triangle par g ∘ f", 27]], ["Rotation de 90° : (x ; y) devient (−y ; x).", "det(g ∘ f) = det g · det f = 9 · 1."], "a) " + M("f(B) = (0 \\,;\\, 4)") + " ; b) " + M("9 \\cdot 1 = 9") + " ; c) " + M("9 \\cdot 3 = 27") + ".")],
     primitives: [() => P("Un ballon est lancé verticalement : sa vitesse vaut v(t) = 15 − 10t (m/s) ; il part d'une hauteur de 2 m.", [["a) Hauteur h(t) au temps t = 1 (m)", 12], ["b) Instant où la vitesse s'annule (s)", 1.5], ["c) Hauteur maximale (m)", 13.25]], ["h(t) = 15t − 5t² + 2 : une primitive de v avec h(0) = 2.", "Le ballon est au plus haut quand v(t) = 0."], "a) " + M("h(1) = 15 - 5 + 2 = 12") + " ; b) " + M("15 - 10t = 0") + " pour " + M("t = 1{,}5") + " ; c) " + M("h(1{,}5) = 22{,}5 - 11{,}25 + 2 = 13{,}25") + " m.")],
     integrale: [() => P("Le débit d'une source vaut r(t) = 3t² − 12t + 15 litres par heure (t en heures, de 0 à 4).", [["a) Débit au départ (L/h)", 15], ["b) Volume écoulé entre 0 h et 4 h (L)", 28], ["c) Débit moyen sur ces 4 heures (L/h)", 7]], ["Primitive : t³ − 6t² + 15t.", "Débit moyen = volume ÷ durée."], "a) 15 ; b) " + M("64 - 96 + 60 = 28") + " L ; c) " + M("28 \\div 4 = 7") + " L/h.")],
     aireint: [() => P("On étudie f(x) = 4 − x² et g(x) = x + 2.", [["a) Plus petite abscisse d'intersection", -2], ["b) Plus grande abscisse d'intersection", 1], ["c) Aire du domaine compris entre les deux courbes", 4.5]], ["4 − x² = x + 2 ⇔ x² + x − 2 = 0.", "Intègre (4 − x²) − (x + 2) = −x² − x + 2 de −2 à 1."], "a) −2 et b) 1 ; c) " + M("\\int_{-2}^{1} (-x^2 - x + 2)\\,dx = \\frac{9}{2}") + ".")],
@@ -780,6 +969,16 @@
       lesson: ["Croissance et décroissance exponentielles", "Une quantité qui varie proportionnellement à elle-même.", "Modèle \\(N(t) = N_0 e^{kt}\\) : croissance si \\(k > 0\\), décroissance si \\(k < 0\\). Temps de doublement \\(T = \\frac{\\ln 2}{k}\\) ; demi-vie \\(\\frac{\\ln 2}{|k|}\\). Pour trouver \\(t\\) : isoler \\(e^{kt}\\), puis appliquer \\(\\ln\\). Autres modèles : refroidissement \\(T(t) = T_a + (T_0 - T_a)e^{-kt}\\), croissance limitée \\(L(1 - e^{-kt})\\).",
         ["\\(N(t) = 500e^{0{,}2t}\\) atteint 2'000 quand \\(e^{0{,}2t} = 4\\), soit \\(t = \\frac{\\ln 4}{0{,}2} \\approx 6{,}9\\).", "Après 3 demi-vies, il reste \\(\\frac{1}{8}\\) de la quantité."], "Une croissance de \\(p\\,\\%\\) par an correspond à \\(k = \\ln(1 + p/100)\\), pas à \\(p/100\\)."],
       comps: ["Utiliser un modèle exponentiel ; doublement, demi-vie", "Trouver k ou un temps à partir de données ; datation", "Refroidissement, croissance limitée, taux annuel et continu"] },
+    { id: "matrices", theme: "fa", label: "Matrices 2 × 2 : calcul, déterminant, inverse", ex: "\\det\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix} = ad - bc", CH: [15], codesMATU: "4\\.GV\\.02[bce]", lv: MA,
+      hint: "Produit : ligne de la première matrice × colonne de la seconde. det = ad − bc. Inverse : (1 ÷ det) · (d −b ; −c a), si det ≠ 0. Système : x = Dx ÷ D, y = Dy ÷ D (Cramer).",
+      lesson: ["Matrices 2 × 2", "Un tableau de nombres qui calcule.", "On additionne et on multiplie par un nombre coefficient par coefficient. Produit \\(AB\\) : chaque coefficient est « ligne de \\(A\\) × colonne de \\(B\\) » ; en général \\(AB \\neq BA\\). Déterminant \\(\\det\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix} = ad - bc\\). Si \\(\\det A \\neq 0\\), \\(A^{-1} = \\frac{1}{\\det A}\\begin{pmatrix} d & -b \\\\ -c & a \\end{pmatrix}\\). Système \\(A\\binom{x}{y} = \\binom{e}{f}\\) : \\(x = \\frac{D_x}{D}\\), \\(y = \\frac{D_y}{D}\\) (Cramer), où \\(D_x\\) remplace la colonne des x par le second membre. \\(\\det(AB) = \\det A \\cdot \\det B\\), \\(\\det(kA) = k^2 \\det A\\).",
+        ["\\(\\det\\begin{pmatrix} 2 & 1 \\\\ 5 & 3 \\end{pmatrix} = 6 - 5 = 1\\), inverse \\(\\begin{pmatrix} 3 & -1 \\\\ -5 & 2 \\end{pmatrix}\\)"], "Le produit matriciel ne se fait pas coefficient par coefficient, et l'inverse non plus."],
+      comps: ["Déterminant ; combinaison de matrices ; matrice × vecteur", "Produit de matrices ; inverse ; matrice non inversible", "Système par Cramer ; propriétés du déterminant ; A²"] },
+    { id: "translin", theme: "es", label: "Transformations linéaires du plan", ex: "f(P) = A \\cdot P", CH: [15], codesMATU: "4\\.GV\\.01[abcd]", lv: TL,
+      hint: "Image d'un point : matrice × coordonnées. Les colonnes de la matrice sont les images de (1 ; 0) et (0 ; 1). Les aires sont multipliées par |det|. Composer : d'abord f puis g, matrice BA.",
+      lesson: ["Transformations linéaires", "Une matrice déplace tous les points du plan à la fois.", "L'image de \\(P(x ; y)\\) par l'application de matrice \\(A\\) est \\(A\\binom{x}{y}\\). Les colonnes de \\(A\\) sont les images de \\((1 ; 0)\\) et \\((0 ; 1)\\) : rotation de 90° \\(\\begin{pmatrix} 0 & -1 \\\\ 1 & 0 \\end{pmatrix}\\), symétrie d'axe Ox \\(\\begin{pmatrix} 1 & 0 \\\\ 0 & -1 \\end{pmatrix}\\), homothétie de rapport k \\(\\begin{pmatrix} k & 0 \\\\ 0 & k \\end{pmatrix}\\), rotation d'angle θ \\(\\begin{pmatrix} \\cos\\theta & -\\sin\\theta \\\\ \\sin\\theta & \\cos\\theta \\end{pmatrix}\\). Les aires sont multipliées par \\(|\\det A|\\). Appliquer \\(f\\) (matrice A) puis \\(g\\) (matrice B) : matrice \\(BA\\).",
+        ["Rotation de 90° : \\((3 ; 1) \\mapsto (-1 ; 3)\\)", "\\(\\det = -6\\) : les aires sont multipliées par 6"], "Pour composer, l'ordre compte : d'abord f, puis g, c'est \\(B \\cdot A\\)."],
+      comps: ["Image d'un point ; transformations usuelles ; rapport des aires", "Antécédent ; composition ; matrice à partir des images", "Rotation d'angle quelconque ; aire avec paramètre ; aires et composition"] },
     { id: "condbayes", theme: "no", label: "Probabilités conditionnelles et Bayes", ex: "P_A(B) = \\frac{P(A \\cap B)}{P(A)}", CH: [15], codesMATU: "4\\.PS\\.02[abcd]", lv: CB,
       hint: "P_A(B) = P(A ∩ B) ÷ P(A). Arbre : on multiplie le long d'un chemin, on additionne les chemins. Bayes : P_B(A) = P(A)·P_A(B) ÷ P(B).",
       lesson: ["Probabilités conditionnelles", "Recalculer une probabilité quand on sait quelque chose.", "\\(P_A(B) = \\frac{P(A \\cap B)}{P(A)}\\). Dans un arbre : \\(P(A \\cap B) = P(A) \\cdot P_A(B)\\) ; probabilités totales \\(P(B) = P(A)P_A(B) + P(\\overline{A})P_{\\overline{A}}(B)\\). Bayes : \\(P_B(A) = \\frac{P(A)P_A(B)}{P(B)}\\). \\(A\\) et \\(B\\) indépendants : \\(P(A \\cap B) = P(A)P(B)\\).",
@@ -795,6 +994,11 @@
       lesson: ["Loi binomiale", "Compter les succès dans des épreuves répétées.", "Schéma de Bernoulli : \\(n\\) épreuves identiques et indépendantes, chacune un succès avec la probabilité \\(p\\). \\(X\\) = nombre de succès suit \\(B(n \\,;\\, p)\\) : \\(P(X = k) = \\binom{n}{k} p^k (1 - p)^{n - k}\\), où \\(\\binom{n}{k}\\) compte les chemins de l'arbre avec \\(k\\) succès. \\(E(X) = np\\), \\(V(X) = np(1 - p)\\).",
         ["\\(B(5 \\,;\\, 0{,}3)\\) : \\(P(X = 2) = 10 \\cdot 0{,}09 \\cdot 0{,}343 \\approx 0{,}309\\).", "Au moins un 6 en 4 lancers : \\(1 - \\left(\\frac{5}{6}\\right)^4 \\approx 0{,}518\\)."], "N'oublie pas le coefficient \\(\\binom{n}{k}\\) : \\(p^k(1 - p)^{n - k}\\) n'est la probabilité que d'un seul chemin."],
       comps: ["Calculer P(X = k) ; espérance ; « au moins un »", "P(X ≤ 1), P(X ≥ 2) ; variance, écart-type ; coefficient binomial", "Taille minimale d'un échantillon ; retrouver n et p ; QCM au hasard"] },
+    { id: "normale", theme: "no", label: "Loi normale (règle 68-95-99,7)", ex: "P(\\mu - \\sigma \\le X \\le \\mu + \\sigma) \\approx 68\\,\\%", CH: [15], codesMATU: "4\\.PS\\.04[abc]", lv: NO,
+      hint: "À 1, 2, 3 écarts-types de la moyenne : 68 %, 95 %, 99,7 % (intervalle centré). La courbe est symétrique : chaque moitié vaut la moitié ; ce qui reste dehors se partage également entre les deux côtés.",
+      lesson: ["Loi normale", "La courbe en cloche, symétrique autour de la moyenne.", "Si \\(X\\) suit une loi normale de moyenne \\(\\mu\\) et d'écart-type \\(\\sigma\\) : \\(P(\\mu - \\sigma \\le X \\le \\mu + \\sigma) \\approx 68\\,\\%\\), \\(P(\\mu - 2\\sigma \\le X \\le \\mu + 2\\sigma) \\approx 95\\,\\%\\), \\(P(\\mu - 3\\sigma \\le X \\le \\mu + 3\\sigma) \\approx 99{,}7\\,\\%\\). Par symétrie, chaque moitié d'intervalle vaut la moitié (34 %, 47,5 %, 49,85 %) et chaque « queue » la moitié du reste (16 %, 2,5 %, 0,15 %). Valeur centrée réduite \\(z = \\frac{x - \\mu}{\\sigma}\\) : à combien d'écarts-types \\(x\\) se trouve de la moyenne.",
+        ["\\(\\mu = 170\\), \\(\\sigma = 8\\) : \\(P(X \\ge 186) = \\frac{100 - 95}{2} = 2{,}5\\,\\%\\)", "\\(P(162 \\le X \\le 186) = 34 + 47{,}5 = 81{,}5\\,\\%\\)"], "Pour un intervalle qui n'est pas centré, coupe à la moyenne et additionne les deux moitiés."],
+      comps: ["Intervalles centrés, demi-intervalles, queues (68-95-99,7)", "Intervalle non centré ; effectif attendu ; retrouver σ ; valeur centrée réduite", "Deux queues ; retrouver μ ; seuil ; probabilité conditionnelle"] },
   ];
 
   // ---------- enregistrement (additif : aucune notion existante n'est modifiée) ----------
