@@ -429,6 +429,7 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .brand .fab-cmt { position: static; align-self: center; width: 32px; height: 32px; font-size: 0.95rem; box-shadow: none; margin-left: 2px; flex: none; }
 .fab-sheet.top { top: 64px; bottom: auto; }
 .fab-sheet { position: fixed; left: 12px; right: 12px; bottom: 140px; z-index: 41; max-width: 460px; margin: 0 auto; }
+.fab-sujet label { white-space: nowrap; margin-right: 6px; }
 .fab-sheet textarea { width: 100%; box-sizing: border-box; font: inherit; padding: 8px; border-radius: 10px; border: 1px solid var(--line); background: var(--card, #fff); color: inherit; }
 
 /* Carnet d'erreurs et programme jusqu'au test (20.11) */

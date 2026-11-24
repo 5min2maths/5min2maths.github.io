@@ -468,7 +468,11 @@ function checkAnswer(spec, input) {
     const want = spec.values;
     const okAll = want.every((w) => got.some((g) => Expr.sameValue(g, w))) && got.every((g) => want.some((w) => Expr.sameValue(g, w)));
     if (okAll) return { status: "correct" };
-    if (want.some((w) => got.some((g) => Expr.sameValue(g, w)))) return { status: "close", message: "Il manque une solution, ou il y en a une en trop." };
+    // 24.11 (commentaire de l'auteur) : message selon le cas, quel que soit le nombre de solutions manquantes ou en trop.
+    if (want.some((w) => got.some((g) => Expr.sameValue(g, w)))) {
+      const manque = want.some((w) => !got.some((g) => Expr.sameValue(g, w))), trop = got.some((g) => !want.some((w) => Expr.sameValue(g, w)));
+      return { status: "close", message: manque && trop ? "Une partie est juste, mais il manque des solutions et certaines sont fausses." : manque ? "Ce que tu as trouvé est juste, mais il manque des solutions." : "Toutes les solutions sont là, mais certaines valeurs sont en trop : vérifie-les." };
+    }
     return { status: "wrong" };
   }
   if (spec.kind === "pair") {
