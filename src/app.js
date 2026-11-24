@@ -794,8 +794,16 @@ function bindBadges(root) {
   const info = root.querySelector(".bdg-info");
   root.querySelectorAll(".bdg[data-info]").forEach((x) => (x.onclick = () => { info.textContent = x.dataset.info; root.querySelectorAll(".bdg").forEach((y) => y.setAttribute("aria-pressed", y === x)); }));
 }
+// Leçon active arrivée après l'affichage (24.11 : 29 leçons de 10e sont dans les paquets 11–12, chargés en arrière-plan) :
+// à l'ouverture du rappel, ou quand un paquet arrive pendant qu'il est ouvert, le rappel passe à sa version active.
+function upgradeLesson(d) {
+  const id = d.dataset.id, box = d.querySelector(":scope > .stack");
+  if (!box || d.querySelector(".act-inline") || typeof ACTIVE === "undefined" || !ACTIVE[id]) return;
+  box.innerHTML = lessonBody(id); typeset(box); bindLessonFeedback(box); bindComment(box, "lecon-" + id); startInlineAct(box);
+}
+window.addEventListener("m2m-pack", () => document.querySelectorAll("details.lesson[data-id][open]").forEach(upgradeLesson));
 function bindLessonOpen(root) {
-  root.querySelectorAll("details.lesson[data-id]").forEach((d) => d.addEventListener("toggle", () => { if (d.open && state) { Badges.onLesson(state, d.dataset.id); Badges.check(state); save(); } if (d.open) startInlineAct(d); }));
+  root.querySelectorAll("details.lesson[data-id]").forEach((d) => d.addEventListener("toggle", () => { if (d.open && state) { Badges.onLesson(state, d.dataset.id); Badges.check(state); save(); } if (d.open) upgradeLesson(d); if (d.open) startInlineAct(d); }));
 }
 // Manipulation dans le rappel de cours (14.11) : les défis de la leçon active, lancés à l'ouverture.
 function startInlineAct(root) {

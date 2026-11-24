@@ -1471,6 +1471,17 @@
         miss: (x, s) => ["Matrice × coordonnées : (0 · 4 − 1 · 2 ; 1 · 4 + 0 · 2).", "Les aires sont multipliées par |det A|.", "f(P) = (1 ; −2), puis g multiplie les coordonnées par 3.", "Facteur des aires : |det| = |1 · (−1) − 3 · 2|."][s],
         wins: [W(-2, "(x ; y) ↦ (−y ; x), donc (4 ; 2) ↦ (−2 ; 4). Les colonnes de la matrice sont les images de (1 ; 0) et (0 ; 1)."), W(5, "Le carré unité (aire 1) devient un parallélogramme d'aire |det A| = |2 · 3 − 1 · 1| = 5."), W(-6, "f : (1 ; 2) ↦ (1 ; −2), puis g : ↦ (3 ; −6). Matrice de g ∘ f : B · A = (3 0 ; 0 −3), dans cet ordre."), W(28, "det = 1 · (−1) − 3 · 2 = −7 : les aires sont multipliées par |−7| = 7, donc 4 · 7 = 28.")] }),
     },
+    /* 24.11 soir : applications linéaires (noyau, image, bases), « À toi » sans figure */
+    appllin: {
+      retiens: { regle: "Le noyau de \\(f\\) est formé des vecteurs \\(\\vec v\\) tels que \\(A\\vec v = \\vec 0\\) ; il n'est pas réduit à \\(\\vec 0\\) exactement quand \\(\\det A = 0\\). Si \\(\\det A = 0\\), l'image est la droite engendrée par une colonne non nulle de \\(A\\). Dans une base \\((\\vec u ; \\vec v)\\), les composantes \\((\\alpha ; \\beta)\\) de \\(\\vec w\\) vérifient \\(\\vec w = \\alpha\\vec u + \\beta\\vec v\\).",
+        exemple: ["\\(A = \\begin{pmatrix} 2 & -4 \\\\ 3 & -6 \\end{pmatrix}\\) : \\(2 - 4m = 0\\), noyau engendré par \\((1 ; 0{,}5)\\) ; image : la droite \\(y = 1{,}5x\\)."] },
+      predict: { q: "La matrice \\(\\begin{pmatrix} 1 & 2 \\\\ 2 & 4 \\end{pmatrix}\\) envoie tous les points du plan…", choices: ["sur une même droite", "sur tout le plan", "sur l'origine seulement"], good: 0,
+        why: "Les deux colonnes (1 ; 2) et (2 ; 4) sont colinéaires (det = 0) : toutes les images sont sur la droite y = 2x. Le plan est « écrasé », et toute une droite de vecteurs est envoyée sur 0 : c'est le noyau." },
+      defis: ["\\(A = \\begin{pmatrix} 6 & -2 \\\\ 9 & -3 \\end{pmatrix}\\). Le noyau est engendré par \\((1 \\,;\\, m)\\). Que vaut \\(m\\) ?", "Pour cette même matrice, l'image est la droite \\(y = px\\). Que vaut \\(p\\) ?", "Base \\(\\vec u = (1 \\,;\\, 2)\\), \\(\\vec v = (1 \\,;\\, -1)\\). \\(\\vec w = (5 \\,;\\, 4) = \\alpha\\vec u + \\beta\\vec v\\). Que vaut \\(\\alpha\\) ?"],
+      garde: [0, 2],
+      play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["Première ligne : 6 · 1 + (−2) · m = 0. ", "L'image est engendrée par la première colonne (6 ; 9) : pente 9 ÷ 6. ", "Système α + β = 5 et 2α − β = 4 : additionne les deux équations. "][s] + tu(x)),
+        wins: [W(3, "6 − 2m = 0, donc m = 3 : le vecteur (1 ; 3) est envoyé sur (0 ; 0)."), W(1.5, "Les colonnes (6 ; 9) et (−2 ; −3) sont colinéaires : l'image est la droite y = 1,5x."), W(3, "3α = 9, donc α = 3, puis β = 2 : (5 ; 4) = 3 · (1 ; 2) + 2 · (1 ; −1).")] }),
+    },
   });
 
   // =====================================================================================================

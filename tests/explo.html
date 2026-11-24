@@ -44,6 +44,8 @@ try{
  homeTab="today";screenHome();screenHome();{const r=document.getElementById("fabc").getBoundingClientRect();ok(r.top>=0&&r.width>0,"💬 visible "+r.top);ok(document.querySelectorAll("#fabs").length===1,"une seule fenêtre 💬");}
  /* 24.11 : toucher le bandeau à côté du 💬 ne ramène pas à l'accueil ; le nom de l'app, si */
  state.placed=true;homeTab="today";screenHome();app.querySelector('.door[data-door="prob"]').click();{const br=app.querySelector(".brand");br.click();ok(!app.querySelector(".hub"),"bandeau hors du nom : on reste");br.querySelector("b").click();ok(!!app.querySelector(".hub"),"nom de l'app : accueil");}
+ /* 24.11 : leçon active arrivée après l'affichage du rappel (paquet chargé en arrière-plan) */
+ if(typeof ACTIVE!=="undefined"&&ACTIVE.pyth){const A=ACTIVE.pyth;delete ACTIVE.pyth;app.innerHTML=lessonDetails("pyth");bindLessonOpen(app);const d=app.querySelector("details.lesson");d.open=true;d.dispatchEvent(new Event("toggle"));ACTIVE.pyth=A;window.dispatchEvent(new Event("m2m-pack"));ok(!!d.querySelector(".act-inline"),"rappel mis à jour quand la leçon active arrive");}
  homeTab="prog";screenHome();const cb=document.getElementById("comps");ok(cb&&cb.classList.contains("btn-primary"),"bouton compétences bleu");
 }catch(e){fails.push("EXC "+e.message+" "+e.stack)}
 document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHECS\n"+fails.join("\n"):"OK")+"</pre>");
