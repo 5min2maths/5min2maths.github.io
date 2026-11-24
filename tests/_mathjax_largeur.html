@@ -6,7 +6,7 @@ window.addEventListener("load", async () => { const L = [], box = document.getEl
  const ids = (/ids=([^&]+)/.exec(location.hash) || [])[1] ? decodeURIComponent(/ids=([^&]+)/.exec(location.hash)[1]).split(",") : NOTIONS.map((n) => n.id).filter((id) => GEN[id]); const NR = +((/n=(\d+)/.exec(location.hash) || [])[1] || 12);
  for (const id of ids) for (const d of [1, 2, 3]) for (let r = 1; r <= NR; r++) { let q; try { q = Engine.build(id, d, r); } catch (e) { continue; } if (!q || !q.q) continue;
    for (const [part, html] of [["énoncé", q.q], ["corrigé", q.sol || ""]]) { box.innerHTML = html; try { splitLongMath(box); } catch (e) {} await MathJax.typesetPromise([box]);
-     let w = 0; box.querySelectorAll("mjx-container").forEach((m) => { w = Math.max(w, m.getBoundingClientRect().width); });
-     if (w > 328) L.push(q.code + " " + part + " : formule de " + Math.round(w) + " px"); } }
+     let w = 0, tex = ""; box.querySelectorAll("mjx-container").forEach((m) => { const x = m.getBoundingClientRect().width; if (x > w) { w = x; try { tex = MathJax.startup.document.getMathItemsWithin(m)[0].math; } catch (e) {} } });
+     if (w > 328) L.push(q.code + " " + part + " : formule de " + Math.round(w) + " px" + (tex ? " — " + tex.slice(0, 160) : "")); } }
  } catch (e) { L.push("EXC " + e.message); } document.getElementById("log").textContent = L.join("\n") || "aucune formule trop large"; });
 </script>

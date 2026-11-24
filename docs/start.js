@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "db03cb0e54"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "69a5b66b44"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 function errCanSend() {
@@ -116,15 +116,20 @@ function addFab() {
   if (document.getElementById("fabc")) return;
   document.body.insertAdjacentHTML("beforeend", `<button type="button" id="fabc" class="fab-cmt" aria-label="Envoyer un commentaire sur cette page">💬</button>
   <div id="fabs" class="fab-sheet" hidden><div class="card stack"><div class="spread"><b>Un commentaire sur cette page ?</b><button type="button" class="btn-ghost small" id="fabx" aria-label="Fermer">✕</button></div>
+  <div class="fab-sujet small" id="fabw" hidden>À propos de : <label><input type="radio" name="fabw" value="page" checked> <span id="fabwl">cette question</span></label> <label><input type="radio" name="fabw" value="app"> l'application en général</label></div>
   <textarea id="fabt" maxlength="500" rows="4" placeholder="Une erreur, une idée, une remarque générale… (n'écris pas ton nom)"></textarea>
   <div class="spread"><span class="small muted" id="fabo"></span><button type="button" class="btn-primary" id="fabg">Envoyer</button></div></div></div>`);
   const sheet = document.getElementById("fabs"), ta = document.getElementById("fabt"), ok = document.getElementById("fabo");
   // 23.11 : stopPropagation, sinon le clic remontait au bandeau (.brand → accueil) et la séance était quittée.
-  document.getElementById("fabc").onclick = (e) => { e.stopPropagation(); sheet.hidden = !sheet.hidden; ok.textContent = ""; if (!sheet.hidden) ta.focus(); };
+  // 24.11 (commentaire de l'auteur) : sur une question ou une leçon, on peut aussi commenter l'application en général.
+  const sujet = document.getElementById("fabw");
+  document.getElementById("fabc").onclick = (e) => { e.stopPropagation(); sheet.hidden = !sheet.hidden; ok.textContent = "";
+    if (!sheet.hidden) { const c = pageCode(), surQ = !/^page-/.test(c); sujet.hidden = !surQ; sujet.querySelector('[value="page"]').checked = true; document.getElementById("fabwl").textContent = /^lecon-/.test(c) ? "cette leçon" : "cette question"; ta.focus(); } };
   document.getElementById("fabx").onclick = () => (sheet.hidden = true);
   document.getElementById("fabg").onclick = () => {
     const text = ta.value.trim(); if (!text) { ok.textContent = "Écris d'abord ton commentaire."; return; }
-    comment(pageCode(), text); ta.value = ""; sheet.hidden = true; toast("Merci ! Ton commentaire est envoyé."); // 21.11 : fermeture immédiate (1,2 s paraissait long), la confirmation passe par le toast
+    const gen = !sujet.hidden && sujet.querySelector('[value="app"]').checked;
+    comment(gen ? "app" : pageCode(), text); ta.value = ""; sheet.hidden = true; toast("Merci ! Ton commentaire est envoyé."); // 21.11 : fermeture immédiate (1,2 s paraissait long), la confirmation passe par le toast
   };
 }
 // Bouton 💬 dans l'en-tête, à droite du titre (20.11 : flottant, il recouvrait une touche du clavier de l'app) ;
@@ -471,7 +476,7 @@ function weekRecapCard() {
 const TOUR = [
   [".sess-card", "▶ Ta séance du jour", "En classe : au rythme de ton cours (choisis ton chapitre). Libre : tous les sujets, à ton rythme. Quelques minutes suffisent."],
   [".elo-band", "📈 Ton Mathélo", "Il monte quand tu réussis des questions de ton niveau. Touche-le pour voir tes grades."],
-  [".doors", "Les 6 cases", "Le problème de la semaine, les questions curieuses, l'histoire des maths, ton test (révision jusqu'au jour J), ton carnet d'erreurs et tes progrès."],
+  [".doors", "🧭 Tes rubriques", "Le problème de la semaine, les questions curieuses, l'histoire des maths, ton test (révision jusqu'au jour J), ton carnet d'erreurs et tes progrès."],
 ];
 let tourK = 0;
 function tourShow() {
