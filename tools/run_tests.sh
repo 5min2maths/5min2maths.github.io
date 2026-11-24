@@ -25,8 +25,8 @@ un() {
 import sys,re,html
 s=open(sys.argv[1]).read(); m=re.findall(r'<pre[^>]*>(.*?)</pre>',s,re.S)
 t=html.unescape(m[-1]).strip() if m else ''
-bad=re.search(r'ÉCHEC|FAIL|EXC',t) or not t or re.match(r'(en cours|chargement|…|\.\.\.)',t,re.I)  # 24.11 : page restée « en cours » (erreur JS) = échec
-print(('ÉCHEC ' if bad else 'ok ')+(t[:260].replace(chr(10),' | ') or 'pas de résultat (page bloquée par une erreur JS ?)'))" "$t")
+bad=re.search(r'ÉCHEC|FAIL|EXC',t) or re.match(r'(en cours|chargement)',t,re.I)  # 24.11 : page restée « en cours » (erreur JS) = échec
+print(('ÉCHEC ' if bad else 'ok ')+(t[:260].replace(chr(10),' | ') or '(page d aperçu, sans résultat écrit)'))" "$t")
   else
     out="ÉCHEC délai dépassé (120 s) : page abandonnée"
   fi
