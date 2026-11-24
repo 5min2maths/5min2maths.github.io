@@ -132,6 +132,14 @@ Par ordre d'intérêt pour un élève sur téléphone :
 
 ## Points à contrôler
 
+Ajouts du 24.11 soir (captures `tests/_cap/soir_*.png`, sonde `_ergo.html#q_prob_recap`, `#q_prob_bas`, `#q_prob_corr`, `#home_elo`) :
+
+- Corrigé progressif : la 1re étape d'office convient-elle, ou préfère-t-on que l'élève la demande (ancien bouton) ? Le découpage vient de `splitSol` : vérifier quelques corrigés coupés à un endroit bizarre.
+- Rappel « 📌 Énoncé » des problèmes : sur un vrai téléphone, pendant la saisie de b) et c) ; il laisse la place du bouton 💬 à droite.
+- Défilement automatique au toucher du champ (`ansInView`) : ne doit pas faire « sauter » l'écran quand la question a une grande figure (il ne défile que si champ + clavier + Valider tiennent dans l'écran).
+- Carte « Mathélo = ton score de maths » : apparaît une fois aux élèves qui avaient déjà passé la visite guidée (y compris les testeurs actuels), puis plus jamais.
+- Vert un peu plus foncé (`--ok`) : à regarder sur l'accueil et les corrections justes.
+
 - Une vraie séance sur téléphone : après une erreur, l'indice apparaît-il sans faire disparaître le champ de réponse ?
 - Clavier à 7 colonnes (secondaire II) : les légendes « fraction », « puissance » sous les touches restent lisibles à 360 px.
 - Les boutons discrets passés à 44 px de haut (« Passer » de la visite, « changer », « Abandonner ») : la mise en page reste aérée sans paraître lourde.

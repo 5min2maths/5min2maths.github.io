@@ -1589,15 +1589,15 @@ function solStepper(box, btn, steps, onStep, onEnd) {
 // un rappel compact sur deux lignes reste collé en haut ; le toucher le déplie (le toucher encore le replie).
 function bindRecap() {
   const rc = document.getElementById("qrecap"), qt = app.querySelector(".qtext"), card = app.querySelector(".card");
-  if (!rc || !qt || !card || !("IntersectionObserver" in window)) return;
-  let qOut = false, cardIn = true;
-  const upd = () => { const on = qOut && cardIn && rc.isConnected; rc.hidden = !on; if (!on) { rc.classList.remove("open"); rc.setAttribute("aria-expanded", "false"); } };
-  const io = new IntersectionObserver((es) => {
-    if (!rc.isConnected) { io.disconnect(); return; }
-    es.forEach((e) => { if (e.target === qt) qOut = !e.isIntersecting && e.boundingClientRect.top < 0; else cardIn = e.isIntersecting; });
-    upd();
-  });
-  io.observe(qt); io.observe(card);
+  if (!rc || !qt || !card) return;
+  const upd = () => {
+    if (!rc.isConnected) { removeEventListener("scroll", onScroll); return; }
+    const on = qt.getBoundingClientRect().bottom < 0 && card.getBoundingClientRect().bottom > 90;
+    if (rc.hidden === !on) return;
+    rc.hidden = !on; if (!on) { rc.classList.remove("open"); rc.setAttribute("aria-expanded", "false"); }
+  };
+  const onScroll = () => upd(); /* deux mesures par défilement : léger, et sûr même sans images (rAF) */
+  addEventListener("scroll", onScroll, { passive: true });
   rc.onclick = () => { const o = !rc.classList.contains("open"); rc.classList.toggle("open", o); rc.setAttribute("aria-expanded", String(o)); };
 }
 // Problème en plusieurs parties : 3 essais, indices progressifs (outil, puis calcul), score partiel.
