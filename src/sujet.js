@@ -87,8 +87,8 @@ function mockDistinct(items) {
   return items.map((it) => {
     if (it.rich || !it.id) return it;
     for (let t = 0; t < 15; t++) {
-      let f = ""; try { const q = Engine.make(state, it.id, it.d, it.seed); f = it.id + "|" + (q.ctx || qForm(q)); } catch (e) { return it; }
-      if (!seen.has(f)) { seen.add(f); return it; }
+      let f = "", hors = false; try { const q = Engine.make(state, it.id, it.d, it.seed); f = it.id + "|" + (q.ctx || qForm(q)); hors = !!(Engine.horsCO && Engine.horsCO(state, it.id, q)); } catch (e) { return it; }
+      if (!seen.has(f) && (!hors || t === 14)) { seen.add(f); return it; } /* 25.11 : forme hors programme de la classe (9e–10e) : autre graine */
       it = { ...it, seed: mockSeed() };
     }
     return it;

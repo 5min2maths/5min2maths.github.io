@@ -65,7 +65,7 @@ const COMPS = {
   distrib: ["Développer avec la simple distributivité", "Développer avec la double distributivité", "Développer avec la double distributivité"],
   eq1: ["Résoudre une équation du type ax + b = c", "Résoudre une équation avec parenthèses", "Résoudre une équation avec fractions"],
   probeq: ["Mettre un problème en équation", "Mettre un problème en équation", "Mettre un problème en équation (2e degré)"],
-  echelle: ["Utiliser une échelle", "Agrandir une aire", "Agrandir un volume"],
+  echelle: ["Utiliser une échelle", "Passer de la carte à la réalité (et inversement)", "Trouver et utiliser une échelle (plans, cartes, maquettes)"], /* 25.11 : aires × k² et volumes × k³ = 11e (tools/niveau_910.md) */
   affine: ["Calculer l'image par une fonction affine", "Calculer la pente d'une droite", "Calculer une préimage par une fonction affine"],
   polyreg: ["Calculer l'angle au centre d'un polygone régulier", "Calculer l'angle intérieur d'un polygone régulier", "Retrouver le nombre de côtés"],
   grandmanq: ["Retrouver une longueur à partir de l'aire", "Retrouver une hauteur à partir de l'aire", "Retrouver une dimension à partir de l'aire"],
