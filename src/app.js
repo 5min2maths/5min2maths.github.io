@@ -259,7 +259,8 @@ function screenWelcome() {
   <p class="small muted">Un autre sujet à chaque visite. Tape ta réponse comme tu veux : fractions, racines, π… le calculateur comprend.</p></div>
   <button class="btn-primary btn-big" id="go">Commencer</button>
   <button class="btn-ghost" id="restore">J'ai déjà un code de sauvegarde</button>
-  <button class="btn-ghost small" id="privacy">🔒 Ce que l'app envoie</button>`);
+  <button class="btn-ghost small" id="privacy">🔒 Ce que l'app envoie</button>
+  <p class="small muted"><a href="#" id="legal-lien">Mentions légales et confidentialité</a></p>`);
   const inp = document.getElementById("dans"), prev = document.getElementById("dprev"), fb = document.getElementById("dfb");
   const show = () => previewOf(inp, prev, q.spec);
   inp.oninput = show;
@@ -290,7 +291,8 @@ function screenWelcome() {
   document.getElementById("dskip").onclick = () => { demoSkip.push(q.id); redraw(); };
   app.querySelectorAll("#dgrade button").forEach((b) => (b.onclick = () => { demoGrade = +b.dataset.v; demoSkip = []; draft.grade = demoGrade; redraw(); }));
   document.getElementById("privacy").onclick = () => screenPrivacy(screenWelcome);
-  document.getElementById("envoie-lien").onclick = (e) => { e.preventDefault(); screenPrivacy(screenWelcome); }; /* 24.11 : promesse exacte, lien vers le détail */
+  document.getElementById("envoie-lien").onclick = (e) => { e.preventDefault(); screenPrivacy(screenWelcome); };
+  document.getElementById("legal-lien").onclick = (e) => { e.preventDefault(); screenLegal(screenWelcome); }; /* 24.11 : mentions légales, lien discret */ /* 24.11 : promesse exacte, lien vers le détail */
   document.getElementById("restore").onclick = () => screenRestore();
 }
 
@@ -689,7 +691,7 @@ function screenSettings() {
     <span class="small muted" id="hc-l">Contraste</span><div class="seg" id="hc" role="group" aria-labelledby="hc-l"><button aria-pressed="${!A.hc}" data-v="0">Normal</button><button aria-pressed="${!!A.hc}" data-v="1">Renforcé</button></div>
     <span class="small muted">Vibrer à chaque réponse (téléphone)</span><div class="seg" id="vib"><button aria-pressed="${UI.vib}" data-v="1">Oui</button><button aria-pressed="${!UI.vib}" data-v="0">Non</button></div></div>
   ${installCard("")}
-  <button class="btn-sec" id="backup">💾 Sauvegarder ou transférer ma progression</button><button class="btn-sec" id="level">Changer de classe ou d'école</button><button class="btn-sec" id="privacy">🔒 Ce que l'app envoie</button>
+  <button class="btn-sec" id="backup">💾 Sauvegarder ou transférer ma progression</button><button class="btn-sec" id="level">Changer de classe ou d'école</button><button class="btn-sec" id="privacy">🔒 Ce que l'app envoie</button><button class="btn-ghost small" id="legal">Mentions légales et confidentialité</button>
   ${isAuthor() ? '<button class="btn-primary" id="stats">📊 Statistiques d\'usage (auteur)</button>' : ""}
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div>
   <button class="btn-primary" id="back">Retour</button></div>`);
@@ -701,6 +703,7 @@ function screenSettings() {
   app.querySelectorAll("#hc button").forEach((b) => (b.onclick = () => setA("hc", +b.dataset.v)));
   app.querySelectorAll("#vib button").forEach((b) => (b.onclick = () => { UI.vib = b.dataset.v === "1"; uiSave(); if (UI.vib) buzz(true); screenSettings(); }));
   document.getElementById("privacy").onclick = () => screenPrivacy(screenSettings);
+  document.getElementById("legal").onclick = () => screenLegal(screenSettings);
   if (document.getElementById("stats")) document.getElementById("stats").onclick = () => screenStats(screenSettings);
   document.getElementById("backup").onclick = screenBackup;
   document.getElementById("level").onclick = () => { draft = { ...state.profile }; screenLevel(); };
@@ -839,14 +842,68 @@ function screenPrivacy(back) {
   <li><b>Tes commentaires</b>, si tu en écris, avec ta classe (par exemple « 10e ») et le même identifiant. N'y écris pas ton nom.</li>
   <li><b>Tes grades Mathélo</b>, quand tu en atteins un : le nom du grade et le même identifiant, pour te donner ton numéro de « collector ».</li>
   <li><b>Ton chapitre du moment</b>, si tu en choisis un : les notions, ta classe et le mois, sans identifiant. Ça sert à proposer les notions dans l'ordre où elles se font vraiment en classe.</li>
-  <li><b>Les erreurs techniques</b> de l'app, si elle plante : le message d'erreur, l'écran ou le code de la question, ta classe et le même identifiant (au plus 5 par jour). Ça sert à réparer les bugs qu'on ne voit pas.</li></ul></div>
+  <li><b>Les erreurs techniques</b> de l'app, si elle plante : le message d'erreur, l'endroit dans le code, la version de l'app, l'écran ou le code de la question, ta classe et le même identifiant (au plus 5 par jour). Ça sert à réparer les bugs qu'on ne voit pas.</li></ul></div>
   <p class="small muted">Identifiant tiré au hasard pour cet appareil : <code>${esc(deviceId() || "—")}</code></p>${isAuthor() ? '<p class="small"><b>Appareil de l\'auteur</b> : rien n\'est envoyé depuis cet appareil, sauf les commentaires 💬 (marqués « auteur »).</p>' : ""}
   <div class="card flat stack"><b>À savoir</b>
   <ul class="plain"><li>L'identifiant ne permet pas de savoir qui tu es : il n'est lié à aucun nom ni compte.</li>
-  <li>Comme pour tout site, les services qui hébergent l'app (GitHub) et chargent ses polices et ses formules (Google Fonts, Cloudflare) voient passer la connexion. L'auteur de l'app n'y a pas accès.</li>
-  <li>« Tout effacer » (en bas de l'accueil) supprime ta progression et l'identifiant de cet appareil. Les avis et commentaires déjà envoyés ne contiennent rien qui te désigne.</li></ul></div>
+  <li>Comme pour tout site, GitHub, qui héberge l'app, voit passer la connexion (adresse IP, type de navigateur) ; Google aussi, à chaque envoi vers le tableau. L'auteur de l'app n'a pas accès à ces adresses, et elles ne sont pas inscrites dans le tableau.</li>
+  <li>Les polices et les formules mathématiques sont fournies par le site de l'app lui-même : aucun autre service n'est contacté.</li>
+  <li>« Tout effacer » (dans les Réglages) supprime ta progression et l'identifiant de cet appareil. Ce qui a déjà été envoyé reste dans le tableau : pour le faire effacer, note d'abord ton identifiant (voir les mentions légales).</li></ul></div>
+  <button class="btn-ghost small" id="legal">Mentions légales et confidentialité</button>
   <button class="btn-primary btn-big" id="back">Retour</button>`);
   document.getElementById("back").onclick = back;
+  document.getElementById("legal").onclick = () => screenLegal(() => screenPrivacy(back));
+}
+
+/* ---------------- Mentions légales et confidentialité (24.11, projet à faire valider) ----------------
+   Les champs [À COMPLÉTER] sont à remplir par l'enseignant (responsable, base légale, durée) : aucune donnée personnelle
+   ici. Accès : Réglages, écran d'entrée (lien discret), « Ce que l'app envoie », lien direct …/#confidentialite. */
+const AC = (t) => `<mark>[À COMPLÉTER par l'enseignant : ${t}]</mark>`;
+function screenLegal(back) {
+  let id = "";
+  try { id = localStorage.getItem("m2m-device") || ""; } catch (e) {}
+  const sec = (titre, corps) => `<div class="card flat stack"><h3>${titre}</h3>${corps}</div>`;
+  h(`${brand}<h2>Mentions légales <span class="mark">et confidentialité</span></h2>
+  <div class="card flat stack"><b>Projet — à faire valider</b><span class="small muted">Ce texte est une première version. Les parties marquées « À COMPLÉTER » doivent encore être remplies et le tout vérifié avant une diffusion large.</span></div>
+  <p class="muted">« 5 minutes de maths par jour » est une application d'exercices de mathématiques, gratuite, sans compte et sans publicité. Cette page explique, pour les élèves et leurs parents, quelles données elle utilise, pourquoi, et comment exercer vos droits.</p>
+  ${sec("1. Qui est responsable ?", `<ul class="plain"><li>Éditeur de l'app et responsable du traitement des données : ${AC("nom")}.</li>
+  <li>Adresse : ${AC("adresse postale")}.</li>
+  <li>Contact pour toute question ou demande sur les données : ${AC("adresse e-mail de contact")}.</li>
+  <li>Cadre : ${AC("projet personnel ou projet lié à un établissement scolaire")}.</li></ul>`)}
+  ${sec("2. À quoi servent les données ?", `<p>Uniquement à améliorer l'app pendant sa phase de test : compter combien de personnes l'utilisent, repérer les questions mal posées, trop difficiles ou mal corrigées, ajuster la durée des séances, réparer les erreurs techniques, proposer les notions dans l'ordre où elles se font en classe.</p>
+  <p class="small muted">Pas de publicité, pas de revente, pas d'évaluation des élèves : les données ne servent pas à noter ni à juger qui que ce soit.</p>`)}
+  ${sec("3. Quelles données ?", `<p><b>Jamais demandé :</b> nom, prénom, adresse e-mail, numéro de téléphone, école, compte. Il n'y a pas d'inscription.</p>
+  <p><b>Gardé seulement sur l'appareil</b> (stockage local du navigateur) : la progression (notions, compétences, badges, Mathélo, historique des réponses), les réglages d'affichage, et un identifiant tiré au hasard, propre à l'appareil.</p>
+  <p><b>Envoyé vers un tableau tenu par l'éditeur</b> (Google Sheets), avec cet identifiant :</p>
+  <ul class="plain"><li>l'ouverture de l'app (au plus une fois par jour), le début et la fin de chaque séance, avec la date, la classe (par exemple « 10e »), le format, le nombre de questions, le score et la durée ;</li>
+  <li>pour chaque question ou rappel de cours : son code, le résultat (trouvé ou non, du premier coup ou non, quitté), le temps passé, l'aide utilisée et la première réponse fausse (un nombre ou un calcul ; des mots sont remplacés par « [texte] ») ;</li>
+  <li>les avis (👍 / 👎, « trop facile », « pas compris ») et les commentaires écrits librement (500 caractères au plus ; il est demandé de ne pas y écrire de nom) ;</li>
+  <li>les grades Mathélo atteints ;</li>
+  <li>les erreurs techniques de l'app (message, endroit dans le code, version, écran), 5 par jour au plus.</li></ul>
+  <p>Envoyé <b>sans identifiant</b> : le chapitre du moment choisi par l'élève (notions, classe, mois).</p>
+  <p class="small muted">Le détail, écran par écran, est dans « Ce que l'app envoie ». Ces données ne permettent pas, à elles seules, de savoir qui est l'élève. Elles concernent toutefois un appareil précis : elles sont donc traitées comme des données personnelles.</p>`)}
+  ${sec("4. Sur quelle base ?", `<p>Base légale du traitement : ${AC("par exemple intérêt légitime à améliorer un outil pédagogique, consentement, ou mission d'intérêt public si l'app est utilisée dans le cadre de l'école ; à déterminer avec l'établissement")}.</p>
+  <p class="small muted">Lois applicables : loi fédérale suisse sur la protection des données (LPD) ; règlement européen (RGPD) pour les utilisateurs de l'Union européenne ; ${AC("loi cantonale, si l'app est utilisée par une école publique")}.</p>`)}
+  ${sec("5. Combien de temps ?", `<ul class="plain"><li>Données envoyées : conservées ${AC("durée, par exemple jusqu'à la fin de la phase de test et au plus 12 mois")}, puis effacées ou rendues entièrement anonymes (totaux sans identifiant).</li>
+  <li>Données sur l'appareil : jusqu'à ce que l'élève les efface (Réglages → « Tout effacer ») ou vide les données du site dans son navigateur.</li></ul>`)}
+  ${sec("6. Qui reçoit les données ?", `<ul class="plain"><li>L'éditeur de l'app, seul à avoir accès au tableau.</li>
+  <li><b>Google LLC</b> (États-Unis), qui fournit le tableau (Google Sheets) et le petit programme qui reçoit les envois (Google Apps Script) : il agit comme sous-traitant. Les données sont donc stockées <b>hors de Suisse et de l'Union européenne</b>. Garanties pour ce transfert : ${AC("par exemple certification Data Privacy Framework de Google, clauses contractuelles types")}.</li>
+  <li><b>GitHub</b> (GitHub Inc., filiale de Microsoft, États-Unis) héberge l'app (GitHub Pages) : comme tout hébergeur, il reçoit l'adresse IP et le type de navigateur des visiteurs pour leur servir les pages, et peut les garder dans ses journaux techniques.</li>
+  <li>Les polices de caractères et l'outil d'affichage des formules (MathJax) sont fournis par le site de l'app lui-même : aucun autre service n'est contacté.</li>
+  <li>Aucune donnée n'est vendue ni transmise à des fins publicitaires.</li></ul>`)}
+  ${sec("7. Vos droits", `<p>Vous pouvez demander à consulter les données envoyées depuis un appareil, à les faire corriger ou effacer, ou vous opposer à leur envoi.</p>
+  <p><b>Comment :</b> écrire à ${AC("adresse e-mail de contact")} en indiquant l'identifiant de l'appareil. C'est le seul moyen de retrouver ses données, puisqu'elles ne sont liées à aucun nom. Les données envoyées sans identifiant (chapitre du moment) ne peuvent pas être retrouvées.</p>
+  <p>Identifiant de cet appareil : ${id ? `<code>${esc(id)}</code>` : "aucun pour l'instant (rien n'a encore été envoyé depuis cet appareil)"}</p>
+  <p class="small muted">Notez cet identifiant <b>avant</b> d'utiliser « Tout effacer » : l'effacement supprime la progression et l'identifiant sur l'appareil, mais pas ce qui a déjà été envoyé. En cas de désaccord, vous pouvez vous adresser à ${AC("autorité de protection des données compétente, par exemple le Préposé fédéral à la protection des données et à la transparence (PFPDT)")}.</p>`)}
+  ${sec("8. Élèves mineurs", `<p>L'app s'adresse à des élèves, en général mineurs. C'est pourquoi elle ne demande aucune donnée qui permette de les identifier, ne montre pas de publicité et ne contient pas de messagerie. Les parents peuvent exercer les droits décrits ci-dessus pour leur enfant.</p>
+  <p class="small muted">${AC("préciser si un accord des parents ou de l'établissement est demandé avant l'utilisation en classe")}</p>`)}
+  ${sec("9. Cookies et stockage local", `<p>L'app n'utilise <b>aucun cookie</b> ni traceur publicitaire. Elle utilise le stockage local du navigateur pour garder la progression, les réglages et l'identifiant de l'appareil, ainsi qu'un cache hors ligne (pour fonctionner sans connexion). Ces informations restent sur l'appareil, sauf les envois décrits au point 3.</p>`)}
+  ${sec("10. Hébergement et licences", `<ul class="plain"><li>Hébergement : GitHub Pages, GitHub Inc., San Francisco, États-Unis.</li>
+  <li>Composants libres inclus : MathJax (licence Apache 2.0) ; polices Atkinson Hyperlegible, Bricolage Grotesque et JetBrains Mono (licence SIL Open Font License 1.1). <a href="vendor/LICENCES.txt" target="_blank" rel="noopener">Textes des licences</a>.</li></ul>`)}
+  <p class="small muted">Version du ${AC("date de validation")}.</p>
+  <button class="btn-primary btn-big" id="back">Retour</button>`);
+  document.getElementById("back").onclick = back;
+  try { window.scrollTo(0, 0); } catch (e) {}
 }
 
 // ---------------- Sauvegarde ----------------
@@ -2107,6 +2164,8 @@ function screenSummary() {
 
 // Consultation d'une question par son code : adresse …/#q-eq2disc-2-k3f (rien n'est enregistré).
 function showCode() {
+  /* Mentions légales (24.11) : lien direct …/#confidentialite, à donner aux parents */
+  if (location.hash === "#confidentialite") { screenLegal(() => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); }); return true; }
   // Consultation d'une leçon (active ou rappel) : …/#l-vitesse (lien du tableau de suivi, 15.11).
   const ml = /^#l-([a-z0-9]+)$/.exec(location.hash);
   if (ml && typeof LESSONS !== "undefined" && LESSONS[ml[1]]) { screenLesson(ml[1], () => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); }, false, false); return true; }
