@@ -846,6 +846,15 @@
         parts: [{ label: "Écris la matrice " + M("A") + " de " + M("f") + " et la matrice " + M("B") + " de " + M("g") + " (images de " + M("(1 \\,;\\, 0)") + " et " + M("(0 \\,;\\, 1)") + ").", pts: 1 }, { label: "Calcule la matrice de " + M("g \\circ f") + " (d'abord " + M("f") + "). Quelle transformation est-ce ?", pts: 2 }, { label: "Même question pour " + M("f \\circ g") + ". L'ordre compte-t-il ?", pts: 1 }, { label: "Calcule l'image de " + M("P(" + p1 + " \\,;\\, " + p2 + ")") + " par " + M("g \\circ f") + ".", pts: 1 }],
         sol: ul([M("A = " + mX(Af)) + ", " + M("B = " + mX(Bg)) + ".", M("BA = " + mX(G)) + " : " + nomD4(G) + ".", M("AB = " + mX(F)) + " : " + nomD4(F) + (nomD4(F) === nomD4(G) ? " ; ici l'ordre ne change rien." : " ; l'ordre compte."), M("BA" + col(p1, p2) + " = " + col(im[0], im[1])) + "."]),
         chk: [[im[0], N(im[0])], [im[1], N(im[1])]] }); },
+    // La machine qui écrase le plan (24.11 : applications linéaires, noyau et image)
+    () => { const b = pk([-3, -2, 2, 3]), m = pk([-2, 2, 3]), a = -b * m, k = pk([-3, -2, 2, 3]), Am = [[a, b], [k * a, k * b]], u = [R.nz(-3, 3), R.nz(-3, 3)];
+      if (a * u[0] + b * u[1] === 0) u[0] += u[0] > 0 ? 1 : -1; /* u hors du noyau */
+      const fu = [a * u[0] + b * u[1], k * (a * u[0] + b * u[1])];
+      return X({ id: "appllin", lv: 2, titre: "La machine qui écrase le plan",
+        q: "L'application linéaire " + M("f") + " a pour matrice " + M(mX(Am)) + ".",
+        parts: [{ label: "Calcule " + M("\\det A") + ". Que peut-on en conclure ?", pts: 1 }, { label: "Le noyau est engendré par " + M("(1 \\,;\\, m)") + ". Trouve " + M("m") + ".", pts: 1 }, { label: "L'image est la droite " + M("y = px") + ". Trouve " + M("p") + ".", pts: 1 }, { label: "Calcule " + M("f" + pt(u[0], u[1])) + " et vérifie que ce point est sur la droite image.", pts: 1 }],
+        sol: ul([M("\\det A = " + FR(a) + " \\cdot " + par(k * b) + " - " + par(b) + " \\cdot " + par(k * a) + " = 0") + " : " + M("f") + " n'est pas inversible ; elle écrase le plan sur une droite.", M(FR(a) + " + " + par(b) + "m = 0") + " : " + M("m = " + m) + ".", "Image engendrée par la première colonne " + M(pt(a, k * a)) + " : " + M("p = " + k) + ".", M("f" + pt(u[0], u[1]) + " = " + pt(fu[0], fu[1])) + " ; " + M(FR(fu[1]) + " = " + k + " \\cdot " + par(fu[0])) + " : il est bien sur " + M("y = " + k + "x") + "."]),
+        chk: [[m, N(m)], [k, N(k)], [fu[0], N(fu[0])], [fu[1], N(fu[1])]] }); },
   ];
   const RAISONA = [
     () => { let P, Q; do { P = nzm(-3, 4); Q = nzm(-3, 4); } while (mul(P, Q)[0][0] === P[0][0] * Q[0][0] || !mul(P, Q)[0][0]); const w = who(), PQ = mul(P, Q);
@@ -893,6 +902,21 @@
         parts: [{ label: "Donne la loi de " + M("X") + ".", pts: 1 }, { label: "Calcule " + M("E(X)") + ". Le jeu est-il favorable au joueur ?", pts: 1 }, { label: "Calcule l'écart-type de " + M("X") + " (au centième).", pts: 1 }, { label: "Quel gain sur le vert rendrait le jeu équitable ? Et que gagne-t-on en moyenne sur 30 parties avec le gain actuel ?", pts: 2 }],
         sol: ul([M("X") + " vaut " + M("-" + mz) + ", " + M(s) + ", " + M(j) + " avec les probabilités " + M("\\frac{1}{2}") + ", " + M("\\frac{1}{3}") + ", " + M("\\frac{1}{6}") + " (angles ÷ 360°).", M("E(X) = -\\frac{" + mz + "}{2} + \\frac{" + s + "}{3} + \\frac{" + j + "}{6} = " + FR(Ex)) + (Ex > 0 ? " > 0 : favorable au joueur." : " < 0 : défavorable au joueur."), M("V = E(X^2) - E(X)^2 = " + FR((mz * mz) / 2 + (s * s) / 3 + (j * j) / 6) + " - \\left(" + FR(Ex) + "\\right)^2 \\approx " + A(V, 2)) + ", " + M("\\sigma \\approx " + A(Math.sqrt(V), 2)) + ".", M("-\\frac{" + mz + "}{2} + \\frac{" + s + "}{3} + \\frac{g}{6} = 0") + " donne " + M("g = " + jf) + " CHF ; sur 30 parties : " + M("30 \\cdot " + FR(Ex) + " = " + FR(30 * Ex)) + " CHF."]),
         chk: [[Ex, FRp(Ex)], [Math.sqrt(V), A(Math.sqrt(V), 2), 0.01], [jf, N(jf)], [30 * Ex, FRp(30 * Ex)]] }); },
+    // Les temps de trajet (24.11 : statistiques ouvertes en 4e)
+    () => { let xs, m, sd, k; do { xs = Array.from({ length: 10 }, () => R.int(12, 45)); m = xs.reduce((a, b) => a + b, 0) / 10; sd = Math.sqrt(xs.reduce((a, b) => a + (b - m) ** 2, 0) / 10); k = xs.filter((x) => x >= m - sd && x <= m + sd).length; } while (sd < 4 || new Set(xs).size < 8);
+      return X({ id: "stats", lv: 2, titre: "Les temps de trajet",
+        q: who() + " note ses temps de trajet (en minutes) pendant deux semaines d'école : " + xs.join(" ; ") + ".",
+        parts: [{ label: "Calcule la moyenne " + M("\\bar x") + ".", pts: 1 }, { label: "Calcule l'écart-type " + M("\\sigma") + " (au centième).", pts: 2 }, { label: "Combien de trajets sont dans l'intervalle " + M("[\\bar x - \\sigma \\,;\\, \\bar x + \\sigma]") + " ? Quel pourcentage cela représente-t-il ?", pts: 1 }],
+        sol: ul([M("\\bar x = \\frac{" + xs.reduce((a, b) => a + b, 0) + "}{10} = " + N(m)) + " min.", M("\\sigma = \\sqrt{\\frac{1}{10}\\sum (x_i - \\bar x)^2} \\approx " + A(sd, 2)) + " min (racine de la moyenne des carrés des écarts).", "Intervalle " + M("[" + A(m - sd, 2) + " \\,;\\, " + A(m + sd, 2) + "]") + " : " + M(k) + " trajets, soit " + M(10 * k + "\\,\\%") + " (pour une loi normale, on en attendrait environ 68 %)."]),
+        chk: [[m, N(m)], [sd, A(sd, 2), 0.01], [k, N(k)]] }); },
+    // Deux classes, deux boîtes (quartiles)
+    () => { const mk11 = () => Array.from({ length: 11 }, () => R.int(20, 60)).sort((a, b) => a - b); let s1, s2; do { s1 = mk11(); s2 = mk11(); } while (s1[8] - s1[2] === s2[8] - s2[2] || s1[5] === s2[5]);
+      const iq1 = s1[8] - s1[2], iq2 = s2[8] - s2[2];
+      return X({ id: "quartiles", lv: 2, titre: "Deux classes, deux boîtes",
+        q: "Points obtenus à un même test (sur 60) dans deux classes de 11 élèves, séries triées. Classe A : " + s1.join(" ; ") + ". Classe B : " + s2.join(" ; ") + ".",
+        parts: [{ label: "Donne la médiane, " + M("Q_1") + " et " + M("Q_3") + " de la classe A.", pts: 1 }, { label: "Calcule l'écart interquartile de chaque classe.", pts: 1 }, { label: "Dessine les deux boîtes à moustaches sur un même axe. Quelle classe est la plus homogène ?", pts: 2 }],
+        sol: ul(["Classe A : médiane " + M(s1[5]) + " (6e valeur), " + M("Q_1 = " + s1[2]) + ", " + M("Q_3 = " + s1[8]) + " (médianes des 5 premières et des 5 dernières valeurs).", "A : " + M(s1[8] + " - " + s1[2] + " = " + iq1) + " ; B : " + M("Q_1 = " + s2[2]) + ", " + M("Q_3 = " + s2[8]) + ", " + M(s2[8] + " - " + s2[2] + " = " + iq2) + ".", "Boîtes : min, " + M("Q_1") + ", médiane, " + M("Q_3") + ", max. La classe " + (iq1 < iq2 ? "A" : "B") + " a le plus petit écart interquartile : la moitié centrale de ses notes est plus resserrée."]),
+        chk: [[s1[5], N(s1[5])], [s1[2], N(s1[2])], [s1[8], N(s1[8])], [iq1, N(iq1)], [iq2, N(iq2)]] }); },
   ];
   const RAISONP = [
     () => { let a, b, c, r; do { a = pk([0.4, 0.5, 0.6]); b = pk([0.2, 0.3]); c = pk([0.25, 0.3, 0.4]); r = (a * b) / c; } while (r > 1 || Math.abs(r - b) < 1e-9); const w = who();
@@ -912,8 +936,8 @@
   RICH.deriv3c = { ids: ["tauxvar", "nbderive", "derivref", "derivregles", "derivprodquot", "derivcomp", "tangente", "variations", "optimderiv"], track: "col", label: "Dérivation", ex: EXD, raison: RAISOND, minutes: 45 };
   RICH.int4c = { ids: ["primitives", "integrale", "aireint", "volrev"], track: "col", label: "Intégration", ex: EXI, raison: RAISONI, minutes: 45 };
   RICH.exp4c = { ids: ["lnexp", "croissance"], track: "col", label: "Logarithme et exponentielle", ex: EXL, raison: RAISONL, minutes: 45 };
-  RICH.alg4c = { ids: ["matrices", "translin"], track: "col", label: "Algèbre linéaire", ex: EXA, raison: RAISONA, minutes: 45 };
-  RICH.proba4c = { ids: ["condbayes", "varalea", "binomiale", "normale"], track: "col", label: "Probabilités", ex: EXP, raison: RAISONP, minutes: 45 };
+  RICH.alg4c = { ids: ["matrices", "translin", "appllin"], track: "col", label: "Algèbre linéaire", ex: EXA, raison: RAISONA, minutes: 45 };
+  RICH.proba4c = { ids: ["condbayes", "varalea", "binomiale", "normale", "stats", "quartiles"], track: "col", label: "Probabilités", ex: EXP, raison: RAISONP, minutes: 45 };
 })();
 
 // Chantier 3e et 4e Collège (24.11) : leçons actives (devine / manipule ou essaie sur la figure / retiens) pour les
