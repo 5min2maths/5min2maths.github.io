@@ -16,3 +16,4 @@ banque/
 tools/chantier_*.md
 !docs/icon-*.png
 !src/pwa/icon-*.png
+tests/_syntaxe.html
