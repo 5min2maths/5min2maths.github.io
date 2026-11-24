@@ -8,7 +8,7 @@ const _rq=renderQuestion; renderQuestion=function(q,opt){window.__q=q;return _rq
 const answer=(good)=>{const q=window.__q;const fr=(v)=>{if(Math.abs(v*1e6-Math.round(v*1e6))<1e-6)return String(+v.toFixed(6));for(let d=2;d<=200;d++){const n=Math.round(v*d);if(Math.abs(n/d-v)<1e-9)return n+"/"+d}return String(v)};document.getElementById("ans").value=good?(q.canon||fr(q.spec.value)):"123456789";document.getElementById("check").click();if(!good&&document.getElementById("check")&&!document.getElementById("check").disabled){document.getElementById("ans").value="123456788";document.getElementById("check").click();}};
 try{
 // 1. positionnement : progression, reprise après « fermeture »
-state=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.autoInit(state);
+state=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.autoInit(state);statsSet(false);/* 24.11 : carte des statistiques déjà répondue, sinon elle prend la place des autres cartes */
 startPlacement();const n=state.placement.plan.length;ok(n>=3,"1 plan "+n);
 ok(/question 1 sur/.test(app.textContent)&&!!app.querySelector(".pbar"),"1 eyebrow et barre");
 document.getElementById("idk").click();document.getElementById("nx").click();
