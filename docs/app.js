@@ -91,7 +91,8 @@ function placeOf(n, profile) {
 // Niveaux proposés à l'élève : clé interne (système + année) et libellé.
 const SYSTEMS = {
   CH: { label: "Suisse romande", grades: [[9, "9e"], [10, "10e"], [11, "11e"], [12, "1re (sec. II)"], [13, "2e (sec. II)"], [14, "3e (sec. II)"], [15, "4e (sec. II)"]] },
-  // 22.11 : 3e et 4e du Collège (grade 14, 15 ; Collège seulement, la MP s'arrête en 2e dans l'app). Programme : tools/programme_3e_4e_college.md.
+  // 22.11 : 3e et 4e du Collège (grade 14, 15). Programme : tools/programme_3e_4e_college.md.
+  // 24.11 : aussi MP 3e et 4e (grade 14, 15, track « mp » : src/ch_mp3.js, src/ch_mp4.js) ; le moteur distingue par la filière (placeOf).
   // FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"]] }, // masqué (bêta genevoise)
 };
 // 22.11 : systèmes définis mais pas proposés dans l'interface (France : collège rendu jouable, ouverture à décider).
@@ -10196,7 +10197,12 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
   sysineq: ["ineq"], ineqfrac: ["ineq"], eqirr: ["eq2disc"], absval: ["eq1"], trinfact: ["eq2disc"], vol: ["aire2"], echelle: ["prop"],
   // 23.11 : dérivation (3e Collège, src/ch3c_ana.js)
   tauxvar: ["fimg"], nbderive: ["tauxvar"], derivref: ["puiss"], derivregles: ["derivref"], derivprodquot: ["derivregles"], derivcomp: ["derivregles", "compo"],
-  tangente: ["nbderive", "droites"], variations: ["derivregles", "ineq2"], optimderiv: ["variations"] };
+  tangente: ["nbderive", "droites"], variations: ["derivregles", "ineq2"], optimderiv: ["variations"],
+  // 24.11 : MP 3e (src/ch_mp3.js) et MP 4e (src/ch_mp4.js)
+  eqabs: ["eq1"], eqbic: ["eq2disc"], eqirrmp: ["eq2disc"], eqratmp: ["fracrat", "eq2disc"], puisrat: ["puiss", "rac"], logdef: ["puiss"], logprop: ["logdef"],
+  eqexp: ["logdef"], eqlog: ["logprop"], croissexp: ["eqexp"], volmp: ["pyth"], similmp: ["volmp"],
+  coordmp: ["pyth"], vectmp: ["coordmp"], scalmp: ["vectmp"], droiteparam: ["vectmp"], ineqmp: ["eq1", "eq2disc"], fctmp: ["fimg"], polymp: ["factor", "eq2disc"],
+  sinusmp: ["trigfn"], explogfn: ["eqexp", "logdef"] };
 // Programme du jour : le format change d'un jour à l'autre ; l'équilibre se fait sur 7 jours.
 // 22.11 : textes courts (une ligne sur téléphone : pas de saut quand on change de format).
 const FORMATS = {

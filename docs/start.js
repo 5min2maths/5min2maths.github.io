@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "52e2d8d9f9"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "63d56a1079"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 function errCanSend() {
@@ -280,11 +280,10 @@ function screenWelcome() {
 function screenLevel() {
   const sys = SYSTEMS[draft.system];
   if (!sys.grades.some(([g]) => g === draft.grade)) draft.grade = sys.grades.some(([g]) => g === 11) ? 11 : sys.grades[0][0];
-  // 22.11 : 3e et 4e du Collège seulement (pas de MP 3e–4e dans l'app) : pas de choix de voie.
-  // Voie imposée seulement en 3e–4e : en revenant en 1re–2e, le choix redevient obligatoire (règle du 20.11).
-  if (draft.system === "CH" && draft.grade >= 14) { if (draft.track !== "college") draft.autoTrack = true; draft.track = "college"; }
-  else if (draft.autoTrack) { draft.track = null; draft.autoTrack = false; }
-  const sec2 = draft.system === "CH" && draft.grade >= 12 && draft.grade <= 13;
+  // 24.11 : MP 3e et 4e ajoutées (src/ch_mp3.js, src/ch_mp4.js) : le choix de la voie est demandé de la 1re à la 4e
+  // (avant : voie « Collège » imposée en 3e–4e). Ancien brouillon à voie imposée : le choix redevient obligatoire.
+  if (draft.autoTrack) { draft.track = null; draft.autoTrack = false; }
+  const sec2 = draft.system === "CH" && draft.grade >= 12;
   h(`${brand}<div class="eyebrow">Étape 1 sur 2</div><h2>Où en es-tu ?</h2>
   <div class="card flat stack">${Object.keys(SYSTEMS).length > 1 ? `<h3>Ton école</h3><div class="seg" id="sys">${Object.entries(SYSTEMS).map(([k, v]) => `<button aria-pressed="${k === draft.system}" data-v="${k}">${v.label}</button>`).join("")}</div>` : ""}
   <h3>Ta classe cette année</h3><div class="seg" id="grade">${sys.grades.map(([g, n]) => `<button aria-pressed="${g === draft.grade}" data-v="${g}">${n}</button>`).join("")}</div>

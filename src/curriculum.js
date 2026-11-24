@@ -91,7 +91,8 @@ function placeOf(n, profile) {
 // Niveaux proposés à l'élève : clé interne (système + année) et libellé.
 const SYSTEMS = {
   CH: { label: "Suisse romande", grades: [[9, "9e"], [10, "10e"], [11, "11e"], [12, "1re (sec. II)"], [13, "2e (sec. II)"], [14, "3e (sec. II)"], [15, "4e (sec. II)"]] },
-  // 22.11 : 3e et 4e du Collège (grade 14, 15 ; Collège seulement, la MP s'arrête en 2e dans l'app). Programme : tools/programme_3e_4e_college.md.
+  // 22.11 : 3e et 4e du Collège (grade 14, 15). Programme : tools/programme_3e_4e_college.md.
+  // 24.11 : aussi MP 3e et 4e (grade 14, 15, track « mp » : src/ch_mp3.js, src/ch_mp4.js) ; le moteur distingue par la filière (placeOf).
   // FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"]] }, // masqué (bêta genevoise)
 };
 // 22.11 : systèmes définis mais pas proposés dans l'interface (France : collège rendu jouable, ouverture à décider).
