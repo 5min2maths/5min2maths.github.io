@@ -80,7 +80,7 @@ const NOTIONS = [
   { id: "cart", theme: "es", label: "Distance et milieu", ex: "d(A,B) = \\sqrt{(x_B - x_A)^2 + (y_B - y_A)^2}", CH: [13], MP: null, FR: [10, 5] },
   { id: "droites", theme: "es", label: "Équations de droites", ex: "y = mx + h", CH: [13], MP: null, FR: null },
   { id: "cercle", theme: "es", label: "Équations de cercles", ex: "(x - a)^2 + (y - b)^2 = r^2", CH: [13], MP: null, FR: [11, 8] }, // 22.11 : FR 1re/Tle (tools/premiere_terminale_fr.md)
-  { id: "stats", theme: "no", label: "Statistiques (moyenne, médiane, écart-type)", ex: "\\bar{x}, \\text{ médiane}, \\sigma", CH: [15] /* 24.11 : ouverte à la 4e du Collège (4.PS.01) */, MP: [13, "S2"], FR: [10, 8] },
+  { id: "stats", theme: "no", label: "Statistiques (moyenne, médiane, écart-type)", ex: "\\bar{x}, \\text{ médiane}, \\sigma", CH: null /* 24.11 : ouverte à la 4e du Collège ; 25.11 (audit niveau) : retirée, niveau CO (moyenne de 5 nombres) : la 4e a « statdesc » (src/ch4c_ana.js) */, MP: [13, "S2"], FR: [10, 8] },
 ];
 
 function placeOf(n, profile) {
@@ -137,6 +137,9 @@ Object.assign(ORDRE_THEME.MATU, {"limites":"M3C02","limitinf":"M3C02","asymptote
 // 25.11 (agent c4plus) : intégration par parties et par substitution (M4C01), étude ln/exp et équations différentielles (M4C02). Ajouté à la main.
 Object.assign(ORDRE.MATU, {"intparties":204,"intsubst":205,"etudelnexp":212,"eqdiff":213});
 Object.assign(ORDRE_THEME.MATU, {"intparties":"M4C01","intsubst":"M4C01","etudelnexp":"M4C02","eqdiff":"M4C02"});
+// 25.11 (agent niv34, audit niveau) : statistique descriptive de 4e (src/ch4c_ana.js) à la place de stats et quartiles (niveau CO). Ajouté à la main.
+Object.assign(ORDRE.MATU, {"statdesc":233.5});
+Object.assign(ORDRE_THEME.MATU, {"statdesc":"M4C04"});
 
 // Calculateur d'expressions : lecture souple de la réponse de l'élève, calcul, mise en forme TeX,
 // équivalence d'expressions (par évaluation en plusieurs points) et contrôle de forme.
@@ -3934,7 +3937,7 @@ FINE.push(
       () => { const es = [0, 0, 0, 0, 0].map(() => R.int(1, 9)), v = R.int(1, 3), s = es.slice(0, v + 1).reduce((x, y) => x + y, 0); return QV("Nombre de retards relevés dans une classe : " + es.map((e, i) => M(i) + " retard" + (i > 1 ? "s" : "") + " : " + M(e) + " apprentis").join(" ; ") + ". Combien d'apprentis ont eu au plus " + M(v) + " retard" + (v > 1 ? "s" : "") + " (effectif cumulé) ?", s, M(es.slice(0, v + 1).join(" + ") + " = " + s) + ".", { fig: FIG.barChart(es, es.map((e, i) => i)) }); },
       () => { const N = R.pick([24, 30, 36, 40, 60, 72]), u = 360 / N, k = R.int(2, N / 3); return QV("Sur " + M(N) + " personnes interrogées, " + M(k) + " ont choisi la réponse A. Dans un diagramme circulaire, quel est l'angle du secteur A (en degrés) ?", k * u, M("\\frac{" + k + "}{" + N + "} \\cdot 360° = " + dec(k * u) + "°") + "."); },
     ] },
-  { id: "quartiles", theme: "no", label: "Étendue, médiane, quartiles", ex: "Q_3 - Q_1", CH: [15] /* 24.11 : ouverte à la 4e du Collège (4.PS.01) */, MP: [13, "S2"], codesMP: "S4\\.AD\\.0[68]",
+  { id: "quartiles", theme: "no", label: "Étendue, médiane, quartiles", ex: "Q_3 - Q_1", CH: null /* 24.11 : ouverte à la 4e du Collège ; 25.11 (audit niveau) : retirée, niveau CO ; la 4e a « statdesc » */, MP: [13, "S2"], codesMP: "S4\\.AD\\.0[68]",
     hint: "Trie d'abord la série. Étendue : max − min. Q1 et Q3 sont les médianes de chaque moitié.",
     lesson: ["Étendue et quartiles", "Ces indicateurs décrivent la dispersion d'une série.", "Série triée. Étendue : \\(\\max - \\min\\). Médiane : valeur du milieu (moyenne des deux valeurs centrales si l'effectif est pair). \\(Q_1\\) et \\(Q_3\\) : médianes de la moitié inférieure et de la moitié supérieure (effectif impair : on laisse la médiane de côté). Écart interquartile : \\(Q_3 - Q_1\\).", ["2, 3, 5, 8, 9 : étendue 7, médiane 5", "2, 3, 5, 8, 9, 11, 12 : médiane 8 ; moitiés 2, 3, 5 et 9, 11, 12 : \\(Q_1 = 3\\), \\(Q_3 = 11\\)", "Boîte à moustaches : min, \\(Q_1\\), médiane, \\(Q_3\\), max"], "Il faut toujours trier la série avant de chercher la médiane ou les quartiles."],
     g: [
@@ -12847,7 +12850,7 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
   coordmp: ["pyth"], vectmp: ["coordmp"], scalmp: ["vectmp"], droiteparam: ["vectmp"], ineqmp: ["eq1", "eq2disc"], fctmp: ["fimg"], polymp: ["factor", "eq2disc"],
   sinusmp: ["trigfn"], explogfn: ["eqexp", "logdef"],
   // 24.11 (chantier G, agent greste) : MP 4e (projection, position de droites, fonctions rationnelles) ; 4e Collège (algèbre linéaire, loi normale)
-  projmp: ["scalmp"], pvectmp: ["scalmp"], posdroites: ["droiteparam"], fratmp: ["fracrat", "ineqmp"], matrices: ["sys2"], translin: ["matrices"], appllin: ["translin"], normale: ["varalea", "stats"], stats: ["diagr"], quartiles: ["diagr"] };
+  projmp: ["scalmp"], pvectmp: ["scalmp"], posdroites: ["droiteparam"], fratmp: ["fracrat", "ineqmp"], matrices: ["sys2"], translin: ["matrices"], appllin: ["translin"], normale: ["varalea", "statdesc"], statdesc: ["varalea"], stats: ["diagr"], quartiles: ["diagr"] };
 // Programme du jour : le format change d'un jour à l'autre ; l'équilibre se fait sur 7 jours.
 // 22.11 : textes courts (une ligne sur téléphone : pas de saut quand on change de format).
 const FORMATS = {
