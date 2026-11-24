@@ -68,19 +68,15 @@
 
   // ======================= tauxvar : taux de variation moyen (3.AN.03a) =======================
   // Contextes (situation, unité du taux) : valeurs choisies pour un taux entier ou demi-entier.
+  /* 25.11 (audit niveau 3e) : les contextes « vélo, plante, température, population » (deux relevés, une division)
+     étaient du niveau du CO. Remplacés par des situations où il faut d'abord évaluer une fonction (3.AN.03a). */
   const TVC = [
-    () => { const t1 = R.int(6, 10), d = R.int(2, 5), r = pk([1.5, 2, 2.5, 3, -1.5, -2, -0.5, 3.5]), v1 = R.int(-4, 10), v2 = r6(v1 + r * d);
-      return { ctx: "temperature", d, r, v1, v2, u: "°C par heure", txt: "À " + t1 + " h, le thermomètre indique " + M(nb(v1) + tu("°C")) + " ; à " + (t1 + d) + " h, il indique " + M(nb(v2) + tu("°C")) + ".", dur: "heures" }; },
-    () => { const t1 = R.int(7, 10), d = R.int(2, 4), r = pk([250, 300, 350, 400, -450, -300]), v1 = R.int(80, 150) * 10, v2 = v1 + r * d;
-      return { ctx: "randonnee", d, r, v1, v2, u: "m par heure", txt: "Une randonneuse est à l'altitude " + M(nb(v1) + tu("m")) + " à " + t1 + " h et à " + M(nb(v2) + tu("m")) + " à " + (t1 + d) + " h.", dur: "heures" }; },
-    () => { const y1 = R.int(2008, 2016), d = R.int(4, 8), r = pk([150, 240, -120, 350, 480, -90]), v1 = R.int(120, 300) * 100, v2 = v1 + r * d;
-      return { ctx: "population", d, r, v1, v2, u: "habitants par an", txt: "Une commune compte " + M(nb(v1)) + " habitants en " + y1 + " et " + M(nb(v2)) + " habitants en " + (y1 + d) + ".", dur: "années" }; },
-    () => { const t1 = R.int(7, 9), d = R.int(2, 6), r = pk([-200, -250, -400, -150, 300, 350]), v1 = R.int(30, 60) * 100, v2 = v1 + r * d;
-      return { ctx: "reservoir", d, r, v1, v2, u: "litres par heure", txt: "Un réservoir contient " + M(nb(v1) + tu("L")) + " à " + t1 + " h et " + M(nb(v2) + tu("L")) + " à " + (t1 + d) + " h.", dur: "heures" }; },
-    () => { const w1 = R.int(2, 4), d = R.int(2, 5), r = pk([1.5, 2, 2.5, 3, 3.5]), v1 = R.int(8, 20), v2 = r6(v1 + r * d);
-      return { ctx: "plante", d, r, v1, v2, u: "cm par semaine", txt: "Un plant de tomate mesure " + M(nb(v1) + tu("cm")) + " à la semaine " + w1 + " et " + M(nb(v2) + tu("cm")) + " à la semaine " + (w1 + d) + ".", dur: "semaines" }; },
-    () => { const t1 = R.int(8, 14), d = R.int(2, 4), r = pk([18, 21, 23, 24, 26, 19]), v1 = R.int(5, 40), v2 = v1 + r * d;
-      return { ctx: "velo", d, r, v1, v2, u: "km par heure", txt: "Le compteur d'une cycliste indique " + M(nb(v1) + tu("km")) + " à " + t1 + " h et " + M(nb(v2) + tu("km")) + " à " + (t1 + d) + " h.", dur: "heures" }; },
+    () => { const v0 = R.int(12, 24), h0 = R.int(1, 3), t1 = R.int(0, 1), t2 = t1 + pk([1, 2]); const f = (t) => r6(h0 + v0 * t - 5 * t * t); const r = r6((f(t2) - f(t1)) / (t2 - t1)); if (f(t2) <= 0 || r === 0) return null;
+      return { ctx: "balle", r, v1: f(t1), v2: f(t2), d: t2 - t1, a: t1, b: t2, u: "m/s", fx: "h(t) = " + h0 + " + " + v0 + "t - 5t^2", fn: "h", txt: "Une balle est lancée vers le haut ; sa hauteur vaut " + M("h(t) = " + h0 + " + " + v0 + "t - 5t^2") + " mètres après " + M("t") + " secondes.", qq: "Quelle est sa vitesse verticale moyenne (en m/s) entre " + M("t = " + t1) + " et " + M("t = " + t2) + " ?" }; },
+    () => { const k = pk([2, 3, 4]), V0 = R.int(4, 9) * 100, t1 = R.int(1, 4), t2 = t1 + R.int(2, 4); const f = (t) => V0 - k * t * t - 10 * t; const r = r6((f(t2) - f(t1)) / (t2 - t1)); if (f(t2) <= 0) return null;
+      return { ctx: "vidange", r, v1: f(t1), v2: f(t2), d: t2 - t1, a: t1, b: t2, u: "L/min", fx: "V(t) = " + V0 + " - 10t - " + k + "t^2", fn: "V", txt: "Une cuve se vide : elle contient " + M("V(t) = " + nb(V0) + " - 10t - " + k + "t^2") + " litres après " + M("t") + " minutes.", qq: "Quel est le taux de variation moyen du volume (en L/min) entre " + M("t = " + t1) + " et " + M("t = " + t2) + " ?" }; },
+    () => { const N0 = R.int(2, 6) * 100, a = pk([2, 4, 6]), t1 = R.int(1, 3), t2 = t1 + R.int(2, 3); const f = (t) => N0 + a * t ** 3; const r = r6((f(t2) - f(t1)) / (t2 - t1));
+      return { ctx: "culture", r, v1: f(t1), v2: f(t2), d: t2 - t1, a: t1, b: t2, u: "bactéries par heure", fx: "N(t) = " + N0 + " + " + a + "t^3", fn: "N", txt: "Une culture compte " + M("N(t) = " + nb(N0) + " + " + a + "t^3") + " bactéries après " + M("t") + " heures.", qq: "Quel est le taux de variation moyen (en bactéries par heure) entre " + M("t = " + t1) + " et " + M("t = " + t2) + " ?" }; },
   ];
   const TV = {
     1: [
@@ -88,10 +84,10 @@
         return QN("Calcule le taux de variation moyen de " + ftex(cs) + " entre " + M(x1) + " et " + M(x2) + ".", t, M("\\frac{f(" + x2 + ") - f(" + x1 + ")}{" + x2 + " - " + par(x1) + "} = \\frac{" + y2 + " - " + par(y1) + "}{" + (x2 - x1) + "} = " + fT(t)) + ".",
           { ctx: "polynome", guide: [GS("Calcule " + M("f(" + x1 + ")") + ".", y1, M("f(" + x1 + ") = " + y1) + "."), GS("Calcule " + M("f(" + x2 + ")") + ".", y2, M("f(" + x2 + ") = " + y2) + "."), GS("Taux : variation de " + M("f") + " divisée par variation de " + M("x") + ". Résultat ?", t, M("\\frac{" + (y2 - y1) + "}{" + (x2 - x1) + "} = " + fT(t)) + ".")],
             traps: [TR(y2 - y1, "Il faut encore diviser par l'écart des abscisses."), TR(y2 === y1 ? NaN : (x2 - x1) / (y2 - y1), "C'est l'inverse : variation de f divisée par variation de x."), TR(-t, "Attention à l'ordre : f(x₂) − f(x₁) avec x₂ − x₁, dans le même ordre.")] }); },
-      () => { const c = pk(TVC)();
-        return QN(c.txt + " Quel est le taux de variation moyen, en " + c.u + " ?", c.r, "Variation " + M(nb(c.v2) + " - " + (c.v1 < 0 ? "(" + nb(c.v1) + ")" : nb(c.v1)) + " = " + nb(r6(c.v2 - c.v1))) + " en " + M(c.d) + " " + c.dur + " : " + M("\\frac{" + nb(r6(c.v2 - c.v1)) + "}{" + c.d + "} = " + nb(c.r)) + " " + c.u + ".",
-          { ctx: c.ctx, guide: [GS("Variation de la grandeur (valeur finale − valeur initiale) ?", r6(c.v2 - c.v1), M(nb(r6(c.v2 - c.v1))) + "."), GS("Durée (en " + c.dur + ") ?", c.d, M(c.d) + "."), GS("Taux moyen = variation ÷ durée ?", c.r, M(nb(c.r)) + " " + c.u + ".")],
-            traps: [TR(r6(c.v2 - c.v1), "C'est la variation totale : divise-la par la durée."), TR(r6(c.v2 / c.d), "On divise la variation (et non la valeur finale) par la durée."), TR(-c.r, "Signe : la grandeur " + (c.r > 0 ? "augmente" : "diminue") + ".")] }); },
+      () => { const c = pk(TVC)(); if (!c) return null;
+        return QN(c.txt + " " + c.qq, c.r, M("\\frac{" + c.fn + "(" + c.b + ") - " + c.fn + "(" + c.a + ")}{" + c.b + " - " + c.a + "} = \\frac{" + nb(c.v2) + " - " + (c.v1 < 0 ? "(" + nb(c.v1) + ")" : nb(c.v1)) + "}{" + c.d + "} = " + nb(c.r)) + " " + c.u + ".",
+          { ctx: c.ctx, guide: [GS("Calcule " + M(c.fn + "(" + c.a + ")") + ".", c.v1, M(nb(c.v1)) + "."), GS("Calcule " + M(c.fn + "(" + c.b + ")") + ".", c.v2, M(nb(c.v2)) + "."), GS("Taux moyen = variation ÷ durée ?", c.r, M(nb(c.r)) + " " + c.u + ".")],
+            traps: [TR(r6(c.v2 - c.v1), "C'est la variation totale : divise-la par la durée " + c.d + "."), TR(r6(c.v2 / c.b), "On divise la variation " + c.fn + "(" + c.b + ") − " + c.fn + "(" + c.a + "), pas la valeur finale."), TR(-c.r, "Signe : la grandeur " + (c.r > 0 ? "augmente" : "diminue") + " sur cet intervalle.")] }); },
       () => { const a = pk([1, -1]), h = nz(-2, 2), k = R.int(-3, 3), cs = [a, -2 * a * h, a * h * h + k], x1 = R.int(-3, 1), x2 = x1 + R.int(2, 3), y1 = pv(cs, x1), y2 = pv(cs, x2); if (Math.abs(y1) > 5 || Math.abs(y2) > 5 || y1 === y2) return null; const t = (y2 - y1) / (x2 - x1);
         return QN("Lis les coordonnées des points " + M("A") + " et " + M("B") + " du graphe de " + M("f") + ". Quel est le taux de variation moyen de " + M("f") + " entre leurs abscisses (la pente de la sécante " + M("AB") + ") ?", t, M("A(" + x1 + " \\,;\\, " + y1 + ")") + ", " + M("B(" + x2 + " \\,;\\, " + y2 + ")") + " : " + M("\\frac{" + y2 + " - " + par(y1) + "}{" + x2 + " - " + par(x1) + "} = " + fT(t)) + ".",
           { ctx: "graphique", fig: PL([{ f: quad(cs) }], [[x1, y1, "A"], [x2, y2, "B"]], { segs: [[x1, y1, x2, y2, "f-line"]] }), guide: [GS("Variation verticale de " + M("A") + " à " + M("B") + " ?", y2 - y1, M(y2 - y1) + "."), GS("Variation horizontale ?", x2 - x1, M(x2 - x1) + "."), GS("Pente de la sécante ?", t, M(fT(t)) + ".")],
@@ -440,10 +436,13 @@
         return QSet("En quelles abscisses " + ftex(cs) + " admet-elle un extremum local ?", [-s, s], M("f'(x) = " + P2(dP(cs)) + " = " + 3 * k + "(x - " + s + ")(x + " + s + ")") + " : s'annule et change de signe en " + M("\\pm " + s) + ".",
           { ctx: "cubique-symetrique", guide: [GX(M("f'(x)") + " ?", tp(dP(cs)), M(P2(dP(cs))) + "."), GSet("Zéros de " + M("f'") + " ?", [-s, s], M("\\pm " + s) + ".")],
             traps: [TSt([s], "f'(x) = 0 a deux solutions."), TSt([0], "On cherche les zéros de f', pas ceux de f ou de f''."), TSt([-s * s, s * s], "x² = " + s * s + " : prends la racine.")] }); },
-      () => { const a = pk([1, -1, 2, -2, 3]), h = pk([-4, -3, -2, 2, 3, 4]), k = pk([-6, -5, -4, -3, -2, 2, 3, 4, 5, 6]), cs = [a, -2 * a * h, a * h * h + k];
-        return QN("Avec la dérivée, trouve la valeur " + (a > 0 ? "minimale" : "maximale") + " de " + ftex(cs) + ".", k, M("f'(x) = " + P2(dP(cs)) + " = 0") + " pour " + M("x = " + h) + " ; " + M("f(" + h + ") = " + k) + " est un " + (a > 0 ? "minimum" : "maximum") + ".",
-          { ctx: "extremum-parabole", guide: [GX(M("f'(x)") + " ?", tp(dP(cs)), M(P2(dP(cs))) + "."), GS(M("f'(x) = 0") + " pour " + M("x") + " = ?", h, M(h) + "."), GS("Valeur " + (a > 0 ? "minimale" : "maximale") + " " + M("f(" + h + ")") + " ?", k, M(k) + ".")],
-            traps: [TR(h, "C'est l'abscisse du " + (a > 0 ? "minimum" : "maximum") + " ; on demande la valeur f(" + h + ")."), TR(cs[2], "C'est f(0), pas l'extremum.")] }); },
+      /* 25.11 (audit niveau 3e) : « valeur extrême d'une parabole » se fait en 1re sans dérivée (sommet). Remplacé :
+         racine double de f' (pas de changement de signe, donc pas d'extremum) (3.AN.07b). */
+      () => { const p = nz(-4, 4), q = p + pk([-5, -4, -3, -2, 2, 3, 4, 5]), s = pk([1, -1]), ext = q; if (Math.abs(q) <= 1) return null;
+        return Object.assign(QN("La dérivée d'une fonction " + M("f") + " est " + M("f'(x) = " + (s > 0 ? "" : "-") + "(x" + sg(-p) + ")^2(x" + sg(-q) + ")") + ". En quelle abscisse " + M("f") + " admet-elle un extremum local ?", ext,
+          M("f'") + " s'annule en " + M(p) + " et en " + M(q) + ". Le facteur " + M("(x" + sg(-p) + ")^2") + " est toujours positif : " + M("f'") + " ne change pas de signe en " + M(p) + " (palier, pas d'extremum). Elle change de signe en " + M(q) + " : " + (s > 0 ? "minimum" : "maximum") + " local.",
+          { ctx: "racine-double", guide: [GSet("Zéros de " + M("f'") + " ?", [p, q], M(p) + " et " + M(q) + "."), GS("En lequel de ces zéros " + M("f'") + " change-t-elle de signe ?", ext, M(ext) + ".")],
+            traps: [TR(p, "En " + p + ", f' s'annule sans changer de signe (carré) : c'est un palier, pas un extremum."), TR(-q, "Le facteur (x − a) s'annule en a : vérifie le signe."), TR(-p, "Le facteur (x − a) s'annule en a ; et en ce point, f' ne change pas de signe.")] }), { shownOk: true }); },
     ],
     2: [
       () => { const p = nz(-4, 2), q = p + pk([2, 4]), b = -1.5 * (p + q), c = 3 * p * q, d = R.int(-5, 5), cs = [1, b, c, d], fp = pv(cs, p), fq = pv(cs, q);
@@ -478,16 +477,18 @@
   // ======================= optimderiv : problèmes d'optimisation (3.AN.10a–c) =======================
   const OP = {
     1: [
-      () => { const a = pk([2, 4, 5]), q0 = R.int(6, 30), b = 2 * a * q0, F = R.int(2, 9) * 50, ask = pk(["q", "B"]), Bm = a * q0 * q0 - F, it = pk(["bougies", "savons artisanaux", "pots de miel", "carnets reliés"]);
-        return QN("Une petite entreprise vend " + M("q") + " " + it + " par semaine. Son bénéfice vaut " + M("B(q) = " + P2([-a, b, -F], "q")) + " CHF. " + (ask === "q" ? "Combien doit-elle en vendre pour un bénéfice maximal ?" : "Quel est le bénéfice maximal (en CHF) ?"), ask === "q" ? q0 : Bm,
-          M("B'(q) = " + P2([-2 * a, b], "q") + " = 0") + " pour " + M("q = " + q0) + " (" + M("B'") + " passe de + à −) ; " + M("B(" + q0 + ") = " + nb(Bm)) + " CHF.",
-          { ctx: "benefice-" + ask, guide: [GX(M("B'(q)") + " ?", tp([-2 * a, b], "q"), M(P2([-2 * a, b], "q")) + "."), GS(M("B'(q) = 0") + " pour " + M("q") + " = ?", q0, M(q0) + ".")].concat(ask === "B" ? [GS(M("B(" + q0 + ")") + " ?", Bm, M(nb(Bm)) + " CHF.")] : []),
-            traps: ask === "q" ? [TR(b / a, "B'(q) = −" + 2 * a + "q + " + b + " : divise par " + 2 * a + "."), TR(Bm, "C'est le bénéfice maximal ; on demande la quantité.")] : [TR(q0, "C'est la quantité ; calcule B(" + q0 + ")."), TR(a * q0 * q0, "N'oublie pas les frais fixes −" + F + ".")] }); },
-      () => { const k = R.int(3, 15), L = 4 * k * pk([1, 2, 5]), x = L / 4, A = L * L / 8, ask = pk(["x", "A"]);
-        return QN("Avec " + M(nb(L) + tu("m")) + " de clôture, on ferme un enclos rectangulaire le long d'une rivière (le côté de la rivière n'est pas clôturé). On note " + M("x") + " la longueur des deux côtés perpendiculaires à la rivière. " + (ask === "x" ? "Quelle valeur de " + M("x") + " (en m) donne l'aire maximale ?" : "Quelle est l'aire maximale (en m²) ?"), ask === "x" ? x : A,
-          "Côté parallèle : " + M(L + " - 2x") + ". " + M("A(x) = x(" + L + " - 2x)") + ", " + M("A'(x) = " + L + " - 4x = 0") + " pour " + M("x = " + nb(x)) + " ; " + M("A = " + nb(x) + " \\cdot " + nb(L / 2) + " = " + nb(A)) + " m².",
-          { ctx: "enclos-" + ask, guide: [GX("Aire " + M("A(x)") + " (développée) ?", tp([-2, L, 0]), M(P2([-2, L, 0])) + "."), GS(M("A'(x) = 0") + " pour " + M("x") + " = ?", x, M(nb(x)) + " m.")].concat(ask === "A" ? [GS("Aire maximale ?", A, M(nb(A)) + " m².")] : []),
-            traps: ask === "x" ? [TR(L / 3, "Les trois côtés ne sont pas égaux à l'optimum : dérive A(x)."), TR(L / 2, "C'est la longueur du côté parallèle à la rivière.")] : [TR(L * L / 9, "Les trois côtés ne sont pas égaux à l'optimum."), TR(L * L / 16, "C'est un carré : ici, le côté de la rivière n'est pas clôturé.")] }); },
+      /* 25.11 (audit niveau 3e) : bénéfice du 2e degré et enclos le long d'une rivière = sommet d'une parabole (1re).
+         Remplacés par le coût moyen minimal (dérivée de k/q) et la boîte de volume maximal à surface donnée (3.AN.10). */
+      () => { const a = pk([1, 2, 4, 5]), q0 = pk([10, 20, 30, 40, 50]), F = a * q0 * q0, b = pk([8, 12, 15, 20]), ask = pk(["q", "CM"]), CM = 2 * a * q0 + b, it = pk(["vélos", "drones", "tables", "trottinettes"]);
+        return QN("Une entreprise produit " + M("q") + " " + it + " par mois pour un coût total " + M("C(q) = " + co(a) + "q^2 + " + b + "q + " + nb(F)) + " CHF. Le coût moyen par pièce est " + M("C_M(q) = \\frac{C(q)}{q}") + ". " + (ask === "q" ? "Quelle production rend le coût moyen minimal ?" : "Quel est le coût moyen minimal (en CHF par pièce) ?"), ask === "q" ? q0 : CM,
+          M("C_M(q) = " + co(a) + "q + " + b + " + \\frac{" + nb(F) + "}{q}") + ", " + M("C_M'(q) = " + a + " - \\frac{" + nb(F) + "}{q^2} = 0") + " pour " + M("q^2 = " + nb(F / a)) + ", " + M("q = " + q0) + " ; " + M("C_M(" + q0 + ") = " + nb(a * q0) + " + " + b + " + " + nb(F / q0) + " = " + nb(CM)) + " CHF.",
+          { ctx: "cout-moyen-" + ask, guide: [GX(M("C_M(q)") + " (simplifié) ?", (a === 1 ? "" : a) + "q + " + b + " + " + F + "/q", M(co(a) + "q + " + b + " + \\frac{" + nb(F) + "}{q}") + "."), GS(M("C_M'(q) = 0") + " pour " + M("q > 0") + " ?", q0, M(q0) + ".")].concat(ask === "CM" ? [GS(M("C_M(" + q0 + ")") + " ?", CM, M(nb(CM)) + " CHF.")] : []),
+            traps: ask === "q" ? [TR(F / a, "C'est q² : prends la racine."), TR(Math.sqrt(F), "C_M'(q) = " + a + " − " + F + "/q² : q² = " + F + " ÷ " + a + "."), TR(F / q0, "C'est la part des frais fixes ; on demande q.")] : [TR(q0, "C'est la production ; calcule C_M(" + q0 + ")."), TR(a * q0 + b, "N'oublie pas les frais fixes répartis : " + F + " ÷ " + q0 + "."), TR(a * q0 * q0 + b * q0 + F, "C'est le coût total, pas le coût moyen.")] }); },
+      () => { const x0 = R.int(4, 10), S = 3 * x0 * x0, ask = pk(["x", "V"]), V = x0 ** 3 / 2;
+        return QN("Une boîte sans couvercle, à base carrée de côté " + M("x") + ", est fabriquée avec " + M(nb(S) + tu("cm^2")) + " de carton. Sa hauteur vaut donc " + M("h = \\frac{" + nb(S) + " - x^2}{4x}") + ". " + (ask === "x" ? "Quel côté " + M("x") + " (en cm) rend son volume maximal ?" : "Quel est son volume maximal (en cm³) ?"), ask === "x" ? x0 : V,
+          M("V(x) = x^2 h = \\frac{" + nb(S) + "x - x^3}{4}") + ", " + M("V'(x) = \\frac{" + nb(S) + " - 3x^2}{4} = 0") + " pour " + M("x^2 = " + x0 * x0) + ", " + M("x = " + x0) + " (+ puis −) ; " + M("V(" + x0 + ") = \\frac{" + nb(S * x0) + " - " + nb(x0 ** 3) + "}{4} = " + nb(V)) + " cm³.",
+          { ctx: "boite-surface-" + ask, guide: [GX(M("V(x) = x^2 h") + " (développé) ?", "(" + S + "x - x^3)/4", M("\\frac{" + nb(S) + "x - x^3}{4}") + "."), GS(M("V'(x) = 0") + " pour " + M("x > 0") + " ?", x0, M(x0) + " cm.")].concat(ask === "V" ? [GS("Volume maximal ?", V, M(nb(V)) + " cm³.")] : []),
+            traps: ask === "x" ? [TR(Math.sqrt(S), "x² = S donnerait h = 0 : résous V'(x) = 0, soit 3x² = " + S + "."), TR(x0 * x0, "C'est x² ; prends la racine."), TR(S / 4, "Dérive V(x) = (" + S + "x − x³) ÷ 4.")] : [TR(x0, "C'est le côté ; calcule V(" + x0 + ")."), TR(x0 ** 3, "V = (S·x − x³) ÷ 4 : n'oublie pas de diviser."), TR(S * x0 / 4, "Il faut retrancher x³.")] }); },
       () => { const k = R.int(2, 8), S = 3 * k, ask = pk(["y", "P"]), y = 2 * k, Pm = 4 * k ** 3;
         return QN("Deux nombres positifs " + M("x") + " et " + M("y") + " ont pour somme " + M(S) + ". On veut rendre le produit " + M("P = x y^2") + " le plus grand possible. " + (ask === "y" ? "Quelle valeur de " + M("y") + " faut-il choisir ?" : "Quelle est la valeur maximale de " + M("P") + " ?"), ask === "y" ? y : Pm,
           M("P(y) = (" + S + " - y)y^2 = " + S + "y^2 - y^3") + ", " + M("P'(y) = " + 2 * S + "y - 3y^2 = y(" + 2 * S + " - 3y)") + " : " + M("y = " + y) + ", " + M("x = " + k) + ", " + M("P = " + k + " \\cdot " + y * y + " = " + Pm) + ".",
@@ -671,6 +672,7 @@
   const QP = (q, vals, sol, o) => mk(q, { kind: "pair", values: vals.map(r6) }, sol, Object.assign({ canon: vals.map(fS).join(" ; ") }, o));
   const QS = (q, ivs, sol, o) => mk(q, solsetSpec(ivs), sol, Object.assign({ canon: SolSet.show(ivs, false) }, o));
   const G = (ask, value, sol) => GS(ask, r6(value), sol);
+  const dS3 = (v) => D(+(+v).toFixed(3)); /* décimal au millième, en TeX */
   const GSet = (ask, vals, sol) => ({ ask, spec: { kind: "set", values: [...new Set(vals.map(r6))].sort((a, b) => a - b) }, sol });
   const GP = (ask, vals, sol) => ({ ask, spec: { kind: "pair", values: vals.map(r6) }, sol });
   const GSS = (ask, ivs, sol) => ({ ask, spec: solsetSpec(ivs), sol });
@@ -1026,12 +1028,14 @@
   const WORDS = ["ANANAS", "BANANE", "PAPAYE", "RADAR", "CERISE", "POMME", "GENEVE", "BALLON", "ARBRE", "ELEVE", "ALGEBRE", "CITRON", "MATHS"];
   const KO = {
     1: [
-      () => { const C = pk([["Une cantine propose", ["entrées", "plats", "desserts"], "menus complets (une entrée, un plat, un dessert)", "menu"], ["Dans son armoire, Léa a", ["t-shirts", "pantalons", "paires de baskets"], "tenues (un habit de chaque sorte)", "tenue"], ["Un glacier propose", ["parfums", "sauces", "décorations"], "coupes (un parfum, une sauce, une décoration)", "glace"]]);
-        const n1 = ri(3, 6), n2 = ri(3, 7), n3 = ri(2, 5), v = n1 * n2 * n3;
-        return QN(C[0] + " " + n1 + " " + C[1][0] + ", " + n2 + " " + C[1][1] + " et " + n3 + " " + C[1][2] + ". Combien de " + C[2] + " différents peut-on composer ?", v,
-          "Principe multiplicatif : chaque choix se combine avec tous les autres. " + M(n1 + " \\cdot " + n2 + " \\cdot " + n3 + " = " + D(v)) + ".",
-          { ctx: C[3], guide: [G("Nombre de choix pour les deux premiers éléments ?", n1 * n2, M(n1 + " \\cdot " + n2 + " = " + n1 * n2) + "."), G("Total ?", v, M(D(v)) + ".")],
-            traps: [TR(n1 + n2 + n3, "On multiplie : chaque choix se combine avec tous les autres."), TR(n1 * n2, "Il manque le 3e choix.")] }); },
+      /* 25.11 (audit niveau 3e) : « menus, tenues, coupes » (principe multiplicatif à trois choix) = niveau 11e (denombr).
+         Remplacé par des choix de groupes, combinaisons calculées avec la formule (3.PS.01d). */
+      () => { const C = pk([["jass", 36, pk([3, 4, 5]), "On tire simultanément", "cartes d'un jeu de jass de 36 cartes. Combien de mains différentes peut-on obtenir ?"], ["loto", pk([42, 45, 49]), 6, "Au loto, on coche", "numéros parmi"], ["livres", ri(9, 15), pk([3, 4, 5]), "Pour les vacances, Noé choisit", "livres parmi"]]);
+        const n = C[1], k = C[2], v = Cb(n, k), A = Cb(n, k) * fact(k);
+        const txt = C[0] === "jass" ? C[3] + " " + k + " " + C[4] : C[0] === "loto" ? C[3] + " " + k + " " + C[4] + " " + n + " (l'ordre ne compte pas). Combien de grilles différentes ?" : C[3] + " " + k + " " + C[4] + " les " + n + " de sa bibliothèque. Combien de choix différents a-t-il ?";
+        return QN(txt, v, "On choisit " + M(k) + " éléments parmi " + M(n) + ", sans ordre : " + M(bn(n, k) + " = \\frac{" + Array.from({ length: k }, (_, i) => n - i).join(" \\cdot ") + "}{" + k + "!} = " + D(v)) + ".",
+          { ctx: "groupe-" + C[0], guide: [G("Si l'ordre comptait (" + M(Array.from({ length: k }, (_, i) => n - i).join(" \\cdot ")) + ") ?", A, M(D(A)) + "."), G(M(k + "!") + " ?", fact(k), M(fact(k)) + "."), G(M(bn(n, k)) + " ?", v, M(D(v)) + ".")],
+            traps: [TR(A, "L'ordre ne compte pas : divise par " + k + "! = " + fact(k) + "."), TR(n ** k, "On ne choisit pas deux fois le même élément, et l'ordre ne compte pas."), TR(Cb(n, k - 1), "C'est le choix de " + (k - 1) + " éléments.")] }); },
       () => { const n = ri(4, 7), C = pk([["De combien de façons peut-on ranger " + n + " livres différents sur une étagère ?", "etagere"], [n + " coureuses participent à une course (sans ex æquo). Combien d'ordres d'arrivée sont possibles ?", "course"], [n + " amis posent en ligne pour une photo. Combien d'ordres différents sont possibles ?", "photo"]]), v = fact(n);
         return QN(C[0], v, "Permutations : " + M(n + " \\cdot " + (n - 1) + " \\cdot \\ldots \\cdot 2 \\cdot 1 = " + n + "! = " + D(v)) + ".",
           { ctx: C[1], guide: [G("Choix pour la 1re place ?", n, M(n) + "."), G("Choix pour la 2e place ?", n - 1, M(n - 1) + "."), G("Total " + M(n + "!") + " ?", v, M(D(v)) + ".")],
@@ -1097,26 +1101,25 @@
   const PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37];
   const PA = {
     1: [
-      () => { const N = ri(20, 40), ev = pk(["mult", "prem", "carre"]); let cnt, txt, tr;
-        if (ev === "mult") { const k = ri(3, 7); cnt = Math.floor(N / k); txt = "un multiple de " + k; tr = TR(1 / k, "Il y a " + cnt + " multiples de " + k + " entre 1 et " + N + " : compte-les."); }
-        else if (ev === "prem") { cnt = PRIMES.filter((p) => p <= N).length; txt = "un nombre premier"; tr = TR((cnt + 1) / N, "1 n'est pas un nombre premier."); }
-        else { cnt = Math.floor(Math.sqrt(N)); txt = "un carré parfait (comme 4, 9 ou 16)"; tr = TR((cnt - 1) / N, "1 = 1² est aussi un carré parfait."); }
-        const v = cnt / N;
-        return QN("Une urne contient " + N + " boules numérotées de 1 à " + N + ". On en tire une au hasard. Quelle est la probabilité d'obtenir " + txt + " ?", v,
-          "Équiprobabilité : " + M(cnt) + " cas favorables sur " + M(N) + " : " + M("\\frac{" + cnt + "}{" + N + "}" + (den(v) < N ? " = " + fT(v) : "")) + ".",
-          { ctx: "urne-" + ev, guide: [G("Nombre de cas favorables ?", cnt, M(cnt) + "."), G("Probabilité ?", v, M(fT(v)) + ".")],
-            traps: [TR(cnt, "C'est le nombre de cas favorables : divise par " + N + "."), tr, TR(cnt / (N - cnt), "On divise par le nombre total de cas (" + N + "), pas par les cas défavorables.")] }); },
-      () => { const C = pk([["La probabilité qu'il pleuve demain à Genève est", "qu'il ne pleuve pas", "meteo"], ["La probabilité que le bus du matin soit en retard est", "qu'il ne soit pas en retard", "bus"], ["La probabilité qu'une ampoule tombe en panne avant un an est", "qu'elle fonctionne encore après un an", "ampoule"]]);
-        const dec = R.rand() < 0.6, p = dec ? pk([0.15, 0.35, 0.42, 0.08, 0.27, 0.65]) : pk([2 / 7, 3 / 8, 5 / 12, 4 / 9, 2 / 9]), v = r6(1 - p);
-        return QN(C[0] + " " + M(dec ? D(p) : fT(p)) + ". Quelle est la probabilité " + C[1] + " ?", v,
-          "Événement contraire : " + M("P(\\overline{A}) = 1 - P(A) = 1 - " + (dec ? D(p) : fT(p)) + " = " + (dec ? D(v) : fT(v))) + ".",
-          { ctx: "contraire-" + C[2], guide: [G(M("P(\\overline{A}) = 1 - P(A)") + " ?", v, M(dec ? D(v) : fT(v)) + ".")],
-            traps: [TR(p, "C'est P(A) : l'événement contraire a la probabilité 1 − P(A)."), TR(100 * v, "Une probabilité est comprise entre 0 et 1 (pas en %)."), TR(1 + p, "On soustrait : 1 − P(A).")] }); },
-      () => { const s = pk([3, 4, 5, 6, 8, 9, 10, 11, 7]), cnt = 6 - Math.abs(7 - s), v = cnt / 36;
-        return QN("On lance deux dés équilibrés (un rouge et un bleu) et on additionne les points. Quelle est la probabilité d'obtenir une somme de " + s + " ?", v,
-          "36 couples (rouge ; bleu) équiprobables, dont " + M(cnt) + " de somme " + M(s) + " : " + M("\\frac{" + cnt + "}{36}" + (den(v) < 36 ? " = " + fT(v) : "")) + ".",
-          { ctx: "deux-des-somme", guide: [G("Nombre de couples (rouge ; bleu) de somme " + s + " ?", cnt, M(cnt) + "."), G("Probabilité ?", v, M(fT(v)) + ".")],
-            traps: [TR(1 / 11, "Les 11 sommes possibles ne sont pas équiprobables : compte les 36 couples."), TR(cnt, "C'est le nombre de cas favorables : divise par 36."), TR(Math.ceil(cnt / 2) / 21, "Les dés sont distincts : (2 ; 5) et (5 ; 2) sont deux issues différentes.")] }); },
+      /* 25.11 (audit niveau 3e) : urne « multiple de k / nombre premier », « 1 − 0,08 » et somme de deux dés = niveau 9e–11e.
+         Remplacés par des probabilités calculées par dénombrement (3.PS.02b–c avec 3.PS.01). */
+      () => { const r = ri(4, 9), b = ri(3, 8), n = r + b, col = pk([["rouges", "bleues", "boules"], ["vertes", "jaunes", "billes"], ["noires", "blanches", "perles"]]), ask = pk(["deux", "mixte"]);
+        const fav = ask === "deux" ? Cb(r, 2) : r * b, v = fav / Cb(n, 2);
+        return QN("Un sac contient " + r + " " + col[2] + " " + col[0] + " et " + b + " " + col[2] + " " + col[1] + ". On en tire deux simultanément. Quelle est la probabilité d'obtenir " + (ask === "deux" ? "deux " + col[2] + " " + col[0] : "une " + col[2].slice(0, -1) + " de chaque couleur") + " ?", v,
+          M(bn(n, 2) + " = " + Cb(n, 2)) + " tirages équiprobables ; favorables : " + M(ask === "deux" ? bn(r, 2) + " = " + fav : r + " \\cdot " + b + " = " + fav) + ". " + M("P = \\frac{" + fav + "}{" + Cb(n, 2) + "}" + (den(v) < Cb(n, 2) ? " = " + fT(v) : "")) + ".",
+          { ctx: "simultane-" + ask, guide: [G("Nombre de tirages possibles " + M(bn(n, 2)) + " ?", Cb(n, 2), M(Cb(n, 2)) + "."), G("Nombre de tirages favorables ?", fav, M(fav) + "."), G("Probabilité ?", v, M(fT(v)) + ".")],
+            traps: ask === "deux" ? [TR((r / n) ** 2, "Les deux boules sont tirées ensemble : pas de remise."), TR(r / n, "Il faut deux boules de cette couleur."), TR(Cb(r, 2) / (n * n), "Le nombre de tirages possibles est C(" + n + " ; 2) = " + Cb(n, 2) + ".")] : [TR(r * b / (n * n), "Sans remise : C(" + n + " ; 2) = " + Cb(n, 2) + " tirages possibles."), TR(r * b / (n * (n - 1)), "Une paire non ordonnée : C(" + n + " ; 2) = " + Cb(n, 2) + ", pas " + n * (n - 1) + "."), TR(0.5, "Les couleurs n'ont pas le même nombre de boules.")] }); },
+      () => { const t = pk(["des", "jass"]); let v, txt, cmp, ctx, tr;
+        if (t === "des") { const k = pk([3, 4, 5]); v = 1 - (5 / 6) ** k; cmp = (5 / 6) ** k; ctx = "au-moins-un-six"; txt = "On lance " + k + " dés équilibrés. Quelle est la probabilité d'obtenir au moins un 6 (" + "arrondi au millième) ?"; tr = [TR(k / 6, "Les cas « un 6 sur le 1er dé », « sur le 2e »… ne sont pas incompatibles : passe par le contraire."), TR(cmp, "C'est la probabilité de n'avoir aucun 6 ; prends le contraire."), TR(1 - (1 / 6) ** k, "Le contraire de « au moins un 6 » est « aucun 6 » : (5/6)^" + k + ".")]; }
+        else { const k = pk([3, 4]); cmp = Cb(32, k) / Cb(36, k); v = 1 - cmp; ctx = "au-moins-un-as"; txt = "On tire simultanément " + k + " cartes d'un jeu de jass de 36 cartes (4 as). Quelle est la probabilité d'obtenir au moins un as (arrondi au millième) ?"; tr = [TR(k * 4 / 36, "Les événements « un as en 1re carte »… ne sont pas incompatibles : passe par le contraire."), TR(cmp, "C'est la probabilité de n'avoir aucun as ; prends le contraire."), TR(4 / 36, "Il y a " + k + " cartes tirées.")]; }
+        return mk(txt, { kind: "value", value: v, round: 0.001 }, "Événement contraire : " + M("P = 1 - P(\\text{aucun}) = 1 - " + dS3(cmp) + " \\approx " + dS3(v)) + ".",
+          { ctx, guide: [GS("Probabilité de l'événement contraire « aucun » (" + "arrondie au millième) ?", cmp, M("\\approx " + dS3(cmp)) + ".", 0.001), GS("Probabilité cherchée ?", v, M("\\approx " + dS3(v)) + ".", 0.001)], traps: tr }); },
+      () => { const t = pk([["chiffres", 10, pk([3, 4]), "Un code de", "chiffres (de 0 à 9) est choisi au hasard."], ["lettres", 6, pk([3, 4]), "Un mot de passe de", "lettres, chacune tirée au hasard parmi A, B, C, D, E, F."], ["anniversaires", 12, pk([3, 4, 5]), "Dans un groupe de", "personnes, chacune est née un mois au hasard (12 mois équiprobables)."]]);
+        const n = t[1], k = t[2], A = Cb(n, k) * fact(k), N = n ** k, v = A / N;
+        return mk(t[3] + " " + k + " " + t[4] + " Quelle est la probabilité que " + (t[0] === "anniversaires" ? "toutes soient nées des mois différents" : "tous ses symboles soient différents") + " (arrondi au millième) ?", { kind: "value", value: v, round: 0.001 },
+          "Issues équiprobables : " + M(n + "^" + k + " = " + D(N)) + ". Favorables (arrangements) : " + M(Array.from({ length: k }, (_, i) => n - i).join(" \\cdot ") + " = " + D(A)) + ". " + M("P = \\frac{" + D(A) + "}{" + D(N) + "} \\approx " + dS3(v)) + ".",
+          { ctx: "tous-differents-" + t[0], guide: [G("Nombre total d'issues " + M(n + "^" + k) + " ?", N, M(D(N)) + "."), G("Nombre d'issues sans répétition ?", A, M(D(A)) + "."), GS("Probabilité (arrondie au millième) ?", v, M("\\approx " + dS3(v)) + ".", 0.001)],
+            traps: [TR(Cb(n, k) / N, "L'ordre compte dans les issues : compte les arrangements " + n + " · " + (n - 1) + " · …"), TR(1 - v, "C'est la probabilité qu'au moins deux symboles soient égaux."), TR(A / (Cb(n + k - 1, k) * fact(k)), "Le total des issues est " + n + "^" + k + ".")] }); },
     ],
     2: [
       () => { const a = pk([0.3, 0.4, 0.45, 0.5, 0.25, 0.6]), b = pk([0.2, 0.35, 0.4, 0.15, 0.3]), i = pk([0.05, 0.1, 0.15]), ask = pk(["union", "inter"]), u = r6(a + b - i); if (i >= Math.min(a, b) || u > 1) return null;
