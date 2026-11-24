@@ -288,6 +288,7 @@ def main():
                     c = ws.cell(r, 21, "leçon"); c.hyperlink = f"{SITE}#l-{row['id']}"; c.font = Font(color="1F4FD8", underline="single")
                 # 24.11 : agents robustesse (/audit-niveau) : verdict du registre tools/niveau.json, sinon « à auditer »
                 au = NIV.get(row["id"]) or {}
+                au = (au.get("par_classe") or {}).get(cl["name"], au)  # 25.11 : verdict propre à la classe (audit 11e d'une notion partagée)
                 ws.cell(r, 22, (au.get("verdict", "") + " (" + au.get("audit", "") + ")") if au else "à auditer")
             # Fin de chapitre : statut du test de préparation (évaluation d'entraînement, demande du 15.11).
             if k + 1 == len(rows) or rows[k + 1]["chap"] != row["chap"]:

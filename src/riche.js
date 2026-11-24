@@ -293,8 +293,8 @@ const RICH = {};
         sol: ul([M("(" + xE(p) + ")(" + xE(q) + ") = 0") + ", soit " + M(poly([1, -(p + q), p * q]) + " = 0") + ".", "Par exemple " + M("2(" + xE(p) + ")(" + xE(q) + ") = 0") + " (n'importe quel facteur non nul).", M("(" + xE(p) + ")^2 = 0") + ".", M("x^2 + 1 = 0") + " (un carré plus 1 n'est jamais nul)."]) }); },
   ];
   RICH.eq1c = { ids: ["eq1", "eqfrac", "eqspec", "formule", "probeq", "eq2fact", "eq2", "eq2disc", "probeq2", "eq3", "bicarre", "eqirr"], label: "Équations", ex: EXE, raison: RAISONE, minutes: 45 };
-  RICH.litt11 = { ids: ["litelab", "valnum", "reduire", "monomes", "parenth", "distrib", "idrem", "factor"], label: "Calcul littéral", ex: EXL, raison: RAISONL, minutes: 45 };
-  RICH.prop11 = { ids: ["utemps", "ucomp", "vitesse", "gquot"], label: "Proportionnalité, grandeurs quotients et unités", ex: EX, raison: RAISON, minutes: 45 };
+  RICH.litt11 = { ids: ["litelab", "valnum", "reduire", "monomes", "parenth", "distrib", "idrem", "factor"], label: "Calcul littéral", ex: EXL, raison: RAISONL, minutes: 45, minA: 2 }; /* 25.11 : automatismes au niveau 2 (audit de niveau 11e) */
+  RICH.prop11 = { ids: ["utemps", "ucomp", "vitesse", "gquot"], label: "Proportionnalité, grandeurs quotients et unités", ex: EX, raison: RAISON, minutes: 45, minA: 2 }; /* 25.11 : automatismes au niveau 2 (audit de niveau 11e) */
 })();
 
 // Chapitre du sujet de préparation : celui dont la banque couvre le plus de notions révisées (au moins la moitié).

@@ -333,14 +333,32 @@
   "plan": "M1C01 · Ma1 Ch1 : calculs à parenthèses imbriquées, ordre des opérations",
   "etalon": "tools/niveau_1c.md E1.1",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C01 · 4 opérations dans ℤ (CT)",
+    "etalon": "tools/niveau_11.md § 2, E-1-1",
+    "audit": "25.11.2026",
+    "verdict": "à valider"
+   }
+  }
  },
  "fracops": {
   "classe": "1re Collège",
   "plan": "M1C01 · Ma1 Ch1 : opérations sur les fractions, fraction irréductible",
   "etalon": "tools/niveau_1c.md E1.1",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C01 · 4 opérations dans ℚ",
+    "etalon": "tools/niveau_11.md § 2, E-1-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "pct": {
   "classe": "1re Collège",
@@ -354,7 +372,16 @@
   "plan": "CO 10e (racines carrées) : remplacé en 1re par racprop, ratden",
   "etalon": "—",
   "audit": "24.11.2026",
-  "verdict": "hors programme"
+  "verdict": "hors programme",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "10C06 (révision 10e en 11e)",
+    "etalon": "tools/niveau_11.md § 2, E-1-4",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "racenc": {
   "classe": "1re Collège",
@@ -368,28 +395,64 @@
   "plan": "M1C01 · Ma1 Ch1 : puissances de 10, écriture scientifique",
   "etalon": "tools/niveau_1c.md E1.2",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C01 · écritures scientifiques",
+    "etalon": "tools/niveau_11.md § 2, E-1-3",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "puiss": {
   "classe": "1re Collège",
   "plan": "M1C01 · Ma1 Ch1 : puissances entières positives, nulles et négatives",
   "etalon": "tools/niveau_1c.md E1.2",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C01 · propriétés des puissances (LC/LS)",
+    "etalon": "tools/niveau_11.md § 2, E-1-2",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "scicalc": {
   "classe": "1re Collège",
   "plan": "CO 10e–11e (calculer en notation scientifique)",
   "etalon": "—",
   "audit": "24.11.2026",
-  "verdict": "hors programme"
+  "verdict": "hors programme",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C01 · écritures scientifiques",
+    "etalon": "tools/niveau_11.md § 2, E-1-3",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "racprop": {
   "classe": "1re Collège",
   "plan": "M1C01 · Ma1 Ch1 : extraire les facteurs carrés, simplifier",
   "etalon": "tools/niveau_1c.md E1.3",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C01 · propriétés des racines (LS)",
+    "etalon": "tools/niveau_11.md § 2, E-1-4, E-1-5",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "ratden": {
   "classe": "1re Collège",
@@ -480,7 +543,16 @@
   "plan": "M1C04 · 1.FO.02b : tableau de valeurs",
   "etalon": "tools/niveau_1c.md E4.2",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C10 · tableaux de valeurs, ax²",
+    "etalon": "tools/niveau_11.md § 2, E-10-2",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "fimg": {
   "classe": "1re Collège",
@@ -529,14 +601,32 @@
   "plan": "M1C05 · 1.AL.04a–b : équations du 1er degré",
   "etalon": "tools/niveau_1c.md E5.1",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C06 · 1er degré (révision)",
+    "etalon": "tools/niveau_11.md § 2, E-6-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "eqfrac": {
   "classe": "1re Collège",
   "plan": "M1C05 · 1.AL.04b : coefficients fractionnaires",
   "etalon": "tools/niveau_1c.md E5.1",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C06 · 1er degré à fractions",
+    "etalon": "tools/niveau_11.md § 2, E-6-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "eqspec": {
   "classe": "1re Collège",
@@ -550,21 +640,48 @@
   "plan": "M1C05 · 1.AL.04d : transformer une formule",
   "etalon": "tools/niveau_1c.md E5.1",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C06 · transformation de formules (LC/LS)",
+    "etalon": "tools/niveau_11.md § 2, E-6-3",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "probeq": {
   "classe": "1re Collège",
   "plan": "M1C05 · 1.AL.04e : problèmes du 1er degré",
   "etalon": "tools/niveau_1c.md E5.4",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C06 · mise en équation",
+    "etalon": "tools/niveau_11.md § 2, E-6-2",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "sys2": {
   "classe": "1re Collège",
   "plan": "M1C05 · 1.AL.07a–b : systèmes 2×2",
   "etalon": "tools/niveau_1c.md E5.5",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C09 · combinaison, substitution (LS)",
+    "etalon": "tools/niveau_11.md § 2, E-9-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "sysgraph": {
   "classe": "1re Collège",
@@ -585,14 +702,32 @@
   "plan": "M1C05 · 1.AL.07e : problèmes à plusieurs inconnues",
   "etalon": "tools/niveau_1c.md E5.4",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C09 · mise en système",
+    "etalon": "tools/niveau_11.md § 2, E-9-2",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "affine": {
   "classe": "1re Collège",
   "plan": "M1C05 · 1.FO.05–06 : fonctions du 1er degré",
   "etalon": "tools/niveau_1c.md E5.3, E5.5",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C10 · fonctions affines",
+    "etalon": "tools/niveau_11.md § 2, E-10-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "affzero": {
   "classe": "1re Collège",
@@ -613,14 +748,32 @@
   "plan": "M1C06 · 1.AL.01a–b : réduire",
   "etalon": "tools/niveau_1c.md E6.1",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C05 · écritures réduites, coefficients dans ℚ (LS)",
+    "etalon": "tools/niveau_11.md § 2, E-5-3",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "monomes": {
   "classe": "1re Collège",
   "plan": "M1C06 · 1.AL.01a : monômes",
   "etalon": "tools/niveau_1c.md E6.1",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "10C07 (révision en 11e)",
+    "etalon": "tools/niveau_11.md § 2, E-5-3",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "polyop": {
   "classe": "1re Collège",
@@ -634,28 +787,64 @@
   "plan": "M1C06 · 1.AL.01b : suppression de parenthèses",
   "etalon": "tools/niveau_1c.md E6.1",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C05 · règles d'écriture (CT)",
+    "etalon": "tools/niveau_11.md § 2, E-5-3",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "distrib": {
   "classe": "1re Collège",
   "plan": "M1C06 · 1.AL.01c : distributivité",
   "etalon": "tools/niveau_1c.md E6.1",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C05 · distributivité double (LC/LS)",
+    "etalon": "tools/niveau_11.md § 2, E-5-4",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "idrem": {
   "classe": "1re Collège",
   "plan": "M1C06 · 1.AL.02a–c : identités remarquables",
   "etalon": "tools/niveau_1c.md E6.1",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C05 · 4 identités remarquables (LS)",
+    "etalon": "tools/niveau_11.md § 2, E-5-5",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "factor": {
   "classe": "1re Collège",
   "plan": "M1C06 · 1.AL.03a–b : factoriser",
   "etalon": "tools/niveau_1c.md E6.2",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C05 · décomposition en facteurs (LS)",
+    "etalon": "tools/niveau_11.md § 2, E-5-6",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "factor2": {
   "classe": "1re Collège",
@@ -676,21 +865,48 @@
   "plan": "M1C07 · 1.AL.05a–b",
   "etalon": "tools/niveau_1c.md E7.2",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C06 · 2e degré par factorisation (LS)",
+    "etalon": "tools/niveau_11.md § 2, E-6-4",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "eq2": {
   "classe": "1re Collège",
   "plan": "M1C07 · 1.AL.05b : produit nul",
   "etalon": "tools/niveau_1c.md E7.2",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C06 · 2e degré par factorisation (LS)",
+    "etalon": "tools/niveau_11.md § 2, E-6-4",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "eq2disc": {
   "classe": "1re Collège",
   "plan": "M1C07 · 1.AL.05c : formule",
   "etalon": "tools/niveau_1c.md E7.2",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C06 · formule de Viète (LS, plan de cheminement)",
+    "etalon": "tools/niveau_11.md § 2, E-6-4",
+    "audit": "25.11.2026",
+    "verdict": "à valider"
+   }
+  }
  },
  "trinfact": {
   "classe": "1re Collège",
@@ -704,7 +920,16 @@
   "plan": "M1C07 · 1.AL.05e : problèmes du 2e degré",
   "etalon": "tools/niveau_1c.md E7.5",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C06 · mise en équation du 2e degré (LS)",
+    "etalon": "tools/niveau_11.md § 2, E-6-5",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "eq3": {
   "classe": "1re Collège",
@@ -788,35 +1013,80 @@
   "plan": "M1C08 · 1.GE.03a, 03c : similitude",
   "etalon": "tools/niveau_1c.md E8.1",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C11 · homothétie, similitude",
+    "etalon": "tools/niveau_11.md § 2, E-11-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "thales": {
   "classe": "1re Collège",
   "plan": "M1C08 · 1.GE.03b : Thalès",
   "etalon": "tools/niveau_1c.md E8.1",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C08 · Thalès (EVACOM 2026-27)",
+    "etalon": "tools/niveau_11.md § 2, E-8-1",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "pyth": {
   "classe": "1re Collège",
   "plan": "M1C08 · 1.GE.03d : Pythagore",
   "etalon": "tools/niveau_1c.md E8.2",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C02 · application directe (CT)",
+    "etalon": "tools/niveau_11.md § 2, E-2-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "pythfig": {
   "classe": "1re Collège",
   "plan": "M1C08 · 1.GE.03d, 03f",
   "etalon": "tools/niveau_1c.md E8.2",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C02 · Pythagore dans une figure",
+    "etalon": "tools/niveau_11.md § 2, E-2-2",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "pythrec": {
   "classe": "1re Collège",
   "plan": "M1C08 · 1.GE.02a, 03d : réciproque",
   "etalon": "tools/niveau_1c.md E8.2",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C02 · réciproque et contraposée (LC/LS)",
+    "etalon": "tools/niveau_11.md § 2, E-2-3",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "euclide": {
   "classe": "1re Collège",
@@ -851,7 +1121,16 @@
   "plan": "M1C09 · 1.GE.01a, 01c : angles, angle inscrit",
   "etalon": "tools/niveau_1c.md E9.1",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C07 · alternes-internes, inscrits, au centre",
+    "etalon": "tools/niveau_11.md § 2, E-7-1",
+    "audit": "25.11.2026",
+    "verdict": "remonté"
+   }
+  }
  },
  "angtri": {
   "classe": "1re Collège",
@@ -865,7 +1144,16 @@
   "plan": "M1C09 · 1.GE.01d : cercle de Thalès, tangente",
   "etalon": "tools/niveau_1c.md E9.2",
   "audit": "24.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "par_classe": {
+   "11e": {
+    "classe": "11e",
+    "plan": "11C07 · tangente, cercle de Thalès (LS)",
+    "etalon": "tools/niveau_11.md § 2, E-7-2",
+    "audit": "25.11.2026",
+    "verdict": "au niveau"
+   }
+  }
  },
  "trigrel": {
   "classe": "1re Collège",
@@ -1118,5 +1406,145 @@
   "etalon": "tools/niveau_2c.md E10.1",
   "plan": "Vecteurs du plan (2e, épreuve 2MA1)",
   "verdict": "remonté"
+ },
+ "prio": {
+  "classe": "11e",
+  "plan": "11C01 · 11NO, priorités (EVACOM)",
+  "etalon": "tools/niveau_11.md § 2, E-1-1",
+  "audit": "25.11.2026",
+  "verdict": "remonté"
+ },
+ "fracadd": {
+  "classe": "11e",
+  "plan": "11C01 · 4 opérations dans ℚ",
+  "etalon": "tools/niveau_11.md § 2, E-1-1",
+  "audit": "25.11.2026",
+  "verdict": "remonté"
+ },
+ "fracconv": {
+  "classe": "11e",
+  "plan": "11C01 · écritures d'un même nombre",
+  "etalon": "tools/niveau_11.md § 2, E-1-1",
+  "audit": "25.11.2026",
+  "verdict": "remonté"
+ },
+ "fracmul": {
+  "classe": "11e",
+  "plan": "11C01 · 4 opérations dans ℚ",
+  "etalon": "tools/niveau_11.md § 2, E-1-1",
+  "audit": "25.11.2026",
+  "verdict": "remonté"
+ },
+ "carres": {
+  "classe": "11e",
+  "plan": "10C06 (révision 10e en 11e)",
+  "etalon": "tools/niveau_11.md § 2, E-1-4",
+  "audit": "25.11.2026",
+  "verdict": "remonté"
+ },
+ "vol": {
+  "classe": "11e",
+  "plan": "11C03 · volume du cylindre (CT), prisme",
+  "etalon": "tools/niveau_11.md § 2, E-3-1",
+  "audit": "25.11.2026",
+  "verdict": "remonté"
+ },
+ "volcone": {
+  "classe": "11e",
+  "plan": "11C03 · pyramide, cône, boule (LC/LS)",
+  "etalon": "tools/niveau_11.md § 2, E-3-1, E-3-2",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "airepyr": {
+  "classe": "11e",
+  "plan": "11C03 · aire de la pyramide, sphère",
+  "etalon": "tools/niveau_11.md § 2, E-3-3",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "volcomp": {
+  "classe": "11e",
+  "plan": "11C03 · solides composés",
+  "etalon": "tools/niveau_11.md § 2, E-3-2",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "volmanq": {
+  "classe": "11e",
+  "plan": "11C03 · grandeur manquante",
+  "etalon": "tools/niveau_11.md § 2, E-3-4",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "vitesse": {
+  "classe": "11e",
+  "plan": "11C04 · vitesse moyenne",
+  "etalon": "tools/niveau_11.md § 2, E-4-1, E-4-2",
+  "audit": "25.11.2026",
+  "verdict": "remonté"
+ },
+ "gquot": {
+  "classe": "11e",
+  "plan": "11C04 · masse volumique, débit (LS)",
+  "etalon": "tools/niveau_11.md § 2, E-4-3, E-4-4",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "ucomp": {
+  "classe": "11e",
+  "plan": "11C04 · unités de mesures associées",
+  "etalon": "tools/niveau_11.md § 2, E-4-1",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "valnum": {
+  "classe": "11e",
+  "plan": "11C05 · substitution",
+  "etalon": "tools/niveau_11.md § 2, E-5-1",
+  "audit": "25.11.2026",
+  "verdict": "remonté"
+ },
+ "litelab": {
+  "classe": "11e",
+  "plan": "11C05 · élaboration d'expressions",
+  "etalon": "tools/niveau_11.md § 2, E-5-2",
+  "audit": "25.11.2026",
+  "verdict": "remonté"
+ },
+ "thalesrec": {
+  "classe": "11e",
+  "plan": "11C08 · réciproque, contraposée",
+  "etalon": "tools/niveau_11.md § 2, E-8-2",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "repere": {
+  "classe": "11e",
+  "plan": "11C10 · repère (révision)",
+  "etalon": "tools/niveau_11.md § 2, E-10-1",
+  "audit": "25.11.2026",
+  "verdict": "remonté"
+ },
+ "pctvar": {
+  "classe": "11e",
+  "plan": "10C10 (révision en 11e)",
+  "etalon": "tools/niveau_11.md § 2, E-4-1",
+  "audit": "25.11.2026",
+  "verdict": "remonté"
+ },
+ "proba": {
+  "classe": "11e",
+  "plan": "11C12 · probabilités (LC/LS)",
+  "etalon": "tools/niveau_11.md § 2, E-12-1",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
+ },
+ "denombr": {
+  "classe": "11e",
+  "plan": "11C12 · dénombrements",
+  "etalon": "tools/niveau_11.md § 2, E-12-2",
+  "audit": "25.11.2026",
+  "verdict": "au niveau"
  }
 }
