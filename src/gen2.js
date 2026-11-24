@@ -75,13 +75,16 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
     if (o.grid !== false) for (let x = Math.ceil(x0); x <= x1; x++) g += L(X(x), Y(y0), X(x), Y(y1), "f-grid");
     if (o.grid !== false) for (let y = Math.ceil(y0); y <= y1; y++) g += L(X(x0), Y(y), X(x1), Y(y), "f-grid");
     g += L(X(x0), Y(0), X(x1), Y(0)) + L(X(0), Y(y0), X(0), Y(y1));
+    let tk = ""; /* chiffres des axes : dessinés après les courbes, avec un liseré (classe f-tick) pour rester lisibles */
     if (o.numbers) {
       /* 24.11 (agent MP 4e : chiffres de l'axe sur la courbe là où elle coupe l'axe) : si la courbe passe sur le chiffre,
          il passe de l'autre côté de l'axe (au-dessus pour x, à droite pour y). */
       const Xi = (px) => x0 + ((px - 10) / (W - 20)) * (x1 - x0);
-      const near = (cx, cy) => fns.some((F) => { for (let px = cx - 7; px <= cx + 7; px += 1.5) { const v = F.f(Xi(px)); if (isFinite(v) && Math.abs(Y(v) - cy) < 7) return true; } return false; });
-      for (let x = Math.ceil(x0); x <= x1; x++) if (x && x % (o.step || 1) === 0) { const up = near(X(x), Y(0) + 9) && !near(X(x), Y(0) - 9); g += t(X(x), up ? Y(0) - 5 : Y(0) + 13, x, "f-txt f-tick", "middle", 10); }
-      for (let y = Math.ceil(y0); y <= y1; y++) if (y && y % (o.step || 1) === 0) { const rt = near(X(0) - 10, Y(y)) && !near(X(0) + 10, Y(y)); g += t(rt ? X(0) + 4 : X(0) - 4, Y(y) + 4, y, "f-txt f-tick", rt ? "start" : "end", 10); }
+      /* 24.11 soir (galerie : « 10 » et « −1 » sur une courbe raide) : test plus fin, y compris quand la courbe traverse la
+         boîte du chiffre entre deux échantillons (courbe presque verticale). */
+      const near = (cx, cy) => fns.some((F) => { let prev = null; for (let px = cx - 9; px <= cx + 9; px += 0.5) { const v = F.f(Xi(px)); if (!isFinite(v)) { prev = null; continue; } const d = Y(v) - cy; if (Math.abs(d) < 8 || (prev !== null && prev * d < 0 && Math.abs(prev - d) < 400)) return true; prev = d; } return false; });
+      for (let x = Math.ceil(x0); x <= x1; x++) if (x && x % (o.step || 1) === 0) { const up = near(X(x), Y(0) + 9) && !near(X(x), Y(0) - 9); tk += t(X(x), up ? Y(0) - 5 : Y(0) + 13, x, "f-txt f-tick", "middle", 10); }
+      for (let y = Math.ceil(y0); y <= y1; y++) if (y && y % (o.step || 1) === 0) { const rt = near(X(0) - 10, Y(y)) && !near(X(0) + 10, Y(y)); tk += t(rt ? X(0) + 4 : X(0) - 4, Y(y) + 4, y, "f-txt f-tick", rt ? "start" : "end", 10); }
     } else if (o.ticks !== false) {
       for (let x = Math.ceil(x0); x <= x1; x++) g += L(X(x), Y(0) - 3, X(x), Y(0) + 3);
       for (let y = Math.ceil(y0); y <= y1; y++) g += L(X(0) - 3, Y(y), X(0) + 3, Y(y));
@@ -99,6 +102,7 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
       g += '<path d="' + d + '" class="' + (F.cls || (k ? "f-line" : "f-accent")) + '" fill="none" stroke-width="2.4" clip-path="url(#' + id + ')"' + (F.dash ? ' stroke-dasharray="5 4"' : "") + "/>";
     });
     (o.polys || []).forEach((Q) => (g += P(Q.map(([x, y]) => [X(x), Y(y)]), "f-fill2")));
+    g += tk;
     // Cercles entiers (22.11 : les demi-cercles tracés comme deux fonctions s'arrêtaient avant l'axe) : [cx, cy, r, cls].
     (o.circles || []).forEach(([cx, cy, r, cls]) => (g += '<ellipse cx="' + X(cx).toFixed(1) + '" cy="' + Y(cy).toFixed(1) + '" rx="' + (X(cx + r) - X(cx)).toFixed(1) + '" ry="' + (Y(cy) - Y(cy + r)).toFixed(1) + '" class="' + (cls || "f-blue") + '" fill="none" stroke-width="2.4" clip-path="url(#' + id + ')"/>'));
     (o.segs || []).forEach(([xa, ya, xb, yb, cls]) => (g += L(X(xa), Y(ya), X(xb), Y(yb), cls || "f-line", 'stroke-width="2"')));
