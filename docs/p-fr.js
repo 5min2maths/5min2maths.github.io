@@ -666,7 +666,7 @@
   const bc = (c, n, p) => c[0] + " " + M(n) + " " + c[1] + " " + M(dP(p)) + (c[2] ? " " + c[2] : "") + ". " + M("X") + " compte le nombre de " + c[3] + " : " + M("X") + " suit la loi binomiale " + M("\\mathcal{B}(" + n + " \\,;\\, " + dP(p) + ")") + ". ";
   const BI = {
     1: [
-      () => { const c = pk(BCTX), n = R.int(2, 4), p = pk(c[5]), all = R.rand() < 0.5, v = rnd(all ? p ** n : (1 - p) ** n);
+      () => { const c = pk(BCTX), n = R.int(2, 4), p = pk(c[5]); let all = R.rand() < 0.5; if ((all ? p ** n : (1 - p) ** n) < 0.001) all = !all; /* 24.11 : jamais de probabilité minuscule (0,02⁴ = 1,6·10⁻⁷, test) */ const v = rnd(all ? p ** n : (1 - p) ** n);
         return QN(bc(c, n, p) + "Calcule " + M("P(X = " + (all ? n : 0) + ")") + ".", v,
           (all ? "Tous les essais réussis : " + M(dP(p) + "^{" + n + "} = " + dP(v)) : "Aucun succès : " + M("(1 - " + dP(p) + ")^{" + n + "} = " + dP(1 - p) + "^{" + n + "} = " + dP(v))) + ".",
           { ctx: c[4] + "-extreme", guide: [GS("Probabilité d'" + (all ? "un succès" : "un échec") + " à un essai ?", all ? p : rnd(1 - p), M(dP(all ? p : 1 - p)) + "."), GS("Probabilité cherchée ?", v, M(dP(v)) + ".")],
