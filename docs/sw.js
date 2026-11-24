@@ -2,8 +2,8 @@
 // le reste (code de l'app, MathJax, polices, icônes) depuis le cache, complété au fil de l'eau.
 // 23.11 (chantier F, chargement) : le code de l'app est un fichier à part (app.js?v=…, versionné à chaque construction),
 // mis en cache dès l'installation ; la page attend le réseau 3 s au plus quand une copie est en cache (réseau faible).
-const CACHE = "5m2m-bbb9604b52";
-const CORE = ["./", "./index.html", "./app.js?v=bbb9604b52", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
+const CACHE = "5m2m-59c4c85a9f";
+const CORE = ["./", "./index.html", "./app.js?v=59c4c85a9f", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
   "https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"];
 self.addEventListener("install", (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });

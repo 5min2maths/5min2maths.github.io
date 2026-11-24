@@ -224,12 +224,12 @@ const FIG = (() => {
   // Expression en tuiles (calcul littéral) : rectangle découpé.
   // Rectangle à paver (commentaire testeur du 15.11 : figure illisible) : rectangle à l'échelle des vraies dimensions,
   // un carré en pointillé « ? » dans un coin (le carré cherché, sans donner sa taille).
-  function tiles(a, b, la, lb) {
+  function tiles(a, b, la, lb) { // 24.11 : rectangle décalé à droite (le robot : l'étiquette de gauche « 56 cm » sortait du cadre)
     const k = Math.min(220 / a, 120 / b), W = a * k, H = b * k, s = Math.min(W, H) / 3.2;
-    let g = '<rect x="40" y="20" width="' + W.toFixed(1) + '" height="' + H.toFixed(1) + '" class="f-fill2" stroke="var(--ink)" stroke-width="1.5"/>';
-    g += '<rect x="40" y="20" width="' + s.toFixed(1) + '" height="' + s.toFixed(1) + '" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-dasharray="4 3"/>';
-    g += t(40 + s / 2, 25 + s / 2, "?", "f-accent f-txt");
-    return svg(300, H + 50, g + t(40 + W / 2, H + 40, la) + t(32, 20 + H / 2, lb, "f-txt", "end"), "rectangle à paver avec des carrés");
+    let g = '<rect x="64" y="20" width="' + W.toFixed(1) + '" height="' + H.toFixed(1) + '" class="f-fill2" stroke="var(--ink)" stroke-width="1.5"/>';
+    g += '<rect x="64" y="20" width="' + s.toFixed(1) + '" height="' + s.toFixed(1) + '" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-dasharray="4 3"/>';
+    g += t(64 + s / 2, 25 + s / 2, "?", "f-accent f-txt");
+    return svg(300, H + 50, g + t(64 + W / 2, H + 40, la) + t(58, 24 + H / 2, lb, "f-txt", "end"), "rectangle à paver avec des carrés");
   }
 
   // Parabole y = a(x - p)(x - q) ou a x² + b x + c, avec points marqués.

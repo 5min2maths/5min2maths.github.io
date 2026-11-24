@@ -68,9 +68,9 @@ const GF = {
   },
   // Hauteur issue de l'angle droit : p = projection de [BC] (côté de B), q = projection de [AC] (côté de A).
   altitude(p, q, { lp = "p", lq = "q", lh = "h", la = "", lb = "", lc = "" } = {}) {
-    const h = Math.sqrt(p * q), g = GEO().pt("B", 0, 0).pt("A", p + q, 0).pt("C", p, h).pt("H", p, 0).poly(["A", "B", "C"]);
+    const h = Math.sqrt(p * q), g = GEO().pt("B", 0, 0).pt("A", p + q, 0).pt("C", p, h).pt("H", p, 0, false).poly(["A", "B", "C"]).text("H", "H", 9, -7); // 24.11 : H au-dessus de l'hypoténuse (le robot : « H » chevauchait l'étiquette de [BH])
     g.seg("C", "H", { cls: "f-accent", dash: true }).right("H", "A", "C").right("C", "A", "B");
-    g.side("B", "H", lp).side("H", "A", lq).side("C", "H", lh, { inside: false }).side("B", "C", la).side("A", "C", lb);
+    g.side("B", "H", lp).side("H", "A", lq).side("C", "H", lh, { inside: true }) /* 24.11 : h à droite de la hauteur (le robot : « h = ? » chevauchait la cathète [BC]) */.side("B", "C", la).side("A", "C", lb);
     if (lc) g.add([p / 2 + q / 2, -h * 0.3]).text([(p + q) / 2, 0], lc, 0, 30);
     return g.svg("hauteur sur l'hypoténuse");
   },
@@ -171,7 +171,9 @@ const GF = {
   // Configuration de Thalès (triangles emboîtés) : D sur [AB], E sur [AC], (DE) ∥ (BC). k = AD/AB (pour le dessin).
   thales(k, labs = {}) {
     const A = [0, 0], B = [6, -4], C = [7.5, 1.5], D = [B[0] * k, B[1] * k], E = [C[0] * k, C[1] * k];
-    const g = GEO().pt("A", ...A).pt("B", ...B).pt("C", ...C).pt("D", ...D).pt("E", ...E).poly(["A", "B", "C"]).seg("D", "E", { cls: "f-accent", w: 2 });
+    // 24.11 (robot : « D » chevauchait la longueur de [AD]) : D et E nommés vers l'intérieur du triangle, les longueurs restent à l'extérieur.
+    const G = [(A[0] + B[0] + C[0]) / 3, (A[1] + B[1] + C[1]) / 3], inw = (P) => { const dx = G[0] - P[0], dy = G[1] - P[1], l = Math.hypot(dx, dy) || 1; return [(dx / l) * 14, -(dy / l) * 14 + 4]; };
+    const g = GEO().pt("A", ...A).pt("B", ...B).pt("C", ...C).pt("D", ...D, false).pt("E", ...E, false).poly(["A", "B", "C"]).seg("D", "E", { cls: "f-accent", w: 2 }).text("D", "D", ...inw(D)).text("E", "E", ...inw(E));
     for (const [k2, a, b] of [["AD", "A", "D"], ["DB", "D", "B"], ["AE", "A", "E"], ["EC", "E", "C"], ["DE", "D", "E"], ["BC", "B", "C"]]) if (labs[k2]) g.side(a, b, labs[k2]);
     if (labs.AB) g.side([B[0] * 0.55, B[1] * 0.55], [B[0] * 0.95, B[1] * 0.95], "", { inside: false }).text([B[0] * 0.78 + 0.6, B[1] * 0.78 - 0.9], labs.AB);
     if (labs.AC) g.text([C[0] * 0.78 - 0.4, C[1] * 0.78 + 0.9], labs.AC);

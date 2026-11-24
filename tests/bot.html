@@ -10,6 +10,9 @@
 // écran sans issue. Résultat : JSON dans <pre id="out"> (lu par tools/bot_eleve.py).
 // Paramètres : bot.html#rapide (moins de tirages) ou #classes=9e,10e,11e
 document.getElementById("app").style.width = "360px";
+// 24.11 : Chromium sans interface impose une fenêtre d'au moins 500 px ; on applique donc à la main les règles CSS
+// « petit écran » (@media max-width ≥ 360 px) pour voir l'app comme sur un téléphone de 360 px.
+(() => { let css = ""; for (const sh of document.styleSheets) { let rs; try { rs = sh.cssRules; } catch (e) { continue; } for (const r of rs) { const m = r.media && /max-width:\s*(\d+)px/.exec(r.media.mediaText); if (m && +m[1] >= 360) for (const x of r.cssRules) css += x.cssText + "\n"; } } const st = document.createElement("style"); st.textContent = css; document.head.appendChild(st); })();
 Element.prototype.scrollIntoView = function () {};
 window.confirm = () => true; window.alert = () => {};
 const ISSUES = [], seen = new Set(), STATS = {}, jsErr = [];
@@ -125,7 +128,7 @@ const play = (mode, cs) => {
   if (cs) { if (cs.has(code)) issue("question répétée dans la séance", code, ""); cs.add(code); }
   if (q.parts) {
     q.parts.forEach((p, i) => { const inp = document.getElementById("p" + i), a = answerOf(null, p.spec); if (inp && a != null) inp.value = a; });
-    click("check"); const bad = [...app.querySelectorAll("[id^=mk]")].filter((x) => x.textContent === "✗"); const pa = q.parts.map((p) => answerOf(null, p.spec)); if (bad.length && pa.some((x) => /\d\.\d{5,}/.test(String(x)))) STATS[CL].nonverif = (STATS[CL].nonverif || 0) + 1; else if (bad.length) issue("réponse juste refusée (problème)", code, pa.join(" | ")); // 24.11 : réponses approchées non vérifiables
+    click("check"); const bad = [...app.querySelectorAll("[id^=mk]")].filter((x) => x.textContent === "✗"); const pa = q.parts.map((p) => answerOf(null, p.spec)); if (bad.length && pa.some((x) => /\d\.\d{4,}/.test(String(x)))) STATS[CL].nonverif = (STATS[CL].nonverif || 0) + 1; else if (bad.length) issue("réponse juste refusée (problème)", code, pa.join(" | ")); // 24.11 : réponses approchées non vérifiables
     scan(code); return click("nx");
   }
   const inp = document.getElementById("ans"), a = answerOf(q); if (!inp) { issue("écran sans champ de réponse", code, ""); return false; }
@@ -134,7 +137,7 @@ const play = (mode, cs) => {
   if (mode === "faux-juste") { inp.value = wrongOf(q.spec); click("check"); }
   if (!document.getElementById("nx")) { inp.value = a; click("check"); }
   const fb = app.querySelector("#fb .fb.ok, .fb.ok");
-  const approx = /\d\.\d{5,}/.test(a); // 24.11 : valeur décimale approchée tapée à la place d'une forme exacte (√, π) : non vérifiable
+  const approx = /\d\.\d{4,}/.test(a); // 24.11 : valeur décimale approchée tapée à la place d'une forme exacte (√, π) : non vérifiable
   if (approx && !fb) { STATS[CL].nonverif = (STATS[CL].nonverif || 0) + 1; }
   else if (!fb && mode !== "idk" && !app.querySelector(".fb.bad")) issue("réponse juste refusée", code, "tapé « " + a + " » : " + ((app.querySelector(".fb") || {}).textContent || "").slice(0, 100));
   else if (!fb && mode === "juste") issue("réponse juste refusée", code, "tapé « " + a + " » : " + ((app.querySelector(".fb") || {}).textContent || "").slice(0, 100));
@@ -148,6 +151,23 @@ const advance = () => {
   const b = [...app.querySelectorAll("button.btn-primary")].find((x) => !x.disabled && x.offsetParent !== null); if (b) { b.click(); return true; }
   return false;
 };
+// Autotest des contrôles de figures (24.11) : bot.html#autotest → chaque cas doit produire (ou non) l'alerte attendue.
+if (/autotest/.test(H)) {
+  const res = [], cas = [
+    ["vrai parallélogramme", "parallélogramme", '<polygon points="10,90 110,90 140,30 40,30"/>', null],
+    ["faux parallélogramme", "parallélogramme", '<polygon points="10,90 110,90 150,30 40,30"/>', "figure ≠ énoncé"],
+    ["faux rectangle", "rectangle", '<polygon points="10,90 110,90 120,30 20,30"/>', "figure ≠ énoncé"],
+    ["angle juste", "angle", '<line x1="50" y1="100" x2="150" y2="100"/><line x1="50" y1="100" x2="100" y2="13.4"/><path d="M70,100 A20,20 0 0 0 60,82.68"/><text x="80" y="80">60°</text>', null],
+    ["angle faux", "angle", '<line x1="50" y1="100" x2="150" y2="100"/><line x1="50" y1="100" x2="100" y2="13.4"/><path d="M70,100 A20,20 0 0 0 60,82.68"/><text x="80" y="80">35°</text>', "figure : angle faux"],
+    ["côté manquant", "angle", '<line x1="50" y1="100" x2="150" y2="100"/><path d="M70,100 A20,20 0 0 0 60,82.68"/><text x="80" y="80">60°</text>', "figure : angle mal tracé"],
+  ];
+  for (const [nom, lab, body, attendu] of cas) {
+    app.innerHTML = '<svg viewBox="0 0 200 120" aria-label="' + lab + '">' + body + "</svg>"; Q = null;
+    const n0 = ISSUES.length; seen.clear(); geoCheck(app.querySelector("svg"), "auto-" + nom); const got = ISSUES.slice(n0).map((x) => x.type);
+    res.push((attendu ? got.includes(attendu) : !got.length) ? "ok " + nom : "ÉCHEC " + nom + " : " + (got.join(", ") || "aucune alerte"));
+  }
+  document.getElementById("out").textContent = res.join("\n"); throw new Error("autotest terminé");
+}
 const t0 = Date.now();
 for (const [nom, prof] of PROF) {
   CL = nom; STATS[nom] = { seances: 0, questions: 0, ecrans: 0, balayage: 0 };

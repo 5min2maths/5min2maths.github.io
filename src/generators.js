@@ -580,13 +580,13 @@ Object.assign(GEN, {
     const a = R.nz(-4, 5), b = R.nz(-6, 6);
     if (d === 1) {
       const x = R.nz(-5, 5), y = a * x + b;
-      return { q: "Soit " + M("f(x) = " + poly([a, b])) + ". Calcule " + M("f^{-1}(" + y + ")") + ".", spec: { kind: "value", value: x }, sol: "On cherche " + M("x") + " tel que " + M(poly([a, b]) + " = " + y) + " : " + M("x = " + x) + "." };
+      return { guide: [GS("On cherche x tel que " + M(poly([a, b]) + " = " + y) + ". D'abord " + M(y + " - " + par(b)) + " = ?", y - b, M(y - b) + "."), GS("Puis divise par " + a + " : x = ?", x, M("x = " + x) + ".")], q: "Soit " + M("f(x) = " + poly([a, b])) + ". Calcule " + M("f^{-1}(" + y + ")") + ".", spec: { kind: "value", value: x }, sol: "On cherche " + M("x") + " tel que " + M(poly([a, b]) + " = " + y) + " : " + M("x = " + x) + "." };
     }
     if (d === 2) {
       const c = R.nz(-3, 3), x = R.nz(-3, 3);
-      return { q: "Soit " + M("f(x) = " + poly([a, b])) + " et " + M("g(x) = x^2 " + (c < 0 ? "- " + -c : "+ " + c)) + ". Calcule " + M("(f \\circ g)(" + x + ")") + ".", spec: { kind: "value", value: a * (x * x + c) + b }, sol: M("g(" + x + ") = " + (x * x + c)) + ", puis " + M("f(" + (x * x + c) + ") = " + (a * (x * x + c) + b)) + "." };
+      return { guide: [GS("D'abord " + M("g(" + x + ")") + " = ?", x * x + c, M(x * x + c) + "."), GS("Puis " + M("f(" + (x * x + c) + ")") + " = ?", a * (x * x + c) + b, M(a * (x * x + c) + b) + ".")], q: "Soit " + M("f(x) = " + poly([a, b])) + " et " + M("g(x) = x^2 " + (c < 0 ? "- " + -c : "+ " + c)) + ". Calcule " + M("(f \\circ g)(" + x + ")") + ".", spec: { kind: "value", value: a * (x * x + c) + b }, sol: M("g(" + x + ") = " + (x * x + c)) + ", puis " + M("f(" + (x * x + c) + ") = " + (a * (x * x + c) + b)) + "." };
     }
-    return { q: "Soit " + M("f(x) = " + poly([a, b])) + ". Donne l'expression de " + M("f^{-1}(x)") + ".", spec: { kind: "expr", expr: "(x-(" + b + "))/(" + a + ")" }, sol: M("y = " + poly([a, b]) + " \\iff x = \\frac{y " + (b < 0 ? "+ " + -b : "- " + b) + "}{" + a + "}") + ", donc " + M("f^{-1}(x) = \\frac{x " + (b < 0 ? "+ " + -b : "- " + b) + "}{" + a + "}") + "." };
+    return { guide: [GS("On pose " + M("y = " + poly([a, b])) + " et on isole x : " + M("x = \\frac{y - (" + b + ")}{?}") + " : dénominateur ?", a, M(a) + "."), { ask: "Expression de " + M("f^{-1}(x)") + " ?", spec: { kind: "expr", expr: "(x-(" + b + "))/(" + a + ")" }, sol: M("f^{-1}(x) = \\frac{x " + (b < 0 ? "+ " + -b : "- " + b) + "}{" + a + "}") + "." }], q: "Soit " + M("f(x) = " + poly([a, b])) + ". Donne l'expression de " + M("f^{-1}(x)") + ".", spec: { kind: "expr", expr: "(x-(" + b + "))/(" + a + ")" }, sol: M("y = " + poly([a, b]) + " \\iff x = \\frac{y " + (b < 0 ? "+ " + -b : "- " + b) + "}{" + a + "}") + ", donc " + M("f^{-1}(x) = \\frac{x " + (b < 0 ? "+ " + -b : "- " + b) + "}{" + a + "}") + "." };
   },
 
   sinlaw(d) {
@@ -613,7 +613,7 @@ Object.assign(GEN, {
       return { fig, guide: [GS(M(b ** n) + " = " + M(b + "^{?}") + " : exposant ?", n, M(b + "^{" + n + "}") + "."), GS("Même base : x = ?", n, M("x = " + n) + ".")], q: "Résous : " + M(b + "^x = " + b ** n) + ".", spec: { kind: "value", value: n }, sol: M(b ** n + " = " + b + "^" + n) + ", donc " + M("x = " + n) + "." };
     }
     if (d === 2) {
-      const b = R.pick([2, 3]), k = R.nz(-3, 3), n = R.int(2, b === 2 ? 6 : 4);
+      const b = R.pick([2, 3]), k = R.nz(-3, 3); let n; do n = R.int(2, b === 2 ? 6 : 5); while (Math.abs(n - k) <= 1); // 24.11 : x = n − k jamais 0 ni ±1 (robot) ; boucle toujours finie (n jusqu'à 5 pour la base 3)
       return { guide: [GS(M(b ** n) + " = " + M(b + "^{?}") + " : exposant ?", n, M(b + "^{" + n + "}") + "."), GS("Donc " + M("x " + (k < 0 ? "- " + -k : "+ " + k) + " = " + n) + " : x = ?", n - k, M("x = " + (n - k)) + ".")], q: "Résous : " + M(b + "^{x " + (k < 0 ? "- " + -k : "+ " + k) + "} = " + b ** n) + ".", spec: { kind: "value", value: n - k }, sol: M("x " + (k < 0 ? "- " + -k : "+ " + k) + " = " + n) + ", donc " + M("x = " + (n - k)) + "." };
     }
     const C = 1000 * R.int(1, 9), t = R.pick([1, 1.5, 2, 2.5, 3]), n = R.int(3, 12);
@@ -625,14 +625,14 @@ Object.assign(GEN, {
     if (d === 1) {
       const b = R.pick([2, 3, 10]), n = R.int(-2, b === 2 ? 6 : 4);
       const x = Math.pow(b, n), xs = n >= 0 ? String(x) : "\\frac{1}{" + b ** -n + "}";
-      return { q: "Calcule " + M("\\log_{" + b + "} " + xs) + ".", spec: { kind: "value", value: n }, sol: M(b + "^{" + n + "} = " + xs) + ", donc " + M("\\log_{" + b + "} " + xs + " = " + n) + "." };
+      return { guide: [GS(M(b + "^{?} = " + xs) + " : exposant ?", n, M(b + "^{" + n + "} = " + xs) + "."), GS("Donc le logarithme vaut ?", n, M(n) + ".")], q: "Calcule " + M("\\log_{" + b + "} " + xs) + ".", spec: { kind: "value", value: n }, sol: M(b + "^{" + n + "} = " + xs) + ", donc " + M("\\log_{" + b + "} " + xs + " = " + n) + "." };
     }
     if (d === 2) {
       const b = R.pick([2, 3, 5]), c = R.pick([7, 10, 15, 20, 50].filter((v) => v !== b));
-      return { fig: FIG.parabola((x) => Math.pow(b, x) / 4, [], null, false), q: "Résous " + M(b + "^x = " + c) + " (valeur exacte avec ln, ou au centième).", spec: { kind: "value", value: Math.log(c) / Math.log(b), round: 0.01, exactOk: true }, sol: M("x = \\frac{\\ln " + c + "}{\\ln " + b + "} \\approx " + dec((Math.log(c) / Math.log(b)).toFixed(2))) };
+      return { fig: FIG.parabola((x) => Math.pow(b, x) / 4, [], null, false), guide: [GS("On prend ln des deux côtés : " + M("x \\cdot \\ln " + b + " = \\ln " + c) + ". " + M("\\ln " + c) + " ≈ ? (au centième)", Math.log(c), M(dec(Math.log(c).toFixed(2))) + ".", 0.01), GS(M("\\ln " + b) + " ≈ ?", Math.log(b), M(dec(Math.log(b).toFixed(2))) + ".", 0.01), GS("x = quotient (au centième) ?", Math.log(c) / Math.log(b), M(dec((Math.log(c) / Math.log(b)).toFixed(2))) + ".", 0.01)], q: "Résous " + M(b + "^x = " + c) + " (valeur exacte avec ln, ou au centième).", spec: { kind: "value", value: Math.log(c) / Math.log(b), round: 0.01, exactOk: true }, sol: M("x = \\frac{\\ln " + c + "}{\\ln " + b + "} \\approx " + dec((Math.log(c) / Math.log(b)).toFixed(2))) };
     }
     const a = R.pick([2, 4, 5, 20, 25]), b2 = 100 / a * R.pick([1, 10]);
-    return { q: "Calcule sans calculatrice : " + M("\\log " + a + " + \\log " + b2) + ".", spec: { kind: "value", value: Math.log10(a * b2) }, sol: M("\\log(" + a + " \\cdot " + b2 + ") = \\log " + a * b2 + " = " + Math.round(Math.log10(a * b2))) + "." };
+    return { guide: [GS("Somme de log = log du produit : " + M(a + " \\cdot " + b2) + " = ?", a * b2, M(a * b2) + "."), GS(M("\\log " + a * b2) + " = ? (puissance de 10)", Math.log10(a * b2), M(Math.round(Math.log10(a * b2))) + ".")], q: "Calcule sans calculatrice : " + M("\\log " + a + " + \\log " + b2) + ".", spec: { kind: "value", value: Math.log10(a * b2) }, sol: M("\\log(" + a + " \\cdot " + b2 + ") = \\log " + a * b2 + " = " + Math.round(Math.log10(a * b2))) + "." };
   },
 
   absval(d) {

@@ -352,7 +352,7 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .home-panel .streak .flame { font-size: 1.7rem; margin: 0; }
 .home-panel .now-card { padding: 12px 14px; gap: 6px; }
 .home-panel .now-card .eyebrow { margin: 0; }
-.elo-band { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; width: 100%; text-align: left; padding: 10px 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); box-shadow: none; margin-bottom: 12px; }
+.elo-band { min-width: 0; /* 24.11 : sans ça, la grille .hub élargissait sa colonne au texte du bandeau (+20 px à 360 px, robot) */ display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; width: 100%; text-align: left; padding: 10px 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); box-shadow: none; margin-bottom: 12px; }
 .elo-band .eyebrow { margin: 0; }
 .eb-l { display: grid; gap: 2px; }
 .eb-n { display: flex; align-items: baseline; gap: 8px; }
@@ -574,7 +574,7 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .st-cmt li { padding: 8px 10px; border-radius: 10px; background: var(--paper); border: 1px solid var(--line); font-size: 0.9rem; }
 
 /* Accueil à cases (22.11, maquette design/maquette_accueil.html) */
-.hub { display: grid; gap: 12px; }
+.hub { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); } /* 24.11 : colonne limitée à la largeur (bandeau +20 px à 360 px, robot) */
 .hub .elo-band { margin-bottom: 0; }
 .sess-card { border: 2px solid var(--blue); }
 .sess-seg { display: grid; grid-template-columns: 1fr 1fr; }
@@ -611,7 +611,7 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: #
 .st-table td:nth-child(2) { width: 50%; text-align: left; }
 
 /* Accueil compact (22.11, « tout sur un écran ») */
-.elo-compact { grid-template-columns: auto 1fr auto; gap: 12px; padding: 8px 12px; }
+.elo-compact { grid-template-columns: auto minmax(0, 1fr) auto; /* 24.11 : minmax(0, …) sinon le texte sur une ligne élargit la colonne (robot : +8 à +20 px à 360 px) */ gap: 12px; padding: 8px 12px; }
 .elo-compact .eb-num { display: grid; gap: 0; }
 .elo-compact .eb-num .eyebrow { font-size: 0.62rem; }
 .elo-compact .num { font-size: 1.6rem; }
@@ -659,6 +659,6 @@ window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "glo
 </head>
 <body>
 <main id="app" aria-live="polite"></main>
-<script src="app.js?v=bbb9604b52"></script>
+<script src="app.js?v=59c4c85a9f"></script>
 </body>
 </html>

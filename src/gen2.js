@@ -63,7 +63,10 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
   let uid = 0;
   // Repère quadrillé : fns = [{ f, cls, from, to }], pts = [[x, y, label]], numbers = graduations chiffrées.
   FIG.plot = function (fns, pts = [], o = {}) {
-    const [x0, x1] = o.xr || [-6, 6], [y0, y1] = o.yr || [-5, 5], W = 300, H = Math.round(W * (y1 - y0) / (x1 - x0) * (o.squash || 1));
+    let [x0, x1] = o.xr || [-6, 6], [y0, y1] = o.yr || [-5, 5];
+    // 24.11 (robot : point B dessiné hors du graphique, cadre fixe −8 à 8) : le cadre s'agrandit pour contenir tous les points.
+    for (const p of pts) { if (!isFinite(p[0]) || !isFinite(p[1])) continue; x0 = Math.min(x0, Math.floor(p[0]) - 1); x1 = Math.max(x1, Math.ceil(p[0]) + 1); y0 = Math.min(y0, Math.floor(p[1]) - 1); y1 = Math.max(y1, Math.ceil(p[1]) + 1); }
+    const W = 300, H = Math.round(W * (y1 - y0) / (x1 - x0) * (o.squash || 1));
     const X = (x) => 10 + ((x - x0) / (x1 - x0)) * (W - 20), Y = (y) => H - 10 - ((y - y0) / (y1 - y0)) * (H - 20);
     let g = "";
     if (o.grid !== false) for (let x = Math.ceil(x0); x <= x1; x++) g += L(X(x), Y(y0), X(x), Y(y1), "f-grid");
@@ -94,7 +97,8 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
     (o.segs || []).forEach(([xa, ya, xb, yb, cls]) => (g += L(X(xa), Y(ya), X(xb), Y(yb), cls || "f-line", 'stroke-width="2"')));
     (o.vlines || []).forEach((x) => (g += L(X(x), Y(y0), X(x), Y(y1), "f-line", 'stroke-dasharray="4 4"')));
     (o.hlines || []).forEach((y) => (g += L(X(x0), Y(y), X(x1), Y(y), "f-line", 'stroke-dasharray="4 4"')));
-    pts.forEach(([x, y, s]) => (g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="4" class="f-dot"/>' + (s ? t(X(x) + 7, Y(y) - 7, s, "f-txt", "start", 12) : "")));
+    // 24.11 (robot : « C » sortait du cadre à droite) : l'étiquette passe à gauche du point près du bord droit, en dessous près du haut.
+    pts.forEach(([x, y, s]) => (g += '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="4" class="f-dot"/>' + (s ? (X(x) > W - 24 ? t(X(x) - 7, Y(y) < 18 ? Y(y) + 16 : Y(y) - 7, s, "f-txt", "end", 12) : t(X(x) + 7, Y(y) < 18 ? Y(y) + 16 : Y(y) - 7, s, "f-txt", "start", 12)) : "")));
     return svg(W, H, g, o.label || "graphique");
   };
   // Triangle avec étiquettes d'angles (aux sommets A, B, C) et de côtés.
@@ -793,7 +797,7 @@ Object.assign(GEN, {
   },
 
   homog(d) {
-    let a, b, c, e; do { a = R.nz(-5, 5); b = R.int(-8, 8); c = R.nz(-3, 3); e = R.int(-8, 8); } while (a * e - b * c === 0);
+    let a, b, c, e; do { a = R.nz(-5, 5); b = R.int(-8, 8); c = R.nz(-3, 3); e = R.int(-8, 8); } while (a * e - b * c === 0 || Math.abs(a) === Math.abs(c) || e === 0); // 24.11 : asymptotes y = ±1 et x = 0 évitées (robot)
     const f = (x) => (a * x + b) / (c * x + e), txt = "f(x) = \\frac{" + lin(a, b) + "}{" + lin(c, e) + "}";
     const fig = FIG.plot([{ f }], [], { grid: false, ticks: false, label: "hyperbole" });
     if (d === 1) return { fig, guide: [GS("Le dénominateur " + M(lin(c, e)) + " s'annule pour x = ?", -e / c, M("x = " + ratT(-e / c)) + " (le numérateur ne s'y annule pas).")], q: "Soit " + M(txt) + ". Quelle est l'équation de l'asymptote verticale ? Donne la valeur de " + M("x") + ".", spec: { kind: "value", value: -e / c }, sol: "Le dénominateur s'annule en " + M("x = " + ratT(-e / c)) + " (et pas le numérateur) : asymptote " + M("x = " + ratT(-e / c)) + "." };

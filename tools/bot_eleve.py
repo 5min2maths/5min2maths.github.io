@@ -21,7 +21,8 @@ def run_page(rapide, classe, limite):
     h = "#" + "&".join(x for x in [("rapide" if rapide else ""), "classes=" + classe.replace(" ", "%20")] if x)
     url = "file://" + str(ROOT / "tests" / "bot.html") + h
     try:
-        dom = subprocess.run(["timeout", "-k", "5", str(limite), "chromium", "--headless", "--disable-gpu", "--no-sandbox",
+        dom = subprocess.run(["timeout", "-k", "5", str(limite), "chromium", "--headless", "--disable-gpu", "--no-sandbox",  "--window-size=360,780",  # 24.11 : vraie fenêtre de téléphone (règles CSS « max-width »)
+                              
                               "--virtual-time-budget=1500000", "--dump-dom", url],
                              capture_output=True, text=True, timeout=limite + 30).stdout
     except subprocess.TimeoutExpired:
