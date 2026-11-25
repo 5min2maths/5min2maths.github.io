@@ -46,6 +46,9 @@ const Badges = {
     const themes = state && state.profile ? Engine.themeOrder(Engine.catalog(state.profile).filter((c) => c.current), state.profile) : Object.keys(THEMES);
     const L = [
       { id: "premier", fam: "reg", icon: "👣", name: "Premier pas", crit: "Terminer une première séance.", prog: (s, b) => [Math.min(b.days, 1), 1] },
+      /* 26.11 (revue d'un testeur, validé par l'enseignant) : palier précoce de la régularité, entre « Premier pas » et
+         « Semaine pleine ». Série du jour ou record : un jour rattrapé par le joker de série compte (la série continue). */
+      { id: "serie3", fam: "reg", icon: "🔥", name: "3 jours d'affilée", crit: "S'entraîner 3 jours de suite (le joker de série compte).", prog: (s) => [Math.min(3, Math.max((s.streak && s.streak.count) || 0, (s.streak && s.streak.best) || 0)), 3] },
       { id: "semaine", fam: "reg", icon: "📅", name: "Semaine pleine", crit: "S'entraîner 5 jours dans une même semaine (du lundi au dimanche).", prog: (s, b) => [Math.min(5, b.weeks[weekOf(day())] || 0, 5), 5, b.full >= 1] },
       { id: "mois", fam: "reg", icon: "🗓️", name: "Un mois fidèle", crit: "4 semaines pleines, pas forcément d'affilée.", prog: (s, b) => [Math.min(b.full, 4), 4] },
       { id: "rentree", fam: "reg", icon: "🎒", name: "Rentrée", crit: "Reprendre l'entraînement après au moins 10 jours de pause.", prog: (s, b) => [b.rentree ? 1 : 0, 1] },

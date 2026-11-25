@@ -281,6 +281,14 @@ const DEFIS = (() => {
            "b) Théorème du sinus : l'angle cherché est en face du plus petit côté, il est aigu. c) Le triangle s'agrandit proportionnellement au temps : AB = " + T(r2c(c / t)) + " km par heure."],
           "a) " + M("AB^2 = " + D(a) + "^2 + " + D(b) + "^2 - 2 \\cdot " + D(a) + " \\cdot " + D(b) + " \\cos " + g + "°") + ", " + M("AB \\approx " + D(r1(c))) + " km. b) " + M("\\sin = \\frac{" + D(sm) + " \\sin " + g + "°}{AB}") + ", angle " + M("\\approx " + D(r1(angS)) + "°") + ". c) " + M(Dd + " \\div " + D(r2c(c / t)) + " \\approx " + D(r2c(tD))) + " h.");
       },
+      () => { /* 26.11 (référentiel du Collège 2.GE.02c) : résoudre complètement un triangle (deux côtés et l'angle compris) */
+        let a, b; do { a = 10 * ri(4, 11); b = 10 * ri(5, 12); } while (b - a < 20);
+        const g = pk([40, 50, 60, 70, 80, 100, 110]), c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(rad(g))), al = deg(Math.asin((a * Math.sin(rad(g))) / c)), be = 180 - g - al, A = 0.5 * a * b * Math.sin(rad(g));
+        return P("Un terrain triangulaire " + M("ABC") + " a deux côtés " + M("a = BC = " + a) + " m et " + M("b = AC = " + b) + " m, qui forment l'angle " + M("\\gamma = " + g + "°") + " en " + M("C") + ". On veut le résoudre complètement.",
+          [["a) Côté c = AB (m, au dixième)", c, 0.1], ["b) Angle α en A (°, au dixième)", al, 0.1], ["c) Angle β en B (°, au dixième)", be, 0.1], ["d) Aire du terrain (m², à l'unité)", A, 1]],
+          ["Théorème du cosinus pour c ; puis théorème du sinus pour α, en face du plus petit côté a (α est donc aigu).", "c) Somme des angles. d) Aire = ½ · a · b · sin γ."],
+          "a) " + M("c^2 = " + a + "^2 + " + b + "^2 - 2 \\cdot " + a + " \\cdot " + b + " \\cos " + g + "°") + ", " + M("c \\approx " + D(r1(c))) + " m. b) " + M("\\sin\\alpha = \\frac{" + a + " \\sin " + g + "°}{c}") + ", " + M("\\alpha \\approx " + D(r1(al)) + "°") + ". c) " + M("\\beta = 180° - " + g + "° - \\alpha \\approx " + D(r1(be)) + "°") + ". d) " + M("\\frac{1}{2} \\cdot " + a + " \\cdot " + b + " \\cdot \\sin " + g + "° \\approx " + nb(Math.round(A))) + " m².");
+      },
     ],
     triaire: [
       () => {
@@ -763,11 +771,11 @@ const DEFIS = (() => {
       () => { /* accélération → vitesse → position */
         const m = ri(1, 3), v0 = 3 * m * m + ri(2, 12), Tt = pk([m + 1, m + 3, m + 4].filter((t) => t !== 2 * m));
         const vT = 3 * Tt * Tt - 6 * m * Tt + v0, xT = Tt ** 3 - 3 * m * Tt * Tt + v0 * Tt;
-        return P("Un chariot roule sur un rail. Son accélération vaut " + M("a(t) = 6t - " + 6 * m) + " (m/s²), sa vitesse au départ " + M(v0) + " m/s ; il part de la position " + M(0) + ".",
-          [["a) Vitesse à " + M("t = " + Tt) + " s (m/s)", vT], ["b) Position à " + M("t = " + Tt) + " s (m)", xT], ["c) Vitesse minimale du chariot (m/s)", v0 - 3 * m * m]],
+        return P("Au labo de physique, un petit chariot roule sur un rail rectiligne. Son accélération vaut " + M("a(t) = 6t - " + 6 * m) + " (cm/s²), sa vitesse au départ " + M(v0) + " cm/s ; il part de la position " + M(0) + ".", /* 26.11 (vraisemblance) : chariot de labo en cm/s (et non 50 m/s) */
+          [["a) Vitesse à " + M("t = " + Tt) + " s (cm/s)", vT], ["b) Position à " + M("t = " + Tt) + " s (cm)", xT], ["c) Vitesse minimale du chariot (cm/s)", v0 - 3 * m * m]],
           ["La vitesse est une primitive de l'accélération, avec v(0) = " + v0 + ". La position est une primitive de la vitesse, avec x(0) = 0.",
            "v(t) = 3t² − " + 6 * m + "t + " + v0 + ". c) La vitesse est minimale quand sa dérivée, a(t), s'annule."],
-          M("v(t) = 3t^2 - " + 6 * m + "t + " + v0) + ", " + M("x(t) = t^3 - " + 3 * m + "t^2 + " + v0 + "t") + ". a) " + M("v(" + Tt + ") = " + vT) + " m/s. b) " + M("x(" + Tt + ") = " + xT) + " m. c) " + M("a(t) = 0") + " pour " + M("t = " + m) + " : " + M("v(" + m + ") = " + (v0 - 3 * m * m)) + " m/s.");
+          M("v(t) = 3t^2 - " + 6 * m + "t + " + v0) + ", " + M("x(t) = t^3 - " + 3 * m + "t^2 + " + v0 + "t") + ". a) " + M("v(" + Tt + ") = " + vT) + " cm/s. b) " + M("x(" + Tt + ") = " + xT) + " cm. c) " + M("a(t) = 0") + " pour " + M("t = " + m) + " : " + M("v(" + m + ") = " + (v0 - 3 * m * m)) + " cm/s.");
       },
     ],
     aireint: [

@@ -409,6 +409,25 @@
       { ctx: "erreur", guide: [GS(M("(" + x + ")^2") + " = ?", k * k, M(k * k) + "."), GS(M("-(" + x + ")^2") + " = ?", -k * k, M(-k * k) + " (le moins reste devant le carré)."), GS(M("f(" + x + ")") + " = ?", v, M(-k * k + sg(b * x) + sg(c) + " = " + v) + ".")],
         traps: [TR(faux, "C'est le résultat de " + w + " : " + M("-(" + x + ")^2 = -" + k * k) + ", pas " + M("+" + k * k) + ".")] });
     if (essai >= 20 || (Math.abs(v) > 1 && !trivialQ(q, 0) && !answerShown(q))) return q; } });
+  // Lot 26.11 (référentiel du Collège 1.FO.03c : zéros et ordonnée à l'origine, par le calcul) : une forme par niveau.
+  const deux = () => { let p, q; do { p = nz(-6, 6); q = nz(-6, 6); } while (p === q || p === -q || Math.abs(p * q) < 2 || Math.abs(p * q) > 30); return [p, q]; };
+  FI[1].push(() => { const [p, q] = deux(), a = pk([1, 1, 2, -1]), v = a * p * q, F = (a === 1 ? "" : a === -1 ? "-" : a) + "(" + xm(p) + ")(" + xm(q) + ")";
+    const Q = QN("Soit " + M("f(x) = " + F) + ". Calcule l'ordonnée à l'origine de " + M("f") + " (l'ordonnée du point où le graphe coupe l'axe vertical).", v,
+      "Sur l'axe vertical, " + M("x = 0") + " : " + M("f(0) = " + (a === 1 ? "" : a === -1 ? "-" : a + " \\cdot ") + "(" + par(-p) + ") \\cdot (" + par(-q) + ") = " + v) + ".",
+      { ctx: "ordonnee-origine", guide: [GS("L'ordonnée à l'origine est " + M("f(0)") + ". Que vaut la première parenthèse " + M("(" + xm(p) + ")") + " pour " + M("x = 0") + " ?", -p, M(-p) + "."), GS(M("f(0)") + " = ?", v, M(v) + ".")],
+        traps: [TR(-v, "Attention aux signes : pour x = 0, " + M(xm(p)) + " vaut " + -p + "."), TR(p, "Ça, c'est un zéro (où le graphe coupe l'axe horizontal) ; l'ordonnée à l'origine est f(0)."), TR(q, "Ça, c'est un zéro (axe horizontal) ; l'ordonnée à l'origine est f(0).")] });
+    return answerShown(Q) ? null : Q; });
+  FI[2].push(() => { const [p, q] = deux(), b = -(p + q), c = p * q;
+    return QSet("Soit " + M("f(x) = " + tri(1, b, c)) + ". Détermine les zéros de " + M("f") + " (les abscisses des points où le graphe coupe l'axe horizontal).", [p, q],
+      "On résout " + M("f(x) = 0") + " : " + M(tri(1, b, c) + " = (" + xm(p) + ")(" + xm(q) + ")") + " (deux nombres de somme " + M(-b) + " et de produit " + M(c) + "), donc " + M("x = " + p) + " ou " + M("x = " + q) + ".",
+      { ctx: "zeros-calcul", guide: [GS("Un zéro est une solution de " + M("f(x) = 0") + ". On factorise : deux nombres de produit " + M(c) + " et de somme " + M(-b) + ". Le plus petit ?", Math.min(p, q), M(p) + " et " + M(q) + "."), GSet("Zéros de " + M("f") + " ?", [p, q], M(p) + " et " + M(q) + ".")],
+        traps: [TSet([-p, -q], "Les zéros de (x − p)(x − q) sont p et q : attention aux signes."), TSet([c], "Ça, c'est l'ordonnée à l'origine f(0) ; les zéros annulent f.")] }); });
+  FI[3].push(() => { const [p, q] = deux(), b = -(p + q), c = p * q, A = (Math.abs(q - p) * Math.abs(c)) / 2;
+    if (!Number.isInteger(2 * A) || A > 120 || A < 3) return null;
+    return QN("Le graphe de " + M("f(x) = " + tri(1, b, c)) + " coupe l'axe horizontal en " + M("A") + " et " + M("B") + ", et l'axe vertical en " + M("C") + ". Calcule l'aire du triangle " + M("ABC") + " (unités du repère).", A,
+      "Zéros : " + M(Math.min(p, q)) + " et " + M(Math.max(p, q)) + ", donc " + M("AB = " + Math.abs(q - p)) + ". Ordonnée à l'origine : " + M("f(0) = " + c) + ", donc la hauteur issue de " + M("C") + " vaut " + M(Math.abs(c)) + ". Aire " + M("= \\frac{" + Math.abs(q - p) + " \\cdot " + Math.abs(c) + "}{2} = " + String(A).replace(".", "{,}")) + ".",
+      { ctx: "axes-triangle", guide: [GSet("Zéros de " + M("f") + " (abscisses de " + M("A") + " et " + M("B") + ") ?", [p, q], M(p) + " et " + M(q) + "."), GS("Longueur " + M("AB") + " ?", Math.abs(q - p), M(Math.abs(q - p)) + "."), GS("Ordonnée à l'origine " + M("f(0)") + " ?", c, M(c) + " : la hauteur vaut " + M(Math.abs(c)) + "."), GS("Aire du triangle ?", A, M(String(A).replace(".", "{,}")) + ".")],
+        traps: [TR(Math.abs(q - p) * Math.abs(c), "L'aire d'un triangle : base · hauteur ÷ 2."), TR((Math.abs(p + q) * Math.abs(c)) / 2, "La base AB est la distance entre les zéros : |" + q + " − (" + p + ")|.")] }); });
   const ALL = { fimg: FI, lectgraph: LG, racinv: RI, modaff: MA, transf: TF, absval: AV, morceaux: MO };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
@@ -426,7 +445,7 @@
     morceaux: "Compare d'abord x à la frontière pour choisir le morceau. Pour résoudre, résous dans chaque morceau et garde ce qui est dans le bon intervalle.",
   });
   if (typeof COMPS !== "undefined") Object.assign(COMPS, {
-    fimg: ["Image, préimage, lecture", "Racine, deux préimages, lecture", "Trinôme, f(f(x)), paramètre"],
+    fimg: ["Image, préimage, lecture, ordonnée à l'origine", "Racine, deux préimages, lecture, zéros", "Trinôme, f(f(x)), paramètre, axes"],
     lectgraph: ["Zéros, ordonnée à l'origine", "Extremums, nombre de solutions", "Signe, variations, f(x) = g(x)"],
     racinv: ["Images et préimages", "Équations avec racine, intersections", "Parasites, paramètre"],
     modaff: ["Coût total, prix unitaire, budget", "Seuil, égalité d'offres, expression", "Bougie, bénéfice, réservoir"],

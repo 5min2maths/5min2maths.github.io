@@ -647,7 +647,7 @@
             traps: [TR(V1 * k, "Les volumes sont multipliés par k³."), TR(V1 * k * k, "k², c'est pour les aires ; les volumes : k³."), TR(V1 * 3 * k, "k³ = k · k · k, pas 3k.")] }); },
     ],
     2: [
-      () => { const [h1, h2] = pk([[20, 30], [10, 20], [12, 18], [15, 30], [16, 24], [30, 15], [20, 10]]), k = h2 / h1, V1 = pk([0.5, 0.25, 0.75, 1, 1.5, 2]), V2 = V1 * k ** 3;
+      () => { const [h1, V1, h2] = pk([[20, 0.4, 30], [10, 0.05, 20], [15, 0.2, 30], [24, 1, 12], [30, 1.5, 15], [20, 0.5, 10]]) /* 26.11 (vraisemblance) : hauteur et contenance cohérentes (1,5 L ≈ 30 cm, et non 20 cm) */, k = h2 / h1, V2 = V1 * k ** 3;
         return QN("Deux bouteilles semblables mesurent " + M(h1 + "\\text{ cm}") + " et " + M(h2 + "\\text{ cm}") + " de haut. La première contient " + M(N(V1) + "\\text{ L}") + ". Combien contient la seconde (en L) ?", V2, M("k = " + h2 + " \\div " + h1 + " = " + N(k)) + ", " + M("k^3 = " + N(k ** 3)) + " : " + M(N(V1) + " \\cdot " + N(k ** 3) + " = " + N(V2) + "\\text{ L}") + ".",
           { ctx: "bouteilles", guide: [G("Rapport " + M("k") + " (seconde ÷ première) ?", k, M(N(k)) + "."), G(M("k^3") + " ?", k ** 3, M(N(k ** 3)) + "."), G("Contenance (L) ?", V2, M(N(V2)) + " L.")],
             traps: [TR(V1 * k, "Les volumes varient comme k³."), TR(V1 * k * k, "k² pour les aires ; k³ pour les volumes.")] }); },

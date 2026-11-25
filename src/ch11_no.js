@@ -67,7 +67,7 @@
             traps: [TR((a - b) / c, "Tu as soustrait avant de diviser. La division passe avant la soustraction.")] }); },
       () => { const a = R.int(2, 9), b = R.int(3, 8), c = R.int(2, 9), x = pk([
           ["Léa achète " + b + " cahiers à " + c + " CHF et une gomme à " + a + " CHF.", "achat"],
-          ["Au cinéma, une famille paie " + b + " billets à " + c + " CHF et un grand pop-corn à " + a + " CHF.", "cine"],
+          ["À la piscine, une famille paie " + b + " entrées à " + c + " CHF et une glace à " + a + " CHF.", "piscine"] /* 26.11 (vraisemblance) : billet de cinéma à 2–9 CHF remplacé (piscine) */,
           ["Un taxi facture " + a + " CHF de prise en charge, puis " + c + " CHF par kilomètre. La course fait " + b + " km.", "taxi"]]);
         return Qv(x[0] + " Écris le calcul en une seule ligne, puis calcule le prix total (en CHF).", a + b * c, "Calcul : " + M(a + " + " + b + " \\cdot " + c + " = " + a + " + " + b * c + " = " + (a + b * c)) + " CHF.",
           { ctx: x[1], guide: [GS("Prix des " + b + " éléments au même prix : " + M(b + " \\cdot " + c) + " = ?", b * c, M(b * c) + " CHF."), GS("Ajoute les " + a + " CHF : total ?", a + b * c, M(b * c + " + " + a + " = " + (a + b * c)) + " CHF.")],

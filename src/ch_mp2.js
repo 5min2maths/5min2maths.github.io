@@ -642,6 +642,17 @@
       "Erreur : le théorème du cosinus donne " + M("c^2") + ", pas " + M("c") + " : " + M("c^2 = a^2 + b^2 - 2ab\\cos\\gamma \\approx " + N(Math.round(c2 * 100) / 100)) + ", donc " + M("c \\approx \\sqrt{" + N(Math.round(c2 * 100) / 100) + "} \\approx " + N(Math.round(c * 100) / 100)) + " cm. (Contrôle : " + M("c") + " doit être plus petit que " + M("a + b = " + (a + b)) + ".)",
       0.01, { ctx: "erreur", guide: [Gd(M("c^2 = " + a + "^2 + " + b + "^2 - 2 \\cdot " + a + " \\cdot " + b + " \\cdot \\cos " + ga + "°") + " ≈ ? (au centième)", c2, M("\\approx " + N(Math.round(c2 * 100) / 100)) + ".", 0.01), Gd(M("c = \\sqrt{c^2}") + " ≈ ? (au centième)", c, M("\\approx " + N(Math.round(c * 100) / 100)) + " cm.", 0.01)],
         traps: [TR(c2, "C'est la valeur de " + w + " : c'est " + M("c^2") + " ; il reste la racine carrée.")] }); });
+  // Lot 26.11 (référentiel du Collège 2.GE.02c : résoudre complètement un triangle quelconque) : deux côtés et l'angle
+  // compris ; c par le cosinus, α par le sinus (a < b : α est aigu, pas de cas ambigu), β par la somme des angles, aire.
+  // Une forme de niveau 3 (réponse : β, au bout de la résolution) ; le défi en quatre parties est dans src/defis.js (sinlaw).
+  const RES = () => { let a, b; do { a = R.int(4, 11); b = R.int(5, 12); } while (b - a < 2); const ga = pk([40, 50, 60, 70, 80, 100, 110]),
+      c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(ga * D2R)), al = Math.asin(a * Math.sin(ga * D2R) / c) / D2R, be = 180 - ga - al, A = 0.5 * a * b * Math.sin(ga * D2R);
+    return { a, b, ga, c, al, be, A, r2: (v) => N(Math.round(v * 100) / 100), r1: (v) => N(Math.round(v * 10) / 10) }; };
+  SL[3].push(() => { const { a, b, ga, c, al, be, A, r1, r2 } = RES();
+    return QRd("Résous complètement le triangle " + M("ABC") + " : " + M("a = " + a) + " cm, " + M("b = " + b) + " cm et " + M("\\gamma = " + ga + "°") + ". Calcule " + M("c") + ", puis " + M("\\alpha") + ", puis " + M("\\beta") + ". Donne " + M("\\beta") + " (au dixième de degré).", be,
+      M("c^2 = " + a * a + " + " + b * b + " - " + 2 * a * b + "\\cos " + ga + "°") + ", " + M("c \\approx " + r2(c)) + " cm ; " + M("\\sin\\alpha = \\frac{" + a + " \\sin " + ga + "°}{c}") + ", " + M("\\alpha \\approx " + r1(al) + "°") + " (aigu, car " + M("a") + " n'est pas le plus grand côté) ; " + M("\\beta = 180° - " + ga + "° - \\alpha \\approx " + r1(be) + "°") + ". Pour finir, l'aire : " + M("\\frac{1}{2} \\cdot " + a + " \\cdot " + b + " \\cdot \\sin " + ga + "° \\approx " + r2(A)) + " cm².", 0.1,
+      { ctx: "resolution", fig: TRI(["a = " + a, "b = " + b, "c = ?", "γ = " + ga + "°", "C"]), guide: [Gd(M("c") + " (théorème du cosinus) ≈ ? (au centième)", c, M("\\approx " + r2(c)) + " cm.", 0.01), Gd(M("\\alpha") + " (théorème du sinus, en face de " + M("a") + ") ≈ ? (au dixième)", al, M("\\approx " + r1(al) + "°") + ".", 0.1), Gd(M("\\beta = 180° - \\gamma - \\alpha") + " ≈ ?", be, M("\\approx " + r1(be) + "°") + ".", 0.1)],
+        traps: [TR(al, "C'est α (en face de a) ; on demande β, le dernier angle."), TR(180 - ga, "β = 180° − γ − α : il faut aussi retirer α.")] }); });
   const ALL = { droites: DR, droitesinter: DI, recipaff: RF, trigcercle: TC, trigfn: TF, sinlaw: SL, trigeq: TQ, trigassoc: TA, trigeq2: T2, triaire: TAi, statfreq: SF, stats: ST, quartiles: QU };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
@@ -670,7 +681,7 @@
     recipaff: ["f⁻¹(b), point symétrique, opération inverse", "Expression de f⁻¹, conversion °C/°F, symétrie", "Taxi, reconstruire f, intersection avec y = x"],
     trigcercle: ["Degrés ↔ radians, quadrants", "Valeurs exactes, coordonnées, angle depuis sin ou cos", "Tangente, radians, angles de plus d'un tour"],
     trigfn: ["Maximum, amplitude, position du maximum", "Période en degrés ou en radians, image", "a et d depuis max et min, zéros, premier maximum"],
-    sinlaw: ["Théorème du sinus : côté, troisième angle, angle", "Théorème du cosinus : côté, distances, parallélogramme", "Angle par le cosinus, bouée, cosinus puis sinus"],
+    sinlaw: ["Théorème du sinus : côté, troisième angle, angle", "Théorème du cosinus : côté, distances, parallélogramme", "Angle par le cosinus, bouée, résolution complète"],
     trigeq: ["sin x = k, cos x = k, valeurs clés", "tan x = k, isoler, 2 sin x + 1 = 0", "sin x = cos x, isoler, carré"],
     trigassoc: ["Angles associés, angle de référence, Pythagore", "Complémentaires, tangente, angle obtus", "Expression, combinaison, quadrant donné"],
     trigeq2: ["sin(2x) = k, max ou min d'un modèle, période", "a et d d'une sinusoïde, hauteur d'un port, heure de marée haute", "Équation du port, grande roue, cos(bx) = 0"],
