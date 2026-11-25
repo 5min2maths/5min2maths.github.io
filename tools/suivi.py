@@ -31,6 +31,11 @@ WIDTH = [30, 30, 10, 9, 42, 9, 11, 8, 9, 9, 13, 13, 5, 5, 5, 12, 40, 7, 7, 7, 12
 
 def inventaire():
     page = ROOT / "tests" / "inventaire.html"
+    # 26.11 : la page d'inventaire charge exactement les fichiers de build.py (sinon les notions récentes manquaient).
+    _b = (ROOT / "build.py").read_text(); _js = re.findall(r'"([a-z0-9_]+\.js)"', _b[_b.index("JS = ["):_b.index("]", _b.index("JS = ["))])
+    _t = "".join(f'<script src="../src/{f}"></script>' for f in _js if f not in ("app.js", "parents.js", "presente.js"))
+    _h = page.read_text(); _i = _h.index("<!-- 26.11 : même liste que build.py"); _j = _h.index("<script>", _h.index("engine.js", _i))
+    page.write_text(_h[:_i] + "<!-- 26.11 : même liste que build.py (sans app.js, parents.js, presente.js) ; tools/suivi.py la régénère -->" + _t + _h[_j:])
     chrome = shutil.which("chromium") or shutil.which("chromium-browser") or shutil.which("google-chrome")
     if not chrome:
         sys.exit("Chromium introuvable")

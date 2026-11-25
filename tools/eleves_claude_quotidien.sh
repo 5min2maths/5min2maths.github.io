@@ -30,4 +30,7 @@ Lis d'abord les revues récentes ($PREV) et ne signale que les problèmes NOUVEA
 flock /tmp/bot5m2m.lock nice -n 10 timeout 3000 "$C" -p "$PROMPT" --max-turns 80 --permission-mode acceptEdits \
   --allowedTools "Read" "Bash(nice timeout 300 chromium:*)" "Bash(timeout 300 chromium:*)" "Bash(ls:*)" "Bash(grep:*)" \
   > "$R/suivi/revues/$D.log" 2>&1
-if [ -s tools/revue_quotidienne.md ]; then cp tools/revue_quotidienne.md "$R/suivi/revues/$D.md"; else echo "$D : pas de revue produite (voir $D.log)" >> "$R/suivi/revues/erreurs.log"; fi
+if [ -s tools/revue_quotidienne.md ]; then cp tools/revue_quotidienne.md "$R/suivi/revues/$D.md"
+  # Copie immédiate dans Dropbox (l'enseignant lit depuis Dropbox ; la synchronisation complète n'a lieu qu'à 6 h 10).
+  mkdir -p /home/jj/Dropbox/Projets/5min2maths/suivi/revues && cp "$R/suivi/revues/$D.md" /home/jj/Dropbox/Projets/5min2maths/suivi/revues/
+else echo "$D : pas de revue produite (voir $D.log)" >> "$R/suivi/revues/erreurs.log"; fi
