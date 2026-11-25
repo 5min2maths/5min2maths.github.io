@@ -115,3 +115,19 @@ reste un décalage, dis sur quel écran (séance, calibrage, problème) et avec 
 Toutes les classes ont été auditées (9e → 11e, 1re → 4e Collège, MP 1re → 4e) ; registre tools/niveau.json
 (253 notions) et colonne « Audit de niveau » du suivi. Décision transversale la plus importante : **niveau normal /
 renforcé** (MA2 montré à tous en 3e–4e) et **radians au Collège** (trigonométrie de 2e en degrés, générateurs MP).
+
+## Ajouts de la journée du 25.11
+
+- **Tes commentaires du matin** (publiés) : « évaluation bilan » au lieu d'EVACOM ; case « Évaluation » (au lieu de « Mon test ») ;
+  sujets blancs seulement sous Évaluation.
+- **Calculatrice** (tools/calculatrice.md) : règle par notion (277 notions : 66 « résultat exigé », 209 « calcul permis »).
+  À trancher : géométrie de 9e (calcul permis ?), pourcentages (0.25*160 accepté), probeq/proba 11e vs Collège,
+  tradexpr, eqexp/eqlog MP (log(32)/log(2) accepté), listes de solutions (pas encore couvertes), clavier calculatrice
+  sans lettres au CO.
+- **Présentations** : …/#decouvrir (élèves, projetable) et …/#parents (Je suis parent) ; bouton « ▶ Présenter ».
+- **Défis de niveau 4** : 40 notions de 9e–10e (src/defis_9.js, src/defis_910.js) et 19 notions de 2e Collège
+  (src/defis_2c.js ; réservés à la 2e : les ouvrir aussi en 3e–4e ? probrat et fracetage sans étalon d'épreuve).
+- **Robot** : 13 valeurs triviales corrigées, 2 fausses alertes d'angle (robot corrigé), 11 formules trop larges reprises.
+- **Nom de l'app** (tools/nom_app.md) : Mathélo déjà pris (mathelo.fr, soutien en maths) ; top 5 : Mathfil, Quotimaths,
+  Jalon, Mathpli, Quotipi. Marques (Swissreg, EUIPO, INPI) et comptes sociaux à vérifier à la main.
+- **Tests** : kp_stable échouait sous charge (budget de temps trop court) : budget réglable par page.
