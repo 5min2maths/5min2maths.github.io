@@ -123,7 +123,7 @@ const FR_WORDS = [
 ];
 function frThouPart(t, tex) {
   return tex ? frTimes(t.replace(/\\text\{['’]\}/g, "\\,").replace(/(\d)['’](?=\d{3}(?!\d))/g, "$1\\,"))
-    : t.replace(/\\text\{['’]\}/g, "\u202f").replace(/(\d)['’](?=\d{3}(?!\d))/g, "$1\u202f").replace(/ · /g, " × ");
+    : t.replace(/\\text\{['’]\}/g, "\u202f").replace(/(\d)['’](?=\d{3}(?!\d))/g, "$1\u202f").replace(/(\d|\))\s·\s(?=[\d(]|[a-zA-Z](?![A-Za-zÀ-ÿ]))/g, "$1 × ").replace(/(^|[^A-Za-zÀ-ÿ0-9])([a-zA-Z])\s·\s(?=[\d(]|[a-zA-Z](?![A-Za-zÀ-ÿ]))/g, "$1$2 × "); /* 25.11 soir : produit seulement (nombres, lettres isolées, parenthèses), pas les séparateurs de l'interface (« Mathélo · provisoire ») */
 }
 /* 25.11 (décision de l'enseignant) : en France, le produit s'écrit × et non avec le point médian. Le produit scalaire
    (formule avec \vec ou \overrightarrow) garde son point. */
@@ -9692,6 +9692,14 @@ const Curieux = {
   const f1 = (v) => v.toFixed(1);
   const dec = (v, k = 2) => String(+v.toFixed(k)).replace(".", "{,}"); /* 24.11 : décimal en formule */
   const r2 = (v, k) => +v.toFixed(k);
+  /* Chiffre maya (1 à 19) dans une case de 100 × 58 : points au-dessus, barres en dessous ; mayaW : le même en mots. */
+  const mayaG = (n, y) => {
+    const b = Math.floor(n / 5), d = n % 5, H = 58; let yy = y + (H - ((d ? 13 : 0) + b * 11)) / 2, g = `<rect x="100" y="${y}" width="100" height="${H}" rx="6" class="f-soft"/>`;
+    if (d) { for (let i = 0; i < d; i++) g += `<circle cx="${150 - (d - 1) * 8 + i * 16}" cy="${yy + 5}" r="5" class="f-head"/>`; yy += 13; }
+    for (let i = 0; i < b; i++) { g += `<rect x="118" y="${yy + 1}" width="64" height="8" rx="3" class="f-head"/>`; yy += 11; }
+    return g;
+  };
+  const mayaW = (n) => { const b = Math.floor(n / 5), d = n % 5; return [b ? b + " barre" + (b > 1 ? "s" : "") : "", d ? d + " point" + (d > 1 ? "s" : "") : ""].filter(Boolean).join(" et "); };
 
   const HISTOIRE = [
     { t: "Événement", titre: "Le signe « = » a été inventé en 1557", lien: "Équations",
@@ -9777,9 +9785,14 @@ const Curieux = {
         return { q: `Comme la Pascaline, additionne avec les retenues : \\(${tm(a)} + ${tm(b)}\\).`, value: a + b, sol: `\\(${tm(a)} + ${tm(b)} = ${tm(a + b)}\\).` }; } },
     { t: "Anecdote", titre: "Les Mayas comptaient en base 20", lien: "Numération",
       txt: "Les Mayas d'Amérique centrale écrivaient les nombres avec des points (1) et des barres (5), et un coquillage pour zéro : l'une des plus anciennes notations du zéro. Ils comptaient par vingtaines : un chiffre placé un étage plus haut vaut 20 fois plus.",
-      fig: () => svg(300, 130, `<rect x="100" y="12" width="100" height="50" rx="6" class="f-soft"/><circle cx="135" cy="37" r="6" class="f-head"/><circle cx="165" cy="37" r="6" class="f-head"/>${T(240, 42, "× 20", 'font-size="12"')}<rect x="100" y="70" width="100" height="50" rx="6" class="f-soft"/><circle cx="140" cy="84" r="5" class="f-head"/><circle cx="160" cy="84" r="5" class="f-head"/><rect x="118" y="94" width="64" height="9" rx="3" class="f-head"/><rect x="118" y="107" width="64" height="9" rx="3" class="f-head"/>${T(240, 100, "× 1", 'font-size="12"')}`, "nombre maya sur deux étages"),
-      ex: () => { const up = ri(2, 9), b = ri(1, 3), d = ri(0, 4), low = 5 * b + d;
-        return { q: `Un nombre maya : en haut, ${up} points (des vingtaines) ; en bas, ${b} barre${b > 1 ? "s" : ""}${d ? " et " + d + " point" + (d > 1 ? "s" : "") : ""}. Que vaut-il ?`, value: 20 * up + low, sol: `En bas : \\(${b} \\cdot 5${d ? " + " + d : ""} = ${low}\\). En haut : \\(${up} \\cdot 20 = ${20 * up}\\). Total : \\(${20 * up + low}\\).` }; } },
+      /* 25.11 (revue : « 5 points (des vingtaines) » alors que 5 s'écrit avec une barre, et une figure sans rapport avec
+         la question) : chaque étage est un chiffre de 1 à 19 écrit en points (1) au-dessus de barres (5) ; la figure est
+         dessinée avec les nombres de la question (fig(E), E.maya = [haut, bas]) ; sans question : 2 et 12 (= 52). */
+      fig: (E) => { const [up, low] = (E && E.maya) || [2, 12];
+        return svg(300, 140, mayaG(up, 8) + T(240, 42, "× 20", 'font-size="12"') + mayaG(low, 74) + T(240, 108, "× 1", 'font-size="12"'), "nombre maya sur deux étages : en haut " + up + ", en bas " + low); },
+      ex: () => { const up = ri(3, 19), low = ri(1, 19), bu = Math.floor(up / 5), bl = Math.floor(low / 5);
+        return { maya: [up, low], q: `Le nombre maya de la figure : en haut (les vingtaines), ${mayaW(up)} ; en bas (les unités), ${mayaW(low)}. Que vaut-il ?`, value: 20 * up + low,
+          sol: `En haut : \\(${bu ? bu + " \\cdot 5" + (up % 5 ? " + " + (up % 5) : "") + " = " : ""}${up}\\) vingtaines, soit \\(${up} \\cdot 20 = ${20 * up}\\). En bas : \\(${bl ? bl + " \\cdot 5" + (low % 5 ? " + " + (low % 5) : "") + " = " : ""}${low}\\). Total : \\(${20 * up + low}\\).` }; } },
     { t: "Événement", titre: "Pourquoi 60 minutes dans une heure ?", lien: "Numération et durées",
       txt: "Les Babyloniens comptaient en base 60, il y a plus de 4000 ans. Nous en avons hérité les 60 minutes d'une heure, les 60 secondes d'une minute et les 360 degrés du cercle. Un nombre s'écrivait avec des « chiffres » de 0 à 59 mis côte à côte : nous les séparons ici par une barre, « 1 | 20 », pour une soixantaine et vingt, c'est-à-dire 80 (pas de virgule : ce n'est pas un nombre décimal).",
       fig: () => svg(300, 130, `<circle cx="150" cy="65" r="52" class="f-shape2"/>${[...Array(12)].map((_, k) => { const s = Math.sin((k * Math.PI) / 6), c = Math.cos((k * Math.PI) / 6); return `<line x1="${f1(150 + 44 * s)}" y1="${f1(65 - 44 * c)}" x2="${f1(150 + 52 * s)}" y2="${f1(65 - 52 * c)}" class="f-line"/>`; }).join("")}<line x1="150" y1="65" x2="150" y2="25" class="f-line" stroke-width="3"/><line x1="150" y1="65" x2="180" y2="65" class="f-accent" stroke-width="3"/>`, "cadran d'horloge"),
@@ -10443,6 +10456,8 @@ const Backup = {
          reconnaître le même enfant quand le parent reçoit un nouveau code). */
       ...(Array.isArray(s.carnet) && s.carnet.length ? { cn: s.carnet.map((x, i, A) => [x.id, x.d, x.code, off(x.date), x.ok || 0].concat(i >= A.length - 8 && x.m ? [x.m, x.a || ""] : [])) } : {}),
       ...(s.pid ? { pid: s.pid } : {}),
+      /* 25.11 (grades de l'année, facultatif) : points de l'année, classe, années passées (souvenirs). */
+      ...(s.yp ? { yp: [s.yp.k, s.yp.c, s.yp.pts, (s.yp.past || []).map((x) => [x.k, x.c, x.p])] } : {}),
     };
   },
   /* base (24.11, espace parent) : date de référence des dates relatives (o.t = jour de la photo) ; par défaut
@@ -10477,6 +10492,7 @@ const Backup = {
     if (Array.isArray(o.co)) s.carnetOut = o.co.map(on);
     if (Array.isArray(o.cn)) s.carnet = o.cn.filter((x) => Array.isArray(x) && x[0] && x[2]).map(([id, d, code, dt, ok, m, a]) => ({ id, d, code, date: on(dt) || t, ok: ok || 0, ...(m ? { m, a: a || undefined } : {}) }));
     if (o.pid) s.pid = o.pid;
+    if (Array.isArray(o.yp)) s.yp = { k: o.yp[0], c: o.yp[1], pts: o.yp[2], d: null, dp: 0, ds: 0, past: (o.yp[3] || []).map(([k, c, p]) => ({ k, c, p })) };
     if (o.a) s.a11y = { fs: +o.a.fs || 1, font: o.a.font ? 1 : 0, hc: o.a.hc ? 1 : 0 }; // réglages de lecture (24.11)
     s.placed = true;
     Engine.migrate(s);
@@ -11876,19 +11892,23 @@ function actRetiens(A, L) {
   return o;
 }
 
-function activeLesson(id, L0, cont, review) {
+/* 25.11 (séance de 5 minutes, revue d'un élève simulé) : opts.short (leçon dans une séance) = Devine puis Retiens tout
+   de suite ; les défis deviennent facultatifs (bouton discret). Hors séance (rappel, Mes compétences) : parcours complet. */
+function activeLesson(id, L0, cont, review, opts = {}) {
   const A0 = ACTIVE[id], P = A0.predict, X = actPrep(A0), A = Object.assign({}, A0, { defis: X.defis, play: X.play }), L = actRetiens(A0, L0);
   const ss = sentences(L.regle);
   const rule = ss.length > 1 ? "<ul>" + ss.map((x) => "<li>" + x + "</li>").join("") + "</ul>" : " · " + L.regle;
   const tail = lessonBody(id), fb = tail.slice(tail.indexOf('<div class="lfb"'));
-  h(`${brand}<div class="eyebrow">${review ? "Leçon" : "Nouvelle notion"} · à toi de jouer</div>
+  const short = !!opts.short && !review, optLab = X.mode === "guide" ? "S'entraîner : " + X.defis.length + " question" + (X.defis.length > 1 ? "s" : "") + " (facultatif)" : "Essayer sur la figure (facultatif)";
+  h(`${brand}<div class="eyebrow">${review ? "Leçon · à toi de jouer" : opts.eyebrow || "Nouvelle notion · à toi de jouer"}</div>
   <div class="card pop lesson-card stack"><h2>${L.titre}</h2>
     <div class="act-step"><div class="act-h"><span class="act-n">1</span> Devine</div><p>${P.q}</p>${P.fig ? `<div class="figwrap">${P.fig}</div>` : ""}
       <div class="seg" id="pc">${predOrder(P.choices.length).map((i) => `<button type="button" data-i="${i}">${P.choices[i]}</button>`).join("")}</div><div id="pfb"></div></div>
-    <div class="act-step" id="s2" hidden><div class="act-h"><span class="act-n">2</span> ${X.titre}</div>
+    <div class="act-step" id="s2" hidden><div class="act-h"><span class="act-n">${short ? "+" : 2}</span> ${X.titre}</div>
       <ul class="act-done" id="adone"></ul><div id="gfb"></div><p class="act-goal" id="goal"></p><div id="play" class="stack"></div>
       <button type="button" class="btn-ghost small" id="skip">${X.mode === "guide" ? "Passer" : "Passer les défis"}</button></div>
-    <div class="act-step" id="s3" hidden><div class="act-h"><span class="act-n">3</span> Retiens</div>
+    ${short ? `<button type="button" class="btn-ghost small act-opt" id="tryopt" hidden>🖐 ${optLab}</button>` : ""}
+    <div class="act-step" id="s3" hidden><div class="act-h"><span class="act-n">${short ? 2 : 3}</span> Retiens</div>
       <div class="rule"><b>À retenir</b>${rule}</div>
       <div class="ex-list">${L.exemple.map((e) => `<div>${e}</div>`).join("")}</div>
       <div class="trap"><b>Piège</b> · ${L.piege}</div>${fb}</div>
@@ -11896,7 +11916,7 @@ function activeLesson(id, L0, cont, review) {
   <button class="btn-primary btn-big" id="go" hidden>${review ? "Retour à mes compétences" : "J'ai compris, à moi !"}</button>`);
   const $ = (s) => document.getElementById(s);
   const reveal = (el) => { el.hidden = false; el.classList.add("pop"); setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 60); };
-  const finish = () => { $("skip").hidden = true; reveal($("s3")); typeset($("s3")); $("go").hidden = false; };
+  const finish = () => { $("skip").hidden = true; if ($("s3").hidden) { reveal($("s3")); typeset($("s3")); } $("go").hidden = false; };
   // Défi : formules \( … \) rendues (ex. fractions, 22.11), sinon texte brut.
   const setGoal = (t) => { const g = $("goal"); if (t.includes("\\(")) { g.innerHTML = t; typeset(g); } else g.textContent = t; };
   let started = false;
@@ -11907,6 +11927,10 @@ function activeLesson(id, L0, cont, review) {
     if (!ok) b.classList.add("act-wrong");
     $("pfb").innerHTML = `<div class="fb ${ok ? "ok" : "hint"}">${ok ? "Exact !" : "Pas tout à fait."} ${P.why}</div>`; typeset($("pfb"));
     if (started) return; started = true;
+    if (short) { finish(); const t = $("tryopt"); t.hidden = false; t.onclick = () => { t.remove(); play(); }; return; }
+    play();
+  }));
+  function play() {
     setGoal(X.lab(0) + " · " + A.defis[0]);
     reveal($("s2"));
     A.play($("play"), (k, msg) => {
@@ -11921,7 +11945,7 @@ function activeLesson(id, L0, cont, review) {
       if (more) { setGoal(X.lab(k + 1) + " · " + A.defis[k + 1]); g.classList.remove("act-new"); void g.offsetWidth; g.classList.add("act-new"); setTimeout(() => $("gfb").scrollIntoView({ behavior: "smooth", block: "nearest" }), 60); }
       else { $("goal").textContent = X.fin; burst(); finish(); }
     });
-  }));
+  }
   $("skip").onclick = () => { if (typeof sig !== "undefined" && sig && sig.ev === "lecon") sigAide(sig, "P"); finish(); };
   $("go").onclick = cont;
 }
@@ -13640,7 +13664,8 @@ const exprForm = (sp, txt) => {
 // 22.11 : textes courts (une ligne sur téléphone : pas de saut quand on change de format).
 const FORMATS = {
   defi: { label: "🏔 Défi du jour", slots: ["defi4"], text: "Un seul problème, prends ton temps." },
-  auto: { label: "⚡ Série d'automatismes", slots: ["drill", "drill", "drill", "drill", "drill", "drill", "drill", "drill"], text: "8 calculs rapides, enchaînés." },
+  /* 25.11 (séance de 5 minutes) : 6 calculs au lieu de 8. */
+  auto: { label: "⚡ Série d'automatismes", slots: ["drill", "drill", "drill", "drill", "drill", "drill"], text: "6 calculs rapides, enchaînés." },
   app: { label: "🧩 Applications", slots: ["app", "app", "app"], text: "Trois questions de fond." },
   mixte: { label: "⚖️ Mixte", slots: ["drill", "app", "defi"], text: "Automatisme, application, défi." },
   revision: { label: "🧠 Révision", slots: ["rev", "rev", "rev", "rev"], text: "Tes notions à revoir aujourd'hui." },
@@ -14236,9 +14261,41 @@ const Engine = {
     return best ? best.f : "mixte";
   },
 
+  /* 25.11 (revue « un élève joue une séance » : 4 leçons complètes + 4 questions, bien plus que 5 minutes ; principe :
+     resserrer, tenir la promesse des 5 minutes). Au plus UNE leçon par séance : les notions dont la leçon reste à voir
+     (lessonDue) attendent les séances suivantes, sauf une, la plus prioritaire (chapitre « en classe » d'abord, puis
+     l'ordre du référentiel), placée en tête au niveau 1. La leçon prend la place d'une question (séances de 3 questions
+     et plus). Révision et défi du jour : jamais de leçon (« Révision » = du déjà-vu), sauf s'il n'y a rien d'autre. */
+  lessonDue(state, id) {
+    const s = state.notions[id];
+    return !!(s && typeof LESSONS !== "undefined" && LESSONS[id] && !s.lessonSeen && (s.status === "encours" || s.m < 0.4));
+  },
+  // Notion dont la leçon reste à voir et qu'on ne peut pas poser en question sans elle (encore jamais travaillée, ou en cours).
+  lessonFirst(state, id) { const s = state.notions[id]; return this.lessonDue(state, id) && (!s.seen || s.status === "encours"); },
+  lessonPick(state, ids) {
+    const now = this.nowActive(state) ? state.now.ids : [], s = (id) => state.notions[id];
+    const key = (id) => (now.includes(id) ? 0 : s(id).status === "encours" ? 1 : 2) * 1e5 + (s(id).status === "encours" || now.includes(id) ? this.rank(state.profile, id) : Math.round(s(id).m * 1000));
+    return [...ids].sort((a, b) => key(a) - key(b))[0] || null;
+  },
   planSession(state, format) {
-    const f = format || this.todayFormat(state);
-    return this.planSlots(state, FORMATS[f].slots);
+    const f = format || this.todayFormat(state), slots = FORMATS[f].slots;
+    const pend = this.eligible(state).filter((id) => this.lessonFirst(state, id));
+    if (!pend.length) return this.planSlots(state, slots);
+    const exclude = new Set(pend);
+    if (f === "revision" || f === "defi") { const p = this.planSlots(state, slots, { exclude }); if (p.length) return p; }
+    const keep = this.lessonPick(state, pend);
+    exclude.add(keep);
+    const rest = slots.length >= 3 ? slots.slice(1, -1) : slots.slice(1);
+    const k0 = slots[0] === "defi4" ? "defi" : slots[0];
+    return [keep + "|1|" + k0, ...this.planSlots(state, rest, { exclude })];
+  },
+  // Séance déjà tirée (mode libre…) : une seule notion à leçon, en tête au niveau 1 ; les autres sortent. n : nombre de questions visé.
+  oneLesson(state, plan, n) {
+    const idOf = (e) => String(e).split("|")[0], pend = plan.map(idOf).filter((id) => state.notions[id] && this.lessonDue(state, id));
+    if (!pend.length) return plan.slice(0, n);
+    const keep = this.lessonPick(state, pend), e0 = plan.find((e) => idOf(e) === keep).split("|");
+    const rest = plan.filter((e) => !pend.includes(idOf(e)));
+    return [[keep, 1, ...e0.slice(2)].join("|"), ...rest].slice(0, Math.max(1, n - 1));
   },
   // Format retenu pour aujourd'hui (stable dans la journée, sauf « Autre format »).
   todayFormat(state) {
@@ -14267,8 +14324,8 @@ const Engine = {
   },
 
   // Remplit des créneaux : pour chacun, la notion ET le niveau les plus proches de la cible fixée par le Mathélo.
-  planSlots(state, slots) {
-    const today = day(), elo = state.elo.r, cap = difficultyCap(state.profile), used = new Set(), plan = [];
+  planSlots(state, slots, opts = {}) {
+    const today = day(), elo = state.elo.r, cap = difficultyCap(state.profile), used = new Set(), plan = [], ex = opts.exclude || new Set();
     const maxOld = slots.includes("rev") ? 2 : 1;
     let old = 0;
     // Créneau « Rappel » : une notion ancienne, jamais triviale. Une séance sur trois environ ;
@@ -14286,6 +14343,7 @@ const Engine = {
       let best = null, pool = only || this.pool(state, base);
       if (kind === "rev" && !only) { const due = pool.filter((id) => state.notions[id].due <= today || state.notions[id].m < 0.5); if (due.length) pool = due; }
       for (const id of pool) {
+        if (ex.has(id)) continue;
         const s = state.notions[id], recent = this.isRecent(state, id), target = elo + TARGET[kind] + (s.easy || 0) * 120;
         if (rappel ? recent : !recent) continue; // les anciennes notions ne passent que par le créneau Rappel
         let levels = [1, 2, 3].filter((d) => d <= cap && (base !== "defi" || d >= 2) && (kind !== "drill" || d <= 2 || !recent));
@@ -14783,7 +14841,8 @@ function pzBind(root) {
   } else root.querySelectorAll(".pz-anim").forEach((el) => el.classList.remove("pz-wait"));
 }
 
-const pzGrades = (id) => `<div class="seg pz-grades" id="${id}">${(PZ.fr() ? [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"], [12, "Tle"]] : [[9, "9e"], [10, "10e"], [11, "11e"], [12, "Collège / MP"]]).map(([g, l]) => `<button type="button" aria-pressed="${g === PZ.grade}" data-v="${g}">${l}</button>`).join("")}</div>`;
+/* 25.11 (revue) : « Sec. II », comme l’app (écran d’accueil, « Je suis en : »), au lieu de « Collège / MP ». */
+const pzGrades = (id) => `<div class="seg pz-grades" id="${id}">${(PZ.fr() ? [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"], [12, "Tle"]] : [[9, "9e"], [10, "10e"], [11, "11e"], [12, "Sec. II"]]).map(([g, l]) => `<button type="button" aria-pressed="${g === PZ.grade}" data-v="${g}">${l}</button>`).join("")}</div>`;
 
 function pzQuestion() {
   if (PZ.fr()) return pzQuestionFR();

@@ -520,7 +520,12 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: v
 /* Programme du test en italique, pour le distinguer des boutons (21.11) */
 .prep-days li { font-style: italic; }
 /* 21.11 : visite guidée, paliers du Mathélo, reprise, bilan de semaine */
-.tour { position: fixed; left: 0; right: 0; bottom: 78px; z-index: 50; display: flex; justify-content: center; padding: 0 12px; pointer-events: none; }
+/* 25.11 : couche plein écran qui bloque les touchers ; carte toujours en bas (bouton « Suivant » à la même place). */
+.tour { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-end; justify-content: center; padding: 0 12px calc(16px + env(safe-area-inset-bottom, 0px)); background: rgba(10, 20, 40, .12); }
+.tour-card #tournext { min-width: 9em; } /* même largeur pour « Suivant » et « C'est parti ! » */
+.tour-card.tour-nudge { animation: tournudge .35s ease-in-out; }
+@keyframes tournudge { 0%, 100% { transform: translateX(0); } 30% { transform: translateX(-6px); } 70% { transform: translateX(6px); } }
+@media (prefers-reduced-motion: reduce) { .tour-card.tour-nudge { animation: none; } }
 .tour-card { pointer-events: auto; max-width: 460px; width: 100%; background: var(--card); border: 2px solid var(--blue); border-radius: 16px; padding: 12px 14px; box-shadow: 0 8px 28px rgba(20, 40, 100, .25); display: grid; gap: 6px; }
 .tour-card .row { justify-content: flex-end; }
 .tab.tour-hi { animation: tourpulse 1.2s ease-in-out infinite; border-radius: 12px; }
@@ -781,7 +786,6 @@ details.solfull summary { padding: 11px 0; margin-top: 0; }
 .goal { margin-top: 4px; }
 
 /* 24.11 : visite guidée en haut quand l'élément présenté est en bas (elle ne couvre plus les boutons) */
-.tour.tour-top { top: 70px; bottom: auto; }
 
 /* 24.11 (retour testeur) : identifiant de question invisible pour les élèves (il part toujours avec les commentaires) ;
    visible en mode auteur (…/#auteur). */
@@ -931,12 +935,12 @@ window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "glo
 </head>
 <body>
 <main id="app" aria-live="polite"></main>
-<script src="app.js?v=a87a94df62"></script>
+<script src="app.js?v=b47fd49afc"></script>
 <script>
 (function () {
   // Chargement par niveau (24.11). Paquets requis : le niveau de l'élève et les niveaux inférieurs de sa filière ;
   // France et liens de consultation (#q-, #l-, #auteur) : tout. Puis le reste en arrière-plan (hors ligne complet).
-  var V = "a87a94df62", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
+  var V = "b47fd49afc", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
   window.__packs = loaded; // pour les tests (tools/test_paquets.py)
   function need(p) {
     if (!p || p.system === "FR") return K.slice();
