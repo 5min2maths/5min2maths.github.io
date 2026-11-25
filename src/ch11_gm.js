@@ -168,10 +168,13 @@
         return Qv("Combien de ces triangles sont rectangles ? Côtés (en cm) : " + ts.map((t) => M("(" + t.join(" \\,;\\, ") + ")")).join(", "), ok, ts.map((t) => M(t[0] ** 2 + " + " + t[1] ** 2 + (t[0] ** 2 + t[1] ** 2 === t[2] ** 2 ? " = " : " \\neq ") + t[2] ** 2)).join(" ; ") + " : " + ok + " rectangle" + (ok > 1 ? "s" : "") + ".",
           { ctx: "compter", guide: [...ts.slice(0, 2).map((t, i) => GS("Triangle " + (i + 1) + " : " + M(t[0] + "^2 + " + t[1] + "^2") + " = ? (à comparer avec " + M(t[2] + "^2 = " + t[2] ** 2) + ")", t[0] ** 2 + t[1] ** 2, M(t[0] ** 2 + t[1] ** 2) + (t[0] ** 2 + t[1] ** 2 === t[2] ** 2 ? " : rectangle." : " : pas rectangle."))), GS("Fais de même pour les deux autres. Nombre de triangles rectangles ?", ok, ok + ".")],
             traps: [TR(4, "Un triangle n'est rectangle que si l'égalité est exacte."), TR(ok + 1, "Vérifie chaque égalité exactement : un écart d'une unité suffit à rendre le triangle non rectangle.")] }); },
-      () => { const [a, b, c] = trip(25), x = c + pk([1, 2, -1]);
-        return Qv("Un triangle a pour côtés " + M(a) + " cm, " + M(b) + " cm et " + M(x) + " cm. Calcule " + M(x + "^2 - (" + a + "^2 + " + b + "^2)") + ". (Si le résultat n'est pas 0, le triangle n'est pas rectangle.)", x * x - a * a - b * b, M(x * x + " - " + (a * a + b * b) + " = " + (x * x - a * a - b * b)) + " : ce n'est pas 0, le triangle n'est pas rectangle.",
-          { ctx: "ecart", guide: [GS(M(x + "^2") + " = ?", x * x, M(x * x) + "."), GS(M(a + "^2 + " + b + "^2") + " = ?", a * a + b * b, M(a * a + b * b) + "."), GS("Différence ?", x * x - a * a - b * b, M(x * x - a * a - b * b) + ".")],
-            traps: [TR(x - a - b, "On compare les carrés, pas les longueurs."), TR(a * a + b * b - x * x, "Dans l'ordre : " + M(x + "^2") + " moins la somme.")] }); },
+      /* 25.11 (revue : « 3, 4 et 4 cm » avec le calcul 4² − (3² + 4²) déjà écrit : trop guidé, sans plus grand côté net) :
+         le plus grand côté dépasse nettement les deux autres, les côtés sont dans le désordre, et le calcul n'est pas
+         écrit : l'élève repère le plus grand côté et compare son carré à la somme des deux autres. */
+      () => { const [a, b, c] = trip(25), x = c + pk([1, 2, 3]), s = shuf([a, b, x]), e = x * x - a * a - b * b;
+        return Qv("Un triangle a pour côtés " + M(s[0]) + " cm, " + M(s[1]) + " cm et " + M(s[2]) + " cm. Est-il rectangle ? Pour le savoir, calcule de combien le carré du plus grand côté dépasse la somme des carrés des deux autres.", e, "Plus grand côté " + M(x) + " : " + M(x + "^2 - (" + a + "^2 + " + b + "^2) = " + x * x + " - " + (a * a + b * b) + " = " + e) + " : ce n'est pas 0, le triangle n'est pas rectangle (il a un angle obtus).",
+          { ctx: "ecart", guide: [GS("Quel est le plus grand côté (en cm) ?", x, M(x) + " cm."), GS(M(x + "^2") + " = ?", x * x, M(x * x) + "."), GS("Somme des carrés des deux autres : " + M(a + "^2 + " + b + "^2") + " = ?", a * a + b * b, M(a * a + b * b) + "."), GS("Différence ?", e, M(e) + ".")],
+            traps: [TR(x - a - b, "On compare les carrés, pas les longueurs."), TR(-e, "Dans l'ordre : le carré du plus grand côté moins la somme des deux autres."), TR(a * a - b * b - x * x, "Le plus grand côté est " + M(x) + " cm : c'est son carré qu'on compare."), TR(b * b - a * a - x * x, "Le plus grand côté est " + M(x) + " cm : c'est son carré qu'on compare.")] }); },
     ],
     2: [
       () => { const [a, b, c] = pk([[1.5, 2, 2.5], [0.9, 1.2, 1.5], [2.4, 3.2, 4], [1.2, 1.6, 2], [3.6, 4.8, 6], [0.6, 0.8, 1], [2.7, 3.6, 4.5]]);

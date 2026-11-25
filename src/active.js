@@ -360,19 +360,23 @@ function actRetiens(A, L) {
   return o;
 }
 
-function activeLesson(id, L0, cont, review) {
+/* 25.11 (séance de 5 minutes, revue d'un élève simulé) : opts.short (leçon dans une séance) = Devine puis Retiens tout
+   de suite ; les défis deviennent facultatifs (bouton discret). Hors séance (rappel, Mes compétences) : parcours complet. */
+function activeLesson(id, L0, cont, review, opts = {}) {
   const A0 = ACTIVE[id], P = A0.predict, X = actPrep(A0), A = Object.assign({}, A0, { defis: X.defis, play: X.play }), L = actRetiens(A0, L0);
   const ss = sentences(L.regle);
   const rule = ss.length > 1 ? "<ul>" + ss.map((x) => "<li>" + x + "</li>").join("") + "</ul>" : " · " + L.regle;
   const tail = lessonBody(id), fb = tail.slice(tail.indexOf('<div class="lfb"'));
-  h(`${brand}<div class="eyebrow">${review ? "Leçon" : "Nouvelle notion"} · à toi de jouer</div>
+  const short = !!opts.short && !review, optLab = X.mode === "guide" ? "S'entraîner : " + X.defis.length + " question" + (X.defis.length > 1 ? "s" : "") + " (facultatif)" : "Essayer sur la figure (facultatif)";
+  h(`${brand}<div class="eyebrow">${review ? "Leçon · à toi de jouer" : opts.eyebrow || "Nouvelle notion · à toi de jouer"}</div>
   <div class="card pop lesson-card stack"><h2>${L.titre}</h2>
     <div class="act-step"><div class="act-h"><span class="act-n">1</span> Devine</div><p>${P.q}</p>${P.fig ? `<div class="figwrap">${P.fig}</div>` : ""}
       <div class="seg" id="pc">${predOrder(P.choices.length).map((i) => `<button type="button" data-i="${i}">${P.choices[i]}</button>`).join("")}</div><div id="pfb"></div></div>
-    <div class="act-step" id="s2" hidden><div class="act-h"><span class="act-n">2</span> ${X.titre}</div>
+    <div class="act-step" id="s2" hidden><div class="act-h"><span class="act-n">${short ? "+" : 2}</span> ${X.titre}</div>
       <ul class="act-done" id="adone"></ul><div id="gfb"></div><p class="act-goal" id="goal"></p><div id="play" class="stack"></div>
       <button type="button" class="btn-ghost small" id="skip">${X.mode === "guide" ? "Passer" : "Passer les défis"}</button></div>
-    <div class="act-step" id="s3" hidden><div class="act-h"><span class="act-n">3</span> Retiens</div>
+    ${short ? `<button type="button" class="btn-ghost small act-opt" id="tryopt" hidden>🖐 ${optLab}</button>` : ""}
+    <div class="act-step" id="s3" hidden><div class="act-h"><span class="act-n">${short ? 2 : 3}</span> Retiens</div>
       <div class="rule"><b>À retenir</b>${rule}</div>
       <div class="ex-list">${L.exemple.map((e) => `<div>${e}</div>`).join("")}</div>
       <div class="trap"><b>Piège</b> · ${L.piege}</div>${fb}</div>
@@ -380,7 +384,7 @@ function activeLesson(id, L0, cont, review) {
   <button class="btn-primary btn-big" id="go" hidden>${review ? "Retour à mes compétences" : "J'ai compris, à moi !"}</button>`);
   const $ = (s) => document.getElementById(s);
   const reveal = (el) => { el.hidden = false; el.classList.add("pop"); setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 60); };
-  const finish = () => { $("skip").hidden = true; reveal($("s3")); typeset($("s3")); $("go").hidden = false; };
+  const finish = () => { $("skip").hidden = true; if ($("s3").hidden) { reveal($("s3")); typeset($("s3")); } $("go").hidden = false; };
   // Défi : formules \( … \) rendues (ex. fractions, 22.11), sinon texte brut.
   const setGoal = (t) => { const g = $("goal"); if (t.includes("\\(")) { g.innerHTML = t; typeset(g); } else g.textContent = t; };
   let started = false;
@@ -391,6 +395,10 @@ function activeLesson(id, L0, cont, review) {
     if (!ok) b.classList.add("act-wrong");
     $("pfb").innerHTML = `<div class="fb ${ok ? "ok" : "hint"}">${ok ? "Exact !" : "Pas tout à fait."} ${P.why}</div>`; typeset($("pfb"));
     if (started) return; started = true;
+    if (short) { finish(); const t = $("tryopt"); t.hidden = false; t.onclick = () => { t.remove(); play(); }; return; }
+    play();
+  }));
+  function play() {
     setGoal(X.lab(0) + " · " + A.defis[0]);
     reveal($("s2"));
     A.play($("play"), (k, msg) => {
@@ -405,7 +413,7 @@ function activeLesson(id, L0, cont, review) {
       if (more) { setGoal(X.lab(k + 1) + " · " + A.defis[k + 1]); g.classList.remove("act-new"); void g.offsetWidth; g.classList.add("act-new"); setTimeout(() => $("gfb").scrollIntoView({ behavior: "smooth", block: "nearest" }), 60); }
       else { $("goal").textContent = X.fin; burst(); finish(); }
     });
-  }));
+  }
   $("skip").onclick = () => { if (typeof sig !== "undefined" && sig && sig.ev === "lecon") sigAide(sig, "P"); finish(); };
   $("go").onclick = cont;
 }

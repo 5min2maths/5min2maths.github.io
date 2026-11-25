@@ -149,7 +149,7 @@ for (const id of Object.keys(LESSONS_V2)) if (!NOTIONS.some((n) => n.id === id))
   const plan = Engine.planSession(strong, "mixte"), kinds = plan.map((e) => e.split("|")[2]);
   if (plan.join() && kinds.join() !== "drill,app,defi") fail("mixte : " + kinds.join(","));
   if (Engine.planSession(strong, "defi").length !== 1) fail("défi du jour : plus d'une question");
-  if (Engine.planSession(strong, "auto").length !== 8) fail("série d'automatismes");
+  if (Engine.planSession(strong, "auto").length !== 6) fail("série d'automatismes"); /* 25.11 : 6 calculs au lieu de 8 (séance de 5 minutes, tests/court.html) */
   // « Trop facile » : demi-victoire, notion relevée, remplaçante un cran au-dessus, cible relevée
   { const t = mk({ system: "CH", grade: 13, track: "college", minutes: 5 }, 1500), r0 = t.elo.r, id = "expo";
     const r = Engine.tooEasy(t, id, 1, "drill");
@@ -220,7 +220,8 @@ const plan = Engine.placementPlan(st);
 if (plan.length !== 5) fail("positionnement : " + plan.length + " questions");
 plan.forEach((id, i) => Engine.placementResult(st, id, i % 3 === 0 ? false : i % 3 === 1 ? true : null));
 const sess = Engine.planSession(st, "app").map((e) => e.split("|")[0]);
-if (sess.length !== 3) fail("séance applications : " + sess.length + " questions");
+/* 25.11 (séance de 5 minutes) : une leçon en tête prend la place d'une question (leçon + 2 questions). */
+if (!(sess.length === 3 || (sess.length === 2 && Engine.lessonDue(st, sess[0])))) fail("séance applications : " + sess.length + " questions");
 sess.forEach((id) => { const q = Engine.make(st, id); Engine.record(st, id, q.d, 1, true); });
 Engine.finishDay(st, sess.length, sess.length);
 if (st.streak.count !== 1) fail("série " + st.streak.count);
@@ -259,6 +260,9 @@ log.push("Mathélo : " + st.elo.r + " — " + eloLabel(prof, st.elo.r));
   const later = Engine.catalog(s.profile).filter((c) => c.current && s.notions[c.id].status === "avenir").map((c) => c.id).slice(-1)[0];
   Engine.setNow(s, [later]);
   if (s.notions[later].status !== "encours") fail("notion du moment non ouverte");
+  /* 25.11 : ce test mesure la part du chapitre ; leçons déjà vues (la leçon unique par séance, qui prend la place d'une
+     question, est vérifiée par tests/court.html). */
+  for (const id in s.notions) s.notions[id].lessonSeen = true;
   let on = 0, tot = 0, order = true;
   for (let k = 0; k < 40; k++) for (const f of ["app", "auto", "mixte", "defi"]) {
     const pl = Engine.planSession(s, f); tot += pl.length; const mine = pl.filter((e) => e.startsWith(later + "|")); on += mine.length;

@@ -16,7 +16,7 @@ screenHome();ok(!document.getElementById("tour"),"2 plus de visite ensuite");
 session={fmt:"auto",plan:["prio|1","fracadd|1","puiss|1"],i:0,score:0,answered:0,start:Date.now(),elo0:state.elo.r,ids:new Set(),pinged:true};nextQuestion();
 document.getElementById("idk").click();document.getElementById("nx").click();
 ok(state.resume&&state.resume.s.i===1&&state.resume.s.answered===1,"1 séance gardée "+JSON.stringify(state.resume&&{i:state.resume.s.i,a:state.resume.s.answered}));
-session=null;homeTab="today";screenHome();ok(/question <b>2 sur 3<\/b>/.test(app.innerHTML),"1 carte Reprendre");
+session=null;homeTab="today";screenHome();ok(/étape <b>2 sur 3<\/b>/.test(app.innerHTML),"1 carte Reprendre"); /* 25.11 : « étape » (la leçon compte dans le compteur) */
 document.getElementById("resgo").click();ok(session&&session.i===1&&session.ids instanceof Set&&/2 sur 3/.test(app.textContent),"1 reprise à la question 2");
 document.getElementById("idk").click();document.getElementById("nx").click();document.getElementById("idk").click();document.getElementById("nx").click();
 ok(/Score/.test(app.textContent)&&!state.resume,"1 bilan : plus de reprise");

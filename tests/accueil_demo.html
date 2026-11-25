@@ -19,7 +19,9 @@ try{
  demoGrade=null;screenWelcome();document.querySelector('#dgrade button[data-v="10"]').click();
  ok(demoGrade===10&&draft.grade===10,"6 choix 10e mémorisé et pré-rempli");ok(document.querySelector('#dgrade button[data-v="10"]').getAttribute("aria-pressed")==="true","6 bouton actif");
  const id1=document.querySelector("#demo .chip").textContent;document.getElementById("dskip").click();ok(demoSkip.length===1,"7 notion écartée");
- document.getElementById("go").click();ok(document.querySelector('#grade button[aria-pressed="true"]').dataset.v==="10","8 étape 1 sur 10e");
+ document.getElementById("go").click();ok(/10e/.test((document.getElementById("gradeknown")||{}).textContent||"")&&!document.getElementById("grade"),"8 étape 1 : 10e déjà su, pas redemandé (25.11)");
+ document.getElementById("gradechg").click();ok(document.querySelector('#grade button[aria-pressed="true"]').dataset.v==="10","8 « changer » : choix de la classe, 10e coché");
+ demoGrade=12;draft.grade=12;draft.fromWelcome=12;screenLevel();ok([...document.querySelectorAll("#grade button")].every((b)=>+b.dataset.v>=12)&&document.getElementById("track"),"8 Sec. II : classe du sec. II et voie à choisir");
  document.body.insertAdjacentHTML("beforeend","<pre id=log>"+log.join("\n")+"</pre>");
 }catch(e){fails.push("EXC "+e.message+" "+e.stack)}
 document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC\n"+fails.slice(0,10).join("\n"):"OK")+"</pre>");

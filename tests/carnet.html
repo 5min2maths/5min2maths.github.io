@@ -23,7 +23,7 @@ startCarnet();ok(/Carnet d'erreurs · 1 sur 1/.test(app.textContent),"3 eyebrow"
 startCarnet();answer(false);ok(state.carnet[0].ok===0,"3 échec remet à 0");document.getElementById("nx").click();
 startCarnet();answer(true);document.getElementById("nx").click();startCarnet();answer(true);
 ok((state.carnet||[]).length===0,"3 effacée après 2 réussites "+JSON.stringify(state.carnet));
-document.getElementById("nx").click();ok(/vide : bravo/.test(app.textContent),"3 bilan carnet vide");
+document.getElementById("nx").click();ok(/vide : bravo|vide ✓/.test(app.textContent),"3 bilan carnet vide"); /* 25.11 : petite séance du Carnet = bilan léger (« vide ✓ », commit du 25.11 soir) */
 // 4. programme du test : J-5 révision, J-2 sujet, J-1 dernier tour, J jour J
 const ids=["prio","fracadd","puiss"];
 for(const [L,kind] of [[5,"autoeval"],[2,"mock"],[1,"apres"],[0,"jourj"]]){state.prep={ids,date:addDays(day(),L)};homeTab="today";screenHome();

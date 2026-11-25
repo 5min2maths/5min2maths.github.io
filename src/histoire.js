@@ -12,6 +12,14 @@
   const f1 = (v) => v.toFixed(1);
   const dec = (v, k = 2) => String(+v.toFixed(k)).replace(".", "{,}"); /* 24.11 : décimal en formule */
   const r2 = (v, k) => +v.toFixed(k);
+  /* Chiffre maya (1 à 19) dans une case de 100 × 58 : points au-dessus, barres en dessous ; mayaW : le même en mots. */
+  const mayaG = (n, y) => {
+    const b = Math.floor(n / 5), d = n % 5, H = 58; let yy = y + (H - ((d ? 13 : 0) + b * 11)) / 2, g = `<rect x="100" y="${y}" width="100" height="${H}" rx="6" class="f-soft"/>`;
+    if (d) { for (let i = 0; i < d; i++) g += `<circle cx="${150 - (d - 1) * 8 + i * 16}" cy="${yy + 5}" r="5" class="f-head"/>`; yy += 13; }
+    for (let i = 0; i < b; i++) { g += `<rect x="118" y="${yy + 1}" width="64" height="8" rx="3" class="f-head"/>`; yy += 11; }
+    return g;
+  };
+  const mayaW = (n) => { const b = Math.floor(n / 5), d = n % 5; return [b ? b + " barre" + (b > 1 ? "s" : "") : "", d ? d + " point" + (d > 1 ? "s" : "") : ""].filter(Boolean).join(" et "); };
 
   const HISTOIRE = [
     { t: "Événement", titre: "Le signe « = » a été inventé en 1557", lien: "Équations",
@@ -97,9 +105,14 @@
         return { q: `Comme la Pascaline, additionne avec les retenues : \\(${tm(a)} + ${tm(b)}\\).`, value: a + b, sol: `\\(${tm(a)} + ${tm(b)} = ${tm(a + b)}\\).` }; } },
     { t: "Anecdote", titre: "Les Mayas comptaient en base 20", lien: "Numération",
       txt: "Les Mayas d'Amérique centrale écrivaient les nombres avec des points (1) et des barres (5), et un coquillage pour zéro : l'une des plus anciennes notations du zéro. Ils comptaient par vingtaines : un chiffre placé un étage plus haut vaut 20 fois plus.",
-      fig: () => svg(300, 130, `<rect x="100" y="12" width="100" height="50" rx="6" class="f-soft"/><circle cx="135" cy="37" r="6" class="f-head"/><circle cx="165" cy="37" r="6" class="f-head"/>${T(240, 42, "× 20", 'font-size="12"')}<rect x="100" y="70" width="100" height="50" rx="6" class="f-soft"/><circle cx="140" cy="84" r="5" class="f-head"/><circle cx="160" cy="84" r="5" class="f-head"/><rect x="118" y="94" width="64" height="9" rx="3" class="f-head"/><rect x="118" y="107" width="64" height="9" rx="3" class="f-head"/>${T(240, 100, "× 1", 'font-size="12"')}`, "nombre maya sur deux étages"),
-      ex: () => { const up = ri(2, 9), b = ri(1, 3), d = ri(0, 4), low = 5 * b + d;
-        return { q: `Un nombre maya : en haut, ${up} points (des vingtaines) ; en bas, ${b} barre${b > 1 ? "s" : ""}${d ? " et " + d + " point" + (d > 1 ? "s" : "") : ""}. Que vaut-il ?`, value: 20 * up + low, sol: `En bas : \\(${b} \\cdot 5${d ? " + " + d : ""} = ${low}\\). En haut : \\(${up} \\cdot 20 = ${20 * up}\\). Total : \\(${20 * up + low}\\).` }; } },
+      /* 25.11 (revue : « 5 points (des vingtaines) » alors que 5 s'écrit avec une barre, et une figure sans rapport avec
+         la question) : chaque étage est un chiffre de 1 à 19 écrit en points (1) au-dessus de barres (5) ; la figure est
+         dessinée avec les nombres de la question (fig(E), E.maya = [haut, bas]) ; sans question : 2 et 12 (= 52). */
+      fig: (E) => { const [up, low] = (E && E.maya) || [2, 12];
+        return svg(300, 140, mayaG(up, 8) + T(240, 42, "× 20", 'font-size="12"') + mayaG(low, 74) + T(240, 108, "× 1", 'font-size="12"'), "nombre maya sur deux étages : en haut " + up + ", en bas " + low); },
+      ex: () => { const up = ri(3, 19), low = ri(1, 19), bu = Math.floor(up / 5), bl = Math.floor(low / 5);
+        return { maya: [up, low], q: `Le nombre maya de la figure : en haut (les vingtaines), ${mayaW(up)} ; en bas (les unités), ${mayaW(low)}. Que vaut-il ?`, value: 20 * up + low,
+          sol: `En haut : \\(${bu ? bu + " \\cdot 5" + (up % 5 ? " + " + (up % 5) : "") + " = " : ""}${up}\\) vingtaines, soit \\(${up} \\cdot 20 = ${20 * up}\\). En bas : \\(${bl ? bl + " \\cdot 5" + (low % 5 ? " + " + (low % 5) : "") + " = " : ""}${low}\\). Total : \\(${20 * up + low}\\).` }; } },
     { t: "Événement", titre: "Pourquoi 60 minutes dans une heure ?", lien: "Numération et durées",
       txt: "Les Babyloniens comptaient en base 60, il y a plus de 4000 ans. Nous en avons hérité les 60 minutes d'une heure, les 60 secondes d'une minute et les 360 degrés du cercle. Un nombre s'écrivait avec des « chiffres » de 0 à 59 mis côte à côte : nous les séparons ici par une barre, « 1 | 20 », pour une soixantaine et vingt, c'est-à-dire 80 (pas de virgule : ce n'est pas un nombre décimal).",
       fig: () => svg(300, 130, `<circle cx="150" cy="65" r="52" class="f-shape2"/>${[...Array(12)].map((_, k) => { const s = Math.sin((k * Math.PI) / 6), c = Math.cos((k * Math.PI) / 6); return `<line x1="${f1(150 + 44 * s)}" y1="${f1(65 - 44 * c)}" x2="${f1(150 + 52 * s)}" y2="${f1(65 - 52 * c)}" class="f-line"/>`; }).join("")}<line x1="150" y1="65" x2="150" y2="25" class="f-line" stroke-width="3"/><line x1="150" y1="65" x2="180" y2="65" class="f-accent" stroke-width="3"/>`, "cadran d'horloge"),
