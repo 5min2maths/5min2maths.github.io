@@ -614,7 +614,9 @@ function screenHome() {
     const nowLine = !Engine.nowActive(state) ? `<button type="button" class="btn-sec small" id="nowpick">📚 Choisir mon chapitre travaillé en classe</button>`
       : Engine.nowStale(state) ? `<div class="now-ask"><b>📚 Cette semaine en classe, tu travailles toujours :</b><span>${esc(state.now.ids.map(nLabel).join(" · "))} ?</span><div class="row now-ask-btns"><button type="button" class="btn-sec small" id="nowyes">Oui, toujours</button><button type="button" class="btn-sec small" id="nowpick">J'ai changé de chapitre</button></div></div>`
       : `<span class="small now-lab">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span><button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
-    const door = (id, ic, label, sub, badge) => `<button type="button" class="door" data-door="${id}">${badge ? `<span class="door-badge">${badge}</span>` : ""}<span class="door-sq">${ic}</span><b>${label}</b>${sub ? `<small>${sub}</small>` : ""}</button>`;
+    /* 25.11 soir (revue d'un testeur) : nom accessible explicite pour chaque case (lecteurs d'écran). */
+    const DOOR_NAME = { prob: "Problème de la semaine", cur: "Questions curieuses", hist: "Histoires des maths", test: "Mon évaluation", carnet: "Carnet d'erreurs", prog: "Mes progrès" };
+    const door = (id, ic, label, sub, badge) => `<button type="button" class="door" data-door="${id}" aria-label="${esc(DOOR_NAME[id] || label)}${sub ? " : " + esc(sub) : ""}${badge === "!" ? " (nouveau)" : ""}">${badge ? `<span class="door-badge">${badge}</span>` : ""}<span class="door-sq">${ic}</span><b>${label}</b>${sub ? `<small>${sub}</small>` : ""}</button>`;
     const svgI = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`, TI = Object.fromEntries(HOME_TABS.map(([k, , ic]) => [k, ic]));
     h(`<div class="hub">${head}
     ${eloBanner()}
@@ -861,9 +863,9 @@ function screenComps() {
 function screenCompsRef() {
   const p = state.profile, y0 = Referentiel.year(p);
   const line = (r) => {
-    if (!Referentiel.hasQuestions(r)) return `<div class="comp rcomp"><span><span class="rcode">${r.code}</span> ${esc(r.label)}</span><span class="comp-r"><span class="tag">travaillée en classe</span></span></div>`;
+    if (!Referentiel.hasQuestions(r)) return `<div class="comp rcomp"><span title="${r.code}">${esc(r.label)}</span><span class="comp-r"><span class="tag">travaillée en classe</span></span></div>`;
     const n = Referentiel.note(state, r), t = Referentiel.plan(p, r).length;
-    return `<div class="comp rcomp"><span><span class="rcode">${r.code}</span> ${esc(r.label)}</span><span class="comp-r">${t ? `<button type="button" class="ctest rtest" data-code="${r.code}" title="3 questions sur cette compétence">Me tester</button>` : ""}<span class="note ${noteCls(n)}">${noteTxt(n)}</span></span></div>`;
+    return `<div class="comp rcomp"><span title="${r.code}">${esc(r.label)}</span><span class="comp-r">${t ? `<button type="button" class="ctest rtest" data-code="${r.code}" title="3 questions sur cette compétence">Me tester</button>` : ""}<span class="note ${noteCls(n)}">${noteTxt(n)}</span></span></div>`;
   };
   const themes = (list) => [...new Set(list.map((r) => r.theme))].map((th) => {
     const rs = list.filter((r) => r.theme === th), t = Referentiel.stats(state, rs);
@@ -945,10 +947,10 @@ function startInlineAct(root) {
 }
 
 // Carte d'accord (24.11) : une seule fois, en tête de l'accueil, tant que l'élève n'a pas répondu.
-const statsCard = () => statsAsked() ? "" : `<div class="card stack" id="statscard"><div class="eyebrow">📊 Aider à améliorer l'app ?</div>
-  <p class="small">Si tu acceptes, l'app envoie des statistiques <b>anonymes</b> (sans nom) : ta classe, tes résultats, le temps passé, les erreurs techniques. Elles servent seulement à améliorer les questions. Tu peux changer d'avis à tout moment dans les Réglages.</p>
-  <div class="row"><button class="btn-primary" id="statsoui">Oui, j'aide</button><button class="btn-sec" id="statsnon">Non merci</button></div>
-  <button class="btn-ghost small" id="statsplus">🔒 Le détail de ce qui est envoyé</button></div>`;
+/* 25.11 soir (revue d'un testeur : l'encart prenait la moitié de l'accueil et repoussait la séance) : une ligne compacte ;
+   le détail reste à un toucher (« ? »). */
+const statsCard = () => statsAsked() ? "" : `<div class="card flat stats-line" id="statscard"><span class="small">📊 Envoyer des statistiques <b>anonymes</b> pour améliorer l'app ?</span>
+  <span class="row stats-btns"><button class="btn-primary small" id="statsoui">Oui</button><button class="btn-sec small" id="statsnon">Non</button><button class="btn-ghost small" id="statsplus" aria-label="Le détail de ce qui est envoyé">?</button></span></div>`;
 
 // ---------------- Ce que l'app envoie (13.11) ----------------
 /* 25.11 soir (séparation France / romand) : exemple de classe dans le système de l'élève. */
@@ -1664,12 +1666,30 @@ function previewOf(inp, prev, spec) {
   if (!v) { prev.innerHTML = ""; return; }
   try { prev.innerHTML = previewHtml(v, spec); typeset(prev); } catch (e) { prev.innerHTML = `<span class="err">${esc(e.message)}</span>`; }
 }
+/* 25.11 soir (revue d'un testeur : « le pavé se décale à l'affichage, mon premier clic est tombé sur la mauvaise touche ») :
+   l'énoncé se met en page (formules, figure) après l'affichage du clavier, qui glisse. On surveille la position du clavier
+   pendant ses premières secondes ; un toucher qui arrive moins de 350 ms après un déplacement visait une autre touche :
+   il est ignoré. */
+const KP_GUARD = { moved: 0 };
+function kpWatch() {
+  const kp = app.querySelector("#kp"); if (!kp || !window.requestAnimationFrame) return;
+  let y = kp.getBoundingClientRect().top + window.scrollY, t0 = performance.now();
+  const tick = () => {
+    if (!kp.isConnected || performance.now() - t0 > 4000) return;
+    const y2 = kp.getBoundingClientRect().top + window.scrollY;
+    if (Math.abs(y2 - y) > 2) { KP_GUARD.moved = performance.now(); y = y2; }
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
 function bindKeypad(getInput, after) {
   let mode = window.matchMedia("(pointer: fine)").matches ? "text" : "none";
   app.querySelectorAll("input.ans").forEach((i) => i.setAttribute("inputmode", mode));
+  KP_GUARD.moved = 0; kpWatch();
   app.querySelectorAll("#kp button").forEach((b) => (b.onclick = () => {
     const inp = getInput(), k = b.dataset.k;
     if (!inp || inp.disabled) return;
+    if (KP_GUARD.moved && performance.now() - KP_GUARD.moved < 350) return;
     if (k === "⌨") { mode = mode === "none" ? "text" : "none"; app.querySelectorAll("input.ans").forEach((i) => i.setAttribute("inputmode", mode)); inp.blur(); inp.focus(); return; }
     typeKey(inp, k);
     after(inp);

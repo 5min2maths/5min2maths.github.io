@@ -800,3 +800,8 @@ details.solfull summary { padding: 11px 0; margin-top: 0; }
 .now-sample .figwrap svg { max-height: 140px; width: auto; }
 .now-card-pick { display: flex; flex-direction: column; gap: 8px; text-align: left; width: 100%; font: inherit; color: inherit; cursor: pointer; }
 .now-card-pick.now-was { border-color: var(--blue); }
+
+/* 25.11 soir : encart des statistiques en une ligne (revue d'un testeur). */
+.stats-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; padding: 8px 12px; }
+.stats-line .stats-btns { gap: 6px; flex: none; }
+.stats-line .btn-primary.small, .stats-line .btn-sec.small { min-height: 36px; padding: 4px 14px; }
