@@ -581,7 +581,7 @@ Object.assign(GEN, {
   recip(d) {
     const a = R.nz(-4, 5), b = R.nz(-6, 6);
     if (d === 1) {
-      const x = R.nz(-5, 5), y = a * x + b;
+      const x = R.pick([-5, -4, -3, -2, 2, 3, 4, 5]), y = a * x + b; /* 25.11 (robot) : réponse jamais ±1 */
       return { guide: [GS("On cherche x tel que " + M(poly([a, b]) + " = " + y) + ". D'abord " + M(y + " - " + par(b)) + " = ?", y - b, M(y - b) + "."), GS("Puis divise par " + a + " : x = ?", x, M("x = " + x) + ".")], q: "Soit " + M("f(x) = " + poly([a, b])) + ". Calcule " + M("f^{-1}(" + y + ")") + ".", spec: { kind: "value", value: x }, traps: [TRAP(a * y + b, "Tu as calculé " + M("f(" + y + ")") + ". " + M("f^{-1}(" + y + ")") + " est le nombre dont l'image est " + M(y) + "."), TRAP((y + b) / a, "Attention au signe : pour isoler x, on " + (b > 0 ? "soustrait " + b : "ajoute " + -b) + ", puis on divise par " + M(a) + ".")], sol: "On cherche " + M("x") + " tel que " + M(poly([a, b]) + " = " + y) + " : " + M("x = " + x) + "." };
     }
     if (d === 2) {

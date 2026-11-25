@@ -16,7 +16,7 @@
   // 2 = sécante haut→gauche (180 − a), 3 = gauche→sécante bas (a), 4 = sécante bas→droite (180 − a).
   // marks : [[point (0 = sur d₁, 1 = sur d₂), région, étiquette], …]. one = true : une seule droite (angles en un point).
   const par = (a, marks, one) => {
-    const t = (a * Math.PI) / 180, d = [Math.cos(t), Math.sin(t)], h = 2.4, I = [[0, 0], [h / Math.tan(t), h]];
+    const t = (a * Math.PI) / 180, d = [Math.cos(t), Math.sin(t)], h = 3.2, /* 25.11 : 2,4 → 3,2, étiquettes des deux angles entre les parallèles moins serrées (robot : « 68° » à 17 px du « ? ») */ I = [[0, 0], [h / Math.tan(t), h]];
     const g = GEO().add([-4, -1.8], [5.2, h + 1.8]);
     g.seg([-4, 0], [5.2, 0]); if (!one) g.seg([-4, h], [5.2, h]);
     g.seg([I[0][0] - 2 * d[0], I[0][1] - 2 * d[1]], [I[one ? 0 : 1][0] + 2 * d[0], I[one ? 0 : 1][1] + 2 * d[1]]);
