@@ -2,6 +2,8 @@
 // le format le plus dynamique). Deux pages publiques, sans rien enregistrer :
 //   …/#decouvrir : présentation aux élèves (projetable en classe), avec une vraie question à essayer ;
 //   …/#parents   : « Je suis parent » (ce que l'app apporte, Résoudre ensemble en direct, mise en route en 3 étapes).
+//   …/#enseignants : présentation aux collègues (25.11, « deux publics distincts : professionnels et parents ») :
+//   principes, démonstration, couverture des plans d'études calculée en direct, différenciation, qualité, données, limites.
 // Bouton « ▶ Présenter » : une diapositive par écran, flèches / espace / clic pour avancer (réunion de parents, classe).
 // Rien n'est envoyé depuis ces pages (voir canSend et ping dans app.js).
 
@@ -15,13 +17,14 @@ const PZ = {
 function presentRoute() {
   if (location.hash === "#decouvrir") { screenDecouvrir(); return true; }
   if (location.hash === "#parents") { screenParents(); return true; }
+  if (location.hash === "#enseignants") { screenEnseignants(); return true; }
   return false;
 }
 
 const pzExit = () => { pzStop(); history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); };
 
 function pzStop() { PZ.on = false; document.body.classList.remove("pz-on"); }
-window.addEventListener("hashchange", () => { if (!/^#(decouvrir|parents)$/.test(location.hash)) pzStop(); });
+window.addEventListener("hashchange", () => { if (!/^#(decouvrir|parents|enseignants)$/.test(location.hash)) pzStop(); });
 
 // Mode présentation : chaque section .pz-s occupe un écran ; navigation au clavier et au clic.
 function pzBind(root) {
@@ -36,7 +39,7 @@ function pzBind(root) {
   }));
   root.querySelectorAll(".pz-next").forEach((b) => (b.onclick = () => goto(cur() + 1)));
   document.onkeydown = (e) => {
-    if (!PZ.on || !/^#(decouvrir|parents)$/.test(location.hash)) return;
+    if (!PZ.on || !/^#(decouvrir|parents|enseignants)$/.test(location.hash)) return;
     if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
     if (["ArrowRight", "ArrowDown", "PageDown", " "].includes(e.key)) { e.preventDefault(); goto(cur() + 1); }
     else if (["ArrowLeft", "ArrowUp", "PageUp"].includes(e.key)) { e.preventDefault(); goto(cur() - 1); }
@@ -93,9 +96,9 @@ const pzInstall = (who) => {
   const u = PZ.url(), qr = PZ.qr(u);
   return `<div class="pz-install">${qr ? `<div class="pz-qr" aria-label="QR code de l'application">${qr}</div>` : ""}
     <div class="stack"><p class="pz-url"><b>${esc(u.replace(/^https?:\/\//, ""))}</b></p>
-    <ol class="small pz-steps"><li>Ouvrir le lien ${who === "parent" ? "sur le téléphone de votre enfant" : "sur ton téléphone"} (ou scanner le QR code).</li>
+    <ol class="small pz-steps"><li>Ouvrir le lien ${who === "parent" ? "sur le téléphone de votre enfant" : who === "prof" ? "sur votre téléphone" : "sur ton téléphone"} (ou scanner le QR code).</li>
     <li><b>Android</b> : menu ⋮ → « Ajouter à l'écran d'accueil ». <b>iPhone</b> : bouton Partager → « Sur l'écran d'accueil ».</li>
-    <li>${who === "parent" ? "Choisir ensemble sa classe et le chapitre en cours : c'est prêt." : "Choisis ta classe et le chapitre en cours : c'est parti."}</li></ol></div></div>`;
+    <li>${who === "parent" ? "Choisir ensemble sa classe et le chapitre en cours : c'est prêt." : who === "prof" ? "Choisir une classe : vous voyez ce que voient vos élèves (rien n'est compté dans les statistiques)." : "Choisis ta classe et le chapitre en cours : c'est parti."}</li></ol></div></div>`;
 };
 
 function screenDecouvrir() {
@@ -254,4 +257,132 @@ function screenParents() {
   root.querySelectorAll("#pzg2 button").forEach((b) => (b.onclick = () => { PZ.grade = +b.dataset.v; root.querySelectorAll("#pzg2 button").forEach((x) => x.setAttribute("aria-pressed", x === b)); pzSolve(box); }));
   document.getElementById("pzgot").onclick = () => { pzStop(); location.hash = "#parent"; };
   pzSolve(box);
+}
+
+// ---------------- Présentation aux enseignants (25.11) ----------------
+/* Nombre de notions travaillées dans l'année, par classe (calculé sur le référentiel, jamais écrit à la main). */
+function pzCoverage() {
+  const P = [["9e", { system: "CH", grade: 9, track: "college" }], ["10e", { system: "CH", grade: 10, track: "college" }], ["11e", { system: "CH", grade: 11, track: "college" }],
+    ["1re Collège", { system: "CH", grade: 12, track: "college" }], ["2e Collège", { system: "CH", grade: 13, track: "college" }], ["3e Collège", { system: "CH", grade: 14, track: "college" }], ["4e Collège", { system: "CH", grade: 15, track: "college" }],
+    ["MP 1re", { system: "CH", grade: 12, track: "mp" }], ["MP 2e", { system: "CH", grade: 13, track: "mp" }], ["MP 3e", { system: "CH", grade: 14, track: "mp" }], ["MP 4e", { system: "CH", grade: 15, track: "mp" }]];
+  return P.map(([l, p]) => { let n = 0, ch = 0; try { const c = Engine.catalog(p).filter((x) => x.current); n = c.length; ch = new Set(c.map((x) => x.theme)).size; } catch (e) {} return [l, n, ch]; }).filter(([, n]) => n > 0);
+}
+/* La boucle d'une séance, en schéma (SVG, couleurs du thème). */
+function pzLoop() {
+  const N = [["🎯", "Question", "à son niveau"], ["✍️", "Réponse", "résultat, pas le calcul"], ["🔎", "Diagnostic", "le piège repéré"], ["🪜", "Pas à pas", "une étape à la fois"], ["📕", "Carnet", "revient plus tard"]];
+  const R = 112, cx = 170, cy = 150;
+  const pos = N.map((_, i) => { const a = -Math.PI / 2 + (i * 2 * Math.PI) / N.length; return [cx + R * Math.cos(a), cy + R * Math.sin(a)]; });
+  const arcs = pos.map(([x, y], i) => { const [x2, y2] = pos[(i + 1) % N.length], mx = (x + x2) / 2, my = (y + y2) / 2, k = 1.18; return `<path d="M${x.toFixed(0)} ${y.toFixed(0)} Q${(cx + (mx - cx) * k).toFixed(0)} ${(cy + (my - cy) * k).toFixed(0)} ${x2.toFixed(0)} ${y2.toFixed(0)}" class="pz-loop-arc"/>`; }).join("");
+  const nodes = pos.map(([x, y], i) => `<g class="pz-loop-n" style="--d:${i * 0.15}s"><circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="33"/><text x="${x.toFixed(0)}" y="${(y - 6).toFixed(0)}" text-anchor="middle" font-size="18">${N[i][0]}</text><text x="${x.toFixed(0)}" y="${(y + 14).toFixed(0)}" text-anchor="middle" font-size="11" font-weight="700">${N[i][1]}</text></g>`).join("");
+  const legend = N.map((n) => `<li><b>${n[0]} ${n[1]}</b> : ${n[2]}</li>`).join("");
+  return `<div class="pz-loop pz-anim"><svg viewBox="0 0 340 300" role="img" aria-label="Boucle d'une séance : question, réponse, diagnostic, pas à pas, carnet d'erreurs">${arcs}${nodes}<text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="13" font-weight="800" class="pz-loop-c">5 minutes</text><text x="${cx}" y="${cy + 14}" text-anchor="middle" font-size="11" class="pz-loop-c">chaque jour</text></svg><ul class="plain small pz-loop-l">${legend}</ul></div>`;
+}
+/* Compteurs qui montent quand la section arrive à l'écran. */
+function pzCount(root) {
+  const run = (el) => { const to = +el.dataset.to, t0 = performance.now(), D = 900; const f = (t) => { const k = Math.min(1, (t - t0) / D); el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))).toLocaleString("fr-CH"); if (k < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); };
+  const els = root.querySelectorAll(".pz-num[data-to]");
+  if (!("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) { els.forEach((e) => (e.textContent = (+e.dataset.to).toLocaleString("fr-CH"))); return; }
+  const io = new IntersectionObserver((es) => es.forEach((en) => { if (en.isIntersecting) { run(en.target); io.unobserve(en.target); } }), { threshold: 0.4 });
+  els.forEach((e) => io.observe(e));
+}
+function screenEnseignants() {
+  const cov = pzCoverage(), maxN = Math.max(1, ...cov.map(([, n]) => n));
+  const nNotions = NOTIONS.filter((n) => n.CH || n.MP).length, nClasses = cov.length;
+  h(`<div class="pz" id="pz">
+  <div class="spread pz-bar">${brand}<span class="row" style="gap:6px"><button type="button" class="btn-sec small pz-play">▶ Présenter</button><button type="button" class="btn-ghost small pz-exit" aria-label="Quitter">✕</button></span></div>
+
+  <section class="pz-s pz-hero">
+    <div class="eyebrow">👩‍🏫 Pour les enseignant·es · secondaire I et II</div>
+    <h1 class="pz-big">Un entraînement quotidien,<br><span class="mark">aligné sur votre programme</span>,<br>que vos élèves font vraiment.</h1>
+    <p class="muted">5 minutes par jour sur le téléphone : des questions au niveau de chaque élève, une correction immédiate et une aide pas à pas. Pour vous, aucune préparation ni correction, et aucune donnée d'élève à gérer.</p>
+    <div class="pz-nums pz-anim"><div><span class="pz-num" data-to="${nNotions}">${nNotions}</span><small>notions</small></div><div><span class="pz-num" data-to="${nClasses}">${nClasses}</span><small>classes, de la 9e à la 4e (CO, Collège, MP)</small></div><div><span class="pz-num" data-to="0">0</span><small>compte à créer</small></div></div>
+    <button type="button" class="btn-primary pz-next">Découvrir ↓</button>
+  </section>
+
+  <section class="pz-s">
+    <div class="eyebrow">🧠 Les principes</div><h2>Ce que la recherche recommande, en 5 minutes</h2>
+    <div class="pz-grid pz-anim">
+      <div class="card flat"><b>🔁 Récupérer en mémoire</b><p class="small">Répondre à une question fixe mieux que relire. Chaque séance est faite de questions, pas de lecture.</p></div>
+      <div class="card flat"><b>📆 Espacer</b><p class="small">Une notion revient plusieurs jours plus tard, au moment où elle risque de s'oublier. Les notions des années précédentes reviennent quand c'est utile.</p></div>
+      <div class="card flat"><b>🔀 Alterner</b><p class="small">Les notions sont mélangées dans une séance : l'élève doit reconnaître la méthode, pas seulement l'appliquer.</p></div>
+      <div class="card flat"><b>⚡ Corriger tout de suite</b><p class="small">La correction est immédiate et ciblée : l'app repère l'erreur typique et la nomme.</p></div>
+    </div>
+  </section>
+
+  <section class="pz-s">
+    <div class="eyebrow">🔄 Une séance</div><h2>La boucle d'une séance</h2>
+    ${pzLoop()}
+  </section>
+
+  <section class="pz-s">
+    <div class="eyebrow">🎯 Démonstration</div><h2>Essayez comme un élève</h2>
+    <p class="small muted">Choisissez une classe et répondez. Faites exprès une erreur classique pour voir le diagnostic, puis « On le fait ensemble ».</p>
+    ${pzGrades("pzg3")}
+    <div id="pztry"></div>
+  </section>
+
+  <section class="pz-s">
+    <div class="eyebrow">📚 Votre programme</div><h2>Le plan d'études, classe par classe</h2>
+    <p class="small muted">Plan d'études romand (CO), plans du Collège de Genève et de la maturité professionnelle. Notions travaillées dans l'année :</p>
+    <div class="pz-cov pz-anim">${cov.map(([l, n, ch]) => `<div class="pz-cov-r"><span>${esc(l)}</span><span class="pz-cov-b"><i style="width:${Math.round((n / maxN) * 100)}%"></i></span><span class="small">${n} notions · ${ch} chap.</span></div>`).join("")}</div>
+    <div class="pz-grid pz-anim">
+      <div class="card flat"><b>🏫 « En ce moment en classe »</b><p class="small">L'élève reconnaît son chapitre à un exercice typique : environ 2 questions sur 3 portent alors dessus.</p></div>
+      <div class="card flat"><b>📝 « Mon évaluation »</b><p class="small">Il donne la date et les notions de votre évaluation : révision jour après jour, puis un sujet de préparation corrigé.</p></div>
+    </div>
+  </section>
+
+  <section class="pz-s">
+    <div class="eyebrow">🪜 Différenciation</div><h2>Chaque élève à son niveau, sans rien régler</h2>
+    <div class="pz-grid pz-anim">
+      <div class="card flat"><b>📈 Quatre niveaux par notion</b><p class="small">De l'automatisme au défi. Le Mathélo de l'élève monte ou descend selon ses réponses, et les questions suivent.</p></div>
+      <div class="card flat"><b>🧩 Élève en difficulté</b><p class="small">Le diagnostic, puis le pas à pas, le rappel de cours et une leçon active à manipuler. Il retente avec d'autres nombres.</p></div>
+      <div class="card flat"><b>🚀 Élève rapide</b><p class="small">Des défis de niveau 4, le problème de la semaine, des questions curieuses et des histoires des maths.</p></div>
+      <div class="card flat"><b>🧮 Le résultat, pas le calcul</b><p class="small">Quand c'est le calcul qu'on évalue, l'élève tape le résultat sur un clavier sans opérations : la calculatrice ne fait pas le travail à sa place.</p></div>
+    </div>
+  </section>
+
+  <section class="pz-s">
+    <div class="eyebrow">✅ Qualité</div><h2>Des questions vérifiées, jamais deux fois les mêmes</h2>
+    <ul class="plain pz-list pz-anim"><li>🎲 <b>Valeurs tirées au hasard</b> dans des plages choisies : jamais de cas trivial (0, 1, réponse déjà dans l'énoncé).</li>
+    <li>📏 <b>Niveau calé sur les vraies évaluations</b> de chaque classe, notion par notion.</li>
+    <li>🤖 <b>Des tests automatiques</b> avant chaque mise à jour, et un élève-robot qui parcourt toutes les classes : textes, figures, réponses acceptées, affichage sur téléphone.</li>
+    <li>👍 <b>Les élèves jugent</b> : un pouce et un commentaire sur chaque question, lus et traités.</li></ul>
+  </section>
+
+  <section class="pz-s">
+    <div class="eyebrow">🔒 Données</div><h2>Rien à déclarer, rien à gérer</h2>
+    <ul class="plain pz-list pz-anim"><li>✅ Ni compte, ni nom, ni adresse mail. La progression reste sur le téléphone de l'élève.</li>
+    <li>✅ Des statistiques anonymes d'usage, seulement avec l'accord de l'élève, qu'il peut couper.</li>
+    <li>✅ Pas de publicité, pas de service tiers. Les polices et les formules sont servies par le site de l'app.</li>
+    <li>✅ Les parents ne voient la semaine de l'enfant que s'il la leur envoie.</li></ul>
+  </section>
+
+  <section class="pz-s">
+    <div class="eyebrow">🧭 Honnêtement</div><h2>Ce que l'app ne fait pas</h2>
+    <div class="pz-grid pz-anim">
+      <div class="card flat"><b>Remplacer le cours</b><p class="small">Elle entraîne ce qui a été vu en classe ; elle n'introduit pas une notion à votre place.</p></div>
+      <div class="card flat"><b>Noter vos élèves</b><p class="small">Pas de note ni de classement. Le Mathélo est un repère pour l'élève, pas une évaluation.</p></div>
+      <div class="card flat"><b>Suivre une classe</b><p class="small">Il n'y a pas de tableau de bord enseignant : sans compte, aucune donnée nominative ne remonte.</p></div>
+      <div class="card flat"><b>Tout évaluer</b><p class="small">Constructions, raisonnements rédigés et démonstrations restent l'affaire de la classe.</p></div>
+    </div>
+  </section>
+
+  <section class="pz-s">
+    <div class="eyebrow">🚀 En classe</div><h2>Lancer l'app avec une classe</h2>
+    <ol class="pz-list pz-anim"><li><b>Présentez-la</b> avec la page élèves, projetable avec son QR code : <a href="#decouvrir">…/#decouvrir</a>.</li>
+    <li><b>Installez-la ensemble</b> en 5 minutes : classe, chapitre en cours, date de la prochaine évaluation.</li>
+    <li><b>Rappelez-la</b> au début d'un chapitre et une semaine avant chaque évaluation.</li>
+    <li><b>Informez les familles</b> avec la page parents : <a href="#parents">…/#parents</a>.</li></ol>
+  </section>
+
+  <section class="pz-s pz-end">
+    <div class="eyebrow">📲 Pour l'essayer</div><h2>Ouvrez-la sur votre téléphone</h2>
+    ${pzInstall("prof")}
+    <div class="actions"><button type="button" class="btn-primary pz-exit">Essayer l'app</button></div>
+  </section>
+  </div>`);
+  const root = document.getElementById("pz"), box = document.getElementById("pztry");
+  pzBind(root); pzCount(root);
+  root.querySelectorAll("#pzg3 button").forEach((b) => (b.onclick = () => { PZ.grade = +b.dataset.v; root.querySelectorAll("#pzg3 button").forEach((x) => x.setAttribute("aria-pressed", x === b)); pzTry(box); }));
+  pzTry(box);
 }

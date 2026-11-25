@@ -42,3 +42,24 @@ body.pz-on .pz-s { scroll-snap-align: start; }
 .pz-bar .brand span { display: none; }
 @media (max-width: 430px) { .pz-bar .brand b { --brand-fs: 1.08rem; } }
 .pz-bar .brand { flex: none; }
+/* 25.11 : présentation enseignants (#enseignants) : compteurs, boucle d'une séance, couverture par classe. */
+.pz-nums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.pz-nums div { background: var(--blue-soft); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 2px; }
+.pz-num { font-size: calc(1.8rem * var(--fs)); font-weight: 800; color: var(--blue); line-height: 1; }
+.pz-nums small { font-size: .78rem; color: var(--muted); }
+.pz-loop { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.pz-loop svg { width: 100%; max-width: 340px; height: auto; flex: none; }
+.pz-loop-arc { fill: none; stroke: var(--line); stroke-width: 3; stroke-dasharray: 5 6; }
+.pz-loop-n circle { fill: var(--blue-soft); stroke: var(--blue); stroke-width: 3; }
+.pz-loop-n text, .pz-loop-c { fill: var(--ink); }
+.pz-loop-l { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 200px; }
+.pz-anim .pz-loop-n { transition: opacity .5s ease var(--d), transform .5s ease var(--d); transform-origin: center; transform-box: fill-box; }
+.pz-anim.pz-wait .pz-loop-n { opacity: 0; transform: scale(.6); }
+.pz-cov { display: flex; flex-direction: column; gap: 6px; }
+.pz-cov-r { display: grid; grid-template-columns: 6.5em 1fr auto; gap: 8px; align-items: center; font-size: .92rem; }
+.pz-cov-b { height: 10px; background: var(--line); border-radius: 99px; overflow: hidden; }
+.pz-cov-b i { display: block; height: 100%; background: var(--blue); border-radius: 99px; transition: width .9s ease; }
+.pz-anim.pz-wait .pz-cov-b i { width: 0 !important; }
+body.pz-on .pz-num { font-size: 3.2rem; }
+body.pz-on .pz-loop svg { max-width: 460px; }
+@media (max-width: 380px) { .pz-cov-r { grid-template-columns: 5.6em 1fr; } .pz-cov-r > .small { grid-column: 2; } }

@@ -24,11 +24,22 @@ const Badges = {
   openOf(state, th) {
     return Engine.catalog(state.profile).filter((c) => c.current && c.theme === th && state.notions[c.id] && ["vu", "encours"].includes(state.notions[c.id].status)).map((c) => c.id);
   },
-  // Icône d'un badge de thème, d'après son libellé.
+  // Icône d'un badge de thème, d'après son libellé. 25.11 (chantier E) : une icône dessinée par famille de chapitres
+  // (CO, matu, MP, France) au lieu d'émojis génériques ; l'ordre compte (le premier motif qui convient l'emporte).
+  THEME_ICONS: [[/algorithm|programmation/i, "algo"], [/automatisme/i, "auto"], [/ensemble/i, "venn"], [/argument|raisonner/i, "implique"],
+    [/combinatoire/i, "arbre"], [/probab/i, "de"], [/statisti|diagramme|données/i, "barres"], [/vectoriel|vecteur/i, "vecteurs"],
+    [/droites param/i, "droiteparam"], [/coordonn|cartésienne/i, "repere"], [/algèbre linéaire/i, "matrice"], [/intégr/i, "integrale"],
+    [/limite|dérivation|analyse/i, "tangente"], [/logarithm|exponentiel|puissances et log/i, "expo"], [/sinuso|fonctions trigo/i, "sinus"],
+    [/trigo/i, "trigo"], [/rationnelle/i, "hyperbole"], [/composition|réciproque/i, "reciproque"], [/polynom|transformations et poly/i, "cubique"],
+    [/quadrat|degré 2/i, "parabole"], [/inéquation/i, "inequation"], [/syst/i, "systeme"], [/équation/i, "balance"],
+    [/affine|degrés 0 et 1/i, "affine"], [/fonction/i, "fonction"], [/thalès/i, "thales"], [/pythagore/i, "pythagore"],
+    [/transformations du plan/i, "symetrie"], [/cercle/i, "cercle"], [/angle/i, "angle"], [/3d|espace|volume|similitude/i, "cube"],
+    [/aire|périmètre/i, "aire"], [/unité|mesure|grandeur/i, "regle"], [/proportion/i, "proportion"], [/littéral|algébrique|algèbre/i, "litteral"],
+    [/fractionnaire|fraction/i, "fraction"], [/relatif/i, "relatifs"], [/arithmétique/i, "points"], [/puissances et racines|racine/i, "racine"],
+    [/décimal/i, "decimal"], [/géom|figure/i, "geometrie"], [/nombre|numérique|calcul/i, "nombres"]],
   themeIcon(label) {
-    const T = [[/vectoriel|coordonn|droites param/i, "🧭"], [/probab|statist|données/i, "🎲"], [/complexe/i, "🌀"], [/analyse/i, "📉"], [/trigo/i, "📐"], [/géom|volume|espace/i, "📐"],
-      [/quadrat|degré 2/i, "svg:parabole"], [/syst|équation|inéquation/i, "⚖️"], [/fonction|puissance|log/i, "📈"], [/algèbre|algébrique/i, "🔣"], [/nombre|numérique/i, "🔢"], [/grandeur|mesure/i, "📏"]];
-    return (T.find(([r]) => r.test(label)) || [0, "🏆"])[1];
+    const m = this.THEME_ICONS.find(([r]) => r.test(label || ""));
+    return m ? "svg:" + m[1] : "🏆";
   },
   // Badges de l'élève : les badges de thème suivent le découpage de son référentiel (CO, matu ou MP).
   list(state) {
@@ -105,11 +116,58 @@ const Badges = {
   onFeedback(state) { this.bc(state).fb++; },
 
   // ---- Affichage ----
-  // Icônes dessinées (14.11) : « svg:<nom> » au lieu d'un émoji, quand aucun émoji ne convient (parabole des fonctions quadratiques).
+  // Icônes dessinées (14.11, toutes les familles de chapitres le 25.11) : « svg:<nom> » au lieu d'un émoji.
+  // Cadre 100 × 100, hexagone de rayon 44 : le dessin tient dans le carré 24–76.
   drawn(icon, col) {
-    if (icon === "svg:parabole")
-      return `<g fill="none" stroke-linecap="round"><path d="M26 72 H74 M50 24 V78" stroke="${col}" stroke-width="2.5" opacity=".45"/><path d="M21 30 Q50 90 79 30" stroke="${col}" stroke-width="6"/><circle cx="50" cy="60" r="4.5" fill="${col}" stroke="none"/></g>`;
-    return "";
+    if (!/^svg:/.test(icon || "")) return "";
+    const k = icon.slice(4), S = (d, w = 6) => `<path d="${d}" stroke="${col}" stroke-width="${w}"/>`, F = (d, o = 0.3) => `<path d="${d}" fill="${col}" stroke="none" opacity="${o}"/>`,
+      D = (x, y, r = 4.5) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" stroke="none"/>`, TX = (x, y, t, fs = 22) => `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${fs}" font-weight="800" fill="${col}" stroke="none" font-family="system-ui, sans-serif">${t}</text>`,
+      AX = S("M26 72 H76 M30 76 V24", 2.5);
+    const P = {
+      parabole: S("M26 72 H74 M50 24 V78", 2.5) + S("M21 30 Q50 90 79 30") + D(50, 60),
+      algo: S("M38 34 L26 50 L38 66 M62 34 L74 50 L62 66") + S("M55 30 L45 70", 4),
+      auto: S("M54 22 L36 54 H52 L46 78 L66 44 H50 Z", 5),
+      venn: `<circle cx="41" cy="50" r="17" stroke="${col}" stroke-width="5"/><circle cx="59" cy="50" r="17" stroke="${col}" stroke-width="5"/>` + F("M50 36 A17 17 0 0 1 50 64 A17 17 0 0 1 50 36 Z", 0.45),
+      implique: S("M24 42 H66 M24 58 H66", 5) + S("M58 30 L76 50 L58 70", 5),
+      arbre: S("M30 50 L64 30 M30 50 L64 70 M30 50 L64 50", 4) + D(30, 50, 6) + D(66, 30) + D(66, 50) + D(66, 70),
+      de: `<rect x="28" y="28" width="44" height="44" rx="9" stroke="${col}" stroke-width="5"/>` + D(39, 39) + D(50, 50) + D(61, 61),
+      barres: S("M24 74 H76", 3) + F("M30 74 V52 H40 V74 Z", 0.9) + F("M45 74 V34 H55 V74 Z", 0.9) + F("M60 74 V44 H70 V74 Z", 0.9),
+      vecteurs: S("M30 70 L68 36", 5) + S("M56 34 L70 34 L68 48", 5) + S("M30 70 L72 70", 3) + S("M64 64 L72 70 L64 76", 3),
+      droiteparam: S("M22 70 L78 30", 3) + D(36, 60) + S("M36 60 L58 44", 6) + S("M48 42 L60 43 L56 54", 5),
+      repere: AX + S("M46 72 V44 H30", 2) + D(46, 44, 5.5),
+      matrice: S("M34 28 H28 V72 H34 M66 28 H72 V72 H66", 5) + TX(42, 39, "1", 15) + TX(58, 39, "2", 15) + TX(42, 61, "0", 15) + TX(58, 61, "3", 15),
+      integrale: AX + F("M38 72 V52 Q50 40 62 42 V72 Z", 0.4) + S("M30 60 Q46 40 74 38", 5),
+      tangente: AX + S("M32 66 Q50 30 74 34", 5) + S("M36 46 L72 30", 3) + D(52, 40),
+      expo: AX + S("M30 70 Q58 68 70 26", 5) + D(30, 66, 0) ,
+      sinus: S("M24 50 H76", 2.5) + S("M24 50 Q31 26 37 50 T50 50 T63 50 T76 50", 5),
+      trigo: `<circle cx="50" cy="50" r="24" stroke="${col}" stroke-width="4"/>` + S("M50 50 L67 33 M50 50 H74", 3) + S("M67 33 V50", 3) + D(67, 33),
+      hyperbole: AX + S("M38 26 Q40 52 74 56", 5) + S("M33 74 Q32 72 31 66", 5),
+      reciproque: S("M26 74 L74 26", 2) + S("M28 64 Q50 64 72 30", 5) + S("M36 72 Q36 50 70 28", 3),
+      cubique: AX + S("M28 74 C40 20 56 80 74 28", 5),
+      inequation: AX + F("M30 24 H76 V30 L30 64 Z", 0.35) + S("M30 64 L76 30", 5),
+      systeme: S("M24 66 L76 34 M24 30 L76 70", 5) + D(50, 50, 6),
+      balance: S("M50 26 V72 M36 74 H64 M26 38 H74", 5) + S("M26 38 L18 56 H34 Z M74 38 L66 56 H82 Z", 3),
+      affine: AX + S("M28 68 L74 30", 5) + D(30, 66, 0),
+      fonction: AX + S("M30 62 Q42 30 54 48 T76 34", 5),
+      thales: S("M28 72 L50 26 L72 72 Z", 4) + S("M38 52 H62", 5),
+      pythagore: S("M34 66 V36 L66 66 Z", 5) + S("M34 58 H42 V66", 3) + F("M34 66 H66 V78 H34 Z", 0) + F("M22 36 H34 V66 H22 Z", 0.4) + F("M34 66 H66 V76 H34 Z", 0.4),
+      symetrie: S("M50 22 V78", 3) + `<path d="M50 22 V78" stroke="${col}" stroke-width="0"/>` + F("M44 32 L28 64 H44 Z", 0.9) + `<path d="M56 32 L72 64 H56 Z" stroke="${col}" stroke-width="4"/>`,
+      cercle: `<circle cx="50" cy="50" r="25" stroke="${col}" stroke-width="5"/>` + S("M50 50 L70 36", 4) + D(50, 50),
+      angle: S("M26 70 H76 M26 70 L64 30", 5) + S("M46 70 A20 20 0 0 0 40 56", 4),
+      cube: S("M30 40 L50 30 L70 40 V64 L50 74 L30 64 Z M30 40 L50 50 L70 40 M50 50 V74", 4) + F("M30 40 L50 30 L70 40 L50 50 Z", 0.35),
+      aire: `<rect x="28" y="30" width="44" height="40" stroke="${col}" stroke-width="5"/>` + F("M28 30 H72 V70 H28 Z", 0.25) + S("M36 70 L28 62 M48 70 L28 50 M60 70 L28 38 M72 70 L32 30 M72 58 L44 30 M72 46 L56 30", 2),
+      regle: `<rect x="22" y="40" width="56" height="20" rx="3" stroke="${col}" stroke-width="5"/>` + S("M30 40 V50 M38 40 V47 M46 40 V50 M54 40 V47 M62 40 V50 M70 40 V47", 3),
+      proportion: AX + S("M30 72 L74 30", 5) + D(41, 61) + D(52, 51) + D(63, 40),
+      litteral: TX(50, 50, "x²", 32),
+      fraction: `<circle cx="50" cy="50" r="24" stroke="${col}" stroke-width="5"/>` + F("M50 50 V26 A24 24 0 1 1 26 50 Z", 0.5) + S("M50 26 V74 M26 50 H74", 3),
+      relatifs: S("M22 54 H78", 4) + S("M30 48 V60 M50 46 V62 M70 48 V60", 3) + TX(30, 36, "−", 20) + TX(70, 36, "+", 20),
+      points: [30, 43, 57, 70].map((x) => [36, 50, 64].map((y) => D(x, y, 4.5)).join("")).join(""),
+      racine: S("M24 52 L32 48 L42 70 L52 30 H78", 5) + TX(65, 47, "x", 18),
+      decimal: TX(50, 50, "3,14", 24),
+      geometrie: S("M28 70 L46 30 L74 62 Z", 5) + D(28, 70) + D(46, 30) + D(74, 62),
+      nombres: TX(50, 50, "123", 26),
+    };
+    return P[k] ? `<g fill="none" stroke-linecap="round" stroke-linejoin="round">${P[k]}</g>` : "";
   },
   COLORS: { reg: ["#f08a24", "#fde7cf"], mai: ["#2457d6", "#e4ecff"], per: ["#1e8a5a", "#e1f5ea"], cur: ["#8a3fd1", "#f0e4fb"] },
   icon(x, on, px = 56) {

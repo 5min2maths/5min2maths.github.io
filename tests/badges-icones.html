@@ -1,0 +1,17 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css">
+<style>body{margin:8px;background:#fff}.g{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;width:600px}.g div{font:10px sans-serif;text-align:center}</style>
+<div class="g" id="g"></div><pre id="out">en cours</pre>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/badges.js"></script>
+<script>
+// 25.11 (chantier E) : chaque chapitre (CO, matu, MP, France) a une icône dessinée, et chaque icône existe.
+const fails = [], ok = (c, m) => { if (!c) fails.push(m); };
+try {
+  const labels = [...Object.values(THEMES), ...Object.values(THEME_LABEL).flatMap((o) => Object.values(o))];
+  const used = new Set();
+  for (const l of labels) { const ic = Badges.themeIcon(l); ok(/^svg:/.test(ic), "sans icône : " + l); ok(Badges.drawn(ic, "#000"), "icône non dessinée : " + ic + " (" + l + ")"); used.add(ic); }
+  const all = Badges.THEME_ICONS.map(([, k]) => "svg:" + k);
+  document.getElementById("g").innerHTML = all.map((k) => `<div>${Badges.icon({ fam: "mai", icon: k }, true, 80)}<br>${k.slice(4)}</div>`).join("") + `<div>${Badges.icon({ fam: "mai", icon: "svg:cube" }, false, 80)}<br>off</div>`;
+  ok(Badges.themeIcon("Théorème de Thalès") === "svg:thales" && Badges.themeIcon("Systèmes d'équations") === "svg:systeme" && Badges.themeIcon("Fonctions quadratiques") === "svg:parabole", "correspondances clés");
+  document.getElementById("out").textContent = fails.length ? "ÉCHEC " + fails.slice(0, 12).join("\n") : "ok icônes : " + labels.length + " chapitres, " + used.size + " icônes utilisées sur " + all.length;
+} catch (e) { document.getElementById("out").textContent = "EXC " + e.message; }
+</script>
