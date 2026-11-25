@@ -70,6 +70,12 @@ function frDomain(id) {
   return { no: "NC", fa: "NC", gm: "GM", es: "EG" }[n.theme] || "NC";
 }
 const TARGET = { drill: -300, app: -100, defi: 80, defi4: 80, rev: -150 }; // écart visé au Mathélo (≈ 85 %, 65 %, 40 % de réussite)
+/* 26.11 (adaptivité, tools/adaptivite_26-11.md ; simulation d'un testeur : élèves faibles à 39–45 % au premier essai).
+   Cible de réussite propre à chaque élève : réussite au 1er essai sur ses 16 dernières réponses (8 au moins) ; sous 55 %,
+   la cible baisse (tadj, en points de Mathélo) jusqu'à revenir vers 70 % ; au-dessus de 85 %, elle monte un peu. Sous
+   le plancher (tadj ≤ -150 et réussite encore sous 65 %) : 2 rappels de notions anciennes par séance au plus (règle de
+   remobilisation inchangée), niveau 1 permis s'il n'est pas trivial pour l'élève (au plus 350 points sous son Mathélo). */
+const ADAPT = { win: 16, min: 8, low: 0.55, aim: 0.7, high: 0.85, down: 20, up: 10, lo: -300, hi: 120, floor: -150 };
 const KIND_LABEL = { drill: "⚡ Automatisme", app: "🧩 Application", defi: "🏔 Défi", rev: "🧠 Révision", rem: "🧱 Une base à consolider" };
 // Remédiation (13.11) : notions de base à reprendre quand une notion échoue deux fois de suite.
 const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2fact", "rel"], eq2fact: ["factor"], fracadd: ["fracsimp", "arith"], fracmul: ["fracsimp"],
@@ -582,7 +588,7 @@ const Engine = {
     const cap = difficultyCap(state.profile), m = state.notions[id].m;
     let best = 1, bestGap = Infinity;
     for (let d = 1; d <= cap; d++) {
-      const gap = Math.abs(itemRating(state.profile, id, d) - (state.elo.r - 150));
+      const gap = Math.abs(itemRating(state.profile, id, d) - (state.elo.r - 150 + (state.tadj || 0)));
       if (gap < bestGap) { bestGap = gap; best = d; }
     }
     if (m < 0.3) best = Math.max(1, best - 1);
@@ -838,8 +844,21 @@ const Engine = {
   // ou niveau ≥ 2 si l'élève l'a ratée (fragile), car alors elle n'est pas triviale pour lui.
   oldLevels(state, id, levels, target) {
     const s = state.notions[id], weak = s.m < 0.45 || this.eloDrop(state); /* 24.11 : baisse du Mathélo = remédiation, niveau 2 permis */
+    /* 26.11 : élève sous le plancher : niveau 1 permis, s'il n'est pas trivial pour lui */
+    if (this.underFloor(state)) return levels.filter((d) => itemRating(state.profile, id, d) >= state.elo.r - 350);
     return levels.filter((d) => weak ? d >= 2 : d >= 3 && itemRating(state.profile, id, d) >= target - 150);
   },
+  /* 26.11 : réussite au 1er essai récente (null avant 8 réponses) ; cible propre à l'élève ; élève sous le plancher */
+  recentRate(state) { const L = state.last1 || []; return L.length >= ADAPT.min ? L.reduce((a, b) => a + b, 0) / L.length : null; },
+  adapt(state, ok1) {
+    state.last1 = [...(state.last1 || []), ok1 ? 1 : 0].slice(-ADAPT.win);
+    const r = this.recentRate(state); if (r === null) return;
+    let a = state.tadj || 0;
+    if (r < ADAPT.low || (a < 0 && r < ADAPT.aim - 0.05) || (a > 0 && r < ADAPT.aim)) a -= ADAPT.down;
+    else if (r > ADAPT.high || (a < 0 && r > ADAPT.aim + 0.05)) a += ADAPT.up;
+    state.tadj = Math.max(ADAPT.lo, Math.min(ADAPT.hi, a));
+  },
+  underFloor(state) { const r = this.recentRate(state); return (state.tadj || 0) <= ADAPT.floor && r !== null && r < ADAPT.aim - 0.05; },
 
   // Format du jour : le plus en retard sur l'équilibre des 7 derniers jours, jamais celui de la veille.
   chooseFormat(state, exclude = [], today = day()) {
@@ -854,6 +873,8 @@ const Engine = {
       if (yesterday && yesterday.f === f) sc -= 3;
       if (f === "revision") sc += due >= 4 && !recentRev ? 1 : due >= 4 ? 0 : -1;
       if (f === "defi" && !this.eligible(state).some((id) => hasProb(id) && this.isRecent(state, id))) sc -= 0.5;
+      /* 26.11 (adaptivité) : élève sous le plancher : le défi du jour (un problème de niveau 4) revient moins souvent */
+      if (f === "defi" && this.underFloor(state)) sc -= 1.5;
       sc += Math.random() * 0.4;
       if (!best || sc > best.sc) best = { f, sc };
     }
@@ -931,8 +952,8 @@ const Engine = {
 
   // Remplit des créneaux : pour chacun, la notion ET le niveau les plus proches de la cible fixée par le Mathélo.
   planSlots(state, slots, opts = {}) {
-    const today = day(), elo = state.elo.r, cap = difficultyCap(state.profile), used = new Set(), plan = [], ex = opts.exclude || new Set();
-    const maxOld = slots.includes("rev") ? 2 : 1;
+    const today = day(), elo = state.elo.r + (state.tadj || 0) /* 26.11 : cible propre à l'élève */, cap = difficultyCap(state.profile), used = new Set(), plan = [], ex = opts.exclude || new Set();
+    const under = slots.length >= 3 && this.underFloor(state), maxOld = slots.includes("rev") || under ? 2 : 1;
     let old = 0;
     // Créneau « Rappel » : une notion ancienne, jamais triviale. Une séance sur trois environ ;
     // en révision, chaque fois qu'une notion ancienne est fragile. Sans candidate valable : créneau normal.
@@ -941,17 +962,21 @@ const Engine = {
     const need = [...this.oldNeed(state)];
     const wantRappel = slots.length > 1 && need.length > 0;
     const rappelAt = wantRappel ? slots.length - 1 - Math.floor(Math.random() * Math.min(2, slots.length)) : -1;
+    /* 26.11 : sous le plancher, un 2e rappel possible (l'autre des deux derniers créneaux) */
+    const rappel2 = wantRappel && under ? (rappelAt === slots.length - 1 ? slots.length - 2 : slots.length - 1) : -1;
     // « En ce moment en classe » : environ 2 créneaux sur 3 portent sur le chapitre choisi par l'élève.
     const nowIds = this.nowActive(state) ? state.now.ids.filter((id) => state.notions[id] && ["vu", "encours"].includes(state.notions[id].status)) : [];
     const nowK = nowIds.length ? (slots.length === 1 ? 1 : Math.round((slots.length * 2) / 3)) : 0;
     const usedPair = new Set();
-    const choose = (kind, base, rappel, only) => {
+    const choose = (kind, base, rappel, only, isNow) => {
       let best = null, pool = only || this.pool(state, base);
       if (kind === "rev" && !only) { const due = pool.filter((id) => state.notions[id].due <= today || state.notions[id].m < 0.5); if (due.length) pool = due; }
       for (const id of pool) {
         if (ex.has(id)) continue;
         const s = state.notions[id], recent = this.isRecent(state, id), target = elo + TARGET[kind] + (s.easy || 0) * 120;
-        if (rappel ? recent : !recent) continue; // les anciennes notions ne passent que par le créneau Rappel
+        /* 26.11 (profondeur, tools/adaptivite_26-11.md) : une notion du chapitre « en classe » passe toujours par le créneau du
+           chapitre, même reprise d'une année précédente (1re du Collège : Pythagore, angles…), à un niveau non trivial (oldLevels) */
+        if (!isNow && (rappel ? recent : !recent)) continue; /* les anciennes notions ne passent que par le créneau Rappel */
         if (kind === "drill" && !this.drillable(state, id)) continue; /* 26.11 : notion sans vrai automatisme au niveau 1 */
         let levels = [1, 2, 3].filter((d) => d <= cap && (base !== "defi" || d >= 2) && (kind !== "drill" || d === 1)); /* 26.11 : automatisme = niveau 1 */
         if ((kind === "defi4" || kind === "defi") && hasProb(id)) levels.push(4);
@@ -975,11 +1000,11 @@ const Engine = {
     const nowPart = [];
     for (const [si, kind] of slots.entries()) {
       const base = kind === "defi4" ? "defi" : kind;
-      if (si < nowK && si !== rappelAt) {
-        const b = choose(kind, base, false, nowIds);
+      if (si < nowK && si !== rappelAt && si !== rappel2) {
+        const b = choose(kind, base, false, nowIds, true);
         if (b) { used.add(b.id); usedPair.add(b.id + "|" + b.d); nowPart.push(b.id + "|" + b.d + "|" + base); continue; }
       }
-      let best = si === rappelAt && old < maxOld ? choose(kind, base, true, need) : null;
+      let best = (si === rappelAt || si === rappel2) && old < maxOld ? choose(kind, base, true, need) : null;
       if (best) old++; else best = choose(kind, base, false);
       if (!best) best = choose(kind, base, true); // aucune notion de l'année disponible
       if (!best) continue;
@@ -1019,6 +1044,7 @@ const Engine = {
       s.m = Math.min(1, Math.max(0, s.m + (partial - 0.5) * 0.2));
       if (partial >= 0.99) { s.box = Math.min(5, s.box + 1); s.ok++; } else if (partial < 0.5) s.box = 0;
       s.due = addDays(day(), partial >= 0.99 ? INTERVALS[s.box] : 1);
+      this.adapt(state, partial >= 0.99 && tries <= 1);
       return partial;
     }
     const today = day();
@@ -1037,6 +1063,7 @@ const Engine = {
     s.due = addDays(today, solved && tries === 1 ? INTERVALS[s.box] : 1);
     if (s.status === "encours" && s.m > 0.7) s.status = "vu";
     const sc = solved ? (tries === 1 ? 1 : 0.5) : 0;
+    this.adapt(state, sc === 1);
     this.recordComp(state, id, d, sc);
     this.unlock(state);
     return sc;
@@ -1098,6 +1125,26 @@ const Engine = {
     const idOf = (e) => String(e).split("|")[0], k = String(plan[i]).split("|")[2], kind = TARGET[k] !== undefined ? k : "app";
     const ex = new Set([...plan.map(idOf), ...this.eligible(state).filter((id) => this.lessonDue(state, id) || !state.notions[id].seen)]);
     return this.planSlots(state, [kind], { exclude: ex })[0] || null;
+  },
+  /* 26.11 (adaptivité) : après deux échecs de suite dans une séance, la question suivante est plus facile, jamais plus
+     dure : même notion un niveau en dessous ; au niveau 1, une base (PREREQ) déjà ouverte ; sinon la notion la mieux
+     maîtrisée de l'élève au niveau 1. Difficulté ressentie = score de la question − 200 × maîtrise. Renvoie la nouvelle
+     entrée du programme (à mettre en i + 1) ou null si la question prévue est déjà plus facile (ou une base). */
+  easeNext(state, plan, i, id, d) {
+    const nx = String(plan[i + 1] || "").split("|");
+    if (!state.notions[nx[0]] || nx[2] === "rem" || String(plan[i + 1]).startsWith("PROB:")) return null;
+    const feel = (x, dd) => itemRating(state.profile, x, dd) - 200 * ((state.notions[x] || {}).m || 0);
+    const bar = feel(id, d), kind = nx[2] === "drill" ? "drill" : nx[2] || "app";
+    if (feel(nx[0], +nx[1] || 1) < bar - 50) return null;
+    const ok = (x, dd) => GEN[x] && state.notions[x] && ["vu", "encours"].includes(state.notions[x].status) && !this.lessonFirst(state, x) && (kind !== "drill" || (dd === 1 && this.drillable(state, x)));
+    if (d > 1 && d !== 4 && ok(id, d - 1)) return id + "|" + (d - 1) + "|" + (kind === "drill" ? "app" : kind);
+    if (d === 4 && ok(id, 2)) return id + "|2|" + kind;
+    const pre = (PREREQ[id] || []).filter((p) => ok(p, 1) && feel(p, 1) < bar).sort((a, b) => state.notions[a].m - state.notions[b].m)[0];
+    if (pre) return pre + "|1|rem";
+    const inPlan = new Set(plan.map((e) => String(e).split("|")[0]));
+    const best = this.eligible(state).filter((x) => x !== id && !inPlan.has(x) && this.isRecent(state, x) && state.notions[x].seen > 0 && ok(x, 1) && feel(x, 1) < bar - 50)
+      .sort((a, b) => feel(a, 1) - feel(b, 1))[0];
+    return best ? best + "|1|" + kind : null;
   },
   remediation(state, id) {
     const s = state.notions[id];
