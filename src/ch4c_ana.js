@@ -1280,7 +1280,8 @@
   const sdClasses = () => { const c0 = pk(SDC), w = pk(c0[3]), a0 = pk(c0[4]), ns = [R.int(2, 9), R.int(5, 14), R.int(4, 12), R.int(1, 7)], c = c0;
     const lo = ns.map((_, i) => a0 + i * w), ce = lo.map((a) => a + w / 2), N = ns.reduce((s, x) => s + x, 0), S = ce.reduce((s, x, i) => s + x * ns[i], 0), m = S / N;
     const S2 = ce.reduce((s, x, i) => s + ns[i] * (x - m) ** 2, 0), sd = Math.sqrt(S2 / N);
-    const tab = M("\\begin{array}{c|cccc} \\text{" + c[2] + "} & " + lo.map((a) => "[" + a + " \\,;\\, " + (a + w) + "[").join(" & ") + " \\\\ \\hline \\text{effectif} & " + ns.join(" & ") + " \\end{array}");
+    /* 25.11 (tableau de 381 px sur téléphone, 394 px même en \\small) : tableau transposé, une classe par ligne. */
+    const tab = "<br>" + M("\\begin{array}{c|c} \\text{" + c[2] + "} & \\text{effectif} \\\\ \\hline " + lo.map((a, i) => "[" + a + " \\,;\\, " + (a + w) + "[ & " + ns[i]).join(" \\\\ ") + " \\end{array}") + "<br>";
     return { w, lo, ce, ns, N, S, m, sd, c, tab }; };
   const SD = {
     1: [

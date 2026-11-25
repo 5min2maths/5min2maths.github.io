@@ -113,8 +113,11 @@ function geoCheck(svg, code) {
     if (!sideOK(P0) || !sideOK(P1)) issue("figure : angle mal tracé", code, "un côté de l'angle n'est pas tracé (ou l'arc n'arrive pas dessus)");
     // Étiquette : celle qui est dans l'ouverture de l'arc (sur la bissectrice), pas seulement la plus proche du sommet.
     const bx = mid[0] - V[0], by = mid[1] - V[1], bl = Math.hypot(bx, by) || 1, B = [V[0] + (bx / bl) * (r + 14), V[1] + (by / bl) * (r + 14)];
-    const lbl = texts.filter((t) => /^\s*\d+(?:[.,]\d+)?\s*°\s*$/.test(t.s)).sort((a, b) => Math.hypot(a.x - B[0], a.y - B[1]) - Math.hypot(b.x - B[0], b.y - B[1]))[0];
-    if (lbl && Math.hypot(lbl.x - B[0], lbl.y - 4 - B[1]) < 30) { const want = parseFloat(lbl.s.replace(",", ".")), got = angDeg(V, P0, P1); if (Math.abs(want - got) > 5) issue("figure : angle faux", code, "écrit " + want + "°, dessiné " + got.toFixed(0) + "°"); }
+    /* 25.11 : l'étiquette de l'arc est le texte le plus proche de sa bissectrice, quel qu'il soit : si c'est « ? » (angle cherché),
+       on ne contrôle pas (faux positifs angles-1-ue et angles-1-fnd : l'étiquette « 122° » de l'angle voisin était prise pour celle du « ? »). */
+    const near = (t) => Math.hypot(t.x - B[0], t.y - 4 - B[1]), lbl0 = texts.slice().sort((a, b) => near(a) - near(b))[0];
+    const lbl = lbl0 && /^\s*\d+(?:[.,]\d+)?\s*°\s*$/.test(lbl0.s) ? lbl0 : null;
+    if (lbl && near(lbl) < 30) { const want = parseFloat(lbl.s.replace(",", ".")), got = angDeg(V, P0, P1); if (Math.abs(want - got) > 5) issue("figure : angle faux", code, "écrit " + want + "°, dessiné " + got.toFixed(0) + "°"); }
   });
 }
 
@@ -162,6 +165,7 @@ if (/autotest/.test(H)) {
     ["faux rectangle", "rectangle", '<polygon points="10,90 110,90 120,30 20,30"/>', "figure ≠ énoncé"],
     ["angle juste", "angle", '<line x1="50" y1="100" x2="150" y2="100"/><line x1="50" y1="100" x2="100" y2="13.4"/><path d="M70,100 A20,20 0 0 0 60,82.68"/><text x="80" y="80">60°</text>', null],
     ["angle faux", "angle", '<line x1="50" y1="100" x2="150" y2="100"/><line x1="50" y1="100" x2="100" y2="13.4"/><path d="M70,100 A20,20 0 0 0 60,82.68"/><text x="80" y="80">35°</text>', "figure : angle faux"],
+    ["« ? » avec étiquette voisine", "angle", '<line x1="50" y1="100" x2="150" y2="100"/><line x1="50" y1="100" x2="100" y2="13.4"/><path d="M70,100 A20,20 0 0 0 60,82.68"/><text x="80" y="87">?</text><text x="95" y="92">35°</text>', null],
     ["côté manquant", "angle", '<line x1="50" y1="100" x2="150" y2="100"/><path d="M70,100 A20,20 0 0 0 60,82.68"/><text x="80" y="80">60°</text>', "figure : angle mal tracé"],
   ];
   for (const [nom, lab, body, attendu] of cas) {

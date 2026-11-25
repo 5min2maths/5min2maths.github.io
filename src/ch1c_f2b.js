@@ -85,7 +85,7 @@
       () => { const a = pk([1, 2, 3, -1, -2]), b = nz(-4, 4), c = nz(-5, 5), cs = [a, b, c], f = quad(cs);
         return QX("Une parabole passe par " + pts3([0, 1, -1], cs) + ". Détermine l'expression développée de " + M("f(x)") + ".", EX(cs), M("c = f(0) = " + c) + " ; " + M("a + b = " + (f(1) - c)) + " et " + M("a - b = " + (f(-1) - c)) + " : " + M("a = " + a) + ", " + M("b = " + b) + ".",
           { ctx: "expr-0-1", guide: [GS(M("c = f(0)") + " ?", c, M(c) + "."), GS(M("a + b = f(1) - c") + " ?", a + b, M(a + b) + "."), GS(M("a") + " (moyenne de " + M("a + b") + " et " + M("a - b") + ") ?", a, M(a) + "."), GX("Expression", EX(cs), M(P2(cs)) + ".")], traps: [TX(P2([a, -b, c]), "a + b = f(1) − c et a − b = f(−1) − c : attention au signe de b.")] }); },
-      () => { const a = pk([1, 2, 3, -1, -2]), b = nz(-4, 4), c = nz(-5, 5), cs = [a, b, c], f = quad(cs);
+      () => { const a = pk([2, 3, -2, -3]), b = nz(-4, 4), c = nz(-5, 5), cs = [a, b, c], f = quad(cs); /* 25.11 (robot) : a ≠ ±1 (réponse) */
         return QN("Une parabole " + M("f(x) = ax^2 + bx + c") + " passe par " + pts3([0, 1, -1], cs) + ". Que vaut " + M("a") + " ?", a, M("c = " + c) + " ; " + M("a + b = " + (a + b)) + ", " + M("a - b = " + (a - b)) + " ; en additionnant : " + M("2a = " + 2 * a) + ".",
           { ctx: "a-0-1", guide: [GS(M("c") + " ?", c, M(c) + "."), GS(M("2a") + " (somme des deux équations) ?", 2 * a, M(2 * a) + "."), GS(M("a") + " ?", a, M(a) + ".")], traps: [TR(2 * a, "En additionnant, on obtient 2a : divise par 2."), TR(b, "Ça, c'est b.")] }); },
       () => { const a = pk([1, 2, -1]), b = nz(-3, 3), c = nz(-4, 4), cs = [a, b, c], f = quad(cs);
@@ -96,7 +96,7 @@
       () => { const a = pk([1, 2, -1, -2]), b = nz(-4, 4), c = nz(-4, 4), cs = [a, b, c], f = quad(cs);
         return QX("Une parabole passe par " + pts3([0, 1, 2], cs) + ". Détermine l'expression développée de " + M("f(x)") + ".", EX(cs), M("c = " + c) + " ; " + M("a + b = " + (a + b)) + " ; " + M("4a + 2b = " + (4 * a + 2 * b)) + " ; d'où " + M("2a = " + 2 * a) + ", " + M("a = " + a) + ", " + M("b = " + b) + ".",
           { ctx: "expr-0-2", guide: [GS(M("c") + " ?", c, M(c) + "."), GS(M("a") + " (soustrais 2 × (a + b) de 4a + 2b) ?", a, M(a) + "."), GX("Expression", EX(cs), M(P2(cs)) + ".")], traps: [TX(P2([b, a, c]), "a est le coefficient de x², b celui de x.")] }); },
-      () => { const a = pk([1, 2, -1, 3]), b = nz(-4, 4), c = nz(-4, 4), cs = [a, b, c];
+      () => { const a = pk([1, 2, -1, 3]), b = pk([-4, -3, -2, 2, 3, 4]), c = nz(-4, 4), cs = [a, b, c]; /* 25.11 (robot) : b ≠ ±1 (réponse) */
         return QN("Une parabole " + M("f(x) = ax^2 + bx + c") + " passe par " + pts3([0, 1, 2], cs) + ". Que vaut " + M("b") + " ?", b, M("c = " + c) + ", " + M("a + b = " + (a + b)) + ", " + M("4a + 2b = " + (4 * a + 2 * b)) + " : " + M("a = " + a) + ", " + M("b = " + b) + ".",
           { ctx: "b-0-2", guide: [GS(M("a") + " ?", a, M(a) + "."), GS(M("b") + " ?", b, M(b) + ".")], traps: [TR(a, "Ça, c'est a."), TR(a + b, "a + b = " + (a + b) + " ; il faut séparer a et b.")] }); },
       () => { const v = R.int(15, 25), h0 = R.int(1, 3), cs = [-5, v, h0], f = quad(cs), t = 3;

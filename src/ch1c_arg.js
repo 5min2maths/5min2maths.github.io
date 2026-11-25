@@ -52,7 +52,8 @@
       () => { const k = pk([3, 4, 5]), ref = pk(["petit", "grand", "milieu"]); if (ref === "milieu" && k === 4) return null;
         const first = ref === "petit" ? 0 : ref === "grand" ? -(k - 1) : -(k - 1) / 2, c = k * first + (k * (k - 1)) / 2, ex = (c ? k + "*n" + (c > 0 ? "+" : "") + c : k + "*n"), exNeg = k + "*n" + (c > 0 ? "-" + c : "+" + -c);
         const tex = (c ? k + "n " + (c > 0 ? "+ " + c : "- " + -c) : k + "n");
-        const terms = [...Array(k).keys()].map((i) => { const d = first + i; return d === 0 ? "n" : "(n " + (d > 0 ? "+ " + d : "- " + -d) + ")"; }).join(" + ");
+        const tl = [...Array(k).keys()].map((i) => { const d = first + i; return d === 0 ? "n" : "(n " + (d > 0 ? "+ " + d : "- " + -d) + ")"; });
+        const terms = (k >= 5 ? [tl[0], tl[1], "\\ldots", tl[k - 1]] : tl).join(" + "); /* 25.11 : 5 termes trop larges sur téléphone (341 px) : somme abrégée */
         return QX("Soit " + M("n") + " un entier. On additionne " + k + " entiers consécutifs dont le " + (ref === "milieu" ? "nombre du milieu" : "plus " + ref) + " est " + M("n") + ". Écris cette somme sous forme réduite (en fonction de " + M("n") + ").", ex,
           M(terms + " = " + tex) + ".",
           { ctx: "consecutifs-" + ref, guide: [GX("Écris les " + k + " nombres et additionne-les (sans réduire).", ex, M(terms) + "."), GX("Réduis.", ex, M(tex) + ".")],
@@ -85,7 +86,7 @@
       /* trois multiples consécutifs */
       () => { const m = pk([7, 11, 13, 17, 19, 23]), k3 = pk([3, 4]), c = (m * k3 * (k3 - 1)) / 2;
         return QX("Soit " + M("k") + " un entier. Écris sous forme réduite la somme de " + k3 + " multiples de " + M(m) + " consécutifs, le premier étant " + M(m + "k") + ".", k3 * m + "*k+" + c,
-          M([...Array(k3).keys()].map((i) => (i ? m + "(k + " + i + ")" : m + "k")).join(" + ") + " = " + k3 * m + "k + " + c) + ".",
+          M([...Array(k3).keys()].map((i) => (i ? m + "(k + " + i + ")" : m + "k")).filter((t, i) => k3 < 4 || i !== 2).map((t, i) => (k3 >= 4 && i === 2 ? "\\ldots + " + t : t)).join(" + ") + " = " + k3 * m + "k + " + c) + ".", /* 25.11 : 4 termes à deux chiffres abrégés (329 px) */
           { ctx: "multiples-consecutifs", guide: [GS("Le multiple de " + M(m) + " qui suit " + M(m + "k") + " est " + M(m + "k + ?") + ". Que vaut « ? » ?", m, M(m + "(k + 1) = " + m + "k + " + m) + "."), GX("Somme réduite ?", k3 * m + "*k+" + c, M(k3 * m + "k + " + c) + ".")],
             traps: [TX(k3 * m + "*k+" + (k3 * (k3 - 1)) / 2, "Deux multiples de " + m + " consécutifs diffèrent de " + m + ", pas de 1."), TX(m + "*k+" + m * (k3 - 1), "Additionne les " + k3 + " multiples, pas seulement le premier et le dernier.")] }); },
       /* moyenne de nombres consécutifs pairs ou impairs */
@@ -116,8 +117,9 @@
     3: [
       /* trouver des impairs consécutifs de somme donnée */
       () => { const k = pk([3, 5]), n = ri(4, 30), first = 2 * n + 1, S = k * first + k * (k - 1);
+        /* 25.11 (437 px sur téléphone) : 5 termes → somme abrégée. */
         return QN("La somme de " + k + " nombres impairs consécutifs vaut " + M(S) + ". Quel est le plus petit de ces nombres ? (Pose " + M("2n + 1") + " pour le plus petit.)", first,
-          M([...Array(k).keys()].map((i) => "(2n + " + (2 * i + 1) + ")").join(" + ") + " = " + 2 * k + "n + " + k * k + " = " + S) + " donne " + M("n = " + n) + " ; le plus petit vaut " + M(first) + ".",
+          M([...Array(k).keys()].map((i) => "(2n + " + (2 * i + 1) + ")").filter((t, i) => k < 5 || i < 2 || i === k - 1).map((t, i) => (k >= 5 && i === 2 ? "\\ldots + " + t : t)).join(" + ") + " = " + 2 * k + "n + " + k * k + " = " + S) + " donne " + M("n = " + n) + " ; le plus petit vaut " + M(first) + ".",
           { ctx: "impairs-somme", guide: [GS("Somme réduite des " + k + " nombres : " + M(2 * k + "n + \\ldots") + ". Quel est le terme constant ?", k * k, M(2 * k + "n + " + k * k) + "."), GS("Résous " + M(2 * k + "n + " + k * k + " = " + S) + " : " + M("n") + " = ?", n, M("n = " + n) + "."), GS("Le plus petit nombre " + M("2n + 1") + " ?", first, M(first) + ".")],
             traps: [TR(n, "n n'est pas le nombre cherché : le plus petit impair est 2n + 1."), TR(S / k, "C'est le nombre du milieu (la moyenne), pas le plus petit."), TR(first + 2 * (k - 1), "C'est le plus grand.")] }); },
       /* nombres de trois chiffres multiples de 5 de somme des chiffres donnée (Sésamath ex. 3) */
@@ -230,7 +232,7 @@
       () => { const v = pk([
           { k: 3, t: "trois nombres impairs consécutifs", f: (n) => 6 * n + 9, first: (n) => 2 * n + 1, g: "(2n + 1) + (2n + 3) + (2n + 5) = 6n + 9", ok: (S) => S >= 9 && (S - 9) % 6 === 0, sol: (S) => 2 * ((S - 9) / 6) + 1, ex: "6*n+9" },
           { k: 4, t: "quatre entiers consécutifs", f: (n) => 4 * n + 6, first: (n) => n, g: "n + (n + 1) + (n + 2) + (n + 3) = 4n + 6", ok: (S) => S >= 6 && (S - 6) % 4 === 0, sol: (S) => (S - 6) / 4, ex: "4*n+6" },
-          { k: 5, t: "cinq nombres pairs consécutifs", f: (n) => 10 * n + 20, first: (n) => 2 * n, g: "2n + (2n + 2) + (2n + 4) + (2n + 6) + (2n + 8) = 10n + 20", ok: (S) => S >= 20 && (S - 20) % 10 === 0, sol: (S) => 2 * ((S - 20) / 10), ex: "10*n+20" }]);
+          { k: 5, t: "cinq nombres pairs consécutifs", f: (n) => 10 * n + 20, first: (n) => 2 * n, g: "2n + (2n + 2) + \\ldots + (2n + 8) = 10n + 20", ok: (S) => S >= 20 && (S - 20) % 10 === 0, sol: (S) => 2 * ((S - 20) / 10), ex: "10*n+20" }]);
         const yes = R.rand() < 0.5, n = ri(5, 40), S = yes ? v.f(n) : v.f(n) + pk([1, 2, 3].filter((d) => !v.ok(v.f(n) + d))); if (!yes && v.ok(S)) return null;
         const ans = v.ok(S) ? [v.sol(S)] : [];
         return QSet("Peut-on trouver " + v.t + " (positifs) dont la somme vaut " + M(S) + " ? Si oui, donne le plus petit ; sinon, écris « aucune ».", ans,

@@ -124,6 +124,15 @@ for (const id of Object.keys(GEN)) for (const d of [1, 2, 3, 4]) {
   if (!q2 || q2.q !== q1.q || q2.sol !== q1.sol) fail("code non reproductible " + q1.code);
 }
 
+// 2 ter bis. Alertes du robot du 25.11 (valeur triviale) : ces formes ne donnent plus jamais 0 ou ±1 comme réponse.
+// [notion, niveau, contexte (q.ctx) ou null pour tout le niveau]. Les comptages et « en quel x ? » (0° pour cos) restent permis ailleurs.
+for (const [id, d, ctx] of [["divcrit", 1, "chiffre-3"], ["rel", 3, "moyenne"], ["recip", 1, null], ["recip", 3, null], ["lectgraph", 2, "max-local"], ["lectgraph", 2, "decroissance"],
+  ["lectgraph", 2, "valeur-max"], ["lectgraph", 2, "valeur-min"], ["f2trois", 1, "a-0-1"], ["f2trois", 2, "b-0-2"], ["homogrec", 3, null], ["optim", 1, null], ["trigfn", 1, "extremum"], ["derivregles", 3, "parametre"]]) {
+  let seen = 0;
+  for (let s = 1; s <= 400; s++) { let q; try { q = GEN[id](d); } catch (e) { continue; } if (!q || (ctx && q.ctx !== ctx)) continue; seen++;
+    if (q.spec && q.spec.kind === "value" && Math.abs(q.spec.value) <= 1 && Number.isInteger(q.spec.value)) { fail("réponse triviale " + id + "-" + d + (ctx ? " (" + ctx + ")" : "") + " : " + q.q); break; } }
+  if (!seen) fail("forme introuvable " + id + "-" + d + " (" + ctx + ")");
+}
 // 2 quater. Une mini-leçon par notion
 for (const n of NOTIONS) {
   const L = LESSONS[n.id];
