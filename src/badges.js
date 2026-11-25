@@ -36,7 +36,7 @@ const Badges = {
     [/transformations du plan/i, "symetrie"], [/cercle/i, "cercle"], [/angle/i, "angle"], [/3d|espace|volume|similitude/i, "cube"],
     [/aire|périmètre/i, "aire"], [/unité|mesure|grandeur/i, "regle"], [/proportion/i, "proportion"], [/littéral|algébrique|algèbre/i, "litteral"],
     [/fractionnaire|fraction/i, "fraction"], [/relatif/i, "relatifs"], [/arithmétique/i, "points"], [/puissances et racines|racine/i, "racine"],
-    [/décimal/i, "decimal"], [/géom|figure/i, "geometrie"], [/nombre|numérique|calcul/i, "nombres"]],
+    [/décimal/i, "decimal"], [/géom|figure/i, "geometrie"], [/nombre|numérique|calcul|prérequis/i, "nombres"]],
   themeIcon(label) {
     const m = this.THEME_ICONS.find(([r]) => r.test(label || ""));
     return m ? "svg:" + m[1] : "🏆";
@@ -141,8 +141,8 @@ const Badges = {
       expo: AX + S("M30 70 Q58 68 70 26", 5) + D(30, 66, 0) ,
       sinus: S("M24 50 H76", 2.5) + S("M24 50 Q31 26 37 50 T50 50 T63 50 T76 50", 5),
       trigo: `<circle cx="50" cy="50" r="24" stroke="${col}" stroke-width="4"/>` + S("M50 50 L67 33 M50 50 H74", 3) + S("M67 33 V50", 3) + D(67, 33),
-      hyperbole: AX + S("M38 26 Q40 52 74 56", 5) + S("M33 74 Q32 72 31 66", 5),
-      reciproque: S("M26 74 L74 26", 2) + S("M28 64 Q50 64 72 30", 5) + S("M36 72 Q36 50 70 28", 3),
+      hyperbole: S("M24 50 H76 M50 24 V76", 2.5) + S("M54 26 Q56 46 76 46", 5) + S("M46 74 Q44 54 24 54", 5),
+      reciproque: S("M26 74 L74 26", 2.5) + S("M28 70 Q60 68 66 26", 5) + S("M30 72 Q32 40 74 34", 3),
       cubique: AX + S("M28 74 C40 20 56 80 74 28", 5),
       inequation: AX + F("M30 24 H76 V30 L30 64 Z", 0.35) + S("M30 64 L76 30", 5),
       systeme: S("M24 66 L76 34 M24 30 L76 70", 5) + D(50, 50, 6),
@@ -150,7 +150,7 @@ const Badges = {
       affine: AX + S("M28 68 L74 30", 5) + D(30, 66, 0),
       fonction: AX + S("M30 62 Q42 30 54 48 T76 34", 5),
       thales: S("M28 72 L50 26 L72 72 Z", 4) + S("M38 52 H62", 5),
-      pythagore: S("M34 66 V36 L66 66 Z", 5) + S("M34 58 H42 V66", 3) + F("M34 66 H66 V78 H34 Z", 0) + F("M22 36 H34 V66 H22 Z", 0.4) + F("M34 66 H66 V76 H34 Z", 0.4),
+      pythagore: F("M36 40 H24 V64 H36 Z", 0.4) + F("M36 64 H60 V76 H36 Z", 0.4) + S("M36 64 V40 L60 64 Z", 5) + S("M36 57 H43 V64", 3),
       symetrie: S("M50 22 V78", 3) + `<path d="M50 22 V78" stroke="${col}" stroke-width="0"/>` + F("M44 32 L28 64 H44 Z", 0.9) + `<path d="M56 32 L72 64 H56 Z" stroke="${col}" stroke-width="4"/>`,
       cercle: `<circle cx="50" cy="50" r="25" stroke="${col}" stroke-width="5"/>` + S("M50 50 L70 36", 4) + D(50, 50),
       angle: S("M26 70 H76 M26 70 L64 30", 5) + S("M46 70 A20 20 0 0 0 40 56", 4),

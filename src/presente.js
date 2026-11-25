@@ -98,7 +98,7 @@ const pzInstall = (who) => {
     <div class="stack"><p class="pz-url"><b>${esc(u.replace(/^https?:\/\//, ""))}</b></p>
     <ol class="small pz-steps"><li>Ouvrir le lien ${who === "parent" ? "sur le téléphone de votre enfant" : who === "prof" ? "sur votre téléphone" : "sur ton téléphone"} (ou scanner le QR code).</li>
     <li><b>Android</b> : menu ⋮ → « Ajouter à l'écran d'accueil ». <b>iPhone</b> : bouton Partager → « Sur l'écran d'accueil ».</li>
-    <li>${who === "parent" ? "Choisir ensemble sa classe et le chapitre en cours : c'est prêt." : who === "prof" ? "Choisir une classe : vous voyez ce que voient vos élèves (rien n'est compté dans les statistiques)." : "Choisis ta classe et le chapitre en cours : c'est parti."}</li></ol></div></div>`;
+    <li>${who === "parent" ? "Choisir ensemble sa classe et le chapitre en cours : c'est prêt." : who === "prof" ? "Choisir une classe : vous voyez exactement ce que voient vos élèves." : "Choisis ta classe et le chapitre en cours : c'est parti."}</li></ol></div></div>`;
 };
 
 function screenDecouvrir() {
@@ -285,9 +285,11 @@ function pzCount(root) {
   const io = new IntersectionObserver((es) => es.forEach((en) => { if (en.isIntersecting) { run(en.target); io.unobserve(en.target); } }), { threshold: 0.4 });
   els.forEach((e) => io.observe(e));
 }
+const PZ_COV_PROFILES = [9, 10, 11, 12, 13, 14, 15].map((g) => ({ system: "CH", grade: g, track: "college" })).concat([12, 13, 14, 15].map((g) => ({ system: "CH", grade: g, track: "mp" })));
+const pzCovHtml = (cov) => { const maxN = Math.max(1, ...cov.map(([, n]) => n)); return cov.map(([l, n, ch]) => `<div class="pz-cov-r"><span>${esc(l)}</span><span class="pz-cov-b"><i style="width:${Math.round((n / maxN) * 100)}%"></i></span><span class="small">${n} notions · ${ch} chap.</span></div>`).join(""); };
+const pzNotionCount = () => NOTIONS.filter((n) => n.CH || n.MP).length;
 function screenEnseignants() {
-  const cov = pzCoverage(), maxN = Math.max(1, ...cov.map(([, n]) => n));
-  const nNotions = NOTIONS.filter((n) => n.CH || n.MP).length, nClasses = cov.length;
+  const cov = pzCoverage(), nNotions = pzNotionCount(), nClasses = 11;
   h(`<div class="pz" id="pz">
   <div class="spread pz-bar">${brand}<span class="row" style="gap:6px"><button type="button" class="btn-sec small pz-play">▶ Présenter</button><button type="button" class="btn-ghost small pz-exit" aria-label="Quitter">✕</button></span></div>
 
@@ -295,7 +297,7 @@ function screenEnseignants() {
     <div class="eyebrow">👩‍🏫 Pour les enseignant·es · secondaire I et II</div>
     <h1 class="pz-big">Un entraînement quotidien,<br><span class="mark">aligné sur votre programme</span>,<br>que vos élèves font vraiment.</h1>
     <p class="muted">5 minutes par jour sur le téléphone : des questions au niveau de chaque élève, une correction immédiate et une aide pas à pas. Pour vous, aucune préparation ni correction, et aucune donnée d'élève à gérer.</p>
-    <div class="pz-nums pz-anim"><div><span class="pz-num" data-to="${nNotions}">${nNotions}</span><small>notions</small></div><div><span class="pz-num" data-to="${nClasses}">${nClasses}</span><small>classes, de la 9e à la 4e (CO, Collège, MP)</small></div><div><span class="pz-num" data-to="0">0</span><small>compte à créer</small></div></div>
+    <div class="pz-nums pz-anim"><div><span class="pz-num" id="pznn" data-to="${nNotions}">${nNotions}</span><small>notions</small></div><div><span class="pz-num" data-to="${nClasses}">${nClasses}</span><small>classes, de la 9e à la 4e (CO, Collège, MP)</small></div><div><span class="pz-num" data-to="0">0</span><small>compte à créer</small></div></div>
     <button type="button" class="btn-primary pz-next">Découvrir ↓</button>
   </section>
 
@@ -324,7 +326,7 @@ function screenEnseignants() {
   <section class="pz-s">
     <div class="eyebrow">📚 Votre programme</div><h2>Le plan d'études, classe par classe</h2>
     <p class="small muted">Plan d'études romand (CO), plans du Collège de Genève et de la maturité professionnelle. Notions travaillées dans l'année :</p>
-    <div class="pz-cov pz-anim">${cov.map(([l, n, ch]) => `<div class="pz-cov-r"><span>${esc(l)}</span><span class="pz-cov-b"><i style="width:${Math.round((n / maxN) * 100)}%"></i></span><span class="small">${n} notions · ${ch} chap.</span></div>`).join("")}</div>
+    <div class="pz-cov pz-anim" id="pzcov">${pzCovHtml(cov)}</div>
     <div class="pz-grid pz-anim">
       <div class="card flat"><b>🏫 « En ce moment en classe »</b><p class="small">L'élève reconnaît son chapitre à un exercice typique : environ 2 questions sur 3 portent alors dessus.</p></div>
       <div class="card flat"><b>📝 « Mon évaluation »</b><p class="small">Il donne la date et les notions de votre évaluation : révision jour après jour, puis un sujet de préparation corrigé.</p></div>
@@ -383,6 +385,12 @@ function screenEnseignants() {
   </div>`);
   const root = document.getElementById("pz"), box = document.getElementById("pztry");
   pzBind(root); pzCount(root);
+  /* Les notions de 3e–4e Collège et de MP 3e–4e sont dans des paquets chargés à la demande : on les charge, puis on recompte. */
+  if (typeof window.ensurePacks === "function") PZ_COV_PROFILES.reduce((pr, p) => pr.then(() => window.ensurePacks(p)).catch(() => {}), Promise.resolve()).then(() => {
+    if (location.hash !== "#enseignants") return;
+    const el = document.getElementById("pzcov"); if (el) el.innerHTML = pzCovHtml(pzCoverage());
+    const nn = document.getElementById("pznn"); if (nn) { nn.dataset.to = pzNotionCount(); nn.textContent = (+nn.dataset.to).toLocaleString("fr-CH"); }
+  });
   root.querySelectorAll("#pzg3 button").forEach((b) => (b.onclick = () => { PZ.grade = +b.dataset.v; root.querySelectorAll("#pzg3 button").forEach((x) => x.setAttribute("aria-pressed", x === b)); pzTry(box); }));
   pzTry(box);
 }

@@ -47,8 +47,23 @@ const txt = () => app.textContent.replace(/\s+/g, " ");
     ok(!over(app).length, "parents : rien ne dépasse à 360 px : " + over(app).slice(0, 4).join(", "));
     document.getElementById("pzgot").click(); await wait(50); ok(location.hash === "#parent", "J'ai reçu un lien → #parent");
     history.replaceState(null, "", location.pathname);
-    ping("open"); ok(!window.__net.length, "aucun envoi réseau : " + window.__net.join());
     log.push("parents ok");
+    /* 3. Enseignants (25.11) */
+    history.replaceState(null, "", "#enseignants"); ok(presentRoute() === true, "route #enseignants");
+    ok(app.querySelectorAll(".pz-s").length >= 9, "sections enseignants : " + app.querySelectorAll(".pz-s").length);
+    const cov = pzCoverage(); ok(cov.length === 11 && cov.every(([, n, ch]) => n >= 5 && ch >= 2), "couverture par classe : " + cov.map((c) => c.join(" ")).join(", "));
+    ok(app.querySelectorAll(".pz-cov-r").length === cov.length, "barres de couverture");
+    ok(app.querySelectorAll(".pz-loop-n").length === 5, "boucle d'une séance");
+    ok(/ne fait pas/.test(txt()) && /plan d'études/i.test(txt()), "limites et programme présentés");
+    for (const g of [9, 11, 12]) {
+      app.querySelector(`#pzg3 button[data-v="${g}"]`).click();
+      ok(app.querySelector("#pztry .qtext").textContent.trim(), "démo enseignant en " + g);
+    }
+    ok(!over(app).length, "enseignants : rien ne dépasse à 360 px : " + over(app).slice(0, 4).join(", "));
+    await until(() => [...app.querySelectorAll(".pz-num")].every((e) => e.textContent.trim()), 1500);
+    history.replaceState(null, "", location.pathname);
+    ping("open"); ok(!window.__net.length, "aucun envoi réseau : " + window.__net.join());
+    log.push("enseignants ok");
   } catch (e) { fails.push("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }
   document.getElementById("out").textContent = fails.length ? "ÉCHEC " + fails.join("\n") : "ok présentation : " + log.join(" | ");
 })();

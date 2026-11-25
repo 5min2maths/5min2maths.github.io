@@ -319,3 +319,11 @@ Mécanismes ajoutés (sans effet pour un profil suisse, contrôlé par `tests/fr
 MP qu'avant) : `HORS_FR` (formes d'une notion partagée hors programme d'une classe française), `UPFR` (niveau minimal des
 notions reprises en 4e, 3e, 2nde, 1re), champ `q.fr` (forme réservée à des classes françaises), dans `src/engine.js` ;
 tables dans `src/fr_couv.js`.
+
+## Décision du 25.11 (soir) : compétences en profil France
+
+Référentiel de compétences France construit sur les items officiels (`tools/referentiels_fr.json` : attendus de fin d'année
+et repères au collège, capacités attendues et automatismes au lycée), libellés officiels. Échelle **4 niveaux du LSU**,
+collège ET lycée, en pastilles sans chiffre : maîtrise insuffisante (< 40 % de réussite) · fragile (40–60 %) ·
+satisfaisante (60–85 %, seuil = note suisse 4) · très bonne maîtrise (≥ 85 %). Profils suisses inchangés (notes 1–6).
+Anciennes grilles « Livret de connaissances et de compétences » (Sources/Officiel/Competences College FR) : périmées, non utilisées.

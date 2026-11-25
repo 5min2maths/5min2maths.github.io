@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "0d15cae298"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "3079a77ce3"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -287,7 +287,7 @@ function screenWelcome() {
   <button class="btn-primary btn-big" id="go">Commencer</button>
   <button class="btn-ghost" id="restore">J'ai déjà un code de sauvegarde</button>
   <button class="btn-ghost small" id="privacy">🔒 Ce que l'app envoie</button>
-  <p class="small muted"><a href="#parents">👪 Je suis parent</a> · <a href="#decouvrir">Découvrir l'app</a> · <a href="#" id="legal-lien">Mentions légales et confidentialité</a></p>`);
+  <p class="small muted"><a href="#parents">👪 Je suis parent</a> · <a href="#enseignants">👩‍🏫 Je suis enseignant·e</a> · <a href="#decouvrir">Découvrir l'app</a> · <a href="#" id="legal-lien">Mentions légales et confidentialité</a></p>`);
   const inp = document.getElementById("dans"), prev = document.getElementById("dprev"), fb = document.getElementById("dfb");
   const show = () => previewOf(inp, prev, q.spec);
   inp.oninput = show;
@@ -750,7 +750,7 @@ function screenSettings() {
     <span class="small muted" id="st-l">Statistiques anonymes pour améliorer l'app</span><div class="seg" id="statsset" role="group" aria-labelledby="st-l"><button aria-pressed="${statsOk()}" data-v="1">J'aide</button><button aria-pressed="${!statsOk()}" data-v="0">Ne rien envoyer</button></div>
     <span class="small muted">Vibrer à chaque réponse (téléphone)</span><div class="seg" id="vib"><button aria-pressed="${UI.vib}" data-v="1">Oui</button><button aria-pressed="${!UI.vib}" data-v="0">Non</button></div></div>
   ${installCard("")}
-  <button class="btn-sec" id="backup">💾 Sauvegarder ou transférer ma progression</button><button class="btn-sec" id="level">Changer de classe ou d'école</button><button class="btn-sec" id="present" onclick="location.hash='#decouvrir'">📣 Présenter l'app (élèves)</button><button class="btn-sec" onclick="location.hash='#parents'">👪 Présenter l'app (parents)</button><button class="btn-sec" id="privacy">🔒 Ce que l'app envoie</button><button class="btn-ghost small" id="legal">Mentions légales et confidentialité</button>
+  <button class="btn-sec" id="backup">💾 Sauvegarder ou transférer ma progression</button><button class="btn-sec" id="level">Changer de classe ou d'école</button><button class="btn-sec" id="present" onclick="location.hash='#decouvrir'">📣 Présenter l'app (élèves)</button><button class="btn-sec" onclick="location.hash='#parents'">👪 Présenter l'app (parents)</button><button class="btn-sec" onclick="location.hash='#enseignants'">👩‍🏫 Présenter l'app (enseignant·es)</button><button class="btn-sec" id="privacy">🔒 Ce que l'app envoie</button><button class="btn-ghost small" id="legal">Mentions légales et confidentialité</button>
   ${isAuthor() ? '<button class="btn-primary" id="stats">📊 Statistiques d\'usage (auteur)</button>' : ""}
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div>
   <button class="btn-primary" id="back">Retour</button></div>`);
