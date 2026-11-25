@@ -1,0 +1,357 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../src/style.css">
+<style>#out{white-space:pre-wrap;font:11px/1.35 monospace;margin:8px}body.trace-hide-out #out{display:none}</style>
+<main id="app"></main><pre id="out">en cours</pre>
+<script>
+/* Trace d'élève (26.11, outil hors suite : préfixe _). Joue des séances dans la VRAIE interface pour un profil donné, avec
+   une politique d'élève, et écrit un journal lisible dans <pre id="out"> : texte visible de chaque écran, boutons proposés,
+   action choisie, retour obtenu, Mathélo, points de l'année, temps estimé (lecture + réflexion).
+   Paramètres (#…, séparés par &) :
+     eleve=lea|noah|ines|malik|chloe  scénario tout prêt (profil, niveau, stratégie, jours, extras)
+     profil=CH-9 | CH-11 | CH-12 (1re Coll.) | MP-13 | FR-8      niveau=faible|moyen|fort
+     strategie=aide,guide,idk,lecon,figure,presse,facile           jours=4   premier=1 (accueil, choix de classe, positionnement, visite)
+     extras=carnet,curieux,histoire,eval,probleme   jour0=2026-11-16   graine=7   ecran=1 (garder l'app visible pour une capture)
+   Lancement : nice timeout 300 chromium --headless --disable-gpu --no-sandbox --virtual-time-budget=90000 --dump-dom "file://$PWD/tests/_trace.html#eleve=lea" */
+const _D = Date; let OFF = 0;
+class FD extends _D { constructor(...a) { if (!a.length) super(_D.now() + OFF); else super(...a); } static now() { return _D.now() + OFF; } }
+window.Date = FD;
+const HP = (() => { const h = decodeURIComponent(location.hash.slice(1)); history.replaceState(null, "", location.pathname); return Object.fromEntries(h.split("&").filter(Boolean).map((s) => { const i = s.indexOf("="); return i < 0 ? [s, "1"] : [s.slice(0, i), s.slice(i + 1)]; })); })();
+const ELEVES = {
+  lea: { nom: "Léa", profil: "CH-9", niveau: "faible", strategie: "aide,guide,lecon,idk", wpm: 320, jours: 4, premier: 1, extras: "carnet,histoire,eval" },
+  noah: { nom: "Noah", profil: "CH-11", niveau: "moyen", strategie: "presse", wpm: 260, jours: 4, premier: 0, extras: "eval,carnet,curieux" },
+  ines: { nom: "Inès", profil: "CH-12", niveau: "fort", strategie: "facile,figure,lecon", wpm: 230, jours: 4, premier: 1, extras: "probleme,curieux,eval" },
+  malik: { nom: "Malik", profil: "MP-13", niveau: "moyen", strategie: "guide", wpm: 200, jours: 4, premier: 1, extras: "eval,carnet,histoire" },
+  chloe: { nom: "Chloé", profil: "FR-8", niveau: "moyen", strategie: "aide,figure", wpm: 220, jours: 4, premier: 1, extras: "curieux,carnet,eval" },
+};
+const CFG = Object.assign({ nom: "élève", profil: "CH-9", niveau: "moyen", strategie: "", wpm: 200, jours: 3, premier: 0, extras: "", jour0: "2026-11-16", graine: 7 }, ELEVES[HP.eleve] || {}, HP);
+CFG.jours = +CFG.jours; CFG.premier = +CFG.premier; CFG.wpm = +CFG.wpm;
+OFF = new _D(CFG.jour0 + "T16:30:00") - _D.now();
+{ let seed = +CFG.graine; Math.random = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; }; }
+try { localStorage.clear(); if (/^FR/.test(CFG.profil)) localStorage.setItem("m2m-france", "1"); } catch (e) {}
+window.MathJax = { typesetPromise: () => Promise.resolve() };
+window.fetch = () => Promise.resolve(new Response("{}")); if (navigator.sendBeacon) navigator.sendBeacon = () => true;
+window.ensurePacks = () => Promise.resolve();
+window.confirm = () => true; window.print = () => {};
+</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/defis_9.js"></script><script src="../src/defis_910.js"></script><script src="../src/defis_2c.js"></script><script src="../src/defis_sec2.js"></script><script src="../src/competences.js"></script><script src="../src/referentiel.js"></script><script src="../src/trx.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch4c_trous.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/ch1c_trous.js"></script><script src="../src/ch11_rep3d.js"></script><script src="../src/fr_college.js"></script><script src="../src/fr_1re.js"></script><script src="../src/fr_3e.js"></script><script src="../src/fr_tle.js"></script><script src="../src/fr_fin.js"></script><script src="../src/fr_trous.js"></script><script src="../src/fr_couv.js"></script><script src="../src/ref_matu.js"></script><script src="../src/ref_fr.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_col34b.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/fr_act.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/parents.js"></script><script src="../src/presente.js"></script><script src="../src/app.js"></script>
+<script>
+(async function () {
+  const OUT = [], log = (s) => OUT.push(s);
+  const flush = () => { document.getElementById("out").textContent = OUT.join("\n"); };
+  const wait = (ms = 30) => new Promise((r) => setTimeout(r, ms));
+  const rnd = Math.random;
+  const ST = new Set(String(CFG.strategie).split(",").filter(Boolean)), EX = String(CFG.extras).split(",").filter(Boolean);
+  const LV = { faible: { p1: 0.45, p2: 0.3, pl: 0.4 }, moyen: { p1: 0.7, p2: 0.5, pl: 0.65 }, fort: { p1: 0.93, p2: 0.8, pl: 0.9 } }[CFG.niveau] || { p1: 0.7, p2: 0.5, pl: 0.65 };
+  /* ---------- temps simulé ---------- */
+  let T = 0, Tsess = 0;
+  const words = (s) => (String(s || "").match(/[\p{L}\p{N}][\p{L}\p{N}'’,.\-]*/gu) || []).length;
+  const readS = (s) => (words(s) * 60) / CFG.wpm;
+  const add = (sec) => { T += sec; Tsess += sec; };
+  const mmss = (s) => { s = Math.round(s); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+  /* ---------- lecture de l'écran ---------- */
+  const hideCss = document.createElement("style");
+  hideCss.textContent = ".keypad,.vote,details.cmt,.tabs,#fabs,#fabc,.fab,.preview{display:none!important}";
+  const vis = (el) => !!el && el.offsetParent !== null && !el.disabled;
+  const screenText = (root = app) => { document.head.appendChild(hideCss); const t = (root.innerText || "").replace(/\n{2,}/g, "\n").trim(); hideCss.remove(); return t; };
+  const buttons = () => [...app.querySelectorAll("button, a.btn-sec, a.btn-ghost")].filter((b) => vis(b) && !b.closest(".keypad") && !b.closest(".vote") && !b.closest("details.cmt")).map((b) => (b.innerText || b.getAttribute("aria-label") || "").replace(/\s+/g, " ").trim()).filter(Boolean);
+  const indent = (t, n = 4) => String(t).split("\n").map((l) => " ".repeat(n) + l).join("\n");
+  const status = () => { try { return "Mathélo " + state.elo.r + " · points de l'année " + ypPts() + " · carnet " + (state.carnet || []).length; } catch (e) { return ""; } };
+  let nShot = 0;
+  const shot = (label, opt = {}) => {
+    nShot++;
+    if (CFG.stopat && (/^\d+$/.test(CFG.stopat) ? String(nShot) === CFG.stopat : new RegExp(CFG.stopat).test(label))) { CFG.ecran = 1; throw new Error("STOP " + label); }
+    const t = screenText();
+    log("\n━━ [" + mmss(T) + "] #" + nShot + " " + label);
+    log(indent(opt.max ? t.slice(0, opt.max) + (t.length > opt.max ? " […]" : "") : t));
+    log("    ▸ boutons : " + buttons().join(" | "));
+    return t;
+  };
+  const act = (s) => log("  → " + s);
+  const click = async (el, what) => { if (!el) { act("(introuvable : " + what + ")"); return false; } act("touche « " + (what || (el.innerText || "").trim().slice(0, 60)) + " »"); el.click(); await wait(); return true; };
+  const $ = (id) => document.getElementById(id);
+  const byText = (re, root = app) => [...root.querySelectorAll("button, a")].find((b) => vis(b) && re.test(b.innerText || ""));
+  /* ---------- réponses ---------- */
+  const fmt = (x) => { if (!isFinite(x)) return String(x); let s = String(+(+x).toPrecision(12)); if (/e/.test(s)) return s; return s.replace(".", ","); };
+  const gcd = (a, b) => (b ? gcd(b, a % b) : Math.abs(a));
+  function valAns(spec) {
+    const v = spec.value;
+    if (spec.sci) { const e = Math.floor(Math.log10(Math.abs(v))), a = +(v / Math.pow(10, e)).toPrecision(10); return fmt(a) + "*10^" + e; }
+    if (spec.round) { const k = Math.round(v / spec.round) * spec.round, dec = Math.max(0, -Math.floor(Math.log10(spec.round) + 1e-9)); return (+k.toFixed(dec)).toFixed(dec).replace(".", ","); }
+    if (Math.abs(v - Math.round(v)) < 1e-9) return String(Math.round(v));
+    for (let k = 1; k <= 4; k++) { const n = v * Math.pow(10, k); if (Math.abs(n - Math.round(n)) < 1e-7) return fmt(+v.toFixed(k)); }
+    for (let d = 2; d <= 400; d++) { const n = v * d; if (Math.abs(n - Math.round(n)) < 1e-9) { const g = gcd(Math.round(n), d); return Math.round(n) / g + "/" + d / g; } }
+    const pi = v / Math.PI; for (let d = 1; d <= 12; d++) { const n = pi * d; if (Math.abs(n - Math.round(n)) < 1e-9) { const g = gcd(Math.round(n), d); return (Math.round(n) / g === 1 ? "" : Math.round(n) / g) + "π" + (d / g > 1 ? "/" + d / g : ""); } }
+    for (let c = 1; c <= 12; c++) { const w2 = Math.round(v * c * v * c); if (Math.abs(v * c * v * c - w2) < 1e-6) { let a = 1, b = w2; for (let k = 2; k * k <= b; k++) while (b % (k * k) === 0) { b /= k * k; a *= k; } return (v < 0 ? "-" : "") + (a > 1 ? a : "") + "√" + b + (c > 1 ? "/" + c : ""); } }
+    return fmt(v);
+  }
+  function rightAns(spec) {
+    if (!spec) return null;
+    if (spec.kind === "value") return valAns(spec);
+    if (spec.kind === "expr") return String(spec.expr);
+    if (spec.kind === "set") return spec.all ? "tous" : !spec.values.length ? "∅" : spec.values.map((v) => valAns({ value: v })).join(" ; ");
+    if (spec.kind === "pair") return spec.values.map((v) => valAns({ value: v })).join(" ; ");
+    if (spec.kind === "ineq") return "x " + spec.op + " " + valAns({ value: spec.value });
+    return null;
+  }
+  function wrongAns(q, spec) {
+    const T = ((q && q.traps) || []).filter((t) => t.v !== undefined || t.e || t.s);
+    if (T.length) { const t = T[Math.floor(rnd() * T.length)]; return { a: t.v !== undefined ? valAns({ value: t.v }) : t.e || t.s.join(" ; "), typ: "piège : " + (t.m || "").slice(0, 80) }; }
+    if (spec && spec.kind === "value") return { a: valAns({ value: spec.value === 0 ? 3 : Math.round(spec.value * 10 + 10) / 10 }), typ: "erreur quelconque" };
+    if (spec && spec.kind === "expr") return { a: "2*x+1", typ: "erreur quelconque" };
+    if (spec && spec.kind === "pair") return { a: spec.values.map((v) => valAns({ value: -v || 1 })).join(" ; "), typ: "erreur quelconque (signes)" };
+    return { a: "7", typ: "erreur quelconque" };
+  }
+  const specTxt = (s) => { if (!s) return "?"; const c = { ...s }; delete c.traps; return JSON.stringify(c).slice(0, 160); };
+  /* ---------- captures de l'app ---------- */
+  let cap = null, lessonId = null;
+  const _rq = renderQuestion; renderQuestion = (q, o) => { cap = { q, o, done: false }; _rq(q, o); };
+  let curQ = null, histE = null, qcmList = [];
+  const _sc = screenCurious; screenCurious = (q, ...a) => { curQ = q; return _sc(q, ...a); };
+  if (typeof HISTOIRE !== "undefined") for (const k of Object.keys(HISTOIRE)) { const f = HISTOIRE[k].ex; HISTOIRE[k].ex = (...a) => (histE = f(...a)); }
+  if (typeof qcmMake === "function") { const _qm = qcmMake; qcmMake = (...a) => { const r = _qm(...a); if (r) qcmList.push(r); return r; }; }
+  const _sl = screenLesson; screenLesson = (id, ...a) => { lessonId = id; return _sl(id, ...a); };
+  const thinkS = (q) => (q.parts ? 150 : q.d >= 4 ? 150 : q.d === 3 ? 50 : q.d === 2 ? 30 : 15) * (CFG.niveau === "faible" ? 1.4 : CFG.niveau === "fort" ? 0.7 : 1) * (ST.has("presse") ? 0.7 : 1);
+  const qs = []; /* questions rencontrées */
+  /* ---------- une question ---------- */
+  async function doQuestion() {
+    const { q, o } = cap; cap.done = true;
+    const t = shot("QUESTION " + (q.code || "") + " · d" + q.d + (q.kind ? " · " + q.kind : ""));
+    const ra = q.parts ? q.parts.map((p) => rightAns(p.spec)).join(" | ") : rightAns(q.spec);
+    log("    ⓘ attendu : " + ra + "   [spec " + (q.parts ? q.parts.map((p) => specTxt(p.spec)).join(" / ") : specTxt(q.spec)) + "]");
+    qs.push({ code: q.code, id: q.id, d: q.d, q: String(q.q).replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").slice(0, 300), ans: ra });
+    add(readS(t.split("\n").slice(0, 12).join(" ")) + thinkS(q));
+    if (q.parts) return doProblem(q);
+    const inp = $("ans");
+    /* « Trop facile » (Inès) */
+    if (ST.has("facile") && q.d <= 1 && $("easy") && vis($("easy")) && rnd() < 0.6) { await click($("easy"), "Trop facile ⏭"); return; }
+    if (ST.has("lecon") && rnd() < 0.25) { const d = app.querySelector(".card details.lesson"); if (d) { d.open = true; await wait(); log("  → ouvre « 📖 Rappel de cours » :"); log(indent(screenText(d).slice(0, 700), 6)); add(readS(screenText(d)) * 0.6); } }
+    if (ST.has("idk") && rnd() < 0.15) { await click($("idk"), "Je ne sais pas"); add(3); return afterEnd(q); }
+    let ok = rnd() < LV.p1, a = ok ? ra : null, w = null;
+    if (!ok) { w = wrongAns(q, q.spec); a = w.a; }
+    if (a === null) { act("(pas de réponse calculable pour ce type : je ne sais pas)"); await click($("idk"), "Je ne sais pas"); return afterEnd(q); }
+    inp.value = a; inp.dispatchEvent(new Event("input")); act("tape « " + a + " »" + (w ? " (" + w.typ + ")" : "")); add(5);
+    await click($("check"), "Valider"); await wait(220);
+    let fb = $("fb");
+    /* forme refusée / illisible avec la bonne réponse : signaler */
+    if (fb && /hint/.test((fb.firstElementChild || {}).className || "") && !cap.finishedFlag && !app.querySelector("#nx")) {
+      const ft = screenText(fb); log("    ◂ retour : " + ft.replace(/\n/g, " ⏎ ")); add(readS(ft));
+      if (/lire ta réponse|Le résultat, pas le calcul|Presque$/m.test(ft) && ok) { log("    ⚠ LA BONNE RÉPONSE CALCULÉE N'EST PAS ACCEPTÉE TELLE QUELLE"); await click($("idk"), "Je ne sais pas"); return afterEnd(q); }
+      /* 2e essai */
+      const ok2 = rnd() < LV.p2 + (ST.has("aide") ? 0.15 : 0);
+      const a2 = ok2 ? ra : wrongAns(q, q.spec).a;
+      inp.value = a2; inp.dispatchEvent(new Event("input")); act("2e essai : tape « " + a2 + " »"); add(thinkS(q) * 0.6 + 5);
+      await click($("check"), "Valider"); await wait(220);
+    }
+    return afterEnd(q);
+  }
+  async function afterEnd(q) {
+    const fb = $("fb"); if (!fb) return;
+    nShot++; if (CFG.stopat && (CFG.stopat === "RETOUR" + nShot || String(nShot) === CFG.stopat)) { CFG.ecran = 1; throw new Error("STOP retour"); }
+    const ft = screenText(fb); log("    ◂ retour (#" + nShot + ") :"); log(indent(ft.slice(0, 1400), 6)); add(readS(ft) * (ST.has("presse") ? 0.4 : 0.8));
+    log("    · " + status());
+    if ($("guide") && ST.has("guide") && rnd() < 0.8) { await click($("guide"), "🪜 On le fait ensemble, pas à pas"); await doGuide(q); }
+    else if ($("solstep") && ST.has("aide")) { let k = 0; while ($("solstep") && vis($("solstep")) && k++ < 8) { $("solstep").click(); await wait(); } act("dévoile les étapes du corrigé (" + k + ")"); log(indent(screenText($("ssteps") || fb).slice(0, 900), 6)); add(20); }
+    const rd = $("redo");
+    if (rd && vis(rd) && ST.has("aide") && rnd() < 0.3) { await click(rd); return; }
+    const nx = $("nx"); if (nx) await click(nx, (nx.innerText || "Continuer").trim());
+  }
+  async function doGuide(q) {
+    for (let k = 0; k < 8; k++) {
+      const el = $("gs" + k); if (!el) break;
+      const g = q.guide[k], inp = el.querySelector("input"); if (!inp || inp.disabled) continue;
+      log("    ◦ étape " + (k + 1) + " : " + screenText(el).split("\n").slice(0, 3).join(" ").slice(0, 300) + "   ⓘ attendu " + rightAns(g.spec));
+      const ok = rnd() < Math.min(0.9, LV.p1 + 0.15), a = ok ? rightAns(g.spec) : wrongAns(g, g.spec).a;
+      inp.value = a; inp.dispatchEvent(new Event("input")); act("tape « " + a + " »"); add(20);
+      el.querySelector(".gok").click(); await wait();
+      const f = el.querySelector(".gfb"); log("      ◂ " + screenText(f).replace(/\n/g, " ⏎ ").slice(0, 400));
+      if (f && /lire|Réponse illisible|résultat/.test(f.innerText) && !el.querySelector(".gok-msg, .gno-msg")) { log("      ⚠ étape refusée (forme)"); break; }
+    }
+    const end = app.querySelector("#gsteps .gstep.ok"); if (end) log("    ◦ fin du pas à pas : " + screenText(end).slice(0, 200).replace(/\n/g, " ⏎ "));
+  }
+  async function doProblem(q) {
+    for (let tr = 0; tr < 3; tr++) {
+      if (ST.has("presse") && tr === 0 && rnd() < 0.2) { await click($("idk"), "Voir le corrigé"); break; }
+      q.parts.forEach((p, i) => { const inp = $("p" + i); if (!inp || inp.disabled) return; const ok = rnd() < LV.p1 + tr * 0.1; const a = ok ? rightAns(p.spec) : wrongAns(p, p.spec).a; inp.value = a; act("partie " + (i + 1) + " : tape « " + a + " »" + (ok ? "" : " (faux)")); });
+      add(10); await click($("check"), "Valider"); await wait(150);
+      if ($("nx")) break;
+      const ft = screenText($("fb")); log("    ◂ retour : " + ft.replace(/\n/g, " ⏎ ")); add(readS(ft) + 40);
+    }
+    return afterEnd(q);
+  }
+  /* ---------- leçon ---------- */
+  async function doLesson() {
+    const id = lessonId; lessonId = null;
+    const card = app.querySelector(".lesson-card"), t = shot("LEÇON " + id);
+    add(readS(t.split("\n").slice(0, 8).join(" ")));
+    const pc = app.querySelectorAll("#pc button");
+    if (pc.length) {
+      const P = ACTIVE[id].predict, good = rnd() < LV.pl, b = [...pc].find((x) => (+x.dataset.i === P.good) === good) || pc[0];
+      await click(b, "Devine : " + b.innerText.trim()); add(8);
+      log("    ◂ " + screenText($("pfb")).replace(/\n/g, " ⏎ "));
+      const tro = $("tryopt");
+      if (tro && vis(tro) && ST.has("figure")) {
+        await click(tro); const s2 = $("s2"); log(indent(screenText(s2).slice(0, 900), 6)); add(readS(screenText(s2)) + 25);
+        /* tentative : réponses tapées des défis « À toi » si champ présent */
+        for (let k = 0; k < 3; k++) { const ip = $("play") && $("play").querySelector("input:not([type=range])"); if (!ip || ip.disabled) break; const btn = [...$("play").querySelectorAll("button")].find((x) => vis(x)); ip.value = "?"; act("(défi interactif : je ne peux pas le jouer automatiquement, je passe)"); break; }
+        const sk = $("skip"); if (sk && vis(sk)) await click(sk);
+      }
+    } else if (ST.has("figure") || ST.has("lecon")) { /* leçon non active */ }
+    const s3 = $("s3"); if (s3 && vis(s3)) add(readS(screenText(s3)) * (ST.has("presse") ? 0.3 : 0.8));
+    else add(readS(screenText(card)) * (ST.has("presse") ? 0.3 : 0.8));
+    const go = $("go"); await click(go, go ? go.innerText.trim() : "J'ai compris");
+  }
+  /* ---------- boucle d'une activité ---------- */
+  async function play(label, maxSteps = 30) {
+    Tsess = 0; log("\n████ " + label + " · " + day() + " · " + status());
+    for (let k = 0; k < maxSteps; k++) {
+      await wait();
+      if ($("tour")) { const tt = screenText($("tour")); log("  [visite] " + tt.replace(/\n/g, " ⏎ ")); add(readS(tt)); $("tournext").click(); continue; }
+      if (lessonId && app.querySelector(".lesson-card")) { await doLesson(); continue; }
+      if (cap && !cap.done && ($("check") || app.querySelector("input#p0"))) { await doQuestion(); continue; }
+      if ($("nx") && vis($("nx"))) { await click($("nx")); continue; }
+      break;
+    }
+    const t = shot("FIN · " + label, { max: 1600 }); add(readS(t) * 0.3);
+    log("  ⏱ durée estimée de « " + label + " » : " + mmss(Tsess) + "   · " + status());
+    return Tsess;
+  }
+  const home = async () => { session = null; homeTab = "today"; screenHome(); await wait(); };
+  const nextDay = async (n = 1) => { OFF += n * 864e5; state = Store.load(); Engine.unlock(state); await home(); };
+  /* ---------- premier lancement ---------- */
+  async function firstLaunch() {
+    log("████ PREMIER LANCEMENT · " + CFG.nom + " · " + CFG.profil + " · " + day());
+    const [sys, g] = CFG.profil.split("-"), grade = +g;
+    shot("ACCUEIL (vu sans rien toucher)", { max: 1600 }); add(readS(screenText()) * 0.5);
+    if (sys !== "FR") { const lab = grade >= 12 ? "Sec. II" : grade + "e"; const b = [...app.querySelectorAll("#dgrade button")].find((x) => x.innerText.trim() === lab); await click(b, "Je suis en : " + lab); shot("ACCUEIL après choix de classe", { max: 900 }); }
+    /* question d'essai */
+    const dq = app.querySelector("#demo .qtext"); if (dq) { const inp = $("dans"); inp.value = "12"; act("essai : tape « 12 » (au hasard)"); $("dok").click(); await wait(); log("    ◂ " + screenText($("dfb")).replace(/\n/g, " ⏎ ").slice(0, 500)); add(30); }
+    await click($("go"), "Commencer");
+    if (sys === "FR") { const b = [...app.querySelectorAll("#sys button")].find((x) => x.dataset.v === "FR"); await click(b, "Ton école : France"); }
+    shot("ÉTAPE 1", { max: 1400 }); add(20);
+    if (sys === "FR" || !app.querySelector("#gradeknown")) { const b = [...app.querySelectorAll("#grade button")].find((x) => +x.dataset.v === grade); await click(b, "classe " + (b && b.innerText)); }
+    if (grade >= 12 && sys !== "FR") { const b = app.querySelector('#track button[data-v="' + (sys === "MP" ? "mp" : "college") + '"]'); await click(b, b && b.innerText); }
+    await click($("next"), "Continuer");
+    /* positionnement */
+    for (let k = 0; k < 8 && cap && !cap.done; k++) { await doQuestion(); await wait(); }
+    shot("FIN DU POSITIONNEMENT", { max: 1500 }); add(20);
+    await click($("go"), "Voir ma première séance"); await wait();
+    log("  ⏱ premier lancement jusqu'à l'accueil : " + mmss(T));
+  }
+  function seed() {
+    const [sys, g] = CFG.profil.split("-"), grade = +g;
+    state = Engine.newState({ system: sys === "MP" ? "CH" : sys, grade, track: sys === "MP" ? "mp" : "college", minutes: 5 });
+    ypSync(state); Engine.autoInit(state); state.placed = true; state.tourDone = true; state.firstDone = true; save();
+    log("████ Profil créé sans positionnement · " + CFG.profil);
+  }
+  /* ---------- extras ---------- */
+  async function doCurieux() {
+    const d = app.querySelector('[data-door="cur"]'); await click(d, "case Curieux");
+    const t = shot("CURIEUX", { max: 1500 }); add(readS(t));
+    const b = app.querySelectorAll("#cbet button"); if (!b.length) return home();
+    await click(b[Math.floor(rnd() * b.length)]); add(10);
+    const inp = $("cans"), cq = curQ;
+    if (inp && cq) { const ok = rnd() < LV.p1, v = cq.calc.range ? (cq.calc.range[0] + cq.calc.range[1]) / 2 : cq.calc.value;
+      log("    ⓘ code " + cq.code + " · attendu " + (cq.calc.range ? "entre " + cq.calc.range.join(" et ") : valAns({ value: cq.calc.value, round: cq.calc.round })));
+      inp.value = ok ? valAns({ value: v, round: cq.calc.round || (cq.calc.range ? 1 : undefined) }) : valAns({ value: Math.round(v * 3) }); act("tape « " + inp.value + " »"); add(60);
+      $("cok").click(); await wait(); log("    ◂ " + screenText($("cfb")).replace(/\n/g, " ⏎ ").slice(0, 500));
+      if ($("cok")) { inp.value = valAns({ value: v, round: cq.calc.round || (cq.calc.range ? 1 : undefined) }); act("2e essai « " + inp.value + " »"); $("cok").click(); await wait(); } }
+    if ($("cidk")) await click($("cidk"), "Voir la réponse");
+    log(indent(screenText(app.querySelector(".card")).split("On vérifie")[1] || "", 4).slice(0, 1600)); add(60);
+    await home();
+  }
+  async function doHistoire() {
+    await click(app.querySelector('[data-door="hist"]'), "case Histoire");
+    const t = shot("HISTOIRE", { max: 2200 }); add(readS(t));
+    const inp = $("hans"); if (inp) { log("    ⓘ attendu " + (histE && histE.value)); inp.value = rnd() < LV.p1 && histE ? valAns({ value: histE.value }) : "12"; act("tape « " + inp.value + " »"); $("hok").click(); await wait(); log("    ◂ " + screenText($("hfb") || app).slice(0, 300).replace(/\n/g, " ⏎ ")); if ($("hidk")) await click($("hidk"), "Voir la réponse"); log(indent(screenText($("hfb")).slice(0, 900), 6)); add(60); }
+    await home();
+  }
+  async function doCarnet() {
+    await click(app.querySelector('[data-door="carnet"]'), "case Carnet");
+    shot("CARNET", { max: 1500 });
+    if ($("carnetgo")) { await click($("carnetgo")); await play("Carnet d'erreurs"); }
+    await home();
+  }
+  async function doProbleme() {
+    await click(app.querySelector('[data-door="prob"]'), "case Problème");
+    shot("PROBLÈME DE LA SEMAINE (porte)", { max: 800 });
+    if ($("wp")) { await click($("wp")); await play("Problème de la semaine", 6); }
+    await home();
+  }
+  async function doEvalSetup() {
+    await click(app.querySelector('[data-door="test"]'), "case Évaluation");
+    shot("ÉVALUATION (porte)", { max: 1200 });
+    await click($("prep"), "Je prépare une évaluation");
+    const t = shot("JE PRÉPARE UN TEST", { max: 2500 }); add(readS(t) * 0.5 + 30);
+    const boxes = [...app.querySelectorAll(".check input")]; const ids = Engine.nowActive(state) ? state.now.ids : [];
+    let pick = boxes.filter((b) => ids.includes(b.value)); if (!pick.length) pick = boxes.filter((b) => ["encours", "vu"].includes((state.notions[b.value] || {}).status)).slice(-3);
+    pick.slice(0, 3).forEach((b) => (b.checked = true)); act("coche : " + pick.slice(0, 3).map((b) => nLab(b.value)).join(" · "));
+    $("pdate").value = addDays(day(), 4); act("date : dans 4 jours (" + addDays(day(), 4) + ")");
+    await click($("save"), "Enregistrer mon évaluation");
+    homeTab = "test"; screenHome(); await wait(); shot("MON ÉVALUATION (programme)", { max: 1800 });
+    await home();
+  }
+  async function doEvalTask() {
+    if (!Engine.prepActive(state)) return;
+    shot("ACCUEIL (évaluation active)", { max: 1200 });
+    const kind = prepKind(); act("tâche du jour : " + kind);
+    await click($("preptask"), "C'est parti (évaluation)");
+    await wait();
+    if (app.querySelector(".at-seg")) { /* autoévaluation : grille Avant */
+      shot("AUTOÉVALUATION", { max: 1500 });
+      app.querySelectorAll(".at-seg").forEach((s) => { const bs = s.querySelectorAll("button"); bs[Math.floor(rnd() * 3)].click(); });
+      act("remplit la grille Avant au hasard"); add(40);
+      qcmList = []; await click($("atgo"));
+      let iq = 0;
+      for (let k = 0; k < 12; k++) { await wait(); const c = app.querySelectorAll(".qcm-c"); if (c.length && !c[0].disabled) { const t = shot("TEST RAPIDE", { max: 900 }); add(readS(t) + 30); const norm = (x) => String(x).replace(/<[^>]*>/g, "").replace(/\\mathbf|[{}\s\\()]/g, ""); const shown = norm(app.querySelector(".qtext").textContent); const it = qcmList[iq++]; const ok = rnd() < LV.p1; const gi = it ? it.choices.findIndex((x) => x.ok) : 0; log("    ⓘ bonne réponse : " + (it ? it.choices[gi].f : "?") + " · code " + (it && it.q.code)); const others = [...c].filter((x, j) => j !== gi); const b = ok || !others.length ? c[gi] : others[Math.floor(rnd() * others.length)]; await click(b, "choix " + b.innerText.replace(/\s+/g, " ").trim()); log("    ◂ " + screenText($("fb")).slice(0, 600).replace(/\n/g, " ⏎ ")); await click($("nx")); continue; }
+        if (cap && !cap.done && $("check")) { await doQuestion(); continue; } break; }
+      shot("GRILLE FINALE", { max: 1500 }); add(30);
+    } else if ($("corr")) { const t = shot("SUJET DE PRÉPARATION", { max: 4000 }); add(readS(t)); log("  (l'élève ne fait pas le sujet sur feuille dans la trace)"); }
+    else await play("Évaluation · " + kind);
+    await home();
+  }
+
+  /* ---------- #scan=1 : balayage de contenu (TeX visible hors formule, décimaux entiers en decmul, triangles plats) ---------- */
+  if (CFG.scan) {
+    const outside = (t) => String(t || "").replace(/<[^>]*>/g, " ").split(/\\\(.*?\\\)/s).join(" ");
+    const BAD = /\{,\}|\\text\{|\\cdot|\\frac|\\times|\\sqrt|\\widehat|\\le\b|\\ge\b/;
+    const hits = {}, ex = {};
+    const ids = Object.keys(GEN || {}).filter((id) => !CFG.ids || CFG.ids.split(",").includes(id));
+    for (const id of ids) for (const lv of [1, 2, 3, 4]) for (let sd = 1; sd <= +(CFG.n || 25); sd++) {
+      let q; try { q = Engine.build(id, lv, sd); } catch (e) { continue; }
+      if (!q) continue;
+      const fields = [["hint", q.hint], ...(q.hints || []).map((x) => ["hints", x]), ...((q.traps || []).map((t) => ["trap", t.m])), ...((q.guide || []).flatMap((g) => [["guide.ask", g.ask], ["guide.sol", g.sol]])), ["sol", q.sol], ["q", q.q]];
+      for (const [f, t] of fields) { const o = outside(t); if (BAD.test(o)) { const k = id + " · " + f; hits[k] = (hits[k] || 0) + 1; if (!ex[k]) ex[k] = q.code + " : " + o.replace(/\s+/g, " ").trim().slice(0, 160); } }
+    }
+    log("SCAN TeX visible hors \\( \\) — " + Object.keys(hits).length + " champs");
+    Object.keys(hits).sort().forEach((k) => log(k + " ×" + hits[k] + "   ex. " + ex[k]));
+    flush(); app.style.display = "none"; return;
+  }
+  /* ---------- scénario ---------- */
+  try {
+    log("ÉLÈVE " + CFG.nom + " · profil " + CFG.profil + " · niveau " + CFG.niveau + " · stratégie " + [...ST].join(",") + " · " + CFG.jours + " jours · départ " + day());
+    if (CFG.premier) await firstLaunch(); else { seed(); await home(); }
+    const durs = [];
+    for (let j = 0; j < CFG.jours; j++) {
+      if (j > 0) await nextDay(j === 2 && !CFG.consecutif ? 2 : 1);
+      shot("ACCUEIL jour " + (j + 1), { max: 1500 });
+      if (j === 0 && !CFG.premier) { /* chapitre en classe */ }
+      if (Engine.prepActive(state) && j >= 1) await doEvalTask();
+      const go = $("go") || $("freego"); await click(go, go && go.innerText.trim());
+      durs.push(await play("Séance jour " + (j + 1)));
+      const sumT = screenText(); if (/Bonus : une question curieuse/.test(sumT)) log("    (le bilan propose une question curieuse en bonus)");
+      await home();
+      const e = EX[j % Math.max(1, EX.length)];
+      if (e === "carnet") await doCarnet(); else if (e === "curieux") await doCurieux(); else if (e === "histoire") await doHistoire(); else if (e === "probleme") await doProbleme(); else if (e === "eval" && !Engine.prepActive(state)) await doEvalSetup();
+      if (EX.includes("eval") && j === 0 && e !== "eval") await doEvalSetup();
+    }
+    log("\n████ RÉSUMÉ · durées des séances : " + durs.map(mmss).join(", ") + " · " + status());
+    log("QUESTIONS\n" + qs.map((x) => x.code + " | d" + x.d + " | " + x.q + " | attendu " + x.ans).join("\n"));
+  } catch (e) { log(/^STOP/.test(e.message) ? e.message : "EXCEPTION " + e.message + "\n" + e.stack); }
+  flush();
+  if (CFG.ecran) {
+    /* débordements horizontaux (largeur téléphone) : éléments visibles qui dépassent la fenêtre */
+    const W = innerWidth, over = [...app.querySelectorAll("*")].filter((e) => { const r = e.getBoundingClientRect(); return r.width && r.right > W + 1; }).slice(0, 8).map((e) => e.tagName.toLowerCase() + (e.id ? "#" + e.id : "") + "." + String(e.className).split(" ")[0] + " right=" + Math.round(e.getBoundingClientRect().right));
+    log("débordements (fenêtre " + W + " px) : " + (over.join(" | ") || "aucun"));
+    document.getElementById("out").textContent = OUT.slice(-3).join("\n"); document.getElementById("out").style.cssText = "position:fixed;top:0;left:0;font-size:9px;background:#ff0;z-index:99;opacity:.85;max-width:100%"; window.scrollTo(0, 0); }
+  if (!CFG.ecran) app.style.display = "none";
+})();
+</script>
