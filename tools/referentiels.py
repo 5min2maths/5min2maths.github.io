@@ -86,23 +86,32 @@ MAP = {
     "droites": {"MATU": r"2\.GE\.03[bc]|1\.FO\.06c", "MP": r"S3\.FA\.0[34]"},
     "cercle": {"MATU": r"2\.GE\.04[ab]|2\.GE\.05a"},
     "stats": {"MP": r"S4\.AD\.0[57]"},
+    "ineqpoly": {"MATU": r"2\.AL\.04[bc]|2\.FO\.04b"},  # 25.11 : inéquations polynomiales de 2e (src/ch2c.js), sans motif jusqu'ici
 }
 # Compétences qui ne se prêtent pas à une réponse saisie (constructions, dessins, démonstrations…)
 HORS = re.compile(r"Énoncer|Esquisser|Maîtriser une démonstration|Justifier|Représenter|Connaître le vocabulaire|construire|réaliser|représenter|tracer|croquis|dessin|développement d|reconnaître, nommer|démonstration|Démontrer|placer|calculatrice|livrets|vocabulaire|justifier|prouver|expérience|illustrer|Représenter|Maîtriser une démonstration|mesurer et construire", re.I)
 
-def main():
-    cur = (ROOT / "src/curriculum.js").read_text() + (ROOT / "src/gen3.js").read_text()
-    cur += (ROOT / "src/ch3c_ana.js").read_text()  # 23.11 : notions de 3e Collège (dérivation), codesMATU sur la ligne de l'id
-    cur += (ROOT / "src/ch4c_ana.js").read_text()  # 24.11 : notions de 4e Collège (intégration, ln-exp, probabilités 2)
-    cur += (ROOT / "src/ch3c_geo.js").read_text()  # 24.11 : notions de 3e Collège (géométrie vectorielle de l'espace)
-    cur += (ROOT / "src/ch1c_arg.js").read_text()  # 24.11 (agent niv1c) : 1re Collège, chapitre « Argumenter » (sans ligne au référentiel : SESA_FIX)
-    ids = re.findall(r'\{ id: "(\w+)"', cur)
-    labels = dict(re.findall(r'\{ id: "(\w+)", theme: "\w+", label: "((?:[^"\\]|\\.)*)"', cur))
-    # notions fines (src/gen3.js) : motifs déclarés avec la notion (codes = CO, codesMATU, codesMP)
-    for m in re.finditer(r'\{ id: "(\w+)", theme[^\n]*', cur):
+# 25.11 (agent refcomp) : toutes les sources de notions romandes (src/*.js), et plus une liste à tenir à la main
+# (la 4e du Collège et plusieurs fichiers manquaient). Exclus : France (fr_*.js, séparation complète), fichiers générés.
+def sources():
+    fs = sorted(f for f in (ROOT / "src").glob("*.js") if not f.name.startswith(("fr_", "ordre", "ref_")))
+    return "\n".join(f.read_text(encoding="utf-8") for f in fs)
+
+def load_map():
+    """Lit les notions de l'app ; complète MAP avec les motifs déclarés dans les notions (codes, codesMATU, codesMP).
+    Renvoie (ids, labels) ; MAP est complété sur place."""
+    cur = sources()
+    NV = r'(?:niv: "\w+", )?'  # 25.11 : notions MA2 (niv: "R" avant theme) : elles manquaient toutes
+    ids = list(dict.fromkeys(re.findall(r'\{ id: "(\w+)", ' + NV + 'theme', cur)))
+    labels = dict(re.findall(r'\{ id: "(\w+)", ' + NV + r'theme: "\w+", label: "((?:[^"\\]|\\.)*)"', cur))
+    for m in re.finditer(r'\{ id: "(\w+)", ' + NV + r'theme[^\n]*', cur):
         for key, ref in (("codes", "CO"), ("codesMATU", "MATU"), ("codesMP", "MP")):
-            c = re.search(key + r': "((?:[^"\\]|\\.)*)"', m.group(0))
+            c = re.search(r"\b" + key + r': "((?:[^"\\]|\\.)*)"', m.group(0))
             if c: MAP.setdefault(m.group(1), {})[ref] = c.group(1).replace("\\\\", "\\")
+    return ids, labels
+
+def main():
+    ids, labels = load_map()
     ids = [i for i in ids if i in MAP or i in labels]
     missing = [i for i in ids if i not in MAP]
     out = ["# Couverture des référentiels par l'app 5min2maths", "", "Généré par `tools/referentiels.py`. Usage interne (les référentiels ne sont pas dans le dépôt).", ""]
@@ -111,7 +120,7 @@ def main():
         if not path.exists():
             out += [f"## {ref} : fichier introuvable ({path})", ""]; continue
         rows = list(csv.DictReader(open(path, encoding="utf-8"), delimiter=";"))
-        scope = [r for r in rows if not (ref == "MATU" and r[kc][0] in "34") and not (ref == "MP" and r.get("annee") in ("MP3", "MP4"))]
+        scope = rows  # 25.11 : 3e-4e du Collège et MP3-MP4 sont dans l'app : tout le référentiel
         cov = {}
         for r in scope:
             cov[r[kc]] = [n for n, m in MAP.items() if ref in m and re.match(m[ref], r[kc])]
@@ -134,7 +143,9 @@ def main():
         larges = [f"{n} ({k})" for n, k in larges if k > 5]
         if larges: print("   notions encore larges (> 5 compétences) :", ", ".join(larges))
     (ROOT / "tools/couverture.md").write_text("\n".join(out), encoding="utf-8")
-    write_order()
+    # 25.11 : src/ordre.js porte des ajouts faits à la main (France, 3e–4e…) que write_order ne sait pas refaire :
+    # il n'est réécrit que sur demande (--ordre), et ces ajouts sont alors conservés.
+    if "--ordre" in sys.argv: write_order()
     if missing: print("sans correspondance :", missing)
 
 # Notions sans code dans le référentiel de l'élève (soutien, reprises du CO) : rangées dans le thème ou chapitre le plus proche.
@@ -229,7 +240,10 @@ def write_order():
     js += "// Matu : chapitre Sésamath de chaque notion ; MP : chapitre du référentiel MP. Libellés courts des chapitres.\n"
     js += "const ORDRE_THEME = " + json.dumps(theme, separators=(",", ":"), ensure_ascii=False) + ";\n"
     js += "const THEME_LABEL = " + json.dumps(label, separators=(",", ":"), ensure_ascii=False) + ";\n"
-    (ROOT / "src/ordre.js").write_text(js, encoding="utf-8")
+    old = (ROOT / "src/ordre.js").read_text(encoding="utf-8").split("\n")
+    k = next((i for i, l in enumerate(old) if l.startswith("const THEME_LABEL")), None)
+    tail = "\n".join(old[k + 1:]) if k is not None else ""
+    (ROOT / "src/ordre.js").write_text(js + tail, encoding="utf-8")
 
 if __name__ == "__main__":
     main()

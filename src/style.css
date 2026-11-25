@@ -235,6 +235,10 @@ details.lesson[open] { background: var(--paper); }
 .cnotion:last-child { border-bottom: none; }
 .comp { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 0.92rem; color: var(--ink-soft); }
 .comp-r { display: inline-flex; align-items: center; gap: 8px; }
+/* 25.11 : compétences officielles (Collège) : code discret devant l'intitulé ; titre d'année dans « Années précédentes » */
+.rcomp > span:first-child { overflow-wrap: anywhere; }
+.rcode { font-size: 0.72rem; color: var(--ink-soft); opacity: 0.8; font-variant-numeric: tabular-nums; margin-right: 2px; }
+.ryear { margin: 14px 0 6px; }
 .ctest { font-size: 0.78rem; padding: 4px 10px; min-height: 0; border-radius: 999px; background: var(--paper, transparent); border: 1px solid currentColor; color: var(--blue); cursor: pointer; white-space: nowrap; }
 .ctest:hover { filter: brightness(0.9); }
 .note { min-width: 3.2em; text-align: center; font-weight: 700; font-size: 0.85rem; padding: 2px 8px; border-radius: 999px; }
