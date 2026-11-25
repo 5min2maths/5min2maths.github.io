@@ -132,6 +132,14 @@ function horsCO(state, id, q) {
   /* 25.11 (audit France, tools/france.md) : profil français : énoncés propres à la Suisse (change EUR ↔ CHF, « en Suisse »,
      TVA suisse) écartés du tirage ; frLocal (CHF → €) les rendrait absurdes (« 1 € = 0,95 € »). */
   if (q && p && p.system === "FR") { const t = String(q.q || "") + " " + (q.parts || []).map((x) => x.label || "").join(" ") + " " + (q.guide || []).map((g) => g.ask || "").join(" "); if (/\bEUR\b|Suisse|suisse|CHF[\s\S]*(€|\beuros?\b)|(€|\beuros?\b)[\s\S]*CHF/.test(t)) return true; }
+  /* 25.11 (couverture France, tools/france_couverture.md) : forme réservée à certaines classes françaises (q.fr = classes FR) ;
+     formes d'une notion partagée hors programme d'une classe française (HORS_FR, src/fr_couv.js : [ctx | RegExp | fonction,
+     première classe FR où la forme est permise]). Sans effet pour un profil suisse, sauf q.fr (forme propre à la France). */
+  if (q && q.fr && p && !(p.system === "FR" && q.fr.includes(p.grade))) return true;
+  if (q && p && p.system === "FR" && typeof HORS_FR !== "undefined" && HORS_FR[id]) {
+    const t = String(q.q || "") + " " + (q.parts || []).map((x) => x.label || "").join(" ");
+    if (HORS_FR[id].some(([r, g]) => p.grade < g && (typeof r === "string" ? q.ctx === r || (r.endsWith("*") && String(q.ctx || "").startsWith(r.slice(0, -1))) : r instanceof RegExp ? r.test(t) : r(q)))) return true;
+  }
   if (!q || !p || p.system !== "CH" || p.track === "mp") return false;
   const L = HORS_CO[p.grade] && HORS_CO[p.grade][id];
   if (!L) return false;
@@ -628,6 +636,10 @@ const Engine = {
     if (level < 3 && state && state.profile && state.profile.system === "CH" && state.profile.track !== "mp" && state.profile.grade >= 12) {
       if (UPC_MIN[id]) level = Math.max(level, UPC_MIN[id]); else if (UPC.includes(id)) level += 1;
     }
+    /* 25.11 (couverture France, tools/france_couverture.md) : même règle pour un profil français (le niveau 1 = automatismes
+       de l'année) : UPFR (src/fr_couv.js) = { classe FR : { notion : niveau minimal } } pour les notions reprises d'une année
+       inférieure, calibré sur le DNB (partie 1) et l'épreuve anticipée de 1re. Sans effet pour un profil suisse. */
+    if (level < 3 && state && state.profile && state.profile.system === "FR" && typeof UPFR !== "undefined" && UPFR[state.profile.grade] && UPFR[state.profile.grade][id]) level = Math.max(level, UPFR[state.profile.grade][id]);
     /* 25.11 (audit France) : profil français, énoncé propre à la Suisse (horsCO) : graine suivante (le code suit la question). */
     if (seed && state && state.profile && state.profile.system === "FR") { let q = this.build(id, level, seed); for (let k = 1; k <= 12 && horsCO(state, id, q); k++) q = this.build(id, level, seed + k * 977); return keep(this.finalize(state, id, q)); }
     if (seed) return keep(this.finalize(state, id, this.build(id, level, seed)));
