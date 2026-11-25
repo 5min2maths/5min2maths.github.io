@@ -16,7 +16,9 @@ else if (w === "restore") Backup.encode(state).then((c) => { state = null; scree
 else if (w === "privacy") screenPrivacy(screenHome);
 else if (w === "home") screenHome();
 else if (w === "nowpick") screenNow();
-else if (w.startsWith("now-")) { state = Engine.newState({ system: "CH", grade: w.slice(4) === "co" ? 10 : 12, track: w.slice(4) === "co" ? "college" : w.slice(4), minutes: 5 }); Engine.autoInit(state); state.placed = true; screenNow(); document.querySelector("details.olds").open = true; }
+else if (w === "nowcards") { state.profile.grade = 11; screenNowCards(); }
+else if (w === "nowguess11") { state = Engine.newState({ system: "CH", grade: 11, track: "college", minutes: 5 }); Engine.autoInit(state); state.placed = true; screenNow(); }
+else if (w.startsWith("now-")) { state = Engine.newState({ system: "CH", grade: w.slice(4) === "co" ? 10 : 12, track: w.slice(4) === "co" ? "college" : w.slice(4), minutes: 5 }); Engine.autoInit(state); state.placed = true; screenNowList(); const od = document.querySelector("details.olds"); if (od) od.open = true; }
 else if (w === "nowset") { Engine.setNow(state, ["fracmul", "fracops"].filter((x) => state.notions[x]).concat(["prio"]).slice(0, 2)); screenHome(); }
 else if (w === "nowstale") { Engine.setNow(state, ["prio"]); state.now.since = addDays(day(), -22); screenHome(); }
 else screenComps();
