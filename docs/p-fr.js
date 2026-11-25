@@ -2450,7 +2450,10 @@ const FRX = (function () {
   };
 
   // ======================= thales4e : Thalès dans des triangles emboîtés (4e, attendus 2019) =======================
-  const tri = () => { const k = pk([[1, 2], [1, 3], [2, 3], [3, 4], [2, 5], [3, 5], [1, 4]]), q = k[0] / k[1], u = pk([1, 1.5, 2, 2.5, 3]); return { q, k, AB: rnd(k[1] * u * pk([2, 3, 4])), AC: rnd(k[1] * u * pk([2, 3, 5])), BC: rnd(k[1] * pk([2, 3, 4, 5])) }; };
+  /* 26.11 (revue élèves, thales-3-q7c) : AB, AC, BC tirés séparément pouvaient former un triangle impossible ; tirage refait
+     jusqu'à l'inégalité triangulaire stricte. */
+  const tri = () => { for (;;) { const k = pk([[1, 2], [1, 3], [2, 3], [3, 4], [2, 5], [3, 5], [1, 4]]), q = k[0] / k[1], u = pk([1, 1.5, 2, 2.5, 3]), t = { q, k, AB: rnd(k[1] * u * pk([2, 3, 4])), AC: rnd(k[1] * u * pk([2, 3, 5])), BC: rnd(k[1] * pk([2, 3, 4, 5])) };
+    if (t.BC < t.AB + t.AC && t.AB < t.AC + t.BC && t.AC < t.AB + t.BC) return t; } };
   const cfg = "Dans le triangle " + M("ABC") + ", " + M("M \\in [AB]") + ", " + M("N \\in [AC]") + " et " + M("(MN) \\parallel (BC)") + ". ";
   const TH = {
     1: [
@@ -4252,6 +4255,9 @@ const HORS_FR = {
   eqdiff: [["separable-*", 99] /* variables séparables : hors programme (y' = ay + b seulement) */],
   /* 25.11 soir : progcalc dès la 5e ; nombre de départ négatif multiplié (produit de relatifs), (x + a)², (x + a)(x − a) : 4e */
   progcalc: [["negatif", 8], ["prouver-carre", 8], ["produit", 8]],
+  /* 26.11 (revue élèves : « Étendue, médiane, quartiles » proposé en 4e) : au collège, médiane et étendue seulement
+     (4e.DP.02, 3e.DP.02) ; quartiles et écart interquartile en 2nde. Libellé du collège : labelFR (Engine.catalog). */
+  quartiles: [[/quartile|Q_1|Q_3|moustache/i, 10]],
 };
 
 /* Niveau minimal d'une notion reprise d'une année inférieure, pour un profil FR de la classe indiquée (Engine.make).
@@ -4273,6 +4279,7 @@ const UPFR = {
 
 (function () {
   const N = (id) => NOTIONS.find((x) => x.id === id);
+  { const q = N("quartiles"); if (q) q.labelFR = [10, "Étendue, médiane"]; } /* 26.11 : avant la 2nde, sans « quartiles » */
   const place = (id, fr, again) => { const n = N(id); if (!n) return; n.FR = fr; if (again) n.againFR = [...new Set([...(n.againFR || []), ...again])]; };
 
   // ---------- 1. Rattachements (attendu contrôlé ; formes écartées : HORS_FR ci-dessus) ----------

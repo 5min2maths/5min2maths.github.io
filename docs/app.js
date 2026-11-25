@@ -1457,10 +1457,15 @@ const R = {
 };
 const gcd = (a, b) => (b ? gcd(b, a % b) : Math.abs(a));
 const M = (t) => "\\(" + t + "\\)";
+/* 26.11 (revue élèves, 46 champs) : nombres écrits pour une formule (« 2{,}86 », « 1\text{'}000 ») collés dans le texte,
+   hors \( \) : MathJax ne les traite pas et l'élève voit le TeX. Filtre unique, appliqué par colonBreak et aux problèmes. */
+const plainTeX = (s) => typeof s !== "string" || !/\{,\}|\\text\{['’]\}/.test(s) ? s
+  : s.split(/(\\\(.*?\\\))/s).map((t, i) => (i % 2 ? t : t.replace(/\{,\}/g, ",").replace(/\\text\{(['’])\}/g, "$1"))).join("");
 // Deux-points lisibles (16.11, demande de l'utilisateur : « on ne comprend rien avec deux points ») : un « : » qui suit
 // une formule (« \(x = 3\) : \(9 = 9\) ») ou une égalité en texte simple (« x = 3 : 9 = 9 ») se lit comme une division.
 // Il devient un retour à la ligne. Les « : » après un mot (« Résous : », « Erreur : ») restent ; dans les formules, « : » est ÷.
 const colonBreak = (s) => {
+  s = plainTeX(s);
   if (typeof s !== "string" || !/[:;?!]/.test(s)) return s;
   const parts = s.split(/(\\\(.*?\\\))/);
   for (let i = 0; i < parts.length; i += 2) {
@@ -6470,7 +6475,9 @@ const DEFIS = (() => {
   const PAIR = (x, y) => ({ kind: "pair", values: [x, y] }), SOLS = (ivs) => ({ kind: "solset", ivs }), RAD = (v) => ({ kind: "value", value: v, radical: true });
   const cfD = (v) => (v === 1 ? "" : v === -1 ? "-" : D(v));
   const pl = (n, w) => n + " " + w + (n > 1 ? "s" : "");
-  const r1 = (v) => Math.round(v * 10) / 10, r2c = (v) => Math.round(v * 100) / 100;
+  /* 26.11 (revue élèves, decmul-4-qkr : 523,075 → corrigé 523,08, « bonnes réponses » 523,07) : arrondi sur l'écriture
+     décimale (523,075 · 100 = 52307,4999… en flottant). */
+  const r1 = (v) => Math.round(+(v * 10).toPrecision(12)) / 10, r2c = (v) => Math.round(+(v * 100).toPrecision(12)) / 100;
   const fx = (v) => { if (Number.isInteger(v)) return String(v); for (let d = 2; d <= 12; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return frac(Math.round(v * d), d); return D(v); };
   const fxT = (v) => { if (Number.isInteger(v)) return String(v); for (let d = 2; d <= 12; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return (v < 0 ? "−" : "") + Math.abs(Math.round(v * d)) + "/" + d; return T(v); };
   const xm = (p) => (p === 0 ? "x" : p > 0 ? "x - " + p : "x + " + -p); /* (x − p) */
@@ -8088,7 +8095,7 @@ const DEFIS = (() => {
       () => {
         const L = ri(31, 69) / 10, l = ri(21, 45) / 10, pu = pk([24.5, 32.9, 38.5, 42.5, 29.9, 45.8]), A = r2c(L * l), C = r2c(A * pu), C2 = r2c(A * 1.1 * pu);
         return P("On carrelle une pièce rectangulaire de " + M(D(L) + " \\text{ m}") + " sur " + M(D(l) + " \\text{ m}") + ". Le carrelage coûte " + M(CHF(pu)) + " CHF le m².",
-          [["a) Aire de la pièce (m²)", A], ["b) Prix du carrelage (CHF, au centime)", L * l * pu, 0.01], ["c) Prix si l'on achète 10 % de plus pour les chutes (CHF, au centime)", L * l * 1.1 * pu, 0.01]],
+          [["a) Aire de la pièce (m²)", A], ["b) Prix du carrelage (CHF, au centime)", C, 0.01], ["c) Prix si l'on achète 10 % de plus pour les chutes (CHF, au centime)", C2, 0.01]],
           ["Aire = longueur · largeur : multiplie sans la virgule, puis place-la (autant de décimales qu'au total dans les facteurs).",
            "c) 10 % de plus : on achète 1,1 fois l'aire."],
           "a) " + M(D(L) + " \\cdot " + D(l) + " = " + D(A)) + " m². b) " + M(D(A) + " \\cdot " + CHF(pu) + " \\approx " + CHF(C)) + " CHF. c) " + M(D(A) + " \\cdot 1{,}1 \\cdot " + CHF(pu) + " \\approx " + CHF(C2)) + " CHF.");
@@ -13408,7 +13415,7 @@ function atGrid(fresh) {
   <div class="card flat at-grid at-res"><div class="at-row at-head"><span class="at-l">Je sais…</span><span class="at-c">Avant</span><span class="at-c">${last ? "1er test" : "Test"}</span>${last ? '<span class="at-c">Après</span>' : ""}</div>
   ${A.rows.map((r) => `<div class="at-row"><span class="at-l">${r.label}${msg(r)}</span><span class="at-c">${atCell(A.avant[r.cid])}</span><span class="at-c">${atCell(first.r[r.cid] === 1 ? 2 : first.r[r.cid] === 0 ? 0 : undefined)}</span>${last ? `<span class="at-c">${atCell(last.r[r.cid] === 1 ? 2 : last.r[r.cid] === 0 ? 0 : undefined)}</span>` : ""}</div>`).join("")}</div>
   <div class="card stack"><p><b>${ok}</b> juste${ok > 1 ? "s" : ""} sur ${n}${surprise ? ` · <b>${surprise}</b> surprise${surprise > 1 ? "s" : ""} (tu pensais savoir)` : ""}</p>
-  <p class="small muted">Ce n'est pas une note. ${last ? "Compare tes colonnes : c'est ton progrès depuis le " + first.date.slice(8, 10) + "." + first.date.slice(5, 7) + "." : "Refais le test rapide dans quelques jours, juste avant le test : ta colonne « Après » se remplira."}</p></div>
+  <p class="small muted">Ce n'est pas une note. ${last ? "Compare tes colonnes : c'est ton progrès depuis le " + first.date.slice(8, 10) + "." + first.date.slice(5, 7) + "." : (typeof prepLeft === "function" && Engine.prepActive(state) && prepLeft(state.prep.date) <= 1 ? "Ton test est tout proche : relis d'abord les compétences à revoir." : "Refais le test rapide dans quelques jours, juste avant le test : ta colonne « Après » se remplira.")}</p></div>
   ${weak.length ? `<div class="card flat stack"><h3>À revoir${surprise ? " (en priorité les ⚠️)" : ""}</h3>${[...new Set(weak.map((r) => r.id))].map((id) => `<div class="spread"><span class="small">${nLabel(id)}</span>${LESSONS[id] ? `<button type="button" class="btn-ghost small atles" data-id="${id}">📖 Leçon</button>` : ""}</div>`).join("")}
     <button class="btn-primary" id="rev">Réviser ces compétences maintenant</button></div>` : ""}
   <div class="row"><button class="btn-primary" id="again">Refaire le test rapide</button><button class="btn-ghost" id="home">Retour</button></div>
@@ -13790,7 +13797,8 @@ const Engine = {
       // 22.11 (seconde FR) : « again » liste des années suisses ; pour la France, on lit againFR (sinon une notion reprise en 10e
       // suisse devenait « de l'année » en 2nde, grade 10 aussi).
       const again = sesa || coYear || (profile.track !== "mp" && ((profile.system === "FR" ? n.againFR : n.again) || []).includes(profile.grade));
-      return { ...n, theme: this.themeKey(profile, n.id), defaultStatus: g < profile.grade ? "vu" : "avenir", current: g === profile.grade || again, again };
+      const label = profile.system === "FR" && n.labelFR && profile.grade < n.labelFR[0] ? n.labelFR[1] : n.label; /* 26.11 : libellé du collège français (fr_couv.js) */
+      return { ...n, label, theme: this.themeKey(profile, n.id), defaultStatus: g < profile.grade ? "vu" : "avenir", current: g === profile.grade || again, again };
     });
   },
   // 22.11 : référentiel « FR » pour un profil français (ordre et chapitres dans ORDRE.FR / ORDRE_THEME.FR, src/fr_2nde.js).
@@ -14024,7 +14032,11 @@ const Engine = {
     const e = state.elo, q = itemRating(state.profile, id, d);
     const expected = 1 / (1 + Math.pow(10, (q - e.r) / 400));
     const K = (e.n < 20 ? 48 : e.n < 60 ? 32 : 20) * weight; // calibrage progressif : provisoire tant que n < 20
-    const delta = Math.round(K * (score - expected));
+    let delta = Math.round(K * (score - expected));
+    /* 26.11 (revue élèves : −32, −37 sur des questions de niveau 1 pendant la phase provisoire, « Bonne séance. Mathélo −42 ») :
+       pendant le calibrage (n < 20), un échec sur une question de niveau 1 coûte 15 points au plus. Les réussites et les
+       niveaux 2 et plus (positionnement compris) gardent le K du calibrage. */
+    if (e.n < 20 && d <= 1 && delta < -15) delta = -15;
     e.r = Math.max(400, e.r + delta);
     e.n++;
     const today = day(), last = e.log[e.log.length - 1];
@@ -14062,7 +14074,7 @@ const Engine = {
     }
     return q;
   },
-  make(state, id, d, seed) {
+  make(state, id, d, seed, vary) {
     let level = d || this.difficulty(state, id);
     const asked = level; /* 25.11 : niveau demandé (carnet, baisse après erreur) ; le contenu peut être remonté ci-dessous */
     const keep = (q) => { if (q && typeof q === "object" && q.d && q.d !== 4 && asked !== 4) q.d = asked; return q; };
@@ -14118,20 +14130,27 @@ const Engine = {
     // Formes variées (14.11, « les questions doivent absolument être variées ») : la forme d'une question
     // (son énoncé aux nombres près) vue dans les 2 dernières questions de la notion est évitée quand c'est possible.
     const forms = ((state.recentForm = state.recentForm || {})[id] = (state.recentForm[id] || []));
+    /* 26.11 (revue élèves : « On carrelle une pièce… » 3 fois en 4 jours, 2 fois le même jour) : un problème (niveau 4) dont
+       le contexte (ctx, sinon les premiers mots de l'énoncé) a été vu dans les 7 derniers jours, sur cette notion ou une
+       autre, est évité ; s'il n'y en a pas d'autre, on pose une question de niveau 3. */
+    const pKey = (x) => x && x.spec && x.spec.kind === "multi" ? "p:" + (x.ctx || String(x.q).replace(/\\\(.*?\\\)|<[^>]*>/g, " ").replace(/[^A-Za-zÀ-ÿ' ]/g, " ").trim().split(/\s+/).slice(0, 4).join(" ").toLowerCase()) : null;
+    const cday = (state.ctxDay = state.ctxDay || {}), lim = addDays(day(), -6), stale = (x) => { const k = pKey(x); return !!(k && cday[k] && cday[k] >= lim); };
     let found = false, fresh1 = null, lastOk = null, lv = level;
     /* 25.11 : une forme hors programme de la classe (HORS_CO, 9e–10e) est refaite ; si le niveau n'a plus aucune forme
        du programme (défi d'une autre année), on descend d'un niveau. */
     for (let k = 0, t = 0; k < 16 && !found && t < 60; t++) {
-      if (t === 30 && !lastOk && lv > 1) lv -= 1;
+      if (t && t % 15 === 0 && !lastOk && lv > 1) lv -= 1; /* 26.11 : on descend jusqu'au niveau 1 (quartiles en 4e FR : niveaux 2 et 3 hors programme) */
       q = this.build(id, lv);
       if (horsCO(state, id, q)) continue;
       k++; lastOk = q;
-      const fresh = !rec.includes(key(q)) && !(q.ctx && ctxs.includes(q.ctx));
+      const fresh = !rec.includes(key(q)) && !(q.ctx && ctxs.includes(q.ctx)) && !stale(q);
       if (fresh && !forms.includes(qForm(q))) found = true;
       else if (fresh && !fresh1) fresh1 = q;
     }
     if (!found && fresh1) q = fresh1; // une seule forme possible : au moins une question jamais vue
     else if (!found && lastOk) q = lastOk;
+    if (vary && stale(q) && level === 4) return this.make(state, id, 3); /* vary : séance ordinaire (pas le problème de la semaine) */
+    if (pKey(q)) { for (const k in cday) if (cday[k] < lim) delete cday[k]; cday[pKey(q)] = day(); }
     rec.push(key(q)); state.recentQ[id] = rec.slice(-15);
     if (q.ctx) state.recentCtx[id] = [...ctxs, q.ctx].slice(-2);
     state.recentForm[id] = [...forms, qForm(q)].slice(-2);
@@ -14143,7 +14162,9 @@ const Engine = {
     R.seed(seed * 7919 + level * 104729 + [...id].reduce((a, c) => a + c.charCodeAt(0), 0));
     const code = id + "-" + level + "-" + seed.toString(36);
     /* 25.11 : PROBX (variantes.js, audit 9e–10e) = défis ajoutés, réservés à certaines classes (p.co). */
-    if (level === 4 && hasProb(id)) { const p = R.pick(probList(id).concat((typeof PROBX !== "undefined" && PROBX[id]) || []))(); return { ...p, id, d: 4, seed, code, spec: { kind: "multi" }, hint: p.hints[0] }; }
+    if (level === 4 && hasProb(id)) { const p = R.pick(probList(id).concat((typeof PROBX !== "undefined" && PROBX[id]) || []))(); /* 26.11 : TeX visible hors formule (plainTeX, generators.js) */
+      const P = { ...p, q: plainTeX(p.q), sol: plainTeX(p.sol), hints: (p.hints || []).map(plainTeX) }; if (p.parts) P.parts = p.parts.map((x) => ({ ...x, label: plainTeX(x.label) }));
+      return { ...P, id, d: 4, seed, code, spec: { kind: "multi" }, hint: P.hints[0] }; }
     // Écritures maladroites des générateurs (audit 13.11) : « 1x » → « x », « + -2 » → « - 2 », « - -3 » → « + 3 ».
     const tidy = (t) => typeof t !== "string" ? t : t.replace(/([(=+\-\s{]|\\\()(-?)1([a-z])(?![a-z{])/g, "$1$2$3").replace(/\+\s*-\s*(?=[\da-z(\\])/g, "- ").replace(/-\s*-\s*(?=[\da-z(\\])/g, "+ ");
     // Pas de question triviale (règle du 14.11 : la trivialité fait décrocher) : tirage refait, de façon
@@ -14172,7 +14193,7 @@ const Engine = {
       q.spec = { ...q.spec, sci: true };
       if (!q.canon) { const e = Math.floor(Math.log10(Math.abs(q.spec.value)) + 1e-9), a = +(q.spec.value / 10 ** e).toFixed(8); q.canon = String(a).replace(".", ",") + "*10^" + e; }
     }
-    return { ...q, id, d: level, seed, code, hint: q.hint || HINTS[id] };
+    return { ...q, id, d: level, seed, code, hint: plainTeX(q.hint || HINTS[id]) };
   },
   // 25.11 : forme hors programme pour la classe de l'élève (HORS_CO, 9e–10e) ; utilisé aussi par les sujets et les QCM.
   horsCO(state, id, q) { return horsCO(state, id, q); },
@@ -14206,7 +14227,9 @@ const Engine = {
     this.updateElo(state, id, d, ok === true ? 1 : 0);
     this.recordComp(state, id, d, ok === true ? 1 : 0);
     const s = state.notions[id];
-    if (ok === true) Object.assign(s, { m: 0.75, box: 2, due: addDays(day(), 3) });
+    /* 26.11 (revue élèves : decread juste au positionnement, puis « Nouvelle notion · Lire un nombre décimal ») : une notion
+       réussie au positionnement est vue, sa leçon aussi. */
+    if (ok === true) Object.assign(s, { m: 0.75, box: 2, due: addDays(day(), 3), seen: Math.max(1, s.seen || 0), lessonSeen: true });
     else if (ok === false) Object.assign(s, { m: 0.3, box: 0, due: day() });
     else Object.assign(s, { m: 0.2, box: 0, due: day() });
     s.placed = true;
@@ -14462,6 +14485,13 @@ const Engine = {
   jokerFree(state, today = day()) { return state.streak.jokerWk !== this.weekOf(today); },
 
   // Notion de base à reprendre après deux échecs de suite (la moins maîtrisée de ses prérequis connus).
+  /* 26.11 (revue élèves) : à la place d'une notion dont la leçon reste à voir (une leçon par séance), une notion déjà
+     travaillée, hors du programme du jour ; null s'il n'y en a pas. Le nombre de questions de la séance ne change pas. */
+  swapLesson(state, plan, i) {
+    const idOf = (e) => String(e).split("|")[0], k = String(plan[i]).split("|")[2], kind = TARGET[k] !== undefined ? k : "app";
+    const ex = new Set([...plan.map(idOf), ...this.eligible(state).filter((id) => this.lessonDue(state, id) || !state.notions[id].seen)]);
+    return this.planSlots(state, [kind], { exclude: ex })[0] || null;
+  },
   remediation(state, id) {
     const s = state.notions[id];
     if (!s || (s.fails || 0) < 2) return null;
@@ -14488,14 +14518,13 @@ const Engine = {
     return [...open.slice(-4), ...next.slice(0, n)].slice(0, n).map((c) => c.id);
   },
   prepActive(state) { return !!(state.prep && state.prep.ids.length && state.prep.date >= day()); },
+  /* 26.11 (revue élèves : « Révision ciblée » de 7 questions + problème = 7 à 12 min) : 4 questions, sans problème
+     (niveau 3 au plus) ; le sujet de préparation reste à part, au choix. */
   planPrep(state) {
     const ids = state.prep.ids.filter((id) => state.notions[id]);
-    const n = 7;
     const order = [...ids].sort((a, b) => state.notions[a].m - state.notions[b].m);
     const plan = [];
-    for (let i = 0; plan.length < n - 1; i++) plan.push(order[i % order.length]);
-    const withProb = order.filter((id) => hasProb(id));
-    plan.push(withProb.length ? "PROB:" + withProb[0] : order[0]);
+    for (let i = 0; order.length && plan.length < 4; i++) { const id = order[i % order.length]; plan.push(id + "|" + Math.min(3, this.difficulty(state, id))); }
     return plan;
   },
 

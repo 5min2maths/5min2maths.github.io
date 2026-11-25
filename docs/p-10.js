@@ -15,7 +15,9 @@
   const TR = (v, m) => TRAP(r6(v), m);
   const P = (q, parts, hints, sol) => ({ q, parts: parts.map(([label, value]) => ({ label, spec: { kind: "value", value } })), hints, sol });
   const who = () => pk(["Lina", "Noé", "Inès", "Yanis", "Mia", "Sam", "Léa", "Tom"]);
-  const dec = (lo, hi, k) => r6(R.int(lo * 10 ** k, hi * 10 ** k) / 10 ** k); // décimal à k décimales
+  /* décimal à k décimales exactement. 26.11 (revue élèves, decmul-1-5it : « 5 · 3 » dans « Multiplier des décimaux ») :
+     le dernier chiffre n'est jamais 0, un « décimal » n'est plus un entier. */
+  const dec = (lo, hi, k) => { let n; do n = R.int(Math.round(lo * 10 ** k), Math.round(hi * 10 ** k)); while (k > 0 && n % 10 === 0); return r6(n / 10 ** k); };
   const nd = (v) => { const s = String(r6(v)); return s.includes(".") ? s.split(".")[1].length : 0; };
   const roundTo = (v, s) => Math.round(v / s) * s;
   const UNIT = { 1000: "au millier", 100: "à la centaine", 10: "à la dizaine", 1: "à l'unité", 0.1: "au dixième", 0.01: "au centième" };
@@ -158,7 +160,7 @@
         return Qv("Calcule sans calculatrice : " + M(N(a) + " \\div " + k), q, M(n + " \\div " + k + " = " + n / k) + " dixièmes, soit " + M(N(q)) + ".",
           { ctx: "calcul", guide: [G("En dixièmes, " + M(N(a)) + " = " + M(n) + " dixièmes. " + M(n + " \\div " + k) + " = ?", n / k, M(n / k) + " dixièmes."), G("Résultat ?", q, M(N(q)) + ".")],
             traps: [TR(n / k, "Ce sont des dixièmes : replace la virgule."), TR(r6(a * k), "On divise.")] }); },
-      () => { const n = R.int(3, 8), each = r6(R.int(15, 160) / 4), tot = r6(each * n), c = pk([["amis partagent équitablement une dépense de", "dépense"], ["élèves se partagent le prix d'un cadeau de", "cadeau"], ["colocataires partagent une facture de", "facture"]]);
+      () => { const n = R.int(3, 8), each = r6(R.int(15, 160) / 4), tot = r6(each * n); if (Number.isInteger(each)) return null; /* 26.11 : 63 ÷ 7 = 9 n'est pas une division de décimaux */ const c = pk([["amis partagent équitablement une dépense de", "dépense"], ["élèves se partagent le prix d'un cadeau de", "cadeau"], ["colocataires partagent une facture de", "facture"]]);
         return Qv(M(n) + " " + c[0] + " " + M(C(tot)) + " CHF. Combien chacun paie-t-il (en CHF) ?", each, M(C(tot) + " \\div " + n + " = " + C(each)) + " CHF.",
           { ctx: c[1], guide: [G("Opération : " + M(C(tot) + " \\div " + n) + ". Résultat ?", each, M(C(each)) + " CHF (vérifie : " + n + " · " + C(each).replace("{,}", ",") + " = " + C(tot).replace("{,}", ",") + ").")], traps: [TR(r6(tot * n), "On partage : on divise."), TR(r6(tot - n), "On divise par le nombre de personnes.")] }); },
       () => { const a = dec(0.5, 99, pk([1, 2])), f = pk([10, 100, 1000]), v = r6(a / f);

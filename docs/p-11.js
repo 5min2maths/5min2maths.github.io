@@ -1793,7 +1793,7 @@
       /* 25.11 (revue : « 3, 4 et 4 cm » avec le calcul 4² − (3² + 4²) déjà écrit : trop guidé, sans plus grand côté net) :
          le plus grand côté dépasse nettement les deux autres, les côtés sont dans le désordre, et le calcul n'est pas
          écrit : l'élève repère le plus grand côté et compare son carré à la somme des deux autres. */
-      () => { const [a, b, c] = trip(25), x = c + pk([1, 2, 3]), s = shuf([a, b, x]), e = x * x - a * a - b * b;
+      () => { const [a, b, c] = trip(25), x = c + pk([1, 2, 3]), s = shuf([a, b, x]), e = x * x - a * a - b * b; if (x >= a + b) return null; /* 26.11 : 3, 4, 8 n'est pas un triangle */
         return Qv("Un triangle a pour côtés " + M(s[0]) + " cm, " + M(s[1]) + " cm et " + M(s[2]) + " cm. Est-il rectangle ? Pour le savoir, calcule de combien le carré du plus grand côté dépasse la somme des carrés des deux autres.", e, "Plus grand côté " + M(x) + " : " + M(x + "^2 - (" + a + "^2 + " + b + "^2) = " + x * x + " - " + (a * a + b * b) + " = " + e) + " : ce n'est pas 0, le triangle n'est pas rectangle (il a un angle obtus).",
           { ctx: "ecart", guide: [GS("Quel est le plus grand côté (en cm) ?", x, M(x) + " cm."), GS(M(x + "^2") + " = ?", x * x, M(x * x) + "."), GS("Somme des carrés des deux autres : " + M(a + "^2 + " + b + "^2") + " = ?", a * a + b * b, M(a * a + b * b) + "."), GS("Différence ?", e, M(e) + ".")],
             traps: [TR(x - a - b, "On compare les carrés, pas les longueurs."), TR(-e, "Dans l'ordre : le carré du plus grand côté moins la somme des deux autres."), TR(a * a - b * b - x * x, "Le plus grand côté est " + M(x) + " cm : c'est son carré qu'on compare."), TR(b * b - a * a - x * x, "Le plus grand côté est " + M(x) + " cm : c'est son carré qu'on compare.")] }); },
@@ -2328,6 +2328,9 @@
   const P = (q, parts, hints, sol, fig) => ({ fig, q, parts: parts.map(([label, value, round]) => ({ label, spec: Object.assign({ kind: "value", value }, round ? { round } : {}) })), hints, sol });
   const cfg = M("D \\in [AB]") + ", " + M("E \\in [AC]") + " et " + M("(DE) \\parallel (BC)");
   const L = (v) => N(v).replace("{,}", ",");
+  /* 26.11 (revue élèves, thales-3-q7c : AD = 2, AE = 4, DE = 6) : un triangle donné par ses trois côtés doit exister
+     (inégalité triangulaire stricte), sinon le tirage est refait. */
+  const tri = (a, b, c) => a < b + c && b < a + c && c < a + b;
 
   // ===================== thales =====================
   const TH = {
@@ -2365,7 +2368,7 @@
           { ctx: "papillon", guide: [GS("Rapport " + M("AB : AD") + " ?", k, M(k) + "."), GS(M("BC") + " = ?", de * k, M(de * k) + ".")], traps: [TR(de / k, "AB est plus long que AD : BC est plus long que DE.")] }); },
     ],
     3: [
-      () => { const k = pk([2, 3]), ad = R.int(2, 5), ae = R.int(2, 6), de = R.int(2, 6), ab = ad * k, ac = ae * k, bc = de * k; if (ad === ae || ae === de) return null;
+      () => { const k = pk([2, 3]), ad = R.int(2, 5), ae = R.int(2, 6), de = R.int(2, 6), ab = ad * k, ac = ae * k, bc = de * k; if (ad === ae || ae === de || !tri(ad, ae, de)) return null;
         const per = (ab - ad) + bc + (ac - ae) + de;
         return Qv("Dans un triangle " + M("ABC") + ", " + cfg + ". " + M("AD = " + ad) + ", " + M("AB = " + ab) + ", " + M("AE = " + ae) + " et " + M("DE = " + de) + " (en cm). Calcule le périmètre du trapèze " + M("DECB") + ".", per,
           M("BC = " + de + " \\cdot " + k + " = " + bc) + ", " + M("AC = " + ac) + " ; " + M("DB = " + (ab - ad)) + ", " + M("EC = " + (ac - ae)) + " ; périmètre " + M((ab - ad) + " + " + bc + " + " + (ac - ae) + " + " + de + " = " + per) + " cm.",
@@ -2416,7 +2419,7 @@
           M("\\frac{AC}{AE} = \\frac{AB}{AD} = " + k) + " : " + M("AC = " + ae * k) + ".", { ctx: "papillon", guide: [GS("Rapport ?", k, M(k) + "."), GS(M("AC") + " = ?", ae * k, M(ae * k) + ".")], traps: [TR(ae / k, "AB est plus long que AD, donc AC plus long que AE.")] }); },
     ],
     3: [
-      () => { const k = pk([2, 3, 4]), ad = R.int(2, 5), ae = R.int(2, 6), bc = 2 * R.int(3, 9); if (ad === ae) return null;
+      () => { const k = pk([2, 3, 4]), ad = R.int(2, 5), ae = R.int(2, 6), bc = 2 * R.int(3, 9); if (ad === ae || !tri(ad * k, ae * k, bc)) return null;
         return Qv(M("D \\in [AB]") + ", " + M("E \\in [AC]") + ", " + M("AD = " + ad) + ", " + M("AB = " + ad * k) + ", " + M("AE = " + ae) + ", " + M("AC = " + ae * k) + " et " + M("BC = " + bc) + ". Montre que " + M("(DE) \\parallel (BC)") + ", puis calcule " + M("DE") + ".", r6(bc / k),
           M("\\frac{AD}{AB} = \\frac{AE}{AC} = \\frac{1}{" + k + "}") + " : parallèles (réciproque). Puis " + M("DE = " + bc + " : " + k + " = " + N(bc / k)) + ".",
           { ctx: "prouver-calculer", fig: GF.thales(1 / k, { AD: ad + "", AE: ae + "", BC: bc + "", DE: "?" }), guide: [GS(M("\\frac{AD}{AB}") + " = ? (fraction)", 1 / k, M("\\frac{1}{" + k + "}") + "."), GS(M("\\frac{AE}{AC}") + " = ? (même valeur : parallèles)", 1 / k, M("\\frac{1}{" + k + "}") + "."), GS(M("DE") + " = ?", r6(bc / k), M(N(bc / k)) + ".")], traps: [TR(bc * k, "DE est le petit côté : on divise.")] }); },
@@ -2427,7 +2430,7 @@
         return Qv("Combien de ces configurations donnent " + M("(DE) \\parallel (BC)") + " ? " + cs.map((c, i) => "(" + (i + 1) + ") " + M("AD = " + c[0] + ", AB = " + N(c[1]) + ", AE = " + c[2] + ", AC = " + N(c[3]))).join(" ; "), n,
           cs.map((c, i) => "(" + (i + 1) + ") " + M(c[0] + " \\cdot " + N(c[3]) + (c[4] ? " = " : " \\neq ") + c[2] + " \\cdot " + N(c[1]))).join(" ; ") + " (produits en croix) : " + n + ".",
           { ctx: "compter-decimaux", fig: GF.thales(0.45, { AD: "AD", AE: "AE" }), guide: [GS("Astuce : compare les produits en croix " + M("AD \\cdot AC") + " et " + M("AE \\cdot AB") + ". Cas (1) : " + M("AD \\cdot AC") + " = ?", r6(cs[0][0] * cs[0][3]), M(N(cs[0][0] * cs[0][3])) + "."), GS("Nombre de cas parallèles ?", n, n + ".")], traps: [TR(4, "Un petit écart suffit : pas parallèles."), TR(n === 0 ? 1 : n - 1, "Vérifie chaque cas.")] }); },
-      () => { const k = pk([1.5, 2.5, 2, 3]), ad = R.int(2, 6), ae = R.int(2, 6), de = R.int(2, 7); if (ad === ae) return null; const ab = r6(ad * k), ac = r6(ae * k), bc = r6(de * k);
+      () => { const k = pk([1.5, 2.5, 2, 3]), ad = R.int(2, 6), ae = R.int(2, 6), de = R.int(2, 7); if (ad === ae) return null; if (!tri(ad, ae, de)) return null; const ab = r6(ad * k), ac = r6(ae * k), bc = r6(de * k);
         return Qv("Configuration « papillon » : " + M("(BD)") + " et " + M("(CE)") + " se coupent en " + M("A") + ". " + M("AD = " + ad) + ", " + M("AB = " + N(ab)) + ", " + M("AE = " + ae) + ", " + M("AC = " + N(ac)) + " et " + M("DE = " + de) + ". Vérifie que " + M("(DE) \\parallel (BC)") + ", puis calcule " + M("BC") + ".", bc,
           M("\\frac{AB}{AD} = \\frac{AC}{AE} = " + N(k)) + " : parallèles (réciproque). " + M("BC = " + de + " \\cdot " + N(k) + " = " + N(bc)) + ".",
           { ctx: "papillon-BC", guide: [GS(M("\\frac{AB}{AD}") + " (décimal) ?", k, M(N(k)) + "."), GS(M("\\frac{AC}{AE}") + " (même valeur : parallèles) ?", k, M(N(k)) + "."), GS(M("BC") + " = ?", bc, M(N(bc)) + ".")], traps: [TR(r6(de / k), "BC est du côté des grandes longueurs (AB, AC) : on multiplie."), TR(r6(de + ab - ad), "Thalès conserve les rapports, pas les différences.")] }); }
@@ -2755,7 +2758,9 @@
       () => { let a, b; do { a = nz(-9, 9); b = nz(-9, 9); } while ((a > 0 && b > 0) || Math.abs(a) === 1 || Math.abs(b) === 1); const div = R.rand() < 0.5, p = a * b; // au moins un négatif, pas de facteur ±1 (21.11)
         return div ? Qv("Calcule : " + M(par(p) + " : " + par(b)), a, "Signe : " + (p * b > 0 ? "même signe → +" : "signes contraires → −") + " ; " + M(Math.abs(p) + " : " + Math.abs(b) + " = " + Math.abs(a)) + " : " + M(a) + ".", { ctx: "division", guide: [GS("Le résultat est-il positif (1) ou négatif (−1) ?", Math.sign(a), p * b > 0 ? "Même signe : positif." : "Signes contraires : négatif."), GS("Résultat ?", a, M(a) + ".")], traps: [TR(-a, "Règle des signes : même signe → +, signes contraires → −.")] })
           : Qv("Calcule : " + M(par(a) + " \\cdot " + par(b)), p, "Signe : " + (a * b > 0 ? "même signe → +" : "signes contraires → −") + " ; " + M(Math.abs(a) + " \\cdot " + Math.abs(b) + " = " + Math.abs(p)) + " : " + M(p) + ".", { ctx: "produit", guide: [GS("Le résultat est-il positif (1) ou négatif (−1) ?", Math.sign(p), a * b > 0 ? "Même signe : positif." : "Signes contraires : négatif."), GS("Résultat ?", p, M(p) + ".")], traps: [TR(-p, "Règle des signes : même signe → +, signes contraires → −."), TR(a + b, "C'est un produit.")] }); },
-      () => { const t0 = -R.int(2, 15), d = R.int(5, 20), up = R.rand() < 0.5, x = pk([["Le matin, il fait " + M(t0) + " °C. La température " + (up ? "monte" : "baisse") + " de " + M(d) + " °C. Quelle température fait-il ensuite (en °C) ?", "temperature"], ["Un plongeur est à " + M(t0) + " m (sous la surface). Il " + (up ? "remonte" : "descend") + " de " + M(d) + " m. À quelle altitude est-il ensuite (en m) ?", "plongeur"]]), v = up ? t0 + d : t0 - d;
+      /* 26.11 (revue élèves, rel-1-jny : plongeur à −2 m qui « remonte de 16 m » → 14 m au-dessus de l'eau) : le plongeur
+         reste sous la surface (remontée plus courte que sa profondeur), la température reste plausible (pas sous −25 °C). */
+      () => { const t0 = -R.int(2, 15), up = R.rand() < 0.5, d = R.int(5, 20), x = pk([["Le matin, il fait " + M(t0) + " °C. La température " + (up ? "monte" : "baisse") + " de " + M(d) + " °C. Quelle température fait-il ensuite (en °C) ?", "temperature"], ["Un plongeur est à " + M(t0) + " m (sous la surface). Il " + (up ? "remonte" : "descend") + " de " + M(d) + " m. À quelle altitude est-il ensuite (en m) ?", "plongeur"]]), v = up ? t0 + d : t0 - d; if (x[1] === "plongeur" ? up && v >= 0 : v < -25) return null;
         return Qv(x[0], v, M(t0 + (up ? " + " : " - ") + d + " = " + v) + ".",
           { ctx: x[1], guide: [GS("Calcul " + M(par(t0) + (up ? " + " : " - ") + d) + " = ?", v, M(v) + ".")], traps: [TR(up ? -(Math.abs(t0) + d) : Math.abs(t0) - d, up ? "Monter, c'est ajouter : " + t0 + " + " + d + "." : "Descendre, c'est soustraire : on s'éloigne encore de zéro."), TR(-v, "Vérifie le signe.")] }); },
     ],
@@ -2770,7 +2775,7 @@
       () => { const a = pk([2, 3, 4, 5]), n = pk([2, 3, 4]), neg = R.rand() < 0.5, v = neg ? -(a ** n) : (-a) ** n;
         return Qv("Calcule : " + M(neg ? "-" + a + "^" + n : "(-" + a + ")^" + n), v, neg ? "L'exposant porte seulement sur " + M(a) + " : " + M("-(" + a + "^" + n + ") = " + v) + "." : "Le négatif est multiplié " + n + " fois : " + (n % 2 ? "nombre impair de facteurs négatifs, résultat négatif" : "nombre pair de facteurs, résultat positif") + " : " + M(v) + ".",
           { ctx: neg ? "puiss-sans-par" : "puiss-par", guide: [GS(M(a + "^" + n) + " = ?", a ** n, M(a ** n) + "."), GS("Avec le signe ?", v, M(v) + ".")], traps: [TR(-v, neg ? "Sans parenthèses, −" + a + "^" + n + " = −(" + a + "^" + n + ")." : "(−" + a + ")^" + n + " : signe + si l'exposant est pair, − s'il est impair."), TR(-a * n, "Une puissance n'est pas un produit par l'exposant.")] }); },
-      () => { const lo = -R.int(3, 15), hi = R.int(2, 20), x = pk([["La température la plus basse de la journée est " + M(lo) + " °C et la plus haute " + M(hi) + " °C. Quel est l'écart de température (en °C) ?", "ecart-temp"], ["Le point le plus bas d'un lac est à " + M(lo * 10) + " m et le sommet voisin à " + M(hi * 100) + " m d'altitude. Quel est le dénivelé (en m) ?", "denivele"]]), v = x[1] === "denivele" ? hi * 100 - lo * 10 : hi - lo;
+      () => { const lo = -R.int(3, 15), hi = R.int(2, 20), x = pk([["La température la plus basse de la journée est " + M(lo) + " °C et la plus haute " + M(hi) + " °C. Quel est l'écart de température (en °C) ?", "ecart-temp"], ["Un sous-marin est à " + M(lo * 10) + " m (sous le niveau de la mer) et un avion vole à " + M(hi * 100) + " m d'altitude. Quelle distance verticale les sépare (en m) ?", "denivele"]]), v = x[1] === "denivele" ? hi * 100 - lo * 10 : hi - lo;
         return Qv(x[0], v, "Écart = plus grand − plus petit : " + M((x[1] === "denivele" ? hi * 100 : hi) + " - " + par(x[1] === "denivele" ? lo * 10 : lo) + " = " + v) + ".",
           { ctx: x[1], guide: [GS("Écart " + M((x[1] === "denivele" ? hi * 100 : hi) + " - " + par(x[1] === "denivele" ? lo * 10 : lo)) + " ?", v, M(v) + ".")], traps: [TR(x[1] === "denivele" ? hi * 100 + lo * 10 : hi + lo, "Soustraire un négatif, c'est ajouter : l'écart est plus grand que " + (x[1] === "denivele" ? hi * 100 : hi) + ".")] }); },
     ],

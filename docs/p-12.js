@@ -315,7 +315,7 @@
           { ctx: "restaurant", guide: [GS("L'addition totale vaut " + M(n + "x") + ". Elle est payée par combien d'élèves ?", n - k, M(n + " - " + k + " = " + (n - k)) + "."), GS("Développe " + M((n - k) + "(x + " + dec(a) + ") = " + n + "x") + " et regroupe : " + M(k + "x = \\ ?"), (n - k) * a, M((n - k) + " \\cdot " + dec(a) + " = " + dec((n - k) * a)) + "."), GS(M("x = \\ ?"), x, M("x = " + dec(x)) + " CHF.")],
             traps: [TV((n * a) / k, "Ce sont les " + (n - k) + " élèves présents qui paient le supplément, pas les " + n + "."), TV((n - k) * a, "C'est le supplément total : il couvre " + k + " menus.")] }); },
       () => { const w = pk([20, 22, 24, 25, 26]), h = R.int(3, 12), S = 40 * w + 1.5 * w * h;
-        return Qv("Le salaire horaire d'un employé est de " + w + " CHF pour les 40 premières heures de la semaine ; chaque heure supplémentaire est payée une fois et demie plus. Cette semaine, il a gagné " + M(nb(S)) + " CHF. Combien d'heures supplémentaires a-t-il faites ?", h,
+        return Qv("Le salaire horaire d'un employé est de " + w + " CHF pour les 40 premières heures de la semaine ; chaque heure supplémentaire est payée une fois et demie le tarif normal. Cette semaine, il a gagné " + M(nb(S)) + " CHF. Combien d'heures supplémentaires a-t-il faites ?", h,
           M("40 \\cdot " + w + " + " + dec(1.5 * w) + " \\cdot h = " + nb(S)) + ", donc " + M(dec(1.5 * w) + "h = " + nb(S - 40 * w)) + " et " + M("h = " + h) + ".",
           { ctx: "salaire", guide: [GS("Salaire des 40 premières heures ?", 40 * w, M("40 \\cdot " + w + " = " + nb(40 * w)) + " CHF."), GS("Prix d'une heure supplémentaire ?", 1.5 * w, M("1{,}5 \\cdot " + w + " = " + dec(1.5 * w)) + " CHF."), GS(M("h = \\ ?"), h, M("\\frac{" + nb(S - 40 * w) + "}{" + dec(1.5 * w) + "} = " + h) + ".")],
             traps: [TV((S - 40 * w) / w, "Les heures supplémentaires sont payées " + M(dec(1.5 * w)) + " CHF, pas " + w + " CHF.")] }); },
@@ -2216,7 +2216,7 @@
     if (tr.spec) { let c; try { c = show(tr.spec); if (seen.has(c) || tr.spec.kind !== spec.kind || checkAnswer(tr.spec, c).status !== "correct" || checkAnswer(spec, c).status === "correct") return false; } catch (e) { return false; }
       seen.add(c); return true; }
     return isFinite(tr.v) && Math.abs(tr.v - spec.value) > 1e-9; }); };
-  const mk = (q, spec, sol, o) => { const x = { q, spec, sol, guide: o.guide, ctx: o.ctx, traps: keepT(spec, o.traps) }; if (o.fig) x.fig = o.fig; if (o.canon) x.canon = o.canon; return x; };
+  const mk = (q, spec, sol, o) => { const x = { q, spec, sol, guide: o.guide, ctx: o.ctx, traps: keepT(spec, o.traps) }; if (o.fig) x.fig = o.fig; if (o.canon) x.canon = o.canon; if (o.hint) x.hint = o.hint; return x; };
   const QN = (q, value, sol, o) => mk(q, { kind: "value", value }, sol, o);
   const QP = (q, vals, sol, o) => mk(q, { kind: "pair", values: vals }, sol, Object.assign({ canon: vals.map(fS).join(" ; ") }, o));
   const QSet = (q, vals, sol, o) => mk(q, { kind: "set", values: [...new Set(vals)] }, sol, o);
@@ -2360,7 +2360,10 @@
           { ctx: "zeros", fig: FIG.parabola((x) => a0 * (x - p) * (x - q) / 3, [], null, false), guide: [GS("Somme des zéros (" + M("-\\frac{b}{a}") + ") ?", p + q, M(p + q) + "."), GSet("Zéros ?", [p, q], M(p) + " et " + M(q) + ".")], traps: [TSet([-p, -q], "Attention aux signes : (x − p) s'annule en p.")] }); },
       () => { const h = nz(-5, 5), k = nz(-6, 6), a = pk([1, -1, 2, -3]);
         return QP("Quel est le sommet de la parabole " + M("f(x) = " + co(a) + "(" + xm(h) + ")^2" + sg(k)) + " ? Réponds « x ; y ».", [h, k], "Forme canonique " + M("a(x - h)^2 + k") + " : sommet " + M("(" + h + " ; " + k + ")") + ".",
-          { ctx: "sommet-canon", guide: [GS("Abscisse du sommet (" + M("h") + ") ?", h, M(h) + "."), GP("Sommet ?", [h, k], M("(" + h + " ; " + k + ")") + ".")], traps: [TP([-h, k], "Dans (x − h)², le sommet a pour abscisse h : (" + xm(h) + ") → " + h + "."), TP([h, -k], "Le + k ou − k se lit tel quel.")] }); },
+          /* 26.11 (revue élèves, f2-1-b9d : après « −3 ; 5 », l'indice général parlait des zéros et du discriminant) : indice
+             propre à la forme canonique, et l'erreur des deux signes à la fois. */
+          { ctx: "sommet-canon", hint: "Forme canonique a(x − h)² + k : le sommet est (h ; k). Dans (" + xm(h) + ")², h = " + h + " (signe contraire de celui écrit) ; k = " + k + " se lit tel quel.",
+            guide: [GS("Abscisse du sommet (" + M("h") + ") ?", h, M(h) + "."), GP("Sommet ?", [h, k], M("(" + h + " ; " + k + ")") + ".")], traps: [TP([-h, k], "Dans (x − h)², le sommet a pour abscisse h : (" + xm(h) + ") → " + h + "."), TP([h, -k], "Le + k ou − k se lit tel quel."), TP([-h, -k], "Les deux signes sont inversés : h a le signe contraire de celui écrit dans (" + xm(h) + ")², k garde le sien.")] }); },
       () => { const p = nz(-5, 5), q = nz(-5, 5), a = pk([1, -1, 2, -2]); if (p === q || p * q === 0) return null;
         return QN("Quelle est l'ordonnée à l'origine de la parabole " + M("f(x) = " + fx(a, p, q)) + " ?", a * p * q, M("f(0) = " + co(a) + "(" + -p + ")(" + -q + ") = " + a * p * q) + ".",
           { ctx: "ordonnee", guide: [GS(M("f(0)") + " = ?", a * p * q, M(a * p * q) + ".")], traps: [TR(p * q, "N'oublie pas le coefficient " + a + "."), TR(-a * p * q, "(0 − " + p + ")(0 − " + q + ") = " + p * q + ".")] }); },
@@ -3831,7 +3834,7 @@
           { ctx: "isoler2-" + fn, guide: [GR("On isole : " + M("\\" + fn + " x") + " = ?", v, M(exT(v)) + "."), G("Angle de référence ?", r, M(r + "°") + "."), GSet("Solutions ?", sols, sols.map((x) => M(x + "°")).join(" et ") + ".")], traps: [TSet(fn === "sin" ? [r, 360 - r] : [r, 180 - r], fn === "sin" ? "Sinus : x et 180° − x." : "Cosinus : x et 360° − x."), TSet([r], "Deux solutions sur un tour.")] }); },
       () => { const r = pk([30, 45, 60]), fn = pk(["sin", "cos"]), v = fn === "sin" ? sinD(r) : cosD(r), sols = (fn === "sin" ? [r, 180 - r, 180 + r, 360 - r] : [r, 360 - r, 180 - r, 180 + r]);
         return QSet("Résous " + M("\\" + fn + "^2 x = " + (r === 45 ? "\\frac{1}{2}" : fn === "sin" ? (r === 30 ? "\\frac{1}{4}" : "\\frac{3}{4}") : (r === 60 ? "\\frac{1}{4}" : "\\frac{3}{4}"))) + IV, sols, M("\\" + fn + " x = " + exT(v)) + " ou " + M("\\" + fn + " x = " + exT(-v)) + " : quatre solutions, " + sols.slice().sort((a, b) => a - b).map((x) => M(x + "°")).join(", ") + ".",
-          { ctx: "carre", guide: [GR("Une valeur positive possible de " + M("\\" + fn + " x") + " ?", v, M(exT(v)) + " (et aussi " + M(exT(-v)) + ")."), GSet("Toutes les solutions (quatre) ?", sols, sols.slice().sort((a, b) => a - b).map((x) => M(x + "°")).join(", ") + ".")], traps: [TSet(sols.slice(0, 2), "N'oublie pas la racine négative : " + fn + " x = ±" + exT(v).replace(/\\\\/g, "") + "."), TSet([r], "Il y a quatre solutions.")] }); },
+          { ctx: "carre", guide: [GR("Une valeur positive possible de " + M("\\" + fn + " x") + " ?", v, M(exT(v)) + " (et aussi " + M(exT(-v)) + ")."), GSet("Toutes les solutions (quatre) ?", sols, sols.slice().sort((a, b) => a - b).map((x) => M(x + "°")).join(", ") + ".")], traps: [TSet(sols.slice(0, 2), "N'oublie pas la racine négative : " + M("\\" + fn + " x = \\pm " + exT(v)) + "."), TSet([r], "Il y a quatre solutions.")] }); },
     ],
   };
 
@@ -4894,6 +4897,51 @@
         defis: ["\\(f(x) = x^2 - 4\\). Combien d'entiers vérifient \\(f(x) \\le 0\\) ?", "\\(f(x) = x^2 - 2x - 3\\) coupe l'axe en \\(-1\\) et \\(3\\). Tape le plus grand entier tel que \\(f(x) < 0\\)."],
         play: toi(["La courbe est sous l'axe entre −2 et 2, bornes comprises", "Sous l'axe entre −1 et 3, bornes exclues"], [W(5, "−2, −1, 0, 1, 2 : cinq entiers."), W(2, "f(3) = 0 n'est pas < 0 : le plus grand entier est 2.")]) } },
   ]);
+})();
+
+// 26.11 · Leçons actives du chapitre « 3. Argumenter » de 1re Collège (notions de src/ch1c_arg.js : tradalg, contrex,
+// demoalg, implication), les seules notions de 1re qui n'en avaient pas (tableau de suivi). Format court (règle de
+// l'enseignant : resserrer) : Devine → Retiens → « À toi : 2 questions » (réponse tapée, coup de pouce après une erreur).
+// Outils : TRX (src/trx.js) ; paquet « 12 » (préfixe ch1c dans build.py).
+(function () {
+  if (typeof TRX === "undefined") return;
+  const { actReg, W, toi } = TRX;
+  actReg({
+    tradalg: {
+      retiens: { regle: "Avec un entier \\(n\\) : un nombre pair s'écrit \\(2n\\), un impair \\(2n + 1\\), trois entiers consécutifs \\(n\\), \\(n + 1\\), \\(n + 2\\), un multiple de 5 \\(5n\\).",
+        exemple: ["Somme de trois entiers consécutifs : \\(n + (n + 1) + (n + 2) = 3n + 3\\).", "Deux impairs consécutifs : \\(2n + 1\\) et \\(2n + 3\\)."],
+        piege: "Deux impairs consécutifs ne s'écrivent pas \\(2n + 1\\) et \\(2n + 2\\) : d'un impair au suivant, on ajoute 2." },
+      predict: { q: "Comment écrire « un nombre impair » avec un entier \\(n\\) ?", choices: ["\\(2n + 1\\)", "\\(n + 1\\)", "\\(2n\\)"], good: 0,
+        why: "\\(2n\\) est toujours pair ; en ajoutant 1, on obtient un impair. \\(n + 1\\) peut être pair (si \\(n\\) est impair)." },
+      defis: ["Trois entiers consécutifs \\(n\\), \\(n + 1\\), \\(n + 2\\) : avec \\(n = 7\\), que vaut leur somme ?", "Deux impairs consécutifs \\(2n + 1\\) et \\(2n + 3\\) : avec \\(n = 4\\), que vaut leur somme ?"],
+      play: toi(["7 + 8 + 9", "2 · 4 + 1 = 9 et 2 · 4 + 3 = 11"], [W(24, "7 + 8 + 9 = 24, et la formule donne bien 3 · 7 + 3 = 24."), W(20, "9 + 11 = 20 : (2n + 1) + (2n + 3) = 4n + 4, ici 4 · 4 + 4 = 20.")]) },
+    contrex: {
+      retiens: { regle: "Un seul contre-exemple suffit à prouver qu'une affirmation « pour tout… » est fausse ; des exemples, même nombreux, ne prouvent pas qu'elle est vraie.",
+        exemple: ["« \\(n^2 + n + 41\\) est toujours premier » : faux pour \\(n = 40\\), car \\(40^2 + 40 + 41 = 1681 = 41^2\\).", "« Tout nombre premier est impair » : faux, 2 est premier et pair."],
+        piege: "Vérifier sur quelques cas ne démontre rien : il faut une démonstration, ou un contre-exemple pour réfuter." },
+      predict: { q: "« Pour tout entier \\(n \\ge 0\\), \\(n^2 + n + 41\\) est premier. » C'est vrai de \\(n = 0\\) à \\(n = 10\\). Est-ce démontré ?",
+        choices: ["non : il faut une démonstration, et un contre-exemple existe peut-être", "oui : onze cas suffisent", "oui, si on vérifie jusqu'à 20"], good: 0,
+        why: "C'est vrai jusqu'à \\(n = 39\\), puis faux pour \\(n = 40\\). Des exemples ne prouvent jamais un « pour tout »." },
+      defis: ["Pour \\(n = 40\\), \\(n^2 + n + 41 = 1681\\). Ce nombre est le carré de quel entier ?", "« Tout nombre premier est impair. » Tape le contre-exemple."],
+      play: toi(["1681 = 1600 + 81 : essaie 41 · 41", "cherche un nombre premier qui est pair"], [W(41, "1681 = 41 · 41 : ce n'est pas un nombre premier. L'affirmation est fausse."), W(2, "2 est premier (diviseurs 1 et 2) et pair : un seul contre-exemple suffit.")]) },
+    demoalg: {
+      retiens: { regle: "Pour démontrer « pour tout entier » : écrire les nombres avec une lettre, calculer, puis reconnaître la forme voulue (\\(3 \\cdot\\) un entier, \\(2k + 1\\)…).",
+        exemple: ["\\(n + (n + 1) + (n + 2) = 3n + 3 = 3(n + 1)\\) : la somme de trois entiers consécutifs est un multiple de 3.", "\\((2k + 1)^2 = 4k^2 + 4k + 1 = 2(2k^2 + 2k) + 1\\) : le carré d'un impair est impair."],
+        piege: "Un exemple illustre, il ne démontre pas ; la forme \\(3(n + 1)\\), elle, vaut pour tous les \\(n\\)." },
+      predict: { q: "La somme de trois entiers consécutifs est toujours…", choices: ["un multiple de 3", "un nombre pair", "un multiple de 6"], good: 0,
+        why: "\\(n + (n + 1) + (n + 2) = 3(n + 1)\\). Elle n'est pas toujours paire : \\(1 + 2 + 3 = 6\\), mais \\(2 + 3 + 4 = 9\\)." },
+      defis: ["\\(n + (n + 1) + (n + 2) = 3(n + 1)\\). Avec \\(n = 12\\) : calcule la somme, divise-la par 3 et tape le quotient.", "\\((2k + 1)^2 = 4k^2 + 4k + 1\\). Pour \\(k = 3\\), que vaut \\((2k + 1)^2\\) ?"],
+      play: toi(["12 + 13 + 14 = 39, puis 39 ÷ 3", "2 · 3 + 1 = 7, puis 7²"], [W(13, "39 ÷ 3 = 13 = n + 1 : c'est exactement ce que dit 3(n + 1)."), W(49, "7² = 49, et 4 · 9 + 4 · 3 + 1 = 49 : impair, comme prévu.")]) },
+    implication: {
+      retiens: { regle: "« Si P, alors Q ». Réciproque : « si Q, alors P » (elle peut être fausse). Contraposée : « si non Q, alors non P » (elle dit la même chose que l'implication).",
+        exemple: ["« Si \\(n\\) est multiple de 4, alors \\(n\\) est pair » : vrai. Réciproque « si \\(n\\) est pair, alors multiple de 4 » : fausse (6).", "Contraposée : « si \\(n\\) est impair, alors \\(n\\) n'est pas multiple de 4 » : vraie."],
+        piege: "Une implication vraie n'a pas forcément une réciproque vraie : il faut la vérifier à part." },
+      predict: { q: "« Si \\(n\\) est multiple de 4, alors \\(n\\) est pair. » Sa réciproque est…",
+        choices: ["« si \\(n\\) est pair, alors \\(n\\) est multiple de 4 », qui est fausse", "« si \\(n\\) est impair, alors \\(n\\) n'est pas multiple de 4 »", "toujours vraie, comme l'implication"], good: 0,
+        why: "La réciproque échange les deux parties ; 6 est pair sans être multiple de 4. La 2e proposition est la contraposée." },
+      defis: ["Réciproque fausse : donne un entier entre 5 et 9 qui est pair sans être multiple de 4.", "« Si un triangle est rectangle en C, alors \\(c^2 = a^2 + b^2\\). » Avec \\(a = 5\\), \\(b = 12\\), \\(c = 14\\) : tape \\(c^2 - (a^2 + b^2)\\)."],
+      play: toi(["6 ou 8 : lequel n'est pas multiple de 4 ?", "14² = 196 et 5² + 12² = 169"], [W(6, "6 est pair, mais 6 ÷ 4 n'est pas entier : la réciproque est fausse."), W(27, "196 − 169 = 27 ≠ 0 : c² ≠ a² + b², donc (contraposée) le triangle n'est pas rectangle en C.")]) },
+  });
 })();
 
 // Généré par tools/ref_matu.py (25.11) : référentiel de compétences du Collège de Genève (code, niveau, thème,
