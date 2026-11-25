@@ -61,7 +61,7 @@
             traps: [TV(m / n, "Tu as inversé : " + M(m + "x = " + n) + " donne " + M("x = " + frac(n, m)) + "."), TV((d + b) / m, "Le nombre " + M(b) + " change de membre : on " + (b > 0 ? "soustrait" : "ajoute") + " " + Math.abs(b) + " des deux côtés.")] }); },
     ],
     2: [
-      () => { let a, c; do { a = R.int(2, 7); c = R.int(2, 6); } while (a === c); const b = R.int(1, 9), d = R.int(1, 9), s = nz(-8, 8), e = a * (s + b) - c * (s - d);
+      () => { let a, c; do { a = R.int(2, 7); c = R.int(2, 6); } while (a === c); const b = R.int(1, 9), d = R.int(1, 9), s = pk([-8, -7, -6, -5, -4, -3, -2, 2, 3, 4, 5, 6, 7, 8]), e = a * (s + b) - c * (s - d); /* 25.11 : solution ≠ ±1 */
         return Qv("Résous : " + M(a + "(x + " + b + ") - " + c + "(x - " + d + ") = " + e) + ".", s, "On développe : " + M(a + "x + " + a * b + " - " + c + "x + " + c * d + " = " + e) + ", donc " + M(L(a - c, 0) + " = " + (e - a * b - c * d)) + " et " + M("x = " + s) + ".",
           { ctx: "parentheses",
             guide: [GS("Développe le membre de gauche. Quel est le nombre seul (" + M(a + " \\cdot " + b + " - " + c + " \\cdot (-" + d + ")") + ") ?", a * b + c * d, M(a * b + " + " + c * d + " = " + (a * b + c * d)) + " : " + M("-" + c + " \\cdot (-" + d + ") = +" + c * d) + "."), GS("Réduis : " + M(L(a - c, 0) + " + " + (a * b + c * d) + " = " + e) + ". Donc " + M(L(a - c, 0) + " = \\ ?"), e - a * b - c * d, M(L(a - c, 0) + " = " + (e - a * b - c * d)) + "."), GS(M("x = \\ ?"), s, M("x = " + s) + ".")],
@@ -74,13 +74,13 @@
             guide: [GS("Regroupe les " + M(v) + " à gauche. Quel est leur coefficient (" + M(dec(p) + " - " + dec(r)) + ") ?", +(p - r).toFixed(4), M(dec(p) + " - " + dec(r) + " = " + dec(+(p - r).toFixed(4))) + "."), GS("Les nombres à droite : " + M(dec(+(p - r).toFixed(4)) + v + " = \\ ?"), t - q, M(t + sgn(-q) + " = " + (t - q)) + "."), GS(M(v + " = \\ ?"), s, M(v + " = \\frac{" + (t - q) + "}{" + dec(+(p - r).toFixed(4)) + "} = " + s) + ".")],
             traps: [TV((t - q) / (p + r), "Pour regrouper les " + M(v) + ", on <b>soustrait</b> " + M(dec(r) + v) + " des deux côtés."), TV((t + q) / (p - r), "Le nombre " + M(q) + " change de membre : on le soustrait des deux côtés.")] }); },
       () => { let a, b, c, d; do { a = nz(-6, 6); b = nz(-6, 6); c = nz(-6, 6); d = nz(-6, 6); } while (a + b === c + d || [a, b].sort().join() === [c, d].sort().join());
-        const s = nz(-7, 7), e = (a + b - c - d) * s + a * b - c * d; if (e === 0) return EQ1[2][2]();
+        const s = pk([-7, -6, -5, -4, -3, -2, 2, 3, 4, 5, 6, 7]), e = (a + b - c - d) * s + a * b - c * d; if (e === 0) return EQ1[2][2](); /* 25.11 : solution ≠ ±1 (robot) */
         const k = a + b - c - d;
         return Qv("Résous : " + M("(" + L(1, a) + ")(" + L(1, b) + ") = (" + L(1, c) + ")(" + L(1, d) + ")" + sgn(e)) + ".", s, "On développe : " + M(T2(1, a + b, a * b) + " = " + T2(1, c + d, c * d + e)) + ". Les " + M("x^2") + " s'éliminent : " + M(L(k, 0) + " = " + (c * d + e - a * b)) + ", donc " + M("x = " + s) + ".",
           { ctx: "carres-elimines",
             guide: [GS("Développe le membre de gauche : coefficient de " + M("x") + " ?", a + b, M("(" + L(1, a) + ")(" + L(1, b) + ") = " + T2(1, a + b, a * b)) + "."), GS("Développe à droite (sans oublier " + M(e) + "), puis soustrais " + M("x^2") + " des deux côtés : " + M(L(k, 0) + " = \\ ?"), c * d + e - a * b, M(T2(1, c + d, c * d + e)) + " ; il reste " + M(L(k, 0) + " = " + (c * d + e - a * b)) + "."), GS(M("x = \\ ?"), s, M("x = " + s) + " : l'équation avait l'air du 2e degré, mais elle est du 1er degré.")],
             traps: [TV((c * d - a * b) / k, "N'oublie pas le terme " + M(e) + " du membre de droite.")] }); },
-      () => { let a, c; do { a = R.int(3, 9); c = R.int(1, 8); } while (a <= c); const s = nz(-6, 9), b = nz(-9, 9), d = (a - c) * s + b, w = pk(WHO), wrong = (d + b) / (a - c);
+      () => { let a, c; do { a = R.int(3, 9); c = R.int(1, 8); } while (a <= c); const s = pk([-6, -5, -4, -3, -2, 2, 3, 4, 5, 6, 7, 8, 9]), b = nz(-9, 9), d = (a - c) * s + b, w = pk(WHO), wrong = (d + b) / (a - c);
         if (Math.abs(wrong - s) < 1e-9) return EQ1[2][3]();
         return Qv(w + " résout " + M(L(a, b) + " = " + L(c, d)) + " ainsi : " + M(L(a - c, 0) + " = " + (d + b)) + ", donc " + M("x = " + tn(wrong)) + ". Trouve l'erreur, puis donne la bonne solution.", s, "Erreur : " + M(b) + " change de membre, donc de signe : " + M(L(a - c, 0) + " = " + d + sgn(-b) + " = " + (d - b)) + ", et " + M("x = " + s) + ". Vérification : " + M(a + " \\cdot " + P(s) + sgn(b) + " = " + (a * s + b)) + " et " + M(c + " \\cdot " + P(s) + sgn(d) + " = " + (c * s + d)) + ".",
           { ctx: "erreur",

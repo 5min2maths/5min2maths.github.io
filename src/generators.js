@@ -625,7 +625,7 @@ Object.assign(GEN, {
 
   log(d) {
     if (d === 1) {
-      const b = R.pick([2, 3, 10]), n = R.int(-2, b === 2 ? 6 : 4);
+      const b = R.pick([2, 3, 10]); let n; do n = R.int(-2, b === 2 ? 6 : 4); while (n === 0 || n === 1); /* 25.11 : log_b 1 et log_b b triviaux (robot) */
       const x = Math.pow(b, n), xs = n >= 0 ? String(x) : "\\frac{1}{" + b ** -n + "}";
       return { guide: [GS(M(b + "^{?} = " + xs) + " : exposant ?", n, M(b + "^{" + n + "} = " + xs) + "."), GS("Donc le logarithme vaut ?", n, M(n) + ".")], q: "Calcule " + M("\\log_{" + b + "} " + xs) + ".", spec: { kind: "value", value: n }, traps: n < 0 ? [TRAP(-n, "Attention au signe : le nombre est plus petit que 1, son logarithme est négatif.")] : [TRAP(x / b, "Le logarithme est un exposant : " + M(b + "^{?} = " + xs) + ".")], sol: M(b + "^{" + n + "} = " + xs) + ", donc " + M("\\log_{" + b + "} " + xs + " = " + n) + "." };
     }
