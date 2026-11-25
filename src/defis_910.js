@@ -58,7 +58,7 @@
       "a) " + M(n + " \\cdot " + N(p) + " = " + N(t)) + " CHF. b) " + N(p) + " ≈ " + Math.round(p) + " ; " + M(n + " \\cdot " + Math.round(p) + " = " + n * Math.round(p)) + " CHF. c) " + M("|" + n * Math.round(p) + " - " + N(t) + "| = " + N(r6(Math.abs(n * Math.round(p) - t)))) + " CHF.");
   });
   PX("decprob", [9, 10], () => {
-    const l = pk([0.75, 1.5, 0.4]), pl = pk([1.8, 2.4, 3.6]), n = pk([12, 18, 24]), pu = pk([2.9, 3.45, 4.2]);
+    const l = pk([0.75, 0.5, 0.4]) /* 26.11 : et non 1,5 L de jus par personne */, pl = pk([1.8, 2.4, 3.6]), n = pk([12, 18, 24]), pu = pk([2.9, 3.45, 4.2]);
     const L = r6(l * n), bott = Math.ceil(r6(L / pl) - 1e-9), cost = r6(bott * pu), bil = [20, 50, 100].find((b) => b > cost);
     return PB("Pour un pique-nique de " + n + " personnes, on prévoit " + X(l) + " L de jus par personne. Le jus est vendu en bouteilles de " + X(pl) + " L à " + X(pu) + " CHF la bouteille. On paie avec un billet de " + bil + " CHF.",
       [["a) Quantité de jus nécessaire, en L", L], ["b) Nombre de bouteilles à acheter", bott], ["c) Monnaie rendue, en CHF", r6(bil - cost), 0.01]],

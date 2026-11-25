@@ -60,7 +60,7 @@
     () => { const h1 = pk([2, 3]), h2 = h1 + pk([2, 3]), t = pk([75, 80, 90]), dpl = pk([50, 60, 70]);
       return X({ id: "affine", lv: 2, titre: "La facture du plombier",
         q: "Un plombier facture un déplacement fixe et un tarif horaire. Pour " + h1 + " h de travail, il demande " + (dpl + t * h1) + " CHF ; pour " + h2 + " h, " + (dpl + t * h2) + " CHF.",
-        parts: [{ label: "Calcule le tarif horaire.", pts: 1 }, { label: "Calcule le prix du déplacement et écris la fonction " + M("P(h)") + ".", pts: 2 }, { label: "Un client a payé " + (dpl + t * 4.5) + " CHF. Combien de temps le plombier a-t-il travaillé ?", pts: 1 }],
+        parts: [{ label: "Calcule le tarif horaire.", pts: 1 }, { label: "Calcule le prix du déplacement et écris la fonction " + M("P(h)") + ".", pts: 2 }, { label: "Un client a payé " + N(dpl + t * 4.5) + " CHF. Combien de temps le plombier a-t-il travaillé ?", pts: 1 }],
         sol: ul([M("\\frac{" + (dpl + t * h2) + " - " + (dpl + t * h1) + "}{" + (h2 - h1) + "} = " + t) + " CHF/h.", M((dpl + t * h1) + " - " + t + " \\cdot " + h1 + " = " + dpl) + " ; " + M("P(h) = " + t + "h + " + dpl) + ".", M(t + "h + " + dpl + " = " + N(dpl + t * 4.5)) + ", " + M("h = 4{,}5") + " : 4 h 30."]) }); },
   ];
   const RAISON = [

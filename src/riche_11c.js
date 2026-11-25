@@ -75,7 +75,7 @@
         q: "Pour mesurer la largeur " + M("BC") + " d'une rivière, on plante des piquets : " + M("A") + ", " + M("E") + ", " + M("C") + " alignés et " + M("A") + ", " + M("D") + ", " + M("B") + " alignés, avec " + M("(DE) \\parallel (BC)") + ". On mesure " + M("AE = " + ae) + " m, " + M("EC = " + ec) + " m et " + M("DE = " + de) + " m.",
         parts: [{ label: "Calcule " + M("AC") + ".", pts: 1 }, { label: "Calcule la largeur " + M("BC") + " (au dixième).", pts: 2 }],
         sol: ul([M("AC = " + ae + " + " + ec + " = " + (ae + ec)) + " m.", M("BC = " + de + " \\cdot \\frac{" + (ae + ec) + "}{" + ae + "} = " + N(r6(bc))) + " m."]) }); },
-    () => { const k = pk([2, 3]), ao = pk([2, 3, 4]), ab = pk([3, 4, 5]);
+    () => { const k = pk([2, 3]), ao = pk([2, 3, 4]), ab = pk([3, 4, 5].filter((v) => v < 2 * ao + 1)) /* 26.11 : OA = 2, OB = 3, AB = 5 : triangle OAB aplati */;
       return X({ id: "thalesrec", lv: 3, titre: "Le papillon",
         q: "Les droites " + M("(AC)") + " et " + M("(BD)") + " se coupent en " + M("O") + ". On a " + M("OA = " + ao) + " cm, " + M("OC = " + ao * k) + " cm, " + M("OB = " + (ao + 1)) + " cm, " + M("OD = " + (ao + 1) * k) + " cm et " + M("AB = " + ab) + " cm.",
         parts: [{ label: "Montre que " + M("(AB) \\parallel (CD)") + ".", pts: 2 }, { label: "Calcule " + M("CD") + ".", pts: 1 }, { label: "Par combien l'aire du triangle " + M("OAB") + " est-elle multipliée pour obtenir celle de " + M("OCD") + " ?", pts: 1 }],

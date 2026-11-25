@@ -171,7 +171,7 @@
       /* 25.11 (revue : « 3, 4 et 4 cm » avec le calcul 4² − (3² + 4²) déjà écrit : trop guidé, sans plus grand côté net) :
          le plus grand côté dépasse nettement les deux autres, les côtés sont dans le désordre, et le calcul n'est pas
          écrit : l'élève repère le plus grand côté et compare son carré à la somme des deux autres. */
-      () => { const [a, b, c] = trip(25), x = c + pk([1, 2, 3]), s = shuf([a, b, x]), e = x * x - a * a - b * b;
+      () => { let a, b, c, x; do { [a, b, c] = trip(25); x = c + pk([1, 2, 3]); } while (x >= a + b); /* 26.11 (vraisemblance) : « côtés 3, 4 et 8 cm » : ce triangle n'existe pas (3 + 4 < 8) */ const s = shuf([a, b, x]), e = x * x - a * a - b * b;
         return Qv("Un triangle a pour côtés " + M(s[0]) + " cm, " + M(s[1]) + " cm et " + M(s[2]) + " cm. Est-il rectangle ? Pour le savoir, calcule de combien le carré du plus grand côté dépasse la somme des carrés des deux autres.", e, "Plus grand côté " + M(x) + " : " + M(x + "^2 - (" + a + "^2 + " + b + "^2) = " + x * x + " - " + (a * a + b * b) + " = " + e) + " : ce n'est pas 0, le triangle n'est pas rectangle (il a un angle obtus).",
           { ctx: "ecart", guide: [GS("Quel est le plus grand côté (en cm) ?", x, M(x) + " cm."), GS(M(x + "^2") + " = ?", x * x, M(x * x) + "."), GS("Somme des carrés des deux autres : " + M(a + "^2 + " + b + "^2") + " = ?", a * a + b * b, M(a * a + b * b) + "."), GS("Différence ?", e, M(e) + ".")],
             traps: [TR(x - a - b, "On compare les carrés, pas les longueurs."), TR(-e, "Dans l'ordre : le carré du plus grand côté moins la somme des deux autres."), TR(a * a - b * b - x * x, "Le plus grand côté est " + M(x) + " cm : c'est son carré qu'on compare."), TR(b * b - a * a - x * x, "Le plus grand côté est " + M(x) + " cm : c'est son carré qu'on compare.")] }); },
@@ -271,7 +271,7 @@
       () => { const a = R.int(3, 12), b = R.int(2, 10), h = 3 * R.int(1, 5); if (a === b) return null; const V = a * b * h / 3;
         return Qv("Une pyramide a pour base un rectangle de " + M(a) + " cm sur " + M(b) + " cm, et une hauteur de " + M(h) + " cm. Calcule son volume (en cm³).", V, M("\\frac{1}{3} \\cdot " + a + " \\cdot " + b + " \\cdot " + h + " = " + V) + " cm³.",
           { ctx: "pyrrect", guide: [GS("Aire de la base ?", a * b, M(a * b) + " cm²."), GS("Volume ?", V, M(V) + " cm³.")], traps: [TR(a * b * h, "On divise par 3 pour une pyramide.")] }); },
-      () => { const d = 2 * R.int(2, 7), h = 3 * R.int(1, 4), r = d / 2, k = r * r * h / 3;
+      () => { const d = 2 * R.int(2, 3), h = 3 * R.int(3, 4), r = d / 2, k = r * r * h / 3; /* 26.11 (vraisemblance) : un cornet mesure 4 à 6 cm de diamètre et 9 à 12 cm de haut (et non 14 cm sur 3 cm) */
         return Qv("Un cornet de glace a la forme d'un cône de diamètre " + M(d) + " cm et de hauteur " + M(h) + " cm. Calcule son volume" + PIX + ".", k * Math.PI, "Rayon : " + M(r) + " cm. " + M("\\frac{1}{3}\\pi \\cdot " + r + "^2 \\cdot " + h + " = " + piT(k)) + " cm³.",
           { canon: k + "π", ctx: "cornet", fig: FIG.cone("d = " + d, "h = " + h), guide: [GS("Le rayon ?", r, M(d + " : 2 = " + r) + " cm."), GS("Volume (avec " + M("\\pi") + ") ?", k * Math.PI, M(piT(k)) + " cm³.")],
             traps: [TR(d * d * h / 3 * Math.PI, "On a donné le diamètre : le rayon en est la moitié.")] }); },
@@ -386,7 +386,7 @@
         return Qv("On découpe dans un cube d'arête " + M(a) + " cm la plus grande pyramide possible (base = une face, sommet = centre de la face opposée). Quel volume de matière enlève-t-on (en cm³) ?", V, "Cube " + M(a ** 3) + ", pyramide " + M(a ** 3 / 3) + " : on enlève " + M(a ** 3 + " - " + a ** 3 / 3 + " = " + V) + " cm³, les deux tiers.",
           { ctx: "decoupe", fig: FIG.cube(a + " cm", true), guide: [GS("Volume du cube ?", a ** 3, M(a ** 3) + " cm³."), GS("Volume de la pyramide ?", a ** 3 / 3, M(a ** 3 / 3) + " cm³."), GS("Volume enlevé ?", V, M(V) + " cm³.")],
             traps: [TR(a ** 3 / 3, "C'est le volume de la pyramide qui reste ; on demande ce qu'on enlève.")] }); },
-      () => { const [hb, s, b2] = pk([[4, 5, 3], [12, 13, 5], [8, 10, 6], [6, 10, 8]]), L = R.int(3, 8), b = 2 * b2, V = b * hb / 2 * L;
+      () => { const [hb, s, b2] = pk([[4, 5, 3], [12, 13, 5], [8, 10, 6], [6, 10, 8]]), L = R.int(18, 25) /* 26.11 (vraisemblance) : une tente longue de 3 dm n'existe pas */, b = 2 * b2, V = b * hb / 2 * L;
         return Qv("Une tente a la forme d'un prisme droit couché. Sa face avant est un triangle isocèle de base " + M(b) + " dm et de côtés " + M(s) + " dm ; la tente est longue de " + M(L) + " dm. Calcule son volume (en dm³).", V, "Hauteur du triangle : " + M("\\sqrt{" + s + "^2 - " + b2 + "^2} = " + hb) + " dm ; aire " + M("\\frac{" + b + " \\cdot " + hb + "}{2} = " + b * hb / 2) + " dm² ; volume " + M(V) + " dm³.",
           { ctx: "tente", fig: GF.isoH(b, s, { lb: b + " dm", ls: s + " dm", lh: "h" }), guide: [GS("Hauteur du triangle (Pythagore avec la demi-base) ?", hb, M(hb) + " dm."), GS("Aire du triangle ?", b * hb / 2, M(b * hb / 2) + " dm²."), GS("Volume ?", V, M(V) + " dm³.")],
             traps: [TR(b * s / 2 * L, "Le côté oblique n'est pas la hauteur du triangle : calcule-la avec Pythagore."), TR(b * hb * L, "L'aire du triangle se divise par 2.")] }); },

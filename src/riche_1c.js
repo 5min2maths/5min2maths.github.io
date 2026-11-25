@@ -41,7 +41,7 @@
   // ===================== 4. Fonctions =====================
   const EXF = [
     () => { const F = pk([8, 10, 12]), p = pk([0.5, 0.8]);
-      return X({ id: "modaff", lv: 1, titre: "La location de trottinette", q: "Une trottinette coûte " + Q(F, "CHF") + " de déblocage, puis " + Q(p, "CHF") + " par minute. Un vélo coûte " + Q(0, "CHF") + " de déblocage et " + Q(p + 0.5, "CHF") + " par minute.",
+      return X({ id: "modaff", lv: 1, titre: "La location de trottinette", q: "Une trottinette coûte " + Q(F, "CHF") + " de déblocage, puis " + Q(p, "CHF") + " par minute. Un vélo électrique se loue sans frais de déblocage, à " + Q(p + 0.5, "CHF") + " par minute.",
         parts: [{ label: "Écris les prix " + M("T(x)") + " et " + M("V(x)") + " pour " + M("x") + " minutes.", pts: 1 }, { label: "À partir de combien de minutes la trottinette est-elle moins chère ?", pts: 2 }],
         sol: ul([M("T(x) = " + F + " + " + N(p) + "x") + " ; " + M("V(x) = " + N(p + 0.5) + "x") + ".", M(F + " + " + N(p) + "x < " + N(p + 0.5) + "x \\iff x > " + 2 * F) + " : dès " + (2 * F + 1) + " minutes."]) }); },
     () => { const a = pk([2, 3]), b = pk([-1, 1, 4]);

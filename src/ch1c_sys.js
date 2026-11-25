@@ -81,7 +81,7 @@
       () => { const x = nz(-4, 6), y = nz(-4, 6), a = R.int(2, 5), k = R.int(2, 3), b = R.int(1, 4), c = R.int(2, 4);
         // a x = b y + r1  et  k(x + y) = r2 + c·y  (à réordonner)
         const r1 = a * x - b * y, r2 = k * (x + y) - c * y;
-        return QP("Résous " + sys(a + "x = " + term(b, "y", true) + (r1 ? (r1 < 0 ? " - " : " + ") + Math.abs(r1) : ""), k + "(x + y) = " + r2 + (c ? " + " + term(c, "y", true) : "")) + " (commence par ordonner chaque équation)." + PAIR, [x, y],
+        return QP("Résous " + sys(a + "x = " + term(b, "y", true) + (r1 ? (r1 < 0 ? " - " : " + ") + Math.abs(r1) : ""), k + "(x + y) = " + (r2 ? r2 + " + " : "") + term(c, "y", true)) /* 26.11 : plus de « = 0 + 4y » */ + " (commence par ordonner chaque équation)." + PAIR, [x, y],
           "Ordonné : " + sys(lhs([a, -b]) + " = " + r1, lhs([k, k - c]) + " = " + r2) + ", puis combinaison : " + pairT([x, y]) + ".",
           { ctx: "ordonner", guide: [GX("Écris la 1re sous la forme « ax + by = c » : le membre de gauche ?", linP(a, 0).replace("x", "x") + "-" + b + "*y", M(lhs([a, -b]) + " = " + r1) + "."), GN("Après avoir ordonné la 2e (" + M(lhs([k, k - c]) + " = " + r2) + ") et combiné, que vaut " + M("x") + " ?", x, M("x = " + x) + "."), GP("Solution « x ; y » ?", [x, y], pairT([x, y]) + ".")],
             traps: [TP([y, x], "x d'abord."), TP([x, -y], "En faisant passer " + M(b + "y") + " à gauche, il change de signe.")] }); },

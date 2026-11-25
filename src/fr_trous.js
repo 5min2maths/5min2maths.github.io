@@ -175,8 +175,8 @@
   const FORM = [
     () => { const a = pk([2.5, 3, 4, 6]), b = R.int(2, 9); return ["le prix à payer (en €) pour " + M("n") + " places, frais de réservation compris", "\\text{prix} = " + N(a) + " \\times n + " + b, (n) => a * n + b, "n", "€", (n) => a * (n + b), "On multiplie d'abord, puis on ajoute " + b + "."]; },
     () => { const b = R.int(4, 9); return ["le périmètre (en cm) d'un rectangle de largeur " + M("x") + " cm", "\\text{périmètre} = 2 \\times (x + " + b + ")", (x) => 2 * (x + b), "x", "cm", (x) => 2 * x + b, "Les parenthèses d'abord : x + " + b + ", puis × 2."]; },
-    () => { const t0 = R.int(15, 25), r = pk([2, 3, 4]); return ["la température (en °C) d'un liquide après " + M("t") + " minutes au congélateur", "\\text{température} = " + t0 + " - " + r + " \\times t", (t) => t0 - r * t, "t", "°C", (t) => (t0 - r) * t, "La multiplication " + r + " × t passe avant la soustraction."]; },
-    () => { const c = R.int(1, 5); return ["l'aire (en cm²) d'une figure de côté " + M("x") + " cm", "\\text{aire} = x \\times x + " + c, (x) => x * x + c, "x", "cm²", (x) => 2 * x + c, "x × x, c'est x fois x (le carré), pas 2 fois x."]; },
+    () => { const t0 = R.int(15, 25), r = pk([2, 3, 4]); return ["la température (en °C) à l'intérieur d'un congélateur, " + M("t") + " heures après sa mise en marche" /* 26.11 (vraisemblance) : un liquide ne perd pas 4 °C par minute */, "\\text{température} = " + t0 + " - " + r + " \\times t", (t) => t0 - r * t, "t", "°C", (t) => (t0 - r) * t, "La multiplication " + r + " × t passe avant la soustraction."]; },
+    () => { const c = R.int(1, 5); return ["l'aire (en cm²) d'une figure formée d'un carré de côté " + M("x") + " cm et d'un rectangle de " + c + " cm²", "\\text{aire} = x \\times x + " + c, (x) => x * x + c, "x", "cm²", (x) => 2 * x + c, "x × x, c'est x fois x (le carré), pas 2 fois x."]; },
   ];
   const TF = {
     1: [

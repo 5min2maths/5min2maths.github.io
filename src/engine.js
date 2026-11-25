@@ -715,7 +715,7 @@ const Engine = {
     R.seed(seed * 7919 + level * 104729 + [...id].reduce((a, c) => a + c.charCodeAt(0), 0));
     const code = id + "-" + level + "-" + seed.toString(36);
     /* 25.11 : PROBX (variantes.js, audit 9e–10e) = défis ajoutés, réservés à certaines classes (p.co). */
-    if (level === 4 && hasProb(id)) { const p = R.pick(probList(id).concat((typeof PROBX !== "undefined" && PROBX[id]) || []))(); return { ...p, id, d: 4, seed, code, spec: { kind: "multi" }, hint: p.hints[0] }; }
+    if (level === 4 && hasProb(id)) { const p = moneyQ(R.pick(probList(id).concat((typeof PROBX !== "undefined" && PROBX[id]) || []))()); return { ...p, id, d: 4, seed, code, spec: { kind: "multi" }, hint: p.hints[0] }; }
     // Écritures maladroites des générateurs (audit 13.11) : « 1x » → « x », « + -2 » → « - 2 », « - -3 » → « + 3 ».
     const tidy = (t) => typeof t !== "string" ? t : t.replace(/([(=+\-\s{]|\\\()(-?)1([a-z])(?![a-z{])/g, "$1$2$3").replace(/\+\s*-\s*(?=[\da-z(\\])/g, "- ").replace(/-\s*-\s*(?=[\da-z(\\])/g, "+ ");
     // Pas de question triviale (règle du 14.11 : la trivialité fait décrocher) : tirage refait, de façon
@@ -733,6 +733,7 @@ const Engine = {
       if (!keep) keep = q; // non triviale mais réponse visible : gardée en réserve
     }
     if (keep) q = keep;
+    q = moneyQ(q); /* 26.11 : « 2,50 CHF » */
     if (q.guide) q.guide = q.guide.map((g) => ({ ...g, ask: colonBreak(tidy(g.ask)), sol: colonBreak(tidy(g.sol)) }));
     q.q = colonBreak(q.q); q.sol = colonBreak(q.sol);
     if (q.traps) q.traps = q.traps.map((t) => ({ ...t, m: colonBreak(t.m) }));

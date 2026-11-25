@@ -782,7 +782,7 @@ const DEFIS = (() => {
     ],
     volrev: [
       () => { /* verre de révolution y = √(kx) : volume, hauteur de liquide, verre à moitié plein */
-        let k, H, V, V0; do { k = pk([2, 3, 4, 5, 6]); H = ri(6, 12); V = (Math.PI * k * H * H) / 2; V0 = 10 * ri(Math.ceil(V / 50), Math.floor((0.85 * V) / 10)); } while (Math.abs(V0 - V / 2) < 5);
+        let k, H, V, V0; do { k = pk([2, 3, 4, 5, 6]); H = ri(6, 12); V = (Math.PI * k * H * H) / 2; V0 = 10 * ri(Math.ceil(V / 50), Math.floor((0.85 * V) / 10)); } while (Math.abs(V0 - V / 2) < 5 || k * H > 20); /* 26.11 (vraisemblance) : bord de rayon √(kH) ≤ 4,5 cm (et non un « verre » de 17 cm de diamètre et 1,1 L) */
         const h0 = Math.sqrt((2 * V0) / (Math.PI * k)), hm = H / Math.SQRT2;
         return P("Un verre a la forme du solide obtenu en faisant tourner la courbe " + M("y = \\sqrt{" + k + "x}") + " autour de l'axe des abscisses, pour " + M("x") + " de " + M(0) + " (le fond) à " + M(H) + " cm (le bord).",
           [["a) Contenance du verre (cm³, à l'unité)", V, 1], ["b) Hauteur du liquide quand on y verse " + M(V0) + " cm³ (cm, au dixième)", h0, 0.1], ["c) Hauteur du liquide quand le verre est à moitié plein (cm, au dixième)", hm, 0.1]],
@@ -847,7 +847,7 @@ const DEFIS = (() => {
         const ph = n - Math.log10(c), ph2 = ph + Math.log10(F);
         return P("Le pH d'une solution vaut " + M("\\text{pH} = -\\log[\\text{H}_3\\text{O}^+]") + " (concentration en mol/L). Une solution contient " + M(c + " \\cdot 10^{-" + n + "}") + " mol/L d'ions " + M("\\text{H}_3\\text{O}^+") + ".",
           [["a) pH de la solution (au centième)", ph, 0.01], ["b) pH après l'avoir diluée " + M(F) + " fois (au centième)", ph2, 0.01],
-           ["c) Une solution est plus acide de " + M(D(dp)) + " unité de pH : sa concentration est combien de fois plus grande ? (au dixième)", 10 ** dp, 0.1]],
+           ["c) Une solution est plus acide de " + M(D(dp)) + " unité" + (dp >= 2 ? "s" : "") + " de pH : sa concentration est combien de fois plus grande ? (au dixième)", 10 ** dp, 0.1]],
           ["log(a · 10⁻ⁿ) = log a − n. Diluer " + F + " fois divise la concentration par " + F + ".",
            "b) −log(c ÷ " + F + ") = −log c + log " + F + " : le pH augmente de log " + F + ". c) pH plus petit de " + T(dp) + " : concentration multipliée par 10^" + T(dp) + "."],
           "a) " + M("-\\log(" + c + " \\cdot 10^{-" + n + "}) = " + n + " - \\log " + c + " \\approx " + D(r2c(ph))) + ". b) " + M(D(r2c(ph)) + " + \\log " + F + " \\approx " + D(r2c(ph2))) + ". c) " + M("10^{" + D(dp) + "} \\approx " + D(r1(10 ** dp))) + ".");
@@ -1659,7 +1659,7 @@ const DEFIS = (() => {
       function DEFIS_RELADD() {
         const h0 = ri(193, 690), u1 = 5 * ri(120, 300), d1 = 5 * ri(40, 110), u2 = 5 * ri(20, 80), d2 = 5 * ri(100, 250);
         const a1 = h0 + u1, fin = a1 - d1 + u2 - d2;
-        if (fin < 190 || fin === h0) return DEFIS_RELADD();
+        if (fin < Math.max(193, h0 - 200) || fin === h0) return DEFIS_RELADD(); /* 26.11 (vraisemblance) : pas d'arrivée à 199 m (plus bas que tout lac suisse, 193 m) ni très au-dessous du départ */
         return P("Un randonneur part d'un lac à l'altitude " + M(h0 + " \\text{ m}") + ". Il monte de " + M(nb(u1) + " \\text{ m}") + ", redescend de " + M(d1 + " \\text{ m}") + ", remonte de " + M(u2 + " \\text{ m}") + " puis redescend de " + M(nb(d2) + " \\text{ m}") + ".",
           [["a) Altitude du point le plus haut (m)", Math.max(a1, a1 - d1 + u2)], ["b) Altitude finale (m)", fin], ["c) Dénivelé total à la montée (m)", u1 + u2], ["d) Variation d'altitude entre le départ et l'arrivée (m, négative si plus bas)", fin - h0]],
           ["Écris la suite des altitudes : chaque montée s'ajoute, chaque descente se soustrait.",

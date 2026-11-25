@@ -451,7 +451,7 @@ const RICHU = (() => {
   // Écriture décimale avec période : 7/24 = 0,291\overline{6}.
   const perDec = (n, d) => { const ip = Math.floor(n / d); let r = n % d, s = "", seen = {}; while (r && seen[r] === undefined) { seen[r] = s.length; r *= 10; s += Math.floor(r / d); r %= d; } return r ? ip + "{,}" + s.slice(0, seen[r]) + "\\overline{" + s.slice(seen[r]) + "}" : ip + (s ? "{,}" + s : ""); };
   const EXF = [
-    () => { const [n, f1, f2] = pk([[24, [1, 3], [3, 8]], [20, [2, 5], [1, 4]], [30, [2, 5], [1, 3]], [28, [3, 7], [1, 4]], [36, [4, 9], [1, 3]]]), b = (n * f1[0]) / f1[1], p = (n * f2[0]) / f2[1], v = n - b - p, fv2 = fr(v, n);
+    () => { const [n, f1, f2] = pk([[24, [1, 3], [3, 8]], [20, [2, 5], [1, 4]], [30, [2, 5], [1, 3]], [28, [3, 7], [1, 4]], [18, [4, 9], [1, 3]]] /* 26.11 : classe de 18 (et non 36) */), b = (n * f1[0]) / f1[1], p = (n * f2[0]) / f2[1], v = n - b - p, fv2 = fr(v, n);
       return X({ id: "fractout", lv: 1, titre: "Comment viens-tu à l'école ?",
         q: "Dans une classe de " + n + " élèves, " + M(ft(f1)) + " des élèves viennent en bus, " + M(ft(f2)) + " à pied et les autres à vélo.",
         parts: [{ label: "Combien d'élèves viennent en bus ? à pied ?", pts: 2 }, { label: "Combien viennent à vélo ?", pts: 1 }, { label: "Quelle fraction de la classe vient à vélo ? Simplifie-la.", pts: 1 }, { label: "Est-ce plus ou moins que le quart de la classe ? Justifie.", pts: 1 }],
@@ -466,7 +466,7 @@ const RICHU = (() => {
         chk: [[new Set(F3.map(fv)).size === 3, "distinctes"], [Math.abs(fv(S) - 1) > 1e-9, "pas égal à 1"]], vals: [fv(S)] }); },
     () => { let c; do { c = [R.int(9, 18), R.int(7, 14)]; c.push(40 - c[0] - c[1]); } while (c[2] < 5 || new Set(c).size < 3); const sp = ["football", "natation", "basket"], k = pk([5, 7, 11]), n2 = 24;
       return X({ id: "fracconv", lv: 2, titre: "Le sondage",
-        q: "On a demandé à 40 élèves leur sport préféré : " + sp.map((s, i) => c[i] + " ont choisi le " + s).join(", ") + ". Dans une autre classe de " + n2 + " élèves, " + k + " ont choisi le football.",
+        q: "On a demandé à 40 élèves leur sport préféré : " + sp.map((s, i) => c[i] + " ont choisi " + (s === "natation" ? "la " : "le ") + s).join(", ") + ". Dans une autre classe de " + n2 + " élèves, " + k + " ont choisi le football.",
         parts: [{ label: "Pour chaque sport, écris la fraction des 40 élèves (simplifiée), puis son écriture décimale et le pourcentage.", pts: 3 }, { label: "Écris " + M("\\frac{" + k + "}{" + n2 + "}") + " sous forme décimale (indique la période).", pts: 1 }, { label: "Dans quel groupe la part d'élèves qui préfèrent le football est-elle la plus grande ?", pts: 1 }],
         sol: ul([sp.map((s, i) => s + " : " + M("\\frac{" + c[i] + "}{40} = " + ft(fr(c[i], 40)) + " = " + N(c[i] / 40) + " = " + N(r6(c[i] * 2.5)) + "\\,\\%")).join(" ; ") + ".", M("\\frac{" + k + "}{" + n2 + "} = " + perDec(k, n2)) + "… (les chiffres sous la barre se répètent), soit environ " + N(Math.round((k / n2) * 1000) / 10) + " %.", (c[0] / 40 > k / n2 ? "Dans le premier groupe" : "Dans la deuxième classe") + " : " + N(c[0] / 40) + " " + (c[0] / 40 > k / n2 ? ">" : "<") + " " + N(Math.round((k / n2) * 1000) / 1000) + "…"]),
         chk: [[c[0] + c[1] + c[2] === 40, "total"], [Math.abs(c[0] / 40 - k / n2) > 1e-9, "comparaison"], [/overline/.test(perDec(k, n2)), "période"]], vals: c.map((x) => x / 40) }); },

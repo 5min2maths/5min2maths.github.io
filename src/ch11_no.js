@@ -297,7 +297,7 @@
           { plain: true, ctx: "p2d", guide: [GS("Pour cent veut dire « sur 100 » : " + M(N(p) + "\\,\\% = \\frac{?}{100}") + ". Numérateur ?", p, M("\\frac{" + N(p) + "}{100}") + "."), GS("Divise par 100 : écriture décimale ?", p / 100, M(N(p) + " : 100 = " + N(p / 100)) + ".")],
             traps: [TR(p / 10, "Pour cent : on divise par 100, pas par 10."), TR(p, "Il faut diviser par 100.")] }); },
       () => { const [n, k] = pk([[20, 7], [25, 9], [40, 14], [50, 17], [20, 13], [25, 16], [40, 26], [50, 33], [80, 28]]), x = pk([
-          ["Dans une classe de " + n + " élèves, " + k + " font partie d'un club de sport.", "Quel pourcentage des élèves fait partie d'un club ?", "sport"],
+          [(n > 28 ? "Parmi les " + n + " élèves interrogés, " : "Dans une classe de " + n + " élèves, ") + k + " font partie d'un club de sport.", "Quel pourcentage des élèves fait partie d'un club ?", "sport"],
           ["À un test de " + n + " questions, Liam répond juste à " + k + " questions.", "Quel est son pourcentage de réponses justes ?", "test"],
           ["Un sac contient " + n + " billes, dont " + k + " rouges.", "Quel pourcentage des billes est rouge ?", "billes"]]);
         return Qv(x[0] + " " + x[1] + " (donne seulement le nombre)", k / n * 100, M(fT(k, n) + " = " + N(k / n) + " = " + N(k / n * 100) + "\\,\\%") + ".",
