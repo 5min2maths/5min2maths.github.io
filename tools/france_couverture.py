@@ -21,9 +21,9 @@ NOM = {6: "6e", 7: "5e", 8: "4e", 9: "3e", 10: "2nde", 11: "1re spécialité", 1
 MAP = {
     # 6e (cycle 3, 2025)
     "6e.NC.26": ["decdiv", "multdiv"], "6e.EG.02": ["mediatrice"], "6e.EG.06": ["mediatrice"], "6e.EG.07": ["mediatrice"], "6e.EG.08": ["mediatrice"], "6e.EG.17": ["mediatrice"],
-    "6e.EG.19": ["symax"], "6e.EG.20": ["symax"], "6e.DP.05": ["proba6"], "6e.DP.06": ["proba6"], "6e.DP.07": ["proba6"], "6e.PF.05": ["echelle6"], "6e.NC.42": ["prop", "fractout"], "6e.NC.43": ["motifs"], "6e.DP.04": ["diagr"],
+    "6e.EG.19": ["symax"], "6e.EG.01": ["cercle6"], "6e.EG.04": ["cercle6"], "6e.EG.05": ["cercle6"], "6e.EG.11": ["bissec6"], "6e.EG.12": ["bissec6"], "6e.EG.20": ["symax"], "6e.DP.05": ["proba6"], "6e.DP.06": ["proba6"], "6e.DP.07": ["proba6"], "6e.PF.05": ["echelle6"], "6e.NC.42": ["prop", "fractout"], "6e.NC.43": ["motifs"], "6e.DP.04": ["filtre6"],
     # 5e (2026)
-    "5e.NC.11": ["tradexpr", "progcalc"], "5e.EG.05": ["empil"], "5e.EG.06": ["empil"], "5e.EG.25": ["mediatrice"], "5e.EG.28": ["mediatrice"], "5e.NC.33": ["automat"], "5e.NC.47": ["automat"], "5e.NC.55": ["motifs"], "5e.NC.56": ["motifs"], "5e.NC.57": ["motifs"], "5e.NC.58": ["automat"], "5e.NC.62": ["structexpr"],
+    "5e.NC.11": ["tradexpr", "progcalc"], "5e.EG.05": ["empil"], "5e.EG.20": ["bissec6"], "5e.EG.31": ["hauteurs5"], "5e.EG.29": ["aire1", "hauteurs5"], "5e.PF.11": ["tabform5"], "5e.PF.12": ["tabform5"], "5e.PF.14": ["tabform5", "lectgraph"], "5e.PF.15": ["tabform5"], "5e.EG.06": ["empil"], "5e.EG.25": ["mediatrice"], "5e.EG.28": ["mediatrice"], "5e.NC.33": ["automat"], "5e.NC.47": ["automat"], "5e.NC.55": ["motifs"], "5e.NC.56": ["motifs"], "5e.NC.57": ["motifs"], "5e.NC.58": ["automat"], "5e.NC.62": ["structexpr"],
     # 4e (attendus 2019)
     "4e-2019.NC.21": ["premiers"], "4e-2019.NC.22": ["structexpr"], "4e-2019.NC.25": ["probeq", "progcalc"], "4e-2019.EG.07": ["thales4e", "cos4e", "pyth"],
     "4e-2019.PF.04": ["prop", "agrand", "ratio"],
@@ -58,7 +58,7 @@ MAP = {
 }
 # Couverture partielle (la notion ne traite qu'une partie de l'attendu)
 PARTIEL = {"6e.NC.42", "6e.NC.26", "3e-2019.NC.07", "2nde.AP.08", "1re.AN.05", "6e.EG.02", "6e.EG.17", "5e.EG.28", "1re.AN.13", "1re.GE.08", "1re.SP.04", "2nde.SP.10",
-           "Tle.AG.06", "Tle.AG.12", "Tle.AN.21", "Tle.AN.12"}
+           "Tle.AG.06", "Tle.AG.12", "Tle.AN.12"}  # 25.11 (agent trous) : Tle.AN.21 complet (y' = ay + f, eqdiff)
 # Attendu couvert en partie seulement tant que la notion indiquée manque (notions créées par agent/frfin, 25.11 au soir)
 SANS = {"1re.AN.09": "posrelc", "2nde.NC.10": "compdiff"}
 # Non saisissables en plus de ceux du JSON : Python (listes) en Tle
@@ -108,7 +108,7 @@ def main():
             sum(1 for i, c in ap[g].items() if c), len(ap[g])))
         out.append("\n## %s (`%s`, %s)\n\n| Code | Attendu | Notions | Verdict |\n|---|---|---|---|\n%s" % (NOM[g], key, REF[key]["reference"], "\n".join(rows)))
     print(HEAD)
-    print("| Classe | Attendus saisissables | Avant (agent/frcouv) | Après (agent/frfin) | Notions de l'année / catalogue |\n|---|---|---|---|---|")
+    print("| Classe | Attendus saisissables | Avant (agent/frfin) | Après (agent/trous) | Notions de l'année / catalogue |\n|---|---|---|---|---|")
     print("\n".join(synth))
     print(LEGEND)
     print("\n".join(out))
@@ -117,7 +117,7 @@ def main():
 
 HEAD = """# Couverture du programme français, attendu par attendu (25.11.2026)
 
-Branches `agent/frcouv` puis `agent/frfin` (25.11 au soir). Calculé par `tools/france_couverture.py` à partir des attendus officiels (`tools/referentiels_fr.json` :
+Branches `agent/frcouv`, `agent/frfin` (25.11 au soir), puis `agent/trous` (25.11, derniers manques). Calculé par `tools/france_couverture.py` à partir des attendus officiels (`tools/referentiels_fr.json` :
 cycle 3 2025, cycle 4 2026 pour la 5e, attendus 2019 en 4e et 3e — en vigueur en 2026-2027 —, 2nde et 1re 2026, Tle (texte
 2026, très proche du 2019 en vigueur) et du catalogue réel d'un profil français (`Engine.catalog`), avant et après le chantier.
 Décisions, rattachements, retraits et niveau : § final de `tools/france.md` et rapport de l'agent.
@@ -127,8 +127,9 @@ Décisions, rattachements, retraits et niveau : § final de `tools/france.md` et
 LEGEND = """
 Taux = (✅ + ½ ◐) / attendus saisissables. ✅ : une notion du catalogue de la classe entraîne l'attendu (de l'année, ou
 automatisme repris) ; ◐ : couverture partielle, ou seulement en révision d'une année antérieure ; ✗ : rien ; — : non
-saisissable (construction, démonstration, programmation). « avant » = catalogue après la branche agent/frcouv
-(25.11 après-midi) ; « après » = branche agent/frfin (25.11 au soir).
+saisissable (construction, démonstration, programmation). « avant » = catalogue après la branche agent/frfin
+(25.11 au soir) ; « après » = branche agent/trous (25.11). Les taux agent/frcouv → agent/frfin : 6e 77 → 90 %, 5e 90 → 93 %,
+2nde 95 → 98 %, 1re 95 → 96 %, Tle 91 → 95 %.
 """
 
 FOOT = """
@@ -179,17 +180,25 @@ FOOT = """
   (1 à 6) de `statfreq`, `stats`, `diagr`, `probeq` par des questions de même niveau et de même graine, notes sur 20.
 - Contrôle : `tests/frfin.html` (générateurs, défis, classes, progcalc en 5e, notes), `tests/act_frfin.html` (leçons actives).
 
+## Ce qui a été fait (25.11, branche agent/trous)
+
+- **Créées** (`src/fr_trous.js` ; 3 niveaux, ≥ 3 formes par niveau, pas à pas, pièges, contextes, leçon, compétences, défi
+  de niveau 4, leçon active « À toi : 2 questions ») : 6e `cercle6` (distance à un point, cercle et disque comme ensembles
+  de points, EG.01, 04, 05), `bissec6` (bissectrice : calculs d'angles, EG.11–12 ; reprise en 5e pour EG.20), `filtre6`
+  (filtrer un tableau selon un ou plusieurs critères, DP.04) ; 5e `tabform5` (formules, tableaux de valeurs et graphiques
+  sans la notation f(x), PF.11, 12, 14, 15), `hauteurs5` (aire, deux hauteurs, triangle obtus, orthocentre, EG.29–31).
+- **Étendue** : `eqdiff` reçoit trois formes y' = ay + f (solution particulière donnée, affine, exponentielle) : Tle.AN.21
+  complet (formes partagées avec la 4e MA2 du Collège).
+- Contrôle : `tests/trous.html` (générateurs, classes, séparation des systèmes), `tests/act_trous.html` (leçons actives).
+
 ## Ce qui reste
 
-- 6e : distances à un point, cercle comme ensemble de points, bissectrice (surtout des constructions) ; filtrer un tableau.
-- 5e : tableaux de valeurs et graphiques sans la notation f(x) (`tabval` et `lectgraph` placés en 3e et 4e) ; hauteurs
-  concourantes.
+- 6e : constructions (bissectrice, cercles) : non saisissables.
 - 4e–3e : repérage dans un pavé droit, sur une sphère (latitude, longitude).
 - 2nde : algorithmique de simulation (AP.08).
 - 1re : arbre de n ⩽ 4 épreuves de Bernoulli
   (SP.04, en partie dans `probarbre`) ; tracé des courbes de e^(kt) (AN.13, non saisissable).
-- Tle : équations y' = ay + f (AN.21, en partie) ; Python
-  (listes) hors périmètre.
+- Tle : Python (listes) hors périmètre.
 - Programmes 2026 de 4e (2027-2028) et de 3e (2028-2029) : `vecgeo` et `ineq1` sont déjà en fin de 3e.
 """
 

@@ -407,3 +407,5 @@ function activeLesson(id, L0, cont, review) {
   $("skip").onclick = () => { if (typeof sig !== "undefined" && sig && sig.ev === "lecon") sigAide(sig, "P"); finish(); };
   $("go").onclick = cont;
 }
+/* 25.11 (agent trous) : leçons actives déclarées par un fichier de notions chargé avant ce fichier (page unique, src/trx.js). */
+if (typeof window !== "undefined" && window.ACT_LATER) Object.assign(ACTIVE, window.ACT_LATER);

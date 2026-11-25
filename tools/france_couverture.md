@@ -1,26 +1,27 @@
 # Couverture du programme français, attendu par attendu (25.11.2026)
 
-Branches `agent/frcouv` puis `agent/frfin` (25.11 au soir). Calculé par `tools/france_couverture.py` à partir des attendus officiels (`tools/referentiels_fr.json` :
+Branches `agent/frcouv`, `agent/frfin` (25.11 au soir), puis `agent/trous` (25.11, derniers manques). Calculé par `tools/france_couverture.py` à partir des attendus officiels (`tools/referentiels_fr.json` :
 cycle 3 2025, cycle 4 2026 pour la 5e, attendus 2019 en 4e et 3e — en vigueur en 2026-2027 —, 2nde et 1re 2026, Tle (texte
 2026, très proche du 2019 en vigueur) et du catalogue réel d'un profil français (`Engine.catalog`), avant et après le chantier.
 Décisions, rattachements, retraits et niveau : § final de `tools/france.md` et rapport de l'agent.
 
 ## Synthèse
 
-| Classe | Attendus saisissables | Avant (agent/frcouv) | Après (agent/frfin) | Notions de l'année / catalogue |
+| Classe | Attendus saisissables | Avant (agent/frfin) | Après (agent/trous) | Notions de l'année / catalogue |
 |---|---|---|---|---|
-| 6e | 77 | 58 ✅ · 2 ◐ · 17 ✗ → **77 %** | 67 ✅ · 4 ◐ · 6 ✗ → **90 %** | 33 / 33 |
-| 5e | 119 | 107 ✅ · 0 ◐ · 12 ✗ → **90 %** | 110 ✅ · 1 ◐ · 8 ✗ → **93 %** | 58 / 63 |
-| 4e | 50 | 48 ✅ · 0 ◐ · 2 ✗ → **96 %** | 48 ✅ · 0 ◐ · 2 ✗ → **96 %** | 58 / 88 |
-| 3e | 40 | 37 ✅ · 1 ◐ · 2 ✗ → **94 %** | 37 ✅ · 1 ◐ · 2 ✗ → **94 %** | 61 / 110 |
-| 2nde | 66 | 62 ✅ · 2 ◐ · 2 ✗ → **95 %** | 64 ✅ · 1 ◐ · 1 ✗ → **98 %** | 59 / 132 |
-| 1re spécialité | 51 | 46 ✅ · 5 ◐ · 0 ✗ → **95 %** | 47 ✅ · 4 ◐ · 0 ✗ → **96 %** | 48 / 160 |
-| Tle spécialité | 43 | 37 ✅ · 4 ◐ · 2 ✗ → **91 %** | 39 ✅ · 4 ◐ · 0 ✗ → **95 %** | 36 / 196 |
+| 6e | 77 | 67 ✅ · 4 ◐ · 6 ✗ → **90 %** | 73 ✅ · 4 ◐ · 0 ✗ → **97 %** | 36 / 36 |
+| 5e | 119 | 110 ✅ · 1 ◐ · 8 ✗ → **93 %** | 116 ✅ · 1 ◐ · 2 ✗ → **98 %** | 63 / 68 |
+| 4e | 50 | 48 ✅ · 0 ◐ · 2 ✗ → **96 %** | 48 ✅ · 0 ◐ · 2 ✗ → **96 %** | 60 / 93 |
+| 3e | 40 | 37 ✅ · 1 ◐ · 2 ✗ → **94 %** | 37 ✅ · 1 ◐ · 2 ✗ → **94 %** | 61 / 115 |
+| 2nde | 66 | 64 ✅ · 1 ◐ · 1 ✗ → **98 %** | 64 ✅ · 1 ◐ · 1 ✗ → **98 %** | 59 / 137 |
+| 1re spécialité | 51 | 47 ✅ · 4 ◐ · 0 ✗ → **96 %** | 47 ✅ · 4 ◐ · 0 ✗ → **96 %** | 48 / 165 |
+| Tle spécialité | 43 | 39 ✅ · 4 ◐ · 0 ✗ → **95 %** | 40 ✅ · 3 ◐ · 0 ✗ → **97 %** | 36 / 201 |
 
 Taux = (✅ + ½ ◐) / attendus saisissables. ✅ : une notion du catalogue de la classe entraîne l'attendu (de l'année, ou
 automatisme repris) ; ◐ : couverture partielle, ou seulement en révision d'une année antérieure ; ✗ : rien ; — : non
-saisissable (construction, démonstration, programmation). « avant » = catalogue après la branche agent/frcouv
-(25.11 après-midi) ; « après » = branche agent/frfin (25.11 au soir).
+saisissable (construction, démonstration, programmation). « avant » = catalogue après la branche agent/frfin
+(25.11 au soir) ; « après » = branche agent/trous (25.11). Les taux agent/frcouv → agent/frfin : 6e 77 → 90 %, 5e 90 → 93 %,
+2nde 95 → 98 %, 1re 95 → 96 %, Tle 91 → 95 %.
 
 
 ## 6e (`6e`, BO n° 16 du 17 avril 2025 (arrêté du 10 avril 2025) : CM1 et 6e dès 2025-2026, CM2 dès 2026-2027)
@@ -84,39 +85,39 @@ saisissable (construction, démonstration, programmation). « avant » = catalog
 | 6e.GM.12 | Effectuer des calculs sur des horaires et des durées | `utemps` | ✅ |
 | 6e.GM.13 | Résoudre des problèmes impliquant des horaires et des durées | `utemps` | ✅ |
 | 6e.GM.14 | Convertir des durées | `utemps` | ✅ |
-| 6e.EG.01 | Connaître et utiliser la définition de la distance entre deux points | — | ✗ |
-| 6e.EG.02 | Connaître et utiliser la définition du milieu d’un segment | `mediatrice` | ◐ (avant ✗) |
+| 6e.EG.01 | Connaître et utiliser la définition de la distance entre deux points | `cercle6` | ✅ (avant ✗) |
+| 6e.EG.02 | Connaître et utiliser la définition du milieu d’un segment | `mediatrice` | ◐ |
 | 6e.EG.03 | Connaître les définitions d’un cercle, d’un disque, d’un rayon, d’un diamètre, d’une corde | `disque` | ✅ |
-| 6e.EG.04 | Comprendre la définition d’un cercle et celle d’un disque sous la forme d’ensembles de points | — | ✗ |
-| 6e.EG.05 | Résoudre des problèmes mettant en jeu des distances à un point | — | ✗ |
-| 6e.EG.06 | Connaître la définition de la médiatrice d’un segment | `mediatrice` | ✅ (avant ✗) |
-| 6e.EG.07 | Comprendre et utiliser la propriété caractéristique de la médiatrice d’un segment | `mediatrice` | ✅ (avant ✗) |
-| 6e.EG.08 | Résoudre des problèmes en s’appuyant sur la propriété caractéristique de la médiatrice | `mediatrice` | ✅ (avant ✗) |
+| 6e.EG.04 | Comprendre la définition d’un cercle et celle d’un disque sous la forme d’ensembles de points | `cercle6` | ✅ (avant ✗) |
+| 6e.EG.05 | Résoudre des problèmes mettant en jeu des distances à un point | `cercle6` | ✅ (avant ✗) |
+| 6e.EG.06 | Connaître la définition de la médiatrice d’un segment | `mediatrice` | ✅ |
+| 6e.EG.07 | Comprendre et utiliser la propriété caractéristique de la médiatrice d’un segment | `mediatrice` | ✅ |
+| 6e.EG.08 | Résoudre des problèmes en s’appuyant sur la propriété caractéristique de la médiatrice | `mediatrice` | ✅ |
 | 6e.EG.09 | Mesurer un angle | `angtype` | ✅ |
 | 6e.EG.10 | Construire un angle de mesure donnée | — | — |
-| 6e.EG.11 | Connaître la définition de la bissectrice d’un angle saillant | — | ✗ |
-| 6e.EG.12 | Utiliser la définition de la bissectrice d’un angle pour effectuer des constructions et résoudre des problèmes | — | ✗ |
+| 6e.EG.11 | Connaître la définition de la bissectrice d’un angle saillant | `bissec6` | ✅ (avant ✗) |
+| 6e.EG.12 | Utiliser la définition de la bissectrice d’un angle pour effectuer des constructions et résoudre des problèmes | `bissec6` | ✅ (avant ✗) |
 | 6e.EG.13 | Construire des triangles | — | — |
 | 6e.EG.14 | Connaître et utiliser les propriétés angulaires des triangles particuliers : triangle rectangle, triangle isoc… | `angtri` | ✅ |
 | 6e.EG.15 | Connaître la valeur de la somme des mesures des angles d’un triangle | `angtri` | ✅ |
 | 6e.EG.16 | L’utiliser pour calculer des angles, effectuer des constructions et résoudre des problèmes | `angtri` | ✅ |
-| 6e.EG.17 | Savoir que les médiatrices d’un triangle sont concourantes | `mediatrice` | ◐ (avant ✗) |
+| 6e.EG.17 | Savoir que les médiatrices d’un triangle sont concourantes | `mediatrice` | ◐ |
 | 6e.EG.18 | Connaître et construire le cercle circonscrit à un triangle | `droitesrem` | — |
-| 6e.EG.19 | Connaître la définition du symétrique d’un point par rapport à une droite | `symax` | ✅ (avant ✗) |
-| 6e.EG.20 | Connaître et utiliser les propriétés de la symétrie axiale pour effectuer des constructions | `symax` | ✅ (avant ✗) |
+| 6e.EG.19 | Connaître la définition du symétrique d’un point par rapport à une droite | `symax` | ✅ |
+| 6e.EG.20 | Connaître et utiliser les propriétés de la symétrie axiale pour effectuer des constructions | `symax` | ✅ |
 | 6e.EG.21 | Voir dans l’espace des assemblages de cubes | — | — |
 | 6e.DP.01 | Planifier une enquête et recueillir des données | — | — |
 | 6e.DP.02 | Réaliser des mesures et les consigner dans un tableau | — | — |
 | 6e.DP.03 | Construire un tableau simple pour présenter des données (observations, caractères) | — | — |
-| 6e.DP.04 | Faire un choix en filtrant les données d’un tableau selon un critère | `diagr` | ✗ |
-| 6e.DP.05 | Savoir que la probabilité d’un évènement est un nombre compris entre 0 et 1 | `proba6` | ✅ (avant ✗) |
-| 6e.DP.06 | Calculer des probabilités dans des situations simples d’équiprobabilité | `proba6` | ✅ (avant ✗) |
-| 6e.DP.07 | Comparer des résultats d’une expérience aléatoire répétée à une probabilité calculée | `proba6` | ✅ (avant ✗) |
+| 6e.DP.04 | Faire un choix en filtrant les données d’un tableau selon un critère | `filtre6` | ✅ (avant ✗) |
+| 6e.DP.05 | Savoir que la probabilité d’un évènement est un nombre compris entre 0 et 1 | `proba6` | ✅ |
+| 6e.DP.06 | Calculer des probabilités dans des situations simples d’équiprobabilité | `proba6` | ✅ |
+| 6e.DP.07 | Comparer des résultats d’une expérience aléatoire répétée à une probabilité calculée | `proba6` | ✅ |
 | 6e.PF.01 | Connaître la définition de la proportionnalité entre deux grandeurs et la mettre en lien avec des expressions … | `prop` | ✅ |
 | 6e.PF.02 | Identifier si une situation relève du « modèle » de la proportionnalité | `prop` | ✅ |
 | 6e.PF.03 | Résoudre un problème de proportionnalité en choisissant une procédure adaptée : propriété de linéarité pour la… | `prop` | ✅ |
 | 6e.PF.04 | Représenter une situation de proportionnalité à l’aide d’un tableau ou de notations symboliques | `prop`, `proptab` | — |
-| 6e.PF.05 | S’initier à la résolution de problèmes d’échelles | `echelle6` | ✅ (avant ✗) |
+| 6e.PF.05 | S’initier à la résolution de problèmes d’échelles | `echelle6` | ✅ |
 | 6e.PI.01 | Identifier une instruction ou une séquence d’instructions | — | — |
 | 6e.PI.02 | Produire et exécuter une séquence d’instructions | — | — |
 | 6e.PI.03 | Répéter à la main une séquence d’instructions pour accomplir une tâche imposée | — | — |
@@ -200,8 +201,8 @@ saisissable (construction, démonstration, programmation). « avant » = catalog
 | 5e.EG.02 | Repérer un nombre décimal sur une demi-droite graduée | `repere` | ✅ |
 | 5e.EG.03 | Sur une droite graduée : - lire l’abscisse d’un point donné ; - placer un point d’abscisse donnée | `repere` | ✅ |
 | 5e.EG.04 | Dans le plan muni d’un repère orthogonal : - lire les coordonnées d’un point donné ; - placer un point de coor… | `repere` | ✅ |
-| 5e.EG.05 | Reconnaitre des vues (de dessus, dessous…) d’empilements de cubes | `empil` | ✅ (avant ✗) |
-| 5e.EG.06 | Dénombrer des cubes dans des empilements | `empil` | ✅ (avant ✗) |
+| 5e.EG.05 | Reconnaitre des vues (de dessus, dessous…) d’empilements de cubes | `empil` | ✅ |
+| 5e.EG.06 | Dénombrer des cubes dans des empilements | `empil` | ✅ |
 | 5e.EG.07 | Reconnaitre un cube, un pavé représenté en perspective cavalière | — | — |
 | 5e.EG.08 | Reconnaitre un patron d’un cube | — | — |
 | 5e.EG.09 | Construire et mettre en relation différentes représentations en perspectives cavalières des solides suivants :… | `vol` | — |
@@ -215,18 +216,18 @@ saisissable (construction, démonstration, programmation). « avant » = catalog
 | 5e.EG.17 | Connaitre les propriétés du demi-tour | `symetries` | ✅ |
 | 5e.EG.18 | Reconnaitre et citer sur une configuration géométrique des angles : angle plein, plat, nul, droit ; angles opp… | `angtype` | ✅ |
 | 5e.EG.19 | Savoir qu’un angle droit mesure 90°, qu’un angle plat mesure 180° | `angtype` | ✅ |
-| 5e.EG.20 | Reconnaitre une bissectrice | — | ✗ |
+| 5e.EG.20 | Reconnaitre une bissectrice | `bissec6` | ✅ (avant ✗) |
 | 5e.EG.21 | Connaitre les mesures des angles de l’équerre dont dispose l’élève (30° 60° 90° ou 45° 45° 90°) | `angtype` | ✅ |
 | 5e.EG.22 | Caractériser le parallélisme par les angles : angles alternes internes, angles correspondants | `angles` | ✅ |
 | 5e.EG.23 | Reconnaitre un triangle isocèle, équilatéral ou rectangle à partir d’un schéma codé | `angtri` | ✅ |
 | 5e.EG.24 | Connaitre la somme des angles d’un triangle, calculer le 3e angle d’un triangle connaissant les mesures des de… | `angtri` | ✅ |
-| 5e.EG.25 | Connaitre la notion de médiatrice, de cercle circonscrit | `mediatrice` | ✅ (avant ✗) |
+| 5e.EG.25 | Connaitre la notion de médiatrice, de cercle circonscrit | `mediatrice` | ✅ |
 | 5e.EG.26 | Connaitre la somme des angles d’un triangle et savoir la démontrer | `angtri` | — |
 | 5e.EG.27 | Construire des triangles à partir de données partielles | — | — |
-| 5e.EG.28 | Connaitre les propriétés des médiatrices et du cercle circonscrit dans le cas de triangles particuliers | `mediatrice` | ◐ (avant ✗) |
-| 5e.EG.29 | Calculer l’aire d’un triangle | `aire1` | ✅ |
+| 5e.EG.28 | Connaitre les propriétés des médiatrices et du cercle circonscrit dans le cas de triangles particuliers | `mediatrice` | ◐ |
+| 5e.EG.29 | Calculer l’aire d’un triangle | `aire1`, `hauteurs5` | ✅ |
 | 5e.EG.30 | Définir et tracer les hauteurs dans un triangle | `droitesrem` | — |
-| 5e.EG.31 | Savoir que les hauteurs d’un triangle sont concourantes | `droitesrem` | ✗ |
+| 5e.EG.31 | Savoir que les hauteurs d’un triangle sont concourantes | `hauteurs5` | ✅ (avant ✗) |
 | 5e.EG.32 | Définir et tracer les médianes dans un triangle | `droitesrem` | — |
 | 5e.EG.33 | Démontrer qu’une médiane partage un triangle en deux triangles d’aires égales | — | — |
 | 5e.EG.34 | Utiliser ces propriétés dans le cas de triangles particuliers | `angtri` | ✅ |
@@ -263,11 +264,11 @@ saisissable (construction, démonstration, programmation). « avant » = catalog
 | 5e.PF.08 | Reconnaitre une situation de proportionnalité à partir d’un tableau ou d’un graphique | `prop`, `proptab` | ✅ |
 | 5e.PF.09 | Reconnaitre graphiquement qu’un nuage de points est ou n’est pas associé à une situation de proportionnalité e… | `prop` | ✅ |
 | 5e.PF.10 | Introduire l’expression : « en fonction de » dans des contextes concrets ou mathématiques | — | — |
-| 5e.PF.11 | Produire un tableau de valeurs | `tabval` | ✗ |
-| 5e.PF.12 | Lire et interpréter un tableau de valeurs | `tabval` | ✗ |
+| 5e.PF.11 | Produire un tableau de valeurs | `tabform5` | ✅ (avant ✗) |
+| 5e.PF.12 | Lire et interpréter un tableau de valeurs | `tabform5` | ✅ (avant ✗) |
 | 5e.PF.13 | Placer dans un repère orthogonal donné des points correspondant à un tableau de valeurs | `repere` | ✅ |
-| 5e.PF.14 | Lire et interpréter un graphique cartésien donné par une courbe ou un nuage de points | `lectgraph` | ✗ |
-| 5e.PF.15 | Traduire la relation de dépendance entre deux grandeurs par un tableau de valeurs à partir d’une formule | `tabval` | ✗ |
+| 5e.PF.14 | Lire et interpréter un graphique cartésien donné par une courbe ou un nuage de points | `tabform5` | ✅ (avant ✗) |
+| 5e.PF.15 | Traduire la relation de dépendance entre deux grandeurs par un tableau de valeurs à partir d’une formule | `tabform5` | ✅ (avant ✗) |
 | 5e.PF.16 | Produire une formule simple représentant la dépendance de deux grandeurs | `litelab` | ✅ |
 | 5e.PF.17 | Caractériser graphiquement la proportionnalité | `prop` | ✅ |
 | 5e.PI.01 | Manipuler des instructions simples et les séquencer | — | — |
@@ -417,7 +418,7 @@ saisissable (construction, démonstration, programmation). « avant » = catalog
 | 2nde.AP.06 | Écrire des fonctions simples ; lire, comprendre, modifier, compléter des fonctions plus complexes. Appeler une… | `algopy` | ✅ |
 | 2nde.AP.07 | Lire et comprendre une fonction renvoyant une moyenne, un écart type. Aucune connaissance sur les listes n’est… | `algopy`, `stats` | ✅ |
 | 2nde.AP.08 | Écrire des fonctions renvoyant le résultat numérique d’une expérience aléatoire, d’une répétition d’expérience… | `algopy` | ◐ |
-| 2nde.AU.01 | Comparer deux nombres directement ou par calcul : • de leur différence ; • s’ils sont strictement positifs, de… | `compdiff` | ✅ (avant ✗) |
+| 2nde.AU.01 | Comparer deux nombres directement ou par calcul : • de leur différence ; • s’ils sont strictement positifs, de… | `compdiff` | ✅ |
 | 2nde.AU.02 | Effectuer des opérations et des comparaisons entre des fractions simples | `fracops` | ✅ |
 | 2nde.AU.03 | Effectuer des opérations sur les puissances | `puiss` | ✅ |
 | 2nde.AU.04 | Passer d’une écriture d’un nombre à une autre (décimale, fractionnaire, pourcentage) | `fracconv` | ✅ |
@@ -444,7 +445,7 @@ saisissable (construction, démonstration, programmation). « avant » = catalog
 | 2nde.NC.07 | Effectuer des calculs numériques ou littéraux mettant en jeu des puissances, des racines carrées, des écriture… | `fracops`, `puiss`, `rac` | ✅ |
 | 2nde.NC.08 | Sur des cas simples de relations entre variables (par exemple U = RI, d =vt, S = πr², V = abc, V = πr²h, expri… | `formule` | ✅ |
 | 2nde.NC.09 | Choisir la forme la plus adaptée (factorisée, développée réduite) d’une expression en vue de la résolution d’u… | `factor` | ✅ |
-| 2nde.NC.10 | Comparer deux quantités en utilisant leur différence, ou leur rapport (ratio) dans le cas de quantités positiv… | `ratio`, `tauxevol`, `compdiff` | ✅ (avant ◐) |
+| 2nde.NC.10 | Comparer deux quantités en utilisant leur différence, ou leur rapport (ratio) dans le cas de quantités positiv… | `ratio`, `tauxevol`, `compdiff` | ✅ |
 | 2nde.NC.11 | Modéliser un problème par une inéquation | `ineq` | ✅ |
 | 2nde.NC.12 | Donner l’ensemble des solutions d’une équation du premier degré du type a𝑥 = b, a + 𝑥 = b, a𝑥 + b = c𝑥 + d, d’… | `eq1`, `eq2fact`, `ineq` | ✅ |
 | 2nde.GE.01 | Représenter la somme de deux vecteurs à partir de représentants de même origine | `vect3e` | — |
@@ -528,7 +529,7 @@ saisissable (construction, démonstration, programmation). « avant » = catalog
 | 1re.AN.06 | Dans des cas simples, calculer une fonction dérivée en utilisant les propriétés des opérations sur les fonctio… | `derivref`, `derivregles`, `derivprodquot` | ✅ |
 | 1re.AN.07 | Étudier les variations d’une fonction. Déterminer les extrémums | `variations` | ✅ |
 | 1re.AN.08 | Résoudre un problème d’optimisation | `optimderiv`, `optim` | ✅ |
-| 1re.AN.09 | Exploiter les variations d’une fonction pour établir une inégalité. Étudier la position relative de deux courb… | `variations`, `posrelc` | ✅ (avant ◐) |
+| 1re.AN.09 | Exploiter les variations d’une fonction pour établir une inégalité. Étudier la position relative de deux courb… | `variations`, `posrelc` | ✅ |
 | 1re.AN.10 | Étudier, en lien avec la dérivation, une fonction polynôme du second degré : variations, extrémum, allure selo… | `variations`, `f2` | ✅ |
 | 1re.AN.11 | Transformer une expression en utilisant les propriétés algébriques de la fonction exponentielle | `expfn` | ✅ |
 | 1re.AN.12 | Pour a réel, dérivée de la fonction t ↦ e^(at) | `expderiv` | ✅ |
@@ -598,12 +599,12 @@ saisissable (construction, démonstration, programmation). « avant » = catalog
 | Tle.AN.18 | Dans le cadre de la résolution de problème, notamment géométrique, étudier une fonction simple définie à parti… | `trigfr` | ✅ |
 | Tle.AN.19 | Calculer une primitive en utilisant les primitives de référence et les fonctions de la forme (v’ ○ u) × u’ | `primitives` | ✅ |
 | Tle.AN.20 | Pour une équation différentielle 𝑦’ = a𝑦 + b (a ≠ 0) : déterminer une solution particulière constante ; utilis… | `eqdiff` | ✅ |
-| Tle.AN.21 | Pour une équation différentielle 𝑦’ = a𝑦 + 𝑓 : à partir de la donnée d’une solution particulière, déterminer t… | `eqdiff` | ◐ |
+| Tle.AN.21 | Pour une équation différentielle 𝑦’ = a𝑦 + 𝑓 : à partir de la donnée d’une solution particulière, déterminer t… | `eqdiff` | ✅ (avant ◐) |
 | Tle.AN.22 | Estimer graphiquement ou encadrer une intégrale, une valeur moyenne | `integrale` | ✅ |
 | Tle.AN.23 | Calculer une intégrale à l’aide d’une primitive, à l’aide d’une intégration par parties | `integrale`, `intparties` | ✅ |
-| Tle.AN.24 | Majorer (minorer) une intégrale à partir d'une majoration (minoration) d'une fonction par une autre fonction | `intmaj` | ✅ (avant ✗) |
+| Tle.AN.24 | Majorer (minorer) une intégrale à partir d'une majoration (minoration) d'une fonction par une autre fonction | `intmaj` | ✅ |
 | Tle.AN.25 | Calculer l’aire entre deux courbes | `aireint` | ✅ |
-| Tle.AN.26 | Étudier une suite d’intégrales, vérifiant éventuellement une relation de récurrence | `suiteint` | ✅ (avant ✗) |
+| Tle.AN.26 | Étudier une suite d’intégrales, vérifiant éventuellement une relation de récurrence | `suiteint` | ✅ |
 | Tle.AN.27 | Interpréter une intégrale, une valeur moyenne dans un contexte issu d’une autre discipline | `integrale` | ✅ |
 | Tle.SP.01 | Modéliser une situation par une succession d’épreuves indépendantes, ou une succession de deux ou trois épreuv… | `probarbre`, `binom` | ✅ |
 | Tle.SP.02 | Modéliser une situation par un schéma de Bernoulli, par une loi binomiale | `binom`, `binomiale` | ✅ |
@@ -660,16 +661,24 @@ saisissable (construction, démonstration, programmation). « avant » = catalog
   (1 à 6) de `statfreq`, `stats`, `diagr`, `probeq` par des questions de même niveau et de même graine, notes sur 20.
 - Contrôle : `tests/frfin.html` (générateurs, défis, classes, progcalc en 5e, notes), `tests/act_frfin.html` (leçons actives).
 
+## Ce qui a été fait (25.11, branche agent/trous)
+
+- **Créées** (`src/fr_trous.js` ; 3 niveaux, ≥ 3 formes par niveau, pas à pas, pièges, contextes, leçon, compétences, défi
+  de niveau 4, leçon active « À toi : 2 questions ») : 6e `cercle6` (distance à un point, cercle et disque comme ensembles
+  de points, EG.01, 04, 05), `bissec6` (bissectrice : calculs d'angles, EG.11–12 ; reprise en 5e pour EG.20), `filtre6`
+  (filtrer un tableau selon un ou plusieurs critères, DP.04) ; 5e `tabform5` (formules, tableaux de valeurs et graphiques
+  sans la notation f(x), PF.11, 12, 14, 15), `hauteurs5` (aire, deux hauteurs, triangle obtus, orthocentre, EG.29–31).
+- **Étendue** : `eqdiff` reçoit trois formes y' = ay + f (solution particulière donnée, affine, exponentielle) : Tle.AN.21
+  complet (formes partagées avec la 4e MA2 du Collège).
+- Contrôle : `tests/trous.html` (générateurs, classes, séparation des systèmes), `tests/act_trous.html` (leçons actives).
+
 ## Ce qui reste
 
-- 6e : distances à un point, cercle comme ensemble de points, bissectrice (surtout des constructions) ; filtrer un tableau.
-- 5e : tableaux de valeurs et graphiques sans la notation f(x) (`tabval` et `lectgraph` placés en 3e et 4e) ; hauteurs
-  concourantes.
+- 6e : constructions (bissectrice, cercles) : non saisissables.
 - 4e–3e : repérage dans un pavé droit, sur une sphère (latitude, longitude).
 - 2nde : algorithmique de simulation (AP.08).
 - 1re : arbre de n ⩽ 4 épreuves de Bernoulli
   (SP.04, en partie dans `probarbre`) ; tracé des courbes de e^(kt) (AN.13, non saisissable).
-- Tle : équations y' = ay + f (AN.21, en partie) ; Python
-  (listes) hors périmètre.
+- Tle : Python (listes) hors périmètre.
 - Programmes 2026 de 4e (2027-2028) et de 3e (2028-2029) : `vecgeo` et `ineq1` sont déjà en fin de 3e.
 

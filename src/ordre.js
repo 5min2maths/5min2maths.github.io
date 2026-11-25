@@ -47,3 +47,11 @@ Object.assign(ORDRE_THEME.MATU, {"derivth":"M3C04","pvect":"M3C06","syslin":"M4C
 // Chapitre 1 de 3e (Sésamath Ma3, « Prérequis pour l'entrée en 3e ») : reprises de 2e, « de l'année » en 3e sans être
 // nouvelles (statut « vu » : notions des années précédentes). Lu par Engine.catalog et Engine.themeKey (MATU_REP).
 ORDRE_THEME.MATU_REP = {"polyfact":"M3C01","fracrat":"M3C01","ineqpoly":"M3C01","ineqfrac":"M3C01","compo":"M3C01","expo":"M3C01","log":"M3C01","trigfn":"M3C01"};
+// 25.11 (agent trous) : derniers savoir-faire calculables. 1re : graphefct (M1C04) ; 2e : ineqgraph (M2C03) ; 4e : geoesp
+// (nouveau chapitre M4C07 « 7. Géométrie dans l'espace », sujet à choix MA1), densite et approxnorm (M4C04, MA2) ; CO 11e :
+// repere3d (11C03). Ajouté à la main : à reporter dans tools/referentiels.py si ce fichier est régénéré (MAP, SESA, SESA_FIX).
+Object.assign(THEME_LABEL.MATU, {"M4C07":"7. Géométrie dans l'espace"});
+Object.assign(ORDRE.MATU, {"graphefct":13.5,"ineqgraph":81.6,"densite":231.5,"approxnorm":235.5,"geoesp":260});
+Object.assign(ORDRE_THEME.MATU, {"graphefct":"M1C04","ineqgraph":"M2C03","densite":"M4C04","approxnorm":"M4C04","geoesp":"M4C07"});
+Object.assign(ORDRE.CO, {"repere3d":82.5});
+ORDRE_THEME.CO_BY.repere3d = {"11":"11C03"};

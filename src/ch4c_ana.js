@@ -1270,6 +1270,28 @@
             traps: [TR(g * t, "Sans frottement on aurait 9,8t ; ici v' dépend de v."), TR(L, "C'est la vitesse limite, atteinte seulement quand t → +∞."), TR(L * Math.exp(-k * t), "v(0) = 0 : v(t) = " + dS(L) + "(1 − e^(−" + dS(k) + "t)).")] }); },
     ],
   };
+  /* 25.11 (agent trous) : y' = ay + f(x) avec un second membre qui n'est pas constant (4.AN.08a, « vérifier » ; programme
+     français Tle.AN.21 : « à partir d'une solution particulière, déterminer toutes les solutions »). */
+  ED[2].push(() => { const a = pk([2, -2, 3, -3, 1, -1]), m = nz(-4, 4), q = nz(-5, 5); let y0; do y0 = nz(-6, 6); while (y0 === q); const C = y0 - q, c1 = -a * m, c0 = m - a * q;
+    if (!c0) return null;
+    const pT = P2([m, q]), pS = tp([m, q]), ans = cS(C) + "exp(" + mS(a, 1) + ") + (" + pS + ")";
+    return QX("On considère l'équation " + M("y' = " + cT(a) + "y + f(x)") + " avec " + M("f(x) = " + P2([c1, c0])) + ". La fonction " + M("p(x) = " + pT) + " en est une solution particulière. Donne la solution qui vérifie " + M("y(0) = " + y0) + ".", ans,
+      "Les solutions de " + M("y' = " + cT(a) + "y") + " sont " + M("Ce^{" + mT(a, 1) + "}") + " ; celles de l'équation complète : " + M("y = Ce^{" + mT(a, 1) + "} + " + pT) + ". " + M("y(0) = C" + sg(q) + " = " + y0) + " donne " + M("C = " + C) + " : " + M("y(x) = " + cT(C) + "e^{" + mT(a, 1) + "} + " + pT) + ".",
+      { ctx: "ay-plus-f-donnee",
+        guide: [GS(M("p(0)") + " ?", q, M(q) + "."), GS("Constante " + M("C") + " (avec " + M("y(0) = C + p(0) = " + y0) + ") ?", C, M(C) + "."), GX(M("y(x)") + " ?", ans, M(cT(C) + "e^{" + mT(a, 1) + "} + " + pT) + ".")],
+        traps: [TX(cS(y0) + "exp(" + mS(a, 1) + ") + (" + pS + ")", "y(0) = C + p(0) : C vaut " + y0 + " − (" + q + "), pas " + y0 + "."), TX(cS(y0) + "exp(" + mS(a, 1) + ")", "Il manque la solution particulière : y = Ce^(ax) + p(x)."), TX(cS(C) + "exp(" + mS(-a, 1) + ") + (" + pS + ")", "Les solutions de y' = ay sont Ce^(ax), avec le même signe que a.")] }); });
+  ED[3].push(() => { const a = pk([2, -2, 3, -3, 4, -1]), m = nz(-3, 3), q = nz(-4, 4), c = -a * m, d = m - a * q, ans = tp([m, q]);
+    return QX("Trouve la solution particulière de la forme " + M("p(x) = mx + q") + " de l'équation " + M("y' = " + cT(a) + "y + g(x)") + " avec " + M("g(x) = " + P2([c, d])) + ". Donne " + M("p(x)") + ".", ans,
+      M("p' = m") + " et " + M(cT(a) + "p + g(x) = " + cT(a) + "(mx + q) + " + (c < 0 ? "(" + P2([c, d]) + ")" : P2([c, d]))) + " : on identifie. Coefficient de " + M("x") + " : " + M("0 = " + fT(a) + "m" + sg(c)) + ", donc " + M("m = " + m) + " ; constante : " + M("m = " + fT(a) + "q" + (d ? sg(d) : "")) + ", donc " + M("q = " + q) + ". " + M("p(x) = " + P2([m, q])) + ".",
+      { ctx: "ay-plus-f-affine",
+        guide: [GS("Coefficient de " + M("x") + " : " + M("0 = " + fT(a) + "m" + sg(c)) + ". Que vaut " + M("m") + " ?", m, M(m) + "."), GS("Constante : " + M("m = " + fT(a) + "q" + (d ? sg(d) : "")) + ". Que vaut " + M("q") + " ?", q, M(q) + "."), GX(M("p(x)") + " ?", ans, M(P2([m, q])) + ".")],
+        traps: [TX(tp([c, d || 0]), "p n'est pas le second membre : remplace y par mx + q dans l'équation et identifie."), TX(tp([-m, q]), "0 = am + c : attention au signe de m."), TX(tp([m, -q]), "Constante : m = aq + d, attention au signe de q.")] }); });
+  ED[3].push(() => { const a = pk([1, 2, -1, -2, 3]); let b; do b = pk([1, 2, 3, -1, -2]); while (b === a); const k = pk([2, 3, 4, -2, -3, -4]), c = k * (b - a);
+    return QN("On cherche une solution particulière de la forme " + M("p(x) = ke^{" + mT(b, 1) + "}") + " de l'équation " + M("y' = " + cT(a) + "y" + (c < 0 ? " - " + cT(-c) : " + " + cT(c)) + "e^{" + mT(b, 1) + "}") + ". Que vaut " + M("k") + " ?", k,
+      M("p' = " + cT(b) + "ke^{" + mT(b, 1) + "}") + ". En remplaçant : " + M(cT(b) + "k = " + cT(a) + "k" + sg(c)) + ", donc " + M("(" + fT(b) + sg(-a) + ")k = " + c) + " et " + M("k = " + k) + ".",
+      { ctx: "ay-plus-f-exp",
+        guide: [GS("En remplaçant, " + M("(b - a)k") + " vaut le coefficient du second membre. Que vaut " + M("b - a") + " ?", b - a, M(fT(b) + sg(-a) + " = " + (b - a)) + "."), GS(M("k") + " ?", k, M("\\frac{" + c + "}{" + (b - a) + "} = " + k) + ".")],
+        traps: [TR(c / b, "La dérivée de ke^(" + b + "x) est " + b + "ke^(" + b + "x) ; il faut aussi retirer le terme " + a + "k."), TR(-k, "(b − a)k = c : attention à l'ordre de la soustraction."), TR(c, "c est le coefficient du second membre ; divise par b − a.")] }); });
 
   // ======================= statdesc : statistique descriptive de 4e (4.PS.01a–d) =======================
   /* 25.11 (audit niveau 4e) : « stats » et « quartiles » (moyenne de 5 nombres, mode, étendue…) avaient été ouverts à la

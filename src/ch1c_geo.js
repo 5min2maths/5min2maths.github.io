@@ -122,6 +122,25 @@
     ],
   };
 
+  /* 25.11 (agent trous) : droites remarquables dans un problème (1.GE.04d) : isocèle (hauteur = médiane), orthocentre,
+     point de la médiatrice (Pythagore). Niveau 3 = « problèmes ». */
+  DR[3].push(
+    () => { const [m, h, s] = pk([[5, 12, 13], [8, 6, 10], [9, 12, 15], [6, 8, 10], [12, 9, 15], [8, 15, 17], [15, 8, 17]]), g = (2 * h) / 3;
+      return Qv("Le triangle " + M("ABC") + " est isocèle en " + M("A") + " : " + M("AB = AC = " + s) + " cm et " + M("BC = " + 2 * m) + " cm. " + M("G") + " est son centre de gravité. Calcule " + M("AG") + " (en cm, fraction acceptée).", g,
+        "Dans un triangle isocèle, la hauteur issue de " + M("A") + " est aussi la médiane : elle tombe au milieu " + M("H") + " de " + M("[BC]") + ". " + M("AH = \\sqrt{" + s * s + " - " + m * m + "} = " + h) + " ; " + M("G") + " est aux deux tiers de la médiane : " + M("AG = \\frac{2}{3} \\cdot " + h + " = " + N(g)) + " cm.",
+        { ctx: "isocele-G", guide: [GS(M("BH") + " (H milieu de [BC]) ?", m, M(m) + " cm."), GS(M("AH") + " (Pythagore) ?", h, M(h) + " cm."), GS(M("AG") + " ?", g, M("\\frac{2}{3} \\cdot " + h + " = " + N(g)) + " cm.")],
+          traps: [TR((2 * s) / 3, "G est sur la médiane [AH], pas sur le côté [AB] : calcule d'abord AH."), TR(h, "C'est la médiane entière ; G est aux 2/3 depuis A."), TR(h / 3, "Ça, c'est GH ; AG en vaut le double.")] }); },
+    () => { const A = R.int(35, 85);
+      return Qv("Le triangle " + M("ABC") + " a tous ses angles aigus et " + M("\\widehat{A} = " + A + "°") + ". " + M("H") + " est son orthocentre (intersection des hauteurs). Que mesure " + M("\\widehat{BHC}") + " (en degrés) ?", 180 - A,
+        "Soient " + M("K") + " et " + M("L") + " les pieds des hauteurs issues de " + M("B") + " et " + M("C") + ". Le quadrilatère " + M("AKHL") + " a deux angles droits (en " + M("K") + " et " + M("L") + ") : " + M("\\widehat{KHL} = 360° - 90° - 90° - " + A + "° = " + (180 - A) + "°") + ", et " + M("\\widehat{BHC}") + " lui est opposé par le sommet.",
+        { ctx: "orthocentre", guide: [GS("Somme des angles du quadrilatère " + M("AKHL") + " ?", 360, "360°."), GS(M("\\widehat{KHL} = \\widehat{BHC}") + " ?", 180 - A, M(180 - A) + "°.")],
+          traps: [TR(90 + A / 2, "Ça, c'est l'angle BIC formé par les bissectrices ; ici ce sont les hauteurs."), TR(A, "Les angles en K et L sont droits : BHC = 180° − A."), TR(90 - A, "Utilise le quadrilatère AKHL et ses deux angles droits.")] }); },
+    () => { const [m, d, s] = pk([[3, 4, 5], [5, 12, 13], [6, 8, 10], [8, 15, 17], [9, 12, 15], [12, 5, 13], [4, 3, 5], [12, 9, 15]]);
+      return Qv("Le point " + M("P") + " est sur la médiatrice du segment " + M("[AB]") + ", avec " + M("AB = " + 2 * m) + " cm et " + M("PA = " + s) + " cm. Calcule la distance de " + M("P") + " à la droite " + M("(AB)") + " (en cm).", d,
+        "La médiatrice coupe " + M("[AB]") + " perpendiculairement en son milieu " + M("I") + " : " + M("AI = " + m) + ". Le triangle " + M("PIA") + " est rectangle en " + M("I") + " : " + M("PI = \\sqrt{" + s * s + " - " + m * m + "} = " + d) + " cm (et " + M("PB = PA = " + s) + ").",
+        { ctx: "mediatrice-pythagore", guide: [GS(M("AI") + " (I milieu de [AB]) ?", m, M(m) + " cm."), GS(M("PI") + " ?", d, M(d) + " cm.")],
+          traps: [TR(s * s - m * m, "C'est PI² : prends la racine."), TR(s - m, "Pythagore : PI² = PA² − AI²."), TR(Math.hypot(s, m), "PA est l'hypoténuse : on soustrait les carrés.")] }); });
+
   // ===================== exactes =====================
   const EX = {
     1: [
@@ -221,7 +240,7 @@
   if (typeof COMPS !== "undefined") Object.assign(COMPS, {
     euclide: ["Hauteur, cathète, projection", "Hauteur par l'aire, segment, hypoténuse", "Aire, périmètre, écart"],
     geocomb: ["Diagonale, isocèle, équilatéral", "Toit, carton, losange", "Trapèze, cône, plus court chemin"],
-    droitesrem: ["Centre de gravité, cercle circonscrit", "Bissectrices, médiane, hauteur", "Équilatéral, cercle inscrit, angle AIB"],
+    droitesrem: ["Centre de gravité, cercle circonscrit", "Bissectrices, médiane, hauteur", "Problèmes : équilatéral, isocèle, cercle inscrit, orthocentre, médiatrice"],
     exactes: ["Diagonale, hauteur, côté", "Aire de l'équilatéral, rectangle, périmètre", "Cube, hexagone, disque inscrit"],
     angtri: ["Triangle, isocèle, quadrilatère", "Angle extérieur, sommet, parallélogramme", "Polygones réguliers, angles proportionnels"],
   });
