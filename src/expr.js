@@ -381,8 +381,11 @@ function diagnose(q, input) {
   if (w !== 0 && tol(v, -w)) return "Le nombre est bon, mais pas le signe : vérifie les règles des signes.";
   for (const k of [1, 2, 3]) if (w !== 0 && (tol(v, w * 10 ** k) || tol(v, w / 10 ** k))) return "Les chiffres sont bons, mais pas la virgule (ou l'unité) : vérifie la conversion ou le rang.";
   if (w !== 0 && Math.abs(w) !== 1 && tol(v, 1 / w)) return "Tu as inversé : c'est l'inverse de la bonne réponse (numérateur et dénominateur échangés ?).";
-  if (Math.abs(w) > 1 && tol(v, w * w)) return "Il manque une étape : n'oublie pas la racine carrée à la fin.";
-  if (w > 1 && tol(v, Math.sqrt(w))) return "Il manque une étape : pense à élever au carré.";
+  /* 26.11 soir (revue d'un testeur : « n'oublie pas la racine carrée » pour une boule, où c'est la racine cubique) : messages
+     génériques EXACTS dans tous les cas — ils décrivent la réponse, sans deviner l'opération oubliée. */
+  if (Math.abs(w) > 1 && tol(v, w * w * w)) return "Ta réponse est le cube de la bonne réponse : il manque une dernière étape (une racine cubique ?).";
+  if (Math.abs(w) > 1 && tol(v, w * w)) return "Ta réponse est le carré de la bonne réponse : il manque une dernière étape.";
+  if (w > 1 && tol(v, Math.sqrt(w))) return "Ta réponse est la racine carrée de la bonne réponse : il manque une dernière étape.";
   return null;
 }
 
