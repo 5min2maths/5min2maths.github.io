@@ -282,12 +282,12 @@
 
   // ======================= recip : niveau 3 (bijection restreinte, racine, cube) =======================
   const RC3 = [
-    () => { const h = nz(-5, 5), k = R.int(-6, 6), m = R.int(2, 6), v = k + m * m;
+    () => { const h = nz(-5, 5), k = R.int(-6, 6), m = R.int(2, 6), v = k + m * m; if (Math.abs(h + m) <= 1) return null; /* 25.11 (robot) : réponse 0 ou ±1 écartée */
       return QN("La fonction " + M("f(x) = " + fac(h) + "^2" + (k ? sg(k) : "")) + " est une bijection de " + M("[" + h + " \\,;\\, +\\infty[") + " vers " + M("[" + k + " \\,;\\, +\\infty[") + ". Calcule " + M("f^{-1}(" + v + ")") + ".", h + m,
         M("f(x) = " + v + " \\iff " + fac(h) + "^2 = " + m * m + " \\iff x = " + h + " \\pm " + m) + " ; seule " + M("x = " + (h + m)) + " est dans " + M("[" + h + " \\,;\\, +\\infty[") + ".",
         { ctx: "parabole-restreinte", guide: [GSet("Solutions de " + M("f(x) = " + v) + " sur " + M("\\mathbb{R}") + " ?", [h - m, h + m], (h - m) + " ; " + (h + m) + "."), GN("Laquelle est dans l'ensemble de départ ?", h + m, M(h + m) + ".")],
           traps: [TR(h - m, "Cette solution n'est pas dans [" + h + " ; +∞[ : la réciproque prend ses valeurs dans l'ensemble de départ."), TR((h + v) ** 2 + k, "C'est f(" + v + ") ; on demande f⁻¹(" + v + ").")] }); },
-    () => { const b = R.int(-3, 4), c = R.int(-4, 5), top = b * b + c, m = R.int(2, 5), v = top - m * m;
+    () => { const b = R.int(-3, 4), c = R.int(-4, 5), top = b * b + c, m = R.int(2, 5), v = top - m * m; if (Math.abs(b + m) <= 1) return null; /* 25.11 (robot) : réponse 0 ou ±1 écartée (recip-4-aab) */
       return QN("Soit " + M("f(x) = " + P2([-1, 2 * b, c])) + ". On la restreint à " + M("A = [" + b + " \\,;\\, +\\infty[") + " ; elle est alors une bijection de " + M("A") + " vers " + M("]-\\infty \\,;\\, " + top + "]") + ". Calcule " + M("f^{-1}(" + v + ")") + ".", b + m,
         M("f(x) = -(x" + sg(-b) + ")^2 + " + top) + " ; " + M("f(x) = " + v + " \\iff (x" + sg(-b) + ")^2 = " + m * m) + ", et " + M("x \\ge " + b) + " donne " + M("x = " + (b + m)) + ".",
         { ctx: "sommet-restreint", guide: [GN("Ordonnée du sommet (maximum de " + M("f") + ") ?", top, M(top) + "."), GN(M("(x" + sg(-b) + ")^2") + " vaut ?", m * m, M(top + " - (" + v + ") = " + m * m) + "."), GN(M("f^{-1}(" + v + ")") + " ?", b + m, M(b + m) + ".")],
@@ -298,7 +298,7 @@
         M("y = \\sqrt{" + P2([a, bb]) + "}" + sg(c) + " \\iff (y" + sg(-c) + ")^2 = " + P2([a, bb])) + ", donc " + M("f^{-1}(x) = \\frac{(x" + sg(-c) + ")^2" + sg(-bb).replace(" + 0", "") + "}{" + a + "}") + " (pour " + M("x \\ge " + c) + ").",
         { ctx: "racine", guide: [GN("Pour commencer : " + M("f^{-1}(" + c + ")") + ", c'est-à-dire le " + M("x") + " tel que " + M("\\sqrt{" + P2([a, bb]) + "} = 0") + " ? (fraction acceptée)", -bb / a, M(fT(-bb / a)) + "."), GX(M("f^{-1}(x)") + " ?", ex, M("\\frac{(x" + sg(-c) + ")^2" + sg(-bb).replace(" + 0", "") + "}{" + a + "}") + ".")],
           traps: [TX("((x" + (c < 0 ? "-" + -c : "+" + c) + ")^2" + (bb ? (bb < 0 ? "+" + -bb : "-" + bb) : "") + ")/(" + a + ")", "Isole d'abord la racine : on retire " + c + " (signe)."), TX("(x" + (c < 0 ? "+" + -c : "-" + c) + ")^2" + (bb ? (bb < 0 ? "+" + -bb : "-" + bb) : "") , "Divise aussi par " + a + ".")] }); },
-    () => { const a = pk([2, 3, -2, 4]), b = R.int(-9, 9), m = nz(-4, 4), v = a * m ** 3 + b;
+    () => { const a = pk([2, 3, -2, 4]), b = R.int(-9, 9), m = pk([-4, -3, -2, 2, 3, 4]), v = a * m ** 3 + b; /* 25.11 (robot) : réponse jamais ±1 */
       return QN("Soit " + M("f(x) = " + P2([a, 0, 0, b])) + " (bijection de " + M("\\mathbb{R}") + " vers " + M("\\mathbb{R}") + "). Calcule " + M("f^{-1}(" + v + ")") + ".", m,
         M(P2([a, 0, 0, b]) + " = " + v + " \\iff x^3 = \\frac{" + (v - b) + "}{" + a + "} = " + m ** 3 + " \\iff x = " + m) + ".",
         { ctx: "cube", guide: [GN("Valeur de " + M("x^3") + " ?", m ** 3, M(m ** 3) + "."), GN(M("f^{-1}(" + v + ")") + " ?", m, M("\\sqrt[3]{" + m ** 3 + "} = " + m) + ".")],
@@ -390,8 +390,9 @@
   const PD3 = [
     () => { const r1 = R.int(-3, 3); let r2 = R.int(-3, 3); if (r1 === r2) return null; const B = prod([1, -r1], [1, -r2]), A = [nz(-3, 3), R.int(-4, 4), R.int(-5, 5), R.int(-6, 6), R.int(-6, 6)];
       const [Q, Rm] = pdiv(A, B); if (Rm.length < 2 || !Rm[0] || !Rm[1] || Q.some((c) => !Number.isInteger(c))) return null;
+      /* 25.11 (formule de 362 px sur téléphone) : corrigé « Quotient Q(x) = … et A(x) = B(x) Q(x) + R(x) ». */
       return QX("Effectue la division euclidienne de " + M("A(x) = " + P2(A)) + " par " + M("B(x) = " + P2(B)) + ". Donne le reste " + M("R(x)") + ".", tp(Rm),
-        M("A(x) = (" + P2(B) + ")(" + P2(Q) + ") + " + P2(Rm)) + " : le reste " + M(P2(Rm)) + " est de degré 1, inférieur au degré du diviseur.",
+        "Quotient " + M("Q(x) = " + P2(Q)) + " et " + M("A(x) = B(x)\\,Q(x) + " + P2(Rm)) + " : le reste " + M(P2(Rm)) + " est de degré 1, inférieur au degré du diviseur.",
         { ctx: "division-deg2", guide: [GX("Quotient " + M("Q(x)") + " ?", tp(Q), M(P2(Q)) + "."), GX("Reste " + M("R(x) = A(x) - B(x)\\,Q(x)") + " ?", tp(Rm), M(P2(Rm)) + ".")],
           traps: [TX(tp(Q), "C'est le quotient ; on demande le reste."), TX(tp(Rm.map((c) => -c)), "Le reste est A − B·Q : vérifie les signes des soustractions."), TX(tp([Rm[1]]), "Le reste a un degré strictement inférieur à celui du diviseur (ici : degré 1 au plus).")] }); },
     () => { const r1 = nz(-3, 3); let r2 = nz(-3, 3), s = nz(-4, 4); if (r1 === r2 || s === r1 || s === r2) return null; const c0 = -r1 * r2 * s, a = -(r1 + r2 + s), b = r1 * r2 + r1 * s + r2 * s, B = prod([1, -r1], [1, -r2]);

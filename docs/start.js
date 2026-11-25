@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "de9baad6c8"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "14d5969d74"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -270,7 +270,7 @@ function screenWelcome() {
   <button class="btn-primary btn-big" id="go">Commencer</button>
   <button class="btn-ghost" id="restore">J'ai déjà un code de sauvegarde</button>
   <button class="btn-ghost small" id="privacy">🔒 Ce que l'app envoie</button>
-  <p class="small muted"><a href="#" id="legal-lien">Mentions légales et confidentialité</a></p>`);
+  <p class="small muted"><a href="#parents">👪 Je suis parent</a> · <a href="#decouvrir">Découvrir l'app</a> · <a href="#" id="legal-lien">Mentions légales et confidentialité</a></p>`);
   const inp = document.getElementById("dans"), prev = document.getElementById("dprev"), fb = document.getElementById("dfb");
   const show = () => previewOf(inp, prev, q.spec);
   inp.oninput = show;
@@ -557,21 +557,21 @@ function screenHome() {
         <p class="muted">Un problème en plusieurs étapes, avec des indices si tu bloques. Facultatif, et il rapporte gros.</p>
         <button class="btn-primary btn-big" id="wp">${wpDone ? "Le refaire" : "Relever le défi"}</button>
         <p class="small muted">${wpDone ? "Bravo ! Un nouveau problème arrive la semaine prochaine." : "Un nouveau problème chaque semaine."}</p></div>`),
-    // 24.11 (chantier L) : parcours EVACOM (11e seulement, src/riche_11c.js) sous le test, et dans Progrès.
+    // 24.11 (chantier L) : parcours évaluation bilan de 11e (src/riche_11c.js) sous l'évaluation ; retiré de Progrès le 25.11 (sujets blancs : case Évaluation seulement).
     test: () => (prep ? prepPanel(left)
-      : `<div class="card stack"><div class="eyebrow">Je prépare un test</div><h2>Un test approche ?</h2>
+      : `<div class="card stack"><div class="eyebrow">Je prépare une évaluation</div><h2>Une évaluation approche ?</h2>
         <p class="muted">Dis-moi sa date et les notions : chaque jour, l'app te fait réviser juste ce qu'il faut, jusqu'au jour J. Tu pourras aussi t'entraîner sur un sujet de préparation, avec son corrigé.</p>
-        <button class="btn-primary btn-big" id="prep">Je prépare un test</button></div>`) + (typeof evacomCard === "function" ? evacomCard() : ""),
+        <button class="btn-primary btn-big" id="prep">Je prépare une évaluation</button></div>`) + (typeof evacomCard === "function" ? evacomCard() : ""),
     prog: () => `${newBadgesCard()}${carnetCard(true)}${themeMapCard()}${compsCard()}`,
   };
   // 22.11 : accueil à cases (maquette design/maquette_accueil.html) ; chaque case ouvre une page « ← Accueil ».
   panels.carnet = () => carnetCard(true) || `<div class="card flat stack"><div class="eyebrow">📕 Carnet d'erreurs</div><p class="small muted">Vide : bravo ! Chaque question ratée viendra s'y ranger, pour que tu puisses la réussir plus tard.</p></div>`;
   // 22.11 : « Ma fiche » (src/fiche.js) : une fiche par chapitre derrière Progrès. Retirée le 23.11 (branche archive/fiche) : inactif sans fiche.js.
-  panels.prog = () => `${weekCard()}${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${typeof evacomCard === "function" ? evacomCard() : ""}${themeMapCard()}${compsCard()}${typeof parentCard === "function" ? parentCard() : ""}`; /* 24.11 : espace parent (src/parents.js) */
+  panels.prog = () => `${weekCard()}${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}${typeof parentCard === "function" ? parentCard() : ""}`; /* 24.11 : espace parent (src/parents.js) */
   if (!panels[homeTab]) homeTab = "today";
   const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted">${gradeName(state.profile)}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
   if (homeTab !== "today") {
-    const T = { prob: "Problème de la semaine", test: "Mon test", carnet: "Carnet d'erreurs", prog: "Progrès" };
+    const T = { prob: "Problème de la semaine", test: "Mon évaluation", carnet: "Carnet d'erreurs", prog: "Progrès" };
     h(`${head}<button type="button" class="btn-ghost back-home" id="hb">← Accueil</button><h2 class="sub-title">${T[homeTab]}</h2>
     <div class="home-panel" data-tab="${homeTab}">${panels[homeTab]()}</div>`);
     document.getElementById("hb").onclick = () => { homeTab = "today"; screenHome(); };
@@ -602,7 +602,7 @@ function screenHome() {
       ${door("prob", svgI(TI.prob), "Problème", "", dots.prob ? "!" : "")}
       ${door("cur", svgI('<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>'), "Curieux", "", "")}
       ${door("hist", svgI('<path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a3 3 0 0 1-3-3V6"/><path d="M4 6a2 2 0 1 0 4 0V4"/><path d="M9 9h7M9 13h7M9 17h4"/>'), "Histoire", "", "")}
-      ${door("test", svgI(TI.test), "Mon test", prep ? (left === 0 ? "aujourd'hui !" : left === 1 ? "demain" : "dans " + left + " j") : "", dots.test ? "!" : "")}
+      ${door("test", svgI(TI.test), "Évaluation", prep ? (left === 0 ? "aujourd'hui !" : left === 1 ? "demain" : "dans " + left + " j") : "", dots.test ? "!" : "")}
       ${door("carnet", svgI('<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h10"/><path d="M9 8l4 4M13 8l-4 4"/>'), "Carnet", nC ? nC + " à effacer" : "", nC || "")}
       ${door("prog", svgI(TI.prog), "Progrès", "", dots.prog ? "!" : "")}
     </div></div>`);
@@ -733,7 +733,7 @@ function screenSettings() {
     <span class="small muted" id="st-l">Statistiques anonymes pour améliorer l'app</span><div class="seg" id="statsset" role="group" aria-labelledby="st-l"><button aria-pressed="${statsOk()}" data-v="1">J'aide</button><button aria-pressed="${!statsOk()}" data-v="0">Ne rien envoyer</button></div>
     <span class="small muted">Vibrer à chaque réponse (téléphone)</span><div class="seg" id="vib"><button aria-pressed="${UI.vib}" data-v="1">Oui</button><button aria-pressed="${!UI.vib}" data-v="0">Non</button></div></div>
   ${installCard("")}
-  <button class="btn-sec" id="backup">💾 Sauvegarder ou transférer ma progression</button><button class="btn-sec" id="level">Changer de classe ou d'école</button><button class="btn-sec" id="privacy">🔒 Ce que l'app envoie</button><button class="btn-ghost small" id="legal">Mentions légales et confidentialité</button>
+  <button class="btn-sec" id="backup">💾 Sauvegarder ou transférer ma progression</button><button class="btn-sec" id="level">Changer de classe ou d'école</button><button class="btn-sec" id="present" onclick="location.hash='#decouvrir'">📣 Présenter l'app (élèves)</button><button class="btn-sec" onclick="location.hash='#parents'">👪 Présenter l'app (parents)</button><button class="btn-sec" id="privacy">🔒 Ce que l'app envoie</button><button class="btn-ghost small" id="legal">Mentions légales et confidentialité</button>
   ${isAuthor() ? '<button class="btn-primary" id="stats">📊 Statistiques d\'usage (auteur)</button>' : ""}
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div>
   <button class="btn-primary" id="back">Retour</button></div>`);
@@ -1141,7 +1141,7 @@ function screenPrep() {
   ${Object.keys(groups).length ? "" : '<div class="card flat"><p class="muted">Rien à cocher : tout ce qui te concerne vient des années précédentes.</p></div>'}
   ${Object.entries(groups).map(([th, list]) => `<div class="card flat"><h3>${Engine.themeLabel(th, state.profile)}</h3><div class="checks">${list.map((c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${c.label}</span></label>`).join("")}</div></div>`).join("")}
   <p class="small muted" id="perr"></p>
-  <button class="btn-primary btn-big save-sticky" id="save">Enregistrer mon test</button>
+  <button class="btn-primary btn-big save-sticky" id="save">Enregistrer mon évaluation</button>
   <div class="row"><button class="btn-ghost" id="back">Annuler</button>${chosen.size ? '<button class="btn-ghost" id="del">Supprimer ce test</button>' : ""}</div>`);
   document.getElementById("save").onclick = () => {
     const ids = [...app.querySelectorAll(".check input:checked")].map((i) => i.value), dt = document.getElementById("pdate").value;
@@ -1306,7 +1306,7 @@ function startPrepTask(kind) {
 function prepTodayCard() {
   if (!Engine.prepActive(state)) return "";
   const L = prepLeft(state.prep.date), kind = prepKind(), t = PREP_TASK[kind], done = (state.prep.log || {})[day()];
-  return `<div class="card stack mode-test"><div class="eyebrow">📝 Mon test · ${L === 0 ? "aujourd'hui" : L === 1 ? "demain" : "dans " + L + " jours"}${done ? " · étape du jour faite ✓" : ""}</div>
+  return `<div class="card stack mode-test"><div class="eyebrow">📝 Mon évaluation · ${L === 0 ? "aujourd'hui" : L === 1 ? "demain" : "dans " + L + " jours"}${done ? " · étape du jour faite ✓" : ""}</div>
     <h2>${t.ic} ${t.label}</h2><p class="muted">${t.text}</p>
     <button class="btn-primary btn-big" id="preptask">${done ? "Refaire" : "C'est parti"}</button>
     <button class="btn-ghost small" id="preptab">Voir mon programme</button></div>`;
@@ -1320,7 +1320,7 @@ function prepPanel(left) {
   const okA = R0 ? Object.values(R0).filter((x) => x === 1).length : 0, nA = R0 ? Object.keys(R0).length : 0;
   const mk = state.mock && state.mock.done && state.mock.ids.join() === state.prep.ids.join() ? state.mock.done : null;
   const info = (x) => esc(prepJ(x.dt) + " · " + PREP_TASK[x.kind].ic + " " + PREP_TASK[x.kind].label + (x.dt === day() ? " (aujourd'hui)" : x.done ? " · fait ✓" : ""));
-  return `<div class="card stack prep-head"><div class="spread"><div class="eyebrow">📝 Mon test</div><button class="btn-ghost small" id="prepedit">Modifier</button></div>
+  return `<div class="card stack prep-head"><div class="spread"><div class="eyebrow">📝 Mon évaluation</div><button class="btn-ghost small" id="prepedit">Modifier</button></div>
     <h2>${left === 0 ? "Aujourd'hui !" : left === 1 ? "Demain, " : prepJ(state.prep.date) + " · "}${left > 1 ? "dans " + left + " jours" : left === 1 ? prepJ(state.prep.date) : ""}</h2>
     <div class="chips">${state.prep.ids.map((id) => `<span class="chip">${esc(nLabel(id))}</span>`).join("")}</div></div>
   <div class="card stack prep-now"><div class="eyebrow">Aujourd'hui${k ? " · étape " + k + " sur " + steps.length : ""}${done ? " · fait ✓" : ""}</div>
@@ -2293,6 +2293,7 @@ function screenSummary() {
 // Consultation d'une question par son code : adresse …/#q-eq2disc-2-k3f (rien n'est enregistré).
 function showCode() {
   /* Mentions légales (24.11) : lien direct …/#confidentialite, à donner aux parents */
+  if (typeof presentRoute === "function" && presentRoute()) return true; /* 25.11 : présentations …/#decouvrir (élèves) et …/#parents (src/presente.js) */
   if (typeof parentRoute === "function" && parentRoute()) return true; /* 24.11 : espace parent, …/#parent=<code> (src/parents.js) */
   if (location.hash === "#confidentialite") { screenLegal(() => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); }); return true; }
   // Consultation d'une leçon (active ou rappel) : …/#l-vitesse (lien du tableau de suivi, 15.11).

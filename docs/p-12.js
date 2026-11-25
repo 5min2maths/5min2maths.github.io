@@ -266,7 +266,8 @@
   const PRQ = {
     1: [
       () => { const k = pk([3, 4, 5]), even = R.rand() < 0.4, n = even ? 2 * R.int(5, 40) : R.int(8, 60), st = even ? 2 : 1, cst = st * (k * (k - 1)) / 2, S = k * n + cst;
-        return Qv("La somme de " + k + " nombres " + (even ? "pairs" : "entiers") + " consécutifs vaut " + M(S) + ". Quel est le plus petit ?", n, "Avec " + M("n") + " le plus petit : " + M(Array.from({ length: k }, (_, i) => (i ? "(n + " + st * i + ")" : "n")).join(" + ") + " = " + k + "n + " + cst + " = " + S) + ", donc " + M(k + "n = " + (S - cst)) + " et " + M("n = " + n) + ".",
+        const tl = Array.from({ length: k }, (_, i) => (i ? "(n + " + st * i + ")" : "n")), sumT = (k >= 5 ? [tl[0], tl[1], "\\ldots", tl[k - 1]] : tl).join(" + "); /* 25.11 : 5 termes trop larges sur téléphone : somme abrégée */
+        return Qv("La somme de " + k + " nombres " + (even ? "pairs" : "entiers") + " consécutifs vaut " + M(S) + ". Quel est le plus petit ?", n, "Avec " + M("n") + " le plus petit : " + M(sumT + " = " + k + "n + " + cst + " = " + S) + ", donc " + M(k + "n = " + (S - cst)) + " et " + M("n = " + n) + ".",
           { ctx: "consecutifs", guide: [GS("Avec " + M("n") + " le plus petit, la somme s'écrit " + M(k + "n + \\ ?") + ". Que vaut le nombre ?", cst, M(st + (k > 2 ? " + " + 2 * st : "") + (k > 3 ? " + " + 3 * st : "") + (k > 4 ? " + " + 4 * st : "") + " = " + cst) + "."), GS(M(k + "n = \\ ?"), S - cst, M(S + " - " + cst + " = " + (S - cst)) + "."), GS(M("n = \\ ?"), n, M("n = " + n) + " ; vérifie en additionnant.")],
             traps: [TV(S / k, "C'est la moyenne des " + k + " nombres, donc celui du milieu" + (k % 2 ? "" : " (ou presque)") + " : on demande le plus petit.")] }); },
       () => { let a, c; do { a = R.int(2, 9); c = R.int(2, 9); } while (a <= c); const x = R.int(2, 15), b = R.int(1, 15), d = (a - c) * x - b; if (d <= 0) return PRQ[1][1]();
@@ -297,7 +298,8 @@
           { ctx: "fractions", guide: [GS("Quelle fraction du total reste-t-il ?", N / D, M(frac(N, D)) + "."), GS("Résous " + M(frac(N, D) + " x = " + left) + " : " + M("x = \\ ?"), x, M("x = " + left + " \\cdot " + frac(D, N) + " = " + x) + ".")],
             traps: [TV((left * N) / D, "On divise par la fraction (on multiplie par son inverse) : " + M(left + " \\cdot " + frac(D, N)) + "."), TV(left * (b1 + b2), "On cherche le total : la part qui reste, " + M(frac(N, D)) + ", correspond à " + left + ".")] }); },
       () => { const n = pk([3, 4, 5]), d = pk([5, 10, 15, 20]), x = 5 * R.int(4, 30), T = n * x + (d * n * (n - 1)) / 2, what = pk([["Paul lit un livre", "pages", "lit"], ["Une cycliste s'entraîne", "km", "parcourt"], ["Un apprenti range des cartons", "cartons", "range"]]);
-        return Qv(what[0] + " en " + n + " jours : en tout " + T + " " + what[1] + ". Chaque jour, " + (what[2] === "lit" ? "il lit" : what[2] === "parcourt" ? "elle parcourt" : "il range") + " " + d + " " + what[1] + " de plus que la veille. Combien le premier jour ?", x, M(Array.from({ length: n }, (_, i) => (i ? "(x + " + d * i + ")" : "x")).join(" + ") + " = " + n + "x + " + (d * n * (n - 1)) / 2 + " = " + T) + ", donc " + M(n + "x = " + (T - (d * n * (n - 1)) / 2)) + " et " + M("x = " + x) + ".",
+        /* 25.11 (377 px sur téléphone) : 5 jours → somme abrégée « x + (x + d) + … + (x + 4d) ». */
+        return Qv(what[0] + " en " + n + " jours : en tout " + T + " " + what[1] + ". Chaque jour, " + (what[2] === "lit" ? "il lit" : what[2] === "parcourt" ? "elle parcourt" : "il range") + " " + d + " " + what[1] + " de plus que la veille. Combien le premier jour ?", x, M(Array.from({ length: n }, (_, i) => (i ? "(x + " + d * i + ")" : "x")).filter((t, i) => n < 5 || i < 2 || i === n - 1).map((t, i) => (n >= 5 && i === 2 ? "\\ldots + " + t : t)).join(" + ") + " = " + n + "x + " + (d * n * (n - 1)) / 2 + " = " + T) + ", donc " + M(n + "x = " + (T - (d * n * (n - 1)) / 2)) + " et " + M("x = " + x) + ".",
           { ctx: "suite", guide: [GS("Avec " + M("x") + " le premier jour, le total s'écrit " + M(n + "x + \\ ?") + ". Le nombre ?", (d * n * (n - 1)) / 2, M(Array.from({ length: n - 1 }, (_, i) => d * (i + 1)).join(" + ") + " = " + (d * n * (n - 1)) / 2) + "."), GS(M("x = \\ ?"), x, M(n + "x = " + (T - (d * n * (n - 1)) / 2)) + ", " + M("x = " + x) + ".")],
             traps: [TV(T / n, "C'est la moyenne par jour : le premier jour est en dessous, car chaque jour en ajoute " + d + ".")] }); },
       () => { const b = pk([2, 3, 4, 5]), h = pk([1, 1.5, 2, 2.5]), B = b + pk([1, 2, 3, 4]), A = ((B + b) * h) / 2;
@@ -1558,9 +1560,11 @@
       () => { let n; do n = R.int(1000, 9990); while ([2, 3, 5, 9, 10].filter((d) => n % d === 0).length < 2); const ok = [2, 3, 5, 9, 10].filter((d) => n % d === 0);
         return QN("Par combien des nombres " + lst([2, 3, 5, 9, 10]) + " le nombre " + M(n) + " est-il divisible ?", ok.length, "Divisible par " + ok.join(", ") + " (unités : " + (n % 10) + " ; somme des chiffres : " + dsum(n) + ") : " + M(ok.length) + ".",
           { ctx: "combien-crit", guide: [GS("Somme des chiffres de " + M(n) + " ?", dsum(n), M(dsum(n)) + "."), GS("Nombre de diviseurs de la liste ?", ok.length, ok.join(", ") + ".")], traps: [TR(ok.length + 1, "Pour 3 et 9, c'est la somme des chiffres qui compte."), TR(ok.length - 1, "Vérifie chaque critère : 2 (pair), 3, 5, 9, 10.")] }); },
-      () => { let a, c; do { a = R.int(1, 9); c = R.int(0, 9); } while ((a + c) % 3 === 0); const x = (3 - ((a + c) % 3)) % 3;
-        return QN("Quel est le plus petit chiffre à écrire à la place de ■ pour que " + M(a + "\\,■\\," + c) + " soit divisible par " + M(3) + " ?", x, "Somme " + M(a + " + " + c + " + ■") + " multiple de 3 : le plus petit chiffre est " + M(x) + " (" + M(a + c + x) + ").",
-          { ctx: "chiffre-3", guide: [GS("Somme des chiffres connus ?", a + c, M(a + c) + "."), GS("Plus petit chiffre ■ ?", x, M(x) + ".")], traps: [TR(x + 3, "Ça marche aussi, mais on demande le plus petit."), TR((3 - (c % 3)) % 3, "C'est la somme de TOUS les chiffres qui doit être un multiple de 3.")] }); },
+      () => { let a, c; do { a = R.int(1, 9); c = R.int(0, 9); } while ((a + c) % 3 === 0); const x0 = (3 - ((a + c) % 3)) % 3;
+        /* 25.11 (robot) : plus petit chiffre = 1 trivial ; alors on demande le plus grand (7), sinon l'un ou l'autre (2 ou 8). */
+        const big = x0 === 1 || R.rand() < 0.4, x = big ? x0 + 6 : x0, mot = big ? "grand" : "petit";
+        return QN("Quel est le plus " + mot + " chiffre à écrire à la place de ■ pour que " + M(a + "\\,■\\," + c) + " soit divisible par " + M(3) + " ?", x, "Somme " + M(a + " + " + c + " + ■") + " multiple de 3 : ■ peut valoir " + [x0, x0 + 3, x0 + 6].join(", ") + " ; le plus " + mot + " est " + M(x) + " (" + M(a + c + x) + ").",
+          { ctx: "chiffre-3", guide: [GS("Somme des chiffres connus ?", a + c, M(a + c) + "."), GS("Plus " + mot + " chiffre ■ ?", x, M(x) + ".")], traps: [TR(big ? x0 : x0 + 3, big ? "Ça marche aussi, mais on demande le plus grand." : "Ça marche aussi, mais on demande le plus petit."), TR((3 - (c % 3)) % 3 + (big ? 6 : 0), "C'est la somme de TOUS les chiffres qui doit être un multiple de 3.")] }); },
       () => { let a, c; do { a = R.int(1, 9); c = R.int(0, 9); } while ((a + c) % 9 === 0 || (a + c) % 9 === 8); const x = 9 - ((a + c) % 9); /* 24.11 : chiffre jamais 1 */
         return QN("Quel chiffre faut-il écrire à la place de ■ pour que " + M(a + "\\,■\\," + c) + " soit divisible par " + M(9) + " ?", x, "La somme des chiffres doit être un multiple de 9 : " + M(a + " + " + c + " + " + x + " = " + (a + c + x)) + ".",
           { ctx: "chiffre-9", guide: [GS("Somme des chiffres connus ?", a + c, M(a + c) + "."), GS("Chiffre ■ ?", x, M(x) + ".")], traps: [TR(x > 3 ? x - 3 : x + 3, "Pour 9, il faut un multiple de 9 (pas seulement de 3).")] }); },
@@ -1845,13 +1849,13 @@
           { ctx: "nb-zeros", fig: PL([{ f }]), guide: [GS("Nombre de points d'intersection avec l'axe horizontal ?", n, M(n) + ".")], traps: [TR(n === 3 ? 1 : 3, "Compte les passages de la courbe sur l'axe horizontal (y = 0)."), TR(2, "Compte bien tous les points.")] }); },
     ],
     2: [
-      () => { const m = R.int(-2, 2), s = pk([1, 1.5]), c = R.int(-1, 1), mx = R.rand() < 0.5;
+      () => { const m = R.int(-3, 3), s = pk([1, 1.5]), c = R.int(-1, 1), mx = R.rand() < 0.5; if (Math.abs(mx ? m - 1 : m + 1) <= 1) return null; /* 25.11 (robot) : abscisse lue 0 ou ±1 écartée */
         return QN("La courbe représente une fonction " + M("f") + ". " + (mx ? "Pour quelle valeur de " + M("x") + " atteint-elle son maximum local (le sommet de la « bosse ») ?" : "Elle est décroissante entre deux valeurs de " + M("x") + ". Quelle est la plus grande des deux ?"), mx ? m - 1 : m + 1, "La courbe monte jusqu'en " + M("x = " + (m - 1)) + ", descend jusqu'en " + M("x = " + (m + 1)) + ", puis remonte.",
           { ctx: mx ? "max-local" : "decroissance", fig: PL([{ f: cubicF(m, s, c) }]), guide: [GS("Abscisse de la bosse ?", m - 1, M(m - 1) + "."), GS("Réponse ?", mx ? m - 1 : m + 1, M(mx ? m - 1 : m + 1) + ".")], traps: [TR(mx ? 2 * s + c : m - 1, mx ? "Ça, c'est la valeur du maximum (ordonnée) ; on demande l'abscisse." : "La courbe descend après la bosse, jusqu'au creux."), TR(mx ? m + 1 : -2 * s + c, mx ? "C'est le creux (minimum local)." : "On demande une valeur de x, pas une ordonnée.")] }); },
       () => { const m = R.int(-2, 2), s = pk([1, 1.5]), c = R.int(-1, 1), hi = 2 * s + c, lo = -2 * s + c; let k; do k = R.int(-5, 5); while (k === hi || k === lo); const n = k < hi && k > lo ? 3 : 1;
         return QN("La courbe représente une fonction " + M("f") + " (elle continue de monter à droite et de descendre à gauche). Combien de solutions l'équation " + M("f(x) = " + k) + " a-t-elle ? La droite " + M("y = " + k) + " est tracée en pointillé.", n, "La droite horizontale " + M("y = " + k) + " coupe la courbe en " + M(n) + " point" + (n > 1 ? "s" : "") + ".",
           { ctx: "nb-solutions", fig: PL([{ f: cubicF(m, s, c) }], { hlines: [k] }), guide: [GS("Points d'intersection avec la droite ?", n, M(n) + ".")], traps: [TR(n === 3 ? 1 : 3, "Compte les points d'intersection de la courbe avec la droite pointillée."), TR(k, "On demande un nombre de solutions.")] }); },
-      () => { const h = R.int(-3, 3), k = R.int(1, 5), down = R.rand() < 0.5, a = down ? -1 : 1, kk = down ? k : -k, f = (x) => a * (x - h) ** 2 + kk;
+      () => { const h = R.int(-3, 3), k = R.int(2, 5), down = R.rand() < 0.5, a = down ? -1 : 1, kk = down ? k : -k, f = (x) => a * (x - h) ** 2 + kk; /* 25.11 (robot) : extremum jamais ±1 */
         return QN("La courbe représente une fonction " + M("f") + ". Quelle est la valeur " + (down ? "maximale" : "minimale") + " de " + M("f") + " ?", kk, "Le sommet de la parabole est " + M("(" + h + " ; " + kk + ")") + " : la valeur " + (down ? "maximale" : "minimale") + " est " + M(kk) + ".",
           { ctx: down ? "valeur-max" : "valeur-min", fig: PL([{ f }]), guide: [GP("Sommet ? (« x ; y »)", [h, kk], M("(" + h + " ; " + kk + ")") + "."), GS("Valeur " + (down ? "maximale" : "minimale") + " ?", kk, M(kk) + ".")], traps: [TR(h, "La valeur d'une fonction est une ordonnée ; " + h + " est l'abscisse où elle est atteinte.")] }); },
     ],
@@ -2590,7 +2594,7 @@
       () => { const a = pk([1, 2, 3, -1, -2]), b = nz(-4, 4), c = nz(-5, 5), cs = [a, b, c], f = quad(cs);
         return QX("Une parabole passe par " + pts3([0, 1, -1], cs) + ". Détermine l'expression développée de " + M("f(x)") + ".", EX(cs), M("c = f(0) = " + c) + " ; " + M("a + b = " + (f(1) - c)) + " et " + M("a - b = " + (f(-1) - c)) + " : " + M("a = " + a) + ", " + M("b = " + b) + ".",
           { ctx: "expr-0-1", guide: [GS(M("c = f(0)") + " ?", c, M(c) + "."), GS(M("a + b = f(1) - c") + " ?", a + b, M(a + b) + "."), GS(M("a") + " (moyenne de " + M("a + b") + " et " + M("a - b") + ") ?", a, M(a) + "."), GX("Expression", EX(cs), M(P2(cs)) + ".")], traps: [TX(P2([a, -b, c]), "a + b = f(1) − c et a − b = f(−1) − c : attention au signe de b.")] }); },
-      () => { const a = pk([1, 2, 3, -1, -2]), b = nz(-4, 4), c = nz(-5, 5), cs = [a, b, c], f = quad(cs);
+      () => { const a = pk([2, 3, -2, -3]), b = nz(-4, 4), c = nz(-5, 5), cs = [a, b, c], f = quad(cs); /* 25.11 (robot) : a ≠ ±1 (réponse) */
         return QN("Une parabole " + M("f(x) = ax^2 + bx + c") + " passe par " + pts3([0, 1, -1], cs) + ". Que vaut " + M("a") + " ?", a, M("c = " + c) + " ; " + M("a + b = " + (a + b)) + ", " + M("a - b = " + (a - b)) + " ; en additionnant : " + M("2a = " + 2 * a) + ".",
           { ctx: "a-0-1", guide: [GS(M("c") + " ?", c, M(c) + "."), GS(M("2a") + " (somme des deux équations) ?", 2 * a, M(2 * a) + "."), GS(M("a") + " ?", a, M(a) + ".")], traps: [TR(2 * a, "En additionnant, on obtient 2a : divise par 2."), TR(b, "Ça, c'est b.")] }); },
       () => { const a = pk([1, 2, -1]), b = nz(-3, 3), c = nz(-4, 4), cs = [a, b, c], f = quad(cs);
@@ -2601,7 +2605,7 @@
       () => { const a = pk([1, 2, -1, -2]), b = nz(-4, 4), c = nz(-4, 4), cs = [a, b, c], f = quad(cs);
         return QX("Une parabole passe par " + pts3([0, 1, 2], cs) + ". Détermine l'expression développée de " + M("f(x)") + ".", EX(cs), M("c = " + c) + " ; " + M("a + b = " + (a + b)) + " ; " + M("4a + 2b = " + (4 * a + 2 * b)) + " ; d'où " + M("2a = " + 2 * a) + ", " + M("a = " + a) + ", " + M("b = " + b) + ".",
           { ctx: "expr-0-2", guide: [GS(M("c") + " ?", c, M(c) + "."), GS(M("a") + " (soustrais 2 × (a + b) de 4a + 2b) ?", a, M(a) + "."), GX("Expression", EX(cs), M(P2(cs)) + ".")], traps: [TX(P2([b, a, c]), "a est le coefficient de x², b celui de x.")] }); },
-      () => { const a = pk([1, 2, -1, 3]), b = nz(-4, 4), c = nz(-4, 4), cs = [a, b, c];
+      () => { const a = pk([1, 2, -1, 3]), b = pk([-4, -3, -2, 2, 3, 4]), c = nz(-4, 4), cs = [a, b, c]; /* 25.11 (robot) : b ≠ ±1 (réponse) */
         return QN("Une parabole " + M("f(x) = ax^2 + bx + c") + " passe par " + pts3([0, 1, 2], cs) + ". Que vaut " + M("b") + " ?", b, M("c = " + c) + ", " + M("a + b = " + (a + b)) + ", " + M("4a + 2b = " + (4 * a + 2 * b)) + " : " + M("a = " + a) + ", " + M("b = " + b) + ".",
           { ctx: "b-0-2", guide: [GS(M("a") + " ?", a, M(a) + "."), GS(M("b") + " ?", b, M(b) + ".")], traps: [TR(a, "Ça, c'est a."), TR(a + b, "a + b = " + (a + b) + " ; il faut séparer a et b.")] }); },
       () => { const v = R.int(15, 25), h0 = R.int(1, 3), cs = [-5, v, h0], f = quad(cs), t = 3;
@@ -3690,7 +3694,7 @@
   const sinTxt = (a, f, b, d) => (a === 1 ? "" : a === -1 ? "-" : N(a)) + "\\" + f + "(" + (b === 1 ? "" : N(b)) + "x)" + (d ? sg(d) : "");
   const TF = {
     1: [
-      () => { const a = pk([1, 2, 3, 4, 0.5]), d = R.int(-3, 3), f = pk(["sin", "cos"]), ask = pk(["max", "min"]), v = ask === "max" ? d + a : d - a;
+      () => { const a = pk([1, 2, 3, 4, 0.5]), d = R.int(-3, 3), f = pk(["sin", "cos"]), ask = pk(["max", "min"]), v = ask === "max" ? d + a : d - a; if ([0, 1, -1].includes(v)) return null; /* 25.11 (robot) : « maximum de sin(x) » = 1, « sin(x) − 1 » = 0 : trop direct */
         return QN("Quelle est la valeur " + (ask === "max" ? "maximale" : "minimale") + " de " + M("f(x) = " + sinTxt(a, f, 1, d)) + " ?", v, M("\\" + f + "(x)") + " varie entre −1 et 1, donc " + M("f") + " varie entre " + M(N(d - a)) + " et " + M(N(d + a)) + ".",
           { ctx: "extremum", fig: PL([{ f: (x) => a * (f === "sin" ? Math.sin(x) : Math.cos(x)) + d }], [], { xr: [-1, 7], yr: [-8, 8], squash: 0.6 }), guide: [G("Valeur " + (ask === "max" ? "maximale" : "minimale") + " de " + M("\\" + f + "(x)") + " ?", ask === "max" ? 1 : -1, ask === "max" ? "1." : "−1."), G("Donc " + M("f") + " vaut au " + (ask === "max" ? "maximum" : "minimum") + " ?", v, M(N(a) + " \\cdot " + (ask === "max" ? "1" : "(-1)") + sg(d) + " = " + N(v)) + ".")],
             traps: [TR(ask === "max" ? a : -a, "N'oublie pas le décalage vertical " + d + "."), TR(ask === "max" ? d - a : d + a, ask === "max" ? "Le maximum, c'est d + a." : "Le minimum, c'est d − a.")] }); },
@@ -4178,7 +4182,8 @@
       () => { const k = pk([3, 4, 5]), ref = pk(["petit", "grand", "milieu"]); if (ref === "milieu" && k === 4) return null;
         const first = ref === "petit" ? 0 : ref === "grand" ? -(k - 1) : -(k - 1) / 2, c = k * first + (k * (k - 1)) / 2, ex = (c ? k + "*n" + (c > 0 ? "+" : "") + c : k + "*n"), exNeg = k + "*n" + (c > 0 ? "-" + c : "+" + -c);
         const tex = (c ? k + "n " + (c > 0 ? "+ " + c : "- " + -c) : k + "n");
-        const terms = [...Array(k).keys()].map((i) => { const d = first + i; return d === 0 ? "n" : "(n " + (d > 0 ? "+ " + d : "- " + -d) + ")"; }).join(" + ");
+        const tl = [...Array(k).keys()].map((i) => { const d = first + i; return d === 0 ? "n" : "(n " + (d > 0 ? "+ " + d : "- " + -d) + ")"; });
+        const terms = (k >= 5 ? [tl[0], tl[1], "\\ldots", tl[k - 1]] : tl).join(" + "); /* 25.11 : 5 termes trop larges sur téléphone (341 px) : somme abrégée */
         return QX("Soit " + M("n") + " un entier. On additionne " + k + " entiers consécutifs dont le " + (ref === "milieu" ? "nombre du milieu" : "plus " + ref) + " est " + M("n") + ". Écris cette somme sous forme réduite (en fonction de " + M("n") + ").", ex,
           M(terms + " = " + tex) + ".",
           { ctx: "consecutifs-" + ref, guide: [GX("Écris les " + k + " nombres et additionne-les (sans réduire).", ex, M(terms) + "."), GX("Réduis.", ex, M(tex) + ".")],
@@ -4211,7 +4216,7 @@
       /* trois multiples consécutifs */
       () => { const m = pk([7, 11, 13, 17, 19, 23]), k3 = pk([3, 4]), c = (m * k3 * (k3 - 1)) / 2;
         return QX("Soit " + M("k") + " un entier. Écris sous forme réduite la somme de " + k3 + " multiples de " + M(m) + " consécutifs, le premier étant " + M(m + "k") + ".", k3 * m + "*k+" + c,
-          M([...Array(k3).keys()].map((i) => (i ? m + "(k + " + i + ")" : m + "k")).join(" + ") + " = " + k3 * m + "k + " + c) + ".",
+          M([...Array(k3).keys()].map((i) => (i ? m + "(k + " + i + ")" : m + "k")).filter((t, i) => k3 < 4 || i !== 2).map((t, i) => (k3 >= 4 && i === 2 ? "\\ldots + " + t : t)).join(" + ") + " = " + k3 * m + "k + " + c) + ".", /* 25.11 : 4 termes à deux chiffres abrégés (329 px) */
           { ctx: "multiples-consecutifs", guide: [GS("Le multiple de " + M(m) + " qui suit " + M(m + "k") + " est " + M(m + "k + ?") + ". Que vaut « ? » ?", m, M(m + "(k + 1) = " + m + "k + " + m) + "."), GX("Somme réduite ?", k3 * m + "*k+" + c, M(k3 * m + "k + " + c) + ".")],
             traps: [TX(k3 * m + "*k+" + (k3 * (k3 - 1)) / 2, "Deux multiples de " + m + " consécutifs diffèrent de " + m + ", pas de 1."), TX(m + "*k+" + m * (k3 - 1), "Additionne les " + k3 + " multiples, pas seulement le premier et le dernier.")] }); },
       /* moyenne de nombres consécutifs pairs ou impairs */
@@ -4242,8 +4247,9 @@
     3: [
       /* trouver des impairs consécutifs de somme donnée */
       () => { const k = pk([3, 5]), n = ri(4, 30), first = 2 * n + 1, S = k * first + k * (k - 1);
+        /* 25.11 (437 px sur téléphone) : 5 termes → somme abrégée. */
         return QN("La somme de " + k + " nombres impairs consécutifs vaut " + M(S) + ". Quel est le plus petit de ces nombres ? (Pose " + M("2n + 1") + " pour le plus petit.)", first,
-          M([...Array(k).keys()].map((i) => "(2n + " + (2 * i + 1) + ")").join(" + ") + " = " + 2 * k + "n + " + k * k + " = " + S) + " donne " + M("n = " + n) + " ; le plus petit vaut " + M(first) + ".",
+          M([...Array(k).keys()].map((i) => "(2n + " + (2 * i + 1) + ")").filter((t, i) => k < 5 || i < 2 || i === k - 1).map((t, i) => (k >= 5 && i === 2 ? "\\ldots + " + t : t)).join(" + ") + " = " + 2 * k + "n + " + k * k + " = " + S) + " donne " + M("n = " + n) + " ; le plus petit vaut " + M(first) + ".",
           { ctx: "impairs-somme", guide: [GS("Somme réduite des " + k + " nombres : " + M(2 * k + "n + \\ldots") + ". Quel est le terme constant ?", k * k, M(2 * k + "n + " + k * k) + "."), GS("Résous " + M(2 * k + "n + " + k * k + " = " + S) + " : " + M("n") + " = ?", n, M("n = " + n) + "."), GS("Le plus petit nombre " + M("2n + 1") + " ?", first, M(first) + ".")],
             traps: [TR(n, "n n'est pas le nombre cherché : le plus petit impair est 2n + 1."), TR(S / k, "C'est le nombre du milieu (la moyenne), pas le plus petit."), TR(first + 2 * (k - 1), "C'est le plus grand.")] }); },
       /* nombres de trois chiffres multiples de 5 de somme des chiffres donnée (Sésamath ex. 3) */
@@ -4356,7 +4362,7 @@
       () => { const v = pk([
           { k: 3, t: "trois nombres impairs consécutifs", f: (n) => 6 * n + 9, first: (n) => 2 * n + 1, g: "(2n + 1) + (2n + 3) + (2n + 5) = 6n + 9", ok: (S) => S >= 9 && (S - 9) % 6 === 0, sol: (S) => 2 * ((S - 9) / 6) + 1, ex: "6*n+9" },
           { k: 4, t: "quatre entiers consécutifs", f: (n) => 4 * n + 6, first: (n) => n, g: "n + (n + 1) + (n + 2) + (n + 3) = 4n + 6", ok: (S) => S >= 6 && (S - 6) % 4 === 0, sol: (S) => (S - 6) / 4, ex: "4*n+6" },
-          { k: 5, t: "cinq nombres pairs consécutifs", f: (n) => 10 * n + 20, first: (n) => 2 * n, g: "2n + (2n + 2) + (2n + 4) + (2n + 6) + (2n + 8) = 10n + 20", ok: (S) => S >= 20 && (S - 20) % 10 === 0, sol: (S) => 2 * ((S - 20) / 10), ex: "10*n+20" }]);
+          { k: 5, t: "cinq nombres pairs consécutifs", f: (n) => 10 * n + 20, first: (n) => 2 * n, g: "2n + (2n + 2) + \\ldots + (2n + 8) = 10n + 20", ok: (S) => S >= 20 && (S - 20) % 10 === 0, sol: (S) => 2 * ((S - 20) / 10), ex: "10*n+20" }]);
         const yes = R.rand() < 0.5, n = ri(5, 40), S = yes ? v.f(n) : v.f(n) + pk([1, 2, 3].filter((d) => !v.ok(v.f(n) + d))); if (!yes && v.ok(S)) return null;
         const ans = v.ok(S) ? [v.sol(S)] : [];
         return QSet("Peut-on trouver " + v.t + " (positifs) dont la somme vaut " + M(S) + " ? Si oui, donne le plus petit ; sinon, écris « aucune ».", ans,

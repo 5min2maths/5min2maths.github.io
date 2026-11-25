@@ -1445,13 +1445,15 @@
   const eqv = (v) => (ok2(v) ? "= " + N(v) : "\\approx " + D(v, 0.01));
   const rnd = (v) => (ok2(v) ? undefined : 0.01);
   const add3 = (a, b, k = 1) => a.map((x, i) => x + k * b[i]);
-  const crT = (u, v) => v3(pT(u[1]) + " \\cdot " + pT(v[2]) + " - " + pT(u[2]) + " \\cdot " + pT(v[1]), pT(u[2]) + " \\cdot " + pT(v[0]) + " - " + pT(u[0]) + " \\cdot " + pT(v[2]), pT(u[0]) + " \\cdot " + pT(v[1]) + " - " + pT(u[1]) + " \\cdot " + pT(v[0]));
+  /* 25.11 (corrigés de 332 à 373 px sur téléphone) : produit sans « · » devant une parenthèse ; le résultat passe à la ligne (M séparé). */
+  const mulT = (a, b) => pT(a) + (b < 0 ? pT(b) : " \\cdot " + pT(b));
+  const crT = (u, v) => v3(mulT(u[1], v[2]) + " - " + mulT(u[2], v[1]), mulT(u[2], v[0]) + " - " + mulT(u[0], v[2]), mulT(u[0], v[1]) + " - " + mulT(u[1], v[0]));
   const sq3 = (w) => w.map((x) => pT(x) + "^2").join(" + ");
   const PV = {
     1: [
       () => { const u = [nz(-4, 4), nz(-4, 4), nz(-4, 4)], v = [nz(-4, 4), nz(-4, 4), nz(-4, 4)], w = cross(u, v); if (w.includes(0)) return null;
         return QP("Calcule le produit vectoriel " + M("\\vec{u} \\times \\vec{v}") + " avec " + M("\\vec{u} = " + v3(...u)) + " et " + M("\\vec{v} = " + v3(...v)) + "." + TRIP, w,
-          M("\\vec{u} \\times \\vec{v} = " + crT(u, v) + " = " + v3(...w)) + ".",
+          M("\\vec{u} \\times \\vec{v} = " + crT(u, v)) + " " + M("= " + v3(...w)) + ".",
           { ctx: "composantes", guide: [G("Première composante " + M("u_2 v_3 - u_3 v_2") + " ?", w[0], M(pT(u[1]) + " \\cdot " + pT(v[2]) + " - " + pT(u[2]) + " \\cdot " + pT(v[1]) + " = " + w[0]) + "."), G("Deuxième composante " + M("u_3 v_1 - u_1 v_3") + " ?", w[1], M(w[1]) + "."), G("Troisième composante " + M("u_1 v_2 - u_2 v_1") + " ?", w[2], M(w[2]) + "."), GP("Produit vectoriel ?", w, M(v3(...w)) + ".")],
             traps: [TP(w.map((x) => -x), "L'ordre compte : v × u = −(u × v). Première composante : u₂v₃ − u₃v₂, dans cet ordre."), TP(u.map((x, i) => x * v[i]), "Ce n'est pas un produit composante par composante : on croise les composantes (u₂v₃ − u₃v₂, …)."), TP([w[0], -w[1], w[2]], "Deuxième composante : u₃v₁ − u₁v₃ (attention à l'ordre des produits).")] }); },
       () => { const [a, b, c, d] = pk(TRI3), w = perm([a, b, c]).map((x) => x * sgn()), tri = R.rand() < 0.5, ar = tri ? d / 2 : d;
@@ -1461,8 +1463,9 @@
             traps: [TR(d * d, "N'oublie pas la racine carrée."), TR(tri ? d : d / 2, tri ? "Le triangle est la moitié du parallélogramme." : "C'est l'aire du triangle ; le parallélogramme vaut la norme entière."), TR(Math.abs(w[0]) + Math.abs(w[1]) + Math.abs(w[2]), "Norme : √(x² + y² + z²), pas la somme des composantes.")] }); },
       () => { const a = nz(-6, 6), b = nz(-6, 6), c = nz(-6, 6), e = nz(-6, 6), det = a * e - b * c, ar = Math.abs(det); if (ar < 2 || [a, b, c, e].map(Math.abs).includes(ar)) return null;
         const it = pk([["Une terrasse", "m"], ["Une parcelle de jardin", "dam"], ["Un vitrail", "dm"], ["Le tablier d'un petit pont", "m"]]);
+        /* 25.11 (formule trop large sur téléphone) : calcul de la 3e composante sorti du vecteur colonne. */
         return QN(it[0] + " a la forme d'un parallélogramme construit sur " + M("\\vec{u} = " + v2(a, b)) + " et " + M("\\vec{v} = " + v2(c, e)) + " (en " + it[1] + "). On les écrit dans l'espace avec " + M("z = 0") + " : " + M("\\vec{u} \\times \\vec{v}") + " n'a qu'une composante non nulle. Calcule l'aire (en " + M("\\text{" + it[1] + "}^2") + ").", ar,
-          M("\\vec{u} \\times \\vec{v} = " + v3(0, 0, pT(a) + " \\cdot " + pT(e) + " - " + pT(b) + " \\cdot " + pT(c) + " = " + det)) + " ; aire " + M("|" + det + "| = " + ar + "\\ \\text{" + it[1] + "}^2") + ".",
+          "Troisième composante " + M("u_1 v_2 - u_2 v_1 = " + pT(a) + " \\cdot " + pT(e) + " - " + pT(b) + " \\cdot " + pT(c) + " = " + det) + ", donc " + M("\\vec{u} \\times \\vec{v} = " + v3(0, 0, det)) + " ; aire " + M("|" + det + "| = " + ar + "\\ \\text{" + it[1] + "}^2") + ".",
           { ctx: "aire-plan", guide: [G("Troisième composante " + M("u_1 v_2 - u_2 v_1") + " ?", det, M(pT(a) + " \\cdot " + pT(e) + " - " + pT(b) + " \\cdot " + pT(c) + " = " + det) + "."), G("Aire (une aire est positive) ?", ar, M(ar) + ".")],
             traps: [TR(Math.abs(a * c + b * e), "C'est le produit scalaire ; l'aire vient du produit vectoriel."), TR(Math.abs(a * e + b * c), "u₁v₂ − u₂v₁ : on soustrait les deux produits."), TR(ar / 2, "Pour le parallélogramme, on prend la norme entière (le triangle en serait la moitié)."), TR(det, "Une aire est positive : prends la valeur absolue.")] }); },
     ],
@@ -1476,13 +1479,14 @@
       () => { const A = [R.int(0, 4), R.int(0, 4), R.int(0, 3)], u = [nz(-3, 3), nz(-3, 3), R.int(-2, 2)], v = [nz(-3, 3), R.int(-3, 3), nz(-2, 2)], w = cross(u, v); if (w.filter((x) => x).length < 2) return null;
         const B = add3(A, u), C = add3(A, v), it = pk([["Un panneau solaire triangulaire", "panneau"], ["Une voile d'ombrage tendue", "voile"], ["Un pan de toit triangulaire", "toit"]]);
         return QP(it[0] + " a ses coins en " + ptN("A", ...A) + ", " + ptN("B", ...B) + " et " + ptN("C", ...C) + " (en m). Calcule le vecteur normal " + M("\\vec{n} = \\overrightarrow{AB} \\times \\overrightarrow{AC}") + ", perpendiculaire à la surface." + TRIP, w,
-          M("\\overrightarrow{AB} = " + v3(...u)) + ", " + M("\\overrightarrow{AC} = " + v3(...v)) + ", " + M("\\vec{n} = " + crT(u, v) + " = " + v3(...w)) + ". Vérification : " + M("\\vec{n} \\cdot \\overrightarrow{AB} = 0") + " et " + M("\\vec{n} \\cdot \\overrightarrow{AC} = 0") + ".",
+          M("\\overrightarrow{AB} = " + v3(...u)) + ", " + M("\\overrightarrow{AC} = " + v3(...v)) + ", " + M("\\vec{n} = " + crT(u, v)) + " " + M("= " + v3(...w)) + ". Vérification : " + M("\\vec{n} \\cdot \\overrightarrow{AB} = 0") + " et " + M("\\vec{n} \\cdot \\overrightarrow{AC} = 0") + ".",
           { ctx: "normal-" + it[1], guide: [GP("Composantes de " + M("\\overrightarrow{AB}") + " ?" + TRIP, u, M(v3(...u)) + "."), GP("Composantes de " + M("\\overrightarrow{AC}") + " ?" + TRIP, v, M(v3(...v)) + "."), GP("Vecteur normal " + M("\\overrightarrow{AB} \\times \\overrightarrow{AC}") + " ?" + TRIP, w, M(v3(...w)) + ".")],
             traps: [TP(w.map((x) => -x), "C'est AC × AB : l'ordre compte, AC × AB = −(AB × AC)."), TP(u.map((x, i) => x * v[i]), "On ne multiplie pas composante par composante : formule « en croix »."), TP(cross(B, C), "Calcule d'abord les vecteurs AB et AC (pas les coordonnées des points).")] }); },
       () => { const it = pk([["On serre un écrou avec une clé", "clé"], ["On pousse une porte", "porte"], ["Un cycliste appuie sur sa pédale", "pedale"]]), rx = pk([0.2, 0.25, 0.3, 0.4]), ry = pk([0.1, 0.15, 0.2]), fx = pk([-40, -30, -20, 20, 30, 50]), fy = pk([60, 80, 100, 120, -60, -80]);
         const mz = r6(rx * fy - ry * fx), am = Math.abs(mz); if (am < 2 || [fx, fy].map(Math.abs).includes(am)) return null;
+        /* 25.11 (formule trop large sur téléphone) : calcul de la 3e composante sorti du vecteur colonne. */
         return QN(it[0] + " : le bras de levier est " + M("\\vec{r} = " + v3(N(rx), N(ry), 0)) + " (en m) et la force " + M("\\vec{F} = " + v3(fx, fy, 0)) + " (en N). Calcule la norme du moment " + M("\\vec{M} = \\vec{r} \\times \\vec{F}") + " (en N·m).", am,
-          M("\\vec{r} \\times \\vec{F} = " + v3(0, 0, N(rx) + " \\cdot " + pT(fy) + " - " + N(ry) + " \\cdot " + pT(fx) + " = " + N(mz))) + " ; norme " + M(N(am)) + " N·m.",
+          "Troisième composante " + M("r_x F_y - r_y F_x = " + N(rx) + " \\cdot " + pT(fy) + " - " + N(ry) + " \\cdot " + pT(fx) + " = " + N(mz)) + ", donc " + M("\\vec{r} \\times \\vec{F} = " + v3(0, 0, N(mz))) + " ; norme " + M(N(am)) + " N·m.",
           { ctx: "moment-" + it[1], guide: [G("Troisième composante " + M("r_x F_y - r_y F_x") + " ?", mz, M(N(rx) + " \\cdot " + pT(fy) + " - " + N(ry) + " \\cdot " + pT(fx) + " = " + N(mz)) + "."), G("Norme du moment (positive) ?", am, M(N(am)) + " N·m.")],
             traps: [TR(Math.abs(r6(rx * fx + ry * fy)), "C'est le produit scalaire (le travail) ; le moment vient du produit vectoriel."), TR(Math.abs(r6(rx * fy + ry * fx)), "r_x F_y − r_y F_x : on soustrait."), TR(nrm([rx, ry]) * nrm([fx, fy]), "‖r‖ · ‖F‖ seulement si la force est perpendiculaire au bras de levier.")] }); },
     ],

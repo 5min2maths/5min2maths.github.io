@@ -2165,7 +2165,7 @@
   // 2 = sécante haut→gauche (180 − a), 3 = gauche→sécante bas (a), 4 = sécante bas→droite (180 − a).
   // marks : [[point (0 = sur d₁, 1 = sur d₂), région, étiquette], …]. one = true : une seule droite (angles en un point).
   const par = (a, marks, one) => {
-    const t = (a * Math.PI) / 180, d = [Math.cos(t), Math.sin(t)], h = 2.4, I = [[0, 0], [h / Math.tan(t), h]];
+    const t = (a * Math.PI) / 180, d = [Math.cos(t), Math.sin(t)], h = 3.2, /* 25.11 : 2,4 → 3,2, étiquettes des deux angles entre les parallèles moins serrées (robot : « 68° » à 17 px du « ? ») */ I = [[0, 0], [h / Math.tan(t), h]];
     const g = GEO().add([-4, -1.8], [5.2, h + 1.8]);
     g.seg([-4, 0], [5.2, 0]); if (!one) g.seg([-4, h], [5.2, h]);
     g.seg([I[0][0] - 2 * d[0], I[0][1] - 2 * d[1]], [I[one ? 0 : 1][0] + 2 * d[0], I[one ? 0 : 1][1] + 2 * d[1]]);
@@ -2790,7 +2790,7 @@
       () => { const x = -R.int(1, 4), a = pk([2, 3, -1]), b = nz(-5, 5), c = nz(-6, 6), v = a * x * x + b * x + c;
         return Qv("Calcule la valeur de " + M((a === 1 ? "" : a === -1 ? "-" : a) + "x^2" + (b < 0 ? " - " + -b : " + " + b) + "x" + (c < 0 ? " - " + -c : " + " + c)) + " pour " + M("x = " + x) + ".", v, M(a + " \\cdot " + par(x) + "^2" + (b < 0 ? " - " + -b : " + " + b) + " \\cdot " + par(x) + (c < 0 ? " - " + -c : " + " + c) + " = " + a * x * x + (b * x < 0 ? " - " + -b * x : " + " + b * x) + (c < 0 ? " - " + -c : " + " + c) + " = " + v) + ".",
           { ctx: "valeur-x", guide: [GS(M(par(x) + "^2") + " ?", x * x, M(x * x) + " (positif)."), GS(M(b + " \\cdot " + par(x)) + " ?", b * x, M(b * x) + "."), GS("Résultat ?", v, M(v) + ".")], traps: [TR(-a * x * x + b * x + c, "(" + x + ")² = " + x * x + " est positif."), TR(a * x * x - b * x + c, "Attention au signe de " + b + " · (" + x + ").")] }); },
-      () => { const ts = Array.from({ length: pk([4, 5]) }, () => R.int(-8, 6)), s = ts.reduce((a, b) => a + b, 0); if (s % ts.length) return null; const v = s / ts.length;
+      () => { const ts = Array.from({ length: pk([4, 5]) }, () => R.int(-8, 6)), s = ts.reduce((a, b) => a + b, 0); if (s % ts.length || Math.abs(s / ts.length) <= 1) return null; const v = s / ts.length; /* 25.11 (robot) : moyenne 0 ou ±1 écartée */
         return Qv("Températures relevées à midi pendant " + M(ts.length) + " jours : " + ts.map((t) => M(t)).join(" ; ") + " (en °C). Quelle est la température moyenne ?", v, "Somme " + M(s) + ", divisée par " + M(ts.length) + " : " + M(v) + " °C.",
           { ctx: "moyenne", guide: [GS("Somme des températures ?", s, M(s) + "."), GS("Moyenne ?", v, M(s + " : " + ts.length + " = " + v) + ".")], traps: [TR(ts.reduce((a, b) => a + Math.abs(b), 0) / ts.length, "Les températures négatives se soustraient."), TR(-v, "Vérifie le signe de la somme.")] }); },
       () => { const a = R.int(2, 6), b = R.int(2, 5), c = R.int(2, 4), sgn = [pk([1, -1]), pk([1, -1]), pk([1, -1])], A = sgn[0] * a * b * c, v = (A / (sgn[1] * b)) * (sgn[2] * c);
@@ -4162,7 +4162,7 @@ const EVACOM = (function () {
   function build(it) { R.seed(it.seed); const q = SLOTS[it.s].forms[it.f](); return Object.assign({ p: SLOTS[it.s].p, slot: it.s }, q); }
   return { SLOTS, plan, build, QC };
 })();
-// Écrans du parcours EVACOM. Entrée : onglet « Mon test » ou « Progrès » (pas de case sur l'accueil : règle des 6 cases).
+// Écrans du parcours EVACOM. Entrée : case « Évaluation » (22.11 ; plus dans Progrès depuis le 25.11) (pas de case sur l'accueil : règle des 6 cases).
 // state.evacom = { items: [{ s, f, seed }], date, done: { date, marks, n, juste, partie, faux } | null, runs: [{ date, n, juste, partie, faux }] }.
 let evcBack = "test";
 function evacomOk() { return !!(typeof state !== "undefined" && state && state.profile && state.profile.system === "CH" && +state.profile.grade === 11); }
@@ -4179,7 +4179,7 @@ function evacomCard() {
   if (!evacomOk()) return "";
   if (!EVACOM_OUVERT && location.protocol === "https:" && !(typeof isAuthor === "function" && isAuthor())) return "";
   const E = state.evacom, last = E && E.runs && E.runs.length ? E.runs[E.runs.length - 1] : null, open = E && E.items && !E.done;
-  return `<div class="card flat stack evc-card"><div class="eyebrow">🎓 EVACOM de 11e · épreuve de fin mai</div><h3>Sujet blanc d'EVACOM</h3>
+  return `<div class="card flat stack evc-card"><div class="eyebrow">🎓 Évaluation bilan de 11e · fin d'année</div><h3>Sujet blanc d'évaluation bilan</h3>
     <p class="small muted">95 minutes au format de l'épreuve cantonale : partie 1 sans calculatrice, partie 2 avec. Un nouveau sujet à chaque fois, un corrigé détaillé, puis ce qu'il te reste à retravailler.</p>
     <button class="btn-sec" id="evacom">📝 ${open ? "Reprendre mon sujet blanc" : "Faire un sujet blanc"}</button>
     ${last ? `<p class="small muted">Dernier sujet blanc : ${last.juste} question${last.juste > 1 ? "s" : ""} juste${last.juste > 1 ? "s" : ""} sur ${last.n}${E.done ? ` · <button type="button" class="btn-ghost small" id="evcbilan">voir le bilan</button>` : ""}</p>` : ""}</div>`;
@@ -4192,7 +4192,7 @@ function screenEvacom(fresh) {
   const qHtml = (x, k) => `<div class="mock-q"><b>Question ${k + 1} · ${x.titre}</b>${x.q ? `<div>${x.q}</div>` : ""}${x.fig ? `<div class="figwrap">${x.fig}</div>` : ""}
     ${x.parts && x.parts.length ? `<ol type="a" class="mock-parts">${x.parts.map((p) => `<li>${p}<div class="mock-space"></div></li>`).join("")}</ol>` : '<div class="mock-space"></div>'}</div>`;
   const part = (p) => qs.map((x, k) => (x.p === p ? qHtml(x, k) : "")).join("");
-  h(`<div class="mock-head">${brand}<div class="eyebrow">Sujet blanc · EVACOM de 11e · 95 minutes</div><h2>EVACOM blanche</h2>
+  h(`<div class="mock-head">${brand}<div class="eyebrow">Sujet blanc · évaluation bilan de 11e · 95 minutes</div><h2>Évaluation bilan blanche</h2>
   <p class="small muted">Partie 1 : 50 min, sans calculatrice · Partie 2 : 45 min, calculatrice autorisée</p></div>
   <div class="card flat"><ul class="small evc-rules"><li>Fais-le sur une feuille, en temps réel, sans regarder tes cours : à l'épreuve, <b>pas d'aide-mémoire</b>, les formules doivent être sues. Matériel : une règle graduée.</li>
     <li>Les raisonnements et les calculs doivent figurer sur la feuille ; les fausses égalités et les erreurs d'écriture sont sanctionnées.</li>
@@ -4211,7 +4211,7 @@ function screenEvacom(fresh) {
 }
 function screenEvacomCorr() {
   const qs = evacomQs(), marks = qs.map(() => null);
-  h(`${brand}<div class="eyebrow">EVACOM blanche · corrigé</div><h2>Corrige-toi</h2>
+  h(`${brand}<div class="eyebrow">Évaluation bilan blanche · corrigé</div><h2>Corrige-toi</h2>
   <p class="small muted">Compare avec ta feuille, question par question. <b>À moitié</b> : la démarche est juste mais il y a une erreur de calcul, ou il manque une justification, une unité, l'arrondi demandé.</p>
   <div class="mock-list">${qs.map((x, i) => `${i === 0 || qs[i - 1].p !== x.p ? `<h3>${x.p === 1 ? "Partie 1 · sans calculatrice" : "Partie 2 · calculatrice"}</h3>` : ""}<div class="mock-q card flat"><b>Question ${i + 1} · ${x.titre}</b>
     ${x.q ? `<div class="small">${x.q}</div>` : ""}
@@ -4243,10 +4243,10 @@ function screenEvacomResult() {
   const ids = Object.keys(by).filter((id) => NOTIONS.find((m) => m.id === id));
   const ok = ids.filter((id) => by[id].every((m) => m === 1)), weak = ids.filter((id) => by[id].some((m) => m < 1)).sort((a, b) => Math.min(...by[a]) - Math.min(...by[b]));
   const pp = (p) => { const L0 = qs.map((x, i) => (x.p === p ? mk[i] : null)).filter((m) => m !== null); return `<b>${L0.filter((m) => m === 1).length}</b> sur ${L0.length}`; };
-  h(`${brand}<div class="eyebrow">EVACOM blanche · bilan</div><h2>Où tu en es</h2>
+  h(`${brand}<div class="eyebrow">Évaluation bilan blanche · résultats</div><h2>Où tu en es</h2>
   <div class="card stack"><p><b>${E.done.juste}</b> question${E.done.juste > 1 ? "s" : ""} juste${E.done.juste > 1 ? "s" : ""} sur ${n}${E.done.partie ? ` · <b>${E.done.partie}</b> à moitié` : ""}${E.done.faux ? ` · <b>${E.done.faux}</b> à revoir` : ""}</p>
     <p class="small">Partie 1 (sans calculatrice) : ${pp(1)} · Partie 2 (calculatrice) : ${pp(2)}</p>
-    <p class="small muted">Ce n'est pas une note : c'est pour savoir quoi travailler d'ici l'EVACOM.</p></div>
+    <p class="small muted">Ce n'est pas une note : c'est pour savoir quoi travailler d'ici l'évaluation bilan.</p></div>
   ${weak.length ? `<div class="card flat stack"><h3>À retravailler</h3><ul class="evc-weak">${weak.map((id) => `<li><span>${esc(nLabel(id))}</span>${typeof LESSONS !== "undefined" && LESSONS[id] ? `<button type="button" class="btn-ghost small evc-les" data-id="${id}">📖 Rappel</button>` : ""}</li>`).join("")}</ul>
     <button class="btn-primary" id="rev">Réviser ces notions maintenant</button></div>` : '<div class="card flat"><p>Tout est juste : bravo ! Refais un sujet blanc dans quelques jours pour le garder.</p></div>'}
   ${ok.length ? `<div class="card flat"><h3>✓ Acquis</h3><ul>${ok.map((id) => `<li>${esc(nLabel(id))}</li>`).join("")}</ul></div>` : ""}

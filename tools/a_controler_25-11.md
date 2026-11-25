@@ -105,6 +105,11 @@ Registre : tools/niveau.json ; colonne « Audit de niveau » du suivi.
   moyenne sur deux trajets écartée en 10e ; affine (pente par deux points, parallèle) en 10e ou en 11e ? ; racenc,
   puiss, monomes (formes LS) en 10e ? ; diagr en 9e (secteur circulaire, moyenne pondérée) ; défis propres de 9e à écrire.
 
+### Ton commentaire de 00h28 (« toujours un petit décalage après la 1re action ») 
+
+Envoyé avant la publication de la correction (2d106c8). **À revérifier** après avoir fermé et rouvert l'app ; s'il
+reste un décalage, dis sur quel écran (séance, calibrage, problème) et avec quel clavier.
+
 ## Bilan de la nuit
 
 Toutes les classes ont été auditées (9e → 11e, 1re → 4e Collège, MP 1re → 4e) ; registre tools/niveau.json

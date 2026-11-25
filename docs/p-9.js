@@ -1,3 +1,361 @@
+// ===================== 25.11 : défis (niveau 4) propres à la 9e =====================
+// Audit de niveau 9e–10e (tools/niveau_910.md, point 7) : pour 21 notions de 9e, le niveau 4 reprenait les formes du
+// niveau 3 (« = N3 »). Ici, un vrai problème par notion, en 2 ou 3 étapes qui s'enchaînent, valeurs tirées au hasard,
+// au programme de 9e (plan de cheminement genevois : pas de produit de relatifs, pas d'aires agrandies, pas de littéral).
+// Réservés à la 9e (co: [9]) ; ailleurs, Engine.make les écarte (horsCO). Chargé après variantes.js (PROBX).
+(() => {
+  if (typeof PROBX === "undefined") return;
+  const ri = R.int, pk = R.pick;
+  const r6 = (v) => Math.round(v * 1e6) / 1e6;
+  const N = (v) => { const [i, f] = String(r6(v)).split("."); return (Math.abs(+i) >= 1000 ? i.replace(/\B(?=(\d{3})+(?!\d))/g, "\\text{'}") : i) + (f ? "{,}" + f : ""); };
+  const X = (v) => M(N(v));
+  const PX = (id, f) => { (PROBX[id] = PROBX[id] || []).push(() => Object.assign(f(), { co: [9] })); };
+  /* parts : [libellé, valeur, arrondi facultatif (0.1, 0.01…)] */
+  const PB = (q, parts, hints, sol) => ({ q, hints, sol,
+    parts: parts.map(([label, value, rd]) => ({ label, spec: Object.assign({ kind: "value", value: r6(value) }, rd ? { round: rd } : {}) })) });
+  const gcd = (a, b) => (b ? gcd(b, a % b) : a), lcm = (a, b) => (a * b) / gcd(a, b);
+
+  // ---------- Nombres ----------
+  PX("decread", () => {
+    let t, a, b, c; do { t = ri(3, 9); a = ri(1, 4); b = ri(1, 9); c = ri(1, 9); } while (t - a < 1 || b === c || t - a === b);
+    const u = 2 * a, cen = t - a, n = 10 * t + u + a / 10 + cen / 100 + c / 1000;
+    return PB("Je suis un nombre décimal. Mon chiffre des dizaines est " + X(t) + ". Mon chiffre des unités est le double de mon chiffre des dixièmes, qui vaut " + X(a) + ". Mon chiffre des centièmes est la différence entre mon chiffre des dizaines et mon chiffre des dixièmes. Mon chiffre des millièmes est " + X(c) + ", et je n'ai pas d'autre chiffre.",
+      [["a) Qui suis-je ?", n], ["b) Combien de centièmes entiers y a-t-il en tout dans ce nombre ?", Math.floor(n * 100 + 1e-9)], ["c) Arrondis ce nombre au dixième.", Math.round(n * 10) / 10]],
+      ["Place les chiffres un à un dans un tableau : dizaines, unités, virgule, dixièmes, centièmes, millièmes.", "« Combien de centièmes en tout » : tout ce qui est à gauche du chiffre des centièmes, ce chiffre compris (comme 3,47 = 347 centièmes)."],
+      "a) Unités : " + M("2 \\cdot " + a + " = " + u) + " ; centièmes : " + M(t + " - " + a + " = " + cen) + ". Le nombre est " + X(n) + ". b) " + X(n) + " = " + X(Math.floor(n * 100 + 1e-9)) + " centièmes et " + X(c) + " millièmes. c) " + X(Math.round(n * 10) / 10) + " (le chiffre des centièmes est " + cen + ").");
+  });
+  PX("deccomp", () => {
+    const b = pk([8, 9, 10, 11, 12]), off = [0.8, 0.08, 0.79, 0.801, 1.1, 0.708].sort(() => R.rand() - 0.5).slice(0, 5), v = off.map((o) => r6(b + o)), s = v.slice().sort((x, y) => x - y);
+    const lo = r6(b + 0.75), hi = b + 1, cnt = v.filter((x) => x > lo && x < hi).length;
+    return PB("Cinq élèves ont couru le 60 m. Leurs temps (en secondes) : " + v.map(X).join(" ; ") + ".",
+      [["a) Le meilleur temps (le plus petit), en s", s[0]], ["b) Le temps de l'élève arrivé 3e, en s", s[2]], ["c) Combien de ces temps sont compris entre " + X(lo) + " s et " + X(hi) + " s ?", cnt]],
+      ["Écris tous les temps avec le même nombre de décimales (complète par des zéros), puis compare chiffre par chiffre.", "Range-les du plus petit au plus grand avant de répondre."],
+      "Avec trois décimales : " + v.map((x) => M(x.toFixed(3).replace(".", "{,}"))).join(", ") + ". Rangés : " + s.map(X).join(" < ") + ". a) " + X(s[0]) + " s. b) " + X(s[2]) + " s. c) " + cnt + ".");
+  });
+  PX("dec10", () => {
+    const e = pk([8.4, 9.6, 10.2, 11.5, 12.8]), k = pk([20, 30, 50, 200]), H = r6((k * e) / 100);
+    return PB("Un paquet de " + X(1000) + " feuilles de papier a une épaisseur de " + X(e) + " cm.",
+      [["a) Épaisseur d'une feuille, en mm", r6((e * 10) / 1000)], ["b) Épaisseur d'une pile de 100 paquets, en m", r6(e)], ["c) Une pile de ces feuilles mesure " + X(H) + " m. Combien de feuilles contient-elle ?", k * 1000]],
+      ["Convertis d'abord en mm : 1 cm = 10 mm. Puis divise par 1'000.", "c) Convertis la hauteur en cm, puis cherche combien de paquets cela fait."],
+      "a) " + M(N(e) + " \\text{ cm} = " + N(e * 10) + " \\text{ mm}") + " et " + M(N(e * 10) + " \\div 1\\text{'}000 = " + N(r6((e * 10) / 1000))) + " mm. b) " + M("100 \\cdot " + N(e) + " = " + N(r6(100 * e))) + " cm = " + X(e) + " m. c) " + M(N(H) + " \\text{ m} = " + N(r6(H * 100)) + " \\text{ cm}") + ", soit " + M(N(r6(H * 100)) + " \\div " + N(e) + " = " + k) + " paquets, donc " + X(k * 1000) + " feuilles.");
+  });
+  PX("pow9", () => {
+    const h1 = pk([2, 3]), h2 = pk([4, 5]), k = pk([7, 10, 11]);
+    return PB("Une bactérie se divise en deux toutes les 20 minutes. Au départ, il y a une seule bactérie.",
+      [["a) Combien y a-t-il de bactéries après " + h1 + " heures ?", 2 ** (3 * h1)], ["b) Après " + h2 + " heures, le nombre de bactéries s'écrit " + M("2^n") + ". Que vaut " + M("n") + " ?", 3 * h2], ["c) Au bout de combien de minutes y a-t-il " + X(2 ** k) + " bactéries ?", 20 * k]],
+      ["En une heure, il y a 3 périodes de 20 minutes : le nombre est multiplié par 2 trois fois.", "c) Écris " + N(2 ** k) + " comme une puissance de 2 : combien de divisions a-t-il fallu ?"],
+      "a) " + M("2^{" + 3 * h1 + "} = " + N(2 ** (3 * h1))) + ". b) " + M(h2 + " \\cdot 3 = " + 3 * h2) + " divisions : " + M("n = " + 3 * h2) + ". c) " + M(N(2 ** k) + " = 2^{" + k + "}") + " : " + k + " divisions de 20 minutes, soit " + 20 * k + " minutes.");
+  });
+
+  // ---------- Grandeurs et mesures ----------
+  PX("ulong", () => {
+    let L, c, n, r; do { L = pk([5, 8, 12, 15]); c = pk([35, 45, 65, 70, 85]); n = Math.floor((L * 100) / c); r = L * 100 - n * c; } while (r === 0 || r < 5);
+    const m = pk([12, 15, 24, 40]), mk = r6((n * c * m) / 100 / 1000);
+    return PB("Un rouleau de ficelle de " + X(L) + " m est coupé en morceaux de " + X(c) + " cm, autant que possible. La ficelle pèse " + X(m) + " g par mètre.",
+      [["a) Combien de morceaux obtient-on ?", n], ["b) Longueur du reste, en cm", r], ["c) Masse de tous les morceaux réunis, en kg", mk]],
+      ["Convertis la longueur du rouleau en cm avant de diviser.", "c) Longueur totale des morceaux en m, puis masse en g, puis en kg (1 kg = 1'000 g)."],
+      "a) " + M(N(L) + " \\text{ m} = " + N(L * 100) + " \\text{ cm}") + " ; " + M(N(L * 100) + " \\div " + c) + " : " + n + " morceaux. b) " + M(N(L * 100) + " - " + n + " \\cdot " + c + " = " + r) + " cm. c) " + M(n + " \\cdot " + c + " = " + N(n * c) + " \\text{ cm} = " + N(r6((n * c) / 100)) + " \\text{ m}") + " ; " + M(N(r6((n * c) / 100)) + " \\cdot " + m + " = " + N(r6((n * c * m) / 100)) + " \\text{ g} = " + N(mk) + " \\text{ kg}") + ".");
+  });
+  PX("uaire", () => {
+    const c = pk([25, 50]), a = pk([3, 3.5, 4, 4.5, 5]), b = pk([2.5, 3, 3.5]), A = r6(a * b), nC = ((a * 100) / c) * ((b * 100) / c);
+    return PB("Le sol d'une pièce rectangulaire de " + X(a) + " m sur " + X(b) + " m est recouvert de carreaux carrés de " + X(c) + " cm de côté.",
+      [["a) Aire du sol, en m²", A], ["b) Aire d'un carreau, en m²", r6((c / 100) ** 2)], ["c) Combien faut-il de carreaux ?", nC]],
+      ["Un carreau de " + c + " cm de côté : " + c + " cm = " + N(c / 100) + " m.", "c) Combien de carreaux tiennent sur la longueur ? sur la largeur ?"],
+      "a) " + M(N(a) + " \\cdot " + N(b) + " = " + N(A)) + " m². b) " + M(N(c / 100) + " \\cdot " + N(c / 100) + " = " + N(r6((c / 100) ** 2))) + " m². c) " + M(N(a * 100) + " \\div " + c + " = " + (a * 100) / c) + " carreaux sur la longueur, " + M(N(b * 100) + " \\div " + c + " = " + (b * 100) / c) + " sur la largeur : " + M((a * 100) / c + " \\cdot " + (b * 100) / c + " = " + nC) + " carreaux.");
+  });
+  PX("uvol", () => {
+    const a = pk([50, 60, 80]), b = pk([25, 30, 40]), c = pk([30, 40, 50]), h = ri(2, Math.floor(c / 10) - 1) * 10 - pk([0, 5]), V = (a * b * c) / 1000, x = r6((a * b * h) / 1000), md = (a * b * (c - h)) / 100;
+    return PB("Un aquarium a la forme d'un pavé de " + X(a) + " cm de long, " + X(b) + " cm de large et " + X(c) + " cm de haut. On y verse " + X(x) + " litres d'eau.",
+      [["a) Contenance de l'aquarium, en litres", V], ["b) Hauteur de l'eau, en cm", h], ["c) Combien de décilitres manque-t-il pour le remplir ?", md]],
+      ["1 litre = 1 dm³ = 1'000 cm³.", "b) Volume d'eau en cm³, divisé par l'aire du fond."],
+      "a) " + M(a + " \\cdot " + b + " \\cdot " + c + " = " + N(a * b * c)) + " cm³ = " + X(V) + " L. b) " + M(N(x) + " \\text{ L} = " + N(a * b * h) + " \\text{ cm}^3") + " ; " + M(N(a * b * h) + " \\div (" + a + " \\cdot " + b + ") = " + h) + " cm. c) " + M(N(V) + " - " + N(x) + " = " + N(r6(V - x))) + " L = " + X(md) + " dl.");
+  });
+
+  // ---------- Géométrie ----------
+  PX("angtype", () => {
+    const h1 = pk([2, 4, 5, 7, 8]), m = pk([12, 25, 35, 40]), h2 = pk([2, 3, 4, 8, 9]);
+    const a1 = Math.min(30 * h1, 360 - 30 * h1), raw = Math.abs(30 * h2 + 15 - 180), a3 = Math.min(raw, 360 - raw);
+    return PB("Sur une horloge, on mesure le plus petit angle formé par les deux aiguilles.",
+      [["a) Angle à " + h1 + " h pile (en degrés)", a1], ["b) De combien de degrés tourne la grande aiguille en " + m + " minutes ?", 6 * m], ["c) Angle à " + h2 + " h 30 (en degrés)", a3]],
+      ["Le cadran fait 360° et compte 12 heures : 30° d'une heure à la suivante. La grande aiguille fait un tour (360°) en 60 minutes.", "c) À " + h2 + " h 30, la petite aiguille n'est pas sur le " + h2 + " : elle est à mi-chemin entre " + h2 + " et " + (h2 + 1) + "."],
+      "a) " + M(h1 + " \\cdot 30° = " + 30 * h1 + "°") + (a1 !== 30 * h1 ? ", donc le plus petit angle vaut " + M("360° - " + 30 * h1 + "° = " + a1 + "°") : "") + ". b) " + M("360° \\div 60 = 6°") + " par minute : " + M(m + " \\cdot 6° = " + 6 * m + "°") + ". c) Petite aiguille à " + M(h2 + " \\cdot 30° + 15° = " + (30 * h2 + 15) + "°") + ", grande aiguille à 180° : écart " + M(raw + "°") + (a3 !== raw ? ", plus petit angle " + M(a3 + "°") : "") + ".");
+  });
+  PX("perim", () => {
+    const l = ri(4, 15), d = ri(2, 9), L = l + d, P = 2 * (l + L);
+    return PB("Un rectangle a un périmètre de " + X(P) + " cm. Sa longueur dépasse sa largeur de " + X(d) + " cm.",
+      [["a) Longueur + largeur, en cm", L + l], ["b) Largeur, en cm", l], ["c) Longueur, en cm", L]],
+      ["Le périmètre contient deux longueurs et deux largeurs : la moitié contient une longueur et une largeur.", "Si on enlève les " + d + " cm de trop à la longueur, il reste deux largeurs."],
+      "a) " + M(P + " \\div 2 = " + (L + l)) + " cm. b) " + M("(" + (L + l) + " - " + d + ") \\div 2 = " + l) + " cm. c) " + M(l + " + " + d + " = " + L) + " cm. Vérification : " + M("2 \\cdot (" + L + " + " + l + ") = " + P) + ".");
+  });
+  PX("aire1", () => {
+    const s = pk([6, 8, 9, 10, 12]), A = s * s, ws = []; for (let w = 2; w < s; w++) if (A % w === 0 && A / w !== s) ws.push(w);
+    const w = pk(ws), L = A / w, dP = 2 * (L + w) - 4 * s;
+    return PB("Un rectangle a la même aire qu'un carré de " + X(s) + " cm de côté. Sa largeur mesure " + X(w) + " cm.",
+      [["a) Aire du carré, en cm²", A], ["b) Longueur du rectangle, en cm", L], ["c) De combien de cm le périmètre du rectangle dépasse-t-il celui du carré ?", dP]],
+      ["Même aire : longueur · largeur = aire du carré.", "c) Calcule les deux périmètres, puis la différence."],
+      "a) " + M(s + " \\cdot " + s + " = " + A) + " cm². b) " + M(A + " \\div " + w + " = " + L) + " cm. c) Rectangle : " + M("2 \\cdot (" + L + " + " + w + ") = " + 2 * (L + w)) + " cm ; carré : " + M("4 \\cdot " + s + " = " + 4 * s) + " cm ; différence " + X(dP) + " cm (même aire, périmètres différents).");
+  });
+  PX("aire2", () => {
+    let b, h, c, A, h2; do { b = ri(6, 14); h = ri(4, 9); c = ri(h + 1, 13); A = b * h; h2 = A / c; } while (c === b || Math.abs(h2 * 10 - Math.round(h2 * 10)) > 1e-9);
+    const d1 = pk([4, 6, 8, 10, 12].filter((x) => (2 * A) % x === 0 && 2 * A / x !== x)) || 2, d2 = (2 * A) / d1;
+    return PB("Un parallélogramme " + M("ABCD") + " a une base " + M("[AB]") + " de " + X(b) + " cm et une hauteur relative à cette base de " + X(h) + " cm. Son côté " + M("[BC]") + " mesure " + X(c) + " cm.",
+      [["a) Aire du parallélogramme, en cm²", A], ["b) Hauteur relative au côté " + M("[BC]") + ", en cm", h2, Number.isInteger(h2) ? 0 : 0.1], ["c) Un losange a la même aire, et une diagonale de " + X(d1) + " cm. Longueur de l'autre diagonale, en cm", d2]],
+      ["L'aire ne dépend pas du côté choisi comme base : base · hauteur correspondante.", "Losange : aire = (diagonale · diagonale) ÷ 2."],
+      "a) " + M(b + " \\cdot " + h + " = " + A) + " cm². b) " + M(A + " \\div " + c + " = " + N(h2)) + " cm. c) " + M("d \\cdot " + d1 + " \\div 2 = " + A) + ", donc " + M("d = " + 2 * A + " \\div " + d1 + " = " + N(d2)) + " cm.");
+  });
+  PX("aire3", () => {
+    const a = ri(8, 20), b = ri(5, 12), l = pk([1, 2]), p = pk([12, 15, 18, 24]), G = (a + 2 * l) * (b + 2 * l), al = G - a * b;
+    return PB("Un jardin rectangulaire de " + X(a) + " m sur " + X(b) + " m est entouré d'une allée de " + X(l) + " m de large. On couvre l'allée de gravier à " + X(p) + " CHF le m².",
+      [["a) Aire du grand rectangle (jardin + allée), en m²", G], ["b) Aire de l'allée, en m²", al], ["c) Prix du gravier, en CHF", al * p]],
+      ["Le grand rectangle dépasse le jardin de " + l + " m de chaque côté : " + 2 * l + " m de plus en longueur et en largeur.", "Aire de l'allée = grand rectangle − jardin."],
+      "a) " + M("(" + a + " + " + 2 * l + ") \\cdot (" + b + " + " + 2 * l + ") = " + (a + 2 * l) + " \\cdot " + (b + 2 * l) + " = " + G) + " m². b) " + M(G + " - " + a + " \\cdot " + b + " = " + al) + " m². c) " + M(al + " \\cdot " + p + " = " + N(al * p)) + " CHF.");
+  });
+  PX("solides", () => {
+    const n = pk([5, 6, 7, 8, 9]), pyr = R.rand() < 0.5, nm = { 5: "pentagone", 6: "hexagone", 7: "heptagone", 8: "octogone", 9: "ennéagone" }[n];
+    const F = pyr ? n + 1 : n + 2, Ar = pyr ? 2 * n : 3 * n, S = pyr ? n + 1 : 2 * n;
+    return PB("Un" + (pyr ? "e pyramide" : " prisme droit") + " a pour base un " + nm + " (" + n + " côtés).",
+      [["a) Nombre de faces", F], ["b) Nombre d'arêtes", Ar], ["c) Nombre de sommets", S]],
+      [pyr ? "Une pyramide : une base, et un triangle sur chaque côté de la base, qui se rejoignent au sommet." : "Un prisme : deux bases identiques, reliées par un rectangle sur chaque côté.", "Vérifie avec la relation d'Euler : faces + sommets − arêtes = 2."],
+      pyr ? "a) " + M("1 + " + n + " = " + F) + " faces. b) " + n + " arêtes autour de la base et " + n + " vers le sommet : " + Ar + ". c) " + n + " sommets de la base et le sommet : " + S + ". Euler : " + M(F + " + " + S + " - " + Ar + " = 2") + "."
+        : "a) " + M("2 + " + n + " = " + F) + " faces. b) " + n + " arêtes par base et " + n + " arêtes latérales : " + M("3 \\cdot " + n + " = " + Ar) + ". c) " + M("2 \\cdot " + n + " = " + S) + " sommets. Euler : " + M(F + " + " + S + " - " + Ar + " = 2") + ".");
+  });
+  PX("volpave", () => {
+    const k = pk([2, 3, 4, 5]), a = k * ri(3, 6), b = k * ri(2, 4), c = k * ri(2, 3), V = a * b * c, S = a * b + 2 * a * c + 2 * b * c;
+    return PB("Une boîte sans couvercle a la forme d'un pavé de " + X(a) + " cm sur " + X(b) + " cm, et " + X(c) + " cm de haut.",
+      [["a) Volume de la boîte, en cm³", V], ["b) Aire de carton nécessaire (sans couvercle), en cm²", S], ["c) Combien de cubes de " + k + " cm d'arête peut-on y ranger ?", (a / k) * (b / k) * (c / k)]],
+      ["Sans couvercle : le fond, et quatre faces latérales (deux paires identiques).", "c) Combien de cubes sur la longueur, sur la largeur, sur la hauteur ?"],
+      "a) " + M(a + " \\cdot " + b + " \\cdot " + c + " = " + N(V)) + " cm³. b) " + M(a + " \\cdot " + b + " + 2 \\cdot " + a + " \\cdot " + c + " + 2 \\cdot " + b + " \\cdot " + c + " = " + N(S)) + " cm². c) " + M(a / k + " \\cdot " + b / k + " \\cdot " + c / k + " = " + (a / k) * (b / k) * (c / k)) + " cubes.");
+  });
+
+  // ---------- Fractions ----------
+  PX("fracrep", () => {
+    const POOL = [[3, 4], [5, 6], [2, 3], [5, 8], [7, 12], [3, 8], [5, 12], [1, 3], [7, 8], [1, 4]];
+    let F; do { F = POOL.slice().sort(() => R.rand() - 0.5).slice(0, 3); } while (new Set(F.map(([p, q]) => p / q)).size < 3 || F.filter(([p, q]) => p / q > 0.5).length !== 2);
+    const D = F.reduce((m, [, q]) => lcm(m, q), 1), big = F.slice().sort((x, y) => y[0] / y[1] - x[0] / x[1])[0], half = F.filter(([p, q]) => p / q > 0.5).length;
+    const nm = ["Lina", "Noé", "Sara"];
+    return PB("Trois amis partagent des tartes de même taille. " + F.map(([p, q], i) => nm[i] + " a mangé " + M("\\frac{" + p + "}{" + q + "}") + " de tarte").join(", ") + ".",
+      [["a) Combien d'entre eux ont mangé plus d'une demi-tarte ?", half], ["b) Plus petit dénominateur commun des trois fractions", D], ["c) Écrite avec ce dénominateur, la plus grande part a pour numérateur…", (big[0] * D) / big[1]]],
+      ["Plus d'une demie : le numérateur dépasse la moitié du dénominateur.", "Dénominateur commun : le plus petit nombre qui est un multiple des trois dénominateurs ; puis amplifie chaque fraction."],
+      "a) " + half + ". b) " + D + ". Avec ce dénominateur : " + F.map(([p, q]) => M("\\frac{" + p + "}{" + q + "} = \\frac{" + (p * D) / q + "}{" + D + "}")).join(" ; ") + ". c) La plus grande part : " + M("\\frac{" + (big[0] * D) / big[1] + "}{" + D + "}") + ".");
+  });
+  PX("fracsimp", () => {
+    const PQ = [[2, 3], [3, 4], [2, 5], [4, 7], [3, 8], [5, 9], [5, 6], [4, 9]], [p, q] = pk(PQ), k = pk([12, 14, 18, 21, 24]), cnt = Math.floor(50 / q) - Math.ceil(20 / q) + 1;
+    return PB("On veut simplifier la fraction " + M("\\frac{" + k * p + "}{" + k * q + "}") + " au maximum.",
+      [["a) Numérateur de la fraction irréductible", p], ["b) Dénominateur de la fraction irréductible", q], ["c) Combien de fractions égales à celle-ci ont un dénominateur compris entre 20 et 50 (bornes comprises) ?", cnt]],
+      ["Simplifie en plusieurs fois si tu veux : par 2, par 3, par 7…", "c) Les fractions égales s'obtiennent en amplifiant : leurs dénominateurs sont les multiples de " + q + "."],
+      "a) et b) " + M("\\frac{" + k * p + "}{" + k * q + "} = \\frac{" + p + "}{" + q + "}") + " (on divise par " + k + "). c) Multiples de " + q + " entre 20 et 50 : " + Array.from({ length: cnt }, (_, i) => (Math.ceil(20 / q) + i) * q).join(", ") + " : " + cnt + " fractions.");
+  });
+  PX("fractout", () => {
+    let n, a, b, c, d, f, r, mu; do { [a, b] = pk([[2, 3], [3, 4], [2, 5], [3, 5], [1, 3], [1, 4]]); [c, d] = pk([[1, 2], [1, 3], [2, 3], [1, 4], [3, 4]]); n = pk([20, 24, 28, 30, 36]); f = (n * a) / b; r = n - f; mu = (r * c) / d; } while (!Number.isInteger(f) || !Number.isInteger(mu) || mu === 0 || r - mu === 0);
+    return PB("Dans une classe de " + X(n) + " élèves, " + M("\\frac{" + a + "}{" + b + "}") + " font du football. Parmi les autres, " + M("\\frac{" + c + "}{" + d + "}") + " font de la musique.",
+      [["a) Combien d'élèves font du football ?", f], ["b) Combien d'élèves font de la musique ?", mu], ["c) Combien d'élèves ne font ni l'un ni l'autre ?", r - mu]],
+      ["Fraction d'une quantité : divise par le dénominateur, multiplie par le numérateur.", "b) Attention : la fraction porte sur « les autres », pas sur toute la classe."],
+      "a) " + M(n + " \\div " + b + " \\cdot " + a + " = " + f) + ". Autres : " + M(n + " - " + f + " = " + r) + ". b) " + M(r + " \\div " + d + " \\cdot " + c + " = " + mu) + ". c) " + M(r + " - " + mu + " = " + (r - mu)) + ".");
+  });
+
+  // ---------- Proportionnalité ----------
+  PX("proptab", () => {
+    const u = pk([2.4, 3.5, 4.2, 5.6, 6.5]), m1 = pk([3, 4, 5]), m2 = pk([1.5, 2.5, 7]), m3 = pk([8, 12, 15]);
+    return PB("Au marché, le prix des cerises est proportionnel à leur masse : " + X(m1) + " kg coûtent " + X(r6(u * m1)) + " CHF.",
+      [["a) Prix d'un kilo, en CHF", u, 0.01], ["b) Prix de " + X(m2) + " kg, en CHF", r6(u * m2), 0.01], ["c) Combien de kg achète-t-on avec " + X(r6(u * m3)) + " CHF ?", m3]],
+      ["Le coefficient de proportionnalité est le prix d'un kilo.", "c) Masse = prix ÷ prix d'un kilo."],
+      "a) " + M(N(r6(u * m1)) + " \\div " + m1 + " = " + N(u)) + " CHF. b) " + M(N(m2) + " \\cdot " + N(u) + " = " + N(r6(u * m2))) + " CHF. c) " + M(N(r6(u * m3)) + " \\div " + N(u) + " = " + m3) + " kg.");
+  });
+  PX("prop", () => {
+    let g, fa, oe, n2, n3; do { g = pk([4, 6]); fa = pk([180, 240, 300, 360]); oe = pk([2, 3, 4]); n2 = pk(g === 4 ? [6, 10, 14] : [9, 15, 4]); n3 = pk(g === 4 ? [12, 18, 22, 10] : [8, 10, 16, 9]); } while (!Number.isInteger((oe * n3) / g) || n2 === n3);
+    return PB("Une recette pour " + g + " personnes demande " + X(fa) + " g de farine et " + X(oe) + " œufs.",
+      [["a) Farine pour " + n2 + " personnes, en g", (fa * n2) / g], ["b) Avec " + X((fa * n3) / g) + " g de farine, pour combien de personnes cuisine-t-on ?", n3], ["c) Œufs nécessaires pour " + n3 + " personnes", (oe * n3) / g]],
+      ["Passe par une personne : divise par " + g + ", puis multiplie.", "b) Combien de fois " + N(fa / g) + " g dans la quantité de farine ?"],
+      "Pour une personne : " + M(N(fa) + " \\div " + g + " = " + N(fa / g)) + " g de farine et " + M(oe + " \\div " + g + " = " + N(oe / g)) + " œuf. a) " + M(n2 + " \\cdot " + N(fa / g) + " = " + N((fa * n2) / g)) + " g. b) " + M(N((fa * n3) / g) + " \\div " + N(fa / g) + " = " + n3) + " personnes. c) " + M(n3 + " \\cdot " + N(oe / g) + " = " + N(r6((oe * n3) / g))) + " œufs.");
+  });
+  PX("change", () => {
+    const r = pk([0.94, 0.95, 0.96]), e1 = pk([150, 240, 320, 450]), c2 = pk([200, 300, 500]), z = pk([35, 45, 60]), r2 = r6(r - pk([0.02, 0.03]));
+    return PB("Avant un voyage, 1 euro vaut " + X(r) + " CHF à la banque.",
+      [["a) Combien coûtent " + X(e1) + " euros, en CHF ?", r6(e1 * r), 0.01], ["b) Combien d'euros obtient-on pour " + X(c2) + " CHF ? (arrondi au centime)", Math.round((c2 / r) * 100) / 100, 0.01], ["c) Au retour, il reste " + X(z) + " euros, que la banque rachète à " + X(r2) + " CHF l'euro. Combien de CHF reçoit-on ?", r6(z * r2), 0.01]],
+      ["De l'euro vers le franc : multiplie par le taux.", "Du franc vers l'euro : divise par le taux."],
+      "a) " + M(e1 + " \\cdot " + N(r) + " = " + N(r6(e1 * r))) + " CHF. b) " + M(c2 + " \\div " + N(r) + " \\approx " + N(Math.round((c2 / r) * 100) / 100)) + " €. c) " + M(z + " \\cdot " + N(r2) + " = " + N(r6(z * r2))) + " CHF.");
+  });
+  PX("agrand", () => {
+    const [a, b] = pk([[10, 15], [9, 13], [12, 18], [10, 14]]), k = pk([1.5, 2.5, 3, 1.2]), k2 = pk([0.5, 0.4, 0.8]), A = r6(a * k);
+    return PB("Une photo de " + X(a) + " cm sur " + X(b) + " cm est agrandie : sa largeur passe à " + X(A) + " cm.",
+      [["a) Coefficient d'agrandissement", k], ["b) Nouvelle hauteur, en cm", r6(b * k)], ["c) On réduit ensuite cette nouvelle photo avec un coefficient de " + X(k2) + ". Largeur finale, en cm", r6(A * k2)]],
+      ["Coefficient = nouvelle longueur ÷ ancienne longueur.", "Toutes les longueurs sont multipliées par le même coefficient."],
+      "a) " + M(N(A) + " \\div " + a + " = " + N(k)) + ". b) " + M(b + " \\cdot " + N(k) + " = " + N(r6(b * k))) + " cm. c) " + M(N(A) + " \\cdot " + N(k2) + " = " + N(r6(A * k2))) + " cm.");
+  });
+})();
+
+// ===================== 25.11 : défis (niveau 4) de 9e et 10e, suite =====================
+// Sonde de couverture du 25.11 : 10 notions de 9e et 13 de 10e n'avaient aucun défi (le niveau 4 retombait sur le
+// niveau 3). Même principe que src/defis_9.js : 2–3 étapes qui s'enchaînent, valeurs tirées au hasard, programme de la
+// classe (plan de cheminement genevois), réservés aux classes indiquées (co). Chargé après variantes.js (PROBX).
+(() => {
+  if (typeof PROBX === "undefined") return;
+  const ri = R.int, pk = R.pick;
+  const r6 = (v) => Math.round(v * 1e6) / 1e6;
+  const N = (v) => { const s = String(r6(v)), neg = s[0] === "-", [i, f] = (neg ? s.slice(1) : s).split("."); return (neg ? "-" : "") + (+i >= 1000 ? i.replace(/\B(?=(\d{3})+(?!\d))/g, "\\text{'}") : i) + (f ? "{,}" + f : ""); };
+  const X = (v) => M(N(v));
+  const PX = (id, co, f) => { (PROBX[id] = PROBX[id] || []).push(() => Object.assign(f(), { co })); };
+  const sp = (v, rd) => (Array.isArray(v) ? { kind: "pair", values: v } : Object.assign({ kind: "value", value: r6(v) }, rd ? { round: rd } : {}));
+  const PB = (q, parts, hints, sol) => ({ q, hints, sol, parts: parts.map(([label, v, rd]) => ({ label, spec: sp(v, rd) })) });
+  const gcd = (a, b) => (b ? gcd(b, a % b) : a);
+  const pt = (x, y) => M("(" + N(x) + "\\,;\\," + N(y) + ")");
+  const PAIRL = " (réponds « x ; y »)";
+
+  // ======================= 9e et 10e =======================
+  PX("arith", [9, 10], () => {
+    let a, b, g; do { g = pk([4, 6, 8, 12, 15]); a = g * ri(3, 9); b = g * ri(3, 9); } while (gcd(a / g, b / g) !== 1 || a === b);
+    const m = (a * b) / g;
+    return PB("Deux bus partent ensemble du terminus à 7 h. Le premier repasse toutes les " + a + " minutes, le second toutes les " + b + " minutes. Pour une fête, on veut aussi répartir " + a + " croissants et " + b + " pains au chocolat dans des corbeilles identiques (même contenu), le plus grand nombre de corbeilles possible.",
+      [["a) Après combien de minutes les deux bus repartent-ils de nouveau ensemble ?", m], ["b) Combien de corbeilles peut-on faire ?", g], ["c) Combien de croissants dans chaque corbeille ?", a / g]],
+      ["« Ensemble de nouveau » : un multiple commun, le plus petit (PPMC).", "« Le plus grand nombre de corbeilles identiques » : un diviseur commun, le plus grand (PGDC)."],
+      "a) PPMC(" + a + " ; " + b + ") = " + m + " minutes. b) PGDC(" + a + " ; " + b + ") = " + g + " corbeilles. c) " + M(a + " \\div " + g + " = " + a / g) + " croissants (et " + b / g + " pains au chocolat).");
+  });
+  PX("diagr", [9, 10], () => {
+    let n, notes, k, tgt; do { n = pk([5, 6]); notes = Array.from({ length: n - 1 }, () => pk([3.5, 4, 4.5, 5, 5.5, 6])); tgt = pk([4.5, 5, 5.5]); k = r6(tgt * n - notes.reduce((s, x) => s + x, 0)); } while (k < 3 || k > 6 || Math.abs(k * 2 - Math.round(k * 2)) > 1e-9);
+    const S = r6(notes.reduce((s, x) => s + x, 0)), m0 = r6(S / (n - 1));
+    return PB("Léa a obtenu ces notes en maths : " + notes.map(X).join(" ; ") + ". Il reste un test avant la fin du semestre.",
+      [["a) Moyenne actuelle (au centième)", m0, 0.01], ["b) Somme de ses notes actuelles", S], ["c) Quelle note doit-elle obtenir au dernier test pour avoir exactement " + N(tgt).replace("{,}", ",") + " de moyenne ?", k]],
+      ["Moyenne = somme des notes ÷ nombre de notes.", "c) Avec " + n + " notes et une moyenne de " + N(tgt).replace("{,}", ",") + ", quelle doit être la somme des " + n + " notes ?"],
+      "a) " + M(N(S) + " \\div " + (n - 1) + " \\approx " + N(Math.round(m0 * 100) / 100)) + ". b) " + X(S) + ". c) Somme nécessaire : " + M(n + " \\cdot " + N(tgt) + " = " + N(r6(n * tgt))) + " ; note : " + M(N(r6(n * tgt)) + " - " + N(S) + " = " + N(k)) + ".");
+  });
+  PX("premiers", [9, 10], () => {
+    const P = [[2, 3], [2, 5], [3, 5], [2, 7], [3, 7]], [p, q] = pk(P), a = pk([2, 3, 4]), b = a % 2 ? ri(1, 2) : 1, n = p ** a * q ** b, nd = (a + 1) * (b + 1), sq = (a % 2 ? p : 1) * (b % 2 ? q : 1);
+    return PB("On considère le nombre " + X(n) + ".",
+      [["a) Combien de facteurs premiers (comptés avec répétition) dans sa décomposition ?", a + b], ["b) Combien de diviseurs a-t-il en tout ?", nd], ["c) Par quel plus petit entier faut-il le multiplier pour obtenir un carré parfait ?", sq]],
+      ["Décompose en divisant par 2, puis 3, puis 5, puis 7… tant que c'est possible.", "Un carré parfait : chaque facteur premier y apparaît un nombre pair de fois."],
+      M(N(n) + " = " + p + "^{" + a + "} \\cdot " + q + (b > 1 ? "^{" + b + "}" : "")) + ". a) " + (a + b) + " facteurs. b) Un diviseur prend " + p + " de 0 à " + a + " fois et " + q + " de 0 à " + b + " fois : " + M((a + 1) + " \\cdot " + (b + 1) + " = " + nd) + ". c) Il faut rendre les exposants pairs : multiplier par " + sq + ".");
+  });
+  PX("fracper", [9, 10], () => {
+    const a = ri(1, 9), bc = pk([12, 27, 36, 45, 63, 81]), v = a / 10 + bc / 990;
+    let num = a * 99 + bc, den = 990; const g = gcd(num, den); num /= g; den /= g;
+    const s = "0{,}" + a + String(bc).padStart(2, "0") + String(bc).padStart(2, "0") + "\\ldots";
+    return PB("On veut écrire " + M(s) + " (le groupe « " + String(bc).padStart(2, "0") + " » se répète) sous forme de fraction irréductible.",
+      [["a) Combien vaut " + M("1000 \\cdot x - 10 \\cdot x") + " si " + M("x = " + s) + " ?", r6(990 * v)], ["b) Numérateur de la fraction irréductible", num], ["c) Dénominateur de la fraction irréductible", den]],
+      ["Multiplie x par 10 pour amener la période juste après la virgule, puis par 1000 pour décaler d'une période : les parties décimales sont les mêmes.", "Soustrais, puis simplifie la fraction obtenue."],
+      M("1000x = " + a + String(bc).padStart(2, "0") + "{,}" + String(bc).padStart(2, "0") + "\\ldots") + " et " + M("10x = " + a + "{,}" + String(bc).padStart(2, "0") + "\\ldots") + " ; " + M("990x = " + (a * 99 + bc)) + ", donc " + M("x = \\frac{" + (a * 99 + bc) + "}{990} = \\frac{" + num + "}{" + den + "}") + ".");
+  });
+
+  // ======================= 9e =======================
+  PX("decarr", [9], () => {
+    const p = pk([12.4, 18.6, 23.7, 7.85, 9.45]), n = pk([3, 4, 6, 7]), t = r6(p * n);
+    return PB("Au supermarché, Tom achète " + n + " articles à " + X(p) + " CHF pièce. Il arrondit chaque prix à l'unité pour calculer de tête.",
+      [["a) Prix total exact, en CHF", t, 0.01], ["b) Total estimé avec les prix arrondis à l'unité", n * Math.round(p)], ["c) Différence entre l'estimation et le prix exact (en CHF, valeur positive)", r6(Math.abs(n * Math.round(p) - t)), 0.01]],
+      ["Arrondir à l'unité : regarde le chiffre des dixièmes.", "c) Chaque arrondi fait une petite erreur ; elle est multipliée par " + n + "."],
+      "a) " + M(n + " \\cdot " + N(p) + " = " + N(t)) + " CHF. b) " + N(p) + " ≈ " + Math.round(p) + " ; " + M(n + " \\cdot " + Math.round(p) + " = " + n * Math.round(p)) + " CHF. c) " + M("|" + n * Math.round(p) + " - " + N(t) + "| = " + N(r6(Math.abs(n * Math.round(p) - t)))) + " CHF.");
+  });
+  PX("decprob", [9], () => {
+    const l = pk([0.75, 1.5, 0.4]), pl = pk([1.8, 2.4, 3.6]), n = pk([12, 18, 24]), pu = pk([2.9, 3.45, 4.2]);
+    const L = r6(l * n), bott = Math.ceil(r6(L / pl) - 1e-9), cost = r6(bott * pu), bil = [20, 50, 100].find((b) => b > cost);
+    return PB("Pour un pique-nique de " + n + " personnes, on prévoit " + X(l) + " L de jus par personne. Le jus est vendu en bouteilles de " + X(pl) + " L à " + X(pu) + " CHF la bouteille. On paie avec un billet de " + bil + " CHF.",
+      [["a) Quantité de jus nécessaire, en L", L], ["b) Nombre de bouteilles à acheter", bott], ["c) Monnaie rendue, en CHF", r6(bil - cost), 0.01]],
+      ["b) On ne peut acheter qu'un nombre entier de bouteilles : arrondis vers le haut.", "c) Prix total des bouteilles, puis soustrais du billet."],
+      "a) " + M(n + " \\cdot " + N(l) + " = " + N(L)) + " L. b) " + M(N(L) + " \\div " + N(pl) + " \\approx " + N(Math.round((L / pl) * 100) / 100)) + " : il faut " + bott + " bouteilles. c) " + M(bott + " \\cdot " + N(pu) + " = " + N(cost)) + " CHF ; " + M(bil + " - " + N(cost) + " = " + N(r6(bil - cost))) + " CHF.");
+  });
+  PX("multdiv", [9], () => {
+    let a, b; do { a = pk([4, 6, 8, 9, 12]); b = pk([6, 10, 15, 14, 21]); } while (a === b || gcd(a, b) === 1 || gcd(a, b) === Math.min(a, b));
+    const L = (a * b) / gcd(a, b), lo = ri(1, 3) * 50, hi = lo + pk([200, 300]), cA = Math.floor(hi / a) - Math.floor((lo - 1) / a), cL = Math.floor(hi / L) - Math.floor((lo - 1) / L);
+    return PB("On considère les nombres entiers de " + lo + " à " + hi + " (bornes comprises).",
+      [["a) Combien sont des multiples de " + a + " ?", cA], ["b) Quel est le plus petit nombre non nul multiple à la fois de " + a + " et de " + b + " ?", L], ["c) Combien de nombres de la liste sont multiples à la fois de " + a + " et de " + b + " ?", cL]],
+      ["Compte les multiples de " + a + " jusqu'à " + hi + ", puis enlève ceux qui sont avant " + lo + ".", "Multiple de " + a + " et de " + b + " : multiple de leur plus petit multiple commun (pas forcément " + a * b + ")."],
+      "a) Jusqu'à " + hi + " : " + Math.floor(hi / a) + " multiples ; avant " + lo + " : " + Math.floor((lo - 1) / a) + " ; donc " + cA + ". b) " + L + " (et non " + a * b + "). c) Multiples de " + L + " : " + Math.floor(hi / L) + " − " + Math.floor((lo - 1) / L) + " = " + cL + ".");
+  });
+  PX("relrep", [9], () => {
+    let a, b, c; do { a = -ri(4, 12); b = ri(3, 11); c = -ri(2, 9); } while (a === c || Math.abs(a + b) < 3);
+    const m = r6((a + b) / 2), d = b - a, e = b - c;
+    return PB("Sur une droite graduée, le point " + M("A") + " a pour abscisse " + X(a) + ", le point " + M("B") + " a pour abscisse " + X(b) + " et le point " + M("C") + " a pour abscisse " + X(c) + ".",
+      [["a) Distance entre " + M("A") + " et " + M("B"), d], ["b) Abscisse du milieu de " + M("[AB]"), m], ["c) De combien d'unités faut-il déplacer " + M("C") + " vers la droite pour qu'il soit à la même distance de " + M("B") + " que " + M("A") + " l'est de " + M("B") + ", de l'autre côté de " + M("B") + " ?", b + d - c]],
+      ["Distance entre deux points : la plus grande abscisse moins la plus petite.", "c) Le point cherché est à " + d + " unités à droite de B."],
+      "a) " + M(b + " - (" + a + ") = " + d) + ". b) " + M("(" + a + " + " + b + ") \\div 2 = " + N(m)) + ". c) Point cherché : " + M(b + " + " + d + " = " + (b + d)) + " ; déplacement : " + M((b + d) + " - (" + c + ") = " + (b + d - c)) + " unités.");
+  });
+  PX("quadri", [9], () => {
+    const al = pk([32, 38, 44, 52, 58, 64]), b = (180 - 2 * al) / 2, kind = R.rand() < 0.5;
+    return kind ? PB("Dans un losange " + M("ABCD") + ", l'angle " + M("\\widehat{BAC}") + " (entre le côté et la diagonale) mesure " + al + "°. Les diagonales se coupent en " + M("O") + ".",
+      [["a) Angle " + M("\\widehat{BAD}") + " (en degrés)", 2 * al], ["b) Angle " + M("\\widehat{AOB}") + " (en degrés)", 90], ["c) Angle " + M("\\widehat{ABC}") + " (en degrés)", 180 - 2 * al]],
+      ["Dans un losange, les diagonales sont les bissectrices des angles et elles sont perpendiculaires.", "Deux angles consécutifs d'un losange sont supplémentaires (somme 180°)."],
+      "a) La diagonale [AC] est bissectrice : " + M("2 \\cdot " + al + "° = " + 2 * al + "°") + ". b) Diagonales perpendiculaires : 90°. c) " + M("180° - " + 2 * al + "° = " + (180 - 2 * al) + "°") + ".")
+      : PB("Dans un rectangle " + M("ABCD") + ", les diagonales se coupent en " + M("O") + " et l'angle " + M("\\widehat{OAB}") + " mesure " + al + "°.",
+      [["a) Angle " + M("\\widehat{OBA}") + " (en degrés)", al], ["b) Angle " + M("\\widehat{AOB}") + " (en degrés)", 180 - 2 * al], ["c) Angle " + M("\\widehat{BOC}") + " (en degrés)", 2 * al]],
+      ["Dans un rectangle, les diagonales ont la même longueur et se coupent en leur milieu : OA = OB.", "Les angles AOB et BOC sont adjacents et forment un angle plat."],
+      "a) OA = OB : le triangle AOB est isocèle, donc " + al + "°. b) " + M("180° - 2 \\cdot " + al + "° = " + (180 - 2 * al) + "°") + ". c) " + M("180° - " + (180 - 2 * al) + "° = " + 2 * al + "°") + ".");
+  });
+  PX("symetries", [9], () => {
+    let ax, ay, cx, cy, tx, ty; do { ax = ri(-5, 5); ay = ri(-5, 5); cx = ri(-3, 3); cy = ri(-3, 3); tx = ri(-4, 4); ty = ri(-4, 4); } while ((ax === cx && ay === cy) || !tx || !ty || !ax || !ay);
+    const bx = 2 * cx - ax, by = 2 * cy - ay;
+    return PB("Dans un repère, " + M("A") + pt(ax, ay) + " et " + M("C") + pt(cx, cy) + ". " + M("B") + " est l'image de " + M("A") + " par la symétrie de centre " + M("C") + ", puis " + M("D") + " est l'image de " + M("B") + " par la translation qui envoie " + M("O(0\\,;\\,0)") + " sur " + M("T") + pt(tx, ty) + ".",
+      [["a) Coordonnées de " + M("B") + PAIRL, [bx, by]], ["b) Coordonnées de " + M("D") + PAIRL, [bx + tx, by + ty]], ["c) Coordonnées de l'image de " + M("A") + " par la symétrie d'axe des ordonnées" + PAIRL, [-ax, ay]]],
+      ["C est le milieu de [AB] : pour passer de A à C, et de C à B, on fait le même déplacement.", "Translation : on ajoute " + tx + " à l'abscisse et " + ty + " à l'ordonnée."],
+      "a) De A à C : " + M("(" + (cx - ax) + "\\,;\\," + (cy - ay) + ")") + " ; on recommence depuis C : " + M("B") + pt(bx, by) + ". b) " + M("D") + pt(bx + tx, by + ty) + ". c) L'abscisse change de signe : " + pt(-ax, ay) + ".");
+  });
+
+  // ======================= 10e =======================
+  PX("rac", [10], () => {
+    const s = pk([7, 9, 11, 12, 13, 15]), V = s ** 3, k = pk([4, 9, 16, 25]);
+    return PB("Un cube a un volume de " + X(V) + " cm³. Un carré a une aire égale à l'aire totale du cube.",
+      [["a) Arête du cube, en cm", s], ["b) Aire totale du cube, en cm²", 6 * s * s], ["c) Côté d'un carré dont l'aire est " + k + " fois celle d'une face du cube, en cm", Math.sqrt(k) * s]],
+      ["L'arête est la racine cubique du volume : quel nombre multiplié trois fois par lui-même donne " + N(V) + " ?", "c) Aire du carré = " + k + " · " + s * s + " ; son côté est la racine carrée de cette aire."],
+      "a) " + M(s + "^3 = " + N(V)) + ", donc " + s + " cm. b) " + M("6 \\cdot " + s + "^2 = " + N(6 * s * s)) + " cm². c) " + M("\\sqrt{" + k + " \\cdot " + s * s + "} = \\sqrt{" + N(k * s * s) + "} = " + Math.sqrt(k) * s) + " cm.");
+  });
+  PX("disque", [10], () => {
+    const r = pk([3, 4, 5, 6, 8]), a = pk([60, 72, 120, 135, 150, 240]), L = (a / 360) * 2 * Math.PI * r, A = (a / 360) * Math.PI * r * r;
+    return PB("Une part de pizza est un secteur de disque de rayon " + r + " cm et d'angle " + a + "°.",
+      [["a) Longueur de l'arc de croûte, en cm (au centième)", L, 0.01], ["b) Périmètre total de la part, en cm (au centième)", L + 2 * r, 0.01], ["c) Aire de la part, en cm² (au centième)", A, 0.01]],
+      ["La part représente " + a + "/360 du disque entier.", "Le périmètre de la part : l'arc et deux rayons."],
+      "Fraction du disque : " + M("\\frac{" + a + "}{360}") + ". a) " + M("\\frac{" + a + "}{360} \\cdot 2\\pi \\cdot " + r + " \\approx " + N(Math.round(L * 100) / 100)) + " cm. b) " + M(N(Math.round(L * 100) / 100) + " + 2 \\cdot " + r + " \\approx " + N(Math.round((L + 2 * r) * 100) / 100)) + " cm. c) " + M("\\frac{" + a + "}{360} \\cdot \\pi \\cdot " + r + "^2 \\approx " + N(Math.round(A * 100) / 100)) + " cm².");
+  });
+  PX("polyreg", [10], () => {
+    const n = pk([5, 6, 8, 9, 10, 12, 15]), S = (n - 2) * 180, ai = S / n, ae = 360 / n;
+    return PB("Un polygone régulier a des angles intérieurs dont la somme vaut " + X(S) + "°.",
+      [["a) Nombre de côtés", n], ["b) Mesure d'un angle intérieur (en degrés)", ai], ["c) Mesure de l'angle au centre (en degrés)", ae]],
+      ["Somme des angles intérieurs d'un polygone à n côtés : (n − 2) · 180°.", "L'angle au centre partage le tour complet (360°) en n parts égales."],
+      "a) " + M("(n - 2) \\cdot 180 = " + N(S)) + ", donc " + M("n - 2 = " + (n - 2)) + " et " + M("n = " + n) + ". b) " + M(N(S) + " \\div " + n + " = " + N(ai) + "°") + ". c) " + M("360° \\div " + n + " = " + N(ae) + "°") + " (et " + M(N(ai) + "° + " + N(ae) + "° = 180°") + ").");
+  });
+  PX("grandmanq", [10], () => {
+    const b1 = pk([6, 8, 10]), b2 = pk([12, 14, 16]), h = pk([5, 6, 7, 9]), A = ((b1 + b2) * h) / 2, w = pk([3, 4, 5, 6, 8].filter((x) => A % x === 0 && A / x !== x)) || 2;
+    return PB("Un trapèze a des bases de " + b1 + " cm et " + b2 + " cm. Son aire vaut " + X(A) + " cm². Un rectangle de largeur " + w + " cm a la même aire.",
+      [["a) Hauteur du trapèze, en cm", h], ["b) Longueur du rectangle, en cm", A / w], ["c) Côté d'un triangle rectangle isocèle de même aire (côtés de l'angle droit), en cm (au centième)", Math.sqrt(2 * A), 0.01]],
+      ["Aire du trapèze = (grande base + petite base) · hauteur ÷ 2 : isole la hauteur.", "c) Triangle rectangle isocèle de côté c : aire = c · c ÷ 2."],
+      "a) " + M("h = 2 \\cdot " + N(A) + " \\div (" + b1 + " + " + b2 + ") = " + h) + " cm. b) " + M(N(A) + " \\div " + w + " = " + N(A / w)) + " cm. c) " + M("c^2 = 2 \\cdot " + N(A) + " = " + N(2 * A)) + ", " + M("c = \\sqrt{" + N(2 * A) + "} \\approx " + N(Math.round(Math.sqrt(2 * A) * 100) / 100)) + " cm.");
+  });
+  PX("airelat", [10], () => {
+    const d = pk([6, 8, 10, 12]), h = pk([9, 11, 14, 15]), r = d / 2, AL = 2 * Math.PI * r * h, AT = AL + 2 * Math.PI * r * r, p = pk([2.5, 3.2, 4]);
+    return PB("Une boîte de conserve cylindrique a un diamètre de " + d + " cm et une hauteur de " + h + " cm. L'étiquette recouvre toute la surface latérale.",
+      [["a) Aire de l'étiquette, en cm² (au centième)", AL, 0.01], ["b) Aire totale de métal (avec les deux disques), en cm² (au centième)", AT, 0.01], ["c) L'étiquette est un rectangle : sa longueur, en cm (au centième)", Math.PI * d, 0.01]],
+      ["Déroulée, la surface latérale est un rectangle : sa longueur est le périmètre du disque, sa largeur la hauteur.", "Aire d'un disque : π · r² ; attention, r = " + r + " cm."],
+      "c) Longueur : " + M("\\pi \\cdot " + d + " \\approx " + N(Math.round(Math.PI * d * 100) / 100)) + " cm. a) " + M("\\pi \\cdot " + d + " \\cdot " + h + " \\approx " + N(Math.round(AL * 100) / 100)) + " cm². b) " + M(N(Math.round(AL * 100) / 100) + " + 2 \\cdot \\pi \\cdot " + r + "^2 \\approx " + N(Math.round(AT * 100) / 100)) + " cm².");
+  });
+  PX("voldecomp", [10], () => {
+    const L = pk([8, 10, 12]), l = pk([4, 5, 6]), h1 = pk([1.2, 1.5, 1.8]), h2 = pk([2.2, 2.5, 3]), V = r6(L * l * h1 + (L / 2) * l * (h2 - h1)), t = pk([20, 25, 40]);
+    return PB("Une piscine a la forme d'un pavé de " + L + " m sur " + l + " m. Sur la moitié de sa longueur, la profondeur est de " + X(h1) + " m ; sur l'autre moitié, elle est de " + X(h2) + " m (deux pavés accolés).",
+      [["a) Volume d'eau quand elle est pleine, en m³", V], ["b) Ce volume en litres", V * 1000], ["c) On la remplit avec un débit de " + t + " m³ par heure : durée en heures (au dixième)", V / t, 0.1]],
+      ["Découpe en deux pavés : chacun mesure " + L / 2 + " m sur " + l + " m.", "1 m³ = 1'000 L."],
+      "a) " + M(N(L / 2) + " \\cdot " + l + " \\cdot " + N(h1) + " + " + N(L / 2) + " \\cdot " + l + " \\cdot " + N(h2) + " = " + N(r6((L / 2) * l * h1)) + " + " + N(r6((L / 2) * l * h2)) + " = " + N(r6((L / 2) * l * (h1 + h2)))) + " m³. b) " + X(r6((L / 2) * l * (h1 + h2) * 1000)) + " L. c) " + M(N(r6((L / 2) * l * (h1 + h2))) + " \\div " + t + " \\approx " + N(Math.round(((L / 2) * l * (h1 + h2) / t) * 10) / 10)) + " h.");
+  });
+  PX("eqverif", [10], () => {
+    let a, b; do { a = ri(2, 9); b = ri(2, 9); } while (a === b);
+    const s = a + b, p = a * b, cands = [a, b, s, -a, p > 30 ? b + 1 : p].sort(() => R.rand() - 0.5), ok = cands.filter((x) => x * x + p === s * x);
+    const c = ri(2, 5);
+    return PB("On considère l'équation " + M("x^2 + " + p + " = " + s + "x") + " et les nombres " + cands.map(X).join(" ; ") + ".",
+      [["a) Combien de ces nombres sont solutions ?", ok.length], ["b) La somme des solutions trouvées", ok.reduce((t, x) => t + x, 0)], ["c) Pour quelle valeur de " + M("k") + " le nombre " + c + " est-il solution de " + M("x^2 + k = " + s + "x") + " ?", s * c - c * c]],
+      ["Remplace x par chaque nombre, calcule les deux membres séparément, et compare.", "c) Remplace x par " + c + " : il reste une équation en k."],
+      cands.map((x) => M("x = " + x) + " : " + M(N(x * x + p) + (x * x + p === s * x ? " = " : " \\neq ") + N(s * x))).join(" ; ") + ". a) " + ok.length + ". b) " + ok.reduce((t, x) => t + x, 0) + ". c) " + M(c + "^2 + k = " + s + " \\cdot " + c) + ", donc " + M("k = " + s * c + " - " + c * c + " = " + (s * c - c * c)) + ".");
+  });
+  PX("pente", [10], () => {
+    const p = pk([8, 12, 15, 18, 24]), d = pk([250, 400, 600, 750]), dh = r6((p / 100) * d), t = pk([10, 12, 15]);
+    return PB("Une route de montagne a une pente constante de " + p + " %. Elle franchit une distance horizontale de " + X(d) + " m. Un panneau prévient : « dénivelé de " + t + " % sur la descente suivante ».",
+      [["a) Dénivelé de cette route, en m", dh], ["b) Distance horizontale pour monter de 100 m avec cette pente, en m (au dixième)", 10000 / p, 0.1], ["c) Sur la descente à " + t + " %, quelle distance horizontale pour descendre de " + X(dh) + " m ?", r6((dh * 100) / t), 0.1]],
+      ["Pente en % = dénivelé ÷ distance horizontale · 100.", "b) et c) Isole la distance horizontale : dénivelé ÷ pente · 100."],
+      "a) " + M(N(p / 100) + " \\cdot " + N(d) + " = " + N(dh)) + " m. b) " + M("100 \\div " + N(p / 100) + " \\approx " + N(Math.round((10000 / p) * 10) / 10)) + " m. c) " + M(N(dh) + " \\div " + N(t / 100) + " = " + N(r6((dh * 100) / t))) + " m.");
+  });
+  PX("rotation", [10], () => {
+    let x, y, cx, cy; do { x = ri(-5, 5); y = ri(-5, 5); cx = ri(-2, 2); cy = ri(-2, 2); } while (!x || !y || (x === cx && y === cy) || Math.abs(x) === Math.abs(y));
+    const r90 = [-y, x], r180 = [-x, -y], u = x - cx, v = y - cy, rc = [cx - v, cy + u];
+    return PB("Dans un repère, on considère le point " + M("A") + pt(x, y) + ". Les rotations tournent dans le sens inverse des aiguilles d'une montre.",
+      [["a) Image de " + M("A") + " par la rotation de centre " + M("O(0\\,;\\,0)") + " et d'angle 90°" + PAIRL, r90], ["b) Image de " + M("A") + " par la rotation de centre " + M("O") + " et d'angle 180°" + PAIRL, r180], ["c) Image de " + M("A") + " par la rotation de centre " + M("C") + pt(cx, cy) + " et d'angle 90°" + PAIRL, rc]],
+      ["Rotation de 90° autour de l'origine : (x ; y) devient (−y ; x). Fais un dessin pour vérifier.", "c) Travaille avec le déplacement de C vers A, fais-le tourner de 90°, puis repars de C."],
+      "a) " + pt(r90[0], r90[1]) + ". b) " + pt(r180[0], r180[1]) + " (symétrie de centre O). c) De C à A : " + M("(" + u + "\\,;\\," + v + ")") + " ; tourné de 90° : " + M("(" + -v + "\\,;\\," + u + ")") + " ; image : " + pt(rc[0], rc[1]) + ".");
+  });
+})();
+
 // Chantier 9e–10e (23.11) : sujets de préparation de qualité (pas du drill) pour les chapitres de 9e du CO.
 // Même format que riche.js (RICH.<chapitre> = { ids, label, ex, raison, minutes }), modelé sur le MER 9e
 // (Mathématiques 9-10-11, CIIP 2024) : situations réalistes, tableaux et figures, questions liées a, b, c,
