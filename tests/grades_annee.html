@@ -1,0 +1,138 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../src/style.css"><body><main id="app"></main><pre id="log"></pre>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_manip.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script>
+if (window === top) {
+  document.body.innerHTML = '<iframe src="grades_annee.html#cadre" style="width:360px;height:740px;border:0"></iframe><pre id="log">en cours</pre>';
+  window.addEventListener("message", (e) => { if (typeof e.data === "string" && e.data.startsWith("ga:")) document.getElementById("log").textContent = e.data.slice(3); });
+} else window.addEventListener("load", () => {
+document.head.insertAdjacentHTML("beforeend", "<style>html { scrollbar-width: none; }</style>");
+// Grades de l'année (25.11, décision de l'enseignant « Progrès de l'année ») : départ Pousse dans chaque système,
+// titre avec la classe, simulation d'une année (4 profils d'élèves), remise à zéro au changement d'année et de classe,
+// rien en « Refaire », plafond du jour, migration d'un état existant, code de sauvegarde, rien ne dépasse à 360 px.
+const OUT = [], INFO = []; let nbF = 0;
+const ok = (c, m) => { if (!c) { nbF++; OUT.push("ÉCHEC " + m); } };
+try {
+  Element.prototype.scrollIntoView = function () {};
+  statsSet(false);
+  const mk = (p) => { const s = Engine.newState({ minutes: 5, track: "college", ...p }); return s; };
+  // 1) Départ Pousse et titre avec la classe, dans chaque système
+  const P = [[{ system: "CH", grade: 11 }, "11e"], [{ system: "CH", grade: 13 }, "2e Coll."], [{ system: "CH", grade: 12, track: "mp" }, "MP 1re"], [{ system: "CH", grade: 13, track: "mp" }, "MP 2e"],
+    [{ system: "CH", grade: 9 }, "9e"], [{ system: "FR", grade: 8 }, "4e"], [{ system: "FR", grade: 10 }, "2nde"], [{ system: "FR", grade: 12 }, "Tle"]];
+  for (const [p, tag] of P) {
+    state = mk(p); const y = ypSync(state, "2026-09-01");
+    ok(classTag(state.profile) === tag, "classe " + JSON.stringify(p) + " → " + classTag(state.profile));
+    ok(y.pts === 0 && gradeOf(y.pts).name === "Pousse" && gradeOf(0).title === "Pousse\u00a0· " + tag, "départ Pousse " + tag + " : " + gradeOf(y.pts).title);
+  }
+  ok(!/Coll|MP/.test(classTag({ system: "FR", grade: 11, track: "college" })), "France : pas de libellé romand");
+  // 2) Barème : Refaire = 0, plafond du jour, séances, problème de la semaine
+  ok(ypPoints(2, { solved: true, tries: 1 }, true) === 0, "Refaire : 0 point");
+  ok(ypPoints(1, { solved: false, dontKnow: true }) === 1 && ypPoints(1, { solved: true, tries: 2 }) === 3 && ypPoints(4, { solved: true, tries: 1 }) === 7, "barème d'une question");
+  state = mk({ system: "CH", grade: 11 });
+  for (let k = 0; k < 30; k++) { for (let q = 0; q < 5; q++) ypAdd(state, 7, null, "2026-10-05"); ypAdd(state, YP.session, "s", "2026-10-05"); }
+  ok(state.yp.pts === YP.cap, "plafond du jour : " + state.yp.pts);
+  ypAdd(state, YP.weekly, "w", "2026-10-05"); ypAdd(state, YP.weekly, "w", "2026-10-07");
+  ok(state.yp.pts === YP.cap + YP.weekly, "problème de la semaine : une fois par semaine, hors plafond " + state.yp.pts);
+  ypAdd(state, YP.session, "s", "2026-10-06"); ypAdd(state, YP.session, "s", "2026-10-06"); ypAdd(state, YP.session, "s", "2026-10-06");
+  ok(state.yp.pts === YP.cap + YP.weekly + 2 * YP.session, "deux séances comptées par jour au plus");
+  // 3) Simulation d'une année (rentrée 24.08.2026, vacances genevoises approximatives)
+  const HOL = [["2026-10-19", "2026-10-23"], ["2026-12-21", "2027-01-01"], ["2027-02-15", "2027-02-19"], ["2027-03-29", "2027-04-09"]];
+  const rnd = (seed) => () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
+  const sim = (pr, seed) => {
+    const r = rnd(seed), s = mk({ system: "CH", grade: 11 }), reach = {}; ypSync(s, "2026-08-24");
+    for (let d = "2026-08-24"; d <= "2027-06-25"; d = addDays(d, 1)) {
+      const dow = (new Date(d + "T12:00:00").getDay() + 6) % 7, hol = HOL.some(([a, b]) => d >= a && d <= b);
+      let nS = pr.days.includes(dow) ? 1 : 0; if (hol && r() >= pr.hol) nS = 0; if (!hol && (pr.extra || []).includes(dow)) nS++;
+      for (let i = 0; i < nS; i++) {
+        for (let q = 0; q < 5; q++) { const u = r(); let lv = 1, c = 0; for (const [l, p] of Object.entries(pr.d)) { c += p; if (u < c) { lv = +l; break; } }
+          const solved = r() < pr.p, first = r() < pr.ft; ypAdd(s, ypPoints(lv, { solved, tries: first ? 1 : 2 }), null, d); }
+        ypAdd(s, YP.session, "s", d);
+      }
+      if (dow === pr.days[0] && !hol && r() < pr.car) ypAdd(s, YP.carnet, null, d);
+      if (dow === 6 && !hol && r() < pr.wp) ypAdd(s, YP.weekly, "w", d);
+      GRADES.forEach(([at, , name], i) => { if (i && s.yp.pts >= at && !reach[i]) reach[i] = d; });
+    }
+    return { pts: s.yp.pts, reach, top: gradeOf(s.yp.pts).i };
+  };
+  const PR = {
+    "assidu moyen (4 séances/sem., 60 %)": { days: [0, 1, 3, 5], p: 0.6, ft: 0.7, d: { 1: 0.3, 2: 0.5, 3: 0.2 }, wp: 0.4, car: 0.7, hol: 0.2 },
+    "très assidu, très bon (6-8 séances/sem., 88 %)": { days: [0, 1, 2, 3, 4, 5], extra: [2, 5], p: 0.88, ft: 0.85, d: { 1: 0.1, 2: 0.4, 3: 0.4, 4: 0.1 }, wp: 0.8, car: 0.8, hol: 0.6 },
+    "en difficulté, assidu (4 séances/sem., 35 %)": { days: [0, 1, 3, 5], p: 0.35, ft: 0.5, d: { 1: 0.6, 2: 0.4 }, wp: 0.1, car: 0.8, hol: 0.2 },
+    "peu assidu (1 séance/sem., 60 %)": { days: [2], p: 0.6, ft: 0.7, d: { 1: 0.3, 2: 0.5, 3: 0.2 }, wp: 0.1, car: 0.2, hol: 0 },
+  };
+  const R = {}, fd = (d) => (d ? d.slice(8) + "." + d.slice(5, 7) : "–");
+  for (const [n, pr] of Object.entries(PR)) { R[n] = sim(pr, 7); INFO.push(n + " : " + R[n].pts + " pts, " + GRADES[R[n].top][2] + " · " + GRADES.map(([, , g], i) => i ? g + " " + fd(R[n].reach[i]) : "").filter((x) => x && !/–$/.test(x)).join(", ")); }
+  const [mo, tb, df, pe] = Object.values(R);
+  ok(mo.reach[10] >= "2027-02-20" && mo.reach[10] <= "2027-04-30", "moyen : milieu de l'échelle (Expert) vers mars-avril : " + mo.reach[10]);
+  ok(tb.reach[20] && tb.reach[20] >= "2027-05-01", "très bon : Légende en fin d'année seulement : " + tb.reach[20]);
+  ok(df.reach[4] && df.reach[4] <= "2026-12-20" && df.top >= 8, "en difficulté assidu : progrès visibles (Bâtisseur avant Noël, " + GRADES[df.top][2] + " en juin)");
+  ok(pe.top >= 2 && pe.top < mo.top && pe.top < df.top, "peu assidu : progresse, moins que les assidus (" + GRADES[pe.top][2] + ")");
+  ok(tb.pts > mo.pts && mo.pts > df.pts && df.pts > pe.pts, "ordre des profils");
+  // Assiduité maximale (plafond chaque jour, problème chaque semaine) : pas de Légende avant le printemps
+  { const s = mk({ system: "CH", grade: 11 }); let at = null; for (let d = "2026-08-24"; d <= "2027-06-25"; d = addDays(d, 1)) { ypAdd(s, 99, null, d); ypAdd(s, YP.weekly, "w", d); if (!at && s.yp.pts >= 9000) at = d; }
+    ok(at >= "2027-03-01", "farming au plafond : Légende pas avant mars (" + at + ")"); INFO.push("plafond chaque jour : Légende le " + fd(at)); }
+  // 4) Remise à zéro : nouvelle année, autre classe, retour à la classe
+  state = mk({ system: "CH", grade: 10 }); ypSync(state, "2026-09-01"); state.yp.pts = 2600;
+  let y = ypSync(state, "2027-08-20");
+  ok(y.pts === 0 && y.past.length === 1 && y.past[0].c === "10e" && y.past[0].p === 2600, "nouvelle année : départ Pousse, année passée gardée " + JSON.stringify(y.past));
+  state.profile = { ...state.profile, grade: 11 }; y = ypSync(state, "2027-08-21");
+  ok(y.pts === 0 && y.c === "11e" && gradeOf(0).title === "Pousse\u00a0· 11e", "nouvelle classe " + y.c);
+  y.pts = 500; state.profile = { ...state.profile, grade: 10 }; ypSync(state, "2027-09-02"); ok(state.yp.pts === 0 && state.yp.c === "10e", "autre classe la même année : départ Pousse");
+  state.profile = { ...state.profile, grade: 11 }; ypSync(state, "2027-09-03"); ok(state.yp.pts === 500, "retour à la classe : points rendus " + state.yp.pts);
+  ok(state.yp.past.length === 1, "souvenirs (10e vide la 2e année : pas gardée) " + JSON.stringify(state.yp.past));
+  // changement de classe par l'écran (nouvel état) : points archivés, numéros gardés
+  state = mk({ system: "CH", grade: 11 }); Engine.autoInit(state); state.placed = true; ypSync(state); state.yp.pts = 1200; state.gradeNo = { Apprenti: 12 };
+  draft = { ...state.profile, grade: 10, keepSys: true }; screenLevel(); document.getElementById("next").click();
+  ok(state.profile.grade === 10 && state.yp && ypSync().pts === 0 && state.yp.past.some((x) => x.c === "11e" && x.p === 1200) && state.gradeNo.Apprenti === 12, "écran classe : départ Pousse, souvenir 11e, collector gardé");
+  // 5) Pas de points en « Refaire » (vraie séance)
+  state = mk({ system: "CH", grade: 11 }); ypSync(state); Engine.autoInit(state); state.placed = true; for (const id in state.notions) state.notions[id].lessonSeen = true;
+  session = { fmt: "auto", plan: ["prio|1", "fracadd|1", "puiss|1"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), pinged: true }; nextQuestion();
+  document.getElementById("idk").click(); const p1 = ypPts();
+  ok(p1 === 1 && session.ypg === 1, "question faite (je ne sais pas) : +1 " + p1);
+  const rd = document.getElementById("redo"); ok(!!rd, "bouton Refaire");
+  if (rd) { rd.click(); document.getElementById("idk").click(); ok(ypPts() === p1, "Refaire : aucun point " + ypPts()); document.getElementById("nx").click(); }
+  while (session && session.i < session.plan.length && document.getElementById("idk")) { document.getElementById("idk").click(); document.getElementById("nx").click(); }
+  ok(/Points de l'année/.test(app.textContent) && ypPts() === 3 + YP.session && /\+13/.test(app.querySelector(".yp-row").textContent) && /avant Apprenti/.test(app.textContent), "fin de séance : +N points · encore X avant… " + (app.querySelector(".yp-row") || {}).textContent);
+  // 6) Migration d'un état existant
+  const old = mk({ system: "CH", grade: 11 }); delete old.yp; old.gradeNo = { Stratège: 41 }; old.elo.r = 1340; old.elo.n = 200;
+  old.history = [{ date: "2026-06-20", n: 9, score: 7 }, { date: "2026-09-02", n: 5, score: 3 }, { date: "2026-09-03", n: 12, score: 11 }, { date: "2026-11-25", n: 4, score: 2 }];
+  y = ypSync(old, "2026-11-25");
+  ok(y.pts === (5 + 9 + 10) + 40 + (4 + 6 + 10) && y.mig === "2026-11-25", "migration : points reconstitués depuis l'historique de l'année " + y.pts);
+  ok(y.dp === 20 && ypAdd(old, 30, null, "2026-11-25") === 20, "migration : plafond du jour tient compte d'aujourd'hui");
+  ok(old.gradeNo.Stratège === 41 && old.elo.r === 1340, "rien n'est perdu (Mathélo, numéros)");
+  const o2 = mk({ system: "CH", grade: 11 }); o2.elo.n = 30; ok(ypSync(o2, "2026-11-25").pts === 30, "sans historique : petit bonus d'effort");
+  const o3 = mk({ system: "CH", grade: 11 }); ok(ypSync(o3, "2026-11-25").pts === 0, "nouvel élève : 0");
+  // numéro collector : affiché seulement pour les grades atteints cette année
+  state = old; screenGrades(); ok(!/#41/.test(app.textContent), "numéro de l'ancien système caché tant que le grade n'est pas atteint");
+  state.yp.pts = 2200; screenGrades(); ok(/#41/.test(app.textContent), "numéro réapparu quand le grade est atteint");
+  // 7) Code de sauvegarde
+  state.yp.past = [{ k: "2025|CH|co|10", c: "10e", p: 2700 }];
+  const rt = Backup.unpack(JSON.parse(JSON.stringify(Backup.pack(state))));
+  ok(rt.yp && rt.yp.pts === 2200 && rt.yp.past[0].p === 2700 && rt.yp.k === state.yp.k, "code de sauvegarde : points et souvenirs repris");
+  // 8) Écrans et 360 px
+  const right = () => app.getBoundingClientRect().right + 1;
+  const scan = (where) => { if (app.scrollWidth > app.clientWidth + 1) ok(false, where + " : #app défile en largeur");
+    app.querySelectorAll("*").forEach((el) => { if (el.closest("svg, mjx-container, .tabs") || getComputedStyle(el).position === "fixed") return;
+      for (let p = el.parentElement; p && p !== app; p = p.parentElement) { const o = getComputedStyle(p).overflowX; if (o === "auto" || o === "scroll" || o === "hidden") return; }
+      const r = el.getBoundingClientRect(); if (r.width && r.right > right()) ok(false, where + " : " + el.tagName.toLowerCase() + "." + String(el.className).split(" ")[0] + " « " + el.textContent.trim().slice(0, 30) + " » dépasse"); }); };
+  ok(innerWidth === 360, "largeur " + innerWidth);
+  for (const [p, tag] of [[{ system: "CH", grade: 13 }, "2e Coll."], [{ system: "CH", grade: 12, track: "mp" }, "MP 1re"], [{ system: "CH", grade: 11 }, "11e"]]) {
+    state = mk(p); Engine.autoInit(state); state.placed = true; state.tourDone = true; state.eloSeen = true; ypSync(state); state.yp.pts = 5600;
+    state.yp.past = [{ k: "2025|CH|co|" + (p.grade - 1), c: "1re Coll.", p: 9100 }, { k: "2024|CH|co|10", c: "10e", p: 3100 }];
+    homeTab = "today"; screenHome(); const b = app.querySelector(".eb-grade"); ok(b && b.textContent.includes("Virtuose\u00a0· " + tag), "bandeau : titre avec la classe " + (b && b.textContent)); scan("accueil " + tag);
+    screenGrades(); scan("Mes grades " + tag);
+    ok(app.querySelector(".grade-now h2").textContent === "Virtuose\u00a0· " + tag && /Souvenirs/.test(app.textContent) && /1re Coll\. · 2025-26 : 🌟 Légende atteint/.test(app.textContent) && /10e · 2024-25 : 🥇 Expert atteint/.test(app.textContent), "Mes grades : titre, souvenirs " + tag);
+    ok(/1'100/.test(app.textContent) && /encore 650 points/.test(app.textContent), "milliers et prochain palier");
+    session = { fmt: "auto", plan: ["prio|1", "fracadd|1", "puiss|1"], i: 3, score: 2, answered: 3, start: Date.now(), elo0: state.elo.r, ids: new Set(["prio"]), pinged: true, ypg: 30 }; screenSummary(); scan("fin de séance " + tag);
+  }
+  state = mk({ system: "FR", grade: 8 }); state.placed = true; ypSync(state); state.yp.pts = 120; screenGrades(); scan("Mes grades France");
+  ok(/Pousse\u00a0· 4e/.test(app.textContent) && !/Coll\.|MP | × /.test(app.textContent) && /encore 30 points/.test(app.textContent), "France : titre 4e " + app.textContent.slice(0, 300));
+  // nouveau grade en fin de séance
+  state = mk({ system: "CH", grade: 11 }); Engine.autoInit(state); state.placed = true; ypSync(state); state.yp.pts = 140; state.yp.d = day(); state.yp.dp = 0;
+  session = { fmt: "auto", plan: ["prio|1", "fracadd|1", "puiss|1"], i: 3, score: 3, answered: 3, start: Date.now(), elo0: state.elo.r, ids: new Set(["prio"]), pinged: true, ypg: 6 }; screenSummary();
+  ok(/Tu es maintenant Apprenti\u00a0· 11e/.test(app.textContent) && /encore 200 avant Arpenteur/.test(app.textContent), "nouveau grade en fin de séance (+10 séance) " + (app.querySelector(".yp-row") || {}).textContent); scan("nouveau grade");
+} catch (e) { OUT.push("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }
+OUT.unshift((nbF ? "ÉCHEC " + nbF + " échec(s)" : "OK grades de l'année") + "\n" + INFO.join("\n"));
+parent.postMessage("ga:" + OUT.join("\n"), "*");
+});
+</script>

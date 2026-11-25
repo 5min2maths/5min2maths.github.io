@@ -32,7 +32,7 @@ try{
  ok(app.querySelector("h2").textContent!==t0,"une autre histoire");
  document.getElementById("hback").click();ok(!!app.querySelector(".hub"),"retour à l'accueil");
  app.querySelector('.door[data-door="prob"]').click();ok(/Problème de la semaine/.test(app.textContent),"case Problème");
- state.elo.r=1420;state.gradeNo={Penseur:243};screenGrades();
+ /* 25.11 (grades de l'année, voulu) : Penseur atteint avec les points de l'année, plus avec le Mathélo */ ypSync();state.yp.pts=2600;state.gradeNo={Penseur:243};screenGrades();
  ok(!/départ en/.test(app.textContent),"plus de repères de classe");ok(/#243/.test(app.textContent),"numéro affiché");
  document.querySelector(".grade-now h2").click(); // clic sur le cadre, pas sur l'image
  const c=document.querySelector(".collector");ok(c&&/Penseur/.test(c.textContent)&&/#243/.test(c.textContent)&&/243<sup>e<\/sup> utilisateur à obtenir ce grade/.test(c.innerHTML),"carte collector "+(c&&c.textContent));

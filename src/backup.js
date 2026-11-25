@@ -28,6 +28,8 @@ const Backup = {
          reconnaître le même enfant quand le parent reçoit un nouveau code). */
       ...(Array.isArray(s.carnet) && s.carnet.length ? { cn: s.carnet.map((x, i, A) => [x.id, x.d, x.code, off(x.date), x.ok || 0].concat(i >= A.length - 8 && x.m ? [x.m, x.a || ""] : [])) } : {}),
       ...(s.pid ? { pid: s.pid } : {}),
+      /* 25.11 (grades de l'année, facultatif) : points de l'année, classe, années passées (souvenirs). */
+      ...(s.yp ? { yp: [s.yp.k, s.yp.c, s.yp.pts, (s.yp.past || []).map((x) => [x.k, x.c, x.p])] } : {}),
     };
   },
   /* base (24.11, espace parent) : date de référence des dates relatives (o.t = jour de la photo) ; par défaut
@@ -62,6 +64,7 @@ const Backup = {
     if (Array.isArray(o.co)) s.carnetOut = o.co.map(on);
     if (Array.isArray(o.cn)) s.carnet = o.cn.filter((x) => Array.isArray(x) && x[0] && x[2]).map(([id, d, code, dt, ok, m, a]) => ({ id, d, code, date: on(dt) || t, ok: ok || 0, ...(m ? { m, a: a || undefined } : {}) }));
     if (o.pid) s.pid = o.pid;
+    if (Array.isArray(o.yp)) s.yp = { k: o.yp[0], c: o.yp[1], pts: o.yp[2], d: null, dp: 0, ds: 0, past: (o.yp[3] || []).map(([k, c, p]) => ({ k, c, p })) };
     if (o.a) s.a11y = { fs: +o.a.fs || 1, font: o.a.font ? 1 : 0, hc: o.a.hc ? 1 : 0 }; // réglages de lecture (24.11)
     s.placed = true;
     Engine.migrate(s);
