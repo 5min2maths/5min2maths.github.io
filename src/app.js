@@ -356,8 +356,11 @@ function screenLevel() {
     if (needNiv && !draft.niv) { document.getElementById("niverr").textContent = "Choisis ton niveau : MA1 (normal) ou MA2 (renforcé)."; document.getElementById("niv").scrollIntoView({ block: "center" }); return; }
     const prof = { system: draft.system, grade: draft.grade, track: draft.system === "CH" && draft.grade >= 12 ? draft.track : "college", minutes: draft.minutes, ...(needNiv ? { niv: draft.niv } : {}) };
     const go = () => {
-      const keep = state && state.comps, keepA = state && state.a11y;
+      const keep = state && state.comps, keepA = state && state.a11y, keepY = state && ypSync(state), keepN = state && state.gradeNo;
       state = Engine.newState(prof);
+      if (keepY) state.yp = keepY; /* 25.11 : points de l'année archivés par ypSync (autre classe → départ Pousse, retour → points rendus) */
+      ypSync(state); /* nouvel élève : départ à 0, avant les questions du positionnement */
+      if (keepN) state.gradeNo = keepN;
       if (keep) state.comps = keep; // changement de classe : les notes des compétences restent
       if (keepA) state.a11y = keepA; // et les réglages de lecture
       Engine.autoInit(state);
@@ -422,55 +425,123 @@ function eloBlock() {
   ${d ? `<div class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "▲ +" : "▼ "}${d} depuis hier</div>` : ""}</div>
   <div class="stack">${spark}</div></div>`;
 }
-// Grades du Mathélo (21.11, « l'histoire des paliers n'est pas claire, plutôt des grades ») : un grade tous les 75 points,
-// soit deux par année scolaire (le Mathélo de départ monte de 150 par année : 950 en 9e, 1250 en 11e, 1550 en 2e).
-// Échelle anticipée jusqu'en 4e du Collège (départ 3e : 1700, 4e : 1850 ; très bon élève de 4e : 2200 à 2400).
-const GRADES = [[0, "🌱", "Pousse"], [800, "✏️", "Apprenti"], [875, "📏", "Arpenteur"], [950, "🧮", "Calculateur"], [1025, "📐", "Bâtisseur"],
-  [1100, "🗺️", "Explorateur"], [1175, "🔦", "Enquêteur"], [1250, "🔭", "Chercheur"], [1325, "♟️", "Stratège"], [1400, "🦉", "Penseur"],
-  [1475, "🥇", "Expert"], [1550, "🎓", "Érudit"], [1625, "🧪", "Savant"], [1700, "🏆", "Maître"], [1775, "🧬", "Inventeur"],
-  [1850, "💎", "Virtuose"], [1925, "🪐", "Astronome"], [2000, "👑", "Génie"], [2075, "⚡", "Prodige"], [2150, "🌌", "Visionnaire"], [2225, "🌟", "Légende"]];
-// 22.11 (retour de l'auteur) : plus de repères de classe sur l'échelle (« départ en 11e »…) : chacun monte à son rythme.
+// Grades de l'année (25.11, décision de l'enseignant « Progrès de l'année ») : l'échelle de 🌱 Pousse à 🌟 Légende se
+// parcourt PAR CLASSE et RECOMMENCE CHAQUE ANNÉE (rentrée au 15 août, ou changement de classe). On monte avec des points
+// de l'année gagnés par le travail et la réussite ; le Mathélo (niveau, échelle continue) reste à part et ne change pas le grade.
+// Avant le 25.11, le grade était dérivé du Mathélo (un nouvel élève de 11e démarrait « Stratège »).
+// Paliers : 150 k + 15 k² arrondi à 50 (de plus en plus espacés). Simulation (tests/grades_annee.html, rentrée le 24.08,
+// vacances genevoises) : élève régulier moyen (4 séances par semaine, 60 % de réussite) → Expert (milieu) vers la mi-mars ;
+// très assidu et très bon → Légende vers la mi-juin ; en difficulté mais assidu → Bâtisseur à Noël, Expert en mai.
+const GRADES = [[0, "🌱", "Pousse"], [150, "✏️", "Apprenti"], [350, "📏", "Arpenteur"], [600, "🧮", "Calculateur"], [850, "📐", "Bâtisseur"],
+  [1100, "🗺️", "Explorateur"], [1450, "🔦", "Enquêteur"], [1800, "🔭", "Chercheur"], [2150, "♟️", "Stratège"], [2550, "🦉", "Penseur"],
+  [3000, "🥇", "Expert"], [3450, "🎓", "Érudit"], [3950, "🧪", "Savant"], [4500, "🏆", "Maître"], [5050, "🧬", "Inventeur"],
+  [5600, "💎", "Virtuose"], [6250, "🪐", "Astronome"], [6900, "👑", "Génie"], [7550, "⚡", "Prodige"], [8250, "🌌", "Visionnaire"], [9000, "🌟", "Légende"]];
+// Barème : question faite +1 ; réussie +2, du premier coup +1, niveau 2 à 4 : +1 à +3 ; partiellement juste +1 ;
+// « Refaire avec d'autres valeurs » : 0 ; séance finie (3 questions au moins) +10, deux par jour au plus ; erreur effacée
+// du carnet +5 ; plafond de 40 points par jour pour tout cela. Problème de la semaine réussi : +10, hors plafond, une fois par semaine.
+const YP = { cap: 40, session: 10, carnet: 5, weekly: 10, start: "08-15" };
+const schoolYear = (d = day()) => +d.slice(0, 4) - (d.slice(5) >= YP.start ? 0 : 1);
+const yearLabel = (y) => y + "-" + String(y + 1).slice(2);
+// Classe dans le système de l'élève : « 11e », « 2e Coll. », « MP 1re », et pour un profil France « 4e », « 2nde », « Tle ».
+function classTag(p) {
+  if (!p) return "";
+  if (p.system === "FR") return gradeName(p);
+  const y = p.grade >= 12 ? (p.grade === 12 ? "1re" : p.grade - 11 + "e") : p.grade + "e";
+  return p.grade < 12 ? y : p.track === "mp" ? "MP " + y : y + " Coll.";
+}
+const ypKey = (p, d) => schoolYear(d) + "|" + p.system + "|" + (p.track === "mp" ? "mp" : "co") + "|" + p.grade;
+// Migration (25.11) : pour un état d'avant les grades de l'année, points reconstitués depuis state.history (jours de
+// l'année scolaire en cours) : par jour, questions + 3 × score + une séance (10), plafonné à 40 comme le barème.
+// Sans historique de l'année mais avec des questions déjà faites : petit bonus d'effort (1 point par question, 50 au plus).
+function ypMigrate(s, k, d) {
+  const from = schoolYear(d) + "-" + YP.start;
+  const pd = (x) => Math.min(YP.cap, Math.round(x.n + 3 * (x.score || 0)) + YP.session), H = (s.history || []).filter((x) => x && x.date >= from && x.date <= d && x.n > 0);
+  let pts = H.reduce((a, x) => a + pd(x), 0);
+  if (!pts && s.elo && s.elo.n > 0) pts = Math.min(50, s.elo.n);
+  const t = H.find((x) => x.date === d), dp = t ? pd(t) : 0; /* aujourd'hui déjà compté : le plafond du jour en tient compte */
+  return { k, c: classTag(s.profile), pts, d, dp, ds: t ? 1 : 0, past: [], mig: d };
+}
+// Points de l'année, à jour de la date et de la classe : nouvelle année ou autre classe → archivés dans past (souvenir),
+// départ à 0 (Pousse). Retour à une classe déjà suivie la même année (profil changé par erreur) : ses points reviennent.
+function ypSync(s = state, d = day()) {
+  if (!s || !s.profile) return null;
+  const k = ypKey(s.profile, d);
+  if (!s.yp) s.yp = ypMigrate(s, k, d);
+  const y = s.yp;
+  if (y.k !== k) {
+    const past = (y.past || []).filter((x) => x.k !== y.k);
+    if (y.pts > 0) past.push({ k: y.k, c: y.c, p: y.pts });
+    const back = past.find((x) => x.k === k);
+    Object.assign(y, { k, c: classTag(s.profile), pts: back ? back.p : 0, d: null, dp: 0, ds: 0, past: past.filter((x) => x !== back).slice(-12) });
+  }
+  return y;
+}
+// Ajoute des points (kind : "s" séance, "w" problème de la semaine, sinon question ou carnet) ; renvoie les points comptés.
+function ypAdd(s, n, kind, d = day()) {
+  const y = ypSync(s, d);
+  if (!y || !(n > 0)) return 0;
+  if (kind === "w") { const w = Engine.weekOf(d); if (y.wk === w) return 0; y.wk = w; y.pts += n; return n; }
+  if (y.d !== d) { y.d = d; y.dp = 0; y.ds = 0; }
+  if (kind === "s") { if (y.ds >= 2) return 0; y.ds++; }
+  const g = Math.max(0, Math.min(n, YP.cap - y.dp));
+  y.dp += g; y.pts += g;
+  return g;
+}
+// Points d'une réponse (avant plafond).
+function ypPoints(d, res, redo) {
+  if (redo || !res) return 0;
+  return 1 + (res.solved ? 2 + (res.tries === 1 ? 1 : 0) + Math.max(0, Math.min(3, (d || 1) - 1)) : res.partial ? 1 : 0);
+}
+const ypPts = () => { const y = ypSync(); return y ? y.pts : 0; };
+const nbFmt = (x) => String(x).replace(/\B(?=(\d{3})+$)/g, isFR() ? "\u202f" : "'");
 // Grades « collector » (22.11) : chaque grade atteint reçoit un numéro, le rang de l'appareil parmi ceux qui l'ont
 // atteint (Apps Script, …/exec?grade=…&app=…). Gardé dans state.gradeNo ; demandé au passage du grade ou à l'ouverture de « Mes grades ».
+// 25.11 (grades de l'année) : seuls les grades atteints cette année sont demandés et affichés. Le serveur redonne toujours
+// le même numéro au même appareil : un numéro reçu avec l'ancien système (Mathélo) réapparaît quand le grade est atteint à nouveau.
 function gradeNumbers(done) {
   if (!canSend()) return;
-  const r = Math.max(state.elo.r, ...((state.elo.log || []).map((x) => x[1]))), no = (state.gradeNo = state.gradeNo || {});
+  const r = ypPts(), no = (state.gradeNo = state.gradeNo || {});
   const todo = GRADES.filter(([at, , name]) => at && r >= at && !no[name]).map(([, , name]) => name);
   todo.forEach((name) => fetch(VOTE_ENDPOINT + "?grade=" + encodeURIComponent(name) + "&app=" + encodeURIComponent(deviceId()))
     .then((x) => x.json()).then((j) => { if (j && j.n) { no[name] = j.n; save(); if (done) done(); } }).catch(() => {}));
 }
 function gradeCard(name) {
   const G = GRADES.find((x) => x[2] === name); if (!G) return;
-  const au = isAuthor(), n = au ? 0 : (state.gradeNo || {})[name]; // 22.11 : l'auteur est le numéro 0
+  const au = isAuthor(), n = au ? 0 : (state.gradeNo || {})[name]; /* 22.11 : l'auteur est le numéro 0 */
   document.querySelectorAll(".collector-bg").forEach((x) => x.remove());
   document.body.insertAdjacentHTML("beforeend", `<div class="collector-bg" role="dialog" aria-label="Carte du grade ${name}"><div class="collector pop">
     <div class="eyebrow">Grade collector</div><div class="col-ic">${G[1]}</div><h2>${name}</h2>
     ${G[0] ? `<div class="col-no">${n != null ? "#" + n : "# …"}</div>` : ""}
     ${G[0] && au ? `<div class="col-exp">le créateur de l'app</div>` : G[0] && n ? `<div class="col-exp">${n === 1 ? "1<sup>er</sup>" : n + "<sup>e</sup>"} utilisateur à obtenir ce grade</div>` : ""}
-    <p class="small muted">${!G[0] ? "Le grade de départ : tout le monde commence ici." : au ? "Avant tous les utilisateurs : le numéro 0." : n ? `Ton numéro de collection : le rang auquel tu as atteint le grade ${name}, parmi tous les utilisateurs de l'app.` : "Le numéro (ton rang parmi les utilisateurs qui ont atteint ce grade) arrive dès que l'app est en ligne."}</p>
-    ${G[0] ? `<p class="small muted">Atteint à ${G[0]} points de Mathélo.</p>` : ""}
+    <p class="small muted">${!G[0] ? "Le grade de départ : tout le monde commence ici à la rentrée." : au ? "Avant tous les utilisateurs : le numéro 0." : n ? `Ton numéro de collection : le rang auquel tu as atteint le grade ${name}, parmi tous les utilisateurs de l'app.` : "Le numéro (ton rang parmi les utilisateurs qui ont atteint ce grade) arrive dès que l'app est en ligne."}</p>
+    ${G[0] ? `<p class="small muted">Atteint à ${nbFmt(G[0])} points de l'année.</p>` : ""}
     <button type="button" class="btn-primary" id="colx">Fermer</button></div></div>`);
   const bg = document.querySelector(".collector-bg");
   bg.onclick = (e) => { if (e.target === bg || e.target.id === "colx") bg.remove(); };
 }
+// Grade pour un nombre de points de l'année ; title = nom et classe (« Explorateur · 11e » ; espace insécable avant le point :
+// le filtre France (frThouPart) change « · » entouré d'espaces en « × »).
 function gradeOf(r) {
   let i = 0; while (i + 1 < GRADES.length && r >= GRADES[i + 1][0]) i++;
-  const [lo, ic, name] = GRADES[i], nx = GRADES[i + 1];
-  return { i, ic, name, lo, next: nx ? { at: nx[0], ic: nx[1], name: nx[2] } : null, pct: nx ? Math.round(((r - lo) / (nx[0] - lo)) * 100) : 100 };
+  const [lo, ic, name] = GRADES[i], nx = GRADES[i + 1], c = state && state.profile ? classTag(state.profile) : "";
+  return { i, ic, name, title: name + (c ? "\u00a0· " + c : ""), lo, next: nx ? { at: nx[0], ic: nx[1], name: nx[2] } : null, pct: nx ? Math.round(((r - lo) / (nx[0] - lo)) * 100) : 100 };
 }
-// Page « Mes grades » (21.11) : l'échelle complète, le grade actuel mis en avant, la courbe du Mathélo.
+// Page « Mes grades » (21.11 ; 25.11 : grades de l'année) : grade et points de l'année, barème, échelle, années passées, courbe du Mathélo.
 function screenGrades() {
   if (!state.eloSeen) { state.eloSeen = true; save(); }
-  const r = state.elo.r, g = gradeOf(r), best = Math.max(r, ...((state.elo.log || []).map((x) => x[1])));
-  h(`${brand}${backTop()}<div class="eyebrow">Mathélo</div><h2>Mes grades</h2>
-  <p class="small muted">Le <b>Mathélo</b> est ton score de maths : il monte quand tu réussis des questions de ton niveau ou plus difficiles, et baisse un peu après une erreur. Chaque palier de 75 points donne un <b>grade</b> (Chercheur, Stratège…).</p>
-  <div class="card stack grade-now"><div class="ic-row"><button type="button" class="ic grade-big grade-open" data-g="${g.name}" aria-label="Voir la carte du grade ${g.name}">${g.ic}</button><div><div class="eyebrow">Mon grade</div><h2>${g.name}</h2><div class="small muted">Mathélo ${r}${best > r ? " · meilleur : " + best : ""}</div></div></div>
-    ${g.next ? `<div class="stack" style="gap:4px"><span class="pbar"><i style="width:${g.pct}%"></i></span><span class="small">Prochain grade : <b>${g.next.ic} ${g.next.name}</b>, à ${g.next.at} (encore ${g.next.at - r} points).</span></div>` : '<p class="small">Le plus haut grade : bravo !</p>'}</div>
-  <div class="card">${eloBlock()}</div>
-  <div class="card flat stack"><h3>L'échelle des grades</h3><p class="small muted">Un grade tous les 75 points. Ton Mathélo monte quand tu réussis des questions de ton niveau ou plus difficiles. Touche un grade atteint pour voir sa carte.</p>
-    <ol class="grades">${GRADES.slice().reverse().map(([at, ic, name]) => { const st = r >= at ? (gradeOf(r).name === name ? "cur" : "ok") : "todo";
+  const y = ypSync(), r = y.pts, g = gradeOf(r);
+  const past = (y.past || []).map((x) => { const G = GRADES.filter(([at]) => x.p >= at).pop(); return `<li>${esc(x.c)} · ${yearLabel(+x.k.split("|")[0])} : ${G[1]} ${G[2]} atteint</li>`; }).reverse().join("");
+  h(`${brand}${backTop()}<div class="eyebrow">Grades de l'année\u00a0· ${esc(y.c)}</div><h2>Mes grades</h2>
+  <div class="card stack grade-now"><div class="ic-row"><button type="button" class="ic grade-big grade-open" data-g="${g.name}" aria-label="Voir la carte du grade ${g.name}">${g.ic}</button><div><div class="eyebrow">Mon grade</div><h2>${esc(g.title)}</h2><div class="small muted">${nbFmt(r)} points cette année</div></div></div>
+    ${g.next ? `<div class="stack" style="gap:4px"><span class="pbar"><i style="width:${g.pct}%"></i></span><span class="small">Prochain grade : <b>${g.next.ic} ${g.next.name}</b>, encore ${nbFmt(g.next.at - r)} points.</span></div>` : '<p class="small">Le plus haut grade : bravo !</p>'}</div>
+  <div class="card flat stack yp-rules"><h3>Gagner des points</h3><p class="small">Question faite <b>+1</b>, réussie <b>+2</b>, du premier coup <b>+1</b>, difficile jusqu'à <b>+3</b> ; séance finie <b>+10</b> ; erreur effacée du carnet <b>+5</b> ; problème de la semaine réussi <b>+10</b>.</p>
+    <p class="small muted">Au plus ${YP.cap} points par jour (hors problème de la semaine) ; « Refaire » ne rapporte rien. Tout le monde repart 🌱 Pousse à la rentrée et au changement de classe.</p></div>
+  <div class="card">${eloBlock()}<p class="small muted">Le Mathélo mesure ton niveau ; il ne change pas ton grade.</p></div>
+  <div class="card flat stack"><h3>L'échelle de l'année</h3><p class="small muted">Touche un grade atteint pour voir sa carte.</p>
+    <ol class="grades">${GRADES.slice().reverse().map(([at, ic, name]) => { const st = r >= at ? (g.name === name ? "cur" : "ok") : "todo";
       const no = st !== "todo" && at && (isAuthor() ? "0" : (state.gradeNo || {})[name]);
-      return `<li class="${st}"><span class="g-ic">${st !== "todo" && at ? `<button type="button" class="grade-open" data-g="${name}" aria-label="Voir la carte du grade ${name}">${ic}</button>` : ic}</span><span class="g-n">${name}${st === "cur" ? " <span class=\"badge\">toi</span>" : ""}${no ? ` <small class="g-no" title="${no}e utilisateur à obtenir ce grade">#${no}</small>` : ""}</span><span class="g-at">${at ? at : "–"}</span></li>`; }).join("")}</ol></div>
+      return `<li class="${st}"><span class="g-ic">${st !== "todo" && at ? `<button type="button" class="grade-open" data-g="${name}" aria-label="Voir la carte du grade ${name}">${ic}</button>` : ic}</span><span class="g-n">${name}${st === "cur" ? " <span class=\"badge\">toi</span>" : ""}${no ? ` <small class="g-no" title="${no}e utilisateur à obtenir ce grade">#${no}</small>` : ""}</span><span class="g-at">${at ? nbFmt(at) : "–"}</span></li>`; }).join("")}</ol></div>
+  ${past ? `<div class="card flat stack yp-past"><h3>Souvenirs</h3><ul class="small">${past}</ul></div>` : ""}
   <button class="btn-primary btn-big" id="back">Retour</button>`);
   document.getElementById("back").onclick = screenHome; document.getElementById("backtop").onclick = screenHome;
   gradeNumbers();
@@ -479,11 +550,12 @@ function screenGrades() {
 }
 // Bandeau Mathélo (14.11, demande de l'utilisateur : « on a envie de le voir monter ») : sur tous les cadres de l'accueil.
 // 22.11 : bandeau compact sur une ligne (chiffre, grade, barre vers le grade suivant) ; la courbe est dans « Mes grades ».
+// 25.11 : le grade est celui de l'année (points de l'année), le chiffre reste le Mathélo.
 function eloBanner() {
-  const e = state.elo, prev = e.log.length > 1 ? e.log[e.log.length - 2][1] : null, d = prev === null ? 0 : e.r - prev, g = gradeOf(e.r);
-  return `<button type="button" class="elo-band elo-compact" id="eloband" aria-label="Mathélo ${e.r}, voir mes grades">
+  const e = state.elo, prev = e.log.length > 1 ? e.log[e.log.length - 2][1] : null, d = prev === null ? 0 : e.r - prev, r = ypPts(), g = gradeOf(r);
+  return `<button type="button" class="elo-band elo-compact" id="eloband" aria-label="Mathélo ${e.r}, grade ${g.title}, voir mes grades">
     <span class="eb-num"><span class="eyebrow">Mathélo${Engine.isProvisional(state) ? " · provisoire" : ""}</span><b class="num">${e.r}</b>${d ? `<span class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "▲ +" : "▼ "}${d}</span>` : ""}</span>
-    <span class="eb-grade"><b><span class="eb-gic" aria-hidden="true">${g.ic}</span> ${g.name}</b>${g.next ? `<span class="pbar"><i style="width:${g.pct}%"></i></span><span class="eb-next">${g.next.ic} ${g.next.name} dans ${g.next.at - e.r} pts</span>` : ""}</span>
+    <span class="eb-grade"><b><span class="eb-gic" aria-hidden="true">${g.ic}</span> ${esc(g.title)}</b>${g.next ? `<span class="pbar"><i style="width:${g.pct}%"></i></span><span class="eb-next">${g.next.ic} ${g.next.name} dans ${nbFmt(g.next.at - r)} pts</span>` : ""}</span>
     <span class="eb-chev" aria-hidden="true">›</span></button>`;
 }
 function themeBars(lv) {
@@ -521,8 +593,8 @@ function backupCard() {
 // Pour qui a passé la visite guidée avant la bulle du Mathélo : une petite carte, une seule fois, fermée par « Compris ».
 function eloHintCard() {
   if (state.eloSeen || !state.tourDone) return "";
-  const g = gradeOf(state.elo.r);
-  return `<div class="card flat stack elo-hint"><p class="small"><b>📈 Mathélo</b> = ton score de maths. Il monte quand tu réussis des questions de ton niveau. Tous les 75 points, un nouveau <b>grade</b> : tu es ${g.ic} ${g.name}${g.next ? `, le prochain est ${g.next.ic} ${g.next.name}` : ""}.</p>
+  const g = gradeOf(ypPts());
+  return `<div class="card flat stack elo-hint"><p class="small"><b>📈 Mathélo</b> = ton score de maths. Ton <b>grade</b>, lui, monte avec les points de l'année (séances, réussites) : tu es ${g.ic} ${g.name}${g.next ? `, le prochain est ${g.next.ic} ${g.next.name}` : ""}.</p>
     <div class="row"><button class="btn-ghost small" id="elohok">Compris</button><button class="btn-ghost small" id="elohmore">Voir tous les grades</button></div></div>`;
 }
 // Bilan de la semaine passée (21.11) : du lundi au mercredi, une fois par semaine, si l'élève a pratiqué.
@@ -544,7 +616,7 @@ function weekRecapCard() {
 // Visite guidée (21.11 ; 22.11 : adaptée à l'accueil à cases) : 3 bulles sur l'accueil, l'élément concerné surligné.
 const TOUR = [
   [".sess-card", "▶ Ta séance du jour", "En classe : au rythme de ton cours (choisis ton chapitre). Libre : tous les sujets, à ton rythme. Quelques minutes suffisent."],
-  [".elo-band", "📈 Ton Mathélo", "Ton score de maths : il monte quand tu réussis des questions de ton niveau. Tous les 75 points, un nouveau grade (Pousse, Apprenti, Arpenteur…). Touche-le pour voir l'échelle."],
+  [".elo-band", "📈 Ton Mathélo", "Ton score de maths : il monte quand tu réussis des questions de ton niveau. À côté, ton grade de l'année (Pousse, Apprenti…) : il monte avec tes séances et tes réussites. Touche-le pour voir l'échelle."],
   [".doors", "🧭 Tes rubriques", "Le problème de la semaine, les questions curieuses, l'histoire des maths, ton test (révision jusqu'au jour J), ton carnet d'erreurs et tes progrès."],
 ];
 let tourK = 0;
@@ -1152,7 +1224,7 @@ function screenStats(back) {
     if (!g || !Array.isArray(g.grades)) { $("st4").innerHTML = `<h3>Grades atteints</h3><p class="small">Indisponible${g && g.erreur ? " : " + esc(g.erreur) : " : redéploie l'Apps Script (tools/votes.gs)"}.</p>`; return; }
     const L = g.grades.filter(([, n]) => n > 0), max = Math.max(1, ...L.map(([, n]) => n)), ic = Object.fromEntries(GRADES.map(([, i, name]) => [name, i]));
     $("st4").innerHTML = `<h3>Grades atteints (appareils)</h3>${L.length ? `<table class="st-table"><tbody>${L.map(([name, n]) => `<tr><td>${ic[name] || ""} ${esc(name)}</td><td><span class="st-bar" style="width:${Math.round((n / max) * 100)}%"></span></td><td>${n}</td></tr>`).join("")}</tbody></table>` : '<p class="small muted">Aucun grade enregistré pour l\'instant.</p>'}
-      <p class="small muted">Comptés depuis la mise en place des numéros collector : un grade atteint avant est enregistré quand l'élève ouvre « Mes grades » ou passe un nouveau grade. Tes appareils ne sont pas comptés.</p>`;
+      <p class="small muted">Depuis le 25.11, grades de l'année (points de travail, remis à zéro à la rentrée), et non plus le Mathélo. Comptés depuis la mise en place des numéros collector : un grade atteint avant est enregistré quand l'élève ouvre « Mes grades » ou passe un nouveau grade. Tes appareils ne sont pas comptés.</p>`;
   }).catch(() => { $("st4").innerHTML = '<h3>Grades atteints</h3><p class="small">Indisponible (réseau ?).</p>'; });
   // 22.11 : les commentaires ne s'affichent plus ici (demande de l'auteur) : onglet Commentaires du tableau de suivi (tools/suivi.py).
 }
@@ -1572,7 +1644,7 @@ function nextQuestion(redo) {
     onDone: (res) => {
       const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
       // Carnet d'erreurs (20.11) : séance « carnet » → progression ; ailleurs, une question ratée y entre.
-      if ((session.carnet || kind === "carnet") && !redo) { const r = carnetResult(id, q.d, res.solved && res.tries === 1); if (r === "efface") toast("📕 Effacée de ton carnet d'erreurs ✓"); else if (r === "encore") toast("📕 1 réussite sur 2 : encore une, du premier coup, et elle sort du carnet.", 4000); else if (r === "rate") toast("📕 Elle reste dans ton carnet : il faut 2 réussites de suite, du premier coup.", 4000); }
+      if ((session.carnet || kind === "carnet") && !redo) { const r = carnetResult(id, q.d, res.solved && res.tries === 1); if (r === "efface") { session.ypg = (session.ypg || 0) + ypAdd(state, YP.carnet); toast("📕 Effacée de ton carnet d'erreurs ✓"); } else if (r === "encore") toast("📕 1 réussite sur 2 : encore une, du premier coup, et elle sort du carnet.", 4000); else if (r === "rate") toast("📕 Elle reste dans ton carnet : il faut 2 réussites de suite, du premier coup.", 4000); }
       else if (!res.solved && !q.parts && !session.weekly && carnetAdd(id, q.d, q.code, res.diag, res.ans)) toast("📕 Rangée dans ton carnet d'erreurs : tu pourras la refaire.");
       // Deux échecs de suite : on glisse juste après une question sur une notion de base (une fois par notion et par séance).
       if (!session.weekly && !session.prep && !session.carnet && sc < 0.5) {
@@ -1584,6 +1656,8 @@ function nextQuestion(redo) {
          « Je ne sais pas » compte à 40 % (−38 décourageait d'avouer qu'on ne sait pas, plus que le gain d'une bonne réponse). */
       const w = redo ? 0 : res.dontKnow ? 0.4 : 1; /* 40 % validé par l'enseignant le 25.11 */
       res.delta = w ? Engine.updateElo(state, id, q.d, sc, w) : 0;
+      /* 25.11 : points de l'année (grades) ; rien en « Refaire » ; problème de la semaine réussi : bonus hors plafond. */
+      session.ypg = (session.ypg || 0) + ypAdd(state, ypPoints(q.d, res, !!redo)) + (session.weekly && res.solved && !redo ? ypAdd(state, YP.weekly, "w") : 0);
       session.score += sc; session.answered++; session.ids.add(id);
       session.res = session.res || {}; const rr = (session.res[id] = session.res[id] || { n: 0, ok: 0 }); rr.n++; if (res.solved) rr.ok++;
       if (Engine.finishDay(state, 1, sc) === "joker") toast("🛡 Joker de série utilisé : ta série continue !"); save();
@@ -2422,7 +2496,7 @@ function sumGoal(g) {
   /* Notion à consolider : ratée dans cette séance, sinon la plus récente du carnet d'erreurs pas encore effacée. */
   const r = session.res || {}, weak = [...(session.ids || [])].find((id) => r[id] && r[id].ok < r[id].n)
     || ((state.carnet || []).filter((x) => !x.ok).slice(-1)[0] || {}).id;
-  const parts = [g && g.next ? `encore <b>${g.next.at - state.elo.r} points</b> avant ${g.next.ic} ${g.next.name}` : "", weak ? `consolider <b>${esc(nLab(weak))}</b>` : ""].filter(Boolean);
+  const parts = [g && g.next ? `encore <b>${nbFmt(g.next.at - ypPts())} points</b> avant ${g.next.ic} ${g.next.name}` : "", weak ? `consolider <b>${esc(nLab(weak))}</b>` : ""].filter(Boolean);
   return parts.length ? `<div class="small goal">🎯 Objectif pour demain : ${parts.join(" · ")}</div>` : "";
 }
 function screenSummary() {
@@ -2433,16 +2507,19 @@ function screenSummary() {
   Badges.check(state); save();
   const nb = newBadgesCard();
   const n = session.answered, sc = session.score, d = state.elo.r - session.elo0;
-  const g0 = gradeOf(session.elo0), g1 = gradeOf(state.elo.r);
+  /* 25.11 : grade de l'année. Séance finie (3 questions au moins, sauf problème de la semaine) : +10, deux fois par jour au plus. */
+  if (!session.weekly && !session.ypDone && n >= Math.min(3, session.plan.length)) { session.ypDone = true; session.ypg = (session.ypg || 0) + ypAdd(state, YP.session, "s"); save(); }
+  const yg = session.ypg || 0, ypt = ypPts(), g0 = gradeOf(ypt - yg), g1 = gradeOf(ypt);
   if (g1.i > g0.i) gradeNumbers();
-  const newGrade = g1.i > g0.i ? `<div class="card stack grade-up"><div class="eyebrow">Nouveau grade !</div><div class="ic-row"><button type="button" class="ic grade-ic grade-open" data-g="${g1.name}" aria-label="Voir la carte du grade ${g1.name}">${g1.ic}</button><div><h3>Tu es maintenant ${g1.name}</h3><div class="small muted">${g1.next ? "Prochain grade : " + g1.next.ic + " " + g1.next.name + ", à " + g1.next.at + "." : "Le plus haut grade : bravo !"}</div></div></div></div>` : "";
+  const newGrade = g1.i > g0.i ? `<div class="card stack grade-up"><div class="eyebrow">Nouveau grade !</div><div class="ic-row"><button type="button" class="ic grade-ic grade-open" data-g="${g1.name}" aria-label="Voir la carte du grade ${g1.name}">${g1.ic}</button><div><h3>Tu es maintenant ${esc(g1.title)}</h3><div class="small muted">${g1.next ? "Prochain grade : " + g1.next.ic + " " + g1.next.name + ", encore " + nbFmt(g1.next.at - ypt) + " points." : "Le plus haut grade : bravo !"}</div></div></div></div>` : "";
+  const ypRow = `<div class="spread yp-row"><span>Points de l'année</span><b>+${yg}${g1.next ? ` <span class="small muted">\u00a0· encore ${nbFmt(g1.next.at - ypt)} avant ${g1.next.name}</span>` : ""}</b></div>`;
   /* 25.11 soir (revue d'un testeur : une séance d'une question du Carnet affichait le grand écran de fin, lourd) :
      petite séance du Carnet → bilan léger (résultat, ce qui reste à effacer, continuer). */
   if (session.carnet && n <= 2) {
     const left = (state.carnet || []).length;
     h(`${brand}<h2>${sc >= n ? "📕 Bien joué !" : "📕 C'est noté."}</h2>
     <div class="card flat stack"><div class="spread"><span>Mathélo</span><b>${state.elo.r} <span class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</span></b></div>
-    <div class="spread"><span>Carnet d'erreurs</span><b>${left ? left + " à effacer" : "vide ✓"}</b></div></div>
+    ${ypRow}<div class="spread"><span>Carnet d'erreurs</span><b>${left ? left + " à effacer" : "vide ✓"}</b></div></div>
     ${newGrade}${nb}
     ${left ? '<button class="btn-primary btn-big" id="carnetagain">📕 Continuer à effacer</button>' : ""}
     <button class="${left ? "btn-sec" : "btn-primary btn-big"}" id="home">Retour à l'accueil</button>`);
@@ -2458,7 +2535,7 @@ function screenSummary() {
   ${weekLine()}
   <div class="card stack"><div class="spread"><span>Score</span><b>${String(sc).replace(".", ",")} / ${n}</b></div>
   <div class="spread"><span>Mathélo</span><b>${state.elo.r} <span class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</span></b></div>
-</div>
+  ${ypRow}</div>
   ${session.ctest ? (() => { const a = ctestNote(session.ctest), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? (isFR() ? "Le niveau apparaît après 3 réponses sur cette compétence." : "La note apparaît après 3 réponses sur cette compétence.") : b === null ? (isFR() ? "Premier positionnement pour cette compétence." : "Première note pour cette compétence.") : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". " + (isFR() ? "Il remontera" : "Elle remontera") + " avec la pratique." : isFR() ? "Niveau stable." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
   ${newGrade}${nb}
   ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${state.carnet.length} à effacer</b></div><span class="small muted">Une erreur s'efface après 2 réussites de suite, du premier coup.</span><button class="btn-primary" id="carnetagain">${session.carnet ? "Continuer à effacer" : "📕 Effacer mes erreurs maintenant"}</button></div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
