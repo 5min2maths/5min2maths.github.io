@@ -76,6 +76,8 @@ try {
   state = null; draft = { system: "FR", grade: 9, track: null, minutes: 5 }; screenLevel();
   ok(!!document.querySelector('#sys button[data-v="FR"]') && document.querySelectorAll("#grade button").length === 7, "aperçu : choix France / 7 classes");
   draft.system = "CH"; screenLevel(); ok(document.querySelectorAll("#grade button").length === SYSTEMS.CH.grades.length, "aperçu : retour Suisse");
+  /* 25.11 : …/#france app déjà ouverte : choix de l'école ouvert sur France */
+  { const keep = SYSTEMS.FR; delete SYSTEMS.FR; history.replaceState(null, "", "#france"); const r = showCode() || restoreFromHash(); ok(SYSTEMS.FR && document.querySelector('#sys button[data-v="FR"][aria-pressed="true"]'), "#france app ouverte : France choisie"); ok(location.hash === "", "#france : adresse nettoyée"); if (!SYSTEMS.FR) SYSTEMS.FR = keep; }
   /* 25.11 : produit × en France, produit scalaire gardé, Suisse inchangée */
   ok(frLocal("Calcule \\(3 \\cdot 4\\).") === "Calcule \\(3 \\times 4\\).", "× en France : " + frLocal("Calcule \\(3 \\cdot 4\\)."));
   ok(/\\cdot/.test(frLocal("\\(\\vec{u} \\cdot \\vec{v} = 0\\)")), "produit scalaire gardé");

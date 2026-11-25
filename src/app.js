@@ -2369,6 +2369,17 @@ function screenSummary() {
 // Consultation d'une question par son code : adresse …/#q-eq2disc-2-k3f (rien n'est enregistré).
 function showCode() {
   /* Mentions légales (24.11) : lien direct …/#confidentialite, à donner aux parents */
+  /* 25.11 : aperçu France aussi quand l'app est déjà ouverte (installée) ; ouvre directement le choix de l'école. */
+  if (location.hash === "#france" || location.hash === "#france-off") {
+    const on = location.hash === "#france";
+    try { if (on) localStorage.setItem("m2m-france", "1"); else localStorage.removeItem("m2m-france"); } catch (e) {}
+    history.replaceState(null, "", location.pathname);
+    if (!on) { location.reload(); return true; }
+    SYSTEMS.FR = SYSTEMS_HIDDEN.FR;
+    if (typeof draft !== "undefined" && draft) draft.system = "FR";
+    screenLevel(); toast("Aperçu France activé sur cet appareil (…/#france-off pour le retirer).", 4000);
+    return true;
+  }
   if (typeof presentRoute === "function" && presentRoute()) return true; /* 25.11 : présentations …/#decouvrir (élèves) et …/#parents (src/presente.js) */
   if (typeof parentRoute === "function" && parentRoute()) return true; /* 24.11 : espace parent, …/#parent=<code> (src/parents.js) */
   if (location.hash === "#confidentialite") { screenLegal(() => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); }); return true; }
