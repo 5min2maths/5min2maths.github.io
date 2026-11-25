@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "726a8b70dd"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "d8881b530e"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -921,29 +921,17 @@ function screenComps() {
       ${compsOf(c.id).map((k) => { const n = compNote(comps[k.cid]); return `<div class="comp"><span>${k.label}</span><span class="comp-r"><button type="button" class="ctest" data-id="${c.id}" data-d="${k.i + 1}" data-label="${esc(k.label)}" title="3 questions sur cette compétence">Me tester</button><span class="note ${noteCls(n)}">${noteTxt(n)}</span></span></div>`; }).join("")}</div>`).join("")}</div>`;
   }).join("");
   const cur = cat.filter((c) => c.current), old = cat.filter((c) => !c.current), st = compStats(cur.map((c) => c.id));
-  // CO (14.11, demande de l'utilisateur) : compétences du cycle classées par grand thème du PER, un bloc repliable par thème.
-  const co = state.profile.system === "CH" && state.profile.grade <= 11;
-  const yearOf = (c) => (placeOf(c, state.profile) || [state.profile.grade])[0];
-  const compLine = (c) => compsOf(c.id).map((k) => { const n = compNote(comps[k.cid]); return `<div class="comp"><span>${k.label}</span><span class="comp-r"><button type="button" class="ctest" data-id="${c.id}" data-d="${k.i + 1}" data-label="${esc(k.label)}" title="3 questions sur cette compétence">Me tester</button><span class="note ${noteCls(n)}">${noteTxt(n)}</span></span></div>`; }).join("");
-  const cycle = () => Object.keys(THEMES).map((th, i) => {
-    const ns = cat.filter((c) => NOTIONS.find((n) => n.id === c.id).theme === th).sort((a, b) => yearOf(a) - yearOf(b) || Engine.rank(state.profile, a.id) - Engine.rank(state.profile, b.id));
-    if (!ns.length) return "";
-    const t = compStats(ns.map((c) => c.id));
-    return `<details class="card flat cyc"><summary><span class="cyc-h"><b>${THEMES[th]}</b><span class="small muted">${t.tested} / ${t.total} notées${avgTxt(t.avg)}</span></span>${t.avg !== null ? `<span class="note ${noteCls(Math.round(t.avg * 2) / 2)}">${String(Math.round(t.avg * 10) / 10).replace(".", ",")}</span>` : ""}</summary>
-      ${ns.map((c) => `<div class="cnotion"><div class="spread"><b>${c.label}</b><span class="row" style="gap:4px"><span class="tag yr">${yearOf(c)}e</span>${statusTag(c.id)}</span></div>${LESSONS[c.id] ? `<button type="button" class="btn-ghost small lopen" data-id="${c.id}">${typeof ACTIVE !== "undefined" && ACTIVE[c.id] ? "🖐 Leçon à manipuler" : "📖 Leçon"}</button>` : ""}${compLine(c)}</div>`).join("")}</details>`;
-  }).join("");
-  const sc = compStats(cat.map((c) => c.id));
+  /* CO : l'affichage « par grands thèmes du PER » (14.11) est remplacé le 25.11 par le référentiel du PER (src/ref_co.js,
+     screenCompsRef) ; sans ce fichier, le CO retombe ici sur les compétences par notion, comme les autres profils. */
   Badges.check(state); state.badgesNew = []; save();
   h(`${brand}${backTop()}<h2>Mes <span class="mark">compétences</span></h2>
   <p class="muted">${isFR() ? "Chaque compétence reçoit un niveau de maîtrise (insuffisante, fragile, satisfaisante, très bonne) dès que tu y as répondu 3 fois. Il suit tes 8 dernières réponses : il monte quand tu progresses." : "Chaque compétence reçoit une note de 1 à 6 dès que tu y as répondu 3 fois. La note suit tes 8 dernières réponses : elle monte quand tu progresses."}</p>
   ${badgesSection()}
-  ${co ? `<div class="card flat"><div class="spread"><span>Cycle 3 · jusqu'en ${state.profile.grade}e</span><b>${sc.tested} / ${sc.total} ${isFR() ? "positionnées" : "notées"}${avgTxt(sc.avg)}</b></div></div>
-  ${cycle()}` : `<div class="card flat"><div class="spread"><span>Cette année</span><b>${st.tested} / ${st.total} ${isFR() ? "positionnées" : "notées"}${avgTxt(st.avg)}</b></div></div>
+  <div class="card flat"><div class="spread"><span>Cette année</span><b>${st.tested} / ${st.total} ${isFR() ? "positionnées" : "notées"}${avgTxt(st.avg)}</b></div></div>
   ${block(cur)}
-  ${old.length ? `<details class="olds"><summary>Années précédentes (${compStats(old.map((c) => c.id)).tested} ${isFR() ? "positionnées" : "notées"})</summary>${block(old)}</details>` : ""}`}
+  ${old.length ? `<details class="olds"><summary>Années précédentes (${compStats(old.map((c) => c.id)).tested} ${isFR() ? "positionnées" : "notées"})</summary>${block(old)}</details>` : ""}
   <button class="btn-primary btn-big" id="back">Retour</button>`);
   bindBadges(app);
-  app.querySelectorAll(".lopen").forEach((b) => (b.onclick = () => screenLesson(b.dataset.id, screenComps, true)));
   // « Me tester » (14.11, demande de l'utilisateur) : 3 questions de la compétence, au niveau de la compétence.
   app.querySelectorAll(".ctest").forEach((b) => (b.onclick = () => {
     const id = b.dataset.id, d = +b.dataset.d, cid = id + ":" + (d - 1);
@@ -961,7 +949,9 @@ function screenComps() {
    référentiel (src/ref_matu.js), groupées par thème et notion du référentiel, code discret, intitulé officiel ; MA2 retiré
    en MA1. Note calculée à la volée depuis state.comps (Referentiel.note) ; sans question rattachée : « travaillée en classe ».
    25.11 (phase France) : profil France = items officiels de sa classe (src/ref_fr.js), pastilles LSU sans chiffre,
-   « travaillé en classe » pour les items non saisissables ; au lycée, 2nde et collège repliés à part. */
+   « travaillé en classe » pour les items non saisissables ; au lycée, 2nde et collège repliés à part.
+   25.11 (phase CO) : profil CO = progression des apprentissages du PER (src/ref_co.js), groupée par axe (Espace, Nombres,
+   Opérations, Grandeurs et mesures) puis par champ du PER ; années précédentes du cycle repliées. */
 function screenCompsRef() {
   const p = state.profile, y0 = Referentiel.year(p), fr = Referentiel.isFR(p), W = fr ? "positionnées" : "notées";
   const line = (r) => {
@@ -969,9 +959,17 @@ function screenCompsRef() {
     const n = Referentiel.note(state, r), t = Referentiel.plan(p, r).length;
     return `<div class="comp rcomp"><span title="${r.code}">${esc(r.label)}</span><span class="comp-r">${t ? `<button type="button" class="ctest rtest" data-code="${r.code}" title="3 questions sur cette compétence">Me tester</button>` : ""}<span class="note ${noteCls(n)}">${noteTxt(n)}</span></span></div>`;
   };
+  /* CO (25.11) : les leçons restent accessibles depuis « Mes compétences » (bouton du 14.11) : une ligne repliée « Leçons »
+     par champ du PER, avec les leçons des notions rattachées que l'élève peut recevoir. Autres systèmes : rien de plus. */
+  const co = Referentiel.of(p) === "CO", inCat = co ? new Set(Engine.catalog(p).map((c) => c.id)) : null;
+  const lessons = (rs) => {
+    if (!co) return "";
+    const ids = [...new Set(rs.flatMap((r) => r.links.map((s) => s.split("@")[0])))].filter((id) => inCat.has(id) && LESSONS[id]);
+    return ids.length ? `<details class="rles"><summary class="small">📖 Leçons (${ids.length})</summary><div class="row" style="flex-wrap:wrap;gap:4px">${ids.map((id) => `<button type="button" class="btn-ghost small lopen" data-id="${id}">${typeof ACTIVE !== "undefined" && ACTIVE[id] ? "🖐 " : ""}${esc((NOTIONS.find((n) => n.id === id) || {}).label || id)}</button>`).join("")}</div></details>` : "";
+  };
   const themes = (list) => [...new Set(list.map((r) => r.theme))].map((th) => {
     const rs = list.filter((r) => r.theme === th), t = Referentiel.stats(state, rs);
-    return `<div class="card flat"><div class="spread"><h3>${esc(th)}</h3><span class="small muted">${t.tested} / ${t.total} ${W}</span></div>${[...new Set(rs.map((r) => r.notion))].map((no) => `<div class="cnotion">${no ? `<b>${esc(no)}</b>` : ""}${rs.filter((r) => r.notion === no).map(line).join("")}</div>`).join("")}</div>`;
+    return `<div class="card flat"><div class="spread"><h3>${esc(th)}</h3><span class="small muted">${t.tested} / ${t.total} ${W}</span></div>${[...new Set(rs.map((r) => r.notion))].map((no) => { const rn = rs.filter((r) => r.notion === no); return `<div class="cnotion">${no ? `<b>${esc(no)}</b>` : ""}${rn.map(line).join("")}${lessons(rn)}</div>`; }).join("")}</div>`;
   }).join("");
   const cur = Referentiel.list(p), st = Referentiel.stats(state, cur), nq = cur.filter(Referentiel.hasQuestions).length, k = st.total - nq;
   const olds = Referentiel.olds(p);
@@ -987,6 +985,7 @@ function screenCompsRef() {
   ${olds.map(([lab, ys]) => `<details class="olds"><summary>${lab} (${ys.map((y) => Referentiel.stats(state, Referentiel.list(p, y)).tested).reduce((a, b) => a + b, 0)} ${W})</summary>${ys.map((y) => `<h3 class="ryear">${Referentiel.yearLabel(p, y)}</h3>${themes(Referentiel.list(p, y))}`).join("")}</details>`).join("")}
   <button class="btn-primary btn-big" id="back">Retour</button>`);
   bindBadges(app);
+  app.querySelectorAll(".lopen").forEach((b) => (b.onclick = () => screenLesson(b.dataset.id, screenComps, true)));
   app.querySelectorAll(".rtest").forEach((b) => (b.onclick = () => {
     const r = Referentiel.find(p, b.dataset.code), ps = Referentiel.plan(p, r);
     if (!ps.length) return;

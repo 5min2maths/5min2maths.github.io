@@ -595,8 +595,11 @@ function diagnose(q, input) {
   if (w !== 0 && tol(v, -w)) return "Le nombre est bon, mais pas le signe : vérifie les règles des signes.";
   for (const k of [1, 2, 3]) if (w !== 0 && (tol(v, w * 10 ** k) || tol(v, w / 10 ** k))) return "Les chiffres sont bons, mais pas la virgule (ou l'unité) : vérifie la conversion ou le rang.";
   if (w !== 0 && Math.abs(w) !== 1 && tol(v, 1 / w)) return "Tu as inversé : c'est l'inverse de la bonne réponse (numérateur et dénominateur échangés ?).";
-  if (Math.abs(w) > 1 && tol(v, w * w)) return "Il manque une étape : n'oublie pas la racine carrée à la fin.";
-  if (w > 1 && tol(v, Math.sqrt(w))) return "Il manque une étape : pense à élever au carré.";
+  /* 26.11 soir (revue d'un testeur : « n'oublie pas la racine carrée » pour une boule, où c'est la racine cubique) : messages
+     génériques EXACTS dans tous les cas — ils décrivent la réponse, sans deviner l'opération oubliée. */
+  if (Math.abs(w) > 1 && tol(v, w * w * w)) return "Ta réponse est le cube de la bonne réponse : il manque une dernière étape (une racine cubique ?).";
+  if (Math.abs(w) > 1 && tol(v, w * w)) return "Ta réponse est le carré de la bonne réponse : il manque une dernière étape.";
+  if (w > 1 && tol(v, Math.sqrt(w))) return "Ta réponse est la racine carrée de la bonne réponse : il manque une dernière étape.";
   return null;
 }
 
@@ -6249,13 +6252,28 @@ function compNote(rec) {
    « Mes compétences » affiche le référentiel du système de l'élève quand il est embarqué dans l'app :
    - Collège de Genève (1re–4e, MA1 / MA2) : REF_MATU (src/ref_matu.js, généré par tools/ref_matu.py) ;
    - France (6e–Tle) : REF_FR (src/ref_fr.js, généré par tools/ref_fr.py) : attendus et capacités officiels, échelle LSU ;
-   - CO, MP : pas encore (phases suivantes) ; ces profils gardent les compétences par notion (src/competences.js).
+   - Cycle d'orientation (9e–11e) : REF_CO (src/ref_co.js, généré par tools/ref_co.py) : progression des apprentissages
+     du Plan d'études romand (PER, MSN 31–34), groupée par axe ; un item couvre une ou plusieurs années (y1–y2) ;
+   - MP : pas encore (phase suivante) ; ces profils gardent les compétences par notion (src/competences.js).
    Pour ajouter un système : un fichier de données généré (même forme que REF_MATU) et une entrée dans SYS ci-dessous.
    Aucune donnée nouvelle n'est enregistrée : la maîtrise d'une compétence officielle se calcule à la volée à partir de
    state.comps (réponses par notion et niveau de question, déjà enregistrées), donc rien n'est perdu ni remis à zéro. */
 const Referentiel = (() => {
   const FR_Y = { 6: "6e", 7: "5e", 8: "4e", 9: "3e", 10: "2nde", 11: "1re", 12: "Terminale" };
   const SYS = {
+    /* 25.11 (phase CO) : PER cycle 3. Un item est affiché dans l'année de l'élève si elle est dans ses années (y1–y2) ;
+       les items terminés une année précédente sont repliés sous cette année. Pas de niveau (profil CO sans niveau). */
+    CO: {
+      data: () => (typeof REF_CO !== "undefined" ? REF_CO : null),
+      applies: (p) => p.system === "CH" && p.track !== "mp" && p.grade >= 9 && p.grade <= 11,
+      year: (p) => p.grade,
+      years: (p) => Array.from({ length: p.grade - 8 }, (_, i) => i + 9),
+      yearLabel: (y) => y + "e",
+      allowed: () => true,
+      track: () => "",
+      title: "Plan d'études romand",
+      intro: "Les apprentissages du Plan d'études romand (PER) pour ton année, par axe. Chacun reçoit une note de 1 à 6 dès que tu as répondu 3 fois à ses questions. La note suit tes 8 dernières réponses : elle monte quand tu progresses.",
+    },
     MATU: {
       data: () => (typeof REF_MATU !== "undefined" ? REF_MATU : null),
       applies: (p) => p.system === "CH" && p.track === "college" && p.grade >= 12 && p.grade <= 15,
@@ -6290,12 +6308,13 @@ const Referentiel = (() => {
   };
   const cache = {};
   const sysOf = (p) => { if (!p) return null; for (const k in SYS) if (SYS[k].applies(p) && SYS[k].data()) return k; return null; };
-  /* Compétences du référentiel, dépliées : { code, year, niv, theme, notion, label, links } */
+  /* Compétences du référentiel, dépliées : { code, year, y2, niv, theme, notion, label, links } ; y2 = dernière année
+     de l'item (7e champ, REF_CO) ; sans 7e champ, y2 = year (une seule année : Collège, France). */
   const rows = (k) => {
     if (cache[k]) return cache[k];
     const D = SYS[k].data();
     /* 6e champ facultatif : l'année (REF_FR : 6 = 6e … 12 = Tle) ; sinon premier chiffre du code (REF_MATU). */
-    return (cache[k] = D.c.map(([code, niv, th, no, label, y]) => ({ code, year: y === undefined ? +code[0] : y, niv, theme: D.th[th], notion: D.no[no], label, links: D.q[code] || [] })));
+    return (cache[k] = D.c.map(([code, niv, th, no, label, y, y2]) => { const year = y === undefined ? +code[0] : y; return { code, year, y2: y2 === undefined ? year : y2, niv, theme: D.th[th], notion: D.no[no], label, links: D.q[code] || [] }; }));
   };
   /* France (catalogOnly, séparation 25.11) : on ne garde que les notions du catalogue France (toutes classes), jamais
      une notion propre à la Suisse ; un item sans notion restante est « travaillé en classe ». */
@@ -6330,10 +6349,12 @@ const Referentiel = (() => {
     yearLabel: (p, y) => SYS[sysOf(p)].yearLabel(y),
     track: (p) => SYS[sysOf(p)].track(p),
     year: (p) => SYS[sysOf(p)].year(p),
-    /* Compétences de l'élève : année y (par défaut la sienne), filtrées par niveau (MA2 retiré en MA1 et inversement). */
+    /* Compétences de l'élève : année y (par défaut la sienne), filtrées par niveau (MA2 retiré en MA1 et inversement).
+       Son année : les items qui la couvrent (year ≤ y ≤ y2) ; une année précédente : les items terminés cette année-là
+       (y2 = y), pour que chaque item n'apparaisse qu'une fois. Items d'une seule année (y2 = year) : comme avant. */
     list(p, y) {
-      const k = sysOf(p), S = SYS[k];
-      return rowsOf(k).filter((r) => r.year === (y || S.year(p)) && S.allowed(p, r.niv));
+      const k = sysOf(p), S = SYS[k], y0 = S.year(p), yy = y || y0;
+      return rowsOf(k).filter((r) => (yy === y0 ? r.year <= yy && r.y2 >= yy : r.y2 === yy) && S.allowed(p, r.niv));
     },
     years(p) { const S = SYS[sysOf(p)]; if (S.years) return S.years(p); const y = this.year(p); return Array.from({ length: y }, (_, i) => i + 1); },
     find(p, code) { const k = sysOf(p); return k ? rowsOf(k).find((r) => r.code === code) || null : null; },
