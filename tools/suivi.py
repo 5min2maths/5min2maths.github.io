@@ -401,7 +401,7 @@ def main():
     n_ref = onglet_referentiel(wb, bold, head_fill, P)
     n_reffr = onglet_referentiel_fr(wb, bold, head_fill, P)
     # Synthèse : formules (se met à jour quand l'utilisateur change « Contrôlé »)
-    syn.append(["Classe", "Notions", "Questions", "Leçons actives", "% notions actives", "Validées", "À corriger", "Vues", "% validé", "Questions à 1 forme", "Tests de qualité"])
+    syn.append(["Classe", "Notions", "Questions", "Leçons actives", "% notions actives", "Validées", "À corriger", "Vues", "% validé", "Questions à 1 forme", "Tests de qualité", "Compétences du référentiel (couvertes / total)"])
     for c in syn[1]:
         c.font, c.fill = bold, head_fill
     for i, cl in enumerate(d["classes"], start=2):
@@ -409,7 +409,10 @@ def main():
         notions = len(cl["rows"])
         actives = sum(1 for r in cl["rows"] if P[r["id"]]["active"])
         syn.append([cl["name"], notions, f"=COUNTA({t}C:C)-1", actives, f"=D{i}/B{i}",
-                    f'=COUNTIF({t}P:P,"validé")', f'=COUNTIF({t}P:P,"à corriger")', f'=COUNTIF({t}P:P,"vu")', f"=F{i}/C{i}", f"=COUNTIF({t}H:H,1)", f'=COUNTIF({t}G:G,"✓ qualité*")&" / "&COUNTIF({t}D:D,"Test")'])
+                    f'=COUNTIF({t}P:P,"validé")', f'=COUNTIF({t}P:P,"à corriger")', f'=COUNTIF({t}P:P,"vu")', f"=F{i}/C{i}", f"=COUNTIF({t}H:H,1)", f'=COUNTIF({t}G:G,"✓ qualité*")&" / "&COUNTIF({t}D:D,"Test")',
+                    # 26.11 : une notion de l'app couvre plusieurs compétences officielles ; on montre aussi les compétences
+                    # (onglet Référentiel Collège) pour ne pas comparer notions et compétences (1re–4e Collège seulement).
+                    (f"=COUNTIFS('Référentiel Collège'!B:B,\"{cl['name']}\",'Référentiel Collège'!H:H,\"couvert\")&\" / \"&COUNTIF('Référentiel Collège'!B:B,\"{cl['name']}\")" if cl["name"] in ("1re", "2e", "3e", "4e") else "")])
         syn[f"E{i}"].number_format = syn[f"I{i}"].number_format = "0%"
     syn.append([])
     syn.append([f"Commentaires des testeurs : {n_c}, dont {n_non} non traités (onglet Commentaires, lignes en jaune)."])
