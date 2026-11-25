@@ -19,8 +19,8 @@ const FRX = (function () {
   const FS = (v) => { const d = den(v); if (d === 1 || !d) return String(rnd(v)).replace(".", ","); return Math.round(v * d) + "/" + d; };
   const sg = (v) => (v < 0 ? " - " + N(-v) : " + " + N(v));
   const X = " \\times ";
-  const co = (a, v = "x") => (a === 1 ? v : a === -1 ? "-" + v : N(a) + v); // coefficient devant une lettre
-  const lin = (a, b, v = "x") => (a ? co(a, v) + (b ? sg(b) : "") : N(b)); // ax + b
+  const co = (a, v = "x") => (a === 1 ? v : a === -1 ? "-" + v : N(a) + v); /* coefficient devant une lettre */
+  const lin = (a, b, v = "x") => (a ? co(a, v) + (b ? sg(b) : "") : N(b)); /* ax + b */
   const linE = (a, b, v = "x") => (a === 1 ? v : a === -1 ? "-" + v : a + "*" + v) + (b < 0 ? "-" + -b : b ? "+" + b : "");
   const keepT = (spec, traps) => (traps || []).filter((tr) => {
     if (!tr) return false;
