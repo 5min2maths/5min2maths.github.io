@@ -814,3 +814,43 @@ details.solfull summary { padding: 11px 0; margin-top: 0; }
 .stats-line .btn-primary.small, .stats-line .btn-sec.small { min-height: 36px; padding: 4px 14px; }
 .welcome-pz { gap: 8px; flex-wrap: wrap; } .welcome-pz a { text-decoration: none; display: inline-flex; align-items: center; min-height: 40px; }
 .seg button .seg-sub { display: block; font-size: 0.72em; font-weight: 400; opacity: 0.8; line-height: 1.1; } /* 26.11 : « Sec. II » + « Collège, MP » */
+
+/* 26.11 — chantier « ergonomie de la question » (revue d'un testeur). */
+/* Clavier de calcul (réponse nombre, calcul tapé permis) : 6 colonnes, sans lettres ni « = » ni « ; ». */
+.keypad.k-calc { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.keypad.k-calc button { padding: 11px 0; font-size: 1.12rem; }
+/* Barre d'action fixe en bas pendant une question : bouton principal toujours à droite, au même endroit ; zone sûre des
+   iPhone respectée ; la page garde en bas la place de la barre pour que le dernier champ et le clavier passent au-dessus. */
+.qbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--card); border-top: 1px solid var(--line);
+  box-shadow: 0 -4px 14px rgba(20, 40, 100, .08); padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.qbar-in { max-width: 528px; margin: 0 auto; display: flex; gap: 10px; align-items: stretch; height: 52px; } /* hauteur fixe : le bouton principal ne bouge pas quand le libellé de gauche passe sur 2 lignes */
+.qbar-l { flex: 1.15 1 0; min-width: 0; display: flex; gap: 10px; align-items: stretch; }
+.qbar-r { flex: 1 1 0; min-width: 0; display: flex; }
+.qbar-l > button, .qbar-r > button { flex: 1; min-width: 0; min-height: 48px; height: 100%; padding: 4px 8px; font-size: 0.95rem; line-height: 1.2; }
+.qbar-l > #idk { white-space: nowrap; }
+.qbar .btn-primary { font-size: 1.05rem; }
+.qmore { position: relative; flex: none; display: flex; }
+.qmore-b { width: 48px; min-width: 48px; min-height: 48px; padding: 0; font-size: 1.4rem; line-height: 1; letter-spacing: 1px; color: var(--ink-soft); border: 1px solid var(--line); background: var(--card); }
+.qmenu { position: absolute; left: 0; bottom: calc(100% + 12px); z-index: 21; display: grid; gap: 10px; padding: 10px; width: max-content; max-width: calc(100vw - 32px);
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 8px 24px rgba(20, 40, 100, .18); }
+.qmenu[hidden] { display: none; }
+.qmenu button { min-height: 48px; text-align: left; font-weight: 700; }
+#app:has(> .qbar) { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+#app:has(> .qbar) :is(#kp, .keypad, input.ans, .fb, .part) { scroll-margin-bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
+body:has(.qbar) .toast { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+/* Avis après la question : une seule icône 💬, discrète, qui ouvre 👍 / 👎 et le commentaire. */
+.qfb { display: flex; justify-content: flex-end; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+.qfb .code { display: none; align-self: center; }
+.auteur .qfb .code { display: inline; }
+.qfb details.qfb-d { flex: 1 1 100%; }
+.qfb details.qfb-d[open] { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 0 10px 8px; }
+.qfb details.qfb-d > summary { list-style: none; margin-left: auto; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 50%; font-size: 1.15rem; opacity: .75; }
+.qfb details.qfb-d > summary::-webkit-details-marker { display: none; }
+.qfb details.qfb-d[open] > summary { opacity: 1; }
+.auteur .qfb { flex-wrap: nowrap; } .auteur .qfb details.qfb-d { flex: 1 1 auto; }
+/* Carte « Retiens » : la règle d'abord ; exemple et piège à la demande. */
+details.lx { border-radius: 10px; }
+details.lx > summary { cursor: pointer; color: var(--blue); font-weight: 700; padding: 11px 0; min-height: 44px; box-sizing: border-box; }
+details.lx[open] > summary { padding-bottom: 6px; }
+/* Accueil : demi-ligne d'explication sous les cases, les premières fois. */
+.door small.door-hint { font-size: 0.74rem; } /* courte : une ligne à la taille normale ; peut passer à la ligne avec une grande police (accessibilité) */
