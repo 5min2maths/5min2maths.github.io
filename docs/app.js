@@ -2733,7 +2733,7 @@ Object.assign(GEN, {
     }
     const notes = [4, 4.5, 5, 5.5, 6], eff = notes.map(() => R.int(1, 6));
     const n = eff.reduce((a, b) => a + b, 0); if (n < 8) return GEN.diagr(3);
-    const s = notes.reduce((a, v, i) => a + v * eff[i], 0), m = s / n;
+    const s = notes.reduce((a, v, i) => a + v * eff[i], 0), m = Math.round((Math.round(2 * s) * 50) / n) / 100; /* 26.11 (recalcul) : moyenne arrondie au centième en calcul exact (104,5 : 20 = 5,225 → 5,23 ; toFixed donnait 5,22 et les deux étaient acceptés) */
     return { fig: FIG.barChart(eff, notes), guide: [GS("Nombre d'élèves ?", n, M(eff.join(" + ") + " = " + n) + "."), GS("Somme pondérée (chaque note · son effectif) ?", s, M(notes.map((v, i) => dec(v) + " \\cdot " + eff[i]).join(" + ") + " = " + dec(s)) + "."), GS("Moyenne au centième ?", m, M(dec(s) + " : " + n + " \\approx " + dec(m.toFixed(2))) + ".", 0.01)], q: "Notes d'un test : " + notes.map((v, i) => M(dec(v)) + " (" + eff[i] + " élève" + (eff[i] > 1 ? "s" : "") + ")").join(", ") + ". Calcule la moyenne de la classe, au centième.", spec: { kind: "value", value: m, round: 0.01 }, traps: [TRAP(5, "Tu as fait la moyenne des 5 notes sans tenir compte du nombre d'élèves : chaque note compte autant de fois que son effectif."), TRAP(s / 5, "Tu as divisé par 5 (le nombre de notes différentes). Il faut diviser par le nombre d'élèves : " + n + ".")], sol: "Somme pondérée " + M(dec(s)) + " pour " + M(n) + " élèves : " + M(dec(s) + " : " + n + " \\approx " + dec(m.toFixed(2))) + "." };
   },
 

@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "faeab9259b"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "735d0685c4"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -1778,7 +1778,9 @@ function nextQuestion(redo) {
   if (easy) session.eased = true;
   /* 24.11 (ergonomie) : le type de question n'est rappelé que s'il change dans la séance (« Révision · 1 sur 4 · Révision » doublait le titre). */
   let q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : easy ? 1 : level, undefined, !session.weekly && !forceProb);
-  if (easy) for (let k = 0; k < 12 && q && lessonEcho(id, q); k++) q = Engine.make(state, id, 1); /* 25.11 : pas les nombres de la leçon */
+  /* 25.11 : pas les nombres de la leçon. 27.11 (test instable, réciproque de Pythagore : peu de triplets au niveau 1) : toute
+     question de la notion qui suit sa leçon dans la séance, et 40 essais au lieu de 12. */
+  if (!redo && session.lessonShown === id) { const lv = q && q.d ? q.d : easy ? 1 : level; for (let k = 0; k < 40 && q && lessonEcho(id, q); k++) q = Engine.make(state, id, lv); }
   /* 25.11 soir (revue d'un testeur : « Refaire avec d'autres valeurs » redonnait le même problème, valeurs fixes) :
      on retire tant que l'énoncé est identique ; sans autre version, on passe à la suite. */
   if (redo) { for (let k = 0; k < 12 && q && q.q === redo.q; k++) q = Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1));

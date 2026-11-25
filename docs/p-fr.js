@@ -1522,8 +1522,9 @@ const FR_NEW = [
   const N = (v) => { let [i, f] = String(r6(v)).split("."); const sg = i.startsWith("-") ? "-" : ""; i = i.replace("-", ""); if (i.length >= 4) i = i.replace(/\B(?=(\d{3})+(?!\d))/g, "\\,"); return sg + i + (f ? "{,}" + f : ""); };
   const P = (v) => (v < 0 ? "(" + N(v) + ")" : N(v));
   const keep = (value, traps) => { const seen = new Set(); return (traps || []).filter((t) => t && isFinite(t.v) && Math.abs(t.v - value) > 1e-9 && !seen.has(r6(t.v)) && seen.add(r6(t.v))); };
-  const Qv = (q, value, sol, o = {}) => { const x = { q, spec: { kind: "value", value: r6(value) }, sol, guide: o.guide, traps: keep(r6(value), o.traps), ctx: o.ctx }; if (o.fig) x.fig = o.fig; return x; };
-  const G = (ask, value, sol) => GS(ask, r6(value), sol);
+  const p15 = (v) => +(+v).toPrecision(15); /* 26.11 (recalcul) : valeur exacte dans la réponse attendue (r6 donnait 0,666667 pour 2/3 : la fraction tapée était refusée) ; r6 reste pour l'affichage */
+  const Qv = (q, value, sol, o = {}) => { const x = { q, spec: { kind: "value", value: p15(value) }, sol, guide: o.guide, traps: keep(p15(value), o.traps), ctx: o.ctx }; if (o.fig) x.fig = o.fig; return x; };
+  const G = (ask, value, sol) => GS(ask, p15(value), sol);
   const TR = (v, m) => TRAP(r6(v), m);
   const Qx = (q, e, sol, o = {}) => { const x = { q, spec: Object.assign({ kind: "expr", expr: e }, o.form ? { form: o.form } : {}), sol, guide: o.guide, ctx: o.ctx };
     let target = null; try { target = Expr.parse(e); } catch (er) {}
@@ -1532,7 +1533,7 @@ const FR_NEW = [
   const GX = (ask, e, sol, form) => ({ ask, spec: Object.assign({ kind: "expr", expr: e }, form ? { form } : {}), sol });
   const TX = (e, m) => ({ e, m });
   const GSet = (ask, vals, sol) => ({ ask, spec: { kind: "set", values: vals }, sol });
-  const Pb = (q, parts, hints, sol, fig) => ({ fig, q, parts: parts.map(([label, value]) => ({ label, spec: { kind: "value", value: r6(value) } })), hints, sol });
+  const Pb = (q, parts, hints, sol, fig) => ({ fig, q, parts: parts.map(([label, value]) => ({ label, spec: { kind: "value", value: p15(value) } })), hints, sol });
   const who = () => pk(["Léa", "Hugo", "Chloé", "Nathan", "Manon", "Louis", "Camille", "Jules", "Inès", "Gabriel"]);
   const ville = () => pk(["Lyon", "Lille", "Nantes", "Toulouse", "Bordeaux", "Strasbourg", "Rennes", "Marseille", "Montpellier", "Dijon"]);
   // Polynôme en x (coefficients [c0, c1, c2]) : écriture réduite (TeX et saisie : « 3x^2 - 5x + 2 »).
@@ -4134,10 +4135,10 @@ const FRX = (function () {
           { ctx: "obtus", guide: [GR("Base ?", b, M(b) + " cm."), GR("Aire ?", v, M(N(v)) + " cm².")], traps: [TR(((b + out) * h) / 2, "C'est l'aire du triangle AHC ; la base de ABC est [BC] seulement."), TR(b * h, "N'oublie pas de diviser par 2.")] }); },
     ],
     3: [
-      () => { const [a, b, c] = pk([[6, 8, 10], [3, 4, 5], [5, 12, 13], [9, 12, 15], [8, 15, 17], [12, 16, 20]]), v = rnd((a * b) / c, 6);
+      () => { const [a, b, c] = pk([[6, 8, 10], [3, 4, 5], [5, 12, 13], [9, 12, 15], [8, 15, 17], [12, 16, 20]]), v = (a * b) / c; /* 26.11 (recalcul) : valeur exacte (r6 refusait la fraction exacte) */ const gd = ((u, w) => { while (w) [u, w] = [w, u % w]; return u; })(a * b, c), vT = Math.abs(v * 1e4 - Math.round(v * 1e4)) < 1e-6 ? N(v) : "\\frac{" + (a * b) / gd + "}{" + c / gd + "} \\approx " + N(Math.round(v * 100) / 100);
         return QN("Le triangle " + M("ABC") + " est rectangle en " + M("A") + ", avec " + M("AB = ") + cm(a) + ", " + M("AC = ") + cm(b) + " et " + M("BC = ") + cm(c) + ". Calcule la hauteur issue de " + M("A") + " (en cm).", v,
-          "Aire avec les côtés de l'angle droit : " + M(a + " \\times " + b + " \\div 2 = " + N((a * b) / 2)) + " cm². Avec la base " + M("[BC]") + " : " + M("\\text{hauteur} = 2 \\times " + N((a * b) / 2) + " \\div " + c + " = " + N(v)) + " cm.",
-          { ctx: "hauteur-hypotenuse", guide: [GR("Aire ?", (a * b) / 2, M(N((a * b) / 2)) + " cm²."), GR("Hauteur issue de " + M("A") + " ?", v, M(N(v)) + " cm.")], traps: [TR(rnd((a + b) / 2, 6), "Calcule l'aire de deux façons."), TR(rnd((a * b) / 2 / c, 6), "Hauteur = 2 × aire ÷ base.")] }); },
+          "Aire avec les côtés de l'angle droit : " + M(a + " \\times " + b + " \\div 2 = " + N((a * b) / 2)) + " cm². Avec la base " + M("[BC]") + " : " + M("\\text{hauteur} = 2 \\times " + N((a * b) / 2) + " \\div " + c + " = " + vT) + " cm.",
+          { ctx: "hauteur-hypotenuse", guide: [GR("Aire ?", (a * b) / 2, M(N((a * b) / 2)) + " cm²."), GR("Hauteur issue de " + M("A") + " ?", v, M(vT) + " cm.")], traps: [TR(rnd((a + b) / 2, 6), "Calcule l'aire de deux façons."), TR(rnd((a * b) / 2 / c, 6), "Hauteur = 2 × aire ÷ base.")] }); },
       () => { const C = R.int(30, 80), B = R.int(30, 80); if (B + C >= 170) return null; const v = 90 - C;
         return QN("Le triangle " + M("ABC") + " a ses trois angles aigus : " + AG("ABC") + " = " + dg(B) + " et " + AG("ACB") + " = " + dg(C) + ". Ses trois hauteurs se coupent en un même point " + M("H") + " (l'orthocentre). La hauteur issue de " + M("B") + " coupe " + M("[AC]") + " en " + M("K") + ". Combien mesure " + AG("HBC") + " (en degrés) ?", v,
           M("H") + " est sur la hauteur " + M("[BK]") + ", perpendiculaire à " + M("(AC)") + ". Dans le triangle " + M("BKC") + " rectangle en " + M("K") + " : " + AG("KBC") + " = " + M("180 - 90 - " + C + " = " + v) + "°, et " + AG("HBC") + " = " + AG("KBC") + ".",
