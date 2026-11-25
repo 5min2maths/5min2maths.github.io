@@ -128,6 +128,9 @@ const HORS_CO = {
 function horsCO(state, id, q) {
   const p = state && state.profile;
   if (q && q.co && p && !(p.system === "CH" && p.track !== "mp" && q.co.includes(p.grade))) return true; /* forme réservée à certaines classes du CO (VARX) */
+  /* 25.11 (audit France, tools/france.md) : profil français : énoncés propres à la Suisse (change EUR ↔ CHF, « en Suisse »,
+     TVA suisse) écartés du tirage ; frLocal (CHF → €) les rendrait absurdes (« 1 € = 0,95 € »). */
+  if (q && p && p.system === "FR") { const t = String(q.q || "") + " " + (q.parts || []).map((x) => x.label || "").join(" ") + " " + (q.guide || []).map((g) => g.ask || "").join(" "); if (/\bEUR\b|Suisse|suisse|CHF[\s\S]*(€|\beuros?\b)|(€|\beuros?\b)[\s\S]*CHF/.test(t)) return true; }
   if (!q || !p || p.system !== "CH" || p.track === "mp") return false;
   const L = HORS_CO[p.grade] && HORS_CO[p.grade][id];
   if (!L) return false;
@@ -318,7 +321,9 @@ const Engine = {
     return NOTIONS.filter((n) => { const pl = placeOf(n, profile); return pl && pl[0] <= profile.grade; }).map((n) => {
       const [g] = placeOf(n, profile);
       // Matu : une notion est « de l'année » si son chapitre Sésamath est celui de l'année (Ma1 = 1re, Ma2 = 2e).
-      const yr = "M" + (profile.grade - 11), sesa = profile.track !== "mp" && profile.grade >= 12 && typeof ORDRE_THEME !== "undefined" &&
+      /* 25.11 (audit France) : chapitres Sésamath du Collège de Genève pour les profils suisses seulement (une Tle française, grade 12,
+         recevait les chapitres de 1re du Collège comme « de l'année » : relatifs, Pythagore, puissances…). */
+      const yr = "M" + (profile.grade - 11), sesa = profile.system === "CH" && profile.track !== "mp" && profile.grade >= 12 && typeof ORDRE_THEME !== "undefined" &&
         [(ORDRE_THEME.MATU || {})[n.id], (ORDRE_THEME.MATU_ALT || {})[n.id]].some((k) => (k || "").startsWith(yr));
       const coYear = this.coChap(profile, n.id, true);
       // 22.11 (seconde FR) : « again » liste des années suisses ; pour la France, on lit againFR (sinon une notion reprise en 10e
@@ -570,6 +575,15 @@ const Engine = {
     mark(q.spec, txt0, q.calcul);
     (q.parts || []).forEach((x) => mark(x.spec, txt0 + " " + (x.label || ""), x.calcul || q.calcul));
     (q.guide || []).forEach((g) => mark(g.spec, txt0 + " " + (g.ask || ""), g.calcul || q.calcul, true));
+    /* 25.11 (audit France, tools/france.md) : profil français : €, milliers 1 200, PGCD, antécédent, factoriser (frLocal,
+       src/curriculum.js). Tous les textes de la question ; jamais les réponses attendues (spec, canon, expressions des pièges). */
+    if (p && p.system === "FR" && typeof frLocal === "function") {
+      const SKIP = new Set(["spec", "canon", "code", "id", "ctx", "e", "expr", "values", "value"]);
+      /* copies (jamais de modification en place : une question peut partager des objets avec les tables communes) */
+      const loc = (v, d) => typeof v === "string" ? frLocal(v) : d > 6 || !v || typeof v !== "object" ? v : Array.isArray(v) ? v.map((x) => loc(x, d + 1))
+        : Object.getPrototypeOf(v) !== Object.prototype ? v : Object.fromEntries(Object.entries(v).map(([k, x]) => [k, SKIP.has(k) ? x : loc(x, d + 1)]));
+      q = loc(q, 0);
+    }
     return q;
   },
   make(state, id, d, seed) {
@@ -613,6 +627,8 @@ const Engine = {
     if (level < 3 && state && state.profile && state.profile.system === "CH" && state.profile.track !== "mp" && state.profile.grade >= 12) {
       if (UPC_MIN[id]) level = Math.max(level, UPC_MIN[id]); else if (UPC.includes(id)) level += 1;
     }
+    /* 25.11 (audit France) : profil français, énoncé propre à la Suisse (horsCO) : graine suivante (le code suit la question). */
+    if (seed && state && state.profile && state.profile.system === "FR") { let q = this.build(id, level, seed); for (let k = 1; k <= 12 && horsCO(state, id, q); k++) q = this.build(id, level, seed + k * 977); return keep(this.finalize(state, id, q)); }
     if (seed) return keep(this.finalize(state, id, this.build(id, level, seed)));
     const rec = ((state.recentQ = state.recentQ || {})[id] = (state.recentQ[id] || []));
     const key = (q) => { let h = 0; for (const c of String(q.q) + JSON.stringify(q.spec)) h = (h * 31 + c.charCodeAt(0)) | 0; return h; };

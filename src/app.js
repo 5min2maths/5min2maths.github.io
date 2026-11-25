@@ -75,6 +75,13 @@ window.addEventListener("unhandledrejection", (e) => {
 });
 
 const app = document.getElementById("app");
+/* 25.11 (audit France, tools/france.md) : aperçu France pour l'enseignant, sans ouverture au public : …/#france ajoute
+   « France » au choix de l'école sur cet appareil (…/#france-off pour annuler). Sans ce réglage, rien ne change. */
+try {
+  if (location.hash === "#france") localStorage.setItem("m2m-france", "1");
+  else if (location.hash === "#france-off") localStorage.removeItem("m2m-france");
+  if (localStorage.getItem("m2m-france") === "1" && !SYSTEMS.FR) SYSTEMS.FR = SYSTEMS_HIDDEN.FR;
+} catch (e) {}
 let state = Store.load();
 if (state && state.profile && !SYSTEMS[state.profile.system]) state = null; // système masqué (France) : on repart de zéro
 // Voie MP gardée en revenant au CO (bug 14.11 : « 9e MP » sans critères de divisibilité, nombres premiers ni PGDC) : la voie n'existe qu'au sec. II.
@@ -172,7 +179,7 @@ const escT = (s) => esc(s).replace(/&lt;(\/?)(b|i|br)&gt;/g, "<$1$2>");
 /* 24.11 (audit ergonomie) : écrans longs (grades, réglages, compétences, curieux, histoire) : leur « Retour » n'était
    qu'en bas, après tout le défilement ; même bouton en haut, comme le « ← Accueil » des pages de l'accueil. */
 const backTop = (id = "backtop") => `<button type="button" class="btn-ghost back-home" id="${id}">← Retour</button>`;
-const gradeName = (p) => (SYSTEMS[p.system].grades.find(([g]) => g === p.grade) || [0, ""])[1];
+const gradeName = (p) => ((SYSTEMS[p.system] || SYSTEMS_HIDDEN[p.system] || { grades: [] }).grades.find(([g]) => g === p.grade) || [0, ""])[1]; /* 25.11 : profil d'un système masqué (France) */
 const brand = '<div class="brand"><b>5 minutes de maths</b><span>par jour</span></div>';
 const PRAISE = ["Juste !", "Bien vu !", "Exact !", "Parfait.", "C'est ça !", "Bravo !"];
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
@@ -182,7 +189,16 @@ const pick = (a) => a[Math.floor(Math.random() * a.length)];
 window.divSign = (t) => frThou(t.replace(/(\\text\{[^}]*\})|( : (?!\\;|;))/g, (m, txt) => txt || " \\div "));
 // Milliers par système (22.11, chantier seconde FR) : les générateurs écrivent 1\text{'}200 (usage suisse) ; pour un profil
 // français, la formule devient 1\,200 (espace fine). Sans effet tant que la France est masquée (SYSTEMS.FR commenté).
-function frThou(t) { return state && state.profile && state.profile.system === "FR" ? t.replace(/\\text\{'\}/g, "\\,") : t; }
+// 25.11 (audit France) : toute la localisation des formules (frLocalPart, src/curriculum.js : milliers, CHF → €, PGCD…).
+const isFR = () => !!(state && state.profile && state.profile.system === "FR");
+function frThou(t) { return isFR() ? frLocalPart(t, true) : t; }
+// 25.11 : textes hors questions (leçons, aide, écrans) d'un profil français : nœuds de texte localisés avant le rendu des formules.
+function frDom(el) {
+  if (!isFR() || !el || !document.createTreeWalker) return;
+  const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentNode && /^(SCRIPT|STYLE|TEXTAREA)$/.test(n.parentNode.nodeName) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT) });
+  const ns = []; while (w.nextNode()) ns.push(w.currentNode);
+  for (const n of ns) { const v = n.nodeValue, r = frLocal(v); if (r !== v) n.nodeValue = r; }
+}
 // Longues chaînes d'égalités (22.11, retour de l'auteur : la correction dépasse de l'écran sur téléphone) : MathJax ne
 // coupe pas une formule en ligne. Avant le rendu, \( A = B = C \) devient \(A\) \(= B\) \(= C\) : le navigateur peut
 // alors passer à la ligne entre deux morceaux. Seulement au niveau 0 (hors parenthèses, accolades, crochets, environnements).
@@ -217,6 +233,7 @@ function splitLongMath(el) {
   }
 }
 function typeset(el) {
+  try { frDom(el); } catch (e) {}
   try { splitLongMath(el); } catch (e) {}
   const go = () => window.MathJax && MathJax.typesetPromise ? MathJax.typesetPromise([el]).catch(() => {}) : setTimeout(go, 150);
   go();
