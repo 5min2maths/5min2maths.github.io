@@ -289,7 +289,10 @@ function pzCoverage() {
   const total = (p) => {
     const ref = Engine.refOf(p), L = (typeof THEME_LABEL !== "undefined" && THEME_LABEL[ref]) || {};
     const pre = ref === "CO" ? p.grade + "C" : ref === "MATU" ? "M" + (p.grade - 11) + "C" : ref === "FR" && p.grade >= 10 ? { 10: "2", 11: "1", 12: "T" }[p.grade] : null;
-    return pre ? Object.keys(L).filter((k) => k.startsWith(pre) && (pre !== "2" || k !== "2AU")).length : 0;
+    /* 25.11 (agent col34) : en 3e–4e MA1, les chapitres faits seulement de notions MA2 (4e : complexes, suites et séries) ne sont pas au plan. */
+    const ma1 = ref === "MATU" && p.grade >= 14 && p.niv !== "R", OT = typeof ORDRE_THEME !== "undefined" ? ORDRE_THEME : {};
+    const inPlan = (k) => !ma1 || NOTIONS.some((n) => n.niv !== "R" && ["MATU", "MATU_ALT", "MATU_REP"].some((m) => (OT[m] || {})[n.id] === k));
+    return pre ? Object.keys(L).filter((k) => k.startsWith(pre) && (pre !== "2" || k !== "2AU") && inPlan(k)).length : 0;
   };
   return P.map(([l, p]) => {
     let nw = 0, rep = 0, ch = 0, tot = 0;

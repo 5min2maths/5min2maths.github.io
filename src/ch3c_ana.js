@@ -1224,6 +1224,81 @@
   };
 
   // ---------- problèmes en plusieurs étapes (niveau 4), valeurs tirées au hasard ----------
+  // ======================= derivth : dérivabilité et continuité, Rolle, Lagrange (3.AN.06a, 06b, 09a ; 25.11, agent col34) =======================
+  // Saisissable seulement : point anguleux, demi-tangentes, raccord dérivable, nombre c de Rolle ou de Lagrange, majoration.
+  // Les démonstrations (3.AN.09b–c) restent à la leçon.
+  const DT = {
+    1: [
+      () => { const sq = R.rand() < 0.5;
+        if (sq) { const k = ri(2, 7), c = nz(-3, 3);
+          return QN("La fonction " + M("f(x) = |x^2 - " + k * k + "|" + (c ? sg(c) + "x" : "")) + " est continue sur " + M("\\mathbb{R}") + ", mais elle n'est pas dérivable en deux points (points anguleux). Donne le plus grand.", k,
+            "Les points anguleux sont aux zéros de " + M("x^2 - " + k * k) + ", où la valeur absolue « casse » la courbe : " + M("x = \\pm " + k) + ". Les demi-tangentes y ont des pentes différentes (" + M(fT(-2 * k + c)) + " et " + M(fT(2 * k + c)) + " en " + M(k) + ").",
+            { ctx: "valeur-absolue-carre", guide: [GSet("Zéros de " + M("x^2 - " + k * k) + " ?", [-k, k], M(setT([-k, k])) + "."), G("Le plus grand ?", k, M(k) + ".")],
+              traps: [TR(k * k, "La courbe casse là où l'expression dans la valeur absolue s'annule : x² = " + T(k * k) + "."), TR(-k, "On demande le plus grand des deux points."), TR(0, "En 0, la fonction est dérivable : la parabole y est retournée, mais lisse.")] }); }
+        const a = pk([2, 3, 4, -2, -3]), b = nz(-9, 9), c = pk([1, 2, -1, -3]), v = -b / a; if (Number.isInteger(v) && Math.abs(v) < 2) return null;
+        return QN("La fonction " + M("f(x) = |" + P2([a, b]) + "|" + sg(c) + "x") + " n'est pas dérivable en un point. Lequel ? (fraction acceptée)", v,
+          "Point anguleux là où " + M(P2([a, b]) + " = 0") + " : " + M("x = " + fT(v)) + ". À gauche et à droite, les pentes valent " + M(fT(-Math.abs(a) + c)) + " et " + M(fT(Math.abs(a) + c)) + " : elles diffèrent.",
+          { ctx: "valeur-absolue-affine", guide: [G("Zéro de " + M(P2([a, b])) + " ?", v, M(fT(v)) + ".")],
+            traps: [TR(-v, "Résous " + T(a) + "x + " + T(b) + " = 0 avec soin : attention au signe."), TR(-c / a, "Le terme " + T(c) + "x est dérivable partout : regarde l'intérieur de la valeur absolue."), TR(b / a, "x = −b ÷ a.")] }); },
+      () => { const a = nz(-3, 3), b = ri(-5, 5), m = nz(-6, 6), left = R.rand() < 0.5; if (m === 2 * a) return null; const ya = a * a + b, cc = ya - m * a, v = left ? 2 * a : m; if (Math.abs(v) < 2) return null;
+        return QN("Soit " + M(cases("x^2" + (b ? sg(b) : ""), "x \\leq " + a, P2([m, cc]), "x > " + a)) + ". Elle est continue en " + M(a) + ". Quelle est la pente de la demi-tangente " + (left ? "à gauche" : "à droite") + " en " + M(a) + " ?", v,
+          "À gauche : " + M("(x^2)' = 2x") + ", pente " + M(2 * a) + " ; à droite : pente " + M(m) + ". Les deux pentes diffèrent : " + M("f") + " n'est pas dérivable en " + M(a) + " (point anguleux).",
+          { ctx: "demi-tangentes", guide: [G("Pente " + (left ? "de " + M("x^2" + (b ? sg(b) : "")) + " en " + M(a) : "de la droite " + M("y = " + P2([m, cc]))) + " ?", v, M(v) + ".")],
+            traps: [TR(left ? m : 2 * a, "C'est l'autre côté."), TR(left ? a * a + b : ya, "C'est la valeur f(" + T(a) + ") ; on demande une pente."), TR(left ? a : cc, left ? "La dérivée de x² est 2x." : "La pente est le coefficient de x.")] }); },
+      () => { const a = ri(-4, 2), b = a + pk([2, 4, 6, 3, 5]), p = -(a + b), q = nz(-8, 8), c = (a + b) / 2;
+        return QN("Soit " + M("f(x) = x^2" + (p ? (p < 0 ? " - " + (p === -1 ? "" : fT(-p)) : " + " + (p === 1 ? "" : fT(p))) + "x" : "") + sg(q)) + " sur " + M("[" + a + " \\,;\\, " + b + "]") + ". On a " + M("f(" + a + ") = f(" + b + ")") + ". Selon le théorème de Rolle, il existe " + M("c") + " dans " + M("]" + a + " \\,;\\, " + b + "[") + " avec " + M("f'(c) = 0") + ". Donne " + M("c") + " (fraction acceptée).", c,
+          M("f(" + a + ") = f(" + b + ") = " + pv([1, p, q], a)) + " ; " + M("f'(x) = 2x" + sg(p)) + " s'annule en " + M("c = " + fT(c)) + ", qui est bien entre " + M(a) + " et " + M(b) + " (le sommet de la parabole).",
+          { ctx: "rolle", guide: [G(M("f(" + a + ")") + " ?", pv([1, p, q], a), M(pv([1, p, q], a)) + " (et de même " + M("f(" + b + ")") + ")."), G("Zéro de " + M("f'(x) = 2x" + sg(p)) + " ?", c, M(fT(c)) + ".")],
+            traps: [TR(pv([1, p, q], a), "C'est f(" + T(a) + ") ; on cherche c tel que f'(c) = 0."), TR(-c, "2x " + (p < 0 ? "− " + T(-p) : "+ " + T(p)) + " = 0 : attention au signe."), TR(b - a, "c est un nombre de l'intervalle, pas sa longueur.")] }); },
+    ],
+    2: [
+      () => { const a = pk([0, 0, 1, 2]), b = a + pk([1, 2, 3]), c = Math.sqrt((a * a + a * b + b * b) / 3), slope = a * a + a * b + b * b;
+        return mk("Soit " + M("f(x) = x^3") + " sur " + M("[" + a + " \\,;\\, " + b + "]") + ". Selon le théorème des accroissements finis (Lagrange), il existe " + M("c") + " dans " + M("]" + a + " \\,;\\, " + b + "[") + " tel que " + M("f'(c) = \\frac{f(" + b + ") - f(" + a + ")}{" + b + " - " + a + "}") + ". Donne " + M("c") + " (au centième).", { kind: "value", value: c, round: 0.01 },
+          "Pente de la corde : " + M("\\frac{" + b ** 3 + " - " + a ** 3 + "}{" + (b - a) + "} = " + slope) + ". " + M("3c^2 = " + slope) + ", " + M("c = \\sqrt{\\frac{" + slope + "}{3}} \\approx " + D(+c.toFixed(2))) + " (la valeur positive, dans l'intervalle).",
+          { ctx: "lagrange-cube", guide: [G("Pente de la corde " + M("\\frac{f(" + b + ") - f(" + a + ")}{" + b + " - " + a + "}") + " ?", slope, M(slope) + "."), G(M("c^2") + " (avec " + M("3c^2 = " + slope) + ") ?", slope / 3, M(fT(slope / 3)) + "."), GS(M("c") + " (au centième) ?", c, M("\\approx " + D(+c.toFixed(2))) + ".", 0.01)],
+            traps: [TR((a + b) / 2, "Pour x³, c n'est pas le milieu : résous 3c² = pente de la corde."), TR(slope / 3, "C'est c² : prends la racine."), TR(Math.sqrt(slope), "f'(c) = 3c² : divise par 3 avant la racine.")] }); },
+      () => { const k = pk([1, 2, -1, 3, 0.5]), x0 = nz(-3, 3), a = 2 * k * x0, b = k * x0 * x0 - a * x0;
+        return QP("Soit " + M(cases((k === 1 ? "" : fT(k)) + "x^2", "x \\leq " + x0, "ax + b", "x > " + x0)) + ". Trouve " + M("a") + " et " + M("b") + " pour que " + M("f") + " soit dérivable en " + M(x0) + ". Réponds « a ; b ».", [a, b],
+          "Dérivable en " + M(x0) + " : continue (mêmes valeurs) et mêmes pentes. Pente : " + M("a = 2 \\cdot " + par(k) + " \\cdot " + par(x0) + " = " + fT(a)) + ". Valeur : " + M(fT(a) + " \\cdot " + par(x0) + " + b = " + fT(k * x0 * x0)) + ", donc " + M("b = " + fT(b)) + " : la droite est la tangente à la parabole.",
+          { ctx: "raccord-derivable", guide: [G("Pente de " + M((k === 1 ? "" : fT(k)) + "x^2") + " en " + M(x0) + " (" + M("a") + ") ?", a, M(fT(a)) + "."), G("Valeur " + M("f(" + x0 + ")") + " ?", k * x0 * x0, M(fT(k * x0 * x0)) + "."), GP("Réponse « a ; b » ?", [a, b], M("(" + fT(a) + " \\,;\\, " + fT(b) + ")") + ".")],
+            traps: [TP([a, k * x0 * x0], "b n'est pas f(" + T(x0) + ") : a·" + T(x0) + " + b doit valoir f(" + T(x0) + ")."), TP([k * x0, b], "La pente de kx² en x₀ est 2k·x₀."), TP([b, a], "Réponds a d'abord, puis b.")] }); },
+      () => { const inv = R.rand() < 0.5;
+        if (inv) { const [a, b] = pk([[1, 4], [2, 8], [4, 9], [3, 12], [1, 9], [4, 16], [2, 18]]), c = Math.sqrt(a * b);
+          return QN("Soit " + M("f(x) = \\frac{1}{x}") + " sur " + M("[" + a + " \\,;\\, " + b + "]") + ". Trouve le nombre " + M("c") + " de l'intervalle où la tangente est parallèle à la corde (théorème des accroissements finis).", c,
+            "Pente de la corde : " + M("\\frac{\\frac{1}{" + b + "} - \\frac{1}{" + a + "}}{" + b + " - " + a + "} = -\\frac{1}{" + a * b + "}") + ". " + M("f'(c) = -\\frac{1}{c^2} = -\\frac{1}{" + a * b + "}") + " : " + M("c = \\sqrt{" + a * b + "} = " + c) + ".",
+            { ctx: "lagrange-inverse", guide: [G("Pente de la corde ?", -1 / (a * b), M("-\\frac{1}{" + a * b + "}") + "."), G(M("c") + " ?", c, M(c) + ".")],
+              traps: [TR((a + b) / 2, "Pour 1/x, c n'est pas le milieu : résous −1/c² = pente de la corde."), TR(a * b, "C'est c² : prends la racine."), TR(-c, "c doit être dans l'intervalle [" + T(a) + " ; " + T(b) + "].")] }); }
+        const a = ri(1, 4), b = a + ri(1, 4), c = ((a + b) / 2) ** 2;
+        return QN("Soit " + M("f(x) = \\sqrt{x}") + " sur " + M("[" + a * a + " \\,;\\, " + b * b + "]") + ". Trouve le nombre " + M("c") + " où la tangente est parallèle à la corde (théorème des accroissements finis ; fraction acceptée).", c,
+          "Pente de la corde : " + M("\\frac{" + b + " - " + a + "}{" + b * b + " - " + a * a + "} = \\frac{1}{" + (a + b) + "}") + ". " + M("f'(c) = \\frac{1}{2\\sqrt{c}} = \\frac{1}{" + (a + b) + "}") + " : " + M("\\sqrt{c} = " + fT((a + b) / 2)) + ", " + M("c = " + fT(c)) + ".",
+          { ctx: "lagrange-racine", guide: [G("Pente de la corde ?", 1 / (a + b), M("\\frac{1}{" + (a + b) + "}") + "."), G(M("\\sqrt{c}") + " ?", (a + b) / 2, M(fT((a + b) / 2)) + "."), G(M("c") + " ?", c, M(fT(c)) + ".")],
+            traps: [TR((a * a + b * b) / 2, "Pour √x, c n'est pas le milieu de l'intervalle : résous f'(c) = pente de la corde."), TR((a + b) / 2, "C'est √c : élève au carré."), TR(a + b, "f'(c) = 1 ÷ (2√c).")] }); },
+    ],
+    3: [
+      () => { const k = ri(2, 6), c = k / Math.sqrt(3);
+        return QSet("Soit " + M("f(x) = x^3 - " + k * k + "x") + " sur " + M("[-" + k + " \\,;\\, " + k + "]") + ". On a " + M("f(-" + k + ") = f(" + k + ") = 0") + ". Donne toutes les valeurs " + M("c") + " de " + M("]-" + k + " \\,;\\, " + k + "[") + " telles que " + M("f'(c) = 0") + " (valeurs exactes).", [-c, c],
+          M("f'(x) = 3x^2 - " + k * k) + " s'annule en " + M("x = \\pm\\frac{" + k + "}{\\sqrt{3}} \\approx \\pm " + D(+c.toFixed(2))) + " : Rolle garantit au moins une valeur, ici il y en a deux.",
+          { ctx: "rolle-cubique", guide: [G(M("c^2") + " (avec " + M("3c^2 = " + k * k) + ") ?", k * k / 3, M(fT(k * k / 3)) + "."), GSet("Valeurs de " + M("c") + " ?", [-c, c], M("\\pm\\frac{" + k + "}{\\sqrt{3}}") + ".")],
+            traps: [TSt([c], "Rolle garantit au moins une valeur ; ici, il y en a deux (symétriques)."), TSt([-k, k], "Ce sont les bornes, où f s'annule ; on cherche les zéros de f'."), TSt([0], "f'(0) = −" + T(k * k) + " ≠ 0.")] }); },
+      () => { const radar = R.rand() < 0.5;
+        if (radar) { const d = pk([12, 15, 18, 20, 24]), tmin = pk([8, 9, 10, 12]), v = (d * 60) / tmin, lim = pk([80, 100]); if (v <= lim) return null;
+          return QN("Sur l'autoroute, deux bornes de contrôle sont distantes de " + M(d + "\\text{ km}") + ". Une voiture les franchit à " + M(tmin + "\\text{ min}") + " d'intervalle. D'après le théorème des accroissements finis, à au moins un instant, son compteur indiquait exactement une vitesse : laquelle (en km/h) ?", v,
+            "La position est dérivable ; entre les deux bornes, il existe un instant où la vitesse instantanée égale la vitesse moyenne : " + M("\\frac{" + d + "}{" + tmin + "} \\cdot 60 = " + D(v) + "\\text{ km/h}") + (v > lim ? ", au-dessus de la limite de " + lim + " km/h : excès de vitesse prouvé." : "."),
+            { ctx: "radar-taf", guide: [G("Vitesse moyenne en km par minute ?", d / tmin, M(fT(d / tmin)) + "."), G("En km/h ?", v, M(D(v)) + ".")],
+              traps: [TR(d / tmin, "Convertis en km/h : × 60."), TR(lim, "La limite n'est pas la vitesse prouvée : c'est la vitesse moyenne."), TR((d * tmin) / 60, "Vitesse = distance ÷ temps.")] }); }
+        const a = ri(-2, 2), b = a + ri(2, 5), y0 = ri(-5, 5), Mx = pk([2, 3, 0.5, 1.5, 4]), v = y0 + Mx * (b - a);
+        return QN("La fonction " + M("f") + " est dérivable, " + M("f(" + a + ") = " + y0) + " et " + M("f'(x) \\leq " + D(Mx)) + " pour tout " + M("x") + ". Quelle est la plus grande valeur possible de " + M("f(" + b + ")") + " ?", v,
+          "Accroissements finis : " + M("f(" + b + ") - f(" + a + ") = f'(c)(" + b + " - " + par(a) + ") \\leq " + D(Mx) + " \\cdot " + (b - a)) + ", donc " + M("f(" + b + ") \\leq " + y0 + " + " + D(Mx * (b - a)) + " = " + D(v)) + " (atteint par une droite de pente " + T(Mx) + ").",
+          { ctx: "majoration", guide: [G("Longueur " + M(b + " - " + par(a)) + " ?", b - a, M(b - a) + "."), G("Accroissement maximal de " + M("f") + " ?", Mx * (b - a), M(D(Mx * (b - a))) + "."), G(M("f(" + b + ")") + " au plus ?", v, M(D(v)) + ".")],
+            traps: [TR(Mx * (b - a), "Ajoute la valeur de départ f(" + T(a) + ") = " + T(y0) + "."), TR(y0 + Mx, "La pente est au plus " + T(Mx) + " sur toute la longueur " + T(b - a) + "."), TR(y0 + Mx * b, "La longueur de l'intervalle est " + T(b) + " − (" + T(a) + ").")] }); },
+      () => { const k = pk([0.5, 1, 1.5, 2, 3]), s = 2 * k, v = Math.round((1800 - (2 * Math.atan(s) * 1800) / Math.PI)) / 10, a1 = Math.round((Math.atan(s) * 1800) / Math.PI) / 10;
+        return mk("La fonction " + M("f(x) = |x^2 - " + D(k * k) + "|") + " a un point anguleux en " + M("x = " + D(k)) + ". Quel angle (en degrés, " + "au dixième) forment ses deux demi-tangentes en ce point ?", { kind: "value", value: v, round: 0.1 },
+          "Pentes des demi-tangentes : " + M("\\pm 2 \\cdot " + D(k) + " = \\pm " + D(s)) + ". Chacune fait l'angle " + M("\\arctan(" + D(s) + ") \\approx " + D(a1) + "^\\circ") + " avec l'horizontale ; l'angle entre elles vaut " + M("180^\\circ - 2\\arctan(" + D(s) + ") \\approx " + D(v) + "^\\circ") + ".",
+          { ctx: "angle-demi-tangentes", guide: [G("Pente de la demi-tangente à droite ?", s, M(D(s)) + "."), GS("Angle (en degrés, au dixième) entre cette demi-tangente et l'horizontale ?", a1, M("\\approx " + D(a1) + "^\\circ") + ".", 0.1), GS("Angle entre les deux demi-tangentes ?", v, M("\\approx " + D(v) + "^\\circ") + ".", 0.1)],
+            traps: [TR(a1, "C'est l'angle d'une seule demi-tangente avec l'horizontale."), TR(Math.round(20 * a1) / 10, "Les deux demi-tangentes montent de part et d'autre : l'angle entre elles vaut 180° − 2·arctan(pente)."), TR(Math.round(900 - 10 * a1) / 10, "L'angle entre les deux demi-tangentes vaut 180° − 2 × " + T(a1) + "°.")] }); },
+    ],
+  };
+
   const PROBS = {
     limites: [() => { let a, r, m; do { a = nz(-4, 4); r = nz(-5, 5); m = pk([2, 3, -2]); } while (r === a || r === -a);
       const num = [m, -m * (a + r), m * a * r], v1 = (m * (a - r)) / (2 * a);
@@ -1281,6 +1356,10 @@
         ["Dessine l'arbre : au 2e tirage, il reste " + (n - 1) + " " + it[0] + ".", "c) Le contraire de « au moins une " + it[4] + " » est « deux " + it[1] + " »."],
         "a) " + M("\\frac{" + r + "}{" + n + "} \\cdot \\frac{" + (r - 1) + "}{" + (n - 1) + "} = " + fT(p1)) + ". b) " + M("2 \\cdot \\frac{" + r + "}{" + n + "} \\cdot \\frac{" + b + "}{" + (n - 1) + "} = " + fT(p2)) + ". c) " + M("1 - " + fT(p1) + " = " + fT(1 - p1)) + ".");
     }],
+    derivth: [() => { const k = ri(2, 4);
+      return P("Soit " + M("f(x) = |x^2 - " + 2 * k + "x|") + " sur " + M("\\mathbb{R}") + ".", [["a) Plus grande abscisse où f n'est pas dérivable", 2 * k], ["b) Pente de la demi-tangente à gauche en ce point", -2 * k], ["c) Nombre c de Rolle sur [0 ; " + 2 * k + "] (f'(c) = 0)", k]],
+        ["Les points anguleux sont aux zéros de x² − " + 2 * k + "x.", "Sur [0 ; " + 2 * k + "], f(x) = −x² + " + 2 * k + "x."],
+        "a) " + M("x^2 - " + 2 * k + "x = x(x - " + 2 * k + ")") + " : 0 et " + M(2 * k) + " ; b) à gauche (sur [0 ; " + 2 * k + "]), " + M("f'(x) = -2x + " + 2 * k) + ", pente " + M(-2 * k) + " (à droite : " + M(2 * k) + ") ; c) " + M("f(0) = f(" + 2 * k + ") = 0") + " et " + M("-2c + " + 2 * k + " = 0") + " : " + M("c = " + k) + "."); }],
   };
 
   // ---------- catalogue ----------
@@ -1330,6 +1409,11 @@
       lesson: ["Expériences successives", "Un arbre pour organiser les étapes.", "Sur un arbre, la probabilité d'un chemin est le produit des probabilités de ses branches ; la probabilité d'un événement est la somme des probabilités de ses chemins. Avec remise, les tirages se répètent à l'identique ; sans remise, l'urne change (un objet de moins au 2e tirage). « Au moins un » : on passe par le contraire « aucun », \\(1 - (1 - p)^n\\).",
         ["3 rouges, 2 bleues, deux tirages sans remise : \\(P(RR) = \\frac{3}{5} \\cdot \\frac{2}{4} = \\frac{3}{10}\\)", "Au moins un 6 en 3 lancers : \\(1 - \\left(\\frac{5}{6}\\right)^3 = \\frac{91}{216}\\)"], "Le long d'un chemin, on multiplie ; entre chemins, on additionne. Pas l'inverse."],
       comps: ["Deux étapes indépendantes ; tirages avec remise", "Tirages sans remise ; deux chemins ; « au moins un »", "Trois tirages ; deux urnes ; second tirage"] },
+    { id: "derivth", theme: "fa", label: "Dérivabilité, théorèmes de Rolle et de Lagrange", ex: "f'(c) = \\frac{f(b) - f(a)}{b - a}", CH: [14], codesMATU: "3\\.AN\\.06[ab]|3\\.AN\\.09a", lv: DT,
+      hint: "Dérivable ⇒ continue, mais pas l'inverse (point anguleux : deux demi-tangentes de pentes différentes). Rolle : f(a) = f(b) ⇒ f'(c) = 0 pour un c entre a et b. Lagrange : f'(c) = pente de la corde.",
+      lesson: ["Dérivabilité et théorèmes", "Ce que la dérivée garantit.", "Si \\(f\\) est dérivable en \\(a\\), elle y est continue. L'inverse est faux : \\(|x|\\) est continue en 0, mais ses demi-tangentes ont les pentes \\(-1\\) et \\(1\\) (point anguleux). Pour un raccord dérivable, il faut les mêmes valeurs ET les mêmes pentes. Rolle : si \\(f\\) est dérivable sur \\([a \\,;\\, b]\\) et \\(f(a) = f(b)\\), il existe \\(c\\) entre \\(a\\) et \\(b\\) avec \\(f'(c) = 0\\) (tangente horizontale). Lagrange (accroissements finis) : il existe \\(c\\) avec \\(f'(c) = \\frac{f(b) - f(a)}{b - a}\\) : la tangente est parallèle à la corde. Conséquence : si \\(f' \\leq M\\), alors \\(f(b) \\leq f(a) + M(b - a)\\).",
+        ["\\(f(x) = x^2 - 4x\\) sur \\([0 \\,;\\, 4]\\) : \\(f(0) = f(4)\\), \\(f'(c) = 2c - 4 = 0\\), \\(c = 2\\)", "\\(f(x) = x^3\\) sur \\([0 \\,;\\, 3]\\) : corde de pente 9, \\(3c^2 = 9\\), \\(c = \\sqrt{3}\\)"], "Rolle et Lagrange disent qu'un tel \\(c\\) existe ; pour le trouver, on résout \\(f'(c) = \\ldots\\), et on garde les solutions de l'intervalle."],
+      comps: ["Repérer un point anguleux ; demi-tangentes ; trouver le c de Rolle", "Nombre c de Lagrange ; raccord dérivable entre deux formules", "Plusieurs valeurs de Rolle ; majorer avec la dérivée (radar) ; angle de deux demi-tangentes"] },
   ];
 
   // ---------- enregistrement (additif) ----------

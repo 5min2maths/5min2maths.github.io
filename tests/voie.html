@@ -14,7 +14,7 @@ try{
  for(const g of [14,15]){state=null;draft={system:"CH",grade:g,track:null,minutes:5};screenLevel();ok(!!document.getElementById("track"),"5 voie proposée en "+(g-11)+"e");
   document.getElementById("next").click();ok(!state,"5 refus sans voie en "+(g-11)+"e");
   document.querySelector('#track button[data-v="mp"]').click();document.getElementById("next").click();ok(state&&state.profile.track==="mp"&&state.profile.grade===g,"5 profil MP "+(g-11)+"e "+JSON.stringify(state&&state.profile));}
- state=null;draft={system:"CH",grade:14,track:null,minutes:5};screenLevel();document.querySelector('#track button[data-v="college"]').click();document.getElementById("next").click();ok(state&&state.profile.track==="college"&&state.profile.grade===14,"6 profil 3e Collège");
+ state=null;draft={system:"CH",grade:14,track:null,minutes:5};screenLevel();document.querySelector('#track button[data-v="college"]').click();{const nv=document.querySelector('#niv [data-v="N"]');if(nv)nv.click();}/* 25.11 : niveau MA1 / MA2 obligatoire en 3e */document.getElementById("next").click();ok(state&&state.profile.track==="college"&&state.profile.grade===14,"6 profil 3e Collège");
  state=null;draft={system:"CH",grade:11,track:null,minutes:5};screenLevel();ok(!document.getElementById("track"),"4 pas de voie en 11e");document.getElementById("next").click();ok(state&&state.profile.track==="college","4 11e = college");
 }catch(e){fails.push("EXC "+e.message)}
 document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC\n"+fails.join("\n"):"OK")+"</pre>");

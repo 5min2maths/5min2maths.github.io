@@ -5,7 +5,7 @@
 // paramétriques de l'espace : notion Collège, car droiteparam de la MP vit dans le paquet « mp », non chargé en 3e),
 // plans (équations paramétriques et cartésienne, traces), posrel (positions relatives, intersections), pscal3d (produit
 // scalaire : angle, orthogonalité, projection), distances (point-droite, point-plan, aire), sphere (vecteur normal,
-// plan médiateur, sphère, plan tangent). Le produit vectoriel (pvect, MA2) reste à faire.
+// plan médiateur, sphère, plan tangent) ; 25.11 (agent col34) : pvect (produit vectoriel, produit mixte, MA2).
 // Réponses : nombre, triplet « x ; y ; z » (format pair à 3 valeurs), couple, ensemble, expression (z en fonction de t).
 // Standard : 3 niveaux, au moins 3 formes par niveau, pas à pas, erreurs typiques, étiquette ctx, leçon, indice,
 // 3 compétences, problème en plusieurs étapes à valeurs tirées (niveau 4). Paquet de chargement « 14 » (build.py).
@@ -487,6 +487,63 @@
     ],
   };
 
+
+  // ======================= pvect : produit vectoriel, produit mixte (3.GV.06a–d, MA2 ; 25.11, agent col34) =======================
+  const sq2 = (n) => { const r = Math.sqrt(n); return Number.isInteger(r6(r)) ? fT(r) : "\\sqrt{" + fT(n) + "}"; };
+  const PV = {
+    1: [
+      () => { const u = rv(4), v = rv(4), w = cross(u, v); if (isZ(w) || w.filter((x) => !x).length > 1) return null;
+        return QP("Calcule le produit vectoriel " + M("\\vec u \\times \\vec v") + " avec " + vN("u", u) + " et " + vN("v", v) + "." + TRIP, w,
+          M("\\vec u \\times \\vec v = " + "\\begin{pmatrix} u_2v_3 - u_3v_2 \\\\ u_3v_1 - u_1v_3 \\\\ u_1v_2 - u_2v_1 \\end{pmatrix}" + " = " + v3(w)) + ". Vérifie : " + M("(\\vec u \\times \\vec v) \\cdot \\vec u = 0") + ".",
+          { ctx: "produit-vectoriel", guide: [G("Première composante " + M("u_2v_3 - u_3v_2") + " ?", w[0], M(par(u[1]) + " \\cdot " + par(v[2]) + " - " + par(u[2]) + " \\cdot " + par(v[1]) + " = " + fT(w[0])) + "."), G("Deuxième " + M("u_3v_1 - u_1v_3") + " ?", w[1], M(fT(w[1])) + "."), G("Troisième " + M("u_1v_2 - u_2v_1") + " ?", w[2], M(fT(w[2])) + "."), GP(M("\\vec u \\times \\vec v") + " ?", w, M(v3(w)) + ".")],
+            traps: [TP(mul(-1, w), "C'est v × u : le produit vectoriel change de signe quand on échange les vecteurs."), TP([u[0] * v[0], u[1] * v[1], u[2] * v[2]], "Ce n'est pas un produit composante par composante : u₂v₃ − u₃v₂, u₃v₁ − u₁v₃, u₁v₂ − u₂v₁."), TP([w[0], -w[1], w[2]], "Deuxième composante : u₃v₁ − u₁v₃ (attention au signe).")] }); },
+      () => { const u = rv(3), v = rv(3), w = cross(u, v), n2 = nn2(w); if (isZ(w)) return null;
+        return QN("Calcule l'aire du parallélogramme construit sur " + vN("u", u) + " et " + vN("v", v) + " (valeur exacte).", Math.sqrt(n2),
+          "Aire " + M("= \\|\\vec u \\times \\vec v\\|") + " avec " + M("\\vec u \\times \\vec v = " + v3(w)) + " : " + M("\\sqrt{" + w.map((x) => par(x) + "^2").join(" + ") + "} = " + sq2(n2)) + ".",
+          { ctx: "aire-parallelogramme", guide: [GP(M("\\vec u \\times \\vec v") + " ?" + TRIP, w, M(v3(w)) + "."), G("Carré de sa norme ?", n2, M(n2) + "."), G("Aire ?", Math.sqrt(n2), M(sq2(n2)) + ".")],
+            traps: [TR(Math.abs(dot(u, v)), "Le produit scalaire ne donne pas l'aire : c'est la norme du produit vectoriel."), TR(n2, "N'oublie pas la racine carrée."), TR(Math.sqrt(n2) / 2, "Parallélogramme : pas de division par 2 (c'est pour le triangle).")] }); },
+      () => { const u = rv(3), v = rv(3), w = rv(3), d = det3(u, v, w); if (Math.abs(d) < 2) return null;
+        return QN("Calcule le produit mixte " + M("[\\vec u, \\vec v, \\vec w] = (\\vec u \\times \\vec v) \\cdot \\vec w") + " avec " + vN("u", u) + ", " + vN("v", v) + " et " + vN("w", w) + ".", d,
+          M("\\vec u \\times \\vec v = " + v3(cross(u, v))) + ", puis le produit scalaire avec " + M("\\vec w") + " : " + M(cross(u, v).map((x, i) => par(x) + " \\cdot " + par(w[i])).join(" + ") + " = " + d) + ". C'est aussi le déterminant des trois vecteurs.",
+          { ctx: "produit-mixte", guide: [GP(M("\\vec u \\times \\vec v") + " ?" + TRIP, cross(u, v), M(v3(cross(u, v))) + "."), G("Produit scalaire avec " + M("\\vec w") + " ?", d, M(d) + ".")],
+            traps: [TR(-d, "(u × v)·w : l'ordre compte ; v × u donne l'opposé."), TR(dot(u, v) + dot(v, w) + dot(u, w), "Le produit mixte n'est pas une somme de produits scalaires : calcule d'abord u × v."), TR(u[0] * v[1] * w[2], "Il faut les trois composantes de u × v, chacune multipliée par celle de w.")] }); },
+    ],
+    2: [
+      () => { const A = rp(3), u = rv(3), v = rv(3), w = cross(u, v); if (isZ(w)) return null; const B = add(A, u), C = add(A, v), S = nrm(w) / 2;
+        return QR("Calcule l'aire du triangle " + M("ABC") + " avec " + ptN("A", A) + ", " + ptN("B", B) + " et " + ptN("C", C) + " (au centième).", S, 0.01,
+          M(vec("AB") + " \\times " + vec("AC") + " = " + v3(w)) + " ; aire " + M("= \\frac{1}{2}\\|" + vec("AB") + " \\times " + vec("AC") + "\\| = \\frac{" + sq2(nn2(w)) + "}{2} \\approx " + D(S, 0.01)) + ".",
+          { ctx: "aire-triangle", guide: [GP(M(vec("AB") + " \\times " + vec("AC")) + " ?" + TRIP, w, M(v3(w)) + "."), G("Norme (au centième) ?", nrm(w), M("\\approx " + D(nrm(w), 0.01)) + ".", 0.01), G("Aire (au centième) ?", S, M("\\approx " + D(S, 0.01)) + ".", 0.01)],
+            traps: [TR(nrm(w), "C'est l'aire du parallélogramme : divise par 2 pour le triangle."), TR(nn2(w) / 2, "Prends la racine de la norme au carré avant de diviser par 2."), TR(Math.abs(dot(u, v)) / 2, "L'aire vient du produit vectoriel, pas du produit scalaire.")] }); },
+      () => { const A = rp(2), u = rv(3), v = rv(3), w = rv(3), d = det3(u, v, w); if (Math.abs(d) < 2) return null; const par6 = R.rand() < 0.5, V = par6 ? Math.abs(d) : Math.abs(d) / 6, B = add(A, u), C = add(A, v), Dd = add(A, w);
+        return QN(par6 ? "Calcule le volume du parallélépipède construit sur " + vN("u", u) + ", " + vN("v", v) + " et " + vN("w", w) + "." : "Calcule le volume du tétraèdre " + M("ABCD") + " avec " + ptN("A", A) + ", " + ptN("B", B) + ", " + ptN("C", C) + " et " + ptN("D", Dd) + " (fraction acceptée).", V,
+          (par6 ? "Volume " + M("= |[\\vec u, \\vec v, \\vec w]|") : "Volume " + M("= \\frac{1}{6}|[" + vec("AB") + ", " + vec("AC") + ", " + vec("AD") + "]|")) + " ; produit mixte " + M(d) + " : " + M("V = " + fT(V)) + ".",
+          { ctx: par6 ? "volume-parallelepipede" : "volume-tetraedre", guide: [G("Produit mixte ?", d, M(d) + "."), G("Volume ?", V, M(fT(V)) + ".")],
+            traps: [TR(par6 ? Math.abs(d) / 6 : Math.abs(d), par6 ? "Le 1/6 est pour le tétraèdre ; le parallélépipède a pour volume |produit mixte|." : "Tétraèdre : un sixième du parallélépipède."), TR(par6 ? Math.abs(d) / 2 : Math.abs(d) / 3, "Facteur : 1 (parallélépipède), 1/6 (tétraèdre)."), TR(-V, "Un volume est positif : valeur absolue.")] }); },
+      () => { const A = rp(3), u = rv(3), v = rv(3); let n = cross(u, v); if (isZ(n)) return null; n = red(n); if (n.some((x) => !x) || n.some((x) => Math.abs(x) > 12)) return null; const B = add(A, u), C = add(A, v), d = -dot(n, A); if (Math.abs(d) < 2) return null;
+        return QN("Le plan passant par " + ptN("A", A) + ", " + ptN("B", B) + " et " + ptN("C", C) + " a pour vecteur normal " + M("\\vec n = " + v3(n)) + " (multiple de " + M(vec("AB") + " \\times " + vec("AC")) + "). Son équation s'écrit " + M(lt(n, ["x", "y", "z"]) + " + d = 0") + ". Que vaut " + M("d") + " ?", d,
+          M(vec("AB") + " \\times " + vec("AC") + " = " + v3(cross(u, v))) + ", parallèle à " + M("\\vec n") + ". " + M("A") + " est dans le plan : " + M(n.map((x, i) => par(x) + " \\cdot " + par(A[i])).join(" + ") + " + d = 0") + ", donc " + M("d = " + d) + ".",
+          { ctx: "plan-normal", guide: [G(M(n[0] + "x_A + " + par(n[1]) + "y_A + " + par(n[2]) + "z_A") + " ?", dot(n, A), M(dot(n, A)) + "."), G(M("d") + " ?", d, M(d) + ".")],
+            traps: [TR(-d, "d = −(a·x_A + b·y_A + c·z_A) : attention au signe."), TR(-dot(cross(u, v), A), "Utilise le vecteur normal n donné (AB × AC simplifié).")] }); },
+    ],
+    3: [
+      () => { const A = rp(3), u = rv(3), Mp = rp(4), w = cross(sub(Mp, A), u); if (isZ(w)) return null; const dd = nrm(w) / nrm(u);
+        return QR("Calcule la distance du point " + ptN("M", Mp) + " à la droite passant par " + ptN("A", A) + " de vecteur directeur " + vN("u", u) + " (au centième).", dd, 0.01,
+          M("d = \\frac{\\|" + vec("AM") + " \\times \\vec u\\|}{\\|\\vec u\\|}") + " avec " + M(vec("AM") + " \\times \\vec u = " + v3(w)) + " : " + M("d = \\frac{" + sq2(nn2(w)) + "}{" + sq2(nn2(u)) + "} \\approx " + D(dd, 0.01)) + ".",
+          { ctx: "distance-point-droite", guide: [GP(M(vec("AM")) + " ?" + TRIP, sub(Mp, A), M(v3(sub(Mp, A))) + "."), GP(M(vec("AM") + " \\times \\vec u") + " ?" + TRIP, w, M(v3(w)) + "."), G("Distance (au centième) ?", dd, M("\\approx " + D(dd, 0.01)) + ".", 0.01)],
+            traps: [TR(nrm(w), "Divise par la norme de u."), TR(nrm(sub(Mp, A)), "C'est la distance AM ; la distance à la droite est plus petite (perpendiculaire)."), TR(nrm(w) / nn2(u), "Divise par ‖u‖, pas par ‖u‖².")] }); },
+      () => { const A = rp(3), u = rv(2), B = rp(3), v = rv(2), n = cross(u, v); if (isZ(n)) return null; const m = det3(sub(B, A), u, v); if (Math.abs(m) < 1) return null; const dd = Math.abs(m) / nrm(n);
+        return QR("Deux droites gauches : " + M("d_1") + " passe par " + ptN("A", A) + " avec " + vN("u", u) + ", " + M("d_2") + " passe par " + ptN("B", B) + " avec " + vN("v", v) + ". Calcule leur distance (au centième).", dd, 0.01,
+          M("d = \\frac{|[" + vec("AB") + ", \\vec u, \\vec v]|}{\\|\\vec u \\times \\vec v\\|}") + " ; " + M("\\vec u \\times \\vec v = " + v3(n)) + ", produit mixte " + M(m) + " : " + M("d = \\frac{" + Math.abs(m) + "}{" + sq2(nn2(n)) + "} \\approx " + D(dd, 0.01)) + ".",
+          { ctx: "droites-gauches", guide: [GP(M("\\vec u \\times \\vec v") + " ?" + TRIP, n, M(v3(n)) + "."), G("Produit mixte " + M("[" + vec("AB") + ", \\vec u, \\vec v]") + " ?", m, M(m) + "."), G("Distance (au centième) ?", dd, M("\\approx " + D(dd, 0.01)) + ".", 0.01)],
+            traps: [TR(nrm(sub(B, A)), "AB n'est pas perpendiculaire aux deux droites : projette sur u × v."), TR(Math.abs(m), "Divise par la norme de u × v."), TR(Math.abs(m) / nn2(n), "Divise par ‖u × v‖, pas par son carré.")] }); },
+      () => { const A = rp(2), u = rv(3), v = rv(3), n = cross(u, v); if (isZ(n) || !n[2]) return null; const al = nz(-2, 2), be = nz(-2, 2), Dp = add(A, add(mul(al, u), mul(be, v))), B = add(A, u), C = add(A, v); if (!Dp[2]) return null;
+        return QN("Pour quelle valeur de " + M("m") + " les points " + ptN("A", A) + ", " + ptN("B", B) + ", " + ptN("C", C) + " et " + M("D(" + fT(Dp[0]) + " \\,;\\, " + fT(Dp[1]) + " \\,;\\, m)") + " sont-ils coplanaires ?", Dp[2],
+          "Coplanaires quand le produit mixte " + M("[" + vec("AB") + ", " + vec("AC") + ", " + vec("AD") + "]") + " est nul. " + M(vec("AB") + " \\times " + vec("AC") + " = " + v3(n)) + " ; " + M(n[0] + " \\cdot " + par(Dp[0] - A[0]) + " + " + par(n[1]) + " \\cdot " + par(Dp[1] - A[1]) + " + " + par(n[2]) + "(m - " + par(A[2]) + ") = 0") + ", donc " + M("m = " + fT(Dp[2])) + ".",
+          { ctx: "coplanaires-m", guide: [GP(M(vec("AB") + " \\times " + vec("AC")) + " ?" + TRIP, n, M(v3(n)) + "."), G(M("m") + " ?", Dp[2], M(fT(Dp[2])) + ".")],
+            traps: [TR(-Dp[2], "Vérifie le signe en remplaçant m dans le produit mixte."), TR(Dp[2] - A[2], "C'est la composante de AD ; m est la cote de D : ajoute la cote de A."), TR(A[2], "D doit vérifier l'équation du plan ABC.")] }); },
+    ],
+  };
+
   // ---------- problèmes en plusieurs étapes (niveau 4, valeurs tirées) ----------
   const PROBS = {
     vect3d: [() => { const A = rp(4), [p, d] = qv(4), B = add(A, p), Mi = add(A, mul(0.5, p)), E = add(A, mul(3, p));
@@ -505,6 +562,10 @@
       return P("Le plan π a pour équation " + plS(n, d) + " ; on donne P" + ptS(Pp) + " et Q" + ptS(Q) + ".", [["a) Norme du vecteur normal de π", nn], ["b) Distance de P à π", m / nn], ["c) Distance entre π et le plan parallèle à π passant par Q", Math.abs(d - d2) / nn]], ["δ = |ax + by + cz + d| ÷ ‖n‖.", "Le plan parallèle par Q : même n, d' = −n · Q."], "a) " + M(nn) + " ; b) " + M("\\frac{" + m + "}{" + nn + "}") + " ; c) " + M("d' = " + d2) + ", " + M("\\frac{|" + fT(d) + " - " + par(d2) + "|}{" + nn + "} = " + fT(Math.abs(d - d2) / nn)) + "."); }],
     sphere: [() => { const C = rp(3), [p, r] = qv(4), T = add(C, p), dT = -dot(p, T), O = sub(mul(2, C), T);
       return P("La sphère de centre C" + ptS(C) + " passe par T" + ptS(T) + ".", [["a) Rayon de la sphère", r], ["b) d dans l'équation du plan tangent en T : " + ltS(p, ["x", "y", "z"]).replace(/-/g, "−") + " + d = 0", dT], ["c) Cote (z) du point diamétralement opposé à T", O[2]]], ["Rayon = CT.", "Le plan tangent en T a pour vecteur normal CT ; le point opposé vaut 2C − T."], "a) " + M("CT = " + r) + " ; b) " + M("d = " + dT) + " ; c) " + M("2 \\cdot " + par(C[2]) + " - " + par(T[2]) + " = " + fT(O[2])) + "."); }],
+    pvect: [() => { const A = [1, 0, 0], B = [0, 2, 0], C = [0, 0, 3], k = pk([1, 2]), Ak = mul(k, A), Bk = mul(k, B), Ck = mul(k, C), n = cross(sub(Bk, Ak), sub(Ck, Ak)), S = nrm(n) / 2, V = Math.abs(det3(Ak, Bk, Ck)) / 6;
+      return P("On donne A" + ptS(Ak) + ", B" + ptS(Bk) + ", C" + ptS(Ck) + " et l'origine O.", [["a) Norme de AB × AC", nrm(n)], ["b) Aire du triangle ABC", S], ["c) Volume du tétraèdre OABC", V], ["d) Distance de O au plan ABC (fraction acceptée)", (3 * V) / S]],
+        ["AB × AC = (" + 6 * k * k + " ; " + 3 * k * k + " ; " + 2 * k * k + ").", "Volume = aire de la base × hauteur ÷ 3 : la hauteur est la distance cherchée."],
+        "a) " + M(vec("AB") + " \\times " + vec("AC") + " = " + v3(n)) + ", norme " + M(fT(nrm(n))) + " ; b) " + M(fT(S)) + " ; c) " + M("\\frac{|[" + vec("OA") + ", " + vec("OB") + ", " + vec("OC") + "]|}{6} = " + fT(V)) + " ; d) " + M("\\frac{3V}{S} = " + fT((3 * V) / S)) + "."); }],
   };
 
   // ---------- catalogue ----------
@@ -549,6 +610,11 @@
       lesson: ["Sphère et plans", "Un vecteur normal suffit pour écrire un plan.", "Le plan passant par \\(A\\) et de vecteur normal \\(\\vec{n} = (a \\,;\\, b \\,;\\, c)\\) a pour équation \\(ax + by + cz + d = 0\\) avec \\(d = -(ax_A + by_A + cz_A)\\). Le plan médiateur de \\([AB]\\) a pour vecteur normal \\(\\overrightarrow{AB}\\) et passe par le milieu de \\([AB]\\). La sphère de centre \\(C\\) et de rayon \\(r\\) : \\((x - a)^2 + (y - b)^2 + (z - c)^2 = r^2\\). Le plan tangent en \\(T\\) a pour vecteur normal \\(\\overrightarrow{CT}\\). Un plan à distance \\(\\delta < r\\) du centre coupe la sphère selon un cercle de rayon \\(\\sqrt{r^2 - \\delta^2}\\).",
         ["\\(x^2 + y^2 + z^2 - 2x + 4z - 4 = 0\\) : \\((x - 1)^2 + y^2 + (z + 2)^2 = 9\\), centre \\((1 \\,;\\, 0 \\,;\\, -2)\\), rayon 3."], "Dans \\((x + 2)^2\\), la coordonnée du centre est \\(-2\\)."],
       comps: ["Plan par un point et un vecteur normal ; centre et rayon d'une sphère", "Plan médiateur ; équation développée ; plan tangent", "Section d'une sphère ; sphère tangente à un plan ; droite et sphère"] },
+    { id: "pvect", niv: "R", theme: "es", label: "Produit vectoriel et produit mixte", ex: "\\vec u \\times \\vec v", CH: [14], codesMATU: "3\\.GV\\.06[a-d]", lv: PV,
+      hint: "u × v = (u₂v₃ − u₃v₂ ; u₃v₁ − u₁v₃ ; u₁v₂ − u₂v₁), perpendiculaire à u et v. Aire du parallélogramme : ‖u × v‖ (triangle : la moitié). Volume : |(u × v)·w| (tétraèdre : un sixième).",
+      lesson: ["Produit vectoriel", "Un vecteur perpendiculaire à deux autres (niveau avancé MA2).", "\\(\\vec u \\times \\vec v = \\begin{pmatrix} u_2v_3 - u_3v_2 \\\\ u_3v_1 - u_1v_3 \\\\ u_1v_2 - u_2v_1 \\end{pmatrix}\\) est perpendiculaire à \\(\\vec u\\) et à \\(\\vec v\\) ; sa norme est l'aire du parallélogramme construit sur \\(\\vec u\\) et \\(\\vec v\\) ; \\(\\vec v \\times \\vec u = -\\vec u \\times \\vec v\\). Produit mixte \\([\\vec u, \\vec v, \\vec w] = (\\vec u \\times \\vec v) \\cdot \\vec w\\) : sa valeur absolue est le volume du parallélépipède (tétraèdre : \\(\\frac{1}{6}\\)) ; il est nul si les vecteurs sont coplanaires. Distances : point-droite \\(\\frac{\\|\\overrightarrow{AM} \\times \\vec u\\|}{\\|\\vec u\\|}\\), entre droites gauches \\(\\frac{|[\\overrightarrow{AB}, \\vec u, \\vec v]|}{\\|\\vec u \\times \\vec v\\|}\\).",
+        ["\\((1 \\,;\\, 2 \\,;\\, 0) \\times (0 \\,;\\, 1 \\,;\\, 3) = (6 \\,;\\, -3 \\,;\\, 1)\\)", "Triangle \\(A(1 \\,;\\, 0 \\,;\\, 0)\\), \\(B(0 \\,;\\, 2 \\,;\\, 0)\\), \\(C(0 \\,;\\, 0 \\,;\\, 3)\\) : \\(\\overrightarrow{AB} \\times \\overrightarrow{AC} = (6 \\,;\\, 3 \\,;\\, 2)\\), aire \\(\\frac{7}{2}\\)"], "L'ordre compte : \\(\\vec v \\times \\vec u\\) est l'opposé de \\(\\vec u \\times \\vec v\\) ; et la deuxième composante est \\(u_3v_1 - u_1v_3\\)."],
+      comps: ["Calculer un produit vectoriel ; aire d'un parallélogramme ; produit mixte", "Aire d'un triangle ; volume d'un tétraèdre ou d'un parallélépipède ; équation d'un plan par trois points", "Distance point-droite ; distance de deux droites gauches ; points coplanaires"] },
   ];
 
   // ---------- enregistrement (additif : aucune notion existante n'est modifiée) ----------
