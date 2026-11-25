@@ -47,7 +47,9 @@
      de Genève : aucun code ni intitulé du référentiel de l'autre système. */
   const MATU_CODE = /\b[1-4]\.[A-Z]{2}\.\d{2}[a-z]\b/, FR_CODE = /\b(?:6e|5e|4e|3e|2nde|1re|Tle)\.[A-Z]{2}\.\d{2}\b/;
   const labs = (D) => new Set(D ? D.c.map((c) => c[4]) : []), MATU_L = labs(typeof REF_MATU !== "undefined" && REF_MATU), FR_L = labs(typeof REF_FR !== "undefined" && REF_FR);
-  for (const [pl, p] of [["FR 3e", { system: "FR", grade: 9 }], ["FR Tle", { system: "FR", grade: 12 }], ["CH Col 1re", { system: "CH", grade: 12 }], ["CH Col 4e MA2", { system: "CH", grade: 15, niv: "R" }]]) {
+  /* 25.11 (phase CO) : profils CO (9e, 11e) = référentiel du PER (REF_CO) : ni code ni intitulé France ou Collège. */
+  const CO_L = labs(typeof REF_CO !== "undefined" && REF_CO), OWN = { FR: FR_L, MATU: MATU_L, CO: CO_L };
+  for (const [pl, p] of [["FR 3e", { system: "FR", grade: 9 }], ["FR Tle", { system: "FR", grade: 12 }], ["CH Col 1re", { system: "CH", grade: 12 }], ["CH Col 4e MA2", { system: "CH", grade: 15, niv: "R" }], ["CH CO 9e", { system: "CH", grade: 9 }], ["CH CO 11e", { system: "CH", grade: 11 }]]) {
     try {
       state = Engine.newState({ ...p, track: "college", minutes: 5 }); Engine.autoInit(state); state.placed = true;
       screenComps(); app.querySelectorAll("details").forEach((d) => (d.open = true));
@@ -55,7 +57,8 @@
       if (!rows.length) errs.push(pl + " compétences : aucun item du référentiel officiel");
       const m = (fr ? MATU_CODE : FR_CODE).exec(t);
       if (m) add(pl, "compétences (déplié)", "code de l'autre référentiel", t.slice(Math.max(0, m.index - 40), m.index + 40).replace(/\s+/g, " "));
-      const other = fr ? MATU_L : FR_L, own = fr ? FR_L : MATU_L;
+      const own = OWN[Referentiel.of(state.profile)] || new Set(), other = fr ? new Set([...MATU_L, ...CO_L]) : FR_L;
+      if (p.system === "CH" && p.grade <= 11 && Referentiel.of(state.profile) !== "CO") errs.push(pl + " compétences : pas le référentiel du PER");
       for (const e of rows) {
         const lab = e.firstElementChild.textContent.trim();
         if (other.has(lab) && !own.has(lab)) add(pl, "compétences (déplié)", "intitulé de l'autre référentiel", lab);
