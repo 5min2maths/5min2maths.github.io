@@ -28,7 +28,7 @@ const FR_COLLEGE = {
     affine: [9], eq2: [9], eq2fact: [9], fimg: [9], gquot: [9], idrem: [9], modaff: [9], pctvar: [9], rac: [9], rotation: [9], scicalc: [9],
     simil: [9], tabval: [9], thales: [9], thalesrec: [9], trigo: [9], volcomp: [9],
     // notions créées ci-dessous
-    motifs: [6, [7]], automat: [6, [7, 8, 9]], structexpr: [7, [8, 9]], progcalc: [8, [9]], ratio: [8, [9]], milieux: [8, [9]],
+    motifs: [6, [7]], automat: [6, [7, 8, 9]], structexpr: [7, [8, 9]], progcalc: [7, [8, 9]] /* 25.11 soir : 5e (5e.NC.11, cycle 4 2026) ; formes de 4e : HORS_FR, fr_couv.js */, ratio: [8, [9]], milieux: [8, [9]],
 };
 // Corrections manuelles de la « première classe » (déjà appliquées dans le tableau ci-dessus), pour mémoire :
 // symetries 6e → 5e (images par coordonnées, relatifs) ; proba 6e → 5e (deux dés, tirages) ; echelle 6e → 4e (aires × k²) ;
@@ -46,10 +46,10 @@ const FR_PROGRESSION = {
   6: ["automat", "decread", "deccomp", "decarr", "decadd", "angtype", "multdiv", "decmul", "dec10", "perim", "fracrep", "fracsimp", "ulong",
     "fractout", "disque", "decdiv", "motifs", "prop", "aire1", "fracconv", "fracadd", "uaire", "proptab", "utemps", "ordgr", "decprob",
     "pct", "volpave", "angtri"],
-  7: ["prio", "relrep", "reladd", "structexpr", "tradexpr", "litelab", "valnum", "divcrit", "angles", "quadri", "repere", "symetries",
+  7: ["prio", "relrep", "reladd", "structexpr", "tradexpr", "progcalc", "litelab", "valnum", "divcrit", "angles", "quadri", "repere", "symetries",
     "eqverif", "distrib", "reduire", "parenth", "factor", "aire2", "aire3", "uvol", "vol", "pow9", "eq1", "probeq", "statfreq", "diagr",
     "proba", "vitesse"],
-  8: ["rel", "fracmul", "fracops", "puiss", "sci", "progcalc", "carres", "racenc", "pyth", "pythrec", "pythfig", "cercthales", "premiers",
+  8: ["rel", "fracmul", "fracops", "puiss", "sci", "carres", "racenc", "pyth", "pythrec", "pythfig", "cercthales", "premiers",
     "monomes", "eqfrac", "milieux", "echelle", "agrand", "ratio", "solides", "volcone", "ucomp", "quartiles", "lectgraph"],
   9: ["idrem", "eq2", "eq2fact", "rac", "scicalc", "thales", "thalesrec", "trigo", "tabval", "fimg", "affine", "modaff", "pctvar",
     "gquot", "volcomp", "rotation", "simil"],

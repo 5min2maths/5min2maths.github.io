@@ -22,6 +22,8 @@ const HORS_FR = {
   primitives: [["puissance-rac", 99], ["puissance-xrac", 99] /* x^(3/2) */],
   intparties: [["exp-cos", 99] /* double intégration par parties avec cosinus : hors programme */],
   eqdiff: [["separable-*", 99] /* variables séparables : hors programme (y' = ay + b seulement) */],
+  /* 25.11 soir : progcalc dès la 5e ; nombre de départ négatif multiplié (produit de relatifs), (x + a)², (x + a)(x − a) : 4e */
+  progcalc: [["negatif", 8], ["prouver-carre", 8], ["produit", 8]],
 };
 
 /* Niveau minimal d'une notion reprise d'une année inférieure, pour un profil FR de la classe indiquée (Engine.make).
@@ -29,7 +31,7 @@ const HORS_FR = {
    l'épreuve anticipée de 1re (QCM d'automatismes). Le code de la question suit le niveau tiré (…-2-…). */
 const UPFR = {
   /* 4e : reprises de 6e–5e dont le niveau 1 est un automatisme de 6e (« 3² », « 5 − 7 », « 50 % de 260 », « 4(2x + 2) ») */
-  8: { fracadd: 2, prop: 2, valnum: 2, ordgr: 2, dec10: 2, pow9: 3, tradexpr: 2, relrep: 2, reladd: 3, fracrep: 2, fracsimp: 2, fracconv: 2, fractout: 2,
+  8: { progcalc: 2, fracadd: 2, prop: 2, valnum: 2, ordgr: 2, dec10: 2, pow9: 3, tradexpr: 2, relrep: 2, reladd: 3, fracrep: 2, fracsimp: 2, fracconv: 2, fractout: 2,
     aire1: 2, litelab: 2, quadri: 2, pct: 2, reduire: 2, distrib: 2, eqverif: 2, statfreq: 2, structexpr: 2, automat: 2, vol: 2 },
   /* 3e : DNB partie 1 (automatismes) — fractions et puissances combinées, pourcentages d'évolution, a² − b² */
   9: { fracadd: 2, diagr: 2, prop: 2, valnum: 2, pow9: 3, divcrit: 2, relrep: 2, fracsimp: 2, solides: 2, agrand: 2, litelab: 2, pct: 2, puiss: 2, sci: 2,
@@ -80,7 +82,7 @@ const UPFR = {
   const CHAP = {
     "1SU": ["suitedef", "suitearith", "suitegeo", "suitesomme"],
     "1SD": ["eq2disc", "f2formes", "trinfact", "ineq2"],
-    "1DE": ["tauxvar", "nbderive", "tangente", "derivref", "derivregles", "derivprodquot", "variations", "optimderiv"],
+    "1DE": ["tauxvar", "nbderive", "tangente", "derivref", "derivregles", "derivprodquot", "variations", "posrelc", "optimderiv"],
     "1EX": ["expfn", "expderiv"],
     "1TR": ["trigrad"],
     "1PS": ["pscal", "droitenorm", "cercle"],
@@ -91,7 +93,7 @@ const UPFR = {
     "TLN": ["lnexp", "lnfr", "etudelnexp", "croissance"],
     "TTR": ["trigfr"],
     "TPR": ["primitives", "eqdiff"],
-    "TIN": ["integrale", "aireint", "intparties"],
+    "TIN": ["integrale", "aireint", "intmaj", "intparties", "suiteint"],
     "TDN": ["denombr", "combi", "binom", "binomiale", "sommeva"],
     "TES": ["vect3d", "colin", "droite3d", "plans", "posrel", "pscal3d", "distances"],
     "TAU": ["compo", "eq3"],
@@ -104,7 +106,7 @@ const UPFR = {
     ins(9, "ineq1", "simil"); ins(9, "vecgeo", "ineq1"); /* programme 2026 de 3e : en fin d'année */
     ORDRE.FR_COL = {}; [6, 7, 8, 9].flatMap((g) => FR_PROGRESSION[g]).forEach((id, i) => { ORDRE.FR_COL[id] = i; });
   }
-  for (const [id, ref, ch] of [["tabvar", "fref", "2AN"], ["linfn", "affine", "2AU"], ["vecgeo", "vect3e", "2GE"]]) if (N(id) && ORDRE.FR[ref] !== undefined) { ORDRE.FR[id] = ORDRE.FR[ref] + (id === "vecgeo" ? -0.5 : 0.5); ORDRE_THEME.FR[id] = ch; }
+  for (const [id, ref, ch] of [["tabvar", "fref", "2AN"], ["linfn", "affine", "2AU"], ["vecgeo", "vect3e", "2GE"], ["compdiff", "fracsimp", "2NC"]]) if (N(id) && ORDRE.FR[ref] !== undefined) { ORDRE.FR[id] = ORDRE.FR[ref] + (id === "vecgeo" ? -0.5 : 0.5); ORDRE_THEME.FR[id] = ch; }
   let rk = 1000;
   for (const [ch, ids] of Object.entries(CHAP)) for (const id of ids) { if (!N(id)) continue; ORDRE.FR[id] = rk++; ORDRE_THEME.FR[id] = ch; }
   Object.assign(THEME_LABEL.FR, { "1SU": "Suites numériques", "1SD": "Second degré", "1DE": "Dérivation", "1EX": "Fonction exponentielle", "1TR": "Trigonométrie",

@@ -327,3 +327,18 @@ et repères au collège, capacités attendues et automatismes au lycée), libell
 collège ET lycée, en pastilles sans chiffre : maîtrise insuffisante (< 40 % de réussite) · fragile (40–60 %) ·
 satisfaisante (60–85 %, seuil = note suisse 4) · très bonne maîtrise (≥ 85 %). Profils suisses inchangés (notes 1–6).
 Anciennes grilles « Livret de connaissances et de compétences » (Sources/Officiel/Competences College FR) : périmées, non utilisées.
+
+## Derniers manques comblés (25.11 au soir, branche `agent/frfin`)
+
+| Classe | Avant | Après | Ce qui a changé |
+|---|---|---|---|
+| 6e | 77 % | 90 % | `symax` (symétrie axiale), `mediatrice`, `echelle6` (échelles ; `echelle` mélange aires et volumes de 4e), `proba6` (premiers pas ; `proba` est de 5e) |
+| 5e | 90 % | 93 % | `empil` (empilements de cubes, vues) ; `progcalc` passe de la 4e à la 5e (formes de 4e écartées par `HORS_FR`) |
+| 2nde | 95 % | 98 % | `compdiff` (comparer par différence ou quotient, AU.01, NC.10) |
+| 1re | 95 % | 96 % | `posrelc` (position relative de deux courbes, AN.09) |
+| Tle | 91 % | 95 % | `intmaj` (majorer, encadrer une intégrale, AN.24), `suiteint` (suites d'intégrales, AN.26) |
+
+Notions dans `src/fr_fin.js`, leçons actives (curseurs) dans `src/fr_act.js`, contrôles `tests/frfin.html` et
+`tests/act_frfin.html`. Notes scolaires : pour un profil français, les questions de `statfreq`, `stats`, `diagr`, `probeq`
+à notes suisses (1 à 6) sont remplacées par des notes sur 20 (`FR_NOTES`, lu par `Engine.finalize`) ; profils suisses
+inchangés. Reste : leçons actives suisses de moyenne (`act_9b.js`, `act_manip2.js` : « notes 6 ; 6 ; 3 ») non localisées.
