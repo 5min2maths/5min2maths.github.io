@@ -9,7 +9,7 @@
   const N = (v) => { const s = String(r6(v)), neg = s[0] === "-", [i, f] = (neg ? s.slice(1) : s).split("."); return (neg ? "-" : "") + (+i >= 1000 ? i.replace(/\B(?=(\d{3})+(?!\d))/g, "\\text{'}") : i) + (f ? "{,}" + f : ""); };
   const X = (v) => M(N(v));
   const PX = (id, co, f) => { (PROBX[id] = PROBX[id] || []).push(() => Object.assign(f(), { co })); };
-  const sp = (v, rd) => (Array.isArray(v) ? { kind: "pair", values: v } : Object.assign({ kind: "value", value: r6(v) }, rd ? { round: rd } : {}));
+  const sp = (v, rd) => (Array.isArray(v) ? { kind: "pair", values: v } : Object.assign({ kind: "value", value: rd ? v : +(+v).toPrecision(15) }, rd ? { round: rd } : {})); /* 26.11 (recalcul) : valeur exacte dans la réponse attendue (r6 donnait 0,666667 pour 2/3 : la fraction tapée était refusée) ; r6 reste pour l'affichage */
   const PB = (q, parts, hints, sol) => ({ q, hints, sol, parts: parts.map(([label, v, rd]) => ({ label, spec: sp(v, rd) })) });
   const gcd = (a, b) => (b ? gcd(b, a % b) : a);
   const pt = (x, y) => M("(" + N(x) + "\\,;\\," + N(y) + ")");

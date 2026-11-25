@@ -90,8 +90,9 @@ const FR_NEW = [
   const N = (v) => { let [i, f] = String(r6(v)).split("."); const sg = i.startsWith("-") ? "-" : ""; i = i.replace("-", ""); if (i.length >= 4) i = i.replace(/\B(?=(\d{3})+(?!\d))/g, "\\,"); return sg + i + (f ? "{,}" + f : ""); };
   const P = (v) => (v < 0 ? "(" + N(v) + ")" : N(v));
   const keep = (value, traps) => { const seen = new Set(); return (traps || []).filter((t) => t && isFinite(t.v) && Math.abs(t.v - value) > 1e-9 && !seen.has(r6(t.v)) && seen.add(r6(t.v))); };
-  const Qv = (q, value, sol, o = {}) => { const x = { q, spec: { kind: "value", value: r6(value) }, sol, guide: o.guide, traps: keep(r6(value), o.traps), ctx: o.ctx }; if (o.fig) x.fig = o.fig; return x; };
-  const G = (ask, value, sol) => GS(ask, r6(value), sol);
+  const p15 = (v) => +(+v).toPrecision(15); /* 26.11 (recalcul) : valeur exacte dans la réponse attendue (r6 donnait 0,666667 pour 2/3 : la fraction tapée était refusée) ; r6 reste pour l'affichage */
+  const Qv = (q, value, sol, o = {}) => { const x = { q, spec: { kind: "value", value: p15(value) }, sol, guide: o.guide, traps: keep(p15(value), o.traps), ctx: o.ctx }; if (o.fig) x.fig = o.fig; return x; };
+  const G = (ask, value, sol) => GS(ask, p15(value), sol);
   const TR = (v, m) => TRAP(r6(v), m);
   const Qx = (q, e, sol, o = {}) => { const x = { q, spec: Object.assign({ kind: "expr", expr: e }, o.form ? { form: o.form } : {}), sol, guide: o.guide, ctx: o.ctx };
     let target = null; try { target = Expr.parse(e); } catch (er) {}
@@ -100,7 +101,7 @@ const FR_NEW = [
   const GX = (ask, e, sol, form) => ({ ask, spec: Object.assign({ kind: "expr", expr: e }, form ? { form } : {}), sol });
   const TX = (e, m) => ({ e, m });
   const GSet = (ask, vals, sol) => ({ ask, spec: { kind: "set", values: vals }, sol });
-  const Pb = (q, parts, hints, sol, fig) => ({ fig, q, parts: parts.map(([label, value]) => ({ label, spec: { kind: "value", value: r6(value) } })), hints, sol });
+  const Pb = (q, parts, hints, sol, fig) => ({ fig, q, parts: parts.map(([label, value]) => ({ label, spec: { kind: "value", value: p15(value) } })), hints, sol });
   const who = () => pk(["Léa", "Hugo", "Chloé", "Nathan", "Manon", "Louis", "Camille", "Jules", "Inès", "Gabriel"]);
   const ville = () => pk(["Lyon", "Lille", "Nantes", "Toulouse", "Bordeaux", "Strasbourg", "Rennes", "Marseille", "Montpellier", "Dijon"]);
   // Polynôme en x (coefficients [c0, c1, c2]) : écriture réduite (TeX et saisie : « 3x^2 - 5x + 2 »).
