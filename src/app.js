@@ -193,9 +193,10 @@ window.divSign = (t) => frThou(t.replace(/(\\text\{[^}]*\})|( : (?!\\;|;))/g, (m
 const isFR = () => !!(state && state.profile && state.profile.system === "FR");
 function frThou(t) { return isFR() ? frLocalPart(t, true) : t; }
 // 25.11 : textes hors questions (leçons, aide, écrans) d'un profil français : nœuds de texte localisés avant le rendu des formules.
+// Sauf [data-noloc] (pages de présentation genevoises).
 function frDom(el) {
   if (!isFR() || !el || !document.createTreeWalker) return;
-  const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentNode && /^(SCRIPT|STYLE|TEXTAREA)$/.test(n.parentNode.nodeName) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT) });
+  const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentNode && (/^(SCRIPT|STYLE|TEXTAREA)$/.test(n.parentNode.nodeName) || (n.parentNode.closest && n.parentNode.closest("[data-noloc]"))) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT) });
   const ns = []; while (w.nextNode()) ns.push(w.currentNode);
   for (const n of ns) { const v = n.nodeValue, r = frLocal(v); if (r !== v) n.nodeValue = r; }
 }
@@ -324,6 +325,9 @@ function screenWelcome() {
 }
 
 function screenLevel() {
+  /* 25.11 soir : profil France sur un appareil sans l'aperçu activé (SYSTEMS.FR masqué) : le système de l'élève reste disponible. */
+  if (!SYSTEMS[draft.system] && typeof SYSTEMS_HIDDEN !== "undefined" && SYSTEMS_HIDDEN[draft.system]) SYSTEMS[draft.system] = SYSTEMS_HIDDEN[draft.system];
+  if (!SYSTEMS[draft.system]) draft.system = "CH";
   const sys = SYSTEMS[draft.system];
   if (!sys.grades.some(([g]) => g === draft.grade)) draft.grade = sys.grades.some(([g]) => g === 11) ? 11 : sys.grades[0][0];
   // 24.11 : MP 3e et 4e ajoutées (src/ch_mp3.js, src/ch_mp4.js) : le choix de la voie est demandé de la 1re à la 4e
@@ -331,14 +335,17 @@ function screenLevel() {
   if (draft.autoTrack) { draft.track = null; draft.autoTrack = false; }
   const sec2 = draft.system === "CH" && draft.grade >= 12;
   h(`${brand}<div class="eyebrow">Étape 1 sur 2</div><h2>Où en es-tu ?</h2>
-  <div class="card flat stack">${Object.keys(SYSTEMS).length > 1 ? `<h3>Ton école</h3><div class="seg" id="sys">${Object.entries(SYSTEMS).map(([k, v]) => `<button aria-pressed="${k === draft.system}" data-v="${k}">${v.label}</button>`).join("")}</div>` : ""}
+  <div class="card flat stack">${Object.keys(SYSTEMS).length > 1 && !draft.keepSys ? `<h3>Ton école</h3><div class="seg" id="sys">${Object.entries(SYSTEMS).map(([k, v]) => `<button aria-pressed="${k === draft.system}" data-v="${k}">${v.label}</button>`).join("")}</div>` : ""}
   <h3>Ta classe cette année</h3><div class="seg" id="grade">${sys.grades.map(([g, n]) => `<button aria-pressed="${g === draft.grade}" data-v="${g}">${n}</button>`).join("")}</div>
   ${sec2 ? `<h3>Ta voie</h3><p class="small muted">Important : choisis ton école, le programme n'est pas le même.</p><div class="seg track-seg" id="track"><button aria-pressed="${draft.track === "college"}" data-v="college">Collège (maturité gymnasiale)</button><button aria-pressed="${draft.track === "mp"}" data-v="mp">Maturité professionnelle (CFPT, école professionnelle…)</button></div><p class="small" id="trackerr" style="color:var(--bad, #c0392b)"></p>` : ""}</div>
   <p class="small muted">Chaque jour, l'app te propose un programme différent (un défi, une série d'automatismes, des applications…), équilibré sur la semaine. Pas de chrono : l'important, c'est de venir chaque jour.</p>
   <p class="small muted">Ensuite : au plus 5 questions pour trouver ton point de départ (2 à 3 minutes). Tu peux t'arrêter, tu reprendras au même endroit.</p>
-  <button class="btn-primary btn-big" id="next">Continuer</button>`);
+  <button class="btn-primary btn-big" id="next">Continuer</button>${draft.keepSys && Object.keys(SYSTEMS).length > 1 ? '<button class="btn-ghost small" id="chgpays">Changer de pays</button>' : ""}`);
   const bind = (id, key, num) => app.querySelectorAll("#" + id + " button").forEach((b) => (b.onclick = () => { draft[key] = num ? +b.dataset.v : b.dataset.v; screenLevel(); }));
   bind("sys", "system"); bind("grade", "grade", true); bind("track", "track");
+  /* 25.11 soir (séparation France / romand) : élève déjà inscrit : seules les classes de son système ; le pays se change
+     par un lien discret. */
+  const cp = document.getElementById("chgpays"); if (cp) cp.onclick = () => { draft.keepSys = false; screenLevel(); };
   // Plus de questionnaire sur les notions : celles de l'année s'ouvrent dans l'ordre du référentiel.
   document.getElementById("next").onclick = () => {
     if (draft.system === "CH" && draft.grade >= 12 && !draft.track) { document.getElementById("trackerr").textContent = "Choisis d'abord ta voie : Collège ou maturité professionnelle."; document.getElementById("track").scrollIntoView({ behavior: "smooth", block: "center" }); return; }
@@ -766,7 +773,7 @@ function screenSettings() {
   document.getElementById("legal").onclick = () => screenLegal(screenSettings);
   if (document.getElementById("stats")) document.getElementById("stats").onclick = () => screenStats(screenSettings);
   document.getElementById("backup").onclick = screenBackup;
-  document.getElementById("level").onclick = () => { draft = { ...state.profile }; screenLevel(); };
+  document.getElementById("level").onclick = () => { draft = { ...state.profile, keepSys: true }; screenLevel(); };
   document.getElementById("r1").onclick = () => {
     document.getElementById("reset").innerHTML = '<span class="small">Effacer ta progression et ton Mathélo ?</span><button id="r2">Oui, effacer</button><button class="btn-ghost" id="r3">Non</button>';
     document.getElementById("r2").onclick = () => { Store.clear(); try { localStorage.removeItem("m2m-device"); localStorage.removeItem("m2m-ping"); } catch (e) {} state = null; uiApply(); screenWelcome(); };
@@ -775,16 +782,22 @@ function screenSettings() {
 }
 
 // ---------------- Mes compétences ----------------
-const noteCls = (n) => (n === null ? "none" : n >= 5 ? "good" : n >= 4 ? "ok" : "low");
-const noteTxt = (n) => (n === null ? "pas testé" : String(n).replace(".", ","));
+/* 25.11 soir (séparation France / romand, décision de l'enseignant) : profil France = 4 niveaux du livret scolaire (LSU)
+   au lieu de la note suisse 1–6. Seuils : < 40 % de réussite insuffisante (note < 3), 40–60 % fragile (3 à 4),
+   60–85 % satisfaisante (4 à 5,5), ≥ 85 % très bonne (5,5 et plus). Le calcul interne reste le même. */
+const LSU = ["Insuffisante", "Fragile", "Satisfaisante", "Très bonne"];
+const lsuK = (n) => (n < 3 ? 0 : n < 4 ? 1 : n < 5.5 ? 2 : 3);
+const noteCls = (n) => (n === null ? "none" : isFR() ? ["low", "frag", "ok", "good"][lsuK(n)] : n >= 5 ? "good" : n >= 4 ? "ok" : "low");
+const noteTxt = (n) => (n === null ? (isFR() ? "pas encore" : "pas testé") : isFR() ? LSU[lsuK(n)] : String(n).replace(".", ","));
+const avgTxt = (a) => (a === null ? "" : isFR() ? " · maîtrise " + LSU[lsuK(a)].toLowerCase() : " · moyenne " + String(Math.round(a * 10) / 10).replace(".", ","));
 function compStats(ids) {
   const all = ids.flatMap((id) => compsOf(id)), notes = all.map((c) => compNote((state.comps || {})[c.cid])).filter((x) => x !== null);
   return { total: all.length, tested: notes.length, avg: notes.length ? notes.reduce((a, b) => a + b, 0) / notes.length : null };
 }
 function compsCard() {
   const cur = Engine.catalog(state.profile).filter((c) => c.current).map((c) => c.id), st = compStats(cur);
-  return `<div class="card flat stack"><div class="spread"><h3>Mes compétences</h3>${st.avg !== null ? `<span class="note ${noteCls(Math.round(st.avg * 2) / 2)}">${String(Math.round(st.avg * 10) / 10).replace(".", ",")}</span>` : ""}</div>
-  <p class="small muted">${st.tested ? `${st.tested} compétence${st.tested > 1 ? "s" : ""} notée${st.tested > 1 ? "s" : ""} sur ${st.total} cette année.` : "Tes notes apparaissent au fil des séances, compétence par compétence."}</p>
+  return `<div class="card flat stack"><div class="spread"><h3>Mes compétences</h3>${st.avg !== null ? `<span class="note ${noteCls(Math.round(st.avg * 2) / 2)}">${isFR() ? noteTxt(st.avg) : String(Math.round(st.avg * 10) / 10).replace(".", ",")}</span>` : ""}</div>
+  <p class="small muted">${st.tested ? `${st.tested} compétence${st.tested > 1 ? "s" : ""} ${isFR() ? "positionnée" : "notée"}${st.tested > 1 ? "s" : ""} sur ${st.total} cette année.` : isFR() ? "Ton niveau de maîtrise apparaît au fil des séances, compétence par compétence." : "Tes notes apparaissent au fil des séances, compétence par compétence."}</p>
   <p class="small">🏅 ${Object.keys(state.badges || {}).length} badge${Object.keys(state.badges || {}).length > 1 ? "s" : ""} sur ${Badges.list(state).length}</p>
   <button class="btn-primary" id="comps">Voir mes compétences et mes badges</button></div>`;
 }
@@ -806,18 +819,18 @@ function screenComps() {
     const ns = cat.filter((c) => NOTIONS.find((n) => n.id === c.id).theme === th).sort((a, b) => yearOf(a) - yearOf(b) || Engine.rank(state.profile, a.id) - Engine.rank(state.profile, b.id));
     if (!ns.length) return "";
     const t = compStats(ns.map((c) => c.id));
-    return `<details class="card flat cyc"><summary><span class="cyc-h"><b>${THEMES[th]}</b><span class="small muted">${t.tested} / ${t.total} notées${t.avg !== null ? " · moyenne " + String(Math.round(t.avg * 10) / 10).replace(".", ",") : ""}</span></span>${t.avg !== null ? `<span class="note ${noteCls(Math.round(t.avg * 2) / 2)}">${String(Math.round(t.avg * 10) / 10).replace(".", ",")}</span>` : ""}</summary>
+    return `<details class="card flat cyc"><summary><span class="cyc-h"><b>${THEMES[th]}</b><span class="small muted">${t.tested} / ${t.total} notées${avgTxt(t.avg)}</span></span>${t.avg !== null ? `<span class="note ${noteCls(Math.round(t.avg * 2) / 2)}">${String(Math.round(t.avg * 10) / 10).replace(".", ",")}</span>` : ""}</summary>
       ${ns.map((c) => `<div class="cnotion"><div class="spread"><b>${c.label}</b><span class="row" style="gap:4px"><span class="tag yr">${yearOf(c)}e</span>${statusTag(c.id)}</span></div>${LESSONS[c.id] ? `<button type="button" class="btn-ghost small lopen" data-id="${c.id}">${typeof ACTIVE !== "undefined" && ACTIVE[c.id] ? "🖐 Leçon à manipuler" : "📖 Leçon"}</button>` : ""}${compLine(c)}</div>`).join("")}</details>`;
   }).join("");
   const sc = compStats(cat.map((c) => c.id));
   Badges.check(state); state.badgesNew = []; save();
   h(`${brand}${backTop()}<h2>Mes <span class="mark">compétences</span></h2>
-  <p class="muted">Chaque compétence reçoit une note de 1 à 6 dès que tu y as répondu 3 fois. La note suit tes 8 dernières réponses : elle monte quand tu progresses.</p>
+  <p class="muted">${isFR() ? "Chaque compétence reçoit un niveau de maîtrise (insuffisante, fragile, satisfaisante, très bonne) dès que tu y as répondu 3 fois. Il suit tes 8 dernières réponses : il monte quand tu progresses." : "Chaque compétence reçoit une note de 1 à 6 dès que tu y as répondu 3 fois. La note suit tes 8 dernières réponses : elle monte quand tu progresses."}</p>
   ${badgesSection()}
-  ${co ? `<div class="card flat"><div class="spread"><span>Cycle 3 · jusqu'en ${state.profile.grade}e</span><b>${sc.tested} / ${sc.total} notées${sc.avg !== null ? " · moyenne " + String(Math.round(sc.avg * 10) / 10).replace(".", ",") : ""}</b></div></div>
-  ${cycle()}` : `<div class="card flat"><div class="spread"><span>Cette année</span><b>${st.tested} / ${st.total} notées${st.avg !== null ? " · moyenne " + String(Math.round(st.avg * 10) / 10).replace(".", ",") : ""}</b></div></div>
+  ${co ? `<div class="card flat"><div class="spread"><span>Cycle 3 · jusqu'en ${state.profile.grade}e</span><b>${sc.tested} / ${sc.total} ${isFR() ? "positionnées" : "notées"}${avgTxt(sc.avg)}</b></div></div>
+  ${cycle()}` : `<div class="card flat"><div class="spread"><span>Cette année</span><b>${st.tested} / ${st.total} ${isFR() ? "positionnées" : "notées"}${avgTxt(st.avg)}</b></div></div>
   ${block(cur)}
-  ${old.length ? `<details class="olds"><summary>Années précédentes (${compStats(old.map((c) => c.id)).tested} notées)</summary>${block(old)}</details>` : ""}`}
+  ${old.length ? `<details class="olds"><summary>Années précédentes (${compStats(old.map((c) => c.id)).tested} ${isFR() ? "positionnées" : "notées"})</summary>${block(old)}</details>` : ""}`}
   <button class="btn-primary btn-big" id="back">Retour</button>`);
   bindBadges(app);
   app.querySelectorAll(".lopen").forEach((b) => (b.onclick = () => screenLesson(b.dataset.id, screenComps, true)));
@@ -893,6 +906,8 @@ const statsCard = () => statsAsked() ? "" : `<div class="card stack" id="statsca
   <button class="btn-ghost small" id="statsplus">🔒 Le détail de ce qui est envoyé</button></div>`;
 
 // ---------------- Ce que l'app envoie (13.11) ----------------
+/* 25.11 soir (séparation France / romand) : exemple de classe dans le système de l'élève. */
+const exClasse = () => (state && state.profile && state.profile.system === "FR" ? "4e" : "10e");
 function screenPrivacy(back) {
   h(`${brand}<h2>Ce que l'app <span class="mark">envoie</span></h2>
   <p class="muted">Pas de compte, pas de nom, pas d'adresse e-mail. Ta progression reste sur ton appareil.</p>
@@ -906,7 +921,7 @@ function screenPrivacy(back) {
   <li><b>Le début et la fin de chaque séance</b>, avec ta classe et le format ; à la fin, le nombre de questions, le score et la durée en minutes. Ça sert à savoir si les séances sont trop longues ou trop difficiles.</li>
   <li><b>Pour chaque question et chaque rappel de cours</b> : le code de la question, si tu as trouvé (du premier coup ou non), si tu as quitté avant de répondre, le temps passé, l'aide utilisée (pas à pas, correction) et ta première réponse fausse (un nombre ou un calcul ; si tu as écrit des mots, seulement « [texte] »), avec le même identifiant. Ça sert à repérer les questions mal posées, trop dures, ou que l'app corrige mal.</li>
   <li><b>Tes avis</b> 👍 / 👎, « trop facile » et « pas compris », avec le code de la question ou du rappel et le même identifiant.</li>
-  <li><b>Tes commentaires</b>, si tu en écris, avec ta classe (par exemple « 10e ») et le même identifiant. N'y écris pas ton nom.</li>
+  <li><b>Tes commentaires</b>, si tu en écris, avec ta classe (par exemple « ${exClasse()} ») et le même identifiant. N'y écris pas ton nom.</li>
   <li><b>Tes grades Mathélo</b>, quand tu en atteins un : le nom du grade et le même identifiant, pour te donner ton numéro de « collector ».</li>
   <li><b>Ton chapitre du moment</b>, si tu en choisis un : les notions, ta classe et le mois, sans identifiant. Ça sert à proposer les notions dans l'ordre où elles se font vraiment en classe.</li>
   <li><b>Les erreurs techniques</b> de l'app, si elle plante : le message d'erreur, l'endroit dans le code, la version de l'app, l'écran ou le code de la question, ta classe et le même identifiant (au plus 5 par jour). Ça sert à réparer les bugs qu'on ne voit pas.</li></ul></div>
@@ -942,7 +957,7 @@ function screenLegal(back) {
   ${sec("3. Quelles données ?", `<p><b>Jamais demandé :</b> nom, prénom, adresse e-mail, numéro de téléphone, école, compte. Il n'y a pas d'inscription.</p>
   <p><b>Gardé seulement sur l'appareil</b> (stockage local du navigateur) : la progression (notions, compétences, badges, Mathélo, historique des réponses), les réglages d'affichage, et un identifiant tiré au hasard, propre à l'appareil.</p>
   <p><b>Envoyé vers un tableau tenu par l'éditeur</b> (Google Sheets), avec cet identifiant :</p>
-  <ul class="plain"><li>l'ouverture de l'app (au plus une fois par jour), le début et la fin de chaque séance, avec la date, la classe (par exemple « 10e »), le format, le nombre de questions, le score et la durée ;</li>
+  <ul class="plain"><li>l'ouverture de l'app (au plus une fois par jour), le début et la fin de chaque séance, avec la date, la classe (par exemple « ${exClasse()} »), le format, le nombre de questions, le score et la durée ;</li>
   <li>pour chaque question ou rappel de cours : son code, le résultat (trouvé ou non, du premier coup ou non, quitté), le temps passé, l'aide utilisée et la première réponse fausse (un nombre ou un calcul ; des mots sont remplacés par « [texte] ») ;</li>
   <li>les avis (👍 / 👎, « trop facile », « pas compris ») et les commentaires écrits librement (500 caractères au plus ; il est demandé de ne pas y écrire de nom) ;</li>
   <li>les grades Mathélo atteints ;</li>
@@ -1257,7 +1272,7 @@ function screenLesson(id, cont0, review, track = true) {
 // ---------------- Séance ----------------
 let session = null;
 // Mode « progression libre » (18.11) : deux portes égales sur l'accueil ; l'élève choisit le périmètre.
-const FREE_THEMES = { no: "Nombres et opérations", fa: "Fonctions et algèbre", gm: "Grandeurs et mesures", es: "Espace et géométrie" };
+const FREE_THEMES = { no: "Nombres et opérations", fa: "Fonctions et algèbre", gm: "Grandeurs et mesures", es: "Espace" }; /* domaines du PER (MSN 31–34), CO seulement */
 // ---------------- Carnet d'erreurs (20.11, idée retenue par l'auteur) ----------------
 // Chaque question ratée en séance entre dans le carnet (une entrée par notion et niveau). « Effacer mes erreurs » la
 // repose avec d'autres nombres ; elle sort après deux réussites de suite du premier coup, un échec remet le compteur à 0.
@@ -1409,13 +1424,23 @@ document.addEventListener("click", (e) => { const b = e.target.closest && e.targ
   if (!on && box) { b.classList.add("on"); box.textContent = b.dataset.i; box.hidden = false; } });
 // Carte de progression par thème : une case par notion, colorée selon la maîtrise (grise : jamais travaillée).
 function themeMapCard() {
-  const by = {};
-  for (const [id, s] of Object.entries(state.notions)) { const n = NOTIONS.find((x) => x.id === id); if (!n || !GEN[id]) continue; (by[n.theme] = by[n.theme] || []).push([n, s]); }
+  /* 25.11 (règle de l'auteur : chaque système a ses dénominations) : domaines du PER au CO seulement ; ailleurs, les
+     chapitres du référentiel de l'élève (Collège, MP, France), et une rangée pour les années précédentes. */
+  const p = state.profile, co = p.system === "CH" && p.grade <= 11, cat = Engine.catalog(p), cur = new Set(cat.filter((c) => c.current).map((c) => c.id));
+  const by = {}, order = [];
+  for (const [id, s] of Object.entries(state.notions)) {
+    const n = NOTIONS.find((x) => x.id === id); if (!n || !GEN[id]) continue;
+    const k = co ? n.theme : cur.has(id) ? Engine.themeKey(p, id) : "_old";
+    if (!by[k]) { by[k] = []; order.push(k); }
+    by[k].push([n, s]);
+  }
+  const keys = co ? Object.keys(FREE_THEMES).filter((k) => by[k]) : [...Engine.themeOrder(order.filter((k) => k !== "_old").map((theme) => ({ theme })), p), ...(by._old ? ["_old"] : [])];
+  const title = (k) => (co ? FREE_THEMES[k] : k === "_old" ? "Années précédentes" : Engine.themeLabel(k, p));
   const col = (s) => (!s.seen ? "var(--line)" : s.m >= 0.7 ? "var(--ok)" : s.m >= 0.45 ? "var(--warn)" : "var(--bad)");
   /* 24.11 (demande de l'auteur) : sur téléphone, title ne s'affiche pas ; un toucher sur la case montre la notion sous la rangée. */
   const etat = (s) => (!s.seen ? "pas encore essayée" : s.m >= 0.7 ? "maîtrisée" : s.m >= 0.45 ? "en route" : "à travailler");
-  const rows = Object.keys(FREE_THEMES).filter((k) => by[k]).map((k) => { const L = by[k], done = L.filter(([, s]) => s.seen && s.m >= 0.7).length;
-    return `<div style="margin:8px 0"><div class="spread small"><b>${FREE_THEMES[k]}</b><span class="muted">${done} / ${L.length} maîtrisées</span></div>
+  const rows = keys.map((k) => { const L = by[k], done = L.filter(([, s]) => s.seen && s.m >= 0.7).length;
+    return `<div style="margin:8px 0"><div class="spread small"><b>${esc(title(k))}</b><span class="muted">${done} / ${L.length} maîtrisées</span></div>
       <div class="pm-row">${L.map(([n, s]) => `<button type="button" class="pm-sq" title="${esc(n.label)}" aria-label="${esc(n.label)} : ${etat(s)}" data-i="${esc(n.label)} — ${etat(s)}" style="background:${col(s)}"></button>`).join("")}</div><div class="pm-info small" hidden></div></div>`; }).join("");
   return `<div class="card stack"><div class="eyebrow">Ma carte de progression</div>${rows}
     <p class="small muted">Vert : maîtrisé · orange : en route · rouge : à travailler · gris : pas encore essayé. Touche une case pour voir la notion.</p></div>`;
@@ -2324,7 +2349,7 @@ function screenSummary() {
   <div class="card stack"><div class="spread"><span>Score</span><b>${String(sc).replace(".", ",")} / ${n}</b></div>
   <div class="spread"><span>Mathélo</span><b>${state.elo.r} <span class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</span></b></div>
 </div>
-  ${session.ctest ? (() => { const a = compNote((state.comps || {})[session.ctest.cid]), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? "La note apparaît après 3 réponses sur cette compétence." : b === null ? "Première note pour cette compétence." : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". Elle remontera avec la pratique." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
+  ${session.ctest ? (() => { const a = compNote((state.comps || {})[session.ctest.cid]), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? (isFR() ? "Le niveau apparaît après 3 réponses sur cette compétence." : "La note apparaît après 3 réponses sur cette compétence.") : b === null ? (isFR() ? "Premier positionnement pour cette compétence." : "Première note pour cette compétence.") : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". " + (isFR() ? "Il remontera" : "Elle remontera") + " avec la pratique." : isFR() ? "Niveau stable." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
   ${newGrade}${nb}
   ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${state.carnet.length} à effacer</b></div><span class="small muted">Une erreur s'efface après 2 réussites de suite, du premier coup.</span><button class="btn-primary" id="carnetagain">${session.carnet ? "Continuer à effacer" : "📕 Effacer mes erreurs maintenant"}</button></div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
   ${returnCard()}

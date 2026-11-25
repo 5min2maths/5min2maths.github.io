@@ -101,13 +101,14 @@ try {
   // 7. Aucune notion hors programme (ou écrite à la suisse) en 1re et en Tle
   const HP = ["sinlaw", "recip", "expo", "modexp", "trigcercle", "trigassoc", "trigfn", "trigeq", "log", "vecteurs"];
   for (const g of [11, 12]) { const cat = Engine.catalog({ system: "FR", grade: g, track: "college" }).map((c) => c.id); for (const id of HP) ok(!cat.includes(id), "hors programme FR " + g + " : " + id); }
-  // 8. Profils suisses inchangés : catalogue identique à celui d'avant le chantier (empreinte du 25.11 ; à mettre à jour
+  // 8. Profils suisses inchangés : catalogue identique à celui d'avant le chantier (empreinte du 25.11, mise à jour le 25.11 soir :
+  //    chapitres CO d'origine pour les notions anciennes du Collège et de la MP, dénominations par système ; à mettre à jour
   //    seulement si le catalogue suisse change volontairement) et aucune notion française au catalogue suisse
-  const FP = { college9: [45, "1hr7vsb"], college10: [78, "2vzk0f"], college11: [103, "bd24is"], college12: [145, "2g89x4"], college13: [178, "rjlk36"], college14: [204, "1aw3qb4"], college15: [222, "5ejcqz"], mp12: [123, "sqp83d"], mp13: [144, "1ng6py5"], mp14: [156, "1a6pe02"], mp15: [169, "1tquckc"] };
+  const FP = { college9: [45, "1hr7vsb"], college10: [78, "2vzk0f"], college11: [103, "bd24is"], college12: [145, "4ucppo"], college13: [178, "59sqo6"], college14: [204, "yvyj5w"], college15: [222, "zm4n7j"], mp12: [123, "wh4ovj"], mp13: [144, "13ef2yz"], mp14: [156, "88b75g"], mp15: [169, "11mfydm"] };
   const hsh = (t) => { let x = 5381; for (const c of t) x = ((x * 33) ^ c.charCodeAt(0)) >>> 0; return x.toString(36); };
   const NEWFR = ["expderiv", "trigrad", "droitenorm", "linfn", "cos4e", "thales4e", "autodnb", "vecgeo", "tabvar", "lnfr", "trigfr", "tvi", "sommeva", "recurrence"];
   for (const [k, [n, fp]] of Object.entries(FP)) { const t = k.replace(/\d+/, ""), g = +k.replace(/\D+/, ""), c = Engine.catalog({ system: "CH", grade: g, track: t });
-    ok(c.length === n && hsh(c.map((x) => x.id + (x.current ? "*" : "") + x.theme).join(",")) === fp, "catalogue suisse modifié : " + k + " (" + c.length + " notions)");
+    ok(c.length === n && hsh(c.map((x) => x.id + (x.current ? "*" : "") + x.theme).join(",")) === fp, "catalogue suisse modifié : " + k + " (" + c.length + " notions) " + hsh(c.map((x) => x.id + (x.current ? "*" : "") + x.theme).join(",")));
     ok(!c.some((x) => NEWFR.includes(x.id)), "notion française au catalogue suisse " + k); }
   { const st = { profile: { system: "CH", grade: 14, track: "college" } }; let n = 0; for (let s = 1; s <= 30; s++) { const q = Engine.make(st, "derivref", 2, s); if (/^exposant-/.test(q.ctx || "")) n++; } ok(n > 0, "Suisse : derivref a perdu ses formes à exposant rationnel"); }
   log.push("profils suisses : " + Object.keys(FP).length + " catalogues identiques");

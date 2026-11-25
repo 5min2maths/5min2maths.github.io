@@ -103,12 +103,11 @@ const SYSTEMS_HIDDEN = { FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [
 // Usages français (25.11, audit France : tools/france.md § 4). Appliqué aux textes d'un profil FR seulement (Engine.finalize,
 // rendu de l'app) ; jamais pour un profil suisse. Idempotent. Sans décision de l'enseignant : seulement ce qui est un défaut
 // certain pour un élève français (monnaie, séparateur des milliers, sigles PGDC / PPMC, « préimage », « mise en évidence »).
-// Genève → Lyon (un seul énoncé au catalogue français le 25.11 : une cycliste « part de Genève »). Les énoncés propres à la
+// Genève → Lyon : énoncés seulement (FR_QWORDS, frLocalQ) ; un seul énoncé au catalogue français le 25.11 : une cycliste « part de Genève »). Les énoncés propres à la
 // Suisse (change EUR ↔ CHF, TVA suisse) sont écartés du tirage par horsCO (src/engine.js), pas traduits.
 // Produit : × en France (décision du 25.11, frTimes) ; laissé pour décision : « cercle de Thalès ».
 const FR_WORDS = [
   [/\ben (CHF|francs)\b/g, "en euros"], [/\bCHF\b/g, "€"], [/au franc près/g, "à l'euro près"], [/(\d|\\\)) francs\b/g, "$1 euros"], [/\bde francs\b/g, "d'euros"],
-  [/\bGenève\b/g, "Lyon"],
   /* 25.11 (couverture France) : équation réduite y = mx + p ; « côtés de l'angle droit » (cathètes : usage suisse) ;
      « ensemble de définition » (domaine de définition : usage suisse ; « l'aire du domaine » inchangé). */
   [/\bmx \+ h\b/g, "mx + p"], [/\b([Ll])es cathètes\b/g, "$1es côtés de l'angle droit"], [/\bcathètes\b/g, "côtés de l'angle droit"], [/\b([Ll])a cathète(?![a-zà-ÿ])/g, "$1e côté de l'angle droit"], [/\bcathète(?![a-zà-ÿ])/g, "côté de l'angle droit"],
@@ -137,6 +136,10 @@ function frLocal(s) {
   if (typeof s !== "string" || !s) return s;
   return frWords(s.split(/(\\\([\s\S]*?\\\))/).map((t, i) => frThouPart(t, i % 2 === 1)).join(""));
 }
+/* Énoncés de questions seulement (25.11 soir : « Collège de Genève » devenait « Collège de Lyon » dans la présentation
+   aux enseignants) : les lieux suisses d'un énoncé deviennent français ; l'interface et les pages genevoises, jamais. */
+const FR_QWORDS = [[/\bGenève\b/g, "Lyon"]];
+function frLocalQ(s) { const r = frLocal(s); return typeof r === "string" ? FR_QWORDS.reduce((a, [re, by]) => a.replace(re, by), r) : r; }
 
 // Difficulté maximale (1 = bases, 3 = approfondi) : on ne demande pas la section à l'élève ;
 // c'est le Mathélo qui situe son niveau. Seules les petites classes (6e, 5e) plafonnent à 2.

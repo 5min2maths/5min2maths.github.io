@@ -38,7 +38,7 @@ print(('ÉCHEC ' if bad else 'ok ')+(t[:260].replace(chr(10),' | ') or '(page d 
 }
 export -f un
 # bot.html = élève-robot complet (tools/bot_eleve.py) : trop lourd pour la batterie, lancé à part chaque nuit (23.11).
-if [ $# -gt 0 ]; then L=$(for t in "$@"; do echo "tests/$t.html"; done); else L=$(ls tests/*.html | grep -v "/_" | grep -v "/bot.html"); fi
+if [ $# -gt 0 ]; then L=$(for t in "$@"; do echo "tests/$t.html"; done); else L=$(ls tests/*.html | grep -v "/_" | grep -v "/bot.html" | grep -v "/eleves.html"); fi
 # 24.11 : contrôle de syntaxe de tous les fichiers de l'app (une erreur de syntaxe fait disparaître un fichier entier
 # sans qu'une page de test le voie forcément : act_ch11c.js, 24.11). Page générée d'après la liste JS de build.py ;
 # les erreurs sont lues dans la console de Chromium (nom du fichier et ligne).

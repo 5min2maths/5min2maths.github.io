@@ -12,6 +12,8 @@ const PZ = {
   qr(u) { try { return typeof QR !== "undefined" ? QR.svg(u) : ""; } catch (e) { return ""; } },
   grade: null,
   on: false,
+  /* 25.11 soir (séparation complète France / romand) : un profil France voit des présentations françaises. */
+  fr() { return !!(typeof state !== "undefined" && state && state.profile && state.profile.system === "FR"); },
 };
 
 function presentRoute() {
@@ -53,9 +55,10 @@ function pzBind(root) {
   } else root.querySelectorAll(".pz-anim").forEach((el) => el.classList.remove("pz-wait"));
 }
 
-const pzGrades = (id) => `<div class="seg pz-grades" id="${id}">${[[9, "9e"], [10, "10e"], [11, "11e"], [12, "Collège / MP"]].map(([g, l]) => `<button type="button" aria-pressed="${g === PZ.grade}" data-v="${g}">${l}</button>`).join("")}</div>`;
+const pzGrades = (id) => `<div class="seg pz-grades" id="${id}">${(PZ.fr() ? [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"], [12, "Tle"]] : [[9, "9e"], [10, "10e"], [11, "11e"], [12, "Collège / MP"]]).map(([g, l]) => `<button type="button" aria-pressed="${g === PZ.grade}" data-v="${g}">${l}</button>`).join("")}</div>`;
 
 function pzQuestion() {
+  if (PZ.fr()) return pzQuestionFR();
   const keep = demoGrade; demoGrade = PZ.grade || null;
   let q; try { q = demoQuestion(); } finally { demoGrade = keep; }
   return q;
@@ -92,6 +95,19 @@ function pzTry(box) {
   document.getElementById("pzother").onclick = () => pzTry(box);
 }
 
+/* Question de démonstration d'un profil France : une notion ouverte de la classe choisie (catalogue français). */
+function pzQuestionFR() {
+  const g = PZ.grade || state.profile.grade, st = Engine.newState({ system: "FR", grade: g, track: "college", minutes: 5 });
+  Engine.autoInit(st);
+  const pool = Object.keys(st.notions).filter((id) => ["vu", "encours"].includes(st.notions[id].status) && GEN[id]);
+  for (let k = 0; k < 40 && pool.length; k++) {
+    const id = pool[Math.floor(Math.random() * pool.length)];
+    let q; try { q = Engine.build(id, 1, 1 + Math.floor(Math.random() * 46655)); } catch (e) { continue; }
+    if (q && q.spec && q.spec.kind === "value" && !q.parts && q.guide && q.guide.length) return Engine.finalize(st, id, q);
+  }
+  return Engine.finalize(st, "prio", Engine.build("prio", 1, 7));
+}
+
 const pzInstall = (who) => {
   const u = PZ.url(), qr = PZ.qr(u);
   return `<div class="pz-install">${qr ? `<div class="pz-qr" aria-label="QR code de l'application">${qr}</div>` : ""}
@@ -102,14 +118,14 @@ const pzInstall = (who) => {
 };
 
 function screenDecouvrir() {
-  h(`<div class="pz" id="pz">
+  h(`<div class="pz" id="pz" data-noloc>
   <div class="spread pz-bar">${brand}<span class="row" style="gap:6px"><button type="button" class="btn-sec small pz-play">▶ Présenter</button><button type="button" class="btn-ghost small pz-exit" aria-label="Quitter">✕</button></span></div>
 
   <section class="pz-s pz-hero">
-    <div class="eyebrow">Pour les élèves · 9e à 4e, Collège et MP</div>
+    <div class="eyebrow">${PZ.fr() ? "Pour les élèves · de la 6e à la terminale" : "Pour les élèves · 9e à 4e, Collège et MP"}</div>
     <h1 class="pz-big">Chaque jour, <span class="mark">5 minutes</span> de maths.<br>Juste à ton niveau.</h1>
     <p class="muted">Une question choisie pour toi, une correction tout de suite, et l'app t'aide étape par étape quand tu bloques.</p>
-    <div class="pz-chips pz-anim"><span>📱 sur ton téléphone</span><span>🙈 sans compte, sans nom</span><span>🆓 gratuit, sans pub</span><span>📚 plan d'études genevois</span></div>
+    <div class="pz-chips pz-anim"><span>📱 sur ton téléphone</span><span>🙈 sans compte, sans nom</span><span>🆓 gratuit, sans pub</span><span>📚 ${PZ.fr() ? "programmes officiels" : "plan d'études genevois"}</span></div>
     <button type="button" class="btn-primary pz-next">Essayer tout de suite ↓</button>
   </section>
 
@@ -183,14 +199,14 @@ function pzSolve(box) {
 
 function screenParents() {
   const JR = ["L", "M", "M", "J", "V", "S", "D"], ON = [1, 1, 0, 1, 0, 1, 0];
-  h(`<div class="pz" id="pz">
+  h(`<div class="pz" id="pz" data-noloc>
   <div class="spread pz-bar">${brand}<span class="row" style="gap:6px"><button type="button" class="btn-sec small pz-play">▶ Présenter</button><button type="button" class="btn-ghost small pz-exit" aria-label="Quitter">✕</button></span></div>
 
   <section class="pz-s pz-hero">
     <div class="eyebrow">👪 Je suis parent</div>
     <h1 class="pz-big">Accompagner son enfant en maths,<br><span class="mark">2 minutes</span> par semaine.</h1>
     <p class="muted">Votre enfant s'entraîne 5 minutes par jour, à son niveau, sur le programme de sa classe. Vous, vous l'encouragez, et vous pouvez résoudre un problème avec lui, même sans être fort en maths.</p>
-    <div class="pz-chips pz-anim"><span>🤝 accompagner, pas surveiller</span><span>🆓 gratuit, sans compte</span><span>📚 plan d'études genevois, 9e → 4e, Collège et MP</span></div>
+    <div class="pz-chips pz-anim"><span>🤝 accompagner, pas surveiller</span><span>🆓 gratuit, sans compte</span><span>📚 ${PZ.fr() ? "programmes officiels, de la 6e à la terminale" : "plan d'études genevois, 9e → 4e, Collège et MP"}</span></div>
     <button type="button" class="btn-primary pz-next">Voir comment ↓</button>
   </section>
 
@@ -262,7 +278,7 @@ function screenParents() {
 // ---------------- Présentation aux enseignants (25.11) ----------------
 /* Nombre de notions travaillées dans l'année, par classe (calculé sur le référentiel, jamais écrit à la main). */
 function pzCoverage() {
-  const P = [["9e", { system: "CH", grade: 9, track: "college" }], ["10e", { system: "CH", grade: 10, track: "college" }], ["11e", { system: "CH", grade: 11, track: "college" }],
+  const P = PZ.fr() ? [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"], [12, "Terminale"]].map(([g, l]) => [l, { system: "FR", grade: g, track: "college" }]) : [["9e", { system: "CH", grade: 9, track: "college" }], ["10e", { system: "CH", grade: 10, track: "college" }], ["11e", { system: "CH", grade: 11, track: "college" }],
     ["1re Collège", { system: "CH", grade: 12, track: "college" }], ["2e Collège", { system: "CH", grade: 13, track: "college" }], ["3e Collège", { system: "CH", grade: 14, track: "college" }], ["4e Collège", { system: "CH", grade: 15, track: "college" }],
     ["MP 1re", { system: "CH", grade: 12, track: "mp" }], ["MP 2e", { system: "CH", grade: 13, track: "mp" }], ["MP 3e", { system: "CH", grade: 14, track: "mp" }], ["MP 4e", { system: "CH", grade: 15, track: "mp" }]];
   return P.map(([l, p]) => { let n = 0, ch = 0; try { const c = Engine.catalog(p).filter((x) => x.current); n = c.length; ch = new Set(c.map((x) => x.theme)).size; } catch (e) {} return [l, n, ch]; }).filter(([, n]) => n > 0);
@@ -285,19 +301,23 @@ function pzCount(root) {
   const io = new IntersectionObserver((es) => es.forEach((en) => { if (en.isIntersecting) { run(en.target); io.unobserve(en.target); } }), { threshold: 0.4 });
   els.forEach((e) => io.observe(e));
 }
+const PZ_COV_PROFILES_FR = [6, 7, 8, 9, 10, 11, 12].map((g) => ({ system: "FR", grade: g, track: "college" }));
 const PZ_COV_PROFILES = [9, 10, 11, 12, 13, 14, 15].map((g) => ({ system: "CH", grade: g, track: "college" })).concat([12, 13, 14, 15].map((g) => ({ system: "CH", grade: g, track: "mp" })));
 const pzCovHtml = (cov) => { const maxN = Math.max(1, ...cov.map(([, n]) => n)); return cov.map(([l, n, ch]) => `<div class="pz-cov-r"><span>${esc(l)}</span><span class="pz-cov-b"><i style="width:${Math.round((n / maxN) * 100)}%"></i></span><span class="small">${n} notions · ${ch} chap.</span></div>`).join(""); };
-const pzNotionCount = () => NOTIONS.filter((n) => n.CH || n.MP).length;
+const pzNotionCount = () => {
+  if (!PZ.fr()) return NOTIONS.filter((n) => n.CH || n.MP).length;
+  const ids = new Set(); PZ_COV_PROFILES_FR.forEach((p) => { try { Engine.catalog(p).filter((c) => c.current).forEach((c) => ids.add(c.id)); } catch (e) {} }); return ids.size;
+};
 function screenEnseignants() {
-  const cov = pzCoverage(), nNotions = pzNotionCount(), nClasses = 11;
-  h(`<div class="pz" id="pz">
+  const cov = pzCoverage(), nNotions = pzNotionCount(), nClasses = PZ.fr() ? 7 : 11;
+  h(`<div class="pz" id="pz" data-noloc>
   <div class="spread pz-bar">${brand}<span class="row" style="gap:6px"><button type="button" class="btn-sec small pz-play">▶ Présenter</button><button type="button" class="btn-ghost small pz-exit" aria-label="Quitter">✕</button></span></div>
 
   <section class="pz-s pz-hero">
-    <div class="eyebrow">👩‍🏫 Pour les enseignant·es · secondaire I et II</div>
+    <div class="eyebrow">👩‍🏫 ${PZ.fr() ? "Pour les enseignant·es · collège et lycée" : "Pour les enseignant·es · secondaire I et II"}</div>
     <h1 class="pz-big">Un entraînement quotidien,<br><span class="mark">aligné sur votre programme</span>,<br>que vos élèves font vraiment.</h1>
     <p class="muted">5 minutes par jour sur le téléphone : des questions au niveau de chaque élève, une correction immédiate et une aide pas à pas. Pour vous, aucune préparation ni correction, et aucune donnée d'élève à gérer.</p>
-    <div class="pz-nums pz-anim"><div><span class="pz-num" id="pznn" data-to="${nNotions}">${nNotions}</span><small>notions</small></div><div><span class="pz-num" data-to="${nClasses}">${nClasses}</span><small>classes, de la 9e à la 4e (CO, Collège, MP)</small></div><div><span class="pz-num" data-to="0">0</span><small>compte à créer</small></div></div>
+    <div class="pz-nums pz-anim"><div><span class="pz-num" id="pznn" data-to="${nNotions}">${nNotions}</span><small>notions</small></div><div><span class="pz-num" data-to="${nClasses}">${nClasses}</span><small>${PZ.fr() ? "classes, de la 6e à la terminale" : "classes, de la 9e à la 4e (CO, Collège, MP)"}</small></div><div><span class="pz-num" data-to="0">0</span><small>compte à créer</small></div></div>
     <button type="button" class="btn-primary pz-next">Découvrir ↓</button>
   </section>
 
@@ -324,8 +344,8 @@ function screenEnseignants() {
   </section>
 
   <section class="pz-s">
-    <div class="eyebrow">📚 Votre programme</div><h2>Le plan d'études, classe par classe</h2>
-    <p class="small muted">Plan d'études romand (CO), plans du Collège de Genève et de la maturité professionnelle. Notions travaillées dans l'année :</p>
+    <div class="eyebrow">📚 Votre programme</div><h2>${PZ.fr() ? "Les programmes, classe par classe" : "Le plan d'études, classe par classe"}</h2>
+    <p class="small muted">${PZ.fr() ? "Programmes officiels : cycle 3 (2025), cycle 4 (2026 en 5e ; 2019 en 4e et 3e), lycée (2026). Notions travaillées dans l'année :" : "Plan d'études romand (CO), plans du Collège de Genève et de la maturité professionnelle. Notions travaillées dans l'année :"}</p>
     <div class="pz-cov pz-anim" id="pzcov">${pzCovHtml(cov)}</div>
     <div class="pz-grid pz-anim">
       <div class="card flat"><b>🏫 « En ce moment en classe »</b><p class="small">L'élève reconnaît son chapitre à un exercice typique : environ 2 questions sur 3 portent alors dessus.</p></div>
@@ -386,7 +406,7 @@ function screenEnseignants() {
   const root = document.getElementById("pz"), box = document.getElementById("pztry");
   pzBind(root); pzCount(root);
   /* Les notions de 3e–4e Collège et de MP 3e–4e sont dans des paquets chargés à la demande : on les charge, puis on recompte. */
-  if (typeof window.ensurePacks === "function") PZ_COV_PROFILES.reduce((pr, p) => pr.then(() => window.ensurePacks(p)).catch(() => {}), Promise.resolve()).then(() => {
+  if (typeof window.ensurePacks === "function") (PZ.fr() ? PZ_COV_PROFILES_FR : PZ_COV_PROFILES).reduce((pr, p) => pr.then(() => window.ensurePacks(p)).catch(() => {}), Promise.resolve()).then(() => {
     if (location.hash !== "#enseignants") return;
     const el = document.getElementById("pzcov"); if (el) el.innerHTML = pzCovHtml(pzCoverage());
     const nn = document.getElementById("pznn"); if (nn) { nn.dataset.to = pzNotionCount(); nn.textContent = (+nn.dataset.to).toLocaleString("fr-CH"); }

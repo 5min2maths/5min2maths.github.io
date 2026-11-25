@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "3079a77ce3"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "f5eeb1369c"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -1257,7 +1257,7 @@ function screenLesson(id, cont0, review, track = true) {
 // ---------------- Séance ----------------
 let session = null;
 // Mode « progression libre » (18.11) : deux portes égales sur l'accueil ; l'élève choisit le périmètre.
-const FREE_THEMES = { no: "Nombres et opérations", fa: "Fonctions et algèbre", gm: "Grandeurs et mesures", es: "Espace et géométrie" };
+const FREE_THEMES = { no: "Nombres et opérations", fa: "Fonctions et algèbre", gm: "Grandeurs et mesures", es: "Espace" }; /* domaines du PER (MSN 31–34), CO seulement */
 // ---------------- Carnet d'erreurs (20.11, idée retenue par l'auteur) ----------------
 // Chaque question ratée en séance entre dans le carnet (une entrée par notion et niveau). « Effacer mes erreurs » la
 // repose avec d'autres nombres ; elle sort après deux réussites de suite du premier coup, un échec remet le compteur à 0.
@@ -1409,13 +1409,23 @@ document.addEventListener("click", (e) => { const b = e.target.closest && e.targ
   if (!on && box) { b.classList.add("on"); box.textContent = b.dataset.i; box.hidden = false; } });
 // Carte de progression par thème : une case par notion, colorée selon la maîtrise (grise : jamais travaillée).
 function themeMapCard() {
-  const by = {};
-  for (const [id, s] of Object.entries(state.notions)) { const n = NOTIONS.find((x) => x.id === id); if (!n || !GEN[id]) continue; (by[n.theme] = by[n.theme] || []).push([n, s]); }
+  /* 25.11 (règle de l'auteur : chaque système a ses dénominations) : domaines du PER au CO seulement ; ailleurs, les
+     chapitres du référentiel de l'élève (Collège, MP, France), et une rangée pour les années précédentes. */
+  const p = state.profile, co = p.system === "CH" && p.grade <= 11, cat = Engine.catalog(p), cur = new Set(cat.filter((c) => c.current).map((c) => c.id));
+  const by = {}, order = [];
+  for (const [id, s] of Object.entries(state.notions)) {
+    const n = NOTIONS.find((x) => x.id === id); if (!n || !GEN[id]) continue;
+    const k = co ? n.theme : cur.has(id) ? Engine.themeKey(p, id) : "_old";
+    if (!by[k]) { by[k] = []; order.push(k); }
+    by[k].push([n, s]);
+  }
+  const keys = co ? Object.keys(FREE_THEMES).filter((k) => by[k]) : [...Engine.themeOrder(order.filter((k) => k !== "_old").map((theme) => ({ theme })), p), ...(by._old ? ["_old"] : [])];
+  const title = (k) => (co ? FREE_THEMES[k] : k === "_old" ? "Années précédentes" : Engine.themeLabel(k, p));
   const col = (s) => (!s.seen ? "var(--line)" : s.m >= 0.7 ? "var(--ok)" : s.m >= 0.45 ? "var(--warn)" : "var(--bad)");
   /* 24.11 (demande de l'auteur) : sur téléphone, title ne s'affiche pas ; un toucher sur la case montre la notion sous la rangée. */
   const etat = (s) => (!s.seen ? "pas encore essayée" : s.m >= 0.7 ? "maîtrisée" : s.m >= 0.45 ? "en route" : "à travailler");
-  const rows = Object.keys(FREE_THEMES).filter((k) => by[k]).map((k) => { const L = by[k], done = L.filter(([, s]) => s.seen && s.m >= 0.7).length;
-    return `<div style="margin:8px 0"><div class="spread small"><b>${FREE_THEMES[k]}</b><span class="muted">${done} / ${L.length} maîtrisées</span></div>
+  const rows = keys.map((k) => { const L = by[k], done = L.filter(([, s]) => s.seen && s.m >= 0.7).length;
+    return `<div style="margin:8px 0"><div class="spread small"><b>${esc(title(k))}</b><span class="muted">${done} / ${L.length} maîtrisées</span></div>
       <div class="pm-row">${L.map(([n, s]) => `<button type="button" class="pm-sq" title="${esc(n.label)}" aria-label="${esc(n.label)} : ${etat(s)}" data-i="${esc(n.label)} — ${etat(s)}" style="background:${col(s)}"></button>`).join("")}</div><div class="pm-info small" hidden></div></div>`; }).join("");
   return `<div class="card stack"><div class="eyebrow">Ma carte de progression</div>${rows}
     <p class="small muted">Vert : maîtrisé · orange : en route · rouge : à travailler · gris : pas encore essayé. Touche une case pour voir la notion.</p></div>`;

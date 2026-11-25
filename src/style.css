@@ -242,6 +242,7 @@ details.lesson[open] { background: var(--paper); }
 .note.good { background: var(--ok-soft); color: var(--ok); }
 .note.ok { background: var(--blue-soft); color: var(--blue); }
 .note.low { background: var(--bad-soft); color: var(--bad); }
+.note.frag { background: var(--warn-soft, #fff1d6); color: var(--warn, #a86400); } /* 25.11 : maîtrise fragile (profil France, LSU) */
 .tag { font-size: 0.75rem; color: var(--ink-soft); border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
 details.olds summary { cursor: pointer; color: var(--blue); font-weight: 700; padding: 8px 0; }
 .notyet { margin-top: 6px; justify-self: start; }

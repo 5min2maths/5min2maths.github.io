@@ -13210,6 +13210,14 @@ const Store = {
 const day = (d = new Date()) => d.toISOString().slice(0, 10);
 const addDays = (s, n) => { const d = new Date(s + "T12:00:00"); d.setDate(d.getDate() + n); return day(d); };
 const INTERVALS = [0, 1, 3, 7, 14, 30];
+/* 25.11 : domaines des programmes français du collège (cycles 3 et 4), pour les profils FR. */
+const FR_DOMAINS = { NC: "Nombres et calculs", OGD: "Organisation et gestion de données, fonctions", GM: "Grandeurs et mesures", EG: "Espace et géométrie", AP: "Algorithmique et programmation" };
+function frDomain(id) {
+  const n = NOTIONS.find((x) => x.id === id) || {}, L = n.label || "";
+  if (/algorithm|programm/i.test(L)) return "AP";
+  if (/diagramme|moyenne|médiane|statist|probab|proportion|pourcentage|fonction|graphique|tableau|échelle|vitesse|débit|grandeurs quotients/i.test(L)) return "OGD";
+  return { no: "NC", fa: "NC", gm: "GM", es: "EG" }[n.theme] || "NC";
+}
 const TARGET = { drill: -300, app: -100, defi: 80, defi4: 80, rev: -150 }; // écart visé au Mathélo (≈ 85 %, 65 %, 40 % de réussite)
 const KIND_LABEL = { drill: "⚡ Automatisme", app: "🧩 Application", defi: "🏔 Défi", rev: "🧠 Révision", rem: "🧱 Une base à consolider" };
 // Remédiation (13.11) : notions de base à reprendre quand une notion échoue deux fois de suite.
@@ -13510,14 +13518,26 @@ const Engine = {
     const ref = this.refOf(profile), alt = ref === "MATU" && typeof ORDRE_THEME !== "undefined" && (ORDRE_THEME.MATU_ALT || {})[id];
     // Notion sur deux années : le chapitre de l'année de l'élève.
     const k = alt && alt.startsWith("M" + (profile.grade - 11)) ? alt : ref !== "CO" && typeof ORDRE_THEME !== "undefined" && (ORDRE_THEME[ref] || {})[id];
-    return k ? ref + "." + k : NOTIONS.find((n) => n.id === id).theme;
+    /* 25.11 (règle de l'auteur, « très important » : chaque système a ses dénominations ; « Nombres et opérations » parle
+       à un élève du CO, pas à un collégien français ni au Collège de Genève) : jamais les 4 domaines du PER hors du CO.
+       France, collège : domaines des programmes (Nombres et calculs…) ; lycée, notion du collège : idem, « Collège · ».
+       Collège de Genève et MP : notion venue du CO → son chapitre du CO (« CO 10e · 6. Puissances et racines »). */
+    if (ref === "FR" && (!k || profile.grade <= 9)) return "FRD." + frDomain(id);
+    if (k) return ref + "." + k;
+    const by = typeof ORDRE_THEME !== "undefined" && (ORDRE_THEME.CO_BY || {})[id];
+    if (ref !== "CO" && by) { const ys = Object.keys(by).map(Number).sort((a, b) => a - b); return "CO." + by[ys[ys.length - 1]]; }
+    return NOTIONS.find((n) => n.id === id).theme;
   },
   // Libellé d'un thème ou chapitre ; chapitre CO d'une autre année : précédé de l'année (« 9e · 10. Calcul littéral »).
   themeLabel(key, profile) {
     const [ref, k] = key.split(".");
     if (!k) return THEMES[key];
-    const y = ref === "CO" && k.split("C")[0];
-    return (y && profile && +y !== profile.grade ? y + "e · " : "") + THEME_LABEL[ref][k];
+    if (ref === "FRD") return (profile && profile.grade >= 10 ? "Collège · " : "") + FR_DOMAINS[k];
+    /* Lycée français : chapitre d'une autre année précédé de l'année (« 2nde · Fonctions »). */
+    const fy = ref === "FR" && k !== "2AU" && { 2: [10, "2nde"], 1: [11, "1re"], T: [12, "Tle"] }[k[0]];
+    if (fy && profile && fy[0] !== profile.grade) return fy[1] + " · " + THEME_LABEL.FR[k];
+    const y = ref === "CO" && k.split("C")[0], coElsewhere = profile && this.refOf(profile) !== "CO";
+    return (y && profile && +y !== profile.grade ? (coElsewhere ? "CO " : "") + y + "e · " : "") + THEME_LABEL[ref][k];
   },
   // Thèmes présents dans une liste du catalogue, dans l'ordre du référentiel puis ceux du CO.
   // Chapitres CO d'une autre année (révisions) : après ceux de l'année.
@@ -13525,6 +13545,7 @@ const Engine = {
     const keys = [...new Set(list.map((c) => c.theme))], pos = (k) => {
       const [ref, t] = k.split(".");
       if (!t) return 1000 + Object.keys(THEMES).indexOf(k);
+      if (ref === "FRD") return (profile && profile.grade >= 10 ? 600 : 0) + Object.keys(FR_DOMAINS).indexOf(t);
       return Object.keys(THEME_LABEL[ref]).indexOf(t) + (ref === "CO" && profile && +t.split("C")[0] !== profile.grade ? 500 : 0);
     };
     return keys.sort((a, b) => pos(a) - pos(b));
