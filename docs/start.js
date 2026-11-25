@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "5e8dcdaddd"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "faeab9259b"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -1821,6 +1821,10 @@ function nextQuestion(redo) {
         const p = !session.remed.has(id) && session.i + 1 < session.plan.length && Engine.remediation(state, id);
         if (p) { session.remed.add(id); session.plan[session.i + 1] = p + "|1|rem"; }
       }
+      /* 26.11 (adaptivité, tools/adaptivite_26-11.md) : deux échecs de suite dans la séance → la question suivante est plus
+         facile (Engine.easeNext), jamais plus dure ; le total « n sur N » ne change pas. */
+      if (!redo) session.failRun = res.solved && res.tries === 1 ? 0 : (session.failRun || 0) + 1;
+      if (!redo && !session.weekly && !session.prep && !session.carnet && !session.ctest && session.failRun >= 2 && session.i + 1 < session.plan.length) { const e2 = Engine.easeNext(state, session.plan, session.i, id, q.d); if (e2) session.plan[session.i + 1] = e2; }
       /* 25.11 soir (revue d'un testeur) : « Refaire » ne rapporte plus de Mathélo (on pouvait monter son score en répétant) ;
          « Je ne sais pas » compte à 40 % (−38 décourageait d'avouer qu'on ne sait pas, plus que le gain d'une bonne réponse). */
       const w = redo ? 0 : res.dontKnow ? 0.4 : 1; /* 40 % validé par l'enseignant le 25.11 */
