@@ -255,6 +255,10 @@ details.lesson[open] { background: var(--paper); }
 .cnotion:last-child { border-bottom: none; }
 .comp { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 0.92rem; color: var(--ink-soft); }
 .comp-r { display: inline-flex; align-items: center; gap: 8px; }
+/* 25.11 : compétences officielles (Collège) : code discret devant l'intitulé ; titre d'année dans « Années précédentes » */
+.rcomp > span:first-child { overflow-wrap: anywhere; }
+.rcode { font-size: 0.72rem; color: var(--ink-soft); opacity: 0.8; font-variant-numeric: tabular-nums; margin-right: 2px; }
+.ryear { margin: 14px 0 6px; }
 .ctest { font-size: 0.78rem; padding: 4px 10px; min-height: 0; border-radius: 999px; background: var(--paper, transparent); border: 1px solid currentColor; color: var(--blue); cursor: pointer; white-space: nowrap; }
 .ctest:hover { filter: brightness(0.9); }
 .note { min-width: 3.2em; text-align: center; font-weight: 700; font-size: 0.85rem; padding: 2px 8px; border-radius: 999px; }
@@ -817,6 +821,12 @@ details.solfull summary { padding: 11px 0; margin-top: 0; }
 .now-card-pick { display: flex; flex-direction: column; gap: 8px; text-align: left; width: 100%; font: inherit; color: inherit; cursor: pointer; }
 .now-card-pick.now-was { border-color: var(--blue); }
 
+/* 25.11 soir : encart des statistiques en une ligne (revue d'un testeur). */
+.stats-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; padding: 8px 12px; }
+.stats-line .stats-btns { gap: 6px; flex: none; }
+.stats-line .btn-primary.small, .stats-line .btn-sec.small { min-height: 36px; padding: 4px 14px; }
+.welcome-pz { gap: 8px; flex-wrap: wrap; } .welcome-pz a { text-decoration: none; display: inline-flex; align-items: center; min-height: 40px; }
+
 /* ---------------- Espace parent (24.11, src/parents.js) ---------------- */
 .par-list { margin: 4px 0 8px; padding: 0; list-style: none; display: grid; gap: 4px; }
 .par-list li { overflow-wrap: anywhere; }
@@ -921,12 +931,12 @@ window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "glo
 </head>
 <body>
 <main id="app" aria-live="polite"></main>
-<script src="app.js?v=c0bb5c7134"></script>
+<script src="app.js?v=a87a94df62"></script>
 <script>
 (function () {
   // Chargement par niveau (24.11). Paquets requis : le niveau de l'élève et les niveaux inférieurs de sa filière ;
   // France et liens de consultation (#q-, #l-, #auteur) : tout. Puis le reste en arrière-plan (hors ligne complet).
-  var V = "c0bb5c7134", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
+  var V = "a87a94df62", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
   window.__packs = loaded; // pour les tests (tools/test_paquets.py)
   function need(p) {
     if (!p || p.system === "FR") return K.slice();

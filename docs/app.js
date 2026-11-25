@@ -203,6 +203,14 @@ Object.assign(ORDRE_THEME.MATU, {"derivth":"M3C04","pvect":"M3C06","syslin":"M4C
 // Chapitre 1 de 3e (Sésamath Ma3, « Prérequis pour l'entrée en 3e ») : reprises de 2e, « de l'année » en 3e sans être
 // nouvelles (statut « vu » : notions des années précédentes). Lu par Engine.catalog et Engine.themeKey (MATU_REP).
 ORDRE_THEME.MATU_REP = {"polyfact":"M3C01","fracrat":"M3C01","ineqpoly":"M3C01","ineqfrac":"M3C01","compo":"M3C01","expo":"M3C01","log":"M3C01","trigfn":"M3C01"};
+// 25.11 (agent trous) : derniers savoir-faire calculables. 1re : graphefct (M1C04) ; 2e : ineqgraph (M2C03) ; 4e : geoesp
+// (nouveau chapitre M4C07 « 7. Géométrie dans l'espace », sujet à choix MA1), densite et approxnorm (M4C04, MA2) ; CO 11e :
+// repere3d (11C03). Ajouté à la main : à reporter dans tools/referentiels.py si ce fichier est régénéré (MAP, SESA, SESA_FIX).
+Object.assign(THEME_LABEL.MATU, {"M4C07":"7. Géométrie dans l'espace"});
+Object.assign(ORDRE.MATU, {"graphefct":13.5,"ineqgraph":81.6,"densite":231.5,"approxnorm":235.5,"geoesp":260});
+Object.assign(ORDRE_THEME.MATU, {"graphefct":"M1C04","ineqgraph":"M2C03","densite":"M4C04","approxnorm":"M4C04","geoesp":"M4C07"});
+Object.assign(ORDRE.CO, {"repere3d":82.5});
+ORDRE_THEME.CO_BY.repere3d = {"11":"11C03"};
 
 // Calculateur d'expressions : lecture souple de la réponse de l'élève, calcul, mise en forme TeX,
 // équivalence d'expressions (par évaluation en plusieurs points) et contrôle de forme.
@@ -6211,6 +6219,237 @@ function compNote(rec) {
   return Math.round((1 + 5 * avg) * 2) / 2;
 }
 
+/* Référentiels officiels de compétences, un par système (25.11, règle de l'enseignant : chaque système a SON
+   référentiel et SES dénominations ; séparation complète France / romand).
+   « Mes compétences » affiche le référentiel du système de l'élève quand il est embarqué dans l'app :
+   - Collège de Genève (1re–4e, MA1 / MA2) : REF_MATU (src/ref_matu.js, généré par tools/ref_matu.py) ;
+   - France (6e–Tle) : REF_FR (src/ref_fr.js, généré par tools/ref_fr.py) : attendus et capacités officiels, échelle LSU ;
+   - CO, MP : pas encore (phases suivantes) ; ces profils gardent les compétences par notion (src/competences.js).
+   Pour ajouter un système : un fichier de données généré (même forme que REF_MATU) et une entrée dans SYS ci-dessous.
+   Aucune donnée nouvelle n'est enregistrée : la maîtrise d'une compétence officielle se calcule à la volée à partir de
+   state.comps (réponses par notion et niveau de question, déjà enregistrées), donc rien n'est perdu ni remis à zéro. */
+const Referentiel = (() => {
+  const FR_Y = { 6: "6e", 7: "5e", 8: "4e", 9: "3e", 10: "2nde", 11: "1re", 12: "Terminale" };
+  const SYS = {
+    MATU: {
+      data: () => (typeof REF_MATU !== "undefined" ? REF_MATU : null),
+      applies: (p) => p.system === "CH" && p.track === "college" && p.grade >= 12 && p.grade <= 15,
+      year: (p) => p.grade - 11,
+      yearLabel: (y) => (y === 1 ? "1re" : y + "e"),
+      /* niveau 0 = MA1 et MA2 ; 1 = MA2 seulement ; 2 = MA1 seulement. Sans choix (1re, 2e, ou profil ancien) : MA1. */
+      allowed: (p, niv) => niv === 0 || (niv === 1 ? p.niv === "R" : p.niv !== "R"),
+      track: (p) => (p.grade >= 14 ? (p.niv === "R" ? "MA2" : "MA1") : ""),
+      title: "Collège",
+      intro: "Les compétences officielles du programme du Collège. Chacune reçoit une note de 1 à 6 dès que tu as répondu 3 fois à ses questions. La note suit tes 8 dernières réponses : elle monte quand tu progresses.",
+    },
+    /* 25.11 (phase France) : items officiels de la classe (attendus de fin d'année au collège, capacités attendues et
+       automatismes au lycée), groupés par domaine (collège) ou partie du programme (lycée). Classe = grade du profil
+       (6 = 6e … 12 = Tle) ; au lycée, le collège et la 2nde sont repliés à part. */
+    FR: {
+      data: () => (typeof REF_FR !== "undefined" ? REF_FR : null),
+      applies: (p) => p.system === "FR" && p.grade >= 6 && p.grade <= 12,
+      year: (p) => p.grade,
+      years: (p) => Array.from({ length: p.grade - 5 }, (_, i) => i + 6),
+      yearLabel: (y) => FR_Y[y],
+      allowed: () => true,
+      track: (p) => (p.grade === 11 || p.grade === 12 ? "spécialité" : ""),
+      /* Années précédentes, repliées : au collège en un bloc ; au lycée, 2nde (et 1re en Tle) à part, puis le collège. */
+      olds: (p) => (p.grade <= 9 ? [["Années précédentes", Array.from({ length: p.grade - 6 }, (_, i) => p.grade - 1 - i)]]
+        : [...Array.from({ length: p.grade - 10 }, (_, i) => [FR_Y[p.grade - 1 - i], [p.grade - 1 - i]]), ["Collège (6e–3e)", [9, 8, 7, 6]]]),
+      catalogOnly: true,
+      fr: true,
+      title: "programme de mathématiques",
+      intro: (p) => (p.grade <= 9 ? "Les attendus de fin d'année du programme officiel de mathématiques de ta classe." : "Les capacités attendues et les automatismes du programme officiel de mathématiques de ta classe.")
+        + " Chacun reçoit un niveau de maîtrise (insuffisante, fragile, satisfaisante, très bonne) dès que tu as répondu 3 fois à ses questions. Il suit tes 8 dernières réponses : il monte quand tu progresses.",
+    },
+  };
+  const cache = {};
+  const sysOf = (p) => { if (!p) return null; for (const k in SYS) if (SYS[k].applies(p) && SYS[k].data()) return k; return null; };
+  /* Compétences du référentiel, dépliées : { code, year, niv, theme, notion, label, links } */
+  const rows = (k) => {
+    if (cache[k]) return cache[k];
+    const D = SYS[k].data();
+    /* 6e champ facultatif : l'année (REF_FR : 6 = 6e … 12 = Tle) ; sinon premier chiffre du code (REF_MATU). */
+    return (cache[k] = D.c.map(([code, niv, th, no, label, y]) => ({ code, year: y === undefined ? +code[0] : y, niv, theme: D.th[th], notion: D.no[no], label, links: D.q[code] || [] })));
+  };
+  /* France (catalogOnly, séparation 25.11) : on ne garde que les notions du catalogue France (toutes classes), jamais
+     une notion propre à la Suisse ; un item sans notion restante est « travaillé en classe ». */
+  let frCat = null;
+  const frOk = (id) => {
+    if (!frCat) { frCat = new Set(); for (let g = 6; g <= 12; g++) Engine.catalog({ system: "FR", grade: g, track: "college", minutes: 5 }).forEach((c) => frCat.add(c.id)); }
+    return frCat.has(id);
+  };
+  const rowsOf = (k) => {
+    const rs = rows(k);
+    if (!SYS[k].catalogOnly || rs.filtered) return rs;
+    rs.forEach((r) => { r.links = r.links.filter((s) => frOk(s.split("@")[0])); });
+    rs.filtered = true;
+    return rs;
+  };
+  /* Couples (notion, niveau de question) rattachés à une compétence. */
+  const pairs = (r) => r.links.flatMap((s) => { const [id, lv] = s.split("@"); return (lv ? lv.split("") : ["1", "2", "3"]).map((d) => [id, +d]); });
+  /* Identifiants d'enregistrement (state.comps) alimentés par une compétence : ceux de src/competences.js (compOf). */
+  const cids = (r) => [...new Set(pairs(r).map(([id, d]) => compOf(id, d)))];
+  return {
+    of: sysOf,
+    title: (p) => { const k = sysOf(p); return k ? SYS[k].title : ""; },
+    intro: (p) => { const S = SYS[sysOf(p)], t = S.intro; return typeof t === "function" ? t(p) : t; },
+    isFR: (p) => !!SYS[sysOf(p)].fr,
+    /* Années précédentes, repliées : [[libellé du bloc, [années]]] ; par défaut un seul bloc. */
+    olds(p) {
+      const S = SYS[sysOf(p)];
+      if (S.olds) return S.olds(p).filter(([, ys]) => ys.length);
+      const ys = this.years(p).filter((y) => y < S.year(p)).reverse();
+      return ys.length ? [["Années précédentes", ys]] : [];
+    },
+    yearLabel: (p, y) => SYS[sysOf(p)].yearLabel(y),
+    track: (p) => SYS[sysOf(p)].track(p),
+    year: (p) => SYS[sysOf(p)].year(p),
+    /* Compétences de l'élève : année y (par défaut la sienne), filtrées par niveau (MA2 retiré en MA1 et inversement). */
+    list(p, y) {
+      const k = sysOf(p), S = SYS[k];
+      return rowsOf(k).filter((r) => r.year === (y || S.year(p)) && S.allowed(p, r.niv));
+    },
+    years(p) { const S = SYS[sysOf(p)]; if (S.years) return S.years(p); const y = this.year(p); return Array.from({ length: y }, (_, i) => i + 1); },
+    find(p, code) { const k = sysOf(p); return k ? rowsOf(k).find((r) => r.code === code) || null : null; },
+    cids,
+    /* Note 1–6 d'une compétence officielle : les 8 dernières réponses aux questions rattachées (toutes notions
+       et niveaux confondus ; ordre approché par le jour de la dernière réponse de chaque savoir-faire). */
+    note(st, r) {
+      const recs = cids(r).map((c) => (st.comps || {})[c]).filter((x) => x && x.r && x.r.length);
+      if (!recs.length) return null;
+      recs.sort((a, b) => String(a.last || "").localeCompare(String(b.last || "")));
+      return compNote({ r: recs.flatMap((x) => x.r).slice(-8) });
+    },
+    hasQuestions: (r) => r.links.length > 0,
+    /* « Me tester » : questions des notions rattachées que l'élève peut recevoir (son catalogue), sinon toutes.
+       France (catalogOnly) : sinon le catalogue France des autres classes, jamais une notion propre à la Suisse (25.11). */
+    plan(p, r) {
+      const ok = new Set(Engine.catalog(p).map((c) => c.id)), gen = (id) => typeof GEN === "undefined" || GEN[id];
+      let ps = pairs(r).filter(([id]) => ok.has(id) && gen(id));
+      if (!ps.length) ps = pairs(r).filter(([id]) => gen(id) && (SYS[sysOf(p)].catalogOnly ? frOk(id) : NOTIONS.some((n) => n.id === id)));
+      return ps;
+    },
+    stats(st, list) {
+      const notes = list.map((r) => this.note(st, r)).filter((x) => x !== null);
+      return { total: list.length, tested: notes.length, avg: notes.length ? notes.reduce((a, b) => a + b, 0) / notes.length : null };
+    },
+  };
+})();
+
+// 25.11 (agent trous) · Outils communs des notions qui comblent les derniers manques des référentiels (src/ch11_rep3d.js,
+// src/ch1c_trous.js, src/ch4c_trous.js, src/fr_trous.js). Code commun (paquet de base) : constructeurs de questions
+// (réponse type « canon » toujours posée), pièges filtrés, enregistrement d'une notion, figures de l'espace en perspective
+// cavalière, repère en panneaux, et brique « À toi : 2 questions » des leçons actives (même rendu que act_col34b.js).
+// Aucun texte d'élève ici : chaque fichier rédige ses énoncés selon son système (Suisse ou France).
+const TRX = (function () {
+  const pk = (a) => a[Math.floor(R.rand() * a.length)];
+  const nz = (a, b) => R.nz(a, b);
+  const r6 = (v) => +(+v).toFixed(9);
+  const den = (v) => { for (let d = 1; d <= 400; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-7) return d; return 0; };
+  /* nombre en TeX à la suisse (virgule, milliers 10'000) ; fraction si dénominateur court */
+  const fT = (v) => { v = r6(v); const d = den(v); if (d === 1 || !d || d > 60) return nb(v); const n = Math.round(v * d); return (n < 0 ? "-" : "") + "\\frac{" + Math.abs(n) + "}{" + d + "}"; };
+  /* nombre tapé : entier ou a/b */
+  const fS = (v) => { v = r6(v); const d = den(v); if (d === 1) return String(Math.round(v)); if (!d || d > 400) return String(v); return Math.round(v * d) + "/" + d; };
+  const dT = (v, k = 4) => nb(+(+v).toFixed(k));
+  const rd = (v, r) => +(Math.round(v / r) * r).toFixed(6);
+  const keepT = (spec, traps) => { const seen = new Set(); return (traps || []).filter((tr) => {
+    if (!tr) return false;
+    if (tr.e) { if (spec.kind !== "expr") return false; try { if (Expr.equivalent(Expr.parse(tr.e), Expr.parse(spec.expr))) return false; } catch (e) { return false; } if (seen.has(tr.e)) return false; seen.add(tr.e); return true; }
+    if (tr.s) { if (spec.kind !== "set" || !tr.s.every(isFinite)) return false; const k = tr.s.map(fS).sort().join(";"); if (seen.has(k) || checkAnswer(spec, tr.s.map(fS).join(" ; ")).status === "correct") return false; seen.add(k); return true; }
+    if (tr.spec) {
+      if (tr.spec.kind !== spec.kind) return false;
+      if (tr.spec.kind === "pair" && (tr.spec.values.length !== spec.values.length || !tr.spec.values.every(isFinite))) return false;
+      const c = tr.spec.kind === "pair" ? tr.spec.values.map(fS).join(" ; ") : SolSet.show(tr.spec.ivs, false);
+      if (seen.has(c) || checkAnswer(spec, c).status === "correct" || checkAnswer(tr.spec, c).status !== "correct") return false; seen.add(c); return true; }
+    if (spec.kind !== "value") return false;
+    const tol = Math.max(spec.round || 0, 1e-9), k = spec.round ? Math.round(tr.v / spec.round) : r6(tr.v);
+    if (!isFinite(tr.v) || Math.abs(tr.v - spec.value) <= tol || seen.has(k)) return false; seen.add(k); return true; }); };
+  const mk = (q, spec, sol, o) => { const x = { q, spec, sol, guide: o.guide, ctx: o.ctx, traps: keepT(spec, o.traps) }; for (const k of ["fig", "canon", "calcul"]) if (o[k] !== undefined) x[k] = o[k]; return x; };
+  const QN = (q, value, sol, o) => mk(q, Object.assign({ kind: "value", value: r6(value) }, o.radical ? { radical: true } : {}), sol, Object.assign({ canon: fS(value) }, o));
+  const QR = (q, value, round, sol, o) => mk(q, { kind: "value", value, round }, sol, Object.assign({ canon: String(rd(value, round)).replace(".", ",") }, o));
+  const QX = (q, expr, sol, o) => mk(q, { kind: "expr", expr }, sol, Object.assign({ canon: expr }, o));
+  const QSet = (q, vals, sol, o) => { const v = [...new Set(vals.map(r6))].sort((a, b) => a - b); return mk(q, { kind: "set", values: v }, sol, Object.assign({ canon: v.map(fS).join(" ; ") }, o)); };
+  const QP = (q, vals, sol, o) => (vals.every(isFinite) ? mk(q, { kind: "pair", values: vals.map(r6) }, sol, Object.assign({ canon: vals.map(fS).join(" ; ") }, o)) : null);
+  const QS = (q, ivs, sol, o) => mk(q, solsetSpec(ivs), sol, Object.assign({ canon: SolSet.show(ivs, false) }, o));
+  const GR = (ask, value, sol, round) => ({ ask, spec: Object.assign({ kind: "value", value: round ? value : r6(value) }, round ? { round } : {}), sol });
+  const GRad = (ask, value, sol) => ({ ask, spec: { kind: "value", value: r6(value), radical: true }, sol });
+  const GX = (ask, expr, sol) => ({ ask, spec: { kind: "expr", expr }, sol });
+  const GSet = (ask, vals, sol) => ({ ask, spec: { kind: "set", values: [...new Set(vals.map(r6))].sort((a, b) => a - b) }, sol });
+  const GP = (ask, vals, sol) => ({ ask, spec: { kind: "pair", values: vals.map(r6) }, sol });
+  const GSS = (ask, ivs, sol) => ({ ask, spec: solsetSpec(ivs), sol });
+  const TR = TRAP, TX = (e, m) => ({ e, m }), TSt = (s, m) => ({ s, m }), TP = (vals, m) => ({ spec: { kind: "pair", values: vals.map(r6) }, m }), TS = (ivs, m) => ({ spec: solsetSpec(ivs), m });
+  /* problème en plusieurs étapes (niveau 4) : parts [libellé, valeur, arrondi] */
+  const P = (q, parts, hints, sol, fig) => ({ fig, q, sol, parts: parts.map(([label, value, round]) => ({ label, spec: Object.assign({ kind: "value", value: round ? value : r6(value) }, round ? { round } : {}) })), hints });
+  /* enregistrement : d = { id, theme, label, ex, CH | FR, againFR, niv, lv, hint, lesson, comps, probs, act } */
+  const reg = (defs) => {
+    for (const d of defs) {
+      if (!NOTIONS.some((n) => n.id === d.id)) NOTIONS.push(Object.assign({ id: d.id, theme: d.theme, label: d.label, ex: d.ex, CH: d.CH || null, MP: null, FR: d.FR || null }, d.againFR ? { againFR: d.againFR } : {}, d.niv ? { niv: d.niv } : {}));
+      GEN[d.id] = (lv) => pickForm(d.lv[Math.min(Math.max(lv, 1), 3)]);
+      if (typeof VAR !== "undefined") VAR[d.id] = {};
+      HINTS_EXTRA[d.id] = d.hint;
+      LESSONS_EXTRA[d.id] = d.lesson;
+      if (typeof COMPS !== "undefined") COMPS[d.id] = d.comps;
+      if (d.probs && typeof PROB_EXTRA !== "undefined") PROB_EXTRA[d.id] = d.probs;
+      if (d.act) actReg({ [d.id]: d.act });
+    }
+  };
+  /* Leçons actives : un fichier de notions est chargé avant src/active.js dans la page unique (dist) et après dans les
+     paquets ; ACT_LATER est recopié dans ACTIVE à la fin de src/active.js. */
+  /* try : dans la page unique, ACTIVE (const de src/active.js) n'est pas encore initialisé (typeof lèverait une erreur). */
+  const actReg = (defs) => { try { Object.assign(ACTIVE, defs); } catch (e) { Object.assign((window.ACT_LATER = window.ACT_LATER || {}), defs); } };
+  // ---------- brique « À toi : 2 questions » (réponse tapée, coup de pouce après une erreur ; copie de act_col34b.js) ----------
+  const anb = (v) => String(+(+v).toFixed(4)).replace(".", ",").replace("-", "−");
+  const parseNum = (s) => Number(String(s).replace(/,/g, ".").replace(/−/g, "-").replace(/\s|'/g, "").replace(/^(-?\d+(?:\.\d+)?)\/(-?\d+(?:\.\d+)?)$/, (m, u, w) => String(u / w)));
+  const W = (target, msg, tol = 1e-9) => (x) => (Math.abs(x - target) <= tol ? msg : "");
+  /* brique « hunt » (copie de act_col34b.js) : o = { ask, label, show(x, s), wins, blank?, miss?, note? } ; actPrep0 (active.js)
+     lit play.o et play.mk pour proposer « À toi : 2 questions ». */
+  const hunt0 = (o) => (box, onWin) => {
+    let x = null, step = 0;
+    const draw = () => {
+      const s = Math.min(step, o.wins.length - 1), fig = x === null ? (o.blank ? o.blank(s) : "") : o.show(x, s);
+      box.innerHTML = fig + actAnswerHtml(o.label || "Ta réponse") + (o.note ? '<div class="small muted">' + o.note + "</div>" : "");
+      const inp = box.querySelector(".act-in"); if (x !== null) inp.value = anb(x).replace("−", "-");
+      const go = () => { const v = parseNum(inp.value); if (inp.value.trim() === "" || !isFinite(v)) { $hint(box, "Tape un nombre (fraction acceptée, par exemple 3/2)."); return; }
+        x = v; draw(); if (!check()) { const mm = typeof o.miss === "function" ? o.miss(x, s) : o.miss; $hint(box, mm || "Pas encore : regarde le coup de pouce, puis recalcule."); } };
+      actAnswerBind(box, go);
+    };
+    const check = () => { if (step >= o.wins.length) return false; const mm = o.wins[step](x); if (mm) { onWin(step, mm); step++; x = null; draw(); return true; } return false; };
+    draw();
+  };
+  const hunt = (o) => Object.assign(hunt0(o), { o, mk: hunt0 });
+  /* cp[s] : coup de pouce du défi s (affiché avec la réponse proposée), wins[s] = W(réponse, message) */
+  const toi = (cp, wins) => hunt({ ask: true, label: "Ta réponse", show: (x, s) => '<div class="act-out">' + cp[s] + "<br>tu proposes <b>" + anb(x) + "</b></div>", wins });
+  // ---------- figures ----------
+  const sv = (w, h, g, lab) => '<svg class="fig" viewBox="0 0 ' + w + " " + h + '" role="img" aria-label="' + lab + '" xmlns="http://www.w3.org/2000/svg">' + g + "</svg>";
+  const tx = (x, y, s, a = "middle", sz = 13, cls = "f-txt") => '<text x="' + (+x).toFixed(1) + '" y="' + (+y).toFixed(1) + '" class="' + cls + '" text-anchor="' + a + '" font-size="' + sz + '">' + s + "</text>";
+  const ln = (x1, y1, x2, y2, cls = "f-line", ex = "") => '<line x1="' + (+x1).toFixed(1) + '" y1="' + (+y1).toFixed(1) + '" x2="' + (+x2).toFixed(1) + '" y2="' + (+y2).toFixed(1) + '" class="' + cls + '"' + ex + "/>";
+  const pg = (pts, cls = "f-shape", ex = "") => '<polygon points="' + pts.map((p) => (+p[0]).toFixed(1) + "," + (+p[1]).toFixed(1)).join(" ") + '" class="' + cls + '"' + ex + "/>";
+  const DASH = ' stroke-dasharray="5 4"';
+  /* Solide en perspective cavalière (fuyantes à 45°, réduction 0,5). o = { pts: { nom: [x, y, z] } (x vers la droite,
+     y en profondeur, z vers le haut), edges: [[A, B, caché?]], faces: [[noms…]] (remplies, avant les arêtes),
+     accent: [[A, B]] (segments mis en valeur), polys: [[noms…]] (section, remplie), labels: noms à écrire, axes: bool,
+     marks: [[nom, texte]] (cotes au milieu d'un segment [A, B] : [[A, B, texte]]), W, H, lab } */
+  const solid = (o) => {
+    const k = 0.5 * Math.SQRT1_2, raw = (p) => [p[0] + k * p[1], -(p[2] + k * p[1])], P0 = o.pts;
+    const all = Object.values(P0).map(raw).concat(o.extra ? o.extra.map(raw) : []);
+    const xs = all.map((p) => p[0]), ys = all.map((p) => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    const Wm = o.W || 300, mg = 26, s = Math.min((Wm - 2 * mg) / Math.max(x1 - x0, 1e-9), ((o.H || 210) - 2 * mg) / Math.max(y1 - y0, 1e-9));
+    const H = Math.round((y1 - y0) * s + 2 * mg), X = (p) => { const r = raw(p); return [mg + (r[0] - x0) * s, mg + (r[1] - y0) * s]; }, Q = (n) => X(P0[n]);
+    let g = "";
+    for (const F of o.faces || []) g += pg(F.map(Q), "f-shape2", ' style="stroke:none;fill-opacity:.55"');
+    for (const F of o.polys || []) g += pg(F.map(Q), "f-fill2", ' style="fill-opacity:.75"');
+    for (const [a, b, hid] of o.edges || []) { const A = Q(a), B = Q(b); g += ln(A[0], A[1], B[0], B[1], "f-line", ' stroke-width="1.8"' + (hid ? DASH : "")); }
+    for (const [a, b, hid] of o.accent || []) { const A = Q(a), B = Q(b); g += ln(A[0], A[1], B[0], B[1], "f-accent", ' stroke-width="2.6"' + (hid ? DASH : "")); }
+    for (const [a, b, t, dx = 0, dy = 0] of o.marks || []) { const A = Q(a), B = Q(b); g += tx((A[0] + B[0]) / 2 + dx, (A[1] + B[1]) / 2 + dy, t, "middle", 12, "f-accent f-txt"); }
+    const cx = mg + ((x0 + x1) / 2 - x0) * s, cy = mg + ((y0 + y1) / 2 - y0) * s;
+    for (const n of o.labels || Object.keys(P0)) { const A = Q(n), dx = A[0] - cx, dy = A[1] - cy, d = Math.hypot(dx, dy) || 1; g += tx(A[0] + (11 * dx) / d, A[1] + (11 * dy) / d + 4, n, "middle", 13); }
+    for (const n of o.dots || []) { const A = Q(n); g += '<circle cx="' + A[0].toFixed(1) + '" cy="' + A[1].toFixed(1) + '" r="3.5" class="f-dot"/>'; }
+    return sv(Wm, H, g, o.lab || "solide en perspective");
+  };
+  return { pk, nz, r6, den, fT, fS, dT, rd, mk, QN, QR, QX, QSet, QP, QS, GR, GRad, GX, GSet, GP, GSS, TR, TX, TSt, TP, TS, P, reg, actReg, W, toi, sv, tx, ln, pg, DASH, solid };
+})();
+
 // ===================== Défis (niveau 4, « Problème de la semaine ») réécrits le 24.11 =====================
 // Audit tools/audit_defis.py (rapport tools/defis.md) : la plupart des problèmes de niveau 4 avaient des valeurs fixes
 // (le même énoncé à chaque fois, « Refaire avec d'autres valeurs » redonnait le même) et beaucoup étaient plus simples
@@ -9542,10 +9781,10 @@ const Curieux = {
       ex: () => { const up = ri(2, 9), b = ri(1, 3), d = ri(0, 4), low = 5 * b + d;
         return { q: `Un nombre maya : en haut, ${up} points (des vingtaines) ; en bas, ${b} barre${b > 1 ? "s" : ""}${d ? " et " + d + " point" + (d > 1 ? "s" : "") : ""}. Que vaut-il ?`, value: 20 * up + low, sol: `En bas : \\(${b} \\cdot 5${d ? " + " + d : ""} = ${low}\\). En haut : \\(${up} \\cdot 20 = ${20 * up}\\). Total : \\(${20 * up + low}\\).` }; } },
     { t: "Événement", titre: "Pourquoi 60 minutes dans une heure ?", lien: "Numération et durées",
-      txt: "Les Babyloniens comptaient en base 60, il y a plus de 4000 ans. Nous en avons hérité les 60 minutes d'une heure, les 60 secondes d'une minute et les 360 degrés du cercle. Ils écrivaient par exemple « 1,20 » pour une soixantaine et vingt, c'est-à-dire 80.",
+      txt: "Les Babyloniens comptaient en base 60, il y a plus de 4000 ans. Nous en avons hérité les 60 minutes d'une heure, les 60 secondes d'une minute et les 360 degrés du cercle. Un nombre s'écrivait avec des « chiffres » de 0 à 59 mis côte à côte : nous les séparons ici par une barre, « 1 | 20 », pour une soixantaine et vingt, c'est-à-dire 80 (pas de virgule : ce n'est pas un nombre décimal).",
       fig: () => svg(300, 130, `<circle cx="150" cy="65" r="52" class="f-shape2"/>${[...Array(12)].map((_, k) => { const s = Math.sin((k * Math.PI) / 6), c = Math.cos((k * Math.PI) / 6); return `<line x1="${f1(150 + 44 * s)}" y1="${f1(65 - 44 * c)}" x2="${f1(150 + 52 * s)}" y2="${f1(65 - 52 * c)}" class="f-line"/>`; }).join("")}<line x1="150" y1="65" x2="150" y2="25" class="f-line" stroke-width="3"/><line x1="150" y1="65" x2="180" y2="65" class="f-accent" stroke-width="3"/>`, "cadran d'horloge"),
       ex: () => { const a = ri(2, 4), b = ri(11, 49);
-        return { q: `Un nombre babylonien s'écrit « ${a},${b} » (${a} soixantaines et ${b}). Que vaut-il ?`, value: 60 * a + b, sol: `\\(${a} \\cdot 60 + ${b} = ${60 * a + b}\\). Comme ${a} h ${b} min = ${60 * a + b} min.` }; } },
+        return { q: `Un nombre babylonien s'écrit « ${a} | ${b} » (${a} soixantaines et ${b} unités ; la barre sépare les deux « chiffres »). Que vaut-il ?` /* 25.11 soir (revue d'un testeur) : « 4,14 » se confondait avec un décimal */, value: 60 * a + b, sol: `\\(${a} \\cdot 60 + ${b} = ${60 * a + b}\\). Comme ${a} h ${b} min = ${60 * a + b} min.` }; } },
     { t: "Anecdote", titre: "Euclide : les nombres premiers ne s'arrêtent jamais", lien: "Nombres premiers",
       txt: "Vers 300 av. J.-C., dans ses <i>Éléments</i>, Euclide démontre qu'il existe une infinité de nombres premiers. L'idée : multiplie des nombres premiers et ajoute 1. Le résultat n'est divisible par aucun d'eux, donc il existe forcément un autre nombre premier.",
       fig: () => svg(300, 100, `${[2, 3, 5, 7, 11, 13, 17, 19, 23].map((p, i) => `<circle cx="${25 + i * 31}" cy="45" r="13" class="${i % 2 ? "f-fill2" : "f-shape"}"/>${T(25 + i * 31, 50, p, 'font-size="12"')}`).join("")}${T(150, 88, "… et ainsi de suite, sans fin", 'font-size="12"')}`, "liste de nombres premiers"),
@@ -11647,7 +11886,7 @@ function activeLesson(id, L0, cont, review) {
     <div class="act-step"><div class="act-h"><span class="act-n">1</span> Devine</div><p>${P.q}</p>${P.fig ? `<div class="figwrap">${P.fig}</div>` : ""}
       <div class="seg" id="pc">${predOrder(P.choices.length).map((i) => `<button type="button" data-i="${i}">${P.choices[i]}</button>`).join("")}</div><div id="pfb"></div></div>
     <div class="act-step" id="s2" hidden><div class="act-h"><span class="act-n">2</span> ${X.titre}</div>
-      <ul class="act-done" id="adone"></ul><p class="act-goal" id="goal"></p><div id="play" class="stack"></div><div id="gfb"></div>
+      <ul class="act-done" id="adone"></ul><div id="gfb"></div><p class="act-goal" id="goal"></p><div id="play" class="stack"></div>
       <button type="button" class="btn-ghost small" id="skip">${X.mode === "guide" ? "Passer" : "Passer les défis"}</button></div>
     <div class="act-step" id="s3" hidden><div class="act-h"><span class="act-n">3</span> Retiens</div>
       <div class="rule"><b>À retenir</b>${rule}</div>
@@ -11672,18 +11911,22 @@ function activeLesson(id, L0, cont, review) {
     reveal($("s2"));
     A.play($("play"), (k, msg) => {
       const more = k + 1 < A.defis.length;
-      $("gfb").innerHTML = `<div class="fb ok">✓ ${colonBreak(msg)}${more ? `<div class="act-suite">➜ ${X.lab(k + 1)} : la consigne a changé, plus haut ↑</div>` : ""}</div>`;
+      $("gfb").innerHTML = `<div class="fb ok">✓ ${colonBreak(msg)}${more ? `<div class="act-suite">➜ ${X.lab(k + 1)} : nouvelle consigne juste en dessous ↓</div>` : ""}</div>`;
       if (typeof sig !== "undefined" && sig && sig.ev === "lecon") sigAide(sig, "f");
+      // 25.11 soir (revue d'un testeur : « ✓ 2,75 convient… » s'affichait sous la figure, hors de vue) : le retour est placé
+      // au-dessus de la consigne (#gfb avant #goal), là où l'élève regarde quand l'écran revient sur la consigne.
       // 22.11 (retour de l'auteur : la consigne suivante remplaçait l'ancienne sans qu'on le voie) : le défi réussi
       // reste affiché, barré, au-dessus ; la nouvelle consigne clignote et revient à l'écran.
       const g = $("goal"); $("adone").insertAdjacentHTML("beforeend", `<li>✓ ${g.innerHTML}</li>`);
-      if (more) { setGoal(X.lab(k + 1) + " · " + A.defis[k + 1]); g.classList.remove("act-new"); void g.offsetWidth; g.classList.add("act-new"); setTimeout(() => g.scrollIntoView({ behavior: "smooth", block: "nearest" }), 60); }
+      if (more) { setGoal(X.lab(k + 1) + " · " + A.defis[k + 1]); g.classList.remove("act-new"); void g.offsetWidth; g.classList.add("act-new"); setTimeout(() => $("gfb").scrollIntoView({ behavior: "smooth", block: "nearest" }), 60); }
       else { $("goal").textContent = X.fin; burst(); finish(); }
     });
   }));
   $("skip").onclick = () => { if (typeof sig !== "undefined" && sig && sig.ev === "lecon") sigAide(sig, "P"); finish(); };
   $("go").onclick = cont;
 }
+/* 25.11 (agent trous) : leçons actives déclarées par un fichier de notions chargé avant ce fichier (page unique, src/trx.js). */
+if (typeof window !== "undefined" && window.ACT_LATER) Object.assign(ACTIVE, window.ACT_LATER);
 
 // Manipulation directe (18.11, demande de l'utilisateur : « stabiliser la manipulation avant de développer toutes les
 // notions »). Brique réutilisable : on GLISSE des poignées sur la figure (doigt, souris ou flèches du clavier),
@@ -13253,6 +13496,9 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
   condbayes: ["proba"], varalea: ["proba"], binomiale: ["varalea"],
   // 25.11 (agent col34) : 3e–4e Collège complétées (derivth, pvect ; syslin, bases, bayes ; MA2 : complexes, suites et séries)
   derivth: ["continuite", "nbderive"], pvect: ["pscal3d"], syslin: ["matrices"], bases: ["matrices", "vect3d"], bayes: ["condbayes"],
+  // 25.11 (agent trous) : derniers savoir-faire calculables (src/ch4c_trous.js, ch1c_trous.js, ch11_rep3d.js, fr_trous.js)
+  geoesp: ["pythfig", "trigo"], densite: ["integrale", "varalea"], approxnorm: ["binomiale", "normale"], graphefct: ["fimg"], ineqgraph: ["ineqpoly", "inter"],
+  repere3d: ["pythfig", "vol"], cercle6: ["disque"], bissec6: ["angtri"], filtre6: ["diagr"], tabform5: ["valnum"], hauteurs5: ["aire1"],
   cplxalg: ["eq2disc"], cplxtrig: ["cplxalg", "trigexact"], cplxeq: ["cplxtrig", "eq2disc"], suitegeom: ["expo", "log"], serie: ["suitegeom", "limitinf"],
   intparties: ["integrale", "derivprodquot"], intsubst: ["integrale", "derivcomp"], etudelnexp: ["lnexp", "variations"], eqdiff: ["croissance", "primitives"],
   // 24.11 (agent niv1c) : 1re Collège, chapitre Argumenter (src/ch1c_arg.js) ; divcrit et tradexpr deviennent des prérequis

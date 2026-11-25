@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "c0bb5c7134"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "a87a94df62"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -277,6 +277,7 @@ function screenWelcome() {
   h(`${brand}
   <div class="stack"><h1>Chaque jour, <span class="mark">5 minutes</span> de maths, à ton niveau.</h1>
   <p class="muted">Une question du jour choisie pour toi, une figure, une correction immédiate. Ton Mathélo monte quand tu progresses. Pas de compte, pas de nom : ta progression reste sur ton téléphone ; seules des statistiques anonymes sont envoyées pour améliorer l'app (<a href="#" id="envoie-lien">ce que l'app envoie</a>).</p></div>
+  <div class="row welcome-pz"><a class="btn-sec small" href="#decouvrir">▶ Découvrir l'app en 1 minute</a><a class="btn-ghost small" href="#parents">👪 Je suis parent</a></div> <!-- 25.11 soir (revue d'un testeur : présentations introuvables pour un nouveau visiteur) -->
   <div class="stack"><span class="small muted">Je suis en :</span><div class="seg" id="dgrade">${[[9, "9e"], [10, "10e"], [11, "11e"], [12, "Sec. II"]].map(([g, l]) => `<button aria-pressed="${g === demoGrade}" data-v="${g}">${l}</button>`).join("")}</div></div>
   <div class="card tilt" id="demo"><div class="qmeta"><span class="chip">Essaie · ${n ? n.label : "exemple"}</span><span class="dots"><i class="on"></i><i></i><i></i></span></div>
   <div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
@@ -288,7 +289,7 @@ function screenWelcome() {
   <button class="btn-primary btn-big" id="go">Commencer</button>
   <button class="btn-ghost" id="restore">J'ai déjà un code de sauvegarde</button>
   <button class="btn-ghost small" id="privacy">🔒 Ce que l'app envoie</button>
-  <p class="small muted"><a href="#parents">👪 Je suis parent</a> · <a href="#decouvrir">Découvrir l'app</a> · <a href="#" id="legal-lien">Mentions légales et confidentialité</a></p>`);
+  <p class="small muted"><a href="#" id="legal-lien">Mentions légales et confidentialité</a></p>`);
   const inp = document.getElementById("dans"), prev = document.getElementById("dprev"), fb = document.getElementById("dfb");
   const show = () => previewOf(inp, prev, q.spec);
   inp.oninput = show;
@@ -597,7 +598,7 @@ function screenHome() {
   // 22.11 : « Ma fiche » (src/fiche.js) : une fiche par chapitre derrière Progrès. Retirée le 23.11 (branche archive/fiche) : inactif sans fiche.js.
   panels.prog = () => `${weekCard()}${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}${typeof parentCard === "function" ? parentCard() : ""}`; /* 24.11 : espace parent (src/parents.js) */
   if (!panels[homeTab]) homeTab = "today";
-  const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted">${gradeName(state.profile)}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
+  const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted" title="Ta classe">Classe ${gradeName(state.profile).replace(/\s*\(.*\)/, "")}${state.profile.track === "mp" ? " MP" : state.profile.system === "CH" && state.profile.grade >= 12 ? " Coll." : ""}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
   if (homeTab !== "today") {
     const T = { prob: "Problème de la semaine", test: "Mon évaluation", carnet: "Carnet d'erreurs", prog: "Progrès" };
     h(`${head}<button type="button" class="btn-ghost back-home" id="hb">← Accueil</button><h2 class="sub-title">${T[homeTab]}</h2>
@@ -614,7 +615,9 @@ function screenHome() {
     const nowLine = !Engine.nowActive(state) ? `<button type="button" class="btn-sec small" id="nowpick">📚 Choisir mon chapitre travaillé en classe</button>`
       : Engine.nowStale(state) ? `<div class="now-ask"><b>📚 Cette semaine en classe, tu travailles toujours :</b><span>${esc(state.now.ids.map(nLabel).join(" · "))} ?</span><div class="row now-ask-btns"><button type="button" class="btn-sec small" id="nowyes">Oui, toujours</button><button type="button" class="btn-sec small" id="nowpick">J'ai changé de chapitre</button></div></div>`
       : `<span class="small now-lab">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span><button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
-    const door = (id, ic, label, sub, badge) => `<button type="button" class="door" data-door="${id}">${badge ? `<span class="door-badge">${badge}</span>` : ""}<span class="door-sq">${ic}</span><b>${label}</b>${sub ? `<small>${sub}</small>` : ""}</button>`;
+    /* 25.11 soir (revue d'un testeur) : nom accessible explicite pour chaque case (lecteurs d'écran). */
+    const DOOR_NAME = { prob: "Problème de la semaine", cur: "Questions curieuses", hist: "Histoires des maths", test: "Mon évaluation", carnet: "Carnet d'erreurs", prog: "Mes progrès" };
+    const door = (id, ic, label, sub, badge) => `<button type="button" class="door" data-door="${id}" aria-label="${esc(DOOR_NAME[id] || label)}${sub ? " : " + esc(sub) : ""}${badge === "!" ? " (nouveau)" : ""}">${badge ? `<span class="door-badge">${badge}</span>` : ""}<span class="door-sq">${ic}</span><b>${label}</b>${sub ? `<small>${sub}</small>` : ""}</button>`;
     const svgI = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`, TI = Object.fromEntries(HOME_TABS.map(([k, , ic]) => [k, ic]));
     h(`<div class="hub">${head}
     ${eloBanner()}
@@ -798,14 +801,18 @@ function compStats(ids) {
   const all = ids.flatMap((id) => compsOf(id)), notes = all.map((c) => compNote((state.comps || {})[c.cid])).filter((x) => x !== null);
   return { total: all.length, tested: notes.length, avg: notes.length ? notes.reduce((a, b) => a + b, 0) / notes.length : null };
 }
+/* 25.11 : note d'un « Me tester » : compétence officielle (code, Collège) ou savoir-faire d'une notion (cid). */
+const ctestNote = (ct) => { const r = ct.code && typeof Referentiel !== "undefined" ? Referentiel.find(state.profile, ct.code) : null; return r ? Referentiel.note(state, r) : compNote((state.comps || {})[ct.cid]); };
+const refOn = () => typeof Referentiel !== "undefined" && !!Referentiel.of(state.profile);
 function compsCard() {
-  const cur = Engine.catalog(state.profile).filter((c) => c.current).map((c) => c.id), st = compStats(cur);
+  const cur = Engine.catalog(state.profile).filter((c) => c.current).map((c) => c.id), st = refOn() ? Referentiel.stats(state, Referentiel.list(state.profile)) : compStats(cur);
   return `<div class="card flat stack"><div class="spread"><h3>Mes compétences</h3>${st.avg !== null ? `<span class="note ${noteCls(Math.round(st.avg * 2) / 2)}">${isFR() ? noteTxt(st.avg) : String(Math.round(st.avg * 10) / 10).replace(".", ",")}</span>` : ""}</div>
   <p class="small muted">${st.tested ? `${st.tested} compétence${st.tested > 1 ? "s" : ""} ${isFR() ? "positionnée" : "notée"}${st.tested > 1 ? "s" : ""} sur ${st.total} cette année.` : isFR() ? "Ton niveau de maîtrise apparaît au fil des séances, compétence par compétence." : "Tes notes apparaissent au fil des séances, compétence par compétence."}</p>
   <p class="small">🏅 ${Object.keys(state.badges || {}).length} badge${Object.keys(state.badges || {}).length > 1 ? "s" : ""} sur ${Badges.list(state).length}</p>
   <button class="btn-primary" id="comps">Voir mes compétences et mes badges</button></div>`;
 }
 function screenComps() {
+  if (refOn()) return screenCompsRef();
   const cat = Engine.catalog(state.profile), comps = state.comps || {};
   const statusTag = (id) => { const s = state.notions[id]; return !s ? "" : s.status === "avenir" ? '<span class="tag">à venir</span>' : s.status === "nonvu" ? '<span class="tag">pas encore vu en classe</span>' : ""; };
   const block = (list) => Engine.themeOrder(list, state.profile).map((th) => {
@@ -846,6 +853,47 @@ function screenComps() {
     const order = lvls.slice().sort(() => Math.random() - 0.5), pick = [0, 1, 2].map((k) => order[k % order.length]);
     session = { plan: pick.map((lv) => id + "|" + lv), i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), prep: true,
       ctest: { label: b.dataset.label, cid, before: compNote((state.comps || {})[cid]) } };
+    nextQuestion();
+  }));
+  document.getElementById("back").onclick = screenHome; document.getElementById("backtop").onclick = screenHome;
+}
+
+/* 25.11 (règle de l'enseignant : chaque système a son référentiel) : Collège de Genève = compétences officielles du
+   référentiel (src/ref_matu.js), groupées par thème et notion du référentiel, code discret, intitulé officiel ; MA2 retiré
+   en MA1. Note calculée à la volée depuis state.comps (Referentiel.note) ; sans question rattachée : « travaillée en classe ».
+   25.11 (phase France) : profil France = items officiels de sa classe (src/ref_fr.js), pastilles LSU sans chiffre,
+   « travaillé en classe » pour les items non saisissables ; au lycée, 2nde et collège repliés à part. */
+function screenCompsRef() {
+  const p = state.profile, y0 = Referentiel.year(p), fr = Referentiel.isFR(p), W = fr ? "positionnées" : "notées";
+  const line = (r) => {
+    if (!Referentiel.hasQuestions(r)) return `<div class="comp rcomp"><span title="${r.code}">${esc(r.label)}</span><span class="comp-r"><span class="tag">${fr ? "travaillé en classe" : "travaillée en classe"}</span></span></div>`;
+    const n = Referentiel.note(state, r), t = Referentiel.plan(p, r).length;
+    return `<div class="comp rcomp"><span title="${r.code}">${esc(r.label)}</span><span class="comp-r">${t ? `<button type="button" class="ctest rtest" data-code="${r.code}" title="3 questions sur cette compétence">Me tester</button>` : ""}<span class="note ${noteCls(n)}">${noteTxt(n)}</span></span></div>`;
+  };
+  const themes = (list) => [...new Set(list.map((r) => r.theme))].map((th) => {
+    const rs = list.filter((r) => r.theme === th), t = Referentiel.stats(state, rs);
+    return `<div class="card flat"><div class="spread"><h3>${esc(th)}</h3><span class="small muted">${t.tested} / ${t.total} ${W}</span></div>${[...new Set(rs.map((r) => r.notion))].map((no) => `<div class="cnotion">${no ? `<b>${esc(no)}</b>` : ""}${rs.filter((r) => r.notion === no).map(line).join("")}</div>`).join("")}</div>`;
+  }).join("");
+  const cur = Referentiel.list(p), st = Referentiel.stats(state, cur), nq = cur.filter(Referentiel.hasQuestions).length, k = st.total - nq;
+  const olds = Referentiel.olds(p);
+  const tr = Referentiel.track(p);
+  const hint = !k ? "" : fr ? `${k} attendu${k > 1 ? "s" : ""} (constructions, démonstrations, programmation…) ${k > 1 ? "sont travaillés" : "est travaillé"} en classe, sans niveau ici.`
+    : `${k} compétence${k > 1 ? "s" : ""} (démonstrations, constructions, représentations…) ${k > 1 ? "sont travaillées" : "est travaillée"} en classe, sans note ici.`;
+  Badges.check(state); state.badgesNew = []; save();
+  h(`${brand}${backTop()}<h2>Mes <span class="mark">compétences</span></h2>
+  <p class="muted">${Referentiel.intro(p)}</p>
+  ${badgesSection()}
+  <div class="card flat"><div class="spread"><span>${Referentiel.yearLabel(p, y0)}${tr ? " · " + tr : ""}</span><b>${st.tested} / ${st.total} ${W}${avgTxt(st.avg)}</b></div>${hint ? `<p class="small muted">${hint}</p>` : ""}</div>
+  ${themes(cur)}
+  ${olds.map(([lab, ys]) => `<details class="olds"><summary>${lab} (${ys.map((y) => Referentiel.stats(state, Referentiel.list(p, y)).tested).reduce((a, b) => a + b, 0)} ${W})</summary>${ys.map((y) => `<h3 class="ryear">${Referentiel.yearLabel(p, y)}</h3>${themes(Referentiel.list(p, y))}`).join("")}</details>`).join("")}
+  <button class="btn-primary btn-big" id="back">Retour</button>`);
+  bindBadges(app);
+  app.querySelectorAll(".rtest").forEach((b) => (b.onclick = () => {
+    const r = Referentiel.find(p, b.dataset.code), ps = Referentiel.plan(p, r);
+    if (!ps.length) return;
+    const order = ps.slice().sort(() => Math.random() - 0.5), pick = [0, 1, 2].map((k) => order[k % order.length]);
+    session = { plan: pick.map(([id, d]) => id + "|" + d), i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), prep: true,
+      ctest: { label: r.label, code: r.code, cid: Referentiel.cids(r)[0], before: Referentiel.note(state, r) } };
     nextQuestion();
   }));
   document.getElementById("back").onclick = screenHome; document.getElementById("backtop").onclick = screenHome;
@@ -896,6 +944,7 @@ function startInlineAct(root) {
     if (h) h.innerHTML = '<span class="act-n">' + (X.mode === "guide" ? "✍" : "🖐") + "</span> " + X.titre;
     const setG = (t) => { if (t.includes("\\(")) { goal.innerHTML = t; typeset(goal); } else goal.textContent = t; };
     setG(X.lab(0) + " · " + X.defis[0]);
+    if (fb && goal && goal.previousElementSibling !== fb) goal.before(fb); /* 25.11 soir : retour au-dessus de la consigne, en vue */
     X.play(el.querySelector(".act-box"), (k, msg) => {
       fb.innerHTML = `<div class="fb ok">✓ ${msg}</div>`;
       if (k + 1 < X.defis.length) setG(X.lab(k + 1) + " · " + X.defis[k + 1]); else goal.textContent = X.fin;
@@ -904,10 +953,10 @@ function startInlineAct(root) {
 }
 
 // Carte d'accord (24.11) : une seule fois, en tête de l'accueil, tant que l'élève n'a pas répondu.
-const statsCard = () => statsAsked() ? "" : `<div class="card stack" id="statscard"><div class="eyebrow">📊 Aider à améliorer l'app ?</div>
-  <p class="small">Si tu acceptes, l'app envoie des statistiques <b>anonymes</b> (sans nom) : ta classe, tes résultats, le temps passé, les erreurs techniques. Elles servent seulement à améliorer les questions. Tu peux changer d'avis à tout moment dans les Réglages.</p>
-  <div class="row"><button class="btn-primary" id="statsoui">Oui, j'aide</button><button class="btn-sec" id="statsnon">Non merci</button></div>
-  <button class="btn-ghost small" id="statsplus">🔒 Le détail de ce qui est envoyé</button></div>`;
+/* 25.11 soir (revue d'un testeur : l'encart prenait la moitié de l'accueil et repoussait la séance) : une ligne compacte ;
+   le détail reste à un toucher (« ? »). */
+const statsCard = () => statsAsked() ? "" : `<div class="card flat stats-line" id="statscard"><span class="small">📊 Envoyer des statistiques <b>anonymes</b> pour améliorer l'app ?</span>
+  <span class="row stats-btns"><button class="btn-primary small" id="statsoui">Oui</button><button class="btn-sec small" id="statsnon">Non</button><button class="btn-ghost small" id="statsplus" aria-label="Le détail de ce qui est envoyé">?</button></span></div>`;
 
 // ---------------- Ce que l'app envoie (13.11) ----------------
 /* 25.11 soir (séparation France / romand) : exemple de classe dans le système de l'élève. */
@@ -1511,7 +1560,11 @@ function nextQuestion(redo) {
   const easy = !redo && !session.weekly && !forceProb && session.lessonShown === id && !session.eased;
   if (easy) session.eased = true;
   /* 24.11 (ergonomie) : le type de question n'est rappelé que s'il change dans la séance (« Révision · 1 sur 4 · Révision » doublait le titre). */
-  const q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : easy ? 1 : level);
+  let q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : easy ? 1 : level);
+  /* 25.11 soir (revue d'un testeur : « Refaire avec d'autres valeurs » redonnait le même problème, valeurs fixes) :
+     on retire tant que l'énoncé est identique ; sans autre version, on passe à la suite. */
+  if (redo) { for (let k = 0; k < 12 && q && q.q === redo.q; k++) q = Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1));
+    if (!q || q.q === redo.q) { toast("Pas d'autre version de ce problème pour l'instant : on continue."); session.i++; return nextQuestion(); } }
   q.kind = kind;
   renderQuestion(q, {
     track: sessionInfo().fmt || "seance", redo: !!redo,
@@ -1527,7 +1580,10 @@ function nextQuestion(redo) {
         const p = !session.remed.has(id) && Engine.remediation(state, id);
         if (p) { session.remed.add(id); session.plan.splice(session.i + 1, 0, p + "|1|rem"); }
       }
-      res.delta = Engine.updateElo(state, id, q.d, sc);
+      /* 25.11 soir (revue d'un testeur) : « Refaire » ne rapporte plus de Mathélo (on pouvait monter son score en répétant) ;
+         « Je ne sais pas » compte à 40 % (−38 décourageait d'avouer qu'on ne sait pas, plus que le gain d'une bonne réponse). */
+      const w = redo ? 0 : res.dontKnow ? 0.4 : 1; /* 40 % validé par l'enseignant le 25.11 */
+      res.delta = w ? Engine.updateElo(state, id, q.d, sc, w) : 0;
       session.score += sc; session.answered++; session.ids.add(id);
       session.res = session.res || {}; const rr = (session.res[id] = session.res[id] || { n: 0, ok: 0 }); rr.n++; if (res.solved) rr.ok++;
       if (Engine.finishDay(state, 1, sc) === "joker") toast("🛡 Joker de série utilisé : ta série continue !"); save();
@@ -1616,19 +1672,41 @@ function previewHtml(v, spec) {
   /* 25.11 : liste de solutions vide (∅, « aucune », { }) */
   if (spec && spec.kind === "set" && NONE_RE.test(v)) return "\\(S = \\varnothing\\)";
   const t = Expr.parse(spec && spec.kind === "set" ? setInput(v) : v), val = Expr.vars(t).size || t.t === "list" ? "" : Expr.evaluate(t);
-  return "\\(" + Expr.tex(t) + "\\)" + (val !== "" && isFinite(val) && !(spec && spec.final) ? `<span class="val">≈ ${String(+val.toPrecision(8)).replace(".", ",")}</span>` : "");
+  /* 25.11 soir (revue d'un testeur) : pas de « ≈ 20 » sous un simple nombre. */
+  const plain = /^-?\d+([.,]\d+)?$/.test(v.replace(/\s|'/g, ""));
+  return "\\(" + Expr.tex(t) + "\\)" + (val !== "" && isFinite(val) && !plain && !(spec && spec.final) ? `<span class="val">≈ ${String(+val.toPrecision(8)).replace(".", ",")}</span>` : "");
 }
 function previewOf(inp, prev, spec) {
   const v = inp.value.trim();
   if (!v) { prev.innerHTML = ""; return; }
   try { prev.innerHTML = previewHtml(v, spec); typeset(prev); } catch (e) { prev.innerHTML = `<span class="err">${esc(e.message)}</span>`; }
 }
+/* 25.11 soir (revue d'un testeur : « le pavé se décale à l'affichage, mon premier clic est tombé sur la mauvaise touche ») :
+   l'énoncé se met en page (formules, figure) après l'affichage du clavier, qui glisse. On surveille la position du clavier
+   pendant ses premières secondes ; un toucher qui arrive moins de 350 ms après un déplacement visait une autre touche :
+   il est ignoré. */
+const KP_GUARD = { moved: 0 };
+window.addEventListener("scroll", () => { if (app.querySelector("#kp")) KP_GUARD.moved = performance.now(); }, { passive: true });
+function kpWatch() {
+  const kp = app.querySelector("#kp"); if (!kp || !window.requestAnimationFrame) return;
+  /* Position À L'ÉCRAN (le défilement automatique au toucher d'un champ déplace aussi le clavier sous le doigt). */
+  let y = kp.getBoundingClientRect().top, t0 = performance.now();
+  const tick = () => {
+    if (!kp.isConnected || performance.now() - t0 > 4000) return;
+    const y2 = kp.getBoundingClientRect().top;
+    if (Math.abs(y2 - y) > 2) { KP_GUARD.moved = performance.now(); y = y2; }
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
 function bindKeypad(getInput, after) {
   let mode = window.matchMedia("(pointer: fine)").matches ? "text" : "none";
   app.querySelectorAll("input.ans").forEach((i) => i.setAttribute("inputmode", mode));
-  app.querySelectorAll("#kp button").forEach((b) => (b.onclick = () => {
+  KP_GUARD.moved = 0; kpWatch();
+  app.querySelectorAll("#kp button").forEach((b) => (b.onclick = (e) => {
     const inp = getInput(), k = b.dataset.k;
     if (!inp || inp.disabled) return;
+    if (e && e.isTrusted && KP_GUARD.moved && performance.now() - KP_GUARD.moved < 350) return; /* vrais touchers seulement */
     if (k === "⌨") { mode = mode === "none" ? "text" : "none"; app.querySelectorAll("input.ans").forEach((i) => i.setAttribute("inputmode", mode)); inp.blur(); inp.focus(); return; }
     typeKey(inp, k);
     after(inp);
@@ -1727,9 +1805,10 @@ function renderProblem(q, opt) {
     inp.onkeydown = (e) => { if (e.key === "Enter") check(); };
   });
   // Clavier sous la case active (20.11, demande de l'auteur) : il suit la réponse en cours, plus besoin de défiler.
-  const placeKp = (inp) => { const kp = document.getElementById("kp"), part = inp.closest(".part"); if (!kp || !part || kp.previousElementSibling === part) return; part.after(kp); setTimeout(() => kp.scrollIntoView({ behavior: "smooth", block: "nearest" }), 40); };
+  const placeKp = (inp) => { const kp = document.getElementById("kp"), part = inp.closest(".part"); if (!kp || !part || kp.previousElementSibling === part) return; part.after(kp); KP_GUARD.moved = performance.now(); kpWatch(); setTimeout(() => kp.scrollIntoView({ behavior: "smooth", block: "nearest" }), 40); };
   active = document.getElementById("p0");
   placeKp(active);
+  if (window.matchMedia("(pointer: fine)").matches) setTimeout(() => { if (active && active.isConnected) active.focus({ preventScroll: true }); }, 30);
   const bindKp = () => bindKeypad(() => active, (inp) => { previewOf(inp, document.getElementById("pv" + inp.id.slice(1)), q.parts[+inp.id.slice(1)].spec); ansInView(inp); });
   bindKp();
   const end = (giveUp) => {
@@ -1741,16 +1820,20 @@ function renderProblem(q, opt) {
     if (S) { S.issue = frac === 1 ? (tries === 1 ? "ok1" : "ok2") : giveUp && tries === 0 ? "idk" : ok.some(Boolean) ? "partiel" : "faux"; S.essais = tries; S.sec = sigSec(S); }
     if (frac === 1) burst();
     buzz(frac === 1);
-    const delta = opt.onDone({ solved: frac === 1, tries, partial: score });
+    const delta = opt.onDone({ solved: frac === 1, tries, partial: score, dontKnow: !!(giveUp && tries === 0) });
     const d = typeof delta === "number" && delta !== 0 ? `<span class="delta ${delta > 0 ? "up" : "down"}">Mathélo ${delta > 0 ? "+" : ""}${delta}</span>` : "";
     const pSteps = frac < 1 && splitSol(q.sol); /* 24.11 : corrigé progressif aussi pour les problèmes */
-    fb.innerHTML = `<div class="fb ${frac === 1 ? "ok" : "bad"} pop"><div class="spread"><b>${frac === 1 ? (tries === 1 ? "Problème résolu du premier coup !" : "Problème résolu.") : ok.filter(Boolean).length + " partie(s) juste(s) sur " + q.parts.length + "."}</b>${d}</div>${pSteps ? `<div id="ssteps" class="stack"></div><button class="btn-primary" id="solstep">Voir l'étape suivante</button><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : `<div class="sol">${q.sol}</div>`}</div>
+    /* 25.11 soir (revue d'un testeur : « le corrigé n'affiche que la partie c, l'élève ne voit jamais la bonne réponse de a ») :
+       la réponse attendue de chaque partie ratée, toujours. */
+    const pAns = (sp) => !sp ? "" : sp.kind === "value" && isFinite(sp.value) ? String(sp.round ? Math.round(sp.value / sp.round) * sp.round : +sp.value.toPrecision(10)).replace(/(\.\d*?)0{6,}\d*$/, "$1").replace(".", ",") : sp.kind === "expr" && sp.expr ? sp.expr : "";
+    const missed = q.parts.map((p, i) => [p, i]).filter(([, i]) => !ok[i]).map(([p, i]) => { const a = pAns(p.spec); return a ? `<li>${p.label.replace(/\s*\(.*?\)\s*$/, "")} : <b>${esc(a)}</b></li>` : ""; }).join("");
+    fb.innerHTML = `<div class="fb ${frac === 1 ? "ok" : "bad"} pop"><div class="spread"><b>${frac === 1 ? (tries === 1 ? "Problème résolu du premier coup !" : "Problème résolu.") : ok.filter(Boolean).length + " partie(s) juste(s) sur " + q.parts.length + "."}</b>${d}</div>${missed ? `<div class="small"><b>Les bonnes réponses</b><ul class="plain p-ans">${missed}</ul></div>` : ""}${pSteps ? `<div id="ssteps" class="stack"></div><button class="btn-primary" id="solstep">Voir l'étape suivante</button><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : `<div class="sol">${q.sol}</div>`}</div>
       <div class="vote"><span>Ce problème était… <button data-v="up" aria-label="Bon problème">👍</button> <button data-v="down" aria-label="Problème à revoir">👎</button></span><span class="code">${code}</span></div>${commentBox()}
       <div class="actions">${frac === 1 ? "" : '<button class="btn-sec" id="redo">Refaire avec d\'autres valeurs</button>'}<button class="btn-primary" id="nx">Continuer</button></div>`;
     typeset(fb);
     fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
     bindComment(fb, code);
-    document.getElementById("nx").onclick = () => opt.onNext(false);
+    { const t0 = performance.now(); document.getElementById("nx").onclick = (e) => { if (e && e.isTrusted && performance.now() - t0 < 400) return; opt.onNext(false); }; } /* 25.11 soir : la touche Entrée qui valide ne passe plus aussitôt à la suite */
     const r = document.getElementById("redo"); if (r) r.onclick = () => { sigAide(S, "x"); opt.onNext(true); };
     if (pSteps) { const sf = fb.querySelector("details.solfull"); if (sf) sf.addEventListener("toggle", () => { if (sf.open) sigAide(S, "s"); }); solStepper(document.getElementById("ssteps"), document.getElementById("solstep"), pSteps, (k) => { if (k > 0) sigAide(S, "e"); }, () => { const sf2 = fb.querySelector("details.solfull"); if (sf2) sf2.remove(); document.getElementById("nx").focus({ preventScroll: true }); }); }
   };
@@ -1774,7 +1857,12 @@ function renderProblem(q, opt) {
     });
     if (ok.every(Boolean) || tries >= 3) return end(false);
     const nx = ok.findIndex((v) => !v); if (nx >= 0) { active = document.getElementById("p" + nx); placeKp(active); }
-    fb.innerHTML = `<div class="fb hint pop"><b>${ok.some(Boolean) ? "En partie juste. Continue !" : "Pas encore."}</b><span><b>Indice ${tries}</b> · ${escT(q.hints[tries - 1])}</span></div>`; fbInView(fb, 120);
+    /* 25.11 soir (revue d'un testeur : indice de la partie c alors que la partie a était fausse) : indice de la première partie
+       fausse s'il est marqué « a) », « b) »… ; un indice non marqué n'est donné que pour la dernière partie ; sinon, relance. */
+    const L = String.fromCharCode(97 + nx), H = (q.hints || []).map((x) => String(x));
+    const tagged = H.find((x) => x.trim().startsWith(L + ")")), free = H.filter((x) => !/^[a-h]\)/.test(x.trim()));
+    const hint = tagged || (nx === q.parts.length - 1 && free.length ? free[Math.min(tries - 1, free.length - 1)] : "Partie " + L + ") : relis bien ce qui est demandé, et fais un calcul à la fois. Les données utiles sont dans l'énoncé.");
+    fb.innerHTML = `<div class="fb hint pop"><b>${ok.some(Boolean) ? "En partie juste. Continue !" : "Pas encore."}</b><span><b>Indice ${tries}</b> · ${escT(hint)}</span></div>`; fbInView(fb, 120);
   };
   document.getElementById("check").onclick = check;
   document.getElementById("idk").onclick = () => { if (!finished) end(true); };
@@ -1802,6 +1890,9 @@ function renderQuestion(q, opt) {
   const S = opt.track ? sigOpen({ ev: "q", code, d: q.d, kind: q.kind || "", fmt: opt.track, redo: opt.redo ? 1 : 0 }) : null;
   sigWatchLesson(S); pageQ = code; bindScratch(S);
   const inp = document.getElementById("ans"), prev = document.getElementById("prev"), fb = document.getElementById("fb");
+  /* 25.11 soir (revue d'un testeur : focus perdu entre deux questions) : sur ordinateur, le champ reçoit le focus ;
+     pas sur téléphone (le clavier du système s'ouvrirait par-dessus celui de l'app). */
+  if (window.matchMedia("(pointer: fine)").matches) setTimeout(() => { if (inp.isConnected && !inp.disabled) inp.focus({ preventScroll: true }); }, 30);
   if (window.matchMedia("(pointer: fine)").matches) { inp.setAttribute("inputmode", "text"); inputMode = "text"; inp.focus(); }
   let tm;
   const showPreview = () => {
@@ -1844,7 +1935,7 @@ function renderQuestion(q, opt) {
     if (opt.single) {
       fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><b>${solved ? "✓ Juste ! " + pick(PRAISE.filter((x) => x !== "Juste !")) : dontKnow ? "D'accord, on s'en occupera. Voici la solution :" : "✗ Pas tout à fait. Voici la solution :"}</b>${solved ? "" : '<span class="sol">' + q.sol + "</span>"}</div><div class="actions"><button class="btn-primary" id="nx">Suivant</button></div>`;
       typeset(fb);
-      document.getElementById("nx").onclick = () => opt.onNext();
+      { const t0 = performance.now(); document.getElementById("nx").onclick = (e) => { if (e && e.isTrusted && performance.now() - t0 < 400) return; opt.onNext(); }; }
       document.getElementById("nx").focus();
       return;
     }
@@ -1861,7 +1952,7 @@ function renderQuestion(q, opt) {
     typeset(fb);
     fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
     bindComment(fb, code);
-    document.getElementById("nx").onclick = () => opt.onNext(false);
+    { const t0 = performance.now(); document.getElementById("nx").onclick = (e) => { if (e && e.isTrusted && performance.now() - t0 < 400) return; opt.onNext(false); }; } /* 25.11 soir : la touche Entrée qui valide ne passe plus aussitôt à la suite */
     const r = document.getElementById("redo");
     if (r) r.onclick = () => { sigAide(S, "x"); opt.onNext(true); };
     const sf = fb.querySelector("details.solfull"); if (sf) sf.addEventListener("toggle", () => { if (sf.open) sigAide(S, "s"); });
@@ -2345,6 +2436,21 @@ function screenSummary() {
   const g0 = gradeOf(session.elo0), g1 = gradeOf(state.elo.r);
   if (g1.i > g0.i) gradeNumbers();
   const newGrade = g1.i > g0.i ? `<div class="card stack grade-up"><div class="eyebrow">Nouveau grade !</div><div class="ic-row"><button type="button" class="ic grade-ic grade-open" data-g="${g1.name}" aria-label="Voir la carte du grade ${g1.name}">${g1.ic}</button><div><h3>Tu es maintenant ${g1.name}</h3><div class="small muted">${g1.next ? "Prochain grade : " + g1.next.ic + " " + g1.next.name + ", à " + g1.next.at + "." : "Le plus haut grade : bravo !"}</div></div></div></div>` : "";
+  /* 25.11 soir (revue d'un testeur : une séance d'une question du Carnet affichait le grand écran de fin, lourd) :
+     petite séance du Carnet → bilan léger (résultat, ce qui reste à effacer, continuer). */
+  if (session.carnet && n <= 2) {
+    const left = (state.carnet || []).length;
+    h(`${brand}<h2>${sc >= n ? "📕 Bien joué !" : "📕 C'est noté."}</h2>
+    <div class="card flat stack"><div class="spread"><span>Mathélo</span><b>${state.elo.r} <span class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</span></b></div>
+    <div class="spread"><span>Carnet d'erreurs</span><b>${left ? left + " à effacer" : "vide : bravo !"}</b></div></div>
+    ${newGrade}${nb}
+    ${left ? '<button class="btn-primary btn-big" id="carnetagain">📕 Continuer à effacer</button>' : ""}
+    <button class="${left ? "btn-sec" : "btn-primary btn-big"}" id="home">Retour à l'accueil</button>`);
+    if (nb || newGrade) setTimeout(burst, 250);
+    document.getElementById("home").onclick = screenHome;
+    if (document.getElementById("carnetagain")) document.getElementById("carnetagain").onclick = () => startCarnet();
+    return;
+  }
   // 22.11 : titre cohérent avec le Mathélo (« Excellente séance » alors que le Mathélo baissait).
   h(`${brand}<h2>${sc >= n * 0.8 && d >= 0 ? "Excellente séance !" : sc >= n * 0.5 ? "Bonne séance." : "Séance faite : c'est en pratiquant qu'on progresse."}</h2>${d < 0 && sc >= n * 0.5 ? `<p class="small muted">Mathélo ${d} : une erreur sur une question de ton niveau coûte plus que ce que rapporte une réussite sur une question facile.</p>` : ""}
   <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span>${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ta série passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${FORMATS[Engine.tomorrowFormat(state)].label}</b></div>${sumGoal(g1)}</div></div>
@@ -2353,7 +2459,7 @@ function screenSummary() {
   <div class="card stack"><div class="spread"><span>Score</span><b>${String(sc).replace(".", ",")} / ${n}</b></div>
   <div class="spread"><span>Mathélo</span><b>${state.elo.r} <span class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</span></b></div>
 </div>
-  ${session.ctest ? (() => { const a = compNote((state.comps || {})[session.ctest.cid]), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? (isFR() ? "Le niveau apparaît après 3 réponses sur cette compétence." : "La note apparaît après 3 réponses sur cette compétence.") : b === null ? (isFR() ? "Premier positionnement pour cette compétence." : "Première note pour cette compétence.") : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". " + (isFR() ? "Il remontera" : "Elle remontera") + " avec la pratique." : isFR() ? "Niveau stable." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
+  ${session.ctest ? (() => { const a = ctestNote(session.ctest), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? (isFR() ? "Le niveau apparaît après 3 réponses sur cette compétence." : "La note apparaît après 3 réponses sur cette compétence.") : b === null ? (isFR() ? "Premier positionnement pour cette compétence." : "Première note pour cette compétence.") : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". " + (isFR() ? "Il remontera" : "Elle remontera") + " avec la pratique." : isFR() ? "Niveau stable." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
   ${newGrade}${nb}
   ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${state.carnet.length} à effacer</b></div><span class="small muted">Une erreur s'efface après 2 réussites de suite, du premier coup.</span><button class="btn-primary" id="carnetagain">${session.carnet ? "Continuer à effacer" : "📕 Effacer mes erreurs maintenant"}</button></div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
   ${returnCard()}

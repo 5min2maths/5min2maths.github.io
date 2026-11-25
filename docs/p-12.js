@@ -2958,6 +2958,25 @@
     ],
   };
 
+  /* 25.11 (agent trous) : droites remarquables dans un problème (1.GE.04d) : isocèle (hauteur = médiane), orthocentre,
+     point de la médiatrice (Pythagore). Niveau 3 = « problèmes ». */
+  DR[3].push(
+    () => { const [m, h, s] = pk([[5, 12, 13], [8, 6, 10], [9, 12, 15], [6, 8, 10], [12, 9, 15], [8, 15, 17], [15, 8, 17]]), g = (2 * h) / 3;
+      return Qv("Le triangle " + M("ABC") + " est isocèle en " + M("A") + " : " + M("AB = AC = " + s) + " cm et " + M("BC = " + 2 * m) + " cm. " + M("G") + " est son centre de gravité. Calcule " + M("AG") + " (en cm, fraction acceptée).", g,
+        "Dans un triangle isocèle, la hauteur issue de " + M("A") + " est aussi la médiane : elle tombe au milieu " + M("H") + " de " + M("[BC]") + ". " + M("AH = \\sqrt{" + s * s + " - " + m * m + "} = " + h) + " ; " + M("G") + " est aux deux tiers de la médiane : " + M("AG = \\frac{2}{3} \\cdot " + h + " = " + N(g)) + " cm.",
+        { ctx: "isocele-G", guide: [GS(M("BH") + " (H milieu de [BC]) ?", m, M(m) + " cm."), GS(M("AH") + " (Pythagore) ?", h, M(h) + " cm."), GS(M("AG") + " ?", g, M("\\frac{2}{3} \\cdot " + h + " = " + N(g)) + " cm.")],
+          traps: [TR((2 * s) / 3, "G est sur la médiane [AH], pas sur le côté [AB] : calcule d'abord AH."), TR(h, "C'est la médiane entière ; G est aux 2/3 depuis A."), TR(h / 3, "Ça, c'est GH ; AG en vaut le double.")] }); },
+    () => { const A = R.int(35, 85);
+      return Qv("Le triangle " + M("ABC") + " a tous ses angles aigus et " + M("\\widehat{A} = " + A + "°") + ". " + M("H") + " est son orthocentre (intersection des hauteurs). Que mesure " + M("\\widehat{BHC}") + " (en degrés) ?", 180 - A,
+        "Soient " + M("K") + " et " + M("L") + " les pieds des hauteurs issues de " + M("B") + " et " + M("C") + ". Le quadrilatère " + M("AKHL") + " a deux angles droits (en " + M("K") + " et " + M("L") + ") : " + M("\\widehat{KHL} = 360° - 90° - 90° - " + A + "° = " + (180 - A) + "°") + ", et " + M("\\widehat{BHC}") + " lui est opposé par le sommet.",
+        { ctx: "orthocentre", guide: [GS("Somme des angles du quadrilatère " + M("AKHL") + " ?", 360, "360°."), GS(M("\\widehat{KHL} = \\widehat{BHC}") + " ?", 180 - A, M(180 - A) + "°.")],
+          traps: [TR(90 + A / 2, "Ça, c'est l'angle BIC formé par les bissectrices ; ici ce sont les hauteurs."), TR(A, "Les angles en K et L sont droits : BHC = 180° − A."), TR(90 - A, "Utilise le quadrilatère AKHL et ses deux angles droits.")] }); },
+    () => { const [m, d, s] = pk([[3, 4, 5], [5, 12, 13], [6, 8, 10], [8, 15, 17], [9, 12, 15], [12, 5, 13], [4, 3, 5], [12, 9, 15]]);
+      return Qv("Le point " + M("P") + " est sur la médiatrice du segment " + M("[AB]") + ", avec " + M("AB = " + 2 * m) + " cm et " + M("PA = " + s) + " cm. Calcule la distance de " + M("P") + " à la droite " + M("(AB)") + " (en cm).", d,
+        "La médiatrice coupe " + M("[AB]") + " perpendiculairement en son milieu " + M("I") + " : " + M("AI = " + m) + ". Le triangle " + M("PIA") + " est rectangle en " + M("I") + " : " + M("PI = \\sqrt{" + s * s + " - " + m * m + "} = " + d) + " cm (et " + M("PB = PA = " + s) + ").",
+        { ctx: "mediatrice-pythagore", guide: [GS(M("AI") + " (I milieu de [AB]) ?", m, M(m) + " cm."), GS(M("PI") + " ?", d, M(d) + " cm.")],
+          traps: [TR(s * s - m * m, "C'est PI² : prends la racine."), TR(s - m, "Pythagore : PI² = PA² − AI²."), TR(Math.hypot(s, m), "PA est l'hypoténuse : on soustrait les carrés.")] }); });
+
   // ===================== exactes =====================
   const EX = {
     1: [
@@ -3057,7 +3076,7 @@
   if (typeof COMPS !== "undefined") Object.assign(COMPS, {
     euclide: ["Hauteur, cathète, projection", "Hauteur par l'aire, segment, hypoténuse", "Aire, périmètre, écart"],
     geocomb: ["Diagonale, isocèle, équilatéral", "Toit, carton, losange", "Trapèze, cône, plus court chemin"],
-    droitesrem: ["Centre de gravité, cercle circonscrit", "Bissectrices, médiane, hauteur", "Équilatéral, cercle inscrit, angle AIB"],
+    droitesrem: ["Centre de gravité, cercle circonscrit", "Bissectrices, médiane, hauteur", "Problèmes : équilatéral, isocèle, cercle inscrit, orthocentre, médiatrice"],
     exactes: ["Diagonale, hauteur, côté", "Aire de l'équilatéral, rectangle, périmètre", "Cube, hexagone, disque inscrit"],
     angtri: ["Triangle, isocèle, quadrilatère", "Angle extérieur, sommet, parallélogramme", "Polygones réguliers, angles proportionnels"],
   });
@@ -4655,6 +4674,564 @@
     if (typeof PROB_EXTRA !== "undefined") PROB_EXTRA[n.id] = PROBS[n.id];
   }
 })();
+
+// 25.11 (agent trous) · Collège de Genève, 1re et 2e : derniers savoir-faire calculables du référentiel matu.
+//  - graphefct (1re, M1C04) : reconnaître si une courbe est le graphe d'une fonction (1.FO.02c) : droites verticales,
+//    tableaux de couples, équations, demi-cercles, courbes « couchées », raccord de deux morceaux.
+//  - ineqgraph (2e, M2C03) : résoudre graphiquement une inéquation (2.AL.04e) : f(x) ≷ 0, f(x) ≷ k, f(x) ≷ g(x),
+//    asymptote verticale, zéro double, encadrement, intersections à calculer.
+// (Les droites remarquables dans un problème, 1.GE.04d, étendent droitesrem dans src/ch1c_geo.js.)
+// Outils : TRX (src/trx.js). Paquet de chargement « 12 » (build.py : préfixe ch1c), chargé aussi en 2e.
+(function () {
+  if (typeof NOTIONS === "undefined" || typeof GEN === "undefined" || typeof TRX === "undefined") return;
+  const { pk, nz, r6, fT, fS, QN, QSet, QS, GR, GSet, GSS, TR, TSt, TS, P, reg, W, toi, sv, tx, ln } = TRX;
+  const NEG = { "<": ">=", "<=": ">", ">": "<=", ">=": "<" }, SWAP = { "<": "<=", "<=": "<", ">": ">=", ">=": ">" };
+  const ssT = (ivs) => SolSet.show(ivs, true);
+  const yrOf = (fs, a, b) => { let lo = Infinity, hi = -Infinity; for (const f of fs) for (let i = 0; i <= 80; i++) { const y = f(a + ((b - a) * i) / 80); if (isFinite(y) && Math.abs(y) < 60) { lo = Math.min(lo, y); hi = Math.max(hi, y); } } return [Math.floor(Math.min(lo, -1)) - 1, Math.ceil(Math.max(hi, 1)) + 1]; };
+  const PLf = (fns, o = {}) => { const yr = o.yr || [-6, 6]; return FIG.plot(fns, o.pts || [], Object.assign({ numbers: true, xr: [-6, 6], maxH: 320 }, yr[1] - yr[0] > 12 ? { step: 2 } : {}, o)); };
+  const fx = (r) => (r === 0 ? "x" : "(x " + (r < 0 ? "+ " + fT(-r) : "- " + fT(r)) + ")");
+
+  // ======================= graphefct : graphe d'une fonction ou non (1.FO.02c) =======================
+  /* courbes : [fonction ?, nom, polylignes (coordonnées dans [−4 ; 4]²)] */
+  const smp = (f, a, b, n = 60) => { const o = []; for (let i = 0; i <= n; i++) { const t = a + ((b - a) * i) / n; o.push(f(t)); } return o; };
+  const CURVES = [
+    [1, "parabole", [smp((t) => [t, t * t / 2 - 2], -3.6, 3.6)]],
+    [1, "droite oblique", [smp((t) => [t, 0.6 * t + 0.5], -4, 4)]],
+    [1, "courbe en S", [smp((t) => [t, (t * t * t) / 6 - t], -3.9, 3.9)]],
+    [1, "courbe en V", [smp((t) => [t, Math.abs(t) * 0.9 - 1.5], -4, 4)]],
+    [1, "hyperbole (deux morceaux)", [smp((t) => [t, 2 / t], -4, -0.5), smp((t) => [t, 2 / t], 0.5, 4)]],
+    [1, "vague", [smp((t) => [t, 2 * Math.sin(1.2 * t)], -4, 4)]],
+    [0, "cercle", [smp((t) => [3 * Math.cos(t), 3 * Math.sin(t)], 0, 2 * Math.PI, 80)]],
+    [0, "droite verticale", [[[1.5, -4], [1.5, 4]]]],
+    [0, "parabole couchée", [smp((t) => [t * t / 2 - 2, t], -3.6, 3.6)]],
+    [0, "courbe en S couchée", [smp((t) => [(t * t * t) / 6 - t, t], -3.9, 3.9)]],
+    [0, "ellipse", [smp((t) => [3.5 * Math.cos(t), 1.8 * Math.sin(t)], 0, 2 * Math.PI, 80)]],
+  ];
+  /* panneaux 2 × 2 : chaque courbe dans un repère [−4 ; 4]², numéro en coin */
+  const panels = (cs, vline) => {
+    const one = cs.length === 1, S = one ? 240 : 146, G = 8, H = one ? S : 2 * S + G, X0 = (i) => (i % 2) * (S + G), Y0 = (i) => Math.floor(i / 2) * (S + G), uid = "gf" + Math.floor(R.rand() * 1e9);
+    let g = "";
+    cs.forEach((c, i) => {
+      const ox = X0(i), oy = Y0(i), X = (x) => ox + S / 2 + (x * (S - 12)) / 8, Y = (y) => oy + S / 2 - (y * (S - 12)) / 8, cid = uid + "-" + i;
+      g += '<clipPath id="' + cid + '"><rect x="' + ox + '" y="' + oy + '" width="' + S + '" height="' + S + '" rx="6"/></clipPath>';
+      g += '<rect x="' + ox + '" y="' + oy + '" width="' + S + '" height="' + S + '" rx="6" class="f-shape2" style="fill-opacity:.25"/>';
+      for (let k = -4; k <= 4; k++) g += ln(X(k), Y(-4), X(k), Y(4), "f-grid", ' stroke-width="0.7"') + ln(X(-4), Y(k), X(4), Y(k), "f-grid", ' stroke-width="0.7"');
+      g += ln(X(-4), Y(0), X(4), Y(0), "f-line", ' stroke-width="1.2"') + ln(X(0), Y(-4), X(0), Y(4), "f-line", ' stroke-width="1.2"');
+      for (const pl of c[2]) g += '<path d="' + pl.map((p, j) => (j ? "L" : "M") + X(p[0]).toFixed(1) + "," + Y(p[1]).toFixed(1)).join(" ") + '" class="f-accent" fill="none" stroke-width="2.4" clip-path="url(#' + cid + ')"/>';
+      if (vline !== undefined) g += ln(X(vline), Y(-4), X(vline), Y(4), "f-line", ' stroke-dasharray="5 4" stroke-width="1.6"');
+      if (!one) g += '<circle cx="' + (ox + 14) + '" cy="' + (oy + 14) + '" r="10" class="f-shape" style="fill-opacity:.9"/>' + tx(ox + 14, oy + 18.5, String(i + 1), "middle", 13);
+    });
+    return sv(one ? S : 2 * S + G, H, g, cs.length > 1 ? "quatre courbes numérotées" : "courbe");
+  };
+  const GF = {
+    1: [
+      () => { const F = CURVES.filter((c) => c[0]), N = CURVES.filter((c) => !c[0]), nf = R.int(1, 3), pickN = (L, n) => { const a = L.slice(); const o = []; while (o.length < n) o.push(a.splice(Math.floor(R.rand() * a.length), 1)[0]); return o; };
+        const cs = pickN(F, nf).concat(pickN(N, 4 - nf)); for (let i = cs.length - 1; i > 0; i--) { const j = Math.floor(R.rand() * (i + 1)); [cs[i], cs[j]] = [cs[j], cs[i]]; }
+        const ok = cs.map((c, i) => (c[0] ? i + 1 : 0)).filter(Boolean), ko = cs.map((c, i) => (c[0] ? 0 : i + 1)).filter(Boolean), hyp = cs.findIndex((c) => /hyperbole/.test(c[1])) + 1;
+        return QSet("Parmi ces quatre courbes, lesquelles sont des graphes de fonctions (une image au plus pour chaque " + M("x") + ") ? Donne leurs numéros, séparés par « ; ».", ok,
+          "Test de la droite verticale : une courbe est le graphe d'une fonction si aucune droite verticale ne la coupe en plus d'un point. " + cs.map((c, i) => (i + 1) + " : " + c[1] + (c[0] ? " (oui)" : " (non : une droite verticale la coupe deux fois ou plus)")).join(" ; ") + ".",
+          { ctx: "quatre-courbes", fig: panels(cs),
+            guide: [GR("Combien de ces courbes ne sont coupées qu'une fois au plus par chaque droite verticale ?", ok.length, M(ok.length) + "."), { ask: "Leurs numéros ?", spec: { kind: "set", values: ok }, sol: ok.join(" ; ") + "." }],
+            traps: [TSt(ko, "Ce sont celles qui ne conviennent pas : une droite verticale les coupe deux fois."), hyp && cs[hyp - 1][0] ? TSt(ok.filter((i) => i !== hyp), "Le graphe d'une fonction peut être en plusieurs morceaux (courbe " + hyp + ") : chaque x a au plus une image.") : null, TSt([1, 2, 3, 4], "Teste chaque courbe avec une droite verticale.")] }); },
+      () => { const c = pk([["le cercle de centre " + M("O") + " et de rayon 3", (a) => (Math.abs(a) < 3 ? 2 : 1), CURVES[6], [-2, -1, 1, 2]], ["la parabole « couchée » " + M("x = \\frac{y^2}{2} - 2"), (a) => 2, CURVES[8], [-1, 1, 2, 3]], ["la courbe en S « couchée »", (a) => 3, CURVES[9], [-0.5, 0.5]]]), a = pk(c[3]), v = c[1](a);
+        return QN("La figure montre " + c[0] + " et la droite verticale " + M("x = " + fT(a)) + " (en traitillé). En combien de points cette droite coupe-t-elle la courbe ?", v,
+          "On compte les points d'intersection : " + v + ". Le nombre " + M(fT(a)) + " aurait donc " + v + " « images » : la courbe n'est pas le graphe d'une fonction.",
+          { ctx: "droite-verticale", fig: panels([c[2]], a),
+            guide: [GR("Nombre de points d'intersection ?", v, M(v) + ".")],
+            traps: [TR(1, "Regarde au-dessus ET au-dessous de l'axe des x."), TR(v === 2 ? 3 : 2, "Compte de nouveau, en suivant la droite en traitillé de haut en bas.")] }); },
+      () => { const mkT = (fn) => { const xs = []; while (xs.length < 4) { const x = R.int(-4, 6); if (!xs.includes(x)) xs.push(x); } const ys = xs.map(() => R.int(-5, 9));
+          if (!fn) { const i = R.int(1, 3); xs[i] = xs[R.int(0, i - 1)]; while (ys[i] === ys[xs.indexOf(xs[i])]) ys[i] = R.int(-5, 9); } else if (R.rand() < 0.6) ys[3] = ys[R.int(0, 2)];
+          return [xs, ys, fn]; };
+        const nf = R.int(1, 3), Ts = Array.from({ length: 4 }, (_, i) => mkT(i < nf)); for (let i = 3; i > 0; i--) { const j = Math.floor(R.rand() * (i + 1)); [Ts[i], Ts[j]] = [Ts[j], Ts[i]]; }
+        const ok = Ts.map((t, i) => (t[2] ? i + 1 : 0)).filter(Boolean), ko = Ts.map((t, i) => (t[2] ? 0 : i + 1)).filter(Boolean);
+        const tabT = (t, i) => (i + 1) + ") " + M("\\begin{array}{c|cccc} x & " + t[0].join(" & ") + " \\\\ \\hline y & " + t[1].join(" & ") + " \\end{array}");
+        return QSet("Chaque tableau donne quatre points " + M("(x \\,;\\, y)") + ". Lesquels peuvent faire partie du graphe d'une fonction ? Donne les numéros, séparés par « ; ».<br>" + Ts.map(tabT).join("<br>"), ok,
+          "Un graphe de fonction ne contient jamais deux points de même abscisse avec des ordonnées différentes. " + (ko.length ? "Tableau" + (ko.length > 1 ? "x " : " ") + ko.join(", ") + " : une même valeur de " + M("x") + " a deux valeurs de " + M("y") + "." : "") + " Deux " + M("x") + " différents peuvent avoir le même " + M("y") + ".",
+          { ctx: "couples", guide: [GR("Combien de tableaux ont une valeur de " + M("x") + " répétée avec deux " + M("y") + " différents ?", ko.length, M(ko.length) + "."), { ask: "Numéros des tableaux qui conviennent ?", spec: { kind: "set", values: ok }, sol: ok.join(" ; ") + "." }],
+            traps: [TSt(ko, "Ce sont ceux qui ne conviennent pas : une abscisse y a deux images."), TSt(ok.filter((i) => new Set(Ts[i - 1][1]).size === 4), "Deux abscisses différentes peuvent avoir la même image : seul un x répété avec deux y différents pose problème.")] }); },
+    ],
+    2: [
+      () => { const h = nz(-2, 2), k = R.int(-1, 2), r = pk([2, 3]), v = [h - r, h + r];
+        const fig = FIG.plot([], [[h, k, "C"]], { numbers: true, xr: [-6, 6], yr: [-5, 5], circles: [[h, k, r]], maxH: 260, label: "cercle de centre C" });
+        return QSet("La figure montre le cercle de centre " + M("C(" + h + " \\,;\\, " + k + ")") + " et de rayon " + M(r) + ". Pour quelles abscisses " + M("a") + " la droite verticale " + M("x = a") + " touche-t-elle le cercle en un seul point ?", v,
+          "Une droite verticale coupe le cercle en deux points tant qu'elle passe entre les bords gauche et droit ; elle le touche en un seul point aux bords, à une distance " + M(r) + " du centre : " + M("a = " + h + " - " + r + " = " + (h - r)) + " et " + M("a = " + h + " + " + r + " = " + (h + r)) + ". Entre les deux, chaque " + M("x") + " a deux « images » : ce n'est pas le graphe d'une fonction.",
+          { ctx: "cercle-verticales", fig,
+            guide: [GR("Abscisse du centre ?", h, M(h) + "."), GR("Rayon ?", r, M(r) + "."), GSet("Abscisses cherchées ?", v, M((h - r) + " \\,;\\, " + (h + r)) + ".")],
+            traps: [TSt([k - r, k + r], "Ce sont des ordonnées : on cherche des abscisses (droites verticales)."), TSt([-r, r], "Le centre n'est pas l'origine : pars de x = " + h + "."), TSt([h], "Au centre, la droite verticale coupe le cercle deux fois.")] }); },
+      () => { const POOL = [[1, "y = x^2 - 3"], [1, "2x - 3y = 6"], [1, "y = |x| + 1"], [1, "y = \\sqrt{x}"], [1, "xy = 4"], [1, "y = x^3"], [1, "y - 2x^2 = 1"], [0, "x^2 + y^2 = 9"], [0, "y^2 = x"], [0, "x = 4"], [0, "|y| = x"], [0, "x = y^2 - 1"], [0, "y^2 = x^2"]];
+        const F = POOL.filter((p) => p[0]), N = POOL.filter((p) => !p[0]), nf = R.int(2, 3), take = (L, n) => { const a = L.slice(), o = []; while (o.length < n) o.push(a.splice(Math.floor(R.rand() * a.length), 1)[0]); return o; };
+        const es = take(F, nf).concat(take(N, 5 - nf)); for (let i = 4; i > 0; i--) { const j = Math.floor(R.rand() * (i + 1)); [es[i], es[j]] = [es[j], es[i]]; }
+        const ok = es.map((e, i) => (e[0] ? i + 1 : 0)).filter(Boolean), ko = es.map((e, i) => (e[0] ? 0 : i + 1)).filter(Boolean);
+        return QSet("Lesquelles de ces équations définissent " + M("y") + " comme une fonction de " + M("x") + " (au plus une valeur de " + M("y") + " pour chaque " + M("x") + ") ? Donne les numéros.<br>" + es.map((e, i) => (i + 1) + ") " + M(e[1])).join(" ; "), ok,
+          "On isole " + M("y") + " : s'il reste deux valeurs possibles (" + M("y = \\pm\\ldots") + ") ou aucune contrainte sur " + M("y") + " (" + M("x = 4") + "), ce n'est pas une fonction. " + es.map((e, i) => (i + 1) + " : " + (e[0] ? "oui" : "non")).join(", ") + ".",
+          { ctx: "equations", guide: [GR("Combien de ces équations donnent une seule valeur de " + M("y") + " pour chaque " + M("x") + " ?", ok.length, M(ok.length) + "."), { ask: "Leurs numéros ?", spec: { kind: "set", values: ok }, sol: ok.join(" ; ") + "." }],
+            traps: [TSt(ko, "Ce sont celles qui ne conviennent pas (deux valeurs de y, ou x seul)."), TSt(es.map((e, i) => (/y\^2|\|y\|/.test(e[1]) ? 0 : i + 1)).filter(Boolean), "x = 4 ne donne pas y : la droite verticale n'est pas un graphe de fonction.")] }); },
+      () => { const [r, a, b] = pk([[5, 3, 4], [5, 4, 3], [10, 6, 8], [10, 8, 6], [13, 5, 12], [13, 12, 5], [17, 8, 15], [15, 9, 12]]), s = pk([1, -1]), up = R.rand() < 0.6, v = up ? b : -b;
+        return QN("Le cercle " + M("x^2 + y^2 = " + r * r) + " n'est pas le graphe d'une fonction, mais sa moitié " + (up ? "supérieure" : "inférieure") + " l'est : c'est le graphe de " + M("f(x) = " + (up ? "" : "-") + "\\sqrt{" + r * r + " - x^2}") + ". Calcule " + M("f(" + s * a + ")") + ".", v,
+          M("f(" + s * a + ") = " + (up ? "" : "-") + "\\sqrt{" + r * r + " - " + a * a + "} = " + (up ? "" : "-") + "\\sqrt{" + b * b + "} = " + v) + " : un seul point de la moitié " + (up ? "supérieure" : "inférieure") + " a pour abscisse " + M(s * a) + ".",
+          { ctx: "demi-cercle", guide: [GR(M(r * r + " - (" + s * a + ")^2") + " ?", b * b, M(b * b) + "."), GR(M("f(" + s * a + ")") + " ?", v, M(v) + ".")],
+            traps: [TR(-v, up ? "Moitié supérieure : la racine est positive." : "Moitié inférieure : f(x) = −√(…) est négative."), TR(up ? r - a : a - r, "On ne soustrait pas les longueurs : √(" + r * r + " − " + a * a + ")."), TR(b * b, "C'est y² ; prends la racine.")] }); },
+    ],
+    3: [
+      () => { const c = R.int(1, 6), sq = pk([4, 9, 16].filter((q) => q !== c)), a = sq - c, v = Math.sqrt(sq);
+        return QSet("La courbe d'équation " + M("x = y^2 - " + c) + " est une parabole « couchée ». Quelles sont les ordonnées de ses points d'abscisse " + M(a) + " ?", [-v, v],
+          M(a + " = y^2 - " + c + " \\iff y^2 = " + sq + " \\iff y = -" + v + " \\text{ ou } y = " + v) + " : deux points ont l'abscisse " + M(a) + ", la courbe n'est pas le graphe d'une fonction de " + M("x") + ".",
+          { ctx: "parabole-couchee", guide: [GR(M("y^2") + " ?", sq, M(sq) + "."), GSet("Ordonnées ?", [-v, v], M("-" + v + " \\,;\\, " + v) + ".")],
+            traps: [TSt([v], "y² = " + sq + " a deux solutions : " + v + " et −" + v + "."), TSt([a * a - c], "Ici x est donné : remplace x par " + a + " et résous en y."), TSt([-sq, sq], "y² = " + sq + " : prends encore la racine.")] }); },
+      () => { const h = nz(-4, 4), r = pk([2, 3, 4, 5]), ivs = [[h - r, true, h + r, true]];
+        return QS("La fonction " + M("f(x) = \\sqrt{" + r * r + " - " + (h > 0 ? "(x - " + h + ")" : "(x + " + -h + ")") + "^2}") + " a pour graphe un demi-cercle. Donne son ensemble de définition (intervalle).", ivs,
+          "Il faut " + M(r * r + " - (x " + (h > 0 ? "- " + h : "+ " + -h) + ")^2 \\ge 0") + ", soit " + M("|x " + (h > 0 ? "- " + h : "+ " + -h) + "| \\le " + r) + " : " + M(ssT(ivs)) + ". C'est la moitié supérieure du cercle de centre " + M("(" + h + " \\,;\\, 0)") + " et de rayon " + M(r) + ".",
+          { ctx: "demi-cercle-domaine", guide: [GR("Abscisse du centre du cercle ?", h, M(h) + "."), GR("Rayon ?", r, M(r) + "."), GSS("Ensemble de définition ?", ivs, M(ssT(ivs)) + ".")],
+            traps: [TS([[-r, true, r, true]], "Le centre n'est pas en 0 : décale de " + h + "."), TS([[h - r, false, h + r, false]], "Aux bornes, la racine vaut 0 : elles sont comprises."), TS([[h - r * r, true, h + r * r, true]], "Le rayon est " + r + ", pas " + r * r + ".")] }); },
+      () => { const a = nz(-3, 3), b = nz(-5, 5), c = nz(-3, 3), x0 = nz(-3, 4); if (a === c) return null; const k = a * x0 + b - c * x0;
+        return QN("On trace " + M("y = " + (a === 1 ? "" : a === -1 ? "-" : a) + "x" + (b < 0 ? " - " + -b : " + " + b)) + " pour " + M("x \\le " + x0) + ", et " + M("y = " + (c === 1 ? "" : c === -1 ? "-" : c) + "x + k") + " pour " + M("x \\ge " + x0) + ". Pour quelle valeur de " + M("k") + " cette réunion est-elle le graphe d'une fonction ?", k,
+          "Les deux morceaux donnent chacun une image à " + M("x = " + x0) + " : il faut qu'elles soient égales. " + M(a + " \\cdot (" + x0 + ")" + (b < 0 ? " - " + -b : " + " + b) + " = " + (a * x0 + b)) + " et " + M(c + " \\cdot (" + x0 + ") + k = " + c * x0 + " + k") + ", donc " + M("k = " + k) + ".",
+          { ctx: "raccord", guide: [GR("Image de " + M(x0) + " par le premier morceau ?", a * x0 + b, M(a * x0 + b) + "."), GR(M("k") + " ?", k, M(k) + ".")],
+            traps: [TR(a * x0 + b, "C'est l'image par le premier morceau ; retire encore " + c + " · (" + x0 + ")."), TR(a * x0 + b + c * x0, "k = (image du premier morceau) − " + c + " · (" + x0 + ") : attention au signe."), TR(b, "On compare les deux morceaux en x = " + x0 + ".")] }); },
+    ],
+  };
+
+  // ======================= ineqgraph : résoudre graphiquement une inéquation (2.AL.04e) =======================
+  const OPS = ["<", "<=", ">", ">="], opT = (op) => OPT[op];
+  const two = (lo, hi) => { let p, q; do { p = R.int(lo, hi); q = R.int(lo, hi); } while (Math.abs(p - q) < 2); return p < q ? [p, q] : [q, p]; };
+  const IG = {
+    1: [
+      () => { const [p, q] = two(-5, 5), a = pk([1, -1, 0.5, -0.5]), f = (x) => a * (x - p) * (x - q), op = pk(OPS), ivs = signSet(f, [p, q], [], op), yr = yrOf([f], -6, 6);
+        return QS("Voici le graphe de la fonction " + M("f") + ". Résous graphiquement " + M("f(x) " + opT(op) + " 0") + " (ensemble des solutions, en intervalles).", ivs,
+          "La courbe coupe l'axe des " + M("x") + " en " + M(p) + " et " + M(q) + ". On garde les " + M("x") + " où la courbe est " + (op[0] === ">" ? "au-dessus" : "au-dessous") + " de l'axe" + (op.length === 2 ? " ou dessus (zéros compris)" : " (zéros exclus)") + " : " + M("S = " + ssT(ivs)) + ".",
+          { ctx: "signe-f", fig: PLf([{ f }], { yr: [Math.max(yr[0], -9), Math.min(yr[1], 9)] }),
+            guide: [GSet("Abscisses des points où la courbe coupe l'axe des " + M("x") + " ?", [p, q], M(p + " \\,;\\, " + q) + "."), GSS("Ensemble des solutions ?", ivs, M(ssT(ivs)) + ".")],
+            traps: [TS(signSet(f, [p, q], [], NEG[op]), "Tu as pris l'autre côté de l'axe : " + M("f(x) " + opT(op) + " 0") + " veut la courbe " + (op[0] === ">" ? "au-dessus" : "au-dessous") + "."), TS(signSet(f, [p, q], [], SWAP[op]), op.length === 2 ? "Inégalité large : les zéros sont solutions." : "Inégalité stricte : les zéros ne sont pas solutions.")] }); },
+      () => { const [p, q] = two(-4, 5), a = pk([1, -1, 0.5, -0.5]), k = nz(-3, 3), f = (x) => a * (x - p) * (x - q) + k, g = (x) => f(x) - k, op = pk(OPS), ivs = signSet(g, [p, q], [], op), yr = yrOf([f, () => k], -6, 6);
+        return QS("Voici le graphe de la fonction " + M("f") + " et la droite " + M("y = " + k) + ". Résous graphiquement " + M("f(x) " + opT(op) + " " + k) + ".", ivs,
+          "La courbe rencontre la droite " + M("y = " + k) + " aux abscisses " + M(p) + " et " + M(q) + ". On garde les " + M("x") + " où la courbe est " + (op[0] === ">" ? "au-dessus" : "au-dessous") + " de la droite : " + M("S = " + ssT(ivs)) + ".",
+          { ctx: "f-et-constante", fig: PLf([{ f }, { f: () => k, cls: "f-line", dash: true }], { yr: [Math.max(yr[0], -9), Math.min(yr[1], 9)] }),
+            guide: [GSet("Abscisses des points communs à la courbe et à la droite " + M("y = " + k) + " ?", [p, q], M(p + " \\,;\\, " + q) + "."), GSS("Ensemble des solutions ?", ivs, M(ssT(ivs)) + ".")],
+            traps: [TS(signSet(g, [p, q], [], NEG[op]), "Tu as pris l'autre côté de la droite y = " + k + "."), TS(signSet(g, [p, q], [], SWAP[op]), op.length === 2 ? "Inégalité large : les points communs sont solutions." : "Inégalité stricte : les points communs ne sont pas solutions.")] }); },
+      () => { const [p, q] = two(-4, 4), a = pk([1, -1, 0.5]), m = pk([-1, 0.5, 1, 2, -0.5]), n = R.int(-2, 2), g = (x) => m * x + n, f = (x) => g(x) + a * (x - p) * (x - q), d = (x) => f(x) - g(x), op = pk(OPS), ivs = signSet(d, [p, q], [], op), yr = yrOf([f, g], -6, 6);
+        return QS("Voici les graphes de " + M("f") + " (courbe) et de " + M("g") + " (droite). Résous graphiquement " + M("f(x) " + opT(op) + " g(x)") + ".", ivs,
+          "Les graphes se coupent aux abscisses " + M(p) + " et " + M(q) + ". " + M("f(x) " + opT(op) + " g(x)") + " : la courbe est " + (op[0] === ">" ? "au-dessus" : "au-dessous") + " de la droite" + (op.length === 2 ? " (points d'intersection compris)" : "") + " : " + M("S = " + ssT(ivs)) + ".",
+          { ctx: "f-et-g", fig: PLf([{ f }, { f: g, cls: "f-line" }], { yr: [Math.max(yr[0], -10), Math.min(yr[1], 10)] }),
+            guide: [GSet("Abscisses des points d'intersection ?", [p, q], M(p + " \\,;\\, " + q) + "."), GSS("Ensemble des solutions ?", ivs, M(ssT(ivs)) + ".")],
+            traps: [TS(signSet(d, [p, q], [], NEG[op]), "C'est l'ensemble où la courbe est de l'autre côté de la droite."), TS(signSet(d, [p, q], [], SWAP[op]), op.length === 2 ? "Inégalité large : les abscisses des intersections sont solutions." : "Inégalité stricte : les intersections ne sont pas solutions.")] }); },
+    ],
+    2: [
+      () => { let p, z; do { p = nz(-3, 3); z = nz(-4, 4); } while (Math.abs(p - z) < 2); const b = pk([1, -1, 2]), a = b * (p - z), f = (x) => a / (x - p) + b, op = pk(OPS), ivs = signSet(f, [z], [p], op);
+        return QS("Voici le graphe de la fonction " + M("f") + " ; la droite " + M("x = " + p) + " (en traitillé) est une asymptote verticale : " + M("f") + " n'est pas définie en " + M(p) + ". Résous graphiquement " + M("f(x) " + opT(op) + " 0") + ".", ivs,
+          "La courbe coupe l'axe des " + M("x") + " en " + M(z) + " ; elle change aussi de côté à l'asymptote " + M("x = " + p) + ", qui est toujours exclue. " + M("S = " + ssT(ivs)) + ".",
+          { ctx: "hyperbole", fig: PLf([{ f }], { yr: [-7, 7], vlines: [p] }),
+            guide: [GR("Zéro de " + M("f") + " (lu sur le graphe) ?", z, M(z) + "."), GSS("Ensemble des solutions ?", ivs, M(ssT(ivs)) + ".")],
+            traps: [TS(signSet(f, [z, p], [], op), "En " + p + ", f n'est pas définie : cette valeur est toujours exclue."), TS(signSet(f, [z], [p], NEG[op]), "Tu as pris l'autre côté de l'axe."), TS(signSet(f, [z], [p], SWAP[op]), op.length === 2 ? "Inégalité large : le zéro " + z + " est solution." : "Inégalité stricte : le zéro " + z + " n'est pas solution.")] }); },
+      () => { const [p, q] = two(-5, 5), k = nz(-3, 3), a = pk([1, 0.5]), f = (x) => a * (x - p) * (x - q) + k, strict = R.rand() < 0.5, v = strict ? q - p - 1 : q - p + 1, yr = yrOf([f, () => k], -6, 6);
+        return QN("Voici le graphe de " + M("f") + " et la droite " + M("y = " + k) + ". Combien de nombres entiers " + M("x") + " vérifient " + M("f(x) " + (strict ? "<" : "\\le") + " " + k) + " ?", v,
+          "La courbe est sous la droite entre " + M(p) + " et " + M(q) + " : " + M("S = " + ssT(signSet((x) => f(x) - k, [p, q], [], strict ? "<" : "<="))) + ". Entiers : de " + M(strict ? p + 1 : p) + " à " + M(strict ? q - 1 : q) + ", soit " + M(v) + ".",
+          { ctx: "entiers", fig: PLf([{ f }, { f: () => k, cls: "f-line", dash: true }], { yr: [Math.max(yr[0], -9), Math.min(yr[1], 9)] }),
+            guide: [GSet("Abscisses des points communs ?", [p, q], M(p + " \\,;\\, " + q) + "."), GR("Nombre d'entiers solutions ?", v, M(v) + ".")],
+            traps: [TR(q - p, "Compte les entiers de " + p + " à " + q + " un par un : " + (strict ? "bornes exclues." : "bornes comprises, il y en a " + (q - p + 1) + ".")), TR(strict ? q - p + 1 : q - p - 1, strict ? "Inégalité stricte : " + p + " et " + q + " ne sont pas solutions." : "Inégalité large : " + p + " et " + q + " sont solutions.")] }); },
+      () => { let p, q; do { p = nz(-3, 3); q = R.int(-3, 3); } while (p === q); const s = pk([1, -1]) * 0.25, f = (x) => s * (x - p) * (x - p) * (x - q), op = pk([">", "<", ">=", "<="]), ivs = signSet(f, [p, q], [], op), yr = yrOf([f], -5, 5);
+        return QS("Voici le graphe de la fonction " + M("f") + " ; il touche l'axe des " + M("x") + " en " + M(p) + " sans le traverser. Résous graphiquement " + M("f(x) " + opT(op) + " 0") + ".", ivs,
+          "En " + M(q) + ", la courbe traverse l'axe ; en " + M(p) + ", elle le touche et repart du même côté (zéro double)" + (op.length === 2 ? " : " + M(p) + " est solution, même isolé" : " : " + M(p) + " est exclu") + ". " + M("S = " + ssT(ivs)) + ".",
+          { ctx: "racine-double", fig: PLf([{ f }], { xr: [-5, 5], yr: [Math.max(yr[0], -8), Math.min(yr[1], 8)] }),
+            guide: [GSet("Abscisses des points communs avec l'axe des " + M("x") + " ?", [p, q], M([p, q].sort((u, v) => u - v).join(" \\,;\\, ")) + "."), GSS("Ensemble des solutions ?", ivs, M(ssT(ivs)) + ".")],
+            traps: [TS(signSet((x) => s * (x - p) * (x - q), [p, q], [], op), "En " + p + ", la courbe ne traverse pas l'axe : le signe ne change pas."), TS(signSet(f, [p, q], [], SWAP[op]), op.length === 2 ? "Inégalité large : les zéros sont solutions." : "Inégalité stricte : les zéros ne sont pas solutions."), TS(signSet(f, [p, q], [], NEG[op]), "Tu as pris l'autre côté de l'axe.")] }); },
+    ],
+    3: [
+      () => { const rs = []; while (rs.length < 3) { const r = R.int(-4, 4); if (!rs.some((x) => Math.abs(x - r) < 2)) rs.push(r); } rs.sort((u, v) => u - v);
+        const s = pk([0.25, -0.25, 0.2]), m = pk([0.5, -0.5, 1]), n = R.int(-1, 1), g = (x) => m * x + n, d = (x) => s * (x - rs[0]) * (x - rs[1]) * (x - rs[2]), f = (x) => g(x) + d(x), op = pk(OPS), ivs = signSet(d, rs, [], op), yr = yrOf([f, g], -5.5, 5.5);
+        return QS("Voici les graphes de " + M("f") + " (courbe) et de " + M("g") + " (droite). Résous graphiquement " + M("f(x) " + opT(op) + " g(x)") + ".", ivs,
+          "Les graphes se coupent en trois points, d'abscisses " + rs.map(M).join(", ") + ". Entre deux intersections consécutives, la courbe reste du même côté de la droite : " + M("S = " + ssT(ivs)) + ".",
+          { ctx: "trois-intersections", fig: PLf([{ f }, { f: g, cls: "f-line" }], { xr: [-6, 6], yr: [Math.max(yr[0], -10), Math.min(yr[1], 10)] }),
+            guide: [GSet("Abscisses des trois points d'intersection ?", rs, M(rs.join(" \\,;\\, ")) + "."), GSS("Ensemble des solutions ?", ivs, M(ssT(ivs)) + ".")],
+            traps: [TS(signSet(d, rs, [], NEG[op]), "C'est là où la courbe est de l'autre côté de la droite."), TS(signSet(d, [rs[0], rs[2]], [], op), "Il y a trois intersections : la courbe change de côté aussi en " + rs[1] + "."), TS(signSet(d, rs, [], SWAP[op]), "Vérifie si les bornes sont comprises (inégalité large) ou non.")] }); },
+      () => { const h = R.int(-2, 2), v0 = R.int(-4, -1), [s1, s2] = pk([[1, 2], [1, 3], [2, 3]]), k1 = v0 + s1 * s1, k2 = v0 + s2 * s2, f = (x) => (x - h) ** 2 + v0;
+        const ivs = [[h - s2, true, h - s1, true], [h + s1, true, h + s2, true]];
+        return QS("Voici le graphe de " + M("f") + " et les droites " + M("y = " + k1) + " et " + M("y = " + k2) + ". Résous graphiquement " + M(k1 + " \\le f(x) \\le " + k2) + ".", ivs,
+          "On garde les " + M("x") + " où la courbe est entre les deux droites (bord compris). Elle rencontre " + M("y = " + k2) + " en " + M(h - s2) + " et " + M(h + s2) + ", et " + M("y = " + k1) + " en " + M(h - s1) + " et " + M(h + s1) + " : deux morceaux, " + M("S = " + ssT(ivs)) + ".",
+          { ctx: "encadrement", fig: PLf([{ f }, { f: () => k1, cls: "f-line", dash: true }, { f: () => k2, cls: "f-line", dash: true }], { yr: [v0 - 1, Math.max(k2 + 1, 2)] }),
+            guide: [GSet("Abscisses où la courbe rencontre " + M("y = " + k2) + " ?", [h - s2, h + s2], M((h - s2) + " \\,;\\, " + (h + s2)) + "."), GSet("Où elle rencontre " + M("y = " + k1) + " ?", [h - s1, h + s1], M((h - s1) + " \\,;\\, " + (h + s1)) + "."), GSS("Ensemble des solutions ?", ivs, M(ssT(ivs)) + ".")],
+            traps: [TS([[h - s2, true, h + s2, true]], "Entre " + (h - s1) + " et " + (h + s1) + ", la courbe passe sous la droite y = " + k1 + " : ces x ne conviennent pas."), TS([[h - s1, true, h + s1, true]], "Là, f(x) ≤ " + k1 + " : on veut la courbe entre les deux droites."), TS([[h - s2, false, h - s1, false], [h + s1, false, h + s2, false]], "Inégalités larges : les bornes sont comprises.")] }); },
+      () => { const p = pk([-1.5, -0.5, 0.5, 1.5, 2.5]), q = nz(-3, 3), m = pk([1, -1, 2]), n = R.int(-2, 2); if (q === p) return null;
+        const B = -2 * (p + q) + m, C = 2 * p * q + n, f = (x) => 2 * x * x + B * x + C, g = (x) => m * x + n, op = pk(["<", "<=", ">", ">="]), d = (x) => f(x) - g(x), ivs = signSet(d, [p, q], [], op);
+        const fT2 = "2x^2" + (B ? (B < 0 ? " - " : " + ") + (Math.abs(B) === 1 ? "" : fT(Math.abs(B))) + "x" : "") + (C ? (C < 0 ? " - " : " + ") + fT(Math.abs(C)) : ""), gT = (m === 1 ? "" : m === -1 ? "-" : m) + "x" + (n ? (n < 0 ? " - " + -n : " + " + n) : "");
+        return QS("On donne " + M("f(x) = " + fT2) + " et " + M("g(x) = " + gT) + " (graphes ci-dessous). Une intersection ne tombe pas sur un nombre entier : calcule les abscisses des intersections, puis résous " + M("f(x) " + opT(op) + " g(x)") + ".", ivs,
+          M("f(x) - g(x) = 2x^2" + (B - m ? (B - m < 0 ? " - " : " + ") + fT(Math.abs(B - m)) + "x" : "") + (C - n ? (C - n < 0 ? " - " : " + ") + fT(Math.abs(C - n)) : "") + " = 2" + fx(p) + fx(q)) + " : intersections en " + M(fT(p)) + " et " + M(q) + ". Le graphe confirme de quel côté est la parabole : " + M("S = " + ssT(ivs)) + ".",
+          { ctx: "algebre-et-graphe", fig: PLf([{ f }, { f: g, cls: "f-line" }], { xr: [-5, 5], yr: [-6, 10], step: 2 }),
+            guide: [GSet("Abscisses des intersections (fraction acceptée) ?", [p, q], M([p, q].sort((u, v) => u - v).map(fT).join(" \\,;\\, ")) + "."), GSS("Ensemble des solutions ?", ivs, M(ssT(ivs)) + ".")],
+            traps: [TS(signSet(d, [Math.round(p + 0.01), q].filter((v, i, t) => t.indexOf(v) === i), [], op), "L'intersection est en " + fS(p) + " : un graphe ne suffit pas, calcule-la."), TS(signSet(d, [p, q], [], NEG[op]), "C'est là où la parabole est de l'autre côté de la droite."), TS(signSet(d, [p, q], [], SWAP[op]), "Vérifie si les bornes sont comprises.")] }); },
+    ],
+  };
+
+  const PROBS = {
+    graphefct: [() => { const [r, a, b] = pk([[5, 3, 4], [10, 6, 8], [13, 5, 12]]);
+      return P("On considère le cercle " + M("x^2 + y^2 = " + r * r) + " et la droite verticale " + M("x = " + a) + ".", [["a) En combien de points la droite coupe-t-elle le cercle ?", 2], ["b) Image de " + a + " par la fonction dont le graphe est la moitié supérieure du cercle", b], ["c) Plus grande abscisse d'un point du cercle", r]],
+        ["Remplace x par " + a + " et résous en y.", "Moitié supérieure : y = √(" + r * r + " − x²)."], "a) 2 : " + M("y = " + b) + " ou " + M("y = -" + b) + ", ce n'est pas une fonction ; b) " + b + " ; c) " + r + "."); }],
+    ineqgraph: [() => { const p = pk([-2, -1]), q = pk([3, 4]), f = (x) => (x - p) * (x - q);
+      return P("Le graphe de " + M("f(x) = " + poly([1, -(p + q), p * q])) + " coupe l'axe des x en deux points.", [["a) Plus petite abscisse d'intersection avec l'axe", p], ["b) Plus grande", q], ["c) Nombre d'entiers x tels que f(x) < 0", q - p - 1]],
+        ["Factorise ou lis le graphe.", "f(x) < 0 entre les zéros, bornes exclues."], "a) " + p + " ; b) " + q + " ; c) les entiers de " + (p + 1) + " à " + (q - 1) + ", soit " + (q - p - 1) + ".", PLf([{ f }], { yr: [-8, 8] })); }],
+  };
+
+  reg([
+    { id: "graphefct", theme: "fa", label: "Graphe d'une fonction ou non ?", ex: "\\text{une droite verticale coupe le graphe au plus une fois}", CH: [12], lv: GF, probs: PROBS.graphefct,
+      hint: "Test de la droite verticale : une courbe est le graphe d'une fonction si chaque droite verticale la coupe au plus une fois (chaque x a au plus une image). Un graphe peut être en plusieurs morceaux. Tableau de couples : aucune abscisse répétée avec deux ordonnées différentes.",
+      lesson: ["Graphe d'une fonction", "Une fonction donne au plus une image à chaque nombre : son graphe ne repasse jamais au-dessus d'un même x.",
+        "Le graphe de \\(f\\) est l'ensemble des points \\((x \\,;\\, f(x))\\). Une courbe est le graphe d'une fonction si et seulement si toute droite verticale \\(x = a\\) la coupe en un point au plus (aucun point : \\(a\\) n'est pas dans l'ensemble de définition). Un cercle, une parabole « couchée » (\\(x = y^2\\)), une droite verticale ne sont pas des graphes de fonctions ; une demi-circonférence l'est (\\(y = \\sqrt{r^2 - x^2}\\)). Une équation définit \\(y\\) comme fonction de \\(x\\) si, pour chaque \\(x\\), elle donne au plus une valeur de \\(y\\).",
+        ["\\(x^2 + y^2 = 25\\) en \\(x = 3\\) : \\(y = 4\\) ou \\(y = -4\\) → pas une fonction.", "\\(y = \\frac{2}{x}\\) : deux morceaux, mais un seul \\(y\\) par \\(x\\) → fonction."],
+        "Deux abscisses différentes peuvent avoir la même image : c'est une même abscisse avec deux images qui est interdite."],
+      comps: ["Reconnaître un graphe de fonction (droites verticales, tableaux de couples)", "Cercles, équations, demi-cercles", "Courbes couchées, ensemble de définition, raccord de deux morceaux"],
+      act: { retiens: { regle: "Une courbe est le graphe d'une fonction si chaque droite verticale la coupe au plus une fois.", exemple: ["Cercle \\(x^2 + y^2 = 25\\), droite \\(x = 3\\) : deux points \\((3 \\,;\\, 4)\\) et \\((3 \\,;\\, -4)\\) → pas une fonction.", "Moitié supérieure : \\(f(x) = \\sqrt{25 - x^2}\\), \\(f(3) = 4\\)."], piege: "Deux x différents avec le même y, c'est permis ; un même x avec deux y, non." },
+        predict: { q: "Un cercle peut-il être le graphe d'une fonction ?", choices: ["non : une droite verticale le coupe en deux points", "oui, c'est une courbe fermée", "oui, si son centre est l'origine"], good: 0, why: "Pour un x entre les bords, il y a un point en haut et un en bas : deux images. Seule une moitié (haute ou basse) est un graphe de fonction." },
+        defis: ["Cercle \\(x^2 + y^2 = 25\\) : en combien de points la droite \\(x = 3\\) le coupe-t-elle ?", "Sa moitié supérieure est le graphe de \\(f(x) = \\sqrt{25 - x^2}\\). Tape \\(f(3)\\)."],
+        play: toi(["Remplace x par 3 : y² = 25 − 9 = 16", "f(3) = √(25 − 9)"], [W(2, "y = 4 ou y = −4 : deux points, donc pas une fonction."), W(4, "√16 = 4 : la moitié supérieure ne garde que y = 4.")]) } },
+    { id: "ineqgraph", theme: "fa", label: "Résoudre graphiquement une inéquation", ex: "f(x) \\ge g(x) \\iff \\text{courbe de } f \\text{ au-dessus}", CH: [13], lv: IG, probs: PROBS.ineqgraph,
+      hint: "f(x) > 0 : courbe au-dessus de l'axe des x ; f(x) > k : au-dessus de la droite y = k ; f(x) > g(x) : courbe de f au-dessus de celle de g. Repère d'abord les abscisses des points d'intersection ; inégalité large : elles sont comprises. Une asymptote verticale est toujours exclue.",
+      lesson: ["Résolution graphique", "Une inéquation se lit sur un graphique : au-dessus ou au-dessous.",
+        "Pour résoudre \\(f(x) \\ge g(x)\\), on trace les deux graphes, on lit les abscisses de leurs points d'intersection, puis on garde les intervalles où la courbe de \\(f\\) est au-dessus de celle de \\(g\\) (avec les abscisses des intersections si l'inégalité est large). \\(f(x) \\ge 0\\) : \\(g\\) est l'axe des \\(x\\) ; \\(f(x) \\ge k\\) : la droite horizontale \\(y = k\\). Une valeur où \\(f\\) n'est pas définie (asymptote) n'est jamais solution. Si une intersection ne tombe pas sur une graduation, on la calcule.",
+        ["Parabole sous l'axe entre \\(-1\\) et \\(3\\) : \\(f(x) < 0 \\iff x \\in \\,]-1 \\,;\\, 3[\\)", "Courbe au-dessus de la droite à gauche de \\(-2\\) : \\(f(x) \\ge g(x)\\) sur \\(]-\\infty \\,;\\, -2]\\)…"],
+        "On lit les solutions sur l'axe des \\(x\\) (des abscisses), pas sur l'axe des \\(y\\)."],
+      comps: ["Lire f(x) ≷ 0, f(x) ≷ k, f(x) ≷ g(x) sur un graphique", "Asymptote verticale, zéro double, solutions entières", "Trois intersections, encadrement, intersection à calculer"],
+      act: { retiens: { regle: "\\(f(x) \\le k\\) : on garde les abscisses où la courbe est sous la droite \\(y = k\\) (bornes comprises si l'inégalité est large).", exemple: ["\\(f(x) = x^2 - 4\\) : sous l'axe entre \\(-2\\) et \\(2\\).", "Entiers solutions de \\(f(x) \\le 0\\) : \\(-2, -1, 0, 1, 2\\), soit 5."], piege: "On lit les solutions sur l'axe des x, pas les valeurs de f." },
+        predict: { q: "La parabole y = x² − 4 est sous l'axe des x…", choices: ["entre −2 et 2", "pour x < −4", "partout"], good: 0, why: "Elle coupe l'axe en −2 et 2 ; entre les deux, x² < 4, donc x² − 4 < 0." },
+        defis: ["\\(f(x) = x^2 - 4\\). Combien d'entiers vérifient \\(f(x) \\le 0\\) ?", "\\(f(x) = x^2 - 2x - 3\\) coupe l'axe en \\(-1\\) et \\(3\\). Tape le plus grand entier tel que \\(f(x) < 0\\)."],
+        play: toi(["La courbe est sous l'axe entre −2 et 2, bornes comprises", "Sous l'axe entre −1 et 3, bornes exclues"], [W(5, "−2, −1, 0, 1, 2 : cinq entiers."), W(2, "f(3) = 0 n'est pas < 0 : le plus grand entier est 2.")]) } },
+  ]);
+})();
+
+// Généré par tools/ref_matu.py (25.11) : référentiel de compétences du Collège de Genève (code, niveau, thème,
+// notion, intitulé ; l'année est le premier chiffre du code) et rattachement aux notions de l'app.
+// Niveaux : 0 = MA1 et MA2, 1 = MA2 seulement, 2 = MA1 seulement.
+const REF_MATU = {
+  niv: ["MA1+MA2", "MA2", "MA1"],
+  th: ["Algèbre", "Fonctions", "Géométrie", "Analyse", "Géométrie vectorielle", "Probabilités et statistiques", "Nombres complexes", "Algèbre linéaire"],
+  no: ["Polynômes", "Équations", "Généralités sur les fonctions", "Fonctions du 1er et du 2e degré", "Racine carrée et inverse", "Résolution de problèmes", "Angles", "Théorèmes fondamentaux", "Droites remarquables du triangle", "Trigonométrie dans le triangle rectangle", "Fractions rationnelles", "Inéquations", "Composition", "Bijection et réciproque", "Fonctions polynomiales", "Valeur absolue", "Fonctions homographiques", "Fonctions trigonométriques", "Exponentielle et logarithme", "Trigonométrie dans un triangle quelconque", "Géométrie cartésienne", "Limites, continuité", "Dérivée", "Étude de fonctions", "Vecteurs du plan et de l'espace", "Droites et plans", "Produit scalaire", "Produit vectoriel", "Analyse combinatoire", "Épreuve aléatoire", "Primitive", "Intégrale", "Logarithme et exponentielle", "Équations différentielles", "Suites et séries (prolongement)", "Corps des complexes", "Formes", "Transformations linéaires du plan", "Applications linéaires", "Espaces vectoriels", "Géométrie dans l'espace", "Statistique descriptive", "Probabilité conditionnelle", "Variable aléatoire"],
+  c: [
+    ["1.AL.01a", 0, 0, 0, "Reconnaître un monôme et un polynôme (coefficient, degré) et réduire des termes semblables"],
+    ["1.AL.01b", 0, 0, 0, "Additionner et soustraire des polynômes (suppression de parenthèses)"],
+    ["1.AL.01c", 0, 0, 0, "Multiplier un monôme par un polynôme et deux polynômes entre eux (distributivité)"],
+    ["1.AL.01d", 0, 0, 0, "Développer, réduire et ordonner une expression combinant plusieurs opérations"],
+    ["1.AL.02a", 0, 0, 0, "Développer (a + b)², (a − b)² et (a + b)(a − b)"],
+    ["1.AL.02b", 0, 0, 0, "Reconnaître une identité remarquable dans une expression développée"],
+    ["1.AL.02c", 0, 0, 0, "Utiliser les identités remarquables dans un calcul (expressions à plusieurs lettres, calcul mental)"],
+    ["1.AL.03a", 0, 0, 0, "Factoriser par mise en évidence (facteur commun : nombre, monôme ou parenthèse)"],
+    ["1.AL.03b", 0, 0, 0, "Factoriser à l'aide des identités remarquables (différence de deux carrés, carré parfait)"],
+    ["1.AL.03c", 0, 0, 0, "Factoriser un trinôme x² + sx + p (somme et produit)"],
+    ["1.AL.03d", 0, 0, 0, "Factoriser par groupements"],
+    ["1.AL.03e", 0, 0, 0, "Factoriser complètement en combinant plusieurs procédés"],
+    ["1.AL.04a", 0, 0, 1, "Résoudre une équation du type ax + b = cx + d"],
+    ["1.AL.04b", 0, 0, 1, "Résoudre une équation du premier degré avec parenthèses ou coefficients fractionnaires"],
+    ["1.AL.04c", 0, 0, 1, "Reconnaître une équation impossible ou indéterminée"],
+    ["1.AL.04d", 0, 0, 1, "Transformer une formule (isoler une variable)"],
+    ["1.AL.04e", 0, 0, 1, "Mettre un problème en équation du premier degré, le résoudre et interpréter la solution"],
+    ["1.AL.05a", 0, 0, 1, "Résoudre les équations incomplètes x² = a et ax² + bx = 0"],
+    ["1.AL.05b", 0, 0, 1, "Résoudre une équation du second degré par factorisation (produit nul)"],
+    ["1.AL.05c", 0, 0, 1, "Résoudre une équation du second degré avec la formule (discriminant) et discuter le nombre de solutions"],
+    ["1.AL.05d", 0, 0, 1, "Factoriser un trinôme du second degré à l'aide de ses zéros"],
+    ["1.AL.05e", 0, 0, 1, "Mettre un problème en équation du second degré, le résoudre et écarter les solutions impossibles"],
+    ["1.AL.06a", 0, 0, 1, "Résoudre une équation de degré 3 ou plus par mise en évidence, puis produit nul"],
+    ["1.AL.06b", 0, 0, 1, "Résoudre une équation de degré supérieur par groupements ou identités remarquables"],
+    ["1.AL.06c", 0, 0, 1, "Résoudre une équation bicarrée par changement de variable"],
+    ["1.AL.07a", 0, 0, 1, "Résoudre un système de deux équations à deux inconnues par substitution"],
+    ["1.AL.07b", 0, 0, 1, "Résoudre un système de deux équations à deux inconnues par combinaison linéaire"],
+    ["1.AL.07c", 0, 0, 1, "Interpréter graphiquement un système 2 × 2 (solution unique, aucune solution, infinité de solutions)"],
+    ["1.AL.07d", 0, 0, 1, "Résoudre un système de trois équations à trois inconnues (élimination)"],
+    ["1.AL.07e", 0, 0, 1, "Mettre un problème en système d'équations et le résoudre"],
+    ["1.FO.01a", 0, 1, 2, "Déterminer le domaine de définition d'une fonction comportant un quotient"],
+    ["1.FO.01b", 0, 1, 2, "Déterminer le domaine de définition d'une fonction comportant une racine carrée"],
+    ["1.FO.01c", 0, 1, 2, "Déterminer le domaine de définition d'une fonction combinant quotient et racine, et l'écrire avec des intervalles"],
+    ["1.FO.02a", 0, 1, 2, "Connaître le vocabulaire et les notations des fonctions (ensemble de départ, d'arrivée, image, graphe)"],
+    ["1.FO.02b", 0, 1, 2, "Établir un tableau de valeurs et tracer le graphe d'une fonction point par point"],
+    ["1.FO.02c", 0, 1, 2, "Reconnaître si une courbe est le graphe d'une fonction"],
+    ["1.FO.03a", 0, 1, 2, "Calculer l'image d'un nombre par une fonction"],
+    ["1.FO.03b", 0, 1, 2, "Déterminer les préimages d'un nombre (résoudre f(x) = b)"],
+    ["1.FO.03c", 0, 1, 2, "Déterminer les zéros et l'ordonnée à l'origine d'une fonction"],
+    ["1.FO.04a", 0, 1, 2, "Lire sur un graphique l'image et les préimages d'un nombre"],
+    ["1.FO.04b", 0, 1, 2, "Lire sur un graphique les zéros et le signe d'une fonction"],
+    ["1.FO.04c", 0, 1, 2, "Lire sur un graphique les intervalles de croissance et de décroissance et les extrema (tableau de variations)"],
+    ["1.FO.04d", 0, 1, 2, "Résoudre graphiquement f(x) = k et f(x) < k"],
+    ["1.FO.05a", 0, 1, 3, "Reconnaître une fonction constante, linéaire ou affine et son sens de variation"],
+    ["1.FO.05b", 0, 1, 3, "Calculer et interpréter la pente et l'ordonnée à l'origine"],
+    ["1.FO.05c", 0, 1, 3, "Tracer la droite représentant une fonction du premier degré à partir de son expression"],
+    ["1.FO.05d", 0, 1, 3, "Calculer le zéro d'une fonction du premier degré et étudier son signe"],
+    ["1.FO.06a", 0, 1, 3, "Déterminer l'expression d'une fonction du premier degré à partir de son graphique (pente, ordonnée à l'origine)"],
+    ["1.FO.06b", 0, 1, 3, "Déterminer l'expression d'une fonction du premier degré à partir de deux points, ou d'un point et de la pente"],
+    ["1.FO.06c", 0, 1, 3, "Reconnaître des droites parallèles à leur pente"],
+    ["1.FO.07a", 0, 1, 3, "Déterminer l'ordonnée à l'origine et les zéros d'une fonction du deuxième degré"],
+    ["1.FO.07b", 0, 1, 3, "Déterminer le sommet et l'axe de symétrie d'une parabole"],
+    ["1.FO.07c", 0, 1, 3, "Passer d'une forme à l'autre (développée, factorisée, canonique)"],
+    ["1.FO.07d", 0, 1, 3, "Esquisser une parabole (orientation, éléments caractéristiques, tableau de variations)"],
+    ["1.FO.08a", 0, 1, 3, "Déterminer l'expression d'une fonction du deuxième degré à partir de ses zéros et d'un point"],
+    ["1.FO.08b", 0, 1, 3, "Déterminer l'expression d'une fonction du deuxième degré à partir de son sommet et d'un point"],
+    ["1.FO.08c", 0, 1, 3, "Déterminer l'expression d'une fonction du deuxième degré à partir de trois points (système)"],
+    ["1.FO.09a", 0, 1, 3, "Déterminer l'intersection de deux droites, algébriquement et graphiquement"],
+    ["1.FO.09b", 0, 1, 3, "Déterminer l'intersection d'une droite et d'une parabole (nombre de points selon le discriminant)"],
+    ["1.FO.09c", 0, 1, 3, "Déterminer l'intersection de deux paraboles"],
+    ["1.FO.09d", 0, 1, 3, "Comparer deux fonctions : résoudre f(x) ≤ g(x) à l'aide des graphes et des points d'intersection"],
+    ["1.FO.10a", 0, 1, 4, "Représenter la fonction racine carrée (domaine, tableau de valeurs, allure)"],
+    ["1.FO.10b", 0, 1, 4, "Représenter la fonction inverse (domaine, branches, asymptotes)"],
+    ["1.FO.10c", 0, 1, 4, "Calculer des images et des préimages par les fonctions racine carrée et inverse"],
+    ["1.FO.11a", 0, 1, 4, "Résoudre une équation du type √x = ax + b et vérifier les solutions"],
+    ["1.FO.11b", 0, 1, 4, "Résoudre une équation du type 1/x = ax + b (se ramener au second degré)"],
+    ["1.FO.11c", 0, 1, 4, "Interpréter graphiquement le nombre de solutions"],
+    ["1.FO.12a", 0, 1, 5, "Modéliser une situation par une fonction du premier degré (tarifs, comparaison d'offres)"],
+    ["1.FO.12b", 0, 1, 5, "Modéliser une situation par une fonction du deuxième degré (aire, trajectoire, recette)"],
+    ["1.FO.12c", 0, 1, 5, "Résoudre un problème d'optimisation à l'aide du sommet d'une parabole"],
+    ["1.FO.12d", 0, 1, 5, "Interpréter le résultat dans le contexte (domaine, unités, vraisemblance)"],
+    ["1.GE.01a", 0, 2, 6, "Utiliser les angles opposés par le sommet, correspondants et alternes-internes"],
+    ["1.GE.01b", 0, 2, 6, "Utiliser la somme des angles d'un triangle et d'un polygone"],
+    ["1.GE.01c", 0, 2, 6, "Utiliser le théorème de l'angle inscrit et de l'angle au centre"],
+    ["1.GE.01d", 0, 2, 6, "Utiliser le cercle de Thalès et la perpendicularité de la tangente et du rayon"],
+    ["1.GE.01e", 0, 2, 6, "Justifier un calcul d'angle par un raisonnement déductif"],
+    ["1.GE.02a", 0, 2, 7, "Énoncer le théorème de Pythagore et sa réciproque"],
+    ["1.GE.02b", 0, 2, 7, "Énoncer les théorèmes d'Euclide et de la hauteur"],
+    ["1.GE.02c", 0, 2, 7, "Maîtriser une démonstration du théorème de Pythagore"],
+    ["1.GE.02d", 0, 2, 7, "Maîtriser une démonstration des théorèmes d'Euclide et de la hauteur (triangles semblables)"],
+    ["1.GE.03a", 0, 2, 7, "Reconnaître des triangles semblables et déterminer le rapport de similitude"],
+    ["1.GE.03b", 0, 2, 7, "Calculer une longueur avec le théorème de Thalès"],
+    ["1.GE.03c", 0, 2, 7, "Utiliser les rapports d'aires et de volumes de figures semblables (k², k³)"],
+    ["1.GE.03d", 0, 2, 7, "Calculer une longueur avec le théorème de Pythagore et utiliser sa réciproque"],
+    ["1.GE.03e", 0, 2, 7, "Calculer une longueur avec les théorèmes d'Euclide et de la hauteur"],
+    ["1.GE.03f", 0, 2, 7, "Résoudre un problème combinant plusieurs théorèmes"],
+    ["1.GE.04a", 0, 2, 8, "Connaître les définitions de la médiatrice, de la bissectrice, de la médiane et de la hauteur, et les construire"],
+    ["1.GE.04b", 0, 2, 8, "Connaître les points de concours (centres des cercles circonscrit et inscrit, centre de gravité, orthocentre)"],
+    ["1.GE.04c", 0, 2, 8, "Utiliser les propriétés des droites remarquables (équidistance, centre de gravité aux deux tiers)"],
+    ["1.GE.04d", 0, 2, 8, "Utiliser les droites remarquables dans un problème ou une démonstration"],
+    ["1.GE.05a", 0, 2, 9, "Connaître les définitions du sinus, du cosinus et de la tangente d'un angle aigu"],
+    ["1.GE.05b", 0, 2, 9, "Calculer un côté d'un triangle rectangle avec un rapport trigonométrique"],
+    ["1.GE.05c", 0, 2, 9, "Calculer un angle d'un triangle rectangle (fonctions inverses de la calculatrice)"],
+    ["1.GE.05d", 0, 2, 9, "Résoudre complètement un triangle rectangle"],
+    ["1.GE.05e", 0, 2, 9, "Connaître les valeurs exactes des rapports trigonométriques de 30°, 45° et 60°"],
+    ["1.GE.06a", 0, 2, 9, "Résoudre un problème de hauteur ou de distance (angle d'élévation, angle de dépression)"],
+    ["1.GE.06b", 0, 2, 9, "Relier pente et angle d'inclinaison"],
+    ["1.GE.06c", 0, 2, 9, "Résoudre un problème dans une figure plane ou dans l'espace en y repérant des triangles rectangles"],
+    ["2.AL.01a", 0, 0, 0, "Effectuer la division euclidienne de deux polynômes (quotient et reste)"],
+    ["2.AL.01b", 0, 0, 0, "Diviser un polynôme par (x − a) avec le schéma de Horner"],
+    ["2.AL.01c", 0, 0, 0, "Utiliser le théorème du reste : P(a) = 0 si et seulement si (x − a) divise P"],
+    ["2.AL.01d", 0, 0, 0, "Factoriser un polynôme à l'aide d'une racine évidente"],
+    ["2.AL.01e", 0, 0, 0, "Factoriser complètement un polynôme de degré 3 ou 4"],
+    ["2.AL.02a", 0, 0, 10, "Déterminer les valeurs interdites d'une fraction rationnelle"],
+    ["2.AL.02b", 0, 0, 10, "Simplifier une fraction rationnelle"],
+    ["2.AL.02c", 0, 0, 10, "Multiplier et diviser des fractions rationnelles"],
+    ["2.AL.02d", 0, 0, 10, "Additionner et soustraire des fractions rationnelles (dénominateur commun)"],
+    ["2.AL.02e", 0, 0, 10, "Simplifier une expression à étages"],
+    ["2.AL.03a", 0, 0, 10, "Poser les conditions d'existence et résoudre une équation rationnelle simple (proportion)"],
+    ["2.AL.03b", 0, 0, 10, "Résoudre une équation rationnelle par réduction au même dénominateur et écarter les solutions interdites"],
+    ["2.AL.03c", 0, 0, 10, "Résoudre un problème menant à une équation rationnelle"],
+    ["2.AL.04a", 0, 0, 11, "Résoudre une inéquation du premier degré et écrire l'ensemble des solutions avec des intervalles"],
+    ["2.AL.04b", 0, 0, 11, "Étudier le signe d'un binôme et d'un trinôme"],
+    ["2.AL.04c", 0, 0, 11, "Résoudre une inéquation à l'aide du tableau des signes d'un produit"],
+    ["2.AL.04d", 0, 0, 11, "Résoudre une inéquation rationnelle (tableau des signes d'un quotient)"],
+    ["2.AL.04e", 0, 0, 11, "Résoudre graphiquement une inéquation"],
+    ["2.FO.01a", 0, 1, 12, "Calculer l'image d'un nombre par une composée"],
+    ["2.FO.01b", 0, 1, 12, "Déterminer l'expression et le domaine d'une composée"],
+    ["2.FO.01c", 0, 1, 12, "Décomposer une fonction en fonctions élémentaires"],
+    ["2.FO.02a", 0, 1, 13, "Reconnaître une fonction injective, surjective ou bijective (graphiquement et par calcul)"],
+    ["2.FO.02b", 0, 1, 13, "Restreindre le domaine et l'ensemble d'arrivée pour obtenir une bijection"],
+    ["2.FO.03a", 0, 1, 13, "Calculer l'expression de la réciproque d'une bijection"],
+    ["2.FO.03b", 0, 1, 13, "Représenter une fonction et sa réciproque dans le même repère (symétrie d'axe y = x)"],
+    ["2.FO.03c", 0, 1, 13, "Vérifier que deux fonctions sont réciproques l'une de l'autre par composition"],
+    ["2.FO.04a", 0, 1, 14, "Déterminer les zéros d'une fonction polynomiale par factorisation"],
+    ["2.FO.04b", 0, 1, 14, "Dresser le tableau des signes d'une fonction polynomiale"],
+    ["2.FO.04c", 0, 1, 14, "Esquisser le graphe (degré, coefficient dominant, multiplicité des zéros, ordonnée à l'origine)"],
+    ["2.FO.04d", 0, 1, 14, "Retrouver l'expression d'une fonction polynomiale à partir de son graphe (zéros et un point)"],
+    ["2.FO.05a", 0, 1, 15, "Connaître la définition de la valeur absolue et résoudre |ax + b| = c"],
+    ["2.FO.05b", 0, 1, 15, "Résoudre une inéquation du type |ax + b| < c ou |ax + b| > c"],
+    ["2.FO.05c", 0, 1, 15, "Écrire une fonction contenant des valeurs absolues sans valeur absolue (par morceaux) et la représenter"],
+    ["2.FO.06a", 0, 1, 16, "Déterminer le domaine, le zéro et l'ordonnée à l'origine d'une fonction homographique"],
+    ["2.FO.06b", 0, 1, 16, "Déterminer les asymptotes verticale et horizontale d'une fonction homographique"],
+    ["2.FO.06c", 0, 1, 16, "Représenter une fonction homographique (hyperbole)"],
+    ["2.FO.06d", 0, 1, 16, "Calculer la réciproque d'une fonction homographique"],
+    ["2.FO.07a", 0, 1, 17, "Connaître le radian, convertir degrés et radians, calculer une longueur d'arc"],
+    ["2.FO.07b", 0, 1, 17, "Définir sinus, cosinus et tangente à partir du cercle trigonométrique"],
+    ["2.FO.07c", 0, 1, 17, "Connaître les valeurs exactes pour les angles remarquables"],
+    ["2.FO.07d", 0, 1, 17, "Utiliser les propriétés des angles associés (−x, π − x, π + x, π/2 − x)"],
+    ["2.FO.07e", 0, 1, 17, "Utiliser les relations fondamentales (sin² x + cos² x = 1, tan x = sin x / cos x)"],
+    ["2.FO.08a", 0, 1, 17, "Résoudre sin x = c, cos x = c et tan x = c et donner toutes les solutions"],
+    ["2.FO.08b", 0, 1, 17, "Déterminer les solutions d'une équation trigonométrique dans un intervalle donné"],
+    ["2.FO.08c", 0, 1, 17, "Résoudre une équation du type sin(ax + b) = c"],
+    ["2.FO.09a", 0, 1, 17, "Représenter les fonctions sinus, cosinus et tangente (période, parité, zéros)"],
+    ["2.FO.09b", 0, 1, 17, "Déterminer l'amplitude, la période et le déphasage de a·sin(bx + c) + d et la représenter"],
+    ["2.FO.09c", 0, 1, 17, "Retrouver l'expression d'une fonction trigonométrique à partir de son graphe"],
+    ["2.FO.10a", 0, 1, 18, "Utiliser les propriétés des puissances à exposants entiers et rationnels"],
+    ["2.FO.10b", 0, 1, 18, "Connaître la fonction exponentielle de base a (graphe, croissance, asymptote)"],
+    ["2.FO.10c", 0, 1, 18, "Définir le logarithme comme réciproque de l'exponentielle et calculer des logarithmes simples"],
+    ["2.FO.10d", 0, 1, 18, "Démontrer et utiliser les propriétés du logarithme (produit, quotient, puissance)"],
+    ["2.FO.10e", 0, 1, 18, "Utiliser la formule de changement de base"],
+    ["2.FO.11a", 0, 1, 18, "Résoudre une équation exponentielle en se ramenant à la même base"],
+    ["2.FO.11b", 0, 1, 18, "Résoudre une équation exponentielle à l'aide du logarithme"],
+    ["2.FO.11c", 0, 1, 18, "Résoudre une équation logarithmique simple (conditions d'existence)"],
+    ["2.FO.12a", 0, 1, 5, "Modéliser une croissance ou une décroissance exponentielle (intérêts composés, population, demi-vie)"],
+    ["2.FO.12b", 0, 1, 5, "Modéliser un phénomène périodique par une fonction trigonométrique"],
+    ["2.FO.12c", 0, 1, 5, "Modéliser une situation par une fonction polynomiale ou rationnelle et interpréter le résultat"],
+    ["2.GE.01a", 0, 2, 19, "Énoncer les théorèmes du sinus et du cosinus"],
+    ["2.GE.01b", 0, 2, 19, "Maîtriser une démonstration du théorème du sinus"],
+    ["2.GE.01c", 0, 2, 19, "Maîtriser une démonstration du théorème du cosinus"],
+    ["2.GE.02a", 0, 2, 19, "Calculer un côté ou un angle avec le théorème du sinus (y compris le cas ambigu)"],
+    ["2.GE.02b", 0, 2, 19, "Calculer un côté ou un angle avec le théorème du cosinus"],
+    ["2.GE.02c", 0, 2, 19, "Résoudre complètement un triangle quelconque"],
+    ["2.GE.02d", 0, 2, 19, "Calculer l'aire d'un triangle avec le sinus (demi-produit de deux côtés par le sinus de l'angle compris)"],
+    ["2.GE.02e", 0, 2, 19, "Résoudre un problème (distance inaccessible, navigation, topographie)"],
+    ["2.GE.03a", 0, 2, 20, "Calculer la distance entre deux points et les coordonnées du milieu d'un segment"],
+    ["2.GE.03b", 0, 2, 20, "Établir l'équation d'une droite (formes explicite et cartésienne) à partir de deux points, ou d'un point et de la pente"],
+    ["2.GE.03c", 0, 2, 20, "Utiliser les conditions de parallélisme et de perpendicularité"],
+    ["2.GE.03d", 0, 2, 20, "Déterminer l'intersection de deux droites"],
+    ["2.GE.03e", 0, 2, 20, "Établir l'équation d'une médiatrice, d'une hauteur ou d'une médiane d'un triangle"],
+    ["2.GE.04a", 0, 2, 20, "Établir l'équation d'un cercle à partir de son centre et de son rayon"],
+    ["2.GE.04b", 0, 2, 20, "Retrouver le centre et le rayon d'un cercle à partir de son équation développée (compléter les carrés)"],
+    ["2.GE.04c", 0, 2, 20, "Établir l'équation d'un cercle à partir de conditions (diamètre, trois points) et situer un point par rapport au cercle"],
+    ["2.GE.05a", 0, 2, 20, "Déterminer les points d'intersection d'une droite et d'un cercle"],
+    ["2.GE.05b", 0, 2, 20, "Étudier la position relative d'une droite et d'un cercle (sécante, tangente, extérieure)"],
+    ["2.GE.05c", 0, 2, 20, "Établir l'équation de la tangente à un cercle en un de ses points"],
+    ["3.AN.01a", 0, 3, 21, "Déterminer une limite par lecture graphique ou par calcul direct"],
+    ["3.AN.01b", 0, 3, 21, "Lever une indétermination du type 0/0 (factorisation, expression conjuguée)"],
+    ["3.AN.01c", 0, 3, 21, "Calculer la limite à l'infini d'une fonction polynomiale ou rationnelle"],
+    ["3.AN.01d", 0, 3, 21, "Déterminer les asymptotes verticales et horizontales d'une fonction"],
+    ["3.AN.01e", 1, 3, 21, "Déterminer une asymptote oblique"],
+    ["3.AN.02a", 0, 3, 21, "Reconnaître graphiquement si une fonction est continue en un point"],
+    ["3.AN.02b", 0, 3, 21, "Étudier la continuité d'une fonction définie par morceaux (limites à gauche et à droite)"],
+    ["3.AN.03a", 0, 3, 22, "Calculer un taux de variation moyen et l'interpréter comme pente d'une sécante"],
+    ["3.AN.03b", 0, 3, 22, "Interpréter le nombre dérivé comme pente de la tangente"],
+    ["3.AN.03c", 0, 3, 22, "Établir l'équation de la tangente en un point"],
+    ["3.AN.03d", 0, 3, 22, "Utiliser l'approximation du premier ordre (approximation affine)"],
+    ["3.AN.04a", 0, 3, 22, "Calculer un nombre dérivé comme limite du taux d'accroissement"],
+    ["3.AN.04b", 0, 3, 22, "Établir à partir de la définition les dérivées de x^n, √x et 1/x"],
+    ["3.AN.04c", 0, 3, 22, "Connaître les dérivées des fonctions élémentaires (puissances, sinus, cosinus)"],
+    ["3.AN.05a", 0, 3, 22, "Dériver une somme et le produit d'une fonction par une constante"],
+    ["3.AN.05b", 0, 3, 22, "Dériver un produit"],
+    ["3.AN.05c", 0, 3, 22, "Dériver un quotient"],
+    ["3.AN.05d", 0, 3, 22, "Dériver une fonction composée"],
+    ["3.AN.05e", 1, 3, 22, "Démontrer les règles de dérivation et dériver une puissance de fonction"],
+    ["3.AN.06a", 0, 3, 23, "Savoir qu'une fonction dérivable est continue et que la réciproque est fausse (contre-exemple |x|)"],
+    ["3.AN.06b", 0, 3, 23, "Reconnaître les points où une fonction n'est pas dérivable (point anguleux, tangente verticale)"],
+    ["3.AN.07a", 0, 3, 23, "Dresser le tableau de variations d'une fonction à partir du signe de sa dérivée"],
+    ["3.AN.07b", 0, 3, 23, "Déterminer les extrema locaux d'une fonction"],
+    ["3.AN.07c", 0, 3, 23, "Étudier une fonction polynomiale (zéros, variations, graphe)"],
+    ["3.AN.07d", 0, 3, 23, "Étudier une fonction rationnelle (domaine, asymptotes, variations, graphe)"],
+    ["3.AN.08a", 1, 3, 23, "Étudier la concavité et la convexité avec le signe de la dérivée seconde"],
+    ["3.AN.08b", 1, 3, 23, "Déterminer les points d'inflexion"],
+    ["3.AN.09a", 0, 3, 23, "Énoncer et interpréter graphiquement les théorèmes de Rolle et des accroissements finis (Lagrange)"],
+    ["3.AN.09b", 0, 3, 23, "Connaître la démonstration du théorème de l'extremum (dérivée nulle en un extremum local)"],
+    ["3.AN.09c", 0, 3, 23, "Connaître la démonstration des théorèmes de Rolle et de Lagrange"],
+    ["3.AN.10a", 0, 3, 23, "Modéliser un problème d'optimisation par une fonction d'une variable"],
+    ["3.AN.10b", 0, 3, 23, "Déterminer l'extremum cherché et le justifier (variations, bords du domaine)"],
+    ["3.AN.10c", 0, 3, 23, "Résoudre un problème d'optimisation géométrique ou économique"],
+    ["3.GV.01a", 0, 4, 24, "Connaître la définition d'un vecteur (représentants, composantes) dans le plan et dans l'espace"],
+    ["3.GV.01b", 0, 4, 24, "Additionner, soustraire des vecteurs et les multiplier par un nombre (géométriquement et par composantes)"],
+    ["3.GV.01c", 0, 4, 24, "Calculer les composantes du vecteur AB, sa norme et les coordonnées d'un milieu"],
+    ["3.GV.01d", 0, 4, 24, "Utiliser la relation de Chasles et les combinaisons linéaires"],
+    ["3.GV.02a", 1, 4, 24, "Reconnaître des vecteurs colinéaires (critère, alignement de points, parallélisme)"],
+    ["3.GV.02b", 1, 4, 24, "Reconnaître des vecteurs coplanaires"],
+    ["3.GV.03a", 0, 4, 25, "Établir les équations paramétriques d'une droite (plan et espace)"],
+    ["3.GV.03b", 0, 4, 25, "Établir l'équation cartésienne d'une droite du plan"],
+    ["3.GV.03c", 0, 4, 25, "Établir les équations paramétriques et cartésienne d'un plan"],
+    ["3.GV.03d", 0, 4, 25, "Étudier les positions relatives et déterminer les intersections (droites, droite et plan, plans)"],
+    ["3.GV.03e", 0, 4, 25, "Déterminer les traces d'une droite ou d'un plan"],
+    ["3.GV.04a", 0, 4, 26, "Calculer un produit scalaire (composantes, forme géométrique) et utiliser ses propriétés"],
+    ["3.GV.04b", 0, 4, 26, "Utiliser le produit scalaire pour établir une orthogonalité"],
+    ["3.GV.04c", 0, 4, 26, "Calculer une longueur et un angle (entre vecteurs, entre droites)"],
+    ["3.GV.04d", 0, 4, 26, "Calculer une projection orthogonale et une distance (point-droite, point-plan)"],
+    ["3.GV.04e", 0, 4, 26, "Calculer l'aire d'un triangle ou d'un parallélogramme"],
+    ["3.GV.05a", 0, 4, 26, "Utiliser un vecteur normal pour établir l'équation d'une droite du plan ou d'un plan de l'espace"],
+    ["3.GV.05b", 0, 4, 26, "Établir l'équation d'une hauteur, d'une médiatrice ou d'un plan médiateur"],
+    ["3.GV.05c", 0, 4, 26, "Établir l'équation d'un cercle ou d'une sphère"],
+    ["3.GV.05d", 0, 4, 26, "Établir l'équation de la tangente à un cercle ou du plan tangent à une sphère"],
+    ["3.GV.06a", 1, 4, 27, "Calculer un produit vectoriel et utiliser ses propriétés"],
+    ["3.GV.06b", 1, 4, 27, "Utiliser le produit vectoriel pour une aire ou un vecteur normal"],
+    ["3.GV.06c", 1, 4, 27, "Calculer un volume avec le produit mixte"],
+    ["3.GV.06d", 1, 4, 27, "Calculer des distances dans l'espace (point-droite, droites gauches)"],
+    ["3.PS.01a", 0, 5, 28, "Dénombrer avec le principe multiplicatif et des arbres"],
+    ["3.PS.01b", 0, 5, 28, "Dénombrer des permutations (factorielle, permutations avec répétition)"],
+    ["3.PS.01c", 0, 5, 28, "Dénombrer des arrangements (avec et sans répétition)"],
+    ["3.PS.01d", 0, 5, 28, "Dénombrer des combinaisons, utiliser les coefficients binomiaux et le triangle de Pascal"],
+    ["3.PS.01e", 0, 5, 28, "Choisir le modèle de dénombrement adapté à un problème"],
+    ["3.PS.02a", 0, 5, 29, "Utiliser le vocabulaire des probabilités (issue, univers, événement, événement contraire, incompatibles)"],
+    ["3.PS.02b", 0, 5, 29, "Calculer une probabilité en situation d'équiprobabilité"],
+    ["3.PS.02c", 0, 5, 29, "Utiliser les axiomes et les théorèmes qui en découlent (événement contraire, réunion)"],
+    ["3.PS.02d", 0, 5, 29, "Calculer des probabilités pour des expériences successives (arbres, tableaux)"],
+    ["3.PS.02e", 1, 5, 29, "Démontrer les théorèmes qui découlent des axiomes"],
+    ["4.AN.01a", 0, 3, 30, "Connaître la définition d'une primitive et vérifier une primitive par dérivation"],
+    ["4.AN.01b", 0, 3, 30, "Connaître les primitives des fonctions élémentaires"],
+    ["4.AN.01c", 0, 3, 30, "Utiliser la linéarité et déterminer la primitive qui vérifie une condition initiale"],
+    ["4.AN.02a", 0, 3, 31, "Interpréter l'intégrale comme une aire algébrique (sommes de Riemann)"],
+    ["4.AN.02b", 0, 3, 31, "Utiliser les propriétés de l'intégrale (linéarité, relation de Chasles, positivité)"],
+    ["4.AN.02c", 0, 3, 31, "Calculer et interpréter la valeur moyenne d'une fonction (théorème de la moyenne)"],
+    ["4.AN.03a", 0, 3, 31, "Calculer une intégrale définie à l'aide d'une primitive (théorème fondamental)"],
+    ["4.AN.03b", 0, 3, 31, "Démontrer le théorème fondamental du calcul intégral"],
+    ["4.AN.04a", 1, 3, 31, "Intégrer par parties"],
+    ["4.AN.04b", 1, 3, 31, "Intégrer par substitution simple"],
+    ["4.AN.05a", 0, 3, 31, "Calculer l'aire entre une courbe et l'axe des abscisses (changements de signe)"],
+    ["4.AN.05b", 0, 3, 31, "Calculer l'aire entre deux courbes"],
+    ["4.AN.05c", 0, 3, 31, "Calculer le volume d'un corps de révolution"],
+    ["4.AN.06a", 0, 3, 32, "Connaître la définition intégrale du logarithme naturel et ses propriétés"],
+    ["4.AN.06b", 0, 3, 32, "Définir l'exponentielle comme réciproque du logarithme (nombre e, propriétés)"],
+    ["4.AN.06c", 0, 3, 32, "Dériver et intégrer des fonctions contenant ln et exp"],
+    ["4.AN.06d", 0, 3, 32, "Étudier une fonction contenant ln ou exp (limites, croissances comparées, graphe)"],
+    ["4.AN.07a", 0, 3, 32, "Établir et utiliser un modèle exponentiel N(t) = N(0)·e^(kt)"],
+    ["4.AN.07b", 0, 3, 32, "Calculer un temps de doublement ou une demi-vie"],
+    ["4.AN.07c", 0, 3, 32, "Interpréter d'autres modèles de croissance et de décroissance (croissance limitée, refroidissement)"],
+    ["4.AN.08a", 1, 3, 33, "Vérifier qu'une fonction est solution d'une équation différentielle"],
+    ["4.AN.08b", 1, 3, 33, "Résoudre une équation différentielle du 1er ordre à variables séparables (solution générale)"],
+    ["4.AN.08c", 1, 3, 33, "Déterminer la solution particulière qui vérifie une condition initiale"],
+    ["4.AN.09a", 1, 3, 33, "Mettre un problème en équation différentielle (croissance, refroidissement, mélange)"],
+    ["4.AN.09b", 1, 3, 33, "Résoudre le problème et interpréter la solution"],
+    ["4.AN.10a", 1, 3, 34, "Utiliser les suites arithmétiques (terme général, somme)"],
+    ["4.AN.10b", 1, 3, 34, "Utiliser les suites géométriques (terme général, somme)"],
+    ["4.AN.10c", 1, 3, 34, "Déterminer la limite d'une suite et la somme d'une série géométrique convergente"],
+    ["4.AN.10d", 1, 3, 34, "Résoudre un problème (intérêts, annuités)"],
+    ["4.AN.11a", 1, 3, 34, "Utiliser des critères de convergence d'une série"],
+    ["4.AN.11b", 1, 3, 34, "Déterminer le rayon de convergence d'une série entière"],
+    ["4.AN.11c", 1, 3, 34, "Établir le développement de Taylor ou de Mac-Laurin d'une fonction usuelle"],
+    ["4.NC.01a", 1, 6, 35, "Connaître la forme algébrique d'un nombre complexe (partie réelle, partie imaginaire, conjugué)"],
+    ["4.NC.01b", 1, 6, 35, "Additionner et multiplier des nombres complexes, calculer les puissances de i"],
+    ["4.NC.01c", 1, 6, 35, "Diviser des nombres complexes (inverse, conjugué)"],
+    ["4.NC.02a", 1, 6, 36, "Déterminer le module et un argument d'un nombre complexe et le représenter dans le plan"],
+    ["4.NC.02b", 1, 6, 36, "Passer de la forme algébrique à la forme trigonométrique et inversement"],
+    ["4.NC.02c", 1, 6, 36, "Utiliser la forme exponentielle"],
+    ["4.NC.02d", 1, 6, 36, "Multiplier, diviser et élever à une puissance sous forme trigonométrique (formule de Moivre)"],
+    ["4.NC.03a", 1, 6, 36, "Représenter un nombre complexe par son affixe et interpréter |z − a| comme une distance"],
+    ["4.NC.03b", 1, 6, 36, "Représenter les points tels que |z − a| = r ou |z − a| = |z − b|"],
+    ["4.NC.03c", 1, 6, 36, "Représenter les points dont l'argument satisfait une condition"],
+    ["4.NC.04a", 1, 6, 1, "Résoudre az² + bz + c = 0 dans les nombres complexes"],
+    ["4.NC.04b", 1, 6, 1, "Déterminer les racines n-ièmes d'un nombre complexe (z^n = a) et les représenter"],
+    ["4.NC.04c", 1, 6, 1, "Démontrer la formule de Moivre"],
+    ["4.GV.01a", 0, 7, 37, "Déterminer la matrice d'une transformation linéaire du plan (images des vecteurs de base)"],
+    ["4.GV.01b", 0, 7, 37, "Connaître les matrices des rotations, symétries, projections et homothéties"],
+    ["4.GV.01c", 0, 7, 37, "Composer des transformations (produit de matrices)"],
+    ["4.GV.01d", 0, 7, 37, "Déterminer l'image d'une figure et interpréter le déterminant (rapport d'aires)"],
+    ["4.GV.02a", 0, 7, 38, "Reconnaître une application linéaire et lui associer sa matrice"],
+    ["4.GV.02b", 0, 7, 38, "Additionner et multiplier des matrices"],
+    ["4.GV.02c", 0, 7, 38, "Calculer un déterminant et l'inverse d'une matrice"],
+    ["4.GV.02d", 0, 7, 38, "Déterminer le noyau et l'image d'une application linéaire"],
+    ["4.GV.02e", 0, 7, 38, "Résoudre un système linéaire avec les matrices"],
+    ["4.GV.02f", 1, 7, 38, "Démontrer les théorèmes sur les applications linéaires"],
+    ["4.GV.03a", 0, 7, 39, "Reconnaître un espace vectoriel et un sous-espace vectoriel"],
+    ["4.GV.03b", 0, 7, 39, "Reconnaître une combinaison linéaire et une famille libre ou liée"],
+    ["4.GV.03c", 0, 7, 39, "Reconnaître une famille génératrice, une base, et déterminer la dimension"],
+    ["4.GV.03d", 0, 7, 39, "Déterminer les composantes d'un vecteur dans une base"],
+    ["4.GV.04a", 0, 4, 40, "Représenter un solide en perspective et en connaître les propriétés"],
+    ["4.GV.04b", 0, 4, 40, "Déterminer une section plane d'un solide"],
+    ["4.GV.04c", 0, 4, 40, "Calculer des angles et des diagonales dans un solide"],
+    ["4.GV.04d", 0, 4, 40, "Calculer des aires et des volumes de solides"],
+    ["4.PS.01a", 0, 5, 41, "Organiser et représenter une série statistique (effectifs, fréquences, diagrammes, histogramme)"],
+    ["4.PS.01b", 0, 5, 41, "Calculer le mode, la médiane et la moyenne"],
+    ["4.PS.01c", 0, 5, 41, "Calculer des indicateurs de dispersion (étendue, quartiles, écart-type) et construire une boîte à moustaches"],
+    ["4.PS.01d", 0, 5, 41, "Interpréter et comparer des séries statistiques"],
+    ["4.PS.02a", 0, 5, 42, "Calculer une probabilité conditionnelle (arbre, tableau)"],
+    ["4.PS.02b", 0, 5, 42, "Utiliser la formule des probabilités totales"],
+    ["4.PS.02c", 0, 5, 42, "Reconnaître deux événements indépendants"],
+    ["4.PS.02d", 0, 5, 42, "Utiliser le théorème de Bayes"],
+    ["4.PS.02e", 1, 5, 42, "Démontrer le théorème de Bayes"],
+    ["4.PS.03a", 0, 5, 43, "Définir une variable aléatoire discrète et établir sa loi de probabilité"],
+    ["4.PS.03b", 0, 5, 43, "Calculer l'espérance, la variance et l'écart-type d'une variable aléatoire"],
+    ["4.PS.03c", 0, 5, 43, "Reconnaître un schéma de Bernoulli et calculer des probabilités avec la loi binomiale"],
+    ["4.PS.03d", 0, 5, 43, "Utiliser l'espérance et la variance de la loi binomiale"],
+    ["4.PS.03e", 1, 5, 43, "Utiliser une variable aléatoire continue (densité de probabilité)"],
+    ["4.PS.04a", 0, 5, 43, "Connaître la loi normale (courbe de Gauss, moyenne, écart-type)"],
+    ["4.PS.04b", 0, 5, 43, "Centrer et réduire une variable et calculer une probabilité avec la table ou la calculatrice"],
+    ["4.PS.04c", 0, 5, 43, "Utiliser les intervalles usuels (68 %, 95 %, 99,7 %)"],
+    ["4.PS.04d", 1, 5, 43, "Approcher une loi binomiale par une loi normale"]
+  ],
+  // compétence → notions de l'app (« id » : tous les niveaux de question ; « id@13 » : niveaux 1 et 3)
+  q: {"1.AL.01a":["reduire","monomes"],"1.AL.01b":["polyop","parenth"],"1.AL.01c":["distrib","polyop@1"],"1.AL.01d":["polyop"],"1.AL.02a":["idrem","polyop@2"],"1.AL.02b":["idrem"],"1.AL.02c":["polyop"],"1.AL.03a":["factor@1"],"1.AL.03b":["factor@23","factor2"],"1.AL.03d":["factor2@3"],"1.AL.03e":["factor2"],"1.AL.04a":["eq1"],"1.AL.04b":["eqfrac"],"1.AL.04c":["eqspec"],"1.AL.04d":["formule"],"1.AL.04e":["probeq"],"1.AL.05a":["eq2fact"],"1.AL.05b":["eq2"],"1.AL.05c":["eq2disc"],"1.AL.05d":["trinfact"],"1.AL.05e":["probeq2"],"1.AL.06a":["eq3"],"1.AL.06b":["eq3"],"1.AL.06c":["bicarre"],"1.AL.07a":["sys2"],"1.AL.07b":["sys2"],"1.AL.07c":["sysgraph"],"1.AL.07d":["sys3"],"1.AL.07e":["sysprob"],"1.FO.01a":["domaine"],"1.FO.01b":["domaine"],"1.FO.01c":["domaine"],"1.FO.02b":["tabval"],"1.FO.02c":["graphefct"],"1.FO.03a":["fimg@12"],"1.FO.03b":["fimg@3"],"1.FO.04b":["lectgraph"],"1.FO.04c":["lectgraph"],"1.FO.04d":["lectgraph"],"1.FO.05a":["affine"],"1.FO.05b":["affine@2"],"1.FO.05c":["affine"],"1.FO.05d":["affzero"],"1.FO.06a":["affine"],"1.FO.06b":["affine"],"1.FO.06c":["droites"],"1.FO.07a":["f2@1"],"1.FO.07b":["f2@23"],"1.FO.07c":["f2formes"],"1.FO.08a":["f2expr@1"],"1.FO.08b":["f2expr@2"],"1.FO.08c":["f2trois"],"1.FO.09b":["inter@123"],"1.FO.09c":["interpar"],"1.FO.09d":["ineq2@3"],"1.FO.10c":["racinv@1"],"1.FO.11a":["racinv@2"],"1.FO.11b":["racinv@3"],"1.FO.11c":["interpar"],"1.FO.12a":["modaff"],"1.FO.12b":["optim"],"1.FO.12c":["optim"],"1.FO.12d":["modaff"],"1.GE.01b":["angtri"],"1.GE.01c":["angles@12"],"1.GE.01d":["cercthales"],"1.GE.03a":["simil@1"],"1.GE.03b":["thales"],"1.GE.03c":["simil@23"],"1.GE.03d":["pyth","pythfig","pythrec"],"1.GE.03e":["euclide"],"1.GE.03f":["geocomb"],"1.GE.04b":["droitesrem"],"1.GE.04c":["droitesrem"],"1.GE.04d":["droitesrem"],"1.GE.05a":["trigo"],"1.GE.05b":["trigo@1"],"1.GE.05c":["trigo@2"],"1.GE.05d":["trigo"],"1.GE.05e":["trigexact"],"1.GE.06a":["trigo@3"],"1.GE.06b":["trigexact"],"1.GE.06c":["geocomb"],"2.AL.01a":["polydiv"],"2.AL.01b":["polydiv@2"],"2.AL.01c":["polydiv@13"],"2.AL.01d":["polyfact@12"],"2.AL.01e":["polyfact@3"],"2.AL.02a":["valint"],"2.AL.02b":["fracrat@13"],"2.AL.02d":["fracrat@2"],"2.AL.02e":["fracetage"],"2.AL.03a":["eqrat@12"],"2.AL.03b":["eqrat@3"],"2.AL.03c":["probrat"],"2.AL.04a":["ineq","sysineq"],"2.AL.04b":["ineq2@12","ineqpoly"],"2.AL.04c":["ineq","ineqpoly"],"2.AL.04d":["ineq","ineqfrac"],"2.AL.04e":["ineqgraph"],"2.FO.01a":["compo"],"2.FO.01b":["compo"],"2.FO.01c":["decomp"],"2.FO.02a":["bijection"],"2.FO.02b":["bijection"],"2.FO.03a":["recip@13"],"2.FO.03c":["recip@2"],"2.FO.04a":["polyfact"],"2.FO.04b":["ineq","ineqpoly"],"2.FO.04d":["polyexpr"],"2.FO.05a":["absval"],"2.FO.05b":["absval"],"2.FO.05c":["morceaux"],"2.FO.06a":["homog"],"2.FO.06b":["homog@12"],"2.FO.06d":["homogrec"],"2.FO.07a":["trigcercle@1"],"2.FO.07b":["trigcercle@3"],"2.FO.07c":["trigcercle@2"],"2.FO.07d":["trigassoc"],"2.FO.07e":["trigassoc","trigrel"],"2.FO.08a":["trigeq"],"2.FO.08b":["trigeq"],"2.FO.08c":["trigeq2"],"2.FO.09b":["trigfn"],"2.FO.09c":["trigeq2"],"2.FO.10a":["expo","expfrac"],"2.FO.10b":["expo"],"2.FO.10c":["log@1"],"2.FO.10d":["log@3"],"2.FO.10e":["logbase"],"2.FO.11a":["expo@12"],"2.FO.11b":["log@2"],"2.FO.11c":["log"],"2.FO.12a":["modexp"],"2.FO.12b":["trigeq2"],"2.FO.12c":["polyexpr"],"2.GE.02a":["sinlaw@1"],"2.GE.02b":["sinlaw@23"],"2.GE.02d":["triaire"],"2.GE.02e":["triaire"],"2.GE.03a":["cart"],"2.GE.03b":["droites@1"],"2.GE.03c":["droites@2"],"2.GE.03d":["droitesinter"],"2.GE.03e":["droitesinter"],"2.GE.04a":["cercle"],"2.GE.04b":["cercle@12"],"2.GE.04c":["cercletan"],"2.GE.05a":["cercle@3"],"2.GE.05b":["cercletan"],"2.GE.05c":["cercletan"],"3.AN.01a":["limites"],"3.AN.01b":["limites"],"3.AN.01c":["limitinf"],"3.AN.01d":["asymptotes"],"3.AN.01e":["asymptotes"],"3.AN.02a":["continuite"],"3.AN.02b":["continuite"],"3.AN.03a":["tauxvar"],"3.AN.03b":["nbderive"],"3.AN.03c":["tangente"],"3.AN.03d":["tangente"],"3.AN.04a":["nbderive"],"3.AN.04b":["derivref"],"3.AN.04c":["derivref"],"3.AN.05a":["derivregles"],"3.AN.05b":["derivprodquot"],"3.AN.05c":["derivprodquot"],"3.AN.05d":["derivcomp"],"3.AN.05e":["derivcomp"],"3.AN.06a":["derivth"],"3.AN.06b":["derivth"],"3.AN.07a":["variations"],"3.AN.07b":["variations"],"3.AN.07c":["etudefct"],"3.AN.07d":["etudefct"],"3.AN.08a":["derivseconde"],"3.AN.08b":["derivseconde"],"3.AN.09a":["derivth"],"3.AN.10a":["optimderiv"],"3.AN.10b":["optimderiv"],"3.AN.10c":["optimderiv"],"3.GV.01a":["vect3d"],"3.GV.01b":["vect3d"],"3.GV.01c":["vect3d"],"3.GV.01d":["vect3d"],"3.GV.02a":["colin"],"3.GV.02b":["colin"],"3.GV.03a":["droite3d"],"3.GV.03b":["droite3d"],"3.GV.03c":["plans"],"3.GV.03d":["posrel"],"3.GV.03e":["plans"],"3.GV.04a":["pscal3d"],"3.GV.04b":["pscal3d"],"3.GV.04c":["pscal3d"],"3.GV.04d":["distances"],"3.GV.04e":["distances"],"3.GV.05a":["sphere"],"3.GV.05b":["sphere"],"3.GV.05c":["sphere"],"3.GV.05d":["sphere"],"3.GV.06a":["pvect"],"3.GV.06b":["pvect"],"3.GV.06c":["pvect"],"3.GV.06d":["pvect"],"3.PS.01a":["combi"],"3.PS.01b":["combi"],"3.PS.01c":["combi"],"3.PS.01d":["combi"],"3.PS.01e":["combi"],"3.PS.02a":["probaxiomes"],"3.PS.02b":["probaxiomes"],"3.PS.02c":["probaxiomes"],"3.PS.02d":["probarbre"],"4.AN.01a":["primitives"],"4.AN.01b":["primitives"],"4.AN.01c":["primitives"],"4.AN.02a":["integrale"],"4.AN.02b":["integrale"],"4.AN.02c":["integrale"],"4.AN.03a":["integrale"],"4.AN.04a":["intparties"],"4.AN.04b":["intsubst"],"4.AN.05a":["aireint"],"4.AN.05b":["aireint"],"4.AN.05c":["volrev"],"4.AN.06a":["lnexp"],"4.AN.06b":["lnexp"],"4.AN.06c":["lnexp"],"4.AN.06d":["lnexp","etudelnexp"],"4.AN.07a":["croissance"],"4.AN.07b":["croissance"],"4.AN.07c":["croissance"],"4.AN.08a":["eqdiff"],"4.AN.08b":["eqdiff"],"4.AN.08c":["eqdiff"],"4.AN.09a":["eqdiff"],"4.AN.09b":["eqdiff"],"4.AN.10a":["suitegeom"],"4.AN.10b":["suitegeom"],"4.AN.10c":["suitegeom"],"4.AN.10d":["serie"],"4.AN.11a":["serie"],"4.AN.11b":["serie"],"4.AN.11c":["serie"],"4.NC.01a":["cplxalg"],"4.NC.01b":["cplxalg"],"4.NC.01c":["cplxalg"],"4.NC.02a":["cplxtrig"],"4.NC.02b":["cplxtrig"],"4.NC.02c":["cplxtrig"],"4.NC.02d":["cplxtrig"],"4.NC.03a":["cplxeq"],"4.NC.03b":["cplxeq"],"4.NC.03c":["cplxeq"],"4.NC.04a":["cplxeq"],"4.NC.04b":["cplxeq"],"4.NC.04c":["cplxeq"],"4.GV.01a":["translin"],"4.GV.01b":["translin"],"4.GV.01c":["translin"],"4.GV.01d":["translin"],"4.GV.02a":["appllin"],"4.GV.02b":["matrices"],"4.GV.02c":["matrices"],"4.GV.02d":["appllin"],"4.GV.02e":["matrices","syslin"],"4.GV.03a":["bases"],"4.GV.03b":["bases"],"4.GV.03c":["bases"],"4.GV.03d":["bases"],"4.GV.04a":["geoesp"],"4.GV.04b":["geoesp"],"4.GV.04c":["geoesp"],"4.GV.04d":["geoesp"],"4.PS.01a":["statdesc"],"4.PS.01b":["statdesc"],"4.PS.01c":["statdesc"],"4.PS.01d":["statdesc"],"4.PS.02a":["condbayes"],"4.PS.02b":["condbayes"],"4.PS.02c":["condbayes"],"4.PS.02d":["bayes"],"4.PS.03a":["varalea"],"4.PS.03b":["varalea"],"4.PS.03c":["binomiale"],"4.PS.03d":["binomiale"],"4.PS.03e":["densite"],"4.PS.04a":["normale"],"4.PS.04b":["normale"],"4.PS.04c":["normale"],"4.PS.04d":["approxnorm"]},
+};
 
 // Chantier 1re Collège (19.11) : tests de préparation de qualité pour 7. Degré 2, 4. Fonctions, 8. De Thalès à
 // Pythagore, 10. Trigonométrie (exercices en situation, plusieurs étapes, interprétation) + raisonnements.

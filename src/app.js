@@ -2442,7 +2442,7 @@ function screenSummary() {
     const left = (state.carnet || []).length;
     h(`${brand}<h2>${sc >= n ? "📕 Bien joué !" : "📕 C'est noté."}</h2>
     <div class="card flat stack"><div class="spread"><span>Mathélo</span><b>${state.elo.r} <span class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</span></b></div>
-    <div class="spread"><span>Carnet d'erreurs</span><b>${left ? left + " à effacer" : "vide ✓"}</b></div></div>
+    <div class="spread"><span>Carnet d'erreurs</span><b>${left ? left + " à effacer" : "vide : bravo !"}</b></div></div>
     ${newGrade}${nb}
     ${left ? '<button class="btn-primary btn-big" id="carnetagain">📕 Continuer à effacer</button>' : ""}
     <button class="${left ? "btn-sec" : "btn-primary btn-big"}" id="home">Retour à l'accueil</button>`);
