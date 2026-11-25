@@ -390,6 +390,28 @@ function diagnose(q, input) {
 /* 25.11 : Ø, ø, ⌀ (sosies de ∅) et { } acceptés pour « aucune ». */
 const NONE_RE = /aucun|∅|Ø|ø|⌀|vide|pas de solution|impossible|\{\s*\}/i, ALL_RE = /\btou[st]e?s?\b|ℝ|\bR\b|infinit/;
 const setInput = (input) => String(input).replace(/\bou\b/gi, ";").replace(/\b[a-zA-Z]\w*\s*=(?!=)/g, " ").replace(/[{}]/g, " ").replace(/^\s*;|;\s*$/g, "").trim();
+/* 25.11 : forme « résultat final » (spec.final). Renvoie null si la réponse est un résultat, sinon le message à afficher
+   (bienveillant : la réponse n'est pas comptée fausse). */
+function finalForm(input, spec) {
+  let raw = String(input).replace(/^\s*[a-zA-Z]\s*=/, "").replace(/[\s'’]/g, "").replace(/,/g, ".").replace(/[−–]/g, "-")
+    .replace(/sqrt|racine/gi, "√").replace(/pi/gi, "π").replace(/[·×]/g, "*").replace(/°$/, "");
+  raw = raw.replace(/([\d)])\*(?=[√π])/g, "$1").replace(/^(-?)\((\d*√\d+)\)(\/\d+)$/, "$1$2$3").replace(/√\((\d+)\)/g, "√$1");
+  const num = "\\d+(\\.\\d+)?", pow = "\\(?-?\\d+(\\.\\d+)?\\)?\\^\\(?-?\\d+\\)?";
+  const rad = "\\d*√\\d+", ok = new RegExp("^-?(" + num + "|\\(?-?\\d+/\\d+\\)?|" + rad + "(/\\d+)?|\\d+/√\\d+|(" + num + ")?π(/\\d+)?" +
+    "|\\(?\\d+/\\d+\\)?π" + "|\\(?-?\\d+[+-]" + rad + "\\)?(/\\d+)?|\\(?-?" + rad + "[+-]\\d+\\)?(/\\d+)?" + (spec.pow ? "|" + pow : "") + ")$"); /* a ± b√c (dénominateur rendu rationnel) */
+  const res = "donne le résultat final, pas le calcul : " + (spec.pow ? "un nombre ou une seule puissance." : "un seul nombre (ou une fraction irréductible).");
+  if (!ok.test(raw)) return res.charAt(0).toUpperCase() + res.slice(1);
+  // Fraction : irréductible exigée (commentaire testeur du 15.11).
+  const fr = raw.match(/^-?\(?-?(\d+)\/(\d+)\)?$/), g = (u, v) => (v ? g(v, u % v) : u);
+  if (fr && (g(+fr[1], +fr[2]) > 1 || +fr[2] === 1)) return +fr[2] === 1 ? "Écris simplement le nombre entier." : "Simplifie la fraction : elle doit être irréductible.";
+  // aπ/b, a√c/b : coefficient et dénominateur premiers entre eux (30π/180 → π/6).
+  const cf = raw.match(/^-?(\d*)[√π]\d*\/(\d+)$/) || raw.match(/^-?\(?(\d+)\/(\d+)\)?π$/); /* (5/3)π, 1/6π : affichage du QCM */
+  if (cf && g(+(cf[1] || 1), +cf[2]) > 1) return "Simplifie : le coefficient et le dénominateur ont un diviseur commun.";
+  // Racine d'un carré parfait (√16, 3√25) : la racine se calcule.
+  const rc = raw.match(/√(\d+)/);
+  if (rc && Number.isInteger(Math.sqrt(+rc[1]))) return "Calcule la racine : le nombre sous le signe √ est un carré parfait.";
+  return null;
+}
 // Vérifie la réponse de l'élève selon la spécification de la question.
 // spec.kind : "value" (valeur numérique, round = précision demandée), "expr" (expression en x,
 // form = "product" | "expanded"), "set" (liste de solutions), "choice" (index d'option).
@@ -424,15 +446,18 @@ function checkAnswer(spec, input) {
   try { tree = Expr.parse(spec.kind === "set" ? setInput(input) : String(input)); }
   catch (e) { return { status: "invalid", message: e.message }; }
   if (spec.kind === "value") {
-    // final (14.11, retour testeur : « on peut taper le calcul ») : au CO, la réponse est le résultat, pas l'opération.
-    // Admis : entier, décimal, fraction a/b, a√b, aπ (avec signe, « x = » devant, séparateur de milliers).
+    // final (14.11, retour testeur : « on peut taper le calcul ») : la réponse est le résultat, pas l'opération.
+    // 25.11 (commentaire de l'enseignant sur vol-4-lsr, tools/calculatrice.md) : final est posé par Engine.finalize selon
+    // la notion (calcul = compétence évaluée), plus seulement au CO. Admis : entier, décimal, fraction a/b irréductible,
+    // a√b, a√b/c, a/√b, aπ, aπ/b (avec signe, « x = » devant, séparateur de milliers) ; a^n seulement si la consigne
+    // demande une puissance (spec.pow). Refusé sans compter faux : un calcul, une fraction non simplifiée, √16, 2^5.
     if (spec.final) {
-      const raw = String(input).replace(/^\s*[a-zA-Z]\s*=/, "").replace(/[\s'’]/g, "").replace(/,/g, ".").replace(/[−–]/g, "-");
-      const num = "\\d+(\\.\\d+)?", ok = new RegExp("^-?(" + num + "|\\(?-?\\d+/\\d+\\)?|\\d*√\\d+(/\\d+)?|" + num + "?π)$");
-      if (!ok.test(raw)) return { status: "form", message: "Calcule jusqu'au bout : écris seulement le résultat (un nombre ou une fraction), sans opération." };
-      // Fraction : irréductible exigée (commentaire testeur du 15.11).
-      const fr = raw.match(/^-?\(?-?(\d+)\/(\d+)\)?$/), g = (u, v) => (v ? g(v, u % v) : u);
-      if (fr && (g(+fr[1], +fr[2]) > 1 || +fr[2] === 1)) return { status: "form", message: +fr[2] === 1 ? "Écris simplement le nombre entier." : "Simplifie la fraction : elle doit être irréductible." };
+      const fm = finalForm(input, spec);
+      if (fm) {
+        let same = false;
+        try { same = !Expr.vars(tree).size && Expr.sameValue(Expr.evaluate(tree), spec.value); } catch (e) {}
+        return { status: "form", calc: true, message: same ? "C'est la bonne valeur, mais " + fm.charAt(0).toLowerCase() + fm.slice(1) : fm };
+      }
     }
     // plain : on attend un nombre écrit en chiffres (conversion, écriture décimale), pas une fraction ni un calcul
     if (spec.plain && !/^\s*-?\s*\d[\d'’ ]*([.,]\d+)?\s*$/.test(String(input))) return { status: "invalid", message: "Écris le résultat comme un nombre décimal (pas de fraction ni de calcul)." };

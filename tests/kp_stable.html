@@ -25,7 +25,8 @@ if (!location.search) {
     /* Codes fixes (rapide) ; recherche seulement si le générateur a changé. */
     const code = (c, ok, ids, lv) => { const q = Engine.fromCode(c); return q && ok(q) ? q : findQ(ids, lv, ok); };
     const cases = [
-      ["calcul", Engine.fromCode("fracmul-3-7"), ["1", "/", "2", "+", "4", "/"]],
+      /* 25.11 : fracmul exige le résultat (tools/calculatrice.md) ; clavier complet = notion où le calcul tapé est permis */
+      ["calcul", code("vol-2-7", (q) => q.spec.kind === "value" && !q.spec.final && !q.parts, ["vol", "disque", "volcone"], 2), ["1", "/", "2", "+", "4", "/"]],
       ["liste ∅", code("eq2fact-1-1", (q) => q.spec.kind === "set" && !q.parts, ["eq2fact", "eq2"], 1), ["3", ";", "-", "2", "∅"]],
       ["intervalles", code("ineq-2-1", (q) => (q.spec.kind === "solset" || q.spec.kind === "ineq") && !q.parts, ["ineq", "domaine", "sysineq"], 2), ["[", "2", ";", "5", "]"]],
       ["résultat", code("puiss-1-1", (q) => q.spec.final && !q.parts, ["puiss"], 1), ["1", "2", "3", "4", "5"]],

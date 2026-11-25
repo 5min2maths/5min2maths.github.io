@@ -250,7 +250,7 @@ function demoQuestion() {
   for (let k = 0; k < 40; k++) {
     const [id, maxLv] = pool[Math.floor(Math.random() * pool.length)];
     let q; try { q = Engine.build(id, maxLv > 1 && Math.random() < 0.4 ? 2 : 1, 1 + Math.floor(Math.random() * 46655)); } catch (e) { continue; }
-    if (q && q.spec && q.spec.kind === "value" && !q.parts && q.guide && q.guide.length) return demoGrade && demoGrade > 11 ? q : Engine.finalize(prof, id, q);
+    if (q && q.spec && q.spec.kind === "value" && !q.parts && q.guide && q.guide.length) return Engine.finalize(prof, id, q); /* 25.11 : règle de la calculatrice valable à tous les niveaux */
   }
   return Engine.build("prio", 1, 7);
 }
@@ -1505,7 +1505,7 @@ const isSetSpec = (spec) => !!spec && (spec.kind === "solset" || spec.kind === "
 // 19.11 (urgent, testeur) : touche π quand la réponse exacte est un multiple simple de π (volumes « en fonction de π »).
 const niceQ = (x) => { if (!isFinite(x) || Math.abs(x) < 1e-3) return false; for (let d = 1; d <= 12; d++) if (Math.round(x * d) !== 0 && Math.abs(x * d - Math.round(x * d)) < 1e-6) return true; return false; };
 const exactKeys = (spec) => { const v = spec.value; if (!isFinite(v) || isTerm(v)) return []; if (!spec.radical && !spec.pi && niceQ(v)) return []; /* fraction : chiffres et / suffisent */ const pi = spec.pi || niceQ(v / Math.PI), root = spec.radical || !pi; return [...(root ? ["√"] : []), ...(pi ? ["π"] : [])]; };
-const numKeys = (spec) => { const ex = exactKeys(spec); return ["7", "8", "9", "⌫", "4", "5", "6", "-", "1", "2", "3", "/", "0", ",", ...ex, "⌨"]
+const numKeys = (spec) => { const ex = exactKeys(spec).concat(spec.pow ? ["^"] : []); /* 25.11 : ^ si la consigne demande une puissance */ return ["7", "8", "9", "⌫", "4", "5", "6", "-", "1", "2", "3", "/", "0", ",", ...ex, "⌨"]
   .map((k) => `<button type="button" class="${/^[\d,]$/.test(k) ? "" : "k-op"}${k === "0" && !ex.length ? " k-wide" : ""}" data-k="${esc(k)}"${keyAttr(k)}>${keyIn(k)}</button>`).join(""); };
 // Lettres du clavier (15.11) : celles de l'expression attendue (a, b, n…) remplacent x et y ; une 3e lettre prend la place de « = ».
 const keyLetters = (spec) => { let L = []; try { if (spec && spec.kind === "expr") L = [...Expr.vars(Expr.parse(spec.expr))].sort(); } catch (e) {} if (!L.length || (L.length <= 2 && L.every((v) => v === "x" || v === "y"))) return KEYS; const k = KEYS.slice(); k[k.indexOf("x")] = L[0]; k[k.indexOf("y")] = L[1] || (L[0] === "x" ? "y" : "x"); if (L[2]) k[k.indexOf("=")] = L[2]; return k; };
@@ -1514,7 +1514,7 @@ const keyLetters = (spec) => { let L = []; try { if (spec && spec.kind === "expr
 const keysFor = (spec) => (spec && spec.final ? numKeys(spec) : isSetSpec(spec) ? SET_KEYS.map((k) => keyBtn(k)).join("")
   : spec && spec.kind === "set" ? keyLetters(spec).flatMap((k) => (k === "⌨" ? ["∅", k] : [k])).map((k) => keyBtn(k, true)).join("") : keyLetters(spec).map((k) => keyBtn(k)).join(""));
 const kpKind = (spec) => (spec && spec.final ? "k-num" : isSetSpec(spec) ? "k-set" : spec && spec.kind === "set" ? "k-list" : "");
-const kpKey = (spec) => { const kind = kpKind(spec); return kind + (kind === "k-num" && exactKeys(spec).length ? "r" : ""); };
+const kpKey = (spec) => { const kind = kpKind(spec); return kind + (kind === "k-num" && exactKeys(spec).length ? "r" : "") + (kind === "k-num" && spec.pow ? "p" : ""); };
 const keypadHtml = (spec) => { const kind = kpKind(spec); return `<div class="keypad${kind ? " " + kind : ""}" id="kp" data-kind="${kpKey(spec)}">${keysFor(spec)}</div>`; };
 // Insère une touche dans le champ (avec « | » : place du curseur), ou efface.
 function typeKey(inp, k) {
@@ -1817,7 +1817,7 @@ function renderQuestion(q, opt) {
     if (r.status === "correct") { tries++; return end(true); }
     if (r.status === "invalid" || r.status === "form") {
       if (S) S.illis = (S.illis || 0) + 1;
-      fb.innerHTML = `<div class="fb hint pop"><b>${r.status === "form" ? "Presque" : "Je n'arrive pas à lire ta réponse"}</b><span>${esc(r.message || "")}</span></div>`;
+      fb.innerHTML = `<div class="fb hint pop"><b>${r.calc ? "Le résultat, pas le calcul" : r.status === "form" ? "Presque" : "Je n'arrive pas à lire ta réponse"}</b><span>${esc(r.message || "")}</span></div>`;
       fbInView(fb); return;
     }
     tries++;
@@ -1866,7 +1866,7 @@ function runGuide(q, box, done) {
     const go = () => {
       const v = inp.value.trim(); if (!v) return;
       const r = checkAnswer(g.spec, v);
-      if (r.status === "invalid") { fbk.innerHTML = `<span class="small">${esc(r.message || "Réponse illisible.")}</span>`; return; }
+      if (r.status === "invalid" || r.calc) { fbk.innerHTML = `<span class="small">${esc(r.message || "Réponse illisible.")}</span>`; return; } /* 25.11 : calcul au lieu du résultat = on redemande */
       inp.disabled = true; el.querySelector(".gok").remove(); const kp = el.querySelector(".keypad"); if (kp) kp.remove(); gprev.remove();
       fbk.innerHTML = `<div class="${r.status === "correct" ? "gok-msg" : "gno-msg"}">${r.status === "correct" ? "✓ Oui." : "Pas tout à fait."} ${g.sol}</div>`;
       typeset(fbk); k++; step();
@@ -2304,8 +2304,8 @@ function showCode() {
   const back0 = () => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); };
   if (/^cur-/.test(m[1]) && typeof Curieux !== "undefined") { const cq = Curieux.fromCode(m[1]); if (cq) { screenCurious(cq, back0); return true; } }
   let q = Engine.fromCode(m[1]);
-  // Même exigence qu'en séance (commentaire testeur du 15.11) : au CO, on donne le résultat, pas le calcul.
-  if (q) { const n = NOTIONS.find((x) => x.id === q.id), y = n && n.CH && n.CH[0]; if (y && y <= 11) q = Engine.finalize({ profile: { system: "CH", grade: y } }, q.id, q); }
+  // Même exigence qu'en séance (commentaire testeur du 15.11) : résultat ou calcul tapé selon la notion (tools/calculatrice.md).
+  if (q) { const n = NOTIONS.find((x) => x.id === q.id), y = (n && n.CH && n.CH[0]) || 12; q = Engine.finalize({ profile: { system: "CH", grade: y } }, q.id, q); } /* 25.11 : tous niveaux (règle de la calculatrice) */
   if (!q) { h(`${brand}<div class="card flat"><h3>Code inconnu</h3><p class="muted">« ${esc(m[1])} » ne correspond à aucune question.</p></div>`); return true; }
   const back = () => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); };
   renderQuestion(q, { eyebrow: "Question " + q.code + " (consultation)", onDone: () => 0, onNext: back });

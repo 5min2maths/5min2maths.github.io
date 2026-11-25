@@ -32,8 +32,8 @@ const Parents = {
     let q = null;
     try { q = Engine.fromCode(code); } catch (e) { q = null; }
     if (!q) return null;
-    const n = NOTIONS.find((x) => x.id === q.id), y = n && n.CH && n.CH[0];
-    if (y && y <= 11) q = Engine.finalize({ profile: { system: "CH", grade: y } }, q.id, q);
+    const n = NOTIONS.find((x) => x.id === q.id), y = (n && n.CH && n.CH[0]) || 12;
+    q = Engine.finalize({ profile: { system: "CH", grade: y } }, q.id, q); /* 25.11 : tous niveaux (règle de la calculatrice) */
     return q;
   },
   /* Résumé de la semaine (7 jours jusqu'à la photo), sans Mathélo, sans heures, sans liste d'erreurs. */
