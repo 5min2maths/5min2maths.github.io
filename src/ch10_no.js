@@ -10,8 +10,9 @@
   const C = (v) => { if (Number.isInteger(r6(v))) return N(v); let [i, f] = r6(v).toFixed(2).split("."); if (i.replace("-", "").length >= 4) i = i.replace(/\B(?=(\d{3})+(?!\d))/g, "\\text{'}"); return i + "{,}" + f; }; // montants en CHF : 2 décimales
   const par = (v) => (v < 0 ? "(" + N(v) + ")" : N(v));
   const keep = (value, traps) => { const seen = new Set(); return (traps || []).filter((t) => t && isFinite(t.v) && Math.abs(t.v - value) > 1e-9 && !seen.has(r6(t.v)) && seen.add(r6(t.v))); };
-  const Qv = (q, value, sol, o = {}) => { const x = { q, spec: { kind: "value", value: r6(value) }, sol, guide: o.guide, traps: keep(r6(value), o.traps), ctx: o.ctx }; if (o.fig) x.fig = o.fig; return x; };
-  const G = (ask, value, sol) => GS(ask, r6(value), sol);
+  const p15 = (v) => +(+v).toPrecision(15); /* 26.11 (recalcul) : valeur exacte dans la réponse attendue (r6 donnait 0,666667 pour 2/3 : la fraction tapée était refusée) ; r6 reste pour l'affichage */
+  const Qv = (q, value, sol, o = {}) => { const x = { q, spec: { kind: "value", value: p15(value) }, sol, guide: o.guide, traps: keep(p15(value), o.traps), ctx: o.ctx }; if (o.fig) x.fig = o.fig; return x; };
+  const G = (ask, value, sol) => GS(ask, p15(value), sol);
   const TR = (v, m) => TRAP(r6(v), m);
   const P = (q, parts, hints, sol) => ({ q, parts: parts.map(([label, value]) => ({ label, spec: { kind: "value", value } })), hints, sol });
   const who = () => pk(["Lina", "Noé", "Inès", "Yanis", "Mia", "Sam", "Léa", "Tom"]);
