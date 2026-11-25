@@ -62,7 +62,7 @@
 
   Object.assign(ACTIVE, {
     sys2: {
-      predict: { q: "x + y = 10 et x − y = 2. Que vaut x ?", choices: ["6", "5", "4"], good: 0, why: "En additionnant les deux équations, les y disparaissent : 2x = 12, donc x = 6 (et y = 4). 5 et 5 font bien 10, mais 5 − 5 ne fait pas 2." },
+      predict: { q: "x + y = 8 et x − y = 2. Que vaut x ?", choices: ["5", "4", "3"], good: 0, why: "En additionnant les deux équations, les y disparaissent : 2x = 10, donc x = 5 (et y = 3). 4 et 4 font bien 8, mais 4 − 4 ne fait pas 2." },
       defis: ["y = −x + 10 et y = x − 2 : quelle valeur de x rend les deux y égaux ?", "y = 2x + 1 et y = −x + 7 : trouve x.", "y = x + 3 et y = −2x − 3 : trouve x."],
       play: hunt({ label: "x =",
         show: (x, s) => { const F = [[(t) => -t + 10, (t) => t - 2], [(t) => 2 * t + 1, (t) => -t + 7], [(t) => t + 3, (t) => -2 * t - 3]][s];
@@ -72,7 +72,7 @@
     sysprob: {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
       retiens: { exemple: ["10 têtes et 28 pattes : si tout était des poules, 20 pattes ; il en manque 8, soit 4 lapins.", "35 têtes et 94 pattes : \\(p + \\ell = 35\\), \\(2p + 4\\ell = 94\\), donc 12 lapins et 23 poules."] },
-      predict: { q: "Dans une ferme : 10 têtes et 28 pattes (poules et lapins). Combien de lapins ?", choices: ["4", "6", "5"], good: 0, why: "Si tous étaient des poules : 20 pattes. Il en manque 8, et chaque lapin ajoute 2 pattes : 4 lapins (et 6 poules)." },
+      predict: { q: "Dans une ferme : 8 têtes et 22 pattes (poules et lapins). Combien de lapins ?", choices: ["3", "5", "4"], good: 0, why: "Si tous étaient des poules : 16 pattes. Il en manque 6, et chaque lapin ajoute 2 pattes : 3 lapins (et 5 poules)." },
       defis: ["10 têtes, 28 pattes : combien de lapins ?", "20 têtes, 56 pattes : combien de lapins ?", "35 têtes, 94 pattes : combien de lapins ?"],
       play: hunt({ label: "Lapins :",
         show: (x, s) => { const [n, p] = [[10, 28], [20, 56], [35, 94]][s]; if (x === null) return `<div class="small muted">${n} têtes, ${p} pattes. Écris le système p + ℓ = ${n}, 2p + 4ℓ = ${p}, ou raisonne « si tous étaient des poules… ».</div>`;
@@ -114,7 +114,7 @@
     affzero: {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
       retiens: { regle: "Zéro : on résout \\(ax + b = 0\\), \\(x = -\\frac{b}{a}\\). Si \\(a > 0\\), la fonction est négative avant le zéro et positive après ; si \\(a < 0\\), c'est l'inverse." },
-      predict: { q: "f(x) = 2x − 6. Son zéro est…", choices: ["−6", "3", "6"], good: 1, why: "2x − 6 = 0 donne x = 3 : la droite coupe l'axe horizontal en 3. −6 est l'ordonnée à l'origine." },
+      predict: { q: "f(x) = 3x − 12. Son zéro est…", choices: ["−12", "4", "12"], good: 1, why: "3x − 12 = 0 donne x = 4 : la droite coupe l'axe horizontal en 4. −12 est l'ordonnée à l'origine." },
       defis: ["Zéro de f(x) = 2x − 6 ?", "Zéro de f(x) = −3x + 12 ?", "Zéro de f(x) = 0,5x + 2 ?"],
       play: hunt({ label: "x =",
         show: (v, s) => { const f = [(t) => 2 * t - 6, (t) => -3 * t + 12, (t) => 0.5 * t + 2][s];

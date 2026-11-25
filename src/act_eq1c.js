@@ -144,7 +144,7 @@
       play: balance([[1 / 2 + 1 / 3, 0, 0, 5, "x/2 + x/3 = 5"], [1 / 4, -1, 1 / 6, 0, "x/4 − 1 = x/6"], [1 / 2, 1 / 2, 1 / 3, 1, "(x + 1)/2 = (x − 3)/3 + 2"]]),
     },
     eqspec: {
-      predict: { q: "2x + 3 = 2x + 5 : combien de solutions ?", choices: ["Une : x = 0", "Aucune", "Une infinité"], good: 1, why: "Quel que soit x, le membre de droite vaut 2 de plus que celui de gauche : jamais égaux. Aucune solution." },
+      predict: { q: "3x + 1 = 3x + 4 : combien de solutions ?", choices: ["Une : x = 0", "Aucune", "Une infinité"], good: 1, why: "Quel que soit x, le membre de droite vaut 3 de plus que celui de gauche : jamais égaux. Aucune solution." },
       defis: ["Résous 2x + 3 = 2x + 5.", "Résous 3(x + 1) = 3x + 3.", "Résous 4x + 1 = x + 1 (attention : les x ne disparaissent pas)."],
       play: balance([[2, 3, 2, 5], [3, 3, 3, 3, "3(x + 1) = 3x + 3"], [4, 1, 1, 1, "4x + 1 = x + 1", "x = 0 : c'est une vraie solution, pas « aucune solution »."]]),
     },
@@ -162,7 +162,7 @@
     probeq: {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
       retiens: { exemple: ["Trois entiers consécutifs de somme 48 : \\(n + (n + 1) + (n + 2) = 48\\), \\(n = 15\\).", "Somme 75 : \\(3n + 3 = 75\\), \\(n = 24\\) (24, 25, 26).", "Quatre consécutifs de somme 98 : \\(4n + 6 = 98\\), \\(n = 23\\)."], piege: "Écris ce que représente l'inconnue : ici \\(n\\) est le plus petit, celui du milieu est \\(n + 1\\)." },
-      predict: { q: "Trois entiers consécutifs ont pour somme 48. Le plus petit est…", choices: ["16", "15", "14"], good: 1, why: "n + (n + 1) + (n + 2) = 3n + 3 = 48, donc n = 15 : 15 + 16 + 17 = 48. 16 est celui du milieu." },
+      predict: { q: "Trois entiers consécutifs ont pour somme 36. Le plus petit est…", choices: ["12", "11", "10"], good: 1, why: "n + (n + 1) + (n + 2) = 3n + 3 = 36, donc n = 11 : 11 + 12 + 13 = 36. 12 est celui du milieu." },
       defis: ["Trouve trois entiers consécutifs de somme 48.", "Trouve trois entiers consécutifs de somme 75.", "Avec 4 nombres : trouve quatre entiers consécutifs de somme 98."],
       play(box, onWin) {
         let n = 10, k = 3, step = 0;
@@ -246,7 +246,7 @@
         wins: [(x, s) => (x ** 4 - 5 * x * x + 4 === 0 ? (s.add(x), "x = " + nb(x) + " : X = " + sq(x) + ".") : null), (x, s) => { if (x ** 4 - 5 * x * x + 4 === 0) s.add(x); return [...s].some((u) => Math.abs(u) !== Math.abs(x)) && x ** 4 - 5 * x * x + 4 === 0 ? "Deux valeurs de X : 1 et 4." : null; }, (x, s) => { if (x ** 4 - 5 * x * x + 4 === 0) s.add(x); return s.size === 4 ? "Quatre solutions : −2, −1, 1, 2 (X = 1 et X = 4 en donnent deux chacune)." : null; }] }),
     },
     eqirr: {
-      predict: { q: "√(x + 7) = x + 1. En élevant au carré, on trouve x = 2 ou x = −3. Les deux conviennent-elles ?", choices: ["Oui", "Non, seulement 2", "Non, seulement −3"], good: 1, why: "Pour −3 : √4 = 2, mais x + 1 = −2. Une racine n'est jamais négative : −3 est une solution « parasite »." },
+      predict: { q: "√(x + 3) = x − 3. En élevant au carré, on trouve x = 6 ou x = 1. Les deux conviennent-elles ?", choices: ["Oui", "Non, seulement 6", "Non, seulement 1"], good: 1, why: "Pour 1 : √4 = 2, mais x − 3 = −2. Une racine n'est jamais négative : 1 est une solution « parasite »." },
       defis: ["Trouve x tel que √(x + 7) = x + 1.", "Trouve un x tel que les carrés soient égaux mais pas les deux membres.", "Trouve x tel que √(x + 7) = 4."],
       play: hunt({ start: 0, min: -7, max: 12, show: (x) => `<div class="act-out">Membre de gauche : √(x + 7) = <b>${nb(+Math.sqrt(x + 7).toFixed(3))}</b><br>Membre de droite : x + 1 = <b>${nb(x + 1)}</b><br><span class="small muted">Au carré, à gauche : x + 7 = ${nb(x + 7)}<br>Au carré, à droite : (x + 1)² = ${sq(x + 1)}</span></div>`,
         wins: [(x) => (Math.sqrt(x + 7) === x + 1 ? "x = 2 : √9 = 3 = 2 + 1." : null), (x) => (x + 7 === (x + 1) ** 2 && Math.sqrt(x + 7) !== x + 1 ? "x = −3 : 4 = 4 au carré, mais √4 = 2 ≠ −2. Le carré a « oublié » le signe : on vérifie toujours." : null), (x) => (Math.sqrt(x + 7) === 4 ? "x = 9 : x + 7 = 16." : null)] }),

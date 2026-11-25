@@ -136,7 +136,7 @@
     denombr: {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
       retiens: { regle: "Si on choisit d'abord parmi \\(a\\) possibilités, puis parmi \\(b\\), il y a \\(a \\cdot b\\) possibilités (c'est un arbre) : on multiplie, on n'additionne pas.", exemple: ["3 t-shirts et 4 pantalons : \\(3 \\cdot 4 = 12\\) tenues.", "6 personnes : \\(\\frac{6 \\cdot 5}{2} = 15\\) poignées de main."] },
-      predict: { q: "3 t-shirts et 4 pantalons : combien de tenues différentes ?", choices: ["7", "12", "34"], good: 1, why: "Chaque t-shirt se combine avec chacun des 4 pantalons : 3 · 4 = 12 (arbre). On multiplie, on n'additionne pas." },
+      predict: { q: "2 casquettes et 5 t-shirts : combien de tenues différentes ?", choices: ["7", "10", "25"], good: 1, why: "Chaque casquette se combine avec chacun des 5 t-shirts : 2 · 5 = 10 (arbre). On multiplie, on n'additionne pas." },
       defis: ["3 t-shirts, 4 pantalons : nombre de tenues ?", "5 coureurs : nombre de podiums (or, argent, bronze) ?", "6 personnes se serrent toutes la main : nombre de poignées ?"],
       play: hunt({ ask: true, label: "Nombre",
         show: (x, s) => plain(["arbre : 3 branches, puis 4 sur chacune", "or : 5 choix, argent : 4, bronze : 3", "chacun serre 5 mains ; chaque poignée est comptée deux fois"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),

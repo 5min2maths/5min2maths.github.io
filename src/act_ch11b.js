@@ -113,7 +113,7 @@
 
   Object.assign(ACTIVE, {
     fracadd: {
-      predict: { q: "Combien font 1/4 + 1/6 ?", choices: ["2/10", "5/12", "2/24"], good: 1, why: "Un quart et un sixième ne sont pas des parts de même taille : on les découpe en douzièmes, 3/12 + 2/12 = 5/12. Additionner les dénominateurs donnerait 2/10 = 1/5, moins qu'un quart seul !" },
+      predict: { q: "Combien font 1/3 + 1/4 ?", choices: ["2/7", "7/12", "2/12"], good: 1, why: "Un tiers et un quart ne sont pas des parts de même taille : on les découpe en douzièmes, 4/12 + 3/12 = 7/12. Additionner les dénominateurs donnerait 2/7, moins qu'un tiers seul !" },
       defis: ["Trouve le plus petit dénominateur commun de 1/4 et 1/6.", "Même chose pour 2/3 et 3/5.", "Et pour 3/8 et 5/12."],
       play: hunt({ ask: true, label: "Dénominateur commun", start: 2, min: 2, max: 60,
         show: (x, s) => { const [a, b, c, d] = [[1, 4, 1, 6], [2, 3, 3, 5], [3, 8, 5, 12]][s], okb = x % b === 0, okd = x % d === 0;
@@ -127,7 +127,7 @@
         { d: "\\(\\frac{2}{3} \\div \\frac{4}{9} = \\frac{a}{2}\\). Tape \\(a\\).", ans: 3, ok: "On multiplie par l'inverse 9/4 : 2/3 · 9/4 = 18/12 = 3/2.", no: "Multiplie 2/3 par l'inverse de 4/9, puis simplifie." }],
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
       retiens: { regle: "On multiplie les numérateurs entre eux et les dénominateurs entre eux. Prendre une fraction d'une fraction, c'est multiplier : « de » veut dire « fois ». Diviser par une fraction, c'est multiplier par son inverse.", exemple: ["Les \\(\\frac{2}{3}\\) de \\(\\frac{3}{4}\\) : \\(\\frac{2}{3} \\cdot \\frac{3}{4} = \\frac{6}{12} = \\frac{1}{2}\\).", "La moitié de \\(\\frac{4}{5}\\) : \\(\\frac{1}{2} \\cdot \\frac{4}{5} = \\frac{4}{10} = \\frac{2}{5}\\).", "Les \\(\\frac{3}{4}\\) de \\(\\frac{2}{5}\\) : \\(\\frac{6}{20} = \\frac{3}{10}\\).", "\\(\\frac{3}{4} \\div \\frac{1}{8} = \\frac{3}{4} \\cdot \\frac{8}{1} = 6\\) ; \\(\\frac{2}{3} \\div \\frac{4}{9} = \\frac{2}{3} \\cdot \\frac{9}{4} = \\frac{3}{2}\\)."], piege: "Pour multiplier, pas de dénominateur commun : on multiplie en haut et en bas." },
-      predict: { q: "Les 2/3 de 3/4 d'une tablette de chocolat, c'est…", choices: ["5/7 de la tablette", "1/2 de la tablette", "6/7 de la tablette"], good: 1, why: "On prend 2 tiers d'une part de 3 quarts : 2/3 · 3/4 = 6/12 = 1/2. « De » veut dire « fois »." },
+      predict: { q: "Les 3/4 de 2/5 d'une tablette de chocolat, c'est…", choices: ["5/9 de la tablette", "3/10 de la tablette", "5/20 de la tablette"], good: 1, why: "On prend 3 quarts d'une part de 2 cinquièmes : 3/4 · 2/5 = 6/20 = 3/10. « De » veut dire « fois »." },
       defis: ["Colorie les 2/3 de 3/4 du carré (règle les lignes).", "Colorie la moitié de 4/5.", "Colorie les 3/4 de 2/5."],
       play: hunt({ label: "Lignes coloriées", start: 0, min: 0, max: 4,
         show: (x, s) => { const [a, b, c, e] = [[3, 4, 2, 3], [4, 5, 1, 2], [2, 5, 3, 4]][s], r = Math.min(x, e), cw = 240 / b, rh = 120 / e; let g = "";
@@ -195,7 +195,7 @@
     pythfig: {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
       retiens: { regle: "Diagonale d'un rectangle : les deux côtés et la diagonale forment un triangle rectangle. Grande diagonale d'un pavé : \\(d^2 = a^2 + b^2 + c^2\\).", exemple: ["Rectangle 9 × 12 : \\(d = \\sqrt{81 + 144} = 15\\).", "Pavé 2 × 3 × 6 : \\(d = \\sqrt{4 + 9 + 36} = 7\\)."], piege: "La diagonale est l'hypoténuse : on additionne les carrés, puis on prend la racine." },
-      predict: { q: "Un rectangle mesure 9 cm sur 12 cm. Sa diagonale mesure…", choices: ["21 cm", "15 cm", "108 cm"], good: 1, why: "La diagonale coupe le rectangle en deux triangles rectangles : √(81 + 144) = √225 = 15." },
+      predict: { q: "Un rectangle mesure 6 cm sur 8 cm. Sa diagonale mesure…", choices: ["14 cm", "10 cm", "48 cm"], good: 1, why: "La diagonale coupe le rectangle en deux triangles rectangles : √(36 + 64) = √100 = 10." },
       defis: ["Rectangle 9 × 12 : trouve la diagonale.", "Triangle isocèle de côtés 10, 10 et de base 12 : trouve la hauteur.", "Pavé 2 × 3 × 6 : trouve la grande diagonale."],
       play: hunt({ ask: true, label: "Longueur", start: 5, min: 1, max: 20,
         show: (x, s) => { const L = [["Triangle (9 ; 12 ; diagonale) : 9² + 12² = 225", 225, x * x, "diagonale² = " + x * x], ["Triangle (demi-base 6 ; hauteur ; côté 10) : 6² + h² = " + (36 + x * x), 100, 36 + x * x, "côté² = 100"], ["Pavé : 2² + 3² + 6² = 49", 49, x * x, "diagonale² = " + x * x]][s];
@@ -271,7 +271,7 @@
     volmanq: {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
       retiens: { regle: "On écrit la formule, on remplace ce qu'on connaît, puis on isole la dimension cherchée.", exemple: ["Cylindre \\(r = 3\\), \\(V = 36\\pi\\) : \\(9\\pi h = 36\\pi\\), \\(h = 4\\).", "Pavé de base 5 × 4, \\(V = 140\\) : \\(20h = 140\\), \\(h = 7\\)."], piege: "\\(\\pi \\cdot 3^2 \\cdot h = 36\\pi\\) : on divise par \\(9\\pi\\), pas par 3." },
-      predict: { q: "Un cylindre de rayon 3 cm a un volume de 36π cm³. Sa hauteur mesure…", choices: ["4 cm", "12 cm", "6 cm"], good: 0, why: "π · 3² · h = 36π, donc 9h = 36 et h = 4. On remplace ce qu'on connaît, puis on isole h." },
+      predict: { q: "Un cylindre de rayon 2 cm a un volume de 20π cm³. Sa hauteur mesure…", choices: ["5 cm", "10 cm", "4 cm"], good: 0, why: "π · 2² · h = 20π, donc 4h = 20 et h = 5. On remplace ce qu'on connaît, puis on isole h." },
       defis: ["Cylindre de rayon 3 et de volume 36π : calcule la hauteur.", "Cône de rayon 3 et de volume 18π : calcule la hauteur.", "Pavé de base 5 × 4 et de volume 140 cm³ : calcule la hauteur."],
       play: hunt({ ask: true, label: "Hauteur", start: 1, min: 1, max: 12,
         show: (x, s) => { const [lab, v, t] = [["π · 3² · " + x, 9 * x, 36], ["⅓ · π · 3² · " + x, 3 * x, 18], ["5 · 4 · " + x, 20 * x, 140]][s];

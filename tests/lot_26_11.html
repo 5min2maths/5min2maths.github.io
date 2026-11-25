@@ -1,9 +1,14 @@
-<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="budget" content="60000"><link rel="stylesheet" href="../src/style.css"><body><main id="app"></main>
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="budget" content="90000"><link rel="stylesheet" href="../src/style.css"><body><main id="app"></main>
 <script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
 <script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/defis_9.js"></script><script src="../src/defis_910.js"></script><script src="../src/defis_2c.js"></script><script src="../src/defis_sec2.js"></script><script src="../src/competences.js"></script><script src="../src/referentiel.js"></script><script src="../src/trx.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch4c_trous.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/ch1c_trous.js"></script><script src="../src/ch1c_argact.js"></script><script src="../src/ch11_rep3d.js"></script><script src="../src/fr_college.js"></script><script src="../src/fr_1re.js"></script><script src="../src/fr_3e.js"></script><script src="../src/fr_tle.js"></script><script src="../src/fr_fin.js"></script><script src="../src/fr_trous.js"></script><script src="../src/fr_couv.js"></script><script src="../src/ref_matu.js"></script><script src="../src/ref_fr.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_col34b.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/fr_act.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/parents.js"></script><script src="../src/presente.js"></script><script src="../src/app.js"></script>
 <script src="vrai_collecte.js"></script><script src="vrai_checks.js"></script>
 <script>
-window.addEventListener("load", () => {
+// Lot du 26.11 : la page se charge dans un cadre de 360 × 640 (téléphone) et y lance tous les contrôles.
+if (window === top) {
+  document.body.innerHTML = '<iframe src="lot_26_11.html#cadre" style="width:360px;height:640px;border:0"></iframe>';
+  const pre = document.createElement("pre"); pre.id = "out"; pre.textContent = "en cours"; document.body.appendChild(pre);
+  window.addEventListener("message", (e) => { if (typeof e.data === "string" && e.data.startsWith("lot:")) pre.textContent = e.data.slice(4); });
+} else window.addEventListener("load", () => {
 // Lot du 26.11 (tests/lot_26_11.html) : un contrôle par point du lot (compétences du Collège, vraisemblance, revue
 // des testeurs). Chaque section écrit ses échecs dans OUT ; la page finit par « OK … » ou « ÉCHEC … ».
 const OUT = []; let nbF = 0;
@@ -47,7 +52,139 @@ sec("A formes", () => {
     if (!(REF_MATU.q[code] || []).includes(n)) fail("ref_matu " + code + " : " + JSON.stringify(REF_MATU.q[code]) + " sans " + n);
 });
 
-// FIN
-const pre = document.createElement("pre"); pre.id = "out"; pre.textContent = nbF ? "ÉCHEC (" + nbF + ")\n" + OUT.join("\n") : "OK lot 26.11"; document.body.appendChild(pre);
+// ---------- B. Vraisemblance : les nouvelles règles de tests/vrai_checks.js se déclenchent ----------
+sec("B règles", () => {
+  const V = (t) => VRAI_CHECK({ raw: t, txt: t, sol: "", parts: [], guide: [], fig: "", spec: null }).map((x) => x[0]);
+  const doit = [["Un hôtel accepte 100 réservations pour 55 chambres ; chaque client vient avec la probabilité 0,5.", "surréservation"], ["Un cheval tire une péniche le long du canal avec une force de 120 N.", "force"],
+    ["Combien de mètres économise-t-il (elle) ?", "formulation"], ["Au cinéma, une place coûte 6 CHF. Combien de places ?", "cinéma"], ["La température baisse de 5 °C chaque fois qu'on monte de 500 m.", "altitude"],
+    ["Un chariot roule sur un rail à 50 m/s.", "vitesse"], ["La petite bouteille mesure 20 cm de haut et contient 1,5 L.", "bouteille"]];
+  for (const [t, k] of doit) if (!V(t).length) fail("règle de vraisemblance muette (" + k + ") : " + t);
+  for (const t of ["Calcule P_N(E). (fraction acceptée)", "Une compagnie vend 400 billets pour un vol de 366 places.", "La température baisse de 3 °C chaque fois qu'on monte de 500 m.", "Au cinéma, une place coûte 18 CHF."])
+    if (V(t).length) fail("règle de vraisemblance trop large : " + t + " → " + V(t).join(", "));
+  // Défis d'arithmétique : un seul contexte par énoncé.
+  for (const f of PROBX.arith || []) for (let s = 1; s <= 20; s++) { R.seed(s); const p = f(); if ((/bus/.test(p.q) && /corbeille/.test(p.q)) || (/carreler/.test(p.q) && /empile/.test(p.q))) fail("défi arith à deux contextes : " + p.q.slice(0, 80)); }
+});
+
+// ---------- C. Revue d'un testeur ----------
+sec("C", () => {
+  const L = Badges.list({ profile: { system: "CH", grade: 11, track: "college" }, notions: {}, streak: { count: 0 } }), i1 = L.findIndex((b) => b.id === "premier"), i3 = L.findIndex((b) => b.id === "serie3");
+  if (i3 !== i1 + 1 || L[i3].fam !== "reg") fail("badge « 3 jours d'affilée » absent ou mal placé");
+  else {
+    const st = Engine.newState({ system: "CH", grade: 11, track: "college", minutes: 5 }), d0 = "2026-11-02";
+    const at = (d) => { const real = Date; window.Date = class extends real { constructor(...a) { super(...(a.length ? a : [d + "T10:00:00"])); } static now() { return new real(d + "T10:00:00").getTime(); } }; try { Engine.finishDay(st, 1, 1); } finally { window.Date = real; } };
+    at(d0); at(addDays(d0, 1)); at(addDays(d0, 3)); /* le 3e jour arrive après un jour manqué : joker */
+    const p = L[i3].prog(st, {}); if (st.streak.count !== 3 || p[0] !== 3) fail("badge « 3 jours » avec le joker : série " + st.streak.count + ", progression " + p[0]);
+  }
+  if (/dans l'espace/.test(NOTIONS.find((n) => n.id === "pythfig").label)) fail("pythfig : libellé « dans l'espace »");
+});
+
+// ---------- D. Revue des élèves testeurs ----------
+sec("D", () => {
+  if (mockTitle({ q: { q: "Sam écrit : … Trouve l'erreur, puis donne le bon produit." } }) !== "Trouve l'erreur") fail("sujet : titre « Trouve l'erreur »");
+  const sp = { kind: "value", value: (120 * Math.sqrt(3)) / 17, radical: true };
+  if (checkAnswer(sp, "12,2262409946").status === "correct") fail("décimal de calculatrice accepté pour 120√3/17");
+  if (checkAnswer({ kind: "value", value: 1 / 3 }, "0,33333").status === "correct") fail("0,33333 accepté pour 1/3");
+  if (checkAnswer({ kind: "value", value: 2.5 }, "2,5").status !== "correct") fail("2,5 refusé");
+  if (checkAnswer({ kind: "value", value: 0.0625 }, "0,0625").status !== "correct") fail("0,0625 refusé (décimal exact)");
+  for (let s = 1; s <= 20; s++) { const c = Curieux.build("gratuit", s); if (!/« −/.test(c.q)) { fail("curieux « gratuit » : pourcentage sans signe moins"); break; } }
+  if (moneyTidy("La virgule se déplace de 1 rang(s).") !== "La virgule se déplace de 1 rang." || moneyTidy("3,25 a 2 décimale(s).") !== "3,25 a 2 décimales.") fail("accords (s) : " + moneyTidy("de 1 rang(s) ; 2 décimale(s)"));
+  if (/<br>/.test(colonBreak("Les \\(x^2\\) : \\(3x^2\\) ; les \\(x\\) : \\(3x\\)"))) fail("colonBreak coupe entre deux formules");
+  if (classTag({ system: "CH", grade: 13, track: "mp" }) !== "MP 2e") fail("classTag MP");
+  for (let s = 1; s <= 60; s++) { const q = Engine.build("sys2", 4, s); if (/-1[A-Z](?![a-zA-Z])/.test(q.sol || "")) { fail("corrigé « -1L » : " + q.code); break; } }
+  if (exactNote({ kind: "value", value: 3.2e-7, sci: true }, "Écris en notation scientifique.")) fail("exactNote sur la notation scientifique");
+  if (!/fraction/.test(exactNote({ kind: "value", value: 1 / 3 }, "Calcule."))) fail("exactNote absente pour 1/3");
+  // Leçon du collège français : médiane et étendue, sans quartiles.
+  const st0 = state; state = Engine.newState({ system: "FR", grade: 8, minutes: 5 });
+  if (/quartile/i.test(lessonBody("quartiles").replace(/<[^>]+>/g, " ")) || !/médiane/i.test(lessonBody("quartiles"))) fail("leçon quartiles en 4e France : " + lessonBody("quartiles").replace(/<[^>]+>/g, " ").slice(0, 120));
+  state = Engine.newState({ system: "FR", grade: 10, minutes: 5 }); if (!/quartile|Q_1/i.test(lessonBody("quartiles"))) fail("leçon quartiles en 2nde");
+  state = st0;
+  // Leçons actives : « Devine » et premier défi pas identiques (mêmes nombres) ; filtre6 compare volontairement « moins de » et « au plus ».
+  const nums = (t) => (String(t).replace(/<[^>]+>/g, " ").match(/\d+(?:[.,]\d+)?/g) || []).join(" "); /* mêmes nombres, dans le même ordre */
+  /* même objet, autre demande (le défi poursuit le « Devine ») : relu le 26.11, gardé */
+  const SUITE = ["filtre6", "eq3", "bicarre", "absval", "ineq2", "ratden", "valint", "trigeq", "etudefct", "compdiff"];
+  for (const [id, A] of Object.entries(ACTIVE)) { if (!A || !A.predict || !Array.isArray(A.defis) || typeof A.defis[0] !== "string" || SUITE.includes(id)) continue;
+    const a = nums(A.predict.q), b = nums(A.defis[0]); if (a.split(" ").length >= 2 && a === b) fail("leçon " + id + " : « Devine » et 1er défi identiques (" + a + ") : " + A.predict.q.slice(0, 70) + " || " + A.defis[0].slice(0, 70)); }
+  if (!/Collège, MP/.test(DEMO_GRADES.CH.find(([g]) => g === 12)[1])) fail("« Sec. II » sans « Collège, MP »");
+  if (Engine.eloRefund({ elo: { r: 1000, log: [] } }, -30) !== 15) fail("Mathélo : moitié de la perte rendue après un pas à pas réussi");
+});
+
+// ---------- Séries d'automatismes : 200 séances, toutes les classes ----------
+sec("auto", () => {
+  const PROFS = [["CH", 9, "college"], ["CH", 10, "college"], ["CH", 11, "college"], ["CH", 12, "college"], ["CH", 13, "college"], ["CH", 14, "college", "N"], ["CH", 15, "college", "R"], ["CH", 12, "mp"], ["CH", 13, "mp"], ["CH", 14, "mp"], ["CH", 15, "mp"],
+    ["FR", 6], ["FR", 7], ["FR", 8], ["FR", 9], ["FR", 10], ["FR", 11], ["FR", 12], ["CH", 11, "college"], ["CH", 9, "college"]];
+  const RQ = window.renderQuestion, SL = window.screenLesson, SS = window.screenSummary, st0 = state, ss0 = session; let cap = null, lessons = 0, n = 0, bad = 0;
+  window.renderQuestion = (q) => { cap = q; }; window.screenLesson = () => { lessons++; }; window.screenSummary = () => {};
+  try {
+    for (const [sys, g, tr, niv] of PROFS) {
+      state = Engine.newState({ system: sys, grade: g, track: tr, niv, minutes: 5 }); Engine.autoInit(state); state.placed = true; state.tourDone = true;
+      for (let k = 0; k < 10; k++) {
+        const plan = Engine.planSession(state, "auto");
+        session = { fmt: "auto", plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), lessonAt: lessonAtStart(plan) };
+        for (let i = 0; i < plan.length; i++) { session.i = i; cap = null; nextQuestion(); n++;
+          if (!cap) { fail("auto " + sys + g + " : pas de question"); continue; }
+          if (!Engine.isDrill(cap) && ++bad <= 12) fail("auto " + sys + g + (tr || "") + " : hors critère « " + String(cap.q).replace(/<[^>]+>/g, "").slice(0, 90) + " » (" + cap.code + ")"); }
+      }
+    }
+  } finally { window.renderQuestion = RQ; window.screenLesson = SL; window.screenSummary = SS; state = st0; session = ss0; }
+  if (lessons) fail("auto : " + lessons + " leçon(s) montrée(s)");
+  if (n < 600) fail("auto : seulement " + n + " questions");
+});
+
+// ---------- Interface (cadre de 360 × 640) : accueil, statistiques, installation, problème, bilan, Mathélo caché ----------
+sec("UI", () => {
+  Element.prototype.scrollIntoView = function () {};
+  const st0 = state, ss0 = session, today = day();
+  const fresh = (o = {}) => { try { localStorage.clear(); } catch (e) {} for (const k of Object.keys(UI)) if (!["fs", "vib"].includes(k)) delete UI[k];
+    state = Engine.newState({ system: "CH", grade: 11, track: "college", minutes: 5 }); Engine.autoInit(state); state.placed = true; state.tourDone = true; state.eloSeen = true; state.firstDone = true;
+    state.history = [{ date: addDays(today, -1), n: 4, score: 3 }, { date: addDays(today, -2), n: 4, score: 3 }]; state.streak = { count: 2, last: addDays(today, -1), best: 2 }; Object.assign(state, o); session = null; homeTab = "today"; return state; };
+  const goTop = () => { const b = app.querySelector(".sess-go, #prepgo, .prep-today .btn-primary"); return b ? b.getBoundingClientRect().top + window.scrollY : 9999; };
+  // 1. Le grand bouton reste dans les 640 premiers pixels, quels que soient les rappels du jour.
+  const CAS = {
+    "simple": () => {},
+    "joker": () => { state.streak = { count: 4, last: addDays(today, -2), best: 4 }; },
+    "bilan de la semaine": () => { state.history.push({ date: addDays(today, -8), n: 5, score: 4 }); state.recapSeen = null; },
+    "sauvegarde": () => { for (let k = 3; k < 12; k++) state.history.push({ date: addDays(today, -k), n: 3, score: 2 }); },
+    "carnet": () => { state.carnet = [{ id: "eq1", d: 1, code: "eq1-1-a", date: today, ok: 0 }]; },
+    "série perdue": () => { state.streak = { count: 3, last: addDays(today, -4), best: 3 }; },
+    "tout à la fois": () => { for (let k = 3; k < 12; k++) state.history.push({ date: addDays(today, -k), n: 3, score: 2 }); state.streak = { count: 4, last: addDays(today, -2), best: 4 }; state.carnet = [{ id: "eq1", d: 1, code: "x", date: today, ok: 0 }]; state.eloSeen = false; },
+  };
+  for (const [k, f] of Object.entries(CAS)) { fresh(); f(); screenHome(); window.scrollTo(0, 0); const y = goTop();
+    if (y > 640 - 48) fail("accueil (" + k + ") : bouton de séance à " + Math.round(y) + " px (> 592)");
+    if (/Mathélo/.test(app.textContent)) fail("accueil (" + k + ") : « Mathélo » visible"); }
+  fresh({ streak: { count: 3, last: addDays(today, -4), best: 5 } }); screenHome();
+  if (!/Ta série de 3 jours s'est arrêtée : on repart aujourd'hui ! Ton record : 5\./.test((app.querySelector(".sess-card") || {}).textContent || "")) fail("série perdue : phrase absente de la carte de séance");
+  // 2. Statistiques : sous la séance, « Plus tard », 3 jours ignorés, « Non » définitif.
+  fresh(); screenHome(); const sc = app.querySelector("#statscard"), sg = app.querySelector(".sess-card");
+  if (!sc || !sg || sc.getBoundingClientRect().top < sg.getBoundingClientRect().bottom) fail("statistiques : carte absente ou au-dessus de la séance");
+  UI.statsSeen = [addDays(today, -3), addDays(today, -2), addDays(today, -1)]; screenHome(); if (app.querySelector("#statscard")) fail("statistiques : encore là après 3 jours ignorés");
+  fresh(); screenHome(); app.querySelector("#statslater").click(); if (app.querySelector("#statscard")) fail("statistiques : « Plus tard » ne masque pas");
+  fresh(); screenHome(); app.querySelector("#statsnon").click(); UI.statsSeen = []; delete UI.statsLater; screenHome(); if (app.querySelector("#statscard")) fail("statistiques : « Non » ne la fait pas disparaître");
+  // 3. Installer : au plus une fois par semaine.
+  fresh(); const r1 = returnCard(), r2 = returnCard(); if (!r1 || r2) fail("installation : " + (!r1 ? "jamais proposée" : "proposée deux fois le même jour"));
+  // 4. Problème en plusieurs parties : Entrée → partie suivante, Entrée sur la dernière → Valider.
+  fresh(); session = { plan: ["x"], i: 0, score: 0, answered: 1, start: Date.now(), elo0: 1000, ids: new Set() };
+  const P = { id: "eq1", d: 4, code: "t", q: "Problème test.", parts: [{ label: "a) A", spec: { kind: "value", value: 1 } }, { label: "b) B", spec: { kind: "value", value: 2 } }, { label: "c) C", spec: { kind: "value", value: 3 } }], hints: ["h"], sol: "s" };
+  let done = null; renderProblem(P, { eyebrow: "t", onDone: (r) => { done = r; return 0; }, onNext() {} });
+  const p0 = document.getElementById("p0"), key = (el) => el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+  p0.value = "1"; key(p0); if (document.activeElement !== document.getElementById("p1")) fail("problème : Entrée n'amène pas la partie b)");
+  const kp = document.getElementById("kp"); if (!kp || kp.previousElementSibling !== document.getElementById("p1").closest(".part")) fail("problème : clavier pas sous la partie b)");
+  if (!app.querySelector('.next-part[data-i="0"]')) fail("problème : bouton « partie suivante ↓ » absent");
+  document.getElementById("p1").value = "2"; document.getElementById("p2").value = "3"; key(document.getElementById("p2"));
+  if (!(document.getElementById("fb").textContent || "").trim()) fail("problème : Entrée sur la dernière partie ne valide pas");
+  // 5. Bilan : séance interrompue, Mathélo caché, explication dans Progrès.
+  fresh(); session = { fmt: "revision", plan: ["eq1|1|rev", "eq1|1|rev", "eq1|1|rev", "eq1|1|rev"], i: 1, score: 1, answered: 1, start: Date.now(), elo0: state.elo.r, ids: new Set(["eq1"]), stopped: true };
+  screenSummary(); const t = app.textContent;
+  if (/défi du jour/.test(t) || !/interrompue/.test(t)) fail("bilan : message d'une séance interrompue");
+  if (/Mathélo/.test(t)) fail("bilan : « Mathélo » visible");
+  fresh(); homeTab = "prog"; screenHome(); if (!/Mathélo = ton niveau/.test(app.textContent)) fail("Progrès : explication Mathélo / points de l'année absente");
+  // 6. Semaine : le positionnement ne compte pas.
+  fresh(); state.history = []; Engine.placementResult(state, "eq1", true, 2); Engine.placementResult(state, "prio", false, 2); if (Engine.week(state).n !== 0) fail("semaine : le positionnement est compté");
+  // 7. Pas à pas : la valeur attendue est donnée quand l'explication ne la contient pas.
+  fresh(); app.innerHTML = '<div id="gb"></div>'; runGuide({ guide: [{ ask: "Chiffre des dixièmes ?", spec: { kind: "value", value: 7 }, sol: "5 ou plus : on monte." }], sol: "fin" }, document.getElementById("gb"), () => {});
+  const gi = app.querySelector(".gin"); gi.value = "3"; app.querySelector(".gok").click(); if (!/Réponse de l'étape : 7/.test(app.textContent)) fail("pas à pas : valeur de l'étape absente");
+  state = st0; session = ss0; try { localStorage.clear(); } catch (e) {}
+});
+
+parent.postMessage("lot:" + (nbF ? "ÉCHEC (" + nbF + ")\n" + OUT.join("\n") : "OK lot 26.11 (compétences du Collège, vraisemblance, revues des testeurs, séries d'automatismes, accueil à 360 × 640)"), "*");
 });
 </script>

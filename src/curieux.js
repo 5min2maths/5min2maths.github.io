@@ -110,7 +110,7 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
     make() {
       const [b, red] = pk([[25, 20], [50, 100 / 3], [100, 50]]), D = pk(b === 50 ? [30, 35, 40] : b === 25 ? [20, 25, 30] : [40, 45, 50]), good = Math.abs(red - D) < 1e-9 ? 2 : red > D ? 0 : 1;
       const it = pk(["paquet de céréales", "flacon de gel douche", "sachet de bonbons"]);
-      return { titre: "Plus de produit ou moins cher ?", q: "Deux offres pour le même " + it + " : « +" + pc(b) + " de produit gratuit » (même prix, plus de contenu), ou « " + pc(D) + " sur le prix ».",
+      return { titre: "Plus de produit ou moins cher ?", q: "Deux offres pour le même " + it + " : « +" + pc(b) + " de produit gratuit » (même prix, plus de contenu), ou « −" + pc(D) + " sur le prix »." /* 26.11 (revue élèves, A12) : « −35 % », comme dans les choix */,
         bet: { q: "Quelle offre baisse le plus le prix de chaque gramme ?", choices: ["+" + b + " % gratuit", "−" + D + " % sur le prix", "C'est pareil"], good },
         calc: { label: "« +" + b + " % gratuit » : de combien de % baisse le prix d'un gramme ? (au dixième)", value: Math.round(red * 10) / 10, round: 0.1 },
         reveal: "Pour le même prix, tu as " + M(N(1 + b / 100)) + " fois plus : chaque gramme coûte " + M("\\frac{1}{" + N(1 + b / 100) + "} \\approx " + N(1 / (1 + b / 100), 3)) + " du prix, soit " + pc(red, 1) + " de moins. " + (good === 2 ? "Exactement comme −" + D + " %." : good === 0 ? "Mieux que −" + D + " %." : "Moins bien que −" + D + " % : « +" + b + " % » impressionne plus qu'il ne rapporte.") };

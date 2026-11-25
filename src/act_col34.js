@@ -317,8 +317,8 @@
           { q: "g(x) = x³ − 3x² − 9x + 2. Quelle est la valeur du minimum local de g ?", ans: -25, ok: "g'(x) = 3x² − 6x − 9 = 3(x + 1)(x − 3) passe de − à + en 3, d'où le minimum g(3) = 27 − 27 − 27 + 2 = −25.", no: "g'(x) = 3(x + 1)(x − 3) : le minimum est en x = 3, calcule g(3)." }] }),
     },
     optimderiv: {
-      predict: { q: "Avec 40 m de clôture le long d'une rivière (trois côtés à clôturer), quel enclos a la plus grande aire ?", choices: ["10 m × 20 m", "13 m × 14 m", "5 m × 30 m"], good: 0,
-        why: "Les trois utilisent 40 m (2 · 10 + 20, 2 · 13 + 14, 2 · 5 + 30). Aires : 200 m², 182 m², 150 m². A(x) = x(40 − 2x) est maximale pour x = 10." },
+      predict: { q: "Avec 60 m de clôture le long d'une rivière (trois côtés à clôturer), quel enclos a la plus grande aire ?", choices: ["15 m × 30 m", "20 m × 20 m", "10 m × 40 m"], good: 0,
+        why: "Les trois utilisent 60 m (2 · 15 + 30, 2 · 20 + 20, 2 · 10 + 40). Aires : 450 m², 400 m², 400 m². A(x) = x(60 − 2x) est maximale pour x = 15." },
       defis: ["Enclos le long d'une rivière : 40 m de clôture pour les trois autres côtés. Règle la largeur x pour que l'aire soit maximale.", "Boîte sans couvercle : dans une feuille de 30 cm × 30 cm, on découpe un carré de côté x à chaque coin. Règle x pour que le volume soit maximal."],
       play: slide({
         ctl: (s) => [s ? { k: "x", lab: "Côté x des carrés découpés (cm)", min: 0.5, max: 14.5, step: 0.5 } : { k: "x", lab: "Largeur x (m)", min: 1, max: 19 }],
@@ -720,8 +720,8 @@
     },
     probarbre: {
       retiens: { regle: "Le long d'un chemin de l'arbre, on multiplie les probabilités. Avec remise, l'urne est la même au 2e tirage ; sans remise, il y a un objet de moins.", exemple: ["3 rouges, 2 bleues, avec remise : \\(P(RR) = \\frac{3}{5} \\cdot \\frac{3}{5} = 0{,}36\\).", "Sans remise : \\(P(RR) = \\frac{3}{5} \\cdot \\frac{2}{4} = 0{,}3\\)."] },
-      predict: { q: "Une urne contient 3 boules rouges et 2 bleues. On tire deux boules avec remise. La probabilité de tirer deux rouges vaut…", choices: ["3/5 · 3/5 = 0,36", "3/5 + 3/5", "3/5"], good: 0,
-        why: "Sur l'arbre, le chemin rouge puis rouge a la probabilité 3/5 · 3/5 : le long d'un chemin, on multiplie." },
+      predict: { q: "Une urne contient 2 boules rouges et 3 bleues. On tire deux boules avec remise. La probabilité de tirer deux rouges vaut…", choices: ["2/5 · 2/5 = 0,16", "2/5 + 2/5", "2/5"], good: 0,
+        why: "Sur l'arbre, le chemin rouge puis rouge a la probabilité 2/5 · 2/5 : le long d'un chemin, on multiplie." },
       defis: ["Urne : 3 boules rouges et 2 bleues. Deux tirages avec remise : probabilité de tirer deux rouges ?", "Même urne, deux tirages sans remise : probabilité de tirer deux rouges ?"],
       play: toi(["Avec remise, chaque tirage donne rouge avec la probabilité 3/5", "Sans remise : 3/5 au 1er tirage, puis il reste 2 rouges sur 4"],
         [W(0.36, "3/5 · 3/5 = 9/25 = 0,36."), W(0.3, "3/5 · 2/4 = 6/20 = 0,3 : moins qu'avec remise.")]),
