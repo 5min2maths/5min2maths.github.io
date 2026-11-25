@@ -335,7 +335,10 @@ const Engine = {
   // Notions du programme jusqu'à l'année de l'élève. Années précédentes : vues. Année en cours : « à venir » ;
   // elles s'ouvrent dans l'ordre du référentiel (unlock), sans rien demander à l'élève.
   catalog(profile) {
-    return NOTIONS.filter((n) => { const pl = placeOf(n, profile); return pl && pl[0] <= profile.grade; }).map((n) => {
+    /* 25.11 soir (décision de l'enseignant : « distinguer normal et renforcé en 3e–4e ») : au Collège de Genève, 3e et 4e,
+       les notions niv: "R" (MA2, niveau renforcé) ne sont proposées qu'aux élèves de MA2. Sans choix : MA1. */
+    const ma1 = profile.system === "CH" && profile.track !== "mp" && profile.grade >= 14 && profile.niv !== "R";
+    return NOTIONS.filter((n) => { const pl = placeOf(n, profile); return pl && pl[0] <= profile.grade && !(ma1 && n.niv === "R"); }).map((n) => {
       const [g] = placeOf(n, profile);
       // Matu : une notion est « de l'année » si son chapitre Sésamath est celui de l'année (Ma1 = 1re, Ma2 = 2e).
       /* 25.11 (audit France) : chapitres Sésamath du Collège de Genève pour les profils suisses seulement (une Tle française, grade 12,

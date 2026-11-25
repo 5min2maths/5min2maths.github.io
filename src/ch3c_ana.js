@@ -595,7 +595,7 @@
 
   // ---------- enregistrement (additif : aucune notion existante n'est modifiée) ----------
   for (const n of NEW) {
-    if (!NOTIONS.some((x) => x.id === n.id)) NOTIONS.push({ id: n.id, theme: n.theme, label: n.label, ex: n.ex, CH: n.CH, MP: null, FR: null });
+    if (!NOTIONS.some((x) => x.id === n.id)) NOTIONS.push(Object.assign({ id: n.id, theme: n.theme, label: n.label, ex: n.ex, CH: n.CH, MP: null, FR: null }, n.niv ? { niv: n.niv } : {}));
     GEN[n.id] = (d) => pickForm(n.lv[Math.min(Math.max(d, 1), 3)]);
     HINTS_EXTRA[n.id] = n.hint;
     LESSONS_EXTRA[n.id] = n.lesson;
@@ -1305,7 +1305,7 @@
       lesson: ["Continuité", "Peut-on tracer la courbe sans lever le crayon ?", "\\(f\\) est continue en \\(a\\) si \\(\\lim_{x \\to a} f(x) = f(a)\\) : la limite à gauche, la limite à droite et \\(f(a)\\) sont égales. Polynômes, fractions rationnelles (là où elles sont définies) et racines sont continus. Fonction par morceaux : chaque morceau est continu ; on vérifie le raccord en égalant les valeurs des deux formules au point de jonction.",
         ["\\(f(x) = 2x + 1\\) si \\(x < 1\\), \\(x^2 + k\\) si \\(x \\ge 1\\) : \\(3 = 1 + k\\), donc \\(k = 2\\).", "\\(f(x) = \\frac{x^2 - 4}{x - 2}\\) et \\(f(2) = 4\\) : continue, car \\(\\lim_{x \\to 2} (x + 2) = 4\\)."], "Au raccord, on utilise les deux formules au même point, même si l'une est écrite avec « < » et l'autre avec « ≥ »."],
       comps: ["Raccorder deux morceaux affines ; repérer un saut sur un graphique ; prolonger par continuité", "Raccord parabole-droite ; paramètre des deux côtés ; tarif sans saut", "Trois morceaux (deux paramètres) ; prolongement avec une racine ; paramètre au carré"] },
-    { id: "derivseconde", theme: "fa", label: "Dérivée seconde, points d'inflexion", ex: "f''(x) = 0 \\text{ et change de signe}", CH: [14], codesMATU: "3\\.AN\\.08[ab]", lv: DS,
+    { id: "derivseconde", niv: "R", theme: "fa", label: "Dérivée seconde, points d'inflexion", ex: "f''(x) = 0 \\text{ et change de signe}", CH: [14], codesMATU: "3\\.AN\\.08[ab]", lv: DS,
       hint: "f'' > 0 : f convexe (tournée vers le haut) ; f'' < 0 : concave. Point d'inflexion : f'' s'annule en changeant de signe.",
       lesson: ["Dérivée seconde, concavité", "Dans quel sens la courbe tourne-t-elle ?", "\\(f''\\) est la dérivée de \\(f'\\). Si \\(f'' > 0\\) sur un intervalle, \\(f\\) est convexe (courbe tournée vers le haut) ; si \\(f'' < 0\\), concave (tournée vers le bas). Un point d'inflexion est un point où la courbe change de concavité : \\(f''\\) s'y annule en changeant de signe. Pour \\(ax^3 + bx^2 + cx + d\\), il est en \\(x = -\\frac{b}{3a}\\).",
         ["\\(f(x) = x^3 - 6x^2\\) : \\(f''(x) = 6x - 12\\), inflexion en \\(x = 2\\) ; concave sur \\(]-\\infty \\,;\\, 2]\\), convexe sur \\([2 \\,;\\, +\\infty[\\)."], "\\(f''(a) = 0\\) ne suffit pas : il faut un changement de signe (\\(x^4\\) en 0 n'a pas de point d'inflexion)."],
@@ -1334,7 +1334,7 @@
 
   // ---------- enregistrement (additif) ----------
   for (const n of NEW) {
-    if (!NOTIONS.some((x) => x.id === n.id)) NOTIONS.push({ id: n.id, theme: n.theme, label: n.label, ex: n.ex, CH: n.CH, MP: null, FR: null });
+    if (!NOTIONS.some((x) => x.id === n.id)) NOTIONS.push(Object.assign({ id: n.id, theme: n.theme, label: n.label, ex: n.ex, CH: n.CH, MP: null, FR: null }, n.niv ? { niv: n.niv } : {}));
     GEN[n.id] = (d) => pickForm(n.lv[Math.min(Math.max(d, 1), 3)]);
     HINTS_EXTRA[n.id] = n.hint;
     LESSONS_EXTRA[n.id] = n.lesson;

@@ -278,12 +278,30 @@ function screenParents() {
 // ---------------- Présentation aux enseignants (25.11) ----------------
 /* Nombre de notions travaillées dans l'année, par classe (calculé sur le référentiel, jamais écrit à la main). */
 function pzCoverage() {
-  const P = PZ.fr() ? [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"], [12, "Terminale"]].map(([g, l]) => [l, { system: "FR", grade: g, track: "college" }]) : [["9e", { system: "CH", grade: 9, track: "college" }], ["10e", { system: "CH", grade: 10, track: "college" }], ["11e", { system: "CH", grade: 11, track: "college" }],
-    ["1re Collège", { system: "CH", grade: 12, track: "college" }], ["2e Collège", { system: "CH", grade: 13, track: "college" }], ["3e Collège", { system: "CH", grade: 14, track: "college" }], ["4e Collège", { system: "CH", grade: 15, track: "college" }],
-    ["MP 1re", { system: "CH", grade: 12, track: "mp" }], ["MP 2e", { system: "CH", grade: 13, track: "mp" }], ["MP 3e", { system: "CH", grade: 14, track: "mp" }], ["MP 4e", { system: "CH", grade: 15, track: "mp" }]];
-  return P.map(([l, p]) => { let n = 0, ch = 0; try { const c = Engine.catalog(p).filter((x) => x.current); n = c.length; ch = new Set(c.map((x) => x.theme)).size; } catch (e) {} return [l, n, ch]; }).filter(([, n]) => n > 0);
-}
-/* La boucle d'une séance, en schéma (SVG, couleurs du thème). */
+  /* 25.11 soir (l'enseignant ne comprenait pas les chiffres de 3e–4e) : nouvelles notions de l'année et reprises des années
+     précédentes comptées à part ; chapitres du plan couverts sur leur total ; MA1 et MA2 séparés en 3e–4e du Collège. */
+  const CH = (g, t, niv) => ({ system: "CH", grade: g, track: t, ...(niv ? { niv } : {}) });
+  const P = PZ.fr() ? [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"], [12, "Terminale"]].map(([g, l]) => [l, { system: "FR", grade: g, track: "college" }])
+    : [["9e", CH(9, "college")], ["10e", CH(10, "college")], ["11e", CH(11, "college")], ["1re Collège", CH(12, "college")], ["2e Collège", CH(13, "college")],
+      ["3e Coll. MA1", CH(14, "college", "N")], ["3e Coll. MA2", CH(14, "college", "R")], ["4e Coll. MA1", CH(15, "college", "N")], ["4e Coll. MA2", CH(15, "college", "R")],
+      ["MP 1re", CH(12, "mp")], ["MP 2e", CH(13, "mp")], ["MP 3e", CH(14, "mp")], ["MP 4e", CH(15, "mp")]];
+  /* Chapitres du plan de l'année (total) : CO « 9C.. », Collège « M3C.. », lycée français « 2.. / 1.. / T.. ». */
+  const total = (p) => {
+    const ref = Engine.refOf(p), L = (typeof THEME_LABEL !== "undefined" && THEME_LABEL[ref]) || {};
+    const pre = ref === "CO" ? p.grade + "C" : ref === "MATU" ? "M" + (p.grade - 11) + "C" : ref === "FR" && p.grade >= 10 ? { 10: "2", 11: "1", 12: "T" }[p.grade] : null;
+    return pre ? Object.keys(L).filter((k) => k.startsWith(pre) && (pre !== "2" || k !== "2AU")).length : 0;
+  };
+  return P.map(([l, p]) => {
+    let nw = 0, rep = 0, ch = 0, tot = 0;
+    try {
+      const c = Engine.catalog(p).filter((x) => x.current), isNew = (x) => (placeOf(x, p) || [0])[0] === p.grade;
+      nw = c.filter(isNew).length; rep = c.length - nw; tot = total(p);
+      const ref = Engine.refOf(p), pre = ref === "CO" ? "CO." + p.grade + "C" : ref === "MATU" ? "MATU.M" + (p.grade - 11) + "C" : null;
+      ch = new Set(c.map((x) => x.theme).filter((k) => (pre ? k.startsWith(pre) : true))).size;
+    } catch (e) {}
+    return [l, nw, rep, ch, tot];
+  }).filter(([, n, r]) => n + r > 0);
+}/* La boucle d'une séance, en schéma (SVG, couleurs du thème). */
 function pzLoop() {
   const N = [["🎯", "Question", "à son niveau"], ["✍️", "Réponse", "résultat, pas le calcul"], ["🔎", "Diagnostic", "le piège repéré"], ["🪜", "Pas à pas", "une étape à la fois"], ["📕", "Carnet", "revient plus tard"]];
   const R = 112, cx = 170, cy = 150;
@@ -302,14 +320,15 @@ function pzCount(root) {
   els.forEach((e) => io.observe(e));
 }
 const PZ_COV_PROFILES_FR = [6, 7, 8, 9, 10, 11, 12].map((g) => ({ system: "FR", grade: g, track: "college" }));
-const PZ_COV_PROFILES = [9, 10, 11, 12, 13, 14, 15].map((g) => ({ system: "CH", grade: g, track: "college" })).concat([12, 13, 14, 15].map((g) => ({ system: "CH", grade: g, track: "mp" })));
-const pzCovHtml = (cov) => { const maxN = Math.max(1, ...cov.map(([, n]) => n)); return cov.map(([l, n, ch]) => `<div class="pz-cov-r"><span>${esc(l)}</span><span class="pz-cov-b"><i style="width:${Math.round((n / maxN) * 100)}%"></i></span><span class="small">${n} notions · ${ch} chap.</span></div>`).join(""); };
+const PZ_COV_PROFILES = [9, 10, 11, 12, 13, 14, 15].map((g) => ({ system: "CH", grade: g, track: "college", niv: "R" })).concat([12, 13, 14, 15].map((g) => ({ system: "CH", grade: g, track: "mp" })));
+const pzCovHtml = (cov) => { const maxN = Math.max(1, ...cov.map(([, n, r]) => n + r)); return cov.map(([l, n, r, ch, tot]) => `<div class="pz-cov-r"><span>${esc(l)}</span><span class="pz-cov-b"><i style="width:${Math.round((n / maxN) * 100)}%"></i><i class="rep" style="width:${Math.round((r / maxN) * 100)}%"></i></span><span class="small">${n}${r ? " + " + r : ""} · ${ch}${tot ? " / " + tot : ""} chap.</span></div>`).join("") +
+  `<p class="small muted pz-cov-leg"><span class="pz-sw"></span> nouvelles notions de l'année · <span class="pz-sw rep"></span> reprises des années précédentes · chapitres du plan couverts${PZ.fr() ? "" : " (MA1 : niveau normal, MA2 : renforcé)"}</p>`; };
 const pzNotionCount = () => {
   if (!PZ.fr()) return NOTIONS.filter((n) => n.CH || n.MP).length;
   const ids = new Set(); PZ_COV_PROFILES_FR.forEach((p) => { try { Engine.catalog(p).filter((c) => c.current).forEach((c) => ids.add(c.id)); } catch (e) {} }); return ids.size;
 };
 function screenEnseignants() {
-  const cov = pzCoverage(), nNotions = pzNotionCount(), nClasses = PZ.fr() ? 7 : 11;
+  const cov = pzCoverage(), nNotions = pzNotionCount(), nClasses = PZ.fr() ? 7 : 11; /* classes, pas lignes du tableau (MA1 / MA2) */
   h(`<div class="pz" id="pz" data-noloc>
   <div class="spread pz-bar">${brand}<span class="row" style="gap:6px"><button type="button" class="btn-sec small pz-play">▶ Présenter</button><button type="button" class="btn-ghost small pz-exit" aria-label="Quitter">✕</button></span></div>
 

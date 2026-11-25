@@ -337,19 +337,23 @@ function screenLevel() {
   h(`${brand}<div class="eyebrow">Étape 1 sur 2</div><h2>Où en es-tu ?</h2>
   <div class="card flat stack">${Object.keys(SYSTEMS).length > 1 && !draft.keepSys ? `<h3>Ton école</h3><div class="seg" id="sys">${Object.entries(SYSTEMS).map(([k, v]) => `<button aria-pressed="${k === draft.system}" data-v="${k}">${v.label}</button>`).join("")}</div>` : ""}
   <h3>Ta classe cette année</h3><div class="seg" id="grade">${sys.grades.map(([g, n]) => `<button aria-pressed="${g === draft.grade}" data-v="${g}">${n}</button>`).join("")}</div>
-  ${sec2 ? `<h3>Ta voie</h3><p class="small muted">Important : choisis ton école, le programme n'est pas le même.</p><div class="seg track-seg" id="track"><button aria-pressed="${draft.track === "college"}" data-v="college">Collège (maturité gymnasiale)</button><button aria-pressed="${draft.track === "mp"}" data-v="mp">Maturité professionnelle (CFPT, école professionnelle…)</button></div><p class="small" id="trackerr" style="color:var(--bad, #c0392b)"></p>` : ""}</div>
+  ${sec2 ? `<h3>Ta voie</h3><p class="small muted">Important : choisis ton école, le programme n'est pas le même.</p><div class="seg track-seg" id="track"><button aria-pressed="${draft.track === "college"}" data-v="college">Collège (maturité gymnasiale)</button><button aria-pressed="${draft.track === "mp"}" data-v="mp">Maturité professionnelle (CFPT, école professionnelle…)</button></div><p class="small" id="trackerr" style="color:var(--bad, #c0392b)"></p>` : ""}
+  ${sec2 && draft.track === "college" && draft.grade >= 14 ? `<h3>Ton niveau de maths</h3><div class="seg track-seg" id="niv"><button aria-pressed="${draft.niv === "N"}" data-v="N">MA1 · niveau normal</button><button aria-pressed="${draft.niv === "R"}" data-v="R">MA2 · niveau renforcé</button></div><p class="small" id="niverr" style="color:var(--bad, #c0392b)"></p>` : ""}</div>
   <p class="small muted">Chaque jour, l'app te propose un programme différent (un défi, une série d'automatismes, des applications…), équilibré sur la semaine. Pas de chrono : l'important, c'est de venir chaque jour.</p>
   <p class="small muted">Ensuite : au plus 5 questions pour trouver ton point de départ (2 à 3 minutes). Tu peux t'arrêter, tu reprendras au même endroit.</p>
   <button class="btn-primary btn-big" id="next">Continuer</button>${draft.keepSys && Object.keys(SYSTEMS).length > 1 ? '<button class="btn-ghost small" id="chgpays">Changer de pays</button>' : ""}`);
   const bind = (id, key, num) => app.querySelectorAll("#" + id + " button").forEach((b) => (b.onclick = () => { draft[key] = num ? +b.dataset.v : b.dataset.v; screenLevel(); }));
-  bind("sys", "system"); bind("grade", "grade", true); bind("track", "track");
+  bind("sys", "system"); bind("grade", "grade", true); bind("track", "track"); bind("niv", "niv");
   /* 25.11 soir (séparation France / romand) : élève déjà inscrit : seules les classes de son système ; le pays se change
      par un lien discret. */
   const cp = document.getElementById("chgpays"); if (cp) cp.onclick = () => { draft.keepSys = false; screenLevel(); };
   // Plus de questionnaire sur les notions : celles de l'année s'ouvrent dans l'ordre du référentiel.
   document.getElementById("next").onclick = () => {
     if (draft.system === "CH" && draft.grade >= 12 && !draft.track) { document.getElementById("trackerr").textContent = "Choisis d'abord ta voie : Collège ou maturité professionnelle."; document.getElementById("track").scrollIntoView({ behavior: "smooth", block: "center" }); return; }
-    const prof = { system: draft.system, grade: draft.grade, track: draft.system === "CH" && draft.grade >= 12 ? draft.track : "college", minutes: draft.minutes };
+    /* 25.11 soir : 3e–4e du Collège, niveau MA1 (normal) ou MA2 (renforcé) obligatoire. */
+    const needNiv = draft.system === "CH" && draft.grade >= 14 && draft.track === "college";
+    if (needNiv && !draft.niv) { document.getElementById("niverr").textContent = "Choisis ton niveau : MA1 (normal) ou MA2 (renforcé)."; document.getElementById("niv").scrollIntoView({ block: "center" }); return; }
+    const prof = { system: draft.system, grade: draft.grade, track: draft.system === "CH" && draft.grade >= 12 ? draft.track : "college", minutes: draft.minutes, ...(needNiv ? { niv: draft.niv } : {}) };
     const go = () => {
       const keep = state && state.comps, keepA = state && state.a11y;
       state = Engine.newState(prof);

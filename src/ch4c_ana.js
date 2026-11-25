@@ -6,7 +6,7 @@
 // Ajouts du 24.11 (agent greste, chantier G) : matrices, translin (M4C03, algèbre linéaire) ; normale (M4C04, loi normale
 // sans table, règle 68-95-99,7) ; stats et quartiles (MP 2e) ouverts à la 4e du Collège (curriculum.js, gen3.js).
 // Ajouts du 25.11 (agent c4plus) : intparties, intsubst (M4C01, renforcé MA2), etudelnexp (M4C02), eqdiff (M4C02, renforcé) ;
-// champ niv: "R" sur les notions du niveau avancé (pas encore lu par le moteur : décision de l'enseignant en attente).
+// champ niv: "R" sur les notions du niveau renforcé MA2 (lu par Engine.catalog depuis le 25.11 : décision de l'enseignant).
 // Standard : 3 niveaux, au moins 3 formes par niveau, pas à pas, erreurs typiques, étiquette ctx, leçon, indice,
 // 3 compétences, problème en plusieurs étapes (niveau 4). Paquet de chargement « 15 » (build.py).
 (function () {

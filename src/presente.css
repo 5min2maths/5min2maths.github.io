@@ -57,8 +57,12 @@ body.pz-on .pz-s { scroll-snap-align: start; }
 .pz-anim.pz-wait .pz-loop-n { opacity: 0; transform: scale(.6); }
 .pz-cov { display: flex; flex-direction: column; gap: 6px; }
 .pz-cov-r { display: grid; grid-template-columns: 6.5em 1fr auto; gap: 8px; align-items: center; font-size: .92rem; }
-.pz-cov-b { height: 10px; background: var(--line); border-radius: 99px; overflow: hidden; }
-.pz-cov-b i { display: block; height: 100%; background: var(--blue); border-radius: 99px; transition: width .9s ease; }
+.pz-cov-b { height: 10px; background: var(--line); border-radius: 99px; overflow: hidden; display: flex; }
+.pz-cov-b i { display: block; height: 100%; background: var(--blue); transition: width .9s ease; }
+.pz-cov-b i.rep { background: var(--blue-soft); box-shadow: inset 0 0 0 1px var(--blue); }
+.pz-sw { display: inline-block; width: 12px; height: 10px; border-radius: 3px; background: var(--blue); vertical-align: middle; }
+.pz-sw.rep { background: var(--blue-soft); box-shadow: inset 0 0 0 1px var(--blue); }
+.pz-cov-r { grid-template-columns: 7em 1fr auto; }
 .pz-anim.pz-wait .pz-cov-b i { width: 0 !important; }
 body.pz-on .pz-num { font-size: 3.2rem; }
 body.pz-on .pz-loop svg { max-width: 460px; }

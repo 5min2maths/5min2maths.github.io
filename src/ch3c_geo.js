@@ -514,7 +514,7 @@
       lesson: ["Vecteurs de l'espace", "Comme dans le plan, avec une troisième coordonnée.", "Dans un repère de l'espace, \\(\\overrightarrow{AB}\\) a pour composantes \\(B - A\\). Les opérations se font composante par composante. Le milieu de \\([AB]\\) est la moyenne des coordonnées. La norme de \\(\\vec{u} = (a \\,;\\, b \\,;\\, c)\\) vaut \\(\\sqrt{a^2 + b^2 + c^2}\\) (Pythagore deux fois). Relation de Chasles : \\(\\overrightarrow{AB} + \\overrightarrow{BC} = \\overrightarrow{AC}\\).",
         ["\\(A(1 \\,;\\, 2 \\,;\\, -1)\\), \\(B(3 \\,;\\, 0 \\,;\\, 4)\\) : \\(\\overrightarrow{AB} = (2 \\,;\\, -2 \\,;\\, 5)\\), \\(AB = \\sqrt{33}\\).", "\\(\\|(2 \\,;\\, 3 \\,;\\, 6)\\| = \\sqrt{4 + 9 + 36} = 7\\)."], "Dans \\(ABCD\\) (parallélogramme), \\(\\overrightarrow{AD} = \\overrightarrow{BC}\\) : l'ordre des sommets compte."],
       comps: ["Calculer composantes, milieu et combinaisons de vecteurs", "Calculer une norme ; parallélogramme ; relation de Chasles", "Symétrique, centre de gravité, norme avec une inconnue"] },
-    { id: "colin", theme: "es", label: "Colinéarité et coplanarité", ex: "\\vec{v} = k\\,\\vec{u}", CH: [14], codesMATU: "3\\.GV\\.02[ab]", lv: CL,
+    { id: "colin", niv: "R", theme: "es", label: "Colinéarité et coplanarité", ex: "\\vec{v} = k\\,\\vec{u}", CH: [14], codesMATU: "3\\.GV\\.02[ab]", lv: CL,
       hint: "Colinéaires : v = k·u (même rapport pour les trois composantes). Coplanaires : w = α·u + β·v. Points alignés : AC = t·AB.",
       lesson: ["Colinéarité et coplanarité", "Deux vecteurs parallèles, trois vecteurs dans un même plan (niveau avancé MA2).", "\\(\\vec{u}\\) et \\(\\vec{v}\\) sont colinéaires s'il existe \\(k\\) tel que \\(\\vec{v} = k\\,\\vec{u}\\) : les trois rapports de composantes sont égaux. Trois points \\(A, B, C\\) sont alignés si \\(\\overrightarrow{AC} = t\\,\\overrightarrow{AB}\\). Trois vecteurs sont coplanaires si l'un est combinaison des deux autres : \\(\\vec{w} = \\alpha\\vec{u} + \\beta\\vec{v}\\) ; quatre points \\(A, B, C, D\\) sont coplanaires si \\(\\overrightarrow{AD} = \\alpha\\overrightarrow{AB} + \\beta\\overrightarrow{AC}\\).",
         ["\\((2 \\,;\\, -1 \\,;\\, 3)\\) et \\((6 \\,;\\, -3 \\,;\\, 9)\\) : \\(k = 3\\), colinéaires.", "\\(\\vec{w} = 2\\vec{u} - \\vec{v}\\) : on trouve \\(\\alpha\\) et \\(\\beta\\) avec deux composantes, la troisième vérifie."], "Deux équations donnent \\(\\alpha\\) et \\(\\beta\\) ; il faut toujours vérifier la troisième."],
@@ -553,7 +553,7 @@
 
   // ---------- enregistrement (additif : aucune notion existante n'est modifiée) ----------
   for (const n of NEW) {
-    if (!NOTIONS.some((x) => x.id === n.id)) NOTIONS.push({ id: n.id, theme: n.theme, label: n.label, ex: n.ex, CH: n.CH, MP: null, FR: null });
+    if (!NOTIONS.some((x) => x.id === n.id)) NOTIONS.push(Object.assign({ id: n.id, theme: n.theme, label: n.label, ex: n.ex, CH: n.CH, MP: null, FR: null }, n.niv ? { niv: n.niv } : {}));
     GEN[n.id] = (d) => pickForm(n.lv[Math.min(Math.max(d, 1), 3)]);
     HINTS_EXTRA[n.id] = n.hint;
     LESSONS_EXTRA[n.id] = n.lesson;

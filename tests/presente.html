@@ -51,7 +51,9 @@ const txt = () => app.textContent.replace(/\s+/g, " ");
     /* 3. Enseignants (25.11) */
     history.replaceState(null, "", "#enseignants"); ok(presentRoute() === true, "route #enseignants");
     ok(app.querySelectorAll(".pz-s").length >= 9, "sections enseignants : " + app.querySelectorAll(".pz-s").length);
-    const cov = pzCoverage(); ok(cov.length === 11 && cov.every(([, n, ch]) => n >= 5 && ch >= 2), "couverture par classe : " + cov.map((c) => c.join(" ")).join(", "));
+    const cov = pzCoverage(); ok(cov.length === 13 && cov.every(([, n, , ch]) => n >= 5 && ch >= 2), "couverture par classe : " + cov.map((c) => c.join(" ")).join(", "));
+    const row = (l) => cov.find((c) => c[0] === l);
+    ok(row("1re Collège")[2] > 0 && row("3e Coll. MA1")[4] === 6 && row("3e Coll. MA2")[1] > row("3e Coll. MA1")[1], "nouvelles / reprises, chapitres du plan, MA1 / MA2 : " + [row("1re Collège"), row("3e Coll. MA1"), row("3e Coll. MA2")].map((c) => c.join(" ")).join(" | "));
     ok(app.querySelectorAll(".pz-cov-r").length === cov.length, "barres de couverture");
     ok(app.querySelectorAll(".pz-loop-n").length === 5, "boucle d'une séance");
     ok(/ne fait pas/.test(txt()) && /plan d'études/i.test(txt()), "limites et programme présentés");
