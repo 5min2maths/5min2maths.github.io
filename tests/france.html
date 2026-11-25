@@ -102,9 +102,9 @@ try {
   const HP = ["sinlaw", "recip", "expo", "modexp", "trigcercle", "trigassoc", "trigfn", "trigeq", "log", "vecteurs"];
   for (const g of [11, 12]) { const cat = Engine.catalog({ system: "FR", grade: g, track: "college" }).map((c) => c.id); for (const id of HP) ok(!cat.includes(id), "hors programme FR " + g + " : " + id); }
   // 8. Profils suisses inchangés : catalogue identique à celui d'avant le chantier (empreinte du 25.11, mise à jour le 25.11 soir :
-  //    chapitres CO d'origine pour les notions anciennes du Collège et de la MP, dénominations par système ; à mettre à jour
+  //    chapitres CO d'origine pour les notions anciennes du Collège et de la MP, dénominations par système ; 3e–4e sans niveau = MA1, sans les notions MA2 ; à mettre à jour
   //    seulement si le catalogue suisse change volontairement) et aucune notion française au catalogue suisse
-  const FP = { college9: [45, "1hr7vsb"], college10: [78, "2vzk0f"], college11: [103, "bd24is"], college12: [145, "4ucppo"], college13: [178, "59sqo6"], college14: [204, "yvyj5w"], college15: [222, "zm4n7j"], mp12: [123, "wh4ovj"], mp13: [144, "13ef2yz"], mp14: [156, "88b75g"], mp15: [169, "11mfydm"] };
+  const FP = { college9: [45, "1hr7vsb"], college10: [78, "2vzk0f"], college11: [103, "bd24is"], college12: [145, "4ucppo"], college13: [178, "59sqo6"], college14: [202, "18zv4cf"], college15: [217, "18d2wx7"], mp12: [123, "wh4ovj"], mp13: [144, "13ef2yz"], mp14: [156, "88b75g"], mp15: [169, "11mfydm"] };
   const hsh = (t) => { let x = 5381; for (const c of t) x = ((x * 33) ^ c.charCodeAt(0)) >>> 0; return x.toString(36); };
   const NEWFR = ["expderiv", "trigrad", "droitenorm", "linfn", "cos4e", "thales4e", "autodnb", "vecgeo", "tabvar", "lnfr", "trigfr", "tvi", "sommeva", "recurrence"];
   for (const [k, [n, fp]] of Object.entries(FP)) { const t = k.replace(/\d+/, ""), g = +k.replace(/\D+/, ""), c = Engine.catalog({ system: "CH", grade: g, track: t });

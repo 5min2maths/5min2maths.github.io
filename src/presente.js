@@ -2,7 +2,8 @@
 // le format le plus dynamique). Deux pages publiques, sans rien enregistrer :
 //   …/#decouvrir : présentation aux élèves (projetable en classe), avec une vraie question à essayer ;
 //   …/#parents   : « Je suis parent » (ce que l'app apporte, Résoudre ensemble en direct, mise en route en 3 étapes).
-//   …/#enseignants : présentation aux collègues (25.11, « deux publics distincts : professionnels et parents ») :
+//   …/#enseignants : présentation aux collègues (25.11 soir : liens retirés, « un peu too much, l'app est destinée aux
+//   élèves et aux parents » ; page gardée, accessible seulement par son adresse) (25.11, « deux publics distincts : professionnels et parents ») :
 //   principes, démonstration, couverture des plans d'études calculée en direct, différenciation, qualité, données, limites.
 // Bouton « ▶ Présenter » : une diapositive par écran, flèches / espace / clic pour avancer (réunion de parents, classe).
 // Rien n'est envoyé depuis ces pages (voir canSend et ping dans app.js).
