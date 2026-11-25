@@ -74,7 +74,7 @@ function mockVF(it, q) {
 }
 function mockQuestions() {
   return state.mock.items.map((it) => {
-    if (it.rich && RICH[it.rich]) { R.seed(it.seed); const q = RICH[it.rich][it.kind === "raison" ? "raison" : "ex"][it.k](); return { ...it, id: q.id, q, pts: q.pts }; }
+    if (it.rich && RICH[it.rich]) { R.seed(it.seed); const q = moneyQ(RICH[it.rich][it.kind === "raison" ? "raison" : "ex"][it.k]()); return { ...it, id: q.id, q, pts: q.pts }; }
     let q = Engine.make(state, it.id, it.d, it.seed);
     if (it.vf) { const f = mockVF(it, q); if (f) q = f; else it = { ...it, vf: false }; }
     return { ...it, q, pts: q.parts ? 2 * q.parts.length : it.vf ? 2 : it.part === "A" ? it.d : Math.min(it.d, 4) };

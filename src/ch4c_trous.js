@@ -186,6 +186,8 @@
     [625, 0.8, 10, "On sème 625 graines ; chacune germe avec la probabilité 0,8, indépendamment des autres ; " + M("X") + " est le nombre de graines qui germent."], [625, 0.2, 10, "Un QCM a 625 questions à 5 choix ; on répond au hasard ; " + M("X") + " est le nombre de bonnes réponses."],
     [1600, 0.5, 20, "Dans une ville, 50 % des habitants approuvent un projet ; on interroge 1'600 personnes au hasard ; " + M("X") + " compte celles qui l'approuvent."], [2500, 0.2, 20, "Un fabricant sait que 20 % de ses clients rappellent le service après-vente ; sur 2'500 clients, " + M("X") + " compte ceux qui rappellent."],
     [25, 0.5, 2.5, "On lance 25 fois une pièce équilibrée ; " + M("X") + " est le nombre de « face »."]];
+  /* 26.11 (vraisemblance) : X compte des issues, k est entier ; avec n = 25 (μ = 12,5), k = μ + 1 donnait « P(X ≤ 13.5) » et une
+     correction de continuité fausse (13,5 + 0,5). Les k partent de la partie entière de μ. */
   const NP2 = NP.filter((c) => c[2] <= 10); /* z = (k ± 0,5 − μ) ÷ σ à deux décimales au plus (table) */
   const AN = {
     1: [
@@ -200,31 +202,31 @@
           M("\\mu = " + nb(mu)) + ", " + M("\\sigma = " + nb(s)) + " : " + M(nb(b) + " = " + lab) + ". " + (Math.abs(k) === 1 ? "68 % entre μ − σ et μ + σ, donc 34 % de chaque côté, et 50 % sous μ" : "95 % entre μ − 2σ et μ + 2σ, donc 47,5 % de chaque côté, et 50 % sous μ") + " : " + M(nb(v) + "\\,\\%") + ".",
           { ctx: "regle-68-95", guide: [GR("Combien d'écarts-types séparent " + M(nb(b)) + " de la moyenne " + M(nb(mu)) + " ? (signe compris)", k, M("\\frac{" + nb(b) + " - " + nb(mu) + "}{" + nb(s) + "} = " + k) + "."), GR(M("P(Y \\le " + nb(b) + ")") + " en % ?", v, M(nb(v) + "\\,\\%") + ".")],
             traps: [TR(Math.abs(k) === 1 ? 68 : 95, "C'est la part de l'intervalle centré ; ici on veut tout ce qui est sous " + nb(b) + "."), TR(Math.abs(k) === 1 ? 34 : 47.5, "Ajoute la moitié sous la moyenne (50 %)."), TR(100 - v, "Tu as pris l'autre côté.")] }); },
-      () => { const C = pk(NP), [n, p, s] = C, mu = n * p, k = mu + pk([1, 2, 3, 4]) * (s / 2.5), z = (k + 0.5 - mu) / s;
+      () => { const C = pk(NP), [n, p, s] = C, mu = n * p, k = Math.floor(mu) + pk([1, 2, 3, 4]) * (s / 2.5), z = (k + 0.5 - mu) / s;
         return QN(C[3] + " On approche " + M("P(X \\le " + k + ")") + " par " + M("P(Y \\le " + k + "{,}5)") + ", où " + M("Y") + " suit la loi normale de moyenne " + M("\\mu = np") + " et d'écart-type " + M("\\sigma = \\sqrt{np(1 - p)}") + " (correction de continuité). Calcule la valeur centrée réduite " + M("z = \\frac{" + k + "{,}5 - \\mu}{\\sigma}") + ".", z,
           M("\\mu = " + nb(mu)) + ", " + M("\\sigma = " + nb(s)) + " : " + M("z = \\frac{" + nb(k + 0.5) + " - " + nb(mu) + "}{" + nb(s) + "} = " + nb(r6(z))) + ".",
           { ctx: "correction-z", guide: [GR(M("\\mu") + " ?", mu, M(nb(mu)) + "."), GR(M("\\sigma") + " ?", s, M(nb(s)) + "."), GR(M("z") + " ?", z, M(nb(r6(z))) + ".")],
             traps: [TR((k - mu) / s, "Avec la correction de continuité, on part de " + k + ",5, pas de " + k + "."), TR((k - 0.5 - mu) / s, "Pour X ≤ " + k + ", on ajoute 0,5 (on englobe le bâton de " + k + ")."), TR(k + 0.5 - mu, "Divise par σ = " + String(s).replace(".", ",") + ".")] }); },
     ],
     2: [
-      () => { const C = pk(NP2), [n, p, s] = C, mu = n * p, k = mu + R.int(1, 3) * (s === 2.5 ? 1 : s / 5) * pk([1, 2]), zc = (k + 0.5 - mu) / s, v = ph4(zc);
+      () => { const C = pk(NP2), [n, p, s] = C, mu = n * p, k = Math.floor(mu) + R.int(1, 3) * (s === 2.5 ? 1 : s / 5) * pk([1, 2]), zc = (k + 0.5 - mu) / s, v = ph4(zc);
         return QR(C[3] + " On approche " + M("X") + " par une loi normale (avec correction de continuité). " + tab([zc, (k - mu) / s, (k - 0.5 - mu) / s]) + " Calcule une valeur approchée de " + M("P(X \\le " + k + ")") + " (au millième).", v, 0.001,
           M("\\mu = " + nb(mu)) + ", " + M("\\sigma = " + nb(s)) + ". " + M("P(X \\le " + k + ") \\approx P(Y \\le " + nb(k + 0.5) + ") = \\Phi\\left(\\frac{" + nb(k + 0.5) + " - " + nb(mu) + "}{" + nb(s) + "}\\right) = \\Phi(" + dT(zc, 3) + ") \\approx " + dT(v, 4)) + ".",
           { ctx: "proba-inf", guide: [GR(M("z") + " (avec la correction de continuité) ?", zc, M(dT(zc, 3)) + "."), GR(M("P(X \\le " + k + ")") + " (au millième) ?", v, M("\\Phi(" + dT(zc, 3) + ") \\approx " + dT(v, 4)) + ".", 0.001)],
             traps: [TR(ph4((k - mu) / s), "Correction de continuité : P(X ≤ " + k + ") ≈ P(Y ≤ " + k + ",5)."), TR(ph4((k - 0.5 - mu) / s), "Pour « ≤ " + k + " », on ajoute 0,5 : la valeur " + k + " est comprise."), TR(1 - v, "Φ donne la probabilité d'être en dessous de z.")] }); },
-      () => { const C = pk(NP2), [n, p, s] = C, mu = n * p, k = mu + R.int(1, 3) * (s === 2.5 ? 1 : s / 5) * pk([1, 2]), zc = (k - 0.5 - mu) / s, v = 1 - ph4(zc);
+      () => { const C = pk(NP2), [n, p, s] = C, mu = n * p, k = Math.floor(mu) + R.int(1, 3) * (s === 2.5 ? 1 : s / 5) * pk([1, 2]), zc = (k - 0.5 - mu) / s, v = 1 - ph4(zc);
         return QR(C[3] + " On approche " + M("X") + " par une loi normale (avec correction de continuité). " + tab([zc, (k - mu) / s, (k + 0.5 - mu) / s]) + " Calcule une valeur approchée de " + M("P(X \\ge " + k + ")") + " (au millième).", r6(v), 0.001,
           M("P(X \\ge " + k + ") \\approx P(Y \\ge " + nb(k - 0.5) + ") = 1 - \\Phi(" + dT(zc, 3) + ") \\approx 1 - " + dT(ph4(zc), 4) + " = " + dT(r6(v), 4)) + ".",
           { ctx: "proba-sup", guide: [GR(M("z") + " pour la borne corrigée " + M(nb(k - 0.5)) + " ?", zc, M(dT(zc, 3)) + "."), GR(M("P(X \\ge " + k + ")") + " (au millième) ?", r6(v), M("1 - " + dT(ph4(zc), 4) + " = " + dT(r6(v), 4)) + ".", 0.001)],
             traps: [TR(ph4(zc), "Φ(z) est la probabilité d'être en dessous ; « au moins » : 1 − Φ(z)."), TR(1 - ph4((k + 0.5 - mu) / s), "Pour « ≥ " + k + " », la borne corrigée est " + k + " − 0,5."), TR(1 - ph4((k - mu) / s), "N'oublie pas la correction de continuité (" + k + " − 0,5).")] }); },
-      () => { const C = pk(NP2), [n, p, s] = C, mu = n * p, k = mu + R.int(1, 3) * (s === 2.5 ? 1 : s / 5) * pk([1, 2]), zc = (k - 0.5 - mu) / s, v = ph4(zc);
+      () => { const C = pk(NP2), [n, p, s] = C, mu = n * p, k = Math.floor(mu) + R.int(1, 3) * (s === 2.5 ? 1 : s / 5) * pk([1, 2]), zc = (k - 0.5 - mu) / s, v = ph4(zc);
         return QR(C[3] + " On approche " + M("X") + " par une loi normale (avec correction de continuité). " + tab([zc, (k - mu) / s, (k + 0.5 - mu) / s]) + " Calcule une valeur approchée de " + M("P(X < " + k + ")") + " (au millième).", v, 0.001,
           "Inégalité stricte : " + M("P(X < " + k + ") = P(X \\le " + (k - 1) + ") \\approx P(Y \\le " + nb(k - 0.5) + ") = \\Phi(" + dT(zc, 3) + ") \\approx " + dT(v, 4)) + ".",
           { ctx: "proba-stricte", guide: [GR("Plus grande valeur entière de " + M("X") + " permise ?", k - 1, M(k - 1) + "."), GR(M("z") + " (borne " + M(nb(k - 0.5)) + ") ?", zc, M(dT(zc, 3)) + "."), GR("Probabilité (au millième) ?", v, M("\\approx " + dT(v, 4)) + ".", 0.001)],
             traps: [TR(ph4((k + 0.5 - mu) / s), "X < " + k + " exclut " + k + " : la borne corrigée est " + k + " − 0,5."), TR(ph4((k - mu) / s), "Applique la correction de continuité."), TR(1 - v, "On veut les valeurs inférieures à " + k + ".")] }); },
     ],
     3: [
-      () => { const C = pk(NP2), [n, p, s] = C, mu = n * p, d = R.int(1, 3) * (s === 2.5 ? 1 : s / 5) * pk([1, 2]), zc = (d + 0.5) / s, v = r6(2 * ph4(zc) - 1);
+      () => { const C = pk(NP2.filter((c) => Number.isInteger(c[0] * c[1]))) /* 26.11 : intervalle centré sur μ entier (et non « P(10.5 ≤ X ≤ 14.5) ») */, [n, p, s] = C, mu = n * p, d = R.int(1, 3) * (s === 2.5 ? 1 : s / 5) * pk([1, 2]), zc = (d + 0.5) / s, v = r6(2 * ph4(zc) - 1);
         return QR(C[3] + " On approche " + M("X") + " par une loi normale (avec correction de continuité). " + tab([zc, d / s, (d - 0.5) / s]) + " Calcule une valeur approchée de " + M("P(" + (mu - d) + " \\le X \\le " + (mu + d) + ")") + " (au millième).", v, 0.001,
           M("P \\approx P(" + nb(mu - d - 0.5) + " \\le Y \\le " + nb(mu + d + 0.5) + ") = \\Phi(" + dT(zc, 3) + ") - \\Phi(-" + dT(zc, 3) + ") = 2\\Phi(" + dT(zc, 3) + ") - 1 \\approx " + dT(v, 4)) + ".",
           { ctx: "proba-intervalle", guide: [GR(M("z") + " pour la borne " + M(nb(mu + d + 0.5)) + " ?", zc, M(dT(zc, 3)) + "."), GR("Probabilité (au millième) ?", v, M("2 \\cdot " + dT(ph4(zc), 4) + " - 1 = " + dT(v, 4)) + ".", 0.001)],

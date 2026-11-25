@@ -38,6 +38,23 @@ const colonBreak = (s) => {
   }
   return parts.join("").replace(/<br>(\s*)([a-zàâçéèêëîïôûù])/g, (m, sp, c) => "<br>" + c.toUpperCase());
 };
+/* 26.11 (audit de vraisemblance, tests/vraisemblance.html) : un montant s'écrit avec deux décimales (« 2,50 CHF », « 0,80 € »),
+   jamais « 2,5 CHF » (37 générateurs le faisaient). Appliqué aux textes des questions (Engine.build, sujets) ; jamais aux réponses. */
+/* Même passe : élision devant un prénom ou un nom propre à voyelle (« le compte de Elsa » → « d'Elsa », « que Inès » → « qu'Inès »). */
+const moneyTidy = (s) => typeof s !== "string" ? s : s.replace(/(^|[^\p{L}])([dD]e|[qQ]ue) (?=[AEIOUYÉÈÊÎ][a-zàâçéèêëîïôûù]+)/gu, (m, b, w) => b + w.slice(0, -1) + "'").replace(/(^|[^\p{L}])([dD]e|[àÀ]) Le (?=\p{Lu})/gu, (m, b, w) => b + (/^[dD]/.test(w) ? w[0] + "u" : w === "à" ? "au" : "Au") + " ").replace(/(^|[^\p{L}])([dD]e|[àÀ]) Les (?=\p{Lu})/gu, (m, b, w) => b + (/^[dD]/.test(w) ? w[0] + "es" : w === "à" ? "aux" : "Aux") + " ").replace(/(\d(?:\{,\}|,))(\d)(?![\d{]|\{,|,\d)((?:\\\))?(?:\s|\\[ ,;]|~|&nbsp;|\\text\{\s*|\\mathrm\{\s*)*(?:CHF|€|francs?(?![a-z])|euros?(?![a-z])))/g, (m, a, b, c) => a + b + "0" + c);
+/* 26.11 : accord après 1 (« 1 vertes », « 1 connexions réussies », « 1 lancers francs ») dans les textes tirés au hasard. */
+const ONE_N = "boules|billes|jetons|cartes|perles|bonbons|stylos|livres|pièces|bleues|vertes|rouges|blanches|noires|jaunes|connexions|lancers|élèves|personnes|filles|garçons|enfants|adultes|flèches|tirs|paniers|buts";
+const ONE_A = "réussies|réussis|francs|rouges|bleues|vertes|blanches|noires|jaunes|gagnants|gagnantes|défectueuses|ratés|manqués";
+const oneTidy = (s) => typeof s !== "string" ? s : s.replace(new RegExp("(^|[^\\d,.'\\-−\\w])((?:\\\\\\()?1(?:\\\\\\))?) (" + ONE_N + ")(?: (" + ONE_A + "))?(?![\\p{L}])", "gu"), (m, b, one, n, a) => b + one + " " + n.slice(0, -1) + (a ? " " + a.slice(0, -1) : ""));
+const moneyQ = (q) => {
+  if (!q || typeof q !== "object") return q;
+  const o = { ...q, q: oneTidy(moneyTidy(q.q)), sol: moneyTidy(q.sol) };
+  if (Array.isArray(q.hints)) o.hints = q.hints.map(moneyTidy);
+  if (Array.isArray(q.parts)) o.parts = q.parts.map((p) => (p && typeof p === "object" ? { ...p, label: oneTidy(moneyTidy(p.label)) } : p));
+  if (Array.isArray(q.guide)) o.guide = q.guide.map((g) => ({ ...g, ask: moneyTidy(g.ask), sol: moneyTidy(g.sol) }));
+  if (Array.isArray(q.traps)) o.traps = q.traps.map((t) => ({ ...t, m: moneyTidy(t.m) }));
+  return o;
+};
 // Étape guidée (« on le fait ensemble ») : consigne, valeur attendue, explication ; et piège typique { v, m }.
 const GS = (ask, value, sol, round) => ({ ask, spec: Object.assign({ kind: "value", value }, round ? { round } : {}), sol });
 const TRAP = (v, m) => ({ v, m });
@@ -809,7 +826,7 @@ const PROB = {
     return { fig: FIG.road(d + " km", v1 + " km/h → " + v2 + " km/h"), q: "Une voiture fait l'aller de " + M(d) + " km à " + M(v1) + " km/h et le retour à " + M(v2) + " km/h.",
       parts: [{ label: "a) Durée de l'aller (min)", spec: { kind: "value", value: t1 * 60, round: 0.01 } }, { label: "b) Durée du retour (min)", spec: { kind: "value", value: t2 * 60, round: 0.01 } }, { label: "c) Vitesse moyenne sur l'aller-retour (km/h, au centième)", spec: { kind: "value", value: vm, round: 0.01 } }],
       hints: ["La vitesse moyenne n'est pas la moyenne des vitesses : c'est la distance totale divisée par la durée totale.", "t = d / v pour chaque trajet ; v moyenne = " + 2 * d + " km / (durée aller + durée retour)."],
-      sol: "a) " + M(dec(r2(t1 * 60))) + " min. b) " + M(dec(r2(t2 * 60))) + " min. c) " + M("\\frac{" + 2 * d + "}{" + dec(r2(t1 + t2)) + "} \\approx " + dec(r2(vm))) + " km/h (et non " + (v1 + v2) / 2 + ")." };
+      sol: "a) " + M(dec(r2(t1 * 60))) + " min. b) " + M(dec(r2(t2 * 60))) + " min. c) " + M("\\frac{" + 2 * d + "}{" + dec(r2(t1 + t2)) + "} \\approx " + dec(r2(vm))) + " km/h (et non " + dec((v1 + v2) / 2) + ")." };
   },
   echelle() {
     const k = R.pick([20, 25, 50, 100]), lm = R.int(4, 15), am = R.int(6, 40), vm = R.int(2, 9);

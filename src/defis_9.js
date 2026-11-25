@@ -147,7 +147,7 @@
       "a) et b) " + M("\\frac{" + k * p + "}{" + k * q + "} = \\frac{" + p + "}{" + q + "}") + " (on divise par " + k + "). c) Multiples de " + q + " entre 20 et 50 : " + Array.from({ length: cnt }, (_, i) => (Math.ceil(20 / q) + i) * q).join(", ") + " : " + cnt + " fractions.");
   });
   PX("fractout", () => {
-    let n, a, b, c, d, f, r, mu; do { [a, b] = pk([[2, 3], [3, 4], [2, 5], [3, 5], [1, 3], [1, 4]]); [c, d] = pk([[1, 2], [1, 3], [2, 3], [1, 4], [3, 4]]); n = pk([20, 24, 28, 30, 36]); f = (n * a) / b; r = n - f; mu = (r * c) / d; } while (!Number.isInteger(f) || !Number.isInteger(mu) || mu === 0 || r - mu === 0);
+    let n, a, b, c, d, f, r, mu; do { [a, b] = pk([[2, 3], [3, 4], [2, 5], [3, 5], [1, 3], [1, 4]]); [c, d] = pk([[1, 2], [1, 3], [2, 3], [1, 4], [3, 4]]); n = pk([18, 20, 24, 28, 30]); /* 26.11 (vraisemblance) : pas de classe de 36 élèves */ f = (n * a) / b; r = n - f; mu = (r * c) / d; } while (!Number.isInteger(f) || !Number.isInteger(mu) || mu === 0 || r - mu === 0);
     return PB("Dans une classe de " + X(n) + " élèves, " + M("\\frac{" + a + "}{" + b + "}") + " font du football. Parmi les autres, " + M("\\frac{" + c + "}{" + d + "}") + " font de la musique.",
       [["a) Combien d'élèves font du football ?", f], ["b) Combien d'élèves font de la musique ?", mu], ["c) Combien d'élèves ne font ni l'un ni l'autre ?", r - mu]],
       ["Fraction d'une quantité : divise par le dénominateur, multiplie par le numérateur.", "b) Attention : la fraction porte sur « les autres », pas sur toute la classe."],

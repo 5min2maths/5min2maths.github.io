@@ -29,9 +29,9 @@
     () => { const [n0, n1] = pk([[4, 6], [6, 9], [4, 10], [6, 8]]), [lait, beurre] = pk([[[3, 4], [1, 5]], [[2, 3], [1, 4]], [[1, 2], [3, 10]]]);
       const kL = [lait[0] * n1, lait[1] * n0], kB = [beurre[0] * n1, beurre[1] * n0];
       return X({ id: "fracmul", lv: 1, titre: "La recette de crêpes",
-        q: "Une recette pour " + n0 + " personnes demande " + M(F(...lait)) + " L de lait et " + M(F(...beurre)) + " kg de beurre. " + who() + " cuisine pour " + n1 + " personnes.",
-        parts: [{ label: "Par quelle fraction faut-il multiplier les quantités ?", pts: 1 }, { label: "Quelle quantité de lait faut-il (fraction irréductible, en L) ?", pts: 1 }, { label: "Il reste les " + M(F(2, 3)) + " d'une plaquette de beurre de " + M(F(1, 4)) + " kg. Cela suffit-il ?", pts: 2 }],
-        sol: ul([M(F(n1, n0)) + ".", M(F(...lait) + " \\cdot " + F(n1, n0) + " = " + F(...kL)) + " L.", "Il reste " + M(F(2, 3) + " \\cdot " + F(1, 4) + " = " + F(1, 6)) + " kg ; il faut " + M(F(...kB)) + " kg : " + (kB[0] / kB[1] <= 1 / 6 ? "oui, cela suffit." : "non, cela ne suffit pas (" + M(F(...kB) + " > " + F(1, 6)) + ").")]) }); },
+        q: "Une recette pour " + n0 + " personnes demande " + M(F(...lait)) + " L de lait et " + M(F(...beurre)) + " kg de farine. " /* 26.11 (vraisemblance) : 300 g de beurre pour 6 personnes, c'est beaucoup trop ; la farine a ces quantités */ + who() + " cuisine pour " + n1 + " personnes.",
+        parts: [{ label: "Par quelle fraction faut-il multiplier les quantités ?", pts: 1 }, { label: "Quelle quantité de lait faut-il (fraction irréductible, en L) ?", pts: 1 }, { label: "Il reste les " + M(F(2, 3)) + " d'un paquet de farine de " + M(F(1, 2)) + " kg. Cela suffit-il ?", pts: 2 }],
+        sol: ul([M(F(n1, n0)) + ".", M(F(...lait) + " \\cdot " + F(n1, n0) + " = " + F(...kL)) + " L.", "Il reste " + M(F(2, 3) + " \\cdot " + F(1, 2) + " = " + F(1, 3)) + " kg ; il faut " + M(F(...kB)) + " kg : " + (kB[0] / kB[1] <= 1 / 3 ? "oui, cela suffit." : "non, cela ne suffit pas (" + M(F(...kB) + " > " + F(1, 3)) + ").")]) }); },
     // Soldes successifs (pourcentages)
     () => { const P = pk([80, 120, 150, 200]), p1 = pk([20, 30, 25]), p2 = pk([10, 15, 20]), f = (1 - p1 / 100) * (1 - p2 / 100), fin = P * f;
       return X({ id: "fracconv", lv: 2, titre: "Soldes successifs",
