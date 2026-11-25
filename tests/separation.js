@@ -43,6 +43,27 @@
       scan(pl, "question " + c.id + "|" + d, fr);
     }
   }
+  /* 25.11 (phase France des référentiels) : « Mes compétences » tout déplié, profils France (collège et lycée) et Collège
+     de Genève : aucun code ni intitulé du référentiel de l'autre système. */
+  const MATU_CODE = /\b[1-4]\.[A-Z]{2}\.\d{2}[a-z]\b/, FR_CODE = /\b(?:6e|5e|4e|3e|2nde|1re|Tle)\.[A-Z]{2}\.\d{2}\b/;
+  const labs = (D) => new Set(D ? D.c.map((c) => c[4]) : []), MATU_L = labs(typeof REF_MATU !== "undefined" && REF_MATU), FR_L = labs(typeof REF_FR !== "undefined" && REF_FR);
+  for (const [pl, p] of [["FR 3e", { system: "FR", grade: 9 }], ["FR Tle", { system: "FR", grade: 12 }], ["CH Col 1re", { system: "CH", grade: 12 }], ["CH Col 4e MA2", { system: "CH", grade: 15, niv: "R" }]]) {
+    try {
+      state = Engine.newState({ ...p, track: "college", minutes: 5 }); Engine.autoInit(state); state.placed = true;
+      screenComps(); app.querySelectorAll("details").forEach((d) => (d.open = true));
+      const fr = p.system === "FR", t = app.innerText, rows = [...app.querySelectorAll(".rcomp")];
+      if (!rows.length) errs.push(pl + " compétences : aucun item du référentiel officiel");
+      const m = (fr ? MATU_CODE : FR_CODE).exec(t);
+      if (m) add(pl, "compétences (déplié)", "code de l'autre référentiel", t.slice(Math.max(0, m.index - 40), m.index + 40).replace(/\s+/g, " "));
+      const other = fr ? MATU_L : FR_L, own = fr ? FR_L : MATU_L;
+      for (const e of rows) {
+        const lab = e.firstElementChild.textContent.trim();
+        if (other.has(lab) && !own.has(lab)) add(pl, "compétences (déplié)", "intitulé de l'autre référentiel", lab);
+        if (!own.has(lab)) add(pl, "compétences (déplié)", "intitulé hors de son référentiel", lab);
+      }
+      scan(pl, "compétences (déplié)", fr);
+    } catch (e) { errs.push(pl + " compétences (déplié) : " + e.message); }
+  }
   const keys = Object.keys(found), byScr = {};
   for (const k of keys) { const [pr, sc, lab] = k.split(" | "); const s = sc.startsWith("question") ? "questions" : sc; (byScr[pr + " · " + s] = byScr[pr + " · " + s] || new Set()).add(lab); }
   const detail = DETAIL;

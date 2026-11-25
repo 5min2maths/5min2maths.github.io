@@ -43,7 +43,7 @@
     screenComps();
     const t = app.innerText;
     ok(app.querySelectorAll(".rcomp").length === 98, "1re : 98 lignes de compétences à l'écran (" + app.querySelectorAll(".rcomp").length + ")");
-    ok(/1\.AL\.03a/.test(t) && /mise en évidence/.test(t), "code et intitulé officiels affichés");
+    ok(!/1\.AL\.03a/.test(t) && !!app.querySelector('.rcomp [title="1.AL.03a"]') && /mise en évidence/.test(t), "intitulé officiel affiché, code seulement en title");
     ok(/travaillée en classe/.test(t), "« travaillée en classe » affiché");
     ok(/\d+ \/ 98 notées/.test(t), "compteur sur 98");
     ok(!app.querySelector(".olds"), "1re : pas d'années précédentes");
@@ -71,8 +71,8 @@
       if (d) d.open = true;
       const n = app.querySelectorAll(".rcomp").length, exp = niv === "N" ? 98 + 78 + 56 + 50 : 98 + 78 + 67 + 77;
       ok(n === exp, "4e " + niv + " : " + n + " lignes au lieu de " + exp);
-      ok(niv === "R" || !/3\.AN\.08a/.test(app.innerText), "4e MA1 : MA2 de 3e retiré");
-      ok(/3\.AN\.05b/.test(app.innerText), "4e : compétence de 3e dans les années précédentes");
+      ok(niv === "R" || !app.querySelector('[title="3.AN.08a"]'), "4e MA1 : MA2 de 3e retiré");
+      ok(!!app.querySelector('.olds [title="3.AN.05b"]'), "4e : compétence de 3e dans les années précédentes");
       xs = overflow(); ok(!xs.length, "4e " + niv + " : débordement à 360 px : " + xs.slice(0, 3).join(" | "));
     }
     /* Profils CO, MP, France : affichage par notion inchangé */
