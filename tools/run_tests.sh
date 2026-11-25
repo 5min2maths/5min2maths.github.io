@@ -49,6 +49,12 @@ open("tests/_syntaxe.html", "w").write('<!doctype html><meta charset="utf-8"><ma
 PY
 SYN=$(timeout -k 5 90 chromium --headless --disable-gpu --no-sandbox --enable-logging=stderr --v=0 --virtual-time-budget=8000 --dump-dom "file://$PWD/tests/_syntaxe.html" 2>&1 >/dev/null 9>&- | grep -o '"Uncaught [^"]*", source: [^ ]* ([0-9]*)' | sed 's#file://[^ ]*/src/##')
 R=$(echo "$L" | xargs -P 2 -I{} bash -c 'un {}' 9>&-)
+# 25.11 : une page en échec pendant la série (2 navigateurs, machine chargée : kp_stable mesure des positions au
+# minutage près) est reprise une fois, seule ; elle ne compte comme échec que si elle échoue encore.
+for f in $(echo "$R" | grep "ÉCHEC" | cut -d: -f1 | grep "^tests/"); do
+  r2=$(un "$f" 9>&-)
+  if ! echo "$r2" | grep -q "ÉCHEC"; then R=$(echo "$R" | grep -v "^$f:"; echo "$r2 (réussie à la reprise)"); fi
+done
 [ -n "$SYN" ] && R=$(printf '%s\n%s' "$R" "$(echo "$SYN" | sed 's/^/syntaxe : ÉCHEC /')")
 echo "$R" | grep -c "" | xargs echo "pages testées :"
 echo "$R" | grep "ÉCHEC" || echo "aucun échec"

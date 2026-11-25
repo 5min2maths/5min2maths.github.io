@@ -127,7 +127,8 @@ const HORS_CO = {
 };
 function horsCO(state, id, q) {
   const p = state && state.profile;
-  if (q && q.co && p && !(p.system === "CH" && p.track !== "mp" && q.co.includes(p.grade))) return true; /* forme réservée à certaines classes du CO (VARX) */
+  /* forme réservée à certaines classes : q.co = classes CO / Collège (grade), q.mp = classes MP (25.11, src/defis_sec2.js) */
+  if (q && (q.co || q.mp) && p && !(p.system === "CH" && (p.track === "mp" ? (q.mp || []) : (q.co || [])).includes(p.grade))) return true;
   if (!q || !p || p.system !== "CH" || p.track === "mp") return false;
   const L = HORS_CO[p.grade] && HORS_CO[p.grade][id];
   if (!L) return false;
