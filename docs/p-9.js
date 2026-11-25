@@ -203,13 +203,21 @@
   const PAIRL = " (réponds « x ; y »)";
 
   // ======================= 9e et 10e =======================
+  // 26.11 (vraisemblance, décision de l'enseignant) : un seul contexte par énoncé. Le défi « bus et croissants » est
+  // séparé en deux défis : les bus (multiple commun), les corbeilles (diviseur commun).
   PX("arith", [9, 10, 11], () => {
-    let a, b, g; do { g = pk([4, 6, 8, 12, 15]); a = g * ri(3, 9); b = g * ri(3, 9); } while (gcd(a / g, b / g) !== 1 || a === b);
-    const m = (a * b) / g;
-    return PB("Deux bus partent ensemble du terminus à 7 h. Le premier repasse toutes les " + a + " minutes, le second toutes les " + b + " minutes. Pour une fête, on veut aussi répartir " + a + " croissants et " + b + " pains au chocolat dans des corbeilles identiques (même contenu), le plus grand nombre de corbeilles possible.",
-      [["a) Après combien de minutes les deux bus repartent-ils de nouveau ensemble ?", m], ["b) Combien de corbeilles peut-on faire ?", g], ["c) Combien de croissants dans chaque corbeille ?", a / g]],
-      ["« Ensemble de nouveau » : un multiple commun, le plus petit (PPMC).", "« Le plus grand nombre de corbeilles identiques » : un diviseur commun, le plus grand (PGDC)."],
-      "a) PPMC(" + a + " ; " + b + ") = " + m + " minutes. b) PGDC(" + a + " ; " + b + ") = " + g + " corbeilles. c) " + M(a + " \\div " + g + " = " + a / g) + " croissants (et " + b / g + " pains au chocolat).");
+    let a, b, m; do { a = pk([6, 8, 9, 10, 12, 15]); b = pk([8, 10, 12, 15, 18, 20]); m = (a * b) / gcd(a, b); } while (a >= b || gcd(a, b) === 1 || m > 120 || m === b);
+    return PB("Deux bus partent ensemble du terminus à 7 h. Le premier repasse au terminus toutes les " + a + " minutes, le second toutes les " + b + " minutes.",
+      [["a) Après combien de minutes les deux bus repartent-ils de nouveau ensemble ?", m], ["b) Combien de tours le premier bus a-t-il faits pendant ce temps ?", m / a], ["c) Et le second ?", m / b]],
+      ["« Ensemble de nouveau » : un multiple commun aux deux durées, le plus petit (PPMC).", "Nombre de tours : la durée divisée par la durée d'un tour."],
+      "a) PPMC(" + a + " ; " + b + ") = " + m + " minutes. b) " + M(m + " \\div " + a + " = " + m / a) + " tours. c) " + M(m + " \\div " + b + " = " + m / b) + " tours.");
+  });
+  PX("arith", [9, 10, 11], () => {
+    let a, b, g; do { g = pk([4, 6, 8, 12]); a = g * ri(3, 9); b = g * ri(3, 9); } while (gcd(a / g, b / g) !== 1 || a === b || a > 80 || b > 80);
+    return PB("Pour une fête, on veut répartir " + a + " croissants et " + b + " pains au chocolat dans des corbeilles identiques (même contenu dans chaque corbeille), avec le plus grand nombre de corbeilles possible.",
+      [["a) Combien de corbeilles peut-on faire ?", g], ["b) Combien de croissants dans chaque corbeille ?", a / g], ["c) Combien de pains au chocolat dans chaque corbeille ?", b / g]],
+      ["« Le plus grand nombre de corbeilles identiques » : un diviseur commun, le plus grand (PGDC).", "Chaque corbeille reçoit la même part : divise par le nombre de corbeilles."],
+      "a) PGDC(" + a + " ; " + b + ") = " + g + " corbeilles. b) " + M(a + " \\div " + g + " = " + a / g) + " croissants. c) " + M(b + " \\div " + g + " = " + b / g) + " pains au chocolat.");
   });
   PX("diagr", [9, 10, 11], () => {
     let n, notes, k, tgt; do { n = pk([5, 6]); notes = Array.from({ length: n - 1 }, () => pk([3.5, 4, 4.5, 5, 5.5, 6])); tgt = pk([4.5, 5, 5.5]); k = r6(tgt * n - notes.reduce((s, x) => s + x, 0)); } while (k < 3 || k > 6 || Math.abs(k * 2 - Math.round(k * 2)) > 1e-9);

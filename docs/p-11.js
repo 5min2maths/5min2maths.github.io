@@ -914,6 +914,24 @@
       { ...red, ctx: "erreur", guide: [GS("Double produit : " + M("2 \\cdot " + bx + " \\cdot " + (s > 0 ? a : "(-" + a + ")")) + " ; coefficient de " + M("x") + " ?", 2 * s * a * b, M(2 * s * a * b + "x") + "."), GX("Le bon développement :", L, M(tex(L)) + ".", "reduced")],
         traps: [TX(F, "C'est le résultat de " + w + " : " + M("(a + b)^2 \\neq a^2 + b^2") + ", il manque le double produit.")] }); });
 
+  // Lot 26.11 (référentiel du Collège 1.AL.03c : factoriser x² + sx + p par somme et produit) : deux formes de plus au
+  // niveau 3, à côté de la forme « trinome » : compléter une factorisation commencée, corriger une erreur de signe.
+  const trin = () => { let a, b; do { a = nz(-7, 7); b = nz(-7, 7); } while (a === b || a + b === 0 || Math.abs(a) === Math.abs(b) || Math.abs(a) < 2 || Math.abs(b) < 2); return [a, b]; };
+  const xp = (a) => "x" + (a < 0 ? " - " + -a : " + " + a);
+  const pq = (v) => (v < 0 ? "(" + v + ")" : String(v));
+  const xe = (a) => "(x" + (a < 0 ? "" : "+") + a + ")";
+  FAC[3].push(() => { for (let essai = 0; ; essai++) { const [a, b] = trin(), T = tex(norm([[1, { x: 2 }], [a + b, { x: 1 }], [a * b, {}]]));
+    const q = Qn("Complète la factorisation : " + M(T + " = (" + xp(a) + ")(x + \\ldots)") + ". Quel nombre manque ? (il peut être négatif)", b,
+      "Les deux nombres ont pour produit " + M(a * b) + " et pour somme " + M(a + b) + " : " + M(a + " \\cdot " + pq(b) + " = " + a * b) + " et " + M(a + " + " + pq(b) + " = " + (a + b)) + ". Donc " + M(T + " = (" + xp(a) + ")(" + xp(b) + ")") + ".",
+      { ctx: "trinome-complete", guide: [GS("Les deux nombres de la factorisation ont pour produit le terme constant. Que vaut ce produit ?", a * b, M(a * b) + "."), GS(M(a + " \\cdot \\ldots = " + a * b) + " : le nombre manquant ?", b, M(a * b + " \\div " + pq(a) + " = " + b) + " ; contrôle : " + M(a + " + " + pq(b) + " = " + (a + b)) + ", le coefficient de " + M("x") + ".")],
+        traps: [TRAP(-b, "Vérifie le signe : le produit " + M(a + " \\cdot " + pq(-b)) + " ne donne pas " + M(a * b) + "."), TRAP(a * b, "C'est le produit ; on cherche le nombre qui, multiplié par " + a + ", donne " + a * b + "."), TRAP(a + b + a, "La somme des deux nombres doit valoir " + (a + b) + " : on soustrait " + a + ", on n'ajoute pas.")] });
+    if (essai >= 20 || (!trivialQ(q, 0) && !answerShown(q))) return q; } });
+  FAC[3].push(() => { const [a, b] = trin(), w = camarade(), T = tex(norm([[1, { x: 2 }], [a + b, { x: 1 }], [a * b, {}]])), e = xe(a) + "*" + xe(b), f = xe(-a) + "*" + xe(-b);
+    return Qx(w + " écrit : « " + M(T + " = (" + xp(-a) + ")(" + xp(-b) + ")") + " ». Trouve l'erreur, puis factorise correctement.", e,
+      "Erreur de signes : en développant " + M("(" + xp(-a) + ")(" + xp(-b) + ")") + ", le coefficient de " + M("x") + " vaut " + M(-(a + b)) + " au lieu de " + M(a + b) + ". Les deux nombres sont " + M(a) + " et " + M(b) + " (produit " + M(a * b) + ", somme " + M(a + b) + ") : " + M("(" + xp(a) + ")(" + xp(b) + ")") + ".",
+      { ...prod, ctx: "erreur", guide: [GS("Somme des deux nombres choisis par " + w + " (" + M(-a) + " et " + M(-b) + ") ?", -(a + b), M(-(a + b)) + " : il fallait " + M(a + b) + "."), GX("La bonne factorisation :", e, M("(" + xp(a) + ")(" + xp(b) + ")") + ".", "product")],
+        traps: [TX(f, "C'est la réponse de " + w + " : développe pour vérifier, le coefficient de " + M("x") + " doit être " + M(a + b) + ".")] }); });
+
   // ===================== Enregistrement =====================
   const ALL = { litelab: LIT, valnum: VAL, reduire: RED, monomes: MON, parenth: PAR, distrib: DIS, idrem: IDR, factor: FAC };
   for (const [id, lv] of Object.entries(ALL)) {
@@ -940,7 +958,7 @@
     parenth: ["Supprimer une parenthèse précédée de −", "Supprimer plusieurs parenthèses", "Parenthèses et crochets"],
     distrib: ["Développer avec la simple distributivité", "Développer avec la double distributivité", "Développer et réduire une expression"],
     idrem: ["Développer (a ± b)² et (a + b)(a − b)", "Identités avec coefficients", "Utiliser les identités (calcul, différence)"],
-    factor: ["Factoriser par mise en évidence", "Factoriser avec une identité remarquable", "Factoriser au maximum, trinôme"],
+    factor: ["Factoriser par mise en évidence", "Factoriser avec une identité remarquable", "Factoriser au maximum, trinôme (somme et produit)"],
   });
 })();
 
@@ -1013,7 +1031,7 @@
             traps: [TR((a - b) / c, "Tu as soustrait avant de diviser. La division passe avant la soustraction.")] }); },
       () => { const a = R.int(2, 9), b = R.int(3, 8), c = R.int(2, 9), x = pk([
           ["Léa achète " + b + " cahiers à " + c + " CHF et une gomme à " + a + " CHF.", "achat"],
-          ["Au cinéma, une famille paie " + b + " billets à " + c + " CHF et un grand pop-corn à " + a + " CHF.", "cine"],
+          ["À la piscine, une famille paie " + b + " entrées à " + c + " CHF et une glace à " + a + " CHF.", "piscine"] /* 26.11 (vraisemblance) : billet de cinéma à 2–9 CHF remplacé (piscine) */,
           ["Un taxi facture " + a + " CHF de prise en charge, puis " + c + " CHF par kilomètre. La course fait " + b + " km.", "taxi"]]);
         return Qv(x[0] + " Écris le calcul en une seule ligne, puis calcule le prix total (en CHF).", a + b * c, "Calcul : " + M(a + " + " + b + " \\cdot " + c + " = " + a + " + " + b * c + " = " + (a + b * c)) + " CHF.",
           { ctx: x[1], guide: [GS("Prix des " + b + " éléments au même prix : " + M(b + " \\cdot " + c) + " = ?", b * c, M(b * c) + " CHF."), GS("Ajoute les " + a + " CHF : total ?", a + b * c, M(b * c + " + " + a + " = " + (a + b * c)) + " CHF.")],
@@ -1687,8 +1705,9 @@
         return Qv("Le triangle " + M("RST") + " est rectangle en " + M("S") + ", avec " + M("RT = " + c) + " cm et " + M("RS = " + a) + " cm. Calcule " + M("ST") + EXA + ".", k * Math.sqrt(m), M("ST^2 = " + c * c + " - " + a * a + " = " + n) + ", donc " + M("ST = " + (k > 1 ? "\\sqrt{" + n + "} = " : "") + rT(k, m)) + " cm.",
           { radical: true, canon: rC(k, m), ctx: "cath-exact", guide: [GS("L'hypoténuse est " + M("RT") + ". " + M("ST^2 = " + c + "^2 - " + a + "^2") + " = ?", n, M(n) + "."), GSR(M("ST = \\sqrt{" + n + "}") + (k > 1 ? " : simplifie" : "") + ".", k * Math.sqrt(m), M(rT(k, m)) + " cm.")],
             traps: [TR(Math.sqrt(c * c + a * a), M("RT") + " est l'hypoténuse : on soustrait."), TR(n, "C'est " + M("ST^2") + ".")] }); },
-      () => { const a = pk([30, 40, 45, 60, 80, 50]), b = pk([25, 35, 55, 70, 90, 65]), d = Math.sqrt(a * a + b * b), g = a + b - d, x = pk([["Pour traverser un parc rectangulaire de " + a + " m sur " + b + " m, Léo coupe en diagonale au lieu de longer deux côtés.", "parc"], ["Un terrain de football improvisé mesure " + a + " m sur " + b + " m. Zoé va d'un coin au coin opposé en diagonale plutôt que par les bords.", "terrain"]]);
-        return Qv(x[0] + " Combien de mètres économise-t-il" + (x[1] === "terrain" ? " (elle)" : "") + " ? (arrondi au dixième)", g, "Diagonale : " + M("\\sqrt{" + a + "^2 + " + b + "^2} \\approx " + N(rd(d, 0.01))) + " m ; économie : " + M(a + b + " - " + N(rd(d, 0.01)) + " \\approx " + N(rd(g, 0.1))) + " m.",
+      () => { const a = pk([30, 40, 45, 60, 80, 50]), b = pk([25, 35, 55, 70, 90, 65]), d = Math.sqrt(a * a + b * b), g = a + b - d, x = pk([["Pour traverser un parc rectangulaire de " + a + " m sur " + b + " m, Léo coupe en diagonale au lieu de longer deux côtés.", "parc", "il"], ["Un terrain de football improvisé mesure " + a + " m sur " + b + " m. Zoé va d'un coin au coin opposé en diagonale plutôt que par les bords.", "terrain", "elle"]]);
+        /* 26.11 (revue d'un testeur : « économise-t-il (elle) ») : pronom accordé au prénom */
+        return Qv(x[0] + " Combien de mètres économise-t-" + x[2] + " ? (arrondi au dixième)", g, "Diagonale : " + M("\\sqrt{" + a + "^2 + " + b + "^2} \\approx " + N(rd(d, 0.01))) + " m ; économie : " + M(a + b + " - " + N(rd(d, 0.01)) + " \\approx " + N(rd(g, 0.1))) + " m.",
           { round: 0.1, ctx: x[1], guide: [GS("Longueur du chemin par les bords ?", a + b, M(a + " + " + b + " = " + (a + b)) + " m."), GS("Longueur de la diagonale (au centième) ?", d, M("\\sqrt{" + (a * a + b * b) + "} \\approx " + N(rd(d, 0.01))) + " m.", 0.01), GS("Économie (au dixième) ?", g, M(N(rd(g, 0.1))) + " m.", 0.1)],
             traps: [TR(d, "C'est la longueur de la diagonale ; on demande la différence avec le chemin par les bords."), TR(a + b, "C'est le chemin par les bords.")] }); },
       () => { let x1, y1, x2, y2, n; do { x1 = R.int(-5, 5); y1 = R.int(-5, 5); x2 = R.int(-5, 6); y2 = R.int(-5, 6); n = (x2 - x1) ** 2 + (y2 - y1) ** 2; } while (x1 === x2 || y1 === y2 || Number.isInteger(Math.sqrt(n)) && R.rand() < 0.6);
@@ -2244,6 +2263,15 @@
             traps: [TR(180 - c, "Il reste " + (180 - c) + "° pour DEUX angles égaux : divise par 2."), TR(c / 2, "Ce n'est pas un angle inscrit : utilise la somme des angles du triangle isocèle AOB.")] }); },
     ],
   };
+  // Lot 26.11 (référentiel du Collège 1.GE.01a : opposés par le sommet, correspondants, alternes-internes ; repris en 1re) :
+  // une forme de niveau 3 qui enchaîne deux propriétés (correspondants, puis opposés par le sommet) sur une équation.
+  ANG[3].push(() => { let x, p, q, s, t, a; do { p = R.int(3, 6); q = R.int(1, p - 2); x = R.int(8, 22); s = R.int(-15, 20); a = p * x + s; t = a - q * x; } while (p - q < 2 || a < 35 || a > 75 || t <= 0 || s === 0);
+    const r = pk([1, 3]), r2 = r === 1 ? 3 : 1, E1 = "(" + p + "x" + (s < 0 ? " - " + -s : " + " + s) + ")°", E2 = "(" + q + "x + " + t + ")°";
+    return Qv("Les droites " + M("d_1") + " et " + M("d_2") + " sont parallèles. Les deux angles marqués mesurent " + M(E1) + " et " + M(E2) + ". Que vaut " + M("x") + " ?", x,
+      "Sur " + M("d_2") + ", l'angle correspondant à " + M(E1) + " (même position) lui est égal ; l'angle marqué sur " + M("d_2") + " lui est opposé par le sommet, donc égal aussi. " + M(p + "x" + (s < 0 ? " - " + -s : " + " + s) + " = " + q + "x + " + t) + ", " + M((p - q) + "x = " + (t - s)) + ", " + M("x = " + x) + " (les deux angles mesurent " + deg(a) + ").",
+      { ctx: "chaine-proprietes", fig: par(a, [[0, r, E1], [1, r2, E2]]),
+        guide: [GS("Correspondants, puis opposés par le sommet : les deux angles sont égaux. " + M(p + "x" + (s < 0 ? " - " + -s : " + " + s) + " = " + q + "x + " + t) + " : " + M((p - q) + "x") + " = ?", t - s, M((p - q) + "x = " + (t - s)) + "."), GS(M("x") + " = ?", x, M("x = " + x) + ".")],
+        traps: [TR((180 - s - t) / (p + q), "Les deux angles sont égaux (correspondants, puis opposés par le sommet) : on n'écrit pas une somme de 180°."), TR((t + s) / (p - q), "En regroupant, " + M(s) + " passe de l'autre côté avec un signe moins.")] }); });
 
   // ===================== cercthales =====================
   const CT = {
@@ -2309,7 +2337,7 @@
     cercthales: "Un triangle inscrit dans un demi-cercle est rectangle (le diamètre est l'hypoténuse). La tangente est perpendiculaire au rayon au point de contact.",
   });
   if (typeof COMPS !== "undefined") Object.assign(COMPS, {
-    angles: ["Complément, supplément, angles en un point", "Parallèles, angle inscrit et angle au centre", "Équations d'angles, triangle isocèle dans le cercle"],
+    angles: ["Complément, opposés par le sommet, correspondants", "Parallèles, angle inscrit et angle au centre", "Équations d'angles, propriétés enchaînées, triangle isocèle dans le cercle"],
     cercthales: ["Cercle de Thalès, tangente et Pythagore", "Angles et rayons, cercle circonscrit", "Deux tangentes, aires, angle droit découpé"],
   });
 })();
@@ -3799,9 +3827,9 @@
         q: "Une fonction affine " + M("f") + " vérifie " + M("f(" + x1 + ") = " + y1) + " et " + M("f(" + x2 + ") = " + y2) + ".",
         parts: [{ label: "Calcule la pente " + M("a") + ".", pts: 1 }, { label: "Calcule l'ordonnée à l'origine " + M("b") + " et écris " + M("f(x)") + ".", pts: 1 }, { label: "Calcule " + M("f(10)") + " et le nombre dont l'image est " + M(N(a * 4 + b)) + ".", pts: 2 }],
         sol: ul([M("a = \\frac{" + y2 + " - " + (y1 < 0 ? "(" + y1 + ")" : y1) + "}{" + x2 + " - " + (x1 < 0 ? "(" + x1 + ")" : x1) + "} = " + N(a)) + ".", M("b = " + N(b)) + " ; " + M("f(x) = " + N(a) + "x " + (b < 0 ? "- " + N(-b) : "+ " + N(b))) + ".", M("f(10) = " + N(10 * a + b)) + " ; le nombre est " + M("4") + "."]) }); },
-    () => { const t0 = pk([18, 20, 22]), d = pk([3, 4, 5]);
+    () => { const t0 = pk([15, 18, 21]), d = 3; /* 26.11 (vraisemblance, décision de l'enseignant) : ≈ −0,65 °C par 100 m, soit −3 °C par 500 m (et non 4 ou 5) */
       return X({ id: "affine", lv: 2, titre: "La température en altitude",
-        q: "Au bord du lac (altitude " + Q(400, "m") + "), il fait " + M(t0 + "\\,°\\text{C}") + ". La température baisse de " + M(d / 5 * 5 === d ? d : d) + " °C chaque fois qu'on monte de " + Q(500, "m") + ".",
+        q: "Au bord du lac (altitude " + Q(400, "m") + "), il fait " + M(t0 + "\\,°\\text{C}") + ". La température baisse de " + M(d) + " °C chaque fois qu'on monte de " + Q(500, "m") + ".",
         parts: [{ label: "Quelle température fait-il à " + Q(1900, "m") + " ?", pts: 1 }, { label: "Écris la température " + M("T(h)") + " en fonction du nombre " + M("h") + " de tranches de 500 m au-dessus du lac.", pts: 1 }, { label: "À partir de quelle altitude gèle-t-il (" + M("T < 0") + ") ? Arrondis à la tranche de 500 m.", pts: 2 }],
         sol: ul(["3 tranches : " + M(t0 + " - 3 \\cdot " + d + " = " + (t0 - 3 * d)) + " °C.", M("T(h) = " + t0 + " - " + d + "h") + ".", M(t0 + " - " + d + "h < 0 \\iff h > " + N(r6(t0 / d))) + " : " + Math.floor(t0 / d + 1) + " tranches, soit vers " + Q(400 + 500 * Math.floor(t0 / d + 1), "m") + "."]) }); },
     () => { const pA = pk([12, 15]), F = pk([60, 90]), pB = pA - pk([3, 5]), n = F / (pA - pB);
@@ -4786,7 +4814,7 @@ function screenEvacomResult() {
     },
     // ---- Factoriser : le rectangle à l'envers ----
     factor: {
-      predict: { q: "Factoriser 6x + 9, c'est l'écrire…", choices: ["comme un produit", "comme une somme plus courte"], good: 0, why: "Factoriser = écrire un produit : 6x + 9 = 3(2x + 3). C'est l'inverse de développer." },
+      predict: { q: "Factoriser 10x + 15, c'est l'écrire…", choices: ["comme un produit", "comme une somme plus courte"], good: 0, why: "Factoriser = écrire un produit : 10x + 15 = 5(2x + 3). C'est l'inverse de développer." },
       defis: ["Factorise 6x + 9 : choisis la largeur du rectangle.", "Factorise 10x − 15.", "Factorise 12x + 18 au maximum."],
       play(box, onWin) {
         const E = [[6, 9], [10, -15], [12, 18]];
@@ -4938,7 +4966,7 @@ function screenEvacomResult() {
 
   Object.assign(ACTIVE, {
     fracadd: {
-      predict: { q: "Combien font 1/4 + 1/6 ?", choices: ["2/10", "5/12", "2/24"], good: 1, why: "Un quart et un sixième ne sont pas des parts de même taille : on les découpe en douzièmes, 3/12 + 2/12 = 5/12. Additionner les dénominateurs donnerait 2/10 = 1/5, moins qu'un quart seul !" },
+      predict: { q: "Combien font 1/3 + 1/4 ?", choices: ["2/7", "7/12", "2/12"], good: 1, why: "Un tiers et un quart ne sont pas des parts de même taille : on les découpe en douzièmes, 4/12 + 3/12 = 7/12. Additionner les dénominateurs donnerait 2/7, moins qu'un tiers seul !" },
       defis: ["Trouve le plus petit dénominateur commun de 1/4 et 1/6.", "Même chose pour 2/3 et 3/5.", "Et pour 3/8 et 5/12."],
       play: hunt({ ask: true, label: "Dénominateur commun", start: 2, min: 2, max: 60,
         show: (x, s) => { const [a, b, c, d] = [[1, 4, 1, 6], [2, 3, 3, 5], [3, 8, 5, 12]][s], okb = x % b === 0, okd = x % d === 0;
@@ -4952,7 +4980,7 @@ function screenEvacomResult() {
         { d: "\\(\\frac{2}{3} \\div \\frac{4}{9} = \\frac{a}{2}\\). Tape \\(a\\).", ans: 3, ok: "On multiplie par l'inverse 9/4 : 2/3 · 9/4 = 18/12 = 3/2.", no: "Multiplie 2/3 par l'inverse de 4/9, puis simplifie." }],
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
       retiens: { regle: "On multiplie les numérateurs entre eux et les dénominateurs entre eux. Prendre une fraction d'une fraction, c'est multiplier : « de » veut dire « fois ». Diviser par une fraction, c'est multiplier par son inverse.", exemple: ["Les \\(\\frac{2}{3}\\) de \\(\\frac{3}{4}\\) : \\(\\frac{2}{3} \\cdot \\frac{3}{4} = \\frac{6}{12} = \\frac{1}{2}\\).", "La moitié de \\(\\frac{4}{5}\\) : \\(\\frac{1}{2} \\cdot \\frac{4}{5} = \\frac{4}{10} = \\frac{2}{5}\\).", "Les \\(\\frac{3}{4}\\) de \\(\\frac{2}{5}\\) : \\(\\frac{6}{20} = \\frac{3}{10}\\).", "\\(\\frac{3}{4} \\div \\frac{1}{8} = \\frac{3}{4} \\cdot \\frac{8}{1} = 6\\) ; \\(\\frac{2}{3} \\div \\frac{4}{9} = \\frac{2}{3} \\cdot \\frac{9}{4} = \\frac{3}{2}\\)."], piege: "Pour multiplier, pas de dénominateur commun : on multiplie en haut et en bas." },
-      predict: { q: "Les 2/3 de 3/4 d'une tablette de chocolat, c'est…", choices: ["5/7 de la tablette", "1/2 de la tablette", "6/7 de la tablette"], good: 1, why: "On prend 2 tiers d'une part de 3 quarts : 2/3 · 3/4 = 6/12 = 1/2. « De » veut dire « fois »." },
+      predict: { q: "Les 3/4 de 2/5 d'une tablette de chocolat, c'est…", choices: ["5/9 de la tablette", "3/10 de la tablette", "5/20 de la tablette"], good: 1, why: "On prend 3 quarts d'une part de 2 cinquièmes : 3/4 · 2/5 = 6/20 = 3/10. « De » veut dire « fois »." },
       defis: ["Colorie les 2/3 de 3/4 du carré (règle les lignes).", "Colorie la moitié de 4/5.", "Colorie les 3/4 de 2/5."],
       play: hunt({ label: "Lignes coloriées", start: 0, min: 0, max: 4,
         show: (x, s) => { const [a, b, c, e] = [[3, 4, 2, 3], [4, 5, 1, 2], [2, 5, 3, 4]][s], r = Math.min(x, e), cw = 240 / b, rh = 120 / e; let g = "";
@@ -5020,7 +5048,7 @@ function screenEvacomResult() {
     pythfig: {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
       retiens: { regle: "Diagonale d'un rectangle : les deux côtés et la diagonale forment un triangle rectangle. Grande diagonale d'un pavé : \\(d^2 = a^2 + b^2 + c^2\\).", exemple: ["Rectangle 9 × 12 : \\(d = \\sqrt{81 + 144} = 15\\).", "Pavé 2 × 3 × 6 : \\(d = \\sqrt{4 + 9 + 36} = 7\\)."], piege: "La diagonale est l'hypoténuse : on additionne les carrés, puis on prend la racine." },
-      predict: { q: "Un rectangle mesure 9 cm sur 12 cm. Sa diagonale mesure…", choices: ["21 cm", "15 cm", "108 cm"], good: 1, why: "La diagonale coupe le rectangle en deux triangles rectangles : √(81 + 144) = √225 = 15." },
+      predict: { q: "Un rectangle mesure 6 cm sur 8 cm. Sa diagonale mesure…", choices: ["14 cm", "10 cm", "48 cm"], good: 1, why: "La diagonale coupe le rectangle en deux triangles rectangles : √(36 + 64) = √100 = 10." },
       defis: ["Rectangle 9 × 12 : trouve la diagonale.", "Triangle isocèle de côtés 10, 10 et de base 12 : trouve la hauteur.", "Pavé 2 × 3 × 6 : trouve la grande diagonale."],
       play: hunt({ ask: true, label: "Longueur", start: 5, min: 1, max: 20,
         show: (x, s) => { const L = [["Triangle (9 ; 12 ; diagonale) : 9² + 12² = 225", 225, x * x, "diagonale² = " + x * x], ["Triangle (demi-base 6 ; hauteur ; côté 10) : 6² + h² = " + (36 + x * x), 100, 36 + x * x, "côté² = 100"], ["Pavé : 2² + 3² + 6² = 49", 49, x * x, "diagonale² = " + x * x]][s];
@@ -5096,7 +5124,7 @@ function screenEvacomResult() {
     volmanq: {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
       retiens: { regle: "On écrit la formule, on remplace ce qu'on connaît, puis on isole la dimension cherchée.", exemple: ["Cylindre \\(r = 3\\), \\(V = 36\\pi\\) : \\(9\\pi h = 36\\pi\\), \\(h = 4\\).", "Pavé de base 5 × 4, \\(V = 140\\) : \\(20h = 140\\), \\(h = 7\\)."], piege: "\\(\\pi \\cdot 3^2 \\cdot h = 36\\pi\\) : on divise par \\(9\\pi\\), pas par 3." },
-      predict: { q: "Un cylindre de rayon 3 cm a un volume de 36π cm³. Sa hauteur mesure…", choices: ["4 cm", "12 cm", "6 cm"], good: 0, why: "π · 3² · h = 36π, donc 9h = 36 et h = 4. On remplace ce qu'on connaît, puis on isole h." },
+      predict: { q: "Un cylindre de rayon 2 cm a un volume de 20π cm³. Sa hauteur mesure…", choices: ["5 cm", "10 cm", "4 cm"], good: 0, why: "π · 2² · h = 20π, donc 4h = 20 et h = 5. On remplace ce qu'on connaît, puis on isole h." },
       defis: ["Cylindre de rayon 3 et de volume 36π : calcule la hauteur.", "Cône de rayon 3 et de volume 18π : calcule la hauteur.", "Pavé de base 5 × 4 et de volume 140 cm³ : calcule la hauteur."],
       play: hunt({ ask: true, label: "Hauteur", start: 1, min: 1, max: 12,
         show: (x, s) => { const [lab, v, t] = [["π · 3² · " + x, 9 * x, 36], ["⅓ · π · 3² · " + x, 3 * x, 18], ["5 · 4 · " + x, 20 * x, 140]][s];
@@ -5244,7 +5272,7 @@ function screenEvacomResult() {
     denombr: {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
       retiens: { regle: "Si on choisit d'abord parmi \\(a\\) possibilités, puis parmi \\(b\\), il y a \\(a \\cdot b\\) possibilités (c'est un arbre) : on multiplie, on n'additionne pas.", exemple: ["3 t-shirts et 4 pantalons : \\(3 \\cdot 4 = 12\\) tenues.", "6 personnes : \\(\\frac{6 \\cdot 5}{2} = 15\\) poignées de main."] },
-      predict: { q: "3 t-shirts et 4 pantalons : combien de tenues différentes ?", choices: ["7", "12", "34"], good: 1, why: "Chaque t-shirt se combine avec chacun des 4 pantalons : 3 · 4 = 12 (arbre). On multiplie, on n'additionne pas." },
+      predict: { q: "2 casquettes et 5 t-shirts : combien de tenues différentes ?", choices: ["7", "10", "25"], good: 1, why: "Chaque casquette se combine avec chacun des 5 t-shirts : 2 · 5 = 10 (arbre). On multiplie, on n'additionne pas." },
       defis: ["3 t-shirts, 4 pantalons : nombre de tenues ?", "5 coureurs : nombre de podiums (or, argent, bronze) ?", "6 personnes se serrent toutes la main : nombre de poignées ?"],
       play: hunt({ ask: true, label: "Nombre",
         show: (x, s) => plain(["arbre : 3 branches, puis 4 sur chacune", "or : 5 choix, argent : 4, bronze : 3", "chacun serre 5 mains ; chaque poignée est comptée deux fois"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),

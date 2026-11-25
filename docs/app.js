@@ -693,6 +693,9 @@ function checkAnswer(spec, input) {
         const m = raw.match(/^(-?\d+(?:\.\d+)?)\*10\^\(?(-?\d+)\)?$/), a = m ? Math.abs(+m[1]) : 0;
         if (!(m && a >= 1 && a < 10) && !(/^-?\d+(\.\d+)?$/.test(raw) && Math.abs(v) >= 1 && Math.abs(v) < 10)) return { status: "form", message: "La valeur est juste ; écris-la en notation scientifique : a · 10^n avec 1 ≤ a < 10 (par exemple 4,5*10^-3)." };
       }
+      /* 26.11 (revue élèves, A11 : 12,2262409946 accepté pour 120√3/17) : racine exacte demandée (spec.radical, pas d'arrondi prévu) :
+         un décimal de calculatrice (4 décimales ou plus, moins de 15 chiffres) n'est pas la valeur exacte. */
+      if (spec.radical && /^-?\d+\.\d{4,}$/.test(raw) && raw !== String(+spec.value) /* valeur stockée arrondie par le générateur */ && raw.replace(/\D/g, "").replace(/^0+/, "").length < 15 && !/^-?\d+(\.\d{1,8})?$/.test(String(+(+spec.value).toPrecision(12)))) return { status: "form", message: "C'est une valeur approchée ; donne la valeur exacte (fraction, racine ou π)." };
       if (spec.radical) {
         // a√b, et aussi a√b/c, (a√b)/c, a/√b (20.11 : √21/5 ou √2/2 étaient refusés) ; « sqrt » tapé au clavier = √.
         const rr = raw.replace(/sqrt/gi, "√").replace(/^\((.*)\)(\/\d+)$/, "$1$2");
@@ -1473,7 +1476,10 @@ const colonBreak = (s) => {
   const parts = s.split(/(\\\(.*?\\\))/);
   for (let i = 0; i < parts.length; i += 2) {
     let t = parts[i];
-    if (i > 0) t = t.replace(/^\s*:\s+(?=\S)/, "<br>").replace(/^\s*:\s*$/, i + 1 < parts.length ? "<br>" : " :"); // juste après une formule
+    /* 26.11 (revue élèves, B10 : « Les x² ⏎ 3x² ; les x ⏎ 3x ») : entre deux formules, on ne coupe après « : » que si une
+       vraie phrase (3 mots au moins) précède la formule ; sinon le « : » reste sur la ligne. */
+    const phrase = i > 0 && (String(parts[i - 2] || "").split(/[.;!?]|<br>/).pop().match(/\p{L}{2,}/gu) || []).length >= 3;
+    if (i > 0) t = t.replace(/^\s*:\s+(?=\S)/, "<br>").replace(/^\s*:\s*$/, i + 1 < parts.length && phrase ? "<br>" : " :"); // juste après une formule
     t = t.replace(/(^|[.!?]\s+|<br>)([^.!?<:]*?=[^.!?<:]*?[0-9A-Za-zÀ-ÿ²³⁴)\]]) : (?=\S)/g, "$1$2<br>"); // « x = 3 : … »
     // « Divisibles par 9 : 117, 126 » se lit « 9 ÷ 117 » : on garde les deux-points et on passe à la ligne.
     t = t.replace(/([0-9)²³°]) : (?=[-−0-9(]|$)/g, "$1 :<br>");
@@ -1485,7 +1491,9 @@ const colonBreak = (s) => {
 /* 26.11 (audit de vraisemblance, tests/vraisemblance.html) : un montant s'écrit avec deux décimales (« 2,50 CHF », « 0,80 € »),
    jamais « 2,5 CHF » (37 générateurs le faisaient). Appliqué aux textes des questions (Engine.build, sujets) ; jamais aux réponses. */
 /* Même passe : élision devant un prénom ou un nom propre à voyelle (« le compte de Elsa » → « d'Elsa », « que Inès » → « qu'Inès »). */
-const moneyTidy = (s) => typeof s !== "string" ? s : s.replace(/(^|[^\p{L}])([dD]e|[qQ]ue) (?=[AEIOUYÉÈÊÎ][a-zàâçéèêëîïôûù]+)/gu, (m, b, w) => b + w.slice(0, -1) + "'").replace(/(^|[^\p{L}])([dD]e|[àÀ]) Le (?=\p{Lu})/gu, (m, b, w) => b + (/^[dD]/.test(w) ? w[0] + "u" : w === "à" ? "au" : "Au") + " ").replace(/(^|[^\p{L}])([dD]e|[àÀ]) Les (?=\p{Lu})/gu, (m, b, w) => b + (/^[dD]/.test(w) ? w[0] + "es" : w === "à" ? "aux" : "Aux") + " ").replace(/(\d(?:\{,\}|,))(\d)(?![\d{]|\{,|,\d)((?:\\\))?(?:\s|\\[ ,;]|~|&nbsp;|\\text\{\s*|\\mathrm\{\s*)*(?:CHF|€|francs?(?![a-z])|euros?(?![a-z])))/g, (m, a, b, c) => a + b + "0" + c);
+/* 26.11 (revue élèves, A13 : « 1 rang(s) », « 2 décimale(s) ») : accord calculé d'après le nombre qui précède. */
+const plurTidy = (s) => s.replace(/(^|[^\d,.])(\d+) (\p{L}+)\(s\)/gu, (m, b, n, w) => b + n + " " + w + (+n >= 2 ? "s" : ""));
+const moneyTidy = (s) => typeof s !== "string" ? s : plurTidy(s).replace(/(^|[^\p{L}])([dD]e|[qQ]ue) (?=[AEIOUYÉÈÊÎ][a-zàâçéèêëîïôûù]+)/gu, (m, b, w) => b + w.slice(0, -1) + "'").replace(/(^|[^\p{L}])([dD]e|[àÀ]) Le (?=\p{Lu})/gu, (m, b, w) => b + (/^[dD]/.test(w) ? w[0] + "u" : w === "à" ? "au" : "Au") + " ").replace(/(^|[^\p{L}])([dD]e|[àÀ]) Les (?=\p{Lu})/gu, (m, b, w) => b + (/^[dD]/.test(w) ? w[0] + "es" : w === "à" ? "aux" : "Aux") + " ").replace(/(\d(?:\{,\}|,))(\d)(?![\d{]|\{,|,\d)((?:\\\))?(?:\s|\\[ ,;]|~|&nbsp;|\\text\{\s*|\\mathrm\{\s*)*(?:CHF|€|francs?(?![a-z])|euros?(?![a-z])))/g, (m, a, b, c) => a + b + "0" + c);
 /* 26.11 : accord après 1 (« 1 vertes », « 1 connexions réussies », « 1 lancers francs ») dans les textes tirés au hasard. */
 const ONE_N = "boules|billes|jetons|cartes|perles|bonbons|stylos|livres|pièces|bleues|vertes|rouges|blanches|noires|jaunes|connexions|lancers|élèves|personnes|filles|garçons|enfants|adultes|flèches|tirs|paniers|buts";
 const ONE_A = "réussies|réussis|francs|rouges|bleues|vertes|blanches|noires|jaunes|gagnants|gagnantes|défectueuses|ratés|manqués";
@@ -3020,7 +3028,7 @@ Object.assign(GEN, {
       return t + "On remonte : " + M(names[1] + " = " + sol[1]) + ", puis " + M(names[0] + " = " + sol[0]) + ". Solution : " + M("(" + sol.join(" ; ") + ")") + ".";
     };
     if (d === 3 && R.rand() < 0.5) {
-      const a = R.int(8, 20), e = R.int(4, 12), s = R.int(5, 10), na = R.int(1, 4), ne = R.int(1, 4), ns = R.int(1, 4);
+      const a = R.int(15, 20), e = R.int(8, 12), s = R.int(10, 14) /* 26.11 (vraisemblance) : cinéma 15 à 20 CHF */, na = R.int(1, 4), ne = R.int(1, 4), ns = R.int(1, 4);
       const t1 = 2 * a + 3 * e + s, t2 = a + 2 * e + 2 * s, t3 = na * a + ne * e + ns * s;
       const mm = [[2, 3, 1], [1, 2, 2], [na, ne, ns]]; if (det(mm) === 0) return GEN.sys3(3);
       return { q: "Au cinéma : 2 adultes, 3 enfants et 1 senior paient " + M(t1) + " CHF ; 1 adulte, 2 enfants et 2 seniors paient " + M(t2) + " CHF ; " + na + " adulte" + (na > 1 ? "s" : "") + ", " + ne + " enfant" + (ne > 1 ? "s" : "") + " et " + ns + " senior" + (ns > 1 ? "s" : "") + " paient " + M(t3) + " CHF. Prix adulte, enfant, senior : « a ; e ; s ».", spec: { kind: "pair", values: [a, e, s] }, sol: "Système " + M("\\begin{cases} 2a + 3e + s = " + t1 + " \\\\ a + 2e + 2s = " + t2 + " \\\\ " + (na === 1 ? "" : na) + "a + " + (ne === 1 ? "" : ne) + "e + " + (ns === 1 ? "" : ns) + "s = " + t3 + " \\end{cases}") + ". " + gauss(mm, [t1, t2, t3], [a, e, s], ["a", "e", "s"]) + " (en CHF)" };
@@ -3759,7 +3767,7 @@ FINE.push(
       () => { const a = R.int(2, 6), b = R.int(2, 7), n = R.int(2, 3); return QX("Calcule : " + M("-" + a + "x \\cdot " + b + "x^" + n), -a * b + "x^" + (n + 1), M("-" + a + " \\cdot " + b + " = " + -a * b) + " et " + M("x \\cdot x^" + n + " = x^" + (n + 1)) + " : " + M(-a * b + "x^" + (n + 1)) + "."); },
       () => { if (R.rand() < 0.5) { const a = R.int(2, 5), b = R.int(2, 5); return QX("Calcule : " + M("(" + a + "x)^2 \\cdot " + b + "x"), a * a * b + "x^3", M("(" + a + "x)^2 = " + a * a + "x^2") + ", puis " + M(a * a + "x^2 \\cdot " + b + "x = " + a * a * b + "x^3") + "."); } const a = R.int(2, 4); return QX("Calcule : " + M("(-" + a + "x)^3"), -(a ** 3) + "x^3", M("(-" + a + ")^3 = " + -(a ** 3)) + " : " + M(-(a ** 3) + "x^3") + "."); },
     ] },
-  { id: "pythfig", theme: "gm", label: "Pythagore dans une figure, dans l'espace", ex: "d = \\sqrt{a^2 + b^2 + c^2}", CH: [10], again: [11], MP: [12, "S2"], codesMATU: "1\\.GE\\.03d", codes: "10GM4\\.0[45]|11GM1\\.02",
+  { id: "pythfig", theme: "gm", label: "Pythagore dans une figure ou un solide" /* 26.11 (revue d'un testeur) : « … dans l'espace » s'affichait sur la diagonale d'un rectangle */, ex: "d = \\sqrt{a^2 + b^2 + c^2}", CH: [10], again: [11], MP: [12, "S2"], codesMATU: "1\\.GE\\.03d", codes: "10GM4\\.0[45]|11GM1\\.02",
     hint: "Cherche le triangle rectangle caché : diagonale d'un rectangle, hauteur d'un triangle isocèle, diagonale d'un pavé.",
     lesson: ["Pythagore dans une figure", "Il faut d'abord trouver le triangle rectangle.", "Diagonale d'un rectangle : \\(d^2 = L^2 + l^2\\). Hauteur d'un triangle isocèle : elle coupe la base en deux. Diagonale d'un pavé : \\(d^2 = a^2 + b^2 + c^2\\).", ["Rectangle 6 × 8 : diagonale 10", "Triangle isocèle de côtés 13, 13, 10 : \\(h = \\sqrt{13^2 - 5^2} = 12\\)"], "Dans le triangle isocèle, on utilise la moitié de la base."],
     g: [
@@ -4635,7 +4643,7 @@ V("decprob", 1,
 );
 V("decprob", 2,
   () => { const pc = R.pick([5.5, 6, 6.5, 7]), pk = R.pick([2.8, 3.2, 3.5, 3.8]), k = R.int(4, 12), t = r6(pc + pk * k); return QV("Un taxi coûte " + M(chf(pc)) + " CHF de prise en charge, puis " + M(chf(pk)) + " CHF par kilomètre. Combien coûte une course de " + M(k) + " km (en CHF) ?", t, M(chf(pc) + " + " + k + " \\cdot " + chf(pk) + " = " + chf(t)) + " CHF.", { guide: [GS("Prix des kilomètres : " + M(k + " \\cdot " + chf(pk)) + " = ?", r6(pk * k), M(chf(r6(pk * k))) + " CHF."), GS("Plus la prise en charge (une seule fois) ?", t, M(chf(t)) + " CHF.")], traps: [TRAP(r6((pc + pk) * k), "La prise en charge ne se paie qu'une fois."), TRAP(r6(pk * k), "N'oublie pas la prise en charge.")] }); },
-  () => { const s = R.pick([50, 100]), a = d2(9.5, 16), b = d2(4.5, 8.9), n = R.int(2, 4), t = r6(n * a + b); return QV("Tu as " + M(s) + " CHF. Tu achètes " + M(n) + " places de cinéma à " + M(chf(a)) + " CHF et un pop-corn à " + M(chf(b)) + " CHF. Combien te reste-t-il (en CHF) ?", r6(s - t), "Dépense : " + M(n + " \\cdot " + chf(a) + " + " + chf(b) + " = " + chf(t)) + ". Reste : " + M(s + " - " + chf(t) + " = " + chf(r6(s - t))) + " CHF.", { guide: [GS("Prix des " + n + " places ?", r6(n * a), M(n + " \\cdot " + chf(a) + " = " + chf(r6(n * a))) + " CHF."), GS("Dépense totale (avec le pop-corn) ?", t, M(chf(t)) + " CHF."), GS("Il reste ?", r6(s - t), M(s + " - " + chf(t) + " = " + chf(r6(s - t))) + " CHF.")], traps: [TRAP(t, "C'est la dépense ; on demande ce qui reste."), TRAP(r6(s - a - b), "Il y a " + n + " places, pas une seule.")] }); },
+  () => { const s = R.pick([50, 100]), a = d2(15, 19) /* 26.11 (vraisemblance) : cinéma 15 à 19 CHF */, b = d2(4.5, 8.9), n = R.int(2, 4), t = r6(n * a + b); return QV("Tu as " + M(s) + " CHF. Tu achètes " + M(n) + " places de cinéma à " + M(chf(a)) + " CHF et un pop-corn à " + M(chf(b)) + " CHF. Combien te reste-t-il (en CHF) ?", r6(s - t), "Dépense : " + M(n + " \\cdot " + chf(a) + " + " + chf(b) + " = " + chf(t)) + ". Reste : " + M(s + " - " + chf(t) + " = " + chf(r6(s - t))) + " CHF.", { guide: [GS("Prix des " + n + " places ?", r6(n * a), M(n + " \\cdot " + chf(a) + " = " + chf(r6(n * a))) + " CHF."), GS("Dépense totale (avec le pop-corn) ?", t, M(chf(t)) + " CHF."), GS("Il reste ?", r6(s - t), M(s + " - " + chf(t) + " = " + chf(r6(s - t))) + " CHF.")], traps: [TRAP(t, "C'est la dépense ; on demande ce qui reste."), TRAP(r6(s - a - b), "Il y a " + n + " places, pas une seule.")] }); },
 );
 V34("decprob",
   () => { const n = R.int(3, 6), p = nonInt(() => d1(1.2, 4.5)), cut = nonInt(() => d1(0.5, 2.5)), L = r6(n * p + cut); return QV("D'une corde de " + M(dec(L)) + " m, on retire d'abord " + M(dec(cut)) + " m abîmés, puis on coupe le reste en " + M(n) + " morceaux égaux. Combien mesure chaque morceau (en m) ?", p, "Reste : " + M(dec(L) + " - " + dec(cut) + " = " + dec(r6(n * p))) + ". Morceau : " + M(dec(r6(n * p)) + " : " + n + " = " + dec(p)) + " m.", { guide: [GS("Longueur qui reste après avoir retiré la partie abîmée ?", r6(n * p), M(dec(L) + " - " + dec(cut) + " = " + dec(r6(n * p))) + " m."), GS("Un morceau : " + M(dec(r6(n * p)) + " : " + n) + " = ?", p, M(dec(p)) + " m.")], traps: [TRAP(r6(L / n), "Retire d'abord les mètres abîmés, puis partage."), TRAP(r6(n * p), "C'est la longueur restante ; on demande un morceau.")] }); },
@@ -5335,7 +5343,7 @@ V("sysprob", 1,
   () => { const a = R.int(10, 30), b = R.int(2, a - 2); return QV("La somme de deux nombres vaut " + (a + b) + " et leur différence " + (a - b) + ". Quel est le plus petit des deux ?", b, "En soustrayant les deux équations : " + M("2y = " + 2 * b) + ", donc " + M("y = " + b) + "."); },
 );
 V34("sysprob",
-  () => { const pa = R.pick([12, 15, 18]), pe = R.pick([6, 8, 9]), a = R.int(2, 8), e = R.int(2, 8); return QV("Au cinéma, une place adulte coûte " + pa + " CHF et une place enfant " + pe + " CHF. Un groupe de " + (a + e) + " personnes a payé " + (a * pa + e * pe) + " CHF. Combien y a-t-il d'adultes ?", a, M("x + y = " + (a + e)) + " et " + M(pa + "x + " + pe + "y = " + (a * pa + e * pe)) + " : " + a + " adultes."); },
+  () => { const pa = R.pick([15, 17, 18, 20]), pe = R.pick([9, 10, 12]) /* 26.11 (vraisemblance) : cinéma 15 à 20 CHF */, a = R.int(2, 8), e = R.int(2, 8); return QV("Au cinéma, une place adulte coûte " + pa + " CHF et une place enfant " + pe + " CHF. Un groupe de " + (a + e) + " personnes a payé " + (a * pa + e * pe) + " CHF. Combien y a-t-il d'adultes ?", a, M("x + y = " + (a + e)) + " et " + M(pa + "x + " + pe + "y = " + (a * pa + e * pe)) + " : " + a + " adultes."); },
   () => clean(() => { const c = R.int(4, 15), d = R.int(4, 15); return QV("Une tirelire contient " + (c + d) + " pièces de 2 CHF et de 5 CHF, pour un total de " + (2 * d + 5 * c) + " CHF. Combien y a-t-il de pièces de 5 CHF ?", c, M("x + y = " + (c + d)) + " et " + M("5x + 2y = " + (2 * d + 5 * c)) + " : en retirant deux fois la première, " + M("3x = " + 3 * c) + ", donc " + c + " pièces."); }),
 );
 V34("sys2",
@@ -6002,10 +6010,11 @@ const PROBX = {}; /* défis (niveau 4) ajoutés, lus en plus de PROB et PROB_EXT
   PX("arith", { co: [12], mp: [12] }, () => {
     let g, m, n; do { g = ri(12, 48); m = ri(5, 17); n = ri(5, 17); } while (gcd(m, n) !== 1 || m === n);
     const a = g * Math.max(m, n), b = g * Math.min(m, n), L = (a * b) / g;
-    return PB("On veut carreler sans découpe une salle rectangulaire de " + X(a) + " cm sur " + X(b) + " cm avec des carreaux carrés identiques, les plus grands possible. On empile ensuite des boîtes de " + X(a) + " mm et de " + X(b) + " mm de haut en deux colonnes séparées.",
-      [["a) Côté des carreaux, en cm (algorithme d'Euclide conseillé)", g], ["b) Nombre de carreaux", m * n], ["c) Plus petite hauteur non nulle où les deux colonnes ont la même hauteur, en mm", L]],
-      ["Euclide : PGDC(a ; b) = PGDC(b ; reste de a ÷ b), jusqu'au reste nul.", "c) Hauteur commune : multiple commun ; PGDC · PPMC = a · b."],
-      "a) PGDC(" + a + " ; " + b + ") = " + g + " cm. b) " + M((a / g) + " \\cdot " + (b / g) + " = " + m * n) + " carreaux. c) PPMC = " + M("\\frac{" + N(a) + " \\cdot " + N(b) + "}{" + g + "} = " + N(L)) + " mm.");
+    /* 26.11 (vraisemblance, décision de l'enseignant) : un seul contexte (le carrelage) ; les boîtes empilées sont retirées. */
+    return PB("On veut carreler sans découpe une salle rectangulaire de " + X(a) + " cm sur " + X(b) + " cm avec des carreaux carrés identiques, les plus grands possible. Les carreaux sont vendus par boîtes de 10.",
+      [["a) Côté des carreaux, en cm (algorithme d'Euclide conseillé)", g], ["b) Nombre de carreaux", m * n], ["c) Nombre de boîtes à acheter, au minimum", Math.ceil((m * n) / 10)]],
+      ["Euclide : PGDC(a ; b) = PGDC(b ; reste de a ÷ b), jusqu'au reste nul.", "c) Il faut au moins le nombre de carreaux : on arrondit à la boîte supérieure."],
+      "a) PGDC(" + a + " ; " + b + ") = " + g + " cm. b) " + M((a / g) + " \\cdot " + (b / g) + " = " + m * n) + " carreaux. c) " + M(m * n + " \\div 10") + " arrondi à l'unité supérieure : " + Math.ceil((m * n) / 10) + " boîtes.");
   });
   // ---------- fracper : 1re Collège ----------
   PX("fracper", { co: [12] }, () => {
@@ -6779,6 +6788,14 @@ const DEFIS = (() => {
            "b) Théorème du sinus : l'angle cherché est en face du plus petit côté, il est aigu. c) Le triangle s'agrandit proportionnellement au temps : AB = " + T(r2c(c / t)) + " km par heure."],
           "a) " + M("AB^2 = " + D(a) + "^2 + " + D(b) + "^2 - 2 \\cdot " + D(a) + " \\cdot " + D(b) + " \\cos " + g + "°") + ", " + M("AB \\approx " + D(r1(c))) + " km. b) " + M("\\sin = \\frac{" + D(sm) + " \\sin " + g + "°}{AB}") + ", angle " + M("\\approx " + D(r1(angS)) + "°") + ". c) " + M(Dd + " \\div " + D(r2c(c / t)) + " \\approx " + D(r2c(tD))) + " h.");
       },
+      () => { /* 26.11 (référentiel du Collège 2.GE.02c) : résoudre complètement un triangle (deux côtés et l'angle compris) */
+        let a, b; do { a = 10 * ri(4, 11); b = 10 * ri(5, 12); } while (b - a < 20);
+        const g = pk([40, 50, 60, 70, 80, 100, 110]), c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(rad(g))), al = deg(Math.asin((a * Math.sin(rad(g))) / c)), be = 180 - g - al, A = 0.5 * a * b * Math.sin(rad(g));
+        return P("Un terrain triangulaire " + M("ABC") + " a deux côtés " + M("a = BC = " + a) + " m et " + M("b = AC = " + b) + " m, qui forment l'angle " + M("\\gamma = " + g + "°") + " en " + M("C") + ". On veut le résoudre complètement.",
+          [["a) Côté c = AB (m, au dixième)", c, 0.1], ["b) Angle α en A (°, au dixième)", al, 0.1], ["c) Angle β en B (°, au dixième)", be, 0.1], ["d) Aire du terrain (m², à l'unité)", A, 1]],
+          ["Théorème du cosinus pour c ; puis théorème du sinus pour α, en face du plus petit côté a (α est donc aigu).", "c) Somme des angles. d) Aire = ½ · a · b · sin γ."],
+          "a) " + M("c^2 = " + a + "^2 + " + b + "^2 - 2 \\cdot " + a + " \\cdot " + b + " \\cos " + g + "°") + ", " + M("c \\approx " + D(r1(c))) + " m. b) " + M("\\sin\\alpha = \\frac{" + a + " \\sin " + g + "°}{c}") + ", " + M("\\alpha \\approx " + D(r1(al)) + "°") + ". c) " + M("\\beta = 180° - " + g + "° - \\alpha \\approx " + D(r1(be)) + "°") + ". d) " + M("\\frac{1}{2} \\cdot " + a + " \\cdot " + b + " \\cdot \\sin " + g + "° \\approx " + nb(Math.round(A))) + " m².");
+      },
     ],
     triaire: [
       () => {
@@ -7261,11 +7278,11 @@ const DEFIS = (() => {
       () => { /* accélération → vitesse → position */
         const m = ri(1, 3), v0 = 3 * m * m + ri(2, 12), Tt = pk([m + 1, m + 3, m + 4].filter((t) => t !== 2 * m));
         const vT = 3 * Tt * Tt - 6 * m * Tt + v0, xT = Tt ** 3 - 3 * m * Tt * Tt + v0 * Tt;
-        return P("Un chariot roule sur un rail. Son accélération vaut " + M("a(t) = 6t - " + 6 * m) + " (m/s²), sa vitesse au départ " + M(v0) + " m/s ; il part de la position " + M(0) + ".",
-          [["a) Vitesse à " + M("t = " + Tt) + " s (m/s)", vT], ["b) Position à " + M("t = " + Tt) + " s (m)", xT], ["c) Vitesse minimale du chariot (m/s)", v0 - 3 * m * m]],
+        return P("Au labo de physique, un petit chariot roule sur un rail rectiligne. Son accélération vaut " + M("a(t) = 6t - " + 6 * m) + " (cm/s²), sa vitesse au départ " + M(v0) + " cm/s ; il part de la position " + M(0) + ".", /* 26.11 (vraisemblance) : chariot de labo en cm/s (et non 50 m/s) */
+          [["a) Vitesse à " + M("t = " + Tt) + " s (cm/s)", vT], ["b) Position à " + M("t = " + Tt) + " s (cm)", xT], ["c) Vitesse minimale du chariot (cm/s)", v0 - 3 * m * m]],
           ["La vitesse est une primitive de l'accélération, avec v(0) = " + v0 + ". La position est une primitive de la vitesse, avec x(0) = 0.",
            "v(t) = 3t² − " + 6 * m + "t + " + v0 + ". c) La vitesse est minimale quand sa dérivée, a(t), s'annule."],
-          M("v(t) = 3t^2 - " + 6 * m + "t + " + v0) + ", " + M("x(t) = t^3 - " + 3 * m + "t^2 + " + v0 + "t") + ". a) " + M("v(" + Tt + ") = " + vT) + " m/s. b) " + M("x(" + Tt + ") = " + xT) + " m. c) " + M("a(t) = 0") + " pour " + M("t = " + m) + " : " + M("v(" + m + ") = " + (v0 - 3 * m * m)) + " m/s.");
+          M("v(t) = 3t^2 - " + 6 * m + "t + " + v0) + ", " + M("x(t) = t^3 - " + 3 * m + "t^2 + " + v0 + "t") + ". a) " + M("v(" + Tt + ") = " + vT) + " cm/s. b) " + M("x(" + Tt + ") = " + xT) + " cm. c) " + M("a(t) = 0") + " pour " + M("t = " + m) + " : " + M("v(" + m + ") = " + (v0 - 3 * m * m)) + " cm/s.");
       },
     ],
     aireint: [
@@ -9256,7 +9273,7 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
     make() {
       const [b, red] = pk([[25, 20], [50, 100 / 3], [100, 50]]), D = pk(b === 50 ? [30, 35, 40] : b === 25 ? [20, 25, 30] : [40, 45, 50]), good = Math.abs(red - D) < 1e-9 ? 2 : red > D ? 0 : 1;
       const it = pk(["paquet de céréales", "flacon de gel douche", "sachet de bonbons"]);
-      return { titre: "Plus de produit ou moins cher ?", q: "Deux offres pour le même " + it + " : « +" + pc(b) + " de produit gratuit » (même prix, plus de contenu), ou « " + pc(D) + " sur le prix ».",
+      return { titre: "Plus de produit ou moins cher ?", q: "Deux offres pour le même " + it + " : « +" + pc(b) + " de produit gratuit » (même prix, plus de contenu), ou « −" + pc(D) + " sur le prix »." /* 26.11 (revue élèves, A12) : « −35 % », comme dans les choix */,
         bet: { q: "Quelle offre baisse le plus le prix de chaque gramme ?", choices: ["+" + b + " % gratuit", "−" + D + " % sur le prix", "C'est pareil"], good },
         calc: { label: "« +" + b + " % gratuit » : de combien de % baisse le prix d'un gramme ? (au dixième)", value: Math.round(red * 10) / 10, round: 0.1 },
         reveal: "Pour le même prix, tu as " + M(N(1 + b / 100)) + " fois plus : chaque gramme coûte " + M("\\frac{1}{" + N(1 + b / 100) + "} \\approx " + N(1 / (1 + b / 100), 3)) + " du prix, soit " + pc(red, 1) + " de moins. " + (good === 2 ? "Exactement comme −" + D + " %." : good === 0 ? "Mieux que −" + D + " %." : "Moins bien que −" + D + " % : « +" + b + " % » impressionne plus qu'il ne rapporte.") };
@@ -10343,6 +10360,9 @@ const Badges = {
     const themes = state && state.profile ? Engine.themeOrder(Engine.catalog(state.profile).filter((c) => c.current), state.profile) : Object.keys(THEMES);
     const L = [
       { id: "premier", fam: "reg", icon: "👣", name: "Premier pas", crit: "Terminer une première séance.", prog: (s, b) => [Math.min(b.days, 1), 1] },
+      /* 26.11 (revue d'un testeur, validé par l'enseignant) : palier précoce de la régularité, entre « Premier pas » et
+         « Semaine pleine ». Série du jour ou record : un jour rattrapé par le joker de série compte (la série continue). */
+      { id: "serie3", fam: "reg", icon: "🔥", name: "3 jours d'affilée", crit: "S'entraîner 3 jours de suite (le joker de série compte).", prog: (s) => [Math.min(3, Math.max((s.streak && s.streak.count) || 0, (s.streak && s.streak.best) || 0)), 3] },
       { id: "semaine", fam: "reg", icon: "📅", name: "Semaine pleine", crit: "S'entraîner 5 jours dans une même semaine (du lundi au dimanche).", prog: (s, b) => [Math.min(5, b.weeks[weekOf(day())] || 0, 5), 5, b.full >= 1] },
       { id: "mois", fam: "reg", icon: "🗓️", name: "Un mois fidèle", crit: "4 semaines pleines, pas forcément d'affilée.", prog: (s, b) => [Math.min(b.full, 4), 4] },
       { id: "rentree", fam: "reg", icon: "🎒", name: "Rentrée", crit: "Reprendre l'entraînement après au moins 10 jours de pause.", prog: (s, b) => [b.rentree ? 1 : 0, 1] },
@@ -12352,7 +12372,7 @@ if (typeof window !== "undefined" && window.ACT_LATER) Object.assign(ACTIVE, win
     set("factor", {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
       retiens: { regle: "Factoriser, c'est écrire un produit : l'inverse de développer. Mise en évidence : on cherche le facteur commun et on l'écrit devant, \\(ka + kb = k(a + b)\\). Factoriser au maximum : on prend le plus grand facteur commun. On vérifie en développant.", exemple: ["\\(6x + 9 = 3(2x + 3)\\).", "\\(10x - 15 = 5(2x - 3)\\).", "\\(12x + 18 = 6(2x + 3)\\)."], piege: "\\(12x + 18 = 2(6x + 9)\\) n'est pas fini : le plus grand facteur commun est 6." },
-      predict: { q: "Factoriser 6x + 9, c'est l'écrire…", choices: ["comme un produit", "comme une somme plus courte"], good: 0, why: "Factoriser = écrire un produit : 6x + 9 = 3(2x + 3). C'est l'inverse de développer." },
+      predict: { q: "Factoriser 10x + 15, c'est l'écrire…", choices: ["comme un produit", "comme une somme plus courte"], good: 0, why: "Factoriser = écrire un produit : 10x + 15 = 5(2x + 3). C'est l'inverse de développer." },
       defis: ["Range les tuiles de 6x + 9 en rectangle : tire le bord pour choisir le nombre de rangées. Fais le plus de rangées possible.", "Même chose avec 10x − 15.", "Et avec 12x + 18, au maximum."],
       play: manipLesson({ W: 320, H: RY + KMAX * RH + 40, aria: "tuiles rangées en rectangle",
         note: "Glisse la poignée rouge vers le bas ou vers le haut (ou flèches du clavier) : les tuiles se rangent en rangées égales.",
@@ -12462,7 +12482,7 @@ if (typeof window !== "undefined" && window.ACT_LATER) Object.assign(ACTIVE, win
       retiens: { regle: "On cherche le plus petit multiple commun des dénominateurs. On écrit chaque fraction avec ce dénominateur (des parts toutes pareilles), on additionne les numérateurs, puis on simplifie. Pour soustraire, même méthode.", exemple: ["\\(\\frac{1}{4} + \\frac{1}{6} = \\frac{3}{12} + \\frac{2}{12} = \\frac{5}{12}\\).", "\\(\\frac{2}{3} + \\frac{1}{6} = \\frac{4}{6} + \\frac{1}{6} = \\frac{5}{6}\\).", "\\(\\frac{1}{3} + \\frac{1}{4} = \\frac{4}{12} + \\frac{3}{12} = \\frac{7}{12}\\).", "\\(\\frac{5}{6} - \\frac{3}{8} = \\frac{20}{24} - \\frac{9}{24} = \\frac{11}{24}\\)."] },
       /* 24.11 : la soustraction (notion « additionner, soustraire »), en défi court */
       plus: [{ d: "Calcule \\(\\frac{5}{6} - \\frac{3}{8} = \\frac{a}{24}\\). Tape \\(a\\).", ans: 11, ok: "5/6 = 20/24 et 3/8 = 9/24 : 20/24 − 9/24 = 11/24. Pour soustraire, même méthode que pour additionner.", no: "Écris chaque fraction en vingt-quatrièmes : 24 ÷ 6 = 4 et 24 ÷ 8 = 3." }],
-      predict: { q: "Combien font 1/4 + 1/6 ?", choices: ["2/10", "5/12", "2/24"], good: 1, why: "Un quart et un sixième ne sont pas des parts de même taille : on les découpe en douzièmes, 3/12 + 2/12 = 5/12. Additionner les dénominateurs donnerait 2/10 = 1/5, moins qu'un quart seul !" },
+      predict: { q: "Combien font 1/3 + 1/4 ?", choices: ["2/7", "7/12", "2/12"], good: 1, why: "Un tiers et un quart ne sont pas des parts de même taille : on les découpe en douzièmes, 4/12 + 3/12 = 7/12. Additionner les dénominateurs donnerait 2/7, moins qu'un tiers seul !" },
       defis: ["Sous 1/4 + 1/6, pose des pièces TOUTES PAREILLES qui font exactement la même longueur.", "Même chose sous 2/3 + 1/6.", "Et sous 1/3 + 1/4."],
       play: manipLesson({ W: 320, H: 240, aria: "barres de fractions",
         note: "Glisse une pièce dans la rangée du milieu (ou touche-la pour l'ajouter). Touche une pièce posée pour l'enlever.",
@@ -12766,7 +12786,7 @@ if (typeof window !== "undefined" && window.ACT_LATER) Object.assign(ACTIVE, win
         { d: "Système \\(y = 2x\\) et \\(x + y = 15\\) : remplace \\(y\\) par \\(2x\\) dans la 2e équation. Que vaut \\(x\\) ?", ans: 5, ok: "x + 2x = 15, donc 3x = 15 et x = 5 ; puis y = 2 · 5 = 10. C'est la méthode par substitution.", no: "x + 2x = 15 : résous cette équation." }],
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
       retiens: { regle: "La solution d'un système de deux équations est un couple \\((x ; y)\\) qui vérifie les deux équations : c'est le point d'intersection des deux droites. En additionnant les deux équations, une inconnue peut disparaître (méthode par combinaison). Si une équation donne une inconnue isolée, on la remplace dans l'autre (méthode par substitution).", exemple: ["\\(y = 2x\\) et \\(x + y = 15\\) : \\(x + 2x = 15\\), donc \\(x = 5\\) et \\(y = 10\\).", "\\(\\begin{cases} x + y = 10 \\\\ x - y = 2 \\end{cases}\\) En additionnant, \\(2x = 12\\), \\(x = 6\\), \\(y = 4\\).", "\\(y = -x + 10\\) et \\(y = x - 2\\) se coupent en \\((6 ; 4)\\).", "\\(y = 2x + 1\\) et \\(y = -x + 7\\) se coupent en \\((2 ; 5)\\)."] },
-      predict: { q: "x + y = 10 et x − y = 2. Que vaut x ?", choices: ["6", "5", "4"], good: 0, why: "En additionnant les deux équations, les y disparaissent : 2x = 12, donc x = 6 (et y = 4). 5 et 5 font bien 10, mais 5 − 5 ne fait pas 2." },
+      predict: { q: "x + y = 8 et x − y = 2. Que vaut x ?", choices: ["5", "4", "3"], good: 0, why: "En additionnant les deux équations, les y disparaissent : 2x = 10, donc x = 5 (et y = 3). 4 et 4 font bien 8, mais 4 − 4 ne fait pas 2." },
       defis: ["y = −x + 10 et y = x − 2 : place le point P pour que ses coordonnées vérifient les DEUX équations.", "Même chose pour y = 2x + 1 et y = −x + 7.", "Et pour y = x + 3 et y = −2x − 3."],
       play: manipLesson({ W: 320, H: 290, aria: "deux droites et un point à placer",
         note: "Glisse le point P sur le quadrillage (ou flèches du clavier). Une équation s'allume quand P est sur sa droite.",
@@ -13110,7 +13130,7 @@ function mockShow(v) {
 // « Vrai ou faux ? » : la valeur annoncée est juste une fois sur deux (selon la graine), sinon une erreur plausible.
 function mockVF(it, q) {
   const sp = q.spec || {};
-  if (sp.kind !== "value" || sp.round || mockShow(sp.value) === null) return null;
+  if (sp.kind !== "value" || sp.round || mockShow(sp.value) === null || q.ctx === "erreur" || /Trouve l.erreur/.test(q.q || "")) return null; /* 26.11 : pas de « Vrai ou faux » greffé sur un « Trouve l'erreur » */
   const v = sp.value, isTrue = it.seed % 2 === 0;
   let w = v;
   if (!isTrue) {
@@ -13124,6 +13144,8 @@ function mockVF(it, q) {
     q: q.q + "<br>" + who + " répond " + M(mockShow(w)) + ". <b>A-t-" + (["Léa", "Lina", "Inès"].includes(who) ? "elle" : "il") + " raison ? Justifie.</b>",
     sol: "<b>" + (w === v ? "Vrai" : "Faux, la bonne réponse est " + M(mockShow(v))) + ".</b> " + (q.sol || "") };
 }
+/* 26.11 (revue élèves, A9 : « Vrai ou faux ? » sur un « Trouve l'erreur ») : titre selon la question réelle. */
+const mockTitle = (x) => (x.q.parts ? "Problème" : x.vf ? "Vrai ou faux ?" : /Trouve l.erreur/.test(x.q.q || "") ? "Trouve l'erreur" : "Question");
 function mockQuestions() {
   return state.mock.items.map((it) => {
     if (it.rich && RICH[it.rich]) { R.seed(it.seed); const q = moneyQ(RICH[it.rich][it.kind === "raison" ? "raison" : "ex"][it.k]()); return { ...it, id: q.id, q, pts: q.pts }; }
@@ -13169,7 +13191,7 @@ function screenMock() {
   <div class="card flat"><p class="small">Pour t'entraîner avant ton test. <b>Ce n'est pas une évaluation</b> : il n'y a pas de note, et personne d'autre que toi ne voit le résultat. Fais-le sur une feuille, sans regarder tes cours, puis corrige-toi avec le corrigé.</p></div>
   <section class="mock-part"><h3>A. Automatismes</h3>${A.map((x) => qHtml(x, "Question " + ++num)).join("")}</section>
   <section class="mock-part"><h3>B. Exercices</h3>${exs.map((e, k) => { const L = B.filter((x) => x.ex === e); num++; return `<div class="mock-ex"><h4>Exercice ${k + 1} · ${L[0].q.titre || nLabel(L[0].id)}</h4>${L.map((x, j) => qHtml(x, x.q.titre ? "" : String.fromCharCode(97 + j) + ")")).join("")}</div>`; }).join("")}</section>
-  ${C.length ? `<section class="mock-part"><h3>C. Raisonnement</h3>${C.map((x) => qHtml(x, x.q.titre || (x.q.parts ? "Problème" : "Vrai ou faux ?"))).join("")}</section>` : ""}
+  ${C.length ? `<section class="mock-part"><h3>C. Raisonnement</h3>${C.map((x) => qHtml(x, x.q.titre || (x.q.parts ? "Problème" : mockTitle(x)))).join("")}</section>` : ""}
   <div class="stack no-print">
     <button class="btn-primary btn-big" id="corr">J'ai fini : voir le corrigé</button>
     <div class="row"><button class="btn-primary" id="print">🖨 Imprimer / PDF</button><button class="btn-ghost" id="again">Un autre sujet</button><button class="btn-ghost" id="back">Retour</button></div>
@@ -13186,7 +13208,7 @@ function screenMockCorr() {
   const partName = { A: "A. Automatismes", B: "B. Exercices", C: "C. Raisonnement" };
   h(`${brand}<div class="eyebrow">Sujet de préparation · corrigé</div><h2>Corrige-toi</h2>
   <p class="small muted">Compare avec ta feuille et coche honnêtement, question par question. Pour « Vrai ou faux », la justification compte : sans justification juste, coche « en partie ».</p>
-  <div class="mock-list">${qs.map((x, i) => `${i === 0 || qs[i - 1].part !== x.part ? `<h3>${partName[x.part]}</h3>` : ""}<div class="mock-q card flat"><div class="spread"><b>${x.q.titre ? x.q.titre : x.part === "B" ? "Exercice · " + nLabel(x.id) : x.vf ? "Vrai ou faux ?" : x.q.parts ? "Problème" : "Question"}</b></div>
+  <div class="mock-list">${qs.map((x, i) => `${i === 0 || qs[i - 1].part !== x.part ? `<h3>${partName[x.part]}</h3>` : ""}<div class="mock-q card flat"><div class="spread"><b>${x.q.titre ? x.q.titre : x.part === "B" ? "Exercice · " + nLabel(x.id) : x.vf || x.part === "C" ? mockTitle(x) : x.q.parts ? "Problème" : "Question"}</b></div>
     <div class="small">${x.q.q}</div>
     <div class="rule"><b>Corrigé</b> · ${x.q.sol || ""}</div>
     <div class="seg mock-mark" data-i="${i}"><button type="button" data-v="1">✓ Juste</button><button type="button" data-v="0.5">½ En partie</button><button type="button" data-v="0">✗ Faux</button></div></div>`).join("")}</div>
@@ -13710,6 +13732,7 @@ const exprForm = (sp, txt) => {
 };
 // Programme du jour : le format change d'un jour à l'autre ; l'équilibre se fait sur 7 jours.
 // 22.11 : textes courts (une ligne sur téléphone : pas de saut quand on change de format).
+const DRILL_OK = {}; /* Engine.drillable (26.11) */
 const FORMATS = {
   defi: { label: "🏔 Défi du jour", slots: ["defi4"], text: "Un seul problème, prends ton temps." },
   /* 25.11 (séance de 5 minutes) : 6 calculs au lieu de 8. */
@@ -14067,6 +14090,14 @@ const Engine = {
     return best;
   },
 
+  /* 26.11 (revue d'un testeur, parcours « erreur » : −35 après deux erreurs puis un pas à pas réussi jusqu'au bout) :
+     pas à pas mené à bien (toutes les étapes justes) → la moitié de la perte est rendue (comme une demi-réussite). */
+  eloRefund(state, delta) {
+    if (!(delta < 0)) return 0;
+    const back = Math.round(-delta / 2), e = state.elo; e.r += back;
+    const last = e.log[e.log.length - 1]; if (last && last[0] === day()) last[1] = e.r;
+    return back;
+  },
   // Mise à jour du Mathélo. score : 1, 0,5 ou 0. K plus grand au début (positionnement rapide).
   updateElo(state, id, d, score, weight = 1) {
     this.snap(state);
@@ -14202,12 +14233,13 @@ const Engine = {
     seed = seed || Math.floor(Math.random() * 46655) + 1;
     R.seed(seed * 7919 + level * 104729 + [...id].reduce((a, c) => a + c.charCodeAt(0), 0));
     const code = id + "-" + level + "-" + seed.toString(36);
+    // Écritures maladroites des générateurs (audit 13.11) : « 1x » → « x », « + -2 » → « - 2 », « - -3 » → « + 3 ».
+    /* 26.11 (revue élèves, B11 : corrigé « −1L + 2l = 2 ») : « -1L » → « -L » aussi (inconnues majuscules), et les défis passent par tidy. */
+    const tidy = (t) => typeof t !== "string" ? t : t.replace(/([(=+\-\s{]|\\\()(-?)1([a-z])(?![a-z{])/g, "$1$2$3").replace(/([(=+\s{]|\\\()-1([A-Z])(?![a-zA-Z{])/g, "$1-$2").replace(/\+\s*-\s*(?=[\da-z(\\])/g, "- ").replace(/-\s*-\s*(?=[\da-z(\\])/g, "+ ");
     /* 25.11 : PROBX (variantes.js, audit 9e–10e) = défis ajoutés, réservés à certaines classes (p.co). */
     if (level === 4 && hasProb(id)) { const p = moneyQ(R.pick(probList(id).concat((typeof PROBX !== "undefined" && PROBX[id]) || []))()); /* 26.11 : TeX visible hors formule (plainTeX, generators.js) */
-      const P = { ...p, q: plainTeX(p.q), sol: plainTeX(p.sol), hints: (p.hints || []).map(plainTeX) }; if (p.parts) P.parts = p.parts.map((x) => ({ ...x, label: plainTeX(x.label) }));
+      const P = { ...p, q: tidy(plainTeX(p.q)), sol: tidy(plainTeX(p.sol)), hints: (p.hints || []).map(plainTeX) }; if (p.parts) P.parts = p.parts.map((x) => ({ ...x, label: plainTeX(x.label) }));
       return { ...P, id, d: 4, seed, code, spec: { kind: "multi" }, hint: P.hints[0] }; }
-    // Écritures maladroites des générateurs (audit 13.11) : « 1x » → « x », « + -2 » → « - 2 », « - -3 » → « + 3 ».
-    const tidy = (t) => typeof t !== "string" ? t : t.replace(/([(=+\-\s{]|\\\()(-?)1([a-z])(?![a-z{])/g, "$1$2$3").replace(/\+\s*-\s*(?=[\da-z(\\])/g, "- ").replace(/-\s*-\s*(?=[\da-z(\\])/g, "+ ");
     // Pas de question triviale (règle du 14.11 : la trivialité fait décrocher) : tirage refait, de façon
     // déterministe (même code → même question), jusqu'à 6 essais ; le dernier est gardé quoi qu'il arrive.
     let q, keep = null;
@@ -14348,11 +14380,18 @@ const Engine = {
     if (!pend.length) return this.planSlots(state, slots);
     const exclude = new Set(pend);
     if (f === "revision" || f === "defi") { const p = this.planSlots(state, slots, { exclude }); if (p.length) return p; }
+    /* 26.11 (revue d'un testeur, jour 3) : jamais de leçon dans une série d'automatismes ; sans notion déjà travaillée,
+       les questions viennent sans leçon (l'app ne montre pas de leçon dans ce format). */
+    if (f === "auto") { const p = this.planSlots(state, slots, { exclude }); return p.length ? p : this.planSlots(state, slots); }
     const keep = this.lessonPick(state, pend);
     exclude.add(keep);
     const rest = slots.length >= 3 ? slots.slice(1, -1) : slots.slice(1);
     const k0 = slots[0] === "defi4" ? "defi" : slots[0];
-    return [keep + "|1|" + k0, ...this.planSlots(state, rest, { exclude })];
+    const out = [keep + "|1|" + k0, ...this.planSlots(state, rest, { exclude })];
+    /* 26.11 (revue élèves, C6 : leçon + 1 question, séance d'une minute) : s'il manque des notions déjà travaillées, la
+       notion de la leçon complète la séance (niveau 1 puis 2). */
+    while (slots.length >= 3 && out.length < slots.length - 1) out.push(keep + "|" + Math.min(2, out.length) + "|" + (rest[0] === "defi4" ? "defi" : rest[0] || "app"));
+    return out;
   },
   // Séance déjà tirée (mode libre…) : une seule notion à leçon, en tête au niveau 1 ; les autres sortent. n : nombre de questions visé.
   oneLesson(state, plan, n) {
@@ -14411,7 +14450,8 @@ const Engine = {
         if (ex.has(id)) continue;
         const s = state.notions[id], recent = this.isRecent(state, id), target = elo + TARGET[kind] + (s.easy || 0) * 120;
         if (rappel ? recent : !recent) continue; // les anciennes notions ne passent que par le créneau Rappel
-        let levels = [1, 2, 3].filter((d) => d <= cap && (base !== "defi" || d >= 2) && (kind !== "drill" || d <= 2 || !recent));
+        if (kind === "drill" && !this.drillable(state, id)) continue; /* 26.11 : notion sans vrai automatisme au niveau 1 */
+        let levels = [1, 2, 3].filter((d) => d <= cap && (base !== "defi" || d >= 2) && (kind !== "drill" || d === 1)); /* 26.11 : automatisme = niveau 1 */
         if ((kind === "defi4" || kind === "defi") && hasProb(id)) levels.push(4);
         if (!recent) levels = this.oldLevels(state, id, levels, target);
         for (const d of levels) {
@@ -14529,6 +14569,29 @@ const Engine = {
   // Notion de base à reprendre après deux échecs de suite (la moins maîtrisée de ses prérequis connus).
   /* 26.11 (revue élèves) : à la place d'une notion dont la leçon reste à voir (une leçon par séance), une notion déjà
      travaillée, hors du programme du jour ; null s'il n'y en a pas. Le nombre de questions de la séance ne change pas. */
+  /* 26.11 (revue d'un testeur, jour 3 : « aire latérale d'une pyramide », « √7825 ≈ 88,46 » dans une série d'automatismes).
+     Un automatisme : une question seule (pas de parties), courte (énoncé de 170 caractères au plus), sans figure, sans
+     arrondi ni calculatrice, sans « Trouve l'erreur », réponse exacte et courte (entier ou décimal à 2 chiffres après la
+     virgule au plus). Contrôlé par tests/lot_26_11.html (séances « automatismes » tirées dans toutes les classes). */
+  isDrill(q) {
+    if (!q || q.parts || !q.spec || q.fig || q.figure || q.ctx === "erreur" || q.spec.round || q.spec.radical) return false;
+    const t = String(q.q || "").replace(/<[^>]+>/g, " ").replace(/\\[()]/g, "").replace(/\s+/g, " ").trim();
+    if (t.length > 170 || /arrondi|au dixième|au centième|au millième|à l'unité|près\b|calculatrice|\\approx|≈|Trouve l'erreur/i.test(t)) return false;
+    const v = q.spec.value;
+    const simple = (x) => Math.abs(x * 100 - Math.round(x * 100)) < 1e-6 || [2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 16, 20].some((d) => Math.abs(x * d - Math.round(x * d)) < 1e-9);
+    if (q.spec.kind === "value" && typeof v === "number" && !simple(v)) return false;
+    return true;
+  },
+  makeDrill(state, id) {
+    for (let k = 0; k < 15; k++) { let q = null; try { q = this.make(state, id, 1, undefined, true); } catch (e) { return null; } if (this.isDrill(q)) return q; }
+    return null;
+  },
+  // Notion qui fournit des automatismes (au moins la moitié de 6 tirages au niveau 1) ; mémorisé pour la page.
+  drillable(state, id) {
+    const key = (state.profile.system || "") + (state.profile.track || "") + state.profile.grade + "|" + id;
+    if (!(key in DRILL_OK)) { let n = 0; for (let k = 0; k < 6; k++) { let q = null; try { q = this.make(state, id, 1); } catch (e) {} if (this.isDrill(q)) n++; } DRILL_OK[key] = n >= 3; }
+    return DRILL_OK[key];
+  },
   swapLesson(state, plan, i) {
     const idOf = (e) => String(e).split("|")[0], k = String(plan[i]).split("|")[2], kind = TARGET[k] !== undefined ? k : "app";
     const ex = new Set([...plan.map(idOf), ...this.eligible(state).filter((id) => this.lessonDue(state, id) || !state.notions[id].seen)]);
@@ -14913,7 +14976,7 @@ function pzBind(root) {
 }
 
 /* 25.11 (revue) : « Sec. II », comme l’app (écran d’accueil, « Je suis en : »), au lieu de « Collège / MP ». */
-const pzGrades = (id) => `<div class="seg pz-grades" id="${id}">${(PZ.fr() ? [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"], [12, "Tle"]] : [[9, "9e"], [10, "10e"], [11, "11e"], [12, "Sec. II"]]).map(([g, l]) => `<button type="button" aria-pressed="${g === PZ.grade}" data-v="${g}">${l}</button>`).join("")}</div>`;
+const pzGrades = (id) => `<div class="seg pz-grades" id="${id}">${(PZ.fr() ? [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"], [12, "Tle"]] : [[9, "9e"], [10, "10e"], [11, "11e"], [12, "Sec. II<small class=\"seg-sub\">Collège, MP</small>"]]).map(([g, l]) => `<button type="button" aria-pressed="${g === PZ.grade}" data-v="${g}">${l}</button>`).join("")}</div>`;
 
 function pzQuestion() {
   if (PZ.fr()) return pzQuestionFR();

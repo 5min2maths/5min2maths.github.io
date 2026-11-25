@@ -1638,8 +1638,8 @@
         wins: [W(3, "(−1 + 7) ÷ 2 = 3 ; et (2 + 8) ÷ 2 = 5 : M(3 ; 5)."), W(10, "AB = √(8² + 6²) = √100 = 10 : c'est Pythagore dans le repère."), W(13, "√(12² + 5²) = √169 = 13 unités, soit 1,3 km.")] }),
     },
     cercle: {
-      predict: { q: "Le cercle d'équation (x − 2)² + (y + 1)² = 9 a pour centre et pour rayon…", choices: ["(2 ; −1) et 3", "(−2 ; 1) et 3", "(2 ; −1) et 9"], good: 0,
-        why: "(x − a)² + (y − b)² = r² : on lit a = 2 et b = −1 (le signe change dans la parenthèse) ; le second membre vaut r², donc r = 3." },
+      predict: { q: "Le cercle d'équation (x + 3)² + (y − 2)² = 16 a pour centre et pour rayon…", choices: ["(−3 ; 2) et 4", "(3 ; −2) et 4", "(−3 ; 2) et 16"], good: 0,
+        why: "(x − a)² + (y − b)² = r² : x + 3 = x − (−3), donc a = −3, et b = 2 (le signe change dans la parenthèse) ; le second membre vaut r², donc r = 4." },
       defis: ["Règle les curseurs pour tracer le cercle (x − 2)² + (y + 1)² = 9.", "Trace le cercle de centre (−1 ; 2) qui passe par le point P(2 ; 6).", "Trace le cercle x² − 6x + y² + 4y = 3 (complète les carrés)."],
       play: slide({
         ctl: () => [{ k: "a", lab: "Centre : abscisse a", min: -5, max: 5 }, { k: "b", lab: "Centre : ordonnée b", min: -5, max: 5 }, { k: "r", lab: "Rayon r", min: 1, max: 6 }],

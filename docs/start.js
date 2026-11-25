@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "d8881b530e"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "69d08c96a9"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -257,7 +257,7 @@ let demoGrade = null, demoSkip = [];
 /* 26.11 (revue élèves : visiteur avec l'aperçu France, accueil en classes suisses et essai en CHF) : aperçu France
    activé sur l'appareil → classes françaises et question d'essai localisée (€, ×). */
 const demoSys = () => (state && state.profile ? (state.profile.system === "FR" ? "FR" : "CH") : SYSTEMS.FR ? "FR" : "CH"); /* élève inscrit : son système */
-const DEMO_GRADES = { CH: [[9, "9e"], [10, "10e"], [11, "11e"], [12, "Sec. II"]], FR: [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "Lycée"]] };
+const DEMO_GRADES = { CH: [[9, "9e"], [10, "10e"], [11, "11e"], [12, "Sec. II<small class=\"seg-sub\">Collège, MP</small>"]] /* 26.11 (revue d'un testeur : « Sec. II » obscur) */, FR: [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "Lycée"]] };
 function demoPoolFor(grade) {
   if (!grade) return DEMO_BASE.map((id) => [id, 1]);
   const st = Engine.newState({ system: demoSys(), grade, track: "college", minutes: 5 });
@@ -282,7 +282,7 @@ function screenWelcome() {
   const q = demoQuestion(), n = NOTIONS.find((x) => x.id === q.id), fine = window.matchMedia("(pointer: fine)").matches;
   h(`${brand}
   <div class="stack"><h1>Chaque jour, <span class="mark">5 minutes</span> de maths, à ton niveau.</h1>
-  <p class="muted">Une question du jour choisie pour toi, une figure, une correction immédiate. Ton Mathélo monte quand tu progresses. Pas de compte, pas de nom : ta progression reste sur ton téléphone ; seules des statistiques anonymes sont envoyées pour améliorer l'app (<a href="#" id="envoie-lien">ce que l'app envoie</a>).</p></div>
+  <p class="muted">Une question du jour choisie pour toi, une figure, une correction immédiate. Ton grade monte avec ton travail. Pas de compte, pas de nom : ta progression reste sur ton téléphone ; seules des statistiques anonymes sont envoyées pour améliorer l'app (<a href="#" id="envoie-lien">ce que l'app envoie</a>).</p></div>
   <div class="row welcome-pz"><a class="btn-sec small" href="#decouvrir">▶ Découvrir l'app en 1 minute</a><a class="btn-ghost small" href="#parents">👪 Je suis parent</a></div> <!-- 25.11 soir (revue d'un testeur : présentations introuvables pour un nouveau visiteur) -->
   <div class="stack"><span class="small muted">Je suis en :</span><div class="seg" id="dgrade">${DEMO_GRADES[demoSys()].map(([g, l]) => `<button aria-pressed="${g === demoGrade}" data-v="${g}">${l}</button>`).join("")}</div></div>
   <div class="card tilt" id="demo"><div class="qmeta"><span class="chip">Essaie · ${n ? n.label : "exemple"}</span><span class="dots"><i class="on"></i><i></i><i></i></span></div>
@@ -346,7 +346,7 @@ function screenLevel() {
   const fw = !draft.keepSys && draft.system === demoSys() ? draft.fromWelcome : null, top = draft.system === "FR" ? 10 : 12; /* 26.11 : aussi en France (« Lycée ») */
   const gList = fw === top ? sys.grades.filter(([g]) => g >= top) : sys.grades;
   const gBlock = fw && fw < top && draft.grade === fw ? `<p class="small" id="gradeknown">Ta classe : <b>${esc(gradeName({ system: draft.system, grade: fw }))}</b> <button type="button" class="btn-ghost small" id="gradechg">changer</button></p>`
-    : `<h3>Ta classe cette année</h3><div class="seg" id="grade">${gList.map(([g, n]) => `<button aria-pressed="${g === draft.grade}" data-v="${g}">${n}</button>`).join("")}</div>`;
+    : `<h3>${fw === top && draft.system === "CH" ? "Ta classe au secondaire II (Collège, MP)" : "Ta classe cette année"}</h3><div class="seg" id="grade">${gList.map(([g, n]) => `<button aria-pressed="${g === draft.grade}" data-v="${g}">${n}</button>`).join("")}</div>`;
   h(`${brand}<div class="eyebrow">Étape 1 sur 2</div><h2>Où en es-tu ?</h2>
   <div class="card flat stack">${Object.keys(SYSTEMS).length > 1 && !draft.keepSys ? `<h3>Ton école</h3><div class="seg" id="sys">${Object.entries(SYSTEMS).map(([k, v]) => `<button aria-pressed="${k === draft.system}" data-v="${k}">${v.label}</button>`).join("")}</div>` : ""}
   ${gBlock}
@@ -555,7 +555,7 @@ function screenGrades() {
     ${g.next ? `<div class="stack" style="gap:4px"><span class="pbar"><i style="width:${g.pct}%"></i></span><span class="small">Prochain grade : <b>${g.next.ic} ${g.next.name}</b>, encore ${nbFmt(g.next.at - r)} points.</span></div>` : '<p class="small">Le plus haut grade : bravo !</p>'}</div>
   <div class="card flat stack yp-rules"><h3>Gagner des points</h3><p class="small">Question faite <b>+1</b>, réussie <b>+2</b>, du premier coup <b>+1</b>, difficile jusqu'à <b>+3</b> ; séance finie <b>+10</b> ; erreur effacée du carnet <b>+5</b> ; problème de la semaine réussi <b>+10</b>.</p>
     <p class="small muted">Au plus ${YP.cap} points par jour (hors problème de la semaine) ; « Refaire » ne rapporte rien. Tout le monde repart 🌱 Pousse à la rentrée et au changement de classe.</p></div>
-  <div class="card">${eloBlock()}<p class="small muted">Le Mathélo mesure ton niveau ; il ne change pas ton grade.</p></div>
+  <div class="card">${eloBlock()}<p class="small muted yp-explain">Mathélo = ton niveau : il monte et descend selon tes réponses · Points de l'année = ton travail, ils font monter ton grade.</p></div>
   <div class="card flat stack"><h3>L'échelle de l'année</h3><p class="small muted">Touche un grade atteint pour voir sa carte.</p>
     <ol class="grades">${GRADES.slice().reverse().map(([at, ic, name]) => { const st = r >= at ? (g.name === name ? "cur" : "ok") : "todo";
       const no = st !== "todo" && at && (isAuthor() ? "0" : (state.gradeNo || {})[name]);
@@ -570,10 +570,12 @@ function screenGrades() {
 // Bandeau Mathélo (14.11, demande de l'utilisateur : « on a envie de le voir monter ») : sur tous les cadres de l'accueil.
 // 22.11 : bandeau compact sur une ligne (chiffre, grade, barre vers le grade suivant) ; la courbe est dans « Mes grades ».
 // 25.11 : le grade est celui de l'année (points de l'année), le chiffre reste le Mathélo.
+/* 26.11 (décision de l'enseignant) : Mathélo caché par défaut. L'accueil montre le grade et les points de l'année ; le
+   Mathélo se consulte sur demande dans Progrès (« Mes grades »). Son calcul ne change pas. */
 function eloBanner() {
-  const e = state.elo, prev = e.log.length > 1 ? e.log[e.log.length - 2][1] : null, d = prev === null ? 0 : e.r - prev, r = ypPts(), g = gradeOf(r);
-  return `<button type="button" class="elo-band elo-compact" id="eloband" aria-label="Mathélo ${e.r}, grade ${g.title}, voir mes grades">
-    <span class="eb-num"><span class="eyebrow">Mathélo${Engine.isProvisional(state) ? " · provisoire" : ""}</span><b class="num">${e.r}</b>${d ? `<span class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "▲ +" : "▼ "}${d}</span>` : ""}</span>
+  const r = ypPts(), g = gradeOf(r);
+  return `<button type="button" class="elo-band elo-compact" id="eloband" aria-label="Grade ${g.title}, ${nbFmt(r)} points de l'année, voir mes grades">
+    <span class="eb-num"><span class="eyebrow">Points de l'année</span><b class="num">${nbFmt(r)}</b></span>
     <span class="eb-grade"><b><span class="eb-gic" aria-hidden="true">${g.ic}</span> ${esc(g.title)}</b>${g.next ? `<span class="pbar"><i style="width:${g.pct}%"></i></span><span class="eb-next">${g.next.ic} ${g.next.name} dans ${nbFmt(g.next.at - r)} pts</span>` : ""}</span>
     <span class="eb-chev" aria-hidden="true">›</span></button>`;
 }
@@ -611,6 +613,7 @@ function backupCard() {
 // Mathélo et grades expliqués (24.11, revue d'un testeur : « Mathélo », « Arpenteur »… ne disent rien au premier passage).
 // Pour qui a passé la visite guidée avant la bulle du Mathélo : une petite carte, une seule fois, fermée par « Compris ».
 function eloHintCard() {
+  return ""; /* 26.11 : Mathélo caché par défaut (expliqué dans Progrès, « Mes grades ») */
   if (state.eloSeen || !state.tourDone) return "";
   const g = gradeOf(ypPts());
   return `<div class="card flat stack elo-hint"><p class="small"><b>📈 Mathélo</b> = ton score de maths. Ton <b>grade</b>, lui, monte avec les points de l'année (séances, réussites) : tu es ${g.ic} ${g.name}${g.next ? `, le prochain est ${g.next.ic} ${g.next.name}` : ""}.</p>
@@ -627,7 +630,7 @@ function weekRecapCard() {
   const at = (d) => { const L = log.filter((x) => x[0] <= d); return L.length ? L[L.length - 1][1] : null; };
   const r1 = at(to), r0 = at(addDays(from, -1)) ?? (log.find((x) => x[0] >= from) || [])[1], dr = r1 !== null && r0 != null ? r1 - r0 : null;
   return `<div class="card flat stack recap-card"><div class="eyebrow">📅 Ta semaine dernière</div>
-    <p><b>${H.length}</b> jour${H.length > 1 ? "s" : ""} de pratique · <b>${n}</b> question${n > 1 ? "s" : ""}${dr ? ` · Mathélo <span class="delta ${dr > 0 ? "up" : "down"}">${dr > 0 ? "+" : ""}${dr}</span>` : ""}</p>
+    <p><b>${H.length}</b> jour${H.length > 1 ? "s" : ""} de pratique · <b>${n}</b> question${n > 1 ? "s" : ""}</p>
     <p class="small muted">${H.length >= 5 ? "Superbe régularité, continue comme ça !" : H.length >= 3 ? "Bonne régularité. Essaie d'ajouter un jour cette semaine." : "Chaque jour compte : vise 3 jours cette semaine."}</p>
     <button class="btn-ghost small" id="recapok">OK</button></div>`;
 }
@@ -635,7 +638,7 @@ function weekRecapCard() {
 // Visite guidée (21.11 ; 22.11 : adaptée à l'accueil à cases) : 3 bulles sur l'accueil, l'élément concerné surligné.
 const TOUR = [
   [".sess-card", "▶ Ta séance du jour", "En classe : au rythme de ton cours (choisis ton chapitre). Libre : tous les sujets, à ton rythme. Quelques minutes suffisent."],
-  [".elo-band", "📈 Ton Mathélo", "Ton score de maths : il monte quand tu réussis des questions de ton niveau. À côté, ton grade de l'année (Pousse, Apprenti…) : il monte avec tes séances et tes réussites. Touche-le pour voir l'échelle."],
+  [".elo-band", "🏅 Ton grade de l'année", "Pousse, Apprenti… : ton grade monte avec tes points de l'année (séances, réussites). Touche-le pour voir l'échelle des grades."], /* 26.11 : Mathélo caché par défaut */
   [".doors", "🧭 Tes rubriques", "Le problème de la semaine, les questions curieuses, l'histoire des maths, ton test (révision jusqu'au jour J), ton carnet d'erreurs et tes progrès."],
 ];
 let tourK = 0;
@@ -692,9 +695,9 @@ function screenHome() {
   // 22.11 : accueil à cases (maquette design/maquette_accueil.html) ; chaque case ouvre une page « ← Accueil ».
   panels.carnet = () => carnetCard(true) || `<div class="card flat stack"><div class="eyebrow">📕 Carnet d'erreurs</div><p class="small muted">Vide : bravo ! Chaque question ratée viendra s'y ranger, pour que tu puisses la réussir plus tard.</p></div>`;
   // 22.11 : « Ma fiche » (src/fiche.js) : une fiche par chapitre derrière Progrès. Retirée le 23.11 (branche archive/fiche) : inactif sans fiche.js.
-  panels.prog = () => `${weekCard()}${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}${typeof parentCard === "function" ? parentCard() : ""}`; /* 24.11 : espace parent (src/parents.js) */
+  panels.prog = () => `${weekCard()}<div class="card flat stack grades-go"><button type="button" class="btn-sec" id="gradesgo">🏅 Mes grades et mon Mathélo</button><p class="small muted yp-explain">Mathélo = ton niveau · Points de l'année = ton travail, ils font monter ton grade.</p></div>${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}${typeof parentCard === "function" ? parentCard() : ""}`; /* 24.11 : espace parent (src/parents.js) */
   if (!panels[homeTab]) homeTab = "today";
-  const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted" title="Ta classe">Classe ${gradeName(state.profile).replace(/\s*\(.*\)/, "")}${state.profile.track === "mp" ? " MP" : state.profile.system === "CH" && state.profile.grade >= 12 ? " Coll." : ""}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
+  const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted" title="Ta classe">Classe ${classTag(state.profile) /* 26.11 (revue élèves, B9 : « Classe 2e MP » et « MP 2e ») : même forme partout */}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
   if (homeTab !== "today") {
     const T = { prob: "Problème de la semaine", test: "Mon évaluation", carnet: "Carnet d'erreurs", prog: "Progrès" };
     h(`${head}<button type="button" class="btn-ghost back-home" id="hb">← Accueil</button><h2 class="sub-title">${T[homeTab]}</h2>
@@ -707,7 +710,16 @@ function screenHome() {
     const paused = !!resumeCard(), doneLab = done && !paused;
     // Une seule bannière ; le joker de série passe avant le bilan de la semaine (sinon la série est perdue le jour même).
     const nudge = streakNudge(), joker = /Joker/.test(nudge);
-    const banner = [resumeCard(), prepTodayCard(), joker ? nudge : "", backupCard(), weekRecapCard(), joker ? "" : nudge, eloHintCard()].find((x) => x) || "";
+    /* 26.11 (revue d'un testeur, jours 4–5 : bannières empilées au-dessus du grand bouton, poussé sous le milieu de l'écran
+       à 360 × 640) : au plus UNE carte au-dessus de la séance (séance à reprendre, ou joker de série le jour où il compte) ;
+       les autres (évaluation du jour, bilan de la semaine, sauvegarde, statistiques) passent sous la séance. */
+    const prepNow0 = prep && !paused && !(state.prep.log || {})[today] && prepKind() !== "mock";
+    const banner = [resumeCard(), prepNow0 ? prepTodayCard() : "", joker ? nudge : ""].find((x) => x) || "";
+    const below = [prepNow0 ? "" : prepTodayCard(), weekRecapCard(), backupCard(), joker ? "" : nudge, eloHintCard()].join("");
+    /* Série perdue (26.11, même revue) : une phrase dans la carte de séance, le jour du retour seulement. */
+    const lostK = s.count >= 2 && !alive && s.last ? s.last : null;
+    if (lostK && (!state.lostSeen || state.lostSeen.k !== lostK)) { state.lostSeen = { k: lostK, d: today }; save(); }
+    const lostLine = lostK && state.lostSeen && state.lostSeen.k === lostK && state.lostSeen.d === today ? `<p class="small streak-lost">Ta série de ${s.count} jours s'est arrêtée : on repart aujourd'hui ! Ton record : ${Math.max(s.best || 0, s.count)}.</p>` : "";
     const nowLine = !Engine.nowActive(state) ? `<button type="button" class="btn-sec small" id="nowpick">📚 Choisir mon chapitre travaillé en classe</button>`
       : Engine.nowStale(state) ? `<div class="now-ask"><b>📚 Cette semaine en classe, tu travailles toujours :</b><span>${esc(state.now.ids.map(nLabel).join(" · "))} ?</span><div class="row now-ask-btns"><button type="button" class="btn-sec small" id="nowyes">Oui, toujours</button><button type="button" class="btn-sec small" id="nowpick">J'ai changé de chapitre</button></div></div>`
       : `<span class="small now-lab">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span><button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
@@ -720,14 +732,15 @@ function screenHome() {
     const prepNow = prep && !paused && !(state.prep.log || {})[today] && prepKind() !== "mock"; /* sujet de préparation : au choix, la séance reste */
     h(`<div class="hub">${head}
     ${eloBanner()}
-    ${statsCard()}${banner}
-    ${prepNow ? "" : `<div class="card stack sess-card sess-first"> <!-- 24.11 : « Séance d'abord » (choix de l'enseignant) : le bouton en premier, le reste discret -->
+    ${banner}
+    ${prepNow ? "" : `<div class="card stack sess-card sess-first">${lostLine} <!-- 24.11 : « Séance d'abord » (choix de l'enseignant) : le bouton en premier, le reste discret -->
       <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${paused ? "Nouvelle séance" : done ? "Encore une séance" : mode === "classe" ? "Ma séance du jour" : "Mon défi du jour"}</button>
       ${mode === "classe" ? `<div class="sess-fmt"><span class="sess-fmt-t"><b class="fmt-lab">${FORMATS[fmt].label}</b><span class="small muted fmt-txt">${FORMATS[fmt].text}${doneLab ? " · séance faite ✓" : ""}</span></span><button type="button" class="btn-sec small" id="other" aria-label="Changer de format">🔁<span class="chg-t"> Changer</span></button></div>
         <div class="now-line">${nowLine}</div>` : ""}
       <div class="sess-modes"><div class="seg sess-seg" role="tablist"><button type="button" data-m="classe" aria-pressed="${mode === "classe"}">🎒 En classe</button><button type="button" data-m="libre" aria-pressed="${mode === "libre"}">🧭 Libre</button></div><button type="button" class="btn-ghost small sess-info" id="sessinfo" aria-label="En classe ou Libre : explication" aria-expanded="false">ⓘ</button></div>
       <div class="small muted sess-sub sess-subs" hidden id="sessexp"><span class="${mode === "classe" ? "on" : ""}">Suit le chapitre que tu travailles en classe, avec des révisions.</span><span class="${mode === "libre" ? "on" : ""}">Tous les sujets de ton année, à ton rythme.</span></div>
     </div>`}
+    ${below}${statsCard()}
     <div class="doors">
       ${door("prob", svgI(TI.prob), "Problème", "", dots.prob ? "!" : "")}
       ${door("cur", svgI('<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>'), "Curieux", "", "")}
@@ -749,6 +762,7 @@ function screenHome() {
   const byId = (x) => document.getElementById(x), on = (x, f) => { if (byId(x)) byId(x).onclick = f; };
   on("settings", screenSettings);
   on("eloband", screenGrades);
+  on("gradesgo", screenGrades);
   on("elohok", () => { state.eloSeen = true; save(); screenHome(); });
   on("elohmore", screenGrades);
   on("go", startSession);
@@ -770,6 +784,7 @@ function screenHome() {
   on("statsoui", () => { statsSet(true); toast("Merci ! Tu peux changer d'avis dans les Réglages."); screenHome(); });
   on("statsnon", () => { statsSet(false); toast("C'est noté : rien n'est envoyé. Modifiable dans les Réglages."); screenHome(); });
   on("statsplus", () => screenPrivacy(screenHome));
+  on("statslater", () => { UI.statsLater = day(); uiSave(); screenHome(); });
   on("recapok", () => { state.recapSeen = weekKey(); save(); screenHome(); });
   if (!state.tourDone) tourShow();
   on("wp", () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); });
@@ -850,7 +865,8 @@ function bindInstall(after) {
 function returnCard() {
   const days = (state.history || []).length;
   const later = (d, n) => !d || addDays(d, n) <= day();
-  if (days >= 2 && !isStandalone() && !UI.installed && later(UI.installLater, 7)) return installCard("bilan");
+  /* 26.11 (revue d'un testeur, jour 3 : la carte revenait à chaque fin de séance) : au plus une fois par semaine. */
+  if (days >= 2 && !isStandalone() && !UI.installed && later(UI.installLater, 7) && later(UI.installShown, 7)) { UI.installShown = day(); uiSave(); return installCard("bilan"); }
   return "";
 }
 function screenSettings() {
@@ -1054,8 +1070,16 @@ function startInlineAct(root) {
 /* 25.11 soir (revue d'un testeur : l'encart prenait la moitié de l'accueil et repoussait la séance) : une ligne compacte ;
    le détail reste à un toucher (« ? »). */
 /* 25.11 (revue : demande affichée dès le tout premier accueil) : seulement après la première séance terminée. */
-const statsCard = () => statsAsked() || !(state && (state.firstDone || (state.history || []).length >= 2)) ? "" : `<div class="card flat stats-line" id="statscard"><span class="small">📊 Envoyer des statistiques <b>anonymes</b> pour améliorer l'app ?</span>
-  <span class="row stats-btns"><button class="btn-primary small" id="statsoui">Oui</button><button class="btn-sec small" id="statsnon">Non</button><button class="btn-ghost small" id="statsplus" aria-label="Le détail de ce qui est envoyé">?</button></span></div>`;
+/* 26.11 (revues de testeurs) : la carte passe sous la séance du jour (accueil) ; « Plus tard » la masque 4 jours ; ignorée
+   (ni Oui ni Non) sur 3 jours d'accueil, elle ne revient plus sur l'accueil (le choix reste dans les Réglages). « Non » : définitif. */
+const statsCard = () => {
+  if (statsAsked() || !(state && (state.firstDone || (state.history || []).length >= 2))) return "";
+  const t = day(), seen = UI.statsSeen || [];
+  if (UI.statsLater && addDays(UI.statsLater, 4) > t) return "";
+  if (!seen.includes(t)) { if (seen.length >= 3) return ""; UI.statsSeen = [...seen, t]; uiSave(); }
+  return `<div class="card flat stats-line" id="statscard"><span class="small">📊 Envoyer des statistiques <b>anonymes</b> pour améliorer l'app ?</span>
+  <span class="row stats-btns"><button class="btn-primary small" id="statsoui">Oui</button><button class="btn-sec small" id="statsnon">Non</button><button class="btn-ghost small" id="statslater">Plus tard</button><button class="btn-ghost small" id="statsplus" aria-label="Le détail de ce qui est envoyé">?</button></span></div>`;
+};
 
 // ---------------- Ce que l'app envoie (13.11) ----------------
 /* 25.11 soir (séparation France / romand) : exemple de classe dans le système de l'élève. */
@@ -1398,11 +1422,18 @@ function sentences(t) {
   if (cur.trim()) out.push(cur.trim());
   return out;
 }
+/* 26.11 (revue élèves : leçon « Étendue et quartiles » en 4e France ; programme du collège : médiane et étendue) :
+   leçon du collège français pour une notion dont le libellé change avant la 2nde (labelFR, src/fr_couv.js). */
+const LESSON_FR_COL = { quartiles: L_("Étendue et médiane", "Deux nombres pour résumer une série.", "Trie d'abord la série. Étendue : la plus grande valeur moins la plus petite. Médiane : la valeur du milieu ; avec un effectif pair, la moyenne des deux valeurs centrales.",
+  ["2, 3, 5, 8, 9 : étendue \\(9 - 2 = 7\\), médiane \\(5\\)", "4, 6, 9, 13 : médiane \\(\\frac{6 + 9}{2} = 7{,}5\\)"], "Chercher la médiane sans avoir trié la série.") };
+const frCol = (id) => { const n = LESSON_FR_COL[id] && state && state.profile && state.profile.system === "FR" && NOTIONS.find((x) => x.id === id); return !!(n && n.labelFR && state.profile.grade < n.labelFR[0]); };
+const lessonOf = (id) => (frCol(id) ? LESSON_FR_COL[id] : LESSONS[id]);
+const activeOf = (id) => typeof ACTIVE !== "undefined" && !!ACTIVE[id] && !frCol(id);
 function lessonBody(id) {
-  const L = LESSONS[id];
+  const L = lessonOf(id);
   if (!L) return "";
-  const fig = typeof LESSON_FIGS !== "undefined" && LESSON_FIGS[id] ? `<div class="figwrap">${LESSON_FIGS[id]()}</div>` : "";
-  const act = typeof ACTIVE !== "undefined" && ACTIVE[id] ? `<div class="act-inline stack" data-act="${id}"><div class="act-h"><span class="act-n">🖐</span> Manipule</div><p class="act-goal"></p><div class="act-box stack"></div><div class="act-fb"></div></div>` : "";
+  const fig = typeof LESSON_FIGS !== "undefined" && LESSON_FIGS[id] && !frCol(id) ? `<div class="figwrap">${LESSON_FIGS[id]()}</div>` : "";
+  const act = activeOf(id) ? `<div class="act-inline stack" data-act="${id}"><div class="act-h"><span class="act-n">🖐</span> Manipule</div><p class="act-goal"></p><div class="act-box stack"></div><div class="act-fb"></div></div>` : "";
   return `<p>${L.intro}</p>${act || fig}<div class="rule"><b>À retenir</b>${(() => { const ss = sentences(L.regle); return ss.length > 1 ? "<ul>" + ss.map((x) => "<li>" + x + "</li>").join("") + "</ul>" : " · " + L.regle; })()}</div>
   <div class="ex-list">${L.exemple.map((e) => `<div>${e}</div>`).join("")}</div>
   <div class="trap"><b>Piège</b> · ${L.piege}</div>
@@ -1414,12 +1445,12 @@ const lessonDetails = (id) => (LESSONS[id] ? `<details class="lesson" data-id="$
 // track = false : consultation par lien (#l-…, contrôle de l'auteur), rien n'est envoyé.
 // opts (25.11, séance de 5 minutes) : { short: défis facultatifs (Devine puis Retiens), eyebrow: étape de la séance }.
 function screenLesson(id, cont0, review, track = true, opts = {}) {
-  const L = LESSONS[id];
+  const L = lessonOf(id);
   if (state) { Badges.onLesson(state, id); save(); }
   let S = null;
   const cont = () => { if (S) { S.issue = "lue"; S.sec = sigSec(S); } cont0(); };
   const open = () => { pageQ = "lecon-" + id; if (track) S = sigOpen({ ev: "lecon", code: "lecon-" + id, fmt: review ? "revue" : "nouvelle", kind: typeof ACTIVE !== "undefined" && ACTIVE[id] ? "active" : "rappel" }); };
-  if (typeof ACTIVE !== "undefined" && ACTIVE[id]) { const r = activeLesson(id, L, cont, review, opts); open(); return r; }
+  if (activeOf(id)) { const r = activeLesson(id, L, cont, review, opts); open(); return r; }
   h(`${brand}<div class="eyebrow">${review ? "Leçon" : opts.eyebrow || "Nouvelle notion · 30 secondes de cours"}</div>
   <div class="card pop lesson-card"><h2>${L.titre}</h2>${lessonBody(id)}</div>
   <button class="btn-primary btn-big" id="go">${review ? "Retour à mes compétences" : "J'ai compris, à moi !"}</button>`);
@@ -1615,7 +1646,7 @@ function themeMapCard() {
 function startSession() {
   const fmt = Engine.todayFormat(state), plan = Engine.planSession(state, fmt);
   Engine.logFormat(state, fmt); save();
-  session = { fmt, plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), lessonAt: lessonAtStart(plan) };
+  session = { fmt, plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), lessonAt: fmt === "auto" ? null : lessonAtStart(plan) }; /* 26.11 : pas de leçon en automatismes */
   nextQuestion();
 }
 /* 26.11 (revue élèves : « Nouvelle notion » sur Pythagore en 11e, Thalès en 1re, les priorités en MP 2e) : libellé réservé
@@ -1685,7 +1716,7 @@ function nextQuestion(redo) {
      défis facultatifs ; une notion nouvelle qui arrive après (remédiation) attend la séance suivante. */
   /* 26.11 (revue élèves, compteur « 5 sur 7 » → « étape 6 sur 8 ») : jamais de leçon dans le Carnet ni dans « Mon
      évaluation » (le rappel de cours reste ouvrable dans la question) ; le compteur ne change plus en cours de séance. */
-  const due = !redo && !session.ctest && !session.carnet && !session.prep && !forceProb && ns && Engine.lessonDue(state, id);
+  const due = !redo && !session.ctest && !session.carnet && !session.prep && !forceProb && session.fmt !== "auto" /* 26.11 : jamais de leçon dans une série d'automatismes */ && ns && Engine.lessonDue(state, id);
   if (due && !session.lessonDone && (session.lessonAt == null || session.lessonAt === session.i)) {
     state.notions[id].lessonSeen = true; session.lessonDone = true; session.lessonAt = session.i; save();
     const st = sessStep(session);
@@ -1706,14 +1737,32 @@ function nextQuestion(redo) {
      on retire tant que l'énoncé est identique ; sans autre version, on passe à la suite. */
   if (redo) { for (let k = 0; k < 12 && q && q.q === redo.q; k++) q = Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1));
     if (!q || q.q === redo.q) { toast("Pas d'autre version de ce problème pour l'instant : on continue."); session.i++; return nextQuestion(); } }
+  /* 26.11 (revue d'un testeur, jour 3) : un créneau « automatisme » ne pose qu'un vrai automatisme (Engine.isDrill) ;
+     sinon on retire, puis on change de notion (8 fois au plus par séance). */
+  if (!redo && !forceProb && kind === "drill" && !Engine.isDrill(q)) {
+    const q2 = Engine.makeDrill(state, id);
+    if (q2) q = q2;
+    else if ((session.drillSwap = (session.drillSwap || 0) + 1) <= 8) {
+      const ex = new Set([...session.plan.map((e) => String(e).split("|")[0]), id]), sw = Engine.planSlots(state, ["drill"], { exclude: ex })[0];
+      if (sw) { session.plan[session.i] = sw; return nextQuestion(); }
+    }
+  }
   q.kind = kind;
   const ST = sessStep(session), nTxt = ST.pos + " sur " + ST.total;
-  const fmtLab = session.fmt && FORMATS[session.fmt] ? (newNotion(id) && ((easy && session.lessonShown === id) || (!ns.seen && session.fmt === "revision")) ? "Nouvelle notion" : ns && !ns.seen && session.fmt === "revision" ? "" : FORMATS[session.fmt].label) /* 26.11 : notion d'une année précédente jamais travaillée : ni « Nouvelle notion » ni « Révision » */ : "";
+  const fmtLab = session.fmt && FORMATS[session.fmt] ? (newNotion(id) && session.lessonShown === id /* 26.11 (lot) : seulement avec sa leçon (l'accueil annonçait « Révision ») */ ? "Nouvelle notion" : ns && !ns.seen && session.fmt === "revision" ? "" : FORMATS[session.fmt].label) /* 26.11 : notion d'une année précédente jamais travaillée : ni « Nouvelle notion » ni « Révision » */ : "";
   renderQuestion(q, {
     track: sessionInfo().fmt || "seance", redo: !!redo,
     /* 25.11 (revue) : compteur qui compte aussi l'étape leçon ; « Nouvelle notion » (et non « Révision ») pour la question
        qui suit la leçon ou pour une notion encore jamais travaillée. */
     eyebrow: ((s) => s + (ST.total > 1 && !session.weekly ? `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((Math.min(ST.pos - 1, ST.total) / ST.total) * 100)}%"></i></span>` : ""))((session.carnet ? "Carnet d'erreurs · " + nTxt : session.free ? "Mon défi du jour · " + nTxt : session.weekly ? "🔍 Problème de la semaine" : session.ctest ? "Me tester · " + session.ctest.label + " · " + nTxt : session.prep ? "Révision du test · " + nTxt : ST.total === 1 ? (fmtLab || "Question du jour") : (fmtLab ? fmtLab + " · " : "") + nTxt) + (kind && KIND_LABEL[kind] && !(session.fmt && FORMATS[session.fmt] && FORMATS[session.fmt].slots.every((x) => x.replace(/\d+$/, "") === kind)) ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo ? " · nouvelles valeurs" : "")),
+    /* 26.11 : pas à pas réussi jusqu'au bout (étapes toutes justes) : moitié de la perte de Mathélo rendue, +1 point de
+       l'année (dans le plafond du jour), et le bilan le dit. Rien si une étape est fausse, ni en « Refaire ». */
+    onGuided: (delta) => {
+      if (redo || session.weekly) return;
+      const back = Engine.eloRefund(state, delta), yp = ypAdd(state, 1);
+      session.ypg = (session.ypg || 0) + yp; session.rebuilt = (session.rebuilt || 0) + 1; save();
+      if (back || yp) toast("🪜 Tu as reconstruit la solution" + (yp ? " : +1 point de l'année" : "") + ".");
+    },
     onDone: (res) => {
       const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
       // Carnet d'erreurs (20.11) : séance « carnet » → progression ; ailleurs, une question ratée y entre.
@@ -1748,7 +1797,7 @@ function nextQuestion(redo) {
       session.ids.add(id);
       if (r.next && !redo) session.plan[session.i] = r.next; else session.i++;
       save();
-      toast(r.next ? "Noté : on monte d'un cran." + (r.delta ? " Mathélo +" + r.delta : "") : "Noté, on passe à la suite.");
+      toast(r.next ? "Noté : on monte d'un cran." : "Noté, on passe à la suite.");
       nextQuestion();
     },
   });
@@ -1758,7 +1807,8 @@ function nextQuestion(redo) {
 // Clavier 7 colonnes : y et = ajoutés (13.11) ; 0 et ⌨ prennent deux cases.
 const KEYS = ["7", "8", "9", "/", "(", ")", "⌫", "4", "5", "6", "*", "^", "√", "π", "1", "2", "3", "-", "x", "y", "=", "0", ",", "+", ";", "⌨"];
 // Réponse exacte non décimale sans arrondi demandé (audit 13.11) : on le dit à l'élève, sauf si l'énoncé le précise déjà.
-const isTerm = (v) => Math.abs(v * 1e6 - Math.round(v * 1e6)) < 1e-6;
+/* 26.11 : écriture décimale finie (8 décimales au plus), y compris les très petits nombres (3,2 · 10⁻⁷ comptait comme non fini) */
+const isTerm = (v) => { const m = String(+(+v).toPrecision(12)).match(/^-?\d+(?:\.(\d+))?(?:e([+-]\d+))?$/); return !!m && (m[1] || "").length - (+m[2] || 0) <= 8; };
 function exactNote(spec, text) {
   if (!spec) return "";
   const t = text || "", notes = [];
@@ -1769,7 +1819,8 @@ function exactNote(spec, text) {
   if (spec.kind === "solset" && !/intervalle|« x|aucune|∅/i.test(t)) notes.push("Réponds avec des intervalles (par exemple ]-∞ ; 2] ∪ [5 ; +∞[), « x ≥ 3 », ou ∅ (« aucune ») s'il n'y a pas de solution.");
   // Commentaire testeur du 20.11 (« comment on tape infini ? ») : la touche ∞ existait, mais rien ne la signalait.
   if (spec.kind === "solset" && spec.ivs.some(([lo, , hi]) => !isFinite(lo) || !isFinite(hi))) notes.push("Infini : touche ∞ du clavier de l'app (−∞ : touche − puis ∞), ou tape « inf ».");
-  if (!spec.round && !spec.plain && !/exact|fraction|arrondi|au centième|au dixième/i.test(t)) {
+  /* 26.11 (revue d'un testeur) : jamais pour la notation scientifique (valeur comme 3,2 · 10⁻⁷, pas une fraction ni une racine) */
+  if (!spec.round && !spec.plain && !spec.sci && !spec.pow && !/exact|fraction|arrondi|au centième|au dixième|notation scientifique|puissance de 10/i.test(t)) {
     const vals = spec.kind === "value" ? [spec.value] : spec.kind === "set" || spec.kind === "pair" ? spec.values : [];
     if (vals.some((v) => isFinite(v) && !isTerm(v))) notes.push(vals.some((v) => isFinite(v) && !isTerm(v) && niceQ(v / Math.PI)) ? "Réponse exacte attendue (avec la touche π), pas d'arrondi." : "Réponse exacte attendue : fraction ou racine, pas d'arrondi.");
   }
@@ -1929,7 +1980,7 @@ function renderProblem(q, opt) {
   ${scratchHtml()}
   ${lessonDetails(q.id)}
   ${q.parts.map((p, i) => `<div class="answer part" data-i="${i}"><label for="p${i}"><b>${p.label}</b>${exactNote(p.spec, p.label) ? ` <span class="small muted">${p.spec.kind === "set" ? "(« ; » entre les solutions, ∅ s'il n'y en a pas)" : "(valeur exacte)"}</span>` : ""} <span class="mk" id="mk${i}"></span></label>
-    <input id="p${i}" class="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…"><div class="preview" id="pv${i}"></div></div>`).join("")}
+    <input id="p${i}" class="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" enterkeyhint="${i < q.parts.length - 1 ? "next" : "done"}"><div class="preview" id="pv${i}"></div>${i < q.parts.length - 1 ? `<button type="button" class="btn-ghost small next-part" data-i="${i}">partie suivante ↓</button>` : ""}</div>`).join("")}
   ${keypadHtml(q.parts[0].spec)}
   <div class="actions"><button class="btn-primary" id="check">Valider</button><button class="btn-sec" id="idk">Voir le corrigé</button></div>
   <div id="fb"></div></div>
@@ -1950,8 +2001,22 @@ function renderProblem(q, opt) {
       placeKp(inp);
     };
     let tm; inp.oninput = () => { clearTimeout(tm); tm = setTimeout(() => previewOf(inp, pv, p.spec), 180); };
-    inp.onkeydown = (e) => { if (e.key === "Enter") check(); };
+    inp.onkeydown = (e) => { if (e.key === "Enter") { e.preventDefault(); goNext(i); } };
   });
+  /* 26.11 (revue d'un testeur : sur téléphone, la partie b) passait sous le clavier de l'app) : Entrée, ou « partie
+     suivante ↓ », amène la partie suivante non remplie, visible, avec le clavier juste en dessous ; sur la dernière partie
+     (ou si tout est rempli), Entrée = Valider. Le déplacement du clavier arme la garde anti-toucher égaré (KP_GUARD). */
+  const goNext = (i) => {
+    if (finished) return;
+    const n = q.parts.length, L = [...Array(n - 1)].map((_, k) => (i + 1 + k) % n), j = L.find((k) => !ok[k] && !document.getElementById("p" + k).value.trim());
+    if (j === undefined || (i === n - 1 && j < i)) return check();
+    const inp = document.getElementById("p" + j); active = inp;
+    try { inp.focus({ preventScroll: true }); } catch (e) {}
+    inp.onfocus();
+    setTimeout(() => { const part = inp.closest(".part"), kp = document.getElementById("kp"); if (!part) return; const top = part.getBoundingClientRect().top, bot = (kp || part).getBoundingClientRect().bottom, vh = window.visualViewport ? visualViewport.height : innerHeight;
+      if (top < 8 || bot > vh - 4) { window.scrollBy(0, top < 8 || bot - top > vh - 16 ? top - 8 : bot - vh + 12); KP_GUARD.moved = performance.now(); } }, 60);
+  };
+  app.querySelectorAll(".next-part").forEach((b) => (b.onclick = () => goNext(+b.dataset.i)));
   // Clavier sous la case active (20.11, demande de l'auteur) : il suit la réponse en cours, plus besoin de défiler.
   const placeKp = (inp) => { const kp = document.getElementById("kp"), part = inp.closest(".part"); if (!kp || !part || kp.previousElementSibling === part) return; part.after(kp); KP_GUARD.moved = performance.now(); kpWatch(); setTimeout(() => kp.scrollIntoView({ behavior: "smooth", block: "nearest" }), 40); };
   active = document.getElementById("p0");
@@ -1962,6 +2027,7 @@ function renderProblem(q, opt) {
   const end = (giveUp) => {
     finished = true;
     app.querySelectorAll("input.ans, #kp button, #check, #idk").forEach((b) => (b.disabled = true));
+    app.querySelectorAll(".next-part").forEach((b) => b.remove());
     { const kp = document.getElementById("kp"); if (kp) kp.style.display = "none"; const ac = app.querySelector(".card > .actions"); if (ac) ac.style.display = "none"; app.querySelectorAll(".card .preview").forEach((x) => (x.style.display = "none")); }
     const frac = ok.filter(Boolean).length / q.parts.length, factor = [1, 1, 2 / 3, 1 / 3][Math.min(tries, 3)] || 1 / 3;
     const score = giveUp && tries === 0 ? 0 : Math.round(frac * factor * 100) / 100;
@@ -1969,7 +2035,7 @@ function renderProblem(q, opt) {
     if (frac === 1) burst();
     buzz(frac === 1);
     const delta = opt.onDone({ solved: frac === 1, tries, partial: score, dontKnow: !!(giveUp && tries === 0) });
-    const d = typeof delta === "number" && delta !== 0 ? `<span class="delta ${delta > 0 ? "up" : "down"}">Mathélo ${delta > 0 ? "+" : ""}${delta}</span>` : "";
+    const d = ""; /* 26.11 : Mathélo caché pendant les questions */
     const pSteps = frac < 1 && splitSol(q.sol); /* 24.11 : corrigé progressif aussi pour les problèmes */
     /* 25.11 soir (revue d'un testeur : « le corrigé n'affiche que la partie c, l'élève ne voit jamais la bonne réponse de a ») :
        la réponse attendue de chaque partie ratée, toujours. */
@@ -2064,7 +2130,7 @@ function renderQuestion(q, opt) {
   }));
   if (!window.matchMedia("(pointer: fine)").matches) inp.addEventListener("focus", () => ansInView(inp, true));
   const stopBtn = document.getElementById("stop");
-  if (stopBtn) stopBtn.onclick = screenSummary;
+  if (stopBtn) stopBtn.onclick = () => { if (session) session.stopped = true; screenSummary(); }; /* 26.11 : séance interrompue (bilan adapté) */
 
   let lastDiag = null, lastAns = null; // 22.11 : lastAns pour le carnet
   const end = (solved, dontKnow) => {
@@ -2087,7 +2153,7 @@ function renderQuestion(q, opt) {
       document.getElementById("nx").focus();
       return;
     }
-    const d = typeof delta === "number" && delta !== 0 ? `<span class="delta ${delta > 0 ? "up" : "down"}">Mathélo ${delta > 0 ? "+" : ""}${delta}</span>` : "";
+    const d = ""; /* 26.11 : Mathélo caché pendant les questions */
     // Élève en difficulté (13.11) : erreur reconnue, et « on le fait ensemble » (sous-questions guidées) avant la correction complète.
     const guided = !solved && q.guide && q.guide.length;
     // Sans guide interactif : correction dévoilée étape par étape (étape 0, 14.11).
@@ -2118,7 +2184,7 @@ function renderQuestion(q, opt) {
       const qt = app.querySelector(".qtext"); if (qt) qt.scrollIntoView({ behavior: "smooth", block: "start" });
     };
     const gb = document.getElementById("guide");
-    if (gb) { gb.onclick = () => { sigAide(S, "g"); gb.remove(); fold(document.getElementById("gsteps")); runGuide(q, document.getElementById("gsteps"), () => { const rd = document.getElementById("redo"); if (rd) { rd.classList.add("btn-primary"); rd.textContent = q.d > 1 && q.d < 4 ? "À toi : la même, un cran plus facile" : "À toi : une question du même type"; rd.focus(); } }); }; gb.focus(); }
+    if (gb) { gb.onclick = () => { sigAide(S, "g"); gb.remove(); fold(document.getElementById("gsteps")); runGuide(q, document.getElementById("gsteps"), (full) => { if (full && opt.onGuided) opt.onGuided(delta); const rd = document.getElementById("redo"); if (rd) { rd.classList.add("btn-primary"); rd.textContent = q.d > 1 && q.d < 4 ? "À toi : la même, un cran plus facile" : "À toi : une question du même type"; rd.focus(); } }); }; gb.focus(); }
     else if (solSteps) {
       const sb = document.getElementById("solstep"), box = document.getElementById("ssteps");
       /* 24.11 (revue d'un testeur) : corrigé progressif. La 1re étape s'affiche tout de suite, sans rien replier ;
@@ -2175,7 +2241,7 @@ function runGuide(q, box, done) {
   const step = () => {
     /* 26.11 (revue élèves : « Bravo, tu as reconstruit la solution » même quand toutes les étapes sont fausses) : message selon le résultat. */
     const fin = nOk === q.guide.length ? "Bravo, tu as reconstruit la solution." : nOk ? "Voici la solution complète (" + nOk + " étape" + (nOk > 1 ? "s" : "") + " juste" + (nOk > 1 ? "s" : "") + " sur " + q.guide.length + ")." : "Voici la solution complète : relis-la, étape par étape.";
-    if (k >= q.guide.length) { box.insertAdjacentHTML("beforeend", `<div class="gstep${nOk === q.guide.length ? " ok" : ""}"><b>${fin}</b><div class="sol">${q.sol}</div></div>`); typeset(box); done(); return; }
+    if (k >= q.guide.length) { box.insertAdjacentHTML("beforeend", `<div class="gstep${nOk === q.guide.length ? " ok" : ""}"><b>${fin}</b><div class="sol">${q.sol}</div></div>`); typeset(box); done(nOk === q.guide.length); return; }
     const g = q.guide[k], id = "gs" + k;
     // Saisie de l'étape (15.11) : comme la question principale — champ large, aperçu, clavier de l'app (repliée au-dessus).
     const fine = window.matchMedia("(pointer: fine)").matches, ks = g.spec.kind === "value" && !g.spec.sci ? { ...g.spec, final: true } : g.spec; // notation scientifique : clavier avec puissances
@@ -2201,7 +2267,12 @@ function runGuide(q, box, done) {
       inp.disabled = true; el.querySelector(".gok").remove(); const kp = el.querySelector(".keypad"); if (kp) kp.remove(); gprev.remove();
       if (r.status === "correct") nOk++;
       const dg = r.status === "correct" ? "" : diagPlus({ spec: g.spec, traps: g.traps }, v, g.ask); /* 25.11 : erreur typique nommée */
-      fbk.innerHTML = `<div class="${r.status === "correct" ? "gok-msg" : "gno-msg"}">${r.status === "correct" ? "✓ Oui." : dg ? escT(dg) : "Pas tout à fait."} ${g.sol}</div>`;
+      /* 26.11 (revue élèves, A8 : « Pas tout à fait. 5 ou plus : on monte » sans la valeur) : la valeur attendue est donnée
+         quand l'explication de l'étape ne la contient pas. */
+      const gv = g.spec.kind === "value" && isFinite(g.spec.value) ? (g.spec.round ? (+g.spec.value).toFixed(Math.max(0, Math.round(-Math.log10(g.spec.round)))) : String(+(+g.spec.value).toPrecision(10))).replace(".", ",").replace("-", "−") : "";
+      const solTxt = String(g.sol || "").replace(/<[^>]+>/g, " ").replace(/\{,\}/g, ",").replace(/\\text\{'\}/g, "'").replace(/-/g, "−");
+      const shown = !gv || new RegExp("(^|[^\\d,])" + gv.replace(/[,.]/g, "\\$&") + "(?![\\d]|,\\d)").test(solTxt);
+      fbk.innerHTML = `<div class="${r.status === "correct" ? "gok-msg" : "gno-msg"}">${r.status === "correct" ? "✓ Oui." : dg ? escT(dg) : "Pas tout à fait."}${r.status !== "correct" && !shown ? ` Réponse de l'étape : <b>${esc(gv)}</b>.` : ""} ${g.sol}</div>`;
       typeset(fbk); k++; step();
     };
     el.querySelector(".gok").onclick = go;
@@ -2546,7 +2617,7 @@ function weekText(w) {
   if (!parts.length && w.first.length) parts.push(plur(w.first.length, "première note de compétence", "premières notes de compétences"));
   // Jours et questions : toujours sur 7 jours (historique) ; comparaisons de notes : depuis le premier instantané.
   if (!parts.length && !w.n) return { main: "Une séance de quelques minutes suffit pour reprendre le fil.", sub: "" };
-  if (!parts.length) return { main: `Cette semaine : ${plur(w.days, "jour", "jours")} de pratique, ${plur(w.n, "question", "questions")}.`, sub: "Les notes bougent au fil des réponses : chaque séance compte pour la suite." };
+  if (!parts.length) return { main: `Cette semaine : ${plur(w.days, "jour", "jours")} de pratique, ${plur(w.n, "question", "questions")} en séance.` /* 26.11 : les questions du positionnement de départ ne comptent pas (state.history ne reçoit que les séances) */, sub: "Les notes bougent au fil des réponses : chaque séance compte pour la suite." };
   const last = parts.pop(), main = `${w.since ? "Depuis le " + ddmm(w.since) : "Cette semaine"} : ${parts.length ? parts.join(", ") + " et " : ""}${last}.`;
   const top = w.ups[0];
   return { main, sub: top ? `Plus belle progression : ${top.label} (${noteTxt(top.b)} → ${noteTxt(top.a)}).` : "" };
@@ -2607,8 +2678,7 @@ function screenSummary() {
   if (session.carnet && n <= 2) {
     const left = (state.carnet || []).length;
     h(`${brand}<h2>${sc >= n ? "📕 Bien joué !" : "📕 C'est noté."}</h2>
-    <div class="card flat stack"><div class="spread"><span>Mathélo</span><b>${state.elo.r} <span class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</span></b></div>
-    ${ypRow}<div class="spread"><span>Carnet d'erreurs</span><b>${left ? left + " à effacer" : "vide : bravo !"}</b></div></div>
+    <div class="card flat stack">${ypRow}<div class="spread"><span>Carnet d'erreurs</span><b>${left ? left + " à effacer" : "vide : bravo !"}</b></div></div>
     ${newGrade}${nb}
     ${left ? '<button class="btn-primary btn-big" id="carnetagain">📕 Continuer à effacer</button>' : ""}
     <button class="${left ? "btn-sec" : "btn-primary btn-big"}" id="home">Retour à l'accueil</button>`);
@@ -2617,21 +2687,24 @@ function screenSummary() {
     if (document.getElementById("carnetagain")) document.getElementById("carnetagain").onclick = () => startCarnet();
     return;
   }
-  // 22.11 : titre cohérent avec le Mathélo (« Excellente séance » alors que le Mathélo baissait).
-  h(`${brand}<h2>${sc >= n * 0.8 && d >= 0 ? "Excellente séance !" : sc >= n * 0.5 ? "Bonne séance." : "Séance faite : c'est en pratiquant qu'on progresse."}</h2>${d < 0 && sc >= n * 0.5 ? `<p class="small muted">Mathélo ${d} : une erreur sur une question de ton niveau coûte plus que ce que rapporte une réussite sur une question facile.</p>` : ""}
+  /* 26.11 (revues : « c'était le défi du jour » après une Révision interrompue) : message selon le type de séance. */
+  const shortMsg = session.stopped && session.i < session.plan.length ? "Séance interrompue : tu reprendras demain. Tu peux aussi continuer maintenant."
+    : n === 1 && session.fmt === "defi" ? "Une seule question aujourd'hui : c'était le défi du jour. Tu peux continuer autant que tu veux."
+    : "Séance courte aujourd'hui. Tu peux continuer autant que tu veux.";
+  // 26.11 : Mathélo caché par défaut : titre selon le score seulement (22.11 : il suivait le Mathélo).
+  h(`${brand}<h2>${sc >= n * 0.8 ? "Excellente séance !" : sc >= n * 0.5 ? "Bonne séance." : "Séance faite : c'est en pratiquant qu'on progresse."}</h2>
   <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span>${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ta série passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${FORMATS[Engine.tomorrowFormat(state)].label}</b></div>${sumGoal(g1)}</div></div>
   ${summaryByNotion()}
   ${weekLine()}
   <div class="card stack"><div class="spread"><span>Score</span><b>${String(sc).replace(".", ",")} / ${n}</b></div>
-  <div class="spread"><span>Mathélo</span><b>${state.elo.r} <span class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</span></b></div>
-  ${ypRow}</div>
+  ${ypRow}${session.rebuilt ? `<p class="small">🪜 Tu as reconstruit ${session.rebuilt > 1 ? session.rebuilt + " solutions" : "une solution"} pas à pas : ça compte aussi.</p>` : ""}</div>
   ${session.ctest ? (() => { const a = ctestNote(session.ctest), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? (isFR() ? "Le niveau apparaît après 3 réponses sur cette compétence." : "La note apparaît après 3 réponses sur cette compétence.") : b === null ? (isFR() ? "Premier positionnement pour cette compétence." : "Première note pour cette compétence.") : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". " + (isFR() ? "Il remontera" : "Elle remontera") + " avec la pratique." : isFR() ? "Niveau stable." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
   ${newGrade}${nb}
   ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${state.carnet.length} à effacer</b></div><span class="small muted">Une erreur s'efface après 2 réussites de suite, du premier coup.</span><button class="btn-primary" id="carnetagain">${session.carnet ? "Continuer à effacer" : "📕 Effacer mes erreurs maintenant"}</button></div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
   ${returnCard()}
   ${typeof Curieux !== "undefined" && Curieux.available(state).length ? '<button class="btn-primary" id="curbonus">🤔 Bonus : une question curieuse</button>' : ""}
   <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)", "app")}</div>
-  ${n <= 2 && !session.weekly && !session.carnet && !session.prep ? `<div class="card flat stack"><p class="small">${n === 1 ? "Une seule question aujourd'hui : c'était le défi du jour." : "Séance courte aujourd'hui."} Tu peux continuer autant que tu veux.</p><button class="btn-sec" id="again">➕ Encore une séance</button></div>` : ""}
+  ${n <= 2 && !session.weekly && !session.carnet && !session.prep ? `<div class="card flat stack"><p class="small">${shortMsg}</p><button class="btn-sec" id="again">➕ Encore une séance</button></div>` : ""}
   <button class="btn-primary btn-big" id="home">Retour à l'accueil</button>`);
   bindComment(app, "app"); bindInstall(screenHome);
   /* 24.11 (retour testeur : « séance très courte, l'élève peut croire qu'il a fini trop vite ») */
