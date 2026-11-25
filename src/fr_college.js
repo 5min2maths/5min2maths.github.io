@@ -63,7 +63,9 @@ ORDRE.FR_COL = {};
 function applyFrCollege() {
   for (const n of NOTIONS) {
     const t = FR_COLLEGE[n.id];
-    if (t) { n.FR = [t[0]]; n.againFR = t[1] || []; continue; }
+    /* 25.11 (audit France, tools/france.md) : fr_college.js est chargé après fr_2nde.js ; les reprises de seconde et au-delà
+       (againFR ≥ 10 : automatismes de 2nde) étaient effacées ici (2nde : 19 notions « de l'année » au lieu de 52). Gardées. */
+    if (t) { n.FR = [t[0]]; n.againFR = [...new Set([...(t[1] || []), ...(n.againFR || []).filter((g) => g >= 10)])]; continue; }
     // Ancienne valeur collège non confirmée, ou notion de FR_MASK placée au collège : masquée. FR ≥ 10 : inchangé.
     if (n.FR && n.FR[0] <= 9) n.FR = null;
   }

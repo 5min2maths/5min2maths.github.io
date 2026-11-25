@@ -1,0 +1,81 @@
+<link rel="stylesheet" href="../src/style.css"><!doctype html><meta charset="utf-8"><meta name="budget" content="60000"><div id="app"></div>
+<!-- France (25.11, audit tools/france.md) : profil FR = pas de CHF, pas d'apostrophe des milliers, pas de PGDC / PPMC, « antécédent »,
+     « factoriser », pas d'EVACOM ni de Genève visibles, sur un échantillon de questions (6e → Tle) et d'écrans ; profils suisses
+     inchangés (frLocal jamais appliqué) ; aperçu …/#france (choix « France » à l'étape 1, …/#france-off pour annuler). -->
+<script>window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); localStorage.setItem("m2m-france", "1"); } catch (e) {}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/defis_9.js"></script><script src="../src/defis_910.js"></script><script src="../src/defis_2c.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/fr_college.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/parents.js"></script><script src="../src/presente.js"></script><script src="../src/app.js"></script>
+<pre id="out">en cours</pre>
+<script>
+const fails = [], log = [], ok = (c, m) => { if (!c && fails.length < 60) fails.push(m); };
+const SW = { CHF: /CHF/, milliers: /\d['’]\d{3}(?!\d)|\\text\{'\}/, PGDC: /PGDC|PPMC/, preimage: /[Pp]réimage/, evidence: /en évidence/, EVACOM: /EVACOM/, Geneve: /Genève|genevois/, change: /\b1 (€|euro) (=|vaut)|\bEUR\b|Suisse/ };
+const hit = (t) => Object.entries(SW).filter(([, re]) => re.test(t)).map(([k, re]) => k + " « " + t.match(new RegExp(".{0,30}(?:" + re.source + ").{0,20}"))[0] + " »");
+try {
+  // 1. frLocal : cas types, idempotence
+  const C = [
+    ["Le prix est 1'200 CHF.", "Le prix est 1 200 €."], ["\\(1\\text{'}250\\ \\text{CHF}\\)", "\\(1\\,250\\ \\text{€}\\)"], ["\\(12'500\\)", "\\(12\\,500\\)"],
+    ["Combien en CHF ?", "Combien en euros ?"], ["PGDC(24 ; 36), PPMC", "PGCD(24 ; 36), PPCM"],
+    ["Détermine la préimage de 3.", "Détermine l'antécédent de 3."], ["Détermine les préimages de 4.", "Détermine les antécédents de 4."],
+    ["une seule préimage", "un seul antécédent"], ["c) Plus grande préimage de 0", "c) Plus grand antécédent de 0"], ["Images et préimages", "Images et antécédents"],
+    ["Mise en évidence de \\(3x\\)", "Factorisation par \\(3x\\)"], ["Factorise (mise en évidence) :", "Factorise (facteur commun) :"], ["Mets en évidence.", "Factorise."],
+    ["Il faut encore mettre en évidence", "Il faut encore factoriser"], ["Mettre \\(x\\) en évidence retire un x", "Factoriser par \\(x\\) retire un x"],
+    ["Ramène à 0 et mets \\(t\\) en évidence : ok", "Ramène à 0 et factorise par \\(t\\) : ok"], ["mets -2 en évidence, puis", "factorise par -2, puis"], ["Après \\(x\\) en évidence, reste", "Après factorisation par \\(x\\), reste"], ["Étape 1 : mise en évidence d'un facteur commun", "Étape 1 : factorisation par un facteur commun"],
+    ["3 lancers francs", "3 lancers francs"], ["au franc près", "à l'euro près"], ["l'aire 1'000'000", "l'aire 1 000 000"], ["2,5 ; 3'14", "2,5 ; 3'14"],
+  ];
+  for (const [a, b] of C) { const r = frLocal(a); ok(r === b, "frLocal « " + a + " » → « " + r + " » (attendu « " + b + " »)"); ok(frLocal(r) === r, "frLocal non idempotent : " + a); }
+  // 2. Profils suisses : finalize ne touche pas aux textes
+  let nCH = 0;
+  for (const id of ["pct", "prop", "fimg", "factor", "arith", "pctvar", "modaff", "sci"]) for (const d of [1, 2, 3]) for (let s = 1; s <= 6; s++) {
+    const raw = Engine.build(id, d, s), q = Engine.finalize({ profile: { system: "CH", grade: 11, track: "college" } }, id, JSON.parse(JSON.stringify(raw)));
+    const T = (x) => [x.q, x.sol, x.hint, ...(x.guide || []).flatMap((g) => [g.ask, g.sol]), ...(x.hints || []), ...(x.traps || []).map((t) => t.m)].join(" | ");
+    ok(T(q) === T(raw), "profil CH modifié : " + raw.code); nCH++;
+  }
+  log.push("profils suisses inchangés : " + nCH + " questions");
+  // 3. Questions d'un profil français, 6e → Tle : tout le catalogue, niveaux 1 à 3 (et défis), 3 graines
+  const txt = (q) => [q.q, q.sol, q.hint, q.fig, ...(q.guide || []).flatMap((g) => [g.ask, g.sol]), ...(q.parts || []).map((p) => p.label), ...(q.hints || []), ...(q.traps || []).map((t) => t.m)].filter((x) => typeof x === "string").join(" | ");
+  const bad = {};
+  for (const g of [6, 7, 8, 9, 10, 11, 12]) {
+    const p = { system: "FR", grade: g, track: "college", minutes: 5 }, st = { profile: p }, cat = Engine.catalog(p); let n = 0;
+    for (const c of cat) for (const d of [1, 2, 3, 4]) for (let s = 1; s <= 3; s++) {
+      if (d === 4 && !hasProb(c.id)) continue;
+      let q; try { q = Engine.make(st, c.id, d, s); } catch (e) { ok(false, "EXC " + c.id + "-" + d + "-" + s + " " + e.message); continue; }
+      if (!q) continue; n++;
+      const sp = q.spec; if (sp && sp.kind === "value" && !q.parts) ok(checkAnswer(sp, q.canon || String(+(+sp.value).toFixed(10)).replace(".", ",")).status === "correct", "réponse refusée après localisation " + q.code);
+      for (const h of hit(txt(q))) { const k = h.split(" ")[0] + " " + c.id; if (!bad[k]) bad[k] = q.code + " : " + h; }
+    }
+    log.push(SYSTEMS_HIDDEN.FR.grades.find(([x]) => x === g)[1] + " : " + cat.length + " notions, " + n + " questions");
+  }
+  for (const [k, v] of Object.entries(bad)) ok(false, "question FR : " + v);
+  // 3 bis. Tirage normal (sans graine) : les énoncés propres à la Suisse (change EUR ↔ CHF, « en Suisse ») sont écartés
+  const stF = { profile: { system: "FR", grade: 9, track: "college", minutes: 5 } }; let nCh = 0;
+  for (const [id, d] of [["prop", 3], ["prop", 2], ["pctvar", 2], ["pctvar", 3], ["pct", 3]]) for (let k = 0; k < 40; k++) {
+    const q = Engine.make(stF, id, d), t = txt(q); nCh++;
+    ok(!/1 € = [\d,]+ €|\bEUR\b|Suisse|taux de change/.test(t), "énoncé suisse tiré en profil FR : " + q.code + " « " + t.slice(0, 90) + " »");
+  }
+  ok(horsCO(stF, "prop", { q: "Au taux 1 EUR = 0,95 CHF, combien ?" }), "horsCO : change non écarté en FR");
+  ok(!horsCO({ profile: { system: "CH", grade: 9, track: "college" } }, "prop", { q: "1 EUR = 0,95 CHF" }), "horsCO : profil CH touché");
+  log.push("tirages normaux FR contrôlés : " + nCh);
+  // 3 ter. Terminale : les chapitres de 1re du Collège de Genève ne sont plus « de l'année »
+  const tle = Engine.catalog({ system: "FR", grade: 12, track: "college" }).filter((c) => c.current).map((c) => c.id);
+  ok(!["rel", "pyth", "puiss", "reduire", "eq1"].some((id) => tle.includes(id)), "Tle : notions de collège « de l'année » : " + tle.join(" "));
+  log.push("Tle de l'année : " + tle.join(" "));
+  // 3 quater. Seconde : les automatismes repris du collège (againFR 10, src/fr_2nde.js) restent « de l'année » malgré fr_college.js
+  const sec = Engine.catalog({ system: "FR", grade: 10, track: "college" }).filter((c) => c.current).map((c) => c.id);
+  ok(["fracops", "idrem", "pctvar", "fimg", "eq1"].every((id) => sec.includes(id)), "2nde : automatismes repris absents (" + sec.length + " de l'année)");
+  log.push("2nde : " + sec.length + " notions de l'année");
+  // 4. Leçons et aide d'un profil français (rendues par l'app : frDom)
+  state = Engine.newState({ system: "FR", grade: 9, track: "college", minutes: 5 }); Engine.autoInit(state); state.placed = true;
+  ok(gradeName(state.profile) === "3e", "nom de classe FR : " + gradeName(state.profile));
+  const scr = (name, f) => { try { f(); const t = app.textContent; for (const h of hit(t)) ok(false, "écran " + name + " : " + h); } catch (e) { ok(false, "écran " + name + " EXC " + e.message); } };
+  scr("accueil", () => screenHome());
+  scr("compétences", () => screenComps());
+  scr("réglages", () => screenSettings());
+  for (const id of ["fimg", "factor", "pct", "prop", "premiers", "pctvar", "sci", "idrem"]) if (state.notions[id]) scr("leçon " + id, () => screenLesson(id));
+  for (const [id, d] of [["pct", 2], ["prop", 1], ["fimg", 2], ["factor", 1], ["pctvar", 2], ["modaff", 2]]) scr("question " + id, () => { const q = Engine.make(state, id, d, 5); renderQuestion(q, { eyebrow: "Question", onDone: () => 0, onNext: () => 0 }); });
+  // 5. Aperçu …/#france : « France » au choix de l'école (étape 1) ; sans le réglage, rien
+  ok(!!SYSTEMS.FR, "aperçu : SYSTEMS.FR absent malgré m2m-france");
+  state = null; draft = { system: "FR", grade: 9, track: null, minutes: 5 }; screenLevel();
+  ok(!!document.querySelector('#sys button[data-v="FR"]') && document.querySelectorAll("#grade button").length === 7, "aperçu : choix France / 7 classes");
+  draft.system = "CH"; screenLevel(); ok(document.querySelectorAll("#grade button").length === SYSTEMS.CH.grades.length, "aperçu : retour Suisse");
+} catch (e) { fails.push("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }
+document.getElementById("out").textContent = (fails.length ? "ÉCHEC\n" + fails.join("\n") : "OK") + "\n" + log.join("\n");
+</script>

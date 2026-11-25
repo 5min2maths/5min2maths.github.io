@@ -97,7 +97,39 @@ const SYSTEMS = {
 };
 // 22.11 : systèmes définis mais pas proposés dans l'interface (France : collège rendu jouable, ouverture à décider).
 // Sert au moteur (Mathélo, libellés de classe) et aux tests avec des profils { system: "FR", grade: 6…9 }.
-const SYSTEMS_HIDDEN = { FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"]] } };
+// 25.11 (audit France, tools/france.md) : terminale ajoutée (notions de src/fr_lycee.js placées en 12).
+const SYSTEMS_HIDDEN = { FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"], [12, "Tle"]] } };
+
+// Usages français (25.11, audit France : tools/france.md § 4). Appliqué aux textes d'un profil FR seulement (Engine.finalize,
+// rendu de l'app) ; jamais pour un profil suisse. Idempotent. Sans décision de l'enseignant : seulement ce qui est un défaut
+// certain pour un élève français (monnaie, séparateur des milliers, sigles PGDC / PPMC, « préimage », « mise en évidence »).
+// Genève → Lyon (un seul énoncé au catalogue français le 25.11 : une cycliste « part de Genève »). Les énoncés propres à la
+// Suisse (change EUR ↔ CHF, TVA suisse) sont écartés du tirage par horsCO (src/engine.js), pas traduits.
+// Laissés pour décision : le point médian du produit (\cdot, aussi produit scalaire), « cercle de Thalès ».
+const FR_WORDS = [
+  [/\ben (CHF|francs)\b/g, "en euros"], [/\bCHF\b/g, "€"], [/au franc près/g, "à l'euro près"], [/(\d|\\\)) francs\b/g, "$1 euros"], [/\bde francs\b/g, "d'euros"],
+  [/\bGenève\b/g, "Lyon"],
+  [/PGDC/g, "PGCD"], [/PPMC/g, "PPCM"],
+  [/\b([Ll])a préimage\b/g, (m, a) => a + "'antécédent"], [/\b([Uu])ne seule préimage\b/g, (m, a) => a + "n seul antécédent"],
+  [/\b([Uu])ne préimage\b/g, (m, a) => a + "n antécédent"], [/\b([Pp]lus) (grande|petite) préimage\b/g, (m, a, b) => a + " " + b.slice(0, -1) + " antécédent"],
+  [/\bpréimages\b/g, "antécédents"], [/\bPréimages\b/g, "Antécédents"], [/\bpréimage\b/g, "antécédent"], [/\bPréimage\b/g, "Antécédent"],
+  [/\b([Ff])actorise \(mise en évidence\)/g, "$1actorise (facteur commun)"],
+  [/\b([Mm])ise en évidence d(?:e |')/g, (m, a) => (a === "M" ? "F" : "f") + "actorisation par "],
+  [/\b([Mm])ise en évidence\b/g, (m, a) => (a === "M" ? "F" : "f") + "acteur commun"], [/\b([Mm])ets en évidence\b/g, (m, a) => (a === "M" ? "F" : "f") + "actorise"],
+  [/\b([Aa])près ((?:(?!en évidence)[^.;!?]){1,40}?) en évidence\b/g, "$1près factorisation par $2"], [/\b([Mm])ettre en évidence\b/g, (m, a) => (a === "M" ? "F" : "f") + "actoriser"], [/\b([Mm])et(s|tre) ((?:(?!en évidence)[^.;!?]){1,40}?) en évidence\b/g, (m, a, t, x) => (a === "M" ? "F" : "f") + "actorise" + (t === "tre" ? "r" : "") + " par " + x], [/\bmettant en évidence\b/g, "factorisant"], [/\bmis en évidence\b/g, "mis en facteur"],
+];
+function frThouPart(t, tex) {
+  return tex ? t.replace(/\\text\{['’]\}/g, "\\,").replace(/(\d)['’](?=\d{3}(?!\d))/g, "$1\\,")
+    : t.replace(/\\text\{['’]\}/g, "\u202f").replace(/(\d)['’](?=\d{3}(?!\d))/g, "$1\u202f");
+}
+const frWords = (t) => FR_WORDS.reduce((a, [re, by]) => a.replace(re, by), t);
+/* formule seule (préfiltre MathJax) */
+function frLocalPart(t, tex) { return frWords(frThouPart(t, tex)); }
+/* texte avec formules \( … \) : milliers selon le mode, puis les mots sur tout le texte (« mets \(t\) en évidence ») */
+function frLocal(s) {
+  if (typeof s !== "string" || !s) return s;
+  return frWords(s.split(/(\\\([\s\S]*?\\\))/).map((t, i) => frThouPart(t, i % 2 === 1)).join(""));
+}
 
 // Difficulté maximale (1 = bases, 3 = approfondi) : on ne demande pas la section à l'élève ;
 // c'est le Mathélo qui situe son niveau. Seules les petites classes (6e, 5e) plafonnent à 2.
