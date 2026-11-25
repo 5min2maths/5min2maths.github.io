@@ -695,7 +695,7 @@ function screenHome() {
   // 22.11 : accueil à cases (maquette design/maquette_accueil.html) ; chaque case ouvre une page « ← Accueil ».
   panels.carnet = () => carnetCard(true) || `<div class="card flat stack"><div class="eyebrow">📕 Carnet d'erreurs</div><p class="small muted">Vide : bravo ! Chaque question ratée viendra s'y ranger, pour que tu puisses la réussir plus tard.</p></div>`;
   // 22.11 : « Ma fiche » (src/fiche.js) : une fiche par chapitre derrière Progrès. Retirée le 23.11 (branche archive/fiche) : inactif sans fiche.js.
-  panels.prog = () => `<div class="card flat stack grades-go"><button type="button" class="btn-sec" id="gradesgo">🏅 Mes grades et mon Mathélo</button><p class="small muted yp-explain">Mathélo = ton niveau · Points de l'année = ton travail, ils font monter ton grade.</p></div>${weekCard()}${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}${typeof parentCard === "function" ? parentCard() : ""}`; /* 24.11 : espace parent (src/parents.js) */
+  panels.prog = () => `${weekCard()}<div class="card flat stack grades-go"><button type="button" class="btn-sec" id="gradesgo">🏅 Mes grades et mon Mathélo</button><p class="small muted yp-explain">Mathélo = ton niveau · Points de l'année = ton travail, ils font monter ton grade.</p></div>${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}${typeof parentCard === "function" ? parentCard() : ""}`; /* 24.11 : espace parent (src/parents.js) */
   if (!panels[homeTab]) homeTab = "today";
   const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted" title="Ta classe">Classe ${classTag(state.profile) /* 26.11 (revue élèves, B9 : « Classe 2e MP » et « MP 2e ») : même forme partout */}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
   if (homeTab !== "today") {
@@ -712,10 +712,10 @@ function screenHome() {
     const nudge = streakNudge(), joker = /Joker/.test(nudge);
     /* 26.11 (revue d'un testeur, jours 4–5 : bannières empilées au-dessus du grand bouton, poussé sous le milieu de l'écran
        à 360 × 640) : au plus UNE carte au-dessus de la séance (séance à reprendre, ou joker de série le jour où il compte) ;
-       les autres (évaluation du jour, bilan de la semaine, sauvegarde, Mathélo, statistiques) passent sous la séance, une seule. */
+       les autres (évaluation du jour, bilan de la semaine, sauvegarde, statistiques) passent sous la séance. */
     const prepNow0 = prep && !paused && !(state.prep.log || {})[today] && prepKind() !== "mock";
     const banner = [resumeCard(), prepNow0 ? prepTodayCard() : "", joker ? nudge : ""].find((x) => x) || "";
-    const below = [prepNow0 ? "" : prepTodayCard(), weekRecapCard(), backupCard(), joker ? "" : nudge, eloHintCard()].find((x) => x) || "";
+    const below = [prepNow0 ? "" : prepTodayCard(), weekRecapCard(), backupCard(), joker ? "" : nudge, eloHintCard()].join("");
     /* Série perdue (26.11, même revue) : une phrase dans la carte de séance, le jour du retour seulement. */
     const lostK = s.count >= 2 && !alive && s.last ? s.last : null;
     if (lostK && (!state.lostSeen || state.lostSeen.k !== lostK)) { state.lostSeen = { k: lostK, d: today }; save(); }
@@ -1647,7 +1647,7 @@ function themeMapCard() {
 function startSession() {
   const fmt = Engine.todayFormat(state), plan = Engine.planSession(state, fmt);
   Engine.logFormat(state, fmt); save();
-  session = { fmt, plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), lessonAt: lessonAtStart(plan) };
+  session = { fmt, plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), lessonAt: fmt === "auto" ? null : lessonAtStart(plan) }; /* 26.11 : pas de leçon en automatismes */
   nextQuestion();
 }
 /* 26.11 (revue élèves : « Nouvelle notion » sur Pythagore en 11e, Thalès en 1re, les priorités en MP 2e) : libellé réservé

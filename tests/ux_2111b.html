@@ -9,7 +9,7 @@ state=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.a
 for(const id in state.notions)state.notions[id].lessonSeen=true;
 // 2. visite guidée
 homeTab="today";screenHome();ok(!!document.getElementById("tour")&&/séance du jour/.test(document.getElementById("tour").textContent)&&app.querySelector(".sess-card.tour-hi"),"2 bulle 1 (accueil à cases, 22.11)");
-document.getElementById("tournext").click();ok(homeTab==="today"&&/Mathélo/.test(document.getElementById("tour").textContent)&&app.querySelector(".elo-band.tour-hi"),"2 bulle 2 sur le Mathélo");
+document.getElementById("tournext").click();/* 26.11 (décision de l'enseignant : Mathélo caché par défaut) : la bulle 2 présente le grade de l'année */ ok(homeTab==="today"&&/grade/.test(document.getElementById("tour").textContent)&&app.querySelector(".elo-band.tour-hi"),"2 bulle 2 sur le grade");
 document.getElementById("tourskip").click();ok(state.tourDone&&!document.getElementById("tour")&&homeTab==="today","2 passer : fini");
 screenHome();ok(!document.getElementById("tour"),"2 plus de visite ensuite");
 // 1. reprise de séance
@@ -30,7 +30,7 @@ ok(gradeOf(0).name==="Pousse"&&gradeOf(1100).name==="Explorateur"&&gradeOf(3000)
 // 4. bilan de la semaine (simulé un lundi)
 const dd=new Date(day()+"T12:00:00"),dow=(dd.getDay()+6)%7,mon=addDays(day(),-dow);
 state.history=[{date:addDays(mon,-6),n:5,score:4},{date:addDays(mon,-4),n:3,score:2},{date:addDays(mon,-2),n:4,score:4}];state.elo.log=[[addDays(mon,-8),1200],[addDays(mon,-2),1240]];delete state.recapSeen;
-const card=weekRecapCard();if(dow<=2){ok(/3<\/b> jours de pratique/.test(card)&&/12<\/b> questions/.test(card)&&/\+40/.test(card),"4 bilan : "+card.replace(/<[^>]+>/g," ").slice(0,140));}else ok(card==="","4 rien après mercredi");
+const card=weekRecapCard();if(dow<=2){ok(/3<\/b> jours de pratique/.test(card)&&/12<\/b> questions/.test(card)/* 26.11 : plus de Mathélo dans le bilan de la semaine (caché par défaut) */&&!/Mathélo/.test(card),"4 bilan : "+card.replace(/<[^>]+>/g," ").slice(0,140));}else ok(card==="","4 rien après mercredi");
 // 6. données en gras
 ok(/\\mathbf\{4\}/.test(boldData("Un magasin vend \\(4\\) cahiers pour \\(32\\) CHF : combien coûtent \\(6\\) cahiers dans ce magasin ?")),"6 gras en contexte");
 ok(!/mathbf/.test(boldData("Calcule : \\(4 + 3 \\cdot 2\\)")),"6 pas de gras dans un calcul nu");
