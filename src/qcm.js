@@ -127,6 +127,8 @@ function atRows(ids) {
 function atState() {
   const key = state.prep.ids.join();
   if (!state.autotest || state.autotest.key !== key) state.autotest = { key, rows: atRows(state.prep.ids), avant: {}, runs: [] };
+  /* 26.11 : autoévaluation reprise d'un code de sauvegarde (Avant et tests rapides seulement) : lignes reconstruites ici. */
+  if (!Array.isArray(state.autotest.rows)) state.autotest.rows = atRows(state.prep.ids);
   return state.autotest;
 }
 const AT_SYM = { 2: "✓", 1: "~", 0: "✗" };

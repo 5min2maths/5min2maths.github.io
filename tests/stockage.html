@@ -1,0 +1,141 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="budget" content="60000"><link rel="stylesheet" href="../src/style.css"><body><main id="app"></main>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}
+/* Navigateur simulé (avant le chargement de l'app) : stockage persistant compté, agent utilisateur modifiable. */
+window.__persist = 0; window.__UA = navigator.userAgent;
+Object.defineProperty(navigator, "storage", { configurable: true, value: { persist: () => { window.__persist++; return Promise.resolve(true); }, persisted: () => Promise.resolve(true) } });
+Object.defineProperty(navigator, "userAgent", { configurable: true, get: () => window.__UA });
+</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/defis_9.js"></script><script src="../src/defis_910.js"></script><script src="../src/defis_2c.js"></script><script src="../src/defis_sec2.js"></script><script src="../src/competences.js"></script><script src="../src/referentiel.js"></script><script src="../src/trx.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch4c_trous.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/ch1c_trous.js"></script><script src="../src/ch1c_argact.js"></script><script src="../src/ch11_rep3d.js"></script><script src="../src/fr_college.js"></script><script src="../src/fr_1re.js"></script><script src="../src/fr_3e.js"></script><script src="../src/fr_tle.js"></script><script src="../src/fr_fin.js"></script><script src="../src/fr_trous.js"></script><script src="../src/fr_couv.js"></script><script src="../src/ref_matu.js"></script><script src="../src/ref_fr.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_col34b.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/fr_act.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/parents.js"></script><script src="../src/presente.js"></script><script src="../src/app.js"></script>
+<script>
+// Stockage durable et code de sauvegarde (26.11, tests/stockage.html) : la page se charge dans un cadre de 360 × 640.
+if (window === top) {
+  document.body.innerHTML = '<iframe src="stockage.html#cadre" style="width:360px;height:640px;border:0"></iframe>';
+  const pre = document.createElement("pre"); pre.id = "out"; pre.textContent = "en cours"; document.body.appendChild(pre);
+  window.addEventListener("message", (e) => { if (typeof e.data === "string" && e.data.startsWith("st:")) pre.textContent = e.data.slice(3); });
+} else window.addEventListener("load", async () => {
+const OUT = []; let nbF = 0;
+const fail = (m) => { nbF++; if (nbF < 200) OUT.push("ÉCHEC " + m); };
+const tick = () => new Promise((r) => setTimeout(r, 0));
+const sec = async (nom, f) => { try { await f(); } catch (e) { fail(nom + " : exception " + e.message + " " + (e.stack || "").split("\n")[1]); } };
+Element.prototype.scrollIntoView = function () {};
+window.ping = () => {};
+const today = day(), CHROME = navigator.userAgent, IPHONE = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1";
+const fresh = (o = {}) => { try { localStorage.clear(); } catch (e) {} for (const k of Object.keys(UI)) if (!["fs", "vib"].includes(k)) delete UI[k];
+  state = Engine.newState({ system: "CH", grade: 11, track: "college", minutes: 5 }); Engine.autoInit(state); state.placed = true; state.tourDone = true; state.eloSeen = true; state.firstDone = true;
+  state.history = []; Object.assign(state, o); session = null; homeTab = "today"; delete navigator.standalone; return state; };
+const endSession = () => { session = { fmt: "revision", plan: ["eq1|1|rev", "eq1|1|rev", "eq1|1|rev"], i: 3, score: 2, answered: 3, start: Date.now(), elo0: state.elo.r, ids: new Set(["eq1"]) }; screenSummary(); };
+const goTop = () => { const b = app.querySelector(".sess-go"); return b ? b.getBoundingClientRect().top + window.scrollY : 9999; };
+
+// ---------- 1. Stockage persistant : demandé une seule fois, après la première séance terminée, sans message ----------
+await sec("persist", async () => {
+  window.__UA = CHROME; fresh(); window.__persist = 0;
+  screenHome(); if (window.__persist) fail("persist demandé avant toute séance");
+  endSession(); await tick(); await tick();
+  if (window.__persist !== 1) fail("persist : " + window.__persist + " demande(s) après la 1re séance (attendu 1)");
+  if (UI.persisted !== 1) fail("persist : résultat non gardé (UI.persisted = " + UI.persisted + ")");
+  if (/persist|stockage/i.test(app.textContent)) fail("persist : un message est affiché à l'élève");
+  endSession(); await tick(); screenHome(); endSession(); await tick();
+  if (window.__persist !== 1) fail("persist redemandé (" + window.__persist + " demandes)");
+  // Firefox (hors iOS) : demande d'autorisation visible, on s'abstient.
+  window.__UA = "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0"; fresh(); window.__persist = 0; endSession(); await tick();
+  if (window.__persist || UI.persisted !== "na") fail("persist : Firefox, demande faite ou indicateur absent");
+  window.__UA = CHROME;
+});
+
+// ---------- 2. Carte iPhone : iOS hors app installée, dès la 2e séance, sous la séance, rythme de 2 semaines ----------
+await sec("carte iOS", async () => {
+  const card = () => app.querySelector(".ios-store");
+  window.__UA = IPHONE;
+  fresh(); UI.sessN = 1; screenHome(); if (card()) fail("iOS : carte après 1 séance seulement");
+  fresh(); UI.sessN = 2; screenHome(); window.scrollTo(0, 0);
+  const c = card(), sc = app.querySelector(".sess-card");
+  if (!c) fail("iOS : carte absente à la 2e séance");
+  else {
+    if (!/Sur iPhone, installe l'app \(Partager → Sur l'écran d'accueil\) pour ne pas perdre ta progression, ou garde ton code de sauvegarde\./.test(c.textContent)) fail("iOS : texte de la carte");
+    if (!sc || c.getBoundingClientRect().top < sc.getBoundingClientRect().bottom) fail("iOS : carte au-dessus de la séance");
+    if (goTop() > 640 - 48) fail("iOS : bouton de séance repoussé à " + Math.round(goTop()) + " px");
+    for (const id of ["iosinst", "iosbk", "iosno"]) if (!document.getElementById(id)) fail("iOS : bouton #" + id + " absent");
+    document.getElementById("iosinst").click(); if (document.getElementById("ioshow").hidden || !/Partager/.test(document.getElementById("ioshow").textContent)) fail("iOS : « Comment installer » n'affiche pas la marche à suivre");
+  }
+  // Une seule carte de stockage : le rappel de sauvegarde (7 jours de pratique) ne s'empile pas.
+  fresh(); UI.sessN = 2; for (let k = 1; k < 10; k++) state.history.push({ date: addDays(today, -k), n: 3, score: 2 }); screenHome();
+  if (!card() || app.querySelector(".backup-card")) fail("iOS : carte iPhone et rappel de sauvegarde ensemble (ou carte absente)");
+  if (goTop() > 640 - 48) fail("iOS + 7 jours : bouton de séance repoussé");
+  if (returnCard()) fail("iOS : carte d'installation générique au bilan en plus de la carte iPhone");
+  // Rythme : visible le jour même, puis plus avant 14 jours.
+  fresh(); UI.sessN = 3; screenHome(); screenHome(); if (!card()) fail("iOS : carte disparue au 2e affichage du même jour");
+  UI.iosShown = addDays(today, -3); screenHome(); if (card()) fail("iOS : carte revenue 3 jours après");
+  UI.iosShown = addDays(today, -14); screenHome(); if (!card()) fail("iOS : carte pas revenue après 14 jours");
+  // « Plus tard ».
+  fresh(); UI.sessN = 2; screenHome(); document.getElementById("iosno").click(); if (card()) fail("iOS : « Plus tard » ne masque pas");
+  screenHome(); if (card()) fail("iOS : revenue après « Plus tard »");
+  UI.iosLater = addDays(today, -15); UI.iosShown = addDays(today, -15); screenHome(); if (!card()) fail("iOS : pas revenue 15 jours après « Plus tard »");
+  // Code de sauvegarde récent : pas de carte ; bouton « Mon code de sauvegarde » → écran du code.
+  fresh(); UI.sessN = 2; UI.lastBackup = addDays(today, -2); screenHome(); if (card()) fail("iOS : carte malgré un code de sauvegarde récent");
+  fresh(); UI.sessN = 2; screenHome(); document.getElementById("iosbk").click(); await tick(); await new Promise((r) => setTimeout(r, 50));
+  if (!/Sauvegarder/.test((app.querySelector("h2") || {}).textContent || "")) fail("iOS : « Mon code de sauvegarde » n'ouvre pas l'écran du code");
+  // App installée (écran d'accueil) : jamais.
+  fresh(); UI.sessN = 5; Object.defineProperty(navigator, "standalone", { configurable: true, value: true }); screenHome(); if (card()) fail("iOS installée : carte affichée");
+  delete navigator.standalone;
+  // Android / ordinateur : jamais ; carte d'installation habituelle au bilan.
+  window.__UA = CHROME; fresh(); UI.sessN = 5; screenHome(); if (card()) fail("hors iOS : carte iPhone affichée");
+  state.history = [{ date: addDays(today, -1), n: 3, score: 2 }, { date: addDays(today, -2), n: 3, score: 2 }]; if (!returnCard()) fail("hors iOS : carte d'installation du bilan disparue");
+  // iPad (Safari se présente comme un Mac) : « Sur iPad ».
+  window.__UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15";
+  Object.defineProperty(navigator, "platform", { configurable: true, value: "MacIntel" }); Object.defineProperty(navigator, "maxTouchPoints", { configurable: true, value: 5 });
+  fresh(); UI.sessN = 2; screenHome(); if (!card() || !/Sur iPad/.test(card().textContent)) fail("iPad : carte absente ou mal nommée");
+  delete navigator.platform; delete navigator.maxTouchPoints; window.__UA = CHROME;
+});
+
+// ---------- 3. Code de sauvegarde : aller-retour complet, anciens codes ----------
+await sec("code", async () => {
+  fresh();
+  const ids = Engine.catalog(state.profile).filter((c) => GEN[c.id]).map((c) => c.id), A = ids[0], B = ids[1];
+  for (const id of [A, B]) Object.assign(state.notions[id], { status: "vu", m: 0.62, box: 2, due: addDays(today, 2), seen: 5, ok: 3, lessonSeen: true });
+  state.comps = { "c1": { r: [1, 0.5, 0.75], n: 3, last: addDays(today, -1) } };
+  state.streak = { count: 6, last: today, best: 9, jokerWk: Engine.weekOf(today) };
+  state.history = [{ date: addDays(today, -1), n: 5, score: 4 }, { date: today, n: 6, score: 5 }];
+  state.carnet = [{ id: A, d: 2, code: A + "-2-k3f", date: addDays(today, -1), ok: 1, m: "signe", a: "-3" }];
+  state.now = { ids: [A], date: addDays(today, -2) };
+  state.prep = { ids: [A, B], date: addDays(today, 6), start: addDays(today, -1), log: { [addDays(today, -1)]: "autoeval" } };
+  state.autotest = { key: [A, B].join(), rows: atRows([A, B]), avant: { x1: 2, x2: 0 }, runs: [{ date: addDays(today, -1), r: { x1: 1, x2: 0 } }] };
+  state.mock = { date: addDays(today, -1), ids: [A, B], level: "standard", items: [{ part: 1, ex: 1, id: A, d: 2, seed: 123 }], done: { date: today, pts: 7, total: 10, n: 1 } };
+  state.a11y = { fs: 1.15, font: 1, hc: 0 }; state.homeMode = "libre"; state.weeklyDone = weekKey(); state.gradeNo = { Apprenti: 42 }; state.pid = "abc123";
+  ypSync(state); state.yp.pts = 321; state.yp.past = [{ k: "2025|CH|co|10", c: "10e", p: 900 }]; ypAdd(state, 12, "q"); ypAdd(state, 10, "s"); ypAdd(state, 10, "w");
+  state.badges = { premier: addDays(today, -3) }; Badges.check(state);
+  const code = await Backup.encode(state), s = await Backup.decode(code);
+  const same = (k, a, b) => { if (JSON.stringify(a) !== JSON.stringify(b)) fail("code : " + k + " " + JSON.stringify(a) + " ≠ " + JSON.stringify(b)); };
+  same("profil", s.profile, state.profile);
+  for (const id of [A, B]) for (const k of ["status", "m", "box", "due", "seen", "ok", "lessonSeen"]) same("notion " + id + "." + k, s.notions[id][k], state.notions[id][k]);
+  same("compétences", s.comps, state.comps); same("série", s.streak, state.streak); same("Mathélo", [s.elo.r, s.elo.n], [state.elo.r, state.elo.n]);
+  same("carnet", s.carnet, state.carnet); same("chapitre en classe", s.now, state.now); same("évaluation", s.prep, state.prep);
+  same("autoévaluation", [s.autotest.key, s.autotest.avant, s.autotest.runs], [state.autotest.key, state.autotest.avant, state.autotest.runs]);
+  same("sujet de préparation", s.mock, state.mock); same("réglages de lecture", s.a11y, state.a11y); same("mode Libre", s.homeMode, "libre");
+  same("repères", [s.tourDone, s.eloSeen, s.firstDone], [true, true, true]); same("problème de la semaine", s.weeklyDone, state.weeklyDone);
+  same("grades collector", s.gradeNo, state.gradeNo); same("pid", s.pid, state.pid); same("badges", s.badges, state.badges); same("historique", s.history, state.history);
+  for (const k of ["k", "c", "pts", "past", "d", "dp", "ds", "wk"]) same("points de l'année ." + k, s.yp[k], state.yp[k]);
+  // Après reprise : pas de points en double (plafond du jour, problème de la semaine) ; autoévaluation utilisable.
+  state = s; if (ypAdd(state, 10, "w")) fail("code : problème de la semaine recompté après reprise");
+  if (!Array.isArray(atState().rows) || !atState().rows.length) fail("code : lignes de l'autoévaluation non reconstruites");
+  if (code.length > 2000) fail("code : " + code.length + " caractères (QR impossible)");
+  OUT.push("code complet : " + code.length + " caractères");
+  // Ancien code (avant le 26.11) : sans les nouveaux champs, toujours lisible, valeurs par défaut.
+  const o = Backup.pack(state); for (const k of ["gn", "f", "wd", "at", "mk"]) delete o[k]; o.yp = o.yp.slice(0, 4);
+  const s2 = Backup.unpack(JSON.parse(JSON.stringify(o)));
+  if (s2.homeMode || s2.tourDone || s2.gradeNo || s2.autotest || s2.mock || s2.yp.dp !== 0 || s2.yp.pts !== state.yp.pts) fail("ancien code : champs inattendus " + JSON.stringify([s2.homeMode, s2.tourDone, s2.yp]));
+  const raw = "0" + Backup.b64(new TextEncoder().encode(JSON.stringify(o))); const s3 = await Backup.decode(raw); if (s3.streak.count !== 6) fail("ancien code non compressé illisible");
+});
+
+// ---------- 4. Nom de l'app : constante unique ----------
+await sec("nom", () => {
+  if (typeof APP_NAME !== "string" || !APP_NAME) fail("APP_NAME absent");
+  if (!brand.includes(APP_NAME) || !brand.includes(APP_TAGLINE)) fail("en-tête sans APP_NAME / APP_TAGLINE");
+  fresh(); screenLegal(() => {}); if (!app.textContent.includes("« " + APP_NAME + " " + APP_TAGLINE + " »")) fail("mentions légales : nom absent");
+  /* Fonctions globales : aucun nom écrit en dur (le contrôle complet des sources est tools/test_nom.py). */
+  for (const k of Object.keys(window)) { let f; try { f = window[k]; } catch (e) { continue; } if (typeof f === "function" && /5 minutes de maths/.test(Function.prototype.toString.call(f))) fail("nom en dur dans " + k + "()"); }
+});
+
+state = null; try { localStorage.clear(); } catch (e) {}
+parent.postMessage("st:" + (nbF ? "ÉCHEC (" + nbF + ")\n" + OUT.join("\n") : "OK stockage (persist une fois, carte iPhone, code de sauvegarde complet, nom centralisé) · " + OUT.join(" · ")), "*");
+});
+</script>

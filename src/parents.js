@@ -101,7 +101,7 @@ async function screenParentShare() {
   <button class="btn-ghost" id="ppreview">Voir la page de mes parents</button>
   <button class="btn-primary btn-big" id="pback">Retour</button>`);
   const $ = (x) => document.getElementById(x), msg = $("pmsg");
-  if ($("pshare")) $("pshare").onclick = () => navigator.share({ title: "Ma semaine de maths", text: "Ma semaine sur 5 minutes de maths (ouvre ce lien) :", url }).catch(() => {});
+  if ($("pshare")) $("pshare").onclick = () => navigator.share({ title: "Ma semaine de maths", text: "Ma semaine sur " + APP_NAME + " (ouvre ce lien) :", url }).catch(() => {});
   $("pcopy").onclick = async () => { try { await navigator.clipboard.writeText(url); msg.textContent = "Lien copié : colle-le dans un message à tes parents."; } catch (e) { msg.textContent = "Copie impossible ici : utilise le QR code."; } };
   $("ppreview").onclick = () => screenParentView(null, { code, preview: true, back: () => screenParentShare() });
   $("pback").onclick = back;

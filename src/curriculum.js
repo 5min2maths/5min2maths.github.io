@@ -1,3 +1,10 @@
+/* Nom de l'app (26.11, centralisé : il peut encore changer avant l'ouverture). Seul endroit où il est écrit : en-tête (brand),
+   présentations, textes qui le citent ; build.py le reporte dans le titre de la page et le manifeste (docs/). Contrôle :
+   tools/test_nom.py (lancé par tools/run_tests.sh). APP_TITLE : titre actuel de l'onglet, gardé tel quel. */
+const APP_NAME = "5 minutes de maths";
+const APP_TAGLINE = "par jour";
+const APP_SHORT = "5 min maths";
+const APP_TITLE = "5minutes2mathsparjour";
 // Catalogue des notions (recalibré le 12.11 sur les référentiels : PER / CO, programme du Collège de Genève 2021,
 // PEE de la maturité professionnelle ; correspondance notion → compétences dans tools/referentiels.py).
 // CH : [année] (9-11 = CO, 12-13 = 1re-2e du Collège). Pas de mois : l'ordre des chapitres varie d'une école à l'autre.
