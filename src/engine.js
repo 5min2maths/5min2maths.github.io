@@ -236,7 +236,8 @@ const exprForm = (sp, txt) => {
 // 22.11 : textes courts (une ligne sur téléphone : pas de saut quand on change de format).
 const FORMATS = {
   defi: { label: "🏔 Défi du jour", slots: ["defi4"], text: "Un seul problème, prends ton temps." },
-  auto: { label: "⚡ Série d'automatismes", slots: ["drill", "drill", "drill", "drill", "drill", "drill", "drill", "drill"], text: "8 calculs rapides, enchaînés." },
+  /* 25.11 (séance de 5 minutes) : 6 calculs au lieu de 8. */
+  auto: { label: "⚡ Série d'automatismes", slots: ["drill", "drill", "drill", "drill", "drill", "drill"], text: "6 calculs rapides, enchaînés." },
   app: { label: "🧩 Applications", slots: ["app", "app", "app"], text: "Trois questions de fond." },
   mixte: { label: "⚖️ Mixte", slots: ["drill", "app", "defi"], text: "Automatisme, application, défi." },
   revision: { label: "🧠 Révision", slots: ["rev", "rev", "rev", "rev"], text: "Tes notions à revoir aujourd'hui." },
@@ -832,9 +833,41 @@ const Engine = {
     return best ? best.f : "mixte";
   },
 
+  /* 25.11 (revue « un élève joue une séance » : 4 leçons complètes + 4 questions, bien plus que 5 minutes ; principe :
+     resserrer, tenir la promesse des 5 minutes). Au plus UNE leçon par séance : les notions dont la leçon reste à voir
+     (lessonDue) attendent les séances suivantes, sauf une, la plus prioritaire (chapitre « en classe » d'abord, puis
+     l'ordre du référentiel), placée en tête au niveau 1. La leçon prend la place d'une question (séances de 3 questions
+     et plus). Révision et défi du jour : jamais de leçon (« Révision » = du déjà-vu), sauf s'il n'y a rien d'autre. */
+  lessonDue(state, id) {
+    const s = state.notions[id];
+    return !!(s && typeof LESSONS !== "undefined" && LESSONS[id] && !s.lessonSeen && (s.status === "encours" || s.m < 0.4));
+  },
+  // Notion dont la leçon reste à voir et qu'on ne peut pas poser en question sans elle (encore jamais travaillée, ou en cours).
+  lessonFirst(state, id) { const s = state.notions[id]; return this.lessonDue(state, id) && (!s.seen || s.status === "encours"); },
+  lessonPick(state, ids) {
+    const now = this.nowActive(state) ? state.now.ids : [], s = (id) => state.notions[id];
+    const key = (id) => (now.includes(id) ? 0 : s(id).status === "encours" ? 1 : 2) * 1e5 + (s(id).status === "encours" || now.includes(id) ? this.rank(state.profile, id) : Math.round(s(id).m * 1000));
+    return [...ids].sort((a, b) => key(a) - key(b))[0] || null;
+  },
   planSession(state, format) {
-    const f = format || this.todayFormat(state);
-    return this.planSlots(state, FORMATS[f].slots);
+    const f = format || this.todayFormat(state), slots = FORMATS[f].slots;
+    const pend = this.eligible(state).filter((id) => this.lessonFirst(state, id));
+    if (!pend.length) return this.planSlots(state, slots);
+    const exclude = new Set(pend);
+    if (f === "revision" || f === "defi") { const p = this.planSlots(state, slots, { exclude }); if (p.length) return p; }
+    const keep = this.lessonPick(state, pend);
+    exclude.add(keep);
+    const rest = slots.length >= 3 ? slots.slice(1, -1) : slots.slice(1);
+    const k0 = slots[0] === "defi4" ? "defi" : slots[0];
+    return [keep + "|1|" + k0, ...this.planSlots(state, rest, { exclude })];
+  },
+  // Séance déjà tirée (mode libre…) : une seule notion à leçon, en tête au niveau 1 ; les autres sortent. n : nombre de questions visé.
+  oneLesson(state, plan, n) {
+    const idOf = (e) => String(e).split("|")[0], pend = plan.map(idOf).filter((id) => state.notions[id] && this.lessonDue(state, id));
+    if (!pend.length) return plan.slice(0, n);
+    const keep = this.lessonPick(state, pend), e0 = plan.find((e) => idOf(e) === keep).split("|");
+    const rest = plan.filter((e) => !pend.includes(idOf(e)));
+    return [[keep, 1, ...e0.slice(2)].join("|"), ...rest].slice(0, Math.max(1, n - 1));
   },
   // Format retenu pour aujourd'hui (stable dans la journée, sauf « Autre format »).
   todayFormat(state) {
@@ -863,8 +896,8 @@ const Engine = {
   },
 
   // Remplit des créneaux : pour chacun, la notion ET le niveau les plus proches de la cible fixée par le Mathélo.
-  planSlots(state, slots) {
-    const today = day(), elo = state.elo.r, cap = difficultyCap(state.profile), used = new Set(), plan = [];
+  planSlots(state, slots, opts = {}) {
+    const today = day(), elo = state.elo.r, cap = difficultyCap(state.profile), used = new Set(), plan = [], ex = opts.exclude || new Set();
     const maxOld = slots.includes("rev") ? 2 : 1;
     let old = 0;
     // Créneau « Rappel » : une notion ancienne, jamais triviale. Une séance sur trois environ ;
@@ -882,6 +915,7 @@ const Engine = {
       let best = null, pool = only || this.pool(state, base);
       if (kind === "rev" && !only) { const due = pool.filter((id) => state.notions[id].due <= today || state.notions[id].m < 0.5); if (due.length) pool = due; }
       for (const id of pool) {
+        if (ex.has(id)) continue;
         const s = state.notions[id], recent = this.isRecent(state, id), target = elo + TARGET[kind] + (s.easy || 0) * 120;
         if (rappel ? recent : !recent) continue; // les anciennes notions ne passent que par le créneau Rappel
         let levels = [1, 2, 3].filter((d) => d <= cap && (base !== "defi" || d >= 2) && (kind !== "drill" || d <= 2 || !recent));

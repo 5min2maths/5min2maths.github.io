@@ -1,0 +1,101 @@
+<!doctype html><meta charset="utf-8"><meta name="budget" content="40000"><link rel="stylesheet" href="../src/style.css">
+<style>body{margin:0}#app{width:360px;max-width:360px;box-sizing:border-box}</style>
+<main id="app"></main><pre id="out">en cours</pre>
+<script>window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}
+window.fetch = () => Promise.resolve(new Response("{}")); if (navigator.sendBeacon) navigator.sendBeacon = () => true;
+window.ensurePacks = () => Promise.resolve();
+</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/defis_9.js"></script><script src="../src/defis_910.js"></script><script src="../src/defis_2c.js"></script><script src="../src/defis_sec2.js"></script><script src="../src/competences.js"></script><script src="../src/referentiel.js"></script><script src="../src/trx.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch4c_trous.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/ch1c_trous.js"></script><script src="../src/ch11_rep3d.js"></script><script src="../src/fr_college.js"></script><script src="../src/fr_1re.js"></script><script src="../src/fr_3e.js"></script><script src="../src/fr_tle.js"></script><script src="../src/fr_fin.js"></script><script src="../src/fr_trous.js"></script><script src="../src/fr_couv.js"></script><script src="../src/ref_matu.js"></script><script src="../src/ref_fr.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_col34b.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/fr_act.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/parents.js"></script><script src="../src/presente.js"></script><script src="../src/app.js"></script>
+<script>
+/* 25.11 (revue « un élève joue une séance », principe : resserrer, tenir la promesse des 5 minutes). Séances simulées
+   dans la vraie interface (startSession, startFree) pour des profils variés, dont un début d'année avec beaucoup de
+   notions nouvelles : au plus une leçon par séance, défis facultatifs dans la séance, compteur qui compte la leçon,
+   « Révision » jamais sur une leçon ni sur une notion jamais vue, question après la leçon sans les nombres de la leçon,
+   durée estimée ≤ 5 min 30. Mesure : leçons et étapes par séance, durée estimée (moyenne et maximum). */
+const fails = [], ok = (c, m) => { if (!c && fails.length < 40) fails.push(m); };
+/* Durées estimées (secondes) : leçon en séance (Devine + Retiens) 60 ; défis faits d'office 35 par défi ; question selon
+   le créneau : automatisme 25, application 60, défi 90, problème (niveau 4) 180, révision 45, autre 50. */
+const T = { drill: 25, app: 60, defi: 90, rev: 45, rem: 40, carnet: 45 };
+let cap = null; const _rq = renderQuestion; renderQuestion = (q, o) => { cap = { q, o }; _rq(q, o); };
+const stats = { n: 0, lessons: 0, maxL: 0, steps: 0, maxSteps: 0, sec: 0, maxSec: 0, maxQ: 0 };
+function play(label, start) {
+  cap = null; start();
+  let remSeen = 0, R = 0, L = 0, Q = 0, sec = 0, guard = 0, total = null, lessonIds = [], afterLesson = false;
+  while (guard++ < 30) {
+    const card = app.querySelector(".lesson-card");
+    if (card) {
+      L++; const eb = app.querySelector(".eyebrow").textContent;
+      ok(/^(Nouvelle notion|Rappel de cours) [·×] étape \d+ sur \d+/.test(eb), label + " : libellé de leçon « " + eb + " »");
+      ok(!/Révision/.test(eb), label + " : « Révision » sur une leçon");
+      total = +eb.match(/sur (\d+)/)[1];
+      lessonIds.push(session.plan[session.i].split("|")[0]);
+      const pc = app.querySelector("#pc button");
+      if (pc) { pc.click();
+        ok(app.querySelector("#s2").hidden, label + " : défis affichés d'office dans la séance");
+        ok(app.querySelector("#tryopt") && !app.querySelector("#tryopt").hidden, label + " : bouton des défis facultatifs");
+        { const A = ACTIVE[lessonIds[lessonIds.length - 1]] || {}; sec += 60 + (app.querySelector("#s2").hidden ? 0 : 35 * ((A.defis || []).length + (Array.isArray(A.plus) ? A.plus.length : 0))); }
+      } else sec += 40;
+      const go = document.getElementById("go"); ok(go && !go.hidden, label + " : « J'ai compris » visible");
+      cap = null; go.click(); afterLesson = true; continue;
+    }
+    if (!cap || !document.querySelector(".qtext")) break;
+    const { q, o } = cap; cap = null; Q++;
+    const eb = (app.querySelector(".eyebrow") || {}).textContent || "", m = eb.match(/(\d+) sur (\d+)/);
+    /* une question de remédiation (« Une base à consolider », après deux échecs) s'ajoute en cours de séance : le total grandit d'autant */
+    const rem = session.plan.filter((e) => String(e).endsWith("|rem")).length;
+    if (m) { total = total || +m[2]; ok(+m[2] === total + rem - remSeen, label + " : total qui change " + eb); total = +m[2]; remSeen = rem; }
+    const id = q.id || session.plan[session.i].split("|")[0], kind = String(session.plan[session.i]).split("|")[2] || "";
+    if (/Révision/.test(eb)) ok(state.notions[id] && state.notions[id].seen > 0, label + " : « Révision » sur une notion jamais vue (" + id + ")");
+    if (afterLesson) { ok(typeof lessonEcho !== "function" || !lessonEcho(id, q), label + " : question après la leçon " + id + " avec les nombres de la leçon : " + String(q.q).replace(/<[^>]*>/g, "").slice(0, 80));
+      ok(/Nouvelle notion/.test(eb) || session.free || !session.fmt, label + " : question après la leçon libellée « " + eb + " »"); afterLesson = false; }
+    if (kind === "rem") R++; else sec += q.d === 4 ? 180 : T[kind] || 50;
+    const solved = Math.random() < 0.7;
+    o.onDone({ tries: 1, solved, dontKnow: false, ans: "1" });
+    o.onNext(false);
+  }
+  ok(L <= 1, label + " : " + L + " leçons dans la séance (" + lessonIds.join(", ") + ")");
+  const steps = L + Q; Q -= R; /* la remédiation (adaptative) n'entre pas dans la durée visée */
+  stats.n++; stats.lessons += L; stats.maxL = Math.max(stats.maxL, L); stats.steps += steps; stats.maxSteps = Math.max(stats.maxSteps, steps);
+  stats.sec += sec; stats.maxSec = Math.max(stats.maxSec, sec); stats.maxQ = Math.max(stats.maxQ, Q);
+  ok(sec <= 330, label + " : durée estimée " + Math.round(sec) + " s");
+  ok(Q <= 6 && (L === 0 || Q <= 5), label + " : " + L + " leçon + " + Q + " questions");
+  ok(!total || total === steps, label + " : compteur " + total + " pour " + steps + " étapes");
+}
+const PROFILES = [["9e", { system: "CH", grade: 9, track: "college" }], ["11e", { system: "CH", grade: 11, track: "college" }],
+  ["1re Collège", { system: "CH", grade: 12, track: "college" }], ["MP 2e", { system: "CH", grade: 13, track: "mp" }],
+  ["FR 4e", { system: "FR", grade: 8 }], ["11e début d'année", { system: "CH", grade: 11, track: "college" }, true]];
+try {
+  for (const [lab, prof, rentree] of PROFILES) {
+    state = Engine.newState({ ...prof, minutes: 5 }); Engine.autoInit(state); state.placed = true; state.tourDone = true;
+    /* début d'année : toutes les notions de l'année ouvertes d'un coup, jamais travaillées ; positionnement raté sur 3 anciennes */
+    if (rentree) { for (const [id, s] of Object.entries(state.notions)) if (s.status === "avenir") Object.assign(s, { status: "encours", m: 0.4 });
+      Object.keys(state.notions).filter((id) => state.notions[id].status === "vu" && LESSONS[id]).slice(0, 3).forEach((id) => Object.assign(state.notions[id], { m: 0.3, placed: true })); }
+    const nowCh = typeof nowChapters === "function" ? nowChapters() : [];
+    if (nowCh.length) Engine.setNow(state, nowCh[0].ids.slice(0, 4));
+    for (let k = 0; k < 12; k++) {
+      const f = Object.keys(FORMATS)[k % Object.keys(FORMATS).length];
+      if (k % 6 === 5) play(lab + " libre", startFree);
+      else { state.today = { date: day(), f }; play(lab + " " + f, startSession); }
+    }
+  }
+  /* hors séance : parcours complet (défis d'office) */
+  state = Engine.newState({ system: "CH", grade: 9, track: "college", minutes: 5 }); Engine.autoInit(state);
+  screenLesson("prio", () => 0, true); app.querySelector("#pc button").click();
+  ok(!app.querySelector("#s2").hidden && !app.querySelector("#tryopt"), "rappel de cours : défis d'office");
+  /* visite guidée : bouton « Suivant » à la même place à chaque bulle ; un toucher à côté ne déclenche rien dessous */
+  state = Engine.newState({ system: "CH", grade: 11, track: "college", minutes: 5 }); Engine.autoInit(state); state.placed = true; state.tourDone = false;
+  homeTab = "today"; screenHome(); if (!document.getElementById("tour") && typeof tourShow === "function") tourShow();
+  const pos = []; for (let k = 0; k < TOUR.length; k++) { const b = document.getElementById("tournext"); if (!b) break; const r = b.getBoundingClientRect(); pos.push([Math.round(r.left), Math.round(r.bottom)]);
+    const tw = document.getElementById("tour"), ev = new MouseEvent("click", { bubbles: true, cancelable: true }); let hit = false; const spy = () => (hit = true); document.addEventListener("click", spy);
+    tw.dispatchEvent(ev); document.removeEventListener("click", spy);
+    ok(!hit && document.getElementById("tour") && app.querySelector(".hub"), "visite : un toucher à côté passe à travers (bulle " + (k + 1) + ")");
+    const hi = app.querySelector(".tour-hi"), cr = tw.querySelector(".tour-card").getBoundingClientRect();
+    if (hi) { const h = hi.getBoundingClientRect(); ok(h.top < cr.top && h.bottom > 0, "visite : élément de la bulle " + (k + 1) + " visible au-dessus de la carte"); }
+    if (k + 1 < TOUR.length) b.click(); }
+  ok(pos.length === TOUR.length && pos.every((p) => p[0] === pos[0][0] && p[1] === pos[0][1]), "visite : « Suivant » à la même place " + JSON.stringify(pos));
+  document.getElementById("tourskip").click();
+} catch (e) { fails.push("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }
+const r = (x) => (Math.round(x * 10) / 10).toString().replace(".", ",");
+const mes = stats.n + " séances · leçons/séance " + r(stats.lessons / stats.n) + " (max " + stats.maxL + ") · étapes " + r(stats.steps / stats.n) + " (max " + stats.maxSteps + ", questions max " + stats.maxQ + ") · durée estimée " + r(stats.sec / stats.n / 60) + " min (max " + r(stats.maxSec / 60) + ")";
+document.getElementById("out").textContent = fails.length ? "ÉCHEC " + mes + "\n" + fails.slice(0, 15).join("\n") : "ok séance courte : " + mes;
+</script>

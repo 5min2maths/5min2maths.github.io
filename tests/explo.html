@@ -47,7 +47,7 @@ try{
  /* 24.11 : leçon active arrivée après l'affichage du rappel (paquet chargé en arrière-plan) */
  if(typeof ACTIVE!=="undefined"&&ACTIVE.pyth){const A=ACTIVE.pyth;delete ACTIVE.pyth;app.innerHTML=lessonDetails("pyth");bindLessonOpen(app);const d=app.querySelector("details.lesson");d.open=true;d.dispatchEvent(new Event("toggle"));ACTIVE.pyth=A;window.dispatchEvent(new Event("m2m-pack"));ok(!!d.querySelector(".act-inline"),"rappel mis à jour quand la leçon active arrive");}
  /* 24.11 : accord pour les statistiques (option A) : rien n'est envoyé sans « Oui » ; carte tant que pas de réponse */
- try{localStorage.removeItem("m2m-stats");}catch(e){} ok(!statsOk()&&!canSend(),"sans accord : rien n'est envoyé"); homeTab="today";screenHome(); ok(!!document.getElementById("statscard"),"carte d'accord affichée");
+ try{localStorage.removeItem("m2m-stats");}catch(e){} ok(!statsOk()&&!canSend(),"sans accord : rien n'est envoyé"); homeTab="today";delete state.firstDone;state.history=[];screenHome(); ok(!document.getElementById("statscard"),"pas de carte d'accord avant la première séance terminée (25.11)"); state.firstDone=true;screenHome(); ok(!!document.getElementById("statscard"),"carte d'accord affichée");
  document.getElementById("statsnon").click(); ok(statsAsked()&&!statsOk()&&!document.getElementById("statscard"),"« Non merci » : plus de carte, rien d'envoyé");
  statsSet(true); ok(statsOk(),"accord enregistré");
  homeTab="prog";screenHome();const cb=document.getElementById("comps");ok(cb&&cb.classList.contains("btn-primary"),"bouton compétences bleu");

@@ -4,7 +4,7 @@
 <script>const log=[];const click=(s)=>{const e=document.querySelector(s);if(!e){log.push("MANQUE "+s);return false;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));return true;};
 // Chaque défi : on fait varier le curseur (d'abord vers le haut, puis vers le bas) jusqu'à ce que le message change.
 const gfb=()=>document.querySelector('#gfb').textContent;
-const C=[];for(let v=-12;v<=120;v++)C.push(v);
+const C=[];for(let v=-12;v<=400;v++)C.push(v); /* 25.11 : jusqu'à 400 (airepyr : aire totale 384 cm², défi qui mêle hauteur et apothème) */
 const seek=()=>{const b=gfb();const inp=()=>document.querySelector(".act-in");
 if(inp()){for(const v of C){const el=inp();if(!el)return gfb()!==b;el.value=String(v);click("[data-go]");if(gfb()!==b)return true;}return false;}for(let i=0;i<70;i++){click('[data-st="x"][data-d="1"]');if(gfb()!==b)return true;}for(let i=0;i<160;i++){click('[data-st="x"][data-d="-1"]');if(gfb()!==b)return true;}return false;};
 const run=(id)=>{ try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; screenLesson(id,()=>{});
