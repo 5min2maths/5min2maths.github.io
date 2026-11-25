@@ -1,0 +1,55 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css"><link rel="stylesheet" href="../src/parents.css"><link rel="stylesheet" href="../src/presente.css">
+<style>body{margin:0}#app{width:360px;max-width:360px;box-sizing:border-box}</style>
+<main id="app"></main><pre id="out">en cours</pre>
+<script>if (/shot=/.test(location.search)) { window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "global" } }; document.write('<script src="../docs/vendor/mathjax/tex-svg.js"><\/script>'); } else window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}
+/* Aucun envoi réseau depuis l'espace parent : fetch et sendBeacon espionnés. */
+window.__net = []; const _f = window.fetch; window.fetch = (...a) => { window.__net.push(String(a[0])); return Promise.resolve(new Response("{}")); };
+if (navigator.sendBeacon) navigator.sendBeacon = (u) => { window.__net.push(String(u)); return true; };
+window.__packs = []; window.ensurePacks = (p) => { window.__packs.push(JSON.stringify(p)); return Promise.resolve(); };
+</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch2c.js"></script><script src="../src/fr_college.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/parents.js"></script><script src="../src/presente.js"></script><script src="../src/app.js"></script>
+<script>
+// Supports de présentation (25.11) : …/#decouvrir (élèves) et …/#parents ; vraie question, indices, mode présentation, 360 px, aucun envoi.
+const fails = [], ok = (c, m) => { if (!c) fails.push(m); }, log = [];
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+async function until(f, ms = 4000) { const t0 = Date.now(); while (Date.now() - t0 < ms) { try { const v = f(); if (v) return v; } catch (e) {} await wait(30); } return null; }
+const over = (root) => [...root.querySelectorAll("*")].filter((e) => e.scrollWidth > e.clientWidth + 1 && !["auto", "scroll"].includes(getComputedStyle(e).overflowX) && e.clientWidth > 0 && !e.closest("mjx-container, .figwrap, .fab-cmt, .keypad") && !e.matches(".brand")).map((e) => (e.className || e.tagName) + " " + e.scrollWidth + "/" + e.clientWidth); /* .brand : 3 px de la bulle 💬 accrochée au titre, comme sur les autres écrans */
+const txt = () => app.textContent.replace(/\s+/g, " ");
+(async () => {
+  try {
+    /* 1. Élèves */
+    history.replaceState(null, "", "#decouvrir"); ok(presentRoute() === true, "route #decouvrir");
+    ok(app.querySelectorAll(".pz-s").length >= 6, "sections élèves : " + app.querySelectorAll(".pz-s").length);
+    ok(app.querySelector("#pztry .qtext") && app.querySelector("#pztry .qtext").textContent.trim(), "vraie question affichée");
+    ok(app.querySelector(".pz-qr svg"), "QR code");
+    for (const g of [9, 10, 11, 12]) {
+      app.querySelector(`#pzg1 button[data-v="${g}"]`).click();
+      ok(app.querySelector("#pztry .qtext").textContent.trim(), "question en " + g);
+      document.getElementById("pzans").value = "987654"; document.getElementById("pzok").click();
+      ok(document.getElementById("pzfb").textContent.trim(), "retour après une réponse fausse (" + g + ")");
+      const gb = document.getElementById("pzg"); if (gb) { gb.click(); ok(document.getElementById("pzgb").textContent.trim(), "aide pas à pas (" + g + ")"); }
+    }
+    ok(!over(app).length, "élèves : rien ne dépasse à 360 px : " + over(app).slice(0, 4).join(", "));
+    app.querySelector(".pz-play").click(); ok(document.body.classList.contains("pz-on"), "mode présentation");
+    app.querySelector(".pz-play").click(); ok(!document.body.classList.contains("pz-on"), "fin du mode présentation");
+    log.push("élèves ok");
+    /* 2. Parents */
+    history.replaceState(null, "", "#parents"); ok(presentRoute() === true, "route #parents");
+    ok(app.querySelectorAll(".pz-s").length >= 7, "sections parents");
+    ok(/accompagner, pas surveiller/.test(txt()) && /ne verrez pas/.test(txt()), "ton : accompagner, ce qui n'est pas montré");
+    for (const g of [9, 11, 12]) {
+      app.querySelector(`#pzg2 button[data-v="${g}"]`).click();
+      ok(app.querySelector("#pzsolve .qtext").textContent.trim(), "problème parent en " + g);
+      const hb = document.getElementById("pzhint");
+      if (hb) { hb.click(); ok(app.querySelectorAll("#pzhints .pz-hint").length === 1, "1er indice dévoilé (" + g + ")"); }
+      ok(app.querySelector("#pzsolve .par-sol"), "solution repliée (" + g + ")");
+    }
+    ok(!over(app).length, "parents : rien ne dépasse à 360 px : " + over(app).slice(0, 4).join(", "));
+    document.getElementById("pzgot").click(); await wait(50); ok(location.hash === "#parent", "J'ai reçu un lien → #parent");
+    history.replaceState(null, "", location.pathname);
+    ping("open"); ok(!window.__net.length, "aucun envoi réseau : " + window.__net.join());
+    log.push("parents ok");
+  } catch (e) { fails.push("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }
+  document.getElementById("out").textContent = fails.length ? "ÉCHEC " + fails.join("\n") : "ok présentation : " + log.join(" | ");
+})();
+</script>

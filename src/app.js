@@ -270,7 +270,7 @@ function screenWelcome() {
   <button class="btn-primary btn-big" id="go">Commencer</button>
   <button class="btn-ghost" id="restore">J'ai déjà un code de sauvegarde</button>
   <button class="btn-ghost small" id="privacy">🔒 Ce que l'app envoie</button>
-  <p class="small muted"><a href="#" id="legal-lien">Mentions légales et confidentialité</a></p>`);
+  <p class="small muted"><a href="#parents">👪 Je suis parent</a> · <a href="#decouvrir">Découvrir l'app</a> · <a href="#" id="legal-lien">Mentions légales et confidentialité</a></p>`);
   const inp = document.getElementById("dans"), prev = document.getElementById("dprev"), fb = document.getElementById("dfb");
   const show = () => previewOf(inp, prev, q.spec);
   inp.oninput = show;
@@ -733,7 +733,7 @@ function screenSettings() {
     <span class="small muted" id="st-l">Statistiques anonymes pour améliorer l'app</span><div class="seg" id="statsset" role="group" aria-labelledby="st-l"><button aria-pressed="${statsOk()}" data-v="1">J'aide</button><button aria-pressed="${!statsOk()}" data-v="0">Ne rien envoyer</button></div>
     <span class="small muted">Vibrer à chaque réponse (téléphone)</span><div class="seg" id="vib"><button aria-pressed="${UI.vib}" data-v="1">Oui</button><button aria-pressed="${!UI.vib}" data-v="0">Non</button></div></div>
   ${installCard("")}
-  <button class="btn-sec" id="backup">💾 Sauvegarder ou transférer ma progression</button><button class="btn-sec" id="level">Changer de classe ou d'école</button><button class="btn-sec" id="privacy">🔒 Ce que l'app envoie</button><button class="btn-ghost small" id="legal">Mentions légales et confidentialité</button>
+  <button class="btn-sec" id="backup">💾 Sauvegarder ou transférer ma progression</button><button class="btn-sec" id="level">Changer de classe ou d'école</button><button class="btn-sec" id="present" onclick="location.hash='#decouvrir'">📣 Présenter l'app (élèves)</button><button class="btn-sec" onclick="location.hash='#parents'">👪 Présenter l'app (parents)</button><button class="btn-sec" id="privacy">🔒 Ce que l'app envoie</button><button class="btn-ghost small" id="legal">Mentions légales et confidentialité</button>
   ${isAuthor() ? '<button class="btn-primary" id="stats">📊 Statistiques d\'usage (auteur)</button>' : ""}
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div>
   <button class="btn-primary" id="back">Retour</button></div>`);
@@ -2293,6 +2293,7 @@ function screenSummary() {
 // Consultation d'une question par son code : adresse …/#q-eq2disc-2-k3f (rien n'est enregistré).
 function showCode() {
   /* Mentions légales (24.11) : lien direct …/#confidentialite, à donner aux parents */
+  if (typeof presentRoute === "function" && presentRoute()) return true; /* 25.11 : présentations …/#decouvrir (élèves) et …/#parents (src/presente.js) */
   if (typeof parentRoute === "function" && parentRoute()) return true; /* 24.11 : espace parent, …/#parent=<code> (src/parents.js) */
   if (location.hash === "#confidentialite") { screenLegal(() => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); }); return true; }
   // Consultation d'une leçon (active ou rappel) : …/#l-vitesse (lien du tableau de suivi, 15.11).
