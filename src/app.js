@@ -857,28 +857,32 @@ function screenComps() {
 
 /* 25.11 (règle de l'enseignant : chaque système a son référentiel) : Collège de Genève = compétences officielles du
    référentiel (src/ref_matu.js), groupées par thème et notion du référentiel, code discret, intitulé officiel ; MA2 retiré
-   en MA1. Note calculée à la volée depuis state.comps (Referentiel.note) ; sans question rattachée : « travaillée en classe ». */
+   en MA1. Note calculée à la volée depuis state.comps (Referentiel.note) ; sans question rattachée : « travaillée en classe ».
+   25.11 (phase France) : profil France = items officiels de sa classe (src/ref_fr.js), pastilles LSU sans chiffre,
+   « travaillé en classe » pour les items non saisissables ; au lycée, 2nde et collège repliés à part. */
 function screenCompsRef() {
-  const p = state.profile, y0 = Referentiel.year(p);
+  const p = state.profile, y0 = Referentiel.year(p), fr = Referentiel.isFR(p), W = fr ? "positionnées" : "notées";
   const line = (r) => {
-    if (!Referentiel.hasQuestions(r)) return `<div class="comp rcomp"><span><span class="rcode">${r.code}</span> ${esc(r.label)}</span><span class="comp-r"><span class="tag">travaillée en classe</span></span></div>`;
+    if (!Referentiel.hasQuestions(r)) return `<div class="comp rcomp"><span title="${r.code}">${esc(r.label)}</span><span class="comp-r"><span class="tag">${fr ? "travaillé en classe" : "travaillée en classe"}</span></span></div>`;
     const n = Referentiel.note(state, r), t = Referentiel.plan(p, r).length;
-    return `<div class="comp rcomp"><span><span class="rcode">${r.code}</span> ${esc(r.label)}</span><span class="comp-r">${t ? `<button type="button" class="ctest rtest" data-code="${r.code}" title="3 questions sur cette compétence">Me tester</button>` : ""}<span class="note ${noteCls(n)}">${noteTxt(n)}</span></span></div>`;
+    return `<div class="comp rcomp"><span title="${r.code}">${esc(r.label)}</span><span class="comp-r">${t ? `<button type="button" class="ctest rtest" data-code="${r.code}" title="3 questions sur cette compétence">Me tester</button>` : ""}<span class="note ${noteCls(n)}">${noteTxt(n)}</span></span></div>`;
   };
   const themes = (list) => [...new Set(list.map((r) => r.theme))].map((th) => {
     const rs = list.filter((r) => r.theme === th), t = Referentiel.stats(state, rs);
-    return `<div class="card flat"><div class="spread"><h3>${esc(th)}</h3><span class="small muted">${t.tested} / ${t.total} notées</span></div>${[...new Set(rs.map((r) => r.notion))].map((no) => `<div class="cnotion"><b>${esc(no)}</b>${rs.filter((r) => r.notion === no).map(line).join("")}</div>`).join("")}</div>`;
+    return `<div class="card flat"><div class="spread"><h3>${esc(th)}</h3><span class="small muted">${t.tested} / ${t.total} ${W}</span></div>${[...new Set(rs.map((r) => r.notion))].map((no) => `<div class="cnotion">${no ? `<b>${esc(no)}</b>` : ""}${rs.filter((r) => r.notion === no).map(line).join("")}</div>`).join("")}</div>`;
   }).join("");
-  const cur = Referentiel.list(p), st = Referentiel.stats(state, cur), nq = cur.filter(Referentiel.hasQuestions).length;
-  const olds = Referentiel.years(p).filter((y) => y < y0).reverse();
+  const cur = Referentiel.list(p), st = Referentiel.stats(state, cur), nq = cur.filter(Referentiel.hasQuestions).length, k = st.total - nq;
+  const olds = Referentiel.olds(p);
   const tr = Referentiel.track(p);
+  const hint = !k ? "" : fr ? `${k} attendu${k > 1 ? "s" : ""} (constructions, démonstrations, programmation…) ${k > 1 ? "sont travaillés" : "est travaillé"} en classe, sans niveau ici.`
+    : `${k} compétence${k > 1 ? "s" : ""} (démonstrations, constructions, représentations…) ${k > 1 ? "sont travaillées" : "est travaillée"} en classe, sans note ici.`;
   Badges.check(state); state.badgesNew = []; save();
   h(`${brand}${backTop()}<h2>Mes <span class="mark">compétences</span></h2>
-  <p class="muted">Les compétences officielles du programme du ${Referentiel.title(p)}. Chacune reçoit une note de 1 à 6 dès que tu as répondu 3 fois à ses questions. La note suit tes 8 dernières réponses : elle monte quand tu progresses.</p>
+  <p class="muted">${Referentiel.intro(p)}</p>
   ${badgesSection()}
-  <div class="card flat"><div class="spread"><span>${Referentiel.yearLabel(p, y0)}${tr ? " · " + tr : ""}</span><b>${st.tested} / ${st.total} notées${avgTxt(st.avg)}</b></div>${nq < st.total ? `<p class="small muted">${st.total - nq} compétence${st.total - nq > 1 ? "s" : ""} (démonstrations, constructions, représentations…) ${st.total - nq > 1 ? "sont travaillées" : "est travaillée"} en classe, sans note ici.</p>` : ""}</div>
+  <div class="card flat"><div class="spread"><span>${Referentiel.yearLabel(p, y0)}${tr ? " · " + tr : ""}</span><b>${st.tested} / ${st.total} ${W}${avgTxt(st.avg)}</b></div>${hint ? `<p class="small muted">${hint}</p>` : ""}</div>
   ${themes(cur)}
-  ${olds.length ? `<details class="olds"><summary>Années précédentes (${olds.map((y) => Referentiel.stats(state, Referentiel.list(p, y)).tested).reduce((a, b) => a + b, 0)} notées)</summary>${olds.map((y) => `<h3 class="ryear">${Referentiel.yearLabel(p, y)}</h3>${themes(Referentiel.list(p, y))}`).join("")}</details>` : ""}
+  ${olds.map(([lab, ys]) => `<details class="olds"><summary>${lab} (${ys.map((y) => Referentiel.stats(state, Referentiel.list(p, y)).tested).reduce((a, b) => a + b, 0)} ${W})</summary>${ys.map((y) => `<h3 class="ryear">${Referentiel.yearLabel(p, y)}</h3>${themes(Referentiel.list(p, y))}`).join("")}</details>`).join("")}
   <button class="btn-primary btn-big" id="back">Retour</button>`);
   bindBadges(app);
   app.querySelectorAll(".rtest").forEach((b) => (b.onclick = () => {
