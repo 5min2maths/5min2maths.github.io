@@ -5,7 +5,7 @@
   const DETAIL = /detail/.test(location.hash), SANSPZ = /sanspz/.test(location.hash), SANSQ = /sansq/.test(location.hash), ONLYPZ = /onlypz/.test(location.hash);
   const CH_MARK = [[/Genève|genevois/i, "Genève"], [/romand/i, "romand"], [/\bPER\b/, "PER"], [/\bCO\b|Cycle d'orientation|du Cycle\b/, "CO"], [/maturité|\bMP\b|\bmatu\b/i, "maturité/MP"],
     [/\bCHF\b|\bfrancs?\b/, "CHF"], [/(?<![\d^{])\b(9|10|11)e\b(?![\^{])/, "9e–11e"], [/évaluation bilan|EVACOM|épreuves? communes?/i, "épreuve romande"], [/Collège de Genève|\bau Collège\b|du Collège\b/, "Collège GE"],
-    [/\bPGDC|\bPPMC|cathète/, "vocabulaire suisse"], [/note de 1 à 6|de 1 à 6/, "notes 1–6"], [/Sésamath|HarmoS|plan d'études/i, "référentiel suisse"]];
+    [/\bPGDC|\bPPMC|cathète/, "vocabulaire suisse"], [/notes? de 1 à 6|note \(1 à 6\)|notes suisses/, "notes 1–6"], [/Sésamath|HarmoS|plan d'études/i, "référentiel suisse"]];
   const FR_MARK = [[/€/, "€"], [/brevet|\bDNB\b/i, "brevet"], [/lycée|\b2nde\b|\bTle\b|terminale/i, "lycée"], [/Éducation nationale|académie|Bulletin officiel/i, "institution FR"], [/\bBO\b/, "institution FR"],
     [/\bPGCD\b|\bPPCM\b/, "vocabulaire FR"], [/maîtrise (insuffisante|fragile|satisfaisante)|\bLSU\b/i, "LSU"], [/collégien/i, "collégien"], [/épreuve anticipée/i, "épreuve anticipée"]];
   const PROFILES = [["FR 6e", { system: "FR", grade: 6, track: "college" }], ["FR 3e", { system: "FR", grade: 9, track: "college" }], ["FR 2nde", { system: "FR", grade: 10, track: "college" }], ["FR Tle", { system: "FR", grade: 12, track: "college" }],
