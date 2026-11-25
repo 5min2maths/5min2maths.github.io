@@ -319,3 +319,18 @@ Mécanismes ajoutés (sans effet pour un profil suisse, contrôlé par `tests/fr
 MP qu'avant) : `HORS_FR` (formes d'une notion partagée hors programme d'une classe française), `UPFR` (niveau minimal des
 notions reprises en 4e, 3e, 2nde, 1re), champ `q.fr` (forme réservée à des classes françaises), dans `src/engine.js` ;
 tables dans `src/fr_couv.js`.
+
+## Derniers manques comblés (25.11 au soir, branche `agent/frfin`)
+
+| Classe | Avant | Après | Ce qui a changé |
+|---|---|---|---|
+| 6e | 77 % | 90 % | `symax` (symétrie axiale), `mediatrice`, `echelle6` (échelles ; `echelle` mélange aires et volumes de 4e), `proba6` (premiers pas ; `proba` est de 5e) |
+| 5e | 90 % | 93 % | `empil` (empilements de cubes, vues) ; `progcalc` passe de la 4e à la 5e (formes de 4e écartées par `HORS_FR`) |
+| 2nde | 95 % | 98 % | `compdiff` (comparer par différence ou quotient, AU.01, NC.10) |
+| 1re | 95 % | 96 % | `posrelc` (position relative de deux courbes, AN.09) |
+| Tle | 91 % | 95 % | `intmaj` (majorer, encadrer une intégrale, AN.24), `suiteint` (suites d'intégrales, AN.26) |
+
+Notions dans `src/fr_fin.js`, leçons actives (curseurs) dans `src/fr_act.js`, contrôles `tests/frfin.html` et
+`tests/act_frfin.html`. Notes scolaires : pour un profil français, les questions de `statfreq`, `stats`, `diagr`, `probeq`
+à notes suisses (1 à 6) sont remplacées par des notes sur 20 (`FR_NOTES`, lu par `Engine.finalize`) ; profils suisses
+inchangés. Reste : leçons actives suisses de moyenne (`act_9b.js`, `act_manip2.js` : « notes 6 ; 6 ; 3 ») non localisées.

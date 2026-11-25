@@ -20,9 +20,10 @@ NOM = {6: "6e", 7: "5e", 8: "4e", 9: "3e", 10: "2nde", 11: "1re spécialité", 1
 
 MAP = {
     # 6e (cycle 3, 2025)
-    "6e.NC.26": ["decdiv", "multdiv"], "6e.NC.42": ["prop", "fractout"], "6e.NC.43": ["motifs"], "6e.DP.04": ["diagr"],
+    "6e.NC.26": ["decdiv", "multdiv"], "6e.EG.02": ["mediatrice"], "6e.EG.06": ["mediatrice"], "6e.EG.07": ["mediatrice"], "6e.EG.08": ["mediatrice"], "6e.EG.17": ["mediatrice"],
+    "6e.EG.19": ["symax"], "6e.EG.20": ["symax"], "6e.DP.05": ["proba6"], "6e.DP.06": ["proba6"], "6e.DP.07": ["proba6"], "6e.PF.05": ["echelle6"], "6e.NC.42": ["prop", "fractout"], "6e.NC.43": ["motifs"], "6e.DP.04": ["diagr"],
     # 5e (2026)
-    "5e.NC.33": ["automat"], "5e.NC.47": ["automat"], "5e.NC.55": ["motifs"], "5e.NC.56": ["motifs"], "5e.NC.57": ["motifs"], "5e.NC.58": ["automat"], "5e.NC.62": ["structexpr"],
+    "5e.NC.11": ["tradexpr", "progcalc"], "5e.EG.05": ["empil"], "5e.EG.06": ["empil"], "5e.EG.25": ["mediatrice"], "5e.EG.28": ["mediatrice"], "5e.NC.33": ["automat"], "5e.NC.47": ["automat"], "5e.NC.55": ["motifs"], "5e.NC.56": ["motifs"], "5e.NC.57": ["motifs"], "5e.NC.58": ["automat"], "5e.NC.62": ["structexpr"],
     # 4e (attendus 2019)
     "4e-2019.NC.21": ["premiers"], "4e-2019.NC.22": ["structexpr"], "4e-2019.NC.25": ["probeq", "progcalc"], "4e-2019.EG.07": ["thales4e", "cos4e", "pyth"],
     "4e-2019.PF.04": ["prop", "agrand", "ratio"],
@@ -30,7 +31,7 @@ MAP = {
     "3e-2019.NC.02": ["fracops", "autodnb"], "3e-2019.NC.07": ["premiers", "divcrit"], "3e-2019.NC.10": ["idrem", "factor", "autodnb"],
     "3e-2019.PF.01": ["linfn"], "3e-2019.PF.12": ["linfn"], "3e-2019.PF.09": ["affine", "linfn"], "3e-2019.PF.02": ["pctvar", "linfn"],
     # 2nde (2026)
-    "2nde.AP.03": ["algopy"], "2nde.AP.06": ["algopy"], "2nde.AP.07": ["algopy", "stats"], "2nde.AP.08": ["algopy"], "2nde.NC.10": ["ratio", "tauxevol"],
+    "2nde.AP.03": ["algopy"], "2nde.AP.06": ["algopy"], "2nde.AP.07": ["algopy", "stats"], "2nde.AP.08": ["algopy"], "2nde.NC.10": ["ratio", "tauxevol", "compdiff"], "2nde.AU.01": ["compdiff"],
     "2nde.GE.01": ["vect3e"], "2nde.GE.02": ["vect3e"], "2nde.GE.03": ["vect3e"], "2nde.GE.05": ["vect3e"], "2nde.GE.06": ["vect3e", "vecgeo"], "2nde.GE.07": ["vect3e", "cart"],
     "2nde.GE.08": ["droites", "vect3e"], "2nde.GE.09": ["droites", "vect3e"], "2nde.AN.08": ["tabvar", "lectgraph"], "2nde.AN.09": ["tabvar", "lectgraph"],
     "2nde.AN.05": ["tabsignes", "ineq1"], "2nde.SP.05": ["stats", "diagr"], "2nde.SP.07": ["probcond"], "2nde.SP.11": ["probcond"], "2nde.SP.12": ["probcond", "proba2"],
@@ -40,7 +41,7 @@ MAP = {
     "1re.AU.15": ["stats", "quartiles"], "1re.AU.16": ["probcond", "probtot"], "1re.AU.17": ["probcond", "probtot"],
     "1re.AL.01": ["suitedef"], "1re.AL.02": ["suitedef", "suitearith", "suitegeo"], "1re.AL.04": ["suitearith", "suitegeo", "suitesomme"], "1re.AL.05": ["suitearith", "suitegeo"],
     "1re.AN.01": ["tauxvar"], "1re.AN.02": ["nbderive", "tangente"], "1re.AN.04": ["tangente"], "1re.AN.05": ["tangente"], "1re.AN.06": ["derivref", "derivregles", "derivprodquot"],
-    "1re.AN.07": ["variations"], "1re.AN.08": ["optimderiv", "optim"], "1re.AN.09": ["variations"], "1re.AN.10": ["variations", "f2"], "1re.AN.11": ["expfn"], "1re.AN.12": ["expderiv"],
+    "1re.AN.07": ["variations"], "1re.AN.09": ["variations", "posrelc"], "1re.AN.08": ["optimderiv", "optim"], "1re.AN.10": ["variations", "f2"], "1re.AN.11": ["expfn"], "1re.AN.12": ["expderiv"],
     "1re.AN.13": ["expderiv"], "1re.AN.14": ["expderiv", "suitegeo"], "1re.AN.15": ["trigrad"], "1re.AN.16": ["trigrad"],
     "1re.GE.02": ["pscal"], "1re.GE.03": ["pscal"], "1re.GE.04": ["droitenorm"], "1re.GE.05": ["droitenorm"], "1re.GE.08": ["droitenorm", "pscal", "cart"],
     "1re.SP.01": ["probtot", "condbayes"], "1re.SP.04": ["probarbre"], "1re.SP.07": ["vaesp", "varalea"], "1re.SP.08": ["vaesp", "varalea"], "1re.SP.09": ["vaesp", "varalea"],
@@ -52,12 +53,14 @@ MAP = {
     "Tle.AN.06": ["derivcomp", "lnexp"], "Tle.AN.10": ["derivseconde"], "Tle.AN.11": ["tvi"], "Tle.AN.12": ["tvi", "suitelim"], "Tle.AN.13": ["lnfr", "lnexp"],
     "Tle.AN.14": ["lnfr", "etudelnexp", "croissance"], "Tle.AN.15": ["trigfr"], "Tle.AN.16": ["trigfr"], "Tle.AN.17": ["trigfr"], "Tle.AN.18": ["trigfr"],
     "Tle.AN.19": ["primitives"], "Tle.AN.20": ["eqdiff"], "Tle.AN.21": ["eqdiff"], "Tle.AN.22": ["integrale"], "Tle.AN.23": ["integrale", "intparties"],
-    "Tle.AN.24": [], "Tle.AN.25": ["aireint"], "Tle.AN.26": [], "Tle.AN.27": ["integrale"],
+    "Tle.AN.24": ["intmaj"], "Tle.AN.25": ["aireint"], "Tle.AN.26": ["suiteint"], "Tle.AN.27": ["integrale"],
     "Tle.SP.01": ["probarbre", "binom"], "Tle.SP.02": ["binom", "binomiale"], "Tle.SP.03": ["binom", "binomiale"], "Tle.SP.06": ["sommeva"], "Tle.SP.07": ["sommeva"],
 }
 # Couverture partielle (la notion ne traite qu'une partie de l'attendu)
-PARTIEL = {"6e.NC.42", "6e.NC.26", "3e-2019.NC.07", "2nde.NC.10", "2nde.AP.08", "1re.AN.05", "1re.AN.09", "1re.AN.13", "1re.GE.08", "1re.SP.04", "2nde.SP.10",
+PARTIEL = {"6e.NC.42", "6e.NC.26", "3e-2019.NC.07", "2nde.AP.08", "1re.AN.05", "6e.EG.02", "6e.EG.17", "5e.EG.28", "1re.AN.13", "1re.GE.08", "1re.SP.04", "2nde.SP.10",
            "Tle.AG.06", "Tle.AG.12", "Tle.AN.21", "Tle.AN.12"}
+# Attendu couvert en partie seulement tant que la notion indiquée manque (notions créées par agent/frfin, 25.11 au soir)
+SANS = {"1re.AN.09": "posrelc", "2nde.NC.10": "compdiff"}
 # Non saisissables en plus de ceux du JSON : Python (listes) en Tle
 NS = {"Tle.AP.01", "Tle.AP.02", "Tle.AP.03", "Tle.AP.04"}
 
@@ -76,7 +79,7 @@ def verdict(code, a, grade, cat):
     cur = [i for i in here if cat[grade][i]]
     if not here:
         return "✗", ids
-    if code in PARTIEL:
+    if code in PARTIEL or (code in SANS and SANS[code] not in here):
         return "◐", here
     if cur or a.get("type") == "automatisme":
         return "✅", here
@@ -105,7 +108,7 @@ def main():
             sum(1 for i, c in ap[g].items() if c), len(ap[g])))
         out.append("\n## %s (`%s`, %s)\n\n| Code | Attendu | Notions | Verdict |\n|---|---|---|---|\n%s" % (NOM[g], key, REF[key]["reference"], "\n".join(rows)))
     print(HEAD)
-    print("| Classe | Attendus saisissables | Avant (23–25.11) | Après (agent/frcouv) | Notions de l'année / catalogue |\n|---|---|---|---|---|")
+    print("| Classe | Attendus saisissables | Avant (agent/frcouv) | Après (agent/frfin) | Notions de l'année / catalogue |\n|---|---|---|---|---|")
     print("\n".join(synth))
     print(LEGEND)
     print("\n".join(out))
@@ -114,7 +117,7 @@ def main():
 
 HEAD = """# Couverture du programme français, attendu par attendu (25.11.2026)
 
-Branche `agent/frcouv`. Calculé par `tools/france_couverture.py` à partir des attendus officiels (`tools/referentiels_fr.json` :
+Branches `agent/frcouv` puis `agent/frfin` (25.11 au soir). Calculé par `tools/france_couverture.py` à partir des attendus officiels (`tools/referentiels_fr.json` :
 cycle 3 2025, cycle 4 2026 pour la 5e, attendus 2019 en 4e et 3e — en vigueur en 2026-2027 —, 2nde et 1re 2026, Tle (texte
 2026, très proche du 2019 en vigueur) et du catalogue réel d'un profil français (`Engine.catalog`), avant et après le chantier.
 Décisions, rattachements, retraits et niveau : § final de `tools/france.md` et rapport de l'agent.
@@ -124,8 +127,8 @@ Décisions, rattachements, retraits et niveau : § final de `tools/france.md` et
 LEGEND = """
 Taux = (✅ + ½ ◐) / attendus saisissables. ✅ : une notion du catalogue de la classe entraîne l'attendu (de l'année, ou
 automatisme repris) ; ◐ : couverture partielle, ou seulement en révision d'une année antérieure ; ✗ : rien ; — : non
-saisissable (construction, démonstration, programmation). « avant » = catalogue du 25.11 au matin (après les chantiers
-collège, 2nde et lycée des 22–23.11).
+saisissable (construction, démonstration, programmation). « avant » = catalogue après la branche agent/frcouv
+(25.11 après-midi) ; « après » = branche agent/frfin (25.11 au soir).
 """
 
 FOOT = """
@@ -160,17 +163,32 @@ FOOT = """
   automatismes de l'épreuve anticipée repris en 1re (`againFR` 11). Profils suisses inchangés (test `tests/france.html`).
 - **Vocabulaire** (`frLocal`) : y = mx + p, « côtés de l'angle droit » (cathètes), « ensemble de définition ».
 
+## Ce qui a été fait (25.11 au soir, branche agent/frfin)
+
+- **Créées** (`src/fr_fin.js` ; 3 niveaux, ≥ 3 formes par niveau, pas à pas, pièges, contextes, leçon, compétences, défi de
+  niveau 4 ; leçon active à curseurs dans `src/fr_act.js`) : 6e `symax` (symétrie axiale : axes d'une figure, conservation,
+  quadrillage, droite graduée), `mediatrice` (équidistance, milieu, cercle circonscrit), `echelle6` (plans, cartes,
+  maquettes ; la notion suisse `echelle` mélange aires × k² et volumes × k³, de 4e), `proba6` (dé, sac, roue, fréquences ;
+  `proba`, de 5e, a deux dés et des tirages sans remise) ; 5e `empil` (empilements de cubes, vues de dessus, de face, de
+  droite) ; 2nde `compdiff` (comparer par différence ou par quotient) ; 1re `posrelc` (position relative de deux courbes,
+  signe de f − g) ; Tle `intmaj` (majorer, encadrer une intégrale, rectangles), `suiteint` (suites d'intégrales).
+- **Rattachée** : `progcalc` (programmes de calcul) passe de la 4e à la 5e (5e.NC.11), reprise en 4e et 3e ; formes de 4e
+  écartées en 5e par `HORS_FR` (nombre négatif multiplié, (x + a)², (x + a)(x − a)), deux formes de 5e ajoutées au niveau 3 ;
+  niveau 1 relevé en 4e (`UPFR`).
+- **Notes sur 20** : pour un profil français, `FR_NOTES` (lu par `Engine.finalize`) remplace les questions à notes suisses
+  (1 à 6) de `statfreq`, `stats`, `diagr`, `probeq` par des questions de même niveau et de même graine, notes sur 20.
+- Contrôle : `tests/frfin.html` (générateurs, défis, classes, progcalc en 5e, notes), `tests/act_frfin.html` (leçons actives).
+
 ## Ce qui reste
 
-- 6e : probabilités (`proba` placée en 5e : rattacher ses formes à une épreuve en 6e avec `HORS_FR`), symétrie axiale
-  (`symetries` en 5e), médiatrice, distances à un point, bissectrice (surtout des constructions), échelles (`echelle` en 4e).
-- 5e : tableaux de valeurs et graphiques sans la notation f(x) (`tabval` et `lectgraph` placés en 3e et 4e), vues
-  d'empilements de cubes, entrées et sorties d'un programme.
+- 6e : distances à un point, cercle comme ensemble de points, bissectrice (surtout des constructions) ; filtrer un tableau.
+- 5e : tableaux de valeurs et graphiques sans la notation f(x) (`tabval` et `lectgraph` placés en 3e et 4e) ; hauteurs
+  concourantes.
 - 4e–3e : repérage dans un pavé droit, sur une sphère (latitude, longitude).
-- 2nde : comparer deux nombres par différence ou quotient (AU.01) ; algorithmique de simulation (AP.08).
-- 1re : position relative de deux courbes, inégalités par les variations (AN.09) ; arbre de n ⩽ 4 épreuves de Bernoulli
+- 2nde : algorithmique de simulation (AP.08).
+- 1re : arbre de n ⩽ 4 épreuves de Bernoulli
   (SP.04, en partie dans `probarbre`) ; tracé des courbes de e^(kt) (AN.13, non saisissable).
-- Tle : majorer une intégrale (AN.24), suites d'intégrales (AN.26), équations y' = ay + f (AN.21, en partie) ; Python
+- Tle : équations y' = ay + f (AN.21, en partie) ; Python
   (listes) hors périmètre.
 - Programmes 2026 de 4e (2027-2028) et de 3e (2028-2029) : `vecgeo` et `ineq1` sont déjà en fin de 3e.
 """

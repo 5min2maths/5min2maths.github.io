@@ -586,6 +586,8 @@ const Engine = {
     (q.guide || []).forEach((g) => mark(g.spec, txt0 + " " + (g.ask || ""), g.calcul || q.calcul, true));
     /* 25.11 (audit France, tools/france.md) : profil français : €, milliers 1 200, PGCD, antécédent, factoriser (frLocal,
        src/curriculum.js). Tous les textes de la question ; jamais les réponses attendues (spec, canon, expressions des pièges). */
+    /* 25.11 (soir, couverture France) : notes suisses (1 à 6) remplacées par des notes sur 20 (FR_NOTES, src/fr_fin.js). */
+    if (p && p.system === "FR" && typeof FR_NOTES === "function") { const r = FR_NOTES(id, q); if (r) q = r; }
     if (p && p.system === "FR" && typeof frLocal === "function") {
       const SKIP = new Set(["spec", "canon", "code", "id", "ctx", "e", "expr", "values", "value"]);
       /* copies (jamais de modification en place : une question peut partager des objets avec les tables communes) */
