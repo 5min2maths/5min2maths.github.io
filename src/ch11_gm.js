@@ -171,7 +171,7 @@
       /* 25.11 (revue : « 3, 4 et 4 cm » avec le calcul 4² − (3² + 4²) déjà écrit : trop guidé, sans plus grand côté net) :
          le plus grand côté dépasse nettement les deux autres, les côtés sont dans le désordre, et le calcul n'est pas
          écrit : l'élève repère le plus grand côté et compare son carré à la somme des deux autres. */
-      () => { const [a, b, c] = trip(25), x = c + pk([1, 2, 3]), s = shuf([a, b, x]), e = x * x - a * a - b * b;
+      () => { const [a, b, c] = trip(25), x = c + pk([1, 2, 3]), s = shuf([a, b, x]), e = x * x - a * a - b * b; if (x >= a + b) return null; /* 26.11 : 3, 4, 8 n'est pas un triangle */
         return Qv("Un triangle a pour côtés " + M(s[0]) + " cm, " + M(s[1]) + " cm et " + M(s[2]) + " cm. Est-il rectangle ? Pour le savoir, calcule de combien le carré du plus grand côté dépasse la somme des carrés des deux autres.", e, "Plus grand côté " + M(x) + " : " + M(x + "^2 - (" + a + "^2 + " + b + "^2) = " + x * x + " - " + (a * a + b * b) + " = " + e) + " : ce n'est pas 0, le triangle n'est pas rectangle (il a un angle obtus).",
           { ctx: "ecart", guide: [GS("Quel est le plus grand côté (en cm) ?", x, M(x) + " cm."), GS(M(x + "^2") + " = ?", x * x, M(x * x) + "."), GS("Somme des carrés des deux autres : " + M(a + "^2 + " + b + "^2") + " = ?", a * a + b * b, M(a * a + b * b) + "."), GS("Différence ?", e, M(e) + ".")],
             traps: [TR(x - a - b, "On compare les carrés, pas les longueurs."), TR(-e, "Dans l'ordre : le carré du plus grand côté moins la somme des deux autres."), TR(a * a - b * b - x * x, "Le plus grand côté est " + M(x) + " cm : c'est son carré qu'on compare."), TR(b * b - a * a - x * x, "Le plus grand côté est " + M(x) + " cm : c'est son carré qu'on compare.")] }); },

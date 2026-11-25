@@ -27,7 +27,7 @@ document.getElementById("nx").click();/* 25.11 soir : petite séance du Carnet �
 // 4. programme du test : J-5 révision, J-2 sujet, J-1 dernier tour, J jour J
 const ids=["prio","fracadd","puiss"];
 for(const [L,kind] of [[5,"autoeval"],[2,"mock"],[1,"apres"],[0,"jourj"]]){state.prep={ids,date:addDays(day(),L)};homeTab="today";screenHome();
- ok(new RegExp(PREP_TASK[kind].label).test(app.textContent),"4 tâche J-"+L+" = "+kind);
+ ok(new RegExp(prepTask(kind).label).test(app.textContent),"4 tâche J-"+L+" = "+kind); /* 26.11 : prepTask — veille du test sans grille de départ = Autoévaluation (plus de « Test rapide final ») */
  homeTab="test";screenHome();ok(app.querySelectorAll(".pday").length>=L+1&&!!document.getElementById("prepgo"),"4 programme J-"+L);}
 // 5. dernier tour avec une erreur du carnet sur une notion du test, puis marquage fait
 state.carnet=[{id:"fracadd",d:1,code:"x",date:day(),ok:0}];state.prep={ids,date:addDays(day(),4),start:addDays(day(),-1)};startPrepTask("revision");

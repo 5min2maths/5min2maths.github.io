@@ -311,7 +311,7 @@ window.confirm = () => true; window.print = () => {};
 
   /* ---------- #scan=1 : balayage de contenu (TeX visible hors formule, décimaux entiers en decmul, triangles plats) ---------- */
   if (CFG.scan) {
-    const outside = (t) => String(t || "").replace(/<[^>]*>/g, " ").split(/\\\(.*?\\\)/s).join(" ");
+    const outside = (t) => String(t || "").replace(/<\/?[a-z][^>]*>/g, " ").split(/\\\(.*?\\\)/s).join(" ");
     const BAD = /\{,\}|\\text\{|\\cdot|\\frac|\\times|\\sqrt|\\widehat|\\le\b|\\ge\b/;
     const hits = {}, ex = {};
     const ids = Object.keys(GEN || {}).filter((id) => !CFG.ids || CFG.ids.split(",").includes(id));
@@ -334,9 +334,12 @@ window.confirm = () => true; window.print = () => {};
       if (j > 0) await nextDay(j === 2 && !CFG.consecutif ? 2 : 1);
       shot("ACCUEIL jour " + (j + 1), { max: 1500 });
       if (j === 0 && !CFG.premier) { /* chapitre en classe */ }
-      if (Engine.prepActive(state) && j >= 1) await doEvalTask();
-      const go = $("go") || $("freego"); await click(go, go && go.innerText.trim());
-      durs.push(await play("Séance jour " + (j + 1)));
+      /* 26.11 : évaluation active → sa tâche EST la séance du jour (un seul bouton à l'accueil), sauf le sujet de préparation (au choix) */
+      let evalDay = false;
+      if (Engine.prepActive(state) && j >= 1) { evalDay = prepKind() !== "mock"; await doEvalTask(); }
+      if (evalDay) { await home(); shot("ACCUEIL après l'évaluation", { max: 600 }); log("  (pas de séance en plus : la tâche de l'évaluation était la séance du jour)"); }
+      else { const go = $("go") || $("freego"); await click(go, go && go.innerText.trim());
+      durs.push(await play("Séance jour " + (j + 1))); }
       const sumT = screenText(); if (/Bonus : une question curieuse/.test(sumT)) log("    (le bilan propose une question curieuse en bonus)");
       await home();
       const e = EX[j % Math.max(1, EX.length)];

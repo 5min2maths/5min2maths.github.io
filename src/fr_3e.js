@@ -124,7 +124,10 @@
   };
 
   // ======================= thales4e : Thalès dans des triangles emboîtés (4e, attendus 2019) =======================
-  const tri = () => { const k = pk([[1, 2], [1, 3], [2, 3], [3, 4], [2, 5], [3, 5], [1, 4]]), q = k[0] / k[1], u = pk([1, 1.5, 2, 2.5, 3]); return { q, k, AB: rnd(k[1] * u * pk([2, 3, 4])), AC: rnd(k[1] * u * pk([2, 3, 5])), BC: rnd(k[1] * pk([2, 3, 4, 5])) }; };
+  /* 26.11 (revue élèves, thales-3-q7c) : AB, AC, BC tirés séparément pouvaient former un triangle impossible ; tirage refait
+     jusqu'à l'inégalité triangulaire stricte. */
+  const tri = () => { for (;;) { const k = pk([[1, 2], [1, 3], [2, 3], [3, 4], [2, 5], [3, 5], [1, 4]]), q = k[0] / k[1], u = pk([1, 1.5, 2, 2.5, 3]), t = { q, k, AB: rnd(k[1] * u * pk([2, 3, 4])), AC: rnd(k[1] * u * pk([2, 3, 5])), BC: rnd(k[1] * pk([2, 3, 4, 5])) };
+    if (t.BC < t.AB + t.AC && t.AB < t.AC + t.BC && t.AC < t.AB + t.BC) return t; } };
   const cfg = "Dans le triangle " + M("ABC") + ", " + M("M \\in [AB]") + ", " + M("N \\in [AC]") + " et " + M("(MN) \\parallel (BC)") + ". ";
   const TH = {
     1: [

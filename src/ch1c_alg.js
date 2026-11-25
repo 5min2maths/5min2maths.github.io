@@ -20,7 +20,7 @@
     if (tr.spec) { let c; try { c = show(tr.spec); if (seen.has(c) || tr.spec.kind !== spec.kind || checkAnswer(tr.spec, c).status !== "correct" || checkAnswer(spec, c).status === "correct") return false; } catch (e) { return false; }
       seen.add(c); return true; }
     return isFinite(tr.v) && Math.abs(tr.v - spec.value) > 1e-9; }); };
-  const mk = (q, spec, sol, o) => { const x = { q, spec, sol, guide: o.guide, ctx: o.ctx, traps: keepT(spec, o.traps) }; if (o.fig) x.fig = o.fig; if (o.canon) x.canon = o.canon; return x; };
+  const mk = (q, spec, sol, o) => { const x = { q, spec, sol, guide: o.guide, ctx: o.ctx, traps: keepT(spec, o.traps) }; if (o.fig) x.fig = o.fig; if (o.canon) x.canon = o.canon; if (o.hint) x.hint = o.hint; return x; };
   const QN = (q, value, sol, o) => mk(q, { kind: "value", value }, sol, o);
   const QP = (q, vals, sol, o) => mk(q, { kind: "pair", values: vals }, sol, Object.assign({ canon: vals.map(fS).join(" ; ") }, o));
   const QSet = (q, vals, sol, o) => mk(q, { kind: "set", values: [...new Set(vals)] }, sol, o);
@@ -164,7 +164,10 @@
           { ctx: "zeros", fig: FIG.parabola((x) => a0 * (x - p) * (x - q) / 3, [], null, false), guide: [GS("Somme des zéros (" + M("-\\frac{b}{a}") + ") ?", p + q, M(p + q) + "."), GSet("Zéros ?", [p, q], M(p) + " et " + M(q) + ".")], traps: [TSet([-p, -q], "Attention aux signes : (x − p) s'annule en p.")] }); },
       () => { const h = nz(-5, 5), k = nz(-6, 6), a = pk([1, -1, 2, -3]);
         return QP("Quel est le sommet de la parabole " + M("f(x) = " + co(a) + "(" + xm(h) + ")^2" + sg(k)) + " ? Réponds « x ; y ».", [h, k], "Forme canonique " + M("a(x - h)^2 + k") + " : sommet " + M("(" + h + " ; " + k + ")") + ".",
-          { ctx: "sommet-canon", guide: [GS("Abscisse du sommet (" + M("h") + ") ?", h, M(h) + "."), GP("Sommet ?", [h, k], M("(" + h + " ; " + k + ")") + ".")], traps: [TP([-h, k], "Dans (x − h)², le sommet a pour abscisse h : (" + xm(h) + ") → " + h + "."), TP([h, -k], "Le + k ou − k se lit tel quel.")] }); },
+          /* 26.11 (revue élèves, f2-1-b9d : après « −3 ; 5 », l'indice général parlait des zéros et du discriminant) : indice
+             propre à la forme canonique, et l'erreur des deux signes à la fois. */
+          { ctx: "sommet-canon", hint: "Forme canonique a(x − h)² + k : le sommet est (h ; k). Dans (" + xm(h) + ")², h = " + h + " (signe contraire de celui écrit) ; k = " + k + " se lit tel quel.",
+            guide: [GS("Abscisse du sommet (" + M("h") + ") ?", h, M(h) + "."), GP("Sommet ?", [h, k], M("(" + h + " ; " + k + ")") + ".")], traps: [TP([-h, k], "Dans (x − h)², le sommet a pour abscisse h : (" + xm(h) + ") → " + h + "."), TP([h, -k], "Le + k ou − k se lit tel quel."), TP([-h, -k], "Les deux signes sont inversés : h a le signe contraire de celui écrit dans (" + xm(h) + ")², k garde le sien.")] }); },
       () => { const p = nz(-5, 5), q = nz(-5, 5), a = pk([1, -1, 2, -2]); if (p === q || p * q === 0) return null;
         return QN("Quelle est l'ordonnée à l'origine de la parabole " + M("f(x) = " + fx(a, p, q)) + " ?", a * p * q, M("f(0) = " + co(a) + "(" + -p + ")(" + -q + ") = " + a * p * q) + ".",
           { ctx: "ordonnee", guide: [GS(M("f(0)") + " = ?", a * p * q, M(a * p * q) + ".")], traps: [TR(p * q, "N'oublie pas le coefficient " + a + "."), TR(-a * p * q, "(0 − " + p + ")(0 − " + q + ") = " + p * q + ".")] }); },

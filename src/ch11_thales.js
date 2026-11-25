@@ -12,6 +12,9 @@
   const P = (q, parts, hints, sol, fig) => ({ fig, q, parts: parts.map(([label, value, round]) => ({ label, spec: Object.assign({ kind: "value", value }, round ? { round } : {}) })), hints, sol });
   const cfg = M("D \\in [AB]") + ", " + M("E \\in [AC]") + " et " + M("(DE) \\parallel (BC)");
   const L = (v) => N(v).replace("{,}", ",");
+  /* 26.11 (revue élèves, thales-3-q7c : AD = 2, AE = 4, DE = 6) : un triangle donné par ses trois côtés doit exister
+     (inégalité triangulaire stricte), sinon le tirage est refait. */
+  const tri = (a, b, c) => a < b + c && b < a + c && c < a + b;
 
   // ===================== thales =====================
   const TH = {
@@ -49,7 +52,7 @@
           { ctx: "papillon", guide: [GS("Rapport " + M("AB : AD") + " ?", k, M(k) + "."), GS(M("BC") + " = ?", de * k, M(de * k) + ".")], traps: [TR(de / k, "AB est plus long que AD : BC est plus long que DE.")] }); },
     ],
     3: [
-      () => { const k = pk([2, 3]), ad = R.int(2, 5), ae = R.int(2, 6), de = R.int(2, 6), ab = ad * k, ac = ae * k, bc = de * k; if (ad === ae || ae === de) return null;
+      () => { const k = pk([2, 3]), ad = R.int(2, 5), ae = R.int(2, 6), de = R.int(2, 6), ab = ad * k, ac = ae * k, bc = de * k; if (ad === ae || ae === de || !tri(ad, ae, de)) return null;
         const per = (ab - ad) + bc + (ac - ae) + de;
         return Qv("Dans un triangle " + M("ABC") + ", " + cfg + ". " + M("AD = " + ad) + ", " + M("AB = " + ab) + ", " + M("AE = " + ae) + " et " + M("DE = " + de) + " (en cm). Calcule le périmètre du trapèze " + M("DECB") + ".", per,
           M("BC = " + de + " \\cdot " + k + " = " + bc) + ", " + M("AC = " + ac) + " ; " + M("DB = " + (ab - ad)) + ", " + M("EC = " + (ac - ae)) + " ; périmètre " + M((ab - ad) + " + " + bc + " + " + (ac - ae) + " + " + de + " = " + per) + " cm.",
@@ -100,7 +103,7 @@
           M("\\frac{AC}{AE} = \\frac{AB}{AD} = " + k) + " : " + M("AC = " + ae * k) + ".", { ctx: "papillon", guide: [GS("Rapport ?", k, M(k) + "."), GS(M("AC") + " = ?", ae * k, M(ae * k) + ".")], traps: [TR(ae / k, "AB est plus long que AD, donc AC plus long que AE.")] }); },
     ],
     3: [
-      () => { const k = pk([2, 3, 4]), ad = R.int(2, 5), ae = R.int(2, 6), bc = 2 * R.int(3, 9); if (ad === ae) return null;
+      () => { const k = pk([2, 3, 4]), ad = R.int(2, 5), ae = R.int(2, 6), bc = 2 * R.int(3, 9); if (ad === ae || !tri(ad * k, ae * k, bc)) return null;
         return Qv(M("D \\in [AB]") + ", " + M("E \\in [AC]") + ", " + M("AD = " + ad) + ", " + M("AB = " + ad * k) + ", " + M("AE = " + ae) + ", " + M("AC = " + ae * k) + " et " + M("BC = " + bc) + ". Montre que " + M("(DE) \\parallel (BC)") + ", puis calcule " + M("DE") + ".", r6(bc / k),
           M("\\frac{AD}{AB} = \\frac{AE}{AC} = \\frac{1}{" + k + "}") + " : parallèles (réciproque). Puis " + M("DE = " + bc + " : " + k + " = " + N(bc / k)) + ".",
           { ctx: "prouver-calculer", fig: GF.thales(1 / k, { AD: ad + "", AE: ae + "", BC: bc + "", DE: "?" }), guide: [GS(M("\\frac{AD}{AB}") + " = ? (fraction)", 1 / k, M("\\frac{1}{" + k + "}") + "."), GS(M("\\frac{AE}{AC}") + " = ? (même valeur : parallèles)", 1 / k, M("\\frac{1}{" + k + "}") + "."), GS(M("DE") + " = ?", r6(bc / k), M(N(bc / k)) + ".")], traps: [TR(bc * k, "DE est le petit côté : on divise.")] }); },
@@ -111,7 +114,7 @@
         return Qv("Combien de ces configurations donnent " + M("(DE) \\parallel (BC)") + " ? " + cs.map((c, i) => "(" + (i + 1) + ") " + M("AD = " + c[0] + ", AB = " + N(c[1]) + ", AE = " + c[2] + ", AC = " + N(c[3]))).join(" ; "), n,
           cs.map((c, i) => "(" + (i + 1) + ") " + M(c[0] + " \\cdot " + N(c[3]) + (c[4] ? " = " : " \\neq ") + c[2] + " \\cdot " + N(c[1]))).join(" ; ") + " (produits en croix) : " + n + ".",
           { ctx: "compter-decimaux", fig: GF.thales(0.45, { AD: "AD", AE: "AE" }), guide: [GS("Astuce : compare les produits en croix " + M("AD \\cdot AC") + " et " + M("AE \\cdot AB") + ". Cas (1) : " + M("AD \\cdot AC") + " = ?", r6(cs[0][0] * cs[0][3]), M(N(cs[0][0] * cs[0][3])) + "."), GS("Nombre de cas parallèles ?", n, n + ".")], traps: [TR(4, "Un petit écart suffit : pas parallèles."), TR(n === 0 ? 1 : n - 1, "Vérifie chaque cas.")] }); },
-      () => { const k = pk([1.5, 2.5, 2, 3]), ad = R.int(2, 6), ae = R.int(2, 6), de = R.int(2, 7); if (ad === ae) return null; const ab = r6(ad * k), ac = r6(ae * k), bc = r6(de * k);
+      () => { const k = pk([1.5, 2.5, 2, 3]), ad = R.int(2, 6), ae = R.int(2, 6), de = R.int(2, 7); if (ad === ae) return null; if (!tri(ad, ae, de)) return null; const ab = r6(ad * k), ac = r6(ae * k), bc = r6(de * k);
         return Qv("Configuration « papillon » : " + M("(BD)") + " et " + M("(CE)") + " se coupent en " + M("A") + ". " + M("AD = " + ad) + ", " + M("AB = " + N(ab)) + ", " + M("AE = " + ae) + ", " + M("AC = " + N(ac)) + " et " + M("DE = " + de) + ". Vérifie que " + M("(DE) \\parallel (BC)") + ", puis calcule " + M("BC") + ".", bc,
           M("\\frac{AB}{AD} = \\frac{AC}{AE} = " + N(k)) + " : parallèles (réciproque). " + M("BC = " + de + " \\cdot " + N(k) + " = " + N(bc)) + ".",
           { ctx: "papillon-BC", guide: [GS(M("\\frac{AB}{AD}") + " (décimal) ?", k, M(N(k)) + "."), GS(M("\\frac{AC}{AE}") + " (même valeur : parallèles) ?", k, M(N(k)) + "."), GS(M("BC") + " = ?", bc, M(N(bc)) + ".")], traps: [TR(r6(de / k), "BC est du côté des grandes longueurs (AB, AC) : on multiplie."), TR(r6(de + ab - ad), "Thalès conserve les rapports, pas les différences.")] }); }
