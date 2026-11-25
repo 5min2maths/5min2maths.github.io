@@ -18,7 +18,10 @@ flock -w 1200 9 || { echo "verrou des tests occupé depuis plus de 20 min ($LOCK
 un() {
   f=$1
   t=$(mktemp)
-  (chromium --headless --disable-gpu --no-sandbox --virtual-time-budget=15000 --dump-dom "file://$PWD/$f" >"$t" 2>/dev/null 9>&- &)
+  # 25.11 : une page peut demander un budget de temps virtuel plus long (<meta name="budget" content="40000">) :
+  # kp_stable (pauses en boucle) restait « en cours » sous charge avec 15 s.
+  bud=$(grep -o '<meta name="budget" content="[0-9]*"' "$f" | grep -o '[0-9]*' | head -1); bud=${bud:-15000}
+  (chromium --headless --disable-gpu --no-sandbox --virtual-time-budget=$bud --dump-dom "file://$PWD/$f" >"$t" 2>/dev/null 9>&- &)
   for _ in $(seq 1 400); do grep -q "</html>" "$t" 2>/dev/null && break; sleep 0.5; done
   if grep -q "</html>" "$t" 2>/dev/null; then
     out=$(python3 -c "
