@@ -1558,7 +1558,11 @@ function nextQuestion(redo) {
   const easy = !redo && !session.weekly && !forceProb && session.lessonShown === id && !session.eased;
   if (easy) session.eased = true;
   /* 24.11 (ergonomie) : le type de question n'est rappelé que s'il change dans la séance (« Révision · 1 sur 4 · Révision » doublait le titre). */
-  const q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : easy ? 1 : level);
+  let q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : easy ? 1 : level);
+  /* 25.11 soir (revue d'un testeur : « Refaire avec d'autres valeurs » redonnait le même problème, valeurs fixes) :
+     on retire tant que l'énoncé est identique ; sans autre version, on passe à la suite. */
+  if (redo) { for (let k = 0; k < 12 && q && q.q === redo.q; k++) q = Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1));
+    if (!q || q.q === redo.q) { toast("Pas d'autre version de ce problème pour l'instant : on continue."); session.i++; return nextQuestion(); } }
   q.kind = kind;
   renderQuestion(q, {
     track: sessionInfo().fmt || "seance", redo: !!redo,
@@ -1574,7 +1578,10 @@ function nextQuestion(redo) {
         const p = !session.remed.has(id) && Engine.remediation(state, id);
         if (p) { session.remed.add(id); session.plan.splice(session.i + 1, 0, p + "|1|rem"); }
       }
-      res.delta = Engine.updateElo(state, id, q.d, sc);
+      /* 25.11 soir (revue d'un testeur) : « Refaire » ne rapporte plus de Mathélo (on pouvait monter son score en répétant) ;
+         « Je ne sais pas » compte à 40 % (−38 décourageait d'avouer qu'on ne sait pas, plus que le gain d'une bonne réponse). */
+      const w = redo ? 0 : res.dontKnow ? 0.4 : 1;
+      res.delta = w ? Engine.updateElo(state, id, q.d, sc, w) : 0;
       session.score += sc; session.answered++; session.ids.add(id);
       session.res = session.res || {}; const rr = (session.res[id] = session.res[id] || { n: 0, ok: 0 }); rr.n++; if (res.solved) rr.ok++;
       if (Engine.finishDay(state, 1, sc) === "joker") toast("🛡 Joker de série utilisé : ta série continue !"); save();
@@ -1663,7 +1670,9 @@ function previewHtml(v, spec) {
   /* 25.11 : liste de solutions vide (∅, « aucune », { }) */
   if (spec && spec.kind === "set" && NONE_RE.test(v)) return "\\(S = \\varnothing\\)";
   const t = Expr.parse(spec && spec.kind === "set" ? setInput(v) : v), val = Expr.vars(t).size || t.t === "list" ? "" : Expr.evaluate(t);
-  return "\\(" + Expr.tex(t) + "\\)" + (val !== "" && isFinite(val) && !(spec && spec.final) ? `<span class="val">≈ ${String(+val.toPrecision(8)).replace(".", ",")}</span>` : "");
+  /* 25.11 soir (revue d'un testeur) : pas de « ≈ 20 » sous un simple nombre. */
+  const plain = /^-?\d+([.,]\d+)?$/.test(v.replace(/\s|'/g, ""));
+  return "\\(" + Expr.tex(t) + "\\)" + (val !== "" && isFinite(val) && !plain && !(spec && spec.final) ? `<span class="val">≈ ${String(+val.toPrecision(8)).replace(".", ",")}</span>` : "");
 }
 function previewOf(inp, prev, spec) {
   const v = inp.value.trim();
@@ -1675,12 +1684,14 @@ function previewOf(inp, prev, spec) {
    pendant ses premières secondes ; un toucher qui arrive moins de 350 ms après un déplacement visait une autre touche :
    il est ignoré. */
 const KP_GUARD = { moved: 0 };
+window.addEventListener("scroll", () => { if (app.querySelector("#kp")) KP_GUARD.moved = performance.now(); }, { passive: true });
 function kpWatch() {
   const kp = app.querySelector("#kp"); if (!kp || !window.requestAnimationFrame) return;
-  let y = kp.getBoundingClientRect().top + window.scrollY, t0 = performance.now();
+  /* Position À L'ÉCRAN (le défilement automatique au toucher d'un champ déplace aussi le clavier sous le doigt). */
+  let y = kp.getBoundingClientRect().top, t0 = performance.now();
   const tick = () => {
     if (!kp.isConnected || performance.now() - t0 > 4000) return;
-    const y2 = kp.getBoundingClientRect().top + window.scrollY;
+    const y2 = kp.getBoundingClientRect().top;
     if (Math.abs(y2 - y) > 2) { KP_GUARD.moved = performance.now(); y = y2; }
     requestAnimationFrame(tick);
   };
@@ -1792,9 +1803,10 @@ function renderProblem(q, opt) {
     inp.onkeydown = (e) => { if (e.key === "Enter") check(); };
   });
   // Clavier sous la case active (20.11, demande de l'auteur) : il suit la réponse en cours, plus besoin de défiler.
-  const placeKp = (inp) => { const kp = document.getElementById("kp"), part = inp.closest(".part"); if (!kp || !part || kp.previousElementSibling === part) return; part.after(kp); setTimeout(() => kp.scrollIntoView({ behavior: "smooth", block: "nearest" }), 40); };
+  const placeKp = (inp) => { const kp = document.getElementById("kp"), part = inp.closest(".part"); if (!kp || !part || kp.previousElementSibling === part) return; part.after(kp); KP_GUARD.moved = performance.now(); kpWatch(); setTimeout(() => kp.scrollIntoView({ behavior: "smooth", block: "nearest" }), 40); };
   active = document.getElementById("p0");
   placeKp(active);
+  if (window.matchMedia("(pointer: fine)").matches) setTimeout(() => { if (active && active.isConnected) active.focus({ preventScroll: true }); }, 30);
   const bindKp = () => bindKeypad(() => active, (inp) => { previewOf(inp, document.getElementById("pv" + inp.id.slice(1)), q.parts[+inp.id.slice(1)].spec); ansInView(inp); });
   bindKp();
   const end = (giveUp) => {
@@ -1806,16 +1818,20 @@ function renderProblem(q, opt) {
     if (S) { S.issue = frac === 1 ? (tries === 1 ? "ok1" : "ok2") : giveUp && tries === 0 ? "idk" : ok.some(Boolean) ? "partiel" : "faux"; S.essais = tries; S.sec = sigSec(S); }
     if (frac === 1) burst();
     buzz(frac === 1);
-    const delta = opt.onDone({ solved: frac === 1, tries, partial: score });
+    const delta = opt.onDone({ solved: frac === 1, tries, partial: score, dontKnow: !!(giveUp && tries === 0) });
     const d = typeof delta === "number" && delta !== 0 ? `<span class="delta ${delta > 0 ? "up" : "down"}">Mathélo ${delta > 0 ? "+" : ""}${delta}</span>` : "";
     const pSteps = frac < 1 && splitSol(q.sol); /* 24.11 : corrigé progressif aussi pour les problèmes */
-    fb.innerHTML = `<div class="fb ${frac === 1 ? "ok" : "bad"} pop"><div class="spread"><b>${frac === 1 ? (tries === 1 ? "Problème résolu du premier coup !" : "Problème résolu.") : ok.filter(Boolean).length + " partie(s) juste(s) sur " + q.parts.length + "."}</b>${d}</div>${pSteps ? `<div id="ssteps" class="stack"></div><button class="btn-primary" id="solstep">Voir l'étape suivante</button><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : `<div class="sol">${q.sol}</div>`}</div>
+    /* 25.11 soir (revue d'un testeur : « le corrigé n'affiche que la partie c, l'élève ne voit jamais la bonne réponse de a ») :
+       la réponse attendue de chaque partie ratée, toujours. */
+    const pAns = (sp) => !sp ? "" : sp.kind === "value" && isFinite(sp.value) ? String(sp.round ? Math.round(sp.value / sp.round) * sp.round : +sp.value.toPrecision(10)).replace(/(\.\d*?)0{6,}\d*$/, "$1").replace(".", ",") : sp.kind === "expr" && sp.expr ? sp.expr : "";
+    const missed = q.parts.map((p, i) => [p, i]).filter(([, i]) => !ok[i]).map(([p, i]) => { const a = pAns(p.spec); return a ? `<li>${p.label.replace(/\s*\(.*?\)\s*$/, "")} : <b>${esc(a)}</b></li>` : ""; }).join("");
+    fb.innerHTML = `<div class="fb ${frac === 1 ? "ok" : "bad"} pop"><div class="spread"><b>${frac === 1 ? (tries === 1 ? "Problème résolu du premier coup !" : "Problème résolu.") : ok.filter(Boolean).length + " partie(s) juste(s) sur " + q.parts.length + "."}</b>${d}</div>${missed ? `<div class="small"><b>Les bonnes réponses</b><ul class="plain p-ans">${missed}</ul></div>` : ""}${pSteps ? `<div id="ssteps" class="stack"></div><button class="btn-primary" id="solstep">Voir l'étape suivante</button><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : `<div class="sol">${q.sol}</div>`}</div>
       <div class="vote"><span>Ce problème était… <button data-v="up" aria-label="Bon problème">👍</button> <button data-v="down" aria-label="Problème à revoir">👎</button></span><span class="code">${code}</span></div>${commentBox()}
       <div class="actions">${frac === 1 ? "" : '<button class="btn-sec" id="redo">Refaire avec d\'autres valeurs</button>'}<button class="btn-primary" id="nx">Continuer</button></div>`;
     typeset(fb);
     fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
     bindComment(fb, code);
-    document.getElementById("nx").onclick = () => opt.onNext(false);
+    { const t0 = performance.now(); document.getElementById("nx").onclick = () => { if (performance.now() - t0 < 400) return; opt.onNext(false); }; } /* 25.11 soir : la touche Entrée qui valide ne passe plus aussitôt à la suite */
     const r = document.getElementById("redo"); if (r) r.onclick = () => { sigAide(S, "x"); opt.onNext(true); };
     if (pSteps) { const sf = fb.querySelector("details.solfull"); if (sf) sf.addEventListener("toggle", () => { if (sf.open) sigAide(S, "s"); }); solStepper(document.getElementById("ssteps"), document.getElementById("solstep"), pSteps, (k) => { if (k > 0) sigAide(S, "e"); }, () => { const sf2 = fb.querySelector("details.solfull"); if (sf2) sf2.remove(); document.getElementById("nx").focus({ preventScroll: true }); }); }
   };
@@ -1839,7 +1855,12 @@ function renderProblem(q, opt) {
     });
     if (ok.every(Boolean) || tries >= 3) return end(false);
     const nx = ok.findIndex((v) => !v); if (nx >= 0) { active = document.getElementById("p" + nx); placeKp(active); }
-    fb.innerHTML = `<div class="fb hint pop"><b>${ok.some(Boolean) ? "En partie juste. Continue !" : "Pas encore."}</b><span><b>Indice ${tries}</b> · ${escT(q.hints[tries - 1])}</span></div>`; fbInView(fb, 120);
+    /* 25.11 soir (revue d'un testeur : indice de la partie c alors que la partie a était fausse) : indice de la première partie
+       fausse s'il est marqué « a) », « b) »… ; un indice non marqué n'est donné que pour la dernière partie ; sinon, relance. */
+    const L = String.fromCharCode(97 + nx), H = (q.hints || []).map((x) => String(x));
+    const tagged = H.find((x) => x.trim().startsWith(L + ")")), free = H.filter((x) => !/^[a-h]\)/.test(x.trim()));
+    const hint = tagged || (nx === q.parts.length - 1 && free.length ? free[Math.min(tries - 1, free.length - 1)] : "Partie " + L + ") : relis bien ce qui est demandé, et fais un calcul à la fois. Les données utiles sont dans l'énoncé.");
+    fb.innerHTML = `<div class="fb hint pop"><b>${ok.some(Boolean) ? "En partie juste. Continue !" : "Pas encore."}</b><span><b>Indice ${tries}</b> · ${escT(hint)}</span></div>`; fbInView(fb, 120);
   };
   document.getElementById("check").onclick = check;
   document.getElementById("idk").onclick = () => { if (!finished) end(true); };
@@ -1867,6 +1888,9 @@ function renderQuestion(q, opt) {
   const S = opt.track ? sigOpen({ ev: "q", code, d: q.d, kind: q.kind || "", fmt: opt.track, redo: opt.redo ? 1 : 0 }) : null;
   sigWatchLesson(S); pageQ = code; bindScratch(S);
   const inp = document.getElementById("ans"), prev = document.getElementById("prev"), fb = document.getElementById("fb");
+  /* 25.11 soir (revue d'un testeur : focus perdu entre deux questions) : sur ordinateur, le champ reçoit le focus ;
+     pas sur téléphone (le clavier du système s'ouvrirait par-dessus celui de l'app). */
+  if (window.matchMedia("(pointer: fine)").matches) setTimeout(() => { if (inp.isConnected && !inp.disabled) inp.focus({ preventScroll: true }); }, 30);
   if (window.matchMedia("(pointer: fine)").matches) { inp.setAttribute("inputmode", "text"); inputMode = "text"; inp.focus(); }
   let tm;
   const showPreview = () => {
@@ -1909,7 +1933,7 @@ function renderQuestion(q, opt) {
     if (opt.single) {
       fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><b>${solved ? "✓ Juste ! " + pick(PRAISE.filter((x) => x !== "Juste !")) : dontKnow ? "D'accord, on s'en occupera. Voici la solution :" : "✗ Pas tout à fait. Voici la solution :"}</b>${solved ? "" : '<span class="sol">' + q.sol + "</span>"}</div><div class="actions"><button class="btn-primary" id="nx">Suivant</button></div>`;
       typeset(fb);
-      document.getElementById("nx").onclick = () => opt.onNext();
+      { const t0 = performance.now(); document.getElementById("nx").onclick = () => { if (performance.now() - t0 < 400) return; opt.onNext(); }; }
       document.getElementById("nx").focus();
       return;
     }
@@ -1926,7 +1950,7 @@ function renderQuestion(q, opt) {
     typeset(fb);
     fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
     bindComment(fb, code);
-    document.getElementById("nx").onclick = () => opt.onNext(false);
+    { const t0 = performance.now(); document.getElementById("nx").onclick = () => { if (performance.now() - t0 < 400) return; opt.onNext(false); }; } /* 25.11 soir : la touche Entrée qui valide ne passe plus aussitôt à la suite */
     const r = document.getElementById("redo");
     if (r) r.onclick = () => { sigAide(S, "x"); opt.onNext(true); };
     const sf = fb.querySelector("details.solfull"); if (sf) sf.addEventListener("toggle", () => { if (sf.open) sigAide(S, "s"); });
