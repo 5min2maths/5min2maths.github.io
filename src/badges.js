@@ -26,7 +26,7 @@ const Badges = {
   },
   // Icône d'un badge de thème, d'après son libellé. 25.11 (chantier E) : une icône dessinée par famille de chapitres
   // (CO, matu, MP, France) au lieu d'émojis génériques ; l'ordre compte (le premier motif qui convient l'emporte).
-  THEME_ICONS: [[/algorithm|programmation/i, "algo"], [/automatisme/i, "auto"], [/ensemble/i, "venn"], [/argument|raisonner/i, "implique"],
+  THEME_ICONS: [[/algorithm|programmation/i, "algo"], [/complexe/i, "repere"], [/suites et séries/i, "expo"], /* 25.11 (agent col34) : chapitres MA2 de 4e */ [/automatisme/i, "auto"], [/ensemble/i, "venn"], [/argument|raisonner/i, "implique"],
     [/combinatoire/i, "arbre"], [/probab/i, "de"], [/statisti|diagramme|données/i, "barres"], [/vectoriel|vecteur/i, "vecteurs"],
     [/droites param/i, "droiteparam"], [/coordonn|cartésienne/i, "repere"], [/algèbre linéaire/i, "matrice"], [/intégr/i, "integrale"],
     [/limite|dérivation|analyse/i, "tangente"], [/logarithm|exponentiel|puissances et log/i, "expo"], [/sinuso|fonctions trigo/i, "sinus"],

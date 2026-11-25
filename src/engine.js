@@ -90,6 +90,9 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
   // 24.11 : 4e Collège (src/ch4c_ana.js) : intégration, ln et exp, probabilités 2
   primitives: ["derivregles"], integrale: ["primitives"], aireint: ["integrale"], volrev: ["integrale"], lnexp: ["log", "derivcomp"], croissance: ["expo", "log"],
   condbayes: ["proba"], varalea: ["proba"], binomiale: ["varalea"],
+  // 25.11 (agent col34) : 3e–4e Collège complétées (derivth, pvect ; syslin, bases, bayes ; MA2 : complexes, suites et séries)
+  derivth: ["continuite", "nbderive"], pvect: ["pscal3d"], syslin: ["matrices"], bases: ["matrices", "vect3d"], bayes: ["condbayes"],
+  cplxalg: ["eq2disc"], cplxtrig: ["cplxalg", "trigexact"], cplxeq: ["cplxtrig", "eq2disc"], suitegeom: ["expo", "log"], serie: ["suitegeom", "limitinf"],
   intparties: ["integrale", "derivprodquot"], intsubst: ["integrale", "derivcomp"], etudelnexp: ["lnexp", "variations"], eqdiff: ["croissance", "primitives"],
   // 24.11 (agent niv1c) : 1re Collège, chapitre Argumenter (src/ch1c_arg.js) ; divcrit et tradexpr deviennent des prérequis
   tradalg: ["tradexpr", "valnum"], contrex: ["divcrit", "premiers"], demoalg: ["tradalg", "distrib"], implication: ["contrex", "divcrit"], ratden: ["rac", "idrem"], racprop: ["rac"], fracper: ["fracops"],
@@ -108,6 +111,7 @@ const UPC_MIN = { fracper: 3 };
    qui se glissaient dans les notions de 9e et de 10e. Au tirage (Engine.make, sujets, QCM), une question dont le contexte
    (q.ctx), l'énoncé (RegExp) ou la réponse (fonction) est listé ici pour la classe est refaite ; les autres classes
    (11e, Collège, MP) ne changent pas. */
+const HORS_MA1 = { asymptotes: [/oblique/i], etudefct: [/oblique/i] };
 const HORS_CO = {
   /* 9e : relatifs sans multiplication ni division, fractions dans Q+ (addition, soustraction), périodes d'un chiffre
      (tiers, neuvièmes) ; réduction d'expressions et polygones réguliers en 10e. */
@@ -149,6 +153,9 @@ function horsCO(state, id, q) {
     if (HORS_FR[id].some(([r, g]) => p.grade < g && (typeof r === "string" ? q.ctx === r || (r.endsWith("*") && String(q.ctx || "").startsWith(r.slice(0, -1))) : r instanceof RegExp ? r.test(t) : r(q)))) return true;
   }
   if (!q || !p || p.system !== "CH" || p.track === "mp") return false;
+  /* 25.11 (agent col34, programme du Collège 2021) : en 3e–4e niveau normal MA1, formes réservées au niveau avancé MA2
+     (asymptotes obliques : « horizontales, verticales, obliques » en MA2 seulement). Notions entières MA2 : champ niv "R". */
+  if (p.grade >= 14 && p.niv !== "R" && HORS_MA1[id]) { const t = String(q.ctx || "") + " " + String(q.q || "") + " " + (q.parts || []).map((x) => x.label || "").join(" "); if (HORS_MA1[id].some((r) => r.test(t))) return true; }
   const L = HORS_CO[p.grade] && HORS_CO[p.grade][id];
   if (!L) return false;
   const txt = String(q.q || "") + " " + (q.parts || []).map((x) => x.label || "").join(" ");
@@ -183,7 +190,7 @@ const CALC_NON = [
 ];
 const CALC_OUI = [
   "diagr", "pct", "denombr", "stats", "statfreq", "quartiles", "statdesc", "combi", "probaxiomes", "probarbre", "condbayes",
-  "varalea", "binomiale", "normale", "proba2", "tauxevol", "probcond", "probtot", "vaesp", "binom",
+  "varalea", "binomiale", "normale", "proba2", "tauxevol", "probcond", "probtot", "vaesp", "binom", "bayes",
 ];
 /* notation scientifique : forme propre (spec.sci), ni calcul ni résultat brut */
 const CALC_LIBRE = ["sci", "scicalc"];
@@ -344,7 +351,9 @@ const Engine = {
       /* 25.11 (audit France) : chapitres Sésamath du Collège de Genève pour les profils suisses seulement (une Tle française, grade 12,
          recevait les chapitres de 1re du Collège comme « de l'année » : relatifs, Pythagore, puissances…). */
       const yr = "M" + (profile.grade - 11), sesa = profile.system === "CH" && profile.track !== "mp" && profile.grade >= 12 && typeof ORDRE_THEME !== "undefined" &&
-        [(ORDRE_THEME.MATU || {})[n.id], (ORDRE_THEME.MATU_ALT || {})[n.id]].some((k) => (k || "").startsWith(yr));
+        [(ORDRE_THEME.MATU || {})[n.id], (ORDRE_THEME.MATU_ALT || {})[n.id], (ORDRE_THEME.MATU_REP || {})[n.id]].some((k) => (k || "").startsWith(yr));
+      /* 25.11 (agent col34) : MATU_REP = reprises d'une année précédente rangées dans un chapitre de l'année (3e, « 1. Prérequis ») :
+         « de l'année » (current), mais statut « vu » (g < grade), donc pas « nouvelles ». */
       const coYear = this.coChap(profile, n.id, true);
       // 22.11 (seconde FR) : « again » liste des années suisses ; pour la France, on lit againFR (sinon une notion reprise en 10e
       // suisse devenait « de l'année » en 2nde, grade 10 aussi).
@@ -369,7 +378,7 @@ const Engine = {
   themeKey(profile, id) {
     const co = this.coChap(profile, id);
     if (co) return "CO." + co;
-    const ref = this.refOf(profile), alt = ref === "MATU" && typeof ORDRE_THEME !== "undefined" && (ORDRE_THEME.MATU_ALT || {})[id];
+    const ref = this.refOf(profile), alt = ref === "MATU" && typeof ORDRE_THEME !== "undefined" && ([(ORDRE_THEME.MATU_REP || {})[id], (ORDRE_THEME.MATU_ALT || {})[id]].find((k) => (k || "").startsWith("M" + (profile.grade - 11))) || (ORDRE_THEME.MATU_ALT || {})[id]);
     // Notion sur deux années : le chapitre de l'année de l'élève.
     const k = alt && alt.startsWith("M" + (profile.grade - 11)) ? alt : ref !== "CO" && typeof ORDRE_THEME !== "undefined" && (ORDRE_THEME[ref] || {})[id];
     /* 25.11 (règle de l'auteur, « très important » : chaque système a ses dénominations ; « Nombres et opérations » parle

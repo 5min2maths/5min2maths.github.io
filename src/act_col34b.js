@@ -3,6 +3,7 @@
 // sphere ; vraies manipulations (curseurs) sur une figure en perspective (projection orthogonale : la sphère reste un
 // cercle). 4e (src/ch4c_ana.js) : intparties, intsubst (« Essaie sur la figure » : l'aire se compare à la réponse
 // tapée), etudelnexp, eqdiff, statdesc (curseurs). ineqpoly (2e) est dans act_2c.js (paquet 13).
+// 25.11 (agent col34) : derivth, pvect, syslin, bases, bayes, cplxalg, cplxtrig, cplxeq, suitegeom, serie (« À toi : 2 questions »).
 // Même moteur que act_col34.js (briques graph, hunt et slide recopiées : fichier autonome). Chaque leçon a son propre
 // « Retiens » (règle du 15.11 : seulement ce que les défis ont présenté). Paquet de chargement « 14 » (build.py).
 (function () {
@@ -524,6 +525,95 @@
         miss: (st, s) => (s ? (st.a === 3 ? "Bon écart-type : b décale toutes les valeurs sans changer la dispersion. Règle b pour la moyenne." : "σ_y = |a| · 5 : seul a change la dispersion.") : "On veut (210 + 35n) ÷ (10 + n) = 25."),
         ask: [{ q: "Une série a pour moyenne x̄ = 30 et pour moyenne des carrés 925. Tape son écart-type σ.", ans: 5, ok: "σ = √(925 − 30²) = √25 = 5.", no: "σ = √(moyenne des carrés − x̄²)." },
           { q: "Températures : x̄ = 20 °C, σ = 5 °C. En degrés Fahrenheit (y = 1,8x + 32), tape σ_y.", ans: 9, ok: "σ_y = 1,8 · 5 = 9 °F ; le + 32 ne change pas l'écart-type.", no: "σ_y = |a| · σ : le terme b n'intervient pas." }] }),
+    },
+  });
+
+  // =====================================================================================================
+  // 25.11 (agent col34) : notions qui complètent la 3e et la 4e (derivth, pvect ; syslin, bases, bayes ; MA2 : cplxalg,
+  // cplxtrig, cplxeq, suitegeom, serie). « À toi : 2 questions » (réponse tapée, coup de pouce après une erreur).
+  // =====================================================================================================
+  const tu = (x) => "tu proposes <b>" + nb(x) + "</b>";
+  const toi = (cp, wins) => hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(cp[s] + "<br>" + tu(x)), wins });
+  Object.assign(ACTIVE, {
+    derivth: {
+      retiens: { regle: "Rolle : si \\(f(a) = f(b)\\), il existe \\(c\\) entre \\(a\\) et \\(b\\) avec \\(f'(c) = 0\\). Lagrange : il existe \\(c\\) avec \\(f'(c) = \\frac{f(b) - f(a)}{b - a}\\), la tangente parallèle à la corde. On trouve \\(c\\) en résolvant cette équation.", exemple: ["\\(f(x) = x^2 - 6x + 1\\) sur \\([1 \\,;\\, 5]\\) : \\(f'(c) = 2c - 6 = 0\\), \\(c = 3\\).", "\\(f(x) = \\sqrt{x}\\) sur \\([1 \\,;\\, 9]\\) : corde de pente \\(\\frac{1}{4}\\), \\(\\frac{1}{2\\sqrt{c}} = \\frac{1}{4}\\), \\(c = 4\\)."], piege: "\\(c\\) n'est pas toujours le milieu de l'intervalle (ici 5, mais \\(c = 4\\))." },
+      predict: { q: "La courbe de \\(f(x) = |x|\\) a une pointe en 0. Est-elle dérivable en 0 ?", choices: ["non : les pentes à gauche (−1) et à droite (1) diffèrent", "oui, car elle est continue", "oui, et f'(0) = 0"], good: 0,
+        why: "f est continue en 0, mais ses deux demi-tangentes ont les pentes −1 et 1 : pas de tangente unique, pas de dérivée. Continue n'implique pas dérivable." },
+      defis: ["\\(f(x) = x^2 - 6x + 1\\) sur \\([1 \\,;\\, 5]\\) : \\(f(1) = f(5)\\). Trouve \\(c\\) avec \\(f'(c) = 0\\) (Rolle).", "\\(f(x) = \\sqrt{x}\\) sur \\([1 \\,;\\, 9]\\) : trouve \\(c\\) où la tangente est parallèle à la corde (Lagrange)."],
+      play: toi(["f'(x) = 2x − 6 : résous f'(c) = 0", "Pente de la corde : (3 − 1) ÷ (9 − 1) = 1/4 ; résous 1 ÷ (2√c) = 1/4"],
+        [W(3, "2c − 6 = 0, donc c = 3 : le sommet de la parabole, entre 1 et 5."), W(4, "1 ÷ (2√c) = 1/4 donne √c = 2, donc c = 4, qui n'est pas le milieu (5) de l'intervalle.")]),
+    },
+    pvect: {
+      retiens: { regle: "\\(\\vec u \\times \\vec v = (u_2v_3 - u_3v_2 \\,;\\, u_3v_1 - u_1v_3 \\,;\\, u_1v_2 - u_2v_1)\\) est perpendiculaire à \\(\\vec u\\) et \\(\\vec v\\). Sa norme est l'aire du parallélogramme ; l'aire du triangle en est la moitié.", exemple: ["\\((1 \\,;\\, 2 \\,;\\, 0) \\times (0 \\,;\\, 1 \\,;\\, 3) = (6 \\,;\\, -3 \\,;\\, 1)\\)", "\\(A(1 \\,;\\, 0 \\,;\\, 0)\\), \\(B(0 \\,;\\, 2 \\,;\\, 0)\\), \\(C(0 \\,;\\, 0 \\,;\\, 3)\\) : \\(\\overrightarrow{AB} \\times \\overrightarrow{AC} = (6 \\,;\\, 3 \\,;\\, 2)\\), norme 7, aire \\(\\frac{7}{2}\\)."], piege: "Triangle : la moitié de \\(\\|\\overrightarrow{AB} \\times \\overrightarrow{AC}\\|\\) ; parallélogramme : la norme entière." },
+      predict: { q: "Le produit vectoriel de deux vecteurs de l'espace est…", choices: ["un vecteur perpendiculaire aux deux", "un nombre", "un vecteur parallèle au premier"], good: 0,
+        why: "Contrairement au produit scalaire (un nombre), u × v est un vecteur, perpendiculaire à u et à v ; sa longueur mesure l'aire du parallélogramme construit sur u et v." },
+      defis: ["\\(\\vec u = (1 \\,;\\, 2 \\,;\\, 0)\\), \\(\\vec v = (0 \\,;\\, 1 \\,;\\, 3)\\). Tape la première composante \\(u_2v_3 - u_3v_2\\) de \\(\\vec u \\times \\vec v\\).", "\\(A(1 \\,;\\, 0 \\,;\\, 0)\\), \\(B(0 \\,;\\, 2 \\,;\\, 0)\\), \\(C(0 \\,;\\, 0 \\,;\\, 3)\\) : \\(\\overrightarrow{AB} \\times \\overrightarrow{AC} = (6 \\,;\\, 3 \\,;\\, 2)\\). Tape l'aire du triangle ABC."],
+      play: toi(["u₂v₃ − u₃v₂ = 2 · 3 − 0 · 1", "Norme : √(36 + 9 + 4) = 7, puis la moitié pour un triangle"],
+        [W(6, "2 · 3 − 0 · 1 = 6 ; les autres composantes : 0 · 0 − 1 · 3 = −3 et 1 · 1 − 2 · 0 = 1."), W(3.5, "‖(6 ; 3 ; 2)‖ = √49 = 7 : aire du parallélogramme 7, du triangle 3,5.")]),
+    },
+    syslin: {
+      retiens: { regle: "Pour \\(\\begin{cases} ax + by = e \\\\ cx + dy = f \\end{cases}\\) : \\(D = ad - bc\\) ; si \\(D \\neq 0\\), \\(x = \\frac{D_x}{D}\\) avec \\(D_x = ed - bf\\) (la colonne des \\(x\\) remplacée par le second membre).", exemple: ["\\(\\begin{cases} 2x + y = 7 \\\\ x - 3y = 7 \\end{cases}\\) : \\(D = -6 - 1 = -7\\).", "\\(D_x = 7 \\cdot (-3) - 1 \\cdot 7 = -28\\), \\(x = \\frac{-28}{-7} = 4\\) (et \\(y = -1\\))."], piege: "\\(x = \\frac{D_x}{D}\\), pas \\(\\frac{D}{D_x}\\)." },
+      predict: { q: "Si le déterminant D du système vaut 0…", choices: ["il n'y a pas une solution unique (aucune ou une infinité)", "la solution est x = 0, y = 0", "on ne peut rien dire"], good: 0,
+        why: "D = 0 : les deux droites sont parallèles (aucune solution) ou confondues (infinité). La règle de Cramer divise par D : impossible." },
+      defis: ["Système \\(\\begin{cases} 2x + y = 7 \\\\ x - 3y = 7 \\end{cases}\\). Tape son déterminant \\(D\\).", "Même système : \\(D_x = -28\\). Tape \\(x\\)."],
+      play: toi(["D = ad − bc = 2 · (−3) − 1 · 1", "x = Dx ÷ D"],
+        [W(-7, "D = −6 − 1 = −7 ≠ 0 : une seule solution."), W(4, "x = −28 ÷ (−7) = 4 ; vérifie : 2 · 4 + y = 7 donne y = −1.")]),
+    },
+    bases: {
+      retiens: { regle: "\\((\\vec u \\,;\\, \\vec v)\\) est une base du plan si \\(\\det(\\vec u \\,;\\, \\vec v) \\neq 0\\). Les composantes de \\(\\vec w\\) sont les nombres \\((\\alpha \\,;\\, \\beta)\\) tels que \\(\\vec w = \\alpha\\vec u + \\beta\\vec v\\). Si le déterminant est nul, les vecteurs sont liés (colinéaires).", exemple: ["\\(\\vec u = \\binom{1}{2}\\), \\(\\vec v = \\binom{3}{1}\\), \\(\\vec w = \\binom{5}{5} = 2\\vec u + \\vec v\\) : composantes \\((2 \\,;\\, 1)\\).", "\\(\\binom{2}{3}\\) et \\(\\binom{m}{6}\\) : \\(12 - 3m = 0\\), liés pour \\(m = 4\\)."], piege: "Les composantes dépendent de la base : \\(\\binom{5}{5}\\) a pour composantes \\((2 \\,;\\, 1)\\) dans \\((\\vec u \\,;\\, \\vec v)\\)." },
+      predict: { q: "\\(\\vec u = \\binom{1}{2}\\) et \\(\\vec v = \\binom{2}{4}\\) forment-ils une base du plan ?", choices: ["non : v = 2u, ils sont colinéaires", "oui, deux vecteurs suffisent toujours", "oui, car ils ne sont pas nuls"], good: 0,
+        why: "v = 2u : avec u et v, on n'atteint que la droite de direction u. det(u ; v) = 4 − 4 = 0 : famille liée, pas une base." },
+      defis: ["\\(\\vec u = \\binom{1}{2}\\), \\(\\vec v = \\binom{3}{1}\\), \\(\\vec w = \\binom{5}{5}\\). Tape \\(\\alpha\\) tel que \\(\\vec w = \\alpha\\vec u + \\beta\\vec v\\).", "Pour quelle valeur de \\(m\\) les vecteurs \\(\\binom{2}{3}\\) et \\(\\binom{m}{6}\\) sont-ils liés ?"],
+      play: toi(["α + 3β = 5 et 2α + β = 5 : résous le système", "det = 2 · 6 − 3 · m = 0"],
+        [W(2, "α = 2, β = 1 : 2u + v = (2 + 3 ; 4 + 1) = (5 ; 5)."), W(4, "12 − 3m = 0, donc m = 4 ; et alors (4 ; 6) = 2 · (2 ; 3).")]),
+    },
+    bayes: {
+      retiens: { regle: "Bayes : \\(P_B(A) = \\frac{P(A) \\cdot P_A(B)}{P(B)}\\). Avec des effectifs : parmi les positifs, la part des vrais positifs = vrais positifs ÷ (vrais + faux positifs).", exemple: ["10'000 personnes, 1 % malades, test positif chez 90 % des malades et 5 % des sains : 90 vrais positifs, 495 faux positifs.", "\\(P_+(M) = \\frac{90}{585} \\approx 15{,}4\\,\\%\\)."], piege: "\\(P_+(M) \\neq P_M(+)\\) : un test « fiable à 90 % » peut donner surtout des fausses alertes quand la maladie est rare." },
+      predict: { q: "Une maladie touche 1 % des gens ; un test détecte 90 % des malades, mais se trompe chez 5 % des gens sains. Ton test est positif. Probabilité d'être malade ?", choices: ["environ 15 %", "90 %", "95 %"], good: 0,
+        why: "Sur 10'000 personnes : 100 malades dont 90 positifs, mais 9'900 sains dont 495 positifs. Parmi 585 positifs, seuls 90 sont malades : environ 15 %." },
+      defis: ["10'000 personnes, 1 % malades ; le test est positif chez 90 % des malades. Combien de vrais positifs ?", "Il y a aussi 495 faux positifs. Parmi les positifs, quel pourcentage est malade (au dixième) ?"],
+      play: toi(["Malades : 1 % de 10'000 = 100 ; positifs parmi eux : 90 %", "90 ÷ (90 + 495), en pour cent"],
+        [W(90, "100 malades, dont 90 % positifs : 90 vrais positifs."), W(15.4, "90 ÷ 585 ≈ 0,154 : environ 15,4 % des positifs sont malades.", 0.051)]),
+    },
+    cplxalg: {
+      retiens: { regle: "On calcule avec \\(i\\) comme avec une lettre, puis \\(i^2 = -1\\). Pour diviser, on multiplie en haut et en bas par le conjugué du dénominateur : \\((a + bi)(a - bi) = a^2 + b^2\\).", exemple: ["\\((2 + 3i)(1 - i) = 2 - 2i + 3i - 3i^2 = 5 + i\\)", "\\(\\frac{5 + 5i}{1 + 2i} = \\frac{(5 + 5i)(1 - 2i)}{5} = \\frac{15 - 5i}{5} = 3 - i\\)"], piege: "\\(-3i^2 = +3\\) : le produit des parties imaginaires change de signe." },
+      predict: { q: "Que vaut \\(i^2\\), si \\(i\\) est le nombre « imaginaire » ?", choices: ["−1", "1", "i"], good: 0,
+        why: "C'est la définition de i : un nombre dont le carré vaut −1. Il n'est pas réel, mais on calcule avec lui comme avec une lettre." },
+      defis: ["Calcule \\((2 + 3i)(1 - i)\\) et tape sa partie réelle.", "Calcule \\(\\frac{5 + 5i}{1 + 2i}\\) et tape sa partie imaginaire."],
+      play: toi(["Développe : 2 − 2i + 3i − 3i², avec i² = −1", "Multiplie en haut et en bas par 1 − 2i : dénominateur 1 + 4 = 5"],
+        [W(5, "2 − 2i + 3i + 3 = 5 + i : partie réelle 5."), W(-1, "(5 + 5i)(1 − 2i) = 5 − 10i + 5i + 10 = 15 − 5i ; divisé par 5 : 3 − i, partie imaginaire −1.")]),
+    },
+    cplxtrig: {
+      retiens: { regle: "Module \\(|a + bi| = \\sqrt{a^2 + b^2}\\). Sous forme \\(re^{i\\theta}\\), Moivre : \\((re^{i\\theta})^n = r^ne^{in\\theta}\\) : le module est élevé à la puissance, l'argument multiplié.", exemple: ["\\(|3 + 4i| = \\sqrt{9 + 16} = 5\\)", "\\(1 + i = \\sqrt{2}e^{i\\frac{\\pi}{4}}\\) : \\((1 + i)^8 = 16e^{2i\\pi} = 16\\)"], piege: "\\((1 + i)^8 \\neq 1^8 + i^8\\) : passe par le module et l'argument." },
+      predict: { q: "Multiplier un nombre complexe par \\(i\\), c'est…", choices: ["tourner son point d'un quart de tour (90°)", "doubler sa distance à l'origine", "changer son signe"], good: 0,
+        why: "i = e^(iπ/2) : module 1, argument π/2. Multiplier par i ajoute π/2 à l'argument sans changer le module : un quart de tour." },
+      defis: ["Tape le module de \\(3 + 4i\\).", "Calcule \\((1 + i)^8\\) (c'est un nombre réel)."],
+      play: toi(["√(3² + 4²)", "1 + i = √2·e^(iπ/4) : (√2)⁸ = 16 et l'argument devient 8 · π/4 = 2π"],
+        [W(5, "√(9 + 16) = √25 = 5."), W(16, "(√2)⁸ = 16 et e^(2iπ) = 1 : (1 + i)⁸ = 16.")]),
+    },
+    cplxeq: {
+      retiens: { regle: "Si \\(\\Delta < 0\\), \\(\\Delta = (i\\sqrt{-\\Delta})^2\\) et \\(z = \\frac{-b \\pm i\\sqrt{-\\Delta}}{2a}\\) : deux solutions conjuguées.", exemple: ["\\(z^2 - 4z + 13 = 0\\) : \\(\\Delta = 16 - 52 = -36 = (6i)^2\\).", "\\(z = \\frac{4 \\pm 6i}{2} = 2 \\pm 3i\\)"], piege: "Divise aussi la partie imaginaire par \\(2a\\) : \\(\\frac{6i}{2} = 3i\\)." },
+      predict: { q: "L'équation \\(z^2 + 1 = 0\\) a-t-elle des solutions dans les complexes ?", choices: ["oui : i et −i", "non, un carré n'est jamais négatif", "oui : 1 et −1"], good: 0,
+        why: "i² = −1 et (−i)² = −1 : i et −i sont solutions. Dans les complexes, toute équation du second degré a des solutions." },
+      defis: ["\\(z^2 - 4z + 13 = 0\\) : tape le discriminant \\(\\Delta\\).", "Tape la partie imaginaire de la solution de partie imaginaire positive."],
+      play: toi(["Δ = b² − 4ac = 16 − 4 · 13", "z = (4 ± 6i) ÷ 2"],
+        [W(-36, "Δ = 16 − 52 = −36 < 0 : deux solutions complexes conjuguées."), W(3, "z = 2 ± 3i : partie imaginaire 3 (et −3 pour l'autre).")]),
+    },
+    suitegeom: {
+      retiens: { regle: "Suite arithmétique : \\(u_n = u_1 + (n - 1)r\\) et \\(S_n = \\frac{n(u_1 + u_n)}{2}\\). Géométrique : \\(u_n = u_1q^{n - 1}\\) et \\(S_n = u_1\\frac{q^n - 1}{q - 1}\\).", exemple: ["\\(1 + 3 + 5 + \\ldots + 29\\) : \\(29 = 1 + (n - 1) \\cdot 2\\), \\(n = 15\\) termes.", "\\(S = \\frac{15 \\cdot (1 + 29)}{2} = 225\\)"], piege: "De \\(u_1\\) à \\(u_n\\), on ajoute la raison \\(n - 1\\) fois." },
+      predict: { q: "Combien vaut \\(1 + 2 + 3 + \\ldots + 100\\) ?", choices: ["5'050", "10'000", "5'000"], good: 0,
+        why: "Gauss : on groupe 1 + 100, 2 + 99, … : 50 paires de somme 101, donc 5'050 = 100 · 101 ÷ 2." },
+      defis: ["Combien de termes dans \\(1 + 3 + 5 + \\ldots + 29\\) ?", "Calcule cette somme."],
+      play: toi(["u_n = 1 + (n − 1) · 2 = 29", "S = n(premier + dernier) ÷ 2"],
+        [W(15, "1 + 2(n − 1) = 29 donne n = 15."), W(225, "15 · (1 + 29) ÷ 2 = 225 (c'est aussi 15²).")]),
+    },
+    serie: {
+      retiens: { regle: "Si \\(|q| < 1\\), \\(u_0 + u_0q + u_0q^2 + \\ldots = \\frac{u_0}{1 - q}\\). Un nombre périodique est une telle série.", exemple: ["\\(1 + \\frac{1}{2} + \\frac{1}{4} + \\ldots = \\frac{1}{1 - \\frac{1}{2}} = 2\\)", "\\(0{,}\\overline{36} = \\frac{36}{100} \\cdot \\frac{1}{1 - \\frac{1}{100}} = \\frac{36}{99} = \\frac{4}{11}\\)"], piege: "La formule ne vaut que pour \\(|q| < 1\\) ; sinon la somme n'a pas de limite." },
+      predict: { q: "On additionne \\(1 + \\frac{1}{2} + \\frac{1}{4} + \\frac{1}{8} + \\ldots\\) sans fin. Le résultat…", choices: ["s'approche de 2", "devient infiniment grand", "s'approche de 1"], good: 0,
+        why: "Chaque terme comble la moitié de ce qui manque pour atteindre 2 : 1, 1,5, 1,75, 1,875… La somme tend vers 2." },
+      defis: ["Calcule \\(1 + \\frac{1}{2} + \\frac{1}{4} + \\ldots\\) (somme infinie).", "Écris \\(0{,}363636\\ldots\\) sous forme de fraction irréductible."],
+      play: toi(["u₀ = 1, q = 1/2 : u₀ ÷ (1 − q)", "0,36 + 0,0036 + … : u₀ = 36/100, q = 1/100"],
+        [W(2, "1 ÷ (1 − 1/2) = 2."), W(4 / 11, "(36/100) ÷ (99/100) = 36/99 = 4/11.", 0.0005)]),
     },
   });
 })();

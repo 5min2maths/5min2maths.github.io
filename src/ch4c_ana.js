@@ -1344,6 +1344,546 @@
   };
 
   // ---------- problèmes en plusieurs étapes (niveau 4) ----------
+  // ======================= 25.11 (agent col34) : bayes, syslin, bases (MA1 + MA2) ; complexes, suites et séries (MA2) =======================
+  // bayes (4.PS.02d) complète condbayes (conditionnelles, totales, indépendance) ; syslin (4.GV.02e) et bases (4.GV.03a–d)
+  // complètent matrices et appllin ; cplxalg, cplxtrig, cplxeq (4.NC.01–04) et suitegeom, serie (4.AN.10–11) : niv "R".
+  const pct = (v, k = 2) => dT(r6(v * 100), k) + "\\,\\%";
+  /* combinaison linéaire en TeX et au clavier : [2, -1] et ["x", "y"] → « 2x - y » */
+  const lc = (cs, vs) => { let o = ""; cs.forEach((c, i) => { c = r6(c); if (!c) return; const a = Math.abs(c), t = (vs[i] && a === 1 ? "" : fT(a)) + vs[i]; o += o === "" ? (c < 0 ? "-" : "") + t : (c < 0 ? " - " : " + ") + t; }); return o || "0"; };
+  const sysT = (rows, vs) => M("\\begin{cases} " + rows.map((r) => lc(r.slice(0, -1), vs) + " = " + fT(r[r.length - 1])).join(" \\\\ ") + " \\end{cases}");
+  const v2 = (u) => "\\begin{pmatrix} " + u.map(fT).join(" \\\\ ") + " \\end{pmatrix}";
+  const crs = (u, v) => [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+  const dt3 = (a, b, c) => a[0] * (b[1] * c[2] - b[2] * c[1]) - a[1] * (b[0] * c[2] - b[2] * c[0]) + a[2] * (b[0] * c[1] - b[1] * c[0]);
+  const m3 = (R3) => "\\begin{pmatrix} " + R3.map((r) => r.map(fT).join(" & ")).join(" \\\\ ") + " \\end{pmatrix}";
+  const lin3 = (al, U) => U[0].map((_, k) => al.reduce((s, a, j) => s + a * U[j][k], 0));
+  const TRI3 = " Réponds « x ; y ; z ».";
+
+  // ======================= bayes : théorème de Bayes (4.PS.02d) =======================
+  const BAY_ARBRE = [["Il pleut un jour donné avec la probabilité", "pluie", "l'application météo annonce la pluie", "l'application annonce la pluie", "qu'il pleuve vraiment", "meteo"],
+    ["Un message reçu est un pourriel avec la probabilité", "pourriel", "le filtre le bloque", "le filtre bloque un message", "que ce soit un pourriel", "filtre"],
+    ["Un athlète est dopé avec la probabilité", "dopé", "le contrôle est positif", "le contrôle d'un athlète est positif", "qu'il soit dopé", "dopage"],
+    ["Un randonneur part sur une pente dangereuse avec la probabilité", "pente dangereuse", "son détecteur sonne", "le détecteur sonne", "que la pente soit dangereuse", "avalanche"]];
+  const BY = {
+    1: [
+      () => { const pa = pk([0.2, 0.3, 0.4, 0.6]), q1 = pk([0.5, 0.7, 0.8, 0.9]), q2 = pk([0.1, 0.2, 0.3]), pb = r6(pa * q1 + (1 - pa) * q2), v = (pa * q1) / pb;
+        return QR("On sait que " + M("P(A) = " + dT(pa)) + ", " + M("P_A(B) = " + dT(q1)) + " et " + M("P(B) = " + dT(pb)) + ". Calcule " + M("P_B(A)") + " (" + RND[0.01] + ").", v, 0.01,
+          "Bayes : " + M("P_B(A) = \\frac{P(A) \\cdot P_A(B)}{P(B)} = \\frac{" + dT(pa) + " \\cdot " + dT(q1) + "}{" + dT(pb) + "} = \\frac{" + dT(r6(pa * q1)) + "}{" + dT(pb) + "} \\approx " + dT(rd(v, 0.01))) + ".",
+          { ctx: "formule", guide: [GS(M("P(A \\cap B) = P(A) \\cdot P_A(B)") + " ?", r6(pa * q1), M(dT(r6(pa * q1))) + "."), GS(M("P_B(A) = \\frac{P(A \\cap B)}{P(B)}") + " (" + RND[0.01] + ") ?", v, M("\\approx " + dT(rd(v, 0.01))) + ".", 0.01)],
+            traps: [TR(q1, "C'est P_A(B) : on demande la condition inverse, A sachant B."), TR(r6(pa * q1), "C'est P(A ∩ B) ; divise encore par P(B)."), TR(r6(pa * pb / q1), "Bayes : P(A)·P_A(B) ÷ P(B).")] }); },
+      () => { const c = pk([["un test rapide", "Malade", "Sain", "Positif", "Négatif", "le test est positif", "que la personne soit malade", "test"],
+          ["un filtre à pourriels", "Pourriel", "Normal", "Bloqué", "Accepté", "le message est bloqué", "que ce soit un pourriel", "pourriel"],
+          ["un détecteur de métaux à l'entrée d'un stade", "Objet interdit", "Rien", "Sonne", "Ne sonne pas", "le détecteur sonne", "que la personne porte un objet interdit", "stade"]]);
+        const a = R.int(12, 45), b = R.int(2, 9), cc = R.int(15, 60), d = R.int(150, 400);
+        const tab = M("\\begin{array}{l|c|c} & \\text{" + c[3] + "} & \\text{" + c[4] + "} \\\\ \\hline \\text{" + c[1] + "} & " + a + " & " + b + " \\\\ \\text{" + c[2] + "} & " + cc + " & " + d + " \\end{array}"), v = a / (a + cc);
+        return QN("Résultats d'" + c[0] + " sur " + (a + b + cc + d) + " cas :<br>" + tab + "<br>On sait que " + c[5] + ". Quelle est la probabilité " + c[6] + " ? (fraction acceptée)", v,
+          "Sachant que " + c[5] + ", on se place dans la colonne " + M("\\text{" + c[3] + "}") + " : " + M(a + cc) + " cas, dont " + M(a) + " favorables : " + M("\\frac{" + a + "}{" + (a + cc) + "}" + (den(v) < a + cc ? " = " + fT(v) : "")) + ". Ce n'est pas " + M("\\frac{" + a + "}{" + (a + b) + "}") + ", la probabilité dans l'autre sens.",
+          { ctx: "tableau-" + c[7], guide: [GS("Nombre de cas dans la colonne « " + c[3] + " » ?", a + cc, M(a + cc) + "."), GS("Probabilité cherchée ?", v, M(fT(v)) + ".")],
+            traps: [TR(a / (a + b), "C'est la probabilité dans l'autre sens (" + c[3].toLowerCase() + " sachant " + c[1].toLowerCase() + ") : on se place dans la colonne."), TR(a / (a + b + cc + d), "On sait déjà dans quelle colonne on est : divise par son total."), TR(cc / (a + cc), "Tu as compté l'autre ligne.")] }); },
+      () => { const c = pk(BAY_ARBRE), p = pk([0.1, 0.2, 0.25, 0.3]), q1 = pk([0.8, 0.85, 0.9, 0.95]), q2 = pk([0.05, 0.1, 0.15, 0.2]), a = r6(p * q1), b = r6((1 - p) * q2), v = a / (a + b);
+        return QR(c[0] + " " + M(dT(p)) + ". Dans ce cas, " + c[2] + " avec la probabilité " + M(dT(q1)) + " ; sinon, avec la probabilité " + M(dT(q2)) + ". Sachant que " + c[3] + ", quelle est la probabilité " + c[4] + " (" + RND[0.01] + ") ?", v, 0.01,
+          "Arbre : " + M("P(" + "\\text{" + c[1] + "} \\cap \\text{alerte}) = " + dT(p) + " \\cdot " + dT(q1) + " = " + dT(a)) + " ; fausses alertes " + M(dT(r6(1 - p)) + " \\cdot " + dT(q2) + " = " + dT(b)) + ". Bayes : " + M("\\frac{" + dT(a) + "}{" + dT(a) + " + " + dT(b) + "} \\approx " + dT(rd(v, 0.01))) + ".",
+          { ctx: "arbre-" + c[5], guide: [GS("Chemin « " + c[1] + " puis alerte » ?", a, M(dT(a)) + "."), GS("Chemin « pas " + c[1] + " puis alerte » ?", b, M(dT(b)) + "."), GS("Probabilité totale de l'alerte ?", r6(a + b), M(dT(r6(a + b))) + "."), GS("Probabilité cherchée (" + RND[0.01] + ") ?", v, M("\\approx " + dT(rd(v, 0.01))) + ".", 0.01)],
+            traps: [TR(q1, "C'est la probabilité de l'alerte sachant « " + c[1] + " » ; on cherche l'inverse."), TR(a, "C'est P(" + c[1] + " et alerte) ; divise par la probabilité totale de l'alerte."), TR(p, "C'est la probabilité avant l'alerte : l'alerte change l'information.")] }); },
+    ],
+    2: [
+      () => { const c = pk([["trois fournisseurs de puces", "puce", "défectueuse", "F"], ["trois ateliers", "pièce", "défectueuse", "A"], ["trois lignes de bus", "trajet", "en retard", "L"]]);
+        const S = pk([[0.5, 0.3, 0.2], [0.4, 0.35, 0.25], [0.45, 0.4, 0.15], [0.6, 0.25, 0.15]]), dd = [pk([0.01, 0.02, 0.03]), pk([0.04, 0.05]), pk([0.06, 0.08, 0.1])], k = R.int(0, 2);
+        const ab = S.map((s, i) => r6(s * dd[i])), tot = r6(ab[0] + ab[1] + ab[2]), v = ab[k] / tot, nm = c[3];
+        return QR("Une entreprise travaille avec " + c[0] + " " + M(nm + "_1, " + nm + "_2, " + nm + "_3") + " : ils représentent " + S.map((s) => M(pct(s, 0))).join(", ") + " de l'ensemble, avec " + dd.map((x) => M(pct(x, 0))).join(", ") + " de cas « " + c[2] + " ». Un(e) " + c[1] + " est " + c[2] + " : quelle est la probabilité qu'il ou elle vienne de " + M(nm + "_" + (k + 1)) + " (" + RND[0.001] + ") ?", v, 0.001,
+          "Probabilités totales : " + M("P(D) = " + S.map((s, i) => dT(s) + " \\cdot " + dT(dd[i])).join(" + ") + " = " + dT(tot, 5)) + ". Bayes : " + M("\\frac{" + dT(ab[k], 5) + "}{" + dT(tot, 5) + "} \\approx " + dT(rd(v, 0.001))) + ".",
+          { ctx: "trois-causes-" + nm, guide: [GS("Chemin passant par " + M(nm + "_" + (k + 1)) + " ?", ab[k], M(dT(ab[k], 5)) + "."), GS("Probabilité totale " + M("P(D)") + " (trois chemins) ?", tot, M(dT(tot, 5)) + "."), GS("Probabilité cherchée (" + RND[0.001] + ") ?", v, M("\\approx " + dT(rd(v, 0.001))) + ".", 0.001)],
+            traps: [TR(S[k], "C'est la part de " + nm + (k + 1) + " avant de savoir qu'il y a un problème."), TR(dd[k], "C'est la probabilité d'un problème sachant " + nm + (k + 1) + " : on cherche l'inverse."), TR(ab[k], "C'est P(" + nm + (k + 1) + " ∩ D) : divise par P(D).")] }); },
+      () => { const p = pk([0.02, 0.05, 0.1, 0.15]), se = pk([0.8, 0.85, 0.9]), sp = pk([0.9, 0.95, 0.98]), a = r6(p * (1 - se)), b = r6((1 - p) * sp), v = (100 * a) / (a + b);
+        return QR("Une maladie touche " + M(pct(p, 0)) + " d'une population. Le test détecte " + M(pct(se, 0)) + " des malades et il est négatif chez " + M(pct(sp, 0)) + " des personnes saines. Le test d'une personne est négatif : quelle est la probabilité qu'elle soit quand même malade (en %, " + RND[0.01] + ") ?", v, 0.01,
+          "Faux négatifs : " + M(dT(p) + " \\cdot " + dT(r6(1 - se)) + " = " + dT(a, 5)) + " ; vrais négatifs : " + M(dT(r6(1 - p)) + " \\cdot " + dT(sp) + " = " + dT(b, 5)) + ". Bayes : " + M("\\frac{" + dT(a, 5) + "}{" + dT(a, 5) + " + " + dT(b, 5) + "} \\approx " + dT(rd(v, 0.01)) + "\\,\\%") + ".",
+          { ctx: "faux-negatif", guide: [GS("Probabilité « malade et test négatif » ?", a, M(dT(a, 5)) + "."), GS("Probabilité « sain et test négatif » ?", b, M(dT(b, 5)) + "."), GS("Probabilité cherchée, en % (" + RND[0.01] + ") ?", v, M("\\approx " + dT(rd(v, 0.01)) + "\\,\\%") + ".", 0.01)],
+            traps: [TR(100 * (1 - se), "C'est la probabilité d'un test négatif sachant malade : on cherche malade sachant négatif."), TR(100 * a, "C'est P(malade ∩ négatif) : divise par P(négatif)."), TR(100 * p, "C'est la proportion de malades avant le test.")] }); },
+      () => { const N = 10000, p = pk([0.01, 0.02, 0.04, 0.05]), se = pk([0.9, 0.95, 0.8]), fp = pk([0.02, 0.05, 0.1]), mal = N * p, vp = r6(mal * se), fpN = r6((N - mal) * fp), v = (100 * vp) / (vp + fpN);
+        return QR("On teste " + M("10\\text{'}000") + " personnes ; " + M(pct(p, 0)) + " sont malades. Le test est positif chez " + M(pct(se, 0)) + " des malades et chez " + M(pct(fp, 0)) + " des personnes saines. Parmi les personnes au test positif, quel pourcentage est vraiment malade (" + RND[0.1] + ") ?", v, 0.1,
+          "Malades : " + M(nb(mal)) + ", dont " + M(nb(vp)) + " positifs ; saines : " + M(nb(N - mal)) + ", dont " + M(nb(fpN)) + " positifs (faux positifs). " + M("\\frac{" + nb(vp) + "}{" + nb(vp) + " + " + nb(fpN) + "} \\approx " + dT(rd(v, 0.1)) + "\\,\\%") + ".",
+          { ctx: "effectifs", guide: [GS("Nombre de malades au test positif ?", vp, M(nb(vp)) + "."), GS("Nombre de personnes saines au test positif ?", fpN, M(nb(fpN)) + "."), GS("Pourcentage cherché (" + RND[0.1] + ") ?", v, M("\\approx " + dT(rd(v, 0.1)) + "\\,\\%") + ".", 0.1)],
+            traps: [TR(100 * se, "C'est le pourcentage de positifs chez les malades : on cherche les malades parmi les positifs."), TR((100 * vp) / N, "Divise par le nombre de positifs, pas par 10'000."), TR(100 - 100 * fp, "Ce n'est pas lié qu'au taux de faux positifs : compte les deux groupes de positifs.")] }); },
+    ],
+    3: [
+      () => { const p = pk([0.01, 0.02, 0.05]), se = pk([0.9, 0.95, 0.99]), fp = pk([0.05, 0.1]), a = p * se * se, b = (1 - p) * fp * fp, v = a / (a + b), v1 = (p * se) / (p * se + (1 - p) * fp);
+        return QR("Une maladie touche " + M(pct(p, 0)) + " de la population. Un test est positif chez " + M(pct(se, 0)) + " des malades et chez " + M(pct(fp, 0)) + " des personnes saines. Une personne passe deux fois le test (résultats indépendants) : deux fois positif. Quelle est la probabilité qu'elle soit malade (" + RND[0.001] + ") ?", v, 0.001,
+          "Après un test positif : " + M("\\frac{" + dT(p) + " \\cdot " + dT(se) + "}{" + dT(p) + " \\cdot " + dT(se) + " + " + dT(r6(1 - p)) + " \\cdot " + dT(fp) + "} \\approx " + dT(rd(v1, 0.001))) + " ; ce nombre sert de nouvelle probabilité de départ. Directement : " + M("\\frac{" + dT(p) + " \\cdot " + dT(se) + "^2}{" + dT(p) + " \\cdot " + dT(se) + "^2 + " + dT(r6(1 - p)) + " \\cdot " + dT(fp) + "^2} \\approx " + dT(rd(v, 0.001))) + ".",
+          { ctx: "deux-tests", guide: [GS("Probabilité d'être malade après un seul test positif (" + RND[0.001] + ") ?", v1, M("\\approx " + dT(rd(v1, 0.001))) + ".", 0.001), GS(M("P(M \\cap ++) = " + dT(p) + " \\cdot " + dT(se) + "^2") + " (" + RND[0.0001] + ") ?", a, M("\\approx " + dT(rd(a, 0.0001))) + ".", 0.0001), GS("Probabilité cherchée (" + RND[0.001] + ") ?", v, M("\\approx " + dT(rd(v, 0.001))) + ".", 0.001)],
+            traps: [TR(v1, "C'est après un seul test : le second test positif renforce encore la probabilité."), TR(se * se, "C'est P(deux positifs sachant malade) ; on cherche malade sachant deux positifs."), TR(p * se * se, "C'est P(M ∩ deux positifs) : divise par la probabilité totale de deux positifs.")] }); },
+      () => { const se = pk([0.8, 0.9, 0.95, 0.99]), fp = pk([0.01, 0.02, 0.05, 0.1]), v = (100 * fp) / (se + fp);
+        return QR("Un test est positif chez " + M(pct(se, 0)) + " des malades et chez " + M(pct(fp, 0)) + " des personnes saines. Quelle devrait être la proportion de malades dans la population (en %, " + RND[0.01] + ") pour qu'une personne au test positif ait exactement une chance sur deux d'être malade ?", v, 0.01,
+          "Avec " + M("p") + " la proportion de malades : " + M("P_+(M) = \\frac{1}{2}") + " quand " + M(dT(se) + "p = " + dT(fp) + "(1 - p)") + ", soit " + M("p = \\frac{" + dT(fp) + "}{" + dT(se) + " + " + dT(fp) + "} \\approx " + dT(rd(v / 100, 0.0001))) + ", environ " + M(dT(rd(v, 0.01)) + "\\,\\%") + ".",
+          { ctx: "prevalence", guide: [GS("Une chance sur deux : vrais positifs = faux positifs, " + M(dT(se) + "p = " + dT(fp) + "(1 - p)") + ". Coefficient de " + M("p") + " après regroupement ?", r6(se + fp), M(dT(se) + " + " + dT(fp) + " = " + dT(r6(se + fp))) + "."), GS("Proportion en % (" + RND[0.01] + ") ?", v, M("\\approx " + dT(rd(v, 0.01)) + "\\,\\%") + ".", 0.01)],
+            traps: [TR(100 * fp, "Les vrais positifs (" + dS(se) + "·p) doivent égaler les faux positifs (" + dS(fp) + "·(1 − p)) : résous l'équation."), TR(50, "C'est la probabilité visée après le test, pas la proportion de malades."), TR((100 * fp) / se, "N'oublie pas le facteur (1 − p) des personnes saines.")] }); },
+      () => { const pa = pk([0.3, 0.4, 0.6]), q1 = pk([0.2, 0.5, 0.7]), q2 = pk([0.1, 0.3, 0.4, 0.8]), pb = r6(pa * q1 + (1 - pa) * q2), v = ((1 - pa) * q2) / pb; if (q1 === q2) return null;
+        return QR("On sait que " + M("P(A) = " + dT(pa)) + ", " + M("P_A(B) = " + dT(q1)) + " et " + M("P(B) = " + dT(pb)) + ". Calcule " + M("P_B(\\overline{A})") + " (" + RND[0.01] + ").", v, 0.01,
+          M("P(\\overline{A} \\cap B) = P(B) - P(A \\cap B) = " + dT(pb) + " - " + dT(r6(pa * q1)) + " = " + dT(r6(pb - pa * q1))) + ", puis " + M("P_B(\\overline{A}) = \\frac{" + dT(r6(pb - pa * q1)) + "}{" + dT(pb) + "} \\approx " + dT(rd(v, 0.01))) + ". (Ou : " + M("1 - P_B(A)") + ".)",
+          { ctx: "inconnue", guide: [GS(M("P(A \\cap B)") + " ?", r6(pa * q1), M(dT(r6(pa * q1))) + "."), GS(M("P(\\overline{A} \\cap B) = P(B) - P(A \\cap B)") + " ?", r6(pb - pa * q1), M(dT(r6(pb - pa * q1))) + "."), GS(M("P_B(\\overline{A})") + " (" + RND[0.01] + ") ?", v, M("\\approx " + dT(rd(v, 0.01))) + ".", 0.01)],
+            traps: [TR(q2, "C'est P_Ā(B) : on cherche Ā sachant B."), TR((pa * q1) / pb, "C'est P_B(A) ; on demande le contraire, Ā sachant B."), TR(r6(pb - pa * q1), "C'est P(Ā ∩ B) : divise par P(B).")] }); },
+    ],
+  };
+
+  // ======================= syslin : systèmes linéaires par les matrices (4.GV.02e) =======================
+  const SYS_VAR = ["x", "y"], SYS_VAR3 = ["x", "y", "z"];
+  /* système 2 × 2 de solution entière (x0 ; y0) et de déterminant |D| ≥ 2 */
+  const sys2r = () => { const A = rnd4(-6, 6), D = dt(A), x0 = nz(-6, 6), y0 = nz(-6, 6); if (Math.abs(D) < 2 || Math.abs(x0) === Math.abs(y0)) return null; const [e, f] = mv(A, [x0, y0]); if (!e || !f) return null; return { A, D, x0, y0, e, f, Dx: e * A[3] - A[1] * f, Dy: A[0] * f - e * A[2] }; };
+  const sysS = (o) => sysT([[o.A[0], o.A[1], o.e], [o.A[2], o.A[3], o.f]], SYS_VAR);
+  const SL = {
+    1: [
+      () => { const o = sys2r(); if (!o) return null;
+        return chk(QN("Le système " + sysS(o) + " s'écrit " + M("A\\begin{pmatrix} x \\\\ y \\end{pmatrix} = \\begin{pmatrix} " + o.e + " \\\\ " + o.f + " \\end{pmatrix}") + ". Calcule " + M("\\det A") + ".", o.D,
+          M("A = " + mX(o.A)) + " (coefficients de x et de y), " + M("\\det A = " + par(o.A[0]) + " \\cdot " + par(o.A[3]) + " - " + par(o.A[1]) + " \\cdot " + par(o.A[2]) + " = " + o.D) + ". Il n'est pas nul : une seule solution.",
+          { ctx: "det-systeme", guide: [GP2("Première ligne de " + M("A") + " (coefficients de x et de y) ?", [o.A[0], o.A[1]], M("(" + o.A[0] + " \\,;\\, " + o.A[1] + ")") + "."), GS(M("\\det A") + " ?", o.D, M(o.D) + ".")],
+            traps: [TR(o.A[0] * o.e - o.A[1] * o.f, "La matrice A ne contient que les coefficients de x et de y, pas le second membre."), TR(o.A[0] * o.A[3] + o.A[1] * o.A[2], "ad − bc : on soustrait."), TR(-o.D, "Diagonale principale moins l'autre.")] })); },
+      () => { const o = sys2r(); if (!o) return null; const X = R.rand() < 0.5, v = X ? o.Dx : o.Dy; if (Math.abs(v) < 2) return null;
+        return chk(QN("Pour résoudre " + sysS(o) + " par la règle de Cramer, calcule le déterminant " + M(X ? "D_x" : "D_y") + ".", v,
+          M(X ? "D_x" : "D_y") + " : on remplace la colonne des " + (X ? "x" : "y") + " par le second membre. " + M((X ? "D_x = " + mat(o.e, o.A[1], o.f, o.A[3]) + " = " + par(o.e) + " \\cdot " + par(o.A[3]) + " - " + par(o.A[1]) + " \\cdot " + par(o.f) : "D_y = " + mat(o.A[0], o.e, o.A[2], o.f) + " = " + par(o.A[0]) + " \\cdot " + par(o.f) + " - " + par(o.e) + " \\cdot " + par(o.A[2])) + " = " + v) + ".",
+          { ctx: X ? "determinant-Dx" : "determinant-Dy", guide: [GP2("Première ligne de la matrice de " + M(X ? "D_x" : "D_y") + " ?", X ? [o.e, o.A[1]] : [o.A[0], o.e], M(X ? "(" + o.e + " \\,;\\, " + o.A[1] + ")" : "(" + o.A[0] + " \\,;\\, " + o.e + ")") + "."), GS(M(X ? "D_x" : "D_y") + " ?", v, M(v) + ".")],
+            traps: [TR(o.D, "C'est le déterminant D du système ; dans " + (X ? "Dx" : "Dy") + ", le second membre remplace la colonne des " + (X ? "x" : "y") + "."), TR(X ? o.Dy : o.Dx, "Tu as remplacé l'autre colonne."), TR(-v, "Attention à l'ordre : diagonale principale moins l'autre.")] })); },
+      () => { const o = sys2r(); if (!o) return null; const X = R.rand() < 0.5, v = X ? o.x0 : o.y0;
+        return QN("Résous " + sysS(o) + " avec la règle de Cramer et donne " + M(X ? "x" : "y") + ".", v,
+          M("D = " + o.D) + ", " + M((X ? "D_x = " + o.Dx : "D_y = " + o.Dy)) + ", donc " + M((X ? "x = \\frac{D_x}{D}" : "y = \\frac{D_y}{D}") + " = \\frac{" + (X ? o.Dx : o.Dy) + "}{" + o.D + "} = " + v) + ".",
+          { ctx: "cramer-" + (X ? "x" : "y"), guide: [GS(M("D = \\det A") + " ?", o.D, M(o.D) + "."), GS(M(X ? "D_x" : "D_y") + " ?", X ? o.Dx : o.Dy, M(X ? o.Dx : o.Dy) + "."), GS(M(X ? "x" : "y") + " ?", v, M(v) + ".")],
+            traps: [TR(r6(o.D / (X ? o.Dx : o.Dy)), "C'est l'inverse : " + (X ? "Dx" : "Dy") + " ÷ D."), TR(X ? o.Dx : o.Dy, "Divise encore par D = " + o.D + "."), TR(X ? o.y0 : o.x0, "C'est l'autre inconnue.")] }); },
+    ],
+    2: [
+      () => { const D = pk([1, -1]), a = nz(-5, 5), b = nz(-5, 5), c = nz(-5, 5); if ((D + b * c) % a) return null; const d = (D + b * c) / a; if (!d) return null; const A = [a, b, c, d], inv = [d / D, -b / D, -c / D, a / D], x0 = nz(-6, 6), y0 = nz(-6, 6); if (Math.abs(x0) === Math.abs(y0)) return null; const [e, f] = mv(A, [x0, y0]); if (!e || !f) return null;
+        return QP2("Le système " + sysT([[a, b, e], [c, d, f]], SYS_VAR) + " s'écrit " + M("AX = B") + ". Calcule " + M("A^{-1}") + ", puis " + M("X = A^{-1}B") + "." + PAIR2, [x0, y0],
+          M("\\det A = " + D) + ", " + M("A^{-1} = " + mX(inv)) + " et " + M("X = " + mX(inv) + col(e, f) + " = " + col(x0, y0)) + ".",
+          { ctx: "inverse", guide: [GS(M("\\det A") + " ?", D, M(D) + "."), GP2("Première ligne de " + M("A^{-1}") + " ?", [inv[0], inv[1]], M("(" + fT(inv[0]) + " \\,;\\, " + fT(inv[1]) + ")") + "."), GP2(M("X = A^{-1}B") + " ?", [x0, y0], M("(" + x0 + " \\,;\\, " + y0 + ")") + ".")],
+            traps: [TP2(mv(A, [e, f]), "On multiplie B par l'inverse A⁻¹, pas par A."), TP2([y0, x0], "x d'abord, puis y."), TP2(mv([a, -b, -c, d], [e, f]).map((t) => t / D), "Dans l'inverse, on échange a et d (et on change le signe de b et c).")] }); },
+      () => { const a = nz(-5, 5), b = nz(-6, 6), c = nz(-6, 6); if ((b * c) % a) return null; const m = (b * c) / a; if (Math.abs(m) < 2) return null; const e = nz(-9, 9), f = nz(-9, 9);
+        return chk(QN("Pour quelle valeur de " + M("m") + " le système " + M("\\begin{cases} " + lc([a, b], SYS_VAR) + " = " + e + " \\\\ " + lc([c], ["x"]) + " + my = " + f + " \\end{cases}") + " n'a-t-il pas une solution unique ?", m,
+          "Pas de solution unique quand le déterminant est nul : " + M(fT(a) + "m - " + par(b) + " \\cdot " + par(c) + " = 0") + ", donc " + M("m = \\frac{" + b * c + "}{" + a + "} = " + m) + ".",
+          { ctx: "parametre-m", guide: [GS("Le déterminant vaut " + M(lc([a], ["m"]) + " - " + par(b) + " \\cdot " + par(c)) + ". Que vaut " + M(par(b) + " \\cdot " + par(c)) + " ?", b * c, M(b * c) + "."), GS(M("m") + " (déterminant nul) ?", m, M(m) + ".")],
+            traps: [TR(-m, "a·m − b·c = 0 donne a·m = b·c : attention au signe."), TR(b * c, "Divise encore par " + a + "."), TR(r6(a / (b * c)), "m = b·c ÷ a.")] })); },
+      () => { const A3 = [[nz(-3, 3), R.int(-3, 3), R.int(-3, 3)], [R.int(-3, 3), nz(-3, 3), R.int(-3, 3)], [R.int(-3, 3), R.int(-3, 3), nz(-3, 3)]], d = dt3(...A3); if (Math.abs(d) < 2) return null;
+        const p = A3[0][0] * A3[1][1] * A3[2][2] + A3[0][1] * A3[1][2] * A3[2][0] + A3[0][2] * A3[1][0] * A3[2][1], n = A3[0][2] * A3[1][1] * A3[2][0] + A3[0][0] * A3[1][2] * A3[2][1] + A3[0][1] * A3[1][0] * A3[2][2];
+        return chk(QN("Calcule le déterminant de la matrice des coefficients " + M(m3(A3)) + " (règle de Sarrus ou développement selon une ligne).", d,
+          "Sarrus : diagonales descendantes " + M(p) + ", montantes " + M(n) + " ; " + M("\\det = " + p + " - " + par(n) + " = " + d) + ".",
+          { ctx: "det3", guide: [GS("Somme des trois produits « descendants » ?", p, M(p) + "."), GS("Somme des trois produits « montants » ?", n, M(n) + "."), GS("Déterminant ?", d, M(d) + ".")],
+            traps: [TR(p + n, "Sarrus : descendants MOINS montants."), TR(n - p, "Descendants moins montants, pas l'inverse."), TR(A3[0][0] * A3[1][1] * A3[2][2], "Il y a six produits (trois descendants, trois montants).")] })); },
+    ],
+    3: [
+      () => { const A3 = [[nz(-3, 3), R.int(-2, 2), R.int(-2, 2)], [R.int(-2, 2), nz(-3, 3), R.int(-2, 2)], [R.int(-2, 2), R.int(-2, 2), nz(-3, 3)]], d = dt3(...A3), s = [nz(-4, 4), nz(-4, 4), nz(-4, 4)]; if (Math.abs(d) < 2 || new Set(s.map(Math.abs)).size < 3) return null;
+        const B = A3.map((r) => r[0] * s[0] + r[1] * s[1] + r[2] * s[2]); if (B.some((x) => !x)) return null; const Dx = dt3(...A3.map((r, i) => [B[i], r[1], r[2]]));
+        return QP2("Résous le système " + sysT(A3.map((r, i) => r.concat([B[i]])), SYS_VAR3) + " (règle de Cramer ou inverse)." + TRI3, s,
+          M("D = " + d) + ", " + M("D_x = " + Dx) + ", donc " + M("x = \\frac{" + Dx + "}{" + d + "} = " + s[0]) + " ; de même " + M("y = " + s[1]) + " et " + M("z = " + s[2]) + ". Vérifie dans les trois équations.",
+          { ctx: "cramer3", guide: [GS(M("D") + " (déterminant des coefficients) ?", d, M(d) + "."), GS(M("D_x") + " (colonne des x remplacée par le second membre) ?", Dx, M(Dx) + "."), GS(M("x") + " ?", s[0], M(s[0]) + "."), GP2("Solution ?", s, M("(" + s.join(" \\,;\\, ") + ")") + ".")],
+            traps: [TP2([s[0], s[2], s[1]], "Respecte l'ordre x ; y ; z."), TP2([-s[0], -s[1], -s[2]], "Vérifie les signes dans une équation.")] }); },
+      () => { const c = pk([["Un cinéma vend des billets adultes et des billets enfants", "billets adultes", "billets enfants", "CHF", "billets vendus", "recette"], ["Un fleuriste compose des bouquets avec des roses et des tulipes", "roses", "tulipes", "CHF", "fleurs", "prix total"], ["Un traiteur prépare des plateaux salés et des plateaux sucrés", "plateaux salés", "plateaux sucrés", "CHF", "plateaux", "montant"]]);
+        const p1 = pk([12, 14, 15, 18]), p2 = pk([6, 7, 8, 9]), x0 = R.int(25, 90), y0 = R.int(20, 80); if (x0 === y0) return null; const N = x0 + y0, T = p1 * x0 + p2 * y0, D = p2 - p1, Dx = N * p2 - T;
+        return QP2(c[0] + " : " + c[1] + " à " + p1 + " " + c[3] + ", " + c[2] + " à " + p2 + " " + c[3] + ". On a " + M(N) + " " + c[4] + " pour une " + c[5] + " de " + M(nb(T)) + " " + c[3] + ". Combien de " + c[1] + " et de " + c[2] + " ? Réponds « x ; y » (x : " + c[1] + ").", [x0, y0],
+          M("\\begin{cases} x + y = " + N + " \\\\ " + p1 + "x + " + p2 + "y = " + T + " \\end{cases}") + " ; " + M("D = " + p2 + " - " + p1 + " = " + D) + ", " + M("D_x = " + N + " \\cdot " + p2 + " - " + T + " = " + Dx) + ", " + M("x = " + x0) + " et " + M("y = " + N + " - " + x0 + " = " + y0) + ".",
+          { ctx: "probleme-" + c[4].split(" ")[0], guide: [GS("Déterminant " + M("D") + " du système " + M("x + y = " + N) + ", " + M(p1 + "x + " + p2 + "y = " + T) + " ?", D, M("1 \\cdot " + p2 + " - 1 \\cdot " + p1 + " = " + D) + "."), GS(M("D_x") + " ?", Dx, M(Dx) + "."), GP2("Solution ?", [x0, y0], M("(" + x0 + " \\,;\\, " + y0 + ")") + ".")],
+            traps: [TP2([y0, x0], "x désigne les " + c[1] + " : vérifie l'ordre."), TP2([Math.round(T / (p1 + p2)), N - Math.round(T / (p1 + p2))], "Ce n'est pas un partage : résous le système.")] }); },
+      () => { const a = pk([1, 2, -1]), b = nz(-4, 4), e = nz(-7, 7), k = pk([2, 3, -2, -3]), c = k * a, m = k * b, kk = k * e;
+        return QP2("Système " + M("\\begin{cases} " + lc([a, b], SYS_VAR) + " = " + e + " \\\\ " + lc([c], ["x"]) + " + my = k \\end{cases}") + ". Pour quelles valeurs de " + M("m") + " et de " + M("k") + " a-t-il une infinité de solutions ? Réponds « m ; k ».", [m, kk],
+          "Il faut " + M("\\det = 0") + " : " + M(fT(a) + "m - " + par(b) + " \\cdot " + par(c) + " = 0") + ", " + M("m = " + m) + " ; la seconde équation est alors " + M(k) + " fois la première, donc " + M("k = " + k + " \\cdot " + par(e) + " = " + kk) + " (sinon, aucune solution).",
+          { ctx: "infinite", guide: [GS(M("m") + " (déterminant nul) ?", m, M(m) + "."), GS("Par quel nombre faut-il multiplier la première équation pour obtenir les coefficients de la seconde ?", k, M(k) + "."), GP2("Réponse « m ; k » ?", [m, kk], M("(" + m + " \\,;\\, " + kk + ")") + ".")],
+            traps: [TP2([m, e], "Le second membre doit aussi être multiplié par " + k + "."), TP2([-m, kk], "a·m − b·c = 0 : attention au signe."), TP2([m, -kk], "k = " + k + " · (" + e + ").")] }); },
+    ],
+  };
+
+  // ======================= bases : familles libres, bases, composantes (4.GV.03a–d) =======================
+  const r3 = (k = 3) => [nz(-k, k), R.int(-k, k), nz(-k, k)];
+  const BA = {
+    1: [
+      () => { const u = [nz(-4, 4), nz(-4, 4)], v = [nz(-4, 4), nz(-4, 4)], D = u[0] * v[1] - u[1] * v[0]; if (Math.abs(D) < 2) return null; const al = nz(-4, 4), be = nz(-4, 4); if (Math.abs(al) === 1 && Math.abs(be) === 1) return null; const w = [al * u[0] + be * v[0], al * u[1] + be * v[1]];
+        return QP2("Les vecteurs " + M("\\vec u = " + v2(u)) + " et " + M("\\vec v = " + v2(v)) + " forment une base du plan. Donne les composantes de " + M("\\vec w = " + v2(w)) + " dans cette base, c'est-à-dire " + M("(\\alpha \\,;\\, \\beta)") + " avec " + M("\\vec w = \\alpha\\vec u + \\beta\\vec v") + ". Réponds « α ; β ».", [al, be],
+          M("\\alpha" + v2(u) + " + \\beta" + v2(v) + " = " + v2(w)) + " donne un système ; Cramer (" + M("D = " + D) + ") : " + M("\\alpha = " + al) + ", " + M("\\beta = " + be) + ". Vérifie : " + M(al + v2(u) + (be < 0 ? " - " + -be : " + " + be) + v2(v) + " = " + v2(w)) + ".",
+          { ctx: "composantes-plan", guide: [GS("Déterminant " + M("\\det(\\vec u \\,;\\, \\vec v)") + " ?", D, M(D) + "."), GS(M("\\alpha") + " ?", al, M(al) + "."), GP2("Composantes « α ; β » ?", [al, be], M("(" + al + " \\,;\\, " + be + ")") + ".")],
+            traps: [TP2(w, "Ce sont les coordonnées dans la base usuelle ; dans la base (u ; v), on résout αu + βv = w."), TP2([be, al], "α va avec u, β avec v.")] }); },
+      () => { const a = nz(-5, 5), b = nz(-5, 5), d = nz(-6, 6); if ((a * d) % b) return null; const m = (a * d) / b; if (Math.abs(m) < 2 || Math.abs(a) === Math.abs(b)) return null;
+        return chk(QN("Pour quelle valeur de " + M("m") + " les vecteurs " + M("\\vec u = " + v2([a, b])) + " et " + M("\\vec v = \\begin{pmatrix} m \\\\ " + d + " \\end{pmatrix}") + " sont-ils liés (ne forment pas une base) ?", m,
+          "Famille liée quand " + M("\\det(\\vec u \\,;\\, \\vec v) = 0") + " : " + M(par(a) + " \\cdot " + par(d) + " - " + par(b) + "m = 0") + ", donc " + M("m = \\frac{" + a * d + "}{" + b + "} = " + m) + " : " + M("\\vec v") + " est alors un multiple de " + M("\\vec u") + ".",
+          { ctx: "liee-plan", guide: [GS("Le déterminant vaut " + M(par(a) + " \\cdot " + par(d) + " - " + par(b) + "m") + ". Que vaut " + M(par(a) + " \\cdot " + par(d)) + " ?", a * d, M(a * d) + "."), GS(M("m") + " ?", m, M(m) + ".")],
+            traps: [TR(-m, "a·d − b·m = 0 donne m = a·d ÷ b : attention au signe."), TR(r6((b * d) / a), "Les composantes doivent être proportionnelles : m ÷ " + a + " = " + d + " ÷ " + b + "."), TR(a * d, "Divise encore par " + b + ".")] })); },
+      () => { const u = [nz(-4, 4), nz(-4, 4)], v = [nz(-4, 4), nz(-4, 4)]; if (Math.abs(u[0] * v[1] - u[1] * v[0]) < 1) return null; const al = nz(-4, 4), be = nz(-4, 4); if (Math.abs(al) === 1 && Math.abs(be) === 1) return null; const w = [al * u[0] + be * v[0], al * u[1] + be * v[1]]; if (w.some((x) => !x)) return null;
+        return QP2("Dans la base " + M("(\\vec u \\,;\\, \\vec v)") + " avec " + M("\\vec u = " + v2(u)) + " et " + M("\\vec v = " + v2(v)) + ", le vecteur " + M("\\vec w") + " a pour composantes " + M("(" + al + " \\,;\\, " + be + ")") + ". Donne ses coordonnées dans la base usuelle." + PAIR2, w,
+          M("\\vec w = " + al + "\\vec u " + (be < 0 ? "- " + -be : "+ " + be) + "\\vec v = " + v2([al * u[0], al * u[1]]) + " + " + v2([be * v[0], be * v[1]]) + " = " + v2(w)) + ".",
+          { ctx: "vers-usuelle", guide: [GP2("Coordonnées de " + M(al + "\\vec u") + " ?", [al * u[0], al * u[1]], M(v2([al * u[0], al * u[1]])) + "."), GP2("Coordonnées de " + M(be + "\\vec v") + " ?", [be * v[0], be * v[1]], M(v2([be * v[0], be * v[1]])) + "."), GP2(M("\\vec w") + " ?", w, M(v2(w)) + ".")],
+            traps: [TP2([al * u[0] + be * u[1], al * v[0] + be * v[1]], "On combine les vecteurs : α·u + β·v, composante par composante."), TP2([al, be], "Ce sont les composantes dans la base (u ; v) ; on demande les coordonnées usuelles.")] }); },
+    ],
+    2: [
+      () => { const u = r3(), v = r3(), n = crs(u, v); if (!n[0] || n.every((x) => !x)) return null; const al = nz(-3, 3), be = nz(-3, 3), w = lin3([al, be], [u, v]); if (Math.abs(w[0]) < 2 || !w[1] || !w[2]) return null; const c1 = n[0];
+        const m = w[0];
+        return chk(QN("Pour quelle valeur de " + M("m") + " les vecteurs " + M("\\vec u = " + v2(u)) + ", " + M("\\vec v = " + v2(v)) + " et " + M("\\vec w = \\begin{pmatrix} m \\\\ " + w[1] + " \\\\ " + w[2] + " \\end{pmatrix}") + " sont-ils coplanaires (famille liée) ?", m,
+          "Famille liée quand " + M("\\det(\\vec u \\,;\\, \\vec v \\,;\\, \\vec w) = 0") + " : ce déterminant est du premier degré en " + M("m") + " (coefficient " + M(c1) + "), il s'annule pour " + M("m = " + m) + ". En effet " + M("\\vec w = " + al + "\\vec u " + (be < 0 ? "- " + -be : "+ " + be) + "\\vec v") + ".",
+          { ctx: "liee-espace", guide: [GS("Le coefficient de " + M("m") + " dans le déterminant (développement selon la colonne de " + M("\\vec w") + ") vaut " + M("u_2v_3 - u_3v_2") + ". Combien ?", c1, M(c1) + "."), GS(M("m") + " ?", m, M(m) + ".")],
+            traps: [TR(-m, "Vérifie le signe : avec cette valeur, le déterminant doit être nul."), TR(al + be, "Écris w = αu + βv avec les deux dernières composantes, puis calcule la première.")] })); },
+      () => { const U = [r3(2), r3(2), r3(2)], d = dt3(...U); if (Math.abs(d) < 1) return null; const s = [nz(-3, 3), nz(-3, 3), nz(-3, 3)]; if (new Set(s.map(Math.abs)).size < 2) return null; const t = lin3(s, U); if (t.some((x) => !x)) return null;
+        return QP2("Les vecteurs " + M("\\vec u = " + v2(U[0])) + ", " + M("\\vec v = " + v2(U[1])) + ", " + M("\\vec w = " + v2(U[2])) + " forment une base de l'espace. Donne les composantes de " + M("\\vec t = " + v2(t)) + " dans cette base. Réponds « α ; β ; γ ».", s,
+          M("\\alpha\\vec u + \\beta\\vec v + \\gamma\\vec w = \\vec t") + " : système de trois équations (" + M("D = " + d) + ") ; solution " + M("(" + s.join(" \\,;\\, ") + ")") + ".",
+          { ctx: "composantes-espace", guide: [GS("Déterminant de la famille " + M("(\\vec u \\,;\\, \\vec v \\,;\\, \\vec w)") + " ?", d, M(d) + "."), GS(M("\\alpha") + " ?", s[0], M(s[0]) + "."), GP2("Composantes « α ; β ; γ » ?", s, M("(" + s.join(" \\,;\\, ") + ")") + ".")],
+            traps: [TP2(t, "Ce sont les coordonnées usuelles de t ; dans la base (u ; v ; w), résous αu + βv + γw = t."), TP2([s[2], s[1], s[0]], "α va avec u, β avec v, γ avec w.")] }); },
+      () => { const u = r3(), v = r3(); if (crs(u, v).every((x) => !x)) return null; const al = nz(-4, 4), be = nz(-4, 4); if (Math.abs(al) === Math.abs(be)) return null; const w = lin3([al, be], [u, v]); if (w.some((x) => !x)) return null;
+        return QP2("Les vecteurs " + M("\\vec u = " + v2(u)) + ", " + M("\\vec v = " + v2(v)) + " et " + M("\\vec w = " + v2(w)) + " sont coplanaires. Trouve " + M("\\alpha") + " et " + M("\\beta") + " tels que " + M("\\vec w = \\alpha\\vec u + \\beta\\vec v") + ". Réponds « α ; β ».", [al, be],
+          "Deux équations suffisent pour trouver " + M("\\alpha") + " et " + M("\\beta") + " ; la troisième sert de vérification : " + M("\\vec w = " + al + "\\vec u " + (be < 0 ? "- " + -be : "+ " + be) + "\\vec v") + ".",
+          { ctx: "combinaison-coplanaire", guide: [GS(M("\\alpha") + " ?", al, M(al) + "."), GS(M("\\beta") + " ?", be, M(be) + "."), GP2("Réponse « α ; β » ?", [al, be], M("(" + al + " \\,;\\, " + be + ")") + ".")],
+            traps: [TP2([be, al], "α multiplie u, β multiplie v."), TP2([-al, -be], "Vérifie les signes dans une équation.")] }); },
+    ],
+    3: [
+      () => { const u = r3(), v = r3(); if (crs(u, v).every((x) => !x)) return null; const t = pk([2, 3]); let w;
+        if (t === 2) { const al = nz(-2, 2), be = nz(-2, 2); w = lin3([al, be], [u, v]); } else { w = r3(); if (!dt3(u, v, w)) return null; }
+        if (w.every((x) => !x)) return null;
+        return QN("Quelle est la dimension du sous-espace engendré par " + M("\\vec u = " + v2(u)) + ", " + M("\\vec v = " + v2(v)) + " et " + M("\\vec w = " + v2(w)) + " ?", t,
+          t === 3 ? M("\\det(\\vec u \\,;\\, \\vec v \\,;\\, \\vec w) = " + dt3(u, v, w) + " \\neq 0") + " : la famille est libre, c'est une base de l'espace, dimension 3." : M("\\det = 0") + " et " + M("\\vec u") + ", " + M("\\vec v") + " ne sont pas colinéaires : " + M("\\vec w") + " est une combinaison de " + M("\\vec u") + " et " + M("\\vec v") + " ; ils engendrent un plan, dimension 2.",
+          { ctx: "dimension", guide: [GS("Déterminant " + M("\\det(\\vec u \\,;\\, \\vec v \\,;\\, \\vec w)") + " ?", dt3(u, v, w), M(dt3(u, v, w)) + "."), GS("Dimension ?", t, M(t) + ".")],
+            traps: [TR(t === 3 ? 2 : 3, t === 3 ? "Le déterminant n'est pas nul : la famille est libre." : "Le déterminant est nul : un des vecteurs est combinaison des autres."), TR(1, "u et v ne sont pas colinéaires : au moins un plan.")] }); },
+      () => { const u = r3(), v = r3(), n = crs(u, v); if (!n[2] || n.every((x) => !x)) return null; const al = nz(-3, 3), be = nz(-3, 3), w = lin3([al, be], [u, v]); if (w.some((x) => !x) || Math.abs(w[2]) < 2) return null;
+        return chk(QN("Pour quelle valeur de " + M("r") + " le vecteur " + M("\\begin{pmatrix} " + w[0] + " \\\\ " + w[1] + " \\\\ r \\end{pmatrix}") + " appartient-il au sous-espace engendré par " + M("\\vec u = " + v2(u)) + " et " + M("\\vec v = " + v2(v)) + " ?", w[2],
+          "Avec les deux premières composantes : " + M("\\alpha = " + al) + ", " + M("\\beta = " + be) + " ; la troisième vaut alors " + M(al + " \\cdot " + par(u[2]) + " + " + par(be) + " \\cdot " + par(v[2]) + " = " + w[2]) + ".",
+          { ctx: "appartenance", guide: [GS(M("\\alpha") + " (deux premières composantes) ?", al, M(al) + "."), GS(M("\\beta") + " ?", be, M(be) + "."), GS(M("r") + " ?", w[2], M(w[2]) + ".")],
+            traps: [TR(u[2] + v[2], "Il faut d'abord trouver α et β avec les deux premières composantes."), TR(-w[2], "Vérifie le signe : r = α·u₃ + β·v₃.")] })); },
+      () => { const u = [nz(-3, 3), nz(-3, 3)], v = [nz(-3, 3), nz(-3, 3)]; if (Math.abs(u[0] * v[1] - u[1] * v[0]) < 1) return null; const ka = nz(-2, 2), kb = nz(-2, 2), u2 = [1, ka], v2v = [kb, 1 + ka * kb], Dd = 1;
+        const al = nz(-3, 3), be = nz(-3, 3), w = [al * u[0] + be * v[0], al * u[1] + be * v[1]];
+        const g = (w[0] * v2v[1] - w[1] * v2v[0]) / Dd, h = (u2[0] * w[1] - u2[1] * w[0]) / Dd; if (!Number.isInteger(g) || !Number.isInteger(h) || (g === al && h === be)) return null;
+        return QP2("Le vecteur " + M("\\vec w") + " a pour composantes " + M("(" + al + " \\,;\\, " + be + ")") + " dans la base " + M("\\vec u = " + v2(u)) + ", " + M("\\vec v = " + v2(v)) + ". Donne ses composantes dans la base " + M("\\vec u' = " + v2(u2)) + ", " + M("\\vec v' = " + v2(v2v)) + ". Réponds « α' ; β' ».", [g, h],
+          "Coordonnées usuelles : " + M("\\vec w = " + v2(w)) + ". Puis " + M("\\alpha'\\vec u' + \\beta'\\vec v' = \\vec w") + " : " + M("\\beta' = " + h) + " (seconde ligne), " + M("\\alpha' = " + g) + ".",
+          { ctx: "changement-base", guide: [GP2("Coordonnées usuelles de " + M("\\vec w") + " ?", w, M(v2(w)) + "."), GP2("Composantes dans " + M("(\\vec u' \\,;\\, \\vec v')") + " ?", [g, h], M("(" + g + " \\,;\\, " + h + ")") + ".")],
+            traps: [TP2(w, "Ce sont les coordonnées usuelles : il reste à les écrire dans la base (u' ; v')."), TP2([al, be], "Les composantes changent avec la base.")] }); },
+    ],
+  };
+
+  // ======================= nombres complexes (MA2) : outils =======================
+  /* z = a + bi en TeX (« 3 - 2i ») et au clavier (« 3 - 2i », fractions entre parenthèses : « (3/2)i ») */
+  const zT = (a, b) => { a = r6(a); b = r6(b); if (!b) return fT(a); const im = (Math.abs(b) === 1 ? "" : fT(Math.abs(b))) + "i"; if (!a) return (b < 0 ? "-" : "") + im; return fT(a) + (b < 0 ? " - " : " + ") + im; };
+  const zS = (a, b) => { a = r6(a); b = r6(b); const bb = Math.abs(b), im = bb === 1 ? "i" : Number.isInteger(bb) ? bb + "i" : "(" + fS(bb) + ")i"; if (!b) return fS(a); if (!a) return (b < 0 ? "-" : "") + im; return fS(a) + (b < 0 ? " - " : " + ") + im; };
+  const zP = (a, b) => (r6(a) && r6(b) ? "(" + zT(a, b) + ")" : r6(b) && r6(b) < 0 ? "(" + zT(a, b) + ")" : zT(a, b));
+  const zm = (z, w) => [z[0] * w[0] - z[1] * w[1], z[0] * w[1] + z[1] * w[0]];
+  const zpow = (z, n) => { let p = [1, 0]; for (let k = 0; k < n; k++) p = zm(p, z); return p; };
+  const gz = () => [nz(-6, 6), nz(-6, 6)];
+  const QZ = (q, z, sol, o) => QX(q, zS(...z), sol, o);
+  const GZ = (ask, z, sol) => GX(ask, zS(...z), sol);
+  const TZ = (z, m) => TX(zS(...z), m);
+  /* argument en unités de π, ramené dans ]−1 ; 1] */
+  const q12 = (c) => Math.round(c * 12) / 12;
+  const princ = (c) => { c = Math.round(c * 12); c = ((c % 24) + 24) % 24; if (c > 12) c -= 24; return c / 12; };
+  const ePi = (c) => (r6(c) ? "e^{" + (c < 0 ? "-" : "") + "i" + piT(Math.abs(c)).replace(/^\\frac\{\\pi\}/, "\\frac{\\pi}") + "}" : "");
+  /* nombres complexes remarquables : k(±1 ± i), k(±√3 ± i), k(±1 ± √3 i) — tex, saisie, module, argument (en π) */
+  const kq = (k, n) => (k === 1 ? "" : k) + "\\sqrt{" + n + "}", kqS = (k, n) => (k === 1 ? "" : k + "*") + "sqrt(" + n + ")";
+  const notable = (kMax = 3) => { const k = R.int(1, kMax), sx = pk([1, -1]), sy = pk([1, -1]), f = pk(["4", "6", "3"]);
+    if (f === "4") return { tex: zT(sx * k, sy * k), ex: zS(sx * k, sy * k), r: k * Math.SQRT2, rT: kq(k, 2), rS: kqS(k, 2), th: princ(sx > 0 ? sy * 0.25 : sy * 0.75), x: sx * k, y: sy * k, f };
+    if (f === "6") return { tex: (sx < 0 ? "-" : "") + kq(k, 3) + (sy < 0 ? " - " : " + ") + (k === 1 ? "" : k) + "i", ex: (sx < 0 ? "-" : "") + kqS(k, 3) + (sy < 0 ? " - " : " + ") + (k === 1 ? "" : k) + "i", r: 2 * k, rT: String(2 * k), rS: String(2 * k), th: princ(sx > 0 ? sy / 6 : sy * 5 / 6), x: sx * k * Math.sqrt(3), y: sy * k, f };
+    return { tex: fT(sx * k) + (sy < 0 ? " - " : " + ") + kq(k, 3) + "i", ex: fS(sx * k) + (sy < 0 ? " - " : " + ") + kqS(k, 3) + "*i", r: 2 * k, rT: String(2 * k), rS: String(2 * k), th: princ(sx > 0 ? sy / 3 : sy * 2 / 3), x: sx * k, y: sy * k * Math.sqrt(3), f }; };
+  const cosPi = (c) => r6(Math.cos(c * Math.PI)), sinPi = (c) => r6(Math.sin(c * Math.PI));
+
+  // ======================= cplxalg : forme algébrique, opérations (4.NC.01a–c) =======================
+  const CA = {
+    1: [
+      () => { const z = gz(), w = gz(), k = pk([2, 3, -2, -3]), r = [z[0] + k * w[0], z[1] + k * w[1]]; if (r.some((x) => !x)) return null;
+        return QZ("Avec " + M("z = " + zT(...z)) + " et " + M("w = " + zT(...w)) + ", donne " + M("z " + (k < 0 ? "- " + -k : "+ " + k) + "w") + " sous la forme " + M("a + bi") + ".", r,
+          "Parties réelles et parties imaginaires séparément : " + M(z[0] + " + " + par(k) + " \\cdot " + par(w[0]) + " = " + r[0]) + " et " + M(z[1] + " + " + par(k) + " \\cdot " + par(w[1]) + " = " + r[1]) + " : " + M(zT(...r)) + ".",
+          { ctx: "somme", guide: [GS("Partie réelle ?", r[0], M(r[0]) + "."), GS("Partie imaginaire ?", r[1], M(r[1]) + "."), GZ("Résultat ?", r, M(zT(...r)) + ".")],
+            traps: [TZ([z[0] + w[0], z[1] + w[1]], "Multiplie aussi w par " + k + "."), TZ([z[0] + k * w[0], z[1] - k * w[1]], "Le facteur " + k + " multiplie aussi la partie imaginaire de w."), TZ([r[1], r[0]], "Partie réelle d'abord, puis partie imaginaire (le nombre devant i).")] }); },
+      () => { const z = gz(), w = gz(), p = zm(z, w); if (p.some((x) => !x)) return null;
+        return QZ("Calcule le produit " + M(zP(...z) + zP(...w)) + " et écris-le sous la forme " + M("a + bi") + ".", p,
+          "On développe : " + M(zP(...z) + zP(...w) + " = " + (z[0] * w[0]) + (z[0] * w[1] + z[1] * w[0] < 0 ? " - " : " + ") + Math.abs(z[0] * w[1] + z[1] * w[0]) + "i " + (z[1] * w[1] < 0 ? "- " : "+ ") + Math.abs(z[1] * w[1]) + "i^2") + ", et " + M("i^2 = -1") + " : " + M(zT(...p)) + ".",
+          { ctx: "produit", guide: [GS("Produit des parties réelles " + M(par(z[0]) + " \\cdot " + par(w[0])) + " ?", z[0] * w[0], M(z[0] * w[0]) + "."), GS("Coefficient de " + M("i^2") + " (produit des parties imaginaires) ?", z[1] * w[1], M(z[1] * w[1]) + " ; avec " + M("i^2 = -1") + ", il passe dans la partie réelle avec le signe opposé."), GZ("Résultat ?", p, M(zT(...p)) + ".")],
+            traps: [TZ([z[0] * w[0], z[1] * w[1]], "On ne multiplie pas partie par partie : développe (quatre produits)."), TZ([z[0] * w[0] + z[1] * w[1], p[1]], "i² = −1 : le produit des parties imaginaires change de signe."), TZ([z[0] * w[0] - z[1] * w[1], z[0] * w[1] - z[1] * w[0]], "Les deux termes en i s'additionnent.")] }); },
+      () => { const t = R.rand() < 0.6, z = gz();
+        if (t) { const v = z[0] * z[0] + z[1] * z[1];
+          return QN("Soit " + M("z = " + zT(...z)) + ". Calcule " + M("z \\cdot \\bar z") + ".", v, M("\\bar z = " + zT(z[0], -z[1])) + " ; " + M("z\\bar z = " + par(z[0]) + "^2 + " + par(z[1]) + "^2 = " + v) + " : c'est un réel (le carré du module).",
+            { ctx: "conjugue", guide: [GZ("Conjugué " + M("\\bar z") + " ?", [z[0], -z[1]], M(zT(z[0], -z[1])) + "."), GS(M("z\\bar z = a^2 + b^2") + " ?", v, M(v) + ".")],
+              traps: [TR(z[0] * z[0] - z[1] * z[1], "(a + bi)(a − bi) = a² − (bi)² = a² + b², car i² = −1."), TR(Math.abs(z[0]) + Math.abs(z[1]), "On additionne les carrés."), TR(Math.hypot(z[0], z[1]), "C'est le module |z| ; z·z̄ = |z|².")] }); }
+        const n = R.int(10, 99), r = n % 4, ans = [[1, 0], [0, 1], [-1, 0], [0, -1]][r]; if (!r) return null;
+        return QZ("Calcule " + M("i^{" + n + "}") + ".", ans, M(n + " = 4 \\cdot " + Math.floor(n / 4) + " + " + r) + " et " + M("i^4 = 1") + ", donc " + M("i^{" + n + "} = i^{" + r + "} = " + zT(...ans)) + ".",
+          { ctx: "puissance-i", guide: [GS("Reste de la division de " + M(n) + " par 4 ?", r, M(r) + "."), GZ(M("i^{" + n + "}") + " ?", ans, M(zT(...ans)) + ".")],
+            traps: [TZ([[1, 0], [0, 1], [-1, 0], [0, -1]][(r + 2) % 4], "Les puissances de i se répètent de 4 en 4 : i, −1, −i, 1."), TZ([0, 1], "i^" + n + " ≠ i : regarde le reste de " + n + " ÷ 4."), TZ([0, -1], "i³ = −i, mais i² = −1 et i⁴ = 1.")] }); },
+    ],
+    2: [
+      () => { const q = gz(), w = gz(), z = zm(q, w); if (q.some((x) => !x) || Math.abs(w[1]) === 0) return null; const n2 = w[0] * w[0] + w[1] * w[1], num = zm(z, [w[0], -w[1]]);
+        return QZ("Calcule " + M("\\frac{" + zT(...z) + "}{" + zT(...w) + "}") + " sous la forme " + M("a + bi") + ".", q,
+          "On multiplie en haut et en bas par le conjugué " + M(zT(w[0], -w[1])) + " : dénominateur " + M(n2) + ", numérateur " + M(zT(...num)) + " ; " + M("\\frac{" + zT(...num) + "}{" + n2 + "} = " + zT(...q)) + ".",
+          { ctx: "quotient", guide: [GS("Dénominateur multiplié par son conjugué, " + M(par(w[0]) + "^2 + " + par(w[1]) + "^2") + " ?", n2, M(n2) + "."), GZ("Numérateur multiplié par " + M(zT(w[0], -w[1])) + " ?", num, M(zT(...num)) + "."), GZ("Quotient ?", q, M(zT(...q)) + ".")],
+            traps: [TZ([z[0] / w[0], z[1] / w[1]], "On ne divise pas partie par partie : multiplie par le conjugué du dénominateur."), TZ([q[0], -q[1]], "Le conjugué va au numérateur ET au dénominateur ; vérifie le signe de la partie imaginaire."), TZ(num, "Divise encore par " + n2 + ".")] }); },
+      () => { const a = gz(), zz = gz(), c = gz(), e = [zm(a, zz)[0] + c[0], zm(a, zz)[1] + c[1]]; if (e.some((x) => !x)) return null; const rhs = [e[0] - c[0], e[1] - c[1]];
+        return QZ("Résous dans " + M("\\mathbb{C}") + " : " + M(zP(...a) + "z " + (c[0] < 0 ? "- " + zT(-c[0], -c[1]) : "+ " + zP(...c)) + " = " + zT(...e)) + ". Donne " + M("z") + " sous la forme " + M("a + bi") + ".", zz,
+          M(zP(...a) + "z = " + zT(...e) + " - " + zP(...c) + " = " + zT(...rhs)) + ", puis on divise par " + M(zT(...a)) + " (conjugué) : " + M("z = " + zT(...zz)) + ".",
+          { ctx: "equation-lineaire", guide: [GZ("Isole le terme en z : " + M(zP(...a) + "z") + " = ?", rhs, M(zT(...rhs)) + "."), GZ(M("z") + " ?", zz, M(zT(...zz)) + ".")],
+            traps: [TZ(rhs, "Il reste à diviser par " + zT(...a) + "."), TZ([zz[0], -zz[1]], "Vérifie le signe de la partie imaginaire (le conjugué sert au dénominateur seulement)."), TZ(zm(rhs, a), "On divise par " + zT(...a) + ", on ne multiplie pas.")] }); },
+      () => { const z = gz(), n2 = z[0] * z[0] + z[1] * z[1], re = R.rand() < 0.5, v = re ? z[0] / n2 : -z[1] / n2;
+        return QN("Donne la partie " + (re ? "réelle" : "imaginaire") + " de " + M("\\frac{1}{" + zT(...z) + "}") + " (fraction acceptée).", v,
+          M("\\frac{1}{" + zT(...z) + "} = \\frac{" + zT(z[0], -z[1]) + "}{" + n2 + "}") + " : partie " + (re ? "réelle " + M(fT(v)) : "imaginaire " + M(fT(v))) + ".",
+          { ctx: "inverse-" + (re ? "re" : "im"), guide: [GS(M("z \\bar z") + " ?", n2, M(n2) + "."), GS("Partie " + (re ? "réelle" : "imaginaire") + " ?", v, M(fT(v)) + ".")],
+            traps: [TR(re ? 1 / z[0] : 1 / z[1], "1 ÷ (a + bi) n'est pas 1/a + (1/b)i : multiplie par le conjugué."), TR(-v, "Le conjugué de " + zS(...z) + " est " + zS(z[0], -z[1]) + " : attention au signe."), TR(re ? z[0] : -z[1], "Divise encore par a² + b² = " + n2 + ".")] }); },
+    ],
+    3: [
+      () => { const k = pk([2, 3, -2, -3]), x = nz(-6, 6), y = nz(-6, 6), rhs = [(1 + k) * x, (1 - k) * y], z = [x, y];
+        return QZ("Trouve le nombre complexe " + M("z") + " tel que " + M("z " + (k < 0 ? "- " + -k : "+ " + k) + "\\bar z = " + zT(...rhs)) + ".", z,
+          "Avec " + M("z = x + yi") + " : " + M("z " + (k < 0 ? "- " + -k : "+ " + k) + "\\bar z = " + (1 + k) + "x + " + par(1 - k) + "yi") + ". Donc " + M((1 + k) + "x = " + rhs[0]) + " et " + M(par(1 - k) + "y = " + rhs[1]) + " : " + M("z = " + zT(...z)) + ".",
+          { ctx: "conjugue-equation", guide: [GS("Partie réelle de " + M("z " + (k < 0 ? "- " + -k : "+ " + k) + "\\bar z") + " : " + M("c \\cdot x") + ". Que vaut " + M("c") + " ?", 1 + k, M(1 + k) + "."), GS(M("x") + " ?", x, M(x) + "."), GS(M("y") + " ?", y, M(y) + "."), GZ(M("z") + " ?", z, M(zT(...z)) + ".")],
+            traps: [TZ([x, -y], "z̄ = x − yi : la partie imaginaire de z + k·z̄ est (1 − k)y."), TZ([rhs[0] / (1 + k), rhs[1] / (1 + k)], "Les parties réelle et imaginaire n'ont pas le même coefficient.")] }); },
+      () => { const z = [nz(-3, 3), nz(-3, 3)], c = zpow(z, 3); if (c.some((x) => !x)) return null; const s = zpow(z, 2);
+        return QZ("Calcule " + M("(" + zT(...z) + ")^3") + " sous la forme " + M("a + bi") + ".", c,
+          M("(" + zT(...z) + ")^2 = " + zT(...s)) + ", puis " + M("(" + zT(...s) + ")(" + zT(...z) + ") = " + zT(...c)) + ".",
+          { ctx: "cube", guide: [GZ("Carré " + M("(" + zT(...z) + ")^2") + " ?", s, M(zT(...s)) + "."), GZ("Cube ?", c, M(zT(...c)) + ".")],
+            traps: [TZ([z[0] ** 3, z[1] ** 3], "(a + bi)³ ≠ a³ + b³i : développe (ou passe par le carré)."), TZ([z[0] ** 3 + 3 * z[0] * z[1] ** 2, 3 * z[0] ** 2 * z[1] + z[1] ** 3], "(bi)² = −b² et (bi)³ = −b³i : i² = −1."), TZ(s, "C'est le carré ; multiplie encore par " + zS(...z) + ".")] }); },
+      () => { const p = R.int(1, 5), q = nz(-5, 5); if (p === Math.abs(q)) return null; const w = zm([p, q], [p, q]);
+        return QZ("Trouve la racine carrée de " + M(zT(...w)) + " dont la partie réelle est positive : le nombre " + M("z = x + yi") + " tel que " + M("z^2 = " + zT(...w)) + " et " + M("x > 0") + ".", [p, q],
+          M("(x + yi)^2 = x^2 - y^2 + 2xyi") + " : " + M("x^2 - y^2 = " + w[0]) + " et " + M("2xy = " + w[1]) + " ; avec " + M("x^2 + y^2 = |z|^2 = " + (p * p + q * q)) + " : " + M("x^2 = " + p * p) + ", " + M("x = " + p) + ", " + M("y = " + q) + ".",
+          { ctx: "racine-carree", guide: [GS(M("x^2 + y^2 = |" + zT(...w) + "|") + " ?", p * p + q * q, M("\\sqrt{" + par(w[0]) + "^2 + " + par(w[1]) + "^2} = " + (p * p + q * q)) + "."), GS(M("x") + " (avec " + M("x^2 - y^2 = " + w[0]) + ") ?", p, M(p) + "."), GZ(M("z") + " ?", [p, q], M(zT(p, q)) + ".")],
+            traps: [TZ([-p, -q], "C'est l'autre racine : on veut x > 0."), TZ([p, -q], "2xy = " + w[1] + " fixe le signe de y."), TZ([q, p], "Partie réelle x, partie imaginaire y : vérifie x² − y² = " + w[0] + ".")] }); },
+    ],
+  };
+
+  // ======================= cplxtrig : module, argument, formes trigonométrique et exponentielle, Moivre (4.NC.02a–d) =======================
+  const CT = {
+    1: [
+      () => { const z = gz(), v = Math.hypot(...z); if (Math.abs(z[0]) === Math.abs(z[1])) return null;
+        return QN("Calcule le module de " + M("z = " + zT(...z)) + " (valeur exacte).", v, M("|z| = \\sqrt{" + par(z[0]) + "^2 + " + par(z[1]) + "^2} = \\sqrt{" + (z[0] * z[0] + z[1] * z[1]) + "}" + (Number.isInteger(r6(v)) ? " = " + v : "")) + ".",
+          { ctx: "module", guide: [GS(M("a^2 + b^2") + " ?", z[0] * z[0] + z[1] * z[1], M(z[0] * z[0] + z[1] * z[1]) + "."), GS(M("|z|") + " ?", v, M(Number.isInteger(r6(v)) ? String(v) : "\\sqrt{" + (z[0] * z[0] + z[1] * z[1]) + "}") + ".")],
+            traps: [TR(Math.abs(z[0]) + Math.abs(z[1]), "Module = √(a² + b²), pas a + b."), TR(z[0] * z[0] + z[1] * z[1], "N'oublie pas la racine carrée."), TR(Math.sqrt(Math.abs(z[0] * z[0] - z[1] * z[1])), "On additionne les carrés (Pythagore).")] }); },
+      () => { const N = notable(); if (N.th === 1 || N.th === 0) return null;
+        return QPi("Donne l'argument principal (dans " + M("]-\\pi \\,;\\, \\pi]") + ") de " + M("z = " + N.tex) + ".", N.th,
+          M("|z| = " + N.rT) + " ; " + M("\\cos\\theta = " + (N.x < 0 ? "-" : "") + { 4: "\\frac{\\sqrt{2}}{2}", 6: "\\frac{\\sqrt{3}}{2}", 3: "\\frac{1}{2}" }[N.f]) + " et " + M("\\sin\\theta") + (N.y > 0 ? " > 0" : " < 0") + " : " + M("\\theta = " + piT(N.th)) + ", point du " + (N.x > 0 ? (N.y > 0 ? "1er" : "4e") : N.y > 0 ? "2e" : "3e") + " quadrant.",
+          { ctx: "argument", guide: [GS("Module " + M("|z|") + " ?", N.r, M(N.rT) + "."), GPi("Argument principal ?", N.th, M(piT(N.th)) + ".")],
+            traps: [TR(-N.th * Math.PI, "Regarde le signe de la partie imaginaire : il donne le signe de l'argument."), TR(princ(N.th > 0 ? 1 - N.th : -1 - N.th) * Math.PI, "Regarde le signe de la partie réelle : quel quadrant ?"), TR(Math.atan(N.y / N.x), "arctan(b ÷ a) ne suffit pas quand a < 0 : place le point dans le bon quadrant.")] }); },
+      () => { const t = pk(["4", "3"]), sx = pk([1, -1]), sy = pk([1, -1]); let x, k, th, rT, ex, tx, tr1, tr2;
+        if (t === "4") { k = pk([2, 3, 4, 5]); th = princ(sx > 0 ? sy * 0.25 : sy * 0.75); rT = kq(k, 2); x = sx * k; ex = zS(x, sy * k); tx = zT(x, sy * k); tr1 = zS(x, -sy * k); tr2 = zS(-x, sy * k); }
+        else { k = pk([1, 2, 3]); th = princ(sx > 0 ? sy / 3 : sy * 2 / 3); rT = String(2 * k); x = sx * k; ex = fS(x) + (sy < 0 ? " - " : " + ") + kqS(k, 3) + "*i"; tx = fT(x) + (sy < 0 ? " - " : " + ") + kq(k, 3) + "i";
+          tr1 = (sx < 0 ? "-" : "") + kqS(k, 3) + (sy < 0 ? " - " : " + ") + (k === 1 ? "" : k + "*") + "i"; tr2 = fS(x) + (sy < 0 ? " + " : " - ") + kqS(k, 3) + "*i"; }
+        const c0 = t === "4" ? "\\frac{\\sqrt{2}}{2}" : "\\frac{1}{2}";
+        return QX("Écris " + M("z = " + rT + "\\left(\\cos\\left(" + piT(th) + "\\right) + i\\sin\\left(" + piT(th) + "\\right)\\right)") + " sous la forme " + M("a + bi") + ".", ex,
+          M("\\cos\\left(" + piT(th) + "\\right) = " + (sx < 0 ? "-" : "") + c0) + " et " + M("\\sin\\left(" + piT(th) + "\\right)") + (sy < 0 ? " est négatif" : " est positif") + " ; on multiplie par " + M(rT) + " : " + M("z = " + tx) + ".",
+          { ctx: "forme-algebrique-" + t, guide: [GS("Partie réelle " + M(rT + "\\cos\\left(" + piT(th) + "\\right)") + " ?", x, M(fT(x)) + "."), GX(M("z") + " ?", ex, M(tx) + ".")],
+            traps: [TX(tr1, t === "4" ? "Vérifie le signe de sin θ." : "Partie réelle = r·cos θ, partie imaginaire = r·sin θ : ne les échange pas."), TX(tr2, t === "4" ? "Vérifie le signe de cos θ." : "Vérifie le signe de sin θ.")] }); },
+    ],
+    2: [
+      () => { const b = pk([[1, 1], [1, -1], [-1, 1], [-1, -1]]), n = R.int(3, 10), p = zpow(b, n); if (!p[0] && !p[1]) return null;
+        return QZ("Calcule " + M("(" + zT(...b) + ")^{" + n + "}") + " sous la forme " + M("a + bi") + " (formule de Moivre).", p,
+          M(zT(...b) + " = \\sqrt{2}\\," + ePi(princ(b[0] > 0 ? b[1] * 0.25 : b[1] * 0.75))) + " ; " + M("(\\sqrt{2})^{" + n + "} = " + (n % 2 ? kq(2 ** ((n - 1) / 2), 2) : 2 ** (n / 2))) + " et l'argument est multiplié par " + M(n) + " : " + M(zT(...p)) + ".",
+          { ctx: "moivre", guide: [GS("Module de " + M("(" + zT(...b) + ")^{" + n + "}") + " ?", Math.SQRT2 ** n, M(n % 2 ? kq(2 ** ((n - 1) / 2), 2) : String(2 ** (n / 2))) + "."), GPi("Argument principal de " + M("(" + zT(...b) + ")^{" + n + "}") + " ?", princ(n * (b[0] > 0 ? b[1] * 0.25 : b[1] * 0.75)), M(piT(princ(n * (b[0] > 0 ? b[1] * 0.25 : b[1] * 0.75)))) + "."), GZ("Résultat ?", p, M(zT(...p)) + ".")],
+            traps: [TZ([b[0] ** n, b[1] ** n], "(a + bi)ⁿ ≠ aⁿ + bⁿi : passe par le module et l'argument."), TZ([p[0], -p[1]], "Vérifie le signe : l'argument est multiplié par " + n + "."), TZ([-p[0], -p[1]], "Vérifie l'argument final (multiple de π/4).")] }); },
+      () => { const r1 = pk([2, 3, 4, 6]), r2 = pk([2, 3, 5]), c1 = pk([1 / 6, 1 / 4, 1 / 3, 2 / 3, 3 / 4, 5 / 6, -1 / 3, -3 / 4]), c2 = pk([1 / 6, 1 / 4, 1 / 3, 1 / 2, -1 / 6, -1 / 4, 2 / 3]), t = pk(["mod-prod", "arg-prod", "arg-quot", "mod-quot"]);
+        const z1 = M("z_1 = " + r1 + ePi(c1)), z2 = M("z_2 = " + r2 + ePi(c2)), prod = t.endsWith("prod"), arg = t.startsWith("arg"), ca = princ(prod ? c1 + c2 : c1 - c2), mod = prod ? r1 * r2 : r1 / r2;
+        if (arg && (ca === 0 || ca === 1)) return null; if (r1 === r2) return null;
+        const ex = prod ? "z_1 z_2" : "\\frac{z_1}{z_2}";
+        if (arg) return QPi("Avec " + z1 + " et " + z2 + ", donne l'argument principal de " + M(ex) + ".", ca, "Les arguments " + (prod ? "s'additionnent" : "se soustraient") + " : " + M(piT(c1) + (prod ? " + " : " - ") + "\\left(" + piT(c2) + "\\right)") + ", ramené dans " + M("]-\\pi \\,;\\, \\pi]") + " : " + M(piT(ca)) + ".",
+          { ctx: prod ? "argument-produit" : "argument-quotient", guide: [GPi("Argument (pas encore ramené) ?", q12(prod ? c1 + c2 : c1 - c2), M(piT(q12(prod ? c1 + c2 : c1 - c2))) + "."), GPi("Argument principal ?", ca, M(piT(ca)) + ".")],
+            traps: [TR(princ(prod ? c1 - c2 : c1 + c2) * Math.PI, prod ? "Pour un produit, les arguments s'additionnent." : "Pour un quotient, les arguments se soustraient."), TR(princ(prod ? c1 * c2 : c1 / c2) * Math.PI, "On ne multiplie pas les arguments.")] });
+        return QN("Avec " + z1 + " et " + z2 + ", donne le module de " + M(ex) + ".", mod, "Les modules " + (prod ? "se multiplient" : "se divisent") + " : " + M(prod ? r1 + " \\cdot " + r2 + " = " + mod : "\\frac{" + r1 + "}{" + r2 + "}" + (den(mod) < r2 ? " = " + fT(mod) : "")) + ".",
+          { ctx: prod ? "module-produit" : "module-quotient", guide: [GS("Module ?", mod, M(fT(mod)) + ".")], traps: [TR(prod ? r1 + r2 : r1 - r2, prod ? "Les modules se multiplient." : "Les modules se divisent."), TR(prod ? r1 / r2 : r1 * r2, prod ? "C'est un produit, pas un quotient." : "C'est un quotient.")] }); },
+      () => { const N = notable(2), n = R.int(3, 9), ca = princ(n * N.th); if (ca === 0 || ca === 1) return null;
+        return QPi("Donne l'argument principal de " + M("z^{" + n + "}") + " avec " + M("z = " + N.tex) + ".", ca,
+          M("\\arg z = " + piT(N.th)) + " ; " + M("\\arg z^{" + n + "} = " + n + " \\cdot " + "\\left(" + piT(N.th) + "\\right) = " + piT(q12(n * N.th))) + ", ramené dans " + M("]-\\pi \\,;\\, \\pi]") + " : " + M(piT(ca)) + ".",
+          { ctx: "argument-puissance", guide: [GPi("Argument de " + M("z") + " ?", N.th, M(piT(N.th)) + "."), GPi(M(n) + " fois cet argument ?", q12(n * N.th), M(piT(q12(n * N.th))) + "."), GPi("Argument principal ?", ca, M(piT(ca)) + ".")],
+            traps: [TR(N.th * Math.PI, "L'argument de zⁿ est n fois celui de z."), TR(q12(n * N.th) * Math.PI, "Ramène dans ]−π ; π] en ajoutant ou retirant des multiples de 2π."), TR(-ca * Math.PI, "Vérifie le signe de l'argument de z.")] }); },
+    ],
+    3: [
+      () => { const t = pk(["3", "6"]), n = R.int(4, 9), c = t === "3" ? 1 / 3 : 1 / 6, re = R.rand() < 0.6, v = r6(2 ** n * (re ? Math.cos(n * c * Math.PI) : Math.sin(n * c * Math.PI))); if (!v) return null;
+        const zz = t === "3" ? "1 + \\sqrt{3}i" : "\\sqrt{3} + i";
+        return QN("Donne la partie " + (re ? "réelle" : "imaginaire") + " de " + M("(" + zz + ")^{" + n + "}") + " (valeur exacte).", v,
+          M(zz + " = 2" + ePi(c)) + " ; Moivre : " + M("(" + zz + ")^{" + n + "} = 2^{" + n + "}" + ePi(princ(n * c))) + ", partie " + (re ? "réelle " + M("2^{" + n + "}\\cos\\left(" + piT(princ(n * c)) + "\\right)") : "imaginaire " + M("2^{" + n + "}\\sin\\left(" + piT(princ(n * c)) + "\\right)")) + " " + M("= " + (Number.isInteger(v) ? v : (v < 0 ? "-" : "") + kq(Math.round(Math.abs(v) / Math.sqrt(3)), 3))) + ".",
+          { ctx: "partie-puissance-" + t, guide: [GS("Module de " + M(zz) + " ?", 2, M(2) + "."), GPi("Argument de " + M("(" + zz + ")^{" + n + "}") + " (ramené) ?", princ(n * c), M(piT(princ(n * c))) + "."), GS("Partie " + (re ? "réelle" : "imaginaire") + " ?", v, M(Number.isInteger(v) ? String(v) : "\\approx " + dT(v, 3)) + ".")],
+            traps: [TR(-v, "Vérifie le signe du " + (re ? "cosinus" : "sinus") + " de l'argument final."), TR(r6(2 ** n * (re ? Math.sin(n * c * Math.PI) : Math.cos(n * c * Math.PI))), re ? "Partie réelle : r·cos θ (pas sin θ)." : "Partie imaginaire : r·sin θ (pas cos θ)."), TR(2 ** n, "Le module est 2ⁿ, mais il faut encore le cosinus ou le sinus de l'argument.")] }); },
+      () => { const N = notable(2), pos = R.rand() < 0.5, p = Math.round(N.th * 12), g = (a, b) => (b ? g(b, a % b) : Math.abs(a)), d = 12 / g(p, 12), pn = p / g(p, 12), n = pos ? (Math.abs(pn) % 2 ? 2 * d : d) : d;
+        return QN("Quel est le plus petit entier " + M("n \\geq 1") + " tel que " + M("(" + N.tex + ")^n") + " soit un nombre réel" + (pos ? " positif" : "") + " ?", n,
+          M("\\arg = " + piT(N.th)) + " ; " + M("z^n") + " est réel" + (pos ? " positif" : "") + " quand " + M("n \\cdot " + piT(N.th)) + " est un multiple de " + M(pos ? "2\\pi" : "\\pi") + " : le plus petit " + M("n") + " est " + M(n) + ".",
+          { ctx: pos ? "plus-petit-n-positif" : "plus-petit-n-reel", guide: [GPi("Argument de " + M(N.tex) + " ?", N.th, M(piT(N.th)) + "."), GS(M("n") + " ?", n, M(n) + ".")],
+            traps: [TR(pos ? (n === d ? 2 * d : d) : 2 * d, pos ? "Réel positif : l'argument doit être un multiple de 2π (réel seulement : multiple de π)." : "Réel : un multiple de π suffit (pas forcément 2π)."), TR(Math.abs(p), "Cherche n tel que n·θ soit un multiple de π.")] }); },
+      () => { const N1 = notable(1), N2 = notable(1), a = R.int(2, 4), b = R.int(2, 3), ca = princ(a * N1.th - b * N2.th); if (ca === 0 || ca === 1 || N1.tex === N2.tex) return null;
+        return QPi("Donne l'argument principal de " + M("\\frac{(" + N1.tex + ")^{" + a + "}}{(" + N2.tex + ")^{" + b + "}}") + ".", ca,
+          M("\\arg = " + a + " \\cdot \\left(" + piT(N1.th) + "\\right) - " + b + " \\cdot \\left(" + piT(N2.th) + "\\right) = " + piT(q12(a * N1.th - b * N2.th))) + ", ramené dans " + M("]-\\pi \\,;\\, \\pi]") + " : " + M(piT(ca)) + ".",
+          { ctx: "argument-quotient-puissances", guide: [GPi("Argument de " + M(N1.tex) + " ?", N1.th, M(piT(N1.th)) + "."), GPi("Argument de " + M(N2.tex) + " ?", N2.th, M(piT(N2.th)) + "."), GPi("Argument principal du quotient ?", ca, M(piT(ca)) + ".")],
+            traps: [TR(princ(a * N1.th + b * N2.th) * Math.PI, "Pour un quotient, on soustrait l'argument du dénominateur."), TR(princ(N1.th - N2.th) * Math.PI, "Les exposants multiplient les arguments.")] }); },
+    ],
+  };
+
+  // ======================= cplxeq : équations dans ℂ, racines n-ièmes, lieux (4.NC.03a–c, 04a–b) =======================
+  const CE = {
+    1: [
+      () => { const sq = R.rand() < 0.5, k = R.int(2, 9), c = sq ? k * k : pk([2, 3, 5, 6, 7, 10, 11]), form = R.rand() < 0.5;
+        const ans = sq ? zS(0, k) : "sqrt(" + c + ")*i", aT = sq ? zT(0, k) : "\\sqrt{" + c + "}\\,i";
+        return QX("Résous " + M(form ? "z^2 + " + c + " = 0" : "z^2 = -" + c) + " dans " + M("\\mathbb{C}") + " et donne la solution de partie imaginaire positive.", ans,
+          M("z^2 = -" + c + " = (" + aT + ")^2") + " car " + M("i^2 = -1") + " : solutions " + M("\\pm " + aT) + ".",
+          { ctx: "carre-negatif", guide: [GX("Solution de partie imaginaire positive ?", ans, M(aT) + ".")],
+            traps: [TX(sq ? String(k) : "sqrt(" + c + ")", "Dans ℝ, pas de solution ; dans ℂ, i² = −1 donne des solutions imaginaires."), TX(sq ? zS(0, -k) : "-sqrt(" + c + ")*i", "On demande la solution de partie imaginaire positive."), TX(zS(0, c), "N'oublie pas la racine carrée.")] }); },
+      () => { const p = nz(-5, 5), q = R.int(1, 5), b = -2 * p, c = p * p + q * q, D = b * b - 4 * c;
+        return chk(QN("Calcule le discriminant de " + M("z^2 " + (b < 0 ? "- " + (-b === 1 ? "" : -b) : "+ " + (b === 1 ? "" : b)) + "z + " + c + " = 0") + ".", D,
+          M("\\Delta = b^2 - 4ac = " + par(b) + "^2 - 4 \\cdot " + c + " = " + D) + " < 0 : deux solutions complexes conjuguées.",
+          { ctx: "discriminant", guide: [GS(M("b^2") + " ?", b * b, M(b * b) + "."), GS(M("\\Delta") + " ?", D, M(D) + ".")],
+            traps: [TR(b * b + 4 * c, "Δ = b² − 4ac : on soustrait."), TR(-b * b - 4 * c, "b² est positif, même si b < 0."), TR(b * b - 2 * c, "Δ = b² − 4ac.")] })); },
+      () => { const p = nz(-5, 5), q = R.int(2, 6), b = -2 * p, c = p * p + q * q;
+        return QZ("Résous " + M("z^2 " + (b < 0 ? "- " + -b : "+ " + b) + "z + " + c + " = 0") + " dans " + M("\\mathbb{C}") + " et donne la solution de partie imaginaire positive.", [p, q],
+          M("\\Delta = " + b * b + " - " + 4 * c + " = " + (b * b - 4 * c) + " = (" + 2 * q + "i)^2") + " ; " + M("z = \\frac{" + -b + " \\pm " + 2 * q + "i}{2}") + ", soit " + M(zT(p, q)) + " et " + M(zT(p, -q)) + ".",
+          { ctx: "trinome", guide: [GS(M("\\Delta") + " ?", b * b - 4 * c, M(b * b - 4 * c) + "."), GZ("Une racine carrée de " + M("\\Delta") + " (partie imaginaire positive) ?", [0, 2 * q], M(2 * q + "i") + "."), GZ("Solution ?", [p, q], M(zT(p, q)) + ".")],
+            traps: [TZ([p, -q], "On demande celle de partie imaginaire positive."), TZ([-p, q], "z = (−b ± √Δ) ÷ 2 : attention au signe de −b."), TZ([p, 2 * q], "Divise aussi la partie imaginaire par 2.")] }); },
+    ],
+    2: [
+      () => { const a = pk([2, 3]), p = nz(-4, 4), q = R.int(1, 4), b = -2 * a * p, c = a * (p * p + q * q);
+        return QZ("Résous " + M(a + "z^2 " + (b < 0 ? "- " + -b : "+ " + b) + "z + " + c + " = 0") + " dans " + M("\\mathbb{C}") + " ; donne la solution de partie imaginaire positive.", [p, q],
+          M("\\Delta = " + b * b + " - " + 4 * a * c + " = " + (b * b - 4 * a * c) + " = (" + 2 * a * q + "i)^2") + ", " + M("z = \\frac{" + -b + " \\pm " + 2 * a * q + "i}{" + 2 * a + "} = " + zT(p, q) + " \\text{ ou } " + zT(p, -q)) + ".",
+          { ctx: "trinome-a", guide: [GS(M("\\Delta") + " ?", b * b - 4 * a * c, M(b * b - 4 * a * c) + "."), GZ("Solution ?", [p, q], M(zT(p, q)) + ".")],
+            traps: [TZ([p * a, q * a], "Divise par 2a = " + 2 * a + ", pas par 2."), TZ([p, -q], "On demande la solution de partie imaginaire positive."), TZ([-p, q], "z = (−b ± √Δ) ÷ 2a : attention au signe.")] }); },
+      () => { const p = nz(-5, 5), q = nz(-5, 5), cAsk = R.rand() < 0.5, b = -2 * p, c = p * p + q * q, v = cAsk ? c : b; if (Math.abs(p) === Math.abs(q)) return null;
+        return chk(QN("Le nombre " + M(zT(p, q)) + " est solution de " + M("z^2 + bz + c = 0") + " avec " + M("b") + " et " + M("c") + " réels. Donne " + M(cAsk ? "c" : "b") + ".", v,
+          "Les coefficients sont réels : l'autre solution est le conjugué " + M(zT(p, -q)) + ". " + (cAsk ? "Produit des solutions : " + M("c = (" + zT(p, q) + ")(" + zT(p, -q) + ") = " + par(p) + "^2 + " + par(q) + "^2 = " + c) : "Somme des solutions : " + M("-b = " + 2 * p) + ", donc " + M("b = " + b)) + ".",
+          { ctx: cAsk ? "coefficients-c" : "coefficients-b", guide: [GZ("Autre solution ?", [p, -q], M(zT(p, -q)) + "."), GS(cAsk ? "Produit des solutions (" + M("c") + ") ?" : M("b") + " (opposé de la somme) ?", v, M(v) + ".")],
+            traps: cAsk ? [TR(p * p - q * q, "(a + bi)(a − bi) = a² + b²."), TR(-c, "Le produit des solutions vaut c.")] : [TR(2 * p, "La somme des solutions vaut −b."), TR(-p, "La somme des deux solutions conjuguées vaut 2a.")] })); },
+      () => { const a = nz(-5, 5), b = nz(-5, 5), r = R.int(2, 6), t = R.rand() < 0.5;
+        if (t) { const v = a + r;
+          return chk(QN("Dans le plan complexe, l'ensemble des points d'affixe " + M("z") + " tels que " + M("|z - (" + zT(a, b) + ")| = " + r) + " est un cercle. Quelle est la plus grande partie réelle d'un point de ce cercle ?", v,
+            "Cercle de centre " + M("(" + a + " \\,;\\, " + b + ")") + " et de rayon " + M(r) + " : le point le plus à droite a pour partie réelle " + M(a + " + " + r + " = " + v) + ".",
+            { ctx: "lieu-cercle", guide: [GS("Partie réelle du centre ?", a, M(a) + "."), GS("Plus grande partie réelle ?", v, M(v) + ".")],
+              traps: [TR(a - r, "C'est le point le plus à gauche."), TR(b + r, "La partie réelle se lit sur l'axe horizontal : centre " + a + "."), TR(-a + r, "|z − (a + bi)| : le centre est (a ; b), pas (−a ; −b).")] })); }
+        const c = nz(-5, 5), d = nz(-5, 5); if (d === b) return null; const k = ((c * c + d * d) - (a * a + b * b)) / 2, y0 = k / (d - b); if (c === a) return null;
+        return QN("L'ensemble des points d'affixe " + M("z") + " tels que " + M("|z - (" + zT(a, b) + ")| = |z - (" + zT(c, d) + ")|") + " est une droite. Donne son ordonnée à l'origine (fraction acceptée).", y0,
+          "C'est la médiatrice de " + M("A(" + a + " \\,;\\, " + b + ")") + " et " + M("B(" + c + " \\,;\\, " + d + ")") + " : " + M(lc([2 * (c - a), 2 * (d - b)], ["x", "y"]) + " = " + (2 * k)) + " ; pour " + M("x = 0") + " : " + M("y = " + fT(y0)) + ".",
+          { ctx: "lieu-mediatrice", guide: [GS("Coefficient de " + M("y") + " dans l'équation " + M(lc([2 * (c - a)], ["x"]) + " + \\ldots y = " + 2 * k) + " ?", 2 * (d - b), M(2 * (d - b)) + "."), GS("Ordonnée à l'origine ?", y0, M(fT(y0)) + ".")],
+            traps: [TR((b + d) / 2, "La médiatrice passe par le milieu, mais elle n'est pas horizontale : écris son équation."), TR(-y0, "Développe |z − a|² = |z − b|² avec soin (signes).")] }); },
+    ],
+    3: [
+      () => { const n = pk([3, 4, 5, 6]), s = pk([2, 3]), R0 = s ** n, phi = pk([0.5, 1, -0.5, 1 / 3, 2 / 3, 0.25]), mod = R.rand() < 0.35;
+        if (mod) return QN("On résout " + M("z^{" + n + "} = " + nb(R0) + ePi(phi)) + ". Quel est le module commun des solutions ?", s, "Chaque solution a pour module " + M("\\sqrt[" + n + "]{" + nb(R0) + "} = " + s) + ".",
+          { ctx: "racines-n-module", guide: [GS("Module ?", s, M(s) + ".")], traps: [TR(R0 / n, "Le module est la racine " + n + "-ième, pas une division par " + n + "."), TR(R0, "Prends la racine " + n + "-ième du module.")] });
+        const th0 = phi / n, small = th0 > 0 ? th0 : th0 + 2 / n;
+        return QPi("On résout " + M("z^{" + n + "} = " + nb(R0) + ePi(phi)) + ". Parmi les " + n + " solutions, quel est le plus petit argument strictement positif ?", small,
+          "Solutions " + M("z_k = " + s + "e^{i\\left(" + piT(th0) + " + \\frac{2k\\pi}{" + n + "}\\right)}") + " ; arguments espacés de " + M(piT(2 / n)) + " : le plus petit positif est " + M(piT(small)) + ".",
+          { ctx: "racines-n-argument", guide: [GPi("Argument divisé par " + M(n) + " ?", th0, M(piT(th0)) + "."), GPi("Écart entre deux solutions ?", r6(2 / n), M(piT(r6(2 / n))) + "."), GPi("Plus petit argument positif ?", small, M(piT(small)) + ".")],
+            traps: [TR(phi * Math.PI, "On divise l'argument par " + n + "."), TR(r6(2 / n) * Math.PI, "Les solutions sont espacées de 2π ÷ " + n + ", mais la première a l'argument φ ÷ " + n + "."), TR(r6(phi / n + 2 / n) * Math.PI, "Vérifie s'il existe un argument positif plus petit.")] }); },
+      () => { const k = R.int(2, 5), t = pk(["i", "-i", "1", "-1"]), K = k ** 3;
+        const rhs = t === "i" ? zT(0, K) : t === "-i" ? zT(0, -K) : t === "1" ? String(K) : String(-K), imag = t.includes("i"), ans = t === "i" ? [0, -k] : t === "-i" ? [0, k] : t === "1" ? [k, 0] : [-k, 0];
+        return QZ("Résous " + M("z^3 = " + rhs) + " dans " + M("\\mathbb{C}") + ". Donne la solution " + (imag ? "imaginaire pure" : "réelle") + ".", ans,
+          "Module " + M("\\sqrt[3]{" + K + "} = " + k) + " ; " + (imag ? M("(" + zT(...ans) + ")^3 = " + fT(ans[1] ** 3) + "i^3 = " + rhs) + " (car " + M("i^3 = -i") + ")" : M("(" + ans[0] + ")^3 = " + rhs)) + ". Les deux autres solutions s'obtiennent en tournant de " + M("\\frac{2\\pi}{3}") + ".",
+          { ctx: "racine-cubique", guide: [GS("Module des solutions ?", k, M(k) + "."), GZ("Solution " + (imag ? "imaginaire pure" : "réelle") + " ?", ans, M(zT(...ans)) + ".")],
+            traps: [TZ(ans.map((x) => -x), imag ? "i³ = −i : vérifie le signe en calculant le cube." : "Le cube d'un négatif est négatif."), TZ(imag ? [k, 0] : [0, k], imag ? "On cherche la solution imaginaire pure." : "On cherche la solution réelle.")] }); },
+      () => { const z1 = nz(-4, 4), z2 = [nz(-4, 4), nz(-4, 4)], S = [z1 + z2[0], z2[1]], Pp = [z1 * z2[0], z1 * z2[1]];
+        return QZ("Le nombre " + M(z1) + " est solution de " + M("z^2 - (" + zT(...S) + ")z + " + zP(...Pp) + " = 0") + ". Trouve l'autre solution.", z2,
+          "La somme des solutions vaut " + M(zT(...S)) + " (coefficient de z changé de signe) : l'autre solution est " + M(zT(...S) + " - " + par(z1) + " = " + zT(...z2)) + ". Vérifie : produit " + M(z1 + " \\cdot (" + zT(...z2) + ") = " + zT(...Pp)) + ".",
+          { ctx: "autre-racine", guide: [GZ("Somme des deux solutions ?", S, M(zT(...S)) + "."), GZ("Autre solution ?", z2, M(zT(...z2)) + ".")],
+            traps: [TZ([z2[0], -z2[1]], "Les coefficients ne sont pas réels : l'autre solution n'est pas forcément le conjugué."), TZ([S[0] + z1, S[1]], "Somme des solutions = " + zS(...S) + " : on soustrait " + z1 + "."), TZ([-z2[0], -z2[1]], "z² − Sz + P : la somme vaut S (pas −S).")] }); },
+    ],
+  };
+
+  // ======================= suitegeom : suites arithmétiques et géométriques (4.AN.10a–c) =======================
+  const SG = {
+    1: [
+      () => { const u1 = R.int(-20, 40), r = pk([3, 4, 5, 7, -2, -3, -4, 2.5, 1.5]), n = R.int(15, 60), v = r6(u1 + (n - 1) * r); if (!u1) return null;
+        return QN("Suite arithmétique de premier terme " + M("u_1 = " + u1) + " et de raison " + M("r = " + dT(r)) + ". Calcule " + M("u_{" + n + "}") + ".", v,
+          M("u_n = u_1 + (n - 1)r") + " : " + M("u_{" + n + "} = " + u1 + " + " + (n - 1) + " \\cdot " + par(r) + " = " + dT(v)) + ".",
+          { ctx: "arith-terme", guide: [GS("Combien de fois ajoute-t-on la raison pour aller de " + M("u_1") + " à " + M("u_{" + n + "}") + " ?", n - 1, M(n - 1) + "."), GS(M("u_{" + n + "}") + " ?", v, M(dT(v)) + ".")],
+            traps: [TR(r6(u1 + n * r), "De u₁ à u_" + n + ", on ajoute la raison " + (n - 1) + " fois (pas " + n + ")."), TR(r6(n * r), "N'oublie pas le premier terme."), TR(r6(u1 * r ** (n - 1)), "Suite arithmétique : on ajoute la raison, on ne multiplie pas.")] }); },
+      () => { const q = pk([2, 3, -2, 0.5]), n = q === 0.5 ? R.int(4, 7) : R.int(5, 9), u1 = q === 0.5 ? pk([3, 5, 7]) * 2 ** (n - 1) : pk([2, 3, 5, -3, 7]), v = r6(u1 * q ** (n - 1));
+        return QN("Suite géométrique de premier terme " + M("u_1 = " + nb(u1)) + " et de raison " + M("q = " + dT(q)) + ". Calcule " + M("u_{" + n + "}") + ".", v,
+          M("u_n = u_1 \\cdot q^{n - 1}") + " : " + M("u_{" + n + "} = " + nb(u1) + " \\cdot " + par(q) + "^{" + (n - 1) + "} = " + nb(v)) + ".",
+          { ctx: "geo-terme", guide: [GS("Exposant de " + M("q") + " ?", n - 1, M(n - 1) + "."), GS(M("u_{" + n + "}") + " ?", v, M(nb(v)) + ".")],
+            traps: [TR(r6(u1 * q ** n), "De u₁ à u_" + n + ", on multiplie " + (n - 1) + " fois par q."), TR(r6(u1 + (n - 1) * q), "Suite géométrique : on multiplie par la raison."), TR(-v, "Avec une raison négative, le signe alterne : vérifie la parité de l'exposant.")] }); },
+      () => { const geo = R.rand() < 0.5;
+        if (geo) { const q = pk([2, 3, -2, -3]), a = R.int(1, 3), gap = pk([2, 3]), u1 = pk([1, 2, 3, 5]), ua = u1 * q ** (a - 1), ub = ua * q ** gap, v = q; if (gap === 2 && q < 0) return null;
+          return QN("Dans une suite géométrique, " + M("u_{" + a + "} = " + nb(ua)) + " et " + M("u_{" + (a + gap) + "} = " + nb(ub)) + ". Quelle est la raison " + M("q") + " ?", v,
+            M("u_{" + (a + gap) + "} = u_{" + a + "} \\cdot q^{" + gap + "}") + ", donc " + M("q^{" + gap + "} = \\frac{" + nb(ub) + "}{" + nb(ua) + "} = " + q ** gap) + " et " + M("q = " + q) + ".",
+            { ctx: "raison-geo", guide: [GS(M("q^{" + gap + "}") + " ?", q ** gap, M(q ** gap) + "."), GS(M("q") + " ?", q, M(q) + ".")],
+              traps: [TR(q ** gap, "C'est q^" + gap + " : prends la racine."), TR(r6((ub - ua) / gap), "Suite géométrique : on divise les termes, on ne les soustrait pas."), TR(-q, "Vérifie le signe avec u_" + a + " et u_" + (a + gap) + ".")] }); }
+        const r = pk([3, 4, 6, -5, 2.5]), a = R.int(2, 6), b = a + R.int(4, 9), ua = R.int(-10, 30), ub = r6(ua + (b - a) * r);
+        return QN("Dans une suite arithmétique, " + M("u_{" + a + "} = " + ua) + " et " + M("u_{" + b + "} = " + dT(ub)) + ". Quelle est la raison " + M("r") + " ?", r,
+          M("u_{" + b + "} - u_{" + a + "} = (" + b + " - " + a + ")r") + " : " + M("r = \\frac{" + dT(r6(ub - ua)) + "}{" + (b - a) + "} = " + dT(r)) + ".",
+          { ctx: "raison-arith", guide: [GS(M("u_{" + b + "} - u_{" + a + "}") + " ?", r6(ub - ua), M(dT(r6(ub - ua))) + "."), GS(M("r") + " ?", r, M(dT(r)) + ".")],
+            traps: [TR(r6((ub - ua) / (b - a + 1)), "Entre u_" + a + " et u_" + b + ", il y a " + (b - a) + " pas (pas " + (b - a + 1) + ")."), TR(r6(ub - ua), "Divise par le nombre de pas, " + (b - a) + ".")] }); },
+    ],
+    2: [
+      () => { const c = pk([["Les gradins d'une salle : la première rangée compte", "places, chaque rangée en a", "de plus que la précédente. Combien de places en tout dans les", "rangées ?", "gradins"], ["Un coureur s'entraîne : le premier jour, il court", "minutes, puis chaque jour", "minutes de plus. Combien de minutes en tout sur les", "premiers jours ?", "course"], ["Une élève épargne : le premier mois, elle met de côté", "CHF, puis chaque mois", "CHF de plus. Combien a-t-elle épargné en tout après", "mois ?", "epargne"]]);
+        const u1 = R.int(12, 30), r = R.int(2, 5), n = R.int(12, 30), un = u1 + (n - 1) * r, S = (n * (u1 + un)) / 2;
+        return QN(c[0] + " " + u1 + " " + c[1] + " " + r + " " + c[2] + " " + n + " " + c[3], S,
+          "Suite arithmétique : " + M("u_{" + n + "} = " + u1 + " + " + (n - 1) + " \\cdot " + r + " = " + un) + " ; " + M("S = \\frac{" + n + "(u_1 + u_{" + n + "})}{2} = \\frac{" + n + " \\cdot " + (u1 + un) + "}{2} = " + nb(S)) + ".",
+          { ctx: "somme-arith-" + c[4], guide: [GS("Dernier terme " + M("u_{" + n + "}") + " ?", un, M(un) + "."), GS("Somme ?", S, M(nb(S)) + ".")],
+            traps: [TR(n * u1, "Les termes augmentent : la somme est n × (premier + dernier) ÷ 2."), TR(n * (u1 + un), "N'oublie pas de diviser par 2."), TR((n * (u1 + u1 + n * r)) / 2, "Le dernier terme est u₁ + (n − 1)r.")] }); },
+      () => { const c = pk([["Un message est transféré : le premier jour,", "personnes le reçoivent ; chaque jour, chacune le transmet à", "nouvelles personnes. Combien de personnes l'ont reçu en tout après", "jours ?", "message"], ["Sur un échiquier, on pose", "grains sur la première case, puis on multiplie par", "à chaque case. Combien de grains en tout sur les", "premières cases ?", "grains"], ["Une plante a", "feuilles la première semaine ; leur nombre est multiplié par", "chaque semaine. Combien de feuilles sont apparues en tout en", "semaines ?", "plante"]]);
+        const u1 = pk([2, 3, 5]), q = pk([2, 3]), n = R.int(5, 9), S = (u1 * (q ** n - 1)) / (q - 1);
+        return QN(c[0] + " " + u1 + " " + c[1] + " " + q + " " + c[2] + " " + n + " " + c[3], S,
+          "Suite géométrique de raison " + M(q) + " : " + M("S = u_1 \\cdot \\frac{q^n - 1}{q - 1} = " + u1 + " \\cdot \\frac{" + q + "^{" + n + "} - 1}{" + (q - 1) + "} = " + nb(S)) + ".",
+          { ctx: "somme-geo-" + c[4], guide: [GS(M(q + "^{" + n + "}") + " ?", q ** n, M(nb(q ** n)) + "."), GS("Somme ?", S, M(nb(S)) + ".")],
+            traps: [TR(u1 * q ** (n - 1), "C'est le dernier terme ; on demande la somme."), TR((u1 * (q ** (n + 1) - 1)) / (q - 1), "Il y a " + n + " termes : exposant " + n + "."), TR(u1 * n * q, "Suite géométrique : utilise la formule de la somme.")] }); },
+      () => { const u1 = pk([100, 200, 500, 800, 50]), q = pk([1.05, 1.08, 1.1, 1.2, 1.5, 2]), S = u1 * pk([3, 5, 10, 20]), n = Math.floor(Math.log(S / u1) / Math.log(q)) + 2; if (u1 * q ** (n - 2) > S || u1 * q ** (n - 1) <= S) return null;
+        return QN("Suite géométrique : " + M("u_1 = " + u1) + ", " + M("q = " + dT(q)) + ". À partir de quel rang " + M("n") + " a-t-on " + M("u_n > " + nb(S)) + " ?", n,
+          M(u1 + " \\cdot " + dT(q) + "^{n - 1} > " + nb(S) + " \\iff n - 1 > \\frac{\\ln(" + nb(S / u1) + ")}{\\ln(" + dT(q) + ")} \\approx " + dT(Math.log(S / u1) / Math.log(q), 2)) + " ; donc " + M("n = " + n) + ".",
+          { ctx: "seuil", guide: [GS(M("\\frac{\\ln(" + nb(S / u1) + ")}{\\ln(" + dT(q) + ")}") + " (" + RND[0.01] + ") ?", Math.log(S / u1) / Math.log(q), M("\\approx " + dT(Math.log(S / u1) / Math.log(q), 2)) + ".", 0.01), GS("Rang " + M("n") + " ?", n, M(n) + ".")],
+            traps: [TR(n - 1, "C'est n − 1 qui dépasse " + dS(Math.log(S / u1) / Math.log(q), 2) + " : ajoute 1."), TR(n + 1, "Vérifie : u_" + n + " dépasse déjà " + S + "."), TR(Math.ceil(S / u1), "Utilise le logarithme pour isoler l'exposant.")] }); },
+    ],
+    3: [
+      () => { const u1 = R.int(2, 9), r = pk([2, 3, 4]), n = R.int(10, 30), S = (n * (2 * u1 + (n - 1) * r)) / 2;
+        return QN("Suite arithmétique : " + M("u_1 = " + u1) + ", " + M("r = " + r) + ". Combien de termes faut-il additionner pour obtenir " + M("S_n = " + nb(S)) + " ?", n,
+          M("S_n = \\frac{n(2u_1 + (n - 1)r)}{2}") + " : " + M(r + "n^2 + " + (2 * u1 - r) + "n - " + 2 * S + " = 0") + " ; la solution positive est " + M("n = " + n) + ".",
+          { ctx: "nombre-termes", guide: [GS("Équation " + M(r + "n^2 + " + (2 * u1 - r) + "n - c = 0") + " : que vaut " + M("c = 2S_n") + " ?", 2 * S, M(nb(2 * S)) + "."), GS(M("n") + " (solution positive) ?", n, M(n) + ".")],
+            traps: [TR(Math.round(S / u1), "Les termes augmentent : résous l'équation du second degré."), TR(Math.round(Math.sqrt(S)), "Résous r·n² + (2u₁ − r)·n − 2S = 0."), TR(n + 1, "Vérifie avec la formule de la somme.")] }); },
+      () => { const D = pk([1000, 1200, 1500, 2000, 2400]), t = pk([0.01, 0.015, 0.02, 0.025]), n = R.int(5, 15), V = (D * ((1 + t) ** n - 1)) / t;
+        return QR("Chaque 1er janvier, on verse " + M(nb(D)) + " CHF sur un compte rémunéré à " + M(dT(t * 100) + "\\,\\%") + " par an (intérêts composés). Combien vaut le compte juste après le " + n + "e versement (" + RND[0.01] + ") ?", V, 0.01,
+          "Le premier versement a gagné des intérêts pendant " + M(n - 1) + " ans, …, le dernier pas encore : " + M("S = " + nb(D) + " \\cdot \\frac{" + dT(1 + t) + "^{" + n + "} - 1}{" + dT(t) + "} \\approx " + dT(rd(V, 0.01), 2)) + " CHF.",
+          { ctx: "epargne", guide: [GS("Valeur du premier versement après " + M(n - 1) + " ans (" + RND[0.01] + ") ?", D * (1 + t) ** (n - 1), M("\\approx " + dT(rd(D * (1 + t) ** (n - 1), 0.01), 2)) + ".", 0.01), GS("Somme des " + M(n) + " termes (" + RND[0.01] + ") ?", V, M("\\approx " + dT(rd(V, 0.01), 2)) + ".", 0.01)],
+            traps: [TR(n * D, "Les intérêts s'ajoutent : c'est une somme géométrique de raison " + dS(1 + t) + "."), TR(D * (1 + t) ** n, "C'est la valeur d'un seul versement."), TR((D * ((1 + t) ** (n + 1) - 1)) / t, "Il y a " + n + " versements : exposant " + n + ".")] }); },
+      () => { const a = pk([2, 3, 0.5]), l = nz(-6, 6), u0 = l + nz(-4, 4) * (a === 0.5 ? 8 : 1), b = r6(l * (1 - a)), n = a === 0.5 ? R.int(2, 3) : R.int(3, 5), v = r6(l + (u0 - l) * a ** n); if (!b || u0 === l) return null;
+        return QN("On définit " + M("u_0 = " + u0) + " et " + M("u_{n + 1} = " + dT(a) + "u_n " + (b < 0 ? "- " + dT(-b) : "+ " + dT(b))) + ". En posant " + M("v_n = u_n - " + par(l)) + " (suite géométrique), calcule " + M("u_{" + n + "}") + ".", v,
+          "Point fixe " + M("\\ell = " + dT(a) + "\\ell " + (b < 0 ? "- " + dT(-b) : "+ " + dT(b)) + " \\iff \\ell = " + l) + " ; " + M("v_n = u_n - \\ell") + " est géométrique de raison " + M(dT(a)) + " et " + M("v_0 = " + (u0 - l)) + " : " + M("u_{" + n + "} = " + l + " + " + par(u0 - l) + " \\cdot " + dT(a) + "^{" + n + "} = " + dT(v)) + ".",
+          { ctx: "arithmetico-geometrique", guide: [GS(M("v_0 = u_0 - " + par(l)) + " ?", u0 - l, M(u0 - l) + "."), GS(M("v_{" + n + "} = v_0 \\cdot " + dT(a) + "^{" + n + "}") + " ?", r6((u0 - l) * a ** n), M(dT(r6((u0 - l) * a ** n))) + "."), GS(M("u_{" + n + "}") + " ?", v, M(dT(v)) + ".")],
+            traps: [TR(r6((u0 - l) * a ** n), "C'est v_" + n + " : u_n = v_n + " + l + "."), TR(r6(u0 * a ** n), "La suite u n'est pas géométrique (à cause du + " + dS(b) + ") : passe par v."), TR(r6(l + (u0 - l) * a ** (n - 1)), "v_n = v₀·qⁿ (on part de l'indice 0).")] }); },
+    ],
+  };
+
+  // ======================= serie : séries géométriques, convergence, Taylor (4.AN.10d, 4.AN.11a–c) =======================
+  const SE = {
+    1: [
+      () => { const a = pk([2, 3, 4, 5, 6, 8, 9, 12]), q = pk([0.5, 0.25, 0.2, -0.5, 1 / 3, 2 / 3, 0.75, -1 / 3]), S = a / (1 - q);
+        return QN("Calcule la somme de la série géométrique " + M(a + " + " + par(a * q) + " + " + par(r6(a * q * q)) + " + \\ldots") + " (raison " + M(fT(q)) + ", fraction acceptée).", S,
+          M("|q| < 1") + " : la série converge et " + M("S = \\frac{u_0}{1 - q} = \\frac{" + a + "}{1 - " + par(q) + "} = " + fT(S)) + ".",
+          { ctx: "somme-infinie", guide: [GS(M("1 - q") + " ?", r6(1 - q), M(fT(r6(1 - q))) + "."), GS("Somme ?", S, M(fT(S)) + ".")],
+            traps: [TR(a / (1 + q), "S = u₀ ÷ (1 − q)."), TR(a * q / (1 - q), "Le premier terme est " + a + " (il compte aussi)."), TR(a / q, "S = u₀ ÷ (1 − q).")] }); },
+      () => { const two = R.rand() < 0.6, ab = two ? R.int(10, 98) : R.int(1, 9); if (ab % 11 === 0 || (two && ab < 10)) return null; const pre = R.rand() < 0.4 ? R.int(1, 9) : 0, d = two ? 99 : 9, v = r6(pre / 10 + (pre ? ab / (10 * d) : ab / d));
+        const tx = pre ? "0{,}" + pre + "\\overline{" + ab + "}" : "0{,}\\overline{" + ab + "}";
+        return QN("Écris le nombre périodique " + M(tx) + " sous forme de fraction irréductible.", v,
+          M(pre ? tx + " = \\frac{" + pre + "}{10} + \\frac{1}{10} \\cdot 0{,}\\overline{" + ab + "}" : tx) + " ; " + M("0{,}\\overline{" + ab + "} = \\frac{" + ab + "}{" + nb(10 ** (two ? 2 : 1)) + "} \\cdot \\frac{1}{1 - \\frac{1}{" + nb(10 ** (two ? 2 : 1)) + "}} = \\frac{" + ab + "}{" + d + "}") + (pre ? "" : "") + " ; résultat " + M(fT(v)) + ".",
+          { ctx: pre ? "periodique-decale" : "periodique", guide: [GS(M("0{,}\\overline{" + ab + "}") + " en fraction ?", ab / d, M(fT(ab / d)) + "."), GS("Résultat ?", v, M(fT(v)) + ".")],
+            traps: [TR(pre ? pre / 10 + ab / (10 * 10 ** (two ? 2 : 1)) : ab / 10 ** (two ? 2 : 1), "La période se répète sans fin : c'est une série géométrique de raison 1/" + (two ? 100 : 10) + "."), TR(pre ? pre / 10 + ab / d : ab / (d + 1), pre ? "La période commence au 2e chiffre après la virgule : divise aussi par 10." : "Divise par " + d + " (autant de 9 que de chiffres dans la période).")] }); },
+      () => { const h = pk([1, 1.5, 2, 3, 4]), q = pk([0.5, 0.6, 0.75, 0.8, 0.4]), D = h + (2 * h * q) / (1 - q);
+        return QN("On lâche une balle d'une hauteur de " + M(dT(h) + "\\text{ m}") + ". À chaque rebond, elle remonte à " + M(pct(q, 0)) + " de la hauteur précédente. Quelle distance totale (montées et descentes) parcourt-elle avant de s'arrêter (en m, fraction acceptée) ?", D,
+          "Descente " + M(dT(h)) + ", puis chaque rebond compte deux fois (montée et descente) : " + M(dT(h) + " + 2 \\cdot \\frac{" + dT(h) + " \\cdot " + dT(q) + "}{1 - " + dT(q) + "} = " + fT(D)) + " m.",
+          { ctx: "balle", guide: [GS("Somme des hauteurs des rebonds " + M(dT(h * q) + " + " + dT(r6(h * q * q)) + " + \\ldots") + " ?", (h * q) / (1 - q), M(fT((h * q) / (1 - q))) + "."), GS("Distance totale ?", D, M(fT(D)) + " m.")],
+            traps: [TR(h / (1 - q), "Chaque rebond est parcouru deux fois (montée et descente)."), TR((2 * h) / (1 - q), "La première chute n'est parcourue qu'une fois."), TR((h * q) / (1 - q), "Ajoute la première chute et compte chaque rebond deux fois.")] }); },
+    ],
+    2: [
+      () => { const k = pk([2, 3, 4, 5, 6]), S = pk([2, 3, 4, 5, 1.5, 2.5]), x = r6(k * (1 - 1 / S)); if (!x) return null;
+        return QN("Pour quelle valeur de " + M("x") + " (avec " + M("|x| < " + k) + ") a-t-on " + M("\\sum_{n = 0}^{+\\infty} \\left(\\frac{x}{" + k + "}\\right)^n = " + dT(S)) + " ? (fraction acceptée)", x,
+          "Série géométrique de raison " + M("\\frac{x}{" + k + "}") + " : " + M("\\frac{1}{1 - \\frac{x}{" + k + "}} = " + dT(S)) + ", donc " + M("1 - \\frac{x}{" + k + "} = " + fT(1 / S)) + " et " + M("x = " + fT(x)) + ".",
+          { ctx: "parametre", guide: [GS("Raison " + M("\\frac{x}{" + k + "}") + " ?", r6(1 - 1 / S), M(fT(r6(1 - 1 / S))) + "."), GS(M("x") + " ?", x, M(fT(x)) + ".")],
+            traps: [TR(r6(1 - 1 / S), "C'est x ÷ " + k + " : multiplie par " + k + "."), TR(r6(k * (S - 1)), "Somme = 1 ÷ (1 − q) : isole q correctement."), TR(r6(k / S), "1 − x/" + k + " = 1/" + dS(S) + ".")] }); },
+      () => { const c = pk([2, 3, 4, 5]), d = pk([3, 5, 7, 2]), p = pk([1, 2, 3]), L = c / d; if (c === d || c % d === 0) return null;
+        return QN("Pour la série de terme général " + M("a_n = \\frac{n^{" + p + "} \\cdot " + c + "^n}{" + d + "^n}") + ", calcule " + M("\\lim_{n \\to +\\infty} \\frac{a_{n + 1}}{a_n}") + " (critère de d'Alembert ; fraction acceptée).", L,
+          M("\\frac{a_{n + 1}}{a_n} = \\left(\\frac{n + 1}{n}\\right)^{" + p + "} \\cdot \\frac{" + c + "}{" + d + "} \\to \\frac{" + c + "}{" + d + "}") + " ; " + (L < 1 ? "limite < 1 : la série converge." : "limite > 1 : la série diverge."),
+          { ctx: "dalembert", guide: [GS("Limite de " + M("\\left(\\frac{n + 1}{n}\\right)^{" + p + "}") + " ?", 1, M(1) + "."), GS("Limite du quotient ?", L, M(fT(L)) + ".")],
+            traps: [TR(d / c, "a_(n+1) ÷ a_n : " + c + "ⁿ⁺¹ ÷ " + c + "ⁿ = " + c + " au numérateur."), TR(r6((2 ** p) * L), "(n + 1)/n tend vers 1, donc sa puissance aussi."), TR(0, "Le facteur polynomial tend vers 1 dans le quotient ; il reste " + c + "/" + d + ".")] }); },
+      () => { const a = pk([1, 2, 5, 10]), q = pk([0.5, 0.8, 0.9, 0.6, 0.75]), eps = pk([0.01, 0.001]), S = a / (1 - q), n = Math.ceil(Math.log((eps * (1 - q)) / a) / Math.log(q)); if (n < 2) return null;
+        return QN("Série " + M("\\sum_{k = 0}^{+\\infty} " + (a === 1 ? "" : a + " \\cdot ") + dT(q) + "^k") + " de somme " + M("S") + ". Quel est le plus petit " + M("n") + " tel que l'écart " + M("S - S_n = \\frac{" + (a === 1 ? "" : a + " \\cdot ") + dT(q) + "^n}{1 - " + dT(q) + "}") + " soit inférieur à " + M(dT(eps)) + " ?", n,
+          M("\\frac{" + (a === 1 ? "" : a + " \\cdot ") + dT(q) + "^n}{" + dT(r6(1 - q)) + "} < " + dT(eps) + " \\iff n > \\frac{\\ln(" + dT(r6((eps * (1 - q)) / a), 6) + ")}{\\ln(" + dT(q) + ")} \\approx " + dT(Math.log((eps * (1 - q)) / a) / Math.log(q), 2)) + " (on divise par " + M("\\ln(" + dT(q) + ") < 0") + " : le sens change) ; " + M("n = " + n) + ".",
+          { ctx: "rang-precision", guide: [GS("Borne " + M("\\frac{\\ln(\\ldots)}{\\ln(" + dT(q) + ")}") + " (" + RND[0.01] + ") ?", Math.log((eps * (1 - q)) / a) / Math.log(q), M("\\approx " + dT(Math.log((eps * (1 - q)) / a) / Math.log(q), 2)) + ".", 0.01), GS(M("n") + " ?", n, M(n) + ".")],
+            traps: [TR(n - 1, "Il faut un écart strictement inférieur : vérifie avec n − 1."), TR(Math.ceil(Math.log(eps / a) / Math.log(q)), "N'oublie pas le facteur 1 ÷ (1 − q)."), TR(n + 1, "n = " + n + " suffit déjà.")] }); },
+    ],
+    3: [
+      () => { const koch = R.rand() < 0.5;
+        if (koch) { const A0 = pk([9, 18, 27, 45, 90]), A = (8 * A0) / 5;
+          return QN("Flocon de Koch : on part d'un triangle équilatéral d'aire " + M(A0 + "\\text{ cm}^2") + ". À chaque étape, sur chaque côté, on ajoute un triangle d'aire " + M("\\frac{1}{9}") + " de celle des triangles ajoutés à l'étape précédente, et le nombre de côtés est multiplié par 4. À la première étape, on ajoute 3 triangles d'aire " + M("\\frac{" + A0 + "}{9}") + ". Quelle est l'aire limite (en cm², fraction acceptée) ?", A,
+            "Aires ajoutées : " + M("\\frac{" + A0 + "}{3}\\left(1 + \\frac{4}{9} + \\left(\\frac{4}{9}\\right)^2 + \\ldots\\right) = \\frac{" + A0 + "}{3} \\cdot \\frac{9}{5} = " + fT((3 * A0) / 5)) + " ; total " + M(A0 + " + " + fT((3 * A0) / 5) + " = " + fT(A)) + ".",
+            { ctx: "flocon", guide: [GS("Aire ajoutée à la première étape ?", A0 / 3, M(fT(A0 / 3)) + "."), GS("Raison de la suite des aires ajoutées ?", 4 / 9, M("\\frac{4}{9}") + " (4 fois plus de triangles, 9 fois plus petits)."), GS("Aire limite ?", A, M(fT(A)) + ".")],
+              traps: [TR(A0 + (A0 / 3) / (1 - 1 / 9), "Le nombre de triangles est multiplié par 4 : raison 4/9."), TR((A0 / 3) / (1 - 4 / 9), "Ajoute l'aire du triangle de départ."), TR(A0 / (1 - 4 / 9), "Le premier ajout vaut A₀ ÷ 3, puis raison 4/9.")] }); }
+        const c = pk([4, 6, 8, 10, 12]), A = 2 * c * c;
+        return QN("On dessine un carré de côté " + M(c + "\\text{ cm}") + ", puis le carré dont les sommets sont les milieux de ses côtés, et ainsi de suite sans fin. Quelle est la somme des aires de tous les carrés (en cm²) ?", A,
+          "Chaque carré a une aire deux fois plus petite que le précédent : " + M(c * c + " \\cdot \\left(1 + \\frac{1}{2} + \\frac{1}{4} + \\ldots\\right) = " + c * c + " \\cdot 2 = " + A) + ".",
+          { ctx: "carres-imbriques", guide: [GS("Aire du deuxième carré ?", (c * c) / 2, M(fT((c * c) / 2)) + "."), GS("Somme des aires ?", A, M(A) + ".")],
+            traps: [TR((4 * c * c) / 3, "Chaque aire est la moitié de la précédente (raison 1/2, pas 1/4)."), TR(c * c, "Additionne les aires de tous les carrés."), TR(4 * c * 2, "On additionne des aires, pas des périmètres.")] }); },
+      () => { const N = R.int(9, 99), two = R.rand() < 0.5, v = two ? 0.5 * (1.5 - 1 / (N + 1) - 1 / (N + 2)) : N / (N + 1);
+        return QN("Calcule " + M(two ? "\\sum_{n = 1}^{" + N + "} \\frac{1}{n(n + 2)}" : "\\sum_{n = 1}^{" + N + "} \\frac{1}{n(n + 1)}") + " (fraction acceptée).", v,
+          (two ? M("\\frac{1}{n(n + 2)} = \\frac{1}{2}\\left(\\frac{1}{n} - \\frac{1}{n + 2}\\right)") + " : presque tout se simplifie, il reste " + M("\\frac{1}{2}\\left(1 + \\frac{1}{2} - \\frac{1}{" + (N + 1) + "} - \\frac{1}{" + (N + 2) + "}\\right)") : M("\\frac{1}{n(n + 1)} = \\frac{1}{n} - \\frac{1}{n + 1}") + " : somme télescopique, il reste " + M("1 - \\frac{1}{" + (N + 1) + "}")) + " " + M("= " + fT(v)) + ".",
+          { ctx: two ? "telescopique-2" : "telescopique", guide: [GS(two ? "Coefficient " + M("c") + " dans " + M("\\frac{1}{n(n + 2)} = c\\left(\\frac{1}{n} - \\frac{1}{n + 2}\\right)") + " ?" : "Premier terme qui reste, " + M("\\frac{1}{1}") + " ?", two ? 0.5 : 1, M(two ? "\\frac{1}{2}" : "1") + "."), GS("Somme ?", v, M(fT(v)) + ".")],
+            traps: [TR(two ? 1.5 - 1 / (N + 1) - 1 / (N + 2) : 1, two ? "N'oublie pas le facteur 1/2." : "C'est la somme infinie ; ici on s'arrête à n = " + N + "."), TR(two ? 0.75 : 1 / (N + 1), two ? "C'est la somme infinie ; ici on s'arrête à n = " + N + "." : "Il reste 1 − 1/(N + 1)."), TR(two ? 0.5 * (1 - 1 / (N + 2)) : (N - 1) / N, "Écris les premiers et derniers termes : lesquels ne se simplifient pas ?")] }); },
+      () => { const t = pk(["exp", "geo", "ln"]), a = pk([2, 3, -2, -3]), k = R.int(2, 5), fact = (m) => (m <= 1 ? 1 : m * fact(m - 1)); let v, fx, sol;
+        if (t === "exp") { v = a ** k / fact(k); fx = "e^{" + a + "x}"; sol = M("e^{u} = \\sum \\frac{u^k}{k!}") + " avec " + M("u = " + a + "x") + " : coefficient " + M("\\frac{" + par(a) + "^{" + k + "}}{" + k + "!} = " + fT(v)); }
+        else if (t === "geo") { v = a ** k; fx = "\\frac{1}{1 " + (a < 0 ? "+ " + -a : "- " + a) + "x}"; sol = M("\\frac{1}{1 - u} = 1 + u + u^2 + \\ldots") + " avec " + M("u = " + a + "x") + " : coefficient " + M(par(a) + "^{" + k + "} = " + v); }
+        else { v = ((-1) ** (k + 1) * a ** k) / k; fx = "\\ln(1 " + (a < 0 ? "- " + -a : "+ " + a) + "x)"; sol = M("\\ln(1 + u) = u - \\frac{u^2}{2} + \\frac{u^3}{3} - \\ldots") + " avec " + M("u = " + a + "x") + " : coefficient " + M(fT(v)); }
+        return QN("Dans le développement de Mac-Laurin de " + M("f(x) = " + fx) + ", quel est le coefficient de " + M("x^{" + k + "}") + " ? (fraction acceptée)", v, sol + ".",
+          { ctx: "maclaurin-" + t, guide: [GS("Coefficient de " + M("x^{" + k + "}") + " ?", v, M(fT(v)) + ".")],
+            traps: [TR(t === "exp" ? a ** k : t === "geo" ? a ** k / fact(k) : a ** k / k, t === "exp" ? "N'oublie pas la factorielle : uᵏ/k!." : t === "geo" ? "Pour 1/(1 − u), les coefficients sont uᵏ, sans factorielle." : "Les signes alternent : (−1)ᵏ⁺¹·uᵏ/k."), TR(t === "exp" ? a / fact(k) : t === "geo" ? -(a ** k) : -v, "Le facteur " + a + " est élevé à la puissance " + k + "."), TR(t === "exp" ? 1 / fact(k) : t === "geo" ? a * k : a ** k / fact(k), "Remplace u par " + a + "x dans le développement connu.")] }); },
+    ],
+  };
+
   const PROBS = {
     statdesc: [() => { const o = sdClasses(); return P("On a relevé " + o.c[0] + " " + o.N + " " + o.c[1] + " (classes de largeur " + o.w + ").", [["a) Effectif total", o.N], ["b) Moyenne, avec les centres des classes (au centième)", rd(o.m, 0.01), 0.01], ["c) Écart-type (au centième)", rd(o.sd, 0.01), 0.01]],
       ["Centres des classes : " + o.ce.join(" ; ") + ".", "σ = √(moyenne des carrés − carré de la moyenne)."],
@@ -1383,6 +1923,14 @@
     condbayes: [() => P("Un détecteur de fumée sonne avec la probabilité 0,98 s'il y a un feu, et 0,01 sinon (fausse alerte). Un jour donné, il y a un feu avec la probabilité 0,002.", [["a) P(feu et alarme)", 0.00196], ["b) P(alarme)", 0.01194], ["c) P(feu sachant alarme) (au centième)", 0.16, 0.01]], ["P(alarme) = 0,002 · 0,98 + 0,998 · 0,01.", "Bayes : a) ÷ b)."], "a) " + M("0{,}002 \\cdot 0{,}98 = 0{,}00196") + " ; b) " + M("0{,}00196 + 0{,}00998 = 0{,}01194") + " ; c) " + M("\\frac{0{,}00196}{0{,}01194} \\approx 0{,}16") + ".")],
     varalea: [() => P("Un jeu : on paie un prix d'entrée, puis on lance deux pièces. Deux piles : on reçoit 6 CHF ; un seul pile : 2 CHF ; aucun : rien. Le prix d'entrée est 3 CHF ; G = gain net.", [["a) P(G = 3)", 0.25], ["b) E(G) (CHF)", -0.5], ["c) Prix d'entrée qui rendrait le jeu équitable (CHF)", 2.5]], ["G vaut 3, −1 ou −3 avec les probabilités 1/4, 1/2, 1/4.", "Équitable : prix = espérance de la somme reçue."], "a) " + M("\\frac{1}{4}") + " ; b) " + M("3 \\cdot \\frac{1}{4} - 1 \\cdot \\frac{1}{2} - 3 \\cdot \\frac{1}{4} = -0{,}5") + " ; c) on reçoit en moyenne " + M("6 \\cdot \\frac{1}{4} + 2 \\cdot \\frac{1}{2} = 2{,}5") + " CHF : prix équitable 2,5 CHF.")],
     binomiale: [() => P("Une petite compagnie vend 12 billets pour un avion de 10 places ; chaque passager se présente avec la probabilité 0,8, indépendamment. X = nombre de passagers présents.", [["a) E(X)", 9.6], ["b) P(X = 12) (au centième)", 0.8 ** 12, 0.01], ["c) P(X = 11) (au centième)", 12 * 0.8 ** 11 * 0.2, 0.01]], ["X ∼ B(12 ; 0,8).", "P(X = 11) = 12 · 0,8¹¹ · 0,2."], "a) " + M("12 \\cdot 0{,}8 = 9{,}6") + " ; b) " + M("0{,}8^{12} \\approx 0{,}07") + " ; c) " + M("12 \\cdot 0{,}8^{11} \\cdot 0{,}2 \\approx 0{,}21") + " : la compagnie a environ 28 % de risque d'avoir trop de passagers.")],
+    bayes: [() => P("Un laboratoire teste un nouveau dépistage : 0,5 % de la population est porteuse d'un virus. Le test est positif chez 98 % des porteurs et chez 3 % des non-porteurs.", [["a) P(test positif), en % (au centième)", 100 * (0.005 * 0.98 + 0.995 * 0.03), 0.01], ["b) P(porteur sachant positif), en % (au dixième)", (100 * 0.005 * 0.98) / (0.005 * 0.98 + 0.995 * 0.03), 0.1], ["c) Après un second test positif (indépendant), P(porteur) en % (au dixième)", (100 * 0.005 * 0.98 * 0.98) / (0.005 * 0.98 * 0.98 + 0.995 * 0.03 * 0.03), 0.1]], ["Probabilités totales : 0,005 · 0,98 + 0,995 · 0,03.", "Pour c), remplace 0,005 par le résultat de b), ou mets les probabilités au carré."], "a) " + M("0{,}0049 + 0{,}02985 = 0{,}03475") + ", soit " + M("3{,}48\\,\\%") + " ; b) " + M("\\frac{0{,}0049}{0{,}03475} \\approx 14{,}1\\,\\%") + " ; c) " + M("\\frac{0{,}005 \\cdot 0{,}98^2}{0{,}005 \\cdot 0{,}98^2 + 0{,}995 \\cdot 0{,}03^2} \\approx 84{,}3\\,\\%") + " : un seul test positif ne suffit pas, deux changent tout.")],
+    syslin: [() => P("Une boulangerie vend des croissants, des pains au chocolat et des tresses. Lundi : 3 croissants, 2 pains au chocolat et 1 tresse coûtent 14 CHF ; mardi : 1 croissant, 3 pains au chocolat et 2 tresses coûtent 17,5 CHF ; mercredi : 2 croissants, 1 pain au chocolat et 3 tresses coûtent 16,5 CHF.", [["a) Déterminant du système", 18], ["b) Prix d'un croissant (CHF)", 1.5, 0.01], ["c) Prix d'une tresse (CHF)", 3.5, 0.01]], ["Système 3 × 3 : x = croissant, y = pain au chocolat, z = tresse.", "Cramer : x = Dx ÷ D."], "a) " + M("\\det\\begin{pmatrix} 3 & 2 & 1 \\\\ 1 & 3 & 2 \\\\ 2 & 1 & 3 \\end{pmatrix} = 18") + " ; b) " + M("D_x = 27") + ", " + M("x = 1{,}5") + " CHF ; c) " + M("D_z = 63") + ", " + M("z = 3{,}5") + " CHF (et " + M("y = 3") + " CHF).")],
+    bases: [() => P("Dans l'espace, u = (1 ; 2 ; 0), v = (0 ; 1 ; 3) et w = (2 ; m ; 1).", [["a) Coefficient de m dans det(u ; v ; w)", -3], ["b) Valeur de m pour laquelle la famille est liée (fraction acceptée)", 13 / 3], ["c) Pour m = 0, première composante α de t = (4 ; 5 ; 4) dans la base (u ; v ; w)", 2]], ["Développe le déterminant selon la colonne de w.", "Pour c), résous αu + βv + γw = t."], "a) " + M("\\det = 1 \\cdot (1 - 3m) - 2 \\cdot (0 - 6) = 13 - 3m") + " ; b) " + M("13 - 3m = 0") + ", " + M("m = \\frac{13}{3}") + " ; c) " + M("\\vec t = 2\\vec u + \\vec v + \\vec w") + ", donc " + M("\\alpha = 2") + ".")],
+    cplxalg: [() => P("Soit z = 3 + 4i et w = 1 − 2i.", [["a) Partie réelle de z·w", 11], ["b) Partie imaginaire de z ÷ w", 2], ["c) z·z̄", 25]], ["(3 + 4i)(1 − 2i) = 3 − 6i + 4i − 8i².", "Multiplie z et w par le conjugué de w."], "a) " + M("(3 + 4i)(1 - 2i) = 11 - 2i") + " ; b) " + M("\\frac{(3 + 4i)(1 + 2i)}{5} = \\frac{-5 + 10i}{5} = -1 + 2i") + " ; c) " + M("9 + 16 = 25") + ".")],
+    cplxtrig: [() => P("Soit z = 1 − i.", [["a) Module de z, au carré", 2], ["b) Argument principal de z, en multiples de π (par exemple −0,25)", -0.25], ["c) Partie réelle de z¹⁰", 0]], ["z = √2·e^(−iπ/4).", "z¹⁰ = 32·e^(−10iπ/4) = 32·e^(−iπ/2)."], "a) " + M("|z|^2 = 2") + " ; b) " + M("-\\frac{\\pi}{4}") + ", soit " + M("-0{,}25") + " ; c) " + M("z^{10} = 32e^{-i\\frac{\\pi}{2}} = -32i") + " : partie réelle 0.")],
+    cplxeq: [() => P("On résout z² − 6z + 13 = 0 dans ℂ.", [["a) Discriminant", -16], ["b) Partie imaginaire de la solution de partie imaginaire positive", 2], ["c) Module commun des deux solutions, au carré", 13]], ["Δ = 36 − 52.", "z = (6 ± 4i) ÷ 2 ; produit des solutions = 13."], "a) " + M("\\Delta = -16 = (4i)^2") + " ; b) " + M("z = 3 \\pm 2i") + " : 2 ; c) " + M("|3 + 2i|^2 = 9 + 4 = 13") + " (c'est aussi le produit des solutions).")],
+    suitegeom: [() => P("Une ville compte 12'000 habitants en 2026 ; sa population augmente de 2 % par an.", [["a) Population en 2031 (à l'unité)", 12000 * 1.02 ** 5, 1], ["b) Rang n (avec u₁ = 2026) de la première année où elle dépasse 15'000", 13], ["c) Somme des populations de 2026 à 2035 (à l'unité)", (12000 * (1.02 ** 10 - 1)) / 0.02, 1]], ["Suite géométrique de raison 1,02.", "Seuil : 1,02^(n − 1) > 1,25."], "a) " + M("12\\text{'}000 \\cdot 1{,}02^5 \\approx 13\\text{'}249") + " ; b) " + M("n - 1 > \\frac{\\ln 1{,}25}{\\ln 1{,}02} \\approx 11{,}27") + ", donc " + M("n = 13") + " (l'an 2038) ; c) " + M("12\\text{'}000 \\cdot \\frac{1{,}02^{10} - 1}{0{,}02} \\approx 131\\text{'}397") + ".")],
+    serie: [() => P("Un médicament : on injecte 10 mg chaque jour ; d'un jour à l'autre, 40 % de la quantité présente reste dans le sang.", [["a) Quantité juste après la 2e injection (mg)", 14], ["b) Quantité juste après la 5e injection (mg, au centième)", (10 * (1 - 0.4 ** 5)) / 0.6, 0.01], ["c) Quantité limite juste après une injection (mg, fraction acceptée)", 50 / 3]], ["Juste après la n-ième injection : 10 + 10·0,4 + … + 10·0,4ⁿ⁻¹.", "Limite : série géométrique 10 ÷ (1 − 0,4)."], "a) " + M("10 + 4 = 14") + " ; b) " + M("10 \\cdot \\frac{1 - 0{,}4^5}{0{,}6} \\approx 16{,}50") + " ; c) " + M("\\frac{10}{0{,}6} = \\frac{50}{3} \\approx 16{,}67") + " mg.")],
   };
 
   // ---------- catalogue ----------
@@ -1447,12 +1995,12 @@
       lesson: ["Transformations linéaires", "Une matrice déplace tous les points du plan à la fois.", "L'image de \\(P(x ; y)\\) par l'application de matrice \\(A\\) est \\(A\\binom{x}{y}\\). Les colonnes de \\(A\\) sont les images de \\((1 ; 0)\\) et \\((0 ; 1)\\) : rotation de 90° \\(\\begin{pmatrix} 0 & -1 \\\\ 1 & 0 \\end{pmatrix}\\), symétrie d'axe Ox \\(\\begin{pmatrix} 1 & 0 \\\\ 0 & -1 \\end{pmatrix}\\), homothétie de rapport k \\(\\begin{pmatrix} k & 0 \\\\ 0 & k \\end{pmatrix}\\), rotation d'angle θ \\(\\begin{pmatrix} \\cos\\theta & -\\sin\\theta \\\\ \\sin\\theta & \\cos\\theta \\end{pmatrix}\\). Les aires sont multipliées par \\(|\\det A|\\). Appliquer \\(f\\) (matrice A) puis \\(g\\) (matrice B) : matrice \\(BA\\).",
         ["Rotation de 90° : \\((3 ; 1) \\mapsto (-1 ; 3)\\)", "\\(\\det = -6\\) : les aires sont multipliées par 6"], "Pour composer, l'ordre compte : d'abord f, puis g, c'est \\(B \\cdot A\\)."],
       comps: ["Image d'un point ; transformations usuelles ; rapport des aires", "Antécédent ; composition ; matrice à partir des images", "Rotation d'angle quelconque ; aire avec paramètre ; aires et composition"] },
-    { id: "appllin", theme: "fa", label: "Applications linéaires : noyau, image, bases", ex: "\\ker f = \\{\\vec v : A\\vec v = \\vec 0\\}", CH: [15], codesMATU: "4\\.GV\\.0[23]", lv: AL,
+    { id: "appllin", theme: "fa", label: "Applications linéaires : noyau, image, bases", ex: "\\ker f = \\{\\vec v : A\\vec v = \\vec 0\\}", CH: [15], codesMATU: "4\\.GV\\.02[ad]", lv: AL,
       hint: "Noyau : vecteurs envoyés sur 0 (résoudre Av = 0) ; il n'est pas réduit à 0 exactement quand det A = 0. Image : si det A = 0, droite engendrée par une colonne non nulle. Composantes dans une base (u ; v) : résoudre αu + βv = w.",
       lesson: ["Noyau, image, bases", "Ce qu'une matrice écrase, et ce qu'elle atteint.", "Le noyau de \\(f\\) est l'ensemble des vecteurs \\(\\vec v\\) tels que \\(A\\vec v = \\vec 0\\). Si \\(\\det A \\neq 0\\), il est réduit à \\(\\vec 0\\) et l'image est tout le plan ; si \\(\\det A = 0\\), le noyau est une droite et l'image est la droite engendrée par une colonne non nulle. Deux vecteurs non colinéaires \\((\\vec u ; \\vec v)\\) forment une base : tout \\(\\vec w\\) s'écrit de façon unique \\(\\alpha\\vec u + \\beta\\vec v\\) (composantes \\((\\alpha ; \\beta)\\)), et \\(f(\\vec w) = \\alpha f(\\vec u) + \\beta f(\\vec v)\\).",
         ["\\(A = \\begin{pmatrix} 2 & -4 \\\\ 3 & -6 \\end{pmatrix}\\) : noyau engendré par \\((2 ; 1)\\), image : la droite \\(y = 1{,}5x\\)."], "Le noyau se cherche au départ (Av = 0) ; l'image est formée des vecteurs d'arrivée (engendrée par les colonnes)."],
       comps: ["Noyau d'une matrice non inversible ; paramètre pour un noyau non nul ; composantes vers coordonnées", "Image d'une matrice non inversible ; composantes dans une base ; appartenance à l'image", "Paramètre puis noyau ; image par linéarité ; changement de base"] },
-    { id: "condbayes", theme: "no", label: "Probabilités conditionnelles et Bayes", ex: "P_A(B) = \\frac{P(A \\cap B)}{P(A)}", CH: [15], codesMATU: "4\\.PS\\.02[abcd]", lv: CB,
+    { id: "condbayes", theme: "no", label: "Probabilités conditionnelles, totales, indépendance", ex: "P_A(B) = \\frac{P(A \\cap B)}{P(A)}", CH: [15], codesMATU: "4\\.PS\\.02[abc]", lv: CB,
       hint: "P_A(B) = P(A ∩ B) ÷ P(A). Arbre : on multiplie le long d'un chemin, on additionne les chemins. Bayes : P_B(A) = P(A)·P_A(B) ÷ P(B).",
       lesson: ["Probabilités conditionnelles", "Recalculer une probabilité quand on sait quelque chose.", "\\(P_A(B) = \\frac{P(A \\cap B)}{P(A)}\\). Dans un arbre : \\(P(A \\cap B) = P(A) \\cdot P_A(B)\\) ; probabilités totales \\(P(B) = P(A)P_A(B) + P(\\overline{A})P_{\\overline{A}}(B)\\). Bayes : \\(P_B(A) = \\frac{P(A)P_A(B)}{P(B)}\\). \\(A\\) et \\(B\\) indépendants : \\(P(A \\cap B) = P(A)P(B)\\).",
         ["Test : \\(P(M) = 0{,}01\\), \\(P_M(+) = 0{,}99\\), \\(P_{\\overline{M}}(+) = 0{,}05\\) : \\(P_+(M) = \\frac{0{,}0099}{0{,}0099 + 0{,}0495} \\approx 0{,}17\\)."], "Ne confonds pas \\(P_A(B)\\) et \\(P_B(A)\\) : un test fiable peut donner beaucoup de faux positifs quand la maladie est rare."],
@@ -1477,6 +2025,47 @@
       lesson: ["Statistique descriptive", "Résumer une série : sa position et sa dispersion.", "Moyenne pondérée \\(\\bar x = \\frac{1}{N}\\sum n_i x_i\\) (série en classes : \\(x_i\\) = centre de la classe). Écart-type \\(\\sigma = \\sqrt{\\frac{1}{N}\\sum n_i (x_i - \\bar x)^2} = \\sqrt{\\overline{x^2} - \\bar x^2}\\). Si \\(y = ax + b\\) : \\(\\bar y = a\\bar x + b\\) et \\(\\sigma_y = |a|\\,\\sigma_x\\). Médiane d'une série en classes : interpolation linéaire dans la classe qui contient la valeur de rang \\(\\frac{N}{2}\\).",
         ["Classes \\([10 \\,;\\, 20[\\), \\([20 \\,;\\, 30[\\) d'effectifs 4 et 6 : \\(\\bar x = \\frac{15 \\cdot 4 + 25 \\cdot 6}{10} = 21\\).", "\\(\\bar x = 30\\), \\(\\overline{x^2} = 925\\) : \\(\\sigma = \\sqrt{925 - 900} = 5\\)."], "Regrouper deux séries : on ne fait pas la moyenne des écarts-types ; on regroupe les moyennes des carrés."],
       comps: ["Moyenne d'une série en classes ; écart-type ; formule de König", "Transformation affine ; effectif inconnu ; médiane par interpolation", "Ajouter une valeur ; regrouper deux séries ; comparer par la valeur centrée réduite"] },
+    // 25.11 (agent col34) : Bayes, systèmes, bases (MA1 + MA2) ; complexes, suites et séries (MA2, niv "R").
+    { id: "bayes", theme: "no", label: "Théorème de Bayes", ex: "P_B(A) = \\frac{P(A)\\,P_A(B)}{P(B)}", CH: [15], codesMATU: "4\\.PS\\.02d", lv: BY,
+      hint: "P_B(A) = P(A)·P_A(B) ÷ P(B), et P(B) se calcule par les probabilités totales (tous les chemins qui mènent à B). Avec des effectifs : vrais positifs ÷ (vrais + faux positifs).",
+      lesson: ["Théorème de Bayes", "Retourner une probabilité conditionnelle.", "On connaît \\(P_A(B)\\) (le test sachant la maladie) et on veut \\(P_B(A)\\) (la maladie sachant le test). Bayes : \\(P_B(A) = \\frac{P(A) \\cdot P_A(B)}{P(B)}\\), où \\(P(B) = P(A)P_A(B) + P(\\overline{A})P_{\\overline{A}}(B)\\) (probabilités totales ; avec trois causes, trois chemins). Avec des effectifs (sur 10'000 personnes), on compte les vrais et les faux positifs. Deux tests positifs indépendants : la probabilité obtenue après le premier sert de point de départ au second.",
+        ["\\(P(M) = 0{,}01\\), \\(P_M(+) = 0{,}9\\), \\(P_{\\overline{M}}(+) = 0{,}05\\) : \\(P_+(M) = \\frac{0{,}009}{0{,}009 + 0{,}0495} \\approx 0{,}154\\)", "Sur 10'000 personnes : 90 vrais positifs, 495 faux positifs, \\(\\frac{90}{585} \\approx 15{,}4\\,\\%\\)"], "\\(P_B(A)\\) et \\(P_A(B)\\) ne sont pas égales : quand \\(A\\) est rare, la plupart des alertes sont fausses."],
+      comps: ["Appliquer la formule de Bayes (arbre à deux branches, tableau d'effectifs)", "Bayes avec trois causes ; faux négatifs ; raisonner sur des effectifs", "Deux tests successifs ; prévalence pour une probabilité donnée ; probabilité inconnue"] },
+    { id: "syslin", theme: "fa", label: "Systèmes linéaires et matrices (Cramer, inverse)", ex: "x = \\frac{D_x}{D}", CH: [15], codesMATU: "4\\.GV\\.02e", lv: SL,
+      hint: "AX = B. Si D = det A ≠ 0 : une seule solution, x = Dx ÷ D (Dx : colonne des x remplacée par le second membre), ou X = A⁻¹B. Si D = 0 : aucune solution ou une infinité.",
+      lesson: ["Systèmes linéaires et matrices", "Résoudre un système avec des déterminants.", "Le système \\(\\begin{cases} ax + by = e \\\\ cx + dy = f \\end{cases}\\) s'écrit \\(AX = B\\) avec \\(A = \\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}\\). Si \\(D = \\det A \\neq 0\\), une seule solution : \\(x = \\frac{D_x}{D}\\), \\(y = \\frac{D_y}{D}\\) (règle de Cramer ; \\(D_x\\) : la colonne des \\(x\\) remplacée par \\(\\binom{e}{f}\\)), ou \\(X = A^{-1}B\\). Si \\(D = 0\\) : aucune solution, ou une infinité si les équations sont proportionnelles. En 3 × 3 : même règle, déterminants par Sarrus.",
+        ["\\(\\begin{cases} 2x + y = 7 \\\\ x - 3y = 7 \\end{cases}\\) : \\(D = -7\\), \\(D_x = -28\\), \\(x = 4\\) ; \\(D_y = 7\\), \\(y = -1\\)."], "Dans \\(D_x\\), on remplace la colonne des \\(x\\), pas une ligne ; et \\(x = \\frac{D_x}{D}\\), pas \\(\\frac{D}{D_x}\\)."],
+      comps: ["Écrire un système sous forme matricielle ; déterminants D, Dx, Dy ; règle de Cramer", "Résoudre avec l'inverse ; système avec paramètre ; déterminant 3 × 3", "Système 3 × 3 ; problème mis en équations ; infinité de solutions"] },
+    { id: "bases", theme: "es", label: "Familles libres, bases, composantes", ex: "\\vec w = \\alpha\\vec u + \\beta\\vec v", CH: [15], codesMATU: "4\\.GV\\.03[abcd]", lv: BA,
+      hint: "Une famille est libre si aucun vecteur n'est combinaison des autres : det ≠ 0 (2 vecteurs du plan, 3 de l'espace). Composantes dans une base : résoudre αu + βv (+ γw) = vecteur.",
+      lesson: ["Familles libres et bases", "Écrire chaque vecteur avec quelques vecteurs de référence.", "Une combinaison linéaire de \\(\\vec u\\) et \\(\\vec v\\) est un vecteur \\(\\alpha\\vec u + \\beta\\vec v\\). La famille est liée si un vecteur est combinaison des autres (dans le plan : \\(\\det(\\vec u \\,;\\, \\vec v) = 0\\) ; dans l'espace : \\(\\det(\\vec u \\,;\\, \\vec v \\,;\\, \\vec w) = 0\\), vecteurs coplanaires), libre sinon. Une famille libre de 2 vecteurs du plan (3 de l'espace) est une base : tout vecteur s'y écrit de façon unique, ses composantes \\((\\alpha \\,;\\, \\beta)\\) se trouvent en résolvant un système. La dimension du sous-espace engendré est le nombre maximal de vecteurs libres.",
+        ["\\(\\vec u = \\binom{1}{2}\\), \\(\\vec v = \\binom{3}{1}\\), \\(\\vec w = \\binom{5}{5}\\) : \\(\\vec w = 2\\vec u + \\vec v\\), composantes \\((2 \\,;\\, 1)\\)."], "Les composantes dépendent de la base : dans la base \\((\\vec u \\,;\\, \\vec v)\\), \\(\\vec w = \\binom{5}{5}\\) a pour composantes \\((2 \\,;\\, 1)\\), pas \\((5 \\,;\\, 5)\\)."],
+      comps: ["Composantes dans une base du plan ; famille liée ; retour aux coordonnées usuelles", "Coplanarité avec un paramètre ; composantes dans une base de l'espace ; combinaison", "Dimension d'un sous-espace engendré ; appartenance ; changement de base"] },
+    { id: "cplxalg", niv: "R", theme: "no", label: "Nombres complexes : forme algébrique", ex: "i^2 = -1", CH: [15], codesMATU: "4\\.NC\\.01[abc]", lv: CA,
+      hint: "Calcule comme avec des polynômes en i, puis remplace i² par −1. Quotient : multiplie en haut et en bas par le conjugué du dénominateur. Réponse : a + bi (touche i du clavier).",
+      lesson: ["Nombres complexes", "Un nombre i tel que i² = −1.", "Un nombre complexe s'écrit \\(z = a + bi\\) (\\(a\\) : partie réelle, \\(b\\) : partie imaginaire). On additionne partie par partie ; on multiplie en développant, avec \\(i^2 = -1\\). Conjugué : \\(\\bar z = a - bi\\), et \\(z\\bar z = a^2 + b^2\\) est réel. Pour diviser, on multiplie numérateur et dénominateur par le conjugué du dénominateur. Puissances de \\(i\\) : \\(i, -1, -i, 1\\), puis ça recommence.",
+        ["\\((2 + 3i)(1 - i) = 2 - 2i + 3i - 3i^2 = 5 + i\\)", "\\(\\frac{5 + 5i}{1 + 2i} = \\frac{(5 + 5i)(1 - 2i)}{5} = 3 - i\\)"], "\\(i^2 = -1\\) : le produit des parties imaginaires passe dans la partie réelle avec le signe opposé."],
+      comps: ["Somme, produit, conjugué ; puissances de i", "Quotient ; équation du premier degré ; inverse d'un complexe", "Équation avec le conjugué ; puissance ; racine carrée d'un complexe"] },
+    { id: "cplxtrig", niv: "R", theme: "no", label: "Complexes : module, argument, Moivre", ex: "z = r\\,e^{i\\theta}", CH: [15], codesMATU: "4\\.NC\\.02[abcd]", lv: CT,
+      hint: "Module |a + bi| = √(a² + b²) ; argument : angle du point (a ; b), ramené dans ]−π ; π]. En multipliant, les modules se multiplient et les arguments s'additionnent ; zⁿ = rⁿe^(inθ) (Moivre).",
+      lesson: ["Forme trigonométrique et exponentielle", "Une longueur et un angle.", "Le point \\((a \\,;\\, b)\\) d'affixe \\(z = a + bi\\) est à la distance \\(r = |z| = \\sqrt{a^2 + b^2}\\) de l'origine, dans la direction \\(\\theta = \\arg z\\) : \\(z = r(\\cos\\theta + i\\sin\\theta) = re^{i\\theta}\\). Produit : \\(r_1e^{i\\theta_1} \\cdot r_2e^{i\\theta_2} = r_1r_2e^{i(\\theta_1 + \\theta_2)}\\) ; quotient : modules divisés, arguments soustraits. Moivre : \\((re^{i\\theta})^n = r^ne^{in\\theta}\\). L'argument principal est ramené dans \\(]-\\pi \\,;\\, \\pi]\\).",
+        ["\\(1 + i = \\sqrt{2}e^{i\\frac{\\pi}{4}}\\), donc \\((1 + i)^8 = 16e^{2i\\pi} = 16\\)", "\\(\\arg(-1 + \\sqrt{3}i) = \\frac{2\\pi}{3}\\) (2e quadrant)"], "L'argument n'est pas toujours \\(\\arctan\\frac{b}{a}\\) : si \\(a < 0\\), le point est à gauche, on ajoute ou retire \\(\\pi\\)."],
+      comps: ["Module, argument ; passer à la forme algébrique", "Moivre ; produit et quotient sous forme exponentielle ; argument d'une puissance", "Parties d'une puissance ; plus petit n pour un réel ; argument d'un quotient de puissances"] },
+    { id: "cplxeq", niv: "R", theme: "no", label: "Équations dans ℂ, racines n-ièmes, lieux", ex: "z = \\frac{-b \\pm i\\sqrt{-\\Delta}}{2a}", CH: [15], codesMATU: "4\\.NC\\.0[34][abc]", lv: CE,
+      hint: "az² + bz + c = 0 avec Δ < 0 : z = (−b ± i√(−Δ)) ÷ 2a, deux solutions conjuguées. zⁿ = Re^(iφ) : module ⁿ√R, arguments φ/n + 2kπ/n. |z − a| = r : cercle de centre a.",
+      lesson: ["Équations dans ℂ", "Toute équation du second degré a des solutions.", "Si \\(\\Delta = b^2 - 4ac < 0\\), on écrit \\(\\Delta = (i\\sqrt{-\\Delta})^2\\) : \\(z = \\frac{-b \\pm i\\sqrt{-\\Delta}}{2a}\\), deux solutions conjuguées (coefficients réels). Somme des solutions \\(-\\frac{b}{a}\\), produit \\(\\frac{c}{a}\\). L'équation \\(z^n = Re^{i\\varphi}\\) a \\(n\\) solutions de module \\(\\sqrt[n]{R}\\) et d'arguments \\(\\frac{\\varphi}{n} + \\frac{2k\\pi}{n}\\) : un polygone régulier. Lieux : \\(|z - a| = r\\) est le cercle de centre \\(a\\) et de rayon \\(r\\) ; \\(|z - a| = |z - b|\\) est la médiatrice de \\([ab]\\).",
+        ["\\(z^2 - 4z + 13 = 0\\) : \\(\\Delta = -36 = (6i)^2\\), \\(z = 2 \\pm 3i\\)", "\\(z^3 = 8i\\) : \\(-2i\\), \\(\\sqrt{3} + i\\), \\(-\\sqrt{3} + i\\)"], "Avec des coefficients complexes, l'autre solution n'est pas forcément le conjugué : utilise la somme des solutions."],
+      comps: ["Équation z² = −c ; discriminant ; trinôme à coefficients réels", "Trinôme avec a ≠ 1 ; coefficients à partir d'une solution ; lieux (cercle, médiatrice)", "Racines n-ièmes ; racines cubiques ; équation à coefficients complexes"] },
+    { id: "suitegeom", niv: "R", theme: "fa", label: "Suites arithmétiques et géométriques", ex: "u_n = u_1 \\cdot q^{n - 1}", CH: [15], codesMATU: "4\\.AN\\.10[abc]", lv: SG,
+      hint: "Arithmétique : u_n = u₁ + (n − 1)r, S = n(u₁ + u_n) ÷ 2. Géométrique : u_n = u₁·qⁿ⁻¹, S = u₁·(qⁿ − 1) ÷ (q − 1). Seuil : on isole l'exposant avec ln.",
+      lesson: ["Suites arithmétiques et géométriques", "Ajouter toujours la même chose, ou multiplier.", "Suite arithmétique de raison \\(r\\) : \\(u_{n + 1} = u_n + r\\), \\(u_n = u_1 + (n - 1)r\\), somme des \\(n\\) premiers termes \\(S_n = \\frac{n(u_1 + u_n)}{2}\\). Suite géométrique de raison \\(q\\) : \\(u_{n + 1} = q \\cdot u_n\\), \\(u_n = u_1q^{n - 1}\\), \\(S_n = u_1\\frac{q^n - 1}{q - 1}\\) (\\(q \\neq 1\\)). Pour trouver un rang, on isole \\(q^{n - 1}\\), puis on applique \\(\\ln\\). Une suite \\(u_{n + 1} = au_n + b\\) devient géométrique en retirant son point fixe \\(\\ell = \\frac{b}{1 - a}\\).",
+        ["\\(1 + 3 + 5 + \\ldots + 99\\) : 50 termes, \\(S = \\frac{50 \\cdot 100}{2} = 2\\text{'}500\\)", "\\(3 + 6 + 12 + \\ldots\\) (8 termes) : \\(3 \\cdot \\frac{2^8 - 1}{1} = 765\\)"], "De \\(u_1\\) à \\(u_n\\), il y a \\(n - 1\\) pas (pas \\(n\\))."],
+      comps: ["Terme général d'une suite arithmétique ou géométrique ; trouver la raison", "Sommes de termes ; rang de dépassement d'un seuil", "Nombre de termes pour une somme ; épargne à versements réguliers ; suites u(n+1) = a·u(n) + b"] },
+    { id: "serie", niv: "R", theme: "fa", label: "Séries : géométriques, convergence, Taylor", ex: "\\sum_{n = 0}^{+\\infty} q^n = \\frac{1}{1 - q}", CH: [15], codesMATU: "4\\.AN\\.10d|4\\.AN\\.11[abc]", lv: SE,
+      hint: "Si |q| < 1 : u₀ + u₀q + u₀q² + … = u₀ ÷ (1 − q). D'Alembert : si a(n+1)/a(n) tend vers L < 1, la série converge. Mac-Laurin : eᵘ = Σ uᵏ/k!, 1/(1 − u) = Σ uᵏ.",
+      lesson: ["Séries", "Additionner une infinité de termes.", "Une série est la limite des sommes partielles \\(S_n\\). Série géométrique de raison \\(q\\) : elle converge si \\(|q| < 1\\), vers \\(\\frac{u_0}{1 - q}\\) ; sinon elle diverge. Critère de d'Alembert (termes positifs) : si \\(\\frac{a_{n + 1}}{a_n} \\to L\\), la série converge si \\(L < 1\\) et diverge si \\(L > 1\\). Série télescopique : les termes se simplifient deux à deux. Développements de Mac-Laurin : \\(e^u = \\sum \\frac{u^k}{k!}\\), \\(\\frac{1}{1 - u} = \\sum u^k\\) (\\(|u| < 1\\)), \\(\\ln(1 + u) = u - \\frac{u^2}{2} + \\frac{u^3}{3} - \\ldots\\)",
+        ["\\(0{,}\\overline{36} = \\frac{36}{100} \\cdot \\frac{1}{1 - \\frac{1}{100}} = \\frac{36}{99} = \\frac{4}{11}\\)", "\\(\\sum_{n = 1}^{N} \\frac{1}{n(n + 1)} = 1 - \\frac{1}{N + 1}\\)"], "La formule \\(\\frac{u_0}{1 - q}\\) n'a de sens que si \\(|q| < 1\\) ; et \\(u_0\\) est le premier terme de la série."],
+      comps: ["Somme d'une série géométrique ; nombre périodique ; balle qui rebondit", "Paramètre pour une somme donnée ; critère de d'Alembert ; rang pour une précision", "Aires limites (carrés, flocon de Koch) ; séries télescopiques ; coefficients de Mac-Laurin"] },
   ];
 
   // ---------- enregistrement (additif : aucune notion existante n'est modifiée) ----------

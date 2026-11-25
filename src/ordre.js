@@ -38,3 +38,12 @@ Object.assign(ORDRE_THEME.MATU, {"fracper":"M1C01","racprop":"M1C01","ratden":"M
 Object.assign(ORDRE.MATU, {"ineqpoly":81.5});
 Object.assign(ORDRE_THEME.MATU, {"ineqpoly":"M2C03","ineq":"M1C05","trigrel":"M1C10"});
 delete ORDRE_THEME.MATU_ALT.ineq; delete ORDRE_THEME.MATU_ALT.trigrel;
+// 25.11 (agent col34) : 3e et 4e du Collège complétées. 3e : derivth (M3C04), pvect (M3C06, MA2). 4e : syslin et bases
+// (M4C03), bayes (M4C04) ; MA2 : nombres complexes (M4C05) et suites et séries (M4C06), chapitres « Av » de Sésamath Ma4.
+// Ajouté à la main : à reporter dans tools/referentiels.py si ce fichier est régénéré.
+Object.assign(THEME_LABEL.MATU, {"M4C05":"5. Nombres complexes","M4C06":"6. Suites et séries"});
+Object.assign(ORDRE.MATU, {"derivth":115,"pvect":157.5,"syslin":220.5,"bases":222.5,"bayes":230.5,"cplxalg":240,"cplxtrig":241,"cplxeq":242,"suitegeom":250,"serie":251});
+Object.assign(ORDRE_THEME.MATU, {"derivth":"M3C04","pvect":"M3C06","syslin":"M4C03","bases":"M4C03","bayes":"M4C04","cplxalg":"M4C05","cplxtrig":"M4C05","cplxeq":"M4C05","suitegeom":"M4C06","serie":"M4C06"});
+// Chapitre 1 de 3e (Sésamath Ma3, « Prérequis pour l'entrée en 3e ») : reprises de 2e, « de l'année » en 3e sans être
+// nouvelles (statut « vu » : notions des années précédentes). Lu par Engine.catalog et Engine.themeKey (MATU_REP).
+ORDRE_THEME.MATU_REP = {"polyfact":"M3C01","fracrat":"M3C01","ineqpoly":"M3C01","ineqfrac":"M3C01","compo":"M3C01","expo":"M3C01","log":"M3C01","trigfn":"M3C01"};

@@ -35,7 +35,7 @@ Code des compétences : référentiel matu (`3.AN.03a` = 3e, analyse, groupe 03,
 
 | Chapitre (Sésamath Ma3) | Notion de l'app (id) | Niv. | Compétences | Existe ? |
 |---|---|---|---|---|
-| 1. Prérequis | reprises de 2e : `polyfact`, `fracrat`, `homog`, `trigfn`, `expo`, `log`, `compo`, `decomp`, `ineq`, `ineqfrac` | N+R | (2e) | oui (CH 12–13, « vues ») |
+| 1. Prérequis | reprises de 2e (Sésamath Ma3 ch. 1) : `polyfact`, `fracrat`, `ineqpoly`, `ineqfrac`, `compo`, `expo`, `log`, `trigfn` | N+R | (2e) | **rattachées le 25.11** : chapitre M3C01, « de l'année » en 3e mais statut « vu » (pas nouvelles) ; `ORDRE_THEME.MATU_REP` (src/ordre.js), lu par `Engine.catalog` et `themeKey` |
 | 2. Limites et continuité | **`limites`** — limite par lecture / calcul direct, forme 0/0 | N+R | 3.AN.01a, 01b | **créée le 24.11** |
 | | **`limitinf`** — limite à l'infini (polynôme, rationnelle) | N+R | 3.AN.01c | **créée** |
 | | **`asymptotes`** — asymptotes verticales, horizontales (obliques : R) | N+R / R | 3.AN.01d, 01e | **créée** |
@@ -51,7 +51,7 @@ Code des compétences : référentiel matu (`3.AN.03a` = 3e, analyse, groupe 03,
 | | **`etudefct`** — étude complète (polynomiale, rationnelle) | N+R | 3.AN.07c, 07d | **créée le 24.11** |
 | | **`derivseconde`** — concavité, points d'inflexion | **R** | 3.AN.08a, 08b | **créée le 24.11** |
 | | **`optimderiv`** — problèmes d'extremum (géométrie, économie) | N+R | 3.AN.10a–c | **créée** |
-| 4. Dérivation (théorie) | `derivth` — dérivable ⇒ continue, points anguleux, Rolle, Lagrange (interprétation graphique) | N+R | 3.AN.06a, 06b, 09a | à créer (démonstrations 09b–c : hors saisie) |
+| 4. Dérivation (théorie) | **`derivth`** — dérivable ⇒ continue, points anguleux, demi-tangentes, raccord dérivable, Rolle, Lagrange, majoration (radar) | N+R | 3.AN.06a, 06b, 09a | **créée le 25.11** (démonstrations 09b–c : hors saisie) |
 | 5. Combinatoire et probabilités | **`combi`** — principe multiplicatif, permutations, arrangements, combinaisons | N+R | 3.PS.01a–e | **créée le 24.11** (`denombr` 11e = bases) |
 | | **`probaxiomes`** — vocabulaire, équiprobabilité, contraire, réunion | N+R | 3.PS.02a–c | **créée** (`proba` 11e = bases) |
 | | **`probarbre`** — expériences successives (arbres, tableaux) | N+R | 3.PS.02d | **créée** |
@@ -64,36 +64,36 @@ Code des compétences : référentiel matu (`3.AN.03a` = 3e, analyse, groupe 03,
 | | **`pscal3d`** — produit scalaire dans l'espace : angle, orthogonalité, projection (id ≠ `pscal` du lycée français) | N+R | 3.GV.04a–c | **créée** |
 | | **`distances`** — distance point-droite, point-plan ; aire d'un triangle | N+R | 3.GV.04d, 04e | **créée** |
 | | **`sphere`** — vecteur normal, plan médiateur, sphère, plan tangent | N+R | 3.GV.05a–d | **créée** (`cercle`, `cercletan` 2e = plan) |
-| | `pvect` — produit vectoriel, produit mixte, distances dans l'espace | **R** | 3.GV.06a–d | à créer |
+| | **`pvect`** — produit vectoriel, produit mixte, aires, volumes, distances point-droite et entre droites gauches | **R** | 3.GV.06a–d | **créée le 25.11** |
 
 ### 4e année
 
-| Chapitre (Sésamath Ma4) | Notion (id proposé) | Niv. | Compétences |
-|---|---|---|---|
-| 1. Intégration | `primitives` — primitives des fonctions de référence, linéarité, condition initiale | N+R | 4.AN.01a–c |
-| | `integrale` — intégrale définie (théorème fondamental), propriétés, valeur moyenne | N+R | 4.AN.02a–c, 03a |
-| | `aires` (nom à éviter : déjà pris au CO) → `aireint` — aire sous une courbe, entre deux courbes | N+R | 4.AN.05a, 05b |
-| | `volrev` — volume d'un corps de révolution | N+R | 4.AN.05c |
-| | **`intparties`** — intégration par parties ; **`intsubst`** — par substitution | **R** | 4.AN.04a, 04b (**créées le 25.11**) |
-| 2. ln et exp | `lnexp` — propriétés, dérivées et primitives de ln et exp | N+R | 4.AN.06a–c |
-| | **`etudelnexp`** — étude de fonctions avec ln, exp (croissances comparées) | N+R | 4.AN.06d (**créée le 25.11**) |
-| | `modexp` (2e) étendu → `croissance` — N(t) = N₀·e^(kt), doublement, demi-vie, croissance limitée | N+R | 4.AN.07a–c |
-| | **`eqdiff`** — équations différentielles à variables séparables | **R** | 4.AN.08a–c, 09a–b (**créée le 25.11**) |
-| 3. Algèbre linéaire | `matrices` — opérations, produit, déterminant, inverse | N+R | 4.GV.02b, 02c |
-| | `translin` — matrice d'une transformation (rotation, symétrie, projection, homothétie), composition, déterminant = rapport d'aires | N+R | 4.GV.01a–d |
-| | `syslin` — systèmes par les matrices (Cramer, inverse) | N+R | 4.GV.02e |
-| | `appllin` — noyau, image ; `bases` — famille libre, base, composantes | N+R | 4.GV.02a, 02d ; 4.GV.03a–d |
-| 4. Probabilités 2 | `probcond` — probabilité conditionnelle, probabilités totales, indépendance | N+R | 4.PS.02a–c |
-| | `bayes` — théorème de Bayes | N+R | 4.PS.02d |
-| | `varalea` — loi, espérance, variance d'une variable discrète | N+R | 4.PS.03a, 03b |
-| | `binomiale` — schéma de Bernoulli, loi binomiale, E et V | N+R | 4.PS.03c, 03d |
-| | `normale` — loi normale, centrer-réduire, intervalles 68–95–99,7 % | N+R | 4.PS.04a–c (04d : R) |
-| | `stats` (existe, MP seulement) + `quartiles` (MP) → ouvrir au Collège | N+R | 4.PS.01a–d |
-| Av1 Complexes | `cplxalg` — forme algébrique, opérations, conjugué, division | **R** | 4.NC.01a–c |
-| | `cplxtrig` — module, argument, formes trigonométrique et exponentielle, Moivre | **R** | 4.NC.02a–d |
-| | `cplxeq` — az² + bz + c = 0, racines n-ièmes ; lieux |z − a| = r | **R** | 4.NC.03a–c, 04a–b |
-| Av3 Suites et séries | `suitearith`, `suitegeom` — terme général, somme ; `serie` — série géométrique, intérêts | **R** | 4.AN.10a–d |
-| | `taylor` — critères de convergence, rayon, Taylor / Mac-Laurin | **R** | 4.AN.11a–c (peu saisissable) |
+| Chapitre (Sésamath Ma4) | Notion (id proposé) | Niv. | Compétences | Existe ? |
+|---|---|---|---|---|
+| 1. Intégration | `primitives` — primitives des fonctions de référence, linéarité, condition initiale | N+R | 4.AN.01a–c | **créée le 24.11** (`primitives`) |
+| | `integrale` — intégrale définie (théorème fondamental), propriétés, valeur moyenne | N+R | 4.AN.02a–c, 03a | **créée** (`integrale`) |
+| | `aires` (nom à éviter : déjà pris au CO) → `aireint` — aire sous une courbe, entre deux courbes | N+R | 4.AN.05a, 05b | **créée** (`aireint`) |
+| | `volrev` — volume d'un corps de révolution | N+R | 4.AN.05c | **créée** (`volrev`) |
+| | **`intparties`** — intégration par parties ; **`intsubst`** — par substitution | **R** | 4.AN.04a, 04b (**créées le 25.11**) | **créées le 25.11** (R) |
+| 2. ln et exp | `lnexp` — propriétés, dérivées et primitives de ln et exp | N+R | 4.AN.06a–c | **créée** (`lnexp`) |
+| | **`etudelnexp`** — étude de fonctions avec ln, exp (croissances comparées) | N+R | 4.AN.06d (**créée le 25.11**) | **créée le 25.11** |
+| | `modexp` (2e) étendu → `croissance` — N(t) = N₀·e^(kt), doublement, demi-vie, croissance limitée | N+R | 4.AN.07a–c | **créée** (`croissance`) |
+| | **`eqdiff`** — équations différentielles à variables séparables | **R** | 4.AN.08a–c, 09a–b (**créée le 25.11**) | **créée le 25.11** (R) |
+| 3. Algèbre linéaire | `matrices` — opérations, produit, déterminant, inverse | N+R | 4.GV.02b, 02c | **créée** (`matrices`, avec Cramer 2 × 2) |
+| | `translin` — matrice d'une transformation (rotation, symétrie, projection, homothétie), composition, déterminant = rapport d'aires | N+R | 4.GV.01a–d | **créée** (`translin`) |
+| | `syslin` — systèmes par les matrices (Cramer, inverse) | N+R | 4.GV.02e | **créée le 25.11** (`syslin` : D, Dx, Cramer, inverse, paramètre, 3 × 3, infinité de solutions) |
+| | `appllin` — noyau, image ; `bases` — famille libre, base, composantes | N+R | 4.GV.02a, 02d ; 4.GV.03a–d | **créées** (`appllin` 24.11 ; `bases` le 25.11 : familles libres, composantes, dimension, changement de base). MA1 : « sujet à choix » du programme |
+| 4. Probabilités 2 | `probcond` — probabilité conditionnelle, probabilités totales, indépendance | N+R | 4.PS.02a–c | **rattachée** : `condbayes` (conditionnelles, totales, indépendance ; id ≠ `probcond` du lycée français) |
+| | `bayes` — théorème de Bayes | N+R | 4.PS.02d | **créée le 25.11** (`bayes`, notion séparée de `condbayes` : trois causes, effectifs, deux tests, prévalence) |
+| | `varalea` — loi, espérance, variance d'une variable discrète | N+R | 4.PS.03a, 03b | **créée** (`varalea`) |
+| | `binomiale` — schéma de Bernoulli, loi binomiale, E et V | N+R | 4.PS.03c, 03d | **créée** (`binomiale`) |
+| | `normale` — loi normale, centrer-réduire, intervalles 68–95–99,7 % | N+R | 4.PS.04a–c (04d : R) | **créée** (`normale`) |
+| | `stats` (existe, MP seulement) + `quartiles` (MP) → ouvrir au Collège | N+R | 4.PS.01a–d | **remplacées** par `statdesc` (25.11, audit : `stats` et `quartiles` = niveau CO, retirées du Collège, MP inchangée) |
+| Av1 Complexes | `cplxalg` — forme algébrique, opérations, conjugué, division | **R** | 4.NC.01a–c | **créée le 25.11** (R) |
+| | `cplxtrig` — module, argument, formes trigonométrique et exponentielle, Moivre | **R** | 4.NC.02a–d | **créée le 25.11** (R) |
+| | `cplxeq` — az² + bz + c = 0, racines n-ièmes ; lieux |z − a| = r | **R** | 4.NC.03a–c, 04a–b | **créée le 25.11** (R) |
+| Av3 Suites et séries | `suitearith`, `suitegeom` — terme général, somme ; `serie` — série géométrique, intérêts | **R** | 4.AN.10a–d | **créées le 25.11** (R) : `suitegeom` (arithmétiques et géométriques, notion suisse ; `suitearith` reste au profil France), `serie` (géométriques, d'Alembert, télescopiques, Mac-Laurin) |
+| | `taylor` — critères de convergence, rayon, Taylor / Mac-Laurin | **R** | 4.AN.11a–c (peu saisissable) | en partie dans `serie` (d'Alembert, coefficients de Mac-Laurin) ; rayon de convergence : non |
 
 Hors saisie (démonstrations, constructions) : 3.AN.05e (démontrer), 3.AN.09b–c, 3.GV.06 (partie preuve), 4.AN.03b, 4.GV.02f, 4.PS.02e, 4.NC.04c, 4.GV.04a–b (perspective, sections) : à traiter par la leçon (« pourquoi ») et les questions curieuses, pas par des questions à réponse tapée.
 
@@ -193,3 +193,12 @@ Outils à prévoir : le calculateur (`src/expr.js`) comprend depuis le 23.11 `si
 3. **Ordre des chapitres de 3e** : Sésamath (limites → dérivation → combinatoire → vecteurs) ou selon l'école (souvent analyse et géométrie vectorielle en parallèle) ? L'app ouvre les notions de l'année dans l'ordre `ORDRE.MATU`.
 4. **Réforme genevoise** (nouveau cadre fédéral, volées 2027+) : attendre le nouveau plan d'études pour la 4e ?
 5. **Bêta-testeurs** : des élèves de 3e ou 4e du Collège sont-ils disponibles (comme les 1re pour les chapitres actuels) ? Sinon, les notions de 3e restent ouvertes mais sans retour élève.
+
+
+## 7. Bilan du 25.11 (agent col34) : 3e et 4e complètes
+
+Notions ajoutées : 3e `derivth` (M3C04), `pvect` (M3C06, MA2) ; 4e `syslin`, `bases` (M4C03), `bayes` (M4C04) ; MA2 `cplxalg`, `cplxtrig`, `cplxeq` (nouveau chapitre M4C05 « 5. Nombres complexes ») et `suitegeom`, `serie` (M4C06 « 6. Suites et séries »). Chapitre 3e « 1. Prérequis » : huit reprises de 2e. Réponses complexes tapées « a + bi » (touche i du clavier, expression en i). Leçons actives dans `src/act_col34b.js` ; test `tests/college34c.html`.
+
+Notions de l'année (avant → après) : 3e MA1 24 → 33 (dont 25 nouvelles et 8 reprises) ; 3e MA2 26 → 36 (28 nouvelles) ; 4e MA1 15 → 18 ; 4e MA2 18 → 26.
+
+Niveau MA1 / MA2 relu (programme 2021, oraux Sismondi) : asymptotes obliques = MA2 (formes écartées en MA1 par `HORS_MA1`) ; `appllin` et `bases` sont des « sujets à choix » en MA1 (gardés N : à trancher) ; suites et séries et complexes : Sismondi les place en 3e MA2, l'app en 4e (décision § 6.2).
