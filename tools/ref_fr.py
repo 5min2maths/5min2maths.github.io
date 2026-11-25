@@ -42,7 +42,10 @@ ORDRE_LY = ["Automatismes", "Nombres et calculs", "Algèbre", "Algèbre et géom
 def known_ids():
     """Identifiants des notions de l'app (toutes les sources, notions françaises comprises)."""
     s = "\n".join(f.read_text(encoding="utf-8") for f in sorted((ROOT / "src").glob("*.js")) if not f.name.startswith(("ordre", "ref_")))
-    return set(re.findall(r'\{ id: "(\w+)", (?:niv: "\w+", )?theme', s))
+    ids = set(re.findall(r'\{ id: "(\w+)", (?:niv: "\w+", )?theme', s))
+    # 25.11 soir : notions de 2nde déclarées en tableau (src/fr_2nde.js : ["tabsignes", "fa", "libellé", …]).
+    ids |= set(re.findall(r'\[\s*"(\w+)", "(?:no|fa|gm|es)", "', s))
+    return ids
 
 
 def couverture():

@@ -1701,10 +1701,10 @@ function bindKeypad(getInput, after) {
   let mode = window.matchMedia("(pointer: fine)").matches ? "text" : "none";
   app.querySelectorAll("input.ans").forEach((i) => i.setAttribute("inputmode", mode));
   KP_GUARD.moved = 0; kpWatch();
-  app.querySelectorAll("#kp button").forEach((b) => (b.onclick = () => {
+  app.querySelectorAll("#kp button").forEach((b) => (b.onclick = (e) => {
     const inp = getInput(), k = b.dataset.k;
     if (!inp || inp.disabled) return;
-    if (KP_GUARD.moved && performance.now() - KP_GUARD.moved < 350) return;
+    if (e && e.isTrusted && KP_GUARD.moved && performance.now() - KP_GUARD.moved < 350) return; /* vrais touchers seulement */
     if (k === "⌨") { mode = mode === "none" ? "text" : "none"; app.querySelectorAll("input.ans").forEach((i) => i.setAttribute("inputmode", mode)); inp.blur(); inp.focus(); return; }
     typeKey(inp, k);
     after(inp);
@@ -1831,7 +1831,7 @@ function renderProblem(q, opt) {
     typeset(fb);
     fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
     bindComment(fb, code);
-    { const t0 = performance.now(); document.getElementById("nx").onclick = () => { if (performance.now() - t0 < 400) return; opt.onNext(false); }; } /* 25.11 soir : la touche Entrée qui valide ne passe plus aussitôt à la suite */
+    { const t0 = performance.now(); document.getElementById("nx").onclick = (e) => { if (e && e.isTrusted && performance.now() - t0 < 400) return; opt.onNext(false); }; } /* 25.11 soir : la touche Entrée qui valide ne passe plus aussitôt à la suite */
     const r = document.getElementById("redo"); if (r) r.onclick = () => { sigAide(S, "x"); opt.onNext(true); };
     if (pSteps) { const sf = fb.querySelector("details.solfull"); if (sf) sf.addEventListener("toggle", () => { if (sf.open) sigAide(S, "s"); }); solStepper(document.getElementById("ssteps"), document.getElementById("solstep"), pSteps, (k) => { if (k > 0) sigAide(S, "e"); }, () => { const sf2 = fb.querySelector("details.solfull"); if (sf2) sf2.remove(); document.getElementById("nx").focus({ preventScroll: true }); }); }
   };
@@ -1933,7 +1933,7 @@ function renderQuestion(q, opt) {
     if (opt.single) {
       fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><b>${solved ? "✓ Juste ! " + pick(PRAISE.filter((x) => x !== "Juste !")) : dontKnow ? "D'accord, on s'en occupera. Voici la solution :" : "✗ Pas tout à fait. Voici la solution :"}</b>${solved ? "" : '<span class="sol">' + q.sol + "</span>"}</div><div class="actions"><button class="btn-primary" id="nx">Suivant</button></div>`;
       typeset(fb);
-      { const t0 = performance.now(); document.getElementById("nx").onclick = () => { if (performance.now() - t0 < 400) return; opt.onNext(); }; }
+      { const t0 = performance.now(); document.getElementById("nx").onclick = (e) => { if (e && e.isTrusted && performance.now() - t0 < 400) return; opt.onNext(); }; }
       document.getElementById("nx").focus();
       return;
     }
@@ -1950,7 +1950,7 @@ function renderQuestion(q, opt) {
     typeset(fb);
     fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
     bindComment(fb, code);
-    { const t0 = performance.now(); document.getElementById("nx").onclick = () => { if (performance.now() - t0 < 400) return; opt.onNext(false); }; } /* 25.11 soir : la touche Entrée qui valide ne passe plus aussitôt à la suite */
+    { const t0 = performance.now(); document.getElementById("nx").onclick = (e) => { if (e && e.isTrusted && performance.now() - t0 < 400) return; opt.onNext(false); }; } /* 25.11 soir : la touche Entrée qui valide ne passe plus aussitôt à la suite */
     const r = document.getElementById("redo");
     if (r) r.onclick = () => { sigAide(S, "x"); opt.onNext(true); };
     const sf = fb.querySelector("details.solfull"); if (sf) sf.addEventListener("toggle", () => { if (sf.open) sigAide(S, "s"); });
