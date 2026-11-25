@@ -96,6 +96,15 @@ const UPFR = {
     "TES": ["vect3d", "colin", "droite3d", "plans", "posrel", "pscal3d", "distances"],
     "TAU": ["compo", "eq3"],
   };
+  ORDRE.FR = ORDRE.FR || {}; ORDRE_THEME.FR = ORDRE_THEME.FR || {}; THEME_LABEL.FR = THEME_LABEL.FR || {}; /* pages de test sans fr_2nde.js */
+  // Progression du collège (ORDRE.FR_COL, fr_college.js) et de 2nde (ORDRE.FR, fr_2nde.js) pour les notions créées le 25.11.
+  if (typeof FR_PROGRESSION !== "undefined") {
+    const ins = (g, id, ref) => { const L = FR_PROGRESSION[g]; if (!N(id) || L.includes(id)) return; const i = L.indexOf(ref); L.splice(i < 0 ? L.length : i + 1, 0, id); };
+    ins(8, "cos4e", "pythfig"); ins(8, "thales4e", "milieux"); ins(9, "autodnb", "pctvar"); ins(9, "linfn", "affine"); ins(9, "proba2", "volcomp");
+    ins(9, "ineq1", "simil"); ins(9, "vecgeo", "ineq1"); /* programme 2026 de 3e : en fin d'année */
+    ORDRE.FR_COL = {}; [6, 7, 8, 9].flatMap((g) => FR_PROGRESSION[g]).forEach((id, i) => { ORDRE.FR_COL[id] = i; });
+  }
+  for (const [id, ref, ch] of [["tabvar", "fref", "2AN"], ["linfn", "affine", "2AU"], ["vecgeo", "vect3e", "2GE"]]) if (N(id) && ORDRE.FR[ref] !== undefined) { ORDRE.FR[id] = ORDRE.FR[ref] + (id === "vecgeo" ? -0.5 : 0.5); ORDRE_THEME.FR[id] = ch; }
   let rk = 1000;
   for (const [ch, ids] of Object.entries(CHAP)) for (const id of ids) { if (!N(id)) continue; ORDRE.FR[id] = rk++; ORDRE_THEME.FR[id] = ch; }
   Object.assign(THEME_LABEL.FR, { "1SU": "Suites numériques", "1SD": "Second degré", "1DE": "Dérivation", "1EX": "Fonction exponentielle", "1TR": "Trigonométrie",

@@ -84,7 +84,7 @@
       () => { const [p, q] = pk([[3, 5], [4, 5], [5, 13], [12, 13], [8, 17], [15, 17], [7, 25], [6, 10]]), v = p / q;
         return QN("Le triangle " + M("RST") + " est rectangle en " + M("S") + ", avec " + M("RS = " + p) + " cm et " + M("RT = " + q) + " cm. Donne la valeur exacte de " + M("\\cos \\widehat{SRT}") + " (fraction ou décimal).", v,
           M("[RS]") + " est adjacent à l'angle " + M("\\widehat{R}") + " et " + M("[RT]") + " est l'hypoténuse : " + M("\\cos \\widehat{R} = \\frac{RS}{RT} = \\frac{" + p + "}{" + q + "}" + (FS(v).includes("/") && FS(v) !== p + "/" + q ? " = " + F(v) : "")) + ".",
-          { ctx: "rapport", guide: [GR("Longueur de l'hypoténuse ?", q, M("RT = " + q) + " (en face de l'angle droit).")],
+          { ctx: "rapport", guide: [GR("Longueur de l'hypoténuse ?", q, M("RT = " + q) + " (en face de l'angle droit)."), GR(M("\\cos \\widehat{SRT}") + " ?", v, M(F(v)) + ".")],
             traps: [TR(q / p, "Cosinus = adjacent ÷ hypoténuse : il est inférieur à 1."), TR(rnd(Math.sqrt(q * q - p * p) / q), "C'est le côté adjacent RS qui compte, pas ST.")] }); },
     ],
     2: [
@@ -273,7 +273,7 @@
       () => { const A = [nz(-5, 5), nz(-5, 5)], u = [nz(-5, 5), nz(-5, 5)], B = [A[0] + u[0], A[1] + u[1]];
         return QP("Le vecteur " + M("\\overrightarrow{AB}") + " a pour coordonnées " + PT(...u) + " et " + M("A") + PT(...A) + ". Donne les coordonnées de " + M("B") + ". Réponds « x ; y ».", B,
           M("x_B = x_A + " + NP(u[0]) + " = " + N(B[0])) + " et " + M("y_B = y_A + " + NP(u[1]) + " = " + N(B[1])) + ".",
-          { ctx: "extremite", guide: [GR(M("x_B") + " ?", B[0], M(N(B[0])) + "."), GR(M("y_B") + " ?", B[1], M(N(B[1])) + ".")],
+          { ctx: "extremite", guide: [GR(M("x_B") + " ?", B[0], M(N(B[0])) + "."), GR(M("y_B") + " ?", B[1], M(N(B[1])) + "."), GP(M("B") + " ?", B, PT(...B) + ".")],
             traps: [{ spec: { kind: "pair", values: [A[0] - u[0], A[1] - u[1]] }, m: "AB va de A vers B : on ajoute ses coordonnées à celles de A." }, { spec: { kind: "pair", values: u }, m: "Ce sont les coordonnées du vecteur, pas du point B." }] }); },
     ],
     2: [
@@ -336,7 +336,7 @@
       () => { const { xs, ys } = mkTab(3), up = ys[1] > ys[0], a = xs[0] + 0.5, b = xs[1] - 0.5, big = up ? b : a;
         return QN(INTRO + tvTex(xs, ys) + " Sans connaître " + M("f(" + N(a) + ")") + " ni " + M("f(" + N(b) + ")") + ", lequel de ces deux nombres est le plus grand ? Réponds " + M(N(a)) + " si c'est " + M("f(" + N(a) + ")") + ", " + M(N(b)) + " si c'est " + M("f(" + N(b) + ")") + ".", big,
           M(N(a)) + " et " + M(N(b)) + " sont dans " + M("[" + N(xs[0]) + " \\,;\\, " + N(xs[1]) + "]") + ", où " + M("f") + " est " + (up ? "croissante : elle conserve l'ordre" : "décroissante : elle inverse l'ordre") + ". Donc " + M("f(" + N(big) + ")") + " est le plus grand.",
-          { ctx: "comparer", shownOk: true, guide: [GR("Sur cet intervalle, " + M("f") + " est-elle croissante (1) ou décroissante (−1) ?", up ? 1 : -1, up ? "Croissante." : "Décroissante.")],
+          { ctx: "comparer", shownOk: true, guide: [GR("Sur cet intervalle, " + M("f") + " est-elle croissante (1) ou décroissante (−1) ?", up ? 1 : -1, up ? "Croissante." : "Décroissante."), GR("Le plus grand est " + M("f(\\dots)") + " : tape le nombre entre parenthèses.", big, M("f(" + N(big) + ")") + ".")],
             traps: [TR(up ? a : b, up ? "f croissante conserve l'ordre : le plus grand x donne la plus grande image." : "f décroissante inverse l'ordre.")] }); },
     ],
     2: [
@@ -369,7 +369,7 @@
       () => { const { xs, ys } = mkTab(4), iv = [[Math.min(...ys), true, Math.max(...ys), true]];
         return QS(INTRO + tvTex(xs, ys) + " Quand " + M("x") + " parcourt " + M("[" + N(xs[0]) + " \\,;\\, " + N(xs[3]) + "]") + ", dans quel intervalle " + M("f(x)") + " prend-elle ses valeurs ? Donne le plus petit intervalle possible.", iv,
           M("f") + " est continue sur l'intervalle (pas de saut) : elle prend toutes les valeurs entre son minimum " + M(N(iv[0][0])) + " et son maximum " + M(N(iv[0][2])) + ", donc " + M("f(x) \\in [" + N(iv[0][0]) + " \\,;\\, " + N(iv[0][2]) + "]") + ".",
-          { ctx: "image-intervalle", guide: [GR("Minimum ?", iv[0][0], M(N(iv[0][0])) + "."), GR("Maximum ?", iv[0][2], M(N(iv[0][2])) + ".")],
+          { ctx: "image-intervalle", guide: [GR("Minimum ?", iv[0][0], M(N(iv[0][0])) + "."), GR("Maximum ?", iv[0][2], M(N(iv[0][2])) + "."), { ask: "Intervalle des valeurs ?", spec: solsetSpec(iv), sol: M("[" + N(iv[0][0]) + " \\,;\\, " + N(iv[0][2]) + "]") + "." }],
             traps: [TS([[Math.min(ys[0], ys[3]), true, Math.max(ys[0], ys[3]), true]], "Les valeurs aux bornes ne suffisent pas : regarde aussi les sommets des flèches."), TS([[xs[0], true, xs[3], true]], "C'est l'intervalle des x ; on demande les valeurs de f.")] }); },
       () => { const { xs, ys } = mkTab(4); let k = R.rand() < 0.5 ? ys[1] + (ys[2] > ys[1] ? 1 : -1) * 0.5 : (ys[2] + ys[3]) / 2, n = 0; for (let i = 1; i < 3; i++) if ((ys[i] - k) * (ys[i + 1] - k) < 0) n++;
         return QN(INTRO + tvTex(xs, ys) + " Combien de solutions l'équation " + M("f(x) = " + N(k)) + " a-t-elle sur " + M("[" + N(xs[1]) + " \\,;\\, " + N(xs[3]) + "]") + " ?", n,

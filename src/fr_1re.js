@@ -150,7 +150,7 @@ const FRX = (function () {
         const [deg, k, d] = pk(pairs), [at, as] = ang(k, d), toRad = R.rand() < 0.5;
         return toRad ? mk2("Convertis " + M(deg + "°") + " en radians (valeur exacte, avec " + M("\\pi") + ").", (k * Math.PI) / d, as,
           M("180° = \\pi") + " rad, donc " + M(deg + "° = " + deg + X + "\\frac{\\pi}{180} = " + at) + ".",
-          { ctx: "deg-rad", guide: [GR("Par quel nombre multiplie-t-on " + M("\\pi") + " ? (fraction : " + M(deg) + " sur 180)", deg / 180, M("\\frac{" + deg + "}{180} = " + F(deg / 180)) + ".")],
+          { ctx: "deg-rad", guide: [GR("Par quel nombre multiplie-t-on " + M("\\pi") + " ? (fraction : " + M(deg) + " sur 180)", deg / 180, M("\\frac{" + deg + "}{180} = " + F(deg / 180)) + "."), GR("Mesure en radians ?", (k * Math.PI) / d, M(at) + ".")],
             traps: [TR((deg * Math.PI) / 360, "180° = π (pas 360°)."), TR((180 * Math.PI) / deg / 1, "On multiplie par π/180, on ne divise pas.")] })
           : QN("Convertis " + M(at) + " rad en degrés.", deg, M("\\pi") + " rad " + M("= 180°") + ", donc " + M(at + " = " + (k === 1 ? "" : k + X) + "\\frac{180°}{" + d + "} = " + deg + "°") + ".",
           { ctx: "rad-deg", guide: [GR("Combien de degrés vaut " + M("\\frac{\\pi}{" + d + "}") + " ?", 180 / d, M("\\frac{180°}{" + d + "} = " + N(180 / d) + "°") + "."), GR("Et " + M(at) + " ?", deg, M(deg + "°") + ".")],
@@ -172,7 +172,7 @@ const FRX = (function () {
         const [f, v] = pk(forms);
         return QN("On sait que " + M("\\" + fn + " x = " + N(c)) + ". Que vaut " + M("\\" + fn + "(" + f + ")") + " ?", v,
           "Sur le cercle trigonométrique, le point associé à " + M(f) + " est le symétrique de celui de " + M("x") + " " + ({ "\\pi - x": "par rapport à l'axe des ordonnées", "\\pi + x": "par rapport à l'origine", "-x": "par rapport à l'axe des abscisses", "x + 2\\pi": "(même point : un tour de plus)", "x - 2\\pi": "(même point : un tour de moins)" })[f] + " : " + M("\\" + fn + "(" + f + ") = " + N(v)) + ".",
-          { ctx: "associe-" + fn, guide: [GR("Même valeur (1) ou valeur opposée (−1) ?", Math.sign(v / c), v === c ? "Même valeur." : "Valeur opposée.")],
+          { ctx: "associe-" + fn, guide: [GR("Même valeur (1) ou valeur opposée (−1) ?", Math.sign(v / c), v === c ? "Même valeur." : "Valeur opposée."), GR(M("\\" + fn + "(" + f + ")") + " ?", v, M(N(v)) + ".")],
             traps: [TR(-v, "Dessine les deux points : quelle symétrie passe de x à " + f.replace(/\\pi/g, "π") + " ?"), TR(rnd(Math.sqrt(1 - c * c)), "On reste sur la même fonction (" + fn + ") : pas besoin de sin² + cos² = 1.")] }); },
       () => { const [c, s] = pk([[0.6, 0.8], [0.8, 0.6], [0.28, 0.96], [0.96, 0.28], [5 / 13, 12 / 13], [12 / 13, 5 / 13]]), q = pk([[1, "\\left[0 \\,;\\, \\frac{\\pi}{2}\\right]", 1, 1], [2, "\\left[\\frac{\\pi}{2} \\,;\\, \\pi\\right]", -1, 1], [3, "\\left[-\\pi \\,;\\, -\\frac{\\pi}{2}\\right]", -1, -1], [4, "\\left[-\\frac{\\pi}{2} \\,;\\, 0\\right]", 1, -1]]);
         const askSin = R.rand() < 0.5, giv = askSin ? q[2] * c : q[3] * s, v = askSin ? q[3] * s : q[2] * c;
