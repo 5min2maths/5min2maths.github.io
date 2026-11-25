@@ -76,6 +76,12 @@ try {
   state = null; draft = { system: "FR", grade: 9, track: null, minutes: 5 }; screenLevel();
   ok(!!document.querySelector('#sys button[data-v="FR"]') && document.querySelectorAll("#grade button").length === 7, "aperçu : choix France / 7 classes");
   draft.system = "CH"; screenLevel(); ok(document.querySelectorAll("#grade button").length === SYSTEMS.CH.grades.length, "aperçu : retour Suisse");
+  /* 25.11 : produit × en France, produit scalaire gardé, Suisse inchangée */
+  ok(frLocal("Calcule \\(3 \\cdot 4\\).") === "Calcule \\(3 \\times 4\\).", "× en France : " + frLocal("Calcule \\(3 \\cdot 4\\)."));
+  ok(/\\cdot/.test(frLocal("\\(\\vec{u} \\cdot \\vec{v} = 0\\)")), "produit scalaire gardé");
+  ok(frLocal("3 · 4 = 12") === "3 × 4 = 12", "× dans le texte");
+  { const st = Engine.newState({ system: "FR", grade: 9, minutes: 5 }); Engine.autoInit(st); let n = 0; for (const id of Object.keys(st.notions).slice(0, 60)) { try { const q = Engine.make(st, id, 2); if (/\\cdot/.test(q.q) && !/\\vec|\\overrightarrow/.test(q.q)) n++; } catch (e) {} } ok(n === 0, "3e FR : plus de point médian dans les énoncés (" + n + ")"); }
+  { const st = Engine.newState({ system: "CH", grade: 11, track: "college", minutes: 5 }); Engine.autoInit(st); let n = 0; for (const id of Object.keys(st.notions).slice(0, 60)) { try { const q = Engine.make(st, id, 2); if (/\\times/.test(q.q) && /\\cdot/.test(Engine.build(id, 2, q.seed).q)) n++; } catch (e) {} } ok(n === 0, "Suisse : point médian inchangé"); }
 } catch (e) { fails.push("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }
 document.getElementById("out").textContent = (fails.length ? "ÉCHEC\n" + fails.join("\n") : "OK") + "\n" + log.join("\n");
 </script>

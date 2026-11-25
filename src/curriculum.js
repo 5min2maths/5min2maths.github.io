@@ -105,7 +105,7 @@ const SYSTEMS_HIDDEN = { FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [
 // certain pour un élève français (monnaie, séparateur des milliers, sigles PGDC / PPMC, « préimage », « mise en évidence »).
 // Genève → Lyon (un seul énoncé au catalogue français le 25.11 : une cycliste « part de Genève »). Les énoncés propres à la
 // Suisse (change EUR ↔ CHF, TVA suisse) sont écartés du tirage par horsCO (src/engine.js), pas traduits.
-// Laissés pour décision : le point médian du produit (\cdot, aussi produit scalaire), « cercle de Thalès ».
+// Produit : × en France (décision du 25.11, frTimes) ; laissé pour décision : « cercle de Thalès ».
 const FR_WORDS = [
   [/\ben (CHF|francs)\b/g, "en euros"], [/\bCHF\b/g, "€"], [/au franc près/g, "à l'euro près"], [/(\d|\\\)) francs\b/g, "$1 euros"], [/\bde francs\b/g, "d'euros"],
   [/\bGenève\b/g, "Lyon"],
@@ -119,9 +119,12 @@ const FR_WORDS = [
   [/\b([Aa])près ((?:(?!en évidence)[^.;!?]){1,40}?) en évidence\b/g, "$1près factorisation par $2"], [/\b([Mm])ettre en évidence\b/g, (m, a) => (a === "M" ? "F" : "f") + "actoriser"], [/\b([Mm])et(s|tre) ((?:(?!en évidence)[^.;!?]){1,40}?) en évidence\b/g, (m, a, t, x) => (a === "M" ? "F" : "f") + "actorise" + (t === "tre" ? "r" : "") + " par " + x], [/\bmettant en évidence\b/g, "factorisant"], [/\bmis en évidence\b/g, "mis en facteur"],
 ];
 function frThouPart(t, tex) {
-  return tex ? t.replace(/\\text\{['’]\}/g, "\\,").replace(/(\d)['’](?=\d{3}(?!\d))/g, "$1\\,")
-    : t.replace(/\\text\{['’]\}/g, "\u202f").replace(/(\d)['’](?=\d{3}(?!\d))/g, "$1\u202f");
+  return tex ? frTimes(t.replace(/\\text\{['’]\}/g, "\\,").replace(/(\d)['’](?=\d{3}(?!\d))/g, "$1\\,"))
+    : t.replace(/\\text\{['’]\}/g, "\u202f").replace(/(\d)['’](?=\d{3}(?!\d))/g, "$1\u202f").replace(/ · /g, " × ");
 }
+/* 25.11 (décision de l'enseignant) : en France, le produit s'écrit × et non avec le point médian. Le produit scalaire
+   (formule avec \vec ou \overrightarrow) garde son point. */
+function frTimes(t) { return /\\vec|\\overrightarrow/.test(t) ? t : t.replace(/\\cdot(?![a-zA-Z])/g, "\\times"); }
 const frWords = (t) => FR_WORDS.reduce((a, [re, by]) => a.replace(re, by), t);
 /* formule seule (préfiltre MathJax) */
 function frLocalPart(t, tex) { return frWords(frThouPart(t, tex)); }
