@@ -109,6 +109,10 @@ const SYSTEMS_HIDDEN = { FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [
 const FR_WORDS = [
   [/\ben (CHF|francs)\b/g, "en euros"], [/\bCHF\b/g, "€"], [/au franc près/g, "à l'euro près"], [/(\d|\\\)) francs\b/g, "$1 euros"], [/\bde francs\b/g, "d'euros"],
   [/\bGenève\b/g, "Lyon"],
+  /* 25.11 (couverture France) : équation réduite y = mx + p ; « côtés de l'angle droit » (cathètes : usage suisse) ;
+     « ensemble de définition » (domaine de définition : usage suisse ; « l'aire du domaine » inchangé). */
+  [/\bmx \+ h\b/g, "mx + p"], [/\b([Ll])es cathètes\b/g, "$1es côtés de l'angle droit"], [/\bcathètes\b/g, "côtés de l'angle droit"], [/\b([Ll])a cathète(?![a-zà-ÿ])/g, "$1e côté de l'angle droit"], [/\bcathète(?![a-zà-ÿ])/g, "côté de l'angle droit"],
+  [/\b([Ll])e domaine de définition\b/g, "$1'ensemble de définition"], [/\bdu domaine de définition\b/g, "de l'ensemble de définition"], [/\bdomaine de définition\b/g, "ensemble de définition"], [/\bdu domaine de (?=\\\()/g, "de l'ensemble de définition de "],
   [/PGDC/g, "PGCD"], [/PPMC/g, "PPCM"],
   [/\b([Ll])a préimage\b/g, (m, a) => a + "'antécédent"], [/\b([Uu])ne seule préimage\b/g, (m, a) => a + "n seul antécédent"],
   [/\b([Uu])ne préimage\b/g, (m, a) => a + "n antécédent"], [/\b([Pp]lus) (grande|petite) préimage\b/g, (m, a, b) => a + " " + b.slice(0, -1) + " antécédent"],
