@@ -142,6 +142,66 @@ function racineCO(q) {
   if (q.q) q.q = q.q.replace(/écris par exemple \\\(3\\sqrt\{5\}\\\)/g, "écris par exemple \\(\\sqrt{13}\\)");
   return q;
 }
+/* 25.11 (commentaire de l'enseignant sur vol-4-lsr, 11e : « Dans un cas comme calculer l'aire d'un disque, taper π r² dans
+   la calculatrice ça va bien ! Calcule −7 + 19 : si l'élève peut taper tel quel et que la valeur est acceptée ça va pas »).
+   Calcul tapé (le champ évalue l'expression et l'aperçu affiche « ≈ … », c'est la calculatrice de l'app) :
+   - permis quand le calcul numérique n'est pas l'objet de la question (formule de géométrie, proportionnalité, statistique,
+     probabilités du Collège, trigonométrie, valeur approchée demandée) ;
+   - interdit quand le calcul EST la compétence (relatifs, priorités, fractions, puissances, racines, décimaux, conversions,
+     substitution, équations, valeurs exactes de trigonométrie, logarithmes) : spec.final, le champ exige le résultat
+     (nombre, fraction irréductible, a√b, aπ…), le clavier n'a plus d'opérations et l'aperçu ne calcule plus.
+   Règle par thème (CALC_THEME), exceptions par notion (CALC_NON, CALC_OUI), puis par question : q.calcul ou part.calcul
+   ("oui" | "non"), consigne « sans calculatrice / mentalement » → non, « à la calculatrice / avec ln » → oui, arrondi
+   demandé (spec.round) → oui. Tableau complet et cas à trancher : tools/calculatrice.md (test tests/calculatrice.html).
+   Expressions littérales (kind "expr") : la consigne fixe la forme quand le générateur ne l'a pas fait (« Développe »,
+   « Réduis » → forme réduite ; « Factorise » → produit), pour que l'expression recopiée de l'énoncé ne soit pas acceptée. */
+const CALC_THEME = { no: false, gm: true, es: true, fa: true };
+const CALC_NON = [
+  "ulong", "uaire", "uvol", "utemps", "ucomp",
+  "trigcercle", "trigassoc", "trigrel",
+  "valnum", "eq1", "eqfrac", "probeq", "eqverif", "eqspec", "structexpr", "fimg", "progcalc", "log", "logbase", "expo",
+];
+const CALC_OUI = [
+  "diagr", "pct", "denombr", "stats", "statfreq", "quartiles", "statdesc", "combi", "probaxiomes", "probarbre", "condbayes",
+  "varalea", "binomiale", "normale", "proba2", "tauxevol", "probcond", "probtot", "vaesp", "binom",
+];
+/* notation scientifique : forme propre (spec.sci), ni calcul ni résultat brut */
+const CALC_LIBRE = ["sci", "scicalc"];
+const CALC_SANS = /sans calculatrice|mentalement|de tête|calcul mental/i, CALC_AVEC = /à la calculatrice|avec (la|une|ta) calculatrice|valeur exacte avec ln/i;
+const CALC_POW = /forme d'une (seule )?puissance|comme une (seule )?puissance|puissance de 10/i;
+/* Calcul tapé permis pour cette notion (règle par défaut, sans la question) : true, false ou null (forme propre). */
+function calcNotion(id) {
+  if (CALC_LIBRE.includes(id)) return null;
+  if (CALC_NON.includes(id)) return false;
+  if (CALC_OUI.includes(id)) return true;
+  const n = typeof NOTIONS !== "undefined" && NOTIONS.find((x) => x.id === id);
+  return n && n.theme in CALC_THEME ? CALC_THEME[n.theme] : true;
+}
+/* Pour une réponse précise : txt = consigne (énoncé + intitulé de la partie), own = déclaration "oui" | "non" éventuelle. */
+function calcPermis(id, txt, spec, own) {
+  if (own === "oui" || own === "non") return own === "oui";
+  if (CALC_SANS.test(txt)) return false;
+  if (CALC_AVEC.test(txt) || (spec && spec.round)) return true;
+  return calcNotion(id);
+}
+/* Polynôme (lettres, nombres, + − ·, puissances entières, division par un nombre) : sa forme réduite s'écrit toujours. */
+const polyLike = (n) => {
+  if (!n) return true;
+  if (n.t === "par" || n.t === "neg") return polyLike(n.a);
+  if (n.t === "num" || n.t === "var") return true;
+  if (["add", "sub", "mul"].includes(n.t)) return polyLike(n.a) && polyLike(n.b);
+  if (n.t === "div") return polyLike(n.a) && Expr.vars(n.b).size === 0 && !/const|fn/.test(JSON.stringify(n.b));
+  if (n.t === "pow") { const e = Expr.unpar(n.b); return polyLike(n.a) && e.t === "num" && Number.isInteger(e.v) && e.v >= 0; }
+  return false;
+};
+const exprForm = (sp, txt) => {
+  if (!sp || sp.kind !== "expr" || sp.form || typeof Expr === "undefined") return;
+  const f = /factoris/i.test(txt), d = /développ|réduis|réduire|réduite|simplifi|supprime les parenthèses|^\s*calcule/i.test(txt);
+  if (f === d) return;
+  let t; try { t = Expr.parse(sp.expr); } catch (e) { return; }
+  if (f && Expr.isProduct(t)) sp.form = "product";
+  else if (d && polyLike(t)) sp.form = "reduced";
+};
 // Programme du jour : le format change d'un jour à l'autre ; l'équilibre se fait sur 7 jours.
 // 22.11 : textes courts (une ligne sur téléphone : pas de saut quand on change de format).
 const FORMATS = {
@@ -495,16 +555,21 @@ const Engine = {
   },
 
   // Anti-répétition (audit 13.11) : une question déjà posée parmi les 15 dernières de la notion est retirée.
-  // Au CO (9e–11e), une réponse numérique est un résultat : pas d'opération ni de calculatrice (14.11).
-  // Sauf les notions où l'écriture attendue contient elle-même une puissance.
+  // Résultat exigé ou calcul tapé permis : règle par notion et par question (CALC_*, 25.11 ; avant : tout le CO en résultat).
   finalize(state, id, q) {
     const p = state && state.profile;
     if (q && p && p.system === "CH" && p.track !== "mp" && p.grade <= 10) racineCO(q);
-    const mark = (sp) => { if (sp && sp.kind === "value" && !sp.sci) sp.final = true; };
-    // 22.11 (retour de l'auteur, sec. II) : « sans calculatrice » = le résultat est exigé à tous les niveaux.
-    if (q && !["sci", "scicalc", "puiss"].includes(id) && /sans calculatrice/i.test(q.q || "")) { mark(q.spec); return q; }
-    if (!q || !p || p.system !== "CH" || p.grade > 11 || ["sci", "scicalc", "puiss"].includes(id)) return q;
-    mark(q.spec); (q.parts || []).forEach((x) => mark(x.spec));
+    if (!q) return q;
+    const txt0 = String(q.q || "");
+    const mark = (sp, txt, own, step) => {
+      if (!sp) return;
+      if (!step) exprForm(sp, txt);
+      if (sp.kind !== "value" || sp.sci || sp.final) return;
+      if (calcPermis(id, txt, sp, own) === false) { sp.final = true; if (CALC_POW.test(txt)) sp.pow = true; }
+    };
+    mark(q.spec, txt0, q.calcul);
+    (q.parts || []).forEach((x) => mark(x.spec, txt0 + " " + (x.label || ""), x.calcul || q.calcul));
+    (q.guide || []).forEach((g) => mark(g.spec, txt0 + " " + (g.ask || ""), g.calcul || q.calcul, true));
     return q;
   },
   make(state, id, d, seed) {

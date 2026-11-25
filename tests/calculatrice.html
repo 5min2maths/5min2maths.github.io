@@ -1,0 +1,112 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css"><main id="app"></main><pre id="out">en cours</pre>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/fr_college.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/parents.js"></script><script src="../src/app.js"></script>
+<script>
+try {
+/* Règle de la calculatrice (25.11, tools/calculatrice.md) :
+   1. échantillon : « -7+19 » refusé pour les relatifs, « 3/4+1/2 » pour les fractions, « pi*3^2 » accepté pour l'aire du disque… ;
+   2. audit de toutes les notions (niveaux 1 à 4, plusieurs tirages) : quand le résultat est exigé (spec.final), la valeur attendue
+      doit pouvoir s'écrire dans une forme admise (sinon l'élève est bloqué) ; une expression littérale dont la forme a été
+      déduite de la consigne doit accepter sa propre réponse ; #table : tableau notion → part des réponses en « résultat exigé ». */
+const out = [], bad = [];
+const ok = (c, m) => { if (!c) bad.push("ÉCHEC " + m); };
+const st = (g, tr) => ({ profile: { system: "CH", grade: g, track: tr || "college" } });
+const fin = (id, q, g, tr) => Engine.finalize(st(g || 11, tr), id, q);
+const V = (txt, v, extra) => ({ q: txt, spec: Object.assign({ kind: "value", value: v }, extra || {}) });
+const S = (q, inp) => checkAnswer(q.spec, inp).status;
+/* 1. échantillon, à plusieurs niveaux (11e CO, 1re Collège, MP 1re) */
+for (const [g, tr] of [[11], [12], [12, "mp"]]) {
+  const lab = g + (tr || "");
+  let q = fin("reladd", V("Calcule : -7 + 19", 12), g, tr);
+  ok(S(q, "-7+19") === "form", lab + " reladd : -7+19 accepté"); ok(S(q, "12") === "correct", lab + " reladd : 12 refusé");
+  ok(checkAnswer(q.spec, "-7+19").calc, lab + " reladd : refus sans le drapeau calc");
+  q = fin("rel", V("Calcule : 5 · (3 - 8)", -25), g, tr);
+  ok(S(q, "5*(3-8)") === "form", lab + " rel : 5*(3-8) accepté"); ok(S(q, "-25") === "correct", lab + " rel : -25 refusé"); ok(S(q, "x = -25") === "correct", lab + " rel : x = -25 refusé");
+  q = fin("fracadd", V("Calcule : 3/4 + 1/2", 1.25), g, tr);
+  ok(S(q, "3/4+1/2") === "form", lab + " fracadd : 3/4+1/2 accepté"); ok(S(q, "5/4") === "correct", lab + " fracadd : 5/4 refusé"); ok(S(q, "10/8") === "form", lab + " fracadd : 10/8 accepté");
+  ok(S(q, "1,25") === "correct", lab + " fracadd : 1,25 refusé");
+  q = fin("puiss", V("Calcule : 2^2 · 2^3", 32), g, tr);
+  ok(S(q, "2^5") === "form", lab + " puiss : 2^5 accepté pour « Calcule »"); ok(S(q, "2^2*2^3") === "form", lab + " puiss : recopie acceptée"); ok(S(q, "32") === "correct", lab + " puiss : 32 refusé");
+  q = fin("puiss", V("Écris sous la forme d'une puissance de 10 : 10^3 · 10^-5", 0.01), g, tr);
+  ok(S(q, "10^-2") === "correct", lab + " puiss : 10^-2 refusé (puissance demandée)"); ok(S(q, "10^3*10^-5") === "form", lab + " puiss : recopie acceptée (puissance demandée)");
+  q = fin("rac", V("Simplifie √968", 22 * Math.sqrt(2), { radical: true }), g, tr);
+  ok(S(q, "sqrt(968)") === "form", lab + " rac : sqrt(968) accepté"); ok(S(q, "22√2") === "correct", lab + " rac : 22√2 refusé");
+  q = fin("rac", V("Calcule √16", 4), g, tr);
+  ok(S(q, "√16") === "form", lab + " rac : √16 accepté"); ok(S(q, "4") === "correct", lab + " rac : 4 refusé");
+  q = fin("disque", V("Calcule l'aire d'un disque de rayon 3 cm (valeur exacte avec π)", 9 * Math.PI), g, tr);
+  ok(!q.spec.final, lab + " disque : résultat exigé"); ok(S(q, "pi*3^2") === "correct", lab + " disque : pi*3^2 refusé"); ok(S(q, "9π") === "correct", lab + " disque : 9π refusé");
+  q = fin("vol", V("Volume d'un cylindre de rayon 5 cm et de hauteur 7 cm (valeur exacte avec π)", 175 * Math.PI), g, tr);
+  ok(S(q, "π*5^2*7") === "correct", lab + " vol : π*5^2*7 refusé");
+  q = fin("pyth", V("Calcule AB", 30), g, tr);
+  ok(S(q, "sqrt(18^2+24^2)") === "correct", lab + " pyth : sqrt(18^2+24^2) refusé");
+  q = fin("prop", V("3 kg coûtent 6,30 CHF. Combien coûtent 7 kg ?", 14.7), g, tr);
+  ok(S(q, "6.3/3*7") === "correct", lab + " prop : 6.3/3*7 refusé");
+  q = fin("disque", V("Sans calculatrice, calcule le périmètre d'un cercle de rayon 2 (valeur exacte)", 4 * Math.PI), g, tr);
+  ok(S(q, "2*pi*2") === "form" && S(q, "4π") === "correct", lab + " disque : « sans calculatrice » ignoré");
+  q = fin("trigcercle", V("Donne la valeur exacte de cos 30°", Math.sqrt(3) / 2, { radical: true }), g, tr);
+  ok(S(q, "√3/2") === "correct" && S(q, "cos(pi/6)") === "form", lab + " trigcercle : √3/2 ou cos(pi/6)");
+  q = fin("trigcercle", V("Convertis 30° en radians", Math.PI / 6), g, tr);
+  ok(S(q, "π/6") === "correct" && S(q, "30*pi/180") === "form", lab + " trigcercle : π/6 " + JSON.stringify([checkAnswer(q.spec, "π/6"), checkAnswer(q.spec, "30*pi/180"), q.spec]));
+  q = fin("logprop", V("Calcule log 250 + log 4", 3), g, tr);
+  ok(S(q, "log(250)+log(4)") === "form", lab + " logprop : log(250)+log(4) accepté");
+  q = fin("stats", V("Calcule la moyenne de 8 ; 3 ; 18", 29 / 3), g, tr);
+  ok(S(q, "(8+3+18)/3") === "correct", lab + " stats : (8+3+18)/3 refusé");
+  q = fin("logdef", V("Résous 3^x = 5 (au millième)", Math.log(5) / Math.log(3), { round: 0.001 }), g, tr);
+  ok(S(q, "log(5)/log(3)") === "correct", lab + " logdef : arrondi demandé, calcul refusé");
+  /* expressions : forme déduite de la consigne */
+  q = fin("distrib", { q: "Développe et réduis : 3(x - 2) + 4x", spec: { kind: "expr", expr: "7x - 6" } }, g, tr);
+  ok(S(q, "3(x-2)+4x") === "form" && S(q, "7x-6") === "correct", lab + " distrib : expression recopiée acceptée");
+  q = fin("puisrat", { q: "Simplifie (125x^9)^(1/3) (avec x > 0).", spec: { kind: "expr", expr: "5x^3", pos: true } }, g, tr);
+  ok(S(q, "(125x^9)^(1/3)") === "form" && S(q, "5x^3") === "correct", lab + " puisrat : expression recopiée acceptée");
+  q = fin("compo", { q: "Soit f(x) = 2x + 2 et g(x) = x^2 - 2. Donne l'expression développée de (g∘f)(x).", spec: { kind: "expr", expr: "(2x+2)^2-2" } }, g, tr);
+  ok(S(q, "(2x+2)^2-2") === "form" && S(q, "4x^2+8x+2") === "correct", lab + " compo : forme développée non exigée");
+  q = fin("factor", { q: "Factorise : x^2 - 9", spec: { kind: "expr", expr: "(x-3)(x+3)" } }, g, tr);
+  ok(S(q, "x^2-9") === "form" && S(q, "(x+3)(x-3)") === "correct", lab + " factor : expression recopiée acceptée");
+}
+/* clavier : résultat exigé = pavé numérique sans opérations (sauf ^ si une puissance est demandée) */
+if (typeof keysFor === "function") {
+  const kr = keysFor(fin("reladd", V("Calcule : -7 + 19", 12)).spec), kd = keysFor(fin("disque", V("Aire d'un disque de rayon 3", 9 * Math.PI)).spec);
+  ok(!/data-k="\+"/.test(kr) && !/data-k="\*"/.test(kr), "clavier relatifs : touches + ou × présentes");
+  ok(/data-k="\*"/.test(kd) && /data-k="π"/.test(kd), "clavier disque : touches × ou π absentes");
+  const kp = keysFor(fin("puiss", V("Écris sous la forme d'une puissance de 10 : 10^3 · 10^-5", 0.01)).spec);
+  ok(/data-k="\^"/.test(kp), "clavier puissance demandée : touche ^ absente");
+}
+/* 2. audit de toutes les notions */
+const gcd = (a, b) => (b ? gcd(b, a % b) : Math.abs(a));
+function rep(v, sp) {
+  if (sp.round) return String(Math.round(v / sp.round) * sp.round).replace(/(\.\d*?)0{4,}\d*$/, "$1");
+  const s = v < 0 ? "-" : "", a = Math.abs(v);
+  if (Math.abs(a * 1e6 - Math.round(a * 1e6)) < 1e-6 && !sp.plain) { const t = String(+a.toFixed(6)); if (!/e/.test(t)) return s + t; }
+  if (sp.plain) return s + String(+a.toFixed(6));
+  for (let d = 1; d <= 2000; d++) { const n = Math.round(a * d); if (n && Math.abs(a * d - n) < 1e-10 * Math.max(1, a * d)) { const g = gcd(n, d); return s + (d / g === 1 ? n / g : n / g + "/" + d / g); } }
+  for (let d = 1; d <= 60; d++) { const m = Math.round((a * d) ** 2); if (m && Math.abs((a * d) ** 2 - m) < 1e-10 * m) { let k = 1, r = m; for (let f = 2; f * f <= r; f++) while (r % (f * f) === 0) { r /= f * f; k *= f; } if (r === 1) continue; const g = gcd(k, d); return s + (k / g === 1 ? "" : k / g) + "√" + r + (d / g === 1 ? "" : "/" + d / g); } }
+  for (let c = 2; c <= 60; c++) { let sq = true; for (let f = 2; f * f <= c; f++) if (c % (f * f) === 0) sq = false; if (!sq) continue;
+    for (let b = -12; b <= 12; b++) for (let d = 1; d <= 12; d++) { const n = Math.round(v * d - b * Math.sqrt(c)); if (b && Math.abs(v * d - b * Math.sqrt(c) - n) < 1e-9 * Math.max(1, Math.abs(v * d))) { const t = n + (b > 0 ? "+" : "-") + (Math.abs(b) === 1 ? "" : Math.abs(b)) + "√" + c; return d === 1 ? t : "(" + t + ")/" + d; } } }
+  for (let d = 1; d <= 60; d++) { const n = Math.round(a / Math.PI * d); if (n && Math.abs(a / Math.PI * d - n) < 1e-7 * n) { const g = gcd(n, d); return s + (n / g === 1 ? "" : n / g) + "π" + (d / g === 1 ? "" : "/" + d / g); } }
+  return null;
+}
+const N = +((location.hash.match(/n=(\d+)/) || [])[1] || 4), table = {}, stuck = {};
+for (const n of NOTIONS) {
+  const g = (n.CH && n.CH[0]) || (n.MP && n.MP[0]) || 12, tr = n.CH ? "college" : n.MP ? "mp" : "college";
+  const T = (table[n.id] = { theme: n.theme, label: n.label, fin: 0, oui: 0, expr: 0, forme: 0, def: calcNotion(n.id) });
+  for (const d of [1, 2, 3, 4]) for (let k = 1; k <= N; k++) {
+    let q; try { q = Engine.finalize(st(g, tr), n.id, Engine.build(n.id, d, 101 * k + d)); } catch (e) { continue; }
+    const specs = [q.spec, ...(q.parts || []).map((x) => x.spec)].filter((x) => x && x.kind !== "multi");
+    for (const sp of specs) {
+      if (sp.kind === "expr") { T.expr++; if (sp.form) T.forme++; if (sp.form) { let r; try { r = checkAnswer(sp, sp.expr).status; } catch (e) { r = "exc"; } if (r !== "correct") (stuck[n.id] = stuck[n.id] || []).push(q.code + " expr " + sp.expr + " → " + r); } continue; }
+      if (sp.kind !== "value" || sp.sci) continue;
+      if (!sp.final) { T.oui++; continue; }
+      T.fin++;
+      const c = rep(sp.value, sp);
+      let r = "non représentable"; try { if (c !== null) r = checkAnswer(sp, c).status; } catch (e) { r = "exc " + e.message; }
+      if (r !== "correct") (stuck[n.id] = stuck[n.id] || []).push(q.code + " " + sp.value + " « " + c + " » → " + r);
+    }
+  }
+}
+for (const id in stuck) bad.push("ÉCHEC bloqué " + id + " (" + stuck[id].length + ") : " + stuck[id].slice(0, 3).join(" | "));
+const nb = Object.keys(table).length;
+out.push(bad.length ? bad.join("\n") : "ok calculatrice : échantillon et " + nb + " notions (résultat exigé toujours écrivable)");
+if (/table/.test(location.hash)) for (const id in table) { const T = table[id]; out.push(["T", id, T.theme, T.def === null ? "forme" : T.def ? "oui" : "non", T.fin, T.oui, T.expr, T.forme, T.label].join("\t")); }
+document.getElementById("out").textContent = out.join("\n");
+} catch (e) { document.getElementById("out").textContent = "EXC " + e.stack; }
+</script>
