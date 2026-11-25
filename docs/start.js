@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "6b66a750f2"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "a42e850ac1"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -2369,6 +2369,17 @@ function screenSummary() {
 // Consultation d'une question par son code : adresse …/#q-eq2disc-2-k3f (rien n'est enregistré).
 function showCode() {
   /* Mentions légales (24.11) : lien direct …/#confidentialite, à donner aux parents */
+  /* 25.11 : aperçu France aussi quand l'app est déjà ouverte (installée) ; ouvre directement le choix de l'école. */
+  if (location.hash === "#france" || location.hash === "#france-off") {
+    const on = location.hash === "#france";
+    try { if (on) localStorage.setItem("m2m-france", "1"); else localStorage.removeItem("m2m-france"); } catch (e) {}
+    history.replaceState(null, "", location.pathname);
+    if (!on) { location.reload(); return true; }
+    SYSTEMS.FR = SYSTEMS_HIDDEN.FR;
+    if (typeof draft !== "undefined" && draft) draft.system = "FR";
+    screenLevel(); toast("Aperçu France activé sur cet appareil (…/#france-off pour le retirer).", 4000);
+    return true;
+  }
   if (typeof presentRoute === "function" && presentRoute()) return true; /* 25.11 : présentations …/#decouvrir (élèves) et …/#parents (src/presente.js) */
   if (typeof parentRoute === "function" && parentRoute()) return true; /* 24.11 : espace parent, …/#parent=<code> (src/parents.js) */
   if (location.hash === "#confidentialite") { screenLegal(() => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); }); return true; }
