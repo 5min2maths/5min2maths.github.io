@@ -262,6 +262,41 @@ def onglet_referentiel(wb, bold, head_fill, P):
     return n - 1
 
 
+CO_COL = {"9e": "E", "10e": "F", "11e": "G"}  # colonnes des années dans l'onglet Référentiel CO
+
+
+def onglet_referentiel_co(wb, bold, head_fill, P):
+    """Onglet « Référentiel CO » (25.11, phase CO) : une ligne par item du PER (MSN 31–34) affiché dans « Mes compétences »
+    d'un profil CO (tools/ref_co.py) : code, axe, champ du PER, intitulé court, années (x dans 9e, 10e, 11e), notions de
+    l'app rattachées, état (couvert / hors saisie), texte du PER. Filtrable."""
+    try:
+        sys.path.insert(0, str(ROOT / "tools"))
+        import ref_co
+        rs = ref_co.rows()
+    except Exception as e:
+        print("(référentiel du CO indisponible :", e, ")")
+        return 0
+    ws = wb.create_sheet("Référentiel CO", 3)
+    ws.append(["Code", "Axe", "Champ du PER", "Intitulé (app)", "9e", "10e", "11e", "Notions de l'app rattachées", "État", "Texte du PER"])
+    for c in ws[1]:
+        c.font, c.fill = bold, head_fill
+    lab = lambda n: (P.get(n.split("@")[0], {}).get("label", "") + " [" + n.split("@")[0] + "]").strip() + (" (niv. " + ", ".join(n.split("@")[1]) + ")" if "@" in n else "")
+    for r in rs:
+        ws.append([r["code"], r["axe"] + " " + r["theme"], r["champ"], r["label"]] + ["x" if r["y1"] <= y <= r["y2"] else "" for y in (9, 10, 11)]
+                  + [" ; ".join(lab(n) for n in r["links"]), ref_co.etat(r), r["per"]])
+    n = ws.max_row
+    for st, col in {"couvert": "C6EFCE", "hors saisie": "F2F2F2"}.items():
+        ws.conditional_formatting.add(f"I2:I{n}", CellIsRule(operator="equal", formula=[f'"{st}"'], fill=PatternFill("solid", fgColor=col)))
+    for col, w in zip("ABCDEFGHIJ", [9, 22, 24, 50, 5, 5, 5, 50, 12, 70]):
+        ws.column_dimensions[col].width = w
+    for row in ws.iter_rows(min_row=2):
+        for c in row:
+            c.alignment = Alignment(wrap_text=True, vertical="top")
+    ws.freeze_panes = "B2"
+    ws.auto_filter.ref = f"A1:J{n}"
+    return n - 1
+
+
 def onglet_referentiel_fr(wb, bold, head_fill, P):
     """Onglet « Référentiel France » (25.11, phase France) : une ligne par item officiel affiché dans « Mes compétences »
     d'un profil France (tools/ref_fr.py) : code, classe, domaine, thème ou chapitre, intitulé, type, notions de l'app
@@ -400,6 +435,7 @@ def main():
     n_ch = onglet_chantiers(wb, bold, head_fill)
     n_ref = onglet_referentiel(wb, bold, head_fill, P)
     n_reffr = onglet_referentiel_fr(wb, bold, head_fill, P)
+    n_refco = onglet_referentiel_co(wb, bold, head_fill, P)
     # Synthèse : formules (se met à jour quand l'utilisateur change « Contrôlé »)
     syn.append(["Classe", "Notions", "Questions", "Leçons actives", "% notions actives", "Validées", "À corriger", "Vues", "% validé", "Questions à 1 forme", "Tests de qualité", "Compétences du référentiel (couvertes / total)"])
     for c in syn[1]:
@@ -412,12 +448,15 @@ def main():
                     f'=COUNTIF({t}P:P,"validé")', f'=COUNTIF({t}P:P,"à corriger")', f'=COUNTIF({t}P:P,"vu")', f"=F{i}/C{i}", f"=COUNTIF({t}H:H,1)", f'=COUNTIF({t}G:G,"✓ qualité*")&" / "&COUNTIF({t}D:D,"Test")',
                     # 26.11 : une notion de l'app couvre plusieurs compétences officielles ; on montre aussi les compétences
                     # (onglet Référentiel Collège) pour ne pas comparer notions et compétences (1re–4e Collège seulement).
-                    (f"=COUNTIFS('Référentiel Collège'!B:B,\"{cl['name']}\",'Référentiel Collège'!H:H,\"couvert\")&\" / \"&COUNTIF('Référentiel Collège'!B:B,\"{cl['name']}\")" if cl["name"] in ("1re", "2e", "3e", "4e") else "")])
+                    (f"=COUNTIFS('Référentiel Collège'!B:B,\"{cl['name']}\",'Référentiel Collège'!H:H,\"couvert\")&\" / \"&COUNTIF('Référentiel Collège'!B:B,\"{cl['name']}\")" if cl["name"] in ("1re", "2e", "3e", "4e")
+                     # 25.11 (phase CO) : 9e–11e = items du PER qui couvrent l'année (colonnes E, F, G de l'onglet Référentiel CO).
+                     else f"=COUNTIFS('Référentiel CO'!{CO_COL[cl['name']]}:{CO_COL[cl['name']]},\"x\",'Référentiel CO'!I:I,\"couvert\")&\" / \"&COUNTIF('Référentiel CO'!{CO_COL[cl['name']]}:{CO_COL[cl['name']]},\"x\")" if cl["name"] in CO_COL and n_refco else "")])
         syn[f"E{i}"].number_format = syn[f"I{i}"].number_format = "0%"
     syn.append([])
     syn.append([f"Commentaires des testeurs : {n_c}, dont {n_non} non traités (onglet Commentaires, lignes en jaune)."])
     syn.append([f"Chantiers du projet : {n_ch} (onglet Chantiers, source tools/chantiers.tsv)."])
     syn.append([f"Référentiel du Collège : {n_ref} compétences officielles, rattachement aux notions de l'app (onglet Référentiel Collège)."])
+    syn.append([f"Référentiel du CO : {n_refco} items du PER (MSN 31–34, 9e–11e), rattachement aux notions de l'app (onglet Référentiel CO)."])
     syn.append([f"Référentiel France : {n_reffr} items officiels (6e–Tle), rattachement aux notions de l'app (onglet Référentiel France)."])
     syn.append([f"Élève-robot : {n_r} problème(s) dans le dernier rapport (onglet Robot ; nouveaux en jaune)."])
     syn.append(["Statuts « Contrôlé » : à faire → vu → à corriger → validé. Colonnes automatiques recalculées par tools/suivi.py ; Contrôlé et Remarque conservés."])

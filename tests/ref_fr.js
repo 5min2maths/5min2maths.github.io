@@ -103,12 +103,17 @@
     ok(app.querySelectorAll(".olds").length === 0, "Collège 1re : pas d'années précédentes");
     fresh({ system: "CH", grade: 15, track: "college", niv: "R", minutes: 5 }); screenComps();
     ok(app.querySelectorAll(".olds").length === 1 && /Années précédentes/.test(app.querySelector(".olds summary").textContent), "Collège 4e : un seul bloc « Années précédentes »");
-    for (const [lab, p] of [["CO 10e", { system: "CH", grade: 10, track: "college" }], ["CO 11e", { system: "CH", grade: 11, track: "college" }], ["MP 2e", { system: "CH", grade: 13, track: "mp" }]]) {
+    /* 25.11 (phase CO) : le CO a son référentiel (PER, src/ref_co.js), sans vocabulaire LSU ; MP inchangé. */
+    for (const [lab, p] of [["CO 10e", { system: "CH", grade: 10, track: "college" }], ["CO 11e", { system: "CH", grade: 11, track: "college" }]]) {
       fresh({ ...p, minutes: 5 });
-      ok(Referentiel.of(state.profile) === null, lab + " : pas de référentiel officiel");
-      screenComps();
-      ok(!app.querySelector(".rcomp") && app.querySelectorAll(".ctest").length > 0, lab + " : compétences par notion (affichage actuel)");
+      ok(Referentiel.of(state.profile) === "CO", lab + " : référentiel du PER");
+      screenComps(); t = app.innerText;
+      ok(!!app.querySelector(".rcomp") && /note de 1 à 6/.test(t) && !/maîtrise|positionn/.test(t), lab + " : référentiel du PER, notes 1–6");
     }
+    fresh({ system: "CH", grade: 13, track: "mp", minutes: 5 });
+    ok(Referentiel.of(state.profile) === null, "MP 2e : pas de référentiel officiel");
+    screenComps();
+    ok(!app.querySelector(".rcomp") && app.querySelectorAll(".ctest").length > 0, "MP 2e : compétences par notion (affichage actuel)");
   } catch (e) { bad.push("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }
   document.getElementById("out").textContent = (bad.length ? "ÉCHEC " + bad.join(" ; ") : "ok référentiel France : " + out.join(" · "));
 })();
