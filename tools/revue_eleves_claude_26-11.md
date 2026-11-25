@@ -1,5 +1,37 @@
 # Revue « élèves joués » — 26.11 (Claude, branche agent/eleves)
 
+## Corrigé le 26.11 (branche agent/fixrevue)
+
+Règle suivie : resserrer (corriger, simplifier, alléger), rien d'ajouté hors demande. Contrôles automatiques dans
+`tests/revue_26_11.html` (sections `#only=tri,plong,tex,dec,arr,app`) ; suite complète verte (135 pages) ;
+`_trace.html#scan=1` : **0 champ** ; les 5 élèves rejoués (graine 7).
+
+| Point | Corrigé | Vérification |
+|---|---|---|
+| 1. Triangles impossibles (A1) | `ch11_thales.js` : refus des tirages sans inégalité stricte (niveau 3 périmètre, réciproque niveau 3, papillon) ; aussi `fr_3e.js` (thales4e : AB, AC, BC tirés séparément, 4/2/6 trouvé) et `ch11_gm.js` (pythrec « 3, 4, 8 cm ») | test : 486 triangles par côtés (toutes notions, niveaux 1–4), inégalité stricte |
+| 2. Plongeur au-dessus de l'eau (A2) | `ch11_no2.js` : la remontée reste sous la surface, température ≥ −25 °C ; « point le plus bas d'un lac à −30 m » (référence ambiguë) → sous-marin / avion | test : plongeur toujours sous l'eau, températures plausibles |
+| 3. TeX visible (A3) | filtre unique `plainTeX` (`generators.js`) appliqué par `colonBreak`, à l'indice et aux problèmes (niveau 4) : `{,}` → `,`, `\text{'}` → `'` hors formule ; un piège trigeq réécrit en formule | scan 0 champ (14 688 questions) |
+| 4. Compteur instable (B1, B2) | jamais de leçon dans le Carnet ni dans « Mon évaluation » ; une 2e notion à leçon n'est plus retirée mais remplacée par une notion déjà travaillée (`Engine.swapLesson`) ; la remédiation remplace la question suivante au lieu de s'ajouter | test : Carnet « 1 sur 2 », « 2 sur 2 » ; séance à total constant ; traces : plus aucun « 5 sur 7 → étape 6 sur 8 » |
+| 5. Durée de « Mon évaluation » (C1) | révision ciblée = 4 questions, niveau 3 au plus, sans problème | traces : 3:31 à 5:30 (au lieu de 7:41 à 12:07) |
+| 6. Deux grands boutons (C2) | évaluation active et tâche du jour pas faite : la tâche remplace la carte séance (un seul bouton) ; J−2 (sujet de préparation) : présenté « au choix », la séance reste le grand bouton | test accueil ; la trace ne joue plus de séance en plus ces jours-là |
+| 7. « Nouvelle notion » (B3) | notion réussie au positionnement : vue et leçon vue ; libellé réservé aux notions de l'année jamais travaillées (sinon « Rappel de cours », et en Révision ni « Nouvelle notion » ni « Révision ») | test (decread, Pythagore en 11e) |
+| 8. Décimaux entiers (A4) | `dec()` (ch10_no.js) : dernier chiffre jamais 0 (corrige aussi « 3 · ? = 18 », A10) ; partage « 63 CHF entre 7 » (quotient entier) refusé | test decmul, decdiv, decadd : 1 350 questions |
+| 9. Arrondi, énoncé, indice (A5–A7) | carrelage : valeur attendue = valeur du corrigé (523,08), arrondis `r1`/`r2c` et « Les bonnes réponses » sur l'écriture décimale ; « une fois et demie le tarif normal » ; f2 sommet canonique : indice propre + piège (−h ; −k) | tests sur les codes de la revue |
+| 10. Motivation (D1–D4, D2) | « plafond du jour atteint, reviens demain » au lieu de +0 ; fin du pas à pas selon le résultat (« Voici la solution complète (n étapes justes sur N) ») ; un problème dont le contexte a été vu dans les 7 jours (toutes notions) est évité, sinon niveau 3 en séance ; Mathélo provisoire (n < 20) : échec de niveau 1 plafonné à −15 | tests |
+| 11. France (B6, B7, A14) | accueil avec l'aperçu France : 6e · 5e · 4e · 3e · Lycée, essai localisé (€, ×), énoncés suisses écartés ; titres d'écran (.eyebrow) sans conversion « · → × » ; quartiles : hors programme au collège (médiane et étendue seulement, 4e.DP.02 / 3e.DP.02, quartiles en 2nde) → formes à quartiles écartées avant la 2nde (HORS_FR), libellé « Étendue, médiane » | tests |
+| 12. Petits points (B5, B8, C3) | veille du test sans grille de départ : « Autoévaluation » (plus de « Test rapide final ») et fin de grille adaptée ; « Je prépare un test » : chapitre en classe et chapitres récents, le reste replié (« Autres chapitres de l'année ») ; positionnement annoncé « environ 5 minutes » (1 min par question) | tests |
+
+Tests existants modifiés volontairement (commentaire dans le test) : `court.html` (le total ne grandit plus avec la
+remédiation ; « Nouvelle notion » seulement pour les notions de l'année), `carnet.html` (veille sans grille =
+Autoévaluation).
+
+**Ce qui reste** (non demandé dans ce lot, ou à décider) : séance d'une question (Léa jour 1, C6) et bilan « c'était le
+défi du jour » (B4) ; pas à pas qui ne donne pas la valeur de l'étape (A8) ; « Vrai ou faux ? » sur un « Trouve
+l'erreur » (A9) ; décimal de calculatrice accepté pour une valeur exacte (A11) ; Curieux « 35 % » sans signe (A12) ;
+accords « décimale(s) » (A13) ; « Classe 2e MP » et « MP 2e » (B9) ; colonBreak entre deux formules (B10) ; corrigé
+« −1L » (B11) ; séance de 6 à 8 min avec leçon + 6 automatismes (C4) ; Mathélo de la bonne élève (D5) ; carte
+statistiques répétée (D6) ; leçon « Étendue et quartiles » encore affichée telle quelle en 4e FR.
+
 Cinq élèves, chacun sur 4 jours (du lundi 16.11 au vendredi 20.11), joués dans la **vraie interface** par l'outil
 `tests/_trace.html` (premier lancement, positionnement, visite guidée, séances, « Mon évaluation » du jour 1 au jour J,
 Carnet, Problème de la semaine, Curieux, Histoire). Chaque question rencontrée a été refaite à la main.

@@ -18,7 +18,9 @@ const DEFIS = (() => {
   const PAIR = (x, y) => ({ kind: "pair", values: [x, y] }), SOLS = (ivs) => ({ kind: "solset", ivs }), RAD = (v) => ({ kind: "value", value: v, radical: true });
   const cfD = (v) => (v === 1 ? "" : v === -1 ? "-" : D(v));
   const pl = (n, w) => n + " " + w + (n > 1 ? "s" : "");
-  const r1 = (v) => Math.round(v * 10) / 10, r2c = (v) => Math.round(v * 100) / 100;
+  /* 26.11 (revue élèves, decmul-4-qkr : 523,075 → corrigé 523,08, « bonnes réponses » 523,07) : arrondi sur l'écriture
+     décimale (523,075 · 100 = 52307,4999… en flottant). */
+  const r1 = (v) => Math.round(+(v * 10).toPrecision(12)) / 10, r2c = (v) => Math.round(+(v * 100).toPrecision(12)) / 100;
   const fx = (v) => { if (Number.isInteger(v)) return String(v); for (let d = 2; d <= 12; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return frac(Math.round(v * d), d); return D(v); };
   const fxT = (v) => { if (Number.isInteger(v)) return String(v); for (let d = 2; d <= 12; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return (v < 0 ? "−" : "") + Math.abs(Math.round(v * d)) + "/" + d; return T(v); };
   const xm = (p) => (p === 0 ? "x" : p > 0 ? "x - " + p : "x + " + -p); /* (x − p) */
@@ -1636,7 +1638,7 @@ const DEFIS = (() => {
       () => {
         const L = ri(31, 69) / 10, l = ri(21, 45) / 10, pu = pk([24.5, 32.9, 38.5, 42.5, 29.9, 45.8]), A = r2c(L * l), C = r2c(A * pu), C2 = r2c(A * 1.1 * pu);
         return P("On carrelle une pièce rectangulaire de " + M(D(L) + " \\text{ m}") + " sur " + M(D(l) + " \\text{ m}") + ". Le carrelage coûte " + M(CHF(pu)) + " CHF le m².",
-          [["a) Aire de la pièce (m²)", A], ["b) Prix du carrelage (CHF, au centime)", L * l * pu, 0.01], ["c) Prix si l'on achète 10 % de plus pour les chutes (CHF, au centime)", L * l * 1.1 * pu, 0.01]],
+          [["a) Aire de la pièce (m²)", A], ["b) Prix du carrelage (CHF, au centime)", C, 0.01], ["c) Prix si l'on achète 10 % de plus pour les chutes (CHF, au centime)", C2, 0.01]],
           ["Aire = longueur · largeur : multiplie sans la virgule, puis place-la (autant de décimales qu'au total dans les facteurs).",
            "c) 10 % de plus : on achète 1,1 fois l'aire."],
           "a) " + M(D(L) + " \\cdot " + D(l) + " = " + D(A)) + " m². b) " + M(D(A) + " \\cdot " + CHF(pu) + " \\approx " + CHF(C)) + " CHF. c) " + M(D(A) + " \\cdot 1{,}1 \\cdot " + CHF(pu) + " \\approx " + CHF(C2)) + " CHF.");

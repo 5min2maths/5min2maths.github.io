@@ -24,6 +24,9 @@ const HORS_FR = {
   eqdiff: [["separable-*", 99] /* variables séparables : hors programme (y' = ay + b seulement) */],
   /* 25.11 soir : progcalc dès la 5e ; nombre de départ négatif multiplié (produit de relatifs), (x + a)², (x + a)(x − a) : 4e */
   progcalc: [["negatif", 8], ["prouver-carre", 8], ["produit", 8]],
+  /* 26.11 (revue élèves : « Étendue, médiane, quartiles » proposé en 4e) : au collège, médiane et étendue seulement
+     (4e.DP.02, 3e.DP.02) ; quartiles et écart interquartile en 2nde. Libellé du collège : labelFR (Engine.catalog). */
+  quartiles: [[/quartile|Q_1|Q_3|moustache/i, 10]],
 };
 
 /* Niveau minimal d'une notion reprise d'une année inférieure, pour un profil FR de la classe indiquée (Engine.make).
@@ -45,6 +48,7 @@ const UPFR = {
 
 (function () {
   const N = (id) => NOTIONS.find((x) => x.id === id);
+  { const q = N("quartiles"); if (q) q.labelFR = [10, "Étendue, médiane"]; } /* 26.11 : avant la 2nde, sans « quartiles » */
   const place = (id, fr, again) => { const n = N(id); if (!n) return; n.FR = fr; if (again) n.againFR = [...new Set([...(n.againFR || []), ...again])]; };
 
   // ---------- 1. Rattachements (attendu contrôlé ; formes écartées : HORS_FR ci-dessus) ----------

@@ -16,10 +16,15 @@ const R = {
 };
 const gcd = (a, b) => (b ? gcd(b, a % b) : Math.abs(a));
 const M = (t) => "\\(" + t + "\\)";
+/* 26.11 (revue élèves, 46 champs) : nombres écrits pour une formule (« 2{,}86 », « 1\text{'}000 ») collés dans le texte,
+   hors \( \) : MathJax ne les traite pas et l'élève voit le TeX. Filtre unique, appliqué par colonBreak et aux problèmes. */
+const plainTeX = (s) => typeof s !== "string" || !/\{,\}|\\text\{['’]\}/.test(s) ? s
+  : s.split(/(\\\(.*?\\\))/s).map((t, i) => (i % 2 ? t : t.replace(/\{,\}/g, ",").replace(/\\text\{(['’])\}/g, "$1"))).join("");
 // Deux-points lisibles (16.11, demande de l'utilisateur : « on ne comprend rien avec deux points ») : un « : » qui suit
 // une formule (« \(x = 3\) : \(9 = 9\) ») ou une égalité en texte simple (« x = 3 : 9 = 9 ») se lit comme une division.
 // Il devient un retour à la ligne. Les « : » après un mot (« Résous : », « Erreur : ») restent ; dans les formules, « : » est ÷.
 const colonBreak = (s) => {
+  s = plainTeX(s);
   if (typeof s !== "string" || !/[:;?!]/.test(s)) return s;
   const parts = s.split(/(\\\(.*?\\\))/);
   for (let i = 0; i < parts.length; i += 2) {
