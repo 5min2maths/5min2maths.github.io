@@ -24,8 +24,8 @@ adaptations d'usage, le cadre légal, la diffusion et un plan chiffré. Sources 
   lieu de 52) ; une Tle française recevait les chapitres de 1re du Collège de Genève comme « de l'année » (relatifs,
   Pythagore…) ; les énoncés de change EUR ↔ CHF et « en Suisse » sont écartés du tirage français.
 - **Cadre légal** : l'app est déjà proche du RGPD (pas de compte, rien de nominatif, polices et MathJax servis localement) ;
-  le point dur est l'envoi des statistiques à Google (États-Unis) sans consentement, pour des mineurs de moins de 15 ans
-  (§ 5). Décision déjà ouverte dans `tools/confidentialite.md` (option A : consentement, ½ journée).
+  le point dur restant est le cas des moins de 15 ans (consentement de l'élève ET d'un parent) et l'hébergement des statistiques chez Google (États-Unis) ; depuis le 24.11, rien n'est envoyé sans accord (option A faite)
+  (§ 5). Voir `tools/confidentialite.md` (option A : consentement, **faite le 24.11** ; option B : réception dans l'UE, à décider).
 - **Concurrence** : MathALÉA (Coopmaths) et MathsMentales sont gratuits, alignés sur les programmes et très utilisés par les
   enseignants ; Sésamath (LaboMEP), Kwyk (freemium), MIA Seconde (ministère). La place de 5min2maths : **l'élève seul, chaque
   jour, 5 minutes, sans compte**, avec adaptation (Mathélo), leçons actives et préparation d'évaluation — pas un outil de
@@ -183,7 +183,7 @@ Les notions créées pour la France (`fr_*.js`) écrivent déjà €, 1 200, ×,
   nom, pas d'adresse e-mail, progression dans le navigateur, pas de publicité ni de traceur tiers, polices et MathJax servis
   par le site**.
 - **Ce qui n'est pas conforme en l'état** : les statistiques (séances, signaux par question, votes, erreurs JS) partent vers
-  Google Apps Script (États-Unis) **sans consentement préalable**, avec un identifiant d'appareil aléatoire (donnée
+  Google Apps Script (États-Unis) (depuis le 24.11 **seulement avec l'accord** de l'élève, désactivé par défaut), avec un identifiant d'appareil aléatoire (donnée
   pseudonyme = donnée personnelle au sens du RGPD), et les commentaires libres peuvent contenir un nom. Pour la France :
   1. **consentement explicite, désactivé par défaut** (option A de `tools/confidentialite.md`) ; avant 15 ans, base légale
      « intérêt légitime » discutable pour des mineurs : le plus simple est **aucun envoi sans accord**, et pour les moins de
@@ -263,7 +263,7 @@ pas ouvrir un nouveau pays tant que le précédent n'est pas propre ».
 | 3 | **Vocabulaire restant** | variantes d'énoncés FR : `droites` (y = mx + p), `f2`/`eq2disc` (racines), `fracsimp` (irréductible), `cercthales`, radians (`trigcercle`, `trigeq`, `trigfn`, `trigassoc`), `ln` (`log`) ; décision sur `\cdot` → `\times` | 3 + 1 R | mars 2027 | décisions 2, 3 |
 | 4 | **Contextes** | relecture des `ctx` suisses restants (CFF, TPG, lieux dans les leçons actives et défis), table de contextes français (villes, SNCF, €) au rendu ; prénoms déjà variés | 2 + 1 R | mars 2027 | — |
 | 5 | **Interface FR** | choix du pays à l'accueil (`#dgrade` selon le pays), libellés des chapitres 1re–Tle pour « En classe », page parents relue, mentions légales FR | 2 + 1 R | avril 2027 | décisions 1, 4 |
-| 6 | **Confidentialité** | consentement aux statistiques (option A, ½ journée) obligatoire avant la France ; puis réception des statistiques dans l'UE (option B) | 1 (A) ; 4–6 (B) | avant l'ouverture | décision 4 |
+| 6 | **Confidentialité** | consentement aux statistiques (option A) fait le 24.11 ; reste l'accord parental avant 15 ans ; puis réception des statistiques dans l'UE (option B) | 1 (A) ; 4–6 (B) | avant l'ouverture | décision 4 |
 | 7 | **Terminale** | `limfn`, `lnfn`, `tvi`, convexité, primitives et intégrales (à partager avec la 3e–4e du Collège), espace ; seulement si la Tle est ouverte | 10 + 4 R | 2027-2028 | décision 5 |
 | 8 | **Programmes 2026 de 4e et 3e** | bascule des placements FR (cosinus, notation scientifique, Thalès, vecteurs en 3e) à la rentrée 2027 (4e) et 2028 (3e) ; `FR_COLLEGE` en deux versions | 2 | été 2027, été 2028 | — |
 | 9 | **Testeurs** | 2 ou 3 enseignants français (un collège, un lycée) : bêta fermée par lien `…/#france` ; les élèves jugent (signaux, votes) | — | mai–juin 2027 | 1–6 |
