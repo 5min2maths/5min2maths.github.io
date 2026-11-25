@@ -95,7 +95,7 @@ const NEW = ["tauxvar", "nbderive", "derivref", "derivregles", "derivprodquot", 
 const NEW2 = { limites: "2. Limites et continuité", limitinf: "2. Limites et continuité", asymptotes: "2. Limites et continuité", continuite: "2. Limites et continuité", derivseconde: "3. Dérivation", etudefct: "3. Dérivation", combi: "5. Combinatoire et probabilités", probaxiomes: "5. Combinatoire et probabilités", probarbre: "5. Combinatoire et probabilités" };
 NEW.push(...Object.keys(NEW2));
 for (const g of [14, 15]) {
-  const p = { system: "CH", grade: g, track: "college" }, cat = Engine.catalog(p), cur = cat.filter((c) => c.current).map((c) => c.id);
+  const p = { system: "CH", grade: g, track: "college", niv: "R" }, cat = Engine.catalog(p) /* 25.11 : MA2, pour voir aussi derivseconde et colin */, cur = cat.filter((c) => c.current).map((c) => c.id);
   if (!SYSTEMS.CH.grades.some(([x]) => x === g)) fail("classe " + g + " absente de SYSTEMS");
   if (g === 14) { NEW.forEach((id) => { if (!cur.includes(id)) fail(id + " pas « de l'année » en 3e"); const th = Engine.themeLabel(Engine.themeKey(p, id), p); if (th !== (NEW2[id] || "3. Dérivation")) fail(id + " chapitre " + th); }); }
   if (cat.some((c) => c.id === "f2expr" && c.current)) fail("notion de 1re « de l'année » en " + (g - 11) + "e");
@@ -111,7 +111,7 @@ for (const [spec, inp, want] of [[{ kind: "expr", expr: "3*cos(3x)" }, "3cos(3x)
 for (const id of NEW) { if (!LESSONS[id]) fail(id + " sans leçon"); if (!HINTS[id]) fail(id + " sans indice"); if (!COMPS[id] || COMPS[id].length !== 3) fail(id + " : 3 compétences attendues"); if (!hasProb(id)) fail(id + " sans problème (niveau 4)"); if (!PREREQ[id]) fail(id + " sans prérequis"); }
 // 24.11 (agent c3geo) : géométrie vectorielle de l'espace (src/ch3c_geo.js), chapitre 6 de 3e.
 const GEO3 = ["vect3d", "colin", "droite3d", "plans", "posrel", "pscal3d", "distances", "sphere"];
-{ const p = { system: "CH", grade: 14, track: "college" }, cur = Engine.catalog(p).filter((c) => c.current).map((c) => c.id);
+{ const p = { system: "CH", grade: 14, track: "college", niv: "R" }, cur = Engine.catalog(p).filter((c) => c.current).map((c) => c.id);
   GEO3.forEach((id) => { if (!cur.includes(id)) fail(id + " pas « de l'année » en 3e"); const th = Engine.themeLabel(Engine.themeKey(p, id), p); if (th !== "6. Géométrie vectorielle") fail(id + " chapitre " + th); if (Engine.rank(p, id) >= 1000) fail(id + " sans rang matu");
     if (!LESSONS[id]) fail(id + " sans leçon"); if (!HINTS[id]) fail(id + " sans indice"); if (!COMPS[id] || COMPS[id].length !== 3) fail(id + " : 3 compétences attendues"); if (!hasProb(id)) fail(id + " sans problème (niveau 4)"); if (!PREREQ[id]) fail(id + " sans prérequis"); }); }
 for (const [spec, inp, want] of [[{ kind: "expr", expr: "3 - 2t" }, "-2t + 3", "correct"], [{ kind: "expr", expr: "-2x - 3" }, "y = -2x - 3", "correct"], [{ kind: "pair", values: [1, 0.5, -2] }, "1 ; 1/2 ; -2", "correct"], [{ kind: "pair", values: [1, 0.5, -2] }, "1 ; 2 ; -2", "close"]])

@@ -36,6 +36,6 @@ const run=(id)=>{ try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=
   const wide=[...document.querySelectorAll("#app *")].filter(e=>e.getBoundingClientRect().right>361).map(e=>e.tagName+"."+(e.getAttribute("class")||"")).slice(0,3); if(wide.length) msgs.push("ÉCHEC dépasse 360 px : "+wide.join(", "));
   log.push(id+" ["+X.mode+"] : "+(ok?"OK":"ÉCHEC "+(bad?"(NaN/undefined) ":"")+(wrongOk?"":"(réponse fausse acceptée) "))+" · "+msgs.join(" | "));
   }catch(e){log.push(id+" ERR ÉCHEC "+e.stack)} };
-const IDS=["vect3d","colin","droite3d","plans","posrel","pscal3d","distances","sphere","intparties","intsubst","etudelnexp","eqdiff","statdesc","ineqpoly"];
+const IDS=["vect3d","colin","droite3d","plans","posrel","pscal3d","distances","sphere","intparties","intsubst","etudelnexp","eqdiff","statdesc","ineqpoly","derivth","pvect","syslin","bases","bayes","cplxalg","cplxtrig","cplxeq","suitegeom","serie"];
 for(const id of IDS){ if(ACTIVE[id]&&LESSONS[id]) run(id); else log.push(id+" : ÉCHEC (leçon active ou leçon absente)"); }
 document.getElementById("log").hidden=false; document.getElementById("log").textContent=log.join("\n");</script>
