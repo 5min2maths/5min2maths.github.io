@@ -428,7 +428,7 @@
   // ======================= variations : signe de f' et extrema (3.AN.07a, 3.AN.07b) =======================
   const VA = {
     1: [
-      () => { const p = nz(-5, 3), q = p + R.int(2, 5), s = pk([1, -1]), max = s > 0 ? p : q, min = s > 0 ? q : p;
+      () => { let p, q, s, max; do { p = nz(-5, 3); q = p + R.int(2, 5); s = pk([1, -1]); max = s > 0 ? p : q; } while (Math.abs(max) <= 1); const min = s > 0 ? q : p; /* 25.11 : abscisse du maximum ≠ 0, ±1 (robot) */
         return QN("La dérivée d'une fonction " + M("f") + " est " + M("f'(x) = " + (s > 0 ? "" : "-") + "(x" + sg(-p) + ")(x" + sg(-q) + ")") + ". En quelle abscisse " + M("f") + " admet-elle un maximum local ?", max, M("f'") + " s'annule en " + M(p) + " et " + M(q) + ". " + (s > 0 ? M("f'") + " est positive avant " + M(p) + ", négative entre les deux, positive après" : M("f'") + " est négative avant " + M(p) + ", positive entre les deux, négative après") + " : " + M("f") + " monte puis descend en " + M(max) + ".",
           { ctx: "signe-derivee", guide: [GSet("Zéros de " + M("f'") + " ?", [p, q], M(p) + " et " + M(q) + "."), GS("Où " + M("f'") + " passe-t-elle de + à − ?", max, M(max) + " : maximum local.")],
             traps: [TR(min, "En " + min + ", f' passe de − à + : c'est un minimum."), TR(-max, "Les zéros de (x − a) sont en a : vérifie le signe.")] }); },

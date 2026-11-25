@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "fe101e3d66"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "6b66a750f2"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -75,6 +75,13 @@ window.addEventListener("unhandledrejection", (e) => {
 });
 
 const app = document.getElementById("app");
+/* 25.11 (audit France, tools/france.md) : aperçu France pour l'enseignant, sans ouverture au public : …/#france ajoute
+   « France » au choix de l'école sur cet appareil (…/#france-off pour annuler). Sans ce réglage, rien ne change. */
+try {
+  if (location.hash === "#france") localStorage.setItem("m2m-france", "1");
+  else if (location.hash === "#france-off") localStorage.removeItem("m2m-france");
+  if (localStorage.getItem("m2m-france") === "1" && !SYSTEMS.FR) SYSTEMS.FR = SYSTEMS_HIDDEN.FR;
+} catch (e) {}
 let state = Store.load();
 if (state && state.profile && !SYSTEMS[state.profile.system]) state = null; // système masqué (France) : on repart de zéro
 // Voie MP gardée en revenant au CO (bug 14.11 : « 9e MP » sans critères de divisibilité, nombres premiers ni PGDC) : la voie n'existe qu'au sec. II.
@@ -172,7 +179,7 @@ const escT = (s) => esc(s).replace(/&lt;(\/?)(b|i|br)&gt;/g, "<$1$2>");
 /* 24.11 (audit ergonomie) : écrans longs (grades, réglages, compétences, curieux, histoire) : leur « Retour » n'était
    qu'en bas, après tout le défilement ; même bouton en haut, comme le « ← Accueil » des pages de l'accueil. */
 const backTop = (id = "backtop") => `<button type="button" class="btn-ghost back-home" id="${id}">← Retour</button>`;
-const gradeName = (p) => (SYSTEMS[p.system].grades.find(([g]) => g === p.grade) || [0, ""])[1];
+const gradeName = (p) => ((SYSTEMS[p.system] || SYSTEMS_HIDDEN[p.system] || { grades: [] }).grades.find(([g]) => g === p.grade) || [0, ""])[1]; /* 25.11 : profil d'un système masqué (France) */
 const brand = '<div class="brand"><b>5 minutes de maths</b><span>par jour</span></div>';
 const PRAISE = ["Juste !", "Bien vu !", "Exact !", "Parfait.", "C'est ça !", "Bravo !"];
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
@@ -182,7 +189,16 @@ const pick = (a) => a[Math.floor(Math.random() * a.length)];
 window.divSign = (t) => frThou(t.replace(/(\\text\{[^}]*\})|( : (?!\\;|;))/g, (m, txt) => txt || " \\div "));
 // Milliers par système (22.11, chantier seconde FR) : les générateurs écrivent 1\text{'}200 (usage suisse) ; pour un profil
 // français, la formule devient 1\,200 (espace fine). Sans effet tant que la France est masquée (SYSTEMS.FR commenté).
-function frThou(t) { return state && state.profile && state.profile.system === "FR" ? t.replace(/\\text\{'\}/g, "\\,") : t; }
+// 25.11 (audit France) : toute la localisation des formules (frLocalPart, src/curriculum.js : milliers, CHF → €, PGCD…).
+const isFR = () => !!(state && state.profile && state.profile.system === "FR");
+function frThou(t) { return isFR() ? frLocalPart(t, true) : t; }
+// 25.11 : textes hors questions (leçons, aide, écrans) d'un profil français : nœuds de texte localisés avant le rendu des formules.
+function frDom(el) {
+  if (!isFR() || !el || !document.createTreeWalker) return;
+  const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentNode && /^(SCRIPT|STYLE|TEXTAREA)$/.test(n.parentNode.nodeName) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT) });
+  const ns = []; while (w.nextNode()) ns.push(w.currentNode);
+  for (const n of ns) { const v = n.nodeValue, r = frLocal(v); if (r !== v) n.nodeValue = r; }
+}
 // Longues chaînes d'égalités (22.11, retour de l'auteur : la correction dépasse de l'écran sur téléphone) : MathJax ne
 // coupe pas une formule en ligne. Avant le rendu, \( A = B = C \) devient \(A\) \(= B\) \(= C\) : le navigateur peut
 // alors passer à la ligne entre deux morceaux. Seulement au niveau 0 (hors parenthèses, accolades, crochets, environnements).
@@ -217,6 +233,7 @@ function splitLongMath(el) {
   }
 }
 function typeset(el) {
+  try { frDom(el); } catch (e) {}
   try { splitLongMath(el); } catch (e) {}
   const go = () => window.MathJax && MathJax.typesetPromise ? MathJax.typesetPromise([el]).catch(() => {}) : setTimeout(go, 150);
   go();
@@ -1089,7 +1106,66 @@ function bindNowCard() {
   if (b) b.onclick = screenNow;
   if (y) y.onclick = () => { state.now.since = day(); save(); screenHome(); };
 }
+// 25.11 (doute de l'enseignant : « l'élève est-il capable de dire ce qu'il travaille en classe ? cocher des notions n'est
+// pas accessible à tous ») : on devine le chapitre d'après la période de l'année (1), l'élève confirme d'un geste ; sinon il
+// reconnaît son chapitre à un exercice typique (2) plutôt qu'à un nom. Le choix notion par notion reste en « avancé ».
+function nowChapters() {
+  const p = state.profile, cur = Engine.catalog(p).filter((c) => c.current && state.notions[c.id]);
+  return Engine.themeOrder(cur, p).map((th) => ({ th, label: Engine.themeLabel(th, p), ids: cur.filter((c) => c.theme === th).sort((a, b) => Engine.rank(p, a.id) - Engine.rank(p, b.id)).map((c) => c.id) })).filter((c) => c.ids.length);
+}
+/* Part de l'année scolaire écoulée (Genève : fin août → fin juin), de 0 à 1. */
+function schoolYearPart(d = new Date()) {
+  const y = d.getMonth() >= 7 ? d.getFullYear() : d.getFullYear() - 1, a = new Date(y, 7, 24), b = new Date(y + 1, 5, 26);
+  return Math.max(0, Math.min(0.999, (d - a) / (b - a)));
+}
+function nowGuess(chs) {
+  if (!chs.length) return -1;
+  const mastered = (c) => c.ids.every((id) => { const n = state.notions[id]; return n && n.m >= 0.75 && n.ok >= 3; });
+  let k = Math.floor(schoolYearPart() * chs.length);
+  while (k < chs.length - 1 && mastered(chs[k])) k++;
+  return k;
+}
+/* Exercice typique d'un chapitre : une notion du milieu du chapitre, niveau 2, graine fixe (même aperçu d'une fois à l'autre). */
+function nowSample(ch) {
+  const id = ch.ids[Math.floor((ch.ids.length - 1) / 2)];
+  let q = null; try { q = Engine.make(state, id, 2, 7); } catch (e) {}
+  if (!q || !q.q) return "";
+  return `<div class="now-sample"><div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}</div>`;
+}
+function nowPickIds(ch) {
+  const open = ch.ids.filter((id) => { const n = state.notions[id]; return !(n && n.m >= 0.75 && n.ok >= 3); });
+  return (open.length ? open : ch.ids).slice(0, 5);
+}
+function nowChoose(ch) { const ids = nowPickIds(ch); Engine.setNow(state, ids); save(); sendNow(ids); toast("Noté : tes séances se concentrent sur « " + ch.label.replace(/^\d+\.\s*/, "") + " »."); screenHome(); }
+const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
 function screenNow() {
+  const chs = nowChapters(), k = nowGuess(chs);
+  if (k < 0) return screenNowList();
+  const d = new Date(), per = (d.getDate() <= 10 ? "début " : d.getDate() >= 21 ? "fin " : "en ") + MOIS[d.getMonth()];
+  const ch = chs[k];
+  h(`${brand}<h2>En ce moment <span class="mark">en classe</span></h2>
+  <div class="card stack now-guess"><p class="small muted">En ${esc(gradeName(state.profile))}${state.profile.track === "mp" ? " MP" : ""}, ${per}, on travaille souvent :</p>
+    <h3>${esc(ch.label)}</h3><p class="small">Par exemple, des exercices comme celui-ci :</p>${nowSample(ch)}
+    <button class="btn-primary btn-big" id="nyes">Oui, c'est ça</button><button class="btn-sec" id="nno">Non, montre-moi les autres</button></div>
+  <p class="small muted">Pas sûr ? Regarde ton cahier ou ta dernière fiche d'exercices.</p>
+  <div class="row"><button class="btn-ghost" id="back">Annuler</button>${Engine.nowActive(state) ? '<button class="btn-ghost" id="none">Rien de particulier en ce moment</button>' : ""}</div>`);
+  document.getElementById("nyes").onclick = () => nowChoose(ch);
+  document.getElementById("nno").onclick = () => screenNowCards(k);
+  document.getElementById("back").onclick = screenHome;
+  const none = document.getElementById("none");
+  if (none) none.onclick = () => { Engine.setNow(state, []); save(); screenHome(); };
+}
+function screenNowCards(k0 = -1) {
+  const chs = nowChapters();
+  h(`${brand}<h2>Ça ressemble à <span class="mark">quoi</span> en classe ?</h2>
+  <p class="muted">Touche le chapitre dont les exercices ressemblent à ceux que tu fais en ce moment.</p>
+  ${chs.map((c, i) => `<button type="button" class="card now-card-pick${i === k0 ? " now-was" : ""}" data-i="${i}"><b>${esc(c.label)}</b>${nowSample(c)}</button>`).join("")}
+  <div class="row"><button class="btn-ghost" id="back">Retour</button><button class="btn-ghost small" id="adv">Choisir notion par notion</button></div>`);
+  app.querySelectorAll(".now-card-pick").forEach((b) => (b.onclick = () => nowChoose(chs[+b.dataset.i])));
+  document.getElementById("back").onclick = screenNow;
+  document.getElementById("adv").onclick = screenNowList;
+}
+function screenNowList() {
   const p = state.profile, cur = Engine.catalog(p).filter((c) => c.current && state.notions[c.id]);
   const chosen = new Set(Engine.nowActive(state) ? state.now.ids : []);
   const box = (c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${c.label}</span></label>`;

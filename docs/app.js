@@ -97,7 +97,42 @@ const SYSTEMS = {
 };
 // 22.11 : systèmes définis mais pas proposés dans l'interface (France : collège rendu jouable, ouverture à décider).
 // Sert au moteur (Mathélo, libellés de classe) et aux tests avec des profils { system: "FR", grade: 6…9 }.
-const SYSTEMS_HIDDEN = { FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"]] } };
+// 25.11 (audit France, tools/france.md) : terminale ajoutée (notions de src/fr_lycee.js placées en 12).
+const SYSTEMS_HIDDEN = { FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"], [12, "Tle"]] } };
+
+// Usages français (25.11, audit France : tools/france.md § 4). Appliqué aux textes d'un profil FR seulement (Engine.finalize,
+// rendu de l'app) ; jamais pour un profil suisse. Idempotent. Sans décision de l'enseignant : seulement ce qui est un défaut
+// certain pour un élève français (monnaie, séparateur des milliers, sigles PGDC / PPMC, « préimage », « mise en évidence »).
+// Genève → Lyon (un seul énoncé au catalogue français le 25.11 : une cycliste « part de Genève »). Les énoncés propres à la
+// Suisse (change EUR ↔ CHF, TVA suisse) sont écartés du tirage par horsCO (src/engine.js), pas traduits.
+// Produit : × en France (décision du 25.11, frTimes) ; laissé pour décision : « cercle de Thalès ».
+const FR_WORDS = [
+  [/\ben (CHF|francs)\b/g, "en euros"], [/\bCHF\b/g, "€"], [/au franc près/g, "à l'euro près"], [/(\d|\\\)) francs\b/g, "$1 euros"], [/\bde francs\b/g, "d'euros"],
+  [/\bGenève\b/g, "Lyon"],
+  [/PGDC/g, "PGCD"], [/PPMC/g, "PPCM"],
+  [/\b([Ll])a préimage\b/g, (m, a) => a + "'antécédent"], [/\b([Uu])ne seule préimage\b/g, (m, a) => a + "n seul antécédent"],
+  [/\b([Uu])ne préimage\b/g, (m, a) => a + "n antécédent"], [/\b([Pp]lus) (grande|petite) préimage\b/g, (m, a, b) => a + " " + b.slice(0, -1) + " antécédent"],
+  [/\bpréimages\b/g, "antécédents"], [/\bPréimages\b/g, "Antécédents"], [/\bpréimage\b/g, "antécédent"], [/\bPréimage\b/g, "Antécédent"],
+  [/\b([Ff])actorise \(mise en évidence\)/g, "$1actorise (facteur commun)"],
+  [/\b([Mm])ise en évidence d(?:e |')/g, (m, a) => (a === "M" ? "F" : "f") + "actorisation par "],
+  [/\b([Mm])ise en évidence\b/g, (m, a) => (a === "M" ? "F" : "f") + "acteur commun"], [/\b([Mm])ets en évidence\b/g, (m, a) => (a === "M" ? "F" : "f") + "actorise"],
+  [/\b([Aa])près ((?:(?!en évidence)[^.;!?]){1,40}?) en évidence\b/g, "$1près factorisation par $2"], [/\b([Mm])ettre en évidence\b/g, (m, a) => (a === "M" ? "F" : "f") + "actoriser"], [/\b([Mm])et(s|tre) ((?:(?!en évidence)[^.;!?]){1,40}?) en évidence\b/g, (m, a, t, x) => (a === "M" ? "F" : "f") + "actorise" + (t === "tre" ? "r" : "") + " par " + x], [/\bmettant en évidence\b/g, "factorisant"], [/\bmis en évidence\b/g, "mis en facteur"],
+];
+function frThouPart(t, tex) {
+  return tex ? frTimes(t.replace(/\\text\{['’]\}/g, "\\,").replace(/(\d)['’](?=\d{3}(?!\d))/g, "$1\\,"))
+    : t.replace(/\\text\{['’]\}/g, "\u202f").replace(/(\d)['’](?=\d{3}(?!\d))/g, "$1\u202f").replace(/ · /g, " × ");
+}
+/* 25.11 (décision de l'enseignant) : en France, le produit s'écrit × et non avec le point médian. Le produit scalaire
+   (formule avec \vec ou \overrightarrow) garde son point. */
+function frTimes(t) { return /\\vec|\\overrightarrow/.test(t) ? t : t.replace(/\\cdot(?![a-zA-Z])/g, "\\times"); }
+const frWords = (t) => FR_WORDS.reduce((a, [re, by]) => a.replace(re, by), t);
+/* formule seule (préfiltre MathJax) */
+function frLocalPart(t, tex) { return frWords(frThouPart(t, tex)); }
+/* texte avec formules \( … \) : milliers selon le mode, puis les mots sur tout le texte (« mets \(t\) en évidence ») */
+function frLocal(s) {
+  if (typeof s !== "string" || !s) return s;
+  return frWords(s.split(/(\\\([\s\S]*?\\\))/).map((t, i) => frThouPart(t, i % 2 === 1)).join(""));
+}
 
 // Difficulté maximale (1 = bases, 3 = approfondi) : on ne demande pas la section à l'élève ;
 // c'est le Mathélo qui situe son niveau. Seules les petites classes (6e, 5e) plafonnent à 2.
@@ -2007,7 +2042,7 @@ Object.assign(GEN, {
 
   log(d) {
     if (d === 1) {
-      const b = R.pick([2, 3, 10]), n = R.int(-2, b === 2 ? 6 : 4);
+      const b = R.pick([2, 3, 10]); let n; do n = R.int(-2, b === 2 ? 6 : 4); while (n === 0 || n === 1); /* 25.11 : log_b 1 et log_b b triviaux (robot) */
       const x = Math.pow(b, n), xs = n >= 0 ? String(x) : "\\frac{1}{" + b ** -n + "}";
       return { guide: [GS(M(b + "^{?} = " + xs) + " : exposant ?", n, M(b + "^{" + n + "} = " + xs) + "."), GS("Donc le logarithme vaut ?", n, M(n) + ".")], q: "Calcule " + M("\\log_{" + b + "} " + xs) + ".", spec: { kind: "value", value: n }, traps: n < 0 ? [TRAP(-n, "Attention au signe : le nombre est plus petit que 1, son logarithme est négatif.")] : [TRAP(x / b, "Le logarithme est un exposant : " + M(b + "^{?} = " + xs) + ".")], sol: M(b + "^{" + n + "} = " + xs) + ", donc " + M("\\log_{" + b + "} " + xs + " = " + n) + "." };
     }
@@ -13181,6 +13216,9 @@ function horsCO(state, id, q) {
   const p = state && state.profile;
   /* forme réservée à certaines classes : q.co = classes CO / Collège (grade), q.mp = classes MP (25.11, src/defis_sec2.js) */
   if (q && (q.co || q.mp) && p && !(p.system === "CH" && (p.track === "mp" ? (q.mp || []) : (q.co || [])).includes(p.grade))) return true;
+  /* 25.11 (audit France, tools/france.md) : profil français : énoncés propres à la Suisse (change EUR ↔ CHF, « en Suisse »,
+     TVA suisse) écartés du tirage ; frLocal (CHF → €) les rendrait absurdes (« 1 € = 0,95 € »). */
+  if (q && p && p.system === "FR") { const t = String(q.q || "") + " " + (q.parts || []).map((x) => x.label || "").join(" ") + " " + (q.guide || []).map((g) => g.ask || "").join(" "); if (/\bEUR\b|Suisse|suisse|CHF[\s\S]*(€|\beuros?\b)|(€|\beuros?\b)[\s\S]*CHF/.test(t)) return true; }
   if (!q || !p || p.system !== "CH" || p.track === "mp") return false;
   const L = HORS_CO[p.grade] && HORS_CO[p.grade][id];
   if (!L) return false;
@@ -13371,7 +13409,9 @@ const Engine = {
     return NOTIONS.filter((n) => { const pl = placeOf(n, profile); return pl && pl[0] <= profile.grade; }).map((n) => {
       const [g] = placeOf(n, profile);
       // Matu : une notion est « de l'année » si son chapitre Sésamath est celui de l'année (Ma1 = 1re, Ma2 = 2e).
-      const yr = "M" + (profile.grade - 11), sesa = profile.track !== "mp" && profile.grade >= 12 && typeof ORDRE_THEME !== "undefined" &&
+      /* 25.11 (audit France) : chapitres Sésamath du Collège de Genève pour les profils suisses seulement (une Tle française, grade 12,
+         recevait les chapitres de 1re du Collège comme « de l'année » : relatifs, Pythagore, puissances…). */
+      const yr = "M" + (profile.grade - 11), sesa = profile.system === "CH" && profile.track !== "mp" && profile.grade >= 12 && typeof ORDRE_THEME !== "undefined" &&
         [(ORDRE_THEME.MATU || {})[n.id], (ORDRE_THEME.MATU_ALT || {})[n.id]].some((k) => (k || "").startsWith(yr));
       const coYear = this.coChap(profile, n.id, true);
       // 22.11 (seconde FR) : « again » liste des années suisses ; pour la France, on lit againFR (sinon une notion reprise en 10e
@@ -13623,6 +13663,15 @@ const Engine = {
     mark(q.spec, txt0, q.calcul);
     (q.parts || []).forEach((x) => mark(x.spec, txt0 + " " + (x.label || ""), x.calcul || q.calcul));
     (q.guide || []).forEach((g) => mark(g.spec, txt0 + " " + (g.ask || ""), g.calcul || q.calcul, true));
+    /* 25.11 (audit France, tools/france.md) : profil français : €, milliers 1 200, PGCD, antécédent, factoriser (frLocal,
+       src/curriculum.js). Tous les textes de la question ; jamais les réponses attendues (spec, canon, expressions des pièges). */
+    if (p && p.system === "FR" && typeof frLocal === "function") {
+      const SKIP = new Set(["spec", "canon", "code", "id", "ctx", "e", "expr", "values", "value"]);
+      /* copies (jamais de modification en place : une question peut partager des objets avec les tables communes) */
+      const loc = (v, d) => typeof v === "string" ? frLocal(v) : d > 6 || !v || typeof v !== "object" ? v : Array.isArray(v) ? v.map((x) => loc(x, d + 1))
+        : Object.getPrototypeOf(v) !== Object.prototype ? v : Object.fromEntries(Object.entries(v).map(([k, x]) => [k, SKIP.has(k) ? x : loc(x, d + 1)]));
+      q = loc(q, 0);
+    }
     return q;
   },
   make(state, id, d, seed) {
@@ -13666,6 +13715,8 @@ const Engine = {
     if (level < 3 && state && state.profile && state.profile.system === "CH" && state.profile.track !== "mp" && state.profile.grade >= 12) {
       if (UPC_MIN[id]) level = Math.max(level, UPC_MIN[id]); else if (UPC.includes(id)) level += 1;
     }
+    /* 25.11 (audit France) : profil français, énoncé propre à la Suisse (horsCO) : graine suivante (le code suit la question). */
+    if (seed && state && state.profile && state.profile.system === "FR") { let q = this.build(id, level, seed); for (let k = 1; k <= 12 && horsCO(state, id, q); k++) q = this.build(id, level, seed + k * 977); return keep(this.finalize(state, id, q)); }
     if (seed) return keep(this.finalize(state, id, this.build(id, level, seed)));
     const rec = ((state.recentQ = state.recentQ || {})[id] = (state.recentQ[id] || []));
     const key = (q) => { let h = 0; for (const c of String(q.q) + JSON.stringify(q.spec)) h = (h * 31 + c.charCodeAt(0)) | 0; return h; };
