@@ -1807,7 +1807,8 @@
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E6.2",
   "plan": "Bijection : ensembles A et B (CdG 2e)",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "25.11.2026 : src/defis_2c.js (co: [13]) — plus grand intervalle d'injectivité → image B → antécédent dans A (E6.2)"
  },
  "cart": {
   "audit": "24.11.2026",
@@ -1821,28 +1822,32 @@
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E1.3",
   "plan": "Équations de cercles, intersections (CdG 2e)",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "25.11.2026 : src/defis_2c.js (co: [13]) — centre et rayon (carrés complétés) → intersection avec une droite → longueur de la corde (E1.3)"
  },
  "cercletan": {
   "audit": "24.11.2026",
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E1.4",
   "plan": "Cercles et tangentes (CdG 2e)",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "25.11.2026 : src/defis_2c.js (co: [13]) — tangente en un point (pente, ordonnée) → cercle tangent à cette droite (distance point-droite) (E1.4)"
  },
  "compo": {
   "audit": "24.11.2026",
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E6.1",
   "plan": "Composition de fonctions (CdG 2e)",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "defi": "25.11.2026 : src/defis_2c.js (co: [13]) — domaine de h∘f → h∘f simplifiée → équation (E6.1)"
  },
  "decomp": {
   "audit": "24.11.2026",
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E6.1",
   "plan": "Décomposer en fonctions élémentaires (CdG 2e)",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "25.11.2026 : src/defis_2c.js (co: [13]) — h = f∘g par complétion du carré → extremum (h = a/((x − p)² + q) ou b^((x − p)² + q))"
  },
  "droites": {
   "audit": "24.11.2026",
@@ -1881,14 +1886,16 @@
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E4.1",
   "plan": "Équations rationnelles (CdG 2e)",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "25.11.2026 : src/defis_2c.js (co: [13]) — valeurs interdites → équation du 2e degré → solution étrangère écartée (E4.1)"
  },
  "expfrac": {
   "audit": "24.11.2026",
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E5.3",
   "plan": "Puissances à exposant rationnel (CdG 2e)",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "25.11.2026 : src/defis_2c.js (co: [13]) — quotient de quatre racines → a^r → écriture a^n·ᴰ√(a^m) → valeur numérique (E5.3)"
  },
  "expo": {
   "audit": "24.11.2026",
@@ -1902,7 +1909,8 @@
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E4.4",
   "plan": "Fractions rationnelles : opérations (CdG 2e)",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "25.11.2026 : src/defis_2c.js (co: [13]) — fraction à étages simplifiée → valeurs interdites → équation, parfois sans solution"
  },
  "fracrat": {
   "audit": "24.11.2026",
@@ -1925,21 +1933,24 @@
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E4.3",
   "plan": "Fonctions homographiques (CdG 2e)",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "25.11.2026 : src/defis_2c.js (co: [13]) — asymptotes → intersection avec y = x (2e degré) (E4.3)"
  },
  "homogrec": {
   "audit": "24.11.2026",
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E4.3",
   "plan": "Fonctions homographiques : réciproque (CdG 2e)",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "25.11.2026 : src/defis_2c.js (co: [13]) — réciproque d'une homographique, sa valeur interdite, une image (E4.3)"
  },
  "ineqpoly": {
   "audit": "24.11.2026",
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E3.4",
   "plan": "Inéquations à une inconnue, tableau des signes (CdG 2e)",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "defi": "25.11.2026 : src/defis_2c.js (co: [13]) — racine évidente → factorisation (zéro double parfois) → intervalles, entiers solutions (E3.4)"
  },
  "log": {
   "audit": "24.11.2026",
@@ -1953,49 +1964,56 @@
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E7.2",
   "plan": "Logarithmes : propriétés (CdG 2e)",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "25.11.2026 : src/defis_2c.js (co: [13]) — log_{b^m} x ± log_b x = K par changement de base ; a^(x + p) = b^x → x = log_{b/a}(a^p) (E7.3)"
  },
  "modexp": {
   "audit": "24.11.2026",
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E5.2",
   "plan": "Fonctions exponentielles : modèles (CdG 2e)",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "defi": "25.11.2026 : src/defis_2c.js (co: [13]) — valeur après n ans → année de dépassement d'un seuil (log) → taux pour l'atteindre plus tard (E5.2)"
  },
  "polydiv": {
   "audit": "24.11.2026",
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E3.1",
   "plan": "Polynômes : diviser (division avec reste) (CdG 2e)",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "defi": "25.11.2026 : src/defis_2c.js (co: [13]) — théorème du reste → système en p et q → Horner, autres racines (E3.1)"
  },
  "polyexpr": {
   "audit": "24.11.2026",
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E3.3",
   "plan": "Fonctions polynomiales (CdG 2e)",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "defi": "25.11.2026 : src/defis_2c.js (co: [13]) — degré 3 retrouvé par ses zéros et f(0), coefficient, tableau des signes (E3.3, E3.4)"
  },
  "polyfact": {
   "audit": "24.11.2026",
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E3.2",
   "plan": "Polynômes : factoriser (CdG 2e)",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "25.11.2026 : src/defis_2c.js (co: [13]) — degré 4 : racines entières, racine fractionnaire, forme factorisée (E3.2)"
  },
  "probrat": {
   "audit": "24.11.2026",
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E4.1",
   "plan": "Résolution de problèmes (CdG 2e)",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "25.11.2026 : src/defis_2c.js (co: [13]) — travail en commun (robinets, imprimantes) ; bateau et courant, vitesse moyenne"
  },
  "recip": {
   "audit": "24.11.2026",
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E6.2",
   "plan": "Bijection et réciproque (CdG 2e)",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "defi": "25.11.2026 : src/defis_2c.js (co: [13]) — parabole restreinte : m, borne de B, f⁻¹(v), expression de f⁻¹ (E6.2)"
  },
  "sinlaw": {
   "audit": "24.11.2026",
@@ -2130,7 +2148,8 @@
   "classe": "2e Collège",
   "etalon": "tools/niveau_2c.md E10.1",
   "plan": "Vecteurs du plan (2e, épreuve 2MA1)",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "defi": "25.11.2026 : src/defis_2c.js (co: [13]) — parallélogramme ABCD → angle (produit scalaire) → aire (déterminant) (E1.1, E10.1)"
  },
  "prio": {
   "classe": "11e",

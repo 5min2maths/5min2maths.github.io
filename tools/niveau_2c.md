@@ -151,3 +151,40 @@ d'années inférieures (le chapitre 2 reste vide, voir ci-dessous).
 6. **France** : cart (2nde), recip (1re), compo et modexp (lycée) utilisent les mêmes générateurs ; les nouveaux niveaux
    y restent au programme, mais à vérifier.
 7. Reste à faire : trigfn en radians (E9.2–E9.3) ; « vrai ou faux, justifier » (E3.5, E6.3, E9.4, E10.2) n'a pas de forme de réponse dans l'app.
+
+## Défis (niveau 4) de 2e — 25.11.2026 (agent defis2c, `src/defis_2c.js`)
+
+Constat : 19 notions de l'année n'avaient **aucun** « Problème de la semaine » (niveau 4 = formes du niveau 3).
+Ajout : un problème par notion (deux pour probrat, decomp, logbase), 2 à 4 questions qui s'enchaînent, valeurs tirées au
+hasard (jamais 0 ni ±1 comme réponse), indices et solution détaillée, calqués sur les épreuves 2MA1 / 2MA2. Réservés à la
+2e Collège (`co: [13]`) : ailleurs (1re, 3e–4e, France), le niveau 4 redescend au niveau 3 comme avant. Aucune de ces
+notions n'existe en MP (MP: null). Chargés dans le paquet 13 (build.py). Test : `tests/defis2c.html` (19 notions × 40
+tirages : structure, valeurs, réponse attendue acceptée par checkAnswer, code reproductible, 2e / 1re / 3e) ; largeur des
+formules vérifiée à 328 px (`tests/_mathjax_largeur.html#lv=4&ids=…`, aucune formule trop large).
+
+| Ch. | Notion | Défi | Étalon |
+|---|---|---|---|
+| 1 | cercle | centre, rayon (carrés complétés) → abscisses des points d'intersection avec une droite → longueur de la corde | E1.3 |
+| 1 | cercletan | tangente en T (pente, ordonnée à l'origine) → rayon du cercle de centre Q tangent à cette droite | E1.4 |
+| 3 | polydiv | P(x) = x³ + px² + qx + c, divisible par x − a, reste donné par x − b → p, q (système) → autres racines | E3.1 |
+| 3 | polyfact | degré 4 : trois racines entières, une fractionnaire, forme factorisée | E3.2 |
+| 3 | polyexpr | degré 3 par ses zéros et f(0) → coefficient dominant, coefficient de x → f(x) ≤ 0 (intervalles) | E3.3, E3.4 |
+| 3 | ineqpoly | cubique à racine évidente (zéro double une fois sur deux) → zéros → intervalles → nombre d'entiers solutions | E3.4 |
+| 4 | eqrat | valeurs interdites → équation du 2e degré → solution étrangère écartée | E4.1 |
+| 4 | fracetage | fraction à étages → valeurs interdites → équation (« aucune » solution 3 fois sur 10) | — |
+| 4 | homog | asymptotes → intersection avec y = x | E4.3 |
+| 4 | homogrec | f⁻¹(x), valeur interdite de f⁻¹, f⁻¹(v) | E4.3 |
+| 4 | probrat | travail en commun (robinets / imprimantes) ; bateau et courant (vitesse moyenne ≠ moyenne des vitesses) | — |
+| 5 | modexp | valeur après n ans → année de dépassement (log) → taux pour n'atteindre le seuil que plus tard | E5.2 |
+| 5 | expfrac | quotient de quatre racines → a^r → a^n·ᴰ√(a^m) → valeur pour a = 2^D | E5.3 |
+| 6 | compo | domaine de h∘f → h∘f simplifiée → équation | E6.1 |
+| 6 | decomp | h = f∘g par complétion du carré → maximum de a/((x − p)² + q) ou minimum de b^((x − p)² + q) | E6.1 |
+| 6 | bijection | plus grand intervalle [m ; q] d'injectivité → B = [u ; w] → antécédent | E6.2 |
+| 6 | recip | parabole restreinte → m, borne de B, f⁻¹(v), expression de f⁻¹ | E6.2 |
+| 7 | logbase | log_{b^m} x ± log_b x = K ; a^(x + p) = b^x → x = log_{b/a}(a^p) | E7.3 |
+| 10 | vecteurs | parallélogramme ABCD → angle BAD (produit scalaire) → aire (déterminant) | E1.1, E10.1 |
+
+À valider par l'enseignant : (1) réserver ces défis à la 2e (choix actuel) ou les ouvrir aussi aux 3e–4e Collège qui
+révisent ces notions (`co: [13, 14, 15]`) ; (2) probrat et fracetage n'ont pas d'étalon d'épreuve (niveau estimé) ;
+(3) recip demande l'expression de f⁻¹ avec une racine : la vérification accepte toute écriture équivalente, mais seulement
+si le domaine de f⁻¹ contient au moins deux des points-tests (d'où B choisi pour : k ≤ −2 si a > 0, k ≥ 2 si a < 0).
