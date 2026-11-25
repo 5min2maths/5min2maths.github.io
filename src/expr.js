@@ -479,6 +479,9 @@ function checkAnswer(spec, input) {
         const m = raw.match(/^(-?\d+(?:\.\d+)?)\*10\^\(?(-?\d+)\)?$/), a = m ? Math.abs(+m[1]) : 0;
         if (!(m && a >= 1 && a < 10) && !(/^-?\d+(\.\d+)?$/.test(raw) && Math.abs(v) >= 1 && Math.abs(v) < 10)) return { status: "form", message: "La valeur est juste ; écris-la en notation scientifique : a · 10^n avec 1 ≤ a < 10 (par exemple 4,5*10^-3)." };
       }
+      /* 26.11 (revue élèves, A11 : 12,2262409946 accepté pour 120√3/17) : racine exacte demandée (spec.radical, pas d'arrondi prévu) :
+         un décimal de calculatrice (4 décimales ou plus, moins de 15 chiffres) n'est pas la valeur exacte. */
+      if (spec.radical && /^-?\d+\.\d{4,}$/.test(raw) && raw !== String(+spec.value) /* valeur stockée arrondie par le générateur */ && raw.replace(/\D/g, "").replace(/^0+/, "").length < 15 && !/^-?\d+(\.\d{1,8})?$/.test(String(+(+spec.value).toPrecision(12)))) return { status: "form", message: "C'est une valeur approchée ; donne la valeur exacte (fraction, racine ou π)." };
       if (spec.radical) {
         // a√b, et aussi a√b/c, (a√b)/c, a/√b (20.11 : √21/5 ou √2/2 étaient refusés) ; « sqrt » tapé au clavier = √.
         const rr = raw.replace(/sqrt/gi, "√").replace(/^\((.*)\)(\/\d+)$/, "$1$2");

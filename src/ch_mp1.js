@@ -108,6 +108,15 @@
         return QX("Simplifie " + M("\\frac{x^2 " + (2 * a < 0 ? "- " + -2 * a : "+ " + 2 * a) + "x + " + a * a + "}{x^2 - " + a * a + "}") + ".", "(x" + (a < 0 ? a : "+" + a) + ")/(x" + (a < 0 ? "+" + -a : "-" + a) + ")", "", "Carré parfait et différence de carrés : " + M("\\frac{(" + xm(-a) + ")^2}{(" + xm(-a) + ")(" + xm(a) + ")} = \\frac{" + xm(-a) + "}{" + xm(a) + "}") + ".", { ctx: "carre-parfait", guide: [GX("Numérateur factorisé", "(" + xs(-a) + ")^2", M("(" + xm(-a) + ")^2") + "."), GX("Résultat", "(x" + (a < 0 ? a : "+" + a) + ")/(x" + (a < 0 ? "+" + -a : "-" + a) + ")", M("\\frac{" + xm(-a) + "}{" + xm(a) + "}") + ".")], traps: [TX("1", "Il reste un facteur en haut et en bas.")] }); },
     ],
   };
+  // Lot 26.11 (référentiel du Collège 2.AL.02c : multiplier et diviser des fractions rationnelles) : la division, au
+  // niveau 3 à côté du produit (multiplier par l'inverse, factoriser, simplifier).
+  FR[3].push(() => { const a = R.int(1, 7), s = pk([1, -1]), k = R.int(2, 4), m = R.int(2, 5), d = xm(-s * a), r = xm(s * a), A = a * a;
+    const e = k + "*(" + xs(s * a) + ")";
+    return QX("Simplifie " + M("\\frac{x^2 - " + A + "}{" + m + "x} \\div \\frac{" + d + "}{" + k * m + "x}") + " (pour les valeurs de " + M("x") + " permises).", e, "nodiv",
+      "Diviser, c'est multiplier par l'inverse : " + M("\\frac{x^2 - " + A + "}{" + m + "x} \\cdot \\frac{" + k * m + "x}{" + d + "} = \\frac{(x - " + a + ")(x + " + a + ") \\cdot " + k * m + "x}{" + m + "x \\cdot (" + d + ")} = " + k + "(" + r + ")") + ".",
+      { ctx: "division", guide: [GX("Multiplie par l'inverse de la deuxième fraction : écris le produit obtenu", "(x^2-" + A + ")/(" + m + "*x)*(" + k * m + "*x)/(" + xs(-s * a) + ")", M("\\frac{x^2 - " + A + "}{" + m + "x} \\cdot \\frac{" + k * m + "x}{" + d + "}") + "."),
+        GX("Factorise " + M("x^2 - " + A), "(x-" + a + ")*(x+" + a + ")", M("(x - " + a + ")(x + " + a + ")") + "."), GX("Après simplification", e, M(k + "(" + r + ")") + ".")],
+        traps: [TX("(x^2-" + A + ")*(" + xs(-s * a) + ")/(" + k * m * m + "*x^2)", "On ne multiplie pas directement : diviser, c'est multiplier par l'INVERSE de la deuxième fraction."), TX("(" + xs(s * a) + ")/" + k, "C'est la deuxième fraction qu'on retourne, pas la première.")] }); });
 
   // ===================== valint =====================
   const VI = {
@@ -190,7 +199,7 @@
   if (typeof COMPS !== "undefined") Object.assign(COMPS, {
     vabs: ["Calculer, distance", "Équations, compter des entiers", "Équations à deux cas, aucune solution"],
     ratden: ["Dénominateur √m", "Conjugué, sommes", "Sommes de conjugués, simplifications"],
-    fracrat: ["Simplifier (trinôme, différence de carrés)", "Facteur commun, opposé", "Une seule fraction, produits"],
+    fracrat: ["Simplifier (trinôme, différence de carrés)", "Facteur commun, opposé", "Une seule fraction, produits, quotients"],
     valint: ["Une ou deux valeurs", "Trinôme, sommes, mise en évidence", "Degré 3, Δ < 0, fraction étagée"],
     eqparam: ["Aucune solution, paramètre par une solution", "Δ = 0, infinité, degré 2", "Infinité, écart des solutions, seuil"],
   });

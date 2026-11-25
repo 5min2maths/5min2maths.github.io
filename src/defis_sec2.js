@@ -41,10 +41,11 @@
   PX("arith", { co: [12], mp: [12] }, () => {
     let g, m, n; do { g = ri(12, 48); m = ri(5, 17); n = ri(5, 17); } while (gcd(m, n) !== 1 || m === n);
     const a = g * Math.max(m, n), b = g * Math.min(m, n), L = (a * b) / g;
-    return PB("On veut carreler sans découpe une salle rectangulaire de " + X(a) + " cm sur " + X(b) + " cm avec des carreaux carrés identiques, les plus grands possible. On empile ensuite des boîtes de " + X(a) + " mm et de " + X(b) + " mm de haut en deux colonnes séparées.",
-      [["a) Côté des carreaux, en cm (algorithme d'Euclide conseillé)", g], ["b) Nombre de carreaux", m * n], ["c) Plus petite hauteur non nulle où les deux colonnes ont la même hauteur, en mm", L]],
-      ["Euclide : PGDC(a ; b) = PGDC(b ; reste de a ÷ b), jusqu'au reste nul.", "c) Hauteur commune : multiple commun ; PGDC · PPMC = a · b."],
-      "a) PGDC(" + a + " ; " + b + ") = " + g + " cm. b) " + M((a / g) + " \\cdot " + (b / g) + " = " + m * n) + " carreaux. c) PPMC = " + M("\\frac{" + N(a) + " \\cdot " + N(b) + "}{" + g + "} = " + N(L)) + " mm.");
+    /* 26.11 (vraisemblance, décision de l'enseignant) : un seul contexte (le carrelage) ; les boîtes empilées sont retirées. */
+    return PB("On veut carreler sans découpe une salle rectangulaire de " + X(a) + " cm sur " + X(b) + " cm avec des carreaux carrés identiques, les plus grands possible. Les carreaux sont vendus par boîtes de 10.",
+      [["a) Côté des carreaux, en cm (algorithme d'Euclide conseillé)", g], ["b) Nombre de carreaux", m * n], ["c) Nombre de boîtes à acheter, au minimum", Math.ceil((m * n) / 10)]],
+      ["Euclide : PGDC(a ; b) = PGDC(b ; reste de a ÷ b), jusqu'au reste nul.", "c) Il faut au moins le nombre de carreaux : on arrondit à la boîte supérieure."],
+      "a) PGDC(" + a + " ; " + b + ") = " + g + " cm. b) " + M((a / g) + " \\cdot " + (b / g) + " = " + m * n) + " carreaux. c) " + M(m * n + " \\div 10") + " arrondi à l'unité supérieure : " + Math.ceil((m * n) / 10) + " boîtes.");
   });
   // ---------- fracper : 1re Collège ----------
   PX("fracper", { co: [12] }, () => {

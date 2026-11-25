@@ -57,7 +57,7 @@ function pzBind(root) {
 }
 
 /* 25.11 (revue) : « Sec. II », comme l’app (écran d’accueil, « Je suis en : »), au lieu de « Collège / MP ». */
-const pzGrades = (id) => `<div class="seg pz-grades" id="${id}">${(PZ.fr() ? [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"], [12, "Tle"]] : [[9, "9e"], [10, "10e"], [11, "11e"], [12, "Sec. II"]]).map(([g, l]) => `<button type="button" aria-pressed="${g === PZ.grade}" data-v="${g}">${l}</button>`).join("")}</div>`;
+const pzGrades = (id) => `<div class="seg pz-grades" id="${id}">${(PZ.fr() ? [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"], [12, "Tle"]] : [[9, "9e"], [10, "10e"], [11, "11e"], [12, "Sec. II<small class=\"seg-sub\">Collège, MP</small>"]]).map(([g, l]) => `<button type="button" aria-pressed="${g === PZ.grade}" data-v="${g}">${l}</button>`).join("")}</div>`;
 
 function pzQuestion() {
   if (PZ.fr()) return pzQuestionFR();

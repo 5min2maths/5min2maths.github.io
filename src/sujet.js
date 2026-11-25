@@ -58,7 +58,7 @@ function mockShow(v) {
 // « Vrai ou faux ? » : la valeur annoncée est juste une fois sur deux (selon la graine), sinon une erreur plausible.
 function mockVF(it, q) {
   const sp = q.spec || {};
-  if (sp.kind !== "value" || sp.round || mockShow(sp.value) === null) return null;
+  if (sp.kind !== "value" || sp.round || mockShow(sp.value) === null || q.ctx === "erreur" || /Trouve l.erreur/.test(q.q || "")) return null; /* 26.11 : pas de « Vrai ou faux » greffé sur un « Trouve l'erreur » */
   const v = sp.value, isTrue = it.seed % 2 === 0;
   let w = v;
   if (!isTrue) {
@@ -72,6 +72,8 @@ function mockVF(it, q) {
     q: q.q + "<br>" + who + " répond " + M(mockShow(w)) + ". <b>A-t-" + (["Léa", "Lina", "Inès"].includes(who) ? "elle" : "il") + " raison ? Justifie.</b>",
     sol: "<b>" + (w === v ? "Vrai" : "Faux, la bonne réponse est " + M(mockShow(v))) + ".</b> " + (q.sol || "") };
 }
+/* 26.11 (revue élèves, A9 : « Vrai ou faux ? » sur un « Trouve l'erreur ») : titre selon la question réelle. */
+const mockTitle = (x) => (x.q.parts ? "Problème" : x.vf ? "Vrai ou faux ?" : /Trouve l.erreur/.test(x.q.q || "") ? "Trouve l'erreur" : "Question");
 function mockQuestions() {
   return state.mock.items.map((it) => {
     if (it.rich && RICH[it.rich]) { R.seed(it.seed); const q = moneyQ(RICH[it.rich][it.kind === "raison" ? "raison" : "ex"][it.k]()); return { ...it, id: q.id, q, pts: q.pts }; }
@@ -117,7 +119,7 @@ function screenMock() {
   <div class="card flat"><p class="small">Pour t'entraîner avant ton test. <b>Ce n'est pas une évaluation</b> : il n'y a pas de note, et personne d'autre que toi ne voit le résultat. Fais-le sur une feuille, sans regarder tes cours, puis corrige-toi avec le corrigé.</p></div>
   <section class="mock-part"><h3>A. Automatismes</h3>${A.map((x) => qHtml(x, "Question " + ++num)).join("")}</section>
   <section class="mock-part"><h3>B. Exercices</h3>${exs.map((e, k) => { const L = B.filter((x) => x.ex === e); num++; return `<div class="mock-ex"><h4>Exercice ${k + 1} · ${L[0].q.titre || nLabel(L[0].id)}</h4>${L.map((x, j) => qHtml(x, x.q.titre ? "" : String.fromCharCode(97 + j) + ")")).join("")}</div>`; }).join("")}</section>
-  ${C.length ? `<section class="mock-part"><h3>C. Raisonnement</h3>${C.map((x) => qHtml(x, x.q.titre || (x.q.parts ? "Problème" : "Vrai ou faux ?"))).join("")}</section>` : ""}
+  ${C.length ? `<section class="mock-part"><h3>C. Raisonnement</h3>${C.map((x) => qHtml(x, x.q.titre || (x.q.parts ? "Problème" : mockTitle(x)))).join("")}</section>` : ""}
   <div class="stack no-print">
     <button class="btn-primary btn-big" id="corr">J'ai fini : voir le corrigé</button>
     <div class="row"><button class="btn-primary" id="print">🖨 Imprimer / PDF</button><button class="btn-ghost" id="again">Un autre sujet</button><button class="btn-ghost" id="back">Retour</button></div>
@@ -134,7 +136,7 @@ function screenMockCorr() {
   const partName = { A: "A. Automatismes", B: "B. Exercices", C: "C. Raisonnement" };
   h(`${brand}<div class="eyebrow">Sujet de préparation · corrigé</div><h2>Corrige-toi</h2>
   <p class="small muted">Compare avec ta feuille et coche honnêtement, question par question. Pour « Vrai ou faux », la justification compte : sans justification juste, coche « en partie ».</p>
-  <div class="mock-list">${qs.map((x, i) => `${i === 0 || qs[i - 1].part !== x.part ? `<h3>${partName[x.part]}</h3>` : ""}<div class="mock-q card flat"><div class="spread"><b>${x.q.titre ? x.q.titre : x.part === "B" ? "Exercice · " + nLabel(x.id) : x.vf ? "Vrai ou faux ?" : x.q.parts ? "Problème" : "Question"}</b></div>
+  <div class="mock-list">${qs.map((x, i) => `${i === 0 || qs[i - 1].part !== x.part ? `<h3>${partName[x.part]}</h3>` : ""}<div class="mock-q card flat"><div class="spread"><b>${x.q.titre ? x.q.titre : x.part === "B" ? "Exercice · " + nLabel(x.id) : x.vf || x.part === "C" ? mockTitle(x) : x.q.parts ? "Problème" : "Question"}</b></div>
     <div class="small">${x.q.q}</div>
     <div class="rule"><b>Corrigé</b> · ${x.q.sol || ""}</div>
     <div class="seg mock-mark" data-i="${i}"><button type="button" data-v="1">✓ Juste</button><button type="button" data-v="0.5">½ En partie</button><button type="button" data-v="0">✗ Faux</button></div></div>`).join("")}</div>

@@ -29,7 +29,10 @@ const colonBreak = (s) => {
   const parts = s.split(/(\\\(.*?\\\))/);
   for (let i = 0; i < parts.length; i += 2) {
     let t = parts[i];
-    if (i > 0) t = t.replace(/^\s*:\s+(?=\S)/, "<br>").replace(/^\s*:\s*$/, i + 1 < parts.length ? "<br>" : " :"); // juste après une formule
+    /* 26.11 (revue élèves, B10 : « Les x² ⏎ 3x² ; les x ⏎ 3x ») : entre deux formules, on ne coupe après « : » que si une
+       vraie phrase (3 mots au moins) précède la formule ; sinon le « : » reste sur la ligne. */
+    const phrase = i > 0 && (String(parts[i - 2] || "").split(/[.;!?]|<br>/).pop().match(/\p{L}{2,}/gu) || []).length >= 3;
+    if (i > 0) t = t.replace(/^\s*:\s+(?=\S)/, "<br>").replace(/^\s*:\s*$/, i + 1 < parts.length && phrase ? "<br>" : " :"); // juste après une formule
     t = t.replace(/(^|[.!?]\s+|<br>)([^.!?<:]*?=[^.!?<:]*?[0-9A-Za-zÀ-ÿ²³⁴)\]]) : (?=\S)/g, "$1$2<br>"); // « x = 3 : … »
     // « Divisibles par 9 : 117, 126 » se lit « 9 ÷ 117 » : on garde les deux-points et on passe à la ligne.
     t = t.replace(/([0-9)²³°]) : (?=[-−0-9(]|$)/g, "$1 :<br>");
@@ -41,7 +44,9 @@ const colonBreak = (s) => {
 /* 26.11 (audit de vraisemblance, tests/vraisemblance.html) : un montant s'écrit avec deux décimales (« 2,50 CHF », « 0,80 € »),
    jamais « 2,5 CHF » (37 générateurs le faisaient). Appliqué aux textes des questions (Engine.build, sujets) ; jamais aux réponses. */
 /* Même passe : élision devant un prénom ou un nom propre à voyelle (« le compte de Elsa » → « d'Elsa », « que Inès » → « qu'Inès »). */
-const moneyTidy = (s) => typeof s !== "string" ? s : s.replace(/(^|[^\p{L}])([dD]e|[qQ]ue) (?=[AEIOUYÉÈÊÎ][a-zàâçéèêëîïôûù]+)/gu, (m, b, w) => b + w.slice(0, -1) + "'").replace(/(^|[^\p{L}])([dD]e|[àÀ]) Le (?=\p{Lu})/gu, (m, b, w) => b + (/^[dD]/.test(w) ? w[0] + "u" : w === "à" ? "au" : "Au") + " ").replace(/(^|[^\p{L}])([dD]e|[àÀ]) Les (?=\p{Lu})/gu, (m, b, w) => b + (/^[dD]/.test(w) ? w[0] + "es" : w === "à" ? "aux" : "Aux") + " ").replace(/(\d(?:\{,\}|,))(\d)(?![\d{]|\{,|,\d)((?:\\\))?(?:\s|\\[ ,;]|~|&nbsp;|\\text\{\s*|\\mathrm\{\s*)*(?:CHF|€|francs?(?![a-z])|euros?(?![a-z])))/g, (m, a, b, c) => a + b + "0" + c);
+/* 26.11 (revue élèves, A13 : « 1 rang(s) », « 2 décimale(s) ») : accord calculé d'après le nombre qui précède. */
+const plurTidy = (s) => s.replace(/(^|[^\d,.])(\d+) (\p{L}+)\(s\)/gu, (m, b, n, w) => b + n + " " + w + (+n >= 2 ? "s" : ""));
+const moneyTidy = (s) => typeof s !== "string" ? s : plurTidy(s).replace(/(^|[^\p{L}])([dD]e|[qQ]ue) (?=[AEIOUYÉÈÊÎ][a-zàâçéèêëîïôûù]+)/gu, (m, b, w) => b + w.slice(0, -1) + "'").replace(/(^|[^\p{L}])([dD]e|[àÀ]) Le (?=\p{Lu})/gu, (m, b, w) => b + (/^[dD]/.test(w) ? w[0] + "u" : w === "à" ? "au" : "Au") + " ").replace(/(^|[^\p{L}])([dD]e|[àÀ]) Les (?=\p{Lu})/gu, (m, b, w) => b + (/^[dD]/.test(w) ? w[0] + "es" : w === "à" ? "aux" : "Aux") + " ").replace(/(\d(?:\{,\}|,))(\d)(?![\d{]|\{,|,\d)((?:\\\))?(?:\s|\\[ ,;]|~|&nbsp;|\\text\{\s*|\\mathrm\{\s*)*(?:CHF|€|francs?(?![a-z])|euros?(?![a-z])))/g, (m, a, b, c) => a + b + "0" + c);
 /* 26.11 : accord après 1 (« 1 vertes », « 1 connexions réussies », « 1 lancers francs ») dans les textes tirés au hasard. */
 const ONE_N = "boules|billes|jetons|cartes|perles|bonbons|stylos|livres|pièces|bleues|vertes|rouges|blanches|noires|jaunes|connexions|lancers|élèves|personnes|filles|garçons|enfants|adultes|flèches|tirs|paniers|buts";
 const ONE_A = "réussies|réussis|francs|rouges|bleues|vertes|blanches|noires|jaunes|gagnants|gagnantes|défectueuses|ratés|manqués";

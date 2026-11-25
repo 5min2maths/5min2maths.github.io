@@ -88,6 +88,14 @@ const VRAI_CHECK = (() => {
       if ((m = new RegExp("(?:\\ba|âgée? de|aura|avait) (" + NUM + ") ans\\b").exec(s)) && (num(m[1]) > 110 || num(m[1]) < 0)) add("âge invraisemblable", s.slice(0, 120));
       const tc = (s.match(new RegExp(NUM + " ?°C", "g")) || []).map((t) => num(t.replace("°C", "")));
       if (tc.length && !/thé|café|°F|refroid/i.test(all) && !/four|soleil|lave|fusion|ébullition|métal|fer|acier|cuisson|bouill|eau chaude|pizza|réacteur/i.test(s) && (Math.max(...tc) > 60 && !/thé|café|tasse|boisson|refroid|°F|chocolat|soupe|bain|douche/i.test(s) || Math.min(...tc) < -90)) add("température invraisemblable", s.slice(0, 120));
+      /* 26.11 (lot, décisions de l'enseignant sur les cas douteux) : contextes chiffrés vérifiables */
+      if ((m = new RegExp("(" + NUM + ") (?:réservations|inscriptions|billets) pour (?:un vol de |)(" + NUM + ") (?:chambres|places)").exec(s)) && num(m[1]) - num(m[2]) > Math.max(3, 0.15 * num(m[2])) && !/gratuit|un inscrit sur deux/.test(s)) add("surréservation invraisemblable", s.slice(0, 120));
+      if (/cheval|péniche/i.test(s)) { const fN = (s.match(new RegExp(NUM + " ?N\\b", "g")) || []).map((t) => num(t.replace(/ ?N$/, ""))); if (fN.some((v) => v < 200 || v > 2000)) add("force invraisemblable", s.slice(0, 120)); }
+      if (/luge/i.test(s)) { const fN = (s.match(new RegExp(NUM + " ?N\\b", "g")) || []).map((t) => num(t.replace(/ ?N$/, ""))); if (fN.some((v) => v > 150)) add("force invraisemblable", s.slice(0, 120)); }
+      if (/chariot/i.test(s) && /rail/i.test(all)) { const ms = (s.match(new RegExp(NUM + " ?m/s(?!²)", "g")) || []).map((t) => num(t.replace(/ ?m\/s$/, ""))); if (ms.some((v) => v > 15)) add("vitesse invraisemblable", s.slice(0, 120)); }
+      if ((m = new RegExp("baisse (?:d'environ |de |)(" + NUM + ") ?°C chaque fois qu'on monte de (" + NUM + ") ?m").exec(s))) { const r = (num(m[1]) / num(m[2])) * 100; if (r < 0.45 || r > 0.8) add("gradient d'altitude invraisemblable", s.slice(0, 120)); }
+      if (/cinéma/i.test(s)) { const RE = new RegExp("(?:billets?|places?|séances?)(?: adultes?|)(?: de cinéma|)(?: à| coûte| :) (" + NUM + ") ?CHF", "g"); let c; while ((c = RE.exec(s))) if (num(c[1]) < 8 && !/enfant|réduit|abonn/.test(s.slice(Math.max(0, c.index - 30), c.index + 40))) add("prix de cinéma invraisemblable", s.slice(0, 120)); }
+      if (/bouteilles?/i.test(s) && (m = new RegExp("(" + NUM + ") ?cm[^.;]{0,80}?(" + NUM + ") ?L\\b").exec(s))) { const r = num(m[2]) / num(m[1]) ** 3; if (r < 2.5e-5 || r > 1.3e-4) add("bouteille invraisemblable", s.slice(0, 120)); }
       if ((m = new RegExp("classe (?:de|compte|a) (" + NUM + ") élèves").exec(s)) && (num(m[1]) > 30 || num(m[1]) < 8)) add("effectif de classe invraisemblable", s.slice(0, 120));
     }
     /* point décimal (le texte doit avoir la virgule) */
@@ -100,7 +108,7 @@ const VRAI_CHECK = (() => {
     /* langue : élision devant un prénom, « Un(e) … il ou elle », mot doublé, « 1 billes » */
     for (const t of [x.txt, ...x.parts.map((p) => p.label)]) {
       if ((m = /(^|[^\p{L}])(de|que) [AEIOUYÉÈ][a-zàâçéèêëîïôûù]+/u.exec(t))) add("élision manquante", t.slice(Math.max(0, m.index - 20), m.index + 30));
-      if ((m = /\bun\(e\)|\bil ou elle\b|\bde le\b|\bà le\b|\bde les\b|\bà les\b/i.exec(t))) add("formulation", t.slice(Math.max(0, m.index - 30), m.index + 30));
+      if ((m = /\bun\(e\)|\bil ou elle\b|\bde le\b|\bà le\b|\bde les\b|\bà les\b/i.exec(t)) || (m = /\((?:elle|il|e|es|elles)\)/.exec(t))) /* 26.11 : « économise-t-il (elle) », « Un(e) » (minuscules : P_N(E) n'est pas visé) */ add("formulation", t.slice(Math.max(0, m.index - 30), m.index + 30));
       if ((m = /(?<![\p{L}])(\p{L}{2,}) \1(?![\p{L}])/iu.exec(t)) && !/^(nous|vous|très|bien|plus|tout|fois|pmatrix|cases|array)$/i.test(m[1])) add("mot doublé", t.slice(Math.max(0, m.index - 20), m.index + 30));
       if ((m = /(?<![\d,'.]|[-−] )1 (?!vers|dans|sous|sans|cases|succès|fois|mois|pas|bras|prix|poids|choix|cours|jus|repas|bus|os|puits|corps|temps|nez|croix|voix|noix|riz|pays|souris|tapis|parcours|colis|dés\b)([a-zéèêàç]{3,}s)\b/.exec(t)) && !/sur 1 |1 sur /.test(t.slice(Math.max(0, m.index - 4), m.index + 6))) add("accord après 1", t.slice(Math.max(0, m.index - 20), m.index + 30));
     }

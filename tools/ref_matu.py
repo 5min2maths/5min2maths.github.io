@@ -26,30 +26,32 @@ NIVEAU = ["MA1+MA2", "MA2", "MA1"]
 # Notion → { code : niveaux de question (1, 2, 3) qui travaillent cette compétence }. [] : la notion ne l'alimente pas
 # (la compétence reste rattachée aux autres notions, ou « travaillée en classe »). Codes absents : tous les niveaux.
 # Seulement pour les notions dont les niveaux ont des savoir-faire distincts (src/competences.js) ; à valider.
+# 26.11 (lot) : 1.AL.03c, 1.FO.03c, 1.FO.04a, 1.FO.09a, 1.GE.01a, 2.AL.02c, 2.GE.02c rattachées aux niveaux qui ont
+# maintenant (ou avaient déjà) une forme de ce savoir-faire (formes « lot 26.11 » dans src/ch*.js).
 NIVEAUX = {
     "simil": {"1.GE.03a": [1], "1.GE.03c": [2, 3]},
-    "factor": {"1.AL.03a": [1], "1.AL.03b": [2, 3], "1.AL.03c": []},
+    "factor": {"1.AL.03a": [1], "1.AL.03b": [2, 3], "1.AL.03c": [3]},
     "affine": {"1.FO.05b": [2]},
-    "angles": {"1.GE.01c": [1, 2], "1.GE.01a": []},
+    "angles": {"1.GE.01a": [1, 2, 3], "1.GE.01c": [2, 3]},
     "polyop": {"1.AL.01c": [1], "1.AL.02a": [2]},
     "factor2": {"1.AL.03d": [3]},
-    "fimg": {"1.FO.03a": [1, 2], "1.FO.03b": [3], "1.FO.03c": [], "1.FO.04a": []},
+    "fimg": {"1.FO.03a": [1, 2], "1.FO.03b": [3], "1.FO.03c": [1, 2, 3], "1.FO.04a": [1, 2]},
     "f2": {"1.FO.07a": [1], "1.FO.07b": [2, 3]},
     "f2expr": {"1.FO.08a": [1], "1.FO.08b": [2]},
-    "inter": {"1.FO.09a": [], "1.FO.09b": [1, 2, 3]},
+    "inter": {"1.FO.09a": [1], "1.FO.09b": [1, 2, 3]},
     "ineq2": {"1.FO.09d": [3], "2.AL.04b": [1, 2]},
     "racinv": {"1.FO.10c": [1], "1.FO.11a": [2], "1.FO.11b": [3]},
     "trigo": {"1.GE.05b": [1], "1.GE.05c": [2], "1.GE.06a": [3]},
     "polydiv": {"2.AL.01b": [2], "2.AL.01c": [1, 3]},
     "polyfact": {"2.AL.01d": [1, 2], "2.AL.01e": [3]},
-    "fracrat": {"2.AL.02b": [1, 3], "2.AL.02d": [2], "2.AL.02c": []},
+    "fracrat": {"2.AL.02b": [1, 3], "2.AL.02d": [2], "2.AL.02c": [3]},
     "eqrat": {"2.AL.03a": [1, 2], "2.AL.03b": [3]},
     "recip": {"2.FO.03a": [1, 3], "2.FO.03c": [2]},
     "homog": {"2.FO.06b": [1, 2]},
     "trigcercle": {"2.FO.07a": [1], "2.FO.07c": [2], "2.FO.07b": [3]},
     "expo": {"2.FO.11a": [1, 2]},
     "log": {"2.FO.10c": [1], "2.FO.11b": [2], "2.FO.10d": [3]},
-    "sinlaw": {"2.GE.02a": [1], "2.GE.02b": [2, 3], "2.GE.02c": []},
+    "sinlaw": {"2.GE.02a": [1], "2.GE.02b": [2, 3], "2.GE.02c": [3]},
     "droites": {"2.GE.03b": [1], "2.GE.03c": [2]},
     "cercle": {"2.GE.04b": [1, 2], "2.GE.05a": [3]},
 }

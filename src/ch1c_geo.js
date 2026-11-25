@@ -199,7 +199,7 @@
         return Qv("Un triangle isocèle a deux angles à la base de " + M(b + "°") + ". Que mesure l'angle au sommet (en degrés) ?", 180 - 2 * b, M("180° - 2 \\cdot " + b + "° = " + (180 - 2 * b) + "°") + ".",
           { ctx: "sommet", guide: [GS("Somme des angles à la base ?", 2 * b, M(2 * b) + "°."), GS("Angle au sommet ?", 180 - 2 * b, M(180 - 2 * b) + "°.")], traps: [TR(180 - b, "Il y a DEUX angles à la base de " + b + "°."), TR(b, "Les angles à la base sont égaux entre eux.")] }); },
       () => { const a = R.int(40, 140); if (a === 90) return null;
-        return Qv("Dans un parallélogramme, un angle mesure " + M(a + "°") + ". Que mesure l'angle consécutif (voisin) (en degrés) ?", 180 - a, "Deux angles consécutifs d'un parallélogramme sont supplémentaires : " + M("180° - " + a + "° = " + (180 - a) + "°") + ".",
+        return Qv("Dans un parallélogramme, un angle mesure " + M(a + "°") + ". Que mesure un angle voisin (consécutif), en degrés ?", 180 - a, "Deux angles consécutifs d'un parallélogramme sont supplémentaires : " + M("180° - " + a + "° = " + (180 - a) + "°") + ".",
           { ctx: "parallelogramme", guide: [GS("Angle consécutif ?", 180 - a, M(180 - a) + "°.")], traps: [TR(a, "Ce sont les angles OPPOSÉS qui sont égaux."), TR(360 - a, "Consécutifs : supplémentaires (180°).")] }); },
     ],
     3: [

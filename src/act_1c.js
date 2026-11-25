@@ -83,7 +83,7 @@
         wins: [W(26, "6 + 2 · 10 = 26 CHF."), W(6, "6 + 2x = 3x ⇔ x = 6 km."), W(18, "6 + 12 = 18 = 3 · 6 CHF.")] }),
     },
     f2: {
-      predict: { q: "La parabole f(x) = x² − 6x + 5 a son sommet en x = …", choices: ["3", "−3", "5"], good: 0, why: "x_S = −b ÷ (2a) = 6 ÷ 2 = 3 : c'est aussi le milieu des zéros 1 et 5." },
+      predict: { q: "La parabole f(x) = x² − 4x + 3 a son sommet en x = …", choices: ["2", "−2", "3"], good: 0, why: "x_S = −b ÷ (2a) = 4 ÷ 2 = 2 : c'est aussi le milieu des zéros 1 et 3." },
       defis: ["Abscisse du sommet de x² − 6x + 5 ?", "Ordonnée du sommet ?", "Plus grand zéro ?"],
       play: hunt({ ask: true, label: "Ta réponse", blank: () => FIG.plot([{ f: (t) => t * t - 6 * t + 5 }], [], { numbers: true, xr: [-2, 8], yr: [-5, 8] }), show: (x) => FIG.plot([{ f: (t) => t * t - 6 * t + 5 }], [[x, 0, ""]], { numbers: true, xr: [-2, 8], yr: [-5, 8] }) + plain("tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(3, "x_S = 6 ÷ 2 = 3."), W(-4, "f(3) = 9 − 18 + 5 = −4."), W(5, "(x − 1)(x − 5) = 0 : zéros 1 et 5.")] }),
@@ -100,7 +100,7 @@
     euclide: {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
       retiens: { regle: "Théorème de la hauteur : dans un triangle rectangle, la hauteur issue de l'angle droit coupe l'hypoténuse en deux segments \\(p\\) et \\(q\\), et \\(h^2 = p \\cdot q\\).", exemple: ["\\(p = 4\\) et \\(q = 9\\) : \\(h^2 = 36\\), donc \\(h = 6\\).", "\\(p = 2\\) et \\(q = 8\\) : \\(h^2 = 16\\), donc \\(h = 4\\)."], piege: "\\(h^2 = p \\cdot q\\) : la hauteur n'est pas la moyenne des deux segments (6, pas 6,5)." },
-      predict: { q: "Triangle rectangle : la hauteur coupe l'hypoténuse en 4 cm et 9 cm. La hauteur mesure…", choices: ["6,5 cm", "6 cm", "13 cm"], good: 1, why: "Théorème de la hauteur : h² = 4 · 9 = 36, h = 6 (et non la moyenne 6,5)." },
+      predict: { q: "Triangle rectangle : la hauteur coupe l'hypoténuse en 2 cm et 8 cm. La hauteur mesure…", choices: ["5 cm", "4 cm", "10 cm"], good: 1, why: "Théorème de la hauteur : h² = 2 · 8 = 16, h = 4 (et non la moyenne 5)." },
       defis: ["h pour des segments de 4 et 9 ?", "Cathète a (projection 4, hypoténuse 13) au carré : a² = ?", "h pour des segments de 2 et 8 ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(["h² = 4 · 9", "a² = p · c = 4 · 13", "h² = 2 · 8"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(6, "√36 = 6."), W(52, "a² = 52, a = 2√13."), W(4, "√16 = 4.")] }),
@@ -156,7 +156,7 @@
     ineq: {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
       retiens: { regle: "On résout une inéquation du 1er degré comme une équation, en isolant \\(x\\). En multipliant ou en divisant par un nombre négatif, on retourne le sens de l'inégalité.", exemple: ["\\(-2x > 6\\) : on divise par \\(-2\\), donc \\(x < -3\\).", "\\(5 - x < 2\\) : \\(-x < -3\\), donc \\(x > 3\\) ; plus petit entier : 4."], piege: "\\(-2x > 6\\) donne \\(x < -3\\), pas \\(x > -3\\) : le sens se retourne." },
-      predict: { q: "−2x > 6 donne…", choices: ["x > −3", "x < −3", "x > 3"], good: 1, why: "En divisant par −2 (négatif), on RETOURNE le sens : x < −3." },
+      predict: { q: "−3x > 12 donne…", choices: ["x > −4", "x < −4", "x > 4"], good: 1, why: "En divisant par −3 (négatif), on RETOURNE le sens : x < −4." },
       defis: ["−2x > 6 : x < … ?", "3x − 4 ≤ 11 : x ≤ … ?", "Plus petit entier solution de 5 − x < 2 ?"],
       play: hunt({ ask: true, label: "Borne", show: (x, s) => plain(["6 ÷ (−2)", "3x ≤ 15", "−x < −3 ⇔ x > 3"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(-3, "x < −3 (sens retourné)."), W(5, "x ≤ 5."), W(4, "x > 3 : le plus petit entier est 4.")] }),
@@ -190,7 +190,7 @@
     geocomb: {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
       retiens: { regle: "On repère les triangles rectangles cachés dans la figure, puis on applique Pythagore. Losange : les diagonales se coupent en leur milieu à angle droit. Pavé : on calcule d'abord la diagonale d'une face, puis celle du pavé.", exemple: ["Losange de diagonales 6 et 8 : côté \\(\\sqrt{3^2 + 4^2} = 5\\).", "Pavé \\(2 \\times 3 \\times 6\\) : diagonale \\(\\sqrt{4 + 9 + 36} = 7\\)."] },
-      predict: { q: "Un losange a des diagonales de 6 et 8 cm. Son côté mesure…", choices: ["7 cm", "5 cm", "10 cm"], good: 1, why: "Les diagonales se coupent en leur milieu à angle droit : √(3² + 4²) = 5." },
+      predict: { q: "Un losange a des diagonales de 10 et 24 cm. Son côté mesure…", choices: ["17 cm", "13 cm", "26 cm"], good: 1, why: "Les diagonales se coupent en leur milieu à angle droit : √(5² + 12²) = 13." },
       defis: ["Côté du losange de diagonales 6 et 8 ?", "Hauteur d'un triangle isocèle de côtés 10, 10 et base 12 ?", "Diagonale d'un pavé 2 × 3 × 6 ?"],
       play: hunt({ ask: true, label: "Longueur", show: (x, s) => plain(["√(3² + 4²)", "√(10² − 6²)", "√(4 + 9 + 36)"][s] + " ; tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(5, "Demi-diagonales 3 et 4 : 5."), W(8, "Demi-base 6 : √64 = 8."), W(7, "√49 = 7.")] }),
@@ -228,7 +228,7 @@
     factor2: {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
       retiens: { regle: "Étape 1 : mise en évidence d'un facteur commun. Étape 2 : identités remarquables (\\(a^2 - b^2 = (a - b)(a + b)\\), carrés parfaits \\(a^2 + 2ab + b^2 = (a + b)^2\\)). On recommence tant qu'un facteur peut encore se factoriser.", exemple: ["\\(2x^2 - 18 = 2(x^2 - 9) = 2(x - 3)(x + 3)\\)", "\\(x^2 + 10x + 25 = (x + 5)^2\\)"], piege: "\\(2(x^2 - 9)\\) n'est pas fini : \\(x^2 - 9\\) se factorise encore." },
-      predict: { q: "2x² − 18 factorisé au maximum, c'est…", choices: ["2(x² − 9)", "2(x − 3)(x + 3)", "(2x − 6)(x + 3)"], good: 1, why: "On met 2 en évidence, puis x² − 9 est une différence de carrés : 2(x − 3)(x + 3)." },
+      predict: { q: "3x² − 12 factorisé au maximum, c'est…", choices: ["3(x² − 4)", "3(x − 2)(x + 2)", "(3x − 6)(x + 2)"], good: 1, why: "On met 3 en évidence, puis x² − 4 est une différence de carrés : 3(x − 2)(x + 2)." },
       defis: ["Facteur mis en évidence dans 2x² − 18 ?", "Racine du carré parfait 9 ?", "x² + 10x + 25 = (x + ?)²"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(2, "2(x² − 9)."), W(3, "(x − 3)(x + 3)."), W(5, "(x + 5)² = x² + 10x + 25.")] }),
@@ -288,7 +288,7 @@
         wins: [W(5, "cos = 4/5."), W(4, "tan = (3/5)/(4/5) = 3/4."), W(100, "sin² + cos² = 1.")] }),
     },
     vabs: {
-      predict: { q: "|3 − 8| vaut…", choices: ["−5", "5", "11"], good: 1, why: "On calcule l'intérieur, 3 − 8 = −5, puis la distance à zéro : 5. Une valeur absolue n'est jamais négative." },
+      predict: { q: "|2 − 9| vaut…", choices: ["−7", "7", "11"], good: 1, why: "On calcule l'intérieur, 2 − 9 = −7, puis la distance à zéro : 7. Une valeur absolue n'est jamais négative." },
       defis: ["|3 − 8| ?", "Distance entre −4 et 7 ?", "|x − 2| = 6 : plus petite solution ?"],
       play: hunt({ ask: true, label: "Ta réponse", show: (x) => plain("tu proposes <b>" + nb(x) + "</b>"),
         wins: [W(5, "|−5| = 5."), W(11, "|−4 − 7| = 11."), W(-4, "2 − 6 = −4 (et 8).")] }),

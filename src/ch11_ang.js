@@ -92,6 +92,15 @@
             traps: [TR(180 - c, "Il reste " + (180 - c) + "° pour DEUX angles égaux : divise par 2."), TR(c / 2, "Ce n'est pas un angle inscrit : utilise la somme des angles du triangle isocèle AOB.")] }); },
     ],
   };
+  // Lot 26.11 (référentiel du Collège 1.GE.01a : opposés par le sommet, correspondants, alternes-internes ; repris en 1re) :
+  // une forme de niveau 3 qui enchaîne deux propriétés (correspondants, puis opposés par le sommet) sur une équation.
+  ANG[3].push(() => { let x, p, q, s, t, a; do { p = R.int(3, 6); q = R.int(1, p - 2); x = R.int(8, 22); s = R.int(-15, 20); a = p * x + s; t = a - q * x; } while (p - q < 2 || a < 35 || a > 75 || t <= 0 || s === 0);
+    const r = pk([1, 3]), r2 = r === 1 ? 3 : 1, E1 = "(" + p + "x" + (s < 0 ? " - " + -s : " + " + s) + ")°", E2 = "(" + q + "x + " + t + ")°";
+    return Qv("Les droites " + M("d_1") + " et " + M("d_2") + " sont parallèles. Les deux angles marqués mesurent " + M(E1) + " et " + M(E2) + ". Que vaut " + M("x") + " ?", x,
+      "Sur " + M("d_2") + ", l'angle correspondant à " + M(E1) + " (même position) lui est égal ; l'angle marqué sur " + M("d_2") + " lui est opposé par le sommet, donc égal aussi. " + M(p + "x" + (s < 0 ? " - " + -s : " + " + s) + " = " + q + "x + " + t) + ", " + M((p - q) + "x = " + (t - s)) + ", " + M("x = " + x) + " (les deux angles mesurent " + deg(a) + ").",
+      { ctx: "chaine-proprietes", fig: par(a, [[0, r, E1], [1, r2, E2]]),
+        guide: [GS("Correspondants, puis opposés par le sommet : les deux angles sont égaux. " + M(p + "x" + (s < 0 ? " - " + -s : " + " + s) + " = " + q + "x + " + t) + " : " + M((p - q) + "x") + " = ?", t - s, M((p - q) + "x = " + (t - s)) + "."), GS(M("x") + " = ?", x, M("x = " + x) + ".")],
+        traps: [TR((180 - s - t) / (p + q), "Les deux angles sont égaux (correspondants, puis opposés par le sommet) : on n'écrit pas une somme de 180°."), TR((t + s) / (p - q), "En regroupant, " + M(s) + " passe de l'autre côté avec un signe moins.")] }); });
 
   // ===================== cercthales =====================
   const CT = {
@@ -157,7 +166,7 @@
     cercthales: "Un triangle inscrit dans un demi-cercle est rectangle (le diamètre est l'hypoténuse). La tangente est perpendiculaire au rayon au point de contact.",
   });
   if (typeof COMPS !== "undefined") Object.assign(COMPS, {
-    angles: ["Complément, supplément, angles en un point", "Parallèles, angle inscrit et angle au centre", "Équations d'angles, triangle isocèle dans le cercle"],
+    angles: ["Complément, opposés par le sommet, correspondants", "Parallèles, angle inscrit et angle au centre", "Équations d'angles, propriétés enchaînées, triangle isocèle dans le cercle"],
     cercthales: ["Cercle de Thalès, tangente et Pythagore", "Angles et rayons, cercle circonscrit", "Deux tangentes, aires, angle droit découpé"],
   });
 })();

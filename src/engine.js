@@ -234,6 +234,7 @@ const exprForm = (sp, txt) => {
 };
 // Programme du jour : le format change d'un jour à l'autre ; l'équilibre se fait sur 7 jours.
 // 22.11 : textes courts (une ligne sur téléphone : pas de saut quand on change de format).
+const DRILL_OK = {}; /* Engine.drillable (26.11) */
 const FORMATS = {
   defi: { label: "🏔 Défi du jour", slots: ["defi4"], text: "Un seul problème, prends ton temps." },
   /* 25.11 (séance de 5 minutes) : 6 calculs au lieu de 8. */
@@ -591,6 +592,14 @@ const Engine = {
     return best;
   },
 
+  /* 26.11 (revue d'un testeur, parcours « erreur » : −35 après deux erreurs puis un pas à pas réussi jusqu'au bout) :
+     pas à pas mené à bien (toutes les étapes justes) → la moitié de la perte est rendue (comme une demi-réussite). */
+  eloRefund(state, delta) {
+    if (!(delta < 0)) return 0;
+    const back = Math.round(-delta / 2), e = state.elo; e.r += back;
+    const last = e.log[e.log.length - 1]; if (last && last[0] === day()) last[1] = e.r;
+    return back;
+  },
   // Mise à jour du Mathélo. score : 1, 0,5 ou 0. K plus grand au début (positionnement rapide).
   updateElo(state, id, d, score, weight = 1) {
     this.snap(state);
@@ -726,12 +735,13 @@ const Engine = {
     seed = seed || Math.floor(Math.random() * 46655) + 1;
     R.seed(seed * 7919 + level * 104729 + [...id].reduce((a, c) => a + c.charCodeAt(0), 0));
     const code = id + "-" + level + "-" + seed.toString(36);
+    // Écritures maladroites des générateurs (audit 13.11) : « 1x » → « x », « + -2 » → « - 2 », « - -3 » → « + 3 ».
+    /* 26.11 (revue élèves, B11 : corrigé « −1L + 2l = 2 ») : « -1L » → « -L » aussi (inconnues majuscules), et les défis passent par tidy. */
+    const tidy = (t) => typeof t !== "string" ? t : t.replace(/([(=+\-\s{]|\\\()(-?)1([a-z])(?![a-z{])/g, "$1$2$3").replace(/([(=+\s{]|\\\()-1([A-Z])(?![a-zA-Z{])/g, "$1-$2").replace(/\+\s*-\s*(?=[\da-z(\\])/g, "- ").replace(/-\s*-\s*(?=[\da-z(\\])/g, "+ ");
     /* 25.11 : PROBX (variantes.js, audit 9e–10e) = défis ajoutés, réservés à certaines classes (p.co). */
     if (level === 4 && hasProb(id)) { const p = moneyQ(R.pick(probList(id).concat((typeof PROBX !== "undefined" && PROBX[id]) || []))()); /* 26.11 : TeX visible hors formule (plainTeX, generators.js) */
-      const P = { ...p, q: plainTeX(p.q), sol: plainTeX(p.sol), hints: (p.hints || []).map(plainTeX) }; if (p.parts) P.parts = p.parts.map((x) => ({ ...x, label: plainTeX(x.label) }));
+      const P = { ...p, q: tidy(plainTeX(p.q)), sol: tidy(plainTeX(p.sol)), hints: (p.hints || []).map(plainTeX) }; if (p.parts) P.parts = p.parts.map((x) => ({ ...x, label: plainTeX(x.label) }));
       return { ...P, id, d: 4, seed, code, spec: { kind: "multi" }, hint: P.hints[0] }; }
-    // Écritures maladroites des générateurs (audit 13.11) : « 1x » → « x », « + -2 » → « - 2 », « - -3 » → « + 3 ».
-    const tidy = (t) => typeof t !== "string" ? t : t.replace(/([(=+\-\s{]|\\\()(-?)1([a-z])(?![a-z{])/g, "$1$2$3").replace(/\+\s*-\s*(?=[\da-z(\\])/g, "- ").replace(/-\s*-\s*(?=[\da-z(\\])/g, "+ ");
     // Pas de question triviale (règle du 14.11 : la trivialité fait décrocher) : tirage refait, de façon
     // déterministe (même code → même question), jusqu'à 6 essais ; le dernier est gardé quoi qu'il arrive.
     let q, keep = null;
@@ -872,11 +882,18 @@ const Engine = {
     if (!pend.length) return this.planSlots(state, slots);
     const exclude = new Set(pend);
     if (f === "revision" || f === "defi") { const p = this.planSlots(state, slots, { exclude }); if (p.length) return p; }
+    /* 26.11 (revue d'un testeur, jour 3) : jamais de leçon dans une série d'automatismes ; sans notion déjà travaillée,
+       les questions viennent sans leçon (l'app ne montre pas de leçon dans ce format). */
+    if (f === "auto") { const p = this.planSlots(state, slots, { exclude }); return p.length ? p : this.planSlots(state, slots); }
     const keep = this.lessonPick(state, pend);
     exclude.add(keep);
     const rest = slots.length >= 3 ? slots.slice(1, -1) : slots.slice(1);
     const k0 = slots[0] === "defi4" ? "defi" : slots[0];
-    return [keep + "|1|" + k0, ...this.planSlots(state, rest, { exclude })];
+    const out = [keep + "|1|" + k0, ...this.planSlots(state, rest, { exclude })];
+    /* 26.11 (revue élèves, C6 : leçon + 1 question, séance d'une minute) : s'il manque des notions déjà travaillées, la
+       notion de la leçon complète la séance (niveau 1 puis 2). */
+    while (slots.length >= 3 && out.length < slots.length - 1) out.push(keep + "|" + Math.min(2, out.length) + "|" + (rest[0] === "defi4" ? "defi" : rest[0] || "app"));
+    return out;
   },
   // Séance déjà tirée (mode libre…) : une seule notion à leçon, en tête au niveau 1 ; les autres sortent. n : nombre de questions visé.
   oneLesson(state, plan, n) {
@@ -935,7 +952,8 @@ const Engine = {
         if (ex.has(id)) continue;
         const s = state.notions[id], recent = this.isRecent(state, id), target = elo + TARGET[kind] + (s.easy || 0) * 120;
         if (rappel ? recent : !recent) continue; // les anciennes notions ne passent que par le créneau Rappel
-        let levels = [1, 2, 3].filter((d) => d <= cap && (base !== "defi" || d >= 2) && (kind !== "drill" || d <= 2 || !recent));
+        if (kind === "drill" && !this.drillable(state, id)) continue; /* 26.11 : notion sans vrai automatisme au niveau 1 */
+        let levels = [1, 2, 3].filter((d) => d <= cap && (base !== "defi" || d >= 2) && (kind !== "drill" || d === 1)); /* 26.11 : automatisme = niveau 1 */
         if ((kind === "defi4" || kind === "defi") && hasProb(id)) levels.push(4);
         if (!recent) levels = this.oldLevels(state, id, levels, target);
         for (const d of levels) {
@@ -1053,6 +1071,29 @@ const Engine = {
   // Notion de base à reprendre après deux échecs de suite (la moins maîtrisée de ses prérequis connus).
   /* 26.11 (revue élèves) : à la place d'une notion dont la leçon reste à voir (une leçon par séance), une notion déjà
      travaillée, hors du programme du jour ; null s'il n'y en a pas. Le nombre de questions de la séance ne change pas. */
+  /* 26.11 (revue d'un testeur, jour 3 : « aire latérale d'une pyramide », « √7825 ≈ 88,46 » dans une série d'automatismes).
+     Un automatisme : une question seule (pas de parties), courte (énoncé de 170 caractères au plus), sans figure, sans
+     arrondi ni calculatrice, sans « Trouve l'erreur », réponse exacte et courte (entier ou décimal à 2 chiffres après la
+     virgule au plus). Contrôlé par tests/lot_26_11.html (séances « automatismes » tirées dans toutes les classes). */
+  isDrill(q) {
+    if (!q || q.parts || !q.spec || q.fig || q.figure || q.ctx === "erreur" || q.spec.round || q.spec.radical) return false;
+    const t = String(q.q || "").replace(/<[^>]+>/g, " ").replace(/\\[()]/g, "").replace(/\s+/g, " ").trim();
+    if (t.length > 170 || /arrondi|au dixième|au centième|au millième|à l'unité|près\b|calculatrice|\\approx|≈|Trouve l'erreur/i.test(t)) return false;
+    const v = q.spec.value;
+    const simple = (x) => Math.abs(x * 100 - Math.round(x * 100)) < 1e-6 || [2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 16, 20].some((d) => Math.abs(x * d - Math.round(x * d)) < 1e-9);
+    if (q.spec.kind === "value" && typeof v === "number" && !simple(v)) return false;
+    return true;
+  },
+  makeDrill(state, id) {
+    for (let k = 0; k < 15; k++) { let q = null; try { q = this.make(state, id, 1, undefined, true); } catch (e) { return null; } if (this.isDrill(q)) return q; }
+    return null;
+  },
+  // Notion qui fournit des automatismes (au moins la moitié de 6 tirages au niveau 1) ; mémorisé pour la page.
+  drillable(state, id) {
+    const key = (state.profile.system || "") + (state.profile.track || "") + state.profile.grade + "|" + id;
+    if (!(key in DRILL_OK)) { let n = 0; for (let k = 0; k < 6; k++) { let q = null; try { q = this.make(state, id, 1); } catch (e) {} if (this.isDrill(q)) n++; } DRILL_OK[key] = n >= 3; }
+    return DRILL_OK[key];
+  },
   swapLesson(state, plan, i) {
     const idOf = (e) => String(e).split("|")[0], k = String(plan[i]).split("|")[2], kind = TARGET[k] !== undefined ? k : "app";
     const ex = new Set([...plan.map(idOf), ...this.eligible(state).filter((id) => this.lessonDue(state, id) || !state.notions[id].seen)]);

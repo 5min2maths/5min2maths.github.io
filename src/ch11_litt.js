@@ -500,6 +500,24 @@
       { ...red, ctx: "erreur", guide: [GS("Double produit : " + M("2 \\cdot " + bx + " \\cdot " + (s > 0 ? a : "(-" + a + ")")) + " ; coefficient de " + M("x") + " ?", 2 * s * a * b, M(2 * s * a * b + "x") + "."), GX("Le bon développement :", L, M(tex(L)) + ".", "reduced")],
         traps: [TX(F, "C'est le résultat de " + w + " : " + M("(a + b)^2 \\neq a^2 + b^2") + ", il manque le double produit.")] }); });
 
+  // Lot 26.11 (référentiel du Collège 1.AL.03c : factoriser x² + sx + p par somme et produit) : deux formes de plus au
+  // niveau 3, à côté de la forme « trinome » : compléter une factorisation commencée, corriger une erreur de signe.
+  const trin = () => { let a, b; do { a = nz(-7, 7); b = nz(-7, 7); } while (a === b || a + b === 0 || Math.abs(a) === Math.abs(b) || Math.abs(a) < 2 || Math.abs(b) < 2); return [a, b]; };
+  const xp = (a) => "x" + (a < 0 ? " - " + -a : " + " + a);
+  const pq = (v) => (v < 0 ? "(" + v + ")" : String(v));
+  const xe = (a) => "(x" + (a < 0 ? "" : "+") + a + ")";
+  FAC[3].push(() => { for (let essai = 0; ; essai++) { const [a, b] = trin(), T = tex(norm([[1, { x: 2 }], [a + b, { x: 1 }], [a * b, {}]]));
+    const q = Qn("Complète la factorisation : " + M(T + " = (" + xp(a) + ")(x + \\ldots)") + ". Quel nombre manque ? (il peut être négatif)", b,
+      "Les deux nombres ont pour produit " + M(a * b) + " et pour somme " + M(a + b) + " : " + M(a + " \\cdot " + pq(b) + " = " + a * b) + " et " + M(a + " + " + pq(b) + " = " + (a + b)) + ". Donc " + M(T + " = (" + xp(a) + ")(" + xp(b) + ")") + ".",
+      { ctx: "trinome-complete", guide: [GS("Les deux nombres de la factorisation ont pour produit le terme constant. Que vaut ce produit ?", a * b, M(a * b) + "."), GS(M(a + " \\cdot \\ldots = " + a * b) + " : le nombre manquant ?", b, M(a * b + " \\div " + pq(a) + " = " + b) + " ; contrôle : " + M(a + " + " + pq(b) + " = " + (a + b)) + ", le coefficient de " + M("x") + ".")],
+        traps: [TRAP(-b, "Vérifie le signe : le produit " + M(a + " \\cdot " + pq(-b)) + " ne donne pas " + M(a * b) + "."), TRAP(a * b, "C'est le produit ; on cherche le nombre qui, multiplié par " + a + ", donne " + a * b + "."), TRAP(a + b + a, "La somme des deux nombres doit valoir " + (a + b) + " : on soustrait " + a + ", on n'ajoute pas.")] });
+    if (essai >= 20 || (!trivialQ(q, 0) && !answerShown(q))) return q; } });
+  FAC[3].push(() => { const [a, b] = trin(), w = camarade(), T = tex(norm([[1, { x: 2 }], [a + b, { x: 1 }], [a * b, {}]])), e = xe(a) + "*" + xe(b), f = xe(-a) + "*" + xe(-b);
+    return Qx(w + " écrit : « " + M(T + " = (" + xp(-a) + ")(" + xp(-b) + ")") + " ». Trouve l'erreur, puis factorise correctement.", e,
+      "Erreur de signes : en développant " + M("(" + xp(-a) + ")(" + xp(-b) + ")") + ", le coefficient de " + M("x") + " vaut " + M(-(a + b)) + " au lieu de " + M(a + b) + ". Les deux nombres sont " + M(a) + " et " + M(b) + " (produit " + M(a * b) + ", somme " + M(a + b) + ") : " + M("(" + xp(a) + ")(" + xp(b) + ")") + ".",
+      { ...prod, ctx: "erreur", guide: [GS("Somme des deux nombres choisis par " + w + " (" + M(-a) + " et " + M(-b) + ") ?", -(a + b), M(-(a + b)) + " : il fallait " + M(a + b) + "."), GX("La bonne factorisation :", e, M("(" + xp(a) + ")(" + xp(b) + ")") + ".", "product")],
+        traps: [TX(f, "C'est la réponse de " + w + " : développe pour vérifier, le coefficient de " + M("x") + " doit être " + M(a + b) + ".")] }); });
+
   // ===================== Enregistrement =====================
   const ALL = { litelab: LIT, valnum: VAL, reduire: RED, monomes: MON, parenth: PAR, distrib: DIS, idrem: IDR, factor: FAC };
   for (const [id, lv] of Object.entries(ALL)) {
@@ -526,6 +544,6 @@
     parenth: ["Supprimer une parenthèse précédée de −", "Supprimer plusieurs parenthèses", "Parenthèses et crochets"],
     distrib: ["Développer avec la simple distributivité", "Développer avec la double distributivité", "Développer et réduire une expression"],
     idrem: ["Développer (a ± b)² et (a + b)(a − b)", "Identités avec coefficients", "Utiliser les identités (calcul, différence)"],
-    factor: ["Factoriser par mise en évidence", "Factoriser avec une identité remarquable", "Factoriser au maximum, trinôme"],
+    factor: ["Factoriser par mise en évidence", "Factoriser avec une identité remarquable", "Factoriser au maximum, trinôme (somme et produit)"],
   });
 })();

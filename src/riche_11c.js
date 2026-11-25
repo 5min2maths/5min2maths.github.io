@@ -108,9 +108,9 @@
         q: "Une fonction affine " + M("f") + " vérifie " + M("f(" + x1 + ") = " + y1) + " et " + M("f(" + x2 + ") = " + y2) + ".",
         parts: [{ label: "Calcule la pente " + M("a") + ".", pts: 1 }, { label: "Calcule l'ordonnée à l'origine " + M("b") + " et écris " + M("f(x)") + ".", pts: 1 }, { label: "Calcule " + M("f(10)") + " et le nombre dont l'image est " + M(N(a * 4 + b)) + ".", pts: 2 }],
         sol: ul([M("a = \\frac{" + y2 + " - " + (y1 < 0 ? "(" + y1 + ")" : y1) + "}{" + x2 + " - " + (x1 < 0 ? "(" + x1 + ")" : x1) + "} = " + N(a)) + ".", M("b = " + N(b)) + " ; " + M("f(x) = " + N(a) + "x " + (b < 0 ? "- " + N(-b) : "+ " + N(b))) + ".", M("f(10) = " + N(10 * a + b)) + " ; le nombre est " + M("4") + "."]) }); },
-    () => { const t0 = pk([18, 20, 22]), d = pk([3, 4, 5]);
+    () => { const t0 = pk([15, 18, 21]), d = 3; /* 26.11 (vraisemblance, décision de l'enseignant) : ≈ −0,65 °C par 100 m, soit −3 °C par 500 m (et non 4 ou 5) */
       return X({ id: "affine", lv: 2, titre: "La température en altitude",
-        q: "Au bord du lac (altitude " + Q(400, "m") + "), il fait " + M(t0 + "\\,°\\text{C}") + ". La température baisse de " + M(d / 5 * 5 === d ? d : d) + " °C chaque fois qu'on monte de " + Q(500, "m") + ".",
+        q: "Au bord du lac (altitude " + Q(400, "m") + "), il fait " + M(t0 + "\\,°\\text{C}") + ". La température baisse de " + M(d) + " °C chaque fois qu'on monte de " + Q(500, "m") + ".",
         parts: [{ label: "Quelle température fait-il à " + Q(1900, "m") + " ?", pts: 1 }, { label: "Écris la température " + M("T(h)") + " en fonction du nombre " + M("h") + " de tranches de 500 m au-dessus du lac.", pts: 1 }, { label: "À partir de quelle altitude gèle-t-il (" + M("T < 0") + ") ? Arrondis à la tranche de 500 m.", pts: 2 }],
         sol: ul(["3 tranches : " + M(t0 + " - 3 \\cdot " + d + " = " + (t0 - 3 * d)) + " °C.", M("T(h) = " + t0 + " - " + d + "h") + ".", M(t0 + " - " + d + "h < 0 \\iff h > " + N(r6(t0 / d))) + " : " + Math.floor(t0 / d + 1) + " tranches, soit vers " + Q(400 + 500 * Math.floor(t0 / d + 1), "m") + "."]) }); },
     () => { const pA = pk([12, 15]), F = pk([60, 90]), pB = pA - pk([3, 5]), n = F / (pA - pB);

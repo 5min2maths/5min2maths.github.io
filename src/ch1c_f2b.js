@@ -300,6 +300,21 @@
       "Erreur : " + w + " oublie les nombres négatifs ; par exemple " + M("(-" + (k + 1) + ")^2 = " + (k + 1) * (k + 1)) + (op[0] === "<" ? " ne vérifie pas l'inéquation, alors que " + M("-" + (k + 1) + " " + opLabel(op) + " " + k) + "." : " vérifie l'inéquation.") + " " + M("x^2 - " + k * k + " = (x - " + k + ")(x + " + k + ")") + ", zéros " + M(-k) + " et " + M(k) + " : " + M("S = " + IT(ivs)) + ".",
       { ctx: "erreur", guide: [GSet("Zéros de " + M("x^2 - " + k * k) + " ?", [-k, k], M(-k) + " et " + M(k) + "."), GSS("Solution ? (parabole tournée vers le haut)", ivs, M(IT(ivs)) + ".")],
         traps: [TS(faux, "C'est la réponse de " + w + " : " + M("\\sqrt{x^2} = |x|") + ", il y a aussi des solutions négatives" + (op[0] === "<" ? " et une borne à gauche." : "."))] }); });
+  // Lot 26.11 (référentiel du Collège 1.FO.09a : intersection de deux droites, algébriquement et graphiquement) :
+  // deux formes au niveau 1, à côté de la parabole.
+  const DD = (grille) => { for (let t = 0; t < 60; t++) { const x0 = R.int(-4, 4), y0 = R.int(grille ? -4 : -6, grille ? 4 : 6), m1 = grille ? pk([-2, -1, 1, 2]) : nz(-4, 4), m2 = grille ? pk([-2, -1, 1, 2]) : nz(-4, 4), h1 = y0 - m1 * x0, h2 = y0 - m2 * x0;
+      if (m1 === m2 || x0 === 0 || Math.abs(x0) === Math.abs(y0) || !h1 || !h2 || h1 === h2 || (grille && (Math.abs(h1) > 6 || Math.abs(h2) > 6))) continue; return { x0, y0, m1, m2, h1, h2 }; } return null; };
+  const verif = (m, h, x0, y0) => M(m + " \\cdot " + par(x0) + sg(h) + " = " + y0);
+  IN[1].push(() => { const d = DD(false); if (!d) return null; const { x0, y0, m1, m2, h1, h2 } = d;
+    return QP("Les droites " + M("d : y = " + P2([m1, h1])) + " et " + M("e : y = " + P2([m2, h2])) + " se coupent en un point. Calcule ses coordonnées. Réponds « x ; y ».", [x0, y0],
+      "On égalise : " + M(P2([m1, h1]) + " = " + P2([m2, h2]) + " \\iff " + P2([m1 - m2, 0]) + " = " + (h2 - h1) + " \\iff x = " + x0) + ", puis " + M("y = " + y0) + " (" + verif(m1, h1, x0, y0) + ") : le point " + M("(" + x0 + " \\,;\\, " + y0 + ")") + ".",
+      { ctx: "deux-droites", guide: [GS("On égalise les deux expressions de " + M("y") + " : " + M(P2([m1, h1]) + " = " + P2([m2, h2])) + ". " + M("x") + " = ?", x0, M(P2([m1 - m2, 0]) + " = " + (h2 - h1)) + ", donc " + M("x = " + x0) + "."), GS(M("y") + " = ? (remplace " + M("x") + " dans " + M("d") + ")", y0, verif(m1, h1, x0, y0) + "."), GP("Point d'intersection ?", [x0, y0], M("(" + x0 + " ; " + y0 + ")") + ".")],
+        traps: [TP([y0, x0], "On donne d'abord l'abscisse x, puis l'ordonnée y."), TP([-x0, -m1 * x0 + h1], "En regroupant les x, attention au signe : " + M(P2([m1 - m2, 0]) + " = " + (h2 - h1)) + ".")] }); });
+  IN[1].push(() => { const d = DD(true); if (!d) return null; const { x0, y0, m1, m2, h1, h2 } = d;
+    return QP("On a tracé les droites " + M("d : y = " + P2([m1, h1])) + " et " + M("e : y = " + P2([m2, h2])) + ". Lis les coordonnées de leur point d'intersection sur le graphique, puis vérifie-les dans les deux équations. Réponds « x ; y ».", [x0, y0],
+      "Les droites se croisent sur le nœud " + M("(" + x0 + " \\,;\\, " + y0 + ")") + " du quadrillage. Vérification : " + verif(m1, h1, x0, y0) + " et " + verif(m2, h2, x0, y0) + ".",
+      { ctx: "deux-droites-graphe", fig: PL([{ f: (x) => m1 * x + h1 }, { f: (x) => m2 * x + h2 }]), guide: [GS("Abscisse du point où les deux droites se croisent ?", x0, M(x0) + "."), GS("Contrôle avec " + M("d") + " : pour " + M("x = " + x0) + ", " + M("y") + " = ?", y0, verif(m1, h1, x0, y0) + " : la lecture est juste."), GP("Point d'intersection ?", [x0, y0], M("(" + x0 + " ; " + y0 + ")") + ".")],
+        traps: [TP([y0, x0], "On donne d'abord l'abscisse x (horizontale), puis l'ordonnée y."), TP([0, h1], "Ça, c'est l'ordonnée à l'origine de d ; on cherche le point commun aux deux droites.")] }); });
   const ALL = { f2expr: FE, f2trois: T3, inter: IN, interpar: IP, ineq2: IQ, ineqfrac: IFQ };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);
@@ -318,7 +333,7 @@
   if (typeof COMPS !== "undefined") Object.assign(COMPS, {
     f2expr: ["Zéros et ordonnée, sommet et a", "Sommet et point, zéros et point, lecture", "Trois points, extremum, axe de symétrie"],
     f2trois: ["Points d'abscisses 0, 1, −1", "Points 0, 1, 2 ; balle", "Sans abscisse 0, différences, sommet"],
-    inter: ["x² et une droite, horizontale, point", "Cas général, Δ, coordonnées", "Tangente, coefficient a, distance"],
+    inter: ["Deux droites, x² et une droite, point", "Cas général, Δ, coordonnées", "Tangente, coefficient a, distance"],
     interpar: ["Deux paraboles", "Hyperbole, même a", "Point, Δ, symétrie"],
     ineq2: ["Produit, différence de carrés, x² ≤ k", "Coefficient a, Δ < 0, carré parfait", "f(x) ≤ g(x), entiers, rectangle"],
     ineqfrac: ["Quotient simple, numérateur constant, coefficients négatifs", "Comparer à un nombre, trois facteurs, différence de carrés", "Deux fractions, x et 1/x, coût moyen"],

@@ -67,3 +67,4 @@ body.pz-on .pz-s { scroll-snap-align: start; }
 body.pz-on .pz-num { font-size: 3.2rem; }
 body.pz-on .pz-loop svg { max-width: 460px; }
 @media (max-width: 380px) { .pz-cov-r { grid-template-columns: 5.6em 1fr; } .pz-cov-r > .small { grid-column: 2; } }
+.pz-grades button .seg-sub { display: block; font-size: 0.72em; font-weight: 400; opacity: 0.8; line-height: 1.1; } /* 26.11 */

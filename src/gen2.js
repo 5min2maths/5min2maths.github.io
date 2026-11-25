@@ -648,7 +648,7 @@ Object.assign(GEN, {
       return t + "On remonte : " + M(names[1] + " = " + sol[1]) + ", puis " + M(names[0] + " = " + sol[0]) + ". Solution : " + M("(" + sol.join(" ; ") + ")") + ".";
     };
     if (d === 3 && R.rand() < 0.5) {
-      const a = R.int(8, 20), e = R.int(4, 12), s = R.int(5, 10), na = R.int(1, 4), ne = R.int(1, 4), ns = R.int(1, 4);
+      const a = R.int(15, 20), e = R.int(8, 12), s = R.int(10, 14) /* 26.11 (vraisemblance) : cinéma 15 à 20 CHF */, na = R.int(1, 4), ne = R.int(1, 4), ns = R.int(1, 4);
       const t1 = 2 * a + 3 * e + s, t2 = a + 2 * e + 2 * s, t3 = na * a + ne * e + ns * s;
       const mm = [[2, 3, 1], [1, 2, 2], [na, ne, ns]]; if (det(mm) === 0) return GEN.sys3(3);
       return { q: "Au cinéma : 2 adultes, 3 enfants et 1 senior paient " + M(t1) + " CHF ; 1 adulte, 2 enfants et 2 seniors paient " + M(t2) + " CHF ; " + na + " adulte" + (na > 1 ? "s" : "") + ", " + ne + " enfant" + (ne > 1 ? "s" : "") + " et " + ns + " senior" + (ns > 1 ? "s" : "") + " paient " + M(t3) + " CHF. Prix adulte, enfant, senior : « a ; e ; s ».", spec: { kind: "pair", values: [a, e, s] }, sol: "Système " + M("\\begin{cases} 2a + 3e + s = " + t1 + " \\\\ a + 2e + 2s = " + t2 + " \\\\ " + (na === 1 ? "" : na) + "a + " + (ne === 1 ? "" : ne) + "e + " + (ns === 1 ? "" : ns) + "s = " + t3 + " \\end{cases}") + ". " + gauss(mm, [t1, t2, t3], [a, e, s], ["a", "e", "s"]) + " (en CHF)" };

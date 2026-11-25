@@ -49,13 +49,13 @@ state.carnet=[{id:"prio",d:1,code:"x",date:T,ok:1}];state.carnetOut=[];ok(carnet
 // ---- Cas 2 : pratique sans note en hausse ----
 state=fresh();state.comps={"prio:0":{r:[1,1,0],n:3}};Engine.snap(state,D(-2));hist(state,[-2,0]);
 w=Engine.week(state);ok(!w.ups.length&&!w.cons.length&&!w.fixed&&!w.first.length,"2 rien n'a bougé "+JSON.stringify(w));
-t=show("cas 2");ok(t.includes("Cette semaine : 2 jours de pratique, 10 questions.")&&t.includes("chaque séance compte"),"2 phrase : "+t);
+t=show("cas 2");/* 26.11 : « questions en séance » (le positionnement ne compte pas) */ ok(t.includes("Cette semaine : 2 jours de pratique, 10 questions en séance.")&&t.includes("chaque séance compte"),"2 phrase : "+t);
 state.comps["prio:0"].r=[1,1,0,0];w=Engine.week(state);ok(!w.ups.length,"2 note en baisse : pas comptée");
 // ---- Cas 3 : ancien state (sans instantané), pratique cette semaine ----
 state=fresh();state.comps={"prio:0":{r:[0,1,0],n:3}};hist(state,[-4,-1,0]);delete state.snaps;delete state.carnetOut;
 w=Engine.week(state);ok(w.days===3&&!w.ups.length,"3 sans instantané : pas d'erreur");show("cas 3a sans instantané");
 Engine.snap(state);ok(state.snaps.length===1&&state.snaps[0].d===T,"3 premier instantané au chargement");
-t=show("cas 3b");ok(t.includes("Cette semaine : 3 jours de pratique, 15 questions."),"3 phrase : "+t);
+t=show("cas 3b");ok(t.includes("Cette semaine : 3 jours de pratique, 15 questions en séance."),"3 phrase : "+t);
 state.comps["prio:0"].r=[0,1,0,1,1,1];t=show("cas 3c après une séance");ok(t.includes("Depuis le "+T.slice(8,10)+"."+T.slice(5,7)+" : 1 compétence a monté."),"3 depuis : "+t);
 app.innerHTML=weekCard();ok(/Notes comparées depuis le/.test(app.textContent),"3 carte : début du suivi");
 // ---- Cas 4 : state vide (aucune activité) et instantanés corrompus ----

@@ -58,9 +58,9 @@
         return QP("Résous par combinaison (addition) : " + sys("x + y = " + s, "x - y = " + t) + "." + PAIR, [x, y], "En additionnant : " + M("2x = " + (s + t)) + ", " + M("x = " + x) + ". Puis " + M("y = " + s + " - " + pT(x) + " = " + y) + ".",
           { ctx: "addition", guide: [GN("Additionne les deux équations : les " + M("y") + " disparaissent. " + M("2x") + " = ?", 2 * x, M("2x = " + s + " + " + pT(t) + " = " + 2 * x) + "."), GN(M("x") + " = ?", x, M("x = " + x) + "."), GP("Avec " + M("x + y = " + s) + " : solution « x ; y » ?", [x, y], pairT([x, y]) + ".")],
             traps: [TP([y, x], "x d'abord, puis y."), TP([x, -y], "Vérifie dans la 2e équation : " + M("x - y = " + t) + ".")] }); },
-      () => { const pa = pk([12, 15, 14, 18]), pe = pk([6, 8, 9, 10]), [n1, m1, n2, m2] = pk([[2, 3, 1, 1], [1, 2, 1, 1], [3, 2, 1, 1], [2, 1, 1, 1]]);
+      () => { const cine = R.rand() < 0.5 /* 26.11 (vraisemblance) : cinéma 15 à 20 CHF, piscine 6 à 9 CHF */, pa = cine ? pk([15, 16, 18, 20]) : pk([6, 7, 8, 9]), pe = cine ? pk([9, 10, 12]) : pk([3, 4, 5]), [n1, m1, n2, m2] = pk([[2, 3, 1, 1], [1, 2, 1, 1], [3, 2, 1, 1], [2, 1, 1, 1]]);
         if (pa === pe) return null;
-        const x = pk([
+        const x = (cine ? (L) => L[0] : (L) => L[1])([
           [`Au cinéma, ${n1} adulte${n1 > 1 ? "s" : ""} et ${m1} enfant${m1 > 1 ? "s" : ""} paient ${n1 * pa + m1 * pe} CHF ; ${n2} adulte et ${m2} enfant paient ${n2 * pa + m2 * pe} CHF. Quel est le prix d'un billet adulte, puis d'un billet enfant ?`, "cinema"],
           [`À la piscine, ${n1} entrée${n1 > 1 ? "s" : ""} adulte et ${m1} entrée${m1 > 1 ? "s" : ""} enfant coûtent ${n1 * pa + m1 * pe} CHF ; ${n2} adulte et ${m2} enfant, ${n2 * pa + m2 * pe} CHF. Prix d'une entrée adulte, puis enfant ?`, "piscine"]]);
         return QP(x[0] + " Réponds « adulte ; enfant ».", [pa, pe], "Avec " + M("a") + " et " + M("e") + " : " + sys(lhs([n1, m1], ["a", "e"]) + " = " + (n1 * pa + m1 * pe), "a + e = " + (pa + pe)) + ". On remplace " + M("e = " + (pa + pe) + " - a") + " : " + M("a = " + pa) + ", " + M("e = " + pe) + ".",
@@ -421,7 +421,7 @@
           { ctx: "negatif", guide: [GN("On retire " + M(fT(b)) + " : " + M(a + "x " + opT[op]) + " ?", c - b, M(c - b) + "."), GSS("On divise par " + M(a) + " (négatif !). Solutions ?", I, "Le sens se retourne : " + SX(rs, x0) + ".")],
             traps: [TS([ivOp(op, x0)], "En divisant par " + a + " (négatif), il faut retourner le sens de l'inégalité.")] }); },
       () => { const pr = pk([1.5, 2.5, 3.5, 4, 4.5, 6.5, 7]), B = R.int(20, 80), n = Math.floor(B / pr + 1e-9); if (Math.abs(n * pr - B) < 1e-9 || n < 3) return null;
-        const chf = (v) => (Number.isInteger(v) ? String(v) : v.toFixed(2).replace(".", "{,}")), c = pk([["cahiers", "un cahier coûte"], ["billets", "un billet de bus coûte"], ["glaces", "une glace coûte"], ["places de cinéma", "une place de cinéma coûte"]]);
+        const chf = (v) => (Number.isInteger(v) ? String(v) : v.toFixed(2).replace(".", "{,}")), c = pk([["cahiers", "un cahier coûte"], ["billets", "un billet de bus coûte"], ["glaces", "une glace coûte"], ["entrées à la piscine", "une entrée à la piscine coûte"]]) /* 26.11 (vraisemblance) : une place de cinéma ne coûte pas 7 CHF */;
         return QN("Avec " + M(B) + " CHF, combien de " + c[0] + " peut-on acheter au maximum si " + c[1] + " " + M(chf(pr)) + " CHF ?", n, M(chf(pr) + " \\cdot n \\le " + B) + " donne " + M("n \\le " + B + " \\div " + chf(pr) + " \\approx " + N(+(B / pr).toFixed(2))) + " : au maximum " + M(n) + " (un nombre entier, arrondi vers le bas).",
           { ctx: "budget", guide: [GN("Inéquation " + M(chf(pr) + " \\cdot n \\le " + B) + ". " + M(B + " \\div " + chf(pr)) + " ≈ ? (au centième)", +(B / pr).toFixed(2), M("\\approx " + N(+(B / pr).toFixed(2))) + "."), GN("Plus grand nombre entier possible ?", n, M(n) + " : on arrondit vers le bas, sinon on dépasse le budget.")],
             traps: [TR(n + 1, "Avec " + (n + 1) + " " + c[0] + ", on dépasserait " + B + " CHF : on arrondit vers le bas."), TR(+(B / pr).toFixed(2), "On ne peut acheter qu'un nombre entier.")] }); },

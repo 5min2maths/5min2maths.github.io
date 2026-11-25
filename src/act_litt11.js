@@ -230,7 +230,7 @@
     },
     // ---- Factoriser : le rectangle à l'envers ----
     factor: {
-      predict: { q: "Factoriser 6x + 9, c'est l'écrire…", choices: ["comme un produit", "comme une somme plus courte"], good: 0, why: "Factoriser = écrire un produit : 6x + 9 = 3(2x + 3). C'est l'inverse de développer." },
+      predict: { q: "Factoriser 10x + 15, c'est l'écrire…", choices: ["comme un produit", "comme une somme plus courte"], good: 0, why: "Factoriser = écrire un produit : 10x + 15 = 5(2x + 3). C'est l'inverse de développer." },
       defis: ["Factorise 6x + 9 : choisis la largeur du rectangle.", "Factorise 10x − 15.", "Factorise 12x + 18 au maximum."],
       play(box, onWin) {
         const E = [[6, 9], [10, -15], [12, 18]];

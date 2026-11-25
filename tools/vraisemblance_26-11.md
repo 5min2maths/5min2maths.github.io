@@ -100,3 +100,14 @@ Règle de l'enseignant : « un énoncé déconnant, un paramètre mal fixé peut
 ## Non traité (autre agent, worktree fixrevue)
 
 Thalès niveau 3, le plongeur (ch11_no2, rel), dec()/decmul (ch10_no), probeq « une fois et demie », l'indice de f2, le filtre TeX au rendu, le déroulé des séances. Rien de neuf vu sur ces points.
+
+## Décisions de l'enseignant appliquées (lot du 26.11, branche agent/lot)
+
+- Hôtel (approxnorm-3) : plus d'hôtel ; « atelier gratuit » (un inscrit sur deux vient, dit dans l'énoncé) ; vol : présence 0,9, 400 billets pour 363 à 369 places.
+- Péniche : 400 à 1000 N (ch_mp4, riche_mp34) ; luge : 30 à 80 N ; valise, skieur : forces propres au contexte.
+- Chariot sur rail (défi primitives) : chariot de labo, en cm/s et cm.
+- Altitude (riche_11c) : −3 °C par 500 m (≈ −0,65 °C par 100 m).
+- Cinéma : 15 à 20 CHF la séance (ch1c_eq, ch1c_sys, gen2, variantes) ; billets à 2–9 CHF remplacés par la piscine.
+- Bouteilles semblables (ch_mp3) : hauteur et contenance cohérentes (0,4 L pour 20 cm, 1,5 L pour 30 cm…).
+- Défis arith : un seul contexte (bus ; corbeilles ; carrelage seul en 1re).
+- Contrôles ajoutés à tests/vrai_checks.js : surréservation, force (cheval, luge), vitesse d'un chariot, gradient d'altitude, prix du cinéma, bouteille, « (elle) » / « Un(e) ».
