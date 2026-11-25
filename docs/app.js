@@ -1,3 +1,10 @@
+/* Nom de l'app (26.11, centralisé : il peut encore changer avant l'ouverture). Seul endroit où il est écrit : en-tête (brand),
+   présentations, textes qui le citent ; build.py le reporte dans le titre de la page et le manifeste (docs/). Contrôle :
+   tools/test_nom.py (lancé par tools/run_tests.sh). APP_TITLE : titre actuel de l'onglet, gardé tel quel. */
+const APP_NAME = "5 minutes de maths";
+const APP_TAGLINE = "par jour";
+const APP_SHORT = "5 min maths";
+const APP_TITLE = "5minutes2mathsparjour";
 // Catalogue des notions (recalibré le 12.11 sur les référentiels : PER / CO, programme du Collège de Genève 2021,
 // PEE de la maturité professionnelle ; correspondance notion → compétences dans tools/referentiels.py).
 // CH : [année] (9-11 = CO, 12-13 = 1re-2e du Collège). Pas de mois : l'ordre des chapitres varie d'une école à l'autre.
@@ -10525,8 +10532,21 @@ const Backup = {
       ...(Array.isArray(s.carnet) && s.carnet.length ? { cn: s.carnet.map((x, i, A) => [x.id, x.d, x.code, off(x.date), x.ok || 0].concat(i >= A.length - 8 && x.m ? [x.m, x.a || ""] : [])) } : {}),
       ...(s.pid ? { pid: s.pid } : {}),
       /* 25.11 (grades de l'année, facultatif) : points de l'année, classe, années passées (souvenirs). */
-      ...(s.yp ? { yp: [s.yp.k, s.yp.c, s.yp.pts, (s.yp.past || []).map((x) => [x.k, x.c, x.p])] } : {}),
+      ...(s.yp ? { yp: [s.yp.k, s.yp.c, s.yp.pts, (s.yp.past || []).map((x) => [x.k, x.c, x.p])].concat(s.yp.d || s.yp.wk ? [off(s.yp.d), s.yp.dp || 0, s.yp.ds || 0, s.yp.wk || null] : []) } : {}),
+      /* 26.11 (stockage durable, champs facultatifs : les anciens codes restent lisibles) : plafond du jour et problème de
+         la semaine déjà comptés (yp, ci-dessus : sinon une reprise le même jour redonnait des points), numéros des grades
+         collector, réglages et repères (visite guidée faite, Mathélo expliqué, première séance, mode « Libre »),
+         problème de la semaine fait, autoévaluation (Avant / tests rapides) et sujet de préparation de l'évaluation en cours. */
+      ...(s.gradeNo && Object.keys(s.gradeNo).length ? { gn: s.gradeNo } : {}),
+      ...(this.flags(s) ? { f: this.flags(s) } : {}),
+      ...(s.weeklyDone ? { wd: s.weeklyDone } : {}),
+      ...(s.prep && s.autotest && s.autotest.key === (s.prep.ids || []).join() ? { at: [s.autotest.avant || {}, (s.autotest.runs || []).map((x) => [x.date, x.r])] } : {}),
+      ...(s.prep && s.mock && s.mock.items ? { mk: s.mock } : {}),
     };
+  },
+  F: ["tourDone", "eloSeen", "firstDone"],
+  flags(s) { return this.F.reduce((a, k, i) => a | (s[k] ? 1 << i : 0), 0) | (s.homeMode === "libre" ? 8 : 0); },
+  setFlags(s, f) { this.F.forEach((k, i) => { if (f & (1 << i)) s[k] = true; }); if (f & 8) s.homeMode = "libre";
   },
   /* base (24.11, espace parent) : date de référence des dates relatives (o.t = jour de la photo) ; par défaut
      aujourd'hui (reprise de la progression). */
@@ -10560,7 +10580,15 @@ const Backup = {
     if (Array.isArray(o.co)) s.carnetOut = o.co.map(on);
     if (Array.isArray(o.cn)) s.carnet = o.cn.filter((x) => Array.isArray(x) && x[0] && x[2]).map(([id, d, code, dt, ok, m, a]) => ({ id, d, code, date: on(dt) || t, ok: ok || 0, ...(m ? { m, a: a || undefined } : {}) }));
     if (o.pid) s.pid = o.pid;
-    if (Array.isArray(o.yp)) s.yp = { k: o.yp[0], c: o.yp[1], pts: o.yp[2], d: null, dp: 0, ds: 0, past: (o.yp[3] || []).map(([k, c, p]) => ({ k, c, p })) };
+    if (Array.isArray(o.yp)) {
+      s.yp = { k: o.yp[0], c: o.yp[1], pts: o.yp[2], d: null, dp: 0, ds: 0, past: (o.yp[3] || []).map(([k, c, p]) => ({ k, c, p })) };
+      if (o.yp.length > 4) { s.yp.d = on(o.yp[4]); s.yp.dp = +o.yp[5] || 0; s.yp.ds = +o.yp[6] || 0; if (o.yp[7]) s.yp.wk = o.yp[7]; }
+    }
+    if (o.gn && typeof o.gn === "object") s.gradeNo = { ...o.gn };
+    if (o.f) this.setFlags(s, +o.f);
+    if (typeof o.wd === "string") s.weeklyDone = o.wd;
+    if (s.prep && Array.isArray(s.prep.ids) && Array.isArray(o.at)) s.autotest = { key: s.prep.ids.join(), rows: null, avant: o.at[0] || {}, runs: (o.at[1] || []).map(([date, r]) => ({ date, r: r || {} })) };
+    if (s.prep && o.mk && Array.isArray(o.mk.items)) s.mock = o.mk;
     if (o.a) s.a11y = { fs: +o.a.fs || 1, font: o.a.font ? 1 : 0, hc: o.a.hc ? 1 : 0 }; // réglages de lecture (24.11)
     s.placed = true;
     Engine.migrate(s);
@@ -13376,6 +13404,8 @@ function atRows(ids) {
 function atState() {
   const key = state.prep.ids.join();
   if (!state.autotest || state.autotest.key !== key) state.autotest = { key, rows: atRows(state.prep.ids), avant: {}, runs: [] };
+  /* 26.11 : autoévaluation reprise d'un code de sauvegarde (Avant et tests rapides seulement) : lignes reconstruites ici. */
+  if (!Array.isArray(state.autotest.rows)) state.autotest.rows = atRows(state.prep.ids);
   return state.autotest;
 }
 const AT_SYM = { 2: "✓", 1: "~", 0: "✗" };
@@ -14769,7 +14799,7 @@ async function screenParentShare() {
   <button class="btn-ghost" id="ppreview">Voir la page de mes parents</button>
   <button class="btn-primary btn-big" id="pback">Retour</button>`);
   const $ = (x) => document.getElementById(x), msg = $("pmsg");
-  if ($("pshare")) $("pshare").onclick = () => navigator.share({ title: "Ma semaine de maths", text: "Ma semaine sur 5 minutes de maths (ouvre ce lien) :", url }).catch(() => {});
+  if ($("pshare")) $("pshare").onclick = () => navigator.share({ title: "Ma semaine de maths", text: "Ma semaine sur " + APP_NAME + " (ouvre ce lien) :", url }).catch(() => {});
   $("pcopy").onclick = async () => { try { await navigator.clipboard.writeText(url); msg.textContent = "Lien copié : colle-le dans un message à tes parents."; } catch (e) { msg.textContent = "Copie impossible ici : utilise le QR code."; } };
   $("ppreview").onclick = () => screenParentView(null, { code, preview: true, back: () => screenParentShare() });
   $("pback").onclick = back;
