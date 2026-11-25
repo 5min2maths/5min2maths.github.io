@@ -131,3 +131,9 @@ renforcé** (MA2 montré à tous en 3e–4e) et **radians au Collège** (trigono
 - **Nom de l'app** (tools/nom_app.md) : Mathélo déjà pris (mathelo.fr, soutien en maths) ; top 5 : Mathfil, Quotimaths,
   Jalon, Mathpli, Quotipi. Marques (Swissreg, EUIPO, INPI) et comptes sociaux à vérifier à la main.
 - **Tests** : kp_stable échouait sous charge (budget de temps trop court) : budget réglable par page.
+- **Leçons actives** (14 notions : 3e géométrie de l'espace, 4e intégration / ln-exp / éq. différentielles / statdesc,
+  2e ineqpoly) : figures 3D parfois petites (pscal3d, plans) à regarder sur téléphone ; posrel et etudelnexp un peu
+  guidés (n·u affiché, f' factorisée) ; intparties et intsubst sans geste (« Essaie sur la figure ») : suffisant ?
+- **Défis ouverts aux classes suivantes** (ta règle « savoir refaire l'avant tant que ce n'est pas trivial ») :
+  2e → 3e–4e, 9e → 10e, 10e → 11e ; défis du secondaire II ajoutés (optim, arith, fracper, premiers, rac).
+- **Tests** : une page en échec pendant la série complète est reprise une fois seule (kp_stable, sensible à la charge).

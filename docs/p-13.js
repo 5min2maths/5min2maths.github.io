@@ -2,7 +2,8 @@
 // Audit de niveau 2e (tools/niveau_2c.md) : 19 notions de l'année n'avaient aucun « Problème de la semaine ». Ici, un vrai
 // problème par notion (deux pour probrat, decomp, logbase), en 2 à 4 étapes qui s'enchaînent, au niveau des épreuves
 // regroupées de 2e (Sismondi 2MA1 et 2MA2, étalons E… de tools/niveau_2c.md), valeurs tirées au hasard, jamais triviales.
-// Réservés à la 2e Collège (co: [13]) ; ailleurs, Engine.make les écarte (horsCO) et redescend au niveau 3.
+// Proposés en 2e, 3e et 4e Collège (co: [13, 14, 15], décision de l'enseignant du 25.11 : « il faut toujours savoir refaire
+// des choses d'avant tant que ce n'est pas trivial ») ; en 1re et en MP, Engine.make les écarte (horsCO).
 // Ces notions n'existent pas en MP (MP: null). Chargé après variantes.js (PROBX).
 (() => {
   if (typeof PROBX === "undefined") return;
@@ -20,7 +21,7 @@
   const pr = (v) => (v < 0 ? "(" + F(v) + ")" : F(v));
   const pT = (cs) => poly(cs).replace(/\^\{?2\}?/g, "²").replace(/\^\{?3\}?/g, "³").replace(/\^\{?4\}?/g, "⁴").replace(/\\frac\{(\d+)\}\{(\d+)\}/g, "$1/$2").replace(/-/g, "−");
   const pt = (a, b) => "(" + F(a) + " \\,;\\, " + F(b) + ")";
-  const PX = (id, f) => { (PROBX[id] = PROBX[id] || []).push(() => { let p = null; for (let k = 0; k < 400 && !p; k++) p = f(); return Object.assign(p, { co: [13] }); }); };
+  const PX = (id, f) => { (PROBX[id] = PROBX[id] || []).push(() => { let p = null; for (let k = 0; k < 400 && !p; k++) p = f(); return Object.assign(p, { co: [13, 14, 15] }); }); };
   /* parts : [libellé, valeur (ou spec), arrondi facultatif] ; valeur exacte gardée telle quelle (fractions comparées à 1e-9). */
   const PB = (q, parts, hints, sol) => ({ q, hints, sol,
     parts: parts.map(([label, v, rd]) => ({ label, spec: v && typeof v === "object" ? v : Object.assign({ kind: "value", value: v }, rd ? { round: rd } : {}) })) });
@@ -1450,7 +1451,7 @@
 
 // Chantier 2e Collège (23.11) : leçons actives (devine / manipule ou calcule / retiens) pour cart, cercle, polydiv,
 // polyfact, polyexpr, fracetage, eqrat, probrat, homog, homogrec, expo, expfrac, modexp, compo, decomp, bijection,
-// recip, log, logbase, vecteurs. Même moteur que act_1c.js et act_mp2.js (outils recopiés : fichier autonome).
+// recip, log, logbase, vecteurs ; 25.11 : ineqpoly (tableau des signes). Même moteur que act_1c.js et act_mp2.js (outils recopiés : fichier autonome).
 // Deux briques :
 // - hunt (réponse tapée, o.ask) : avec o.blank → « Essaie sur la figure » (tous les défis), sans → « À toi » (2 questions) ;
 // - slide (vraie manipulation) : un ou plusieurs curseurs qui déforment une courbe ou déplacent une figure ; l'objectif
@@ -1959,6 +1960,60 @@
         miss: (st, s) => (s === 1 && 2 * st.x + 3 * st.y === 0 ? "Perpendiculaire (produit scalaire nul), mais la norme n'est pas √13." : s === 1 && st.x * st.x + st.y * st.y === 13 ? "Bonne norme, mais le produit scalaire n'est pas nul." : ""),
         ask: [null, { q: "\\(\\vec{u} = (4 \\, ; -1)\\) et \\(\\vec{w} = (1 \\, ; k)\\) sont perpendiculaires. Que vaut k ?", ans: 4, ok: "4 · 1 + (−1) · k = 0, donc k = 4.", no: "Écris le produit scalaire 4 · 1 + (−1) · k et égale-le à 0." },
           { q: "norme du vecteur (−6 ; 8) ?", ans: 10, ok: "√(36 + 64) = √100 = 10.", no: "Norme : √(x² + y²)." }] }),
+    },
+  });
+
+  // =====================================================================================================
+  // ineqpoly (25.11, agent act34) : inéquations polynomiales. Courbe du polynôme et tableau des signes ; la colonne
+  // où se trouve x (curseur) est mise en évidence. Le tableau est rangé ici (paquet 13) et non dans act_col34b.js.
+  // =====================================================================================================
+  /* F = [[libellé, f]] (dernière ligne : le produit), zs = zéros triés, x = valeur du curseur */
+  const signTab = (F, zs, x) => {
+    const W = 320, lw = 58, n = zs.length, cw = (W - lw - 6) / (n + 1), rh = 24, H = rh * (F.length + 1) + 4, bx = (k) => lw + (k + 1) * cw;
+    const rep = (k) => (k === 0 ? zs[0] - 1 : k === n ? zs[n - 1] + 1 : (zs[k - 1] + zs[k]) / 2);
+    let g = "", cell = zs.findIndex((z) => x < z); if (cell < 0) cell = n;
+    const onZ = zs.indexOf(x);
+    if (onZ >= 0) g += `<rect x="${bx(onZ) - 9}" y="0" width="18" height="${H}" class="f-soft" style="stroke:none"/>`;
+    else g += `<rect x="${lw + cell * cw}" y="0" width="${cw}" height="${H}" class="f-soft" style="stroke:none"/>`;
+    g += T(lw / 2, 16, "x", "middle", 12) + T(lw + 10, 16, "−∞", "middle", 11) + T(W - 14, 16, "+∞", "middle", 11);
+    zs.forEach((z, k) => (g += T(bx(k), 16, nb(z), "middle", 12)));
+    F.forEach(([lab, f], r) => {
+      const y = rh * (r + 1), last = r === F.length - 1;
+      g += L(0, y, W, y, "f-line", last ? 1.6 : 1) + T(lw / 2, y + 16, lab, "middle", 12);
+      for (let k = 0; k <= n; k++) { const v = f(rep(k)); g += T(lw + k * cw + cw / 2, y + 17, v > 0 ? "+" : "−", "middle", 15, v > 0 ? "f-txt" : "f-txt f-accent"); }
+      zs.forEach((z, k) => (g += Math.abs(f(z)) < 1e-9 ? T(bx(k), y + 16, "0", "middle", 12) : ""));
+    });
+    zs.forEach((z, k) => (g += L(bx(k), rh, bx(k), H - 2, "f-line", 1, "3 3")));
+    g += L(lw, 0, lw, H - 2, "f-line", 1.2);
+    return svg(W, H, g, "tableau des signes");
+  };
+  const IQ = [
+    { f: (x) => (x + 2) * (x - 1) * (x - 4), zs: [-2, 1, 4], rows: [["x + 2", (x) => x + 2], ["x − 1", (x) => x - 1], ["x − 4", (x) => x - 4]], name: "P", txt: "(x + 2)(x − 1)(x − 4)", yr: [-20, 20] },
+    { f: (x) => x * x * (x - 4), zs: [0, 4], rows: [["x²", (x) => x * x], ["x − 4", (x) => x - 4]], name: "Q", txt: "x²(x − 4)", yr: [-15, 15] },
+  ];
+
+  Object.assign(ACTIVE, {
+    ineqpoly: {
+      retiens: { regle: "On ramène tout d'un côté (\\(P(x) \\ge 0\\), \\(< 0\\)…) et on factorise \\(P(x)\\). On place les zéros dans l'ordre et on cherche le signe de chaque facteur ; le signe du produit se lit colonne par colonne. Un facteur \\(x^2\\) ou \\((x - a)^2\\) ne change pas de signe. Inégalité large : les zéros sont solutions ; stricte : ils ne le sont pas.",
+        exemple: ["\\((x + 2)(x - 1)(x - 4) < 0\\) : \\(S = \\,]-\\infty \\,;\\, -2[\\, \\cup \\,]1 \\,;\\, 4[\\)", "\\(x^3 \\ge 4x^2 \\iff x^2(x - 4) \\ge 0\\) : \\(S = \\{0\\} \\cup [4 \\,;\\, +\\infty[\\)", "\\((x - 3)^2(x + 1) < 0\\) : \\(S = \\,]-\\infty \\,;\\, -1[\\)"],
+        piege: "Ne divise jamais une inéquation par une expression dont tu ne connais pas le signe (\\(x\\), \\(x^2\\)…) : factorise plutôt." },
+      predict: { q: "Pour résoudre x³ ≥ 4x², peut-on diviser les deux membres par x² ?", choices: ["Oui, x² est positif", "Non, on perdrait une solution"], good: 1,
+        why: "x² peut valoir 0 : x = 0 vérifie 0 ≥ 0, c'est une solution. En divisant par x², on ne garde que x ≥ 4 et on la perd. On factorise : x²(x − 4) ≥ 0." },
+      defis: ["P(x) = (x + 2)(x − 1)(x − 4). Place x dans l'intervalle borné où P(x) < 0.", "x³ ≥ 4x² s'écrit x²(x − 4) ≥ 0. Une solution est isolée, en dehors de [4 ; +∞[ : place x dessus."],
+      play: slide({
+        ctl: () => [{ k: "x", lab: "x", min: -4, max: 6, step: 0.5 }],
+        init: (s) => ({ x: s ? 2 : 0 }),
+        fig: (st, s) => { const D = IQ[s], x = st.x;
+          return graph({ xr: [-4.5, 6.5], yr: D.yr, gy: 5, ly: 10, H: 170, fns: [{ f: D.f }], vl: [[x, "f-line"]], pts: [[x, D.f(x), "", "f-dot"]], lab: "courbe de " + D.name + "(x)" }) + signTab(D.rows.concat([[D.name + "(x)", D.f]]), D.zs, x); },
+        out: (st, s) => { const D = IQ[s], x = st.x, v = D.f(x);
+          return D.name + "(" + nb(x) + ") = " + D.rows.map(([l, f]) => "(" + nb(f(x)) + ")").join(" · ") + " = <b>" + nb(v) + "</b>" + (v > 0 ? " > 0" : v < 0 ? " < 0" : " (zéro)"); },
+        goal: [(st) => (st.x > 1 && st.x < 4 ? "Sur ]1 ; 4[ : un facteur négatif (x − 4) et deux positifs, donc P(x) < 0. Avec ]−∞ ; −2[ (trois facteurs négatifs) : S = ]−∞ ; −2[ ∪ ]1 ; 4[." : ""),
+          (st) => (st.x === 0 ? "x = 0 : Q(0) = 0 ≥ 0, c'est une solution. Le facteur x² vaut 0 en 0 mais reste positif des deux côtés : S = {0} ∪ [4 ; +∞[." : "")],
+        miss: (st, s) => { const v = IQ[s].f(st.x);
+          if (!s) return v < 0 ? "P(x) < 0 ici aussi, mais cet intervalle n'est pas borné : cherche l'autre." : "Ici P(x) ≥ 0 : regarde la dernière ligne du tableau.";
+          return st.x >= 4 ? "Ces x sont solutions, mais ils ne sont pas isolés : cherche en dehors de [4 ; +∞[." : "Ici Q(x) < 0 : regarde la colonne d'un zéro."; },
+        ask: [{ q: "Combien de nombres entiers de [−5 ; 5] vérifient (x + 2)(x − 1)(x − 4) < 0 ?", ans: 5, ok: "−5, −4, −3 (dans ]−∞ ; −2[) et 2, 3 (dans ]1 ; 4[) : 5 entiers. Les zéros −2, 1 et 4 ne sont pas solutions (inégalité stricte).", no: "S = ]−∞ ; −2[ ∪ ]1 ; 4[ : compte les entiers de [−5 ; 5] dans ces intervalles, sans les bornes." },
+          { q: "\\((x - 3)^2(x + 1) < 0\\) a pour solutions \\(S = \\,]-\\infty \\,;\\, b[\\). Tape b.", ans: -1, ok: "(x − 3)² ≥ 0 ne change pas de signe ; il faut x + 1 < 0, donc x < −1 (et x = 3 donne 0, pas < 0). b = −1.", no: "(x − 3)² est positif ou nul : le signe dépend de x + 1." }] }),
     },
   });
 })();
