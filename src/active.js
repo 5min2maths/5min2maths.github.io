@@ -364,8 +364,6 @@ function actRetiens(A, L) {
    de suite ; les défis deviennent facultatifs (bouton discret). Hors séance (rappel, Mes compétences) : parcours complet. */
 function activeLesson(id, L0, cont, review, opts = {}) {
   const A0 = ACTIVE[id], P = A0.predict, X = actPrep(A0), A = Object.assign({}, A0, { defis: X.defis, play: X.play }), L = actRetiens(A0, L0);
-  const ss = sentences(L.regle);
-  const rule = ss.length > 1 ? "<ul>" + ss.map((x) => "<li>" + x + "</li>").join("") + "</ul>" : " · " + L.regle;
   const tail = lessonBody(id), fb = tail.slice(tail.indexOf('<div class="lfb"'));
   const short = !!opts.short && !review, optLab = X.mode === "guide" ? "S'entraîner : " + X.defis.length + " question" + (X.defis.length > 1 ? "s" : "") + " (facultatif)" : "Essayer sur la figure (facultatif)";
   h(`${brand}<div class="eyebrow">${review ? "Leçon · à toi de jouer" : opts.eyebrow || "Nouvelle notion · à toi de jouer"}</div>
@@ -377,9 +375,7 @@ function activeLesson(id, L0, cont, review, opts = {}) {
       <button type="button" class="btn-ghost small" id="skip">${X.mode === "guide" ? "Passer" : "Passer les défis"}</button></div>
     ${short ? `<button type="button" class="btn-ghost small act-opt" id="tryopt" hidden>🖐 ${optLab}</button>` : ""}
     <div class="act-step" id="s3" hidden><div class="act-h"><span class="act-n">${short ? 2 : 3}</span> Retiens</div>
-      <div class="rule"><b>À retenir</b>${rule}</div>
-      <div class="ex-list">${L.exemple.map((e) => `<div>${e}</div>`).join("")}</div>
-      <div class="trap"><b>Piège</b> · ${L.piege}</div>${fb}</div>
+      ${retiensHtml(L) /* 26.11 : règle d'abord, exemples et piège dépliables (app.js) */}${fb}</div>
   </div>
   <button class="btn-primary btn-big" id="go" hidden>${review ? "Retour à mes compétences" : "J'ai compris, à moi !"}</button>`);
   const $ = (s) => document.getElementById(s);

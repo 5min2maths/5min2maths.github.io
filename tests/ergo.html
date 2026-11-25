@@ -1,0 +1,218 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="budget" content="90000"><link rel="stylesheet" href="../src/style.css"><body><main id="app"></main>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/defis_9.js"></script><script src="../src/defis_910.js"></script><script src="../src/defis_2c.js"></script><script src="../src/defis_sec2.js"></script><script src="../src/competences.js"></script><script src="../src/referentiel.js"></script><script src="../src/trx.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch4c_trous.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/ch1c_trous.js"></script><script src="../src/ch1c_argact.js"></script><script src="../src/ch11_rep3d.js"></script><script src="../src/fr_college.js"></script><script src="../src/fr_1re.js"></script><script src="../src/fr_3e.js"></script><script src="../src/fr_tle.js"></script><script src="../src/fr_fin.js"></script><script src="../src/fr_trous.js"></script><script src="../src/fr_couv.js"></script><script src="../src/ref_matu.js"></script><script src="../src/ref_fr.js"></script><script src="../src/ref_co.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_col34b.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/fr_act.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/parents.js"></script><script src="../src/presente.js"></script><script src="../src/app.js"></script>
+<script>
+/* Chantier « ergonomie de la question » (26.11, revue d'un testeur ; ROADMAP.md). La page se charge dans un cadre de
+   360 × 640 (téléphone) et contrôle : 1. menu « ⋯ » (Pas encore vu, Trop facile) et zones de toucher ≥ 44 px ;
+   2. clavier contextuel : sur toutes les notions et de nombreux tirages, la réponse attendue se compose avec les touches
+   affichées (aucune touche utile perdue par rapport à l'ancien clavier), et ⌨ reste présent ; 3. barre d'action fixe :
+   « Valider » puis « Continuer » au même endroit, ni clavier ni dernier champ sous la barre (question et problème) ;
+   4. une seule icône 💬 après la question (vote et commentaire envoyés comme avant) ; 5. « Retiens » : règle d'abord,
+   exemples et piège dépliables, sans perte ; 6. accueil : explication des cases aux 3 premières ouvertures seulement. */
+if (window === top) {
+  document.body.innerHTML = '<iframe src="ergo.html#cadre" style="width:360px;height:640px;border:0"></iframe>';
+  const pre = document.createElement("pre"); pre.id = "out"; pre.textContent = "en cours"; document.body.appendChild(pre);
+  window.addEventListener("message", (e) => { if (typeof e.data === "string" && e.data.startsWith("ergo:")) pre.textContent = e.data.slice(5); });
+} else window.addEventListener("load", () => {
+const OUT = [], INFO = []; let nbF = 0;
+const fail = (m) => { nbF++; if (nbF < 120) OUT.push("ÉCHEC " + m); };
+const sec = (nom, f) => { try { return f(); } catch (e) { fail(nom + " : exception " + e.message + " " + (e.stack || "").split("\n")[1]); } };
+const R_ = (el) => el.getBoundingClientRect();
+const vis = (el) => !!el && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== "hidden" && !el.closest("[hidden]") && !el.closest("details:not([open]) > :not(summary)");
+const newSt = (g, tr) => { state = Engine.newState({ system: "CH", grade: g || 11, track: tr || (g >= 12 ? "college" : "co"), minutes: 5 }); Engine.autoInit(state); state.tourDone = true; };
+const opt = (o) => Object.assign({ eyebrow: "Test", onDone: () => 3, onNext: () => 0, track: "" }, o || {});
+newSt(11);
+const qRel = () => Engine.finalize(state, "rel", Engine.build("rel", 2, 11));
+
+// ---------- 1. Menu « ⋯ » ----------
+sec("1 menu", () => {
+  let ny = 0, ez = 0;
+  renderQuestion(qRel(), opt({ onNotYet: () => ny++, onEasy: () => ez++ }));
+  const idk = document.getElementById("idk"), chk = document.getElementById("check"), more = document.getElementById("qmore"), menu = document.getElementById("qmenu");
+  if (!vis(idk)) fail("« Je ne sais pas » pas visible");
+  if (!more || !vis(more)) fail("bouton ⋯ absent");
+  if (!menu || !menu.hidden) fail("menu ⋯ ouvert d'office");
+  for (const id of ["notyet", "easy"]) { const b = document.getElementById(id); if (!b || !menu.contains(b)) fail("#" + id + " hors du menu ⋯"); else if (vis(b)) fail("#" + id + " visible sans ouvrir ⋯"); }
+  [idk, chk, more].forEach((b) => { const r = R_(b); if (r.height < 44 || r.width < 44) fail("zone de toucher < 44 px : " + (b.id) + " " + Math.round(r.width) + " × " + Math.round(r.height)); });
+  const gap = (a, b) => R_(b).left - R_(a).right; if (gap(more, idk) < 8 || gap(idk, chk) < 8) fail("boutons de la barre trop serrés (" + Math.round(gap(more, idk)) + ", " + Math.round(gap(idk, chk)) + " px)");
+  more.click();
+  if (menu.hidden) fail("⋯ n'ouvre pas le menu");
+  const bs = [...menu.querySelectorAll("button")]; bs.forEach((b) => { if (R_(b).height < 44) fail("menu : bouton < 44 px"); });
+  if (bs.length === 2 && R_(bs[1]).top - R_(bs[0]).bottom < 8) fail("menu : boutons trop serrés");
+  if (bs.some((b) => R_(b).bottom > R_(more).top - 4)) fail("menu : un choix recouvre le bouton ⋯");
+  document.querySelector(".qtext").click();
+  if (!menu.hidden) fail("toucher ailleurs ne ferme pas le menu");
+  more.click(); document.getElementById("easy").click();
+  if (ez !== 1) fail("Trop facile ne passe pas la question");
+  renderQuestion(qRel(), opt({ onNotYet: () => ny++, onEasy: () => ez++ })); document.getElementById("notyet").click();
+  if (ny !== 1) fail("Pas encore vu ne fonctionne pas");
+  renderQuestion(qRel(), opt({ onNotYet: () => ny++, onEasy: () => ez++ }));
+  document.getElementById("ans").value = "1"; document.getElementById("check").click();
+  if (document.getElementById("qmore")) fail("⋯ reste après un premier essai (ses choix ne valent plus)");
+  renderQuestion(qRel(), opt());
+  if (document.getElementById("qmore")) fail("⋯ sans choix à proposer");
+});
+
+// ---------- 2. Clavier contextuel ----------
+const keysOf = (html) => [...String(html).matchAll(/data-k="([^"]*)"/g)].map((m) => m[1].replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"'));
+const oldKeys = (spec) => (spec && spec.final ? keysOf(numKeys(spec)) : isSetSpec(spec) ? SET_KEYS.slice() : spec && spec.kind === "set" ? keyLetters(spec).concat(["∅"]) : keyLetters(spec));
+const charsOf = (keys) => { const c = new Set(); keys.forEach((k) => [...k.replace("|", "")].forEach((x) => c.add(x))); c.delete(" "); return c; };
+const isOk = (sp, t) => { try { return checkAnswer(sp, t).status === "correct"; } catch (e) { return false; } };
+const fmtDec = (v, dec) => { let t = v.toFixed(dec); if (t.includes(".")) t = t.replace(/0+$/, "").replace(/\.$/, ""); return t.replace("-0", "0").replace(".", ","); };
+function valCands(sp) {
+  const v = sp.value, out = [];
+  if (!isFinite(v)) return out;
+  if (sp.round) { const dec = Math.max(0, Math.round(-Math.log10(sp.round))); out.push(fmtDec(Math.round(v / sp.round) * sp.round, dec)); }
+  if (isTerm(v)) out.push(fmtDec(+v.toPrecision(12), 10));
+  for (let d = 1; d <= 40; d++) { const n = v * d; if (Math.abs(n - Math.round(n)) < 1e-7) { out.push(Math.round(n) + (d > 1 ? "/" + d : "")); break; } }
+  const r = v / Math.PI; for (let d = 1; d <= 12; d++) { const n = r * d; if (Math.abs(n - Math.round(n)) < 1e-7 && Math.round(n)) { const k = Math.round(n); out.push((k === 1 ? "" : k === -1 ? "-" : k) + "π" + (d > 1 ? "/" + d : "")); break; } }
+  for (let n = 2; n <= 400; n++) { if ([4, 9, 25, 49].some((q) => n % q === 0)) continue; let hit = false;
+    for (let d = 1; d <= 24 && !hit; d++) { const k = (v * d) / Math.sqrt(n); if (Math.abs(k - Math.round(k)) < 1e-7 && Math.round(k)) { const K = Math.round(k); out.push((K === 1 ? "" : K === -1 ? "-" : K) + "√" + n + (d > 1 ? "/" + d : "")); hit = true; } }
+    if (hit) break; }
+  if (sp.sci) { const e = Math.floor(Math.log10(Math.abs(v))), a = v / Math.pow(10, e); out.push(fmtDec(+a.toPrecision(10), 8) + "*10^" + e); }
+  return out;
+}
+const norm = (t) => String(t).replace(/\s+/g, "").replace(/sqrt/g, "√").replace(/\bpi\b|pi/g, "π").replace(/[·×]/g, "*").replace(/−/g, "-").replace(/<=/g, "≤").replace(/>=/g, "≥").replace(/\./g, ",");
+function canonFor(sp, canon) {
+  const C = [];
+  if (canon) C.push(String(canon));
+  if (sp.kind === "value") C.push(...valCands(sp));
+  else if (sp.kind === "expr" && sp.expr) C.push(sp.expr);
+  else if (sp.kind === "set") { if (sp.all) return null; if (!sp.values.length) C.push("∅"); else { const parts = sp.values.map((v) => valCands(Object.assign({}, sp, { kind: "value", value: v }))[0]); if (parts.every(Boolean)) C.push(parts.join(" ; ")); } }
+  else if (sp.kind === "pair") { const parts = sp.values.map((v) => valCands({ kind: "value", value: v })[0]); if (parts.every(Boolean)) C.push(parts.join(" ; ")); }
+  else if (sp.kind === "solset") C.push(SolSet.show(sp.ivs, false));
+  else if (sp.kind === "ineq") { const b = valCands({ kind: "value", value: sp.value })[0]; if (b) C.push("x" + { "<": "<", ">": ">", "<=": "≤", ">=": "≥" }[sp.op] + b); }
+  else return null;
+  return C.find((t) => isOk(sp, t) || isOk(sp, norm(t))) || false;
+}
+sec("2 clavier", () => {
+  const KINDS = new Set(["value", "expr", "set", "pair", "solset", "ineq"]);
+  let n = 0, nonC = 0; const reg = new Map(), pre = new Map(), noKb = new Set(), byKind = {};
+  const check = (sp, canon, code, keyHtml) => {
+    if (!sp || !KINDS.has(sp.kind)) return;
+    const keys = keysOf(keyHtml), ks = charsOf(keys);
+    if (!keys.includes("⌨")) noKb.add(code);
+    const c = canonFor(sp, canon); if (c === null) return;
+    if (c === false) { nonC++; return; }
+    n++; byKind[kpKind(sp) || "complet"] = (byKind[kpKind(sp) || "complet"] || 0) + 1;
+    const miss = [...norm(c)].filter((x) => !ks.has(x));
+    if (!miss.length) return;
+    const old = charsOf(oldKeys(sp)), lost = [...norm(c)].every((x) => old.has(x)) ? miss : [];
+    if (lost.length) { if (!reg.has(code.split("-").slice(0, 2).join("-"))) reg.set(code.split("-").slice(0, 2).join("-"), code + " « " + c + " » : touche(s) " + [...new Set(lost)].join(" ") + " retirée(s)"); }
+    else pre.set(code.split("-")[0], [...new Set(miss)].join(""));
+  };
+  for (const [g, tr] of [[10, "co"], [12, "college"], [12, "mp"]]) {
+    const st = { profile: { system: "CH", grade: g, track: tr } };
+    for (const id of Object.keys(GEN)) for (const d of [1, 2, 3, 4]) for (let k = 0; k < (g === 12 && tr === "college" ? 10 : 5); k++) {
+      let q; try { q = Engine.finalize(st, id, Engine.build(id, d, 1 + k * 7919 + d * 131)); } catch (e) { continue; }
+      if (!q) continue;
+      const code = q.code || id + "-" + d;
+      if (q.spec) check(q.spec, q.canon, code, keypadHtml(q.spec));
+      (q.parts || []).forEach((p, i) => check(p.spec, null, code + "/p" + i, keypadHtml(p.spec)));
+      (q.guide || []).forEach((gs, i) => { const ksp = gs.spec && gs.spec.kind === "value" && !gs.spec.sci ? Object.assign({}, gs.spec, { final: true }) : gs.spec; check(gs.spec, null, code + "/g" + i, keypadHtml(ksp)); });
+    }
+  }
+  if (n < 20000) fail("clavier : trop peu de réponses vérifiées (" + n + ")");
+  reg.forEach((m) => fail("clavier : " + m));
+  noKb.forEach((c) => fail("clavier sans ⌨ : " + c));
+  INFO.push("clavier : " + n + " réponses composées avec les touches (" + Object.entries(byKind).map(([k, v]) => k + " " + v).join(", ") + ") ; " + nonC + " sans forme canonique reconstruite ; " + pre.size + " notions déjà au ⌨ avant (lettres de fonctions…)" + (pre.size ? " : " + [...pre].slice(0, 6).map(([k, v]) => k + " [" + v + "]").join(" ") : ""));
+  // Le bon clavier pour chaque genre de réponse
+  const has = (sp, k) => keysOf(keypadHtml(sp)).includes(k);
+  const num = { kind: "value", value: 3, final: true }, calc = { kind: "value", value: 12.5 }, ex = { kind: "expr", expr: "2*x+1" }, li = { kind: "set", values: [1, 2] }, pa = { kind: "pair", values: [1, 2] }, iv = { kind: "solset", ivs: [[1, true, Infinity, false]] };
+  for (const k of ["x", "y", "=", ";"]) { if (has(num, k)) fail("clavier numérique avec « " + k + " »"); if (has(calc, k)) fail("clavier de calcul avec « " + k + " »"); }
+  for (const k of ["x", ";"]) for (const [nm, sp] of [["expression", ex], ["liste", li], ["couple", pa]]) if (!has(sp, k)) fail("clavier " + nm + " sans « " + k + " »");
+  if (!has(iv, ";") || !has(iv, "∞")) fail("clavier d'intervalles incomplet");
+  if (has(num, "√") || has(num, "π") || has(num, "^")) fail("clavier numérique : √, π ou ^ sans raison");
+  if (!has({ kind: "value", value: Math.SQRT2, final: true }, "√")) fail("√2 attendu : pas de touche √");
+  if (!has({ kind: "value", value: 2 * Math.PI, final: true, pi: true }, "π")) fail("2π attendu : pas de touche π");
+  if (!has({ kind: "value", value: 32, final: true, pow: true }, "^")) fail("puissance demandée : pas de touche ^");
+  for (const sp of [num, calc, ex, li, pa, iv]) if (!has(sp, "⌨")) fail("⌨ absent (" + sp.kind + ")");
+  for (const sp of [num, calc]) for (const k of ["0", "1", "9", ",", "-", "/", "⌫"]) if (!has(sp, k)) fail("clavier " + (sp.final ? "numérique" : "de calcul") + " sans « " + k + " »");
+});
+
+// ---------- 3. Barre d'action fixe ----------
+const SEC3 = () => sec("3 barre", () => {
+  const bar = () => document.getElementById("qbar");
+  renderQuestion(qRel(), opt({ onNotYet: () => 0, onEasy: () => 0 }));
+  const b = bar(); if (!b) return fail("pas de barre d'action");
+  if (getComputedStyle(b).position !== "fixed") fail("barre non fixe : " + getComputedStyle(b).position);
+  if (Math.abs(R_(b).bottom - innerHeight) > 1) fail("barre pas collée en bas (" + Math.round(R_(b).bottom) + " / " + innerHeight + ")");
+  const r0 = R_(document.getElementById("check"));
+  window.scrollTo(0, 99999);
+  const kp = document.getElementById("kp"); if (R_(kp).bottom > R_(b).top - 2) fail("clavier sous la barre en fin de page (" + Math.round(R_(kp).bottom) + " > " + Math.round(R_(b).top) + ")");
+  const r1 = R_(document.getElementById("check")); if (Math.abs(r1.top - r0.top) > 1) fail("« Valider » bouge au défilement");
+  document.getElementById("ans").value = "1"; document.getElementById("check").click(); document.getElementById("ans").value = "2"; document.getElementById("check").click();
+  const nx = document.getElementById("nx"); if (!nx) return fail("pas de « Continuer » après la correction");
+  if (!b.contains(nx)) fail("« Continuer » hors de la barre");
+  const r2 = R_(nx); if (Math.abs(r2.left - r0.left) > 1 || Math.abs(r2.top - r0.top) > 1 || Math.abs(r2.width - r0.width) > 1) fail("« Continuer » pas à la place de « Valider » (" + [r2.left, r2.top, r2.width].map(Math.round) + " vs " + [r0.left, r0.top, r0.width].map(Math.round) + ")");
+  if (vis(document.getElementById("check"))) fail("« Valider » encore visible après la correction");
+  window.scrollTo(0, 99999); const last = [...document.querySelectorAll("#fb > *")].pop(); if (last && R_(last).bottom > R_(b).top - 2) fail("fin de la correction sous la barre");
+  let next = 0; renderQuestion(qRel(), opt({ onNext: () => next++ })); document.getElementById("ans").value = "625"; document.getElementById("check").click();
+  if (!document.getElementById("nx")) document.getElementById("idk").click();
+  const nb = document.getElementById("nx"); if (nb) { nb.click(); if (next !== 1) fail("« Continuer » ne passe pas à la suite"); }
+  // Problème : partie suivante visible au-dessus de la barre, puis « Continuer » à la place de « Valider ».
+  let P = null; for (const id of ["eq1", "thales", "prop", "pythag", "aire1"]) { for (let s = 1; s < 30 && !P; s++) { try { const q = Engine.build(id, 4, s); if (q && q.parts && q.parts.length >= 2) P = q; } catch (e) {} } if (P) break; }
+  if (!P) return fail("pas de problème à plusieurs parties pour le test");
+  renderQuestion(P, opt());
+  const c0 = R_(document.getElementById("check"));
+  document.querySelector(".next-part").click();
+  const rest = () => { const p1 = document.getElementById("p1"), kp = document.getElementById("kp"); if (R_(p1).bottom > R_(bar()).top - 2) fail("problème : partie b) sous la barre"); if (R_(kp).top < R_(p1).bottom - 2) fail("problème : clavier pas sous la partie b)"); };
+  return new Promise((res) => setTimeout(() => { try { rest(); document.getElementById("idk").click(); const nx = document.getElementById("nx"), c1 = nx && R_(nx);
+    if (!c1 || Math.abs(c1.left - c0.left) > 1 || Math.abs(c1.top - c0.top) > 1) fail("problème : « Continuer » pas à la place de « Valider »"); } catch (e) { fail("3 problème : " + e.message); } res(); }, 400));
+});
+
+// ---------- 4. Icône 💬 unique ----------
+const sec4 = () => sec("4 avis", () => {
+  newSt(11); const q = qRel(); renderQuestion(q, opt()); document.getElementById("idk").click();
+  const fb = document.getElementById("fb"), sums = [...fb.querySelectorAll("summary")].filter((s) => /💬/.test(s.textContent));
+  if (sums.length !== 1) fail("après la question : " + sums.length + " icône(s) 💬 (1 attendue)");
+  if (/Un commentaire sur cette question/.test(fb.textContent)) fail("ancien « Un commentaire sur cette question ? » encore là");
+  if ([...fb.querySelectorAll(".vote button")].some(vis)) fail("👍 👎 visibles sans toucher 💬");
+  if (sums[0]) { if (sums[0].textContent.trim() !== "💬") fail("💬 accompagné de texte : " + sums[0].textContent.trim()); if (sums[0].offsetWidth < 44 || sums[0].offsetHeight < 44) fail("💬 : zone de toucher < 44 px"); sums[0].click(); }
+  const up = fb.querySelector('.vote button[data-v="up"]'); if (!vis(up)) fail("💬 n'ouvre pas le vote"); up.click();
+  if (!state.votes || !state.votes[q.code] || state.votes[q.code].v !== "up") fail("vote 👍 non enregistré pour " + q.code);
+  const ta = fb.querySelector("textarea.cmt-t"); if (!vis(ta)) fail("💬 n'ouvre pas le commentaire"); ta.value = "Consigne à préciser"; fb.querySelector(".cmt-s").click();
+  const c = (state.comments || []).slice(-1)[0]; if (!c || c.code !== q.code || c.text !== "Consigne à préciser") fail("commentaire non enregistré avec le code de la question");
+  if (!fb.querySelector(".qfb .code") || fb.querySelector(".qfb .code").textContent !== q.code) fail("code de la question absent (mode auteur)");
+  document.documentElement.classList.add("auteur"); if (!vis(fb.querySelector(".qfb .code"))) fail("mode auteur : code invisible"); document.documentElement.classList.remove("auteur");
+});
+
+// ---------- 5. Retiens ----------
+const sec5 = () => sec("5 retiens", () => {
+  newSt(11);
+  const chk = (L, where) => {
+    const root = document.getElementById("app"), rule = root.querySelector(".rule");
+    if (!vis(rule)) fail(where + " : règle pas visible d'emblée");
+    const ex = root.querySelector("details.lx-ex"), tr = root.querySelector("details.lx-trap");
+    if ((L.exemple || []).length) { if (!ex || ex.open) fail(where + " : exemples pas repliés"); else if (ex.querySelectorAll(".ex-list > div").length !== L.exemple.length) fail(where + " : exemples perdus"); else if (!/exemple/i.test(ex.querySelector("summary").textContent)) fail(where + " : titre « Voir un exemple » absent"); }
+    if (L.piege) { if (!tr || tr.open) fail(where + " : piège pas replié"); else if (!/piège/i.test(tr.querySelector("summary").textContent) || !tr.querySelector(".trap")) fail(where + " : piège perdu"); }
+    [ex, tr].filter(Boolean).forEach((d) => { if (d.querySelector("summary").offsetHeight < 44) fail(where + " : titre dépliable < 44 px"); });
+  };
+  let nA = 0, nR = 0;
+  for (const id of Object.keys(LESSONS)) {
+    if (activeOf(id)) { if (nA >= 40) continue; nA++; screenLesson(id, () => 0, false, false); const b = document.querySelector("#pc button"); if (b) b.click(); const sk = document.getElementById("skip"); if (sk) sk.click(); document.getElementById("s3").hidden = false; chk(actRetiens(ACTIVE[id], lessonOf(id)), "leçon active " + id); }
+    else { if (nR >= 40) continue; nR++; screenLesson(id, () => 0, false, false); chk(lessonOf(id), "rappel " + id); }
+  }
+  if (!nA || !nR) fail("Retiens : leçons actives " + nA + ", rappels " + nR);
+});
+
+// ---------- 6. Accueil ----------
+const sec6 = () => sec("6 accueil", () => {
+  newSt(11); state.placed = true; save();
+  const hints = () => [...document.querySelectorAll(".door small.door-hint")].length;
+  for (let k = 1; k <= 4; k++) {
+    doorHintCounted = false; homeTab = "today"; screenHome(); screenHome(); /* un 2e affichage dans la même ouverture ne compte pas */
+    const n = hints();
+    if (k <= 3 && n < 3) fail("ouverture " + k + " : " + n + " explication(s) sous les cases");
+    if (k <= 3) for (const d of ["prob", "cur", "hist"]) if (!document.querySelector('.door[data-door="' + d + '"] small')) fail("ouverture " + k + " : pas d'explication sous « " + d + " »");
+    if (k === 4 && n) fail("4e ouverture : explications encore affichées");
+    window.scrollTo(0, 0); const go = document.querySelector(".sess-go"); if (go && R_(go).bottom > 640) fail("ouverture " + k + " : bouton principal hors du premier écran");
+    document.querySelectorAll(".door small.door-hint").forEach((s) => { if (R_(s).height > 22) fail("explication sur plus d'une ligne : " + s.textContent); });
+  }
+});
+
+Promise.resolve().then(() => SEC3())
+  .then(() => { sec4(); sec5(); sec6(); })
+  .then(() => { window.scrollTo(0, 0); parent.postMessage("ergo:" + (nbF ? "ÉCHEC (" + nbF + ")\n" + OUT.join("\n") : "OK ergonomie de la question (menu ⋯, clavier contextuel, barre fixe, 💬 unique, Retiens dépliable, cases de l'accueil)") + "\n" + INFO.join("\n"), "*"); });
+});
+</script>
