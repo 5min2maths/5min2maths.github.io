@@ -1778,7 +1778,9 @@ function nextQuestion(redo) {
   if (easy) session.eased = true;
   /* 24.11 (ergonomie) : le type de question n'est rappelé que s'il change dans la séance (« Révision · 1 sur 4 · Révision » doublait le titre). */
   let q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : easy ? 1 : level, undefined, !session.weekly && !forceProb);
-  if (easy) for (let k = 0; k < 12 && q && lessonEcho(id, q); k++) q = Engine.make(state, id, 1); /* 25.11 : pas les nombres de la leçon */
+  /* 25.11 : pas les nombres de la leçon. 27.11 (test instable, réciproque de Pythagore : peu de triplets au niveau 1) : toute
+     question de la notion qui suit sa leçon dans la séance, et 40 essais au lieu de 12. */
+  if (!redo && session.lessonShown === id) { const lv = q && q.d ? q.d : easy ? 1 : level; for (let k = 0; k < 40 && q && lessonEcho(id, q); k++) q = Engine.make(state, id, lv); }
   /* 25.11 soir (revue d'un testeur : « Refaire avec d'autres valeurs » redonnait le même problème, valeurs fixes) :
      on retire tant que l'énoncé est identique ; sans autre version, on passe à la suite. */
   if (redo) { for (let k = 0; k < 12 && q && q.q === redo.q; k++) q = Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1));
