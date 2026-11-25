@@ -103,12 +103,11 @@ const SYSTEMS_HIDDEN = { FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [
 // Usages français (25.11, audit France : tools/france.md § 4). Appliqué aux textes d'un profil FR seulement (Engine.finalize,
 // rendu de l'app) ; jamais pour un profil suisse. Idempotent. Sans décision de l'enseignant : seulement ce qui est un défaut
 // certain pour un élève français (monnaie, séparateur des milliers, sigles PGDC / PPMC, « préimage », « mise en évidence »).
-// Genève → Lyon (un seul énoncé au catalogue français le 25.11 : une cycliste « part de Genève »). Les énoncés propres à la
+// Genève → Lyon : énoncés seulement (FR_QWORDS, frLocalQ) ; un seul énoncé au catalogue français le 25.11 : une cycliste « part de Genève »). Les énoncés propres à la
 // Suisse (change EUR ↔ CHF, TVA suisse) sont écartés du tirage par horsCO (src/engine.js), pas traduits.
 // Produit : × en France (décision du 25.11, frTimes) ; laissé pour décision : « cercle de Thalès ».
 const FR_WORDS = [
   [/\ben (CHF|francs)\b/g, "en euros"], [/\bCHF\b/g, "€"], [/au franc près/g, "à l'euro près"], [/(\d|\\\)) francs\b/g, "$1 euros"], [/\bde francs\b/g, "d'euros"],
-  [/\bGenève\b/g, "Lyon"],
   /* 25.11 (couverture France) : équation réduite y = mx + p ; « côtés de l'angle droit » (cathètes : usage suisse) ;
      « ensemble de définition » (domaine de définition : usage suisse ; « l'aire du domaine » inchangé). */
   [/\bmx \+ h\b/g, "mx + p"], [/\b([Ll])es cathètes\b/g, "$1es côtés de l'angle droit"], [/\bcathètes\b/g, "côtés de l'angle droit"], [/\b([Ll])a cathète(?![a-zà-ÿ])/g, "$1e côté de l'angle droit"], [/\bcathète(?![a-zà-ÿ])/g, "côté de l'angle droit"],
@@ -137,6 +136,10 @@ function frLocal(s) {
   if (typeof s !== "string" || !s) return s;
   return frWords(s.split(/(\\\([\s\S]*?\\\))/).map((t, i) => frThouPart(t, i % 2 === 1)).join(""));
 }
+/* Énoncés de questions seulement (25.11 soir : « Collège de Genève » devenait « Collège de Lyon » dans la présentation
+   aux enseignants) : les lieux suisses d'un énoncé deviennent français ; l'interface et les pages genevoises, jamais. */
+const FR_QWORDS = [[/\bGenève\b/g, "Lyon"]];
+function frLocalQ(s) { const r = frLocal(s); return typeof r === "string" ? FR_QWORDS.reduce((a, [re, by]) => a.replace(re, by), r) : r; }
 
 // Difficulté maximale (1 = bases, 3 = approfondi) : on ne demande pas la section à l'élève ;
 // c'est le Mathélo qui situe son niveau. Seules les petites classes (6e, 5e) plafonnent à 2.
@@ -191,6 +194,15 @@ Object.assign(ORDRE_THEME.MATU, {"fracper":"M1C01","racprop":"M1C01","ratden":"M
 Object.assign(ORDRE.MATU, {"ineqpoly":81.5});
 Object.assign(ORDRE_THEME.MATU, {"ineqpoly":"M2C03","ineq":"M1C05","trigrel":"M1C10"});
 delete ORDRE_THEME.MATU_ALT.ineq; delete ORDRE_THEME.MATU_ALT.trigrel;
+// 25.11 (agent col34) : 3e et 4e du Collège complétées. 3e : derivth (M3C04), pvect (M3C06, MA2). 4e : syslin et bases
+// (M4C03), bayes (M4C04) ; MA2 : nombres complexes (M4C05) et suites et séries (M4C06), chapitres « Av » de Sésamath Ma4.
+// Ajouté à la main : à reporter dans tools/referentiels.py si ce fichier est régénéré.
+Object.assign(THEME_LABEL.MATU, {"M4C05":"5. Nombres complexes","M4C06":"6. Suites et séries"});
+Object.assign(ORDRE.MATU, {"derivth":115,"pvect":157.5,"syslin":220.5,"bases":222.5,"bayes":230.5,"cplxalg":240,"cplxtrig":241,"cplxeq":242,"suitegeom":250,"serie":251});
+Object.assign(ORDRE_THEME.MATU, {"derivth":"M3C04","pvect":"M3C06","syslin":"M4C03","bases":"M4C03","bayes":"M4C04","cplxalg":"M4C05","cplxtrig":"M4C05","cplxeq":"M4C05","suitegeom":"M4C06","serie":"M4C06"});
+// Chapitre 1 de 3e (Sésamath Ma3, « Prérequis pour l'entrée en 3e ») : reprises de 2e, « de l'année » en 3e sans être
+// nouvelles (statut « vu » : notions des années précédentes). Lu par Engine.catalog et Engine.themeKey (MATU_REP).
+ORDRE_THEME.MATU_REP = {"polyfact":"M3C01","fracrat":"M3C01","ineqpoly":"M3C01","ineqfrac":"M3C01","compo":"M3C01","expo":"M3C01","log":"M3C01","trigfn":"M3C01"};
 
 // Calculateur d'expressions : lecture souple de la réponse de l'élève, calcul, mise en forme TeX,
 // équivalence d'expressions (par évaluation en plusieurs points) et contrôle de forme.
@@ -10011,7 +10023,7 @@ const Badges = {
   },
   // Icône d'un badge de thème, d'après son libellé. 25.11 (chantier E) : une icône dessinée par famille de chapitres
   // (CO, matu, MP, France) au lieu d'émojis génériques ; l'ordre compte (le premier motif qui convient l'emporte).
-  THEME_ICONS: [[/algorithm|programmation/i, "algo"], [/automatisme/i, "auto"], [/ensemble/i, "venn"], [/argument|raisonner/i, "implique"],
+  THEME_ICONS: [[/algorithm|programmation/i, "algo"], [/complexe/i, "repere"], [/suites et séries/i, "expo"], /* 25.11 (agent col34) : chapitres MA2 de 4e */ [/automatisme/i, "auto"], [/ensemble/i, "venn"], [/argument|raisonner/i, "implique"],
     [/combinatoire/i, "arbre"], [/probab/i, "de"], [/statisti|diagramme|données/i, "barres"], [/vectoriel|vecteur/i, "vecteurs"],
     [/droites param/i, "droiteparam"], [/coordonn|cartésienne/i, "repere"], [/algèbre linéaire/i, "matrice"], [/intégr/i, "integrale"],
     [/limite|dérivation|analyse/i, "tangente"], [/logarithm|exponentiel|puissances et log/i, "expo"], [/sinuso|fonctions trigo/i, "sinus"],
@@ -13239,6 +13251,9 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
   // 24.11 : 4e Collège (src/ch4c_ana.js) : intégration, ln et exp, probabilités 2
   primitives: ["derivregles"], integrale: ["primitives"], aireint: ["integrale"], volrev: ["integrale"], lnexp: ["log", "derivcomp"], croissance: ["expo", "log"],
   condbayes: ["proba"], varalea: ["proba"], binomiale: ["varalea"],
+  // 25.11 (agent col34) : 3e–4e Collège complétées (derivth, pvect ; syslin, bases, bayes ; MA2 : complexes, suites et séries)
+  derivth: ["continuite", "nbderive"], pvect: ["pscal3d"], syslin: ["matrices"], bases: ["matrices", "vect3d"], bayes: ["condbayes"],
+  cplxalg: ["eq2disc"], cplxtrig: ["cplxalg", "trigexact"], cplxeq: ["cplxtrig", "eq2disc"], suitegeom: ["expo", "log"], serie: ["suitegeom", "limitinf"],
   intparties: ["integrale", "derivprodquot"], intsubst: ["integrale", "derivcomp"], etudelnexp: ["lnexp", "variations"], eqdiff: ["croissance", "primitives"],
   // 24.11 (agent niv1c) : 1re Collège, chapitre Argumenter (src/ch1c_arg.js) ; divcrit et tradexpr deviennent des prérequis
   tradalg: ["tradexpr", "valnum"], contrex: ["divcrit", "premiers"], demoalg: ["tradalg", "distrib"], implication: ["contrex", "divcrit"], ratden: ["rac", "idrem"], racprop: ["rac"], fracper: ["fracops"],
@@ -13257,6 +13272,7 @@ const UPC_MIN = { fracper: 3 };
    qui se glissaient dans les notions de 9e et de 10e. Au tirage (Engine.make, sujets, QCM), une question dont le contexte
    (q.ctx), l'énoncé (RegExp) ou la réponse (fonction) est listé ici pour la classe est refaite ; les autres classes
    (11e, Collège, MP) ne changent pas. */
+const HORS_MA1 = { asymptotes: [/oblique/i], etudefct: [/oblique/i] };
 const HORS_CO = {
   /* 9e : relatifs sans multiplication ni division, fractions dans Q+ (addition, soustraction), périodes d'un chiffre
      (tiers, neuvièmes) ; réduction d'expressions et polygones réguliers en 10e. */
@@ -13298,6 +13314,9 @@ function horsCO(state, id, q) {
     if (HORS_FR[id].some(([r, g]) => p.grade < g && (typeof r === "string" ? q.ctx === r || (r.endsWith("*") && String(q.ctx || "").startsWith(r.slice(0, -1))) : r instanceof RegExp ? r.test(t) : r(q)))) return true;
   }
   if (!q || !p || p.system !== "CH" || p.track === "mp") return false;
+  /* 25.11 (agent col34, programme du Collège 2021) : en 3e–4e niveau normal MA1, formes réservées au niveau avancé MA2
+     (asymptotes obliques : « horizontales, verticales, obliques » en MA2 seulement). Notions entières MA2 : champ niv "R". */
+  if (p.grade >= 14 && p.niv !== "R" && HORS_MA1[id]) { const t = String(q.ctx || "") + " " + String(q.q || "") + " " + (q.parts || []).map((x) => x.label || "").join(" "); if (HORS_MA1[id].some((r) => r.test(t))) return true; }
   const L = HORS_CO[p.grade] && HORS_CO[p.grade][id];
   if (!L) return false;
   const txt = String(q.q || "") + " " + (q.parts || []).map((x) => x.label || "").join(" ");
@@ -13332,7 +13351,7 @@ const CALC_NON = [
 ];
 const CALC_OUI = [
   "diagr", "pct", "denombr", "stats", "statfreq", "quartiles", "statdesc", "combi", "probaxiomes", "probarbre", "condbayes",
-  "varalea", "binomiale", "normale", "proba2", "tauxevol", "probcond", "probtot", "vaesp", "binom",
+  "varalea", "binomiale", "normale", "proba2", "tauxevol", "probcond", "probtot", "vaesp", "binom", "bayes",
 ];
 /* notation scientifique : forme propre (spec.sci), ni calcul ni résultat brut */
 const CALC_LIBRE = ["sci", "scicalc"];
@@ -13484,13 +13503,18 @@ const Engine = {
   // Notions du programme jusqu'à l'année de l'élève. Années précédentes : vues. Année en cours : « à venir » ;
   // elles s'ouvrent dans l'ordre du référentiel (unlock), sans rien demander à l'élève.
   catalog(profile) {
-    return NOTIONS.filter((n) => { const pl = placeOf(n, profile); return pl && pl[0] <= profile.grade; }).map((n) => {
+    /* 25.11 soir (décision de l'enseignant : « distinguer normal et renforcé en 3e–4e ») : au Collège de Genève, 3e et 4e,
+       les notions niv: "R" (MA2, niveau renforcé) ne sont proposées qu'aux élèves de MA2. Sans choix : MA1. */
+    const ma1 = profile.system === "CH" && profile.track !== "mp" && profile.grade >= 14 && profile.niv !== "R";
+    return NOTIONS.filter((n) => { const pl = placeOf(n, profile); return pl && pl[0] <= profile.grade && !(ma1 && n.niv === "R"); }).map((n) => {
       const [g] = placeOf(n, profile);
       // Matu : une notion est « de l'année » si son chapitre Sésamath est celui de l'année (Ma1 = 1re, Ma2 = 2e).
       /* 25.11 (audit France) : chapitres Sésamath du Collège de Genève pour les profils suisses seulement (une Tle française, grade 12,
          recevait les chapitres de 1re du Collège comme « de l'année » : relatifs, Pythagore, puissances…). */
       const yr = "M" + (profile.grade - 11), sesa = profile.system === "CH" && profile.track !== "mp" && profile.grade >= 12 && typeof ORDRE_THEME !== "undefined" &&
-        [(ORDRE_THEME.MATU || {})[n.id], (ORDRE_THEME.MATU_ALT || {})[n.id]].some((k) => (k || "").startsWith(yr));
+        [(ORDRE_THEME.MATU || {})[n.id], (ORDRE_THEME.MATU_ALT || {})[n.id], (ORDRE_THEME.MATU_REP || {})[n.id]].some((k) => (k || "").startsWith(yr));
+      /* 25.11 (agent col34) : MATU_REP = reprises d'une année précédente rangées dans un chapitre de l'année (3e, « 1. Prérequis ») :
+         « de l'année » (current), mais statut « vu » (g < grade), donc pas « nouvelles ». */
       const coYear = this.coChap(profile, n.id, true);
       // 22.11 (seconde FR) : « again » liste des années suisses ; pour la France, on lit againFR (sinon une notion reprise en 10e
       // suisse devenait « de l'année » en 2nde, grade 10 aussi).
@@ -13515,7 +13539,7 @@ const Engine = {
   themeKey(profile, id) {
     const co = this.coChap(profile, id);
     if (co) return "CO." + co;
-    const ref = this.refOf(profile), alt = ref === "MATU" && typeof ORDRE_THEME !== "undefined" && (ORDRE_THEME.MATU_ALT || {})[id];
+    const ref = this.refOf(profile), alt = ref === "MATU" && typeof ORDRE_THEME !== "undefined" && ([(ORDRE_THEME.MATU_REP || {})[id], (ORDRE_THEME.MATU_ALT || {})[id]].find((k) => (k || "").startsWith("M" + (profile.grade - 11))) || (ORDRE_THEME.MATU_ALT || {})[id]);
     // Notion sur deux années : le chapitre de l'année de l'élève.
     const k = alt && alt.startsWith("M" + (profile.grade - 11)) ? alt : ref !== "CO" && typeof ORDRE_THEME !== "undefined" && (ORDRE_THEME[ref] || {})[id];
     /* 25.11 (règle de l'auteur, « très important » : chaque système a ses dénominations ; « Nombres et opérations » parle
@@ -13756,10 +13780,12 @@ const Engine = {
     (q.guide || []).forEach((g) => mark(g.spec, txt0 + " " + (g.ask || ""), g.calcul || q.calcul, true));
     /* 25.11 (audit France, tools/france.md) : profil français : €, milliers 1 200, PGCD, antécédent, factoriser (frLocal,
        src/curriculum.js). Tous les textes de la question ; jamais les réponses attendues (spec, canon, expressions des pièges). */
+    /* 25.11 (soir, couverture France) : notes suisses (1 à 6) remplacées par des notes sur 20 (FR_NOTES, src/fr_fin.js). */
+    if (p && p.system === "FR" && typeof FR_NOTES === "function") { const r = FR_NOTES(id, q); if (r) q = r; }
     if (p && p.system === "FR" && typeof frLocal === "function") {
       const SKIP = new Set(["spec", "canon", "code", "id", "ctx", "e", "expr", "values", "value"]);
       /* copies (jamais de modification en place : une question peut partager des objets avec les tables communes) */
-      const loc = (v, d) => typeof v === "string" ? frLocal(v) : d > 6 || !v || typeof v !== "object" ? v : Array.isArray(v) ? v.map((x) => loc(x, d + 1))
+      const loc = (v, d) => typeof v === "string" ? frLocalQ(v) : d > 6 || !v || typeof v !== "object" ? v : Array.isArray(v) ? v.map((x) => loc(x, d + 1))
         : Object.getPrototypeOf(v) !== Object.prototype ? v : Object.fromEntries(Object.entries(v).map(([k, x]) => [k, SKIP.has(k) ? x : loc(x, d + 1)]));
       q = loc(q, 0);
     }
@@ -14457,7 +14483,8 @@ function screenParentEmpty() {
 // le format le plus dynamique). Deux pages publiques, sans rien enregistrer :
 //   …/#decouvrir : présentation aux élèves (projetable en classe), avec une vraie question à essayer ;
 //   …/#parents   : « Je suis parent » (ce que l'app apporte, Résoudre ensemble en direct, mise en route en 3 étapes).
-//   …/#enseignants : présentation aux collègues (25.11, « deux publics distincts : professionnels et parents ») :
+//   …/#enseignants : présentation aux collègues (25.11 soir : liens retirés, « un peu too much, l'app est destinée aux
+//   élèves et aux parents » ; page gardée, accessible seulement par son adresse) (25.11, « deux publics distincts : professionnels et parents ») :
 //   principes, démonstration, couverture des plans d'études calculée en direct, différenciation, qualité, données, limites.
 // Bouton « ▶ Présenter » : une diapositive par écran, flèches / espace / clic pour avancer (réunion de parents, classe).
 // Rien n'est envoyé depuis ces pages (voir canSend et ping dans app.js).
@@ -14467,6 +14494,8 @@ const PZ = {
   qr(u) { try { return typeof QR !== "undefined" ? QR.svg(u) : ""; } catch (e) { return ""; } },
   grade: null,
   on: false,
+  /* 25.11 soir (séparation complète France / romand) : un profil France voit des présentations françaises. */
+  fr() { return !!(typeof state !== "undefined" && state && state.profile && state.profile.system === "FR"); },
 };
 
 function presentRoute() {
@@ -14508,9 +14537,10 @@ function pzBind(root) {
   } else root.querySelectorAll(".pz-anim").forEach((el) => el.classList.remove("pz-wait"));
 }
 
-const pzGrades = (id) => `<div class="seg pz-grades" id="${id}">${[[9, "9e"], [10, "10e"], [11, "11e"], [12, "Collège / MP"]].map(([g, l]) => `<button type="button" aria-pressed="${g === PZ.grade}" data-v="${g}">${l}</button>`).join("")}</div>`;
+const pzGrades = (id) => `<div class="seg pz-grades" id="${id}">${(PZ.fr() ? [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"], [12, "Tle"]] : [[9, "9e"], [10, "10e"], [11, "11e"], [12, "Collège / MP"]]).map(([g, l]) => `<button type="button" aria-pressed="${g === PZ.grade}" data-v="${g}">${l}</button>`).join("")}</div>`;
 
 function pzQuestion() {
+  if (PZ.fr()) return pzQuestionFR();
   const keep = demoGrade; demoGrade = PZ.grade || null;
   let q; try { q = demoQuestion(); } finally { demoGrade = keep; }
   return q;
@@ -14547,6 +14577,19 @@ function pzTry(box) {
   document.getElementById("pzother").onclick = () => pzTry(box);
 }
 
+/* Question de démonstration d'un profil France : une notion ouverte de la classe choisie (catalogue français). */
+function pzQuestionFR() {
+  const g = PZ.grade || state.profile.grade, st = Engine.newState({ system: "FR", grade: g, track: "college", minutes: 5 });
+  Engine.autoInit(st);
+  const pool = Object.keys(st.notions).filter((id) => ["vu", "encours"].includes(st.notions[id].status) && GEN[id]);
+  for (let k = 0; k < 40 && pool.length; k++) {
+    const id = pool[Math.floor(Math.random() * pool.length)];
+    let q; try { q = Engine.build(id, 1, 1 + Math.floor(Math.random() * 46655)); } catch (e) { continue; }
+    if (q && q.spec && q.spec.kind === "value" && !q.parts && q.guide && q.guide.length) return Engine.finalize(st, id, q);
+  }
+  return Engine.finalize(st, "prio", Engine.build("prio", 1, 7));
+}
+
 const pzInstall = (who) => {
   const u = PZ.url(), qr = PZ.qr(u);
   return `<div class="pz-install">${qr ? `<div class="pz-qr" aria-label="QR code de l'application">${qr}</div>` : ""}
@@ -14557,14 +14600,14 @@ const pzInstall = (who) => {
 };
 
 function screenDecouvrir() {
-  h(`<div class="pz" id="pz">
+  h(`<div class="pz" id="pz" data-noloc>
   <div class="spread pz-bar">${brand}<span class="row" style="gap:6px"><button type="button" class="btn-sec small pz-play">▶ Présenter</button><button type="button" class="btn-ghost small pz-exit" aria-label="Quitter">✕</button></span></div>
 
   <section class="pz-s pz-hero">
-    <div class="eyebrow">Pour les élèves · 9e à 4e, Collège et MP</div>
+    <div class="eyebrow">${PZ.fr() ? "Pour les élèves · de la 6e à la terminale" : "Pour les élèves · 9e à 4e, Collège et MP"}</div>
     <h1 class="pz-big">Chaque jour, <span class="mark">5 minutes</span> de maths.<br>Juste à ton niveau.</h1>
     <p class="muted">Une question choisie pour toi, une correction tout de suite, et l'app t'aide étape par étape quand tu bloques.</p>
-    <div class="pz-chips pz-anim"><span>📱 sur ton téléphone</span><span>🙈 sans compte, sans nom</span><span>🆓 gratuit, sans pub</span><span>📚 plan d'études genevois</span></div>
+    <div class="pz-chips pz-anim"><span>📱 sur ton téléphone</span><span>🙈 sans compte, sans nom</span><span>🆓 gratuit, sans pub</span><span>📚 ${PZ.fr() ? "programmes officiels" : "plan d'études genevois"}</span></div>
     <button type="button" class="btn-primary pz-next">Essayer tout de suite ↓</button>
   </section>
 
@@ -14638,14 +14681,14 @@ function pzSolve(box) {
 
 function screenParents() {
   const JR = ["L", "M", "M", "J", "V", "S", "D"], ON = [1, 1, 0, 1, 0, 1, 0];
-  h(`<div class="pz" id="pz">
+  h(`<div class="pz" id="pz" data-noloc>
   <div class="spread pz-bar">${brand}<span class="row" style="gap:6px"><button type="button" class="btn-sec small pz-play">▶ Présenter</button><button type="button" class="btn-ghost small pz-exit" aria-label="Quitter">✕</button></span></div>
 
   <section class="pz-s pz-hero">
     <div class="eyebrow">👪 Je suis parent</div>
     <h1 class="pz-big">Accompagner son enfant en maths,<br><span class="mark">2 minutes</span> par semaine.</h1>
     <p class="muted">Votre enfant s'entraîne 5 minutes par jour, à son niveau, sur le programme de sa classe. Vous, vous l'encouragez, et vous pouvez résoudre un problème avec lui, même sans être fort en maths.</p>
-    <div class="pz-chips pz-anim"><span>🤝 accompagner, pas surveiller</span><span>🆓 gratuit, sans compte</span><span>📚 plan d'études genevois, 9e → 4e, Collège et MP</span></div>
+    <div class="pz-chips pz-anim"><span>🤝 accompagner, pas surveiller</span><span>🆓 gratuit, sans compte</span><span>📚 ${PZ.fr() ? "programmes officiels, de la 6e à la terminale" : "plan d'études genevois, 9e → 4e, Collège et MP"}</span></div>
     <button type="button" class="btn-primary pz-next">Voir comment ↓</button>
   </section>
 
@@ -14717,12 +14760,33 @@ function screenParents() {
 // ---------------- Présentation aux enseignants (25.11) ----------------
 /* Nombre de notions travaillées dans l'année, par classe (calculé sur le référentiel, jamais écrit à la main). */
 function pzCoverage() {
-  const P = [["9e", { system: "CH", grade: 9, track: "college" }], ["10e", { system: "CH", grade: 10, track: "college" }], ["11e", { system: "CH", grade: 11, track: "college" }],
-    ["1re Collège", { system: "CH", grade: 12, track: "college" }], ["2e Collège", { system: "CH", grade: 13, track: "college" }], ["3e Collège", { system: "CH", grade: 14, track: "college" }], ["4e Collège", { system: "CH", grade: 15, track: "college" }],
-    ["MP 1re", { system: "CH", grade: 12, track: "mp" }], ["MP 2e", { system: "CH", grade: 13, track: "mp" }], ["MP 3e", { system: "CH", grade: 14, track: "mp" }], ["MP 4e", { system: "CH", grade: 15, track: "mp" }]];
-  return P.map(([l, p]) => { let n = 0, ch = 0; try { const c = Engine.catalog(p).filter((x) => x.current); n = c.length; ch = new Set(c.map((x) => x.theme)).size; } catch (e) {} return [l, n, ch]; }).filter(([, n]) => n > 0);
-}
-/* La boucle d'une séance, en schéma (SVG, couleurs du thème). */
+  /* 25.11 soir (l'enseignant ne comprenait pas les chiffres de 3e–4e) : nouvelles notions de l'année et reprises des années
+     précédentes comptées à part ; chapitres du plan couverts sur leur total ; MA1 et MA2 séparés en 3e–4e du Collège. */
+  const CH = (g, t, niv) => ({ system: "CH", grade: g, track: t, ...(niv ? { niv } : {}) });
+  const P = PZ.fr() ? [[6, "6e"], [7, "5e"], [8, "4e"], [9, "3e"], [10, "2nde"], [11, "1re"], [12, "Terminale"]].map(([g, l]) => [l, { system: "FR", grade: g, track: "college" }])
+    : [["9e", CH(9, "college")], ["10e", CH(10, "college")], ["11e", CH(11, "college")], ["1re Collège", CH(12, "college")], ["2e Collège", CH(13, "college")],
+      ["3e Coll. MA1", CH(14, "college", "N")], ["3e Coll. MA2", CH(14, "college", "R")], ["4e Coll. MA1", CH(15, "college", "N")], ["4e Coll. MA2", CH(15, "college", "R")],
+      ["MP 1re", CH(12, "mp")], ["MP 2e", CH(13, "mp")], ["MP 3e", CH(14, "mp")], ["MP 4e", CH(15, "mp")]];
+  /* Chapitres du plan de l'année (total) : CO « 9C.. », Collège « M3C.. », lycée français « 2.. / 1.. / T.. ». */
+  const total = (p) => {
+    const ref = Engine.refOf(p), L = (typeof THEME_LABEL !== "undefined" && THEME_LABEL[ref]) || {};
+    const pre = ref === "CO" ? p.grade + "C" : ref === "MATU" ? "M" + (p.grade - 11) + "C" : ref === "FR" && p.grade >= 10 ? { 10: "2", 11: "1", 12: "T" }[p.grade] : null;
+    /* 25.11 (agent col34) : en 3e–4e MA1, les chapitres faits seulement de notions MA2 (4e : complexes, suites et séries) ne sont pas au plan. */
+    const ma1 = ref === "MATU" && p.grade >= 14 && p.niv !== "R", OT = typeof ORDRE_THEME !== "undefined" ? ORDRE_THEME : {};
+    const inPlan = (k) => !ma1 || NOTIONS.some((n) => n.niv !== "R" && ["MATU", "MATU_ALT", "MATU_REP"].some((m) => (OT[m] || {})[n.id] === k));
+    return pre ? Object.keys(L).filter((k) => k.startsWith(pre) && (pre !== "2" || k !== "2AU") && inPlan(k)).length : 0;
+  };
+  return P.map(([l, p]) => {
+    let nw = 0, rep = 0, ch = 0, tot = 0;
+    try {
+      const c = Engine.catalog(p).filter((x) => x.current), isNew = (x) => (placeOf(x, p) || [0])[0] === p.grade;
+      nw = c.filter(isNew).length; rep = c.length - nw; tot = total(p);
+      const ref = Engine.refOf(p), pre = ref === "CO" ? "CO." + p.grade + "C" : ref === "MATU" ? "MATU.M" + (p.grade - 11) + "C" : null;
+      ch = new Set(c.map((x) => x.theme).filter((k) => (pre ? k.startsWith(pre) : true))).size;
+    } catch (e) {}
+    return [l, nw, rep, ch, tot];
+  }).filter(([, n, r]) => n + r > 0);
+}/* La boucle d'une séance, en schéma (SVG, couleurs du thème). */
 function pzLoop() {
   const N = [["🎯", "Question", "à son niveau"], ["✍️", "Réponse", "résultat, pas le calcul"], ["🔎", "Diagnostic", "le piège repéré"], ["🪜", "Pas à pas", "une étape à la fois"], ["📕", "Carnet", "revient plus tard"]];
   const R = 112, cx = 170, cy = 150;
@@ -14740,19 +14804,24 @@ function pzCount(root) {
   const io = new IntersectionObserver((es) => es.forEach((en) => { if (en.isIntersecting) { run(en.target); io.unobserve(en.target); } }), { threshold: 0.4 });
   els.forEach((e) => io.observe(e));
 }
-const PZ_COV_PROFILES = [9, 10, 11, 12, 13, 14, 15].map((g) => ({ system: "CH", grade: g, track: "college" })).concat([12, 13, 14, 15].map((g) => ({ system: "CH", grade: g, track: "mp" })));
-const pzCovHtml = (cov) => { const maxN = Math.max(1, ...cov.map(([, n]) => n)); return cov.map(([l, n, ch]) => `<div class="pz-cov-r"><span>${esc(l)}</span><span class="pz-cov-b"><i style="width:${Math.round((n / maxN) * 100)}%"></i></span><span class="small">${n} notions · ${ch} chap.</span></div>`).join(""); };
-const pzNotionCount = () => NOTIONS.filter((n) => n.CH || n.MP).length;
+const PZ_COV_PROFILES_FR = [6, 7, 8, 9, 10, 11, 12].map((g) => ({ system: "FR", grade: g, track: "college" }));
+const PZ_COV_PROFILES = [9, 10, 11, 12, 13, 14, 15].map((g) => ({ system: "CH", grade: g, track: "college", niv: "R" })).concat([12, 13, 14, 15].map((g) => ({ system: "CH", grade: g, track: "mp" })));
+const pzCovHtml = (cov) => { const maxN = Math.max(1, ...cov.map(([, n, r]) => n + r)); return cov.map(([l, n, r, ch, tot]) => `<div class="pz-cov-r"><span>${esc(l)}</span><span class="pz-cov-b"><i style="width:${Math.round((n / maxN) * 100)}%"></i><i class="rep" style="width:${Math.round((r / maxN) * 100)}%"></i></span><span class="small">${n}${r ? " + " + r : ""} · ${ch}${tot ? " / " + tot : ""} chap.</span></div>`).join("") +
+  `<p class="small muted pz-cov-leg"><span class="pz-sw"></span> nouvelles notions de l'année · <span class="pz-sw rep"></span> reprises des années précédentes · chapitres du plan couverts${PZ.fr() ? "" : " (MA1 : niveau normal, MA2 : renforcé)"}</p>`; };
+const pzNotionCount = () => {
+  if (!PZ.fr()) return NOTIONS.filter((n) => n.CH || n.MP).length;
+  const ids = new Set(); PZ_COV_PROFILES_FR.forEach((p) => { try { Engine.catalog(p).filter((c) => c.current).forEach((c) => ids.add(c.id)); } catch (e) {} }); return ids.size;
+};
 function screenEnseignants() {
-  const cov = pzCoverage(), nNotions = pzNotionCount(), nClasses = 11;
-  h(`<div class="pz" id="pz">
+  const cov = pzCoverage(), nNotions = pzNotionCount(), nClasses = PZ.fr() ? 7 : 11; /* classes, pas lignes du tableau (MA1 / MA2) */
+  h(`<div class="pz" id="pz" data-noloc>
   <div class="spread pz-bar">${brand}<span class="row" style="gap:6px"><button type="button" class="btn-sec small pz-play">▶ Présenter</button><button type="button" class="btn-ghost small pz-exit" aria-label="Quitter">✕</button></span></div>
 
   <section class="pz-s pz-hero">
-    <div class="eyebrow">👩‍🏫 Pour les enseignant·es · secondaire I et II</div>
+    <div class="eyebrow">👩‍🏫 ${PZ.fr() ? "Pour les enseignant·es · collège et lycée" : "Pour les enseignant·es · secondaire I et II"}</div>
     <h1 class="pz-big">Un entraînement quotidien,<br><span class="mark">aligné sur votre programme</span>,<br>que vos élèves font vraiment.</h1>
     <p class="muted">5 minutes par jour sur le téléphone : des questions au niveau de chaque élève, une correction immédiate et une aide pas à pas. Pour vous, aucune préparation ni correction, et aucune donnée d'élève à gérer.</p>
-    <div class="pz-nums pz-anim"><div><span class="pz-num" id="pznn" data-to="${nNotions}">${nNotions}</span><small>notions</small></div><div><span class="pz-num" data-to="${nClasses}">${nClasses}</span><small>classes, de la 9e à la 4e (CO, Collège, MP)</small></div><div><span class="pz-num" data-to="0">0</span><small>compte à créer</small></div></div>
+    <div class="pz-nums pz-anim"><div><span class="pz-num" id="pznn" data-to="${nNotions}">${nNotions}</span><small>notions</small></div><div><span class="pz-num" data-to="${nClasses}">${nClasses}</span><small>${PZ.fr() ? "classes, de la 6e à la terminale" : "classes, de la 9e à la 4e (CO, Collège, MP)"}</small></div><div><span class="pz-num" data-to="0">0</span><small>compte à créer</small></div></div>
     <button type="button" class="btn-primary pz-next">Découvrir ↓</button>
   </section>
 
@@ -14779,8 +14848,8 @@ function screenEnseignants() {
   </section>
 
   <section class="pz-s">
-    <div class="eyebrow">📚 Votre programme</div><h2>Le plan d'études, classe par classe</h2>
-    <p class="small muted">Plan d'études romand (CO), plans du Collège de Genève et de la maturité professionnelle. Notions travaillées dans l'année :</p>
+    <div class="eyebrow">📚 Votre programme</div><h2>${PZ.fr() ? "Les programmes, classe par classe" : "Le plan d'études, classe par classe"}</h2>
+    <p class="small muted">${PZ.fr() ? "Programmes officiels : cycle 3 (2025), cycle 4 (2026 en 5e ; 2019 en 4e et 3e), lycée (2026). Notions travaillées dans l'année :" : "Plan d'études romand (CO), plans du Collège de Genève et de la maturité professionnelle. Notions travaillées dans l'année :"}</p>
     <div class="pz-cov pz-anim" id="pzcov">${pzCovHtml(cov)}</div>
     <div class="pz-grid pz-anim">
       <div class="card flat"><b>🏫 « En ce moment en classe »</b><p class="small">L'élève reconnaît son chapitre à un exercice typique : environ 2 questions sur 3 portent alors dessus.</p></div>
@@ -14841,7 +14910,7 @@ function screenEnseignants() {
   const root = document.getElementById("pz"), box = document.getElementById("pztry");
   pzBind(root); pzCount(root);
   /* Les notions de 3e–4e Collège et de MP 3e–4e sont dans des paquets chargés à la demande : on les charge, puis on recompte. */
-  if (typeof window.ensurePacks === "function") PZ_COV_PROFILES.reduce((pr, p) => pr.then(() => window.ensurePacks(p)).catch(() => {}), Promise.resolve()).then(() => {
+  if (typeof window.ensurePacks === "function") (PZ.fr() ? PZ_COV_PROFILES_FR : PZ_COV_PROFILES).reduce((pr, p) => pr.then(() => window.ensurePacks(p)).catch(() => {}), Promise.resolve()).then(() => {
     if (location.hash !== "#enseignants") return;
     const el = document.getElementById("pzcov"); if (el) el.innerHTML = pzCovHtml(pzCoverage());
     const nn = document.getElementById("pznn"); if (nn) { nn.dataset.to = pzNotionCount(); nn.textContent = (+nn.dataset.to).toLocaleString("fr-CH"); }

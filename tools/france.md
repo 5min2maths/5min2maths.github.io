@@ -342,3 +342,10 @@ Notions dans `src/fr_fin.js`, leçons actives (curseurs) dans `src/fr_act.js`, c
 `tests/act_frfin.html`. Notes scolaires : pour un profil français, les questions de `statfreq`, `stats`, `diagr`, `probeq`
 à notes suisses (1 à 6) sont remplacées par des notes sur 20 (`FR_NOTES`, lu par `Engine.finalize`) ; profils suisses
 inchangés. Reste : leçons actives suisses de moyenne (`act_9b.js`, `act_manip2.js` : « notes 6 ; 6 ; 3 ») non localisées.
+
+## À lancer après la phase Collège (décision du 25.11 soir)
+
+Phase France du chantier « référentiel de compétences » : « Mes compétences » d'un profil FR = attendus officiels de la
+classe (collège : attendus de fin d'année ; lycée : capacités attendues + automatismes ; tools/referentiels_fr.json),
+intitulés exacts, échelle LSU 4 niveaux (déjà en place), items non saisissables « travaillé en classe ». Même structure
+générique que la phase Collège (src/ref_matu.js, agent refcomp). Données existantes des élèves conservées.

@@ -595,7 +595,7 @@
 
   // ---------- enregistrement (additif : aucune notion existante n'est modifiée) ----------
   for (const n of NEW) {
-    if (!NOTIONS.some((x) => x.id === n.id)) NOTIONS.push({ id: n.id, theme: n.theme, label: n.label, ex: n.ex, CH: n.CH, MP: null, FR: null });
+    if (!NOTIONS.some((x) => x.id === n.id)) NOTIONS.push(Object.assign({ id: n.id, theme: n.theme, label: n.label, ex: n.ex, CH: n.CH, MP: null, FR: null }, n.niv ? { niv: n.niv } : {}));
     GEN[n.id] = (d) => pickForm(n.lv[Math.min(Math.max(d, 1), 3)]);
     HINTS_EXTRA[n.id] = n.hint;
     LESSONS_EXTRA[n.id] = n.lesson;
@@ -1224,6 +1224,81 @@
   };
 
   // ---------- problèmes en plusieurs étapes (niveau 4), valeurs tirées au hasard ----------
+  // ======================= derivth : dérivabilité et continuité, Rolle, Lagrange (3.AN.06a, 06b, 09a ; 25.11, agent col34) =======================
+  // Saisissable seulement : point anguleux, demi-tangentes, raccord dérivable, nombre c de Rolle ou de Lagrange, majoration.
+  // Les démonstrations (3.AN.09b–c) restent à la leçon.
+  const DT = {
+    1: [
+      () => { const sq = R.rand() < 0.5;
+        if (sq) { const k = ri(2, 7), c = nz(-3, 3);
+          return QN("La fonction " + M("f(x) = |x^2 - " + k * k + "|" + (c ? sg(c) + "x" : "")) + " est continue sur " + M("\\mathbb{R}") + ", mais elle n'est pas dérivable en deux points (points anguleux). Donne le plus grand.", k,
+            "Les points anguleux sont aux zéros de " + M("x^2 - " + k * k) + ", où la valeur absolue « casse » la courbe : " + M("x = \\pm " + k) + ". Les demi-tangentes y ont des pentes différentes (" + M(fT(-2 * k + c)) + " et " + M(fT(2 * k + c)) + " en " + M(k) + ").",
+            { ctx: "valeur-absolue-carre", guide: [GSet("Zéros de " + M("x^2 - " + k * k) + " ?", [-k, k], M(setT([-k, k])) + "."), G("Le plus grand ?", k, M(k) + ".")],
+              traps: [TR(k * k, "La courbe casse là où l'expression dans la valeur absolue s'annule : x² = " + T(k * k) + "."), TR(-k, "On demande le plus grand des deux points."), TR(0, "En 0, la fonction est dérivable : la parabole y est retournée, mais lisse.")] }); }
+        const a = pk([2, 3, 4, -2, -3]), b = nz(-9, 9), c = pk([1, 2, -1, -3]), v = -b / a; if (Number.isInteger(v) && Math.abs(v) < 2) return null;
+        return QN("La fonction " + M("f(x) = |" + P2([a, b]) + "|" + sg(c) + "x") + " n'est pas dérivable en un point. Lequel ? (fraction acceptée)", v,
+          "Point anguleux là où " + M(P2([a, b]) + " = 0") + " : " + M("x = " + fT(v)) + ". À gauche et à droite, les pentes valent " + M(fT(-Math.abs(a) + c)) + " et " + M(fT(Math.abs(a) + c)) + " : elles diffèrent.",
+          { ctx: "valeur-absolue-affine", guide: [G("Zéro de " + M(P2([a, b])) + " ?", v, M(fT(v)) + ".")],
+            traps: [TR(-v, "Résous " + T(a) + "x + " + T(b) + " = 0 avec soin : attention au signe."), TR(-c / a, "Le terme " + T(c) + "x est dérivable partout : regarde l'intérieur de la valeur absolue."), TR(b / a, "x = −b ÷ a.")] }); },
+      () => { const a = nz(-3, 3), b = ri(-5, 5), m = nz(-6, 6), left = R.rand() < 0.5; if (m === 2 * a) return null; const ya = a * a + b, cc = ya - m * a, v = left ? 2 * a : m; if (Math.abs(v) < 2) return null;
+        return QN("Soit " + M(cases("x^2" + (b ? sg(b) : ""), "x \\leq " + a, P2([m, cc]), "x > " + a)) + ". Elle est continue en " + M(a) + ". Quelle est la pente de la demi-tangente " + (left ? "à gauche" : "à droite") + " en " + M(a) + " ?", v,
+          "À gauche : " + M("(x^2)' = 2x") + ", pente " + M(2 * a) + " ; à droite : pente " + M(m) + ". Les deux pentes diffèrent : " + M("f") + " n'est pas dérivable en " + M(a) + " (point anguleux).",
+          { ctx: "demi-tangentes", guide: [G("Pente " + (left ? "de " + M("x^2" + (b ? sg(b) : "")) + " en " + M(a) : "de la droite " + M("y = " + P2([m, cc]))) + " ?", v, M(v) + ".")],
+            traps: [TR(left ? m : 2 * a, "C'est l'autre côté."), TR(left ? a * a + b : ya, "C'est la valeur f(" + T(a) + ") ; on demande une pente."), TR(left ? a : cc, left ? "La dérivée de x² est 2x." : "La pente est le coefficient de x.")] }); },
+      () => { const a = ri(-4, 2), b = a + pk([2, 4, 6, 3, 5]), p = -(a + b), q = nz(-8, 8), c = (a + b) / 2;
+        return QN("Soit " + M("f(x) = x^2" + (p ? (p < 0 ? " - " + (p === -1 ? "" : fT(-p)) : " + " + (p === 1 ? "" : fT(p))) + "x" : "") + sg(q)) + " sur " + M("[" + a + " \\,;\\, " + b + "]") + ". On a " + M("f(" + a + ") = f(" + b + ")") + ". Selon le théorème de Rolle, il existe " + M("c") + " dans " + M("]" + a + " \\,;\\, " + b + "[") + " avec " + M("f'(c) = 0") + ". Donne " + M("c") + " (fraction acceptée).", c,
+          M("f(" + a + ") = f(" + b + ") = " + pv([1, p, q], a)) + " ; " + M("f'(x) = 2x" + sg(p)) + " s'annule en " + M("c = " + fT(c)) + ", qui est bien entre " + M(a) + " et " + M(b) + " (le sommet de la parabole).",
+          { ctx: "rolle", guide: [G(M("f(" + a + ")") + " ?", pv([1, p, q], a), M(pv([1, p, q], a)) + " (et de même " + M("f(" + b + ")") + ")."), G("Zéro de " + M("f'(x) = 2x" + sg(p)) + " ?", c, M(fT(c)) + ".")],
+            traps: [TR(pv([1, p, q], a), "C'est f(" + T(a) + ") ; on cherche c tel que f'(c) = 0."), TR(-c, "2x " + (p < 0 ? "− " + T(-p) : "+ " + T(p)) + " = 0 : attention au signe."), TR(b - a, "c est un nombre de l'intervalle, pas sa longueur.")] }); },
+    ],
+    2: [
+      () => { const a = pk([0, 0, 1, 2]), b = a + pk([1, 2, 3]), c = Math.sqrt((a * a + a * b + b * b) / 3), slope = a * a + a * b + b * b;
+        return mk("Soit " + M("f(x) = x^3") + " sur " + M("[" + a + " \\,;\\, " + b + "]") + ". Selon le théorème des accroissements finis (Lagrange), il existe " + M("c") + " dans " + M("]" + a + " \\,;\\, " + b + "[") + " tel que " + M("f'(c) = \\frac{f(" + b + ") - f(" + a + ")}{" + b + " - " + a + "}") + ". Donne " + M("c") + " (au centième).", { kind: "value", value: c, round: 0.01 },
+          "Pente de la corde : " + M("\\frac{" + b ** 3 + " - " + a ** 3 + "}{" + (b - a) + "} = " + slope) + ". " + M("3c^2 = " + slope) + ", " + M("c = \\sqrt{\\frac{" + slope + "}{3}} \\approx " + D(+c.toFixed(2))) + " (la valeur positive, dans l'intervalle).",
+          { ctx: "lagrange-cube", guide: [G("Pente de la corde " + M("\\frac{f(" + b + ") - f(" + a + ")}{" + b + " - " + a + "}") + " ?", slope, M(slope) + "."), G(M("c^2") + " (avec " + M("3c^2 = " + slope) + ") ?", slope / 3, M(fT(slope / 3)) + "."), GS(M("c") + " (au centième) ?", c, M("\\approx " + D(+c.toFixed(2))) + ".", 0.01)],
+            traps: [TR((a + b) / 2, "Pour x³, c n'est pas le milieu : résous 3c² = pente de la corde."), TR(slope / 3, "C'est c² : prends la racine."), TR(Math.sqrt(slope), "f'(c) = 3c² : divise par 3 avant la racine.")] }); },
+      () => { const k = pk([1, 2, -1, 3, 0.5]), x0 = nz(-3, 3), a = 2 * k * x0, b = k * x0 * x0 - a * x0;
+        return QP("Soit " + M(cases((k === 1 ? "" : fT(k)) + "x^2", "x \\leq " + x0, "ax + b", "x > " + x0)) + ". Trouve " + M("a") + " et " + M("b") + " pour que " + M("f") + " soit dérivable en " + M(x0) + ". Réponds « a ; b ».", [a, b],
+          "Dérivable en " + M(x0) + " : continue (mêmes valeurs) et mêmes pentes. Pente : " + M("a = 2 \\cdot " + par(k) + " \\cdot " + par(x0) + " = " + fT(a)) + ". Valeur : " + M(fT(a) + " \\cdot " + par(x0) + " + b = " + fT(k * x0 * x0)) + ", donc " + M("b = " + fT(b)) + " : la droite est la tangente à la parabole.",
+          { ctx: "raccord-derivable", guide: [G("Pente de " + M((k === 1 ? "" : fT(k)) + "x^2") + " en " + M(x0) + " (" + M("a") + ") ?", a, M(fT(a)) + "."), G("Valeur " + M("f(" + x0 + ")") + " ?", k * x0 * x0, M(fT(k * x0 * x0)) + "."), GP("Réponse « a ; b » ?", [a, b], M("(" + fT(a) + " \\,;\\, " + fT(b) + ")") + ".")],
+            traps: [TP([a, k * x0 * x0], "b n'est pas f(" + T(x0) + ") : a·" + T(x0) + " + b doit valoir f(" + T(x0) + ")."), TP([k * x0, b], "La pente de kx² en x₀ est 2k·x₀."), TP([b, a], "Réponds a d'abord, puis b.")] }); },
+      () => { const inv = R.rand() < 0.5;
+        if (inv) { const [a, b] = pk([[1, 4], [2, 8], [4, 9], [3, 12], [1, 9], [4, 16], [2, 18]]), c = Math.sqrt(a * b);
+          return QN("Soit " + M("f(x) = \\frac{1}{x}") + " sur " + M("[" + a + " \\,;\\, " + b + "]") + ". Trouve le nombre " + M("c") + " de l'intervalle où la tangente est parallèle à la corde (théorème des accroissements finis).", c,
+            "Pente de la corde : " + M("\\frac{\\frac{1}{" + b + "} - \\frac{1}{" + a + "}}{" + b + " - " + a + "} = -\\frac{1}{" + a * b + "}") + ". " + M("f'(c) = -\\frac{1}{c^2} = -\\frac{1}{" + a * b + "}") + " : " + M("c = \\sqrt{" + a * b + "} = " + c) + ".",
+            { ctx: "lagrange-inverse", guide: [G("Pente de la corde ?", -1 / (a * b), M("-\\frac{1}{" + a * b + "}") + "."), G(M("c") + " ?", c, M(c) + ".")],
+              traps: [TR((a + b) / 2, "Pour 1/x, c n'est pas le milieu : résous −1/c² = pente de la corde."), TR(a * b, "C'est c² : prends la racine."), TR(-c, "c doit être dans l'intervalle [" + T(a) + " ; " + T(b) + "].")] }); }
+        const a = ri(1, 4), b = a + ri(1, 4), c = ((a + b) / 2) ** 2;
+        return QN("Soit " + M("f(x) = \\sqrt{x}") + " sur " + M("[" + a * a + " \\,;\\, " + b * b + "]") + ". Trouve le nombre " + M("c") + " où la tangente est parallèle à la corde (théorème des accroissements finis ; fraction acceptée).", c,
+          "Pente de la corde : " + M("\\frac{" + b + " - " + a + "}{" + b * b + " - " + a * a + "} = \\frac{1}{" + (a + b) + "}") + ". " + M("f'(c) = \\frac{1}{2\\sqrt{c}} = \\frac{1}{" + (a + b) + "}") + " : " + M("\\sqrt{c} = " + fT((a + b) / 2)) + ", " + M("c = " + fT(c)) + ".",
+          { ctx: "lagrange-racine", guide: [G("Pente de la corde ?", 1 / (a + b), M("\\frac{1}{" + (a + b) + "}") + "."), G(M("\\sqrt{c}") + " ?", (a + b) / 2, M(fT((a + b) / 2)) + "."), G(M("c") + " ?", c, M(fT(c)) + ".")],
+            traps: [TR((a * a + b * b) / 2, "Pour √x, c n'est pas le milieu de l'intervalle : résous f'(c) = pente de la corde."), TR((a + b) / 2, "C'est √c : élève au carré."), TR(a + b, "f'(c) = 1 ÷ (2√c).")] }); },
+    ],
+    3: [
+      () => { const k = ri(2, 6), c = k / Math.sqrt(3);
+        return QSet("Soit " + M("f(x) = x^3 - " + k * k + "x") + " sur " + M("[-" + k + " \\,;\\, " + k + "]") + ". On a " + M("f(-" + k + ") = f(" + k + ") = 0") + ". Donne toutes les valeurs " + M("c") + " de " + M("]-" + k + " \\,;\\, " + k + "[") + " telles que " + M("f'(c) = 0") + " (valeurs exactes).", [-c, c],
+          M("f'(x) = 3x^2 - " + k * k) + " s'annule en " + M("x = \\pm\\frac{" + k + "}{\\sqrt{3}} \\approx \\pm " + D(+c.toFixed(2))) + " : Rolle garantit au moins une valeur, ici il y en a deux.",
+          { ctx: "rolle-cubique", guide: [G(M("c^2") + " (avec " + M("3c^2 = " + k * k) + ") ?", k * k / 3, M(fT(k * k / 3)) + "."), GSet("Valeurs de " + M("c") + " ?", [-c, c], M("\\pm\\frac{" + k + "}{\\sqrt{3}}") + ".")],
+            traps: [TSt([c], "Rolle garantit au moins une valeur ; ici, il y en a deux (symétriques)."), TSt([-k, k], "Ce sont les bornes, où f s'annule ; on cherche les zéros de f'."), TSt([0], "f'(0) = −" + T(k * k) + " ≠ 0.")] }); },
+      () => { const radar = R.rand() < 0.5;
+        if (radar) { const d = pk([12, 15, 18, 20, 24]), tmin = pk([8, 9, 10, 12]), v = (d * 60) / tmin, lim = pk([80, 100]); if (v <= lim) return null;
+          return QN("Sur l'autoroute, deux bornes de contrôle sont distantes de " + M(d + "\\text{ km}") + ". Une voiture les franchit à " + M(tmin + "\\text{ min}") + " d'intervalle. D'après le théorème des accroissements finis, à au moins un instant, son compteur indiquait exactement une vitesse : laquelle (en km/h) ?", v,
+            "La position est dérivable ; entre les deux bornes, il existe un instant où la vitesse instantanée égale la vitesse moyenne : " + M("\\frac{" + d + "}{" + tmin + "} \\cdot 60 = " + D(v) + "\\text{ km/h}") + (v > lim ? ", au-dessus de la limite de " + lim + " km/h : excès de vitesse prouvé." : "."),
+            { ctx: "radar-taf", guide: [G("Vitesse moyenne en km par minute ?", d / tmin, M(fT(d / tmin)) + "."), G("En km/h ?", v, M(D(v)) + ".")],
+              traps: [TR(d / tmin, "Convertis en km/h : × 60."), TR(lim, "La limite n'est pas la vitesse prouvée : c'est la vitesse moyenne."), TR((d * tmin) / 60, "Vitesse = distance ÷ temps.")] }); }
+        const a = ri(-2, 2), b = a + ri(2, 5), y0 = ri(-5, 5), Mx = pk([2, 3, 0.5, 1.5, 4]), v = y0 + Mx * (b - a);
+        return QN("La fonction " + M("f") + " est dérivable, " + M("f(" + a + ") = " + y0) + " et " + M("f'(x) \\leq " + D(Mx)) + " pour tout " + M("x") + ". Quelle est la plus grande valeur possible de " + M("f(" + b + ")") + " ?", v,
+          "Accroissements finis : " + M("f(" + b + ") - f(" + a + ") = f'(c)(" + b + " - " + par(a) + ") \\leq " + D(Mx) + " \\cdot " + (b - a)) + ", donc " + M("f(" + b + ") \\leq " + y0 + " + " + D(Mx * (b - a)) + " = " + D(v)) + " (atteint par une droite de pente " + T(Mx) + ").",
+          { ctx: "majoration", guide: [G("Longueur " + M(b + " - " + par(a)) + " ?", b - a, M(b - a) + "."), G("Accroissement maximal de " + M("f") + " ?", Mx * (b - a), M(D(Mx * (b - a))) + "."), G(M("f(" + b + ")") + " au plus ?", v, M(D(v)) + ".")],
+            traps: [TR(Mx * (b - a), "Ajoute la valeur de départ f(" + T(a) + ") = " + T(y0) + "."), TR(y0 + Mx, "La pente est au plus " + T(Mx) + " sur toute la longueur " + T(b - a) + "."), TR(y0 + Mx * b, "La longueur de l'intervalle est " + T(b) + " − (" + T(a) + ").")] }); },
+      () => { const k = pk([0.5, 1, 1.5, 2, 3]), s = 2 * k, v = Math.round((1800 - (2 * Math.atan(s) * 1800) / Math.PI)) / 10, a1 = Math.round((Math.atan(s) * 1800) / Math.PI) / 10;
+        return mk("La fonction " + M("f(x) = |x^2 - " + D(k * k) + "|") + " a un point anguleux en " + M("x = " + D(k)) + ". Quel angle (en degrés, " + "au dixième) forment ses deux demi-tangentes en ce point ?", { kind: "value", value: v, round: 0.1 },
+          "Pentes des demi-tangentes : " + M("\\pm 2 \\cdot " + D(k) + " = \\pm " + D(s)) + ". Chacune fait l'angle " + M("\\arctan(" + D(s) + ") \\approx " + D(a1) + "^\\circ") + " avec l'horizontale ; l'angle entre elles vaut " + M("180^\\circ - 2\\arctan(" + D(s) + ") \\approx " + D(v) + "^\\circ") + ".",
+          { ctx: "angle-demi-tangentes", guide: [G("Pente de la demi-tangente à droite ?", s, M(D(s)) + "."), GS("Angle (en degrés, au dixième) entre cette demi-tangente et l'horizontale ?", a1, M("\\approx " + D(a1) + "^\\circ") + ".", 0.1), GS("Angle entre les deux demi-tangentes ?", v, M("\\approx " + D(v) + "^\\circ") + ".", 0.1)],
+            traps: [TR(a1, "C'est l'angle d'une seule demi-tangente avec l'horizontale."), TR(Math.round(20 * a1) / 10, "Les deux demi-tangentes montent de part et d'autre : l'angle entre elles vaut 180° − 2·arctan(pente)."), TR(Math.round(900 - 10 * a1) / 10, "L'angle entre les deux demi-tangentes vaut 180° − 2 × " + T(a1) + "°.")] }); },
+    ],
+  };
+
   const PROBS = {
     limites: [() => { let a, r, m; do { a = nz(-4, 4); r = nz(-5, 5); m = pk([2, 3, -2]); } while (r === a || r === -a);
       const num = [m, -m * (a + r), m * a * r], v1 = (m * (a - r)) / (2 * a);
@@ -1281,6 +1356,10 @@
         ["Dessine l'arbre : au 2e tirage, il reste " + (n - 1) + " " + it[0] + ".", "c) Le contraire de « au moins une " + it[4] + " » est « deux " + it[1] + " »."],
         "a) " + M("\\frac{" + r + "}{" + n + "} \\cdot \\frac{" + (r - 1) + "}{" + (n - 1) + "} = " + fT(p1)) + ". b) " + M("2 \\cdot \\frac{" + r + "}{" + n + "} \\cdot \\frac{" + b + "}{" + (n - 1) + "} = " + fT(p2)) + ". c) " + M("1 - " + fT(p1) + " = " + fT(1 - p1)) + ".");
     }],
+    derivth: [() => { const k = ri(2, 4);
+      return P("Soit " + M("f(x) = |x^2 - " + 2 * k + "x|") + " sur " + M("\\mathbb{R}") + ".", [["a) Plus grande abscisse où f n'est pas dérivable", 2 * k], ["b) Pente de la demi-tangente à gauche en ce point", -2 * k], ["c) Nombre c de Rolle sur [0 ; " + 2 * k + "] (f'(c) = 0)", k]],
+        ["Les points anguleux sont aux zéros de x² − " + 2 * k + "x.", "Sur [0 ; " + 2 * k + "], f(x) = −x² + " + 2 * k + "x."],
+        "a) " + M("x^2 - " + 2 * k + "x = x(x - " + 2 * k + ")") + " : 0 et " + M(2 * k) + " ; b) à gauche (sur [0 ; " + 2 * k + "]), " + M("f'(x) = -2x + " + 2 * k) + ", pente " + M(-2 * k) + " (à droite : " + M(2 * k) + ") ; c) " + M("f(0) = f(" + 2 * k + ") = 0") + " et " + M("-2c + " + 2 * k + " = 0") + " : " + M("c = " + k) + "."); }],
   };
 
   // ---------- catalogue ----------
@@ -1305,7 +1384,7 @@
       lesson: ["Continuité", "Peut-on tracer la courbe sans lever le crayon ?", "\\(f\\) est continue en \\(a\\) si \\(\\lim_{x \\to a} f(x) = f(a)\\) : la limite à gauche, la limite à droite et \\(f(a)\\) sont égales. Polynômes, fractions rationnelles (là où elles sont définies) et racines sont continus. Fonction par morceaux : chaque morceau est continu ; on vérifie le raccord en égalant les valeurs des deux formules au point de jonction.",
         ["\\(f(x) = 2x + 1\\) si \\(x < 1\\), \\(x^2 + k\\) si \\(x \\ge 1\\) : \\(3 = 1 + k\\), donc \\(k = 2\\).", "\\(f(x) = \\frac{x^2 - 4}{x - 2}\\) et \\(f(2) = 4\\) : continue, car \\(\\lim_{x \\to 2} (x + 2) = 4\\)."], "Au raccord, on utilise les deux formules au même point, même si l'une est écrite avec « < » et l'autre avec « ≥ »."],
       comps: ["Raccorder deux morceaux affines ; repérer un saut sur un graphique ; prolonger par continuité", "Raccord parabole-droite ; paramètre des deux côtés ; tarif sans saut", "Trois morceaux (deux paramètres) ; prolongement avec une racine ; paramètre au carré"] },
-    { id: "derivseconde", theme: "fa", label: "Dérivée seconde, points d'inflexion", ex: "f''(x) = 0 \\text{ et change de signe}", CH: [14], codesMATU: "3\\.AN\\.08[ab]", lv: DS,
+    { id: "derivseconde", niv: "R", theme: "fa", label: "Dérivée seconde, points d'inflexion", ex: "f''(x) = 0 \\text{ et change de signe}", CH: [14], codesMATU: "3\\.AN\\.08[ab]", lv: DS,
       hint: "f'' > 0 : f convexe (tournée vers le haut) ; f'' < 0 : concave. Point d'inflexion : f'' s'annule en changeant de signe.",
       lesson: ["Dérivée seconde, concavité", "Dans quel sens la courbe tourne-t-elle ?", "\\(f''\\) est la dérivée de \\(f'\\). Si \\(f'' > 0\\) sur un intervalle, \\(f\\) est convexe (courbe tournée vers le haut) ; si \\(f'' < 0\\), concave (tournée vers le bas). Un point d'inflexion est un point où la courbe change de concavité : \\(f''\\) s'y annule en changeant de signe. Pour \\(ax^3 + bx^2 + cx + d\\), il est en \\(x = -\\frac{b}{3a}\\).",
         ["\\(f(x) = x^3 - 6x^2\\) : \\(f''(x) = 6x - 12\\), inflexion en \\(x = 2\\) ; concave sur \\(]-\\infty \\,;\\, 2]\\), convexe sur \\([2 \\,;\\, +\\infty[\\)."], "\\(f''(a) = 0\\) ne suffit pas : il faut un changement de signe (\\(x^4\\) en 0 n'a pas de point d'inflexion)."],
@@ -1330,11 +1409,16 @@
       lesson: ["Expériences successives", "Un arbre pour organiser les étapes.", "Sur un arbre, la probabilité d'un chemin est le produit des probabilités de ses branches ; la probabilité d'un événement est la somme des probabilités de ses chemins. Avec remise, les tirages se répètent à l'identique ; sans remise, l'urne change (un objet de moins au 2e tirage). « Au moins un » : on passe par le contraire « aucun », \\(1 - (1 - p)^n\\).",
         ["3 rouges, 2 bleues, deux tirages sans remise : \\(P(RR) = \\frac{3}{5} \\cdot \\frac{2}{4} = \\frac{3}{10}\\)", "Au moins un 6 en 3 lancers : \\(1 - \\left(\\frac{5}{6}\\right)^3 = \\frac{91}{216}\\)"], "Le long d'un chemin, on multiplie ; entre chemins, on additionne. Pas l'inverse."],
       comps: ["Deux étapes indépendantes ; tirages avec remise", "Tirages sans remise ; deux chemins ; « au moins un »", "Trois tirages ; deux urnes ; second tirage"] },
+    { id: "derivth", theme: "fa", label: "Dérivabilité, théorèmes de Rolle et de Lagrange", ex: "f'(c) = \\frac{f(b) - f(a)}{b - a}", CH: [14], codesMATU: "3\\.AN\\.06[ab]|3\\.AN\\.09a", lv: DT,
+      hint: "Dérivable ⇒ continue, mais pas l'inverse (point anguleux : deux demi-tangentes de pentes différentes). Rolle : f(a) = f(b) ⇒ f'(c) = 0 pour un c entre a et b. Lagrange : f'(c) = pente de la corde.",
+      lesson: ["Dérivabilité et théorèmes", "Ce que la dérivée garantit.", "Si \\(f\\) est dérivable en \\(a\\), elle y est continue. L'inverse est faux : \\(|x|\\) est continue en 0, mais ses demi-tangentes ont les pentes \\(-1\\) et \\(1\\) (point anguleux). Pour un raccord dérivable, il faut les mêmes valeurs ET les mêmes pentes. Rolle : si \\(f\\) est dérivable sur \\([a \\,;\\, b]\\) et \\(f(a) = f(b)\\), il existe \\(c\\) entre \\(a\\) et \\(b\\) avec \\(f'(c) = 0\\) (tangente horizontale). Lagrange (accroissements finis) : il existe \\(c\\) avec \\(f'(c) = \\frac{f(b) - f(a)}{b - a}\\) : la tangente est parallèle à la corde. Conséquence : si \\(f' \\leq M\\), alors \\(f(b) \\leq f(a) + M(b - a)\\).",
+        ["\\(f(x) = x^2 - 4x\\) sur \\([0 \\,;\\, 4]\\) : \\(f(0) = f(4)\\), \\(f'(c) = 2c - 4 = 0\\), \\(c = 2\\)", "\\(f(x) = x^3\\) sur \\([0 \\,;\\, 3]\\) : corde de pente 9, \\(3c^2 = 9\\), \\(c = \\sqrt{3}\\)"], "Rolle et Lagrange disent qu'un tel \\(c\\) existe ; pour le trouver, on résout \\(f'(c) = \\ldots\\), et on garde les solutions de l'intervalle."],
+      comps: ["Repérer un point anguleux ; demi-tangentes ; trouver le c de Rolle", "Nombre c de Lagrange ; raccord dérivable entre deux formules", "Plusieurs valeurs de Rolle ; majorer avec la dérivée (radar) ; angle de deux demi-tangentes"] },
   ];
 
   // ---------- enregistrement (additif) ----------
   for (const n of NEW) {
-    if (!NOTIONS.some((x) => x.id === n.id)) NOTIONS.push({ id: n.id, theme: n.theme, label: n.label, ex: n.ex, CH: n.CH, MP: null, FR: null });
+    if (!NOTIONS.some((x) => x.id === n.id)) NOTIONS.push(Object.assign({ id: n.id, theme: n.theme, label: n.label, ex: n.ex, CH: n.CH, MP: null, FR: null }, n.niv ? { niv: n.niv } : {}));
     GEN[n.id] = (d) => pickForm(n.lv[Math.min(Math.max(d, 1), 3)]);
     HINTS_EXTRA[n.id] = n.hint;
     LESSONS_EXTRA[n.id] = n.lesson;
@@ -1355,7 +1439,7 @@
 // paramétriques de l'espace : notion Collège, car droiteparam de la MP vit dans le paquet « mp », non chargé en 3e),
 // plans (équations paramétriques et cartésienne, traces), posrel (positions relatives, intersections), pscal3d (produit
 // scalaire : angle, orthogonalité, projection), distances (point-droite, point-plan, aire), sphere (vecteur normal,
-// plan médiateur, sphère, plan tangent). Le produit vectoriel (pvect, MA2) reste à faire.
+// plan médiateur, sphère, plan tangent) ; 25.11 (agent col34) : pvect (produit vectoriel, produit mixte, MA2).
 // Réponses : nombre, triplet « x ; y ; z » (format pair à 3 valeurs), couple, ensemble, expression (z en fonction de t).
 // Standard : 3 niveaux, au moins 3 formes par niveau, pas à pas, erreurs typiques, étiquette ctx, leçon, indice,
 // 3 compétences, problème en plusieurs étapes à valeurs tirées (niveau 4). Paquet de chargement « 14 » (build.py).
@@ -1837,6 +1921,63 @@
     ],
   };
 
+
+  // ======================= pvect : produit vectoriel, produit mixte (3.GV.06a–d, MA2 ; 25.11, agent col34) =======================
+  const sq2 = (n) => { const r = Math.sqrt(n); return Number.isInteger(r6(r)) ? fT(r) : "\\sqrt{" + fT(n) + "}"; };
+  const PV = {
+    1: [
+      () => { const u = rv(4), v = rv(4), w = cross(u, v); if (isZ(w) || w.filter((x) => !x).length > 1) return null;
+        return QP("Calcule le produit vectoriel " + M("\\vec u \\times \\vec v") + " avec " + vN("u", u) + " et " + vN("v", v) + "." + TRIP, w,
+          M("\\vec u \\times \\vec v = " + "\\begin{pmatrix} u_2v_3 - u_3v_2 \\\\ u_3v_1 - u_1v_3 \\\\ u_1v_2 - u_2v_1 \\end{pmatrix}" + " = " + v3(w)) + ". Vérifie : " + M("(\\vec u \\times \\vec v) \\cdot \\vec u = 0") + ".",
+          { ctx: "produit-vectoriel", guide: [G("Première composante " + M("u_2v_3 - u_3v_2") + " ?", w[0], M(par(u[1]) + " \\cdot " + par(v[2]) + " - " + par(u[2]) + " \\cdot " + par(v[1]) + " = " + fT(w[0])) + "."), G("Deuxième " + M("u_3v_1 - u_1v_3") + " ?", w[1], M(fT(w[1])) + "."), G("Troisième " + M("u_1v_2 - u_2v_1") + " ?", w[2], M(fT(w[2])) + "."), GP(M("\\vec u \\times \\vec v") + " ?", w, M(v3(w)) + ".")],
+            traps: [TP(mul(-1, w), "C'est v × u : le produit vectoriel change de signe quand on échange les vecteurs."), TP([u[0] * v[0], u[1] * v[1], u[2] * v[2]], "Ce n'est pas un produit composante par composante : u₂v₃ − u₃v₂, u₃v₁ − u₁v₃, u₁v₂ − u₂v₁."), TP([w[0], -w[1], w[2]], "Deuxième composante : u₃v₁ − u₁v₃ (attention au signe).")] }); },
+      () => { const u = rv(3), v = rv(3), w = cross(u, v), n2 = nn2(w); if (isZ(w)) return null;
+        return QN("Calcule l'aire du parallélogramme construit sur " + vN("u", u) + " et " + vN("v", v) + " (valeur exacte).", Math.sqrt(n2),
+          "Aire " + M("= \\|\\vec u \\times \\vec v\\|") + " avec " + M("\\vec u \\times \\vec v = " + v3(w)) + " : " + M("\\sqrt{" + w.map((x) => par(x) + "^2").join(" + ") + "} = " + sq2(n2)) + ".",
+          { ctx: "aire-parallelogramme", guide: [GP(M("\\vec u \\times \\vec v") + " ?" + TRIP, w, M(v3(w)) + "."), G("Carré de sa norme ?", n2, M(n2) + "."), G("Aire ?", Math.sqrt(n2), M(sq2(n2)) + ".")],
+            traps: [TR(Math.abs(dot(u, v)), "Le produit scalaire ne donne pas l'aire : c'est la norme du produit vectoriel."), TR(n2, "N'oublie pas la racine carrée."), TR(Math.sqrt(n2) / 2, "Parallélogramme : pas de division par 2 (c'est pour le triangle).")] }); },
+      () => { const u = rv(3), v = rv(3), w = rv(3), d = det3(u, v, w); if (Math.abs(d) < 2) return null;
+        return QN("Calcule le produit mixte " + M("[\\vec u, \\vec v, \\vec w] = (\\vec u \\times \\vec v) \\cdot \\vec w") + " avec " + vN("u", u) + ", " + vN("v", v) + " et " + vN("w", w) + ".", d,
+          M("\\vec u \\times \\vec v = " + v3(cross(u, v))) + ", puis le produit scalaire avec " + M("\\vec w") + " : " + M(cross(u, v).map((x, i) => par(x) + " \\cdot " + par(w[i])).join(" + ") + " = " + d) + ". C'est aussi le déterminant des trois vecteurs.",
+          { ctx: "produit-mixte", guide: [GP(M("\\vec u \\times \\vec v") + " ?" + TRIP, cross(u, v), M(v3(cross(u, v))) + "."), G("Produit scalaire avec " + M("\\vec w") + " ?", d, M(d) + ".")],
+            traps: [TR(-d, "(u × v)·w : l'ordre compte ; v × u donne l'opposé."), TR(dot(u, v) + dot(v, w) + dot(u, w), "Le produit mixte n'est pas une somme de produits scalaires : calcule d'abord u × v."), TR(u[0] * v[1] * w[2], "Il faut les trois composantes de u × v, chacune multipliée par celle de w.")] }); },
+    ],
+    2: [
+      () => { const A = rp(3), u = rv(3), v = rv(3), w = cross(u, v); if (isZ(w)) return null; const B = add(A, u), C = add(A, v), S = nrm(w) / 2;
+        return QR("Calcule l'aire du triangle " + M("ABC") + " avec " + ptN("A", A) + ", " + ptN("B", B) + " et " + ptN("C", C) + " (au centième).", S, 0.01,
+          M(vec("AB") + " \\times " + vec("AC") + " = " + v3(w)) + " ; aire " + M("= \\frac{1}{2}\\|" + vec("AB") + " \\times " + vec("AC") + "\\| = \\frac{" + sq2(nn2(w)) + "}{2} \\approx " + D(S, 0.01)) + ".",
+          { ctx: "aire-triangle", guide: [GP(M(vec("AB") + " \\times " + vec("AC")) + " ?" + TRIP, w, M(v3(w)) + "."), G("Norme (au centième) ?", nrm(w), M("\\approx " + D(nrm(w), 0.01)) + ".", 0.01), G("Aire (au centième) ?", S, M("\\approx " + D(S, 0.01)) + ".", 0.01)],
+            traps: [TR(nrm(w), "C'est l'aire du parallélogramme : divise par 2 pour le triangle."), TR(nn2(w) / 2, "Prends la racine de la norme au carré avant de diviser par 2."), TR(Math.abs(dot(u, v)) / 2, "L'aire vient du produit vectoriel, pas du produit scalaire.")] }); },
+      () => { const A = rp(2), u = rv(3), v = rv(3), w = rv(3), d = det3(u, v, w); if (Math.abs(d) < 2) return null; const par6 = R.rand() < 0.5, V = par6 ? Math.abs(d) : Math.abs(d) / 6, B = add(A, u), C = add(A, v), Dd = add(A, w);
+        return QN(par6 ? "Calcule le volume du parallélépipède construit sur " + vN("u", u) + ", " + vN("v", v) + " et " + vN("w", w) + "." : "Calcule le volume du tétraèdre " + M("ABCD") + " avec " + ptN("A", A) + ", " + ptN("B", B) + ", " + ptN("C", C) + " et " + ptN("D", Dd) + " (fraction acceptée).", V,
+          (par6 ? "Volume " + M("= |[\\vec u, \\vec v, \\vec w]|") : "Volume " + M("= \\frac{1}{6}|[" + vec("AB") + ", " + vec("AC") + ", " + vec("AD") + "]|")) + " ; produit mixte " + M(d) + " : " + M("V = " + fT(V)) + ".",
+          { ctx: par6 ? "volume-parallelepipede" : "volume-tetraedre", guide: [G("Produit mixte ?", d, M(d) + "."), G("Volume ?", V, M(fT(V)) + ".")],
+            traps: [TR(par6 ? Math.abs(d) / 6 : Math.abs(d), par6 ? "Le 1/6 est pour le tétraèdre ; le parallélépipède a pour volume |produit mixte|." : "Tétraèdre : un sixième du parallélépipède."), TR(par6 ? Math.abs(d) / 2 : Math.abs(d) / 3, "Facteur : 1 (parallélépipède), 1/6 (tétraèdre)."), TR(-V, "Un volume est positif : valeur absolue.")] }); },
+      () => { const A = rp(3), u = rv(3), v = rv(3); let n = cross(u, v); if (isZ(n)) return null; n = red(n); if (n.some((x) => !x) || n.some((x) => Math.abs(x) > 12)) return null; const B = add(A, u), C = add(A, v), d = -dot(n, A); if (Math.abs(d) < 2) return null;
+        return QN("Le plan passant par " + ptN("A", A) + ", " + ptN("B", B) + " et " + ptN("C", C) + " a pour vecteur normal " + M("\\vec n = " + v3(n)) + " (multiple de " + M(vec("AB") + " \\times " + vec("AC")) + "). Son équation s'écrit " + M(lt(n, ["x", "y", "z"]) + " + d = 0") + ". Que vaut " + M("d") + " ?", d,
+          M(vec("AB") + " \\times " + vec("AC") + " = " + v3(cross(u, v))) + ", parallèle à " + M("\\vec n") + ". " + M("A") + " est dans le plan : " + M(n.map((x, i) => par(x) + " \\cdot " + par(A[i])).join(" + ") + " + d = 0") + ", donc " + M("d = " + d) + ".",
+          { ctx: "plan-normal", guide: [G(M(n[0] + "x_A + " + par(n[1]) + "y_A + " + par(n[2]) + "z_A") + " ?", dot(n, A), M(dot(n, A)) + "."), G(M("d") + " ?", d, M(d) + ".")],
+            traps: [TR(-d, "d = −(a·x_A + b·y_A + c·z_A) : attention au signe."), TR(-dot(cross(u, v), A), "Utilise le vecteur normal n donné (AB × AC simplifié).")] }); },
+    ],
+    3: [
+      () => { const A = rp(3), u = rv(3), Mp = rp(4), w = cross(sub(Mp, A), u); if (isZ(w)) return null; const dd = nrm(w) / nrm(u);
+        return QR("Calcule la distance du point " + ptN("M", Mp) + " à la droite passant par " + ptN("A", A) + " de vecteur directeur " + vN("u", u) + " (au centième).", dd, 0.01,
+          M("d = \\frac{\\|" + vec("AM") + " \\times \\vec u\\|}{\\|\\vec u\\|}") + " avec " + M(vec("AM") + " \\times \\vec u = " + v3(w)) + " : " + M("d = \\frac{" + sq2(nn2(w)) + "}{" + sq2(nn2(u)) + "} \\approx " + D(dd, 0.01)) + ".",
+          { ctx: "distance-point-droite", guide: [GP(M(vec("AM")) + " ?" + TRIP, sub(Mp, A), M(v3(sub(Mp, A))) + "."), GP(M(vec("AM") + " \\times \\vec u") + " ?" + TRIP, w, M(v3(w)) + "."), G("Distance (au centième) ?", dd, M("\\approx " + D(dd, 0.01)) + ".", 0.01)],
+            traps: [TR(nrm(w), "Divise par la norme de u."), TR(nrm(sub(Mp, A)), "C'est la distance AM ; la distance à la droite est plus petite (perpendiculaire)."), TR(nrm(w) / nn2(u), "Divise par ‖u‖, pas par ‖u‖².")] }); },
+      () => { const A = rp(3), u = rv(2), B = rp(3), v = rv(2), n = cross(u, v); if (isZ(n)) return null; const m = det3(sub(B, A), u, v); if (Math.abs(m) < 1) return null; const dd = Math.abs(m) / nrm(n);
+        return QR("Deux droites gauches : " + M("d_1") + " passe par " + ptN("A", A) + " avec " + vN("u", u) + ", " + M("d_2") + " passe par " + ptN("B", B) + " avec " + vN("v", v) + ". Calcule leur distance (au centième).", dd, 0.01,
+          M("d = \\frac{|[" + vec("AB") + ", \\vec u, \\vec v]|}{\\|\\vec u \\times \\vec v\\|}") + " ; " + M("\\vec u \\times \\vec v = " + v3(n)) + ", produit mixte " + M(m) + " : " + M("d = \\frac{" + Math.abs(m) + "}{" + sq2(nn2(n)) + "} \\approx " + D(dd, 0.01)) + ".",
+          { ctx: "droites-gauches", guide: [GP(M("\\vec u \\times \\vec v") + " ?" + TRIP, n, M(v3(n)) + "."), G("Produit mixte " + M("[" + vec("AB") + ", \\vec u, \\vec v]") + " ?", m, M(m) + "."), G("Distance (au centième) ?", dd, M("\\approx " + D(dd, 0.01)) + ".", 0.01)],
+            traps: [TR(nrm(sub(B, A)), "AB n'est pas perpendiculaire aux deux droites : projette sur u × v."), TR(Math.abs(m), "Divise par la norme de u × v."), TR(Math.abs(m) / nn2(n), "Divise par ‖u × v‖, pas par son carré.")] }); },
+      () => { const A = rp(2), u = rv(3), v = rv(3), n = cross(u, v); if (isZ(n) || !n[2]) return null; const al = nz(-2, 2), be = nz(-2, 2), Dp = add(A, add(mul(al, u), mul(be, v))), B = add(A, u), C = add(A, v); if (!Dp[2]) return null;
+        return QN("Pour quelle valeur de " + M("m") + " les points " + ptN("A", A) + ", " + ptN("B", B) + ", " + ptN("C", C) + " et " + M("D(" + fT(Dp[0]) + " \\,;\\, " + fT(Dp[1]) + " \\,;\\, m)") + " sont-ils coplanaires ?", Dp[2],
+          "Coplanaires quand le produit mixte " + M("[" + vec("AB") + ", " + vec("AC") + ", " + vec("AD") + "]") + " est nul. " + M(vec("AB") + " \\times " + vec("AC") + " = " + v3(n)) + " ; " + M(n[0] + " \\cdot " + par(Dp[0] - A[0]) + " + " + par(n[1]) + " \\cdot " + par(Dp[1] - A[1]) + " + " + par(n[2]) + "(m - " + par(A[2]) + ") = 0") + ", donc " + M("m = " + fT(Dp[2])) + ".",
+          { ctx: "coplanaires-m", guide: [GP(M(vec("AB") + " \\times " + vec("AC")) + " ?" + TRIP, n, M(v3(n)) + "."), G(M("m") + " ?", Dp[2], M(fT(Dp[2])) + ".")],
+            traps: [TR(-Dp[2], "Vérifie le signe en remplaçant m dans le produit mixte."), TR(Dp[2] - A[2], "C'est la composante de AD ; m est la cote de D : ajoute la cote de A."), TR(A[2], "D doit vérifier l'équation du plan ABC.")] }); },
+    ],
+  };
+
   // ---------- problèmes en plusieurs étapes (niveau 4, valeurs tirées) ----------
   const PROBS = {
     vect3d: [() => { const A = rp(4), [p, d] = qv(4), B = add(A, p), Mi = add(A, mul(0.5, p)), E = add(A, mul(3, p));
@@ -1855,6 +1996,10 @@
       return P("Le plan π a pour équation " + plS(n, d) + " ; on donne P" + ptS(Pp) + " et Q" + ptS(Q) + ".", [["a) Norme du vecteur normal de π", nn], ["b) Distance de P à π", m / nn], ["c) Distance entre π et le plan parallèle à π passant par Q", Math.abs(d - d2) / nn]], ["δ = |ax + by + cz + d| ÷ ‖n‖.", "Le plan parallèle par Q : même n, d' = −n · Q."], "a) " + M(nn) + " ; b) " + M("\\frac{" + m + "}{" + nn + "}") + " ; c) " + M("d' = " + d2) + ", " + M("\\frac{|" + fT(d) + " - " + par(d2) + "|}{" + nn + "} = " + fT(Math.abs(d - d2) / nn)) + "."); }],
     sphere: [() => { const C = rp(3), [p, r] = qv(4), T = add(C, p), dT = -dot(p, T), O = sub(mul(2, C), T);
       return P("La sphère de centre C" + ptS(C) + " passe par T" + ptS(T) + ".", [["a) Rayon de la sphère", r], ["b) d dans l'équation du plan tangent en T : " + ltS(p, ["x", "y", "z"]).replace(/-/g, "−") + " + d = 0", dT], ["c) Cote (z) du point diamétralement opposé à T", O[2]]], ["Rayon = CT.", "Le plan tangent en T a pour vecteur normal CT ; le point opposé vaut 2C − T."], "a) " + M("CT = " + r) + " ; b) " + M("d = " + dT) + " ; c) " + M("2 \\cdot " + par(C[2]) + " - " + par(T[2]) + " = " + fT(O[2])) + "."); }],
+    pvect: [() => { const A = [1, 0, 0], B = [0, 2, 0], C = [0, 0, 3], k = pk([1, 2]), Ak = mul(k, A), Bk = mul(k, B), Ck = mul(k, C), n = cross(sub(Bk, Ak), sub(Ck, Ak)), S = nrm(n) / 2, V = Math.abs(det3(Ak, Bk, Ck)) / 6;
+      return P("On donne A" + ptS(Ak) + ", B" + ptS(Bk) + ", C" + ptS(Ck) + " et l'origine O.", [["a) Norme de AB × AC", nrm(n)], ["b) Aire du triangle ABC", S], ["c) Volume du tétraèdre OABC", V], ["d) Distance de O au plan ABC (fraction acceptée)", (3 * V) / S]],
+        ["AB × AC = (" + 6 * k * k + " ; " + 3 * k * k + " ; " + 2 * k * k + ").", "Volume = aire de la base × hauteur ÷ 3 : la hauteur est la distance cherchée."],
+        "a) " + M(vec("AB") + " \\times " + vec("AC") + " = " + v3(n)) + ", norme " + M(fT(nrm(n))) + " ; b) " + M(fT(S)) + " ; c) " + M("\\frac{|[" + vec("OA") + ", " + vec("OB") + ", " + vec("OC") + "]|}{6} = " + fT(V)) + " ; d) " + M("\\frac{3V}{S} = " + fT((3 * V) / S)) + "."); }],
   };
 
   // ---------- catalogue ----------
@@ -1864,7 +2009,7 @@
       lesson: ["Vecteurs de l'espace", "Comme dans le plan, avec une troisième coordonnée.", "Dans un repère de l'espace, \\(\\overrightarrow{AB}\\) a pour composantes \\(B - A\\). Les opérations se font composante par composante. Le milieu de \\([AB]\\) est la moyenne des coordonnées. La norme de \\(\\vec{u} = (a \\,;\\, b \\,;\\, c)\\) vaut \\(\\sqrt{a^2 + b^2 + c^2}\\) (Pythagore deux fois). Relation de Chasles : \\(\\overrightarrow{AB} + \\overrightarrow{BC} = \\overrightarrow{AC}\\).",
         ["\\(A(1 \\,;\\, 2 \\,;\\, -1)\\), \\(B(3 \\,;\\, 0 \\,;\\, 4)\\) : \\(\\overrightarrow{AB} = (2 \\,;\\, -2 \\,;\\, 5)\\), \\(AB = \\sqrt{33}\\).", "\\(\\|(2 \\,;\\, 3 \\,;\\, 6)\\| = \\sqrt{4 + 9 + 36} = 7\\)."], "Dans \\(ABCD\\) (parallélogramme), \\(\\overrightarrow{AD} = \\overrightarrow{BC}\\) : l'ordre des sommets compte."],
       comps: ["Calculer composantes, milieu et combinaisons de vecteurs", "Calculer une norme ; parallélogramme ; relation de Chasles", "Symétrique, centre de gravité, norme avec une inconnue"] },
-    { id: "colin", theme: "es", label: "Colinéarité et coplanarité", ex: "\\vec{v} = k\\,\\vec{u}", CH: [14], codesMATU: "3\\.GV\\.02[ab]", lv: CL,
+    { id: "colin", niv: "R", theme: "es", label: "Colinéarité et coplanarité", ex: "\\vec{v} = k\\,\\vec{u}", CH: [14], codesMATU: "3\\.GV\\.02[ab]", lv: CL,
       hint: "Colinéaires : v = k·u (même rapport pour les trois composantes). Coplanaires : w = α·u + β·v. Points alignés : AC = t·AB.",
       lesson: ["Colinéarité et coplanarité", "Deux vecteurs parallèles, trois vecteurs dans un même plan (niveau avancé MA2).", "\\(\\vec{u}\\) et \\(\\vec{v}\\) sont colinéaires s'il existe \\(k\\) tel que \\(\\vec{v} = k\\,\\vec{u}\\) : les trois rapports de composantes sont égaux. Trois points \\(A, B, C\\) sont alignés si \\(\\overrightarrow{AC} = t\\,\\overrightarrow{AB}\\). Trois vecteurs sont coplanaires si l'un est combinaison des deux autres : \\(\\vec{w} = \\alpha\\vec{u} + \\beta\\vec{v}\\) ; quatre points \\(A, B, C, D\\) sont coplanaires si \\(\\overrightarrow{AD} = \\alpha\\overrightarrow{AB} + \\beta\\overrightarrow{AC}\\).",
         ["\\((2 \\,;\\, -1 \\,;\\, 3)\\) et \\((6 \\,;\\, -3 \\,;\\, 9)\\) : \\(k = 3\\), colinéaires.", "\\(\\vec{w} = 2\\vec{u} - \\vec{v}\\) : on trouve \\(\\alpha\\) et \\(\\beta\\) avec deux composantes, la troisième vérifie."], "Deux équations donnent \\(\\alpha\\) et \\(\\beta\\) ; il faut toujours vérifier la troisième."],
@@ -1899,11 +2044,16 @@
       lesson: ["Sphère et plans", "Un vecteur normal suffit pour écrire un plan.", "Le plan passant par \\(A\\) et de vecteur normal \\(\\vec{n} = (a \\,;\\, b \\,;\\, c)\\) a pour équation \\(ax + by + cz + d = 0\\) avec \\(d = -(ax_A + by_A + cz_A)\\). Le plan médiateur de \\([AB]\\) a pour vecteur normal \\(\\overrightarrow{AB}\\) et passe par le milieu de \\([AB]\\). La sphère de centre \\(C\\) et de rayon \\(r\\) : \\((x - a)^2 + (y - b)^2 + (z - c)^2 = r^2\\). Le plan tangent en \\(T\\) a pour vecteur normal \\(\\overrightarrow{CT}\\). Un plan à distance \\(\\delta < r\\) du centre coupe la sphère selon un cercle de rayon \\(\\sqrt{r^2 - \\delta^2}\\).",
         ["\\(x^2 + y^2 + z^2 - 2x + 4z - 4 = 0\\) : \\((x - 1)^2 + y^2 + (z + 2)^2 = 9\\), centre \\((1 \\,;\\, 0 \\,;\\, -2)\\), rayon 3."], "Dans \\((x + 2)^2\\), la coordonnée du centre est \\(-2\\)."],
       comps: ["Plan par un point et un vecteur normal ; centre et rayon d'une sphère", "Plan médiateur ; équation développée ; plan tangent", "Section d'une sphère ; sphère tangente à un plan ; droite et sphère"] },
+    { id: "pvect", niv: "R", theme: "es", label: "Produit vectoriel et produit mixte", ex: "\\vec u \\times \\vec v", CH: [14], codesMATU: "3\\.GV\\.06[a-d]", lv: PV,
+      hint: "u × v = (u₂v₃ − u₃v₂ ; u₃v₁ − u₁v₃ ; u₁v₂ − u₂v₁), perpendiculaire à u et v. Aire du parallélogramme : ‖u × v‖ (triangle : la moitié). Volume : |(u × v)·w| (tétraèdre : un sixième).",
+      lesson: ["Produit vectoriel", "Un vecteur perpendiculaire à deux autres (niveau avancé MA2).", "\\(\\vec u \\times \\vec v = \\begin{pmatrix} u_2v_3 - u_3v_2 \\\\ u_3v_1 - u_1v_3 \\\\ u_1v_2 - u_2v_1 \\end{pmatrix}\\) est perpendiculaire à \\(\\vec u\\) et à \\(\\vec v\\) ; sa norme est l'aire du parallélogramme construit sur \\(\\vec u\\) et \\(\\vec v\\) ; \\(\\vec v \\times \\vec u = -\\vec u \\times \\vec v\\). Produit mixte \\([\\vec u, \\vec v, \\vec w] = (\\vec u \\times \\vec v) \\cdot \\vec w\\) : sa valeur absolue est le volume du parallélépipède (tétraèdre : \\(\\frac{1}{6}\\)) ; il est nul si les vecteurs sont coplanaires. Distances : point-droite \\(\\frac{\\|\\overrightarrow{AM} \\times \\vec u\\|}{\\|\\vec u\\|}\\), entre droites gauches \\(\\frac{|[\\overrightarrow{AB}, \\vec u, \\vec v]|}{\\|\\vec u \\times \\vec v\\|}\\).",
+        ["\\((1 \\,;\\, 2 \\,;\\, 0) \\times (0 \\,;\\, 1 \\,;\\, 3) = (6 \\,;\\, -3 \\,;\\, 1)\\)", "Triangle \\(A(1 \\,;\\, 0 \\,;\\, 0)\\), \\(B(0 \\,;\\, 2 \\,;\\, 0)\\), \\(C(0 \\,;\\, 0 \\,;\\, 3)\\) : \\(\\overrightarrow{AB} \\times \\overrightarrow{AC} = (6 \\,;\\, 3 \\,;\\, 2)\\), aire \\(\\frac{7}{2}\\)"], "L'ordre compte : \\(\\vec v \\times \\vec u\\) est l'opposé de \\(\\vec u \\times \\vec v\\) ; et la deuxième composante est \\(u_3v_1 - u_1v_3\\)."],
+      comps: ["Calculer un produit vectoriel ; aire d'un parallélogramme ; produit mixte", "Aire d'un triangle ; volume d'un tétraèdre ou d'un parallélépipède ; équation d'un plan par trois points", "Distance point-droite ; distance de deux droites gauches ; points coplanaires"] },
   ];
 
   // ---------- enregistrement (additif : aucune notion existante n'est modifiée) ----------
   for (const n of NEW) {
-    if (!NOTIONS.some((x) => x.id === n.id)) NOTIONS.push({ id: n.id, theme: n.theme, label: n.label, ex: n.ex, CH: n.CH, MP: null, FR: null });
+    if (!NOTIONS.some((x) => x.id === n.id)) NOTIONS.push(Object.assign({ id: n.id, theme: n.theme, label: n.label, ex: n.ex, CH: n.CH, MP: null, FR: null }, n.niv ? { niv: n.niv } : {}));
     GEN[n.id] = (d) => pickForm(n.lv[Math.min(Math.max(d, 1), 3)]);
     HINTS_EXTRA[n.id] = n.hint;
     LESSONS_EXTRA[n.id] = n.lesson;
@@ -2979,6 +3129,7 @@
 // sphere ; vraies manipulations (curseurs) sur une figure en perspective (projection orthogonale : la sphère reste un
 // cercle). 4e (src/ch4c_ana.js) : intparties, intsubst (« Essaie sur la figure » : l'aire se compare à la réponse
 // tapée), etudelnexp, eqdiff, statdesc (curseurs). ineqpoly (2e) est dans act_2c.js (paquet 13).
+// 25.11 (agent col34) : derivth, pvect, syslin, bases, bayes, cplxalg, cplxtrig, cplxeq, suitegeom, serie (« À toi : 2 questions »).
 // Même moteur que act_col34.js (briques graph, hunt et slide recopiées : fichier autonome). Chaque leçon a son propre
 // « Retiens » (règle du 15.11 : seulement ce que les défis ont présenté). Paquet de chargement « 14 » (build.py).
 (function () {
@@ -3500,6 +3651,95 @@
         miss: (st, s) => (s ? (st.a === 3 ? "Bon écart-type : b décale toutes les valeurs sans changer la dispersion. Règle b pour la moyenne." : "σ_y = |a| · 5 : seul a change la dispersion.") : "On veut (210 + 35n) ÷ (10 + n) = 25."),
         ask: [{ q: "Une série a pour moyenne x̄ = 30 et pour moyenne des carrés 925. Tape son écart-type σ.", ans: 5, ok: "σ = √(925 − 30²) = √25 = 5.", no: "σ = √(moyenne des carrés − x̄²)." },
           { q: "Températures : x̄ = 20 °C, σ = 5 °C. En degrés Fahrenheit (y = 1,8x + 32), tape σ_y.", ans: 9, ok: "σ_y = 1,8 · 5 = 9 °F ; le + 32 ne change pas l'écart-type.", no: "σ_y = |a| · σ : le terme b n'intervient pas." }] }),
+    },
+  });
+
+  // =====================================================================================================
+  // 25.11 (agent col34) : notions qui complètent la 3e et la 4e (derivth, pvect ; syslin, bases, bayes ; MA2 : cplxalg,
+  // cplxtrig, cplxeq, suitegeom, serie). « À toi : 2 questions » (réponse tapée, coup de pouce après une erreur).
+  // =====================================================================================================
+  const tu = (x) => "tu proposes <b>" + nb(x) + "</b>";
+  const toi = (cp, wins) => hunt({ ask: true, label: "Ta réponse", show: (x, s) => plain(cp[s] + "<br>" + tu(x)), wins });
+  Object.assign(ACTIVE, {
+    derivth: {
+      retiens: { regle: "Rolle : si \\(f(a) = f(b)\\), il existe \\(c\\) entre \\(a\\) et \\(b\\) avec \\(f'(c) = 0\\). Lagrange : il existe \\(c\\) avec \\(f'(c) = \\frac{f(b) - f(a)}{b - a}\\), la tangente parallèle à la corde. On trouve \\(c\\) en résolvant cette équation.", exemple: ["\\(f(x) = x^2 - 6x + 1\\) sur \\([1 \\,;\\, 5]\\) : \\(f'(c) = 2c - 6 = 0\\), \\(c = 3\\).", "\\(f(x) = \\sqrt{x}\\) sur \\([1 \\,;\\, 9]\\) : corde de pente \\(\\frac{1}{4}\\), \\(\\frac{1}{2\\sqrt{c}} = \\frac{1}{4}\\), \\(c = 4\\)."], piege: "\\(c\\) n'est pas toujours le milieu de l'intervalle (ici 5, mais \\(c = 4\\))." },
+      predict: { q: "La courbe de \\(f(x) = |x|\\) a une pointe en 0. Est-elle dérivable en 0 ?", choices: ["non : les pentes à gauche (−1) et à droite (1) diffèrent", "oui, car elle est continue", "oui, et f'(0) = 0"], good: 0,
+        why: "f est continue en 0, mais ses deux demi-tangentes ont les pentes −1 et 1 : pas de tangente unique, pas de dérivée. Continue n'implique pas dérivable." },
+      defis: ["\\(f(x) = x^2 - 6x + 1\\) sur \\([1 \\,;\\, 5]\\) : \\(f(1) = f(5)\\). Trouve \\(c\\) avec \\(f'(c) = 0\\) (Rolle).", "\\(f(x) = \\sqrt{x}\\) sur \\([1 \\,;\\, 9]\\) : trouve \\(c\\) où la tangente est parallèle à la corde (Lagrange)."],
+      play: toi(["f'(x) = 2x − 6 : résous f'(c) = 0", "Pente de la corde : (3 − 1) ÷ (9 − 1) = 1/4 ; résous 1 ÷ (2√c) = 1/4"],
+        [W(3, "2c − 6 = 0, donc c = 3 : le sommet de la parabole, entre 1 et 5."), W(4, "1 ÷ (2√c) = 1/4 donne √c = 2, donc c = 4, qui n'est pas le milieu (5) de l'intervalle.")]),
+    },
+    pvect: {
+      retiens: { regle: "\\(\\vec u \\times \\vec v = (u_2v_3 - u_3v_2 \\,;\\, u_3v_1 - u_1v_3 \\,;\\, u_1v_2 - u_2v_1)\\) est perpendiculaire à \\(\\vec u\\) et \\(\\vec v\\). Sa norme est l'aire du parallélogramme ; l'aire du triangle en est la moitié.", exemple: ["\\((1 \\,;\\, 2 \\,;\\, 0) \\times (0 \\,;\\, 1 \\,;\\, 3) = (6 \\,;\\, -3 \\,;\\, 1)\\)", "\\(A(1 \\,;\\, 0 \\,;\\, 0)\\), \\(B(0 \\,;\\, 2 \\,;\\, 0)\\), \\(C(0 \\,;\\, 0 \\,;\\, 3)\\) : \\(\\overrightarrow{AB} \\times \\overrightarrow{AC} = (6 \\,;\\, 3 \\,;\\, 2)\\), norme 7, aire \\(\\frac{7}{2}\\)."], piege: "Triangle : la moitié de \\(\\|\\overrightarrow{AB} \\times \\overrightarrow{AC}\\|\\) ; parallélogramme : la norme entière." },
+      predict: { q: "Le produit vectoriel de deux vecteurs de l'espace est…", choices: ["un vecteur perpendiculaire aux deux", "un nombre", "un vecteur parallèle au premier"], good: 0,
+        why: "Contrairement au produit scalaire (un nombre), u × v est un vecteur, perpendiculaire à u et à v ; sa longueur mesure l'aire du parallélogramme construit sur u et v." },
+      defis: ["\\(\\vec u = (1 \\,;\\, 2 \\,;\\, 0)\\), \\(\\vec v = (0 \\,;\\, 1 \\,;\\, 3)\\). Tape la première composante \\(u_2v_3 - u_3v_2\\) de \\(\\vec u \\times \\vec v\\).", "\\(A(1 \\,;\\, 0 \\,;\\, 0)\\), \\(B(0 \\,;\\, 2 \\,;\\, 0)\\), \\(C(0 \\,;\\, 0 \\,;\\, 3)\\) : \\(\\overrightarrow{AB} \\times \\overrightarrow{AC} = (6 \\,;\\, 3 \\,;\\, 2)\\). Tape l'aire du triangle ABC."],
+      play: toi(["u₂v₃ − u₃v₂ = 2 · 3 − 0 · 1", "Norme : √(36 + 9 + 4) = 7, puis la moitié pour un triangle"],
+        [W(6, "2 · 3 − 0 · 1 = 6 ; les autres composantes : 0 · 0 − 1 · 3 = −3 et 1 · 1 − 2 · 0 = 1."), W(3.5, "‖(6 ; 3 ; 2)‖ = √49 = 7 : aire du parallélogramme 7, du triangle 3,5.")]),
+    },
+    syslin: {
+      retiens: { regle: "Pour \\(\\begin{cases} ax + by = e \\\\ cx + dy = f \\end{cases}\\) : \\(D = ad - bc\\) ; si \\(D \\neq 0\\), \\(x = \\frac{D_x}{D}\\) avec \\(D_x = ed - bf\\) (la colonne des \\(x\\) remplacée par le second membre).", exemple: ["\\(\\begin{cases} 2x + y = 7 \\\\ x - 3y = 7 \\end{cases}\\) : \\(D = -6 - 1 = -7\\).", "\\(D_x = 7 \\cdot (-3) - 1 \\cdot 7 = -28\\), \\(x = \\frac{-28}{-7} = 4\\) (et \\(y = -1\\))."], piege: "\\(x = \\frac{D_x}{D}\\), pas \\(\\frac{D}{D_x}\\)." },
+      predict: { q: "Si le déterminant D du système vaut 0…", choices: ["il n'y a pas une solution unique (aucune ou une infinité)", "la solution est x = 0, y = 0", "on ne peut rien dire"], good: 0,
+        why: "D = 0 : les deux droites sont parallèles (aucune solution) ou confondues (infinité). La règle de Cramer divise par D : impossible." },
+      defis: ["Système \\(\\begin{cases} 2x + y = 7 \\\\ x - 3y = 7 \\end{cases}\\). Tape son déterminant \\(D\\).", "Même système : \\(D_x = -28\\). Tape \\(x\\)."],
+      play: toi(["D = ad − bc = 2 · (−3) − 1 · 1", "x = Dx ÷ D"],
+        [W(-7, "D = −6 − 1 = −7 ≠ 0 : une seule solution."), W(4, "x = −28 ÷ (−7) = 4 ; vérifie : 2 · 4 + y = 7 donne y = −1.")]),
+    },
+    bases: {
+      retiens: { regle: "\\((\\vec u \\,;\\, \\vec v)\\) est une base du plan si \\(\\det(\\vec u \\,;\\, \\vec v) \\neq 0\\). Les composantes de \\(\\vec w\\) sont les nombres \\((\\alpha \\,;\\, \\beta)\\) tels que \\(\\vec w = \\alpha\\vec u + \\beta\\vec v\\). Si le déterminant est nul, les vecteurs sont liés (colinéaires).", exemple: ["\\(\\vec u = \\binom{1}{2}\\), \\(\\vec v = \\binom{3}{1}\\), \\(\\vec w = \\binom{5}{5} = 2\\vec u + \\vec v\\) : composantes \\((2 \\,;\\, 1)\\).", "\\(\\binom{2}{3}\\) et \\(\\binom{m}{6}\\) : \\(12 - 3m = 0\\), liés pour \\(m = 4\\)."], piege: "Les composantes dépendent de la base : \\(\\binom{5}{5}\\) a pour composantes \\((2 \\,;\\, 1)\\) dans \\((\\vec u \\,;\\, \\vec v)\\)." },
+      predict: { q: "\\(\\vec u = \\binom{1}{2}\\) et \\(\\vec v = \\binom{2}{4}\\) forment-ils une base du plan ?", choices: ["non : v = 2u, ils sont colinéaires", "oui, deux vecteurs suffisent toujours", "oui, car ils ne sont pas nuls"], good: 0,
+        why: "v = 2u : avec u et v, on n'atteint que la droite de direction u. det(u ; v) = 4 − 4 = 0 : famille liée, pas une base." },
+      defis: ["\\(\\vec u = \\binom{1}{2}\\), \\(\\vec v = \\binom{3}{1}\\), \\(\\vec w = \\binom{5}{5}\\). Tape \\(\\alpha\\) tel que \\(\\vec w = \\alpha\\vec u + \\beta\\vec v\\).", "Pour quelle valeur de \\(m\\) les vecteurs \\(\\binom{2}{3}\\) et \\(\\binom{m}{6}\\) sont-ils liés ?"],
+      play: toi(["α + 3β = 5 et 2α + β = 5 : résous le système", "det = 2 · 6 − 3 · m = 0"],
+        [W(2, "α = 2, β = 1 : 2u + v = (2 + 3 ; 4 + 1) = (5 ; 5)."), W(4, "12 − 3m = 0, donc m = 4 ; et alors (4 ; 6) = 2 · (2 ; 3).")]),
+    },
+    bayes: {
+      retiens: { regle: "Bayes : \\(P_B(A) = \\frac{P(A) \\cdot P_A(B)}{P(B)}\\). Avec des effectifs : parmi les positifs, la part des vrais positifs = vrais positifs ÷ (vrais + faux positifs).", exemple: ["10'000 personnes, 1 % malades, test positif chez 90 % des malades et 5 % des sains : 90 vrais positifs, 495 faux positifs.", "\\(P_+(M) = \\frac{90}{585} \\approx 15{,}4\\,\\%\\)."], piege: "\\(P_+(M) \\neq P_M(+)\\) : un test « fiable à 90 % » peut donner surtout des fausses alertes quand la maladie est rare." },
+      predict: { q: "Une maladie touche 1 % des gens ; un test détecte 90 % des malades, mais se trompe chez 5 % des gens sains. Ton test est positif. Probabilité d'être malade ?", choices: ["environ 15 %", "90 %", "95 %"], good: 0,
+        why: "Sur 10'000 personnes : 100 malades dont 90 positifs, mais 9'900 sains dont 495 positifs. Parmi 585 positifs, seuls 90 sont malades : environ 15 %." },
+      defis: ["10'000 personnes, 1 % malades ; le test est positif chez 90 % des malades. Combien de vrais positifs ?", "Il y a aussi 495 faux positifs. Parmi les positifs, quel pourcentage est malade (au dixième) ?"],
+      play: toi(["Malades : 1 % de 10'000 = 100 ; positifs parmi eux : 90 %", "90 ÷ (90 + 495), en pour cent"],
+        [W(90, "100 malades, dont 90 % positifs : 90 vrais positifs."), W(15.4, "90 ÷ 585 ≈ 0,154 : environ 15,4 % des positifs sont malades.", 0.051)]),
+    },
+    cplxalg: {
+      retiens: { regle: "On calcule avec \\(i\\) comme avec une lettre, puis \\(i^2 = -1\\). Pour diviser, on multiplie en haut et en bas par le conjugué du dénominateur : \\((a + bi)(a - bi) = a^2 + b^2\\).", exemple: ["\\((2 + 3i)(1 - i) = 2 - 2i + 3i - 3i^2 = 5 + i\\)", "\\(\\frac{5 + 5i}{1 + 2i} = \\frac{(5 + 5i)(1 - 2i)}{5} = \\frac{15 - 5i}{5} = 3 - i\\)"], piege: "\\(-3i^2 = +3\\) : le produit des parties imaginaires change de signe." },
+      predict: { q: "Que vaut \\(i^2\\), si \\(i\\) est le nombre « imaginaire » ?", choices: ["−1", "1", "i"], good: 0,
+        why: "C'est la définition de i : un nombre dont le carré vaut −1. Il n'est pas réel, mais on calcule avec lui comme avec une lettre." },
+      defis: ["Calcule \\((2 + 3i)(1 - i)\\) et tape sa partie réelle.", "Calcule \\(\\frac{5 + 5i}{1 + 2i}\\) et tape sa partie imaginaire."],
+      play: toi(["Développe : 2 − 2i + 3i − 3i², avec i² = −1", "Multiplie en haut et en bas par 1 − 2i : dénominateur 1 + 4 = 5"],
+        [W(5, "2 − 2i + 3i + 3 = 5 + i : partie réelle 5."), W(-1, "(5 + 5i)(1 − 2i) = 5 − 10i + 5i + 10 = 15 − 5i ; divisé par 5 : 3 − i, partie imaginaire −1.")]),
+    },
+    cplxtrig: {
+      retiens: { regle: "Module \\(|a + bi| = \\sqrt{a^2 + b^2}\\). Sous forme \\(re^{i\\theta}\\), Moivre : \\((re^{i\\theta})^n = r^ne^{in\\theta}\\) : le module est élevé à la puissance, l'argument multiplié.", exemple: ["\\(|3 + 4i| = \\sqrt{9 + 16} = 5\\)", "\\(1 + i = \\sqrt{2}e^{i\\frac{\\pi}{4}}\\) : \\((1 + i)^8 = 16e^{2i\\pi} = 16\\)"], piege: "\\((1 + i)^8 \\neq 1^8 + i^8\\) : passe par le module et l'argument." },
+      predict: { q: "Multiplier un nombre complexe par \\(i\\), c'est…", choices: ["tourner son point d'un quart de tour (90°)", "doubler sa distance à l'origine", "changer son signe"], good: 0,
+        why: "i = e^(iπ/2) : module 1, argument π/2. Multiplier par i ajoute π/2 à l'argument sans changer le module : un quart de tour." },
+      defis: ["Tape le module de \\(3 + 4i\\).", "Calcule \\((1 + i)^8\\) (c'est un nombre réel)."],
+      play: toi(["√(3² + 4²)", "1 + i = √2·e^(iπ/4) : (√2)⁸ = 16 et l'argument devient 8 · π/4 = 2π"],
+        [W(5, "√(9 + 16) = √25 = 5."), W(16, "(√2)⁸ = 16 et e^(2iπ) = 1 : (1 + i)⁸ = 16.")]),
+    },
+    cplxeq: {
+      retiens: { regle: "Si \\(\\Delta < 0\\), \\(\\Delta = (i\\sqrt{-\\Delta})^2\\) et \\(z = \\frac{-b \\pm i\\sqrt{-\\Delta}}{2a}\\) : deux solutions conjuguées.", exemple: ["\\(z^2 - 4z + 13 = 0\\) : \\(\\Delta = 16 - 52 = -36 = (6i)^2\\).", "\\(z = \\frac{4 \\pm 6i}{2} = 2 \\pm 3i\\)"], piege: "Divise aussi la partie imaginaire par \\(2a\\) : \\(\\frac{6i}{2} = 3i\\)." },
+      predict: { q: "L'équation \\(z^2 + 1 = 0\\) a-t-elle des solutions dans les complexes ?", choices: ["oui : i et −i", "non, un carré n'est jamais négatif", "oui : 1 et −1"], good: 0,
+        why: "i² = −1 et (−i)² = −1 : i et −i sont solutions. Dans les complexes, toute équation du second degré a des solutions." },
+      defis: ["\\(z^2 - 4z + 13 = 0\\) : tape le discriminant \\(\\Delta\\).", "Tape la partie imaginaire de la solution de partie imaginaire positive."],
+      play: toi(["Δ = b² − 4ac = 16 − 4 · 13", "z = (4 ± 6i) ÷ 2"],
+        [W(-36, "Δ = 16 − 52 = −36 < 0 : deux solutions complexes conjuguées."), W(3, "z = 2 ± 3i : partie imaginaire 3 (et −3 pour l'autre).")]),
+    },
+    suitegeom: {
+      retiens: { regle: "Suite arithmétique : \\(u_n = u_1 + (n - 1)r\\) et \\(S_n = \\frac{n(u_1 + u_n)}{2}\\). Géométrique : \\(u_n = u_1q^{n - 1}\\) et \\(S_n = u_1\\frac{q^n - 1}{q - 1}\\).", exemple: ["\\(1 + 3 + 5 + \\ldots + 29\\) : \\(29 = 1 + (n - 1) \\cdot 2\\), \\(n = 15\\) termes.", "\\(S = \\frac{15 \\cdot (1 + 29)}{2} = 225\\)"], piege: "De \\(u_1\\) à \\(u_n\\), on ajoute la raison \\(n - 1\\) fois." },
+      predict: { q: "Combien vaut \\(1 + 2 + 3 + \\ldots + 100\\) ?", choices: ["5'050", "10'000", "5'000"], good: 0,
+        why: "Gauss : on groupe 1 + 100, 2 + 99, … : 50 paires de somme 101, donc 5'050 = 100 · 101 ÷ 2." },
+      defis: ["Combien de termes dans \\(1 + 3 + 5 + \\ldots + 29\\) ?", "Calcule cette somme."],
+      play: toi(["u_n = 1 + (n − 1) · 2 = 29", "S = n(premier + dernier) ÷ 2"],
+        [W(15, "1 + 2(n − 1) = 29 donne n = 15."), W(225, "15 · (1 + 29) ÷ 2 = 225 (c'est aussi 15²).")]),
+    },
+    serie: {
+      retiens: { regle: "Si \\(|q| < 1\\), \\(u_0 + u_0q + u_0q^2 + \\ldots = \\frac{u_0}{1 - q}\\). Un nombre périodique est une telle série.", exemple: ["\\(1 + \\frac{1}{2} + \\frac{1}{4} + \\ldots = \\frac{1}{1 - \\frac{1}{2}} = 2\\)", "\\(0{,}\\overline{36} = \\frac{36}{100} \\cdot \\frac{1}{1 - \\frac{1}{100}} = \\frac{36}{99} = \\frac{4}{11}\\)"], piege: "La formule ne vaut que pour \\(|q| < 1\\) ; sinon la somme n'a pas de limite." },
+      predict: { q: "On additionne \\(1 + \\frac{1}{2} + \\frac{1}{4} + \\frac{1}{8} + \\ldots\\) sans fin. Le résultat…", choices: ["s'approche de 2", "devient infiniment grand", "s'approche de 1"], good: 0,
+        why: "Chaque terme comble la moitié de ce qui manque pour atteindre 2 : 1, 1,5, 1,75, 1,875… La somme tend vers 2." },
+      defis: ["Calcule \\(1 + \\frac{1}{2} + \\frac{1}{4} + \\ldots\\) (somme infinie).", "Écris \\(0{,}363636\\ldots\\) sous forme de fraction irréductible."],
+      play: toi(["u₀ = 1, q = 1/2 : u₀ ÷ (1 − q)", "0,36 + 0,0036 + … : u₀ = 36/100, q = 1/100"],
+        [W(2, "1 ÷ (1 − 1/2) = 2."), W(4 / 11, "(36/100) ÷ (99/100) = 36/99 = 4/11.", 0.0005)]),
     },
   });
 })();

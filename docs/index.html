@@ -262,6 +262,7 @@ details.lesson[open] { background: var(--paper); }
 .note.good { background: var(--ok-soft); color: var(--ok); }
 .note.ok { background: var(--blue-soft); color: var(--blue); }
 .note.low { background: var(--bad-soft); color: var(--bad); }
+.note.frag { background: var(--warn-soft, #fff1d6); color: var(--warn, #a86400); } /* 25.11 : maîtrise fragile (profil France, LSU) */
 .tag { font-size: 0.75rem; color: var(--ink-soft); border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
 details.olds summary { cursor: pointer; color: var(--blue); font-weight: 700; padding: 8px 0; }
 .notyet { margin-top: 6px; justify-self: start; }
@@ -901,8 +902,12 @@ body.pz-on .pz-s { scroll-snap-align: start; }
 .pz-anim.pz-wait .pz-loop-n { opacity: 0; transform: scale(.6); }
 .pz-cov { display: flex; flex-direction: column; gap: 6px; }
 .pz-cov-r { display: grid; grid-template-columns: 6.5em 1fr auto; gap: 8px; align-items: center; font-size: .92rem; }
-.pz-cov-b { height: 10px; background: var(--line); border-radius: 99px; overflow: hidden; }
-.pz-cov-b i { display: block; height: 100%; background: var(--blue); border-radius: 99px; transition: width .9s ease; }
+.pz-cov-b { height: 10px; background: var(--line); border-radius: 99px; overflow: hidden; display: flex; }
+.pz-cov-b i { display: block; height: 100%; background: var(--blue); transition: width .9s ease; }
+.pz-cov-b i.rep { background: var(--blue-soft); box-shadow: inset 0 0 0 1px var(--blue); }
+.pz-sw { display: inline-block; width: 12px; height: 10px; border-radius: 3px; background: var(--blue); vertical-align: middle; }
+.pz-sw.rep { background: var(--blue-soft); box-shadow: inset 0 0 0 1px var(--blue); }
+.pz-cov-r { grid-template-columns: 7em 1fr auto; }
 .pz-anim.pz-wait .pz-cov-b i { width: 0 !important; }
 body.pz-on .pz-num { font-size: 3.2rem; }
 body.pz-on .pz-loop svg { max-width: 460px; }
@@ -916,12 +921,12 @@ window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "glo
 </head>
 <body>
 <main id="app" aria-live="polite"></main>
-<script src="app.js?v=f5eeb1369c"></script>
+<script src="app.js?v=c0bb5c7134"></script>
 <script>
 (function () {
   // Chargement par niveau (24.11). Paquets requis : le niveau de l'élève et les niveaux inférieurs de sa filière ;
   // France et liens de consultation (#q-, #l-, #auteur) : tout. Puis le reste en arrière-plan (hors ligne complet).
-  var V = "f5eeb1369c", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
+  var V = "c0bb5c7134", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
   window.__packs = loaded; // pour les tests (tools/test_paquets.py)
   function need(p) {
     if (!p || p.system === "FR") return K.slice();

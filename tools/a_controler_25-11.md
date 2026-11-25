@@ -137,3 +137,22 @@ renforcé** (MA2 montré à tous en 3e–4e) et **radians au Collège** (trigono
 - **Défis ouverts aux classes suivantes** (ta règle « savoir refaire l'avant tant que ce n'est pas trivial ») :
   2e → 3e–4e, 9e → 10e, 10e → 11e ; défis du secondaire II ajoutés (optim, arith, fracper, premiers, rac).
 - **Tests** : une page en échec pendant la série complète est reprise une fois seule (kp_stable, sensible à la charge).
+
+## Soir — France, derniers manques (agent frfin, fusionné) : à contrôler
+
+1. `progcalc` en 4e : niveau 1 remonté au niveau 2 (la forme « nombre de départ négatif » n'est plus tirée en 4e). D'accord ?
+2. Débordements possibles en 6e–5e : `symax` utilise la somme des angles et le triangle isocèle ; `mediatrice` parle du cercle
+   circonscrit (calculs, pas constructions) ; `empil` « nombre maximal de cubes d'après 3 vues » peut-être un cran au-dessus de la 5e.
+3. Énoncé des empilements : « aucun cube n'est caché : il n'y a pas de trou » (piles du fond au moins aussi hautes) — à relire.
+4. Tle `suiteint` : limites de n·Iₙ (e, 1/e, 1/2) et Wallis exigeants ; corrigé de ∫ xⁿ/(1+x) (encadrement résumé) à vérifier.
+5. Notes sur 20 en France : questions faites ; les leçons actives suisses sur la moyenne (« notes 6 ; 6 ; 3 ») pas encore.
+6. Encore non couverts : 6e distance à un point, cercle comme ensemble de points, bissectrice, filtrer un tableau ; 5e tableaux
+   de valeurs sans f(x), hauteurs ; 2nde algorithmique de simulation ; Tle y' = ay + f (en partie).
+Couverture : 6e 90 %, 5e 93 %, 4e 96 %, 3e 94 %, 2nde 98 %, 1re 96 %, Tle 95 %.
+
+## Soir — séparation complète France / romand (règle de l'enseignant, « très important »)
+
+Sonde `tests/separation.html` (dans la suite) : 8 profils × tous les écrans + questions de l'année, marqueurs de l'autre
+système dans les deux sens. Compétences France en 4 niveaux LSU. Présentations françaises pour un profil France.
+Reste : intitulés des compétences en France (chantier « référentiel de compétences FR », libellés officiels) ; leçons actives
+suisses sur la moyenne en notes 1–6.
