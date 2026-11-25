@@ -2375,7 +2375,7 @@
     () => { let a, b, c, r; do { a = pk([0.4, 0.5, 0.6]); b = pk([0.2, 0.3]); c = pk([0.25, 0.3, 0.4]); r = (a * b) / c; } while (r > 1 || Math.abs(r - b) < 1e-9); const w = who();
       return X({ id: "condbayes", lv: 2, titre: "Trouve l'erreur",
         q: "Dans un collège, " + M(N(100 * a) + "\\,\\%") + " des élèves font du sport (S) ; parmi les sportifs, " + M(N(100 * b) + "\\,\\%") + " jouent d'un instrument (I) ; en tout, " + M(N(100 * c) + "\\,\\%") + " des élèves jouent d'un instrument. " + w + " affirme : « parmi les musiciens, " + M(N(100 * b) + "\\,\\%") + " font du sport ».",
-        parts: [{ label: "Quelle confusion " + w + " fait-il ou elle ?", pts: 1 }, { label: "Calcule la bonne probabilité " + M("P_I(S)") + " (au millième).", pts: 1 }],
+        parts: [{ label: "Quelle confusion fait " + w + " ?", pts: 1 }, { label: "Calcule la bonne probabilité " + M("P_I(S)") + " (au millième).", pts: 1 }],
         sol: ul(["On connaît " + M("P_S(I) = " + N(b)) + " ; " + w + " le prend pour " + M("P_I(S)") + ", ce n'est pas la même chose.", "Bayes : " + M("P_I(S) = \\frac{P(S) \\cdot P_S(I)}{P(I)} = \\frac{" + N(a) + " \\cdot " + N(b) + "}{" + N(c) + "} \\approx " + A(r, 3)) + "."]),
         chk: [[r, A(r, 3), 0.001]] }); },
     () => VF("binomiale", 2, [["« Si " + M("X \\sim B(10 \\,;\\, 0{,}3)") + ", alors " + M("E(X) = 3") + ". »", true, M("E(X) = np = 10 \\cdot 0{,}3") + "."],

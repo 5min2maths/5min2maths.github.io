@@ -76,7 +76,7 @@
           M(N(t) + " : 3600") + " : " + h + " h entières (" + M(N(3600 * h)) + " s). Reste " + M(N(t - 3600 * h) + " s") + " ; " + M(N(t - 3600 * h) + " : 60") + " : " + m + " min et " + s + " s. Donc " + hmsT(t) + ".",
           { ctx: "hms", guide: [GS("Combien d'heures entières dans " + M(N(t) + u("s")) + " ? (une heure = 3600 s)", h, M(h + " \\cdot 3600 = " + N(3600 * h)) + " ≤ " + M(N(t)) + " < " + M(N(3600 * (h + 1))) + "."), GS("Combien de secondes restent après ces heures ?", t - 3600 * h, M(N(t) + " - " + N(3600 * h) + " = " + N(t - 3600 * h)) + " s."), GS("Combien de minutes entières dans ce reste ?", m, M(N(t - 3600 * h) + " = " + m + " \\cdot 60 + " + s) + " : " + m + " min et " + s + " s.")],
             traps: [TRAP(Math.floor(t / 60), "Ça, c'est le nombre total de minutes. Il faut d'abord retirer les heures entières.")] }); },
-      () => { const m = pickBy([5, 10, 25, 35, 40, 50, 55, 20]), h = R.int(1, 4), v = h + m / 60, c = pickBy([["Un épisode de série dure", "serie"], ["Le cours de piano a duré", "piano"], ["Le trajet Genève–Berne dure", "geneve"]]);
+      () => { /* 26.11 (vraisemblance) : un épisode de série ou un cours de piano de 3 h 55 n'existe pas : heures propres au contexte */ const m = pickBy([5, 10, 25, 35, 40, 50, 55, 20]), c = pickBy([["Un épisode de série dure", "serie", [1]], ["Le film a duré", "film", [1, 2]], ["Le trajet Genève–Berne en voiture dure", "geneve", [1, 2]], ["La randonnée a duré", "rando", [2, 3, 4]]]), h = pickBy(c[2]), v = h + m / 60;
         return Qv(c[0] + " " + M(h + u("h") + "\\ " + two(m) + u("min")) + ". Écris cette durée en heures, arrondie au centième.", v,
           M(m + " : 60 \\approx " + N(+(m / 60).toFixed(4))) + " h, donc environ " + Q(+v.toFixed(2), "h") + ".",
           { round: 0.01, ctx: c[1], guide: [GS("Calcule " + M(m + " : 60") + " (au centième).", m / 60, M(m + " : 60 \\approx " + N(+(m / 60).toFixed(2))) + ".", 0.01), GS("Durée en heures, au centième ?", v, M(h + " + " + N(+(m / 60).toFixed(2)) + " \\approx " + N(+v.toFixed(2))) + " h.", 0.01)],
@@ -189,11 +189,11 @@
           hmT(min) + " = " + Q(r6(min / 60), "h") + ". " + M("d = " + v + " \\cdot " + N(r6(min / 60)) + " = " + N(d)) + " km.",
           { ctx: c[1], guide: [GS("Écris " + hmT(min) + " en heures (nombre décimal).", r6(min / 60), M((min % 60) + " : 60 = " + N(r6((min % 60) / 60))) + ", donc " + Q(r6(min / 60), "h") + "."), GS("Distance : " + M("d = v \\cdot t") + " ?", d, M(v + " \\cdot " + N(r6(min / 60)) + " = " + N(d)) + " km.")],
             traps: [TRAP(r6(v * (Math.floor(min / 60) + (min % 60) / 100)), "Attention : " + hmT(min) + " n'est pas " + Math.floor(min / 60) + "," + two(min % 60) + " h.")] }); },
-      () => { const c = pickBy([[4, "Un escargot avance à", "mm/s", "escargot"], [8, "Une chenille avance à", "mm/s", "chenille"], [5, "Un glacier de montagne avance de", "cm/jour", "glacier"]]);
+      () => { const c = pickBy([[1.5, "Un escargot avance à", "mm/s", "escargot"], [3, "Une chenille avance à", "mm/s", "chenille"] /* 26.11 (vraisemblance) : un escargot fait environ 1 mm/s (et non 4) */, [5, "Un glacier de montagne avance de", "cm/jour", "glacier"]]);
         if (c[2] === "cm/jour") { const j = pickBy([30, 365, 120]), d = r6(c[0] * j / 100); return Qv(c[1] + " " + Q(c[0], "cm") + " par jour. De combien de mètres avance-t-il en " + j + " jours ?", d, M(c[0] + " \\cdot " + j + " = " + c[0] * j) + " cm = " + Q(d, "m") + ".", { ctx: c[3], guide: [GS("Combien de cm en " + j + " jours ?", c[0] * j, M(c[0] + " \\cdot " + j + " = " + c[0] * j) + " cm."), GS("En mètres ?", d, M(c[0] * j + " : 100 = " + N(d)) + " m.")], traps: [TRAP(c[0] * j, "C'est en centimètres : 1 m = 100 cm.")] }); }
         const d = r6(c[0] * 3600 / 1000);
-        return Qv(c[1] + " " + Q(c[0], c[2]) + ". Quelle distance parcourt-il en une heure (en m) ?", d, "Une heure = 3600 s : " + M(c[0] + " \\cdot 3600 = " + N(c[0] * 3600)) + " mm = " + Q(d, "m") + ".",
-          { ctx: c[3], guide: [GS("Combien de mm en une heure (3600 s) ?", c[0] * 3600, M(c[0] + " \\cdot 3600 = " + N(c[0] * 3600)) + " mm."), GS("En mètres (1 m = 1000 mm) ?", d, M(N(c[0] * 3600) + " : 1000 = " + N(d)) + " m.")], traps: [TRAP(c[0] * 60 / 1000, "Une heure vaut 3600 secondes, pas 60."), TRAP(c[0] * 3600, "C'est en millimètres : 1 m = 1000 mm.")] }); },
+        return Qv(c[1] + " " + Q(c[0], c[2]) + ". Quelle distance parcourt-il en une heure (en m) ?", d, "Une heure = 3600 s : " + M(N(c[0]) + " \\cdot 3600 = " + N(c[0] * 3600)) + " mm = " + Q(d, "m") + ".",
+          { ctx: c[3], guide: [GS("Combien de mm en une heure (3600 s) ?", c[0] * 3600, M(N(c[0]) + " \\cdot 3600 = " + N(c[0] * 3600)) + " mm."), GS("En mètres (1 m = 1000 mm) ?", d, M(N(c[0] * 3600) + " : 1000 = " + N(d)) + " m.")], traps: [TRAP(c[0] * 60 / 1000, "Une heure vaut 3600 secondes, pas 60."), TRAP(c[0] * 3600, "C'est en millimètres : 1 m = 1000 mm.")] }); },
     ],
     3: [
       () => { const [v1, v2, dd] = pickBy([[40, 60, 120], [60, 120, 120], [30, 60, 60], [60, 90, 180], [40, 120, 120], [60, 40, 240], [90, 60, 180], [80, 120, 240]]), tt = dd / v1 + dd / v2, vm = (2 * dd) / tt, c = pickBy([["Une voiture fait un aller", "voiture"], ["Un motard fait un aller", "moto"], ["Une cycliste fait un aller", "velo"]]);
@@ -352,7 +352,7 @@
         return P(FIG.road(d + " km", v1 + " km/h → " + v2 + " km/h"), "Une voiture fait l'aller de " + M(d) + " km à " + M(v1) + " km/h et le retour à " + M(v2) + " km/h.",
           [["a) Durée de l'aller (min)", t1 * 60, 0.01], ["b) Durée du retour (min)", t2 * 60, 0.01], ["c) Vitesse moyenne sur l'aller-retour (km/h, au centième)", vm, 0.01]],
           ["La vitesse moyenne n'est pas la moyenne des vitesses : c'est la distance totale divisée par la durée totale.", "t = d / v pour chaque trajet ; v moyenne = " + 2 * d + " km / (durée aller + durée retour)."],
-          "a) " + M(N(+(t1 * 60).toFixed(2))) + " min. b) " + M(N(+(t2 * 60).toFixed(2))) + " min. c) " + M("\\frac{" + 2 * d + "}{" + N(+(t1 + t2).toFixed(4)) + "} \\approx " + N(+vm.toFixed(2))) + " km/h (et non " + (v1 + v2) / 2 + ")."); },
+          "a) " + M(N(+(t1 * 60).toFixed(2))) + " min. b) " + M(N(+(t2 * 60).toFixed(2))) + " min. c) " + M("\\frac{" + 2 * d + "}{" + N(+(t1 + t2).toFixed(4)) + "} \\approx " + N(+vm.toFixed(2))) + " km/h (et non " + String((v1 + v2) / 2).replace(".", ",") + ")."); },
       () => { const dep = 60 * R.int(6, 9) + pickBy([12, 18, 24, 36, 42, 48]), dur = pickBy([135, 150, 165, 105]), v = pickBy([84, 92, 76, 88]), d = v * dur / 60, arr = dep + dur;
         return P(null, "Un train part à " + horaire(dep) + " et arrive à " + horaire(arr) + " après avoir parcouru " + Q(d, "km") + ".",
           [["a) Durée du trajet en minutes", dur], ["b) Durée en heures (nombre décimal)", dur / 60], ["c) Vitesse moyenne en km/h", v], ["d) Vitesse moyenne en m/s (au dixième)", v / 3.6, 0.1]],
@@ -1243,7 +1243,7 @@
           { plain: true, ctx: "p2d", guide: [GS("Pour cent veut dire « sur 100 » : " + M(N(p) + "\\,\\% = \\frac{?}{100}") + ". Numérateur ?", p, M("\\frac{" + N(p) + "}{100}") + "."), GS("Divise par 100 : écriture décimale ?", p / 100, M(N(p) + " : 100 = " + N(p / 100)) + ".")],
             traps: [TR(p / 10, "Pour cent : on divise par 100, pas par 10."), TR(p, "Il faut diviser par 100.")] }); },
       () => { const [n, k] = pk([[20, 7], [25, 9], [40, 14], [50, 17], [20, 13], [25, 16], [40, 26], [50, 33], [80, 28]]), x = pk([
-          ["Dans une classe de " + n + " élèves, " + k + " font partie d'un club de sport.", "Quel pourcentage des élèves fait partie d'un club ?", "sport"],
+          [(n > 28 ? "Parmi les " + n + " élèves interrogés, " : "Dans une classe de " + n + " élèves, ") + k + " font partie d'un club de sport.", "Quel pourcentage des élèves fait partie d'un club ?", "sport"],
           ["À un test de " + n + " questions, Liam répond juste à " + k + " questions.", "Quel est son pourcentage de réponses justes ?", "test"],
           ["Un sac contient " + n + " billes, dont " + k + " rouges.", "Quel pourcentage des billes est rouge ?", "billes"]]);
         return Qv(x[0] + " " + x[1] + " (donne seulement le nombre)", k / n * 100, M(fT(k, n) + " = " + N(k / n) + " = " + N(k / n * 100) + "\\,\\%") + ".",
@@ -1793,7 +1793,7 @@
       /* 25.11 (revue : « 3, 4 et 4 cm » avec le calcul 4² − (3² + 4²) déjà écrit : trop guidé, sans plus grand côté net) :
          le plus grand côté dépasse nettement les deux autres, les côtés sont dans le désordre, et le calcul n'est pas
          écrit : l'élève repère le plus grand côté et compare son carré à la somme des deux autres. */
-      () => { const [a, b, c] = trip(25), x = c + pk([1, 2, 3]), s = shuf([a, b, x]), e = x * x - a * a - b * b; if (x >= a + b) return null; /* 26.11 : 3, 4, 8 n'est pas un triangle */
+      () => { let a, b, c, x; do { [a, b, c] = trip(25); x = c + pk([1, 2, 3]); } while (x >= a + b); /* 26.11 (vraisemblance) : « côtés 3, 4 et 8 cm » : ce triangle n'existe pas (3 + 4 < 8) */ const s = shuf([a, b, x]), e = x * x - a * a - b * b;
         return Qv("Un triangle a pour côtés " + M(s[0]) + " cm, " + M(s[1]) + " cm et " + M(s[2]) + " cm. Est-il rectangle ? Pour le savoir, calcule de combien le carré du plus grand côté dépasse la somme des carrés des deux autres.", e, "Plus grand côté " + M(x) + " : " + M(x + "^2 - (" + a + "^2 + " + b + "^2) = " + x * x + " - " + (a * a + b * b) + " = " + e) + " : ce n'est pas 0, le triangle n'est pas rectangle (il a un angle obtus).",
           { ctx: "ecart", guide: [GS("Quel est le plus grand côté (en cm) ?", x, M(x) + " cm."), GS(M(x + "^2") + " = ?", x * x, M(x * x) + "."), GS("Somme des carrés des deux autres : " + M(a + "^2 + " + b + "^2") + " = ?", a * a + b * b, M(a * a + b * b) + "."), GS("Différence ?", e, M(e) + ".")],
             traps: [TR(x - a - b, "On compare les carrés, pas les longueurs."), TR(-e, "Dans l'ordre : le carré du plus grand côté moins la somme des deux autres."), TR(a * a - b * b - x * x, "Le plus grand côté est " + M(x) + " cm : c'est son carré qu'on compare."), TR(b * b - a * a - x * x, "Le plus grand côté est " + M(x) + " cm : c'est son carré qu'on compare.")] }); },
@@ -1893,7 +1893,7 @@
       () => { const a = R.int(3, 12), b = R.int(2, 10), h = 3 * R.int(1, 5); if (a === b) return null; const V = a * b * h / 3;
         return Qv("Une pyramide a pour base un rectangle de " + M(a) + " cm sur " + M(b) + " cm, et une hauteur de " + M(h) + " cm. Calcule son volume (en cm³).", V, M("\\frac{1}{3} \\cdot " + a + " \\cdot " + b + " \\cdot " + h + " = " + V) + " cm³.",
           { ctx: "pyrrect", guide: [GS("Aire de la base ?", a * b, M(a * b) + " cm²."), GS("Volume ?", V, M(V) + " cm³.")], traps: [TR(a * b * h, "On divise par 3 pour une pyramide.")] }); },
-      () => { const d = 2 * R.int(2, 7), h = 3 * R.int(1, 4), r = d / 2, k = r * r * h / 3;
+      () => { const d = 2 * R.int(2, 3), h = 3 * R.int(3, 4), r = d / 2, k = r * r * h / 3; /* 26.11 (vraisemblance) : un cornet mesure 4 à 6 cm de diamètre et 9 à 12 cm de haut (et non 14 cm sur 3 cm) */
         return Qv("Un cornet de glace a la forme d'un cône de diamètre " + M(d) + " cm et de hauteur " + M(h) + " cm. Calcule son volume" + PIX + ".", k * Math.PI, "Rayon : " + M(r) + " cm. " + M("\\frac{1}{3}\\pi \\cdot " + r + "^2 \\cdot " + h + " = " + piT(k)) + " cm³.",
           { canon: k + "π", ctx: "cornet", fig: FIG.cone("d = " + d, "h = " + h), guide: [GS("Le rayon ?", r, M(d + " : 2 = " + r) + " cm."), GS("Volume (avec " + M("\\pi") + ") ?", k * Math.PI, M(piT(k)) + " cm³.")],
             traps: [TR(d * d * h / 3 * Math.PI, "On a donné le diamètre : le rayon en est la moitié.")] }); },
@@ -2008,7 +2008,7 @@
         return Qv("On découpe dans un cube d'arête " + M(a) + " cm la plus grande pyramide possible (base = une face, sommet = centre de la face opposée). Quel volume de matière enlève-t-on (en cm³) ?", V, "Cube " + M(a ** 3) + ", pyramide " + M(a ** 3 / 3) + " : on enlève " + M(a ** 3 + " - " + a ** 3 / 3 + " = " + V) + " cm³, les deux tiers.",
           { ctx: "decoupe", fig: FIG.cube(a + " cm", true), guide: [GS("Volume du cube ?", a ** 3, M(a ** 3) + " cm³."), GS("Volume de la pyramide ?", a ** 3 / 3, M(a ** 3 / 3) + " cm³."), GS("Volume enlevé ?", V, M(V) + " cm³.")],
             traps: [TR(a ** 3 / 3, "C'est le volume de la pyramide qui reste ; on demande ce qu'on enlève.")] }); },
-      () => { const [hb, s, b2] = pk([[4, 5, 3], [12, 13, 5], [8, 10, 6], [6, 10, 8]]), L = R.int(3, 8), b = 2 * b2, V = b * hb / 2 * L;
+      () => { const [hb, s, b2] = pk([[4, 5, 3], [12, 13, 5], [8, 10, 6], [6, 10, 8]]), L = R.int(18, 25) /* 26.11 (vraisemblance) : une tente longue de 3 dm n'existe pas */, b = 2 * b2, V = b * hb / 2 * L;
         return Qv("Une tente a la forme d'un prisme droit couché. Sa face avant est un triangle isocèle de base " + M(b) + " dm et de côtés " + M(s) + " dm ; la tente est longue de " + M(L) + " dm. Calcule son volume (en dm³).", V, "Hauteur du triangle : " + M("\\sqrt{" + s + "^2 - " + b2 + "^2} = " + hb) + " dm ; aire " + M("\\frac{" + b + " \\cdot " + hb + "}{2} = " + b * hb / 2) + " dm² ; volume " + M(V) + " dm³.",
           { ctx: "tente", fig: GF.isoH(b, s, { lb: b + " dm", ls: s + " dm", lh: "h" }), guide: [GS("Hauteur du triangle (Pythagore avec la demi-base) ?", hb, M(hb) + " dm."), GS("Aire du triangle ?", b * hb / 2, M(b * hb / 2) + " dm²."), GS("Volume ?", V, M(V) + " dm³.")],
             traps: [TR(b * s / 2 * L, "Le côté oblique n'est pas la hauteur du triangle : calcule-la avec Pythagore."), TR(b * hb * L, "L'aire du triangle se divise par 2.")] }); },
@@ -3502,9 +3502,9 @@
     () => { const [n0, n1] = pk([[4, 6], [6, 9], [4, 10], [6, 8]]), [lait, beurre] = pk([[[3, 4], [1, 5]], [[2, 3], [1, 4]], [[1, 2], [3, 10]]]);
       const kL = [lait[0] * n1, lait[1] * n0], kB = [beurre[0] * n1, beurre[1] * n0];
       return X({ id: "fracmul", lv: 1, titre: "La recette de crêpes",
-        q: "Une recette pour " + n0 + " personnes demande " + M(F(...lait)) + " L de lait et " + M(F(...beurre)) + " kg de beurre. " + who() + " cuisine pour " + n1 + " personnes.",
-        parts: [{ label: "Par quelle fraction faut-il multiplier les quantités ?", pts: 1 }, { label: "Quelle quantité de lait faut-il (fraction irréductible, en L) ?", pts: 1 }, { label: "Il reste les " + M(F(2, 3)) + " d'une plaquette de beurre de " + M(F(1, 4)) + " kg. Cela suffit-il ?", pts: 2 }],
-        sol: ul([M(F(n1, n0)) + ".", M(F(...lait) + " \\cdot " + F(n1, n0) + " = " + F(...kL)) + " L.", "Il reste " + M(F(2, 3) + " \\cdot " + F(1, 4) + " = " + F(1, 6)) + " kg ; il faut " + M(F(...kB)) + " kg : " + (kB[0] / kB[1] <= 1 / 6 ? "oui, cela suffit." : "non, cela ne suffit pas (" + M(F(...kB) + " > " + F(1, 6)) + ").")]) }); },
+        q: "Une recette pour " + n0 + " personnes demande " + M(F(...lait)) + " L de lait et " + M(F(...beurre)) + " kg de farine. " /* 26.11 (vraisemblance) : 300 g de beurre pour 6 personnes, c'est beaucoup trop ; la farine a ces quantités */ + who() + " cuisine pour " + n1 + " personnes.",
+        parts: [{ label: "Par quelle fraction faut-il multiplier les quantités ?", pts: 1 }, { label: "Quelle quantité de lait faut-il (fraction irréductible, en L) ?", pts: 1 }, { label: "Il reste les " + M(F(2, 3)) + " d'un paquet de farine de " + M(F(1, 2)) + " kg. Cela suffit-il ?", pts: 2 }],
+        sol: ul([M(F(n1, n0)) + ".", M(F(...lait) + " \\cdot " + F(n1, n0) + " = " + F(...kL)) + " L.", "Il reste " + M(F(2, 3) + " \\cdot " + F(1, 2) + " = " + F(1, 3)) + " kg ; il faut " + M(F(...kB)) + " kg : " + (kB[0] / kB[1] <= 1 / 3 ? "oui, cela suffit." : "non, cela ne suffit pas (" + M(F(...kB) + " > " + F(1, 3)) + ").")]) }); },
     // Soldes successifs (pourcentages)
     () => { const P = pk([80, 120, 150, 200]), p1 = pk([20, 30, 25]), p2 = pk([10, 15, 20]), f = (1 - p1 / 100) * (1 - p2 / 100), fin = P * f;
       return X({ id: "fracconv", lv: 2, titre: "Soldes successifs",
@@ -3766,7 +3766,7 @@
         q: "Pour mesurer la largeur " + M("BC") + " d'une rivière, on plante des piquets : " + M("A") + ", " + M("E") + ", " + M("C") + " alignés et " + M("A") + ", " + M("D") + ", " + M("B") + " alignés, avec " + M("(DE) \\parallel (BC)") + ". On mesure " + M("AE = " + ae) + " m, " + M("EC = " + ec) + " m et " + M("DE = " + de) + " m.",
         parts: [{ label: "Calcule " + M("AC") + ".", pts: 1 }, { label: "Calcule la largeur " + M("BC") + " (au dixième).", pts: 2 }],
         sol: ul([M("AC = " + ae + " + " + ec + " = " + (ae + ec)) + " m.", M("BC = " + de + " \\cdot \\frac{" + (ae + ec) + "}{" + ae + "} = " + N(r6(bc))) + " m."]) }); },
-    () => { const k = pk([2, 3]), ao = pk([2, 3, 4]), ab = pk([3, 4, 5]);
+    () => { const k = pk([2, 3]), ao = pk([2, 3, 4]), ab = pk([3, 4, 5].filter((v) => v < 2 * ao + 1)) /* 26.11 : OA = 2, OB = 3, AB = 5 : triangle OAB aplati */;
       return X({ id: "thalesrec", lv: 3, titre: "Le papillon",
         q: "Les droites " + M("(AC)") + " et " + M("(BD)") + " se coupent en " + M("O") + ". On a " + M("OA = " + ao) + " cm, " + M("OC = " + ao * k) + " cm, " + M("OB = " + (ao + 1)) + " cm, " + M("OD = " + (ao + 1) * k) + " cm et " + M("AB = " + ab) + " cm.",
         parts: [{ label: "Montre que " + M("(AB) \\parallel (CD)") + ".", pts: 2 }, { label: "Calcule " + M("CD") + ".", pts: 1 }, { label: "Par combien l'aire du triangle " + M("OAB") + " est-elle multipliée pour obtenir celle de " + M("OCD") + " ?", pts: 1 }],

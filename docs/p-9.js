@@ -147,7 +147,7 @@
       "a) et b) " + M("\\frac{" + k * p + "}{" + k * q + "} = \\frac{" + p + "}{" + q + "}") + " (on divise par " + k + "). c) Multiples de " + q + " entre 20 et 50 : " + Array.from({ length: cnt }, (_, i) => (Math.ceil(20 / q) + i) * q).join(", ") + " : " + cnt + " fractions.");
   });
   PX("fractout", () => {
-    let n, a, b, c, d, f, r, mu; do { [a, b] = pk([[2, 3], [3, 4], [2, 5], [3, 5], [1, 3], [1, 4]]); [c, d] = pk([[1, 2], [1, 3], [2, 3], [1, 4], [3, 4]]); n = pk([20, 24, 28, 30, 36]); f = (n * a) / b; r = n - f; mu = (r * c) / d; } while (!Number.isInteger(f) || !Number.isInteger(mu) || mu === 0 || r - mu === 0);
+    let n, a, b, c, d, f, r, mu; do { [a, b] = pk([[2, 3], [3, 4], [2, 5], [3, 5], [1, 3], [1, 4]]); [c, d] = pk([[1, 2], [1, 3], [2, 3], [1, 4], [3, 4]]); n = pk([18, 20, 24, 28, 30]); /* 26.11 (vraisemblance) : pas de classe de 36 élèves */ f = (n * a) / b; r = n - f; mu = (r * c) / d; } while (!Number.isInteger(f) || !Number.isInteger(mu) || mu === 0 || r - mu === 0);
     return PB("Dans une classe de " + X(n) + " élèves, " + M("\\frac{" + a + "}{" + b + "}") + " font du football. Parmi les autres, " + M("\\frac{" + c + "}{" + d + "}") + " font de la musique.",
       [["a) Combien d'élèves font du football ?", f], ["b) Combien d'élèves font de la musique ?", mu], ["c) Combien d'élèves ne font ni l'un ni l'autre ?", r - mu]],
       ["Fraction d'une quantité : divise par le dénominateur, multiplie par le numérateur.", "b) Attention : la fraction porte sur « les autres », pas sur toute la classe."],
@@ -245,7 +245,7 @@
       "a) " + M(n + " \\cdot " + N(p) + " = " + N(t)) + " CHF. b) " + N(p) + " ≈ " + Math.round(p) + " ; " + M(n + " \\cdot " + Math.round(p) + " = " + n * Math.round(p)) + " CHF. c) " + M("|" + n * Math.round(p) + " - " + N(t) + "| = " + N(r6(Math.abs(n * Math.round(p) - t)))) + " CHF.");
   });
   PX("decprob", [9, 10], () => {
-    const l = pk([0.75, 1.5, 0.4]), pl = pk([1.8, 2.4, 3.6]), n = pk([12, 18, 24]), pu = pk([2.9, 3.45, 4.2]);
+    const l = pk([0.75, 0.5, 0.4]) /* 26.11 : et non 1,5 L de jus par personne */, pl = pk([1.8, 2.4, 3.6]), n = pk([12, 18, 24]), pu = pk([2.9, 3.45, 4.2]);
     const L = r6(l * n), bott = Math.ceil(r6(L / pl) - 1e-9), cost = r6(bott * pu), bil = [20, 50, 100].find((b) => b > cost);
     return PB("Pour un pique-nique de " + n + " personnes, on prévoit " + X(l) + " L de jus par personne. Le jus est vendu en bouteilles de " + X(pl) + " L à " + X(pu) + " CHF la bouteille. On paie avec un billet de " + bil + " CHF.",
       [["a) Quantité de jus nécessaire, en L", L], ["b) Nombre de bouteilles à acheter", bott], ["c) Monnaie rendue, en CHF", r6(bil - cost), 0.01]],
@@ -810,7 +810,7 @@ const RICHU = (() => {
   // Écriture décimale avec période : 7/24 = 0,291\overline{6}.
   const perDec = (n, d) => { const ip = Math.floor(n / d); let r = n % d, s = "", seen = {}; while (r && seen[r] === undefined) { seen[r] = s.length; r *= 10; s += Math.floor(r / d); r %= d; } return r ? ip + "{,}" + s.slice(0, seen[r]) + "\\overline{" + s.slice(seen[r]) + "}" : ip + (s ? "{,}" + s : ""); };
   const EXF = [
-    () => { const [n, f1, f2] = pk([[24, [1, 3], [3, 8]], [20, [2, 5], [1, 4]], [30, [2, 5], [1, 3]], [28, [3, 7], [1, 4]], [36, [4, 9], [1, 3]]]), b = (n * f1[0]) / f1[1], p = (n * f2[0]) / f2[1], v = n - b - p, fv2 = fr(v, n);
+    () => { const [n, f1, f2] = pk([[24, [1, 3], [3, 8]], [20, [2, 5], [1, 4]], [30, [2, 5], [1, 3]], [28, [3, 7], [1, 4]], [18, [4, 9], [1, 3]]] /* 26.11 : classe de 18 (et non 36) */), b = (n * f1[0]) / f1[1], p = (n * f2[0]) / f2[1], v = n - b - p, fv2 = fr(v, n);
       return X({ id: "fractout", lv: 1, titre: "Comment viens-tu à l'école ?",
         q: "Dans une classe de " + n + " élèves, " + M(ft(f1)) + " des élèves viennent en bus, " + M(ft(f2)) + " à pied et les autres à vélo.",
         parts: [{ label: "Combien d'élèves viennent en bus ? à pied ?", pts: 2 }, { label: "Combien viennent à vélo ?", pts: 1 }, { label: "Quelle fraction de la classe vient à vélo ? Simplifie-la.", pts: 1 }, { label: "Est-ce plus ou moins que le quart de la classe ? Justifie.", pts: 1 }],
@@ -825,7 +825,7 @@ const RICHU = (() => {
         chk: [[new Set(F3.map(fv)).size === 3, "distinctes"], [Math.abs(fv(S) - 1) > 1e-9, "pas égal à 1"]], vals: [fv(S)] }); },
     () => { let c; do { c = [R.int(9, 18), R.int(7, 14)]; c.push(40 - c[0] - c[1]); } while (c[2] < 5 || new Set(c).size < 3); const sp = ["football", "natation", "basket"], k = pk([5, 7, 11]), n2 = 24;
       return X({ id: "fracconv", lv: 2, titre: "Le sondage",
-        q: "On a demandé à 40 élèves leur sport préféré : " + sp.map((s, i) => c[i] + " ont choisi le " + s).join(", ") + ". Dans une autre classe de " + n2 + " élèves, " + k + " ont choisi le football.",
+        q: "On a demandé à 40 élèves leur sport préféré : " + sp.map((s, i) => c[i] + " ont choisi " + (s === "natation" ? "la " : "le ") + s).join(", ") + ". Dans une autre classe de " + n2 + " élèves, " + k + " ont choisi le football.",
         parts: [{ label: "Pour chaque sport, écris la fraction des 40 élèves (simplifiée), puis son écriture décimale et le pourcentage.", pts: 3 }, { label: "Écris " + M("\\frac{" + k + "}{" + n2 + "}") + " sous forme décimale (indique la période).", pts: 1 }, { label: "Dans quel groupe la part d'élèves qui préfèrent le football est-elle la plus grande ?", pts: 1 }],
         sol: ul([sp.map((s, i) => s + " : " + M("\\frac{" + c[i] + "}{40} = " + ft(fr(c[i], 40)) + " = " + N(c[i] / 40) + " = " + N(r6(c[i] * 2.5)) + "\\,\\%")).join(" ; ") + ".", M("\\frac{" + k + "}{" + n2 + "} = " + perDec(k, n2)) + "… (les chiffres sous la barre se répètent), soit environ " + N(Math.round((k / n2) * 1000) / 10) + " %.", (c[0] / 40 > k / n2 ? "Dans le premier groupe" : "Dans la deuxième classe") + " : " + N(c[0] / 40) + " " + (c[0] / 40 > k / n2 ? ">" : "<") + " " + N(Math.round((k / n2) * 1000) / 1000) + "…"]),
         chk: [[c[0] + c[1] + c[2] === 40, "total"], [Math.abs(c[0] / 40 - k / n2) > 1e-9, "comparaison"], [/overline/.test(perDec(k, n2)), "période"]], vals: c.map((x) => x / 40) }); },
