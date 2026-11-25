@@ -38,13 +38,13 @@ try {
   ok(same === 0, "formes reprises du sujet précédent : " + same);
   // 3. Accès : 11e seulement ; carte sous « Mon test » et dans « Progrès » (pas de 7e case sur l'accueil).
   homeTab = "today"; screenHome(); ok(document.querySelectorAll(".door").length === 6, "6 cases sur l'accueil");
-  homeTab = "prog"; screenHome(); ok(!!document.getElementById("evacom"), "carte dans Progrès");
+  homeTab = "prog"; screenHome(); ok(!document.getElementById("evacom"), "pas de carte dans Progrès (25.11)");
   homeTab = "test"; screenHome(); ok(!!document.getElementById("evacom"), "carte sous Mon test (sans test prévu)");
   state.prep = { ids: ["fracadd", "rel"], date: addDays(day(), 4) }; screenHome(); ok(!!document.getElementById("evacom"), "carte sous Mon test (test prévu)"); state.prep = null;
   const s10 = Engine.newState({ system: "CH", grade: 10, track: "college", minutes: 5 }), s11 = state; state = s10; ok(evacomCard() === "", "pas de parcours en 10e"); state = Object.assign(Engine.newState({ system: "CH", grade: 12, track: "college", minutes: 5 })); ok(evacomCard() === "", "pas de parcours en 1re"); state = s11;
   // 4. Sujet affiché à 360 px : pas de débordement.
   homeTab = "test"; screenHome(); document.getElementById("evacom").click();
-  ok(/EVACOM blanche/.test(app.textContent) && /95 minutes/.test(app.textContent) && /sans calculatrice/.test(app.textContent), "en-tête du sujet");
+  ok(/Évaluation bilan blanche/.test(app.textContent) && /95 minutes/.test(app.textContent) && /sans calculatrice/.test(app.textContent), "en-tête du sujet");
   ok(!/\bpts?\b|points?\)/.test(app.querySelector(".mock-part").textContent), "pas de barème affiché");
   ok(document.querySelectorAll(".mock-part").length === 2 && document.querySelectorAll(".mock-q").length === 14, "2 parties, 14 questions");
   let over = []; for (let k = 0; k < 20; k++) { screenEvacom(true); const W = document.body.getBoundingClientRect().right;

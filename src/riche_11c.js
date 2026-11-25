@@ -583,7 +583,7 @@ const EVACOM = (function () {
   function build(it) { R.seed(it.seed); const q = SLOTS[it.s].forms[it.f](); return Object.assign({ p: SLOTS[it.s].p, slot: it.s }, q); }
   return { SLOTS, plan, build, QC };
 })();
-// Écrans du parcours EVACOM. Entrée : onglet « Mon test » ou « Progrès » (pas de case sur l'accueil : règle des 6 cases).
+// Écrans du parcours EVACOM. Entrée : case « Évaluation » (22.11 ; plus dans Progrès depuis le 25.11) (pas de case sur l'accueil : règle des 6 cases).
 // state.evacom = { items: [{ s, f, seed }], date, done: { date, marks, n, juste, partie, faux } | null, runs: [{ date, n, juste, partie, faux }] }.
 let evcBack = "test";
 function evacomOk() { return !!(typeof state !== "undefined" && state && state.profile && state.profile.system === "CH" && +state.profile.grade === 11); }
@@ -600,7 +600,7 @@ function evacomCard() {
   if (!evacomOk()) return "";
   if (!EVACOM_OUVERT && location.protocol === "https:" && !(typeof isAuthor === "function" && isAuthor())) return "";
   const E = state.evacom, last = E && E.runs && E.runs.length ? E.runs[E.runs.length - 1] : null, open = E && E.items && !E.done;
-  return `<div class="card flat stack evc-card"><div class="eyebrow">🎓 EVACOM de 11e · épreuve de fin mai</div><h3>Sujet blanc d'EVACOM</h3>
+  return `<div class="card flat stack evc-card"><div class="eyebrow">🎓 Évaluation bilan de 11e · fin d'année</div><h3>Sujet blanc d'évaluation bilan</h3>
     <p class="small muted">95 minutes au format de l'épreuve cantonale : partie 1 sans calculatrice, partie 2 avec. Un nouveau sujet à chaque fois, un corrigé détaillé, puis ce qu'il te reste à retravailler.</p>
     <button class="btn-sec" id="evacom">📝 ${open ? "Reprendre mon sujet blanc" : "Faire un sujet blanc"}</button>
     ${last ? `<p class="small muted">Dernier sujet blanc : ${last.juste} question${last.juste > 1 ? "s" : ""} juste${last.juste > 1 ? "s" : ""} sur ${last.n}${E.done ? ` · <button type="button" class="btn-ghost small" id="evcbilan">voir le bilan</button>` : ""}</p>` : ""}</div>`;
@@ -613,7 +613,7 @@ function screenEvacom(fresh) {
   const qHtml = (x, k) => `<div class="mock-q"><b>Question ${k + 1} · ${x.titre}</b>${x.q ? `<div>${x.q}</div>` : ""}${x.fig ? `<div class="figwrap">${x.fig}</div>` : ""}
     ${x.parts && x.parts.length ? `<ol type="a" class="mock-parts">${x.parts.map((p) => `<li>${p}<div class="mock-space"></div></li>`).join("")}</ol>` : '<div class="mock-space"></div>'}</div>`;
   const part = (p) => qs.map((x, k) => (x.p === p ? qHtml(x, k) : "")).join("");
-  h(`<div class="mock-head">${brand}<div class="eyebrow">Sujet blanc · EVACOM de 11e · 95 minutes</div><h2>EVACOM blanche</h2>
+  h(`<div class="mock-head">${brand}<div class="eyebrow">Sujet blanc · évaluation bilan de 11e · 95 minutes</div><h2>Évaluation bilan blanche</h2>
   <p class="small muted">Partie 1 : 50 min, sans calculatrice · Partie 2 : 45 min, calculatrice autorisée</p></div>
   <div class="card flat"><ul class="small evc-rules"><li>Fais-le sur une feuille, en temps réel, sans regarder tes cours : à l'épreuve, <b>pas d'aide-mémoire</b>, les formules doivent être sues. Matériel : une règle graduée.</li>
     <li>Les raisonnements et les calculs doivent figurer sur la feuille ; les fausses égalités et les erreurs d'écriture sont sanctionnées.</li>
@@ -632,7 +632,7 @@ function screenEvacom(fresh) {
 }
 function screenEvacomCorr() {
   const qs = evacomQs(), marks = qs.map(() => null);
-  h(`${brand}<div class="eyebrow">EVACOM blanche · corrigé</div><h2>Corrige-toi</h2>
+  h(`${brand}<div class="eyebrow">Évaluation bilan blanche · corrigé</div><h2>Corrige-toi</h2>
   <p class="small muted">Compare avec ta feuille, question par question. <b>À moitié</b> : la démarche est juste mais il y a une erreur de calcul, ou il manque une justification, une unité, l'arrondi demandé.</p>
   <div class="mock-list">${qs.map((x, i) => `${i === 0 || qs[i - 1].p !== x.p ? `<h3>${x.p === 1 ? "Partie 1 · sans calculatrice" : "Partie 2 · calculatrice"}</h3>` : ""}<div class="mock-q card flat"><b>Question ${i + 1} · ${x.titre}</b>
     ${x.q ? `<div class="small">${x.q}</div>` : ""}
@@ -664,10 +664,10 @@ function screenEvacomResult() {
   const ids = Object.keys(by).filter((id) => NOTIONS.find((m) => m.id === id));
   const ok = ids.filter((id) => by[id].every((m) => m === 1)), weak = ids.filter((id) => by[id].some((m) => m < 1)).sort((a, b) => Math.min(...by[a]) - Math.min(...by[b]));
   const pp = (p) => { const L0 = qs.map((x, i) => (x.p === p ? mk[i] : null)).filter((m) => m !== null); return `<b>${L0.filter((m) => m === 1).length}</b> sur ${L0.length}`; };
-  h(`${brand}<div class="eyebrow">EVACOM blanche · bilan</div><h2>Où tu en es</h2>
+  h(`${brand}<div class="eyebrow">Évaluation bilan blanche · résultats</div><h2>Où tu en es</h2>
   <div class="card stack"><p><b>${E.done.juste}</b> question${E.done.juste > 1 ? "s" : ""} juste${E.done.juste > 1 ? "s" : ""} sur ${n}${E.done.partie ? ` · <b>${E.done.partie}</b> à moitié` : ""}${E.done.faux ? ` · <b>${E.done.faux}</b> à revoir` : ""}</p>
     <p class="small">Partie 1 (sans calculatrice) : ${pp(1)} · Partie 2 (calculatrice) : ${pp(2)}</p>
-    <p class="small muted">Ce n'est pas une note : c'est pour savoir quoi travailler d'ici l'EVACOM.</p></div>
+    <p class="small muted">Ce n'est pas une note : c'est pour savoir quoi travailler d'ici l'évaluation bilan.</p></div>
   ${weak.length ? `<div class="card flat stack"><h3>À retravailler</h3><ul class="evc-weak">${weak.map((id) => `<li><span>${esc(nLabel(id))}</span>${typeof LESSONS !== "undefined" && LESSONS[id] ? `<button type="button" class="btn-ghost small evc-les" data-id="${id}">📖 Rappel</button>` : ""}</li>`).join("")}</ul>
     <button class="btn-primary" id="rev">Réviser ces notions maintenant</button></div>` : '<div class="card flat"><p>Tout est juste : bravo ! Refais un sujet blanc dans quelques jours pour le garder.</p></div>'}
   ${ok.length ? `<div class="card flat"><h3>✓ Acquis</h3><ul>${ok.map((id) => `<li>${esc(nLabel(id))}</li>`).join("")}</ul></div>` : ""}
