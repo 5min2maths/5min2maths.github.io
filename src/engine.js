@@ -92,6 +92,9 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
   condbayes: ["proba"], varalea: ["proba"], binomiale: ["varalea"],
   // 25.11 (agent col34) : 3e–4e Collège complétées (derivth, pvect ; syslin, bases, bayes ; MA2 : complexes, suites et séries)
   derivth: ["continuite", "nbderive"], pvect: ["pscal3d"], syslin: ["matrices"], bases: ["matrices", "vect3d"], bayes: ["condbayes"],
+  // 25.11 (agent trous) : derniers savoir-faire calculables (src/ch4c_trous.js, ch1c_trous.js, ch11_rep3d.js, fr_trous.js)
+  geoesp: ["pythfig", "trigo"], densite: ["integrale", "varalea"], approxnorm: ["binomiale", "normale"], graphefct: ["fimg"], ineqgraph: ["ineqpoly", "inter"],
+  repere3d: ["pythfig", "vol"], cercle6: ["disque"], bissec6: ["angtri"], filtre6: ["diagr"], tabform5: ["valnum"], hauteurs5: ["aire1"],
   cplxalg: ["eq2disc"], cplxtrig: ["cplxalg", "trigexact"], cplxeq: ["cplxtrig", "eq2disc"], suitegeom: ["expo", "log"], serie: ["suitegeom", "limitinf"],
   intparties: ["integrale", "derivprodquot"], intsubst: ["integrale", "derivcomp"], etudelnexp: ["lnexp", "variations"], eqdiff: ["croissance", "primitives"],
   // 24.11 (agent niv1c) : 1re Collège, chapitre Argumenter (src/ch1c_arg.js) ; divcrit et tradexpr deviennent des prérequis

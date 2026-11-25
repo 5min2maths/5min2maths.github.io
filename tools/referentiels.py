@@ -66,7 +66,7 @@ MAP = {
     "ineq2": {"MATU": r"1\.FO\.09d|2\.AL\.04b"},
     "racinv": {"MATU": r"1\.FO\.10c|1\.FO\.11[ab]"},
     "euclide": {"MATU": r"1\.GE\.03e", "MP": r"S2\.GE\.07"},
-    "droitesrem": {"MATU": r"1\.GE\.04[bc]", "MP": r"S2\.GE\.02"},
+    "droitesrem": {"MATU": r"1\.GE\.04[bcd]", "MP": r"S2\.GE\.02"},  # 25.11 (agent trous) : 04d, problèmes
     "trigo": {"MATU": r"1\.GE\.05[abcd]|1\.GE\.06a", "MP": r"S2\.TR\."},
     "polydiv": {"MATU": r"2\.AL\.01[abc]"},
     "polyfact": {"MATU": r"2\.AL\.01[de]|2\.FO\.04a"},
@@ -86,6 +86,13 @@ MAP = {
     "droites": {"MATU": r"2\.GE\.03[bc]|1\.FO\.06c", "MP": r"S3\.FA\.0[34]"},
     "cercle": {"MATU": r"2\.GE\.04[ab]|2\.GE\.05a"},
     "stats": {"MP": r"S4\.AD\.0[57]"},
+    # 25.11 (agent trous) : derniers savoir-faire calculables (src/ch4c_trous.js, ch1c_trous.js, ch11_rep3d.js)
+    "graphefct": {"MATU": r"1\.FO\.02c"},
+    "ineqgraph": {"MATU": r"2\.AL\.04e"},
+    "geoesp": {"MATU": r"4\.GV\.04[a-d]"},
+    "densite": {"MATU": r"4\.PS\.03e"},
+    "approxnorm": {"MATU": r"4\.PS\.04d"},
+    "repere3d": {"CO": r"11ES1\.05"},
 }
 # Compétences qui ne se prêtent pas à une réponse saisie (constructions, dessins, démonstrations…)
 HORS = re.compile(r"Énoncer|Esquisser|Maîtriser une démonstration|Justifier|Représenter|Connaître le vocabulaire|construire|réaliser|représenter|tracer|croquis|dessin|développement d|reconnaître, nommer|démonstration|Démontrer|placer|calculatrice|livrets|vocabulaire|justifier|prouver|expérience|illustrer|Représenter|Maîtriser une démonstration|mesurer et construire", re.I)
@@ -157,7 +164,8 @@ SESA = {"M1C01": "1. Nombres", "M1C02": "2. Ensembles", "M1C03": "3. Argumenter"
         # 23.11 : 3e et 4e du Collège (Sésamath Ma3, Ma4 ; tools/programme_3e_4e_college.md)
         "M3C01": "1. Prérequis", "M3C02": "2. Limites et continuité", "M3C03": "3. Dérivation", "M3C04": "4. Dérivation (théorie)",
         "M3C05": "5. Combinatoire et probabilités", "M3C06": "6. Géométrie vectorielle",
-        "M4C01": "1. Intégration", "M4C02": "2. Logarithme et exponentielle", "M4C03": "3. Algèbre linéaire", "M4C04": "4. Probabilités et statistique"}
+        "M4C01": "1. Intégration", "M4C02": "2. Logarithme et exponentielle", "M4C03": "3. Algèbre linéaire", "M4C04": "4. Probabilités et statistique",
+        "M4C05": "5. Nombres complexes", "M4C06": "6. Suites et séries", "M4C07": "7. Géométrie dans l'espace"}  # 25.11 (agent trous) : M4C07, sujet à choix MA1
 # Chapitre imposé : notions sans ligne Sésamath (reprises du CO en 1re) ou dont le premier chapitre trouvé n'est pas le bon.
 # 24.11 (audit de niveau 1re, tools/niveau_1c.md) : rac, racenc, pct, scicalc, divcrit, tradexpr (niveau 9e–10e) ne sont plus des
 # notions de 1re (révisions du CO) ; Nombres de 1re = racprop, ratden, fracper en plus ; Argumenter = tradalg, contrex, demoalg, implication.
@@ -167,7 +175,8 @@ SESA_FIX = {"rel": "M1C01", "fracops": "M1C01", "puiss": "M1C01", "sci": "M1C01"
             "trigeq2": "M2C09", "absval": "M2C06", "ineq": "M1C05", "droites": "M2C01", "modexp": "M2C05",
             # notions ajoutées le 13.11 d'après les cours pinkmaths 2026-27
             "sysineq": "M1C05", "ineqfrac": "M2C04", "eqirr": "M1C07", "morceaux": "M2C06", "transf": "M1C04", "trigrel": "M1C10",
-            "expfrac": "M2C05", "vecteurs": "M2C10"}
+            "expfrac": "M2C05", "vecteurs": "M2C10",
+            "geoesp": "M4C07", "densite": "M4C04", "approxnorm": "M4C04", "ineqgraph": "M2C03"}  # 25.11 (agent trous)
 
 # Notions enseignées sur deux années (cours réels du Collège, ex. pinkmaths 2026-27) : chapitre de 1re en plus du chapitre principal.
 # 24.11 (audit niv2c) : ineq et trigrel retirés (notions de 1re ; en 2e : ineqpoly, ineqfrac, trigassoc).

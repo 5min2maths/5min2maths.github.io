@@ -86,16 +86,19 @@ Code des compétences : référentiel matu (`3.AN.03a` = 3e, analyse, groupe 03,
 | 4. Probabilités 2 | `probcond` — probabilité conditionnelle, probabilités totales, indépendance | N+R | 4.PS.02a–c | **rattachée** : `condbayes` (conditionnelles, totales, indépendance ; id ≠ `probcond` du lycée français) |
 | | `bayes` — théorème de Bayes | N+R | 4.PS.02d | **créée le 25.11** (`bayes`, notion séparée de `condbayes` : trois causes, effectifs, deux tests, prévalence) |
 | | `varalea` — loi, espérance, variance d'une variable discrète | N+R | 4.PS.03a, 03b | **créée** (`varalea`) |
+| | **`densite`** — variables continues : densité, constante, lois uniforme et exponentielle, espérance, variance, médiane | **R** | 4.PS.03e | **créée le 25.11** (agent trous, R) |
 | | `binomiale` — schéma de Bernoulli, loi binomiale, E et V | N+R | 4.PS.03c, 03d | **créée** (`binomiale`) |
 | | `normale` — loi normale, centrer-réduire, intervalles 68–95–99,7 % | N+R | 4.PS.04a–c (04d : R) | **créée** (`normale`) |
+| | **`approxnorm`** — approximation de la binomiale par la normale, correction de continuité (table de Φ dans l'énoncé) | **R** | 4.PS.04d | **créée le 25.11** (agent trous, R) |
 | | `stats` (existe, MP seulement) + `quartiles` (MP) → ouvrir au Collège | N+R | 4.PS.01a–d | **remplacées** par `statdesc` (25.11, audit : `stats` et `quartiles` = niveau CO, retirées du Collège, MP inchangée) |
 | Av1 Complexes | `cplxalg` — forme algébrique, opérations, conjugué, division | **R** | 4.NC.01a–c | **créée le 25.11** (R) |
 | | `cplxtrig` — module, argument, formes trigonométrique et exponentielle, Moivre | **R** | 4.NC.02a–d | **créée le 25.11** (R) |
 | | `cplxeq` — az² + bz + c = 0, racines n-ièmes ; lieux |z − a| = r | **R** | 4.NC.03a–c, 04a–b | **créée le 25.11** (R) |
 | Av3 Suites et séries | `suitearith`, `suitegeom` — terme général, somme ; `serie` — série géométrique, intérêts | **R** | 4.AN.10a–d | **créées le 25.11** (R) : `suitegeom` (arithmétiques et géométriques, notion suisse ; `suitearith` reste au profil France), `serie` (géométriques, d'Alembert, télescopiques, Mac-Laurin) |
+| 7. Géométrie dans l'espace (sujet à choix MA1) | **`geoesp`** — diagonales, volumes, perspective cavalière, angles dans un solide, sections planes (nature, dimensions), tronc de cône, angle entre deux faces | N (gardé MA2 aussi) | 4.GV.04a–d | **créée le 25.11** (agent trous ; nouveau chapitre M4C07) |
 | | `taylor` — critères de convergence, rayon, Taylor / Mac-Laurin | **R** | 4.AN.11a–c (peu saisissable) | en partie dans `serie` (d'Alembert, coefficients de Mac-Laurin) ; rayon de convergence : non |
 
-Hors saisie (démonstrations, constructions) : 3.AN.05e (démontrer), 3.AN.09b–c, 3.GV.06 (partie preuve), 4.AN.03b, 4.GV.02f, 4.PS.02e, 4.NC.04c, 4.GV.04a–b (perspective, sections) : à traiter par la leçon (« pourquoi ») et les questions curieuses, pas par des questions à réponse tapée.
+Hors saisie (démonstrations, constructions) : 3.AN.05e (démontrer), 3.AN.09b–c, 3.GV.06 (partie preuve), 4.AN.03b, 4.GV.02f, 4.PS.02e, 4.NC.04c : à traiter par la leçon (« pourquoi ») et les questions curieuses, pas par des questions à réponse tapée.
 
 ## 4. Correspondance avec l'app
 
@@ -202,3 +205,26 @@ Notions ajoutées : 3e `derivth` (M3C04), `pvect` (M3C06, MA2) ; 4e `syslin`, `b
 Notions de l'année (avant → après) : 3e MA1 24 → 33 (dont 25 nouvelles et 8 reprises) ; 3e MA2 26 → 36 (28 nouvelles) ; 4e MA1 15 → 18 ; 4e MA2 18 → 26.
 
 Niveau MA1 / MA2 relu (programme 2021, oraux Sismondi) : asymptotes obliques = MA2 (formes écartées en MA1 par `HORS_MA1`) ; `appllin` et `bases` sont des « sujets à choix » en MA1 (gardés N : à trancher) ; suites et séries et complexes : Sismondi les place en 3e MA2, l'app en 4e (décision § 6.2).
+
+
+## 8. Bilan du 25.11 (agent trous) : derniers savoir-faire calculables
+
+- 4e : `geoesp` (4.GV.04a–d, chapitre M4C07 « 7. Géométrie dans l'espace ») : diagonales de pavé et de cube, volume par
+  l'apothème, perspective cavalière (coefficient de réduction), angles diagonale-base, arête-base, face-base, sections
+  d'un cube (triangle BDE, rectangle diagonal, hexagone régulier), section parallèle d'une pyramide, tronc de cône. Les
+  propriétés de perspective et la nature des sections, jusqu'ici classées « hors saisie », sont devenues calculables
+  (dimensions et aires). Programme 2021 : « notions de géométrie dans l'espace » = sujet à choix de MA1 ; gardée N (visible
+  aussi en MA2, comme `appllin` et `bases`) : **à trancher**.
+- 4e MA2 (niv R) : `densite` (4.PS.03e) et `approxnorm` (4.PS.04d), chapitre M4C04. Approximation normale : valeurs de Φ
+  données dans l'énoncé (style table), σ ∈ {2,5 ; 5 ; 10} pour des z à deux décimales ; la calculatrice TI-30X Plus donne
+  les mêmes valeurs.
+- 1re : `graphefct` (1.FO.02c, M1C04) ; `droitesrem` étendue à 1.GE.04d (problèmes : isocèle et centre de gravité,
+  orthocentre, point de la médiatrice).
+- 2e : `ineqgraph` (2.AL.04e, M2C03) : lecture graphique de f(x) ≷ 0, ≷ k, ≷ g(x), asymptote, zéro double, encadrement,
+  intersection à calculer.
+- 4e MA2 et Tle française : `eqdiff` + y' = ay + f (solution particulière donnée, affine, exponentielle).
+- CO 11e : `repere3d` (11ES1.05, chapitre 11C03).
+- Couverture (`tools/referentiels.py`, lancé sur une copie) : MATU 1re–2e 156 → 159 / 176 (0 à traiter) ; CO 220 → 221 / 245
+  (0 à traiter). En 3e–4e, 4.GV.04a–d, 4.PS.03e et 4.PS.04d sont désormais rattachées.
+- Fichiers : `src/trx.js` (outils communs), `src/ch4c_trous.js`, `src/ch1c_trous.js`, `src/ch11_rep3d.js` ; tests
+  `tests/trous.html`, `tests/act_trous.html`.
