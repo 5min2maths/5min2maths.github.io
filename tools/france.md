@@ -299,3 +299,23 @@ juin 2027, sans toucher aux classes genevoises. La terminale (étape 7) double p
 4. **Construire la Tle** (≈ 14 demi-journées d'agent, après le niveau FR et les automatismes).
 Restent ouvertes : 3 (filtre ou variantes pour le vocabulaire), 5 (statistiques : moins de 15 ans, hébergement UE,
 responsable), 6 (positionnement et diffusion), 7 (testeurs), 8 (domaine propre).
+
+## Couverture recalculée et manques comblés (25.11, branche `agent/frcouv`)
+
+Détail attendu par attendu : `tools/france_couverture.md` (script `tools/france_couverture.py`). Taux = (✅ + ½ ◐) / attendus
+saisissables, sur le catalogue réel d'un profil français.
+
+| Classe | Avant | Après | Ce qui a changé |
+|---|---|---|---|
+| 6e | 77 % | 77 % | rien (manques : probabilités, symétrie axiale, médiatrice — voir « Ce qui reste ») |
+| 5e | 90 % | 90 % | rien |
+| 4e | 96 % | 96 % | `cos4e` (cosinus seul, 2019) et `thales4e` (triangles emboîtés) : les attendus étaient « couverts » par des notions de 3e qui mélangeaient les cas |
+| 3e | 89 % | 94 % | `linfn`, `autodnb` (partie 1 du DNB), `vecgeo` et `ineq1` (programme 2026, fin d'année), `proba2` rattachée ; niveau 1 relevé (`UPFR`) |
+| 2nde | 95 % | 95 % | `tabvar` (tableaux de variations), `probaxiomes`, y = mx + p ; niveau 1 des automatismes relevé |
+| 1re | 70 % | 95 % | dérivation (8 notions de la 3e du Collège), `expderiv`, `trigrad` (radians), `droitenorm`, probabilités ; 10 notions suisses retirées (`sinlaw`, `recip`, `expo`, degrés, `log`…) ; automatismes de l'épreuve anticipée repris |
+| Tle | 20 % | 91 % | 28 notions de 3e–4e du Collège rattachées (limites, continuité, convexité, ln/exp, primitives, intégrales, équations différentielles, espace, dénombrement) + `lnfr`, `trigfr`, `tvi`, `sommeva`, `recurrence` |
+
+Mécanismes ajoutés (sans effet pour un profil suisse, contrôlé par `tests/france.html` : mêmes catalogues 9e–11e, Collège,
+MP qu'avant) : `HORS_FR` (formes d'une notion partagée hors programme d'une classe française), `UPFR` (niveau minimal des
+notions reprises en 4e, 3e, 2nde, 1re), champ `q.fr` (forme réservée à des classes françaises), dans `src/engine.js` ;
+tables dans `src/fr_couv.js`.
