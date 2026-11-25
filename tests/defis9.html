@@ -1,0 +1,36 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css">
+<style>body{margin:0}#app{width:360px;max-width:360px;box-sizing:border-box}</style>
+<main id="app"></main><pre id="out">en cours</pre>
+<script>if (/shot=/.test(location.search)) { window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "global" } }; document.write('<script src="../docs/vendor/mathjax/tex-svg.js"><\/script>'); } else window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}
+/* Aucun envoi réseau depuis l'espace parent : fetch et sendBeacon espionnés. */
+window.__net = []; const _f = window.fetch; window.fetch = (...a) => { window.__net.push(String(a[0])); return Promise.resolve(new Response("{}")); };
+if (navigator.sendBeacon) navigator.sendBeacon = (u) => { window.__net.push(String(u)); return true; };
+window.__packs = []; window.ensurePacks = (p) => { window.__packs.push(JSON.stringify(p)); return Promise.resolve(); };
+</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/defis_9.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch2c.js"></script><script src="../src/fr_college.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/parents.js"></script><script src="../src/app.js"></script>
+<script>
+// Défis propres à la 9e (25.11, src/defis_9.js) : 21 notions, 40 tirages chacune ; valeurs finies, non triviales,
+// réponses distinctes, solution présente ; réservés à la 9e (pas en 11e) ; Engine.make niveau 4 en 9e = un défi PROBX.
+const fails = [], ok = (c, m) => { if (!c) fails.push(m); }, log = [];
+try {
+  const ids = Object.keys(PROBX).filter((id) => PROBX[id].some((f) => { const p = f(); return p.co && p.co.length === 1 && p.co[0] === 9; }));
+  ok(ids.length >= 21, "notions avec défi de 9e : " + ids.length);
+  for (const id of ids) {
+    for (let s = 1; s <= 40; s++) {
+      const q = Engine.build(id, 4, s);
+      ok(q && q.parts && q.parts.length >= 2 && q.q && q.sol && q.hints && q.hints.length, id + " " + s + " : structure");
+      const vs = q.parts.map((p) => p.spec.value);
+      ok(vs.every((v) => Number.isFinite(v)), id + " " + s + " : valeur non finie " + vs);
+      ok(vs.every((v) => v !== 0 && v !== 1), id + " " + s + " : valeur triviale " + vs);
+      ok(!/undefined|NaN|Infinity/.test(q.q + q.sol + q.parts.map((p) => p.label).join()), id + " " + s + " : texte « undefined/NaN »");
+      ok(Engine.fromCode(q.code).q === q.q, id + " " + s + " : code reproductible");
+    }
+    const s9 = Engine.newState({ system: "CH", grade: 9, track: "college", minutes: 5 }), s11 = Engine.newState({ system: "CH", grade: 11, track: "college", minutes: 5 });
+    const q9 = Engine.make(s9, id, 4), q11 = Engine.make(s11, id, 4);
+    ok(q9.co && q9.co[0] === 9, id + " : en 9e, le niveau 4 est un défi de 9e");
+    ok(!(q11.co && q11.co.includes(9)), id + " : pas de défi de 9e en 11e");
+  }
+  log.push(ids.length + " notions × 40 tirages");
+} catch (e) { fails.push("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }
+document.getElementById("out").textContent = fails.length ? "ÉCHEC " + fails.slice(0, 15).join("\n") : "ok défis 9e : " + log.join(" | ");
+</script>

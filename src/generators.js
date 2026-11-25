@@ -901,5 +901,5 @@ const PROB_EXTRA = {
   }],
 };
 const probList = (id) => [...(PROB[id] ? [PROB[id]] : []), ...(PROB_EXTRA[id] || [])];
-const hasProb = (id) => probList(id).length > 0;
+const hasProb = (id) => probList(id).length > 0 || (typeof PROBX !== "undefined" && !!(PROBX[id] && PROBX[id].length)); /* 25.11 : défis PROBX seuls (9e, src/defis_9.js) */
 const probFor = (id) => R.pick(probList(id));
