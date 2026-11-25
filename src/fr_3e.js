@@ -188,7 +188,7 @@
   const AD = {
     1: [
       () => { const [a, b] = pk([[2, 3], [3, 4], [1, 6], [5, 6], [3, 8], [2, 5]]), [c, d] = pk([[5, 6], [1, 4], [2, 9], [3, 10], [1, 12]]), [e, f] = pk([[3, 5], [2, 3], [4, 3], [6, 5], [3, 2]]), v = a / b + (c / d) * (e / f);
-        if (FRX.den(v) > 60) return null;
+        { const dv = FRX.den(v); if (!dv || dv > 60) return null; }
         return QN(SC + "calcule " + M(fr(a, b) + " + " + fr(c, d) + X + fr(e, f)) + ". Donne le résultat sous forme de fraction irréductible.", v,
           "La multiplication d'abord : " + M(fr(c, d) + X + fr(e, f) + " = " + F((c * e) / (d * f))) + ", puis " + M(fr(a, b) + " + " + F((c * e) / (d * f)) + " = " + F(v)) + ".",
           { ctx: "fractions", guide: [GR("Produit " + M(fr(c, d) + X + fr(e, f)) + " ?", (c * e) / (d * f), M(F((c * e) / (d * f))) + "."), GR("Résultat ?", v, M(F(v)) + ".")],
@@ -232,7 +232,7 @@
     ],
     3: [
       () => { const [a, b] = pk([[2, 3], [3, 4], [3, 2], [4, 5], [5, 3]]), [c, d] = pk([[9, 4], [16, 9], [4, 9], [25, 16], [9, 25]]), [e, f] = pk([[1, 2], [1, 3], [5, 6], [3, 4]]), v = (a * a) / (b * b) * (c / d) - e / f;
-        if (FRX.den(v) > 40 || Math.abs(v) < 1e-9) return null;
+        { const dv = FRX.den(v); if (!dv || dv > 40 || Math.abs(v) < 1e-9) return null; }
         return QN(SC + "calcule " + M("\\left(" + fr(a, b) + "\\right)^2" + X + fr(c, d) + " - " + fr(e, f)) + ". Donne le résultat sous forme de fraction irréductible.", v,
           M("\\left(" + fr(a, b) + "\\right)^2 = " + fr(a * a, b * b)) + ", " + M(fr(a * a, b * b) + X + fr(c, d) + " = " + F((a * a * c) / (b * b * d))) + ", puis " + M(F((a * a * c) / (b * b * d)) + " - " + fr(e, f) + " = " + F(v)) + ".",
           { ctx: "fractions-puissances", guide: [GR(M("\\left(" + fr(a, b) + "\\right)^2") + " ?", (a * a) / (b * b), M(fr(a * a, b * b)) + "."), GR("Produit ?", (a * a * c) / (b * b * d), M(F((a * a * c) / (b * b * d))) + "."), GR("Résultat ?", v, M(F(v)) + ".")],
