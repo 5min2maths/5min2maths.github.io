@@ -2600,7 +2600,8 @@
   "plan": "S1.CN.10 (*) : fraction irréductible",
   "etalon": "tools/niveau_mp12.md § 2, E-CN-1",
   "audit": "25.11.2026",
-  "verdict": "à valider"
+  "verdict": "à valider",
+  "defi": "propre à la 9e (src/defis_9.js, 25.11)"
  },
  "eqparam": {
   "classe": "MP 1re",
@@ -2628,14 +2629,16 @@
   "plan": "9C01 · Écritures décimale et fractionnaire",
   "etalon": "tools/niveau_910.md § 2, chapitre 1 (9e)",
   "audit": "25.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "defi": "propre à la 9e (src/defis_9.js, 25.11)"
  },
  "deccomp": {
   "classe": "9e",
   "plan": "9C01 · Écritures décimale et fractionnaire",
   "etalon": "tools/niveau_910.md § 2, chapitre 1 (9e)",
   "audit": "25.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "defi": "propre à la 9e (src/defis_9.js, 25.11)"
  },
  "decarr": {
   "classe": "9e",
@@ -2663,7 +2666,8 @@
   "plan": "9C01 · Écritures décimale et fractionnaire",
   "etalon": "tools/niveau_910.md § 2, chapitre 1 (9e)",
   "audit": "25.11.2026",
-  "verdict": "à valider"
+  "verdict": "à valider",
+  "defi": "propre à la 9e (src/defis_9.js, 25.11)"
  },
  "decmul": {
   "classe": "9e",
@@ -2691,28 +2695,32 @@
   "plan": "9C01 · Écritures décimale et fractionnaire",
   "etalon": "tools/niveau_910.md § 2, chapitre 1 (9e)",
   "audit": "25.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "propre à la 9e (src/defis_9.js, 25.11)"
  },
  "ulong": {
   "classe": "9e",
   "plan": "9C02 · Unités et mesures",
   "etalon": "tools/niveau_910.md § 2, chapitre 2 (9e)",
   "audit": "25.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "propre à la 9e (src/defis_9.js, 25.11)"
  },
  "uaire": {
   "classe": "9e",
   "plan": "9C02 · Unités et mesures",
   "etalon": "tools/niveau_910.md § 2, chapitre 2 (9e)",
   "audit": "25.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "propre à la 9e (src/defis_9.js, 25.11)"
  },
  "uvol": {
   "classe": "9e",
   "plan": "9C02 · Unités et mesures",
   "etalon": "tools/niveau_910.md § 2, chapitre 2 (9e)",
   "audit": "25.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "propre à la 9e (src/defis_9.js, 25.11)"
  },
  "utemps": {
   "classe": "9e",
@@ -2726,7 +2734,8 @@
   "plan": "9C03 · Géométrie du plan",
   "etalon": "tools/niveau_910.md § 2, chapitre 3 (9e)",
   "audit": "25.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "propre à la 9e (src/defis_9.js, 25.11)"
  },
  "quadri": {
   "classe": "9e",
@@ -2747,28 +2756,32 @@
   "plan": "9C05 · Aires et périmètres",
   "etalon": "tools/niveau_910.md § 2, chapitre 5 (9e)",
   "audit": "25.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "defi": "propre à la 9e (src/defis_9.js, 25.11)"
  },
  "aire1": {
   "classe": "9e",
   "plan": "9C05 · Aires et périmètres",
   "etalon": "tools/niveau_910.md § 2, chapitre 5 (9e)",
   "audit": "25.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "defi": "propre à la 9e (src/defis_9.js, 25.11)"
  },
  "aire2": {
   "classe": "9e",
   "plan": "9C05 · Aires et périmètres",
   "etalon": "tools/niveau_910.md § 2, chapitre 5 (9e)",
   "audit": "25.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "propre à la 9e (src/defis_9.js, 25.11)"
  },
  "aire3": {
   "classe": "9e",
   "plan": "9C05 · Aires et périmètres",
   "etalon": "tools/niveau_910.md § 2, chapitre 5 (9e)",
   "audit": "25.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "propre à la 9e (src/defis_9.js, 25.11)"
  },
  "relrep": {
   "classe": "9e",
@@ -2789,56 +2802,64 @@
   "plan": "9C07 · 3D (ES et GM)",
   "etalon": "tools/niveau_910.md § 2, chapitre 7 (9e)",
   "audit": "25.11.2026",
-  "verdict": "remonté"
+  "verdict": "remonté",
+  "defi": "propre à la 9e (src/defis_9.js, 25.11)"
  },
  "volpave": {
   "classe": "9e",
   "plan": "9C07 · 3D (ES et GM)",
   "etalon": "tools/niveau_910.md § 2, chapitre 7 (9e)",
   "audit": "25.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "propre à la 9e (src/defis_9.js, 25.11)"
  },
  "fracrep": {
   "classe": "9e",
   "plan": "9C08 · Écriture fractionnaire dans ℚ⁺",
   "etalon": "tools/niveau_910.md § 2, chapitre 8 (9e)",
   "audit": "25.11.2026",
-  "verdict": "à valider"
+  "verdict": "à valider",
+  "defi": "propre à la 9e (src/defis_9.js, 25.11)"
  },
  "fractout": {
   "classe": "9e",
   "plan": "9C08 · Écriture fractionnaire dans ℚ⁺",
   "etalon": "tools/niveau_910.md § 2, chapitre 8 (9e)",
   "audit": "25.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "propre à la 9e (src/defis_9.js, 25.11)"
  },
  "proptab": {
   "classe": "9e",
   "plan": "9C09 · Proportionnalité",
   "etalon": "tools/niveau_910.md § 2, chapitre 9 (9e)",
   "audit": "25.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "propre à la 9e (src/defis_9.js, 25.11)"
  },
  "prop": {
   "classe": "9e",
   "plan": "9C09 · Proportionnalité",
   "etalon": "tools/niveau_910.md § 2, chapitre 9 (9e)",
   "audit": "25.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "propre à la 9e (src/defis_9.js, 25.11)"
  },
  "change": {
   "classe": "9e",
   "plan": "9C09 · Proportionnalité",
   "etalon": "tools/niveau_910.md § 2, chapitre 9 (9e)",
   "audit": "25.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "propre à la 9e (src/defis_9.js, 25.11)"
  },
  "agrand": {
   "classe": "9e",
   "plan": "9C09 · Proportionnalité",
   "etalon": "tools/niveau_910.md § 2, chapitre 9 (9e)",
   "audit": "25.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "defi": "propre à la 9e (src/defis_9.js, 25.11)"
  },
  "symetries": {
   "classe": "9e",
