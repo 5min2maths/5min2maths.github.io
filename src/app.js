@@ -1107,23 +1107,11 @@ function bindNowCard() {
   if (y) y.onclick = () => { state.now.since = day(); save(); screenHome(); };
 }
 // 25.11 (doute de l'enseignant : « l'élève est-il capable de dire ce qu'il travaille en classe ? cocher des notions n'est
-// pas accessible à tous ») : on devine le chapitre d'après la période de l'année (1), l'élève confirme d'un geste ; sinon il
-// reconnaît son chapitre à un exercice typique (2) plutôt qu'à un nom. Le choix notion par notion reste en « avancé ».
+// pas accessible à tous ») : l'élève reconnaît son chapitre à un exercice typique plutôt qu'à un nom. Pas de devinette
+// d'après la date (25.11, l'enseignant : « les plans de cheminement peuvent différer »). Notion par notion en « avancé ».
 function nowChapters() {
   const p = state.profile, cur = Engine.catalog(p).filter((c) => c.current && state.notions[c.id]);
   return Engine.themeOrder(cur, p).map((th) => ({ th, label: Engine.themeLabel(th, p), ids: cur.filter((c) => c.theme === th).sort((a, b) => Engine.rank(p, a.id) - Engine.rank(p, b.id)).map((c) => c.id) })).filter((c) => c.ids.length);
-}
-/* Part de l'année scolaire écoulée (Genève : fin août → fin juin), de 0 à 1. */
-function schoolYearPart(d = new Date()) {
-  const y = d.getMonth() >= 7 ? d.getFullYear() : d.getFullYear() - 1, a = new Date(y, 7, 24), b = new Date(y + 1, 5, 26);
-  return Math.max(0, Math.min(0.999, (d - a) / (b - a)));
-}
-function nowGuess(chs) {
-  if (!chs.length) return -1;
-  const mastered = (c) => c.ids.every((id) => { const n = state.notions[id]; return n && n.m >= 0.75 && n.ok >= 3; });
-  let k = Math.floor(schoolYearPart() * chs.length);
-  while (k < chs.length - 1 && mastered(chs[k])) k++;
-  return k;
 }
 /* Exercice typique d'un chapitre : une notion du milieu du chapitre, niveau 2, graine fixe (même aperçu d'une fois à l'autre). */
 function nowSample(ch) {
@@ -1137,33 +1125,21 @@ function nowPickIds(ch) {
   return (open.length ? open : ch.ids).slice(0, 5);
 }
 function nowChoose(ch) { const ids = nowPickIds(ch); Engine.setNow(state, ids); save(); sendNow(ids); toast("Noté : tes séances se concentrent sur « " + ch.label.replace(/^\d+\.\s*/, "") + " »."); screenHome(); }
-const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
 function screenNow() {
-  const chs = nowChapters(), k = nowGuess(chs);
-  if (k < 0) return screenNowList();
-  const d = new Date(), per = (d.getDate() <= 10 ? "début " : d.getDate() >= 21 ? "fin " : "en ") + MOIS[d.getMonth()];
-  const ch = chs[k];
-  h(`${brand}<h2>En ce moment <span class="mark">en classe</span></h2>
-  <div class="card stack now-guess"><p class="small muted">En ${esc(gradeName(state.profile))}${state.profile.track === "mp" ? " MP" : ""}, ${per}, on travaille souvent :</p>
-    <h3>${esc(ch.label)}</h3><p class="small">Par exemple, des exercices comme celui-ci :</p>${nowSample(ch)}
-    <button class="btn-primary btn-big" id="nyes">Oui, c'est ça</button><button class="btn-sec" id="nno">Non, montre-moi les autres</button></div>
-  <p class="small muted">Pas sûr ? Regarde ton cahier ou ta dernière fiche d'exercices.</p>
-  <div class="row"><button class="btn-ghost" id="back">Annuler</button>${Engine.nowActive(state) ? '<button class="btn-ghost" id="none">Rien de particulier en ce moment</button>' : ""}</div>`);
-  document.getElementById("nyes").onclick = () => nowChoose(ch);
-  document.getElementById("nno").onclick = () => screenNowCards(k);
-  document.getElementById("back").onclick = screenHome;
-  const none = document.getElementById("none");
-  if (none) none.onclick = () => { Engine.setNow(state, []); save(); screenHome(); };
-}
-function screenNowCards(k0 = -1) {
   const chs = nowChapters();
+  if (chs.length < 2) return screenNowList();
+  const act = Engine.nowActive(state) ? new Set(state.now.ids) : null;
+  const isCur = (c) => act && c.ids.some((id) => act.has(id));
   h(`${brand}<h2>Ça ressemble à <span class="mark">quoi</span> en classe ?</h2>
   <p class="muted">Touche le chapitre dont les exercices ressemblent à ceux que tu fais en ce moment.</p>
-  ${chs.map((c, i) => `<button type="button" class="card now-card-pick${i === k0 ? " now-was" : ""}" data-i="${i}"><b>${esc(c.label)}</b>${nowSample(c)}</button>`).join("")}
-  <div class="row"><button class="btn-ghost" id="back">Retour</button><button class="btn-ghost small" id="adv">Choisir notion par notion</button></div>`);
+  <p class="small muted">Pas sûr ? Regarde ton cahier ou ta dernière fiche d'exercices.</p>
+  ${chs.map((c, i) => `<button type="button" class="card now-card-pick${isCur(c) ? " now-was" : ""}" data-i="${i}"><b>${esc(c.label)}</b>${isCur(c) ? '<span class="small muted">Ton chapitre actuel</span>' : ""}${nowSample(c)}</button>`).join("")}
+  <div class="row"><button class="btn-ghost" id="back">Annuler</button>${act ? '<button class="btn-ghost" id="none">Rien de particulier en ce moment</button>' : ""}<button class="btn-ghost small" id="adv">Choisir notion par notion</button></div>`);
   app.querySelectorAll(".now-card-pick").forEach((b) => (b.onclick = () => nowChoose(chs[+b.dataset.i])));
-  document.getElementById("back").onclick = screenNow;
+  document.getElementById("back").onclick = screenHome;
   document.getElementById("adv").onclick = screenNowList;
+  const none = document.getElementById("none");
+  if (none) none.onclick = () => { Engine.setNow(state, []); save(); screenHome(); };
 }
 function screenNowList() {
   const p = state.profile, cur = Engine.catalog(p).filter((c) => c.current && state.notions[c.id]);
