@@ -291,3 +291,11 @@ juin 2027, sans toucher aux classes genevoises. La terminale (étape 7) double p
    frontaliers de Genève : Haute-Savoie, Ain — académie de Grenoble et de Lyon), ouverture à la rentrée 2027.
 8. **Nom et domaine** : « 5 minutes de maths par jour » convient en France ; un domaine `.fr` ou neutre (`.org`) plutôt que
    GitHub Pages pour la confiance des parents et des établissements (voir `tools/nom_app.md`).
+
+## Décisions de l'enseignant (25.11.2026)
+
+1. Classes ouvertes en France : **de la 6e à la 1re** (la Tle s'ajoutera quand elle sera prête).
+2. Produit : **signe ×** en France à la place du point médian (profil FR seulement).
+4. **Construire la Tle** (≈ 14 demi-journées d'agent, après le niveau FR et les automatismes).
+Restent ouvertes : 3 (filtre ou variantes pour le vocabulaire), 5 (statistiques : moins de 15 ans, hébergement UE,
+responsable), 6 (positionnement et diffusion), 7 (testeurs), 8 (domaine propre).
