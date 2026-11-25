@@ -805,3 +805,4 @@ details.solfull summary { padding: 11px 0; margin-top: 0; }
 .stats-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; padding: 8px 12px; }
 .stats-line .stats-btns { gap: 6px; flex: none; }
 .stats-line .btn-primary.small, .stats-line .btn-sec.small { min-height: 36px; padding: 4px 14px; }
+.welcome-pz { gap: 8px; flex-wrap: wrap; } .welcome-pz a { text-decoration: none; display: inline-flex; align-items: center; min-height: 40px; }

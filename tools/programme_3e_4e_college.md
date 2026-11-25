@@ -228,3 +228,11 @@ Niveau MA1 / MA2 relu (programme 2021, oraux Sismondi) : asymptotes obliques = M
   (0 à traiter). En 3e–4e, 4.GV.04a–d, 4.PS.03e et 4.PS.04d sont désormais rattachées.
 - Fichiers : `src/trx.js` (outils communs), `src/ch4c_trous.js`, `src/ch1c_trous.js`, `src/ch11_rep3d.js` ; tests
   `tests/trous.html`, `tests/act_trous.html`.
+
+## Décisions de l'enseignant (25.11 soir)
+
+- Complexes (cplxalg, cplxtrig, cplxeq), suites et séries (suitegeom, serie) : **4e MA2** (et non 3e MA2 comme Sismondi).
+- « Je ne sais pas » : 40 % du poids d'une erreur au Mathélo (validé).
+- En attente : géométrie dans l'espace (geoesp), bases et applications linéaires (bases, appllin), « sujets à choix » de MA1 :
+  → les deux niveaux (décidé le 25.11 ; 4.GV.04a–d forcés MA1+MA2 dans tools/ref_matu.py).
+- Repère 3D au CO (repere3d) : x vers l'avant, y à droite, z en haut : convention confirmée par l'enseignant (25.11).

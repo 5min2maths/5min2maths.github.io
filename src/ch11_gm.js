@@ -454,8 +454,8 @@
     vol: [
       () => P("Une piscine de 25 m × 10 m a une profondeur de 1,2 m d'un côté et 2 m de l'autre (fond en pente régulière).", [["a) Aire de la face latérale (trapèze) en m²", 40], ["b) Volume de la piscine (m³)", 400], ["c) Nombre de litres", 400000]],
           ["La piscine est un prisme dont la base est un trapèze : (1,2 + 2) · 25 ÷ 2.", "1 m³ = 1000 L."], "a) " + M("\\frac{(1{,}2 + 2) \\cdot 25}{2} = 40") + " m² ; b) " + M("40 \\cdot 10 = 400") + " m³ ; c) " + M("400\\text{'}000") + " L."),
-      () => P("Une canette de 33 cL a un rayon de 3,3 cm.", [["a) Volume en cm³", 330], ["b) Aire de la base (cm², au centième)", Math.PI * 3.3 * 3.3, 0.01], ["c) Hauteur minimale (cm, au dixième)", 330 / (Math.PI * 3.3 * 3.3), 0.1]],
-          ["1 cL = 10 cm³.", "c) Volume ÷ aire de la base."], "a) 330 ; b) " + M("\\approx 34{,}21") + " ; c) " + M("\\approx 9{,}6") + " cm."),
+      () => P("Une canette de 33 cL a un rayon de 3,3 cm.", [["a) Volume en cm³", 330], ["b) Aire de la base (cm², au centième)", Math.PI * 3.3 * 3.3, 0.01], ["c) Hauteur minimale pour contenir les 33 cL (cm, au dixième supérieur)", Math.ceil(330 / (Math.PI * 3.3 * 3.3) * 10) / 10, 0.01]],
+          ["1 cL = 10 cm³.", "c) Volume ÷ aire de la base, puis arrondir AU-DESSUS : une hauteur plus petite ne contiendrait pas tout."], "a) 330 ; b) " + M("\\approx 34{,}21") + " ; c) " + M("330 \\div 34{,}21 \\approx 9{,}646") + ", donc " + M("9{,}7") + " cm (avec " + M("9{,}6") + " cm, la canette ne contiendrait que " + M("\\approx 328") + " cm³)."), /* 25.11 soir (revue d'un testeur) : hauteur minimale = arrondi supérieur */
     ],
     volcone: [
       () => P("Une boule de rayon 3 cm est posée dans un cylindre de même rayon et de hauteur 6 cm.", [["a) Volume du cylindre (cm³, au centième)", 54 * Math.PI, 0.01], ["b) Volume de la boule (cm³, au centième)", 36 * Math.PI, 0.01], ["c) Quelle fraction du cylindre la boule occupe-t-elle ? (fraction)", 2 / 3]],

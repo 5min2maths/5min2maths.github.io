@@ -370,7 +370,7 @@ function activeLesson(id, L0, cont, review) {
     <div class="act-step"><div class="act-h"><span class="act-n">1</span> Devine</div><p>${P.q}</p>${P.fig ? `<div class="figwrap">${P.fig}</div>` : ""}
       <div class="seg" id="pc">${predOrder(P.choices.length).map((i) => `<button type="button" data-i="${i}">${P.choices[i]}</button>`).join("")}</div><div id="pfb"></div></div>
     <div class="act-step" id="s2" hidden><div class="act-h"><span class="act-n">2</span> ${X.titre}</div>
-      <ul class="act-done" id="adone"></ul><p class="act-goal" id="goal"></p><div id="play" class="stack"></div><div id="gfb"></div>
+      <ul class="act-done" id="adone"></ul><div id="gfb"></div><p class="act-goal" id="goal"></p><div id="play" class="stack"></div>
       <button type="button" class="btn-ghost small" id="skip">${X.mode === "guide" ? "Passer" : "Passer les défis"}</button></div>
     <div class="act-step" id="s3" hidden><div class="act-h"><span class="act-n">3</span> Retiens</div>
       <div class="rule"><b>À retenir</b>${rule}</div>
@@ -395,12 +395,14 @@ function activeLesson(id, L0, cont, review) {
     reveal($("s2"));
     A.play($("play"), (k, msg) => {
       const more = k + 1 < A.defis.length;
-      $("gfb").innerHTML = `<div class="fb ok">✓ ${colonBreak(msg)}${more ? `<div class="act-suite">➜ ${X.lab(k + 1)} : la consigne a changé, plus haut ↑</div>` : ""}</div>`;
+      $("gfb").innerHTML = `<div class="fb ok">✓ ${colonBreak(msg)}${more ? `<div class="act-suite">➜ ${X.lab(k + 1)} : nouvelle consigne juste en dessous ↓</div>` : ""}</div>`;
       if (typeof sig !== "undefined" && sig && sig.ev === "lecon") sigAide(sig, "f");
+      // 25.11 soir (revue d'un testeur : « ✓ 2,75 convient… » s'affichait sous la figure, hors de vue) : le retour est placé
+      // au-dessus de la consigne (#gfb avant #goal), là où l'élève regarde quand l'écran revient sur la consigne.
       // 22.11 (retour de l'auteur : la consigne suivante remplaçait l'ancienne sans qu'on le voie) : le défi réussi
       // reste affiché, barré, au-dessus ; la nouvelle consigne clignote et revient à l'écran.
       const g = $("goal"); $("adone").insertAdjacentHTML("beforeend", `<li>✓ ${g.innerHTML}</li>`);
-      if (more) { setGoal(X.lab(k + 1) + " · " + A.defis[k + 1]); g.classList.remove("act-new"); void g.offsetWidth; g.classList.add("act-new"); setTimeout(() => g.scrollIntoView({ behavior: "smooth", block: "nearest" }), 60); }
+      if (more) { setGoal(X.lab(k + 1) + " · " + A.defis[k + 1]); g.classList.remove("act-new"); void g.offsetWidth; g.classList.add("act-new"); setTimeout(() => $("gfb").scrollIntoView({ behavior: "smooth", block: "nearest" }), 60); }
       else { $("goal").textContent = X.fin; burst(); finish(); }
     });
   }));

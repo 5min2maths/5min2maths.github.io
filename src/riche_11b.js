@@ -159,8 +159,10 @@
     () => { const r = pk([3.3, 3.2, 3]), V = 33;
       return X({ id: "vol", lv: 2, titre: "La canette",
         q: "Une canette cylindrique contient 33 cL. Son rayon intérieur est " + Q(r, "cm") + ".",
-        parts: [{ label: "Exprime 33 cL en cm³.", pts: 1 }, { label: "Calcule la hauteur minimale de la canette (au mm).", pts: 2 }, { label: "Calcule l'aire totale de métal (disques et paroi), en cm², pour cette hauteur.", pts: 2 }],
-        sol: ul(["330 cm³.", M("h = \\frac{330}{\\pi \\cdot " + N(r) + "^2} \\approx " + A(330 / (Math.PI * r * r), 1)) + " cm.", M("2\\pi \\cdot " + N(r) + "^2 + 2\\pi \\cdot " + N(r) + " \\cdot " + A(330 / (Math.PI * r * r), 1) + " \\approx " + A(2 * Math.PI * r * r + 2 * Math.PI * r * +(330 / (Math.PI * r * r)).toFixed(1), 1)) + " cm²."]) }); },
+        parts: [{ label: "Exprime 33 cL en cm³.", pts: 1 }, { label: "Calcule la hauteur minimale de la canette (au mm supérieur : elle doit contenir les 33 cL).", pts: 2 }, { label: "Calcule l'aire totale de métal (disques et paroi), en cm², pour cette hauteur.", pts: 2 }],
+        sol: (() => { /* 25.11 soir (revue d'un testeur) : hauteur MINIMALE = arrondi au mm supérieur, sinon la canette ne contient pas tout */
+          const hx = 330 / (Math.PI * r * r), hm = Math.ceil(hx * 10 - 1e-9) / 10;
+          return ul(["330 cm³.", M("h = \\frac{330}{\\pi \\cdot " + N(r) + "^2} \\approx " + A(hx, 3)) + " cm, donc au mm supérieur " + M(A(hm, 1)) + " cm (une hauteur plus petite ne contiendrait pas les 33 cL).", M("2\\pi \\cdot " + N(r) + "^2 + 2\\pi \\cdot " + N(r) + " \\cdot " + A(hm, 1) + " \\approx " + A(2 * Math.PI * r * r + 2 * Math.PI * r * hm, 1)) + " cm²."]); })() }); },
     () => X({ id: "airepyr", lv: 2, titre: "La pyramide du Louvre",
         q: "La pyramide du Louvre est une pyramide régulière à base carrée de côté " + Q(35.4, "m") + " et de hauteur " + Q(21.6, "m") + ". Ses quatre faces sont en verre.",
         parts: [{ label: "Calcule son volume (au m³).", pts: 1 }, { label: "Calcule son apothème (au cm).", pts: 2 }, { label: "Calcule la surface de verre (au m²).", pts: 2 }],

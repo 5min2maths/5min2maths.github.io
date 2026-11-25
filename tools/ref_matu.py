@@ -82,9 +82,14 @@ def etat(r, L):
     return "couvert" if L else ("hors saisie" if R.HORS.search(r["competence"]) else "à faire")
 
 
+# Décisions de l'enseignant qui priment sur le niveau du CSV (25.11 soir : « sujets à choix » de MA1 → les deux niveaux).
+NIVEAU_FORCE = {"4.GV.04a": "MA1+MA2", "4.GV.04b": "MA1+MA2", "4.GV.04c": "MA1+MA2", "4.GV.04d": "MA1+MA2"}
+
+
 def main():
     rs = rows()
     for r in rs:
+        r["niveau"] = NIVEAU_FORCE.get(r["code"], r["niveau"])
         assert r["annee"][0] == r["code"][0], r["code"]  # l'année se lit sur le code
         assert r["niveau"] in NIVEAU, r["niveau"]
     for n, d in NIVEAUX.items():  # pas de faute de frappe dans les codes affinés

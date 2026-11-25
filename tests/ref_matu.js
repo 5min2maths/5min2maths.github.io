@@ -4,8 +4,8 @@
 (function () {
   const out = [], bad = [];
   const ok = (c, m) => { if (!c) bad.push(m); };
-  /* Comptes du CSV (referentiel_matu.csv, 25.11) : 1re 98 ; 2e 78 ; 3e 56 communes + 11 MA2 ; 4e 46 communes + 31 MA2 + 4 MA1. */
-  const EXP = [["1re", 12, null, 98], ["2e", 13, null, 78], ["3e MA1", 14, "N", 56], ["3e MA2", 14, "R", 67], ["4e MA1", 15, "N", 50], ["4e MA2", 15, "R", 77]];
+  /* Comptes du CSV (referentiel_matu.csv, 25.11) : 1re 98 ; 2e 78 ; 3e 56 communes + 11 MA2 ; 4e 50 communes (4.GV.04a–d « sujets à choix » MA1 ouverts aux deux niveaux, décision du 25.11) + 31 MA2. */
+  const EXP = [["1re", 12, null, 98], ["2e", 13, null, 78], ["3e MA1", 14, "N", 56], ["3e MA2", 14, "R", 67], ["4e MA1", 15, "N", 50], ["4e MA2", 15, "R", 81]];
   const P = (grade, niv, extra) => Object.assign({ system: "CH", grade, track: "college", minutes: 5 }, niv ? { niv } : {}, extra || {});
   const overflow = () => {
     const R = app.getBoundingClientRect().right + 0.5, xs = [];
@@ -69,7 +69,7 @@
       const d = app.querySelector(".olds");
       ok(!!d, "4e " + niv + " : années précédentes");
       if (d) d.open = true;
-      const n = app.querySelectorAll(".rcomp").length, exp = niv === "N" ? 98 + 78 + 56 + 50 : 98 + 78 + 67 + 77;
+      const n = app.querySelectorAll(".rcomp").length, exp = niv === "N" ? 98 + 78 + 56 + 50 : 98 + 78 + 67 + 81; /* 25.11 soir : 4.GV.04a–d aux deux niveaux */
       ok(n === exp, "4e " + niv + " : " + n + " lignes au lieu de " + exp);
       ok(niv === "R" || !app.querySelector('[title="3.AN.08a"]'), "4e MA1 : MA2 de 3e retiré");
       ok(!!app.querySelector('.olds [title="3.AN.05b"]'), "4e : compétence de 3e dans les années précédentes");

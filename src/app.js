@@ -277,6 +277,7 @@ function screenWelcome() {
   h(`${brand}
   <div class="stack"><h1>Chaque jour, <span class="mark">5 minutes</span> de maths, à ton niveau.</h1>
   <p class="muted">Une question du jour choisie pour toi, une figure, une correction immédiate. Ton Mathélo monte quand tu progresses. Pas de compte, pas de nom : ta progression reste sur ton téléphone ; seules des statistiques anonymes sont envoyées pour améliorer l'app (<a href="#" id="envoie-lien">ce que l'app envoie</a>).</p></div>
+  <div class="row welcome-pz"><a class="btn-sec small" href="#decouvrir">▶ Découvrir l'app en 1 minute</a><a class="btn-ghost small" href="#parents">👪 Je suis parent</a></div> <!-- 25.11 soir (revue d'un testeur : présentations introuvables pour un nouveau visiteur) -->
   <div class="stack"><span class="small muted">Je suis en :</span><div class="seg" id="dgrade">${[[9, "9e"], [10, "10e"], [11, "11e"], [12, "Sec. II"]].map(([g, l]) => `<button aria-pressed="${g === demoGrade}" data-v="${g}">${l}</button>`).join("")}</div></div>
   <div class="card tilt" id="demo"><div class="qmeta"><span class="chip">Essaie · ${n ? n.label : "exemple"}</span><span class="dots"><i class="on"></i><i></i><i></i></span></div>
   <div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
@@ -288,7 +289,7 @@ function screenWelcome() {
   <button class="btn-primary btn-big" id="go">Commencer</button>
   <button class="btn-ghost" id="restore">J'ai déjà un code de sauvegarde</button>
   <button class="btn-ghost small" id="privacy">🔒 Ce que l'app envoie</button>
-  <p class="small muted"><a href="#parents">👪 Je suis parent</a> · <a href="#decouvrir">Découvrir l'app</a> · <a href="#" id="legal-lien">Mentions légales et confidentialité</a></p>`);
+  <p class="small muted"><a href="#" id="legal-lien">Mentions légales et confidentialité</a></p>`);
   const inp = document.getElementById("dans"), prev = document.getElementById("dprev"), fb = document.getElementById("dfb");
   const show = () => previewOf(inp, prev, q.spec);
   inp.oninput = show;
@@ -597,7 +598,7 @@ function screenHome() {
   // 22.11 : « Ma fiche » (src/fiche.js) : une fiche par chapitre derrière Progrès. Retirée le 23.11 (branche archive/fiche) : inactif sans fiche.js.
   panels.prog = () => `${weekCard()}${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}${typeof parentCard === "function" ? parentCard() : ""}`; /* 24.11 : espace parent (src/parents.js) */
   if (!panels[homeTab]) homeTab = "today";
-  const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted">${gradeName(state.profile)}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
+  const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted" title="Ta classe">Classe ${gradeName(state.profile).replace(/\s*\(.*\)/, "")}${state.profile.track === "mp" ? " MP" : state.profile.system === "CH" && state.profile.grade >= 12 ? " Coll." : ""}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
   if (homeTab !== "today") {
     const T = { prob: "Problème de la semaine", test: "Mon évaluation", carnet: "Carnet d'erreurs", prog: "Progrès" };
     h(`${head}<button type="button" class="btn-ghost back-home" id="hb">← Accueil</button><h2 class="sub-title">${T[homeTab]}</h2>
@@ -943,6 +944,7 @@ function startInlineAct(root) {
     if (h) h.innerHTML = '<span class="act-n">' + (X.mode === "guide" ? "✍" : "🖐") + "</span> " + X.titre;
     const setG = (t) => { if (t.includes("\\(")) { goal.innerHTML = t; typeset(goal); } else goal.textContent = t; };
     setG(X.lab(0) + " · " + X.defis[0]);
+    if (fb && goal && goal.previousElementSibling !== fb) goal.before(fb); /* 25.11 soir : retour au-dessus de la consigne, en vue */
     X.play(el.querySelector(".act-box"), (k, msg) => {
       fb.innerHTML = `<div class="fb ok">✓ ${msg}</div>`;
       if (k + 1 < X.defis.length) setG(X.lab(k + 1) + " · " + X.defis[k + 1]); else goal.textContent = X.fin;
@@ -1580,7 +1582,7 @@ function nextQuestion(redo) {
       }
       /* 25.11 soir (revue d'un testeur) : « Refaire » ne rapporte plus de Mathélo (on pouvait monter son score en répétant) ;
          « Je ne sais pas » compte à 40 % (−38 décourageait d'avouer qu'on ne sait pas, plus que le gain d'une bonne réponse). */
-      const w = redo ? 0 : res.dontKnow ? 0.4 : 1;
+      const w = redo ? 0 : res.dontKnow ? 0.4 : 1; /* 40 % validé par l'enseignant le 25.11 */
       res.delta = w ? Engine.updateElo(state, id, q.d, sc, w) : 0;
       session.score += sc; session.answered++; session.ids.add(id);
       session.res = session.res || {}; const rr = (session.res[id] = session.res[id] || { n: 0, ok: 0 }); rr.n++; if (res.solved) rr.ok++;
@@ -2434,6 +2436,21 @@ function screenSummary() {
   const g0 = gradeOf(session.elo0), g1 = gradeOf(state.elo.r);
   if (g1.i > g0.i) gradeNumbers();
   const newGrade = g1.i > g0.i ? `<div class="card stack grade-up"><div class="eyebrow">Nouveau grade !</div><div class="ic-row"><button type="button" class="ic grade-ic grade-open" data-g="${g1.name}" aria-label="Voir la carte du grade ${g1.name}">${g1.ic}</button><div><h3>Tu es maintenant ${g1.name}</h3><div class="small muted">${g1.next ? "Prochain grade : " + g1.next.ic + " " + g1.next.name + ", à " + g1.next.at + "." : "Le plus haut grade : bravo !"}</div></div></div></div>` : "";
+  /* 25.11 soir (revue d'un testeur : une séance d'une question du Carnet affichait le grand écran de fin, lourd) :
+     petite séance du Carnet → bilan léger (résultat, ce qui reste à effacer, continuer). */
+  if (session.carnet && n <= 2) {
+    const left = (state.carnet || []).length;
+    h(`${brand}<h2>${sc >= n ? "📕 Bien joué !" : "📕 C'est noté."}</h2>
+    <div class="card flat stack"><div class="spread"><span>Mathélo</span><b>${state.elo.r} <span class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</span></b></div>
+    <div class="spread"><span>Carnet d'erreurs</span><b>${left ? left + " à effacer" : "vide ✓"}</b></div></div>
+    ${newGrade}${nb}
+    ${left ? '<button class="btn-primary btn-big" id="carnetagain">📕 Continuer à effacer</button>' : ""}
+    <button class="${left ? "btn-sec" : "btn-primary btn-big"}" id="home">Retour à l'accueil</button>`);
+    if (nb || newGrade) setTimeout(burst, 250);
+    document.getElementById("home").onclick = screenHome;
+    if (document.getElementById("carnetagain")) document.getElementById("carnetagain").onclick = () => startCarnet();
+    return;
+  }
   // 22.11 : titre cohérent avec le Mathélo (« Excellente séance » alors que le Mathélo baissait).
   h(`${brand}<h2>${sc >= n * 0.8 && d >= 0 ? "Excellente séance !" : sc >= n * 0.5 ? "Bonne séance." : "Séance faite : c'est en pratiquant qu'on progresse."}</h2>${d < 0 && sc >= n * 0.5 ? `<p class="small muted">Mathélo ${d} : une erreur sur une question de ton niveau coûte plus que ce que rapporte une réussite sur une question facile.</p>` : ""}
   <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span>${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ta série passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${FORMATS[Engine.tomorrowFormat(state)].label}</b></div>${sumGoal(g1)}</div></div>
