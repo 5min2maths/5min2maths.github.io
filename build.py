@@ -9,7 +9,12 @@ ROOT = Path(__file__).parent
 SRC = ROOT / "src"
 JS = ["curriculum.js", "ordre.js", "expr.js", "figures.js", "geo.js", "generators.js", "gen2.js", "gen3.js", "variantes.js", "defis_9.js", "defis_910.js", "defis_2c.js", "defis_sec2.js", "competences.js", "referentiel.js", "trx.js", "ch11_prop.js", "ch11_litt.js", "ch1c_eq.js", "ch1c_sys.js", "ch11_no.js", "ch11_gm.js", "ch11_ang.js", "ch11_thales.js", "ch11_proba.js", "ch1c_no.js", "ch1c_fct.js", "ch1c_alg.js", "ch1c_f2b.js", "ch11_no2.js", "ch1c_geo.js", "ch1c_trig.js", "ch_mp1.js", "ch11_fct.js", "ch10_no.js", "ch_mp2.js", "ch_mp3.js", "ch_mp4.js", "fr_lycee.js", "fr_2nde.js", "ch3c_ana.js", "ch3c_geo.js", "ch4c_ana.js", "ch4c_trous.js", "ch2c.js", "ch1c_arg.js", "ch1c_trous.js", "ch1c_argact.js", "ch11_rep3d.js", "fr_college.js", "fr_1re.js", "fr_3e.js", "fr_tle.js", "fr_fin.js", "fr_trous.js", "fr_couv.js", "ref_matu.js", "ref_fr.js", "ref_co.js", "defis.js", "riche.js", "riche_11b.js", "riche_11c.js", "riche_1c.js", "riche_sys1c.js", "riche_9.js", "riche_10.js", "riche_mp2.js", "riche_mp1.js", "riche_2c.js", "riche_col34.js", "riche_mp34.js", "curieux.js", "histoire.js", "badges.js", "backup.js", "qr.js", "lessons.js", "lessons2.js", "dyn.js", "manip.js", "active.js", "act_prop11.js", "act_litt11.js", "act_eq1c.js", "act_sys1c.js", "act_ch11b.js", "act_ch11c.js", "act_9a.js", "act_9b.js", "act_10a.js", "act_10b.js", "act_11d.js", "act_1c.js", "act_mp2.js", "act_mp34.js", "act_2c.js", "act_col34.js", "act_col34b.js", "act_manip.js", "act_manip2.js", "fr_act.js", "sujet.js", "qcm.js", "engine.js", "parents.js", "presente.js", "app.js"]
 
-head = """<title>5minutes2mathsparjour</title>
+# 26.11 : nom de l'app centralisé dans src/curriculum.js (APP_NAME, APP_TAGLINE, APP_SHORT, APP_TITLE), reporté ici dans
+# le titre de la page et le manifeste de l'app installable.
+import re as _re, json as _json
+APP = dict(_re.findall(r'^const (APP_[A-Z]+) = "([^"]*)";', (SRC / "curriculum.js").read_text(), _re.M))
+assert {"APP_NAME", "APP_TAGLINE", "APP_SHORT", "APP_TITLE"} <= set(APP), "constantes APP_* introuvables dans src/curriculum.js"
+head = """<title>""" + APP["APP_TITLE"] + """</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Chaque jour, quelques minutes de maths, à ton niveau.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -150,7 +155,10 @@ for k, fs in PAQ.items():
     (ROOT / "docs" / f"p-{k}.js").write_text("\n".join((SRC / f).read_text() for f in fs) + "\n")
 (ROOT / "docs" / "start.js").write_text(app_js.replace('const BUILD = "dev";', f'const BUILD = "{version}";', 1))
 (ROOT / "docs" / "sw.js").write_text((SRC / "pwa" / "sw.js").read_text().replace("__VERSION__", version))
-for f in ("manifest.webmanifest", "icon-192.png", "icon-512.png"):
+for f in ("icon-192.png", "icon-512.png"):
     shutil.copy(SRC / "pwa" / f, ROOT / "docs" / f)
+MAN = _json.loads((SRC / "pwa" / "manifest.webmanifest").read_text())
+MAN["name"], MAN["short_name"] = APP["APP_NAME"] + " " + APP["APP_TAGLINE"], APP["APP_SHORT"]
+(ROOT / "docs" / "manifest.webmanifest").write_text(_json.dumps(MAN, ensure_ascii=False, indent=2) + "\n")
 (ROOT / "docs" / ".nojekyll").write_text("")
 print("dist/5min2maths.html, dist/index.html et docs/index.html (GitHub Pages) :", round(len(head + body) / 1024), "Ko")

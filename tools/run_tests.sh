@@ -55,6 +55,8 @@ for f in $(echo "$R" | grep "ÉCHEC" | cut -d: -f1 | grep "^tests/"); do
   r2=$(un "$f" 9>&-)
   if ! echo "$r2" | grep -q "ÉCHEC"; then R=$(echo "$R" | grep -v "^$f:"; echo "$r2 (réussie à la reprise)"); fi
 done
+# 26.11 : nom de l'app centralisé (constantes APP_* de src/curriculum.js), contrôle sur les sources.
+R=$(printf '%s\ntools/test_nom.py: %s' "$R" "$(python3 tools/test_nom.py)")
 [ -n "$SYN" ] && R=$(printf '%s\n%s' "$R" "$(echo "$SYN" | sed 's/^/syntaxe : ÉCHEC /')")
 echo "$R" | grep -c "" | xargs echo "pages testées :"
 echo "$R" | grep "ÉCHEC" || echo "aucun échec"

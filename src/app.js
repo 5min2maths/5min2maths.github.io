@@ -180,7 +180,7 @@ const escT = (s) => esc(s).replace(/&lt;(\/?)(b|i|br)&gt;/g, "<$1$2>");
    qu'en bas, après tout le défilement ; même bouton en haut, comme le « ← Accueil » des pages de l'accueil. */
 const backTop = (id = "backtop") => `<button type="button" class="btn-ghost back-home" id="${id}">← Retour</button>`;
 const gradeName = (p) => ((SYSTEMS[p.system] || SYSTEMS_HIDDEN[p.system] || { grades: [] }).grades.find(([g]) => g === p.grade) || [0, ""])[1]; /* 25.11 : profil d'un système masqué (France) */
-const brand = '<div class="brand"><b>5 minutes de maths</b><span>par jour</span></div>';
+const brand = '<div class="brand"><b>' + APP_NAME + '</b><span>' + APP_TAGLINE + '</span></div>'; /* 26.11 : nom centralisé (src/curriculum.js) */
 const PRAISE = ["Juste !", "Bien vu !", "Exact !", "Parfait.", "C'est ça !", "Bravo !"];
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 
@@ -715,7 +715,8 @@ function screenHome() {
        les autres (évaluation du jour, bilan de la semaine, sauvegarde, statistiques) passent sous la séance. */
     const prepNow0 = prep && !paused && !(state.prep.log || {})[today] && prepKind() !== "mock";
     const banner = [resumeCard(), prepNow0 ? prepTodayCard() : "", joker ? nudge : ""].find((x) => x) || "";
-    const below = [prepNow0 ? "" : prepTodayCard(), weekRecapCard(), backupCard(), joker ? "" : nudge, eloHintCard()].join("");
+    const ios = iosStoreCard(); /* 26.11 : stockage sur iPhone, à la place du rappel de sauvegarde (une seule carte) */
+    const below = [prepNow0 ? "" : prepTodayCard(), weekRecapCard(), ios || backupCard(), joker ? "" : nudge, eloHintCard()].join("");
     /* Série perdue (26.11, même revue) : une phrase dans la carte de séance, le jour du retour seulement. */
     const lostK = s.count >= 2 && !alive && s.last ? s.last : null;
     if (lostK && (!state.lostSeen || state.lostSeen.k !== lostK)) { state.lostSeen = { k: lostK, d: today }; save(); }
@@ -785,6 +786,7 @@ function screenHome() {
   on("resno", () => { delete state.resume; save(); screenHome(); });
   on("bkgo", screenBackup);
   on("bkno", () => { UI.backupLater = day(); uiSave(); screenHome(); });
+  bindIosStore();
   on("sessinfo", () => { const e = document.getElementById("sessexp"), b = document.getElementById("sessinfo"); if (!e) return; e.hidden = !e.hidden; b.setAttribute("aria-expanded", String(!e.hidden)); });
   on("statsoui", () => { statsSet(true); toast("Merci ! Tu peux changer d'avis dans les Réglages."); screenHome(); });
   on("statsnon", () => { statsSet(false); toast("C'est noté : rien n'est envoyé. Modifiable dans les Réglages."); screenHome(); });
@@ -868,11 +870,45 @@ function bindInstall(after) {
 // Au bilan : installer l'app dès le 2e jour de pratique (reproposé après 7 jours). Le rappel par l'agenda (21.11)
 // a été retiré le jour même (« trop compliqué ») : de vraies notifications viendront avec l'app installée (voir l'historique git).
 function returnCard() {
+  if (iosRisk()) return ""; /* 26.11 : sur iPhone / iPad (navigateur), la carte « stockage » de l'accueil la remplace (une seule des deux) */
   const days = (state.history || []).length;
   const later = (d, n) => !d || addDays(d, n) <= day();
   /* 26.11 (revue d'un testeur, jour 3 : la carte revenait à chaque fin de séance) : au plus une fois par semaine. */
   if (days >= 2 && !isStandalone() && !UI.installed && later(UI.installLater, 7) && later(UI.installShown, 7)) { UI.installShown = day(); uiSave(); return installCard("bilan"); }
   return "";
+}
+// ---- Stockage durable (26.11 ; voir tools/stockage.md) ----
+// Séances terminées sur cet appareil (UI.sessN) ; un élève d'avant le compteur : ses jours de pratique.
+const sessDone = () => Math.max(+UI.sessN || 0, (state && state.history || []).filter((x) => x && x.n > 0).length);
+// Après la première séance terminée, une seule fois et sans message : stockage « persistant » demandé au navigateur
+// (Chrome l'accorde ou le refuse sans rien afficher ; Safari selon ses propres critères). Firefox (hors iOS) affiche une
+// demande d'autorisation : on s'abstient. Résultat gardé dans UI.persisted (1 accordé, 0 refusé, "na" sans objet).
+function storagePersist() {
+  if (UI.persistAsked || sessDone() < 1) return;
+  UI.persistAsked = day();
+  const S = navigator.storage;
+  if (!S || typeof S.persist !== "function" || (/firefox/i.test(navigator.userAgent) && !isIOS())) { UI.persisted = "na"; uiSave(); return; }
+  uiSave();
+  try { S.persist().then((g) => (typeof S.persisted === "function" ? S.persisted() : g)).then((p) => { UI.persisted = p ? 1 : 0; uiSave(); }, () => {}); } catch (e) {}
+}
+// iPhone / iPad dans le navigateur (pas l'app installée) : Safari peut effacer les données d'un site après 7 jours sans
+// visite. Dès la 2e séance terminée, une carte sous la séance (installer, ou garder son code), puis au plus toutes les 2 semaines.
+const iosRisk = () => isIOS() && !isStandalone() && !UI.installed;
+function iosStoreCard() {
+  if (!state || !iosRisk() || sessDone() < 2) return "";
+  const t = day(), recent = (d) => d && addDays(d, 14) > t;
+  if (recent(UI.lastBackup) || recent(UI.iosLater) || (UI.iosShown !== t && recent(UI.iosShown))) return "";
+  if (UI.iosShown !== t) { UI.iosShown = t; uiSave(); }
+  const dev = /ipad/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1) ? "iPad" : "iPhone";
+  return `<div class="card flat stack ios-store"><p class="small">📲 Sur ${dev}, installe l'app (Partager → Sur l'écran d'accueil) pour ne pas perdre ta progression, ou garde ton code de sauvegarde.</p>
+    <p class="small" id="ioshow" hidden>${installHow()}</p>
+    <div class="row"><button type="button" class="btn-sec small" id="iosinst">Comment installer</button><button type="button" class="btn-sec small" id="iosbk">Mon code de sauvegarde</button><button type="button" class="btn-ghost small" id="iosno">Plus tard</button></div></div>`;
+}
+function bindIosStore() {
+  const g = (x) => document.getElementById(x);
+  if (g("iosinst")) g("iosinst").onclick = () => { g("ioshow").hidden = false; g("iosinst").remove(); };
+  if (g("iosbk")) g("iosbk").onclick = screenBackup;
+  if (g("iosno")) g("iosno").onclick = () => { UI.iosLater = day(); uiSave(); const c = app.querySelector(".ios-store"); if (c) c.remove(); };
 }
 function screenSettings() {
   const A = a11yOf(state);
@@ -1128,7 +1164,7 @@ function screenLegal(back) {
   const sec = (titre, corps) => `<div class="card flat stack"><h3>${titre}</h3>${corps}</div>`;
   h(`${brand}<h2>Mentions légales <span class="mark">et confidentialité</span></h2>
   <div class="card flat stack"><b>Projet — à faire valider</b><span class="small muted">Ce texte est une première version. Les parties marquées « À COMPLÉTER » doivent encore être remplies et le tout vérifié avant une diffusion large.</span></div>
-  <p class="muted">« 5 minutes de maths par jour » est une application d'exercices de mathématiques, gratuite, sans compte et sans publicité. Cette page explique, pour les élèves et leurs parents, quelles données elle utilise, pourquoi, et comment exercer vos droits.</p>
+  <p class="muted">« ${APP_NAME} ${APP_TAGLINE} » est une application d'exercices de mathématiques, gratuite, sans compte et sans publicité. Cette page explique, pour les élèves et leurs parents, quelles données elle utilise, pourquoi, et comment exercer vos droits.</p>
   ${sec("1. Qui est responsable ?", `<ul class="plain"><li>Éditeur de l'app et responsable du traitement des données : ${AC("nom")}.</li>
   <li>Adresse : ${AC("adresse postale")}.</li>
   <li>Contact pour toute question ou demande sur les données : ${AC("adresse e-mail de contact")}.</li>
@@ -1191,7 +1227,7 @@ async function screenBackup() {
   document.getElementById("copy").onclick = async () => { marked();
     try { await navigator.clipboard.writeText(code); msg.textContent = "Code copié."; } catch (e) { ta.select(); msg.textContent = "Sélectionne le code et copie-le."; }
   };
-  if (document.getElementById("share")) document.getElementById("share").onclick = () => marked() || navigator.share({ title: "Ma progression 5 minutes de maths", text: "Mon code de sauvegarde 5 minutes de maths (ouvre ce lien sur l'autre appareil) :", url }).catch(() => {});
+  if (document.getElementById("share")) document.getElementById("share").onclick = () => marked() || navigator.share({ title: "Ma progression " + APP_NAME, text: "Mon code de sauvegarde " + APP_NAME + " (ouvre ce lien sur l'autre appareil) :", url }).catch(() => {});
   document.getElementById("restore").onclick = () => screenRestore();
   document.getElementById("back").onclick = screenHome;
 }
@@ -2697,6 +2733,7 @@ function sumGoal(g) {
 }
 function screenSummary() {
   if (state) { delete state.resume; if (session && session.answered) state.firstDone = true; save(); }
+  if (session && session.answered && !session.counted) { session.counted = true; UI.sessN = (+UI.sessN || 0) + 1; uiSave(); storagePersist(); }
   if (session && session.weekly && state) { state.weeklyDone = weekKey(); save(); }
   if (session && session.prepKind && session.answered) prepMark(session.prepKind);
   ping("session", { ...sessionInfo(), n: session.answered, score: session.score, min: Math.max(1, Math.round((Date.now() - session.start) / 6e4)) });
