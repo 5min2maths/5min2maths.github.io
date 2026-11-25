@@ -2,14 +2,15 @@
 // Audit de niveau 9e–10e (tools/niveau_910.md, point 7) : pour 21 notions de 9e, le niveau 4 reprenait les formes du
 // niveau 3 (« = N3 »). Ici, un vrai problème par notion, en 2 ou 3 étapes qui s'enchaînent, valeurs tirées au hasard,
 // au programme de 9e (plan de cheminement genevois : pas de produit de relatifs, pas d'aires agrandies, pas de littéral).
-// Réservés à la 9e (co: [9]) ; ailleurs, Engine.make les écarte (horsCO). Chargé après variantes.js (PROBX).
+// Proposés en 9e et en 10e (co: [9, 10] ; 25.11 : savoir refaire ce qui est d'avant tant que ce n'est pas trivial) ;
+// ailleurs, Engine.make les écarte (horsCO). Chargé après variantes.js (PROBX).
 (() => {
   if (typeof PROBX === "undefined") return;
   const ri = R.int, pk = R.pick;
   const r6 = (v) => Math.round(v * 1e6) / 1e6;
   const N = (v) => { const [i, f] = String(r6(v)).split("."); return (Math.abs(+i) >= 1000 ? i.replace(/\B(?=(\d{3})+(?!\d))/g, "\\text{'}") : i) + (f ? "{,}" + f : ""); };
   const X = (v) => M(N(v));
-  const PX = (id, f) => { (PROBX[id] = PROBX[id] || []).push(() => Object.assign(f(), { co: [9] })); };
+  const PX = (id, f) => { (PROBX[id] = PROBX[id] || []).push(() => Object.assign(f(), { co: [9, 10] })); };
   /* parts : [libellé, valeur, arrondi facultatif (0.1, 0.01…)] */
   const PB = (q, parts, hints, sol) => ({ q, hints, sol,
     parts: parts.map(([label, value, rd]) => ({ label, spec: Object.assign({ kind: "value", value: r6(value) }, rd ? { round: rd } : {}) })) });

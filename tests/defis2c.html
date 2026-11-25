@@ -15,7 +15,7 @@ const fails = [], ok = (c, m) => { if (!c) fails.push(m); }, log = [];
 const IDS = ["polydiv", "polyfact", "eqrat", "recip", "homog", "cercle", "modexp", "compo", "fracetage", "probrat", "bijection", "decomp", "polyexpr", "homogrec", "logbase", "cercletan", "expfrac", "vecteurs", "ineqpoly"];
 const answer = (sp) => sp.kind === "value" ? String(sp.value) : sp.kind === "set" ? (sp.values.length ? sp.values.join(" ; ") : "aucune") : sp.kind === "pair" ? sp.values.join(" ; ") : sp.kind === "solset" ? SolSet.show(sp.ivs, false) : sp.expr;
 try {
-  const ids = Object.keys(PROBX).filter((id) => PROBX[id].some((f) => { const p = f(); return p.co && p.co.length === 1 && p.co[0] === 13; }));
+  const ids = Object.keys(PROBX).filter((id) => PROBX[id].some((f) => { const p = f(); return p.co && p.co[0] === 13; }));
   ok(IDS.every((id) => ids.includes(id)), "notions sans défi de 2e : " + IDS.filter((id) => !ids.includes(id)));
   let nq = 0;
   for (const id of IDS) {
@@ -43,7 +43,7 @@ try {
     ok(q13.co && q13.co[0] === 13, id + " : en 2e Collège, le niveau 4 est un défi de 2e");
     ok(!(q12.co && q12.co.includes(13)), id + " : pas de défi de 2e en 1re");
     const q14 = Engine.make(st(14, "college"), id, 4);
-    ok(q14 && q14.q && !(q14.co && q14.co.includes(13)), id + " : en 3e, le niveau 4 reste une question (pas un défi de 2e)");
+    ok(q14 && q14.q, id + " : en 3e, le niveau 4 donne une question (défi de 2e possible, 25.11)");
   }
   log.push(IDS.length + " notions, " + nq + " tirages");
 } catch (e) { fails.push("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }

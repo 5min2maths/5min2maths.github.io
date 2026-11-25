@@ -13,7 +13,7 @@ window.__packs = []; window.ensurePacks = (p) => { window.__packs.push(JSON.stri
 // réponses distinctes, solution présente ; réservés à la 9e (pas en 11e) ; Engine.make niveau 4 en 9e = un défi PROBX.
 const fails = [], ok = (c, m) => { if (!c) fails.push(m); }, log = [];
 try {
-  const ids = Object.keys(PROBX).filter((id) => PROBX[id].some((f) => { const p = f(); return p.co && p.co.every((g) => g === 9 || g === 10); }));
+  const ids = Object.keys(PROBX).filter((id) => PROBX[id].some((f) => { const p = f(); return p.co && p.co.every((g) => g >= 9 && g <= 11); }));
   ok(ids.length >= 21 + 19, "notions avec défi de 9e–10e : " + ids.length);
   for (const id of ids) {
     for (let s = 1; s <= 40; s++) {
@@ -28,7 +28,7 @@ try {
     const s9 = Engine.newState({ system: "CH", grade: 9, track: "college", minutes: 5 }), s11 = Engine.newState({ system: "CH", grade: 11, track: "college", minutes: 5 });
     const g0 = PROBX[id][PROBX[id].length - 1]().co[0], sG = Engine.newState({ system: "CH", grade: g0, track: "college", minutes: 5 }), q9 = Engine.make(sG, id, 4), q11 = Engine.make(s11, id, 4);
     ok(q9.co && q9.co.includes(g0), id + " : en " + g0 + "e, le niveau 4 est un défi propre");
-    ok(!(q11.co && (q11.co.includes(9) || q11.co.includes(10))), id + " : pas de défi de 9e–10e en 11e");
+    const s12 = Engine.newState({ system: "CH", grade: 12, track: "college", minutes: 5 }), q12 = Engine.make(s12, id, 4); ok(!(q12.co && q12.co.some((g) => g <= 11)), id + " : pas de défi du Cycle au Collège");
   }
   log.push(ids.length + " notions × 40 tirages");
 } catch (e) { fails.push("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }

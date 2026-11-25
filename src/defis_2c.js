@@ -2,7 +2,8 @@
 // Audit de niveau 2e (tools/niveau_2c.md) : 19 notions de l'année n'avaient aucun « Problème de la semaine ». Ici, un vrai
 // problème par notion (deux pour probrat, decomp, logbase), en 2 à 4 étapes qui s'enchaînent, au niveau des épreuves
 // regroupées de 2e (Sismondi 2MA1 et 2MA2, étalons E… de tools/niveau_2c.md), valeurs tirées au hasard, jamais triviales.
-// Réservés à la 2e Collège (co: [13]) ; ailleurs, Engine.make les écarte (horsCO) et redescend au niveau 3.
+// Proposés en 2e, 3e et 4e Collège (co: [13, 14, 15], décision de l'enseignant du 25.11 : « il faut toujours savoir refaire
+// des choses d'avant tant que ce n'est pas trivial ») ; en 1re et en MP, Engine.make les écarte (horsCO).
 // Ces notions n'existent pas en MP (MP: null). Chargé après variantes.js (PROBX).
 (() => {
   if (typeof PROBX === "undefined") return;
@@ -20,7 +21,7 @@
   const pr = (v) => (v < 0 ? "(" + F(v) + ")" : F(v));
   const pT = (cs) => poly(cs).replace(/\^\{?2\}?/g, "²").replace(/\^\{?3\}?/g, "³").replace(/\^\{?4\}?/g, "⁴").replace(/\\frac\{(\d+)\}\{(\d+)\}/g, "$1/$2").replace(/-/g, "−");
   const pt = (a, b) => "(" + F(a) + " \\,;\\, " + F(b) + ")";
-  const PX = (id, f) => { (PROBX[id] = PROBX[id] || []).push(() => { let p = null; for (let k = 0; k < 400 && !p; k++) p = f(); return Object.assign(p, { co: [13] }); }); };
+  const PX = (id, f) => { (PROBX[id] = PROBX[id] || []).push(() => { let p = null; for (let k = 0; k < 400 && !p; k++) p = f(); return Object.assign(p, { co: [13, 14, 15] }); }); };
   /* parts : [libellé, valeur (ou spec), arrondi facultatif] ; valeur exacte gardée telle quelle (fractions comparées à 1e-9). */
   const PB = (q, parts, hints, sol) => ({ q, hints, sol,
     parts: parts.map(([label, v, rd]) => ({ label, spec: v && typeof v === "object" ? v : Object.assign({ kind: "value", value: v }, rd ? { round: rd } : {}) })) });
