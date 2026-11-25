@@ -225,6 +225,38 @@ def onglet_chantiers(wb, bold, head_fill):
     return n - 1
 
 
+def onglet_referentiel(wb, bold, head_fill, P):
+    """Onglet « Référentiel Collège » (25.11) : une ligne par compétence officielle du Collège (tools/ref_matu.py) :
+    code, année, niveau, intitulé, notions de l'app rattachées, état (couvert / à faire / hors saisie). Filtrable."""
+    try:
+        sys.path.insert(0, str(ROOT / "tools"))
+        import ref_matu
+        rs = ref_matu.rows()
+    except Exception as e:
+        print("(référentiel du Collège indisponible :", e, ")")
+        return 0
+    lk = ref_matu.links(rs)
+    ws = wb.create_sheet("Référentiel Collège", 1)
+    ws.append(["Code", "Année", "Niveau", "Thème", "Notion du référentiel", "Compétence", "Notions de l'app rattachées", "État"])
+    for c in ws[1]:
+        c.font, c.fill = bold, head_fill
+    lab = lambda n: (P.get(n.split("@")[0], {}).get("label", "") + " [" + n.split("@")[0] + "]").strip() + (" (niv. " + ", ".join(n.split("@")[1]) + ")" if "@" in n else "")
+    for r in rs:
+        L = lk[r["code"]]
+        ws.append([r["code"], r["annee"], r["niveau"], r["theme"], r["notion"], r["competence"], " ; ".join(lab(n) for n in L), ref_matu.etat(r, L)])
+    n = ws.max_row
+    for st, col in {"couvert": "C6EFCE", "à faire": "FFC7CE", "hors saisie": "F2F2F2"}.items():
+        ws.conditional_formatting.add(f"H2:H{n}", CellIsRule(operator="equal", formula=[f'"{st}"'], fill=PatternFill("solid", fgColor=col)))
+    for col, w in zip("ABCDEFGH", [10, 7, 10, 18, 26, 70, 50, 12]):
+        ws.column_dimensions[col].width = w
+    for row in ws.iter_rows(min_row=2):
+        for c in row:
+            c.alignment = Alignment(wrap_text=True, vertical="top")
+    ws.freeze_panes = "B2"
+    ws.auto_filter.ref = f"A1:H{n}"
+    return n - 1
+
+
 def main():
     d = inventaire()
     votes, comms = retours()
@@ -330,6 +362,7 @@ def main():
     n_c, n_non = onglet_commentaires(wb, comms, bold, head_fill)
     n_r = onglet_robot(wb, bold, head_fill)
     n_ch = onglet_chantiers(wb, bold, head_fill)
+    n_ref = onglet_referentiel(wb, bold, head_fill, P)
     # Synthèse : formules (se met à jour quand l'utilisateur change « Contrôlé »)
     syn.append(["Classe", "Notions", "Questions", "Leçons actives", "% notions actives", "Validées", "À corriger", "Vues", "% validé", "Questions à 1 forme", "Tests de qualité"])
     for c in syn[1]:
@@ -344,6 +377,7 @@ def main():
     syn.append([])
     syn.append([f"Commentaires des testeurs : {n_c}, dont {n_non} non traités (onglet Commentaires, lignes en jaune)."])
     syn.append([f"Chantiers du projet : {n_ch} (onglet Chantiers, source tools/chantiers.tsv)."])
+    syn.append([f"Référentiel du Collège : {n_ref} compétences officielles, rattachement aux notions de l'app (onglet Référentiel Collège)."])
     syn.append([f"Élève-robot : {n_r} problème(s) dans le dernier rapport (onglet Robot ; nouveaux en jaune)."])
     syn.append(["Statuts « Contrôlé » : à faire → vu → à corriger → validé. Colonnes automatiques recalculées par tools/suivi.py ; Contrôlé et Remarque conservés."])
     for col, w in zip("ABCDEFGHIJK", [12, 9, 10, 14, 16, 9, 11, 7, 9, 18, 14]):

@@ -798,14 +798,18 @@ function compStats(ids) {
   const all = ids.flatMap((id) => compsOf(id)), notes = all.map((c) => compNote((state.comps || {})[c.cid])).filter((x) => x !== null);
   return { total: all.length, tested: notes.length, avg: notes.length ? notes.reduce((a, b) => a + b, 0) / notes.length : null };
 }
+/* 25.11 : note d'un « Me tester » : compétence officielle (code, Collège) ou savoir-faire d'une notion (cid). */
+const ctestNote = (ct) => { const r = ct.code && typeof Referentiel !== "undefined" ? Referentiel.find(state.profile, ct.code) : null; return r ? Referentiel.note(state, r) : compNote((state.comps || {})[ct.cid]); };
+const refOn = () => typeof Referentiel !== "undefined" && !!Referentiel.of(state.profile);
 function compsCard() {
-  const cur = Engine.catalog(state.profile).filter((c) => c.current).map((c) => c.id), st = compStats(cur);
+  const cur = Engine.catalog(state.profile).filter((c) => c.current).map((c) => c.id), st = refOn() ? Referentiel.stats(state, Referentiel.list(state.profile)) : compStats(cur);
   return `<div class="card flat stack"><div class="spread"><h3>Mes compétences</h3>${st.avg !== null ? `<span class="note ${noteCls(Math.round(st.avg * 2) / 2)}">${isFR() ? noteTxt(st.avg) : String(Math.round(st.avg * 10) / 10).replace(".", ",")}</span>` : ""}</div>
   <p class="small muted">${st.tested ? `${st.tested} compétence${st.tested > 1 ? "s" : ""} ${isFR() ? "positionnée" : "notée"}${st.tested > 1 ? "s" : ""} sur ${st.total} cette année.` : isFR() ? "Ton niveau de maîtrise apparaît au fil des séances, compétence par compétence." : "Tes notes apparaissent au fil des séances, compétence par compétence."}</p>
   <p class="small">🏅 ${Object.keys(state.badges || {}).length} badge${Object.keys(state.badges || {}).length > 1 ? "s" : ""} sur ${Badges.list(state).length}</p>
   <button class="btn-primary" id="comps">Voir mes compétences et mes badges</button></div>`;
 }
 function screenComps() {
+  if (refOn()) return screenCompsRef();
   const cat = Engine.catalog(state.profile), comps = state.comps || {};
   const statusTag = (id) => { const s = state.notions[id]; return !s ? "" : s.status === "avenir" ? '<span class="tag">à venir</span>' : s.status === "nonvu" ? '<span class="tag">pas encore vu en classe</span>' : ""; };
   const block = (list) => Engine.themeOrder(list, state.profile).map((th) => {
@@ -846,6 +850,43 @@ function screenComps() {
     const order = lvls.slice().sort(() => Math.random() - 0.5), pick = [0, 1, 2].map((k) => order[k % order.length]);
     session = { plan: pick.map((lv) => id + "|" + lv), i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), prep: true,
       ctest: { label: b.dataset.label, cid, before: compNote((state.comps || {})[cid]) } };
+    nextQuestion();
+  }));
+  document.getElementById("back").onclick = screenHome; document.getElementById("backtop").onclick = screenHome;
+}
+
+/* 25.11 (règle de l'enseignant : chaque système a son référentiel) : Collège de Genève = compétences officielles du
+   référentiel (src/ref_matu.js), groupées par thème et notion du référentiel, code discret, intitulé officiel ; MA2 retiré
+   en MA1. Note calculée à la volée depuis state.comps (Referentiel.note) ; sans question rattachée : « travaillée en classe ». */
+function screenCompsRef() {
+  const p = state.profile, y0 = Referentiel.year(p);
+  const line = (r) => {
+    if (!Referentiel.hasQuestions(r)) return `<div class="comp rcomp"><span><span class="rcode">${r.code}</span> ${esc(r.label)}</span><span class="comp-r"><span class="tag">travaillée en classe</span></span></div>`;
+    const n = Referentiel.note(state, r), t = Referentiel.plan(p, r).length;
+    return `<div class="comp rcomp"><span><span class="rcode">${r.code}</span> ${esc(r.label)}</span><span class="comp-r">${t ? `<button type="button" class="ctest rtest" data-code="${r.code}" title="3 questions sur cette compétence">Me tester</button>` : ""}<span class="note ${noteCls(n)}">${noteTxt(n)}</span></span></div>`;
+  };
+  const themes = (list) => [...new Set(list.map((r) => r.theme))].map((th) => {
+    const rs = list.filter((r) => r.theme === th), t = Referentiel.stats(state, rs);
+    return `<div class="card flat"><div class="spread"><h3>${esc(th)}</h3><span class="small muted">${t.tested} / ${t.total} notées</span></div>${[...new Set(rs.map((r) => r.notion))].map((no) => `<div class="cnotion"><b>${esc(no)}</b>${rs.filter((r) => r.notion === no).map(line).join("")}</div>`).join("")}</div>`;
+  }).join("");
+  const cur = Referentiel.list(p), st = Referentiel.stats(state, cur), nq = cur.filter(Referentiel.hasQuestions).length;
+  const olds = Referentiel.years(p).filter((y) => y < y0).reverse();
+  const tr = Referentiel.track(p);
+  Badges.check(state); state.badgesNew = []; save();
+  h(`${brand}${backTop()}<h2>Mes <span class="mark">compétences</span></h2>
+  <p class="muted">Les compétences officielles du programme du ${Referentiel.title(p)}. Chacune reçoit une note de 1 à 6 dès que tu as répondu 3 fois à ses questions. La note suit tes 8 dernières réponses : elle monte quand tu progresses.</p>
+  ${badgesSection()}
+  <div class="card flat"><div class="spread"><span>${Referentiel.yearLabel(p, y0)}${tr ? " · " + tr : ""}</span><b>${st.tested} / ${st.total} notées${avgTxt(st.avg)}</b></div>${nq < st.total ? `<p class="small muted">${st.total - nq} compétence${st.total - nq > 1 ? "s" : ""} (démonstrations, constructions, représentations…) ${st.total - nq > 1 ? "sont travaillées" : "est travaillée"} en classe, sans note ici.</p>` : ""}</div>
+  ${themes(cur)}
+  ${olds.length ? `<details class="olds"><summary>Années précédentes (${olds.map((y) => Referentiel.stats(state, Referentiel.list(p, y)).tested).reduce((a, b) => a + b, 0)} notées)</summary>${olds.map((y) => `<h3 class="ryear">${Referentiel.yearLabel(p, y)}</h3>${themes(Referentiel.list(p, y))}`).join("")}</details>` : ""}
+  <button class="btn-primary btn-big" id="back">Retour</button>`);
+  bindBadges(app);
+  app.querySelectorAll(".rtest").forEach((b) => (b.onclick = () => {
+    const r = Referentiel.find(p, b.dataset.code), ps = Referentiel.plan(p, r);
+    if (!ps.length) return;
+    const order = ps.slice().sort(() => Math.random() - 0.5), pick = [0, 1, 2].map((k) => order[k % order.length]);
+    session = { plan: pick.map(([id, d]) => id + "|" + d), i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), prep: true,
+      ctest: { label: r.label, code: r.code, cid: Referentiel.cids(r)[0], before: Referentiel.note(state, r) } };
     nextQuestion();
   }));
   document.getElementById("back").onclick = screenHome; document.getElementById("backtop").onclick = screenHome;
@@ -2353,7 +2394,7 @@ function screenSummary() {
   <div class="card stack"><div class="spread"><span>Score</span><b>${String(sc).replace(".", ",")} / ${n}</b></div>
   <div class="spread"><span>Mathélo</span><b>${state.elo.r} <span class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}</span></b></div>
 </div>
-  ${session.ctest ? (() => { const a = compNote((state.comps || {})[session.ctest.cid]), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? (isFR() ? "Le niveau apparaît après 3 réponses sur cette compétence." : "La note apparaît après 3 réponses sur cette compétence.") : b === null ? (isFR() ? "Premier positionnement pour cette compétence." : "Première note pour cette compétence.") : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". " + (isFR() ? "Il remontera" : "Elle remontera") + " avec la pratique." : isFR() ? "Niveau stable." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
+  ${session.ctest ? (() => { const a = ctestNote(session.ctest), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? (isFR() ? "Le niveau apparaît après 3 réponses sur cette compétence." : "La note apparaît après 3 réponses sur cette compétence.") : b === null ? (isFR() ? "Premier positionnement pour cette compétence." : "Première note pour cette compétence.") : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". " + (isFR() ? "Il remontera" : "Elle remontera") + " avec la pratique." : isFR() ? "Niveau stable." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
   ${newGrade}${nb}
   ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${state.carnet.length} à effacer</b></div><span class="small muted">Une erreur s'efface après 2 réussites de suite, du premier coup.</span><button class="btn-primary" id="carnetagain">${session.carnet ? "Continuer à effacer" : "📕 Effacer mes erreurs maintenant"}</button></div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
   ${returnCard()}
