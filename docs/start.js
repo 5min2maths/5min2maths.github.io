@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "69d08c96a9"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "c0d88d82aa"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -641,7 +641,7 @@ const TOUR = [
   [".elo-band", "🏅 Ton grade de l'année", "Pousse, Apprenti… : ton grade monte avec tes points de l'année (séances, réussites). Touche-le pour voir l'échelle des grades."], /* 26.11 : Mathélo caché par défaut */
   [".doors", "🧭 Tes rubriques", "Le problème de la semaine, les questions curieuses, l'histoire des maths, ton test (révision jusqu'au jour J), ton carnet d'erreurs et tes progrès."],
 ];
-let tourK = 0;
+let tourK = 0, doorHintCounted = false;
 function tourShow() {
   const old = document.getElementById("tour"); if (old) old.remove();
   if (homeTab !== "today") return;
@@ -725,7 +725,12 @@ function screenHome() {
       : `<span class="small now-lab">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span><button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
     /* 25.11 soir (revue d'un testeur) : nom accessible explicite pour chaque case (lecteurs d'écran). */
     const DOOR_NAME = { prob: "Problème de la semaine", cur: "Questions curieuses", hist: "Histoires des maths", test: "Mon évaluation", carnet: "Carnet d'erreurs", prog: "Mes progrès" };
-    const door = (id, ic, label, sub, badge) => `<button type="button" class="door" data-door="${id}" aria-label="${esc(DOOR_NAME[id] || label)}${sub ? " : " + esc(sub) : ""}${badge === "!" ? " (nouveau)" : ""}">${badge ? `<span class="door-badge">${badge}</span>` : ""}<span class="door-sq">${ic}</span><b>${label}</b>${sub ? `<small>${sub}</small>` : ""}</button>`;
+    /* 26.11 (chantier « ergonomie », revue d'un testeur : « Problème, Curieux, Histoire : on ne sait pas ce que c'est ») :
+       une demi-ligne sous chaque case sans indication, aux 3 premières ouvertures de l'app seulement (state.doorHints). */
+    if (!doorHintCounted) { doorHintCounted = true; state.doorHints = (state.doorHints || 0) + 1; save(); }
+    const DOOR_HINT = { prob: "chaque semaine", cur: "maths cachées", hist: "découvertes", test: "révise ton test", carnet: "tes erreurs", prog: "grades, badges" };
+    const hintOn = (state.doorHints || 0) <= 3;
+    const door = (id, ic, label, sub0, badge) => { const sub = sub0 || (hintOn ? DOOR_HINT[id] : ""), hint = !sub0 && !!sub; return `<button type="button" class="door" data-door="${id}" aria-label="${esc(DOOR_NAME[id] || label)}${sub ? " : " + esc(sub) : ""}${badge === "!" ? " (nouveau)" : ""}">${badge ? `<span class="door-badge">${badge}</span>` : ""}<span class="door-sq">${ic}</span><b>${label}</b>${sub ? `<small${hint ? ' class="door-hint"' : ""}>${sub}</small>` : ""}</button>`; };
     const svgI = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`, TI = Object.fromEntries(HOME_TABS.map(([k, , ic]) => [k, ic]));
     /* 26.11 (revue élèves : deux grands boutons, évaluation et « Ma séance du jour », les élèves faisaient les deux, 15 à
        17 min) : évaluation active et tâche du jour pas encore faite → cette tâche EST la séance du jour (un seul bouton). */
@@ -1434,11 +1439,16 @@ function lessonBody(id) {
   if (!L) return "";
   const fig = typeof LESSON_FIGS !== "undefined" && LESSON_FIGS[id] && !frCol(id) ? `<div class="figwrap">${LESSON_FIGS[id]()}</div>` : "";
   const act = activeOf(id) ? `<div class="act-inline stack" data-act="${id}"><div class="act-h"><span class="act-n">🖐</span> Manipule</div><p class="act-goal"></p><div class="act-box stack"></div><div class="act-fb"></div></div>` : "";
-  return `<p>${L.intro}</p>${act || fig}<div class="rule"><b>À retenir</b>${(() => { const ss = sentences(L.regle); return ss.length > 1 ? "<ul>" + ss.map((x) => "<li>" + x + "</li>").join("") + "</ul>" : " · " + L.regle; })()}</div>
-  <div class="ex-list">${L.exemple.map((e) => `<div>${e}</div>`).join("")}</div>
-  <div class="trap"><b>Piège</b> · ${L.piege}</div>
+  return `<p>${L.intro}</p>${act || fig}${retiensHtml(L)}
   <div class="lfb" data-id="${id}"><span class="small muted">Ce rappel est…</span><button class="small" data-v="up">👍 clair</button><button class="small" data-v="down">🤔 pas compris</button><span class="small muted lfb-msg"></span></div>
   ${commentBox("💬 Un commentaire sur ce rappel ?", "Ce qui n'est pas clair, un exemple qui manque… (n'écris pas ton nom)", "lecon-" + id)}`;
+}
+/* 26.11 (chantier « ergonomie de la question », revue d'un testeur) : carte « Retiens » (leçons actives et rappels) :
+   la règle seule d'abord ; les exemples et le piège se déplient à la demande (contenu inchangé). */
+function retiensHtml(L) {
+  const ss = sentences(L.regle || ""), rule = ss.length > 1 ? "<ul>" + ss.map((x) => "<li>" + x + "</li>").join("") + "</ul>" : " · " + (L.regle || "");
+  const ex = L.exemple || [];
+  return `<div class="rule"><b>À retenir</b>${rule}</div>${ex.length ? `<details class="lx lx-ex"><summary>${ex.length > 1 ? "Voir des exemples" : "Voir un exemple"}</summary><div class="ex-list">${ex.map((e) => `<div>${e}</div>`).join("")}</div></details>` : ""}${L.piege ? `<details class="lx lx-trap"><summary>Le piège</summary><div class="trap"><b>Piège</b> · ${L.piege}</div></details>` : ""}`;
 }
 const lessonDetails = (id) => (LESSONS[id] ? `<details class="lesson" data-id="${id}"><summary>📖 Rappel de cours</summary><div class="stack">${lessonBody(id)}</div></details>` : "");
 // review : leçon rouverte depuis « Mes compétences » (pas une nouvelle notion), retour à cet écran.
@@ -1847,9 +1857,15 @@ const numKeys = (spec) => { const ex = exactKeys(spec).concat(spec.pow ? ["^"] :
 const keyLetters = (spec) => { let L = []; try { if (spec && spec.kind === "expr") L = [...Expr.vars(Expr.parse(spec.expr))].sort(); } catch (e) {} if (!L.length || (L.length <= 2 && L.every((v) => v === "x" || v === "y"))) return KEYS; const k = KEYS.slice(); k[k.indexOf("x")] = L[0]; k[k.indexOf("y")] = L[1] || (L[0] === "x" ? "y" : "x"); if (L[2]) k[k.indexOf("=")] = L[2]; return k; };
 /* 25.11 (commentaire de l'enseignant : « comment j'écris aucune ? ») : touche ∅ sur le clavier des listes de solutions
    (kind "set", classe k-list) ; « ⌨ » y prend une seule case pour lui faire place. */
+/* 26.11 (chantier « ergonomie de la question », revue d'un testeur : clavier trop chargé) : une réponse NOMBRE dont le calcul
+   tapé est permis (spec.value sans final) a un clavier de calcul sans lettres ni « = » ni « ; » (classe k-calc, 6 colonnes) ;
+   x, y, =, ; restent pour les expressions, les listes de solutions, les couples (et les intervalles). Test : tests/ergo.html. */
+const CALC_KEYS = ["7", "8", "9", "/", "(", ")", "4", "5", "6", "*", "^", "⌫", "1", "2", "3", "-", "√", "π", "0", ",", "+", "⌨"];
+const isCalcSpec = (spec) => !!spec && spec.kind === "value" && !spec.final;
 const keysFor = (spec) => (spec && spec.final ? numKeys(spec) : isSetSpec(spec) ? SET_KEYS.map((k) => keyBtn(k)).join("")
+  : isCalcSpec(spec) ? CALC_KEYS.map((k) => keyBtn(k)).join("")
   : spec && spec.kind === "set" ? keyLetters(spec).flatMap((k) => (k === "⌨" ? ["∅", k] : [k])).map((k) => keyBtn(k, true)).join("") : keyLetters(spec).map((k) => keyBtn(k)).join(""));
-const kpKind = (spec) => (spec && spec.final ? "k-num" : isSetSpec(spec) ? "k-set" : spec && spec.kind === "set" ? "k-list" : "");
+const kpKind = (spec) => (spec && spec.final ? "k-num" : isSetSpec(spec) ? "k-set" : isCalcSpec(spec) ? "k-calc" : spec && spec.kind === "set" ? "k-list" : "");
 const kpKey = (spec) => { const kind = kpKind(spec); return kind + (kind === "k-num" && exactKeys(spec).length ? "r" : "") + (kind === "k-num" && spec.pow ? "p" : ""); };
 const keypadHtml = (spec) => { const kind = kpKind(spec); return `<div class="keypad${kind ? " " + kind : ""}" id="kp" data-kind="${kpKey(spec)}">${keysFor(spec)}</div>`; };
 // Insère une touche dans le champ (avec « | » : place du curseur), ou efface.
@@ -1915,14 +1931,14 @@ function bindKeypad(getInput, after) {
 // Indice après une erreur (24.11, audit ergonomie) : sur un téléphone, il s'affichait sous le clavier et les boutons,
 // hors de l'écran ; l'élève ne voyait pas « Pas encore. Réessaie ! ». On défile juste assez pour le montrer.
 function fbInView(el, ms = 60) {
-  setTimeout(() => { if (!el || !el.isConnected) return; const r = el.getBoundingClientRect(); if (r.height && r.bottom > innerHeight) el.scrollIntoView({ behavior: "smooth", block: "nearest" }); }, ms);
+  setTimeout(() => { if (!el || !el.isConnected) return; const r = el.getBoundingClientRect(); if (r.height && r.bottom > innerHeight - qbarH()) el.scrollIntoView({ behavior: "smooth", block: "nearest" }); }, ms);
 }
 // Champ de réponse toujours visible au clavier de l'app (24.11, revue d'un testeur, écran 360 × 640) : au toucher du champ,
 // on montre d'un coup le champ, le clavier et « Valider » s'ils tiennent dans l'écran ; à chaque touche, le champ revient
 // à l'écran s'il en était sorti (défilement pendant la saisie).
 function ansInView(inp, all) {
   if (!inp || !inp.isConnected) return;
-  const vh = window.visualViewport ? visualViewport.height : innerHeight, r = inp.getBoundingClientRect();
+  const vh = (window.visualViewport ? visualViewport.height : innerHeight) - qbarH(), r = inp.getBoundingClientRect(); /* 26.11 : barre d'action fixe en bas */
   if (all && imOf(inp) === "none") {
     const box = inp.closest(".answer"), b = box ? box.getBoundingClientRect() : r;
     if (b.bottom > vh - 4 && b.bottom - r.top < vh - 16) { window.scrollBy({ top: b.bottom - vh + 12, behavior: "smooth" }); return; }
@@ -1937,7 +1953,7 @@ const imOf = (inp) => inp.getAttribute("inputmode") || "text";
 if (window.visualViewport) visualViewport.addEventListener("resize", () => {
   const a = document.activeElement;
   if (!a || !a.matches || !a.matches("input.ans, input#ans, textarea")) return;
-  const r = a.getBoundingClientRect(), vh = visualViewport.height;
+  const r = a.getBoundingClientRect(), vh = visualViewport.height - qbarH();
   if (r.bottom > vh - 8 || r.top < 0) a.scrollIntoView({ block: "center", behavior: "smooth" });
 });
 // Corrigé progressif (24.11) : étapes de splitSol dévoilées une à une sous un bouton « Voir l'étape suivante ».
@@ -1968,6 +1984,26 @@ function bindRecap() {
   addEventListener("scroll", onScroll, { passive: true });
   rc.onclick = () => { const o = !rc.classList.contains("open"); rc.classList.toggle("open", o); rc.setAttribute("aria-expanded", String(o)); };
 }
+/* 26.11 (chantier « ergonomie de la question », revue d'un testeur) : barre d'action fixe en bas de l'écran pendant une
+   question ou un problème. À droite toujours le bouton principal, au même endroit : « Valider », puis « Continuer » (ou
+   « Suivant ») après la correction ; à gauche « Je ne sais pas » (puis « Refaire… »). « Pas encore vu en classe » et
+   « Trop facile ⏭ » sont rangés derrière « ⋯ » : un toucher égaré n'ouvre que ce petit menu. La place de la barre est
+   réservée en bas de la page (#app:has(> .qbar), style.css), et qbarH() la retire de la hauteur utile des calculs de
+   défilement (champ, clavier de l'app, indice) pour que rien ne passe dessous. */
+const qbarHtml = (left, right, more) => `<div class="qbar" id="qbar"><div class="qbar-in"><div class="qbar-l">${more ? `<div class="qmore"><button type="button" class="btn-ghost qmore-b" id="qmore" aria-label="Autres choix : pas encore vu, trop facile" aria-haspopup="true" aria-expanded="false">⋯</button><div class="qmenu" id="qmenu" hidden>${more}</div></div>` : ""}${left}</div><div class="qbar-r">${right}</div></div></div>`;
+function qbarSet(left, right) { const b = document.getElementById("qbar"); if (!b) return; b.querySelector(".qbar-l").innerHTML = left; b.querySelector(".qbar-r").innerHTML = right; }
+const qbarH = () => { const b = document.getElementById("qbar"); return b && b.isConnected && b.getClientRects().length ? b.getBoundingClientRect().height : 0; };
+const qmenuShow = (on) => { const m = document.getElementById("qmenu"), b = document.getElementById("qmore"); if (!m || !b) return; m.hidden = !on; b.setAttribute("aria-expanded", String(on)); };
+function bindQmore() { const b = document.getElementById("qmore"); if (b) b.onclick = (e) => { e.stopPropagation(); qmenuShow(document.getElementById("qmenu").hidden); }; }
+/* Plus rien dans le menu (les deux choix ne valent qu'avant le premier essai) : « ⋯ » disparaît. */
+function qmoreTidy() { const m = app.querySelector(".qmore"); if (m && !m.querySelector("#notyet, #easy")) m.remove(); }
+document.addEventListener("click", (e) => { if (e.target.closest && !e.target.closest(".qmore")) qmenuShow(false); });
+/* Après une question : une seule icône 💬 discrète ; elle ouvre 👍 / 👎 et le commentaire (mêmes envois qu'avant :
+   vote(code, …) et comment(code, …) ; identifiant de la question visible en mode auteur). */
+const avisHtml = (code, lab, up, down) => `<div class="qfb"><span class="code" title="Code de la question">${code}</span><details class="cmt qfb-d"><summary aria-label="Ton avis : 👍, 👎 ou un commentaire" title="Ton avis sur cette question">💬</summary>
+  <div class="vote"><span>${lab} <button data-v="up" aria-label="${up}">👍</button> <button data-v="down" aria-label="${down}">👎</button></span></div>
+  <textarea class="cmt-t" maxlength="500" rows="3" placeholder="Un commentaire ? Une erreur, une consigne pas claire, une idée… (n'écris pas ton nom)" aria-label="Ton commentaire"></textarea>
+  <div class="spread"><span class="small muted cmt-ok"></span><button class="small cmt-s">Envoyer</button></div></details></div>`;
 // Problème en plusieurs parties : 3 essais, indices progressifs (outil, puis calcul), score partiel.
 function renderProblem(q, opt) {
   const notion = NOTIONS.find((n) => n.id === q.id);
@@ -1982,8 +2018,8 @@ function renderProblem(q, opt) {
   ${q.parts.map((p, i) => `<div class="answer part" data-i="${i}"><label for="p${i}"><b>${p.label}</b>${exactNote(p.spec, p.label) ? ` <span class="small muted">${p.spec.kind === "set" ? "(« ; » entre les solutions, ∅ s'il n'y en a pas)" : "(valeur exacte)"}</span>` : ""} <span class="mk" id="mk${i}"></span></label>
     <input id="p${i}" class="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" enterkeyhint="${i < q.parts.length - 1 ? "next" : "done"}"><div class="preview" id="pv${i}"></div>${i < q.parts.length - 1 ? `<button type="button" class="btn-ghost small next-part" data-i="${i}">partie suivante ↓</button>` : ""}</div>`).join("")}
   ${keypadHtml(q.parts[0].spec)}
-  <div class="actions"><button class="btn-primary" id="check">Valider</button><button class="btn-sec" id="idk">Voir le corrigé</button></div>
   <div id="fb"></div></div>
+  ${qbarHtml('<button class="btn-sec" id="idk">Voir le corrigé</button>', '<button class="btn-primary" id="check">Valider</button>')}
   <button type="button" class="qrecap" id="qrecap" hidden aria-expanded="false"><span class="qr-tag">📌 Énoncé</span><span class="qr-txt">${boldData(q.q)}</span></button>`);
   bindRecap();
   const S = opt.track ? sigOpen({ ev: "q", code, d: q.d, kind: q.kind || "", fmt: opt.track, redo: opt.redo ? 1 : 0 }) : null;
@@ -1996,7 +2032,7 @@ function renderProblem(q, opt) {
       active = inp;
       const kp = document.getElementById("kp"), kind = kpKind(p.spec);
       if ((kp.dataset.kind || "") !== kpKey(p.spec)) {
-        kp.classList.remove("k-set", "k-num", "k-list"); if (kind) kp.classList.add(kind);
+        kp.classList.remove("k-set", "k-num", "k-list", "k-calc"); if (kind) kp.classList.add(kind);
         kp.dataset.kind = kpKey(p.spec); kp.innerHTML = keysFor(p.spec); bindKp(); }
       placeKp(inp);
     };
@@ -2013,7 +2049,7 @@ function renderProblem(q, opt) {
     const inp = document.getElementById("p" + j); active = inp;
     try { inp.focus({ preventScroll: true }); } catch (e) {}
     inp.onfocus();
-    setTimeout(() => { const part = inp.closest(".part"), kp = document.getElementById("kp"); if (!part) return; const top = part.getBoundingClientRect().top, bot = (kp || part).getBoundingClientRect().bottom, vh = window.visualViewport ? visualViewport.height : innerHeight;
+    setTimeout(() => { const part = inp.closest(".part"), kp = document.getElementById("kp"); if (!part) return; const top = part.getBoundingClientRect().top, bot = (kp || part).getBoundingClientRect().bottom, vh = (window.visualViewport ? visualViewport.height : innerHeight) - qbarH();
       if (top < 8 || bot > vh - 4) { window.scrollBy(0, top < 8 || bot - top > vh - 16 ? top - 8 : bot - vh + 12); KP_GUARD.moved = performance.now(); } }, 60);
   };
   app.querySelectorAll(".next-part").forEach((b) => (b.onclick = () => goNext(+b.dataset.i)));
@@ -2028,7 +2064,7 @@ function renderProblem(q, opt) {
     finished = true;
     app.querySelectorAll("input.ans, #kp button, #check, #idk").forEach((b) => (b.disabled = true));
     app.querySelectorAll(".next-part").forEach((b) => b.remove());
-    { const kp = document.getElementById("kp"); if (kp) kp.style.display = "none"; const ac = app.querySelector(".card > .actions"); if (ac) ac.style.display = "none"; app.querySelectorAll(".card .preview").forEach((x) => (x.style.display = "none")); }
+    { const kp = document.getElementById("kp"); if (kp) kp.style.display = "none"; app.querySelectorAll(".card .preview").forEach((x) => (x.style.display = "none")); }
     const frac = ok.filter(Boolean).length / q.parts.length, factor = [1, 1, 2 / 3, 1 / 3][Math.min(tries, 3)] || 1 / 3;
     const score = giveUp && tries === 0 ? 0 : Math.round(frac * factor * 100) / 100;
     if (S) { S.issue = frac === 1 ? (tries === 1 ? "ok1" : "ok2") : giveUp && tries === 0 ? "idk" : ok.some(Boolean) ? "partiel" : "faux"; S.essais = tries; S.sec = sigSec(S); }
@@ -2042,8 +2078,8 @@ function renderProblem(q, opt) {
     const pAns = (sp) => !sp ? "" : sp.kind === "value" && isFinite(sp.value) ? String(sp.round ? +(Math.round(+(sp.value / sp.round).toPrecision(12)) * sp.round).toPrecision(12) : +sp.value.toPrecision(10)) /* 26.11 : arrondi sur l'écriture décimale */.replace(/(\.\d*?)0{6,}\d*$/, "$1").replace(".", ",") : sp.kind === "expr" && sp.expr ? sp.expr : "";
     const missed = q.parts.map((p, i) => [p, i]).filter(([, i]) => !ok[i]).map(([p, i]) => { const a = pAns(p.spec); return a ? `<li>${p.label.replace(/\s*\(.*?\)\s*$/, "")} : <b>${esc(a)}</b></li>` : ""; }).join("");
     fb.innerHTML = `<div class="fb ${frac === 1 ? "ok" : "bad"} pop"><div class="spread"><b>${frac === 1 ? (tries === 1 ? "Problème résolu du premier coup !" : "Problème résolu.") : ok.filter(Boolean).length + " partie(s) juste(s) sur " + q.parts.length + "."}</b>${d}</div>${missed ? `<div class="small"><b>Les bonnes réponses</b><ul class="plain p-ans">${missed}</ul></div>` : ""}${pSteps ? `<div id="ssteps" class="stack"></div><button class="btn-primary" id="solstep">Voir l'étape suivante</button><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : `<div class="sol">${q.sol}</div>`}</div>
-      <div class="vote"><span>Ce problème était… <button data-v="up" aria-label="Bon problème">👍</button> <button data-v="down" aria-label="Problème à revoir">👎</button></span><span class="code">${code}</span></div>${commentBox()}
-      <div class="actions">${frac === 1 ? "" : '<button class="btn-sec" id="redo">Refaire avec d\'autres valeurs</button>'}<button class="btn-primary" id="nx">Continuer</button></div>`;
+      ${avisHtml(code, "Ce problème était…", "Bon problème", "Problème à revoir")}`;
+    qbarSet(frac === 1 ? "" : '<button class="btn-sec" id="redo">Refaire avec d\'autres valeurs</button>', '<button class="btn-primary" id="nx">Continuer</button>');
     typeset(fb);
     fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
     bindComment(fb, code);
@@ -2097,10 +2133,9 @@ function renderQuestion(q, opt) {
   ${opt.single ? "" : lessonDetails(q.id)}
   <div class="answer"><input id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="none" placeholder="Ta réponse…" aria-label="Ta réponse">
   <div class="preview" id="prev"></div>
-  ${keypadHtml(q.spec)}
-  <div class="actions"><button class="btn-primary" id="check">Valider</button><button class="btn-sec" id="idk">Je ne sais pas</button></div>
-  ${opt.onNotYet || opt.onEasy ? `<div class="skips">${opt.onNotYet ? '<button class="btn-ghost small notyet" id="notyet">Pas encore vu en classe</button>' : ""}${opt.onEasy ? '<button class="btn-ghost small easy" id="easy" title="Passer cette question et monter d\'un cran">Trop facile ⏭</button>' : ""}</div>` : ""}</div>
-  <div id="fb"></div></div>`);
+  ${keypadHtml(q.spec)}</div>
+  <div id="fb"></div></div>
+  ${qbarHtml('<button class="btn-sec" id="idk">Je ne sais pas</button>', '<button class="btn-primary" id="check">Valider</button>', opt.onNotYet || opt.onEasy ? (opt.onNotYet ? '<button type="button" class="btn-sec notyet" id="notyet">Pas encore vu en classe</button>' : "") + (opt.onEasy ? '<button type="button" class="btn-sec easy" id="easy" title="Passer cette question et monter d\'un cran">Trop facile ⏭</button>' : "") : "")}`);
   const S = opt.track ? sigOpen({ ev: "q", code, d: q.d, kind: q.kind || "", fmt: opt.track, redo: opt.redo ? 1 : 0 }) : null;
   sigWatchLesson(S); pageQ = code; bindScratch(S);
   const inp = document.getElementById("ans"), prev = document.getElementById("prev"), fb = document.getElementById("fb");
@@ -2137,9 +2172,8 @@ function renderQuestion(q, opt) {
     finished = true;
     inp.disabled = true;
     app.querySelectorAll("#kp button, #check, #idk, #notyet").forEach((b) => (b.disabled = true));
-    // Proposition UI 1 (21.11) : clavier, aperçu et boutons repliés, la correction prend leur place sans défiler.
+    // Proposition UI 1 (21.11) : clavier et aperçu repliés, la correction prend leur place sans défiler.
     ["kp", "prev"].forEach((x) => { const el = document.getElementById(x); if (el) el.style.display = "none"; });
-    app.querySelectorAll(".card .answer > .actions, .card .skips").forEach((el) => (el.style.display = "none"));
     buzz(solved);
     setTimeout(() => { const f = document.getElementById("fb"); if (f && f.getBoundingClientRect().top > innerHeight * 0.75) f.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80);
     const res = { solved, tries, dontKnow, diag: solved ? null : lastDiag, ans: solved ? null : lastAns }; // 22.11 : diag et réponse pour le carnet (Ma fiche)
@@ -2147,7 +2181,8 @@ function renderQuestion(q, opt) {
     if (solved) burst();
     const delta = opt.onDone(res);
     if (opt.single) {
-      fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><b>${solved ? "✓ Juste ! " + pick(PRAISE.filter((x) => x !== "Juste !")) : dontKnow ? "D'accord, on s'en occupera. Voici la solution :" : "✗ Pas tout à fait. Voici la solution :"}</b>${solved ? "" : '<span class="sol">' + q.sol + "</span>"}</div><div class="actions"><button class="btn-primary" id="nx">Suivant</button></div>`;
+      fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><b>${solved ? "✓ Juste ! " + pick(PRAISE.filter((x) => x !== "Juste !")) : dontKnow ? "D'accord, on s'en occupera. Voici la solution :" : "✗ Pas tout à fait. Voici la solution :"}</b>${solved ? "" : '<span class="sol">' + q.sol + "</span>"}</div>`;
+      qbarSet("", '<button class="btn-primary" id="nx">Suivant</button>'); /* 26.11 : barre fixe, même place que « Valider » */
       typeset(fb);
       { const t0 = performance.now(); document.getElementById("nx").onclick = (e) => { if (e && e.isTrusted && performance.now() - t0 < 400) return; opt.onNext(); }; }
       document.getElementById("nx").focus();
@@ -2161,8 +2196,9 @@ function renderQuestion(q, opt) {
     fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><div class="spread"><b>${solved ? (tries === 1 ? pick(PRAISE) : "Juste au deuxième essai.") : dontKnow ? "Voici la méthode." : "Pas cette fois."}</b>${d}</div>
       ${!solved && lastDiag ? `<div class="diag">🔎 ${esc(lastDiag)}</div>` : ""}
       ${guided ? `<button class="btn-primary" id="guide">🪜 On le fait ensemble, pas à pas</button><div id="gsteps" class="stack"></div><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : solSteps ? `<div id="ssteps" class="stack"></div><button class="btn-primary" id="solstep">Voir l'étape suivante</button><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : `<div class="sol">${q.sol}</div>`}</div>
-      <div class="vote"><span>Cette question était… <button data-v="up" aria-label="Bonne question">👍</button> <button data-v="down" aria-label="Question à revoir">👎</button></span><span class="code" title="Code de la question">${code}</span></div>${commentBox()}
-      <div class="actions">${solved ? "" : `<button id="redo" class="${!guided && !solSteps ? "btn-primary" : "btn-sec"}">${q.d > 1 && q.d < 4 ? "💪 Une plus facile pour repartir" : "Refaire avec d'autres valeurs"}</button>`}<button class="${solved ? "btn-primary" : ""}" id="nx">Continuer</button></div>`;
+      ${avisHtml(code, "Cette question était…", "Bonne question", "Question à revoir")}`;
+    /* 26.11 : « Continuer » dans la barre fixe, à la place de « Valider » ; « Refaire » à la place de « Je ne sais pas ». */
+    qbarSet(solved ? "" : `<button id="redo" class="${!guided && !solSteps ? "btn-primary" : "btn-sec"}">${q.d > 1 && q.d < 4 ? "💪 Une plus facile pour repartir" : "Refaire avec d'autres valeurs"}</button>`, `<button class="${solved ? "btn-primary" : "btn-sec"}" id="nx">Continuer</button>`);
     typeset(fb);
     fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
     bindComment(fb, code);
@@ -2209,6 +2245,7 @@ function renderQuestion(q, opt) {
     tries++;
     const ez = document.getElementById("easy"); if (ez) ez.remove();
     const ny = document.getElementById("notyet"); if (ny) ny.remove();
+    qmoreTidy();
     const diag = r.status === "wrong" || (r.status === "close" && q.spec.kind === "set") ? diagnose(q, v) : null;
     lastDiag = diag; if (diag) lastAns = v;
     if (S && !S.rep1) { S.rep1 = sigRep(v); S.diag = diag ? 1 : 0; }
@@ -2220,6 +2257,7 @@ function renderQuestion(q, opt) {
   };
   document.getElementById("check").onclick = check;
   document.getElementById("idk").onclick = () => { if (!finished) end(false, true); };
+  bindQmore();
   const ny = document.getElementById("notyet");
   if (ny) ny.onclick = () => { if (!finished && tries === 0) { finished = true; if (S) { S.issue = "pasvu"; S.sec = sigSec(S); } opt.onNotYet(); } };
   const ez = document.getElementById("easy");
