@@ -1869,6 +1869,14 @@ function nextQuestion(redo) {
     const sw = Engine.planSlots(state, ["defi4"], { exclude: new Set(session.defiSkip) })[0];
     if (sw && sw.split("|")[1] === "4") { session.plan[session.i] = sw; return nextQuestion(); }
   }
+  /* 26.11 (test court instable : pythrec, f2) : la question peut être remplacée après le premier contrôle (automatisme, défi) ;
+     dernier contrôle juste avant l'affichage, au même niveau puis au niveau au-dessus si la notion a peu de valeurs. */
+  if (!redo && q && session.lessonShown === id && lessonEcho(id, q)) {
+    for (let k = 0; k < 60; k++) {
+      const c = kind === "drill" && k < 20 ? Engine.makeDrill(state, id) : Engine.make(state, id, Math.min(4, (q.d || level) + (k >= 40 ? 1 : 0)));
+      if (c && !lessonEcho(id, c)) { q = c; break; }
+    }
+  }
   q.kind = kind;
   const ST = sessStep(session), nTxt = ST.pos + " sur " + ST.total;
   const fmtLab = session.fmt && FORMATS[session.fmt] ? (newNotion(id) && session.lessonShown === id /* 26.11 (lot) : seulement avec sa leçon (l'accueil annonçait « Révision ») */ ? "Nouvelle notion" : FORMATS[session.fmt].label) /* 26.11 : notion d'une année précédente jamais travaillée : pas « Nouvelle notion ». 26.11 soir (revue des élèves testeurs, n° 3 : « 1 sur 4 » seul) : la séance Révision garde son libellé, comme les autres formats ; il nomme la séance, pas la notion. */ : "";
