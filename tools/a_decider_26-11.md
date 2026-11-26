@@ -40,3 +40,12 @@ Rien ici n'est bloquant : l'app est publiée avec le choix indiqué.
 24. **Élève faible mais au-dessus du critère** (Hugo, 6e France) : défi du jour en 4 parties (6 min), « Me tester » 5 min. Limiter aussi ces formats ?
 25. **Défi pct, « carte d'étudiant »** (réservé 3e France, 10e CO et plus) : reformuler en « carte jeune » ?
 26. **« Me tester »** : polygones réguliers retirés de l'objectif « triangles, quadrilatères, cercles », pas encore rattachés à l'objectif « polygones ».
+
+## Élèves faibles (agent /eleves-faibles, nuit du 26.11 ; rapport tools/eleves_faibles_26-11.md)
+27. **Rejouer au lieu d'ajouter** : pour un élève en grande difficulté, après un raté, la question suivante = même notion, autres nombres, un niveau en dessous (1 fois par séance, durée inchangée). Gain simulé modeste (séances sans aucune réussite 70 → 63 % en 9e très faible), sous hypothèse.
+28. **Carnet à la portée** : une seule réussite efface une erreur (au lieu de 2 de suite), réussites en séance comptées.
+29. **Positionnement au niveau 1** (première impression).
+30. **9e : automatismes de fin de primaire** pour les très faibles (seul levier qui passe le plancher : réussite ≈ 25 → 44 %).
+31. **Bilan centré sur les réussites** (au lieu de « Séance faite… ») et message de retour après une absence.
+32. **Sans chapitre « en classe »**, 78–83 % des questions d'un élève moyen de 10e–1re portent en novembre sur l'année précédente : voulu ?
+Constat : le moteur sert déjà le plus facile possible aux faibles (plancher) ; la simulation est trop pessimiste (modèle d'apprentissage) : ne plus régler le moteur sur elle, attendre les données de la 11LS.
