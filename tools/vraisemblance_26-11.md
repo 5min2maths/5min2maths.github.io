@@ -430,3 +430,82 @@ droitesinter, vecteurs, recipaff, eqratmp, logprop, croissexp, volmp, similmp, c
 explogfn, limitinf, continuite, combi, vect3d, droite3d, plans, pscal3d, primitives, volrev, croissance, appllin,
 condbayes, varalea, binomiale, normale, log, vabs, eqparam, trigassoc, trigeq2, eqirrmp, eqlog, derivref, etudefct,
 lnexp) ; France seule et hors catalogue : inchangés (voir la liste d'agent/defisch).
+
+### Défis à 3 contextes, fin (26.11 soir, branche agent/defisch3)
+
+Fin de la liste « Restent à 1 ou 2 contextes » : les **46 défis** de 2e–4e Collège et MP (eqlog avait déjà ses 3
+contextes). Même méthode : gabarits d'origine étiquetés (ctx), deux contextes ajoutés par notion (un pour log et
+trigeq2), valeurs tirées, corrigé calculé, oracle par contexte **y compris pour les gabarits d'origine** dans
+`tests/recalc_oracles.js` (section « agent defisch3 » ; `DX` = oracle qui lit aussi le TeX brut, pour ln et les
+matrices), ajout à `VARIES` de `tests/vraisemblance_soir.html`. Contrôle des 140 contextes par le nouvel outil hors
+suite `tests/_oracles4.html#ids=…&n=60` (parties recalculées / parties numériques par ctx, contre-épreuve, valeurs non
+arrondies) : 140/140 entièrement recalculés. `tests/_frch.html` sur les 21 notions servies en France : aucun CHF,
+lieu ou usage suisse (2'460 défis).
+
+Arrondis : `RFIX` (src/defis.js) arrondit sur l'écriture décimale la valeur attendue de toute partie « au dixième »,
+« au centième », « à l'unité »… de ces 46 notions, gabarits d'origine compris (avant : 4,615 au centième, cart ;
+459,63 m² à l'unité, triaire ; 65,217 % au dixième, condbayes… acceptaient les deux voisins à l'égalité).
+
+| Notion | Contextes (ctx) |
+|---|---|
+| stats | notes6 (CH), **notes20** (France seulement, `fr: [10, 11, 12]`), **production** (atelier, boulangerie, cinéma : moyenne, médiane, écart-type), **velo** (8e sortie pour une moyenne visée) |
+| statfreq | transport, **de** (fréquence cumulée), **sport** (effectif manquant, angle) |
+| quartiles | trajet, **saut** (15 valeurs : EIQ, étendue), **ecran** (Q1, Q3, valeurs extrêmes) |
+| triaire | terrain, **voile** (aire, chute, angle), **plaque** (parallélogramme : deux diagonales) |
+| droites | perpendiculaire, **alignes** (piquets d'un géomètre), **plan** (piste cyclable parallèle) |
+| droitesinter | location, **rencontre** (deux cyclistes, départs décalés), **repere** |
+| recipaff | forfait, **ressort**, **four** (f⁻¹ d'un préchauffage) |
+| trigassoc | sinus, **reference** (angle de référence, quadrant), **bras** (robot de soudure) |
+| trigeq2 | roue, maree, **temperature** (journée d'été) |
+| fracrat | evidence, **trinome**, **produit** |
+| vabs | droite, **thermostat**, **equation** |
+| eqparam | delta, **lineaire** ((m − a)x = m² − a²), **ecart** (écart des solutions, solution double de l'autre) |
+| cart | triangle, **carte** (refuge, lac, sommet), **isocele** |
+| expo | demivie, **depreciation** (voiture), **vues** (vidéo) |
+| log | capital, doublement, **seisme** (magnitude) |
+| vecteurs | parallelogramme, **forces** (deux cordes), **drone** (co : 2e–4e, comme le défi d'origine) |
+| eqratmp | robinets, **bateau** (aller-retour sur une rivière), **partage** (minibus d'une sortie d'atelier) |
+| logprop | calculs, **approx** (log 2 ≈ 0,301, log 3 ≈ 0,477), **chiffres** (nombre de chiffres de 2ⁿ, 3ⁿ, 7ⁿ) |
+| croissexp | capital, **medicament** (décroissance), **population** |
+| volmp | silo, **citerne** (cylindre et deux demi-boules), **piece** (bague d'acier percée : masse) |
+| similmp | verre, **maquette** (aires et volumes à l'échelle), **ombre** |
+| coordmp | triangle, **terrain** (quadrilatère : clôture, aire), **percage** (entraxes, milieu) |
+| vectmp | parallelogramme, **courant** (bateau), **base** (w = au + bv) |
+| scalmp | triangle, **travail** (W = F · d), **orthogonal** |
+| projmp | projete, **route** (chemin le plus court, coût), **rail** (composante utile, travail) |
+| pvectmp | calcul, **toit** (aire d'un pan, tuiles), **caisse** (produit mixte) |
+| explogfn | points, **refroidissement** (T = 20 + a · bᵗ), **isotope** (demi-vie) |
+| eqirrmp | deuxracines, **parasite** (√(ax + b) = x − c), **pendule** |
+| limitinf | perfusion, **coutmoyen**, **rationnelle** |
+| continuite | parking, **cuve**, **parametre** |
+| combi | comite, **code** (au moins un 7…), **podium** |
+| vect3d, droite3d, plans, pscal3d | points, **salle**, **drone** ; parametrique, **avion**, **ombre** (mât) ; normal, **troispoints**, **traces** (tétraèdre) ; triangle, **pave**, **cables** (mât haubané) |
+| derivref | benefice, **voiture** (vitesse instantanée et moyenne), **hyperbole** (tangente, triangle d'aire 2k) |
+| etudefct | cubique, **bicarre** (nombre de zéros), **rampe** (profil de skate : inflexion, pente la plus forte) |
+| primitives | chariot, **debit** (cuve), **cout** (coût marginal) |
+| volrev | verre, **bol** (demi-boule, hauteur de soupe), **entonnoir** |
+| croissance | bacteries, **cafe** (refroidissement), **medicament** |
+| appllin | noyau, **aire** (\|det A\|), **antecedent** |
+| condbayes | maladie, **machines** (pièces défectueuses), **spam** |
+| varalea | foire, **tombola**, **assurance** (espérance, écart-type) |
+| binomiale | avion, **graines**, **lancers** (lancers francs) |
+| normale | paquets, **tailles**, **trajet** (règle 68 – 95 – 99,7) |
+| lnexp | lnmin, **concentration** (a t e^(−bt)), **xexp** ((x − a)eˣ) |
+
+Défauts trouvés par les oracles (corrigés) :
+
+- **appllin (grave, src/ch4c_ana.js)** : le noyau annoncé était faux. Avec b = −a · m, le vecteur (1 ; m) n'était pas
+  dans le noyau (a + b · m ≠ 0 sauf m = ±1) : maintenant a = −b · m.
+- **stats en France** : le défi d'origine (notes sur 6, barème suisse) était servi en 2nde–Tle françaises. Écarté du
+  profil FR (`HORS_FR.stats`, src/fr_couv.js) ; forme « notes sur 20 » réservée à la France (`q.fr`).
+- Énoncés incomplets pour le recalcul (et pour l'élève qui relit une question seule) : similmp b) « Combien de
+  verres remplis ainsi » → « remplis jusqu'à h cm » ; eqparam d) « L'autre solution dans ce cas » → « quand t est
+  solution ».
+- Libellés qui contenaient « maximale », « au moins » avec un arrondi (lus comme « arrondir vers le bas / le haut ») :
+  « la plus forte », « la plus élevée », « ne pas tous les rater ».
+- Relecture : « Fréquence du natation », « font du athlétisme » (articles), « 1t² » réécrit « t² » par tidy (cuve),
+  écart de températures trop grand pour un thermostat, vues de vidéo non entières (facteur 1,5), bateau toujours à
+  3,2 h (liste trop étroite).
+- Suite : « de les réussir tous » (formulation), températures du four hors du mot « four » (vraisemblance) ;
+  « z = 0 : … » lu comme une division (college34) ; `tests/test.html` saisissait toute réponse arrondie avec
+  2 décimales (refus des parties « au millième », logprop et explogfn) : nombre de décimales selon la précision.

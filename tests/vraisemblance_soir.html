@@ -56,7 +56,11 @@
     /* 26.11 soir (agent defisch2) : suite, 9e–11e */
     "distrib", "idrem", "eq2", "echelle", "sys2", "angles", "angtri", "volcone", "formule", "proba", "volmanq", "eq2fact", "cercthales", "thalesrec", "racprop", "litconv",
     /* 26.11 soir (agent defisch2) : 1re Collège */
-    "eq3", "absval", "ineq2", "ensembles", "trinfact", "eqspec", "modaff", "geocomb", "trigrel", "f2", "euclide", "trigo", "ineq", "f2expr", "racinv", "ratden", "exactes", "f2trois", "morceaux", "tradalg", "contrex", "demoalg", "implication"];
+    "eq3", "absval", "ineq2", "ensembles", "trinfact", "eqspec", "modaff", "geocomb", "trigrel", "f2", "euclide", "trigo", "ineq", "f2expr", "racinv", "ratden", "exactes", "f2trois", "morceaux", "tradalg", "contrex", "demoalg", "implication",
+    /* 26.11 soir (agent defisch3) : 2e–4e Collège et MP */
+    "stats", "statfreq", "quartiles", "triaire", "droites", "droitesinter", "recipaff", "trigassoc", "trigeq2", "fracrat", "vabs", "eqparam", "cart", "expo", "log", "vecteurs",
+    "eqratmp", "logprop", "croissexp", "volmp", "similmp", "coordmp", "vectmp", "scalmp", "projmp", "pvectmp", "explogfn", "eqirrmp", "limitinf", "continuite", "combi",
+    "vect3d", "droite3d", "plans", "pscal3d", "derivref", "etudefct", "primitives", "volrev", "croissance", "appllin", "condbayes", "varalea", "binomiale", "normale", "lnexp"];
   for (const id of VARIES) {
     const S = new Set(), C = new Set();
     for (let s = 1; s <= N; s++) { let q; try { q = Engine.build(id, 4, s); } catch (e) { errs.push(id + "-4-" + s + " : " + e.message); continue; } S.add(q.q + " | " + (q.parts || []).map((p) => p.label).join(" | ")); C.add(q.ctx || "?"); }
