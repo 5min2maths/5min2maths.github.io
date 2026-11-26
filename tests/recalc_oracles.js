@@ -1619,6 +1619,13 @@ const RECALC = (() => {
     return lab.startsWith("a)") && p ? 2 ** p[0] : lab.startsWith("b)") && p ? p[0] : n ? Math.log2(n[0]) : null; });
   DF("aire1", /même aire qu'(?:un carré|une pelouse carrée|une affiche carrée) de (\d+) (?:cm|m|dm) de côté\. Sa largeur mesure (\d+)/, (g, lab) => { const [s, w] = g.map(nn), L = (s * s) / w;
     return lab.startsWith("a)") ? s * s : lab.startsWith("b)") ? L : lab.startsWith("c)") ? 2 * (L + w) - 4 * s : null; });
+  /* quadri, decarr, airelat (9e–10e, defis_910) */
+  DF("quadri", /losange ABCD, l'angle ∠BAC .*?mesure (\d+)°/, (g, lab) => { const a = nn(g[0]); return lab.startsWith("a)") ? 2 * a : lab.startsWith("b)") ? 90 : lab.startsWith("c)") ? 180 - 2 * a : null; });
+  DF("quadri", /rectangle ABCD, .*?l'angle ∠OAB mesure (\d+)°/, (g, lab) => { const a = nn(g[0]); return lab.startsWith("a)") ? a : lab.startsWith("b)") ? 180 - 2 * a : lab.startsWith("c)") ? 2 * a : null; });
+  DF("quadri", /l'angle ∠BAD mesure (\d+)° et la diagonale \[AC\] fait avec le côté \[AB\] un angle ∠BAC de (\d+)°/, (g, lab) => { const [A, b] = g.map(nn); return lab.startsWith("a)") ? 180 - A : lab.startsWith("b)") ? A - b : lab.startsWith("c)") ? b : null; });
+  DF("decarr", /achète (\d+) [^0-9]+? à (\d+,\d+) CHF pièce/, (g, lab) => { const [n, p] = g.map(nn); return lab.startsWith("a)") ? n * p : lab.startsWith("b)") ? n * Math.round(p) : lab.startsWith("c)") ? Math.abs(n * Math.round(p) - n * p) : null; });
+  DF("airelat", /diamètre de (\d+) cm et une (?:hauteur|longueur) de (\d+) cm/, (g, lab) => { const [d, h] = g.map(nn), AL = Math.PI * d * h;
+    return lab.startsWith("a)") ? AL : lab.startsWith("b)") ? AL + (Math.PI * d * d) / 2 : lab.startsWith("c)") ? Math.PI * d : null; });
   /* ==== fin agent defis3 ==== */
 
   /* ---------- 26.11 (agent defis2) : notions encore sous 20 % (transf, trigcercle, trigfn, recip, lectures de graphique
