@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "28e4c3979f"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "326570cd96"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -199,7 +199,7 @@ function frDom(el) {
   const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentNode && (/^(SCRIPT|STYLE|TEXTAREA)$/.test(n.parentNode.nodeName) || (n.parentNode.closest && n.parentNode.closest("[data-noloc]"))) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT) });
   const ns = []; while (w.nextNode()) ns.push(w.currentNode);
   /* 26.11 (revue élèves : « ÉTAPE 2 SUR 2 × 1 SUR 8 ») : dans un titre d'écran (.eyebrow), le « · » est un séparateur, jamais un produit. */
-  for (const n of ns) { const v = n.nodeValue; let r = n.parentNode.closest && n.parentNode.closest(".eyebrow") ? frWords(v) : frLocal(v);
+  for (const n of ns) { const v = n.nodeValue; let r = n.parentNode.closest && n.parentNode.closest(".eyebrow") ? frWords(v) : frLocal(v); if (state.profile.grade >= 10 && typeof frZero === "function") r = frZero(r); /* 26.11 : racines (lycée) */
     /* 26.11 (revue p3, n° 5 : « 4 · ? = 14 » dans la leçon proptab) : dans une leçon, un produit coupé par une balise
        (« 4 · » puis <b>?</b>, flèche « · 8 ») est aussi un produit. */
     if (n.parentNode.closest && n.parentNode.closest(".act-inline, .lesson-card, .act-out")) {
