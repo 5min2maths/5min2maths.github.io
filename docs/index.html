@@ -989,12 +989,12 @@ window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "glo
 </head>
 <body>
 <main id="app" aria-live="polite"></main>
-<script src="app.js?v=5b0a5845e1"></script>
+<script src="app.js?v=28e4c3979f"></script>
 <script>
 (function () {
   // Chargement par niveau (24.11). Paquets requis : le niveau de l'élève et les niveaux inférieurs de sa filière ;
   // France et liens de consultation (#q-, #l-, #auteur) : tout. Puis le reste en arrière-plan (hors ligne complet).
-  var V = "5b0a5845e1", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
+  var V = "28e4c3979f", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
   window.__packs = loaded; // pour les tests (tools/test_paquets.py)
   function need(p) {
     if (!p || p.system === "FR") return K.slice();

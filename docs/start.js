@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "5b0a5845e1"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "28e4c3979f"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -1868,6 +1868,14 @@ function nextQuestion(redo) {
   if (!redo && !forceProb && session.fmt === "defi" && level === 4 && q && q.d !== 4 && (session.defiSkip = [...(session.defiSkip || []), id]).length <= 4) {
     const sw = Engine.planSlots(state, ["defi4"], { exclude: new Set(session.defiSkip) })[0];
     if (sw && sw.split("|")[1] === "4") { session.plan[session.i] = sw; return nextQuestion(); }
+  }
+  /* 26.11 (test court instable : pythrec, f2) : la question peut être remplacée après le premier contrôle (automatisme, défi) ;
+     dernier contrôle juste avant l'affichage, au même niveau puis au niveau au-dessus si la notion a peu de valeurs. */
+  if (!redo && q && session.lessonShown === id && lessonEcho(id, q)) {
+    for (let k = 0; k < 60; k++) {
+      const c = kind === "drill" && k < 20 ? Engine.makeDrill(state, id) : Engine.make(state, id, Math.min(4, (q.d || level) + (k >= 40 ? 1 : 0)));
+      if (c && !lessonEcho(id, c)) { q = c; break; }
+    }
   }
   q.kind = kind;
   const ST = sessStep(session), nTxt = ST.pos + " sur " + ST.total;
