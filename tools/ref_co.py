@@ -25,6 +25,10 @@ Choix (à valider par l'enseignant) :
 - Rattachement (champ « q ») : une notion (ou certains de ses niveaux de question, « id@13 ») n'est rattachée que si
   ses questions entraînent vraiment l'item (lu dans les générateurs et src/competences.js, sans les modifier) ;
   constructions, représentations, manipulations, preuves : aucun rattachement (« travaillée en classe »).
+- 26.11 (agent perco) : 31-SO2, 31-TR1, 31-TR3, 31-TR4, 31-TR8, 32-NB9, 32-NB10, 33-FO1, 33-FO2, 33-LI1, 33-LI4 rattachés aux
+  notions de src/perco.js (isom, ensco, numer, fctlec, litconv) et aux formes ajoutées à simil (homothéties) et volcone
+  (cône et sphère). Items « Résoudre des problèmes » (31-RP, 33-RP) laissés sans rattachement : aucune notion ne les porte
+  sans forcer.
 
 Usage : python3 tools/ref_co.py   (relancer après un changement de ITEMS)
 """
@@ -58,7 +62,7 @@ ITEMS = [
      "Représentation de figures planes par un croquis et/ou un dessin à l'échelle (y compris l'échelle 1:1)"),
     ("31-SO1", 31, "Solides", "Reconnaître et décrire cube, pavé, prisme droit, cylindre, pyramide (faces, arêtes, sommets)", 9, 10, ["solides"],
      "Reconnaissance, dénomination, description de solides selon leurs propriétés (faces, sommets, arêtes, polyèdre ou non) : cube, parallélépipède rectangle, prisme droit, cylindre, pyramide"),
-    ("31-SO2", 31, "Solides", "Reconnaître et décrire le cône et la sphère", 11, 11, [],
+    ("31-SO2", 31, "Solides", "Reconnaître et décrire le cône et la sphère", 11, 11, ["volcone"],
      "… : cône, sphère"),
     ("31-SO3", 31, "Solides", "Réaliser le développement d'un cube, d'un pavé, d'un prisme droit", 9, 10, [],
      "Réalisation de développements et construction de solides : cube, parallélépipède rectangle, prisme droit"),
@@ -66,13 +70,13 @@ ITEMS = [
      "… : cylindre (Niv 1s-2-3) ; pyramide régulière (Niv 2-3)"),
     ("31-SO5", 31, "Solides", "Représenter un solide en perspective", 9, 11, [],
      "Représentation de solides en perspective"),
-    ("31-TR1", 31, "Transformations géométriques", "Reconnaître et nommer les isométries : translation, symétries axiale et centrale, rotation", 9, 10, [],
+    ("31-TR1", 31, "Transformations géométriques", "Reconnaître et nommer les isométries : translation, symétries axiale et centrale, rotation", 9, 10, ["isom@12"],
      "Reconnaissance et dénomination des isométries : translation, symétrie axiale, rotation, symétrie centrale"),
     ("31-TR2", 31, "Transformations géométriques", "Identifier les caractéristiques d'une isométrie (vecteur, axe, centre, angle)", 9, 10, ["rotation@12"],
      "Description et identification des caractéristiques d'une isométrie (vecteur de translation, axe de symétrie, centre de rotation ou de symétrie, conservation des grandeurs,…)"),
-    ("31-TR3", 31, "Transformations géométriques", "Identifier les caractéristiques d'une homothétie (centre, rapport)", 11, 11, [],
+    ("31-TR3", 31, "Transformations géométriques", "Identifier les caractéristiques d'une homothétie (centre, rapport)", 11, 11, ["simil"],
      "Description et identification des caractéristiques d'une : homothétie (centre, rapport,…) ; similitude (Niv 3s) (Niv 2-3)"),
-    ("31-TR4", 31, "Transformations géométriques", "Anticiper la position d'une figure après une ou plusieurs isométries", 9, 11, [],
+    ("31-TR4", 31, "Transformations géométriques", "Anticiper la position d'une figure après une ou plusieurs isométries", 9, 11, ["isom@13"],
      "Anticipation de la position d'une figure plane après une ou plusieurs isométries"),
     ("31-TR5", 31, "Transformations géométriques", "Réaliser des frises et des pavages", 9, 11, [],
      "Réalisation de frises ou de pavages à l'aide d'isométries"),
@@ -80,7 +84,7 @@ ITEMS = [
      "À l'aide des instruments ou de logiciels appropriés, construction de l'image d'une figure plane par une isométrie : translation, symétrie axiale, rotation, symétrie centrale"),
     ("31-TR7", 31, "Transformations géométriques", "Agrandir et réduire une figure (proportionnalité)", 10, 10, ["agrand"],
      "Agrandissement et réduction de figures planes en utilisant la proportionnalité (9e : Niv s)"),
-    ("31-TR8", 31, "Transformations géométriques", "Construire l'image d'une figure par une homothétie", 11, 11, [],
+    ("31-TR8", 31, "Transformations géométriques", "Construire l'image d'une figure par une homothétie", 11, 11, ["simil"],
      "Construction de l'image d'une figure plane : par une homothétie ; par une similitude (Niv 3s) (Niv 2-3)"),
     ("31-RE", 31, "Repérage dans le plan et dans l'espace", "Se repérer dans le plan et dans l'espace (placer des points, coordonnées)", 9, 11, ["repere", "repere3d"],
      "Utilisation de systèmes de repérage pour communiquer des positions et des itinéraires, pour placer des points (plan et espace)"),
@@ -109,9 +113,9 @@ ITEMS = [
      "… sous forme : de la notation scientifique a·10ⁿ (n dans ℕ : Niv 1s ; n dans ℤ : Niv 2-3)"),
     ("32-NB8", 32, "Nombres", "Encadrer et comparer des racines carrées et cubiques", 10, 11, ["racenc", "rac@2"],
      "… sous forme : de racine carrée et cubique dans ℝ+"),
-    ("32-NB9", 32, "Nombres", "Distinguer les ensembles de nombres ; découvrir des irrationnels", 9, 11, [],
+    ("32-NB9", 32, "Nombres", "Distinguer les ensembles de nombres ; découvrir des irrationnels", 9, 11, ["ensco"],
      "Discernement des ensembles de nombres, découverte de quelques nombres irrationnels"),
-    ("32-NB10", 32, "Nombres", "Explorer des systèmes de numération (romain, égyptien, binaire…)", 9, 11, [],
+    ("32-NB10", 32, "Nombres", "Explorer des systèmes de numération (romain, égyptien, binaire…)", 9, 11, ["numer"],
      "Exploration de quelques systèmes de numération (Rome, Égypte, Babylone, binaire,…)"),
     ("32-CA1", 32, "Calculs", "Priorités des opérations (parenthèses comprises)", 9, 10, ["prio"],
      "Connaissance et utilisation des priorités des opérations (y compris parenthèses)"),
@@ -140,9 +144,9 @@ ITEMS = [
      "… : échelle, pourcentage, pente"),
     ("33-PR3", 33, "Éléments pour la résolution de problèmes", "Proportionnalité : vitesse moyenne, masse volumique, débit", 11, 11, ["vitesse", "gquot"],
      "… : vitesse moyenne ; masse volumique (Niv 1s-2-3) ; débit (Niv 3)"),
-    ("33-FO1", 33, "Fonctions", "Reconnaître une situation qui se modélise par une fonction", 9, 11, [],
+    ("33-FO1", 33, "Fonctions", "Reconnaître une situation qui se modélise par une fonction", 9, 11, ["fctlec@23"],
      "Reconnaissance de situations pouvant être modélisées par des fonctions"),
-    ("33-FO2", 33, "Fonctions", "Lire et interpréter un tableau de valeurs, un graphique", 9, 11, [],
+    ("33-FO2", 33, "Fonctions", "Lire et interpréter un tableau de valeurs, un graphique", 9, 11, ["fctlec@13"],
      "Lecture et interprétation de tableaux de valeurs, de représentations graphiques"),
     ("33-FO3", 33, "Fonctions", "Représenter une relation par un tableau, un graphique, un opérateur ; passer de l'un à l'autre", 9, 11, [],
      "Représentation d'une relation où interviennent deux grandeurs variables par : un tableau de valeurs ; une représentation graphique ; un ou plusieurs opérateurs ; passage d'une représentation à une autre : de l'opérateur au tableau de valeurs et inversement, du tableau de valeurs à la représentation graphique et inversement"),
@@ -158,13 +162,13 @@ ITEMS = [
      "Réalisation de diagrammes : diagramme circulaire, en barre (Niv 1s-2-3)"),
     ("33-DI4", 33, "Diagrammes", "Utiliser un tableur, un grapheur", 9, 11, [],
      "Utilisation d'outils appropriés (tableur, grapheur,…)"),
-    ("33-LI1", 33, "Algèbre – Calcul littéral", "Règles et conventions d'écriture algébrique", 10, 11, [],
+    ("33-LI1", 33, "Algèbre – Calcul littéral", "Règles et conventions d'écriture algébrique", 10, 11, ["litconv@1"],
      "Connaissance et utilisation des règles et conventions usuelles d'écriture algébrique (9e : Niv 2s-3s ; 10e : Niv 1s-2-3 ; 11e : Niv 1)"),
     ("33-LI2", 33, "Algèbre – Calcul littéral", "Calculer la valeur d'une expression littérale", 9, 11, ["valnum"],
      "Détermination de la valeur numérique d'une expression littérale en substituant des nombres aux lettres (9e : Niv 2-3 ; 10e–11e : tous niveaux)"),
     ("33-LI3", 33, "Algèbre – Calcul littéral", "Écrire une expression littérale (énoncé, figure, phrase)", 10, 11, ["litelab"],
      "Élaboration d'expressions littérales à partir d'énoncés de problèmes, de figures géométriques ou d'expressions verbales (9e : Niv 2s-3s ; 10e–11e : Niv 2-3 ; 11e : Niv 1s)"),
-    ("33-LI4", 33, "Algèbre – Calcul littéral", "Interpréter des expressions et reconnaître des expressions équivalentes", 10, 11, [],
+    ("33-LI4", 33, "Algèbre – Calcul littéral", "Interpréter des expressions et reconnaître des expressions équivalentes", 10, 11, ["litconv@23"],
      "Interprétation d'expressions littérales et identification de celles qui sont équivalentes (Niv 2-3)"),
     ("33-LI5", 33, "Algèbre – Calcul littéral", "Réduire et ordonner monômes et polynômes", 10, 11, ["reduire"],
      "Connaissance de la terminologie, écriture réduite et ordonnée de : monômes (10e) ; polynômes de degré ≤ 3 (11e) (Niv 2-3) ; addition, réduction de polynômes du premier degré (11e, Niv 1)"),

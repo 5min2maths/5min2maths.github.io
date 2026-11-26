@@ -1,0 +1,145 @@
+<!doctype html><meta charset="utf-8"><meta name="budget" content="40000">
+<!-- 26.11 (agent perco) : items du PER encore sans question (src/perco.js). Notions isom, ensco, numer, fctlec, litconv :
+     boucle de contrôle copiée de trous.html (formes, guides, pièges, trivialité, TeX hors formule), questions à choix
+     (q.choix : numéro attendu, chaque autre numéro diagnostiqué), formes réservées à certaines classes (q.co : rotation
+     et irrationnels à partir de la 10e, mot « affine » jamais en 9e), placement (classe, chapitre, France, MP), leçons,
+     compétences, défis, prérequis, leçons actives ; formes ajoutées à simil (homothéties) et volcone (cône, sphère) ;
+     rattachement au référentiel du PER (src/ref_co.js). Scripts : ordre de build.py (sans app.js). -->
+<script>window.MathJax = { typesetPromise: () => Promise.resolve() };</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/defis_9.js"></script><script src="../src/defis_910.js"></script><script src="../src/defis_2c.js"></script><script src="../src/defis_sec2.js"></script><script src="../src/competences.js"></script><script src="../src/referentiel.js"></script><script src="../src/trx.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch4c_trous.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/ch1c_trous.js"></script><script src="../src/ch1c_argact.js"></script><script src="../src/ch11_rep3d.js"></script><script src="../src/perco.js"></script><script src="../src/fr_college.js"></script><script src="../src/fr_1re.js"></script><script src="../src/fr_3e.js"></script><script src="../src/fr_tle.js"></script><script src="../src/fr_fin.js"></script><script src="../src/fr_trous.js"></script><script src="../src/fr_couv.js"></script><script src="../src/ref_matu.js"></script><script src="../src/ref_fr.js"></script><script src="../src/ref_co.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_col34b.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/fr_act.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/parents.js"></script><script src="../src/presente.js"></script>
+<pre id="out">en cours</pre>
+<script>
+const out = [], ids = location.hash ? location.hash.slice(1).split(",") : ["isom", "ensco", "numer", "fctlec", "litconv"]; let bad = 0;
+const fail = (m) => { bad++; if (bad < 3000) out.push("ÉCHEC " + m); };
+// Étapes du pas à pas (23.11) : chaque étape accepte sa propre réponse, quel que soit son type (nombre, expression, ensemble, couple, intervalle).
+const fS0 = (v) => { for (let d = 1; d <= 120; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return d === 1 ? String(Math.round(v)) : Math.round(v * d) + "/" + d; return String(v); };
+const canonAny = (sp) => sp.kind === "pair" ? sp.values.map(fS0).join(" ; ") : sp.kind === "set" ? (sp.values.length ? sp.values.map(fS0).join(" ; ") : "aucune") : sp.kind === "solset" ? SolSet.show(sp.ivs, false) : sp.kind === "expr" ? sp.expr : sp.kind === "ineq" ? "x " + sp.op + " " + fS0(sp.value) : String(sp.value);
+const checkSteps = (q) => q.guide.forEach((x) => { if (x.spec.kind === "value" && !isFinite(x.spec.value)) fail(q.code + " étape non finie"); const r = checkAnswer(x.spec, canonAny(x.spec)); if (r.status !== "correct") fail(q.code + " étape refuse sa propre réponse : " + canonAny(x.spec) + " " + (r.message || r.status)); });
+const txt = (q) => [q.q, q.sol, ...(q.guide || []).flatMap((g) => [g.ask, g.sol]), ...(q.parts || []).map((p) => p.label), ...(q.hints || [])].join(" | ");
+for (const id of ids) {
+  const line = [];
+  for (const d of [1, 2, 3, 4]) {
+    const forms = new Set(), ctx = new Set(); let n = 0, g = 0, triv = 0, shown = 0, samples = [];
+    for (let s = 1; s <= 300; s++) {
+      let q; try { q = Engine.build(id, d, s); } catch (e) { fail(id + "-" + d + "-" + s + " exception " + e.message); continue; }
+      n++; forms.add(qForm(q)); if (q.ctx) ctx.add(q.ctx);
+      const t = txt(q);
+      { const plainTxt = t.replace(/\\\(.*?\\\)/g, " "); const dv = [...plainTxt.matchAll(/.{0,25}(\d|\)) : (\d|\().{0,10}/g)].map((m) => m[0]).find((s) => !/h \d{1,2} : \d/.test(s)); if (dv) fail(q.code + " division « : » en texte simple (écrire ÷) : " + dv); }
+      { const pl = t.replace(/\\\(.*?\\\)/g, " "); const bad = pl.match(/.{0,30}(\{,\}|\\frac|\\cdot|\^\{).{0,10}/); if (bad) fail(q.code + " TeX hors formule : " + bad[0]); }
+      if (/undefined|NaN|Infinity|\[object/.test(t)) fail(q.code + " texte : " + t.match(/.{0,40}(undefined|NaN|Infinity|\[object).{0,20}/)[0]);
+      if (q.parts) { /* 24.11 : parts « ensemble », « couple » et « intervalles » admises (défis), contrôlées par checkAnswer */ q.parts.forEach((p) => { const sp = p.spec, vs = sp.kind === "set" || sp.kind === "pair" ? sp.values : sp.kind === "solset" ? [] : [sp.value]; if (vs.some((v) => !isFinite(v))) fail(q.code + " partie non finie " + p.label); else if (sp.kind !== "value" && checkAnswer(sp, canonAny(sp)).status !== "correct") fail(q.code + " partie refuse sa propre réponse " + p.label); }); if (s <= 2) samples.push(q.q.replace(/<[^>]+>/g, "").slice(0, 90) + " → " + q.parts.map((p) => p.spec.kind === "value" ? +(+p.spec.value).toFixed(4) : canonAny(p.spec)).join(" ; ")); continue; }
+      if (q.spec.kind === "expr") { // réponse littérale (calcul littéral, 15.11)
+        const self = checkAnswer(q.spec, q.spec.expr); if (self.status !== "correct") fail(q.code + " la réponse attendue est refusée (" + self.status + " " + (self.message || "") + ") : " + q.spec.expr);
+        if (!q.guide) fail(q.code + " sans guide"); else { g++; const last = q.guide[q.guide.length - 1].spec;
+          if (last.kind === "expr" && !Expr.equivalent(Expr.parse(last.expr), Expr.parse(q.spec.expr), q.spec.pos)) fail(q.code + " dernière étape ≠ réponse : " + last.expr + " / " + q.spec.expr);
+          checkSteps(q); }
+        if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+        (q.traps || []).forEach((tr) => { if (tr.e) { let te; try { te = Expr.parse(tr.e); } catch (e) { fail(q.code + " piège illisible " + tr.e); return; } if (Expr.equivalent(te, Expr.parse(q.spec.expr))) fail(q.code + " piège = bonne réponse : " + tr.e); } });
+        if (!q.ctx) fail(q.code + " sans ctx");
+        if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 100) + " → " + q.spec.expr + (q.spec.form ? " [" + q.spec.form + (q.spec.minFactors ? " ≥" + q.spec.minFactors : "") + "]" : ""));
+        continue;
+      }
+      if (["pair", "ineq", "solset"].includes(q.spec.kind)) { // couples, inégalités, intervalles (systèmes, 18.11)
+        const fS = (v) => { for (let d = 1; d <= 120; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return d === 1 ? String(Math.round(v)) : Math.round(v * d) + "/" + d; return String(v); };
+        const canon = (sp) => sp.kind === "pair" ? sp.values.map(fS).join(" ; ") : sp.kind === "ineq" ? "x " + sp.op + " " + fS(sp.value) : sp.kind === "solset" ? SolSet.show(sp.ivs, false) : sp.kind === "expr" ? sp.expr : String(sp.value);
+        const c0 = canon(q.spec), self = checkAnswer(q.spec, c0); if (self.status !== "correct") fail(q.code + " la réponse attendue est refusée (" + self.status + " " + (self.message || "") + ") : " + c0);
+        if (q.spec.kind === "pair" && q.spec.values.some((v) => !isFinite(v))) fail(q.code + " valeur non finie");
+        if (!q.guide) fail(q.code + " sans guide"); else { g++; const last = q.guide[q.guide.length - 1].spec;
+          if (last.kind !== q.spec.kind || checkAnswer(q.spec, canon(last)).status !== "correct") fail(q.code + " dernière étape ≠ réponse : " + canon(last) + " / " + c0);
+          checkSteps(q); }
+        if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+        (q.traps || []).forEach((tr) => { if (!tr.spec) return; const ci = canon(tr.spec); if (checkAnswer(q.spec, ci).status === "correct") fail(q.code + " piège = bonne réponse : " + ci); else if (diagnose(q, ci) !== tr.m) fail(q.code + " piège non diagnostiqué : " + ci); });
+        if (!q.ctx) fail(q.code + " sans ctx");
+        if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 110) + " → " + c0);
+        continue;
+      }
+      if (q.spec.kind === "set") { // ensemble de solutions (équations, 16.11)
+        const canon = q.spec.all ? "tous" : q.spec.values.length ? q.spec.values.map((v) => { for (let d = 1; d <= 60; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return d === 1 ? String(Math.round(v)) : Math.round(v * d) + "/" + d; const r = Math.round(v * v * 1e6) / 1e6; return v; }).join(" ; ") : "aucune";
+        const self = checkAnswer(q.spec, canon); if (self.status !== "correct") fail(q.code + " la réponse attendue est refusée (" + self.status + ") : " + canon);
+        if (!q.spec.all && q.spec.values.some((v) => !isFinite(v))) fail(q.code + " solution non finie");
+        if (!q.guide) fail(q.code + " sans guide"); else { g++; const last = q.guide[q.guide.length - 1].spec;
+          if (last.kind !== "set" || !!last.all !== !!q.spec.all || last.values.length !== q.spec.values.length || last.values.some((v, i) => Math.abs(v - q.spec.values[i]) > 1e-9)) fail(q.code + " dernière étape ≠ réponse");
+          checkSteps(q); }
+        if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+        (q.traps || []).forEach((tr) => { if (tr.s && checkAnswer(q.spec, tr.s.join(";")).status === "correct") fail(q.code + " piège = bonne réponse"); if (tr.s && tr.s.some((v) => !isFinite(v))) fail(q.code + " piège non fini"); });
+        if (!q.ctx) fail(q.code + " sans ctx");
+        // le diagnostic retrouve chaque piège
+        (q.traps || []).forEach((tr) => { const inp = tr.none ? "aucune" : tr.all ? "tous" : tr.s ? tr.s.join(" ; ") : null; if (inp && diagnose(q, inp) !== tr.m && checkAnswer(q.spec, inp).status !== "correct") fail(q.code + " piège non diagnostiqué : " + inp); });
+        if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 110) + " → " + canon);
+        continue;
+      }
+      const ans = q.spec.value; if (!isFinite(ans)) fail(q.code + " réponse non finie");
+      if (trivialQ(q, 0)) triv++; if (answerShown(q)) shown++;
+      if (q.guide) { g++; const last = q.guide[q.guide.length - 1].spec.value, tol = Math.max(q.spec.round || 0, q.guide[q.guide.length - 1].spec.round || 0, 1e-9 * Math.max(1, Math.abs(ans)));
+        if (Math.abs(last - ans) > tol) fail(q.code + " dernière étape " + last + " ≠ " + ans);
+        checkSteps(q); }
+      else fail(q.code + " sans guide");
+      if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+      if (!q.ctx) fail(q.code + " sans ctx");
+      if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 110) + " → " + +(+ans).toFixed(4));
+    }
+    if (d < 4 && ctx.size < 3) fail(id + " N" + d + " : moins de 3 formes (ctx " + [...ctx].join(", ") + ")");
+    if (d < 4 && triv > n * 0.05) fail(id + " N" + d + " : " + triv + " questions triviales sur " + n);
+    line.push("  N" + d + " : " + n + " q., " + forms.size + " formes, " + ctx.size + " contextes" + (d < 4 ? ", guides " + Math.round(100 * g / n) + " %, triviales " + triv + ", réponse visible " + shown : ""));
+    samples.forEach((x) => line.push("     · " + x));
+  }
+  out.push(id + "\n" + line.join("\n"));
+}
+
+// Questions à choix : réponse = un numéro, chaque autre numéro a son explication ; jamais triviales.
+for (const id of ["isom", "ensco", "fctlec", "litconv", "simil", "volcone"]) for (const d of [1, 2, 3]) {
+  let nch = 0;
+  for (let s = 1; s <= 200; s++) { const q = Engine.build(id, d, s); if (!q.choix) continue; nch++;
+    const k = q.spec.value; if (!(Number.isInteger(k) && k >= 1 && k <= q.choix)) fail(q.code + " numéro attendu hors des propositions");
+    const nums = new Set((q.traps || []).map((t) => t.v)); for (let j = 1; j <= q.choix; j++) if (j !== k && !nums.has(j)) fail(q.code + " proposition " + j + " sans explication");
+    if ((q.q.match(/<br><b>\d+<\/b>/g) || []).length !== q.choix && !/Tape son numéro/.test(q.q)) fail(q.code + " propositions mal numérotées");
+    if (trivialQ(q, 0) || answerShown(q)) fail(q.code + " question à choix jugée triviale"); }
+  if (["isom", "ensco", "fctlec", "litconv"].includes(id) && d < 3 && !nch && id !== "numer") out.push("  (info) " + id + " N" + d + " : aucune question à choix");
+}
+// Réponses à choix équilibrées (pas toujours la même position).
+{ const cnt = {}; for (let s = 1; s <= 400; s++) { const q = Engine.build("isom", 1, s); if (q.ctx === "nom3") cnt[q.spec.value] = (cnt[q.spec.value] || 0) + 1; }
+  if (Object.keys(cnt).length < 3) fail("isom nom3 : la bonne réponse n'occupe pas toutes les positions (" + JSON.stringify(cnt) + ")"); out.push("isom nom3, positions de la bonne réponse : " + JSON.stringify(cnt)); }
+// Formes réservées : en 9e, ni rotation (isom), ni irrationnels (ensco), ni « affine » (fctlec) ; en 10e, elles sortent.
+const prof = (g) => ({ system: "CH", grade: g, track: "college" });
+for (const [g, id, d, re, want] of [[9, "isom", 2, /nom4/, false], [10, "isom", 2, /nom4/, true], [9, "ensco", 3, /irrationnel|plus-petit-R|compte-Q/, false], [11, "ensco", 3, /irrationnel|plus-petit-R|compte-Q/, true]]) {
+  const st = Engine.newState(prof(g)); Engine.autoInit(st); let n = 0;
+  for (let k = 0; k < 150; k++) { const q = Engine.make(st, id, d); if (re.test(q.ctx || "")) n++; }
+  if (want ? !n : n) fail(id + " N" + d + " en " + g + "e : formes réservées " + (want ? "jamais tirées" : "tirées " + n + " fois"));
+}
+{ const st = Engine.newState(prof(9)); Engine.autoInit(st); let aff = 0, n = 0;
+  for (let k = 0; k < 150; k++) for (const d of [2, 3]) { const q = Engine.make(st, "fctlec", d); n++; if (/affine/i.test(q.q + " " + q.sol + " " + (q.traps || []).map((t) => t.m).join(" "))) aff++; }
+  if (aff) fail("fctlec en 9e : « affine » dans " + aff + " questions sur " + n);
+  const st10 = Engine.newState(prof(10)); Engine.autoInit(st10); let a10 = 0; for (let k = 0; k < 80; k++) if (/affine/.test(Engine.make(st10, "fctlec", 2).q)) a10++;
+  if (!a10) fail("fctlec en 10e : jamais de proposition « affine »"); }
+// Placement : classe, chapitre ; ni France ni MP.
+const PL = { isom: [9, "11. Transformations du plan"], ensco: [9, "8. Écriture fractionnaire (dans Q+)"], numer: [9, "1. Écritures décimale et fractionnaire décimale"], fctlec: [9, "12. Diagrammes"], litconv: [10, "7. Calcul littéral"] };
+for (const [id, [g, chap]] of Object.entries(PL)) {
+  const n = NOTIONS.find((x) => x.id === id); if (!n) { fail(id + " absente"); continue; }
+  const c = Engine.catalog(prof(g)).find((x) => x.id === id); if (!c || !c.current) fail(id + " pas « de l'année » en " + g + "e");
+  const th = Engine.themeLabel(Engine.themeKey(prof(g), id), prof(g)); if (th !== chap) fail(id + " chapitre « " + th + " » en " + g + "e");
+  for (const gg of [10, 11]) if (gg > g && !Engine.catalog(prof(gg)).some((x) => x.id === id)) fail(id + " absente du catalogue en " + gg + "e");
+  if (g === 10 && Engine.catalog(prof(9)).some((x) => x.id === id)) fail(id + " visible en 9e");
+  for (const fg of [6, 9, 10, 11]) if (Engine.catalog({ system: "FR", grade: fg, track: "college" }).some((x) => x.id === id)) fail(id + " visible en France (" + fg + ")");
+  if (Engine.catalog({ system: "CH", grade: 12, track: "mp" }).some((x) => x.id === id)) fail(id + " visible en MP");
+  if (!LESSONS[id]) fail(id + " sans leçon"); if (!HINTS[id]) fail(id + " sans indice"); if (!COMPS[id] || COMPS[id].length !== 3) fail(id + " : 3 compétences attendues");
+  if (!hasProb(id)) fail(id + " sans problème (niveau 4)"); if (!PREREQ[id] || !PREREQ[id].every((x) => NOTIONS.some((m) => m.id === x))) fail(id + " prérequis absent ou inconnu");
+  if (!ACTIVE[id]) fail(id + " sans leçon active");
+}
+// Formes ajoutées (VARX) : simil (homothéties) et volcone (cône, sphère) : part des tirages, contrôles de base.
+for (const [id, re, lo, hi] of [["simil", /^hom-/, 0.2, 0.6], ["volcone", /^(revolution|sphere-boule|revol-diametre|generatrice|section-|coupe-axiale|rayon-depuis-g)/, 0.15, 0.55]]) for (const d of [1, 2, 3]) {
+  let n = 0, m = 0; const cx = new Set();
+  for (let s = 1; s <= 300; s++) { const q = Engine.build(id, d, s); n++; if (!re.test(q.ctx || "")) continue; m++; cx.add(q.ctx);
+    if (!q.guide || !q.traps || !q.traps.length) fail(q.code + " sans guide ou sans piège");
+    else if (q.spec.kind === "value") { const last = q.guide[q.guide.length - 1].spec.value; if (Math.abs(last - q.spec.value) > 1e-9) fail(q.code + " dernière étape ≠ réponse"); checkSteps(q); }
+    else checkSteps(q);
+    if (/undefined|NaN|Infinity/.test(txt(q))) fail(q.code + " texte cassé"); }
+  if (m / n < lo || m / n > hi) fail(id + " N" + d + " : part des formes ajoutées " + Math.round(100 * m / n) + " %");
+  if (cx.size < 3) fail(id + " N" + d + " : moins de 3 formes ajoutées (" + [...cx].join(", ") + ")");
+  out.push(id + " N" + d + " : formes ajoutées " + Math.round(100 * m / n) + " % (" + [...cx].join(", ") + ")");
+}
+// Référentiel du PER : items rattachés.
+const LINK = { "31-SO2": "volcone", "31-TR1": "isom", "31-TR3": "simil", "31-TR4": "isom", "31-TR8": "simil", "32-NB9": "ensco", "32-NB10": "numer", "33-FO1": "fctlec", "33-FO2": "fctlec", "33-LI1": "litconv", "33-LI4": "litconv" };
+for (const [c, id] of Object.entries(LINK)) if (!(REF_CO.q[c] || []).some((s) => s.split("@")[0] === id)) fail(c + " non rattaché à " + id);
+out.unshift(bad ? bad + " échec(s)" : "OK");
+document.getElementById("out").textContent = out.join("\n");
+</script>

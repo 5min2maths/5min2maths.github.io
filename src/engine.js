@@ -100,6 +100,8 @@ const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2f
   derivth: ["continuite", "nbderive"], pvect: ["pscal3d"], syslin: ["matrices"], bases: ["matrices", "vect3d"], bayes: ["condbayes"],
   // 25.11 (agent trous) : derniers savoir-faire calculables (src/ch4c_trous.js, ch1c_trous.js, ch11_rep3d.js, fr_trous.js)
   geoesp: ["pythfig", "trigo"], densite: ["integrale", "varalea"], approxnorm: ["binomiale", "normale"], graphefct: ["fimg"], ineqgraph: ["ineqpoly", "inter"],
+  // 26.11 (agent perco) : items du PER encore sans question (src/perco.js)
+  isom: ["symetries"], ensco: ["relrep", "fracconv"], numer: ["decread"], fctlec: ["repere", "proptab"], litconv: ["valnum", "distrib"],
   repere3d: ["pythfig", "vol"], cercle6: ["disque"], bissec6: ["angtri"], filtre6: ["diagr"], tabform5: ["valnum"], hauteurs5: ["aire1"],
   cplxalg: ["eq2disc"], cplxtrig: ["cplxalg", "trigexact"], cplxeq: ["cplxtrig", "eq2disc"], suitegeom: ["expo", "log"], serie: ["suitegeom", "limitinf"],
   intparties: ["integrale", "derivprodquot"], intsubst: ["integrale", "derivcomp"], etudelnexp: ["lnexp", "variations"], eqdiff: ["croissance", "primitives"],
@@ -326,7 +328,8 @@ function trivialQ(q, k) {
   if (sp.kind !== "value" || typeof sp.value !== "number") return "";
   const nums = (raw.replace(/\{,\}/g, ".").replace(/[\^_]\s*(\{[^}]*\}|-?\d)/g, " ").replace(/\\[a-zA-Z]+/g, " ").match(/-?\d+(?:[.,]\d+)?/g) || []).map((t) => +t.replace(",", "."));
   if (!q.shownOk && nums.includes(sp.value) && new Set(nums).size < nums.length) return "réponse dans l'énoncé, données égales";
-  if (k < 2 && (sp.value === 0 || Math.abs(sp.value) === 1)) return "réponse 0 ou ±1";
+  /* 26.11 (agent perco) : question à choix numérotés (q.choix = nombre de propositions) : « 1 » est une réponse comme une autre. */
+  if (k < 2 && !q.choix && (sp.value === 0 || Math.abs(sp.value) === 1)) return "réponse 0 ou ±1";
   return "";
 }
 
@@ -335,7 +338,7 @@ function trivialQ(q, k) {
 function answerShown(q) {
   const sp = q.spec || {}, raw = String(q.q || "").replace(/<[^>]+>/g, " ");
   // q.shownOk (20.11) : la réponse est par nature une des données (mode, médiane, quartile d'une série).
-  if (q.shownOk || sp.kind !== "value" || !Number.isInteger(sp.value) || Math.abs(sp.value) < 2 || /ces nombres|parmi|lequel|laquelle/i.test(raw)) return false;
+  if (q.shownOk || q.choix || sp.kind !== "value" || !Number.isInteger(sp.value) || Math.abs(sp.value) < 2 || /ces nombres|parmi|lequel|laquelle/i.test(raw)) return false;
   const nums = (raw.replace(/\{,\}/g, ".").replace(/\\[a-zA-Z]+/g, " ").match(/-?\d+(?:[.,]\d+)?/g) || []).map((t) => +t.replace(",", "."));
   return nums.includes(sp.value) || nums.includes(-sp.value);
 }
