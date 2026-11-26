@@ -60,7 +60,7 @@
   // ======================= 9e =======================
   PX("decarr", [9, 10], () => {
     let p; do { p = r6(ri(4, 24) + ri(1, 9) / 10 + pk([0, 5]) / 100); } /* prix au 5 centimes près (romand) */ while (Math.abs(p - Math.round(p)) < 0.15 || Math.round((p % 1) * 10) === 5);
-    const n = pk([3, 4, 6, 7, 8]), t = r6(p * n), [cx, txt] = pk([["supermarche", "Au supermarché, Tom achète # articles à @ CHF pièce."], ["librairie", "À la librairie, Inès achète # livres de poche à @ CHF pièce."], ["papeterie", "Pour la rentrée, Noé achète # classeurs à @ CHF pièce."]]);
+    const n = pk([3, 4, 6, 7, 8].filter((k) => ![0, 1].includes(r6(Math.abs(k * Math.round(p) - k * p))))) || 3, t = r6(p * n), [cx, txt] = pk([["supermarche", "Au supermarché, Tom achète # articles à @ CHF pièce."], ["librairie", "À la librairie, Inès achète # livres de poche à @ CHF pièce."], ["papeterie", "Pour la rentrée, Noé achète # classeurs à @ CHF pièce."]]);
     return Object.assign(PB(txt.replace("#", n).replace("@", N(p)) + " Pour calculer de tête, on arrondit le prix à l'unité.",
       [["a) Prix total exact, en CHF", t, 0.01], ["b) Total estimé avec le prix arrondi à l'unité", n * Math.round(p)], ["c) Différence entre l'estimation et le prix exact (en CHF, valeur positive)", r6(Math.abs(n * Math.round(p) - t)), 0.01]],
       ["Arrondir à l'unité : regarde le chiffre des dixièmes.", "c) L'arrondi fait une petite erreur sur chaque article ; elle est multipliée par " + n + "."],
