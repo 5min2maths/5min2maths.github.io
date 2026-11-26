@@ -16,21 +16,39 @@ const MOCK_LV = {
 // Sujet de qualité (15.11, « pas seulement du drill ») : si le chapitre révisé a sa banque d'exercices riches
 // (riche.js), le sujet ressemble à un vrai test : A. automatismes courts, B. trois exercices en situation
 // (questions liées, donnée inutile, estimation, interprétation), C. raisonnement (trouve l'erreur, vrai ou faux, deux méthodes).
+/* 26.11 (revue élèves p3, n° 1, grave) : exercice riche permis pour le profil ? Profil français : la notion de l'exercice
+   est au programme de la classe (Engine.catalog) et le texte (trois tirages) ne contient aucun contenu hors programme
+   (horsFRTexte, src/engine.js : équation de cercle, perpendiculaire par les pentes, produit scalaire avant la 1re). */
+const richFRCat = {};
+function richOkFR(f, profile) {
+  if (!profile || profile.system !== "FR") return true;
+  const g = profile.grade, cat = (richFRCat[g] = richFRCat[g] || new Set(Engine.catalog({ system: "FR", grade: g, track: "college", minutes: 5 }).map((n) => n.id)));
+  for (const sd of [1, 2, 3]) { R.seed(sd); let x; try { x = f(); } catch (e) { return false; } if (!cat.has(x.id) || horsFRTexte(g, qTextAll(x))) return false; }
+  return true;
+}
 function richPlan(ch, ids, level) {
   const C = RICH[ch], items = [], mine = C.ids.filter((id) => ids.includes(id));
+  const prof = typeof state !== "undefined" && state && state.profile;
   /* 25.11 (audit de niveau 11e) : minA = niveau minimal des automatismes (banques de 11e dont les notions viennent de 9e-10e ; voir UP11 dans engine.js). */
   const dA = ({ facile: [1, 1, 1, 1], standard: [1, 2, 1, 2], exigeant: [2, 2, 3, 2] }[level] || [1, 2, 1, 2]).map((d) => Math.max(d, C.minA || 1));
   // Automatismes tirés parmi toutes les notions révisées (16.11 : avec 8 ou 12 notions, les 4 premières revenaient toujours).
   R.seed(mockSeed()); const pickA = mine.length > dA.length ? shuffle(mine.slice()).slice(0, dA.length).sort((a, b) => mine.indexOf(a) - mine.indexOf(b)) : mine;
   dA.forEach((d, k) => items.push({ part: "A", id: pickA[k % pickA.length], d, seed: mockSeed() }));
   const lvOk = { facile: (l) => l <= 2, standard: () => true, exigeant: (l) => l >= 2 }[level] || (() => true);
-  const probe = (arr, kind) => arr.map((f, k) => { R.seed(1); const x = f(); return { k, id: x.id, lv: x.lv, kind }; });
-  let ex = probe(C.ex, "ex").filter((x) => lvOk(x.lv));
+  /* 26.11 p3 (n° 1) : seulement les notions choisies par l'élève (le « cercle déguisé » sortait pour « Distance et milieu ·
+     Équations de droites ») et, pour un profil français, seulement ce qui est au programme de la classe (richOkFR). Il
+     manque des exercices riches : exercices ordinaires (Engine) sur les notions choisies, comme le sujet sans banque. */
+  const probe = (arr, kind) => arr.map((f, k) => { R.seed(1); const x = f(); return { k, id: x.id, lv: x.lv, kind, ok: ids.includes(x.id) && richOkFR(f, prof) }; }).filter((x) => x.ok);
+  let ex = probe(C.ex, "ex");
+  if (ex.filter((x) => lvOk(x.lv)).length >= Math.min(3, ex.length)) ex = ex.filter((x) => lvOk(x.lv));
   R.seed(mockSeed()); // tirage des exercices : un sujet différent à chaque fois
-  const inIds = ex.filter((x) => ids.includes(x.id));
-  if (inIds.length >= 3) ex = inIds;
-  shuffle(ex).slice(0, 3).forEach((x, j) => items.push({ part: "B", ex: j, rich: ch, kind: "ex", k: x.k, id: x.id, d: 3, seed: mockSeed() }));
-  shuffle(probe(C.raison, "raison")).slice(0, 2).forEach((x) => items.push({ part: "C", rich: ch, kind: "raison", k: x.k, id: x.id, d: 3, seed: mockSeed() }));
+  const exB = shuffle(ex).slice(0, 3);
+  exB.forEach((x, j) => items.push({ part: "B", ex: j, rich: ch, kind: "ex", k: x.k, id: x.id, d: 3, seed: mockSeed() }));
+  const used = new Set(exB.map((x) => x.id)), rest = ids.filter((id) => !used.has(id)).concat(ids.filter((id) => used.has(id)));
+  for (let j = exB.length, r = 0; j < 3 && r < rest.length; j++, r++) [2, 3].forEach((d) => items.push({ part: "B", ex: j, id: rest[r], d, seed: mockSeed() }));
+  const rs = shuffle(probe(C.raison, "raison")).slice(0, 2);
+  rs.forEach((x) => items.push({ part: "C", rich: ch, kind: "raison", k: x.k, id: x.id, d: 3, seed: mockSeed() }));
+  if (!rs.length) ids.slice(0, 2).forEach((id) => items.push({ part: "C", id, d: 2, seed: mockSeed(), vf: true }));
   return items;
 }
 function mockPlan(ids, level = "standard") {

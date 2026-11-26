@@ -1,0 +1,70 @@
+<!doctype html><meta charset="utf-8"><meta name="budget" content="120000"><link rel="stylesheet" href="../src/style.css"><link rel="stylesheet" href="../src/presente.css"><link rel="stylesheet" href="../src/parents.css">
+<main id="app" style="width:360px"></main><pre id="out">en cours</pre>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){};window.ensurePacks=()=>Promise.resolve();window.fetch=()=>Promise.resolve(new Response("{}"));if(navigator.sendBeacon)navigator.sendBeacon=()=>true;Element.prototype.scrollIntoView=function(){};window.confirm=()=>true;window.alert=()=>{};</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/defis_9.js"></script><script src="../src/defis_910.js"></script><script src="../src/defis_sec2.js"></script><script src="../src/competences.js"></script><script src="../src/ref_matu.js"></script><script src="../src/ref_fr.js"></script><script src="../src/ref_co.js"></script><script src="../src/referentiel.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch2c.js"></script><script src="../src/fr_college.js"></script><script src="../src/fr_1re.js"></script><script src="../src/fr_3e.js"></script><script src="../src/fr_tle.js"></script><script src="../src/fr_couv.js"></script><script src="../src/fr_fin.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/fr_act.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/parents.js"></script><script src="../src/app.js"></script><script src="../src/presente.js"></script>
+<script>
+/* Revue « élèves joués » du 26.11, 3e passage (tools/revue_eleves_claude_26-11_p3.md) : un contrôle par point corrigé.
+   #only=fr,j1,... pour ne lancer que certaines sections. */
+(async function () {
+  const out = [], fail = [];
+  const ok = (c, m) => { (c ? out : fail).push((c ? "ok " : "ÉCHEC ") + m); };
+  const ONLY = (location.hash.match(/only=([\w,]+)/) || [])[1];
+  const on = (k) => !ONLY || ONLY.split(",").includes(k);
+  const fresh = (prof) => { state = Engine.newState(prof); Engine.autoInit(state); state.placed = true; save(); return state; };
+  const txt = (q) => [q.q, q.sol, ...(q.parts || []).map((x) => x.label), ...(q.guide || []).flatMap((g) => [g.ask, g.sol])].map((t) => String(t || "")).join(" ");
+
+  /* 1. (grave) Profil France : aucune forme ni aucun exercice de sujet hors programme de la classe. Marqueurs propres au test
+     (indépendants du filtre de l'app) : équation de cercle, perpendiculaire en repère (pentes, équation), produit scalaire,
+     vecteur normal — permis dès la 1re (grade 11). Parcours : toutes les notions du catalogue de 6e à Tle, niveaux 1 à 4,
+     tirages servis par Engine.make (avec et sans graine) ; tous les sujets de préparation (chaque banque riche, ses notions
+     au programme de la classe), trois niveaux de sujet, plusieurs tirages. */
+  if (on("fr")) try {
+    const MARK = [[/équation du cercle circonscrit|cercle déguisé|équation (?:cartésienne )?(?:du|d'un|de ce) cercle|x\^\{?2\}?\s*\+\s*y\^\{?2\}?|\(x\s*[-+−][^()]*\)\^\{?2\}?\s*\+\s*\(y\s*[-+−]/, "cercle"],
+      [/perpendiculaire[^.?!;]{0,160}(?:pente|coefficient directeur|y\s*=|équation)|(?:pente|coefficient directeur|y\s*=|équation)[^.?!;]{0,160}perpendiculaire|produit des pentes|pente-perp/, "perpendiculaire (repère)"],
+      [/produit scalaire|vecteur normal/, "produit scalaire"]];
+    const hit = (t) => { for (const [r, l] of MARK) if (r.test(t)) return l; return null; };
+    let n = 0; const bad = [];
+    for (let g = 6; g <= 12; g++) {
+      fresh({ system: "FR", grade: g, track: "college", minutes: 5 });
+      const cat = Engine.catalog(state.profile).map((c) => c.id);
+      for (const id of cat) for (const lv of [1, 2, 3, 4]) {
+        for (let sd = 1; sd <= (lv === 4 ? 6 : 14); sd++) { let q; try { q = Engine.make(state, id, lv, sd * 37 + g); } catch (e) { continue; } n++; const h = g < 11 && hit(txt(q) + " " + (q.ctx || "")); if (h) bad.push(g + " " + q.code + " (" + h + ")"); }
+        for (let k = 0; k < 3; k++) { let q; try { q = Engine.make(state, id, lv); } catch (e) { continue; } n++; const h = g < 11 && hit(txt(q) + " " + (q.ctx || "")); if (h) bad.push(g + " " + q.code + " (" + h + ")"); }
+      }
+    }
+    ok(n > 5000 && !bad.length, "France 6e→2nde : " + n + " questions servies, aucune hors programme" + (bad.length ? " — " + [...new Set(bad)].slice(0, 8).join(" | ") : ""));
+    /* sujets de préparation : chaque banque riche, notions au programme de la classe */
+    let ns = 0; const badS = [], horsIds = [];
+    for (let g = 6; g <= 12; g++) {
+      fresh({ system: "FR", grade: g, track: "college", minutes: 5 });
+      const cat = new Set(Engine.catalog(state.profile).map((c) => c.id));
+      for (const [ch, C] of Object.entries(RICH)) {
+        const ids = C.ids.filter((id) => cat.has(id));
+        if (!ids.length) continue;
+        for (const ch2 of [ids, ids.slice(0, Math.max(1, Math.ceil(ids.length / 2)))]) for (const lvl of ["facile", "standard", "exigeant"]) for (let k = 0; k < 2; k++) {
+          state.prep = { ids: ch2.slice(), date: addDays(day(), 3) }; state.mock = null; mockNew(lvl);
+          for (const x of mockQuestions()) { ns++;
+            if (!ch2.includes(x.id) && !(x.q && ch2.includes(x.q.id))) horsIds.push(g + " " + ch + " " + x.id + " ∉ " + ch2.join(","));
+            const h = g < 11 && hit(txt(x.q)); if (h) badS.push(g + " " + ch + " « " + (x.q.titre || x.q.code || "") + " » (" + h + ")"); }
+        }
+      }
+    }
+    ok(ns > 300 && !badS.length, "France : " + ns + " items de sujets de préparation, aucun hors programme" + (badS.length ? " — " + [...new Set(badS)].slice(0, 8).join(" | ") : ""));
+    ok(!horsIds.length, "sujet de préparation : seulement les notions choisies" + (horsIds.length ? " — " + [...new Set(horsIds)].slice(0, 6).join(" | ") : ""));
+    /* cas de la revue : 2nde, « Distance et milieu · Équations de droites · Intersection de droites » */
+    fresh({ system: "FR", grade: 10, track: "college", minutes: 5 });
+    const tit = new Set();
+    for (let k = 0; k < 30; k++) { state.prep = { ids: ["cart", "droites", "droitesinter"], date: addDays(day(), 2) }; state.mock = null; mockNew("standard"); mockQuestions().forEach((x) => x.q.titre && tit.add(x.q.titre)); }
+    ok(!tit.has("Le triangle et son cercle") && !tit.has("Un cercle déguisé") && !tit.has("La route et la maison") && !tit.has("Deux tangentes parallèles"), "2nde FR : ni « Le triangle et son cercle », ni « Un cercle déguisé », ni « La route et la maison » (" + [...tit].join(", ") + ")");
+    ok(Engine.fromCode && (() => { const q = Engine.make(state, "droites", 1, parseInt("8s3", 36)); return !/perpendiculaire/.test(q.q); })(), "2nde FR : droites-1-8s3 (pente d'une perpendiculaire) remplacée");
+    /* Suisse inchangé : la 2e du Collège garde ses exercices */
+    fresh({ system: "CH", grade: 13, track: "college", minutes: 5 }); const tch = new Set();
+    for (let k = 0; k < 30; k++) { state.prep = { ids: ["cart", "droites", "droitesinter", "cercle"], date: addDays(day(), 2) }; state.mock = null; mockNew("standard"); mockQuestions().forEach((x) => x.q.titre && tch.add(x.q.titre)); }
+    ok(tch.has("Un cercle déguisé") || tch.has("Le triangle et son cercle"), "2e Collège (CH) : exercices de cercle gardés");
+  } catch (e) { fail.push("EXC fr " + e.message + " " + (e.stack || "").split("\n").slice(0, 3).join(" ")); }
+
+  /*@@SUITE@@*/
+
+  document.getElementById("out").textContent = fail.concat(out).join("\n") + "\n" + (fail.length ? fail.length + " ÉCHEC(S)" : "tout ok");
+})().catch((e) => { document.getElementById("out").textContent = "EXC " + e.message + "\n" + e.stack; });
+</script>

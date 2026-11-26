@@ -148,6 +148,20 @@ const HORS_CO = {
     vitesse: [/aller de|aller-retour|, puis [^.]*km\/h/], /* vitesse moyenne sur deux trajets : 11e (10e = sensibilisation) */
   },
 };
+/* 26.11 (revue élèves p3, n° 1, grave : 2nde FR servie avec l'équation du cercle circonscrit, un « cercle déguisé », la
+   perpendiculaire par les pentes — banque de la 2e du Collège suisse) : contenus hors programme d'une classe française,
+   repérés dans le TEXTE de la question ou de l'exercice (énoncé, parties, corrigé), quelle que soit la notion :
+   [RegExp, première classe FR où le contenu est permis, libellé]. Programme de 2nde (2019, BO 2026) : vecteurs, colinéarité,
+   équations de droites, droites parallèles ; PAS l'équation de cercle, ni l'orthogonalité (pentes, vecteur normal), ni le
+   produit scalaire (1re spécialité). Lu par horsCO (questions), richOkFR (sujets riches, src/sujet.js) et tests/p3_26_11.html. */
+const HORS_FR_TXT = [
+  [/équation (?:cartésienne )?(?:du|d'un|de ce) cercle|cercle (?:circonscrit )?d'équation|\\left\(x\s*[-+][^)]*\\right\)\^\{?2\}?\s*\+\s*\\left\(y|\(x\s*[-+−][^()]*\)\^\{?2\}?\s*\+\s*\(y\s*[-+−]|\(x\s*[-+−][^()]*\)²\s*\+\s*\(y|x\^\{?2\}?\s*\+\s*y\^\{?2\}?|x²\s*\+\s*y²/, 11, "équation de cercle"],
+  [/perpendiculaire[^.?!;]{0,160}(?:pente|coefficient directeur|y\s*=|équation)|(?:pente|coefficient directeur|y\s*=|équation)[^.?!;]{0,160}perpendiculaire|produit des pentes/, 11, "orthogonalité de droites (repère)"],
+  [/produit scalaire|vecteur normal|orthogona/, 11, "produit scalaire, orthogonalité"],
+];
+const qTextAll = (q) => [q.q, q.sol, ...(q.parts || []).map((x) => x.label), ...(q.guide || []).flatMap((g) => [g.ask, g.sol])].map((t) => String(t || "")).join(" ");
+/* Libellé du contenu hors programme d'une classe française trouvé dans le texte t (ou null). */
+function horsFRTexte(grade, t) { for (const [r, g, lab] of HORS_FR_TXT) if (grade < g && r.test(t)) return lab; return null; }
 function horsCO(state, id, q) {
   const p = state && state.profile;
   /* forme réservée à certaines classes : q.co = classes CO / Collège (grade), q.mp = classes MP (25.11, src/defis_sec2.js) */
@@ -159,6 +173,7 @@ function horsCO(state, id, q) {
      formes d'une notion partagée hors programme d'une classe française (HORS_FR, src/fr_couv.js : [ctx | RegExp | fonction,
      première classe FR où la forme est permise]). Sans effet pour un profil suisse, sauf q.fr (forme propre à la France). */
   if (q && q.fr && p && !(p.system === "FR" && q.fr.includes(p.grade))) return true;
+  if (q && p && p.system === "FR" && p.grade && horsFRTexte(p.grade, qTextAll(q))) return true;
   if (q && p && p.system === "FR" && typeof HORS_FR !== "undefined" && HORS_FR[id]) {
     const t = String(q.q || "") + " " + (q.parts || []).map((x) => x.label || "").join(" ");
     if (HORS_FR[id].some(([r, g]) => p.grade < g && (typeof r === "string" ? q.ctx === r || (r.endsWith("*") && String(q.ctx || "").startsWith(r.slice(0, -1))) : r instanceof RegExp ? r.test(t) : r(q)))) return true;
@@ -706,7 +721,7 @@ const Engine = {
        inférieure, calibré sur le DNB (partie 1) et l'épreuve anticipée de 1re. Sans effet pour un profil suisse. */
     if (level < 3 && state && state.profile && state.profile.system === "FR" && typeof UPFR !== "undefined" && UPFR[state.profile.grade] && UPFR[state.profile.grade][id]) level = Math.max(level, UPFR[state.profile.grade][id]);
     /* 25.11 (audit France) : profil français, énoncé propre à la Suisse (horsCO) : graine suivante (le code suit la question). */
-    if (seed && state && state.profile && state.profile.system === "FR") { let q = this.build(id, level, seed); for (let k = 1; k <= 12 && horsCO(state, id, q); k++) q = this.build(id, level, seed + k * 977); return keep(this.finalize(state, id, q)); }
+    if (seed && state && state.profile && state.profile.system === "FR") { let q = this.build(id, level, seed); for (let k = 1; k <= 40 && horsCO(state, id, q); k++) q = this.build(id, level, seed + k * 977); /* 26.11 p3 : 40 graines (formes hors programme FR filtrées par le texte) */ return keep(this.finalize(state, id, q)); }
     /* 26.11 : forme réservée à la France (q.fr, p. ex. médiane en 4e–3e FR, src/fr_couv.js) tirée pour un autre profil : graine suivante. */
     if (seed) { let q = this.build(id, level, seed); for (let k = 1; k <= 12 && q && q.fr && horsCO(state, id, q); k++) q = this.build(id, level, seed + k * 977); return keep(this.finalize(state, id, q)); }
     const rec = ((state.recentQ = state.recentQ || {})[id] = (state.recentQ[id] || []));
