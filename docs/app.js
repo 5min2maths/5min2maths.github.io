@@ -68,7 +68,7 @@ const NOTIONS = [
   { id: "ineq2", theme: "fa", label: "Inéquations du 2e degré", ex: "f(x) \\le g(x)", CH: [12], MP: null, FR: [11, 1] }, // 22.11 : FR 1re/Tle (tools/premiere_terminale_fr.md)
   { id: "racinv", theme: "fa", label: "Fonctions racine carrée et inverse", ex: "\\sqrt{x} = x - 2", CH: [12], MP: null, FR: null },
   { id: "euclide", theme: "es", label: "Théorèmes d'Euclide et de la hauteur", ex: "h^2 = p \\cdot q", CH: [12], MP: [12, "S2"], FR: null },
-  { id: "droitesrem", theme: "es", label: "Droites remarquables du triangle", ex: "CG = \\frac{2}{3}\\,CM", CH: [12], MP: null, FR: null },
+  { id: "droitesrem", theme: "es", label: "Droites remarquables du triangle", ex: "CG = \\frac{2}{3}\\,CM", CH: [12], MP: [12, "S2"], FR: null }, /* 26.11 (agent trousmp) : MP 1re, S2.GE.02 (Chap04 Géométrie) ; formes hors du cours MP : HORS_MP (src/engine.js) */
   { id: "trigo", theme: "es", label: "Trigonométrie du triangle rectangle", ex: "\\sin \\alpha = \\frac{\\text{opposé}}{\\text{hypoténuse}}", CH: [12], MP: [12, "S2"], FR: [9, 7] },
   { id: "polydiv", theme: "fa", label: "Division de polynômes", ex: "P(a) = \\text{reste de } P : (x - a)", CH: [13], MP: null, FR: null },
   { id: "polyfact", theme: "fa", label: "Factoriser un polynôme, racine évidente", ex: "x^3 - 7x + 6 = 0", CH: [13], MP: null, FR: null },
@@ -14959,6 +14959,10 @@ const UPC_MIN = { fracper: 3 };
    (q.ctx), l'énoncé (RegExp) ou la réponse (fonction) est listé ici pour la classe est refaite ; les autres classes
    (11e, Collège, MP) ne changent pas. */
 const HORS_MA1 = { asymptotes: [/oblique/i], etudefct: [/oblique/i] };
+/* 26.11 (agent trousmp, objectif S2.GE.02 du plan d'études MP) : filière MP, formes d'une notion partagée avec le Collège
+   qui sortent du cours de MP 1re (Chap04 : définitions, points de concours, G aux 2/3, triangle isocèle) : la formule du
+   rayon du cercle inscrit r = (a + b − c)/2 et l'angle BHC à l'orthocentre (quadrilatère à deux angles droits). Par ctx. */
+const HORS_MP = { droitesrem: ["inscrit", "orthocentre"] };
 const HORS_CO = {
   /* 9e : relatifs sans multiplication ni division, fractions dans Q+ (addition, soustraction), périodes d'un chiffre
      (tiers, neuvièmes) ; réduction d'expressions et polygones réguliers en 10e. */
@@ -15032,6 +15036,7 @@ function horsCO(state, id, q) {
     const t = String(q.q || "") + " " + (q.parts || []).map((x) => x.label || "").join(" ");
     if (HORS_FR[id].some(([r, g]) => p.grade < g && (typeof r === "string" ? q.ctx === r || (r.endsWith("*") && String(q.ctx || "").startsWith(r.slice(0, -1))) : r instanceof RegExp ? r.test(t) : r(q)))) return true;
   }
+  if (q && p && p.system === "CH" && p.track === "mp" && HORS_MP[id] && HORS_MP[id].includes(q.ctx)) return true;
   if (!q || !p || p.system !== "CH" || p.track === "mp") return false;
   /* 25.11 (agent col34, programme du Collège 2021) : en 3e–4e niveau normal MA1, formes réservées au niveau avancé MA2
      (asymptotes obliques : « horizontales, verticales, obliques » en MA2 seulement). Notions entières MA2 : champ niv "R". */
