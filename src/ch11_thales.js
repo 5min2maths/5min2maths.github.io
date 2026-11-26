@@ -161,9 +161,27 @@
   };
 
   const PROBS = {
+    /* 26.11 soir (agent defis3) : valeurs tirées, 3 contextes et plus (avant : deux énoncés fixes). */
     thales: [
-      () => P("Un panneau de 2 m de haut a une ombre de 1,5 m. Au même moment, l'ombre d'une tour mesure 45 m.", [["a) Rapport entre les ombres", 30], ["b) Hauteur de la tour (m)", 60], ["c) Longueur de l'ombre d'un arbre de 9 m (m)", 6.75]], ["Les rayons du soleil sont parallèles.", "Hauteur ÷ ombre est le même pour tous : 2 ÷ 1,5."], "a) 30 ; b) 60 m ; c) " + M("9 \\cdot \\frac{1{,}5}{2} = 6{,}75") + " m."),
-      () => P("Dans un triangle ABC, D ∈ [AB], E ∈ [AC], (DE) ∥ (BC) ; AD = 4, DB = 6, AE = 5, DE = 3.", [["a) AB", 10], ["b) AC", 12.5], ["c) BC", 7.5], ["d) Périmètre du trapèze DECB", 24]], ["AB = AD + DB ; rapport AB/AD.", "Trapèze : DB + BC + CE + ED."], "a) 10 ; b) 12,5 ; c) 7,5 ; d) " + M("6 + 7{,}5 + 7{,}5 + 3 = 24") + "."),
+      () => { const [cx, big, def, Hs] = pk([["tour", "d'une tour", "de la tour", [30, 36, 40, 45, 48, 54, 60]], ["clocher", "du clocher du village", "du clocher", [24, 27, 30, 36, 42]], ["sapin", "d'un grand sapin", "du sapin", [15, 16, 18, 20, 24]]]), [ref, h1, rd] = pk([["un panneau de", 2, "du panneau"], ["un bâton de", 1, "du bâton"], ["un piquet de", 1.5, "du piquet"]]);
+        let H = 30, r = 0.75; for (let t = 0; t < 60; t++) { const HH = pk(Hs), rr = pk([0.5, 0.75, 1.25, 1.5, 0.8]); if (Number.isInteger(r6((HH * 100) / h1)) && Number.isInteger(r6(HH * rr * 100))) { H = HH; r = rr; break; } }
+        const s1 = r6(h1 * r), S = r6(H * r), h3 = pk([4, 5, 6, 8, 9, 10, 12].filter((z) => z < H)), s3 = r6(h3 * r);
+        return Object.assign(P("Au même moment, " + ref + " " + M(N(h1)) + " m de haut a une ombre de " + M(N(s1)) + " m, et l'ombre " + big + " mesure " + M(N(S)) + " m.",
+          [["a) Combien de fois l'ombre " + def + " est-elle plus longue que celle " + rd + " ?", r6(S / s1)], ["b) Hauteur " + def + " (m)", H], ["c) Longueur de l'ombre d'un arbre de " + h3 + " m, au même moment (m)", s3]],
+          ["Les rayons du soleil sont parallèles : hauteur et ombre sont proportionnelles.", "Hauteur ÷ ombre est la même pour tous : " + L(h1) + " ÷ " + L(s1) + "."],
+          "a) " + M(N(S) + " : " + N(s1) + " = " + N(r6(S / s1))) + " ; b) " + M(N(h1) + " \\cdot " + N(r6(S / s1)) + " = " + H) + " m ; c) " + M(h3 + " \\cdot \\frac{" + N(s1) + "}{" + N(h1) + "} = " + N(s3)) + " m."), { ctx: cx }); },
+      () => { let a = 4, b = 6, c = 5, d = 3; for (let t = 0; t < 80; t++) { const aa = R.int(2, 8), k = pk([1.5, 2, 2.5, 3, 4]), bb = r6(aa * (k - 1)), cc = R.int(2, 9), dd = R.int(2, 9); if (Number.isInteger(bb) && cc !== aa && tri(aa, cc, dd) && Number.isInteger(r6(cc * k * 10)) && Number.isInteger(r6(dd * k * 10))) { a = aa; b = bb; c = cc; d = dd; break; } }
+        const k = (a + b) / a, AC = r6(c * k), BC = r6(d * k), per = r6(b + BC + (AC - c) + d), [cx, txt, u] = pk([["triangle", "Dans un triangle ABC, D ∈ [AB], E ∈ [AC] et (DE) ∥ (BC) ; AD = #a, DB = #b, AE = #c et DE = #d (en cm).", "cm"],
+          ["charpente", "La ferme d'une charpente est un triangle ABC ; une poutre [DE] est parallèle à la base [BC], avec D ∈ [AB] et E ∈ [AC]. On mesure AD = #a m, DB = #b m, AE = #c m et DE = #d m.", "m"],
+          ["voile", "Une voile triangulaire ABC est renforcée par une latte [DE] parallèle à son bord [BC], avec D ∈ [AB] et E ∈ [AC] : AD = #a dm, DB = #b dm, AE = #c dm et DE = #d dm.", "dm"]]);
+        return Object.assign(P(txt.replace("#a", L(a)).replace("#b", L(b)).replace("#c", L(c)).replace("#d", L(d)), [["a) AB (" + u + ")", a + b], ["b) AC (" + u + ")", AC], ["c) BC (" + u + ")", BC], ["d) Périmètre du trapèze DECB (" + u + ")", per]],
+          ["AB = AD + DB ; rapport d'agrandissement AB ÷ AD = " + L(k) + ".", "Trapèze : DB + BC + CE + ED, avec CE = AC − AE."],
+          "a) " + M(a + " + " + L(b) + " = " + (a + b)) + " ; rapport " + M(N(a + b) + " : " + a + " = " + N(k)) + " ; b) " + M(c + " \\cdot " + N(k) + " = " + N(AC)) + " ; c) " + M(d + " \\cdot " + N(k) + " = " + N(BC)) + " ; d) " + M(N(b) + " + " + N(BC) + " + " + N(r6(AC - c)) + " + " + d + " = " + N(per)) + " " + u + "."), { ctx: cx }); },
+      () => { const [cx, what] = pk([["etang", "la largeur BC d'un étang"], ["riviere", "la largeur BC d'une rivière"], ["ravin", "la largeur BC d'un ravin"]]), ad = R.int(3, 8), db = R.int(10, 40), de = R.int(4, 12), bc = (de * (ad + db)) / ad;
+        return Object.assign(P("Pour mesurer " + what + ", on plante des piquets : " + M("(DE) \\parallel (BC)") + ", D sur [AB], E sur [AC], " + M("AD = " + ad) + " m, " + M("DB = " + db) + " m et " + M("DE = " + de) + " m.",
+          [["a) Longueur AB (m)", ad + db], ["b) Largeur BC (m, au centième)", Math.round(r6(bc * 100)) / 100, 0.01]],
+          ["Thalès : le petit triangle ADE et le grand triangle ABC.", "BC ÷ DE = AB ÷ AD."],
+          "a) " + M(ad + " + " + db + " = " + (ad + db)) + " m ; b) " + M("BC = " + de + " \\cdot \\frac{" + (ad + db) + "}{" + ad + "} \\approx " + N(Math.round(bc * 100) / 100)) + " m."), { ctx: cx }); },
     ],
     thalesrec: [
       () => P("D ∈ [AB], E ∈ [AC] avec AD = 3, AB = 7,5, AE = 4, AC = 10.", [["a) AD/AB (décimal)", 0.4], ["b) AE/AC (décimal)", 0.4], ["c) Si BC = 12, que vaut DE ?", 4.8]], ["Rapports égaux : parallèles.", "DE = BC · 0,4."], "a) et b) 0,4, donc (DE) ∥ (BC) ; c) " + M("4{,}8") + "."),

@@ -1485,6 +1485,35 @@ const RECALC = (() => {
     return lab.startsWith("a)") ? Vc : lab.startsWith("b)") ? Vk : lab.startsWith("c)") ? (Vc + Vk) * 1000 : null; });
   DF("volcomp", /un cube de (\d+) cm d'arête surmonté d'une pyramide de même base et de (\d+) cm de hauteur/, (g, lab) => { const [a, h] = g.map(nn), rho = lm(lab, /pèse (\d+(?:,\d+)?) g/);
     return lab.startsWith("a)") ? a ** 3 : lab.startsWith("b)") ? (a * a * h) / 3 : rho ? (a ** 3 + (a * a * h) / 3) * rho[0] : null; });
+  /* thales (11e, ch11_thales) */
+  DF("thales", new RegExp("de " + NR + " m de haut a une ombre de " + NR + " m, et l'ombre .+? mesure " + NR + " m\\."), (g, lab) => { const [h1, s1, S] = g.map(nn), h3 = lm(lab, /arbre de (\d+) m/);
+    return lab.startsWith("a)") ? S / s1 : lab.startsWith("b)") ? (S * h1) / s1 : h3 ? (h3[0] * s1) / h1 : null; });
+  DF("thales", new RegExp("AD = " + NR + "(?: d?m)?, DB = " + NR + "(?: d?m)?, AE = " + NR + "(?: d?m)? et DE = " + NR), (g, lab) => { const [a, b, c, d] = g.map(nn), k = (a + b) / a;
+    return lab.startsWith("a)") ? a + b : lab.startsWith("b)") ? c * k : lab.startsWith("c)") ? d * k : lab.startsWith("d)") ? b + d * k + (c * k - c) + d : null; });
+  DF("thales", /AD = (\d+) m, DB = (\d+) m et DE = (\d+) m/, (g, lab) => { const [a, b, d] = g.map(nn); return lab.startsWith("a)") ? a + b : lab.startsWith("b)") ? (d * (a + b)) / a : null; });
+  /* repere (10e–11e, ch11_fct) */
+  DF("repere", /A\((-?\d+) ; (-?\d+)\), B\((-?\d+) ; (-?\d+)\) et C\((-?\d+) ; (-?\d+)\)/, (g, lab, txt) => { const [ax, ay, bx, by, cx, cy] = g.map(nn), D = [ax + cx - bx, ay + cy - by], ar = Math.abs((bx - ax) * (D[1] - ay) - (by - ay) * (D[0] - ax));
+    return lab.startsWith("a)") ? D[0] : lab.startsWith("b)") ? D[1] : lab.startsWith("c)") ? ar : lab.startsWith("d)") ? ar * (/1 carreau = 10 m/.test(txt) ? 100 : /1 carreau = 8 pixels/.test(txt) ? 64 : NaN) : null; });
+  DF("repere", /M\((-?\d+) ; (-?\d+)\)/, (g, lab, txt) => { const [mx, my] = g.map(nn), a = /A\((-?\d+) ; (-?\d+)\)/.exec(txt); if (!a) return null;
+    return lab.startsWith("a)") ? 2 * mx - nn(a[1]) : lab.startsWith("b)") ? 2 * my - nn(a[2]) : null; });
+  /* sysprob (11e–1re, ch1c_sys) : têtes et pattes ; vitesses avec et contre le vent ou le courant */
+  DF("sysprob", /on compte (\d+) (?:têtes|véhicules|sièges) et (\d+) (?:pattes|roues|pieds)/, (g, lab, txt) => { const [T, P0] = g.map(nn), l1 = /tabourets à 3 pieds/.test(txt) ? 3 : 2, l2 = 4, b = (P0 - l1 * T) / (l2 - l1);
+    return lab.startsWith("a)") ? T - b : lab.startsWith("b)") ? b : null; });
+  DF("sysprob", /parcourt ([\d']+) km .*?en (\d+) h .*?, et en (\d+) h/, (g, lab) => { const [D, t1, t2] = g.map(nn), s1 = D / t1, s2 = D / t2;
+    return lab.startsWith("a)") ? s1 : lab.startsWith("b)") ? s2 : lab.startsWith("c)") ? (s1 + s2) / 2 : lab.startsWith("d)") ? (s1 - s2) / 2 : null; });
+  /* sysgraph (1re Collège, ch1c_sys) */
+  DF("sysgraph", /cases (-?\d*)x ([+-]) (\d*)y = (-?\d+) \\ (\d+)x \+ my = k cases/, (g, lab) => { const a1 = g[0] === "" ? 1 : g[0] === "-" ? -1 : nn(g[0]), b1 = (g[1] === "-" ? -1 : 1) * (g[2] === "" ? 1 : nn(g[2])), c1 = nn(g[3]), a2 = nn(g[4]), f = a2 / a1, mk = lm(lab, /m = (\d+) et k = (-?\d+)/);
+    if (lab.startsWith("a)")) return f * b1; if (lab.startsWith("b)")) return f * c1;
+    if (!mk) return null; const [m, k] = mk, det = a1 * m - b1 * a2; if (!det) return NaN;
+    return lab.startsWith("c)") ? (c1 * m - b1 * k) / det : lab.startsWith("d)") ? (a1 * k - a2 * c1) / det : null; });
+  DF("sysgraph", /A (?:coûte|demande) ([\d,]+) CHF (?:par mois|de frais de dossier|par an) plus ([\d,]+) CHF (?:la minute|de l'heure|la séance) ; (?:B|l'agence B|la formule B) (?:coûte|demande) ([\d,]+) CHF/, (g, lab) => { const [F, pA, pB] = g.map(nn), n = lm(lab, /pour (\d+) /);
+    return lab.startsWith("a)") && n ? F + pA * n[0] : lab.startsWith("b)") && n ? pB * n[0] : lab.startsWith("c)") ? F / (pB - pA) : null; });
+  /* sysineq (1re Collège, ch1c_sys) */
+  DF("sysineq", /dispose de ([\d']+) CHF.*? coûte (\d+) CHF et (?:l'entrée|le repas|l'inscription) (\d+) CHF par \S+\. .*?au moins (\d+)/, (g, lab) => { const [B, C, p, mn] = g.map(nn), mx = Math.floor((B - C) / p + 1e-9);
+    return lab.startsWith("a)") ? mx : lab.startsWith("b)") ? mn : lab.startsWith("c)") ? mx - mn + 1 : null; });
+  DF("sysineq", /à la fois (\d+)x - (\d+) (>|≥) (-?\d+) et (\d+) - x ≥ (-?\d+)/, (g, lab) => { const a = nn(g[0]), b = nn(g[1]), st = g[2] === ">", c = nn(g[3]), d = nn(g[4]), e = nn(g[5]), L = (c + b) / a, Rr = d - e;
+    let n = 0; for (let x = Math.ceil(L - 1); x <= Rr; x++) if ((st ? x > L : x >= L) && x <= Rr) n++;
+    return lab.startsWith("a)") ? L : lab.startsWith("b)") ? Rr : lab.startsWith("c)") ? n : null; });
   /* ==== fin agent defis3 ==== */
 
   /* ---------- 26.11 (agent defis2) : notions encore sous 20 % (transf, trigcercle, trigfn, recip, lectures de graphique

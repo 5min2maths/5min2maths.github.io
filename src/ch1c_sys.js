@@ -42,6 +42,7 @@
   const TS = (ivs, m) => ({ spec: solsetSpec(ivs), m });
   const TX = (e, m) => ({ e, m });
   const P = (q, parts, hints, sol, fig) => ({ fig, q, parts: parts.map(([label, value, round]) => ({ label, spec: Object.assign({ kind: "value", value }, round ? { round } : {}) })), hints, sol });
+  const r6 = (v) => +(+v).toFixed(6);
   const PAIR = " Réponds « x ; y ».";
   const who = () => pk(["Lina", "Noé", "Inès", "Yanis", "Mia", "Sam"]);
 
@@ -469,16 +470,40 @@
       () => P("La droite " + M("y = ax + b") + " passe par " + M("A(1 \\,;\\, 5)") + " et " + M("B(4 \\,;\\, -1)") + ".", [["a) a", -2], ["b) b", 7], ["c) Abscisse du point où elle coupe l'axe des x", 3.5]],
           ["a + b = 5 et 4a + b = −1.", "c) Résous −2x + 7 = 0."], "a) " + M("a = -2") + " ; b) " + M("b = 7") + " ; c) " + M("x = 3{,}5") + "."),
     ],
+    /* 26.11 soir (agent defis3) : sysprob, sysgraph, sysineq tirés au hasard, 3 contextes et plus (avant : deux énoncés fixes). */
     sysprob: [
-      () => P("Dans une ferme, il y a des poules et des lapins : 35 têtes et 94 pattes.", [["a) Nombre de poules", 23], ["b) Nombre de lapins", 12]], ["Si tous étaient des poules : 70 pattes.", "Chaque lapin ajoute 2 pattes."], "Lapins : " + M("(94 - 70) : 2 = 12") + " ; poules : 23."),
-      () => P("Un avion parcourt 1'800 km en 2 h avec le vent dans le dos, et 3 h contre le vent.", [["a) Vitesse avec le vent (km/h)", 900], ["b) Vitesse contre le vent (km/h)", 600], ["c) Vitesse de l'avion sans vent (km/h)", 750], ["d) Vitesse du vent (km/h)", 150]],
-          ["v + w = 900, v − w = 600.", "Additionne."], "c) 750 km/h ; d) 150 km/h."),
+      () => { const [cx, txt, n1, l1, n2, l2, tw, lw, lo, hi] = pk([["ferme", "Dans une ferme, il y a des poules et des lapins : on compte # têtes et # pattes.", "poules", 2, "lapins", 4, "têtes", "pattes", [8, 30], [5, 20]],
+          ["parking", "Sur un parking, il y a des voitures et des motos : on compte # véhicules et # roues.", "motos", 2, "voitures", 4, "véhicules", "roues", [5, 25], [10, 40]],
+          ["salle", "Dans une salle, il y a des tabourets à 3 pieds et des chaises à 4 pieds : on compte # sièges et # pieds.", "tabourets", 3, "chaises", 4, "sièges", "pieds", [6, 20], [10, 30]]]);
+        const a = R.int(lo[0], lo[1]), b = R.int(hi[0], hi[1]), T = a + b, P0 = a * l1 + b * l2;
+        let i = 0; const q = txt.replace(/#/g, () => [T, P0][i++]);
+        return Object.assign(P(q, [["a) Nombre de " + n1, a], ["b) Nombre de " + n2, b]],
+          ["Si tous étaient des " + n1 + " : " + T + " · " + l1 + " = " + T * l1 + " " + lw + ".", "Chaque " + n2.replace(/s$/, "") + " ajoute " + (l2 - l1) + " " + lw + " de plus."],
+          "Avec x " + n1 + " et y " + n2 + " : " + sys("x + y = " + T, l1 + "x + " + l2 + "y = " + P0) + ". Si tous étaient des " + n1 + " : " + M(T * l1) + " " + lw + " ; il en manque " + M(P0 - T * l1) + ", donc " + M("y = " + (P0 - T * l1) + " : " + (l2 - l1) + " = " + b) + " " + n2 + " et " + M("x = " + T + " - " + b + " = " + a) + " " + n1 + "."), { ctx: cx }); },
+      () => { const [cx, txt, u, mm, tt] = pk([["avion", "Un avion parcourt # km en # h avec le vent dans le dos, et en # h contre le vent.", "km/h", [170, 200, 10], [[4, 5]]],
+          ["bateau", "Un bateau parcourt # km sur une rivière en # h en descendant le courant, et en # h en le remontant.", "km/h", [4, 10, 2], [[2, 3], [3, 4]]],
+          ["kayak", "Une kayakiste parcourt # km en # h en descendant une rivière, et en # h en la remontant.", "km/h", [2, 4, 2], [[2, 3], [1, 2]]]]);
+        const [t1, t2] = pk(tt), m = mm[0] + mm[2] * R.int(0, Math.floor((mm[1] - mm[0]) / mm[2])), D = m * t1 * t2, s1 = D / t1, s2 = D / t2, v = (s1 + s2) / 2, w = (s1 - s2) / 2, fl = cx === "avion" ? "du vent" : "du courant";
+        let i = 0; const q = txt.replace(/#/g, () => [N(D), t1, t2][i++]);
+        return Object.assign(P(q, [["a) Vitesse dans le sens favorable (" + u + ")", s1], ["b) Vitesse dans le sens contraire (" + u + ")", s2], ["c) Vitesse propre (sans " + (cx === "avion" ? "vent" : "courant") + ", " + u + ")", v], ["d) Vitesse " + fl + " (" + u + ")", w]],
+          ["Avec v la vitesse propre et w celle " + fl + " : v + w = " + N(s1).replace(/\\text\{'\}/g, "'") + " et v − w = " + N(s2).replace(/\\text\{'\}/g, "'") + ".", "Additionne les deux équations, puis soustrais-les."],
+          "a) " + M(N(D) + " : " + t1 + " = " + N(s1)) + " ; b) " + M(N(D) + " : " + t2 + " = " + N(s2)) + " ; " + sys("v + w = " + N(s1), "v - w = " + N(s2)) + " ; c) " + M("2v = " + N(s1 + s2)) + ", " + M("v = " + N(v)) + " " + u + " ; d) " + M("w = " + N(s1) + " - " + N(v) + " = " + N(w)) + " " + u + "."), { ctx: cx }); },
     ],
     sysgraph: [
-      () => P("On considère " + sys("2x + 3y = 6", "4x + my = k") + ".", [["a) Pour quel m les droites sont-elles parallèles ?", 6], ["b) Avec ce m, pour quel k y a-t-il une infinité de solutions ?", 12], ["c) Avec m = 1 et k = 2 : abscisse de la solution", 0]],
-          ["Coefficients proportionnels (facteur 2).", "c) Résous le système."], "a) 6 ; b) 12 ; c) " + M("x = 0") + ", " + M("y = 2") + "."),
-      () => P("Deux opérateurs : A coûte 20 CHF par mois plus 0,10 CHF la minute ; B coûte 0,30 CHF la minute.", [["a) Coût de A pour 60 minutes (CHF)", 26], ["b) Coût de B pour 60 minutes (CHF)", 18], ["c) Nombre de minutes où les coûts sont égaux", 100]],
-          ["Écris deux fonctions affines.", "c) 0,1x + 20 = 0,3x."], "c) " + M("0{,}2x = 20") + ", " + M("x = 100") + " minutes."),
+      () => { let a1, b1, f, x0, y0, m0; do { a1 = R.int(1, 5); b1 = R.int(1, 5); f = pk([2, 3]); x0 = R.int(-3, 4); y0 = R.int(-3, 4); m0 = R.int(1, 9); } while (gcd2(a1, b1) !== 1 || m0 === f * b1 || x0 === 0 || y0 === 0);
+        const c1 = a1 * x0 + b1 * y0, a2 = f * a1, k0 = a2 * x0 + m0 * y0;
+        return Object.assign(P("On considère " + sys(lhs([a1, b1]) + " = " + c1, a2 + "x + my = k") + " (m et k sont des nombres).", [["a) Pour quel m les deux droites sont-elles parallèles ?", f * b1], ["b) Avec ce m, pour quel k y a-t-il une infinité de solutions ?", f * c1], ["c) Avec m = " + m0 + " et k = " + k0 + " : abscisse x de la solution", x0], ["d) Avec m = " + m0 + " et k = " + k0 + " : ordonnée y de la solution", y0]],
+          ["Parallèles : coefficients de x et de y proportionnels (facteur " + f + ").", "c) Résous le système (par exemple par combinaison)."],
+          "a) " + M(a2 + " = " + f + " \\cdot " + a1) + ", donc " + M("m = " + f + " \\cdot " + b1 + " = " + f * b1) + " ; b) confondues si aussi " + M("k = " + f + " \\cdot " + pT(c1) + " = " + f * c1) + " ; c) et d) " + sys(lhs([a1, b1]) + " = " + c1, a2 + "x + " + m0 + "y = " + k0) + " donne " + pairT([x0, y0]) + "."), { ctx: "parametre" }); },
+      () => { const [cx, txt, unit, pAs, pBs] = pk([["operateur", "Deux opérateurs : A coûte # CHF par mois plus # CHF la minute ; B coûte # CHF la minute.", "minutes", [0.05, 0.1], [0.2, 0.25, 0.3]],
+          ["velo", "Location de vélo : l'agence A demande # CHF de frais de dossier plus # CHF de l'heure ; l'agence B demande # CHF de l'heure.", "heures", [2, 3], [5, 6, 7]],
+          ["sport", "Salle de sport : la formule A coûte # CHF par an plus # CHF la séance ; la formule B coûte # CHF la séance.", "séances", [4, 5, 6], [9, 10, 12]]]);
+        let pA, pB, xe, F; for (let t = 0; t < 50; t++) { pA = pk(pAs); pB = pk(pBs); xe = unit === "minutes" ? 10 * R.int(5, 20) : unit === "heures" ? R.int(3, 8) : R.int(8, 20); F = r6((pB - pA) * xe); if (F >= 4 && Number.isInteger(r6(F * 100))) break; }
+        const n = unit === "minutes" ? 10 * R.int(3, 25) : unit === "heures" ? R.int(2, 10) : R.int(5, 25), cA = r6(F + pA * n), cB = r6(pB * n);
+        let i = 0; const q = txt.replace(/#/g, () => N([F, pA, pB][i++]));
+        return Object.assign(P(q, [["a) Coût de A pour " + n + " " + unit + " (CHF)", cA], ["b) Coût de B pour " + n + " " + unit + " (CHF)", cB], ["c) Nombre de " + unit + " pour lequel les deux coûts sont égaux", xe]],
+          ["Écris deux fonctions affines : A(x) = " + N(F).replace("{,}", ",") + " + " + N(pA).replace("{,}", ",") + "x et B(x) = " + N(pB).replace("{,}", ",") + "x.", "c) Résous A(x) = B(x) : les deux droites se coupent."],
+          "a) " + M(N(F) + " + " + N(pA) + " \\cdot " + n + " = " + N(cA)) + " CHF ; b) " + M(N(pB) + " \\cdot " + n + " = " + N(cB)) + " CHF ; c) " + M(N(F) + " + " + N(pA) + "x = " + N(pB) + "x") + ", " + M(N(r6(pB - pA)) + "x = " + N(F)) + ", " + M("x = " + xe) + " " + unit + "."), { ctx: cx }); },
     ],
     sys3: [
       () => P("Trois amis comparent leurs économies : A et B ont ensemble 70 CHF, B et C 90 CHF, A et C 80 CHF.", [["a) Total des trois (CHF)", 120], ["b) Économies de A", 30], ["c) Économies de B", 40], ["d) Économies de C", 50]], ["Additionne les trois équations : 2(A + B + C) = 240.", "A = total − (B + C)."], "a) 120 ; A = 30, B = 40, C = 50."),
@@ -494,9 +519,20 @@
       () => P("Soit " + M("f(x) = 3x - 7") + " et " + M("g(x) = -x + 5") + ".", [["a) Zéro de f (fraction : 7/3)", 7 / 3], ["b) Zéro de g", 5], ["c) Abscisse où f(x) = g(x)", 3]], ["Résous f(x) = 0, puis g(x) = 0.", "c) 3x − 7 = −x + 5."], "a) " + M("\\frac{7}{3}") + " ; b) 5 ; c) " + M("x = 3") + "."),
     ],
     sysineq: [
-      () => P("Pour une sortie, la classe dispose de 600 CHF. Le car coûte 240 CHF et l'entrée 15 CHF par élève. Il faut au moins 12 élèves pour que la sortie ait lieu.", [["a) Nombre maximal d'élèves", 24], ["b) Nombre minimal d'élèves", 12], ["c) Combien de valeurs possibles pour le nombre d'élèves ?", 13]],
-          ["240 + 15x ≤ 600.", "c) Les entiers de 12 à 24."], "a) " + M("15x \\le 360") + ", " + M("x \\le 24") + " ; c) 13 valeurs."),
-      () => P("On cherche les nombres x qui vérifient à la fois 2x − 3 > 1 et 5 − x ≥ −2.", [["a) Borne de gauche (exclue)", 2], ["b) Borne de droite (comprise)", 7], ["c) Combien d'entiers vérifient le système ?", 5]], ["2x > 4 ; −x ≥ −7, donc x ≤ 7.", "c) 3, 4, 5, 6, 7."], M("S = \\,]2 \\,;\\, 7]") + " ; 5 entiers."),
+      () => { const [cx, txt, who, Cs, ps, mins] = pk([["sortie", "Pour une sortie, la classe dispose de # CHF. Le car coûte # CHF et l'entrée # CHF par élève. Il faut au moins # élèves pour que la sortie ait lieu.", "élèves", [180, 240, 300], [8, 10, 12, 15], [10, 12]],
+          ["anniversaire", "Pour un anniversaire, Léa dispose de # CHF. La salle coûte # CHF et le repas # CHF par invité. Elle veut inviter au moins # personnes.", "invités", [60, 80, 100], [12, 15, 18, 20], [8, 10]],
+          ["club", "Un club de foot dispose de # CHF pour un tournoi. La location du terrain coûte # CHF et l'inscription # CHF par joueur. Il faut au moins # joueurs.", "joueurs", [100, 150, 200], [6, 8, 10], [11, 14]]]);
+        let B, C, p, mn, mx; for (let t = 0; t < 80; t++) { C = pk(Cs); p = pk(ps); mn = pk(mins); mx = mn + R.int(4, 14); B = C + p * mx + R.int(0, p - 1); if (Math.floor((B - C) / p) === mx && B % 10 === 0) break; }
+        mx = Math.floor((B - C) / p); const dw = /^[éiaeou]/.test(who) ? "d'" : "de ", ex = (B - C) % p === 0;
+        let i = 0; const q = txt.replace(/#/g, () => N([B, C, p, mn][i++]));
+        return Object.assign(P(q, [["a) Nombre maximal " + dw + who, mx], ["b) Nombre minimal " + dw + who, mn], ["c) Combien de valeurs possibles pour le nombre " + dw + who + " ?", mx - mn + 1]],
+          [C + " + " + p + "x ≤ " + B + ".", "c) Les entiers de " + mn + " à " + mx + "."],
+          "a) " + M(C + " + " + p + "x \\le " + N(B)) + ", " + M(p + "x \\le " + (B - C)) + ", " + M("x \\le \\frac{" + (B - C) + "}{" + p + "}" + (ex ? " = " + mx : " \\approx " + N(Math.floor(((B - C) / p) * 10) / 10) + "\\ldots")) + ", donc au plus " + M(mx) + " ; b) " + M(mn) + " ; c) de " + mn + " à " + mx + " : " + M(mx + " - " + mn + " + 1 = " + (mx - mn + 1)) + " valeurs."), { ctx: cx }); },
+      () => { let Lb, Rb, a, b, d; do { Lb = R.int(-4, 4); Rb = Lb + R.int(3, 8); a = R.int(2, 5); b = R.int(1, 9); d = R.int(1, 9); } while (d - Rb === 0 || a * Lb - b === 0);
+        const strictL = R.rand() < 0.5, cnt = Rb - Lb + (strictL ? 0 : 1), c1 = a * Lb - b, e = d - Rb;
+        return Object.assign(P("On cherche les nombres x qui vérifient à la fois " + M(a + "x - " + b + (strictL ? " > " : " \\ge ") + c1) + " et " + M(d + " - x \\ge " + e) + ".", [["a) Borne de gauche (" + (strictL ? "exclue" : "comprise") + ")", Lb], ["b) Borne de droite (comprise)", Rb], ["c) Combien d'entiers vérifient le système ?", cnt]],
+          [M(a + "x" + (strictL ? " > " : " \\ge ") + (c1 + b)) + " ; " + M("-x \\ge " + (e - d)) + ", donc " + M("x \\le " + Rb) + " (on change le sens en divisant par −1).", "c) Compte les entiers de l'intervalle."],
+          M(a + "x" + (strictL ? " > " : " \\ge ") + (c1 + b)) + ", " + M("x" + (strictL ? " > " : " \\ge ") + Lb) + " ; " + M("x \\le " + Rb) + " : " + M("S = \\," + (strictL ? "]" : "[") + Lb + " \\,;\\, " + Rb + "]") + " ; " + cnt + " entiers."), { ctx: "algebre" }); },
     ],
   };
 

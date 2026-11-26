@@ -96,9 +96,22 @@
   };
 
   const PROBS = {
+    /* 26.11 soir (agent defis3) : sommets et milieux tirés au hasard, 3 contextes et plus (avant : deux énoncés fixes). */
     repere: [
-      () => P("Un parallélogramme ABCD a pour sommets A(1 ; 1), B(6 ; 1) et C(8 ; 4).", [["a) Abscisse de D", 3], ["b) Ordonnée de D", 4], ["c) Aire (en carreaux)", 15]], ["Le vecteur AB se reporte de D à C : D = C − (B − A).", "Aire = base × hauteur."], "a) b) D(3 ; 4) ; c) " + M("5 \\cdot 3 = 15") + "."),
-      () => P("Le point M(2 ; 3) est le milieu de [AB], avec A(−1 ; 5).", [["a) Abscisse de B", 5], ["b) Ordonnée de B", 1]], ["Le milieu est la moyenne : (−1 + x_B) ÷ 2 = 2.", "Idem pour les ordonnées."], "B(5 ; 1)."),
+      () => { const w = R.int(3, 7), h = R.int(2, 5), s = nz(-2, 3), A = [R.int(-3, 2), R.int(-2, 2)], B = [A[0] + w, A[1]], C = [B[0] + s, B[1] + h], D = [A[0] + s, A[1] + h];
+        const [cx, txt, extra] = pk([["geometrie", "Dans un repère, un parallélogramme ABCD a pour sommets ", null], ["parcelle", "Sur un plan quadrillé (1 carreau = 10 m), une parcelle a la forme d'un parallélogramme ABCD de sommets ", ["d) Aire réelle de la parcelle (m²)", w * h * 100, "1 carreau = 10 m · 10 m = 100 m²"]],
+          ["jeu", "Dans un jeu vidéo, une plateforme a la forme d'un parallélogramme ABCD ; sur la grille de l'écran (1 carreau = 8 pixels), ses sommets sont ", ["d) Aire de la plateforme (en pixels²)", w * h * 64, "1 carreau = 8 · 8 = 64 pixels²"]]]);
+        const parts = [["a) Abscisse de D", D[0]], ["b) Ordonnée de D", D[1]], ["c) Aire (en carreaux)", w * h]].concat(extra ? [[extra[0], extra[1]]] : []);
+        return Object.assign(P(txt + pt("A", A[0], A[1]) + ", " + pt("B", B[0], B[1]) + " et " + pt("C", C[0], C[1]) + ".", parts,
+          ["Le déplacement de B à C se reporte de A à D : D = A + (C − B).", "Aire d'un parallélogramme = base × hauteur ; ici la base [AB] est horizontale."],
+          "De B à C : " + M((s < 0 ? s : "+" + s) + "") + " en x et " + M("+" + h) + " en y, donc " + pt("D", D[0], D[1]) + " : a) " + M(D[0]) + " ; b) " + M(D[1]) + " ; c) base " + M(w) + ", hauteur " + M(h) + " : " + M(w + " \\cdot " + h + " = " + w * h) + " carreaux" + (extra ? " ; d) " + extra[2] + ", donc " + M(w * h + " \\cdot " + extra[1] / (w * h) + " = " + extra[1]) : "") + "."), { ctx: cx }); },
+      () => { let A, Mi; do { A = [R.int(-5, 5), R.int(-5, 5)]; Mi = [R.int(-3, 4), R.int(-3, 4)]; } while (A[0] === Mi[0] || A[1] === Mi[1]);
+        const B = [2 * Mi[0] - A[0], 2 * Mi[1] - A[1]], [cx, txt] = pk([["milieu", "Dans un repère, le point " + pt("M", Mi[0], Mi[1]) + " est le milieu du segment [AB], avec " + pt("A", A[0], A[1]) + "."],
+          ["rendez-vous", "Sur un plan quadrillé (1 carreau = 100 m), Léa habite en " + pt("A", A[0], A[1]) + ". Elle donne rendez-vous à Noé exactement à mi-chemin de leurs maisons, au point " + pt("M", Mi[0], Mi[1]) + ". Noé habite en B."],
+          ["passerelle", "Sur le plan d'un parc (repère en dizaines de mètres), une passerelle droite part de " + pt("A", A[0], A[1]) + " ; son pilier central est en son milieu " + pt("M", Mi[0], Mi[1]) + ". L'autre extrémité est B."]]);
+        return Object.assign(P(txt, [["a) Abscisse de B", B[0]], ["b) Ordonnée de B", B[1]]],
+          ["Le milieu est la moyenne des coordonnées : (" + A[0] + " + x_B) ÷ 2 = " + Mi[0] + ".", "Ou : de A à M, on se déplace de " + (Mi[0] - A[0]) + " en x et " + (Mi[1] - A[1]) + " en y ; on refait le même déplacement de M à B."],
+          M("x_B = 2 \\cdot " + pr(Mi[0]) + " - " + pr(A[0]) + " = " + B[0]) + " et " + M("y_B = 2 \\cdot " + pr(Mi[1]) + " - " + pr(A[1]) + " = " + B[1]) + " : " + pt("B", B[0], B[1]) + "."), { ctx: cx }); },
     ],
     tabval: [
       () => P("Une bougie de 20 cm diminue de 1,5 cm par heure. On note h(t) sa hauteur après t heures.", [["a) h(2)", 17], ["b) h(6)", 11], ["c) Après combien d'heures mesure-t-elle 8 cm ?", 8]], ["h(t) = 20 − 1,5 t.", "c) Résous 20 − 1,5 t = 8."], "a) 17 ; b) 11 ; c) 8 h."),
