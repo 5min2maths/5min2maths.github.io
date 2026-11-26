@@ -725,7 +725,7 @@ function screenHome() {
   // 22.11 : « Ma fiche » (src/fiche.js) : une fiche par chapitre derrière Progrès. Retirée le 23.11 (branche archive/fiche) : inactif sans fiche.js.
   panels.prog = () => `${weekCard()}<div class="card flat stack grades-go"><button type="button" class="btn-sec" id="gradesgo">🏅 Mes grades et mon Mathélo</button><p class="small muted yp-explain">Mathélo = ton niveau · Points de l'année = ton travail, ils font monter ton grade.</p></div>${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}${typeof parentCard === "function" ? parentCard() : ""}`; /* 24.11 : espace parent (src/parents.js) */
   if (!panels[homeTab]) homeTab = "today";
-  const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted hh-cl" title="Ta classe"><span class="hh-w">Classe </span>${classTag(state.profile) /* 26.11 (revue élèves, B9 : « Classe 2e MP » et « MP 2e ») : même forme partout */}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
+  const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="${alive && s.count ? "jours d'affilée" : "une séance aujourd'hui et ta série repart à 1"}${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted hh-cl" title="Ta classe"><span class="hh-w">Classe </span>${classTag(state.profile) /* 26.11 (revue élèves, B9 : « Classe 2e MP » et « MP 2e ») : même forme partout */}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
   if (homeTab !== "today") {
     const T = { prob: "Problème de la semaine", test: "Mon évaluation", carnet: "Carnet d'erreurs", prog: "Progrès" };
     h(`${head}<button type="button" class="btn-ghost back-home" id="hb">← Accueil</button><h2 class="sub-title">${T[homeTab]}</h2>
@@ -746,9 +746,9 @@ function screenHome() {
     const ios = iosStoreCard(); /* 26.11 : stockage sur iPhone, à la place du rappel de sauvegarde (une seule carte) */
     const below = [prepNow0 ? "" : prepTodayCard(), weekRecapCard(), ios || backupCard(), joker ? "" : nudge, eloHintCard()].join("");
     /* Série perdue (26.11, même revue) : une phrase dans la carte de séance, le jour du retour seulement. */
-    const lostK = s.count >= 2 && !alive && s.last ? s.last : null;
+    const lostK = s.count >= 1 && !alive && s.last ? s.last : null; /* 26.11 soir (revue d'un testeur : « 0 j » sans un mot après une absence) : dès 1 jour */
     if (lostK && (!state.lostSeen || state.lostSeen.k !== lostK)) { state.lostSeen = { k: lostK, d: today }; save(); }
-    const lostLine = lostK && state.lostSeen && state.lostSeen.k === lostK && state.lostSeen.d === today ? `<p class="small streak-lost">Ta série de ${s.count} jours s'est arrêtée : on repart aujourd'hui ! Ton record : ${Math.max(s.best || 0, s.count)}.</p>` : "";
+    const lostLine = lostK && state.lostSeen && state.lostSeen.k === lostK && state.lostSeen.d === today ? `<p class="small streak-lost">Ta série de ${s.count} ${s.count > 1 ? "jours" : "jour"} s'est arrêtée. Fais une séance aujourd'hui : elle repart à 1.${Math.max(s.best || 0, s.count) > 1 ? " Ton record : " + Math.max(s.best || 0, s.count) + " jours." : ""}</p>` : "";
     const nowLine = !Engine.nowActive(state) ? `<button type="button" class="btn-sec small" id="nowpick">📚 Choisir mon chapitre travaillé en classe</button>`
       : Engine.nowStale(state) ? `<div class="now-ask"><b>📚 Cette semaine en classe, tu travailles toujours :</b><span>${esc(state.now.ids.map(nLabel).join(" · "))} ?</span><div class="row now-ask-btns"><button type="button" class="btn-sec small" id="nowyes">Oui, toujours</button><button type="button" class="btn-sec small" id="nowpick">J'ai changé de chapitre</button></div></div>`
       : `<span class="small now-lab">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span><button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
@@ -767,7 +767,7 @@ function screenHome() {
     h(`<div class="hub">${head}
     ${eloBanner()}
     ${banner}
-    ${prepNow ? "" : `<div class="card stack sess-card sess-first">${lostLine} <!-- 24.11 : « Séance d'abord » (choix de l'enseignant) : le bouton en premier, le reste discret -->
+    ${prepNow ? lostLine : `<div class="card stack sess-card sess-first">${lostLine} <!-- 24.11 : « Séance d'abord » (choix de l'enseignant) : le bouton en premier, le reste discret -->
       <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${paused ? "Nouvelle séance" : done ? "Encore une séance" : mode === "classe" ? "Ma séance du jour" : "Mon défi du jour"}</button>
       ${mode === "classe" ? `<div class="sess-fmt"><span class="sess-fmt-t"><b class="fmt-lab">${FORMATS[fmt].label}</b><span class="small muted fmt-txt">${Engine.fmtText(state, fmt)}${doneLab ? " · séance faite ✓" : ""}</span></span><button type="button" class="btn-sec small" id="other" aria-label="Changer de format">🔁<span class="chg-t"> Changer</span></button></div>
         <div class="now-line">${nowLine}</div>` : ""}
@@ -2056,6 +2056,9 @@ function previewHtml(v, spec) {
 function previewOf(inp, prev, spec) {
   const v = inp.value.trim();
   if (!v) { prev.innerHTML = ""; return; }
+  /* 26.11 soir (enseignant, sur téléphone : « si on répond 12, on a l'impression qu'il apparaît une fois de trop ») : un
+     simple nombre n'a pas besoin d'aperçu ; l'aperçu reste pour un calcul (3*7/4), une fraction, une puissance, une lettre. */
+  if (/^-?\d+([.,]\d+)?$/.test(v.replace(/\s|'/g, "")) && !isSetSpec(spec)) { prev.innerHTML = ""; return; }
   try { prev.innerHTML = previewHtml(v, spec); typeset(prev); } catch (e) { prev.innerHTML = `<span class="err">${esc(e.message)}</span>`; }
 }
 /* 25.11 soir (revue d'un testeur : « le pavé se décale à l'affichage, mon premier clic est tombé sur la mauvaise touche ») :
@@ -2103,7 +2106,10 @@ function ansInView(inp, all) {
   const vh = (window.visualViewport ? visualViewport.height : innerHeight) - qbarH(), r = inp.getBoundingClientRect(); /* 26.11 : barre d'action fixe en bas */
   if (all && imOf(inp) === "none") {
     const box = inp.closest(".answer"), b = box ? box.getBoundingClientRect() : r;
-    if (b.bottom > vh - 4 && b.bottom - r.top < vh - 16) { window.scrollBy({ top: b.bottom - vh + 12, behavior: "smooth" }); return; }
+    /* 26.11 soir (constat de l'enseignant sur téléphone : dernière ligne du pavé cachée par la barre « Vérifier ») : on
+       remonte autant que possible pour montrer tout le pavé, sans faire sortir le champ par le haut. */
+    const rc0 = document.getElementById("qrecap"), top0 = rc0 && !rc0.hidden ? rc0.getBoundingClientRect().bottom : 0;
+    if (b.bottom > vh - 4) { const d = Math.min(b.bottom - vh + 12, r.top - top0 - 8); if (d > 4) { window.scrollBy({ top: d, behavior: "smooth" }); return; } }
   }
   const rc = document.getElementById("qrecap"), top = rc && !rc.hidden ? rc.getBoundingClientRect().bottom : 0; /* rappel d'énoncé collé en haut */
   if (r.top < top + 4) window.scrollBy({ top: r.top - top - 12, behavior: "smooth" });

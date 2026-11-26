@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "fb42e8a4c5"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "ca41d3c5e7"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -725,7 +725,7 @@ function screenHome() {
   // 22.11 : « Ma fiche » (src/fiche.js) : une fiche par chapitre derrière Progrès. Retirée le 23.11 (branche archive/fiche) : inactif sans fiche.js.
   panels.prog = () => `${weekCard()}<div class="card flat stack grades-go"><button type="button" class="btn-sec" id="gradesgo">🏅 Mes grades et mon Mathélo</button><p class="small muted yp-explain">Mathélo = ton niveau · Points de l'année = ton travail, ils font monter ton grade.</p></div>${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}${typeof parentCard === "function" ? parentCard() : ""}`; /* 24.11 : espace parent (src/parents.js) */
   if (!panels[homeTab]) homeTab = "today";
-  const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="jours d'affilée${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted hh-cl" title="Ta classe"><span class="hh-w">Classe </span>${classTag(state.profile) /* 26.11 (revue élèves, B9 : « Classe 2e MP » et « MP 2e ») : même forme partout */}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
+  const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="${alive && s.count ? "jours d'affilée" : "une séance aujourd'hui et ta série repart à 1"}${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥" : "✏️"} <b>${alive ? s.count : 0}</b> j</span><span class="small muted hh-cl" title="Ta classe"><span class="hh-w">Classe </span>${classTag(state.profile) /* 26.11 (revue élèves, B9 : « Classe 2e MP » et « MP 2e ») : même forme partout */}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
   if (homeTab !== "today") {
     const T = { prob: "Problème de la semaine", test: "Mon évaluation", carnet: "Carnet d'erreurs", prog: "Progrès" };
     h(`${head}<button type="button" class="btn-ghost back-home" id="hb">← Accueil</button><h2 class="sub-title">${T[homeTab]}</h2>
@@ -746,9 +746,9 @@ function screenHome() {
     const ios = iosStoreCard(); /* 26.11 : stockage sur iPhone, à la place du rappel de sauvegarde (une seule carte) */
     const below = [prepNow0 ? "" : prepTodayCard(), weekRecapCard(), ios || backupCard(), joker ? "" : nudge, eloHintCard()].join("");
     /* Série perdue (26.11, même revue) : une phrase dans la carte de séance, le jour du retour seulement. */
-    const lostK = s.count >= 2 && !alive && s.last ? s.last : null;
+    const lostK = s.count >= 1 && !alive && s.last ? s.last : null; /* 26.11 soir (revue d'un testeur : « 0 j » sans un mot après une absence) : dès 1 jour */
     if (lostK && (!state.lostSeen || state.lostSeen.k !== lostK)) { state.lostSeen = { k: lostK, d: today }; save(); }
-    const lostLine = lostK && state.lostSeen && state.lostSeen.k === lostK && state.lostSeen.d === today ? `<p class="small streak-lost">Ta série de ${s.count} jours s'est arrêtée : on repart aujourd'hui ! Ton record : ${Math.max(s.best || 0, s.count)}.</p>` : "";
+    const lostLine = lostK && state.lostSeen && state.lostSeen.k === lostK && state.lostSeen.d === today ? `<p class="small streak-lost">Ta série de ${s.count} ${s.count > 1 ? "jours" : "jour"} s'est arrêtée. Fais une séance aujourd'hui : elle repart à 1.${Math.max(s.best || 0, s.count) > 1 ? " Ton record : " + Math.max(s.best || 0, s.count) + " jours." : ""}</p>` : "";
     const nowLine = !Engine.nowActive(state) ? `<button type="button" class="btn-sec small" id="nowpick">📚 Choisir mon chapitre travaillé en classe</button>`
       : Engine.nowStale(state) ? `<div class="now-ask"><b>📚 Cette semaine en classe, tu travailles toujours :</b><span>${esc(state.now.ids.map(nLabel).join(" · "))} ?</span><div class="row now-ask-btns"><button type="button" class="btn-sec small" id="nowyes">Oui, toujours</button><button type="button" class="btn-sec small" id="nowpick">J'ai changé de chapitre</button></div></div>`
       : `<span class="small now-lab">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span><button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
@@ -767,7 +767,7 @@ function screenHome() {
     h(`<div class="hub">${head}
     ${eloBanner()}
     ${banner}
-    ${prepNow ? "" : `<div class="card stack sess-card sess-first">${lostLine} <!-- 24.11 : « Séance d'abord » (choix de l'enseignant) : le bouton en premier, le reste discret -->
+    ${prepNow ? lostLine : `<div class="card stack sess-card sess-first">${lostLine} <!-- 24.11 : « Séance d'abord » (choix de l'enseignant) : le bouton en premier, le reste discret -->
       <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${paused ? "Nouvelle séance" : done ? "Encore une séance" : mode === "classe" ? "Ma séance du jour" : "Mon défi du jour"}</button>
       ${mode === "classe" ? `<div class="sess-fmt"><span class="sess-fmt-t"><b class="fmt-lab">${FORMATS[fmt].label}</b><span class="small muted fmt-txt">${Engine.fmtText(state, fmt)}${doneLab ? " · séance faite ✓" : ""}</span></span><button type="button" class="btn-sec small" id="other" aria-label="Changer de format">🔁<span class="chg-t"> Changer</span></button></div>
         <div class="now-line">${nowLine}</div>` : ""}

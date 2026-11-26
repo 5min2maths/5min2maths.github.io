@@ -14,3 +14,16 @@ Ordre (solidité d'abord) :
    révision, accords il/elle.
 6. Recalcul des notions propres au lycée français (1re, Tle, niveaux 1–3).
 Page légale : pas avant une ouverture au-delà des testeurs (décision de l'enseignant).
+
+## En premier le 27.11 (fait le 26.11 à 20 h 45, pas encore testé ni publié)
+- Pavé caché par la barre « Vérifier » (constaté par l'enseignant sur téléphone) : `#app:has(.qbar)` (au lieu de `> .qbar`)
+  et `ansInView` remonte pour montrer tout le pavé sans faire sortir le champ par le haut.
+- Aperçu de la réponse masqué pour un simple nombre (« 12 » apparaissait deux fois) ; gardé pour un calcul (3*7/4).
+- Tests : kp.html, kp_stable.html, ergo.html, ux_2111*.html, entete_360.html, puis publier.
+- Reste de la revue ergonomie/technique du soir : pavé 1–4 pour les choix, « Plus tard » / « Non » du bandeau
+  statistiques, « Réessayer » / « On le fait ensemble », aria-live et prefers-reduced-motion, « Nouvelle version prête »,
+  journal d'erreurs (avec accord), test de migration d'anciens profils, poids de la page.
+
+## Présentation PDF (retour de l'enseignant, 26.11 soir : « globalement top »)
+- Retirer « Loulou » (prénom fictif bizarre pour désigner l'enfant, vue parent) : prénom neutre ou « votre enfant ».
+- Faire une **version séparée Suisse romande seulement** (sans la partie France), en plus de la version actuelle.

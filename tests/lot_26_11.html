@@ -152,7 +152,10 @@ sec("UI", () => {
     if (y > 640 - 48) fail("accueil (" + k + ") : bouton de séance à " + Math.round(y) + " px (> 592)");
     if (/Mathélo/.test(app.textContent)) fail("accueil (" + k + ") : « Mathélo » visible"); }
   fresh({ streak: { count: 3, last: addDays(today, -4), best: 5 } }); screenHome();
-  if (!/Ta série de 3 jours s'est arrêtée : on repart aujourd'hui ! Ton record : 5\./.test((app.querySelector(".sess-card") || {}).textContent || "")) fail("série perdue : phrase absente de la carte de séance");
+  if (!/Ta série de 3 jours s'est arrêtée\. Fais une séance aujourd'hui : elle repart à 1\. Ton record : 5 jours\./.test((app.querySelector(".sess-card") || {}).textContent || "")) fail("série perdue : phrase absente de la carte de séance");
+  /* 26.11 soir (revue d'un testeur : « 0 j » sans un mot après 4 jours d'absence) : phrase dès une série d'un jour */
+  fresh({ streak: { count: 1, last: addDays(today, -4), best: 1 } }); screenHome();
+  if (!/Ta série de 1 jour s'est arrêtée\. Fais une séance aujourd'hui : elle repart à 1\./.test((app.querySelector(".sess-card") || {}).textContent || "")) fail("série perdue d'un jour : phrase absente");
   // 2. Statistiques : sous la séance, « Plus tard », 3 jours ignorés, « Non » définitif.
   fresh(); screenHome(); const sc = app.querySelector("#statscard"), sg = app.querySelector(".sess-card");
   if (!sc || !sg || sc.getBoundingClientRect().top < sg.getBoundingClientRect().bottom) fail("statistiques : carte absente ou au-dessus de la séance");

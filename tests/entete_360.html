@@ -30,6 +30,17 @@ if (window === top) {
       const W = document.documentElement.clientWidth, r = gear.getBoundingClientRect(), hr = hd.getBoundingClientRect();
       if (r.right > W + 0.5 || r.right > hr.right + 0.5 || hd.scrollWidth > hd.clientWidth + 1 || document.documentElement.scrollWidth > W + 1) bad.push(classTag(prof) + " : roue à " + Math.round(r.right) + " / " + W + " (en-tête " + hd.scrollWidth + " / " + hd.clientWidth + ")");
     }
+    /* 26.11 soir (revue d'un testeur : zones de toucher sous 44 px) : chaque petit bouton répond à ±21 px de son centre. */
+    { const tiny = []; state = Engine.newState({ system: "CH", grade: 11, track: "college", minutes: 5 }); Engine.autoInit(state); state.placed = true; save(); homeTab = "today"; screenHome();
+      /* zone sensible d'au moins 44 × 44 px : 44 px de haut autour du centre, et 44 px de large (centrés, ou vers la gauche pour la roue au bord droit) */
+      const on = (el, x, y) => { const t = document.elementFromPoint(x, y); return !!t && (t === el || el.contains(t)); };
+      const hit = (el) => { const r = el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+        return on(el, cx, cy - 21) && on(el, cx, cy + 21) && ((on(el, cx - 21, cy) && on(el, cx + 21, cy)) || (on(el, r.right - 43, cy) && on(el, r.right - 1, cy))); };
+      const sel = ["#settings", ".home-head .fab-cmt", "#sessinfo", "#nowpick", ".seg button"];
+      let seen = 0; document.querySelectorAll("#tour").forEach((t) => t.remove()); /* visite guidée du premier accueil : couche par-dessus */
+      for (const q of sel) for (const el of app.querySelectorAll(q)) { if (getComputedStyle(el).display === "none" || !el.offsetWidth) continue; el.scrollIntoView({ block: "center" }); seen++; if (!hit(el)) tiny.push(q + " « " + el.textContent.trim().slice(0, 14) + " » " + Math.round(el.offsetWidth) + "×" + Math.round(el.offsetHeight)); }
+      window.scrollTo(0, 0);
+      ok(seen >= 2 && !tiny.length, "zones de toucher ≥ 44 px : " + seen + " boutons" + (tiny.length ? " — " + tiny.join(" | ") : "")); }
     ok(n === P.length && !bad.length, "en-tête à " + document.documentElement.clientWidth + " px : " + n + " classes, roue ⚙️ visible" + (bad.length ? " — " + bad.join(" | ") : ""));
   } catch (e) { fail.push("EXC " + e.message); }
   parent.postMessage("ent:" + fail.concat(out).join("\n") + "\n" + (fail.length ? fail.length + " ÉCHEC(S)" : "tout ok"), "*");
