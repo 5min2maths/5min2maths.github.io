@@ -35,6 +35,15 @@ const ELEVES = {
      (evalj=2 : jour 1 = J−2 sujet de préparation, jour 2 = J−1 « Tes erreurs ») */
   emma: { nom: "Emma", profil: "CH-10", niveau: "moyen", strategie: "aide,figure", wpm: 230, jours: 2, premier: 1, chapitre: "auto", extras: "carnet,curieux" },
   hugo: { nom: "Hugo", profil: "FR-6", niveau: "faible", strategie: "aide,guide,lecon", wpm: 200, jours: 2, premier: 1, chapitre: "auto", extras: "carnet,histoire" },
+  /* 26.11, 4e passage (agent eleves4) : MP 3e–4e, 2e Coll. en mode libre, 9e très faible, 5e, 3e (brevet) et Tle France ;
+     niveau=tresfaible (p1 0,25, « Je ne sais pas » fréquent : idk=0.4) ; mode=libre (porte « 🧭 Libre » le jour 1) */
+  adam: { nom: "Adam", profil: "MP-14", niveau: "fort", strategie: "facile", wpm: 260, jours: 2, premier: 1, chapitre: "auto", extras: "probleme,curieux" },
+  nina: { nom: "Nina", profil: "MP-15", niveau: "moyen", strategie: "aide,guide", wpm: 220, jours: 2, premier: 1, chapitre: "auto", extras: "carnet,histoire" },
+  elias: { nom: "Elias", profil: "CH-13", niveau: "moyen", strategie: "aide,figure", wpm: 230, jours: 2, premier: 1, mode: "libre", extras: "curieux,carnet" },
+  kevin: { nom: "Kevin", profil: "CH-9", niveau: "tresfaible", strategie: "idk,aide,guide", idk: 0.4, wpm: 170, jours: 2, premier: 1, chapitre: "auto", extras: "carnet,histoire" },
+  manon: { nom: "Manon", profil: "FR-7", niveau: "moyen", strategie: "aide,lecon", wpm: 210, jours: 2, premier: 1, chapitre: "auto", extras: "curieux,carnet" },
+  louis: { nom: "Louis", profil: "FR-9", niveau: "moyen", strategie: "aide", wpm: 230, jours: 2, premier: 1, chapitre: "auto", extras: "carnet,probleme" },
+  clara: { nom: "Clara", profil: "FR-12", niveau: "fort", strategie: "facile,lecon", wpm: 260, jours: 2, premier: 1, chapitre: "auto", extras: "probleme,curieux" },
 };
 const CFG = Object.assign({ nom: "élève", profil: "CH-9", niveau: "moyen", strategie: "", wpm: 200, jours: 3, premier: 0, extras: "", jour0: "2026-11-16", graine: 7 }, ELEVES[HP.eleve] || {}, HP);
 CFG.jours = +CFG.jours; CFG.premier = +CFG.premier; CFG.wpm = +CFG.wpm;
@@ -54,7 +63,7 @@ window.confirm = () => true; window.print = () => {};
   const wait = (ms = 30) => new Promise((r) => setTimeout(r, ms));
   const rnd = Math.random;
   const ST = new Set(String(CFG.strategie).split(",").filter(Boolean)), EX = String(CFG.extras).split(",").filter(Boolean);
-  const LV = { faible: { p1: 0.45, p2: 0.3, pl: 0.4 }, moyen: { p1: 0.7, p2: 0.5, pl: 0.65 }, fort: { p1: 0.93, p2: 0.8, pl: 0.9 } }[CFG.niveau] || { p1: 0.7, p2: 0.5, pl: 0.65 };
+  const LV = { tresfaible: { p1: 0.25, p2: 0.15, pl: 0.25 }, faible: { p1: 0.45, p2: 0.3, pl: 0.4 }, moyen: { p1: 0.7, p2: 0.5, pl: 0.65 }, fort: { p1: 0.93, p2: 0.8, pl: 0.9 } }[CFG.niveau] || { p1: 0.7, p2: 0.5, pl: 0.65 };
   /* ---------- temps simulé ---------- */
   let T = 0, Tsess = 0;
   const words = (s) => (String(s || "").match(/[\p{L}\p{N}][\p{L}\p{N}'’,.\-]*/gu) || []).length;
@@ -125,7 +134,7 @@ window.confirm = () => true; window.print = () => {};
   if (typeof HISTOIRE !== "undefined") for (const k of Object.keys(HISTOIRE)) { const f = HISTOIRE[k].ex; HISTOIRE[k].ex = (...a) => (histE = f(...a)); }
   if (typeof qcmMake === "function") { const _qm = qcmMake; qcmMake = (...a) => { const r = _qm(...a); if (r) qcmList.push(r); return r; }; }
   const _sl = screenLesson; screenLesson = (id, ...a) => { lessonId = id; return _sl(id, ...a); };
-  const thinkS = (q) => (q.parts ? 150 : q.d >= 4 ? 150 : q.d === 3 ? 50 : q.d === 2 ? 30 : 15) * (CFG.niveau === "faible" ? 1.4 : CFG.niveau === "fort" ? 0.7 : 1) * (ST.has("presse") ? 0.7 : 1);
+  const thinkS = (q) => (q.parts ? 150 : q.d >= 4 ? 150 : q.d === 3 ? 50 : q.d === 2 ? 30 : 15) * (/faible/.test(CFG.niveau) ? 1.4 : CFG.niveau === "fort" ? 0.7 : 1) * (ST.has("presse") ? 0.7 : 1);
   const qs = []; /* questions rencontrées */
   const inNow = (q) => !!(state.now && state.now.ids && q && state.now.ids.includes(q.id)); /* 26.11 soir : question du chapitre « en classe » ? */
   /* ---------- une question ---------- */
@@ -141,7 +150,7 @@ window.confirm = () => true; window.print = () => {};
     /* « Trop facile » (Inès) */
     if (ST.has("facile") && q.d <= 1 && $("easy") && vis($("easy")) && rnd() < 0.6) { await click($("easy"), "Trop facile ⏭"); return; }
     if (ST.has("lecon") && rnd() < 0.25) { const d = app.querySelector(".card details.lesson"); if (d) { d.open = true; await wait(); log("  → ouvre « 📖 Rappel de cours » :"); log(indent(screenText(d).slice(0, 700), 6)); add(readS(screenText(d)) * 0.6); } }
-    if (ST.has("idk") && rnd() < 0.15) { await click($("idk"), "Je ne sais pas"); add(3); return afterEnd(q); }
+    if (ST.has("idk") && rnd() < +(CFG.idk || 0.15)) { await click($("idk"), "Je ne sais pas"); add(3); return afterEnd(q); }
     let ok = rnd() < LV.p1, a = ok ? ra : null, w = null;
     if (!ok) { w = wrongAns(q, q.spec); a = w.a; }
     if (a === null) { act("(pas de réponse calculable pour ce type : je ne sais pas)"); await click($("idk"), "Je ne sais pas"); return afterEnd(q); }
@@ -366,6 +375,7 @@ window.confirm = () => true; window.print = () => {};
     for (let j = 0; j < CFG.jours; j++) {
       if (j > 0) await nextDay(j === 2 && !CFG.consecutif ? 2 : 1);
       shot("ACCUEIL jour " + (j + 1), { max: 1500 });
+      if (j === 0 && CFG.mode === "libre") { const b = app.querySelector('.sess-seg button[data-m="libre"]'); await click(b, "🧭 Libre"); shot("ACCUEIL mode libre", { max: 1500 }); }
       if (j === 0 && CFG.chapitre) await doChapitre();
       if (j === 0 && CFG.evalj) { await doEvalSetup(+CFG.evalj); shot("ACCUEIL avec évaluation", { max: 1500 }); }
       /* 26.11 : évaluation active → sa tâche EST la séance du jour (un seul bouton à l'accueil), sauf le sujet de préparation (au choix) */
