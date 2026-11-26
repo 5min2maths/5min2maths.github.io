@@ -518,6 +518,37 @@
       { ...prod, ctx: "erreur", guide: [GS("Somme des deux nombres choisis par " + w + " (" + M(-a) + " et " + M(-b) + ") ?", -(a + b), M(-(a + b)) + " : il fallait " + M(a + b) + "."), GX("La bonne factorisation :", e, M("(" + xp(a) + ")(" + xp(b) + ")") + ".", "product")],
         traps: [TX(f, "C'est la réponse de " + w + " : développe pour vérifier, le coefficient de " + M("x") + " doit être " + M(a + b) + ".")] }); });
 
+  /* 26.11 soir (agent defisch) : litelab et parenth passés de 1 à 3 contextes (tag ctx, oracle par contexte dans
+     tests/recalc_oracles.js). Notions communes avec la France : aucun lieu suisse. */
+  {
+    const CXQ = (cx, q) => Object.assign(q, { ctx: cx }), W0 = (id, cx) => { const f = PROBS[id][0]; PROBS[id][0] = () => CXQ(cx, f()); };
+    W0("litelab", "rectangle"); W0("parenth", "expression");
+    PROBS.litelab.push(
+      () => { const k = R.int(2, 7), x = R.int(3, 9); let xs; do { xs = R.int(4, 15); } while (xs === x);
+        return CXQ("triangle", Pb("Un triangle isocèle a une base de " + M("x") + " cm, et ses deux autres côtés mesurent chacun " + M("x + " + k) + " cm.",
+          [["a) Périmètre pour x = " + x + " (cm)", 3 * x + 2 * k], ["b) Valeur de x pour un périmètre de " + (3 * xs + 2 * k) + " cm", xs], ["c) Longueur d'un des côtés égaux quand le périmètre vaut " + (3 * xs + 2 * k) + " cm (cm)", xs + k]],
+          ["Périmètre : x + 2(x + " + k + ") = 3x + " + 2 * k + ".", "b) Résous 3x + " + 2 * k + " = " + (3 * xs + 2 * k) + "."],
+          "a) " + M("3 \\cdot " + x + " + " + 2 * k + " = " + (3 * x + 2 * k)) + " cm. b) " + M("3x + " + 2 * k + " = " + (3 * xs + 2 * k)) + " ; " + M("3x = " + 3 * xs) + " ; " + M("x = " + xs) + ". c) " + M(xs + " + " + k + " = " + (xs + k)) + " cm.")); },
+      () => { const k = R.int(2, 5), x = R.int(8, 14), nm = pk([["Tom", "sa sœur"], ["Lina", "son frère"], ["Noé", "sa sœur"]]); let xs; do { xs = R.int(8, 15); } while (xs === x);
+        return CXQ("ages", Pb(nm[0] + " a " + M("x") + " ans. " + nm[1].charAt(0).toUpperCase() + nm[1].slice(1) + " a " + k + " ans de plus que " + (nm[0] === "Lina" ? "elle" : "lui") + ", et leur mère a le triple de l'âge de " + nm[0] + ".",
+          [["a) Somme des trois âges pour x = " + x + " (ans)", 5 * x + k], ["b) Valeur de x si la somme des trois âges vaut " + (5 * xs + k) + " ans", xs], ["c) Âge de la mère quand la somme des trois âges vaut " + (5 * xs + k) + " ans (ans)", 3 * xs]],
+          ["Somme : x + (x + " + k + ") + 3x = 5x + " + k + ".", "b) Résous 5x + " + k + " = " + (5 * xs + k) + "."],
+          "a) " + M("5 \\cdot " + x + " + " + k + " = " + (5 * x + k)) + " ans. b) " + M("5x = " + 5 * xs) + ", " + M("x = " + xs) + ". c) " + M("3 \\cdot " + xs + " = " + 3 * xs) + " ans.")); });
+    PROBS.parenth.push(
+      () => { let a, b, c, x; do { a = R.int(4, 7); b = R.int(2, 9); c = R.int(2, 9); x = R.int(3, 8); } while (b === c);
+        const k = a - 3, cst = b - c;
+        return CXQ("programme", Pb("Programme : « Choisis un nombre " + M("x") + ", multiplie-le par " + a + ", soustrais " + M("(2x - " + b + ")") + ", puis soustrais encore " + M("(x + " + c + ")") + ". » On obtient " + M("E = " + a + "x - (2x - " + b + ") - (x + " + c + ")") + ".",
+          [["a) Coefficient de x dans E réduite", k], ["b) Terme constant de E réduite", cst], ["c) Résultat du programme pour x = " + x, k * x + cst]],
+          ["Un signe − devant une parenthèse change le signe de chaque terme à l'intérieur.", "E = " + a + "x − 2x + " + b + " − x − " + c + "."],
+          M("E = " + a + "x - 2x + " + b + " - x - " + c + " = " + (k === 1 ? "" : k) + "x " + (cst < 0 ? "- " + -cst : "+ " + cst)) + ". a) " + k + ". b) " + cst + ". c) " + M((k === 1 ? "" : k + " \\cdot ") + x + (cst < 0 ? " - " + -cst : " + " + cst) + " = " + (k * x + cst)) + ".")); },
+      () => { let a, b, c, x; do { a = R.int(3, 7); b = R.int(3, 9); c = R.int(1, 3); x = R.int(4, 10); } while (x - c < 1);
+        const k = a - 2, cst = a * b + 2 * c;
+        return CXQ("decoupe", Pb("Dans une plaque rectangulaire de " + a + " cm sur " + M("(x + " + b + ")") + " cm, on découpe une fente rectangulaire de 2 cm sur " + M("(x - " + c + ")") + " cm. L'aire qui reste vaut " + M("E = " + a + "(x + " + b + ") - 2(x - " + c + ")") + " cm².",
+          [["a) Coefficient de x dans E réduite", k], ["b) Terme constant de E réduite", cst], ["c) Aire qui reste pour x = " + x + " (cm²)", k * x + cst]],
+          ["Distribue chaque facteur, en faisant attention au signe − devant 2(x − " + c + ").", "−2 · (−" + c + ") = +" + 2 * c + "."],
+          M("E = " + a + "x + " + a * b + " - 2x + " + 2 * c + " = " + (k === 1 ? "" : k) + "x + " + cst) + ". a) " + k + ". b) " + cst + ". c) " + M((k === 1 ? "" : k + " \\cdot ") + x + " + " + cst + " = " + (k * x + cst)) + " cm².")); });
+  }
+
   // ===================== Enregistrement =====================
   const ALL = { litelab: LIT, valnum: VAL, reduire: RED, monomes: MON, parenth: PAR, distrib: DIS, idrem: IDR, factor: FAC };
   for (const [id, lv] of Object.entries(ALL)) {

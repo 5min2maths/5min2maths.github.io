@@ -303,3 +303,55 @@ Défauts trouvés par les oracles avant publication (corrigés) : bénéfice « 
 « concentration maximale (au centième) » lue comme un arrondi par défaut (devenu « la plus élevée ») ; nacelle à 5π/4
 où « tourner de π/2 » ne changeait pas la hauteur (π/4 et 5π/4 écartés) ; « 1 crayons bleus » (autodnb) ; la question
 « aire d'un disque de rayon r » reconnue par un oracle générique comme une aire décimale (formulation changée).
+
+### Défis à 3 contextes, suite (26.11 soir, branche agent/defisch)
+
+Relevé de départ (`tests/_variete.html`, 60 graines) : 167 défis à 1 ou 2 gabarits. Traités ici **56 défis**, par
+fréquence (9e–11e d'abord) : valeurs tirées, au moins 3 contextes vraisemblables (tag `ctx`), corrigé calculé, oracle
+par contexte **et pour le gabarit d'origine** dans `tests/recalc_oracles.js` (section « agent defisch » ; les parties à
+réponse en couple — coordonnées — sont maintenant recalculées aussi), ajout à la liste `VARIES` de
+`tests/vraisemblance_soir.html` (≥ 10 énoncés, ≥ 3 contextes). Notions communes avec la France (defis.js, ch1c_eq,
+ch11_litt, generators) : aucun lieu suisse dans les énoncés ajoutés (CHF → € par frLocal) ; contrôle hors suite
+`tests/_frch.html#rel,pct,…` (profils FR 6e–Tle, 60 graines : ni CHF, ni lieu suisse, ni usage suisse).
+
+| Notion (fichier) | Contextes (ctx) |
+|---|---|
+| decread (defis_9) | énigme ; décomposition avec retenue (« 41 millièmes ») ; chronomètre (slalom, natation, 400 m) |
+| deccomp (defis_9) | sprint ; colis (le plus lourd) ; épaisseurs au micromètre |
+| ulong (defis_9) | ficelle (masse) ; planche (chutes) ; ruban (rouleaux pour N cadeaux, au minimum) |
+| uaire (defis_9) | carrelage ; terrasse (dalles de 40 cm, prix) ; planche de timbres (mm → cm²) |
+| uvol (defis_9) | aquarium ; récupérateur d'eau de pluie (arrosoirs) ; piscine hors-sol (m³, débit du tuyau) |
+| angtype (defis_9) | horloge ; gâteau (parts, angle obtus et non droit) ; rose des vents (girouette, sens horaire) |
+| perim (defis_9) | rectangle ; enclos le long d'une grange (prix) ; fil de fer (carré, triangle, hexagone) |
+| aire2 (defis_9) | parallélogramme ; voile triangulaire (hauteur relative au grand côté, tissu) ; cerf-volant en losange |
+| aire3 (defis_9) | jardin et allée ; bassin et bordure de dalles ; photo et passe-partout (dm²) |
+| volpave (defis_9) | boîte sans couvercle ; carton de déménagement (L, 6 faces) ; jardinière (sacs de terreau) |
+| fracrep, fracsimp, fractout (defis_9) | tartes, sentier, gourdes ; fraction, matchs gagnés, sondage ; classe, argent de poche, bonbons |
+| proptab, prop, change, agrand (defis_9) | cerises, essence, fromage à la coupe ; recette, sirop, mur de briques ; euro, livre (Londres), dollar (New York) ; photo, photocopie (%), logo de t-shirt |
+| diagr, premiers, fracper (defis_910) | notes, basket, températures en montagne ; nombre, fanfare en rangs, dalles en rectangle ; trois formes de périodes |
+| decprob, multdiv, relrep, symetries (defis_910) | pique-nique, peinture, gazon ; liste, bus, phares ; droite graduée, ascenseur, plongée ; repère, jeu vidéo, plan d'un parc |
+| rac, disque, grandmanq, voldecomp (defis_910) | cube, terrain carré, aquarium cubique ; pizza, arroseur, aiguille des minutes ; trapèze, champ (are), canal ; piscine, escalier en béton, plate-bande en L |
+| eqverif, pente, rotation (defis_910) | équation, rectangle, nombre pensé ; route, rampe (6 %), funiculaire ; repère, robot, logiciel de dessin |
+| rel, reladd, decadd, decdiv, carres, ordgr (defis.js, communs FR) | températures, golf, compte d'un club ; randonnée, plongée, journée d'hiver ; achats, relais 4 × 100 m, randonnée ; restaurant, marché, vélo ; carrelage, chorale, verger ; course d'école, camp de ski, tournoi |
+| fracops, divcrit, racenc, tradexpr, valnum (defis.js) | priorités, division, fractions d'heure ; 45 et 36, casiers, 15 et 18 ; racine, jardin carré, chute libre ; phrases, programme de calcul, rectangle ; freinage, chute libre, Fahrenheit |
+| pctvar, affine, pyth, simil, monomes, reduire, pct (defis.js) | vélo, abonnés, récolte ; taxi, vélo électrique, plombier ; échelle, parc, cerf-volant ; photo, maquette, pizza ; pavé, cube, terrain ; triangle, rectangle, course d'orientation ; vélo, fitness, action |
+| eq1, probeq, probeq2 (ch1c_eq) | bougies, citernes, tirelires ; musée, location de voiture, imprimerie ; cadre, entiers consécutifs, carré agrandi |
+| litelab, parenth (ch11_litt), fctlec (perco), prio (ch11_no) | rectangle, triangle isocèle, âges ; expression, programme, plaque découpée ; taxi, kayak, électricité ; musée, parenthèses, anniversaire |
+
+Défauts trouvés en route (corrigés) : moyenne de notes 4,625 « au centième » qui acceptait 4,62 et 4,63 (diagr) et
+durée 1,95 h « au dixième » qui acceptait 1,9 et 2 (voldecomp) : valeur attendue arrondie exactement ; « Combien de
+livres obtient-on » (compté comme des livres-objets) → « Somme obtenue en livres » ; corrigé de prio (musée) sans les
+réponses a) et b) ; « 1 citrons », « 1 œufs » (prop) écartés ; « ≈ » devant une division exacte.
+
+Restent à 1 ou 2 contextes (111 défis) :
+- 9e–11e : distrib, idrem, eq2, echelle, sys2, angles, angtri, volcone, formule, proba, volmanq, eq2fact, cercthales,
+  thalesrec, racprop (2 contextes chacun) ; litconv (1).
+- 1re Collège : eq3, absval, ineq2, ensembles, trinfact, eqspec, modaff, geocomb, trigrel, f2, euclide, trigo, ineq,
+  f2expr, racinv, ratden, exactes, f2trois, morceaux, tradalg, contrex, demoalg, implication.
+- 2e–4e Collège, MP, France (fichiers fr_*.js réservés à l'agent defisfr) : cart, expo, stats, fracrat, droites,
+  statfreq, quartiles, triaire, droitesinter, vecteurs, recipaff, eqratmp, logprop, croissexp, volmp, similmp, coordmp,
+  vectmp, scalmp, projmp, pvectmp, explogfn, limitinf, continuite, combi, vect3d, droite3d, plans, pscal3d,
+  primitives, volrev, croissance, appllin, condbayes, varalea, binomiale, normale, log, vabs, eqparam, trigassoc,
+  trigeq2, eqirrmp, eqlog, derivref, etudefct, lnexp ; France seule : proba2, tauxevol, vect3e, probcond, algopy,
+  colin, intparties, eqdiff, expderiv, trigrad, autodnb, tabvar, lnfr, cercle6, bissec6, tabform5, hauteurs5,
+  progcalc ; hors catalogue : pvect, intsubst, cplxalg, cplxtrig, cplxeq, suitegeom, serie.

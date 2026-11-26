@@ -479,6 +479,17 @@
       return P("Un taxi facture " + pc + " CHF de prise en charge, puis " + ch(pu) + " CHF par kilomètre.", [["a) Prix d'une course de " + d1 + " km (CHF)", y1], ["b) Prix d'une course de " + d2 + " km (CHF)", y2], ["c) De combien le prix augmente-t-il quand on passe de " + d1 + " km à " + d2 + " km (CHF) ?", r6(y2 - y1)]],
         ["Prix = " + ch(pu) + " · km + " + pc + ".", "Si c'était proportionnel, doubler la distance doublerait le prix."], "a) " + M(fT(pu) + " \\cdot " + d1 + " + " + pc + " = " + fT(y1)) + " ; b) " + M(fT(pu) + " \\cdot " + d2 + " + " + pc + " = " + fT(y2)) + " ; c) " + M(fT(y2) + " - " + fT(y1) + " = " + fT(r6(y2 - y1))) + " CHF. Doubler la distance ne double pas le prix (" + M(fT(y2) + " \\ne 2 \\cdot " + fT(y1)) + ") : ce n'est pas proportionnel."); },
   ];
+  /* 26.11 soir (agent defisch) : défi fctlec passé de 1 à 3 contextes (taxi, location de kayak, facture d'électricité) ;
+     oracle par contexte dans tests/recalc_oracles.js. */
+  { const f0 = FLP[0]; FLP[0] = () => Object.assign(f0(), { ctx: "taxi" }); }
+  FLP.push(
+    () => { const pc = pk([8, 10, 12]), pu = pk([12, 15, 18]), d1 = pk([2, 3]), d2 = 2 * d1, y1 = pc + pu * d1, y2 = pc + pu * d2;
+      return Object.assign(P("Au bord du lac, la location d'un kayak coûte " + pc + " CHF de base, plus " + pu + " CHF par heure.", [["a) Prix pour " + d1 + " h (CHF)", y1], ["b) Prix pour " + d2 + " h (CHF)", y2], ["c) De combien le prix augmente-t-il quand on passe de " + d1 + " h à " + d2 + " h (CHF) ?", y2 - y1]],
+        ["Prix = " + pu + " · heures + " + pc + ".", "Si c'était proportionnel, doubler la durée doublerait le prix."], "a) " + M(pu + " \\cdot " + d1 + " + " + pc + " = " + y1) + " ; b) " + M(pu + " \\cdot " + d2 + " + " + pc + " = " + y2) + " ; c) " + M(y2 + " - " + y1 + " = " + (y2 - y1)) + " CHF. Doubler la durée ne double pas le prix (" + M(y2 + " \\ne 2 \\cdot " + y1) + ") : ce n'est pas proportionnel."), { ctx: "kayak" }); },
+    () => { const ab = pk([18, 20, 24]), pu = pk([0.25, 0.3, 0.35]), d1 = pk([150, 200, 250]), d2 = 2 * d1, y1 = r6(ab + pu * d1), y2 = r6(ab + pu * d2);
+      return Object.assign(P("Une facture d'électricité mensuelle comprend un abonnement de " + ab + " CHF, plus " + M(fT(pu)) + " CHF par kWh consommé.", [["a) Facture pour " + d1 + " kWh (CHF)", y1], ["b) Facture pour " + d2 + " kWh (CHF)", y2], ["c) De combien la facture augmente-t-elle quand on passe de " + d1 + " kWh à " + d2 + " kWh (CHF) ?", r6(y2 - y1)]],
+        ["Facture = " + dS(pu) + " · kWh + " + ab + ".", "Si c'était proportionnel, doubler la consommation doublerait la facture."], "a) " + M(fT(pu) + " \\cdot " + d1 + " + " + ab + " = " + fT(y1)) + " ; b) " + M(fT(pu) + " \\cdot " + d2 + " + " + ab + " = " + fT(y2)) + " ; c) " + M(fT(y2) + " - " + fT(y1) + " = " + fT(r6(y2 - y1))) + " CHF : la facture n'est pas proportionnelle à la consommation (" + M(fT(y2) + " \\ne 2 \\cdot " + fT(y1)) + ")."), { ctx: "electricite" }); });
+
 
   // ======================= litconv : conventions d'écriture, expressions équivalentes =======================
   const LT = () => pk(["x", "a", "n", "y"]);
