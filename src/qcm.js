@@ -139,14 +139,14 @@ function screenQcm() {
   const A = atState();
   if (A.rows.length < 2) {
     h(`${brand}<div class="eyebrow">Autoévaluation</div><h2>Pas de test rapide pour ces notions</h2>
-    <p class="muted">Les notions de ton test se prêtent mal aux questions à choix. Fais plutôt le sujet de préparation ou une révision ciblée.</p>
+    <p class="muted">Les notions de ton évaluation se prêtent mal aux questions à choix. Fais plutôt le sujet de préparation ou une révision ciblée.</p>
     <button class="btn-primary btn-big" id="back">Retour</button>`);
     document.getElementById("back").onclick = () => { homeTab = "test"; screenHome(); };
     return;
   }
   if (A.runs.length) return atGrid();
   const all = () => A.rows.every((r) => A.avant[r.cid] !== undefined);
-  h(`${brand}<div class="eyebrow">Je prépare mon test · étape 1 sur 2</div><h2>Autoévaluation</h2>
+  h(`${brand}<div class="eyebrow">Je prépare mon évaluation · étape 1 sur 2</div><h2>Autoévaluation</h2>
   <p class="small muted">Pour chaque ligne, sois honnête : ✓ je sais faire, ~ à peu près, ✗ pas encore. Ensuite, un test rapide (une question par ligne) te dira si tu avais raison.</p>
   <div class="card flat at-grid"><div class="at-row at-head"><span class="at-l">Je sais…</span><span class="at-c" style="width:auto">✓ oui · ~ à peu près · ✗ pas encore</span></div>${A.rows.map((r) => `<div class="at-row"><span class="at-l">${r.label}</span>
     <div class="seg at-seg" data-cid="${r.cid}">${[2, 1, 0].map((v) => `<button type="button" data-v="${v}" aria-pressed="${A.avant[r.cid] === v}" aria-label="${["pas encore", "à peu près", "je sais faire"][v]}">${AT_SYM[v]}</button>`).join("")}</div></div>`).join("")}</div>
@@ -166,7 +166,7 @@ function screenQcm() {
 // Test rapide : une question à choix par ligne de la grille.
 function atTest() {
   const A = atState(), items = A.rows.map((r) => ({ row: r, it: r.mode === "tape" ? null : qcmMake(r.id, r.lv) })), res = {};
-  const head = (i, lab = "") => `${A.runs.length ? "Test rapide · après" : "Je prépare mon test · étape 2 sur 2"} · ${i + 1} sur ${items.length}${lab ? " · " + esc(lab) : ""}<span class="pbar" aria-hidden="true"><i style="width:${Math.round((i / items.length) * 100)}%"></i></span>`;
+  const head = (i, lab = "") => `${A.runs.length ? "Test rapide · après" : "Je prépare mon évaluation · étape 2 sur 2"} · ${i + 1} sur ${items.length}${lab ? " · " + esc(lab) : ""}<span class="pbar" aria-hidden="true"><i style="width:${Math.round((i / items.length) * 100)}%"></i></span>`;
   const show = (i) => {
     if (i >= items.length) { A.runs.push({ date: day(), r: res }); A.runs = A.runs.slice(-6); if (typeof prepMark === "function") { prepMark("autoeval"); prepMark("apres"); } Badges.check(state); save(); return atGrid(true); }
     // Ligne sans question à choix : question à réponse tapée, un seul essai, correction affichée.
@@ -179,7 +179,7 @@ function atTest() {
         onNext: () => show(i + 1) });
     }
     const { row, it } = items[i], q = it.q, pct = Math.round((i / items.length) * 100);
-    h(`${brand}<div class="eyebrow">${A.runs.length ? "Test rapide · après" : "Je prépare mon test · étape 2 sur 2"} · ${i + 1} sur ${items.length}<span class="pbar" aria-hidden="true"><i style="width:${pct}%"></i></span></div>
+    h(`${brand}<div class="eyebrow">${A.runs.length ? "Test rapide · après" : "Je prépare mon évaluation · étape 2 sur 2"} · ${i + 1} sur ${items.length}<span class="pbar" aria-hidden="true"><i style="width:${pct}%"></i></span></div>
     <div class="card pop"><div class="qmeta"><span class="chip">${row.label}</span></div>
     <div class="qtext">${boldData(q.q)}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
     ${scratchHtml()}
@@ -227,7 +227,7 @@ function atGrid(fresh) {
   <div class="card flat at-grid at-res"><div class="at-row at-head"><span class="at-l">Je sais…</span><span class="at-c">Avant</span><span class="at-c">${last ? "1er test" : "Test"}</span>${last ? '<span class="at-c">Après</span>' : ""}</div>
   ${A.rows.map((r) => `<div class="at-row"><span class="at-l">${r.label}${msg(r)}</span><span class="at-c">${atCell(A.avant[r.cid])}</span><span class="at-c">${atCell(first.r[r.cid] === 1 ? 2 : first.r[r.cid] === 0 ? 0 : undefined)}</span>${last ? `<span class="at-c">${atCell(last.r[r.cid] === 1 ? 2 : last.r[r.cid] === 0 ? 0 : undefined)}</span>` : ""}</div>`).join("")}</div>
   <div class="card stack"><p><b>${ok}</b> juste${ok > 1 ? "s" : ""} sur ${n}${surprise ? ` · <b>${surprise}</b> surprise${surprise > 1 ? "s" : ""} (tu pensais savoir)` : ""}</p>
-  <p class="small muted">Ce n'est pas une note. ${last ? "Compare tes colonnes : c'est ton progrès depuis le " + first.date.slice(8, 10) + "." + first.date.slice(5, 7) + "." : (typeof prepLeft === "function" && Engine.prepActive(state) && prepLeft(state.prep.date) <= 1 ? "Ton test est tout proche : relis d'abord les compétences à revoir." : "Refais le test rapide dans quelques jours, juste avant le test : ta colonne « Après » se remplira.")}</p></div>
+  <p class="small muted">Ce n'est pas une note. ${last ? "Compare tes colonnes : c'est ton progrès depuis le " + first.date.slice(8, 10) + "." + first.date.slice(5, 7) + "." : (typeof prepLeft === "function" && Engine.prepActive(state) && prepLeft(state.prep.date) <= 1 ? "Ton évaluation est toute proche : relis d'abord les compétences à revoir." : "Refais le test rapide dans quelques jours, juste avant l'évaluation : ta colonne « Après » se remplira.")}</p></div>
   ${weak.length ? `<div class="card flat stack"><h3>À revoir${surprise ? " (en priorité les ⚠️)" : ""}</h3>${[...new Set(weak.map((r) => r.id))].map((id) => `<div class="spread"><span class="small">${nLabel(id)}</span>${LESSONS[id] ? `<button type="button" class="btn-ghost small atles" data-id="${id}">📖 Leçon</button>` : ""}</div>`).join("")}
     <button class="btn-primary" id="rev">Réviser ces compétences maintenant</button></div>` : ""}
   <div class="row"><button class="btn-primary" id="again">Refaire le test rapide</button><button class="btn-ghost" id="home">Retour</button></div>

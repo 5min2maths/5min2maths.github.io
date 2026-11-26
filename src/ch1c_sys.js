@@ -149,7 +149,7 @@
             traps: [TP([V - x, x], "Dans l'ordre demandé."), TP([V / 2, V / 2], "Ce n'est pas moitié-moitié : la concentration finale n'est pas la moyenne.")] }); },
       () => { const va = pk([60, 80, 90]), vb = pk([40, 50, 70]), D = (va + vb) * pk([2, 3]), t = D / (va + vb);
         return QP("Deux trains partent en même temps de deux villes distantes de " + D + " km, l'un vers l'autre, à " + va + " km/h et " + vb + " km/h. Au bout de combien d'heures se croisent-ils, et à quelle distance de la ville du premier train (km) ? Réponds « heures ; km ».", [t, va * t],
-          "Ils se rapprochent de " + M((va + vb) + " km/h") + " : " + M("t = " + D + " : " + (va + vb) + " = " + t) + " h ; le premier a parcouru " + M(va + " \\cdot " + t + " = " + va * t) + " km.",
+          "Ils se rapprochent de " + M((va + vb) + "\\ \\text{km/h}") + " : " + M("t = " + D + " : " + (va + vb) + " = " + t) + " h ; le premier a parcouru " + M(va + " \\cdot " + t + " = " + va * t) + " km.",
           { ctx: "trains", guide: [GN("De combien de km se rapprochent-ils chaque heure ?", va + vb, M(va + " + " + vb + " = " + (va + vb)) + "."), GN("Après combien d'heures ?", t, M(t) + " h."), GP("Réponse « heures ; km » ?", [t, va * t], t + " h, à " + va * t + " km.")],
             traps: [TP([t, vb * t], "On demande la distance depuis la ville du premier train (" + va + " km/h).")] }); },
       () => { const pa = pk([3, 4, 5]), pb = pk([6, 7, 8]), na = R.int(5, 15), nb = R.int(5, 15), mon = pa * na + pb * nb, nt = na + nb;

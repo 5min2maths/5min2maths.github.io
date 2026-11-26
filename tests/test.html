@@ -269,7 +269,9 @@ log.push("Mathélo : " + st.elo.r + " — " + eloLabel(prof, st.elo.r));
     const ds = mine.map((e) => +e.split("|")[1]); if (ds.some((d, i) => i && d < ds[i - 1])) order = false;
     if (f === "defi" && !mine.length) fail("défi hors chapitre");
   }
-  if (on / tot < 0.55 || on / tot > 0.8) fail("part du chapitre : " + (on / tot).toFixed(2));
+  /* 26.11 soir (revue des élèves joués, n° 2) : une notion au plus 2 fois par séance ; ici le chapitre n'a qu'une notion,
+     la série d'automatismes (6 créneaux) n'en pose plus que 2 : part attendue abaissée de 0,55 à 0,45. */
+  if (on / tot < 0.45 || on / tot > 0.8) fail("part du chapitre : " + (on / tot).toFixed(2));
   if (!order) fail("chapitre pas du plus simple au plus difficile");
   if (Engine.nowStale(s) || Engine.nowStale(s, addDays(day(), 6)) || !Engine.nowStale(s, addDays(day(), 7))) fail("relance chaque semaine");
   log.push("chapitre du moment (" + later + ") : " + Math.round((100 * on) / tot) + " % des questions"); }

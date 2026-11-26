@@ -453,8 +453,8 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
     make() {
       const h = pk([2.5, 3, 3.5, 4, 5]), v = (h * 365) / 24;
       return { titre: "Le temps d'écran", q: "Tu passes environ " + M(N(h) + "\\ \\text{h}") + " par jour sur ton téléphone.",
-        bet: { q: "En une année, cela fait combien de jours entiers, 24 heures sur 24 ?", choices: ["environ 5 jours", "environ 15 jours", "plus d'un mois"], good: 2 },
-        calc: { label: "Nombre de jours entiers (au dixième)", value: Math.round(v * 10) / 10, range: [v * 0.95, v * 1.05] },
+        bet: { q: "En une année, cela fait combien de jours complets, 24 heures sur 24 ?", choices: ["environ 5 jours", "environ 15 jours", "plus d'un mois"], good: 2 },
+        calc: { label: "Nombre de jours de 24 h (au dixième)" /* 26.11 soir : « jours entiers » au dixième était contradictoire */, value: Math.round(v * 10) / 10, range: [v * 0.95, v * 1.05] },
         reveal: M(N(h) + " \\cdot 365 = " + N(h * 365)) + " h, et " + M(N(h * 365) + " \\div 24 \\approx " + N(v, 1)) + " jours : plus d'un mois sans dormir, ni manger, ni aller à l'école." };
     } });
   add({ key: "respire", fam: "fermi", uses: ["decmul"], outil: "la multiplication et les conversions de durées (minutes → jour).",

@@ -767,6 +767,7 @@ details.solfull summary { padding: 11px 0; margin-top: 0; }
 /* Police plus lisible proposée à la 1re question du calibrage */
 .font-hint { align-self: flex-start; font-size: 0.85rem; }
 .goal { margin-top: 4px; }
+.streak .goal b { font-family: inherit; font-size: inherit; } /* 26.11 soir : « Objectif pour demain » en texte normal (héritait du chiffre de la série) */
 
 /* 24.11 : visite guidée en haut quand l'élément présenté est en bas (elle ne couvre plus les boutons) */
 

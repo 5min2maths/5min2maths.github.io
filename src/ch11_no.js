@@ -18,6 +18,10 @@
   const qv = (x) => x[0] / x[1];
   const qT = (x) => frac(x[0], x[1]); // TeX simplifié
   const fT = (n, d) => (n < 0 ? "-" : "") + "\\frac{" + Math.abs(n) + "}{" + d + "}"; // TeX tel quel
+  /* 26.11 soir (revue des élèves joués, n° 7 : « Dénominateur commun 10 : −14/5 », aucune fraction convertie) : corrigé de
+     trois fractions avec la ligne convertie, p. ex. −25/10 + 4/10 − 7/10 = −28/10 = −14/5. */
+  const conv3 = (F, res) => { const L = F.reduce((m, [, d]) => lcm(m, d), 1), ns = F.map(([n, d]) => (n * L) / d), tot = ns.reduce((x, y) => x + y, 0);
+    return "Dénominateur commun " + M(L) + " : " + M(ns.map((n, i) => (i ? (n < 0 ? " - " : " + ") + fT(Math.abs(n), L) : fT(n, L))).join("") + " = " + fT(tot, L) + (res[1] !== L ? " = " + qT(res) : "")) + "."; };
   const fP = (n, d) => (n < 0 ? "\\left(-\\frac{" + -n + "}{" + d + "}\\right)" : "\\frac{" + n + "}{" + d + "}"); // entre parenthèses si négatif
   const sg = (n) => (n < 0 ? " - " : " + ");
   // ---------- nombres ----------
@@ -156,7 +160,7 @@
           { ctx: "negatif", guide: addGuide([[a, b], [-c, e]], res),
             traps: [TR(-qv(res), "Attention au signe : " + M(fT(c, e)) + " est plus grand que " + M(fT(a, b)) + ", le résultat est négatif."), TR((a - c) / (b - e), "On n'opère pas sur les dénominateurs.")] }); },
       () => { const [b, e, h] = pk(TRIPLES), a = cop(1, b), c = cop(1, e), g = cop(1, h), res = qs(qa([a, b], [c, e]), [g, h]);
-        return Qv(FI + M(fT(a, b) + " + " + fT(c, e) + " - " + fT(g, h)), qv(res), "Dénominateur commun " + M(lcm(lcm(b, e), h)) + " : " + M(qT(res)) + ".",
+        return Qv(FI + M(fT(a, b) + " + " + fT(c, e) + " - " + fT(g, h)), qv(res), conv3([[a, b], [c, e], [-g, h]], res),
           { ctx: "trois", guide: addGuide([[a, b], [c, e], [-g, h]], res),
             traps: [TR((a + c - g) / (b + e + h), "On n'additionne pas les dénominateurs : il faut un dénominateur commun aux trois fractions.")] }); },
       () => { let b, e, a, c; do { [b, e] = pk([[3, 4], [4, 6], [3, 5], [5, 10], [6, 8], [4, 5], [3, 8], [2, 5], [6, 9]]); a = cop(1, b); c = cop(1, e); } while (a / b + c / e >= 0.95);
@@ -170,7 +174,7 @@
     ],
     3: [
       () => { const [b, e, h] = pk(TRIPLES), a = irr(b), c = irr(e), g = irr(h), A = -a, res = qs(qa([A, b], [c, e]), [g, h]);
-        return Qv(FI + M(fT(A, b) + " + " + fT(c, e) + " - " + fT(g, h)), qv(res), "Dénominateur commun " + M(lcm(lcm(b, e), h)) + " : " + M(qT(res)) + ".",
+        return Qv(FI + M(fT(A, b) + " + " + fT(c, e) + " - " + fT(g, h)), qv(res), conv3([[A, b], [c, e], [-g, h]], res),
           { ctx: "rel3", guide: addGuide([[A, b], [c, e], [-g, h]], res),
             traps: [TR(qv(qs(qa([a, b], [c, e]), [g, h])), "La première fraction est négative : son numérateur compte avec le signe « − »."), TR(-qv(res), "Vérifie le signe du résultat.")] }); },
       () => { const [b, e, h] = pk(TRIPLES), a = cop(1, b), c = cop(1, e), g = cop(1, h), inner = qs([c, e], [g, h]), res = qs([a, b], inner);

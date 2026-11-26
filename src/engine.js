@@ -898,7 +898,12 @@ const Engine = {
     return !!(s && typeof LESSONS !== "undefined" && LESSONS[id] && !s.lessonSeen && (s.status === "encours" || s.m < 0.4));
   },
   // Notion dont la leçon reste à voir et qu'on ne peut pas poser en question sans elle (encore jamais travaillée, ou en cours).
-  lessonFirst(state, id) { const s = state.notions[id]; return this.lessonDue(state, id) && (!s.seen || s.status === "encours"); },
+  /* 26.11 soir (revue des élèves joués, n° 1, grave : chapitre « en classe » de l'année jamais travaillé, ses notions étant
+     exclues de Révision, Défi et Automatismes tant que leur leçon n'était pas vue) : une notion du chapitre choisi « en
+     classe » a été vue en classe ; elle se pose sans sa leçon. Sa leçon (active si elle existe) reste prioritaire pour
+     l'unique leçon d'une séance qui en admet une (lessonPick), et le rappel de cours reste ouvrable dans chaque question. */
+  nowHas(state, id) { return this.nowActive(state) && state.now.ids.includes(id); },
+  lessonFirst(state, id) { const s = state.notions[id]; return this.lessonDue(state, id) && (!s.seen || s.status === "encours") && !this.nowHas(state, id); },
   lessonPick(state, ids) {
     const now = this.nowActive(state) ? state.now.ids : [], s = (id) => state.notions[id];
     const key = (id) => (now.includes(id) ? 0 : s(id).status === "encours" ? 1 : 2) * 1e5 + (s(id).status === "encours" || now.includes(id) ? this.rank(state.profile, id) : Math.round(s(id).m * 1000));
@@ -910,14 +915,18 @@ const Engine = {
   fmtText(state, f) { const n = f === "auto" ? this.autoN(state) : 0; return n && n < FORMATS.auto.slots.length ? n + " calculs rapides, enchaînés." : FORMATS[f].text; },
   planSession(state, format) {
     const f = format || this.todayFormat(state), slots = f === "auto" ? FORMATS.auto.slots.slice(0, this.autoN(state)) : FORMATS[f].slots;
-    const pend = this.eligible(state).filter((id) => this.lessonFirst(state, id));
-    if (!pend.length) return this.planSlots(state, slots);
+    const el = this.eligible(state), pend = el.filter((id) => this.lessonFirst(state, id));
+    /* 26.11 soir (n° 1) : notions du chapitre « en classe » dont la leçon reste à voir : posées sans leçon (lessonFirst),
+       mais candidates à la leçon de la séance. Révision, Défi, Automatismes : jamais de leçon (plan.noLesson). */
+    const nowLes = el.filter((id) => this.nowHas(state, id) && this.lessonDue(state, id));
+    const noLes = (p) => Object.assign(p, { noLesson: true });
+    if (!pend.length && !nowLes.length) return this.planSlots(state, slots);
     const exclude = new Set(pend);
-    if (f === "revision" || f === "defi") { const p = this.planSlots(state, slots, { exclude }); if (p.length) return p; }
+    if (f === "revision" || f === "defi") { const p = this.planSlots(state, slots, { exclude }); if (p.length) return noLes(p); }
     /* 26.11 (revue d'un testeur, jour 3) : jamais de leçon dans une série d'automatismes ; sans notion déjà travaillée,
        les questions viennent sans leçon (l'app ne montre pas de leçon dans ce format). */
     if (f === "auto") { const p = this.planSlots(state, slots, { exclude }); return p.length ? p : this.planSlots(state, slots); }
-    const keep = this.lessonPick(state, pend);
+    const keep = this.lessonPick(state, [...pend, ...nowLes]);
     exclude.add(keep);
     const rest = slots.length >= 3 ? slots.slice(1, -1) : slots.slice(1);
     const k0 = slots[0] === "defi4" ? "defi" : slots[0];
@@ -978,12 +987,16 @@ const Engine = {
     // « En ce moment en classe » : environ 2 créneaux sur 3 portent sur le chapitre choisi par l'élève.
     const nowIds = this.nowActive(state) ? state.now.ids.filter((id) => state.notions[id] && ["vu", "encours"].includes(state.notions[id].status)) : [];
     const nowK = nowIds.length ? (slots.length === 1 ? 1 : Math.round((slots.length * 2) / 3)) : 0;
-    const usedPair = new Set();
-    const choose = (kind, base, rappel, only, isNow) => {
+    const usedPair = new Set(), cnt = new Map();
+    /* 26.11 soir (revue des élèves joués, n° 2 : 5 × la même notion dans une série d'automatismes quand le chapitre en
+       classe n'en offre qu'une ou deux) : une notion au plus 2 fois par séance ; un créneau « chapitre » sans notion
+       possible redevient un créneau normal ; la limite ne se lève qu'à défaut de toute autre notion (free). */
+    const choose = (kind, base, rappel, only, isNow, free) => {
       let best = null, pool = only || this.pool(state, base);
       if (kind === "rev" && !only) { const due = pool.filter((id) => state.notions[id].due <= today || state.notions[id].m < 0.5); if (due.length) pool = due; }
       for (const id of pool) {
         if (ex.has(id)) continue;
+        if (!free && (cnt.get(id) || 0) >= 2) continue;
         const s = state.notions[id], recent = this.isRecent(state, id), target = elo + TARGET[kind] + (s.easy || 0) * 120;
         /* 26.11 (profondeur, tools/adaptivite_26-11.md) : une notion du chapitre « en classe » passe toujours par le créneau du
            chapitre, même reprise d'une année précédente (1re du Collège : Pythagore, angles…), à un niveau non trivial (oldLevels) */
@@ -1016,13 +1029,14 @@ const Engine = {
       const base = kind === "defi4" ? "defi" : kind;
       if (si < nowK && si !== rappelAt && si !== rappel2) {
         const b = choose(kind, base, false, nowIds, true);
-        if (b) { used.add(b.id); usedPair.add(b.id + "|" + b.d); nowPart.push(b.id + "|" + b.d + "|" + base); continue; }
+        if (b) { used.add(b.id); usedPair.add(b.id + "|" + b.d); cnt.set(b.id, (cnt.get(b.id) || 0) + 1); nowPart.push(b.id + "|" + b.d + "|" + base); continue; }
       }
       let best = (si === rappelAt || si === rappel2) && old < maxOld ? choose(kind, base, true, need) : null;
       if (best) old++; else best = choose(kind, base, false);
       if (!best) best = choose(kind, base, true); // aucune notion de l'année disponible
+      if (!best) best = choose(kind, base, false, null, false, true) || choose(kind, base, true, null, false, true);
       if (!best) continue;
-      used.add(best.id);
+      used.add(best.id); cnt.set(best.id, (cnt.get(best.id) || 0) + 1);
       plan.push(best.id + "|" + best.d + "|" + base);
     }
     // Le chapitre du moment d'abord, du plus simple au plus difficile.

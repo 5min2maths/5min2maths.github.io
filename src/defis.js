@@ -738,9 +738,11 @@ const DEFIS = (() => {
     ],
     tauxvar: [
       () => { /* vitesse moyenne, instant où la vitesse instantanée l'égale, vitesse moyenne depuis le départ */
-        let a, b, t1, t2, Tm; do { a = pk([0.5, 1, 1.5, 2, 2.5, 3]); b = ri(1, 9); t1 = ri(1, 5); t2 = t1 + ri(2, 7); Tm = ri(5, 15); } while (Tm === t2 || Tm === t1);
+        /* 26.11 soir (revue des élèves joués, n° 6 : « démarre » à 8 m/s, 73 m/s soit 263 km/h) : accélération réaliste
+           (a ≤ 1,5), vitesse moyenne visée en c) ≤ 20 m/s, vitesse instantanée ≤ 35 m/s (126 km/h) ; « accélère ». */
+        let a, b, t1, t2, Tm; do { a = pk([0.5, 1, 1.5]); b = ri(1, 9); t1 = ri(1, 5); t2 = t1 + ri(2, 7); Tm = ri(5, 15); } while (Tm === t2 || Tm === t1 || a * Tm + b > 20 || 2 * a * Math.max(t2, Tm) + b > 35);
         const vm = a * (t1 + t2) + b, V = a * Tm + b, d = (t) => a * t * t + b * t;
-        return P("Une voiture démarre ; elle a parcouru " + M("d(t) = " + poly([a, b, 0], "t")) + " mètres après " + M("t") + " secondes.",
+        return P("Une voiture accélère ; depuis l'instant " + M("t = 0") + ", elle a parcouru " + M("d(t) = " + poly([a, b, 0], "t")) + " mètres après " + M("t") + " secondes.",
           [["a) Vitesse moyenne entre " + M(t1) + " s et " + M(t2) + " s (m/s)", vm], ["b) À quel instant la vitesse instantanée est-elle égale à cette vitesse moyenne ? (s)", (t1 + t2) / 2],
            ["c) Après combien de secondes la vitesse moyenne depuis le départ atteint-elle " + M(D(V)) + " m/s ?", Tm]],
           ["Vitesse moyenne = (d(" + t2 + ") − d(" + t1 + ")) ÷ (" + t2 + " − " + t1 + "). Vitesse instantanée = d'(t).",

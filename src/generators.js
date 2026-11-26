@@ -32,7 +32,7 @@ const colonBreak = (s) => {
     /* 26.11 (revue élèves, B10 : « Les x² ⏎ 3x² ; les x ⏎ 3x ») : entre deux formules, on ne coupe après « : » que si une
        vraie phrase (3 mots au moins) précède la formule ; sinon le « : » reste sur la ligne. */
     const phrase = i > 0 && (String(parts[i - 2] || "").split(/[.;!?]|<br>/).pop().match(/\p{L}{2,}/gu) || []).length >= 3;
-    if (i > 0) t = t.replace(/^\s*:\s+(?=\S)/, "<br>").replace(/^\s*:\s*$/, i + 1 < parts.length && phrase ? "<br>" : " :"); // juste après une formule
+    if (i > 0) t = t.replace(/^\s*:\s+(?=\S)/, "<br>").replace(/^\s*:\s*$/, i + 1 < parts.length && phrase ? "<br>" : " : "); /* juste après une formule (26.11 soir, n° 9 : espace après « : ») */
     t = t.replace(/(^|[.!?]\s+|<br>)([^.!?<:]*?=[^.!?<:]*?[0-9A-Za-zÀ-ÿ²³⁴)\]]) : (?=\S)/g, "$1$2<br>"); // « x = 3 : … »
     // « Divisibles par 9 : 117, 126 » se lit « 9 ÷ 117 » : on garde les deux-points et on passe à la ligne.
     t = t.replace(/([0-9)²³°]) : (?=[-−0-9(]|$)/g, "$1 :<br>");

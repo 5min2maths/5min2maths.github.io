@@ -485,7 +485,10 @@ function checkAnswer(spec, input) {
     if (!isFinite(v)) return { status: "invalid", message: "Ce calcul n'a pas de valeur (division par zéro ?)." };
     if (spec.round) {
       if (Math.abs(v - spec.value) <= spec.round / 2 + 1e-9) return { status: "correct" };
-      if (Math.abs(v - spec.value) <= spec.round * 5) return { status: "close", message: "Presque : vérifie l'arrondi (au " + (spec.round === 0.01 ? "centième" : spec.round === 0.1 ? "dixième" : "près") + ")." };
+      /* 26.11 soir (revue des élèves joués, n° 4 : « à 20 kg près », 150,975 au lieu de 237 traité comme un arrondi raté,
+         « (au près) ») : pour une graduation d'au moins 1, « presque » = à une graduation près ; libellé avec le pas. */
+      const r = spec.round, lab = r === 0.01 ? "au centième" : r === 0.1 ? "au dixième" : r === 0.001 ? "au millième" : r === 1 ? "à l'unité" : "à " + String(r).replace(".", ",") + " près";
+      if (Math.abs(v - spec.value) <= (r >= 1 ? r : r * 5)) return { status: "close", message: "Presque : vérifie l'arrondi (" + lab + ")." };
       return { status: "wrong" };
     }
     if (!spec.plain && !spec.radical && roundedFrac(tree, spec.value)) return { status: "form", message: ROUNDED_FRAC };

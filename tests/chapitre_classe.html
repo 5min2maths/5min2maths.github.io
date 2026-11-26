@@ -1,0 +1,57 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css">
+<main id="app"></main><pre id="out">en cours</pre>
+<script>window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}
+window.fetch = () => Promise.resolve(new Response("{}")); if (navigator.sendBeacon) navigator.sendBeacon = () => true; window.ensurePacks = () => Promise.resolve();
+{ let seed = 5; Math.random = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; }; }
+</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/defis_9.js"></script><script src="../src/defis_910.js"></script><script src="../src/defis_2c.js"></script><script src="../src/defis_sec2.js"></script><script src="../src/competences.js"></script><script src="../src/referentiel.js"></script><script src="../src/trx.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch4c_trous.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/ch1c_trous.js"></script><script src="../src/ch11_rep3d.js"></script><script src="../src/fr_college.js"></script><script src="../src/fr_1re.js"></script><script src="../src/fr_3e.js"></script><script src="../src/fr_tle.js"></script><script src="../src/fr_fin.js"></script><script src="../src/fr_trous.js"></script><script src="../src/fr_couv.js"></script><script src="../src/ref_matu.js"></script><script src="../src/ref_fr.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_col34b.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/fr_act.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/parents.js"></script><script src="../src/presente.js"></script><script src="../src/app.js"></script>
+<script>
+/* 26.11 soir (revue des élèves joués, n° 1, grave) : le chapitre choisi « En ce moment en classe » doit être travaillé même
+   quand ses notions sont de l'année (« en cours », leçon pas encore vue). Avant la correction : Révision, Défi du jour et
+   Automatismes n'en posaient aucune (MP 2e « Fonctions quadratiques » 0 sur 15). Pour chaque profil et chaque chapitre de
+   l'année dont une notion a sa leçon à voir : au moins la moitié des questions de l'ensemble des formats portent sur le
+   chapitre, chaque format en pose au moins une (Automatismes : si une notion du chapitre en fournit), au plus une leçon,
+   en tête, et jamais en Révision ni au Défi du jour ; une notion au plus 2 fois par séance (n° 2). */
+const fails = [], ok = (c, m) => { if (!c) fails.push(m); }, log = [];
+const idOf = (e) => String(e).split("|")[0];
+try {
+  const P = [["MP 2e", { system: "CH", grade: 13, track: "mp" }], ["3e Coll. MA1", { system: "CH", grade: 14, track: "college", niv: "N" }],
+    ["4e Coll. MA2", { system: "CH", grade: 15, track: "college", niv: "R" }], ["11e", { system: "CH", grade: 11, track: "college" }],
+    ["4e FR", { system: "FR", grade: 8, track: "college" }], ["2nde FR", { system: "FR", grade: 10, track: "college" }]];
+  let nCh = 0, tot = 0, totNow = 0;
+  for (const [nom, pr] of P) {
+    state = Engine.newState({ ...pr, minutes: 5 }); Engine.autoInit(state); state.placed = true;
+    const base = JSON.stringify(state);
+    const chs = nowChapters();
+    for (const ch of chs) {
+      state = JSON.parse(base);
+      const ids = nowPickIds(ch); Engine.setNow(state, ids);
+      if (!ids.some((id) => Engine.lessonDue(state, id))) continue; /* chapitre déjà vu : non concerné */
+      nCh++;
+      let n = 0, k = 0;
+      for (const f of Object.keys(FORMATS)) {
+        let fN = 0, fK = 0;
+        for (let r = 0; r < 4; r++) {
+          const plan = Engine.planSession(state, f);
+          fN += plan.length; fK += plan.filter((e) => ids.includes(idOf(e))).length;
+          const c = {}; plan.forEach((e) => (c[idOf(e)] = (c[idOf(e)] || 0) + 1));
+          const lone = Object.keys(c).length === 1;
+          ok(lone || Object.values(c).every((x) => x <= 2), nom + " " + ch.label + " " + f + " : une notion plus de 2 fois " + plan.join(" "));
+          const les = plan.map((e, i) => (Engine.lessonDue(state, idOf(e)) && !ids.includes(idOf(e)) ? i : -1)).filter((i) => i >= 0);
+          ok(les.length <= 1 && (!les.length || les[0] === 0), nom + " " + ch.label + " " + f + " : leçon ailleurs qu'en tête " + plan.join(" "));
+          if (f === "revision" || f === "defi" || f === "auto") ok(plan.noLesson || f === "auto" || !plan.some((e) => Engine.lessonDue(state, idOf(e))), nom + " " + ch.label + " " + f + " : leçon possible en " + f);
+        }
+        const drillable = ids.some((id) => Engine.drillable(state, id));
+        if (f !== "auto" || drillable) ok(fK > 0, nom + " · " + ch.label + " · " + f + " : aucune question du chapitre");
+        n += fN; k += fK;
+      }
+      /* chapitre d'une ou deux notions : la limite de 2 fois par séance (n° 2) passe avant la part du chapitre */
+      ok(k >= n / (ids.length >= 3 ? 2 : 3), nom + " · " + ch.label + " (" + ids.length + " notions) : " + k + " questions du chapitre sur " + n);
+      tot += n; totNow += k;
+    }
+  }
+  ok(nCh >= 15, "chapitres de l'année testés : " + nCh);
+  log.push(nCh + " chapitres de l'année, " + totNow + " questions du chapitre sur " + tot + " (" + Math.round((100 * totNow) / tot) + " %)");
+} catch (e) { fails.push("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }
+document.getElementById("out").textContent = fails.length ? "ÉCHEC " + fails.length + " · " + fails.slice(0, 12).join("\n") : "ok chapitre en classe servi : " + log.join(" | ");
+</script>
