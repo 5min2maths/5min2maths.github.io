@@ -35,12 +35,32 @@ personne ne refaisait le calcul.
   sans tolérance qui est l'arrondi à 5–8 décimales d'une fraction non décimale (q ≤ 30), de (p/q)·π ou (p/q)·√n
   (ex. `r6(2/3) = 0,666667`) : l'élève qui tape 2/3 ou 2π est refusé (« très proche »). Idem pour un coefficient
   arrondi dans une réponse attendue de type expression.
+- **Saisie** (26.11, extension) : avec la réponse attendue **complète** (formes exigées : `plain`, `radical`, `final`),
+  `checkAnswer` doit accepter l'arrondi annoncé tapé avec la virgule (« 14,9 »), la fraction irréductible (quand
+  l'énoncé dit « fraction » ou que la valeur est un décimal illimité), kπ (« 160π ») et a√b (« 2√2 ») quand la valeur
+  en est un ; une réponse `plain` (décimal seul) dont la valeur est un décimal illimité est signalée.
+- Oracles génériques ajoutés le 26.11 : **vérification** (« Lequel / Combien de ces nombres est solution de … ? » :
+  chaque proposition est substituée, « Lequel » exige exactement une solution), **équation trigonométrique** (toutes
+  les solutions sur [0° ; 360°[ ou [0 ; 2π[, racines doubles comprises), **monômes** (« Calcule : 4y · 9y », M² = …),
+  **périodique** (0,2\overline{7} → fraction), **domaine** de définition (appartenance point par point, pôles et bords
+  des racines vérifiés exactement), **parabole** (sommet, zéros, extremum, expression à partir de sommet + a, zéros + a,
+  sommet + point, zéros + point, trois points, axe + ordonnée à l'origine + point, zéros + extremum), **zéro** d'une
+  fonction, **inéquation « x > a »** (réponse de type `ineq`), **formule** (« exprime t en fonction des autres lettres » :
+  la réponse substituée vérifie la formule pour des valeurs quelconques). Valeur absolue |…| lue dans le TeX.
+- Règles de texte ajoutées (≈ 330) : volumes composés et manquants, Pythagore dans les figures, conversions d'unités
+  (longueurs, masses, aires, volumes, capacités, durées, unités composées — table d'unités, pas de gabarit par
+  conversion), fractions (amplifier, simplifier, comparer, encadrer, périodiques, fraction d'une quantité), périmètres
+  et aires, grandeur manquante, décimaux (arrondir, encadrer, comparer, ranger, ×10, lire), divisibilité, multiples,
+  premiers, tableaux de proportionnalité, change, agrandissement, ordre de grandeur, relatifs sur la droite, racines
+  (encadrer, comparer), cercle de Thalès et tangente, dénombrement, Euclide et hauteur, droites remarquables,
+  relations trigonométriques, problèmes (mise en équation, 2e degré, systèmes à deux inconnues — réponse en couple).
+  Option `exact` (`TE`) : réponse exacte, sans relire l'arrondi dans l'énoncé (« au dixième » y est une donnée).
 - **Contre-épreuve** : sur les 3 premières graines de chaque notion et niveau (et sur chaque défi reconnu), la
   réponse attendue est faussée ; l'oracle doit protester, sinon échec (oracle devenu aveugle). `#mutant` : partout.
 
 ## Page de test
 
-`tests/recalcul.html` (dans la suite, ≈ 40 s) : passe 1, toutes les notions, niveaux 1 à 3, graines 1 à 15 ;
+`tests/recalcul.html` (dans la suite ; 180 s mesurées le 26.11 après l'extension, machine très chargée — 92 s avant l'extension dans les mêmes conditions) : passe 1, toutes les notions, niveaux 1 à 3, graines 1 à 15 ;
 passe 2, notions reconnues (≥ 20 % à un niveau), graines 16 à 100, soit **100 énoncés par notion et niveau** ;
 puis exercices riches et défis (parties reconnues). Échec sur tout désaccord, avec le code de la question.
 Options : `#ids=pct,vitesse`, `#n=…`, `#detail` (taux de reconnaissance), `#mutant`.
@@ -67,10 +87,31 @@ sont lus avec la virgule et l'apostrophe), puis vérifier avec `#ids=…&detail`
 | `hauteurs5-3-*` (fr_trous) | hauteur issue de A | 7,058824 : 120/17 refusé | exact |
 | `vitesse-3-*` (ch11_prop), étapes | « 1 h 20 min en heures décimales » et durées | 1,333333 : 1,33 refusé (faux), 4/3 « très proche » | exact, 3 chiffres significatifs acceptés (1,33 ; 4/3) |
 
+### Extension du 26.11 (agent/recalc2)
+
+Aucune réponse attendue fausse dans les 53 notions ajoutées (≈ 9'300 énoncés de plus recalculés) ; la saisie accepte
+partout les écritures justes. Corrections :
+
+| Code | Notion | Avant | Après |
+|---|---|---|---|
+| `probeq-*` (ch1c_eq, âges) | « a le double de l'âge de son fils » | un père de 12 ans pour un fils de 6 ans (écart d'âge invraisemblable) ; « Une mère … sa fille … ils » | écart ≥ 20 ans (grands-parents ≥ 45 ans) ; « elles » pour deux femmes |
+| `eqverif-3-*` (gen3) | combien de solutions parmi une liste | corrigé sans le nombre demandé | « …, donc 2 nombres de la liste » |
+| `fracper-1-*`, `fracper-2-*` (variantes) | chiffre / groupe qui se répète | corrigé « 10,6666… » sans la réponse | « : le chiffre 6 se répète », « le groupe 81 se répète » |
+| `divcrit-2-*`, `divcrit-3-*` (ch1c_no) | combien sont divisibles ; plus petit chiffre ■ | corrigé sans le nombre (liste seule) ; sans le chiffre (852 seul) | « soit 2 nombres » ; « le chiffre est 2 » |
+| `premiers-1-*` (variantes) | combien de premiers entre a et b | corrigé = liste de tous les premiers jusqu'à 100 | premiers de l'intervalle et leur nombre |
+| `racenc-2-*` (ch1c_no) | le plus grand de a√b et √c | corrigé sans conclusion | « le plus grand est √19 » |
+| `f2trois-1-*` (ch1c_f2b) | que vaut a ? | corrigé s'arrêtant à « 2a = −6 » | « …, donc a = −3 » |
+
+Oracle : la recherche des racines doubles manquait une racine située exactement à mi-chemin de deux pas de la grille
+(sin 2x = 1) ; corrigé (≤ d'un côté). `solHas` lit aussi les nombres sans fusionner « 21 133 » (« 21 : 133 » en
+texte lisible).
+
 Contrôle de la canette du testeur (`vol-4-*`, défi) : recalculé, hauteur minimale 9,7 (9,6 refusé) — correct depuis
 le 25.11.
 
-## Notions couvertes (taux d'énoncés recalculés aux niveaux 1, 2, 3 ; 100 tirages par niveau)
+## Notions couvertes (taux d'énoncés recalculés aux niveaux 1, 2, 3 ; 100 tirages par niveau ; état du 26.11 après extension)
+
+Avant l'extension (matin du 26.11) : **119 notions** couvertes (≥ 20 % à un niveau). Après : **172 notions** (+53, marquées « nouveau »), 38'173 énoncés recalculés sur 58'560 (avant : 28'827 sur 50'655), 1'176 contre-épreuves.
 
 | Notion | Libellé | Niveaux 1 / 2 / 3 |
 |---|---|---|
@@ -92,9 +133,12 @@ le 25.11.
 | `thales` | Théorème de Thalès | 100 %  100 %  74 % |
 | `eq3` | Équations de degré 3 par factorisation | 100 %  100 %  100 % |
 | `eq2disc` | Équations du 2e degré (formule) | 63 %  100 %  59 % |
+| `euclide` (nouveau) | Théorèmes d'Euclide et de la hauteur | 100 %  100 %  100 % |
 | `trigo` | Trigonométrie du triangle rectangle | 100 %  78 %  100 % |
 | `sinlaw` | Triangle quelconque (sinus, cosinus) | 100 %  100 %  100 % |
 | `expo` | Exponentielles | 100 %  100 %  0 % |
+| `absval` (nouveau) | Valeur absolue | 73 %  100 %  100 % |
+| `trigeq` (nouveau) | Équations trigonométriques | 100 %  100 %  100 % |
 | `stats` | Statistiques (moyenne, médiane, écart-type) | 100 %  100 %  100 % |
 | `angtri` | Somme des angles d'un triangle | 100 %  100 %  100 % |
 | `arith` | PGDC et PPMC | 100 %  100 %  100 % |
@@ -103,38 +147,86 @@ le 25.11.
 | `polyreg` | Polygones réguliers | 100 %  100 %  100 % |
 | `volcone` | Volumes : pyramide, cône, boule | 100 %  100 %  100 % |
 | `gquot` | Masse volumique et débit | 100 %  40 %  100 % |
+| `formule` (nouveau) | Transformer une formule | 100 %  100 %  88 % |
 | `simil` | Homothéties et similitudes | 100 %  78 %  100 % |
 | `proba` | Probabilités | 100 %  100 %  100 % |
 | `polyop` | Polynômes : développer et réduire | 100 %  81 %  100 % |
 | `factor2` | Factoriser au maximum | 100 %  100 %  100 % |
+| `domaine` (nouveau) | Domaine de définition | 100 %  100 %  100 % |
+| `f2expr` (nouveau) | Parabole : retrouver l'expression | 100 %  60 %  98 % |
 | `racinv` | Fonctions racine carrée et inverse | 100 %  59 %  30 % |
 | `ineq2` | Inéquations du 2e degré | 100 %  79 %  0 % |
+| `droitesrem` (nouveau) | Droites remarquables du triangle | 100 %  100 %  100 % |
 | `polyfact` | Factoriser un polynôme, racine évidente | 0 %  100 %  100 % |
 | `fracrat` | Fractions rationnelles | 72 %  100 %  70 % |
 | `eqrat` | Équations rationnelles | 100 %  100 %  100 % |
+| `decread` | Lire et décomposer un nombre décimal | 100 %  100 %  100 % |
+| `deccomp` (nouveau) | Comparer et ranger des nombres décimaux | 100 %  100 %  100 % |
+| `decarr` (nouveau) | Encadrer et arrondir | 100 %  100 %  100 % |
+| `ordgr` (nouveau) | Ordre de grandeur | 100 %  100 %  100 % |
+| `decadd` | Additionner et soustraire des décimaux | 73 %  72 %  100 % |
+| `dec10` | Multiplier et diviser par 10, 100, 1000 | 100 %  100 %  100 % |
+| `decmul` | Multiplier des nombres décimaux | 100 %  39 %  67 % |
+| `decprob` (nouveau) | Problèmes avec des nombres décimaux | 100 %  100 %  100 % |
 | `pow9` | Carrés, cubes et puissances | 39 %  57 %  100 % |
+| `multdiv` (nouveau) | Multiples et diviseurs | 100 %  100 %  100 % |
+| `divcrit` (nouveau) | Critères de divisibilité | 98 %  71 %  100 % |
+| `premiers` (nouveau) | Nombres premiers, décomposition | 100 %  100 %  100 % |
+| `relrep` (nouveau) | Nombres relatifs : repérer et comparer | 100 %  100 %  100 % |
+| `fracrep` (nouveau) | Fractions : comparer et encadrer | 100 %  100 %  100 % |
+| `fracsimp` (nouveau) | Amplifier et simplifier une fraction | 100 %  100 %  100 % |
+| `fracconv` | Fraction, nombre décimal, pourcentage | 90 %  100 %  100 % |
+| `fracper` (nouveau) | Fractions et nombres périodiques | 100 %  100 %  100 % |
+| `fractout` (nouveau) | Fraction d'une quantité | 100 %  100 %  100 % |
+| `ulong` (nouveau) | Unités de longueur et de masse | 100 %  100 %  100 % |
+| `uaire` (nouveau) | Unités d'aire | 100 %  100 %  100 % |
+| `uvol` (nouveau) | Unités de volume et de capacité | 100 %  100 %  100 % |
+| `utemps` (nouveau) | Durées et horaires | 100 %  95 %  91 % |
+| `perim` (nouveau) | Périmètre d'un polygone | 100 %  100 %  100 % |
+| `aire1` (nouveau) | Aire : carré, rectangle, triangle | 100 %  89 %  100 % |
+| `aire2` (nouveau) | Aire : parallélogramme, losange | 100 %  100 %  100 % |
+| `aire3` (nouveau) | Aire par décomposition | 100 %  100 %  100 % |
+| `proptab` (nouveau) | Tableau de proportionnalité | 100 %  100 %  100 % |
+| `change` (nouveau) | Taux de change | 100 %  100 %  100 % |
+| `agrand` (nouveau) | Agrandir, réduire | 100 %  100 %  100 % |
+| `grandmanq` (nouveau) | Retrouver une dimension à partir de l'aire | 100 %  100 %  100 % |
 | `fracops` | Fractions relatives et priorités | 100 %  100 %  65 % |
+| `voldecomp` (nouveau) | Volumes : décomposition et contenances | 100 %  100 %  100 % |
+| `racenc` (nouveau) | Encadrer et comparer des racines | 100 %  100 %  100 % |
+| `monomes` (nouveau) | Multiplier des monômes | 100 %  73 %  27 % |
+| `pythfig` (nouveau) | Pythagore dans une figure ou un solide | 90 %  100 %  100 % |
+| `eqverif` (nouveau) | Vérifier une solution d'équation | 100 %  100 %  100 % |
 | `pctvar` | Augmentation et diminution en pourcentage | 100 %  100 %  100 % |
 | `pente` | Pente en pourcentage | 100 %  100 %  100 % |
 | `airepyr` | Aire d'une pyramide, apothème | 100 %  100 %  38 % |
-| `ucomp` | Convertir des unités composées | 89 %  100 %  96 % |
+| `volcomp` (nouveau) | Volume d'un solide composé | 100 %  100 %  100 % |
+| `volmanq` (nouveau) | Retrouver une dimension d'un solide | 100 %  100 %  100 % |
+| `ucomp` | Convertir des unités composées | 89 %  100 %  100 % |
 | `parenth` | Supprimer des parenthèses | 100 %  71 %  70 % |
 | `eqfrac` | Équations avec parenthèses ou fractions | 100 %  100 %  100 % |
 | `eq2fact` | Équations du 2e degré par factorisation | 69 %  87 %  100 % |
+| `probeq2` (nouveau) | Problèmes du 2e degré | 76 %  100 %  100 % |
+| `cercthales` (nouveau) | Cercle de Thalès et tangente | 100 %  100 %  100 % |
 | `thalesrec` | Réciproque de Thalès | 56 %  100 %  100 % |
+| `sysprob` (nouveau) | Problèmes à deux inconnues | 100 %  100 %  100 % |
+| `denombr` (nouveau) | Dénombrer | 100 %  100 %  61 % |
 | `statfreq` | Effectifs, fréquences, diagramme circulaire | 53 %  0 %  100 % |
 | `eqspec` | Équations impossibles ou indéterminées | 100 %  100 %  41 % |
 | `bicarre` | Équations bicarrées | 100 %  100 %  100 % |
+| `affzero` (nouveau) | Zéro et signe d'une fonction du premier degré | 86 %  100 %  61 % |
+| `f2trois` (nouveau) | Parabole passant par trois points | 100 %  100 %  100 % |
 | `fracetage` | Fractions à étages | 100 %  0 %  0 % |
 | `ineqfrac` | Inéquations fractionnaires | 100 %  100 %  72 % |
 | `eqirr` | Équations irrationnelles | 85 %  100 %  100 % |
+| `trigrel` (nouveau) | Relations trigonométriques | 100 %  100 %  100 % |
 | `expfrac` | Exposants fractionnaires | 84 %  100 %  0 % |
-| `racprop` | Racines : propriétés (carrées et cubiques) | 100 %  21 %  16 % |
+| `racprop` | Racines : propriétés (carrées et cubiques) | 100 %  21 %  31 % |
+| `eqabs` (nouveau) |  | 100 %  73 %  76 % |
 | `eqbic` | Équations bicarrées, changement de variable | 66 %  100 %  100 % |
 | `eqirrmp` | Équations irrationnelles | 100 %  100 %  72 % |
 | `eqratmp` | Équations rationnelles | 67 %  100 %  38 % |
 | `eqexp` | Équations exponentielles | 100 %  100 %  100 % |
-| `ineqmp` | Inéquations, tableau des signes | 37 %  84 %  100 % |
+| `ineqmp` | Inéquations, tableau des signes | 100 %  84 %  100 % |
 | `tabsignes` | Tableau de signes, inéquations produit et quotient | 0 %  100 %  100 % |
 | `derivregles` | Dériver une somme, un polynôme | 66 %  100 %  0 % |
 | `ineqpoly` | Inéquations polynomiales (tableau des signes) | 100 %  100 %  100 % |
@@ -144,6 +236,7 @@ le 25.11.
 | `sys2` | Systèmes de deux équations | 67 %  90 %  29 % |
 | `fracadd` | Fractions : additionner, soustraire | 71 %  62 %  89 % |
 | `cercle` | Équations de cercles | 0 %  84 %  0 % |
+| `rac` | Racines carrées | 82 %  6 %  0 % |
 | `pythrec` | Réciproque de Pythagore | 81 %  63 %  31 % |
 | `carres` | Carrés parfaits, racines exactes | 53 %  79 %  46 % |
 | `expderiv` | Exponentielle : dérivée, tangente, variations | 79 %  35 %  0 % |
@@ -151,37 +244,38 @@ le 25.11.
 | `log` | Logarithmes | 0 %  78 %  0 % |
 | `fimg` | Images et préimages | 71 %  77 %  35 % |
 | `ineq` | Inéquations du 1er degré | 70 %  77 %  69 % |
+| `probeq` (nouveau) | Mettre un problème en équation | 69 %  77 %  77 % |
 | `derivcomp` | Dériver une fonction composée | 74 %  65 %  35 % |
 | `sys3` | Systèmes de trois équations | 73 %  69 %  28 % |
 | `puisrat` | Puissances d'exposant rationnel | 73 %  40 %  64 % |
-| `rac` | Racines carrées | 72 %  6 %  0 % |
 | `lnfr` | Logarithme népérien : propriétés, équations, seuils | 72 %  29 %  65 % |
 | `angles` | Angles : parallèles, cercle | 44 %  52 %  71 % |
 | `quartiles` | Étendue, médiane, quartiles | 71 %  16 %  30 % |
 | `expfn` | Fonction exponentielle : propriétés, équations | 29 %  37 %  71 % |
 | `derivprodquot` | Dériver un produit, un quotient | 71 %  34 %  35 % |
 | `fracmul` | Fractions : multiplier, diviser | 63 %  66 %  70 % |
-| `decdiv` | Diviser des nombres décimaux | 66 %  24 %  70 % |
+| `decdiv` | Diviser des nombres décimaux | 66 %  67 %  70 % |
+| `f2` | Parabole : zéros et sommet | 63 %  68 %  38 % |
+| `vabs` (nouveau) | Valeur absolue d'un nombre | 67 %  63 %  49 % |
 | `ineq1` | Inéquations du 1er degré | 51 %  67 %  0 % |
+| `volpave` (nouveau) | Cube et pavé : volume et aire | 65 %  0 %  0 % |
 | `scicalc` | Calculer en notation scientifique | 65 %  58 %  30 % |
-| `decmul` | Multiplier des nombres décimaux | 63 %  22 %  38 % |
-| `f2formes` | Formes d'une fonction du 2e degré | 62 %  0 %  27 % |
+| `exactes` (nouveau) | Longueurs et aires en valeurs exactes | 62 %  0 %  0 % |
+| `f2formes` | Formes d'une fonction du 2e degré | 62 %  0 %  61 % |
 | `reladd` | Additionner et soustraire des relatifs | 28 %  14 %  61 % |
 | `eqlog` | Équations logarithmiques | 37 %  48 %  60 % |
 | `fref` | Fonctions de référence : carré, inverse, racine | 28 %  58 %  21 % |
-| `fracconv` | Fraction, nombre décimal, pourcentage | 57 %  0 %  0 % |
+| `volmp` | Volumes des solides | 47 %  56 %  36 % |
 | `derivref` | Dérivées des fonctions de référence | 37 %  44 %  55 % |
-| `decread` | Lire et décomposer un nombre décimal | 0 %  22 %  51 % |
-| `dec10` | Multiplier et diviser par 10, 100, 1000 | 28 %  26 %  47 % |
-| `volmp` | Volumes des solides | 47 %  0 %  22 % |
 | `cart` | Distance et milieu | 45 %  0 %  41 % |
 | `tabval` | Tableau de valeurs d'une fonction | 43 %  25 %  20 % |
 | `syslin` | Systèmes linéaires et matrices (Cramer, inverse) | 0 %  35 %  42 % |
 | `affine` | Fonctions affines | 39 %  0 %  41 % |
-| `decadd` | Additionner et soustraire des décimaux | 36 %  25 %  36 % |
+| `serie` (nouveau) |  | 37 %  0 %  0 % |
 | `coordmp` | Coordonnées : distance, milieu, polaires | 36 %  0 %  0 % |
 | `trigfr` | Fonctions sinus et cosinus | 35 %  31 %  0 % |
 | `ratden` | Rendre rationnel un dénominateur | 34 %  0 %  30 % |
+| `trigeq2` (nouveau) | Équations et modèles trigonométriques | 34 %  0 %  27 % |
 | `logdef` | Logarithmes : définition et calcul | 0 %  0 %  34 % |
 | `airelat` | Aire latérale et totale : prisme, cylindre | 0 %  0 %  32 % |
 | `trigexact` | Valeurs exactes, pente et angle | 0 %  32 %  28 % |
@@ -190,9 +284,9 @@ le 25.11.
 | `sysineq` | Systèmes d'inéquations du 1er degré | 0 %  31 %  0 % |
 | `matrices` | Matrices 2 × 2 : calcul, déterminant, inverse | 0 %  0 %  30 % |
 | `polymp` | Polynômes : zéros, division, signe | 0 %  0 %  29 % |
+| `trigassoc` (nouveau) | Angles associés, relations fondamentales | 24 %  27 %  0 % |
 | `sysgraph` | Systèmes : nombre de solutions | 26 %  0 %  0 % |
 | `autodnb` | Automatismes du brevet (partie 1) | 0 %  0 %  25 % |
-| `f2` | Parabole : zéros et sommet | 0 %  20 %  0 % |
 
 ## Notions non couvertes et pourquoi
 
@@ -209,12 +303,12 @@ le 25.11.
   `sphere`, `pvect`, `cplxalg`, `cplxtrig`, `cplxeq`, `primitives`, `integrale`, `aireint`, `volrev`, `intparties`,
   `intsubst`, `eqdiff`, `suitedef`, `suitearith`, `suitegeo`, `suitesomme`, `suitelim`, `serie`, `binom`,
   `binomiale`, `normale`, `approxnorm`, `densite`, `varalea`, `vaesp`, `matrices`, `translin`, `appllin`, `bases`.
-- **Couverture partielle à compléter en priorité** (notions fréquentes de 9e–11e dont seules certaines formes
-  sont reconnues) : `volcomp`, `volmanq`, `grandmanq`, `voldecomp`, `pythfig`, `eqverif`, `ucomp` (formes rares),
-  `perim`, `aire1`–`aire3`, `ulong`, `uaire`, `uvol`, `utemps`, `fracsimp`, `fracrep`, `fracper`, `fractout`,
-  `trigcercle`, `trigeq` (solutions périodiques), `absval`, `recip`, `formule` (réponse = expression littérale).
+- **Couverture partielle restante** (après l'extension du 26.11) : lectures de graphique de `f2`, `f2expr` (« lis le
+  sommet »), `absval` niveau 1 (formes rares), `affzero` niveau 3 (comparaison de forfaits), `probeq` (≈ 25 % des
+  histoires), `decadd` (≈ 25 %), `trigcercle`, `trigfn`, `recip`, `homog`, `polydiv`, `inter`, `interpar`, `geocomb`,
+  `morceaux`, `transf` (sommet de g(x) = f(x − a) + b : à ajouter), `litelab`, `tradexpr` (réponse = expression).
 - **Exercices riches** : leurs parties n'ont pas de réponse attendue automatique (barème en points) ; **défis**
   (niveau 4) : seule la canette est reconnue (14 tirages) — les défis sont des problèmes à étapes, un gabarit par
   défi.
 
-Liste brute des notions sous 20 % : `fratmp`, `volpave`, `monomes`, `tauxevol`, `automat`, `inter`, `euclide`, `recip`, `absval`, `trigcercle`, `trigeq`, `formule`, `probeq`, `domaine`, `f2expr`, `droitesrem`, `polydiv`, `homog`, `trigfn`, `deccomp`, `decarr`, `ordgr`, `decprob`, `tradexpr`, `multdiv`, `divcrit`, `premiers`, `relrep`, `fracrep`, `fracsimp`, `fracper`, `fractout`, `ulong`, `uaire`, `uvol`, `utemps`, `perim`, `aire1`, `aire2`, `aire3`, `solides`, `proptab`, `change`, `agrand`, `litelab`, `angtype`, `quadri`, `grandmanq`, `voldecomp`, `racenc`, `pythfig`, `eqverif`, `repere`, `rotation`, `volcomp`, `volmanq`, `probeq2`, `cercthales`, `sysprob`, `denombr`, `ensembles`, `vabs`, `valint`, `eqparam`, `exactes`, `optim`, `modexp`, `compo`, `lectgraph`, `affzero`, `f2trois`, `interpar`, `modaff`, `geocomb`, `probrat`, `bijection`, `decomp`, `polyexpr`, `homogrec`, `trigassoc`, `trigeq2`, `logbase`, `triaire`, `droitesinter`, `cercletan`, `symetries`, `morceaux`, `transf`, `trigrel`, `vecteurs`, `recipaff`, `eqabs`, `logprop`, `croissexp`, `similmp`, `vectmp`, `scalmp`, `projmp`, `pvectmp`, `droiteparam`, `posdroites`, `fctmp`, `sinusmp`, `explogfn`, `suitedef`, `suitearith`, `suitegeo`, `suitesomme`, `pscal`, `probtot`, `vaesp`, `suitelim`, `binom`, `proba2`, `vect3e`, `probcond`, `algopy`, `tauxvar`, `nbderive`, `tangente`, `variations`, `optimderiv`, `limites`, `limitinf`, `asymptotes`, `continuite`, `derivseconde`, `etudefct`, `combi`, `probaxiomes`, `probarbre`, `derivth`, `vect3d`, `colin`, `droite3d`, `plans`, `posrel`, `pscal3d`, `distances`, `sphere`, `pvect`, `primitives`, `integrale`, `aireint`, `volrev`, `croissance`, `intparties`, `intsubst`, `eqdiff`, `translin`, `appllin`, `condbayes`, `varalea`, `binomiale`, `normale`, `statdesc`, `bayes`, `bases`, `cplxalg`, `cplxtrig`, `cplxeq`, `suitegeom`, `serie`, `geoesp`, `densite`, `approxnorm`, `tradalg`, `contrex`, `demoalg`, `implication`, `graphefct`, `ineqgraph`, `repere3d`, `progcalc`, `ratio`, `milieux`, `structexpr`, `motifs`, `trigrad`, `droitenorm`, `linfn`, `cos4e`, `thales4e`, `vecgeo`, `tabvar`, `tvi`, `sommeva`, `recurrence`, `symax`, `mediatrice`, `echelle6`, `proba6`, `empil`, `compdiff`, `posrelc`, `intmaj`, `suiteint`, `cercle6`, `bissec6`, `filtre6`, `tabform5`, `hauteurs5`.
+Liste brute des notions sous 20 % (après extension) : `fratmp`, `optim`, `combi`, `tauxevol`, `automat`, `inter`, `recip`, `trigcercle`, `polydiv`, `homog`, `trigfn`, `tradexpr`, `solides`, `litelab`, `angtype`, `quadri`, `repere`, `rotation`, `ensembles`, `valint`, `eqparam`, `modexp`, `compo`, `lectgraph`, `interpar`, `modaff`, `geocomb`, `probrat`, `bijection`, `decomp`, `polyexpr`, `homogrec`, `logbase`, `triaire`, `droitesinter`, `cercletan`, `symetries`, `morceaux`, `transf`, `vecteurs`, `recipaff`, `logprop`, `croissexp`, `similmp`, `vectmp`, `scalmp`, `projmp`, `pvectmp`, `droiteparam`, `posdroites`, `fctmp`, `sinusmp`, `explogfn`, `suitedef`, `suitearith`, `suitegeo`, `suitesomme`, `pscal`, `probtot`, `vaesp`, `suitelim`, `binom`, `proba2`, `vect3e`, `probcond`, `algopy`, `tauxvar`, `nbderive`, `tangente`, `variations`, `optimderiv`, `limites`, `limitinf`, `asymptotes`, `continuite`, `derivseconde`, `etudefct`, `probaxiomes`, `probarbre`, `derivth`, `vect3d`, `colin`, `droite3d`, `plans`, `posrel`, `pscal3d`, `distances`, `sphere`, `pvect`, `primitives`, `integrale`, `aireint`, `volrev`, `croissance`, `intparties`, `intsubst`, `eqdiff`, `translin`, `appllin`, `condbayes`, `varalea`, `binomiale`, `normale`, `statdesc`, `bayes`, `bases`, `cplxalg`, `cplxtrig`, `cplxeq`, `suitegeom`, `geoesp`, `densite`, `approxnorm`, `tradalg`, `contrex`, `demoalg`, `implication`, `graphefct`, `ineqgraph`, `repere3d`, `progcalc`, `ratio`, `milieux`, `structexpr`, `motifs`, `trigrad`, `droitenorm`, `linfn`, `cos4e`, `thales4e`, `vecgeo`, `tabvar`, `tvi`, `sommeva`, `recurrence`, `symax`, `mediatrice`, `echelle6`, `proba6`, `empil`, `compdiff`, `posrelc`, `intmaj`, `suiteint`, `cercle6`, `bissec6`, `filtre6`, `tabform5`, `hauteurs5`.
