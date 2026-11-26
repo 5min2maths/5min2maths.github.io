@@ -1626,6 +1626,13 @@ const RECALC = (() => {
   DF("decarr", /achète (\d+) [^0-9]+? à (\d+,\d+) CHF pièce/, (g, lab) => { const [n, p] = g.map(nn); return lab.startsWith("a)") ? n * p : lab.startsWith("b)") ? n * Math.round(p) : lab.startsWith("c)") ? Math.abs(n * Math.round(p) - n * p) : null; });
   DF("airelat", /diamètre de (\d+) cm et une (?:hauteur|longueur) de (\d+) cm/, (g, lab) => { const [d, h] = g.map(nn), AL = Math.PI * d * h;
     return lab.startsWith("a)") ? AL : lab.startsWith("b)") ? AL + (Math.PI * d * d) / 2 : lab.startsWith("c)") ? Math.PI * d : null; });
+  /* fracadd (9e–11e, ch11_no) */
+  DF("fracadd", /\((\d+)\)\/\((\d+)\) des élèves votent pour \S+, \((\d+)\)\/\((\d+)\) pour \S+, et le reste pour \S+\. L'école compte (\d+) élèves/, (g, lab) => { const [a, b, c, e, t] = g.map(nn), r = 1 - a / b - c / e;
+    return lab.startsWith("a)") ? r : lab.startsWith("b)") ? (t * a) / b : lab.startsWith("c)") ? t * r : null; });
+  DF("fracadd", /on met \((\d+)\)\/\((\d+)\) [^,]+, \((\d+)\)\/\((\d+)\) .+? et le reste d'eau gazeuse/, (g, lab) => { const [a, b, c, e] = g.map(nn), V = lm(lab, /(\d+(?:,\d+)?) L/);
+    return lab.startsWith("a)") ? 1 - a / b - c / e : lab.startsWith("b)") && V ? (V[0] * a) / b : lab.startsWith("c)") && V ? (V[0] * c) / e : null; });
+  DF("fracadd", /reçoit (\d+) CHF d'argent de poche : \((\d+)\)\/\((\d+)\) part .*?, \((\d+)\)\/\((\d+)\) dans/, (g, lab) => { const [A, a, b, c, e] = g.map(nn), r = 1 - a / b - c / e;
+    return lab.startsWith("a)") ? r : lab.startsWith("b)") ? (A * a) / b : lab.startsWith("c)") ? A * r : null; });
   /* ==== fin agent defis3 ==== */
 
   /* ---------- 26.11 (agent defis2) : notions encore sous 20 % (transf, trigcercle, trigfn, recip, lectures de graphique

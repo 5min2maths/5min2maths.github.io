@@ -565,14 +565,21 @@
           [["a) " + a + " + " + b + " · " + c + " − 1 (sans parenthèses)", a + b * c - 1], ["b) (" + a + " + " + b + ") · " + c + " − 1", (a + b) * c - 1], ["c) " + a + " + " + b + " · (" + c + " − 1)", a + b * (c - 1)], ["d) (" + a + " + " + b + ") · (" + c + " − 1)", (a + b) * (c - 1)]],
           ["Sans parenthèses : la multiplication d'abord.", "Les parenthèses changent l'ordre des calculs."], "a) " + (a + b * c - 1) + " ; b) " + ((a + b) * c - 1) + " ; c) " + (a + b * (c - 1)) + " ; d) " + (a + b) * (c - 1) + "."); },
     ],
+    /* 26.11 soir (agent defis3) : fracadd, 3 contextes (élection, boisson diluée, argent de poche), valeurs tirées. */
     fracadd: [
-      () => { const [a, b, c, e] = pk([[1, 3, 1, 4], [2, 5, 1, 3], [1, 4, 1, 6], [3, 8, 1, 4]]), rest = qs([1, 1], qa([a, b], [c, e])), tot = pk([120, 240, 360]) ;
-        return P("Lors d'une élection de délégué, " + M(fT(a, b)) + " des élèves votent pour Ana, " + M(fT(c, e)) + " pour Ben, et le reste pour Chloé. L'école compte " + tot + " élèves.",
-          [["a) Fraction des voix pour Chloé (tape la fraction)", qv(rest)], ["b) Nombre de voix pour Ana", tot * a / b], ["c) Nombre de voix pour Chloé", tot * qv(rest)]],
-          ["a) 1 − (" + a + "/" + b + " + " + c + "/" + e + ").", "b) et c) : fraction × nombre d'élèves."], "a) " + M(qT(rest)) + " ; b) " + M(tot * a / b) + " ; c) " + M(r12(tot * qv(rest))) + "."); },
-      () => P("Un sirop se dilue ainsi : " + M(fT(1, 6)) + " de sirop, " + M(fT(2, 3)) + " d'eau plate et le reste d'eau gazeuse.",
-          [["a) Fraction d'eau gazeuse (tape la fraction)", 1 / 6], ["b) Pour 1,2 L de boisson, volume de sirop (L)", 0.2], ["c) Volume d'eau plate (L)", 0.8]],
-          ["a) 1 − 1/6 − 2/3, au dénominateur 6.", "b) 1/6 de 1,2 L."], "a) " + M("1 - \\frac{1}{6} - \\frac{4}{6} = \\frac{1}{6}") + " ; b) " + M("0{,}2") + " L ; c) " + M("0{,}8") + " L."),
+      () => { const [a, b, c, e] = pk([[1, 3, 1, 4], [2, 5, 1, 3], [1, 4, 1, 6], [3, 8, 1, 4], [1, 6, 2, 5], [1, 5, 3, 10], [2, 7, 1, 4]]), rest = qs([1, 1], qa([a, b], [c, e])), L = lcm(b, e), tot = L * R.int(Math.ceil(120 / L), Math.floor(480 / L)), [n1, n2, n3] = pk([["Ana", "Ben", "Chloé"], ["Yanis", "Léa", "Noé"], ["Inès", "Sam", "Lina"]]);
+        return Object.assign(P("Lors d'une élection de délégué, " + M(fT(a, b)) + " des élèves votent pour " + n1 + ", " + M(fT(c, e)) + " pour " + n2 + ", et le reste pour " + n3 + ". L'école compte " + tot + " élèves.",
+          [["a) Fraction des voix pour " + n3 + " (tape la fraction)", qv(rest)], ["b) Nombre de voix pour " + n1, (tot * a) / b], ["c) Nombre de voix pour " + n3, tot * qv(rest)]],
+          ["a) 1 − (" + a + "/" + b + " + " + c + "/" + e + ").", "b) et c) : fraction × nombre d'élèves."], "a) " + M("1 - \\left(" + fT(a, b) + " + " + fT(c, e) + "\\right) = " + qT(rest)) + " ; b) " + M(fT(a, b) + " \\cdot " + tot + " = " + (tot * a) / b) + " ; c) " + M(qT(rest) + " \\cdot " + tot + " = " + r12(tot * qv(rest))) + "."), { ctx: "election" }); },
+      () => { const [a, b, c, e] = pk([[1, 6, 2, 3], [1, 5, 1, 2], [1, 8, 1, 2], [1, 4, 1, 2], [1, 10, 3, 5], [1, 6, 1, 2]]), rest = qs([1, 1], qa([a, b], [c, e])), [boi, s1, s2] = pk([["sirop", "de sirop", "d'eau plate"], ["thé glacé", "de thé", "d'eau"], ["cocktail de fruits", "de jus d'orange", "de jus de pomme"]]);
+        let V = 1.2; for (let t = 0; t < 40; t++) { const v = pk([0.6, 0.9, 1.2, 1.5, 1.8, 2, 2.4, 3]); if (Number.isInteger(r12((v * 1000 * a) / b)) && Number.isInteger(r12((v * 1000 * c) / e))) { V = v; break; } }
+        return Object.assign(P("Pour préparer un " + boi + ", on met " + M(fT(a, b)) + " " + s1 + ", " + M(fT(c, e)) + " " + s2 + " et le reste d'eau gazeuse.",
+          [["a) Fraction d'eau gazeuse (tape la fraction)", qv(rest)], ["b) Pour " + N(V).replace("{,}", ",") + " L de boisson, volume " + s1 + " (L)", r12((V * a) / b)], ["c) Volume " + s2 + " dans ces " + N(V).replace("{,}", ",") + " L (L)", r12((V * c) / e)]],
+          ["a) 1 − " + a + "/" + b + " − " + c + "/" + e + ", au même dénominateur.", "b) " + a + "/" + b + " de " + N(V).replace("{,}", ",") + " L."], "a) " + M("1 - " + fT(a, b) + " - " + fT(c, e) + " = " + qT(rest)) + " ; b) " + M(fT(a, b) + " \\cdot " + N(V) + " = " + N(r12((V * a) / b))) + " L ; c) " + M(fT(c, e) + " \\cdot " + N(V) + " = " + N(r12((V * c) / e))) + " L."), { ctx: "boisson" }); },
+      () => { const [a, b, c, e] = pk([[1, 3, 1, 4], [1, 4, 2, 5], [1, 2, 1, 5], [2, 5, 1, 4], [1, 3, 1, 6], [3, 10, 1, 4]]), rest = qs([1, 1], qa([a, b], [c, e])), L = lcm(b, e), A = L * pk([1, 2, 3, 4].filter((k) => L * k >= 20 && L * k <= 120)), nm = pk(["Léa", "Noé", "Inès", "Yanis"]);
+        return Object.assign(P(nm + " reçoit " + A + " CHF d'argent de poche : " + M(fT(a, b)) + " part dans une sortie au cinéma, " + M(fT(c, e)) + " dans un livre, et le reste est mis de côté.",
+          [["a) Fraction mise de côté (tape la fraction)", qv(rest)], ["b) Prix du cinéma (CHF)", (A * a) / b], ["c) Montant mis de côté (CHF)", A * qv(rest)]],
+          ["a) 1 − (" + a + "/" + b + " + " + c + "/" + e + ").", "b) et c) : fraction × " + A + " CHF."], "a) " + M("1 - \\left(" + fT(a, b) + " + " + fT(c, e) + "\\right) = " + qT(rest)) + " ; b) " + M(fT(a, b) + " \\cdot " + A + " = " + (A * a) / b) + " CHF ; c) " + M(qT(rest) + " \\cdot " + A + " = " + r12(A * qv(rest))) + " CHF."), { ctx: "argent" }); },
     ],
     /* 26.11 soir (agent defis3) : défis tirés au hasard, 3 contextes chacun (avant : deux énoncés presque fixes). */
     fracmul: [
