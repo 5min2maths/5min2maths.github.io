@@ -185,11 +185,25 @@
           { ctx: "compose-nom", guide: [GR("Combien de fois la figure est-elle retournée (comme dans un miroir) en tout ?", t === "C" ? 2 : t === "T" && /axe/.test(txt) ? 2 : 0, t === "C" || /axe/.test(txt) ? "Deux fois : elle est remise à l'endroit." : "Aucune : une symétrie centrale ne retourne pas la figure.")] }); },
     ],
   };
+  /* 26.11 (agent defis2) : défis tirés au hasard, 3 contextes (avant : deux énoncés fixes). */
+  const PC = (A, x, y) => M(A + "(" + nb(x) + " \\,;\\, " + nb(y) + ")");
   const ISP = [
-    () => P("On applique au point " + M("A(1 \\,;\\, 2)") + " la symétrie d'axe vertical " + M("x = 3") + ", puis la symétrie d'axe vertical " + M("x = 7") + ".", [["a) Abscisse de l'image après la 1re symétrie", 5], ["b) Abscisse de l'image finale", 9], ["c) De combien d'unités le point a-t-il glissé vers la droite ?", 8]],
-      ["A est à 2 unités de l'axe x = 3 : son image est à 2 unités de l'autre côté.", "Deux symétries d'axes parallèles : une translation du double de la distance entre les axes."], "a) " + M("5") + " ; b) " + M("9") + " ; c) " + M("9 - 1 = 8 = 2 \\cdot (7 - 3)") + "."),
-    () => P("Le triangle " + M("ABC") + " a pour sommets " + M("A(1 \\,;\\, 1)") + ", " + M("B(4 \\,;\\, 1)") + " et " + M("C(1 \\,;\\, 3)") + ". On lui applique la symétrie de centre " + M("O(0 \\,;\\, 0)") + ".", [["a) Abscisse de B'", -4], ["b) Ordonnée de C'", -3], ["c) Aire du triangle A'B'C' (en unités d'aire)", 3]],
-      ["Symétrie de centre O : les deux coordonnées changent de signe.", "Une isométrie conserve les aires : celle de ABC vaut 3 · 2 ÷ 2."], "a) " + M("-4") + " ; b) " + M("-3") + " ; c) " + M("\\frac{3 \\cdot 2}{2} = 3") + ", comme " + M("ABC") + "."),
+    () => { const vert = R.rand() < 0.5, a = R.int(-2, 4), b = a + R.int(2, 5), p = a - R.int(1, 4), o = R.int(-3, 5), X1 = 2 * a - p, X2 = 2 * b - X1, c = vert ? "x" : "y", Cn = vert ? "Abscisse" : "Ordonnée", pp = (v) => (v < 0 ? "(" + v + ")" : String(v)), e = a - p;
+      return Object.assign(P("On applique au point " + (vert ? PC("A", p, o) : PC("A", o, p)) + " la symétrie d'axe " + (vert ? "vertical" : "horizontal") + " " + M(c + " = " + a) + ", puis la symétrie d'axe " + (vert ? "vertical" : "horizontal") + " " + M(c + " = " + b) + ".",
+        [["a) " + Cn + " de l'image après la 1re symétrie", X1], ["b) " + Cn + " de l'image finale", X2], ["c) De combien d'unités le point a-t-il glissé " + (vert ? "vers la droite" : "vers le haut") + " en tout ?", X2 - p]],
+        ["A est à " + e + " unité" + (e > 1 ? "s" : "") + " de l'axe " + c + " = " + String(a).replace("-", "−") + " : son image est à " + e + " unité" + (e > 1 ? "s" : "") + " de l'autre côté.", "Deux symétries d'axes parallèles : une translation du double de la distance entre les axes."],
+        "a) " + M(pp(p) + " + 2 \\cdot " + e + " = " + X1) + " ; b) " + M("2 \\cdot " + pp(b) + " - " + pp(X1) + " = " + X2) + " ; c) " + M(X2 + " - " + pp(p) + " = " + (X2 - p) + " = 2 \\cdot (" + b + " - " + pp(a) + ")") + "."), { ctx: "deux-symetries" }); },
+    () => { const u = R.int(2, 6), v0 = R.int(2, 5), v = (u * v0) % 2 ? v0 + 1 : v0, x0 = R.int(1, 4), y0 = R.int(1, 4), [h, k] = R.rand() < 0.5 ? [0, 0] : [R.int(1, 3), R.int(-2, 2)], pp = (z) => (z < 0 ? "(" + z + ")" : String(z));
+      const B = [x0 + u, y0], C = [x0, y0 + v], Bx = 2 * h - B[0], Cy = 2 * k - C[1], O = h || k ? PC("\\Omega", h, k) : PC("O", 0, 0);
+      return Object.assign(P("Le triangle " + M("ABC") + " a pour sommets " + PC("A", x0, y0) + ", " + PC("B", B[0], B[1]) + " et " + PC("C", C[0], C[1]) + ". On lui applique la symétrie de centre " + O + ".",
+        [["a) Abscisse de B'", Bx], ["b) Ordonnée de C'", Cy], ["c) Aire du triangle A'B'C' (en unités d'aire)", (u * v) / 2]],
+        [h || k ? "Le centre Ω est le milieu de [BB'] et de [CC'] : x(B') = 2 · " + h + " − " + B[0] + "." : "Symétrie de centre O : les deux coordonnées changent de signe.", "Une isométrie conserve les aires : celle de ABC vaut " + u + " · " + v + " ÷ 2."],
+        "a) " + M(h || k ? "2 \\cdot " + h + " - " + B[0] + " = " + Bx : "-" + B[0]) + " ; b) " + M(h || k ? "2 \\cdot " + pp(k) + " - " + C[1] + " = " + Cy : "-" + C[1]) + " ; c) le triangle est rectangle en A : " + M("\\frac{" + u + " \\cdot " + v + "}{2} = " + (u * v) / 2) + ", comme " + M("ABC") + "."), { ctx: "symetrie-centrale" }); },
+    () => { const B = [R.int(-3, 3), R.int(-3, 3)], d = [nz(-5, 5), nz(-4, 4)], C = [B[0] + d[0], B[1] + d[1]], A = [R.int(-2, 6), R.int(-2, 6)], obj = pk(["un motif de frise", "une pièce de puzzle", "un logo"]);
+      return Object.assign(P("Sur un quadrillage, on déplace " + obj + " par la translation qui envoie le point " + PC("B", B[0], B[1]) + " sur le point " + PC("C", C[0], C[1]) + ". Un sommet du motif est " + PC("A", A[0], A[1]) + ".",
+        [["a) Abscisse de A', image de A", A[0] + d[0]], ["b) Ordonnée de A'", A[1] + d[1]], ["c) On applique la même translation une deuxième fois à A' : abscisse de A''", A[0] + 2 * d[0]]],
+        ["De B à C : " + (d[0] > 0 ? d[0] + " vers la droite" : -d[0] + " vers la gauche") + ", " + (d[1] > 0 ? d[1] + " vers le haut" : -d[1] + " vers le bas") + ".", "Une translation déplace tous les points de la même façon."],
+        "De B à C : " + M("x") + " change de " + M((d[0] > 0 ? "+" : "") + d[0]) + " et " + M("y") + " de " + M((d[1] > 0 ? "+" : "") + d[1]) + ". a) " + M(A[0] + (d[0] < 0 ? " - " + -d[0] : " + " + d[0]) + " = " + (A[0] + d[0])) + " ; b) " + M(A[1] + (d[1] < 0 ? " - " + -d[1] : " + " + d[1]) + " = " + (A[1] + d[1])) + " ; c) " + M((A[0] + d[0]) + (d[0] < 0 ? " - " + -d[0] : " + " + d[0]) + " = " + (A[0] + 2 * d[0])) + "."), { ctx: "translation" }); },
   ];
 
   // ======================= ensco : ensembles de nombres =======================
@@ -349,11 +363,21 @@
             traps: [f !== n ? TR(f, "Un symbole placé avant un plus grand se soustrait : CM = 900, XL = 40, IX = 9.") : null] }); },
     ],
   };
+  /* 26.11 (agent defis2) : défis tirés au hasard (année, nombres binaires, nombre égyptien), 3 contextes. */
   const NUP = [
-    () => P("Un monument porte l'inscription " + RB("MDCCCXLVIII") + ".", [["a) Année en chiffres", 1848], ["b) Combien d'années jusqu'en 2026 ?", 178], ["c) Nombre de symboles romains de l'inscription", 11]],
-      ["XL = 40 : un symbole avant un plus grand se soustrait.", "Compte chaque lettre."], "a) " + M("1000 + 500 + 300 + 40 + 8 = 1848") + " ; b) " + M("2026 - 1848 = 178") + " ; c) M, D, C, C, C, X, L, V, I, I, I : 11 symboles."),
-    () => P("Un message est codé en binaire : " + RB("1011") + " puis " + RB("110") + ".", [["a) 1011 en base 10", 11], ["b) 110 en base 10", 6], ["c) La somme des deux, en base 10", 17]],
-      ["Positions : 8, 4, 2, 1 (de gauche à droite).", "Additionne en base 10."], "a) " + M("8 + 2 + 1 = 11") + " ; b) " + M("4 + 2 = 6") + " ; c) " + M("17") + " (en binaire 10001)."),
+    () => { let y = 1848; for (let k = 0; k < 50; k++) { const t = R.int(1450, 2019); if (!noSub(t)) { y = t; break; } } const r = roman(y), lieu = pk(["Un monument porte l'inscription", "Une cloche d'église porte la date"].concat(y >= 1850 && y <= 1990 ? ["Le fronton d'une gare indique sa date de construction :"] : ["Le cadran d'un vieux moulin indique sa date de construction :"]));
+      return Object.assign(P(lieu + " " + RB(r) + ".", [["a) Année en chiffres", y], ["b) Combien d'années jusqu'en 2026 ?", 2026 - y], ["c) Nombre de symboles romains de l'inscription", r.length]],
+        ["Un symbole placé avant un plus grand se soustrait (IV = 4, XC = 90, CM = 900).", "Compte chaque lettre."],
+        "a) " + r + " = " + M(nb(y)) + " ; b) " + M("2026 - " + y + " = " + (2026 - y)) + " ; c) " + [...r].join(", ") + " : " + r.length + " symboles."), { ctx: "romain-date" }); },
+    () => { const pc = (n) => bin(n).split("1").length - 1, two = () => { let t = 0; for (let k = 0; k < 30 && !t; k++) { const z = R.int(5, 31); if (pc(z) >= 2) t = z; } return t || 13; }, a = two(); let b = two(); if (b === a) b = a === 13 ? 22 : 13; const pos = (n) => bin(n).split("").map((c, i, t) => (c === "1" ? 2 ** (t.length - 1 - i) : 0)).filter((v) => v).join(" + "), cx = pk([["Un message est codé en binaire :", "puis"], ["Deux capteurs envoient leurs mesures en binaire :", "et"], ["Un robot reçoit deux nombres en binaire :", "puis"]]);
+      return Object.assign(P(cx[0] + " " + RB(bin(a)) + " " + cx[1] + " " + RB(bin(b)) + ".", [["a) " + bin(a) + " en base 10", a], ["b) " + bin(b) + " en base 10", b], ["c) La somme des deux, en base 10", a + b]],
+        ["Positions de droite à gauche : 1, 2, 4, 8, 16.", "Additionne en base 10."], "a) " + M(pos(a) + " = " + a) + " ; b) " + M(pos(b) + " = " + b) + " ; c) " + M(a + " + " + b + " = " + (a + b)) + " (en binaire " + bin(a + b) + ")."), { ctx: "binaire" }); },
+    () => { let n = 2357; for (let k = 0; k < 50; k++) { const t = R.int(1100, 4899), d = String(t).split("").map(Number); if (d.every((x) => x <= 7) && d.some((x) => x >= 5) && d.filter((x) => x).length >= 3) { n = t; break; } }
+      const dg = String(n).split("").map(Number), [m, c, d, u] = dg, ds = (x) => String(x).split("").reduce((s, z) => s + +z, 0), n2 = 2 * n;
+      const part = [[m, "fleur de lotus", "fleurs de lotus"], [c, "corde enroulée", "cordes enroulées"], [d, "anse", "anses"], [u, "bâton", "bâtons"]].filter((x) => x[0]).map((x) => x[0] + " " + (x[0] > 1 ? x[2] : x[1]));
+      return Object.assign(P("En numération égyptienne (bâton : 1, anse : 10, corde enroulée : 100, fleur de lotus : 1000), un scribe écrit un nombre avec " + (part.length > 1 ? part.slice(0, -1).join(", ") + " et " + part[part.length - 1] : part[0]) + ".", [["a) Quel est ce nombre ?", n], ["b) Combien de symboles a-t-il utilisés ?", ds(n)], ["c) Combien de symboles faut-il, au minimum, pour écrire le double de ce nombre ?", ds(n2)]],
+        ["Chaque symbole répété s'additionne.", "Pour le double, calcule-le en base 10, puis compte les symboles de chaque rang (10 bâtons s'échangent contre 1 anse…)."],
+        "a) " + M(nb(1000 * m) + " + " + 100 * c + " + " + 10 * d + " + " + u + " = " + nb(n)) + " ; b) " + M(dg.join(" + ") + " = " + ds(n)) + " symboles ; c) " + M("2 \\cdot " + nb(n) + " = " + nb(n2)) + " : " + M(String(n2).split("").join(" + ") + " = " + ds(n2)) + " symboles (et non " + 2 * ds(n) + " : les échanges en réduisent le nombre)."), { ctx: "egypte-double" }); },
   ];
 
   // ======================= fctlec : lire un graphique, reconnaître une fonction =======================

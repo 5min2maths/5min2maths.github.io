@@ -255,9 +255,22 @@
         ["Aire totale = 1.", "E(X) = ∫ x f(x) dx."], "a) " + M("k = \\frac{2}{" + b * b + "}") + " ; b) " + M("\\frac{" + half + "^2}{" + b * b + "} = \\frac{1}{4}") + " ; c) " + M("\\frac{2 \\cdot " + b + "}{3} = " + fT((2 * b) / 3)) + " min."); }],
     /* 26.11 soir (vraisemblance, décision de l'enseignant du 26.11 : présence 0,9, surréservation de quelques places) :
        avant, 625 billets pour 515 places avec une présence de 0,8 (110 billets de trop). */
-    approxnorm: [() => { const S = 94, zc = (S + 0.5 - 90) / 3;
-      return P("Une compagnie vend 100 billets pour un vol de " + S + " places ; chaque passager se présente avec la probabilité 0,9, indépendamment des autres. On donne " + M("\\Phi(1{,}5) \\approx " + dT(ph4(zc), 4)) + ".", [["a) Nombre moyen de passagers μ", 90], ["b) Écart-type σ", 3], ["c) Probabilité de surréservation (au millième)", r6(1 - ph4(zc)), 0.001]],
-        ["σ = √(100 · 0,9 · 0,1).", "Trop de passagers : X ≥ " + (S + 1) + ", borne corrigée " + S + ",5."], "a) 90 ; b) " + M("\\sqrt{9} = 3") + " ; c) " + M("1 - \\Phi(1{,}5) \\approx " + dT(rd(1 - ph4(zc), 0.001), 3)) + "."); }],
+    /* 26.11 (agent defis2) : un seul énoncé figé jusque-là ; 3 contextes, valeurs tirées (z exact à 3 décimales au plus, table de Φ
+       donnée), présence 0,9 et surréservation de quelques places pour les vols (décision du 26.11). */
+    approxnorm: [
+      () => { const [n, mu, s, S] = pk([[100, 90, 3, 91], [100, 90, 3, 94], [100, 90, 3, 97], [400, 360, 6, 361], [400, 360, 6, 367], [400, 360, 6, 370]]), zc = (S + 0.5 - mu) / s, ph = ph4(zc), v = r6(1 - ph);
+        return Object.assign(P("Une compagnie vend " + n + " billets pour un vol de " + S + " places ; chaque passager se présente avec la probabilité 0,9, indépendamment des autres. On donne " + M("\\Phi(" + dT(zc, 3) + ") \\approx " + dT(ph, 4)) + ".", [["a) Nombre moyen de passagers μ", mu], ["b) Écart-type σ", s], ["c) Probabilité de surréservation (au dix-millième, avec la table)", v, 0.0001]],
+          ["σ = √(" + n + " · 0,9 · 0,1).", "Trop de passagers : X ≥ " + (S + 1) + ", borne corrigée " + S + ",5."], "a) " + M(n + " \\cdot 0{,}9 = " + mu) + " ; b) " + M("\\sqrt{" + n + " \\cdot 0{,}9 \\cdot 0{,}1} = \\sqrt{" + s * s + "} = " + s) + " ; c) " + M("P(Y \\ge " + nb(S + 0.5) + ") = 1 - \\Phi\\left(\\frac{" + nb(S + 0.5) + " - " + mu + "}{" + s + "}\\right) = 1 - \\Phi(" + dT(zc, 3) + ") \\approx " + dT(v, 4)) + "."), { ctx: "surreservation" }); },
+      () => { const [n, mu, s, j] = pk([[100, 80, 4, 1], [100, 80, 4, 3], [100, 80, 4, 5], [100, 80, 4, 7], [625, 500, 10, 4], [625, 500, 10, 9], [625, 500, 10, 14], [625, 500, 10, 19]]), k = mu - j, zc = (mu - k + 0.5) / s, v = ph4(zc), qui = n === 100 ? "Un sachet contient 100 graines" : "Un maraîcher sème 625 graines";
+        return Object.assign(P(qui + " ; chacune germe avec la probabilité 0,8, indépendamment des autres. On approche le nombre X de graines qui germent par une loi normale (avec correction de continuité). On donne " + M("\\Phi(" + dT(zc, 3) + ") \\approx " + dT(v, 4)) + ".", [["a) Moyenne μ", mu], ["b) Écart-type σ", s], ["c) Probabilité qu'au moins " + k + " graines germent (au dix-millième, avec la table)", v, 0.0001]],
+          ["σ = √(np(1 − p)).", "Au moins " + k + " : X ≥ " + k + ", borne corrigée " + (k - 1) + ",5 ; par symétrie, P(Z ≥ −z) = Φ(z)."],
+          "a) " + M(n + " \\cdot 0{,}8 = " + mu) + " ; b) " + M("\\sqrt{" + n + " \\cdot 0{,}8 \\cdot 0{,}2} = \\sqrt{" + s * s + "} = " + s) + " ; c) " + M("P(Y \\ge " + nb(k - 0.5) + ") = P\\left(Z \\ge -" + dT(zc, 3) + "\\right) = \\Phi(" + dT(zc, 3) + ") \\approx " + dT(v, 4)) + "."), { ctx: "germination" }); },
+      () => { const [n, mu, s, d, cx] = pk([[100, 50, 5, 2, 0], [100, 50, 5, 4, 0], [100, 50, 5, 7, 0], [400, 200, 10, 9, 0], [400, 200, 10, 14, 0], [1600, 800, 20, 19, 1], [1600, 800, 20, 39, 1]]), zc = (d + 0.5) / s, ph = ph4(zc), v = r6(2 * ph - 1);
+        const T = cx ? "Dans une ville, la moitié des habitants approuvent un projet. On interroge " + nb(n) + " personnes au hasard ; X compte celles qui l'approuvent." : "On lance " + n + " fois une pièce équilibrée ; X est le nombre de « pile ».";
+        return Object.assign(P(T + " On approche X par une loi normale (avec correction de continuité). On donne " + M("\\Phi(" + dT(zc, 3) + ") \\approx " + dT(ph, 4)) + ".", [["a) Moyenne μ", mu], ["b) Écart-type σ", s], ["c) " + M("P(" + (mu - d) + " \\le X \\le " + (mu + d) + ")") + " (au dix-millième, avec la table)", v, 0.0001]],
+          ["σ = √(n · 0,5 · 0,5).", "Correction de continuité : on élargit l'intervalle de 0,5 de chaque côté ; par symétrie, P = 2Φ(z) − 1."],
+          "a) " + M(nb(n) + " \\cdot 0{,}5 = " + mu) + " ; b) " + M("\\sqrt{" + nb(n) + " \\cdot 0{,}25} = " + s) + " ; c) " + M("P(" + nb(mu - d - 0.5) + " \\le Y \\le " + nb(mu + d + 0.5) + ") = 2\\Phi(" + dT(zc, 3) + ") - 1 \\approx " + dT(v, 4)) + "."), { ctx: "intervalle-centre" }); },
+    ],
   };
 
   // ---------- notions ----------

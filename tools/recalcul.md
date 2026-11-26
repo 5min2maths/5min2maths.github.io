@@ -60,7 +60,7 @@ personne ne refaisait le calcul.
 
 ## Page de test
 
-`tests/recalcul.html` (dans la suite ; 180 s mesurées le 26.11 après l'extension, machine très chargée — 92 s avant l'extension dans les mêmes conditions) : passe 1, toutes les notions, niveaux 1 à 3, graines 1 à 15 ;
+`tests/recalcul.html` et `tests/recalcul2.html` (dans la suite ; **scindée en deux le 26.11 au soir** : 316 s sous charge 10 pour la page unique après la 3e extension, au-delà de la cible de 200 s ; recalcul.html = notions de rang pair + exercices riches et défis, recalcul2.html = notions de rang impair, `<meta name="part">` ; les deux fichiers ne diffèrent que par cette meta) : passe 1, toutes les notions, niveaux 1 à 3, graines 1 à 15 ;
 passe 2, notions reconnues (≥ 20 % à un niveau), graines 16 à 100, soit **100 énoncés par notion et niveau** ;
 puis exercices riches et défis (parties reconnues). Échec sur tout désaccord, avec le code de la question.
 Options : `#ids=pct,vitesse`, `#n=…`, `#detail` (taux de reconnaissance), `#mutant`.
@@ -108,6 +108,49 @@ texte lisible).
 
 Contrôle de la canette du testeur (`vol-4-*`, défi) : recalculé, hauteur minimale 9,7 (9,6 refusé) — correct depuis
 le 25.11.
+
+### Extension du soir (26.11, agent/defis2)
+
+Oracles ajoutés (`tests/recalc_oracles.js`, sections « défis » et « notions encore sous 20 % ») :
+
+- **Défis rendus aléatoires** (symax, mediatrice, echelle6, proba6, empil, compdiff, posrelc, intmaj, suiteint, approxnorm,
+  isom, numer) : un oracle par contexte et par question (`DF`, texte « énoncé ¶ question », seulement sur les parties de
+  défi) ; cohérence de l'énoncé contrôlée (angles du triangle et côtés, cordes < 2R, monotonie et encadrement de
+  l'intégrale par Simpson, valeur de Φ donnée comparée à Φ réelle, z recalculé) ; suites d'intégrales recalculées par
+  Simpson. 5'400 questions sur 150 graines : 100 % reconnues, aucun désaccord, contre-épreuves détectées.
+- **transf** (sommets et minima par recherche numérique sur g, points images, g(a), forme canonique, décalages),
+  **trigcercle** (conversions, quadrants, valeurs exactes, coordonnées, angle unique sur un intervalle), **trigfn**
+  (amplitude, extremums, position du minimum, image en degrés, période par balayage et affinage, nombre de zéros),
+  **recip** (antécédent unique sur le domaine de restriction, expression de f⁻¹ vérifiée par f(f⁻¹(y)) = y, composée).
+- **Lecture de graphique** (`figRead`) : la figure SVG de `FIG.plot` est relue (graduations → échelle, tracé de la courbe,
+  points marqués et leurs noms) ; parabole ajustée par moindres carrés, lecture « propre » exigée à la demi-unité près.
+  Couvre f2 (zéros lus, axe de symétrie, sommet lu, forme canonique lue, a à partir de S et P, a à partir des zéros et de
+  f(0)) et f2expr (sommet lu, même ouverture que ±x²). Le texte de l'item porte maintenant `fig`.
+- f2 « Détermine le sommet » (fractions), f2expr « axe, ordonnée à l'origine et un point ».
+- probeq : nombres pairs/impairs consécutifs, note manquante pour une moyenne, prix avant réduction, partage du sac la
+  nuit ; decadd : rendu de monnaie, écarts (course, saut), bouteille.
+- Autres notions fréquentes : **inter** (intersections, nombre de points, distance horizontale, tangente horizontale),
+  **homog** (asymptotes, réciproque vérifiée), **polydiv** (reste, quotient vérifié, a et b, k, reste d'une division par
+  un trinôme), **nbderive** (nombre dérivé par différences centrées d'ordre 4, s'(t)), **combi** (19 gabarits),
+  **milieux**, **suitearith** / **suitegeo** (formes directes).
+
+Taux (niveaux 1 / 2 / 3) : transf, trigcercle, trigfn, recip, f2, f2expr, probeq, decadd, inter, homog 100 % partout ;
+polydiv 100 / 100 / 59 ; combi 100 / 100 / 70 ; nbderive 33 / 87 / 100 ; milieux 100 / 100 / 0 ; suitearith 70 / 41 / 0 ;
+suitegeo 54 / 0 / 0. Total : **187 notions couvertes** (178 avant), 41'266 énoncés recalculés sur 62'355.
+
+Erreurs trouvées et corrigées :
+
+| Code | Notion | Avant | Après |
+|---|---|---|---|
+| `f2expr-3-*` (ch1c_f2b, axe-point) | axe x = h, ordonnée à l'origine c, point (2h ; c) | le point donné était le symétrique de (0 ; c) : a indéterminé, infinité de paraboles, une seule acceptée | point choisi hors de 0, h et 2h |
+| `inter-2-*` (ch1c_f2b, delta) et forme hyperbole | « combien de points d'intersection » | corrigé « un point (droite tangente) », sans le nombre en chiffres | « 1 point (droite tangente) », « 2 points », « 0 point » |
+
+Outils corrigés : `tests/recalcul.html` ne chargeait pas `src/perco.js` (isom, ensco, numer, fctlec, litconv jamais
+recalculés) ; la contre-épreuve v → 1,2v + 0,7 laissait −3,5 inchangé (point fixe : réponse faussée identique), elle
+ajoute maintenant 1 dans ce cas.
+
+Aucune erreur dans les fichiers réservés à l'autre agent (app.js, expr.js, active.js, riche_2c.js, variantes.js) n'a
+été rencontrée par ces oracles.
 
 ## Notions couvertes (taux d'énoncés recalculés aux niveaux 1, 2, 3 ; 100 tirages par niveau ; état du 26.11 après extension)
 
@@ -301,14 +344,15 @@ Avant l'extension (matin du 26.11) : **119 notions** couvertes (≥ 20 % à un n
 - **Niveaux avancés pas encore outillés** (oracles à écrire : vecteurs, complexes, intégrales, suites, lois) :
   `vectmp`, `scalmp`, `projmp`, `pvectmp`, `vect3d`, `colin`, `droite3d`, `plans`, `posrel`, `pscal3d`, `distances`,
   `sphere`, `pvect`, `cplxalg`, `cplxtrig`, `cplxeq`, `primitives`, `integrale`, `aireint`, `volrev`, `intparties`,
-  `intsubst`, `eqdiff`, `suitedef`, `suitearith`, `suitegeo`, `suitesomme`, `suitelim`, `serie`, `binom`,
+  `intsubst`, `eqdiff`, `suitedef`, `suitesomme`, `suitelim`, `serie`, `binom`,
   `binomiale`, `normale`, `approxnorm`, `densite`, `varalea`, `vaesp`, `matrices`, `translin`, `appllin`, `bases`.
-- **Couverture partielle restante** (après l'extension du 26.11) : lectures de graphique de `f2`, `f2expr` (« lis le
-  sommet »), `absval` niveau 1 (formes rares), `affzero` niveau 3 (comparaison de forfaits), `probeq` (≈ 25 % des
-  histoires), `decadd` (≈ 25 %), `trigcercle`, `trigfn`, `recip`, `homog`, `polydiv`, `inter`, `interpar`, `geocomb`,
-  `morceaux`, `transf` (sommet de g(x) = f(x − a) + b : à ajouter), `litelab`, `tradexpr` (réponse = expression).
+- **Couverture partielle restante** (après l'extension du soir) : `absval` niveau 1 (formes rares), `affzero` niveau 3
+  (comparaison de forfaits), `polydiv` 3, `combi` 3, `milieux` 3, `suitearith` / `suitegeo` (problèmes à contexte),
+  `suitesomme`, `tangente` (lecture de la tangente sur la figure), `interpar`, `geocomb`, `morceaux`, `litelab`,
+  `tradexpr` (réponse = expression). transf, trigcercle, trigfn, recip, homog, inter et les lectures de f2 / f2expr sont
+  maintenant couverts.
 - **Exercices riches** : leurs parties n'ont pas de réponse attendue automatique (barème en points) ; **défis**
   (niveau 4) : seule la canette est reconnue (14 tirages) — les défis sont des problèmes à étapes, un gabarit par
   défi.
 
-Liste brute des notions sous 20 % (après extension) : `fratmp`, `optim`, `combi`, `tauxevol`, `automat`, `inter`, `recip`, `trigcercle`, `polydiv`, `homog`, `trigfn`, `tradexpr`, `solides`, `litelab`, `angtype`, `quadri`, `repere`, `rotation`, `ensembles`, `valint`, `eqparam`, `modexp`, `compo`, `lectgraph`, `interpar`, `modaff`, `geocomb`, `probrat`, `bijection`, `decomp`, `polyexpr`, `homogrec`, `logbase`, `triaire`, `droitesinter`, `cercletan`, `symetries`, `morceaux`, `transf`, `vecteurs`, `recipaff`, `logprop`, `croissexp`, `similmp`, `vectmp`, `scalmp`, `projmp`, `pvectmp`, `droiteparam`, `posdroites`, `fctmp`, `sinusmp`, `explogfn`, `suitedef`, `suitearith`, `suitegeo`, `suitesomme`, `pscal`, `probtot`, `vaesp`, `suitelim`, `binom`, `proba2`, `vect3e`, `probcond`, `algopy`, `tauxvar`, `nbderive`, `tangente`, `variations`, `optimderiv`, `limites`, `limitinf`, `asymptotes`, `continuite`, `derivseconde`, `etudefct`, `probaxiomes`, `probarbre`, `derivth`, `vect3d`, `colin`, `droite3d`, `plans`, `posrel`, `pscal3d`, `distances`, `sphere`, `pvect`, `primitives`, `integrale`, `aireint`, `volrev`, `croissance`, `intparties`, `intsubst`, `eqdiff`, `translin`, `appllin`, `condbayes`, `varalea`, `binomiale`, `normale`, `statdesc`, `bayes`, `bases`, `cplxalg`, `cplxtrig`, `cplxeq`, `suitegeom`, `geoesp`, `densite`, `approxnorm`, `tradalg`, `contrex`, `demoalg`, `implication`, `graphefct`, `ineqgraph`, `repere3d`, `progcalc`, `ratio`, `milieux`, `structexpr`, `motifs`, `trigrad`, `droitenorm`, `linfn`, `cos4e`, `thales4e`, `vecgeo`, `tabvar`, `tvi`, `sommeva`, `recurrence`, `symax`, `mediatrice`, `echelle6`, `proba6`, `empil`, `compdiff`, `posrelc`, `intmaj`, `suiteint`, `cercle6`, `bissec6`, `filtre6`, `tabform5`, `hauteurs5`.
+Liste brute des notions sous 20 % (après extension) : `fratmp`, `optim`, `combi`, `tauxevol`, `automat`, `inter`, `recip`, `trigcercle`, `polydiv`, `homog`, `trigfn`, `tradexpr`, `solides`, `litelab`, `angtype`, `quadri`, `repere`, `rotation`, `ensembles`, `valint`, `eqparam`, `modexp`, `compo`, `lectgraph`, `interpar`, `modaff`, `geocomb`, `probrat`, `bijection`, `decomp`, `polyexpr`, `homogrec`, `logbase`, `triaire`, `droitesinter`, `cercletan`, `symetries`, `morceaux`, `transf`, `vecteurs`, `recipaff`, `logprop`, `croissexp`, `similmp`, `vectmp`, `scalmp`, `projmp`, `pvectmp`, `droiteparam`, `posdroites`, `fctmp`, `sinusmp`, `explogfn`, `suitedef`, `suitesomme`, `pscal`, `probtot`, `vaesp`, `suitelim`, `binom`, `proba2`, `vect3e`, `probcond`, `algopy`, `tauxvar`, `nbderive`, `tangente`, `variations`, `optimderiv`, `limites`, `limitinf`, `asymptotes`, `continuite`, `derivseconde`, `etudefct`, `probaxiomes`, `probarbre`, `derivth`, `vect3d`, `colin`, `droite3d`, `plans`, `posrel`, `pscal3d`, `distances`, `sphere`, `pvect`, `primitives`, `integrale`, `aireint`, `volrev`, `croissance`, `intparties`, `intsubst`, `eqdiff`, `translin`, `appllin`, `condbayes`, `varalea`, `binomiale`, `normale`, `statdesc`, `bayes`, `bases`, `cplxalg`, `cplxtrig`, `cplxeq`, `suitegeom`, `geoesp`, `densite`, `approxnorm`, `tradalg`, `contrex`, `demoalg`, `implication`, `graphefct`, `ineqgraph`, `repere3d`, `progcalc`, `ratio`, `milieux`, `structexpr`, `motifs`, `trigrad`, `droitenorm`, `linfn`, `cos4e`, `thales4e`, `vecgeo`, `tabvar`, `tvi`, `sommeva`, `recurrence`, `symax`, `mediatrice`, `echelle6`, `proba6`, `empil`, `compdiff`, `posrelc`, `intmaj`, `suiteint`, `cercle6`, `bissec6`, `filtre6`, `tabform5`, `hauteurs5`.
