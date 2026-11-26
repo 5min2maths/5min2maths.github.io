@@ -1537,6 +1537,27 @@ const RECALC = (() => {
   /* droitesrem (1re Collège–MP, defis.js) */
   DF("droitesrem", /rectangle en C, (?:avec AC = (\d+) (?:cm|m) et BC = (\d+) (?:cm|m)|d'hypoténuse AB = (\d+) cm et de côté AC = (\d+) cm)/, (g, lab) => { let a, b, c; if (g[0]) { a = nn(g[0]); b = nn(g[1]); c = Math.hypot(a, b); } else { c = nn(g[2]); a = nn(g[3]); b = Math.sqrt(c * c - a * a); }
     return lab.startsWith("a)") ? c / 2 : lab.startsWith("b)") ? c / 3 : lab.startsWith("c)") ? (a * b) / c : null; });
+  /* polyreg (10e, defis_910) */
+  DF("polyreg", /dont la somme vaut ([\d']+)°/, (g, lab) => { const S = nn(g[0]), n = S / 180 + 2; return lab.startsWith("a)") ? n : lab.startsWith("b)") ? S / n : lab.startsWith("c)") ? 360 / n : null; });
+  DF("polyreg", /Chaque angle intérieur du plancher mesure (\d+(?:,\d+)?)°/, (g, lab) => { const ai = nn(g[0]), n = 360 / (180 - ai); return lab.startsWith("a)") ? 180 - ai : lab.startsWith("b)") ? n : lab.startsWith("c)") ? (n - 2) * 180 : null; });
+  DF("polyreg", /polygone régulier à (\d+) côtés/, (g, lab) => { const n = nn(g[0]); return lab.startsWith("a)") ? 360 / n : lab.startsWith("b)") ? ((n - 2) * 180) / n : lab.startsWith("c)") ? (n - 2) * 180 : null; });
+  /* graphefct (1re Collège, ch1c_trous) */
+  DF("graphefct", /le cercle x\^2 \+ y\^2 = (\d+) et la droite verticale x = (\d+)/, (g, lab) => { const [r2, a] = g.map(nn), r = Math.sqrt(r2), a1 = lm(lab, /Image de (\d+)/);
+    return lab.startsWith("a)") ? (a * a < r2 ? 2 : a * a === r2 ? 1 : 0) : a1 ? Math.sqrt(r2 - a1[0] ** 2) : lab.startsWith("c)") ? r : null; });
+  DF("graphefct", /demi-cercle de rayon (\d+) m\./, (g, lab) => { const r = nn(g[0]), a = lm(lab, /à (\d+) m du centre/);
+    return a ? Math.sqrt(r * r - a[0] ** 2) : lab.startsWith("b)") ? 2 * r : lab.startsWith("c)") ? { v: 1, sol: false } : null; });
+  DF("graphefct", /courbe d'équation x = y\^2(?: ([+-]) (\d+))? \(une parabole « couchée »\) et la droite verticale x = (-?\d+)/, (g, lab) => { const c = g[0] ? (g[0] === "-" ? -1 : 1) * nn(g[1]) : 0, k = nn(g[2]), kk = lm(lab, /d'abscisse (-?\d+)/);
+    return lab.startsWith("a)") ? (k > c ? 2 : k === c ? 1 : 0) : kk ? Math.sqrt(kk[0] - c) : lab.startsWith("c)") ? { v: 0, sol: false } : null; });
+  /* ineqgraph (2e Collège, ch1c_trous) : zéros par le discriminant, entiers comptés un à un */
+  const coef2 = (s) => { const m = /^(-?)x\^2(?: ([+-]) (\d*)x)?(?: ([+-]) (\d+))?$/.exec(s.trim()); if (!m) return null; return [m[1] ? -1 : 1, m[2] ? (m[2] === "-" ? -1 : 1) * (m[3] === "" ? 1 : nn(m[3])) : 0, m[4] ? (m[4] === "-" ? -1 : 1) * nn(m[5]) : 0]; };
+  DF("ineqgraph", /(?:f|B)\(x\) = (-?x\^2[^=(]*?) (?:coupe|\(en milliers)/, (g, lab) => { const C = coef2(g[0]); if (!C) return null; const [a, b, c] = C, D = b * b - 4 * a * c; if (D <= 0) return NaN;
+    const z = [(-b - Math.sqrt(D)) / (2 * a), (-b + Math.sqrt(D)) / (2 * a)].sort((u, v) => u - v), f = (x) => a * x * x + b * x + c, o = /(≤|≥|<|>) 0/.exec(lab), t = (x) => (o[1] === "<" ? f(x) < 0 : o[1] === "≤" ? f(x) <= 0 : o[1] === ">" ? f(x) > 0 : f(x) >= 0);
+    if (lab.startsWith("a)")) return z[0]; if (lab.startsWith("b)")) return z[1]; if (!o) return null;
+    if (/Nombre (?:d'entiers|de quantités entières)/.test(lab)) { let n = 0; for (let x = -50; x <= 50; x++) if (t(x)) n++; return n; }
+    if (/Plus petit entier positif/.test(lab)) { for (let x = 1; x <= 100; x++) if (t(x)) return x; return NaN; } return null; });
+  /* repere3d (11e, ch11_rep3d) */
+  DF("repere3d", /le sommet opposé à O est F\((\d+) ; (\d+) ; (\d+)\)/, (g, lab) => { const [a, b, c] = g.map(nn);
+    return lab.startsWith("a)") ? a * b * c : lab.startsWith("b)") ? (/Abscisse/.test(lab) ? a : /Ordonnée/.test(lab) ? b : c) / 2 : lab.startsWith("c)") ? Math.sqrt(a * a + b * b + c * c) : null; });
   /* ==== fin agent defis3 ==== */
 
   /* ---------- 26.11 (agent defis2) : notions encore sous 20 % (transf, trigcercle, trigfn, recip, lectures de graphique

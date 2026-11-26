@@ -81,9 +81,14 @@
     ],
   };
   const PROBS = {
-    repere3d: [() => { const [a, b, c, d] = pk([[2, 3, 6, 7], [1, 4, 8, 9], [4, 4, 7, 9]]);
-      return P("Une boîte en forme de pavé droit est posée à l'origine d'un repère de l'espace ; le sommet opposé à O est " + M("F" + T3([a, b, c])) + " (en dm).", [["a) Volume de la boîte (dm³)", a * b * c], ["b) Cote (coordonnée z) du centre de la boîte", c / 2], ["c) Longueur de la diagonale OF (dm)", d]],
-        ["Les coordonnées de F sont les dimensions.", "Diagonale : Pythagore deux fois."], "a) " + M(a + " \\cdot " + b + " \\cdot " + c + " = " + a * b * c) + " ; b) " + M(fT(c / 2)) + " ; c) " + M("\\sqrt{" + a * a + " + " + b * b + " + " + c * c + "} = " + d) + "."); }],
+    /* 26.11 soir (agent defis3) : dimensions tirées (quadruplets a² + b² + c² = d²), 3 contextes, coordonnée du centre au hasard. */
+    repere3d: [() => { const [cx, nm, u, Q] = pk([["boite", "Une boîte en forme de pavé droit", "dm", [[2, 3, 6, 7], [1, 4, 8, 9], [4, 4, 7, 9], [2, 6, 9, 11], [6, 6, 7, 11], [3, 4, 12, 13], [2, 4, 4, 6]]],
+        ["salle", "Une salle de sport (un pavé droit)", "m", [[6, 6, 3, 9], [10, 10, 5, 15], [9, 12, 8, 17], [12, 12, 6, 18]]],
+        ["aquarium", "Un aquarium en forme de pavé droit", "dm", [[4, 8, 8, 12], [2, 6, 3, 7], [4, 12, 6, 14], [3, 6, 6, 9], [6, 6, 3, 9]]]]), [a, b, c, d] = pk(Q), k = R.int(0, 2), cn = ["Abscisse (x)", "Ordonnée (y)", "Cote (z)"][k], cv = [a, b, c][k] / 2;
+      const vol = a * b * c, lab1 = cx === "aquarium" ? "a) Contenance de l'aquarium (L ; 1 dm³ = 1 L)" : "a) Volume (" + u + "³)";
+      return Object.assign(P(nm + (cx === "aquarium" ? " est posé" : " est posée") + " à l'origine O d'un repère de l'espace ; le sommet opposé à O est " + M("F" + T3([a, b, c])) + " (en " + u + ").", [[lab1, vol], ["b) " + cn + " du centre du pavé (milieu de [OF])", cv], ["c) Longueur de la diagonale OF (" + u + ")", d]],
+        ["Les coordonnées de F sont les dimensions du pavé. Le centre est le milieu de [OF] : moyenne des coordonnées.", "Diagonale : Pythagore deux fois, " + M("OF^2 = x^2 + y^2 + z^2") + "."],
+        "a) " + M(a + " \\cdot " + b + " \\cdot " + c + " = " + vol) + (cx === "aquarium" ? " dm³, soit " + vol + " L" : " " + u + "³") + " ; b) " + M(fT([a, b, c][k]) + " : 2 = " + fT(cv)) + " ; c) " + M("\\sqrt{" + a * a + " + " + b * b + " + " + c * c + "} = \\sqrt{" + d * d + "} = " + d) + " " + u + "."), { ctx: cx }); }],
   };
   reg([
     { id: "repere3d", theme: "es", label: "Repérer un point dans l'espace", ex: "F(4 \\,;\\, 3 \\,;\\, 2)", CH: [11], lv: RP, probs: PROBS.repere3d,

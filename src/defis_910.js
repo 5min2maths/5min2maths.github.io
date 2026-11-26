@@ -124,12 +124,23 @@
       ["La part représente " + a + "/360 du disque entier.", "Le périmètre de la part : l'arc et deux rayons."],
       "Fraction du disque : " + M("\\frac{" + a + "}{360}") + ". a) " + M("\\frac{" + a + "}{360} \\cdot 2\\pi \\cdot " + r + " \\approx " + N(Math.round(L * 100) / 100)) + " cm. b) " + M(N(Math.round(L * 100) / 100) + " + 2 \\cdot " + r + " \\approx " + N(Math.round((L + 2 * r) * 100) / 100)) + " cm. c) " + M("\\frac{" + a + "}{360} \\cdot \\pi \\cdot " + r + "^2 \\approx " + N(Math.round(A * 100) / 100)) + " cm².");
   });
+  /* 26.11 soir (agent defis3) : 3 contextes (somme des angles donnée, kiosque dont on connaît l'angle intérieur, bassin à n côtés). */
   PX("polyreg", [10, 11], () => {
-    const n = pk([5, 6, 8, 9, 10, 12, 15]), S = (n - 2) * 180, ai = S / n, ae = 360 / n;
-    return PB("Un polygone régulier a des angles intérieurs dont la somme vaut " + X(S) + "°.",
+    const n = pk([5, 6, 8, 9, 10, 12, 15]), S = (n - 2) * 180, ai = S / n, ae = 360 / n, cx = pk(["somme", "kiosque", "bassin"]);
+    if (cx === "kiosque") { const m = pk([5, 6, 8, 9, 10, 12]), S2 = (m - 2) * 180, ai2 = S2 / m, ae2 = 360 / m;
+      return Object.assign(PB("Le toit d'un kiosque à musique repose sur un plancher en forme de polygone régulier. Chaque angle intérieur du plancher mesure " + X(ai2) + "°.",
+        [["a) Mesure de l'angle au centre (en degrés)", ae2], ["b) Nombre de côtés du plancher", m], ["c) Somme des angles intérieurs (en degrés)", S2]],
+        ["Angle intérieur et angle au centre sont supplémentaires : leur somme vaut 180°.", "Le tour complet (360°) est partagé en n angles au centre égaux."],
+        "a) " + M("180° - " + N(ai2) + "° = " + N(ae2) + "°") + ". b) " + M("360 \\div " + N(ae2) + " = " + m) + " côtés. c) " + M("(" + m + " - 2) \\cdot 180° = " + N(S2) + "°") + "."), { ctx: cx }); }
+    if (cx === "bassin") { const m = pk([5, 6, 8, 10, 12, 18, 20]), S2 = (m - 2) * 180;
+      return Object.assign(PB("Le bassin d'une fontaine a la forme d'un polygone régulier à " + m + " côtés. Depuis le jet d'eau, au centre, on tend une corde vers chaque sommet.",
+        [["a) Angle entre deux cordes voisines (angle au centre, en degrés)", 360 / m], ["b) Mesure d'un angle intérieur du bassin (en degrés)", S2 / m], ["c) Somme des angles intérieurs (en degrés)", S2]],
+        ["Les cordes partagent le tour complet (360°) en " + m + " angles égaux.", "Chaque triangle formé est isocèle : angle intérieur = 180° − angle au centre."],
+        "a) " + M("360° \\div " + m + " = " + N(360 / m) + "°") + ". b) " + M("180° - " + N(360 / m) + "° = " + N(S2 / m) + "°") + ". c) " + M(m + " \\cdot " + N(S2 / m) + "° = " + N(S2) + "°") + " (ou " + M("(" + m + " - 2) \\cdot 180°") + ")."), { ctx: cx }); }
+    return Object.assign(PB("Un polygone régulier a des angles intérieurs dont la somme vaut " + X(S) + "°.",
       [["a) Nombre de côtés", n], ["b) Mesure d'un angle intérieur (en degrés)", ai], ["c) Mesure de l'angle au centre (en degrés)", ae]],
       ["Somme des angles intérieurs d'un polygone à n côtés : (n − 2) · 180°.", "L'angle au centre partage le tour complet (360°) en n parts égales."],
-      "a) " + M("(n - 2) \\cdot 180 = " + N(S)) + ", donc " + M("n - 2 = " + (n - 2)) + " et " + M("n = " + n) + ". b) " + M(N(S) + " \\div " + n + " = " + N(ai) + "°") + ". c) " + M("360° \\div " + n + " = " + N(ae) + "°") + " (et " + M(N(ai) + "° + " + N(ae) + "° = 180°") + ").");
+      "a) " + M("(n - 2) \\cdot 180 = " + N(S)) + ", donc " + M("n - 2 = " + (n - 2)) + " et " + M("n = " + n) + ". b) " + M(N(S) + " \\div " + n + " = " + N(ai) + "°") + ". c) " + M("360° \\div " + n + " = " + N(ae) + "°") + " (et " + M(N(ai) + "° + " + N(ae) + "° = 180°") + ")."), { ctx: cx });
   });
   PX("grandmanq", [10, 11], () => {
     const b1 = pk([6, 8, 10]), b2 = pk([12, 14, 16]), h = pk([5, 6, 7, 9]), A = ((b1 + b2) * h) / 2, w = pk([3, 4, 5, 6, 8].filter((x) => A % x === 0 && A / x !== x)) || 2;
