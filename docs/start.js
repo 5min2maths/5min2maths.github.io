@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "548becb3a7"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "b23f5fa39f"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -421,7 +421,7 @@ function startPlacement() {
     state.placement.i = i; save();
     /* 26.11 (revue p4, n° 3 : 9e très faible, positionnement 7:19 puis séance 6:46 le premier jour) : 3 questions ratées ou
        « Je ne sais pas » suffisent à situer l'élève, le positionnement s'arrête là. */
-    if (i >= plan.length || (state.placement.miss || 0) >= 3) { state.placeMiss = state.placement.miss || 0; state.placed = true; state.placedOn = day(); /* 26.11 soir : série d'automatismes courte ce jour-là (Engine.autoN) */ delete state.placement; save(); return screenPlacementDone(); }
+    if (i >= plan.length || (state.placement.miss || 0) >= 3) { state.placeMiss = state.placement.miss || 0; state.placed = true; state.placedOn = day(); /* 26.11 soir : série d'automatismes courte ce jour-là (Engine.autoN) */ delete state.placement; Engine.snapPlaced(state); /* revue p5, n° 12 */ save(); return screenPlacementDone(); }
     const id = plan[i], q = Engine.make(state, id, Math.min(2, difficultyCap(state.profile)));
     renderQuestion(q, {
       eyebrow: "Étape 2 sur 2 · question " + (i + 1) + " sur " + plan.length + (plan.length - i > 1 ? " · encore " + (plan.length - i - 1) + " après celle-ci · environ " + (plan.length - i) + " min" /* 26.11 : une minute par question (mesuré : 4 à 5 min pour 5) */ : " · la dernière !") + `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((i / plan.length) * 100)}%"></i></span>`, single: true, track: "positionnement",
@@ -709,7 +709,7 @@ function screenHome() {
       <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>${nowCard()}</div>
       ${freeCard()}`,
     prob: () => (!wp ? `<div class="card flat stack"><div class="eyebrow">🔍 Problème de la semaine</div><h3>Pas encore de problème pour toi</h3><p class="small muted">Les problèmes arrivent avec les notions que tu as déjà travaillées. Fais quelques séances !</p></div>`
-      : `<div class="card stack"><div class="eyebrow">🔍 Problème de la semaine${wpDone ? " · fait ✓" : ""}</div><h2>${NOTIONS.find((n) => n.id === wp).label}</h2>
+      : `<div class="card stack"><div class="eyebrow">🔍 Problème de la semaine${wpDone ? " · fait ✓" : ""}</div><h2>${nLabel(wp)}</h2>
         <p class="muted">Un problème en plusieurs étapes, avec des indices si tu bloques. Facultatif, et il rapporte gros.</p>
         <button class="btn-primary btn-big" id="wp">${wpDone ? "Le refaire" : "Relever le défi"}</button>
         <p class="small muted">${wpDone ? "Bravo ! Un nouveau problème arrive la semaine prochaine." : "Un nouveau problème chaque semaine."}</p></div>`),
@@ -1011,10 +1011,10 @@ function screenComps() {
   Badges.check(state); state.badgesNew = []; save();
   h(`${brand}${backTop()}<h2>Mes <span class="mark">compétences</span></h2>
   <p class="muted">${isFR() ? "Chaque compétence reçoit un niveau de maîtrise (insuffisante, fragile, satisfaisante, très bonne) dès que tu y as répondu 3 fois. Il suit tes 8 dernières réponses : il monte quand tu progresses." : "Chaque compétence reçoit une note de 1 à 6 dès que tu y as répondu 3 fois. La note suit tes 8 dernières réponses : elle monte quand tu progresses."}</p>
-  ${badgesSection()}
   <div class="card flat"><div class="spread"><span>${classTag(state.profile) || "Cette année" /* 26.11 soir : la classe, comme les autres profils (MP : « Cette année ») */}</span><b>${st.tested} / ${st.total} ${isFR() ? "positionnées" : "notées"}${avgTxt(st.avg)}</b></div></div>
   ${block(cur)}
   ${old.length ? `<details class="olds"><summary>Années précédentes (${compStats(old.map((c) => c.id)).tested} ${isFR() ? "positionnées" : "notées"})</summary>${block(old)}</details>` : ""}
+  ${badgesSection()}
   <button class="btn-primary btn-big" id="back">Retour</button>`);
   bindBadges(app);
   // « Me tester » (14.11, demande de l'utilisateur) : 3 questions de la compétence, au niveau de la compétence.
@@ -1057,10 +1057,10 @@ function screenCompsRef() {
   Badges.check(state); state.badgesNew = []; save();
   h(`${brand}${backTop()}<h2>Mes <span class="mark">compétences</span></h2>
   <p class="muted">${Referentiel.intro(p)}</p>
-  ${badgesSection()}
   <div class="card flat"><div class="spread"><span>${Referentiel.yearLabel(p, y0)}${tr ? " · " + tr : ""}</span><b>${st.tested} / ${st.total} ${W}${avgTxt(st.avg)}</b></div>${hint ? `<p class="small muted">${hint}</p>` : ""}</div>
   ${themes(cur)}
   ${olds.map(([lab, ys]) => `<details class="olds"><summary>${lab} (${ys.map((y) => Referentiel.stats(state, Referentiel.list(p, y)).tested).reduce((a, b) => a + b, 0)} ${W})</summary>${ys.map((y) => `<h3 class="ryear">${Referentiel.yearLabel(p, y)}</h3>${themes(Referentiel.list(p, y))}`).join("")}</details>`).join("")}
+  ${badgesSection()}
   <button class="btn-primary btn-big" id="back">Retour</button>`);
   bindBadges(app);
   app.querySelectorAll(".rtest").forEach((b) => (b.onclick = () => {
@@ -1068,7 +1068,7 @@ function screenCompsRef() {
     if (!ps.length) return;
     const order = ps.slice().sort(() => Math.random() - 0.5), pick = [0, 1, 2].map((k) => order[k % order.length]);
     session = { plan: pick.map(([id, d]) => id + "|" + d), i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), prep: true,
-      ctest: { label: r.label, code: r.code, cid: Referentiel.cids(r)[0], before: Referentiel.note(state, r) } };
+      ctest: { label: r.label, code: r.code, cid: Referentiel.cids(r)[0], before: Referentiel.note(state, r), forms: r.forms || null } };
     nextQuestion();
   }));
   document.getElementById("back").onclick = screenHome; document.getElementById("backtop").onclick = screenHome;
@@ -1086,13 +1086,14 @@ function newBadgesCard() {
 function badgesSection() {
   const got = state.badges || {}, b = Badges.bc(state), L = Badges.list(state);
   const fmt = (d) => d.slice(8, 10) + "." + d.slice(5, 7);
-  return `<div class="card flat stack bdg-sec"><div class="spread"><h3>Mes badges</h3><b>${Object.keys(got).length} / ${L.length}</b></div>
+  /* 26.11 (revue p5, n° 11 : 19–21 badges, 1,5 écran à 360 px, avant le premier objectif) : badges repliés, après les compétences */
+  return `<details class="card flat stack bdg-sec bdg-fold"><summary class="spread"><h3>🏅 Mes badges</h3><b>${Object.keys(got).length} / ${L.length}</b></summary>
   ${Object.entries(BADGE_FAM).map(([f, label]) => `<div class="eyebrow">${label}</div><div class="bdg-grid">${L.filter((x) => x.fam === f).map((x) => {
     const on = !!got[x.id], p = x.prog(state, b);
     const info = on ? "Gagné le " + fmt(got[x.id]) + ". " + x.crit : x.crit + (p[1] > 1 ? ` Où tu en es : ${p[0]} / ${p[1]}.` : "");
     return `<button type="button" class="bdg${on ? "" : " off"}" data-info="${esc(x.name + " · " + info)}">${Badges.icon(x, on, 48)}<span class="bdg-n">${x.name}</span><span class="small muted">${on ? fmt(got[x.id]) : p[1] > 1 ? p[0] + " / " + p[1] : "à gagner"}</span></button>`;
   }).join("")}</div>`).join("")}
-  <p class="small muted bdg-info" aria-live="polite">Touche un badge pour savoir comment le gagner.</p></div>`;
+  <p class="small muted bdg-info" aria-live="polite">Touche un badge pour savoir comment le gagner.</p></details>`;
 }
 function bindBadges(root) {
   const info = root.querySelector(".bdg-info");
@@ -1342,7 +1343,7 @@ function screenStats(back) {
 }
 
 // ---------------- En ce moment en classe (13.11) ----------------
-const nLabel = (id) => { const n = NOTIONS.find((x) => x.id === id), p = typeof state !== "undefined" && state && state.profile; return p && p.system === "FR" && n.labelFR && p.grade < n.labelFR[0] ? n.labelFR[1] : n.label; }; /* 26.11 (revue p3) : libellé du collège / de la 2nde français (labelFR) */
+const nLabel = (id) => { const n = NOTIONS.find((x) => x.id === id), p = typeof state !== "undefined" && state && state.profile; if (!n) return id; return p && p.system === "FR" && n.labelFR && p.grade < n.labelFR[0] ? n.labelFR[1] : n.label; }; /* 26.11 (revue p3) : libellé du collège / de la 2nde français (labelFR) */
 function nowCard() {
   if (!Engine.nowActive(state)) return `<div class="stack now-in"><div class="eyebrow">📚 En ce moment en classe</div>
     <p class="small">Dis-moi ce que tu étudies en classe en ce moment : tes séances s'y concentreront.</p><button class="btn-primary btn-big" id="nowpick">Choisir mon chapitre</button></div>`;
@@ -1584,7 +1585,7 @@ function startCarnet(only) {
   nextQuestion();
   toast("📕 Pour effacer une erreur : 2 réussites de suite, du premier coup.", 4000); // 22.11 : règle expliquée au départ
 }
-const nLab = (id) => (NOTIONS.find((n) => n.id === id) || {}).label || id;
+const nLab = (id) => nLabel(id); /* 26.11 (revue p5, n° 7) : libellé du collège français (labelFR) aussi au bilan et au carnet */
 /* 26.11 soir (revue des élèves testeurs, n° 6 : « 3 à effacer » après une bonne séance, aucun progrès visible) : les
    erreurs à une réussite de la sortie sont dites « presque effacées ». */
 function carnetLeft(c) {
@@ -1834,7 +1835,10 @@ function nextQuestion(redo) {
      défis facultatifs ; une notion nouvelle qui arrive après (remédiation) attend la séance suivante. */
   /* 26.11 (revue élèves, compteur « 5 sur 7 » → « étape 6 sur 8 ») : jamais de leçon dans le Carnet ni dans « Mon
      évaluation » (le rappel de cours reste ouvrable dans la question) ; le compteur ne change plus en cours de séance. */
-  const due = !redo && !session.ctest && !session.carnet && !session.prep && !forceProb && session.fmt !== "auto" /* 26.11 : jamais de leçon dans une série d'automatismes */ && !session.noLesson && ns && Engine.lessonDue(state, id);
+  const due = !redo && !session.ctest && !session.carnet && !session.prep && !forceProb && session.fmt !== "auto" /* 26.11 : jamais de leçon dans une série d'automatismes */ && !session.noLesson && ns && Engine.lessonDue(state, id)
+    /* 26.11 (revue p5, n° 4 : « Nouvelle notion · étape 1 sur 2 » avant le Problème de la semaine, notion du chapitre en classe ou
+       réussie 5 minutes plus tôt) : problème de la semaine, leçon seulement pour une notion jamais travaillée, hors chapitre en classe */
+    && !(session.weekly && !(Engine.lessonFirst(state, id) && !ns.seen));
   if (due && !session.lessonDone && (session.lessonAt == null || session.lessonAt === session.i)) {
     state.notions[id].lessonSeen = true; session.lessonDone = true; session.lessonAt = session.i; save();
     const st = sessStep(session);
@@ -1850,6 +1854,8 @@ function nextQuestion(redo) {
   if (easy) session.eased = true;
   /* 24.11 (ergonomie) : le type de question n'est rappelé que s'il change dans la séance (« Révision · 1 sur 4 · Révision » doublait le titre). */
   let q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : easy ? 1 : level, undefined, !session.weekly && !forceProb);
+  /* 26.11 (revue p5, n° 2) : « Me tester » d'un objectif : seulement les formes de la notion rattachées à CET objectif */
+  if (!redo && session.ctest && session.ctest.forms && session.ctest.forms[id]) { const F = session.ctest.forms[id]; for (let k = 0; k < 60 && q && !F.includes(q.ctx); k++) q = Engine.make(state, id, level); }
   /* 26.11 (revue p4, n° 6) : problème de la semaine : un vrai problème (niveau 4), quitte à retirer plusieurs fois */
   if (!redo && session.weekly) for (let k = 0; k < 20 && q && q.d !== 4; k++) q = Engine.make(state, id, 4, undefined, false);
   /* 25.11 : pas les nombres de la leçon. 27.11 (test instable, réciproque de Pythagore : peu de triplets au niveau 1) : toute
@@ -1902,9 +1908,10 @@ function nextQuestion(redo) {
     /* Élève en grande difficulté (Engine.struggling) : pas de reprise non plus (Kevin, Révision de 4 devenue 6 questions, 9:25) ;
        le pas à pas reste, et l'erreur va au carnet. */
     noRedo: !!redo || session.fmt === "auto" || Engine.struggling(state),
+    sub: session.ctest ? session.ctest.label : "", /* revue p5, n° 11 : intitulé de l'objectif en texte normal sous l'en-tête */
     /* 25.11 (revue) : compteur qui compte aussi l'étape leçon ; « Nouvelle notion » (et non « Révision ») pour la question
        qui suit la leçon ou pour une notion encore jamais travaillée. */
-    eyebrow: ((s) => s + (ST.total > 1 && !session.weekly ? `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((Math.min(ST.pos - 1, ST.total) / ST.total) * 100)}%"></i></span>` : ""))((session.carnet ? "Carnet d'erreurs · " + nTxt : session.free ? "Mon défi du jour · " + nTxt : session.weekly ? "🔍 Problème de la semaine" : session.ctest ? "Me tester · " + session.ctest.label + " · " + nTxt : session.prep ? "Révision de l'évaluation · " + nTxt : ST.total === 1 ? (fmtLab || "Question du jour") : (fmtLab ? fmtLab + " · " : "") + nTxt) + (kind && KIND_LABEL[kind] && !(session.fmt && FORMATS[session.fmt] && FORMATS[session.fmt].slots.every((x) => x.replace(/\d+$/, "") === kind)) ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo ? " · nouvelles valeurs" : "")),
+    eyebrow: ((s) => s + (ST.total > 1 && !session.weekly ? `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((Math.min(ST.pos - 1, ST.total) / ST.total) * 100)}%"></i></span>` : ""))((session.carnet ? "Carnet d'erreurs · " + nTxt : session.free ? "Mon défi du jour · " + nTxt : session.weekly ? "🔍 Problème de la semaine" : session.ctest ? "Me tester · " + nTxt /* 26.11 (revue p5, n° 11 : intitulé en majuscules sur 4 lignes à 360 px) : intitulé en dessous (sub) */ : session.prep ? "Révision de l'évaluation · " + nTxt : ST.total === 1 ? (fmtLab || "Question du jour") : (fmtLab ? fmtLab + " · " : "") + nTxt) + (kind && KIND_LABEL[kind] && !(session.fmt && FORMATS[session.fmt] && FORMATS[session.fmt].slots.every((x) => x.replace(/\d+$/, "") === kind)) ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo ? " · nouvelles valeurs" : "")),
     /* 26.11 : pas à pas réussi jusqu'au bout (étapes toutes justes) : moitié de la perte de Mathélo rendue, +1 point de
        l'année (dans le plafond du jour), et le bilan le dit. Rien si une étape est fausse, ni en « Refaire ». */
     onGuided: (delta) => {
@@ -2157,7 +2164,7 @@ function renderProblem(q, opt) {
   let tries = 0, finished = false, active = null, hintsShown = [];
   const ok = q.parts.map(() => false);
   h(`<div class="spread">${brand}</div><div class="eyebrow">${opt.eyebrow}</div>
-  <div class="card pop"><div class="qmeta"><span class="chip">Problème · ${notion.label}</span><span class="dots" title="difficulté"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+  <div class="card pop"><div class="qmeta"><span class="chip">Problème · ${nLabel(notion.id)}</span><span class="dots" title="difficulté"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
   <div class="qtext">${boldData(q.q)}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
   ${scratchHtml()}
   ${lessonDetails(q.id)}
@@ -2259,7 +2266,9 @@ function renderProblem(q, opt) {
     const tagged = H.find((x) => x.trim().startsWith(L + ")")), free = H.filter((x) => !/^[a-h]\)/.test(x.trim()));
     /* 26.11 (revue des élèves testeurs, n° 1 : indice générique vide) : sans indice marqué pour cette partie, l'indice de la
        notion (HINTS, le même qu'aux questions simples) ; la phrase générique ne reste que si la notion n'en a pas. */
-    const nHint = typeof HINTS !== "undefined" && HINTS[q.id] ? plainTeX(HINTS[q.id]) : "";
+    let nHint = typeof HINTS !== "undefined" && HINTS[q.id] ? plainTeX(HINTS[q.id]) : "";
+    /* 26.11 (revue p5, n° 7) : profil français, indice de notion hors programme de la classe (quartiles en 4e) : version du collège ou rien */
+    if (nHint && state.profile.system === "FR" && horsFRTexte(state.profile.grade, nHint)) nHint = typeof HINTS_FR_COL !== "undefined" && HINTS_FR_COL[q.id] ? plainTeX(HINTS_FR_COL[q.id]) : "";
     let hint = tagged || (nx === q.parts.length - 1 && free.length ? free[Math.min(tries - 1, free.length - 1)] : nHint ? "Partie " + L + ") · " + nHint : "Partie " + L + ") : relis bien ce qui est demandé, et fais un calcul à la fois. Les données utiles sont dans l'énoncé.");
     /* 26.11 (revue p3, n° 9 : « Indice 2 · Partie a) · » identique à l'indice 1) : un indice déjà donné n'est pas renuméroté ;
        on passe à un indice de l'énoncé qui ne vise pas une autre partie, sinon on le donne comme rappel. */
@@ -2282,7 +2291,7 @@ function renderQuestion(q, opt) {
   let tries = 0, finished = false, inputMode = "none";
   h(`<div class="spread">${brand}</div>
   ${session && !opt.single && session.answered > 0 ? '<div class="spread"><span></span><button class="btn-ghost small" id="stop">Terminer ici</button></div>' : ""}
-  <div class="eyebrow">${opt.eyebrow}</div>
+  <div class="eyebrow">${opt.eyebrow}</div>${opt.sub ? `<p class="small eb-sub">${esc(opt.sub)}</p>` : ""}
   <div class="card pop"><div class="qmeta"><span class="chip">${nLabel(notion.id)}</span><span class="dots" title="difficulté">${[1, 2, 3].map((k) => `<i class="${k <= q.d ? "on" : ""}"></i>`).join("")}</span></div>
   <div class="qtext">${boldData(q.q)}</div>${exactNote(q.spec, q.q) ? `<p class="small muted exact-note">${exactNote(q.spec, q.q)}</p>` : ""}${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
   ${scratchHtml()}
@@ -2838,7 +2847,7 @@ function weekCard() {
 function summaryByNotion() {
   const r = session.res || {}, ids = [...session.ids].filter((id) => r[id]);
   if (!ids.length) return "";
-  const lab = (id) => (NOTIONS.find((x) => x.id === id) || {}).label || id;
+  const lab = (id) => nLabel(id);
   const ok = ids.filter((id) => r[id].ok === r[id].n), mid = ids.filter((id) => r[id].ok > 0 && r[id].ok < r[id].n), ko = ids.filter((id) => !r[id].ok);
   const line = (ic, t, arr, note) => arr.length ? `<div class="sum-line"><span>${ic}</span><div><b>${t}</b><div class="small">${arr.map(lab).join(" · ")}</div>${note ? `<div class="small muted">${note}</div>` : ""}</div></div>` : "";
   return `<div class="card flat stack sum-notions">${line("✅", ok.length > 1 ? "Réussies" : "Réussie", ok)}${line("📈", "En progrès", mid, "Une partie juste : encore une ou deux séances.")}${line("🔁", ko.length > 1 ? "Reviendront bientôt" : "Reviendra bientôt", ko, (state.carnet || []).length ? "Rangées dans ton carnet d'erreurs, à refaire quand tu veux." : "L'app te les reproposera dans les prochains jours.")}</div>`;

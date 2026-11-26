@@ -763,6 +763,9 @@ function checkAnswer(spec, input) {
       /* 26.11 (revue élèves, A11 : 12,2262409946 accepté pour 120√3/17) : racine exacte demandée (spec.radical, pas d'arrondi prévu) :
          un décimal de calculatrice (4 décimales ou plus, moins de 15 chiffres) n'est pas la valeur exacte. */
       if ((spec.radical || spec.exact) /* 26.11 (revue p3, n° 12) : « valeur exacte » demandée */ && /^-?\d+\.\d{4,}$/.test(raw) && raw !== String(+spec.value) /* valeur stockée arrondie par le générateur */ && raw.replace(/\D/g, "").replace(/^0+/, "").length < 15 && !/^-?\d+(\.\d{1,8})?$/.test(String(+(+spec.value).toPrecision(12)))) return { status: "form", message: "C'est une valeur approchée ; donne la valeur exacte (fraction, racine ou π)." };
+      /* 26.11 (revue p5, n° 14) : la consigne demande une fraction : un décimal exact (0,9375 pour 15/16) n'est pas compté faux,
+         mais il est refusé. */
+      if (spec.frac && /^-?\d*\.\d+$/.test(raw)) return { status: "form", message: "La valeur est juste ; écris-la sous forme de fraction irréductible (par exemple 3/4)." };
       if (spec.radical) {
         // a√b, et aussi a√b/c, (a√b)/c, a/√b (20.11 : √21/5 ou √2/2 étaient refusés) ; « sqrt » tapé au clavier = √.
         const rr = raw.replace(/sqrt/gi, "√").replace(/^\((.*)\)(\/\d+)$/, "$1$2");
@@ -1544,21 +1547,31 @@ const plainTeX = (s) => typeof s !== "string" || !/\{,\}|\\text\{['’]\}/.test(
 const colonBreak = (s) => {
   s = plainTeX(s);
   if (typeof s !== "string" || !/[:;?!]/.test(s)) return s;
-  const parts = s.split(/(\\\(.*?\\\))/);
+  const parts = s.split(/(\\\(.*?\\\))/), BR = "<br>\u2063"; /* U+2063 : retour à la ligne créé ici (marque retirée à la fin) */
+  /* 26.11 (revue p5, n° 8 : « « f(x) = 3x est une fonction linéaire⏎Sa courbe… » », « « f(x) :⏎4, 6, 9 » ») : rien n'est coupé
+     dans une citation « … » (profondeur suivie d'une formule à l'autre) ; f s'applique hors citation seulement. */
+  let depth = 0;
+  const outQ = (t, f) => { let out = "", buf = "", q = depth > 0; for (const ch of t) { if (!q && ch === "«") { out += f(buf); buf = ch; q = true; } else if (q && ch === "»") { out += buf + ch; buf = ""; q = false; } else buf += ch; } out += q ? buf : f(buf); return out; };
   for (let i = 0; i < parts.length; i += 2) {
     let t = parts[i];
     /* 26.11 (revue élèves, B10 : « Les x² ⏎ 3x² ; les x ⏎ 3x ») : entre deux formules, on ne coupe après « : » que si une
        vraie phrase (3 mots au moins) précède la formule ; sinon le « : » reste sur la ligne. */
     const phrase = i > 0 && (String(parts[i - 2] || "").split(/[.;!?]|<br>/).pop().match(/\p{L}{2,}/gu) || []).length >= 3;
     /* 26.11 (revue p3, n° 7 : « en divisant par x⏎« x = 5 » ») : un « : » avant une citation reste « : ». */
-    if (i > 0) t = t.replace(/^\s*:\s+(?=«)/, " : ").replace(/^\s*:\s+(?=[^\s«])/, "<br>").replace(/^\s*:\s*$/, i + 1 < parts.length && phrase ? "<br>" : " : "); /* juste après une formule (26.11 soir, n° 9 : espace après « : ») */
-    t = t.replace(/(^|[.!?]\s+|<br>)([^.!?<:]*?=[^.!?<:]*?[0-9A-Za-zÀ-ÿ²³⁴)\]]) : (?=\S)/g, "$1$2<br>"); // « x = 3 : … »
-    // « Divisibles par 9 : 117, 126 » se lit « 9 ÷ 117 » : on garde les deux-points et on passe à la ligne.
-    t = t.replace(/([0-9)²³°]) : (?=[-−0-9(]|$)/g, "$1 :<br>");
-    if (i + 1 < parts.length) t = t.replace(/([0-9)²³°]) :\s*$/, "$1 :<br>");
-    parts[i] = t.replace(/ ([:;?!])/g, "\u00a0$1"); // espace insécable : le signe ne passe pas seul à la ligne
+    if (i > 0 && !depth) t = t.replace(/^\s*:\s+(?=«)/, " : ").replace(/^\s*:\s+(?=[^\s«])/, BR).replace(/^\s*:\s*$/, i + 1 < parts.length && phrase ? BR : " : "); /* juste après une formule (26.11 soir, n° 9 : espace après « : ») */
+    t = outQ(t, (u) => {
+      u = u.replace(/(^|[.!?]\s+|<br>)([^.!?<:«»]*?=[^.!?<:«»]*?[0-9A-Za-zÀ-ÿ²³⁴)\]]) : (?=\S)/g, "$1$2" + BR); /* « x = 3 : … » */
+      // « Divisibles par 9 : 117, 126 » se lit « 9 ÷ 117 » : on garde les deux-points et on passe à la ligne.
+      return u.replace(/([0-9)²³°]) : (?=[-−0-9(]|$)/g, "$1 :<br>");
+    });
+    if (i + 1 < parts.length && !(depth + (t.split("«").length - t.split("»").length) > 0)) t = t.replace(/([0-9)²³°]) :\s*$/, "$1 :<br>");
+    depth = Math.max(0, depth + (t.split("«").length - 1) - (t.split("»").length - 1));
+    parts[i] = t.replace(/ ([:;?!])/g, "\u00a0$1"); /* espace insécable : le signe ne passe pas seul à la ligne */
   }
-  return parts.join("").replace(/<br>(\s*)([a-zàâçéèêëîïôûù])/g, (m, sp, c) => "<br>" + c.toUpperCase());
+  /* majuscule en début de ligne : après un retour créé ici (le « : » remplacé ouvre une nouvelle phrase) ou après une phrase
+     finie (. ! ?) ; jamais au milieu d'une phrase (« Sachant que :<br>P(x) = …<br>est divisible », revue p5, n° 8). */
+  const up = (m, sp, c) => "<br>" + sp + c.toUpperCase();
+  return parts.join("").replace(/<br>\u2063(\s*)([a-zàâçéèêëîïôûù])/g, up).replace(/([.!?]\s*(?:<\/[a-z]+>)?\s*)<br>(\s*)([a-zàâçéèêëîïôûù])/g, (m, pre, sp, c) => pre + "<br>" + sp + c.toUpperCase()).replace(/\u2063/g, "");
 };
 /* 26.11 (audit de vraisemblance, tests/vraisemblance.html) : un montant s'écrit avec deux décimales (« 2,50 CHF », « 0,80 € »),
    jamais « 2,5 CHF » (37 générateurs le faisaient). Appliqué aux textes des questions (Engine.build, sujets) ; jamais aux réponses. */
@@ -3231,7 +3244,7 @@ Object.assign(GEN, {
     }
     if (d === 2) {
       const qc = [R.nz(-3, 3), R.int(-5, 5), R.int(-6, 6)], a = R.nz(-4, 4), P = pmul(qc, [1, -a]);
-      return { guide: [GS("Horner avec " + M(a) + " : premier coefficient du quotient (on abaisse) ?", qc[0], M(qc[0]) + "."), GS("Deuxième coefficient (· " + par(a) + " + " + par(P[1]) + ") ?", qc[1], M(qc[1]) + "."), GS("Troisième coefficient ?", qc[2], M(qc[2]) + " (puis le reste vaut 0)."), { ask: "Quotient " + M("Q(x)") + " ?", spec: { kind: "expr", expr: poly(qc), form: "expanded" }, sol: M("Q(x) = " + poly(qc)) + "." }], q: "Sachant que :<br>" + M("P(x) = " + poly(P)) + "<br>est divisible par " + M(xm(a)) + ", donne le quotient " + M("Q(x)") + ".", spec: { kind: "expr", expr: poly(qc), form: "expanded" }, canon: poly(qc), sol: (() => { const r = [P[0]]; for (let i = 1; i < P.length; i++) r.push(r[i - 1] * a + P[i]);
+      return { guide: [GS("Horner avec " + M(a) + " : premier coefficient du quotient (on abaisse) ?", qc[0], M(qc[0]) + "."), GS("Deuxième coefficient (· " + par(a) + " + " + par(P[1]) + ") ?", qc[1], M(qc[1]) + "."), GS("Troisième coefficient ?", qc[2], M(qc[2]) + " (puis le reste vaut 0)."), { ask: "Quotient " + M("Q(x)") + " ?", spec: { kind: "expr", expr: poly(qc), form: "expanded" }, sol: M("Q(x) = " + poly(qc)) + "." }], q: /* 26.11 (revue p5, n° 8 : « Sachant que :⏎P(x) = …⏎Est divisible ») */ "Le polynôme " + M("P(x) = " + poly(P)) + " est divisible par " + M(xm(a)) + ". Donne le quotient " + M("Q(x)") + ".", spec: { kind: "expr", expr: poly(qc), form: "expanded" }, canon: poly(qc), sol: (() => { const r = [P[0]]; for (let i = 1; i < P.length; i++) r.push(r[i - 1] * a + P[i]);
       return "Schéma de Horner avec " + M(a) + " : coefficients de " + M("P") + " : " + M(P.join(" \\;|\\; ")) + ". On abaisse " + M(P[0]) + ", puis à chaque colonne on multiplie par " + M(a) + " et on ajoute : " + M(r.join(" \\;|\\; ")) + ". Le dernier nombre est le reste (" + M(r[r.length - 1]) + "), les autres sont les coefficients du quotient : " + M("Q(x) = " + poly(qc)) + "."; })() };
     }
     const a = R.nz(-3, 3), b = R.int(-4, 4), c = R.int(-9, 9);
@@ -6334,10 +6347,13 @@ function compsOf(id) {
   return L.map((label, i) => ({ cid: id + ":" + i, label, i })).filter((c) => L.indexOf(c.label) === c.i);
 }
 // Note sur l'échelle suisse (1 à 6, demi-points) à partir des 8 dernières réponses ; null avant 3 réponses.
+/* 26.11 (revue p5, n° 3 : 3 questions de niveau 1 réussies au « Me tester » → note 6, « Première compétence » et « Expert »
+   d'un coup) : la note 6 demande des preuves : au moins une réponse de niveau 2 ou plus (rec.hi, posé par Engine.recordComp),
+   ou 5 réponses ; sinon la note s'arrête à 5. */
 function compNote(rec) {
   if (!rec || rec.r.length < 3) return null;
-  const avg = rec.r.reduce((a, b) => a + b, 0) / rec.r.length;
-  return Math.round((1 + 5 * avg) * 2) / 2;
+  const avg = rec.r.reduce((a, b) => a + b, 0) / rec.r.length, n = Math.round((1 + 5 * avg) * 2) / 2;
+  return n > 5 && !rec.hi && Math.max(rec.r.length, rec.n || 0) < 5 ? 5 : n;
 }
 
 /* Référentiels officiels de compétences, un par système (25.11, règle de l'enseignant : chaque système a SON
@@ -6421,7 +6437,7 @@ const Referentiel = (() => {
     if (cache[k]) return cache[k];
     const D = SYS[k].data();
     /* 6e champ facultatif : l'année (REF_FR : 6 = 6e … 12 = Tle) ; sinon premier chiffre du code (REF_MATU). */
-    return (cache[k] = D.c.map(([code, niv, th, no, label, y, y2]) => { const year = y === undefined ? +code[0] : y; return { code, year, y2: y2 === undefined ? year : y2, niv, theme: D.th[th], notion: D.no[no], label, links: D.q[code] || [] }; }));
+    return (cache[k] = D.c.map(([code, niv, th, no, label, y, y2]) => { const year = y === undefined ? +code[0] : y; return { code, year, y2: y2 === undefined ? year : y2, niv, theme: D.th[th], notion: D.no[no], label, links: D.q[code] || [], forms: (D.f && D.f[code]) || null }; }));
   };
   /* France (catalogOnly, séparation 25.11) : on ne garde que les notions du catalogue France (toutes classes), jamais
      une notion propre à la Suisse ; un item sans notion restante est « travaillé en classe ». 26.11 : idem pour la MP
@@ -6442,6 +6458,13 @@ const Referentiel = (() => {
   const pairs = (r) => r.links.flatMap((s) => { const [id, lv] = s.split("@"); return (lv ? lv.split("") : ["1", "2", "3"]).map((d) => [id, +d]); });
   /* Identifiants d'enregistrement (state.comps) alimentés par une compétence : ceux de src/competences.js (compOf). */
   const cids = (r) => [...new Set(pairs(r).map(([id, d]) => compOf(id, d)))];
+  /* Formes (ctx) tirées pour (notion, niveau) par un profil : 30 graines, en cache (le niveau peut être relevé par Engine.make). */
+  const formsC = {};
+  const formsAt = (p, id, d) => {
+    const k = [p.system, p.grade, p.track, p.niv, id, d].join("|");
+    if (!formsC[k]) { const st = { profile: p }, cs = new Set(); for (let s = 1; s <= 30; s++) { try { const q = Engine.make(st, id, d, s); if (q && q.ctx) cs.add(q.ctx); } catch (e) { break; } } formsC[k] = [...cs]; }
+    return formsC[k];
+  };
   return {
     of: sysOf,
     title: (p) => { const k = sysOf(p); return k ? SYS[k].title : ""; },
@@ -6473,7 +6496,7 @@ const Referentiel = (() => {
       const recs = cids(r).map((c) => (st.comps || {})[c]).filter((x) => x && x.r && x.r.length);
       if (!recs.length) return null;
       recs.sort((a, b) => String(a.last || "").localeCompare(String(b.last || "")));
-      return compNote({ r: recs.flatMap((x) => x.r).slice(-8) });
+      return compNote({ r: recs.flatMap((x) => x.r).slice(-8), n: recs.reduce((a, x) => a + (x.n || x.r.length), 0), hi: recs.some((x) => x.hi) });
     },
     hasQuestions: (r) => r.links.length > 0,
     /* « Me tester » : questions des notions rattachées que l'élève peut recevoir (son catalogue), sinon toutes.
@@ -6481,10 +6504,15 @@ const Referentiel = (() => {
        MP (26.11) : sinon le catalogue MP des autres années. */
     plan(p, r) {
       const ok = new Set(Engine.catalog(p).map((c) => c.id)), gen = (id) => typeof GEN === "undefined" || GEN[id];
-      let ps = pairs(r).filter(([id]) => ok.has(id) && gen(id));
-      if (!ps.length) { const k = sysOf(p); ps = pairs(r).filter(([id]) => gen(id) && (SYS[k].catalogOnly ? catOk(k, id) : NOTIONS.some((n) => n.id === id))); }
+      /* 26.11 (revue p5, n° 2) : formes retenues pour l'objectif (r.forms, p. ex. coordmp « plan » / « espace ») : un niveau
+         qui n'en tire aucune pour ce profil est écarté. */
+      const fit = ([id, d]) => !r.forms || !r.forms[id] || formsAt(p, id, d).some((c) => r.forms[id].includes(c));
+      let ps = pairs(r).filter(([id]) => ok.has(id) && gen(id)).filter(fit);
+      if (!ps.length) { const k = sysOf(p); ps = pairs(r).filter(([id]) => gen(id) && (SYS[k].catalogOnly ? catOk(k, id) : NOTIONS.some((n) => n.id === id))).filter(fit); }
       return ps;
     },
+    /* Formes (ctx) que « Me tester » accepte pour la notion id de l'objectif r (null : toutes). */
+    forms: (r, id) => (r && r.forms && r.forms[id]) || null,
     stats(st, list) {
       const notes = list.map((r) => this.note(st, r)).filter((x) => x !== null);
       return { total: list.length, tested: notes.length, avg: notes.length ? notes.reduce((a, b) => a + b, 0) / notes.length : null };
@@ -10956,10 +10984,10 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
     make() {
       const A = pk([1.8, 1.95, 2.1, 2.4]), pl = A / 1.5, k = pk([0.9, 0.94, 1.06, 1.1]), B = Math.round((pl * 1.98 * k) / 0.05) * 0.05, pl2 = B / 1.98, cheap = pl2 < pl ? 1 : 0;
       const drink = pk(["l'eau gazeuse", "le thé froid", "le jus de pomme"]);
-      return { titre: "Le grand format", q: "Au magasin, " + drink + " existe en bouteille de " + M("1{,}5\\ \\ell") + " à " + chf(A) + ", ou en pack de " + M("6") + " canettes de " + M("33\\ \\text{cl}") + " à " + chf(B) + ".",
+      return { titre: "Le grand format", q: "Au magasin, " + drink + " existe en bouteille de " + M("1{,}5\\ \\text{L}") + " à " + chf(A) + ", ou en pack de " + M("6") + " canettes de " + M("33\\ \\text{cl}") + " à " + chf(B) + ".",
         bet: { q: "Lequel est le moins cher, à quantité égale ?", choices: ["La bouteille de 1,5 l", "Le pack de 6 canettes"], good: cheap },
         calc: { label: "Prix d'un litre avec le pack (en CHF, au centime)", value: r6(pl2), round: 0.01 },
-        reveal: "Pack : " + M("6 \\cdot 0{,}33 = 1{,}98\\ \\ell") + ", donc " + M(N(B) + " \\div 1{,}98 \\approx " + N(pl2, 2)) + " CHF le litre. Bouteille : " + M(N(A) + " \\div 1{,}5 = " + N(pl, 2)) + " CHF le litre. " + (cheap ? "Le pack est moins cher." : "La bouteille est moins chère : le « grand » pack n'est pas toujours la bonne affaire.") };
+        reveal: "Pack : " + M("6 \\cdot 0{,}33 = 1{,}98\\ \\text{L}") + ", donc " + M(N(B) + " \\div 1{,}98 \\approx " + N(pl2, 2)) + " CHF le litre. Bouteille : " + M(N(A) + " \\div 1{,}5 = " + N(pl, 2)) + " CHF le litre. " + (cheap ? "Le pack est moins cher." : "La bouteille est moins chère : le « grand » pack n'est pas toujours la bonne affaire.") };
     } });
   add({ key: "promo", fam: "arnaque", uses: ["pct"], outil: "les pourcentages : traduire une offre (« 3 pour 2 ») en réduction, puis comparer.",
     make() {
@@ -11176,8 +11204,8 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
   add({ key: "douche", fam: "fermi", uses: ["decmul"], outil: "la multiplication et la comparaison de volumes (litres).",
     make() {
       const deb = pk([8, 10, 12]), m = pk([5, 8, 10]), v = deb * m * 365, bain = 150;
-      return { titre: "L'eau de la douche", q: "Une douche coule environ " + M(deb + "\\ \\ell") + " par minute. Tu prends chaque jour une douche de " + M(m + "\\ \\text{min}") + ".",
-        bet: { q: "En une année, cela fait combien de baignoires pleines (" + bain + " l) ?", choices: ["moins de 10", "entre 10 et 50", "entre 50 et 500", "plus de 500"], good: v / bain < 10 ? 0 : v / bain < 50 ? 1 : v / bain < 500 ? 2 : 3 },
+      return { titre: "L'eau de la douche", q: "Une douche coule environ " + M(deb + "\\ \\text{L}") + " par minute. Tu prends chaque jour une douche de " + M(m + "\\ \\text{min}") + ".",
+        bet: { q: "En une année, cela fait combien de baignoires pleines (" + bain + " L) ?", choices: ["moins de 10", "entre 10 et 50", "entre 50 et 500", "plus de 500"], good: v / bain < 10 ? 0 : v / bain < 50 ? 1 : v / bain < 500 ? 2 : 3 },
         calc: { label: "Litres d'eau en une année", value: v, range: [v * 0.97, v * 1.03] },
         reveal: M(deb + " \\cdot " + m + " \\cdot 365 = " + N(v)) + " litres, soit environ " + P(v / bain) + " baignoires (" + M(N(v) + " \\div " + bain) + ")." };
     } });
@@ -11287,7 +11315,7 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
   add({ key: "essence", fam: "quotidien", uses: ["prop"], outil: "la proportionnalité : la consommation est donnée pour 100 km.",
     make() {
       const c = pk([5.5, 6.5, 7]), d = pk([160, 240, 280, 320]), pr = pk([1.8, 1.85, 1.9]), v = (c * d / 100) * pr, tr = pk([25, 35, 45]);
-      return { titre: "Voiture ou train ?", q: "Une voiture consomme " + M(N(c) + "\\ \\ell") + " d'essence aux 100 km. Le trajet aller fait " + M(d + "\\ \\text{km}") + ", l'essence coûte " + chf(pr) + " le litre. En train, le billet aller coûte " + chf(tr) + " par personne.",
+      return { titre: "Voiture ou train ?", q: "Une voiture consomme " + M(N(c) + "\\ \\text{L}") + " d'essence aux 100 km. Le trajet aller fait " + M(d + "\\ \\text{km}") + ", l'essence coûte " + chf(pr) + " le litre. En train, le billet aller coûte " + chf(tr) + " par personne.",
         bet: { q: "À quatre, l'essence de la voiture revient-elle moins cher que quatre billets de train ?", choices: ["Oui", "Non"], good: v < 4 * tr ? 0 : 1 },
         calc: { label: "Prix de l'essence pour ce trajet aller (en CHF, au centime)", value: r6(v), round: 0.01 },
         reveal: "Litres : " + M(N(c) + " \\cdot " + d + " \\div 100 = " + N(c * d / 100)) + ". Prix : " + M(N(c * d / 100) + " \\cdot " + N(pr) + " \\approx " + N(v, 2)) + " CHF, contre " + M("4 \\cdot " + tr + " = " + 4 * tr) + " CHF en train. (Sans compter l'usure, le parking… ni le climat.)" };
@@ -11371,7 +11399,7 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
   add({ key: "respire", fam: "fermi", uses: ["decmul"], outil: "la multiplication et les conversions de durées (minutes → jour).",
     make() {
       const r = pk([12, 14, 15, 16]), v = r * 0.5 * 1440;
-      return { titre: "L'air que tu respires", q: "Au repos, tu respires environ " + M(r) + " fois par minute, et chaque inspiration fait entrer environ " + M("0{,}5\\ \\ell") + " d'air.",
+      return { titre: "L'air que tu respires", q: "Au repos, tu respires environ " + M(r) + " fois par minute, et chaque inspiration fait entrer environ " + M("0{,}5\\ \\text{L}") + " d'air.",
         bet: { q: "En une journée, tu respires environ…", choices: ["100 litres d'air", "1'000 litres d'air", "10'000 litres d'air"], good: 2 },
         calc: { label: "Litres d'air respirés en un jour", value: v, range: [v * 0.95, v * 1.05] },
         reveal: M(r + " \\cdot 0{,}5 = " + N(r * 0.5)) + " litre" + (r * 0.5 > 1 ? "s" : "") + " par minute ; une journée a " + M("24 \\cdot 60 = 1\\text{'}440") + " minutes : " + M(N(r * 0.5) + " \\cdot 1\\text{'}440 = " + N(v)) + " litres, de quoi remplir une petite piscine gonflable chaque jour." };
@@ -11452,7 +11480,7 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
   add({ key: "peinture", fam: "quotidien", uses: ["prop"], outil: "l'aire des murs (périmètre × hauteur) puis la proportionnalité (litres par m²).",
     make() {
       const [L, l] = pk([[4, 3], [5, 4], [3, 3], [4.5, 3.5]]), h = 2.5, S = 2 * (L + l) * h, lit = (2 * S) / 10, pots = Math.ceil(lit / 2.5);
-      return { titre: "Repeindre ta chambre", q: "Ta chambre mesure " + M(N(L) + "\\ \\text{m} \\times " + N(l) + "\\ \\text{m}") + ", avec " + M("2{,}5\\ \\text{m}") + " de hauteur. Tu repeins les quatre murs (on oublie la fenêtre et la porte), en deux couches. Un litre de peinture couvre " + M("10\\ \\text{m}^2") + " ; la peinture se vend en pots de " + M("2{,}5\\ \\ell") + ".",
+      return { titre: "Repeindre ta chambre", q: "Ta chambre mesure " + M(N(L) + "\\ \\text{m} \\times " + N(l) + "\\ \\text{m}") + ", avec " + M("2{,}5\\ \\text{m}") + " de hauteur. Tu repeins les quatre murs (on oublie la fenêtre et la porte), en deux couches. Un litre de peinture couvre " + M("10\\ \\text{m}^2") + " ; la peinture se vend en pots de " + M("2{,}5\\ \\text{L}") + ".",
         bet: { q: "Combien de pots faut-il acheter ?", choices: ["2", "3", "4", "5"], good: pots - 2 },
         calc: { label: "Aire des quatre murs (en m²)", value: S },
         reveal: "Les quatre murs, déroulés, forment un rectangle : périmètre × hauteur = " + M(N(2 * (L + l)) + " \\cdot 2{,}5 = " + N(S)) + " m². Deux couches : " + M(N(2 * S)) + " m², donc " + M(N(lit)) + " litres, soit " + M(N(lit) + " \\div 2{,}5 = " + N(lit / 2.5)) + " → " + pots + " pots (on arrondit vers le haut)." };
@@ -15458,6 +15486,10 @@ const HORS_FR_TXT = [
   [/équation (?:cartésienne )?(?:du|d'un|de ce) cercle|cercle (?:circonscrit )?d'équation|\\left\(x\s*[-+][^)]*\\right\)\^\{?2\}?\s*\+\s*\\left\(y|\(x\s*[-+−][^()]*\)\^\{?2\}?\s*\+\s*\(y\s*[-+−]|\(x\s*[-+−][^()]*\)²\s*\+\s*\(y|x\^\{?2\}?\s*\+\s*y\^\{?2\}?|x²\s*\+\s*y²/, 11, "équation de cercle"],
   [/perpendiculaire[^.?!;]{0,160}(?:pente|coefficient directeur|y\s*=|équation)|(?:pente|coefficient directeur|y\s*=|équation)[^.?!;]{0,160}perpendiculaire|produit des pentes/, 11, "orthogonalité de droites (repère)"],
   [/produit scalaire|vecteur normal|orthogona/, 11, "produit scalaire, orthogonalité"],
+  /* 26.11 (revue p5, n° 1) : différence de deux carrés (a² − b² = (a − b)(a + b)) : 3e (exercices riches, défis, corrigés) */
+  [/différence de (?:deux )?carrés|a\^\{?2\}?\s*-\s*b\^\{?2\}?|a²\s*[−-]\s*b²/, 9, "différence de deux carrés"],
+  /* 26.11 (revue p5, n° 7 : indice « Q1 et Q3… écart interquartile » en 4e FR) : quartiles, écart interquartile : 2nde */
+  [/[Qq]uartile|\bQ_?\{?[13]\}?(?!\d)|[Mm]oustache/, 10, "quartiles"],
   [/(?:médiatrice|hauteur issue)[^.?!;]{0,120}(?:équation|y\s*=)|(?:équation|y\s*=)[^.?!;]{0,120}(?:médiatrice|hauteur issue)/, 11, "médiatrice, hauteur en repère"],
 ];
 const qTextAll = (q) => [q.q, q.sol, ...(q.parts || []).map((x) => x.label), ...(q.guide || []).flatMap((g) => [g.ask, g.sol])].map((t) => String(t || "")).join(" ");
@@ -15577,6 +15609,8 @@ const exprForm = (sp, txt) => {
 // Programme du jour : le format change d'un jour à l'autre ; l'équilibre se fait sur 7 jours.
 // 22.11 : textes courts (une ligne sur téléphone : pas de saut quand on change de format).
 const DRILL_OK = {}; /* Engine.drillable (26.11) */
+/* Notions de problèmes à mettre en équation : jamais en série d'automatismes (Engine.isDrill ; revue p5, n° 6). */
+const NO_DRILL = ["probeq", "probeq2", "sysprob", "probrat", "decprob"];
 const FORMATS = {
   defi: { label: "🏔 Défi du jour", slots: ["defi4"], text: "Un seul problème, prends ton temps." },
   /* 25.11 (séance de 5 minutes) : 6 calculs au lieu de 8. */
@@ -15820,6 +15854,14 @@ const Engine = {
     const lim = addDays(today, -6);
     state.snaps = [...S.filter((x) => x && x.d >= lim && x.d < today), { d: today, c, k }];
   },
+  /* 26.11 (revue p5, n° 12 : « Cette semaine : 6 notions consolidées » dès le premier jour, 1 à 3 questions faites) : à la fin
+     du positionnement, l'instantané du jour reprend les notions qu'il a validées ; seules les séances comptent ensuite. */
+  snapPlaced(state, today = day()) {
+    if (!state || !state.notions) return;
+    this.snap(state, today);
+    const x = state.snaps[state.snaps.length - 1];
+    if (x && x.d === today) x.k = Object.keys(state.notions).filter((id) => { const s = state.notions[id]; return s && s.seen > 0 && s.m >= 0.7; });
+  },
   // Bilan des 7 derniers jours (aujourd'hui compris), comparé à soi-même seulement.
   // ups : compétences dont la note a monté [{ cid, label, b, a }], de la plus forte hausse à la plus faible ;
   // first : compétences notées pour la première fois ; cons : notions devenues maîtrisées ; fixed : erreurs effacées du
@@ -15851,6 +15893,7 @@ const Engine = {
     state.comps = state.comps || {};
     const cid = compOf(id, d), rec = (state.comps[cid] = state.comps[cid] || { r: [], n: 0 }), before = compNote(rec);
     rec.r.push(score); rec.r = rec.r.slice(-8); rec.n++; rec.last = day();
+    if (d >= 2 || +cid.split(":")[1] > 0) rec.hi = true; /* 26.11 (revue p5, n° 3) : réponse de niveau 2 ou plus (note 6 possible, compNote) */
     if (typeof Badges !== "undefined") Badges.onComp(state, cid, before, compNote(rec));
   },
 
@@ -15863,6 +15906,8 @@ const Engine = {
     /* Décision de l'enseignant (26.11, n° 4) : une réussite au positionnement compte comme notion vue. Progressions
        antérieures : notion réussie au positionnement (boîte 2) et jamais reposée depuis → vue, leçon comprise. */
     for (const s of Object.values(state.notions)) if (s.placed && !s.seen && !s.lessonSeen && s.box >= 2) { s.seen = 1; s.lessonSeen = true; changed = true; }
+    /* 26.11 (revue p5, n° 3) : savoir-faire de niveau 2 ou 3 déjà notés : réponses de niveau 2 ou plus (compNote) */
+    for (const [cid, rec] of Object.entries(state.comps || {})) if (rec && !rec.hi && +cid.split(":")[1] > 0) { rec.hi = true; changed = true; }
     for (const id of Object.keys(state.notions)) { const n = NOTIONS.find((x) => x.id === id); if (!n || !placeOf(n, state.profile)) { delete state.notions[id]; changed = true; } }
     if (this.unlock(state)) changed = true;
     return changed;
@@ -15997,6 +16042,8 @@ const Engine = {
       /* 26.11 (revue p3, n° 12, A11 : 0,309016994375 accepté pour « Donne la valeur exacte ») : valeur exacte demandée, pas
          d'arrondi prévu : un décimal de calculatrice est refusé (checkAnswer, src/expr.js) ; un décimal exact reste accepté. */
       if (sp.kind === "value" && !sp.round && /valeur exacte/i.test(txt) && !/approch|arrondi/i.test(txt)) sp.exact = true;
+      /* 26.11 (revue p5, n° 14 : « … sous forme de fraction irréductible » acceptait 0,9375) : fraction demandée (spec.frac) */
+      if (!step && sp.kind === "value" && !sp.round && isFinite(sp.value) && !Number.isInteger(sp.value) && /fraction irréductible|sous forme (?:de|d'une) fraction/i.test(txt)) sp.frac = true;
       if (sp.kind !== "value" || sp.sci || sp.final) return;
       if (calcPermis(id, txt, sp, own) === false) { sp.final = true; if (CALC_POW.test(txt)) sp.pow = true; }
     };
@@ -16012,7 +16059,7 @@ const Engine = {
     if (p && p.system === "FR" && p.grade) {
       if (q.traps) q = { ...q, traps: q.traps.filter((t) => !horsFRTexte(p.grade, String(t.m || ""))) };
       if (q.hints) q = { ...q, hints: q.hints.filter((h) => !horsFRTexte(p.grade, String(h || ""))) };
-      if (q.hint && horsFRTexte(p.grade, String(q.hint))) q = { ...q, hint: plainTeX(HINTS[id] && !horsFRTexte(p.grade, HINTS[id]) ? HINTS[id] : "Relis l'énoncé et fais un calcul à la fois.") };
+      if (q.hint && horsFRTexte(p.grade, String(q.hint))) q = { ...q, hint: plainTeX(typeof HINTS_FR_COL !== "undefined" && HINTS_FR_COL[id] && !horsFRTexte(p.grade, HINTS_FR_COL[id]) ? HINTS_FR_COL[id] : HINTS[id] && !horsFRTexte(p.grade, HINTS[id]) ? HINTS[id] : "Relis l'énoncé et fais un calcul à la fois.") };
     }
     if (p && p.system === "FR" && typeof frLocal === "function") {
       const SKIP = new Set(["spec", "canon", "code", "id", "ctx", "e", "expr", "values", "value"]);
@@ -16069,7 +16116,10 @@ const Engine = {
        inférieure, calibré sur le DNB (partie 1) et l'épreuve anticipée de 1re. Sans effet pour un profil suisse. */
     if (level < 3 && state && state.profile && state.profile.system === "FR" && typeof UPFR !== "undefined" && UPFR[state.profile.grade] && UPFR[state.profile.grade][id]) level = Math.max(level, UPFR[state.profile.grade][id]);
     /* 25.11 (audit France) : profil français, énoncé propre à la Suisse (horsCO) : graine suivante (le code suit la question). */
-    if (seed && state && state.profile && state.profile.system === "FR") { let q = this.build(id, level, seed); for (let k = 1; k <= 40 && horsCO(state, id, q); k++) q = this.build(id, level, seed + k * 977); /* 26.11 p3 : 40 graines (formes hors programme FR filtrées par le texte) */ return keep(this.finalize(state, id, q)); }
+    if (seed && state && state.profile && state.profile.system === "FR") { let q = this.build(id, level, seed); for (let k = 1; k <= 40 && horsCO(state, id, q); k++) q = this.build(id, level, seed + k * 977); /* 26.11 p3 : 40 graines (formes hors programme FR filtrées par le texte) */
+      /* 26.11 (revue p5, n° 1 : carnet de 4e FR « Factorise x² − 64 ») : aucune forme du niveau au programme de la classe → niveau inférieur */
+      if (horsCO(state, id, q) && level > 1) return this.make(state, id, level - 1, seed);
+      return keep(this.finalize(state, id, q)); }
     /* 26.11 : forme réservée à la France (q.fr, p. ex. médiane en 4e–3e FR, src/fr_couv.js) tirée pour un autre profil : graine suivante. */
     if (seed) { let q = this.build(id, level, seed); for (let k = 1; k <= 12 && q && q.fr && horsCO(state, id, q); k++) q = this.build(id, level, seed + k * 977); return keep(this.finalize(state, id, q)); }
     const rec = ((state.recentQ = state.recentQ || {})[id] = (state.recentQ[id] || []));
@@ -16248,6 +16298,9 @@ const Engine = {
       if (f === "defi" && !this.eligible(state).some((id) => hasProb(id) && this.isRecent(state, id))) sc -= 0.5;
       /* 26.11 (adaptivité) : élève sous le plancher : le défi du jour (un problème de niveau 4) revient moins souvent */
       if (f === "defi" && this.underFloor(state)) sc -= 1.5;
+      /* 26.11 (revue p5, n° 5 : Kevin, Mathélo 928, problème de niveau 4 en 3 parties, 6:19) : élève en grande difficulté
+         (struggling) : pas de défi du jour (ni annoncé au bilan « Demain : 🏔 Défi ») ; il revient quand l'élève remonte. */
+      if (f === "defi" && this.struggling(state)) continue;
       sc += Math.random() * 0.4;
       if (!best || sc > best.sc) best = { f, sc };
     }
@@ -16282,11 +16335,14 @@ const Engine = {
   struggling(state) { const L = state.last1 || [], r = L.length ? L.reduce((a, b) => a + b, 0) / L.length : 1;
     /* pendant le calibrage, moins de 5 réponses : positionnement arrêté sur 3 ratés (placeMiss) et pas de réussite franche depuis */
     return this.underFloor(state) || (L.length >= 5 && r < ADAPT.low) || (L.length < 5 && state.elo.n < 20 && (state.placeMiss || 0) >= 3 && r < 0.75); },
-  autoN(state) { return state.placedOn === day() ? 3 : this.struggling(state) ? 4 : FORMATS.auto.slots.length; },
+  /* 26.11 (revue p5, n° 5 : Kevin, jour 1 = positionnement + série de 3 avec deux pas à pas, 13 min) : le jour du positionnement,
+     élève en grande difficulté : 2 questions (jour 1 ≈ 10 minutes). */
+  firstDayN(state) { return this.struggling(state) || (state.placeMiss || 0) >= 3 ? 2 : 3; },
+  autoN(state) { return state.placedOn === day() ? this.firstDayN(state) : this.struggling(state) ? 4 : FORMATS.auto.slots.length; },
   fmtText(state, f) { const n = f === "auto" ? this.autoN(state) : 0; return n && n < FORMATS.auto.slots.length ? n + " calculs rapides, enchaînés." : FORMATS[f].text; },
   planSession(state, format) {
     /* 26.11 (revue p4, n° 3) : le jour du positionnement, 3 questions au plus quel que soit le format (positionnement + séance ≈ 10 min) ; */
-    const f = format || this.todayFormat(state), slots = f === "auto" ? FORMATS.auto.slots.slice(0, this.autoN(state)) : FORMATS[f].slots.slice(0, state.placedOn === day() || this.struggling(state) ? 3 : 9); /* et pour l'élève en grande difficulté (Kevin : Révision de 4 questions avec pas à pas, 8 à 9 min) */
+    const f = format || this.todayFormat(state), slots = f === "auto" ? FORMATS.auto.slots.slice(0, this.autoN(state)) : FORMATS[f].slots.slice(0, state.placedOn === day() ? this.firstDayN(state) : this.struggling(state) ? 3 : 9); /* et pour l'élève en grande difficulté (Kevin : Révision de 4 questions avec pas à pas, 8 à 9 min) */
     const el = this.eligible(state), pend = el.filter((id) => this.lessonFirst(state, id));
     /* 26.11 soir (n° 1) : notions du chapitre « en classe » dont la leçon reste à voir : posées sans leçon (lessonFirst),
        mais candidates à la leçon de la séance. Révision, Défi, Automatismes : jamais de leçon (plan.noLesson). */
@@ -16320,7 +16376,7 @@ const Engine = {
   todayFormat(state) {
     const today = day();
     // Format annoncé la veille au bilan (21.11) : promesse tenue.
-    if (!state.today || state.today.date !== today) state.today = { date: today, f: state.tomorrow && state.tomorrow.date === today && FORMATS[state.tomorrow.f] ? state.tomorrow.f : this.chooseFormat(state) };
+    if (!state.today || state.today.date !== today) state.today = { date: today, f: state.tomorrow && state.tomorrow.date === today && FORMATS[state.tomorrow.f] && !(state.tomorrow.f === "defi" && this.struggling(state)) /* revue p5, n° 5 */ ? state.tomorrow.f : this.chooseFormat(state) };
     return state.today.f;
   },
   // Format de demain, choisi dès aujourd'hui et annoncé au bilan (21.11).
@@ -16507,10 +16563,13 @@ const Engine = {
      virgule au plus). Contrôlé par tests/lot_26_11.html (séances « automatismes » tirées dans toutes les classes). */
   isDrill(q) {
     if (!q || q.parts || !q.spec || q.fig || q.figure || q.ctx === "erreur" || q.spec.round || q.spec.radical) return false;
+    /* 26.11 (revue p5, n° 6 : « Un père a le triple de l'âge de son fils… » dans une série d'automatismes, 6:04) : un problème
+       à mettre en équation n'est jamais un automatisme (lecture, modélisation, résolution). */
+    if (NO_DRILL.includes(q.id)) return false;
     const t = String(q.q || "").replace(/<[^>]+>/g, " ").replace(/\\[()]/g, "").replace(/\s+/g, " ").trim();
     /* 26.11 (revue p4, n° 8 : MP 3e, « Calcule sans calculatrice \(\log_2 32\) » refusé comme automatisme, chapitre absent
        de la série) : « sans calculatrice » annonce justement un automatisme ; seule la calculatrice demandée exclut. */
-    if (t.length > 170 || /arrondi|au dixième|au centième|au millième|à l'unité|près\b|(?<!sans )calculatrice|\\approx|≈|Trouve l'erreur/i.test(t)) return false;
+    if (t.length > 170 || /mets? (?:le problème )?en équation|l'âge|ans de plus|ans de moins|(?:double|triple|quadruple) de (?:l'âge|celui|celle)|arrondi|au dixième|au centième|au millième|à l'unité|près\b|(?<!sans )calculatrice|\\approx|≈|Trouve l'erreur/i.test(t)) return false;
     const v = q.spec.value;
     const simple = (x) => Math.abs(x * 100 - Math.round(x * 100)) < 1e-6 || [2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 16, 20].some((d) => Math.abs(x * d - Math.round(x * d)) < 1e-9);
     if (q.spec.kind === "value" && typeof v === "number" && !simple(v)) return false;
