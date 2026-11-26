@@ -559,7 +559,7 @@
         return P("Une classe va au musée. Le bus coûte " + M(n * 40) + " CHF pour tout le groupe. L'entrée coûte " + M(p) + " CHF par élève, avec une réduction de " + M(r) + " CHF par élève. Il y a " + M(s * 4) + " élèves.",
           [["a) Prix d'entrée par élève après réduction (CHF)", p - r], ["b) Prix total des entrées (CHF)", (p - r) * s * 4], ["c) Coût total de la sortie (CHF)", n * 40 + (p - r) * s * 4]],
           ["Écris le calcul en une ligne avec des parenthèses : " + n * 40 + " + " + s * 4 + " · (" + p + " − " + r + ").", "La parenthèse d'abord, puis la multiplication, puis l'addition."],
-          "c) " + M(n * 40 + " + " + s * 4 + " \\cdot (" + p + " - " + r + ") = " + n * 40 + " + " + (p - r) * s * 4 + " = " + (n * 40 + (p - r) * s * 4)) + " CHF."); },
+          "a) " + M(p + " - " + r + " = " + (p - r)) + " CHF. b) " + M(s * 4 + " \\cdot " + (p - r) + " = " + (p - r) * s * 4) + " CHF. c) " + M(n * 40 + " + " + s * 4 + " \\cdot (" + p + " - " + r + ") = " + n * 40 + " + " + (p - r) * s * 4 + " = " + (n * 40 + (p - r) * s * 4)) + " CHF."); /* 26.11 soir (agent defisch, recalcul) : a) et b) dans le corrigé */ },
       () => { const a = R.int(2, 5), b = R.int(6, 9), c = R.int(2, 4);
         return P("Place des parenthèses dans " + M(a + " + " + b + " \\cdot " + c + " - 1") + " pour obtenir différents résultats. Calcule :",
           [["a) " + a + " + " + b + " · " + c + " − 1 (sans parenthèses)", a + b * c - 1], ["b) (" + a + " + " + b + ") · " + c + " − 1", (a + b) * c - 1], ["c) " + a + " + " + b + " · (" + c + " − 1)", a + b * (c - 1)], ["d) (" + a + " + " + b + ") · (" + c + " − 1)", (a + b) * (c - 1)]],
@@ -696,6 +696,13 @@
       "Erreur : pour un quotient, on <b>soustrait</b> les exposants : " + M(m + " - (" + n + ") = " + (m - n)) + ". " + M(N(a) + " : " + N(b) + " = " + N(k)) + ", donc " + M(S(k, m - n)) + ".",
       { sci: true, ctx: "erreur", guide: [GS("Nombres devant : " + M(N(a) + " : " + N(b)) + " = ?", k, M(N(k)) + "."), GS("Exposant : " + M(m + " - (" + n + ")") + " = ?", m - n, M(m - n) + " (soustraire un négatif, c'est ajouter)."), GSci("Résultat en notation scientifique ?", v, M(S(k, m - n)) + ".")],
         traps: [TR(f, "C'est le résultat de " + w + " : " + M("10^{" + m + "} : 10^{" + n + "} = 10^{" + m + " - (" + n + ")}") + ".")] }); });
+  /* 26.11 soir (agent defisch) : prio, un troisième contexte (fête d'anniversaire), tag ctx ; oracles dans tests/recalc_oracles.js. */
+  { const [f0, f1] = PROBS.prio; PROBS.prio = [() => Object.assign(f0(), { ctx: "musee" }), () => Object.assign(f1(), { ctx: "parentheses" }),
+    () => { let n, p, k, b, r, m, tot; do { n = R.int(3, 6); p = pk([14, 16, 18, 22]); k = R.int(6, 12); b = pk([2, 3, 4]); r = pk([5, 10, 15]); m = R.int(5, 9); tot = n * p + k * b - r; } while (tot % m !== 0);
+      return Object.assign(P("Pour un anniversaire, " + m + " amis commandent " + M(n) + " pizzas à " + M(p) + " CHF et " + M(k) + " boissons à " + M(b) + " CHF. Ils ont un bon de réduction de " + M(r) + " CHF, puis partagent la note en parts égales.",
+        [["a) Prix des pizzas et des boissons, avant la réduction (CHF)", n * p + k * b], ["b) Montant de la note après la réduction (CHF)", tot], ["c) Part de chacun (CHF)", tot / m]],
+        ["Écris le calcul en une ligne : (" + n + " · " + p + " + " + k + " · " + b + " − " + r + ") ÷ " + m + ".", "Les multiplications d'abord, puis l'addition et la soustraction, enfin la division de toute la parenthèse."],
+        "a) " + M(n + " \\cdot " + p + " + " + k + " \\cdot " + b + " = " + n * p + " + " + k * b + " = " + (n * p + k * b)) + " CHF. b) " + M((n * p + k * b) + " - " + r + " = " + tot) + " CHF. c) " + M(tot + " \\div " + m + " = " + tot / m) + " CHF."), { ctx: "anniversaire" }); }]; }
   const ALL = { prio: PRIO, fracadd: FADD, fracmul: FMUL, fracconv: FCONV, puiss: PUISS, sci: SCI, scicalc: SCALC };
   for (const [id, lv] of Object.entries(ALL)) {
     GEN[id] = (d) => pickForm(lv[Math.min(Math.max(d, 1), 3)]);

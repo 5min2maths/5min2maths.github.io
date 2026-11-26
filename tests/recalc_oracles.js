@@ -1885,6 +1885,24 @@ const RECALC = (() => {
   DF("fctlec", rs("taxi facture # CHF de prise en charge, puis # CHF par kilomètre"), (g, lab) => { const [b0, p] = g.map(nn); return LIN(b0, p, lab, /course de (\d+) km/); });
   DF("fctlec", rs("location d'un kayak coûte # CHF de base, plus # CHF par heure"), (g, lab) => { const [b0, p] = g.map(nn); return LIN(b0, p, lab, /Prix pour (\d+) h/); });
   DF("fctlec", rs("abonnement de # CHF, plus # CHF par kWh"), (g, lab) => { const [b0, p] = g.map(nn); return LIN(b0, p, lab, /Facture pour (\d+) kWh/); });
+  /* --- monomes, reduire, pct (defis.js), prio (ch11_no) --- */
+  const MONO = (lab, k3, k2, f) => { const v = lm(lab, /pour x = (\d+)/), m = lm(lab, /multiplié par (\d+)/); return pick(lab, { a: k3, b: k2, c: v ? f(v[0]) : null, d: /double/.test(lab) ? 8 : m ? m[0] ** 2 : null }); };
+  DF("monomes", /pavé droit a pour dimensions (\d*)x, (\d+)x et (\d+)x/, (g, lab) => { const [a, b, c] = g.map((t) => (t === "" ? 1 : nn(t))); return MONO(lab, a * b * c, 2 * (a * b + b * c + a * c), (v) => a * b * c * v ** 3); });
+  DF("monomes", /cube a des arêtes de (\d+)x cm/, (g, lab) => { const a = nn(g[0]); return MONO(lab, a ** 3, 6 * a * a, (v) => a ** 3 * v ** 3); });
+  DF("monomes", /rectangle de (\d+)x m sur (\d+)x m, accolé à un carré de (\d+)x m/, (g, lab) => { const [a, b, c] = g.map(nn), v = lm(lab, /pour x = (\d+)/); return pick(lab, { a: a * b, b: a * b + c * c, c: v ? (a * b + c * c) * v[0] ** 2 : null, d: 9 }); });
+  const LINS = (terms, lab, eq) => { const A = terms.reduce((s, [a]) => s + a, 0), B = terms.reduce((s, [, b]) => s + b, 0), P2 = lm(lab, /(?:périmètre|longueur totale) de (\d+(?:'\d{3})*) /);
+    return pick(lab, { a: A, b: B, c: P2 ? (P2[0] - B) / A : null, d: (eq[1][1] - eq[0][1]) / (eq[0][0] - eq[1][0]) }); };
+  const TRM = (s) => { const m = /^(\d*)x ([+-]) (\d+)$/.exec(s.trim()); return m ? [m[1] === "" ? 1 : +m[1], (m[2] === "-" ? -1 : 1) * +m[3]] : null; };
+  DF("reduire", /triangle a des côtés de (.+?), (.+?) et (.+?) \(en cm\)/, (g, lab) => { const t = g.map(TRM); if (t.some((x) => !x)) return null; return LINS(t, lab, [t[0], t[2]]); });
+  DF("reduire", /rectangle a des côtés de (.+?) et (.+?) \(en cm\)/, (g, lab) => { const t = g.map(TRM); if (t.some((x) => !x)) return null; return LINS([t[0], t[1], t[0], t[1]], lab, [t[0], t[1]]); });
+  DF("reduire", /trois étapes de (.+?) m, (.+?) m et (.+?) m\./, (g, lab) => { const t = g.map(TRM); if (t.some((x) => !x)) return null; return LINS(t, lab, [t[0], t[2]]); });
+  const PCT = (P0, up, dn, lab) => { const p1 = P0 * (1 + up / 100), p2 = p1 * (1 - dn / 100); return pick(lab, { a: p1, b: p2, c: (p2 / P0 - 1) * 100 }); };
+  DF("pct", rs("vélo coûte # CHF\\. Son prix augmente de # %, puis baisse de # %"), (g, lab) => PCT(...g.map(nn), lab));
+  DF("pct", rs("abonnement de fitness coûte # CHF par mois\\. Le prix augmente de # % ; puis, avec la carte d'étudiant, il baisse de # %"), (g, lab) => PCT(...g.map(nn), lab));
+  DF("pct", rs("action vaut # CHF\\. En une semaine, sa valeur monte de # %, puis la semaine suivante elle baisse de # %"), (g, lab) => PCT(...g.map(nn), lab));
+  DF("prio", rs("Le bus coûte # CHF pour tout le groupe\\. L'entrée coûte # CHF par élève, avec une réduction de # CHF par élève\\. Il y a # élèves"), (g, lab) => { const [B, p, r, n] = g.map(nn); return pick(lab, { a: p - r, b: (p - r) * n, c: B + (p - r) * n }); });
+  DF("prio", rs("(\\d+) amis commandent # pizzas à # CHF et # boissons à # CHF\\. Ils ont un bon de réduction de # CHF"), (g, lab) => { const [m, n, p, k, b, r] = g.map(nn); return pick(lab, { a: n * p + k * b, b: n * p + k * b - r, c: (n * p + k * b - r) / m }); });
+  DF("prio", /Place des parenthèses dans (\d+) \+ (\d+) · (\d+) - 1/, (g, lab) => { const [a, b, c] = g.map(nn); return pick(lab, { a: a + b * c - 1, b: (a + b) * c - 1, c: a + b * (c - 1), d: (a + b) * (c - 1) }); });
   /* ==== fin agent defisch ==== */
 
   /* ---------- 26.11 (agent defis2) : notions encore sous 20 % (transf, trigcercle, trigfn, recip, lectures de graphique

@@ -2410,6 +2410,50 @@ const DEFIS = (() => {
         ["Rapport = diamètre de la grande ÷ diamètre de la petite.", "Les aires (donc le prix et le fromage) sont multipliées par le CARRÉ du rapport."],
         "a) " + M(D(d2) + " \\div " + d1 + " = " + D(k)) + ". b) " + M(CHF(Pp) + " \\cdot " + D(k) + "^2 = " + CHF(Pp) + " \\cdot " + D(k * k) + eqa(Pp * k * k, r2c(Pp * k * k)) + CHF(r2c(Pp * k * k))) + " CHF. c) " + M(g + " \\cdot " + D(k * k) + " = " + D(+(g * k * k).toFixed(6))) + " g."));
     });
+  ADD("monomes", "pave",
+    () => { /* cube */
+      const a = ri(2, 6), v = ri(2, 5), m = pk([2, 3]);
+      return CXP("cube", P("Un cube a des arêtes de " + M(a + "x") + " cm.",
+        [["a) Coefficient du volume écrit sous forme de monôme " + M("kx^3"), a ** 3], ["b) Coefficient de l'aire totale (6 faces) écrite " + M("kx^2"), 6 * a * a], ["c) Volume pour " + M("x = " + v) + " (cm³)", a ** 3 * v ** 3], ["d) Si " + M("x") + " est multiplié par " + m + ", l'aire totale est multipliée par…", m * m]],
+        ["(" + a + "x)³ = " + a + "³ · x³ : le coefficient aussi est élevé au cube.", "Une face : (" + a + "x)² ; six faces. d) (" + m + "x)² = " + m * m + "x²."],
+        "a) " + M("(" + a + "x)^3 = " + a ** 3 + "x^3") + ". b) " + M("6 \\cdot (" + a + "x)^2 = 6 \\cdot " + a * a + "x^2 = " + 6 * a * a + "x^2") + ". c) " + M(a ** 3 + " \\cdot " + v + "^3 = " + nb(a ** 3 * v ** 3)) + " cm³. d) " + M("(" + m + "x)^2 = " + m * m + "x^2") + " : multipliée par " + m * m + "."));
+    },
+    () => { /* terrain : rectangle et carré */
+      let a, b, c; do { a = ri(2, 6); b = ri(3, 9); c = ri(2, 5); } while (a === b);
+      const v = ri(2, 6);
+      return CXP("terrain", P("Un terrain de sport est formé d'un rectangle de " + M(a + "x") + " m sur " + M(b + "x") + " m, accolé à un carré de " + M(c + "x") + " m de côté.",
+        [["a) Coefficient de l'aire du rectangle écrite " + M("kx^2"), a * b], ["b) Coefficient de l'aire totale du terrain écrite " + M("kx^2"), a * b + c * c], ["c) Aire totale pour " + M("x = " + v) + " (m²)", (a * b + c * c) * v * v], ["d) Si " + M("x") + " est multiplié par 3, l'aire totale est multipliée par…", 9]],
+        ["Multiplie les coefficients entre eux et les x entre eux : x · x = x².", "b) Additionne deux monômes semblables (en x²)."],
+        "a) " + M(a + "x \\cdot " + b + "x = " + a * b + "x^2") + ". b) " + M(a * b + "x^2 + (" + c + "x)^2 = " + a * b + "x^2 + " + c * c + "x^2 = " + (a * b + c * c) + "x^2") + ". c) " + M((a * b + c * c) + " \\cdot " + v + "^2 = " + nb((a * b + c * c) * v * v)) + " m². d) " + M("(3x)^2 = 9x^2") + " : multipliée par 9."));
+    });
+  ADD("reduire", "triangle",
+    () => { /* rectangle : périmètre, puis carré */
+      let a1, b1, a2, b2, xi, xp; do { a1 = ri(1, 4); b1 = ri(1, 9); a2 = ri(2, 6); b2 = ri(1, 9); xi = (b1 + b2) / (a2 - a1); xp = ri(3, 9); } while (a2 <= a1 || !Number.isInteger(xi) || xi < 2 || xi > 12 || b1 === b2 || a2 * xp - b2 <= 0 || xp === xi);
+      const A = 2 * (a1 + a2), B = 2 * (b1 - b2), Pp = A * xp + B, cf = (k) => (k === 1 ? "" : k);
+      return CXP("rectangle", P("Un rectangle a des côtés de " + M(cf(a1) + "x + " + b1) + " et " + M(a2 + "x - " + b2) + " (en cm).",
+        [["a) Coefficient de " + M("x") + " dans le périmètre réduit", A], ["b) Terme constant du périmètre réduit", B], ["c) Valeur de " + M("x") + " pour un périmètre de " + M(Pp) + " cm", xp], ["d) Valeur de " + M("x") + " pour laquelle ce rectangle est un carré", xi]],
+        ["Périmètre = 2 · (longueur + largeur) : réduis la parenthèse, puis distribue le 2.", "d) Un carré : les deux côtés sont égaux. Résous " + cf(a1) + "x + " + b1 + " = " + a2 + "x − " + b2 + "."],
+        "a) et b) " + M("P = 2(" + (a1 + a2) + "x " + (b1 - b2 < 0 ? "- " + (b2 - b1) : "+ " + (b1 - b2)) + ") = " + poly([A, B])) + ". c) " + M(poly([A, B]) + " = " + Pp + " \\iff " + A + "x = " + (Pp - B) + " \\iff x = " + xp) + ". d) " + M(cf(a1) + "x + " + b1 + " = " + a2 + "x - " + b2 + " \\iff " + (b1 + b2) + " = " + cfD(a2 - a1) + "x \\iff x = " + xi) + "."));
+    },
+    () => { /* course d'orientation : trois étapes */
+      let a1, b1, a2, b2, a3, b3, xi, xp; do { a1 = ri(2, 5); b1 = 10 * ri(1, 9); a2 = ri(2, 6); b2 = 10 * ri(1, 9); a3 = ri(3, 8); b3 = 10 * ri(1, 9); xi = (b1 + b3) / (a3 - a1); xp = 10 * ri(5, 20); } while (a3 <= a1 || !Number.isInteger(xi) || xi < 20 || xi > 200 || b1 + b2 === b3 || a3 * xp - b3 <= 0 || xp === xi);
+      const A = a1 + a2 + a3, B = b1 + b2 - b3, Pp = A * xp + B;
+      return CXP("orientation", P("Une course d'orientation compte trois étapes de " + M(a1 + "x + " + b1) + " m, " + M(a2 + "x + " + b2) + " m et " + M(a3 + "x - " + b3) + " m.",
+        [["a) Coefficient de " + M("x") + " dans la longueur totale réduite", A], ["b) Terme constant de la longueur totale réduite", B], ["c) Valeur de " + M("x") + " pour une longueur totale de " + M(nb(Pp)) + " m", xp], ["d) Valeur de " + M("x") + " pour laquelle la première et la troisième étape ont la même longueur", xi]],
+        ["Additionne les trois étapes, puis regroupe les termes en x et les nombres (attention au « − " + b3 + " »).", "c) Résous " + A + "x " + (B < 0 ? "− " + -B : "+ " + B) + " = " + nbT(Pp) + "."],
+        "a) et b) " + M(poly([A, B])) + ". c) " + M(poly([A, B]) + " = " + nb(Pp) + " \\iff " + A + "x = " + nb(Pp - B) + " \\iff x = " + xp) + ". d) " + M(a1 + "x + " + b1 + " = " + a3 + "x - " + b3 + " \\iff " + (b1 + b3) + " = " + cfD(a3 - a1) + "x \\iff x = " + xi) + "."));
+    });
+  /* pct (PROB de generators.js) : vélo, puis abonnement de fitness et action en bourse */
+  if (typeof PROB !== "undefined" && PROB.pct && !OUT.pct) {
+    const pct0 = PROB.pct;
+    const PC = (cx, quoi, fin, intro, up, dn, P0) => { const p1 = P0 * (1 + up / 100), p2 = p1 * (1 - dn / 100), glob = (p2 / P0 - 1) * 100;
+      return CXP(cx, Object.assign(P(intro, [["a) " + quoi + " après la hausse (CHF)", +p1.toFixed(6)], ["b) " + quoi + " " + fin + " (CHF)", +p2.toFixed(6)], ["c) Variation globale en % (négative si baisse)", +glob.toFixed(6), 0.01]],
+        ["Les pourcentages successifs se multiplient : on ne les additionne pas.", "Multiplie par " + T(1 + up / 100) + " puis par " + T(1 - dn / 100) + " ; variation globale = (prix final / prix initial − 1) · 100."],
+        "a) " + M(nb(P0) + " \\cdot " + D(1 + up / 100) + " = " + CHF(p1)) + ". b) " + M(CHF(p1) + " \\cdot " + D(1 - dn / 100) + " = " + CHF(p2)) + ". c) " + M(D(+glob.toFixed(2)) + "\\,\\%") + " (et non " + (up - dn) + " %)."), { fig: FIG.percentBar(up, P0, " CHF") })); };
+    OUT.pct = [() => CXP("velo", pct0()),
+      () => { const P0 = 12 * ri(4, 9), up = pk([10, 20, 25]), dn = pk([15, 20, 30, 40]); return PC("fitness", "Prix mensuel", "final", "Un abonnement de fitness coûte " + M(P0) + " CHF par mois. Le prix augmente de " + M(up + "\\,\\%") + " ; puis, avec la carte d'étudiant, il baisse de " + M(dn + "\\,\\%") + ".", up, dn, P0); },
+      () => { const P0 = 20 * ri(3, 40), up = pk([10, 20, 25, 30, 50]), dn = pk([10, 20, 25, 40]); return PC("action", "Valeur", "finale", "Une action vaut " + M(nb(P0)) + " CHF. En une semaine, sa valeur monte de " + M(up + "\\,\\%") + ", puis la semaine suivante elle baisse de " + M(dn + "\\,\\%") + ".", up, dn, P0); }];
+  }
   return OUT;
 })();
 // Texte simple : milliers avec ' (indices et étiquettes).
