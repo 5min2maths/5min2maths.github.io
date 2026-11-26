@@ -365,7 +365,8 @@ avait qu'un), valeurs tirées, corrigé calculé, oracle par contexte **y compri
 `tests/_frch.html` sur les 39 notions : aucun CHF, lieu ou usage suisse en profil FR. Les défis hors de l'objet de
 defis.js (distrib, echelle, litconv, eq3, eqspec, tradalg, contrex, demoalg, implication, angtri en 9e) sont complétés
 dans PROB_EXTRA / PROBX ; les classes restent respectées (distrib « double » écarté en 10e par HORS_CO, angtri
-« polygone » écarté en 9e, échelle « train » sans aire ni volume, donc permis en 10e).
+« polygone » écarté en 9e ; cerf-volant réservé à la 9e et à la 1re, sortie de classe à la 10e–11e, train à la 10e
+(champ `co` : en 10e et en 9e, le niveau 4 reste un défi propre de la classe, contrôle de `tests/defis9.html`).
 
 | Notion | Contextes (ctx) |
 |---|---|

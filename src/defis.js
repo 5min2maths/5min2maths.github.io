@@ -2500,11 +2500,11 @@ const DEFIS = (() => {
     () => { /* cerf-volant : quadrilatère à deux paires de côtés égaux */
       let a, c; do { a = 2 * ri(30, 60); c = 2 * ri(20, 50); } while (a === c || a + c > 220 || a + c < 120);
       const b = (360 - a - c) / 2;
-      return CXP("cerfvolant", P("L'armature d'un cerf-volant forme un quadrilatère " + M("ABCD") + " avec " + M("AB = AD") + " et " + M("CB = CD") + ". On mesure " + M("\\widehat{DAB} = " + a + "°") + " et " + M("\\widehat{BCD} = " + c + "°") + ".",
+      return Object.assign(CXP("cerfvolant", P("L'armature d'un cerf-volant forme un quadrilatère " + M("ABCD") + " avec " + M("AB = AD") + " et " + M("CB = CD") + ". On mesure " + M("\\widehat{DAB} = " + a + "°") + " et " + M("\\widehat{BCD} = " + c + "°") + ".",
         [["a) " + M("\\widehat{ABC}") + " (°)", b], ["b) " + M("\\widehat{BAC}") + " (°)", a / 2], ["c) " + M("\\widehat{ABD}") + " (°)", 90 - a / 2]],
         ["Somme des angles d'un quadrilatère : 360°. La diagonale (AC) est un axe de symétrie : les angles en B et en D sont égaux, et (AC) partage les angles en A et en C en deux.",
          "c) Le triangle ABD est isocèle en A (AB = AD) : ses angles à la base sont égaux."],
-        "a) " + M("\\frac{360° - " + a + "° - " + c + "°}{2} = " + b + "°") + ". b) " + M("\\frac{" + a + "°}{2} = " + a / 2 + "°") + ". c) " + M("\\frac{180° - " + a + "°}{2} = " + (90 - a / 2) + "°") + "."));
+        "a) " + M("\\frac{360° - " + a + "° - " + c + "°}{2} = " + b + "°") + ". b) " + M("\\frac{" + a + "°}{2} = " + a / 2 + "°") + ". c) " + M("\\frac{180° - " + a + "°}{2} = " + (90 - a / 2) + "°") + ".")), { co: [9, 12] });
     });
   if (PROBX.angtri) PROBX.angtri = PROBX.angtri.map((f) => TAGX(f, "bissectrice"));
   ADD("volcone", ["cornet", "boule"],
@@ -2590,10 +2590,10 @@ const DEFIS = (() => {
       () => { /* simple distributivité : sortie de classe */
         let k, g, a, v; do { k = ri(17, 25); g = pk([2, 3]); a = ri(3, 9); v = ri(6, 18); } while (v === a);
         const lieu = pk(["au zoo", "à la patinoire", "au musée des sciences", "au parc d'attractions"]);
-        return CXP("sortie", P("Une classe de " + M(k) + " élèves part " + lieu + " avec " + g + " accompagnants. Chaque personne paie l'entrée, " + M("x") + " CHF, plus " + M(a) + " CHF de transport. Le coût total s'écrit " + M((k + g) + "(x + " + a + ")") + ".",
+        return Object.assign(CXP("sortie", P("Une classe de " + M(k) + " élèves part " + lieu + " avec " + g + " accompagnants. Chaque personne paie l'entrée, " + M("x") + " CHF, plus " + M(a) + " CHF de transport. Le coût total s'écrit " + M((k + g) + "(x + " + a + ")") + ".",
           [["a) Développé, le coût total s'écrit " + M("\\ldots x + \\ldots") + " : coefficient de " + M("x"), k + g], ["b) Terme constant (CHF)", (k + g) * a], ["c) Coût total si l'entrée coûte " + M(v) + " CHF (CHF)", (k + g) * (v + a)]],
           ["Distributivité : le nombre devant la parenthèse multiplie CHAQUE terme de la parenthèse.", "c) Remplace x par " + v + " dans la forme développée (ou dans la forme factorisée : même résultat)."],
-          M((k + g) + "(x + " + a + ") = " + (k + g) + "x + " + (k + g) * a) + ". a) " + M(k + g) + ". b) " + M((k + g) * a) + " CHF (le transport de tout le monde). c) " + M((k + g) + " \\cdot " + v + " + " + (k + g) * a + " = " + (k + g) * (v + a)) + " CHF."));
+          M((k + g) + "(x + " + a + ") = " + (k + g) + "x + " + (k + g) * a) + ". a) " + M(k + g) + ". b) " + M((k + g) * a) + " CHF (le transport de tout le monde). c) " + M((k + g) + " \\cdot " + v + " + " + (k + g) * a + " = " + (k + g) * (v + a)) + " CHF.")), { co: [10, 11] }); /* 10e : défi propre de la classe (tests/defis9.html) */
       }]);
     if (PROBX.distrib) PROBX.distrib = PROBX.distrib.map((f) => TAGX(f, "accoles"));
     if (PROB.echelle) PROB.echelle = TAGX(PROB.echelle, "maquette");
@@ -2601,12 +2601,12 @@ const DEFIS = (() => {
     if (GEN.echelle) (PROB_EXTRA.echelle = PROB_EXTRA.echelle || []).push(() => { /* modèle réduit de train : longueurs et vitesse */
       const [E, nmE] = pk([[87, "H0"], [160, "N"], [120, "TT"]]), Lm = ri(Math.ceil(1500 / E), Math.floor(2500 / E)), W = ri(18, 27), v = pk([60, 80, 100, 120]);
       const Lr = (Lm * E) / 100, Wm = (W * 100) / E, vm = (v * 100000) / 3600 / E;
-      return CXP("train", P("Un réseau de trains miniatures est à l'échelle " + nmE + ", soit " + M("1\\,:\\," + E) + ".",
+      return Object.assign(CXP("train", P("Un réseau de trains miniatures est à l'échelle " + nmE + ", soit " + M("1\\,:\\," + E) + ".",
         [["a) La locomotive miniature mesure " + M(Lm) + " cm : longueur de la vraie locomotive (m)", Lr], ["b) Un vrai wagon mesure " + M(W) + " m : longueur de sa maquette (cm, au dixième)", r1(Wm), 0.1],
          ["c) Un vrai train roule à " + M(v) + " km/h. À quelle vitesse la maquette doit-elle rouler pour paraître aussi rapide (cm/s, au dixième) ?", r1(vm), 0.1]],
         ["Longueur réelle = longueur de la maquette · " + E + " ; maquette = longueur réelle ÷ " + E + ". Attention aux unités : 1 m = 100 cm.",
          "c) Convertis d'abord " + v + " km/h en cm/s (1 km = 100'000 cm, 1 h = 3'600 s), puis divise par " + E + "."],
-        "a) " + M(Lm + " \\cdot " + E + " = " + nb(Lm * E)) + " cm " + M("= " + D(Lr)) + " m. b) " + M(nb(W * 100) + " \\div " + E + " \\approx " + D(r1(Wm))) + " cm. c) " + M(v + " \\text{ km/h} = \\frac{" + nb(v * 100000) + "}{3\\text{'}600} \\approx " + D(r1((v * 100000) / 3600)) + " \\text{ cm/s}") + ", puis " + M("\\div " + E + " \\approx " + D(r1(vm))) + " cm/s."));
+        "a) " + M(Lm + " \\cdot " + E + " = " + nb(Lm * E)) + " cm " + M("= " + D(Lr)) + " m. b) " + M(nb(W * 100) + " \\div " + E + " \\approx " + D(r1(Wm))) + " cm. c) " + M(v + " \\text{ km/h} = \\frac{" + nb(v * 100000) + "}{3\\text{'}600} \\approx " + D(r1((v * 100000) / 3600)) + " \\text{ cm/s}") + ", puis " + M("\\div " + E + " \\approx " + D(r1(vm))) + " cm/s.")), { co: [10] });
     });
     if (PROB_EXTRA.litconv) PROB_EXTRA.litconv = PROB_EXTRA.litconv.map((f) => TAGX(f, "comparer")).concat([
       () => { /* périmètre écrit de deux façons */
