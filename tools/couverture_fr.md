@@ -502,7 +502,7 @@ Non couverts (saisissables) :
 | `simil` | Homothéties et similitudes | 3e | null | à renseigner |
 | `thales` | Théorème de Thalès | 3e | [9, 2] |  |
 | `thalesrec` | Réciproque de Thalès | 3e | — | à renseigner |
-| `vecteurs` | Vecteurs : composantes, norme, produit scalaire | 3e | — | à renseigner |
+| `vecteurs` | Vecteurs : composantes, norme, produit scalaire | 3e | null | 26.11 : hors catalogue FR (vect3e, cart, vecgeo en 2nde ; pscal en 1re) |
 | `volcomp` | Volume d'un solide composé | 3e | — | à renseigner |
 | `absval` | Valeur absolue | 2nde | [10, 6] |  |
 | `affzero` | Zéro et signe d'une fonction du premier degré | 2nde | — | à renseigner |
@@ -511,8 +511,8 @@ Non couverts (saisissables) :
 | `droitesinter` | Intersection de droites, médiatrice, hauteur | 2nde | — | à renseigner |
 | `ensembles` | Intervalles et ensembles de nombres | 2nde | — | à renseigner |
 | `formule` | Transformer une formule | 2nde | null | à renseigner |
-| `inter` | Intersection de deux graphes | 2nde | [10, 7] |  |
-| `optim` | Problèmes d'optimisation (2e degré) | 2nde | — | à renseigner |
+| `inter` | Intersection de deux graphes | 2nde | [11, 1] | 26.11 : 1re (discriminant) |
+| `optim` | Problèmes d'optimisation (2e degré) | 2nde | [11, 0] | 26.11 : 1re (sommet d'un trinôme) |
 | `racinv` | Fonctions racine carrée et inverse | 2nde | null | à renseigner |
 | `stats` | Statistiques (moyenne, médiane, écart-type) | 2nde | [10, 8] |  |
 | `cercle` | Équations de cercles | 1re | null | à renseigner |

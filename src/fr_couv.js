@@ -27,6 +27,18 @@ const HORS_FR = {
   /* 26.11 (revue élèves : « Étendue, médiane, quartiles » proposé en 4e) : au collège, médiane et étendue seulement
      (4e.DP.02, 3e.DP.02) ; quartiles et écart interquartile en 2nde. Libellé du collège : labelFR (Engine.catalog). */
   quartiles: [[/quartile|Q_1|Q_3|moustache/i, 10]],
+  /* 26.11 (audit lycée, tools/audit_fr_lycee_26-11.md) : 2nde 2026 = produit nul, x² = a, forme factorisée donnée ; la
+     factorisation d'un trinôme (racines par somme et produit, discriminant) et la forme canonique sont de 1re (1re.AL). */
+  eq2fact: [["ramener-zero", 11], ["trinome", 11], ["erreur", 11], ["facteur-num", 11]],
+  fimg: [["zeros-calcul", 11], ["preimage-tri", 11], ["axes-triangle", 11]],
+  /* équations avec radical (√x = x − 12, solutions parasites) : hors programme français ; 12/x = x − 1 : trinôme (1re) */
+  racinv: [["sqrt-lin", 99], ["sqrt-param", 99], ["inv-aff", 11]],
+  /* systèmes linéaires retirés du programme de 2nde 2026 : intersection de droites données par leur équation réduite (droitesinter) */
+  droites: [["systeme", 11]],
+  /* triangle rectangle par le produit scalaire : 1re */
+  cart: [["angle-droit", 11]],
+  /* 1re 2026 : « le calcul effectif de la forme canonique dans le cas général n'est pas un attendu » (complétion du carré, a = 1) */
+  f2formes: [["canon-couple", 99], ["dev-k-a", 99]],
 };
 
 /* 26.11 (décision de l'enseignant, n° 5 : quartiles retirés de la 4e FR, gardés en 2nde) : au collège français, la notion
@@ -99,7 +111,11 @@ const UPFR = {
 (function () {
   const N = (id) => NOTIONS.find((x) => x.id === id);
   { const q = N("quartiles"); if (q) q.labelFR = [10, "Étendue, médiane"]; }
-  { const q = N("droitesinter"); if (q) q.labelFR = [11, "Intersection de droites"]; } /* 26.11 (revue p3, n° 1) : médiatrice et hauteur en repère = 1re (orthogonalité) */ /* 26.11 : avant la 2nde, sans « quartiles » */
+  { const q = N("droitesinter"); if (q) q.labelFR = [11, "Intersection de droites"]; }
+  /* 26.11 (audit lycée) : vocabulaire français dans les libellés (13 = toutes les classes françaises) : racines, antécédents,
+     fonction affine ; « zéro » et « préimage » sont des usages suisses. */
+  for (const [id, lab] of [["lectgraph", "Lire un graphique : images, antécédents, variations"], ["f2", "Parabole : racines et sommet"],
+    ["trinfact", "Factoriser un trinôme à l'aide de ses racines"], ["affzero", "Signe d'une fonction affine"], ["fimg", "Images et antécédents"]]) { const q = N(id); if (q && !q.labelFR) q.labelFR = [13, lab]; } /* 26.11 (revue p3, n° 1) : médiatrice et hauteur en repère = 1re (orthogonalité) */ /* 26.11 : avant la 2nde, sans « quartiles » */
   const place = (id, fr, again) => { const n = N(id); if (!n) return; n.FR = fr; if (again) n.againFR = [...new Set([...(n.againFR || []), ...again])]; };
 
   // ---------- 1. Rattachements (attendu contrôlé ; formes écartées : HORS_FR ci-dessus) ----------
@@ -117,6 +133,8 @@ const UPFR = {
     /* 26.11 soir (revue des élèves joués, n° 8) : sommet d'un trinôme développé (−b ÷ 2a) = 1re spécialité (1re.AL.10, 1re.AN.10),
        pas la 2nde (fonction carré seulement) ; il était rangé en 2nde sous « Collège · Nombres et calculs ». */
     f2: [11, 0],
+    /* 26.11 (audit lycée) : sommet d'un trinôme et intersection parabole–droite (discriminant) = 1re, pas la 2nde */
+    optim: [11, 0], inter: [11, 1],
   };
   for (const [id, fr] of Object.entries(RATT)) place(id, fr);
   // Créées en 2nde (fr_2nde.js) avec une place au collège, effacée ensuite par applyFrCollege (fr_college.js chargé après) :
@@ -139,7 +157,7 @@ const UPFR = {
   // ---------- 4. Ordre et chapitres de 1re et de Tle (référentiel « FR ») ----------
   const CHAP = {
     "1SU": ["suitedef", "suitearith", "suitegeo", "suitesomme"],
-    "1SD": ["eq2disc", "f2", "f2formes", "trinfact", "ineq2"],
+    "1SD": ["eq2disc", "f2", "f2formes", "trinfact", "ineq2", "inter", "optim"],
     "1DE": ["tauxvar", "nbderive", "tangente", "derivref", "derivregles", "derivprodquot", "variations", "posrelc", "optimderiv"],
     "1EX": ["expfn", "expderiv"],
     "1TR": ["trigrad"],

@@ -13,7 +13,7 @@ Décisions, rattachements, retraits et niveau : § final de `tools/france.md` et
 | 5e | 119 | 110 ✅ · 1 ◐ · 8 ✗ → **93 %** | 116 ✅ · 1 ◐ · 2 ✗ → **98 %** | 63 / 68 |
 | 4e | 50 | 48 ✅ · 0 ◐ · 2 ✗ → **96 %** | 48 ✅ · 0 ◐ · 2 ✗ → **96 %** | 60 / 93 |
 | 3e | 40 | 37 ✅ · 1 ◐ · 2 ✗ → **94 %** | 37 ✅ · 1 ◐ · 2 ✗ → **94 %** | 61 / 115 |
-| 2nde | 66 | 64 ✅ · 1 ◐ · 1 ✗ → **98 %** | 64 ✅ · 1 ◐ · 1 ✗ → **98 %** | 59 / 137 |
+| 2nde | 66 | 64 ✅ · 1 ◐ · 1 ✗ → **98 %** | 63 ✅ · 2 ◐ · 1 ✗ → **97 %** (26.11, agent/frlycee) | 56 / 134 |
 | 1re spécialité | 51 | 47 ✅ · 4 ◐ · 0 ✗ → **96 %** | 47 ✅ · 4 ◐ · 0 ✗ → **96 %** | 48 / 165 |
 | Tle spécialité | 43 | 39 ✅ · 4 ◐ · 0 ✗ → **95 %** | 40 ✅ · 3 ◐ · 0 ✗ → **97 %** | 36 / 201 |
 
@@ -466,13 +466,13 @@ saisissable (construction, démonstration, programmation). « avant » = catalog
 | 2nde.AN.03 | Fonctions valeur absolue, carré, inverse : définitions et courbes représentatives | `racinv`, `absval` | ✅ |
 | 2nde.AN.04 | Résoudre une équation ou une inéquation du type ƒ (𝑥) = k, ƒ (𝑥) < k, en choisissant une méthode adaptée : gra… | `ineq` | — |
 | 2nde.AN.05 | Résoudre une équation ou une inéquation de la forme ƒ (𝑥) = 0, ƒ (𝑥) > 0 à l’aide d’un tableau de signes, lors… | `tabsignes`, `ineq1` | ✅ |
-| 2nde.AN.06 | Résoudre, graphiquement ou à l’aide d’un outil numérique, une équation ou inéquation du type ƒ (𝑥) = g (𝑥), ƒ … | `ineq`, `inter` | ✅ |
+| 2nde.AN.06 | Résoudre, graphiquement ou à l’aide d’un outil numérique, une équation ou inéquation du type ƒ (𝑥) = g (𝑥), ƒ … | `ineq`, `lectgraph` | ✅ |
 | 2nde.AN.07 | Pour les fonctions affines, valeur absolue, carré, inverse, racine carrée et cube, résoudre graphiquement ou a… | `ineq`, `racinv`, `absval` | ✅ |
 | 2nde.AN.08 | Relier représentation graphique et tableau de variations | `tabvar`, `lectgraph` | ✅ |
 | 2nde.AN.09 | Déterminer graphiquement les extrémums d’une fonction sur un intervalle | `tabvar`, `lectgraph` | ✅ |
 | 2nde.AN.10 | Exploiter un logiciel de géométrie dynamique ou de calcul formel, la calculatrice ou Python pour décrire les v… | — | — |
 | 2nde.AN.11 | Pour une fonction affine, relier sens de variation, signe de la fonction et droite représentative | `affzero` | ✅ |
-| 2nde.AN.12 | Traiter de problèmes d’optimisation | `optim` | ✅ |
+| 2nde.AN.12 | Traiter de problèmes d’optimisation | `tabvar`, `lectgraph` (`optim` en 1re) | ◐ |
 | 2nde.AN.13 | Fonctions valeur absolue, carré : signe et variations | `absval` | ✅ |
 | 2nde.AN.14 | Pour deux nombres a et b donnés et une fonction de référence ƒ, comparer ƒ (a) et ƒ (b) numériquement ou graph… | `racinv` | ✅ |
 | 2nde.SP.01 | Exploiter la relation entre effectifs, proportions et pourcentages | `pct`, `statfreq` | ✅ |
@@ -520,7 +520,7 @@ saisissable (construction, démonstration, programmation). « avant » = catalog
 | 1re.AL.07 | Étudier le signe d’une fonction polynôme du second degré donnée sous forme factorisée | `ineq2` | ✅ |
 | 1re.AL.08 | Déterminer les fonctions polynômes du second degré s’annulant en deux nombres réels distincts | `trinfact` | ✅ |
 | 1re.AL.09 | Factoriser une fonction polynôme du second degré, en diversifiant les stratégies : racine évidente, détection … | `trinfact` | ✅ |
-| 1re.AL.10 | Choisir une forme adaptée (développée réduite, canonique, factorisée) d’une fonction polynôme du second degré … | `eq2disc`, `f2formes`, `optim` | ✅ |
+| 1re.AL.10 | Choisir une forme adaptée (développée réduite, canonique, factorisée) d’une fonction polynôme du second degré … | `eq2disc`, `f2formes`, `optim`, `inter` | ✅ |
 | 1re.AN.01 | Calculer un taux de variation, la pente d’une sécante | `tauxvar` | ✅ |
 | 1re.AN.02 | Interpréter le nombre dérivé en contexte : pente d’une tangente, vitesse instantanée, cout marginal, etc | `nbderive`, `tangente` | ✅ |
 | 1re.AN.03 | Déterminer graphiquement un nombre dérivé par la pente de la tangente. Construire la tangente en un point à un… | — | — |
@@ -671,6 +671,20 @@ saisissable (construction, démonstration, programmation). « avant » = catalog
 - **Étendue** : `eqdiff` reçoit trois formes y' = ay + f (solution particulière donnée, affine, exponentielle) : Tle.AN.21
   complet (formes partagées avec la 4e MA2 du Collège).
 - Contrôle : `tests/trous.html` (générateurs, classes, séparation des systèmes), `tests/act_trous.html` (leçons actives).
+
+## Ce qui a été fait (26.11, branche agent/frlycee : audit du lycée, `tools/audit_fr_lycee_26-11.md`)
+
+- **Placement** : `optim` (sommet d'un trinôme) et `inter` (intersection parabole–droite, discriminant) passent de 2nde en
+  1re (chapitre « Second degré ») ; `vecteurs` (notion suisse : composantes, produit scalaire) reste hors du catalogue
+  français, la ligne morte qui la plaçait en 1re (`fr_2nde.js`) est supprimée : les vecteurs de 2nde sont `vect3e`
+  (+ forme « norme » créée), `cart` (distance, milieu), `vecgeo`.
+- **Formes écartées** (HORS_FR, `src/fr_couv.js`) : en 2nde, trinômes à factoriser (`eq2fact`, `fimg`), 12/x = x − 1
+  (`racinv`), système de deux équations cartésiennes (`droites`), triangle rectangle par le produit scalaire (`cart`) ;
+  partout en France, équations à radical (√x = x − 12) et forme canonique dans le cas général (`f2formes`, a ≠ 1).
+- **Vocabulaire** : racine(s) au lycée (au lieu de « zéro(s) »), courbe (graphe), axe des abscisses / des ordonnées,
+  coordonnées (composantes), ordonnée à l'origine p, produit × hors produit scalaire ; libellés français (`labelFR`).
+- 2nde.AN.12 (optimisation) passe en ◐ : en 2nde, extremums lus sur un graphique ou un tableau de variations seulement.
+- Contrôle : `tests/frplace.html`.
 
 ## Ce qui reste
 

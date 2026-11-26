@@ -75,12 +75,12 @@ Légende : ✅ couvert ; 🟡 couvert avec écart (vocabulaire, notation, niveau
 | AN.03 | Valeur absolue, carré, inverse : définitions, courbes | `fref`, `absval`, `racinv` | 🆕 |
 | AN.04 | f(x) = k, f(x) < k : méthode adaptée | `fref`, `lectgraph` | 🆕 |
 | AN.05 | **Tableau de signes** d'un produit ou d'un quotient | `tabsignes` | 🆕 (absent de l'app) |
-| AN.06 | f(x) = g(x), f(x) < g(x) graphiquement | `lectgraph` (niv. 3), `inter` | ✅ |
+| AN.06 | f(x) = g(x), f(x) < g(x) graphiquement | `lectgraph` (niv. 3) (`inter` en 1re depuis le 26.11) | ✅ |
 | AN.07 | Fonctions de référence : f(x) = k, f(x) < k | `fref`, `racinv`, `absval` | 🆕 |
 | AN.08–09 | Tableau de variations, extrémums | `lectgraph` | 🟡 pas de tableau de variations dessiné |
 | AN.10 | Variations avec un logiciel, Python | — | ✗ |
 | AN.11 | Affine : sens de variation, signe, droite | `affzero` | ✅ |
-| AN.12 | Optimisation | `optim` | ✅ |
+| AN.12 | Optimisation | `tabvar`, `lectgraph` (extremums lus) ; `optim` (sommet d'un trinôme) en 1re depuis le 26.11 | ◐ |
 | AN.13 | Valeur absolue, carré : signe et variations | `fref`, `absval` | 🆕 |
 | AN.14 | Comparer f(a) et f(b) pour une fonction de référence | `fref` | 🆕 |
 
@@ -177,3 +177,7 @@ Légende : ✅ couvert ; 🟡 couvert avec écart (vocabulaire, notation, niveau
    notion avec `again: [10]` suisse devenait « de l'année ») ; corrigé : pour la France, l'app lit `againFR`.
 5. **Ordre et chapitres** : `ORDRE.FR` et `ORDRE_THEME.FR` (chapitres de seconde : Nombres et calculs, Géométrie,
    Fonctions, Statistiques et probabilités, Algorithmique) ajoutés ; `Engine.refOf` rend « FR » pour un profil français.
+
+
+26.11 (audit lycée, `tools/audit_fr_lycee_26-11.md`) : `optim` et `inter` passent en 1re ; `vecteurs` hors catalogue français
+(la ligne qui le plaçait en 1re était écrasée par `fr_couv.js`) ; forme « norme » ajoutée à `vect3e`.

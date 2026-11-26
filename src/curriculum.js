@@ -132,7 +132,29 @@ const FR_WORDS = [
   [/\b([Mm])ise en évidence d(?:e |')/g, (m, a) => (a === "M" ? "F" : "f") + "actorisation par "],
   [/\b([Mm])ise en évidence\b/g, (m, a) => (a === "M" ? "F" : "f") + "acteur commun"], [/\b([Mm])ets en évidence\b/g, (m, a) => (a === "M" ? "F" : "f") + "actorise"],
   [/\b([Aa])près ((?:(?!en évidence)[^.;!?]){1,40}?) en évidence\b/g, "$1près factorisation par $2"], [/\b([Mm])ettre en évidence\b/g, (m, a) => (a === "M" ? "F" : "f") + "actoriser"], [/\b([Mm])et(s|tre|) ((?:(?!en évidence)[^.;!?]){1,40}?) en évidence\b/g, (m, a, t, x) => (a === "M" ? "F" : "f") + "actorise" + (t === "tre" ? "r" : "") + " par " + x] /* 26.11 soir : aussi « on met (x + 4) en évidence » */, [/\bmettant en évidence\b/g, "factorisant"], [/\bmis en évidence\b/g, "mis en facteur"],
+  /* 26.11 (audit lycée, tools/audit_fr_lycee_26-11.md) : « graphe » → courbe (représentative), « axe horizontal / vertical »
+     → axe des abscisses / des ordonnées, « composantes » d'un vecteur → coordonnées, « zéro(s) » d'une fonction → racine(s)
+     (au lycée seulement : FR_ZERO ci-dessous). */
+  [/\b([Ll])e graphe\b/g, "$1a courbe"], [/\bau graphe\b/g, "à la courbe"], [/\bdu graphe\b/g, "de la courbe"], [/\b([Ll])es graphes\b/g, "$1es courbes"],
+  [/\bdes graphes\b/g, "des courbes"], [/\b([Ss])on graphe\b/g, "$1a courbe"], [/\bun graphe\b/g, "une courbe"],
+  [/\bdeux graphes\b/g, "deux courbes"], [/(?<!d')\baxe horizontal\b(?! de symétrie)/g, "axe des abscisses"], [/(?<!d')\baxe vertical\b(?! de symétrie)/g, "axe des ordonnées"],
+  [/\\\)\s+en évidence\b/g, "\\) en facteur"], [/\b([Ll])e domaine de (?=[a-z] ∘)/g, "$1'ensemble de définition de "],
+  [/\b([Cc])omposante(s?)\b/g, "$1oordonnée$2"],
 ];
+/* 26.11 (audit lycée) : « zéro(s) » d'une fonction → racine(s), au lycée seulement (au collège, « racine » évoque la racine
+   carrée) ; le nombre zéro et les zéros d'un nombre écrit (« complète par des zéros », « compte les zéros ») restent.
+   Lu par frIdTxt (questions, Engine.finalize) et frDom (leçons, src/app.js) pour une classe française ≥ 2nde. */
+const FR_ZERO = [
+  [/\b(?:le |les |des )?zéro(s?) du (numérateur|dénominateur)\b/g, (m, p, w) => (p ? "les valeurs qui annulent" : "la valeur qui annule") + " le " + w],
+  [/\b([Ll])e plus (petit|grand) zéro\b/g, "$1a plus $2e racine"], [/\b([Ss])on plus (petit|grand) zéro\b/g, "$1a plus $2e racine"], [/\b([Uu])n seul zéro\b/g, "$1ne seule racine"],
+  [/\b([Pp]lus) (petit|grand) zéro\b/g, "$1 $2e racine"], [/\bzéro évident\b/g, "racine évidente"],
+  [/\bzéro (positif|négatif|entier)\b/g, (m, a) => "racine " + { positif: "positive", "négatif": "négative", entier: "entière" }[a]],
+  [/\b([Ll])e zéro\b/g, "$1a racine"], [/\b([Uu])n zéro\b/g, "$1ne racine"], [/\b([Ss])on zéro\b/g, "$1a racine"], [/\bdu zéro\b/g, "de la racine"], [/\bau zéro\b/g, "à la racine"],
+  [/\bchaque zéro\b/g, "chaque racine"], [/\bZéro(?= \?| de )/g, "Racine"],
+  [/\b([Tt])ous les zéros de\b/g, "$1outes les racines de"], [/(?<!(?:avec|par|ajouter|ajoute|ompte|omplète|tous|Tous) )\b(les|Les|des|ses|Ses|aux|deux|ces) zéros\b(?! après| <b>après| : le 1)/g, "$1 racines"], [/\bde zéros (?=\\\(|[-\d−])/g, "de racines "],
+  [/\bzéros (?=\\\()/g, "racines "], [/\bzéro (?=\\\()/g, "racine "], [/\bracines sont (in|ex)clus\b/g, "racines sont $1cluses"], [/\bracines sont compris\b/g, "racines sont comprises"], [/\bQuels sont (les|ses|leurs) racines/g, "Quelles sont $1 racines"], [/(racines de [^,;.]{1,12}, pas) ceux\b/g, "$1 celles"], [/\bQuel est (sa|la) plus (petite|grande) racine/g, "Quelle est $1 plus $2 racine"],
+];
+const frZero = (t) => FR_ZERO.reduce((a, [re, by]) => a.replace(re, by), t);
 function frThouPart(t, tex) {
   return tex ? frTimes(t.replace(/\\text\{['’]\}/g, "\\,").replace(/(\d)['’](?=\d{3}(?!\d))/g, "$1\\,"))
     : t.replace(/\\text\{['’]\}/g, "\u202f").replace(/(\d)['’](?=\d{3}(?!\d))/g, "$1\u202f").replace(/(\d|\)|\?)\s·\s(?=[\d(?]|[a-zA-Z](?![A-Za-zÀ-ÿ]))/g, "$1 × ").replace(/(^|[^A-Za-zÀ-ÿ0-9])([a-zA-Z])\s·\s(?=[\d(]|[a-zA-Z](?![A-Za-zÀ-ÿ]))/g, "$1$2 × "); /* 25.11 soir : produit seulement (nombres, lettres isolées, parenthèses), pas les séparateurs de l'interface (« Mathélo · provisoire ») */
@@ -151,6 +173,18 @@ function frLocal(s) {
 /* Énoncés de questions seulement (25.11 soir : « Collège de Genève » devenait « Collège de Lyon » dans la présentation
    aux enseignants) : les lieux suisses d'un énoncé deviennent français ; l'interface et les pages genevoises, jamais. */
 const FR_QWORDS = [[/\bGenève–Berne\b/g, "Lyon–Grenoble"] /* 26.11 soir : « trajet Lyon–Berne » */, [/\bGenève\b/g, "Lyon"], [/\bLa Brévine\b/g, "Mouthe"] /* 26.11 soir : village du Jura suisse ; Mouthe (Doubs), son équivalent français */];
+/* 26.11 (audit lycée) : textes d'une question française selon la notion (Engine.finalize) : ordonnée à l'origine p (et non h)
+   dans les équations de droites ; produit écrit × (et non ·) hors du produit scalaire de deux vecteurs (AB · AC, u · v). */
+const FR_ORD_P = new Set(["droites", "droitesinter"]);
+function frIdTxt(id, s, grade) {
+  if (typeof s !== "string" || !s) return s;
+  if (grade >= 10) s = frZero(s);
+  if (FR_ORD_P.has(id)) s = s.replace(/(^|[^\\\w\/'’])h(?![\w'’])/g, "$1p");
+  return s.replace(/(\S)[  ]?·[  ]?(?=\S)/g, (m, a, i, all) => {
+    const L = all.slice(Math.max(0, i - 2), i + 1), R = all.slice(i + m.length, i + m.length + 3);
+    return /(?:[A-Z]{2}|(?:^|[^A-Za-z'’])[uvwn])$/.test(L) && /^(?:[A-Z]{2}|[uvwn])(?![A-Za-z'’])/.test(R) ? m : a + " × ";
+  });
+}
 function frLocalQ(s) { const r = frLocal(s); return typeof r === "string" ? FR_QWORDS.reduce((a, [re, by]) => a.replace(re, by), r) : r; }
 
 // Difficulté maximale (1 = bases, 3 = approfondi) : on ne demande pas la section à l'élève ;

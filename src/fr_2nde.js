@@ -328,6 +328,11 @@
         return QP("On donne " + PN(A[0], A[1], "A") + " et " + PN(B[0], B[1], "B") + ". Calcule les coordonnées du point " + M("M") + " tel que " + M(VB("AM") + " = " + (k === -1 ? "-" : k) + VB("AB")) + "." + PAIRQ, Mx, M(VB("AB") + "\\begin{pmatrix} " + u[0] + " \\\\ " + u[1] + " \\end{pmatrix}") + ", " + M(VB("AM") + "\\begin{pmatrix} " + k * u[0] + " \\\\ " + k * u[1] + " \\end{pmatrix}") + ", donc " + M("M(" + nf(A[0]) + " + " + par(k * u[0]) + " \\,;\\, " + nf(A[1]) + " + " + par(k * u[1]) + ") = (" + Mx[0] + " \\,;\\, " + Mx[1] + ")") + ".",
           { ctx: "point-image", guide: [GP("Coordonnées de " + M(VB("AB")) + " ?", u, M("(" + u[0] + " \\,;\\, " + u[1] + ")") + "."), GP("Coordonnées de " + M(VB("AM")) + " ?", [k * u[0], k * u[1]], M("(" + k * u[0] + " \\,;\\, " + k * u[1] + ")") + "."), GP(M("M = A + " + VB("AM")) + " ?", Mx, M("M(" + Mx[0] + " \\,;\\, " + Mx[1] + ")") + ".")],
             traps: [TP([k * u[0], k * u[1]], "Ce sont les coordonnées du vecteur AM ; le point M s'obtient en partant de A."), TP([B[0] + k * u[0], B[1] + k * u[1]], "Le vecteur AM part de A, pas de B.")] }); },
+      /* 26.11 (audit lycée) : norme d'un vecteur en base orthonormée (2nde.GE : « expression de la norme d'un vecteur ») */
+      () => { const [a, b, c] = pk([[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 6, 10], [4, 3, 5], [12, 5, 13], [9, 12, 15], [8, 15, 17]]), u = [a * pk([1, -1]), b * pk([1, -1])];
+        return QN("Dans un repère orthonormé, on donne " + VC("u", u) + ". Calcule la norme " + M("\\lVert \\vec{u} \\rVert") + ".", c, M("\\lVert \\vec{u} \\rVert = \\sqrt{"  + par(u[0]) + "^2 + " + par(u[1]) + "^2} = \\sqrt{" + c * c + "} = " + c) + ".",
+          { ctx: "norme", guide: [GS("Somme des carrés des coordonnées ?", c * c, M(a * a + " + " + b * b + " = " + c * c) + "."), GS("Norme (racine carrée) ?", c, M("\\sqrt{" + c * c + "} = " + c) + ".")],
+            traps: [TR(Math.abs(u[0]) + Math.abs(u[1]), "La norme n'est pas la somme des coordonnées : c'est la racine de la somme des carrés."), TR(c * c, "Il reste à prendre la racine carrée."), TR(u[0] + u[1], "Les carrés font disparaître les signes : la norme est la racine de la somme des carrés.")] }); },
     ],
     3: [
       () => { const u = [nz(-6, 6), nz(-6, 6)], v = [nz(-6, 6), nz(-6, 6)], d = u[0] * v[1] - u[1] * v[0]; if (d === 0 || Math.abs(d) === 1) return null;
@@ -576,7 +581,7 @@
     ["proba2", "no", "Probabilités : contraire, deux épreuves, réunion", "P(A \\cup B) = P(A) + P(B) - P(A \\cap B)", [9, 9], [10], PROBA2, "Contraire : 1 − P(A). Deux épreuves : on multiplie le long d'une branche et on additionne les branches. « A ou B » : P(A) + P(B) − P(A ∩ B).", ["Évènement contraire, somme égale à 1", "Deux épreuves : arbre, avec ou sans remise", "Réunion et intersection"]],
     ["tabsignes", "fa", "Tableau de signes, inéquations produit et quotient", "\\frac{x - 1}{x + 3} \\ge 0", [10, 7], null, TSIG, "Une ligne par facteur (signe de ax + b : celui de a à droite du zéro), puis la règle des signes. Valeur interdite : double barre, toujours exclue.", ["Signe d'une expression affine", "Inéquation produit", "Inéquation quotient"]],
     ["tauxevol", "no", "Évolutions : coefficient multiplicateur, taux successifs et réciproque", "+20\\,\\% \\text{ puis } -10\\,\\% : \\times 1{,}08", [10, 5], null, TAUX, "Évoluer de t %, c'est multiplier par 1 + t/100. Évolutions successives : on multiplie les coefficients. Taux réciproque : coefficient inverse.", ["Coefficient multiplicateur, comparer deux valeurs", "Évolutions successives, proportion de proportion", "Taux réciproque, évolutions répétées"]],
-    ["vect3e", "es", "Vecteurs et coordonnées", "\\overrightarrow{AB}\\begin{pmatrix} x_B - x_A \\\\ y_B - y_A \\end{pmatrix}", [10, 9], null, VECT, "AB a pour coordonnées (x_B − x_A ; y_B − y_A). Chasles : AB + BC = AC. Colinéaires ⇔ déterminant x_u y_v − y_u x_v nul.", ["Lire et calculer des coordonnées, Chasles", "Somme, produit par un réel, parallélogramme", "Déterminant, colinéarité, alignement"]],
+    ["vect3e", "es", "Vecteurs et coordonnées", "\\overrightarrow{AB}\\begin{pmatrix} x_B - x_A \\\\ y_B - y_A \\end{pmatrix}", [10, 9], null, VECT, "AB a pour coordonnées (x_B − x_A ; y_B − y_A). Chasles : AB + BC = AC. Norme de u(a ; b) : √(a² + b²). Colinéaires ⇔ déterminant x_u y_v − y_u x_v nul.", ["Lire et calculer des coordonnées, Chasles", "Somme, produit par un réel, parallélogramme, norme", "Déterminant, colinéarité, alignement"]],
     ["fref", "fa", "Fonctions de référence : carré, inverse, racine", "x^2 \\le 9 \\iff -3 \\le x \\le 3", [10, 11], null, FREF, "Carré : décroissante sur ]−∞ ; 0], croissante sur [0 ; +∞[. Inverse : décroissante sur chacun de ses deux intervalles. Racine : croissante sur [0 ; +∞[.", ["Comparer des images, x² = k", "Inéquations x² ⩽ k, √x ⩽ k", "Inverse, encadrements"]],
     ["probcond", "no", "Probabilités conditionnelles, tableau croisé", "P_A(B) = \\frac{P(A \\cap B)}{P(A)}", [10, 14], [11], PCOND, "P_A(B) : on se place dans A (ligne ou colonne du tableau, ou branche de l'arbre). Le long d'un chemin, on multiplie ; on additionne les chemins.", ["Fréquences marginales et conditionnelles", "P_A(B) par tableau ou arbre", "P_B(A), faux positifs"]],
     ["algopy", "no", "Algorithmique : lire un programme Python", "\\texttt{for i in range(5)}", [10, 15], null, ALGO, "Suis le programme ligne par ligne en notant la valeur de chaque variable ; range(a, b) s'arrête à b − 1 ; if … elif … else : la première condition vraie l'emporte.", ["Affectations, fonctions", "Instructions conditionnelles", "Boucles for et while"]],
@@ -592,12 +597,15 @@
 
   // ===================== place des notions existantes en seconde (22.11) =====================
   // Notions qui apparaissent en seconde (programme 2026) : FR [10, rang].
-  const FR_2NDE = { ensembles: 1, formule: 3, ineq: 7, absval: 10, racinv: 11, affzero: 12, inter: 12, optim: 13, cart: 8, droites: 9, droitesinter: 9, stats: 14 };
+  const FR_2NDE = { ensembles: 1, formule: 3, ineq: 7, absval: 10, racinv: 11, affzero: 12, cart: 8, droites: 9, droitesinter: 9, stats: 14 };
   for (const [id, k] of Object.entries(FR_2NDE)) { const n = NOTIONS.find((x) => x.id === id); if (n) n.FR = [10, k]; }
   // Retirés du programme de seconde 2026 : systèmes (masqués en France) ; degré 3 en terminale ; produit scalaire en 1re.
   for (const id of ["sys2", "sys3", "sysprob", "sysgraph"]) { const n = NOTIONS.find((x) => x.id === id); if (n) n.FR = null; }
   { const n = NOTIONS.find((x) => x.id === "eq3"); if (n) n.FR = [12, 3]; }
-  { const n = NOTIONS.find((x) => x.id === "vecteurs"); if (n) n.FR = [11, 9]; }
+  /* 26.11 (audit lycée, tools/audit_fr_lycee_26-11.md) : les vecteurs de 2nde sont servis par vect3e (coordonnées, somme,
+     colinéarité, norme), cart (distance, milieu) et vecgeo ; la notion suisse « vecteurs » (composantes, produit scalaire)
+     reste hors du catalogue français (fr_couv.js). optim et inter (second degré : sommet, discriminant) : 1re (fr_couv.js). */
+  { const n = NOTIONS.find((x) => x.id === "vecteurs"); if (n) n.FR = null; }
   // Reprises en seconde (automatismes, rappels du collège) : « de l'année » pour un élève de seconde. Classe d'origine
   // (couverture_fr.md) seulement si la notion n'a pas encore de place en France (l'agent « collège » la fixe sinon).
   const AGAIN_2NDE = { fracops: 8, fracadd: 6, fracmul: 8, puiss: 8, fracconv: 6, ordgr: 6, uvol: 7, ucomp: 8, parenth: 7, distrib: 7, idrem: 9, factor: 7, eq1: 7, eq2fact: 9,
@@ -614,7 +622,7 @@
     "2AU": ["fracops", "fracadd", "fracmul", "puiss", "fracconv", "ordgr", "uvol", "ucomp", "parenth", "distrib", "idrem", "factor", "eq1", "eq2fact", "valnum", "pct", "fractout", "pctvar", "fimg", "affine"],
     "2NC": ["multdiv", "premiers", "fracsimp", "ensembles", "relrep", "decarr", "racenc", "rac", "formule", "ineq1", "ineq", "tabsignes"],
     "2GE": ["vect3e", "cart", "droites", "droitesinter"],
-    "2AN": ["lectgraph", "modaff", "affzero", "fref", "racinv", "absval", "inter", "optim"],
+    "2AN": ["lectgraph", "modaff", "affzero", "fref", "racinv", "absval"],
     "2SP": ["tauxevol", "statfreq", "diagr", "stats", "quartiles", "proba", "proba2", "probcond"],
     "2AP": ["algopy"],
   };
