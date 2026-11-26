@@ -110,7 +110,7 @@
 
   // ======================= densite : variables aléatoires continues (4.PS.03e, MA2) =======================
   const UNIF = [["Le temps d'attente d'un bus (en minutes) suit une loi uniforme sur", "attente"], ["L'heure d'arrivée d'un colis (en heures après 8 h) suit une loi uniforme sur", "colis"], ["La position (en m) d'une panne sur un câble suit une loi uniforme sur", "cable"]];
-  const EXPO = [["La durée de vie (en années) d'un composant électronique", "composant"], ["Le temps d'attente (en minutes) avant l'appel suivant dans un centre d'appels", "appels"], ["La distance (en km) parcourue par un vélo de location avant une crevaison", "crevaison"]];
+  const EXPO = [["La durée de vie (en années) d'un composant électronique", "composant"], ["Le temps d'attente (en minutes) avant l'appel suivant dans un centre d'appels", "appels"], ["La distance (en centaines de km) parcourue par un vélo de location avant une crevaison" /* 26.11 soir : une crevaison tous les 2 km en moyenne n'est pas vraisemblable */, "crevaison"]];
   const DE = {
     1: [
       () => { const c0 = pk(UNIF), a = R.int(0, 4), L = pk([4, 5, 6, 8, 10, 12]), b = a + L; let c, d; do { c = R.int(a, b - 1); d = R.int(c + 1, b); } while (d - c === L || d - c === L / 2); const v = (d - c) / L;
@@ -183,7 +183,7 @@
   const tab = (zs) => "On donne " + [...new Set(zs.map((z) => r6(z)))].sort((a, b) => a - b).map((z) => M("\\Phi(" + dT(z, 3) + ") \\approx " + dT(ph4(z), 4))).join(" ; ") + ", où " + M("\\Phi(z) = P(Z \\le z)") + ".";
   /* [n, p, σ, contexte] : σ = √(np(1 − p)) tel que 0,5/σ ait au plus deux décimales */
   const NP = [[100, 0.5, 5, "On lance " + 100 + " fois une pièce équilibrée ; " + M("X") + " est le nombre de « pile »."], [400, 0.5, 10, "On lance 400 fois une pièce équilibrée ; " + M("X") + " est le nombre de « pile »."],
-    [625, 0.8, 10, "On sème 625 graines ; chacune germe avec la probabilité 0,8, indépendamment des autres ; " + M("X") + " est le nombre de graines qui germent."], [625, 0.2, 10, "Un QCM a 625 questions à 5 choix ; on répond au hasard ; " + M("X") + " est le nombre de bonnes réponses."],
+    [625, 0.8, 10, "On sème 625 graines ; chacune germe avec la probabilité 0,8, indépendamment des autres ; " + M("X") + " est le nombre de graines qui germent."], [625, 0.2, 10, "625 élèves répondent au hasard à une même question à 5 choix ; " /* 26.11 soir : un QCM de 625 questions n'existe pas */ + M("X") + " est le nombre de bonnes réponses."],
     [1600, 0.5, 20, "Dans une ville, 50 % des habitants approuvent un projet ; on interroge 1'600 personnes au hasard ; " + M("X") + " compte celles qui l'approuvent."], [2500, 0.2, 20, "Un fabricant sait que 20 % de ses clients rappellent le service après-vente ; sur 2'500 clients, " + M("X") + " compte ceux qui rappellent."],
     [25, 0.5, 2.5, "On lance 25 fois une pièce équilibrée ; " + M("X") + " est le nombre de « face »."]];
   /* 26.11 (vraisemblance) : X compte des issues, k est entier ; avec n = 25 (μ = 12,5), k = μ + 1 donnait « P(X ≤ 13.5) » et une
@@ -253,9 +253,11 @@
     densite: [() => { const b = pk([4, 10]), half = b / 2;
       return P("La durée (en minutes) d'un appel suit la densité " + M("f(x) = kx") + " sur " + M("[0 \\,;\\, " + b + "]") + " (0 ailleurs).", [["a) Valeur de k (fraction acceptée)", 2 / (b * b)], ["b) P(X ≤ " + half + ")", 0.25], ["c) Durée moyenne E(X) (min, fraction acceptée)", (2 * b) / 3]],
         ["Aire totale = 1.", "E(X) = ∫ x f(x) dx."], "a) " + M("k = \\frac{2}{" + b * b + "}") + " ; b) " + M("\\frac{" + half + "^2}{" + b * b + "} = \\frac{1}{4}") + " ; c) " + M("\\frac{2 \\cdot " + b + "}{3} = " + fT((2 * b) / 3)) + " min."); }],
-    approxnorm: [() => { const S = 515, zc = (S + 0.5 - 500) / 10;
-      return P("Une compagnie vend 625 billets pour un avion de " + S + " places ; chaque passager se présente avec la probabilité 0,8. On donne " + M("\\Phi(1{,}55) \\approx 0{,}9394") + ".", [["a) Nombre moyen de passagers μ", 500], ["b) Écart-type σ", 10], ["c) Probabilité de surréservation (au millième)", r6(1 - ph4(zc)), 0.001]],
-        ["σ = √(625 · 0,8 · 0,2).", "Trop de passagers : X ≥ " + (S + 1) + ", borne corrigée " + S + ",5."], "a) 500 ; b) " + M("\\sqrt{100} = 10") + " ; c) " + M("1 - \\Phi(1{,}55) \\approx 0{,}061") + "."); }],
+    /* 26.11 soir (vraisemblance, décision de l'enseignant du 26.11 : présence 0,9, surréservation de quelques places) :
+       avant, 625 billets pour 515 places avec une présence de 0,8 (110 billets de trop). */
+    approxnorm: [() => { const S = 94, zc = (S + 0.5 - 90) / 3;
+      return P("Une compagnie vend 100 billets pour un vol de " + S + " places ; chaque passager se présente avec la probabilité 0,9, indépendamment des autres. On donne " + M("\\Phi(1{,}5) \\approx " + dT(ph4(zc), 4)) + ".", [["a) Nombre moyen de passagers μ", 90], ["b) Écart-type σ", 3], ["c) Probabilité de surréservation (au millième)", r6(1 - ph4(zc)), 0.001]],
+        ["σ = √(100 · 0,9 · 0,1).", "Trop de passagers : X ≥ " + (S + 1) + ", borne corrigée " + S + ",5."], "a) 90 ; b) " + M("\\sqrt{9} = 3") + " ; c) " + M("1 - \\Phi(1{,}5) \\approx " + dT(rd(1 - ph4(zc), 0.001), 3)) + "."); }],
   };
 
   // ---------- notions ----------

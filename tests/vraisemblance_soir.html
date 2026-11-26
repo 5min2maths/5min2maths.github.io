@@ -1,0 +1,84 @@
+<!doctype html><meta charset="utf-8"><meta name="budget" content="90000">
+<main id="app"></main>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){};window.fetch=()=>Promise.resolve(new Response("{}"));</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/defis_9.js"></script><script src="../src/defis_910.js"></script><script src="../src/defis_2c.js"></script><script src="../src/defis_sec2.js"></script><script src="../src/competences.js"></script><script src="../src/referentiel.js"></script><script src="../src/trx.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch4c_trous.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/ch1c_trous.js"></script><script src="../src/ch1c_argact.js"></script><script src="../src/ch11_rep3d.js"></script><script src="../src/perco.js"></script><script src="../src/fr_college.js"></script><script src="../src/fr_1re.js"></script><script src="../src/fr_3e.js"></script><script src="../src/fr_tle.js"></script><script src="../src/fr_fin.js"></script><script src="../src/fr_trous.js"></script><script src="../src/fr_couv.js"></script><script src="../src/ref_matu.js"></script><script src="../src/ref_fr.js"></script><script src="../src/ref_co.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_col34b.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/fr_act.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script>
+<script src="vrai_collecte.js"></script><script src="vrai_checks.js"></script>
+<!-- Audit de vraisemblance, suite du soir (26.11, tools/vraisemblance_26-11.md § « soir ») :
+     1. notions ajoutées ou très modifiées depuis l'audit du matin (src/perco.js, ch1c_trous, ch4c_trous, fr_trous, fr_fin,
+        ch11_rep3d, ch1c_arg, formes VARX de simil et volcone) : #n graines (150) par niveau, défis compris, contrôles de
+        tests/vrai_checks.js et contrôles propres (ci-dessous) ;
+     2. profils strictement séparés : tout le catalogue de chaque classe (CO 9e–11e, Collège 1re–4e, MP 1re–4e, France 6e–Tle),
+        questions finales (Engine.make : formes réservées écartées, passe française appliquée) : aucun terme romand en
+        profil France (CHF, francs, villes suisses, apprentis, PGDC, préimage, cathète, septante, produit « · »…) et aucun
+        terme français en profil romand (€ hors change, × entre deux nombres, PGCD, antécédent, brevet…) ;
+     3. rapport (mineur, sans échec) : défis figés (un seul énoncé au niveau 4) des notions du soir.
+     #n=150 ; #np=3 (graines par notion et par niveau pour les profils) ; #detail. -->
+<pre id="out">en cours</pre>
+<script>
+(function () {
+  const P = new URLSearchParams(location.hash.slice(1)), N = +(P.get("n") || 150), NP = +(P.get("np") || 3), DET = P.has("detail"), t0 = performance.now();
+  const SOIR = ["isom", "ensco", "numer", "fctlec", "litconv", "simil", "volcone", "graphefct", "ineqgraph", "geoesp", "densite", "approxnorm", "cercle6", "bissec6", "filtre6", "tabform5", "hauteurs5",
+    "symax", "mediatrice", "echelle6", "proba6", "empil", "compdiff", "posrelc", "intmaj", "suiteint", "repere3d", "tradalg", "contrex", "demoalg", "implication"];
+  const MINEUR = new Set(["montant à 1 décimale (mineur)", "défi figé (mineur)"]);
+  const byKey = {}, ex = {}, add = (k, id, code, m) => { const kk = k + " | " + id; byKey[kk] = (byKey[kk] || 0) + 1; if (!ex[kk]) ex[kk] = code + " : " + m; };
+  const errs = [];
+  // 1. notions du soir : contrôles communs et propres
+  const { items, errs: e1 } = VRAI.items({ n: N, ids: SOIR, src: ["gen", "defi"] }); errs.push(...e1);
+  const d4 = {};
+  for (const x of items) {
+    for (const [k, m] of VRAI_CHECK(x)) add(k, x.id + "-" + x.d, x.code, m);
+    const all = x.txt + " " + x.parts.map((p) => p.label).join(" ");
+    /* variable annoncée mais absente (« si x = 8, alors x² = 64 (x et y sont des réels) ») */
+    if (/x et y sont des réels/.test(all) && !/\by\b|xy|y\s*=|y\^/.test(all.replace(/x et y sont des réels/, ""))) add("variable absente", x.id + "-" + x.d, x.code, all.slice(0, 120));
+    /* accord du participe (« une allée de 2,5 m est représenté ») */
+    let m; if ((m = /\b(une|la) [a-zàâçéèêëîïôûù]+ de [\d,']+ ?(?:m|cm|km) est représenté(?![\p{L}])/u.exec(all))) add("accord", x.id + "-" + x.d, x.code, m[0]);
+    /* tableau de valeurs : la même valeur de x deux fois dans la ligne du haut (« n | 1 4 6 8 5 6 ») */
+    for (const r of String(x.raw).matchAll(/\\begin\{array\}\{c\|[c|]+\}\s*(?:\\text\{[^}]*\}|[a-z]) & ([^\\]+)\\\\/g)) {
+      const v = r[1].split("&").map((t) => t.trim()).filter((t) => t && t !== "?"); if (/tableau de valeurs|tableau donne/i.test(all) && !/fonction/.test(all) && new Set(v).size !== v.length) add("tableau : colonne répétée", x.id + "-" + x.d, x.code, v.join(" "));
+    }
+    /* congélateur : jamais en dessous de −26 °C */
+    if (/congélateur/.test(all) && x.spec && x.spec.kind === "value" && x.spec.value < -26 && /température/.test(all)) add("température invraisemblable", x.id + "-" + x.d, x.code, all.slice(0, 100) + " → " + x.spec.value);
+    if (x.d === 4) (d4[x.id] = d4[x.id] || new Set()).add(x.txt);
+  }
+  for (const [id, S] of Object.entries(d4)) if (S.size === 1) add("défi figé (mineur)", id + "-4", id, [...S][0].slice(0, 90));
+  // 2. profils : tout le catalogue de chaque classe, questions finales
+  const PROFS = [];
+  for (const g of [9, 10, 11, 12, 13, 14, 15]) PROFS.push({ system: "CH", grade: g, track: "college" });
+  for (const g of [12, 13, 14, 15]) PROFS.push({ system: "CH", grade: g, track: "mp" });
+  for (const g of [6, 7, 8, 9, 10, 11, 12]) PROFS.push({ system: "FR", grade: g, track: "college" });
+  const txt = (q) => [q.q, q.sol, ...(q.guide || []).flatMap((g) => [g.ask, g.sol]), ...(q.parts || []).map((p) => p.label), ...(q.hints || []), ...(q.traps || []).map((t) => t.m)].filter((t) => typeof t === "string").join(" | ");
+  const VILLES_CH = "Genève|Lausanne|Berne|Zurich|Neuchâtel|Fribourg|Valais|Sion|Lugano|Bâle|Léman|Montreux|Vevey|Yverdon|Nyon|Morges|Bienne|Lucerne|Gruyère|Cervin|Brévine|Romont|Delémont|Salève|Jungfrau|Lavaux|Carouge|Onex|Meyrin|Vernier|Plainpalais|Gothard";
+  const FRB = [["CHF / francs", /CHF|(?<!lancers? )\bfrancs?\b(?! (?:succès|lancers?|tireurs?))/], ["lieu suisse", new RegExp("\\b(?:" + VILLES_CH + ")\\b")], ["usage suisse", /\b(?:septante|huitante|nonante|PGDC|PPMC|[Pp]réimages?|cathètes?|apprenti(?:e|s|es)?|EVACOM|natel|CFC|gymnase)\b|mise en évidence|mets? [^.;]{0,25}en évidence/],
+    ["produit « · » (usage suisse)", /\\cdot(?![a-zA-Z])/]];
+  const CHB = [["euro hors change", /€|\beuros?\b/], ["× entre deux nombres (usage français)", /\d\s*(?:\\text\{[^}]*\}\s*)?\\times\s*\d[\d,{}]*\s*(?:\\text\{[^}]*\}\s*)?(?:=|\\\))/], ["usage français", /\b(?:PGCD|PPCM|antécédents?|brevet|baccalauréat|collégiens?|lycéens?)\b/]];
+  /* cas relus et acceptés (clé|notion) */
+  const OK = new Set([
+    "produit « · » (usage suisse)|*vec", /* produit scalaire : le point est voulu (frTimes) */
+  ]);
+  let nq = 0;
+  for (const p of PROFS) {
+    const st = { profile: p }, B = p.system === "FR" ? FRB : CHB, cat = Engine.catalog(p), lab = p.system + p.grade + (p.track === "mp" ? "mp" : "");
+    for (const c of cat) for (const d of [1, 2, 3, 4]) {
+      if (d === 4 && !hasProb(c.id)) continue;
+      for (let s = 1; s <= NP; s++) {
+        let q; try { q = Engine.make(st, c.id, d, s); } catch (e) { errs.push(lab + " " + c.id + "-" + d + "-" + s + " : " + e.message); continue; }
+        if (!q) continue; nq++;
+        const t = txt(q);
+        for (const [k, re] of B) {
+          let tt = t;
+          if (k.startsWith("produit")) tt = t.replace(/\\\([\s\S]*?\\\)/g, (f) => (/\\vec|\\overrightarrow/.test(f) ? "" : f));
+          if (k === "euro hors change" && /CHF/.test(t) && /\bEUR\b|euros?|€/.test(t) && /change|vaut|obtient|banque|taux|convert/.test(t)) continue;
+          const m = tt.match(new RegExp(".{0,50}(?:" + re.source + ").{0,30}", re.flags.replace("g", "")));
+          if (m && !OK.has(k + "|" + c.id)) add(k, c.id + "-" + d + " (" + p.system + ")", lab + " " + q.code, m[0]);
+        }
+      }
+    }
+  }
+  const keys = Object.keys(byKey).sort(), grave = keys.filter((k) => !MINEUR.has(k.split(" | ")[0])), mineur = keys.filter((k) => MINEUR.has(k.split(" | ")[0]));
+  const out = [(grave.length || errs.length ? "ÉCHEC " : "ok ") + items.length + " énoncés du soir (" + N + " graines, " + SOIR.length + " notions) et " + nq + " questions de profil (" + PROFS.length + " classes, " + NP + " graines), " + grave.length + " problème(s), " + mineur.length + " mineur(s), " + errs.length + " exception(s), " + Math.round(performance.now() - t0) + " ms"];
+  for (const k of keys) if (DET || !MINEUR.has(k.split(" | ")[0])) out.push((MINEUR.has(k.split(" | ")[0]) ? "  (mineur) " : "  ") + k + " ×" + byKey[k] + "  ex. " + ex[k]);
+  if (!DET && mineur.length) out.push("  mineurs : " + mineur.map((k) => k.split(" | ")[1]).join(", "));
+  if (errs.length) out.push("EXC :\n  " + errs.slice(0, 30).join("\n  "));
+  document.getElementById("out").textContent = out.join("\n");
+})();
+</script>

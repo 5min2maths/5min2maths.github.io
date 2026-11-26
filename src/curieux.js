@@ -444,7 +444,7 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
   add({ key: "photo", fam: "paradoxe", uses: [], outil: "l'agrandissement : si chaque côté est multiplié par k, l'aire est multipliée par k × k.",
     make() {
       const [a, b] = pk([[10, 15], [9, 13], [13, 18]]), k = pk([2, 3]);
-      return { titre: "Le poster", q: "Tu fais agrandir une photo de " + M(a + "\\ \\text{cm} \\times " + b + "\\ \\text{cm}") + " pour en faire un poster : chaque côté est multiplié par " + M(k) + ".",
+      return { titre: "Le poster", q: "Tu fais agrandir une photo de " + M(a) + " cm sur " + M(b) + " cm pour en faire un poster : chaque côté est multiplié par " + M(k) + ".",
         bet: { q: "Il faudra combien de fois plus d'encre ?", choices: [k + " fois plus", k * k + " fois plus", k ** 3 + " fois plus"], good: 1 },
         calc: { label: "Aire du poster (en cm²)", value: k * a * k * b },
         reveal: "Photo : " + M(a + " \\cdot " + b + " = " + a * b) + " cm². Poster : " + M(k * a + " \\cdot " + k * b + " = " + N(k * a * k * b)) + " cm², soit " + M(k * k) + " fois plus : on agrandit dans les deux directions, " + M(k + " \\cdot " + k) + "." };

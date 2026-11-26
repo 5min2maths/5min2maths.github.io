@@ -120,13 +120,17 @@ const FR_WORDS = [
   [/\bmx \+ h\b/g, "mx + p"], [/\b([Ll])es cathètes\b/g, "$1es côtés de l'angle droit"], [/\bcathètes\b/g, "côtés de l'angle droit"], [/\b([Ll])a cathète(?![a-zà-ÿ])/g, "$1e côté de l'angle droit"], [/\bcathète(?![a-zà-ÿ])/g, "côté de l'angle droit"],
   [/\b([Ll])e domaine de définition\b/g, "$1'ensemble de définition"], [/\bdu domaine de définition\b/g, "de l'ensemble de définition"], [/\bdomaine de définition\b/g, "ensemble de définition"], [/\bdu domaine de (?=\\\()/g, "de l'ensemble de définition de "],
   [/PGDC/g, "PGCD"], [/PPMC/g, "PPCM"],
+  /* 26.11 soir (vraisemblance, profils séparés) : « arrondie au franc supérieur (€) », « pas des francs », « Sur 50 apprentis
+     interrogés » (apprenti = filière professionnelle suisse ; en France, élèves de collège et de lycée). */
+  [/\bau franc (supérieur|inférieur)\b/g, "à l'euro $1"], [/\bdes francs\b/g, "des euros"], [/\b([Cc]haque|[Uu]n|[Pp]ar) franc\b/g, "$1 euro"],
+  [/\b([Aa])pprenti(e?)(s?)\b/g, (m, a, e, p) => (a === "A" ? "É" : "é") + "lève" + p],
   [/\b([Ll])a préimage\b/g, (m, a) => a + "'antécédent"], [/\b([Uu])ne seule préimage\b/g, (m, a) => a + "n seul antécédent"],
-  [/\b([Uu])ne préimage\b/g, (m, a) => a + "n antécédent"], [/\b([Pp]lus) (grande|petite) préimage\b/g, (m, a, b) => a + " " + b.slice(0, -1) + " antécédent"],
+  [/\b([Uu])ne préimage\b/g, (m, a) => a + "n antécédent"], [/\b([Ss])a préimage\b/g, (m, a) => a + "on antécédent"], [/\b([Pp]lus) (grande|petite) préimage\b/g, (m, a, b) => a + " " + b.slice(0, -1) + " antécédent"],
   [/\bpréimages\b/g, "antécédents"], [/\bPréimages\b/g, "Antécédents"], [/\bpréimage\b/g, "antécédent"], [/\bPréimage\b/g, "Antécédent"],
   [/\b([Ff])actorise \(mise en évidence\)/g, "$1actorise (facteur commun)"],
   [/\b([Mm])ise en évidence d(?:e |')/g, (m, a) => (a === "M" ? "F" : "f") + "actorisation par "],
   [/\b([Mm])ise en évidence\b/g, (m, a) => (a === "M" ? "F" : "f") + "acteur commun"], [/\b([Mm])ets en évidence\b/g, (m, a) => (a === "M" ? "F" : "f") + "actorise"],
-  [/\b([Aa])près ((?:(?!en évidence)[^.;!?]){1,40}?) en évidence\b/g, "$1près factorisation par $2"], [/\b([Mm])ettre en évidence\b/g, (m, a) => (a === "M" ? "F" : "f") + "actoriser"], [/\b([Mm])et(s|tre) ((?:(?!en évidence)[^.;!?]){1,40}?) en évidence\b/g, (m, a, t, x) => (a === "M" ? "F" : "f") + "actorise" + (t === "tre" ? "r" : "") + " par " + x], [/\bmettant en évidence\b/g, "factorisant"], [/\bmis en évidence\b/g, "mis en facteur"],
+  [/\b([Aa])près ((?:(?!en évidence)[^.;!?]){1,40}?) en évidence\b/g, "$1près factorisation par $2"], [/\b([Mm])ettre en évidence\b/g, (m, a) => (a === "M" ? "F" : "f") + "actoriser"], [/\b([Mm])et(s|tre|) ((?:(?!en évidence)[^.;!?]){1,40}?) en évidence\b/g, (m, a, t, x) => (a === "M" ? "F" : "f") + "actorise" + (t === "tre" ? "r" : "") + " par " + x] /* 26.11 soir : aussi « on met (x + 4) en évidence » */, [/\bmettant en évidence\b/g, "factorisant"], [/\bmis en évidence\b/g, "mis en facteur"],
 ];
 function frThouPart(t, tex) {
   return tex ? frTimes(t.replace(/\\text\{['’]\}/g, "\\,").replace(/(\d)['’](?=\d{3}(?!\d))/g, "$1\\,"))
@@ -145,7 +149,7 @@ function frLocal(s) {
 }
 /* Énoncés de questions seulement (25.11 soir : « Collège de Genève » devenait « Collège de Lyon » dans la présentation
    aux enseignants) : les lieux suisses d'un énoncé deviennent français ; l'interface et les pages genevoises, jamais. */
-const FR_QWORDS = [[/\bGenève\b/g, "Lyon"]];
+const FR_QWORDS = [[/\bGenève–Berne\b/g, "Lyon–Grenoble"] /* 26.11 soir : « trajet Lyon–Berne » */, [/\bGenève\b/g, "Lyon"], [/\bLa Brévine\b/g, "Mouthe"] /* 26.11 soir : village du Jura suisse ; Mouthe (Doubs), son équivalent français */];
 function frLocalQ(s) { const r = frLocal(s); return typeof r === "string" ? FR_QWORDS.reduce((a, [re, by]) => a.replace(re, by), r) : r; }
 
 // Difficulté maximale (1 = bases, 3 = approfondi) : on ne demande pas la section à l'élève ;
