@@ -87,7 +87,7 @@ Verdicts : **au niveau** ; **remonté** (niveau 1 corrigé le 25.11) ; **ajout**
 Le niveau 1 des notions du CO reprises en MP est tiré au niveau 2 (`UPMP`, `engine.js`) ; le niveau 2 ne monte pas
 (contrairement au Collège), car les épreuves CFPT restent au niveau 2–3 de l'app.
 
-### MP 1re (grade 12) — 58 notions
+### MP 1re (grade 12) — 59 notions (58 + droitesrem le 26.11)
 
 | Ch. | Notion | N1 | N2 | N3 | N4 | Étalon | Remarque |
 |---|---|---|---|---|---|---|---|
@@ -139,6 +139,7 @@ Le niveau 1 des notions du CO reprises en MP est tiré au niveau 2 (`UPMP`, `eng
 | GE | angles | remonté | au niveau | au niveau | au niveau | E-GE-2 | N1 « complément de 25° » (9e) → N2 (angle au centre, inscrit) |
 | GE | cercthales | remonté | au niveau | au niveau | au niveau | E-GE-2 | |
 | GE | geocomb | remonté | au niveau | au niveau | au niveau | E-GE-1 | N1 « écran 5 × 12 » (Pythagore direct) → N2 |
+| GE | droitesrem | **ajout** (26.11) | au niveau | au niveau, sans inscrit ni orthocentre | au niveau | Chap04 | S2.GE.02 ; voir § 6 |
 | TR | trigo | au niveau | au niveau | au niveau | au niveau | E-TR-1 | |
 | TR | trigexact | au niveau | au niveau | au niveau | au niveau | E-TR-1 | |
 | SY | sys2 | remonté | au niveau | au niveau | au niveau | E-SY-1 | N1 « x + y = 3, x − y = −7 » → N2 (« −4x − 5y = 9, −6x + 2y = −15 ») |
@@ -177,7 +178,7 @@ Le niveau 1 des notions du CO reprises en MP est tiré au niveau 2 (`UPMP`, `eng
 | AD | quartiles | au niveau | au niveau | au niveau | au niveau | E-AD-1 | |
 
 Aucune notion n'est « trop difficile pour la MP » : niveaux 3 et défis restent dans le registre des épreuves CFPT
-(2 à 4 étapes, nombres simples). Aucun chapitre vide : CN (19), CA (11), EQ (9), GE (9), TR (2), SY (4), FO (4) en MP 1re ;
+(2 à 4 étapes, nombres simples). Aucun chapitre vide : CN (19), CA (11), EQ (9), GE (9 ; 10 avec droitesrem, 26.11), TR (2), SY (4), FO (4) en MP 1re ;
 FA (6), FQ (5), TG (7), AD (3) en MP 2e. Avant l'audit, le chapitre CN de MP 1re n'avait ni la hiérarchie des opérations
 (S1.CN.06), ni la notation scientifique (S1.CN.04, T11 Q6–Q8), ni la simplification des racines (S1.CN.14, T11 Q9) :
 ces notions étaient traitées comme des notions antérieures du CO.
@@ -215,3 +216,20 @@ ces notions étaient traitées comme des notions antérieures du CO.
    la 2e Collège (hors du périmètre de cet audit).
 8. **Banques riches** : MP 1re n'a qu'une banque (cnmp1, calcul numérique) ; les chapitres CA, EQ, GE, SY, FO de MP 1re
    tirent leurs sujets de préparation des banques génériques.
+
+## 6. Trous du référentiel MP comblés (26.11, agent trousmp)
+
+- **S1.CN.04** (passer d'une écriture à l'autre) : rattaché à `fracconv` et `sci`, déjà notions de l'année de MP 1re
+  depuis le 25.11 (`src/ch_mp1.js`) mais sans motif MP. Formes vérifiées par tirages : fraction ↔ décimal ↔ %, nombres
+  périodiques, % successifs (N3, défi « trois magasins »), notation scientifique ↔ décimal, conversions d'unités en
+  notation scientifique (N2–N3), défis astronomie / microscopie.
+- **S2.GE.02** (médiane, bissectrice, médiatrice) : `droitesrem` ouverte en MP 1re, semestre 2 (`MP: [12, "S2"]`,
+  rang et chapitre GE déjà dans `ORDRE.MP`). Étalon : polycopié MP1 Chap04 « Droites remarquables du triangle »
+  (définitions, points de concours, G aux 2/3, triangle isocèle ; l'exercice du polycopié est une construction).
+  Gardé : N1 CG, GM, cercle circonscrit du triangle rectangle ; N2 médiane depuis BG, hauteur (angle BAH), angle BIC des
+  bissectrices ; N3 équilatéral (rayon exact), angle AIB, isocèle (Pythagore puis 2/3), point de la médiatrice
+  (Pythagore) ; N4 défis (triangle rectangle : cercle circonscrit, G, hauteur). Écarté pour la filière MP (`HORS_MP`,
+  `src/engine.js`, par ctx) : rayon du cercle inscrit par la formule r = (a + b − c)/2 (pas au cours) et angle BHC à
+  l'orthocentre (quadrilatère à deux angles droits) ; ces formes restent au Collège. Pas de `UPMP` (notion propre au PEE).
+- **S5.EA.04** (équations paramétriques avancées, facultatif) : `eqparam` niveaux 2–3 (Δ = 0, infinité, écart des
+  solutions, seuil), notion de MP 1re déjà au catalogue des MP 3e.

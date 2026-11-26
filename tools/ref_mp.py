@@ -36,7 +36,6 @@ STATUTS = ["PEC", "*", "facultatif"]
 NIVEAUX = {
     "fracadd": {"S1.CN.04": [], "S1.CN.10": [1]},  # pas de changement d'écriture (décimale, pourcentage) dans fracadd
     "affine": {"S3.FA.06": []},  # la réciproque est la notion recipaff
-    "droitesrem": {"S2.GE.02": []},  # notion hors du catalogue MP (constructions du Collège)
 }
 
 # Rattachements ajoutés (26.11) : notions propres à la MP sans motif (soutien de MP 1re–2e, rangées par
@@ -44,6 +43,7 @@ NIVEAUX = {
 # niveaux 1 et 2. Lu dans les savoir-faire par niveau (comps) de chaque notion ; à valider par l'enseignant.
 AJOUTS = {
     # MP 1re–2e : notions de soutien
+    "S1.CN.04": ["fracconv", "sci"],  # 26.11 (agent trousmp) : écritures fraction ↔ décimal ↔ %, notation scientifique (ch_mp1.js)
     "S1.CN.06": ["fracops@3"], "S1.CN.07": ["divcrit", "premiers@1"], "S1.CN.08": ["premiers"], "S1.CN.10": ["fracsimp"],
     "S1.CN.11": ["fracops@12"], "S1.CA.04": ["parenth"], "S1.EQ.01": ["eqfrac", "eqspec"], "S1.EQ.04": ["eq2fact"],
     "S2.GE.04": ["pythfig"], "S2.GE.05": ["pythrec"], "S2.GE.08": ["cercthales"], "S2.GE.09": ["geocomb"],
@@ -52,7 +52,7 @@ AJOUTS = {
     "S3.FQ.01": ["f2formes@1"], "S3.FQ.02": ["f2formes"], "S3.FQ.05": ["f2trois"],
     "S4.TG.03": ["trigassoc"], "S4.TG.06": ["triaire"], "S4.TG.08": ["trigeq2"],
     # MP 3e (S5–S6)
-    "S5.EA.01": ["eqabs"], "S5.EA.02": ["eq2disc"], "S5.EA.03": ["eqbic"], "S5.EA.05": ["eqirrmp"], "S5.EA.06": ["eqratmp"],
+    "S5.EA.01": ["eqabs"], "S5.EA.02": ["eq2disc"], "S5.EA.03": ["eqbic"], "S5.EA.04": ["eqparam@23"], "S5.EA.05": ["eqirrmp"], "S5.EA.06": ["eqratmp"],
     "S5.EA.07": ["eqratmp@3"], "S5.PL.01": ["puiss"], "S5.PL.02": ["puisrat@1"], "S5.PL.03": ["puisrat@23"],
     "S5.PL.04": ["logdef@1"], "S5.PL.05": ["logdef@12"], "S5.PL.06": ["logprop"],
     "S6.EL.01": ["eqexp"], "S6.EL.02": ["eqlog"], "S6.EL.03": ["croissexp"],

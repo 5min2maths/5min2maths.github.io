@@ -108,7 +108,7 @@ try {
   // 8. Profils suisses inchangés : catalogue identique à celui d'avant le chantier (empreinte du 25.11, mise à jour le 25.11 soir :
   //    chapitres CO d'origine pour les notions anciennes du Collège et de la MP, dénominations par système ; à mettre à jour
   //    seulement si le catalogue suisse change volontairement ; 25.11, agent col34 : 3e–4e complétées, profil MA1 par défaut) et aucune notion française au catalogue suisse
-  const FP = { college9: [45, "1hr7vsb"], college10: [78, "2vzk0f"], college11: [103, "bd24is"], college12: [145, "4ucppo"], college13: [178, "59sqo6"], college14: [203, "1joekym"], college15: [221, "m4m3ce"], mp12: [123, "wh4ovj"], mp13: [144, "13ef2yz"], mp14: [156, "88b75g"], mp15: [169, "11mfydm"] };
+  const FP = { college9: [45, "1hr7vsb"], college10: [78, "2vzk0f"], college11: [103, "bd24is"], college12: [145, "4ucppo"], college13: [178, "59sqo6"], college14: [203, "1joekym"], college15: [221, "m4m3ce"], mp12: [124, "12rjzzk"], mp13: [145, "r3qdmm"], mp14: [157, "wazach"], mp15: [170, "lfy5b3"] }; /* 26.11 (agent trousmp) : MP +1 notion, droitesrem (S2.GE.02) ; Collège et CO inchangés */
   const hsh = (t) => { let x = 5381; for (const c of t) x = ((x * 33) ^ c.charCodeAt(0)) >>> 0; return x.toString(36); };
   const NEWFR = ["expderiv", "trigrad", "droitenorm", "linfn", "cos4e", "thales4e", "autodnb", "vecgeo", "tabvar", "lnfr", "trigfr", "tvi", "sommeva", "recurrence"];
   for (const [k, [n, fp]] of Object.entries(FP)) { const t = k.replace(/\d+/, ""), g = +k.replace(/\D+/, ""), c = Engine.catalog({ system: "CH", grade: g, track: t });

@@ -6,7 +6,8 @@
 (function () {
   const out = [], bad = [];
   const ok = (c, m) => { if (!c) bad.push(m); };
-  /* Comptes de tools/ref_mp.py (26.11) : 150 objectifs ; MP 1re 62 (S1–S2), 2e 30, 3e 22, 4e 36 ; 139 rattachés. */
+  /* Comptes de tools/ref_mp.py (26.11) : 150 objectifs ; MP 1re 62 (S1–S2), 2e 30, 3e 22, 4e 36 ; 142 rattachés
+     (26.11, agent trousmp : + S1.CN.04 fracconv et sci, S2.GE.02 droitesrem ouverte en MP 1re, S5.EA.04 eqparam). */
   const EXP = [[12, 62], [13, 30], [14, 22], [15, 36]];
   const P = (grade) => ({ system: "CH", grade, track: "mp", minutes: 5 });
   const overflow = () => {
@@ -42,8 +43,18 @@
       ok(!hors.length, lab + " : « Me tester » hors catalogue MP : " + hors.join(", "));
       out.push(lab + " " + linked.length + "/" + L.length);
     }
-    ok(linkedAll === Object.keys(REF_MP.q).length && linkedAll >= 139, "couverture : " + linkedAll + " objectifs rattachés sur 150 (attendu 139, tous ceux de REF_MP.q)");
+    ok(linkedAll === Object.keys(REF_MP.q).length && linkedAll >= 142, "couverture : " + linkedAll + " objectifs rattachés sur 150 (attendu 142, tous ceux de REF_MP.q)");
     out.push("couverture " + linkedAll + "/150");
+    /* 26.11 (agent trousmp) : trous comblés. S1.CN.04 et S2.GE.02 rattachés à des notions de l'année de MP 1re ;
+       droitesrem ouverte en MP 1re (S2), sans les formes hors du cours MP (HORS_MP : cercle inscrit par formule,
+       orthocentre), qui restent proposées au Collège. */
+    for (const [c, ids] of [["S1.CN.04", ["fracconv", "sci"]], ["S2.GE.02", ["droitesrem"]], ["S5.EA.04", ["eqparam@23"]]]) ok(JSON.stringify(REF_MP.q[c]) === JSON.stringify(ids), c + " : rattachement " + JSON.stringify(REF_MP.q[c]));
+    { const dr = Engine.catalog(P(12)).find((x) => x.id === "droitesrem");
+      ok(dr && dr.current && dr.theme === Engine.catalog(P(12)).find((x) => x.id === "euclide").theme, "droitesrem : notion de l'année de MP 1re, chapitre Géométrie");
+      const ctxs = (p) => { const st = { profile: p }, n = {}; for (let k = 0; k < 60; k++) { const q = Engine.make(st, "droitesrem", 3); n[q.ctx] = (n[q.ctx] || 0) + 1; } return n; };
+      const mp = ctxs(P(12)), col = ctxs({ system: "CH", grade: 12, track: "college", minutes: 5 });
+      ok(!mp.inscrit && !mp.orthocentre && Object.keys(mp).length >= 3, "droitesrem MP 1re : formes du niveau 3 " + JSON.stringify(mp));
+      ok(col.inscrit || col.orthocentre, "droitesrem 1re Collège : formes inscrit et orthocentre perdues " + JSON.stringify(col)); }
     /* Années précédentes : chaque objectif n'apparaît qu'une fois sur l'écran d'un élève de MP 4e. */
     const all4 = [4, 3, 2, 1].flatMap((y) => Referentiel.list(P(15), y).map((r) => r.code));
     ok(all4.length === 150 && new Set(all4).size === 150, "MP 4e : 150 objectifs en tout, sans doublon (" + all4.length + ")");

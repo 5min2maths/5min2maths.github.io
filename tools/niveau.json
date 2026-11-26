@@ -1683,7 +1683,16 @@
   "plan": "M1C08 · 1.GE.04a–d : droites remarquables",
   "etalon": "tools/niveau_1c.md E8.3",
   "audit": "24.11.2026",
-  "verdict": "au niveau"
+  "verdict": "au niveau",
+  "par_classe": {
+   "MP 1re": {
+    "classe": "MP 1re",
+    "plan": "S2.GE.02 : médiane, bissectrice, médiatrice (ajoutée à l'année ; inscrit et orthocentre écartés, HORS_MP)",
+    "etalon": "tools/niveau_mp12.md § 6 ; polycopié MP1 Chap04 « Droites remarquables du triangle »",
+    "audit": "26.11.2026",
+    "verdict": "au niveau ; inscrit et orthocentre écartés en MP (HORS_MP)"
+   }
+  }
  },
  "exactes": {
   "classe": "1re Collège",
