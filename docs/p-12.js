@@ -1137,7 +1137,7 @@
             traps: [TX(linP(a, -b), "Attention au signe de b : b = f(x) − a·x."), TX(linP(b, a), "La pente multiplie x ; b est le terme constant.")] }); },
       () => { const a = nz(-5, 5), b = nz(-8, 8), x = nz(-6, 6), v = a * x + b;
         return QN("Soit " + M("f(x) = " + lin(a, b)) + ". Quel nombre a pour image " + M(v) + " ? (Résous " + M("f(x) = " + v) + ".)", x, M(lin(a, b) + " = " + v) + ", " + M(a + "x = " + (v - b)) + ", " + M("x = " + x) + ".",
-          { ctx: "antecedent", guide: [GN(M(a + "x") + " = ? (on retire " + M(b) + ")", v - b, M(a + "x = " + (v - b)) + "."), GN(M("x") + " = ?", x, M("x = " + x) + ".")], traps: [{ v: a * v + b, m: "On cherche un antécédent (le x), pas l'image de " + v + "." }, { v: (v + b) / a, m: "Pour isoler ax, on soustrait b." }] }); },
+          { ctx: "antecedent", guide: [GN(M(a + "x") + " = ? (on retire " + M(b) + ")", v - b, M(a + "x = " + (v - b)) + "."), GN(M("x") + " = ?", x, M("x = " + x) + ".")], traps: [{ v: a * v + b, m: "On cherche une préimage (le x), pas l'image de " /* 26.11 soir : « préimage » en Suisse (FR_WORDS → antécédent en France) */ + v + "." }, { v: (v + b) / a, m: "Pour isoler ax, on soustrait b." }] }); },
       () => { const a = pk([-2, -1, 1, 2, 0.5, -0.5, 3]), b = R.int(-3, 3);
         return QN("Lis sur le graphique la pente de la droite.", a, "En avançant de " + (Number.isInteger(a) ? 1 : 2) + " vers la droite, la droite " + (a > 0 ? "monte" : "descend") + " de " + Math.abs(Number.isInteger(a) ? a : 2 * a) + " : " + M("a = " + fT(a)) + ".",
           { ctx: "graphe", fig: FIG.plot([{ f: (x) => a * x + b }], [[0, b, ""], [Number.isInteger(a) ? 1 : 2, b + (Number.isInteger(a) ? a : 2 * a), ""]], { numbers: true }), guide: [GN("Entre les deux points marqués, de combien avance-t-on horizontalement ?", Number.isInteger(a) ? 1 : 2, Number.isInteger(a) ? "De 1." : "De 2."), GN("Et de combien monte-t-on (négatif si on descend) ?", Number.isInteger(a) ? a : 2 * a, M(Number.isInteger(a) ? a : 2 * a) + "."), GN("Pente = montée ÷ avancée ?", a, M("a = " + fT(a)) + ".")],
@@ -4576,7 +4576,9 @@
     () => ({ ctx: "premier-impair", P: M("n") + " est premier", Q: M("n") + " est impair", nP: M("n") + " n'est pas premier", nQ: M("n") + " est pair", pq: false, qp: false, why: "2 est premier et pair ; 9 est impair et pas premier" }),
   ];
   const swap = (s) => (R.rand() < 0.5 ? s : { ...s, P: s.Q, Q: s.P, nP: s.nQ, nQ: s.nP, pq: s.qp, qp: s.pq });
-  const ctxOf = (s) => (/[xy]/.test(s.P + s.Q) && !/ABC/.test(s.P + s.Q) ? "(" + M("x") + " et " + M("y") + " sont des réels)" : /ABC/.test(s.P + s.Q) ? "" : "(" + M("n") + " est un entier naturel)");
+  /* 26.11 soir (vraisemblance) : « si x = 8, alors x² = 64 (x et y sont des réels) » : y absent ; espace avant le point (« » . ») */
+  const ctxOf = (s) => { const t = s.P + s.Q, mt = (t.match(/\\\([\s\S]*?\\\)/g) || []).join(" ").replace(/\\[a-zA-Z]+/g, " "), hx = /x/.test(mt), hy = /y/.test(mt);
+    return /ABC/.test(t) ? "" : hx && hy ? " (" + M("x") + " et " + M("y") + " sont des réels)" : hx ? " (" + M("x") + " est un réel)" : hy ? " (" + M("y") + " est un réel)" : " (" + M("n") + " est un entier naturel)"; };
   const LIFE = [
     { c: "parapluie", H: "il pleut quand Léa sort", C: "Léa prend son parapluie", nH: "il ne pleut pas quand Léa sort", nC: "Léa n'a pas son parapluie" },
     { c: "jazz", H: "Sam aime le jazz", C: "Sam écoute souvent du jazz", nH: "Sam n'aime pas le jazz", nC: "Sam n'écoute pas souvent de jazz" },
@@ -4588,13 +4590,13 @@
     1: [
       /* P ⇒ Q, Q ⇒ P : lesquelles sont vraies ? */
       () => { const s = swap(pk(PAIRS)()), ans = [s.pq ? 1 : 0, s.qp ? 2 : 0].filter((x) => x);
-        return QSet("On considère les énoncés P : « " + s.P + " » et Q : « " + s.Q + " » " + ctxOf(s) + ". Lesquelles de ces implications sont vraies ?" + liste([M("P " + IMPL + " Q"), M("Q " + IMPL + " P")]) + "<br>" + ASK_NUM, ans,
+        return QSet("On considère les énoncés P : « " + s.P + " » et Q : « " + s.Q + " »" + ctxOf(s) + ". Lesquelles de ces implications sont vraies ?" + liste([M("P " + IMPL + " Q"), M("Q " + IMPL + " P")]) + "<br>" + ASK_NUM, ans,
           "(1) " + (s.pq ? "vraie" : "fausse") + ", (2) " + (s.qp ? "vraie" : "fausse") + " : " + s.why + "." + (ans.length === 2 ? " On écrit " + M("P \\Leftrightarrow Q") + "." : ""),
           { ctx: "sens-" + s.ctx, guide: [GSet("Pour chaque implication, cherche un contre-exemple (hypothèse vraie, conclusion fausse). Lesquelles sont vraies ?", ans, s.why + ".")],
             traps: [ans.length === 2 ? TSt([1], "La réciproque est vraie aussi : c'est une équivalence.") : TSt([1, 2], "Une des deux a un contre-exemple : " + s.why + "."), ans.length === 1 ? TSt([3 - ans[0]], "C'est l'autre sens qui est vrai.") : null, ans.length ? TNone("Teste avec un exemple : l'hypothèse vraie entraîne-t-elle la conclusion ?") : TSt([1], "Contre-exemple : " + s.why + ".")] }); },
       /* reconnaître la réciproque ou la contraposée */
       () => { let s; do s = pk(PAIRS)(); while (!s.pq); const want = pk(["réciproque", "contraposée"]), opts = sh([["rec", "si " + s.Q + ", alors " + s.P], ["contra", "si " + s.nQ + ", alors " + s.nP], ["inv", "si " + s.nP + ", alors " + s.nQ]]), k = opts.findIndex((o) => o[0] === (want === "réciproque" ? "rec" : "contra")) + 1;
-        return QN("Implication : « si " + s.P + ", alors " + s.Q + " » " + ctxOf(s) + ". Laquelle de ces phrases est sa " + want + " ?" + liste(opts.map((o) => "« " + o[1] + " »")) + "<br>Écris son numéro.", k,
+        return QN("Implication : « si " + s.P + ", alors " + s.Q + " »" + ctxOf(s) + ". Laquelle de ces phrases est sa " + want + " ?" + liste(opts.map((o) => "« " + o[1] + " »")) + "<br>Écris son numéro.", k,
           "La réciproque échange hypothèse et conclusion ; la contraposée les échange et les nie : « si " + s.nQ + ", alors " + s.nP + " ». La " + want + " est la phrase (" + k + ").",
           { ctx: "reconnaitre-" + (want === "réciproque" ? "rec" : "contra"), shownOk: true, guide: [GS(want === "réciproque" ? "Réciproque : on échange hypothèse et conclusion. Numéro ?" : "Contraposée : on échange ET on nie les deux. Numéro ?", k, "(" + k + ").")],
             traps: opts.map((o, i) => (o[0] === (want === "réciproque" ? "rec" : "contra") ? null : TR(i + 1, o[0] === "inv" ? "Celle-ci nie sans échanger : ce n'est ni la réciproque ni la contraposée." : o[0] === "rec" ? "C'est la réciproque (échange sans négation)." : "C'est la contraposée (échange et négation)."))) }); },
@@ -4609,7 +4611,7 @@
     2: [
       /* combien d'énoncés vrais parmi implication, réciproque, contraposée */
       () => { const s = swap(pk(PAIRS)()), n = (s.pq ? 2 : 0) + (s.qp ? 1 : 0);
-        return QN("Implication : « si " + s.P + ", alors " + s.Q + " » " + ctxOf(s) + ". Parmi cette implication, sa réciproque et sa contraposée, combien sont vraies ?", n,
+        return QN("Implication : « si " + s.P + ", alors " + s.Q + " »" + ctxOf(s) + ". Parmi cette implication, sa réciproque et sa contraposée, combien sont vraies ?", n,
           "L'implication est " + (s.pq ? "vraie" : "fausse") + ", donc sa contraposée aussi ; la réciproque est " + (s.qp ? "vraie" : "fausse") + " (" + s.why + "). Total : " + M(n) + ".",
           { ctx: "compte-" + s.ctx, guide: [GS("Combien parmi l'implication et sa contraposée (elles ont toujours la même valeur) : 0 ou 2 ?", s.pq ? 2 : 0, s.pq ? "Les deux sont vraies." : "Les deux sont fausses."), GS("Total avec la réciproque ?", n, M(n) + ".")],
             traps: [TR(s.pq ? (s.qp ? 2 : 3) : s.qp ? 2 : 1, "Une implication et sa contraposée sont toujours vraies ensemble ou fausses ensemble."), TR(s.pq ? 1 : 2, "Teste aussi la réciproque séparément.")] }); },
@@ -4810,7 +4812,7 @@
     2: [
       () => { const h = nz(-2, 2), k = R.int(-1, 2), r = pk([2, 3]), v = [h - r, h + r];
         const fig = FIG.plot([], [[h, k, "C"]], { numbers: true, xr: [-6, 6], yr: [-5, 5], circles: [[h, k, r]], maxH: 260, label: "cercle de centre C" });
-        return QSet("La figure montre le cercle de centre " + M("C(" + h + " \\,;\\, " + k + ")") + " et de rayon " + M(r) + ". Pour quelles abscisses " + M("a") + " la droite verticale " + M("x = a") + " touche-t-elle le cercle en un seul point ?", v,
+        return QSet("La figure montre le cercle de centre " + M("C(" + h + " \\,;\\, " + k + ")") + " et de rayon " + M(r) + ". Pour quelles valeurs de " + M("a") + " la droite verticale " + M("x = a") + " touche-t-elle le cercle en un seul point ?", v,
           "Une droite verticale coupe le cercle en deux points tant qu'elle passe entre les bords gauche et droit ; elle le touche en un seul point aux bords, à une distance " + M(r) + " du centre : " + M("a = " + h + " - " + r + " = " + (h - r)) + " et " + M("a = " + h + " + " + r + " = " + (h + r)) + ". Entre les deux, chaque " + M("x") + " a deux « images » : ce n'est pas le graphe d'une fonction.",
           { ctx: "cercle-verticales", fig,
             guide: [GR("Abscisse du centre ?", h, M(h) + "."), GR("Rayon ?", r, M(r) + "."), GSet("Abscisses cherchées ?", v, M((h - r) + " \\,;\\, " + (h + r)) + ".")],

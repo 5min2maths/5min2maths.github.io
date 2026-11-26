@@ -2107,7 +2107,7 @@
     // La boîte en carton
     () => { const [L, l, xs] = pk([[16, 10, 2], [24, 9, 2], [21, 16, 3], [45, 24, 5], [40, 25, 5]]), x2 = (L * l) / (12 * xs), Vm = xs * (L - 2 * xs) * (l - 2 * xs), V1 = (L - 2) * (l - 2);
       return X({ id: "optimderiv", lv: 2, titre: "La boîte en carton",
-        q: "Dans une plaque de carton de " + M(L + "\\ \\text{cm} \\times " + l + "\\ \\text{cm}") + ", on découpe un carré de côté " + M("x") + " cm à chaque coin, puis on plie les bords pour obtenir une boîte sans couvercle.",
+        q: "Dans une plaque de carton de " + M(L) + " cm sur " + M(l) + " cm, on découpe un carré de côté " + M("x") + " cm à chaque coin, puis on plie les bords pour obtenir une boîte sans couvercle.",
         parts: [{ label: "Exprime le volume " + M("V(x)") + " de la boîte ; pour quelles valeurs de " + M("x") + " a-t-il un sens ? Calcule " + M("V(1)") + ".", pts: 1 }, { label: "Calcule " + M("V'(x)") + ".", pts: 1 }, { label: "Pour quelle valeur de " + M("x") + " le volume est-il maximal ? Justifie.", pts: 2 }, { label: "Quel est ce volume maximal ?", pts: 1 }],
         sol: ul([M("V(x) = x(" + L + " - 2x)(" + l + " - 2x)") + " pour " + M("0 \\lt x \\lt " + FR(l / 2)) + " ; " + M("V(1) = " + N(V1)) + " cm³.", "En développant, " + M("V(x) = " + poly([4, -2 * (L + l), L * l, 0])) + ", donc " + M("V'(x) = " + poly([12, -4 * (L + l), L * l])) + ".", M("V'(x) = 0") + " pour " + M("x = " + xs) + " ou " + M("x = " + FR(x2)) + " ; la seconde est hors du domaine. " + M("V'") + " passe de + à − en " + M(xs) + " : maximum.", M("V(" + xs + ") = " + xs + " \\cdot " + (L - 2 * xs) + " \\cdot " + (l - 2 * xs) + " = " + N(Vm)) + " cm³."]),
         chk: [[V1, N(V1)], [xs, N(xs)], [x2, FRp(x2)], [Vm, N(Vm)]] }); },
