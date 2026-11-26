@@ -765,7 +765,9 @@
     ["le QI d'une personne prise au hasard", [100], [15], "qi"],
     ["la note (sur 100) d'un candidat à un examen", [60, 62, 65], [8, 10], "examen"]];
   const nPick = () => { const c = pk(NCTX); return { c, mu: pk(c[1]), s: pk(c[2]) }; };
-  const nIntro = (o, noParam) => "On note " + M("X") + " " + o.c[0] + (noParam ? " ; " + M("X") + " suit une loi normale. " : " ; " + M("X") + " suit une loi normale de moyenne " + M("\\mu = " + nb(o.mu)) + " et d'écart-type " + M("\\sigma = " + nb(o.s)) + ". ");
+  /* 27.11 (recalcul, agent recalc34) : les probabilités attendues sont celles de la règle 68-95-99,7 (68 %, 16 %…), mais l'énoncé
+     ne le disait pas : l'élève qui calculait avec Φ (68,27 %, 31,7 % au dixième…) était refusé. La règle est maintenant rappelée. */
+  const nIntro = (o, noParam, noRule) => "On note " + M("X") + " " + o.c[0] + (noParam ? " ; " + M("X") + " suit une loi normale. " : " ; " + M("X") + " suit une loi normale de moyenne " + M("\\mu = " + nb(o.mu)) + " et d'écart-type " + M("\\sigma = " + nb(o.s)) + ". ") + (noRule ? "" : "Utilise la règle 68-95-99,7. ");
   const pc = (v) => M(nb(v) + "\\,\\%");
   const kS = (k) => (k === 1 ? "un écart-type" : k + " écarts-types");
   const NO = {
@@ -797,7 +799,7 @@
           { ctx: "trouver-sigma", guide: [GS("Moyenne " + M("\\mu") + " (milieu de l'intervalle) ?", o.mu, M(nb(o.mu)) + "."), GS("Demi-largeur de l'intervalle ?", k * o.s, M(nb(b) + " - " + nb(o.mu) + " = " + nb(k * o.s)) + "."), GS("Combien d'écarts-types dans cette demi-largeur ?", k, M(k) + "."), GS(M("\\sigma") + " ?", o.s, M(nb(o.s)) + ".")],
             traps: [TR(k * o.s, "C'est " + kS(k) + " : divise par " + k + "."), TR(b - a, "C'est la largeur totale."), TR(((b - a) / 2) / (k === 2 ? 1 : 2), "Pour " + nb(PCT[k]) + " %, la demi-largeur vaut " + k + "σ.")] })); },
       () => { const o = nPick(), z = pk([1.5, -1.5, 2.5, -2.5, 0.5, -0.5, 2, -2, 3]), x = o.mu + z * o.s; if (!Number.isInteger(x)) return null;
-        return chk(QN(nIntro(o) + "Calcule la valeur centrée réduite " + M("z = \\frac{x - \\mu}{\\sigma}") + " de " + M("x = " + nb(x)) + ". (décimal accepté)", z, M("z = \\frac{" + nb(x) + " - " + nb(o.mu) + "}{" + nb(o.s) + "} = \\frac{" + nb(x - o.mu) + "}{" + nb(o.s) + "} = " + nb(z)) + " : " + M(nb(x)) + " est à " + dS(Math.abs(z)) + " écart(s)-type(s) " + (z > 0 ? "au-dessus" : "en dessous") + " de la moyenne.",
+        return chk(QN(nIntro(o, false, true) + "Calcule la valeur centrée réduite " + M("z = \\frac{x - \\mu}{\\sigma}") + " de " + M("x = " + nb(x)) + ". (décimal accepté)", z, M("z = \\frac{" + nb(x) + " - " + nb(o.mu) + "}{" + nb(o.s) + "} = \\frac{" + nb(x - o.mu) + "}{" + nb(o.s) + "} = " + nb(z)) + " : " + M(nb(x)) + " est à " + dS(Math.abs(z)) + " écart(s)-type(s) " + (z > 0 ? "au-dessus" : "en dessous") + " de la moyenne.",
           { ctx: "centrer-reduire", guide: [GS(M("x - \\mu") + " ?", x - o.mu, M(nb(x - o.mu)) + "."), GS(M("z") + " ?", z, M(nb(z)) + ".")],
             traps: [TR(x - o.mu, "Divise encore par l'écart-type."), TR(-z, "Attention au signe : x − μ."), TR(r6(x / o.s - o.mu), "On centre d'abord (x − μ), puis on divise par σ.")] })); },
     ],
@@ -1358,9 +1360,12 @@
             traps: [TR((n1 * s1 + n2 * s2) / N, "On ne fait pas la moyenne des écarts-types : l'écart entre les deux moyennes ajoute de la dispersion."), TR(Math.sqrt((n1 * s1 * s1 + n2 * s2 * s2) / N), "Il manque la dispersion entre les groupes (les moyennes " + m1 + " et " + m2 + " diffèrent)."), TR((s1 + s2) / 2, "Les effectifs et l'écart entre les moyennes comptent.")] })); },
       () => { const muA = R.int(40, 60), sA = R.int(4, 8), xA = muA + pk([-1, 1]) * R.int(1, 2 * sA), muB = R.int(60, 80), sB = pk([6, 9, 10, 12, 15].filter((x) => x !== sA)), z = (xA - muA) / sA, v = muB + sB * z, nmA = pk(["Léa", "Noé", "Inès"]);
         if (Math.abs(z) < 0.2) return null;
-        return chk(QR(nmA + " obtient " + M(xA) + " points à un test A (moyenne " + M(muA) + ", écart-type " + M(sA) + "). Quel score au test B (moyenne " + M(muB) + ", écart-type " + M(sB) + ") correspond à la même position par rapport aux autres candidats, c'est-à-dire à la même valeur centrée réduite (" + RND[0.1] + ") ?", v, 0.1,
+        /* 27.11 (recalcul, agent recalc34) : v tombait parfois pile entre deux dixièmes (72 − 1,25 · 15 = 53,25) et 53,2 était aussi
+           accepté : réponse attendue = l'arrondi au dixième (demi vers le haut, comme le corrigé). */
+        const v1 = Math.round(+(v * 10).toFixed(6)) / 10;
+        return chk(QR(nmA + " obtient " + M(xA) + " points à un test A (moyenne " + M(muA) + ", écart-type " + M(sA) + "). Quel score au test B (moyenne " + M(muB) + ", écart-type " + M(sB) + ") correspond à la même position par rapport aux autres candidats, c'est-à-dire à la même valeur centrée réduite (" + RND[0.1] + ") ?", v1, 0.1,
           M("z = \\frac{" + xA + " - " + muA + "}{" + sA + "} = " + fT(z)) + " ; au test B : " + M(muB + " + " + fT(z) + " \\cdot " + sB + " \\approx " + dT(v, 1)) + " points.",
-          { ctx: "centree-reduite", guide: [GS("Valeur centrée réduite " + M("z") + " au test A ?", z, M(fT(z)) + "."), GS("Score équivalent au test B (" + RND[0.1] + ") ?", v, M("\\approx " + dT(v, 1)) + ".", 0.1)],
+          { ctx: "centree-reduite", guide: [GS("Valeur centrée réduite " + M("z") + " au test A ?", z, M(fT(z)) + "."), GS("Score équivalent au test B (" + RND[0.1] + ") ?", v1, M("\\approx " + dT(v, 1)) + ".", 0.1)],
             traps: [TR(xA + muB - muA, "Il faut aussi tenir compte de la dispersion : z = (x − μ) ÷ σ."), TR((muB * xA) / muA, "Ce n'est pas une proportion : on garde le même nombre d'écarts-types."), TR(z, "C'est la valeur centrée réduite z ; convertis-la en score du test B.")] })); },
     ],
   };

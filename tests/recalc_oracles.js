@@ -2661,5 +2661,5 @@ const RECALC = (() => {
     }
     return out;
   }
-  return { check, truncSpec, tex2e, roots, rounding, solHas, RULES, fmt, saisie };
+  return { check, truncSpec, tex2e, roots, rounding, solHas, RULES, fmt, saisie, G /* 27.11 (agent recalc34) : oracles ajoutés par tests/recalc_oracles34.js */, compile, ev };
 })();
