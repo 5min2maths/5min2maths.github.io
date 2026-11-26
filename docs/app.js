@@ -135,7 +135,7 @@ const FR_WORDS = [
 ];
 function frThouPart(t, tex) {
   return tex ? frTimes(t.replace(/\\text\{['’]\}/g, "\\,").replace(/(\d)['’](?=\d{3}(?!\d))/g, "$1\\,"))
-    : t.replace(/\\text\{['’]\}/g, "\u202f").replace(/(\d)['’](?=\d{3}(?!\d))/g, "$1\u202f").replace(/(\d|\))\s·\s(?=[\d(]|[a-zA-Z](?![A-Za-zÀ-ÿ]))/g, "$1 × ").replace(/(^|[^A-Za-zÀ-ÿ0-9])([a-zA-Z])\s·\s(?=[\d(]|[a-zA-Z](?![A-Za-zÀ-ÿ]))/g, "$1$2 × "); /* 25.11 soir : produit seulement (nombres, lettres isolées, parenthèses), pas les séparateurs de l'interface (« Mathélo · provisoire ») */
+    : t.replace(/\\text\{['’]\}/g, "\u202f").replace(/(\d)['’](?=\d{3}(?!\d))/g, "$1\u202f").replace(/(\d|\)|\?)\s·\s(?=[\d(?]|[a-zA-Z](?![A-Za-zÀ-ÿ]))/g, "$1 × ").replace(/(^|[^A-Za-zÀ-ÿ0-9])([a-zA-Z])\s·\s(?=[\d(]|[a-zA-Z](?![A-Za-zÀ-ÿ]))/g, "$1$2 × "); /* 25.11 soir : produit seulement (nombres, lettres isolées, parenthèses), pas les séparateurs de l'interface (« Mathélo · provisoire ») */
 }
 /* 25.11 (décision de l'enseignant) : en France, le produit s'écrit × et non avec le point médian. Le produit scalaire
    (formule avec \vec ou \overrightarrow) garde son point. */
@@ -727,7 +727,7 @@ function checkAnswer(spec, input) {
       }
       /* 26.11 (revue élèves, A11 : 12,2262409946 accepté pour 120√3/17) : racine exacte demandée (spec.radical, pas d'arrondi prévu) :
          un décimal de calculatrice (4 décimales ou plus, moins de 15 chiffres) n'est pas la valeur exacte. */
-      if (spec.radical && /^-?\d+\.\d{4,}$/.test(raw) && raw !== String(+spec.value) /* valeur stockée arrondie par le générateur */ && raw.replace(/\D/g, "").replace(/^0+/, "").length < 15 && !/^-?\d+(\.\d{1,8})?$/.test(String(+(+spec.value).toPrecision(12)))) return { status: "form", message: "C'est une valeur approchée ; donne la valeur exacte (fraction, racine ou π)." };
+      if ((spec.radical || spec.exact) /* 26.11 (revue p3, n° 12) : « valeur exacte » demandée */ && /^-?\d+\.\d{4,}$/.test(raw) && raw !== String(+spec.value) /* valeur stockée arrondie par le générateur */ && raw.replace(/\D/g, "").replace(/^0+/, "").length < 15 && !/^-?\d+(\.\d{1,8})?$/.test(String(+(+spec.value).toPrecision(12)))) return { status: "form", message: "C'est une valeur approchée ; donne la valeur exacte (fraction, racine ou π)." };
       if (spec.radical) {
         // a√b, et aussi a√b/c, (a√b)/c, a/√b (20.11 : √21/5 ou √2/2 étaient refusés) ; « sqrt » tapé au clavier = √.
         const rr = raw.replace(/sqrt/gi, "√").replace(/^\((.*)\)(\/\d+)$/, "$1$2");
@@ -1515,7 +1515,8 @@ const colonBreak = (s) => {
     /* 26.11 (revue élèves, B10 : « Les x² ⏎ 3x² ; les x ⏎ 3x ») : entre deux formules, on ne coupe après « : » que si une
        vraie phrase (3 mots au moins) précède la formule ; sinon le « : » reste sur la ligne. */
     const phrase = i > 0 && (String(parts[i - 2] || "").split(/[.;!?]|<br>/).pop().match(/\p{L}{2,}/gu) || []).length >= 3;
-    if (i > 0) t = t.replace(/^\s*:\s+(?=\S)/, "<br>").replace(/^\s*:\s*$/, i + 1 < parts.length && phrase ? "<br>" : " : "); /* juste après une formule (26.11 soir, n° 9 : espace après « : ») */
+    /* 26.11 (revue p3, n° 7 : « en divisant par x⏎« x = 5 » ») : un « : » avant une citation reste « : ». */
+    if (i > 0) t = t.replace(/^\s*:\s+(?=«)/, " : ").replace(/^\s*:\s+(?=[^\s«])/, "<br>").replace(/^\s*:\s*$/, i + 1 < parts.length && phrase ? "<br>" : " : "); /* juste après une formule (26.11 soir, n° 9 : espace après « : ») */
     t = t.replace(/(^|[.!?]\s+|<br>)([^.!?<:]*?=[^.!?<:]*?[0-9A-Za-zÀ-ÿ²³⁴)\]]) : (?=\S)/g, "$1$2<br>"); // « x = 3 : … »
     // « Divisibles par 9 : 117, 126 » se lit « 9 ÷ 117 » : on garde les deux-points et on passe à la ligne.
     t = t.replace(/([0-9)²³°]) : (?=[-−0-9(]|$)/g, "$1 :<br>");
@@ -2269,7 +2270,7 @@ const PROB = {
     const V = Math.PI * r * r * hh, m = V * rho;
     return { fig: FIG.cylinder("r = " + r, "h = " + hh), q: "Une pièce en " + mat + " (" + M("\\rho = " + dec(rho)) + " g/cm³) est un cylindre de rayon " + M(r) + " cm et de hauteur " + M(hh) + " cm.",
       parts: [{ label: "a) Volume (cm³, au centième)", spec: { kind: "value", value: V, round: 0.01, exactOk: true } }, { label: "b) Masse (g, au centième)", spec: { kind: "value", value: m, round: 0.01 } }, { label: "c) Nombre de pièces complètes dans 10 kg", spec: { kind: "value", value: Math.floor(10000 / m) } }],
-      hints: ["Volume du cylindre, puis masse = masse volumique · volume. Attention : 10 kg = 10 000 g.", "V = π · " + r + "² · " + hh + " ; m = " + dec(rho) + " · V ; pièces = partie entière de 10 000 / m."],
+      hints: ["Volume du cylindre, puis masse = masse volumique · volume. Attention : 10 kg = 10'000 g.", "V = π · " + r + "² · " + hh + " ; m = " + dec(rho) + " · V ; pièces = partie entière de 10 000 / m."],
       sol: "a) " + M(r * r * hh + "\\pi \\approx " + dec(r2(V))) + " cm³. b) " + M("\\approx " + dec(r2(m))) + " g. c) " + M("10\\,000 : " + dec(r2(m)) + " \\approx " + dec(r2(10000 / m))) + ", donc " + M(Math.floor(10000 / m)) + " pièces." };
   },
   sys2() {
@@ -2324,7 +2325,7 @@ const PROB = {
     const k = R.pick([20, 25, 50, 100]), lm = R.int(4, 15), am = R.int(6, 40), vm = R.int(2, 9);
     return { fig: FIG.scaling(3, "1 : " + k), q: "Une maquette de bâtiment est à l'échelle " + M("1\\,:\\, " + k) + ".",
       parts: [{ label: "a) Un mur mesure " + lm + " cm sur la maquette : longueur réelle (m)", spec: { kind: "value", value: (lm * k) / 100 } }, { label: "b) Une pièce mesure " + am + " cm² sur la maquette : aire réelle (m²)", spec: { kind: "value", value: (am * k * k) / 10000 } }, { label: "c) Une cuve de " + vm + " cm³ sur la maquette : volume réel (m³)", spec: { kind: "value", value: (vm * k ** 3) / 1e6 } }],
-      hints: ["Longueurs × " + decTxt(k) + ", aires × " + decTxt(k) + "², volumes × " + decTxt(k) + "³.", "Puis convertis : 1 m = 100 cm, 1 m² = 10 000 cm², 1 m³ = 1 000 000 cm³."],
+      hints: ["Longueurs × " + decTxt(k) + ", aires × " + decTxt(k) + "², volumes × " + decTxt(k) + "³.", "Puis convertis : 1 m = 100 cm, 1 m² = 10'000 cm², 1 m³ = 1'000'000 cm³."],
       sol: "a) " + M(lm * k + " \\text{ cm} = " + dec((lm * k) / 100)) + " m. b) " + M(am + " \\cdot " + k * k + " = " + am * k * k + " \\text{ cm}^2 = " + dec((am * k * k) / 10000)) + " m². c) " + M(vm + " \\cdot " + k ** 3 + " = " + vm * k ** 3 + " \\text{ cm}^3 = " + dec((vm * k ** 3) / 1e6)) + " m³." };
   },
 };
@@ -3592,7 +3593,7 @@ FINE.push(
     lesson: ["Fraction d'une quantité", "Prendre les trois quarts de 20, c'est partager 20 en 4 parts égales et en prendre 3.", "Pour calculer les \\(\\frac{a}{b}\\) de \\(n\\), on divise \\(n\\) par \\(b\\) (une part), puis on multiplie par \\(a\\). En une ligne, cela donne \\(n \\div b \\cdot a\\). À l'envers, si les \\(\\frac{3}{5}\\) d'un nombre valent 18, alors un cinquième vaut \\(18 \\div 3 = 6\\) et le nombre vaut \\(6 \\cdot 5 = 30\\).", ["Les \\(\\frac{3}{4}\\) de \\(20\\) valent \\(20 \\div 4 \\cdot 3 = 15\\).", "\\(\\frac{2}{3}\\) de 24 élèves sont des filles : 16 filles, 8 garçons"], "Lis bien la question : on demande parfois ce qui reste, pas la part prise."],
     g: [
       () => { const b = R.int(3, 9), a = R.int(2, b - 1), k = R.int(2, 9); if (gcd(a, b) !== 1) return GEN.fractout(1); return QV("Calcule les " + M("\\frac{" + a + "}{" + b + "}") + " de " + M(b * k) + ".", a * k, M(b * k + " \\div " + b + " = " + k) + ", puis " + M(k + " \\cdot " + a + " = " + a * k) + ".", { guide: [GS(M("\\frac{1}{" + b + "}") + " de " + b * k + " : " + M(b * k + " \\div " + b) + " = ?", k, M(k) + "."), GS("Les " + M("\\frac{" + a + "}{" + b + "}") + " : " + M(k + " \\cdot " + a) + " = ?", a * k, M(a * k) + ".")], traps: [TRAP(k, "C'est " + "1/" + b + " ; il faut encore multiplier par " + a + "."), TRAP(b * k * a, "On divise d'abord par " + b + ", puis on multiplie par " + a + ".")] }); },
-      () => { const b = R.int(3, 6), a = R.int(1, b - 1), k = R.int(3, 6); if (gcd(a, b) !== 1) return GEN.fractout(2); return QV("Dans une classe de " + M(b * k) + " élèves, les " + M("\\frac{" + a + "}{" + b + "}") + " sont des filles. Combien y a-t-il de garçons ?", b * k - a * k, "Filles : " + M(b * k + " \\div " + b + " \\cdot " + a + " = " + a * k) + ". Garçons : " + M(b * k + " - " + a * k + " = " + (b * k - a * k)) + ".", { guide: [GS("Un " + NTH[b] + " de la classe : " + M(b * k + " \\div " + b) + " = ?", k, M(k) + " élèves."), GS("Filles : " + M(k + " \\cdot " + a) + " = ?", a * k, M(a * k) + " filles."), GS("Garçons : " + M(b * k + " - " + a * k) + " = ?", b * k - a * k, M(b * k - a * k) + " garçons.")], traps: [TRAP(a * k, "C'est le nombre de filles ; on demande les garçons."), TRAP(b * k - a, "Calcule d'abord le nombre de filles : " + b * k + " : " + b + " · " + a + ".")] }); },
+      () => { const b = R.int(3, 6), a = R.int(1, b - 1), k = R.int(3, 6); if (gcd(a, b) !== 1) return GEN.fractout(2); return QV("Dans une classe de " + M(b * k) + " élèves, les " + M("\\frac{" + a + "}{" + b + "}") + " sont des filles. Combien y a-t-il de garçons ?", b * k - a * k, "Filles : " + M(b * k + " \\div " + b + " \\cdot " + a + " = " + a * k) + ". Garçons : " + M(b * k + " - " + a * k + " = " + (b * k - a * k)) + ".", { guide: [GS("Un " + NTH[b] + " de la classe : " + M(b * k + " \\div " + b) + " = ?", k, M(k) + " élèves."), GS("Filles : " + M(k + " \\cdot " + a) + " = ?", a * k, M(a * k) + " filles."), GS("Garçons : " + M(b * k + " - " + a * k) + " = ?", b * k - a * k, M(b * k - a * k) + " garçons.")], traps: [TRAP(a * k, "C'est le nombre de filles ; on demande les garçons."), TRAP(b * k - a, "Calcule d'abord le nombre de filles : " + M(b * k + " : " + b + " \\cdot " + a) + ".")] }); },
       () => { const b = R.int(3, 8), a = R.int(2, b - 1), k = R.int(3, 9); if (gcd(a, b) !== 1) return GEN.fractout(3); return QV("Les " + M("\\frac{" + a + "}{" + b + "}") + " d'un nombre valent " + M(a * k) + ". Quel est ce nombre ?", b * k, "Un " + ["", "", "", "tiers", "quart", "cinquième", "sixième", "septième", "huitième"][b] + " vaut " + M(a * k + " \\div " + a + " = " + k) + " ; le nombre vaut " + M(k + " \\cdot " + b + " = " + b * k) + ".", { guide: [GS("Les " + a + " " + NTH[b] + (/s$/.test(NTH[b]) ? "" : "s") + " valent " + a * k + ". Un " + NTH[b] + " : " + M(a * k + " \\div " + a) + " = ?", k, M(k) + "."), GS("Le nombre contient " + b + " " + NTH[b] + (/s$/.test(NTH[b]) ? "" : "s") + " : " + M(k + " \\cdot " + b) + " = ?", b * k, M(b * k) + ".")], traps: [TRAP(a * k * a / b, "On cherche le nombre entier : un " + ["", "", "", "tiers", "quart", "cinquième", "sixième", "septième", "huitième"][b] + " vaut " + a * k + " : " + a + "."), TRAP(k, "C'est un " + ["", "", "", "tiers", "quart", "cinquième", "sixième", "septième", "huitième"][b] + " ; le nombre en contient " + b + ".")] }); },
     ] },
   { id: "ulong", theme: "gm", label: "Unités de longueur et de masse", ex: "2{,}4\\ \\text{km} = 2400\\ \\text{m}", CH: [9], codes: "9GM1\\.0[126]",
@@ -3604,7 +3605,7 @@ FINE.push(
       () => { if (R.rand() < 0.5) { const a = R.int(11, 59) / 10, b = R.int(5, 95) * 10; return QV("Calcule en mètres : " + M(dec(a) + tu("km") + " + " + b + tu("m")), fx(a * 1000 + b), M(dec(a) + tu("km") + " = " + nb(fx(a * 1000)) + tu("m")) + " ; total : " + M(nb(fx(a * 1000 + b))) + " m.", { guide: [GS(dec(a) + " km en m ?", fx(a * 1000), M(nb(fx(a * 1000))) + " m."), GS("Total en m ?", fx(a * 1000 + b), M(nb(fx(a * 1000)) + " + " + b + " = " + nb(fx(a * 1000 + b))) + " m.")], traps: [TRAP(fx(a + b), "Il faut d'abord convertir les km en m avant d'additionner."), TRAP(fx(a * 100 + b), "1 km = 1000 m, pas 100 m.")] }); } const a = R.int(11, 59) / 10, b = R.int(5, 95) * 10; return QV("Un colis de " + M(dec(a)) + " kg contient un objet de " + M(b) + " g ; le reste est l'emballage. Quelle est la masse de l'emballage, en grammes ?", fx(a * 1000 - b), M(dec(a) + tu("kg") + " = " + nb(fx(a * 1000)) + tu("g")) + " ; " + M(nb(fx(a * 1000)) + " - " + b + " = " + nb(fx(a * 1000 - b))) + " g.", { guide: [GS(dec(a) + " kg en g ?", fx(a * 1000), M(nb(fx(a * 1000))) + " g."), GS("Emballage : " + M(nb(fx(a * 1000)) + " - " + b) + " = ?", fx(a * 1000 - b), M(nb(fx(a * 1000 - b))) + " g.")], traps: [TRAP(fx(a * 100 - b), "1 kg = 1000 g, pas 100 g."), TRAP(fx(a * 1000 + b), "On cherche la masse de l'emballage : on enlève celle de l'objet.")] }); },
     ] },
   { id: "uaire", theme: "gm", label: "Unités d'aire", ex: "1\\ \\text{m}^2 = 100\\ \\text{dm}^2", CH: [9], codes: "9GM1\\.03",
-    hint: "Pour les aires, on multiplie par 100 à chaque rang : 1 m² = 100 dm² = 10 000 cm².",
+    hint: "Pour les aires, on multiplie par 100 à chaque rang : 1 m² = 100 dm² = 10'000 cm².",
     lesson: ["Unités d'aire", "Un carré de 1 m de côté contient \\(10 \\cdot 10 = 100\\) carrés de 1 dm de côté.", "D'une unité d'aire à la suivante : \\(\\cdot\\,100\\). \\(1\\ \\text{m}^2 = 100\\ \\text{dm}^2 = 10'000\\ \\text{cm}^2\\). \\(1\\ \\text{ha} = 10'000\\ \\text{m}^2\\), \\(1\\ \\text{a} = 100\\ \\text{m}^2\\).", ["\\(2{,}5\\ \\text{m}^2 = 250\\ \\text{dm}^2\\)", "\\(3\\ \\text{ha} = 30'000\\ \\text{m}^2\\)"], "\\(1\\ \\text{m}^2\\) ne vaut pas \\(100\\ \\text{cm}^2\\), mais \\(10'000\\ \\text{cm}^2\\)."],
     g: [
       () => { const c = R.pick([["m^2", "dm^2"], ["dm^2", "cm^2"], ["cm^2", "mm^2"]]), v = R.int(12, 950) / 10; return QV("Convertis " + M(dec(v) + tu(c[0])) + " en " + M(tu(c[1]).trim()) + ".", fx(v * 100), "Pour les aires, " + M("\\cdot\\,100") + " par rang : " + M(dec(v) + " \\cdot 100 = " + nb(fx(v * 100))) + ".", { guide: [GS("Aires : 1 rang = ×100 (10 · 10 petits carrés). " + M("1" + tu(c[0]) + " = \\;?" + tu(c[1])), 100, M("1" + tu(c[0]) + " = 100" + tu(c[1])) + "."), GS(M(dec(v) + " \\cdot 100") + " = ?", fx(v * 100), M(nb(fx(v * 100))) + ".")], traps: [TRAP(fx(v * 10), "Pour les aires, on multiplie par 100 à chaque rang (un carré de 1 sur 1 contient 10 · 10 petits carrés), pas par 10."), TRAP(fx(v * 1000), "× 1000 par rang, c'est pour les volumes ; pour les aires, c'est × 100."), TRAP(fx(v / 100), "Vers une unité plus petite, on multiplie.")], plain: true, fig: FIG.areaSquare("1 " + c[0].replace("^2", "²")) }); },
@@ -3679,9 +3680,9 @@ FINE.push(
     hint: "Dans un tableau de proportionnalité, on passe d'une ligne à l'autre en multipliant toujours par le même nombre.",
     lesson: ["Reconnaître la proportionnalité", "Deux grandeurs sont proportionnelles si l'une s'obtient en multipliant l'autre par un nombre fixe.", "Ce nombre est le coefficient de proportionnalité : on le trouve en divisant une valeur de la 2e ligne par la valeur correspondante de la 1re.", ["\\(2 \\to 7\\) et \\(6 \\to 21\\) : coefficient \\(3{,}5\\)", "\\(4 \\to 10\\), donc \\(6 \\to 15\\) (coefficient \\(2{,}5\\))"], "Ajouter le même nombre partout ne donne pas une proportionnalité : \\(2 \\to 5\\) et \\(4 \\to 7\\) n'est pas proportionnel."],
     g: [
-      () => { const k = R.int(3, 9), a = R.int(2, 6), b = a + R.int(1, 5); if (k === a || k === b) return GEN.proptab(1); return QV("Dans un tableau de proportionnalité, " + M(a) + " correspond à " + M(k * a) + " et " + M(b) + " à " + M(k * b) + ". Par quel nombre multiplie-t-on la première ligne ?", k, M(k * a + " : " + a + " = " + k) + " (et " + M(k * b + " : " + b + " = " + k) + ").", { guide: [GS("Coefficient = 2e ligne : 1re ligne = " + M(k * a + " : " + a) + " = ?", k, M(k) + " (vérifie : " + M(k * b + " : " + b + " = " + k) + ").")], traps: [TRAP(k * a - a, "On cherche un facteur (on multiplie), pas une différence."), TRAP(k * b - k * a, "C'est l'écart entre deux nombres de la 2e ligne ; le coefficient : " + k * a + " : " + a + ".")] }); },
-      () => { const k = R.pick([1.5, 2.5, 3.5, 0.5, 0.4, 0.75, 1.2]), a = R.pick([4, 8, 12, 20]), b = a + R.pick([4, 8, 20]); return QV("Dans un tableau de proportionnalité, " + M(a) + " correspond à " + M(dec(fx(k * a))) + " et " + M(b) + " à " + M(dec(fx(k * b))) + ". Quel est le coefficient de proportionnalité (de la première à la deuxième ligne) ?", k, M(dec(fx(k * a)) + " : " + a + " = " + dec(k)) + ".", { guide: [GS("Coefficient = " + M(dec(fx(k * a)) + " : " + a) + " = ?", k, M(dec(k)) + ".")], traps: [TRAP(r6(1 / k), "Dans l'autre sens : on divise la 2e ligne par la 1re, " + dec(fx(k * a)) + " : " + a + "."), TRAP(r6(fx(k * a) - a), "On cherche un facteur, pas une différence.")] }); },
-      () => { const k = R.pick([1.5, 2.5, 3.5]), a = R.pick([2, 4, 6]), b = a + R.pick([2, 4, 6, 8]); return QV("Le tableau est un tableau de proportionnalité : " + M(a + " \\to " + fx(k * a)) + " et " + M(b + " \\to \\; ?") + ". Quel nombre manque ?", fx(k * b), "Coefficient : " + M(fx(k * a) + " : " + a + " = " + dec(k)) + ". Donc " + M(b + " \\cdot " + dec(k) + " = " + dec(fx(k * b))) + ".", { guide: [GS("Coefficient : " + M(fx(k * a) + " : " + a) + " = ?", k, M(dec(k)) + "."), GS("Nombre manquant : " + M(b + " \\cdot " + dec(k)) + " = ?", fx(k * b), M(dec(fx(k * b))) + ".")], traps: [TRAP(fx(k * a + (b - a)), "Proportionnalité : on multiplie par le coefficient, on n'ajoute pas."), TRAP(fx(k * a * b), "Calcule d'abord le coefficient : " + fx(k * a) + " : " + a + ".")] }); },
+      () => { const k = R.int(3, 9), a = R.int(2, 6), b = a + R.int(1, 5); if (k === a || k === b) return GEN.proptab(1); return QV("Dans un tableau de proportionnalité, " + M(a) + " correspond à " + M(k * a) + " et " + M(b) + " à " + M(k * b) + ". Par quel nombre multiplie-t-on la première ligne ?", k, M(k * a + " : " + a + " = " + k) + " (et " + M(k * b + " : " + b + " = " + k) + ").", { guide: [GS("Coefficient = 2e ligne : 1re ligne = " + M(k * a + " : " + a) + " = ?", k, M(k) + " (vérifie : " + M(k * b + " : " + b + " = " + k) + ").")], traps: [TRAP(k * a - a, "On cherche un facteur (on multiplie), pas une différence."), TRAP(k * b - k * a, "C'est l'écart entre deux nombres de la 2e ligne ; le coefficient : " + M(k * a + " : " + a) + ".")] }); },
+      () => { const k = R.pick([1.5, 2.5, 3.5, 0.5, 0.4, 0.75, 1.2]), a = R.pick([4, 8, 12, 20]), b = a + R.pick([4, 8, 20]); return QV("Dans un tableau de proportionnalité, " + M(a) + " correspond à " + M(dec(fx(k * a))) + " et " + M(b) + " à " + M(dec(fx(k * b))) + ". Quel est le coefficient de proportionnalité (de la première à la deuxième ligne) ?", k, M(dec(fx(k * a)) + " : " + a + " = " + dec(k)) + ".", { guide: [GS("Coefficient = " + M(dec(fx(k * a)) + " : " + a) + " = ?", k, M(dec(k)) + ".")], traps: [TRAP(r6(1 / k), "Dans l'autre sens : on divise la 2e ligne par la 1re, " + M(dec(fx(k * a)) + " : " + a) + "."), TRAP(r6(fx(k * a) - a), "On cherche un facteur, pas une différence.")] }); },
+      () => { const k = R.pick([1.5, 2.5, 3.5]), a = R.pick([2, 4, 6]), b = a + R.pick([2, 4, 6, 8]); return QV("Le tableau est un tableau de proportionnalité : " + M(a + " \\to " + fx(k * a)) + " et " + M(b + " \\to \\; ?") + ". Quel nombre manque ?", fx(k * b), "Coefficient : " + M(fx(k * a) + " : " + a + " = " + dec(k)) + ". Donc " + M(b + " \\cdot " + dec(k) + " = " + dec(fx(k * b))) + ".", { guide: [GS("Coefficient : " + M(fx(k * a) + " : " + a) + " = ?", k, M(dec(k)) + "."), GS("Nombre manquant : " + M(b + " \\cdot " + dec(k)) + " = ?", fx(k * b), M(dec(fx(k * b))) + ".")], traps: [TRAP(fx(k * a + (b - a)), "Proportionnalité : on multiplie par le coefficient, on n'ajoute pas."), TRAP(fx(k * a * b), "Calcule d'abord le coefficient : " + M(fx(k * a) + " : " + a) + ".")] }); },
     ] },
   { id: "change", theme: "fa", label: "Taux de change", ex: "1\\ \\text{EUR} = 0{,}95\\ \\text{CHF}", CH: [9], codes: "9FA1\\.03",
     hint: "Écris le taux comme une règle de trois : 1 EUR → t CHF. On multiplie dans un sens, on divise dans l'autre.",
@@ -3696,7 +3697,7 @@ FINE.push(
     lesson: ["Agrandir, réduire", "Un agrandissement garde la forme : toutes les longueurs sont multipliées par le même nombre.", "Facteur \\(= \\frac{\\text{longueur image}}{\\text{longueur de départ}}\\). Plus grand que 1 : agrandissement ; plus petit que 1 : réduction.", ["\\(4\\ \\text{cm} \\to 10\\ \\text{cm}\\) : facteur \\(2{,}5\\)", "Avec ce facteur, \\(6\\ \\text{cm} \\to 15\\ \\text{cm}\\)"], "On multiplie, on n'ajoute pas : ajouter 6 cm à chaque côté déforme la figure."],
     g: [
       () => { const k = R.pick([1.5, 2, 2.5, 3, 0.5, 4]), a = 2 * R.int(2, 8); return QV("Sur une photocopie, une longueur de " + M(a) + " cm devient " + M(dec(fx(a * k))) + " cm. Par quel nombre les longueurs ont-elles été multipliées ?", k, M(dec(fx(a * k)) + " : " + a + " = " + dec(k)) + ".", { guide: [GS("Facteur = nouvelle longueur : ancienne longueur = " + M(dec(fx(a * k)) + " : " + a) + " = ?", k, M(dec(k)) + ".")], traps: [TRAP(fx(a * k - a), "On cherche un facteur (on divise), pas une différence."), TRAP(fx(1 / k), "Dans l'autre sens : nouvelle longueur : ancienne longueur.")], fig: FIG.scaling(k, "?") }); },
-      () => { const k = R.pick([1.5, 2.5, 3, 4]), a = 2 * R.int(2, 6), b = a + 2 * R.int(1, 4); return QV("On agrandit une photo de " + M(a) + " cm sur " + M(b) + " cm : sa largeur passe de " + M(a) + " cm à " + M(fx(a * k)) + " cm. Quelle est sa nouvelle longueur (en cm) ?", fx(b * k), "Facteur : " + M(fx(a * k) + " : " + a + " = " + dec(k)) + ". Longueur : " + M(b + " \\cdot " + dec(k) + " = " + dec(fx(b * k))) + " cm.", { guide: [GS("Facteur : " + M(fx(a * k) + " : " + a) + " = ?", k, M(dec(k)) + "."), GS("Nouvelle longueur : " + M(b + " \\cdot " + dec(k)) + " = ?", fx(b * k), M(dec(fx(b * k))) + " cm.")], traps: [TRAP(fx(b + (a * k - a)), "Agrandir, c'est multiplier toutes les longueurs par le même nombre, pas ajouter."), TRAP(fx(b * k * k), "Calcule d'abord le facteur : " + fx(a * k) + " : " + a + ".")] }); },
+      () => { const k = R.pick([1.5, 2.5, 3, 4]), a = 2 * R.int(2, 6), b = a + 2 * R.int(1, 4); return QV("On agrandit une photo de " + M(a) + " cm sur " + M(b) + " cm : sa largeur passe de " + M(a) + " cm à " + M(fx(a * k)) + " cm. Quelle est sa nouvelle longueur (en cm) ?", fx(b * k), "Facteur : " + M(fx(a * k) + " : " + a + " = " + dec(k)) + ". Longueur : " + M(b + " \\cdot " + dec(k) + " = " + dec(fx(b * k))) + " cm.", { guide: [GS("Facteur : " + M(fx(a * k) + " : " + a) + " = ?", k, M(dec(k)) + "."), GS("Nouvelle longueur : " + M(b + " \\cdot " + dec(k)) + " = ?", fx(b * k), M(dec(fx(b * k))) + " cm.")], traps: [TRAP(fx(b + (a * k - a)), "Agrandir, c'est multiplier toutes les longueurs par le même nombre, pas ajouter."), TRAP(fx(b * k * k), "Calcule d'abord le facteur : " + M(fx(a * k) + " : " + a) + ".")] }); },
       () => { const [n, d] = R.pick([[3, 4], [2, 3], [3, 5], [2, 5], [5, 4], [4, 3]]), a = d * R.int(2, 5), b = d * R.int(6, 9); return QV("On transforme un plan : un segment de " + M(a) + " cm devient un segment de " + M(a * n / d) + " cm. Que devient un segment de " + M(b) + " cm (en cm) ?", b * n / d, "Facteur : " + M("\\frac{" + a * n / d + "}{" + a + "} = \\frac{" + n + "}{" + d + "}") + ". " + M(b + " \\cdot \\frac{" + n + "}{" + d + "} = " + b * n / d) + " cm.", { guide: [GS("Facteur (nouveau : ancien) " + M(a * n / d + " : " + a) + " = ? (fraction)", n / d, M("\\frac{" + n + "}{" + d + "}") + "."), GS("Nouveau segment : " + M(b + " \\cdot \\frac{" + n + "}{" + d + "}") + " = ?", b * n / d, M(b * n / d) + " cm.")], traps: [TRAP(b + (a * n / d - a), "On multiplie toutes les longueurs par le même nombre, on n'ajoute pas."), TRAP(b * d / n, "Le facteur est " + n + "/" + d + " (nouveau : ancien), pas l'inverse.")] }); },
     ] },
   { id: "litelab", theme: "fa", label: "Écrire une expression littérale", ex: "\\text{le triple de } x \\text{ plus } 5 : \\; 3x + 5", CH: [9], again: [10, 11], codes: "9FA2\\.0[13]|10FA1\\.0[1345]|11FA2\\.0[134]",
@@ -4925,8 +4926,8 @@ V34("fracadd",
 );
 // --- Proportionnalité ---
 V("proptab", 1,
-  () => { const k = R.int(3, 12), a = R.int(2, 9); return QV("Dans un tableau de proportionnalité, " + a + " correspond à " + a * k + ". Par quel nombre multiplie-t-on la première ligne pour obtenir la seconde ?", k, M(a * k + " : " + a + " = " + k) + ".", { guide: [GS("Coefficient = " + M(a * k + " : " + a) + " = ?", k, M(k) + ".")], traps: [TRAP(a * k - a, "On cherche un facteur, pas une différence."), TRAP(r6(a / (a * k)), "Dans l'autre sens : " + a * k + " : " + a + ".")] }); },
-  () => { const p = nonInt(() => d1(1.2, 4.8)), m = R.int(3, 9); return QV(M(m) + " kg de pommes coûtent " + M(chf(r6(p * m))) + " CHF. Quel est le coefficient de proportionnalité de la masse au prix (le prix d'un kilo, en CHF) ?", p, M(chf(r6(p * m)) + " : " + m + " = " + dec(p)) + " CHF par kilo.", { guide: [GS("Prix d'un kilo = " + M(chf(r6(p * m)) + " : " + m) + " = ?", p, M(dec(p)) + " CHF.")], traps: [TRAP(r6(1 / p), "Du poids au prix : prix : masse, pas l'inverse."), TRAP(r6(p * m), "C'est le prix total ; le coefficient est le prix d'un kilo.")] }); },
+  () => { const k = R.int(3, 12), a = R.int(2, 9); return QV("Dans un tableau de proportionnalité, " + a + " correspond à " + a * k + ". Par quel nombre multiplie-t-on la première ligne pour obtenir la seconde ?", k, M(a * k + " : " + a + " = " + k) + ".", { guide: [GS("Coefficient = " + M(a * k + " : " + a) + " = ?", k, M(k) + ".")], traps: [TRAP(a * k - a, "On cherche un facteur, pas une différence."), TRAP(r6(a / (a * k)), "Dans l'autre sens : " + M(a * k + " : " + a) + ".")] }); },
+  () => { const p = nonInt(() => d1(1.2, 4.8)), m = R.int(3, 9); return QV(M(m) + " kg de pommes coûtent " + M(chf(r6(p * m))) + " CHF. Quel est le coefficient de proportionnalité de la masse au prix (le prix d'un kilo, en CHF) ?", p, M(chf(r6(p * m)) + " : " + m + " = " + dec(p)) + " CHF par kilo.", { guide: [GS("Prix d'un kilo = " + M(chf(r6(p * m)) + " : " + m) + " = ?", p, M(dec(p)) + " CHF.")], traps: [TRAP(r6(1 / p), "Du poids au prix : prix ÷ masse, pas l'inverse."), TRAP(r6(p * m), "C'est le prix total ; le coefficient est le prix d'un kilo.")] }); },
 );
 V("proptab", 2,
   () => { const per = R.pick([4, 5, 8]), g = R.pick([200, 250, 300, 500]); return QV("Une recette demande " + g + " g de farine pour " + per + " personnes. Quelle quantité de farine faut-il par personne (en g) ?", r6(g / per), M(g + " : " + per + " = " + dec(r6(g / per))) + " g : c'est le coefficient.", { guide: [GS("Farine par personne = " + M(g + " : " + per) + " = ?", r6(g / per), M(dec(r6(g / per))) + " g.")], traps: [TRAP(g * per, "Une personne a besoin de moins : on divise."), TRAP(r6(per / g), "On divise la farine par le nombre de personnes, pas l'inverse.")] }); },
@@ -4937,16 +4938,16 @@ V34("proptab",
   () => { const a = R.int(2, 6), b = R.pick([2, 3, 4, 5, 6].filter((v) => v !== a)), u = R.int(3, 9); /* 24.11 : a ≠ b (colonne répétée) */ return QV("Tableau de proportionnalité : " + M(a + " \\to " + a * u) + " et " + M(b + " \\to " + b * u) + ". Quel nombre correspond à " + (a + b) + " ?", (a + b) * u, "On additionne les colonnes : " + M(a * u + " + " + b * u + " = " + (a + b) * u) + ".", { guide: [GS("La colonne " + (a + b) + " est la somme des colonnes " + a + " et " + b + ". Additionne leurs images : " + M(a * u + " + " + b * u) + " = ?", (a + b) * u, M((a + b) * u) + ".")], traps: [TRAP(a * u * b * u, "On additionne les colonnes : " + a * u + " + " + b * u + "."), TRAP((a + b) * u + u, "On additionne les colonnes : " + a * u + " + " + b * u + ".")] }); },
 );
 V("prop", 1,
-  () => { const p = nonInt(() => d1(1.2, 3.8)), a = R.int(2, 4), b = R.int(5, 9); return QV(M(a) + " kg de pommes coûtent " + M(chf(r6(p * a))) + " CHF. Combien coûtent " + M(b) + " kg (en CHF) ?", r6(p * b), "Un kilo : " + M(chf(p)) + " CHF ; " + M(b + " \\cdot " + chf(p) + " = " + chf(r6(p * b))) + " CHF.", { guide: [GS("Prix d'un kilo : " + M(chf(r6(p * a)) + " : " + a) + " = ? (en CHF)", p, M(chf(p)) + " CHF."), GS("Prix de " + b + " kg ?", r6(p * b), M(b + " \\cdot " + chf(p) + " = " + chf(r6(p * b))) + " CHF.")], traps: [TRAP(r6(p * a + (b - a)), "Proportionnalité : on multiplie, on n'ajoute pas la différence des masses."), TRAP(r6(p * a * b), "Calcule d'abord le prix d'un kilo : " + chf(r6(p * a)) + " : " + a + ".")] }); },
+  () => { const p = nonInt(() => d1(1.2, 3.8)), a = R.int(2, 4), b = R.int(5, 9); return QV(M(a) + " kg de pommes coûtent " + M(chf(r6(p * a))) + " CHF. Combien coûtent " + M(b) + " kg (en CHF) ?", r6(p * b), "Un kilo : " + M(chf(p)) + " CHF ; " + M(b + " \\cdot " + chf(p) + " = " + chf(r6(p * b))) + " CHF.", { guide: [GS("Prix d'un kilo : " + M(chf(r6(p * a)) + " : " + a) + " = ? (en CHF)", p, M(chf(p)) + " CHF."), GS("Prix de " + b + " kg ?", r6(p * b), M(b + " \\cdot " + chf(p) + " = " + chf(r6(p * b))) + " CHF.")], traps: [TRAP(r6(p * a + (b - a)), "Proportionnalité : on multiplie, on n'ajoute pas la différence des masses."), TRAP(r6(p * a * b), "Calcule d'abord le prix d'un kilo : " + M(chf(r6(p * a)) + " : " + a) + ".") /* 26.11 (revue p3, n° 6) : division en formule (÷ au rendu) */] }); },
   () => { const c = R.int(5, 8), a = R.int(2, 4) * 10, b = R.int(5, 9) * 10; return QV("Une voiture consomme " + (c * a) / 10 + " L pour " + a * 10 + " km. Combien consomme-t-elle pour " + b * 10 + " km (en L) ?", (c * b) / 10, "Pour 10 km : " + dT(c / 10) + " L ; pour " + b * 10 + " km : " + M(dec((c * b) / 10)) + " L.", { guide: [GS("Consommation pour 10 km : " + M(dec((c * a) / 10) + " : " + a) + " = ? (en L)", c / 10, M(dec(c / 10)) + " L."), GS("Pour " + b * 10 + " km (" + b + " fois 10 km) ?", (c * b) / 10, M(b + " \\cdot " + dec(c / 10) + " = " + dec((c * b) / 10)) + " L.")], traps: [TRAP((c * a) / 10 + (b - a), "Proportionnalité : on multiplie, on n'ajoute pas."), TRAP((c * a * b) / 10, "Calcule d'abord la consommation pour 10 km.")] }); },
 );
 V("prop", 2,
-  () => { const r = R.int(4, 12) * 10, h1 = R.int(2, 4), h2 = R.int(5, 8); return QV("En " + h1 + " h, une machine fabrique " + r * h1 + " pièces. Combien en fabrique-t-elle en " + h2 + " h ?", r * h2, "En 1 h : " + r + " pièces ; " + M(h2 + " \\cdot " + r + " = " + r * h2) + ".", { guide: [GS("Pièces en 1 h : " + M(r * h1 + " : " + h1) + " = ?", r, M(r) + " pièces."), GS("En " + h2 + " h ?", r * h2, M(h2 + " \\cdot " + r + " = " + r * h2) + " pièces.")], traps: [TRAP(r * h1 + (h2 - h1), "Proportionnalité : on multiplie, on n'ajoute pas."), TRAP(r * h1 * h2, "Calcule d'abord la production en 1 h : " + r * h1 + " : " + h1 + ".")] }); },
+  () => { const r = R.int(4, 12) * 10, h1 = R.int(2, 4), h2 = R.int(5, 8); return QV("En " + h1 + " h, une machine fabrique " + r * h1 + " pièces. Combien en fabrique-t-elle en " + h2 + " h ?", r * h2, "En 1 h : " + r + " pièces ; " + M(h2 + " \\cdot " + r + " = " + r * h2) + ".", { guide: [GS("Pièces en 1 h : " + M(r * h1 + " : " + h1) + " = ?", r, M(r) + " pièces."), GS("En " + h2 + " h ?", r * h2, M(h2 + " \\cdot " + r + " = " + r * h2) + " pièces.")], traps: [TRAP(r * h1 + (h2 - h1), "Proportionnalité : on multiplie, on n'ajoute pas."), TRAP(r * h1 * h2, "Calcule d'abord la production en 1 h : " + M(r * h1 + " : " + h1) + ".")] }); },
   () => { const d = R.int(3, 8), t1 = R.int(2, 5), V2 = d * R.int(6, 15); return QV("Un robinet remplit " + d * t1 + " L en " + t1 + " minutes. En combien de minutes remplit-il " + V2 + " L ?", V2 / d, "Débit : " + d + " L par minute ; " + M(V2 + " : " + d + " = " + V2 / d) + " min.", { guide: [GS("Litres par minute (débit) : " + M(d * t1 + " : " + t1) + " = ?", d, M(d) + " L/min."), GS("Minutes pour " + V2 + " L : " + M(V2 + " : " + d) + " = ?", V2 / d, M(V2 / d) + " min.")], traps: [TRAP(V2 * d, "Plus de litres demande plus de temps, mais on divise par le débit."), TRAP(V2 / (d * t1), "Le débit est de " + d + " L par minute : divise par " + d + ".")] }); },
 );
 V34("prop",
   () => { const p = R.pick([12, 16, 18, 20, 24]), t = R.pick([1.5, 2.5, 0.5]), n = R.int(3, 8); return QV("Une imprimante imprime " + dT(p * t) + " pages en " + dT(t) + " minute" + (t > 1 ? "s" : "") + ". Combien de pages imprime-t-elle en " + n + " minutes ?", p * n, "En 1 minute : " + M(dec(r6(p * t)) + " : " + dec(t) + " = " + p) + " pages ; " + M(n + " \\cdot " + p + " = " + p * n) + ".", { guide: [GS("Pages en 1 minute : " + M(dec(r6(p * t)) + " : " + dec(t)) + " = ?", p, M(p) + " pages."), GS("En " + n + " minutes ?", p * n, M(n + " \\cdot " + p + " = " + p * n) + " pages.")], traps: [TRAP(r6(p * t * n), "Calcule d'abord le nombre de pages en 1 minute."), TRAP(r6(p * t + n), "Proportionnalité : on multiplie, on n'ajoute pas.")] }); },
-  () => { const k = R.int(3, 9), b = R.int(6, 12), m = R.pick([2.5, 1.5, 3.5]); return QV(M(dec(m)) + " m de tissu coûtent " + M(chf(r6(m * k))) + " CHF. Combien coûtent " + b + " m (en CHF) ?", k * b, "Un mètre : " + M(chf(r6(m * k)) + " : " + dec(m) + " = " + k) + " CHF ; " + M(b + " \\cdot " + k + " = " + k * b) + " CHF.", { guide: [GS("Prix d'un mètre : " + M(chf(r6(m * k)) + " : " + dec(m)) + " = ? (en CHF)", k, M(k) + " CHF."), GS("Prix de " + b + " m ?", k * b, M(b + " \\cdot " + k + " = " + k * b) + " CHF.")], traps: [TRAP(r6(m * k * b), "Calcule d'abord le prix d'un mètre : " + chf(r6(m * k)) + " : " + dec(m) + "."), TRAP(r6(m * k + (b - m)), "Proportionnalité : on multiplie, on n'ajoute pas.")] }); },
+  () => { const k = R.int(3, 9), b = R.int(6, 12), m = R.pick([2.5, 1.5, 3.5]); return QV(M(dec(m)) + " m de tissu coûtent " + M(chf(r6(m * k))) + " CHF. Combien coûtent " + b + " m (en CHF) ?", k * b, "Un mètre : " + M(chf(r6(m * k)) + " : " + dec(m) + " = " + k) + " CHF ; " + M(b + " \\cdot " + k + " = " + k * b) + " CHF.", { guide: [GS("Prix d'un mètre : " + M(chf(r6(m * k)) + " : " + dec(m)) + " = ? (en CHF)", k, M(k) + " CHF."), GS("Prix de " + b + " m ?", k * b, M(b + " \\cdot " + k + " = " + k * b) + " CHF.")], traps: [TRAP(r6(m * k * b), "Calcule d'abord le prix d'un mètre : " + M(chf(r6(m * k)) + " : " + dec(m)) + "."), TRAP(r6(m * k + (b - m)), "Proportionnalité : on multiplie, on n'ajoute pas.")] }); },
 );
 V("change", 1,
   () => { const t = R.pick([0.95, 0.9, 0.94, 1.05, 1.1]), e = R.int(4, 15) * 2; return QV("Un repas coûte " + e + " EUR en Italie. Le taux est 1 EUR = " + dT(t) + " CHF. Combien cela fait-il en francs ?", r6(e * t), M(e + " \\cdot " + dec(t) + " = " + dec(r6(e * t))) + " CHF.", { guide: [GS("Euros vers francs : on multiplie par " + dT(t) + ". " + M(e + " \\cdot " + dec(t)) + " = ?", r6(e * t), M(dec(r6(e * t))) + " CHF.")], traps: [TRAP(r6(e / t), "Euros vers francs : on multiplie par le taux."), TRAP(r6(e + t), "On multiplie par le taux.")] }); },
@@ -5181,7 +5182,14 @@ V("echelle", 1,
 );
 V("echelle", 2,
   () => { const k = R.int(2, 5), A0 = R.int(3, 20); return QV("Une figure agrandie dans le rapport " + k + " a une aire de " + A0 * k * k + " cm². Quelle était l'aire de la figure de départ (en cm²) ?", A0, "Les aires sont multipliées par " + M(k + "^2 = " + k * k) + " : " + M(A0 * k * k + " : " + k * k + " = " + A0) + " cm².", { guide: [GS("Les aires ont été multipliées par " + M(k + "^2") + " = ?", k * k, M(k * k) + "."), GS("Aire de départ : " + M(A0 * k * k + " : " + k * k) + " = ?", A0, M(A0) + " cm².")], traps: [TRAP(A0 * k, "Les aires sont multipliées par " + k + "² = " + k * k + ", pas par " + k + "."), TRAP(A0 * k * k * k, "Agrandir : on divise par " + k * k + " pour revenir à la figure de départ.")] }); },
-  () => { const A0 = R.int(5, 30) * 4; return QV("On réduit une figure dans le rapport " + M("\\frac{1}{2}") + ". Son aire était de " + A0 + " cm². Quelle est sa nouvelle aire (en cm²) ?", A0 / 4, "Les aires sont multipliées par " + M("\\left(\\frac{1}{2}\\right)^2 = \\frac{1}{4}") + " : " + A0 / 4 + " cm².", { guide: [GS("Les aires sont multipliées par " + M("\\left(\\frac{1}{2}\\right)^2") + " = ? (écris une fraction)", 1 / 4, M("\\frac{1}{4}") + "."), GS("Nouvelle aire : " + M(A0 + " : 4") + " = ?", A0 / 4, M(A0 / 4) + " cm².")], traps: [TRAP(A0 / 2, "Les aires sont multipliées par (1/2)² = 1/4, pas par 1/2."), TRAP(A0 / 8, "Pour une aire : (1/2)² = 1/4 ; (1/2)³ est pour les volumes.")] }); },
+  /* 26.11 (captures de la présentation : presque toujours « rapport 1/2, aires × 1/4 », diagnostic « (1/2)² = 1/4 » en texte
+     brut) : rapport p/q et objet tirés, diagnostics en formule. */
+  () => { const [p, q] = R.pick([[1, 2], [1, 3], [2, 3], [3, 4], [2, 5], [3, 5]]), A0 = q * q * R.int(2, 9), A1 = (A0 * p * p) / (q * q), o = R.pick([["une figure", "Son aire"], ["une photo", "Son aire"], ["le plan d'un jardin", "L'aire du jardin sur le plan"], ["un logo", "Son aire"]]), K = "\\frac{" + p + "}{" + q + "}", K2 = "\\frac{" + p * p + "}{" + q * q + "}";
+    return QV("On réduit " + o[0] + " dans le rapport " + M(K) + ". " + o[1] + " était de " + A0 + " cm². Quelle est la nouvelle aire (en cm²) ?", A1, "Les aires sont multipliées par " + M("\\left(" + K + "\\right)^2 = " + K2) + " : " + M(A0 + " \\cdot " + K2 + " = " + A1) + " cm².",
+      { ctx: "reduction-" + p + "-" + q, guide: [GS("Les aires sont multipliées par " + M("\\left(" + K + "\\right)^2") + " = ? (écris une fraction)", (p * p) / (q * q), M(K2) + "."), GS("Nouvelle aire : " + M(A0 + " \\cdot " + K2) + " = ?", A1, M(A1) + " cm².")],
+        traps: [TRAP((A0 * p) / q, "Les aires sont multipliées par " + M("\\left(" + K + "\\right)^2 = " + K2) + ", pas par " + M(K) + "."), TRAP((A0 * p ** 3) / q ** 3, "Pour une aire : " + M("\\left(" + K + "\\right)^2") + " ; " + M("\\left(" + K + "\\right)^3") + " est pour les volumes.")] }); },
+  () => { const k = R.pick([2, 3, 4, 5, 1.5, 2.5]), kk = r6(k * k); return QV("En agrandissant une figure, son aire est multipliée par " + M(dec(kk)) + ". Par combien ses longueurs ont-elles été multipliées ?", k, M(dec(k) + "^2 = " + dec(kk)) + " : les longueurs sont multipliées par " + M(dec(k)) + ".",
+      { ctx: "rapport-inconnu", guide: [GS("Aire multipliée par " + M("k^2") + ". Quel nombre positif " + M("k") + " vérifie " + M("k^2 = " + dec(kk)) + " ?", k, M(dec(k) + " \\cdot " + dec(k) + " = " + dec(kk)) + ".")], traps: [TRAP(kk / 2, "On cherche le nombre dont le carré vaut " + decTxt(kk) + ", pas la moitié."), TRAP(kk, "Les longueurs sont multipliées par k, les aires par " + M("k^2") + ".")] }); },
 );
 V34("echelle",
   () => { const k = R.pick([2, 3, 4, 5]); return QV("En agrandissant un cube, son volume est multiplié par " + k ** 3 + ". Par combien ses arêtes ont-elles été multipliées ?", k, M(k + "^3 = " + k ** 3) + " : les longueurs sont multipliées par " + k + ".", { guide: [GS("Volume multiplié par " + M("k^3") + ". Quel nombre k vérifie " + M("k^3 = " + k ** 3) + " ?", k, M(k + " \\cdot " + k + " \\cdot " + k + " = " + k ** 3) + ".")], traps: [TRAP(k ** 3 / 3, "Les volumes sont multipliés par le cube du rapport : on cherche k tel que k³ = " + k ** 3 + "."), TRAP(k * k, "Les volumes sont multipliés par k³, pas k².")] }); },
@@ -5804,10 +5812,10 @@ VA("domaine", 2,
       { ctx: "erreur", guide: [GS("Combien vaut 1 % du prix ? (" + M(N + " : " + t) + ")", N / t, M(nT(N / t)) + " CHF."), GS("Le prix entier (100 %) ?", X, M(nT(N / t) + " \\cdot 100 = " + nT(X)) + " CHF.")],
         traps: [TRAP(f, "C'est le calcul de " + w + " : " + N + " CHF est la partie, pas le tout."), TRAP(N + t, "On ne mélange pas des CHF et des pourcents.")] }); });
   // disque : aire calculée avec le diamètre.
-  VA("disque", 2, () => { const d = R.int(4, 16), r = d / 2, v = Math.PI * r * r, f = Math.PI * d * d, w = who(), c = R.pick(["d'un disque", "d'une pizza", "d'un tapis rond", "d'une table ronde"]);
-    return QV("Le diamètre " + c + " mesure " + M(d) + " cm. " + w + " calcule son aire : « " + M("\\pi \\cdot " + d + "^2 \\approx " + dec(Math.round(f * 10) / 10)) + " cm² ». Trouve l'erreur, puis donne l'aire (au dixième, en cm²).", v,
-      "Erreur : la formule " + M("A = \\pi r^2") + " utilise le <b>rayon</b>, la moitié du diamètre : " + M("r = " + dec(r)) + " cm. " + M("A = \\pi \\cdot " + dec(r) + "^2 \\approx " + dec(Math.round(v * 10) / 10)) + " cm² (4 fois moins que le calcul de " + w + ").",
-      { round: 0.1, ctx: "erreur", guide: [GS("Rayon (en cm) ?", r, M(dec(r)) + " cm."), GS("Aire " + M("\\pi r^2") + " ≈ ? (au dixième)", v, M("\\approx " + dec(Math.round(v * 10) / 10)) + " cm².", 0.1)],
+  VA("disque", 2, () => { /* 26.11 (revue p3, n° 4 : « table ronde de 6 cm ») : diamètre et unité selon l'objet */ const o = R.pick([["d'un disque", 4, 16, "cm"], ["d'une pizza", 12, 20, "cm", 2], ["d'un tapis rond", 8, 20, "dm"], ["d'une table ronde", 8, 16, "dm"]]), c = o[0], u = o[3], d = R.int(o[1], o[2]) * (o[4] || 1), r = d / 2, v = Math.PI * r * r, f = Math.PI * d * d, w = who();
+    return QV("Le diamètre " + c + " mesure " + M(d) + " " + u + ". " + w + " calcule son aire : « " + M("\\pi \\cdot " + d + "^2 \\approx " + dec(Math.round(f * 10) / 10)) + " " + u + "² ». Trouve l'erreur, puis donne l'aire (au dixième, en " + u + "²).", v,
+      "Erreur : la formule " + M("A = \\pi r^2") + " utilise le <b>rayon</b>, la moitié du diamètre : " + M("r = " + dec(r)) + " " + u + ". " + M("A = \\pi \\cdot " + dec(r) + "^2 \\approx " + dec(Math.round(v * 10) / 10)) + " " + u + "² (4 fois moins que le calcul de " + w + ").",
+      { round: 0.1, ctx: "erreur", guide: [GS("Rayon (en " + u + ") ?", r, M(dec(r)) + " " + u + "."), GS("Aire " + M("\\pi r^2") + " ≈ ? (au dixième)", v, M("\\approx " + dec(Math.round(v * 10) / 10)) + " " + u + "².", 0.1)],
         traps: [TRAP(f, "C'est le résultat de " + w + " : il faut le rayon, pas le diamètre."), TRAP(Math.PI * d, "Ça, c'est le périmètre du cercle.")] }); });
   // echelle : conversion cm → km avec 1 km = 1000 cm.
   VA("echelle", 2, () => clean(() => { const E = R.pick([10000, 20000, 25000, 50000]), c = R.int(5, 24) / 2, cm = r6(c * E), v = r6(cm / 100000), f = r6(cm / 1000), w = who();
@@ -10572,7 +10580,7 @@ const Curieux = {
 (function () {
   const ri = (a, b) => a + Math.floor(Math.random() * (b - a + 1)), pk = (a) => a[Math.floor(Math.random() * a.length)];
   const mil = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, "'");
-  const tm = (n) => mil(n).replace(/'/g, "\\,"); // milliers dans une formule
+  const tm = (n) => mil(n).replace(/'/g, "\\text{'}"); /* milliers dans une formule ; 26.11 (revue p3, n° 10) : ' en profil romand, espace fine en France (frLocal) */
   const svg = (w, h, g, lab) => `<svg class="fig hist-fig" viewBox="0 0 ${w} ${h}" role="img" aria-label="${lab}">${g}</svg>`;
   const T = (x, y, t, o = "") => `<text x="${x}" y="${y}" class="f-txt" text-anchor="middle" font-size="13" ${o}>${t}</text>`;
   const f1 = (v) => v.toFixed(1);
@@ -10800,8 +10808,8 @@ const Curieux = {
     { t: "Événement", titre: "John Snow et la pompe de Broad Street", lien: "Statistiques et proportions",
       txt: "Londres, 1854 : une épidémie de choléra tue plus de 500 personnes en dix jours. Le médecin John Snow note sur un plan les maisons des victimes : elles se regroupent autour d'une pompe à eau de Broad Street. On démonte la poignée de la pompe. Snow compare ensuite les décès selon la compagnie qui fournissait l'eau : c'est l'un des débuts de l'épidémiologie.",
       fig: () => svg(300, 140, `<rect x="20" y="10" width="260" height="120" class="f-soft"/><line x1="20" y1="70" x2="280" y2="70" class="f-line" stroke-width="6"/><line x1="150" y1="10" x2="150" y2="130" class="f-line" stroke-width="6"/>${[[130, 55], [140, 85], [165, 50], [170, 90], [125, 80], [160, 60], [175, 78], [135, 45], [185, 62], [115, 62], [145, 100], [190, 95]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.5" class="f-dot"/>`).join("")}<rect x="146" y="66" width="8" height="8" class="f-fill"/><line x1="157" y1="77" x2="196" y2="110" class="f-line" stroke-width="1"/>${T(212, 122, "pompe", 'font-size="12"')}`, "plan : décès regroupés autour d'une pompe"),
-      ex: () => { const N = pk([400, 500, 600, 800]), p = pk([60, 70, 75, 80, 85]);
-        return { q: `Sur ${N} victimes d'une épidémie, ${p} % habitaient à moins de 250 m de la pompe. Combien de victimes cela représente-t-il ?`, value: N * p / 100, sol: `\\(${N} \\cdot ${dec(p / 100)} = ${N * p / 100}\\) victimes.` }; } },
+      ex: () => { const N = pk([520, 560, 600]), p = pk([60, 70, 75, 80, 85]); /* 26.11 (revue p3, n° 14) : « plus de 500 » morts, comme le récit */
+        return { q: `Sur ${N} victimes de cette épidémie, ${p} % habitaient à moins de 250 m de la pompe. Combien de victimes cela représente-t-il ?`, value: N * p / 100, sol: `\\(${N} \\cdot ${dec(p / 100)} = ${N * p / 100}\\) victimes.` }; } },
   ];
 
   // Notions de l'app liées à chaque récit (même ordre que HISTOIRE ; 22.11) : en mode scolaire, la carte propose d'abord
@@ -12824,6 +12832,9 @@ function activeLesson(id, L0, cont, review, opts = {}) {
   const reveal = (el) => { el.hidden = false; el.classList.add("pop"); setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 60); };
   const finish = () => { $("skip").hidden = true; if ($("s3").hidden) { reveal($("s3")); typeset($("s3")); } $("go").hidden = false; };
   // Défi : formules \( … \) rendues (ex. fractions, 22.11), sinon texte brut.
+  /* 26.11 (revue p3, n° 5 : « Défi 1 × 5 m de tissu », profil FR) : le séparateur de l'en-tête n'est pas un point médian en
+     France (la localisation · → × le prenait pour un produit). */
+  const goalSep = () => (typeof isFR === "function" && isFR() ? " — " : " · ");
   const setGoal = (t) => { const g = $("goal"); if (t.includes("\\(")) { g.innerHTML = t; typeset(g); } else g.textContent = t; };
   let started = false;
   app.querySelectorAll("#pc button").forEach((b) => (b.onclick = () => {
@@ -12837,7 +12848,7 @@ function activeLesson(id, L0, cont, review, opts = {}) {
     play();
   }));
   function play() {
-    setGoal(X.lab(0) + " · " + A.defis[0]);
+    setGoal(X.lab(0) + goalSep() + A.defis[0]);
     reveal($("s2"));
     A.play($("play"), (k, msg) => {
       const more = k + 1 < A.defis.length;
@@ -12848,7 +12859,7 @@ function activeLesson(id, L0, cont, review, opts = {}) {
       // 22.11 (retour de l'auteur : la consigne suivante remplaçait l'ancienne sans qu'on le voie) : le défi réussi
       // reste affiché, barré, au-dessus ; la nouvelle consigne clignote et revient à l'écran.
       const g = $("goal"); $("adone").insertAdjacentHTML("beforeend", `<li>✓ ${g.innerHTML}</li>`);
-      if (more) { setGoal(X.lab(k + 1) + " · " + A.defis[k + 1]); g.classList.remove("act-new"); void g.offsetWidth; g.classList.add("act-new"); setTimeout(() => $("gfb").scrollIntoView({ behavior: "smooth", block: "nearest" }), 60); }
+      if (more) { setGoal(X.lab(k + 1) + goalSep() + A.defis[k + 1]); g.classList.remove("act-new"); void g.offsetWidth; g.classList.add("act-new"); setTimeout(() => $("gfb").scrollIntoView({ behavior: "smooth", block: "nearest" }), 60); }
       else { $("goal").textContent = X.fin; burst(); finish(); }
     });
   }
@@ -13926,21 +13937,43 @@ const MOCK_LV = {
 // Sujet de qualité (15.11, « pas seulement du drill ») : si le chapitre révisé a sa banque d'exercices riches
 // (riche.js), le sujet ressemble à un vrai test : A. automatismes courts, B. trois exercices en situation
 // (questions liées, donnée inutile, estimation, interprétation), C. raisonnement (trouve l'erreur, vrai ou faux, deux méthodes).
+/* 26.11 (revue élèves p3, n° 1, grave) : exercice riche permis pour le profil ? Profil français : la notion de l'exercice
+   est au programme de la classe (Engine.catalog) et le texte (trois tirages) ne contient aucun contenu hors programme
+   (horsFRTexte, src/engine.js : équation de cercle, perpendiculaire par les pentes, produit scalaire avant la 1re). */
+const richFRCat = {};
+function richOkFR(f, profile) {
+  if (!profile || profile.system !== "FR") return true;
+  const g = profile.grade, cat = (richFRCat[g] = richFRCat[g] || new Set(Engine.catalog({ system: "FR", grade: g, track: "college", minutes: 5 }).map((n) => n.id)));
+  for (const sd of [1, 2, 3]) { R.seed(sd); let x; try { x = f(); } catch (e) { return false; } if (!cat.has(x.id) || horsFRTexte(g, qTextAll(x))) return false; }
+  return true;
+}
 function richPlan(ch, ids, level) {
   const C = RICH[ch], items = [], mine = C.ids.filter((id) => ids.includes(id));
+  const prof = typeof state !== "undefined" && state && state.profile;
   /* 25.11 (audit de niveau 11e) : minA = niveau minimal des automatismes (banques de 11e dont les notions viennent de 9e-10e ; voir UP11 dans engine.js). */
   const dA = ({ facile: [1, 1, 1, 1], standard: [1, 2, 1, 2], exigeant: [2, 2, 3, 2] }[level] || [1, 2, 1, 2]).map((d) => Math.max(d, C.minA || 1));
   // Automatismes tirés parmi toutes les notions révisées (16.11 : avec 8 ou 12 notions, les 4 premières revenaient toujours).
   R.seed(mockSeed()); const pickA = mine.length > dA.length ? shuffle(mine.slice()).slice(0, dA.length).sort((a, b) => mine.indexOf(a) - mine.indexOf(b)) : mine;
   dA.forEach((d, k) => items.push({ part: "A", id: pickA[k % pickA.length], d, seed: mockSeed() }));
   const lvOk = { facile: (l) => l <= 2, standard: () => true, exigeant: (l) => l >= 2 }[level] || (() => true);
-  const probe = (arr, kind) => arr.map((f, k) => { R.seed(1); const x = f(); return { k, id: x.id, lv: x.lv, kind }; });
-  let ex = probe(C.ex, "ex").filter((x) => lvOk(x.lv));
+  /* 26.11 p3 (n° 1) : seulement les notions choisies par l'élève (le « cercle déguisé » sortait pour « Distance et milieu ·
+     Équations de droites ») et, pour un profil français, seulement ce qui est au programme de la classe (richOkFR). Il
+     manque des exercices riches : exercices ordinaires (Engine) sur les notions choisies, comme le sujet sans banque. */
+  const probe = (arr, kind) => arr.map((f, k) => { R.seed(1); const x = f(); return { k, id: x.id, lv: x.lv, kind, ok: ids.includes(x.id) && richOkFR(f, prof) }; }).filter((x) => x.ok);
+  let ex = probe(C.ex, "ex");
+  if (ex.filter((x) => lvOk(x.lv)).length >= Math.min(3, ex.length)) ex = ex.filter((x) => lvOk(x.lv));
   R.seed(mockSeed()); // tirage des exercices : un sujet différent à chaque fois
-  const inIds = ex.filter((x) => ids.includes(x.id));
-  if (inIds.length >= 3) ex = inIds;
-  shuffle(ex).slice(0, 3).forEach((x, j) => items.push({ part: "B", ex: j, rich: ch, kind: "ex", k: x.k, id: x.id, d: 3, seed: mockSeed() }));
-  shuffle(probe(C.raison, "raison")).slice(0, 2).forEach((x) => items.push({ part: "C", rich: ch, kind: "raison", k: x.k, id: x.id, d: 3, seed: mockSeed() }));
+  /* 26.11 p3 (n° 3) : pas deux exercices de la même scène, et une scène vue ces 7 derniers jours en dernier recours */
+  const scOf = (x) => { try { R.seed(1); return sceneKey(C.ex[x.k]()); } catch (e) { return null; } };
+  const shuf = shuffle(ex), fresh = shuf.filter((x) => !sceneStale(typeof state !== "undefined" ? state : null, scOf(x))), exB = [];
+  R.seed(mockSeed());
+  for (const x of fresh.concat(shuf.filter((y) => !fresh.includes(y)))) { const k = scOf(x); if (exB.length < 3 && !(k && exB.some((y) => scOf(y) === k))) exB.push(x); }
+  exB.forEach((x, j) => items.push({ part: "B", ex: j, rich: ch, kind: "ex", k: x.k, id: x.id, d: 3, seed: mockSeed() }));
+  const used = new Set(exB.map((x) => x.id)), rest = ids.filter((id) => !used.has(id)).concat(ids.filter((id) => used.has(id)));
+  for (let j = exB.length, r = 0; j < 3 && r < rest.length; j++, r++) [2, 3].forEach((d) => items.push({ part: "B", ex: j, id: rest[r], d, seed: mockSeed() }));
+  const rs = shuffle(probe(C.raison, "raison")).slice(0, 2);
+  rs.forEach((x) => items.push({ part: "C", rich: ch, kind: "raison", k: x.k, id: x.id, d: 3, seed: mockSeed() }));
+  if (!rs.length) ids.slice(0, 2).forEach((id) => items.push({ part: "C", id, d: 2, seed: mockSeed(), vf: true }));
   return items;
 }
 function mockPlan(ids, level = "standard") {
@@ -13994,17 +14027,23 @@ function mockQuestions() {
 }
 // Pas deux fois la même question dans un sujet (commentaire testeur du 20.11 : « questions identiques dans le test ») :
 // une question d'automatisme ou d'exercice qui reprend la forme d'une précédente est retirée avec une autre graine.
+/* 26.11 (revue p3, n° 3) : une scène (sceneKey, src/engine.js : parc en diagonale, table ronde…) une fois par sujet, et pas
+   une scène vue ces 7 derniers jours si possible ; les scènes du sujet sont notées pour le défi et la veille. */
 function mockDistinct(items) {
-  const seen = new Set();
-  return items.map((it) => {
+  const seen = new Set(), scenes = new Set();
+  for (const it of items) if (it.rich && RICH[it.rich]) { try { R.seed(it.seed); const k = sceneKey(RICH[it.rich][it.kind === "raison" ? "raison" : "ex"][it.k]()); if (k) scenes.add(k); } catch (e) { /* exercice sans scène */ } }
+  const res = items.map((it) => {
     if (it.rich || !it.id) return it;
     for (let t = 0; t < 15; t++) {
-      let f = "", hors = false; try { const q = Engine.make(state, it.id, it.d, it.seed); f = it.id + "|" + (q.ctx || qForm(q)); hors = !!(Engine.horsCO && Engine.horsCO(state, it.id, q)); } catch (e) { return it; }
-      if (!seen.has(f) && (!hors || t === 14)) { seen.add(f); return it; } /* 25.11 : forme hors programme de la classe (9e–10e) : autre graine */
+      let f = "", hors = false, sk = null; try { const q = Engine.make(state, it.id, it.d, it.seed); f = it.id + "|" + (q.ctx || qForm(q)); hors = !!(Engine.horsCO && Engine.horsCO(state, it.id, q)); sk = sceneKey(q); } catch (e) { return it; }
+      const vu = sk && (scenes.has(sk) || (t < 10 && sceneStale(state, sk)));
+      if (!seen.has(f) && ((!hors && !vu) || t === 14)) { seen.add(f); if (sk) scenes.add(sk); return it; } /* 25.11 : forme hors programme de la classe (9e–10e) : autre graine */
       it = { ...it, seed: mockSeed() };
     }
     return it;
   });
+  scenes.forEach((k) => sceneNote(state, k));
+  return res;
 }
 function mockNew(level) {
   level = level || (state.mock && state.mock.level) || "standard";
@@ -14486,6 +14525,35 @@ const HORS_CO = {
     vitesse: [/aller de|aller-retour|, puis [^.]*km\/h/], /* vitesse moyenne sur deux trajets : 11e (10e = sensibilisation) */
   },
 };
+/* 26.11 (revue élèves p3, n° 1, grave : 2nde FR servie avec l'équation du cercle circonscrit, un « cercle déguisé », la
+   perpendiculaire par les pentes — banque de la 2e du Collège suisse) : contenus hors programme d'une classe française,
+   repérés dans le TEXTE de la question ou de l'exercice (énoncé, parties, corrigé), quelle que soit la notion :
+   [RegExp, première classe FR où le contenu est permis, libellé]. Programme de 2nde (2019, BO 2026) : vecteurs, colinéarité,
+   équations de droites, droites parallèles ; PAS l'équation de cercle, ni l'orthogonalité (pentes, vecteur normal), ni le
+   produit scalaire (1re spécialité). Lu par horsCO (questions), richOkFR (sujets riches, src/sujet.js) et tests/p3_26_11.html. */
+const HORS_FR_TXT = [
+  [/équation (?:cartésienne )?(?:du|d'un|de ce) cercle|cercle (?:circonscrit )?d'équation|\\left\(x\s*[-+][^)]*\\right\)\^\{?2\}?\s*\+\s*\\left\(y|\(x\s*[-+−][^()]*\)\^\{?2\}?\s*\+\s*\(y\s*[-+−]|\(x\s*[-+−][^()]*\)²\s*\+\s*\(y|x\^\{?2\}?\s*\+\s*y\^\{?2\}?|x²\s*\+\s*y²/, 11, "équation de cercle"],
+  [/perpendiculaire[^.?!;]{0,160}(?:pente|coefficient directeur|y\s*=|équation)|(?:pente|coefficient directeur|y\s*=|équation)[^.?!;]{0,160}perpendiculaire|produit des pentes/, 11, "orthogonalité de droites (repère)"],
+  [/produit scalaire|vecteur normal|orthogona/, 11, "produit scalaire, orthogonalité"],
+  [/(?:médiatrice|hauteur issue)[^.?!;]{0,120}(?:équation|y\s*=)|(?:équation|y\s*=)[^.?!;]{0,120}(?:médiatrice|hauteur issue)/, 11, "médiatrice, hauteur en repère"],
+];
+const qTextAll = (q) => [q.q, q.sol, ...(q.parts || []).map((x) => x.label), ...(q.guide || []).flatMap((g) => [g.ask, g.sol])].map((t) => String(t || "")).join(" ");
+/* Libellé du contenu hors programme d'une classe française trouvé dans le texte t (ou null). */
+function horsFRTexte(grade, t) { for (const [r, g, lab] of HORS_FR_TXT) if (grade < g && r.test(t)) return lab; return null; }
+/* 26.11 (revue p3, n° 3 : parc traversé en diagonale 4 fois en 2 jours autour d'une évaluation — sujet, défi, veille ;
+   table ronde 2 fois dans un même sujet) : scènes reconnues dans l'énoncé, quelle que soit la notion ou l'étiquette ctx.
+   Une scène servie est notée (state.ctxDay, clé « s:… ») ; pendant 7 jours, Engine.make et le sujet de préparation
+   (mockDistinct, src/sujet.js) l'évitent quand une autre forme existe. */
+const SCENES = [
+  [/parc[^.?!]{0,90}diagonale|diagonale[^.?!]{0,90}parc|coin au coin opposé|coupe en diagonale/i, "parc-diagonale"],
+  [/table ronde/i, "table-ronde"], [/pizza[^.?!]{0,60}(?:diamètre|ronde|rayon)|(?:diamètre|rayon)[^.?!]{0,60}pizza/i, "pizza"], [/tapis rond/i, "tapis-rond"],
+  [/échelle[^.?!]{0,90}(?:mur|façade)|(?:mur|façade)[^.?!]{0,90}échelle/i, "echelle-mur"],
+  [/carrel/i, "carrelage"], [/enclos/i, "enclos"], [/cerf-volant/i, "cerf-volant"],
+];
+function sceneKey(q) { const t = q ? String(q.q || "") + " " + (q.parts || []).map((x) => x.label || "").join(" ") : ""; for (const [r, k] of SCENES) if (r.test(t)) return k; return null; }
+/* scène vue dans les 7 derniers jours (hors aujourd'hui exclu : aujourd'hui compte aussi) ; note une scène servie */
+function sceneStale(state, k) { const c = state && state.ctxDay; return !!(k && c && c["s:" + k] && c["s:" + k] >= addDays(day(), -6)); }
+function sceneNote(state, k) { if (k && state) (state.ctxDay = state.ctxDay || {})["s:" + k] = day(); }
 function horsCO(state, id, q) {
   const p = state && state.profile;
   /* forme réservée à certaines classes : q.co = classes CO / Collège (grade), q.mp = classes MP (25.11, src/defis_sec2.js) */
@@ -14497,6 +14565,7 @@ function horsCO(state, id, q) {
      formes d'une notion partagée hors programme d'une classe française (HORS_FR, src/fr_couv.js : [ctx | RegExp | fonction,
      première classe FR où la forme est permise]). Sans effet pour un profil suisse, sauf q.fr (forme propre à la France). */
   if (q && q.fr && p && !(p.system === "FR" && q.fr.includes(p.grade))) return true;
+  if (q && p && p.system === "FR" && p.grade && horsFRTexte(p.grade, qTextAll(q))) return true;
   if (q && p && p.system === "FR" && typeof HORS_FR !== "undefined" && HORS_FR[id]) {
     const t = String(q.q || "") + " " + (q.parts || []).map((x) => x.label || "").join(" ");
     if (HORS_FR[id].some(([r, g]) => p.grade < g && (typeof r === "string" ? q.ctx === r || (r.endsWith("*") && String(q.ctx || "").startsWith(r.slice(0, -1))) : r instanceof RegExp ? r.test(t) : r(q)))) return true;
@@ -14979,6 +15048,9 @@ const Engine = {
     const mark = (sp, txt, own, step) => {
       if (!sp) return;
       if (!step) exprForm(sp, txt);
+      /* 26.11 (revue p3, n° 12, A11 : 0,309016994375 accepté pour « Donne la valeur exacte ») : valeur exacte demandée, pas
+         d'arrondi prévu : un décimal de calculatrice est refusé (checkAnswer, src/expr.js) ; un décimal exact reste accepté. */
+      if (sp.kind === "value" && !sp.round && /valeur exacte/i.test(txt) && !/approch|arrondi/i.test(txt)) sp.exact = true;
       if (sp.kind !== "value" || sp.sci || sp.final) return;
       if (calcPermis(id, txt, sp, own) === false) { sp.final = true; if (CALC_POW.test(txt)) sp.pow = true; }
     };
@@ -14989,6 +15061,13 @@ const Engine = {
        src/curriculum.js). Tous les textes de la question ; jamais les réponses attendues (spec, canon, expressions des pièges). */
     /* 25.11 (soir, couverture France) : notes suisses (1 à 6) remplacées par des notes sur 20 (FR_NOTES, src/fr_fin.js). */
     if (p && p.system === "FR" && typeof FR_NOTES === "function") { const r = FR_NOTES(id, q); if (r) q = r; }
+    /* 26.11 (revue p3, n° 1, trace de Théo : piège « −1/a, c'est pour perpendiculaire » en 2nde) : profil français, un message
+       de piège ou un indice qui parle d'un contenu hors programme de la classe est retiré (le retour générique reste). */
+    if (p && p.system === "FR" && p.grade) {
+      if (q.traps) q = { ...q, traps: q.traps.filter((t) => !horsFRTexte(p.grade, String(t.m || ""))) };
+      if (q.hints) q = { ...q, hints: q.hints.filter((h) => !horsFRTexte(p.grade, String(h || ""))) };
+      if (q.hint && horsFRTexte(p.grade, String(q.hint))) q = { ...q, hint: plainTeX(HINTS[id] && !horsFRTexte(p.grade, HINTS[id]) ? HINTS[id] : "Relis l'énoncé et fais un calcul à la fois.") };
+    }
     if (p && p.system === "FR" && typeof frLocal === "function") {
       const SKIP = new Set(["spec", "canon", "code", "id", "ctx", "e", "expr", "values", "value"]);
       /* copies (jamais de modification en place : une question peut partager des objets avec les tables communes) */
@@ -15044,7 +15123,7 @@ const Engine = {
        inférieure, calibré sur le DNB (partie 1) et l'épreuve anticipée de 1re. Sans effet pour un profil suisse. */
     if (level < 3 && state && state.profile && state.profile.system === "FR" && typeof UPFR !== "undefined" && UPFR[state.profile.grade] && UPFR[state.profile.grade][id]) level = Math.max(level, UPFR[state.profile.grade][id]);
     /* 25.11 (audit France) : profil français, énoncé propre à la Suisse (horsCO) : graine suivante (le code suit la question). */
-    if (seed && state && state.profile && state.profile.system === "FR") { let q = this.build(id, level, seed); for (let k = 1; k <= 12 && horsCO(state, id, q); k++) q = this.build(id, level, seed + k * 977); return keep(this.finalize(state, id, q)); }
+    if (seed && state && state.profile && state.profile.system === "FR") { let q = this.build(id, level, seed); for (let k = 1; k <= 40 && horsCO(state, id, q); k++) q = this.build(id, level, seed + k * 977); /* 26.11 p3 : 40 graines (formes hors programme FR filtrées par le texte) */ return keep(this.finalize(state, id, q)); }
     /* 26.11 : forme réservée à la France (q.fr, p. ex. médiane en 4e–3e FR, src/fr_couv.js) tirée pour un autre profil : graine suivante. */
     if (seed) { let q = this.build(id, level, seed); for (let k = 1; k <= 12 && q && q.fr && horsCO(state, id, q); k++) q = this.build(id, level, seed + k * 977); return keep(this.finalize(state, id, q)); }
     const rec = ((state.recentQ = state.recentQ || {})[id] = (state.recentQ[id] || []));
@@ -15059,7 +15138,7 @@ const Engine = {
        le contexte (ctx, sinon les premiers mots de l'énoncé) a été vu dans les 7 derniers jours, sur cette notion ou une
        autre, est évité ; s'il n'y en a pas d'autre, on pose une question de niveau 3. */
     const pKey = (x) => x && x.spec && x.spec.kind === "multi" ? "p:" + (x.ctx || String(x.q).replace(/\\\(.*?\\\)|<[^>]*>/g, " ").replace(/[^A-Za-zÀ-ÿ' ]/g, " ").trim().split(/\s+/).slice(0, 4).join(" ").toLowerCase()) : null;
-    const cday = (state.ctxDay = state.ctxDay || {}), lim = addDays(day(), -6), stale = (x) => { const k = pKey(x); return !!(k && cday[k] && cday[k] >= lim); };
+    const cday = (state.ctxDay = state.ctxDay || {}), lim = addDays(day(), -6), stale = (x) => { const k = pKey(x); return !!(k && cday[k] && cday[k] >= lim) || sceneStale(state, sceneKey(x)); };
     let found = false, fresh1 = null, lastOk = null, lv = level;
     /* 25.11 : une forme hors programme de la classe (HORS_CO, 9e–10e) est refaite ; si le niveau n'a plus aucune forme
        du programme (défi d'une autre année), on descend d'un niveau. */
@@ -15076,6 +15155,7 @@ const Engine = {
     else if (!found && lastOk) q = lastOk;
     if (vary && stale(q) && level === 4) return this.make(state, id, 3); /* vary : séance ordinaire (pas le problème de la semaine) */
     if (pKey(q)) { for (const k in cday) if (cday[k] < lim) delete cday[k]; cday[pKey(q)] = day(); }
+    sceneNote(state, sceneKey(q));
     rec.push(key(q)); state.recentQ[id] = rec.slice(-15);
     if (q.ctx) state.recentCtx[id] = [...ctxs, q.ctx].slice(-2);
     state.recentForm[id] = [...forms, qForm(q)].slice(-2);
@@ -15088,7 +15168,9 @@ const Engine = {
     const code = id + "-" + level + "-" + seed.toString(36);
     // Écritures maladroites des générateurs (audit 13.11) : « 1x » → « x », « + -2 » → « - 2 », « - -3 » → « + 3 ».
     /* 26.11 (revue élèves, B11 : corrigé « −1L + 2l = 2 ») : « -1L » → « -L » aussi (inconnues majuscules), et les défis passent par tidy. */
-    const tidy = (t) => typeof t !== "string" ? t : t.replace(/([(=+\-\s{]|\\\()(-?)1([a-z])(?![a-z{])/g, "$1$2$3").replace(/([(=+\s{]|\\\()-1([A-Z])(?![a-zA-Z{])/g, "$1-$2").replace(/\+\s*-\s*(?=[\da-z(\\])/g, "- ").replace(/-\s*-\s*(?=[\da-z(\\])/g, "+ ");
+    const tidy = (t) => typeof t !== "string" ? t : t.replace(/([(=+\-\s{]|\\\()(-?)1([a-z])(?![a-z{])/g, "$1$2$3").replace(/([(=+\s{]|\\\()-1([A-Z])(?![a-zA-Z{])/g, "$1-$2").replace(/\+\s*-\s*(?=[\da-z(\\])/g, "- ").replace(/-\s*-\s*(?=[\da-z(\\])/g, "+ ")
+      /* 26.11 (revue p3, n° 11 : « 2(x + 2)(x) », « (x)(x − 6) = 0 ») : facteur x écrit en tête, sans parenthèses */
+      .replace(/(^|[^\w)}'′\\])(-?(?:\d+|[ak])?)((?:\([^()]*\)){2,})/g, (m, b, c, g) => { const fs = g.match(/\([^()]*\)/g); if (fs.filter((f) => f === "(x)").length !== 1 || fs.length < 2 || /\\|∘/.test(g)) return m; return b + c + "x" + fs.filter((f) => f !== "(x)").join(""); });
     /* 25.11 : PROBX (variantes.js, audit 9e–10e) = défis ajoutés, réservés à certaines classes (p.co). */
     if (level === 4 && hasProb(id)) { const p = moneyQ(R.pick(probList(id).concat((typeof PROBX !== "undefined" && PROBX[id]) || []))()); /* 26.11 : TeX visible hors formule (plainTeX, generators.js) */
       const P = { ...p, q: tidy(plainTeX(p.q)), sol: tidy(plainTeX(p.sol)), hints: (p.hints || []).map(plainTeX) }; if (p.parts) P.parts = p.parts.map((x) => ({ ...x, label: plainTeX(x.label) }));
@@ -15345,7 +15427,10 @@ const Engine = {
         if (!recent) levels = this.oldLevels(state, id, levels, target);
         /* 26.11 soir (revue des élèves testeurs, n° 9 : élève forte, Révision de 4 questions de niveau 1, +12 à +15 chacune) :
            en Révision, un élève dont le Mathélo atteint le niveau 2 de la notion (et qui ne l'a pas ratée) n'a plus de niveau 1. */
-        if (kind === "rev" && levels.some((d) => d >= 2) && s.m >= 0.45 && !this.underFloor(state) && elo >= itemRating(state.profile, id, 2)) levels = levels.filter((d) => d >= 2);
+        /* 26.11 (revue p3, n° 13, D5 : Inès, Mathélo 1508, intervalle au niveau 1 ; Sami, MP 2e, priorités de 9e au niveau 1) :
+           même règle dans tous les formats, sauf le créneau d'automatisme (niveau 1 : décision de l'enseignant du 26.11, n° 12,
+           tests/decisions26.html) : minLevel. */
+        if (kind !== "drill" && levels.some((d) => d >= 2) && this.minLevel(state, id) >= 2) levels = levels.filter((d) => d >= 2);
         for (const d of levels) {
           let sc = Math.abs(itemRating(state.profile, id, d) - target) / 100;
           if (rappel) sc = (s.m < 0.45 ? -1 : 0) + Math.max(0, itemRating(state.profile, id, d) - target) / 200;
@@ -15540,11 +15625,17 @@ const Engine = {
   prepActive(state) { return !!(state.prep && state.prep.ids.length && state.prep.date >= day()); },
   /* 26.11 (revue élèves : « Révision ciblée » de 7 questions + problème = 7 à 12 min) : 4 questions, sans problème
      (niveau 3 au plus) ; le sujet de préparation reste à part, au choix. */
+  /* 26.11 (revue p3, n° 13) : niveau minimal d'une notion pour un élève : 2 si son Mathélo (cible propre) atteint le niveau 2
+     de la notion et qu'il ne l'a pas ratée (maîtrise ≥ 0,45), hors élève sous le plancher ; sinon 1. */
+  minLevel(state, id) {
+    const s = state.notions[id]; if (!s || this.underFloor(state)) return 1;
+    return s.m >= 0.45 && state.elo.r + (state.tadj || 0) >= itemRating(state.profile, id, 2) ? 2 : 1;
+  },
   planPrep(state) {
     const ids = state.prep.ids.filter((id) => state.notions[id]);
     const order = [...ids].sort((a, b) => state.notions[a].m - state.notions[b].m);
     const plan = [];
-    for (let i = 0; order.length && plan.length < 4; i++) { const id = order[i % order.length]; plan.push(id + "|" + Math.min(3, this.difficulty(state, id))); }
+    for (let i = 0; order.length && plan.length < 4; i++) { const id = order[i % order.length]; plan.push(id + "|" + Math.min(3, Math.max(this.difficulty(state, id), this.minLevel(state, id)))); }
     return plan;
   },
 

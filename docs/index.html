@@ -388,6 +388,13 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .home-head { flex-wrap: nowrap; }
 .home-head .row { flex-wrap: nowrap; flex-shrink: 0; }
 @media (max-width: 430px) { .home-head .brand span { display: none; } }
+/* 26.11 (captures de la présentation : « Classe MP 2e » à 412 px, roue ⚙️ coupée au bord) : l'en-tête tient à 360 px pour
+   toutes les classes ; le mot « Classe » tombe sous 430 px, la classe ne passe pas à la ligne, la marque peut se réduire. */
+.home-head { min-width: 0; }
+.home-head .brand { min-width: 0; }
+.home-head .hh-cl { white-space: nowrap; }
+.home-head .gear { flex: none; }
+@media (max-width: 430px) { .home-head .hh-w { display: none; } .home-head .row { gap: 4px !important; } .home-head .brand { gap: 4px; } .home-head .brand .fab-cmt { width: 28px; height: 28px; margin-left: 0; } .home-head .streak-chip { padding: 3px 6px; } .home-head .gear { padding: 4px 4px; } }
 .keypad.k-num { grid-template-columns: repeat(4, 1fr); width: 100%; max-width: 340px; margin-inline: auto; align-self: center; }
 .keypad.k-num button { padding: 12px 0; font-size: 1.2rem; }
 .figstack { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px; }
@@ -474,7 +481,7 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .prep-days li.small { display: block; border: none; text-align: center; }
 /* En-tête de l'accueil (20.11) : le titre reste sur une ligne malgré le bouton 💬 */
 .brand b { white-space: nowrap; }
-@media (max-width: 430px) { .home-head .brand b { --brand-fs: 1.08rem; } .home-head { gap: 6px; } }
+@media (max-width: 430px) { .home-head .brand b { --brand-fs: 1.02rem; } .home-head { gap: 6px; } }
 
 /* 21.11 : améliorations UX (progression du positionnement, série, bilan par notion, légendes du clavier) */
 .pbar { display: block; height: 6px; border-radius: 3px; background: var(--line, #dde3f0); margin-top: 6px; overflow: hidden; }
@@ -686,6 +693,7 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: v
   .sess-fmt .chg-t { display: none; }
   .home-head .row > .small.muted { display: none; }
   .home-head .brand b { --brand-fs: 1rem; }
+  .home-head { gap: 4px; }
   .elo-compact { gap: 8px; padding: 8px 10px; }
   .elo-compact .eb-num .eyebrow { display: none; }
   .door b { font-size: 0.85rem; }
@@ -981,12 +989,12 @@ window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "glo
 </head>
 <body>
 <main id="app" aria-live="polite"></main>
-<script src="app.js?v=adb82bd813"></script>
+<script src="app.js?v=5b0a5845e1"></script>
 <script>
 (function () {
   // Chargement par niveau (24.11). Paquets requis : le niveau de l'élève et les niveaux inférieurs de sa filière ;
   // France et liens de consultation (#q-, #l-, #auteur) : tout. Puis le reste en arrière-plan (hors ligne complet).
-  var V = "adb82bd813", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
+  var V = "5b0a5845e1", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
   window.__packs = loaded; // pour les tests (tools/test_paquets.py)
   function need(p) {
     if (!p || p.system === "FR") return K.slice();
