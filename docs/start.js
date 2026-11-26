@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "6bcabf8d3c"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "fb42e8a4c5"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -1838,7 +1838,8 @@ function nextQuestion(redo) {
   const due = !redo && !session.ctest && !session.carnet && !session.prep && !forceProb && session.fmt !== "auto" /* 26.11 : jamais de leçon dans une série d'automatismes */ && !session.noLesson && ns && Engine.lessonDue(state, id)
     /* 26.11 (revue p5, n° 4 : « Nouvelle notion · étape 1 sur 2 » avant le Problème de la semaine, notion du chapitre en classe ou
        réussie 5 minutes plus tôt) : problème de la semaine, leçon seulement pour une notion jamais travaillée, hors chapitre en classe */
-    && !(session.weekly && !(Engine.lessonFirst(state, id) && !ns.seen));
+    /* 26.11 (revue p6, n° 2) : plus jamais de leçon avant le Problème de la semaine (notion déjà travaillée ou du chapitre). */
+    && !session.weekly;
   if (due && !session.lessonDone && (session.lessonAt == null || session.lessonAt === session.i)) {
     state.notions[id].lessonSeen = true; session.lessonDone = true; session.lessonAt = session.i; save();
     const st = sessStep(session);
@@ -1856,6 +1857,14 @@ function nextQuestion(redo) {
   let q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : easy ? 1 : level, undefined, !session.weekly && !forceProb);
   /* 26.11 (revue p5, n° 2) : « Me tester » d'un objectif : seulement les formes de la notion rattachées à CET objectif */
   if (!redo && session.ctest && session.ctest.forms && session.ctest.forms[id]) { const F = session.ctest.forms[id]; for (let k = 0; k < 60 && q && !F.includes(q.ctx); k++) q = Engine.make(state, id, level); }
+  /* 26.11 (revue p6, n° 12 : « Me tester » 9e, deux fois le même parallélogramme, « le triple » puis « le quadruple de son
+     voisin ») : une forme au plus une fois par test (ctx, sinon l'énoncé sans ses nombres ni son multiple). */
+  if (!redo && session.ctest && q) {
+    const F = session.ctest.forms && session.ctest.forms[id], key = (x) => id + "|" + (x.ctx || qForm(x).replace(/\b(?:double|triple|quadruple|quintuple|moitié|tiers|quart)\b/g, "#"));
+    const used = (session.ctest.used = session.ctest.used || []);
+    for (let k = 0; k < 40 && used.includes(key(q)); k++) { const q2 = Engine.make(state, id, level); if (q2 && (!F || F.includes(q2.ctx))) q = q2; }
+    used.push(key(q));
+  }
   /* 26.11 (revue p4, n° 6) : problème de la semaine : un vrai problème (niveau 4), quitte à retirer plusieurs fois */
   if (!redo && session.weekly) for (let k = 0; k < 20 && q && q.d !== 4; k++) q = Engine.make(state, id, 4, undefined, false);
   /* 25.11 : pas les nombres de la leçon. 27.11 (test instable, réciproque de Pythagore : peu de triplets au niveau 1) : toute
@@ -1979,7 +1988,7 @@ function exactNote(spec, text) {
   if (spec.kind === "set" && !/« ; »|sépare/i.test(t)) notes.push("Plusieurs solutions : sépare-les par « ; ».");
   /* 25.11 : dire partout comment écrire « pas de solution » (sur toutes les listes de solutions, pour ne rien trahir). */
   if ((spec.kind === "set" || spec.kind === "solset") && !/∅/.test(t) && !notes.some((n) => /∅/.test(n))) notes.push(/aucune/i.test(t) ? "« aucune » : touche ∅ du clavier." : "Pas de solution : touche ∅ (ou écris « aucune »).");
-  if (spec.kind === "solset" && !/intervalle|« x|aucune|∅/i.test(t)) notes.push("Réponds avec des intervalles (par exemple ]-∞ ; 2] ∪ [5 ; +∞[), « x ≥ 3 », ou ∅ (« aucune ») s'il n'y a pas de solution.");
+  if (spec.kind === "solset" && !/intervalle|« x|aucune|∅/i.test(t)) notes.push(notes.some((n) => /∅/.test(n)) /* 26.11 (revue p6, n° 14 : consigne ∅ en double) */ ? "Réponds avec des intervalles (par exemple ]-∞ ; 2] ∪ [5 ; +∞[) ou « x ≥ 3 »." : "Réponds avec des intervalles (par exemple ]-∞ ; 2] ∪ [5 ; +∞[), « x ≥ 3 », ou ∅ (« aucune ») s'il n'y a pas de solution.");
   // Commentaire testeur du 20.11 (« comment on tape infini ? ») : la touche ∞ existait, mais rien ne la signalait.
   if (spec.kind === "solset" && spec.ivs.some(([lo, , hi]) => !isFinite(lo) || !isFinite(hi))) notes.push("Infini : touche ∞ du clavier de l'app (−∞ : touche − puis ∞), ou tape « inf ».");
   /* 26.11 (revue d'un testeur) : jamais pour la notation scientifique (valeur comme 3,2 · 10⁻⁷, pas une fraction ni une racine) */
@@ -2269,7 +2278,7 @@ function renderProblem(q, opt) {
     let nHint = typeof HINTS !== "undefined" && HINTS[q.id] ? plainTeX(HINTS[q.id]) : "";
     /* 26.11 (revue p5, n° 7) : profil français, indice de notion hors programme de la classe (quartiles en 4e) : version du collège ou rien */
     if (nHint && state.profile.system === "FR" && horsFRTexte(state.profile.grade, nHint)) nHint = typeof HINTS_FR_COL !== "undefined" && HINTS_FR_COL[q.id] ? plainTeX(HINTS_FR_COL[q.id]) : "";
-    let hint = tagged || (nx === q.parts.length - 1 && free.length ? free[Math.min(tries - 1, free.length - 1)] : nHint ? "Partie " + L + ") · " + nHint : "Partie " + L + ") : relis bien ce qui est demandé, et fais un calcul à la fois. Les données utiles sont dans l'énoncé.");
+    let hint = tagged || (nx === q.parts.length - 1 && free.length ? free[Math.min(tries - 1, free.length - 1)] : nHint ? nHint /* 26.11 (revue p6, n° 10 : « Partie b) · » devant l'indice général de la notion, sans rapport avec b) : plus de « Partie b) » sans indice propre à la partie) */ : "Partie " + L + ") : relis bien ce qui est demandé, et fais un calcul à la fois. Les données utiles sont dans l'énoncé.");
     /* 26.11 (revue p3, n° 9 : « Indice 2 · Partie a) · » identique à l'indice 1) : un indice déjà donné n'est pas renuméroté ;
        on passe à un indice de l'énoncé qui ne vise pas une autre partie, sinon on le donne comme rappel. */
     let rappel = false;

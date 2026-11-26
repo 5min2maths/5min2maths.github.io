@@ -1570,8 +1570,11 @@ const colonBreak = (s) => {
   }
   /* majuscule en début de ligne : après un retour créé ici (le « : » remplacé ouvre une nouvelle phrase) ou après une phrase
      finie (. ! ?) ; jamais au milieu d'une phrase (« Sachant que :<br>P(x) = …<br>est divisible », revue p5, n° 8). */
-  const up = (m, sp, c) => "<br>" + sp + c.toUpperCase();
-  return parts.join("").replace(/<br>\u2063(\s*)([a-zàâçéèêëîïôûù])/g, up).replace(/([.!?]\s*(?:<\/[a-z]+>)?\s*)<br>(\s*)([a-zàâçéèêëîïôûù])/g, (m, pre, sp, c) => pre + "<br>" + sp + c.toUpperCase()).replace(/\u2063/g, "");
+  /* 26.11 (revue p6, n° 7 : « 2k = 8⏎K = 4 », « k² = 36⏎K = 6 ») : pas de majuscule à une variable — lettre seule suivie
+     (éventuellement d'un exposant, d'un indice ou d'un argument) d'un signe de relation : « k = 4 », « k² = 36 », « f(x) = 3 ». */
+  const VAR = /^[a-zàâçéèêëîïôûù](?:[²³⁴]|\^\S+|_\S+|\([^)]*\))?\s*[=<>≤≥≠]/;
+  const up = (m, sp, c, o, all) => VAR.test(all.slice(o + m.length - 1)) ? m : "<br>" + sp + c.toUpperCase();
+  return parts.join("").replace(/<br>\u2063(\s*)([a-zàâçéèêëîïôûù])/g, up).replace(/([.!?]\s*(?:<\/[a-z]+>)?\s*)<br>(\s*)([a-zàâçéèêëîïôûù])/g, (m, pre, sp, c, o, all) => VAR.test(all.slice(o + m.length - 1)) ? m : pre + "<br>" + sp + c.toUpperCase()).replace(/\u2063/g, "");
 };
 /* 26.11 (audit de vraisemblance, tests/vraisemblance.html) : un montant s'écrit avec deux décimales (« 2,50 CHF », « 0,80 € »),
    jamais « 2,5 CHF » (37 générateurs le faisaient). Appliqué aux textes des questions (Engine.build, sujets) ; jamais aux réponses. */
@@ -1582,7 +1585,8 @@ const plurTidy = (s) => s.replace(/(^|[^\d,.])(\d+) (\p{L}+)\(s\)/gu, (m, b, n, 
    « que il touche ») ; liste fermée de mots (pas de h aspiré : « de hauteur » reste). */
 const ELIDE_W = "heures?|habitants?|années?|élèves?|enfants?|euros?|œufs?|arbres?|amis?|entrées?|ordinateurs?|abonnés?|images?|unités?|objets?|exercices?|issues?|angles?|arêtes?|étages?|essais?|oranges?|ampoules?|abricots?|avions?|eau|il|ils|elle|elles|on|abord|autres?|essence|argent|huile|herbe|hiver|hôtel|été|automne|aire|axe|intervalle|ensemble|équation|expression|inconnue|entier";
 const elideTidy = (s) => s.replace(new RegExp("(^|[^\\p{L}'’\\\\])([dD]e|[qQ]ue|[jJ]usque|[lL]orsque|[pP]uisque) (?=(?:" + ELIDE_W + ")(?![\\p{L}]))", "gu"), (m, b, w) => b + w.slice(0, -1) + "'");
-const moneyTidy = (s) => typeof s !== "string" ? s : elideTidy(plurTidy(s)).replace(/(^|[^\p{L}])([dD]e|[qQ]ue) (?=[AEIOUYÉÈÊÎ][a-zàâçéèêëîïôûù]+)/gu, (m, b, w) => b + w.slice(0, -1) + "'").replace(/(^|[^\p{L}])([dD]e|[àÀ]) Le (?=\p{Lu})/gu, (m, b, w) => b + (/^[dD]/.test(w) ? w[0] + "u" : w === "à" ? "au" : "Au") + " ").replace(/(^|[^\p{L}])([dD]e|[àÀ]) Les (?=\p{Lu})/gu, (m, b, w) => b + (/^[dD]/.test(w) ? w[0] + "es" : w === "à" ? "aux" : "Aux") + " ").replace(/(\d(?:\{,\}|,))(\d)(?![\d{]|\{,|,\d)((?:\\\))?(?:\s|\\[ ,;]|~|&nbsp;|\\text\{\s*|\\mathrm\{\s*)*(?:CHF|€|francs?(?![a-z])|euros?(?![a-z])))/g, (m, a, b, c) => a + b + "0" + c);
+/* 26.11 (revue p6, n° 14 : « Les notes d'Yanis ») : pas d'élision devant Y suivi d'une voyelle (Yanis, Yasmine) ; « d'Yves » reste. */
+const moneyTidy = (s) => typeof s !== "string" ? s : elideTidy(plurTidy(s)).replace(/(^|[^\p{L}])([dD]e|[qQ]ue) (?=(?:[AEIOUÉÈÊÎ]|Y(?=[^aeiouyéèêëîïôûù]))[a-zàâçéèêëîïôûù]+)/gu, (m, b, w) => b + w.slice(0, -1) + "'").replace(/(^|[^\p{L}])([dD]e|[àÀ]) Le (?=\p{Lu})/gu, (m, b, w) => b + (/^[dD]/.test(w) ? w[0] + "u" : w === "à" ? "au" : "Au") + " ").replace(/(^|[^\p{L}])([dD]e|[àÀ]) Les (?=\p{Lu})/gu, (m, b, w) => b + (/^[dD]/.test(w) ? w[0] + "es" : w === "à" ? "aux" : "Aux") + " ").replace(/(\d(?:\{,\}|,))(\d)(?![\d{]|\{,|,\d)((?:\\\))?(?:\s|\\[ ,;]|~|&nbsp;|\\text\{\s*|\\mathrm\{\s*)*(?:CHF|€|francs?(?![a-z])|euros?(?![a-z])))/g, (m, a, b, c) => a + b + "0" + c);
 /* 26.11 : accord après 1 (« 1 vertes », « 1 connexions réussies », « 1 lancers francs ») dans les textes tirés au hasard. */
 const ONE_N = "boules|billes|jetons|cartes|perles|bonbons|stylos|livres|pièces|bleues|vertes|rouges|blanches|noires|jaunes|connexions|lancers|élèves|personnes|filles|garçons|enfants|adultes|flèches|tirs|paniers|buts";
 const ONE_A = "réussies|réussis|francs|rouges|bleues|vertes|blanches|noires|jaunes|gagnants|gagnantes|défectueuses|ratés|manqués";
@@ -2333,10 +2337,10 @@ const PROB = {
   log() {
     const C = 1000 * R.int(2, 9), t = R.pick([2, 3, 4, 5]), n0 = R.int(3, 8);
     const v = C * Math.pow(1 + t / 100, n0), years = Math.ceil(Math.log(2) / Math.log(1 + t / 100));
-    return { fig: FIG.parabola((x) => Math.pow(1 + t / 100, x * 3) * 2 - 2), q: "On place " + M(C) + " CHF à " + M(t + "\\,\\%") + " d'intérêt composé par an.",
+    return { fig: FIG.parabola((x) => Math.pow(1 + t / 100, x * 3) * 2 - 2), q: "On place " + M(C / 1000 + "\\text{'}000") /* 26.11 (revue p6, n° 14 : « 5000 CHF ») */ + " CHF à " + M(t + "\\,\\%") + " d'intérêt composé par an.",
       parts: [{ label: "a) Capital après " + n0 + " ans (CHF, au centime)", spec: { kind: "value", value: v, round: 0.01 } }, { label: "b) Nombre d'années pour que le capital double (années entières)", spec: { kind: "value", value: years } }],
       hints: ["Chaque année, le capital est multiplié par " + dec(1 + t / 100) + ". Doubler : résoudre " + dec(1 + t / 100) + "ⁿ = 2.", "n = ln 2 / ln " + dec(1 + t / 100) + ", puis arrondir à l'année supérieure."],
-      sol: "a) " + M(C + " \\cdot " + dec(1 + t / 100) + "^{" + n0 + "} \\approx " + dec(r2(v))) + " CHF. b) " + M("n = \\frac{\\ln 2}{\\ln " + dec(1 + t / 100) + "} \\approx " + dec(r2(Math.log(2) / Math.log(1 + t / 100)))) + ", donc " + M(years) + " ans." };
+      sol: "a) " + M(C / 1000 + "\\text{'}000 \\cdot " + dec(1 + t / 100) + "^{" + n0 + "} \\approx " + dec(r2(v)).replace(/^(\d+)(\d{3})(?!\d)/, "$1\\text{'}$2")) + " CHF. b) " + M("n = \\frac{\\ln 2}{\\ln " + dec(1 + t / 100) + "} \\approx " + dec(r2(Math.log(2) / Math.log(1 + t / 100)))) + ", donc " + M(years) + " ans." };
   },
   eq2() {
     const x = R.int(3, 12), k = R.int(2, 8);
@@ -3479,7 +3483,7 @@ FINE.push(
     hint: "Après la virgule : dixièmes, centièmes, millièmes. « Chiffre des » et « nombre de » ne sont pas la même question.",
     lesson: ["Lire un nombre décimal", "Chaque chiffre a une valeur selon sa position.", "À gauche de la virgule : unités, dizaines, centaines. À droite : dixièmes, centièmes, millièmes. \\(\\frac{347}{100} = 3{,}47\\).", ["\\(5{,}28\\) : 2 est le chiffre des dixièmes", "\\(3 + \\frac{4}{10} + \\frac{7}{1000} = 3{,}407\\)"], "Dans \\(3{,}47\\), le chiffre des centièmes est 7, mais il y a 347 centièmes en tout."],
     g: [
-      () => { const ds = pickN([1, 2, 3, 4, 5, 6, 7, 8, 9], 5), n = ds[0] * 10 + ds[1] + ds[2] / 10 + ds[3] / 100 + ds[4] / 1000, k = R.int(0, 4), nm = ["dizaines", "unités", "dixièmes", "centièmes", "millièmes"][k]; return QV("Dans le nombre " + M(dec(n)) + ", quel est le chiffre des " + nm + " ?", ds[k], "À droite de la virgule : dixièmes, centièmes, millièmes. Le chiffre des " + nm + " est " + M(ds[k]) + ".", { guide: [GS("Rangs, de gauche à droite : dizaines, unités, puis dixièmes, centièmes, millièmes. Les " + nm + " sont au combientième rang ?", k + 1, "Rang " + (k + 1) + "."), GS("Chiffre des " + nm + " ?", ds[k], M(ds[k]) + ".")], traps: [TRAP(ds[k === 0 ? 1 : k - 1], "Attention aux rangs : dizaines, unités, puis après la virgule dixièmes, centièmes, millièmes."), TRAP(ds[k === 4 ? 3 : k + 1], "Attention aux rangs : dizaines, unités, puis après la virgule dixièmes, centièmes, millièmes.")] }); },
+      () => { const ds = pickN([1, 2, 3, 4, 5, 6, 7, 8, 9], 5), n = ds[0] * 10 + ds[1] + ds[2] / 10 + ds[3] / 100 + ds[4] / 1000, k = R.int(0, 4), nm = ["dizaines", "unités", "dixièmes", "centièmes", "millièmes"][k]; return QV("Dans le nombre " + M(dec(n)) + ", quel est le chiffre des " + nm + " ?", ds[k], (k < 2 ? "À gauche de la virgule : dizaines, puis unités" : "À droite de la virgule : dixièmes, centièmes, millièmes") /* 26.11 (revue p6, n° 11) */ + ". Le chiffre des " + nm + " est " + M(ds[k]) + ".", { guide: [GS("Rangs, de gauche à droite : dizaines, unités, puis dixièmes, centièmes, millièmes. Les " + nm + " sont au combientième rang ?", k + 1, "Rang " + (k + 1) + "."), GS("Chiffre des " + nm + " ?", ds[k], M(ds[k]) + ".")], traps: [TRAP(ds[k === 0 ? 1 : k - 1], "Attention aux rangs : dizaines, unités, puis après la virgule dixièmes, centièmes, millièmes."), TRAP(ds[k === 4 ? 3 : k + 1], "Attention aux rangs : dizaines, unités, puis après la virgule dixièmes, centièmes, millièmes.")] }); },
       () => { const a = R.int(2, 9), b = R.int(2, 9), c = R.int(2, 9), v = a + b / 10 + c / 1000; return QV("Écris en nombre décimal : " + M(a) + " unités, " + M(b) + " dixièmes et " + M(c) + " millièmes.", fx(v), M(a + " + \\frac{" + b + "}{10} + \\frac{" + c + "}{1000} = " + dec(v)) + " (il n'y a pas de centième : on écrit 0).", { guide: [GS("Chiffre des centièmes (il n'y en a pas) ?", 0, "0 : on l'écrit pour garder la place."), GS("Le nombre ?", fx(v), M(dec(v)) + ".")], traps: [TRAP(fx(a + b / 10 + c / 100), "Il n'y a pas de centièmes : on écrit 0 à leur place, puis les millièmes."), TRAP(fx(a + b / 100 + c / 1000), "Les dixièmes sont le 1er chiffre après la virgule.")], plain: true }); },
       () => { if (R.rand() < 0.5) { const n = R.int(101, 999), k = R.pick([10, 100]); if (n % 10 === 0) return GEN.decread(3); return QV("Combien y a-t-il de " + (k === 10 ? "dixièmes" : "centièmes") + " en tout dans " + M(dec(n / k)) + " ?", n, M(dec(n / k) + " = \\frac{" + n + "}{" + k + "}") + " : il y a " + M(n) + (k === 10 ? " dixièmes." : " centièmes."), { guide: [GS("Combien d'unités entières dans " + M(dec(n / k)) + " ?", Math.floor(n / k), M(Math.floor(n / k)) + "."), GS("Une unité = " + k + " " + (k === 10 ? "dixièmes" : "centièmes") + ". En tout (unités · " + k + " + le reste) ?", n, M(n) + ".")], traps: [TRAP(n % 10, "On demande le nombre total de " + (k === 10 ? "dixièmes" : "centièmes") + ", pas seulement le chiffre des " + (k === 10 ? "dixièmes" : "centièmes") + "."), TRAP(Math.floor(n / k), "Ce sont les unités ; chaque unité vaut " + k + " " + (k === 10 ? "dixièmes" : "centièmes") + ".")] }); } const n = R.int(1001, 9999), k = R.pick([100, 1000]); if (n % 10 === 0) return GEN.decread(3); return QV("Écris " + M("\\frac{" + n + "}{" + k + "}") + " en nombre décimal.", fx(n / k), "Diviser par " + M(k) + " : la virgule recule de " + (k === 100 ? "deux" : "trois") + " rangs. " + M("\\frac{" + n + "}{" + k + "} = " + dec(n / k)), { plain: true, traps: [TRAP(fx(n / (k === 100 ? 1000 : 100)), "Diviser par " + k + " fait reculer la virgule de " + (k === 100 ? "deux" : "trois") + " rangs (autant que de zéros)."), TRAP(fx(n / 10), "Diviser par " + k + " : la virgule recule de " + (k === 100 ? "deux" : "trois") + " rangs, pas d'un seul.")], guide: [GS("Diviser par " + k + " : de combien de rangs la virgule recule-t-elle ?", k === 100 ? 2 : 3, (k === 100 ? 2 : 3) + " rangs."), GS("Le nombre décimal ?", fx(n / k), M(dec(n / k)) + ".")] }); },
     ] },
@@ -7738,7 +7742,8 @@ const DEFIS = (() => {
           xs = Array.from({ length: 5 }, () => ri(6, 11) / 2); Mg = pk([4.5, 5, 5.5]);
           need = ((7 * Mg) - xs.reduce((u, v) => u + v, 0)) / 2; } while (need < 3.5 || need > 6 || Math.abs(need * 10 - Math.round(need * 10)) > 1e-9);
         const sum = xs.reduce((u, v) => u + v, 0), so = [...xs].sort((u, v) => u - v);
-        return P("Les notes de Yanis : " + M(xs.map(D).join(" \\,;\\, ")) + ". Le prochain test compte double. Il veut finir avec une moyenne de " + M(D(Mg)) + ".",
+        const [nm, il] = pk([["Yanis", "Il"], ["Lina", "Elle"], ["Noé", "Il"], ["Maëlle", "Elle"], ["Sacha", "Il"]]); /* 26.11 (revue p6, n° 14) : pas toujours Yanis */
+        return P("Les notes de " + nm + " : " + M(xs.map(D).join(" \\,;\\, ")) + ". Le prochain test compte double. " + il + " veut finir avec une moyenne de " + M(D(Mg)) + ".",
           [["a) Moyenne actuelle (au centième)", sum / 5, 0.01], ["b) Médiane actuelle", so[2]], ["c) Note à obtenir au prochain test", need]],
           ["Un test qui compte double compte comme deux notes : il y aura 7 notes en tout.", "Somme visée = 7 · " + T(Mg) + " ; la note x vérifie " + T(sum) + " + 2x = " + T(7 * Mg) + "."],
           "a) " + M("\\frac{" + D(sum) + "}{5} \\approx " + D(r2c(sum / 5))) + ". b) Série triée : " + M(so.map(D).join(" \\,;\\, ")) + ", médiane " + M(D(so[2])) + ". c) " + M(D(sum) + " + 2x = 7 \\cdot " + D(Mg) + " = " + D(7 * Mg)) + ", " + M("x = " + D(need)) + ".");
@@ -8185,11 +8190,14 @@ const DEFIS = (() => {
       () => { /* freinage : durée, distance, décélération pour une distance donnée */
         let v0, a, a2, D2; do { v0 = ri(12, 30); a = pk([4, 5, 6, 8]); a2 = pk([3, 3.5, 4, 4.5, 5, 6, 6.5, 7, 7.5, 9]); D2 = (v0 * v0) / (2 * a2); } while (a2 === a || Math.abs(D2 * 100 - Math.round(D2 * 100)) > 1e-9);
         const tf = v0 / a, dist = (v0 * v0) / (2 * a);
+        /* 26.11 (revue p6, n° 11 : « au centième » pour 3 s et 18 m, attendu « 3,00 », corrigé « = 18 ≈ 18 m ») : valeur exacte
+           (au plus deux décimales) = sans arrondi ni « ≈ » */
+        const ex = (v) => Math.abs(v * 100 - Math.round(v * 100)) < 1e-9, PT = (lab, u, v) => ex(v) ? [lab + " (" + u + ")", v] : [lab + " (" + u + ", au centième)", v, 0.01];
         return P("Une voiture roule à " + M(v0) + " m/s et freine : sa vitesse vaut " + M("v(t) = " + v0 + " - " + a + "t") + " (m/s) jusqu'à l'arrêt.",
-          [["a) Durée du freinage (s, au centième)", tf, 0.01], ["b) Distance de freinage (m, au centième)", dist, 0.01], ["c) Quelle décélération (m/s²) faudrait-il pour s'arrêter en " + M(D(D2)) + " m ?", a2]],
+          [PT("a) Durée du freinage", "s", tf), PT("b) Distance de freinage", "m", dist), ["c) Quelle décélération (m/s²) faudrait-il pour s'arrêter en " + M(D(D2)) + " m ?", a2]],
           ["Arrêt : v(t) = 0. Distance = intégrale de la vitesse, de 0 jusqu'à l'arrêt.",
            "c) Avec v(t) = " + v0 + " − ct : arrêt en " + v0 + " ÷ c, distance " + v0 + "² ÷ (2c). Résous " + v0 * v0 + " ÷ (2c) = " + T(D2) + "."],
-          "a) " + M(v0 + " - " + a + "t = 0 \\iff t = " + fx(tf)) + " s. b) " + M("\\int_0^{" + fx(tf) + "} (" + v0 + " - " + a + "t)\\,dt = \\Big[" + v0 + "t - " + fx(a / 2) + "t^2\\Big]_0^{" + fx(tf) + "} = " + frac(v0 * v0, 2 * a) + " \\approx " + D(r2c(dist))) + " m. c) " + M("\\frac{" + v0 * v0 + "}{2c} = " + D(D2) + " \\iff c = " + D(a2)) + " m/s².");
+          "a) " + M(v0 + " - " + a + "t = 0 \\iff t = " + fx(tf)) + " s. b) " + M("\\int_0^{" + fx(tf) + "} (" + v0 + " - " + a + "t)\\,dt = \\Big[" + v0 + "t - " + fx(a / 2) + "t^2\\Big]_0^{" + fx(tf) + "} = " + (ex(dist) ? D(dist) : frac(v0 * v0, 2 * a) + " \\approx " + D(r2c(dist)))) + " m. c) " + M("\\frac{" + v0 * v0 + "}{2c} = " + D(D2) + " \\iff c = " + D(a2)) + " m/s².");
       },
     ],
     primitives: [
@@ -9040,7 +9048,7 @@ const DEFIS = (() => {
           [["a) Prix d'un Go (CHF)", m], ["b) " + M("f^{-1}(" + D(y0) + ")") + " : nombre de Go pour une facture de " + D(y0) + " CHF", (y0 - p) / m], ["c) Abscisse du point où les graphes de " + M("f") + " et de " + M("f^{-1}") + " se coupent", fix]],
           ["Pente = différence des prix ÷ différence des Go ; ordonnée à l'origine = prix − pente · Go. Puis f⁻¹(y) : résous f(x) = y.",
            "c) Les graphes de f et f⁻¹ sont symétriques par rapport à la droite y = x : ils se coupent sur cette droite, donc là où f(x) = x."],
-          "a) " + M("\\frac{" + D(f(x2)) + " - " + D(f(x1)) + "}{" + (x2 - x1) + "} = " + D(m)) + ", " + M("f(x) = " + D(m) + "x + " + p) + ". b) " + M(D(m) + "x + " + p + " = " + D(y0) + " \\iff x = " + D((y0 - p) / m)) + " Go. c) " + M(D(m) + "x + " + p + " = x \\iff " + D(r2c(1 - m)) + "x = " + -p + " \\iff x = " + fx(fix)) + ".");
+          "a) " + M("\\frac{" + D(f(x2)) + " - " + D(f(x1)) + "}{" + (x2 - x1) + "} = " + D(m)) + ", " + M("f(x) = " + D(m) + "x + " + p) + ". b) " + M(D(m) + "x + " + p + " = " + D(y0) + " \\iff x = " + D((y0 - p) / m)) + " Go. c) " + M(D(m) + "x + " + p + " = x \\iff " + D(r2c(1 - m)) + "x = " + p + " \\iff x = " + fx(fix)) + ".");
       },
     ],
     /* ---------- 4e Collège : probabilités conditionnelles (dépistage, deux tests) ---------- */
@@ -9474,7 +9482,7 @@ const DEFIS = (() => {
     /* ---------- MP 1re : fraction rationnelle à simplifier ---------- */
     fracrat: [
       () => {
-        let a, k, x1, xs; do { a = ri(2, 9); k = R.nz(-4, 4); x1 = R.nz(-6, 6); xs = a / (1 - k); } while (k === 1 || x1 === a || x1 === -a || !Number.isInteger(xs) || xs === 0 || xs === -a || xs === a);
+        let a, k, x1, xs; do { a = ri(2, 9); k = R.nz(-4, 4); x1 = R.nz(-6, 6); xs = a / (1 - k); } while (k === 1 || x1 === a || x1 === -a || !Number.isInteger(xs) || xs === 0 || xs === -a || xs === a || x1 === xs); /* 26.11 (revue p6, n° 8) : c) pas déjà répondue par b) */
         const F = (x) => (x - a) / x;
         return P("On étudie " + M("F(x) = \\frac{x^2 - " + a * a + "}{x^2 + " + a + "x}") + ".",
           [["a) Somme des valeurs interdites", -a], ["b) " + M("F(" + x1 + ")") + " (fraction)", F(x1)], ["c) Solution de " + M("F(x) = " + k), xs]],
@@ -10104,7 +10112,8 @@ const DEFIS = (() => {
     () => { let a, b, c, d; do { a = ri(6, 10); b = ri(12, 17); c = ri(a + 1, b - 2); d = ri(b + 1, 22); } while (false);
       return ENS("horaires", "Un magasin est ouvert de " + a + " h (compris) à " + b + " h (non compris) ; Léo est libre après " + c + " h (non compris) et jusqu'à " + d + " h (compris). On ne considère que les heures pile.", [a, b], [c, d], "d'heures entières", "où le magasin est ouvert", "où Léo est libre"); },
     () => { let a, b, c, d; do { a = ri(6, 12); b = ri(15, 20); c = ri(a + 1, b - 2); d = ri(b + 1, 30); } while (false);
-      return ENS("ages", "Un camp de vacances accepte les jeunes de " + a + " ans (compris) à " + b + " ans (non compris). Le tarif « jeune adulte » s'applique au-delà de " + c + " ans (non compris) et jusqu'à " + d + " ans (compris).", [a, b], [c, d], "d'âges entiers", "acceptés au camp", "au tarif « jeune adulte »"); });
+      /* 26.11 (revue p6, n° 5 : tarif « jeune adulte » du camp pour des âges que le camp refuse) : deux offres indépendantes */
+      return ENS("ages", "Un camp de vacances accepte les jeunes de " + a + " ans (compris) à " + b + " ans (non compris). Le club de voile de la commune, lui, accepte les jeunes de " + c + " ans (non compris) à " + d + " ans (compris).", [a, b], [c, d], "d'âges entiers", "acceptés au camp", "acceptés au club de voile"); });
   ADD("trinfact", "benefice",
     () => { /* jet d'eau d'une fontaine */
       let k, p, q; do { k = pk([0.5, 1, 2]); p = pk([1, 2]); q = ri(3, 9); } while (k * p * q > 3 || k * p * q < 1);
@@ -10334,7 +10343,7 @@ const DEFIS = (() => {
     },
     () => { /* sorties à vélo : distance à faire pour atteindre une moyenne */
       let xs, Mg, need; do { xs = Array.from({ length: 7 }, () => ri(25, 90)); Mg = ri(45, 75); need = 8 * Mg - sum(xs); } while (need < 30 || need > 110 || new Set(xs).size < 6 || xs.includes(need));
-      const m = sum(xs) / 7, so = [...xs].sort((a, b) => a - b), nm = pk(["Une cycliste", "Un cycliste", "Une traileuse", "Un coureur à ski de fond"]);
+      const m = sum(xs) / 7, so = [...xs].sort((a, b) => a - b), nm = pk(["Une cycliste", "Un cycliste", "Une cyclotouriste", "Un cycliste du club"]); /* 26.11 (revue p6, n° 9) : 25 à 90 km par sortie = vélo seulement */
       return CXP("velo", P(nm + " note les distances (km) parcourues lors de ses 7 sorties du mois : " + LST(xs) + ".",
         [["a) Distance moyenne d'une sortie (km, au dixième)", r1(m), 0.1], ["b) Distance médiane (km)", so[3]], ["c) Distance à parcourir lors de la 8e sortie pour une moyenne de " + M(Mg) + " km sur les 8 sorties (km)", need]],
         ["Moyenne = somme ÷ 7. Médiane : 4e valeur de la série triée.", "c) Les 8 sorties doivent totaliser 8 · " + Mg + " = " + 8 * Mg + " km."],
@@ -10396,8 +10405,8 @@ const DEFIS = (() => {
   /* ---------- 2e Collège, MP 2e : droites ---------- */
   ADD("droites", "perpendiculaire",
     () => { /* piquets alignés */
-      let p, q, A, k, xc, m, h; do { [p, q] = pk([[1, 2], [3, 2], [-1, 2], [-3, 2], [2, 3], [-2, 3], [1, 3], [-1, 3], [3, 4], [-3, 4], [2, 1], [-3, 1]]); A = [ri(-6, 4), ri(-5, 5)]; k = pk([1, 2]); xc = ri(-8, 9); m = p / q; h = A[1] - m * A[0]; } while (xc === A[0] || xc === A[0] + k * q || h === 0 || Math.abs(A[0] + k * q) > 9);
-      const B = [A[0] + k * q, A[1] + k * p], yc = m * xc + h;
+      let p, q, A, k, xc, m, h; do { [p, q] = pk([[1, 2], [3, 2], [-1, 2], [-3, 2], [2, 3], [-2, 3], [1, 3], [-1, 3], [3, 4], [-3, 4], [2, 1], [-3, 1]]); A = [ri(-6, 4), ri(-5, 5)]; k = pk([1, 2]); xc = ri(-8, 9); m = p / q; h = +(A[1] - m * A[0]).toFixed(10); /* 26.11 (agent p6, test.html : h = 4,4 · 10⁻¹⁶ au lieu de 0) */ } while (xc === A[0] || xc === A[0] + k * q || h === 0 || Math.abs(A[0] + k * q) > 9);
+      const B = [A[0] + k * q, A[1] + k * p], yc = +(m * xc + h).toFixed(10);
       return CXP("alignes", P("Un géomètre plante des piquets. Dans un repère (unité : 1 m), " + M("A" + PT(A)) + " et " + M("B" + PT(B)) + ". Un troisième piquet " + M("C") + " a pour abscisse " + M(xc) + ".",
         [["a) Pente de la droite " + M("(AB)") + " (fraction acceptée)", m], ["b) Ordonnée à l'origine de " + M("(AB)") + " (fraction acceptée)", h], ["c) Ordonnée de " + M("C") + " pour que " + M("A") + ", " + M("B") + " et " + M("C") + " soient alignés (fraction acceptée)", yc]],
         ["Pente = (y_B − y_A) ÷ (x_B − x_A).", "Ordonnée à l'origine : remplace les coordonnées de A dans y = mx + h. c) C est sur (AB) : y_C = m · " + tT(xc) + " + h."],
@@ -10667,11 +10676,16 @@ const DEFIS = (() => {
     });
   ADD("similmp", "verre",
     () => { /* maquette d'un bâtiment */
-      const k = pk([50, 100, 200]), A = ri(40, 400), V = 10 * ri(50, 900), B = ri(80, 600);
-      return CXP("maquette", P("La maquette d'un bâtiment est à l'échelle " + M("1\\,:\\," + k) + ". Sur la maquette, une façade a une aire de " + M(A + " \\text{ cm}^2") + " et le bâtiment un volume de " + M(nb(V) + " \\text{ cm}^3") + ".",
-        [["a) Aire réelle de la façade (m²)", (A * k * k) / 10000], ["b) Volume réel du bâtiment (m³)", (V * k ** 3) / 1e6], ["c) Le toit réel a une aire de " + M(B + " \\text{ m}^2") + " : aire du toit sur la maquette (cm², au dixième)", r1((B * 10000) / (k * k)), 0.1]],
+      /* 26.11 (revue p6, n° 4 : façade, volume et toit tirés indépendamment → bâtiment de 64 cm de haut au 1 : 50, façade de
+         6'720 m² au 1 : 200) : dimensions réelles plausibles (longueur L, largeur l, hauteur h, en m, entiers en cm sur la
+         maquette), puis façade = L · h, volume = L · l · h, toit plat = L · l. */
+      const k = pk([50, 100, 200]), st = k === 200 ? 2 : 1;
+      let L, l, h; do { L = st * ri(12 / st, 48 / st); l = st * ri(8 / st, 20 / st); h = st * ri(6 / st, 24 / st); } while (l >= L || h > L);
+      const c = (x) => (x * 100) / k, A = c(L) * c(h), V = c(L) * c(l) * c(h), B = L * l, Bm = c(L) * c(l);
+      return CXP("maquette", P("La maquette d'un bâtiment (un pavé droit à toit plat) est à l'échelle " + M("1\\,:\\," + k) + ". Sur la maquette, la grande façade a une aire de " + M(nb(A) + " \\text{ cm}^2") + " et le bâtiment un volume de " + M(nb(V) + " \\text{ cm}^3") + ".",
+        [["a) Aire réelle de la façade (m²)", L * h], ["b) Volume réel du bâtiment (m³)", L * l * h], ["c) Le toit réel a une aire de " + M(nb(B) + " \\text{ m}^2") + " : aire du toit sur la maquette (cm²)", Bm]],
         ["Les longueurs sont multipliées par " + k + " : les aires par " + k + "², les volumes par " + k + "³.", "1 m² = 10'000 cm² ; 1 m³ = 1'000'000 cm³."],
-        "a) " + M(A + " \\cdot " + k + "^2 = " + nb(A * k * k)) + " cm² " + M("= " + D((A * k * k) / 10000)) + " m². b) " + M(nb(V) + " \\cdot " + k + "^3 = " + nb(V * k ** 3)) + " cm³ " + M("= " + nb((V * k ** 3) / 1e6)) + " m³. c) " + M(nb(B * 10000) + " \\div " + k + "^2 " + eqa((B * 10000) / (k * k), r1((B * 10000) / (k * k))) + D(r1((B * 10000) / (k * k)))) + " cm²."));
+        "a) " + M(nb(A) + " \\cdot " + k + "^2 = " + nb(A * k * k)) + " cm² " + M("= " + nb(L * h)) + " m². b) " + M(nb(V) + " \\cdot " + k + "^3 = " + nb(V * k ** 3)) + " cm³ " + M("= " + nb(L * l * h)) + " m³. c) " + M(nb(B) + " \\text{ m}^2 = " + nb(B * 10000) + " \\text{ cm}^2") + ", " + M(nb(B * 10000) + " \\div " + k + "^2 = " + nb(Bm)) + " cm²."));
     },
     () => { /* ombres à la même heure */
       let h, s, S, H; do { h = ri(15, 30) / 10; s = ri(10, 40) / 10; S = ri(40, 250) / 10; H = ri(12, 45); } while (Math.abs(h - s) < 0.3);
@@ -10726,7 +10740,7 @@ const DEFIS = (() => {
         "a) " + M(F[0] + " \\cdot " + d[0] + " + " + pr(F[1]) + " \\cdot " + pr(d[1]) + " = " + W) + " J. b) " + M("\\cos\\alpha = \\frac{" + W + "}{\\sqrt{" + (F[0] ** 2 + F[1] ** 2) + "} \\cdot \\sqrt{" + (d[0] ** 2 + d[1] ** 2) + "}}") + ", " + M("\\alpha \\approx " + D(r1(ang)) + "°") + ". c) " + M("\\sqrt{" + (F[0] ** 2 + F[1] ** 2) + "} \\approx " + D(r1(nF))) + " N."));
     },
     () => { /* vecteurs orthogonaux avec un paramètre */
-      let a, b, c, w, k; do { a = R.nz(-6, 6); b = R.nz(-6, 6); c = R.nz(-6, 6); w = [R.nz(-5, 5), R.nz(-5, 5)]; k = (-a * b) / c; } while (!Number.isInteger(2 * k) || k === 0 || a * w[0] + k * w[1] === 0 || Math.abs(a) === Math.abs(b));
+      let a, b, c, w, k; do { a = R.nz(-6, 6); b = R.nz(-6, 6); c = R.nz(-6, 6); w = [R.nz(-5, 5), R.nz(-5, 5)]; k = (-a * b) / c; } while (!Number.isInteger(2 * k) || k === 0 || a * w[0] + k * w[1] === 0 || Math.abs(a) === Math.abs(b) || a * w[1] === k * w[0]); /* 26.11 (agent p6, test.html : u et w colinéaires, acos(−1 − ε) = NaN) */
       const u = [a, k], ps = a * w[0] + k * w[1], ang = deg(Math.acos(ps / (Math.hypot(...u) * Math.hypot(...w))));
       return CXP("orthogonal", P("On donne " + M("\\vec{u} = (" + a + " \\,;\\, k)") + ", " + M("\\vec{v} = " + PT([b, c])) + " et " + M("\\vec{w} = " + PT(w)) + ".",
         [["a) Valeur de " + M("k") + " pour que " + M("\\vec{u}") + " et " + M("\\vec{v}") + " soient orthogonaux (fraction acceptée)", k], ["b) Avec cette valeur, " + M("\\vec{u} \\cdot \\vec{w}") + " (fraction acceptée)", ps], ["c) Angle entre " + M("\\vec{u}") + " et " + M("\\vec{w}") + " (°, au dixième)", r1(ang), 0.1]],
@@ -11117,9 +11131,30 @@ const DEFIS = (() => {
       return CXP(cx, Object.assign(P(intro, [["a) " + quoi + " après la hausse (CHF)", +p1.toFixed(6)], ["b) " + quoi + " " + fin + " (CHF)", +p2.toFixed(6)], ["c) Variation globale en % (négative si baisse)", +glob.toFixed(6), 0.01]],
         ["Les pourcentages successifs se multiplient : on ne les additionne pas.", "Multiplie par " + T(1 + up / 100) + " puis par " + T(1 - dn / 100) + " ; variation globale = (prix final / prix initial − 1) · 100."],
         "a) " + M(nb(P0) + " \\cdot " + D(1 + up / 100) + " = " + CHF(p1)) + ". b) " + M(CHF(p1) + " \\cdot " + D(1 - dn / 100) + " = " + CHF(p2)) + ". c) " + M(D(+glob.toFixed(2)) + "\\,\\%") + " (et non " + (up - dn) + " %)."), { fig: FIG.percentBar(up, P0, " CHF") })); };
-    OUT.pct = [() => CXP("velo", pct0()),
-      () => { const P0 = 12 * ri(4, 9), up = pk([10, 20, 25]), dn = pk([15, 20, 30, 40]); return PC("fitness", "Prix mensuel", "final", "Un abonnement de fitness coûte " + M(P0) + " CHF par mois. Le prix augmente de " + M(up + "\\,\\%") + " ; puis, avec la carte d'étudiant, il baisse de " + M(dn + "\\,\\%") + ".", up, dn, P0); },
-      () => { const P0 = 20 * ri(3, 40), up = pk([10, 20, 25, 30, 50]), dn = pk([10, 20, 25, 40]); return PC("action", "Valeur", "finale", "Une action vaut " + M(nb(P0)) + " CHF. En une semaine, sa valeur monte de " + M(up + "\\,\\%") + ", puis la semaine suivante elle baisse de " + M(dn + "\\,\\%") + ".", up, dn, P0); }];
+    /* 26.11 (revue p6, n° 6 : 6e FR, défi « hausse de 20 % puis, avec la carte d'étudiant, baisse de 30 % ») : les trois formes
+       ci-dessous sont des pourcentages successifs (coefficient multiplicateur : 3e FR, 10e CO) ; ctx « succ-* », écartées en
+       France avant la 3e (HORS_FR) et en 9e CO (HORS_CO). Formes pour tous : remise puis prix payé, part d'un total. */
+    const remise = () => { const r = pk([10, 20, 25, 50]), [art, le, a2] = pk([["un ballon de basket", "le ballon", "un maillot"], ["un jeu de société", "le jeu", "un puzzle"], ["une paire de baskets", "les baskets", "un sac de sport"], ["un skateboard", "le skateboard", "un casque"]]);
+      let P0, Q0; do { P0 = 4 * ri(5, 30); Q0 = 4 * ri(3, 20); } while (Q0 === P0);
+      const rem = (P0 * r) / 100, pay = P0 - rem, tot = ((P0 + Q0) * (100 - r)) / 100;
+      return CXP("remise", P("Pendant les soldes, un magasin baisse tous ses prix de " + M(r + "\\,\\%") + ". Tu achètes " + art + " affiché à " + M(P0) + " CHF et " + a2 + " affiché à " + M(Q0) + " CHF.",
+        [["a) Montant de la remise sur " + le + " (CHF)", rem], ["b) Prix payé pour " + le + " (CHF)", pay], ["c) Prix total payé pour les deux articles (CHF)", tot]],
+        [r + " % de " + P0 + " CHF : " + P0 + " · " + r + " ÷ 100. Le prix payé est le prix affiché moins la remise.", "c) Même calcul pour le deuxième article (ou sur le total " + (P0 + Q0) + " CHF), puis additionne les prix payés."],
+        "a) " + M(P0 + " \\cdot \\frac{" + r + "}{100} = " + CHF(rem)) + " CHF. b) " + M(P0 + " - " + CHF(rem) + " = " + CHF(pay)) + " CHF. c) " + M("(" + P0 + " + " + Q0 + ") \\cdot \\frac{" + (100 - r) + "}{100} = " + (P0 + Q0) + " \\cdot \\frac{" + (100 - r) + "}{100} = " + CHF(tot)) + " CHF.")); };
+    const part = () => { let N, p, G, esc; do { N = 20 * ri(6, 20); p = pk([10, 20, 25, 30, 40, 60, 75]); esc = (N * p) / 100; G = pk([4, 5, 6, 8]); } while (!Number.isInteger(esc) || esc % G || esc / G < 3);
+      return CXP("part-total", P("Pour la journée sportive, les " + M(N) + " élèves d'une école choisissent une activité : " + M(p + "\\,\\%") + " d'entre eux font de l'escalade, les autres une randonnée.",
+        [["a) Nombre d'élèves qui font de l'escalade", esc], ["b) Nombre d'élèves qui font la randonnée", N - esc], ["c) Pour l'escalade, on forme des cordées de " + G + " élèves : nombre de cordées", esc / G]],
+        [p + " % de " + N + " : " + N + " · " + p + " ÷ 100.", "b) Le reste des élèves : " + N + " moins le résultat de a). c) Partage les élèves de a) en groupes de " + G + "."],
+        "a) " + M(N + " \\cdot \\frac{" + p + "}{100} = " + esc) + " élèves. b) " + M(N + " - " + esc + " = " + (N - esc)) + " élèves. c) " + M(esc + " \\div " + G + " = " + esc / G) + " cordées.")); };
+    const compo = () => { const [prod, m0, ps, por] = pk([["Un paquet de céréales", 500, [10, 20, 25, 30], 40], ["Une tablette de chocolat au lait", 200, [40, 50], 20], ["Un pot de pâte à tartiner", 400, [50, 60], 20]]);
+      let p, k; do { p = pk(ps); k = ri(2, 5); } while ((m0 * p) % 100 || (k * por * p) % 100);
+      return CXP("composition", P(prod + " de " + M(m0) + " g contient " + M(p + "\\,\\%") + " de sucre.",
+        [["a) Masse de sucre dans le paquet entier (g)", (m0 * p) / 100], ["b) Masse de tout le reste (g)", m0 - (m0 * p) / 100], ["c) Masse de sucre dans " + k + " portions de " + por + " g (g)", (k * por * p) / 100]],
+        [p + " % de " + m0 + " g : " + m0 + " · " + p + " ÷ 100.", "c) " + k + " portions de " + por + " g font " + k * por + " g ; prends-en " + p + " %."],
+        "a) " + M(m0 + " \\cdot \\frac{" + p + "}{100} = " + (m0 * p) / 100) + " g. b) " + M(m0 + " - " + (m0 * p) / 100 + " = " + (m0 - (m0 * p) / 100)) + " g. c) " + M(k + " \\cdot " + por + " = " + k * por) + " g, " + M(k * por + " \\cdot \\frac{" + p + "}{100} = " + (k * por * p) / 100) + " g.")); };
+    OUT.pct = [remise, part, compo, () => CXP("succ-velo", pct0()),
+      () => { const P0 = 12 * ri(4, 9), up = pk([10, 20, 25]), dn = pk([15, 20, 30, 40]); return PC("succ-fitness", "Prix mensuel", "final", "Un abonnement de fitness coûte " + M(P0) + " CHF par mois. Le prix augmente de " + M(up + "\\,\\%") + " ; puis, avec la carte d'étudiant, il baisse de " + M(dn + "\\,\\%") + ".", up, dn, P0); },
+      () => { const P0 = 20 * ri(3, 40), up = pk([10, 20, 25, 30, 50]), dn = pk([10, 20, 25, 40]); return PC("succ-action", "Valeur", "finale", "Une action vaut " + M(nb(P0)) + " CHF. En une semaine, sa valeur monte de " + M(up + "\\,\\%") + ", puis la semaine suivante elle baisse de " + M(dn + "\\,\\%") + ".", up, dn, P0); }];
   }
   return OUT;
 })();
@@ -16276,6 +16311,8 @@ const HORS_CO = {
     fracconv: ["per2", "permixte"],
     fracper: [/seul le \d se répète|\{,\}(\d)(?!\1)(\d)\1\2/],
     quadri: [/axes? de symétrie/], /* primaire (trop facile), remplacé par diagonales et triangles isocèles */
+    /* 26.11 (revue p6, n° 6) : pourcentages successifs (défi pct « succ-* ») en 10e avec pctvar ; en 9e, appliquer un pourcentage */
+    pct: [(q) => /^succ-/.test(String(q.ctx || ""))],
   },
   /* 10e : simple distributivité seulement (double distributivité, identités : 11e), pas de fractions algébriques ni de
      formules à transformer, pas d'inéquations, pas de cône (11e), aires × k² et volumes × k³ en 11e, vitesse moyenne sur deux trajets en 11e. */
@@ -17114,6 +17151,8 @@ const Engine = {
       /* 26.11 (revue p5, n° 5 : Kevin, Mathélo 928, problème de niveau 4 en 3 parties, 6:19) : élève en grande difficulté
          (struggling) : pas de défi du jour (ni annoncé au bilan « Demain : 🏔 Défi ») ; il revient quand l'élève remonte. */
       if (f === "defi" && this.struggling(state)) continue;
+      /* 26.11 (revue p6, n° 15 : positionnement 6:52 puis défi de niveau 4 en 3 parties) : pas de défi le jour du positionnement */
+      if (f === "defi" && state.placedOn === today) continue;
       sc += Math.random() * 0.4;
       if (!best || sc > best.sc) best = { f, sc };
     }
@@ -17151,7 +17190,14 @@ const Engine = {
   /* 26.11 (revue p5, n° 5 : Kevin, jour 1 = positionnement + série de 3 avec deux pas à pas, 13 min) : le jour du positionnement,
      élève en grande difficulté : 2 questions (jour 1 ≈ 10 minutes). */
   firstDayN(state) { return this.struggling(state) || (state.placeMiss || 0) >= 3 ? 2 : 3; },
-  autoN(state) { return state.placedOn === day() ? this.firstDayN(state) : this.struggling(state) ? 4 : FORMATS.auto.slots.length; },
+  /* 26.11 (revue p6, n° 15 : Hugo, 6e faible, série de 6 automatismes en 6:37 avec deux pas à pas) : élève sous la moyenne
+     de la classe : Mathélo sous la valeur de départ de sa classe (Engine.newState : élève moyen), ou
+     moins de 70 % de réussites du premier coup sur ses 5 dernières réponses au moins. */
+  belowClass(state) {
+    const h = harmos(state.profile.system, state.profile.grade), r0 = 700 + (h - 8) * 150 + 100, L = state.last1 || [];
+    return state.elo.r + (state.tadj || 0) < r0 || (L.length >= 5 && L.reduce((a, b) => a + b, 0) / L.length < ADAPT.aim);
+  },
+  autoN(state) { return state.placedOn === day() ? this.firstDayN(state) : this.struggling(state) || this.belowClass(state) ? 4 : FORMATS.auto.slots.length; },
   fmtText(state, f) { const n = f === "auto" ? this.autoN(state) : 0; return n && n < FORMATS.auto.slots.length ? n + " calculs rapides, enchaînés." : FORMATS[f].text; },
   planSession(state, format) {
     /* 26.11 (revue p4, n° 3) : le jour du positionnement, 3 questions au plus quel que soit le format (positionnement + séance ≈ 10 min) ; */
@@ -17190,6 +17236,8 @@ const Engine = {
     const today = day();
     // Format annoncé la veille au bilan (21.11) : promesse tenue.
     if (!state.today || state.today.date !== today) state.today = { date: today, f: state.tomorrow && state.tomorrow.date === today && FORMATS[state.tomorrow.f] && !(state.tomorrow.f === "defi" && this.struggling(state)) /* revue p5, n° 5 */ ? state.tomorrow.f : this.chooseFormat(state) };
+    /* revue p6, n° 15 : format tiré avant la fin du positionnement : pas de défi ce jour-là */
+    if (state.today.f === "defi" && state.placedOn === today) state.today.f = this.chooseFormat(state, ["defi"]);
     return state.today.f;
   },
   // Format de demain, choisi dès aujourd'hui et annoncé au bilan (21.11).
@@ -17474,9 +17522,15 @@ const Engine = {
   // les 3 notions dont le défi (niveau 4) est le plus proche du Mathélo, une notion pas encore travaillée (m < 0,3) en dernier recours.
   weeklyProblem(state) {
     const d = new Date(), week = d.getFullYear() + "-" + Math.floor((d - new Date(d.getFullYear(), 0, 1)) / 6048e5);
-    const ids = this.eligible(state).filter((id) => hasProb(id));
+    /* 26.11 (revue p6, n° 2 : Hugo 6e, leçon « 0,5 × 0,5 » puis un problème de niveau 4 sur une notion jamais travaillée) :
+       seulement une notion déjà travaillée (seen, maîtrise > 0) ou du chapitre « en classe » ; jamais de leçon avant. */
+    const worked = (id) => { const s = state.notions[id]; return this.nowHas(state, id) || (s && s.seen > 0 && s.m > 0); };
+    const ids = this.eligible(state).filter((id) => hasProb(id) && worked(id));
     if (!ids.length) return null;
-    if (state.weeklyPick && state.weeklyPick.week === week && state.weeklyPick.v === 3 && ids.includes(state.weeklyPick.id)) return state.weeklyPick.id; /* v2 (24.11), v3 (26.11, revue p4) : nouveau choix */
+    /* revue p6, n° 1 (Yanis, Emma : problème tiré à l'accueil avant le choix du chapitre « en classe ») : le choix de la semaine
+       est refait si le chapitre en classe change, tant que le problème n'est pas fait */
+    const nowSig = this.nowActive(state) ? state.now.ids.join(",") : "", done = typeof weekKey === "function" && state.weeklyDone === weekKey();
+    if (state.weeklyPick && state.weeklyPick.week === week && state.weeklyPick.v === 4 && ids.includes(state.weeklyPick.id) && (done || (state.weeklyPick.now || "") === nowSig)) return state.weeklyPick.id; /* v2 (24.11), v3 (26.11, revue p4), v4 (26.11, revue p6) : nouveau choix */
     const r = state.elo.r, m = (id) => (state.notions[id] || {}).m || 0;
     // 24.11 (auteur en 4e : « une factorisation vraiment simple ») : un vrai défi. Notions de l'année ou de l'année
     // précédente d'abord (les plus anciennes pénalisées) ; difficulté visée au-dessus du Mathélo (+150), plus faciles pénalisées.
@@ -17484,17 +17538,23 @@ const Engine = {
     /* 26.11 (revue p4, n° 7 : Tle → parabole de 1re, MP 3e → fonctions trigonométriques de MP 2e) : notion de l'année
        (catalogue, current) avant toute autre ; une notion d'avant ne vient que s'il n'y a rien dans l'année. */
     const yearSet = new Set(this.catalog(state.profile).filter((c) => c.current).map((c) => c.id));
+    /* 26.11 (revue p6, n° 1 : Emma 10e → arith@9, Yanis 11e → vol@10, Théo 2nde → pctvar@3e) : le catalogue « current »
+       contient aussi les reprises. Rangs : 0 = notion de l'année (placeOf = classe) du chapitre « en classe », 1 = autre
+       notion de l'année, 2 = reprise du chapitre en classe, 3 = reprise du catalogue de l'année, 4 = autre ; on ne prend
+       que le meilleur rang qui donne un vrai problème. L'écart d'année est pénalisé dès 1 an. */
+    const tier = (id) => { const own = yr(id) === g, ch = this.nowHas(state, id); return own && ch ? 0 : own ? 1 : ch ? 2 : yearSet.has(id) ? 3 : 4; };
     const score = (id) => { const it = itemRating(state.profile, id, 4), gap = g - yr(id);
-      return Math.abs(it - (r + 150)) + (it < r ? 150 : 0) + (gap >= 2 ? 250 * (gap - 1) : 0) + (m(id) < 0.3 ? 400 : 0) + (yearSet.has(id) ? 0 : 5000); };
+      return Math.abs(it - (r + 150)) + (it < r ? 150 : 0) + (gap >= 1 ? 250 * gap : 0) + (m(id) < 0.3 ? 400 : 0); };
     /* 26.11 (revue p4, n° 6 : 3e FR, « Problème de la semaine » d'une seule question, rac niveau 3, sous la porte « un problème
        en plusieurs étapes ») : seulement une notion dont le niveau 4 donne, pour ce profil, un vrai problème en plusieurs parties. */
     /* (rac en 3e FR : les 200 premiers problèmes de niveau 4 sont hors programme, racine cubique ; make retombait au niveau 3) */
     const real = (id) => { for (let k = 1; k <= 12; k++) { try { const q = this.build(id, 4, k); if (q && q.d === 4 && Array.isArray(q.parts) && q.parts.length >= 2 && !horsCO(state, id, q)) return true; } catch (e) { return false; } } return false; };
-    const best = [];
-    for (const id of ids.slice().sort((a, b) => score(a) - score(b))) { if (real(id)) best.push(id); if (best.length >= 3) break; }
+    let best = [];
+    for (let t = 0; t <= 4 && !best.length; t++)
+      for (const id of ids.filter((x) => tier(x) === t).sort((a, b) => score(a) - score(b))) { if (real(id)) best.push(id); if (best.length >= 3) break; }
     if (!best.length) return null;
     const n = +week.split("-")[1], id = best[n % best.length];
-    state.weeklyPick = { week, id, v: 3 };
+    state.weeklyPick = { week, id, v: 4, now: nowSig };
     return id;
   },
 
