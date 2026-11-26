@@ -22,7 +22,7 @@ try{
  const st=(g)=>{const s=Engine.newState({system:"CH",grade:g,track:"college",minutes:5});Engine.autoInit(s);return s};
  const a9=Curieux.available(st(9)).map(c=>c.key),a11=Curieux.available(st(11)).map(c=>c.key),a12=Curieux.available(st(12)).map(c=>c.key);
  log.push("9e : "+a9.join(", ")+"\n11e : "+a11.length+"\nsec II : "+a12.length);
- ok(!a9.includes("corde")&&!a9.includes("monty"),"9e : pas de disque ni de proba");ok(a9.length>=8,"9e : au moins 8 questions");ok(a12.length===CURIEUX.length,"sec II : toutes");
+ ok(!a9.includes("corde")&&!a9.includes("monty"),"9e : pas de disque ni de proba");ok(a9.length>=8,"9e : au moins 8 questions");const exp12=CURIEUX.filter(c=>c.sys!=="FR"&&c.uses.every(id=>{const n=NOTIONS.find(x=>x.id===id);return n&&n.CH&&n.CH[0]<12;})).length;ok(a12.length===exp12,"sec II : toutes (hors France et notions de 2e) "+a12.length+"/"+exp12); /* 26.11 : questions réservées à un système, logarithmes (2e) */
  // Pas de répétition immédiate, familles alternées
  const s=st(12);let last=null,lastFam=null,rep=0,same=0;for(let k=0;k<40;k++){const q=Curieux.pick(s);s.curSeen=[...(s.curSeen||[]),q.key].slice(-20);if(q.key===last)rep++;if(q.fam===lastFam)same++;last=q.key;lastFam=q.fam;}
  ok(rep===0,"répétition immédiate");ok(same===0,"familles non alternées "+same);
