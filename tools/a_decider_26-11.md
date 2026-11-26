@@ -34,3 +34,9 @@ Rien ici n'est bloquant : l'app est publiée avec le choix indiqué.
 
 ## Référentiels
 22. « Me tester » ciblé par forme : fait pour 5 objectifs MP ; à étendre aux autres référentiels (beaucoup d'objectifs partagent les mêmes questions : France 285 couples, Collège 110) ?
+
+## Ajouts du soir (6e passage)
+23. **Série de 4 calculs pour un élève « sous la moyenne »** (Mathélo sous la valeur de départ de la classe, ou < 70 % de réussites du 1er coup) : peut toucher la moitié des élèves. Garder ce critère ?
+24. **Élève faible mais au-dessus du critère** (Hugo, 6e France) : défi du jour en 4 parties (6 min), « Me tester » 5 min. Limiter aussi ces formats ?
+25. **Défi pct, « carte d'étudiant »** (réservé 3e France, 10e CO et plus) : reformuler en « carte jeune » ?
+26. **« Me tester »** : polygones réguliers retirés de l'objectif « triangles, quadrilatères, cercles », pas encore rattachés à l'objectif « polygones ».
