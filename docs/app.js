@@ -115,6 +115,7 @@ const SYSTEMS_HIDDEN = { FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [
 // Produit : × en France (décision du 25.11, frTimes) ; laissé pour décision : « cercle de Thalès ».
 const FR_WORDS = [
   [/\ben (CHF|francs)\b/g, "en euros"], [/\bCHF\b/g, "€"], [/au franc près/g, "à l'euro près"], [/(\d|\\\)) francs\b/g, "$1 euros"], [/\bde francs\b/g, "d'euros"],
+  [/produit \(·\), quotient \(:\)/g, "produit (×), quotient (÷)"], /* 26.11 (revue p4, n° 10 : rappel de tradexpr, 5e FR) */
   [/\bapprentis\b/g, "élèves"], /* 26.11 soir (revue des élèves joués, n° 13 : « Sondage auprès de 40 apprentis » en 4e FR, école professionnelle suisse) */
   /* 25.11 (couverture France) : équation réduite y = mx + p ; « côtés de l'angle droit » (cathètes : usage suisse) ;
      « ensemble de définition » (domaine de définition : usage suisse ; « l'aire du domaine » inchangé). */
@@ -14607,6 +14608,9 @@ const SCENES = [
   [/table ronde/i, "table-ronde"], [/pizza[^.?!]{0,60}(?:diamètre|ronde|rayon)|(?:diamètre|rayon)[^.?!]{0,60}pizza/i, "pizza"], [/tapis rond/i, "tapis-rond"],
   [/échelle[^.?!]{0,90}(?:mur|façade)|(?:mur|façade)[^.?!]{0,90}échelle/i, "echelle-mur"],
   [/carrel/i, "carrelage"], [/enclos/i, "enclos"], [/cerf-volant/i, "cerf-volant"],
+  /* 26.11 (revue p4, n° 11 : 3e FR, sujet « Un robinet remplit 25 L en 5 minutes… 40 L » puis, à J−1, mêmes données pour 45 L ;
+     « Sur 50 élèves, 5 viennent à vélo » puis « Sur 80 élèves, 12 viennent à vélo ») */
+  [/robinet/i, "robinet"], [/viennent (?:à|en) vélo/i, "velo-eleves"],
 ];
 function sceneKey(q) { const t = q ? String(q.q || "") + " " + (q.parts || []).map((x) => x.label || "").join(" ") : ""; for (const [r, k] of SCENES) if (r.test(t)) return k; return null; }
 /* scène vue dans les 7 derniers jours (hors aujourd'hui exclu : aujourd'hui compte aussi) ; note une scène servie */
@@ -15016,7 +15020,14 @@ const Engine = {
   // Thèmes alternés. Le second argument (ancien choix de périmètre) est ignoré.
   freePlan(state, scope, n = 6) {
     const theme = (id) => (NOTIONS.find((x) => x.id === id) || {}).theme || "";
-    const pool = Object.keys(state.notions).filter((id) => GEN[id]);
+    /* 26.11 (revue des élèves joués p4, n° 2, grave : 2e Collège en mode libre, 4 questions sur 5 en « 🔙 Rappel » du CO,
+       notions des années précédentes dans les groupes « forts » et « neufs ») : notions de l'année seulement (catalogue,
+       current) ; une notion d'avant n'entre que si le parcours le demande (remob : ratée, prérequis d'une notion de l'année
+       qui coince, Mathélo en baisse), et seulement parmi les points faibles. Sans assez de notions de l'année : les autres. */
+    const yearSet = new Set(this.catalog(state.profile).filter((c) => c.current).map((c) => c.id)), need = this.remob(state, yearSet);
+    const all = Object.keys(state.notions).filter((id) => GEN[id]), yr = all.filter((id) => yearSet.has(id));
+    const pool = yr.length >= n ? yr.concat(all.filter((id) => !yearSet.has(id) && need.has(id))) : all;
+    const inYear = (id) => yr.length < n || yearSet.has(id);
     const s = (id) => state.notions[id], ok = (id) => !state.notions[id] || (s(id).seen > 0 && s(id).m >= 0.7);
     const seen = pool.filter((id) => s(id).seen > 0), L = seen.length ? seen.reduce((t, id) => t + s(id).m, 0) / seen.length : 0.6;
     const tier = seen.length < 3 ? "mid" : L >= 0.75 ? "fort" : L < 0.55 ? "fragile" : "mid";
@@ -15026,13 +15037,13 @@ const Engine = {
     // posée lors des deux dernières séances libres passe après les autres ; les points faibles reviennent, mais en alternance.
     const recent = (state.freeRecent || []).flat(), rec = (id) => recent.filter((x) => x === id).length;
     const byRecent = (a) => a.map((id, i) => [id, i]).sort((x, y) => rec(x[0]) - rec(y[0]) || x[1] - y[1]).map((x) => x[0]);
-    const strong = byRecent(sh(pool.filter((id) => s(id).seen > 0 && s(id).m >= 0.7)));
+    const strong = byRecent(sh(pool.filter((id) => inYear(id) && s(id).seen > 0 && s(id).m >= 0.7)));
     // Points faibles du plus fragile au moins fragile ; pour un élève fragile, chaque point faible est précédé de ses bases.
     let weak = pool.filter((id) => s(id).seen > 0 && s(id).m < 0.7).sort((a, b) => s(a).m + 0.3 * rec(a) - s(b).m - 0.3 * rec(b) + (Math.random() - 0.5) * 0.1);
-    if (tier === "fragile") weak = [...new Set(weak.flatMap((id) => [...(PREREQ[id] || []).filter((p) => pool.includes(p) && !ok(p)), id]))];
+    if (tier === "fragile") weak = [...new Set(weak.flatMap((id) => [...(PREREQ[id] || []).filter((p) => all.includes(p) && !ok(p)), id]))];
     // Notions neuves dans l'ordre du référentiel : l'élève fragile prend les premières (bases d'abord, prérequis acquis) ;
     // l'élève à l'aise pioche plus loin (fenêtre décalée).
-    let fresh = pool.filter((id) => !s(id).seen).sort((a, b) => rk(a) - rk(b));
+    let fresh = pool.filter((id) => inYear(id) && !s(id).seen).sort((a, b) => rk(a) - rk(b));
     if (tier === "fragile") fresh = fresh.filter((id) => (PREREQ[id] || []).every(ok));
     const win = tier === "fort" ? fresh.slice(Math.min(4, Math.max(0, fresh.length - 8)), Math.min(4, Math.max(0, fresh.length - 8)) + 20) : fresh.slice(0, tier === "fragile" ? 10 : 20); // fenêtre élargie (20.11) : plusieurs chapitres, pour la limite de 2 par chapitre
     fresh = byRecent(sh(win.length ? win : fresh));
@@ -15050,6 +15061,18 @@ const Engine = {
     return out.map((id) => { let d = this.difficulty(state, id); if (tier === "fort" && s(id).seen > 0 && s(id).m >= 0.85) d = Math.min(cap, d + 1); return id + "|" + d; });
   },
 
+  /* 26.11 (revue p4, n° 2) : notions hors de l'année que le parcours de l'élève demande de remobiliser (règle du 24.11) :
+     ratée (travaillée dans l'app, maîtrise < 0,45 ou deux échecs), prérequis d'une notion de l'année qui coince, ou toutes
+     celles déjà travaillées si le Mathélo est en forte baisse. year : ensemble des notions de l'année. */
+  remob(state, year) {
+    const need = new Set(), coince = (s) => !!s && s.seen > 0 && (s.m < 0.45 || (s.fails || 0) >= 2);
+    for (const [id, s] of Object.entries(state.notions)) {
+      if (!year.has(id)) { if (coince(s)) need.add(id); continue; }
+      if (s.seen >= 2 && coince(s)) for (const p of PREREQ[id] || []) if (state.notions[p] && !year.has(p)) need.add(p);
+    }
+    if (this.eloDrop(state)) for (const [id, s] of Object.entries(state.notions)) if (!year.has(id) && s.seen > 0) need.add(id);
+    return need;
+  },
   eligible(state) {
     return Object.entries(state.notions).filter(([, s]) => s.status === "vu" || s.status === "encours").map(([id]) => id);
   },
@@ -15389,10 +15412,16 @@ const Engine = {
   },
   /* 26.11 soir (revue des élèves testeurs, n° 7 : positionnement 5:10 puis 6 automatismes en 6:05, 12 minutes le premier
      jour) : série d'automatismes de 3 calculs le jour du positionnement, de 4 pour un élève sous le plancher, sinon 6. */
-  autoN(state) { return state.placedOn === day() ? 3 : this.underFloor(state) ? 4 : FORMATS.auto.slots.length; },
+  /* 26.11 (revue p4, n° 3 : 9e très faible, série de 6 automatismes en 9:58) : 4 aussi pour un élève en grande difficulté
+     encore en calibrage (au moins 5 réponses récentes, moins de 55 % justes du premier coup), avant que underFloor ne s'établisse. */
+  struggling(state) { const L = state.last1 || [], r = L.length ? L.reduce((a, b) => a + b, 0) / L.length : 1;
+    /* pendant le calibrage, moins de 5 réponses : positionnement arrêté sur 3 ratés (placeMiss) et pas de réussite franche depuis */
+    return this.underFloor(state) || (L.length >= 5 && r < ADAPT.low) || (L.length < 5 && state.elo.n < 20 && (state.placeMiss || 0) >= 3 && r < 0.75); },
+  autoN(state) { return state.placedOn === day() ? 3 : this.struggling(state) ? 4 : FORMATS.auto.slots.length; },
   fmtText(state, f) { const n = f === "auto" ? this.autoN(state) : 0; return n && n < FORMATS.auto.slots.length ? n + " calculs rapides, enchaînés." : FORMATS[f].text; },
   planSession(state, format) {
-    const f = format || this.todayFormat(state), slots = f === "auto" ? FORMATS.auto.slots.slice(0, this.autoN(state)) : FORMATS[f].slots;
+    /* 26.11 (revue p4, n° 3) : le jour du positionnement, 3 questions au plus quel que soit le format (positionnement + séance ≈ 10 min) ; */
+    const f = format || this.todayFormat(state), slots = f === "auto" ? FORMATS.auto.slots.slice(0, this.autoN(state)) : FORMATS[f].slots.slice(0, state.placedOn === day() || this.struggling(state) ? 3 : 9); /* et pour l'élève en grande difficulté (Kevin : Révision de 4 questions avec pas à pas, 8 à 9 min) */
     const el = this.eligible(state), pend = el.filter((id) => this.lessonFirst(state, id));
     /* 26.11 soir (n° 1) : notions du chapitre « en classe » dont la leçon reste à voir : posées sans leçon (lessonFirst),
        mais candidates à la leçon de la séance. Révision, Défi, Automatismes : jamais de leçon (plan.noLesson). */
@@ -15614,7 +15643,9 @@ const Engine = {
   isDrill(q) {
     if (!q || q.parts || !q.spec || q.fig || q.figure || q.ctx === "erreur" || q.spec.round || q.spec.radical) return false;
     const t = String(q.q || "").replace(/<[^>]+>/g, " ").replace(/\\[()]/g, "").replace(/\s+/g, " ").trim();
-    if (t.length > 170 || /arrondi|au dixième|au centième|au millième|à l'unité|près\b|calculatrice|\\approx|≈|Trouve l'erreur/i.test(t)) return false;
+    /* 26.11 (revue p4, n° 8 : MP 3e, « Calcule sans calculatrice \(\log_2 32\) » refusé comme automatisme, chapitre absent
+       de la série) : « sans calculatrice » annonce justement un automatisme ; seule la calculatrice demandée exclut. */
+    if (t.length > 170 || /arrondi|au dixième|au centième|au millième|à l'unité|près\b|(?<!sans )calculatrice|\\approx|≈|Trouve l'erreur/i.test(t)) return false;
     const v = q.spec.value;
     const simple = (x) => Math.abs(x * 100 - Math.round(x * 100)) < 1e-6 || [2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 16, 20].some((d) => Math.abs(x * d - Math.round(x * d)) < 1e-9);
     if (q.spec.kind === "value" && typeof v === "number" && !simple(v)) return false;
@@ -15627,7 +15658,8 @@ const Engine = {
   // Notion qui fournit des automatismes (au moins la moitié de 6 tirages au niveau 1) ; mémorisé pour la page.
   drillable(state, id) {
     const key = (state.profile.system || "") + (state.profile.track || "") + state.profile.grade + "|" + id;
-    if (!(key in DRILL_OK)) { let n = 0; for (let k = 0; k < 6; k++) { let q = null; try { q = this.make(state, id, 1); } catch (e) {} if (this.isDrill(q)) n++; } DRILL_OK[key] = n >= 3; }
+    /* 26.11 (revue p4, n° 8) : 8 tirages à graine fixe (reproductible, sans toucher à l'anti-répétition) au lieu de 6 au hasard */
+    if (!(key in DRILL_OK)) { let n = 0; for (let k = 1; k <= 8; k++) { let q = null; try { q = this.make(state, id, 1, k * 101); } catch (e) {} if (this.isDrill(q)) n++; } DRILL_OK[key] = n >= 4; }
     return DRILL_OK[key];
   },
   swapLesson(state, plan, i) {
@@ -15687,7 +15719,10 @@ const Engine = {
      de la notion et qu'il ne l'a pas ratée (maîtrise ≥ 0,45), hors élève sous le plancher ; sinon 1. */
   minLevel(state, id) {
     const s = state.notions[id]; if (!s || this.underFloor(state)) return 1;
-    return s.m >= 0.45 && state.elo.r + (state.tadj || 0) >= itemRating(state.profile, id, 2) ? 2 : 1;
+    /* 26.11 (revue p4, n° 9 : Tle forte, Mathélo 1852, 4 questions de niveau 1 sur des notions jamais vues, m = 0,4 à
+       l'ouverture) : notion jamais travaillée ni ratée au positionnement → même règle, sur le seul Mathélo. La question qui
+       suit une leçon reste au niveau 1 (nextQuestion). */
+    return (s.m >= 0.45 || (!s.seen && !s.placed)) && state.elo.r + (state.tadj || 0) >= itemRating(state.profile, id, 2) ? 2 : 1;
   },
   planPrep(state) {
     const ids = state.prep.ids.filter((id) => state.notions[id]);
@@ -15704,16 +15739,25 @@ const Engine = {
     const d = new Date(), week = d.getFullYear() + "-" + Math.floor((d - new Date(d.getFullYear(), 0, 1)) / 6048e5);
     const ids = this.eligible(state).filter((id) => hasProb(id));
     if (!ids.length) return null;
-    if (state.weeklyPick && state.weeklyPick.week === week && state.weeklyPick.v === 2 && ids.includes(state.weeklyPick.id)) return state.weeklyPick.id; /* v2 (24.11) : nouveau choix */
+    if (state.weeklyPick && state.weeklyPick.week === week && state.weeklyPick.v === 3 && ids.includes(state.weeklyPick.id)) return state.weeklyPick.id; /* v2 (24.11), v3 (26.11, revue p4) : nouveau choix */
     const r = state.elo.r, m = (id) => (state.notions[id] || {}).m || 0;
     // 24.11 (auteur en 4e : « une factorisation vraiment simple ») : un vrai défi. Notions de l'année ou de l'année
     // précédente d'abord (les plus anciennes pénalisées) ; difficulté visée au-dessus du Mathélo (+150), plus faciles pénalisées.
     const g = state.profile.grade, yr = (id) => { try { const p = placeOf(NOTIONS.find((n) => n.id === id), state.profile); return p ? p[0] : g; } catch (e) { return g; } };
+    /* 26.11 (revue p4, n° 7 : Tle → parabole de 1re, MP 3e → fonctions trigonométriques de MP 2e) : notion de l'année
+       (catalogue, current) avant toute autre ; une notion d'avant ne vient que s'il n'y a rien dans l'année. */
+    const yearSet = new Set(this.catalog(state.profile).filter((c) => c.current).map((c) => c.id));
     const score = (id) => { const it = itemRating(state.profile, id, 4), gap = g - yr(id);
-      return Math.abs(it - (r + 150)) + (it < r ? 150 : 0) + (gap >= 2 ? 250 * (gap - 1) : 0) + (m(id) < 0.3 ? 400 : 0); };
-    const best = ids.slice().sort((a, b) => score(a) - score(b)).slice(0, 3);
+      return Math.abs(it - (r + 150)) + (it < r ? 150 : 0) + (gap >= 2 ? 250 * (gap - 1) : 0) + (m(id) < 0.3 ? 400 : 0) + (yearSet.has(id) ? 0 : 5000); };
+    /* 26.11 (revue p4, n° 6 : 3e FR, « Problème de la semaine » d'une seule question, rac niveau 3, sous la porte « un problème
+       en plusieurs étapes ») : seulement une notion dont le niveau 4 donne, pour ce profil, un vrai problème en plusieurs parties. */
+    /* (rac en 3e FR : les 200 premiers problèmes de niveau 4 sont hors programme, racine cubique ; make retombait au niveau 3) */
+    const real = (id) => { for (let k = 1; k <= 12; k++) { try { const q = this.build(id, 4, k); if (q && q.d === 4 && Array.isArray(q.parts) && q.parts.length >= 2 && !horsCO(state, id, q)) return true; } catch (e) { return false; } } return false; };
+    const best = [];
+    for (const id of ids.slice().sort((a, b) => score(a) - score(b))) { if (real(id)) best.push(id); if (best.length >= 3) break; }
+    if (!best.length) return null;
     const n = +week.split("-")[1], id = best[n % best.length];
-    state.weeklyPick = { week, id, v: 2 };
+    state.weeklyPick = { week, id, v: 3 };
     return id;
   },
 

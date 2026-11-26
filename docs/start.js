@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "326570cd96"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "b9e149498a"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -419,11 +419,15 @@ function startPlacement() {
   let i = state.placement.i;
   const next = () => {
     state.placement.i = i; save();
-    if (i >= plan.length) { state.placed = true; state.placedOn = day(); /* 26.11 soir : série d'automatismes courte ce jour-là (Engine.autoN) */ delete state.placement; save(); return screenPlacementDone(); }
+    /* 26.11 (revue p4, n° 3 : 9e très faible, positionnement 7:19 puis séance 6:46 le premier jour) : 3 questions ratées ou
+       « Je ne sais pas » suffisent à situer l'élève, le positionnement s'arrête là. */
+    if (i >= plan.length || (state.placement.miss || 0) >= 3) { state.placeMiss = state.placement.miss || 0; state.placed = true; state.placedOn = day(); /* 26.11 soir : série d'automatismes courte ce jour-là (Engine.autoN) */ delete state.placement; save(); return screenPlacementDone(); }
     const id = plan[i], q = Engine.make(state, id, Math.min(2, difficultyCap(state.profile)));
     renderQuestion(q, {
       eyebrow: "Étape 2 sur 2 · question " + (i + 1) + " sur " + plan.length + (plan.length - i > 1 ? " · encore " + (plan.length - i - 1) + " après celle-ci · environ " + (plan.length - i) + " min" /* 26.11 : une minute par question (mesuré : 4 à 5 min pour 5) */ : " · la dernière !") + `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((i / plan.length) * 100)}%"></i></span>`, single: true, track: "positionnement",
-      onDone: (res) => { Engine.placementResult(state, id, res.solved ? true : res.dontKnow ? null : false, q.d); if (!res.solved && !res.dontKnow) carnetAdd(id, q.d, q.code, res.diag, res.ans); /* 24.11 : erreur du calibrage aussi dans le carnet (retour testeur) */ save(); },
+      /* 26.11 (revue p4, n° 5) : les ratés du positionnement ne vont plus au carnet (l'écran de fin dit « ces questions
+         servaient à te situer, pas à te noter » ; le carnet de l'élève très faible ne faisait que grossir). Avant : 24.11. */
+      onDone: (res) => { Engine.placementResult(state, id, res.solved ? true : res.dontKnow ? null : false, q.d); if (!res.solved) state.placement.miss = (state.placement.miss || 0) + 1; save(); },
       onNext: () => { i++; next(); },
       onNotYet: () => { Engine.notYet(state, id); save(); toast("Noté : cette notion reviendra plus tard."); i++; next(); },
     });
@@ -1363,14 +1367,19 @@ function nowChapters() {
 }
 /* Exercice typique d'un chapitre : une notion du milieu du chapitre, niveau 2, graine fixe (même aperçu d'une fois à l'autre). */
 function nowSample(ch) {
-  const id = ch.ids[Math.floor((ch.ids.length - 1) / 2)];
+  const own = ch.ids.filter(nowOwn), L = own.length ? own : ch.ids, id = L[Math.floor((L.length - 1) / 2)]; /* 26.11 (revue p4, n° 1) : exemple pris dans les notions de la classe */
   let q = null; try { q = Engine.make(state, id, 2, 7); } catch (e) {}
   if (!q || !q.q) return "";
   return `<div class="now-sample"><div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}</div>`;
 }
+/* 26.11 (revue des élèves joués p4, n° 1, grave : chapitres français = thèmes de cycle, 16 notions de la 6e à la 3e ; les 5
+   premières ouvertes étaient les plus anciennes, un élève de 3e recevait prop, pct, statfreq…) : notions de la classe de
+   l'élève d'abord (placeOf), celles des années précédentes seulement s'il en manque. Même règle au Collège et en MP. */
+const nowOwn = (id) => { const n = NOTIONS.find((x) => x.id === id), pl = n && placeOf(n, state.profile); return !!(pl && pl[0] === state.profile.grade); };
 function nowPickIds(ch) {
   const open = ch.ids.filter((id) => { const n = state.notions[id]; return !(n && n.m >= 0.75 && n.ok >= 3); });
-  return (open.length ? open : ch.ids).slice(0, 5);
+  const L = open.length ? open : ch.ids, pick = new Set([...L.filter(nowOwn), ...L.filter((id) => !nowOwn(id))].slice(0, 5));
+  return ch.ids.filter((id) => pick.has(id));
 }
 function nowChoose(ch) { const ids = nowPickIds(ch); Engine.setNow(state, ids); save(); sendNow(ids); toast("Noté : tes séances se concentrent sur « " + ch.label.replace(/^\d+\.\s*/, "") + " »."); screenHome(); }
 function screenNow() {
@@ -1438,7 +1447,8 @@ function screenPrep() {
   const chosen = new Set(state.prep && Engine.prepActive(state) ? state.prep.ids : []);
   // On ne demande que les notions de l'année : celles des années précédentes sont vues, sans poser la question.
   const groups = {};
-  Engine.themeOrder(cat.filter((c) => c.current), state.profile).forEach((th) => { const l = cat.filter((c) => c.current && c.theme === th); if (l.length) groups[th] = l; });
+  /* 26.11 (revue p4, n° 1) : dans chaque chapitre, les notions de la classe de l'élève d'abord (le sujet de préparation suit cet ordre) */
+  Engine.themeOrder(cat.filter((c) => c.current), state.profile).forEach((th) => { const l = cat.filter((c) => c.current && c.theme === th); if (l.length) groups[th] = [...l.filter((c) => nowOwn(c.id)), ...l.filter((c) => !nowOwn(c.id))]; });
   const date = state.prep && Engine.prepActive(state) ? state.prep.date : addDays(day(), 7);
   /* 26.11 (revue élèves : 50 à 80 notions à parcourir pour en cocher trois) : par défaut, le chapitre travaillé en classe
      et les chapitres récents (notion en cours, déjà travaillée ou cochée) ; les autres chapitres de l'année sont repliés. */
@@ -1712,7 +1722,9 @@ function startFree() {
   /* 25.11 (séance de 5 minutes) : 5 questions (6 avant) ; une seule notion à leçon, qui prend la place d'une question. */
   let plan = Engine.oneLesson(state, Engine.freePlan(state, "annee", 8), 5);
   /* un seul problème (niveau 4) par séance, et une durée estimée de 5 min 30 au plus (leçon 60 s, problème 180 s, question 50 s) */
-  let p4 = 0; plan = plan.map((e) => { const x = e.split("|"); if (+x[1] === 4 && p4++) x[1] = "3"; return x.join("|"); });
+  /* 26.11 (revue p4, n° 2) : le problème du défi est un problème de l'année (notion du catalogue de l'année) */
+  const yearSet = new Set(Engine.catalog(state.profile).filter((c) => c.current).map((c) => c.id));
+  let p4 = 0; plan = plan.map((e) => { const x = e.split("|"); if (+x[1] === 4 && (!yearSet.has(x[0]) || p4++)) x[1] = "3"; return x.join("|"); });
   const est = () => (lessonAtStart(plan) === 0 ? 60 : 0) + plan.reduce((t, e) => t + (+e.split("|")[1] === 4 ? 180 : 50), 0);
   while (plan.length > 2 && est() > 330) plan.splice(plan.length - 1 - (+plan[plan.length - 1].split("|")[1] === 4 ? 1 : 0), 1);
   if (!plan.length) return startSession();
@@ -1838,6 +1850,8 @@ function nextQuestion(redo) {
   if (easy) session.eased = true;
   /* 24.11 (ergonomie) : le type de question n'est rappelé que s'il change dans la séance (« Révision · 1 sur 4 · Révision » doublait le titre). */
   let q = redo ? Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1)) : Engine.make(state, id, session.weekly || forceProb ? 4 : easy ? 1 : level, undefined, !session.weekly && !forceProb);
+  /* 26.11 (revue p4, n° 6) : problème de la semaine : un vrai problème (niveau 4), quitte à retirer plusieurs fois */
+  if (!redo && session.weekly) for (let k = 0; k < 20 && q && q.d !== 4; k++) q = Engine.make(state, id, 4, undefined, false);
   /* 25.11 : pas les nombres de la leçon. 27.11 (test instable, réciproque de Pythagore : peu de triplets au niveau 1) : toute
      question de la notion qui suit sa leçon dans la séance, et 40 essais au lieu de 12. */
   if (!redo && session.lessonShown === id) { const lv = q && q.d ? q.d : easy ? 1 : level; for (let k = 0; k < 40 && q && lessonEcho(id, q); k++) q = Engine.make(state, id, lv); }
@@ -1882,6 +1896,12 @@ function nextQuestion(redo) {
   const fmtLab = session.fmt && FORMATS[session.fmt] ? (newNotion(id) && session.lessonShown === id /* 26.11 (lot) : seulement avec sa leçon (l'accueil annonçait « Révision ») */ ? "Nouvelle notion" : FORMATS[session.fmt].label) /* 26.11 : notion d'une année précédente jamais travaillée : pas « Nouvelle notion ». 26.11 soir (revue des élèves testeurs, n° 3 : « 1 sur 4 » seul) : la séance Révision garde son libellé, comme les autres formats ; il nomme la séance, pas la notion. */ : "";
   renderQuestion(q, {
     track: sessionInfo().fmt || "seance", redo: !!redo,
+    /* 26.11 (revue p4, n° 3 et 4 : reprises en chaîne, 3 fois la même erreur au carnet ; série d'automatismes de 6 créneaux
+       devenue 7 questions) : pas de « À toi » sur une question déjà reprise (« nouvelles valeurs »), ni dans une série
+       d'automatismes (une question par créneau) ; « Continuer » en bouton principal. */
+    /* Élève en grande difficulté (Engine.struggling) : pas de reprise non plus (Kevin, Révision de 4 devenue 6 questions, 9:25) ;
+       le pas à pas reste, et l'erreur va au carnet. */
+    noRedo: !!redo || session.fmt === "auto" || Engine.struggling(state),
     /* 25.11 (revue) : compteur qui compte aussi l'étape leçon ; « Nouvelle notion » (et non « Révision ») pour la question
        qui suit la leçon ou pour une notion encore jamais travaillée. */
     eyebrow: ((s) => s + (ST.total > 1 && !session.weekly ? `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((Math.min(ST.pos - 1, ST.total) / ST.total) * 100)}%"></i></span>` : ""))((session.carnet ? "Carnet d'erreurs · " + nTxt : session.free ? "Mon défi du jour · " + nTxt : session.weekly ? "🔍 Problème de la semaine" : session.ctest ? "Me tester · " + session.ctest.label + " · " + nTxt : session.prep ? "Révision de l'évaluation · " + nTxt : ST.total === 1 ? (fmtLab || "Question du jour") : (fmtLab ? fmtLab + " · " : "") + nTxt) + (kind && KIND_LABEL[kind] && !(session.fmt && FORMATS[session.fmt] && FORMATS[session.fmt].slots.every((x) => x.replace(/\d+$/, "") === kind)) ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo ? " · nouvelles valeurs" : "")),
@@ -2205,7 +2225,7 @@ function renderProblem(q, opt) {
     const missed = q.parts.map((p, i) => [p, i]).filter(([, i]) => !ok[i]).map(([p, i]) => { const a = pAns(p.spec); return a ? `<li>${p.label.replace(/\s*\(.*?\)\s*$/, "")} : <b>${esc(a)}</b></li>` : ""; }).join("");
     fb.innerHTML = `<div class="fb ${frac === 1 ? "ok" : "bad"} pop"><div class="spread"><b>${frac === 1 ? (tries === 1 ? "Problème résolu du premier coup !" : "Problème résolu.") : ok.filter(Boolean).length + " partie(s) juste(s) sur " + q.parts.length + "."}</b>${d}</div>${missed ? `<div class="small"><b>Les bonnes réponses</b><ul class="plain p-ans">${missed}</ul></div>` : ""}${pSteps ? `<div id="ssteps" class="stack"></div><button class="btn-primary" id="solstep">Voir l'étape suivante</button><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : `<div class="sol">${q.sol}</div>`}</div>
       ${avisHtml(code, "Ce problème était…", "Bon problème", "Problème à revoir")}`;
-    qbarSet(frac === 1 ? "" : '<button class="btn-sec" id="redo">Refaire avec d\'autres valeurs</button>', '<button class="btn-primary" id="nx">Continuer</button>');
+    qbarSet(frac === 1 || opt.noRedo ? "" : '<button class="btn-sec" id="redo">Refaire avec d\'autres valeurs</button>', '<button class="btn-primary" id="nx">Continuer</button>');
     typeset(fb);
     fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
     bindComment(fb, code);
@@ -2334,7 +2354,7 @@ function renderQuestion(q, opt) {
       ${guided ? `<button class="btn-primary" id="guide">🪜 On le fait ensemble, pas à pas</button><div id="gsteps" class="stack"></div><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : solSteps ? `<div id="ssteps" class="stack"></div><button class="btn-primary" id="solstep">Voir l'étape suivante</button><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : `<div class="sol">${q.sol}</div>`}</div>
       ${avisHtml(code, "Cette question était…", "Bonne question", "Question à revoir")}`;
     /* 26.11 : « Continuer » dans la barre fixe, à la place de « Vérifier » ; « Refaire » à la place de « Je ne sais pas ». */
-    qbarSet(solved ? "" : `<button id="redo" class="${!guided && !solSteps ? "btn-primary" : "btn-sec"}">${q.d > 1 && q.d < 4 ? "💪 Une plus facile pour repartir" : "Refaire avec d'autres valeurs"}</button>`, `<button class="${solved ? "btn-primary" : "btn-sec"}" id="nx">Continuer</button>`);
+    qbarSet(solved || opt.noRedo ? "" : `<button id="redo" class="${!guided && !solSteps ? "btn-primary" : "btn-sec"}">${q.d > 1 && q.d < 4 ? "💪 Une plus facile pour repartir" : "Refaire avec d'autres valeurs"}</button>`, `<button class="${solved || opt.noRedo ? "btn-primary" : "btn-sec"}" id="nx">Continuer</button>`);
     typeset(fb);
     fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
     bindComment(fb, code);
