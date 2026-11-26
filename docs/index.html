@@ -864,8 +864,8 @@ details.solfull summary { padding: 11px 0; margin-top: 0; }
   background: var(--card); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 8px 24px rgba(20, 40, 100, .18); }
 .qmenu[hidden] { display: none; }
 .qmenu button { min-height: 48px; text-align: left; font-weight: 700; }
-#app:has(> .qbar) { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
-#app:has(> .qbar) :is(#kp, .keypad, input.ans, .fb, .part) { scroll-margin-bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
+#app:has(.qbar) { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+#app:has(.qbar) :is(#kp, .keypad, input.ans, .fb, .part) { scroll-margin-bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
 body:has(.qbar) .toast { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
 /* Avis après la question : une seule icône 💬, discrète, qui ouvre 👍 / 👎 et le commentaire. */
 .qfb { display: flex; justify-content: flex-end; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
@@ -1013,12 +1013,12 @@ window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "glo
 </head>
 <body>
 <main id="app" aria-live="polite"></main>
-<script src="app.js?v=ca41d3c5e7"></script>
+<script src="app.js?v=12b8319d13"></script>
 <script>
 (function () {
   // Chargement par niveau (24.11). Paquets requis : le niveau de l'élève et les niveaux inférieurs de sa filière ;
   // France et liens de consultation (#q-, #l-, #auteur) : tout. Puis le reste en arrière-plan (hors ligne complet).
-  var V = "ca41d3c5e7", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
+  var V = "12b8319d13", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
   window.__packs = loaded; // pour les tests (tools/test_paquets.py)
   function need(p) {
     if (!p || p.system === "FR") return K.slice();

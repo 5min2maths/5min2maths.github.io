@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "ca41d3c5e7"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "12b8319d13"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -2056,6 +2056,9 @@ function previewHtml(v, spec) {
 function previewOf(inp, prev, spec) {
   const v = inp.value.trim();
   if (!v) { prev.innerHTML = ""; return; }
+  /* 26.11 soir (enseignant, sur téléphone : « si on répond 12, on a l'impression qu'il apparaît une fois de trop ») : un
+     simple nombre n'a pas besoin d'aperçu ; l'aperçu reste pour un calcul (3*7/4), une fraction, une puissance, une lettre. */
+  if (/^-?\d+([.,]\d+)?$/.test(v.replace(/\s|'/g, "")) && !isSetSpec(spec)) { prev.innerHTML = ""; return; }
   try { prev.innerHTML = previewHtml(v, spec); typeset(prev); } catch (e) { prev.innerHTML = `<span class="err">${esc(e.message)}</span>`; }
 }
 /* 25.11 soir (revue d'un testeur : « le pavé se décale à l'affichage, mon premier clic est tombé sur la mauvaise touche ») :
@@ -2103,7 +2106,10 @@ function ansInView(inp, all) {
   const vh = (window.visualViewport ? visualViewport.height : innerHeight) - qbarH(), r = inp.getBoundingClientRect(); /* 26.11 : barre d'action fixe en bas */
   if (all && imOf(inp) === "none") {
     const box = inp.closest(".answer"), b = box ? box.getBoundingClientRect() : r;
-    if (b.bottom > vh - 4 && b.bottom - r.top < vh - 16) { window.scrollBy({ top: b.bottom - vh + 12, behavior: "smooth" }); return; }
+    /* 26.11 soir (constat de l'enseignant sur téléphone : dernière ligne du pavé cachée par la barre « Vérifier ») : on
+       remonte autant que possible pour montrer tout le pavé, sans faire sortir le champ par le haut. */
+    const rc0 = document.getElementById("qrecap"), top0 = rc0 && !rc0.hidden ? rc0.getBoundingClientRect().bottom : 0;
+    if (b.bottom > vh - 4) { const d = Math.min(b.bottom - vh + 12, r.top - top0 - 8); if (d > 4) { window.scrollBy({ top: d, behavior: "smooth" }); return; } }
   }
   const rc = document.getElementById("qrecap"), top = rc && !rc.hidden ? rc.getBoundingClientRect().bottom : 0; /* rappel d'énoncé collé en haut */
   if (r.top < top + 4) window.scrollBy({ top: r.top - top - 12, behavior: "smooth" });
