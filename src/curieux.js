@@ -45,10 +45,10 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
     make() {
       const A = pk([1.8, 1.95, 2.1, 2.4]), pl = A / 1.5, k = pk([0.9, 0.94, 1.06, 1.1]), B = Math.round((pl * 1.98 * k) / 0.05) * 0.05, pl2 = B / 1.98, cheap = pl2 < pl ? 1 : 0;
       const drink = pk(["l'eau gazeuse", "le thé froid", "le jus de pomme"]);
-      return { titre: "Le grand format", q: "Au magasin, " + drink + " existe en bouteille de " + M("1{,}5\\ \\ell") + " à " + chf(A) + ", ou en pack de " + M("6") + " canettes de " + M("33\\ \\text{cl}") + " à " + chf(B) + ".",
+      return { titre: "Le grand format", q: "Au magasin, " + drink + " existe en bouteille de " + M("1{,}5\\ \\text{L}") + " à " + chf(A) + ", ou en pack de " + M("6") + " canettes de " + M("33\\ \\text{cl}") + " à " + chf(B) + ".",
         bet: { q: "Lequel est le moins cher, à quantité égale ?", choices: ["La bouteille de 1,5 l", "Le pack de 6 canettes"], good: cheap },
         calc: { label: "Prix d'un litre avec le pack (en CHF, au centime)", value: r6(pl2), round: 0.01 },
-        reveal: "Pack : " + M("6 \\cdot 0{,}33 = 1{,}98\\ \\ell") + ", donc " + M(N(B) + " \\div 1{,}98 \\approx " + N(pl2, 2)) + " CHF le litre. Bouteille : " + M(N(A) + " \\div 1{,}5 = " + N(pl, 2)) + " CHF le litre. " + (cheap ? "Le pack est moins cher." : "La bouteille est moins chère : le « grand » pack n'est pas toujours la bonne affaire.") };
+        reveal: "Pack : " + M("6 \\cdot 0{,}33 = 1{,}98\\ \\text{L}") + ", donc " + M(N(B) + " \\div 1{,}98 \\approx " + N(pl2, 2)) + " CHF le litre. Bouteille : " + M(N(A) + " \\div 1{,}5 = " + N(pl, 2)) + " CHF le litre. " + (cheap ? "Le pack est moins cher." : "La bouteille est moins chère : le « grand » pack n'est pas toujours la bonne affaire.") };
     } });
   add({ key: "promo", fam: "arnaque", uses: ["pct"], outil: "les pourcentages : traduire une offre (« 3 pour 2 ») en réduction, puis comparer.",
     make() {
@@ -265,8 +265,8 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
   add({ key: "douche", fam: "fermi", uses: ["decmul"], outil: "la multiplication et la comparaison de volumes (litres).",
     make() {
       const deb = pk([8, 10, 12]), m = pk([5, 8, 10]), v = deb * m * 365, bain = 150;
-      return { titre: "L'eau de la douche", q: "Une douche coule environ " + M(deb + "\\ \\ell") + " par minute. Tu prends chaque jour une douche de " + M(m + "\\ \\text{min}") + ".",
-        bet: { q: "En une année, cela fait combien de baignoires pleines (" + bain + " l) ?", choices: ["moins de 10", "entre 10 et 50", "entre 50 et 500", "plus de 500"], good: v / bain < 10 ? 0 : v / bain < 50 ? 1 : v / bain < 500 ? 2 : 3 },
+      return { titre: "L'eau de la douche", q: "Une douche coule environ " + M(deb + "\\ \\text{L}") + " par minute. Tu prends chaque jour une douche de " + M(m + "\\ \\text{min}") + ".",
+        bet: { q: "En une année, cela fait combien de baignoires pleines (" + bain + " L) ?", choices: ["moins de 10", "entre 10 et 50", "entre 50 et 500", "plus de 500"], good: v / bain < 10 ? 0 : v / bain < 50 ? 1 : v / bain < 500 ? 2 : 3 },
         calc: { label: "Litres d'eau en une année", value: v, range: [v * 0.97, v * 1.03] },
         reveal: M(deb + " \\cdot " + m + " \\cdot 365 = " + N(v)) + " litres, soit environ " + P(v / bain) + " baignoires (" + M(N(v) + " \\div " + bain) + ")." };
     } });
@@ -376,7 +376,7 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
   add({ key: "essence", fam: "quotidien", uses: ["prop"], outil: "la proportionnalité : la consommation est donnée pour 100 km.",
     make() {
       const c = pk([5.5, 6.5, 7]), d = pk([160, 240, 280, 320]), pr = pk([1.8, 1.85, 1.9]), v = (c * d / 100) * pr, tr = pk([25, 35, 45]);
-      return { titre: "Voiture ou train ?", q: "Une voiture consomme " + M(N(c) + "\\ \\ell") + " d'essence aux 100 km. Le trajet aller fait " + M(d + "\\ \\text{km}") + ", l'essence coûte " + chf(pr) + " le litre. En train, le billet aller coûte " + chf(tr) + " par personne.",
+      return { titre: "Voiture ou train ?", q: "Une voiture consomme " + M(N(c) + "\\ \\text{L}") + " d'essence aux 100 km. Le trajet aller fait " + M(d + "\\ \\text{km}") + ", l'essence coûte " + chf(pr) + " le litre. En train, le billet aller coûte " + chf(tr) + " par personne.",
         bet: { q: "À quatre, l'essence de la voiture revient-elle moins cher que quatre billets de train ?", choices: ["Oui", "Non"], good: v < 4 * tr ? 0 : 1 },
         calc: { label: "Prix de l'essence pour ce trajet aller (en CHF, au centime)", value: r6(v), round: 0.01 },
         reveal: "Litres : " + M(N(c) + " \\cdot " + d + " \\div 100 = " + N(c * d / 100)) + ". Prix : " + M(N(c * d / 100) + " \\cdot " + N(pr) + " \\approx " + N(v, 2)) + " CHF, contre " + M("4 \\cdot " + tr + " = " + 4 * tr) + " CHF en train. (Sans compter l'usure, le parking… ni le climat.)" };
@@ -460,7 +460,7 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
   add({ key: "respire", fam: "fermi", uses: ["decmul"], outil: "la multiplication et les conversions de durées (minutes → jour).",
     make() {
       const r = pk([12, 14, 15, 16]), v = r * 0.5 * 1440;
-      return { titre: "L'air que tu respires", q: "Au repos, tu respires environ " + M(r) + " fois par minute, et chaque inspiration fait entrer environ " + M("0{,}5\\ \\ell") + " d'air.",
+      return { titre: "L'air que tu respires", q: "Au repos, tu respires environ " + M(r) + " fois par minute, et chaque inspiration fait entrer environ " + M("0{,}5\\ \\text{L}") + " d'air.",
         bet: { q: "En une journée, tu respires environ…", choices: ["100 litres d'air", "1'000 litres d'air", "10'000 litres d'air"], good: 2 },
         calc: { label: "Litres d'air respirés en un jour", value: v, range: [v * 0.95, v * 1.05] },
         reveal: M(r + " \\cdot 0{,}5 = " + N(r * 0.5)) + " litre" + (r * 0.5 > 1 ? "s" : "") + " par minute ; une journée a " + M("24 \\cdot 60 = 1\\text{'}440") + " minutes : " + M(N(r * 0.5) + " \\cdot 1\\text{'}440 = " + N(v)) + " litres, de quoi remplir une petite piscine gonflable chaque jour." };
@@ -541,7 +541,7 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
   add({ key: "peinture", fam: "quotidien", uses: ["prop"], outil: "l'aire des murs (périmètre × hauteur) puis la proportionnalité (litres par m²).",
     make() {
       const [L, l] = pk([[4, 3], [5, 4], [3, 3], [4.5, 3.5]]), h = 2.5, S = 2 * (L + l) * h, lit = (2 * S) / 10, pots = Math.ceil(lit / 2.5);
-      return { titre: "Repeindre ta chambre", q: "Ta chambre mesure " + M(N(L) + "\\ \\text{m} \\times " + N(l) + "\\ \\text{m}") + ", avec " + M("2{,}5\\ \\text{m}") + " de hauteur. Tu repeins les quatre murs (on oublie la fenêtre et la porte), en deux couches. Un litre de peinture couvre " + M("10\\ \\text{m}^2") + " ; la peinture se vend en pots de " + M("2{,}5\\ \\ell") + ".",
+      return { titre: "Repeindre ta chambre", q: "Ta chambre mesure " + M(N(L) + "\\ \\text{m} \\times " + N(l) + "\\ \\text{m}") + ", avec " + M("2{,}5\\ \\text{m}") + " de hauteur. Tu repeins les quatre murs (on oublie la fenêtre et la porte), en deux couches. Un litre de peinture couvre " + M("10\\ \\text{m}^2") + " ; la peinture se vend en pots de " + M("2{,}5\\ \\text{L}") + ".",
         bet: { q: "Combien de pots faut-il acheter ?", choices: ["2", "3", "4", "5"], good: pots - 2 },
         calc: { label: "Aire des quatre murs (en m²)", value: S },
         reveal: "Les quatre murs, déroulés, forment un rectangle : périmètre × hauteur = " + M(N(2 * (L + l)) + " \\cdot 2{,}5 = " + N(S)) + " m². Deux couches : " + M(N(2 * S)) + " m², donc " + M(N(lit)) + " litres, soit " + M(N(lit) + " \\div 2{,}5 = " + N(lit / 2.5)) + " → " + pots + " pots (on arrondit vers le haut)." };

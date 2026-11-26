@@ -79,7 +79,7 @@ const Referentiel = (() => {
     if (cache[k]) return cache[k];
     const D = SYS[k].data();
     /* 6e champ facultatif : l'année (REF_FR : 6 = 6e … 12 = Tle) ; sinon premier chiffre du code (REF_MATU). */
-    return (cache[k] = D.c.map(([code, niv, th, no, label, y, y2]) => { const year = y === undefined ? +code[0] : y; return { code, year, y2: y2 === undefined ? year : y2, niv, theme: D.th[th], notion: D.no[no], label, links: D.q[code] || [] }; }));
+    return (cache[k] = D.c.map(([code, niv, th, no, label, y, y2]) => { const year = y === undefined ? +code[0] : y; return { code, year, y2: y2 === undefined ? year : y2, niv, theme: D.th[th], notion: D.no[no], label, links: D.q[code] || [], forms: (D.f && D.f[code]) || null }; }));
   };
   /* France (catalogOnly, séparation 25.11) : on ne garde que les notions du catalogue France (toutes classes), jamais
      une notion propre à la Suisse ; un item sans notion restante est « travaillé en classe ». 26.11 : idem pour la MP
@@ -100,6 +100,13 @@ const Referentiel = (() => {
   const pairs = (r) => r.links.flatMap((s) => { const [id, lv] = s.split("@"); return (lv ? lv.split("") : ["1", "2", "3"]).map((d) => [id, +d]); });
   /* Identifiants d'enregistrement (state.comps) alimentés par une compétence : ceux de src/competences.js (compOf). */
   const cids = (r) => [...new Set(pairs(r).map(([id, d]) => compOf(id, d)))];
+  /* Formes (ctx) tirées pour (notion, niveau) par un profil : 30 graines, en cache (le niveau peut être relevé par Engine.make). */
+  const formsC = {};
+  const formsAt = (p, id, d) => {
+    const k = [p.system, p.grade, p.track, p.niv, id, d].join("|");
+    if (!formsC[k]) { const st = { profile: p }, cs = new Set(); for (let s = 1; s <= 30; s++) { try { const q = Engine.make(st, id, d, s); if (q && q.ctx) cs.add(q.ctx); } catch (e) { break; } } formsC[k] = [...cs]; }
+    return formsC[k];
+  };
   return {
     of: sysOf,
     title: (p) => { const k = sysOf(p); return k ? SYS[k].title : ""; },
@@ -131,7 +138,7 @@ const Referentiel = (() => {
       const recs = cids(r).map((c) => (st.comps || {})[c]).filter((x) => x && x.r && x.r.length);
       if (!recs.length) return null;
       recs.sort((a, b) => String(a.last || "").localeCompare(String(b.last || "")));
-      return compNote({ r: recs.flatMap((x) => x.r).slice(-8) });
+      return compNote({ r: recs.flatMap((x) => x.r).slice(-8), n: recs.reduce((a, x) => a + (x.n || x.r.length), 0), hi: recs.some((x) => x.hi) });
     },
     hasQuestions: (r) => r.links.length > 0,
     /* « Me tester » : questions des notions rattachées que l'élève peut recevoir (son catalogue), sinon toutes.
@@ -139,10 +146,15 @@ const Referentiel = (() => {
        MP (26.11) : sinon le catalogue MP des autres années. */
     plan(p, r) {
       const ok = new Set(Engine.catalog(p).map((c) => c.id)), gen = (id) => typeof GEN === "undefined" || GEN[id];
-      let ps = pairs(r).filter(([id]) => ok.has(id) && gen(id));
-      if (!ps.length) { const k = sysOf(p); ps = pairs(r).filter(([id]) => gen(id) && (SYS[k].catalogOnly ? catOk(k, id) : NOTIONS.some((n) => n.id === id))); }
+      /* 26.11 (revue p5, n° 2) : formes retenues pour l'objectif (r.forms, p. ex. coordmp « plan » / « espace ») : un niveau
+         qui n'en tire aucune pour ce profil est écarté. */
+      const fit = ([id, d]) => !r.forms || !r.forms[id] || formsAt(p, id, d).some((c) => r.forms[id].includes(c));
+      let ps = pairs(r).filter(([id]) => ok.has(id) && gen(id)).filter(fit);
+      if (!ps.length) { const k = sysOf(p); ps = pairs(r).filter(([id]) => gen(id) && (SYS[k].catalogOnly ? catOk(k, id) : NOTIONS.some((n) => n.id === id))).filter(fit); }
       return ps;
     },
+    /* Formes (ctx) que « Me tester » accepte pour la notion id de l'objectif r (null : toutes). */
+    forms: (r, id) => (r && r.forms && r.forms[id]) || null,
     stats(st, list) {
       const notes = list.map((r) => this.note(st, r)).filter((x) => x !== null);
       return { total: list.length, tested: notes.length, avg: notes.length ? notes.reduce((a, b) => a + b, 0) / notes.length : null };

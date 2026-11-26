@@ -97,7 +97,9 @@ for (const n of NOTIONS) {
       if (sp.kind !== "value" || sp.sci) continue;
       if (!sp.final) { T.oui++; continue; }
       T.fin++;
-      const c = rep(sp.value, sp);
+      /* 26.11 (revue p5, n° 14) : consigne « fraction irréductible » (spec.frac) : on tape la fraction */
+      const fq = (v) => { for (let d = 2; d <= 1000; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) { const n = Math.round(v * d), g = gcd(Math.abs(n), d); return n / g + "/" + d / g; } return null; };
+      const c = sp.frac && fq(sp.value) ? fq(sp.value) : rep(sp.value, sp);
       let r = "non représentable"; try { if (c !== null) r = checkAnswer(sp, c).status; } catch (e) { r = "exc " + e.message; }
       if (r !== "correct") (stuck[n.id] = stuck[n.id] || []).push(q.code + " " + sp.value + " « " + c + " » → " + r);
     }

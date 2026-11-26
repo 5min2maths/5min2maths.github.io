@@ -203,8 +203,11 @@ function compsOf(id) {
   return L.map((label, i) => ({ cid: id + ":" + i, label, i })).filter((c) => L.indexOf(c.label) === c.i);
 }
 // Note sur l'échelle suisse (1 à 6, demi-points) à partir des 8 dernières réponses ; null avant 3 réponses.
+/* 26.11 (revue p5, n° 3 : 3 questions de niveau 1 réussies au « Me tester » → note 6, « Première compétence » et « Expert »
+   d'un coup) : la note 6 demande des preuves : au moins une réponse de niveau 2 ou plus (rec.hi, posé par Engine.recordComp),
+   ou 5 réponses ; sinon la note s'arrête à 5. */
 function compNote(rec) {
   if (!rec || rec.r.length < 3) return null;
-  const avg = rec.r.reduce((a, b) => a + b, 0) / rec.r.length;
-  return Math.round((1 + 5 * avg) * 2) / 2;
+  const avg = rec.r.reduce((a, b) => a + b, 0) / rec.r.length, n = Math.round((1 + 5 * avg) * 2) / 2;
+  return n > 5 && !rec.hi && Math.max(rec.r.length, rec.n || 0) < 5 ? 5 : n;
 }

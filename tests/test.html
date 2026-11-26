@@ -194,7 +194,7 @@ for (const n of NOTIONS) {
   if (!L || L.length !== 3 || L.some((x) => !x)) fail("compétences manquantes : " + n.id);
   if (ORDRE.CO[n.id] === undefined && ORDRE.MATU[n.id] === undefined && ORDRE.MP[n.id] === undefined && (ORDRE.FR || {})[n.id] === undefined && (ORDRE.FR_COL || {})[n.id] === undefined) fail("notion hors de l'ordre du référentiel : " + n.id);
 }
-if (compNote({ r: [1, 1] }) !== null || compNote({ r: [1, 1, 1] }) !== 6 || compNote({ r: [0, 0, 0] }) !== 1 || compNote({ r: [1, 0.5, 1, 0, 1] }) !== 4.5) fail("note de compétence");
+if (compNote({ r: [1, 1] }) !== null || compNote({ r: [1, 1, 1] }) !== 5 /* revue p5, n° 3 : 6 = niveau ≥ 2 ou 5 réponses */ || compNote({ r: [1, 1, 1], hi: true }) !== 6 || compNote({ r: [0, 0, 0] }) !== 1 || compNote({ r: [1, 0.5, 1, 0, 1] }) !== 4.5) fail("note de compétence");
 // Ouverture des notions de l'année dans l'ordre du référentiel, sans questionnaire ; « pas encore vu en classe »
 { const t = Engine.newState({ system: "CH", grade: 9, track: "college", minutes: 5 }); Engine.initNotions(t, Object.fromEntries(Engine.catalog(t.profile).map((c) => [c.id, c.defaultStatus])));
   Engine.unlock(t, new Date("2026-09-10"));
@@ -207,7 +207,7 @@ if (compNote({ r: [1, 1] }) !== null || compNote({ r: [1, 1, 1] }) !== 6 || comp
   const share = open().length / Object.values(t.notions).length;
   if (share < 0.5) fail("9e en mars : seulement " + open().length + " notions ouvertes");
   for (let k = 0; k < 3; k++) Engine.record(t, "decread", 1, 1, true);
-  const cid = compOf("decread", 1); if (compNote(t.comps[cid]) !== 6) fail("compétence non notée : " + JSON.stringify(t.comps));
+  const cid = compOf("decread", 1); if (compNote(t.comps[cid]) !== 5) fail("compétence non notée : " + JSON.stringify(t.comps));
   log.push("9e : rentrée " + "decread,deccomp,decarr" + " ; mars " + open().length + " notions ouvertes"); }
 
 // 3. Moteur : parcours complet

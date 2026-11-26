@@ -42,7 +42,7 @@ try {
       /* 26.11 (revue p3, n° 12) : « valeur exacte » demandée (spec.exact) : un décimal à 10 chiffres est refusé à juste titre ;
          on tape la fraction (sinon, valeur irrationnelle : seul le refus « forme » est admis). */
       const frc = (v) => { for (let d = 1; d <= 400; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return Math.round(v * d) + (d > 1 ? "/" + d : ""); return null; };
-      const sp = q.spec; if (sp && sp.kind === "value" && !q.parts) { const inp = q.canon || (sp.exact && frc(sp.value)) || String(+(+sp.value).toFixed(10)).replace(".", ","), st2 = checkAnswer(sp, inp).status;
+      const sp = q.spec; if (sp && sp.kind === "value" && !q.parts) { const inp = q.canon || ((sp.exact || sp.frac /* revue p5, n° 14 : fraction exigée */) && frc(sp.value)) || String(+(+sp.value).toFixed(10)).replace(".", ","), st2 = checkAnswer(sp, inp).status;
         ok(st2 === "correct" || (sp.exact && !q.canon && !frc(sp.value) && st2 === "form"), "réponse refusée après localisation " + q.code); }
       for (const h of hit(txt(q))) { const k = h.split(" ")[0] + " " + c.id; if (!bad[k]) bad[k] = q.code + " : " + h; }
     }

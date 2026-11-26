@@ -28,12 +28,13 @@
     state.comps = { "factor:0": { r: [1, 1, 1, 1], n: 4, last: "2026-11-20" }, "f2:0": { r: [1, 0], n: 2, last: "2026-11-21" }, "eq2:0": { r: [1, 1, 0, 1], n: 4, last: "2026-11-22" }, "pyth:0": { r: [0, 0, 1], n: 3, last: "2026-11-01" } };
     const before = JSON.stringify(state.comps);
     const f = (c) => Referentiel.find(state.profile, c);
-    ok(Referentiel.note(state, f("1.AL.03a")) === 6, "1.AL.03a (factor niv. 1, 4/4) : note " + Referentiel.note(state, f("1.AL.03a")));
+    /* 26.11 (revue p5, n° 3) : 4 réponses de niveau 1 seulement : note plafonnée à 5 (6 = une réponse de niveau ≥ 2 ou 5 réponses) */
+    ok(Referentiel.note(state, f("1.AL.03a")) === 5, "1.AL.03a (factor niv. 1, 4/4) : note " + Referentiel.note(state, f("1.AL.03a")));
     ok(Referentiel.note(state, f("1.FO.07a")) === null, "1.FO.07a : 2 réponses seulement, pas de note");
     ok(Referentiel.note(state, f("1.GE.02a")) === null && !Referentiel.hasQuestions(f("1.GE.02a")), "1.GE.02a (énoncer) : sans question");
     for (let i = 0; i < 3; i++) Engine.recordComp(state, "factor", 2, 0);
     ok(Referentiel.note(state, f("1.AL.03b")) === 1, "1.AL.03b après 3 erreurs au niveau 2 : note " + Referentiel.note(state, f("1.AL.03b")));
-    ok(Referentiel.note(state, f("1.AL.03a")) === 6, "1.AL.03a inchangée par le niveau 2");
+    ok(Referentiel.note(state, f("1.AL.03a")) === 5, "1.AL.03a inchangée par le niveau 2");
     Engine.recordComp(state, "f2", 1, 1);
     ok(Referentiel.note(state, f("1.FO.07a")) !== null, "1.FO.07a notée à la 3e réponse");
     const old = JSON.parse(before);
@@ -59,7 +60,7 @@
       b.click();
       ok(session && session.ctest && session.ctest.code === "1.AL.03a" && session.plan.length === 3, "Me tester : 3 questions, compétence officielle");
       ok(session.plan.every((x) => /^(factor)\|1$/.test(x)), "Me tester : questions de factor niveau 1 (" + session.plan.join(", ") + ")");
-      ok(ctestNote(session.ctest) === 6, "bilan du test : note officielle");
+      ok(ctestNote(session.ctest) === 5, "bilan du test : note officielle");
       session = null;
     }
     /* 4e MA1 : années précédentes repliées, 3e sans MA2 ; 4e MA2 : rien ne dépasse, dépliés */

@@ -10,8 +10,10 @@
   // ---------- polynômes : liste de termes [coef, { lettre: exposant }] ----------
   const key = (v) => Object.keys(v).filter((k) => v[k]).sort().map((k) => k + v[k]).join("");
   const deg = (v) => Object.values(v).reduce((s, p) => s + p, 0);
+  /* 26.11 (revue p5, n° 10 : corrigé « −12ab + 4a² + 9b² ») : à degré égal, ordre lexicographique (a², ab, b²) */
+  const lexo = (v, w) => { for (const k of [...new Set([...Object.keys(v), ...Object.keys(w)])].sort()) { const d = (w[k] || 0) - (v[k] || 0); if (d) return d; } return 0; };
   const norm = (L) => { const m = new Map(); for (const [c, v] of L) { const k = key(v); const o = m.get(k); m.set(k, o ? [o[0] + c, o[1]] : [c, { ...v }]); }
-    return [...m.values()].filter(([c]) => Math.abs(c) > 1e-12).sort((a, b) => deg(b[1]) - deg(a[1]) || key(a[1]).localeCompare(key(b[1]))); };
+    return [...m.values()].filter(([c]) => Math.abs(c) > 1e-12).sort((a, b) => deg(b[1]) - deg(a[1]) || lexo(a[1], b[1]) || key(a[1]).localeCompare(key(b[1]))); };
   const mulP = (A, B) => norm(A.flatMap(([c, v]) => B.map(([d, w]) => { const u = { ...v }; for (const k in w) u[k] = (u[k] || 0) + w[k]; return [c * d, u]; })));
   const addP = (...Ls) => norm(Ls.flat());
   const neg = (L) => L.map(([c, v]) => [-c, v]);

@@ -42,6 +42,22 @@ const HORS_FR = {
   cart: [["angle-droit", 11]],
   /* 1re 2026 : « le calcul effectif de la forme canonique dans le cas général n'est pas un attendu » (complétion du carré, a = 1) */
   f2formes: [["canon-couple", 99], ["dev-k-a", 99]],
+  /* 26.11 (revue p5, n° 1, grave : 4e FR, « Factorise x² − 100 ») : repères annuels du cycle 4 — 5e : factoriser ka + kb
+     (facteur commun numérique) ; 4e : facteur commun littéral, relatifs ; 3e : facteur commun entre parenthèses,
+     a² − b² = (a − b)(a + b) ; 2nde : carré parfait lu à l'envers ; 1re : trinôme (somme et produit, racines).
+     Défi (niveau 4 : calcul mental par a² − b², (100 − 2)(100 + 2)) : 3e. */
+  factor: [["lettre", 8], ["parenthese", 9], ["diffcarres", 9], ["diffcarres2", 9], ["maximal", 9], ["cube", 9], ["carre", 10],
+    ["trinome", 11], ["trinome-complete", 11], ["erreur", 11], [(q) => q.d === 4, 9]],
+  /* même revue : développer — 5e : k(a + b), k positif ; 4e : produit de relatifs, x · x = x², double distributivité ;
+     3e : différence de deux produits ; 2nde : binôme × trinôme (degré 3). */
+  idrem: [["racines", 10] /* (a + √b)² : calcul avec radicaux, 2nde */],
+  distrib: [["negatif", 8], ["lettre", 8], ["double", 8], ["double2", 8], ["trinome", 8], ["difference", 9], ["deuxdev", 9], ["degre3", 10]],
+};
+
+/* 26.11 (revue p5, n° 7) : indice de la notion pour une classe française où l'indice suisse parle d'un contenu hors programme
+   (horsFRTexte : quartiles avant la 2nde). Lu par Engine.finalize. */
+const HINTS_FR_COL = {
+  quartiles: "Trie la série. Étendue = plus grande valeur − plus petite. Médiane : la valeur du milieu (effectif pair : la moyenne des deux valeurs du milieu).",
 };
 
 /* 26.11 (décision de l'enseignant, n° 5 : quartiles retirés de la 4e FR, gardés en 2nde) : au collège français, la notion

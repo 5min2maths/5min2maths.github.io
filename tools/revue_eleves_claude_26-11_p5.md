@@ -55,6 +55,7 @@ Ne tiennent pas (ou en partie) :
    on factorise seulement par un facteur commun. `factor` est placé en 5e–3e (`src/fr_college.js` l. 20) sans écarter ces formes.
    Reproduire : `#eleve=jade&jours=2&jour0=2027-01-12&graine=316`, jour 1, Révision 3/3, puis Carnet.
    Correction : formes « différence de carrés » de `factor` dans `HORS_FR` (`src/fr_couv.js`) avant la 3e (FR-9).
+   **Corrigé** (26.11, agent/p5) : HORS_FR (src/fr_couv.js) : factor — facteur commun littéral (x) dès la 4e, parenthèse commune, a² − b², « au maximum » et défi (calcul mental par a² − b²) en 3e, carré parfait en 2nde, trinôme en 1re ; distrib — relatifs, x · x, double distributivité en 4e, différence de produits en 3e, binôme × trinôme en 2nde ; idrem (a + √b)² en 2nde. Texte « différence de (deux) carrés / a² − b² » réservé à la 3e (HORS_FR_TXT : exercices riches). Engine.make avec graine (carnet) : si aucune forme du niveau n'est au programme, niveau inférieur (avant : la forme hors programme restait). Jade rejouée : « Factorise au maximum : 3x² − 7x ». Contrôle tests/p5_26_11.html n° 1 (échoue sans la correction : 594 cas).
 
 ## Moyens
 
@@ -67,10 +68,12 @@ Ne tiennent pas (ou en partie) :
    Reproduire : `#eleve=sami&…&graine=314&extras=comp,probleme` ; `#eleve=nina&…&graine=315&extras=comp,carnet`.
    Correction : rattacher par niveau ou par forme (`affine@1,2` sans problème ; coordmp formes « plan » / « espace » / « polaires »).
 
+   **Corrigé** (26.11, agent/p5) : Rattachement par forme : FORMES dans tools/ref_mp.py → REF_MP.f (objectif → { notion : [ctx] }), lu par Referentiel.plan (niveaux sans forme retenue écartés, sondage de 30 graines par profil) et par « Me tester » (nextQuestion retire jusqu'à une forme de l'objectif). S3.FA.01 = définition, pente, lecture, parallèle, zéro ; S3.FA.05 = taxi, vélo, températures, forfaits, bougie, réservoir, trottinette, modaff ; S7.CO.01 plan / .02 polaires / .03 espace (niveaux 12 / 2 / 13 pour la note). Sami : parallèle, pente lue, zéro ; Nina : milieu, symétrique, distance, tous dans le plan. Mécanisme générique (champ f), disponible pour REF_CO / REF_MATU / REF_FR ; non appliqué à ces référentiels (voir rapport).
 3. **Moyenne** — Note et badges trop faciles : Nina réussit 3 questions de niveau 1 au « Me tester » → note 6 et, d'un
    coup, « ⭐ Première compétence (note 5) » et « 💎 Expert (note 6) ». Reproduire : trace de Nina, écran 32.
    Correction : note 6 (et Expert) seulement avec au moins une réponse de niveau ≥ 2, ou après 5 réponses.
 
+   **Corrigé** (26.11, agent/p5) : compNote : note 6 seulement avec une réponse de niveau ≥ 2 (rec.hi, posé par Engine.recordComp ; migration des savoir-faire de niveau 2–3 existants) ou 5 réponses ; sinon 5 au plus. Référentiels : idem sur les réponses réunies. Nina : 3 réponses de niveau 1 → 5,5 / 5, « Première compétence » seule.
 4. **Moyenne** — Leçon avant le Problème de la semaine pour une notion du chapitre en classe. Sami (MP 2e, chapitre
    « Fonctions quadratiques », f2 = encours, sommet déjà réussi la veille au défi f2formes) : « NOUVELLE NOTION · ÉTAPE 1
    SUR 2 · La parabole » avant `q-f2-4-are`. Clara (Tle, chapitre « Limites », limites-2 réussie 5 minutes avant) :
@@ -79,16 +82,19 @@ Ne tiennent pas (ou en partie) :
    Reproduire : `#eleve=sami&…&graine=314&extras=comp,probleme`, jour 2, case Problème ; `#eleve=clara&…&graine=318`, jour 1.
    Correction : appliquer au Problème de la semaine la règle des séances (`Engine.lessonFirst` faux si `nowHas`, ou notion vue).
 
+   **Corrigé** (26.11, agent/p5) : nextQuestion : au Problème de la semaine, leçon seulement pour une notion jamais travaillée hors chapitre en classe (Engine.lessonFirst et !seen). Sami (f2, chapitre en classe) et Clara (limites déjà réussies) : plus de leçon.
 5. **Moyenne** — Élève très faible et Défi du jour : Kevin (Mathélo 928) reçoit le jour 2 un problème de niveau 4 en
    3 parties (`q-utemps-4-aq3`, 16'352 s en h, min, s), 2 essais et 2 indices, **6:19**. Jour 1 : positionnement 5 questions
    (3 ratés, le 3e à la dernière question) + série de 3 avec deux pas à pas = 13:13, puis carnet 2:08.
    Reproduire : `#eleve=kevin&jours=2&jour0=2027-01-11&graine=311`.
    Correction : pour `Engine.struggling`, défi au niveau 3 (ou format Révision de 3 questions) ; ne pas annoncer « Demain : 🏔 Défi ».
 
+   **Corrigé** (26.11, agent/p5) : Engine.chooseFormat : pas de défi du jour pour un élève struggling (ni annoncé au bilan) ; todayFormat ne tient pas un défi annoncé si l'élève est en grande difficulté ; jour du positionnement : 2 questions (au lieu de 3) si l'élève est struggling ou si le positionnement a fini sur 3 ratés (Engine.firstDayN). Kevin rejoué : Révision de 3 au jour 2, plus de défi.
 6. **Moyenne** (C4) — Jade (4e FR, moyenne) : « ⚡ Série d'automatismes · 6 calculs rapides » **6:04**, avec un problème à
    mettre en équation (`q-probeq-1-j0p` « Un père a le triple de l'âge de son fils… ») et un partage (`q-ratio-1-zk2`).
    Reproduire : `#eleve=jade&…&graine=316`, jour 2.
    Correction : `Engine.isDrill` refuse les énoncés de mise en équation (probeq) ; ou série de 5.
+   **Corrigé** (26.11, agent/p5) : Engine.isDrill : jamais probeq, probeq2, sysprob, probrat, decprob (NO_DRILL), ni un énoncé d'âges ou « mets en équation ». Série gardée à 6 (Jade rejouée : 4:16).
 
 ## Bas
 
@@ -97,18 +103,22 @@ Ne tiennent pas (ou en partie) :
    quartiles » alors que l'écran dit « Étendue, médiane » (le bilan prend `label`, pas `labelFR`).
    Correction : `labelFR` partout (bilan, carnet) ; indice FR sans quartiles avant la 2nde.
 
+   **Corrigé** (26.11, agent/p5) : labelFR partout : bilan, carnet, Ma semaine, Problème de la semaine (nLabel). HORS_FR_TXT : quartiles, Q1/Q3, moustaches avant la 2nde ; indice de remplacement du collège (HINTS_FR_COL.quartiles : étendue, médiane), aussi pour les indices de problème.
 8. **Basse** — `colonBreak` coupe dans une citation et met une majuscule au milieu d'une phrase : sujet de 3e FR
    « « f(x) = 3x est une fonction linéaire⏎Sa courbe passe par l'origine. » » et « « Le tableau x : 1, 2, 3 ; f(x) :⏎4, 6, 9
    … » » (`src/riche_11c.js` l. 127) ; « Sachant que : P(x) = …⏎Est divisible par x − 4 » (`q-polydiv-2-rkc`).
    Correction : pas de coupure entre « et » ; majuscule après `<br>` seulement si la ligne d'avant finit une phrase.
 
+   **Corrigé** (26.11, agent/p5) : colonBreak : rien n'est coupé dans une citation « … » (profondeur suivie d'une formule à l'autre) ; majuscule seulement après un retour créé par colonBreak (« : » remplacé) ou après une phrase finie. polydiv : « Le polynôme P(x) = … est divisible par x − 4. Donne le quotient Q(x). »
 9. **Basse** — Pas à pas générique : taxi « 6 CHF par kilomètre, 7 km » → « Prix des 7 éléments au même prix : 7 · 6 = ? » et
    piège « On ne peut pas additionner un nombre d'objets et un prix » (`q-prio-1-fd`, `src/ch11_no.js` l. 77–78).
    Correction : unité tirée du contexte (« Prix des 7 km »).
 
+   **Corrigé** (26.11, agent/p5) : Pas à pas et pièges tirés du contexte : « Prix des 7 km », « Ajoute les 5 CHF de la prise en charge », « On ne peut pas additionner un nombre de kilomètres et un prix », « Seuls les 7 km coûtent… » (idem cahiers, entrées).
 10. **Basse** — Corrigé du positionnement non ordonné : « (2a − 3b)² » → « −12ab + 4a² + 9b² » (`q-idrem-2-oxo`).
     Correction : ordonner (4a² − 12ab + 9b²).
 
+   **Corrigé** (26.11, agent/p5) : ch11_litt.js (norm) : à degré égal, ordre lexicographique : 4a² − 12ab + 9b².
 11. **Basse** — Lisibilité à 360 px (captures `_cadre360.html`) : « Mes compétences » MP commence par 19–21 badges
     (≈ 1,5 écran) avant le premier objectif ; les intitulés, serrés par « Me tester » + « pas testé », tiennent sur 6–7
     lignes ; en « Me tester », l'en-tête en majuscules « ME TESTER · CONNAÎTRE LA DÉFINITION D'UNE FONCTION AFFINE
@@ -116,14 +126,18 @@ Ne tiennent pas (ou en partie) :
     Correction : badges repliés (« 🏅 Mes badges 1 / 19 ») ; boutons sous l'intitulé ; en-tête « ME TESTER · 1 SUR 3 »,
     l'intitulé en texte normal.
 
+   **Corrigé** (26.11, agent/p5) : Badges repliés (« 🏅 Mes badges n / N ») après les compétences ; à ≤ 480 px, boutons sous l'intitulé (pleine largeur, 2–3 lignes au lieu de 6–7) ; en-tête « ME TESTER · 1 SUR 3 », intitulé en texte normal dessous ; « Je ne sais pas » sur 2 lignes au besoin à ≤ 400 px. Intitulés du PEE non raccourcis (dénominations officielles : à décider). Vérifié par captures _cadre360.
 12. **Basse** — « Cette semaine : 4 / 5 / 6 notions consolidées » dès le premier jour (Sami, Nina, Jade : 1 à 3 questions
     faites) : le positionnement est compté. Correction : ne compter que les séances.
 
+   **Corrigé** (26.11, agent/p5) : Engine.snapPlaced à la fin du positionnement : l'instantané du jour reprend les notions validées ; seules les séances comptent. Sami, Nina, Jade : plus de « notions consolidées » au jour 1.
 13. **Basse** — Curieux « Une douche coule environ 12 ℓ par minute … baignoires pleines (150 l) » : deux notations dans le
     même énoncé (`cur-douche-jav`). Correction : « L » partout.
 
+   **Corrigé** (26.11, agent/p5) : « L » partout dans les questions curieuses (douche, boissons, essence, air ; baignoire « 150 L »).
 14. **Basse** — « Calcule et donne le résultat sous forme de fraction irréductible » accepte « 0,9375 » (`q-fracmul-2-kpv`).
     Correction : demander la fraction (spec `frac`) ou retirer « sous forme de fraction irréductible ».
+   **Corrigé** (26.11, agent/p5) : Engine.finalize : consigne « fraction irréductible / sous forme de fraction » et valeur non entière → spec.frac ; checkAnswer refuse un décimal exact (« La valeur est juste ; écris-la sous forme de fraction irréductible »), sans compter faux.
 
 ## Ce qui marche
 

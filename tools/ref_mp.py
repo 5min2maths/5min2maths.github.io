@@ -35,7 +35,7 @@ STATUTS = ["PEC", "*", "facultatif"]
 # motifs MP de tools/referentiels.py trop larges (lu dans src/competences.js et les générateurs ; à valider).
 NIVEAUX = {
     "fracadd": {"S1.CN.04": [], "S1.CN.10": [1]},  # pas de changement d'écriture (décimale, pourcentage) dans fracadd
-    "affine": {"S3.FA.06": []},  # la réciproque est la notion recipaff
+    "affine": {"S3.FA.06": [], "S3.FA.05": [1, 3]},  # la réciproque est la notion recipaff ; problèmes (taxi, vélo ; forfaits, températures) : niveaux 1 et 3
 }
 
 # Rattachements ajoutés (26.11) : notions propres à la MP sans motif (soutien de MP 1re–2e, rangées par
@@ -48,7 +48,7 @@ AJOUTS = {
     "S1.CN.11": ["fracops@12"], "S1.CA.04": ["parenth"], "S1.EQ.01": ["eqfrac", "eqspec"], "S1.EQ.04": ["eq2fact"],
     "S2.GE.04": ["pythfig"], "S2.GE.05": ["pythrec"], "S2.GE.08": ["cercthales"], "S2.GE.09": ["geocomb"],
     "S2.TR.05": ["trigexact"], "S2.SY.05": ["sysprob"], "S2.FO.05": ["lectgraph"],
-    "S3.FA.01": ["affzero"], "S3.FA.05": ["modaff"], "S3.FA.06": ["recipaff"], "S3.FA.03": ["droitesinter"],
+    "S3.FA.01": ["affzero@12"], "S3.FA.05": ["modaff", "affzero@13"], "S3.FA.06": ["recipaff"], "S3.FA.03": ["droitesinter"],
     "S3.FQ.01": ["f2formes@1"], "S3.FQ.02": ["f2formes"], "S3.FQ.05": ["f2trois"],
     "S4.TG.03": ["trigassoc"], "S4.TG.06": ["triaire"], "S4.TG.08": ["trigeq2"],
     # MP 3e (S5–S6)
@@ -59,7 +59,7 @@ AJOUTS = {
     "S6.VS.01": ["volmp@1"], "S6.VS.02": ["volmp@3"], "S6.VS.03": ["volmp@2"], "S6.VS.04": ["similmp@3"],
     "S6.VS.05": ["similmp@12"], "S6.VS.06": ["similmp@12"],
     # MP 4e (S7–S8)
-    "S7.CO.01": ["coordmp@1"], "S7.CO.02": ["coordmp@2"], "S7.CO.03": ["coordmp@3"],
+    "S7.CO.01": ["coordmp@12"], "S7.CO.02": ["coordmp@2"], "S7.CO.03": ["coordmp@13"],  # formes : FORMES (plan / polaires / espace)
     "S7.VE.03": ["vectmp@1"], "S7.VE.04": ["vectmp"], "S7.VE.05": ["vectmp@12"], "S7.VE.06": ["vectmp@2"],
     "S7.VE.07": ["scalmp", "projmp@1"], "S7.VE.08": ["scalmp@13"], "S7.VE.09": ["scalmp@2"], "S7.VE.10": ["pvectmp"],
     "S7.DP.01": ["droiteparam@1"], "S7.DP.02": ["droiteparam@1"], "S7.DP.03": ["posdroites"], "S7.DP.04": ["droiteparam@2"],
@@ -69,6 +69,20 @@ AJOUTS = {
     "S8.FP.06": ["fctmp@23"], "S8.FP.07": ["polymp@13"], "S8.FP.08": ["polymp@2"], "S8.FP.09": ["polymp@3"],
     "S8.FS.01": ["sinusmp@12"], "S8.FS.02": ["sinusmp@3"], "S8.FS.03": ["explogfn@12"], "S8.FS.04": ["explogfn@13"],
     "S8.FS.05": ["explogfn@23", "sinusmp@3"], "S8.FS.06": ["fratmp"],
+}
+
+# Formes de question (étiquette ctx du générateur) quand une notion couvre plusieurs objectifs (26.11, revue p5, n° 2 :
+# « Me tester » de S3.FA.01 « définition, pente, ordonnée à l'origine » posait le problème des forfaits (S3.FA.05) et
+# une inéquation ; S7.CO.01 « dans le plan » posait une distance dans l'espace). Code → { notion : [ctx…] } ; les autres
+# formes de la notion ne sont pas tirées par « Me tester » de cet objectif (src/referentiel.js, plan). À valider.
+FORMES = {
+    "S3.FA.01": {"affine": ["image-lue", "pente", "image", "b-lu", "expression", "antecedent", "expression-lue", "graphe",
+                            "pente-fraction", "parallele", "f-sup-g-droites", "expression-fraction"],
+                 "affzero": ["zero", "zerofrac"]},
+    "S3.FA.05": {"affine": ["taxi", "velo", "temperature", "forfaits"], "affzero": ["bougie", "reservoir", "trottinette"]},
+    "S7.CO.01": {"coordmp": ["distance-plan", "milieu-plan", "symetrique"]},
+    "S7.CO.02": {"coordmp": ["polaire-vers-cart", "cart-vers-polaire"]},
+    "S7.CO.03": {"coordmp": ["distance-espace", "milieu-espace", "diagonale"]},
 }
 
 # Objectifs qu'une réponse saisie n'évalue pas (tracer, représenter, construire, vocabulaire, définition) : pas de
@@ -145,6 +159,8 @@ def main():
     for c in list(SANS) + list(AJOUTS):
         assert any(r["code"] == c for r in rs), c
     assert not set(SANS) & set(AJOUTS)
+    for c, F in FORMES.items():
+        assert any(r["code"] == c for r in rs), c
     lk = links(rs)
     th = []
     idx = lambda L, x: L.index(x) if x in L else (L.append(x) or len(L) - 1)
@@ -158,7 +174,9 @@ def main():
           "  no: [\"\"],\n"
           "  c: [\n" + ",\n".join("    " + json.dumps(d, ensure_ascii=False) for d in data) + "\n  ],\n"
           "  // objectif → notions de l'app (« id » : tous les niveaux de question ; « id@13 » : niveaux 1 et 3)\n"
-          "  q: " + json.dumps({c: L for c, L in lk.items() if L}, ensure_ascii=False, separators=(",", ":")) + ",\n};\n")
+          "  q: " + json.dumps({c: L for c, L in lk.items() if L}, ensure_ascii=False, separators=(",", ":")) + ",\n"
+          "  // objectif → formes de question retenues pour une notion (ctx du générateur ; les autres formes servent d'autres objectifs)\n"
+          "  f: " + json.dumps(FORMES, ensure_ascii=False, separators=(",", ":")) + ",\n};\n")
     assert not any("//" in l for l in js.splitlines() if not l.lstrip().startswith("//")), "« // » au milieu d'une ligne"
     OUT.write_text(js, encoding="utf-8")
     by = {}

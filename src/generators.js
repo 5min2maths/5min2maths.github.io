@@ -26,21 +26,31 @@ const plainTeX = (s) => typeof s !== "string" || !/\{,\}|\\text\{['’]\}/.test(
 const colonBreak = (s) => {
   s = plainTeX(s);
   if (typeof s !== "string" || !/[:;?!]/.test(s)) return s;
-  const parts = s.split(/(\\\(.*?\\\))/);
+  const parts = s.split(/(\\\(.*?\\\))/), BR = "<br>\u2063"; /* U+2063 : retour à la ligne créé ici (marque retirée à la fin) */
+  /* 26.11 (revue p5, n° 8 : « « f(x) = 3x est une fonction linéaire⏎Sa courbe… » », « « f(x) :⏎4, 6, 9 » ») : rien n'est coupé
+     dans une citation « … » (profondeur suivie d'une formule à l'autre) ; f s'applique hors citation seulement. */
+  let depth = 0;
+  const outQ = (t, f) => { let out = "", buf = "", q = depth > 0; for (const ch of t) { if (!q && ch === "«") { out += f(buf); buf = ch; q = true; } else if (q && ch === "»") { out += buf + ch; buf = ""; q = false; } else buf += ch; } out += q ? buf : f(buf); return out; };
   for (let i = 0; i < parts.length; i += 2) {
     let t = parts[i];
     /* 26.11 (revue élèves, B10 : « Les x² ⏎ 3x² ; les x ⏎ 3x ») : entre deux formules, on ne coupe après « : » que si une
        vraie phrase (3 mots au moins) précède la formule ; sinon le « : » reste sur la ligne. */
     const phrase = i > 0 && (String(parts[i - 2] || "").split(/[.;!?]|<br>/).pop().match(/\p{L}{2,}/gu) || []).length >= 3;
     /* 26.11 (revue p3, n° 7 : « en divisant par x⏎« x = 5 » ») : un « : » avant une citation reste « : ». */
-    if (i > 0) t = t.replace(/^\s*:\s+(?=«)/, " : ").replace(/^\s*:\s+(?=[^\s«])/, "<br>").replace(/^\s*:\s*$/, i + 1 < parts.length && phrase ? "<br>" : " : "); /* juste après une formule (26.11 soir, n° 9 : espace après « : ») */
-    t = t.replace(/(^|[.!?]\s+|<br>)([^.!?<:]*?=[^.!?<:]*?[0-9A-Za-zÀ-ÿ²³⁴)\]]) : (?=\S)/g, "$1$2<br>"); // « x = 3 : … »
-    // « Divisibles par 9 : 117, 126 » se lit « 9 ÷ 117 » : on garde les deux-points et on passe à la ligne.
-    t = t.replace(/([0-9)²³°]) : (?=[-−0-9(]|$)/g, "$1 :<br>");
-    if (i + 1 < parts.length) t = t.replace(/([0-9)²³°]) :\s*$/, "$1 :<br>");
-    parts[i] = t.replace(/ ([:;?!])/g, "\u00a0$1"); // espace insécable : le signe ne passe pas seul à la ligne
+    if (i > 0 && !depth) t = t.replace(/^\s*:\s+(?=«)/, " : ").replace(/^\s*:\s+(?=[^\s«])/, BR).replace(/^\s*:\s*$/, i + 1 < parts.length && phrase ? BR : " : "); /* juste après une formule (26.11 soir, n° 9 : espace après « : ») */
+    t = outQ(t, (u) => {
+      u = u.replace(/(^|[.!?]\s+|<br>)([^.!?<:«»]*?=[^.!?<:«»]*?[0-9A-Za-zÀ-ÿ²³⁴)\]]) : (?=\S)/g, "$1$2" + BR); /* « x = 3 : … » */
+      // « Divisibles par 9 : 117, 126 » se lit « 9 ÷ 117 » : on garde les deux-points et on passe à la ligne.
+      return u.replace(/([0-9)²³°]) : (?=[-−0-9(]|$)/g, "$1 :<br>");
+    });
+    if (i + 1 < parts.length && !(depth + (t.split("«").length - t.split("»").length) > 0)) t = t.replace(/([0-9)²³°]) :\s*$/, "$1 :<br>");
+    depth = Math.max(0, depth + (t.split("«").length - 1) - (t.split("»").length - 1));
+    parts[i] = t.replace(/ ([:;?!])/g, "\u00a0$1"); /* espace insécable : le signe ne passe pas seul à la ligne */
   }
-  return parts.join("").replace(/<br>(\s*)([a-zàâçéèêëîïôûù])/g, (m, sp, c) => "<br>" + c.toUpperCase());
+  /* majuscule en début de ligne : après un retour créé ici (le « : » remplacé ouvre une nouvelle phrase) ou après une phrase
+     finie (. ! ?) ; jamais au milieu d'une phrase (« Sachant que :<br>P(x) = …<br>est divisible », revue p5, n° 8). */
+  const up = (m, sp, c) => "<br>" + sp + c.toUpperCase();
+  return parts.join("").replace(/<br>\u2063(\s*)([a-zàâçéèêëîïôûù])/g, up).replace(/([.!?]\s*(?:<\/[a-z]+>)?\s*)<br>(\s*)([a-zàâçéèêëîïôûù])/g, (m, pre, sp, c) => pre + "<br>" + sp + c.toUpperCase()).replace(/\u2063/g, "");
 };
 /* 26.11 (audit de vraisemblance, tests/vraisemblance.html) : un montant s'écrit avec deux décimales (« 2,50 CHF », « 0,80 € »),
    jamais « 2,5 CHF » (37 générateurs le faisaient). Appliqué aux textes des questions (Engine.build, sujets) ; jamais aux réponses. */

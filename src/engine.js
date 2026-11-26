@@ -162,6 +162,10 @@ const HORS_FR_TXT = [
   [/équation (?:cartésienne )?(?:du|d'un|de ce) cercle|cercle (?:circonscrit )?d'équation|\\left\(x\s*[-+][^)]*\\right\)\^\{?2\}?\s*\+\s*\\left\(y|\(x\s*[-+−][^()]*\)\^\{?2\}?\s*\+\s*\(y\s*[-+−]|\(x\s*[-+−][^()]*\)²\s*\+\s*\(y|x\^\{?2\}?\s*\+\s*y\^\{?2\}?|x²\s*\+\s*y²/, 11, "équation de cercle"],
   [/perpendiculaire[^.?!;]{0,160}(?:pente|coefficient directeur|y\s*=|équation)|(?:pente|coefficient directeur|y\s*=|équation)[^.?!;]{0,160}perpendiculaire|produit des pentes/, 11, "orthogonalité de droites (repère)"],
   [/produit scalaire|vecteur normal|orthogona/, 11, "produit scalaire, orthogonalité"],
+  /* 26.11 (revue p5, n° 1) : différence de deux carrés (a² − b² = (a − b)(a + b)) : 3e (exercices riches, défis, corrigés) */
+  [/différence de (?:deux )?carrés|a\^\{?2\}?\s*-\s*b\^\{?2\}?|a²\s*[−-]\s*b²/, 9, "différence de deux carrés"],
+  /* 26.11 (revue p5, n° 7 : indice « Q1 et Q3… écart interquartile » en 4e FR) : quartiles, écart interquartile : 2nde */
+  [/[Qq]uartile|\bQ_?\{?[13]\}?(?!\d)|[Mm]oustache/, 10, "quartiles"],
   [/(?:médiatrice|hauteur issue)[^.?!;]{0,120}(?:équation|y\s*=)|(?:équation|y\s*=)[^.?!;]{0,120}(?:médiatrice|hauteur issue)/, 11, "médiatrice, hauteur en repère"],
 ];
 const qTextAll = (q) => [q.q, q.sol, ...(q.parts || []).map((x) => x.label), ...(q.guide || []).flatMap((g) => [g.ask, g.sol])].map((t) => String(t || "")).join(" ");
@@ -281,6 +285,8 @@ const exprForm = (sp, txt) => {
 // Programme du jour : le format change d'un jour à l'autre ; l'équilibre se fait sur 7 jours.
 // 22.11 : textes courts (une ligne sur téléphone : pas de saut quand on change de format).
 const DRILL_OK = {}; /* Engine.drillable (26.11) */
+/* Notions de problèmes à mettre en équation : jamais en série d'automatismes (Engine.isDrill ; revue p5, n° 6). */
+const NO_DRILL = ["probeq", "probeq2", "sysprob", "probrat", "decprob"];
 const FORMATS = {
   defi: { label: "🏔 Défi du jour", slots: ["defi4"], text: "Un seul problème, prends ton temps." },
   /* 25.11 (séance de 5 minutes) : 6 calculs au lieu de 8. */
@@ -524,6 +530,14 @@ const Engine = {
     const lim = addDays(today, -6);
     state.snaps = [...S.filter((x) => x && x.d >= lim && x.d < today), { d: today, c, k }];
   },
+  /* 26.11 (revue p5, n° 12 : « Cette semaine : 6 notions consolidées » dès le premier jour, 1 à 3 questions faites) : à la fin
+     du positionnement, l'instantané du jour reprend les notions qu'il a validées ; seules les séances comptent ensuite. */
+  snapPlaced(state, today = day()) {
+    if (!state || !state.notions) return;
+    this.snap(state, today);
+    const x = state.snaps[state.snaps.length - 1];
+    if (x && x.d === today) x.k = Object.keys(state.notions).filter((id) => { const s = state.notions[id]; return s && s.seen > 0 && s.m >= 0.7; });
+  },
   // Bilan des 7 derniers jours (aujourd'hui compris), comparé à soi-même seulement.
   // ups : compétences dont la note a monté [{ cid, label, b, a }], de la plus forte hausse à la plus faible ;
   // first : compétences notées pour la première fois ; cons : notions devenues maîtrisées ; fixed : erreurs effacées du
@@ -555,6 +569,7 @@ const Engine = {
     state.comps = state.comps || {};
     const cid = compOf(id, d), rec = (state.comps[cid] = state.comps[cid] || { r: [], n: 0 }), before = compNote(rec);
     rec.r.push(score); rec.r = rec.r.slice(-8); rec.n++; rec.last = day();
+    if (d >= 2 || +cid.split(":")[1] > 0) rec.hi = true; /* 26.11 (revue p5, n° 3) : réponse de niveau 2 ou plus (note 6 possible, compNote) */
     if (typeof Badges !== "undefined") Badges.onComp(state, cid, before, compNote(rec));
   },
 
@@ -567,6 +582,8 @@ const Engine = {
     /* Décision de l'enseignant (26.11, n° 4) : une réussite au positionnement compte comme notion vue. Progressions
        antérieures : notion réussie au positionnement (boîte 2) et jamais reposée depuis → vue, leçon comprise. */
     for (const s of Object.values(state.notions)) if (s.placed && !s.seen && !s.lessonSeen && s.box >= 2) { s.seen = 1; s.lessonSeen = true; changed = true; }
+    /* 26.11 (revue p5, n° 3) : savoir-faire de niveau 2 ou 3 déjà notés : réponses de niveau 2 ou plus (compNote) */
+    for (const [cid, rec] of Object.entries(state.comps || {})) if (rec && !rec.hi && +cid.split(":")[1] > 0) { rec.hi = true; changed = true; }
     for (const id of Object.keys(state.notions)) { const n = NOTIONS.find((x) => x.id === id); if (!n || !placeOf(n, state.profile)) { delete state.notions[id]; changed = true; } }
     if (this.unlock(state)) changed = true;
     return changed;
@@ -701,6 +718,8 @@ const Engine = {
       /* 26.11 (revue p3, n° 12, A11 : 0,309016994375 accepté pour « Donne la valeur exacte ») : valeur exacte demandée, pas
          d'arrondi prévu : un décimal de calculatrice est refusé (checkAnswer, src/expr.js) ; un décimal exact reste accepté. */
       if (sp.kind === "value" && !sp.round && /valeur exacte/i.test(txt) && !/approch|arrondi/i.test(txt)) sp.exact = true;
+      /* 26.11 (revue p5, n° 14 : « … sous forme de fraction irréductible » acceptait 0,9375) : fraction demandée (spec.frac) */
+      if (!step && sp.kind === "value" && !sp.round && isFinite(sp.value) && !Number.isInteger(sp.value) && /fraction irréductible|sous forme (?:de|d'une) fraction/i.test(txt)) sp.frac = true;
       if (sp.kind !== "value" || sp.sci || sp.final) return;
       if (calcPermis(id, txt, sp, own) === false) { sp.final = true; if (CALC_POW.test(txt)) sp.pow = true; }
     };
@@ -716,7 +735,7 @@ const Engine = {
     if (p && p.system === "FR" && p.grade) {
       if (q.traps) q = { ...q, traps: q.traps.filter((t) => !horsFRTexte(p.grade, String(t.m || ""))) };
       if (q.hints) q = { ...q, hints: q.hints.filter((h) => !horsFRTexte(p.grade, String(h || ""))) };
-      if (q.hint && horsFRTexte(p.grade, String(q.hint))) q = { ...q, hint: plainTeX(HINTS[id] && !horsFRTexte(p.grade, HINTS[id]) ? HINTS[id] : "Relis l'énoncé et fais un calcul à la fois.") };
+      if (q.hint && horsFRTexte(p.grade, String(q.hint))) q = { ...q, hint: plainTeX(typeof HINTS_FR_COL !== "undefined" && HINTS_FR_COL[id] && !horsFRTexte(p.grade, HINTS_FR_COL[id]) ? HINTS_FR_COL[id] : HINTS[id] && !horsFRTexte(p.grade, HINTS[id]) ? HINTS[id] : "Relis l'énoncé et fais un calcul à la fois.") };
     }
     if (p && p.system === "FR" && typeof frLocal === "function") {
       const SKIP = new Set(["spec", "canon", "code", "id", "ctx", "e", "expr", "values", "value"]);
@@ -773,7 +792,10 @@ const Engine = {
        inférieure, calibré sur le DNB (partie 1) et l'épreuve anticipée de 1re. Sans effet pour un profil suisse. */
     if (level < 3 && state && state.profile && state.profile.system === "FR" && typeof UPFR !== "undefined" && UPFR[state.profile.grade] && UPFR[state.profile.grade][id]) level = Math.max(level, UPFR[state.profile.grade][id]);
     /* 25.11 (audit France) : profil français, énoncé propre à la Suisse (horsCO) : graine suivante (le code suit la question). */
-    if (seed && state && state.profile && state.profile.system === "FR") { let q = this.build(id, level, seed); for (let k = 1; k <= 40 && horsCO(state, id, q); k++) q = this.build(id, level, seed + k * 977); /* 26.11 p3 : 40 graines (formes hors programme FR filtrées par le texte) */ return keep(this.finalize(state, id, q)); }
+    if (seed && state && state.profile && state.profile.system === "FR") { let q = this.build(id, level, seed); for (let k = 1; k <= 40 && horsCO(state, id, q); k++) q = this.build(id, level, seed + k * 977); /* 26.11 p3 : 40 graines (formes hors programme FR filtrées par le texte) */
+      /* 26.11 (revue p5, n° 1 : carnet de 4e FR « Factorise x² − 64 ») : aucune forme du niveau au programme de la classe → niveau inférieur */
+      if (horsCO(state, id, q) && level > 1) return this.make(state, id, level - 1, seed);
+      return keep(this.finalize(state, id, q)); }
     /* 26.11 : forme réservée à la France (q.fr, p. ex. médiane en 4e–3e FR, src/fr_couv.js) tirée pour un autre profil : graine suivante. */
     if (seed) { let q = this.build(id, level, seed); for (let k = 1; k <= 12 && q && q.fr && horsCO(state, id, q); k++) q = this.build(id, level, seed + k * 977); return keep(this.finalize(state, id, q)); }
     const rec = ((state.recentQ = state.recentQ || {})[id] = (state.recentQ[id] || []));
@@ -952,6 +974,9 @@ const Engine = {
       if (f === "defi" && !this.eligible(state).some((id) => hasProb(id) && this.isRecent(state, id))) sc -= 0.5;
       /* 26.11 (adaptivité) : élève sous le plancher : le défi du jour (un problème de niveau 4) revient moins souvent */
       if (f === "defi" && this.underFloor(state)) sc -= 1.5;
+      /* 26.11 (revue p5, n° 5 : Kevin, Mathélo 928, problème de niveau 4 en 3 parties, 6:19) : élève en grande difficulté
+         (struggling) : pas de défi du jour (ni annoncé au bilan « Demain : 🏔 Défi ») ; il revient quand l'élève remonte. */
+      if (f === "defi" && this.struggling(state)) continue;
       sc += Math.random() * 0.4;
       if (!best || sc > best.sc) best = { f, sc };
     }
@@ -986,11 +1011,14 @@ const Engine = {
   struggling(state) { const L = state.last1 || [], r = L.length ? L.reduce((a, b) => a + b, 0) / L.length : 1;
     /* pendant le calibrage, moins de 5 réponses : positionnement arrêté sur 3 ratés (placeMiss) et pas de réussite franche depuis */
     return this.underFloor(state) || (L.length >= 5 && r < ADAPT.low) || (L.length < 5 && state.elo.n < 20 && (state.placeMiss || 0) >= 3 && r < 0.75); },
-  autoN(state) { return state.placedOn === day() ? 3 : this.struggling(state) ? 4 : FORMATS.auto.slots.length; },
+  /* 26.11 (revue p5, n° 5 : Kevin, jour 1 = positionnement + série de 3 avec deux pas à pas, 13 min) : le jour du positionnement,
+     élève en grande difficulté : 2 questions (jour 1 ≈ 10 minutes). */
+  firstDayN(state) { return this.struggling(state) || (state.placeMiss || 0) >= 3 ? 2 : 3; },
+  autoN(state) { return state.placedOn === day() ? this.firstDayN(state) : this.struggling(state) ? 4 : FORMATS.auto.slots.length; },
   fmtText(state, f) { const n = f === "auto" ? this.autoN(state) : 0; return n && n < FORMATS.auto.slots.length ? n + " calculs rapides, enchaînés." : FORMATS[f].text; },
   planSession(state, format) {
     /* 26.11 (revue p4, n° 3) : le jour du positionnement, 3 questions au plus quel que soit le format (positionnement + séance ≈ 10 min) ; */
-    const f = format || this.todayFormat(state), slots = f === "auto" ? FORMATS.auto.slots.slice(0, this.autoN(state)) : FORMATS[f].slots.slice(0, state.placedOn === day() || this.struggling(state) ? 3 : 9); /* et pour l'élève en grande difficulté (Kevin : Révision de 4 questions avec pas à pas, 8 à 9 min) */
+    const f = format || this.todayFormat(state), slots = f === "auto" ? FORMATS.auto.slots.slice(0, this.autoN(state)) : FORMATS[f].slots.slice(0, state.placedOn === day() ? this.firstDayN(state) : this.struggling(state) ? 3 : 9); /* et pour l'élève en grande difficulté (Kevin : Révision de 4 questions avec pas à pas, 8 à 9 min) */
     const el = this.eligible(state), pend = el.filter((id) => this.lessonFirst(state, id));
     /* 26.11 soir (n° 1) : notions du chapitre « en classe » dont la leçon reste à voir : posées sans leçon (lessonFirst),
        mais candidates à la leçon de la séance. Révision, Défi, Automatismes : jamais de leçon (plan.noLesson). */
@@ -1024,7 +1052,7 @@ const Engine = {
   todayFormat(state) {
     const today = day();
     // Format annoncé la veille au bilan (21.11) : promesse tenue.
-    if (!state.today || state.today.date !== today) state.today = { date: today, f: state.tomorrow && state.tomorrow.date === today && FORMATS[state.tomorrow.f] ? state.tomorrow.f : this.chooseFormat(state) };
+    if (!state.today || state.today.date !== today) state.today = { date: today, f: state.tomorrow && state.tomorrow.date === today && FORMATS[state.tomorrow.f] && !(state.tomorrow.f === "defi" && this.struggling(state)) /* revue p5, n° 5 */ ? state.tomorrow.f : this.chooseFormat(state) };
     return state.today.f;
   },
   // Format de demain, choisi dès aujourd'hui et annoncé au bilan (21.11).
@@ -1211,10 +1239,13 @@ const Engine = {
      virgule au plus). Contrôlé par tests/lot_26_11.html (séances « automatismes » tirées dans toutes les classes). */
   isDrill(q) {
     if (!q || q.parts || !q.spec || q.fig || q.figure || q.ctx === "erreur" || q.spec.round || q.spec.radical) return false;
+    /* 26.11 (revue p5, n° 6 : « Un père a le triple de l'âge de son fils… » dans une série d'automatismes, 6:04) : un problème
+       à mettre en équation n'est jamais un automatisme (lecture, modélisation, résolution). */
+    if (NO_DRILL.includes(q.id)) return false;
     const t = String(q.q || "").replace(/<[^>]+>/g, " ").replace(/\\[()]/g, "").replace(/\s+/g, " ").trim();
     /* 26.11 (revue p4, n° 8 : MP 3e, « Calcule sans calculatrice \(\log_2 32\) » refusé comme automatisme, chapitre absent
        de la série) : « sans calculatrice » annonce justement un automatisme ; seule la calculatrice demandée exclut. */
-    if (t.length > 170 || /arrondi|au dixième|au centième|au millième|à l'unité|près\b|(?<!sans )calculatrice|\\approx|≈|Trouve l'erreur/i.test(t)) return false;
+    if (t.length > 170 || /mets? (?:le problème )?en équation|l'âge|ans de plus|ans de moins|(?:double|triple|quadruple) de (?:l'âge|celui|celle)|arrondi|au dixième|au centième|au millième|à l'unité|près\b|(?<!sans )calculatrice|\\approx|≈|Trouve l'erreur/i.test(t)) return false;
     const v = q.spec.value;
     const simple = (x) => Math.abs(x * 100 - Math.round(x * 100)) < 1e-6 || [2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 16, 20].some((d) => Math.abs(x * d - Math.round(x * d)) < 1e-9);
     if (q.spec.kind === "value" && typeof v === "number" && !simple(v)) return false;
