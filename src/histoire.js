@@ -12,6 +12,7 @@
   const f1 = (v) => v.toFixed(1);
   const dec = (v, k = 2) => String(+v.toFixed(k)).replace(".", "{,}"); /* 24.11 : décimal en formule */
   const r2 = (v, k) => +v.toFixed(k);
+  const dm = (v, k = 2) => dec(v, k).replace(/^\d+/, (i) => tm(+i)); /* 26.11 : décimal en formule, avec milliers */
   /* Chiffre maya (1 à 19) dans une case de 100 × 58 : points au-dessus, barres en dessous ; mayaW : le même en mots. */
   const mayaG = (n, y) => {
     const b = Math.floor(n / 5), d = n % 5, H = 58; let yy = y + (H - ((d ? 13 : 0) + b * 11)) / 2, g = `<rect x="100" y="${y}" width="100" height="${H}" rx="6" class="f-soft"/>`;
@@ -236,6 +237,95 @@
       fig: () => svg(300, 140, `<rect x="20" y="10" width="260" height="120" class="f-soft"/><line x1="20" y1="70" x2="280" y2="70" class="f-line" stroke-width="6"/><line x1="150" y1="10" x2="150" y2="130" class="f-line" stroke-width="6"/>${[[130, 55], [140, 85], [165, 50], [170, 90], [125, 80], [160, 60], [175, 78], [135, 45], [185, 62], [115, 62], [145, 100], [190, 95]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.5" class="f-dot"/>`).join("")}<rect x="146" y="66" width="8" height="8" class="f-fill"/><line x1="157" y1="77" x2="196" y2="110" class="f-line" stroke-width="1"/>${T(212, 122, "pompe", 'font-size="12"')}`, "plan : décès regroupés autour d'une pompe"),
       ex: () => { const N = pk([520, 560, 600]), p = pk([60, 70, 75, 80, 85]); /* 26.11 (revue p3, n° 14) : « plus de 500 » morts, comme le récit */
         return { q: `Sur ${N} victimes de cette épidémie, ${p} % habitaient à moins de 250 m de la pompe. Combien de victimes cela représente-t-il ?`, value: N * p / 100, sol: `\\(${N} \\cdot ${dec(p / 100)} = ${N * p / 100}\\) victimes.` }; } },
+    /* ---- 3e série (26.11, « d'autres entrées ») : ids = notions liées ; need = au moins une de ces notions au programme
+       de la classe ou d'une classe antérieure (Histoire.ok) ; sys = récit réservé à un système (CH romand, FR). ---- */
+    { t: "Portrait", titre: "Évariste Galois, une vie de 20 ans", lien: "Équations du 2e degré", ids: ["eq2disc", "eq2"], need: ["eq2disc"],
+      txt: "Évariste Galois naît en 1811 à Bourg-la-Reine, près de Paris. Passionné de mathématiques, il échoue deux fois au concours de l'École polytechnique, en 1828 et en 1829. Il envoie ses travaux à l'Académie des sciences : un premier mémoire n'aboutit pas, un deuxième est perdu à la mort de Joseph Fourier, qui devait le lire, et un troisième est refusé en 1831 parce qu'on le juge trop peu clair. Le 30 mai 1832, il se bat en duel ; il meurt le lendemain, à 20 ans. La nuit d'avant, il écrit une longue lettre à son ami Auguste Chevalier pour résumer ses découvertes. En marge d'un manuscrit relu cette nuit-là, on lit : « je n'ai pas le temps ». La légende en a rajouté : ses idées dataient de plusieurs années. Sa question : une équation se résout-elle « avec une formule », comme celle du 2e degré avec la racine du discriminant ? Il existe des formules pour les degrés 3 et 4, mais aucune formule générale à partir du degré 5 (le Norvégien Niels Abel l'avait montré peu avant). Galois explique pourquoi, et comment savoir, équation par équation, si une telle formule existe. Ses travaux ne sont publiés qu'en 1846, par Joseph Liouville.",
+      fig: () => svg(300, 140, [["degré 2", "x = (−b ± √Δ) / 2a", "f-fill2"], ["degrés 3 et 4", "formules (XVIᵉ siècle)", "f-fill2"], ["degré 5", "pas de formule générale", "f-soft"]].map(([a, b, c], i) => `<rect x="10" y="${10 + i * 42}" width="280" height="34" rx="8" class="${c}"/>${T(60, 32 + i * 42, a, 'font-size="12"')}${T(190, 32 + i * 42, b, 'font-size="12"')}`).join(""), "formules de résolution selon le degré"),
+      ex: () => { let r1, r2; do { r1 = ri(-9, -2); r2 = ri(2, 9); } while (r1 + r2 === 0);
+        const b = -(r1 + r2), c = r1 * r2, D = b * b - 4 * c, s = r2 - r1, p = (v) => (v < 0 ? "(" + v + ")" : v);
+        const bx = (b > 0 ? " + " : " - ") + (Math.abs(b) === 1 ? "" : Math.abs(b)) + "x", cc = (c > 0 ? " + " : " - ") + Math.abs(c);
+        return { q: `Résous avec le discriminant : \\(x^2${bx}${cc} = 0\\). Quelle est la plus grande solution ?`, value: r2,
+          sol: `\\(\\Delta = ${p(b)}^2 - 4 \\cdot 1 \\cdot ${p(c)} = ${D} = ${s}^2\\), donc \\(x = \\dfrac{${-b} \\pm ${s}}{2}\\) : \\(x_1 = ${r1}\\) et \\(x_2 = ${r2}\\). La plus grande est \\(${r2}\\).` }; } },
+    { t: "Portrait", titre: "Hypatie d'Alexandrie", lien: "Mettre un problème en équation", ids: ["eq1", "probeq", "sys2"], need: ["eq1", "probeq"],
+      txt: "Hypatie vit à Alexandrie, en Égypte, vers l'an 400. Fille du mathématicien Théon, elle enseigne les mathématiques, l'astronomie et la philosophie ; des élèves viennent de loin pour l'écouter. Aucun de ses écrits ne nous est parvenu. Selon une encyclopédie byzantine, la Souda, elle a commenté l'<i>Arithmétique</i> de Diophante et les <i>Coniques</i> d'Apollonius. En 415, elle est tuée par une foule, pendant de violents conflits politiques et religieux dans la ville. C'est la plus ancienne mathématicienne dont la vie nous soit assez bien connue.",
+      fig: () => svg(300, 110, `<rect x="30" y="30" width="168" height="30" class="f-fill2"/><rect x="198" y="30" width="72" height="30" class="f-shape"/>${T(114, 50, "grande partie")}${T(234, 50, "petite", 'font-size="12"')}<path d="M30 72 L270 72" class="f-line"/>${T(150, 92, "somme connue, différence connue", 'font-size="12"')}`, "un nombre partagé en deux parties"),
+      ex: () => { const b = ri(12, 40), d = ri(6, 30), a = b + d, S = a + b;
+        return { q: `Le premier problème de l'<i>Arithmétique</i> de Diophante, qu'Hypatie a commentée : partager un nombre en deux parties dont on connaît la différence. Partage ${S} en deux parties dont la différence vaut ${d}. Quelle est la plus grande partie ?`, value: a,
+          sol: `Si la petite partie vaut \\(x\\), la grande vaut \\(x + ${d}\\) : \\(2x + ${d} = ${S}\\), donc \\(x = ${b}\\) et la grande partie vaut \\(${a}\\). Diophante, lui, partageait 100 avec une différence de 40 : 70 et 30.` }; } },
+    { t: "Événement", titre: "Les Neuf Chapitres et les baguettes à calculer", lien: "Systèmes d'équations", ids: ["sys2"], need: ["sys2"],
+      txt: "En Chine, <i>Les Neuf Chapitres sur l'art du calcul</i> rassemblent, il y a environ 2000 ans, 246 problèmes : partages, surfaces, impôts, systèmes d'équations… En 263, le savant Liu Hui en écrit un commentaire célèbre. Pour résoudre un système, on dispose des baguettes à calculer en tableau sur une planche, puis on combine les colonnes : une méthode très proche de celle qu'on enseigne aujourd'hui. Des baguettes rouges et noires distinguent les nombres positifs et les nombres négatifs.",
+      fig: () => svg(300, 120, `<rect x="40" y="10" width="220" height="100" rx="8" class="f-shape2"/>${[[70, 5], [110, 2], [190, 2], [230, 5]].map(([x, n]) => [...Array(n)].map((_, j) => `<rect x="${x - 12 + j * 6}" y="22" width="3" height="26" class="f-head"/>`).join("")).join("")}${[90, 210].map((x) => `<line x1="${x - 18}" y1="70" x2="${x + 18}" y2="70" class="f-accent" stroke-width="3"/><line x1="${x - 18}" y1="80" x2="${x + 18}" y2="80" class="f-accent" stroke-width="3"/>`).join("")}`, "baguettes à calculer disposées en colonnes"),
+      ex: () => { const c = ri(4, 9), m = ri(2, c - 1), A = 5 * c + 2 * m, B = 2 * c + 5 * m;
+        return { q: `À la manière des <i>Neuf Chapitres</i> : 5 buffles et 2 moutons valent ${A} pièces ; 2 buffles et 5 moutons valent ${B} pièces. Combien vaut un buffle, en pièces ?`, value: c,
+          sol: `En additionnant : 7 buffles et 7 moutons valent \\(${A + B}\\), donc un buffle et un mouton valent \\(${A + B} \\div 7 = ${c + m}\\). En soustrayant : 3 buffles valent 3 moutons plus \\(${A - B}\\), donc un buffle vaut un mouton plus \\(${A - B} \\div 3 = ${c - m}\\). Un buffle : \\((${c + m} + ${c - m}) \\div 2 = ${c}\\) pièces.` }; } },
+    { t: "Portrait", titre: "Émilie du Châtelet, traductrice de Newton", lien: "Puissances (le carré)", ids: ["puiss"],
+      txt: "Émilie du Châtelet (1706–1749) est une savante française. Elle traduit en français et commente le grand livre d'Isaac Newton, les <i>Principia</i> ; sa traduction, publiée après sa mort, est encore aujourd'hui la traduction française de référence. Elle défend aussi une idée alors très discutée : l'énergie d'un objet en mouvement est proportionnelle au carré de sa vitesse. Elle s'appuie sur une expérience du Néerlandais Willem 's Gravesande : des billes lâchées dans de l'argile molle s'enfoncent 4 fois plus profond quand leur vitesse double.",
+      fig: () => svg(300, 120, `<rect x="20" y="80" width="260" height="30" class="f-soft"/><circle cx="90" cy="70" r="10" class="f-head"/><path d="M78 80 Q90 92 102 80" class="f-line"/><circle cx="210" cy="82" r="10" class="f-head"/><path d="M198 80 L198 96 Q210 108 222 96 L222 80" class="f-line"/>${T(90, 30, "vitesse v")}${T(210, 30, "vitesse 2v")}${T(210, 50, "4 fois plus profond", 'font-size="11"')}`, "deux billes enfoncées dans l'argile"),
+      ex: () => { const d = ri(2, 6), k = ri(3, 5);
+        return { q: `Une bille s'enfonce de ${d} mm dans l'argile. Lâchée avec une vitesse ${k} fois plus grande, de combien de millimètres s'enfonce-t-elle ?`, value: d * k * k,
+          sol: `La profondeur est proportionnelle au carré de la vitesse : \\(${k}^2 = ${k * k}\\) fois plus, soit \\(${d} \\cdot ${k * k} = ${d * k * k}\\) mm.` }; } },
+    { t: "Événement", titre: "L'os d'Ishango, il y a 20'000 ans", lien: "Nombres premiers", ids: ["arith"],
+      txt: "En 1950, le géologue belge Jean de Heinzelin découvre à Ishango, au bord du lac Édouard (aujourd'hui en République démocratique du Congo), un os de babouin couvert d'entailles. Il a environ 20'000 ans. Les entailles sont groupées en trois rangées. Sur l'une d'elles, les groupes comptent 11, 13, 17 et 19 entailles : exactement les nombres premiers entre 10 et 20 ! Hasard ou calcul ? Les spécialistes ne sont pas d'accord, mais c'est l'un des plus anciens objets de comptage connus.",
+      fig: () => svg(300, 110, `<path d="M20 50 Q30 30 50 40 L250 40 Q270 30 280 50 Q270 70 250 60 L50 60 Q30 70 20 50 Z" class="f-shape2"/>${[11, 13, 17, 19].map((n, g) => [...Array(n)].map((_, j) => `<line x1="${58 + g * 50 + j * 2.4}" y1="42" x2="${58 + g * 50 + j * 2.4}" y2="58" class="f-line" stroke-width="1"/>`).join("")).join("")}${T(150, 92, "11 · 13 · 17 · 19", 'font-size="13"')}`, "os gravé de groupes d'entailles"),
+      ex: () => { const [a, b, L] = pk([[10, 20, [11, 13, 17, 19]], [20, 40, [23, 29, 31, 37]], [30, 50, [31, 37, 41, 43, 47]], [40, 60, [41, 43, 47, 53, 59]]]), v = L.reduce((x, y) => x + y, 0);
+        return { q: `Et si l'os portait tous les nombres premiers compris entre ${a} et ${b} ? Combien d'entailles cela ferait-il en tout ?`, value: v,
+          sol: `Les nombres premiers entre ${a} et ${b} : ${L.join(", ")}. Total : \\(${L.join(" + ")} = ${v}\\).` }; } },
+    { t: "Anecdote", titre: "Al-Kashi et les 16 décimales de π", lien: "Puissances et cercle", ids: ["puiss", "disque"],
+      txt: "En 1424, à Samarcande (dans l'actuel Ouzbékistan), l'astronome persan Jamshid al-Kashi calcule π avec 16 décimales justes. Ce record tiendra environ 170 ans. Sa méthode prolonge celle d'Archimède : il utilise un polygone régulier de 3 · 2<sup>28</sup> côtés, soit plus de 800 millions de côtés, si proche du cercle qu'on ne pourrait pas les distinguer.",
+      fig: () => { const pg = (n, r) => [...Array(n)].map((_, k) => f1(150 + r * Math.cos((2 * k * Math.PI) / n)) + "," + f1(62 + r * Math.sin((2 * k * Math.PI) / n))).join(" ");
+        return svg(300, 125, `<circle cx="150" cy="62" r="52" class="f-line"/><polygon points="${pg(6, 52)}" class="f-soft"/><polygon points="${pg(12, 52)}" class="f-fill2"/>${T(150, 122, "6 → 12 → 24 → … côtés", 'font-size="12"')}`, "polygones à 6 et 12 côtés inscrits dans un cercle"); },
+      ex: () => { const n = ri(5, 10);
+        return { q: `On part d'un triangle (3 côtés) et on double ${n} fois le nombre de côtés. Combien de côtés a le polygone obtenu ?`, value: 3 * 2 ** n,
+          sol: `Doubler ${n} fois, c'est multiplier par \\(2^{${n}} = ${tm(2 ** n)}\\) : \\(3 \\cdot 2^{${n}} = ${tm(3 * 2 ** n)}\\) côtés. Al-Kashi est allé jusqu'à \\(3 \\cdot 2^{28}\\).` }; } },
+    { t: "Événement", titre: "La carte Dufour, la Suisse en relief", lien: "Échelles", ids: ["echelle"], sys: "CH",
+      txt: "Le Genevois Guillaume-Henri Dufour, ingénieur et général, dirige la réalisation de la première carte précise de toute la Suisse. Elle paraît de 1845 à 1864, en 25 feuilles, à l'échelle 1:100'000. Les géomètres mesurent le pays par triangulation : un réseau de triangles dont on mesure les angles. Pour le relief, la carte utilise des hachures et un ombrage qui donnent l'impression de voir les montagnes en trois dimensions. Le plus haut sommet de Suisse, la pointe Dufour (4'634 m), porte son nom.",
+      fig: () => svg(300, 120, `<rect x="20" y="10" width="260" height="100" rx="6" class="f-shape2"/><path d="M40 95 L95 35 L130 70 L175 25 L240 95 Z" class="f-soft"/><polyline points="60,90 120,60 200,80 250,40" class="f-blue" stroke-width="1.6" fill="none"/>${[[60, 90], [120, 60], [200, 80], [250, 40]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4" class="f-dot"/>`).join("")}${T(225, 104, "1:100'000", 'font-size="11"')}`, "carte avec relief et points de triangulation"),
+      ex: () => { const d = ri(12, 80);
+        return { q: `Sur la carte Dufour (1:100'000), deux villages sont à ${d} mm l'un de l'autre. Quelle est la distance réelle, à vol d'oiseau, en mètres ?`, value: 100 * d,
+          sol: `1 mm sur la carte = \\(100\\text{'}000\\) mm = 100 m en réalité. \\(${d} \\cdot 100 = ${tm(100 * d)}\\) m.` }; } },
+    { t: "Événement", titre: "La carte de Cassini, la France mesurée", lien: "Échelles", ids: ["echelle"], sys: "FR",
+      txt: "Au XVIII<sup>e</sup> siècle, quatre générations de la famille Cassini travaillent à la carte de France. En 1747, César-François Cassini de Thury lance la première carte détaillée de tout le royaume, à l'échelle 1:86 400. Elle repose sur une triangulation : un immense réseau de triangles dont on mesure les angles depuis les clochers et les collines. Son fils, Jean-Dominique Cassini, poursuit le travail ; les dernières feuilles paraissent en 1815.",
+      fig: () => svg(300, 120, `<rect x="20" y="10" width="260" height="100" rx="6" class="f-shape2"/><path d="M60 90 L110 30 L170 80 L230 25 L250 95 Z M110 30 L250 95 M60 90 L170 80 L230 25" class="f-blue" stroke-width="1.4" fill="none"/>${[[60, 90], [110, 30], [170, 80], [230, 25], [250, 95]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4" class="f-dot"/>`).join("")}${T(80, 104, "1:86 400", 'font-size="11"')}`, "réseau de triangles sur une carte"),
+      ex: () => { const d = ri(3, 12), v = 864 * d;
+        return { q: `Sur la carte de Cassini (1:86 400), deux clochers sont à ${d} cm l'un de l'autre. Quelle est la distance réelle, en mètres ?`, value: v,
+          sol: `1 cm sur la carte = \\(86\\,400\\) cm = 864 m en réalité. \\(${d} \\times 864 = ${mil(v).replace(/'/g, "\\,")}\\) m.` }; } },
+    { t: "Anecdote", titre: "Le lotus de Bhāskara", lien: "Théorème de Pythagore", ids: ["pyth", "eq1"], need: ["pyth"],
+      txt: "En 1150, le mathématicien indien Bhāskara II écrit la <i>Līlāvatī</i>, un livre de problèmes en vers. Selon la tradition, il porterait le nom de sa fille. L'un de ses problèmes : une fleur de lotus dépasse d'une demi-coudée la surface d'un lac. Poussée par le vent, la tige se couche et la fleur touche l'eau à deux coudées de là. Quelle est la profondeur du lac ? La tige, le fond et la surface forment un triangle rectangle.",
+      fig: () => svg(300, 140, `<rect x="20" y="40" width="260" height="90" class="f-soft"/><line x1="100" y1="130" x2="100" y2="22" class="f-line" stroke-width="2"/><circle cx="100" cy="18" r="6" class="f-dot"/><line x1="100" y1="130" x2="220" y2="40" class="f-accent" stroke-width="2" stroke-dasharray="4 3"/><circle cx="220" cy="40" r="6" class="f-dot"/><line x1="100" y1="40" x2="220" y2="40" class="f-blue" stroke-width="2"/>${T(160, 34, "s", 'font-size="12"')}${T(86, 32, "h", 'font-size="12"')}${T(86, 90, "d", 'font-size="12"')}`, "lotus, tige couchée et profondeur du lac"),
+      ex: () => { const [h, s] = pk([[1, 3], [1, 5], [2, 4], [2, 6], [1, 7], [3, 9]]), d = (s * s - h * h) / (2 * h);
+        return { q: `Une fleur de lotus dépasse de ${h} dm la surface de l'eau. Couchée par le vent, elle touche l'eau à ${s} dm de l'endroit où sa tige sortait. Quelle est la profondeur du lac, en dm ?`, value: d,
+          sol: `La tige mesure \\(d + ${h}\\). Pythagore : \\((d + ${h})^2 = d^2 + ${s}^2\\), donc \\(${2 * h}d + ${h * h} = ${s * s}\\) et \\(d = ${s * s - h * h} \\div ${2 * h} = ${d}\\) dm.` }; } },
+    { t: "Anecdote", titre: "Héron et la racine de 720", lien: "Racines carrées", ids: ["rac"], need: ["rac"],
+      txt: "Héron d'Alexandrie (I<sup>er</sup> siècle) explique dans ses <i>Métriques</i> comment calculer une racine carrée à la main. Pour la racine de 720, il part de 27, car 27² = 729 est proche de 720. Il divise 720 par 27, puis il fait la moyenne de 27 et du quotient. Il trouve 26 + 5/6, soit environ 26,83 ; la vraie valeur est 26,8328… Et l'on peut recommencer avec ce nouveau nombre pour être encore plus précis.",
+      fig: () => svg(300, 110, `<rect x="40" y="20" width="80" height="70" class="f-fill2"/><rect x="170" y="27" width="70" height="63" class="f-shape"/>${T(80, 60, "27 × 26,7")}${T(205, 63, "carré ?", 'font-size="12"')}<path d="M126 55 l36 0" class="f-line"/><path d="M158 49 l8 6 l-8 6 z" class="f-head"/>${T(150, 106, "même aire : 720", 'font-size="12"')}`, "rectangle transformé en carré de même aire"),
+      ex: () => { const [n, a] = pk([[20, 5], [30, 6], [42, 7], [56, 8], [72, 9], [90, 10]]), v = (a + n / a) / 2;
+        return { q: `Fais comme Héron pour \\(\\sqrt{${n}}\\) : pars de ${a}, divise ${n} par ${a}, puis fais la moyenne de ${a} et du quotient. Quel nombre trouves-tu ?`, value: v,
+          sol: `\\(${n} \\div ${a} = ${n / a}\\), puis \\((${a} + ${n / a}) \\div 2 = ${dec(v)}\\). Vérification : \\(${dec(v)}^2 = ${dec(v * v)}\\), tout près de ${n}.` }; } },
+    { t: "Anecdote", titre: "Jacques Bernoulli et le nombre e", lien: "Exponentielles", ids: ["expo", "pct"], need: ["expo", "croissance", "modexp", "expfn", "lnexp", "croissexp", "explogfn"],
+      txt: "En 1683, Jacques Bernoulli se pose une question d'argent. Un capital placé à 100 % d'intérêt par an double en un an. Et si l'on versait les intérêts deux fois par an (50 % chaque fois), ou chaque mois, ou chaque jour ? Le capital grandit un peu plus à chaque fois, mais il ne dépasse jamais 2,718… fois le capital de départ. Euler appellera plus tard ce nombre e : c'est la base de la fonction exponentielle.",
+      fig: () => svg(300, 120, `${[[1, 2], [2, 2.25], [4, 2.441], [12, 2.613], [365, 2.715]].map(([n, v], i) => `<rect x="${25 + i * 52}" y="${100 - (v - 1.6) * 70}" width="40" height="${(v - 1.6) * 70}" class="f-fill2"/>${T(45 + i * 52, 114, n, 'font-size="11"')}${T(45 + i * 52, 92 - (v - 1.6) * 70, String(v).replace(".", ","), 'font-size="10"')}`).join("")}<line x1="20" y1="${100 - (Math.E - 1.6) * 70}" x2="285" y2="${100 - (Math.E - 1.6) * 70}" class="f-accent" stroke-dasharray="4 3"/>`, "capital après un an selon le nombre de versements"),
+      ex: () => { const [n, C] = pk([[2, 1000], [2, 4000], [4, 2560], [5, 1000], [5, 5000]]), v = r2(C * (1 + 1 / n) ** n, 6);
+        return { q: `On place ${mil(C)} CHF à 100 % par an, avec ${n} versements d'intérêts de ${100 / n} % chacun (chaque versement compte dans le suivant). Quel est le capital au bout d'un an, en CHF ?`, value: v,
+          sol: `\\(${tm(C)} \\cdot ${dec(1 + 1 / n)}^{${n}} = ${tm(C)} \\cdot ${dec((1 + 1 / n) ** n, 5)} = ${dm(v)}\\) CHF : plus que le double, mais moins de \\(${tm(C)} \\cdot e \\approx ${dm(C * Math.E, 0)}\\) CHF.` }; } },
+    { t: "Événement", titre: "Al-Bīrūnī mesure la Terre depuis une montagne", lien: "Pythagore et trigonométrie", ids: ["pyth", "trigo"], need: ["pyth"],
+      txt: "Vers 1020, le savant persan al-Bīrūnī mesure la Terre depuis une montagne, au nord-ouest de l'Inde (dans l'actuel Pakistan). Il mesure d'abord la hauteur de la montagne. Puis, depuis le sommet, il mesure le très petit angle entre l'horizontale et la ligne de l'horizon. Avec la trigonométrie, il en déduit le rayon de la Terre, à moins de 1 % de la valeur actuelle (6'371 km).",
+      fig: () => svg(300, 140, `<path d="M20 140 A170 170 0 0 1 280 140" class="f-shape2"/><polygon points="120,58 135,30 150,58" class="f-shape"/><line x1="135" y1="30" x2="240" y2="70" class="f-accent" stroke-dasharray="4 3"/><line x1="135" y1="30" x2="260" y2="30" class="f-line" stroke-dasharray="2 3"/><circle cx="240" cy="70" r="4" class="f-dot"/>${T(250, 90, "horizon", 'font-size="11"')}`, "ligne de visée de la montagne vers l'horizon"),
+      ex: () => { const h = pk([0.5, 1, 2, 3]), d = Math.sqrt((6371 + h) ** 2 - 6371 ** 2), v = Math.round(d);
+        return { q: `Depuis un sommet à ${String(h).replace(".", ",")} km d'altitude, à quelle distance se trouve l'horizon ? Le rayon de la Terre vaut 6'371 km et la ligne de visée touche la Terre à angle droit. Arrondis au km.`, value: v,
+          sol: `Triangle rectangle : hypoténuse \\(6\\text{'}371 + ${dec(h, 1)}\\), côté \\(6\\text{'}371\\). \\(d = \\sqrt{${dec(6371 + h, 1).replace(/^(\d)(\d{3})/, "$1\\text{'}$2")}^2 - 6\\text{'}371^2} \\approx ${v}\\) km.` }; } },
+    { t: "Événement", titre: "Newton, Leibniz et la querelle de la dérivée", lien: "Dérivées", ids: ["derivregles", "nbderive", "derivref"], need: ["derivregles", "nbderive", "derivref"],
+      txt: "Vers 1665, le jeune Isaac Newton invente en Angleterre une méthode pour calculer des vitesses qui changent sans cesse : ce que nous appelons la dérivée. Il ne la publie pas. En Allemagne, Gottfried Wilhelm Leibniz trouve la même idée de son côté et la publie le premier, en 1684, avec la notation dx que l'on utilise encore. Une longue querelle éclate. En 1712, un rapport de la Royal Society de Londres donne raison à Newton… mais Newton, président de cette société, l'avait en grande partie rédigé lui-même. On admet aujourd'hui que les deux ont fait la découverte indépendamment.",
+      fig: () => svg(300, 130, `<line x1="30" y1="115" x2="280" y2="115" class="f-line"/><line x1="40" y1="125" x2="40" y2="10" class="f-line"/><path d="M40 112 Q140 110 260 20" class="f-blue" stroke-width="2" fill="none"/><line x1="110" y1="128" x2="250" y2="40" class="f-accent" stroke-width="1.6"/><circle cx="180" cy="84" r="4" class="f-dot"/>${T(205, 110, "pente = f'(x)", 'font-size="11"')}`, "courbe et sa tangente"),
+      ex: () => { let a, b, k, v; do { a = ri(2, 5); b = R.nz(-6, 6); k = ri(1, 4); v = 2 * a * k + b; } while (v === 0 || v === 1);
+        return { q: `Avec \\(f(x) = ${a}x^2 ${b < 0 ? "-" : "+"} ${Math.abs(b) === 1 ? "" : Math.abs(b)}x\\), calcule le nombre dérivé \\(f'(${k})\\).`, value: v,
+          sol: `\\(f'(x) = ${2 * a}x ${b < 0 ? "-" : "+"} ${Math.abs(b)}\\), donc \\(f'(${k}) = ${2 * a} \\cdot ${k} ${b < 0 ? "-" : "+"} ${Math.abs(b)} = ${v}\\).` }; } },
+    { t: "Portrait", titre: "Maria Gaetana Agnesi et la « sorcière »", lien: "Fonctions", ids: ["fimg"], need: ["fimg"],
+      txt: "En 1748, l'Italienne Maria Gaetana Agnesi publie à Milan les <i>Instituzioni analitiche</i>, un grand manuel d'algèbre et d'analyse écrit pour les étudiants. C'est l'un des premiers livres de mathématiques importants écrits par une femme. Elle y étudie une courbe en forme de cloche, qu'on appelle aujourd'hui la « courbe d'Agnesi ». En anglais, on la surnomme « witch of Agnesi » (la sorcière d'Agnesi), à cause d'une erreur de traduction : le mot italien <i>versiera</i> (« qui tourne ») a été confondu avec <i>avversiera</i> (« diablesse »).",
+      fig: () => svg(300, 120, `<line x1="20" y1="100" x2="280" y2="100" class="f-line"/><line x1="150" y1="110" x2="150" y2="10" class="f-line"/><polyline points="${[...Array(41)].map((_, i) => { const x = -4 + i * 0.2; return f1(150 + x * 30) + "," + f1(100 - 70 / (1 + x * x)); }).join(" ")}" class="f-blue" stroke-width="2" fill="none"/>${T(225, 60, "y = a³ / (x² + a²)", 'font-size="12"')}`, "courbe d'Agnesi en forme de cloche"),
+      ex: () => { const a = pk([4, 6, 8, 10]);
+        return { q: `La courbe d'Agnesi : \\(f(x) = \\dfrac{${a ** 3}}{x^2 + ${a * a}}\\) (ici \\(a = ${a}\\)). Calcule \\(f(${a})\\).`, value: a / 2,
+          sol: `\\(f(${a}) = \\dfrac{${a ** 3}}{${a * a} + ${a * a}} = \\dfrac{${a ** 3}}{${2 * a * a}} = ${a / 2}\\).` }; } },
   ];
 
   // Notions de l'app liées à chaque récit (même ordre que HISTOIRE ; 22.11) : en mode scolaire, la carte propose d'abord
@@ -247,7 +337,7 @@
     ["vitesse", "gquot"], ["disque", "fracadd"], ["fracmul", "prop"], ["pct", "diagr", "stats"], ["echelle", "sci"], ["prio", "eq3"],
     ["puiss"], ["puiss", "sci"], ["puiss"],
     ["fracadd", "vitesse"], ["eq1", "valnum"], ["valnum", "eq2"], ["puiss", "sci"], ["pct", "expo"], ["pct", "stats"]];
-  HISTOIRE.forEach((H, i) => (H.ids = IDS[i] || []));
+  HISTOIRE.forEach((H, i) => (H.ids = H.ids || IDS[i] || [])); /* 26.11 : la 3e série déclare ses ids dans le récit */
 
   // ---------- Applications poussées (24.11, demande de l'auteur : « les applications restent très simples », surtout
   // pour les plus âgés ou avancés). plus : problème en 2–3 étapes (tous) ; expert : défi du sec. II (grade ≥ 12).
@@ -543,16 +633,29 @@
     // ou le prochain non lu. Renvoie { k, classe } (classe : lien avec le chapitre en cours).
     pick(state) {
       const seen = new Set((state && state.histSeen) || []), now = (state && state.now && state.now.ids) || [];
-      const liés = HISTOIRE.map((H, k) => k).filter((k) => HISTOIRE[k].ids.some((id) => now.includes(id) || now.some((n) => n.startsWith(id))));
+      const liés = HISTOIRE.map((H, k) => k).filter((k) => this.ok(HISTOIRE[k], state) && HISTOIRE[k].ids.some((id) => now.includes(id) || now.some((n) => n.startsWith(id))));
       const neuf = liés.filter((k) => !seen.has(HISTOIRE[k].titre));
       if (neuf.length) return { k: neuf[Math.floor(Date.now() / 864e5) % neuf.length], classe: true };
       let k = this.week();
-      for (let i = 0; i < HISTOIRE.length && seen.has(HISTOIRE[k].titre); i++) k = (k + 1) % HISTOIRE.length;
+      for (let i = 0; i < HISTOIRE.length && !this.ok(HISTOIRE[k], state); i++) k = (k + 1) % HISTOIRE.length;
+      for (let i = 0, k0 = k; i < HISTOIRE.length; i++) { const j = (k0 + i) % HISTOIRE.length; if (this.ok(HISTOIRE[j], state) && !seen.has(HISTOIRE[j].titre)) { k = j; break; } }
       return { k, classe: false };
     },
     // Récit lu : retenu (par son titre) pour ne pas le reproposer tant qu'il en reste d'autres.
     seen(state, k) { if (!state) return; state.histSeen = [...new Set([...(state.histSeen || []), HISTOIRE[k].titre])]; },
-    other(k) { let j; do { j = Math.floor(Math.random() * HISTOIRE.length); } while (j === k && HISTOIRE.length > 1); return j; },
+    other(k, st = typeof state !== "undefined" ? state : null) {
+      const L = HISTOIRE.map((H, j) => j).filter((j) => j !== k && this.ok(HISTOIRE[j], st));
+      return L.length ? L[Math.floor(Math.random() * L.length)] : k;
+    },
+    // 26.11 : récit permis pour ce profil. sys : réservé à un système (« CH » romand, « FR ») ; need : au moins une de ces
+    // notions au programme de la classe de l'élève ou d'une classe antérieure (filière MP comprise, placeOf). Sans profil :
+    // profil romand de 9e.
+    ok(H, st) {
+      const p = (st && st.profile) || { system: "CH", grade: 9, track: "college" };
+      if (H.sys && H.sys !== p.system) return false;
+      if (!H.need) return true;
+      return H.need.some((id) => { const n = NOTIONS.find((x) => x.id === id), pl = n && placeOf(n, p); return !!pl && pl[0] <= p.grade; });
+    },
     // Carte de l'onglet Exploration : illustration, titre, première phrase du récit.
     card(k, classe) {
       const H = HISTOIRE[k], debut = H.txt.replace(/<[^>]+>/g, "").split(/(?<=[.!?])\s/)[0];

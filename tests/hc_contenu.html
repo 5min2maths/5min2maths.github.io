@@ -1,0 +1,83 @@
+<link rel="stylesheet" href="../src/style.css"><!doctype html><meta charset="utf-8"><div id="app"></div><pre id="out">en cours</pre>
+<script>window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/defis_9.js"></script><script src="../src/defis_910.js"></script><script src="../src/defis_sec2.js"></script><script src="../src/competences.js"></script><script src="../src/ref_matu.js"></script><script src="../src/ref_fr.js"></script><script src="../src/ref_co.js"></script><script src="../src/ref_mp.js"></script><script src="../src/referentiel.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch2c.js"></script><script src="../src/fr_college.js"></script><script src="../src/fr_1re.js"></script><script src="../src/fr_3e.js"></script><script src="../src/fr_tle.js"></script><script src="../src/fr_couv.js"></script><script src="../src/fr_fin.js"></script><script src="../src/trx.js"></script><script src="../src/perco.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/fr_act.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/parents.js"></script><script src="../src/app.js"></script><script src="../src/presente.js"></script>
+<script>
+(function(){
+// 26.11 : 3e série d'histoires et de questions curieuses. Réponse recalculée depuis l'énoncé (oracle indépendant),
+// pas de NaN, séparation des systèmes (sys CH / FR), notions liées existantes et au programme d'au moins une classe.
+const fails=[],ok=(c,m)=>{if(!c&&fails.length<40)fails.push(m)},log=[];Element.prototype.scrollIntoView=function(){};
+const clean=(s)=>s.replace(/<[^>]+>/g," ").replace(/\\text\{'\}|\\,| /g,"").replace(/(\d)'(\d)/g,"$1$2").replace(/\{,\}/g,".").replace(/(\d),(\d)/g,"$1.$2");
+const nums=(s)=>(clean(s).match(/\d+(?:\.\d+)?/g)||[]).map(Number);
+const near=(a,b,e=1e-6)=>Math.abs(a-b)<=e*Math.max(1,Math.abs(b));
+const prime=(n)=>{if(n<2)return false;for(let d=2;d*d<=n;d++)if(n%d===0)return false;return true};
+const BAD={FR:/CHF|\b[Ff]rancs?\b|Suisse|Genève|Léman|\\text\{'\}|\d'\d|\\cdot|·/,CH:/€|[Ee]uro|France|\\times/};
+const prof=(system,grade,track="college")=>{const s=Engine.newState({system,grade,track,minutes:5});Engine.autoInit(s);return s};
+const PROFS=[["CH",9],["CH",10],["CH",11],["CH",12],["CH",13],["CH",14],["CH",15],["CH",12,"mp"],["CH",13,"mp"],["CH",14,"mp"],["CH",15,"mp"],["FR",6],["FR",7],["FR",8],["FR",9],["FR",10],["FR",11],["FR",12]].map(([a,b,c])=>({n:a+b+(c?"mp":""),s:prof(a,b,c)}));
+try{
+ // ---------- Histoires ----------
+ const HO={
+  "Évariste Galois":(q)=>{const m=clean(q).match(/x\^2 ([+-]) (\d*)x ([+-]) (\d+) = 0/);const b=(m[1]==="-"?-1:1)*(+m[2]||1),c=(m[3]==="-"?-1:1)*+m[4];return(-b+Math.sqrt(b*b-4*c))/2},
+  "Hypatie":(q)=>{const m=clean(q).match(/Partage (\d+) en deux parties dont la différence vaut (\d+)/);return(+m[1]+ +m[2])/2},
+  "Les Neuf Chapitres":(q)=>{const m=clean(q).match(/valent (\d+) pièces ; 2 buffles et 5 moutons valent (\d+)/);return(5*m[1]-2*m[2])/21},
+  "Émilie du Châtelet":(q)=>{const m=clean(q).match(/de (\d+) mm.*vitesse (\d+) fois/);return m[1]*m[2]*m[2]},
+  "L'os d'Ishango":(q)=>{const m=clean(q).match(/entre (\d+) et (\d+)/);let s=0;for(let k=+m[1]+1;k<+m[2];k++)if(prime(k))s+=k;return s},
+  "Al-Kashi":(q)=>3*2**+clean(q).match(/double (\d+) fois/)[1],
+  "La carte Dufour":(q)=>100*clean(q).match(/à (\d+) mm/)[1],
+  "La carte de Cassini":(q)=>864*clean(q).match(/à (\d+) cm/)[1],
+  "Le lotus":(q)=>{const m=clean(q).match(/dépasse de (\d+) dm.*à (\d+) dm/);return(m[2]**2-m[1]**2)/(2*m[1])},
+  "Héron":(q)=>{const m=clean(q).match(/sqrt\{(\d+)\}\\\) : pars de (\d+)/);return(+m[2]+m[1]/m[2])/2},
+  "Jacques Bernoulli":(q)=>{const m=clean(q).match(/On place (\d+) CHF.*avec (\d+) versements/);return m[1]*(1+1/m[2])**m[2]},
+  "Al-Bīrūnī":(q)=>{const h=+clean(q).match(/à ([\d.]+) km d'altitude/)[1];return Math.round(Math.sqrt((6371+h)**2-6371**2))},
+  "Newton, Leibniz":(q)=>{const m=clean(q).match(/f\(x\) = (\d+)x\^2 ([+-]) (\d*)x\\\), calcule le nombre dérivé \\\(f'\((\d+)\)/);return 2*m[1]*m[4]+(m[2]==="-"?-1:1)*(+m[3]||1)},
+  "Maria Gaetana Agnesi":(q)=>{const m=clean(q).match(/dfrac\{(\d+)\}\{x\^2 \+ (\d+)\}.*f\((\d+)\)/);const x=+m[3];return m[1]/(x*x+ +m[2])},
+ };
+ for(const [t,f] of Object.entries(HO)){const H=HISTOIRE.find(x=>x.titre.startsWith(t));ok(H,"histoire absente "+t);if(!H)continue;
+  const raw=H.txt+H.titre+H.fig();if(H.sys)ok(!BAD[H.sys].test(raw),"séparation "+H.sys+" : "+t+" "+(raw.match(BAD[H.sys])||[""])[0]);
+  ok(H.ids.length&&H.ids.every(id=>NOTIONS.some(n=>n.id===id)),"ids inconnus "+t+" "+H.ids);
+  if(H.need)ok(H.need.some(id=>NOTIONS.some(n=>n.id===id)),"need inconnu "+t);
+  const vals=new Set();for(let i=0;i<60;i++){const E=H.ex(),txt=E.q+E.sol;let o;try{o=f(E.q)}catch(e){o=NaN}
+   ok(near(E.value,o),"recalcul "+t+" : "+E.value+" ≠ "+o+" | "+E.q.slice(0,120));ok(!/NaN|undefined|Infinity/.test(txt),"texte "+t);
+   if(H.sys)ok(!BAD[H.sys].test(txt),"séparation ex "+t+" "+(txt.match(BAD[H.sys])||[""])[0]);vals.add(E.value);}
+  const where=PROFS.filter(p=>Histoire.ok(H,p.s)).map(p=>p.n);ok(where.length,"récit accessible nulle part "+t);
+  log.push(t+" ("+vals.size+" valeurs) : "+(where.length===PROFS.length?"tous":where.join(" ")));}
+ const G=HISTOIRE.find(x=>x.titre.startsWith("Évariste Galois")),okp=(H,n)=>Histoire.ok(H,PROFS.find(p=>p.n===n).s);
+ ok(!okp(G,"CH10")&&!okp(G,"CH9")&&okp(G,"CH11")&&okp(G,"CH12")&&okp(G,"CH12mp")&&okp(G,"FR11")&&!okp(G,"FR10"),"Galois : 11e, sec. II, MP, 1re France seulement");
+ for(const p of PROFS){const sys=p.s.profile.system;for(let i=0;i<30;i++){const k=Histoire.other(-1,p.s);ok(Histoire.ok(HISTOIRE[k],p.s),"autre récit interdit "+p.n+" "+HISTOIRE[k].titre)}
+  const P=Histoire.pick(p.s);ok(Histoire.ok(HISTOIRE[P.k],p.s),"récit proposé interdit "+p.n);}
+ for(const H of HISTOIRE)ok(H.ids.every(id=>NOTIONS.some(n=>n.id===id)),"ids inconnus (toutes) "+H.titre+" "+H.ids.filter(id=>!NOTIONS.some(n=>n.id===id)));
+ // ---------- Questions curieuses ----------
+ const CU={
+  pieces:{u:["prop"],f:(q)=>{const n=nums(q.q.split("Grand pack")[1]);return n[1]/n[0]*1000}},
+  sucre:{u:["pct"],f:(q)=>{const n=nums(q.q);return n[0]*(1-n[2]/100)*n[3]*10/100}},
+  simpson:{u:["pct"],f:(q)=>{const n=nums(q.q),A=n.slice(0,8),B=n.slice(8,16);ok(A[1]===2&&A[5]===3&&B[1]===2&&B[5]===3,"simpson : lecture");
+   ok(A[0]/A[2]>B[0]/B[2]&&A[4]/A[6]>B[4]/B[6]&&(B[0]+B[4])/(B[2]+B[6])>(A[0]+A[4])/(A[2]+A[6]),"simpson : pas de paradoxe "+n);return 100*(B[0]+B[4])/(B[2]+B[6])}},
+  orange:{u:["volcone"],f:(q)=>{const [D,e]=nums(q.q);return 100*(1-((D/2-e)/(D/2))**3)}},
+  lumiere:{u:["vitesse","sci"],f:(q)=>{const m=clean(q.q).match(/à environ (\d+)( millions)? (?:de )?km/);return m[1]*(m[2]?1e6:1)/3e5}},
+  photos:{u:["decdiv"],f:(q)=>{const n=nums(q.q);return n[0]*1000/n[3]}},
+  hirondelle:{u:["vitesse"],f:(q)=>{const [D,v,w]=nums(q.q);return w*D/(2*v)}},
+  traversee:{u:[],f:()=>7},
+  cadenas:{u:["puiss"],f:(q)=>{const n=nums(q.q);return 10**n[0]*n[3]/60}},
+  recharge:{u:["decmul"],f:(q)=>{const n=nums(q.q);return n[0]*365/1000*n[3]},sys:"CH"},
+  rechargefr:{u:["decmul"],f:(q)=>{const n=nums(q.q);return n[0]*365/1000*n[3]},sys:"FR"},
+  tvafr:{u:["pct"],f:(q)=>nums(q.q)[2]/1.2,sys:"FR"},
+  fuseau:{u:["rel"],f:(q)=>{const c=clean(q.q),H=+c.match(/commence à (\d+) h/)[1],m=c.match(/\(UTC ([−+]) (\d+)\)/),z=(m[1]==="+"?1:-1)*m[2];return((H+1-z)%24+24)%24}},
+  jetdeau:{u:["decdiv"],f:(q)=>140000/+clean(q.q).match(/épaisseur de \\\(([\d.]+)/)[1],sys:"CH"},
+  eiffel:{u:["decdiv"],f:(q)=>330000/+clean(q.q).match(/épaisseur de \\\(([\d.]+)/)[1],sys:"FR"},
+  doubler:{u:["log"],f:(q)=>{const t=+clean(q.q).match(/rapporte \\\((\d+)/)[1];return Math.ceil(Math.log(2)/Math.log(1+t/100))}},
+ };
+ for(const [k,o] of Object.entries(CU)){const c=CURIEUX.find(x=>x.key===k);ok(c,"curieuse absente "+k);if(!c)continue;
+  ok(JSON.stringify(c.uses)===JSON.stringify(o.u),"notions de "+k+" : "+c.uses+" (attendu "+o.u+")");ok((c.sys||"")===(o.sys||""),"sys de "+k);
+  const vals=new Set();for(let sd=1;sd<=150;sd++){const q=Curieux.build(k,sd),txt=q.titre+q.q+q.bet.q+q.bet.choices.join()+q.calc.label+q.reveal+q.outil;let e;try{e=o.f(q)}catch(err){e=NaN}
+   const v=q.calc.value;ok(q.calc.range?near(v,e,0.01):near(v,e),"recalcul "+k+" "+sd+" : "+v+" ≠ "+e);
+   if(q.calc.range)ok(q.calc.range[0]<=e&&e<=q.calc.range[1],"fourchette "+k);
+   ok(!/NaN|undefined|Infinity/.test(txt),"texte "+k);if(c.sys)ok(!BAD[c.sys].test(txt),"séparation "+c.sys+" "+k+" : "+(txt.match(BAD[c.sys])||[""])[0]);
+   else ok(!/Genève|Suisse|Léman|France|Paris|€|[Ff]ranc\b|[Ee]uro/.test(txt),"contexte non neutre "+k+" : "+(txt.match(/Genève|Suisse|Léman|France|Paris|€|[Ff]ranc\b|[Ee]uro/)||[""])[0]);vals.add(v);}
+  const where=PROFS.filter(p=>Curieux.available(p.s).some(x=>x.key===k)).map(p=>p.n);ok(where.length,"curieuse accessible nulle part "+k);
+  log.push(k+" ("+c.fam+", "+vals.size+" valeurs) : "+(where.length===PROFS.length?"tous":where.join(" ")));}
+ for(const p of PROFS){const sys=p.s.profile.system,av=Curieux.available(p.s);ok(av.every(c=>!c.sys||c.sys===sys),"curieuse d'un autre système pour "+p.n+" : "+av.filter(c=>c.sys&&c.sys!==sys).map(c=>c.key));}
+ log.push("Histoires : "+HISTOIRE.length+" ; questions curieuses : "+CURIEUX.length);
+ document.body.insertAdjacentHTML("beforeend","<pre id=log>"+log.join("\n")+"</pre>");
+}catch(e){fails.push("EXC "+e.message+" "+e.stack)}
+document.body.insertAdjacentHTML("beforeend","<pre id=out2>"+(fails.length?"ÉCHEC\n"+fails.join("\n"):"OK")+"</pre>");
+})();
+</script>

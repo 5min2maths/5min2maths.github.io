@@ -90,7 +90,7 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
         calc: { label: "Combien paies-tu en tout ? (en CHF)", value: tot },
         reveal: M(m + " \\cdot " + n + " = " + N(tot)) + " CHF, soit " + M(N(tot - P)) + " CHF de plus que le prix comptant : " + pc(plus, 1) + " de plus." };
     } });
-  add({ key: "tva", fam: "arnaque", uses: ["pct"], outil: "les pourcentages : retrouver le prix avant une hausse, c'est diviser par 1,081, pas enlever 8,1 %.",
+  add({ key: "tva", fam: "arnaque", sys: "CH", uses: ["pct"], outil: "les pourcentages : retrouver le prix avant une hausse, c'est diviser par 1,081, pas enlever 8,1 %.",
     make() {
       const HT = pk([200, 250, 400, 600, 1200]), TTC = r6(HT * 1.081), wrong = r6(TTC * 0.919);
       return { titre: "Le prix hors taxe", q: "En Suisse, la TVA est de " + pc(8.1) + " : le prix TTC est le prix hors taxe augmenté de 8,1 %. Un vendeur affiche " + chf(TTC) + " TTC et dit : « Pour le prix hors taxe, j'enlève 8,1 % : " + chf(wrong) + ". »",
@@ -229,7 +229,7 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
         calc: { label: "Longueur totale poussée en un jour (en m)", value: r6(v), range: [v * 0.95, v * 1.05] },
         reveal: M(N(n) + " \\cdot " + N(g) + " = " + N(n * g)) + " mm, soit " + M(N(v)) + " m par jour, à peu près la longueur d'une piscine !" };
     } });
-  add({ key: "leman", fam: "fermi", uses: ["decdiv"], outil: "la division et les conversions de longueurs (km → m).",
+  add({ key: "leman", fam: "fermi", sys: "CH", uses: ["decdiv"], outil: "la division et les conversions de longueurs (km → m).",
     make() {
       const f = pk([200, 250]), L = pk([12.5, 11]), rl = (f * L) / 100, v = 200000 / rl;
       return { titre: "Le tour du Léman en papier toilette", q: "La rive du Léman mesure environ " + M("200\\ \\text{km}") + ". Un rouleau de papier toilette a " + M(f) + " feuilles de " + M(N(L) + "\\ \\text{cm}") + ".",
@@ -505,7 +505,7 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
         calc: { label: "Nombre de matchs joués en tout", value: n - 1 },
         reveal: "Pas besoin de compter tour par tour : chaque match élimine une équipe, et il faut éliminer toutes les équipes sauf le vainqueur. " + M(n + " - 1 = " + (n - 1)) + " matchs." };
     } });
-  add({ key: "franchise", fam: "quotidien", uses: ["prop"], outil: "la comparaison de deux tarifs : coût fixe (primes) + coût variable (franchise).",
+  add({ key: "franchise", fam: "quotidien", sys: "CH", uses: ["prop"], outil: "la comparaison de deux tarifs : coût fixe (primes) + coût variable (franchise).",
     make() {
       const [pa, fa, pb, fb] = pk([[420, 300, 330, 2500], [380, 300, 300, 2500], [450, 500, 360, 2000]]), F = pk([200, 1500, 4000]);
       const A = 12 * pa + Math.min(F, fa), B = 12 * pb + Math.min(F, fb);
@@ -547,6 +547,158 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
         reveal: "Les quatre murs, déroulés, forment un rectangle : périmètre × hauteur = " + M(N(2 * (L + l)) + " \\cdot 2{,}5 = " + N(S)) + " m². Deux couches : " + M(N(2 * S)) + " m², donc " + M(N(lit)) + " litres, soit " + M(N(lit) + " \\div 2{,}5 = " + N(lit / 2.5)) + " → " + pots + " pots (on arrondit vers le haut)." };
     } });
 
+  // ===================== 3e série (26.11, « d'autres entrées ») =====================
+  // sys : question réservée à un système (« CH » : contexte romand, CHF ; « FR » : contexte français, €, ×) ; sans sys,
+  // contexte neutre (CHF devient € par frLocal en France). eur / NF : montants et nombres écrits à la française.
+  const NF = (v, k) => N(v, k).replace(/\\text\{'\}/g, "\\,");
+  const eur = (v) => M(NF(v, Number.isInteger(r6(v)) ? 0 : 2).replace(/\{,\}(\d)$/, "{,}$10") + "\\ \\text{€}");
+  const m2 = (v) => v.toFixed(2).replace(".", "{,}");
+  const PF = (v) => String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f");
+  add({ key: "pieces", fam: "arnaque", uses: ["prop"], outil: "la proportionnalité : comparer deux packs, c'est comparer le prix d'une même quantité (ici 1'000 pièces).",
+    make() {
+      const [n1, p1, n2, p2] = pk([[1000, 9.9, 2800, 24.9], [500, 4.9, 2000, 21.9], [1000, 8.9, 5000, 49.9], [600, 5.9, 2500, 22.9]]);
+      const u1 = (p1 / n1) * 1000, u2 = (p2 / n2) * 1000, cheap = u2 < u1 ? 1 : 0;
+      return { titre: "La « meilleure offre » du jeu", q: "Dans un jeu en ligne, on achète des pièces virtuelles. Petit pack : " + T(n1) + " pièces pour " + chf(p1) + ". Grand pack, marqué « Meilleure offre ! » : " + T(n2) + " pièces pour " + chf(p2) + ".",
+        bet: { q: "Lequel est le moins cher, pour la même quantité de pièces ?", choices: ["Le petit pack", "Le grand pack"], good: cheap },
+        calc: { label: "Prix de " + T(1000) + " pièces avec le grand pack (en CHF, au centime)", value: r6(u2), round: 0.01 },
+        reveal: "Grand pack : " + M(m2(p2) + " \\div " + N(n2) + " \\cdot 1\\text{'}000 \\approx " + m2(u2)) + " CHF les 1'000 pièces. Petit pack : " + M(m2(p1) + " \\div " + N(n1) + " \\cdot 1\\text{'}000 \\approx " + m2(u1)) + " CHF. " + (cheap ? "Le grand pack est bien moins cher." : "Le petit pack est moins cher : l'étiquette « Meilleure offre » ne prouve rien, il faut calculer.") };
+    } });
+  add({ key: "sucre", fam: "quotidien", uses: ["pct"], outil: "les pourcentages (enlever 30 %, c'est garder 70 % : on multiplie par 0,7) et la proportionnalité (grammes pour 100 mL).",
+    make() {
+      const s = pk([10, 10.6, 11]), r = pk([20, 25, 30]), [V, Vt] = pk([[330, "une canette de 33 cL"], [500, "une bouteille de 50 cL"]]), g = r6((s * (1 - r / 100) * V) / 100), cubes = g / 5;
+      return { titre: "« −" + r + " % de sucre »", q: "Une boisson gazeuse contenait " + M(N(s) + "\\ \\text{g}") + " de sucre pour " + M("100\\ \\text{mL}") + ". Sa nouvelle recette annonce « " + pc(r) + " de sucre en moins ». Tu bois " + Vt + ". Un morceau de sucre pèse environ " + M("5\\ \\text{g}") + ".",
+        bet: { q: "Avec la nouvelle recette, combien de morceaux de sucre y a-t-il dans " + Vt + " ?", choices: ["moins de 5", "entre 5 et 10", "plus de 10"], good: cubes < 5 ? 0 : cubes <= 10 ? 1 : 2 },
+        calc: { label: "Masse de sucre dans " + Vt + " avec la nouvelle recette (en g, au dixième)", value: g, round: 0.1 },
+        reveal: "Nouvelle recette : " + M(N(s) + " \\cdot " + N(1 - r / 100) + " = " + N(s * (1 - r / 100))) + " g pour 100 mL. Pour " + V + " mL : " + M(N(s * (1 - r / 100)) + " \\cdot " + N(V / 100) + " = " + N(g)) + " g, soit environ " + M(N(cubes, 1)) + " morceaux de sucre. « Moins sucré » ne veut pas dire « peu sucré »." };
+    } });
+  add({ key: "simpson", fam: "paradoxe", uses: ["pct"], outil: "les pourcentages : un pourcentage global dépend aussi de la répartition des essais (c'est le paradoxe de Simpson).",
+    make() {
+      let A, B;
+      for (let t = 0; t < 400; t++) {
+        const a2 = pk([20, 30, 40]), a3 = pk([60, 80, 100]), b2 = pk([80, 100, 120]), b3 = pk([10, 20]);
+        const pa2 = pk([56, 58, 60, 62]), pb2 = pa2 - pk([2, 4]), pa3 = pk([36, 38, 40]), pb3 = pa3 - pk([3, 5]);
+        A = { n2: a2, m2: Math.round((a2 * pa2) / 100), n3: a3, m3: Math.round((a3 * pa3) / 100) };
+        B = { n2: b2, m2: Math.round((b2 * pb2) / 100), n3: b3, m3: Math.round((b3 * pb3) / 100) };
+        if (A.m2 / A.n2 > B.m2 / B.n2 && A.m3 / A.n3 > B.m3 / B.n3 && (B.m2 + B.m3) / (B.n2 + B.n3) > (A.m2 + A.m3) / (A.n2 + A.n3) + 0.02) break;
+        A = { n2: 30, m2: 18, n3: 100, m3: 38 }; B = { n2: 100, m2: 56, n3: 20, m3: 7 };
+      }
+      const tA = (100 * (A.m2 + A.m3)) / (A.n2 + A.n3), tB = (100 * (B.m2 + B.m3)) / (B.n2 + B.n3), w = (P, x) => x + " réussit " + M(P.m2) + " tirs à 2 points sur " + M(P.n2) + " (" + pc((100 * P.m2) / P.n2, 1) + ") et " + M(P.m3) + " tirs à 3 points sur " + M(P.n3) + " (" + pc((100 * P.m3) / P.n3, 1) + ")";
+      return { titre: "Le meilleur tireur", q: "Bilan de la saison de basket. " + w(A, "Alex") + ". " + w(B, "Sam") + ". Alex est meilleur que Sam aux deux sortes de tirs.",
+        bet: { q: "Qui a le meilleur pourcentage de réussite sur l'ensemble de ses tirs ?", choices: ["Alex, forcément", "Sam", "Ils sont à égalité"], good: 1 },
+        calc: { label: "Pourcentage de réussite de Sam sur tous ses tirs (au dixième)", value: r6(tB), round: 0.1 },
+        reveal: "Sam : " + M("\\frac{" + (B.m2 + B.m3) + "}{" + (B.n2 + B.n3) + "} \\approx " + N(tB, 1) + "\\,\\%") + ". Alex : " + M("\\frac{" + (A.m2 + A.m3) + "}{" + (A.n2 + A.n3) + "} \\approx " + N(tA, 1) + "\\,\\%") + ". Alex tente surtout des tirs à 3 points, les plus difficiles ; Sam surtout des tirs à 2 points. Être meilleur dans chaque catégorie ne suffit pas : la répartition compte." };
+    } });
+  add({ key: "orange", fam: "paradoxe", uses: ["volcone"], outil: "le volume de la boule, V = 4/3 · π · r³ : quand le rayon est multiplié par k, le volume est multiplié par k³.",
+    make() {
+      const [f, D, e] = pk([["une orange", 7, 0.5], ["une orange", 8, 0.7], ["un pamplemousse", 12, 1], ["une mandarine", 6, 0.4]]), R0 = D / 2, ri = R0 - e, v = r6(100 * (1 - (ri / R0) ** 3));
+      return { titre: "L'orange épluchée", q: "Tu épluches " + f + " bien " + (f.startsWith("une") ? "ronde" : "rond") + " de " + M(N(D) + "\\ \\text{cm}") + " de diamètre. Sa peau a une épaisseur de " + M(N(e) + "\\ \\text{cm}") + ".",
+        bet: { q: "Quelle part du volume du fruit part avec la peau ?", choices: ["environ 10 %", "environ 20 %", "plus de 30 %"], good: v < 15 ? 0 : v < 30 ? 1 : 2 },
+        calc: { label: "Pourcentage du volume occupé par la peau (au dixième)", value: v, round: 0.1 },
+        reveal: "Fruit entier : rayon " + M(N(R0)) + " cm ; sans la peau : rayon " + M(N(ri)) + " cm. Les volumes sont dans le rapport " + M("\\left(\\frac{" + N(ri) + "}{" + N(R0) + "}\\right)^3 \\approx " + N((ri / R0) ** 3, 3)) + " : il reste environ " + pc(100 - v, 1) + " du volume, la peau en prend " + pc(v, 1) + ". Une couche fine, mais tout autour, sur la partie la plus large de la boule." };
+    } });
+  add({ key: "lumiere", fam: "fermi", uses: ["vitesse", "sci"], outil: "la vitesse : durée = distance ÷ vitesse, avec de très grands nombres (notation scientifique).",
+    make() {
+      const o = pk([{ n: "Le Soleil", d: 1.5e8, dt: "150 millions de km", ch: ["environ 8 secondes", "environ 8 minutes", "environ 8 heures"], g: 1, fin: "Tu vois le Soleil tel qu'il était il y a plus de 8 minutes." },
+        { n: "La Lune", d: 3.84e5, dt: "384'000 km", ch: ["environ 1 seconde", "environ 1 minute", "environ 1 heure"], g: 0, fin: "La lumière renvoyée par la Lune arrive en un peu plus d'une seconde." },
+        { n: "Mars, au plus près,", d: 5.6e7, dt: "56 millions de km", ch: ["environ 3 secondes", "environ 3 minutes", "environ 3 heures"], g: 1, fin: "Un robot sur Mars ne peut pas être piloté en direct : chaque ordre met plusieurs minutes à arriver." }]);
+      const v = o.d / 3e5;
+      return { titre: "La lumière en route", q: "La lumière va à environ " + M("300\\text{'}000\\ \\text{km/s}") + ". " + o.n + " est à environ " + o.dt + " de la Terre.",
+        bet: { q: "Combien de temps sa lumière met-elle pour arriver jusqu'à nous ?", choices: o.ch, good: o.g },
+        calc: { label: "Durée du trajet de la lumière (en secondes)", value: r6(v), range: [v * 0.95, v * 1.05] },
+        reveal: M("t = \\frac{d}{v} = \\frac{" + N(o.d / 10 ** Math.floor(Math.log10(o.d))) + " \\cdot 10^{" + Math.floor(Math.log10(o.d)) + "}}{3 \\cdot 10^5} \\approx " + N(v, v < 10 ? 2 : 0)) + " s. " + o.fin };
+    } });
+  add({ key: "photos", fam: "fermi", uses: ["decdiv"], outil: "la division et les conversions d'unités (1 Go = 1'000 Mo).",
+    make() {
+      const G = pk([64, 128, 256]), p = pk([2.5, 3, 4]), v = (G * 1000) / p;
+      return { titre: "Combien de photos ?", q: "Ton téléphone a encore " + M(G + "\\ \\text{Go}") + " de libres (" + M("1\\ \\text{Go} = 1\\text{'}000\\ \\text{Mo}") + "). Une photo pèse environ " + M(N(p) + "\\ \\text{Mo}") + ".",
+        bet: { q: "Combien de photos peux-tu encore prendre ?", choices: ["environ 400", "environ 4'000", "environ 40'000", "environ 400'000"], good: mag(v, [400, 4000, 40000, 400000]) },
+        calc: { label: "Nombre de photos (arrondi)", value: Math.round(v), range: [v * 0.95, v * 1.05] },
+        reveal: M(G + " \\cdot 1\\text{'}000 = " + N(G * 1000)) + " Mo, puis " + M(N(G * 1000) + " \\div " + N(p) + " \\approx " + N(Math.round(v))) + " photos. Une vidéo, elle, remplit la mémoire bien plus vite." };
+    } });
+  add({ key: "hirondelle", fam: "enigme", uses: ["vitesse"], outil: "la vitesse : inutile de suivre les allers-retours, il suffit de connaître la durée du vol (distance = vitesse · durée).",
+    make() {
+      const v = pk([12, 20]), D = pk([12, 18, 24, 30, 36]), [w, a] = pk([[50, "Une hirondelle"], [30, "Un petit drone"]]), t = D / (2 * v), d = r6(w * t);
+      return { titre: "L'hirondelle et les deux cyclistes", q: "Deux cyclistes sont à " + M(D + "\\ \\text{km}") + " l'un de l'autre et roulent l'un vers l'autre, chacun à " + M(v + "\\ \\text{km/h}") + ". " + a + " part du premier, vole à " + M(w + "\\ \\text{km/h}") + " jusqu'au second, fait demi-tour, et ainsi de suite jusqu'à ce que les cyclistes se croisent.",
+        bet: { q: "Quelle distance parcourt-" + (a.includes("drone") ? "il" : "elle") + " en tout ?", choices: ["moins de " + D + " km", "exactement " + D + " km", "plus de " + D + " km"], good: d < D ? 0 : d === D ? 1 : 2 },
+        calc: { label: "Distance parcourue en vol (en km)", value: d, round: 0.1 },
+        reveal: "Les cyclistes se rapprochent de " + M(2 * v + "\\ \\text{km/h}") + " : ils se croisent après " + M(D + " \\div " + 2 * v + " = " + N(t)) + " h. Pendant tout ce temps, on vole à " + w + " km/h : " + M(w + " \\cdot " + N(t) + " = " + N(d)) + " km. Pas besoin d'additionner une infinité d'allers-retours !" };
+    } });
+  add({ key: "traversee", fam: "enigme", uses: [], outil: "le raisonnement par étapes : repérer les paires interdites, et oser ramener un passager en arrière.",
+    make() {
+      const [L, C, X, xm] = pk([["un loup", "une chèvre", "un chou", "le chou"], ["un renard", "une poule", "un sac de grain", "le grain"]]), c = C.replace(/^une? /, "la "), l = L.replace(/^un /, "le "), x = X.replace(/^un /, "le ");
+      return { titre: "La traversée", q: "Un passeur doit faire traverser une rivière à " + L + ", " + C + " et " + X + ". Sa barque ne peut porter que lui et un seul passager. Sans lui, " + l + " mange " + c + ", et " + c + " mange " + xm + ".",
+        bet: { q: "Combien de traversées (aller ou retour) faut-il au minimum ?", choices: ["3", "5", "7", "C'est impossible"], good: 2 },
+        calc: { label: "Nombre minimal de traversées", value: 7 },
+        reveal: "1. " + c + " passe ; 2. retour à vide ; 3. " + l + " passe ; 4. on <b>ramène</b> " + c + " ; 5. " + x + " passe ; 6. retour à vide ; 7. " + c + " passe. Total : 7 traversées. Cette énigme figure déjà dans un recueil d'Alcuin, un savant de l'époque de Charlemagne, vers l'an 800." };
+    } });
+  add({ key: "cadenas", fam: "enigme", uses: ["puiss"], outil: "le dénombrement : 10 chiffres possibles sur chaque roue, donc 10 · 10 · 10 = 10³ codes pour 3 roues.",
+    make() {
+      const n = pk([3, 4]), s = pk([2, 3, 5]), codes = 10 ** n, m = r6((codes * s) / 60);
+      return { titre: "Le cadenas à code", q: "Tu as oublié le code de ton cadenas : " + M(n) + " roues, chacune avec les chiffres de 0 à 9. Tu essaies les codes un par un, un toutes les " + M(s) + " secondes.",
+        bet: { q: "Combien de temps te faut-il, au pire, pour tout essayer ?", choices: ["moins de 10 minutes", "entre 10 minutes et 1 heure", "plus d'une heure"], good: m < 10 ? 0 : m <= 60 ? 1 : 2 },
+        calc: { label: "Temps maximal pour essayer tous les codes (en minutes, à l'unité)", value: m, round: 1 },
+        reveal: M(n) + " roues : " + M("10^{" + n + "} = " + N(codes)) + " codes. " + M(N(codes) + " \\cdot " + s + " = " + N(codes * s)) + " s, soit " + M(N(codes * s) + " \\div 60 \\approx " + N(Math.round(m))) + " min. Une roue de plus, et c'est 10 fois plus long." };
+    } });
+  add({ key: "recharge", fam: "quotidien", sys: "CH", uses: ["decmul"], outil: "la multiplication et les conversions d'énergie (1 kWh = 1'000 Wh).",
+    make() {
+      const E = pk([15, 18, 20]), kwh = r6((E * 365) / 1000), c = r6(kwh * 0.28);
+      return { titre: "Recharger son téléphone", q: "Une recharge complète de ton téléphone consomme environ " + M(E + "\\ \\text{Wh}") + " (pertes du chargeur comprises). Tu le recharges une fois par jour. En Suisse, le kilowattheure (" + M("1\\ \\text{kWh} = 1\\text{'}000\\ \\text{Wh}") + ") coûte environ " + chf(0.28) + " à un ménage.",
+        bet: { q: "Combien coûte l'électricité pour une année de recharges ?", choices: ["moins de 5 CHF", "entre 5 et 50 CHF", "plus de 50 CHF"], good: c < 5 ? 0 : c <= 50 ? 1 : 2 },
+        calc: { label: "Coût sur une année (en CHF, au centime)", value: c, round: 0.01 },
+        reveal: M(E + " \\cdot 365 = " + N(E * 365)) + " Wh, soit " + M(N(kwh)) + " kWh. " + M(N(kwh) + " \\cdot 0{,}28 \\approx " + N(c, 2)) + " CHF par an : bien moins qu'un seul câble de rechange !" };
+    } });
+  add({ key: "rechargefr", fam: "quotidien", sys: "FR", uses: ["decmul"], outil: "la multiplication et les conversions d'énergie (1 kWh = 1 000 Wh).",
+    make() {
+      const E = pk([15, 18, 20]), kwh = r6((E * 365) / 1000), c = r6(kwh * 0.2);
+      return { titre: "Recharger son téléphone", q: "Une recharge complète de ton téléphone consomme environ " + M(E + "\\ \\text{Wh}") + " (pertes du chargeur comprises). Tu le recharges une fois par jour. En France, le kilowattheure (" + M("1\\ \\text{kWh} = 1\\,000\\ \\text{Wh}") + ") coûte environ " + eur(0.2) + " au tarif réglementé.",
+        bet: { q: "Combien coûte l'électricité pour une année de recharges ?", choices: ["moins de 5 €", "entre 5 et 50 €", "plus de 50 €"], good: c < 5 ? 0 : c <= 50 ? 1 : 2 },
+        calc: { label: "Coût sur une année (en €, au centime)", value: c, round: 0.01 },
+        reveal: M(E + " \\times 365 = " + NF(E * 365)) + " Wh, soit " + M(NF(kwh)) + " kWh. " + M(NF(kwh) + " \\times 0{,}20 \\approx " + NF(c, 2)) + " € par an : bien moins qu'un seul câble de rechange !" };
+    } });
+  add({ key: "tvafr", fam: "arnaque", sys: "FR", uses: ["pct"], outil: "les pourcentages : retrouver le prix avant une hausse, c'est diviser par 1,2, pas enlever 20 %.",
+    make() {
+      const HT = pk([150, 250, 400, 600, 1200]), TTC = r6(HT * 1.2), wrong = r6(TTC * 0.8);
+      return { titre: "Le prix hors taxe", q: "En France, le taux normal de TVA est de " + pc(20) + " : le prix TTC est le prix hors taxe augmenté de 20 %. Un vendeur affiche " + eur(TTC) + " TTC et dit : « Pour le prix hors taxe, j'enlève 20 % : " + eur(wrong) + ". »",
+        bet: { q: "A-t-il raison ?", choices: ["Oui, c'est le bon prix hors taxe", "Non, le vrai prix hors taxe est plus élevé", "Non, le vrai prix hors taxe est plus bas"], good: 1 },
+        calc: { label: "Quel est le vrai prix hors taxe ? (en €)", value: HT, round: 0.01 },
+        reveal: "TTC = HT × 1,2, donc HT = " + M(NF(TTC) + " \\div 1{,}2 = " + NF(HT)) + " €. Les 20 % se calculent sur le prix hors taxe, plus petit : enlever 20 % du prix TTC enlève trop (" + eur(r6(TTC - wrong)) + " au lieu de " + eur(r6(TTC - HT)) + ")." };
+    } });
+  add({ key: "fuseau", fam: "quotidien", uses: ["rel"], outil: "les nombres relatifs : le décalage horaire est la différence de deux écarts à l'heure universelle (UTC).",
+    make() {
+      const o = pk([{ c: "New York", z: -5, e: "un match de basket", H: [20, 21] }, { c: "Los Angeles", z: -8, e: "une cérémonie de remise de prix", H: [17, 18] },
+        { c: "Tokyo", z: 9, e: "un concert", H: [18, 19, 20] }, { c: "Rio de Janeiro", z: -3, e: "un match de football", H: [16, 18, 19] }]);
+      const H = pk(o.H), dz = 1 - o.z, raw = H + dz, v = ((raw % 24) + 24) % 24, j = raw >= 24 ? " le lendemain" : raw < 0 ? " la veille" : "";
+      const zt = (z) => "UTC " + (z < 0 ? "− " + -z : "+ " + z);
+      return { titre: "En direct de " + o.c, q: "En janvier, " + o.e + " commence à " + H + " h, heure de " + o.c + " (" + zt(o.z) + "). Chez toi, on est à l'heure " + zt(1) + ".",
+        bet: { q: "Peux-tu le regarder en direct sans te lever en pleine nuit ?", choices: ["Oui", "Non"], good: v >= 7 ? 0 : 1 },
+        calc: { label: "À quelle heure commence-t-il chez toi ? (heure de 0 à 23)", value: v },
+        reveal: "Décalage : " + M("(+1) - (" + (o.z < 0 ? "-" : "+") + Math.abs(o.z) + ") = " + (dz > 0 ? "+" : "") + dz) + " h. " + M(H + " " + (dz < 0 ? "-" : "+") + " " + Math.abs(dz) + " = " + raw) + (raw >= 24 ? ", et " + M(raw + " - 24 = " + v) : "") + " : il commence à " + v + " h" + j + ", chez toi." };
+    } });
+  add({ key: "jetdeau", fam: "fermi", sys: "CH", uses: ["decdiv"], outil: "la division et les conversions de longueurs (m → mm).",
+    make() {
+      const [nom, ep, val] = pk([["5 francs", 2.35, 5], ["2 francs", 2.15, 2], ["1 franc", 1.55, 1]]), v = 140000 / ep;
+      return { titre: "Le Jet d'eau en pièces de monnaie", q: "Le Jet d'eau de Genève monte à environ " + M("140\\ \\text{m}") + ". Une pièce de " + nom + " a une épaisseur de " + M(m2(ep) + "\\ \\text{mm}") + ". On imagine une pile de pièces aussi haute que le jet.",
+        bet: { q: "Combien de pièces faut-il empiler ?", choices: ["environ 600", "environ 6'000", "environ 60'000", "environ 600'000"], good: mag(v, [600, 6000, 60000, 600000]) },
+        calc: { label: "Nombre de pièces (arrondi)", value: Math.round(v), range: [v * 0.95, v * 1.05] },
+        reveal: M("140\\ \\text{m} = 140\\text{'}000\\ \\text{mm}") + ", puis " + M("140\\text{'}000 \\div " + m2(ep) + " \\approx " + N(Math.round(v))) + " pièces, soit environ " + P(v * val) + " francs." };
+    } });
+  add({ key: "eiffel", fam: "fermi", sys: "FR", uses: ["decdiv"], outil: "la division et les conversions de longueurs (m → mm).",
+    make() {
+      const [nom, ep, val] = pk([["2 €", 2.2, 2], ["1 €", 2.33, 1], ["50 centimes", 2.38, 0.5]]), v = 330000 / ep;
+      return { titre: "La tour Eiffel en pièces de monnaie", q: "La tour Eiffel mesure environ " + M("330\\ \\text{m}") + ". Une pièce de " + nom + " a une épaisseur de " + M(m2(ep) + "\\ \\text{mm}") + ". On imagine une pile de pièces aussi haute que la tour.",
+        bet: { q: "Combien de pièces faut-il empiler ?", choices: ["environ 1\u202f500", "environ 15\u202f000", "environ 150\u202f000", "environ 1\u202f500\u202f000"], good: mag(v, [1500, 15000, 150000, 1500000]) },
+        calc: { label: "Nombre de pièces (arrondi)", value: Math.round(v), range: [v * 0.95, v * 1.05] },
+        reveal: M("330\\ \\text{m} = 330\\,000\\ \\text{mm}") + ", puis " + M("330\\,000 \\div " + m2(ep) + " \\approx " + NF(Math.round(v))) + " pièces, soit environ " + PF(v * val) + " €." };
+    } });
+  add({ key: "doubler", fam: "quotidien", uses: ["log"], outil: "les logarithmes : (1 + t/100)ⁿ ≥ 2 donne n ≥ ln 2 ÷ ln(1 + t/100) ; la « règle de 72 » en donne une bonne estimation : environ 72 ÷ t années.",
+    make() {
+      const t = pk([2, 3, 4, 6]), f = 1 + t / 100, x = Math.log(2) / Math.log(f), n = Math.ceil(x), C = pk([1000, 2000, 5000]);
+      return { titre: "Doubler son argent", q: "Tu places " + chf(C) + " sur un placement qui rapporte " + pc(t) + " par an, intérêts composés (chaque année, les intérêts s'ajoutent au capital et rapportent à leur tour).",
+        bet: { q: "Au bout de combien d'années ton capital aura-t-il doublé ?", choices: ["environ " + Math.round(100 / t) + " ans (100 % ÷ " + t + " %)", "environ " + Math.round(72 / t) + " ans", "environ " + 2 * Math.round(100 / t) + " ans"], good: 1 },
+        calc: { label: "Nombre entier d'années pour atteindre au moins le double", value: n },
+        reveal: "Après " + M("n") + " années : " + M(N(C) + " \\cdot " + N(f) + "^n") + ". On veut " + M(N(f) + "^n \\geq 2") + ", donc " + M("n \\geq \\frac{\\ln 2}{\\ln " + N(f) + "} \\approx " + N(x, 2)) + " : il faut " + n + " ans, moins que les " + Math.round(100 / t) + " ans qu'on imagine. Les banquiers utilisent la « règle de 72 » : " + M("72 \\div " + t + " = " + N(72 / t)) + " ans environ." };
+    } });
+
   CURIEUX.forEach((c) => { const n = (id) => NOTIONS.find((x) => x.id === id); c.uses = c.uses.filter(n); });
 })();
 
@@ -561,7 +713,8 @@ const Curieux = {
   fromCode(code) { const m = /^cur-([a-z0-9]+)-([a-z0-9]+)$/.exec(code); return m ? this.build(m[1], parseInt(m[2], 36)) : null; },
   // Questions accessibles : toutes les notions utilisées sont déjà vues (ou en cours) ; sans profil, celles de 9e.
   available(state) {
-    return CURIEUX.filter((c) => c.uses.every((id) => {
+    const sys = (state && state.profile && state.profile.system) || "CH"; /* 26.11 : questions réservées à un système (c.sys) */
+    return CURIEUX.filter((c) => (!c.sys || c.sys === sys) && c.uses.every((id) => {
       if (state && state.notions && state.notions[id]) return ["vu", "encours"].includes(state.notions[id].status);
       const n = NOTIONS.find((x) => x.id === id), g = state && state.profile ? state.profile.grade : 9;
       return n && n.CH && n.CH[0] < g;

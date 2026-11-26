@@ -58,10 +58,10 @@ const Parents = {
     const wk = Math.floor(new Date(t + "T12:00:00") / 6048e5);
     return Curieux.build(av[wk % av.length].key, (wk % 9000) + 1);
   },
-  story(t) {
+  story(t, s) { /* 26.11 : seulement les récits permis pour le profil de l'enfant (Histoire.ok : système, classe) */
     if (typeof HISTOIRE === "undefined" || !HISTOIRE.length) return null;
-    const k = Math.floor(new Date(t + "T12:00:00") / 6048e5) % HISTOIRE.length;
-    return HISTOIRE[k];
+    const L = typeof Histoire !== "undefined" ? HISTOIRE.filter((H) => Histoire.ok(H, s)) : HISTOIRE;
+    return L.length ? L[Math.floor(new Date(t + "T12:00:00") / 6048e5) % L.length] : null;
   },
 };
 
@@ -166,7 +166,7 @@ async function screenParentView(id, opt = {}) {
   const JR = ["D", "L", "M", "M", "J", "V", "S"];
   const reg = W.n >= 4 ? "Belle régularité !" : W.n ? "Un bon début : quelques minutes par jour suffisent." : "Pas de séance cette semaine-là. Proposez-lui le défi du jour ensemble ?";
   const pbs = (s.carnet || []).slice().reverse().map((x) => ({ x, q: Parents.problem(x.code) })).filter((p) => p.q).slice(0, 3);
-  const cur = Parents.curious(s, t), H = Parents.story(t);
+  const cur = Parents.curious(s, t), H = Parents.story(t, s);
   const tabs = !opt.preview && L.kids.length > 1 ? `<div class="row par-kids" role="tablist">${L.kids.map((k) => `<button type="button" class="${k.id === kid.id ? "btn-primary" : "btn-sec"} small" data-kid="${k.id}" aria-pressed="${k.id === kid.id}">${esc(k.nick)}</button>`).join("")}</div>` : "";
   const lessonOf = (qid) => {
     const Ls = typeof LESSONS !== "undefined" && LESSONS[qid];
