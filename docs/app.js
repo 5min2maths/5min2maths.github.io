@@ -3402,7 +3402,8 @@ FINE.push(
       () => { if (R.rand() < 0.5) { const n = R.int(101, 999), k = R.pick([10, 100]); if (n % 10 === 0) return GEN.decread(3); return QV("Combien y a-t-il de " + (k === 10 ? "dixièmes" : "centièmes") + " en tout dans " + M(dec(n / k)) + " ?", n, M(dec(n / k) + " = \\frac{" + n + "}{" + k + "}") + " : il y a " + M(n) + (k === 10 ? " dixièmes." : " centièmes."), { guide: [GS("Combien d'unités entières dans " + M(dec(n / k)) + " ?", Math.floor(n / k), M(Math.floor(n / k)) + "."), GS("Une unité = " + k + " " + (k === 10 ? "dixièmes" : "centièmes") + ". En tout (unités · " + k + " + le reste) ?", n, M(n) + ".")], traps: [TRAP(n % 10, "On demande le nombre total de " + (k === 10 ? "dixièmes" : "centièmes") + ", pas seulement le chiffre des " + (k === 10 ? "dixièmes" : "centièmes") + "."), TRAP(Math.floor(n / k), "Ce sont les unités ; chaque unité vaut " + k + " " + (k === 10 ? "dixièmes" : "centièmes") + ".")] }); } const n = R.int(1001, 9999), k = R.pick([100, 1000]); if (n % 10 === 0) return GEN.decread(3); return QV("Écris " + M("\\frac{" + n + "}{" + k + "}") + " en nombre décimal.", fx(n / k), "Diviser par " + M(k) + " : la virgule recule de " + (k === 100 ? "deux" : "trois") + " rangs. " + M("\\frac{" + n + "}{" + k + "} = " + dec(n / k)), { plain: true, traps: [TRAP(fx(n / (k === 100 ? 1000 : 100)), "Diviser par " + k + " fait reculer la virgule de " + (k === 100 ? "deux" : "trois") + " rangs (autant que de zéros)."), TRAP(fx(n / 10), "Diviser par " + k + " : la virgule recule de " + (k === 100 ? "deux" : "trois") + " rangs, pas d'un seul.")], guide: [GS("Diviser par " + k + " : de combien de rangs la virgule recule-t-elle ?", k === 100 ? 2 : 3, (k === 100 ? 2 : 3) + " rangs."), GS("Le nombre décimal ?", fx(n / k), M(dec(n / k)) + ".")] }); },
     ] },
   { id: "deccomp", theme: "no", label: "Comparer et ranger des nombres décimaux", ex: "3{,}7 > 3{,}65", CH: [9], codes: "9NO1\\.0[45]",
-    hint: "Compare d'abord les unités, puis les dixièmes, puis les centièmes. Au besoin, ajoute des zéros : 3,7 = 3,70.",
+    /* 26.11 (revue des élèves testeurs, n° 2 : « compare les unités » pour « de combien dépasse-t-il ») : indice valable pour toutes les formes (comparer, ranger, écart, milieu) */
+    hint: "Écris les nombres avec autant de décimales (3,7 = 3,70) : tu peux alors les comparer rang par rang, les ranger ou calculer leur écart (370 centièmes − 365 centièmes).",
     lesson: ["Comparer des décimaux", "Le nombre le plus long n'est pas le plus grand.", "On compare rang par rang, de gauche à droite. On peut compléter avec des zéros : \\(3{,}7 = 3{,}70\\).", ["\\(3{,}7 > 3{,}65\\) car \\(3{,}70 > 3{,}65\\)", "\\(0{,}09 < 0{,}1\\) car \\(0{,}09 < 0{,}10\\)"], "\\(4{,}12 < 4{,}5\\) : 12 centièmes, c'est moins que 5 dixièmes (50 centièmes)."],
     g: [
       () => { const a = R.int(11, 98) / 10; if (Number.isInteger(a)) return GEN.deccomp(1); const b = fx(a + R.pick([-0.07, -0.05, -0.03, 0.02, 0.04, 0.06])), big = R.rand() < 0.5; return QV("Quel est le plus " + (big ? "grand" : "petit") + " de ces deux nombres : " + M(dec(a)) + " ou " + M(dec(b)) + " ?", big ? Math.max(a, b) : Math.min(a, b), "On écrit " + M(dec(a) + " = " + a.toFixed(2).replace(".", "{,}")) + " : " + M(dec(Math.min(a, b)) + " < " + dec(Math.max(a, b))) + ".", { guide: [GS("Écris " + M(dec(a)) + " avec deux chiffres après la virgule : " + M(a.toFixed(2).replace(".", "{,}")) + ". Compare les centièmes : le plus grand des deux ?", Math.max(a, b), M(dec(Math.max(a, b))) + "."), ...(big ? [] : [GS("Donc le plus petit ?", Math.min(a, b), M(dec(Math.min(a, b))) + ".")])], traps: [TRAP(big ? Math.min(a, b) : Math.max(a, b), "Compare chiffre par chiffre, en écrivant les deux nombres avec autant de décimales.")] }); },
@@ -15142,8 +15143,12 @@ const Engine = {
     const key = (id) => (now.includes(id) ? 0 : s(id).status === "encours" ? 1 : 2) * 1e5 + (s(id).status === "encours" || now.includes(id) ? this.rank(state.profile, id) : Math.round(s(id).m * 1000));
     return [...ids].sort((a, b) => key(a) - key(b))[0] || null;
   },
+  /* 26.11 soir (revue des élèves testeurs, n° 7 : positionnement 5:10 puis 6 automatismes en 6:05, 12 minutes le premier
+     jour) : série d'automatismes de 3 calculs le jour du positionnement, de 4 pour un élève sous le plancher, sinon 6. */
+  autoN(state) { return state.placedOn === day() ? 3 : this.underFloor(state) ? 4 : FORMATS.auto.slots.length; },
+  fmtText(state, f) { const n = f === "auto" ? this.autoN(state) : 0; return n && n < FORMATS.auto.slots.length ? n + " calculs rapides, enchaînés." : FORMATS[f].text; },
   planSession(state, format) {
-    const f = format || this.todayFormat(state), slots = FORMATS[f].slots;
+    const f = format || this.todayFormat(state), slots = f === "auto" ? FORMATS.auto.slots.slice(0, this.autoN(state)) : FORMATS[f].slots;
     const pend = this.eligible(state).filter((id) => this.lessonFirst(state, id));
     if (!pend.length) return this.planSlots(state, slots);
     const exclude = new Set(pend);
@@ -15226,6 +15231,9 @@ const Engine = {
         let levels = [1, 2, 3].filter((d) => d <= cap && (base !== "defi" || d >= 2) && (kind !== "drill" || d === 1)); /* 26.11 : automatisme = niveau 1 */
         if ((kind === "defi4" || kind === "defi") && hasProb(id)) levels.push(4);
         if (!recent) levels = this.oldLevels(state, id, levels, target);
+        /* 26.11 soir (revue des élèves testeurs, n° 9 : élève forte, Révision de 4 questions de niveau 1, +12 à +15 chacune) :
+           en Révision, un élève dont le Mathélo atteint le niveau 2 de la notion (et qui ne l'a pas ratée) n'a plus de niveau 1. */
+        if (kind === "rev" && levels.some((d) => d >= 2) && s.m >= 0.45 && !this.underFloor(state) && elo >= itemRating(state.profile, id, 2)) levels = levels.filter((d) => d >= 2);
         for (const d of levels) {
           let sc = Math.abs(itemRating(state.profile, id, d) - target) / 100;
           if (rappel) sc = (s.m < 0.45 ? -1 : 0) + Math.max(0, itemRating(state.profile, id, d) - target) / 200;

@@ -3429,7 +3429,7 @@
             traps: [TP([p[1], p[0], p[2]], "L'ordre compte : d'abord x (l'axe vers l'avant), puis y, puis z."), TP([p[2], p[1], p[0]], "z est la hauteur : c'est la dernière coordonnée."), TP([a, b, c], "Ce sont les dimensions du pavé ; regarde de combien on avance sur chaque axe pour atteindre " + n + ".")] }); },
       () => { const [a, b, c] = dims(), v = a * b * c;
         return QN("Un pavé droit a un sommet à l'origine " + M("O(0 \\,;\\, 0 \\,;\\, 0)") + ", ses arêtes issues de " + M("O") + " sur les axes, et le sommet opposé en " + M("F" + T3([a, b, c])) + " (unité : le cm). Calcule son volume (en cm³).", v,
-          "Les coordonnées de " + M("F") + " donnent les trois dimensions : " + M(a + " \\times " + b + " \\times " + c + " = " + v) + " cm³.",
+          "Les coordonnées de " + M("F") + " donnent les trois dimensions : " + M(a + " \\cdot " + b + " \\cdot " + c + " = " + v) + " cm³.", /* 26.11 (revue des élèves testeurs, n° 4) : « · » en romand, « × » en France (frTimes) */
           { ctx: "volume", fig: fig(a, b, c, { noDims: true, dots: ["F"] }),
             guide: [GR("Longueur de l'arête sur l'axe " + M("x") + " ?", a, M(a) + " cm."), GR("Volume ?", v, M(v) + " cm³.")],
             traps: [TR(a + b + c, "Le volume est le produit des trois dimensions, pas leur somme."), TR(a * b, "C'est l'aire de la base ; multiplie encore par la hauteur " + c + "."), TR(2 * (a * b + b * c + a * c), "C'est l'aire totale ; on demande le volume.")] }); },

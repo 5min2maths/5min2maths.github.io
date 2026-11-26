@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "4e99a2ddd7"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "cddd0611f2"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -395,7 +395,7 @@ function startPlacement() {
   let i = state.placement.i;
   const next = () => {
     state.placement.i = i; save();
-    if (i >= plan.length) { state.placed = true; delete state.placement; save(); return screenPlacementDone(); }
+    if (i >= plan.length) { state.placed = true; state.placedOn = day(); /* 26.11 soir : série d'automatismes courte ce jour-là (Engine.autoN) */ delete state.placement; save(); return screenPlacementDone(); }
     const id = plan[i], q = Engine.make(state, id, Math.min(2, difficultyCap(state.profile)));
     renderQuestion(q, {
       eyebrow: "Étape 2 sur 2 · question " + (i + 1) + " sur " + plan.length + (plan.length - i > 1 ? " · encore " + (plan.length - i - 1) + " après celle-ci · environ " + (plan.length - i) + " min" /* 26.11 : une minute par question (mesuré : 4 à 5 min pour 5) */ : " · la dernière !") + `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((i / plan.length) * 100)}%"></i></span>`, single: true, track: "positionnement",
@@ -677,7 +677,7 @@ function screenHome() {
   const panels = {
     today: () => `${statsCard()}${resumeCard()}${weekRecapCard()}${backupCard()}${streakNudge()}${prepTodayCard()}${carnetCard(false)}<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire · au rythme de ton cours en classe${done ? " · séance faite, tu peux en refaire une" : ""}</div>
       <div class="fmt-box stack"><div class="spread"><span class="eyebrow">Aujourd'hui</span><button class="btn-ghost small" id="other">🔁 Changer de format</button></div>
-        <h3>${FORMATS[fmt].label}</h3><p class="small muted">${FORMATS[fmt].text}</p></div>
+        <h3>${FORMATS[fmt].label}</h3><p class="small muted">${Engine.fmtText(state, fmt)}</p></div>
       <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>${nowCard()}</div>
       ${freeCard()}`,
     prob: () => (!wp ? `<div class="card flat stack"><div class="eyebrow">🔍 Problème de la semaine</div><h3>Pas encore de problème pour toi</h3><p class="small muted">Les problèmes arrivent avec les notions que tu as déjà travaillées. Fais quelques séances !</p></div>`
@@ -741,7 +741,7 @@ function screenHome() {
     ${banner}
     ${prepNow ? "" : `<div class="card stack sess-card sess-first">${lostLine} <!-- 24.11 : « Séance d'abord » (choix de l'enseignant) : le bouton en premier, le reste discret -->
       <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${paused ? "Nouvelle séance" : done ? "Encore une séance" : mode === "classe" ? "Ma séance du jour" : "Mon défi du jour"}</button>
-      ${mode === "classe" ? `<div class="sess-fmt"><span class="sess-fmt-t"><b class="fmt-lab">${FORMATS[fmt].label}</b><span class="small muted fmt-txt">${FORMATS[fmt].text}${doneLab ? " · séance faite ✓" : ""}</span></span><button type="button" class="btn-sec small" id="other" aria-label="Changer de format">🔁<span class="chg-t"> Changer</span></button></div>
+      ${mode === "classe" ? `<div class="sess-fmt"><span class="sess-fmt-t"><b class="fmt-lab">${FORMATS[fmt].label}</b><span class="small muted fmt-txt">${Engine.fmtText(state, fmt)}${doneLab ? " · séance faite ✓" : ""}</span></span><button type="button" class="btn-sec small" id="other" aria-label="Changer de format">🔁<span class="chg-t"> Changer</span></button></div>
         <div class="now-line">${nowLine}</div>` : ""}
       <div class="sess-modes"><div class="seg sess-seg" role="tablist"><button type="button" data-m="classe" aria-pressed="${mode === "classe"}">🎒 En classe</button><button type="button" data-m="libre" aria-pressed="${mode === "libre"}">🧭 Libre</button></div><button type="button" class="btn-ghost small sess-info" id="sessinfo" aria-label="En classe ou Libre : explication" aria-expanded="false">ⓘ</button></div>
       <div class="small muted sess-sub sess-subs" hidden id="sessexp"><span class="${mode === "classe" ? "on" : ""}">Suit le chapitre que tu travailles en classe, avec des révisions.</span><span class="${mode === "libre" ? "on" : ""}">Tous les sujets de ton année, à ton rythme.</span></div>
@@ -778,7 +778,7 @@ function screenHome() {
     const f = Engine.otherFormat(state); save();
     const lab = app.querySelector(".fmt-lab"), txt = app.querySelector(".fmt-txt"), box = app.querySelector(".sess-fmt");
     if (!lab || !box) return screenHome();
-    lab.textContent = FORMATS[f].label; if (txt) txt.textContent = FORMATS[f].text;
+    lab.textContent = FORMATS[f].label; if (txt) txt.textContent = Engine.fmtText(state, f);
     box.classList.remove("fmt-swap"); void box.offsetWidth; box.classList.add("fmt-swap");
   });
   if (homeTab === "today") bindNowCard();
@@ -1422,7 +1422,15 @@ function screenPrep() {
   /* 26.11 (revue élèves : 50 à 80 notions à parcourir pour en cocher trois) : par défaut, le chapitre travaillé en classe
      et les chapitres récents (notion en cours, déjà travaillée ou cochée) ; les autres chapitres de l'année sont repliés. */
   const nowIds = Engine.nowActive(state) ? state.now.ids : [];
-  const recentG = (l) => l.some((c) => nowIds.includes(c.id) || chosen.has(c.id) || state.notions[c.id].status === "encours" || state.notions[c.id].seen > 0);
+  /* 26.11 soir (revue des élèves testeurs, n° 8 : 9 chapitres dépliés en 1re du Collège après le positionnement) : déplié =
+     le chapitre en classe, ceux où une notion est cochée, et le dernier chapitre travaillé (date de la dernière réponse,
+     state.comps ; à égalité, le plus avancé dans l'année) ; sans rien de cela, le premier chapitre en cours. Le reste est replié. */
+  const lastOf = (id) => Object.entries(state.comps || {}).reduce((a, [k, r]) => k.split(":")[0] === id && r.last > a ? r.last : a, "");
+  const G0 = Object.entries(groups), lastD = (l) => l.reduce((a, c) => (state.notions[c.id].seen > 0 && lastOf(c.id) > a ? lastOf(c.id) : a), "");
+  const pinned = new Set(G0.filter(([, l]) => l.some((c) => nowIds.includes(c.id) || chosen.has(c.id))).map(([th]) => th));
+  { let best = null; G0.forEach(([th, l]) => { const d = lastD(l); if (d && (!best || d >= best[1])) best = [th, d]; });
+    if (best) pinned.add(best[0]); else if (!pinned.size) { const e = G0.find(([, l]) => l.some((c) => state.notions[c.id].status === "encours")); if (e) pinned.add(e[0]); } }
+  const recentG = (l) => G0.some(([th, l2]) => l2 === l && pinned.has(th));
   const grp = ([th, list]) => `<div class="card flat"><h3>${Engine.themeLabel(th, state.profile)}</h3><div class="checks">${list.map((c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${c.label}</span></label>`).join("")}</div></div>`;
   h(`${brand}<h2>Je prépare <span class="mark">un test</span></h2>
   <p class="muted">Choisis les notions de ton test et sa date. Jusqu'à ce jour-là, tes séances porteront surtout sur elles.</p>
@@ -1546,11 +1554,17 @@ function startCarnet(only) {
   toast("📕 Pour effacer une erreur : 2 réussites de suite, du premier coup.", 4000); // 22.11 : règle expliquée au départ
 }
 const nLab = (id) => (NOTIONS.find((n) => n.id === id) || {}).label || id;
+/* 26.11 soir (revue des élèves testeurs, n° 6 : « 3 à effacer » après une bonne séance, aucun progrès visible) : les
+   erreurs à une réussite de la sortie sont dites « presque effacées ». */
+function carnetLeft(c) {
+  const near = c.filter((x) => x.ok >= CARNET_OK - 1 && x.ok > 0).length;
+  return c.length + " à effacer" + (near ? (near === c.length ? (near > 1 ? ", toutes presque effacées" : ", presque effacée") : ", dont " + near + " presque effacée" + (near > 1 ? "s" : "")) + " (encore 1 réussite)" : "");
+}
 function carnetCard(full) {
   const c = state.carnet || [];
   if (!c.length) return full ? `<div class="card flat stack"><div class="eyebrow">📕 Carnet d'erreurs</div><p class="small muted">Vide : bravo ! Chaque question ratée viendra s'y ranger, pour que tu puisses la réussir plus tard.</p></div>` : "";
   const rows = full ? `<ul class="carnet-list">${c.slice().reverse().map((x) => `<li><span>${nLab(x.id)} <span class="dots small">${[1, 2, 3].map((k) => `<i class="${k <= x.d ? "on" : ""}"></i>`).join("")}</span></span><span class="small muted">${x.ok ? "✓ 1 sur 2" : "à refaire"}</span></li>`).join("")}</ul>` : "";
-  return `<div class="card stack carnet-card"><div class="eyebrow">📕 Carnet d'erreurs</div><h3>${c.length} erreur${c.length > 1 ? "s" : ""} à effacer</h3>
+  return `<div class="card stack carnet-card"><div class="eyebrow">📕 Carnet d'erreurs</div><h3>${c.length} erreur${c.length > 1 ? "s" : ""} à effacer</h3>${c.some((x) => x.ok > 0) ? `<p class="small">${esc(carnetLeft(c).replace(/^\d+ à effacer, (dont )?/, "").replace(/^./, (m) => m.toUpperCase()))}.</p>` : ""}
     <p class="small muted">Refais-les avec d'autres nombres : deux réussites de suite du premier coup, et elle disparaît.</p>${rows}
     <button class="btn-primary" id="carnetgo">Effacer mes erreurs (${Math.min(5, c.length)} question${Math.min(5, c.length) > 1 ? "s" : ""})</button></div>`;
 }
@@ -1797,7 +1811,7 @@ function nextQuestion(redo) {
   }
   q.kind = kind;
   const ST = sessStep(session), nTxt = ST.pos + " sur " + ST.total;
-  const fmtLab = session.fmt && FORMATS[session.fmt] ? (newNotion(id) && session.lessonShown === id /* 26.11 (lot) : seulement avec sa leçon (l'accueil annonçait « Révision ») */ ? "Nouvelle notion" : ns && !ns.seen && session.fmt === "revision" ? "" : FORMATS[session.fmt].label) /* 26.11 : notion d'une année précédente jamais travaillée : ni « Nouvelle notion » ni « Révision » */ : "";
+  const fmtLab = session.fmt && FORMATS[session.fmt] ? (newNotion(id) && session.lessonShown === id /* 26.11 (lot) : seulement avec sa leçon (l'accueil annonçait « Révision ») */ ? "Nouvelle notion" : FORMATS[session.fmt].label) /* 26.11 : notion d'une année précédente jamais travaillée : pas « Nouvelle notion ». 26.11 soir (revue des élèves testeurs, n° 3 : « 1 sur 4 » seul) : la séance Révision garde son libellé, comme les autres formats ; il nomme la séance, pas la notion. */ : "";
   renderQuestion(q, {
     track: sessionInfo().fmt || "seance", redo: !!redo,
     /* 25.11 (revue) : compteur qui compte aussi l'étape leçon ; « Nouvelle notion » (et non « Révision ») pour la question
@@ -1834,6 +1848,7 @@ function nextQuestion(redo) {
       /* 25.11 : points de l'année (grades) ; rien en « Refaire » ; problème de la semaine réussi : bonus hors plafond. */
       session.ypg = (session.ypg || 0) + ypAdd(state, ypPoints(q.d, res, !!redo)) + (session.weekly && res.solved && !redo ? ypAdd(state, YP.weekly, "w") : 0);
       session.score += sc; session.answered++; session.ids.add(id);
+      if (res.parts) session.parts = [(session.parts ? session.parts[0] : 0) + res.parts[0], (session.parts ? session.parts[1] : 0) + res.parts[1]]; /* 26.11 soir : bilan d'un problème en parties */
       session.res = session.res || {}; const rr = (session.res[id] = session.res[id] || { n: 0, ok: 0 }); rr.n++; if (res.solved) rr.ok++;
       if (Engine.finishDay(state, 1, sc) === "joker") toast("🛡 Joker de série utilisé : ta série continue !"); save();
       return res.delta;
@@ -2112,7 +2127,7 @@ function renderProblem(q, opt) {
     if (S) { S.issue = frac === 1 ? (tries === 1 ? "ok1" : "ok2") : giveUp && tries === 0 ? "idk" : ok.some(Boolean) ? "partiel" : "faux"; S.essais = tries; S.sec = sigSec(S); }
     if (frac === 1) burst();
     buzz(frac === 1);
-    const delta = opt.onDone({ solved: frac === 1, tries, partial: score, dontKnow: !!(giveUp && tries === 0) });
+    const delta = opt.onDone({ solved: frac === 1, tries, partial: score, dontKnow: !!(giveUp && tries === 0), parts: [ok.filter(Boolean).length, q.parts.length] });
     const d = ""; /* 26.11 : Mathélo caché pendant les questions */
     const pSteps = frac < 1 && splitSol(q.sol); /* 24.11 : corrigé progressif aussi pour les problèmes */
     /* 25.11 soir (revue d'un testeur : « le corrigé n'affiche que la partie c, l'élève ne voit jamais la bonne réponse de a ») :
@@ -2153,7 +2168,10 @@ function renderProblem(q, opt) {
        fausse s'il est marqué « a) », « b) »… ; un indice non marqué n'est donné que pour la dernière partie ; sinon, relance. */
     const L = String.fromCharCode(97 + nx), H = (q.hints || []).map((x) => String(x));
     const tagged = H.find((x) => x.trim().startsWith(L + ")")), free = H.filter((x) => !/^[a-h]\)/.test(x.trim()));
-    const hint = tagged || (nx === q.parts.length - 1 && free.length ? free[Math.min(tries - 1, free.length - 1)] : "Partie " + L + ") : relis bien ce qui est demandé, et fais un calcul à la fois. Les données utiles sont dans l'énoncé.");
+    /* 26.11 (revue des élèves testeurs, n° 1 : indice générique vide) : sans indice marqué pour cette partie, l'indice de la
+       notion (HINTS, le même qu'aux questions simples) ; la phrase générique ne reste que si la notion n'en a pas. */
+    const nHint = typeof HINTS !== "undefined" && HINTS[q.id] ? plainTeX(HINTS[q.id]) : "";
+    const hint = tagged || (nx === q.parts.length - 1 && free.length ? free[Math.min(tries - 1, free.length - 1)] : nHint ? "Partie " + L + ") · " + nHint : "Partie " + L + ") : relis bien ce qui est demandé, et fais un calcul à la fois. Les données utiles sont dans l'énoncé.");
     fb.innerHTML = `<div class="fb hint pop"><b>${ok.some(Boolean) ? "En partie juste. Continue !" : "Pas encore."}</b><span><b>Indice ${tries}</b> · ${escT(hint)}</span></div>`; fbInView(fb, 120);
   };
   document.getElementById("check").onclick = check;
@@ -2737,6 +2755,13 @@ function sumGoal(g) {
   const parts = [g && g.next ? `encore <b>${nbFmt(g.next.at - ypPts())} points</b> avant ${g.next.ic} ${g.next.name}` : "", weak ? `consolider <b>${esc(nLab(weak))}</b>` : ""].filter(Boolean);
   return parts.length ? `<div class="small goal">🎯 Objectif pour demain : ${parts.join(" · ")}</div>` : "";
 }
+/* 26.11 soir (revue des élèves testeurs, n° 5 : « Problème résolu » puis « Score 0,67 / 1 ») : une séance faite d'un problème
+   (problème de la semaine, défi du jour) donne ses parties justes ; ailleurs, le score arrondi au dixième. */
+function scoreRow(n, sc) {
+  const P = session.parts;
+  if (P && n === 1) return `<div class="spread"><span>Parties justes</span><b>${P[0]} / ${P[1]}</b></div>`;
+  return `<div class="spread"><span>Score</span><b>${String(Math.round(sc * 10) / 10).replace(".", ",")} / ${n}</b></div>`;
+}
 function screenSummary() {
   if (state) { delete state.resume; if (session && session.answered) state.firstDone = true; save(); }
   if (session && session.answered && !session.counted) { session.counted = true; UI.sessN = (+UI.sessN || 0) + 1; uiSave(); storagePersist(); }
@@ -2759,7 +2784,7 @@ function screenSummary() {
   if (session.carnet && n <= 2) {
     const left = (state.carnet || []).length;
     h(`${brand}<h2>${sc >= n ? "📕 Bien joué !" : "📕 C'est noté."}</h2>
-    <div class="card flat stack">${ypRow}<div class="spread"><span>Carnet d'erreurs</span><b>${left ? left + " à effacer" : "vide : bravo !"}</b></div></div>
+    <div class="card flat stack">${ypRow}<div class="spread"><span>Carnet d'erreurs</span><b>${left ? carnetLeft(state.carnet) : "vide : bravo !"}</b></div></div>
     ${newGrade}${nb}
     ${left ? '<button class="btn-primary btn-big" id="carnetagain">📕 Continuer à effacer</button>' : ""}
     <button class="${left ? "btn-sec" : "btn-primary btn-big"}" id="home">Retour à l'accueil</button>`);
@@ -2777,11 +2802,11 @@ function screenSummary() {
   <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span>${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ta série passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${FORMATS[Engine.tomorrowFormat(state)].label}</b></div>${sumGoal(g1)}</div></div>
   ${summaryByNotion()}
   ${weekLine()}
-  <div class="card stack"><div class="spread"><span>Score</span><b>${String(sc).replace(".", ",")} / ${n}</b></div>
+  <div class="card stack">${scoreRow(n, sc)}
   ${ypRow}${session.rebuilt ? `<p class="small">🪜 Tu as reconstruit ${session.rebuilt > 1 ? session.rebuilt + " solutions" : "une solution"} pas à pas : ça compte aussi.</p>` : ""}</div>
   ${session.ctest ? (() => { const a = ctestNote(session.ctest), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? (isFR() ? "Le niveau apparaît après 3 réponses sur cette compétence." : "La note apparaît après 3 réponses sur cette compétence.") : b === null ? (isFR() ? "Premier positionnement pour cette compétence." : "Première note pour cette compétence.") : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". " + (isFR() ? "Il remontera" : "Elle remontera") + " avec la pratique." : isFR() ? "Niveau stable." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
   ${newGrade}${nb}
-  ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${state.carnet.length} à effacer</b></div><span class="small muted">Une erreur s'efface après 2 réussites de suite, du premier coup.</span><button class="btn-primary" id="carnetagain">${session.carnet ? "Continuer à effacer" : "📕 Effacer mes erreurs maintenant"}</button></div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
+  ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${carnetLeft(state.carnet)}</b></div><span class="small muted">Une erreur s'efface après 2 réussites de suite, du premier coup.</span><button class="btn-primary" id="carnetagain">${session.carnet ? "Continuer à effacer" : "📕 Effacer mes erreurs maintenant"}</button></div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
   ${returnCard()}
   ${typeof Curieux !== "undefined" && Curieux.available(state).length ? '<button class="btn-primary" id="curbonus">🤔 Bonus : une question curieuse</button>' : ""}
   <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)", "app")}</div>
