@@ -24,9 +24,9 @@ startCarnet();answer(false);ok(state.carnet[0].ok===0,"3 échec remet à 0");doc
 startCarnet();answer(true);document.getElementById("nx").click();startCarnet();answer(true);
 ok((state.carnet||[]).length===0,"3 effacée après 2 réussites "+JSON.stringify(state.carnet));
 document.getElementById("nx").click();/* 25.11 soir : petite séance du Carnet → bilan léger (« vide ✓ », commit 878d2ea) */ ok(/vide : bravo|vide ✓/.test(app.textContent),"3 bilan carnet vide");
-// 4. programme du test : J-5 révision, J-2 sujet, J-1 dernier tour, J jour J
+// 4. programme du test : J-5 autoévaluation, J-2 sujet, J-1 erreurs (décision du 26.11, n° 11), J jour J
 const ids=["prio","fracadd","puiss"];
-for(const [L,kind] of [[5,"autoeval"],[2,"mock"],[1,"apres"],[0,"jourj"]]){state.prep={ids,date:addDays(day(),L)};homeTab="today";screenHome();
+for(const [L,kind] of [[5,"autoeval"],[2,"mock"],[1,"tour"],[0,"jourj"]]){state.prep={ids,date:addDays(day(),L)};homeTab="today";screenHome();
  ok(new RegExp(prepTask(kind).label).test(app.textContent),"4 tâche J-"+L+" = "+kind); /* 26.11 : prepTask — veille du test sans grille de départ = Autoévaluation (plus de « Test rapide final ») */
  homeTab="test";screenHome();ok(app.querySelectorAll(".pday").length>=L+1&&!!document.getElementById("prepgo"),"4 programme J-"+L);}
 // 5. dernier tour avec une erreur du carnet sur une notion du test, puis marquage fait
@@ -35,8 +35,8 @@ ok(session.plan[0]==="fracadd|1|carnet","5 carnet en tête de la révision cibl�
 answer(true);ok(state.carnet[0].ok===1,"5 réussite comptée pour le carnet");
 for(let k=0;k<40&&!/Score/.test(app.textContent);k++){const b=document.getElementById("nx");if(b)b.click();else if(document.getElementById("idk"))document.getElementById("idk").click();}
 ok((state.prep.log||{})[day()]==="revision","5 tâche du jour marquée "+JSON.stringify(state.prep.log));
-// 6. parcours guidé : J-1 = test rapide (après) ; autoévaluation du 1er jour cochée dans la frise
-state.prep={ids,date:addDays(day(),1),start:addDays(day(),-3)};startPrepTask("apres");ok(/Autoévaluation/.test(app.textContent),"6 J-1 : autoévaluation");
+// 6. test rapide « après » (onglet Test ; plus une tâche du programme depuis le 26.11) ; autoévaluation du 1er jour cochée dans la frise
+state.prep={ids,date:addDays(day(),1),start:addDays(day(),-3)};startPrepTask("apres");ok(/Autoévaluation/.test(app.textContent),"6 test rapide sans grille : autoévaluation");
 state.prep={ids,date:addDays(day(),5)};state.autotest=null;homeTab="test";screenHome();ok(/étape 1 sur 6/.test(app.textContent)&&/Autoévaluation/.test(app.querySelector(".prep-now").textContent),"6 1er jour : autoévaluation, étape 1 sur 6");
 }catch(e){fails.push("EXC "+e.message+" "+e.stack)}
 document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC\n"+fails.join("\n"):"OK")+"</pre>");

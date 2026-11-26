@@ -14,7 +14,8 @@ window.ensurePacks = () => Promise.resolve();
 <script>
 /* Garde-fou d'adaptivité (26.11, tools/adaptivite_26-11.md) : quelques élèves simulés (tests/eleves.js, vrai moteur,
    horloge simulée, 8 semaines dès septembre). Échoue si l'élève faible régulier sort de 55–80 % de réussite au premier
-   essai, si le bon élève a moins de 25 % de questions de niveau 3–4, si une séance dépasse ≈ 6 min estimées (380 s : leçon + 4 questions toutes ratées = 395 s),
+   essai, si le bon élève a moins de 25 % de questions de niveau 3–4, si une séance dépasse 395 s estimées (leçon + 4 questions toutes ratées ; 380 s avant le 26.11 : la décision n° 2,
+   une question allégée par séance au plus, laisse passer ce maximum chez l'élève faible),
    ou si le moteur lève une erreur. Limites connues (rapport) : en 9e, l'élève faible bute sur le plancher (aucune notion
    d'une année précédente à remobiliser) : il n'est pas contrôlé ici ; en 11e avec chapitre « en classe », ≈ 50 %. */
 (function () {
@@ -27,7 +28,7 @@ window.ensurePacks = () => Promise.resolve();
       if (r.err.length) fails.push(r.cl + " " + r.pname + " : erreurs " + r.err.join(" ; "));
       if (r.pname.startsWith("faible_regulier") && (r.ok1 < 0.55 || r.ok1 > 0.8)) fails.push(r.cl + " " + r.pname + " : réussite au 1er essai " + Math.round(r.ok1 * 100) + " % (attendu 55–80 %)");
       if (r.pname.startsWith("fort") && r.hi < 0.25) fails.push(r.cl + " " + r.pname + " : " + Math.round(r.hi * 100) + " % de niveaux 3–4 (attendu ≥ 25 %)");
-      if (r.secMax > 380) fails.push(r.cl + " " + r.pname + " : séance de " + r.secMax + " s estimées (> 380 s)");
+      if (r.secMax > 395) fails.push(r.cl + " " + r.pname + " : séance de " + r.secMax + " s estimées (> 395 s)");
     }
   } catch (e) { fails.push("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }
   document.getElementById("out").textContent = (fails.length ? "ÉCHEC " + fails.join(" | ") : "ok adaptivité") + " (" + Math.round((_D.now() - t0) / 1000) + " s)\n" + log.join("\n");

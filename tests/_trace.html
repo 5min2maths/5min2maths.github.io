@@ -129,7 +129,7 @@ window.confirm = () => true; window.print = () => {};
     if (!ok) { w = wrongAns(q, q.spec); a = w.a; }
     if (a === null) { act("(pas de réponse calculable pour ce type : je ne sais pas)"); await click($("idk"), "Je ne sais pas"); return afterEnd(q); }
     inp.value = a; inp.dispatchEvent(new Event("input")); act("tape « " + a + " »" + (w ? " (" + w.typ + ")" : "")); add(5);
-    await click($("check"), "Valider"); await wait(220);
+    await click($("check"), "Vérifier"); await wait(220);
     let fb = $("fb");
     /* forme refusée / illisible avec la bonne réponse : signaler */
     if (fb && /hint/.test((fb.firstElementChild || {}).className || "") && !cap.finishedFlag && !app.querySelector("#nx")) {
@@ -139,7 +139,7 @@ window.confirm = () => true; window.print = () => {};
       const ok2 = rnd() < LV.p2 + (ST.has("aide") ? 0.15 : 0);
       const a2 = ok2 ? ra : wrongAns(q, q.spec).a;
       inp.value = a2; inp.dispatchEvent(new Event("input")); act("2e essai : tape « " + a2 + " »"); add(thinkS(q) * 0.6 + 5);
-      await click($("check"), "Valider"); await wait(220);
+      await click($("check"), "Vérifier"); await wait(220);
     }
     return afterEnd(q);
   }
@@ -171,7 +171,7 @@ window.confirm = () => true; window.print = () => {};
     for (let tr = 0; tr < 3; tr++) {
       if (ST.has("presse") && tr === 0 && rnd() < 0.2) { await click($("idk"), "Voir le corrigé"); break; }
       q.parts.forEach((p, i) => { const inp = $("p" + i); if (!inp || inp.disabled) return; const ok = rnd() < LV.p1 + tr * 0.1; const a = ok ? rightAns(p.spec) : wrongAns(p, p.spec).a; inp.value = a; act("partie " + (i + 1) + " : tape « " + a + " »" + (ok ? "" : " (faux)")); });
-      add(10); await click($("check"), "Valider"); await wait(150);
+      add(10); await click($("check"), "Vérifier"); await wait(150);
       if ($("nx")) break;
       const ft = screenText($("fb")); log("    ◂ retour : " + ft.replace(/\n/g, " ⏎ ")); add(readS(ft) + 40);
     }

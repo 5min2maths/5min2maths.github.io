@@ -76,11 +76,9 @@
       ok(ctestNote(session.ctest) === Referentiel.note(state, r1), "bilan du test : note de l'item du PER");
       session = null;
     }
-    /* Leçons toujours accessibles depuis « Mes compétences » (14.11) */
+    /* 26.11 (décision de l'enseignant, n° 15) : plus de ligne « Leçons » dans « Mes compétences » au CO */
     screenComps();
-    const lb = app.querySelector(".lopen");
-    ok(!!lb, "10e : bouton de leçon dans « Mes compétences »");
-    if (lb) { const id = lb.dataset.id; lb.click(); ok(!app.querySelector(".rcomp") && !!document.querySelector("h2"), "leçon " + id + " ouverte"); }
+    ok(!app.querySelector(".lopen") && !app.querySelector("details.rles"), "10e : pas de ligne « Leçons » dans « Mes compétences »");
     /* Chaque année : blocs repliés, rien ne dépasse à 360 px (tout déplié), compteur de la carte. */
     for (const [g, n] of EXP) {
       fresh(P(g)); screenComps();

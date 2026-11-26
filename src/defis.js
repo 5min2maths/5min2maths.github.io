@@ -31,6 +31,8 @@ const DEFIS = (() => {
   const rad = (d) => (d * Math.PI) / 180, deg = (r) => (r * 180) / Math.PI;
   /* Prix en CHF : deux décimales quand le montant n'est pas entier (13,90 et non 13,9). */
   const CHF = (v) => (Number.isInteger(r2c(v)) ? D(r2c(v)) : grp(Math.trunc(r2c(v)), "\\text{'}", "{,}") + "{,}" + Math.abs(r2c(v)).toFixed(2).split(".")[1]);
+  /* « = » si la valeur au centime est exacte, « ≈ » sinon (26.11, problèmes de decmul) */
+  const eqa = (x, r) => (Math.abs(x - r) < 1e-9 ? " = " : " \\approx ");
   const CHFT = (v) => (Number.isInteger(r2c(v)) ? T(r2c(v)) : grp(Math.trunc(r2c(v)), "'", ",") + "," + Math.abs(r2c(v)).toFixed(2).split(".")[1]);
 
   return {
@@ -1650,6 +1652,58 @@ const DEFIS = (() => {
           ["Aire = longueur · largeur : multiplie sans la virgule, puis place-la (autant de décimales qu'au total dans les facteurs).",
            "c) 10 % de plus : on achète 1,1 fois l'aire."],
           "a) " + M(D(L) + " \\cdot " + D(l) + " = " + D(A)) + " m². b) " + M(D(A) + " \\cdot " + CHF(pu) + " \\approx " + CHF(C)) + " CHF. c) " + M(D(A) + " \\cdot 1{,}1 \\cdot " + CHF(pu) + " \\approx " + CHF(C2)) + " CHF.");
+      },
+      /* 26.11 (décision de l'enseignant, n° 6 : contextes élargis ; revue D4 : « On carrelle une pièce… » 3 fois en 4 jours) :
+         six autres situations, chacune avec son ctx (anti-répétition sur 7 jours, Engine.make) et des grandeurs réalistes
+         (prix du marché, puissance d'un appareil, tarif de location, salaire horaire d'un job d'été, masse d'une bouteille
+         pleine, tissu au m²). Valeurs au centime quand le calcul en donne plus, et le corrigé écrit la même valeur. */
+      () => { /* marché : masses × prix au kilo */
+        const f1 = pk([["pommes", 2.9, 4.2], ["poires", 3.5, 4.9], ["carottes", 1.9, 2.9]]), f2 = pk([["tomates", 3.9, 5.9], ["courgettes", 3.2, 4.8], ["cerises", 9.5, 14.5]]);
+        const p1 = ri(f1[1] * 10, f1[2] * 10) / 10, p2 = ri(f2[1] * 10, f2[2] * 10) / 10, m1 = ri(12, 35) / 10, m2 = ri(4, 18) / 10;
+        const a = r2c(m1 * p1), b = r2c(m2 * p2), t = r2c(a + b), B = t < 20 ? 20 : 50, r = r2c(B - t);
+        return Object.assign(P("Au marché, " + M(D(m1) + " \\text{ kg}") + " de " + f1[0] + " à " + M(CHF(p1)) + " CHF le kilo et " + M(D(m2) + " \\text{ kg}") + " de " + f2[0] + " à " + M(CHF(p2)) + " CHF le kilo.",
+          [["a) Prix des " + f1[0] + " (CHF, au centime)", a, 0.01], ["b) Prix total (CHF, au centime)", t, 0.01], ["c) On paie avec un billet de " + B + " CHF : monnaie rendue (CHF, au centime)", r, 0.01]],
+          ["Prix = masse · prix au kilo, pour chaque produit.", "c) Billet − prix total."],
+          "a) " + M(D(m1) + " \\cdot " + CHF(p1) + eqa(m1 * p1, a) + CHF(a)) + " CHF. b) " + M(D(m2) + " \\cdot " + CHF(p2) + eqa(m2 * p2, b) + CHF(b)) + " CHF, total " + M(CHF(a) + " + " + CHF(b) + " = " + CHF(t)) + " CHF. c) " + M(B + " - " + CHF(t) + " = " + CHF(r)) + " CHF."), { ctx: "marche" });
+      },
+      () => { /* électricité : puissance · durée = énergie ; énergie · tarif */
+        const ap = pk([["Un radiateur d'appoint", [1.5, 2]], ["Un sèche-linge", [2.5, 2.8]], ["Un four", [2.2, 2.4]]]), kw = pk(ap[1]), h = pk([0.5, 1.5, 2.5]), tf = pk([0.24, 0.28, 0.32]), j = pk([20, 30]);
+        const e = +(kw * h).toFixed(6), c = r2c(e * tf), cj = r2c(e * tf * j);
+        return Object.assign(P(ap[0] + " a une puissance de " + M(D(kw) + " \\text{ kW}") + ". Il fonctionne " + M(D(h) + " \\text{ h}") + " par jour. Le kilowattheure (kWh) coûte " + M(CHF(tf)) + " CHF.",
+          [["a) Énergie consommée par jour (kWh)", e], ["b) Coût par jour (CHF, au centime)", c, 0.01], ["c) Coût sur " + j + " jours (CHF, au centime)", cj, 0.01]],
+          ["Énergie (kWh) = puissance (kW) · durée (h).", "c) Calcule avec l'énergie de " + j + " jours, puis arrondis à la fin."],
+          "a) " + M(D(kw) + " \\cdot " + D(h) + " = " + D(e)) + " kWh. b) " + M(D(e) + " \\cdot " + CHF(tf) + eqa(e * tf, c) + CHF(c)) + " CHF. c) " + M(D(e) + " \\cdot " + j + " = " + D(+(e * j).toFixed(6))) + " kWh, " + M(D(+(e * j).toFixed(6)) + " \\cdot " + CHF(tf) + eqa(e * j * tf, cj) + CHF(cj)) + " CHF."), { ctx: "electricite" });
+      },
+      () => { /* location de vélos : tarif horaire · durée · nombre */
+        const tx = pk([4.5, 5.5, 6.5, 7.5]), h = pk([1.5, 2.5, 3.5]), n = ri(2, 4), u = r2c(tx * h), t = r2c(u * n), B = t < 50 ? 50 : t < 100 ? 100 : 200, r = r2c(B - t);
+        return Object.assign(P("Une famille loue " + M(n) + " vélos pendant " + M(D(h) + " \\text{ h}") + ". La location coûte " + M(CHF(tx)) + " CHF de l'heure par vélo.",
+          [["a) Prix pour un vélo (CHF)", u], ["b) Prix pour les " + n + " vélos (CHF)", t], ["c) Monnaie rendue sur " + B + " CHF (CHF)", r]],
+          ["Un vélo : tarif horaire · nombre d'heures.", "b) Multiplie par le nombre de vélos."],
+          "a) " + M(CHF(tx) + " \\cdot " + D(h) + " = " + CHF(u)) + " CHF. b) " + M(CHF(u) + " \\cdot " + n + " = " + CHF(t)) + " CHF. c) " + M(B + " - " + CHF(t) + " = " + CHF(r)) + " CHF."), { ctx: "location" });
+      },
+      () => { /* job d'été : salaire horaire · heures */
+        const sh = pk([13.5, 14.5, 15.5, 16.5, 17.5]), hj = pk([3.5, 4.5, 5.5]), nj = ri(3, 5), hs = pk([1.5, 2.5]), w = pk([["Lina", "elle"], ["Noé", "il"], ["Inès", "elle"], ["Yanis", "il"], ["Mia", "elle"], ["Tom", "il"]]);
+        const g = r2c(sh * hj), gs = r2c(g * nj), gt = r2c(gs + sh * hs);
+        return Object.assign(P(w[0] + " a un job d'été payé " + M(CHF(sh)) + " CHF de l'heure. Pendant " + nj + " jours, " + w[1] + " travaille " + M(D(hj) + " \\text{ h}") + " par jour, puis encore " + M(D(hs) + " \\text{ h}") + " le samedi.",
+          [["a) Salaire d'une journée (CHF, au centime)", g, 0.01], ["b) Salaire des " + nj + " journées (CHF, au centime)", gs, 0.01], ["c) Salaire total avec le samedi (CHF, au centime)", gt, 0.01]],
+          ["Salaire = salaire horaire · nombre d'heures.", "c) Ajoute le salaire des heures du samedi."],
+          "a) " + M(CHF(sh) + " \\cdot " + D(hj) + eqa(sh * hj, g) + CHF(g)) + " CHF. b) " + M(CHF(g) + " \\cdot " + nj + " = " + CHF(gs)) + " CHF. c) " + M(CHF(gs) + " + " + CHF(sh) + " \\cdot " + D(hs) + eqa(gs + sh * hs, gt) + CHF(gt)) + " CHF."), { ctx: "salaire" });
+      },
+      () => { /* livraison : masse d'une bouteille pleine · nombre, casiers */
+        const b = pk([[12, "bouteilles de jus de 1 L", [1.48, 1.52, 1.55], [1.6, 1.8]], [20, "bouteilles d'eau de 0,5 L", [0.82, 0.85, 0.88], [1.9, 2.2]], [24, "bouteilles de 33 cl", [0.53, 0.55, 0.58], [1.8, 2.1]]]), mb = pk(b[2]), mc = pk(b[3]), nc = ri(3, 6);
+        const m1 = +(b[0] * mb).toFixed(6), mcs = +(m1 + mc).toFixed(6), mt = +(mcs * nc).toFixed(6);
+        return Object.assign(P("Un casier contient " + M(b[0]) + " " + b[1] + ". Une bouteille pleine pèse " + M(D(mb) + " \\text{ kg}") + " et le casier vide " + M(D(mc) + " \\text{ kg}") + ". On charge " + M(nc) + " casiers pleins dans une voiture.",
+          [["a) Masse des bouteilles d'un casier (kg)", m1], ["b) Masse d'un casier plein (kg)", mcs], ["c) Masse des " + nc + " casiers (kg)", mt]],
+          ["a) Masse d'une bouteille · nombre de bouteilles.", "c) Masse d'un casier plein · nombre de casiers."],
+          "a) " + M(b[0] + " \\cdot " + D(mb) + " = " + D(m1)) + " kg. b) " + M(D(m1) + " + " + D(mc) + " = " + D(mcs)) + " kg. c) " + M(D(mcs) + " \\cdot " + nc + " = " + D(mt)) + " kg."), { ctx: "livraison" });
+      },
+      () => { /* rideaux : surface de tissu · prix au m² */
+        const l = pk([1.2, 1.4, 1.5]), h = pk([2.25, 2.4, 2.6]), n = pk([2, 4]), pu = pk([9.9, 12.5, 14.9, 18.5]);
+        const a = +(l * h).toFixed(6), at = +(a * n).toFixed(6), c = r2c(at * pu);
+        return Object.assign(P("Pour " + M(n) + " rideaux, il faut pour chacun un rectangle de tissu de " + M(D(l) + " \\text{ m}") + " sur " + M(D(h) + " \\text{ m}") + ". Le tissu coûte " + M(CHF(pu)) + " CHF le m².",
+          [["a) Aire de tissu pour un rideau (m²)", a], ["b) Aire de tissu pour les " + n + " rideaux (m²)", at], ["c) Prix du tissu (CHF, au centime)", c, 0.01]],
+          ["Aire = longueur · largeur : place bien la virgule.", "c) Aire totale · prix au m²."],
+          "a) " + M(D(l) + " \\cdot " + D(h) + " = " + D(a)) + " m². b) " + M(D(a) + " \\cdot " + n + " = " + D(at)) + " m². c) " + M(D(at) + " \\cdot " + CHF(pu) + eqa(at * pu, c) + CHF(c)) + " CHF."), { ctx: "rideaux" });
       },
     ],
     /* ---------- 10e : addition et soustraction de décimaux ---------- */

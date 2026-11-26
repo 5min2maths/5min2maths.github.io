@@ -311,7 +311,7 @@ saisissable (construction, démonstration, programmation). « avant » = catalog
 | 4e-2019.NC.26 | Il teste si un nombre est solution d’une équation | `eqverif` | ✅ |
 | 4e-2019.NC.27 | Il résout algébriquement une équation du premier degré | `eq1` | ✅ |
 | 4e-2019.DP.01 | Il lit, interprète et représente des données sous forme de diagrammes circulaires | `diagr`, `statfreq` | ✅ |
-| 4e-2019.DP.02 | Il calcule et interprète la médiane d’une série de données de petit effectif total | `quartiles` | ✅ |
+| 4e-2019.DP.02 | Il calcule et interprète la médiane d’une série de données de petit effectif total | `quartiles` (« Étendue, médiane » en 4e–3e : médiane seulement, sans quartiles, 26.11) | ✅ |
 | 4e-2019.DP.03 | Il utilise le vocabulaire des probabilités : expérience aléatoire, issues, événement, probabilité, événement c… | `proba` | ✅ |
 | 4e-2019.DP.04 | Il reconnaît des événements contraires et s’en sert pour calculer des probabilités | `proba` | ✅ |
 | 4e-2019.DP.05 | Il calcule des probabilités | `proba` | ✅ |

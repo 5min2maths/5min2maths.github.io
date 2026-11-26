@@ -6,7 +6,7 @@
    360 × 640 (téléphone) et contrôle : 1. menu « ⋯ » (Pas encore vu, Trop facile) et zones de toucher ≥ 44 px ;
    2. clavier contextuel : sur toutes les notions et de nombreux tirages, la réponse attendue se compose avec les touches
    affichées (aucune touche utile perdue par rapport à l'ancien clavier), et ⌨ reste présent ; 3. barre d'action fixe :
-   « Valider » puis « Continuer » au même endroit, ni clavier ni dernier champ sous la barre (question et problème) ;
+   « Vérifier » puis « Continuer » au même endroit, ni clavier ni dernier champ sous la barre (question et problème) ;
    4. une seule icône 💬 après la question (vote et commentaire envoyés comme avant) ; 5. « Retiens » : règle d'abord,
    exemples et piège dépliables, sans perte ; 6. accueil : explication des cases aux 3 premières ouvertures seulement. */
 if (window === top) {
@@ -140,17 +140,17 @@ const SEC3 = () => sec("3 barre", () => {
   const r0 = R_(document.getElementById("check"));
   window.scrollTo(0, 99999);
   const kp = document.getElementById("kp"); if (R_(kp).bottom > R_(b).top - 2) fail("clavier sous la barre en fin de page (" + Math.round(R_(kp).bottom) + " > " + Math.round(R_(b).top) + ")");
-  const r1 = R_(document.getElementById("check")); if (Math.abs(r1.top - r0.top) > 1) fail("« Valider » bouge au défilement");
+  const r1 = R_(document.getElementById("check")); if (Math.abs(r1.top - r0.top) > 1) fail("« Vérifier » bouge au défilement");
   document.getElementById("ans").value = "1"; document.getElementById("check").click(); document.getElementById("ans").value = "2"; document.getElementById("check").click();
   const nx = document.getElementById("nx"); if (!nx) return fail("pas de « Continuer » après la correction");
   if (!b.contains(nx)) fail("« Continuer » hors de la barre");
-  const r2 = R_(nx); if (Math.abs(r2.left - r0.left) > 1 || Math.abs(r2.top - r0.top) > 1 || Math.abs(r2.width - r0.width) > 1) fail("« Continuer » pas à la place de « Valider » (" + [r2.left, r2.top, r2.width].map(Math.round) + " vs " + [r0.left, r0.top, r0.width].map(Math.round) + ")");
-  if (vis(document.getElementById("check"))) fail("« Valider » encore visible après la correction");
+  const r2 = R_(nx); if (Math.abs(r2.left - r0.left) > 1 || Math.abs(r2.top - r0.top) > 1 || Math.abs(r2.width - r0.width) > 1) fail("« Continuer » pas à la place de « Vérifier » (" + [r2.left, r2.top, r2.width].map(Math.round) + " vs " + [r0.left, r0.top, r0.width].map(Math.round) + ")");
+  if (vis(document.getElementById("check"))) fail("« Vérifier » encore visible après la correction");
   window.scrollTo(0, 99999); const last = [...document.querySelectorAll("#fb > *")].pop(); if (last && R_(last).bottom > R_(b).top - 2) fail("fin de la correction sous la barre");
   let next = 0; renderQuestion(qRel(), opt({ onNext: () => next++ })); document.getElementById("ans").value = "625"; document.getElementById("check").click();
   if (!document.getElementById("nx")) document.getElementById("idk").click();
   const nb = document.getElementById("nx"); if (nb) { nb.click(); if (next !== 1) fail("« Continuer » ne passe pas à la suite"); }
-  // Problème : partie suivante visible au-dessus de la barre, puis « Continuer » à la place de « Valider ».
+  // Problème : partie suivante visible au-dessus de la barre, puis « Continuer » à la place de « Vérifier ».
   let P = null; for (const id of ["eq1", "thales", "prop", "pythag", "aire1"]) { for (let s = 1; s < 30 && !P; s++) { try { const q = Engine.build(id, 4, s); if (q && q.parts && q.parts.length >= 2) P = q; } catch (e) {} } if (P) break; }
   if (!P) return fail("pas de problème à plusieurs parties pour le test");
   renderQuestion(P, opt());
@@ -158,7 +158,7 @@ const SEC3 = () => sec("3 barre", () => {
   document.querySelector(".next-part").click();
   const rest = () => { const p1 = document.getElementById("p1"), kp = document.getElementById("kp"); if (R_(p1).bottom > R_(bar()).top - 2) fail("problème : partie b) sous la barre"); if (R_(kp).top < R_(p1).bottom - 2) fail("problème : clavier pas sous la partie b)"); };
   return new Promise((res) => setTimeout(() => { try { rest(); document.getElementById("idk").click(); const nx = document.getElementById("nx"), c1 = nx && R_(nx);
-    if (!c1 || Math.abs(c1.left - c0.left) > 1 || Math.abs(c1.top - c0.top) > 1) fail("problème : « Continuer » pas à la place de « Valider »"); } catch (e) { fail("3 problème : " + e.message); } res(); }, 400));
+    if (!c1 || Math.abs(c1.left - c0.left) > 1 || Math.abs(c1.top - c0.top) > 1) fail("problème : « Continuer » pas à la place de « Vérifier »"); } catch (e) { fail("3 problème : " + e.message); } res(); }, 400));
 });
 
 // ---------- 4. Icône 💬 unique ----------

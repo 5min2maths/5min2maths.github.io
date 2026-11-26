@@ -107,7 +107,7 @@
           const ok1 = solved && tries === 1;
           S.failRun = ok1 ? 0 : S.failRun + 1;
           if (sc < 0.5) { const pq = !S.remed.has(id) && S.i + 1 < S.plan.length && Engine.remediation(state, id); if (pq) { S.remed.add(id); S.plan[S.i + 1] = pq + "|1|rem"; R.remed++; } }
-          if (Engine.easeNext && S.failRun >= 2 && S.i + 1 < S.plan.length) { const e2 = Engine.easeNext(state, S.plan, S.i, id, d); if (e2) { S.plan[S.i + 1] = e2; R.eased++; } }
+          if (Engine.easeNext && !S.easeUsed && S.failRun >= 2 && S.i + 1 < S.plan.length) { const e2 = Engine.easeNext(state, S.plan, S.i, id, d); if (e2) { S.plan[S.i + 1] = e2; S.easeUsed = true; R.eased++; } } /* une par séance (décision 26.11, n° 2) */
           Engine.updateElo(state, id, d, sc, dk ? 0.4 : 1);
           Engine.finishDay(state, 1, sc);
           if (typeof ypAdd === "function") ypAdd(state, ypPoints(d, { solved, tries, partial }, false));

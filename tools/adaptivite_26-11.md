@@ -114,7 +114,7 @@ un tiers seulement des créneaux sur le chapitre « en classe » (gain en 11e–
 
 `tests/adaptivite.html` (dans la suite, quelques secondes) : 6 élèves simulés, 8 semaines. Échoue si l'élève faible
 régulier (11e, 1re, 1re + chapitre) sort de 55–80 % au premier essai, si le bon élève (9e, 11e) a moins de 25 % de
-niveaux 3–4, si une séance dépasse 380 s estimées (≈ 6 min ; avant réglage : 395 s au plus), ou si le moteur lève une erreur.
+niveaux 3–4, si une séance dépasse 395 s estimées (380 s jusqu’à la décision n° 2 du 26.11 : une question allégée par séance au plus ; la séance maximale, leçon + 4 échecs, revient à 395 s chez l’élève faible de 1re), ou si le moteur lève une erreur.
 
 ## Limites du modèle
 

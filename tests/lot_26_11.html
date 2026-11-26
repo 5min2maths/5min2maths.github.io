@@ -161,7 +161,7 @@ sec("UI", () => {
   fresh(); screenHome(); app.querySelector("#statsnon").click(); UI.statsSeen = []; delete UI.statsLater; screenHome(); if (app.querySelector("#statscard")) fail("statistiques : « Non » ne la fait pas disparaître");
   // 3. Installer : au plus une fois par semaine.
   fresh(); const r1 = returnCard(), r2 = returnCard(); if (!r1 || r2) fail("installation : " + (!r1 ? "jamais proposée" : "proposée deux fois le même jour"));
-  // 4. Problème en plusieurs parties : Entrée → partie suivante, Entrée sur la dernière → Valider.
+  // 4. Problème en plusieurs parties : Entrée → partie suivante, Entrée sur la dernière → Vérifier.
   fresh(); session = { plan: ["x"], i: 0, score: 0, answered: 1, start: Date.now(), elo0: 1000, ids: new Set() };
   const P = { id: "eq1", d: 4, code: "t", q: "Problème test.", parts: [{ label: "a) A", spec: { kind: "value", value: 1 } }, { label: "b) B", spec: { kind: "value", value: 2 } }, { label: "c) C", spec: { kind: "value", value: 3 } }], hints: ["h"], sol: "s" };
   let done = null; renderProblem(P, { eyebrow: "t", onDone: (r) => { done = r; return 0; }, onNext() {} });
