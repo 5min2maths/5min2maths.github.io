@@ -1606,6 +1606,19 @@ const RECALC = (() => {
   DF("eqbic", /diagonale de (\d+) cm et une aire de ([\d']+) cm²/, (g, lab) => { const [d, A] = g.map(nn), s = bicXY(d * d, A * A); if (!s) return NaN; return lab.startsWith("b)") ? s[1] : lab.startsWith("c)") ? 2 * (s[0] + s[1]) : null; });
   DF("eqbic", /ont pour produit (\d+) et la somme de leurs carrés vaut (\d+)/, (g, lab) => { const [P0, S] = g.map(nn), s = bicXY(S, P0 * P0); if (!s) return NaN; return lab.startsWith("b)") ? s[1] : lab.startsWith("c)") ? s[0] + s[1] : null; });
   DF("eqbic", /hypoténuse de (\d+) cm et une aire de (\d+(?:,\d+)?) cm²/, (g, lab) => { const [r, A] = g.map(nn), s = bicXY(r * r, 4 * A * A); if (!s) return NaN; return lab.startsWith("b)") ? s[1] : lab.startsWith("c)") ? s[0] + s[1] + r : null; });
+  /* dec10, pow9, aire1 (9e, defis_9) */
+  DF("dec10", /(?:1'000 feuilles de papier a une épaisseur de|1'000 pièces de monnaie identiques mesure) (\d+(?:,\d+)?) cm/, (g, lab) => { const e = nn(g[0]), H = lm(lab, /mesure (\d+(?:,\d+)?) m\./);
+    return lab.startsWith("a)") ? (e * 10) / 1000 : lab.startsWith("b)") ? e : H ? ((H[0] * 100) / e) * 1000 : null; });
+  DF("dec10", /1'000 grains de riz pèse (\d+(?:,\d+)?) g\./, (g, lab) => { const e = nn(g[0]), H = lm(lab, /pèse (\d+(?:,\d+)?) kg/);
+    return lab.startsWith("a)") ? e : lab.startsWith("b)") ? (100 * e) / 1000 : H ? ((H[0] * 1000) / e) * 1000 : null; });
+  DF("pow9", /se divise en deux toutes les 20 minutes/, (g, lab) => { const h = lm(lab, /[Aa]près (\d+) heures/), n = lm(lab, /y a-t-il ([\d']+) bactéries/);
+    return lab.startsWith("a)") && h ? 2 ** (3 * h[0]) : lab.startsWith("b)") && h ? 3 * h[0] : n ? 20 * Math.log2(n[0]) : null; });
+  DF("pow9", /la raconte à 3 nouvelles personnes/, (g, lab) => { const d = lm(lab, /le jour (\d+)/i), n = lm(lab, /([\d']+) nouvelles personnes/);
+    return lab.startsWith("a)") && d ? 3 ** d[0] : lab.startsWith("b)") && d ? d[0] : n ? Math.log(n[0]) / Math.log(3) : null; });
+  DF("pow9", /le nombre de couches double/, (g, lab) => { const p = lm(lab, /[Aa]près (\d+) pliages/), n = lm(lab, /obtenir ([\d']+) couches/);
+    return lab.startsWith("a)") && p ? 2 ** p[0] : lab.startsWith("b)") && p ? p[0] : n ? Math.log2(n[0]) : null; });
+  DF("aire1", /même aire qu'(?:un carré|une pelouse carrée|une affiche carrée) de (\d+) (?:cm|m|dm) de côté\. Sa largeur mesure (\d+)/, (g, lab) => { const [s, w] = g.map(nn), L = (s * s) / w;
+    return lab.startsWith("a)") ? s * s : lab.startsWith("b)") ? L : lab.startsWith("c)") ? 2 * (L + w) - 4 * s : null; });
   /* ==== fin agent defis3 ==== */
 
   /* ---------- 26.11 (agent defis2) : notions encore sous 20 % (transf, trigcercle, trigfn, recip, lectures de graphique

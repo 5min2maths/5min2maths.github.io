@@ -33,19 +33,36 @@
       ["Écris tous les temps avec le même nombre de décimales (complète par des zéros), puis compare chiffre par chiffre.", "Range-les du plus petit au plus grand avant de répondre."],
       "Avec trois décimales : " + v.map((x) => M(x.toFixed(3).replace(".", "{,}"))).join(", ") + ". Rangés : " + s.map(X).join(" < ") + ". a) " + X(s[0]) + " s. b) " + X(s[2]) + " s. c) " + cnt + ".");
   });
+  /* 26.11 soir (agent defis3) : dec10, pow9, aire1 : 3 contextes chacun (avant : un seul contexte). */
   PX("dec10", () => {
-    const e = pk([8.4, 9.6, 10.2, 11.5, 12.8]), k = pk([20, 30, 50, 200]), H = r6((k * e) / 100);
-    return PB("Un paquet de " + X(1000) + " feuilles de papier a une épaisseur de " + X(e) + " cm.",
-      [["a) Épaisseur d'une feuille, en mm", r6((e * 10) / 1000)], ["b) Épaisseur d'une pile de 100 paquets, en m", r6(e)], ["c) Une pile de ces feuilles mesure " + X(H) + " m. Combien de feuilles contient-elle ?", k * 1000]],
-      ["Convertis d'abord en mm : 1 cm = 10 mm. Puis divise par 1'000.", "c) Convertis la hauteur en cm, puis cherche combien de paquets cela fait."],
-      "a) " + M(N(e) + " \\text{ cm} = " + N(e * 10) + " \\text{ mm}") + " et " + M(N(e * 10) + " \\div 1\\text{'}000 = " + N(r6((e * 10) / 1000))) + " mm. b) " + M("100 \\cdot " + N(e) + " = " + N(r6(100 * e))) + " cm = " + X(e) + " m. c) " + M(N(H) + " \\text{ m} = " + N(r6(H * 100)) + " \\text{ cm}") + ", soit " + M(N(r6(H * 100)) + " \\div " + N(e) + " = " + k) + " paquets, donc " + X(k * 1000) + " feuilles.");
+    const [cx, obj, u1, us, es, txtA, txtB, txtC] = pk([["feuilles", "Un paquet de " + X(1000) + " feuilles de papier a une épaisseur de # cm.", "mm", "feuilles", [8.4, 9.6, 10.2, 11.5, 12.8], "Épaisseur d'une feuille, en mm", "Épaisseur d'une pile de 100 paquets, en m", "Une pile de ces feuilles mesure # m. Combien de feuilles contient-elle ?"],
+      ["pieces", "Une pile de " + X(1000) + " pièces de monnaie identiques mesure # cm de haut.", "mm", "pièces", [150, 170, 190, 210], "Épaisseur d'une pièce, en mm", "Hauteur de 100 piles de " + X(1000) + " pièces, en m", "Une pile de ces pièces mesure # m. Combien de pièces contient-elle ?"],
+      ["riz", "Un lot de " + X(1000) + " grains de riz pèse # g.", "mg", "grains", [18.5, 21.4, 24.6, 27.2], "Masse d'un grain, en mg", "Masse de 100 lots de " + X(1000) + " grains, en kg", "Un sac de ces grains de riz pèse # kg. Combien de grains contient-il ?"]]);
+    const e = pk(es), k = pk(cx === "pieces" ? [2, 3, 5] : [20, 30, 50, 200]), H = r6((k * e) / 100), U = cx === "riz" ? ["g", "mg", "kg", "1 g = 1'000 mg", "1 kg = 1'000 g"] : ["cm", "mm", "m", "1 cm = 10 mm", "1 m = 100 cm"];
+    const a = cx === "riz" ? e : r6((e * 10) / 1000), b = cx === "riz" ? r6((100 * e) / 1000) : r6(e), Hd = cx === "riz" ? r6((k * e) / 1000) : H;
+    return Object.assign(PB(obj.replace("#", N(e)),
+      [["a) " + txtA, a], ["b) " + txtB, b], ["c) " + txtC.replace("#", N(Hd)), k * 1000]],
+      ["Convertis d'abord (" + U[3] + "), puis divise par 1'000.", "c) Convertis en " + U[0] + ", puis cherche combien de lots de 1'000 cela fait."],
+      cx === "riz" ? "a) " + M(N(e) + " \\text{ g} = " + N(e * 1000) + " \\text{ mg}") + " et " + M(N(e * 1000) + " \\div 1\\text{'}000 = " + N(e)) + " mg. b) " + M("100 \\cdot " + N(e) + " = " + N(r6(100 * e))) + " g = " + X(b) + " kg. c) " + M(N(Hd) + " \\text{ kg} = " + N(r6(Hd * 1000)) + " \\text{ g}") + ", soit " + M(N(r6(Hd * 1000)) + " \\div " + N(e) + " = " + k) + " lots, donc " + X(k * 1000) + " grains."
+        : "a) " + M(N(e) + " \\text{ cm} = " + N(e * 10) + " \\text{ mm}") + " et " + M(N(e * 10) + " \\div 1\\text{'}000 = " + N(a)) + " mm. b) " + M("100 \\cdot " + N(e) + " = " + N(r6(100 * e))) + " cm = " + X(b) + " m. c) " + M(N(H) + " \\text{ m} = " + N(r6(H * 100)) + " \\text{ cm}") + ", soit " + M(N(r6(H * 100)) + " \\div " + N(e) + " = " + k) + " piles de 1'000, donc " + X(k * 1000) + " " + us + "."), { ctx: cx });
   });
   PX("pow9", () => {
+    const cx = pk(["bacteries", "messages", "pliage"]);
+    if (cx === "messages") { const d1 = pk([3, 4]), d2 = pk([5, 6]), k = pk([7, 8, 9]);
+      return Object.assign(PB("Une rumeur circule : le premier jour, une personne la raconte à 3 nouvelles personnes ; chaque jour, chaque personne qui vient de l'apprendre la raconte à 3 nouvelles personnes.",
+        [["a) Combien de personnes l'apprennent le jour " + d1 + " ?", 3 ** d1], ["b) Le jour " + d2 + ", ce nombre s'écrit " + M("3^n") + ". Que vaut " + M("n") + " ?", d2], ["c) Quel jour " + X(3 ** k) + " nouvelles personnes l'apprennent-elles ?", k]],
+        ["Chaque jour, le nombre de nouvelles personnes est multiplié par 3.", "c) Écris " + N(3 ** k) + " comme une puissance de 3."],
+        "a) " + M("3^{" + d1 + "} = " + N(3 ** d1)) + ". b) " + M("n = " + d2) + ". c) " + M(N(3 ** k) + " = 3^{" + k + "}") + " : le jour " + k + "."), { ctx: cx }); }
+    if (cx === "pliage") { const p1 = pk([3, 4, 5]), p2 = pk([6, 7, 8]), k = pk([9, 10, 11]);
+      return Object.assign(PB("On plie une feuille en deux, puis encore en deux, et ainsi de suite. À chaque pliage, le nombre de couches double.",
+        [["a) Combien de couches après " + p1 + " pliages ?", 2 ** p1], ["b) Après " + p2 + " pliages, le nombre de couches s'écrit " + M("2^n") + ". Que vaut " + M("n") + " ?", p2], ["c) Combien de pliages faut-il pour obtenir " + X(2 ** k) + " couches ?", k]],
+        ["Un pliage double le nombre de couches : 2, 4, 8…", "c) Écris " + N(2 ** k) + " comme une puissance de 2."],
+        "a) " + M("2^{" + p1 + "} = " + 2 ** p1) + ". b) " + M("n = " + p2) + ". c) " + M(N(2 ** k) + " = 2^{" + k + "}") + " : " + k + " pliages."), { ctx: cx }); }
     const h1 = pk([2, 3]), h2 = pk([4, 5]), k = pk([7, 10, 11]);
-    return PB("Une bactérie se divise en deux toutes les 20 minutes. Au départ, il y a une seule bactérie.",
+    return Object.assign(PB("Une bactérie se divise en deux toutes les 20 minutes. Au départ, il y a une seule bactérie.",
       [["a) Combien y a-t-il de bactéries après " + h1 + " heures ?", 2 ** (3 * h1)], ["b) Après " + h2 + " heures, le nombre de bactéries s'écrit " + M("2^n") + ". Que vaut " + M("n") + " ?", 3 * h2], ["c) Au bout de combien de minutes y a-t-il " + X(2 ** k) + " bactéries ?", 20 * k]],
       ["En une heure, il y a 3 périodes de 20 minutes : le nombre est multiplié par 2 trois fois.", "c) Écris " + N(2 ** k) + " comme une puissance de 2 : combien de divisions a-t-il fallu ?"],
-      "a) " + M("2^{" + 3 * h1 + "} = " + N(2 ** (3 * h1))) + ". b) " + M(h2 + " \\cdot 3 = " + 3 * h2) + " divisions : " + M("n = " + 3 * h2) + ". c) " + M(N(2 ** k) + " = 2^{" + k + "}") + " : " + k + " divisions de 20 minutes, soit " + 20 * k + " minutes.");
+      "a) " + M("2^{" + 3 * h1 + "} = " + N(2 ** (3 * h1))) + ". b) " + M(h2 + " \\cdot 3 = " + 3 * h2) + " divisions : " + M("n = " + 3 * h2) + ". c) " + M(N(2 ** k) + " = 2^{" + k + "}") + " : " + k + " divisions de 20 minutes, soit " + 20 * k + " minutes."), { ctx: cx });
   });
 
   // ---------- Grandeurs et mesures ----------
@@ -91,10 +108,12 @@
   PX("aire1", () => {
     const s = pk([6, 8, 9, 10, 12]), A = s * s, ws = []; for (let w = 2; w < s; w++) if (A % w === 0 && A / w !== s) ws.push(w);
     const w = pk(ws), L = A / w, dP = 2 * (L + w) - 4 * s;
-    return PB("Un rectangle a la même aire qu'un carré de " + X(s) + " cm de côté. Sa largeur mesure " + X(w) + " cm.",
-      [["a) Aire du carré, en cm²", A], ["b) Longueur du rectangle, en cm", L], ["c) De combien de cm le périmètre du rectangle dépasse-t-il celui du carré ?", dP]],
+    const [cx, txt, u] = pk([["figure", "Un rectangle a la même aire qu'un carré de # cm de côté. Sa largeur mesure @ cm.", "cm"], ["potager", "Un potager rectangulaire a la même aire qu'une pelouse carrée de # m de côté. Sa largeur mesure @ m.", "m"],
+      ["affiche", "Une affiche rectangulaire a la même aire qu'une affiche carrée de # dm de côté. Sa largeur mesure @ dm.", "dm"]]);
+    return Object.assign(PB(txt.replace("#", N(s)).replace("@", N(w)),
+      [["a) Aire du carré, en " + u + "²", A], ["b) Longueur du rectangle, en " + u, L], ["c) De combien de " + u + " le périmètre du rectangle dépasse-t-il celui du carré ?", dP]],
       ["Même aire : longueur · largeur = aire du carré.", "c) Calcule les deux périmètres, puis la différence."],
-      "a) " + M(s + " \\cdot " + s + " = " + A) + " cm². b) " + M(A + " \\div " + w + " = " + L) + " cm. c) Rectangle : " + M("2 \\cdot (" + L + " + " + w + ") = " + 2 * (L + w)) + " cm ; carré : " + M("4 \\cdot " + s + " = " + 4 * s) + " cm ; différence " + X(dP) + " cm (même aire, périmètres différents).");
+      "a) " + M(s + " \\cdot " + s + " = " + A) + " " + u + "². b) " + M(A + " \\div " + w + " = " + L) + " " + u + ". c) Rectangle : " + M("2 \\cdot (" + L + " + " + w + ") = " + 2 * (L + w)) + " " + u + " ; carré : " + M("4 \\cdot " + s + " = " + 4 * s) + " " + u + " ; différence " + X(dP) + " " + u + " (même aire, périmètres différents)."), { ctx: cx });
   });
   PX("aire2", () => {
     let b, h, c, A, h2; do { b = ri(6, 14); h = ri(4, 9); c = ri(h + 1, 13); A = b * h; h2 = A / c; } while (c === b || Math.abs(h2 * 10 - Math.round(h2 * 10)) > 1e-9);

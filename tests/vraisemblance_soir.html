@@ -11,8 +11,8 @@
         questions finales (Engine.make : formes réservées écartées, passe française appliquée) : aucun terme romand en
         profil France (CHF, francs, villes suisses, apprentis, PGDC, préimage, cathète, septante, produit « · »…) et aucun
         terme français en profil romand (€ hors change, × entre deux nombres, PGCD, antécédent, brevet…) ;
-     3. défis figés (un seul énoncé au niveau 4) = ÉCHEC ; pour les 12 défis rendus aléatoires le 26.11 (agent defis2), au
-        moins 10 énoncés différents et 3 contextes (avant : simple rapport mineur).
+     3. défis figés (un seul énoncé au niveau 4) = ÉCHEC ; pour les défis rendus aléatoires le 26.11 (agents defis2 et defis3,
+        liste VARIES), au moins 10 énoncés différents et 3 contextes (avant : simple rapport mineur).
      #n=150 ; #np=3 (graines par notion et par niveau pour les profils) ; #detail. -->
 <pre id="out">en cours</pre>
 <script>
@@ -42,8 +42,13 @@
     if (x.d === 4) (d4[x.id] = d4[x.id] || new Set()).add(x.txt + " | " + x.parts.map((p) => p.label).join(" | "));
   }
   for (const [id, S] of Object.entries(d4)) if (S.size === 1) add("défi figé", id + "-4", id, [...S][0].slice(0, 90));
-  /* défis rendus aléatoires le 26.11 (agent defis2) : au moins 10 énoncés différents (énoncé et questions) et 3 contextes (ctx) */
-  for (const id of ["approxnorm", "compdiff", "echelle6", "empil", "intmaj", "mediatrice", "posrelc", "proba6", "suiteint", "symax", "isom", "numer"]) {
+  /* défis rendus aléatoires le 26.11 (agent defis2, puis agent defis3 le soir : 38 défis de plus) : au moins 10 énoncés
+     différents (énoncé et questions) et 3 contextes (ctx) */
+  const VARIES = ["approxnorm", "compdiff", "echelle6", "empil", "intmaj", "mediatrice", "posrelc", "proba6", "suiteint", "symax", "isom", "numer",
+    "fracmul", "fracconv", "sci", "scicalc", "pythfig", "pythrec", "vol", "airepyr", "volcomp", "thales", "repere", "sysprob", "sysgraph", "sysineq", "eqfrac", "bicarre",
+    "lectgraph", "trigexact", "droitesrem", "polyreg", "graphefct", "ineqgraph", "repere3d", "bayes", "syslin", "bases", "etudelnexp", "geoesp", "densite",
+    "probaxiomes", "derivth", "trigcercle", "optimderiv", "eqlog", "eqbic", "dec10", "pow9", "aire1"];
+  for (const id of VARIES) {
     const S = new Set(), C = new Set();
     for (let s = 1; s <= N; s++) { let q; try { q = Engine.build(id, 4, s); } catch (e) { errs.push(id + "-4-" + s + " : " + e.message); continue; } S.add(q.q + " | " + (q.parts || []).map((p) => p.label).join(" | ")); C.add(q.ctx || "?"); }
     if (S.size < Math.min(10, N / 3) || C.size < 3) add("défi peu varié", id + "-4", id, S.size + " énoncés différents et " + C.size + " contexte(s) sur " + N + " graines");
