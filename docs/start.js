@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 // max), fichier (nom court), ligne, colonne, 3 lignes de pile sans URL, écran ou code de la question, version, classe,
 // identifiant d'appareil. Anti-déluge : le même message une fois par jour et par appareil, 5 envois par jour au plus.
 // Rien depuis les pages de test (file://), claude.ai ou l'appareil de l'auteur ; bruit d'extensions et de réseau ignoré.
-const BUILD = "faccc6af76"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
+const BUILD = "a4dbda7775"; // remplacé par build.py (empreinte du contenu, comme la version du cache hors ligne)
 const ERR_MAX = 5;
 var errMem = null; // repli en mémoire si localStorage est indisponible
 // Accord pour les statistiques (24.11, option A de tools/confidentialite.md, accord de l'enseignant) : rien n'est envoyé
@@ -1016,17 +1016,10 @@ function screenCompsRef() {
     const n = Referentiel.note(state, r), t = Referentiel.plan(p, r).length;
     return `<div class="comp rcomp"><span title="${r.code}">${esc(r.label)}</span><span class="comp-r">${t ? `<button type="button" class="ctest rtest" data-code="${r.code}" title="3 questions sur cette compétence">Me tester</button>` : ""}<span class="note ${noteCls(n)}">${noteTxt(n)}</span></span></div>`;
   };
-  /* CO (25.11) : les leçons restent accessibles depuis « Mes compétences » (bouton du 14.11) : une ligne repliée « Leçons »
-     par champ du PER, avec les leçons des notions rattachées que l'élève peut recevoir. Autres systèmes : rien de plus. */
-  const co = Referentiel.of(p) === "CO", inCat = co ? new Set(Engine.catalog(p).map((c) => c.id)) : null;
-  const lessons = (rs) => {
-    if (!co) return "";
-    const ids = [...new Set(rs.flatMap((r) => r.links.map((s) => s.split("@")[0])))].filter((id) => inCat.has(id) && LESSONS[id]);
-    return ids.length ? `<details class="rles"><summary class="small">📖 Leçons (${ids.length})</summary><div class="row" style="flex-wrap:wrap;gap:4px">${ids.map((id) => `<button type="button" class="btn-ghost small lopen" data-id="${id}">${typeof ACTIVE !== "undefined" && ACTIVE[id] ? "🖐 " : ""}${esc((NOTIONS.find((n) => n.id === id) || {}).label || id)}</button>`).join("")}</div></details>` : "";
-  };
+  /* 26.11 (décision de l'enseignant, n° 15) : plus de ligne « Leçons » dans « Mes compétences » au CO (elle y était depuis le 25.11). */
   const themes = (list) => [...new Set(list.map((r) => r.theme))].map((th) => {
     const rs = list.filter((r) => r.theme === th), t = Referentiel.stats(state, rs);
-    return `<div class="card flat"><div class="spread"><h3>${esc(th)}</h3><span class="small muted">${t.tested} / ${t.total} ${W}</span></div>${[...new Set(rs.map((r) => r.notion))].map((no) => { const rn = rs.filter((r) => r.notion === no); return `<div class="cnotion">${no ? `<b>${esc(no)}</b>` : ""}${rn.map(line).join("")}${lessons(rn)}</div>`; }).join("")}</div>`;
+    return `<div class="card flat"><div class="spread"><h3>${esc(th)}</h3><span class="small muted">${t.tested} / ${t.total} ${W}</span></div>${[...new Set(rs.map((r) => r.notion))].map((no) => { const rn = rs.filter((r) => r.notion === no); return `<div class="cnotion">${no ? `<b>${esc(no)}</b>` : ""}${rn.map(line).join("")}</div>`; }).join("")}</div>`;
   }).join("");
   const cur = Referentiel.list(p), st = Referentiel.stats(state, cur), nq = cur.filter(Referentiel.hasQuestions).length, k = st.total - nq;
   const olds = Referentiel.olds(p);
@@ -1042,7 +1035,6 @@ function screenCompsRef() {
   ${olds.map(([lab, ys]) => `<details class="olds"><summary>${lab} (${ys.map((y) => Referentiel.stats(state, Referentiel.list(p, y)).tested).reduce((a, b) => a + b, 0)} ${W})</summary>${ys.map((y) => `<h3 class="ryear">${Referentiel.yearLabel(p, y)}</h3>${themes(Referentiel.list(p, y))}`).join("")}</details>`).join("")}
   <button class="btn-primary btn-big" id="back">Retour</button>`);
   bindBadges(app);
-  app.querySelectorAll(".lopen").forEach((b) => (b.onclick = () => screenLesson(b.dataset.id, screenComps, true)));
   app.querySelectorAll(".rtest").forEach((b) => (b.onclick = () => {
     const r = Referentiel.find(p, b.dataset.code), ps = Referentiel.plan(p, r);
     if (!ps.length) return;
@@ -1570,16 +1562,16 @@ function carnetCard(full) {
 }
 
 // ---------------- Programme jusqu'au test (20.11) ----------------
-// J−3 et avant : révision ciblée ; J−2 : sujet de préparation ; J−1 : dernier tour ; jour J : échauffement.
 // Programme jusqu'au test, en parcours guidé (21.11, « la page Test n'est pas intuitive ») :
-// 1er jour : autoévaluation (où en es-tu ?) ; puis révisions ciblées ; J-2 : sujet de préparation ;
-// J-1 : test rapide refait (colonne Après) et révision de ce qui coince ; jour J : échauffement.
+// 1er jour : autoévaluation (où en es-tu ?) ; puis révisions ciblées ; J−2 : sujet de préparation (au choix) ;
+// J−1 : tes erreurs (décision de l'enseignant du 26.11, n° 11 : « J−2 sujet, J−1 erreurs » ; avant : test rapide refait,
+// qui reste dans l'onglet Test) ; jour J : échauffement.
 const PREP_TASK = {
   autoeval: { ic: "📋", label: "Autoévaluation", text: "Où en es-tu ? Coche ce que tu sais faire, puis un test rapide te dira si tu avais raison." },
   revision: { ic: "🎯", label: "Révision ciblée", text: "4 questions sur les notions où tu es le moins sûr·e." },
   mock: { ic: "📝", label: "Sujet de préparation", text: "Au choix, si tu as du temps : un sujet comme le vrai, sur une feuille, puis tu te corriges avec le corrigé." },
   apres: { ic: "📋", label: "Test rapide final", text: "Où en es-tu maintenant ? Refais le test rapide : ta grille compare avec le début. Puis révise ce qui coince encore." },
-  tour: { ic: "🔁", label: "Dernier tour", text: "Une question courte par notion, en commençant par tes erreurs du carnet." },
+  tour: { ic: "📕", label: "Tes erreurs, une dernière fois", text: "4 questions : tes erreurs du carnet sur ce test, puis ce que ton test rapide a raté, avec d'autres nombres." },
   jourj: { ic: "✏️", label: "Échauffement, puis le test", text: "3 questions pour te mettre en route. Tu es prêt·e : bonne chance !" },
 };
 /* 26.11 (revue élèves : « Test rapide final … compare avec le début » sans autoévaluation de départ) : sans grille de
@@ -1591,7 +1583,7 @@ const prepStart = () => state.prep.start || Object.keys(state.prep.log || {}).so
 function prepKindOn(dt = day()) {
   const L = prepLeft(state.prep.date, dt);
   if (L <= 0) return "jourj";
-  if (L === 1) return "apres";
+  if (L === 1) return "tour";
   if (L === 2) return "mock";
   if (dt === prepStart() && L >= 3) return "autoeval";
   return "revision";
@@ -1616,7 +1608,15 @@ function startPrepTask(kind) {
   if (kind === "mock") return typeof screenMock === "function" ? screenMock() : screenHome();
   let plan;
   if (kind === "revision") { const c = carnetPlan(2, ids); plan = c.concat(Engine.planPrep(state).slice(c.length)); } // erreurs du carnet sur le test en tête (ex-« dernier tour »)
-  else if (kind === "tour") { const c = carnetPlan(3, ids); plan = c.concat([...ids].sort((a, b) => state.notions[a].m - state.notions[b].m).slice(0, 8 - c.length).map((id) => id + "|" + (state.notions[id].m < 0.6 ? 1 : 2))); }
+  else if (kind === "tour") {
+    /* J−1 = erreurs (26.11) : erreurs du carnet sur le test, puis compétences ratées au dernier test rapide, puis les notions
+       les plus fragiles ; 4 questions, une par notion si possible. */
+    const A = state.autotest && state.autotest.key === state.prep.ids.join() && Array.isArray(state.autotest.rows) ? state.autotest : null, last = A && A.runs.length ? A.runs[A.runs.length - 1].r : {};
+    const rat = A ? A.rows.filter((r) => last[r.cid] === 0 && state.notions[r.id]).map((r) => r.id + "|" + Math.min(3, r.lv || 1)) : [];
+    const weak = [...ids].sort((a, b) => state.notions[a].m - state.notions[b].m).map((id) => id + "|" + (state.notions[id].m < 0.6 ? 1 : 2));
+    plan = carnetPlan(4, ids);
+    for (const e of [...rat, ...weak]) if (plan.length < 4 && !plan.some((x) => x.split("|")[0] === e.split("|")[0])) plan.push(e);
+  }
   else plan = [...ids].sort((a, b) => state.notions[b].m - state.notions[a].m).slice(0, 3).map((id) => id + "|1");
   session = { plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), prep: true, prepKind: kind };
   nextQuestion();
@@ -1767,7 +1767,9 @@ function nextQuestion(redo) {
   // Pas de chrono : la séance finit quand le programme du jour est fait.
   if (!redo && session.i >= session.plan.length) return screenSummary();
   const raw = redo ? redo.id : session.plan[session.i], forceProb = String(raw).startsWith("PROB:");
-  const parts = String(raw).split("|"), id = forceProb ? raw.slice(5) : parts[0], level = parts[1] ? +parts[1] : undefined, kind = redo ? redo.kind : parts[2];
+  const parts = String(raw).split("|"), id = forceProb ? raw.slice(5) : parts[0], kind = redo ? redo.kind : parts[2];
+  /* 26.11 (décision de l'enseignant, n° 12) : un automatisme est toujours de niveau 1, même dans un programme gardé (reprise). */
+  const level = parts[2] === "drill" ? 1 : parts[1] ? +parts[1] : undefined;
   const ns = state.notions[id];
   // Écran de leçon : seulement la première fois, et pour une notion en cours en classe ou encore fragile.
   // Pas dans « Me tester » (14.11, retour de l'utilisateur) : on y attend 3 questions sur la compétence choisie ;
@@ -1838,9 +1840,10 @@ function nextQuestion(redo) {
         if (p) { session.remed.add(id); session.plan[session.i + 1] = p + "|1|rem"; }
       }
       /* 26.11 (adaptivité, tools/adaptivite_26-11.md) : deux échecs de suite dans la séance → la question suivante est plus
-         facile (Engine.easeNext), jamais plus dure ; le total « n sur N » ne change pas. */
+         facile (Engine.easeNext), jamais plus dure ; le total « n sur N » ne change pas. Décision de l'enseignant (26.11,
+         n° 2) : une question allégée par séance au plus (session.easeUsed). */
       if (!redo) session.failRun = res.solved && res.tries === 1 ? 0 : (session.failRun || 0) + 1;
-      if (!redo && !session.weekly && !session.prep && !session.carnet && !session.ctest && session.failRun >= 2 && session.i + 1 < session.plan.length) { const e2 = Engine.easeNext(state, session.plan, session.i, id, q.d); if (e2) session.plan[session.i + 1] = e2; }
+      if (!redo && !session.easeUsed && !session.weekly && !session.prep && !session.carnet && !session.ctest && session.failRun >= 2 && session.i + 1 < session.plan.length) { const e2 = Engine.easeNext(state, session.plan, session.i, id, q.d); if (e2) { session.plan[session.i + 1] = e2; session.easeUsed = true; } }
       /* 25.11 soir (revue d'un testeur) : « Refaire » ne rapporte plus de Mathélo (on pouvait monter son score en répétant) ;
          « Je ne sais pas » compte à 40 % (−38 décourageait d'avouer qu'on ne sait pas, plus que le gain d'une bonne réponse). */
       const w = redo ? 0 : res.dontKnow ? 0.4 : 1; /* 40 % validé par l'enseignant le 25.11 */
@@ -1991,7 +1994,7 @@ function fbInView(el, ms = 60) {
   setTimeout(() => { if (!el || !el.isConnected) return; const r = el.getBoundingClientRect(); if (r.height && r.bottom > innerHeight - qbarH()) el.scrollIntoView({ behavior: "smooth", block: "nearest" }); }, ms);
 }
 // Champ de réponse toujours visible au clavier de l'app (24.11, revue d'un testeur, écran 360 × 640) : au toucher du champ,
-// on montre d'un coup le champ, le clavier et « Valider » s'ils tiennent dans l'écran ; à chaque touche, le champ revient
+// on montre d'un coup le champ, le clavier et « Vérifier » s'ils tiennent dans l'écran ; à chaque touche, le champ revient
 // à l'écran s'il en était sorti (défilement pendant la saisie).
 function ansInView(inp, all) {
   if (!inp || !inp.isConnected) return;
@@ -2042,7 +2045,7 @@ function bindRecap() {
   rc.onclick = () => { const o = !rc.classList.contains("open"); rc.classList.toggle("open", o); rc.setAttribute("aria-expanded", String(o)); };
 }
 /* 26.11 (chantier « ergonomie de la question », revue d'un testeur) : barre d'action fixe en bas de l'écran pendant une
-   question ou un problème. À droite toujours le bouton principal, au même endroit : « Valider », puis « Continuer » (ou
+   question ou un problème. À droite toujours le bouton principal, au même endroit : « Vérifier », puis « Continuer » (ou
    « Suivant ») après la correction ; à gauche « Je ne sais pas » (puis « Refaire… »). « Pas encore vu en classe » et
    « Trop facile ⏭ » sont rangés derrière « ⋯ » : un toucher égaré n'ouvre que ce petit menu. La place de la barre est
    réservée en bas de la page (#app:has(> .qbar), style.css), et qbarH() la retire de la hauteur utile des calculs de
@@ -2076,7 +2079,7 @@ function renderProblem(q, opt) {
     <input id="p${i}" class="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" enterkeyhint="${i < q.parts.length - 1 ? "next" : "done"}"><div class="preview" id="pv${i}"></div>${i < q.parts.length - 1 ? `<button type="button" class="btn-ghost small next-part" data-i="${i}">partie suivante ↓</button>` : ""}</div>`).join("")}
   ${keypadHtml(q.parts[0].spec)}
   <div id="fb"></div></div>
-  ${qbarHtml('<button class="btn-sec" id="idk">Voir le corrigé</button>', '<button class="btn-primary" id="check">Valider</button>')}
+  ${qbarHtml('<button class="btn-sec" id="idk">Voir le corrigé</button>', '<button class="btn-primary" id="check">Vérifier</button>')}
   <button type="button" class="qrecap" id="qrecap" hidden aria-expanded="false"><span class="qr-tag">📌 Énoncé</span><span class="qr-txt">${boldData(q.q)}</span></button>`);
   bindRecap();
   const S = opt.track ? sigOpen({ ev: "q", code, d: q.d, kind: q.kind || "", fmt: opt.track, redo: opt.redo ? 1 : 0 }) : null;
@@ -2098,7 +2101,7 @@ function renderProblem(q, opt) {
   });
   /* 26.11 (revue d'un testeur : sur téléphone, la partie b) passait sous le clavier de l'app) : Entrée, ou « partie
      suivante ↓ », amène la partie suivante non remplie, visible, avec le clavier juste en dessous ; sur la dernière partie
-     (ou si tout est rempli), Entrée = Valider. Le déplacement du clavier arme la garde anti-toucher égaré (KP_GUARD). */
+     (ou si tout est rempli), Entrée = Vérifier. Le déplacement du clavier arme la garde anti-toucher égaré (KP_GUARD). */
   const goNext = (i) => {
     if (finished) return;
     const n = q.parts.length, L = [...Array(n - 1)].map((_, k) => (i + 1 + k) % n), j = L.find((k) => !ok[k] && !document.getElementById("p" + k).value.trim());
@@ -2195,7 +2198,7 @@ function renderQuestion(q, opt) {
   <div class="preview" id="prev"></div>
   ${keypadHtml(q.spec)}</div>
   <div id="fb"></div></div>
-  ${qbarHtml('<button class="btn-sec" id="idk">Je ne sais pas</button>', '<button class="btn-primary" id="check">Valider</button>', opt.onNotYet || opt.onEasy ? (opt.onNotYet ? '<button type="button" class="btn-sec notyet" id="notyet">Pas encore vu en classe</button>' : "") + (opt.onEasy ? '<button type="button" class="btn-sec easy" id="easy" title="Passer cette question et monter d\'un cran">Trop facile ⏭</button>' : "") : "")}`);
+  ${qbarHtml('<button class="btn-sec" id="idk">Je ne sais pas</button>', '<button class="btn-primary" id="check">Vérifier</button>', opt.onNotYet || opt.onEasy ? (opt.onNotYet ? '<button type="button" class="btn-sec notyet" id="notyet">Pas encore vu en classe</button>' : "") + (opt.onEasy ? '<button type="button" class="btn-sec easy" id="easy" title="Passer cette question et monter d\'un cran">Trop facile ⏭</button>' : "") : "")}`);
   const S = opt.track ? sigOpen({ ev: "q", code, d: q.d, kind: q.kind || "", fmt: opt.track, redo: opt.redo ? 1 : 0 }) : null;
   sigWatchLesson(S); pageQ = code; bindScratch(S);
   const inp = document.getElementById("ans"), prev = document.getElementById("prev"), fb = document.getElementById("fb");
@@ -2242,7 +2245,7 @@ function renderQuestion(q, opt) {
     const delta = opt.onDone(res);
     if (opt.single) {
       fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><b>${solved ? "✓ Juste ! " + pick(PRAISE.filter((x) => x !== "Juste !")) : dontKnow ? "D'accord, on s'en occupera. Voici la solution :" : "✗ Pas tout à fait. Voici la solution :"}</b>${solved ? "" : '<span class="sol">' + q.sol + "</span>"}</div>`;
-      qbarSet("", '<button class="btn-primary" id="nx">Suivant</button>'); /* 26.11 : barre fixe, même place que « Valider » */
+      qbarSet("", '<button class="btn-primary" id="nx">Suivant</button>'); /* 26.11 : barre fixe, même place que « Vérifier » */
       typeset(fb);
       { const t0 = performance.now(); document.getElementById("nx").onclick = (e) => { if (e && e.isTrusted && performance.now() - t0 < 400) return; opt.onNext(); }; }
       document.getElementById("nx").focus();
@@ -2257,7 +2260,7 @@ function renderQuestion(q, opt) {
       ${!solved && lastDiag ? `<div class="diag">🔎 ${esc(lastDiag)}</div>` : ""}
       ${guided ? `<button class="btn-primary" id="guide">🪜 On le fait ensemble, pas à pas</button><div id="gsteps" class="stack"></div><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : solSteps ? `<div id="ssteps" class="stack"></div><button class="btn-primary" id="solstep">Voir l'étape suivante</button><details class="solfull"><summary>Voir directement la correction</summary><div class="sol">${q.sol}</div></details>` : `<div class="sol">${q.sol}</div>`}</div>
       ${avisHtml(code, "Cette question était…", "Bonne question", "Question à revoir")}`;
-    /* 26.11 : « Continuer » dans la barre fixe, à la place de « Valider » ; « Refaire » à la place de « Je ne sais pas ». */
+    /* 26.11 : « Continuer » dans la barre fixe, à la place de « Vérifier » ; « Refaire » à la place de « Je ne sais pas ». */
     qbarSet(solved ? "" : `<button id="redo" class="${!guided && !solSteps ? "btn-primary" : "btn-sec"}">${q.d > 1 && q.d < 4 ? "💪 Une plus facile pour repartir" : "Refaire avec d'autres valeurs"}</button>`, `<button class="${solved ? "btn-primary" : "btn-sec"}" id="nx">Continuer</button>`);
     typeset(fb);
     fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
@@ -2346,7 +2349,7 @@ function runGuide(q, box, done) {
     box.insertAdjacentHTML("beforeend", `<div class="gstep" id="${id}"><span class="small muted">Étape ${k + 1} sur ${q.guide.length}</span><div>${g.ask}</div>
       <div class="answer gans"><input class="ans gin" inputmode="${fine ? "text" : "none"}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Réponse de l'étape">
       <div class="preview gprev"></div>${keypadHtml(ks).replace(' id="kp"', "")}
-      <div class="actions"><button class="btn-primary gok">Valider l'étape</button></div></div><div class="gfb"></div></div>`);
+      <div class="actions"><button class="btn-primary gok">Vérifier l'étape</button></div></div><div class="gfb"></div></div>`);
     typeset(box);
     const el = document.getElementById(id), inp = el.querySelector("input"), fbk = el.querySelector(".gfb"), gprev = el.querySelector(".gprev");
     let gmode = fine ? "text" : "none";
@@ -2472,7 +2475,7 @@ function bindComment(root, code) {
     };
   });
 }
-// Commentaire tapé mais pas envoyé (22.11, retour de l'auteur) : un clic sur un autre bouton (Continuer, Valider…)
+// Commentaire tapé mais pas envoyé (22.11, retour de l'auteur) : un clic sur un autre bouton (Continuer, Vérifier…)
 // l'envoie aussi, au lieu de le perdre. « Fermer » (✕) de la fenêtre 💬 reste une annulation.
 function flushComments(except) {
   document.querySelectorAll("details.cmt").forEach((box) => {

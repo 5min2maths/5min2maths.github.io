@@ -636,6 +636,22 @@ function finalForm(input, spec) {
   if (rc && Number.isInteger(Math.sqrt(+rc[1]))) return "Calcule la racine : le nombre sous le signe √ est un carré parfait.";
   return null;
 }
+/* 26.11 (décision de l'enseignant, n° 10) : un décimal pour une fraction est accepté s'il est exact (0,75 pour 3/4), refusé
+   sans compter faux s'il est arrondi (0,33 pour 1/3). Valeur attendue = fraction non décimale (dénominateur irréductible
+   ≤ 1000 avec un facteur autre que 2 et 5) et nombre décimal tapé, à moins d'une unité de son dernier chiffre : arrondi. */
+const ROUNDED_FRAC = "C'est une valeur arrondie : donne la valeur exacte, en fraction.";
+function nonDecFrac(x) {
+  if (!isFinite(x) || Math.abs(x - Math.round(x)) < 1e-9) return false;
+  for (let q = 2; q <= 1000; q++) { const p = x * q; if (Math.abs(p - Math.round(p)) < 1e-7 * Math.max(1, Math.abs(p))) { while (q % 2 === 0) q /= 2; while (q % 5 === 0) q /= 5; return q > 1; } }
+  return false;
+}
+function roundedFrac(node, want) {
+  const neg = node && node.t === "neg", t = neg ? node.a : node;
+  if (!t || t.t !== "num" || Number.isInteger(t.v) || !nonDecFrac(want)) return false;
+  const d = neg ? -t.v : t.v, k = (String(t.v).split(".")[1] || "").length;
+  /* valeur de machine (écart ≤ 10⁻⁹, déjà admise par sameValue, p. ex. 0,666666667) : gardée telle quelle */
+  return Math.abs(d - want) > 1e-9 * Math.max(1, Math.abs(want)) && Math.abs(d - want) <= Math.pow(10, -k) + 1e-12;
+}
 // Vérifie la réponse de l'élève selon la spécification de la question.
 // spec.kind : "value" (valeur numérique, round = précision demandée), "expr" (expression en x,
 // form = "product" | "expanded"), "set" (liste de solutions), "choice" (index d'option).
@@ -693,6 +709,7 @@ function checkAnswer(spec, input) {
       if (Math.abs(v - spec.value) <= spec.round * 5) return { status: "close", message: "Presque : vérifie l'arrondi (au " + (spec.round === 0.01 ? "centième" : spec.round === 0.1 ? "dixième" : "près") + ")." };
       return { status: "wrong" };
     }
+    if (!spec.plain && !spec.radical && roundedFrac(tree, spec.value)) return { status: "form", message: ROUNDED_FRAC };
     if (Expr.sameValue(v, spec.value)) {
       // Forme exigée par la consigne (audit 13.11) : notation scientifique, racine simplifiée a√b.
       const raw = String(input).replace(/\s+/g, "").replace(/[·×]/g, "*").replace(/,/g, ".");
@@ -721,6 +738,8 @@ function checkAnswer(spec, input) {
     const want = spec.values;
     const okAll = want.every((w) => got.some((g) => Expr.sameValue(g, w))) && got.every((g) => want.some((w) => Expr.sameValue(g, w)));
     if (okAll) return { status: "correct" };
+    /* 26.11 (décision n° 10) : toutes les solutions trouvées, mais une fraction donnée en décimal arrondi */
+    if (got.length === want.length && want.every((w) => items.some((it, k) => Expr.sameValue(got[k], w) || roundedFrac(it, w)))) return { status: "form", message: ROUNDED_FRAC };
     // 24.11 (commentaire de l'auteur) : message selon le cas, quel que soit le nombre de solutions manquantes ou en trop.
     if (want.some((w) => got.some((g) => Expr.sameValue(g, w)))) {
       const manque = want.some((w) => !got.some((g) => Expr.sameValue(g, w))), trop = got.some((g) => !want.some((w) => Expr.sameValue(g, w)));
@@ -732,6 +751,8 @@ function checkAnswer(spec, input) {
     const items = tree.t === "list" ? tree.items : [tree];
     const n = spec.values.length;
     if (items.length !== n || items.some((i) => Expr.vars(i).size)) return { status: "invalid", message: n === 3 ? "Donne trois nombres séparés par « ; » (x, puis y, puis z)." : "Donne deux nombres séparés par « ; » (x d'abord, puis y)." };
+    /* 26.11 (décision n° 10) : coordonnées justes, mais une fraction donnée en décimal arrondi */
+    { const g = items.map((i) => Expr.evaluate(i)); if (!g.every((x, k) => Expr.sameValue(x, spec.values[k])) && items.every((it, k) => Expr.sameValue(g[k], spec.values[k]) || roundedFrac(it, spec.values[k]))) return { status: "form", message: ROUNDED_FRAC }; }
     if (n === 3) { const g = items.map((i) => Expr.evaluate(i)); if (g.every((v, k) => Expr.sameValue(v, spec.values[k]))) return { status: "correct" }; return g.filter((v, k) => Expr.sameValue(v, spec.values[k])).length >= 1 ? { status: "close", message: "Une partie est juste : vérifie chaque valeur dans les trois équations." } : { status: "wrong" }; }
     const [u, v] = items.map((i) => Expr.evaluate(i));
     if (Expr.sameValue(u, spec.values[0]) && Expr.sameValue(v, spec.values[1])) return { status: "correct" };
@@ -7264,6 +7285,8 @@ const DEFIS = (() => {
   const rad = (d) => (d * Math.PI) / 180, deg = (r) => (r * 180) / Math.PI;
   /* Prix en CHF : deux décimales quand le montant n'est pas entier (13,90 et non 13,9). */
   const CHF = (v) => (Number.isInteger(r2c(v)) ? D(r2c(v)) : grp(Math.trunc(r2c(v)), "\\text{'}", "{,}") + "{,}" + Math.abs(r2c(v)).toFixed(2).split(".")[1]);
+  /* « = » si la valeur au centime est exacte, « ≈ » sinon (26.11, problèmes de decmul) */
+  const eqa = (x, r) => (Math.abs(x - r) < 1e-9 ? " = " : " \\approx ");
   const CHFT = (v) => (Number.isInteger(r2c(v)) ? T(r2c(v)) : grp(Math.trunc(r2c(v)), "'", ",") + "," + Math.abs(r2c(v)).toFixed(2).split(".")[1]);
 
   return {
@@ -8883,6 +8906,58 @@ const DEFIS = (() => {
           ["Aire = longueur · largeur : multiplie sans la virgule, puis place-la (autant de décimales qu'au total dans les facteurs).",
            "c) 10 % de plus : on achète 1,1 fois l'aire."],
           "a) " + M(D(L) + " \\cdot " + D(l) + " = " + D(A)) + " m². b) " + M(D(A) + " \\cdot " + CHF(pu) + " \\approx " + CHF(C)) + " CHF. c) " + M(D(A) + " \\cdot 1{,}1 \\cdot " + CHF(pu) + " \\approx " + CHF(C2)) + " CHF.");
+      },
+      /* 26.11 (décision de l'enseignant, n° 6 : contextes élargis ; revue D4 : « On carrelle une pièce… » 3 fois en 4 jours) :
+         six autres situations, chacune avec son ctx (anti-répétition sur 7 jours, Engine.make) et des grandeurs réalistes
+         (prix du marché, puissance d'un appareil, tarif de location, salaire horaire d'un job d'été, masse d'une bouteille
+         pleine, tissu au m²). Valeurs au centime quand le calcul en donne plus, et le corrigé écrit la même valeur. */
+      () => { /* marché : masses × prix au kilo */
+        const f1 = pk([["pommes", 2.9, 4.2], ["poires", 3.5, 4.9], ["carottes", 1.9, 2.9]]), f2 = pk([["tomates", 3.9, 5.9], ["courgettes", 3.2, 4.8], ["cerises", 9.5, 14.5]]);
+        const p1 = ri(f1[1] * 10, f1[2] * 10) / 10, p2 = ri(f2[1] * 10, f2[2] * 10) / 10, m1 = ri(12, 35) / 10, m2 = ri(4, 18) / 10;
+        const a = r2c(m1 * p1), b = r2c(m2 * p2), t = r2c(a + b), B = t < 20 ? 20 : 50, r = r2c(B - t);
+        return Object.assign(P("Au marché, " + M(D(m1) + " \\text{ kg}") + " de " + f1[0] + " à " + M(CHF(p1)) + " CHF le kilo et " + M(D(m2) + " \\text{ kg}") + " de " + f2[0] + " à " + M(CHF(p2)) + " CHF le kilo.",
+          [["a) Prix des " + f1[0] + " (CHF, au centime)", a, 0.01], ["b) Prix total (CHF, au centime)", t, 0.01], ["c) On paie avec un billet de " + B + " CHF : monnaie rendue (CHF, au centime)", r, 0.01]],
+          ["Prix = masse · prix au kilo, pour chaque produit.", "c) Billet − prix total."],
+          "a) " + M(D(m1) + " \\cdot " + CHF(p1) + eqa(m1 * p1, a) + CHF(a)) + " CHF. b) " + M(D(m2) + " \\cdot " + CHF(p2) + eqa(m2 * p2, b) + CHF(b)) + " CHF, total " + M(CHF(a) + " + " + CHF(b) + " = " + CHF(t)) + " CHF. c) " + M(B + " - " + CHF(t) + " = " + CHF(r)) + " CHF."), { ctx: "marche" });
+      },
+      () => { /* électricité : puissance · durée = énergie ; énergie · tarif */
+        const ap = pk([["Un radiateur d'appoint", [1.5, 2]], ["Un sèche-linge", [2.5, 2.8]], ["Un four", [2.2, 2.4]]]), kw = pk(ap[1]), h = pk([0.5, 1.5, 2.5]), tf = pk([0.24, 0.28, 0.32]), j = pk([20, 30]);
+        const e = +(kw * h).toFixed(6), c = r2c(e * tf), cj = r2c(e * tf * j);
+        return Object.assign(P(ap[0] + " a une puissance de " + M(D(kw) + " \\text{ kW}") + ". Il fonctionne " + M(D(h) + " \\text{ h}") + " par jour. Le kilowattheure (kWh) coûte " + M(CHF(tf)) + " CHF.",
+          [["a) Énergie consommée par jour (kWh)", e], ["b) Coût par jour (CHF, au centime)", c, 0.01], ["c) Coût sur " + j + " jours (CHF, au centime)", cj, 0.01]],
+          ["Énergie (kWh) = puissance (kW) · durée (h).", "c) Calcule avec l'énergie de " + j + " jours, puis arrondis à la fin."],
+          "a) " + M(D(kw) + " \\cdot " + D(h) + " = " + D(e)) + " kWh. b) " + M(D(e) + " \\cdot " + CHF(tf) + eqa(e * tf, c) + CHF(c)) + " CHF. c) " + M(D(e) + " \\cdot " + j + " = " + D(+(e * j).toFixed(6))) + " kWh, " + M(D(+(e * j).toFixed(6)) + " \\cdot " + CHF(tf) + eqa(e * j * tf, cj) + CHF(cj)) + " CHF."), { ctx: "electricite" });
+      },
+      () => { /* location de vélos : tarif horaire · durée · nombre */
+        const tx = pk([4.5, 5.5, 6.5, 7.5]), h = pk([1.5, 2.5, 3.5]), n = ri(2, 4), u = r2c(tx * h), t = r2c(u * n), B = t < 50 ? 50 : t < 100 ? 100 : 200, r = r2c(B - t);
+        return Object.assign(P("Une famille loue " + M(n) + " vélos pendant " + M(D(h) + " \\text{ h}") + ". La location coûte " + M(CHF(tx)) + " CHF de l'heure par vélo.",
+          [["a) Prix pour un vélo (CHF)", u], ["b) Prix pour les " + n + " vélos (CHF)", t], ["c) Monnaie rendue sur " + B + " CHF (CHF)", r]],
+          ["Un vélo : tarif horaire · nombre d'heures.", "b) Multiplie par le nombre de vélos."],
+          "a) " + M(CHF(tx) + " \\cdot " + D(h) + " = " + CHF(u)) + " CHF. b) " + M(CHF(u) + " \\cdot " + n + " = " + CHF(t)) + " CHF. c) " + M(B + " - " + CHF(t) + " = " + CHF(r)) + " CHF."), { ctx: "location" });
+      },
+      () => { /* job d'été : salaire horaire · heures */
+        const sh = pk([13.5, 14.5, 15.5, 16.5, 17.5]), hj = pk([3.5, 4.5, 5.5]), nj = ri(3, 5), hs = pk([1.5, 2.5]), w = pk([["Lina", "elle"], ["Noé", "il"], ["Inès", "elle"], ["Yanis", "il"], ["Mia", "elle"], ["Tom", "il"]]);
+        const g = r2c(sh * hj), gs = r2c(g * nj), gt = r2c(gs + sh * hs);
+        return Object.assign(P(w[0] + " a un job d'été payé " + M(CHF(sh)) + " CHF de l'heure. Pendant " + nj + " jours, " + w[1] + " travaille " + M(D(hj) + " \\text{ h}") + " par jour, puis encore " + M(D(hs) + " \\text{ h}") + " le samedi.",
+          [["a) Salaire d'une journée (CHF, au centime)", g, 0.01], ["b) Salaire des " + nj + " journées (CHF, au centime)", gs, 0.01], ["c) Salaire total avec le samedi (CHF, au centime)", gt, 0.01]],
+          ["Salaire = salaire horaire · nombre d'heures.", "c) Ajoute le salaire des heures du samedi."],
+          "a) " + M(CHF(sh) + " \\cdot " + D(hj) + eqa(sh * hj, g) + CHF(g)) + " CHF. b) " + M(CHF(g) + " \\cdot " + nj + " = " + CHF(gs)) + " CHF. c) " + M(CHF(gs) + " + " + CHF(sh) + " \\cdot " + D(hs) + eqa(gs + sh * hs, gt) + CHF(gt)) + " CHF."), { ctx: "salaire" });
+      },
+      () => { /* livraison : masse d'une bouteille pleine · nombre, casiers */
+        const b = pk([[12, "bouteilles de jus de 1 L", [1.48, 1.52, 1.55], [1.6, 1.8]], [20, "bouteilles d'eau de 0,5 L", [0.82, 0.85, 0.88], [1.9, 2.2]], [24, "bouteilles de 33 cl", [0.53, 0.55, 0.58], [1.8, 2.1]]]), mb = pk(b[2]), mc = pk(b[3]), nc = ri(3, 6);
+        const m1 = +(b[0] * mb).toFixed(6), mcs = +(m1 + mc).toFixed(6), mt = +(mcs * nc).toFixed(6);
+        return Object.assign(P("Un casier contient " + M(b[0]) + " " + b[1] + ". Une bouteille pleine pèse " + M(D(mb) + " \\text{ kg}") + " et le casier vide " + M(D(mc) + " \\text{ kg}") + ". On charge " + M(nc) + " casiers pleins dans une voiture.",
+          [["a) Masse des bouteilles d'un casier (kg)", m1], ["b) Masse d'un casier plein (kg)", mcs], ["c) Masse des " + nc + " casiers (kg)", mt]],
+          ["a) Masse d'une bouteille · nombre de bouteilles.", "c) Masse d'un casier plein · nombre de casiers."],
+          "a) " + M(b[0] + " \\cdot " + D(mb) + " = " + D(m1)) + " kg. b) " + M(D(m1) + " + " + D(mc) + " = " + D(mcs)) + " kg. c) " + M(D(mcs) + " \\cdot " + nc + " = " + D(mt)) + " kg."), { ctx: "livraison" });
+      },
+      () => { /* rideaux : surface de tissu · prix au m² */
+        const l = pk([1.2, 1.4, 1.5]), h = pk([2.25, 2.4, 2.6]), n = pk([2, 4]), pu = pk([9.9, 12.5, 14.9, 18.5]);
+        const a = +(l * h).toFixed(6), at = +(a * n).toFixed(6), c = r2c(at * pu);
+        return Object.assign(P("Pour " + M(n) + " rideaux, il faut pour chacun un rectangle de tissu de " + M(D(l) + " \\text{ m}") + " sur " + M(D(h) + " \\text{ m}") + ". Le tissu coûte " + M(CHF(pu)) + " CHF le m².",
+          [["a) Aire de tissu pour un rideau (m²)", a], ["b) Aire de tissu pour les " + n + " rideaux (m²)", at], ["c) Prix du tissu (CHF, au centime)", c, 0.01]],
+          ["Aire = longueur · largeur : place bien la virgule.", "c) Aire totale · prix au m²."],
+          "a) " + M(D(l) + " \\cdot " + D(h) + " = " + D(a)) + " m². b) " + M(D(a) + " \\cdot " + n + " = " + D(at)) + " m². c) " + M(D(at) + " \\cdot " + CHF(pu) + eqa(at * pu, c) + CHF(c)) + " CHF."), { ctx: "rideaux" });
       },
     ],
     /* ---------- 10e : addition et soustraction de décimaux ---------- */
@@ -14769,6 +14844,9 @@ const Engine = {
     for (const c of this.catalog(state.profile)) if (!state.notions[c.id]) { state.notions[c.id] = this.newNotion(c.defaultStatus); changed = true; }
     // Ancien questionnaire : « pas encore » coché par l'élève → à venir (la notion s'ouvrira dans l'ordre).
     for (const s of Object.values(state.notions)) if (s.status === "nonvu" && !s.retry) { s.status = "avenir"; changed = true; }
+    /* Décision de l'enseignant (26.11, n° 4) : une réussite au positionnement compte comme notion vue. Progressions
+       antérieures : notion réussie au positionnement (boîte 2) et jamais reposée depuis → vue, leçon comprise. */
+    for (const s of Object.values(state.notions)) if (s.placed && !s.seen && !s.lessonSeen && s.box >= 2) { s.seen = 1; s.lessonSeen = true; changed = true; }
     for (const id of Object.keys(state.notions)) { const n = NOTIONS.find((x) => x.id === id); if (!n || !placeOf(n, state.profile)) { delete state.notions[id]; changed = true; } }
     if (this.unlock(state)) changed = true;
     return changed;
@@ -14947,7 +15025,8 @@ const Engine = {
     if (level < 3 && state && state.profile && state.profile.system === "FR" && typeof UPFR !== "undefined" && UPFR[state.profile.grade] && UPFR[state.profile.grade][id]) level = Math.max(level, UPFR[state.profile.grade][id]);
     /* 25.11 (audit France) : profil français, énoncé propre à la Suisse (horsCO) : graine suivante (le code suit la question). */
     if (seed && state && state.profile && state.profile.system === "FR") { let q = this.build(id, level, seed); for (let k = 1; k <= 12 && horsCO(state, id, q); k++) q = this.build(id, level, seed + k * 977); return keep(this.finalize(state, id, q)); }
-    if (seed) return keep(this.finalize(state, id, this.build(id, level, seed)));
+    /* 26.11 : forme réservée à la France (q.fr, p. ex. médiane en 4e–3e FR, src/fr_couv.js) tirée pour un autre profil : graine suivante. */
+    if (seed) { let q = this.build(id, level, seed); for (let k = 1; k <= 12 && q && q.fr && horsCO(state, id, q); k++) q = this.build(id, level, seed + k * 977); return keep(this.finalize(state, id, q)); }
     const rec = ((state.recentQ = state.recentQ || {})[id] = (state.recentQ[id] || []));
     const key = (q) => { let h = 0; for (const c of String(q.q) + JSON.stringify(q.spec)) h = (h * 31 + c.charCodeAt(0)) | 0; return h; };
     let q;

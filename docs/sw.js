@@ -2,8 +2,8 @@
 // le reste (code de l'app, MathJax, polices, icônes) depuis le cache, complété au fil de l'eau.
 // 23.11 (chantier F, chargement) : le code de l'app est un fichier à part (app.js?v=…, versionné à chaque construction),
 // mis en cache dès l'installation ; la page attend le réseau 3 s au plus quand une copie est en cache (réseau faible).
-const CACHE = "5m2m-faccc6af76";
-const CORE = ["./", "./index.html", "./app.js?v=faccc6af76", "./start.js?v=faccc6af76", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
+const CACHE = "5m2m-a4dbda7775";
+const CORE = ["./", "./index.html", "./app.js?v=a4dbda7775", "./start.js?v=a4dbda7775", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
   /* 24.11 : MathJax et polices hébergés avec l'app (docs/vendor/, plus de Cloudflare ni de Google Fonts) */
   "./vendor/mathjax/tex-svg.js", "./vendor/fonts/atkinson-400.woff2", "./vendor/fonts/atkinson-700.woff2",
   "./vendor/fonts/bricolage-var.woff2", "./vendor/fonts/jetbrainsmono-var.woff2"];
