@@ -1578,6 +1578,16 @@ const RECALC = (() => {
     return lab.startsWith("a)") ? Math.sqrt(h * h + (c * c) / 2) : lab.startsWith("b)") ? (Math.atan(h / (c / 2)) * 180) / Math.PI : lab.startsWith("c)") ? (c * c * h) / 3 : null; });
   DF("densite", /f\(x\) = kx sur \[0 ; (\d+)\]/, (g, lab) => { const b = nn(g[0]), t = lm(lab, /P\(X ≤ (\d+(?:,\d+)?)\)/);
     return lab.startsWith("a)") ? 2 / (b * b) : t ? (t[0] * t[0]) / (b * b) : lab.startsWith("c)") ? (2 * b) / 3 : null; });
+  /* probaxiomes, derivth (3e Collège, ch3c_ana) */
+  DF("probaxiomes", /la somme vaut (\d+) » ; B : « ([^»]+) »/, (g, lab) => { const s = nn(g[0]), B = /double/.test(g[1]) ? (r, b) => r === b : /au moins un 6/.test(g[1]) ? (r, b) => r === 6 || b === 6 : /rouge donne un nombre pair/.test(g[1]) ? (r) => r % 2 === 0 : null; if (!B) return null;
+    let a = 0, bb = 0, u = 0; for (let r = 1; r <= 6; r++) for (let b = 1; b <= 6; b++) { const A = r + b === s, E = B(r, b); a += A; bb += E; u += A || E; }
+    return lab.startsWith("a)") ? a / 36 : lab.startsWith("b)") ? bb / 36 : lab.startsWith("c)") ? u / 36 : null; });
+  const sgn = (o, v) => (o === "-" ? 1 : -1) * nn(v); /* (x − p) : p = +v ; (x + p) : p = −v */
+  DF("derivth", /f\(x\) = \|\(x ([+-]) (\d+)\)\(x ([+-]) (\d+)\)\|/, (g, lab) => { const p = sgn(g[0], g[1]), q = sgn(g[2], g[3]), lo = Math.min(p, q), hi = Math.max(p, q);
+    return lab.startsWith("a)") ? hi : lab.startsWith("b)") ? -(hi - lo) : lab.startsWith("c)") ? (lo + hi) / 2 : null; });
+  DF("derivth", /f\(x\) = \|x ([+-]) (\d+)\| \+ \|x ([+-]) (\d+)\|/, (g, lab) => { const p = sgn(g[0], g[1]), q = sgn(g[2], g[3]), f = (x) => Math.abs(x - p) + Math.abs(x - q), hi = Math.max(p, q);
+    return lab.startsWith("a)") ? hi : lab.startsWith("b)") ? (f(hi + 1e-3) - f(hi)) / 1e-3 : lab.startsWith("c)") ? f((p + q) / 2) : null; });
+  DF("derivth", /f\(x\) = x\^3 sur \[0 ; (\d+)\]/, (g, lab) => { const b = nn(g[0]); return lab.startsWith("a)") ? b ** 3 / b : lab.startsWith("b)") ? Math.sqrt((b * b) / 3) : lab.startsWith("c)") ? 3 * b * b : null; });
   /* ==== fin agent defis3 ==== */
 
   /* ---------- 26.11 (agent defis2) : notions encore sous 20 % (transf, trigcercle, trigfn, recip, lectures de graphique

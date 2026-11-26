@@ -1344,11 +1344,14 @@
         ["L'ordre ne compte pas : combinaisons.", "c) Passe par le contraire : les comités sans fille."],
         "a) " + M(bn(n, 4) + " = " + D(v1)) + ". b) " + M(bn(g, 2) + " \\cdot " + bn(b, 2) + " = " + Cb(g, 2) + " \\cdot " + Cb(b, 2) + " = " + D(v2)) + ". c) " + M(D(v1) + " - " + bn(b, 4) + " = " + D(v1) + " - " + D(Cb(b, 4)) + " = " + D(v3)) + ".");
     }],
-    probaxiomes: [() => { const s = pk([4, 5, 6, 8, 9, 10]), cnt = 6 - Math.abs(7 - s), dbl = s % 2 === 0 ? 1 : 0, u = cnt + 6 - dbl;
-      return P("On lance deux dés équilibrés (un rouge et un bleu). A : « la somme vaut " + s + " » ; B : « on obtient un double ».",
-        [["a) P(A) (fraction acceptée)", cnt / 36], ["b) P(B)", 1 / 6], ["c) P(A ∪ B)", u / 36]],
-        ["Compte les couples (rouge ; bleu) parmi les 36.", "c) P(A ∪ B) = P(A) + P(B) − P(A ∩ B) : " + (dbl ? "le double (" + s / 2 + " ; " + s / 2 + ") est dans A et dans B." : "une somme impaire n'est jamais un double.")],
-        "a) " + M("\\frac{" + cnt + "}{36}") + ". b) " + M("\\frac{6}{36} = \\frac{1}{6}") + ". c) " + M("\\frac{" + cnt + "}{36} + \\frac{6}{36} - \\frac{" + dbl + "}{36} = \\frac{" + u + "}{36}" + (den(u / 36) < 36 ? " = " + fT(u / 36) : "")) + ".");
+    /* 26.11 soir (agent defis3) : événement B tiré parmi trois (double, au moins un 6, rouge pair), 3 contextes (avant : 6 énoncés). */
+    probaxiomes: [() => { const s = pk([4, 5, 6, 7, 8, 9, 10]), [cx, bT, inB] = pk([["double", "on obtient un double", (r, b) => r === b], ["six", "on obtient au moins un 6", (r, b) => r === 6 || b === 6], ["pair", "le dé rouge donne un nombre pair", (r) => r % 2 === 0]]);
+      let nA = 0, nB = 0, nAB = 0; for (let r = 1; r <= 6; r++) for (let b = 1; b <= 6; b++) { const a = r + b === s, bb = inB(r, b); nA += a; nB += bb; nAB += a && bb; }
+      const u = nA + nB - nAB;
+      return Object.assign(P("On lance deux dés équilibrés (un rouge et un bleu). A : « la somme vaut " + s + " » ; B : « " + bT + " ».",
+        [["a) P(A) (fraction acceptée)", nA / 36], ["b) P(B)", nB / 36], ["c) P(A ∪ B)", u / 36]],
+        ["Compte les couples (rouge ; bleu) parmi les 36.", "c) P(A ∪ B) = P(A) + P(B) − P(A ∩ B) : compte les couples qui sont à la fois dans A et dans B (ici " + nAB + ")."],
+        "a) " + M("\\frac{" + nA + "}{36}" + (den(nA / 36) < 36 ? " = " + fT(nA / 36) : "")) + ". b) " + M("\\frac{" + nB + "}{36}" + (den(nB / 36) < 36 ? " = " + fT(nB / 36) : "")) + ". c) " + M("\\frac{" + nA + "}{36} + \\frac{" + nB + "}{36} - \\frac{" + nAB + "}{36} = \\frac{" + u + "}{36}" + (den(u / 36) < 36 ? " = " + fT(u / 36) : "")) + "."), { ctx: cx });
     }],
     probarbre: [() => { const r = ri(3, 6), b = ri(2, 5), n = r + b, it = pk(ITEMS), dd = n * (n - 1), p1 = (r * (r - 1)) / dd, p2 = (2 * r * b) / dd;
       return P("Une urne contient " + r + " " + it[0] + " " + it[1] + " et " + b + " " + it[0] + " " + it[2] + ". On en tire deux, l'une après l'autre, sans remise.",
@@ -1356,10 +1359,20 @@
         ["Dessine l'arbre : au 2e tirage, il reste " + (n - 1) + " " + it[0] + ".", "c) Le contraire de « au moins une " + it[4] + " » est « deux " + it[1] + " »."],
         "a) " + M("\\frac{" + r + "}{" + n + "} \\cdot \\frac{" + (r - 1) + "}{" + (n - 1) + "} = " + fT(p1)) + ". b) " + M("2 \\cdot \\frac{" + r + "}{" + n + "} \\cdot \\frac{" + b + "}{" + (n - 1) + "} = " + fT(p2)) + ". c) " + M("1 - " + fT(p1) + " = " + fT(1 - p1)) + ".");
     }],
-    derivth: [() => { const k = ri(2, 4);
-      return P("Soit " + M("f(x) = |x^2 - " + 2 * k + "x|") + " sur " + M("\\mathbb{R}") + ".", [["a) Plus grande abscisse où f n'est pas dérivable", 2 * k], ["b) Pente de la demi-tangente à gauche en ce point", -2 * k], ["c) Nombre c de Rolle sur [0 ; " + 2 * k + "] (f'(c) = 0)", k]],
-        ["Les points anguleux sont aux zéros de x² − " + 2 * k + "x.", "Sur [0 ; " + 2 * k + "], f(x) = −x² + " + 2 * k + "x."],
-        "a) " + M("x^2 - " + 2 * k + "x = x(x - " + 2 * k + ")") + " : 0 et " + M(2 * k) + " ; b) à gauche (sur [0 ; " + 2 * k + "]), " + M("f'(x) = -2x + " + 2 * k) + ", pente " + M(-2 * k) + " (à droite : " + M(2 * k) + ") ; c) " + M("f(0) = f(" + 2 * k + ") = 0") + " et " + M("-2c + " + 2 * k + " = 0") + " : " + M("c = " + k) + "."); }],
+    /* 26.11 soir (agent defis3) : |(x − p)(x − q)|, |x − p| + |x − q| et accroissements finis sur x³, valeurs tirées (avant : 3 énoncés). */
+    derivth: [() => { const cx = pk(["abs-trinome", "abs-somme", "taf"]), xm = (v) => (v < 0 ? "x + " + -v : "x - " + v);
+      if (cx === "abs-trinome") { let p, q; do { p = ri(-4, 3); q = ri(-2, 6); } while (q - p < 2 || p === 0 || q === 0 || (p + q) % 2 !== 0);
+        return Object.assign(P("Soit " + M("f(x) = |(" + xm(p) + ")(" + xm(q) + ")|") + " sur " + M("\\mathbb{R}") + ".", [["a) Plus grande abscisse où f n'est pas dérivable", q], ["b) Pente de la demi-tangente à gauche en ce point", -(q - p)], ["c) Nombre c de Rolle sur [" + p + " ; " + q + "] (f'(c) = 0)", (p + q) / 2]],
+          ["Les points anguleux sont aux zéros de (" + xm(p) + ")(" + xm(q) + ").", "Sur [" + p + " ; " + q + "], le produit est négatif : f(x) = −(" + xm(p) + ")(" + xm(q) + ")."],
+          "a) zéros " + M(p) + " et " + M(q) + " : f n'est pas dérivable en " + M(q) + " ; b) sur [" + p + " ; " + q + "], " + M("f'(x) = -2x + " + (p + q)) + ", pente en " + M(q) + " : " + M(-(q - p)) + " (à droite : " + M(q - p) + ") ; c) " + M("f(" + p + ") = f(" + q + ") = 0") + " et " + M("-2c + " + (p + q) + " = 0") + " : " + M("c = " + (p + q) / 2) + "."), { ctx: cx }); }
+      if (cx === "abs-somme") { let p, q; do { p = ri(-5, 2); q = ri(-1, 6); } while (q - p < 2 || p === 0 || q === 0);
+        return Object.assign(P("Soit " + M("f(x) = |" + xm(p) + "| + |" + xm(q) + "|") + " sur " + M("\\mathbb{R}") + ".", [["a) Plus grande abscisse où f n'est pas dérivable", q], ["b) Pente de la demi-tangente à droite en ce point", 2], ["c) Valeur minimale de f", q - p]],
+          ["Chaque valeur absolue crée un point anguleux là où elle s'annule.", "Entre " + p + " et " + q + ", f(x) = (x − " + (p < 0 ? "(" + p + ")" : p) + ") + (" + q + " − x) est constante."],
+          "a) " + M(q) + " ; b) à droite de " + M(q) + ", " + M("f(x) = 2x " + (p + q < 0 ? "+ " + -(p + q) : "- " + (p + q))) + " : pente " + M(2) + " (à gauche : 0) ; c) entre " + M(p) + " et " + M(q) + ", " + M("f(x) = " + (q - p)) + " : minimum " + M(q - p) + "."), { ctx: cx }); }
+      const b = ri(2, 6), c = b / Math.sqrt(3);
+      return Object.assign(P("Soit " + M("f(x) = x^3") + " sur " + M("[0 \\,;\\, " + b + "]") + ". On applique le théorème des accroissements finis.", [["a) Taux d'accroissement de f entre 0 et " + b, b * b], ["b) Nombre c de ]0 ; " + b + "[ tel que f'(c) = ce taux (au centième)", (Math.round(c * 100) / 100), 0.01], ["c) f'(" + b + ")", 3 * b * b]],
+        ["Taux : (f(" + b + ") − f(0)) ÷ " + b + ".", "f'(x) = 3x² : résous 3c² = " + b * b + "."],
+        "a) " + M("\\frac{" + b ** 3 + " - 0}{" + b + "} = " + b * b) + " ; b) " + M("3c^2 = " + b * b + " \\iff c = \\frac{" + b + "}{\\sqrt{3}} \\approx " + D((Math.round(c * 100) / 100))) + " ; c) " + M("3 \\cdot " + b + "^2 = " + 3 * b * b) + "."), { ctx: cx }); }],
   };
 
   // ---------- catalogue ----------
