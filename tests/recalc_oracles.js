@@ -1348,6 +1348,276 @@ const RECALC = (() => {
   TE(null, Z`nombre de deux chiffres a une somme des chiffres égale à #\. Si on permute ses chiffres, on obtient un nombre plus grand de #`, (s, k) => { const u = (s + k / 9) / 2, d = s - u; return Number.isInteger(u) && Number.isInteger(d) ? 10 * d + u : NaN; });
   TE(null, Z`nombre de deux chiffres a une somme des chiffres égale à #\. Si on permute ses chiffres, on obtient un nombre plus petit de #`, (s, k) => { const d = (s + k / 9) / 2, u = s - d; return Number.isInteger(u) && Number.isInteger(d) ? 10 * d + u : NaN; });
 
+  /* ---------- défis (niveau 4) rendus aléatoires le 26.11 (agent defis2) : un oracle par contexte, partie par partie ----------
+     Le texte reçu est « énoncé ¶ question » ; NaN = énoncé incohérent (signalé « recalcul impossible »). */
+  const nn = (s) => +String(s).replace(/[\s'’]/g, "").replace(",", ".").replace("−", "-");
+  const DF = (ids, re, f) => T(ids, re, (txt) => { const m = re.exec(txt); if (!m || !/ ¶ /.test(txt)) return null; /* parties de défi seulement */ const lab = txt.split(" ¶ ").slice(1).join(" ¶ "); return f(m.slice(1), lab, txt); }, { text: true });
+  const lm = (lab, re) => { const m = re.exec(lab); return m ? m.slice(1).map(nn) : null; };
+  const simpson = (g, a, b, n = 4000) => { const h = (b - a) / n; let s = g(a) + g(b); for (let i = 1; i < n; i++) s += (i % 2 ? 4 : 2) * g(a + i * h); return (s * h) / 3; };
+  const erfPhi = (z) => { const t = 1 / (1 + 0.2316419 * Math.abs(z)), d = 0.3989422804014327 * Math.exp((-z * z) / 2), p = d * t * (0.31938153 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429)))); return z >= 0 ? 1 - p : p; };
+  const jsf = (s) => { const e = String(s).replace(/√\(/g, "Math.sqrt(").replace(/\^/g, "**").replace(/(\d)\s*x/g, "$1*x").replace(/−/g, "-"); if (/[^-+*/().\d\sxMathsqr]/.test(e)) return null; try { return new Function("x", "return " + e); } catch (e2) { return null; } };
+  /* polynôme « -x^2 + 3x - 4 » → [a, b, c] */
+  const poly = (s) => { const c = [0, 0, 0]; for (const t of String(s).replace(/−/g, "-").replace(/\s+/g, "").replace(/-/g, "+-").split("+").filter(Boolean)) { const m = /^(-?\d*(?:\.\d+)?)(x(?:\^2)?)?$/.exec(t); if (!m) return null; const k = m[1] === "" ? 1 : m[1] === "-" ? -1 : +m[1]; c[m[2] === "x^2" ? 0 : m[2] === "x" ? 1 : 2] += m[2] ? k : +m[1]; } return c; };
+  /* symax (6e, fr_fin) */
+  DF("symax", /AB = (\d+) cm, BC = (\d+) cm, AC = (\d+) cm et pour angles ∠A = (\d+)°, ∠B = (\d+)°/, (g, lab) => { const [ab, bc, ac, A, B] = g.map(nn), deg = (x, y, o) => (Math.acos((x * x + y * y - o * o) / (2 * x * y)) * 180) / Math.PI;
+    if (Math.abs(deg(ab, ac, bc) - A) > 0.6 || Math.abs(deg(ab, bc, ac) - B) > 0.6) return NaN; return /A'B'/.test(lab) ? ab : /A'C'/.test(lab) ? ac : /angle/.test(lab) ? 180 - A - B : /Périmètre/.test(lab) ? 2 * ab + 2 * ac : null; });
+  DF("symax", /statue S est à (\d+) m de l'axe ; un banc B est à (\d+) m de l'axe, du même côté/, (g, lab) => { const [d, b] = g.map(nn); return /SS'/.test(lab) ? 2 * d : /S'B'/.test(lab) ? d - b : /SB'/.test(lab) ? d + b : null; });
+  DF("symax", /longueur AB = (\d+) cm et pour largeur BC = (\d+(?:,\d+)?) cm\. On trace son symétrique par rapport à la droite \(BC\)/, (g, lab) => { const [L, l] = g.map(nn); return /AA'/.test(lab) ? 2 * L : /Périmètre/.test(lab) ? 2 * (2 * L + l) : /Aire/.test(lab) ? 2 * L * l : null; });
+  /* mediatrice (6e, fr_fin) */
+  DF("mediatrice", /AB = (\d+) m, BC = (\d+) m et la distance PA = (\d+) m/, (g, lab) => { const [ab, bc, r] = g.map(nn); if (ab >= 2 * r || bc >= 2 * r) return NaN; return /PB \(/.test(lab) ? r : /PAB/.test(lab) ? 2 * r + ab : /PBC/.test(lab) ? 2 * r + bc : null; });
+  DF("mediatrice", /distants de (\d+) km\. .*? à (\d+(?:,\d+)?) km de A\./, (g, lab) => { const [ab, x] = g.map(nn); if (x <= ab / 2) return NaN; return /MB/.test(lab) ? x : /AI/.test(lab) ? ab / 2 : /trajet/.test(lab) ? 2 * x : null; });
+  DF("mediatrice", /\[AB\] mesure (\d+) cm ; .*?CA = (\d+) cm et DA = (\d+) cm/, (g, lab) => { const [t, c, d] = g.map(nn); if (c <= t / 2 || d <= t / 2) return NaN; return /tour/.test(lab) ? 2 * c + 2 * d : /CB/.test(lab) ? c : /DB/.test(lab) ? d : null; });
+  /* echelle6 (6e, fr_fin) */
+  DF("echelle6", /carte au 1\/([\d ]+), .*?: (\d+(?:,\d+)?) cm, puis (\d+(?:,\d+)?) cm, puis (\d+(?:,\d+)?) cm/, (g, lab) => { const [s, a, b, c] = g.map(nn), cm = a + b + c, km = (cm * s) / 100000, v = lm(lab, /à (\d+) km\/h/);
+    return /sur la carte/.test(lab) ? cm : /réelle \(km\)/.test(lab) ? km : v ? (km / v[0]) * 60 : null; });
+  DF("echelle6", /plan d'un appartement au 1\/(\d+), .*? rectangle de (\d+(?:,\d+)?) cm sur (\d+(?:,\d+)?) cm/, (g, lab) => { const [s, a, b] = g.map(nn); return /Longueur/.test(lab) ? (a * s) / 100 : /Largeur/.test(lab) ? (b * s) / 100 : /Aire/.test(lab) ? (a * s * b * s) / 10000 : null; });
+  DF("echelle6", /maquette .*? au 1\/(\d+)\. En réalité, il mesure ([\d ]+) m de long\. Sur la maquette, .*? mesure (\d+(?:,\d+)?) cm/, (g, lab) => { const [s, L, h] = g.map(nn), s2 = lm(lab, /au 1\/(\d+)/);
+    return s2 ? (L * 100) / s2[0] : /Longueur de la maquette/.test(lab) ? (L * 100) / s : /Hauteur réelle/.test(lab) ? (h * s) / 100 : null; });
+  /* proba6 (6e, fr_fin) */
+  DF("proba6", /contient (\d+) \S+ [^,]+, (\d+) \S+ [^,]+ et (\d+) \S+ .+?\. On en tire un au hasard/, (g, lab) => { const [r, b, v] = g.map(nn), T = r + b + v, t = lm(lab, /soit (\d+(?:,\d+)?)$/);
+    return t ? T - r / t[0] : /ne pas tirer/.test(lab) ? (r + b) / T : /Probabilité de tirer/.test(lab) ? r / T : null; });
+  DF("proba6", /partagée en (\d+) secteurs égaux : (\d+) rouges?, (\d+) jaunes? et les autres bleus/, (g, lab) => { const [n, r, j] = g.map(nn), t = lm(lab, /P\(rouge\) = (\d+(?:,\d+)?)/);
+    return t ? t[0] * n - r : /ne pas tomber sur le bleu/.test(lab) ? (r + j) / n : /tomber sur le rouge/.test(lab) ? r / n : null; });
+  DF("proba6", /contient (\d+) cartes numérotées de 1 à (\d+)\./, (g, lab) => { const [n, N] = g.map(nn); if (n !== N) return NaN; const cnt = (p) => Array.from({ length: N }, (_, i) => i + 1).filter(p).length, m = lm(lab, /multiples? de (\d+)/), k = lm(lab, /supérieur ou égal à (\d+)/);
+    return /reste-t-il/.test(lab) && m ? N - cnt((u) => u % m[0] === 0) : m ? cnt((u) => u % m[0] === 0) / N : k ? cnt((u) => u >= k[0]) / N : null; });
+  /* empil (5e, fr_fin) */
+  DF("empil", /pyramide de cubes à étages carrés/, (g, lab) => { const p = lm(lab, /pyramide de (\d+) étages/), d = lm(lab, /vue de dessus \((\d+) étages\)/); let s = 0; if (p) for (let i = 1; i <= p[0]; i++) s += i * i; return p ? s : d ? d[0] * d[0] : null; });
+  DF("empil", /escalier de (\d+) marches .*?l'escalier a (\d+) cubes de largeur/, (g, lab) => { const [n, p] = g.map(nn); let prof = 0; for (let i = 1; i <= n; i++) prof += i; return /vue de côté/.test(lab) ? prof : /Nombre de cubes/.test(lab) ? prof * p : /vue de dessus/.test(lab) ? n * p : null; });
+  DF("empil", /contour d'un carré de (\d+) cubes de côté .*?la tour a (\d+) étages/, (g, lab) => { const [c, h] = g.map(nn); let b = 0; for (let i = 0; i < c; i++) for (let j = 0; j < c; j++) if (i === 0 || j === 0 || i === c - 1 || j === c - 1) b++;
+    return /d'un étage/.test(lab) ? b : /de la tour/.test(lab) ? b * h : /remplir/.test(lab) ? (c * c - b) * h : null; });
+  /* compdiff (2nde, fr_fin) */
+  DF("compdiff", /A coûte (\d+(?:,\d+)?) € pour (\d+) g, B coûte (\d+(?:,\d+)?) € pour (\d+) g/, (g, lab) => { const [a, ma, b, mb] = g.map(nn), pa = a / (ma / 1000), pb = b / (mb / 1000); return /Prix de A/.test(lab) ? pa : /Prix de B/.test(lab) ? pb : /Quotient/.test(lab) ? pa / pb : null; });
+  DF("compdiff", /passée de ([\d ]+) à ([\d ]+) habitants, et le village B de ([\d ]+) à ([\d ]+) habitants/, (g, lab) => { const [p1, p2, q1, q2] = g.map(nn); return /Augmentation de A/.test(lab) ? p2 - p1 : /Augmentation de B/.test(lab) ? q2 - q1 : /Quotient/.test(lab) ? q2 / q1 : null; });
+  DF("compdiff", /consommé (\d+(?:,\d+)?) L d'essence pour (\d+) km, la voiture B (\d+(?:,\d+)?) L pour (\d+) km/, (g, lab) => { const [la, da, lb, db] = g.map(nn), ca = (100 * la) / da, cb = (100 * lb) / db; return /de A aux/.test(lab) ? ca : /de B aux/.test(lab) ? cb : /Différence/.test(lab) ? ca - cb : null; });
+  /* posrelc (1re, fr_fin) : racines et extremum de la différence */
+  const diffQ = (F, G, lab) => { if (!F || !G) return null; const [a, b, c] = [F[0] - G[0], F[1] - G[1], F[2] - G[2]], D = b * b - 4 * a * c; if (!a || D <= 0) return NaN; const r = [(-b - Math.sqrt(D)) / (2 * a), (-b + Math.sqrt(D)) / (2 * a)].sort((u, v) => u - v);
+    return /Plus petite/.test(lab) ? r[0] : /Plus grande/.test(lab) ? r[1] : /(?:minimale|maximal)/.test(lab) ? c - (b * b) / (4 * a) : null; };
+  DF("posrelc", /Soit f\(x\) = (.+?) et g\(x\) = (.+?)\. On étudie/, (g, lab) => diffQ(poly(g[0]), poly(g[1]), lab));
+  DF("posrelc", /C\(x\) = (.+?) et la recette R\(x\) = (.+?), en milliers/, (g, lab) => diffQ(poly(g[1]), poly(g[0]), lab));
+  /* intmaj (Tle, fr_fin) : monotonie vérifiée, encadrement contrôlé par l'intégrale (Simpson) */
+  DF("intmaj", /Soit ([IJ]) = _(\d+)\^(\d+) (.+?) dx\. La fonction x .+? est (croissante|décroissante)/, (g, lab) => { const a = nn(g[1]), b = nn(g[2]), f = jsf(g[3]), cr = g[4] === "croissante"; if (!f) return null;
+    for (let i = 0; i < 40; i++) { const u = a + ((b - a) * i) / 40, v = a + ((b - a) * (i + 1)) / 40; if (cr ? f(v) < f(u) : f(v) > f(u)) return NaN; }
+    const L = b - a, lo = L * Math.min(f(a), f(b)), hi = L * Math.max(f(a), f(b)), I = simpson(f, a, b); if (I < lo || I > hi) return NaN;
+    const at = lm(lab, /en (\d+)$/); return at ? f(at[0]) : /Amplitude/.test(lab) ? hi - lo : /Minorant/.test(lab) ? lo : /Majorant/.test(lab) ? hi : /Centre/.test(lab) ? (lo + hi) / 2 : null; });
+  DF("intmaj", /d\(t\) = (\d+) \+ √\(t\), .*?entre 0 et (\d+) minutes/, (g, lab) => { const [c, T] = g.map(nn), f = (t) => c + Math.sqrt(t); return /au départ/.test(lab) ? f(0) : /au bout/.test(lab) ? f(T) : /Majorant/.test(lab) ? T * f(T) : null; });
+  /* suiteint (Tle, fr_fin) : intégrales recalculées par Simpson */
+  DF("suiteint", /I_n = _0\^ 1 x\^n\(([^)]+)\)(\^2)? dx/, (g, lab) => { const h = jsf(g[0]), p = g[1] ? 2 : 1; if (!h) return null; const I = (n) => simpson((x) => x ** n * h(x) ** p, 0, 1, n > 200 ? 200000 : 4000);
+    const k = lm(lab, /^\S+ I_(\d+)/), s = lm(lab, /I_n < \(1\)\/\((\d+)\)/);
+    if (s) { for (let n = 0; n < 100; n++) if (I(n) < 1 / s[0]) return n; return NaN; }
+    if (/Limite de n I_n/.test(lab)) { const L = 2 * (2000 * I(2000)) - 1000 * I(1000); return Math.abs(L - Math.round(L)) < 0.01 ? Math.round(L) : L; }
+    return k ? I(k[0]) : null; });
+  /* isom (9e, perco) */
+  DF("isom", /au point A\((-?\d+) ; (-?\d+)\) la symétrie d'axe (vertical|horizontal) [xy] = (-?\d+), puis la symétrie d'axe \S+ [xy] = (-?\d+)\./, (g, lab) => { const [px, py, , a, b] = g.map(nn), p = g[2] === "vertical" ? px : py, X1 = 2 * a - p, X2 = 2 * b - X1;
+    return /1re symétrie/.test(lab) ? X1 : /image finale/.test(lab) ? X2 : /glissé/.test(lab) ? X2 - p : null; });
+  DF("isom", /sommets A\((-?\d+) ; (-?\d+)\), B\((-?\d+) ; (-?\d+)\) et C\((-?\d+) ; (-?\d+)\)\. On lui applique la symétrie de centre [^(]*\((-?\d+) ; (-?\d+)\)/, (g, lab) => { const [ax, ay, bx, by, cx, cy, h, k] = g.map(nn);
+    return /Abscisse de B'/.test(lab) ? 2 * h - bx : /Ordonnée de C'/.test(lab) ? 2 * k - cy : /Aire/.test(lab) ? Math.abs((bx - ax) * (cy - ay) - (cx - ax) * (by - ay)) / 2 : null; });
+  DF("isom", /envoie le point B\((-?\d+) ; (-?\d+)\) sur le point C\((-?\d+) ; (-?\d+)\)\. Un sommet du motif est A\((-?\d+) ; (-?\d+)\)/, (g, lab) => { const [bx, by, cx, cy, ax, ay] = g.map(nn);
+    return /Abscisse de A'(?!')/.test(lab) ? ax + cx - bx : /Ordonnée de A'/.test(lab) ? ay + cy - by : /A''/.test(lab) ? ax + 2 * (cx - bx) : null; });
+  /* numer (9e, perco) */
+  const romVal = (s) => { const V = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 }; let t = 0; for (let i = 0; i < s.length; i++) t += V[s[i]] < (V[s[i + 1]] || 0) ? -V[s[i]] : V[s[i]]; return t; };
+  DF("numer", /(?:inscription|la date|construction :) ([MDCLXVI]{3,}) \./, (g, lab) => { const v = romVal(g[0]); return /Année/.test(lab) ? v : /jusqu'en 2026/.test(lab) ? 2026 - v : /symboles/.test(lab) ? g[0].length : null; });
+  DF("numer", /en binaire : ([01]+) (?:puis|et) ([01]+) \./, (g, lab) => { const a = parseInt(g[0], 2), b = parseInt(g[1], 2); return lab.startsWith("a)") ? a : lab.startsWith("b)") ? b : /somme/.test(lab) ? a + b : null; });
+  DF("numer", /un scribe écrit un nombre avec (.+?)\./, (g, lab) => { const c = (re) => { const m = re.exec(g[0]); return m ? +m[1] : 0; }, n = 1000 * c(/(\d+) fleurs? de lotus/) + 100 * c(/(\d+) cordes? enroulées?/) + 10 * c(/(\d+) anses?/) + c(/(\d+) bâtons?/), ds = (x) => String(x).split("").reduce((s, z) => s + +z, 0);
+    return /Quel est ce nombre/.test(lab) ? n : /a-t-il utilisés/.test(lab) ? ds(n) : /double/.test(lab) ? ds(2 * n) : null; });
+  /* approxnorm (4e Collège, ch4c_trous) : table de Φ contrôlée, z recalculé */
+  const tabPhi = (txt) => { const m = /On donne [^(]*\((\d+(?:,\d+)?)\) ≈ (\d+(?:,\d+)?)/.exec(txt); if (!m) return null; const z = nn(m[1]), p = nn(m[2]); return Math.abs(erfPhi(z) - p) < 6e-5 ? [z, p] : [z, NaN]; };
+  DF("approxnorm", /vend (\d+) billets pour un vol de (\d+) places ; chaque passager se présente avec la probabilité (\d+(?:,\d+)?)/, (g, lab, txt) => { const [n, S, p] = g.map(nn), mu = n * p, s = Math.sqrt(n * p * (1 - p)), t = tabPhi(txt);
+    if (/moyen/.test(lab)) return mu; if (/Écart-type/.test(lab)) return s; if (!t || !(Math.abs((S + 0.5 - mu) / s - t[0]) <= 1e-9)) return NaN; return 1 - t[1]; });
+  DF("approxnorm", /(\d+) graines ; chacune germe avec la probabilité (\d+(?:,\d+)?)/, (g, lab, txt) => { const [n, p] = g.map(nn), mu = n * p, s = Math.sqrt(n * p * (1 - p)), t = tabPhi(txt), k = lm(lab, /au moins (\d+) graines/);
+    if (/Moyenne/.test(lab)) return mu; if (/Écart-type/.test(lab)) return s; if (!k) return null; if (!t || !(Math.abs((mu - (k[0] - 0.5)) / s - t[0]) <= 1e-9)) return NaN; return t[1]; });
+  DF("approxnorm", /(?:On lance (\d+) fois une pièce équilibrée|On interroge ([\d' ]+) personnes)/, (g, lab, txt) => { const n = nn(g[0] || g[1]), mu = n / 2, s = Math.sqrt(n / 4), t = tabPhi(txt), I = lm(lab, /P\((\d+) ≤ X ≤ (\d+)\)/);
+    if (/Moyenne/.test(lab)) return mu; if (/Écart-type/.test(lab)) return s; if (!I) return null; if (!t || I[0] + I[1] !== 2 * mu || !(Math.abs((I[1] + 0.5 - mu) / s - t[0]) <= 1e-9)) return NaN; return 2 * t[1] - 1; });
+
+  /* ---------- 26.11 (agent defis2) : notions encore sous 20 % (transf, trigcercle, trigfn, recip, lectures de graphique
+     de f2 / f2expr, histoires de probeq, formes de decadd) ---------- */
+  const fxT = (tex) => { const c = compile(Expr.parse(tex2e(tex))); return (u) => c({ x: u }); };
+  const DEG = Math.PI / 180;
+  /* lecture d'une figure FIG.plot : graduations → échelle ; courbe (1er chemin f-accent) ; points marqués (f-dot) */
+  function figRead(svg) {
+    if (!svg || typeof DOMParser === "undefined") return null;
+    const doc = new DOMParser().parseFromString(String(svg), "image/svg+xml"), tx = [], ty = [];
+    for (const t of doc.querySelectorAll("text")) { if (!/f-tick/.test(t.getAttribute("class") || "")) continue; const v = +t.textContent.replace("−", "-"); if (!isFinite(v)) continue;
+      if (t.getAttribute("text-anchor") === "middle") tx.push([v, +t.getAttribute("x")]); else ty.push([v, +t.getAttribute("y") - 4]); }
+    if (tx.length < 2 || ty.length < 2) return null;
+    const lin = (P) => { const [a, b] = [P[0], P[P.length - 1]], k = (b[1] - a[1]) / (b[0] - a[0]); return (px) => a[0] + (px - a[1]) / k; };
+    const X = lin(tx), Y = lin(ty), path = doc.querySelector("path.f-accent, path[class~='f-accent']");
+    const curve = []; if (path) for (const m of (path.getAttribute("d") || "").matchAll(/(-?[\d.]+),(-?[\d.]+)/g)) curve.push([X(+m[1]), Y(+m[2])]);
+    const dots = [...doc.querySelectorAll("circle")].filter((c) => /f-dot/.test(c.getAttribute("class") || "")).map((c) => ({ x: X(+c.getAttribute("cx")), y: Y(+c.getAttribute("cy")), px: +c.getAttribute("cx"), py: +c.getAttribute("cy"), lab: "" }));
+    for (const t of doc.querySelectorAll("text")) { if ((t.getAttribute("class") || "") !== "f-txt") continue; const px = +t.getAttribute("x"), py = +t.getAttribute("y"); let best = null, bd = 30;
+      for (const d of dots) { const dd = Math.hypot(d.px - px, d.py - py); if (dd < bd) { bd = dd; best = d; } } if (best) best.lab = t.textContent.trim(); }
+    return { curve, dots };
+  }
+  /* parabole lue : moindres carrés sur les points du tracé → [a, b, c] ; lecture « propre » à la demi-unité */
+  const quadFit = (P) => { if (P.length < 10) return null; const S = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]; for (const [x, y] of P) { const r = [x * x, x, 1]; for (let i = 0; i < 3; i++) { for (let j = 0; j < 3; j++) S[i][j] += r[i] * r[j]; S[i][3] += r[i] * y; } }
+    for (let i = 0; i < 3; i++) { let p = i; for (let k = i + 1; k < 3; k++) if (Math.abs(S[k][i]) > Math.abs(S[p][i])) p = k; [S[i], S[p]] = [S[p], S[i]]; for (let k = 0; k < 3; k++) if (k !== i) { const f = S[k][i] / S[i][i]; for (let j = i; j < 4; j++) S[k][j] -= f * S[i][j]; } }
+    return [S[0][3] / S[0][0], S[1][3] / S[1][1], S[2][3] / S[2][2]]; };
+  const clean = (v, st = 0.5, tol = 0.08) => { const r = Math.round(v / st) * st; return Math.abs(v - r) <= tol ? r : NaN; };
+  const quadRead = (x) => { const F = figRead(x.fig); if (!F) return null; const q = quadFit(F.curve); if (!q) return null; const [a, b, c] = q, D = b * b - 4 * a * c, h = -b / (2 * a);
+    return { F, a, h: clean(h), k: clean(c - (b * b) / (4 * a)), z: D > 0 ? [(-b - Math.sqrt(D)) / (2 * a), (-b + Math.sqrt(D)) / (2 * a)].sort((u, v) => u - v).map((u) => clean(u)) : [] }; };
+  G.push({ name: "parabole lue sur la figure", f(x) {
+    if (!["f2", "f2expr"].includes(x.id) || !x.fig || !/parabole|Parabole/.test(x.raw) || !/[Ll]is|lue?s?\b|marqués?|point marqué/.test(x.raw)) return null;
+    const Q = quadRead(x); if (!Q) return null;
+    if (x.spec.kind === "set" && /Lis ses zéros/.test(x.raw)) return { set: Q.z, f: (u) => [Q.a * (u - Q.z[0]) * (u - Q.z[1]), 0] };
+    if (x.spec.kind === "value" && /axe de symétrie/.test(x.raw) && /zéros/.test(x.raw)) return Q.z.length === 2 ? { v: (Q.z[0] + Q.z[1]) / 2 } : { v: NaN };
+    if (x.spec.kind === "pair" && /Lis les coordonnées de son sommet/.test(x.raw)) return { pair: [Q.h, Q.k] };
+    if (x.spec.kind === "expr" && /Lis son sommet et son orientation/.test(x.raw)) return { expr: Expr.parse((Q.a < 0 ? "-" : "") + "(x-(" + Q.h + "))^2+(" + Q.k + ")") };
+    if (x.spec.kind === "expr" && /Lis le sommet sur le graphique \(la parabole a la même ouverture que \\\(y = (-?)x\^2\\\)\)/.test(x.raw)) { const s = /même ouverture que \\\(y = -x\^2/.test(x.raw) ? -1 : 1; if (Math.abs(Q.a - s) > 0.05) return { err: "ouverture lue " + Q.a.toFixed(2) + " au lieu de " + s }; return { expr: Expr.parse((s < 0 ? "-" : "") + "(x-(" + Q.h + "))^2+(" + Q.k + ")") }; }
+    if (x.spec.kind === "value" && /sommet \\\(S\\\) et passe par le point \\\(P\\\)/.test(x.raw)) { const S = Q.F.dots.find((d) => d.lab === "S"), P = Q.F.dots.find((d) => d.lab === "P"); if (!S || !P) return null; const sx = clean(S.x), sy = clean(S.y), px = clean(P.x), py = clean(P.y); return { v: (py - sy) / (px - sx) ** 2 }; }
+    if (x.spec.kind === "value" && /a\(x - x_1\)\(x - x_2\)/.test(x.raw) && /ordonnée à l'origine/.test(x.raw)) { const d0 = Q.F.dots.find((d) => Math.abs(d.x) < 0.05); if (!d0 || Q.z.length !== 2) return null; return { v: clean(d0.y) / (Q.z[0] * Q.z[1]) }; }
+    return null;
+  } });
+  /* f2, f2expr : sommet par la formule ; parabole donnée par son axe, son ordonnée à l'origine et un point */
+  G.push({ name: "parabole (sommet, axe)", f(x) {
+    if (!["f2", "f2expr"].includes(x.id)) return null; let m;
+    if (x.spec.kind === "pair" && (m = /^Détermine le sommet de \\\(f\(x\) = (.+?)\\\)/.exec(x.raw))) { const f = fxT(m[1]), a = (f(1) + f(-1) - 2 * f(0)) / 2, b = (f(1) - f(-1)) / 2; if (!a) return null; const h = -b / (2 * a); return { pair: [h, f(h)] }; }
+    if (x.spec.kind === "expr" && (m = /pour axe de symétrie la droite \\\(x = (-?\d+)\\\), coupe l'axe des \\\(y\\\) en \\\((-?\d+)\\\) et passe par \\\(\((-?\d+) \\,;\\, (-?\d+)\)\\\)/.exec(x.raw))) { const [h, c, p, q] = m.slice(1).map(Number), den = (p - h) ** 2 - h * h; if (!den) return { err: "point symétrique de l'ordonnée à l'origine : parabole non déterminée" }; const a = (q - c) / den, k = c - a * h * h; return { expr: Expr.parse("(" + a + ")*(x-(" + h + "))^2+(" + k + ")") }; }
+    return null;
+  } });
+  /* transf : translations et dilatations verticales de graphes */
+  G.push({ name: "transformation de graphe", f(x) {
+    if (x.id !== "transf") return null;
+    const r = x.raw; let m;
+    if (x.spec.kind === "expr" && (m = /On décale la parabole \\\(y = x\^2\\\) de \\\((\d+)\\\) vers la (gauche|droite) et de \\\((\d+)\\\) vers le (haut|bas)/.exec(r))) { const h = (m[2] === "gauche" ? -1 : 1) * +m[1], k = (m[4] === "bas" ? -1 : 1) * +m[3]; return { expr: Expr.parse("(x-(" + h + "))^2+(" + k + ")") }; }
+    const gdef = /g\(x\) = (-?\d*)f\(x ([+-]) (\d+)\)(?: ([+-]) (\d+))?/.exec(r), A = gdef ? (gdef[1] === "" ? 1 : gdef[1] === "-" ? -1 : +gdef[1]) : 1, H = gdef ? (gdef[2] === "-" ? +gdef[3] : -gdef[3]) : 0, K = gdef && gdef[4] ? (gdef[4] === "+" ? +gdef[5] : -gdef[5]) : 0;
+    const argmin = (f) => { let lo = -60, hi = 60; for (let i = 0; i < 200; i++) { const a = lo + (hi - lo) / 3, b = hi - (hi - lo) / 3; if (f(a) < f(b)) hi = b; else lo = a; } const u = (lo + hi) / 2; return [+u.toFixed(6), +f(u).toFixed(6)]; };
+    if (x.spec.kind === "pair" && (m = /^Le graphe de \\\(g\(x\) = ([^\\]+?)\\\) est obtenu en déplaçant celui de \\\(f\(x\) = x\^2\\\)\. Quel est le sommet/.exec(r))) return { pair: argmin(fxT(m[1])) };
+    if (x.spec.kind === "pair" && gdef && (m = /^Soit \\\(f\(x\) = ([^\\]+?)\\\) et \\\(g\(x\)/.exec(r)) && /sommet de la parabole de/.test(r)) { const f = fxT(m[1]); return { pair: argmin((u) => A * f(u - H) + K) }; }
+    if (x.spec.kind === "value" && gdef && (m = /^Soit \\\(f\(x\) = (.+?)\\\) et \\\(g\(x\)/.exec(r)) && /minimum de \\\(g\\\) est-il atteint/.test(r)) { const f = fxT(m[1]); return { v: argmin((u) => A * f(u - H) + K)[0] }; }
+    if (x.spec.kind === "pair" && gdef && (m = /Le point \\\(P\((-?\d+) ; (-?\d+)\)\\\) est sur le graphe de \\\(f\\\)/.exec(r))) return { pair: [+m[1] + H, A * +m[2] + K] };
+    if (x.spec.kind === "value" && gdef && (m = /On sait que \\\(f\((-?\d+)\) = (-?\d+)\\\)\..*Calcule \\\(g\((-?\d+)\)\\\)/.exec(r))) return +m[3] - H === +m[1] ? { v: A * +m[2] + K } : { err: "g(" + m[3] + ") demande f(" + (+m[3] - H) + "), inconnu (on donne f(" + m[1] + "))" };
+    if (x.spec.kind === "value" && (m = /^Le graphe de \\\(g\(x\) = ([^\\]+?)\\\) est celui de \\\(f\(x\) = ([^\\]+?)\\\) déplacé\. De combien d'unités est-il décalé (horizontalement|verticalement)/.exec(r))) { const a = argmin(fxT(m[1])), b = argmin(fxT(m[2])); return { v: m[3] === "horizontalement" ? a[0] - b[0] : a[1] - b[1] }; }
+    if (x.spec.kind === "value" && gdef && (m = /^Soit \\\(f\(x\) = (.+?)\\\) et \\\(g\(x\)/.exec(r)) && /Quelle est la valeur minimale de \\\(g\\\)/.test(r)) { const f = fxT(m[1]); return { v: argmin((u) => A * f(u - H) + K)[1] }; }
+    if (x.spec.kind === "pair" && (m = /envoie la parabole \\\(y = x\^2\\\) sur \\\(y = ([^\\]+?)\\\)/.exec(r))) return { pair: argmin(fxT(m[1])) };
+    return null;
+  } });
+  /* trigcercle, trigfn : cercle trigonométrique et fonctions sinusoïdales (balayage numérique) */
+  G.push({ name: "trigonométrie (cercle, fonctions)", f(x) {
+    if (!["trigcercle", "trigfn"].includes(x.id)) return null;
+    const r = x.raw, sp = x.spec; let m;
+    if (sp.kind === "value" && (m = /^Convertis \\\((-?\d+)°\\\) en radians/.exec(r))) return { v: +m[1] * DEG };
+    if (sp.kind === "value" && (m = /^Convertis \\\((.+?)\\\) radians en degrés/.exec(r))) return { v: ev(m[1]) / DEG };
+    if (sp.kind === "value" && (m = /quadrant du cercle trigonométrique se trouve l'angle \\\((-?\d+)°\\\)/.exec(r))) { const a = ((+m[1] % 360) + 360) % 360; return a % 90 ? { v: Math.floor(a / 90) + 1 } : { err: "angle sur un axe : pas de quadrant" }; }
+    if (sp.kind === "value" && (m = /a le même point sur le cercle trigonométrique que \\\((-?\d+)°\\\)/.exec(r))) return { v: ((+m[1] % 360) + 360) % 360 };
+    if (sp.kind === "value" && (m = /^Donne la valeur exacte de \\\(\\(sin|cos|tan) (-?\d+)°\\\)/.exec(r))) return { v: Math[m[1]](+m[2] * DEG) };
+    if (sp.kind === "pair" && (m = /cercle trigonométrique associé à (?:\\\((-?\d+)°\\\)|l'angle \\\((.+?)\\\) \(en radians\))/.exec(r))) { const t = m[1] !== undefined ? +m[1] * DEG : ev(m[2]); return { pair: [Math.cos(t), Math.sin(t)] }; }
+    if (sp.kind === "value" && (m = /^Quel angle \\\(\\alpha\\\) compris entre \\\((\d+)°\\\) et \\\((\d+)°\\\) vérifie \\\(\\(sin|cos|tan) \\alpha = (.+?)\\\)/.exec(r))) { const w = ev(m[4]), S = []; for (let t = +m[1]; t <= +m[2]; t++) if (Math.abs(Math[m[3]](t * DEG) - w) < 1e-9) S.push(t); return S.length === 1 ? { v: S[0] } : { err: S.length + " angles conviennent : " + S.join(", ") }; }
+    /* fonctions sinusoïdales (x en degrés sauf mention « radians ») */
+    const fm = /f\(x\) = ([^\\]*?(?:\\(?:sin|cos)[^\\]*?)+)\\\)/.exec(r); if (!fm) { if ((m = /a pour maximum \\\((-?[\d{},]+)\\\) et pour minimum \\\((-?[\d{},]+)\\\)\. Que vaut \\\(([ad])\\\)/.exec(r))) { const M2 = ev(m[1]), m2 = ev(m[2]); return { v: m[3] === "d" ? (M2 + m2) / 2 : (M2 - m2) / 2 }; } return null; }
+    if (/f\(x\) = a\\sin\(x\) \+ d/.test(r)) { if ((m = /a pour maximum \\\((-?[\d{},]+)\\\) et pour minimum \\\((-?[\d{},]+)\\\)\. Que vaut \\\(([ad])\\\)/.exec(r))) { const M2 = ev(m[1]), m2 = ev(m[2]); return { v: m[3] === "d" ? (M2 + m2) / 2 : (M2 - m2) / 2 }; } return null; }
+    let f; try { f = fxT(fm[1]); } catch (e) { return null; }
+    const fd = (d) => f(d * DEG), grid = (a, b, st) => { const out = []; for (let i = 0; a + i * st <= b + 1e-9; i++) out.push(+(a + i * st).toFixed(6)); return out; };
+    const G1 = grid(0, 360, 0.25), V = G1.map(fd), mx = Math.max(...V), mn = Math.min(...V);
+    if (sp.kind === "value" && /amplitude/.test(r)) return { v: (mx - mn) / 2 };
+    if (sp.kind === "value" && (m = /valeur (minimale|maximale) de/.exec(r))) return { v: m[1] === "minimale" ? mn : mx };
+    if (sp.kind === "value" && (m = /^Sur l'intervalle \\\(0° \\le x < 360°\\\), en quel \\\(x\\\) la fonction .* atteint-elle son (minimum|maximum)/.exec(r))) { const w = m[1] === "minimum" ? mn : mx, S = G1.filter((d, i) => d < 360 && Math.abs(V[i] - w) < 1e-9); return S.length === 1 ? { v: S[0] } : { err: "extremum atteint en " + S.join(", ") }; }
+    if (sp.kind === "value" && (m = /^En quel plus petit \\\(x > 0\\\) \(en degrés\) la fonction .* atteint-elle son (minimum|maximum)/.exec(r))) { const w = m[1] === "minimum" ? mn : mx; for (const d of grid(0.25, 720, 0.25)) if (Math.abs(fd(d) - w) < 1e-9) return { v: d }; return { v: NaN }; }
+    if (sp.kind === "value" && (m = /\(x en degrés\)\. Calcule \\\(f\((-?\d+)°\)\\\)/.exec(r))) return { v: fd(+m[1]) };
+    if (sp.kind === "value" && /^Quelle est la période/.test(r)) { const rad = /x en radians/.test(r), u = rad ? 1 : DEG, P0 = [0.3, 1.1, 2.7, 4.2], err = (t) => P0.reduce((a, p) => a + Math.abs(f(p + t * u) - f(p)), 0), st = rad ? 0.002 : 0.1, top = rad ? 30 : 1800;
+      for (let t = st; t <= top; t += st) { if (!(err(t) < err(t - st) && err(t) <= err(t + st) && err(t) < 0.05)) continue; let lo = t - st, hi = t + st; for (let i = 0; i < 100; i++) { const a = lo + (hi - lo) / 3, b = hi - (hi - lo) / 3; if (err(a) < err(b)) hi = b; else lo = a; } const T = (lo + hi) / 2; if (err(T) < 1e-7) return { v: T }; }
+      return { v: NaN }; }
+    if (sp.kind === "value" && /coupe-t-elle l'axe des abscisses pour \\\(0° \\le x \\le 360°\\\)/.test(r)) { let n = 0; const st = 0.25; for (let i = 0; i < G1.length; i++) { if (Math.abs(V[i]) < 1e-9) n++; else if (i && Math.abs(V[i - 1]) >= 1e-9 && V[i - 1] * V[i] < 0) n++; } return { v: n }; }
+    return null;
+  } });
+  /* recip : réciproque (valeur et expression), composée */
+  G.push({ name: "réciproque", f(x) {
+    if (x.id !== "recip") return null;
+    const r = x.raw, sp = x.spec; let m;
+    if (sp.kind === "value" && (m = /\\\(f\(x\) = (.+?)\\\) et \\\(g\(x\) = (.+?)\\\)\. Calcule \\\(\((f|g) \\circ (f|g)\)\((-?\d+)\)\\\)/.exec(r))) { const F = { f: fxT(m[1]), g: fxT(m[2]) }; return { v: F[m[3]](F[m[4]](+m[5])) }; }
+    const fm = /(?:^Soit|^La fonction) \\\(f\(x\) = (.+?)\\\)/.exec(r); if (!fm) return null; let f; try { f = fxT(fm[1]); } catch (e) { return null; }
+    const dom = /(?:\\\(A = |bijection de \\\()\[(-?\d+) \\,;\\, \+\\infty\[/.exec(r), lo = dom ? +dom[1] : -Infinity;
+    if (sp.kind === "value" && (m = /Calcule \\\(f\^\{-1\}\((-?\d+)\)\\\)/.exec(r))) { const y = +m[1], S = (roots((u) => [f(u), y]) || []).filter((u) => u >= lo - 1e-9); return S.length === 1 ? { v: S[0] } : { err: S.length + " antécédents de " + y + " : " + S.map(fmt).join(" ; ") }; }
+    if (sp.kind === "expr" && /Donne l'expression de \\\(f\^\{-1\}\(x\)\\\)/.test(r)) { let E; try { E = compile(Expr.parse(sp.expr)); } catch (e) { return null; }
+      const im = /vers \\\(\[(-?\d+) \\,;\\, \+\\infty\[/.exec(r), y0 = im ? +im[1] : -5; let n = 0;
+      for (const t of [0.4, 1.3, 2.9, 5.1, 7.7]) { const y = y0 + t, u = E({ x: y }), b = f(u); if (!isFinite(u) || !isFinite(b)) continue; n++; if (Math.abs(b - y) > 1e-7 * (1 + Math.abs(y))) return { err: "f(f⁻¹(" + fmt(y) + ")) = " + fmt(b) }; }
+      return n >= 3 ? { err: null } : null; }
+    return null;
+  } });
+
+  /* probeq : histoires restantes ; decadd : rendu de monnaie, écarts, bouteille */
+  T("probeq", /La somme de (\d+) nombres (pairs |impairs |entiers )?consécutifs vaut (-?\d+)\. Quel est le plus (petit|grand)/i, (k, t, S, w) => { k = +k; S = +S; const st = t ? 2 : 1, n = (S - (st * k * (k - 1)) / 2) / k; return w === "petit" ? n : n + st * (k - 1); }, { raw: true });
+  T("probeq", /a obtenu les notes ((?:\d+(?:,\d+)?, )+\d+(?:,\d+)?)\. Quelle note doit-il obtenir au prochain test pour avoir exactement (\d+(?:,\d+)?) de moyenne/i, (L, m) => { const v = L.split(", ").map(num); return num(m) * (v.length + 1) - v.reduce((a, b) => a + b, 0); }, { raw: true });
+  T(null, /Après une réduction de (\d+(?:,\d+)?) ?%, [^.]*? coûte (\d+(?:'\d{3})*(?:,\d+)?) (?:CHF|€)\. Quel était son prix avant/i, (p, P) => P / (1 - p / 100));
+  T("probeq", /(Deux|Trois|Quatre) amis partagent un sac de [^.]+\. Chacun se réveille à son tour et mange (la moitié|un tiers|un quart) de ce qui reste dans le sac\. Au matin, il reste (\d+) /i, (n, f, r) => { const k = { deux: 2, trois: 3, quatre: 4 }[n.toLowerCase()], q = { "la moitié": 1 / 2, "un tiers": 1 / 3, "un quart": 1 / 4 }[f]; return +r / (1 - q) ** k; }, { raw: true });
+  T(null, /à (\d+(?:,\d+)?) (?:CHF|€) et tu paies avec un billet de (\d+) (?:CHF|€)\. Combien te rend-on/i, (a, b) => b - a);
+  T(null, /court le 100 m en (\d+(?:,\d+)?) s et \S+ (\d+(?:,\d+)?) s\. Quel est l'écart/i, (a, b) => Math.abs(a - b));
+  T(null, /saute en longueur (\d+(?:,\d+)?) m et \S+ (\d+(?:,\d+)?) m\. Quel est l'écart/i, (a, b) => Math.abs(a - b));
+  T(null, /contient (\d+(?:,\d+)?) L ; on en verse (\d+(?:,\d+)?) L\. Combien reste-t-il/i, (a, b) => a - b);
+
+  /* ---------- 26.11 (agent defis2) : autres notions fréquentes encore non couvertes (inter, homog, polydiv, nbderive,
+     combi, milieux, suites arithmétiques et géométriques, tauxevol) ---------- */
+  const fdefs = (raw) => { const o = {}; for (const t of math(raw)) { const m = /^\s*(?:([a-zA-Z])\(([xt])\)|(?:[de] : )?y) = ([\s\S]+)$/.exec(t); if (!m) continue; const k = m[1] || "y" + Object.keys(o).length; try { o[k] = fxT(m[2] === "t" ? m[3].replace(/(?<![a-zA-Z\\])t(?![a-zA-Z])/g, "x") : m[3]); } catch (e) {} } return o; };
+  G.push({ name: "intersections de graphes", f(x) {
+    if (x.id !== "inter") return null; const r = x.raw, sp = x.spec, F = Object.values(fdefs(r)); let m;
+    if ((m = /la droite \\\(y = k\\\) est-elle tangente à la parabole \\\(f\(x\) = (.+?)\\\)/.exec(r))) { const f = fxT(m[1]), a = (f(1) + f(-1) - 2 * f(0)) / 2, b = (f(1) - f(-1)) / 2; return { v: f(-b / (2 * a)) }; }
+    if (F.length < 2) return null; const [f, g] = F, R0 = roots((u) => [f(u), g(u)]); if (!R0) return null;
+    if (sp.kind === "set") return { set: R0, f: (u) => [f(u), g(u)] };
+    if (sp.kind === "value" && /Combien de points d'intersection/.test(r)) return { v: R0.length };
+    if (sp.kind === "value" && /distance horizontale/.test(r)) return R0.length === 2 ? { v: Math.abs(R0[1] - R0[0]) } : { err: R0.length + " points communs" };
+    if (sp.kind === "pair") { let u; if (R0.length === 1) u = R0[0]; else if (/abscisse positive/.test(r)) { const P2 = R0.filter((t) => t > 0); if (P2.length !== 1) return { err: P2.length + " points d'abscisse positive" }; u = P2[0]; } else if (/abscisse négative/.test(r)) { const P2 = R0.filter((t) => t < 0); if (P2.length !== 1) return { err: P2.length + " points d'abscisse négative" }; u = P2[0]; } else if (/plus à droite/.test(r)) u = Math.max(...R0); else if (/plus à gauche/.test(r)) u = Math.min(...R0); else return { err: R0.length + " points communs, lequel ?" }; return { pair: [u, f(u)] }; }
+    return null;
+  } });
+  G.push({ name: "fonction homographique", f(x) {
+    if (x.id !== "homog") return null; const r = x.raw; const m = /^Soit \\\(f\(x\) = (.+?)\\\)\./.exec(r); if (!m) return null; let f; try { f = fxT(m[1]); } catch (e) { return null; }
+    if (x.spec.kind === "value" && /asymptote verticale/.test(r)) { const d = /\\frac\{.+?\}\{(.+?)\}$/.exec(m[1]); if (!d) return null; const R0 = roots((u) => [fxT(d[1])(u), 0]); return R0 && R0.length === 1 ? { v: R0[0] } : null; }
+    if (x.spec.kind === "value" && /asymptote horizontale/.test(r)) { const a = f(1e7), b = f(-1e7); return { v: (a + b) / 2 }; }
+    if (x.spec.kind === "expr" && /réciproque/.test(r)) { let E; try { E = compile(Expr.parse(x.spec.expr)); } catch (e) { return null; } let n = 0;
+      for (const y of [-7.3, -2.2, 0.6, 3.1, 9.4]) { const u = E({ x: y }), b = f(u); if (!isFinite(u) || !isFinite(b) || Math.abs(u) > 1e6) continue; n++; if (Math.abs(b - y) > 1e-7 * (1 + Math.abs(y))) return { err: "f(f⁻¹(" + fmt(y) + ")) = " + fmt(b) }; }
+      return n >= 3 ? { err: null } : null; }
+    return null;
+  } });
+  G.push({ name: "division de polynômes", f(x) {
+    if (x.id !== "polydiv") return null; const r = x.raw, sp = x.spec; let m;
+    const P = /([PA])\(x\) = ([^\\]+?)\\\)/.exec(r); if (!P) return null;
+    if (sp.kind === "value" && (m = /reste de la division de \\\(P\(x\) = (.+?)\\\) par \\\(x ([+-]) (\d+)\\\)/.exec(r))) return { v: fxT(m[1])((m[2] === "-" ? 1 : -1) * +m[3]) };
+    if (sp.kind === "expr" && (m = /divisible par \\\(x ([+-]) (\d+)\\\), donne le quotient/.exec(r))) { const p = fxT(P[2]), a = (m[1] === "-" ? 1 : -1) * +m[2]; let Q; try { Q = compile(Expr.parse(sp.expr)); } catch (e) { return null; }
+      for (const t of [-2.3, -0.7, 1.4, 3.6]) { const w = Q({ x: t }) * (t - a), v = p(t); if (Math.abs(w - v) > 1e-7 * (1 + Math.abs(v))) return { err: "Q(x)·(x − " + a + ") ≠ P(x) en x = " + t }; } return { err: null }; }
+    if (sp.kind === "expr" && (m = /de \\\(A\(x\) = (.+?)\\\) par \\\(B\(x\) = (.+?)\\\)\. Donne le reste/.exec(r))) { const A = fxT(m[1]), B = fxT(m[2]), Rr = roots((u) => [B(u), 0]); let Re; try { Re = compile(Expr.parse(sp.expr)); } catch (e) { return null; } if (!Rr || Rr.length !== 2) return null;
+      for (const t of Rr) { const d = A(t) - Re({ x: t }); if (Math.abs(d) > 1e-6 * (1 + Math.abs(A(t)))) return { err: "A − R ne s'annule pas en la racine " + fmt(t) + " de B" }; } return /x\^[2-9]/.test(sp.expr) ? { err: "reste de degré ≥ 2" } : { err: null }; }
+    const lin = (expr, vars, pts) => { const T2 = Expr.parse(tex2e(expr)), ev2 = (env) => Expr.evaluate(T2, env); return pts.map((t) => { const e0 = { x: t }; vars.forEach((v) => (e0[v] = 0)); const c0 = ev2(e0); return [...vars.map((v) => { const e1 = { ...e0 }; e1[v] = 1; return ev2(e1) - c0; }), -c0]; }); };
+    if (sp.kind === "value" && (m = /\\\(P\(x\) = (.+?)\\\) soit divisible par \\\(x ([+-]) (\d+)\\\)/.exec(r)) && /Détermine \\\(k\\\)/.test(r)) { const [[a, c]] = lin(m[1], ["k"], [(m[2] === "-" ? 1 : -1) * +m[3]]); return a ? { v: c / a } : null; }
+    if (sp.kind === "pair" && (m = /\\\(P\(x\) = (.+?)\\\) soit divisible par \\\((.+?)\\\)\. Réponds « a ; b »/.exec(r))) { const Rr = roots((u) => [fxT(m[2])(u), 0]); if (!Rr || Rr.length !== 2) return null; const [[a1, b1, c1], [a2, b2, c2]] = lin(m[1], ["a", "b"], Rr), D = a1 * b2 - a2 * b1; return D ? { pair: [(c1 * b2 - c2 * b1) / D, (a1 * c2 - a2 * c1) / D] } : null; }
+    return null;
+  } });
+  G.push({ name: "nombre dérivé", f(x) {
+    if (!["nbderive", "tangente"].includes(x.id) || x.spec.kind !== "value") return null; const r = x.raw; let m;
+    if (!(m = /\\\(([fs])'\((-?\d+)\)\\\)/.exec(r)) && !(m = /([fs])'\((-?\d+)\)/.exec(r))) return null; const D2 = fdefs(r)[m[1]]; if (!D2) return null;
+    if (!/calcule|vitesse instantanée|Calcule|pente de la tangente/.test(r)) return null;
+    const a = +m[2], h = 1e-3; return { v: (8 * (D2(a + h) - D2(a - h)) - (D2(a + 2 * h) - D2(a - 2 * h))) / (12 * h) };
+  } });
+  /* combi */
+  const Cnk = (n, k) => (k < 0 || k > n ? 0 : Math.round(fact(n) / (fact(k) * fact(n - k)))), Ank = (n, k) => Math.round(fact(n) / fact(n - k));
+  T("combi", /^(\d+) \S+ participent à une course \(sans ex æquo\)\. Combien d'ordres/i, (n) => fact(n));
+  T("combi", /^(\d+) \S+ posent en ligne pour une photo/i, (n) => fact(n));
+  T("combi", /choisit (\d+) \S+ parmi les (\d+) /i, (k, n) => Cnk(n, k));
+  T("combi", /^(\d+) \S+ disputent une finale\. Combien de podiums/i, (n) => Ank(n, 3));
+  T("combi", /tire simultanément (\d+) cartes d'un jeu de \S+ de (\d+) cartes/i, (k, n) => Cnk(n, k));
+  T("combi", /on coche (\d+) numéros parmi (\d+)/i, (k, n) => Cnk(n, k));
+  T("combi", /club de (\d+) membres élit un président, un vice-président et un caissier/i, (n) => Ank(n, 3));
+  T("combi", /^(\d+) chevaux prennent le départ\. Un pari « tiercé dans l'ordre »/i, (n) => Ank(n, 3));
+  T("combi", /avec toutes les lettres du mot ([A-ZÉÈ]+)/, (w) => { const c = {}; for (const ch of w) c[ch] = (c[ch] || 0) + 1; return Object.values(c).reduce((a, k) => a / fact(k), fact(w.length)); }, { raw: true });
+  T("combi", /QCM a (\d+) questions, chacune avec (\d+) réponses possibles/i, (n, k) => k ** n);
+  T("combi", /propose (\d+) garnitures\. Combien de pizzas différentes peut-on composer avec (\d+) garnitures différentes/i, (n, k) => Cnk(n, k));
+  T("combi", /codes de (\d+) lettres \(de A à Z, répétitions permises\)/i, (k) => 26 ** k);
+  T("combi", /^(\d+) personnes se saluent/i, (n) => Cnk(n, 2));
+  T("combi", /cadenas a (\d+) roues de (\d+) symboles/i, (r, s) => s ** r);
+  T("combi", /classe de (\d+) élèves choisit (\d+) délégués \(sans rôle/i, (n, k) => Cnk(n, k));
+  T("combi", /compte (\d+) filles et (\d+) garçons\. On forme un comité de (\d+) élèves\. Combien de comités comptent exactement (\d+) filles/i, (f, g, n, k) => Cnk(f, k) * Cnk(g, n - k));
+  T("combi", /On compte (\d+) poignées de main\. Combien y a-t-il d'invités/i, (P) => { for (let n = 2; n < 200; n++) if ((n * (n - 1)) / 2 === P) return n; return NaN; });
+  T("combi", /^(\d+) amis, dont \S+ et \S+, s'assoient sur un banc de \d+ places\. [^?]*côte à côte/i, (n) => 2 * fact(n - 1));
+  T("combi", /nombres de (\d+) chiffres \(le premier n'est pas 0\) ont tous leurs chiffres différents/i, (k) => 9 * Ank(9, k - 1));
+  /* milieux (théorème des milieux) */
+  T("milieux", Z`milieux des côtés \[\w+\] et \[\w+\] du triangle \w+, et \w+ = # cm\. Calcule`, (c) => c / 2);
+  T("milieux", Z`est le milieu de \[\w+\] et \w+ celui de \[\w+\]\. On mesure \w+ = # cm\. Quelle est la longueur`, (c) => 2 * c);
+  T("milieux", Z`milieux des côtés \[\w+\], \[\w+\] et \[\w+\] du triangle \w+, avec \w+ = # cm, \w+ = # cm et \w+ = # cm\. Quel est le périmètre`, (a, b, c) => (a + b + c) / 2);
+  T("milieux", Z`La parallèle à \(\w+\) passant par \w+ coupe \[\w+\] en \w+\. On sait que \w+ = # cm\. Calcule`, (c) => c / 2);
+  T("milieux", Z`parallèle à \(\w+\) coupe \[\w+\] en \w+\. Sachant que \w+ = # cm, calcule`, (c) => c / 2);
+  T("milieux", Z`du quadrilatère \w+\. Ses diagonales mesurent \w+ = # cm et \w+ = # cm\. Quel est le périmètre`, (a, b) => a + b);
+  /* suites arithmétiques et géométriques (formes directes) */
+  T(null, Z`suite (arithmétique|géométrique)[^.]*? premier terme u_(\d+) = # et (?:pour|de) raison (?:[rq] = )?#\. Calcule u_(\d+)\b`, (t, i, a, q, n) => (/arith/i.test(t) ? num(a) + (num(n) - num(i)) * num(q) : num(a) * num(q) ** (num(n) - num(i))), { raw: true });
+  T(null, Z`suite arithmétique vérifie u_(\d+) = # et u_(\d+) = #\. Quelle est sa raison`, (i, a, j, b) => (b - a) / (j - i));
+  T(null, Z`suite arithmétique vérifie u_(\d+) = # et u_(\d+) = #\. Calcule u_0`, (i, a, j, b) => a - (i * (b - a)) / (j - i));
+  T(null, Z`suite arithmétique \(u_n\) a pour premier terme u_0 = # et pour raison #\. Pour quel entier n a-t-on u_n = #`, (a, q, v) => (v - a) / q);
+
   /* ---------- application ---------- */
   function ruleFor(x, txt) {
     for (const r of RULES) {

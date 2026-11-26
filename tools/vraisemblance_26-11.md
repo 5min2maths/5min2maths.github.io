@@ -155,7 +155,38 @@ isom (formes, axes, centres, compositions), numer (égyptien, romain, binaire, b
 
 ### Reste (non traité)
 
-- Défis figés (un seul énoncé au niveau 4, rapportés en mineur par la page) : approxnorm, compdiff, echelle6, empil, intmaj, mediatrice, posrelc, proba6, suiteint, symax ; et deux énoncés fixes seulement pour isom et numer. À tirer au hasard comme ensco, fctlec et litconv.
+- ~~Défis figés~~ : traité (agent/defis2, ci-dessous).
 - Le signe « × » reste dans des aides en texte du profil romand (« longueur × largeur », « Longueurs × k », 91 notions-niveaux, src/generators.js HINTS et leçons) et pour les formats (« pavé 2 × 3 × 6 », « matrice 2 × 2 », produit vectoriel) : usage courant en Suisse aussi ; décision de l'enseignant à prendre (le contrôle de la page ne vise que « nombre × nombre = »).
 - La pyramide du Louvre (pythfig, profil romand) et le change CHF ↔ EUR sont gardés (références voulues).
 - Contrôle de densite-1 « position d'une panne sur un câble, loi uniforme sur [3 ; 7] (en m) » : vraisemblable mais peu parlant.
+
+### Défis figés rendus aléatoires (26.11 soir, branche agent/defis2)
+
+Les 12 défis (niveau 4) qui n'avaient qu'un ou deux énoncés fixes sont maintenant tirés au hasard, avec 3 contextes
+chacun (tag `ctx`), corrigé calculé et recalculé indépendamment (`tests/recalc_oracles.js`, un oracle par contexte et par
+question : 5'400 questions de défi sur 150 graines, toutes justes, contre-épreuves détectées).
+
+| Notion | Profil | Contextes (ctx) |
+|---|---|---|
+| symax (6e) | France | triangle et axe (BC), angles calculés depuis les côtés (loi des cosinus, cohérents) ; allée d'un jardin à la française (statue, banc) ; rectangle doublé par symétrie (périmètre, aire) |
+| mediatrice (6e) | France | puits à égale distance de trois maisons (PA > AB/2, cordes < 2PA) ; salle de sport commune à deux villages ; cerf-volant (C et D sur la médiatrice) |
+| echelle6 (6e) | France | carte de randonnée (1/25 000 ou 1/50 000, 4 ou 5 km/h) ; plan d'appartement (1/50, 1/100 : dimensions et aire) ; maquette (paquebot, voilier, avion, pont ; maquette deux fois plus grande) |
+| proba6 (6e) | France | sac (billes, jetons, bonbons ; objets à retirer pour une probabilité donnée) ; roue de loterie (secteurs à repeindre) ; cartes numérotées (multiples, « au moins ») |
+| empil (5e) | France | pyramide à étages carrés ; escalier (profil, cubes, vue de dessus) ; tour creuse (contour, remplissage) |
+| compdiff (2nde) | France | prix au kilo (café, fromage, chocolat, thé ; quotient) ; population ville / village (différence et quotient) ; consommation aux 100 km |
+| posrelc (1re) | France | parabole et droite ; deux paraboles ; coût et recette (bénéfice maximal) |
+| intmaj (Tle) | France | fonction croissante (amplitude) ; fonction décroissante (minorant, majorant, centre) ; débit d'une source (majorant du volume) — encadrement contrôlé par l'intégrale (Simpson) |
+| suiteint (Tle) | France | xⁿ(1 − x)² ; xⁿ(1 − x) avec seuil ; xⁿ(a + x) avec limite de n·Iₙ — intégrales recalculées par Simpson |
+| approxnorm (4e Collège) | romand | surréservation (présence 0,9, quelques places de moins) ; germination (« au moins k ») ; pièce ou sondage (intervalle centré) — valeur de Φ contrôlée, réponse « au dix-millième, avec la table » |
+| isom (9e) | romand | deux symétries d'axes parallèles (verticaux ou horizontaux) ; symétrie de centre O ou Ω (aire conservée) ; translation appliquée une ou deux fois |
+| numer (9e) | romand | date en chiffres romains (monument, cloche, gare après 1850, moulin) ; deux nombres binaires (au moins deux « 1 ») ; nombre égyptien et son double (échanges) |
+
+Contrôle : `tests/vraisemblance_soir.html` échoue désormais (au lieu de signaler) si un défi des notions du soir n'a qu'un
+énoncé, et si l'un de ces 12 défis a moins de 10 énoncés différents (énoncé et questions) ou moins de 3 contextes sur
+#n graines.
+
+Restent peu variés (2 à 4 énoncés au niveau 4, hors de cette tâche) : densite, hauteurs5, graphefct, repere3d, geoesp,
+tabform5, ineqgraph ; et, dans tout le catalogue, une soixantaine de défis à 1 ou 2 énoncés (relevé sur 60 graines par
+défi : pow9, angtype, lectgraph, puisrat, logprop, proba2, tauxevol, vect3e, probcond, algopy,
+bayes, syslin, bases, cplxalg, cplxtrig, cplxeq, suitegeom, serie, expderiv, trigrad, autodnb, tabvar, lnfr…).
+
