@@ -1782,16 +1782,33 @@ const DEFIS = (() => {
           "a) " + M("\\frac{2^{" + a + "} \\cdot 2^{" + 2 * b + "}}{2^{" + 3 * c + "}} = 2^{" + e1 + "}") + ". b) " + M("\\frac{3^{" + 2 * p + "} \\cdot 3^{" + 3 * q + "}}{3^{" + r + "}} = 3^{" + e2 + "}")+ ".");
       },
     ],
-    /* ---------- 11e : notation scientifique (vitesse de la lumière) ---------- */
+    /* ---------- 11e : notation scientifique (vitesse de la lumière ; 26.11 soir, agent defis3 : + objets microscopiques
+       et rayons des astres, 3 contextes et plus) ---------- */
     sci: [
       () => {
         const [pl, man, ex] = pk([["Mars", 2.28, 8], ["Jupiter", 7.78, 8], ["Saturne", 1.43, 9], ["Uranus", 2.87, 9], ["Neptune", 4.5, 9], ["Mercure", 5.79, 7], ["Vénus", 1.08, 8]]);
         const dkm = man * 10 ** ex, t = dkm / 3e5;
-        return P("La planète " + pl + " est à environ " + M(D(man) + " \\cdot 10^{" + ex + "} \\text{ km}") + " du Soleil. La lumière parcourt " + M("3 \\cdot 10^5 \\text{ km}") + " par seconde.",
+        return Object.assign(P("La planète " + pl + " est à environ " + M(D(man) + " \\cdot 10^{" + ex + "} \\text{ km}") + " du Soleil. La lumière parcourt " + M("3 \\cdot 10^5 \\text{ km}") + " par seconde.",
           [["a) Cette distance en m s'écrit " + M("a \\cdot 10^n") + " : que vaut " + M("n") + " ?", ex + 3], ["b) Durée du trajet de la lumière du Soleil à " + pl + " (s, à l'unité)", t, 1], ["c) Cette durée en minutes (au dixième)", t / 60, 0.1]],
           ["1 km = 10³ m : multiplie par 10³, donc ajoute 3 à l'exposant.",
            "Temps = distance ÷ vitesse : divise les nombres devant (" + T(man) + " ÷ 3) et soustrais les exposants (" + ex + " − 5)."],
-          "a) " + M(D(man) + " \\cdot 10^{" + ex + "} \\cdot 10^3 = " + D(man) + " \\cdot 10^{" + (ex + 3) + "}") + " m. b) " + M("\\frac{" + D(man) + " \\cdot 10^{" + ex + "}}{3 \\cdot 10^5} \\approx " + D(r2c((man / 3) * 10 ** (ex - 5 - Math.floor(Math.log10(t))))) + " \\cdot 10^{" + Math.floor(Math.log10(t)) + "} \\approx " + nb(Math.round(t))) + " s. c) " + M(nb(Math.round(t)) + " \\div 60 \\approx " + D(r1(t / 60))) + " min.");
+          "a) " + M(D(man) + " \\cdot 10^{" + ex + "} \\cdot 10^3 = " + D(man) + " \\cdot 10^{" + (ex + 3) + "}") + " m. b) " + M("\\frac{" + D(man) + " \\cdot 10^{" + ex + "}}{3 \\cdot 10^5} \\approx " + D(r2c((man / 3) * 10 ** (ex - 5 - Math.floor(Math.log10(t))))) + " \\cdot 10^{" + Math.floor(Math.log10(t)) + "} \\approx " + nb(Math.round(t))) + " s. c) " + M(nb(Math.round(t)) + " \\div 60 \\approx " + D(r1(t / 60))) + " min."), { ctx: "lumiere" });
+      },
+      () => { /* objets microscopiques : diamètre en nm ou µm, nombre d'objets alignés sur 1 mm */
+        const o = pk([["atome", "Un atome d'hydrogène a un diamètre d'environ", [1.06], -10, "nm", -9], ["virus", "Un virus de la grippe a un diamètre d'environ", [1, 1.2, 1.4], -7, "nm", -9],
+          ["cellule", "Une bactérie mesure environ", [2, 3, 4], -6, "µm", -6], ["cellule", "Un globule rouge a un diamètre d'environ", [7, 7.5, 8], -6, "µm", -6], ["cellule", "Un grain de pollen de bouleau mesure environ", [2, 2.5], -5, "µm", -6]]);
+        const m = pk(o[2]), sc = (a, e) => D(a) + " \\cdot 10^{" + e + "}", d = +(m * 10 ** o[3]).toPrecision(12), inU = +(m * 10 ** (o[3] - o[5])).toPrecision(12), n = 1e-3 / d, e = Math.floor(Math.log10(n) + 1e-9), st = e >= 2 ? 10 ** (e - 1) : 1;
+        const W = { 1: "à l'unité", 10: "à la dizaine", 100: "à la centaine", 1000: "au millier", 10000: "à la dizaine de milliers", 100000: "à la centaine de milliers", 1000000: "au million" }[st], ar = Math.round(n / st) * st;
+        return Object.assign(P(o[1] + " " + M(sc(m, o[3])) + " m.",
+          [["a) " + (o[0] === "cellule" ? "Cette mesure" : "Ce diamètre") + " en " + o[4] + " (1 " + o[4] + " = 10" + (o[5] === -9 ? "⁻⁹" : "⁻⁶") + " m)", inU], ["b) Combien de ces objets faut-il aligner pour faire 1 mm ? (arrondi " + W + ")", ar, st]],
+          ["a) Divise par " + M("10^{" + o[5] + "}") + " : on soustrait les exposants.", "b) " + M("10^{-3} : (" + sc(m, o[3]) + ")") + "."],
+          "a) " + M(sc(m, o[3]) + " : 10^{" + o[5] + "} = " + D(inU)) + " " + o[4] + " ; b) " + M("\\frac{10^{-3}}{" + sc(m, o[3]) + "} \\approx " + D(n >= 1000 ? Math.round(n) : r1(n))) + ", soit environ " + M(D(ar)) + "."), { ctx: o[0] });
+      },
+      () => { /* rayon d'un astre : conversion en m, longueur de l'équateur */
+        const [nm, r] = pk([["la Terre", 6.37], ["Mars", 3.39], ["Vénus", 6.05], ["la Lune", 1.74], ["Mercure", 2.44]]), C = 2 * Math.PI * r * 1000, st = r >= 5 ? 1000 : 100, ar = Math.round(C / st) * st;
+        return Object.assign(P("Le rayon de " + nm + " vaut environ " + M(D(r) + " \\cdot 10^3") + " km.", [["a) Ce rayon en m (nombre entier)", Math.round(r * 1e6)], ["b) Longueur de l'équateur en km (2πr, arrondie " + (st === 1000 ? "au millier" : "à la centaine") + ")", ar, st]],
+          ["1 km = 10³ m : " + M(D(r) + " \\cdot 10^3 \\cdot 10^3") + ".", "b) " + M("2 \\cdot \\pi \\cdot " + D(r * 1000)) + "."],
+          "a) " + M(D(r) + " \\cdot 10^6 = " + D(Math.round(r * 1e6))) + " m ; b) " + M("2\\pi \\cdot " + D(r * 1000) + " \\approx " + D(Math.round(C))) + ", soit environ " + M(D(ar)) + " km."), { ctx: "planete" });
       },
     ],
     /* ---------- 1re Collège : critères de divisibilité ---------- */

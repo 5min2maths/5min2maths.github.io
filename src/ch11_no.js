@@ -574,22 +574,50 @@
           [["a) Fraction d'eau gazeuse (tape la fraction)", 1 / 6], ["b) Pour 1,2 L de boisson, volume de sirop (L)", 0.2], ["c) Volume d'eau plate (L)", 0.8]],
           ["a) 1 − 1/6 − 2/3, au dénominateur 6.", "b) 1/6 de 1,2 L."], "a) " + M("1 - \\frac{1}{6} - \\frac{4}{6} = \\frac{1}{6}") + " ; b) " + M("0{,}2") + " L ; c) " + M("0{,}8") + " L."),
     ],
+    /* 26.11 soir (agent defis3) : défis tirés au hasard, 3 contextes chacun (avant : deux énoncés presque fixes). */
     fracmul: [
-      () => { const N0 = pk([360, 480, 600, 720]);
-        return P("Une ville de " + N0 + " hectares : les " + M(fT(2, 5)) + " sont des forêts ; les " + M(fT(3, 4)) + " des forêts sont des feuillus.",
-          [["a) Surface de forêt (ha)", N0 * 2 / 5], ["b) Fraction de la ville couverte de feuillus (tape la fraction)", 3 / 10], ["c) Surface de feuillus (ha)", N0 * 3 / 10]],
-          ["b) Les 3/4 des 2/5, c'est 3/4 · 2/5.", "c) Cette fraction de " + N0 + " ha."], "a) " + M(N0 * 2 / 5) + " ha ; b) " + M("\\frac{3}{4} \\cdot \\frac{2}{5} = \\frac{3}{10}") + " ; c) " + M(N0 * 3 / 10) + " ha."); },
-      () => { const L0 = pk([12, 15, 18]);
-        return P("Un ruban de " + L0 + " m. On en coupe les " + M(fT(1, 3)) + ", puis on coupe le reste en morceaux de " + M(fT(2, 5)) + " m.",
-          [["a) Longueur coupée d'abord (m)", L0 / 3], ["b) Longueur restante (m)", L0 * 2 / 3], ["c) Nombre de morceaux de 2/5 m", L0 * 2 / 3 * 5 / 2]],
-          ["b) " + L0 + " − " + L0 / 3 + ".", "c) Divise par 2/5 : multiplie par 5/2."], "c) " + M(L0 * 2 / 3 + " : \\frac{2}{5} = " + L0 * 2 / 3 + " \\cdot \\frac{5}{2} = " + L0 * 2 / 3 * 5 / 2) + " morceaux."); },
+      () => { const [[a, b], [c, e]] = pk([[[2, 5], [3, 4]], [[3, 5], [2, 3]], [[3, 4], [1, 3]], [[2, 3], [3, 4]], [[4, 5], [1, 4]], [[5, 6], [2, 5]], [[3, 8], [2, 3]], [[2, 5], [5, 6]]]), fr = rq(a * c, b * e);
+        const cx = pk([["foret", "Une commune de # hectares : les A sont couverts de forêts ; les C des forêts sont des feuillus.", "Surface de forêt (ha)", "Fraction de la commune couverte de feuillus (tape la fraction)", "Surface de feuillus (ha)", [300, 900]],
+          ["sport", "Un collège compte # élèves : les A font partie d'un club de sport ; les C de ces sportifs jouent au football.", "Nombre d'élèves dans un club de sport", "Fraction des élèves du collège qui jouent au football (tape la fraction)", "Nombre d'élèves qui jouent au football", [240, 720]],
+          ["jardin", "Un jardin mesure # m² : les A sont occupés par un potager ; les C du potager sont plantés de tomates.", "Aire du potager (m²)", "Fraction du jardin plantée de tomates (tape la fraction)", "Aire plantée de tomates (m²)", [60, 240]]]);
+        const st = b * e, lo = Math.ceil(cx[5][0] / st), hi = Math.floor(cx[5][1] / st), N0 = st * R.int(lo, Math.max(lo, hi)), A1 = (N0 * a) / b, A2 = (N0 * qv(fr));
+        return Object.assign(P(cx[1].replace("#", N(N0)).replace("A", M(fT(a, b))).replace("C", M(fT(c, e))), [["a) " + cx[2], A1], ["b) " + cx[3], qv(fr)], ["c) " + cx[4], A2]],
+          ["b) Les " + c + "/" + e + " des " + a + "/" + b + ", c'est " + c + "/" + e + " · " + a + "/" + b + ".", "c) Cette fraction de " + N0 + "."],
+          "a) " + M(fT(a, b) + " \\cdot " + N(N0) + " = " + N(A1)) + " ; b) " + M(fT(c, e) + " \\cdot " + fT(a, b) + " = " + qT(fr)) + " ; c) " + M(qT(fr) + " \\cdot " + N(N0) + " = " + N(A2)) + "."), { ctx: cx[0] }); },
+      () => { const cx = pk([["ruban", "Un ruban mesure # m. On en coupe d'abord K, puis on coupe le reste en morceaux de Q m.", "Longueur coupée d'abord (m)", "Longueur restante (m)", "Nombre de morceaux", [6, 24]],
+          ["jus", "Une fontaine à jus contient # L. Au petit-déjeuner, on en boit K, puis on verse le reste dans des gourdes de Q L.", "Volume bu au petit-déjeuner (L)", "Volume restant (L)", "Nombre de gourdes remplies", [6, 15]],
+          ["planche", "Une planche mesure # m. On en scie d'abord K, puis on découpe le reste en lattes de Q m.", "Longueur sciée d'abord (m)", "Longueur restante (m)", "Nombre de lattes", [3, 6]]]);
+        let L0 = 12, k = 3, p = 2, q = 5;
+        for (let t = 0; t < 200; t++) { const kk = R.int(3, 5), [pp, qq] = pk([[2, 5], [3, 4], [2, 3], [3, 5], [1, 4]]), LL = R.int(cx[5][0], cx[5][1]); const rest = (LL * (kk - 1)) / kk, n = (rest * qq) / pp;
+          if (LL % kk === 0 && Number.isInteger(n) && n >= 3 && n <= 40 && !(pp === 1 && qq === kk)) { L0 = LL; k = kk; p = pp; q = qq; break; } }
+        const cut = L0 / k, rest = L0 - cut, n = (rest * q) / p, KW = { 3: "le tiers", 4: "le quart", 5: "le cinquième" }[k];
+        return Object.assign(P(cx[1].replace("#", N(L0)).replace("K", KW + " (" + M(fT(1, k)) + ")").replace("Q", M(fT(p, q))), [["a) " + cx[2], cut], ["b) " + cx[3], rest], ["c) " + cx[4], n]],
+          ["a) " + M(fT(1, k)) + " de " + L0 + ".", "c) Divise par " + p + "/" + q + " : multiplie par " + q + "/" + p + "."],
+          "a) " + M(N(L0) + " : " + k + " = " + N(cut)) + " ; b) " + M(N(L0) + " - " + N(cut) + " = " + N(rest)) + " ; c) " + M(N(rest) + " : " + fT(p, q) + " = " + N(rest) + " \\cdot " + fT(q, p) + " = " + n) + "."), { ctx: cx[0] }); },
     ],
     fracconv: [
-      () => P("Trois magasins proposent le même article à 80 CHF : le premier fait " + M(fT(1, 4)) + " de rabais, le deuxième " + M("22\\,\\%") + ", le troisième " + M("0{,}3") + " du prix en moins après une hausse de 10 %.",
-          [["a) Prix au premier magasin (CHF)", 60], ["b) Prix au deuxième (CHF)", 62.4], ["c) Prix au troisième (CHF)", 61.6]],
-          ["a) 80 · (1 − 1/4).", "c) 80 · 1,1 · 0,7."], "a) " + M("60") + " ; b) " + M("80 \\cdot 0{,}78 = 62{,}4") + " ; c) " + M("80 \\cdot 1{,}1 \\cdot 0{,}7 = 61{,}6") + " : le premier est le moins cher."),
-      () => P("Nombres périodiques.", [["a) 0,777… en fraction (tape la fraction)", 7 / 9], ["b) 0,1818… en fraction", 2 / 11], ["c) 0,999… = ?", 1]],
-          ["a) 10x − x = 7.", "c) 10x − x = 9, donc 9x = 9."], "a) " + M("\\frac{7}{9}") + " ; b) " + M("\\frac{18}{99} = \\frac{2}{11}") + " ; c) " + M("x = 1") + " : " + M("0{,}\\overline{9} = 1") + "."),
+      () => { const obj = pk(["un casque audio", "une paire de chaussures de sport", "une trottinette", "un sac de randonnée", "une veste de ski"]);
+        let P0 = 80, f = [1, 4], p = 22, h = 10, d = 3;
+        for (let t = 0; t < 200; t++) { const PP = pk([60, 80, 120, 140, 160, 180, 200, 240]), ff = pk([[1, 4], [1, 5], [3, 10], [1, 3]]), pp = R.int(15, 32), hh = pk([5, 10, 20]), dd = pk([2, 25, 3]);
+          const a = PP * (1 - ff[0] / ff[1]), b = (PP * (100 - pp)) / 100, c = (PP * (100 + hh) * (dd === 25 ? 75 : 100 - 10 * dd)) / 10000;
+          const ok = [a, b, c].every((v) => Math.abs(v * 100 - Math.round(v * 100)) < 1e-6) && new Set([a, b, c].map((v) => Math.round(v * 100))).size === 3 && Math.min(Math.abs(a - b), Math.abs(a - c), Math.abs(b - c)) >= 0.5;
+          if (ok) { P0 = PP; f = ff; p = pp; h = hh; d = dd; break; } }
+        const dT = d === 25 ? "0{,}25" : "0{,}" + d, dv = d === 25 ? 0.25 : d / 10, A = r12(P0 * (1 - f[0] / f[1])), B = r12((P0 * (100 - p)) / 100), C = r12(P0 * (1 + h / 100) * (1 - dv)), best = Math.min(A, B, C);
+        return Object.assign(P("Trois magasins vendent " + obj + " au même prix de " + M(P0) + " CHF. Le premier fait un rabais de " + M(fT(f[0], f[1])) + " du prix, le deuxième un rabais de " + M(p + "\\,\\%") + ", le troisième augmente d'abord son prix de " + M(h + "\\,\\%") + ", puis retire " + M(dT) + " du nouveau prix.",
+          [["a) Prix au premier magasin (CHF)", A], ["b) Prix au deuxième (CHF)", B], ["c) Prix au troisième (CHF)", C]],
+          ["a) " + P0 + " · (1 − " + f[0] + "/" + f[1] + ").", "c) " + P0 + " · " + String(1 + h / 100).replace(".", ",") + " · " + String(r12(1 - dv)).replace(".", ",") + "."],
+          "a) " + M(P0 + " \\cdot \\left(1 - " + fT(f[0], f[1]) + "\\right) = " + N(A)) + " ; b) " + M(P0 + " \\cdot " + N(r12(1 - p / 100)) + " = " + N(B)) + " ; c) " + M(P0 + " \\cdot " + N(r12(1 + h / 100)) + " \\cdot " + N(r12(1 - dv)) + " = " + N(C)) + " : le " + (best === A ? "premier" : best === B ? "deuxième" : "troisième") + " est le moins cher."), { ctx: "magasins" }); },
+      () => { const d = R.int(1, 8), ab = pk([12, 18, 27, 36, 45, 54, 63, 72, 81, 15, 24, 42, 51, 57, 78]), u = R.int(1, 8), A = rq(d, 9), B = rq(ab, 99), C = rq(u + 1, 10);
+        return Object.assign(P("Nombres périodiques : écris chacun sous forme de fraction irréductible (tape la fraction).", [["a) 0," + String(d).repeat(3) + "…", qv(A)], ["b) " + ("0," + String(ab).repeat(2) + "…"), qv(B)], ["c) 0," + u + "999…", qv(C)]],
+          ["a) Avec x = 0," + d + d + d + "… : 10x − x = " + d + ".", "c) 0,999… = 1, donc 0," + u + "999… = 0," + u + " + 0,0999… = 0," + (u + 1) + "."],
+          "a) " + M("9x = " + d) + ", donc " + M("x = " + fT(d, 9) + (A[1] !== 9 ? " = " + qT(A) : "")) + " ; b) " + M("99x = " + ab) + ", donc " + M("x = " + fT(ab, 99) + " = " + qT(B)) + " ; c) " + M("0{," + u + "}999\\ldots = 0{," + (u + 1) + "} = " + qT(C)) + "."), { ctx: "periodique" }); },
+      () => { let a = 3, b = 8, p = 20, Nn = 200; for (let t = 0; t < 200; t++) { const [aa, bb] = pk([[3, 8], [1, 8], [5, 8], [2, 5], [3, 20], [7, 20], [1, 4]]), pp = pk([15, 20, 25, 30, 35, 12]), nn = 40 * R.int(3, 10), rr = 100 - (100 * aa) / bb - pp;
+          if (rr >= 8 && Number.isInteger((nn * rr) / 100) && Number.isInteger((nn * aa) / bb)) { a = aa; b = bb; p = pp; Nn = nn; break; } }
+        const rest = r12(100 - (100 * a) / b - p), sp = pk([["le ski", "le vélo", "la natation"], ["le football", "le basket", "le tennis"], ["la lecture", "les jeux vidéo", "la musique"]]), ns = (Nn * a) / b, nr = (Nn * rest) / 100;
+        return Object.assign(P("Lors d'un sondage auprès de " + M(N(Nn)) + " élèves, les " + M(fT(a, b)) + " préfèrent " + sp[0] + ", " + M(p + "\\,\\%") + " préfèrent " + sp[1] + " et les autres " + sp[2] + ".",
+          [["a) La fraction " + a + "/" + b + " en nombre décimal", a / b], ["b) Nombre d'élèves qui préfèrent " + sp[0], ns], ["c) Pourcentage des élèves qui préfèrent " + sp[2] + " (%)", rest], ["d) Nombre d'élèves qui préfèrent " + sp[2], nr]],
+          ["a) " + a + " : " + b + ".", "c) 100 % − " + String(r12((100 * a) / b)).replace(".", ",") + " % − " + p + " %."],
+          "a) " + M(a + " : " + b + " = " + N(a / b)) + " ; b) " + M(fT(a, b) + " \\cdot " + N(Nn) + " = " + N(ns)) + " ; c) " + M("100 - " + N(r12((100 * a) / b)) + " - " + p + " = " + N(rest)) + " % ; d) " + M(N(rest) + "\\,\\% \\cdot " + N(Nn) + " = " + N(nr)) + "."), { ctx: "sondage" }); },
     ],
     puiss: [
       () => P("Une feuille pliée en deux double d'épaisseur à chaque pliage. Elle mesure " + M("0{,}1") + " mm d'épaisseur.",
@@ -605,13 +633,23 @@
       () => P("La Terre a un rayon d'environ " + M("6{,}4 \\cdot 10^3") + " km.", [["a) Rayon en m (nombre entier)", 6400000], ["b) Circonférence de l'équateur en km (2πr, arrondie au millier)", 2 * Math.PI * 6400, 1000]],
           ["1 km = 10³ m.", "b) 2 · π · 6400."], "a) " + M("6{,}4 \\cdot 10^6 = 6\\text{'}400\\text{'}000") + " m ; b) " + M("2\\pi \\cdot 6400 \\approx 40\\text{'}000") + " km."),
     ],
+    /* 26.11 soir (agent defis3) : étoile, volume de sang et pouls tirés au hasard, 3 contextes (avant : deux énoncés fixes). */
     scicalc: [
-      () => P("Une année-lumière est la distance parcourue par la lumière en un an. La lumière va à " + M("3 \\cdot 10^5") + " km/s, et une année compte environ " + M("3{,}15 \\cdot 10^7") + " s.",
-          [["a) Une année-lumière en km (notation scientifique)", 9.45e12], ["b) L'étoile Proxima est à 4,2 années-lumière : distance en km (notation scientifique, deux décimales)", 3.969e13, 1e11]],
-          ["a) Vitesse × durée.", "b) 4,2 × le résultat a)."], "a) " + M("9{,}45 \\cdot 10^{12}") + " km ; b) " + M("\\approx 3{,}97 \\cdot 10^{13}") + " km."),
-      () => P("Le corps humain contient environ " + M("5") + " L de sang, et chaque mm³ de sang contient environ " + M("5 \\cdot 10^6") + " globules rouges.",
-          [["a) Nombre de mm³ dans 1 L (tape la puissance de 10, ex. 10^6)", 1e6], ["b) Nombre de globules rouges dans 5 L (notation scientifique)", 2.5e13]],
-          ["1 L = 1 dm³ = 10⁶ mm³.", "b) 5 · 10⁶ · 5 · 10⁶."], "a) " + M("10^6") + " ; b) " + M("5 \\cdot 10^6 \\cdot 5 \\cdot 10^6 = 2{,}5 \\cdot 10^{13}") + "."),
+      () => { const [nm, d] = pk([["Proxima du Centaure", 4.2], ["Sirius", 8.6], ["Altaïr", 16.7], ["Véga", 25], ["Arcturus", 37]]), al = 9.45e12, D = d * al, e = Math.floor(Math.log10(D)), st = 10 ** (e - 2);
+        return Object.assign(P("Une année-lumière est la distance parcourue par la lumière en un an. La lumière va à " + M("3 \\cdot 10^5") + " km/s, et une année compte environ " + M("3{,}15 \\cdot 10^7") + " s. L'étoile " + nm + " est à " + M(N(d)) + " années-lumière.",
+          [["a) Une année-lumière en km (notation scientifique)", al], ["b) Distance de " + nm + " en km (notation scientifique, deux décimales)", Math.round(D / st) * st, st]],
+          ["a) Vitesse × durée.", "b) " + N(d).replace("{,}", ",") + " × le résultat a)."],
+          "a) " + M("3 \\cdot 10^5 \\cdot 3{,}15 \\cdot 10^7 = 9{,}45 \\cdot 10^{12}") + " km ; b) " + M(N(d) + " \\cdot 9{,}45 \\cdot 10^{12} \\approx " + S(r12(Math.round(D / st) / 100), e)) + " km."), { ctx: "etoile" }); },
+      () => { const V = pk([4.5, 5, 5.5, 6]), c = pk([4.5, 5, 5.2]), tot = V * 1e6 * c * 1e6, [m, e] = norm(tot);
+        return Object.assign(P("Le corps d'un adulte contient environ " + M(N(V)) + " L de sang, et chaque mm³ de sang contient environ " + M(S(c, 6)) + " globules rouges.",
+          [["a) Nombre de mm³ dans 1 L (tape la puissance de 10, ex. 10^3)", 1e6], ["b) Nombre de globules rouges dans " + N(V).replace("{,}", ",") + " L (notation scientifique)", tot]],
+          ["1 L = 1 dm³ = 10⁶ mm³.", "b) " + M(N(V) + " \\cdot 10^6 \\cdot " + S(c, 6)) + "."],
+          "a) " + M("10^6 = 1\\text{'}000\\text{'}000") + " ; b) " + M(N(V) + " \\cdot 10^6 \\cdot " + S(c, 6) + " = " + S(m, e)) + "."), { ctx: "sang" }); },
+      () => { const b = pk([60, 65, 70, 75, 80]), A = pk([75, 80, 85, 90]), an = b * 5.26e5, vie = an * A, st1 = 10 ** (Math.floor(Math.log10(an)) - 1), st2 = 10 ** (Math.floor(Math.log10(vie)) - 1), r1 = Math.round(an / st1) * st1, r2 = Math.round(vie / st2) * st2, F1 = (v) => { const e = Math.floor(Math.log10(v) + 1e-9); return (v / 10 ** e).toFixed(1).replace(".", "{,}") + " \\cdot 10^{" + e + "}"; };
+        return Object.assign(P("Au repos, un cœur bat environ " + M(b) + " fois par minute. Une année compte environ " + M("5{,}26 \\cdot 10^5") + " minutes.",
+          [["a) Nombre de battements en une année (notation scientifique, une décimale)", r1, st1], ["b) Nombre de battements en " + A + " ans (notation scientifique, une décimale)", r2, st2]],
+          ["a) " + M(b + " \\cdot 5{,}26 \\cdot 10^5") + " : multiplie les nombres devant, garde la puissance de 10.", "b) Multiplie le résultat exact de a) par " + A + "."],
+          "a) " + M(b + " \\cdot 5{,}26 \\cdot 10^5 = " + S(r12(an / 10 ** Math.floor(Math.log10(an))), Math.floor(Math.log10(an))) + " \\approx " + F1(r1)) + " ; b) " + M(A + " \\cdot " + N(an) + " = " + S(r12(vie / 10 ** Math.floor(Math.log10(vie))), Math.floor(Math.log10(vie))) + " \\approx " + F1(r2)) + " battements."), { ctx: "coeur" }); },
     ],
   };
 

@@ -1428,6 +1428,65 @@ const RECALC = (() => {
   DF("approxnorm", /(?:On lance (\d+) fois une pièce équilibrée|On interroge ([\d' ]+) personnes)/, (g, lab, txt) => { const n = nn(g[0] || g[1]), mu = n / 2, s = Math.sqrt(n / 4), t = tabPhi(txt), I = lm(lab, /P\((\d+) ≤ X ≤ (\d+)\)/);
     if (/Moyenne/.test(lab)) return mu; if (/Écart-type/.test(lab)) return s; if (!I) return null; if (!t || I[0] + I[1] !== 2 * mu || !(Math.abs((I[1] + 0.5 - mu) / s - t[0]) <= 1e-9)) return NaN; return 2 * t[1] - 1; });
 
+  /* ==== défis rendus variés (agent defis3, 26.11 soir) ==== */
+  /* Même modèle que les défis du soir (DF : « énoncé ¶ question », un oracle par contexte). WST3 : arrondi annoncé en mots. */
+  const WST3 = (lab) => (/au million/.test(lab) ? 1e6 : /centaine de milliers/.test(lab) ? 1e5 : /dizaine de milliers/.test(lab) ? 1e4 : /au millier/.test(lab) ? 1e3 : /à la centaine/.test(lab) ? 100 : /à la dizaine/.test(lab) ? 10 : /à l'unité/.test(lab) ? 1 : null);
+  const QF = "\\((\\d+)\\)\\/\\((\\d+)\\)";
+  /* fracmul (11e, ch11_no) */
+  DF("fracmul", new RegExp("([\\d']+) (?:hectares|élèves|m²) : les " + QF + " [^;]+; les " + QF), (g, lab) => { const [n, a, b, c, e] = g.map(nn), f = (a / b) * (c / e);
+    return lab.startsWith("a)") ? (n * a) / b : /Fraction/.test(lab) ? f : lab.startsWith("c)") ? n * f : null; });
+  DF("fracmul", new RegExp("(?:mesure|contient) (\\d+) (?:m|L)\\..*?\\(\\(1\\)\\/\\((\\d+)\\)\\), puis .*? de " + QF + " (?:m|L)\\."), (g, lab) => { const [L, k, p, q] = g.map(nn), rest = L - L / k;
+    return lab.startsWith("a)") ? L / k : lab.startsWith("b)") ? rest : lab.startsWith("c)") ? rest / (p / q) : null; });
+  /* fracconv (11e, ch11_no) */
+  DF("fracconv", new RegExp("au même prix de (\\d+) CHF\\. Le premier fait un rabais de " + QF + " du prix, le deuxième un rabais de (\\d+) %, le troisième augmente d'abord son prix de (\\d+) %, puis retire (\\d+,\\d+) du nouveau prix"), (g, lab) => { const [P0, a, b, p, h, d] = g.map(nn);
+    return lab.startsWith("a)") ? P0 * (1 - a / b) : lab.startsWith("b)") ? (P0 * (100 - p)) / 100 : lab.startsWith("c)") ? P0 * (1 + h / 100) * (1 - d) : null; });
+  DF("fracconv", /Nombres périodiques/, (g, lab) => { let m;
+    if ((m = /^a\) 0,(\d)\1\1…/.exec(lab))) return +m[1] / 9; if ((m = /^b\) 0,(\d\d)\1…/.exec(lab))) return +m[1] / 99; if ((m = /^c\) 0,(\d)999…/.exec(lab))) return (+m[1] + 1) / 10; return null; });
+  DF("fracconv", new RegExp("sondage auprès de ([\\d']+) élèves, les " + QF + " préfèrent .+?, (\\d+) % préfèrent"), (g, lab) => { const [n, a, b, p] = g.map(nn), r = 100 - (100 * a) / b - p;
+    return lab.startsWith("a)") ? a / b : lab.startsWith("b)") ? (n * a) / b : lab.startsWith("c)") ? r : lab.startsWith("d)") ? (n * r) / 100 : null; });
+  /* sci (11e, defis.js) */
+  DF("sci", /^(?:Un|Une) .+? (?:a un diamètre d'environ|mesure environ) (\d+(?:,\d+)?) · 10\^(-\d+) m\./, (g, lab) => { const d = nn(g[0]) * 10 ** nn(g[1]), u = lm(lab, /1 (?:nm|µm) = 10(⁻⁹|⁻⁶) m/);
+    if (lab.startsWith("a)") && u) return d / (u[0] === undefined ? NaN : /⁻⁹/.test(lab) ? 1e-9 : 1e-6); if (lab.startsWith("b)")) { const st = WST3(lab); return st ? { v: 1e-3 / d, st } : null; } return null; });
+  DF("sci", /Le rayon de .+? vaut environ (\d+(?:,\d+)?) · 10\^3 km/, (g, lab) => { const r = nn(g[0]) * 1000; return lab.startsWith("a)") ? r * 1000 : lab.startsWith("b)") && WST3(lab) ? { v: 2 * Math.PI * r, st: WST3(lab) } : null; });
+  DF("sci", /est à environ (\d+(?:,\d+)?) · 10\^(\d+) km du Soleil\. La lumière parcourt 3 · 10\^5 km par seconde/, (g, lab) => { const [m, e] = g.map(nn), t = (m * 10 ** e) / 3e5, me = Math.floor(Math.log10(m * 10 ** (e + 3)));
+    return lab.startsWith("a)") ? me : lab.startsWith("b)") ? t : lab.startsWith("c)") ? t / 60 : null; });
+  /* scicalc (11e, ch11_no) */
+  DF("scicalc", /La lumière va à 3 · 10\^5 km\/s, et une année compte environ 3,15 · 10\^7 s\. L'étoile .+? est à (\d+(?:,\d+)?) années-lumière/, (g, lab) => { const al = 3e5 * 3.15e7, D = nn(g[0]) * al;
+    return lab.startsWith("a)") ? al : /deux décimales/.test(lab) ? { v: D, st: 10 ** (Math.floor(Math.log10(D)) - 2) } : null; });
+  DF("scicalc", /contient environ (\d+(?:,\d+)?) L de sang, et chaque mm³ de sang contient environ (\d+(?:,\d+)?) · 10\^6 globules/, (g, lab) => { const [V, c] = g.map(nn); return lab.startsWith("a)") ? 1e6 : lab.startsWith("b)") ? V * 1e6 * c * 1e6 : null; });
+  DF("scicalc", /un cœur bat environ (\d+) fois par minute\. Une année compte environ 5,26 · 10\^5 minutes/, (g, lab) => { const an = nn(g[0]) * 5.26e5, A = lm(lab, /en (\d+) ans/), v = lab.startsWith("a)") ? an : A ? an * A[0] : null;
+    return v === null ? null : { v, st: 10 ** (Math.floor(Math.log10(v)) - 1) }; });
+  const NR = "(\\d+(?:,\\d+)?)";
+  /* pythfig (11e, ch11_gm) */
+  DF("pythfig", /(\d+) cm de (?:long|large), (\d+) cm de (?:large|profondeur) et (\d+) cm de haut\. On veut y ranger, en diagonale, .+? (\d+) cm\./, (g, lab) => { const [a, b, c, L] = g.map(nn), d = Math.sqrt(a * a + b * b + c * c);
+    return lab.startsWith("a)") ? Math.sqrt(a * a + b * b) : lab.startsWith("b)") ? d : lab.startsWith("c)") ? { v: L < d ? 1 : 0, sol: false } : null; });
+  DF("pythfig", /de rayon (\d+) (?:cm|m)\b.*?carré.*?coins touchent/, (g, lab) => { const r = nn(g[0]); return lab.startsWith("a)") ? 2 * r : lab.startsWith("b)") ? 2 * r * r : lab.startsWith("c)") ? Math.PI * r * r - 2 * r * r : null; });
+  /* pythrec (11e, ch11_gm) */
+  DF("pythrec", /A\((-?\d+) ; (-?\d+)\), B\((-?\d+) ; (-?\d+)\) et C\((-?\d+) ; (-?\d+)\)/, (g, lab) => { const [ax, ay, bx, by, cx, cy] = g.map(nn), ab = (ax - bx) ** 2 + (ay - by) ** 2, bc = (bx - cx) ** 2 + (by - cy) ** 2, ac = (ax - cx) ** 2 + (ay - cy) ** 2, S = [ab, bc, ac].sort((u, v) => u - v);
+    return lab.startsWith("a)") ? ab : lab.startsWith("b)") ? bc : lab.startsWith("c)") ? ac : lab.startsWith("d)") ? { v: S[0] + S[1] === S[2] ? 1 : 0, sol: false } : null; });
+  DF("pythrec", /On prend n = (\d+)\./, (g, lab) => { const n = nn(g[0]); return lab.startsWith("a)") ? n * n + 1 : lab.startsWith("b)") ? (n * n - 1) ** 2 + 4 * n * n : lab.startsWith("c)") ? (n * n + 1) ** 2 : null; });
+  DF("pythrec", /deux côtés mesurent (\d+) cm et (\d+) cm, et la diagonale mesure (\d+) cm/, (g, lab) => { const [a, b, d] = g.map(nn); return lab.startsWith("a)") ? a * a + b * b : lab.startsWith("b)") ? d * d : lab.startsWith("c)") ? { v: a * a + b * b === d * d ? 1 : 0, sol: false } : null; });
+  /* vol (10e–11e, ch11_gm) */
+  DF("vol", new RegExp("piscine de (\\d+) m de long et (\\d+) m de large a une profondeur de " + NR + " m d'un côté et " + NR + " m de l'autre"), (g, lab) => { const [L, l, h1, h2] = g.map(nn), A = ((h1 + h2) * L) / 2;
+    return lab.startsWith("a)") ? A : lab.startsWith("b)") ? A * l : lab.startsWith("c)") ? A * l * 1000 : null; });
+  DF("vol", new RegExp("profil en trapèze : " + NR + " m de large en haut, " + NR + " m au fond et " + NR + " m de profondeur\\. Il mesure (\\d+) m de long"), (g, lab) => { const [B, b, h, L] = g.map(nn), A = ((B + b) * h) / 2;
+    return lab.startsWith("a)") ? A : lab.startsWith("b)") ? A * L : lab.startsWith("c)") ? A * L * 1000 : null; });
+  DF("vol", new RegExp("triangle de " + NR + " m de base et " + NR + " m de haut, et la tente mesure " + NR + " m de long"), (g, lab) => { const [b, h, L] = g.map(nn), A = (b * h) / 2;
+    return lab.startsWith("a)") ? A : lab.startsWith("b)") ? A * L : lab.startsWith("c)") ? A * L * 1000 : null; });
+  DF("vol", new RegExp("doit contenir (\\d+) cL\\. Son rayon intérieur est de " + NR + " cm"), (g, lab) => { const [c, r] = g.map(nn), V = 10 * c, A = Math.PI * r * r;
+    return lab.startsWith("a)") ? V : lab.startsWith("b)") ? A : lab.startsWith("c)") ? V / A : null; });
+  /* airepyr (11e, ch11_gm) */
+  DF("airepyr", new RegExp("base carrée de " + NR + " (?:m|cm) de côté et de " + NR + " (?:m|cm) de haut"), (g, lab) => { const [c, h] = g.map(nn), a = Math.sqrt(h * h + (c * c) / 4);
+    return lab.startsWith("a)") ? a : lab.startsWith("b)") ? 2 * c * a : lab.startsWith("c)") ? (c * c * h) / 3 : null; });
+  DF("airepyr", /un carré de (\d+) cm de côté et quatre triangles isocèles d'apothème \(hauteur\) (\d+) cm/, (g, lab) => { const [c, a] = g.map(nn), h = Math.sqrt(a * a - (c * c) / 4);
+    return lab.startsWith("a)") ? c * c + 2 * c * a : lab.startsWith("b)") ? h : lab.startsWith("c)") ? (c * c * h) / 3 : null; });
+  /* volcomp (11e, ch11_gm) */
+  DF("volcomp", new RegExp("cylindre de rayon " + NR + " m et de hauteur " + NR + " m, avec un fond en cône de même rayon et de hauteur " + NR + " m"), (g, lab) => { const [r, H, h] = g.map(nn), Vc = Math.PI * r * r * H, Vk = (Math.PI * r * r * h) / 3;
+    return lab.startsWith("a)") ? Vc : lab.startsWith("b)") ? Vk : lab.startsWith("c)") ? (Vc + Vk) * 1000 : null; });
+  DF("volcomp", /un cube de (\d+) cm d'arête surmonté d'une pyramide de même base et de (\d+) cm de hauteur/, (g, lab) => { const [a, h] = g.map(nn), rho = lm(lab, /pèse (\d+(?:,\d+)?) g/);
+    return lab.startsWith("a)") ? a ** 3 : lab.startsWith("b)") ? (a * a * h) / 3 : rho ? (a ** 3 + (a * a * h) / 3) * rho[0] : null; });
+  /* ==== fin agent defis3 ==== */
+
   /* ---------- 26.11 (agent defis2) : notions encore sous 20 % (transf, trigcercle, trigfn, recip, lectures de graphique
      de f2 / f2expr, histoires de probeq, formes de decadd) ---------- */
   const fxT = (tex) => { const c = compile(Expr.parse(tex2e(tex))); return (u) => c({ x: u }); };
