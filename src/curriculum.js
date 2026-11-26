@@ -115,6 +115,7 @@ const SYSTEMS_HIDDEN = { FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [
 // Produit : × en France (décision du 25.11, frTimes) ; laissé pour décision : « cercle de Thalès ».
 const FR_WORDS = [
   [/\ben (CHF|francs)\b/g, "en euros"], [/\bCHF\b/g, "€"], [/au franc près/g, "à l'euro près"], [/(\d|\\\)) francs\b/g, "$1 euros"], [/\bde francs\b/g, "d'euros"],
+  [/produit \(·\), quotient \(:\)/g, "produit (×), quotient (÷)"], /* 26.11 (revue p4, n° 10 : rappel de tradexpr, 5e FR) */
   [/\bapprentis\b/g, "élèves"], /* 26.11 soir (revue des élèves joués, n° 13 : « Sondage auprès de 40 apprentis » en 4e FR, école professionnelle suisse) */
   /* 25.11 (couverture France) : équation réduite y = mx + p ; « côtés de l'angle droit » (cathètes : usage suisse) ;
      « ensemble de définition » (domaine de définition : usage suisse ; « l'aire du domaine » inchangé). */

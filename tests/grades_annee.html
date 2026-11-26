@@ -86,7 +86,8 @@ try {
   ok(state.profile.grade === 10 && state.yp && ypSync().pts === 0 && state.yp.past.some((x) => x.c === "11e" && x.p === 1200) && state.gradeNo.Apprenti === 12, "écran classe : départ Pousse, souvenir 11e, collector gardé");
   // 5) Pas de points en « Refaire » (vraie séance)
   state = mk({ system: "CH", grade: 11 }); ypSync(state); Engine.autoInit(state); state.placed = true; for (const id in state.notions) state.notions[id].lessonSeen = true;
-  session = { fmt: "auto", plan: ["prio|1", "fracadd|1", "puiss|1"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), pinged: true }; nextQuestion();
+  /* 26.11 (revue p4, n° 3–4) : plus de « Refaire » dans une série d'automatismes (une question par créneau) : séance de révision */
+  session = { fmt: "revision", plan: ["prio|1", "fracadd|1", "puiss|1"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), pinged: true }; nextQuestion();
   document.getElementById("idk").click(); const p1 = ypPts();
   ok(p1 === 1 && session.ypg === 1, "question faite (je ne sais pas) : +1 " + p1);
   const rd = document.getElementById("redo"); ok(!!rd, "bouton Refaire");

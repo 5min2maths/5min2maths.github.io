@@ -24,6 +24,9 @@ const HORS_FR = {
   eqdiff: [["separable-*", 99] /* variables séparables : hors programme (y' = ay + b seulement) */],
   /* 25.11 soir : progcalc dès la 5e ; nombre de départ négatif multiplié (produit de relatifs), (x + a)², (x + a)(x − a) : 4e */
   progcalc: [["negatif", 8], ["prouver-carre", 8], ["produit", 8]],
+  /* 26.11 (revue p4, remarque : 5e FR, « Écris 0,3̄ sous forme de fraction », corrigé « 10x − x = 3 ») : écriture fractionnaire
+     d'un décimal périodique par une équation, pas avant la 4e (équations du 1er degré : 4e.AL) */
+  fracconv: [["per1", 8], ["per2", 8], ["permixte", 8]],
   /* 26.11 (revue élèves : « Étendue, médiane, quartiles » proposé en 4e) : au collège, médiane et étendue seulement
      (4e.DP.02, 3e.DP.02) ; quartiles et écart interquartile en 2nde. Libellé du collège : labelFR (Engine.catalog). */
   quartiles: [[/quartile|Q_1|Q_3|moustache/i, 10]],
