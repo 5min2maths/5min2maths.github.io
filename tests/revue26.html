@@ -6,7 +6,7 @@
 /* Revue quotidienne des élèves testeurs du 26.11 (suivi/revues/2026-11-26.md) : un contrôle par point corrigé.
    1 indice de notion au problème ; 2 indices valables pour toutes les formes (decdiv, deccomp) ; 3 « 🧠 Révision · 1 sur 4 » ;
    4 « · » dans le corrigé du pavé (repere3d), « × » en France ; 5 bilan d'un problème en parties ; 6 carnet « presque effacées » ;
-   7 série d'automatismes courte (positionnement du jour, sous le plancher) ; 8 « Je prépare un test » replié ;
+   7 série d'automatismes courte (positionnement du jour, sous le plancher) ; 8 « Je prépare une évaluation » replié ;
    9 Révision d'un élève fort : niveau 2 au moins. */
 (async function () {
   const out = [], fail = [];
@@ -65,14 +65,14 @@
     const n4 = Engine.underFloor(state) ? Engine.planSession(state, "auto").length : -1;
     ok(n6 === 6 && n3 === 3 && n4 === 4 && /^3 calculs/.test(t3), "automatismes : " + n6 + " / " + n3 + " (jour du positionnement, « " + t3 + " ») / " + n4 + " (sous le plancher)");
 
-    /* 8. « Je prépare un test » en 1re du Collège après un positionnement : chapitre en classe + dernier travaillé */
+    /* 8. « Je prépare une évaluation » en 1re du Collège après un positionnement : chapitre en classe + dernier travaillé */
     fresh({ system: "CH", grade: 12, track: "college", minutes: 5 });
     const cur = Engine.catalog(state.profile).filter((c) => c.current && state.notions[c.id]);
     cur.forEach((c, k) => { Object.assign(state.notions[c.id], { seen: 1 }); if (k % 3 === 0) Engine.recordComp(state, c.id, 1, 1); });
     state.now = { ids: [cur[cur.length - 1].id], date: day() }; screenPrep();
-    const open8 = [...app.querySelectorAll(".card.flat h3")].filter((h) => !h.closest("details")).length - 1; /* moins « Date du test » */
+    const open8 = [...app.querySelectorAll(".card.flat h3")].filter((h) => !h.closest("details")).length - 1; /* moins « Date de l'évaluation » */
     const vis = [...app.querySelectorAll(".check")].filter((c) => !c.closest("details")).length, all = app.querySelectorAll(".check").length;
-    ok(open8 >= 1 && open8 <= 2 && vis < all && app.querySelector("details.prep-more:not([open])"), "« Je prépare un test » 1re Collège : " + open8 + " chapitre(s) déplié(s), " + vis + " notions visibles sur " + all);
+    ok(open8 >= 1 && open8 <= 2 && vis < all && app.querySelector("details.prep-more:not([open])"), "« Je prépare une évaluation » 1re Collège : " + open8 + " chapitre(s) déplié(s), " + vis + " notions visibles sur " + all);
 
     /* 9. Révision d'un élève fort : niveau 2 au moins */
     fresh({ system: "CH", grade: 12, track: "college", minutes: 5 });

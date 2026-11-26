@@ -113,6 +113,9 @@ const UPFR = {
     combi: [12, 0], binomiale: [12, 7], vect3d: [12, 4], colin: [12, 4], droite3d: [12, 4], plans: [12, 4], posrel: [12, 4], pscal3d: [12, 4], distances: [12, 4],
     // 2nde : réunion, contraire (SP) — src/ch3c_ana.js
     probaxiomes: [10, 14],
+    /* 26.11 soir (revue des élèves joués, n° 8) : sommet d'un trinôme développé (−b ÷ 2a) = 1re spécialité (1re.AL.10, 1re.AN.10),
+       pas la 2nde (fonction carré seulement) ; il était rangé en 2nde sous « Collège · Nombres et calculs ». */
+    f2: [11, 0],
   };
   for (const [id, fr] of Object.entries(RATT)) place(id, fr);
   // Créées en 2nde (fr_2nde.js) avec une place au collège, effacée ensuite par applyFrCollege (fr_college.js chargé après) :
@@ -135,7 +138,7 @@ const UPFR = {
   // ---------- 4. Ordre et chapitres de 1re et de Tle (référentiel « FR ») ----------
   const CHAP = {
     "1SU": ["suitedef", "suitearith", "suitegeo", "suitesomme"],
-    "1SD": ["eq2disc", "f2formes", "trinfact", "ineq2"],
+    "1SD": ["eq2disc", "f2", "f2formes", "trinfact", "ineq2"],
     "1DE": ["tauxvar", "nbderive", "tangente", "derivref", "derivregles", "derivprodquot", "variations", "posrelc", "optimderiv"],
     "1EX": ["expfn", "expderiv"],
     "1TR": ["trigrad"],
@@ -160,7 +163,7 @@ const UPFR = {
     ins(9, "ineq1", "simil"); ins(9, "vecgeo", "ineq1"); /* programme 2026 de 3e : en fin d'année */
     ORDRE.FR_COL = {}; [6, 7, 8, 9].flatMap((g) => FR_PROGRESSION[g]).forEach((id, i) => { ORDRE.FR_COL[id] = i; });
   }
-  for (const [id, ref, ch] of [["tabvar", "fref", "2AN"], ["linfn", "affine", "2AU"], ["vecgeo", "vect3e", "2GE"], ["compdiff", "fracsimp", "2NC"]]) if (N(id) && ORDRE.FR[ref] !== undefined) { ORDRE.FR[id] = ORDRE.FR[ref] + (id === "vecgeo" ? -0.5 : 0.5); ORDRE_THEME.FR[id] = ch; }
+  for (const [id, ref, ch] of [["tabvar", "fref", "2AN"], ["linfn", "affine", "2AU"], ["vecgeo", "vect3e", "2GE"], ["compdiff", "fracsimp", "2NC"], ["probaxiomes", "probcond", "2SP"], ["eq2", "eq2fact", "2AU"] /* 26.11 soir (n° 8) : chapitres du lycée, plus « Collège · » (eq2 : automatisme de 1re, 1re.AU.05) */]) if (N(id) && ORDRE.FR[ref] !== undefined) { ORDRE.FR[id] = ORDRE.FR[ref] + (id === "vecgeo" ? -0.5 : 0.5); ORDRE_THEME.FR[id] = ch; }
   let rk = 1000;
   for (const [ch, ids] of Object.entries(CHAP)) for (const id of ids) { if (!N(id)) continue; ORDRE.FR[id] = rk++; ORDRE_THEME.FR[id] = ch; }
   Object.assign(THEME_LABEL.FR, { "1SU": "Suites numériques", "1SD": "Second degré", "1DE": "Dérivation", "1EX": "Fonction exponentielle", "1TR": "Trigonométrie",

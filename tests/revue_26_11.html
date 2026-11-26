@@ -185,19 +185,19 @@
     for (let k = 0; k < 20; k++) { demoSkip = []; screenWelcome(); if (/CHF/.test(document.getElementById("demo").textContent)) { ok(false, "essai en CHF : " + document.getElementById("demo").textContent.slice(0, 80)); break; } }
     delete SYSTEMS.FR; demoGrade = null; draft = { system: "CH", grade: 11, track: null, minutes: 5 };
     fresh({ system: "FR", grade: 8, track: "college", minutes: 5 });
-    const d = document.createElement("div"); d.innerHTML = '<div class="eyebrow">Je prépare mon test · étape 2 sur 2 · 1 sur 8</div><p>Calcule 2 · 3</p>'; frDom(d);
+    const d = document.createElement("div"); d.innerHTML = '<div class="eyebrow">Je prépare mon évaluation · étape 2 sur 2 · 1 sur 8</div><p>Calcule 2 · 3</p>'; frDom(d);
     ok(!/×/.test(d.querySelector(".eyebrow").textContent) && /×/.test(d.querySelector("p").textContent), "France : « · » du titre gardé, produit en × (" + d.textContent + ")");
     const cq = Engine.catalog(state.profile).find((c) => c.id === "quartiles");
     let qq = 0; for (let k = 0; k < 30; k++) { const q = Engine.make(state, "quartiles", 3); if (/quartile/i.test(q.q)) qq++; }
     ok(cq && !/quartile/i.test(cq.label) && !qq, "France 4e : ni libellé ni question sur les quartiles (" + (cq && cq.label) + ", " + qq + ")");
     fresh({ system: "FR", grade: 10, track: "college", minutes: 5 });
     ok(/quartiles/.test(Engine.catalog(state.profile).find((c) => c.id === "quartiles").label), "France 2nde : quartiles gardés");
-    /* 12. « Je prépare un test » : chapitre en classe et chapitres récents, le reste replié */
+    /* 12. « Je prépare une évaluation » : chapitre en classe et chapitres récents, le reste replié */
     fresh({ system: "CH", grade: 11, track: "college", minutes: 5 });
     const nid = Object.keys(state.notions).find((id) => state.notions[id].status === "encours") || Object.keys(state.notions)[0];
     state.now = { ids: [nid], date: day() }; screenPrep();
     const vis = [...app.querySelectorAll(".check")].filter((c) => !c.closest("details")).length, all = app.querySelectorAll(".check").length;
-    ok(vis > 0 && vis < all && app.querySelector("details.prep-more:not([open])"), "« Je prépare un test » : " + vis + " notions visibles sur " + all + ", le reste replié");
+    ok(vis > 0 && vis < all && app.querySelector("details.prep-more:not([open])"), "« Je prépare une évaluation » : " + vis + " notions visibles sur " + all + ", le reste replié");
     /* 12. positionnement annoncé honnêtement */
     state = null; draft = { system: "CH", grade: 11, track: "college", minutes: 5 }; screenLevel();
     ok(/environ 5 minutes/.test(app.textContent) && !/2 à 3 minutes/.test(app.textContent), "positionnement annoncé « environ 5 minutes »");

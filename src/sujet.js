@@ -114,9 +114,9 @@ function screenMock() {
   const A = qs.filter((x) => x.part === "A"), B = qs.filter((x) => x.part === "B"), C = qs.filter((x) => x.part === "C");
   const exs = [...new Set(B.map((x) => x.ex))];
   h(`<div class="mock-head">${brand}<div class="eyebrow">Sujet de préparation · environ ${minutes} min</div>
-  <h2>Je m'entraîne pour mon test</h2><p class="small muted">${state.prep.ids.map(nLabel).join(" · ")} · niveau ${MOCK_LV[state.mock.level || "standard"].label.toLowerCase()}</p></div>
+  <h2>Je m'entraîne pour mon évaluation</h2><p class="small muted">${state.prep.ids.map(nLabel).join(" · ")} · niveau ${MOCK_LV[state.mock.level || "standard"].label.toLowerCase()}</p></div>
   <div class="seg no-print" id="mlv">${Object.entries(MOCK_LV).map(([k, v]) => `<button type="button" data-lv="${k}" aria-pressed="${(state.mock.level || "standard") === k}">${v.label}</button>`).join("")}</div>
-  <div class="card flat"><p class="small">Pour t'entraîner avant ton test. <b>Ce n'est pas une évaluation</b> : il n'y a pas de note, et personne d'autre que toi ne voit le résultat. Fais-le sur une feuille, sans regarder tes cours, puis corrige-toi avec le corrigé.</p></div>
+  <div class="card flat"><p class="small">Pour t'entraîner avant ton évaluation. <b>Rien n'est noté</b> : il n'y a pas de note, et personne d'autre que toi ne voit le résultat. Fais-le sur une feuille, sans regarder tes cours, puis corrige-toi avec le corrigé.</p></div>
   <section class="mock-part"><h3>A. Automatismes</h3>${A.map((x) => qHtml(x, "Question " + ++num)).join("")}</section>
   <section class="mock-part"><h3>B. Exercices</h3>${exs.map((e, k) => { const L = B.filter((x) => x.ex === e); num++; return `<div class="mock-ex"><h4>Exercice ${k + 1} · ${L[0].q.titre || nLabel(L[0].id)}</h4>${L.map((x, j) => qHtml(x, x.q.titre ? "" : String.fromCharCode(97 + j) + ")")).join("")}</div>`; }).join("")}</section>
   ${C.length ? `<section class="mock-part"><h3>C. Raisonnement</h3>${C.map((x) => qHtml(x, x.q.titre || (x.q.parts ? "Problème" : mockTitle(x)))).join("")}</section>` : ""}
@@ -165,10 +165,10 @@ function screenMockCorr() {
 // Pas de points (15.11) : un barème donnerait une fausse idée de l'importance des notions ; on compte les questions.
 function screenMockResult(cnt, n, ok, weak) {
   h(`${brand}<div class="eyebrow">Sujet de préparation · bilan</div><h2>Où tu en es</h2>
-  <div class="card stack"><p><b>${cnt.juste}</b> question${cnt.juste > 1 ? "s" : ""} juste${cnt.juste > 1 ? "s" : ""} sur ${n}${cnt.partie ? ` · <b>${cnt.partie}</b> en partie` : ""}${cnt.faux ? ` · <b>${cnt.faux}</b> à revoir` : ""}</p><p class="small muted">Ce n'est pas une note : c'est pour savoir quoi travailler d'ici ton test.</p></div>
+  <div class="card stack"><p><b>${cnt.juste}</b> question${cnt.juste > 1 ? "s" : ""} juste${cnt.juste > 1 ? "s" : ""} sur ${n}${cnt.partie ? ` · <b>${cnt.partie}</b> en partie` : ""}${cnt.faux ? ` · <b>${cnt.faux}</b> à revoir` : ""}</p><p class="small muted">Ce n'est pas une note : c'est pour savoir quoi travailler d'ici ton évaluation.</p></div>
   ${ok.length ? `<div class="card flat"><h3>✓ Acquis</h3><ul>${ok.map((id) => `<li>${nLabel(id)}</li>`).join("")}</ul></div>` : ""}
   ${weak.length ? `<div class="card flat stack"><h3>À retravailler</h3><ul>${weak.map((id) => `<li>${nLabel(id)}</li>`).join("")}</ul>
-    <button class="btn-primary" id="rev">Réviser ces notions maintenant</button></div>` : '<div class="card flat"><p>Tout est juste : bravo ! Une séance de révision par jour suffit jusqu\'au test.</p></div>'}
+    <button class="btn-primary" id="rev">Réviser ces notions maintenant</button></div>` : '<div class="card flat"><p>Tout est juste : bravo ! Une séance de révision par jour suffit jusqu\'à l\'évaluation.</p></div>'}
   <div class="row"><button class="btn-primary" id="again">Un autre sujet</button><button class="btn-ghost" id="home">Retour à l'accueil</button></div>`);
   if (cnt.juste >= 0.8 * n) burst();
   if (document.getElementById("rev")) document.getElementById("rev").onclick = () => {
