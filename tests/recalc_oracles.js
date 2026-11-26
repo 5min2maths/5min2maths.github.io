@@ -1708,6 +1708,75 @@ const RECALC = (() => {
     return pick(lab, { a: k, b: b * k, c: k2 ? A * k2[0] : null }); });
   DF("agrand", rx("agrandit un plan de # cm sur # cm : sur la copie, la longueur mesure # cm"), (g, lab) => { const [a, b, A] = g.map(nn), k = A / a, q = lm(lab, /à (\d+) %/);
     return pick(lab, { a: 100 * k, b: b * k, c: q ? (A * q[0]) / 100 : null }); });
+  /* --- 9e–11e (defis_910.js) --- */
+  const LSTN = (s) => s.split(" ; ").map((t) => nn(t.replace(/ ?°C$/, "")));
+  DF("diagr", /a obtenu ces notes en maths : ([\d,; ]+)\. Il reste un test/, (g, lab) => { const v = LSTN(g[0]), S = v.reduce((a, b) => a + b, 0), t = lm(lab, /exactement (\d+(?:,\d+)?) de moyenne/);
+    return pick(lab, { a: S / v.length, b: S, c: t ? t[0] * (v.length + 1) - S : null }); });
+  DF("diagr", /premiers matchs de basket, \S+ a marqué ([\d; ]+) points/, (g, lab) => { const v = LSTN(g[0]), S = v.reduce((a, b) => a + b, 0), t = lm(lab, /exactement (\d+) points de moyenne/);
+    return pick(lab, { a: S / v.length, b: S, c: t ? t[0] * (v.length + 1) - S : null }); });
+  DF("diagr", /température à midi pendant \d+ jours de janvier : ([-−\d °C;]+)\. On attend/, (g, lab) => { const v = LSTN(g[0].trim()), S = v.reduce((a, b) => a + b, 0), t = lm(lab, /soit exactement (-?\d+) °C/);
+    return pick(lab, { a: S / v.length, b: S, c: t ? t[0] * (v.length + 1) - S : null }); });
+  const divs = (n) => { let c = 0; for (let d = 1; d <= n; d++) if (n % d === 0) c++; return c; };
+  const sqk = (n) => { for (let k = 1; k <= n; k++) { const r = Math.round(Math.sqrt(n * k)); if (r * r === n * k) return k; } return NaN; };
+  const nfp = (n) => { let c = 0; for (let p = 2; n > 1; p++) while (n % p === 0) { n /= p; c++; } return c; };
+  DF("premiers", rx("On considère le nombre #\\.(?: |$)"), (g, lab) => { const n = nn(g[0]); return pick(lab, { a: nfp(n), b: divs(n), c: sqk(n) }); });
+  DF("premiers", rx("fanfare de # musiciens"), (g, lab) => { const n = nn(g[0]), s = Math.ceil(Math.sqrt(n) - 1e-9); return pick(lab, { a: divs(n), b: divs(n) - 2, c: s * s - n }); });
+  DF("premiers", rx("dispose de # dalles carrées"), (g, lab) => { const n = nn(g[0]); return pick(lab, { a: divs(n), b: Math.ceil(divs(n) / 2), c: sqk(n) }); });
+  /* fracper : x lu dans l'énoncé (« 0,4272727… » ou « 0,48484848… »), puis rapport irréductible */
+  const perFrac = (s, per) => { const [, dec] = String(s).split(","), k = dec.indexOf(per), pre = dec.slice(0, k), L = per.length, num = +(pre + per) - +(pre || "0"), den = (10 ** L - 1) * 10 ** pre.length; return [num, den]; };
+  DF("fracper", /(?:écrire|affiche) (0,\d+)(?:…|\.\.\.)? \((?:le groupe « (\d+) »|seul le chiffre « (\d) »)/, (g, lab) => { const per = g[1] || g[2], [num, den] = perFrac(g[0], per), gd = (a, b) => (b ? gd(b, a % b) : a), k = gd(num, den);
+    return pick(lab, { a: num, b: num / k, c: den / k }); });
+  DF("decprob", rx("pique-nique de # personnes, on prévoit # L de jus par personne\\. Le jus est vendu en bouteilles de # L à # CHF la bouteille\\. On paie avec un billet de # CHF"), (g, lab) => { const [n, l, pl, pu, b] = g.map(nn), L = n * l, k = Math.ceil(L / pl - 1e-9);
+    return pick(lab, { a: L, b: k, c: b - k * pu }); });
+  DF("decprob", rx("# m² à couvrir, en deux couches\\. Il faut # L de peinture par m² et par couche\\. .*?pots de # L à # CHF le pot\\. On paie avec un billet de # CHF"), (g, lab) => { const [S, d, pl, pu, b] = g.map(nn), L = 2 * S * d, k = Math.ceil(L / pl - 1e-9);
+    return pick(lab, { a: L, b: k, c: b - k * pu }); });
+  DF("decprob", rx("pelouse de # m², il faut # g de graines par m²\\. .*?sacs de # kg à # CHF le sac\\. On paie avec un billet de # CHF"), (g, lab) => { const [S, d, pl, pu, b] = g.map(nn), L = (S * d) / 1000, k = Math.ceil(L / pl - 1e-9);
+    return pick(lab, { a: L, b: k, c: b - k * pu }); });
+  const ppmc = (a, b) => { for (let m = Math.max(a, b); ; m++) if (m % a === 0 && m % b === 0) return m; };
+  DF("multdiv", /nombres entiers de (\d+) à (\d+) \(bornes comprises\)/, (g, lab) => { const [lo, hi] = g.map(nn), ab = lm(lab, /de (\d+) et de (\d+)/), a = lm(lab, /multiples de (\d+) \?/), cnt = (k) => { let c = 0; for (let x = lo; x <= hi; x++) if (x % k === 0) c++; return c; };
+    return L0(lab, "a") && a ? cnt(a[0]) : L0(lab, "b") && ab ? ppmc(ab[0], ab[1]) : L0(lab, "c") && ab ? cnt(ppmc(ab[0], ab[1])) : null; });
+  DF("multdiv", /la ligne A repart ensuite toutes les (\d+) minutes, la ligne B toutes les (\d+) minutes\. On observe les départs de (\d+) h 00 à (\d+) h 00/, (g, lab) => { const [a, b, h0, h1] = g.map(nn), T = 60 * (h1 - h0), L = ppmc(a, b);
+    return pick(lab, { a: Math.floor(T / a) + 1, b: L, c: Math.floor(T / L) + 1 }); });
+  DF("multdiv", /premier envoie un éclair toutes les (\d+) secondes, le second toutes les (\d+) secondes\. On compte les éclairs pendant les (\d+) secondes/, (g, lab) => { const [a, b, T] = g.map(nn), L = ppmc(a, b);
+    return pick(lab, { a: Math.floor(T / a), b: L, c: Math.floor(T / L) }); });
+  DF("relrep", /point A a pour abscisse (-?\d+), le point B a pour abscisse (-?\d+) et le point C a pour abscisse (-?\d+)/, (g, lab) => { const [a, b, c] = g.map(nn); return pick(lab, { a: Math.abs(b - a), b: (a + b) / 2, c: b + (b - a) - c }); });
+  DF("relrep", /du niveau (-?\d+) \(parking\) au niveau (-?\d+), puis redescend au niveau (-?\d+)/, (g, lab) => { const [a, b, c] = g.map(nn); return pick(lab, { a: b - a, b: (a + b) / 2, c: b - c }); });
+  DF("relrep", /plongeuse est à l'altitude (-?\d+) m .*?truite nage à (-?\d+) m et un goéland vole à (\d+) m/, (g, lab) => { const [a, c, b] = g.map(nn); return pick(lab, { a: b - a, b: (a + b) / 2, c: c - a }); });
+  /* symetries, rotation (réponses en couple) : A, C, T lus dans l'énoncé */
+  const PTN = (txt, P) => { const m = new RegExp("\\b" + P + "\\((-?\\d+) ; (-?\\d+)\\)").exec(txt); return m ? [nn(m[1]), nn(m[2])] : null; };
+  DF("symetries", /symétrique de A par rapport à C|image de A par la symétrie de centre C/, (g, lab, txt) => { const t = txt.split(" ¶ ")[0], A = PTN(t, "A"), C = PTN(t, "C"), T = PTN(t, "T"); if (!A || !C || !T) return null; const B = [2 * C[0] - A[0], 2 * C[1] - A[1]];
+    return pick(lab, { a: { pair: B }, b: { pair: [B[0] + T[0], B[1] + T[1]] }, c: { pair: [-A[0], A[1]] } }); });
+  DF("rotation", /sens inverse des aiguilles d'une montre/, (g, lab, txt) => { const A = PTN(txt.split(" ¶ ")[0], "A"); if (!A) return null; const C = PTN(lab, "C"), [x, y] = A;
+    return pick(lab, { a: { pair: [-y, x] }, b: { pair: [-x, -y] }, c: C ? { pair: [C[0] - (y - C[1]), C[1] + (x - C[0])] } : null }); });
+  DF("rac", rx("cube a un volume de # cm³"), (g, lab) => { const s = Math.cbrt(nn(g[0])), k = lm(lab, /est (\d+) fois celle/); return pick(lab, { a: s, b: 6 * s * s, c: k ? Math.sqrt(k[0] * s * s) : null }); });
+  DF("rac", rx("terrain carré a une aire de # m²\\. On veut l'entourer d'une clôture à # CHF"), (g, lab) => { const [A, p] = g.map(nn), s = Math.sqrt(A), k = lm(lab, /carré (\d+) fois plus grand/); return pick(lab, { a: s, b: 4 * s * p, c: k ? Math.sqrt(k[0] * A) : null }); });
+  DF("rac", rx("aquarium cubique \\(sans couvercle\\) contient exactement # litres"), (g, lab) => { const s = Math.cbrt(nn(g[0]) * 1000); return pick(lab, { a: s, b: 5 * s * s, c: Math.cbrt(8 * s ** 3) }); });
+  DF("disque", rx("(?:secteur de disque de rayon # (?:cm|m) et d'angle (\\d+)°|aiguille des minutes d'une horloge mesure # cm\\. On observe son mouvement pendant # minutes)"), (g, lab) => { const [r1, a1, r2, m] = g.map(nn), r = r1 || r2, a = a1 || 6 * m, L = (a / 360) * 2 * Math.PI * r;
+    return pick(lab, { a: L, b: L + 2 * r, c: (a / 360) * Math.PI * r * r }); });
+  DF("grandmanq", rx("trapèze a des bases de # cm et # cm\\. Son aire vaut # cm²\\. Un rectangle de largeur # cm"), (g, lab) => { const [b1, b2, A, w] = g.map(nn); return pick(lab, { a: (2 * A) / (b1 + b2), b: A / w, c: Math.sqrt(2 * A) }); });
+  DF("grandmanq", rx("champ a la forme d'un trapèze dont les côtés parallèles mesurent # m et # m\\. Son aire vaut # m²"), (g, lab) => { const [b1, b2, A] = g.map(nn), w = lm(lab, /rectangulaire de (\d+) m de large/), p = lm(lab, /coûte (\d+) CHF par are/);
+    return pick(lab, { a: (2 * A) / (b1 + b2), b: w ? A / w[0] : null, c: p ? (A / 100) * p[0] : null }); });
+  DF("grandmanq", rx("canal d'irrigation est un trapèze : largeur # m au fond, # m en haut\\. L'aire de cette section vaut # m²"), (g, lab) => { const [b1, b2, A] = g.map(nn), L = lm(lab, /dans (\d+) m de canal/);
+    return pick(lab, { a: (2 * A) / (b1 + b2), b: L ? A * L[0] : null, c: L ? A * L[0] * 1000 : null }); });
+  DF("voldecomp", rx("piscine a la forme d'un pavé de # m sur # m\\. Sur la moitié de sa longueur, la profondeur est de # m ; sur l'autre moitié, elle est de # m"), (g, lab) => { const [L, l, h1, h2] = g.map(nn), V = (L / 2) * l * (h1 + h2), t = lm(lab, /débit de (\d+) m³/);
+    return pick(lab, { a: V, b: V * 1000, c: t ? V / t[0] : null }); });
+  DF("voldecomp", rx("a (\\d) marches\\. Vu de côté, .*?Chaque bloc est un pavé de # m de large, 30 cm de profondeur et # cm de haut"), (g, lab) => { const [n, w, h] = g.map(nn), V = ((n * (n + 1)) / 2) * w * 0.3 * (h / 100);
+    return pick(lab, { a: V, b: V * 2400, c: Math.ceil((V * 2400) / 40 - 1e-9) }); });
+  DF("voldecomp", rx("deux bacs pavés accolés, de # m de haut : l'un de # m sur # m, l'autre de # m sur # m\\. On la remplit de terre, vendue en sacs de # L"), (g, lab) => { const [h, a, b, c, d, s] = g.map(nn), V = (a * b + c * d) * h;
+    return pick(lab, { a: V, b: V * 1000, c: Math.ceil((V * 1000) / s - 1e-9) }); });
+  /* eqverif : les nombres proposés sont substitués dans l'équation lue dans le libellé ou l'énoncé */
+  DF("eqverif", /On considère l'équation x\^2 \+ (\d+) = (\d+)x et les nombres ([-−\d ;]+)\./, (g, lab) => { const p = nn(g[0]), s = nn(g[1]), c = LSTN(g[2].trim()), ok = c.filter((x) => x * x + p === s * x), z = lm(lab, /le nombre (\d+) est-il/);
+    return pick(lab, { a: ok.length, b: ok.reduce((t, x) => t + x, 0), c: z ? s * z[0] - z[0] * z[0] : null }); });
+  DF("eqverif", /largeur de x cm et une longueur de x \+ (\d+) cm\. Son aire vaut (\d+) cm²\. On propose pour x les nombres ([-−\d ;]+)\./, (g, lab) => { const d = nn(g[0]), A = nn(g[1]), c = LSTN(g[2].trim()), ok = c.filter((x) => x * (x + d) === A), r = ok.find((x) => x > 0);
+    return pick(lab, { a: ok.length, b: r, c: 2 * (2 * r + d) }); });
+  DF("eqverif", /Le carré de ce nombre, diminué de (\d+), est égal à (\d+) fois ce nombre\. Elle propose à son frère les nombres ([-−\d ;]+)\./, (g, lab) => { const p = nn(g[0]), s = nn(g[1]), c = LSTN(g[2].trim()), ok = c.filter((x) => x * x - p === s * x), z = lm(lab, /le nombre (\d+) vérifie/);
+    return pick(lab, { a: ok.length, b: ok.find((x) => x > 0), c: z ? z[0] * z[0] - s * z[0] : null }); });
+  DF("pente", rx("route de montagne a une pente constante de # %\\. Elle franchit une distance horizontale de # m\\. Un panneau prévient : « dénivelé de # %"), (g, lab) => { const [p, d, t] = g.map(nn), dh = (p * d) / 100;
+    return pick(lab, { a: dh, b: 10000 / p, c: (dh * 100) / t }); });
+  DF("pente", rx("pente de 6 % au plus\\. Il faut franchir une marche de # cm"), (g, lab) => { const h = nn(g[0]), Lr = lm(lab, /rampe de (\d+(?:,\d+)?) m/), L2 = lm(lab, /sur (\d+(?:,\d+)?) m de longueur/);
+    return pick(lab, { a: h / 6, b: Lr ? h / Lr[0] : null, c: L2 ? 0.06 * L2[0] * 100 : null }); });
+  DF("pente", rx("funiculaire monte avec une pente moyenne de # % sur une distance horizontale de # m\\. Plus haut, un deuxième tronçon s'élève de # m sur # m"), (g, lab) => { const [p, d, D, d2] = g.map(nn);
+    return pick(lab, { a: (p * d) / 100, b: 10000 / p, c: (100 * D) / d2 }); });
   /* ==== fin agent defisch ==== */
 
   /* ---------- 26.11 (agent defis2) : notions encore sous 20 % (transf, trigcercle, trigfn, recip, lectures de graphique
@@ -1973,6 +2042,11 @@ const RECALC = (() => {
     for (const p of x.parts || []) if (p.spec && p.spec.kind === "value") {
       const r = ruleFor(x, x.txt + " ¶ " + p.label);
       if (r && "v" in r[1]) out.push({ rule: r[0], msg: cmpValue(x, p.spec, r[1], p.label) });
+    }
+    /* 26.11 soir (agent defisch) : parties de défi à réponse en couple (coordonnées) */
+    for (const p of x.parts || []) if (p.spec && p.spec.kind === "pair") {
+      const r = ruleFor(x, x.txt + " ¶ " + p.label);
+      if (r && r[1].pair) out.push({ rule: r[0], msg: r[1].pair.length === p.spec.values.length && r[1].pair.every((v, i) => sameSet([p.spec.values[i]], [v])) ? null : "attendu (" + p.spec.values.map(fmt).join(" ; ") + "), recalcul (" + r[1].pair.map(fmt).join(" ; ") + ")" });
     }
     return out;
   }
