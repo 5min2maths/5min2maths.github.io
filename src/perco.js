@@ -566,7 +566,7 @@
     ],
   };
   const LCP = [
-    () => { const k = R.int(2, 5), m = R.int(2, 6), v = R.int(3, 7), A = k * (v + m) - v;
+    () => { const k = R.int(3, 6), m = R.int(2, 6), v = R.int(3, 7), A = k * (v + m) - v; /* 26.11 soir : k ≥ 3 (k = 2 donnait le coefficient 1, « B = x + … ») */
       return P("On compare " + M("A = " + k + "(x + " + m + ") - x") + " et " + M("B = " + (k - 1 === 1 ? "" : k - 1) + "x + " + k * m) + ".", [["a) Valeur de A pour x = " + v, A], ["b) Valeur de B pour x = " + v, A], ["c) Coefficient de x dans A réduite", k - 1]],
         ["Remplace x par " + v + ", parenthèse d'abord.", "A = " + k + "x + " + k * m + " − x."], "a) " + M(k + " \\cdot " + (v + m) + " - " + v + " = " + A) + " ; b) " + M((k - 1) * v + " + " + k * m + " = " + A) + " ; c) " + M("A = " + (k - 1 === 1 ? "" : k - 1) + "x + " + k * m + " = B") + " : les expressions sont équivalentes."); },
   ];

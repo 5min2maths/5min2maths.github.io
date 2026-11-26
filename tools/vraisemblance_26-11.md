@@ -355,3 +355,77 @@ Restent à 1 ou 2 contextes (111 défis) :
   trigeq2, eqirrmp, eqlog, derivref, etudefct, lnexp ; France seule : proba2, tauxevol, vect3e, probcond, algopy,
   colin, intparties, eqdiff, expderiv, trigrad, autodnb, tabvar, lnfr, cercle6, bissec6, tabform5, hauteurs5,
   progcalc ; hors catalogue : pvect, intsubst, cplxalg, cplxtrig, cplxeq, suitegeom, serie.
+
+### Défis à 3 contextes, suite (26.11 soir, branche agent/defisch2)
+
+Suite de la liste « Restent à 1 ou 2 contextes » de agent/defisch : **39 défis** (les 16 de 9e–11e, puis les 23 de
+1re Collège). Même méthode : gabarits existants étiquetés (ctx), un contexte ajouté par notion (deux quand il n'y en
+avait qu'un), valeurs tirées, corrigé calculé, oracle par contexte **y compris pour les gabarits d'origine** dans
+`tests/recalc_oracles.js` (section « agent defisch2 »), ajout à `VARIES` de `tests/vraisemblance_soir.html`. Contrôle
+`tests/_frch.html` sur les 39 notions : aucun CHF, lieu ou usage suisse en profil FR. Les défis hors de l'objet de
+defis.js (distrib, echelle, litconv, eq3, eqspec, tradalg, contrex, demoalg, implication, angtri en 9e) sont complétés
+dans PROB_EXTRA / PROBX ; les classes restent respectées (distrib « double » écarté en 10e par HORS_CO, angtri
+« polygone » écarté en 9e, échelle « train » sans aire ni volume, donc permis en 10e).
+
+| Notion | Contextes (ctx) |
+|---|---|
+| distrib | difference, accoles (10e), **double** (potager, poulailler, tapis agrandis ; 11e), **sortie** (classe et accompagnants, entrée + transport) |
+| idrem | nombre, carre, **calcmental** (34², 26², 34 · 26 par les identités) |
+| eq2 | rectangle, carre, **tournoi** (chaque équipe rencontre les autres une fois : n(n − 1)/2 matchs) |
+| echelle | maquette, carte, **train** (trains miniatures H0, N, TT : locomotive, wagon, vitesse apparente en cm/s) |
+| sys2 | billets, rectangle, **qcm** (points gagnés et perdus, autre barème) |
+| angles | polygone, inscrits, **granderoue** (nacelles : angle au centre, inscrit, triangle isocèle) |
+| angtri | polygone (1re), bissectrice (9e), **cerfvolant** (quadrilatère AB = AD, CB = CD) |
+| volcone | cornet, boule, **tas** (sable, gravier, compost : remorques, couche étalée) |
+| formule | imc, energie, **horizon** (d = 3,57√h : phare, tour, falaise) |
+| proba | urne, des, **qcm** (2 ou 3 questions au hasard, 3 à 5 choix) |
+| volmanq | conserve, verre, **piscine** (piscine ronde hors-sol : hauteur d'eau, durée au tuyau) |
+| eq2fact | chute, lancer, **nappe** (nappe carrée qui dépasse : différence de deux carrés) |
+| cercthales | tangentes, demicercle, **tunnel** (voûte en demi-cercle : hauteur, AC, BC, angle droit en C) |
+| thalesrec | etagere, triangle, **escabeau** (sangle parallèle au sol) |
+| racprop | carre, triangle, **cube** (arête a√k : diagonales exactes, aire) |
+| litconv | comparer, **perimetre** (triangle isocèle ou rectangle), **conventions** (k · x · x − m · x + x · j · x) |
+| eq3 | polynome, **evidence** (ax³ = bx), **groupement** (x³ + ax² − b²x − ab²) |
+| absval | route, **tolerance** (pièces usinées), **bus** (deux fois plus loin de A que de B) |
+| ineq2 | rectangle, **balle** (filmée au-dessus d'une hauteur), **recette** (prix pour une recette minimale) |
+| ensembles | intervalles, **horaires** (magasin ouvert / Léo libre), **ages** (camp, tarif jeune adulte) |
+| trinfact | benefice, **jet** (jet d'eau, zéro positif et sommet), **signe** (entiers où P(x) < 0) |
+| eqspec | programme, **tarifs** (deux formules identiques), **perimetre** (aucune solution) |
+| modaff | piscine, **cinema**, **escalade** |
+| geocomb | tente, **rampe** (rampe de skate en prisme), **abri** (pavé et toit à deux pans) |
+| trigrel | perimetre, **sinus** (hypoténuse donnée), **echelle** (cos donné) |
+| f2 | recette, enclos, **fusee** (fusée à eau) |
+| euclide | hauteur, cathete, **charpente** (AH et HB donnés) |
+| trigo | elevation, rampe, **cerfvolant** (hauteur, distance, angle pour une hauteur visée) |
+| ineq | rectangle, tarifs, **moyenne** (points par match à marquer) |
+| f2expr | arche, sommet, **cable** (pont suspendu) |
+| racinv | intersection, **partage** (une ou deux personnes de plus), **rectangle** (aire et périmètre donnés) |
+| ratden | conjugue, **isocele** (a/√2), **inverse** (x = p + √q, x + 1/x, x² + 1/x²) |
+| exactes | cube, hexagone, **equilateral** (panneau : hauteur, aire, rayon inscrit) |
+| f2trois | points, falaise, **fleche** (trois hauteurs mesurées) |
+| morceaux | parking, **kayak**, **velo** (location à l'heure plafonnée) |
+| tradalg | impairs, reste, **calendrier** (carré 2 × 2 de dates) |
+| contrex | multiples, premiers, **impairs** (« 2n + 1 est premier ») |
+| demoalg | consecutifs, identite, **renverse** (ab + ba multiple de 11, ab − ba de 9) |
+| implication | multiples, pair, **carres** (« n² multiple de 4 ⇒ n multiple de 4 ») |
+
+Défauts trouvés par les oracles (corrigés) :
+
+- Arrondis à égalité (valeur exacte en …5) qui acceptaient les deux voisins : thalesrec (AE ÷ AC au centième),
+  formule (IMC, énergie cinétique), trigo (rampe), geocomb (tente) : valeur attendue arrondie sur l'écriture décimale
+  (r1, r2c), comme pour les contextes ajoutés.
+- litconv : k = 2 donnait « B = x + … » et le coefficient 1 (×1 trivial) : k ≥ 3.
+- `tests/vrai_collecte.js` (texte lisible des tests) : \frac{12\sqrt{3}}{5} devenait « 12√(3)5 » (racine traitée après
+  la fraction) ; la racine est maintenant remplacée d'abord — le corrigé de racprop (hauteur relative à l'hypoténuse)
+  est enfin reconnu par le recalcul.
+- Relecture : « Sur un jardin », chalet de vacances à 120 CHF, « l'échelle 0 », fusée à eau à 80 m, « heures entiers »
+  corrigés avant publication.
+
+Outil hors suite ajouté : `tests/_gabarits.html#ids=…&n=80` (gabarits par ctx, nombres effacés, sources PROB /
+PROB_EXTRA / PROBX).
+
+Restent à 1 ou 2 contextes : 2e–4e Collège et MP (cart, expo, stats, fracrat, droites, statfreq, quartiles, triaire,
+droitesinter, vecteurs, recipaff, eqratmp, logprop, croissexp, volmp, similmp, coordmp, vectmp, scalmp, projmp, pvectmp,
+explogfn, limitinf, continuite, combi, vect3d, droite3d, plans, pscal3d, primitives, volrev, croissance, appllin,
+condbayes, varalea, binomiale, normale, log, vabs, eqparam, trigassoc, trigeq2, eqirrmp, eqlog, derivref, etudefct,
+lnexp) ; France seule et hors catalogue : inchangés (voir la liste d'agent/defisch).

@@ -12,7 +12,7 @@ const VRAI = (() => {
     .replace(/&nbsp;/g, " ").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&")
     .replace(/\\\(|\\\)|\\\[|\\\]/g, "")
     .replace(/\{,\}/g, ",").replace(/\\text\{'\}|\{'\}/g, "'")
-    .replace(/\\d?frac\{([^{}]*)\}\{([^{}]*)\}/g, "($1)/($2)").replace(/\\sqrt\{([^{}]*)\}/g, "√($1)")
+    .replace(/\\sqrt\{([^{}]*)\}/g, "√($1)").replace(/\\d?frac\{([^{}]*)\}\{([^{}]*)\}/g, "($1)/($2)") /* 26.11 soir (defisch2) : racine avant fraction (\\frac{12\\sqrt{3}}{5} donnait « 12√(3)5 ») */
     .replace(/\\(?:text|mathrm|textbf|mathbf|operatorname)\{([^{}]*)\}/g, "$1")
     .replace(/\\cdot|\\times/g, "·").replace(/\\div/g, ":").replace(/\\pi/g, "π").replace(/\\circ|\^\{?\\circ\}?/g, "°")
     .replace(/\\le(q)?\b/g, "≤").replace(/\\ge(q)?\b/g, "≥").replace(/\\approx/g, "≈").replace(/\\%/g, "%")
