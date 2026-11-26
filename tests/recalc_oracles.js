@@ -1558,6 +1558,21 @@ const RECALC = (() => {
   /* repere3d (11e, ch11_rep3d) */
   DF("repere3d", /le sommet opposé à O est F\((\d+) ; (\d+) ; (\d+)\)/, (g, lab) => { const [a, b, c] = g.map(nn);
     return lab.startsWith("a)") ? a * b * c : lab.startsWith("b)") ? (/Abscisse/.test(lab) ? a : /Ordonnée/.test(lab) ? b : c) / 2 : lab.startsWith("c)") ? Math.sqrt(a * a + b * b + c * c) : null; });
+  /* bayes, syslin, bases, etudelnexp (4e Collège, ch4c_ana) */
+  DF("bayes", /(\d+(?:,\d+)?) % [^%]*?(\d+(?:,\d+)?) % [^%]*?(\d+(?:,\d+)?) %/, (g, lab) => { const [p, s, f] = g.map((v) => nn(v) / 100), pos = p * s + (1 - p) * f;
+    return lab.startsWith("a)") ? 100 * pos : lab.startsWith("b)") ? (100 * p * s) / pos : lab.startsWith("c)") ? (100 * p * s * s) / (p * s * s + (1 - p) * f * f) : null; });
+  const det3 = (A) => A[0][0] * (A[1][1] * A[2][2] - A[1][2] * A[2][1]) - A[0][1] * (A[1][0] * A[2][2] - A[1][2] * A[2][0]) + A[0][2] * (A[1][0] * A[2][1] - A[1][1] * A[2][0]);
+  DF("syslin", /coûtent ([\d',]+) CHF ; mardi/, (g, lab, txt) => { const L = [...txt.split(" ¶ ")[0].matchAll(/(\d+) [^,0-9]+?, (\d+) [^0-9]+? et (\d+) [^0-9]+? coûtent ([\d',]+) CHF/g)]; if (L.length !== 3) return null;
+    const A = L.map((m) => [nn(m[1]), nn(m[2]), nn(m[3])]), B = L.map((m) => nn(m[4])), D = det3(A), col = (k) => A.map((r, i) => r.map((v, j) => (j === k ? B[i] : v)));
+    return lab.startsWith("a)") ? D : lab.startsWith("b)") ? det3(col(0)) / D : lab.startsWith("c)") ? det3(col(2)) / D : null; });
+  DF("bases", /u = \((-?\d+) ; (-?\d+) ; (-?\d+)\), v = \((-?\d+) ; (-?\d+) ; (-?\d+)\) et w = \((-?\d+) ; m ; (-?\d+)\)/, (g, lab) => { const [u0, u1, u2, v0, v1, v2, w0, w2] = g.map(nn), u = [u0, u1, u2], v = [v0, v1, v2];
+    const dm = (m) => det3([[u0, v0, w0], [u1, v1, m], [u2, v2, w2]]), a = dm(1) - dm(0), b = dm(0);
+    if (lab.startsWith("a)")) return a; if (lab.startsWith("b)")) return -b / a;
+    const t = lm(lab, /t = \((-?\d+) ; (-?\d+) ; (-?\d+)\)/), k = /composante α/.test(lab) ? 0 : /composante β/.test(lab) ? 1 : /composante γ/.test(lab) ? 2 : -1; if (!t || k < 0) return null;
+    const M3 = [[u0, v0, w0], [u1, v1, 0], [u2, v2, w2]], D = det3(M3); return det3(M3.map((r, i) => r.map((x, j) => (j === k ? t[i] : x)))) / D; });
+  DF("etudelnexp", /Soit f\(x\) = (\d*)x·e\^\(−x\/(\d+)\) pour x ≥ 0/, (g, lab) => { const a = g[0] ? nn(g[0]) : 1, k = nn(g[1]); return lab.startsWith("a)") ? k : lab.startsWith("b)") ? (a * k) / Math.E : lab.startsWith("c)") ? 0 : null; });
+  DF("etudelnexp", /Soit f\(x\) = (\d*)x²·e\^\(−x\/(\d+)\) pour x ≥ 0/, (g, lab) => { const a = g[0] ? nn(g[0]) : 1, k = nn(g[1]); return lab.startsWith("a)") ? 2 * k : lab.startsWith("b)") ? 4 * a * k * k * Math.exp(-2) : lab.startsWith("c)") ? 0 : null; });
+  DF("etudelnexp", /Soit f\(x\) = (\d*)ln\(x\)\/x pour x > 0/, (g, lab) => { const a = g[0] ? nn(g[0]) : 1; return lab.startsWith("a)") ? Math.E : lab.startsWith("b)") ? a / Math.E : lab.startsWith("c)") ? 0 : null; });
   /* ==== fin agent defis3 ==== */
 
   /* ---------- 26.11 (agent defis2) : notions encore sous 20 % (transf, trigcercle, trigfn, recip, lectures de graphique
