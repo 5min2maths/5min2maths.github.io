@@ -1635,6 +1635,81 @@ const RECALC = (() => {
     return lab.startsWith("a)") ? r : lab.startsWith("b)") ? (A * a) / b : lab.startsWith("c)") ? A * r : null; });
   /* ==== fin agent defis3 ==== */
 
+  /* ==== défis à 3 contextes (agent defisch, 26.11 soir) : un oracle par contexte, partie par partie ==== */
+  const NB = "(\\d+(?:'\\d{3})*(?:,\\d+)?)", rx = (s) => new RegExp(s.replace(/#/g, NB)), L0 = (lab, k) => lab.startsWith(k + ")");
+  const pick = (lab, o) => { for (const k of Object.keys(o)) if (L0(lab, k)) return typeof o[k] === "function" ? o[k]() : o[k]; return null; };
+  /* --- 9e (defis_9.js) --- */
+  DF("decread", rx("formé de # dizaines, # unités, # dixièmes et # millièmes"), (g, lab) => { const [d, u, t, m] = g.map(nn), n = 10 * d + u + t / 10 + m / 1000, T = Math.round(n * 1000);
+    return pick(lab, { a: n, b: Math.floor(T / 10) % 10, c: { v: n, st: 0.01 } }); });
+  DF("decread", rx("chronomètre électronique affiche pour \\S+ : # s"), (g, lab) => { const t = nn(g[0]), T = Math.round(t * 1000); return pick(lab, { a: Math.floor(T / 10) % 10, b: Math.floor(T / 100), c: { v: t, st: 0.01 } }); });
+  DF("decread", /chiffre des dizaines est (\d)\. .*?dixièmes, qui vaut (\d)\. .*?millièmes est (\d),/, (g, lab) => { const [t, a, c] = g.map(nn), n = 10 * t + 2 * a + a / 10 + (t - a) / 100 + c / 1000;
+    return pick(lab, { a: n, b: Math.floor(Math.round(n * 1000) / 10), c: { v: n, st: 0.1 } }); });
+  DF("deccomp", rx("(temps|masses|épaisseurs) \\(en (?:secondes|kg|mm)\\) : ([\\d,; ]+)\\."), (g, lab) => { const v = g[1].split(" ; ").map(nn).sort((x, y) => x - y), lo = lm(lab, /entre (\d+(?:,\d+)?) \S+ et (\d+(?:,\d+)?)/);
+    return pick(lab, { a: /plus lourd/.test(lab) ? v[4] : v[0], b: /plus lourd/.test(lab) ? v[v.length - 3] : v[2], c: lo ? v.filter((x) => x > lo[0] && x < lo[1]).length : null }); });
+  DF("ulong", rx("rouleau de ficelle de # m est coupé en morceaux de # cm, autant que possible\\. La ficelle pèse # g par mètre"), (g, lab) => { const [L, c, m] = g.map(nn), n = Math.floor((L * 100) / c + 1e-9);
+    return pick(lab, { a: n, b: L * 100 - n * c, c: (n * c * m) / 100000 }); });
+  DF("ulong", rx("planche de # m est sciée en tablettes de # cm"), (g, lab) => { const [L, c] = g.map(nn), n = Math.floor((L * 100) / c + 1e-9), k = lm(lab, /On scie (\d+) planches/);
+    return pick(lab, { a: n, b: L * 100 - n * c, c: k ? (k[0] * (L * 100 - n * c)) / 100 : null }); });
+  DF("ulong", rx("ruban de # m en morceaux de # cm"), (g, lab) => { const [L, c] = g.map(nn), n = Math.floor((L * 100) / c + 1e-9), k = lm(lab, /emballer (\d+) cadeaux/);
+    return pick(lab, { a: n, b: L * 100 - n * c, c: k ? Math.ceil(k[0] / n) : null }); });
+  DF("uaire", rx("pièce rectangulaire de # m sur # m est recouvert de carreaux carrés de # cm"), (g, lab) => { const [a, b, c] = g.map(nn); return pick(lab, { a: a * b, b: (c / 100) ** 2, c: (a * b) / (c / 100) ** 2 }); });
+  DF("uaire", rx("terrasse rectangulaire de # m sur # m est couverte de dalles carrées de 40 cm de côté\\. Une dalle coûte # CHF"), (g, lab) => { const [a, b, p] = g.map(nn), n = Math.round((a * b) / 0.16);
+    return pick(lab, { a: a * b, b: n, c: n * p }); });
+  DF("uaire", rx("timbres rectangulaire mesure # cm sur # cm\\. .*?carrés de # mm"), (g, lab) => { const [a, b, s] = g.map(nn), t = (s / 10) ** 2; return pick(lab, { a: a * b, b: t, c: (a * b) / t }); });
+  DF("uvol", rx("aquarium a la forme d'un pavé de # cm de long, # cm de large et # cm de haut\\. On y verse # litres"), (g, lab) => { const [a, b, c, x] = g.map(nn);
+    return pick(lab, { a: (a * b * c) / 1000, b: (x * 1000) / (a * b), c: ((a * b * c) / 1000 - x) * 10 }); });
+  DF("uvol", rx("récupérateur d'eau de pluie a la forme d'un pavé de # cm de long, # cm de large et # cm de haut\\. .*?il contient # litres"), (g, lab) => { const [a, b, c, x] = g.map(nn), k = lm(lab, /arrosoirs de (\d+) L/);
+    return pick(lab, { a: (a * b * c) / 1000, b: (x * 1000) / (a * b), c: k ? Math.floor(x / k[0] + 1e-9) : null }); });
+  DF("uvol", rx("piscine hors-sol a la forme d'un pavé de # m sur # m, avec des parois de # m de haut\\. On la remplit avec # m³ d'eau, à l'aide d'un tuyau qui débite # litres par minute"), (g, lab) => { const [a, b, h, x, d] = g.map(nn);
+    return pick(lab, { a: a * b * h, b: (100 * x) / (a * b), c: (x * 1000) / d }); });
+  DF("angtype", /Sur une horloge, on mesure le plus petit angle/, (g, lab) => { const sm = (v) => Math.min(v % 360, 360 - (v % 360)); let m;
+    if ((m = lm(lab, /^a\) Angle à (\d+) h pile/))) return sm(30 * m[0]); if ((m = lm(lab, /en (\d+) minutes/))) return 6 * m[0]; if ((m = lm(lab, /^c\) Angle à (\d+) h 30/))) return sm(Math.abs(30 * m[0] + 15 - 180)); return null; });
+  DF("angtype", /gâteau rond est coupé en (\d+) parts égales/, (g, lab) => { const n = nn(g[0]), p = 360 / n, k = lm(lab, /formé par (\d+) parts/); let o = 1; while (o * p <= 90) o++;
+    return pick(lab, { a: p, b: k ? k[0] * p : null, c: o }); });
+  const ROSE = { nord: 0, "nord-est": 45, est: 90, "sud-est": 135, sud: 180, "sud-ouest": 225, ouest: 270, "nord-ouest": 315 };
+  DF("angtype", /Sur une rose des vents/, (g, lab) => { const m = /directions? (\S+) (?:et|à la direction) (?:la direction )?(\S+?)(?:,| en)/.exec(lab); if (!m) return null; const x = ROSE[m[1]], y = ROSE[m[2]]; if (x === undefined || y === undefined) return null;
+    return L0(lab, "c") ? (y - x + 360) % 360 : Math.min(Math.abs(x - y), 360 - Math.abs(x - y)); });
+  DF("perim", rx("rectangle a un périmètre de # cm, et sa longueur dépasse sa largeur de # cm"), (g, lab) => { const [P, d] = g.map(nn), l = (P / 2 - d) / 2; return pick(lab, { a: P / 2, b: l, c: l + d }); });
+  DF("perim", rx("Il faut # m de clôture pour les trois autres côtés, et le côté le long du mur mesure # m\\. La clôture coûte # CHF le mètre"), (g, lab) => { const [C, L, p] = g.map(nn), w = (C - L) / 2;
+    return pick(lab, { a: w, b: 2 * (L + w), c: C * p }); });
+  DF("perim", rx("fil de fer de # cm"), (g, lab) => { const F = nn(g[0]); return pick(lab, { a: F / 4, b: F / 3, c: F / 6 }); });
+  DF("aire2", rx("base \\[AB\\] de # cm et une hauteur relative à cette base de # cm\\. Son côté \\[BC\\] mesure # cm"), (g, lab) => { const [b, h, c] = g.map(nn), A = b * h, d = lm(lab, /diagonale de (\d+) cm/);
+    return pick(lab, { a: A, b: A / c, c: d ? (2 * A) / d[0] : null }); });
+  DF("aire2", rx("Sa base mesure # m et la hauteur relative à cette base # m\\. Le côté le plus long de la voile mesure # m"), (g, lab) => { const [b, h, c] = g.map(nn), A = (b * h) / 2, p = lm(lab, /coûte (\d+) CHF/);
+    if (c <= h) return NaN; return pick(lab, { a: A, b: (2 * A) / c, c: p ? A * p[0] : null }); });
+  DF("aire2", rx("losange dont les diagonales mesurent # cm et # cm"), (g, lab) => { const [d1, d2] = g.map(nn), A = (d1 * d2) / 2, k = lm(lab, /on en fabrique (\d+)/); return pick(lab, { a: A, b: A / 100, c: k ? (k[0] * A) / 10000 : null }); });
+  DF("aire3", rx("jardin rectangulaire de # m sur # m est entouré d'une allée de # m de large\\. On couvre l'allée de gravier à # CHF"), (g, lab) => { const [a, b, l, p] = g.map(nn), G = (a + 2 * l) * (b + 2 * l);
+    return pick(lab, { a: G, b: G - a * b, c: (G - a * b) * p }); });
+  DF("aire3", rx("bassin rectangulaire de # m sur # m est entouré d'une bordure de dalles de 50 cm"), (g, lab) => { const [a, b] = g.map(nn), G = (a + 1) * (b + 1); return pick(lab, { a: G, b: G - a * b, c: (G - a * b) / 0.25 }); });
+  DF("aire3", rx("photo de # cm sur # cm est collée sur un passe-partout en carton qui dépasse de # cm"), (g, lab) => { const [a, b, l] = g.map(nn), G = (a + 2 * l) * (b + 2 * l); return pick(lab, { a: G, b: G - a * b, c: (G - a * b) / 100 }); });
+  DF("volpave", rx("boîte sans couvercle a la forme d'un pavé de # cm sur # cm, et # cm de haut"), (g, lab) => { const [a, b, c] = g.map(nn), k = lm(lab, /cubes de (\d+) cm/);
+    return pick(lab, { a: a * b * c, b: a * b + 2 * a * c + 2 * b * c, c: k ? Math.floor(a / k[0]) * Math.floor(b / k[0]) * Math.floor(c / k[0]) : null }); });
+  DF("volpave", rx("carton de déménagement fermé a la forme d'un pavé de # cm sur # cm, et # cm de haut"), (g, lab) => { const [a, b, c] = g.map(nn), k = lm(lab, /cubiques de (\d+) cm/);
+    return pick(lab, { a: (a * b * c) / 1000, b: 2 * (a * b + a * c + b * c), c: k ? Math.floor(a / k[0]) * Math.floor(b / k[0]) * Math.floor(c / k[0]) : null }); });
+  DF("volpave", rx("jardinière a la forme d'un pavé de # cm de long, # cm de large et # cm de haut .*?sacs de # L"), (g, lab) => { const [a, b, c, s] = g.map(nn), V = (a * b * c) / 1000;
+    return pick(lab, { a: V, b: 2 * (a + b) * c, c: Math.ceil(V / s - 1e-9) }); });
+  DF("fracrep", /^Trois amis (?:partagent|partent|ont des gourdes)/, (g, lab, txt) => { const F = [...txt.split(" ¶ ")[0].matchAll(/\((\d+)\)\/\((\d+)\)/g)].map((m) => [+m[1], +m[2]]); if (F.length !== 3) return null;
+    const gd = (a, b) => (b ? gd(b, a % b) : a), D = F.reduce((m, [, q]) => (m * q) / gd(m, q), 1), big = F.reduce((x, y) => (y[0] / y[1] > x[0] / x[1] ? y : x));
+    return pick(lab, { a: F.filter(([p, q]) => 2 * p > q).length, b: D, c: (big[0] * D) / big[1] }); });
+  DF("fracsimp", /(?:simplifier la fraction \((\d+)\)\/\((\d+)\)|a gagné (\d+) de ses (\d+) matchs|sondage, (\d+(?:'\d{3})?) des (\d+(?:'\d{3})?) élèves)/, (g, lab) => { const [p0, q0] = (g[0] ? g.slice(0, 2) : g[2] ? g.slice(2, 4) : g.slice(4, 6)).map(nn), gd = (a, b) => (b ? gd(b, a % b) : a), k = gd(p0, q0), p = p0 / k, q = q0 / k;
+    if (L0(lab, "a")) return p; if (L0(lab, "b")) return q; const m = lm(lab, /sur (\d+(?:'\d{3})?) (?:matchs|\S+ ont|\S+ font|\S+ viennent)/) || lm(lab, /sur (\d+(?:'\d{3})?)/);
+    if (/entre 20 et 50/.test(lab)) { let c = 0; for (let d = 20; d <= 50; d++) if (d % q === 0) c++; return c; } return m ? (m[0] * p) / q : null; });
+  DF("fractout", /(?:classe de|a|contient) (\d+) (?:élèves|CHF|bonbons)\b.*?\((\d+)\)\/\((\d+)\) .*?\((\d+)\)\/\((\d+)\)/, (g, lab) => { const [n, a, b, c, d] = g.map(nn), f = (n * a) / b, mu = ((n - f) * c) / d;
+    return pick(lab, { a: f, b: mu, c: n - f - mu }); });
+  DF("proptab", rx("(?:cerises est proportionnel à leur masse|essence est proportionnel au volume) : # (kg|litres) coûtent # CHF"), (g, lab) => { const m1 = nn(g[0]), P = nn(g[2]), u = P / m1, m2 = lm(lab, /^b\) Prix de (\d+(?:,\d+)?) /), X3 = lm(lab, /pour (\d+(?:'\d{3})*(?:,\d+)?) CHF|avec (\d+(?:'\d{3})*(?:,\d+)?) CHF/);
+    return pick(lab, { a: u, b: m2 ? m2[0] * u : null, c: X3 ? (X3[0] || X3[1]) / u : null }); });
+  DF("proptab", rx("Au rayon fromage, .*?: # g de \\S+ coûtent # CHF"), (g, lab) => { const [m1, P] = g.map(nn), u = (P * 1000) / m1, m2 = lm(lab, /Prix de (\d+) g/), X3 = lm(lab, /pour (\d+(?:,\d+)?) CHF/);
+    return pick(lab, { a: u, b: m2 ? (m2[0] * u) / 1000 : null, c: X3 ? (X3[0] * 1000) / u : null }); });
+  DF("prop", rx("(?:recette pour # personnes demande # g de farine et # œufs|Pour # litres de boisson .*?on mélange # ml de sirop et le jus de # citrons|Pour monter # m² de mur, un maçon utilise # briques et # sacs)"), (g, lab) => { const v = g.filter((x) => x !== undefined).map(nn); if (v.length !== 3) return null; const [G, A, B] = v, n = lm(lab, /(?:pour|Avec) (\d+(?:'\d{3})*) /);
+    if (!n) return null; return L0(lab, "b") ? (n[0] * G) / A : L0(lab, "a") ? (n[0] * A) / G : L0(lab, "c") ? (n[0] * B) / G : null; });
+  DF("change", rx("1 (?:euro|dollar|livre sterling) vaut # CHF à la banque"), (g, lab) => { const r = nn(g[0]); let m;
+    if ((m = lm(lab, /^a\) Combien coûtent (\d+) /))) return m[0] * r; if ((m = lm(lab, /pour (\d+) CHF/))) return { v: m[0] / r, st: 0.01 }; if ((m = lm(lab, /il reste (\d+) \S+, que la banque rachète à (\d+,\d+) CHF/))) return m[0] * m[1]; return null; });
+  DF("agrand", rx("(?:photo|logo) de # (cm|mm) (?:sur|de large et) # (?:cm|mm)(?: de haut)? (?:est agrandie?|est agrandi pour être imprimé sur un t-shirt) : sa largeur passe à # (?:cm|mm)"), (g, lab) => { const a = nn(g[0]), b = nn(g[2]), A = nn(g[3]), k = A / a, k2 = lm(lab, /coefficient de (\d+(?:,\d+)?)/);
+    return pick(lab, { a: k, b: b * k, c: k2 ? A * k2[0] : null }); });
+  DF("agrand", rx("agrandit un plan de # cm sur # cm : sur la copie, la longueur mesure # cm"), (g, lab) => { const [a, b, A] = g.map(nn), k = A / a, q = lm(lab, /à (\d+) %/);
+    return pick(lab, { a: 100 * k, b: b * k, c: q ? (A * q[0]) / 100 : null }); });
+  /* ==== fin agent defisch ==== */
+
   /* ---------- 26.11 (agent defis2) : notions encore sous 20 % (transf, trigcercle, trigfn, recip, lectures de graphique
      de f2 / f2expr, histoires de probeq, formes de decadd) ---------- */
   const fxT = (tex) => { const c = compile(Expr.parse(tex2e(tex))); return (u) => c({ x: u }); };
