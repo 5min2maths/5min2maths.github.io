@@ -5,7 +5,8 @@
    - France (6e–Tle) : REF_FR (src/ref_fr.js, généré par tools/ref_fr.py) : attendus et capacités officiels, échelle LSU ;
    - Cycle d'orientation (9e–11e) : REF_CO (src/ref_co.js, généré par tools/ref_co.py) : progression des apprentissages
      du Plan d'études romand (PER, MSN 31–34), groupée par axe ; un item couvre une ou plusieurs années (y1–y2) ;
-   - MP : pas encore (phase suivante) ; ces profils gardent les compétences par notion (src/competences.js).
+   - Maturité professionnelle (MP 1re–4e) : REF_MP (src/ref_mp.js, généré par tools/ref_mp.py) : objectifs du plan
+     d'études d'établissement MP (semestres 1 à 8), groupés par semestre et chapitre (26.11).
    Pour ajouter un système : un fichier de données généré (même forme que REF_MATU) et une entrée dans SYS ci-dessous.
    Aucune donnée nouvelle n'est enregistrée : la maîtrise d'une compétence officielle se calcule à la volée à partir de
    state.comps (réponses par notion et niveau de question, déjà enregistrées), donc rien n'est perdu ni remis à zéro. */
@@ -24,6 +25,19 @@ const Referentiel = (() => {
       track: () => "",
       title: "Plan d'études romand",
       intro: "Les apprentissages du Plan d'études romand (PER) pour ton année, par axe. Chacun reçoit une note de 1 à 6 dès que tu as répondu 3 fois à ses questions. La note suit tes 8 dernières réponses : elle monte quand tu progresses.",
+    },
+    /* 26.11 (phase MP) : objectifs du plan d'études MP, groupés « Semestre n — chapitre » ; année = MP 1re–4e. Les
+       questions viennent seulement du catalogue MP (catalogOnly) : jamais une notion propre au Collège ou au CO. */
+    MP: {
+      data: () => (typeof REF_MP !== "undefined" ? REF_MP : null),
+      applies: (p) => p.system === "CH" && p.track === "mp" && p.grade >= 12 && p.grade <= 15,
+      year: (p) => p.grade - 11,
+      yearLabel: (y) => "MP " + (y === 1 ? "1re" : y + "e"),
+      allowed: () => true,
+      track: () => "",
+      catalogOnly: () => [12, 13, 14, 15].map((grade) => ({ system: "CH", grade, track: "mp", minutes: 5 })),
+      title: "maturité professionnelle",
+      intro: "Les objectifs du plan d'études de mathématiques de la maturité professionnelle, semestre par semestre. Chacun reçoit une note de 1 à 6 dès que tu as répondu 3 fois à ses questions. La note suit tes 8 dernières réponses : elle monte quand tu progresses.",
     },
     MATU: {
       data: () => (typeof REF_MATU !== "undefined" ? REF_MATU : null),
@@ -50,7 +64,7 @@ const Referentiel = (() => {
       /* Années précédentes, repliées : au collège en un bloc ; au lycée, 2nde (et 1re en Tle) à part, puis le collège. */
       olds: (p) => (p.grade <= 9 ? [["Années précédentes", Array.from({ length: p.grade - 6 }, (_, i) => p.grade - 1 - i)]]
         : [...Array.from({ length: p.grade - 10 }, (_, i) => [FR_Y[p.grade - 1 - i], [p.grade - 1 - i]]), ["Collège (6e–3e)", [9, 8, 7, 6]]]),
-      catalogOnly: true,
+      catalogOnly: () => [6, 7, 8, 9, 10, 11, 12].map((grade) => ({ system: "FR", grade, track: "college", minutes: 5 })),
       fr: true,
       title: "programme de mathématiques",
       intro: (p) => (p.grade <= 9 ? "Les attendus de fin d'année du programme officiel de mathématiques de ta classe." : "Les capacités attendues et les automatismes du programme officiel de mathématiques de ta classe.")
@@ -68,16 +82,17 @@ const Referentiel = (() => {
     return (cache[k] = D.c.map(([code, niv, th, no, label, y, y2]) => { const year = y === undefined ? +code[0] : y; return { code, year, y2: y2 === undefined ? year : y2, niv, theme: D.th[th], notion: D.no[no], label, links: D.q[code] || [] }; }));
   };
   /* France (catalogOnly, séparation 25.11) : on ne garde que les notions du catalogue France (toutes classes), jamais
-     une notion propre à la Suisse ; un item sans notion restante est « travaillé en classe ». */
-  let frCat = null;
-  const frOk = (id) => {
-    if (!frCat) { frCat = new Set(); for (let g = 6; g <= 12; g++) Engine.catalog({ system: "FR", grade: g, track: "college", minutes: 5 }).forEach((c) => frCat.add(c.id)); }
-    return frCat.has(id);
+     une notion propre à la Suisse ; un item sans notion restante est « travaillé en classe ». 26.11 : idem pour la MP
+     (catalogue MP 1re–4e, jamais une notion propre au Collège ou au CO). catalogOnly = profils dont on unit les catalogues. */
+  const catSet = {};
+  const catOk = (k, id) => {
+    if (!catSet[k]) { catSet[k] = new Set(); SYS[k].catalogOnly().forEach((p) => Engine.catalog(p).forEach((c) => catSet[k].add(c.id))); }
+    return catSet[k].has(id);
   };
   const rowsOf = (k) => {
     const rs = rows(k);
     if (!SYS[k].catalogOnly || rs.filtered) return rs;
-    rs.forEach((r) => { r.links = r.links.filter((s) => frOk(s.split("@")[0])); });
+    rs.forEach((r) => { r.links = r.links.filter((s) => catOk(k, s.split("@")[0])); });
     rs.filtered = true;
     return rs;
   };
@@ -120,11 +135,12 @@ const Referentiel = (() => {
     },
     hasQuestions: (r) => r.links.length > 0,
     /* « Me tester » : questions des notions rattachées que l'élève peut recevoir (son catalogue), sinon toutes.
-       France (catalogOnly) : sinon le catalogue France des autres classes, jamais une notion propre à la Suisse (25.11). */
+       France (catalogOnly) : sinon le catalogue France des autres classes, jamais une notion propre à la Suisse (25.11) ;
+       MP (26.11) : sinon le catalogue MP des autres années. */
     plan(p, r) {
       const ok = new Set(Engine.catalog(p).map((c) => c.id)), gen = (id) => typeof GEN === "undefined" || GEN[id];
       let ps = pairs(r).filter(([id]) => ok.has(id) && gen(id));
-      if (!ps.length) ps = pairs(r).filter(([id]) => gen(id) && (SYS[sysOf(p)].catalogOnly ? frOk(id) : NOTIONS.some((n) => n.id === id)));
+      if (!ps.length) { const k = sysOf(p); ps = pairs(r).filter(([id]) => gen(id) && (SYS[k].catalogOnly ? catOk(k, id) : NOTIONS.some((n) => n.id === id))); }
       return ps;
     },
     stats(st, list) {
