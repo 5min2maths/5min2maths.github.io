@@ -40,6 +40,8 @@ const HORS_FR = {
   droites: [["systeme", 11]],
   /* triangle rectangle par le produit scalaire : 1re */
   cart: [["angle-droit", 11]],
+  /* 26.11 soir (agent defisch3) : notes sur 6 (barème suisse) écartées en France ; la France a la forme « notes20 » (q.fr) */
+  stats: [["notes6", 99]],
   /* 1re 2026 : « le calcul effectif de la forme canonique dans le cas général n'est pas un attendu » (complétion du carré, a = 1) */
   f2formes: [["canon-couple", 99], ["dev-k-a", 99]],
   /* 26.11 (revue p5, n° 1, grave : 4e FR, « Factorise x² − 100 ») : repères annuels du cycle 4 — 5e : factoriser ka + kb

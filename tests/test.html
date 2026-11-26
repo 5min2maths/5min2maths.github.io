@@ -111,7 +111,7 @@ for (const id of Object.keys(GEN).filter(hasProb)) for (const fn of probList(id)
     for (const pt of p.parts) if (pt.spec.kind === "value" && pt.spec.value !== 0) { const str = String(+(+pt.spec.value).toFixed(4)); if (labs.includes(str) && !new RegExp("(^|[^0-9.])" + str.replace(".", "\\.") + "([^0-9]|$)").test(qt)) fail("PROB " + id + " : la figure révèle la réponse " + str); }
   }
   p.parts.forEach((pt, k) => {
-    const s = pt.spec, ans = s.round ? s.value.toFixed(2) : canonical(s);
+    const s = pt.spec, ans = s.round ? s.value.toFixed(Math.max(2, Math.round(-Math.log10(s.round)))) : canonical(s); /* 26.11 soir (agent defisch3) : « au millième » saisi avec 3 décimales */
     if (s.kind === "value" && !isFinite(s.value)) fail("PROB " + id + " partie " + k + " valeur " + s.value);
     else if (checkAnswer(s, ans).status !== "correct") fail("PROB " + id + " partie " + k + " refusée : " + ans);
   });
