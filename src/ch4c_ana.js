@@ -75,7 +75,10 @@
     return ch.map((c) => "\\(" + c + "\\)").join(" "); }));
   const mk = (q, spec, sol, o) => { const x = { q: wrapM(q), spec, sol: wrapM(sol), guide: (o.guide || []).map((g) => Object.assign({}, g, { ask: wrapM(g.ask), sol: wrapM(g.sol) })), ctx: o.ctx, traps: keepT(spec, o.traps) }; if (o.fig) x.fig = o.fig; if (o.canon) x.canon = o.canon; return x; };
   const QN = (q, value, sol, o) => mk(q, { kind: "value", value }, sol, o);
-  const QR = (q, value, round, sol, o) => mk(q, { kind: "value", value, round }, sol, o);
+  /* 27.11 (recalcul, agent recalc34) : une valeur pile entre deux arrondis (0,3125 au millième, médiane 18,125 au centième) faisait
+     accepter les deux voisins ; on garde l'arrondi « demi vers le haut », celui du corrigé. */
+  const tie = (v, r) => { const k = +(v / r).toFixed(6); return r && Math.abs(k - Math.floor(k) - 0.5) < 1e-6 ? +((Math.floor(k) + 1) * r).toFixed(10) : v; };
+  const QR = (q, value, round, sol, o) => mk(q, { kind: "value", value: tie(value, round), round }, sol, o);
   const QPi = (q, c, sol, o) => mk(q, { kind: "value", value: c * Math.PI }, sol, Object.assign({ canon: piS(c) }, o));
   const QX = (q, expr, sol, o) => mk(q, Object.assign({ kind: "expr", expr }, o.pos ? { pos: true } : {}), sol, Object.assign({ canon: expr }, o));
   const QSet = (q, vals, sol, o) => mk(q, { kind: "set", values: [...new Set(vals.map(r6))].sort((a, b) => a - b) }, sol, o);
@@ -441,7 +444,7 @@
     ],
     3: [
       () => { if (R.rand() < 0.5) { const a = pk([2, 3, 5]), v = Math.log(a) - 1;
-          return QN("Donne l'ordonnée à l'origine de la tangente au graphe de " + M("f(x) = \\ln(x)") + " au point d'abscisse " + M(a) + " (valeur exacte).", v, M("f(" + a + ") = \\ln(" + a + ")") + ", " + M("f'(" + a + ") = \\frac{1}{" + a + "}") + " : " + M("y = \\frac{1}{" + a + "}(x - " + a + ") + \\ln(" + a + ") = \\frac{x}{" + a + "} + \\ln(" + a + ") - 1") + ".",
+          return QN("Donne l'ordonnée à l'origine de la tangente au graphe de " + M("f(x) = \\ln(x)") + " au point d'abscisse " + M(a) + " (valeur exacte).", v, M("f(" + a + ") = \\ln(" + a + ")") + ", " + M("f'(" + a + ") = \\frac{1}{" + a + "}") + " : " + M("y = \\frac{1}{" + a + "}(x - " + a + ") + \\ln(" + a + ") = \\frac{x}{" + a + "} + \\ln(" + a + ") - 1") + " ; ordonnée à l'origine " + M("\\ln(" + a + ") - 1") + "." /* 27.11 (recalcul) : le corrigé ne donnait pas la valeur demandée */,
             { ctx: "tangente-ln", canon: "ln(" + a + ") - 1", guide: [GS(M("f(" + a + ")") + " ?", Math.log(a), M("\\ln(" + a + ")") + "."), GS("Pente " + M("f'(" + a + ")") + " ?", 1 / a, M("\\frac{1}{" + a + "}") + "."), GS("Ordonnée à l'origine ?", v, M("\\ln(" + a + ") - 1") + ".")],
               traps: [TR(Math.log(a), "C'est f(" + a + ") ; l'ordonnée à l'origine est la valeur de la tangente en x = 0."), TR(Math.log(a) + 1, "y = (1/" + a + ")(x − " + a + ") + ln(" + a + ") : en x = 0, on retire 1."), TR(1 / a, "C'est la pente.")] }); }
         const a = pk([2, 3, -1, -2]), v = Math.exp(a) * (1 - a);
@@ -765,7 +768,9 @@
     ["le QI d'une personne prise au hasard", [100], [15], "qi"],
     ["la note (sur 100) d'un candidat à un examen", [60, 62, 65], [8, 10], "examen"]];
   const nPick = () => { const c = pk(NCTX); return { c, mu: pk(c[1]), s: pk(c[2]) }; };
-  const nIntro = (o, noParam) => "On note " + M("X") + " " + o.c[0] + (noParam ? " ; " + M("X") + " suit une loi normale. " : " ; " + M("X") + " suit une loi normale de moyenne " + M("\\mu = " + nb(o.mu)) + " et d'écart-type " + M("\\sigma = " + nb(o.s)) + ". ");
+  /* 27.11 (recalcul, agent recalc34) : les probabilités attendues sont celles de la règle 68-95-99,7 (68 %, 16 %…), mais l'énoncé
+     ne le disait pas : l'élève qui calculait avec Φ (68,27 %, 31,7 % au dixième…) était refusé. La règle est maintenant rappelée. */
+  const nIntro = (o, noParam, noRule) => "On note " + M("X") + " " + o.c[0] + (noParam ? " ; " + M("X") + " suit une loi normale. " : " ; " + M("X") + " suit une loi normale de moyenne " + M("\\mu = " + nb(o.mu)) + " et d'écart-type " + M("\\sigma = " + nb(o.s)) + ". ") + (noRule ? "" : "Utilise la règle 68-95-99,7. ");
   const pc = (v) => M(nb(v) + "\\,\\%");
   const kS = (k) => (k === 1 ? "un écart-type" : k + " écarts-types");
   const NO = {
@@ -797,7 +802,7 @@
           { ctx: "trouver-sigma", guide: [GS("Moyenne " + M("\\mu") + " (milieu de l'intervalle) ?", o.mu, M(nb(o.mu)) + "."), GS("Demi-largeur de l'intervalle ?", k * o.s, M(nb(b) + " - " + nb(o.mu) + " = " + nb(k * o.s)) + "."), GS("Combien d'écarts-types dans cette demi-largeur ?", k, M(k) + "."), GS(M("\\sigma") + " ?", o.s, M(nb(o.s)) + ".")],
             traps: [TR(k * o.s, "C'est " + kS(k) + " : divise par " + k + "."), TR(b - a, "C'est la largeur totale."), TR(((b - a) / 2) / (k === 2 ? 1 : 2), "Pour " + nb(PCT[k]) + " %, la demi-largeur vaut " + k + "σ.")] })); },
       () => { const o = nPick(), z = pk([1.5, -1.5, 2.5, -2.5, 0.5, -0.5, 2, -2, 3]), x = o.mu + z * o.s; if (!Number.isInteger(x)) return null;
-        return chk(QN(nIntro(o) + "Calcule la valeur centrée réduite " + M("z = \\frac{x - \\mu}{\\sigma}") + " de " + M("x = " + nb(x)) + ". (décimal accepté)", z, M("z = \\frac{" + nb(x) + " - " + nb(o.mu) + "}{" + nb(o.s) + "} = \\frac{" + nb(x - o.mu) + "}{" + nb(o.s) + "} = " + nb(z)) + " : " + M(nb(x)) + " est à " + dS(Math.abs(z)) + " écart(s)-type(s) " + (z > 0 ? "au-dessus" : "en dessous") + " de la moyenne.",
+        return chk(QN(nIntro(o, false, true) + "Calcule la valeur centrée réduite " + M("z = \\frac{x - \\mu}{\\sigma}") + " de " + M("x = " + nb(x)) + ". (décimal accepté)", z, M("z = \\frac{" + nb(x) + " - " + nb(o.mu) + "}{" + nb(o.s) + "} = \\frac{" + nb(x - o.mu) + "}{" + nb(o.s) + "} = " + nb(z)) + " : " + M(nb(x)) + " est à " + dS(Math.abs(z)) + " écart(s)-type(s) " + (z > 0 ? "au-dessus" : "en dessous") + " de la moyenne.",
           { ctx: "centrer-reduire", guide: [GS(M("x - \\mu") + " ?", x - o.mu, M(nb(x - o.mu)) + "."), GS(M("z") + " ?", z, M(nb(z)) + ".")],
             traps: [TR(x - o.mu, "Divise encore par l'écart-type."), TR(-z, "Attention au signe : x − μ."), TR(r6(x / o.s - o.mu), "On centre d'abord (x − μ), puis on divise par σ.")] })); },
     ],
@@ -1358,9 +1363,12 @@
             traps: [TR((n1 * s1 + n2 * s2) / N, "On ne fait pas la moyenne des écarts-types : l'écart entre les deux moyennes ajoute de la dispersion."), TR(Math.sqrt((n1 * s1 * s1 + n2 * s2 * s2) / N), "Il manque la dispersion entre les groupes (les moyennes " + m1 + " et " + m2 + " diffèrent)."), TR((s1 + s2) / 2, "Les effectifs et l'écart entre les moyennes comptent.")] })); },
       () => { const muA = R.int(40, 60), sA = R.int(4, 8), xA = muA + pk([-1, 1]) * R.int(1, 2 * sA), muB = R.int(60, 80), sB = pk([6, 9, 10, 12, 15].filter((x) => x !== sA)), z = (xA - muA) / sA, v = muB + sB * z, nmA = pk(["Léa", "Noé", "Inès"]);
         if (Math.abs(z) < 0.2) return null;
-        return chk(QR(nmA + " obtient " + M(xA) + " points à un test A (moyenne " + M(muA) + ", écart-type " + M(sA) + "). Quel score au test B (moyenne " + M(muB) + ", écart-type " + M(sB) + ") correspond à la même position par rapport aux autres candidats, c'est-à-dire à la même valeur centrée réduite (" + RND[0.1] + ") ?", v, 0.1,
+        /* 27.11 (recalcul, agent recalc34) : v tombait parfois pile entre deux dixièmes (72 − 1,25 · 15 = 53,25) et 53,2 était aussi
+           accepté : réponse attendue = l'arrondi au dixième (demi vers le haut, comme le corrigé). */
+        const v1 = Math.round(+(v * 10).toFixed(6)) / 10;
+        return chk(QR(nmA + " obtient " + M(xA) + " points à un test A (moyenne " + M(muA) + ", écart-type " + M(sA) + "). Quel score au test B (moyenne " + M(muB) + ", écart-type " + M(sB) + ") correspond à la même position par rapport aux autres candidats, c'est-à-dire à la même valeur centrée réduite (" + RND[0.1] + ") ?", v1, 0.1,
           M("z = \\frac{" + xA + " - " + muA + "}{" + sA + "} = " + fT(z)) + " ; au test B : " + M(muB + " + " + fT(z) + " \\cdot " + sB + " \\approx " + dT(v, 1)) + " points.",
-          { ctx: "centree-reduite", guide: [GS("Valeur centrée réduite " + M("z") + " au test A ?", z, M(fT(z)) + "."), GS("Score équivalent au test B (" + RND[0.1] + ") ?", v, M("\\approx " + dT(v, 1)) + ".", 0.1)],
+          { ctx: "centree-reduite", guide: [GS("Valeur centrée réduite " + M("z") + " au test A ?", z, M(fT(z)) + "."), GS("Score équivalent au test B (" + RND[0.1] + ") ?", v1, M("\\approx " + dT(v, 1)) + ".", 0.1)],
             traps: [TR(xA + muB - muA, "Il faut aussi tenir compte de la dispersion : z = (x − μ) ÷ σ."), TR((muB * xA) / muA, "Ce n'est pas une proportion : on garde le même nombre d'écarts-types."), TR(z, "C'est la valeur centrée réduite z ; convertis-la en score du test B.")] })); },
     ],
   };
@@ -1621,7 +1629,9 @@
           { ctx: "quotient", guide: [GS("Dénominateur multiplié par son conjugué, " + M(par(w[0]) + "^2 + " + par(w[1]) + "^2") + " ?", n2, M(n2) + "."), GZ("Numérateur multiplié par " + M(zT(w[0], -w[1])) + " ?", num, M(zT(...num)) + "."), GZ("Quotient ?", q, M(zT(...q)) + ".")],
             traps: [TZ([z[0] / w[0], z[1] / w[1]], "On ne divise pas partie par partie : multiplie par le conjugué du dénominateur."), TZ([q[0], -q[1]], "Le conjugué va au numérateur ET au dénominateur ; vérifie le signe de la partie imaginaire."), TZ(num, "Divise encore par " + n2 + ".")] }); },
       () => { const a = gz(), zz = gz(), c = gz(), e = [zm(a, zz)[0] + c[0], zm(a, zz)[1] + c[1]]; if (e.some((x) => !x)) return null; const rhs = [e[0] - c[0], e[1] - c[1]];
-        return QZ("Résous dans " + M("\\mathbb{C}") + " : " + M(zP(...a) + "z " + (c[0] < 0 ? "- " + zT(-c[0], -c[1]) : "+ " + zP(...c)) + " = " + zT(...e)) + ". Donne " + M("z") + " sous la forme " + M("a + bi") + ".", zz,
+        /* 27.11 (recalcul, agent recalc34) : avec c = -3 + 6i, l'énoncé affichait « - 3 - 6i » (zT(-c[0], -c[1]) : partie imaginaire
+           de signe inversé) alors que la réponse attendue utilisait -3 + 6i : réponse fausse dès que c[0] < 0 et c[1] ≠ 0. */
+        return QZ("Résous dans " + M("\\mathbb{C}") + " : " + M(zP(...a) + "z " + (c[0] < 0 ? "- " + zT(-c[0], c[1]) : "+ " + zP(...c)) + " = " + zT(...e)) + ". Donne " + M("z") + " sous la forme " + M("a + bi") + ".", zz,
           M(zP(...a) + "z = " + zT(...e) + " - " + zP(...c) + " = " + zT(...rhs)) + ", puis on divise par " + M(zT(...a)) + " (conjugué) : " + M("z = " + zT(...zz)) + ".",
           { ctx: "equation-lineaire", guide: [GZ("Isole le terme en z : " + M(zP(...a) + "z") + " = ?", rhs, M(zT(...rhs)) + "."), GZ(M("z") + " ?", zz, M(zT(...zz)) + ".")],
             traps: [TZ(rhs, "Il reste à diviser par " + zT(...a) + "."), TZ([zz[0], -zz[1]], "Vérifie le signe de la partie imaginaire (le conjugué sert au dénominateur seulement)."), TZ(zm(rhs, a), "On divise par " + zT(...a) + ", on ne multiplie pas.")] }); },
