@@ -21,7 +21,7 @@
     parts: (q.parts || []).map((p) => ({ label: VRAI.plain(prep(p.label)), spec: p.spec || null })) });
   const mutate = (sp) => !sp ? sp : sp.kind === "value" ? { ...sp, value: Math.abs(sp.value * 0.2 + 0.7) < 1e-9 ? sp.value + 1 : sp.value * 1.2 + 0.7 } /* 26.11 : −3,5 est point fixe de v → 1,2v + 0,7 */ : sp.kind === "set" ? { ...sp, all: false, values: sp.all ? [1] : sp.values.length ? [sp.values[0] + 1, ...sp.values.slice(1)] : [1] } : sp.kind === "pair" ? { ...sp, values: [sp.values[0] + 1, ...sp.values.slice(1)] } : sp.kind === "ineq" ? { ...sp, value: sp.value + 1 } : sp.kind === "expr" ? { ...sp, expr: "(" + sp.expr + ")+1" } : sp.kind === "solset" ? { ...sp, ivs: sp.ivs.length ? sp.ivs.map((iv, i) => i ? iv : iv.map((e, j) => (j % 2 === 0 && e !== null && isFinite(e) ? e + 1 : e))) : [[0, true, 1, true]] } : sp;
   /* 26.11 soir (agent defis2) : 316 s sous charge après l'extension → deux pages. <meta name="part"> : 1 = notions de rang
-     pair + exercices riches et défis (recalcul.html), 2 = notions de rang impair (recalcul2.html) ; sans meta ou avec #ids : tout. */
+     pair + exercices riches (recalcul.html), 2 = notions de rang impair + défis (recalcul2.html) ; sans meta ou avec #ids : tout. */
   const PART = +((document.querySelector('meta[name="part"]') || {}).content || 0);
   const t0 = performance.now(), ids = P.get("ids") ? P.get("ids").split(",") : Object.keys(GEN).filter((_, i) => !PART || i % 2 === PART - 1);
   const stat = {}, fails = [], exc = [];
@@ -46,7 +46,8 @@
   const covered = ids.filter((id) => rate(id) >= 0.2);
   for (const id of covered) for (const d of [1, 2, 3]) for (let k = N1 + 1; k <= N; k++) run(id, d, k);
   /* exercices riches et défis (niveau 4) : parties reconnues */
-  for (const x of PART === 2 ? [] : VRAI.items({ n: Math.min(N, 20), src: ["riche", "defi"], ids: P.get("ids") ? ids : null }).items) {
+  /* 26.11 soir (agent defis3) : 237 s sous charge avec 42 défis de plus → exercices riches en page 1, défis en page 2. */
+  for (const x of VRAI.items({ n: Math.min(N, 20), src: PART === 1 ? ["riche"] : PART === 2 ? ["defi"] : ["riche", "defi"], ids: P.get("ids") ? ids : null }).items) {
     nr++;
     const it = { id: x.id, d: x.d, code: x.code, raw: x.raw, fig: x.fig, txt: x.txt, sol: x.sol, rawSol: "", spec: x.spec && x.spec.kind === "multi" ? null : x.spec, parts: x.parts };
     for (const sp of [x.spec, ...x.parts.map((p) => p.spec)]) { const t = RECALC.truncSpec(sp); if (t) fails.push(x.code + " [valeur tronquée] " + t); }
