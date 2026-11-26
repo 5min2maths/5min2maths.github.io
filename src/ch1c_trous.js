@@ -185,12 +185,33 @@
   };
 
   const PROBS = {
-    graphefct: [() => { const [r, a, b] = pk([[5, 3, 4], [10, 6, 8], [13, 5, 12]]);
-      return P("On considère le cercle " + M("x^2 + y^2 = " + r * r) + " et la droite verticale " + M("x = " + a) + ".", [["a) En combien de points la droite coupe-t-elle le cercle ?", 2], ["b) Image de " + a + " par la fonction dont le graphe est la moitié supérieure du cercle", b], ["c) Plus grande abscisse d'un point du cercle", r]],
-        ["Remplace x par " + a + " et résous en y.", "Moitié supérieure : y = √(" + r * r + " − x²)."], "a) 2 : " + M("y = " + b) + " ou " + M("y = -" + b) + ", ce n'est pas une fonction ; b) " + b + " ; c) " + r + "."); }],
-    ineqgraph: [() => { const p = pk([-2, -1]), q = pk([3, 4]), f = (x) => (x - p) * (x - q);
-      return P("Le graphe de " + M("f(x) = " + poly([1, -(p + q), p * q])) + " coupe l'axe des x en deux points.", [["a) Plus petite abscisse d'intersection avec l'axe", p], ["b) Plus grande", q], ["c) Nombre d'entiers x tels que f(x) < 0", q - p - 1]],
-        ["Factorise ou lis le graphe.", "f(x) < 0 entre les zéros, bornes exclues."], "a) " + p + " ; b) " + q + " ; c) les entiers de " + (p + 1) + " à " + (q - 1) + ", soit " + (q - p - 1) + ".", PLf([{ f }], { yr: [-8, 8] })); }],
+    /* 26.11 soir (agent defis3) : valeurs tirées, 3 contextes chacun (avant : 3 ou 2 énoncés presque fixes). */
+    graphefct: [
+      () => { const [a1, b1, r] = pk([[3, 4, 5], [4, 3, 5], [6, 8, 10], [8, 6, 10], [5, 12, 13], [12, 5, 13], [9, 12, 15], [12, 9, 15]]), a = pk([a1, b1, r, r, r + R.int(1, 3)]), n = a < r ? 2 : a === r ? 1 : 0;
+        return Object.assign(P("On considère le cercle " + M("x^2 + y^2 = " + r * r) + " et la droite verticale " + M("x = " + a) + ".", [["a) En combien de points la droite coupe-t-elle le cercle ?", n], ["b) Image de " + a1 + " par la fonction dont le graphe est la moitié supérieure du cercle", b1], ["c) Plus grande abscisse d'un point du cercle", r]],
+          ["Remplace x par " + a + " dans l'équation : combien de valeurs de y conviennent ?", "Moitié supérieure : y = √(" + r * r + " − x²), toujours positif."],
+          "a) " + (n === 2 ? M("y^2 = " + (r * r - a * a)) + " : deux valeurs de " + M("y") + ", 2 points (le cercle n'est pas le graphe d'une fonction)" : n === 1 ? M("y^2 = 0") + " : un seul point (1), la droite touche le cercle" : M("y^2 = " + (r * r - a * a)) + " < 0 : aucun point, 0") + " ; b) " + M("\\sqrt{" + r * r + " - " + a1 * a1 + "} = " + b1) + " ; c) " + r + "."), { ctx: "cercle" }); },
+      () => { const [a, h, r] = pk([[3, 4, 5], [4, 3, 5], [6, 8, 10], [8, 6, 10], [5, 12, 13], [12, 5, 13], [9, 12, 15], [12, 9, 15]]);
+        return Object.assign(P("Une arche de pont est un demi-cercle de rayon " + M(r) + " m. On place un repère au centre, au niveau de l'eau : l'arche est la moitié supérieure du cercle " + M("x^2 + y^2 = " + r * r) + ".", [["a) Hauteur de l'arche à " + a + " m du centre (m)", h], ["b) Largeur de la rivière sous l'arche (m)", 2 * r], ["c) Combien de points de l'arche ont pour abscisse " + a + " ?", 1]],
+          ["Hauteur à " + a + " m du centre : y = √(" + r * r + " − " + a + "²).", "c) L'arche ne garde que y ≥ 0 : c'est le graphe d'une fonction."],
+          "a) " + M("\\sqrt{" + r * r + " - " + a * a + "} = \\sqrt{" + h * h + "} = " + h) + " m ; b) " + M("2 \\cdot " + r + " = " + 2 * r) + " m ; c) 1 : le cercle entier en aurait 2, mais l'arche n'en garde qu'un (graphe d'une fonction)."), { ctx: "arche" }); },
+      () => { const c = R.int(-4, 3), d = R.int(2, 5), k = pk([c + d * d, c, c - R.int(1, 3)]), n = k > c ? 2 : k === c ? 1 : 0, kk = c + d * d;
+        return Object.assign(P("On considère la courbe d'équation " + M("x = y^2" + (c ? (c < 0 ? " - " + -c : " + " + c) : "")) + " (une parabole « couchée ») et la droite verticale " + M("x = " + k) + ".", [["a) En combien de points la droite coupe-t-elle la courbe ?", n], ["b) Plus grande ordonnée d'un point de la courbe d'abscisse " + kk, d], ["c) Cette courbe est-elle le graphe d'une fonction de x ? Tape 1 pour oui, 0 pour non.", 0]],
+          ["Remplace x par " + k + " : " + M("y^2 = " + k + (c ? (c < 0 ? " + " + -c : " - " + c) : "")) + ".", "Un graphe de fonction : toute droite verticale le coupe au plus une fois."],
+          "a) " + M("y^2 = " + (k - c)) + " : " + (n === 2 ? "deux valeurs de " + M("y") + ", 2 points" : n === 1 ? M("y = 0") + ", 1 point" : "impossible, 0 point") + " ; b) " + M("y^2 = " + kk + (c ? (c < 0 ? " + " + -c : " - " + c) + " = " + d * d : "")) + ", " + M("y = " + d) + " ; c) non (0) : la droite " + M("x = " + kk) + " la coupe en deux points."), { ctx: "parabole-couchee" }); },
+    ],
+    ineqgraph: [
+      () => { const p = R.int(-4, -1), q = R.int(1, 5), f = (x) => (x - p) * (x - q), [op, opT, cx] = pk([["<", "<", "inf"], ["<=", "\\le", "infeg"], [">", ">", "sup"], [">=", "\\ge", "supeg"]]);
+        const ok = (x) => (op === "<" ? f(x) < 0 : op === "<=" ? f(x) <= 0 : op === ">" ? f(x) > 0 : f(x) >= 0), fin = op[0] === "<", cnt = fin ? (op === "<" ? q - p - 1 : q - p + 1) : op === ">" ? q + 1 : q;
+        const lc = fin ? "c) Nombre d'entiers x tels que " + M("f(x) " + opT + " 0") : "c) Plus petit entier positif x tel que " + M("f(x) " + opT + " 0");
+        return Object.assign(P("Le graphe de " + M("f(x) = " + poly([1, -(p + q), p * q])) + " coupe l'axe des x en deux points.", [["a) Plus petite abscisse d'intersection avec l'axe", p], ["b) Plus grande", q], [lc, cnt]],
+          ["Factorise : f(x) = " + fx(p) + fx(q) + ", ou lis le graphe.", fin ? "f(x) " + (op === "<" ? "<" : "≤") + " 0 entre les zéros, bornes " + (op === "<" ? "exclues" : "comprises") + "." : "f(x) " + (op === ">" ? ">" : "≥") + " 0 à l'extérieur des zéros, bornes " + (op === ">" ? "exclues" : "comprises") + "."],
+          "a) " + p + " ; b) " + q + " ; c) " + (fin ? "les entiers de " + (op === "<" ? p + 1 : p) + " à " + (op === "<" ? q - 1 : q) + ", soit " + cnt : "à droite de " + q + (op === ">" ? " (exclu)" : " (compris)") + ", le plus petit entier positif est " + cnt) + ".", PLf([{ f }], { yr: [-8, 8] })), { ctx: cx }); },
+      () => { const p = R.int(1, 3), q = R.int(6, 9), B = (x) => -(x - p) * (x - q), top = ((q - p) / 2) ** 2, obj = pk(["vélos", "tables", "lampes", "sacs"]);
+        return Object.assign(P("Un atelier fabrique des " + obj + ". Pour " + M("x") + " centaines d'objets vendus, son bénéfice vaut " + M("B(x) = " + poly([-1, p + q, -p * q])) + " (en milliers de CHF). Le graphe de B est tracé.", [["a) Plus petite quantité (en centaines) pour laquelle B(x) = 0", p], ["b) Plus grande quantité pour laquelle B(x) = 0", q], ["c) Nombre de quantités entières (en centaines) pour lesquelles B(x) > 0", q - p - 1]],
+          ["B(x) = −(x − " + p + ")(x − " + q + ") : lis où la courbe coupe l'axe.", "B(x) > 0 là où la courbe est au-dessus de l'axe, bornes exclues."],
+          "a) " + p + " ; b) " + q + " : " + M("B(x) = -(x - " + p + ")(x - " + q + ")") + " ; c) bénéfice positif entre les zéros, bornes exclues : de " + (p + 1) + " à " + (q - 1) + ", soit " + (q - p - 1) + " quantités.", PLf([{ f: B }], { xr: [-1, 10], yr: [-6, Math.ceil(top) + 2] })), { ctx: "benefice" }); },
+    ],
   };
 
   reg([

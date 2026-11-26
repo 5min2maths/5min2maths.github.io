@@ -152,6 +152,18 @@ ajoute maintenant 1 dans ce cas.
 Aucune erreur dans les fichiers réservés à l'autre agent (app.js, expr.js, active.js, riche_2c.js, variantes.js) n'a
 été rencontrée par ces oracles.
 
+### Défis variés, suite (26.11 soir, agent/defis3)
+
+Section « défis rendus variés (agent defis3) » de `tests/recalc_oracles.js` : un oracle `DF` par contexte et par question
+pour les 42 défis rendus variés ce soir (fracmul, fracconv, fracadd, sci, scicalc, pythfig, pythrec, vol, airepyr,
+volcomp, thales, repere, sysprob, sysgraph, sysineq, eqfrac, bicarre, lectgraph, trigexact, droitesrem, polyreg,
+graphefct, ineqgraph, repere3d, bayes, syslin, bases, etudelnexp, geoesp, densite, probaxiomes, derivth, trigcercle,
+optimderiv, eqlog, eqbic, dec10, pow9, aire1, quadri, decarr, airelat). Sur 150 graines par défi : toutes les parties
+numériques reconnues, aucun désaccord. Les règles de texte reçoivent maintenant l'item en second argument
+(`r.f(txt, x)`) et les items de défi portent `fig` (recalcul.html, recalcul2.html) : la parabole de lectgraph est relue
+sur la figure (`figRead`, `quadFit`). Réponses oui/non (1/0) et valeurs exactes en fraction imbriquée : `{ v, sol: false }`
+(le corrigé dit « oui » ou donne la forme exacte, illisible en texte simple).
+
 ## Notions couvertes (taux d'énoncés recalculés aux niveaux 1, 2, 3 ; 100 tirages par niveau ; état du 26.11 après extension)
 
 Avant l'extension (matin du 26.11) : **119 notions** couvertes (≥ 20 % à un niveau). Après : **172 notions** (+53, marquées « nouveau »), 38'173 énoncés recalculés sur 58'560 (avant : 28'827 sur 50'655), 1'176 contre-épreuves.

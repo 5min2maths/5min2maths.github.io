@@ -189,4 +189,82 @@ Restent peu variés (2 à 4 énoncés au niveau 4, hors de cette tâche) : densi
 tabform5, ineqgraph ; et, dans tout le catalogue, une soixantaine de défis à 1 ou 2 énoncés (relevé sur 60 graines par
 défi : pow9, angtype, lectgraph, puisrat, logprop, proba2, tauxevol, vect3e, probcond, algopy,
 bayes, syslin, bases, cplxalg, cplxtrig, cplxeq, suitegeom, serie, expderiv, trigrad, autodnb, tabvar, lnfr…).
+→ suite traitée ci-dessous (agent/defis3).
+
+### Défis variés, suite (26.11 soir, branche agent/defis3)
+
+Relevé de départ (`tests/_variete.html`, hors suite : 60 graines par défi, énoncé et questions) : 50 défis avaient moins
+de 10 énoncés différents. Traités par ordre de fréquence (9e–11e et 1re Collège, puis 2e–4e Collège et MP) : valeurs
+tirées, au moins 3 contextes vraisemblables (tag `ctx`), corrigé calculé à partir des valeurs, oracle par contexte et par
+question dans `tests/recalc_oracles.js` (section « défis rendus variés (agent defis3) »).
+
+| Notion (classe, fichier) | Avant | Contextes (ctx) |
+|---|---|---|
+| fracmul (10e–11e, ch11_no) | 7 | forêts et feuillus ; élèves sportifs et football ; potager et tomates ; ruban, fontaine à jus, planche (fraction retirée puis morceaux) |
+| fracconv (9e–11e, ch11_no) | 2 | trois magasins (rabais en fraction, en %, hausse puis baisse) ; nombres périodiques tirés ; sondage (fraction, %, effectifs) |
+| sci (10e–11e, defis.js) | 7 | lumière du Soleil aux planètes ; objets microscopiques (atome, virus, bactérie, globule, pollen : en nm ou µm, nombre alignés sur 1 mm) ; rayon d'un astre (en m, équateur) |
+| scicalc (10e–11e, ch11_no) | 2 | année-lumière et étoile ; globules rouges ; battements de cœur (an, vie) |
+| pythfig (10e–11e, ch11_gm) | 2 | boîte, coffre de voiture, placard (diagonale, l'objet entre-t-il ?) ; planche, parterre, vitrail (carré inscrit) |
+| pythrec (11e, ch11_gm) | 2 | repère, carte (villages), voile d'ombrage (réciproque, rectangle ou non) ; formule n² − 1, 2n, n² + 1 ; équerrage d'un cadre, d'une dalle, d'une plate-bande |
+| vol (10e–11e, ch11_gm) | 2 | piscine à fond incliné ; canal d'irrigation ; tente canadienne ; canette, conserve, pot de peinture (hauteur minimale) |
+| airepyr (11e, ch11_gm) | 2 | toit de tour, tente, presse-papier ; patrons (carton, emballage, abat-jour) |
+| volcomp (11e, ch11_gm) | 2 | silo, réservoir (cylindre et cône) ; bougie, presse-papier, savon (cube et pyramide, masse) |
+| thales (11e, ch11_thales) | 2 | ombres (tour, clocher, sapin) ; triangle, charpente, voile (trapèze DECB) ; étang, rivière, ravin (piquets) |
+| repere (10e–11e, ch11_fct) | 2 | parallélogramme (repère, parcelle en m², plateforme de jeu en pixels²) ; milieu (repère, rendez-vous, passerelle) |
+| sysprob (11e–1re, ch1c_sys) | 2 | têtes et pattes (ferme, parking, tabourets et chaises) ; avec et contre le vent ou le courant (avion, bateau, kayak) |
+| sysgraph (1re, ch1c_sys) | 2 | paramètres m et k (parallèles, confondues, solution) ; opérateurs, location de vélos, salle de sport |
+| sysineq (1re, ch1c_sys) | 2 | budget (sortie, anniversaire, tournoi) ; double inéquation (borne gauche exclue ou comprise) |
+| eqfrac (10e–11e, ch1c_eq) | 6 | robinets, imprimantes, peintres |
+| bicarre (1re, ch1c_eq) | 9 | bicarrée à 4 ou 2 solutions (X négatif) ; rectangle (aire et diagonale) ; deux nombres (produit, somme des carrés) |
+| lectgraph (1re–MP, defis.js) | 1 | f(x) < g(x), >, ≤, ≥ ; image hors du dessin tirée (la parabole est relue sur la figure par l'oracle) |
+| trigexact (1re–MP, defis.js) | 5 | panneau équilatéral ; table hexagonale ; chevron de toit à 30°, 45°, 60° |
+| droitesrem (1re–MP, defis.js) | 7 | triangle ; jardin et arroseur (centre du cercle circonscrit) ; équerre donnée par l'hypoténuse |
+| polyreg (10e, defis_910) | 7 | somme des angles donnée ; kiosque (angle intérieur donné) ; bassin à n côtés |
+| graphefct (1re, ch1c_trous) | 3 | cercle et droite verticale (0, 1 ou 2 points) ; arche de pont ; parabole couchée |
+| ineqgraph (2e, ch1c_trous) | 4 | f(x) <, ≤ (entiers entre les zéros), >, ≥ (plus petit entier positif) ; bénéfice d'un atelier |
+| repere3d (11e, ch11_rep3d) | 3 | boîte, salle de sport, aquarium (quadruplets a² + b² + c² = d², coordonnée du centre tirée) |
+| bayes (4e, ch4c_ana) | 1 | dépistage ; filtre à spam ; contrôle qualité (second signal indépendant) |
+| syslin (4e, ch4c_ana) | 1 | boulangerie, cinéma, papeterie (système 3 × 3 tiré, Cramer) |
+| bases (4e, ch4c_ana) | 1 | vecteurs tirés ; composante α, β ou γ demandée |
+| etudelnexp (4e, ch4c_ana) | 3 | x·e^(−x/k), x²·e^(−x/k), ln(x)/x, facteur tiré |
+| geoesp (4e, ch4c_trous) | 4 | tente, toit, presse-papier (pyramide : arête, angle face–base, volume) |
+| densite (4e, ch4c_trous) | 2 | durée d'appel, attente au guichet, fléchette sur une cible (f(x) = kx) |
+| probaxiomes (3e–4e, ch3c_ana) | 6 | B = double, au moins un 6, rouge pair (comptage sur les 36 issues) |
+| derivth (3e–4e, ch3c_ana) | 3 | \|(x − p)(x − q)\| (Rolle) ; \|x − p\| + \|x − q\| ; accroissements finis sur x³ |
+| trigcercle (2e–4e, MP, defis.js) | 9 | angle (radians, cosinus, angles associés) ; grande roue, arroseur (coordonnées exactes) |
+| optimderiv (3e–4e, defis.js) | 9 | boîte sans couvercle ; boîte de conserve (10 volumes) ; potager, enclos, terrasse le long d'un mur |
+| eqlog (MP 3e–4e, defis.js) | 10 | base 2 ; base 3 ; équation-quotient log₂(x + b) − log₂(x − a) = k |
+| eqbic (MP 3e–4e, defis.js) | 12 | écran (diagonale et aire) ; deux nombres ; triangle rectangle (hypoténuse et aire) |
+| dec10, pow9, aire1 (9e, defis_9) | 1 contexte | feuilles, pièces, grains de riz ; bactéries, rumeur (puissances de 3), pliage ; carré et rectangle, pelouse et potager, affiches |
+| quadri, decarr, airelat (9e–10e, defis_910) | 1–2 contextes | losange, rectangle, parallélogramme ; supermarché, librairie, papeterie (prix au 5 centimes) ; conserve, tube d'affiche, bidon |
+| fracadd (9e–11e, ch11_no) | 2 contextes | élection (prénoms tirés) ; boisson diluée (sirop, thé glacé, cocktail) ; argent de poche |
+
+Contrôles : `tests/vraisemblance_soir.html` (liste `VARIES`, 54 défis) échoue si l'un de ces défis a moins de 10 énoncés
+différents ou moins de 3 contextes sur #n graines ; `tests/recalcul.html` recalcule leurs parties (oracles `DF`) ; le
+recalcul reçoit maintenant l'item (`fig` compris) pour les règles de texte, ce qui permet de relire la parabole de
+lectgraph sur la figure. Mesure hors suite : `tests/_defis3.html#ids=…&n=150&show=2` (énoncés, contextes, parties
+recalculées, désaccords) et `tests/_variete.html` (relevé de tout le catalogue).
+
+Défauts trouvés en route (corrigés) :
+
+- bayes, thales (rivière) : réponse « au centième » non arrondie sur l'écriture décimale (3,475 donnait 3,47 en
+  flottant) : arrondi décimal exact, ou valeur attendue déjà arrondie.
+- optimderiv (conserve, existant) : l'oracle lisait « surface minimale (à l'unité) » comme un arrondi vers le haut ;
+  la réponse attendue (au plus proche) est juste, l'oracle force maintenant l'arrondi au plus proche.
+- decarr : prix à 21,65 CHF, 11,37 CHF : au 5 centimes près (usage romand).
+- Énoncés : « l'ombre de une tour », « Hauteur de le clocher », « Nombre maximal de invités », « Une boîte … est
+  posé » : élisions et accords corrigés avant publication ; salle de 1 m de haut, planche à repasser de 227 cm :
+  dimensions et objets adaptés au contexte.
+
+Restent à 1 ou 2 contextes (gabarits, nombres effacés ; relevé de `tests/_variete.html` sur 60 graines) : environ
+130 défis, dont, en 9e–11e : rel, pct, valnum, eq1, prop, affine, disque, probeq, decread, deccomp, ordgr, decadd,
+decdiv, decprob, tradexpr, multdiv, divcrit, relrep, reladd, fracrep, fracsimp, fractout, ulong, uaire, uvol, perim,
+aire2, aire3, volpave, proptab, change, agrand, litelab, angtype, grandmanq, fracops, voldecomp, carres, racenc,
+eqverif, pctvar, pente, rotation, parenth, probeq2, symetries, fctlec, prio, rac, reduire, distrib, idrem, eq2,
+echelle, pyth, sys2, angles, angtri, diagr, volcone, formule, simil, proba, premiers, fracper… (valeurs déjà
+tirées, contexte unique). Profil France (fichiers fr_*.js, réservés à l'agent frlycee) : proba2, tauxevol, vect3e,
+probcond, algopy (fr_2nde), expderiv, trigrad (fr_1re), autodnb, tabvar (fr_3e), lnfr (fr_tle) n'ont qu'un énoncé
+figé ; hauteurs5 (2 énoncés) et tabform5 (4) dans fr_trous. Hors catalogue (aucune classe) : cplxalg, cplxtrig, cplxeq,
+suitegeom, serie, pvect, intsubst.
+
 

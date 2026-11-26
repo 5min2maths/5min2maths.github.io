@@ -1428,6 +1428,213 @@ const RECALC = (() => {
   DF("approxnorm", /(?:On lance (\d+) fois une pièce équilibrée|On interroge ([\d' ]+) personnes)/, (g, lab, txt) => { const n = nn(g[0] || g[1]), mu = n / 2, s = Math.sqrt(n / 4), t = tabPhi(txt), I = lm(lab, /P\((\d+) ≤ X ≤ (\d+)\)/);
     if (/Moyenne/.test(lab)) return mu; if (/Écart-type/.test(lab)) return s; if (!I) return null; if (!t || I[0] + I[1] !== 2 * mu || !(Math.abs((I[1] + 0.5 - mu) / s - t[0]) <= 1e-9)) return NaN; return 2 * t[1] - 1; });
 
+  /* ==== défis rendus variés (agent defis3, 26.11 soir) ==== */
+  /* Même modèle que les défis du soir (DF : « énoncé ¶ question », un oracle par contexte). WST3 : arrondi annoncé en mots. */
+  const WST3 = (lab) => (/au million/.test(lab) ? 1e6 : /centaine de milliers/.test(lab) ? 1e5 : /dizaine de milliers/.test(lab) ? 1e4 : /au millier/.test(lab) ? 1e3 : /à la centaine/.test(lab) ? 100 : /à la dizaine/.test(lab) ? 10 : /à l'unité/.test(lab) ? 1 : null);
+  const QF = "\\((\\d+)\\)\\/\\((\\d+)\\)";
+  /* fracmul (11e, ch11_no) */
+  DF("fracmul", new RegExp("([\\d']+) (?:hectares|élèves|m²) : les " + QF + " [^;]+; les " + QF), (g, lab) => { const [n, a, b, c, e] = g.map(nn), f = (a / b) * (c / e);
+    return lab.startsWith("a)") ? (n * a) / b : /Fraction/.test(lab) ? f : lab.startsWith("c)") ? n * f : null; });
+  DF("fracmul", new RegExp("(?:mesure|contient) (\\d+) (?:m|L)\\..*?\\(\\(1\\)\\/\\((\\d+)\\)\\), puis .*? de " + QF + " (?:m|L)\\."), (g, lab) => { const [L, k, p, q] = g.map(nn), rest = L - L / k;
+    return lab.startsWith("a)") ? L / k : lab.startsWith("b)") ? rest : lab.startsWith("c)") ? rest / (p / q) : null; });
+  /* fracconv (11e, ch11_no) */
+  DF("fracconv", new RegExp("au même prix de (\\d+) CHF\\. Le premier fait un rabais de " + QF + " du prix, le deuxième un rabais de (\\d+) %, le troisième augmente d'abord son prix de (\\d+) %, puis retire (\\d+,\\d+) du nouveau prix"), (g, lab) => { const [P0, a, b, p, h, d] = g.map(nn);
+    return lab.startsWith("a)") ? P0 * (1 - a / b) : lab.startsWith("b)") ? (P0 * (100 - p)) / 100 : lab.startsWith("c)") ? P0 * (1 + h / 100) * (1 - d) : null; });
+  DF("fracconv", /Nombres périodiques/, (g, lab) => { let m;
+    if ((m = /^a\) 0,(\d)\1\1…/.exec(lab))) return +m[1] / 9; if ((m = /^b\) 0,(\d\d)\1…/.exec(lab))) return +m[1] / 99; if ((m = /^c\) 0,(\d)999…/.exec(lab))) return (+m[1] + 1) / 10; return null; });
+  DF("fracconv", new RegExp("sondage auprès de ([\\d']+) élèves, les " + QF + " préfèrent .+?, (\\d+) % préfèrent"), (g, lab) => { const [n, a, b, p] = g.map(nn), r = 100 - (100 * a) / b - p;
+    return lab.startsWith("a)") ? a / b : lab.startsWith("b)") ? (n * a) / b : lab.startsWith("c)") ? r : lab.startsWith("d)") ? (n * r) / 100 : null; });
+  /* sci (11e, defis.js) */
+  DF("sci", /^(?:Un|Une) .+? (?:a un diamètre d'environ|mesure environ) (\d+(?:,\d+)?) · 10\^(-\d+) m\./, (g, lab) => { const d = nn(g[0]) * 10 ** nn(g[1]), u = lm(lab, /1 (?:nm|µm) = 10(⁻⁹|⁻⁶) m/);
+    if (lab.startsWith("a)") && u) return d / (u[0] === undefined ? NaN : /⁻⁹/.test(lab) ? 1e-9 : 1e-6); if (lab.startsWith("b)")) { const st = WST3(lab); return st ? { v: 1e-3 / d, st } : null; } return null; });
+  DF("sci", /Le rayon de .+? vaut environ (\d+(?:,\d+)?) · 10\^3 km/, (g, lab) => { const r = nn(g[0]) * 1000; return lab.startsWith("a)") ? r * 1000 : lab.startsWith("b)") && WST3(lab) ? { v: 2 * Math.PI * r, st: WST3(lab) } : null; });
+  DF("sci", /est à environ (\d+(?:,\d+)?) · 10\^(\d+) km du Soleil\. La lumière parcourt 3 · 10\^5 km par seconde/, (g, lab) => { const [m, e] = g.map(nn), t = (m * 10 ** e) / 3e5, me = Math.floor(Math.log10(m * 10 ** (e + 3)));
+    return lab.startsWith("a)") ? me : lab.startsWith("b)") ? t : lab.startsWith("c)") ? t / 60 : null; });
+  /* scicalc (11e, ch11_no) */
+  DF("scicalc", /La lumière va à 3 · 10\^5 km\/s, et une année compte environ 3,15 · 10\^7 s\. L'étoile .+? est à (\d+(?:,\d+)?) années-lumière/, (g, lab) => { const al = 3e5 * 3.15e7, D = nn(g[0]) * al;
+    return lab.startsWith("a)") ? al : /deux décimales/.test(lab) ? { v: D, st: 10 ** (Math.floor(Math.log10(D)) - 2) } : null; });
+  DF("scicalc", /contient environ (\d+(?:,\d+)?) L de sang, et chaque mm³ de sang contient environ (\d+(?:,\d+)?) · 10\^6 globules/, (g, lab) => { const [V, c] = g.map(nn); return lab.startsWith("a)") ? 1e6 : lab.startsWith("b)") ? V * 1e6 * c * 1e6 : null; });
+  DF("scicalc", /un cœur bat environ (\d+) fois par minute\. Une année compte environ 5,26 · 10\^5 minutes/, (g, lab) => { const an = nn(g[0]) * 5.26e5, A = lm(lab, /en (\d+) ans/), v = lab.startsWith("a)") ? an : A ? an * A[0] : null;
+    return v === null ? null : { v, st: 10 ** (Math.floor(Math.log10(v)) - 1) }; });
+  const NR = "(\\d+(?:,\\d+)?)";
+  /* pythfig (11e, ch11_gm) */
+  DF("pythfig", /(\d+) cm de (?:long|large), (\d+) cm de (?:large|profondeur) et (\d+) cm de haut\. On veut y ranger, en diagonale, .+? (\d+) cm\./, (g, lab) => { const [a, b, c, L] = g.map(nn), d = Math.sqrt(a * a + b * b + c * c);
+    return lab.startsWith("a)") ? Math.sqrt(a * a + b * b) : lab.startsWith("b)") ? d : lab.startsWith("c)") ? { v: L < d ? 1 : 0, sol: false } : null; });
+  DF("pythfig", /de rayon (\d+) (?:cm|m)\b.*?carré.*?coins touchent/, (g, lab) => { const r = nn(g[0]); return lab.startsWith("a)") ? 2 * r : lab.startsWith("b)") ? 2 * r * r : lab.startsWith("c)") ? Math.PI * r * r - 2 * r * r : null; });
+  /* pythrec (11e, ch11_gm) */
+  DF("pythrec", /A\((-?\d+) ; (-?\d+)\), B\((-?\d+) ; (-?\d+)\) et C\((-?\d+) ; (-?\d+)\)/, (g, lab) => { const [ax, ay, bx, by, cx, cy] = g.map(nn), ab = (ax - bx) ** 2 + (ay - by) ** 2, bc = (bx - cx) ** 2 + (by - cy) ** 2, ac = (ax - cx) ** 2 + (ay - cy) ** 2, S = [ab, bc, ac].sort((u, v) => u - v);
+    return lab.startsWith("a)") ? ab : lab.startsWith("b)") ? bc : lab.startsWith("c)") ? ac : lab.startsWith("d)") ? { v: S[0] + S[1] === S[2] ? 1 : 0, sol: false } : null; });
+  DF("pythrec", /On prend n = (\d+)\./, (g, lab) => { const n = nn(g[0]); return lab.startsWith("a)") ? n * n + 1 : lab.startsWith("b)") ? (n * n - 1) ** 2 + 4 * n * n : lab.startsWith("c)") ? (n * n + 1) ** 2 : null; });
+  DF("pythrec", /deux côtés mesurent (\d+) cm et (\d+) cm, et la diagonale mesure (\d+) cm/, (g, lab) => { const [a, b, d] = g.map(nn); return lab.startsWith("a)") ? a * a + b * b : lab.startsWith("b)") ? d * d : lab.startsWith("c)") ? { v: a * a + b * b === d * d ? 1 : 0, sol: false } : null; });
+  /* vol (10e–11e, ch11_gm) */
+  DF("vol", new RegExp("piscine de (\\d+) m de long et (\\d+) m de large a une profondeur de " + NR + " m d'un côté et " + NR + " m de l'autre"), (g, lab) => { const [L, l, h1, h2] = g.map(nn), A = ((h1 + h2) * L) / 2;
+    return lab.startsWith("a)") ? A : lab.startsWith("b)") ? A * l : lab.startsWith("c)") ? A * l * 1000 : null; });
+  DF("vol", new RegExp("profil en trapèze : " + NR + " m de large en haut, " + NR + " m au fond et " + NR + " m de profondeur\\. Il mesure (\\d+) m de long"), (g, lab) => { const [B, b, h, L] = g.map(nn), A = ((B + b) * h) / 2;
+    return lab.startsWith("a)") ? A : lab.startsWith("b)") ? A * L : lab.startsWith("c)") ? A * L * 1000 : null; });
+  DF("vol", new RegExp("triangle de " + NR + " m de base et " + NR + " m de haut, et la tente mesure " + NR + " m de long"), (g, lab) => { const [b, h, L] = g.map(nn), A = (b * h) / 2;
+    return lab.startsWith("a)") ? A : lab.startsWith("b)") ? A * L : lab.startsWith("c)") ? A * L * 1000 : null; });
+  DF("vol", new RegExp("doit contenir (\\d+) cL\\. Son rayon intérieur est de " + NR + " cm"), (g, lab) => { const [c, r] = g.map(nn), V = 10 * c, A = Math.PI * r * r;
+    return lab.startsWith("a)") ? V : lab.startsWith("b)") ? A : lab.startsWith("c)") ? V / A : null; });
+  /* airepyr (11e, ch11_gm) */
+  DF("airepyr", new RegExp("base carrée de " + NR + " (?:m|cm) de côté et de " + NR + " (?:m|cm) de haut"), (g, lab) => { const [c, h] = g.map(nn), a = Math.sqrt(h * h + (c * c) / 4);
+    return lab.startsWith("a)") ? a : lab.startsWith("b)") ? 2 * c * a : lab.startsWith("c)") ? (c * c * h) / 3 : null; });
+  DF("airepyr", /un carré de (\d+) cm de côté et quatre triangles isocèles d'apothème \(hauteur\) (\d+) cm/, (g, lab) => { const [c, a] = g.map(nn), h = Math.sqrt(a * a - (c * c) / 4);
+    return lab.startsWith("a)") ? c * c + 2 * c * a : lab.startsWith("b)") ? h : lab.startsWith("c)") ? (c * c * h) / 3 : null; });
+  /* volcomp (11e, ch11_gm) */
+  DF("volcomp", new RegExp("cylindre de rayon " + NR + " m et de hauteur " + NR + " m, avec un fond en cône de même rayon et de hauteur " + NR + " m"), (g, lab) => { const [r, H, h] = g.map(nn), Vc = Math.PI * r * r * H, Vk = (Math.PI * r * r * h) / 3;
+    return lab.startsWith("a)") ? Vc : lab.startsWith("b)") ? Vk : lab.startsWith("c)") ? (Vc + Vk) * 1000 : null; });
+  DF("volcomp", /un cube de (\d+) cm d'arête surmonté d'une pyramide de même base et de (\d+) cm de hauteur/, (g, lab) => { const [a, h] = g.map(nn), rho = lm(lab, /pèse (\d+(?:,\d+)?) g/);
+    return lab.startsWith("a)") ? a ** 3 : lab.startsWith("b)") ? (a * a * h) / 3 : rho ? (a ** 3 + (a * a * h) / 3) * rho[0] : null; });
+  /* thales (11e, ch11_thales) */
+  DF("thales", new RegExp("de " + NR + " m de haut a une ombre de " + NR + " m, et l'ombre .+? mesure " + NR + " m\\."), (g, lab) => { const [h1, s1, S] = g.map(nn), h3 = lm(lab, /arbre de (\d+) m/);
+    return lab.startsWith("a)") ? S / s1 : lab.startsWith("b)") ? (S * h1) / s1 : h3 ? (h3[0] * s1) / h1 : null; });
+  DF("thales", new RegExp("AD = " + NR + "(?: d?m)?, DB = " + NR + "(?: d?m)?, AE = " + NR + "(?: d?m)? et DE = " + NR), (g, lab) => { const [a, b, c, d] = g.map(nn), k = (a + b) / a;
+    return lab.startsWith("a)") ? a + b : lab.startsWith("b)") ? c * k : lab.startsWith("c)") ? d * k : lab.startsWith("d)") ? b + d * k + (c * k - c) + d : null; });
+  DF("thales", /AD = (\d+) m, DB = (\d+) m et DE = (\d+) m/, (g, lab) => { const [a, b, d] = g.map(nn); return lab.startsWith("a)") ? a + b : lab.startsWith("b)") ? (d * (a + b)) / a : null; });
+  /* repere (10e–11e, ch11_fct) */
+  DF("repere", /A\((-?\d+) ; (-?\d+)\), B\((-?\d+) ; (-?\d+)\) et C\((-?\d+) ; (-?\d+)\)/, (g, lab, txt) => { const [ax, ay, bx, by, cx, cy] = g.map(nn), D = [ax + cx - bx, ay + cy - by], ar = Math.abs((bx - ax) * (D[1] - ay) - (by - ay) * (D[0] - ax));
+    return lab.startsWith("a)") ? D[0] : lab.startsWith("b)") ? D[1] : lab.startsWith("c)") ? ar : lab.startsWith("d)") ? ar * (/1 carreau = 10 m/.test(txt) ? 100 : /1 carreau = 8 pixels/.test(txt) ? 64 : NaN) : null; });
+  DF("repere", /M\((-?\d+) ; (-?\d+)\)/, (g, lab, txt) => { const [mx, my] = g.map(nn), a = /A\((-?\d+) ; (-?\d+)\)/.exec(txt); if (!a) return null;
+    return lab.startsWith("a)") ? 2 * mx - nn(a[1]) : lab.startsWith("b)") ? 2 * my - nn(a[2]) : null; });
+  /* sysprob (11e–1re, ch1c_sys) : têtes et pattes ; vitesses avec et contre le vent ou le courant */
+  DF("sysprob", /on compte (\d+) (?:têtes|véhicules|sièges) et (\d+) (?:pattes|roues|pieds)/, (g, lab, txt) => { const [T, P0] = g.map(nn), l1 = /tabourets à 3 pieds/.test(txt) ? 3 : 2, l2 = 4, b = (P0 - l1 * T) / (l2 - l1);
+    return lab.startsWith("a)") ? T - b : lab.startsWith("b)") ? b : null; });
+  DF("sysprob", /parcourt ([\d']+) km .*?en (\d+) h .*?, et en (\d+) h/, (g, lab) => { const [D, t1, t2] = g.map(nn), s1 = D / t1, s2 = D / t2;
+    return lab.startsWith("a)") ? s1 : lab.startsWith("b)") ? s2 : lab.startsWith("c)") ? (s1 + s2) / 2 : lab.startsWith("d)") ? (s1 - s2) / 2 : null; });
+  /* sysgraph (1re Collège, ch1c_sys) */
+  DF("sysgraph", /cases (-?\d*)x ([+-]) (\d*)y = (-?\d+) \\ (\d+)x \+ my = k cases/, (g, lab) => { const a1 = g[0] === "" ? 1 : g[0] === "-" ? -1 : nn(g[0]), b1 = (g[1] === "-" ? -1 : 1) * (g[2] === "" ? 1 : nn(g[2])), c1 = nn(g[3]), a2 = nn(g[4]), f = a2 / a1, mk = lm(lab, /m = (\d+) et k = (-?\d+)/);
+    if (lab.startsWith("a)")) return f * b1; if (lab.startsWith("b)")) return f * c1;
+    if (!mk) return null; const [m, k] = mk, det = a1 * m - b1 * a2; if (!det) return NaN;
+    return lab.startsWith("c)") ? (c1 * m - b1 * k) / det : lab.startsWith("d)") ? (a1 * k - a2 * c1) / det : null; });
+  DF("sysgraph", /A (?:coûte|demande) ([\d,]+) CHF (?:par mois|de frais de dossier|par an) plus ([\d,]+) CHF (?:la minute|de l'heure|la séance) ; (?:B|l'agence B|la formule B) (?:coûte|demande) ([\d,]+) CHF/, (g, lab) => { const [F, pA, pB] = g.map(nn), n = lm(lab, /pour (\d+) /);
+    return lab.startsWith("a)") && n ? F + pA * n[0] : lab.startsWith("b)") && n ? pB * n[0] : lab.startsWith("c)") ? F / (pB - pA) : null; });
+  /* sysineq (1re Collège, ch1c_sys) */
+  DF("sysineq", /dispose de ([\d']+) CHF.*? coûte (\d+) CHF et (?:l'entrée|le repas|l'inscription) (\d+) CHF par \S+\. .*?au moins (\d+)/, (g, lab) => { const [B, C, p, mn] = g.map(nn), mx = Math.floor((B - C) / p + 1e-9);
+    return lab.startsWith("a)") ? mx : lab.startsWith("b)") ? mn : lab.startsWith("c)") ? mx - mn + 1 : null; });
+  DF("sysineq", /à la fois (\d+)x - (\d+) (>|≥) (-?\d+) et (\d+) - x ≥ (-?\d+)/, (g, lab) => { const a = nn(g[0]), b = nn(g[1]), st = g[2] === ">", c = nn(g[3]), d = nn(g[4]), e = nn(g[5]), L = (c + b) / a, Rr = d - e;
+    let n = 0; for (let x = Math.ceil(L - 1); x <= Rr; x++) if ((st ? x > L : x >= L) && x <= Rr) n++;
+    return lab.startsWith("a)") ? L : lab.startsWith("b)") ? Rr : lab.startsWith("c)") ? n : null; });
+  /* eqfrac (10e–11e, ch1c_eq) : travail à deux */
+  DF("eqfrac", /en (\d+) (?:h|min) ; .*?en (\d+) (?:h|min)\./, (g, lab) => { const [a, b] = g.map(nn); return lab.startsWith("a)") ? 1 / a : lab.startsWith("b)") ? 1 / a + 1 / b : lab.startsWith("c)") ? (a * b) / (a + b) : null; });
+  /* bicarre (1re Collège, ch1c_eq) : X = x² recalculé par le discriminant */
+  const bic = (b, c) => { const D = b * b - 4 * c; if (D < 0) return null; return [(-b - Math.sqrt(D)) / 2, (-b + Math.sqrt(D)) / 2]; };
+  DF("bicarre", /x\^4(?: ([+-]) (\d*)x\^2)? ([+-]) (\d+) = 0 et l'on pose X = x\^2/, (g, lab) => { const b = g[0] ? (g[0] === "-" ? -1 : 1) * (g[1] === "" ? 1 : nn(g[1])) : 0, c = (g[2] === "-" ? -1 : 1) * nn(g[3]), X = bic(b, c); if (!X) return NaN;
+    return lab.startsWith("a)") ? X[0] : lab.startsWith("b)") ? X[1] : lab.startsWith("c)") ? X.reduce((s, v) => s + (v > 1e-12 ? 2 : Math.abs(v) <= 1e-12 ? 1 : 0), 0) : null; });
+  DF("bicarre", /aire de (\d+) cm² et une diagonale de (\d+) cm/, (g, lab) => { const [A, d] = g.map(nn), X = bic(-d * d, A * A); if (!X) return NaN;
+    return lab.startsWith("a)") ? X[0] : lab.startsWith("b)") ? Math.sqrt(X[0]) : lab.startsWith("c)") ? A / Math.sqrt(X[0]) : null; });
+  DF("bicarre", /produit de deux nombres positifs vaut (\d+) et la somme de leurs carrés vaut (\d+)/, (g, lab) => { const [P0, S] = g.map(nn), X = bic(-S, P0 * P0); if (!X) return NaN;
+    return lab.startsWith("a)") ? X[1] : lab.startsWith("b)") ? Math.sqrt(X[1]) : lab.startsWith("c)") ? Math.sqrt(X[0]) : null; });
+  /* lectgraph (1re Collège–MP, defis.js) : parabole relue sur la figure (moindres carrés, figRead plus bas : fonction hissée) */
+  T("lectgraph", /Le graphique montre une parabole \(fonction f\) et une droite/, (txt, x) => { if (!/ ¶ /.test(txt) || !x || !x.fig) return null; const lab = txt.split(" ¶ ").slice(1).join(" ¶ "), F = figRead(x.fig); if (!F) return null; const q = quadFit(F.curve); if (!q) return null;
+    const [a, b, c] = q, h = -b / (2 * a), k = c - (b * b) / (4 * a), A = Math.round(a * 2) / 2, H = Math.round(h), K = Math.round(k), at = lm(lab, /f\((-?\d+)\)/);
+    if (Math.abs(A - a) > 0.05 || Math.abs(H - h) > 0.08 || Math.abs(K - k) > 0.08) return NaN;
+    return lab.startsWith("a)") ? A : lab.startsWith("b)") && at ? A * (at[0] - H) ** 2 + K : null; }, { text: true });
+  /* trigexact (1re Collège–MP, defis.js) */
+  DF("trigexact", /triangle équilatéral de (\d+) cm de côté/, (g, lab) => { const a = nn(g[0]), s3 = Math.sqrt(3); return lab.startsWith("a)") ? (a * s3) / 2 : lab.startsWith("b)") ? (a * a * s3) / 4 : lab.startsWith("c)") ? (a * s3) / 6 : null; });
+  DF("trigexact", /hexagone régulier de (\d+) cm de côté/, (g, lab) => { const a = nn(g[0]), s3 = Math.sqrt(3); return lab.startsWith("a)") ? (a * s3) / 2 : lab.startsWith("b)") ? (3 * a * a * s3) / 2 : lab.startsWith("c)") ? 2 * a : null; });
+  DF("trigexact", /chevron de toit de (\d+) m est incliné à (\d+)°/, (g, lab) => { const [L, t] = g.map(nn), h = L * Math.sin((t * Math.PI) / 180), w = L * Math.cos((t * Math.PI) / 180);
+    return lab.startsWith("a)") ? h : lab.startsWith("b)") ? w : lab.startsWith("c)") ? (h * w) / 2 : null; });
+  /* droitesrem (1re Collège–MP, defis.js) */
+  DF("droitesrem", /rectangle en C, (?:avec AC = (\d+) (?:cm|m) et BC = (\d+) (?:cm|m)|d'hypoténuse AB = (\d+) cm et de côté AC = (\d+) cm)/, (g, lab) => { let a, b, c; if (g[0]) { a = nn(g[0]); b = nn(g[1]); c = Math.hypot(a, b); } else { c = nn(g[2]); a = nn(g[3]); b = Math.sqrt(c * c - a * a); }
+    return lab.startsWith("a)") ? c / 2 : lab.startsWith("b)") ? c / 3 : lab.startsWith("c)") ? (a * b) / c : null; });
+  /* polyreg (10e, defis_910) */
+  DF("polyreg", /dont la somme vaut ([\d']+)°/, (g, lab) => { const S = nn(g[0]), n = S / 180 + 2; return lab.startsWith("a)") ? n : lab.startsWith("b)") ? S / n : lab.startsWith("c)") ? 360 / n : null; });
+  DF("polyreg", /Chaque angle intérieur du plancher mesure (\d+(?:,\d+)?)°/, (g, lab) => { const ai = nn(g[0]), n = 360 / (180 - ai); return lab.startsWith("a)") ? 180 - ai : lab.startsWith("b)") ? n : lab.startsWith("c)") ? (n - 2) * 180 : null; });
+  DF("polyreg", /polygone régulier à (\d+) côtés/, (g, lab) => { const n = nn(g[0]); return lab.startsWith("a)") ? 360 / n : lab.startsWith("b)") ? ((n - 2) * 180) / n : lab.startsWith("c)") ? (n - 2) * 180 : null; });
+  /* graphefct (1re Collège, ch1c_trous) */
+  DF("graphefct", /le cercle x\^2 \+ y\^2 = (\d+) et la droite verticale x = (\d+)/, (g, lab) => { const [r2, a] = g.map(nn), r = Math.sqrt(r2), a1 = lm(lab, /Image de (\d+)/);
+    return lab.startsWith("a)") ? (a * a < r2 ? 2 : a * a === r2 ? 1 : 0) : a1 ? Math.sqrt(r2 - a1[0] ** 2) : lab.startsWith("c)") ? r : null; });
+  DF("graphefct", /demi-cercle de rayon (\d+) m\./, (g, lab) => { const r = nn(g[0]), a = lm(lab, /à (\d+) m du centre/);
+    return a ? Math.sqrt(r * r - a[0] ** 2) : lab.startsWith("b)") ? 2 * r : lab.startsWith("c)") ? { v: 1, sol: false } : null; });
+  DF("graphefct", /courbe d'équation x = y\^2(?: ([+-]) (\d+))? \(une parabole « couchée »\) et la droite verticale x = (-?\d+)/, (g, lab) => { const c = g[0] ? (g[0] === "-" ? -1 : 1) * nn(g[1]) : 0, k = nn(g[2]), kk = lm(lab, /d'abscisse (-?\d+)/);
+    return lab.startsWith("a)") ? (k > c ? 2 : k === c ? 1 : 0) : kk ? Math.sqrt(kk[0] - c) : lab.startsWith("c)") ? { v: 0, sol: false } : null; });
+  /* ineqgraph (2e Collège, ch1c_trous) : zéros par le discriminant, entiers comptés un à un */
+  const coef2 = (s) => { const m = /^(-?)x\^2(?: ([+-]) (\d*)x)?(?: ([+-]) (\d+))?$/.exec(s.trim()); if (!m) return null; return [m[1] ? -1 : 1, m[2] ? (m[2] === "-" ? -1 : 1) * (m[3] === "" ? 1 : nn(m[3])) : 0, m[4] ? (m[4] === "-" ? -1 : 1) * nn(m[5]) : 0]; };
+  DF("ineqgraph", /(?:f|B)\(x\) = (-?x\^2[^=(]*?) (?:coupe|\(en milliers)/, (g, lab) => { const C = coef2(g[0]); if (!C) return null; const [a, b, c] = C, D = b * b - 4 * a * c; if (D <= 0) return NaN;
+    const z = [(-b - Math.sqrt(D)) / (2 * a), (-b + Math.sqrt(D)) / (2 * a)].sort((u, v) => u - v), f = (x) => a * x * x + b * x + c, o = /(≤|≥|<|>) 0/.exec(lab), t = (x) => (o[1] === "<" ? f(x) < 0 : o[1] === "≤" ? f(x) <= 0 : o[1] === ">" ? f(x) > 0 : f(x) >= 0);
+    if (lab.startsWith("a)")) return z[0]; if (lab.startsWith("b)")) return z[1]; if (!o) return null;
+    if (/Nombre (?:d'entiers|de quantités entières)/.test(lab)) { let n = 0; for (let x = -50; x <= 50; x++) if (t(x)) n++; return n; }
+    if (/Plus petit entier positif/.test(lab)) { for (let x = 1; x <= 100; x++) if (t(x)) return x; return NaN; } return null; });
+  /* repere3d (11e, ch11_rep3d) */
+  DF("repere3d", /le sommet opposé à O est F\((\d+) ; (\d+) ; (\d+)\)/, (g, lab) => { const [a, b, c] = g.map(nn);
+    return lab.startsWith("a)") ? a * b * c : lab.startsWith("b)") ? (/Abscisse/.test(lab) ? a : /Ordonnée/.test(lab) ? b : c) / 2 : lab.startsWith("c)") ? Math.sqrt(a * a + b * b + c * c) : null; });
+  /* bayes, syslin, bases, etudelnexp (4e Collège, ch4c_ana) */
+  DF("bayes", /(\d+(?:,\d+)?) % [^%]*?(\d+(?:,\d+)?) % [^%]*?(\d+(?:,\d+)?) %/, (g, lab) => { const [p, s, f] = g.map((v) => nn(v) / 100), pos = p * s + (1 - p) * f;
+    return lab.startsWith("a)") ? 100 * pos : lab.startsWith("b)") ? (100 * p * s) / pos : lab.startsWith("c)") ? (100 * p * s * s) / (p * s * s + (1 - p) * f * f) : null; });
+  const det3 = (A) => A[0][0] * (A[1][1] * A[2][2] - A[1][2] * A[2][1]) - A[0][1] * (A[1][0] * A[2][2] - A[1][2] * A[2][0]) + A[0][2] * (A[1][0] * A[2][1] - A[1][1] * A[2][0]);
+  DF("syslin", /coûtent ([\d',]+) CHF ; mardi/, (g, lab, txt) => { const L = [...txt.split(" ¶ ")[0].matchAll(/(\d+) [^,0-9]+?, (\d+) [^0-9]+? et (\d+) [^0-9]+? coûtent ([\d',]+) CHF/g)]; if (L.length !== 3) return null;
+    const A = L.map((m) => [nn(m[1]), nn(m[2]), nn(m[3])]), B = L.map((m) => nn(m[4])), D = det3(A), col = (k) => A.map((r, i) => r.map((v, j) => (j === k ? B[i] : v)));
+    return lab.startsWith("a)") ? D : lab.startsWith("b)") ? det3(col(0)) / D : lab.startsWith("c)") ? det3(col(2)) / D : null; });
+  DF("bases", /u = \((-?\d+) ; (-?\d+) ; (-?\d+)\), v = \((-?\d+) ; (-?\d+) ; (-?\d+)\) et w = \((-?\d+) ; m ; (-?\d+)\)/, (g, lab) => { const [u0, u1, u2, v0, v1, v2, w0, w2] = g.map(nn), u = [u0, u1, u2], v = [v0, v1, v2];
+    const dm = (m) => det3([[u0, v0, w0], [u1, v1, m], [u2, v2, w2]]), a = dm(1) - dm(0), b = dm(0);
+    if (lab.startsWith("a)")) return a; if (lab.startsWith("b)")) return -b / a;
+    const t = lm(lab, /t = \((-?\d+) ; (-?\d+) ; (-?\d+)\)/), k = /composante α/.test(lab) ? 0 : /composante β/.test(lab) ? 1 : /composante γ/.test(lab) ? 2 : -1; if (!t || k < 0) return null;
+    const M3 = [[u0, v0, w0], [u1, v1, 0], [u2, v2, w2]], D = det3(M3); return det3(M3.map((r, i) => r.map((x, j) => (j === k ? t[i] : x)))) / D; });
+  DF("etudelnexp", /Soit f\(x\) = (\d*)x·e\^\(−x\/(\d+)\) pour x ≥ 0/, (g, lab) => { const a = g[0] ? nn(g[0]) : 1, k = nn(g[1]); return lab.startsWith("a)") ? k : lab.startsWith("b)") ? (a * k) / Math.E : lab.startsWith("c)") ? 0 : null; });
+  DF("etudelnexp", /Soit f\(x\) = (\d*)x²·e\^\(−x\/(\d+)\) pour x ≥ 0/, (g, lab) => { const a = g[0] ? nn(g[0]) : 1, k = nn(g[1]); return lab.startsWith("a)") ? 2 * k : lab.startsWith("b)") ? 4 * a * k * k * Math.exp(-2) : lab.startsWith("c)") ? 0 : null; });
+  DF("etudelnexp", /Soit f\(x\) = (\d*)ln\(x\)\/x pour x > 0/, (g, lab) => { const a = g[0] ? nn(g[0]) : 1; return lab.startsWith("a)") ? Math.E : lab.startsWith("b)") ? a / Math.E : lab.startsWith("c)") ? 0 : null; });
+  /* geoesp, densite (4e Collège, ch4c_trous) */
+  DF("geoesp", new RegExp("pyramide régulière à base carrée de côté " + NR + " (?:m|cm) et de hauteur " + NR + " (?:m|cm)"), (g, lab) => { const [c, h] = g.map(nn);
+    return lab.startsWith("a)") ? Math.sqrt(h * h + (c * c) / 2) : lab.startsWith("b)") ? (Math.atan(h / (c / 2)) * 180) / Math.PI : lab.startsWith("c)") ? (c * c * h) / 3 : null; });
+  DF("densite", /f\(x\) = kx sur \[0 ; (\d+)\]/, (g, lab) => { const b = nn(g[0]), t = lm(lab, /P\(X ≤ (\d+(?:,\d+)?)\)/);
+    return lab.startsWith("a)") ? 2 / (b * b) : t ? (t[0] * t[0]) / (b * b) : lab.startsWith("c)") ? (2 * b) / 3 : null; });
+  /* probaxiomes, derivth (3e Collège, ch3c_ana) */
+  DF("probaxiomes", /la somme vaut (\d+) » ; B : « ([^»]+) »/, (g, lab) => { const s = nn(g[0]), B = /double/.test(g[1]) ? (r, b) => r === b : /au moins un 6/.test(g[1]) ? (r, b) => r === 6 || b === 6 : /rouge donne un nombre pair/.test(g[1]) ? (r) => r % 2 === 0 : null; if (!B) return null;
+    let a = 0, bb = 0, u = 0; for (let r = 1; r <= 6; r++) for (let b = 1; b <= 6; b++) { const A = r + b === s, E = B(r, b); a += A; bb += E; u += A || E; }
+    return lab.startsWith("a)") ? a / 36 : lab.startsWith("b)") ? bb / 36 : lab.startsWith("c)") ? u / 36 : null; });
+  const sgn = (o, v) => (o === "-" ? 1 : -1) * nn(v); /* (x − p) : p = +v ; (x + p) : p = −v */
+  DF("derivth", /f\(x\) = \|\(x ([+-]) (\d+)\)\(x ([+-]) (\d+)\)\|/, (g, lab) => { const p = sgn(g[0], g[1]), q = sgn(g[2], g[3]), lo = Math.min(p, q), hi = Math.max(p, q);
+    return lab.startsWith("a)") ? hi : lab.startsWith("b)") ? -(hi - lo) : lab.startsWith("c)") ? (lo + hi) / 2 : null; });
+  DF("derivth", /f\(x\) = \|x ([+-]) (\d+)\| \+ \|x ([+-]) (\d+)\|/, (g, lab) => { const p = sgn(g[0], g[1]), q = sgn(g[2], g[3]), f = (x) => Math.abs(x - p) + Math.abs(x - q), hi = Math.max(p, q);
+    return lab.startsWith("a)") ? hi : lab.startsWith("b)") ? (f(hi + 1e-3) - f(hi)) / 1e-3 : lab.startsWith("c)") ? f((p + q) / 2) : null; });
+  DF("derivth", /f\(x\) = x\^3 sur \[0 ; (\d+)\]/, (g, lab) => { const b = nn(g[0]); return lab.startsWith("a)") ? b ** 3 / b : lab.startsWith("b)") ? Math.sqrt((b * b) / 3) : lab.startsWith("c)") ? 3 * b * b : null; });
+  /* trigcercle, optimderiv, eqlog, eqbic (defis.js, 2e–4e Collège et MP) */
+  DF("trigcercle", /On considère l'angle (?:θ )?= (\d+)°\./, (g, lab) => { const t = nn(g[0]), d = lm(lab, /\(kπ\)\/\((\d+)\)/);
+    if (lab.startsWith("a)") && d) return (t * d[0]) / 180; if (lab.startsWith("b)")) return { v: Math.cos((t * Math.PI) / 180), sol: false }; /* corrigé exact ±√3/2 : fraction imbriquée, illisible en texte simple */ if (/même sinus/.test(lab)) return (540 - t) % 360; if (/même cosinus/.test(lab)) return 360 - t; return null; });
+  DF("trigcercle", /(?:a un rayon de|a une portée de) (\d+) m\..*?l'angle (?:θ )?= (\d+)°/, (g, lab) => { const [R0, t] = g.map(nn), d = lm(lab, /\(kπ\)\/\((\d+)\)/), r = (t * Math.PI) / 180;
+    return lab.startsWith("a)") && d ? (t * d[0]) / 180 : lab.startsWith("b)") ? R0 * Math.cos(r) : lab.startsWith("c)") ? R0 * Math.sin(r) : null; });
+  DF("optimderiv", /Dans une feuille de (\d+) cm sur (\d+) cm, on découpe un carré/, (g, lab) => { const [a, b] = g.map(nn), V = (x) => x * (a - 2 * x) * (b - 2 * x), D2 = 16 * (a + b) ** 2 - 48 * a * b, x = (4 * (a + b) - Math.sqrt(D2)) / 24, c = (a + b) / 2;
+    return lab.startsWith("a)") ? x : lab.startsWith("b)") ? V(x) : lab.startsWith("c)") ? (2 * c ** 3) / 27 : null; });
+  DF("optimderiv", /cylindrique doit contenir ([\d']+) cm\^3/, (g, lab) => { const V = nn(g[0]), r = Math.cbrt(V / (2 * Math.PI)); return lab.startsWith("a)") ? r : lab.startsWith("b)") ? V / (Math.PI * r * r) : lab.startsWith("c)") ? { v: 2 * Math.PI * r * r + (2 * V) / r, st: 1, dir: 0 } : null; }); /* « surface minimale (à l'unité) » : arrondi au plus proche */
+  DF("optimderiv", /Avec (\d+) m de clôture, on délimite .+? le long d'un mur/, (g, lab) => { const L = nn(g[0]); let best = 0; for (let i = 1; i < 4000; i++) { const x = (i * L) / 8000; if (x * (L - 2 * x) > best * (L - 2 * best)) best = x; }
+    const x = L / 4; if (Math.abs(best - x) > L / 4000) return NaN; return lab.startsWith("a)") ? x : lab.startsWith("b)") ? L - 2 * x : lab.startsWith("c)") ? x * (L - 2 * x) : null; });
+  DF("eqlog", /On résout (?:log)?_(\d) x \+ (?:log)?_\d\(x - (\d+)\) = (\d+)\./, (g, lab) => { const [B, a, n] = g.map(nn), D = a * a + 4 * B ** n, r = (a + Math.sqrt(D)) / 2;
+    return lab.startsWith("a)") ? a : lab.startsWith("b)") ? r : lab.startsWith("c)") ? { v: 2, sol: false } : null; });
+  DF("eqlog", /On résout (?:log)?_2\(x \+ (\d+)\) - (?:log)?_2\(x - (\d+)\) = (\d+)\./, (g, lab) => { const [b, a, k] = g.map(nn), K = 2 ** k, x = (b + K * a) / (K - 1);
+    return lab.startsWith("a)") ? a : lab.startsWith("b)") ? x : lab.startsWith("c)") ? (x + b) / (x - a) : null; });
+  const bicXY = (S, P2) => { const D = S * S - 4 * P2; return D < 0 ? null : [(S - Math.sqrt(D)) / 2, (S + Math.sqrt(D)) / 2].map(Math.sqrt); };
+  DF("eqbic", /diagonale de (\d+) cm et une aire de ([\d']+) cm²/, (g, lab) => { const [d, A] = g.map(nn), s = bicXY(d * d, A * A); if (!s) return NaN; return lab.startsWith("b)") ? s[1] : lab.startsWith("c)") ? 2 * (s[0] + s[1]) : null; });
+  DF("eqbic", /ont pour produit (\d+) et la somme de leurs carrés vaut (\d+)/, (g, lab) => { const [P0, S] = g.map(nn), s = bicXY(S, P0 * P0); if (!s) return NaN; return lab.startsWith("b)") ? s[1] : lab.startsWith("c)") ? s[0] + s[1] : null; });
+  DF("eqbic", /hypoténuse de (\d+) cm et une aire de (\d+(?:,\d+)?) cm²/, (g, lab) => { const [r, A] = g.map(nn), s = bicXY(r * r, 4 * A * A); if (!s) return NaN; return lab.startsWith("b)") ? s[1] : lab.startsWith("c)") ? s[0] + s[1] + r : null; });
+  /* dec10, pow9, aire1 (9e, defis_9) */
+  DF("dec10", /(?:1'000 feuilles de papier a une épaisseur de|1'000 pièces de monnaie identiques mesure) (\d+(?:,\d+)?) cm/, (g, lab) => { const e = nn(g[0]), H = lm(lab, /mesure (\d+(?:,\d+)?) m\./);
+    return lab.startsWith("a)") ? (e * 10) / 1000 : lab.startsWith("b)") ? e : H ? ((H[0] * 100) / e) * 1000 : null; });
+  DF("dec10", /1'000 grains de riz pèse (\d+(?:,\d+)?) g\./, (g, lab) => { const e = nn(g[0]), H = lm(lab, /pèse (\d+(?:,\d+)?) kg/);
+    return lab.startsWith("a)") ? e : lab.startsWith("b)") ? (100 * e) / 1000 : H ? ((H[0] * 1000) / e) * 1000 : null; });
+  DF("pow9", /se divise en deux toutes les 20 minutes/, (g, lab) => { const h = lm(lab, /[Aa]près (\d+) heures/), n = lm(lab, /y a-t-il ([\d']+) bactéries/);
+    return lab.startsWith("a)") && h ? 2 ** (3 * h[0]) : lab.startsWith("b)") && h ? 3 * h[0] : n ? 20 * Math.log2(n[0]) : null; });
+  DF("pow9", /la raconte à 3 nouvelles personnes/, (g, lab) => { const d = lm(lab, /le jour (\d+)/i), n = lm(lab, /([\d']+) nouvelles personnes/);
+    return lab.startsWith("a)") && d ? 3 ** d[0] : lab.startsWith("b)") && d ? d[0] : n ? Math.log(n[0]) / Math.log(3) : null; });
+  DF("pow9", /le nombre de couches double/, (g, lab) => { const p = lm(lab, /[Aa]près (\d+) pliages/), n = lm(lab, /obtenir ([\d']+) couches/);
+    return lab.startsWith("a)") && p ? 2 ** p[0] : lab.startsWith("b)") && p ? p[0] : n ? Math.log2(n[0]) : null; });
+  DF("aire1", /même aire qu'(?:un carré|une pelouse carrée|une affiche carrée) de (\d+) (?:cm|m|dm) de côté\. Sa largeur mesure (\d+)/, (g, lab) => { const [s, w] = g.map(nn), L = (s * s) / w;
+    return lab.startsWith("a)") ? s * s : lab.startsWith("b)") ? L : lab.startsWith("c)") ? 2 * (L + w) - 4 * s : null; });
+  /* quadri, decarr, airelat (9e–10e, defis_910) */
+  DF("quadri", /losange ABCD, l'angle ∠BAC .*?mesure (\d+)°/, (g, lab) => { const a = nn(g[0]); return lab.startsWith("a)") ? 2 * a : lab.startsWith("b)") ? 90 : lab.startsWith("c)") ? 180 - 2 * a : null; });
+  DF("quadri", /rectangle ABCD, .*?l'angle ∠OAB mesure (\d+)°/, (g, lab) => { const a = nn(g[0]); return lab.startsWith("a)") ? a : lab.startsWith("b)") ? 180 - 2 * a : lab.startsWith("c)") ? 2 * a : null; });
+  DF("quadri", /l'angle ∠BAD mesure (\d+)° et la diagonale \[AC\] fait avec le côté \[AB\] un angle ∠BAC de (\d+)°/, (g, lab) => { const [A, b] = g.map(nn); return lab.startsWith("a)") ? 180 - A : lab.startsWith("b)") ? A - b : lab.startsWith("c)") ? b : null; });
+  DF("decarr", /achète (\d+) [^0-9]+? à (\d+,\d+) CHF pièce/, (g, lab) => { const [n, p] = g.map(nn); return lab.startsWith("a)") ? n * p : lab.startsWith("b)") ? n * Math.round(p) : lab.startsWith("c)") ? Math.abs(n * Math.round(p) - n * p) : null; });
+  DF("airelat", /diamètre de (\d+) cm et une (?:hauteur|longueur) de (\d+) cm/, (g, lab) => { const [d, h] = g.map(nn), AL = Math.PI * d * h;
+    return lab.startsWith("a)") ? AL : lab.startsWith("b)") ? AL + (Math.PI * d * d) / 2 : lab.startsWith("c)") ? Math.PI * d : null; });
+  /* fracadd (9e–11e, ch11_no) */
+  DF("fracadd", /\((\d+)\)\/\((\d+)\) des élèves votent pour \S+, \((\d+)\)\/\((\d+)\) pour \S+, et le reste pour \S+\. L'école compte (\d+) élèves/, (g, lab) => { const [a, b, c, e, t] = g.map(nn), r = 1 - a / b - c / e;
+    return lab.startsWith("a)") ? r : lab.startsWith("b)") ? (t * a) / b : lab.startsWith("c)") ? t * r : null; });
+  DF("fracadd", /on met \((\d+)\)\/\((\d+)\) [^,]+, \((\d+)\)\/\((\d+)\) .+? et le reste d'eau gazeuse/, (g, lab) => { const [a, b, c, e] = g.map(nn), V = lm(lab, /(\d+(?:,\d+)?) L/);
+    return lab.startsWith("a)") ? 1 - a / b - c / e : lab.startsWith("b)") && V ? (V[0] * a) / b : lab.startsWith("c)") && V ? (V[0] * c) / e : null; });
+  DF("fracadd", /reçoit (\d+) CHF d'argent de poche : \((\d+)\)\/\((\d+)\) part .*?, \((\d+)\)\/\((\d+)\) dans/, (g, lab) => { const [A, a, b, c, e] = g.map(nn), r = 1 - a / b - c / e;
+    return lab.startsWith("a)") ? r : lab.startsWith("b)") ? (A * a) / b : lab.startsWith("c)") ? A * r : null; });
+  /* ==== fin agent defis3 ==== */
+
   /* ---------- 26.11 (agent defis2) : notions encore sous 20 % (transf, trigcercle, trigfn, recip, lectures de graphique
      de f2 / f2expr, histoires de probeq, formes de decadd) ---------- */
   const fxT = (tex) => { const c = compile(Expr.parse(tex2e(tex))); return (u) => c({ x: u }); };
@@ -1625,7 +1832,7 @@ const RECALC = (() => {
       if (r.o.not && r.o.not.test(x.raw)) continue; /* 26.11 : \overline disparaît du texte lisible */
       if (!r.f) continue;
       const m = r.re.exec(txt); if (!m) continue;
-      const res = r.o.text ? r.f(txt) : r.o.raw ? r.f(...m.slice(1)) : r.f(...m.slice(1).map(num));
+      const res = r.o.text ? r.f(txt, x) /* 26.11 soir (agent defis3) : l'item aussi, pour les défis lus sur une figure */ : r.o.raw ? r.f(...m.slice(1)) : r.f(...m.slice(1).map(num));
       if (res === null || res === undefined) continue;
       return [r.re.source.slice(0, 60), typeof res === "number" ? (r.o.exact ? { v: res, st: null } : { v: res }) : res];
     }

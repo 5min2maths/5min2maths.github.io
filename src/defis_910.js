@@ -59,11 +59,12 @@
 
   // ======================= 9e =======================
   PX("decarr", [9, 10], () => {
-    const p = pk([12.4, 18.6, 23.7, 7.85, 9.45]), n = pk([3, 4, 6, 7]), t = r6(p * n);
-    return PB("Au supermarché, Tom achète " + n + " articles à " + X(p) + " CHF pièce. Il arrondit chaque prix à l'unité pour calculer de tête.",
-      [["a) Prix total exact, en CHF", t, 0.01], ["b) Total estimé avec les prix arrondis à l'unité", n * Math.round(p)], ["c) Différence entre l'estimation et le prix exact (en CHF, valeur positive)", r6(Math.abs(n * Math.round(p) - t)), 0.01]],
-      ["Arrondir à l'unité : regarde le chiffre des dixièmes.", "c) Chaque arrondi fait une petite erreur ; elle est multipliée par " + n + "."],
-      "a) " + M(n + " \\cdot " + N(p) + " = " + N(t)) + " CHF. b) " + N(p) + " ≈ " + Math.round(p) + " ; " + M(n + " \\cdot " + Math.round(p) + " = " + n * Math.round(p)) + " CHF. c) " + M("|" + n * Math.round(p) + " - " + N(t) + "| = " + N(r6(Math.abs(n * Math.round(p) - t)))) + " CHF.");
+    let p; do { p = r6(ri(4, 24) + ri(1, 9) / 10 + pk([0, 5]) / 100); } /* prix au 5 centimes près (romand) */ while (Math.abs(p - Math.round(p)) < 0.15 || Math.round((p % 1) * 10) === 5);
+    const n = pk([3, 4, 6, 7, 8].filter((k) => ![0, 1].includes(r6(Math.abs(k * Math.round(p) - k * p))))) || 3, t = r6(p * n), [cx, txt] = pk([["supermarche", "Au supermarché, Tom achète # articles à @ CHF pièce."], ["librairie", "À la librairie, Inès achète # livres de poche à @ CHF pièce."], ["papeterie", "Pour la rentrée, Noé achète # classeurs à @ CHF pièce."]]);
+    return Object.assign(PB(txt.replace("#", n).replace("@", N(p)) + " Pour calculer de tête, on arrondit le prix à l'unité.",
+      [["a) Prix total exact, en CHF", t, 0.01], ["b) Total estimé avec le prix arrondi à l'unité", n * Math.round(p)], ["c) Différence entre l'estimation et le prix exact (en CHF, valeur positive)", r6(Math.abs(n * Math.round(p) - t)), 0.01]],
+      ["Arrondir à l'unité : regarde le chiffre des dixièmes.", "c) L'arrondi fait une petite erreur sur chaque article ; elle est multipliée par " + n + "."],
+      "a) " + M(n + " \\cdot " + N(p) + " = " + N(t)) + " CHF. b) " + N(p) + " ≈ " + Math.round(p) + " ; " + M(n + " \\cdot " + Math.round(p) + " = " + n * Math.round(p)) + " CHF. c) " + M("|" + n * Math.round(p) + " - " + N(t) + "| = " + N(r6(Math.abs(n * Math.round(p) - t)))) + " CHF."), { ctx: cx });
   });
   PX("decprob", [9, 10], () => {
     const l = pk([0.75, 0.5, 0.4]) /* 26.11 : et non 1,5 L de jus par personne */, pl = pk([1.8, 2.4, 3.6]), n = pk([12, 18, 24]), pu = pk([2.9, 3.45, 4.2]);
@@ -89,16 +90,22 @@
       ["Distance entre deux points : la plus grande abscisse moins la plus petite.", "c) Le point cherché est à " + d + " unités à droite de B."],
       "a) " + M(b + " - (" + a + ") = " + d) + ". b) " + M("(" + a + " + " + b + ") \\div 2 = " + N(m)) + ". c) Point cherché : " + M(b + " + " + d + " = " + (b + d)) + " ; déplacement : " + M((b + d) + " - (" + c + ") = " + (b + d - c)) + " unités.");
   });
+  /* 26.11 soir (agent defis3) : quadri, decarr, airelat : 3 contextes chacun (avant : 1 ou 2). */
   PX("quadri", [9, 10], () => {
-    const al = pk([32, 38, 44, 52, 58, 64]), b = (180 - 2 * al) / 2, kind = R.rand() < 0.5;
-    return kind ? PB("Dans un losange " + M("ABCD") + ", l'angle " + M("\\widehat{BAC}") + " (entre le côté et la diagonale) mesure " + al + "°. Les diagonales se coupent en " + M("O") + ".",
+    const al = pk([32, 38, 44, 52, 58, 64]), b = (180 - 2 * al) / 2, kind = pk(["losange", "rectangle", "parallelogramme"]);
+    if (kind === "parallelogramme") { const A = pk([62, 68, 74, 108, 116, 124]), be = pk([20, 24, 28, 32, 36].filter((z) => z < A - 15));
+      return Object.assign(PB("Dans un parallélogramme " + M("ABCD") + ", l'angle " + M("\\widehat{BAD}") + " mesure " + A + "° et la diagonale [AC] fait avec le côté [AB] un angle " + M("\\widehat{BAC}") + " de " + be + "°.",
+        [["a) Angle " + M("\\widehat{ABC}") + " (en degrés)", 180 - A], ["b) Angle " + M("\\widehat{CAD}") + " (en degrés)", A - be], ["c) Angle " + M("\\widehat{ACD}") + " (en degrés)", be]],
+        ["Deux angles consécutifs d'un parallélogramme sont supplémentaires (somme 180°).", "(AB) et (CD) sont parallèles : les angles BAC et ACD sont alternes-internes."],
+        "a) " + M("180° - " + A + "° = " + (180 - A) + "°") + ". b) " + M(A + "° - " + be + "° = " + (A - be) + "°") + ". c) Alternes-internes avec " + M("\\widehat{BAC}") + " : " + be + "°."), { ctx: kind }); }
+    return Object.assign(kind === "losange" ? PB("Dans un losange " + M("ABCD") + ", l'angle " + M("\\widehat{BAC}") + " (entre le côté et la diagonale) mesure " + al + "°. Les diagonales se coupent en " + M("O") + ".",
       [["a) Angle " + M("\\widehat{BAD}") + " (en degrés)", 2 * al], ["b) Angle " + M("\\widehat{AOB}") + " (en degrés)", 90], ["c) Angle " + M("\\widehat{ABC}") + " (en degrés)", 180 - 2 * al]],
       ["Dans un losange, les diagonales sont les bissectrices des angles et elles sont perpendiculaires.", "Deux angles consécutifs d'un losange sont supplémentaires (somme 180°)."],
       "a) La diagonale [AC] est bissectrice : " + M("2 \\cdot " + al + "° = " + 2 * al + "°") + ". b) Diagonales perpendiculaires : 90°. c) " + M("180° - " + 2 * al + "° = " + (180 - 2 * al) + "°") + ".")
       : PB("Dans un rectangle " + M("ABCD") + ", les diagonales se coupent en " + M("O") + " et l'angle " + M("\\widehat{OAB}") + " mesure " + al + "°.",
       [["a) Angle " + M("\\widehat{OBA}") + " (en degrés)", al], ["b) Angle " + M("\\widehat{AOB}") + " (en degrés)", 180 - 2 * al], ["c) Angle " + M("\\widehat{BOC}") + " (en degrés)", 2 * al]],
       ["Dans un rectangle, les diagonales ont la même longueur et se coupent en leur milieu : OA = OB.", "Les angles AOB et BOC sont adjacents et forment un angle plat."],
-      "a) OA = OB : le triangle AOB est isocèle, donc " + al + "°. b) " + M("180° - 2 \\cdot " + al + "° = " + (180 - 2 * al) + "°") + ". c) " + M("180° - " + (180 - 2 * al) + "° = " + 2 * al + "°") + ".");
+      "a) OA = OB : le triangle AOB est isocèle, donc " + al + "°. b) " + M("180° - 2 \\cdot " + al + "° = " + (180 - 2 * al) + "°") + ". c) " + M("180° - " + (180 - 2 * al) + "° = " + 2 * al + "°") + "."), { ctx: kind });
   });
   PX("symetries", [9, 10], () => {
     let ax, ay, cx, cy, tx, ty; do { ax = ri(-5, 5); ay = ri(-5, 5); cx = ri(-3, 3); cy = ri(-3, 3); tx = ri(-4, 4); ty = ri(-4, 4); } while ((ax === cx && ay === cy) || !tx || !ty || !ax || !ay);
@@ -124,12 +131,23 @@
       ["La part représente " + a + "/360 du disque entier.", "Le périmètre de la part : l'arc et deux rayons."],
       "Fraction du disque : " + M("\\frac{" + a + "}{360}") + ". a) " + M("\\frac{" + a + "}{360} \\cdot 2\\pi \\cdot " + r + " \\approx " + N(Math.round(L * 100) / 100)) + " cm. b) " + M(N(Math.round(L * 100) / 100) + " + 2 \\cdot " + r + " \\approx " + N(Math.round((L + 2 * r) * 100) / 100)) + " cm. c) " + M("\\frac{" + a + "}{360} \\cdot \\pi \\cdot " + r + "^2 \\approx " + N(Math.round(A * 100) / 100)) + " cm².");
   });
+  /* 26.11 soir (agent defis3) : 3 contextes (somme des angles donnée, kiosque dont on connaît l'angle intérieur, bassin à n côtés). */
   PX("polyreg", [10, 11], () => {
-    const n = pk([5, 6, 8, 9, 10, 12, 15]), S = (n - 2) * 180, ai = S / n, ae = 360 / n;
-    return PB("Un polygone régulier a des angles intérieurs dont la somme vaut " + X(S) + "°.",
+    const n = pk([5, 6, 8, 9, 10, 12, 15]), S = (n - 2) * 180, ai = S / n, ae = 360 / n, cx = pk(["somme", "kiosque", "bassin"]);
+    if (cx === "kiosque") { const m = pk([5, 6, 8, 9, 10, 12]), S2 = (m - 2) * 180, ai2 = S2 / m, ae2 = 360 / m;
+      return Object.assign(PB("Le toit d'un kiosque à musique repose sur un plancher en forme de polygone régulier. Chaque angle intérieur du plancher mesure " + X(ai2) + "°.",
+        [["a) Mesure de l'angle au centre (en degrés)", ae2], ["b) Nombre de côtés du plancher", m], ["c) Somme des angles intérieurs (en degrés)", S2]],
+        ["Angle intérieur et angle au centre sont supplémentaires : leur somme vaut 180°.", "Le tour complet (360°) est partagé en n angles au centre égaux."],
+        "a) " + M("180° - " + N(ai2) + "° = " + N(ae2) + "°") + ". b) " + M("360 \\div " + N(ae2) + " = " + m) + " côtés. c) " + M("(" + m + " - 2) \\cdot 180° = " + N(S2) + "°") + "."), { ctx: cx }); }
+    if (cx === "bassin") { const m = pk([5, 6, 8, 10, 12, 18, 20]), S2 = (m - 2) * 180;
+      return Object.assign(PB("Le bassin d'une fontaine a la forme d'un polygone régulier à " + m + " côtés. Depuis le jet d'eau, au centre, on tend une corde vers chaque sommet.",
+        [["a) Angle entre deux cordes voisines (angle au centre, en degrés)", 360 / m], ["b) Mesure d'un angle intérieur du bassin (en degrés)", S2 / m], ["c) Somme des angles intérieurs (en degrés)", S2]],
+        ["Les cordes partagent le tour complet (360°) en " + m + " angles égaux.", "Chaque triangle formé est isocèle : angle intérieur = 180° − angle au centre."],
+        "a) " + M("360° \\div " + m + " = " + N(360 / m) + "°") + ". b) " + M("180° - " + N(360 / m) + "° = " + N(S2 / m) + "°") + ". c) " + M(m + " \\cdot " + N(S2 / m) + "° = " + N(S2) + "°") + " (ou " + M("(" + m + " - 2) \\cdot 180°") + ")."), { ctx: cx }); }
+    return Object.assign(PB("Un polygone régulier a des angles intérieurs dont la somme vaut " + X(S) + "°.",
       [["a) Nombre de côtés", n], ["b) Mesure d'un angle intérieur (en degrés)", ai], ["c) Mesure de l'angle au centre (en degrés)", ae]],
       ["Somme des angles intérieurs d'un polygone à n côtés : (n − 2) · 180°.", "L'angle au centre partage le tour complet (360°) en n parts égales."],
-      "a) " + M("(n - 2) \\cdot 180 = " + N(S)) + ", donc " + M("n - 2 = " + (n - 2)) + " et " + M("n = " + n) + ". b) " + M(N(S) + " \\div " + n + " = " + N(ai) + "°") + ". c) " + M("360° \\div " + n + " = " + N(ae) + "°") + " (et " + M(N(ai) + "° + " + N(ae) + "° = 180°") + ").");
+      "a) " + M("(n - 2) \\cdot 180 = " + N(S)) + ", donc " + M("n - 2 = " + (n - 2)) + " et " + M("n = " + n) + ". b) " + M(N(S) + " \\div " + n + " = " + N(ai) + "°") + ". c) " + M("360° \\div " + n + " = " + N(ae) + "°") + " (et " + M(N(ai) + "° + " + N(ae) + "° = 180°") + ")."), { ctx: cx });
   });
   PX("grandmanq", [10, 11], () => {
     const b1 = pk([6, 8, 10]), b2 = pk([12, 14, 16]), h = pk([5, 6, 7, 9]), A = ((b1 + b2) * h) / 2, w = pk([3, 4, 5, 6, 8].filter((x) => A % x === 0 && A / x !== x)) || 2;
@@ -139,11 +157,14 @@
       "a) " + M("h = 2 \\cdot " + N(A) + " \\div (" + b1 + " + " + b2 + ") = " + h) + " cm. b) " + M(N(A) + " \\div " + w + " = " + N(A / w)) + " cm. c) " + M("c^2 = 2 \\cdot " + N(A) + " = " + N(2 * A)) + ", " + M("c = \\sqrt{" + N(2 * A) + "} \\approx " + N(Math.round(Math.sqrt(2 * A) * 100) / 100)) + " cm.");
   });
   PX("airelat", [10, 11], () => {
-    const d = pk([6, 8, 10, 12]), h = pk([9, 11, 14, 15]), r = d / 2, AL = 2 * Math.PI * r * h, AT = AL + 2 * Math.PI * r * r, p = pk([2.5, 3.2, 4]);
-    return PB("Une boîte de conserve cylindrique a un diamètre de " + d + " cm et une hauteur de " + h + " cm. L'étiquette recouvre toute la surface latérale.",
-      [["a) Aire de l'étiquette, en cm² (au centième)", AL, 0.01], ["b) Aire totale de métal (avec les deux disques), en cm² (au centième)", AT, 0.01], ["c) L'étiquette est un rectangle : sa longueur, en cm (au centième)", Math.PI * d, 0.01]],
+    const [cx, txt, ds, hs] = pk([["conserve", "Une boîte de conserve cylindrique a un diamètre de # cm et une hauteur de @ cm. L'étiquette recouvre toute la surface latérale.", [6, 8, 10, 12], [9, 11, 14, 15]],
+      ["tube", "Un tube d'affiche en carton (un cylindre) a un diamètre de # cm et une longueur de @ cm. On le recouvre entièrement de papier cadeau sur sa surface latérale.", [6, 8, 10], [60, 70, 80, 100]],
+      ["bidon", "Un bidon cylindrique a un diamètre de # cm et une hauteur de @ cm. On peint toute sa surface latérale.", [20, 24, 30], [30, 35, 40, 45]]]);
+    const d = pk(ds), h = pk(hs), r = d / 2, AL = 2 * Math.PI * r * h, AT = AL + 2 * Math.PI * r * r, lab = cx === "conserve" ? "de l'étiquette" : cx === "tube" ? "du papier" : "peinte";
+    return Object.assign(PB(txt.replace("#", d).replace("@", h),
+      [["a) Aire " + lab + ", en cm² (au centième)", AL, 0.01], ["b) Aire totale (surface latérale et les deux disques), en cm² (au centième)", AT, 0.01], ["c) Déroulée, la surface latérale est un rectangle : sa longueur, en cm (au centième)", Math.PI * d, 0.01]],
       ["Déroulée, la surface latérale est un rectangle : sa longueur est le périmètre du disque, sa largeur la hauteur.", "Aire d'un disque : π · r² ; attention, r = " + r + " cm."],
-      "c) Longueur : " + M("\\pi \\cdot " + d + " \\approx " + N(Math.round(Math.PI * d * 100) / 100)) + " cm. a) " + M("\\pi \\cdot " + d + " \\cdot " + h + " \\approx " + N(Math.round(AL * 100) / 100)) + " cm². b) " + M(N(Math.round(AL * 100) / 100) + " + 2 \\cdot \\pi \\cdot " + r + "^2 \\approx " + N(Math.round(AT * 100) / 100)) + " cm².");
+      "c) Longueur : " + M("\\pi \\cdot " + d + " \\approx " + N(Math.round(Math.PI * d * 100) / 100)) + " cm. a) " + M("\\pi \\cdot " + d + " \\cdot " + h + " \\approx " + N(Math.round(AL * 100) / 100)) + " cm². b) " + M(N(Math.round(AL * 100) / 100) + " + 2 \\cdot \\pi \\cdot " + r + "^2 \\approx " + N(Math.round(AT * 100) / 100)) + " cm²."), { ctx: cx });
   });
   PX("voldecomp", [10, 11], () => {
     const L = pk([8, 10, 12]), l = pk([4, 5, 6]), h1 = pk([1.2, 1.5, 1.8]), h2 = pk([2.2, 2.5, 3]), V = r6(L * l * h1 + (L / 2) * l * (h2 - h1)), t = pk([20, 25, 40]);

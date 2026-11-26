@@ -443,23 +443,54 @@
           [["a) Distance parcourue vers le nord en 2 h (km)", 24], ["b) Distance vers l'est en 2 h (km)", 32], ["c) Distance entre les deux bateaux après 2 h (km)", 40]],
           ["Nord et est forment un angle droit.", "c) √(24² + 32²)."], "c) " + M("\\sqrt{24^2 + 32^2} = 40") + " km."),
     ],
+    /* 26.11 soir (agent defis3) : pythfig, pythrec, vol, airepyr, volcomp tirés au hasard, 3 contextes et plus (avant : deux énoncés fixes). */
     pythfig: [
-      () => P("Une boîte en forme de pavé mesure 30 cm × 40 cm × 120 cm.", [["a) Diagonale du fond 30 × 40 (cm)", 50], ["b) Grande diagonale de la boîte (cm)", 130], ["c) Un bâton de 1,25 m entre-t-il ? Tape 1 pour oui, 0 pour non.", 1]],
-          ["b) Avec la hauteur : √(50² + 120²).", "c) Compare 125 cm et la grande diagonale."], "a) 50 cm ; b) " + M("\\sqrt{2500 + 14\\text{'}400} = 130") + " cm ; c) oui, 125 < 130."),
-      () => P("Un carré est inscrit dans un cercle de rayon 5 cm.", [["a) Diagonale du carré (cm)", 10], ["b) Aire du carré (cm²)", 50], ["c) Aire entre le cercle et le carré (cm², au centième)", 25 * Math.PI - 50, 0.01]],
-          ["La diagonale est un diamètre.", "b) c² + c² = 10²."], "a) 10 ; b) " + M("c^2 = 50") + " ; c) " + M("25\\pi - 50 \\approx 28{,}54") + " cm²."),
+      () => { const cx = pk([["boite", "Une boîte en carton (un pavé) mesure # cm de long, # cm de large et # cm de haut.", [[20, 40], [15, 30], [30, 60]], ["une règle de", "un tube d'affiche de"]],
+          ["coffre", "Le coffre d'une voiture a la forme d'un pavé : # cm de large, # cm de profondeur et # cm de haut.", [[90, 110], [70, 95], [40, 55]], ["une canne à pêche de", "un parasol de"]],
+          ["placard", "Un placard (un pavé) mesure # cm de large, # cm de profondeur et # cm de haut.", [[70, 100], [45, 60], [190, 220]], ["une planche de", "une tringle à rideau de"]]]);
+        const [a, b, c] = cx[2].map(([lo, hi]) => R.int(lo, hi)), db = Math.sqrt(a * a + b * b), d = Math.sqrt(a * a + b * b + c * c), L = Math.round(d * (R.rand() < 0.5 ? R.int(85, 97) : R.int(103, 112)) / 100), ok = L < d ? 1 : 0, ob = pk(cx[3]);
+        let k = 0; const txt = cx[1].replace(/#/g, () => [a, b, c][k++]);
+        return Object.assign(P(txt + " On veut y ranger, en diagonale, " + ob + " " + M(L) + " cm.", [["a) Diagonale du fond (cm, au dixième)", db, 0.1], ["b) Grande diagonale du pavé (cm, au dixième)", d, 0.1], ["c) L'objet entre-t-il ? Tape 1 pour oui, 0 pour non.", ok]],
+          ["a) Le fond est un rectangle : " + M("\\sqrt{" + a + "^2 + " + b + "^2}") + ".", "b) Avec la hauteur : " + M("\\sqrt{d^2 + " + c + "^2}") + ", soit " + M("\\sqrt{" + a + "^2 + " + b + "^2 + " + c + "^2}") + "."],
+          "a) " + M("\\sqrt{" + (a * a + b * b) + "} \\approx " + N(rd(db, 0.1))) + " cm ; b) " + M("\\sqrt{" + (a * a + b * b) + " + " + c * c + "} = \\sqrt{" + (a * a + b * b + c * c) + "} \\approx " + N(rd(d, 0.1))) + " cm ; c) " + (ok ? "oui : " + M(L + " < " + N(rd(d, 0.1))) : "non : " + M(L + " > " + N(rd(d, 0.1)))) + "."), { ctx: cx[0] }); },
+      () => { const cx = pk([["planche", "Dans un disque de bois de rayon # cm, un menuisier découpe la plus grande planche carrée possible : ses quatre coins touchent le bord du disque.", [8, 20], "cm"],
+          ["parterre", "Dans un parterre circulaire de rayon # m, on aménage un carré de gazon dont les quatre coins touchent le bord.", [2, 7], "m"],
+          ["vitrail", "Un vitrail rond de rayon # cm contient un carré de verre bleu dont les quatre coins touchent le cercle.", [15, 45], "cm"]]);
+        const r = R.int(cx[2][0], cx[2][1]), u = cx[3], A = 2 * r * r, rest = Math.PI * r * r - A;
+        return Object.assign(P(cx[1].replace("#", r), [["a) Diagonale du carré (" + u + ")", 2 * r], ["b) Aire du carré (" + u + "²)", A], ["c) Aire restante entre le cercle et le carré (" + u + "², au centième)", rest, 0.01]],
+          ["La diagonale du carré est un diamètre du cercle.", "b) Côté c : " + M("c^2 + c^2 = " + 2 * r + "^2") + ", et l'aire du carré vaut " + M("c^2") + "."],
+          "a) " + M("2 \\cdot " + r + " = " + 2 * r) + " " + u + " ; b) " + M("2c^2 = " + 4 * r * r + "") + ", donc " + M("c^2 = " + A) + " " + u + "² ; c) " + M("\\pi \\cdot " + r + "^2 - " + A + " = " + r * r + "\\pi - " + A + " \\approx " + N(rd(rest, 0.01))) + " " + u + "²."), { ctx: cx[0] }); },
     ],
     pythrec: [
-      () => P("Un triangle a pour sommets A(1 ; 1), B(5 ; 3) et C(3 ; 7).", [["a) AB²", 20], ["b) BC²", 20], ["c) AC²", 40]],
-          ["Écarts de coordonnées au carré, additionnés.", "Compare AC² et AB² + BC²."], "a) " + M("4^2 + 2^2 = 20") + " ; b) " + M("2^2 + 4^2 = 20") + " ; c) " + M("2^2 + 6^2 = 40 = 20 + 20") + " : rectangle (et isocèle) en " + M("B") + "."),
-      () => P("Les côtés d'un triangle mesurent n² − 1, 2n et n² + 1 (n entier, n ≥ 2).", [["a) Pour n = 4 : le plus grand côté", 17], ["b) (n² − 1)² + (2n)² pour n = 4", 289], ["c) (n² + 1)² pour n = 4", 289]],
-          ["Remplace n par 4.", "Ces triangles sont toujours rectangles : vérifie en développant."], "a) 17 ; b) " + M("15^2 + 8^2 = 289") + " ; c) " + M("17^2 = 289") + " : rectangle."),
+      () => { const cx = pk([["repere", "Dans un repère, un triangle a pour sommets"], ["carte", "Sur une carte quadrillée (1 carreau = 1 km), trois villages ont pour coordonnées"], ["voile", "Une voile d'ombrage triangulaire est fixée à trois crochets ; dans un repère (en m), ils ont pour coordonnées"]]);
+        let A, B, C; for (let t = 0; t < 50; t++) { const p = R.int(1, 4), q = R.int(1, 4), s = pk([1, 1, 2]), dev = R.rand() < 0.35 ? pk([[1, 0], [0, 1], [-1, 0]]) : [0, 0]; A = [R.int(0, 3), R.int(0, 3)]; B = [A[0] + p, A[1] + q]; C = [B[0] - q * s + dev[0], B[1] + p * s + dev[1]]; if (C[0] >= -2 && C[1] <= 12 && !(A[0] === C[0] && A[1] === C[1])) break; }
+        const d2 = (U, V) => (U[0] - V[0]) ** 2 + (U[1] - V[1]) ** 2, ab = d2(A, B), bc = d2(B, C), ac = d2(A, C), S = [ab, bc, ac].sort((x, y) => x - y), rect = S[0] + S[1] === S[2] ? 1 : 0, pt = (n, P0) => n + "(" + P0[0] + " ; " + P0[1] + ")";
+        return Object.assign(P(cx[1] + " " + pt("A", A) + ", " + pt("B", B) + " et " + pt("C", C) + ".", [["a) AB²", ab], ["b) BC²", bc], ["c) AC²", ac], ["d) Le triangle ABC est-il rectangle ? Tape 1 pour oui, 0 pour non.", rect]],
+          ["Écarts de coordonnées au carré, additionnés : " + M("AB^2 = (x_B - x_A)^2 + (y_B - y_A)^2") + ".", "Compare le plus grand des trois carrés avec la somme des deux autres."],
+          "a) " + M(ab) + " ; b) " + M(bc) + " ; c) " + M(ac) + " ; d) " + M(S[0] + " + " + S[1] + " = " + (S[0] + S[1]) + (rect ? " = " : " \\neq ") + S[2]) + " : " + (rect ? "rectangle (réciproque de Pythagore)" : "pas rectangle") + "."), { ctx: cx[0] }); },
+      () => { const n = R.int(2, 7), a = n * n - 1, b = 2 * n, c = n * n + 1;
+        return Object.assign(P("Les côtés d'un triangle mesurent " + M("n^2 - 1") + ", " + M("2n") + " et " + M("n^2 + 1") + " (n entier, n ≥ 2). On prend " + M("n = " + n) + ".", [["a) Le plus grand côté", c], ["b) (n² − 1)² + (2n)² pour n = " + n, a * a + b * b], ["c) (n² + 1)² pour n = " + n, c * c]],
+          ["Remplace n par " + n + ".", "Ces triangles sont toujours rectangles : vérifie en développant."], "a) " + M(c) + " ; b) " + M(a + "^2 + " + b + "^2 = " + a * a + " + " + b * b + " = " + (a * a + b * b)) + " ; c) " + M(c + "^2 = " + c * c) + " : égalité, le triangle est rectangle."), { ctx: "formule" }); },
+      () => { const [p, q, s] = pk(TRIP.filter((t) => t[2] <= 25)), ks = [5, 10, 20].filter((z) => s * z <= 250 && Math.min(p, q) * z >= 30), k = ks.length ? pk(ks) : 10, a = p * k, b = q * k, d = s * k + pk([0, 0, -2, -1, 1, 2, 3]), ok = a * a + b * b === d * d ? 1 : 0, obj = pk([["Un menuisier vérifie un cadre de fenêtre", "cm"], ["Une maçonne vérifie l'angle d'une dalle", "cm"], ["Un jardinier vérifie le coin d'une plate-bande", "cm"]]);
+        return Object.assign(P(obj[0] + " : deux côtés mesurent " + M(a) + " " + obj[1] + " et " + M(b) + " " + obj[1] + ", et la diagonale mesure " + M(d) + " " + obj[1] + ".", [["a) Somme des carrés des deux côtés", a * a + b * b], ["b) Carré de la diagonale", d * d], ["c) L'angle est-il droit ? Tape 1 pour oui, 0 pour non.", ok]],
+          ["Calcule " + M(a + "^2 + " + b + "^2") + " et " + M(d + "^2") + ".", "Égalité : angle droit (réciproque de Pythagore) ; sinon, l'angle n'est pas droit."],
+          "a) " + M(a + "^2 + " + b + "^2 = " + (a * a + b * b)) + " ; b) " + M(d + "^2 = " + d * d) + " ; c) " + (ok ? "oui, égalité : l'angle est droit." : "non : " + M((a * a + b * b) + " \\neq " + d * d) + ", l'angle n'est pas droit.")), { ctx: "equerrage" }); },
     ],
     vol: [
-      () => P("Une piscine de 25 m × 10 m a une profondeur de 1,2 m d'un côté et 2 m de l'autre (fond en pente régulière).", [["a) Aire de la face latérale (trapèze) en m²", 40], ["b) Volume de la piscine (m³)", 400], ["c) Nombre de litres", 400000]],
-          ["La piscine est un prisme dont la base est un trapèze : (1,2 + 2) · 25 ÷ 2.", "1 m³ = 1000 L."], "a) " + M("\\frac{(1{,}2 + 2) \\cdot 25}{2} = 40") + " m² ; b) " + M("40 \\cdot 10 = 400") + " m³ ; c) " + M("400\\text{'}000") + " L."),
-      () => P("Une canette de 33 cL a un rayon de 3,3 cm.", [["a) Volume en cm³", 330], ["b) Aire de la base (cm², au centième)", Math.PI * 3.3 * 3.3, 0.01], ["c) Hauteur minimale pour contenir les 33 cL (cm, au dixième supérieur)", Math.ceil(330 / (Math.PI * 3.3 * 3.3) * 10) / 10, 0.01]],
-          ["1 cL = 10 cm³.", "c) Volume ÷ aire de la base, puis arrondir AU-DESSUS : une hauteur plus petite ne contiendrait pas tout."], "a) 330 ; b) " + M("\\approx 34{,}21") + " ; c) " + M("330 \\div 34{,}21 \\approx 9{,}646") + ", donc " + M("9{,}7") + " cm (avec " + M("9{,}6") + " cm, la canette ne contiendrait que " + M("\\approx 328") + " cm³)."), /* 25.11 soir (revue d'un testeur) : hauteur minimale = arrondi supérieur */
+      () => { const cx = pk(["piscine", "canal", "tente"]);
+        if (cx === "piscine") { const L = pk([20, 25, 30, 40, 50]), l = R.int(8, 16), h1 = pk([0.8, 1, 1.2, 1.4]), h2 = pk([1.8, 2, 2.2, 2.5, 3]), A = ((h1 + h2) * L) / 2, V = A * l;
+          return Object.assign(P("Une piscine de " + M(L) + " m de long et " + M(l) + " m de large a une profondeur de " + M(N(h1)) + " m d'un côté et " + M(N(h2)) + " m de l'autre (fond en pente régulière).", [["a) Aire de la face latérale (trapèze) en m²", A], ["b) Volume de la piscine (m³)", V], ["c) Nombre de litres", V * 1000]],
+            ["La piscine est un prisme dont la base est un trapèze : (" + N(h1).replace("{,}", ",") + " + " + N(h2).replace("{,}", ",") + ") · " + L + " ÷ 2.", "1 m³ = 1000 L."], "a) " + M("\\frac{(" + N(h1) + " + " + N(h2) + ") \\cdot " + L + "}{2} = " + N(A)) + " m² ; b) " + M(N(A) + " \\cdot " + l + " = " + N(V)) + " m³ ; c) " + M(N(V * 1000)) + " L."), { ctx: cx }); }
+        if (cx === "canal") { const B = pk([1.2, 1.5, 2, 2.5]), b = pk([0.6, 0.8, 1]), h = pk([0.5, 0.6, 0.8, 1]), L = pk([50, 80, 120, 150, 200]), A = r12(((B + b) * h) / 2), V = r12(A * L);
+          return Object.assign(P("Un canal d'irrigation a un profil en trapèze : " + M(N(B)) + " m de large en haut, " + M(N(b)) + " m au fond et " + M(N(h)) + " m de profondeur. Il mesure " + M(L) + " m de long et il est plein.", [["a) Aire du profil (m²)", A], ["b) Volume d'eau (m³)", V], ["c) Volume d'eau en litres", r12(V * 1000)]],
+            ["Aire d'un trapèze : (grande base + petite base) · hauteur ÷ 2.", "Le canal est un prisme : aire du profil · longueur ; 1 m³ = 1000 L."], "a) " + M("\\frac{(" + N(B) + " + " + N(b) + ") \\cdot " + N(h) + "}{2} = " + N(A)) + " m² ; b) " + M(N(A) + " \\cdot " + L + " = " + N(V)) + " m³ ; c) " + M(N(r12(V * 1000))) + " L."), { ctx: cx }); }
+        const b = pk([1.6, 1.8, 2, 2.4]), h = pk([1.1, 1.2, 1.4, 1.5]), L = pk([2, 2.2, 2.5, 3]), A = r12((b * h) / 2), V = r12(A * L);
+        return Object.assign(P("Une tente canadienne a la forme d'un prisme à base triangulaire : l'entrée est un triangle de " + M(N(b)) + " m de base et " + M(N(h)) + " m de haut, et la tente mesure " + M(N(L)) + " m de long.", [["a) Aire de l'entrée (m²)", A], ["b) Volume de la tente (m³)", V], ["c) Ce volume en litres", r12(V * 1000)]],
+          ["Aire d'un triangle : base · hauteur ÷ 2.", "Prisme : aire de la base · longueur ; 1 m³ = 1000 L."], "a) " + M("\\frac{" + N(b) + " \\cdot " + N(h) + "}{2} = " + N(A)) + " m² ; b) " + M(N(A) + " \\cdot " + N(L) + " = " + N(V)) + " m³ ; c) " + M(N(r12(V * 1000))) + " L."), { ctx: cx }); },
+      () => { const [cx, nm, cl, rs] = pk([["canette", "Une canette", [33, 50], [3.2, 3.3]], ["conserve", "Une boîte de conserve", [40, 85], [4, 5]], ["pot", "Un pot de peinture", [75, 100], [5, 5.5]]]), V0 = pk(cl), r = pk(rs), V = V0 * 10, Ab = Math.PI * r * r, h = V / Ab, hm = Math.ceil(r12(h * 10)) / 10, Vm = Ab * (hm - 0.1);
+        return Object.assign(P(nm + " cylindrique doit contenir " + M(V0) + " cL. Son rayon intérieur est de " + M(N(r)) + " cm.", [["a) Volume en cm³", V], ["b) Aire de la base (cm², au centième)", Ab, 0.01], ["c) Hauteur minimale pour contenir les " + V0 + " cL (cm, au dixième supérieur)", hm, 0.01]],
+          ["1 cL = 10 cm³.", "c) Volume ÷ aire de la base, puis arrondir AU-DESSUS : une hauteur plus petite ne contiendrait pas tout."],
+          "a) " + M(V) + " cm³ ; b) " + M("\\pi \\cdot " + N(r) + "^2 \\approx " + N(rd(Ab, 0.01))) + " cm² ; c) " + M(V + " : " + N(rd(Ab, 0.01)) + " \\approx " + N(rd(h, 0.001))) + ", donc " + M(N(hm)) + " cm (avec " + M(N(r12(hm - 0.1))) + " cm, on n'aurait que " + M("\\approx " + N(Math.round(Vm))) + " cm³)."), { ctx: cx }); },
     ],
     volcone: [
       () => P("Une boule de rayon 3 cm est posée dans un cylindre de même rayon et de hauteur 6 cm.", [["a) Volume du cylindre (cm³, au centième)", 54 * Math.PI, 0.01], ["b) Volume de la boule (cm³, au centième)", 36 * Math.PI, 0.01], ["c) Quelle fraction du cylindre la boule occupe-t-elle ? (fraction)", 2 / 3]],
@@ -468,16 +499,35 @@
           ["Le cône vaut le tiers d'un cylindre de même base et même hauteur.", "b) Il doit être 3 fois plus haut."], "b) " + M("3 \\cdot 5 = 15") + " cm."),
     ],
     airepyr: [
-      () => P("Une pyramide régulière à base carrée a une base de 10 m de côté et une hauteur de 12 m.", [["a) Apothème (m)", 13], ["b) Aire latérale (m²)", 260], ["c) Volume (m³)", 400]],
-          ["a) √(12² + 5²).", "c) Base × hauteur ÷ 3."], "a) 13 ; b) " + M("2 \\cdot 10 \\cdot 13 = 260") + " ; c) " + M("\\frac{100 \\cdot 12}{3} = 400") + "."),
-      () => P("Patron d'une pyramide régulière : un carré de 16 cm de côté et quatre triangles isocèles d'apothème 10 cm.", [["a) Aire du patron (cm²)", 576], ["b) Hauteur de la pyramide montée (cm)", 6], ["c) Volume (cm³)", 512]],
-          ["a) Carré + 4 triangles.", "b) √(10² − 8²) ; c) Base × hauteur ÷ 3."], "a) " + M("256 + 4 \\cdot \\frac{16 \\cdot 10}{2} = 576") + " ; b) " + M("\\sqrt{100 - 64} = 6") + " ; c) " + M("\\frac{256 \\cdot 6}{3} = 512") + "."),
+      () => { const [cx, txt, u, TT] = pk([["toit", "Le toit d'une tour est une pyramide régulière à base carrée de # m de côté et de # m de haut.", "m", [[3, 4, 5], [4, 3, 5], [6, 8, 10], [8, 6, 10], [5, 12, 13]]],
+          ["tente", "Une tente a la forme d'une pyramide régulière à base carrée de # m de côté et de # m de haut.", "m", [[1.5, 2, 2.5], [1.2, 1.6, 2], [0.9, 1.2, 1.5]]],
+          ["presse-papier", "Un presse-papier en verre est une pyramide régulière à base carrée de # cm de côté et de # cm de haut.", "cm", [[3, 4, 5], [4, 3, 5], [6, 8, 10], [1.5, 2, 2.5], [4.5, 6, 7.5]]]]);
+        const [s, h, a] = pk(TT), c = r12(2 * s), AL = 2 * c * a, V = (c * c * h) / 3, ex = Number.isInteger(r12(V * 100));
+        let i = 0; const q = txt.replace(/#/g, () => N([c, h][i++]));
+        return Object.assign(P(q, [["a) Apothème (hauteur d'une face, en " + u + ")", a], ["b) Aire latérale (" + u + "²)", r12(AL)], ["c) Volume (" + u + "³" + (ex ? "" : ", au centième") + ")", ex ? r12(V) : V, ex ? 0 : 0.01]],
+          ["a) Triangle rectangle : hauteur, demi-côté de la base et apothème : " + M("\\sqrt{" + N(h) + "^2 + " + N(s) + "^2}") + ".", "b) 4 triangles de base " + N(c).replace("{,}", ",") + " et de hauteur l'apothème ; c) aire de la base · hauteur ÷ 3."],
+          "a) " + M("\\sqrt{" + N(r12(h * h)) + " + " + N(r12(s * s)) + "} = " + N(a)) + " ; b) " + M("4 \\cdot \\frac{" + N(c) + " \\cdot " + N(a) + "}{2} = " + N(r12(AL))) + " ; c) " + M("\\frac{" + N(r12(c * c)) + " \\cdot " + N(h) + "}{3} " + (ex ? "= " : "\\approx ") + N(rd(V, 0.01))) + "."), { ctx: cx }); },
+      () => { const [cx, nm] = pk([["patron", "Patron d'une pyramide régulière en carton"], ["emballage", "Patron d'un emballage de chocolats en forme de pyramide régulière"], ["lampe", "Patron d'un abat-jour en papier en forme de pyramide régulière (fermée)"]]);
+        const [s, h, a] = pk([[8, 6, 10], [6, 8, 10], [5, 12, 13], [12, 5, 13], [9, 12, 15], [12, 9, 15], [3, 4, 5], [4, 3, 5]]), c = 2 * s, Ap = c * c + 2 * c * a, V = (c * c * h) / 3;
+        return Object.assign(P(nm + " : un carré de " + M(c) + " cm de côté et quatre triangles isocèles d'apothème (hauteur) " + M(a) + " cm.", [["a) Aire du patron (cm²)", Ap], ["b) Hauteur de la pyramide montée (cm)", h], ["c) Volume (cm³)", V]],
+          ["a) Carré + 4 triangles.", "b) " + M("\\sqrt{" + a + "^2 - " + s + "^2}") + " (demi-côté de la base) ; c) aire de la base · hauteur ÷ 3."],
+          "a) " + M(c * c + " + 4 \\cdot \\frac{" + c + " \\cdot " + a + "}{2} = " + Ap) + " cm² ; b) " + M("\\sqrt{" + a * a + " - " + s * s + "} = " + h) + " cm ; c) " + M("\\frac{" + c * c + " \\cdot " + h + "}{3} = " + N(V)) + " cm³."), { ctx: cx }); },
     ],
     volcomp: [
-      () => P("Un réservoir : cylindre de rayon 1 m et de hauteur 3 m, avec un fond en cône de même rayon et de hauteur 0,6 m.", [["a) Volume du cylindre (m³, au centième)", 3 * Math.PI, 0.01], ["b) Volume du cône (m³, au centième)", 0.2 * Math.PI, 0.01], ["c) Contenance totale en litres (à l'unité)", 3200 * Math.PI, 1]],
-          ["Cône : ⅓ · π · r² · h.", "1 m³ = 1000 L."], "c) " + M("3{,}2\\pi \\approx 10{,}053") + " m³, soit environ " + M("10\\text{'}053") + " L."),
-      () => P("Une bougie : un cube de 6 cm d'arête surmonté d'une pyramide de 6 cm de hauteur.", [["a) Volume du cube (cm³)", 216], ["b) Volume de la pyramide (cm³)", 72], ["c) Masse de cire si 1 cm³ pèse 0,9 g (g)", 259.2]],
-          ["Pyramide : 36 · 6 ÷ 3.", "Masse = volume · 0,9."], "c) " + M("288 \\cdot 0{,}9 = 259{,}2") + " g."),
+      () => { const [cx, nm, rr, HH, hh] = pk([["silo", "Un silo à grain est un cylindre de rayon # m et de hauteur # m, avec un fond en cône de même rayon et de hauteur # m.", [2, 2.5, 3], [6, 8, 10], [1, 1.5, 2]],
+          ["reservoir", "Un réservoir d'eau est un cylindre de rayon # m et de hauteur # m, avec un fond en cône de même rayon et de hauteur # m.", [1, 1.2, 1.5], [2, 3, 4], [0.6, 0.9, 1.2]]]);
+        const r = pk(rr), H = pk(HH), h = pk(hh), Vc = Math.PI * r * r * H, Vk = (Math.PI * r * r * h) / 3, L = (Vc + Vk) * 1000;
+        let i = 0; const q = nm.replace(/#/g, () => N([r, H, h][i++]));
+        return Object.assign(P(q, [["a) Volume du cylindre (m³, au centième)", Vc, 0.01], ["b) Volume du cône (m³, au centième)", Vk, 0.01], ["c) Contenance totale en litres (à l'unité)", L, 1]],
+          ["Cylindre : π · r² · h ; cône : ⅓ · π · r² · h.", "1 m³ = 1000 L."],
+          "a) " + M("\\pi \\cdot " + N(r) + "^2 \\cdot " + N(H) + " \\approx " + N(rd(Vc, 0.01))) + " m³ ; b) " + M("\\frac{1}{3} \\pi \\cdot " + N(r) + "^2 \\cdot " + N(h) + " \\approx " + N(rd(Vk, 0.01))) + " m³ ; c) " + M("\\approx " + N(rd(Vc + Vk, 0.001))) + " m³, soit " + M("\\approx " + N(Math.round(L))) + " L."), { ctx: cx }); },
+      () => { const [cx, txt, rho, mat] = pk([["bougie", "Une bougie : un cube de # cm d'arête surmonté d'une pyramide de même base et de # cm de hauteur.", 0.9, "de cire"], ["presse-papier", "Un presse-papier en verre : un cube de # cm d'arête surmonté d'une pyramide de même base et de # cm de hauteur.", 2.5, "de verre"],
+          ["savon", "Un savon décoratif : un cube de # cm d'arête surmonté d'une pyramide de même base et de # cm de hauteur.", 1.1, "de savon"]]);
+        const a = pk([4, 5, 6, 8]), h = pk([3, 6, 9].filter((z) => z <= 1.5 * a)), Vc = a ** 3, Vp = (a * a * h) / 3, m = r12((Vc + Vp) * rho);
+        let i = 0; const q = txt.replace(/#/g, () => [a, h][i++]);
+        return Object.assign(P(q, [["a) Volume du cube (cm³)", Vc], ["b) Volume de la pyramide (cm³)", Vp], ["c) Masse " + mat + " si 1 cm³ pèse " + N(rho).replace("{,}", ",") + " g (g)", m]],
+          ["Pyramide : " + a * a + " · " + h + " ÷ 3.", "Masse = volume total · " + N(rho).replace("{,}", ",") + "."],
+          "a) " + M(a + "^3 = " + Vc) + " cm³ ; b) " + M("\\frac{" + a * a + " \\cdot " + h + "}{3} = " + Vp) + " cm³ ; c) " + M("(" + Vc + " + " + Vp + ") \\cdot " + N(rho) + " = " + N(m)) + " g."), { ctx: cx }); },
     ],
     volmanq: [
       () => P("Un verre conique de 6 cm de rayon doit contenir 20 cL.", [["a) 20 cL en cm³", 200], ["b) Hauteur du verre (cm, au dixième)", 600 / (36 * Math.PI), 0.1]],
