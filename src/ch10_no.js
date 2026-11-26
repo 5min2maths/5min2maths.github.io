@@ -266,7 +266,8 @@
     ordgr: "Arrondis chaque nombre comme demandé (chiffre suivant ≥ 5 → vers le haut), puis calcule avec les nombres arrondis. Sert à vérifier un résultat.",
     decadd: "Aligne les virgules (complète par des zéros), puis calcule comme avec des entiers. Vérifie une soustraction par une addition.",
     decmul: "Multiplie sans les virgules, puis place autant de décimales que dans les deux facteurs réunis. × 10, 100… : la virgule va à droite.",
-    decdiv: "Diviser par un décimal : multiplie les deux nombres par 10, 100… pour diviser par un entier. ÷ 0,1 = × 10.",
+    /* 26.11 (revue des élèves testeurs, n° 2 : « diviser par un décimal » affiché pour 18,8 ÷ 2) : indice valable pour toutes les formes */
+    decdiv: "Divise comme avec des entiers ; la virgule du quotient se place dès que tu abaisses le chiffre des dixièmes. Si le diviseur est décimal, multiplie d'abord les deux nombres par 10, 100… pour qu'il devienne entier.",
     reladd: "Même signe : on additionne les distances. Signes contraires : on soustrait, signe du plus éloigné de zéro. Soustraire, c'est ajouter l'opposé.",
   });
   if (typeof COMPS !== "undefined") Object.assign(COMPS, {
