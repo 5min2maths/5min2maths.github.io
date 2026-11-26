@@ -158,10 +158,25 @@ const HORS_FR_TXT = [
   [/équation (?:cartésienne )?(?:du|d'un|de ce) cercle|cercle (?:circonscrit )?d'équation|\\left\(x\s*[-+][^)]*\\right\)\^\{?2\}?\s*\+\s*\\left\(y|\(x\s*[-+−][^()]*\)\^\{?2\}?\s*\+\s*\(y\s*[-+−]|\(x\s*[-+−][^()]*\)²\s*\+\s*\(y|x\^\{?2\}?\s*\+\s*y\^\{?2\}?|x²\s*\+\s*y²/, 11, "équation de cercle"],
   [/perpendiculaire[^.?!;]{0,160}(?:pente|coefficient directeur|y\s*=|équation)|(?:pente|coefficient directeur|y\s*=|équation)[^.?!;]{0,160}perpendiculaire|produit des pentes/, 11, "orthogonalité de droites (repère)"],
   [/produit scalaire|vecteur normal|orthogona/, 11, "produit scalaire, orthogonalité"],
+  [/(?:médiatrice|hauteur issue)[^.?!;]{0,120}(?:équation|y\s*=)|(?:équation|y\s*=)[^.?!;]{0,120}(?:médiatrice|hauteur issue)/, 11, "médiatrice, hauteur en repère"],
 ];
 const qTextAll = (q) => [q.q, q.sol, ...(q.parts || []).map((x) => x.label), ...(q.guide || []).flatMap((g) => [g.ask, g.sol])].map((t) => String(t || "")).join(" ");
 /* Libellé du contenu hors programme d'une classe française trouvé dans le texte t (ou null). */
 function horsFRTexte(grade, t) { for (const [r, g, lab] of HORS_FR_TXT) if (grade < g && r.test(t)) return lab; return null; }
+/* 26.11 (revue p3, n° 3 : parc traversé en diagonale 4 fois en 2 jours autour d'une évaluation — sujet, défi, veille ;
+   table ronde 2 fois dans un même sujet) : scènes reconnues dans l'énoncé, quelle que soit la notion ou l'étiquette ctx.
+   Une scène servie est notée (state.ctxDay, clé « s:… ») ; pendant 7 jours, Engine.make et le sujet de préparation
+   (mockDistinct, src/sujet.js) l'évitent quand une autre forme existe. */
+const SCENES = [
+  [/parc[^.?!]{0,90}diagonale|diagonale[^.?!]{0,90}parc|coin au coin opposé|coupe en diagonale/i, "parc-diagonale"],
+  [/table ronde/i, "table-ronde"], [/pizza[^.?!]{0,60}(?:diamètre|ronde|rayon)|(?:diamètre|rayon)[^.?!]{0,60}pizza/i, "pizza"], [/tapis rond/i, "tapis-rond"],
+  [/échelle[^.?!]{0,90}(?:mur|façade)|(?:mur|façade)[^.?!]{0,90}échelle/i, "echelle-mur"],
+  [/carrel/i, "carrelage"], [/enclos/i, "enclos"], [/cerf-volant/i, "cerf-volant"],
+];
+function sceneKey(q) { const t = q ? String(q.q || "") + " " + (q.parts || []).map((x) => x.label || "").join(" ") : ""; for (const [r, k] of SCENES) if (r.test(t)) return k; return null; }
+/* scène vue dans les 7 derniers jours (hors aujourd'hui exclu : aujourd'hui compte aussi) ; note une scène servie */
+function sceneStale(state, k) { const c = state && state.ctxDay; return !!(k && c && c["s:" + k] && c["s:" + k] >= addDays(day(), -6)); }
+function sceneNote(state, k) { if (k && state) (state.ctxDay = state.ctxDay || {})["s:" + k] = day(); }
 function horsCO(state, id, q) {
   const p = state && state.profile;
   /* forme réservée à certaines classes : q.co = classes CO / Collège (grade), q.mp = classes MP (25.11, src/defis_sec2.js) */
@@ -656,6 +671,9 @@ const Engine = {
     const mark = (sp, txt, own, step) => {
       if (!sp) return;
       if (!step) exprForm(sp, txt);
+      /* 26.11 (revue p3, n° 12, A11 : 0,309016994375 accepté pour « Donne la valeur exacte ») : valeur exacte demandée, pas
+         d'arrondi prévu : un décimal de calculatrice est refusé (checkAnswer, src/expr.js) ; un décimal exact reste accepté. */
+      if (sp.kind === "value" && !sp.round && /valeur exacte/i.test(txt) && !/approch|arrondi/i.test(txt)) sp.exact = true;
       if (sp.kind !== "value" || sp.sci || sp.final) return;
       if (calcPermis(id, txt, sp, own) === false) { sp.final = true; if (CALC_POW.test(txt)) sp.pow = true; }
     };
@@ -666,6 +684,13 @@ const Engine = {
        src/curriculum.js). Tous les textes de la question ; jamais les réponses attendues (spec, canon, expressions des pièges). */
     /* 25.11 (soir, couverture France) : notes suisses (1 à 6) remplacées par des notes sur 20 (FR_NOTES, src/fr_fin.js). */
     if (p && p.system === "FR" && typeof FR_NOTES === "function") { const r = FR_NOTES(id, q); if (r) q = r; }
+    /* 26.11 (revue p3, n° 1, trace de Théo : piège « −1/a, c'est pour perpendiculaire » en 2nde) : profil français, un message
+       de piège ou un indice qui parle d'un contenu hors programme de la classe est retiré (le retour générique reste). */
+    if (p && p.system === "FR" && p.grade) {
+      if (q.traps) q = { ...q, traps: q.traps.filter((t) => !horsFRTexte(p.grade, String(t.m || ""))) };
+      if (q.hints) q = { ...q, hints: q.hints.filter((h) => !horsFRTexte(p.grade, String(h || ""))) };
+      if (q.hint && horsFRTexte(p.grade, String(q.hint))) q = { ...q, hint: plainTeX(HINTS[id] && !horsFRTexte(p.grade, HINTS[id]) ? HINTS[id] : "Relis l'énoncé et fais un calcul à la fois.") };
+    }
     if (p && p.system === "FR" && typeof frLocal === "function") {
       const SKIP = new Set(["spec", "canon", "code", "id", "ctx", "e", "expr", "values", "value"]);
       /* copies (jamais de modification en place : une question peut partager des objets avec les tables communes) */
@@ -736,7 +761,7 @@ const Engine = {
        le contexte (ctx, sinon les premiers mots de l'énoncé) a été vu dans les 7 derniers jours, sur cette notion ou une
        autre, est évité ; s'il n'y en a pas d'autre, on pose une question de niveau 3. */
     const pKey = (x) => x && x.spec && x.spec.kind === "multi" ? "p:" + (x.ctx || String(x.q).replace(/\\\(.*?\\\)|<[^>]*>/g, " ").replace(/[^A-Za-zÀ-ÿ' ]/g, " ").trim().split(/\s+/).slice(0, 4).join(" ").toLowerCase()) : null;
-    const cday = (state.ctxDay = state.ctxDay || {}), lim = addDays(day(), -6), stale = (x) => { const k = pKey(x); return !!(k && cday[k] && cday[k] >= lim); };
+    const cday = (state.ctxDay = state.ctxDay || {}), lim = addDays(day(), -6), stale = (x) => { const k = pKey(x); return !!(k && cday[k] && cday[k] >= lim) || sceneStale(state, sceneKey(x)); };
     let found = false, fresh1 = null, lastOk = null, lv = level;
     /* 25.11 : une forme hors programme de la classe (HORS_CO, 9e–10e) est refaite ; si le niveau n'a plus aucune forme
        du programme (défi d'une autre année), on descend d'un niveau. */
@@ -753,6 +778,7 @@ const Engine = {
     else if (!found && lastOk) q = lastOk;
     if (vary && stale(q) && level === 4) return this.make(state, id, 3); /* vary : séance ordinaire (pas le problème de la semaine) */
     if (pKey(q)) { for (const k in cday) if (cday[k] < lim) delete cday[k]; cday[pKey(q)] = day(); }
+    sceneNote(state, sceneKey(q));
     rec.push(key(q)); state.recentQ[id] = rec.slice(-15);
     if (q.ctx) state.recentCtx[id] = [...ctxs, q.ctx].slice(-2);
     state.recentForm[id] = [...forms, qForm(q)].slice(-2);
@@ -765,7 +791,9 @@ const Engine = {
     const code = id + "-" + level + "-" + seed.toString(36);
     // Écritures maladroites des générateurs (audit 13.11) : « 1x » → « x », « + -2 » → « - 2 », « - -3 » → « + 3 ».
     /* 26.11 (revue élèves, B11 : corrigé « −1L + 2l = 2 ») : « -1L » → « -L » aussi (inconnues majuscules), et les défis passent par tidy. */
-    const tidy = (t) => typeof t !== "string" ? t : t.replace(/([(=+\-\s{]|\\\()(-?)1([a-z])(?![a-z{])/g, "$1$2$3").replace(/([(=+\s{]|\\\()-1([A-Z])(?![a-zA-Z{])/g, "$1-$2").replace(/\+\s*-\s*(?=[\da-z(\\])/g, "- ").replace(/-\s*-\s*(?=[\da-z(\\])/g, "+ ");
+    const tidy = (t) => typeof t !== "string" ? t : t.replace(/([(=+\-\s{]|\\\()(-?)1([a-z])(?![a-z{])/g, "$1$2$3").replace(/([(=+\s{]|\\\()-1([A-Z])(?![a-zA-Z{])/g, "$1-$2").replace(/\+\s*-\s*(?=[\da-z(\\])/g, "- ").replace(/-\s*-\s*(?=[\da-z(\\])/g, "+ ")
+      /* 26.11 (revue p3, n° 11 : « 2(x + 2)(x) », « (x)(x − 6) = 0 ») : facteur x écrit en tête, sans parenthèses */
+      .replace(/(^|[^\w)}'′\\])(-?(?:\d+|[ak])?)((?:\([^()]*\)){2,})/g, (m, b, c, g) => { const fs = g.match(/\([^()]*\)/g); if (fs.filter((f) => f === "(x)").length !== 1 || fs.length < 2 || /\\|∘/.test(g)) return m; return b + c + "x" + fs.filter((f) => f !== "(x)").join(""); });
     /* 25.11 : PROBX (variantes.js, audit 9e–10e) = défis ajoutés, réservés à certaines classes (p.co). */
     if (level === 4 && hasProb(id)) { const p = moneyQ(R.pick(probList(id).concat((typeof PROBX !== "undefined" && PROBX[id]) || []))()); /* 26.11 : TeX visible hors formule (plainTeX, generators.js) */
       const P = { ...p, q: tidy(plainTeX(p.q)), sol: tidy(plainTeX(p.sol)), hints: (p.hints || []).map(plainTeX) }; if (p.parts) P.parts = p.parts.map((x) => ({ ...x, label: plainTeX(x.label) }));
@@ -1022,7 +1050,10 @@ const Engine = {
         if (!recent) levels = this.oldLevels(state, id, levels, target);
         /* 26.11 soir (revue des élèves testeurs, n° 9 : élève forte, Révision de 4 questions de niveau 1, +12 à +15 chacune) :
            en Révision, un élève dont le Mathélo atteint le niveau 2 de la notion (et qui ne l'a pas ratée) n'a plus de niveau 1. */
-        if (kind === "rev" && levels.some((d) => d >= 2) && s.m >= 0.45 && !this.underFloor(state) && elo >= itemRating(state.profile, id, 2)) levels = levels.filter((d) => d >= 2);
+        /* 26.11 (revue p3, n° 13, D5 : Inès, Mathélo 1508, intervalle au niveau 1 ; Sami, MP 2e, priorités de 9e au niveau 1) :
+           même règle dans tous les formats, sauf le créneau d'automatisme (niveau 1 : décision de l'enseignant du 26.11, n° 12,
+           tests/decisions26.html) : minLevel. */
+        if (kind !== "drill" && levels.some((d) => d >= 2) && this.minLevel(state, id) >= 2) levels = levels.filter((d) => d >= 2);
         for (const d of levels) {
           let sc = Math.abs(itemRating(state.profile, id, d) - target) / 100;
           if (rappel) sc = (s.m < 0.45 ? -1 : 0) + Math.max(0, itemRating(state.profile, id, d) - target) / 200;
@@ -1217,11 +1248,17 @@ const Engine = {
   prepActive(state) { return !!(state.prep && state.prep.ids.length && state.prep.date >= day()); },
   /* 26.11 (revue élèves : « Révision ciblée » de 7 questions + problème = 7 à 12 min) : 4 questions, sans problème
      (niveau 3 au plus) ; le sujet de préparation reste à part, au choix. */
+  /* 26.11 (revue p3, n° 13) : niveau minimal d'une notion pour un élève : 2 si son Mathélo (cible propre) atteint le niveau 2
+     de la notion et qu'il ne l'a pas ratée (maîtrise ≥ 0,45), hors élève sous le plancher ; sinon 1. */
+  minLevel(state, id) {
+    const s = state.notions[id]; if (!s || this.underFloor(state)) return 1;
+    return s.m >= 0.45 && state.elo.r + (state.tadj || 0) >= itemRating(state.profile, id, 2) ? 2 : 1;
+  },
   planPrep(state) {
     const ids = state.prep.ids.filter((id) => state.notions[id]);
     const order = [...ids].sort((a, b) => state.notions[a].m - state.notions[b].m);
     const plan = [];
-    for (let i = 0; order.length && plan.length < 4; i++) { const id = order[i % order.length]; plan.push(id + "|" + Math.min(3, this.difficulty(state, id))); }
+    for (let i = 0; order.length && plan.length < 4; i++) { const id = order[i % order.length]; plan.push(id + "|" + Math.min(3, Math.max(this.difficulty(state, id), this.minLevel(state, id)))); }
     return plan;
   },
 

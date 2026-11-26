@@ -54,6 +54,7 @@ pas de triangle impossible, pas de TeX visible hors formule, pas de compteur qui
    Reproduire : `#eleve=theo&jours=2&jour0=2026-12-02&graine=107&evalj=2&extras=carnet` (écran 22, puis jour 2).
    Correction : profil FR, sujets et formes filtrés par le référentiel français (pas d'exercice d'une notion hors programme de
    la classe ; formes « perpendiculaire » et « cercle » écartées avant la 1re, comme HORS_FR pour les quartiles).
+   Corrigé (agent/p3) : profil FR, contenus hors programme repérés dans le texte de toute question ou exercice (HORS_FR_TXT, src/engine.js : équation de cercle, perpendiculaire en repère / produit des pentes, produit scalaire, vecteur normal, médiatrice / hauteur en repère — permis dès la 1re) et écartés par horsCO ; pièges et indices qui en parlent retirés (Engine.finalize) ; libellé 2nde « Intersection de droites » (labelFR, nLabel) ; sujets riches filtrés par richOkFR (notion au catalogue de la classe + texte de trois tirages) ; le sujet de préparation ne sert que les notions choisies (exercices ordinaires des notions choisies s'il manque des exercices riches). Test tests/p3_26_11.html#only=fr : 6e→Tle, 46 860 questions servies et 27 236 items de sujets, aucun hors programme (échoue sans la correction : droites-*-* perpendiculaire, « Un cercle déguisé »…).
 
 ## Moyens
 
@@ -63,6 +64,7 @@ pas de triangle impossible, pas de TeX visible hors formule, pas de compteur qui
    l'autoévaluation n'est jamais proposée dans le programme) ; « ce test », « test rapide » au lieu d'« évaluation » (B5).
    4 traces sur 4 (Emma, Yanis, Sami, Théo). Reproduire : `#eleve=emma&jours=2&jour0=2026-11-30&graine=101&evalj=2`, jour 2.
    Correction : texte calculé (« 3 questions : tes erreurs sur ces notions, puis ce qui reste à consolider ») ; « ce test » → « cette évaluation ».
+   Corrigé : texte de la veille calculé (tourPlan, src/app.js) : « 3 questions : tes erreurs sur cette évaluation, puis ce qui reste à consolider » ; le test rapide n'est cité que s'il a été fait.
 
 3. **Moyenne** — Même contexte en boucle autour d'une évaluation (Pythagore, 11e) : parc traversé en diagonale **4 fois en
    2 jours** — sujet Question 1 (« parc rectangulaire de 50 m sur 55 m, Léo coupe en diagonale »), sujet Exercice 3 (« parc de
@@ -70,12 +72,14 @@ pas de triangle impossible, pas de TeX visible hors formule, pas de compteur qui
    `q-pyth-2-ajz` (« parc de 30 m sur 65 m, Léo coupe en diagonale »). 10e : table ronde 2 fois dans le même sujet
    (Question 2 et « Trouve l'erreur »). Reproduire : `#eleve=yanis&jours=2&jour0=2026-12-02&graine=103&evalj=2&extras=carnet`.
    Correction : tag `ctx` commun au sujet (automatismes ≠ exercices) et aux séances des 7 jours, comme pour les problèmes.
+   Corrigé : scènes reconnues dans l'énoncé (SCENES / sceneKey, src/engine.js : parc en diagonale, table ronde, pizza, tapis, échelle contre un mur, carrelage, enclos, cerf-volant) ; une fois par sujet, notées 7 jours (state.ctxDay « s:… ») et évitées par Engine.make et par le sujet suivant.
 
 4. **Moyenne** — Énoncé absurde : « Le diamètre d'une table ronde mesure 6 cm. Inès calcule son aire… » (sujet 10e,
    Question 2). Le générateur `disque` niveau 2 tire d = 4 à 16 cm pour « un disque », « une pizza », « un tapis rond »,
    « une table ronde » : table de 6 cm, tapis de 4 cm, pizza de 5 cm. `src/variantes.js` l. 1228.
    Reproduire : `#eleve=emma&jours=2&jour0=2026-11-30&graine=101&evalj=2`, écran 23.
    Correction : diamètre selon l'objet (pizza 24–40 cm, tapis 8–20 dm, table 8–16 dm, « disque » libre) et unité accordée.
+   Corrigé : diamètre et unité selon l'objet (disque 4–16 cm, pizza 24–40 cm, tapis 8–20 dm, table 8–16 dm), unité accordée dans l'énoncé, le corrigé et le pas à pas.
 
 5. **Moyenne** — France, rappel de cours : « Défi 1 × 5 m de tissu coûtent 42 €. Combien coûte 1 m ? » (Hugo, 6e, leçon prop
    ouverte depuis `q-prop-1-u78`). La localisation « · → × » prend le séparateur de l'en-tête « Défi 1 · … » pour un produit :
@@ -83,6 +87,7 @@ pas de triangle impossible, pas de TeX visible hors formule, pas de compteur qui
    via l'observateur ajouté hier (`src/app.js` l. 207). Dans la même leçon (proptab), « 4 · ? = 14 » reste en point médian.
    Reproduire : `#eleve=hugo&jours=2&jour0=2026-12-01&graine=102`, jour 2, question 2 (Rappel de cours).
    Correction : séparateur « — » (ou `.act-goal` traité comme `.eyebrow`, `frWords` seulement) ; « 4 × ? = 14 » pour un profil FR.
+   Corrigé : séparateur « — » de l'en-tête des défis en profil FR (goalSep, src/active.js) ; « 4 · ? » → « 4 × ? » (frThouPart) et produit coupé par une balise dans une leçon (frDom).
 
 ## Bas
 
@@ -90,37 +95,46 @@ pas de triangle impossible, pas de TeX visible hors formule, pas de compteur qui
    (`q-prop-1-rfj`, coupé en deux lignes) et « Du poids au prix : prix : masse, pas l'inverse. » (`q-proptab-1-axk`), en 6e
    France où la division s'écrit ÷. `src/variantes.js` l. 350 et 361. Correction : `M(chf(…) + " : " + a)` (÷ au rendu) ;
    « prix ÷ masse ».
+   Corrigé : divisions « : » en texte simple de prop / proptab mises en formule (÷ au rendu), « prix ÷ masse » ; contrôle sur tous les tirages de prop et proptab.
 
 7. **Basse** — `colonBreak` avale le « : » entre une formule et une citation : « Yanis résout x² = 5x en divisant par x⏎« x = 5 ». »
    (sujet MP 2e, `src/riche_1c.js` l. 38) ; « Sam calcule le milieu de [AB] avec A(−1 ; 2) et B(6 ; −2)⏎« M = … » » (sujet 2nde).
    Correction : garder « : » avant « (`/^\s*:\s+(?=«)/` → « : »).
+   Corrigé : colonBreak garde « : » avant une citation « … ».
 
 8. **Basse** — Bilan de la séance la veille de J−1 et à J−1 : « Demain : 🏔 Défi du jour » / « Demain : ⚡ Série d'automatismes »,
    alors que demain la tâche de l'évaluation remplace la séance. Correction : « Demain : 📕 Tes erreurs » / « Demain : jour J ».
+   Corrigé : bilan « Demain : 📕 Tes erreurs, une dernière fois » à J−2, « Demain : jour J : ✏️ Échauffement, puis l'évaluation » à J−1 (tomorrowLabel).
 
 9. **Basse** — Défi `q-derivref-4-pi6` (bénéfice B(x) = 12√x − 3x, 3e Coll. faible, 6:28) : « Indice 1 · Partie a) · (xⁿ)' = n·xⁿ⁻¹…,
    (√x)' = 1/(2√x)… » puis « Indice 2 · Partie a) · » **identique** ; rien sur « le maximum est où B'(x) = 0 ».
    Correction : Indice 2 propre à la partie (« Résous B'(x) = 0 »), ou pas d'Indice 2 s'il répète le 1.
+   Corrigé : un indice déjà donné n'est plus renuméroté ; on passe à un indice de l'énoncé qui ne vise pas une autre partie (ici « B'(x) = … »), sinon « Rappel de l'indice ». Pas de contrôle automatique (écran de problème) : à vérifier sur une trace.
 
 10. **Basse** — Milliers en profil romand : indice uaire « 1 m² = 100 dm² = 10 000 cm² » alors que la leçon écrit « 10'000 cm² »
     (`q-uaire-1-*`) ; Histoire « Euclide » : « 2 310, plus 1 : 2 311 ». Correction : `'` partout en profil CH.
+    Corrigé : Euclide en \text{'} (espace fine en France via frLocal) ; indices uaire / conversions « 10'000 », « 1'000'000 ».
 
 11. **Basse** — Écriture maladroite d'un facteur x : « Quel est le sommet de f(x) = 2(x + 2)(x) ? » (aperçu « 7. Degré 2 »,
     1re Coll.) ; corrigé « x² − 6x = 0 ⟺ (x)(x − 6) = 0 » (`q-fimg-4-y4m`). Correction : « 2x(x + 2) », « x(x − 6) ».
+    Corrigé : tidy (Engine.build) écrit le facteur x en tête : « 2x(x + 2) », « x(x − 6) », « ax(x + 1)(x² + 1) » ; contrôle sur toutes les notions, niveaux 1–4.
 
 12. **Basse** (A11, encore présent) — « Rends rationnel le dénominateur de 1/(1 + √5). Donne la valeur exacte (touche √). » :
     0,309016994375 → « ✓ Juste ! Exact ! » (`q-ratden-2-htf`, positionnement Inès). Correction : valeur exacte exigée
     (« Presque : donne la valeur exacte ») quand l'énoncé la demande.
+    Corrigé : « valeur exacte » dans la consigne (sans arrondi) → spec.exact ; un décimal de calculatrice reçoit « C'est une valeur approchée ; donne la valeur exacte », un décimal exact reste accepté.
 
 13. **Basse** (D5, encore présent) — Élève au-dessus de la cible en niveau 1 : Inès (Mathélo 1508) « Combien de nombres entiers
     l'intervalle ]−2 ; 6] contient-il ? » puis « plus grand entier de [−1 ; 7[ » ; Sami (MP 2e, 1615) révision `q-prio-1-ucg`
     « Léa achète 4 cahiers à 8 CHF et une gomme à 8 CHF » (Priorités réussies au positionnement ; gomme à 8 CHF).
     Correction : niveau 2 au moins au-dessus de la cible ; pas de notion de 9e réussie au positionnement en révision MP 2e.
+    Corrigé : Engine.minLevel (Mathélo ≥ niveau 2 de la notion, notion non ratée, hors élève sous le plancher) appliqué à tous les créneaux sauf l'automatisme (niveau 1 maintenu : décision de l'enseignant n° 12, tests/decisions26.html — à trancher si l'intervalle de niveau 1 d'Inès venait de ce créneau), à la veille (tourPlan) et à la révision ciblée (planPrep). Non traité : « gomme à 8 CHF » (prix égal à celui du cahier, vraisemblance mineure).
 
 14. **Basse** (vraisemblance) — « Le chronomètre d'une course de relais affiche 13'219 secondes. » (`q-utemps-4-kfg`) : un
     chronomètre affiche h:min:s ; « temps total en secondes donné par l'ordinateur de course » serait plausible. Histoire
     « John Snow » : « une épidémie de choléra tue plus de 500 personnes » puis « Sur 800 victimes d'une épidémie… ».
     Correction : reformuler l'appareil ; même ordre de grandeur (« Sur 600 victimes »).
+    Corrigé : « l'ordinateur de chronométrage donne le temps total en secondes … écris-le en h, min, s » ; John Snow : 520, 560 ou 600 victimes « de cette épidémie ».
 
 ## Ce qui marche
 
@@ -128,3 +142,11 @@ Chapitre « en classe » enfin au cœur des séances ; défis riches et justes (
 cinéma, ensembles A ∩ B / A ∪ B / A \ B, f(f(2))) ; pas à pas courts et justes ; « Une plus facile » vraiment plus facile ;
 carnet qui montre le progrès (« presque effacée ») ; 6e France : €, « collège », pas de CHF ni de lieu suisse vu ; accueil
 France (6e · 5e · 4e · 3e · Lycée) correct ; J−2 : sujet « au choix », la séance reste le grand bouton.
+
+
+## Lot ajouté (captures de la présentation, 26.11)
+
+- (a) En-tête trop large (« Classe MP 2e » à 412 px, roue coupée). **Corrigé** : sous 430 px le mot « Classe » tombe, espacements réduits ; test tests/entete_360.html (18 classes dans un cadre de 360 px : roue visible, rien ne se chevauche ; échoue avec l'ancien style).
+- (b) Diagnostic des aires « (1/2)² = 1/4 » en texte brut. **Corrigé** : diagnostics en formule.
+- (c) France, correction lente (> 1 s) après le 2e essai faux. **Non reproduit** : même temps de traitement mesuré en France et en Suisse (≈ 4 ms, Chromium sans temps virtuel) ; aucun délai propre au profil FR trouvé dans le code (piste : rendu MathJax ou chargement d'un paquet au moment de la capture). À revoir sur l'appareil.
+- (d) « Échelles et pentes » : toujours rapport ½, aires × 1/4. **Corrigé** : rapport p/q tiré (1/2, 1/3, 2/3, 3/4, 2/5, 3/5), objet varié (figure, photo, plan d'un jardin, logo), forme nouvelle « aire × k² → longueurs × k » ; 10 formes en 120 tirages (11e).

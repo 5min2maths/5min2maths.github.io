@@ -11,7 +11,7 @@
   const ONLY = (location.hash.match(/only=([\w,]+)/) || [])[1];
   const on = (k) => !ONLY || ONLY.split(",").includes(k);
   const fresh = (prof) => { state = Engine.newState(prof); Engine.autoInit(state); state.placed = true; save(); return state; };
-  const txt = (q) => [q.q, q.sol, ...(q.parts || []).map((x) => x.label), ...(q.guide || []).flatMap((g) => [g.ask, g.sol])].map((t) => String(t || "")).join(" ");
+  const txt = (q) => [q.q, q.sol, ...(q.parts || []).map((x) => x.label), ...(q.guide || []).flatMap((g) => [g.ask, g.sol]), ...(q.traps || []).map((t) => t.m), ...(q.hints || []), q.hint].map((t) => String(t || "")).join(" ");
 
   /* 1. (grave) Profil France : aucune forme ni aucun exercice de sujet hors programme de la classe. Marqueurs propres au test
      (indépendants du filtre de l'app) : équation de cercle, perpendiculaire en repère (pentes, équation), produit scalaire,
@@ -21,7 +21,7 @@
   if (on("fr")) try {
     const MARK = [[/équation du cercle circonscrit|cercle déguisé|équation (?:cartésienne )?(?:du|d'un|de ce) cercle|x\^\{?2\}?\s*\+\s*y\^\{?2\}?|\(x\s*[-+−][^()]*\)\^\{?2\}?\s*\+\s*\(y\s*[-+−]/, "cercle"],
       [/perpendiculaire[^.?!;]{0,160}(?:pente|coefficient directeur|y\s*=|équation)|(?:pente|coefficient directeur|y\s*=|équation)[^.?!;]{0,160}perpendiculaire|produit des pentes|pente-perp/, "perpendiculaire (repère)"],
-      [/produit scalaire|vecteur normal/, "produit scalaire"]];
+      [/produit scalaire|vecteur normal/, "produit scalaire"], [/(?:médiatrice|hauteur issue)[^.?!;]{0,120}(?:équation|y\s*=)/, "médiatrice / hauteur en repère"]];
     const hit = (t) => { for (const [r, l] of MARK) if (r.test(t)) return l; return null; };
     let n = 0; const bad = [];
     for (let g = 6; g <= 12; g++) {
@@ -63,7 +63,122 @@
     ok(tch.has("Un cercle déguisé") || tch.has("Le triangle et son cercle"), "2e Collège (CH) : exercices de cercle gardés");
   } catch (e) { fail.push("EXC fr " + e.message + " " + (e.stack || "").split("\n").slice(0, 3).join(" ")); }
 
-  /*@@SUITE@@*/
+  const B = (id, lv, sd) => { try { return Engine.build(id, lv, sd); } catch (e) { return null; } };
+  const outside = (t) => String(t || "").replace(/<\/?[a-z][^>]*>/g, " ").split(/\\\(.*?\\\)/s).join(" ");
+
+  /* 2 et 8. Veille de l'évaluation : nombre réel de questions, pas de test rapide non fait, « évaluation » ; bilan « Demain ». */
+  if (on("j1")) try {
+    fresh({ system: "CH", grade: 10, track: "college", minutes: 5 });
+    const ids = Object.keys(state.notions).filter((id) => GEN[id]).slice(0, 3);
+    state.prep = { ids, date: addDays(day(), 1), start: addDays(day(), -1) }; state.autotest = null;
+    const t = prepTask("tour"), n = tourPlan().plan.length;
+    ok(new RegExp("^" + n + " question").test(t.text) && !/test rapide|ce test/.test(t.text) && /évaluation/.test(t.text), "J−1 : « " + t.text + " » (" + n + " questions au plan)");
+    ok(/Tes erreurs/.test(PREP_TASK.tour.label) && !/ce test|test rapide/.test(PREP_TASK.tour.text), "J−1 : texte par défaut sans « ce test » ni test rapide");
+    state.prep.date = addDays(day(), 2); ok(/Tes erreurs/.test(tomorrowLabel()), "bilan à J−2 : « Demain : " + tomorrowLabel() + " »");
+    state.prep.date = addDays(day(), 1); ok(/jour J/.test(tomorrowLabel()), "bilan à J−1 : « Demain : " + tomorrowLabel() + " »");
+    state.prep.date = day(); ok(!/jour J|Tes erreurs/.test(tomorrowLabel()), "bilan le jour J : format ordinaire (" + tomorrowLabel() + ")");
+  } catch (e) { fail.push("EXC j1 " + e.message + " " + (e.stack || "").split("\n").slice(0, 2).join(" ")); }
+
+  /* 3. Scènes : une par sujet ; une scène du sujet n'est pas reprise par les questions des jours suivants. */
+  if (on("ctx")) try {
+    ok(sceneKey({ q: "Pour traverser un parc rectangulaire de 50 m sur 55 m, Léo coupe en diagonale." }) === "parc-diagonale" && sceneKey({ q: "Une pizzeria propose 8 garnitures." }) === null, "scènes reconnues (parc en diagonale ; une pizzeria n'est pas une pizza ronde)");
+    fresh({ system: "CH", grade: 11, track: "college", minutes: 5 });
+    let dup = 0, ns = 0;
+    for (let k = 0; k < 25; k++) { state.ctxDay = {}; state.prep = { ids: ["pyth", "pythfig", "pythrec"], date: addDays(day(), 2) }; state.mock = null; mockNew("standard");
+      const sc = mockQuestions().map((x) => sceneKey(x.q)).filter(Boolean); ns += sc.length; if (new Set(sc).size < sc.length) dup++; }
+    ok(!dup, "sujet de préparation (Pythagore, 11e) : jamais deux fois la même scène (" + ns + " scènes vues en 25 sujets)");
+    state.ctxDay = {}; sceneNote(state, "parc-diagonale"); let parc = 0;
+    for (let k = 0; k < 40; k++) { const q = Engine.make(state, "pyth", 1 + (k % 3)); if (sceneKey(q) === "parc-diagonale") parc++; }
+    ok(!parc, "parc vu au sujet : pas repris dans les 40 questions de Pythagore suivantes (" + parc + ")");
+  } catch (e) { fail.push("EXC ctx " + e.message); }
+
+  /* 4. Diamètre selon l'objet (disque niveau 2). */
+  if (on("disque")) {
+    const bad = []; let n = 0;
+    for (let sd = 1; sd <= 300; sd++) { const q = B("disque", 2, sd); if (!q || !/Trouve l'erreur/.test(q.q)) continue; n++;
+      const d = +(String(q.q).match(/mesure \\\((\d+)\\\) (cm|dm)/) || [])[1], u = (String(q.q).match(/mesure \\\(\d+\\\) (cm|dm)/) || [])[1];
+      if (/table ronde|tapis rond/.test(q.q) && !(u === "dm" && d >= 8)) bad.push(q.code + " " + d + " " + u);
+      if (/pizza/.test(q.q) && !(u === "cm" && d >= 24)) bad.push(q.code + " " + d + " " + u);
+      if (u && !new RegExp("en " + u + "²").test(q.q)) bad.push(q.code + " unité"); }
+    ok(n > 20 && !bad.length, "disque : diamètre et unité selon l'objet (" + n + " tirages)" + (bad.length ? " — " + bad.slice(0, 5).join(" | ") : ""));
+  }
+
+  /* 5. France : séparateur d'en-tête de défi, produit « 4 · ? ». */
+  if (on("fr5")) try {
+    ok(frLocal("4 · ? = 14") === "4 × ? = 14" && frLocal("Défi 1 — 5 m de tissu coûtent 42 €.") === "Défi 1 — 5 m de tissu coûtent 42 €.", "frLocal : « 4 × ? = 14 », en-tête « Défi 1 — … » intact");
+    fresh({ system: "FR", grade: 6, track: "college", minutes: 5 });
+    const d = document.createElement("div"); d.className = "act-out"; d.innerHTML = '4 · <b>?</b> = 14'; app.appendChild(d); frDom(d);
+    ok(/4 × \?/.test(d.textContent), "leçon proptab (FR) : « " + d.textContent + " »"); d.remove();
+  } catch (e) { fail.push("EXC fr5 " + e.message); }
+
+  /* 6. Division en texte simple dans prop / proptab (« 14,80 : 4 », « prix : masse »). */
+  if (on("div")) {
+    const bad = [];
+    for (const id of ["prop", "proptab"]) for (const lv of [1, 2, 3]) for (let sd = 1; sd <= 150; sd++) { const q = B(id, lv, sd); if (!q) continue;
+      for (const t of [q.q, q.sol, q.hint, ...(q.traps || []).map((x) => x.m), ...(q.guide || []).flatMap((g) => [g.ask, g.sol])]) { const o = outside(t); if (/\d\s*:\s*\d|prix : masse/.test(o.replace(/\d+ ?h ?\d+|\d\s*:\s*\d\d(?!\d)\s*(?:h|min)/g, ""))) { bad.push(q.code + " : " + o.replace(/\s+/g, " ").slice(0, 60)); break; } } }
+    ok(!bad.length, "prop, proptab : pas de division « : » en texte simple" + (bad.length ? " — " + [...new Set(bad)].slice(0, 5).join(" | ") : ""));
+  }
+
+  /* 7. « : » avant une citation. */
+  if (on("colon")) {
+    const a = colonBreak("Yanis résout \\(x^2 = 5x\\) en divisant par \\(x\\) : « \\(x = 5\\) ».");
+    const b = colonBreak("Sam calcule le milieu de \\([AB]\\) avec \\(A(-1 ; 2)\\) et \\(B(6 ; -2)\\) : « \\(M = (2,5 ; 0)\\) ».");
+    const c = colonBreak("Divisibles par 9 : 117, 126.");
+    ok(!/<br>\s*«/.test(a + b) && /:\s*«/.test(a) && /<br>/.test(c), "colonBreak : « : » gardé avant une citation, retour à la ligne ailleurs");
+  }
+
+  /* 10. Milliers romands avec ' (uaire, Euclide). */
+  if (on("mil")) {
+    const H = (window.HISTOIRE || []).find((x) => /Euclide/.test(x.titre)); let s = ""; for (let k = 0; k < 20 && H; k++) s += H.ex().sol;
+    ok(H && !/\d\\,\d{3}/.test(s) && /\\text\{'\}/.test(s), "Euclide : milliers « ' » (" + outside(s).slice(0, 40) + ")");
+    const q = B("uaire", 1, 3); ok(q && /10'000/.test(q.hint || HINTS.uaire || "") , "uaire : indice « 10'000 cm² » (" + (q && q.hint) + ")");
+  }
+
+  /* 11. Facteur x : jamais « (x)(…) » ni « (…)(x) ». */
+  if (on("x")) {
+    const bad = []; let n = 0;
+    for (const id of Object.keys(GEN)) for (const lv of [1, 2, 3, 4]) for (let sd = 1; sd <= 8; sd++) { const q = B(id, lv, sd); if (!q) continue; n++;
+      if (/\(x\)\(|[^\w'′]\([^()]*\)\(x\)/.test([q.q, q.sol, ...(q.parts || []).map((p) => p.label)].join(" ").replace(/\([^()]*(?:\\circ|∘)[^()]*\)\(x\)/g, ""))) bad.push(q.code); }
+    ok(n > 1000 && !bad.length, "écriture x(x − 6) : " + n + " questions" + (bad.length ? " — " + bad.slice(0, 6).join(" | ") : ""));
+  }
+
+  /* 12. Valeur exacte demandée : décimal de calculatrice refusé, décimal exact accepté. */
+  if (on("exact")) try {
+    fresh({ system: "CH", grade: 13, track: "mp", minutes: 5 });
+    const q = Engine.make(state, "ratden", 2, parseInt("htf", 36)), v = q.spec.value;
+    const r1 = checkAnswer(q.spec, String(+v.toFixed(12)).replace(".", ",")), r2 = checkAnswer(q.spec, String(v));
+    ok(/valeur exacte/.test(q.q) && r1.status !== "correct", "ratden-2-htf : « " + String(+v.toFixed(12)).replace(".", ",") + " » refusé (" + r1.status + ")");
+    let qe = null; for (let sd = 1; sd < 400 && !qe; sd++) { const x = Engine.make(state, "ratden", 2, sd); if (x.spec.exact && Math.abs(x.spec.value * 1e4 - Math.round(x.spec.value * 1e4)) < 1e-9) qe = x; }
+    ok(!qe || checkAnswer(qe.spec, String(qe.spec.value).replace(".", ",")).status === "correct", "valeur exacte décimale acceptée" + (qe ? " (" + qe.code + ")" : " (pas de cas)"));
+  } catch (e) { fail.push("EXC exact " + e.message); }
+
+  /* 13. D5 : au-dessus de la cible, pas de niveau 1 hors notion ratée, dans tous les formats ; le créneau d'automatisme reste au
+     niveau 1 (décision de l'enseignant du 26.11, n° 12, tests/decisions26.html). */
+  if (on("d5")) try {
+    for (const prof of [{ system: "CH", grade: 12, track: "college", minutes: 5 }, { system: "CH", grade: 13, track: "mp", minutes: 5 }]) {
+      fresh(prof); state.elo.r = 1600; Object.values(state.notions).forEach((s) => { s.m = 0.8; s.seen = 5; s.status = "vu"; s.lessonSeen = true; });
+      const bad = [];
+      for (const f of ["mixte", "revision", "app", "defi"]) for (let k = 0; k < 8; k++) for (const e of Engine.planSession(state, f)) { const [id, d, k] = e.split("|"); if (+d === 1 && k !== "drill" && Engine.minLevel(state, id) >= 2) bad.push(f + " " + id); }
+      ok(!bad.length, classTag(prof) + " (Mathélo 1600) : aucun niveau 1 au-dessus de la cible" + (bad.length ? " — " + [...new Set(bad)].slice(0, 6).join(" | ") : ""));
+    }
+  } catch (e) { fail.push("EXC d5 " + e.message); }
+
+  /* 14. Vraisemblance : chronométrage, John Snow. */
+  if (on("vrai")) {
+    let ch = 0, bad = 0; for (let sd = 1; sd <= 200; sd++) { const q = B("utemps", 4, sd); if (q && /relais/.test(q.q)) { ch++; if (/chronomètre[^.]*affiche/.test(q.q)) bad++; } }
+    ok(!bad, "utemps : plus de « chronomètre qui affiche 13'219 secondes » (" + ch + " tirages relais)");
+    const H = (window.HISTOIRE || []).find((x) => /John Snow/.test(x.txt || "")); let lo = 1e9; for (let k = 0; k < 40 && H; k++) lo = Math.min(lo, +H.ex().q.match(/Sur (\d+)/)[1]);
+    ok(H && lo > 500, "John Snow : plus de 500 victimes, comme le récit (min " + lo + ")");
+  }
+
+  /* (b) et (d) Échelles et pentes : rapports variés, diagnostics en formule. */
+  if (on("echelle")) try {
+    fresh({ system: "CH", grade: 11, track: "college", minutes: 5 });
+    const forms = new Set(), bad = []; let n = 0;
+    for (let k = 0; k < 120; k++) { const q = Engine.make(state, "echelle", 2); n++; forms.add(q.ctx || qForm(q));
+      for (const t of (q.traps || []).map((x) => x.m).concat([q.sol])) if (/\(\d\/\d\)²|\d\/\d\b/.test(outside(t))) bad.push(q.code + " : " + outside(t).slice(0, 50)); }
+    ok(forms.size >= 5 && !bad.length, "échelle niveau 2 (11e) : " + forms.size + " formes en " + n + " tirages, fractions en formule" + (bad.length ? " — " + bad.slice(0, 4).join(" | ") : ""));
+  } catch (e) { fail.push("EXC echelle " + e.message); }
 
   document.getElementById("out").textContent = fail.concat(out).join("\n") + "\n" + (fail.length ? fail.length + " ÉCHEC(S)" : "tout ok");
 })().catch((e) => { document.getElementById("out").textContent = "EXC " + e.message + "\n" + e.stack; });

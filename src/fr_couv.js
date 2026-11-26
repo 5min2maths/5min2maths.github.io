@@ -98,7 +98,8 @@ const UPFR = {
 
 (function () {
   const N = (id) => NOTIONS.find((x) => x.id === id);
-  { const q = N("quartiles"); if (q) q.labelFR = [10, "Étendue, médiane"]; } /* 26.11 : avant la 2nde, sans « quartiles » */
+  { const q = N("quartiles"); if (q) q.labelFR = [10, "Étendue, médiane"]; }
+  { const q = N("droitesinter"); if (q) q.labelFR = [11, "Intersection de droites"]; } /* 26.11 (revue p3, n° 1) : médiatrice et hauteur en repère = 1re (orthogonalité) */ /* 26.11 : avant la 2nde, sans « quartiles » */
   const place = (id, fr, again) => { const n = N(id); if (!n) return; n.FR = fr; if (again) n.againFR = [...new Set([...(n.againFR || []), ...again])]; };
 
   // ---------- 1. Rattachements (attendu contrôlé ; formes écartées : HORS_FR ci-dessus) ----------

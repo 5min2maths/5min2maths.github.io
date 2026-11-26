@@ -501,7 +501,7 @@ function checkAnswer(spec, input) {
       }
       /* 26.11 (revue élèves, A11 : 12,2262409946 accepté pour 120√3/17) : racine exacte demandée (spec.radical, pas d'arrondi prévu) :
          un décimal de calculatrice (4 décimales ou plus, moins de 15 chiffres) n'est pas la valeur exacte. */
-      if (spec.radical && /^-?\d+\.\d{4,}$/.test(raw) && raw !== String(+spec.value) /* valeur stockée arrondie par le générateur */ && raw.replace(/\D/g, "").replace(/^0+/, "").length < 15 && !/^-?\d+(\.\d{1,8})?$/.test(String(+(+spec.value).toPrecision(12)))) return { status: "form", message: "C'est une valeur approchée ; donne la valeur exacte (fraction, racine ou π)." };
+      if ((spec.radical || spec.exact) /* 26.11 (revue p3, n° 12) : « valeur exacte » demandée */ && /^-?\d+\.\d{4,}$/.test(raw) && raw !== String(+spec.value) /* valeur stockée arrondie par le générateur */ && raw.replace(/\D/g, "").replace(/^0+/, "").length < 15 && !/^-?\d+(\.\d{1,8})?$/.test(String(+(+spec.value).toPrecision(12)))) return { status: "form", message: "C'est une valeur approchée ; donne la valeur exacte (fraction, racine ou π)." };
       if (spec.radical) {
         // a√b, et aussi a√b/c, (a√b)/c, a/√b (20.11 : √21/5 ou √2/2 étaient refusés) ; « sqrt » tapé au clavier = √.
         const rr = raw.replace(/sqrt/gi, "√").replace(/^\((.*)\)(\/\d+)$/, "$1$2");

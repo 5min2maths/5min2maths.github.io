@@ -6,7 +6,7 @@
 (function () {
   const ri = (a, b) => a + Math.floor(Math.random() * (b - a + 1)), pk = (a) => a[Math.floor(Math.random() * a.length)];
   const mil = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, "'");
-  const tm = (n) => mil(n).replace(/'/g, "\\,"); // milliers dans une formule
+  const tm = (n) => mil(n).replace(/'/g, "\\text{'}"); /* milliers dans une formule ; 26.11 (revue p3, n° 10) : ' en profil romand, espace fine en France (frLocal) */
   const svg = (w, h, g, lab) => `<svg class="fig hist-fig" viewBox="0 0 ${w} ${h}" role="img" aria-label="${lab}">${g}</svg>`;
   const T = (x, y, t, o = "") => `<text x="${x}" y="${y}" class="f-txt" text-anchor="middle" font-size="13" ${o}>${t}</text>`;
   const f1 = (v) => v.toFixed(1);
@@ -234,8 +234,8 @@
     { t: "Événement", titre: "John Snow et la pompe de Broad Street", lien: "Statistiques et proportions",
       txt: "Londres, 1854 : une épidémie de choléra tue plus de 500 personnes en dix jours. Le médecin John Snow note sur un plan les maisons des victimes : elles se regroupent autour d'une pompe à eau de Broad Street. On démonte la poignée de la pompe. Snow compare ensuite les décès selon la compagnie qui fournissait l'eau : c'est l'un des débuts de l'épidémiologie.",
       fig: () => svg(300, 140, `<rect x="20" y="10" width="260" height="120" class="f-soft"/><line x1="20" y1="70" x2="280" y2="70" class="f-line" stroke-width="6"/><line x1="150" y1="10" x2="150" y2="130" class="f-line" stroke-width="6"/>${[[130, 55], [140, 85], [165, 50], [170, 90], [125, 80], [160, 60], [175, 78], [135, 45], [185, 62], [115, 62], [145, 100], [190, 95]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.5" class="f-dot"/>`).join("")}<rect x="146" y="66" width="8" height="8" class="f-fill"/><line x1="157" y1="77" x2="196" y2="110" class="f-line" stroke-width="1"/>${T(212, 122, "pompe", 'font-size="12"')}`, "plan : décès regroupés autour d'une pompe"),
-      ex: () => { const N = pk([400, 500, 600, 800]), p = pk([60, 70, 75, 80, 85]);
-        return { q: `Sur ${N} victimes d'une épidémie, ${p} % habitaient à moins de 250 m de la pompe. Combien de victimes cela représente-t-il ?`, value: N * p / 100, sol: `\\(${N} \\cdot ${dec(p / 100)} = ${N * p / 100}\\) victimes.` }; } },
+      ex: () => { const N = pk([520, 560, 600]), p = pk([60, 70, 75, 80, 85]); /* 26.11 (revue p3, n° 14) : « plus de 500 » morts, comme le récit */
+        return { q: `Sur ${N} victimes de cette épidémie, ${p} % habitaient à moins de 250 m de la pompe. Combien de victimes cela représente-t-il ?`, value: N * p / 100, sol: `\\(${N} \\cdot ${dec(p / 100)} = ${N * p / 100}\\) victimes.` }; } },
   ];
 
   // Notions de l'app liées à chaque récit (même ordre que HISTOIRE ; 22.11) : en mode scolaire, la carte propose d'abord

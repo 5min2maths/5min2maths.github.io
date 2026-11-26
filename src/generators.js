@@ -32,7 +32,8 @@ const colonBreak = (s) => {
     /* 26.11 (revue élèves, B10 : « Les x² ⏎ 3x² ; les x ⏎ 3x ») : entre deux formules, on ne coupe après « : » que si une
        vraie phrase (3 mots au moins) précède la formule ; sinon le « : » reste sur la ligne. */
     const phrase = i > 0 && (String(parts[i - 2] || "").split(/[.;!?]|<br>/).pop().match(/\p{L}{2,}/gu) || []).length >= 3;
-    if (i > 0) t = t.replace(/^\s*:\s+(?=\S)/, "<br>").replace(/^\s*:\s*$/, i + 1 < parts.length && phrase ? "<br>" : " : "); /* juste après une formule (26.11 soir, n° 9 : espace après « : ») */
+    /* 26.11 (revue p3, n° 7 : « en divisant par x⏎« x = 5 » ») : un « : » avant une citation reste « : ». */
+    if (i > 0) t = t.replace(/^\s*:\s+(?=«)/, " : ").replace(/^\s*:\s+(?=[^\s«])/, "<br>").replace(/^\s*:\s*$/, i + 1 < parts.length && phrase ? "<br>" : " : "); /* juste après une formule (26.11 soir, n° 9 : espace après « : ») */
     t = t.replace(/(^|[.!?]\s+|<br>)([^.!?<:]*?=[^.!?<:]*?[0-9A-Za-zÀ-ÿ²³⁴)\]]) : (?=\S)/g, "$1$2<br>"); // « x = 3 : … »
     // « Divisibles par 9 : 117, 126 » se lit « 9 ÷ 117 » : on garde les deux-points et on passe à la ligne.
     t = t.replace(/([0-9)²³°]) : (?=[-−0-9(]|$)/g, "$1 :<br>");
@@ -786,7 +787,7 @@ const PROB = {
     const V = Math.PI * r * r * hh, m = V * rho;
     return { fig: FIG.cylinder("r = " + r, "h = " + hh), q: "Une pièce en " + mat + " (" + M("\\rho = " + dec(rho)) + " g/cm³) est un cylindre de rayon " + M(r) + " cm et de hauteur " + M(hh) + " cm.",
       parts: [{ label: "a) Volume (cm³, au centième)", spec: { kind: "value", value: V, round: 0.01, exactOk: true } }, { label: "b) Masse (g, au centième)", spec: { kind: "value", value: m, round: 0.01 } }, { label: "c) Nombre de pièces complètes dans 10 kg", spec: { kind: "value", value: Math.floor(10000 / m) } }],
-      hints: ["Volume du cylindre, puis masse = masse volumique · volume. Attention : 10 kg = 10 000 g.", "V = π · " + r + "² · " + hh + " ; m = " + dec(rho) + " · V ; pièces = partie entière de 10 000 / m."],
+      hints: ["Volume du cylindre, puis masse = masse volumique · volume. Attention : 10 kg = 10'000 g.", "V = π · " + r + "² · " + hh + " ; m = " + dec(rho) + " · V ; pièces = partie entière de 10 000 / m."],
       sol: "a) " + M(r * r * hh + "\\pi \\approx " + dec(r2(V))) + " cm³. b) " + M("\\approx " + dec(r2(m))) + " g. c) " + M("10\\,000 : " + dec(r2(m)) + " \\approx " + dec(r2(10000 / m))) + ", donc " + M(Math.floor(10000 / m)) + " pièces." };
   },
   sys2() {
@@ -841,7 +842,7 @@ const PROB = {
     const k = R.pick([20, 25, 50, 100]), lm = R.int(4, 15), am = R.int(6, 40), vm = R.int(2, 9);
     return { fig: FIG.scaling(3, "1 : " + k), q: "Une maquette de bâtiment est à l'échelle " + M("1\\,:\\, " + k) + ".",
       parts: [{ label: "a) Un mur mesure " + lm + " cm sur la maquette : longueur réelle (m)", spec: { kind: "value", value: (lm * k) / 100 } }, { label: "b) Une pièce mesure " + am + " cm² sur la maquette : aire réelle (m²)", spec: { kind: "value", value: (am * k * k) / 10000 } }, { label: "c) Une cuve de " + vm + " cm³ sur la maquette : volume réel (m³)", spec: { kind: "value", value: (vm * k ** 3) / 1e6 } }],
-      hints: ["Longueurs × " + decTxt(k) + ", aires × " + decTxt(k) + "², volumes × " + decTxt(k) + "³.", "Puis convertis : 1 m = 100 cm, 1 m² = 10 000 cm², 1 m³ = 1 000 000 cm³."],
+      hints: ["Longueurs × " + decTxt(k) + ", aires × " + decTxt(k) + "², volumes × " + decTxt(k) + "³.", "Puis convertis : 1 m = 100 cm, 1 m² = 10'000 cm², 1 m³ = 1'000'000 cm³."],
       sol: "a) " + M(lm * k + " \\text{ cm} = " + dec((lm * k) / 100)) + " m. b) " + M(am + " \\cdot " + k * k + " = " + am * k * k + " \\text{ cm}^2 = " + dec((am * k * k) / 10000)) + " m². c) " + M(vm + " \\cdot " + k ** 3 + " = " + vm * k ** 3 + " \\text{ cm}^3 = " + dec((vm * k ** 3) / 1e6)) + " m³." };
   },
 };

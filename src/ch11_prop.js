@@ -328,7 +328,7 @@
           ["Compte d'abord jusqu'à minuit (24 h 00), puis de minuit à l'arrivée.", "Heures décimales : minutes ÷ 60."],
           "a) " + M(24 * 60 - dep) + " min. b) " + M((24 * 60 - dep) + " + " + (arr - 24 * 60) + " = " + dur) + " min. c) " + M(dur + " : 60 \\approx " + N(+(dur / 60).toFixed(2))) + " h."); },
       () => { const t = 3600 * R.int(1, 4) + 60 * R.int(10, 50) + R.int(5, 55), h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
-        return P(null, "Le chronomètre d'une course de relais affiche " + M(N(t)) + " secondes.",
+        return P(null, "À l'arrivée d'une course de relais, l'ordinateur de chronométrage donne le temps total de l'équipe en secondes : " + M(N(t)) + " s. Écris-le en heures, minutes et secondes." /* 26.11 (revue p3, n° 14) : un chronomètre affiche h:min:s */,
           [["a) Nombre d'heures entières", h], ["b) Minutes restantes", m], ["c) Secondes restantes", s]],
           ["Une heure = 3600 s : combien de fois 3600 dans le total ?", "Le reste, divise-le par 60."],
           M(N(t) + " = " + h + " \\cdot 3600 + " + m + " \\cdot 60 + " + s) + " : " + hmsT(t) + "."); },

@@ -42,7 +42,11 @@ function richPlan(ch, ids, level) {
   let ex = probe(C.ex, "ex");
   if (ex.filter((x) => lvOk(x.lv)).length >= Math.min(3, ex.length)) ex = ex.filter((x) => lvOk(x.lv));
   R.seed(mockSeed()); // tirage des exercices : un sujet différent à chaque fois
-  const exB = shuffle(ex).slice(0, 3);
+  /* 26.11 p3 (n° 3) : pas deux exercices de la même scène, et une scène vue ces 7 derniers jours en dernier recours */
+  const scOf = (x) => { try { R.seed(1); return sceneKey(C.ex[x.k]()); } catch (e) { return null; } };
+  const shuf = shuffle(ex), fresh = shuf.filter((x) => !sceneStale(typeof state !== "undefined" ? state : null, scOf(x))), exB = [];
+  R.seed(mockSeed());
+  for (const x of fresh.concat(shuf.filter((y) => !fresh.includes(y)))) { const k = scOf(x); if (exB.length < 3 && !(k && exB.some((y) => scOf(y) === k))) exB.push(x); }
   exB.forEach((x, j) => items.push({ part: "B", ex: j, rich: ch, kind: "ex", k: x.k, id: x.id, d: 3, seed: mockSeed() }));
   const used = new Set(exB.map((x) => x.id)), rest = ids.filter((id) => !used.has(id)).concat(ids.filter((id) => used.has(id)));
   for (let j = exB.length, r = 0; j < 3 && r < rest.length; j++, r++) [2, 3].forEach((d) => items.push({ part: "B", ex: j, id: rest[r], d, seed: mockSeed() }));
@@ -102,17 +106,23 @@ function mockQuestions() {
 }
 // Pas deux fois la même question dans un sujet (commentaire testeur du 20.11 : « questions identiques dans le test ») :
 // une question d'automatisme ou d'exercice qui reprend la forme d'une précédente est retirée avec une autre graine.
+/* 26.11 (revue p3, n° 3) : une scène (sceneKey, src/engine.js : parc en diagonale, table ronde…) une fois par sujet, et pas
+   une scène vue ces 7 derniers jours si possible ; les scènes du sujet sont notées pour le défi et la veille. */
 function mockDistinct(items) {
-  const seen = new Set();
-  return items.map((it) => {
+  const seen = new Set(), scenes = new Set();
+  for (const it of items) if (it.rich && RICH[it.rich]) { try { R.seed(it.seed); const k = sceneKey(RICH[it.rich][it.kind === "raison" ? "raison" : "ex"][it.k]()); if (k) scenes.add(k); } catch (e) { /* exercice sans scène */ } }
+  const res = items.map((it) => {
     if (it.rich || !it.id) return it;
     for (let t = 0; t < 15; t++) {
-      let f = "", hors = false; try { const q = Engine.make(state, it.id, it.d, it.seed); f = it.id + "|" + (q.ctx || qForm(q)); hors = !!(Engine.horsCO && Engine.horsCO(state, it.id, q)); } catch (e) { return it; }
-      if (!seen.has(f) && (!hors || t === 14)) { seen.add(f); return it; } /* 25.11 : forme hors programme de la classe (9e–10e) : autre graine */
+      let f = "", hors = false, sk = null; try { const q = Engine.make(state, it.id, it.d, it.seed); f = it.id + "|" + (q.ctx || qForm(q)); hors = !!(Engine.horsCO && Engine.horsCO(state, it.id, q)); sk = sceneKey(q); } catch (e) { return it; }
+      const vu = sk && (scenes.has(sk) || (t < 10 && sceneStale(state, sk)));
+      if (!seen.has(f) && ((!hors && !vu) || t === 14)) { seen.add(f); if (sk) scenes.add(sk); return it; } /* 25.11 : forme hors programme de la classe (9e–10e) : autre graine */
       it = { ...it, seed: mockSeed() };
     }
     return it;
   });
+  scenes.forEach((k) => sceneNote(state, k));
+  return res;
 }
 function mockNew(level) {
   level = level || (state.mock && state.mock.level) || "standard";

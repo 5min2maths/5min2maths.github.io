@@ -382,6 +382,9 @@ function activeLesson(id, L0, cont, review, opts = {}) {
   const reveal = (el) => { el.hidden = false; el.classList.add("pop"); setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 60); };
   const finish = () => { $("skip").hidden = true; if ($("s3").hidden) { reveal($("s3")); typeset($("s3")); } $("go").hidden = false; };
   // Défi : formules \( … \) rendues (ex. fractions, 22.11), sinon texte brut.
+  /* 26.11 (revue p3, n° 5 : « Défi 1 × 5 m de tissu », profil FR) : le séparateur de l'en-tête n'est pas un point médian en
+     France (la localisation · → × le prenait pour un produit). */
+  const goalSep = () => (typeof isFR === "function" && isFR() ? " — " : " · ");
   const setGoal = (t) => { const g = $("goal"); if (t.includes("\\(")) { g.innerHTML = t; typeset(g); } else g.textContent = t; };
   let started = false;
   app.querySelectorAll("#pc button").forEach((b) => (b.onclick = () => {
@@ -395,7 +398,7 @@ function activeLesson(id, L0, cont, review, opts = {}) {
     play();
   }));
   function play() {
-    setGoal(X.lab(0) + " · " + A.defis[0]);
+    setGoal(X.lab(0) + goalSep() + A.defis[0]);
     reveal($("s2"));
     A.play($("play"), (k, msg) => {
       const more = k + 1 < A.defis.length;
@@ -406,7 +409,7 @@ function activeLesson(id, L0, cont, review, opts = {}) {
       // 22.11 (retour de l'auteur : la consigne suivante remplaçait l'ancienne sans qu'on le voie) : le défi réussi
       // reste affiché, barré, au-dessus ; la nouvelle consigne clignote et revient à l'écran.
       const g = $("goal"); $("adone").insertAdjacentHTML("beforeend", `<li>✓ ${g.innerHTML}</li>`);
-      if (more) { setGoal(X.lab(k + 1) + " · " + A.defis[k + 1]); g.classList.remove("act-new"); void g.offsetWidth; g.classList.add("act-new"); setTimeout(() => $("gfb").scrollIntoView({ behavior: "smooth", block: "nearest" }), 60); }
+      if (more) { setGoal(X.lab(k + 1) + goalSep() + A.defis[k + 1]); g.classList.remove("act-new"); void g.offsetWidth; g.classList.add("act-new"); setTimeout(() => $("gfb").scrollIntoView({ behavior: "smooth", block: "nearest" }), 60); }
       else { $("goal").textContent = X.fin; burst(); finish(); }
     });
   }
