@@ -31,6 +31,9 @@ adaptations d'usage, le cadre légal, la diffusion et un plan chiffré. Sources 
   jour, 5 minutes, sans compte**, avec adaptation (Mathélo), leçons actives et préparation d'évaluation — pas un outil de
   l'enseignant pour fabriquer des fiches.
 
+- **Audit du lycée (26.11, branche agent/frlycee)** : placement, formes hors programme, vocabulaire et niveau de la 2nde,
+  de la 1re et de la Tle contrôlés contre les textes en vigueur : `tools/audit_fr_lycee_26-11.md` (test `tests/frplace.html`).
+
 ## 1. Programmes et examens en vigueur (2026-2027)
 
 Détail attendu par attendu : `tools/couverture_fr.md` § 1 et § 6 (JSON `tools/referentiels_fr.json`).

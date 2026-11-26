@@ -35,7 +35,7 @@ MAP = {
     "2nde.GE.01": ["vect3e"], "2nde.GE.02": ["vect3e"], "2nde.GE.03": ["vect3e"], "2nde.GE.05": ["vect3e"], "2nde.GE.06": ["vect3e", "vecgeo"], "2nde.GE.07": ["vect3e", "cart"],
     "2nde.GE.08": ["droites", "vect3e"], "2nde.GE.09": ["droites", "vect3e"], "2nde.AN.08": ["tabvar", "lectgraph"], "2nde.AN.09": ["tabvar", "lectgraph"],
     "2nde.AN.05": ["tabsignes", "ineq1"], "2nde.SP.05": ["stats", "diagr"], "2nde.SP.07": ["probcond"], "2nde.SP.11": ["probcond"], "2nde.SP.12": ["probcond", "proba2"],
-    "2nde.SP.13": ["probcond", "proba2"], "2nde.SP.14": ["probcond"], "2nde.SP.10": ["probcond"], "2nde.AU.18": ["affine", "linfn"], "2nde.AU.10": ["eq1", "eq2fact", "ineq1"],
+    "2nde.SP.13": ["probcond", "proba2"], "2nde.SP.14": ["probcond"], "2nde.SP.10": ["probcond"], "2nde.AN.12": ["tabvar", "lectgraph"], "2nde.AN.06": ["ineq", "lectgraph"], "2nde.AU.18": ["affine", "linfn"], "2nde.AU.10": ["eq1", "eq2fact", "ineq1"],
     # 1re spécialité (2026)
     "1re.AU.06": ["ineq1", "affzero", "ineq2", "tabsignes"], "1re.AU.07": ["distrib", "factor", "idrem"], "1re.AU.09": ["lectgraph", "tabvar"], "1re.AU.13": ["diagr", "stats", "quartiles"],
     "1re.AU.15": ["stats", "quartiles"], "1re.AU.16": ["probcond", "probtot"], "1re.AU.17": ["probcond", "probtot"],
@@ -57,7 +57,7 @@ MAP = {
     "Tle.SP.01": ["probarbre", "binom"], "Tle.SP.02": ["binom", "binomiale"], "Tle.SP.03": ["binom", "binomiale"], "Tle.SP.06": ["sommeva"], "Tle.SP.07": ["sommeva"],
 }
 # Couverture partielle (la notion ne traite qu'une partie de l'attendu)
-PARTIEL = {"6e.NC.42", "6e.NC.26", "3e-2019.NC.07", "2nde.AP.08", "1re.AN.05", "6e.EG.02", "6e.EG.17", "5e.EG.28", "1re.AN.13", "1re.GE.08", "1re.SP.04", "2nde.SP.10",
+PARTIEL = {"2nde.AN.12", "6e.NC.42", "6e.NC.26", "3e-2019.NC.07", "2nde.AP.08", "1re.AN.05", "6e.EG.02", "6e.EG.17", "5e.EG.28", "1re.AN.13", "1re.GE.08", "1re.SP.04", "2nde.SP.10",
            "Tle.AG.06", "Tle.AG.12", "Tle.AN.12"}  # 25.11 (agent trous) : Tle.AN.21 complet (y' = ay + f, eqdiff)
 # Attendu couvert en partie seulement tant que la notion indiquée manque (notions créées par agent/frfin, 25.11 au soir)
 SANS = {"1re.AN.09": "posrelc", "2nde.NC.10": "compdiff"}

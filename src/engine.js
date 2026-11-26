@@ -694,7 +694,7 @@ const Engine = {
     if (p && p.system === "FR" && typeof frLocal === "function") {
       const SKIP = new Set(["spec", "canon", "code", "id", "ctx", "e", "expr", "values", "value"]);
       /* copies (jamais de modification en place : une question peut partager des objets avec les tables communes) */
-      const loc = (v, d) => typeof v === "string" ? frLocalQ(v) : d > 6 || !v || typeof v !== "object" ? v : Array.isArray(v) ? v.map((x) => loc(x, d + 1))
+      const loc = (v, d) => typeof v === "string" ? (typeof frIdTxt === "function" && !/^\s*<svg/.test(v) ? frIdTxt(id, frLocalQ(v), p.grade) : frLocalQ(v)) : d > 6 || !v || typeof v !== "object" ? v : Array.isArray(v) ? v.map((x) => loc(x, d + 1))
         : Object.getPrototypeOf(v) !== Object.prototype ? v : Object.fromEntries(Object.entries(v).map(([k, x]) => [k, SKIP.has(k) ? x : loc(x, d + 1)]));
       q = loc(q, 0);
     }
