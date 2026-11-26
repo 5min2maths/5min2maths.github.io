@@ -11,7 +11,7 @@ Rien ici n'est bloquant : l'app est publiée avec le choix indiqué.
 5. **Notion du chapitre « en classe »** posée sans sa leçon en Révision / Défi / Automatismes (elle a été vue en classe) ; la leçon vient à la séance Mixte suivante.
 6. **Élève fort** : jamais de niveau 1 hors notion ratée — sauf les automatismes (ta décision n° 12 : niveau 1).
 7. **Note 6 d'une compétence** : exige une réponse de niveau ≥ 2 ou au moins 5 réponses (sinon 5 au plus). Abaisse certaines notes existantes.
-8. **Défi du jour possible le jour du positionnement** (~11 min ce jour-là) : à retirer ? (je propose : oui, pas de défi ce jour-là)
+8. ~~Défi du jour le jour du positionnement~~ : retiré (6e passage). Rien à décider.
 
 ## Contenu romand
 9. **« préimage »** remplace « antécédent » en profil romand (3 notions).
