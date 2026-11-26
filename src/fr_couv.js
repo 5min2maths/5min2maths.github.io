@@ -29,6 +29,56 @@ const HORS_FR = {
   quartiles: [[/quartile|Q_1|Q_3|moustache/i, 10]],
 };
 
+/* 26.11 (décision de l'enseignant, n° 5 : quartiles retirés de la 4e FR, gardés en 2nde) : au collège français, la notion
+   « quartiles » (libellé « Étendue, médiane ») n'avait plus que l'étendue, au niveau 1 (les formes à quartiles sont écartées
+   par HORS_FR). Formes de médiane réservées à la 4e et à la 3e françaises (q.fr = [8, 9]) : 4e.DP.02 (médiane d'une série
+   de petit effectif), 3e.DP.02 (étendue, médiane, données d'un tableau). Une entrée VARX par niveau, qui tire une forme :
+   un autre profil la refuse (horsCO) et retire sa graine ; le paquet « fr » n'est chargé que pour un profil français. */
+if (typeof VARX !== "undefined") (function () {
+  const nb = (v) => String(+(+v).toFixed(6)).replace(".", "{,}");
+  const lst = (a) => M(a.map(nb).join(" \\,;\\, "));
+  const srt = (a) => a.slice().sort((x, y) => x - y);
+  const med = (s) => (s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2);
+  const mix = (a) => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(R.rand() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+  const fr = (q, shown) => (q ? Object.assign(q, { fr: [8, 9] }, shown ? { shownOk: true } : {}) : q);
+  const pick = (fs) => () => { for (let k = 0; k < 40; k++) { const q = fs[Math.floor(R.rand() * fs.length)](); if (q) return q; } return fs[0](); }; /* fs[0] ne renvoie jamais null */
+  const L = {
+    1: [
+      () => { const s = srt(Array.from({ length: 7 }, () => R.int(4, 20))), m = s[3];
+        return fr(QV("Notes (sur 20) de 7 élèves, rangées dans l'ordre croissant : " + lst(s) + ". Quelle est la médiane de cette série ?", m, "7 valeurs : la médiane est la 4e, " + M(nb(m)) + " (3 valeurs avant, 3 après).",
+          { ctx: "mediane-triee", guide: [GS("Combien de valeurs ?", 7, "7."), GS("Rang de la valeur du milieu ?", 4, "4e (3 avant, 3 après)."), GS("Médiane ?", m, M(nb(m)) + ".")], traps: [TRAP(s[6] - s[0], "C'est l'étendue ; la médiane est la valeur du milieu."), TRAP(+(s.reduce((a, b) => a + b, 0) / 7).toFixed(6), "C'est la moyenne ; la médiane est la valeur du milieu.")] }), true); },
+      () => { const s = srt(Array.from({ length: 5 }, () => R.int(5, 40))), sh = mix(s), m = s[2]; if (sh[2] === m) return null;
+        return fr(QV("Quelle est la médiane de la série " + lst(sh) + " ?", m, "On range d'abord : " + lst(s) + ". 5 valeurs : la médiane est la 3e, " + M(nb(m)) + ".",
+          { ctx: "mediane-5", guide: [GS("On range la série dans l'ordre croissant. Quelle est la 1re valeur ?", s[0], lst(s) + "."), GS("Médiane (3e valeur de la série rangée) ?", m, M(nb(m)) + ".")], traps: [TRAP(sh[2], "C'est la valeur du milieu de la série non rangée : range-la d'abord.")] }), true); },
+    ],
+    2: [
+      () => { const n = 2 * R.int(10, 15), t = R.int(150, 165);
+        return fr(QV("Dans une classe de " + M(n) + " élèves, la médiane des tailles est " + M(t + "\\text{ cm}") + ". Au moins combien d'élèves mesurent " + M(t + "\\text{ cm}") + " ou plus ?", n / 2, "La médiane partage l'effectif en deux : au moins la moitié des élèves, " + M(n + " \\div 2 = " + n / 2) + ", mesure " + t + " cm ou plus.",
+          { ctx: "mediane-sens", guide: [GS("Quelle part de l'effectif est au-dessus de la médiane (en %) ?", 50, "Au moins la moitié : 50 %."), GS("Nombre d'élèves ?", n / 2, M(n / 2) + ".")], traps: [TRAP(t, "On demande un nombre d'élèves."), TRAP(n, "Pas tous : la moitié au moins.")] })); },
+      () => { const s = srt(Array.from({ length: 6 }, () => R.int(2, 30))), sh = mix(s), m = med(s); if (s[2] === s[3]) return null;
+        return fr(QV("Quelle est la médiane de la série " + lst(sh) + " ?", m, "Série rangée : " + lst(s) + ". 6 valeurs : la médiane est entre la 3e et la 4e, " + M("\\frac{" + s[2] + " + " + s[3] + "}{2} = " + nb(m)) + ".",
+          { ctx: "mediane-paire", guide: [GS("Série rangée : 3e valeur ?", s[2], lst(s) + "."), GS("4e valeur ?", s[3], M(s[3]) + "."), GS("Médiane (moyenne de ces deux valeurs) ?", m, M(nb(m)) + ".")], traps: [TRAP(s[2], "Effectif pair : la médiane est la moyenne des deux valeurs du milieu."), TRAP(s[3], "Effectif pair : la médiane est la moyenne des deux valeurs du milieu."), TRAP(med(sh), "Range d'abord la série.")] })); },
+      () => { const s = srt(Array.from({ length: 9 }, () => R.int(8, 45))), sh = mix(s), m = s[4]; if (sh[4] === m) return null;
+        return fr(QV("Temps (en minutes) mis par 9 élèves pour venir au collège : " + lst(sh) + ". Quelle est la médiane de ces temps ?", m, "Série rangée : " + lst(s) + ". 9 valeurs : la médiane est la 5e, " + M(nb(m)) + " min : la moitié des élèves met au plus " + nb(m) + " min.",
+          { ctx: "mediane-trajet", guide: [GS("Rang de la médiane pour 9 valeurs ?", 5, "5e (4 avant, 4 après)."), GS("Médiane (série rangée) ?", m, M(nb(m)) + " min.")], traps: [TRAP(sh[4], "Range d'abord la série."), TRAP(s[8] - s[0], "C'est l'étendue.")] }), true); },
+    ],
+    3: [
+      () => { const v = [8, 10, 12, 14, 16], e = v.map(() => R.int(1, 6)), N = e.reduce((a, b) => a + b, 0), s = v.flatMap((x, k) => Array(e[k]).fill(x)), m = med(s);
+        return fr(QV("Notes d'un contrôle : " + v.map((x, k) => "note " + M(x) + " : " + M(e[k]) + " élève" + (e[k] > 1 ? "s" : "")).join(" ; ") + ". Quelle est la note médiane ?", m,
+          "Effectif total " + M(N) + ". " + (N % 2 ? "La médiane est la " + (N + 1) / 2 + "e note" : "La médiane est la moyenne des " + N / 2 + "e et " + (N / 2 + 1) + "e notes") + " dans l'ordre croissant (effectifs cumulés : " + e.map((x, k) => e.slice(0, k + 1).reduce((a, b) => a + b, 0)).join(" ; ") + ") : " + M(nb(m)) + ".",
+          { ctx: "mediane-effectifs", guide: [GS("Effectif total ?", N, M(N) + "."), GS("Médiane ?", m, M(nb(m)) + ".")], traps: [TRAP(12, "La note du milieu du tableau n'est pas forcément la médiane : compte les élèves."), TRAP(+(s.reduce((a, b) => a + b, 0) / N).toFixed(6), "C'est la moyenne.")] })); },
+      () => { const s = srt(Array.from({ length: 5 }, () => R.int(3, 30))), m0 = s[2], x = s[4] + R.int(3, 15), s2 = srt([...s, x]), m = med(s2); if (m === m0 || new Set(s).size < 5) return null;
+        return fr(QV("La série " + lst(s) + " a pour médiane " + M(m0) + ". On ajoute la valeur " + M(x) + ". Quelle est la nouvelle médiane ?", m, "Nouvelle série rangée : " + lst(s2) + ". 6 valeurs : médiane " + M("\\frac{" + s2[2] + " + " + s2[3] + "}{2} = " + nb(m)) + ".",
+          { ctx: "mediane-ajout", guide: [GS("Combien de valeurs maintenant ?", 6, "6."), GS("Nouvelle médiane (moyenne des 3e et 4e valeurs) ?", m, M(nb(m)) + ".")], traps: [TRAP(m0, "La médiane change : il y a maintenant 6 valeurs."), TRAP(x, "La nouvelle valeur est la plus grande, pas la médiane.")] })); },
+      () => { const s = srt(Array.from({ length: 8 }, () => R.int(-6, 9))), sh = mix(s), m = med(s), e = s[7] - s[0]; if (s[3] === s[4] || s[0] >= 0) return null;
+        return fr(QV("Températures (en °C) relevées à 8 h pendant 8 jours : " + lst(sh) + ". Quelle est la température médiane ?", m, "Série rangée : " + lst(s) + ". 8 valeurs : " + M("\\frac{" + s[3] + (s[4] < 0 ? " + (" + s[4] + ")" : " + " + s[4]) + "}{2} = " + nb(m)) + " °C (étendue : " + M(s[7] + " - (" + s[0] + ") = " + e) + " °C).",
+          { ctx: "mediane-temp", guide: [GS("Série rangée : 4e valeur ?", s[3], lst(s) + "."), GS("5e valeur ?", s[4], M(s[4]) + "."), GS("Médiane ?", m, M(nb(m)) + " °C.")], traps: [TRAP(e, "C'est l'étendue."), TRAP(med(sh), "Range d'abord la série (attention aux négatifs).")] })); },
+    ],
+  };
+  const X = (VARX.quartiles = VARX.quartiles || {});
+  for (const lv of [1, 2, 3]) (X[lv] = X[lv] || []).push(pick(L[lv]));
+})();
+
 /* Niveau minimal d'une notion reprise d'une année inférieure, pour un profil FR de la classe indiquée (Engine.make).
    Calibré sur la sonde tests/_niv_fr.html (25.11) et les attendus du DNB (partie 1 : automatismes de 3e) et de
    l'épreuve anticipée de 1re (QCM d'automatismes). Le code de la question suit le niveau tiré (…-2-…). */

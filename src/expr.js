@@ -415,6 +415,22 @@ function finalForm(input, spec) {
   if (rc && Number.isInteger(Math.sqrt(+rc[1]))) return "Calcule la racine : le nombre sous le signe √ est un carré parfait.";
   return null;
 }
+/* 26.11 (décision de l'enseignant, n° 10) : un décimal pour une fraction est accepté s'il est exact (0,75 pour 3/4), refusé
+   sans compter faux s'il est arrondi (0,33 pour 1/3). Valeur attendue = fraction non décimale (dénominateur irréductible
+   ≤ 1000 avec un facteur autre que 2 et 5) et nombre décimal tapé, à moins d'une unité de son dernier chiffre : arrondi. */
+const ROUNDED_FRAC = "C'est une valeur arrondie : donne la valeur exacte, en fraction.";
+function nonDecFrac(x) {
+  if (!isFinite(x) || Math.abs(x - Math.round(x)) < 1e-9) return false;
+  for (let q = 2; q <= 1000; q++) { const p = x * q; if (Math.abs(p - Math.round(p)) < 1e-7 * Math.max(1, Math.abs(p))) { while (q % 2 === 0) q /= 2; while (q % 5 === 0) q /= 5; return q > 1; } }
+  return false;
+}
+function roundedFrac(node, want) {
+  const neg = node && node.t === "neg", t = neg ? node.a : node;
+  if (!t || t.t !== "num" || Number.isInteger(t.v) || !nonDecFrac(want)) return false;
+  const d = neg ? -t.v : t.v, k = (String(t.v).split(".")[1] || "").length;
+  /* valeur de machine (écart ≤ 10⁻⁹, déjà admise par sameValue, p. ex. 0,666666667) : gardée telle quelle */
+  return Math.abs(d - want) > 1e-9 * Math.max(1, Math.abs(want)) && Math.abs(d - want) <= Math.pow(10, -k) + 1e-12;
+}
 // Vérifie la réponse de l'élève selon la spécification de la question.
 // spec.kind : "value" (valeur numérique, round = précision demandée), "expr" (expression en x,
 // form = "product" | "expanded"), "set" (liste de solutions), "choice" (index d'option).
@@ -472,6 +488,7 @@ function checkAnswer(spec, input) {
       if (Math.abs(v - spec.value) <= spec.round * 5) return { status: "close", message: "Presque : vérifie l'arrondi (au " + (spec.round === 0.01 ? "centième" : spec.round === 0.1 ? "dixième" : "près") + ")." };
       return { status: "wrong" };
     }
+    if (!spec.plain && !spec.radical && roundedFrac(tree, spec.value)) return { status: "form", message: ROUNDED_FRAC };
     if (Expr.sameValue(v, spec.value)) {
       // Forme exigée par la consigne (audit 13.11) : notation scientifique, racine simplifiée a√b.
       const raw = String(input).replace(/\s+/g, "").replace(/[·×]/g, "*").replace(/,/g, ".");
@@ -500,6 +517,8 @@ function checkAnswer(spec, input) {
     const want = spec.values;
     const okAll = want.every((w) => got.some((g) => Expr.sameValue(g, w))) && got.every((g) => want.some((w) => Expr.sameValue(g, w)));
     if (okAll) return { status: "correct" };
+    /* 26.11 (décision n° 10) : toutes les solutions trouvées, mais une fraction donnée en décimal arrondi */
+    if (got.length === want.length && want.every((w) => items.some((it, k) => Expr.sameValue(got[k], w) || roundedFrac(it, w)))) return { status: "form", message: ROUNDED_FRAC };
     // 24.11 (commentaire de l'auteur) : message selon le cas, quel que soit le nombre de solutions manquantes ou en trop.
     if (want.some((w) => got.some((g) => Expr.sameValue(g, w)))) {
       const manque = want.some((w) => !got.some((g) => Expr.sameValue(g, w))), trop = got.some((g) => !want.some((w) => Expr.sameValue(g, w)));
@@ -511,6 +530,8 @@ function checkAnswer(spec, input) {
     const items = tree.t === "list" ? tree.items : [tree];
     const n = spec.values.length;
     if (items.length !== n || items.some((i) => Expr.vars(i).size)) return { status: "invalid", message: n === 3 ? "Donne trois nombres séparés par « ; » (x, puis y, puis z)." : "Donne deux nombres séparés par « ; » (x d'abord, puis y)." };
+    /* 26.11 (décision n° 10) : coordonnées justes, mais une fraction donnée en décimal arrondi */
+    { const g = items.map((i) => Expr.evaluate(i)); if (!g.every((x, k) => Expr.sameValue(x, spec.values[k])) && items.every((it, k) => Expr.sameValue(g[k], spec.values[k]) || roundedFrac(it, spec.values[k]))) return { status: "form", message: ROUNDED_FRAC }; }
     if (n === 3) { const g = items.map((i) => Expr.evaluate(i)); if (g.every((v, k) => Expr.sameValue(v, spec.values[k]))) return { status: "correct" }; return g.filter((v, k) => Expr.sameValue(v, spec.values[k])).length >= 1 ? { status: "close", message: "Une partie est juste : vérifie chaque valeur dans les trois équations." } : { status: "wrong" }; }
     const [u, v] = items.map((i) => Expr.evaluate(i));
     if (Expr.sameValue(u, spec.values[0]) && Expr.sameValue(v, spec.values[1])) return { status: "correct" };

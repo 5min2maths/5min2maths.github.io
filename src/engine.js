@@ -526,6 +526,9 @@ const Engine = {
     for (const c of this.catalog(state.profile)) if (!state.notions[c.id]) { state.notions[c.id] = this.newNotion(c.defaultStatus); changed = true; }
     // Ancien questionnaire : « pas encore » coché par l'élève → à venir (la notion s'ouvrira dans l'ordre).
     for (const s of Object.values(state.notions)) if (s.status === "nonvu" && !s.retry) { s.status = "avenir"; changed = true; }
+    /* Décision de l'enseignant (26.11, n° 4) : une réussite au positionnement compte comme notion vue. Progressions
+       antérieures : notion réussie au positionnement (boîte 2) et jamais reposée depuis → vue, leçon comprise. */
+    for (const s of Object.values(state.notions)) if (s.placed && !s.seen && !s.lessonSeen && s.box >= 2) { s.seen = 1; s.lessonSeen = true; changed = true; }
     for (const id of Object.keys(state.notions)) { const n = NOTIONS.find((x) => x.id === id); if (!n || !placeOf(n, state.profile)) { delete state.notions[id]; changed = true; } }
     if (this.unlock(state)) changed = true;
     return changed;
@@ -704,7 +707,8 @@ const Engine = {
     if (level < 3 && state && state.profile && state.profile.system === "FR" && typeof UPFR !== "undefined" && UPFR[state.profile.grade] && UPFR[state.profile.grade][id]) level = Math.max(level, UPFR[state.profile.grade][id]);
     /* 25.11 (audit France) : profil français, énoncé propre à la Suisse (horsCO) : graine suivante (le code suit la question). */
     if (seed && state && state.profile && state.profile.system === "FR") { let q = this.build(id, level, seed); for (let k = 1; k <= 12 && horsCO(state, id, q); k++) q = this.build(id, level, seed + k * 977); return keep(this.finalize(state, id, q)); }
-    if (seed) return keep(this.finalize(state, id, this.build(id, level, seed)));
+    /* 26.11 : forme réservée à la France (q.fr, p. ex. médiane en 4e–3e FR, src/fr_couv.js) tirée pour un autre profil : graine suivante. */
+    if (seed) { let q = this.build(id, level, seed); for (let k = 1; k <= 12 && q && q.fr && horsCO(state, id, q); k++) q = this.build(id, level, seed + k * 977); return keep(this.finalize(state, id, q)); }
     const rec = ((state.recentQ = state.recentQ || {})[id] = (state.recentQ[id] || []));
     const key = (q) => { let h = 0; for (const c of String(q.q) + JSON.stringify(q.spec)) h = (h * 31 + c.charCodeAt(0)) | 0; return h; };
     let q;

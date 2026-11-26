@@ -35,11 +35,11 @@ Légende : ✅ corrigé dans la branche `agent/ergo` · 💡 proposition à déc
 - ✅ **Indice invisible après une erreur** (q_wrong.png) : « Pas encore. Réessaie ! » et l'indice s'affichaient sous le clavier et les boutons, hors de l'écran ; l'élève voyait seulement sa réponse resélectionnée. L'app défile maintenant juste assez pour montrer l'indice (aussi pour « Je n'arrive pas à lire ta réponse » et pour les indices des problèmes en plusieurs parties). Fonction `fbInView` dans `src/app.js`.
 - ✅ Clavier à 7 colonnes (q_mp.png) : les chiffres, les touches les plus utilisées, faisaient 36 px de large contre 52 px pour « / fraction » ou « ^ puissance » (colonnes calées sur la largeur des légendes). Colonnes égales (`minmax(0, 1fr)`), légendes un peu plus grandes (0,62 rem).
 - ✅ Zones tactiles sous 44 px : « ✏️ Brouillon » (37), « 📖 Rappel de cours » (30), « Pas encore vu en classe » (37), « Voir directement la correction » (21), « 💬 Un commentaire sur cette question ? » (28), « Afficher ma réponse » (35), 👍 / 👎 (36). Tous à 44 px.
-- 💡 **« Valider » sous le premier écran** quand la question a une figure (q.png : énoncé + figure + brouillon + rappel + champ + clavier = « Valider » vers 1 000 px sur un écran de 800). L'élève tape au clavier puis doit défiler pour valider. Pistes : bouton « Valider » dans la dernière rangée du clavier (à la place de « ⌨ » qui sert peu sur téléphone), ou barre « Valider · Je ne sais pas » collée en bas de l'écran pendant la saisie.
+- 💡 **« Vérifier » sous le premier écran** quand la question a une figure (q.png : énoncé + figure + brouillon + rappel + champ + clavier = « Vérifier » vers 1 000 px sur un écran de 800). L'élève tape au clavier puis doit défiler pour valider. Pistes : bouton « Vérifier » dans la dernière rangée du clavier (à la place de « ⌨ » qui sert peu sur téléphone), ou barre « Valider · Je ne sais pas » collée en bas de l'écran pendant la saisie.
 - 💡 Pas de sortie visible avant la première réponse : « Terminer ici » n'apparaît qu'après une question répondue ; avant, seul le nom de l'app ramène à l'accueil (et le bouton retour du téléphone). Proposition : un petit « ✕ » ou « ← Accueil » discret en haut, avec la même confirmation.
 - 💡 « Je ne sais pas » coûte autant de Mathélo qu'une mauvaise réponse (q_ok.png : −28). Cohérent avec le calcul, mais décourage l'honnêteté ; à décider (pédagogie, pas ergonomie).
 - 💡 Brouillon ouvert (q_brouillon.png) : « Cacher le brouillon » au-dessus et « Fermer » en dessous font la même chose. Garder un seul des deux.
-- ✔️ Problèmes en plusieurs parties (q_prob.png, q_corr.png) : le clavier suit la partie active, bien. Mais l'écran est très long (≈ 1 250 px) ; voir la proposition « Valider » ci-dessus.
+- ✔️ Problèmes en plusieurs parties (q_prob.png, q_corr.png) : le clavier suit la partie active, bien. Mais l'écran est très long (≈ 1 250 px) ; voir la proposition « Vérifier » ci-dessus.
 - ✔️ Pas à pas (q_steps.png) : énoncé gardé en haut, étapes avec leur clavier, « Afficher ma réponse » : clair.
 
 ### Leçon active et rappel (lecon.png, lecon_active.png, q_rappel.png)
@@ -95,7 +95,7 @@ Déjà fait sur master avant cet audit (pas refait ici) : visite guidée non blo
 |---|---|---|
 | 1 | Corrigés progressifs après une erreur | ✅ (soir) la 1re étape du corrigé s'affiche d'office, sans rien replier, puis « Voir l'étape suivante (2 sur 4) » dévoile les autres (`solStepper`, réutilise `splitSol`) ; « Voir directement la correction » reste. Aussi pour les problèmes en plusieurs parties (corrigé jusque-là d'un seul tenant). Avant : après la 2e erreur (ou « Je ne sais pas »), « 🪜 Voir la correction étape par étape » / « On le fait ensemble », énoncé gardé au-dessus, le reste replié (q_steps.png) ; correction d'un seul tenant seulement quand elle n'a qu'une étape. ✅ L'indice de la 1re erreur est maintenant ramené à l'écran (voir plus haut). |
 | 2 | Défis à plusieurs parties : écran long | ✅ « 📌 Énoncé » collé en haut dès que l'énoncé sort de l'écran (2 lignes ; toucher = tout lire, max 42 % de l'écran ; disparaît quand la carte du problème n'est plus visible) : `bindRecap`, `.qrecap`. Le passage partie par partie (a, puis b) reste une option, non faite (change le déroulé). |
-| 3 | Champ visible quand le clavier est ouvert (360 × 640) | ✅ Clavier de l'app : au toucher du champ, l'écran défile pour montrer d'un coup champ + clavier + « Valider » ; à chaque touche, le champ revient s'il est sorti de l'écran (aussi sous le rappel d'énoncé des problèmes) : `ansInView`. Clavier du téléphone (⌨) : quand la zone visible rétrécit et que le champ passe dessous, il est recentré (`visualViewport`, `src/app.js`). À vérifier sur un vrai téléphone (le navigateur sans interface n'ouvre pas de clavier). |
+| 3 | Champ visible quand le clavier est ouvert (360 × 640) | ✅ Clavier de l'app : au toucher du champ, l'écran défile pour montrer d'un coup champ + clavier + « Vérifier » ; à chaque touche, le champ revient s'il est sorti de l'écran (aussi sous le rappel d'énoncé des problèmes) : `ansInView`. Clavier du téléphone (⌨) : quand la zone visible rétrécit et que le champ passe dessous, il est recentré (`visualViewport`, `src/app.js`). À vérifier sur un vrai téléphone (le navigateur sans interface n'ouvre pas de clavier). |
 | 4 | « Mathélo », noms des grades | ✅ Phrase d'explication en haut de « Mes grades » (ouvert en touchant le bandeau Mathélo) ; bulle de la visite guidée complétée (score, un grade tous les 75 points, exemples) ; pour qui a passé la visite avant cette bulle : petite carte unique sous le bandeau (« Mathélo = ton score… tu es 🌱 Pousse, le prochain est ✏️ Apprenti » · Compris · Voir tous les grades), dans l'emplacement des cartes de rappel (pas une case). `state.eloSeen`. |
 | 5 | En classe / Libre : une phrase claire | ✅ Une phrase sous chacun des deux boutons (celle du mode choisi en encre normale) au lieu d'une seule phrase qui changeait. |
 | 6 | Bilan : objectif concret pour demain | ✅ « 🎯 Objectif pour demain : encore N points avant ♟️ Stratège · consolider <notion> » (notion ratée dans la séance, sinon la dernière du carnet). Ancienne formulation : « 🎯 Prochain objectif : encore N points avant ♟️ Stratège · à consolider : <notion> » dans la carte de série du bilan. |
@@ -122,7 +122,7 @@ Aucun changement de fonctionnement ; rien ajouté à l'accueil hormis la deuxiè
 
 Par ordre d'intérêt pour un élève sur téléphone :
 
-1. **« Valider » toujours à portée** pendant la saisie (dans le clavier ou barre collée en bas).
+1. **« Vérifier » toujours à portée** pendant la saisie (dans le clavier ou barre collée en bas).
 2. **Sortie visible en séance** dès la première question (« ✕ » discret avec confirmation).
 3. **Retours unifiés** : un seul « ← » en haut de chaque écran ; « Retour à l'accueil » du bilan remonté après le score.
 4. **Carte de progression** utilisable au doigt (liste par thème ou cases plus grandes).
@@ -136,7 +136,7 @@ Ajouts du 24.11 soir (captures `tests/_cap/soir_*.png`, sonde `_ergo.html#q_prob
 
 - Corrigé progressif : la 1re étape d'office convient-elle, ou préfère-t-on que l'élève la demande (ancien bouton) ? Le découpage vient de `splitSol` : vérifier quelques corrigés coupés à un endroit bizarre.
 - Rappel « 📌 Énoncé » des problèmes : sur un vrai téléphone, pendant la saisie de b) et c) ; il laisse la place du bouton 💬 à droite.
-- Défilement automatique au toucher du champ (`ansInView`) : ne doit pas faire « sauter » l'écran quand la question a une grande figure (il ne défile que si champ + clavier + Valider tiennent dans l'écran).
+- Défilement automatique au toucher du champ (`ansInView`) : ne doit pas faire « sauter » l'écran quand la question a une grande figure (il ne défile que si champ + clavier + Vérifier tiennent dans l'écran).
 - Carte « Mathélo = ton score de maths » : apparaît une fois aux élèves qui avaient déjà passé la visite guidée (y compris les testeurs actuels), puis plus jamais.
 - Vert un peu plus foncé (`--ok`) : à regarder sur l'accueil et les corrections justes.
 

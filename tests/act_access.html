@@ -6,8 +6,8 @@ const d=document.querySelector("details.lesson"); d.open=true; d.dispatchEvent(n
 setTimeout(()=>{ L.push("rappel : "+document.querySelector(".act-inline .act-goal").textContent);
  for(let i=0;i<4;i++) document.querySelector(".act-inline #ja").click(); for(let i=0;i<3;i++) document.querySelector(".act-inline #jb").click();
  L.push("défi : "+document.querySelector(".act-inline .act-fb").textContent);
- screenComps(); /* 25.11 : CO = référentiel du PER ; leçons dans « Leçons » repliées par champ */ document.querySelectorAll("details.rles").forEach((x)=>x.open=true);
- const b=document.querySelector('.lopen[data-id="arith"]'); L.push("bouton : "+(b&&b.textContent)); b.click();
+ screenComps(); /* 26.11 (décision n° 15) : plus de ligne « Leçons » dans « Mes compétences » au CO ; leçon ouverte directement */
+ if(document.querySelector(".lopen,details.rles")) L.push("ÉCHEC ligne Leçons encore présente"); screenLesson("arith", screenComps, true);
  L.push("écran : "+document.querySelector(".eyebrow").textContent+" / "+document.querySelector("h2").textContent);
  document.getElementById("log").textContent=L.join("\n"); },50);
 }catch(e){document.getElementById("log").textContent="ERR "+e.stack}</script>

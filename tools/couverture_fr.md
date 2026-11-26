@@ -479,7 +479,7 @@ Non couverts (saisissables) :
 | `pyth` | Théorème de Pythagore | 4e | [8, 3] |  |
 | `pythfig` | Pythagore dans une figure, dans l'espace | 4e | — | à renseigner |
 | `pythrec` | Réciproque de Pythagore | 4e | — | à renseigner |
-| `quartiles` | Étendue, médiane, quartiles | 4e | — | à renseigner |
+| `quartiles` | Étendue, médiane, quartiles (en 4e–3e FR : « Étendue, médiane », formes de médiane réservées ; quartiles en 2nde, décision du 26.11) | 4e | [8, [9]] | fait 26.11 |
 | `racenc` | Encadrer et comparer des racines | 4e | — | à renseigner |
 | `rel` | Nombres relatifs | 4e | [7, 2] | à corriger (5e → 4e) |
 | `sci` | Notation scientifique | 4e | [8, 4] |  |

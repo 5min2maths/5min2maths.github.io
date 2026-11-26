@@ -1,0 +1,106 @@
+<!doctype html><meta charset="utf-8"><meta name="budget" content="40000"><link rel="stylesheet" href="../src/style.css">
+<main id="app" style="width:360px"></main><pre id="out">en cours</pre>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){};window.ensurePacks=()=>Promise.resolve();window.fetch=()=>Promise.resolve(new Response("{}"));if(navigator.sendBeacon)navigator.sendBeacon=()=>true;Element.prototype.scrollIntoView=function(){};window.confirm=()=>true;window.alert=()=>{};</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/defis_9.js"></script><script src="../src/defis_910.js"></script><script src="../src/defis_2c.js"></script><script src="../src/defis_sec2.js"></script><script src="../src/competences.js"></script><script src="../src/referentiel.js"></script><script src="../src/trx.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch4c_trous.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/ch1c_trous.js"></script><script src="../src/ch1c_argact.js"></script><script src="../src/ch11_rep3d.js"></script><script src="../src/perco.js"></script><script src="../src/fr_college.js"></script><script src="../src/fr_1re.js"></script><script src="../src/fr_3e.js"></script><script src="../src/fr_tle.js"></script><script src="../src/fr_fin.js"></script><script src="../src/fr_trous.js"></script><script src="../src/fr_couv.js"></script><script src="../src/ref_matu.js"></script><script src="../src/ref_fr.js"></script><script src="../src/ref_co.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_col34b.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/fr_act.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/parents.js"></script><script src="../src/presente.js"></script><script src="../src/app.js"></script>
+<script>
+/* Décisions de l'enseignant du 26.11 (tools/decisions_26-11.md) : contrôles des n° 2, 4, 5, 6, 10, 12, 15, 16. */
+const out = [], fail = [], ok = (c, m) => (c ? out : fail).push((c ? "ok " : "ÉCHEC ") + m);
+const fresh = (prof) => { state = Engine.newState(prof); Engine.autoInit(state); state.placed = true; save(); return state; };
+const _rq = renderQuestion; renderQuestion = function (q, opt) { window.__q = q; return _rq(q, opt); };
+try {
+  /* 16. bouton « Vérifier » */
+  fresh({ system: "CH", grade: 11, track: "college", minutes: 5 });
+  for (const id in state.notions) state.notions[id].lessonSeen = true;
+  session = { fmt: "", plan: ["prio|2"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), pinged: true }; nextQuestion();
+  const chk = document.getElementById("check");
+  ok(chk && chk.textContent.trim() === "Vérifier", "16. bouton de réponse « Vérifier » (" + (chk && chk.textContent) + ")");
+  ok(![...document.querySelectorAll("button")].some((b) => /^Valider/.test(b.textContent.trim())), "16. aucun bouton « Valider » sur la question");
+
+  /* 2. une question allégée par séance au plus */
+  let calls = 0; const ease0 = Engine.easeNext;
+  const ids = Object.keys(state.notions).filter((id) => GEN[id] && ["vu", "encours"].includes(state.notions[id].status)).slice(0, 6);
+  Engine.easeNext = (st, plan, i) => { calls++; return ids[0] + "|1|app"; };
+  session = { fmt: "mixte", plan: ids.map((id) => id + "|2|app"), i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), pinged: true }; nextQuestion();
+  for (let k = 0; k < 6 && session.i < session.plan.length; k++) {
+    const a = document.getElementById("ans"); if (!a) break;
+    a.value = "123456789"; document.getElementById("check").click(); a.value = "123456788"; document.getElementById("check").click();
+    const nx = document.getElementById("nx"); if (nx) nx.click(); else break;
+  }
+  Engine.easeNext = ease0;
+  ok(calls === 1 && session.easeUsed, "2. question allégée appliquée une fois sur une séance de 6 échecs (appels : " + calls + ")");
+
+  /* 4. réussite au positionnement = notion vue, sans leçon ni « Nouvelle notion » */
+  fresh({ system: "CH", grade: 9, track: "college", minutes: 5 });
+  const pid = Object.keys(state.notions).find((id) => LESSONS[id] && GEN[id] && ["vu", "encours"].includes(state.notions[id].status));
+  state.notions[pid].status = "encours"; state.notions[pid].seen = 0; state.notions[pid].lessonSeen = false;
+  Engine.placementResult(state, pid, true, 2);
+  ok(!Engine.lessonDue(state, pid) && !newNotion(pid), "4. " + pid + " réussie au positionnement : pas de leçon due, pas « Nouvelle notion »");
+  session = { fmt: "mixte", plan: [pid + "|1|app"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), pinged: true, lessonAt: lessonAtStart([pid + "|1|app"]) }; nextQuestion();
+  ok(!/Nouvelle notion|Rappel de cours/.test((document.querySelector(".eyebrow") || {}).textContent || "") && document.getElementById("check"), "4. séance suivante : la question directement, sans leçon");
+  const pid2 = Object.keys(state.notions).find((id) => id !== pid && LESSONS[id] && GEN[id] && ["vu", "encours"].includes(state.notions[id].status));
+  Object.assign(state.notions[pid2], { status: "encours", seen: 0, lessonSeen: false, placed: true, m: 0.75, box: 2 });
+  Engine.migrate(state);
+  ok(state.notions[pid2].lessonSeen && state.notions[pid2].seen === 1, "4. progression antérieure : réussite au positionnement migrée en notion vue");
+  Engine.placementResult(state, pid2, false, 2);
+
+  /* 5. France 4e–3e : médiane et étendue, pas de quartiles ; 2nde : quartiles ; profils suisses inchangés */
+  for (const g of [8, 9]) {
+    fresh({ system: "FR", grade: g, track: "college", minutes: 5 });
+    const cq = Engine.catalog(state.profile).find((c) => c.id === "quartiles");
+    let qt = 0, med = 0, n = 0;
+    for (const lv of [1, 2, 3, 4]) for (let k = 0; k < 25; k++) { const q = Engine.make(state, "quartiles", lv); n++; const t = q.q + " " + (q.parts || []).map((p) => p.label).join(" ");
+      if (/quartile|Q_1|Q_3|moustache/i.test(t)) qt++; if (/médiane/i.test(t)) med++; }
+    ok(cq && cq.label === "Étendue, médiane" && !qt && med >= 40, "5. FR " + (g === 8 ? "4e" : "3e") + " : libellé « " + (cq && cq.label) + " », " + qt + " question(s) à quartiles, " + med + " sur " + n + " sur la médiane");
+  }
+  fresh({ system: "FR", grade: 10, track: "college", minutes: 5 });
+  { let qt = 0, fr = 0; for (const lv of [2, 3]) for (let k = 0; k < 20; k++) { const q = Engine.make(state, "quartiles", lv); if (/quartile|Q_1|Q_3|moustache/i.test(q.q)) qt++; if (q.fr) fr++; }
+    ok(qt >= 30 && !fr, "5. FR 2nde : quartiles gardés (" + qt + "/40), aucune forme réservée au collège"); }
+  for (const prof of [{ system: "CH", grade: 13, track: "mp", minutes: 5 }, { system: "CH", grade: 15, track: "college", minutes: 5 }]) {
+    fresh(prof); if (!state.notions.quartiles) continue;
+    let fr = 0; for (const lv of [1, 2, 3]) for (let k = 0; k < 20; k++) { if (Engine.make(state, "quartiles", lv).fr) fr++; if (Engine.make(state, "quartiles", lv, 1 + k).fr) fr++; }
+    ok(!fr, "5. profil suisse " + prof.track + " " + prof.grade + " : aucune forme française (" + fr + ")");
+  }
+  { const bad = []; for (const lv of [1, 2, 3]) for (let sd = 1; sd <= 120; sd++) { const q = VARX.quartiles[lv][0](); if (!q || !q.fr || !(q.spec.value === q.spec.value) || !q.sol) bad.push(lv + ":" + sd); else if (checkAnswer(q.spec, String(q.spec.value)).status !== "correct") bad.push(lv + " valeur " + q.spec.value); }
+    ok(!bad.length, "5. formes de médiane : toujours une question valide" + (bad.length ? " — " + bad.slice(0, 4).join(" | ") : "")); }
+
+  /* 6. multiplication de décimaux : au moins 6 contextes de problème, chacun avec son ctx, valeurs cohérentes */
+  { const ctx = new Set(), bad = []; for (let sd = 1; sd <= 400; sd++) { const q = Engine.build("decmul", 4, sd); ctx.add(q.ctx || "carrelage");
+      for (const p of q.parts) { const v = p.spec.value; if (!isFinite(v) || v <= 0) bad.push(q.code + " " + v); if (p.spec.round && Math.abs(v * 100 - Math.round(v * 100)) > 1e-6) bad.push(q.code + " pas au centime " + v);
+        const f = Number.isInteger(v) ? String(v) : String(+v.toFixed(6)).replace(".", "{,}"); if (!q.sol.replace(/\\text\{'\}/g, "").includes(f) && !q.sol.replace(/\\text\{'\}/g, "").includes(v.toFixed(2).replace(".", "{,}"))) bad.push(q.code + " " + v + " absent du corrigé"); } }
+    ok(ctx.size >= 7, "6. decmul : " + ctx.size + " contextes de problème (" + [...ctx].join(", ") + ")");
+    ok(!bad.length, "6. decmul : valeurs attendues valides et présentes dans le corrigé" + (bad.length ? " — " + bad.slice(0, 4).join(" | ") : "")); }
+  { fresh({ system: "CH", grade: 10, track: "college", minutes: 5 }); const seen = []; for (let k = 0; k < 6; k++) { const q = Engine.make(state, "decmul", 4, undefined, true); if (q.d === 4) seen.push(q.ctx || "carrelage"); }
+    ok(new Set(seen).size === seen.length, "6. decmul : pas deux fois le même contexte en 6 problèmes de suite (" + seen.join(", ") + ")"); }
+
+  /* 10. décimal pour une fraction : exact accepté, arrondi refusé avec message */
+  const V = (value, input, o) => checkAnswer(Object.assign({ kind: "value", value }, o || {}), input);
+  ok(V(3 / 4, "0,75").status === "correct", "10. 0,75 pour 3/4 : accepté");
+  ok(V(3 / 4, "0,75", { final: true }).status === "correct", "10. 0,75 pour 3/4 (résultat exigé) : accepté");
+  ok(V(1 / 3, "1/3").status === "correct" && V(-5 / 6, "-5/6").status === "correct", "10. 1/3 et −5/6 en fraction : acceptés");
+  for (const [v, t] of [[1 / 3, "0,33"], [1 / 3, "0,3333"], [2 / 3, "0,67"], [2 / 3, "0,666667"], [-5 / 6, "-0,83"], [7 / 3, "2,33"]]) {
+    const r = V(v, t); ok(r.status === "form" && /arrondie/.test(r.message) && /fraction/.test(r.message), "10. " + t + " pour " + v.toFixed(4) + " : refusé (« " + r.message + " »)"); }
+  { const r = V(1 / 3, "0,33", { final: true }); ok(r.status === "form" && /arrondie/.test(r.message), "10. 0,33 pour 1/3 (résultat exigé) : refusé"); }
+  ok(V(2 / 3, "0,666666667").status === "correct", "10. valeur de machine (écart ≤ 10⁻⁹) : acceptée comme avant");
+  ok(V(1 / 3, "0,5").status === "wrong", "10. 0,5 pour 1/3 : faux (pas un arrondi)");
+  ok(V(1 / 3, "0,33", { round: 0.01 }).status === "correct", "10. arrondi demandé (au centième) : 0,33 accepté");
+  ok(V(0.333333, "0,333333").status === "correct", "10. valeur décimale stockée par le générateur : inchangé");
+  ok(checkAnswer({ kind: "set", values: [1 / 3, 2] }, "0,33 ; 2").status === "form" && checkAnswer({ kind: "set", values: [0.5, 2] }, "0,5 ; 2").status === "correct", "10. ensemble de solutions : arrondi refusé, décimal exact accepté");
+  ok(checkAnswer({ kind: "pair", values: [2 / 3, 1] }, "0,67 ; 1").status === "form" && checkAnswer({ kind: "pair", values: [0.25, 1] }, "0,25 ; 1").status === "correct", "10. coordonnées : arrondi refusé, décimal exact accepté");
+  ok(checkAnswer({ kind: "value", value: 3 / 4, final: true }, "6/8").status === "form", "10. fraction non simplifiée : exigence de forme gardée");
+
+  /* 12. automatismes : niveau 1 seulement */
+  for (const prof of [{ system: "CH", grade: 9, track: "college", minutes: 5 }, { system: "CH", grade: 11, track: "college", minutes: 5 }, { system: "FR", grade: 8, track: "college", minutes: 5 }, { system: "CH", grade: 13, track: "mp", minutes: 5 }]) {
+    fresh(prof); const lv = [];
+    for (let k = 0; k < 4; k++) for (const e of Engine.planSlots(state, ["drill", "drill", "drill", "drill", "drill", "drill"])) lv.push(+String(e).split("|")[1]);
+    ok(lv.length && lv.every((d) => d === 1), "12. " + prof.system + " " + prof.grade + " : automatismes au niveau 1 (" + [...new Set(lv)].join(",") + ")");
+  }
+  fresh({ system: "CH", grade: 11, track: "college", minutes: 5 }); for (const id in state.notions) state.notions[id].lessonSeen = true;
+  session = { fmt: "auto", plan: ["prio|3|drill"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), pinged: true }; nextQuestion();
+  ok(window.__q && window.__q.d === 1, "12. créneau automatisme gardé au niveau 3 (reprise) : posé au niveau 1 (" + (window.__q && window.__q.code) + ")");
+
+  /* 15. « Mes compétences » au CO : plus de ligne « Leçons » */
+  for (const g of [9, 10, 11]) { fresh({ system: "CH", grade: g, track: "college", minutes: 5 }); screenComps();
+    ok(!app.querySelector("details.rles, .lopen") && !/📖 Leçons/.test(app.textContent), "15. CO " + g + "e : pas de ligne « Leçons »"); }
+} catch (e) { fail.push("EXC " + e.message + " " + (e.stack || "").split("\n").slice(0, 3).join(" ")); }
+document.getElementById("out").textContent = fail.concat(out).join("\n") + "\n" + (fail.length ? fail.length + " ÉCHEC(S)" : "tout ok");
+</script>
