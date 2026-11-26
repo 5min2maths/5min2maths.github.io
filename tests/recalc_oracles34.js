@@ -16,8 +16,7 @@
     let s = String(tex).replace(/\\left|\\right/g, "").replace(/\\,|\\;|\\!/g, " ").replace(/\\operatorname\{([a-z]+)\}/g, "\\$1");
     s = s.replace(/([A-Z])e\^/g, "$1\\cdot e^");
     s = s.replace(/\\(sin|cos|tan)\^\{?(\d)\}?\s*\(([^()]*)\)/g, "(\\$1($3))^$2").replace(/\\(sin|cos|tan|ln|exp|sqrt|log)(?![a-z])/g, " \\$1");
-    s = s.replace(/\\log_\{?(\d+)\}?\s*\\?\(?/g, (m, b) => "\\LOGB" + b + "("); /* log en base b (parenthèses obligatoires ensuite) */
-    if (/\\LOGB/.test(s)) { s = s.replace(/\\LOGB(\d+)\(/g, (m, b) => "(1/ln(" + b + "))*ln("); }
+    s = s.replace(/\\log_\{?(\d+|[a-z])\}?\s*/g, (m, b) => "(1/\\ln(" + b + "))*\\ln "); /* log en base b */
     let e; try { e = tex2e(s); } catch (er) { return null; }
     if (/\\(?!pi)[a-zA-Z]/.test(e)) return null;
     let tr; try { tr = Expr.parse(e); } catch (er) { return null; }
@@ -62,7 +61,10 @@
     if (side) { const h = 1e-4; return snap(2 * S(h / 2) - S(h), 1e-6); }
     return snap((4 * S(5e-4) - S(1e-3)) / 3, 1e-8);
   };
-  const limInf = (f, s = 1) => { const X = 2e4 * s, a = f(X), b = f(2 * X), c = f(4 * X); return snap((8 * c - 6 * b + a) / 3, 1e-7); };
+  const limInf = (f, s = 1, tex = "") => {
+    if (/e\^|\\exp/.test(tex)) { const a = f(350 * s), b = f(700 * s); return Math.abs(a - b) < 1e-9 * Math.max(1, Math.abs(b)) ? snap(b, 1e-7) : NaN; } /* exponentielle : convergence rapide, pas d'extrapolation */
+    if (/\\ln|\\log/.test(tex)) return snap(f(1e12 * s), 1e-7); /* logarithme : ln(x)/x ≈ 3·10⁻¹¹ */
+    const X = 2e4 * s, a = f(X), b = f(2 * X), c = f(4 * X); return snap((8 * c - 6 * b + a) / 3, 1e-7); };
   /* intégrale (Simpson adaptatif) */
   function integ(f, a, b, eps = 1e-12) {
     const sim = (a, b, fa, fm, fb) => ((b - a) / 6) * (fa + 4 * fm + fb);
@@ -160,7 +162,7 @@
       else return { err: "réponse attendue de type " + sp.kind + " (intervalles recalculés)" };
       const E = [...(r.pts || [])]; if (sp.kind === "solset") for (const [a, , b] of sp.ivs) E.push(a, b); else E.push(sp.value);
       const T0 = []; for (let t = -60; t <= 60; t += 0.37) T0.push(+t.toFixed(4));
-      for (const e of E) if (e !== null && isFinite(e)) T0.push(e - 1e-3, e + 1e-3, e);
+      for (const e of E) if (e !== null && isFinite(e)) { T0.push(e - 1e-3, e + 1e-3); if (Math.abs(e * 1000 - Math.round(e * 1000)) < 1e-6) T0.push(e); } /* borne exacte seulement si elle est décimale (2/3 est stocké arrondi) */
       const bad = T0.find((t) => !!r.I(t) !== !!want(t));
       return { err: bad === undefined ? null : "ensemble attendu " + JSON.stringify(sp.ivs || [sp.op, sp.value]) + " faux en " + fmt(+bad.toFixed(6)) };
     }
@@ -168,11 +170,12 @@
   }
   const LIST = [];
   /* un oracle : ids (séparés par des espaces), f(c) → résultat ou null ; c = { x, raw, txt, S, D } */
+  const IDS = new Set(); /* notions munies d'un oracle de ce fichier : page tests/recalcul3.html */
   function O(ids, f) {
-    const set = new Set(ids.split(" "));
+    const set = new Set(ids.split(" ")); for (const i of set) IDS.add(i);
     LIST.push({ name: "recalc34 " + ids, f(x) {
       if (!set.has(x.id) || !x.spec) return null;
-      const c = { x, raw: String(x.raw).replace(/<br\s*\/?>/g, " ").replace(/\\\)\s*\\\(\s*=\s*/g, " = "), txt: x.txt, get S() { return segs(this.raw); }, get D() { return this._D || (this._D = defs(this.raw)); } };
+      const c = { x, raw: String(x.raw).replace(/<br\s*\/?>/g, " ").replace(/[\u00a0\u202f]/g, " ").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/\\\)\s*\\\(\s*=\s*/g, " = "), txt: String(x.txt).replace(/[\u00a0\u202f]/g, " "), get S() { return segs(this.raw); }, get D() { return this._D || (this._D = defs(this.raw)); } };
       const r = f(c); return r === null || r === undefined ? null : judge(x, r);
     } });
   }
@@ -191,7 +194,7 @@
     if (/expression (?:développée )?de \\\(\((\w) \\circ (\w)\)\(x\)\\\)|Donne l'expression de \\\(\((\w) \\circ (\w)\)\(x\)\\\)|Donne \\\(\((\w) \\circ (\w)\)\(x\)\\\) sous la forme/.test(c.raw)) {
       const m = /\((\w) \\circ (\w)\)\(x\)/.exec(c.raw), F = D[m[1]], H = D[m[2]]; if (!F || !H) return null; return { E: (t) => F(H(t)) };
     }
-    let m = /^Calcule \\\(([^]*\\circ[^]*)\\\)\.$/.exec(c.S.length ? c.raw.slice(c.raw.lastIndexOf("Calcule")) : "");
+    let m = /^Calcule \\\(([^]*?\\circ[^]*?)(?: = [^=]*)?\\\)\.$/.exec(c.S.length ? c.raw.slice(c.raw.lastIndexOf("Calcule")) : "");
     if (m) { let ok = true; const e = m[1].replace(/\((\w) \\circ (\w)\)\(([^)]+)\)/g, (u, a, b, t) => { if (!D[a] || !D[b]) { ok = false; return "0"; } return "(" + D[a](D[b](val(t))) + ")"; }); if (!ok) return null; return val(e); }
     if ((m = /domaine de définition de \\\((\w) \\circ (\w)\\\)/.exec(c.raw))) { const F = D[m[1]], H = D[m[2]]; if (!F || !H) return null; return { I: (t) => fin(H(t)) && fin(F(H(t))) }; }
     if ((m = /exclure du domaine de \\\((\w) \\circ (\w)\\\)/.exec(c.raw))) {
@@ -292,7 +295,7 @@
     const L = limSeg(c); if (!L) return null; const [v, to, body, eq] = L;
     if (/^Calcule/.test(c.txt) && !eq) {
       const f = fn(body.replace(/^\((.*)\)$/, "$1"), [v]); if (!f) return null;
-      if (/infty/.test(to)) return limInf(f, /^-/.test(to) ? -1 : 1);
+      if (/infty/.test(to)) return limInf(f, /^-/.test(to) ? -1 : 1, body);
       const a = val(to); return fin(a) ? lim(f, a) : null;
     }
     if (eq && /Pour quelle valeur de \\\(k\\\)/.test(c.raw)) { const F = fn(body, [v, "k"]); if (!F) return null; return lin((k) => limInf((u) => F({ [v]: u, k }), /^-/.test(to) ? -1 : 1) - val(eq)); }
@@ -366,7 +369,7 @@
       const [N, a, b, d] = m;
       if (/ni [^?]* ni /.test(t)) return (N - (a + b - d)) / N; if (/au moins l'un|l'un ou l'autre/.test(t)) return (a + b - d) / N; if (/un seul|exactement un/.test(t)) return (a + b - 2 * d) / N; return null;
     }
-    if (/jeu de jass de 36 cartes/.test(t) && (m = /tirer une? (?:cœur|carreau|trèfle|pique) ou ((?:une? (?:as|roi|valet|dame|6|7|8|9|10)(?:, | ou )?)+) \?/.exec(t))) { const r = (m[1].match(/une? /g) || []).length; return (9 + 4 * r - r) / 36; }
+    if (/jeu de jass de 36 cartes/.test(t) && (m = /tirer une? (?:cœur|carreau|trèfle|pique)(?: ou|,) (une carte de valeur ((?:\d+, )*\d+ ou \d+)|une figure|(?:une? (?:as|roi|valet|dame|dix|\d+)(?:, | ou )?)+) /.exec(t))) { const r = m[2] ? m[2].split(/, | ou /).length : /figure/.test(m[1]) ? 3 : (m[1].match(/une? /g) || []).length; return (9 + 3 * r) / 36; }
     if ((m = /P\(A\) = (\d+(?:\{,\}\d+)?),? P\(B\) = (\d+(?:\{,\}\d+)?) et P\(A \\(cup|cap) B\) = (\d+(?:\{,\}\d+)?)/.exec(c.raw.replace(/\\\)|\\\(/g, "")))) {
       const [a, b] = [val(m[1]), val(m[2])], u = val(m[4]), I = m[3] === "cup" ? a + b - u : u, U = m[3] === "cup" ? u : a + b - u;
       if (/Calcule \\\(P\(A \\cap B\)\\\)/.test(c.raw)) return I; if (/Calcule \\\(P\(A \\cup B\)\\\)/.test(c.raw)) return U;
@@ -947,8 +950,8 @@
     const evs = c.S.filter((s) => /X/.test(s) && /\\le|\\ge|<|>/.test(s) && !/\\mid/.test(s));
     if (P) {
       const [mu, sg] = P;
-      if (/Quelle est la probabilité, en %, que/.test(t) && !/Sachant/.test(t)) { if (/ ou /.test(t.split("que").pop()) && evs.length === 2) return { v: ev2(evs[0], mu, sg) + ev2(evs[1], mu, sg) }; return evs.length === 1 ? { v: ev2(evs[0], mu, sg) } : null; }
-      if ((m = mt(c, new RegExp(`Sur ${NB} observations indépendantes, combien de fois attend-on`)))) { const p = evs.length === 2 && / ou /.test(t) ? ev2(evs[0], mu, sg) + ev2(evs[1], mu, sg) : evs.length === 1 ? ev2(evs[0], mu, sg) : NaN; return (m[0] * p) / 100; }
+      if (/Quelle est la probabilité, en %, que/.test(t) && !/Sachant/.test(t)) { if (/\\\) ou \\\(/.test(raw) && evs.length === 2) return { v: ev2(evs[0], mu, sg) + ev2(evs[1], mu, sg) }; return evs.length === 1 ? { v: ev2(evs[0], mu, sg) } : null; }
+      if ((m = mt(c, new RegExp(`Sur ${NB} observations indépendantes, combien de fois attend-on`)))) { const p = evs.length === 2 && /\\\) ou \\\(/.test(raw) ? ev2(evs[0], mu, sg) + ev2(evs[1], mu, sg) : evs.length === 1 ? ev2(evs[0], mu, sg) : NaN; return (m[0] * p) / 100; }
       if ((m = /Calcule la valeur centrée réduite .* de \\\(x = ([^\\]*)\\\)/.exec(raw))) return (val(m[1]) - mu) / sg;
       if ((m = /Sachant que \\\(([^\\]*)\\\), quelle est la probabilité, en %, que \\\(([^\\]*)\\\)/.exec(raw))) return (100 * ev2(m[2], mu, sg)) / ev2(m[1], mu, sg);
       if ((m = /(Au-dessus|En dessous) de quelle valeur se trouvent les \\\(([\d{},]+)\\,\\%\\\)/.exec(raw))) { const p = val(m[2]), k = [1, 2, 3].find((q) => near(100 - Fr(q), p)); return k ? mu + (m[1] === "Au-dessus" ? 1 : -1) * k * sg : null; }
@@ -1132,7 +1135,211 @@
     return null;
   });
 
+
+  /* ================= MP 3e–4e ================= */
+  const piSnap = (v) => Math.PI * snap(v / Math.PI, 1e-7, 60);
+  O("logdef logprop eqlog", (c) => {
+    const t = c.txt, raw = c.raw; let m;
+    if ((m = /^Résous \\\(\\log_\{?(\d+)\}? x = ([^\\]*)\\\)\.?/.exec(raw))) return { S: [(+m[1]) ** val(m[2])] };
+    if ((m = /^Calcule sans calculatrice \\\(([^\\]*(?:\\(?:log|frac|sqrt|cdot)[^\\]*)*)\\\)\.?(?: \(fraction\))?$/.exec(raw))) { const v = val(m[1]); return fin(v) ? snap(v, 1e-9) : null; }
+    if ((m = /^Résous \\\(([\d{},]+)\^\{x\} = ([\d{},]+)\\\)/.exec(raw))) return Math.log(val(m[2])) / Math.log(val(m[1]));
+    if ((m = /Calcule \\\(L\\\) pour un son \\\(([^\\]*(?:\\cdot[^\\]*)?)\\\) fois plus intense/.exec(raw))) return 10 * Math.log10(val(m[1]));
+    if ((m = /Calcule le pH si \\\(\[H\^\+\] = ([^\\]*(?:\\cdot[^\\]*)?)\\\)/.exec(raw))) return -Math.log10(val(m[1]));
+    if ((m = /^Sachant que \\\(\\log 2 \\approx ([\d{},]+)\\\)(?: et \\\(\\log 3 \\approx ([\d{},]+)\\\))?, calcule sans calculatrice \\\(\\log ([\d{},]+)\\\)/.exec(raw))) {
+      const l2 = val(m[1]), l3 = m[2] ? val(m[2]) : NaN, n = val(m[3]);
+      for (let a = -6; a <= 6; a++) for (let b = m[2] ? -6 : 0; b <= (m[2] ? 6 : 0); b++) for (let e = -4; e <= 4; e++) if (near(2 ** a * 3 ** b * 10 ** e, n, 1e-12)) return { v: a * l2 + (b ? b * l3 : 0) + e };
+      return null;
+    }
+    if ((m = /^Simplifie \\\(\\log_a\\left\(([\s\S]*?)\\right\)\\\)/.exec(raw))) { const f = fn(m[1], ["a"]); if (!f) return null; const v2 = Math.log(f(2)) / Math.log(2), v3 = Math.log(f(3)) / Math.log(3); return near(v2, v3) ? snap(v2, 1e-9) : { err: "dépend de a" }; }
+    if ((m = /^Résous \\\(\\log_\{?(\d+)\}? x = ([^\\]*)\\\)/.exec(raw))) { const v = val(m[2]); return fin(v) ? { S: [snap((+m[1]) ** v, 1e-9)] } : null; }
+    return null;
+  });
+  O("croissexp explogfn", (c) => {
+    const t = c.txt, raw = c.raw, f = Object.values(c.D)[0]; let m;
+    if ((m = mt(c, new RegExp(`Combien y a-t-il de bactéries après ${NB} heures`))) && f) return f(m[0]);
+    if ((m = mt(c, new RegExp(`achetée ${NB} CHF perd ${NB} % de sa valeur chaque année\\. Que vaut-elle après ${NB} ans`)))) return m[0] * (1 - m[1] / 100) ** m[2];
+    if ((m = mt(c, new RegExp(`Un capital de ${NB} CHF est placé à ${NB} % d'intérêts composés par an\\. Que vaut-il après ${NB} ans`)))) return m[0] * (1 + m[1] / 100) ** m[2];
+    if ((m = mt(c, new RegExp(`Un capital est placé à ${NB} % d'intérêts composés\\. Après combien d'années entières aura-t-il doublé`)))) { let n = 1; while ((1 + m[0] / 100) ** n < 2) n++; return n; }
+    if ((m = mt(c, new RegExp(`Une culture de ${NB} bactéries double toutes les ${NB} heures\\. Après combien d'heures y en aura-t-il ${NB}`)))) return m[1] * Math.log2(m[2] / m[0]);
+    if ((m = mt(c, new RegExp(`Un capital de ${NB} CHF placé à intérêts composés vaut ${NB} CHF après ${NB} ans\\. Quel est le taux annuel`)))) return 100 * ((m[1] / m[0]) ** (1 / m[2]) - 1);
+    if ((m = mt(c, new RegExp(`Le corps élimine ${NB} % d'un médicament par heure\\. Après combien d'heures entières en reste-t-il moins de ${NB} %`)))) { let n = 1; while ((1 - m[0] / 100) ** n >= m[1] / 100) n++; return n; }
+    if ((m = mt(c, new RegExp(`passe par \\(0 ; ${NB}\\) et \\(${NB} ; ${NB}\\)\\. (?:Que vaut b|Calcule f\\(${NB}\\))`)))) { const a = m[0], b = (m[2] / a) ** (1 / m[1]); return /Que vaut b/.test(t) ? snap(b, 1e-9) : a * b ** m[3]; }
+    if ((m = /Quel est le zéro de \\\(f\(x\) = ([^\\]*(?:\\log[^\\]*)*)\\\)/.exec(raw))) { const g = fn(m[1]); return g ? { S: zeros(g, 200).map((v) => snap(v)) } : null; }
+    if ((m = /Quel est son zéro/.exec(t)) && (m = /\\\(g\(x\) = ([^\\]*(?:\\log[^\\]*)*)\\\)/.exec(raw))) { const g = fn(m[1]); return g ? { S: zeros(g).map((v) => snap(v)) } : null; }
+    if (/Quel est l'ensemble de définition de/.test(t) && f) return { I: (u) => fin(f(u)), pts: zeros((u) => (fin(f(u)) ? 1 : -1)) };
+    if ((m = mt(c, new RegExp(`Estime la population après ${NB} ans`))) && f) return f(m[0]);
+    if ((m = /Calcule \\\(f\^\{-1\}\(([^)]*)\)\\\)/.exec(raw)) && f) { const y = val(m[1]), r = zeros((u) => f(u) - y); return r.length === 1 ? snap(r[0]) : null; }
+    if ((m = /Après combien de jours y a-t-il \\\(([\d\\text{}']+)\\\) malades/.exec(raw)) && f) { const y = val(m[1].replace(/\\text\{'\}/g, "")), r = zeros((u) => f(u) - y); return r.length === 1 ? r[0] : null; }
+    return null;
+  });
+  O("similmp", (c) => {
+    const t = c.txt; let m;
+    if ((m = mt(c, new RegExp(`figure d'aire ${NB} cm\\^2 Toutes ses longueurs sont multipliées par ${NB}`))) || (m = mt(c, new RegExp(`figure d'aire ${NB} cm\\^2\\.? Toutes ses longueurs sont multipliées par ${NB}`)))) return m[0] * m[1] ** 2;
+    if ((m = mt(c, new RegExp(`solide de volume ${NB} cm\\^3\\.? Ses longueurs sont multipliées par ${NB}`)))) return m[0] * m[1] ** 3;
+    if ((m = /Une statue de ([\d,]+) (m|cm) pèse ([\d']+) kg\. Quelle est la masse d'une copie semblable, dans le même matériau, de ([\d,]+) (m|cm)/.exec(t))) { const L = (v, u) => nn(v) * (u === "m" ? 100 : 1); return nn(m[3]) * (L(m[4], m[5]) / L(m[1], m[2])) ** 3; }
+    if ((m = /Un verre conique \(pointe en bas\) est rempli jusqu'aux \\\(\\frac\{(\d+)\}\{(\d+)\}\\\) de sa hauteur/.exec(c.raw))) return 100 * (+m[1] / +m[2]) ** 3;
+    if ((m = mt(c, new RegExp(`Deux bouteilles semblables mesurent ${NB} cm et ${NB} cm de haut\\. La première contient ${NB} L`)))) return m[2] * (m[1] / m[0]) ** 3;
+    if ((m = mt(c, new RegExp(`Sur une carte au 1 : ${NB}, un terrain couvre ${NB} cm\\^2\\. Quelle est sa surface réelle \\(en m²\\)`)))) return (m[1] * m[0] * m[0]) / 1e4;
+    if ((m = mt(c, new RegExp(`Deux cônes semblables ont des volumes de ${NB} cm\\^3 et ${NB} cm\\^3\\. Quel est le rapport de leurs hauteurs \\(petit ÷ grand\\)`)))) return snap(Math.cbrt(m[0] / m[1]), 1e-9);
+    if ((m = mt(c, new RegExp(`Deux boîtes semblables ont des surfaces de ${NB} cm\\^2 et ${NB} cm\\^2\\. La première a un volume de ${NB} cm\\^3`)))) return m[2] * (m[1] / m[0]) ** 1.5;
+    if ((m = /Un cône a un volume de \\\((\d+)\\ ?\\text\{ ?cm\}\^3\\\)\. On le coupe par un plan parallèle à la base, aux \\\(\\frac\{(\d+)\}\{(\d+)\}\\\) de sa hauteur depuis la pointe\. Quel est le volume du (tronc de cône|petit cône)/.exec(c.raw)) || (m = /Un cône a un volume de \\\((\d+)\\\) cm\^3\. On le coupe[^\\]*\\\(\\frac\{(\d+)\}\{(\d+)\}\\\)[^?]*volume du (tronc de cône|petit cône)/.exec(c.raw))) { const V = +m[1], k = +m[2] / +m[3]; return m[4] === "petit cône" ? V * k ** 3 : V * (1 - k ** 3); }
+    if ((m = mt(c, new RegExp(`On veut multiplier par ${NB} le volume d'un ballon sphérique de rayon ${NB} cm\\. Quel doit être le nouveau rayon`)))) return m[1] * Math.cbrt(m[0]);
+    return null;
+  });
+  O("sinusmp", (c) => {
+    const t = c.txt, raw = c.raw, f = Object.values(c.D)[0]; let m;
+    if (/Quelle est la période de/.test(t) && f) { const S0 = (raw.match(/\\sin\\?l?e?f?t?\(?\s*([^)]*?)x/) || []); const b = /\\sin\\left\(\\frac\{(\d+)\}\{(\d+)\}x\\right\)|\\sin\((\d*)x\)|\\sin\\left\((\d*)x\\right\)/.exec(raw); if (!b) return null; const k = b[1] ? +b[1] / +b[2] : b[3] !== undefined ? (b[3] === "" ? 1 : +b[3]) : b[4] === "" ? 1 : +b[4]; return piSnap((2 * Math.PI) / k); }
+    if ((m = mt(c, new RegExp(`varie au cours de l'année entre ${NB}° C et ${NB}° C\\. On la modélise par f\\(x\\) = a sin\\(b x\\) \\+ d\\. Que vaut (d|a)`)))) return /Que vaut d/.test(t) ? (m[0] + m[1]) / 2 : (m[1] - m[0]) / 2;
+    if ((m = /donne le premier \\\(x > ([^\\]*(?:\\frac\{[^}]*\}\{[^}]*\})?[^\\]*)\\\) où \\\(f\\\) est (maximale|minimale)/.exec(raw)) && f) {
+      const x0 = val(m[1]), s = m[2] === "maximale" ? 1 : -1, g = (u) => d1(f, u); const r = zsc(g, 40).filter((u) => u > x0 + 1e-9 && s * g(u - 1e-3) > 0).sort((a, b) => a - b); return r.length ? piSnap(r[0]) : null;
+    }
+    if ((m = mt(c, new RegExp(`À quelle heure la hauteur vaut-elle ${NB} m pour la première fois`))) && f) { const r = zeros((u) => f(u) - m[0], 30).filter((u) => u > 0).sort((a, b) => a - b); return r.length ? r[0] : null; }
+    return null;
+  });
+  O("fctmp", (c) => {
+    const t = c.txt, raw = c.raw, D = c.D; let m;
+    if ((m = /La fonction \\\(f\(x\) = ([^\\]*)\\\) est bijective de \\\(([^\\]*(?:\\[a-z]+[^\\]*)*)\\\) vers .*Calcule \\\(f\^\{-1\}\(([^)]*)\)\\\)/.exec(raw))) {
+      const f = fn(m[1]), y = val(m[3]); if (!f) return null; const I = m[2].replace(/\\,|;/g, " "), pos = /^\[\s*0\s/.test(I), neg = /\s0\s*\]$/.test(I.trim());
+      const r = zeros((u) => f(u) - y).filter((u) => (pos ? u >= -1e-12 : neg ? u <= 1e-12 : true)); return r.length === 1 ? snap(r[0]) : { err: r.length + " antécédents dans l'intervalle" };
+    }
+    if ((m = /On sait que \\\(f\(([^)]*)\) = ([^\\]*)\\\)\. Soit \\\(g\(x\) = ([^\\]*)\\\)\. Que vaut \\\(g\(([^)]*)\)\\\)/.exec(raw))) {
+      const a = val(m[1]), b = val(m[2]), x0 = val(m[4]), q = /f\(([^()]*)\)/.exec(m[3]); if (!q) return null; const inner = fn(q[1]), outer = fn(m[3].replace(/f\([^()]*\)/, "F"), ["F"]); if (!inner || !outer) return null;
+      return near(inner(x0), a) ? outer(b) : { err: "g(" + x0 + ") ne fait pas intervenir f(" + a + ")" };
+    }
+    if ((m = /Le point \\\(\(([^\\]*)\)\\\) est sur le graphe de \\\(f\\\)\. Donne le point correspondant du graphe de \\\(g\(x\) = ([^\\]*(?:\\frac\{\d+\}\{\d+\}[^\\]*)*)\\\)/.exec(raw))) {
+      const [x0, y0] = m[1].split(/\\,;\\,|;/).map((u) => val(u)), q = /f\(([^()]*)\)/.exec(m[2]); if (!q) return null; const inner = fn(q[1]), outer = fn(m[2].replace(/f\([^()]*\)/, "F"), ["F"]); if (!inner || !outer) return null;
+      const a = inner(1) - inner(0), b = inner(0); return { P: [snap((x0 - b) / a), outer(y0)] };
+    }
+    if ((m = /Donne l'expression de \\\(f\^\{-1\}\(x\)\\\)/.exec(raw)) && D.f) { const f = D.f, inv = (y) => { const r = zsc((u) => f(u) - y, 60); return r.length === 1 ? r[0] : NaN; }; return { E: inv, pts: [-2.3, -1.1, 0.7, 1.6, 2.9, 3.4, 7.7, 11.2] }; }
+    if (/Quel est l'ensemble de définition de/.test(t) && D.f) return { I: (u) => fin(D.f(u)), pts: zeros((u) => (fin(D.f(u)) ? 1 : -1)) };
+    if (/coordonnées du point d'intersection des graphes de f\(x\) = .* et g\(x\) = /.test(t) && D.f && D.g) { const r = zeros((u) => D.f(u) - D.g(u)).filter((u) => fin(D.f(u))); return r.length === 1 ? { P: [snap(r[0]), snap(D.f(r[0]))] } : { err: r.length + " intersections" }; }
+    return null;
+  });
+  O("posdroites", (c) => {
+    const t = c.txt, raw = c.raw; let m;
+    const K = cases(raw);
+    if ((m = /coupe la droite \\\(g\\\) ?:? ?\\\(y = ([^\\]*)\\\)|coupe la droite g y = /.exec(raw)) || /coupe la droite g/.test(t)) {
+      const L = K.length && param(K[0]); const s = c.S.find((u) => /^y = /.test(u)); const G = s && fn(s.slice(4)); if (!L || !G) return null; const k = lin((u) => { const P = L.at(u, 0); return P[1] - G(P[0]); }); return { P: L.at(k, 0).map((v) => snap(v)) };
+    }
+    if ((m = /Pour quelle valeur de \\\(m\\\) la droite \\\(d\\\) : .* est-elle parallèle à la droite \\\(g\\\) : \\\(([^=]*)=\s*([^\\]*)\\\)/.exec(raw))) {
+      const rows = K[0].map((r) => fn(r.replace(/^[xy]\s*=\s*/, ""), ["t", "m"])), gl = fn(m[1], ["x", "y"]); if (rows.some((f) => !f) || !gl) return null; const a = gl({ x: 1, y: 0 }) - gl({ x: 0, y: 0 }), b = gl({ x: 0, y: 1 }) - gl({ x: 0, y: 0 });
+      return lin((k) => { const dx = rows[0]({ t: 1, m: k }) - rows[0]({ t: 0, m: k }), dy = rows[1]({ t: 1, m: k }) - rows[1]({ t: 0, m: k }); return dx * -a - dy * b; });
+    }
+    if ((m = /Pour quelle valeur du paramètre \\\(t\\\) la droite \\\(d\\\) : .* coupe-t-elle la droite \\\(([^=]*)=\s*([^\\]*)\\\)/.exec(raw))) { const L = param(K[0]), gl = fn(m[1], ["x", "y"]), r = val(m[2]); if (!L || !gl) return null; return lin((u) => { const P = L.at(u, 0); return gl({ x: P[0], y: P[1] }) - r; }); }
+    if ((m = /sont parallèles\. Pour quelle valeur de \\\(c\\\) sont-elles confondues/.exec(raw)) && K.length === 2) {
+      const L = param(K[0]), rows = K[1].map((r) => fn(r.replace(/^[xyz]\s*=\s*/, ""), ["s", "c"])); if (!L || rows.some((f) => !f)) return null;
+      const i = rows.findIndex((f) => f({ s: 0, c: 0 }) === f({ s: 0, c: 1 })), j = rows.findIndex((f) => f({ s: 0, c: 0 }) !== f({ s: 0, c: 1 })); if (i < 0 || j < 0 || !L.dir[i]) return null;
+      const k = (rows[i]({ s: 0, c: 0 }) - L.P0[i]) / L.dir[i]; return lin((cc) => rows[j]({ s: 0, c: cc }) - (L.P0[j] + k * L.dir[j]));
+    }
+    if (/Pour quelle valeur de \\\(m\\\) les droites de l'espace .* sont-elles parallèles/.test(raw) && K.length === 2) {
+      const D2 = K.map((rows) => rows.map((r) => fn(r.replace(/^[xyz]\s*=\s*/, ""), ["t", "s", "m"]))); if (D2.flat().some((f) => !f)) return null;
+      const dir = (D, k) => D.map((f) => f({ t: 1, s: 1, m: k }) - f({ t: 0, s: 0, m: k })); const W = [0, 1].map((q) => [0, 1, 2].map((i) => (k) => dir(D2[q], k)[i])); return colM(W);
+    }
+    if (/Pour quelle valeur de \\\(m\\\) les droites \\\(d\\\) : .* et \\\(g\\\) : .* sont-elles sécantes/.test(raw) && K.length === 2) {
+      const KK = K.map((rows) => rows.map((r) => fn(r.replace(/^[xyz]\s*=\s*/, ""), ["t", "s", "m"]))); if (KK.flat().some((f) => !f)) return null;
+      const g = (D, k, l, mm) => D.map((f) => f({ t: k, s: l, m: mm })), i0 = [0, 1, 2].filter((i) => KK.every((D) => D[i]({ t: 1, s: 1, m: 0 }) === D[i]({ t: 1, s: 1, m: 1 }))); if (i0.length < 2) return null;
+      const [i, j] = i0, A0 = g(KK[0], 0, 0, 0), a = add(sub(g(KK[0], 1, 0, 0), A0), sub(g(KK[0], 0, 1, 0), A0)), B0 = g(KK[1], 0, 0, 0), b = add(sub(g(KK[1], 1, 0, 0), B0), sub(g(KK[1], 0, 1, 0), B0));
+      const sol = cramer([[a[i], -b[i]], [a[j], -b[j]]], [B0[i] - A0[i], B0[j] - A0[j]]); if (!sol) return null; const z = [0, 1, 2].find((q) => q !== i && q !== j);
+      return lin((mm) => add(g(KK[0], 0, 0, mm), mul(sol[0], a))[z] - add(g(KK[1], 0, 0, mm), mul(sol[1], b))[z]);
+    }
+    return null;
+  });
+  O("polymp", (c) => {
+    const t = c.txt, raw = c.raw, P = c.D.P; let m;
+    if (/^Donne les zéros de P\(x\)|^Trouve tous les zéros de P\(x\)/.test(t) && P) return { S: zeros(P).map((v) => snap(v)) };
+    if ((m = /Le nombre \\\(([^\\]*)\\\) est un zéro de \\\(P\(x\) = ([^\\]*)\\\)\. Que vaut \\\(([a-z])\\\)/.exec(raw))) { const F = fn(m[2], ["x", m[3]]); if (!F) return null; const a = val(m[1]); return lin((k) => F({ x: a, [m[3]]: k })); }
+    if ((m = /Le nombre \\\(([^\\]*)\\\) est un zéro de \\\(P\(x\) = ([^\\]*)\\\)\. Trouve les autres zéros/.exec(raw)) && P) { const a = val(m[1]); if (!near(P(a), 0)) return { err: a + " n'est pas un zéro" }; return { S: zeros(P).filter((u) => !near(u, a, 1e-7)).map((v) => snap(v)) }; }
+    if ((m = /Quel est le reste de la division de \\\(P\(x\) = [^\\]*\\\) par \\\(([^\\]*)\\\)/.exec(raw)) && P) { const d = fn(m[1]); if (!d) return null; const r = zeros(d); return r.length === 1 ? snap(P(r[0])) : null; }
+    if ((m = /Effectue la division de \\\(P\(x\) = [^\\]*\\\) par \\\(([^\\]*)\\\)\. Donne le quotient/.exec(raw)) && P) { const d = fn(m[1]); if (!d) return null; const a = zeros(d)[0], r = P(a); return { E: (u) => (P(u) - r) / d(u) }; }
+    if ((m = /^Résous \\\(([^≤≥]*?) (\\le|\\ge|<|>) 0\\\)\.?$/.exec(raw))) { const g = fn(m[1]); if (!g) return null; const o = m[2]; return { I: (u) => { const v = g(u); return o === "\\le" ? v <= 1e-9 : o === "\\ge" ? v >= -1e-9 : o === "<" ? v < -1e-12 : v > 1e-12; }, pts: zeros(g) }; }
+    return null;
+  });
+  O("volmp coordmp", (c) => {
+    const t = c.txt; let m;
+    if ((m = mt(c, new RegExp(`Un ballon sphérique a un diamètre de ${NB} cm\\. Quel volume d'air contient-il, en litres`)))) return ((4 / 3) * Math.PI * (m[0] / 2) ** 3) / 1000;
+    if ((m = mt(c, new RegExp(`Calcule le volume d'un cône de rayon ${NB} cm et de hauteur ${NB} cm`)))) return (Math.PI * m[0] ** 2 * m[1]) / 3;
+    if ((m = mt(c, new RegExp(`Calcule le volume d'une boule de rayon ${NB} cm`)))) return (4 / 3) * Math.PI * m[0] ** 3;
+    if ((m = mt(c, new RegExp(`Calcule le volume d'un cylindre de rayon ${NB} cm et de hauteur ${NB} cm`)))) return Math.PI * m[0] ** 2 * m[1];
+    if ((m = mt(c, new RegExp(`Un cône de hauteur ${NB} cm a un volume de ${NB}π cm\\^3\\. Quel est son rayon`)))) return Math.sqrt((3 * m[1]) / m[0]);
+    if ((m = mt(c, new RegExp(`Un cylindre de rayon ${NB} cm a un volume de ${NB}π cm\\^3\\. Quelle est sa hauteur`)))) return m[1] / m[0] ** 2;
+    if ((m = mt(c, new RegExp(`base un triangle rectangle dont les côtés de l'angle droit mesurent ${NB} cm et ${NB} cm\\. Sa hauteur vaut ${NB} cm\\. Calcule son volume`)))) return (m[0] * m[1] * m[2]) / 2;
+    if ((m = mt(c, new RegExp(`Un silo est formé d'un cylindre de rayon ${NB} m et de hauteur ${NB} m, surmonté d'un cône de même rayon et de hauteur ${NB} m`)))) return Math.PI * m[0] ** 2 * (m[1] + m[2] / 3);
+    if ((m = mt(c, new RegExp(`Un silo est formé d'un cylindre de rayon ${NB} m et de hauteur ${NB} m, surmonté d'une demi-boule de même rayon`)))) return Math.PI * m[0] ** 2 * m[1] + (2 / 3) * Math.PI * m[0] ** 3;
+    if ((m = mt(c, new RegExp(`Un cône a un rayon de ${NB} cm et une génératrice de ${NB} cm\\. Calcule son volume`)))) return (Math.PI * m[0] ** 2 * Math.sqrt(m[1] ** 2 - m[0] ** 2)) / 3;
+    if ((m = /coordonnées polaires \(r ; θ\) = \((\d+(?:,\d+)?) ; (-?\d+)°\)/.exec(t))) { const r = nn(m[1]), a = rad(+m[2]); return { P: [r * Math.cos(a), r * Math.sin(a)] }; }
+    if ((m = mt(c, new RegExp(`Trouve le point P\\(x ; 0\\) de l'axe des abscisses situé à égale distance de A\\(${NB} ; ${NB}\\) et de B\\(${NB} ; ${NB}\\)`)))) { const [xa, ya, xb, yb] = m; return lin((x) => (x - xa) ** 2 + ya * ya - (x - xb) ** 2 - yb * yb); }
+    return null;
+  });
+
+
+  /* 3e Collège : compléments (polyfact, log, expo) */
+  O("polyfact log expo logdef logprop", (c) => {
+    const t = c.txt, raw = c.raw; let m;
+    if ((m = /Sachant que \\\(([^\\]*)\\\) est racine de : \\\(P\(x\) = ([^\\]*)\\\)/.exec(raw)) && /résous/.test(t)) { const P = fn(m[2]); if (!P) return null; if (!near(P(val(m[1])), 0)) return { err: "la racine annoncée n'en est pas une" }; return { S: zeros(P).map((v) => snap(v)) }; }
+    if ((m = /^Calcule(?: sans calculatrice)? ?:? \\\(([^\\]*(?:\\(?:log|ln|frac)[^\\]*)+)\\\)\.?$/.exec(raw)) && /\\log|\\ln/.test(m[1])) { const v = val(m[1]); return fin(v) ? snap(v, 1e-9) : null; }
+    if ((m = mt(c, new RegExp(`Un capital est placé à ${NB} % d'intérêt composé par an\\. Au bout de combien d'années complètes aura-t-il au moins doublé`)))) { let n = 1; while ((1 + m[0] / 100) ** n < 2) n++; return { v: n, st: null }; }
+    if ((m = mt(c, new RegExp(`Après ${NB} ans à ${NB} % d'intérêt composé, un capital vaut ${NB} CHF\\. Quel était le capital de départ`)))) return m[2] / (1 + m[1] / 100) ** m[0];
+    if ((m = mt(c, new RegExp(`Un capital de ${NB} CHF est placé à ${NB} % d'intérêt composé par an\\. Que vaut-il après ${NB} ans`)))) return m[0] * (1 + m[1] / 100) ** m[2];
+    return null;
+  });
+
+
+  /* dérivées : nombre dérivé, fonction dérivée, pentes (derivref, derivregles, derivprodquot, derivcomp) */
+  O("derivref derivregles derivprodquot derivcomp lnexp nbderive", (c) => {
+    const t = c.txt, raw = c.raw; let m; const f = Object.values(c.D)[0];
+    if ((m = /calcule \\\(([a-zA-Z])'\(([^)]*)\)\\\)/.exec(raw)) && c.D[m[1]]) return snap(d1(c.D[m[1]], val(m[2])), 1e-8);
+    if (/Donne la fonction dérivée de f\(x\) = .* Écris seulement l'expression de f'\(x\)/.test(t) && c.D.f) { const pos = /\\sqrt|\\ln|x\^\{?-?\\frac|x\^\{-/.test(raw); return { E: (u) => d1(c.D.f, u), pos }; }
+    if ((m = mt(c, new RegExp(`En quelles abscisses la tangente au graphe de f\\(x\\) = .* a-t-elle une pente égale à ${NB}`))) && c.D.f) return { S: zeros((u) => d1(c.D.f, u) - m[0]).map((v) => snap(v, 1e-7)) };
+    if (/En quelles abscisses la tangente au graphe de f\(x\) = .* est-elle horizontale/.test(t) && c.D.f) return { S: zeros((u) => d1(c.D.f, u)).filter((u) => fin(c.D.f(u))).map((v) => snap(v, 1e-7)) };
+    if (/Après combien d'heures la concentration est-elle maximale/.test(t) && f) return opt(f, 0, 60, 1, 20000)[0];
+    if ((m = /À quelle vitesse (?:verticale )?\(en m\/(?:h|min)\) .* à \\\(t = ([^\\]*)\\\)/.exec(raw)) && f) { const v = d1(f, val(m[1])); return { v: Math.PI * snap(v / Math.PI, 1e-7, 60) }; }
+    if ((m = /Pour \\\(f\(x\) = ([^\\]*)\\\), on sait que \\\(f'\(([^)]*)\) = ([^\\]*)\\\)\. Que vaut \\\(([a-z])\\\)/.exec(raw))) { const F = fn(m[1].replace(/\\cdot/g, "*"), ["x", m[4]]); if (!F) return null; return lin((k) => d1((u) => F({ x: u, [m[4]]: k }), val(m[2])) - val(m[3])); }
+    return null;
+  });
+  O("eqlog eqexp logdef", (c) => {
+    const m = /^Résous \\\(([^=]*\\log[^=]*)=([^\\]*)\\\)\.?/.exec(c.raw); if (!m) return null; const L = fn(m[1]), Rr = fn(m[2]); if (!L || !Rr) return null;
+    const g = (u) => L(u) - Rr(u), big = zeros((w) => g(Math.exp(w)), 25).map(Math.exp).filter((u) => u > 199); /* grandes solutions (x = 1012, 1000) : recherche en ln x */
+    return { S: [...zeros(g, 200), ...big].map((v) => snap(v, 1e-8)) };
+  });
+  O("eqlog", (c) => { const m = mt(c, new RegExp(`Un son a un niveau de ${NB} dB\\. Combien de fois son intensité est-elle plus grande que I_0`)); return m ? 10 ** (m[0] / 10) : null; });
+  O("puisrat", (c) => {
+    const raw = c.raw; let m;
+    if ((m = /^Simplifie \\\(([^\\]*(?:\\frac\{[^}]*\}\{[^}]*\}[^\\]*|\\cdot[^\\]*|\\sqrt[^\\]*)*)\\\) en \\\(x\^k\\\)/.exec(raw)) || (m = /^Écris \\\(([^\\]*(?:\\sqrt(?:\[\d\])?\{[^}]*\}[^\\]*|\\frac\{[^}]*\}\{[^}]*\}[^\\]*)*)\\\) sous la forme \\\(x\^k\\\)/.exec(raw))) { const f = fn(m[1]); if (!f) return null; const k2 = Math.log(f(2)) / Math.log(2), k3 = Math.log(f(3)) / Math.log(3); return near(k2, k3) ? snap(k2, 1e-9) : { err: "pas une puissance de x" }; }
+    if ((m = /^Simplifie \\\(([^\\]*(?:\\frac\{[^}]*\}\{[^}]*\}[^\\]*|\\cdot[^\\]*|\\sqrt[^\\]*)*)\\\) \(avec \\\(x > 0\\\)\)/.exec(raw))) { const f = fn(m[1]); return f ? { E: f, pos: true } : null; }
+    return null;
+  });
+  O("sinusmp", (c) => {
+    const t = c.txt, raw = c.raw, f = Object.values(c.D)[0]; let m;
+    if ((m = /Quelle est la valeur (maximale|minimale) de f\(x\)/.exec(t)) && f) return snap(opt(f, 0, 40, m[1] === "maximale" ? 1 : -1, 20000)[1], 1e-7);
+    if ((m = /Calcule \\\(f\(([^)]*(?:\\frac\{[^}]*\}\{[^}]*\})?[^)]*)\)\\\)/.exec(raw)) && f) return snap(f(val(m[1])), 1e-9);
+    if ((m = mt(c, new RegExp(`varie entre ${NB} m et ${NB} m\\. On la modélise par f\\(x\\) = a sin\\(b x\\) \\+ d\\. Que vaut (?:l'amplitude a|d)`)))) return /amplitude/.test(t) ? (m[1] - m[0]) / 2 : (m[0] + m[1]) / 2;
+    if ((m = mt(c, new RegExp(`Une sinusoïde coupe son axe en (montant|descendant) en x = 0, varie entre ${NB} et ${NB} et a une période de`)))) { const per = /période de \\\(([^\\]*)\\\)/.exec(raw); if (!per) return null; const T = val(per[1]), a = ((m[2] - m[1]) / 2) * (/montant/.test(t) ? 1 : -1), d = (m[1] + m[2]) / 2, b = (2 * Math.PI) / T; return { E: (u) => a * Math.sin(b * u) + d }; }
+    return null;
+  });
+  O("geoesp", (c) => {
+    const t = c.txt; let m;
+    if ((m = mt(c, new RegExp(`On coupe un cube d'arête ${NB} cm par le plan qui passe par les milieux de six de ses arêtes`)))) { const s0 = m[0] / Math.SQRT2; return ((3 * Math.sqrt(3)) / 2) * s0 * s0; }
+    if ((m = mt(c, new RegExp(`Un cube a des arêtes de ${NB} cm\\. Calcule la longueur de sa grande diagonale`)))) return m[0] * Math.sqrt(3);
+    if ((m = mt(c, new RegExp(`base carrée de côté ${NB} cm et une hauteur de ${NB} cm\\. Calcule l'angle entre une face latérale et la base`)))) return deg(Math.atan(m[1] / (m[0] / 2)));
+    if ((m = mt(c, new RegExp(`réduites par le coefficient ${NB}\\. Une arête fuyante mesure ${NB} cm en réalité`)))) return m[0] * m[1];
+    return null;
+  });
+  O("statdesc", (c) => {
+    const A = arr(c.raw); if (!A || !/Calcule la moyenne de la série \(avec les centres/.test(c.txt)) return null;
+    const rows = A.slice(1).map((r) => { const iv = /\[\s*(-?[\d{},]+)\s*\\?,?;\\?,?\s*(-?[\d{},]+)\s*\[/.exec(r[0]); return iv ? [(val(iv[1]) + val(iv[2])) / 2, val(r[1])] : null; }); if (rows.some((r) => !r)) return null;
+    return rows.reduce((s, [x, n]) => s + x * n, 0) / rows.reduce((s, [, n]) => s + n, 0);
+  });
+  O("condbayes bayes", (c) => {
+    const t = c.txt, raw = c.raw.replace(/\\,/g, ""); let m;
+    if ((m = mt(c, new RegExp(`Une boîte contient ${NB} \\S+ \\S+ et ${NB} \\S+ \\S+\\. On en tire deux successivement, sans remise\\. Quelle est la probabilité d'obtenir deux couleurs différentes`)))) { const [a, b] = m, n = a + b; return (2 * a * b) / (n * (n - 1)); }
+    if ((m = /\\\(P\(([A-Z])\) = ([\d{},]+)\\\)\. [^.]*avec \\\(P_\{?\1\}?\(([A-Z])\) = ([\d{},]+)\\\) et \\\(P_\{\\overline\{\1\}\}\(\3\) = ([\d{},]+)\\\)\. Calcule \\\(([^\\]*(?:\\overline\{[A-Z]\}[^\\]*)?)\\\)/.exec(raw))) {
+      const [, A, a0, B, g1s, g0s, q] = m, a = val(a0), g1 = val(g1s), g0 = val(g0s), PB = a * g1 + (1 - a) * g0, n = (s) => s.replace(/\s+/g, "");
+      const Q = n(q); if (Q === n(`P(\\overline{${A}}\\cap${B})`)) return (1 - a) * g0; if (Q === n(`P(${A}\\cap${B})`)) return a * g1; if (Q === n(`P(${B})`)) return PB; if (Q === n(`P_{${B}}(${A})`) || Q === n(`P_${B}(${A})`)) return (a * g1) / PB; return null;
+    }
+    return null;
+  });
+
   for (const o of LIST.reverse()) G.unshift(o);
   LIST.length = 0;
-  R._34 = { O, judge, fn, val, defs, segs, snap, d1, d2, zeros, zsc, extrema, lim, limInf, integ, opt, lin, cramer, dot, nrm, sub, add, mul, cross, deg, rad, mats, vecs, cases, param, pt, plane, planes, near, nn, NB, has, m1, mt, after, fOf, lastFn, fin, det2, det3, LIST };
+  R.IDS34 = IDS; R._34 = { O, judge, fn, val, defs, segs, snap, d1, d2, zeros, zsc, extrema, lim, limInf, integ, opt, lin, cramer, dot, nrm, sub, add, mul, cross, deg, rad, mats, vecs, cases, param, pt, plane, planes, near, nn, NB, has, m1, mt, after, fOf, lastFn, fin, det2, det3, LIST };
 })();

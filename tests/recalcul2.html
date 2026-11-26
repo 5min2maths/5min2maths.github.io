@@ -24,7 +24,7 @@
   /* 26.11 soir (agent defis2) : 316 s sous charge après l'extension → deux pages. <meta name="part"> : 1 = notions de rang
      pair + exercices riches (recalcul.html), 2 = notions de rang impair + défis (recalcul2.html) ; sans meta ou avec #ids : tout. */
   const PART = +((document.querySelector('meta[name="part"]') || {}).content || 0);
-  const t0 = performance.now(), ids = P.get("ids") ? P.get("ids").split(",") : Object.keys(GEN).filter((_, i) => !PART || i % 2 === PART - 1);
+  const t0 = performance.now(), ids = P.get("ids") ? P.get("ids").split(",") : PART >= 3 ? Object.keys(GEN).filter((id) => RECALC.IDS34.has(id)).filter((_, i) => i % 2 === PART - 3) /* pages 3 et 4 */ : Object.keys(GEN).filter((id, i) => !PART || (i % 2 === PART - 1 && !RECALC.IDS34.has(id))) /* 27.11 (agent recalc34) : notions de tests/recalc_oracles34.js en page 3 */;
   const stat = {}, fails = [], exc = [];
   let nq = 0, nk = 0, nm = 0, nr = 0, nrk = 0; const rk = [];
   function run(id, d, k) {
@@ -48,7 +48,7 @@
   for (const id of covered) for (const d of [1, 2, 3]) for (let k = N1 + 1; k <= N; k++) run(id, d, k);
   /* exercices riches et défis (niveau 4) : parties reconnues */
   /* 26.11 soir (agent defis3) : 237 s sous charge avec 42 défis de plus → exercices riches en page 1, défis en page 2. */
-  for (const x of VRAI.items({ n: Math.min(N, 20), src: PART === 1 ? ["riche"] : PART === 2 ? ["defi"] : ["riche", "defi"], ids: P.get("ids") ? ids : null }).items) {
+  for (const x of VRAI.items({ n: Math.min(N, 20), src: PART === 1 ? ["riche"] : PART === 2 ? ["defi"] : PART >= 3 ? [] : ["riche", "defi"], ids: P.get("ids") ? ids : null }).items) {
     nr++;
     const it = { id: x.id, d: x.d, code: x.code, raw: x.raw, fig: x.fig, txt: x.txt, sol: x.sol, rawSol: "", spec: x.spec && x.spec.kind === "multi" ? null : x.spec, parts: x.parts };
     for (const sp of [x.spec, ...x.parts.map((p) => p.spec)]) { const t = RECALC.truncSpec(sp); if (t) fails.push(x.code + " [valeur tronquée] " + t); }

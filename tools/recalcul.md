@@ -164,6 +164,137 @@ numériques reconnues, aucun désaccord. Les règles de texte reçoivent mainten
 sur la figure (`figRead`, `quadFit`). Réponses oui/non (1/0) et valeurs exactes en fraction imbriquée : `{ v, sol: false }`
 (le corrigé dit « oui » ou donne la forme exacte, illisible en texte simple).
 
+### 3e–4e Collège et MP 3e–4e (27.11, agent/recalc34)
+
+Déclencheur : le noyau faux d'appllin (4e Collège). Nouveau fichier **`tests/recalc_oracles34.js`** (chargé après
+`recalc_oracles.js`) : oracles placés en tête de `RECALC.G`, limités aux notions nommées, qui relisent le **TeX** de l'énoncé
+et refont le calcul par une autre voie, quelle que soit la forme de la réponse attendue (valeur, ensemble, couple ou
+triplet, expression comparée en 6 points, nombre complexe a + bi, intervalles). Outils : dérivées par différences
+centrées d'ordre 4, limites extrapolées (Richardson ; ±∞ avec ln et exp traités à part), intégrales par Simpson adaptatif,
+extremums par changement de signe de f', optimisation par balayage et section dorée, Cramer 2×2 / 3×3, produits scalaire,
+vectoriel et mixte, droites et plans paramétriques ou cartésiens (lus dans les `cases` et `pmatrix`), sphères (centre et
+rayon tirés de l'équation), petit évaluateur de nombres complexes (z, w, z̄, i, e^{iθ}, puissances), tableaux `array`
+(lois de probabilité, effectifs, classes, tableaux de contingence), règle 68-95-99,7, table de Φ donnée dans l'énoncé.
+Contre-épreuve sur toutes les graines pendant la mise au point (`#mutant`) : toute réponse faussée est détectée.
+
+Pages : **`tests/recalcul3.html`** et **`tests/recalcul4.html`** (même gabarit, `<meta name="part" content="3|4">`) recalculent
+les notions de `recalc_oracles34.js` (`RECALC.IDS34`, une sur deux par page) ; `recalcul.html` et `recalcul2.html` les
+excluent (recalcul.html : 280 s sous charge 15 avec ces notions, au-delà de 200 s).
+
+Erreurs trouvées et corrigées :
+
+| Code | Notion | Gravité | Avant | Après |
+|---|---|---|---|---|
+| `cplxalg-2-*` (ch4c_ana, équation (a)z + c = e) | Résoudre dans ℂ | **grave** | avec c = −3 + 6i, l'énoncé affichait « (6 − 6i)z − 3 − 6i » (partie imaginaire de c de signe inversé dès que Re c < 0) : réponse attendue fausse pour l'énoncé lu, environ une question sur quatre | énoncé « − 3 + 6i », cohérent avec la réponse |
+| `normale-*` (ch4c_ana) | Loi normale | moyenne | réponses de la règle 68-95-99,7 (68 %, 16 %, 32 % « au dixième »…) sans que l'énoncé le dise : l'élève qui calcule avec Φ (68,27 %, 31,7 %) est refusé | « Utilise la règle 68-95-99,7. » dans l'énoncé (sauf la valeur centrée réduite) |
+| `approxnorm-2-*`, `approxnorm-3-*` (ch4c_trous) | Approximation normale | faible | probabilité lue dans la table (4 décimales) demandée au millième, parfois pile entre deux millièmes (0,3085) : 0,308 et 0,309 acceptés | réponse = arrondi au millième (demi vers le haut) |
+| `statdesc-3-*`, `statdesc-2-*`, `condbayes-3-*` et tout `QR` de ch4c_ana | Arrondis à égalité | faible | 53,25 au dixième, médiane 18,125 au centième, 0,3125 au millième : les deux voisins acceptés | arrondi demi vers le haut, comme le corrigé (`tie` dans `QR`) |
+| `croissexp-1-*` (ch_mp3) | Dépréciation au franc près | faible | 25'000 · 0,9⁴ = 16'402,5 : 16'402 et 16'403 acceptés | 16'403 |
+| `lnexp-3-*` (ch4c_ana) | Ordonnée à l'origine de la tangente à ln | corrigé | corrigé s'arrêtant à l'équation y = x/a + ln a − 1 | « ; ordonnée à l'origine ln(a) − 1 » |
+| `probaxiomes-2-*` (ch3c_ana, jass) | Réunion d'événements | énoncé | « tirer un pique ou un 6, un 7 ou un 8 », « un carreau ou un dix ou un as » ; corrigé « les 1 cartes » | « une carte de valeur 6, 7 ou 8 », « un carreau, un dix ou un as » ; « la carte qui est les deux à la fois » |
+
+Aucune autre réponse attendue fausse dans les ≈ 90 notions balayées (≈ 25'000 énoncés à 100 tirages par niveau).
+
+Couverture (taux d'énoncés recalculés aux niveaux 1 / 2 / 3, avant → après ; avant : mesure à 30 tirages, après : 100 tirages) :
+
+**90 notions** visées (3e et 4e Collège MA1 et MA2, MP 3e–4e) : **32 couvertes avant** (≥ 20 % à un niveau), **90 après**. Pages 3 et 4 : 83 s et 155 s sous charge 13 ; recalcul3 + recalcul4 : 24'600 énoncés, 21'139 recalculés.
+
+| Notion | Avant (1 / 2 / 3) | Après (1 / 2 / 3) |
+|---|---|---|
+| `polyfact` | 0 %  100 %  100 % | 100 %  100 %  100 % |
+| `fracrat` | 70 %  100 %  67 % | 70 %  100 %  67 % |
+| `ineqfrac` | 100 %  100 %  73 % | 100 %  100 %  73 % |
+| `trigfn` | 100 %  100 %  100 % | 100 %  100 %  100 % |
+| `expo` | 100 %  100 %  0 % | 100 %  100 %  100 % |
+| `log` | 0 %  77 %  0 % | 100 %  78 %  100 % |
+| `compo` | 0 %  0 %  0 % | 100 %  100 %  100 % |
+| `tauxvar` | 0 %  0 %  0 % | 75 %  100 %  100 % |
+| `nbderive` | 37 %  97 %  100 % | 33 %  87 %  100 % |
+| `derivref` | 37 %  37 %  57 % | 100 %  100 %  55 % |
+| `derivregles` | 70 %  100 %  0 % | 100 %  100 %  53 % |
+| `derivprodquot` | 67 %  17 %  47 % | 100 %  100 %  84 % |
+| `derivcomp` | 80 %  60 %  40 % | 100 %  100 %  100 % |
+| `tangente` | 0 %  0 %  0 % | 100 %  100 %  100 % |
+| `variations` | 0 %  0 %  0 % | 99 %  100 %  100 % |
+| `optimderiv` | 0 %  0 %  0 % | 100 %  100 %  100 % |
+| `limites` | 0 %  0 %  0 % | 72 %  100 %  100 % |
+| `limitinf` | 0 %  0 %  0 % | 66 %  100 %  100 % |
+| `asymptotes` | 0 %  0 %  0 % | 59 %  100 %  100 % |
+| `continuite` | 0 %  0 %  0 % | 73 %  100 %  100 % |
+| `derivseconde` | 0 %  0 %  0 % | 49 %  100 %  100 % |
+| `etudefct` | 0 %  0 %  0 % | 100 %  100 %  59 % |
+| `combi` | 100 %  100 %  73 % | 100 %  100 %  73 % |
+| `probaxiomes` | 0 %  0 %  0 % | 85 %  100 %  85 % |
+| `probarbre` | 0 %  0 %  0 % | 100 %  100 %  100 % |
+| `derivth` | 0 %  0 %  0 % | 78 %  100 %  71 % |
+| `vect3d` | 0 %  0 %  0 % | 100 %  100 %  100 % |
+| `colin` | 0 %  0 %  0 % | 100 %  100 %  100 % |
+| `droite3d` | 0 %  0 %  0 % | 100 %  100 %  100 % |
+| `plans` | 0 %  0 %  0 % | 100 %  100 %  100 % |
+| `posrel` | 0 %  0 %  0 % | 100 %  100 %  100 % |
+| `pscal3d` | 0 %  0 %  0 % | 100 %  100 %  100 % |
+| `distances` | 0 %  0 %  0 % | 100 %  100 %  100 % |
+| `sphere` | 0 %  0 %  0 % | 100 %  100 %  100 % |
+| `pvect` | 0 %  0 %  0 % | 100 %  100 %  100 % |
+| `ineqpoly` | 100 %  100 %  100 % | 100 %  100 %  100 % |
+| `primitives` | 0 %  0 %  0 % | 100 %  100 %  96 % |
+| `integrale` | 0 %  0 %  0 % | 100 %  85 %  74 % |
+| `aireint` | 0 %  0 %  0 % | 100 %  100 %  100 % |
+| `volrev` | 0 %  0 %  0 % | 100 %  100 %  88 % |
+| `lnexp` | 80 %  87 %  0 % | 74 %  92 %  84 % |
+| `croissance` | 0 %  0 %  0 % | 88 %  100 %  83 % |
+| `intparties` | 0 %  0 %  0 % | 100 %  100 %  100 % |
+| `intsubst` | 0 %  0 %  0 % | 100 %  100 %  100 % |
+| `etudelnexp` | 0 %  0 %  23 % | 74 %  82 %  100 % |
+| `eqdiff` | 0 %  0 %  0 % | 100 %  100 %  96 % |
+| `matrices` | 0 %  0 %  27 % | 100 %  100 %  100 % |
+| `translin` | 0 %  0 %  0 % | 93 %  100 %  100 % |
+| `appllin` | 0 %  0 %  0 % | 100 %  100 %  71 % |
+| `condbayes` | 0 %  0 %  0 % | 47 %  64 %  86 % |
+| `varalea` | 0 %  0 %  0 % | 100 %  100 %  94 % |
+| `binomiale` | 0 %  0 %  0 % | 81 %  57 %  100 % |
+| `normale` | 0 %  0 %  0 % | 100 %  100 %  70 % |
+| `statdesc` | 0 %  0 %  0 % | 100 %  79 %  100 % |
+| `bayes` | 0 %  0 %  0 % | 100 %  100 %  72 % |
+| `syslin` | 0 %  30 %  43 % | 100 %  100 %  100 % |
+| `bases` | 0 %  0 %  0 % | 100 %  100 %  100 % |
+| `cplxalg` | 0 %  0 %  0 % | 66 %  100 %  100 % |
+| `cplxtrig` | 0 %  0 %  0 % | 66 %  59 %  53 % |
+| `cplxeq` | 0 %  0 %  0 % | 80 %  66 %  74 % |
+| `suitegeom` | 70 %  0 %  0 % | 92 %  65 %  100 % |
+| `serie` | 33 %  0 %  0 % | 100 %  44 %  61 % |
+| `geoesp` | 0 %  0 %  0 % | 84 %  80 %  77 % |
+| `densite` | 0 %  0 %  0 % | 100 %  68 %  46 % |
+| `approxnorm` | 0 %  0 %  0 % | 55 %  100 %  59 % |
+| `eqabs` | 100 %  70 %  73 % | 100 %  70 %  73 % |
+| `eqbic` | 63 %  100 %  100 % | 63 %  100 %  100 % |
+| `eqirrmp` | 100 %  100 %  80 % | 100 %  100 %  80 % |
+| `eqratmp` | 67 %  100 %  47 % | 67 %  100 %  47 % |
+| `puisrat` | 73 %  30 %  77 % | 79 %  65 %  64 % |
+| `logdef` | 0 %  0 %  33 % | 91 %  100 %  72 % |
+| `logprop` | 0 %  0 %  0 % | 100 %  77 %  61 % |
+| `eqexp` | 100 %  100 %  100 % | 100 %  100 %  100 % |
+| `eqlog` | 30 %  50 %  70 % | 100 %  100 %  85 % |
+| `croissexp` | 0 %  0 %  0 % | 100 %  49 %  43 % |
+| `volmp` | 47 %  43 %  27 % | 73 %  85 %  54 % |
+| `similmp` | 0 %  0 %  0 % | 69 %  83 %  70 % |
+| `coordmp` | 43 %  0 %  0 % | 100 %  59 %  71 % |
+| `vectmp` | 0 %  0 %  0 % | 100 %  100 %  58 % |
+| `scalmp` | 0 %  0 %  0 % | 85 %  54 %  71 % |
+| `projmp` | 0 %  0 %  0 % | 45 %  100 %  66 % |
+| `pvectmp` | 0 %  0 %  0 % | 41 %  100 %  100 % |
+| `droiteparam` | 0 %  0 %  0 % | 100 %  100 %  72 % |
+| `posdroites` | 0 %  0 %  0 % | 39 %  100 %  70 % |
+| `ineqmp` | 100 %  73 %  100 % | 100 %  73 %  100 % |
+| `fctmp` | 0 %  0 %  0 % | 50 %  73 %  100 % |
+| `polymp` | 0 %  0 %  30 % | 62 %  100 %  56 % |
+| `sinusmp` | 0 %  0 %  0 % | 78 %  39 %  64 % |
+| `explogfn` | 0 %  0 %  0 % | 92 %  69 %  82 % |
+| `fratmp` | 0 %  23 %  0 % | 72 %  100 %  0 % |
+
+Restent non couverts : lectures de graphique (tauxvar 1, limites et continuité lues, asymptotes en pointillés, dérivée
+seconde lue, fratmp 3, sinusmp lus), quelques formes rares (d'Alembert hors fractions simples, Mac-Laurin autre que e^{ax}).
+
 ## Notions couvertes (taux d'énoncés recalculés aux niveaux 1, 2, 3 ; 100 tirages par niveau ; état du 26.11 après extension)
 
 Avant l'extension (matin du 26.11) : **119 notions** couvertes (≥ 20 % à un niveau). Après : **172 notions** (+53, marquées « nouveau »), 38'173 énoncés recalculés sur 58'560 (avant : 28'827 sur 50'655), 1'176 contre-épreuves.
@@ -353,7 +484,7 @@ Avant l'extension (matin du 26.11) : **119 notions** couvertes (≥ 20 % à un n
   `ensembles`, `angtype`, `quadri`, `continuite`, `tvi`, `derivth`.
 - **Énoncés à mise en équation très variés** (un gabarit par histoire, rendement faible) : `probeq`, `probeq2`,
   `sysprob`, `probrat`, `optim`, `optimderiv`, `modaff`, `modexp`, `croissexp`, `croissance`, `decprob`.
-- **Niveaux avancés pas encore outillés** (oracles à écrire : vecteurs, complexes, intégrales, suites, lois) :
+- **Niveaux avancés** (outillés le 27.11 par `tests/recalc_oracles34.js`, voir « 3e–4e Collège et MP 3e–4e ») :
   `vectmp`, `scalmp`, `projmp`, `pvectmp`, `vect3d`, `colin`, `droite3d`, `plans`, `posrel`, `pscal3d`, `distances`,
   `sphere`, `pvect`, `cplxalg`, `cplxtrig`, `cplxeq`, `primitives`, `integrale`, `aireint`, `volrev`, `intparties`,
   `intsubst`, `eqdiff`, `suitedef`, `suitesomme`, `suitelim`, `serie`, `binom`,

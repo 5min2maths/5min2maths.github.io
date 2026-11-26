@@ -75,7 +75,10 @@
     return ch.map((c) => "\\(" + c + "\\)").join(" "); }));
   const mk = (q, spec, sol, o) => { const x = { q: wrapM(q), spec, sol: wrapM(sol), guide: (o.guide || []).map((g) => Object.assign({}, g, { ask: wrapM(g.ask), sol: wrapM(g.sol) })), ctx: o.ctx, traps: keepT(spec, o.traps) }; if (o.fig) x.fig = o.fig; if (o.canon) x.canon = o.canon; return x; };
   const QN = (q, value, sol, o) => mk(q, { kind: "value", value }, sol, o);
-  const QR = (q, value, round, sol, o) => mk(q, { kind: "value", value, round }, sol, o);
+  /* 27.11 (recalcul, agent recalc34) : une valeur pile entre deux arrondis (0,3125 au millième, médiane 18,125 au centième) faisait
+     accepter les deux voisins ; on garde l'arrondi « demi vers le haut », celui du corrigé. */
+  const tie = (v, r) => { const k = +(v / r).toFixed(6); return r && Math.abs(k - Math.floor(k) - 0.5) < 1e-6 ? +((Math.floor(k) + 1) * r).toFixed(10) : v; };
+  const QR = (q, value, round, sol, o) => mk(q, { kind: "value", value: tie(value, round), round }, sol, o);
   const QPi = (q, c, sol, o) => mk(q, { kind: "value", value: c * Math.PI }, sol, Object.assign({ canon: piS(c) }, o));
   const QX = (q, expr, sol, o) => mk(q, Object.assign({ kind: "expr", expr }, o.pos ? { pos: true } : {}), sol, Object.assign({ canon: expr }, o));
   const QSet = (q, vals, sol, o) => mk(q, { kind: "set", values: [...new Set(vals.map(r6))].sort((a, b) => a - b) }, sol, o);
@@ -441,7 +444,7 @@
     ],
     3: [
       () => { if (R.rand() < 0.5) { const a = pk([2, 3, 5]), v = Math.log(a) - 1;
-          return QN("Donne l'ordonnée à l'origine de la tangente au graphe de " + M("f(x) = \\ln(x)") + " au point d'abscisse " + M(a) + " (valeur exacte).", v, M("f(" + a + ") = \\ln(" + a + ")") + ", " + M("f'(" + a + ") = \\frac{1}{" + a + "}") + " : " + M("y = \\frac{1}{" + a + "}(x - " + a + ") + \\ln(" + a + ") = \\frac{x}{" + a + "} + \\ln(" + a + ") - 1") + ".",
+          return QN("Donne l'ordonnée à l'origine de la tangente au graphe de " + M("f(x) = \\ln(x)") + " au point d'abscisse " + M(a) + " (valeur exacte).", v, M("f(" + a + ") = \\ln(" + a + ")") + ", " + M("f'(" + a + ") = \\frac{1}{" + a + "}") + " : " + M("y = \\frac{1}{" + a + "}(x - " + a + ") + \\ln(" + a + ") = \\frac{x}{" + a + "} + \\ln(" + a + ") - 1") + " ; ordonnée à l'origine " + M("\\ln(" + a + ") - 1") + "." /* 27.11 (recalcul) : le corrigé ne donnait pas la valeur demandée */,
             { ctx: "tangente-ln", canon: "ln(" + a + ") - 1", guide: [GS(M("f(" + a + ")") + " ?", Math.log(a), M("\\ln(" + a + ")") + "."), GS("Pente " + M("f'(" + a + ")") + " ?", 1 / a, M("\\frac{1}{" + a + "}") + "."), GS("Ordonnée à l'origine ?", v, M("\\ln(" + a + ") - 1") + ".")],
               traps: [TR(Math.log(a), "C'est f(" + a + ") ; l'ordonnée à l'origine est la valeur de la tangente en x = 0."), TR(Math.log(a) + 1, "y = (1/" + a + ")(x − " + a + ") + ln(" + a + ") : en x = 0, on retire 1."), TR(1 / a, "C'est la pente.")] }); }
         const a = pk([2, 3, -1, -2]), v = Math.exp(a) * (1 - a);
@@ -1626,7 +1629,9 @@
           { ctx: "quotient", guide: [GS("Dénominateur multiplié par son conjugué, " + M(par(w[0]) + "^2 + " + par(w[1]) + "^2") + " ?", n2, M(n2) + "."), GZ("Numérateur multiplié par " + M(zT(w[0], -w[1])) + " ?", num, M(zT(...num)) + "."), GZ("Quotient ?", q, M(zT(...q)) + ".")],
             traps: [TZ([z[0] / w[0], z[1] / w[1]], "On ne divise pas partie par partie : multiplie par le conjugué du dénominateur."), TZ([q[0], -q[1]], "Le conjugué va au numérateur ET au dénominateur ; vérifie le signe de la partie imaginaire."), TZ(num, "Divise encore par " + n2 + ".")] }); },
       () => { const a = gz(), zz = gz(), c = gz(), e = [zm(a, zz)[0] + c[0], zm(a, zz)[1] + c[1]]; if (e.some((x) => !x)) return null; const rhs = [e[0] - c[0], e[1] - c[1]];
-        return QZ("Résous dans " + M("\\mathbb{C}") + " : " + M(zP(...a) + "z " + (c[0] < 0 ? "- " + zT(-c[0], -c[1]) : "+ " + zP(...c)) + " = " + zT(...e)) + ". Donne " + M("z") + " sous la forme " + M("a + bi") + ".", zz,
+        /* 27.11 (recalcul, agent recalc34) : avec c = -3 + 6i, l'énoncé affichait « - 3 - 6i » (zT(-c[0], -c[1]) : partie imaginaire
+           de signe inversé) alors que la réponse attendue utilisait -3 + 6i : réponse fausse dès que c[0] < 0 et c[1] ≠ 0. */
+        return QZ("Résous dans " + M("\\mathbb{C}") + " : " + M(zP(...a) + "z " + (c[0] < 0 ? "- " + zT(-c[0], c[1]) : "+ " + zP(...c)) + " = " + zT(...e)) + ". Donne " + M("z") + " sous la forme " + M("a + bi") + ".", zz,
           M(zP(...a) + "z = " + zT(...e) + " - " + zP(...c) + " = " + zT(...rhs)) + ", puis on divise par " + M(zT(...a)) + " (conjugué) : " + M("z = " + zT(...zz)) + ".",
           { ctx: "equation-lineaire", guide: [GZ("Isole le terme en z : " + M(zP(...a) + "z") + " = ?", rhs, M(zT(...rhs)) + "."), GZ(M("z") + " ?", zz, M(zT(...zz)) + ".")],
             traps: [TZ(rhs, "Il reste à diviser par " + zT(...a) + "."), TZ([zz[0], -zz[1]], "Vérifie le signe de la partie imaginaire (le conjugué sert au dénominateur seulement)."), TZ(zm(rhs, a), "On divise par " + zT(...a) + ", on ne multiplie pas.")] }); },
