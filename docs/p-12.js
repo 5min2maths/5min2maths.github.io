@@ -761,9 +761,13 @@
     eq1: [() => { const h1 = pk([24, 30, 36]), a = pk([3, 4, 6]), b = pk([1, 1.5, 2]), t = pk([4, 5, 6]), h2 = h1 - (a - b) * t; if (h2 <= 0 || h2 >= h1 || h1 - a * t < 3) return PROBS.eq1[0](); /* 25.11 : hauteur commune non nulle (sinon les bougies sont consumées) */
       return Pb("Deux bougies sont allumées en même temps. La bougie A mesure " + h1 + " cm et raccourcit de " + a + " cm par heure ; la bougie B mesure " + M(dec(h2)) + " cm et raccourcit de " + M(dec(b)) + " cm par heure.", [["a) Hauteur de A après 2 h (cm)", h1 - 2 * a], ["b) Au bout de combien d'heures ont-elles la même hauteur ?", t], ["c) Quelle est alors cette hauteur (cm) ?", h1 - a * t]],
         ["Hauteur de A : " + h1 + " − " + a + "t ; de B : " + decTxt(h2) + " − " + (b === 1 ? "" : decTxt(b)) + "t.", "Résous " + h1 + " − " + a + "t = " + decTxt(h2) + " − " + (b === 1 ? "" : decTxt(b)) + "t."], "a) " + M(h1 + " - " + 2 * a + " = " + (h1 - 2 * a)) + " cm. b) " + M(h1 + " - " + a + "t = " + dec(h2) + " - " + (b === 1 ? "" : dec(b)) + "t") + " donne " + M(dec(a - b) + "t = " + dec(h1 - h2)) + ", " + M("t = " + t) + " h. c) " + M(h1 + " - " + a * t + " = " + (h1 - a * t)) + " cm."); }],
-    eqfrac: [() => { const [a, b] = pk([[3, 6], [4, 12], [2, 3], [6, 3], [10, 15], [4, 6]]), t = (a * b) / (a + b);
-      return Pb("Un robinet remplit une cuve en " + a + " h ; un autre la remplit en " + b + " h. On les ouvre ensemble.", [["a) Fraction de la cuve remplie en 1 h par le premier", 1 / a], ["b) Fraction remplie en 1 h par les deux ensemble", 1 / a + 1 / b], ["c) Durée pour remplir la cuve ensemble (h)", t]],
-        ["En 1 h, le premier remplit 1/" + a + " de la cuve.", "Résous t/" + a + " + t/" + b + " = 1."], "a) " + M("\\frac{1}{" + a + "}") + ". b) " + M("\\frac{1}{" + a + "} + \\frac{1}{" + b + "} = " + frac(a + b, a * b)) + ". c) " + M("\\frac{t}{" + a + "} + \\frac{t}{" + b + "} = 1 \\iff t = " + tn(t)) + " h."); }],
+    /* 26.11 soir (agent defis3) : eqfrac et bicarre tirés au hasard, 3 contextes (avant : un seul énoncé, valeurs choisies dans une courte liste). */
+    eqfrac: [() => { const [cx, txt, u, L] = pk([["robinets", "Un robinet remplit une cuve en # h ; un autre la remplit en # h. On les ouvre ensemble.", "h", [[3, 6], [4, 12], [2, 3], [6, 3], [10, 15], [4, 6], [2, 6], [5, 20]]],
+        ["imprimantes", "Une imprimante imprime un lot de brochures en # min ; une autre, plus lente, en # min. On partage le travail entre les deux, qui impriment en même temps.", "min", [[20, 30], [30, 60], [12, 24], [15, 30], [40, 60], [10, 15]]],
+        ["peintres", "Lina peint une clôture seule en # h ; Noé la peindrait seul en # h. Ils peignent ensemble.", "h", [[3, 6], [4, 12], [6, 12], [2, 3], [10, 15], [5, 20]]]]), [a, b] = pk(L), t = (a * b) / (a + b);
+      let k = 0; const q = txt.replace(/#/g, () => [a, b][k++]), w = cx === "imprimantes" ? ["en 1 min par la première", "en 1 min par les deux", "Durée pour imprimer le lot ensemble (min)"] : cx === "peintres" ? ["en 1 h par Lina", "en 1 h par les deux", "Durée pour peindre la clôture ensemble (h)"] : ["en 1 h par le premier", "en 1 h par les deux ensemble", "Durée pour remplir la cuve ensemble (h)"];
+      return Object.assign(Pb(q, [["a) Fraction du travail faite " + w[0], 1 / a], ["b) Fraction faite " + w[1], 1 / a + 1 / b], ["c) " + w[2], t]],
+        ["En 1 " + u + ", le premier fait 1/" + a + " du travail.", "Résous t/" + a + " + t/" + b + " = 1."], "a) " + M("\\frac{1}{" + a + "}") + ". b) " + M("\\frac{1}{" + a + "} + \\frac{1}{" + b + "} = " + frac(a + b, a * b)) + ". c) " + M("\\frac{t}{" + a + "} + \\frac{t}{" + b + "} = 1 \\iff t = " + tn(t)) + " " + u + "."), { ctx: cx }); }],
     eqspec: [() => { const a = R.int(2, 9), m = pk([2, 3]);
       return Pb("Programme : « Choisis un nombre. Ajoute " + a + ". Multiplie par " + m + ". Retire " + m + " fois le nombre de départ. »", [["a) Résultat pour 5", m * a], ["b) Résultat pour −3", m * a], ["c) Combien de nombres donnent " + (m * a + 1) + " ?", 0]],
         ["Écris le programme avec n : " + m + "(n + " + a + ") − " + m + "n.", "c) Résous " + m + "(n + " + a + ") − " + m + "n = " + (m * a + 1) + "."], "a) et b) " + M(m * a) + " : " + M(m + "(n + " + a + ") - " + m + "n = " + m * a) + " pour tout " + M("n") + ". c) " + M(m * a + " = " + (m * a + 1)) + " est faux : aucun nombre, donc 0."); }],
@@ -788,9 +792,20 @@
     eq3: [() => { let p, q; do { p = R.int(1, 7); q = R.int(1, 7); } while (p === q);
       return Pb("On considère " + M(poly([1, -(p + q), p * q, 0]) + " = 0") + ".", [["a) Nombre de solutions", 3], ["b) Plus grande solution", Math.max(p, q)], ["c) Somme des solutions", p + q]],
         ["Mets x en évidence, puis factorise le trinôme.", "x(x − " + p + ")(x − " + q + ") = 0."], "a) 3 : " + SS([0, p, q]) + ". b) " + Math.max(p, q) + ". c) " + (p + q) + "."); }],
-    bicarre: [() => { const p = R.int(1, 3), q = p + R.int(1, 3);
-      return Pb("On considère " + M(poly([1, 0, -(p * p + q * q), 0, p * p * q * q]) + " = 0") + " et l'on pose " + M("X = x^2") + ".", [["a) Plus petite valeur de X", p * p], ["b) Plus grande valeur de X", q * q], ["c) Nombre de solutions x", 4]],
-        ["X² − " + (p * p + q * q) + "X + " + p * p * q * q + " = 0.", "Chaque X positif donne deux valeurs de x."], "a) " + p * p + ". b) " + q * q + ". c) 4 : " + SS([-q, -p, p, q]) + "."); }],
+    bicarre: [
+      () => { const p = R.int(1, 4), neg = R.rand() < 0.4, q = neg ? R.int(1, 9) : p + R.int(1, 3), X1 = neg ? -q : p * p, X2 = neg ? p * p : q * q, n = neg ? 2 : 4;
+        return Object.assign(Pb("On considère " + M(poly([1, 0, -(X1 + X2), 0, X1 * X2]) + " = 0") + " et l'on pose " + M("X = x^2") + ".", [["a) Plus petite valeur de X", X1], ["b) Plus grande valeur de X", X2], ["c) Nombre de solutions x", n]],
+          ["X² " + (X1 + X2 < 0 ? "+ " + -(X1 + X2) : "− " + (X1 + X2)) + "X " + (X1 * X2 < 0 ? "− " + -(X1 * X2) : "+ " + X1 * X2) + " = 0 : cherche deux nombres de somme " + (X1 + X2) + " et de produit " + X1 * X2 + ".", "Chaque X positif donne deux valeurs de x ; un X négatif n'en donne aucune (x² ≥ 0)."],
+          "a) " + X1 + ". b) " + X2 + ". c) " + n + " : " + (neg ? M("x^2 = " + X1) + " est impossible, il reste " + SS([-p, p]) : SS([-q, -p, p, q])) + "."), { ctx: neg ? "bicarre-2" : "bicarre-4" }); },
+      () => { const [p, q, d] = pk([[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 15, 17], [9, 12, 15], [12, 16, 20], [7, 24, 25]]), A = p * q;
+        return Object.assign(Pb("Un rectangle a une aire de " + M(A) + " cm² et une diagonale de " + M(d) + " cm. On note " + M("x") + " sa largeur : sa longueur vaut " + M("\\frac{" + A + "}{x}") + ", et Pythagore donne " + M("x^4 - " + d * d + "x^2 + " + A * A + " = 0") + ".", [["a) Plus petite valeur de X = x²", p * p], ["b) Largeur du rectangle (cm)", p], ["c) Longueur du rectangle (cm)", q]],
+          ["Pose X = x² : X² − " + d * d + "X + " + A * A + " = 0.", "Les deux valeurs positives de x sont la largeur et la longueur."],
+          M("X^2 - " + d * d + "X + " + A * A + " = 0") + " donne " + M("X = " + p * p) + " ou " + M("X = " + q * q) + ". a) " + p * p + ". b) " + M("x = \\sqrt{" + p * p + "} = " + p) + " cm. c) " + M("\\frac{" + A + "}{" + p + "} = " + q) + " cm."), { ctx: "rectangle" }); },
+      () => { let p, q; do { p = R.int(2, 8); q = R.int(3, 9); } while (p >= q);
+        return Object.assign(Pb("Le produit de deux nombres positifs vaut " + M(p * q) + " et la somme de leurs carrés vaut " + M(p * p + q * q) + ". En notant " + M("x") + " l'un d'eux, on obtient " + M("x^4 - " + (p * p + q * q) + "x^2 + " + p * p * q * q + " = 0") + ".", [["a) Plus grande valeur de X = x²", q * q], ["b) Le plus grand des deux nombres", q], ["c) Le plus petit des deux nombres", p]],
+          ["L'autre nombre vaut " + p * q + "/x : x² + (" + p * q + "/x)² = " + (p * p + q * q) + ".", "Pose X = x², résous, puis garde les racines positives."],
+          M("X^2 - " + (p * p + q * q) + "X + " + p * p * q * q + " = 0") + " : " + M("X = " + p * p) + " ou " + M("X = " + q * q) + ". a) " + q * q + ". b) " + q + ". c) " + p + " (vérification : " + M(p + " \\cdot " + q + " = " + p * q) + ")."), { ctx: "nombres" }); },
+    ],
     eqirr: [() => { const d1 = pk([18, 32, 50, 72]), v2 = pk([40, 60, 100]);
       return Pb("D'après la longueur " + M("d") + " (en m) de ses traces de freinage, la vitesse d'une voiture est environ " + M("v = \\sqrt{200d}") + " (en km/h).", [["a) v pour d = " + d1 + " m", Math.sqrt(200 * d1)], ["b) d pour v = " + v2 + " km/h (m)", (v2 * v2) / 200], ["c) Si d est multipliée par 4, v est multipliée par…", 2]],
         ["b) Résous √(200d) = " + v2 + " : élève au carré.", "c) √(200 · 4d) = 2√(200d)."], "a) " + M("\\sqrt{" + 200 * d1 + "} = " + Math.sqrt(200 * d1)) + " km/h. b) " + M("200d = " + v2 * v2 + " \\iff d = " + tn((v2 * v2) / 200)) + " m. c) 2, car " + M("\\sqrt{4} = 2") + "."); }],
@@ -893,6 +908,7 @@
   const TS = (ivs, m) => ({ spec: solsetSpec(ivs), m });
   const TX = (e, m) => ({ e, m });
   const P = (q, parts, hints, sol, fig) => ({ fig, q, parts: parts.map(([label, value, round]) => ({ label, spec: Object.assign({ kind: "value", value }, round ? { round } : {}) })), hints, sol });
+  const r6 = (v) => +(+v).toFixed(6);
   const PAIR = " Réponds « x ; y ».";
   const who = () => pk(["Lina", "Noé", "Inès", "Yanis", "Mia", "Sam"]);
 
@@ -1320,16 +1336,40 @@
       () => P("La droite " + M("y = ax + b") + " passe par " + M("A(1 \\,;\\, 5)") + " et " + M("B(4 \\,;\\, -1)") + ".", [["a) a", -2], ["b) b", 7], ["c) Abscisse du point où elle coupe l'axe des x", 3.5]],
           ["a + b = 5 et 4a + b = −1.", "c) Résous −2x + 7 = 0."], "a) " + M("a = -2") + " ; b) " + M("b = 7") + " ; c) " + M("x = 3{,}5") + "."),
     ],
+    /* 26.11 soir (agent defis3) : sysprob, sysgraph, sysineq tirés au hasard, 3 contextes et plus (avant : deux énoncés fixes). */
     sysprob: [
-      () => P("Dans une ferme, il y a des poules et des lapins : 35 têtes et 94 pattes.", [["a) Nombre de poules", 23], ["b) Nombre de lapins", 12]], ["Si tous étaient des poules : 70 pattes.", "Chaque lapin ajoute 2 pattes."], "Lapins : " + M("(94 - 70) : 2 = 12") + " ; poules : 23."),
-      () => P("Un avion parcourt 1'800 km en 2 h avec le vent dans le dos, et 3 h contre le vent.", [["a) Vitesse avec le vent (km/h)", 900], ["b) Vitesse contre le vent (km/h)", 600], ["c) Vitesse de l'avion sans vent (km/h)", 750], ["d) Vitesse du vent (km/h)", 150]],
-          ["v + w = 900, v − w = 600.", "Additionne."], "c) 750 km/h ; d) 150 km/h."),
+      () => { const [cx, txt, n1, l1, n2, l2, tw, lw, lo, hi] = pk([["ferme", "Dans une ferme, il y a des poules et des lapins : on compte # têtes et # pattes.", "poules", 2, "lapins", 4, "têtes", "pattes", [8, 30], [5, 20]],
+          ["parking", "Sur un parking, il y a des voitures et des motos : on compte # véhicules et # roues.", "motos", 2, "voitures", 4, "véhicules", "roues", [5, 25], [10, 40]],
+          ["salle", "Dans une salle, il y a des tabourets à 3 pieds et des chaises à 4 pieds : on compte # sièges et # pieds.", "tabourets", 3, "chaises", 4, "sièges", "pieds", [6, 20], [10, 30]]]);
+        const a = R.int(lo[0], lo[1]), b = R.int(hi[0], hi[1]), T = a + b, P0 = a * l1 + b * l2;
+        let i = 0; const q = txt.replace(/#/g, () => [T, P0][i++]);
+        return Object.assign(P(q, [["a) Nombre de " + n1, a], ["b) Nombre de " + n2, b]],
+          ["Si tous étaient des " + n1 + " : " + T + " · " + l1 + " = " + T * l1 + " " + lw + ".", "Chaque " + n2.replace(/s$/, "") + " ajoute " + (l2 - l1) + " " + lw + " de plus."],
+          "Avec x " + n1 + " et y " + n2 + " : " + sys("x + y = " + T, l1 + "x + " + l2 + "y = " + P0) + ". Si tous étaient des " + n1 + " : " + M(T * l1) + " " + lw + " ; il en manque " + M(P0 - T * l1) + ", donc " + M("y = " + (P0 - T * l1) + " : " + (l2 - l1) + " = " + b) + " " + n2 + " et " + M("x = " + T + " - " + b + " = " + a) + " " + n1 + "."), { ctx: cx }); },
+      () => { const [cx, txt, u, mm, tt] = pk([["avion", "Un avion parcourt # km en # h avec le vent dans le dos, et en # h contre le vent.", "km/h", [170, 200, 10], [[4, 5]]],
+          ["bateau", "Un bateau parcourt # km sur une rivière en # h en descendant le courant, et en # h en le remontant.", "km/h", [4, 10, 2], [[2, 3], [3, 4]]],
+          ["kayak", "Une kayakiste parcourt # km en # h en descendant une rivière, et en # h en la remontant.", "km/h", [2, 4, 2], [[2, 3], [1, 2]]]]);
+        const [t1, t2] = pk(tt), m = mm[0] + mm[2] * R.int(0, Math.floor((mm[1] - mm[0]) / mm[2])), D = m * t1 * t2, s1 = D / t1, s2 = D / t2, v = (s1 + s2) / 2, w = (s1 - s2) / 2, fl = cx === "avion" ? "du vent" : "du courant";
+        let i = 0; const q = txt.replace(/#/g, () => [N(D), t1, t2][i++]);
+        return Object.assign(P(q, [["a) Vitesse dans le sens favorable (" + u + ")", s1], ["b) Vitesse dans le sens contraire (" + u + ")", s2], ["c) Vitesse propre (sans " + (cx === "avion" ? "vent" : "courant") + ", " + u + ")", v], ["d) Vitesse " + fl + " (" + u + ")", w]],
+          ["Avec v la vitesse propre et w celle " + fl + " : v + w = " + N(s1).replace(/\\text\{'\}/g, "'") + " et v − w = " + N(s2).replace(/\\text\{'\}/g, "'") + ".", "Additionne les deux équations, puis soustrais-les."],
+          "a) " + M(N(D) + " : " + t1 + " = " + N(s1)) + " ; b) " + M(N(D) + " : " + t2 + " = " + N(s2)) + " ; " + sys("v + w = " + N(s1), "v - w = " + N(s2)) + " ; c) " + M("2v = " + N(s1 + s2)) + ", " + M("v = " + N(v)) + " " + u + " ; d) " + M("w = " + N(s1) + " - " + N(v) + " = " + N(w)) + " " + u + "."), { ctx: cx }); },
     ],
     sysgraph: [
-      () => P("On considère " + sys("2x + 3y = 6", "4x + my = k") + ".", [["a) Pour quel m les droites sont-elles parallèles ?", 6], ["b) Avec ce m, pour quel k y a-t-il une infinité de solutions ?", 12], ["c) Avec m = 1 et k = 2 : abscisse de la solution", 0]],
-          ["Coefficients proportionnels (facteur 2).", "c) Résous le système."], "a) 6 ; b) 12 ; c) " + M("x = 0") + ", " + M("y = 2") + "."),
-      () => P("Deux opérateurs : A coûte 20 CHF par mois plus 0,10 CHF la minute ; B coûte 0,30 CHF la minute.", [["a) Coût de A pour 60 minutes (CHF)", 26], ["b) Coût de B pour 60 minutes (CHF)", 18], ["c) Nombre de minutes où les coûts sont égaux", 100]],
-          ["Écris deux fonctions affines.", "c) 0,1x + 20 = 0,3x."], "c) " + M("0{,}2x = 20") + ", " + M("x = 100") + " minutes."),
+      () => { let a1, b1, f, x0, y0, m0; do { a1 = R.int(1, 5); b1 = R.int(1, 5); f = pk([2, 3]); x0 = R.int(-3, 4); y0 = R.int(-3, 4); m0 = R.int(1, 9); } while (gcd2(a1, b1) !== 1 || m0 === f * b1 || x0 === 0 || y0 === 0);
+        const c1 = a1 * x0 + b1 * y0, a2 = f * a1, k0 = a2 * x0 + m0 * y0;
+        return Object.assign(P("On considère " + sys(lhs([a1, b1]) + " = " + c1, a2 + "x + my = k") + " (m et k sont des nombres).", [["a) Pour quel m les deux droites sont-elles parallèles ?", f * b1], ["b) Avec ce m, pour quel k y a-t-il une infinité de solutions ?", f * c1], ["c) Avec m = " + m0 + " et k = " + k0 + " : abscisse x de la solution", x0], ["d) Avec m = " + m0 + " et k = " + k0 + " : ordonnée y de la solution", y0]],
+          ["Parallèles : coefficients de x et de y proportionnels (facteur " + f + ").", "c) Résous le système (par exemple par combinaison)."],
+          "a) " + M(a2 + " = " + f + " \\cdot " + a1) + ", donc " + M("m = " + f + " \\cdot " + b1 + " = " + f * b1) + " ; b) confondues si aussi " + M("k = " + f + " \\cdot " + pT(c1) + " = " + f * c1) + " ; c) et d) " + sys(lhs([a1, b1]) + " = " + c1, a2 + "x + " + m0 + "y = " + k0) + " donne " + pairT([x0, y0]) + "."), { ctx: "parametre" }); },
+      () => { const [cx, txt, unit, pAs, pBs] = pk([["operateur", "Deux opérateurs : A coûte # CHF par mois plus # CHF la minute ; B coûte # CHF la minute.", "minutes", [0.05, 0.1], [0.2, 0.25, 0.3]],
+          ["velo", "Location de vélo : l'agence A demande # CHF de frais de dossier plus # CHF de l'heure ; l'agence B demande # CHF de l'heure.", "heures", [2, 3], [5, 6, 7]],
+          ["sport", "Salle de sport : la formule A coûte # CHF par an plus # CHF la séance ; la formule B coûte # CHF la séance.", "séances", [4, 5, 6], [9, 10, 12]]]);
+        let pA, pB, xe, F; for (let t = 0; t < 50; t++) { pA = pk(pAs); pB = pk(pBs); xe = unit === "minutes" ? 10 * R.int(5, 20) : unit === "heures" ? R.int(3, 8) : R.int(8, 20); F = r6((pB - pA) * xe); if (F >= 4 && Number.isInteger(r6(F * 100))) break; }
+        const n = unit === "minutes" ? 10 * R.int(3, 25) : unit === "heures" ? R.int(2, 10) : R.int(5, 25), cA = r6(F + pA * n), cB = r6(pB * n);
+        let i = 0; const q = txt.replace(/#/g, () => N([F, pA, pB][i++]));
+        return Object.assign(P(q, [["a) Coût de A pour " + n + " " + unit + " (CHF)", cA], ["b) Coût de B pour " + n + " " + unit + " (CHF)", cB], ["c) Nombre de " + unit + " pour lequel les deux coûts sont égaux", xe]],
+          ["Écris deux fonctions affines : A(x) = " + N(F).replace("{,}", ",") + " + " + N(pA).replace("{,}", ",") + "x et B(x) = " + N(pB).replace("{,}", ",") + "x.", "c) Résous A(x) = B(x) : les deux droites se coupent."],
+          "a) " + M(N(F) + " + " + N(pA) + " \\cdot " + n + " = " + N(cA)) + " CHF ; b) " + M(N(pB) + " \\cdot " + n + " = " + N(cB)) + " CHF ; c) " + M(N(F) + " + " + N(pA) + "x = " + N(pB) + "x") + ", " + M(N(r6(pB - pA)) + "x = " + N(F)) + ", " + M("x = " + xe) + " " + unit + "."), { ctx: cx }); },
     ],
     sys3: [
       () => P("Trois amis comparent leurs économies : A et B ont ensemble 70 CHF, B et C 90 CHF, A et C 80 CHF.", [["a) Total des trois (CHF)", 120], ["b) Économies de A", 30], ["c) Économies de B", 40], ["d) Économies de C", 50]], ["Additionne les trois équations : 2(A + B + C) = 240.", "A = total − (B + C)."], "a) 120 ; A = 30, B = 40, C = 50."),
@@ -1345,9 +1385,20 @@
       () => P("Soit " + M("f(x) = 3x - 7") + " et " + M("g(x) = -x + 5") + ".", [["a) Zéro de f (fraction : 7/3)", 7 / 3], ["b) Zéro de g", 5], ["c) Abscisse où f(x) = g(x)", 3]], ["Résous f(x) = 0, puis g(x) = 0.", "c) 3x − 7 = −x + 5."], "a) " + M("\\frac{7}{3}") + " ; b) 5 ; c) " + M("x = 3") + "."),
     ],
     sysineq: [
-      () => P("Pour une sortie, la classe dispose de 600 CHF. Le car coûte 240 CHF et l'entrée 15 CHF par élève. Il faut au moins 12 élèves pour que la sortie ait lieu.", [["a) Nombre maximal d'élèves", 24], ["b) Nombre minimal d'élèves", 12], ["c) Combien de valeurs possibles pour le nombre d'élèves ?", 13]],
-          ["240 + 15x ≤ 600.", "c) Les entiers de 12 à 24."], "a) " + M("15x \\le 360") + ", " + M("x \\le 24") + " ; c) 13 valeurs."),
-      () => P("On cherche les nombres x qui vérifient à la fois 2x − 3 > 1 et 5 − x ≥ −2.", [["a) Borne de gauche (exclue)", 2], ["b) Borne de droite (comprise)", 7], ["c) Combien d'entiers vérifient le système ?", 5]], ["2x > 4 ; −x ≥ −7, donc x ≤ 7.", "c) 3, 4, 5, 6, 7."], M("S = \\,]2 \\,;\\, 7]") + " ; 5 entiers."),
+      () => { const [cx, txt, who, Cs, ps, mins] = pk([["sortie", "Pour une sortie, la classe dispose de # CHF. Le car coûte # CHF et l'entrée # CHF par élève. Il faut au moins # élèves pour que la sortie ait lieu.", "élèves", [180, 240, 300], [8, 10, 12, 15], [10, 12]],
+          ["anniversaire", "Pour un anniversaire, Léa dispose de # CHF. La salle coûte # CHF et le repas # CHF par invité. Elle veut inviter au moins # personnes.", "invités", [60, 80, 100], [12, 15, 18, 20], [8, 10]],
+          ["club", "Un club de foot dispose de # CHF pour un tournoi. La location du terrain coûte # CHF et l'inscription # CHF par joueur. Il faut au moins # joueurs.", "joueurs", [100, 150, 200], [6, 8, 10], [11, 14]]]);
+        let B, C, p, mn, mx; for (let t = 0; t < 80; t++) { C = pk(Cs); p = pk(ps); mn = pk(mins); mx = mn + R.int(4, 14); B = C + p * mx + R.int(0, p - 1); if (Math.floor((B - C) / p) === mx && B % 10 === 0) break; }
+        mx = Math.floor((B - C) / p); const dw = /^[éiaeou]/.test(who) ? "d'" : "de ", ex = (B - C) % p === 0;
+        let i = 0; const q = txt.replace(/#/g, () => N([B, C, p, mn][i++]));
+        return Object.assign(P(q, [["a) Nombre maximal " + dw + who, mx], ["b) Nombre minimal " + dw + who, mn], ["c) Combien de valeurs possibles pour le nombre " + dw + who + " ?", mx - mn + 1]],
+          [C + " + " + p + "x ≤ " + B + ".", "c) Les entiers de " + mn + " à " + mx + "."],
+          "a) " + M(C + " + " + p + "x \\le " + N(B)) + ", " + M(p + "x \\le " + (B - C)) + ", " + M("x \\le \\frac{" + (B - C) + "}{" + p + "}" + (ex ? " = " + mx : " \\approx " + N(Math.floor(((B - C) / p) * 10) / 10) + "\\ldots")) + ", donc au plus " + M(mx) + " ; b) " + M(mn) + " ; c) de " + mn + " à " + mx + " : " + M(mx + " - " + mn + " + 1 = " + (mx - mn + 1)) + " valeurs."), { ctx: cx }); },
+      () => { let Lb, Rb, a, b, d; do { Lb = R.int(-4, 4); Rb = Lb + R.int(3, 8); a = R.int(2, 5); b = R.int(1, 9); d = R.int(1, 9); } while (d - Rb === 0 || a * Lb - b === 0);
+        const strictL = R.rand() < 0.5, cnt = Rb - Lb + (strictL ? 0 : 1), c1 = a * Lb - b, e = d - Rb;
+        return Object.assign(P("On cherche les nombres x qui vérifient à la fois " + M(a + "x - " + b + (strictL ? " > " : " \\ge ") + c1) + " et " + M(d + " - x \\ge " + e) + ".", [["a) Borne de gauche (" + (strictL ? "exclue" : "comprise") + ")", Lb], ["b) Borne de droite (comprise)", Rb], ["c) Combien d'entiers vérifient le système ?", cnt]],
+          [M(a + "x" + (strictL ? " > " : " \\ge ") + (c1 + b)) + " ; " + M("-x \\ge " + (e - d)) + ", donc " + M("x \\le " + Rb) + " (on change le sens en divisant par −1).", "c) Compte les entiers de l'intervalle."],
+          M(a + "x" + (strictL ? " > " : " \\ge ") + (c1 + b)) + ", " + M("x" + (strictL ? " > " : " \\ge ") + Lb) + " ; " + M("x \\le " + Rb) + " : " + M("S = \\," + (strictL ? "]" : "[") + Lb + " \\,;\\, " + Rb + "]") + " ; " + cnt + " entiers."), { ctx: "algebre" }); },
     ],
   };
 
@@ -4921,12 +4972,33 @@
   };
 
   const PROBS = {
-    graphefct: [() => { const [r, a, b] = pk([[5, 3, 4], [10, 6, 8], [13, 5, 12]]);
-      return P("On considère le cercle " + M("x^2 + y^2 = " + r * r) + " et la droite verticale " + M("x = " + a) + ".", [["a) En combien de points la droite coupe-t-elle le cercle ?", 2], ["b) Image de " + a + " par la fonction dont le graphe est la moitié supérieure du cercle", b], ["c) Plus grande abscisse d'un point du cercle", r]],
-        ["Remplace x par " + a + " et résous en y.", "Moitié supérieure : y = √(" + r * r + " − x²)."], "a) 2 : " + M("y = " + b) + " ou " + M("y = -" + b) + ", ce n'est pas une fonction ; b) " + b + " ; c) " + r + "."); }],
-    ineqgraph: [() => { const p = pk([-2, -1]), q = pk([3, 4]), f = (x) => (x - p) * (x - q);
-      return P("Le graphe de " + M("f(x) = " + poly([1, -(p + q), p * q])) + " coupe l'axe des x en deux points.", [["a) Plus petite abscisse d'intersection avec l'axe", p], ["b) Plus grande", q], ["c) Nombre d'entiers x tels que f(x) < 0", q - p - 1]],
-        ["Factorise ou lis le graphe.", "f(x) < 0 entre les zéros, bornes exclues."], "a) " + p + " ; b) " + q + " ; c) les entiers de " + (p + 1) + " à " + (q - 1) + ", soit " + (q - p - 1) + ".", PLf([{ f }], { yr: [-8, 8] })); }],
+    /* 26.11 soir (agent defis3) : valeurs tirées, 3 contextes chacun (avant : 3 ou 2 énoncés presque fixes). */
+    graphefct: [
+      () => { const [a1, b1, r] = pk([[3, 4, 5], [4, 3, 5], [6, 8, 10], [8, 6, 10], [5, 12, 13], [12, 5, 13], [9, 12, 15], [12, 9, 15]]), a = pk([a1, b1, r, r, r + R.int(1, 3)]), n = a < r ? 2 : a === r ? 1 : 0;
+        return Object.assign(P("On considère le cercle " + M("x^2 + y^2 = " + r * r) + " et la droite verticale " + M("x = " + a) + ".", [["a) En combien de points la droite coupe-t-elle le cercle ?", n], ["b) Image de " + a1 + " par la fonction dont le graphe est la moitié supérieure du cercle", b1], ["c) Plus grande abscisse d'un point du cercle", r]],
+          ["Remplace x par " + a + " dans l'équation : combien de valeurs de y conviennent ?", "Moitié supérieure : y = √(" + r * r + " − x²), toujours positif."],
+          "a) " + (n === 2 ? M("y^2 = " + (r * r - a * a)) + " : deux valeurs de " + M("y") + ", 2 points (le cercle n'est pas le graphe d'une fonction)" : n === 1 ? M("y^2 = 0") + " : un seul point (1), la droite touche le cercle" : M("y^2 = " + (r * r - a * a)) + " < 0 : aucun point, 0") + " ; b) " + M("\\sqrt{" + r * r + " - " + a1 * a1 + "} = " + b1) + " ; c) " + r + "."), { ctx: "cercle" }); },
+      () => { const [a, h, r] = pk([[3, 4, 5], [4, 3, 5], [6, 8, 10], [8, 6, 10], [5, 12, 13], [12, 5, 13], [9, 12, 15], [12, 9, 15]]);
+        return Object.assign(P("Une arche de pont est un demi-cercle de rayon " + M(r) + " m. On place un repère au centre, au niveau de l'eau : l'arche est la moitié supérieure du cercle " + M("x^2 + y^2 = " + r * r) + ".", [["a) Hauteur de l'arche à " + a + " m du centre (m)", h], ["b) Largeur de la rivière sous l'arche (m)", 2 * r], ["c) Combien de points de l'arche ont pour abscisse " + a + " ?", 1]],
+          ["Hauteur à " + a + " m du centre : y = √(" + r * r + " − " + a + "²).", "c) L'arche ne garde que y ≥ 0 : c'est le graphe d'une fonction."],
+          "a) " + M("\\sqrt{" + r * r + " - " + a * a + "} = \\sqrt{" + h * h + "} = " + h) + " m ; b) " + M("2 \\cdot " + r + " = " + 2 * r) + " m ; c) 1 : le cercle entier en aurait 2, mais l'arche n'en garde qu'un (graphe d'une fonction)."), { ctx: "arche" }); },
+      () => { const c = R.int(-4, 3), d = R.int(2, 5), k = pk([c + d * d, c, c - R.int(1, 3)]), n = k > c ? 2 : k === c ? 1 : 0, kk = c + d * d;
+        return Object.assign(P("On considère la courbe d'équation " + M("x = y^2" + (c ? (c < 0 ? " - " + -c : " + " + c) : "")) + " (une parabole « couchée ») et la droite verticale " + M("x = " + k) + ".", [["a) En combien de points la droite coupe-t-elle la courbe ?", n], ["b) Plus grande ordonnée d'un point de la courbe d'abscisse " + kk, d], ["c) Cette courbe est-elle le graphe d'une fonction de x ? Tape 1 pour oui, 0 pour non.", 0]],
+          ["Remplace x par " + k + " : " + M("y^2 = " + k + (c ? (c < 0 ? " + " + -c : " - " + c) : "")) + ".", "Un graphe de fonction : toute droite verticale le coupe au plus une fois."],
+          "a) " + M("y^2 = " + (k - c)) + " : " + (n === 2 ? "deux valeurs de " + M("y") + ", 2 points" : n === 1 ? M("y = 0") + ", 1 point" : "impossible, 0 point") + " ; b) " + M("y^2 = " + kk + (c ? (c < 0 ? " + " + -c : " - " + c) + " = " + d * d : "")) + ", " + M("y = " + d) + " ; c) non (0) : la droite " + M("x = " + kk) + " la coupe en deux points."), { ctx: "parabole-couchee" }); },
+    ],
+    ineqgraph: [
+      () => { const p = R.int(-4, -1), q = R.int(1, 5), f = (x) => (x - p) * (x - q), [op, opT, cx] = pk([["<", "<", "inf"], ["<=", "\\le", "infeg"], [">", ">", "sup"], [">=", "\\ge", "supeg"]]);
+        const ok = (x) => (op === "<" ? f(x) < 0 : op === "<=" ? f(x) <= 0 : op === ">" ? f(x) > 0 : f(x) >= 0), fin = op[0] === "<", cnt = fin ? (op === "<" ? q - p - 1 : q - p + 1) : op === ">" ? q + 1 : q;
+        const lc = fin ? "c) Nombre d'entiers x tels que " + M("f(x) " + opT + " 0") : "c) Plus petit entier positif x tel que " + M("f(x) " + opT + " 0");
+        return Object.assign(P("Le graphe de " + M("f(x) = " + poly([1, -(p + q), p * q])) + " coupe l'axe des x en deux points.", [["a) Plus petite abscisse d'intersection avec l'axe", p], ["b) Plus grande", q], [lc, cnt]],
+          ["Factorise : f(x) = " + fx(p) + fx(q) + ", ou lis le graphe.", fin ? "f(x) " + (op === "<" ? "<" : "≤") + " 0 entre les zéros, bornes " + (op === "<" ? "exclues" : "comprises") + "." : "f(x) " + (op === ">" ? ">" : "≥") + " 0 à l'extérieur des zéros, bornes " + (op === ">" ? "exclues" : "comprises") + "."],
+          "a) " + p + " ; b) " + q + " ; c) " + (fin ? "les entiers de " + (op === "<" ? p + 1 : p) + " à " + (op === "<" ? q - 1 : q) + ", soit " + cnt : "à droite de " + q + (op === ">" ? " (exclu)" : " (compris)") + ", le plus petit entier positif est " + cnt) + ".", PLf([{ f }], { yr: [-8, 8] })), { ctx: cx }); },
+      () => { const p = R.int(1, 3), q = R.int(6, 9), B = (x) => -(x - p) * (x - q), top = ((q - p) / 2) ** 2, obj = pk(["vélos", "tables", "lampes", "sacs"]);
+        return Object.assign(P("Un atelier fabrique des " + obj + ". Pour " + M("x") + " centaines d'objets vendus, son bénéfice vaut " + M("B(x) = " + poly([-1, p + q, -p * q])) + " (en milliers de CHF). Le graphe de B est tracé.", [["a) Plus petite quantité (en centaines) pour laquelle B(x) = 0", p], ["b) Plus grande quantité pour laquelle B(x) = 0", q], ["c) Nombre de quantités entières (en centaines) pour lesquelles B(x) > 0", q - p - 1]],
+          ["B(x) = −(x − " + p + ")(x − " + q + ") : lis où la courbe coupe l'axe.", "B(x) > 0 là où la courbe est au-dessus de l'axe, bornes exclues."],
+          "a) " + p + " ; b) " + q + " : " + M("B(x) = -(x - " + p + ")(x - " + q + ")") + " ; c) bénéfice positif entre les zéros, bornes exclues : de " + (p + 1) + " à " + (q - 1) + ", soit " + (q - p - 1) + " quantités.", PLf([{ f: B }], { xr: [-1, 10], yr: [-6, Math.ceil(top) + 2] })), { ctx: "benefice" }); },
+    ],
   };
 
   reg([

@@ -1531,31 +1531,66 @@
           [["a) " + a + " + " + b + " · " + c + " − 1 (sans parenthèses)", a + b * c - 1], ["b) (" + a + " + " + b + ") · " + c + " − 1", (a + b) * c - 1], ["c) " + a + " + " + b + " · (" + c + " − 1)", a + b * (c - 1)], ["d) (" + a + " + " + b + ") · (" + c + " − 1)", (a + b) * (c - 1)]],
           ["Sans parenthèses : la multiplication d'abord.", "Les parenthèses changent l'ordre des calculs."], "a) " + (a + b * c - 1) + " ; b) " + ((a + b) * c - 1) + " ; c) " + (a + b * (c - 1)) + " ; d) " + (a + b) * (c - 1) + "."); },
     ],
+    /* 26.11 soir (agent defis3) : fracadd, 3 contextes (élection, boisson diluée, argent de poche), valeurs tirées. */
     fracadd: [
-      () => { const [a, b, c, e] = pk([[1, 3, 1, 4], [2, 5, 1, 3], [1, 4, 1, 6], [3, 8, 1, 4]]), rest = qs([1, 1], qa([a, b], [c, e])), tot = pk([120, 240, 360]) ;
-        return P("Lors d'une élection de délégué, " + M(fT(a, b)) + " des élèves votent pour Ana, " + M(fT(c, e)) + " pour Ben, et le reste pour Chloé. L'école compte " + tot + " élèves.",
-          [["a) Fraction des voix pour Chloé (tape la fraction)", qv(rest)], ["b) Nombre de voix pour Ana", tot * a / b], ["c) Nombre de voix pour Chloé", tot * qv(rest)]],
-          ["a) 1 − (" + a + "/" + b + " + " + c + "/" + e + ").", "b) et c) : fraction × nombre d'élèves."], "a) " + M(qT(rest)) + " ; b) " + M(tot * a / b) + " ; c) " + M(r12(tot * qv(rest))) + "."); },
-      () => P("Un sirop se dilue ainsi : " + M(fT(1, 6)) + " de sirop, " + M(fT(2, 3)) + " d'eau plate et le reste d'eau gazeuse.",
-          [["a) Fraction d'eau gazeuse (tape la fraction)", 1 / 6], ["b) Pour 1,2 L de boisson, volume de sirop (L)", 0.2], ["c) Volume d'eau plate (L)", 0.8]],
-          ["a) 1 − 1/6 − 2/3, au dénominateur 6.", "b) 1/6 de 1,2 L."], "a) " + M("1 - \\frac{1}{6} - \\frac{4}{6} = \\frac{1}{6}") + " ; b) " + M("0{,}2") + " L ; c) " + M("0{,}8") + " L."),
+      () => { const [a, b, c, e] = pk([[1, 3, 1, 4], [2, 5, 1, 3], [1, 4, 1, 6], [3, 8, 1, 4], [1, 6, 2, 5], [1, 5, 3, 10], [2, 7, 1, 4]]), rest = qs([1, 1], qa([a, b], [c, e])), L = lcm(b, e), tot = L * R.int(Math.ceil(120 / L), Math.floor(480 / L)), [n1, n2, n3] = pk([["Ana", "Ben", "Chloé"], ["Yanis", "Léa", "Noé"], ["Inès", "Sam", "Lina"]]);
+        return Object.assign(P("Lors d'une élection de délégué, " + M(fT(a, b)) + " des élèves votent pour " + n1 + ", " + M(fT(c, e)) + " pour " + n2 + ", et le reste pour " + n3 + ". L'école compte " + tot + " élèves.",
+          [["a) Fraction des voix pour " + n3 + " (tape la fraction)", qv(rest)], ["b) Nombre de voix pour " + n1, (tot * a) / b], ["c) Nombre de voix pour " + n3, tot * qv(rest)]],
+          ["a) 1 − (" + a + "/" + b + " + " + c + "/" + e + ").", "b) et c) : fraction × nombre d'élèves."], "a) " + M("1 - \\left(" + fT(a, b) + " + " + fT(c, e) + "\\right) = " + qT(rest)) + " ; b) " + M(fT(a, b) + " \\cdot " + tot + " = " + (tot * a) / b) + " ; c) " + M(qT(rest) + " \\cdot " + tot + " = " + r12(tot * qv(rest))) + "."), { ctx: "election" }); },
+      () => { const [a, b, c, e] = pk([[1, 6, 2, 3], [1, 5, 1, 2], [1, 8, 1, 2], [1, 4, 1, 2], [1, 10, 3, 5], [1, 6, 1, 2]]), rest = qs([1, 1], qa([a, b], [c, e])), [boi, s1, s2] = pk([["sirop", "de sirop", "d'eau plate"], ["thé glacé", "de thé", "d'eau"], ["cocktail de fruits", "de jus d'orange", "de jus de pomme"]]);
+        let V = 1.2; for (let t = 0; t < 40; t++) { const v = pk([0.6, 0.9, 1.2, 1.5, 1.8, 2, 2.4, 3]); if (Number.isInteger(r12((v * 1000 * a) / b)) && Number.isInteger(r12((v * 1000 * c) / e))) { V = v; break; } }
+        return Object.assign(P("Pour préparer un " + boi + ", on met " + M(fT(a, b)) + " " + s1 + ", " + M(fT(c, e)) + " " + s2 + " et le reste d'eau gazeuse.",
+          [["a) Fraction d'eau gazeuse (tape la fraction)", qv(rest)], ["b) Pour " + N(V).replace("{,}", ",") + " L de boisson, volume " + s1 + " (L)", r12((V * a) / b)], ["c) Volume " + s2 + " dans ces " + N(V).replace("{,}", ",") + " L (L)", r12((V * c) / e)]],
+          ["a) 1 − " + a + "/" + b + " − " + c + "/" + e + ", au même dénominateur.", "b) " + a + "/" + b + " de " + N(V).replace("{,}", ",") + " L."], "a) " + M("1 - " + fT(a, b) + " - " + fT(c, e) + " = " + qT(rest)) + " ; b) " + M(fT(a, b) + " \\cdot " + N(V) + " = " + N(r12((V * a) / b))) + " L ; c) " + M(fT(c, e) + " \\cdot " + N(V) + " = " + N(r12((V * c) / e))) + " L."), { ctx: "boisson" }); },
+      () => { const [a, b, c, e] = pk([[1, 3, 1, 4], [1, 4, 2, 5], [1, 2, 1, 5], [2, 5, 1, 4], [1, 3, 1, 6], [3, 10, 1, 4]]), rest = qs([1, 1], qa([a, b], [c, e])), L = lcm(b, e), A = L * pk([1, 2, 3, 4].filter((k) => L * k >= 20 && L * k <= 120)), nm = pk(["Léa", "Noé", "Inès", "Yanis"]);
+        return Object.assign(P(nm + " reçoit " + A + " CHF d'argent de poche : " + M(fT(a, b)) + " part dans une sortie au cinéma, " + M(fT(c, e)) + " dans un livre, et le reste est mis de côté.",
+          [["a) Fraction mise de côté (tape la fraction)", qv(rest)], ["b) Prix du cinéma (CHF)", (A * a) / b], ["c) Montant mis de côté (CHF)", A * qv(rest)]],
+          ["a) 1 − (" + a + "/" + b + " + " + c + "/" + e + ").", "b) et c) : fraction × " + A + " CHF."], "a) " + M("1 - \\left(" + fT(a, b) + " + " + fT(c, e) + "\\right) = " + qT(rest)) + " ; b) " + M(fT(a, b) + " \\cdot " + A + " = " + (A * a) / b) + " CHF ; c) " + M(qT(rest) + " \\cdot " + A + " = " + r12(A * qv(rest))) + " CHF."), { ctx: "argent" }); },
     ],
+    /* 26.11 soir (agent defis3) : défis tirés au hasard, 3 contextes chacun (avant : deux énoncés presque fixes). */
     fracmul: [
-      () => { const N0 = pk([360, 480, 600, 720]);
-        return P("Une ville de " + N0 + " hectares : les " + M(fT(2, 5)) + " sont des forêts ; les " + M(fT(3, 4)) + " des forêts sont des feuillus.",
-          [["a) Surface de forêt (ha)", N0 * 2 / 5], ["b) Fraction de la ville couverte de feuillus (tape la fraction)", 3 / 10], ["c) Surface de feuillus (ha)", N0 * 3 / 10]],
-          ["b) Les 3/4 des 2/5, c'est 3/4 · 2/5.", "c) Cette fraction de " + N0 + " ha."], "a) " + M(N0 * 2 / 5) + " ha ; b) " + M("\\frac{3}{4} \\cdot \\frac{2}{5} = \\frac{3}{10}") + " ; c) " + M(N0 * 3 / 10) + " ha."); },
-      () => { const L0 = pk([12, 15, 18]);
-        return P("Un ruban de " + L0 + " m. On en coupe les " + M(fT(1, 3)) + ", puis on coupe le reste en morceaux de " + M(fT(2, 5)) + " m.",
-          [["a) Longueur coupée d'abord (m)", L0 / 3], ["b) Longueur restante (m)", L0 * 2 / 3], ["c) Nombre de morceaux de 2/5 m", L0 * 2 / 3 * 5 / 2]],
-          ["b) " + L0 + " − " + L0 / 3 + ".", "c) Divise par 2/5 : multiplie par 5/2."], "c) " + M(L0 * 2 / 3 + " : \\frac{2}{5} = " + L0 * 2 / 3 + " \\cdot \\frac{5}{2} = " + L0 * 2 / 3 * 5 / 2) + " morceaux."); },
+      () => { const [[a, b], [c, e]] = pk([[[2, 5], [3, 4]], [[3, 5], [2, 3]], [[3, 4], [1, 3]], [[2, 3], [3, 4]], [[4, 5], [1, 4]], [[5, 6], [2, 5]], [[3, 8], [2, 3]], [[2, 5], [5, 6]]]), fr = rq(a * c, b * e);
+        const cx = pk([["foret", "Une commune de # hectares : les A sont couverts de forêts ; les C des forêts sont des feuillus.", "Surface de forêt (ha)", "Fraction de la commune couverte de feuillus (tape la fraction)", "Surface de feuillus (ha)", [300, 900]],
+          ["sport", "Un collège compte # élèves : les A font partie d'un club de sport ; les C de ces sportifs jouent au football.", "Nombre d'élèves dans un club de sport", "Fraction des élèves du collège qui jouent au football (tape la fraction)", "Nombre d'élèves qui jouent au football", [240, 720]],
+          ["jardin", "Un jardin mesure # m² : les A sont occupés par un potager ; les C du potager sont plantés de tomates.", "Aire du potager (m²)", "Fraction du jardin plantée de tomates (tape la fraction)", "Aire plantée de tomates (m²)", [60, 240]]]);
+        const st = b * e, lo = Math.ceil(cx[5][0] / st), hi = Math.floor(cx[5][1] / st), N0 = st * R.int(lo, Math.max(lo, hi)), A1 = (N0 * a) / b, A2 = (N0 * qv(fr));
+        return Object.assign(P(cx[1].replace("#", N(N0)).replace("A", M(fT(a, b))).replace("C", M(fT(c, e))), [["a) " + cx[2], A1], ["b) " + cx[3], qv(fr)], ["c) " + cx[4], A2]],
+          ["b) Les " + c + "/" + e + " des " + a + "/" + b + ", c'est " + c + "/" + e + " · " + a + "/" + b + ".", "c) Cette fraction de " + N0 + "."],
+          "a) " + M(fT(a, b) + " \\cdot " + N(N0) + " = " + N(A1)) + " ; b) " + M(fT(c, e) + " \\cdot " + fT(a, b) + " = " + qT(fr)) + " ; c) " + M(qT(fr) + " \\cdot " + N(N0) + " = " + N(A2)) + "."), { ctx: cx[0] }); },
+      () => { const cx = pk([["ruban", "Un ruban mesure # m. On en coupe d'abord K, puis on coupe le reste en morceaux de Q m.", "Longueur coupée d'abord (m)", "Longueur restante (m)", "Nombre de morceaux", [6, 24]],
+          ["jus", "Une fontaine à jus contient # L. Au petit-déjeuner, on en boit K, puis on verse le reste dans des gourdes de Q L.", "Volume bu au petit-déjeuner (L)", "Volume restant (L)", "Nombre de gourdes remplies", [6, 15]],
+          ["planche", "Une planche mesure # m. On en scie d'abord K, puis on découpe le reste en lattes de Q m.", "Longueur sciée d'abord (m)", "Longueur restante (m)", "Nombre de lattes", [3, 6]]]);
+        let L0 = 12, k = 3, p = 2, q = 5;
+        for (let t = 0; t < 200; t++) { const kk = R.int(3, 5), [pp, qq] = pk([[2, 5], [3, 4], [2, 3], [3, 5], [1, 4]]), LL = R.int(cx[5][0], cx[5][1]); const rest = (LL * (kk - 1)) / kk, n = (rest * qq) / pp;
+          if (LL % kk === 0 && Number.isInteger(n) && n >= 3 && n <= 40 && !(pp === 1 && qq === kk)) { L0 = LL; k = kk; p = pp; q = qq; break; } }
+        const cut = L0 / k, rest = L0 - cut, n = (rest * q) / p, KW = { 3: "le tiers", 4: "le quart", 5: "le cinquième" }[k];
+        return Object.assign(P(cx[1].replace("#", N(L0)).replace("K", KW + " (" + M(fT(1, k)) + ")").replace("Q", M(fT(p, q))), [["a) " + cx[2], cut], ["b) " + cx[3], rest], ["c) " + cx[4], n]],
+          ["a) " + M(fT(1, k)) + " de " + L0 + ".", "c) Divise par " + p + "/" + q + " : multiplie par " + q + "/" + p + "."],
+          "a) " + M(N(L0) + " : " + k + " = " + N(cut)) + " ; b) " + M(N(L0) + " - " + N(cut) + " = " + N(rest)) + " ; c) " + M(N(rest) + " : " + fT(p, q) + " = " + N(rest) + " \\cdot " + fT(q, p) + " = " + n) + "."), { ctx: cx[0] }); },
     ],
     fracconv: [
-      () => P("Trois magasins proposent le même article à 80 CHF : le premier fait " + M(fT(1, 4)) + " de rabais, le deuxième " + M("22\\,\\%") + ", le troisième " + M("0{,}3") + " du prix en moins après une hausse de 10 %.",
-          [["a) Prix au premier magasin (CHF)", 60], ["b) Prix au deuxième (CHF)", 62.4], ["c) Prix au troisième (CHF)", 61.6]],
-          ["a) 80 · (1 − 1/4).", "c) 80 · 1,1 · 0,7."], "a) " + M("60") + " ; b) " + M("80 \\cdot 0{,}78 = 62{,}4") + " ; c) " + M("80 \\cdot 1{,}1 \\cdot 0{,}7 = 61{,}6") + " : le premier est le moins cher."),
-      () => P("Nombres périodiques.", [["a) 0,777… en fraction (tape la fraction)", 7 / 9], ["b) 0,1818… en fraction", 2 / 11], ["c) 0,999… = ?", 1]],
-          ["a) 10x − x = 7.", "c) 10x − x = 9, donc 9x = 9."], "a) " + M("\\frac{7}{9}") + " ; b) " + M("\\frac{18}{99} = \\frac{2}{11}") + " ; c) " + M("x = 1") + " : " + M("0{,}\\overline{9} = 1") + "."),
+      () => { const obj = pk(["un casque audio", "une paire de chaussures de sport", "une trottinette", "un sac de randonnée", "une veste de ski"]);
+        let P0 = 80, f = [1, 4], p = 22, h = 10, d = 3;
+        for (let t = 0; t < 200; t++) { const PP = pk([60, 80, 120, 140, 160, 180, 200, 240]), ff = pk([[1, 4], [1, 5], [3, 10], [1, 3]]), pp = R.int(15, 32), hh = pk([5, 10, 20]), dd = pk([2, 25, 3]);
+          const a = PP * (1 - ff[0] / ff[1]), b = (PP * (100 - pp)) / 100, c = (PP * (100 + hh) * (dd === 25 ? 75 : 100 - 10 * dd)) / 10000;
+          const ok = [a, b, c].every((v) => Math.abs(v * 100 - Math.round(v * 100)) < 1e-6) && new Set([a, b, c].map((v) => Math.round(v * 100))).size === 3 && Math.min(Math.abs(a - b), Math.abs(a - c), Math.abs(b - c)) >= 0.5;
+          if (ok) { P0 = PP; f = ff; p = pp; h = hh; d = dd; break; } }
+        const dT = d === 25 ? "0{,}25" : "0{,}" + d, dv = d === 25 ? 0.25 : d / 10, A = r12(P0 * (1 - f[0] / f[1])), B = r12((P0 * (100 - p)) / 100), C = r12(P0 * (1 + h / 100) * (1 - dv)), best = Math.min(A, B, C);
+        return Object.assign(P("Trois magasins vendent " + obj + " au même prix de " + M(P0) + " CHF. Le premier fait un rabais de " + M(fT(f[0], f[1])) + " du prix, le deuxième un rabais de " + M(p + "\\,\\%") + ", le troisième augmente d'abord son prix de " + M(h + "\\,\\%") + ", puis retire " + M(dT) + " du nouveau prix.",
+          [["a) Prix au premier magasin (CHF)", A], ["b) Prix au deuxième (CHF)", B], ["c) Prix au troisième (CHF)", C]],
+          ["a) " + P0 + " · (1 − " + f[0] + "/" + f[1] + ").", "c) " + P0 + " · " + String(1 + h / 100).replace(".", ",") + " · " + String(r12(1 - dv)).replace(".", ",") + "."],
+          "a) " + M(P0 + " \\cdot \\left(1 - " + fT(f[0], f[1]) + "\\right) = " + N(A)) + " ; b) " + M(P0 + " \\cdot " + N(r12(1 - p / 100)) + " = " + N(B)) + " ; c) " + M(P0 + " \\cdot " + N(r12(1 + h / 100)) + " \\cdot " + N(r12(1 - dv)) + " = " + N(C)) + " : le " + (best === A ? "premier" : best === B ? "deuxième" : "troisième") + " est le moins cher."), { ctx: "magasins" }); },
+      () => { const d = R.int(1, 8), ab = pk([12, 18, 27, 36, 45, 54, 63, 72, 81, 15, 24, 42, 51, 57, 78]), u = R.int(1, 8), A = rq(d, 9), B = rq(ab, 99), C = rq(u + 1, 10);
+        return Object.assign(P("Nombres périodiques : écris chacun sous forme de fraction irréductible (tape la fraction).", [["a) 0," + String(d).repeat(3) + "…", qv(A)], ["b) " + ("0," + String(ab).repeat(2) + "…"), qv(B)], ["c) 0," + u + "999…", qv(C)]],
+          ["a) Avec x = 0," + d + d + d + "… : 10x − x = " + d + ".", "c) 0,999… = 1, donc 0," + u + "999… = 0," + u + " + 0,0999… = 0," + (u + 1) + "."],
+          "a) " + M("9x = " + d) + ", donc " + M("x = " + fT(d, 9) + (A[1] !== 9 ? " = " + qT(A) : "")) + " ; b) " + M("99x = " + ab) + ", donc " + M("x = " + fT(ab, 99) + " = " + qT(B)) + " ; c) " + M("0{," + u + "}999\\ldots = 0{," + (u + 1) + "} = " + qT(C)) + "."), { ctx: "periodique" }); },
+      () => { let a = 3, b = 8, p = 20, Nn = 200; for (let t = 0; t < 200; t++) { const [aa, bb] = pk([[3, 8], [1, 8], [5, 8], [2, 5], [3, 20], [7, 20], [1, 4]]), pp = pk([15, 20, 25, 30, 35, 12]), nn = 40 * R.int(3, 10), rr = 100 - (100 * aa) / bb - pp;
+          if (rr >= 8 && Number.isInteger((nn * rr) / 100) && Number.isInteger((nn * aa) / bb)) { a = aa; b = bb; p = pp; Nn = nn; break; } }
+        const rest = r12(100 - (100 * a) / b - p), sp = pk([["le ski", "le vélo", "la natation"], ["le football", "le basket", "le tennis"], ["la lecture", "les jeux vidéo", "la musique"]]), ns = (Nn * a) / b, nr = (Nn * rest) / 100;
+        return Object.assign(P("Lors d'un sondage auprès de " + M(N(Nn)) + " élèves, les " + M(fT(a, b)) + " préfèrent " + sp[0] + ", " + M(p + "\\,\\%") + " préfèrent " + sp[1] + " et les autres " + sp[2] + ".",
+          [["a) La fraction " + a + "/" + b + " en nombre décimal", a / b], ["b) Nombre d'élèves qui préfèrent " + sp[0], ns], ["c) Pourcentage des élèves qui préfèrent " + sp[2] + " (%)", rest], ["d) Nombre d'élèves qui préfèrent " + sp[2], nr]],
+          ["a) " + a + " : " + b + ".", "c) 100 % − " + String(r12((100 * a) / b)).replace(".", ",") + " % − " + p + " %."],
+          "a) " + M(a + " : " + b + " = " + N(a / b)) + " ; b) " + M(fT(a, b) + " \\cdot " + N(Nn) + " = " + N(ns)) + " ; c) " + M("100 - " + N(r12((100 * a) / b)) + " - " + p + " = " + N(rest)) + " % ; d) " + M(N(rest) + "\\,\\% \\cdot " + N(Nn) + " = " + N(nr)) + "."), { ctx: "sondage" }); },
     ],
     puiss: [
       () => P("Une feuille pliée en deux double d'épaisseur à chaque pliage. Elle mesure " + M("0{,}1") + " mm d'épaisseur.",
@@ -1571,13 +1606,23 @@
       () => P("La Terre a un rayon d'environ " + M("6{,}4 \\cdot 10^3") + " km.", [["a) Rayon en m (nombre entier)", 6400000], ["b) Circonférence de l'équateur en km (2πr, arrondie au millier)", 2 * Math.PI * 6400, 1000]],
           ["1 km = 10³ m.", "b) 2 · π · 6400."], "a) " + M("6{,}4 \\cdot 10^6 = 6\\text{'}400\\text{'}000") + " m ; b) " + M("2\\pi \\cdot 6400 \\approx 40\\text{'}000") + " km."),
     ],
+    /* 26.11 soir (agent defis3) : étoile, volume de sang et pouls tirés au hasard, 3 contextes (avant : deux énoncés fixes). */
     scicalc: [
-      () => P("Une année-lumière est la distance parcourue par la lumière en un an. La lumière va à " + M("3 \\cdot 10^5") + " km/s, et une année compte environ " + M("3{,}15 \\cdot 10^7") + " s.",
-          [["a) Une année-lumière en km (notation scientifique)", 9.45e12], ["b) L'étoile Proxima est à 4,2 années-lumière : distance en km (notation scientifique, deux décimales)", 3.969e13, 1e11]],
-          ["a) Vitesse × durée.", "b) 4,2 × le résultat a)."], "a) " + M("9{,}45 \\cdot 10^{12}") + " km ; b) " + M("\\approx 3{,}97 \\cdot 10^{13}") + " km."),
-      () => P("Le corps humain contient environ " + M("5") + " L de sang, et chaque mm³ de sang contient environ " + M("5 \\cdot 10^6") + " globules rouges.",
-          [["a) Nombre de mm³ dans 1 L (tape la puissance de 10, ex. 10^6)", 1e6], ["b) Nombre de globules rouges dans 5 L (notation scientifique)", 2.5e13]],
-          ["1 L = 1 dm³ = 10⁶ mm³.", "b) 5 · 10⁶ · 5 · 10⁶."], "a) " + M("10^6") + " ; b) " + M("5 \\cdot 10^6 \\cdot 5 \\cdot 10^6 = 2{,}5 \\cdot 10^{13}") + "."),
+      () => { const [nm, d] = pk([["Proxima du Centaure", 4.2], ["Sirius", 8.6], ["Altaïr", 16.7], ["Véga", 25], ["Arcturus", 37]]), al = 9.45e12, D = d * al, e = Math.floor(Math.log10(D)), st = 10 ** (e - 2);
+        return Object.assign(P("Une année-lumière est la distance parcourue par la lumière en un an. La lumière va à " + M("3 \\cdot 10^5") + " km/s, et une année compte environ " + M("3{,}15 \\cdot 10^7") + " s. L'étoile " + nm + " est à " + M(N(d)) + " années-lumière.",
+          [["a) Une année-lumière en km (notation scientifique)", al], ["b) Distance de " + nm + " en km (notation scientifique, deux décimales)", Math.round(D / st) * st, st]],
+          ["a) Vitesse × durée.", "b) " + N(d).replace("{,}", ",") + " × le résultat a)."],
+          "a) " + M("3 \\cdot 10^5 \\cdot 3{,}15 \\cdot 10^7 = 9{,}45 \\cdot 10^{12}") + " km ; b) " + M(N(d) + " \\cdot 9{,}45 \\cdot 10^{12} \\approx " + S(r12(Math.round(D / st) / 100), e)) + " km."), { ctx: "etoile" }); },
+      () => { const V = pk([4.5, 5, 5.5, 6]), c = pk([4.5, 5, 5.2]), tot = V * 1e6 * c * 1e6, [m, e] = norm(tot);
+        return Object.assign(P("Le corps d'un adulte contient environ " + M(N(V)) + " L de sang, et chaque mm³ de sang contient environ " + M(S(c, 6)) + " globules rouges.",
+          [["a) Nombre de mm³ dans 1 L (tape la puissance de 10, ex. 10^3)", 1e6], ["b) Nombre de globules rouges dans " + N(V).replace("{,}", ",") + " L (notation scientifique)", tot]],
+          ["1 L = 1 dm³ = 10⁶ mm³.", "b) " + M(N(V) + " \\cdot 10^6 \\cdot " + S(c, 6)) + "."],
+          "a) " + M("10^6 = 1\\text{'}000\\text{'}000") + " ; b) " + M(N(V) + " \\cdot 10^6 \\cdot " + S(c, 6) + " = " + S(m, e)) + "."), { ctx: "sang" }); },
+      () => { const b = pk([60, 65, 70, 75, 80]), A = pk([75, 80, 85, 90]), an = b * 5.26e5, vie = an * A, st1 = 10 ** (Math.floor(Math.log10(an)) - 1), st2 = 10 ** (Math.floor(Math.log10(vie)) - 1), r1 = Math.round(an / st1) * st1, r2 = Math.round(vie / st2) * st2, F1 = (v) => { const e = Math.floor(Math.log10(v) + 1e-9); return (v / 10 ** e).toFixed(1).replace(".", "{,}") + " \\cdot 10^{" + e + "}"; };
+        return Object.assign(P("Au repos, un cœur bat environ " + M(b) + " fois par minute. Une année compte environ " + M("5{,}26 \\cdot 10^5") + " minutes.",
+          [["a) Nombre de battements en une année (notation scientifique, une décimale)", r1, st1], ["b) Nombre de battements en " + A + " ans (notation scientifique, une décimale)", r2, st2]],
+          ["a) " + M(b + " \\cdot 5{,}26 \\cdot 10^5") + " : multiplie les nombres devant, garde la puissance de 10.", "b) Multiplie le résultat exact de a) par " + A + "."],
+          "a) " + M(b + " \\cdot 5{,}26 \\cdot 10^5 = " + S(r12(an / 10 ** Math.floor(Math.log10(an))), Math.floor(Math.log10(an))) + " \\approx " + F1(r1)) + " ; b) " + M(A + " \\cdot " + N(an) + " = " + S(r12(vie / 10 ** Math.floor(Math.log10(vie))), Math.floor(Math.log10(vie))) + " \\approx " + F1(r2)) + " battements."), { ctx: "coeur" }); },
     ],
   };
 
@@ -2089,23 +2134,54 @@
           [["a) Distance parcourue vers le nord en 2 h (km)", 24], ["b) Distance vers l'est en 2 h (km)", 32], ["c) Distance entre les deux bateaux après 2 h (km)", 40]],
           ["Nord et est forment un angle droit.", "c) √(24² + 32²)."], "c) " + M("\\sqrt{24^2 + 32^2} = 40") + " km."),
     ],
+    /* 26.11 soir (agent defis3) : pythfig, pythrec, vol, airepyr, volcomp tirés au hasard, 3 contextes et plus (avant : deux énoncés fixes). */
     pythfig: [
-      () => P("Une boîte en forme de pavé mesure 30 cm × 40 cm × 120 cm.", [["a) Diagonale du fond 30 × 40 (cm)", 50], ["b) Grande diagonale de la boîte (cm)", 130], ["c) Un bâton de 1,25 m entre-t-il ? Tape 1 pour oui, 0 pour non.", 1]],
-          ["b) Avec la hauteur : √(50² + 120²).", "c) Compare 125 cm et la grande diagonale."], "a) 50 cm ; b) " + M("\\sqrt{2500 + 14\\text{'}400} = 130") + " cm ; c) oui, 125 < 130."),
-      () => P("Un carré est inscrit dans un cercle de rayon 5 cm.", [["a) Diagonale du carré (cm)", 10], ["b) Aire du carré (cm²)", 50], ["c) Aire entre le cercle et le carré (cm², au centième)", 25 * Math.PI - 50, 0.01]],
-          ["La diagonale est un diamètre.", "b) c² + c² = 10²."], "a) 10 ; b) " + M("c^2 = 50") + " ; c) " + M("25\\pi - 50 \\approx 28{,}54") + " cm²."),
+      () => { const cx = pk([["boite", "Une boîte en carton (un pavé) mesure # cm de long, # cm de large et # cm de haut.", [[20, 40], [15, 30], [30, 60]], ["une règle de", "un tube d'affiche de"]],
+          ["coffre", "Le coffre d'une voiture a la forme d'un pavé : # cm de large, # cm de profondeur et # cm de haut.", [[90, 110], [70, 95], [40, 55]], ["une canne à pêche de", "un parasol de"]],
+          ["placard", "Un placard (un pavé) mesure # cm de large, # cm de profondeur et # cm de haut.", [[70, 100], [45, 60], [190, 220]], ["une planche de", "une tringle à rideau de"]]]);
+        const [a, b, c] = cx[2].map(([lo, hi]) => R.int(lo, hi)), db = Math.sqrt(a * a + b * b), d = Math.sqrt(a * a + b * b + c * c), L = Math.round(d * (R.rand() < 0.5 ? R.int(85, 97) : R.int(103, 112)) / 100), ok = L < d ? 1 : 0, ob = pk(cx[3]);
+        let k = 0; const txt = cx[1].replace(/#/g, () => [a, b, c][k++]);
+        return Object.assign(P(txt + " On veut y ranger, en diagonale, " + ob + " " + M(L) + " cm.", [["a) Diagonale du fond (cm, au dixième)", db, 0.1], ["b) Grande diagonale du pavé (cm, au dixième)", d, 0.1], ["c) L'objet entre-t-il ? Tape 1 pour oui, 0 pour non.", ok]],
+          ["a) Le fond est un rectangle : " + M("\\sqrt{" + a + "^2 + " + b + "^2}") + ".", "b) Avec la hauteur : " + M("\\sqrt{d^2 + " + c + "^2}") + ", soit " + M("\\sqrt{" + a + "^2 + " + b + "^2 + " + c + "^2}") + "."],
+          "a) " + M("\\sqrt{" + (a * a + b * b) + "} \\approx " + N(rd(db, 0.1))) + " cm ; b) " + M("\\sqrt{" + (a * a + b * b) + " + " + c * c + "} = \\sqrt{" + (a * a + b * b + c * c) + "} \\approx " + N(rd(d, 0.1))) + " cm ; c) " + (ok ? "oui : " + M(L + " < " + N(rd(d, 0.1))) : "non : " + M(L + " > " + N(rd(d, 0.1)))) + "."), { ctx: cx[0] }); },
+      () => { const cx = pk([["planche", "Dans un disque de bois de rayon # cm, un menuisier découpe la plus grande planche carrée possible : ses quatre coins touchent le bord du disque.", [8, 20], "cm"],
+          ["parterre", "Dans un parterre circulaire de rayon # m, on aménage un carré de gazon dont les quatre coins touchent le bord.", [2, 7], "m"],
+          ["vitrail", "Un vitrail rond de rayon # cm contient un carré de verre bleu dont les quatre coins touchent le cercle.", [15, 45], "cm"]]);
+        const r = R.int(cx[2][0], cx[2][1]), u = cx[3], A = 2 * r * r, rest = Math.PI * r * r - A;
+        return Object.assign(P(cx[1].replace("#", r), [["a) Diagonale du carré (" + u + ")", 2 * r], ["b) Aire du carré (" + u + "²)", A], ["c) Aire restante entre le cercle et le carré (" + u + "², au centième)", rest, 0.01]],
+          ["La diagonale du carré est un diamètre du cercle.", "b) Côté c : " + M("c^2 + c^2 = " + 2 * r + "^2") + ", et l'aire du carré vaut " + M("c^2") + "."],
+          "a) " + M("2 \\cdot " + r + " = " + 2 * r) + " " + u + " ; b) " + M("2c^2 = " + 4 * r * r + "") + ", donc " + M("c^2 = " + A) + " " + u + "² ; c) " + M("\\pi \\cdot " + r + "^2 - " + A + " = " + r * r + "\\pi - " + A + " \\approx " + N(rd(rest, 0.01))) + " " + u + "²."), { ctx: cx[0] }); },
     ],
     pythrec: [
-      () => P("Un triangle a pour sommets A(1 ; 1), B(5 ; 3) et C(3 ; 7).", [["a) AB²", 20], ["b) BC²", 20], ["c) AC²", 40]],
-          ["Écarts de coordonnées au carré, additionnés.", "Compare AC² et AB² + BC²."], "a) " + M("4^2 + 2^2 = 20") + " ; b) " + M("2^2 + 4^2 = 20") + " ; c) " + M("2^2 + 6^2 = 40 = 20 + 20") + " : rectangle (et isocèle) en " + M("B") + "."),
-      () => P("Les côtés d'un triangle mesurent n² − 1, 2n et n² + 1 (n entier, n ≥ 2).", [["a) Pour n = 4 : le plus grand côté", 17], ["b) (n² − 1)² + (2n)² pour n = 4", 289], ["c) (n² + 1)² pour n = 4", 289]],
-          ["Remplace n par 4.", "Ces triangles sont toujours rectangles : vérifie en développant."], "a) 17 ; b) " + M("15^2 + 8^2 = 289") + " ; c) " + M("17^2 = 289") + " : rectangle."),
+      () => { const cx = pk([["repere", "Dans un repère, un triangle a pour sommets"], ["carte", "Sur une carte quadrillée (1 carreau = 1 km), trois villages ont pour coordonnées"], ["voile", "Une voile d'ombrage triangulaire est fixée à trois crochets ; dans un repère (en m), ils ont pour coordonnées"]]);
+        let A, B, C; for (let t = 0; t < 50; t++) { const p = R.int(1, 4), q = R.int(1, 4), s = pk([1, 1, 2]), dev = R.rand() < 0.35 ? pk([[1, 0], [0, 1], [-1, 0]]) : [0, 0]; A = [R.int(0, 3), R.int(0, 3)]; B = [A[0] + p, A[1] + q]; C = [B[0] - q * s + dev[0], B[1] + p * s + dev[1]]; if (C[0] >= -2 && C[1] <= 12 && !(A[0] === C[0] && A[1] === C[1])) break; }
+        const d2 = (U, V) => (U[0] - V[0]) ** 2 + (U[1] - V[1]) ** 2, ab = d2(A, B), bc = d2(B, C), ac = d2(A, C), S = [ab, bc, ac].sort((x, y) => x - y), rect = S[0] + S[1] === S[2] ? 1 : 0, pt = (n, P0) => n + "(" + P0[0] + " ; " + P0[1] + ")";
+        return Object.assign(P(cx[1] + " " + pt("A", A) + ", " + pt("B", B) + " et " + pt("C", C) + ".", [["a) AB²", ab], ["b) BC²", bc], ["c) AC²", ac], ["d) Le triangle ABC est-il rectangle ? Tape 1 pour oui, 0 pour non.", rect]],
+          ["Écarts de coordonnées au carré, additionnés : " + M("AB^2 = (x_B - x_A)^2 + (y_B - y_A)^2") + ".", "Compare le plus grand des trois carrés avec la somme des deux autres."],
+          "a) " + M(ab) + " ; b) " + M(bc) + " ; c) " + M(ac) + " ; d) " + M(S[0] + " + " + S[1] + " = " + (S[0] + S[1]) + (rect ? " = " : " \\neq ") + S[2]) + " : " + (rect ? "rectangle (réciproque de Pythagore)" : "pas rectangle") + "."), { ctx: cx[0] }); },
+      () => { const n = R.int(2, 7), a = n * n - 1, b = 2 * n, c = n * n + 1;
+        return Object.assign(P("Les côtés d'un triangle mesurent " + M("n^2 - 1") + ", " + M("2n") + " et " + M("n^2 + 1") + " (n entier, n ≥ 2). On prend " + M("n = " + n) + ".", [["a) Le plus grand côté", c], ["b) (n² − 1)² + (2n)² pour n = " + n, a * a + b * b], ["c) (n² + 1)² pour n = " + n, c * c]],
+          ["Remplace n par " + n + ".", "Ces triangles sont toujours rectangles : vérifie en développant."], "a) " + M(c) + " ; b) " + M(a + "^2 + " + b + "^2 = " + a * a + " + " + b * b + " = " + (a * a + b * b)) + " ; c) " + M(c + "^2 = " + c * c) + " : égalité, le triangle est rectangle."), { ctx: "formule" }); },
+      () => { const [p, q, s] = pk(TRIP.filter((t) => t[2] <= 25)), ks = [5, 10, 20].filter((z) => s * z <= 250 && Math.min(p, q) * z >= 30), k = ks.length ? pk(ks) : 10, a = p * k, b = q * k, d = s * k + pk([0, 0, -2, -1, 1, 2, 3]), ok = a * a + b * b === d * d ? 1 : 0, obj = pk([["Un menuisier vérifie un cadre de fenêtre", "cm"], ["Une maçonne vérifie l'angle d'une dalle", "cm"], ["Un jardinier vérifie le coin d'une plate-bande", "cm"]]);
+        return Object.assign(P(obj[0] + " : deux côtés mesurent " + M(a) + " " + obj[1] + " et " + M(b) + " " + obj[1] + ", et la diagonale mesure " + M(d) + " " + obj[1] + ".", [["a) Somme des carrés des deux côtés", a * a + b * b], ["b) Carré de la diagonale", d * d], ["c) L'angle est-il droit ? Tape 1 pour oui, 0 pour non.", ok]],
+          ["Calcule " + M(a + "^2 + " + b + "^2") + " et " + M(d + "^2") + ".", "Égalité : angle droit (réciproque de Pythagore) ; sinon, l'angle n'est pas droit."],
+          "a) " + M(a + "^2 + " + b + "^2 = " + (a * a + b * b)) + " ; b) " + M(d + "^2 = " + d * d) + " ; c) " + (ok ? "oui, égalité : l'angle est droit." : "non : " + M((a * a + b * b) + " \\neq " + d * d) + ", l'angle n'est pas droit.")), { ctx: "equerrage" }); },
     ],
     vol: [
-      () => P("Une piscine de 25 m × 10 m a une profondeur de 1,2 m d'un côté et 2 m de l'autre (fond en pente régulière).", [["a) Aire de la face latérale (trapèze) en m²", 40], ["b) Volume de la piscine (m³)", 400], ["c) Nombre de litres", 400000]],
-          ["La piscine est un prisme dont la base est un trapèze : (1,2 + 2) · 25 ÷ 2.", "1 m³ = 1000 L."], "a) " + M("\\frac{(1{,}2 + 2) \\cdot 25}{2} = 40") + " m² ; b) " + M("40 \\cdot 10 = 400") + " m³ ; c) " + M("400\\text{'}000") + " L."),
-      () => P("Une canette de 33 cL a un rayon de 3,3 cm.", [["a) Volume en cm³", 330], ["b) Aire de la base (cm², au centième)", Math.PI * 3.3 * 3.3, 0.01], ["c) Hauteur minimale pour contenir les 33 cL (cm, au dixième supérieur)", Math.ceil(330 / (Math.PI * 3.3 * 3.3) * 10) / 10, 0.01]],
-          ["1 cL = 10 cm³.", "c) Volume ÷ aire de la base, puis arrondir AU-DESSUS : une hauteur plus petite ne contiendrait pas tout."], "a) 330 ; b) " + M("\\approx 34{,}21") + " ; c) " + M("330 \\div 34{,}21 \\approx 9{,}646") + ", donc " + M("9{,}7") + " cm (avec " + M("9{,}6") + " cm, la canette ne contiendrait que " + M("\\approx 328") + " cm³)."), /* 25.11 soir (revue d'un testeur) : hauteur minimale = arrondi supérieur */
+      () => { const cx = pk(["piscine", "canal", "tente"]);
+        if (cx === "piscine") { const L = pk([20, 25, 30, 40, 50]), l = R.int(8, 16), h1 = pk([0.8, 1, 1.2, 1.4]), h2 = pk([1.8, 2, 2.2, 2.5, 3]), A = ((h1 + h2) * L) / 2, V = A * l;
+          return Object.assign(P("Une piscine de " + M(L) + " m de long et " + M(l) + " m de large a une profondeur de " + M(N(h1)) + " m d'un côté et " + M(N(h2)) + " m de l'autre (fond en pente régulière).", [["a) Aire de la face latérale (trapèze) en m²", A], ["b) Volume de la piscine (m³)", V], ["c) Nombre de litres", V * 1000]],
+            ["La piscine est un prisme dont la base est un trapèze : (" + N(h1).replace("{,}", ",") + " + " + N(h2).replace("{,}", ",") + ") · " + L + " ÷ 2.", "1 m³ = 1000 L."], "a) " + M("\\frac{(" + N(h1) + " + " + N(h2) + ") \\cdot " + L + "}{2} = " + N(A)) + " m² ; b) " + M(N(A) + " \\cdot " + l + " = " + N(V)) + " m³ ; c) " + M(N(V * 1000)) + " L."), { ctx: cx }); }
+        if (cx === "canal") { const B = pk([1.2, 1.5, 2, 2.5]), b = pk([0.6, 0.8, 1]), h = pk([0.5, 0.6, 0.8, 1]), L = pk([50, 80, 120, 150, 200]), A = r12(((B + b) * h) / 2), V = r12(A * L);
+          return Object.assign(P("Un canal d'irrigation a un profil en trapèze : " + M(N(B)) + " m de large en haut, " + M(N(b)) + " m au fond et " + M(N(h)) + " m de profondeur. Il mesure " + M(L) + " m de long et il est plein.", [["a) Aire du profil (m²)", A], ["b) Volume d'eau (m³)", V], ["c) Volume d'eau en litres", r12(V * 1000)]],
+            ["Aire d'un trapèze : (grande base + petite base) · hauteur ÷ 2.", "Le canal est un prisme : aire du profil · longueur ; 1 m³ = 1000 L."], "a) " + M("\\frac{(" + N(B) + " + " + N(b) + ") \\cdot " + N(h) + "}{2} = " + N(A)) + " m² ; b) " + M(N(A) + " \\cdot " + L + " = " + N(V)) + " m³ ; c) " + M(N(r12(V * 1000))) + " L."), { ctx: cx }); }
+        const b = pk([1.6, 1.8, 2, 2.4]), h = pk([1.1, 1.2, 1.4, 1.5]), L = pk([2, 2.2, 2.5, 3]), A = r12((b * h) / 2), V = r12(A * L);
+        return Object.assign(P("Une tente canadienne a la forme d'un prisme à base triangulaire : l'entrée est un triangle de " + M(N(b)) + " m de base et " + M(N(h)) + " m de haut, et la tente mesure " + M(N(L)) + " m de long.", [["a) Aire de l'entrée (m²)", A], ["b) Volume de la tente (m³)", V], ["c) Ce volume en litres", r12(V * 1000)]],
+          ["Aire d'un triangle : base · hauteur ÷ 2.", "Prisme : aire de la base · longueur ; 1 m³ = 1000 L."], "a) " + M("\\frac{" + N(b) + " \\cdot " + N(h) + "}{2} = " + N(A)) + " m² ; b) " + M(N(A) + " \\cdot " + N(L) + " = " + N(V)) + " m³ ; c) " + M(N(r12(V * 1000))) + " L."), { ctx: cx }); },
+      () => { const [cx, nm, cl, rs] = pk([["canette", "Une canette", [33, 50], [3.2, 3.3]], ["conserve", "Une boîte de conserve", [40, 85], [4, 5]], ["pot", "Un pot de peinture", [75, 100], [5, 5.5]]]), V0 = pk(cl), r = pk(rs), V = V0 * 10, Ab = Math.PI * r * r, h = V / Ab, hm = Math.ceil(r12(h * 10)) / 10, Vm = Ab * (hm - 0.1);
+        return Object.assign(P(nm + " cylindrique doit contenir " + M(V0) + " cL. Son rayon intérieur est de " + M(N(r)) + " cm.", [["a) Volume en cm³", V], ["b) Aire de la base (cm², au centième)", Ab, 0.01], ["c) Hauteur minimale pour contenir les " + V0 + " cL (cm, au dixième supérieur)", hm, 0.01]],
+          ["1 cL = 10 cm³.", "c) Volume ÷ aire de la base, puis arrondir AU-DESSUS : une hauteur plus petite ne contiendrait pas tout."],
+          "a) " + M(V) + " cm³ ; b) " + M("\\pi \\cdot " + N(r) + "^2 \\approx " + N(rd(Ab, 0.01))) + " cm² ; c) " + M(V + " : " + N(rd(Ab, 0.01)) + " \\approx " + N(rd(h, 0.001))) + ", donc " + M(N(hm)) + " cm (avec " + M(N(r12(hm - 0.1))) + " cm, on n'aurait que " + M("\\approx " + N(Math.round(Vm))) + " cm³)."), { ctx: cx }); },
     ],
     volcone: [
       () => P("Une boule de rayon 3 cm est posée dans un cylindre de même rayon et de hauteur 6 cm.", [["a) Volume du cylindre (cm³, au centième)", 54 * Math.PI, 0.01], ["b) Volume de la boule (cm³, au centième)", 36 * Math.PI, 0.01], ["c) Quelle fraction du cylindre la boule occupe-t-elle ? (fraction)", 2 / 3]],
@@ -2114,16 +2190,35 @@
           ["Le cône vaut le tiers d'un cylindre de même base et même hauteur.", "b) Il doit être 3 fois plus haut."], "b) " + M("3 \\cdot 5 = 15") + " cm."),
     ],
     airepyr: [
-      () => P("Une pyramide régulière à base carrée a une base de 10 m de côté et une hauteur de 12 m.", [["a) Apothème (m)", 13], ["b) Aire latérale (m²)", 260], ["c) Volume (m³)", 400]],
-          ["a) √(12² + 5²).", "c) Base × hauteur ÷ 3."], "a) 13 ; b) " + M("2 \\cdot 10 \\cdot 13 = 260") + " ; c) " + M("\\frac{100 \\cdot 12}{3} = 400") + "."),
-      () => P("Patron d'une pyramide régulière : un carré de 16 cm de côté et quatre triangles isocèles d'apothème 10 cm.", [["a) Aire du patron (cm²)", 576], ["b) Hauteur de la pyramide montée (cm)", 6], ["c) Volume (cm³)", 512]],
-          ["a) Carré + 4 triangles.", "b) √(10² − 8²) ; c) Base × hauteur ÷ 3."], "a) " + M("256 + 4 \\cdot \\frac{16 \\cdot 10}{2} = 576") + " ; b) " + M("\\sqrt{100 - 64} = 6") + " ; c) " + M("\\frac{256 \\cdot 6}{3} = 512") + "."),
+      () => { const [cx, txt, u, TT] = pk([["toit", "Le toit d'une tour est une pyramide régulière à base carrée de # m de côté et de # m de haut.", "m", [[3, 4, 5], [4, 3, 5], [6, 8, 10], [8, 6, 10], [5, 12, 13]]],
+          ["tente", "Une tente a la forme d'une pyramide régulière à base carrée de # m de côté et de # m de haut.", "m", [[1.5, 2, 2.5], [1.2, 1.6, 2], [0.9, 1.2, 1.5]]],
+          ["presse-papier", "Un presse-papier en verre est une pyramide régulière à base carrée de # cm de côté et de # cm de haut.", "cm", [[3, 4, 5], [4, 3, 5], [6, 8, 10], [1.5, 2, 2.5], [4.5, 6, 7.5]]]]);
+        const [s, h, a] = pk(TT), c = r12(2 * s), AL = 2 * c * a, V = (c * c * h) / 3, ex = Number.isInteger(r12(V * 100));
+        let i = 0; const q = txt.replace(/#/g, () => N([c, h][i++]));
+        return Object.assign(P(q, [["a) Apothème (hauteur d'une face, en " + u + ")", a], ["b) Aire latérale (" + u + "²)", r12(AL)], ["c) Volume (" + u + "³" + (ex ? "" : ", au centième") + ")", ex ? r12(V) : V, ex ? 0 : 0.01]],
+          ["a) Triangle rectangle : hauteur, demi-côté de la base et apothème : " + M("\\sqrt{" + N(h) + "^2 + " + N(s) + "^2}") + ".", "b) 4 triangles de base " + N(c).replace("{,}", ",") + " et de hauteur l'apothème ; c) aire de la base · hauteur ÷ 3."],
+          "a) " + M("\\sqrt{" + N(r12(h * h)) + " + " + N(r12(s * s)) + "} = " + N(a)) + " ; b) " + M("4 \\cdot \\frac{" + N(c) + " \\cdot " + N(a) + "}{2} = " + N(r12(AL))) + " ; c) " + M("\\frac{" + N(r12(c * c)) + " \\cdot " + N(h) + "}{3} " + (ex ? "= " : "\\approx ") + N(rd(V, 0.01))) + "."), { ctx: cx }); },
+      () => { const [cx, nm] = pk([["patron", "Patron d'une pyramide régulière en carton"], ["emballage", "Patron d'un emballage de chocolats en forme de pyramide régulière"], ["lampe", "Patron d'un abat-jour en papier en forme de pyramide régulière (fermée)"]]);
+        const [s, h, a] = pk([[8, 6, 10], [6, 8, 10], [5, 12, 13], [12, 5, 13], [9, 12, 15], [12, 9, 15], [3, 4, 5], [4, 3, 5]]), c = 2 * s, Ap = c * c + 2 * c * a, V = (c * c * h) / 3;
+        return Object.assign(P(nm + " : un carré de " + M(c) + " cm de côté et quatre triangles isocèles d'apothème (hauteur) " + M(a) + " cm.", [["a) Aire du patron (cm²)", Ap], ["b) Hauteur de la pyramide montée (cm)", h], ["c) Volume (cm³)", V]],
+          ["a) Carré + 4 triangles.", "b) " + M("\\sqrt{" + a + "^2 - " + s + "^2}") + " (demi-côté de la base) ; c) aire de la base · hauteur ÷ 3."],
+          "a) " + M(c * c + " + 4 \\cdot \\frac{" + c + " \\cdot " + a + "}{2} = " + Ap) + " cm² ; b) " + M("\\sqrt{" + a * a + " - " + s * s + "} = " + h) + " cm ; c) " + M("\\frac{" + c * c + " \\cdot " + h + "}{3} = " + N(V)) + " cm³."), { ctx: cx }); },
     ],
     volcomp: [
-      () => P("Un réservoir : cylindre de rayon 1 m et de hauteur 3 m, avec un fond en cône de même rayon et de hauteur 0,6 m.", [["a) Volume du cylindre (m³, au centième)", 3 * Math.PI, 0.01], ["b) Volume du cône (m³, au centième)", 0.2 * Math.PI, 0.01], ["c) Contenance totale en litres (à l'unité)", 3200 * Math.PI, 1]],
-          ["Cône : ⅓ · π · r² · h.", "1 m³ = 1000 L."], "c) " + M("3{,}2\\pi \\approx 10{,}053") + " m³, soit environ " + M("10\\text{'}053") + " L."),
-      () => P("Une bougie : un cube de 6 cm d'arête surmonté d'une pyramide de 6 cm de hauteur.", [["a) Volume du cube (cm³)", 216], ["b) Volume de la pyramide (cm³)", 72], ["c) Masse de cire si 1 cm³ pèse 0,9 g (g)", 259.2]],
-          ["Pyramide : 36 · 6 ÷ 3.", "Masse = volume · 0,9."], "c) " + M("288 \\cdot 0{,}9 = 259{,}2") + " g."),
+      () => { const [cx, nm, rr, HH, hh] = pk([["silo", "Un silo à grain est un cylindre de rayon # m et de hauteur # m, avec un fond en cône de même rayon et de hauteur # m.", [2, 2.5, 3], [6, 8, 10], [1, 1.5, 2]],
+          ["reservoir", "Un réservoir d'eau est un cylindre de rayon # m et de hauteur # m, avec un fond en cône de même rayon et de hauteur # m.", [1, 1.2, 1.5], [2, 3, 4], [0.6, 0.9, 1.2]]]);
+        const r = pk(rr), H = pk(HH), h = pk(hh), Vc = Math.PI * r * r * H, Vk = (Math.PI * r * r * h) / 3, L = (Vc + Vk) * 1000;
+        let i = 0; const q = nm.replace(/#/g, () => N([r, H, h][i++]));
+        return Object.assign(P(q, [["a) Volume du cylindre (m³, au centième)", Vc, 0.01], ["b) Volume du cône (m³, au centième)", Vk, 0.01], ["c) Contenance totale en litres (à l'unité)", L, 1]],
+          ["Cylindre : π · r² · h ; cône : ⅓ · π · r² · h.", "1 m³ = 1000 L."],
+          "a) " + M("\\pi \\cdot " + N(r) + "^2 \\cdot " + N(H) + " \\approx " + N(rd(Vc, 0.01))) + " m³ ; b) " + M("\\frac{1}{3} \\pi \\cdot " + N(r) + "^2 \\cdot " + N(h) + " \\approx " + N(rd(Vk, 0.01))) + " m³ ; c) " + M("\\approx " + N(rd(Vc + Vk, 0.001))) + " m³, soit " + M("\\approx " + N(Math.round(L))) + " L."), { ctx: cx }); },
+      () => { const [cx, txt, rho, mat] = pk([["bougie", "Une bougie : un cube de # cm d'arête surmonté d'une pyramide de même base et de # cm de hauteur.", 0.9, "de cire"], ["presse-papier", "Un presse-papier en verre : un cube de # cm d'arête surmonté d'une pyramide de même base et de # cm de hauteur.", 2.5, "de verre"],
+          ["savon", "Un savon décoratif : un cube de # cm d'arête surmonté d'une pyramide de même base et de # cm de hauteur.", 1.1, "de savon"]]);
+        const a = pk([4, 5, 6, 8]), h = pk([3, 6, 9].filter((z) => z <= 1.5 * a)), Vc = a ** 3, Vp = (a * a * h) / 3, m = r12((Vc + Vp) * rho);
+        let i = 0; const q = txt.replace(/#/g, () => [a, h][i++]);
+        return Object.assign(P(q, [["a) Volume du cube (cm³)", Vc], ["b) Volume de la pyramide (cm³)", Vp], ["c) Masse " + mat + " si 1 cm³ pèse " + N(rho).replace("{,}", ",") + " g (g)", m]],
+          ["Pyramide : " + a * a + " · " + h + " ÷ 3.", "Masse = volume total · " + N(rho).replace("{,}", ",") + "."],
+          "a) " + M(a + "^3 = " + Vc) + " cm³ ; b) " + M("\\frac{" + a * a + " \\cdot " + h + "}{3} = " + Vp) + " cm³ ; c) " + M("(" + Vc + " + " + Vp + ") \\cdot " + N(rho) + " = " + N(m)) + " g."), { ctx: cx }); },
     ],
     volmanq: [
       () => P("Un verre conique de 6 cm de rayon doit contenir 20 cL.", [["a) 20 cL en cm³", 200], ["b) Hauteur du verre (cm, au dixième)", 600 / (36 * Math.PI), 0.1]],
@@ -2511,9 +2606,27 @@
   };
 
   const PROBS = {
+    /* 26.11 soir (agent defis3) : valeurs tirées, 3 contextes et plus (avant : deux énoncés fixes). */
     thales: [
-      () => P("Un panneau de 2 m de haut a une ombre de 1,5 m. Au même moment, l'ombre d'une tour mesure 45 m.", [["a) Rapport entre les ombres", 30], ["b) Hauteur de la tour (m)", 60], ["c) Longueur de l'ombre d'un arbre de 9 m (m)", 6.75]], ["Les rayons du soleil sont parallèles.", "Hauteur ÷ ombre est le même pour tous : 2 ÷ 1,5."], "a) 30 ; b) 60 m ; c) " + M("9 \\cdot \\frac{1{,}5}{2} = 6{,}75") + " m."),
-      () => P("Dans un triangle ABC, D ∈ [AB], E ∈ [AC], (DE) ∥ (BC) ; AD = 4, DB = 6, AE = 5, DE = 3.", [["a) AB", 10], ["b) AC", 12.5], ["c) BC", 7.5], ["d) Périmètre du trapèze DECB", 24]], ["AB = AD + DB ; rapport AB/AD.", "Trapèze : DB + BC + CE + ED."], "a) 10 ; b) 12,5 ; c) 7,5 ; d) " + M("6 + 7{,}5 + 7{,}5 + 3 = 24") + "."),
+      () => { const [cx, big, def, Hs] = pk([["tour", "d'une tour", "de la tour", [30, 36, 40, 45, 48, 54, 60]], ["clocher", "du clocher du village", "du clocher", [24, 27, 30, 36, 42]], ["sapin", "d'un grand sapin", "du sapin", [15, 16, 18, 20, 24]]]), [ref, h1, rd] = pk([["un panneau de", 2, "du panneau"], ["un bâton de", 1, "du bâton"], ["un piquet de", 1.5, "du piquet"]]);
+        let H = 30, r = 0.75; for (let t = 0; t < 60; t++) { const HH = pk(Hs), rr = pk([0.5, 0.75, 1.25, 1.5, 0.8]); if (Number.isInteger(r6((HH * 100) / h1)) && Number.isInteger(r6(HH * rr * 100))) { H = HH; r = rr; break; } }
+        const s1 = r6(h1 * r), S = r6(H * r), h3 = pk([4, 5, 6, 8, 9, 10, 12].filter((z) => z < H)), s3 = r6(h3 * r);
+        return Object.assign(P("Au même moment, " + ref + " " + M(N(h1)) + " m de haut a une ombre de " + M(N(s1)) + " m, et l'ombre " + big + " mesure " + M(N(S)) + " m.",
+          [["a) Combien de fois l'ombre " + def + " est-elle plus longue que celle " + rd + " ?", r6(S / s1)], ["b) Hauteur " + def + " (m)", H], ["c) Longueur de l'ombre d'un arbre de " + h3 + " m, au même moment (m)", s3]],
+          ["Les rayons du soleil sont parallèles : hauteur et ombre sont proportionnelles.", "Hauteur ÷ ombre est la même pour tous : " + L(h1) + " ÷ " + L(s1) + "."],
+          "a) " + M(N(S) + " : " + N(s1) + " = " + N(r6(S / s1))) + " ; b) " + M(N(h1) + " \\cdot " + N(r6(S / s1)) + " = " + H) + " m ; c) " + M(h3 + " \\cdot \\frac{" + N(s1) + "}{" + N(h1) + "} = " + N(s3)) + " m."), { ctx: cx }); },
+      () => { let a = 4, b = 6, c = 5, d = 3; for (let t = 0; t < 80; t++) { const aa = R.int(2, 8), k = pk([1.5, 2, 2.5, 3, 4]), bb = r6(aa * (k - 1)), cc = R.int(2, 9), dd = R.int(2, 9); if (Number.isInteger(bb) && cc !== aa && tri(aa, cc, dd) && Number.isInteger(r6(cc * k * 10)) && Number.isInteger(r6(dd * k * 10))) { a = aa; b = bb; c = cc; d = dd; break; } }
+        const k = (a + b) / a, AC = r6(c * k), BC = r6(d * k), per = r6(b + BC + (AC - c) + d), [cx, txt, u] = pk([["triangle", "Dans un triangle ABC, D ∈ [AB], E ∈ [AC] et (DE) ∥ (BC) ; AD = #a, DB = #b, AE = #c et DE = #d (en cm).", "cm"],
+          ["charpente", "La ferme d'une charpente est un triangle ABC ; une poutre [DE] est parallèle à la base [BC], avec D ∈ [AB] et E ∈ [AC]. On mesure AD = #a m, DB = #b m, AE = #c m et DE = #d m.", "m"],
+          ["voile", "Une voile triangulaire ABC est renforcée par une latte [DE] parallèle à son bord [BC], avec D ∈ [AB] et E ∈ [AC] : AD = #a dm, DB = #b dm, AE = #c dm et DE = #d dm.", "dm"]]);
+        return Object.assign(P(txt.replace("#a", L(a)).replace("#b", L(b)).replace("#c", L(c)).replace("#d", L(d)), [["a) AB (" + u + ")", a + b], ["b) AC (" + u + ")", AC], ["c) BC (" + u + ")", BC], ["d) Périmètre du trapèze DECB (" + u + ")", per]],
+          ["AB = AD + DB ; rapport d'agrandissement AB ÷ AD = " + L(k) + ".", "Trapèze : DB + BC + CE + ED, avec CE = AC − AE."],
+          "a) " + M(a + " + " + L(b) + " = " + (a + b)) + " ; rapport " + M(N(a + b) + " : " + a + " = " + N(k)) + " ; b) " + M(c + " \\cdot " + N(k) + " = " + N(AC)) + " ; c) " + M(d + " \\cdot " + N(k) + " = " + N(BC)) + " ; d) " + M(N(b) + " + " + N(BC) + " + " + N(r6(AC - c)) + " + " + d + " = " + N(per)) + " " + u + "."), { ctx: cx }); },
+      () => { const [cx, what] = pk([["etang", "la largeur BC d'un étang"], ["riviere", "la largeur BC d'une rivière"], ["ravin", "la largeur BC d'un ravin"]]), ad = R.int(3, 8), db = R.int(10, 40), de = R.int(4, 12), bc = (de * (ad + db)) / ad;
+        return Object.assign(P("Pour mesurer " + what + ", on plante des piquets : " + M("(DE) \\parallel (BC)") + ", D sur [AB], E sur [AC], " + M("AD = " + ad) + " m, " + M("DB = " + db) + " m et " + M("DE = " + de) + " m.",
+          [["a) Longueur AB (m)", ad + db], ["b) Largeur BC (m, au centième)", Math.round(r6(bc * 100)) / 100, 0.01]],
+          ["Thalès : le petit triangle ADE et le grand triangle ABC.", "BC ÷ DE = AB ÷ AD."],
+          "a) " + M(ad + " + " + db + " = " + (ad + db)) + " m ; b) " + M("BC = " + de + " \\cdot \\frac{" + (ad + db) + "}{" + ad + "} \\approx " + N(Math.round(bc * 100) / 100)) + " m."), { ctx: cx }); },
     ],
     thalesrec: [
       () => P("D ∈ [AB], E ∈ [AC] avec AD = 3, AB = 7,5, AE = 4, AC = 10.", [["a) AD/AB (décimal)", 0.4], ["b) AE/AC (décimal)", 0.4], ["c) Si BC = 12, que vaut DE ?", 4.8]], ["Rapports égaux : parallèles.", "DE = BC · 0,4."], "a) et b) 0,4, donc (DE) ∥ (BC) ; c) " + M("4{,}8") + "."),
@@ -3284,9 +3397,22 @@
   };
 
   const PROBS = {
+    /* 26.11 soir (agent defis3) : sommets et milieux tirés au hasard, 3 contextes et plus (avant : deux énoncés fixes). */
     repere: [
-      () => P("Un parallélogramme ABCD a pour sommets A(1 ; 1), B(6 ; 1) et C(8 ; 4).", [["a) Abscisse de D", 3], ["b) Ordonnée de D", 4], ["c) Aire (en carreaux)", 15]], ["Le vecteur AB se reporte de D à C : D = C − (B − A).", "Aire = base × hauteur."], "a) b) D(3 ; 4) ; c) " + M("5 \\cdot 3 = 15") + "."),
-      () => P("Le point M(2 ; 3) est le milieu de [AB], avec A(−1 ; 5).", [["a) Abscisse de B", 5], ["b) Ordonnée de B", 1]], ["Le milieu est la moyenne : (−1 + x_B) ÷ 2 = 2.", "Idem pour les ordonnées."], "B(5 ; 1)."),
+      () => { const w = R.int(3, 7), h = R.int(2, 5), s = nz(-2, 3), A = [R.int(-3, 2), R.int(-2, 2)], B = [A[0] + w, A[1]], C = [B[0] + s, B[1] + h], D = [A[0] + s, A[1] + h];
+        const [cx, txt, extra] = pk([["geometrie", "Dans un repère, un parallélogramme ABCD a pour sommets ", null], ["parcelle", "Sur un plan quadrillé (1 carreau = 10 m), une parcelle a la forme d'un parallélogramme ABCD de sommets ", ["d) Aire réelle de la parcelle (m²)", w * h * 100, "1 carreau = 10 m · 10 m = 100 m²"]],
+          ["jeu", "Dans un jeu vidéo, une plateforme a la forme d'un parallélogramme ABCD ; sur la grille de l'écran (1 carreau = 8 pixels), ses sommets sont ", ["d) Aire de la plateforme (en pixels²)", w * h * 64, "1 carreau = 8 · 8 = 64 pixels²"]]]);
+        const parts = [["a) Abscisse de D", D[0]], ["b) Ordonnée de D", D[1]], ["c) Aire (en carreaux)", w * h]].concat(extra ? [[extra[0], extra[1]]] : []);
+        return Object.assign(P(txt + pt("A", A[0], A[1]) + ", " + pt("B", B[0], B[1]) + " et " + pt("C", C[0], C[1]) + ".", parts,
+          ["Le déplacement de B à C se reporte de A à D : D = A + (C − B).", "Aire d'un parallélogramme = base × hauteur ; ici la base [AB] est horizontale."],
+          "De B à C : " + M((s < 0 ? s : "+" + s) + "") + " en x et " + M("+" + h) + " en y, donc " + pt("D", D[0], D[1]) + " : a) " + M(D[0]) + " ; b) " + M(D[1]) + " ; c) base " + M(w) + ", hauteur " + M(h) + " : " + M(w + " \\cdot " + h + " = " + w * h) + " carreaux" + (extra ? " ; d) " + extra[2] + ", donc " + M(w * h + " \\cdot " + extra[1] / (w * h) + " = " + extra[1]) : "") + "."), { ctx: cx }); },
+      () => { let A, Mi; do { A = [R.int(-5, 5), R.int(-5, 5)]; Mi = [R.int(-3, 4), R.int(-3, 4)]; } while (A[0] === Mi[0] || A[1] === Mi[1]);
+        const B = [2 * Mi[0] - A[0], 2 * Mi[1] - A[1]], [cx, txt] = pk([["milieu", "Dans un repère, le point " + pt("M", Mi[0], Mi[1]) + " est le milieu du segment [AB], avec " + pt("A", A[0], A[1]) + "."],
+          ["rendez-vous", "Sur un plan quadrillé (1 carreau = 100 m), Léa habite en " + pt("A", A[0], A[1]) + ". Elle donne rendez-vous à Noé exactement à mi-chemin de leurs maisons, au point " + pt("M", Mi[0], Mi[1]) + ". Noé habite en B."],
+          ["passerelle", "Sur le plan d'un parc (repère en dizaines de mètres), une passerelle droite part de " + pt("A", A[0], A[1]) + " ; son pilier central est en son milieu " + pt("M", Mi[0], Mi[1]) + ". L'autre extrémité est B."]]);
+        return Object.assign(P(txt, [["a) Abscisse de B", B[0]], ["b) Ordonnée de B", B[1]]],
+          ["Le milieu est la moyenne des coordonnées : (" + A[0] + " + x_B) ÷ 2 = " + Mi[0] + ".", "Ou : de A à M, on se déplace de " + (Mi[0] - A[0]) + " en x et " + (Mi[1] - A[1]) + " en y ; on refait le même déplacement de M à B."],
+          M("x_B = 2 \\cdot " + pr(Mi[0]) + " - " + pr(A[0]) + " = " + B[0]) + " et " + M("y_B = 2 \\cdot " + pr(Mi[1]) + " - " + pr(A[1]) + " = " + B[1]) + " : " + pt("B", B[0], B[1]) + "."), { ctx: cx }); },
     ],
     tabval: [
       () => P("Une bougie de 20 cm diminue de 1,5 cm par heure. On note h(t) sa hauteur après t heures.", [["a) h(2)", 17], ["b) h(6)", 11], ["c) Après combien d'heures mesure-t-elle 8 cm ?", 8]], ["h(t) = 20 − 1,5 t.", "c) Résous 20 − 1,5 t = 8."], "a) 17 ; b) 11 ; c) 8 h."),
@@ -3486,9 +3612,14 @@
     ],
   };
   const PROBS = {
-    repere3d: [() => { const [a, b, c, d] = pk([[2, 3, 6, 7], [1, 4, 8, 9], [4, 4, 7, 9]]);
-      return P("Une boîte en forme de pavé droit est posée à l'origine d'un repère de l'espace ; le sommet opposé à O est " + M("F" + T3([a, b, c])) + " (en dm).", [["a) Volume de la boîte (dm³)", a * b * c], ["b) Cote (coordonnée z) du centre de la boîte", c / 2], ["c) Longueur de la diagonale OF (dm)", d]],
-        ["Les coordonnées de F sont les dimensions.", "Diagonale : Pythagore deux fois."], "a) " + M(a + " \\cdot " + b + " \\cdot " + c + " = " + a * b * c) + " ; b) " + M(fT(c / 2)) + " ; c) " + M("\\sqrt{" + a * a + " + " + b * b + " + " + c * c + "} = " + d) + "."); }],
+    /* 26.11 soir (agent defis3) : dimensions tirées (quadruplets a² + b² + c² = d²), 3 contextes, coordonnée du centre au hasard. */
+    repere3d: [() => { const [cx, nm, u, Q] = pk([["boite", "Une boîte en forme de pavé droit", "dm", [[2, 3, 6, 7], [1, 4, 8, 9], [4, 4, 7, 9], [2, 6, 9, 11], [6, 6, 7, 11], [3, 4, 12, 13], [2, 4, 4, 6]]],
+        ["salle", "Une salle de sport (un pavé droit)", "m", [[6, 6, 3, 9], [10, 10, 5, 15], [9, 12, 8, 17], [12, 12, 6, 18]]],
+        ["aquarium", "Un aquarium en forme de pavé droit", "dm", [[4, 8, 8, 12], [2, 6, 3, 7], [4, 12, 6, 14], [3, 6, 6, 9], [6, 6, 3, 9]]]]), [a, b, c, d] = pk(Q), k = R.int(0, 2), cn = ["Abscisse (x)", "Ordonnée (y)", "Cote (z)"][k], cv = [a, b, c][k] / 2;
+      const vol = a * b * c, lab1 = cx === "aquarium" ? "a) Contenance de l'aquarium (L ; 1 dm³ = 1 L)" : "a) Volume (" + u + "³)";
+      return Object.assign(P(nm + (cx === "aquarium" ? " est posé" : " est posée") + " à l'origine O d'un repère de l'espace ; le sommet opposé à O est " + M("F" + T3([a, b, c])) + " (en " + u + ").", [[lab1, vol], ["b) " + cn + " du centre du pavé (milieu de [OF])", cv], ["c) Longueur de la diagonale OF (" + u + ")", d]],
+        ["Les coordonnées de F sont les dimensions du pavé. Le centre est le milieu de [OF] : moyenne des coordonnées.", "Diagonale : Pythagore deux fois, " + M("OF^2 = x^2 + y^2 + z^2") + "."],
+        "a) " + M(a + " \\cdot " + b + " \\cdot " + c + " = " + vol) + (cx === "aquarium" ? " dm³, soit " + vol + " L" : " " + u + "³") + " ; b) " + M(fT([a, b, c][k]) + " : 2 = " + fT(cv)) + " ; c) " + M("\\sqrt{" + a * a + " + " + b * b + " + " + c * c + "} = \\sqrt{" + d * d + "} = " + d) + " " + u + "."), { ctx: cx }); }],
   };
   reg([
     { id: "repere3d", theme: "es", label: "Repérer un point dans l'espace", ex: "F(4 \\,;\\, 3 \\,;\\, 2)", CH: [11], lv: RP, probs: PROBS.repere3d,
