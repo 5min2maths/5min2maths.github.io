@@ -139,6 +139,8 @@ const HORS_CO = {
     fracconv: ["per2", "permixte"],
     fracper: [/seul le \d se répète|\{,\}(\d)(?!\1)(\d)\1\2/],
     quadri: [/axes? de symétrie/], /* primaire (trop facile), remplacé par diagonales et triangles isocèles */
+    /* 26.11 (revue p6, n° 6) : pourcentages successifs (défi pct « succ-* ») en 10e avec pctvar ; en 9e, appliquer un pourcentage */
+    pct: [(q) => /^succ-/.test(String(q.ctx || ""))],
   },
   /* 10e : simple distributivité seulement (double distributivité, identités : 11e), pas de fractions algébriques ni de
      formules à transformer, pas d'inéquations, pas de cône (11e), aires × k² et volumes × k³ en 11e, vitesse moyenne sur deux trajets en 11e. */
@@ -977,6 +979,8 @@ const Engine = {
       /* 26.11 (revue p5, n° 5 : Kevin, Mathélo 928, problème de niveau 4 en 3 parties, 6:19) : élève en grande difficulté
          (struggling) : pas de défi du jour (ni annoncé au bilan « Demain : 🏔 Défi ») ; il revient quand l'élève remonte. */
       if (f === "defi" && this.struggling(state)) continue;
+      /* 26.11 (revue p6, n° 15 : positionnement 6:52 puis défi de niveau 4 en 3 parties) : pas de défi le jour du positionnement */
+      if (f === "defi" && state.placedOn === today) continue;
       sc += Math.random() * 0.4;
       if (!best || sc > best.sc) best = { f, sc };
     }
@@ -1014,7 +1018,14 @@ const Engine = {
   /* 26.11 (revue p5, n° 5 : Kevin, jour 1 = positionnement + série de 3 avec deux pas à pas, 13 min) : le jour du positionnement,
      élève en grande difficulté : 2 questions (jour 1 ≈ 10 minutes). */
   firstDayN(state) { return this.struggling(state) || (state.placeMiss || 0) >= 3 ? 2 : 3; },
-  autoN(state) { return state.placedOn === day() ? this.firstDayN(state) : this.struggling(state) ? 4 : FORMATS.auto.slots.length; },
+  /* 26.11 (revue p6, n° 15 : Hugo, 6e faible, série de 6 automatismes en 6:37 avec deux pas à pas) : élève sous la moyenne
+     de la classe : Mathélo sous la valeur de départ de sa classe (Engine.newState : élève moyen), ou
+     moins de 70 % de réussites du premier coup sur ses 5 dernières réponses au moins. */
+  belowClass(state) {
+    const h = harmos(state.profile.system, state.profile.grade), r0 = 700 + (h - 8) * 150 + 100, L = state.last1 || [];
+    return state.elo.r + (state.tadj || 0) < r0 || (L.length >= 5 && L.reduce((a, b) => a + b, 0) / L.length < ADAPT.aim);
+  },
+  autoN(state) { return state.placedOn === day() ? this.firstDayN(state) : this.struggling(state) || this.belowClass(state) ? 4 : FORMATS.auto.slots.length; },
   fmtText(state, f) { const n = f === "auto" ? this.autoN(state) : 0; return n && n < FORMATS.auto.slots.length ? n + " calculs rapides, enchaînés." : FORMATS[f].text; },
   planSession(state, format) {
     /* 26.11 (revue p4, n° 3) : le jour du positionnement, 3 questions au plus quel que soit le format (positionnement + séance ≈ 10 min) ; */
@@ -1053,6 +1064,8 @@ const Engine = {
     const today = day();
     // Format annoncé la veille au bilan (21.11) : promesse tenue.
     if (!state.today || state.today.date !== today) state.today = { date: today, f: state.tomorrow && state.tomorrow.date === today && FORMATS[state.tomorrow.f] && !(state.tomorrow.f === "defi" && this.struggling(state)) /* revue p5, n° 5 */ ? state.tomorrow.f : this.chooseFormat(state) };
+    /* revue p6, n° 15 : format tiré avant la fin du positionnement : pas de défi ce jour-là */
+    if (state.today.f === "defi" && state.placedOn === today) state.today.f = this.chooseFormat(state, ["defi"]);
     return state.today.f;
   },
   // Format de demain, choisi dès aujourd'hui et annoncé au bilan (21.11).
@@ -1337,9 +1350,15 @@ const Engine = {
   // les 3 notions dont le défi (niveau 4) est le plus proche du Mathélo, une notion pas encore travaillée (m < 0,3) en dernier recours.
   weeklyProblem(state) {
     const d = new Date(), week = d.getFullYear() + "-" + Math.floor((d - new Date(d.getFullYear(), 0, 1)) / 6048e5);
-    const ids = this.eligible(state).filter((id) => hasProb(id));
+    /* 26.11 (revue p6, n° 2 : Hugo 6e, leçon « 0,5 × 0,5 » puis un problème de niveau 4 sur une notion jamais travaillée) :
+       seulement une notion déjà travaillée (seen, maîtrise > 0) ou du chapitre « en classe » ; jamais de leçon avant. */
+    const worked = (id) => { const s = state.notions[id]; return this.nowHas(state, id) || (s && s.seen > 0 && s.m > 0); };
+    const ids = this.eligible(state).filter((id) => hasProb(id) && worked(id));
     if (!ids.length) return null;
-    if (state.weeklyPick && state.weeklyPick.week === week && state.weeklyPick.v === 3 && ids.includes(state.weeklyPick.id)) return state.weeklyPick.id; /* v2 (24.11), v3 (26.11, revue p4) : nouveau choix */
+    /* revue p6, n° 1 (Yanis, Emma : problème tiré à l'accueil avant le choix du chapitre « en classe ») : le choix de la semaine
+       est refait si le chapitre en classe change, tant que le problème n'est pas fait */
+    const nowSig = this.nowActive(state) ? state.now.ids.join(",") : "", done = typeof weekKey === "function" && state.weeklyDone === weekKey();
+    if (state.weeklyPick && state.weeklyPick.week === week && state.weeklyPick.v === 4 && ids.includes(state.weeklyPick.id) && (done || (state.weeklyPick.now || "") === nowSig)) return state.weeklyPick.id; /* v2 (24.11), v3 (26.11, revue p4), v4 (26.11, revue p6) : nouveau choix */
     const r = state.elo.r, m = (id) => (state.notions[id] || {}).m || 0;
     // 24.11 (auteur en 4e : « une factorisation vraiment simple ») : un vrai défi. Notions de l'année ou de l'année
     // précédente d'abord (les plus anciennes pénalisées) ; difficulté visée au-dessus du Mathélo (+150), plus faciles pénalisées.
@@ -1347,17 +1366,23 @@ const Engine = {
     /* 26.11 (revue p4, n° 7 : Tle → parabole de 1re, MP 3e → fonctions trigonométriques de MP 2e) : notion de l'année
        (catalogue, current) avant toute autre ; une notion d'avant ne vient que s'il n'y a rien dans l'année. */
     const yearSet = new Set(this.catalog(state.profile).filter((c) => c.current).map((c) => c.id));
+    /* 26.11 (revue p6, n° 1 : Emma 10e → arith@9, Yanis 11e → vol@10, Théo 2nde → pctvar@3e) : le catalogue « current »
+       contient aussi les reprises. Rangs : 0 = notion de l'année (placeOf = classe) du chapitre « en classe », 1 = autre
+       notion de l'année, 2 = reprise du chapitre en classe, 3 = reprise du catalogue de l'année, 4 = autre ; on ne prend
+       que le meilleur rang qui donne un vrai problème. L'écart d'année est pénalisé dès 1 an. */
+    const tier = (id) => { const own = yr(id) === g, ch = this.nowHas(state, id); return own && ch ? 0 : own ? 1 : ch ? 2 : yearSet.has(id) ? 3 : 4; };
     const score = (id) => { const it = itemRating(state.profile, id, 4), gap = g - yr(id);
-      return Math.abs(it - (r + 150)) + (it < r ? 150 : 0) + (gap >= 2 ? 250 * (gap - 1) : 0) + (m(id) < 0.3 ? 400 : 0) + (yearSet.has(id) ? 0 : 5000); };
+      return Math.abs(it - (r + 150)) + (it < r ? 150 : 0) + (gap >= 1 ? 250 * gap : 0) + (m(id) < 0.3 ? 400 : 0); };
     /* 26.11 (revue p4, n° 6 : 3e FR, « Problème de la semaine » d'une seule question, rac niveau 3, sous la porte « un problème
        en plusieurs étapes ») : seulement une notion dont le niveau 4 donne, pour ce profil, un vrai problème en plusieurs parties. */
     /* (rac en 3e FR : les 200 premiers problèmes de niveau 4 sont hors programme, racine cubique ; make retombait au niveau 3) */
     const real = (id) => { for (let k = 1; k <= 12; k++) { try { const q = this.build(id, 4, k); if (q && q.d === 4 && Array.isArray(q.parts) && q.parts.length >= 2 && !horsCO(state, id, q)) return true; } catch (e) { return false; } } return false; };
-    const best = [];
-    for (const id of ids.slice().sort((a, b) => score(a) - score(b))) { if (real(id)) best.push(id); if (best.length >= 3) break; }
+    let best = [];
+    for (let t = 0; t <= 4 && !best.length; t++)
+      for (const id of ids.filter((x) => tier(x) === t).sort((a, b) => score(a) - score(b))) { if (real(id)) best.push(id); if (best.length >= 3) break; }
     if (!best.length) return null;
     const n = +week.split("-")[1], id = best[n % best.length];
-    state.weeklyPick = { week, id, v: 3 };
+    state.weeklyPick = { week, id, v: 4, now: nowSig };
     return id;
   },
 
