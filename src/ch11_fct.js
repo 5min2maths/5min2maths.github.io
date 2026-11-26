@@ -72,7 +72,7 @@
     ],
     2: [
       () => { const a = nz2(-4, 5), b = nz(-8, 8), x = nz2(-6, 7), v = a * x + b;
-        return Qv("Soit " + M("f(x) = " + lin(a, b)) + ". Quel nombre a pour image " + M(v) + " ? (on cherche son antécédent)", x, M(lin(a, b) + " = " + v) + ", " + M(a + "x = " + (v - b)) + ", " + M("x = " + x) + ".",
+        return Qv("Soit " + M("f(x) = " + lin(a, b)) + ". Quel nombre a pour image " + M(v) + " ? (on cherche sa préimage)" /* 26.11 soir : usage suisse (FR_WORDS → son antécédent) */, x, M(lin(a, b) + " = " + v) + ", " + M(a + "x = " + (v - b)) + ", " + M("x = " + x) + ".",
           { ctx: "antecedent", guide: [GS("Résous " + M(lin(a, b) + " = " + v) + " : " + M(a + "x") + " = ?", v - b, M(a + "x = " + (v - b)) + "."), GS(M("x") + " = ?", x, M("x = " + x) + ".")], traps: [TR(a * v + b, "On cherche le x dont l'image vaut " + v + " (antécédent), pas l'image de " + v + "."), TR((v + b) / a, "Pour isoler ax, on soustrait " + b + ".")] }); },
       () => { const a = pk([2, 3, -2]), b = pk([-3, -1, 1, 4]), x = nz(-3, 3), v = a * x * x + b * x;
         return Qv("Soit " + M("f(x) = " + a + "x^2" + (b < 0 ? " - " + (b === -1 ? "" : -b) : " + " + (b === 1 ? "" : b)) + "x") + ". Calcule " + M("f(" + x + ")") + ".", v, M("f(" + x + ") = " + a + " \\cdot " + pr(x) + "^2 " + (b < 0 ? "-" : "+") + " " + Math.abs(b) + " \\cdot " + pr(x) + " = " + a * x * x + (b * x < 0 ? " - " + -b * x : " + " + b * x) + " = " + v) + ".",

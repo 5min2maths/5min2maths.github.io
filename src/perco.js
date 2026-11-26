@@ -270,9 +270,13 @@
       compte(["rnat", "irr", "pi", "neg", "frac", "dec", "rfrac", "irr"], (x) => x[1] <= 2, "rationnels (dans " + M("\\mathbb{Q}") + ")", "compte-Q", CO10, "Les racines de carrés parfaits sont rationnelles ; " + M("\\pi") + " et les racines de nombres qui ne sont pas des carrés parfaits sont irrationnels."),
     ],
   };
+  /* 26.11 soir (vraisemblance) : défi tiré au hasard (avant : toujours les mêmes six nombres) */
   const ENP = [
-    () => P("Voici six nombres : " + M("-7") + " ; " + M("\\frac{12}{4}") + " ; " + M("2{,}5") + " ; " + M("0") + " ; " + M("-\\frac{9}{3}") + " ; " + M("\\frac{2}{3}") + ".", [["a) Combien sont dans ℕ ?", 2], ["b) Combien sont dans ℤ ?", 4], ["c) Combien sont dans ℚ ?", 6]],
-      ["Simplifie d'abord les fractions : 12/4 = 3 et −9/3 = −3.", "ℕ ⊂ ℤ ⊂ ℚ : un nombre de ℕ compte aussi dans ℤ et dans ℚ."], "a) " + M("\\frac{12}{4} = 3") + " et " + M("0") + " ; b) en plus " + M("-7") + " et " + M("-3") + " ; c) tous (ce sont des quotients d'entiers)."),
+    () => { const a = -R.int(2, 9), f1 = pk([[12, 4], [15, 5], [18, 6], [14, 7], [20, 4]]), dc = pk([2.5, 1.5, 3.2, 0.4]), f2 = pk([[9, 3], [8, 4], [12, 3], [10, 5]]), f3 = pk([[2, 3], [3, 4], [5, 6], [1, 7]]);
+      const L = shuf([M(a), M("\\frac{" + f1[0] + "}{" + f1[1] + "}"), M(fT(dc)), M("0"), M("-\\frac{" + f2[0] + "}{" + f2[1] + "}"), M("\\frac{" + f3[0] + "}{" + f3[1] + "}")]);
+      return P("Voici six nombres : " + L.join(" ; ") + ".", [["a) Combien sont dans ℕ ?", 2], ["b) Combien sont dans ℤ ?", 4], ["c) Combien sont dans ℚ ?", 6]],
+        ["Simplifie d'abord les fractions : " + f1[0] + "/" + f1[1] + " = " + f1[0] / f1[1] + " et −" + f2[0] + "/" + f2[1] + " = −" + f2[0] / f2[1] + ".", "ℕ ⊂ ℤ ⊂ ℚ : un nombre de ℕ compte aussi dans ℤ et dans ℚ."],
+        "a) " + M("\\frac{" + f1[0] + "}{" + f1[1] + "} = " + f1[0] / f1[1]) + " et " + M("0") + " ; b) en plus " + M(a) + " et " + M("-" + f2[0] / f2[1]) + " ; c) tous (ce sont des quotients d'entiers : " + M(fT(dc)) + " aussi)."); },
   ];
 
   // ======================= numer : systèmes de numération =======================
@@ -354,9 +358,9 @@
 
   // ======================= fctlec : lire un graphique, reconnaître une fonction =======================
   const CTXG = [
-    { nom: "la distance (en km) entre une randonneuse et son point de départ, en fonction du temps (en heures)", ul: "heures", us: "heure", uy: "km", N: [6, 8], start: 0 },
-    { nom: "le volume d'eau (en m³) dans une citerne, en fonction du temps (en jours)", ul: "jours", us: "jour", uy: "m³", N: [8, 10], start: null },
-    { nom: "la température extérieure (en °C) un matin de printemps, en fonction du nombre d'heures écoulées depuis 5 h", ul: "heures", us: "heure", uy: "°C", N: [7, 9], start: null },
+    { nom: "la distance (en km) entre une randonneuse et son point de départ, en fonction du temps (en heures)", ul: "heures", cb: "combien d'heures", us: "heure", uy: "km", N: [6, 8], start: 0 },
+    { nom: "le volume d'eau (en m³) dans une citerne, en fonction du temps (en jours)", ul: "jours", cb: "combien de jours", us: "jour", uy: "m³", N: [8, 10], start: null },
+    { nom: "la température extérieure (en °C) pendant une journée de printemps, en fonction du nombre d'heures écoulées depuis 5 h", ul: "heures", cb: "combien d'heures", us: "heure", uy: "°C", N: [7, 9], start: null },
   ];
   const duree = (C, t) => M(t) + " " + (t > 1 ? C.ul : C.us);
   /* profil linéaire par morceaux, sommets entiers entre 0 et 12 ; au moins deux montées, une descente et un palier ;
@@ -402,14 +406,14 @@
           { ctx: "lire-image", fig, guide: [GR("Sur quel axe repère-t-on le temps " + M(t) + " ? Tape 1 pour l'axe horizontal, 2 pour l'axe vertical.", 1, "Le temps est sur l'axe horizontal."), GR("Valeur lue ?", v, M(v) + " " + C.uy + ".")],
             traps: [TR(y[t - 1], "C'est la valeur à " + (t - 1) + " ; repère bien " + t + " sur l'axe horizontal."), TR(y[t + 1], "C'est la valeur à " + (t + 1) + " ; repère bien " + t + " sur l'axe horizontal."), TR(y.indexOf(t) >= 0 && y.indexOf(t) !== t ? y.indexOf(t) : NaN, "Tu as lu à l'envers : " + t + " se repère sur l'axe horizontal.")] }); }),
       avecG((C, y, fig) => { const mx = Math.max(...y), t = y.indexOf(mx);
-        return QN("Le graphique représente " + C.nom + ". Au bout de combien de " + C.ul + " la valeur est-elle la plus grande ?", t,
+        return QN("Le graphique représente " + C.nom + ". Au bout de " + C.cb + " la valeur est-elle la plus grande ?", t,
           "Le point le plus haut du graphique est à " + M(t) + " sur l'axe horizontal (valeur " + M(mx) + " " + C.uy + ").",
-          { ctx: "lire-max", fig, guide: [GR("Valeur la plus grande (en " + C.uy + ") ?", mx, M(mx) + "."), GR("Au bout de combien de " + C.ul + " ?", t, M(t) + ".")],
+          { ctx: "lire-max", fig, guide: [GR("Valeur la plus grande (en " + C.uy + ") ?", mx, M(mx) + "."), GR("Au bout de " + C.cb + " ?", t, M(t) + ".")],
             traps: [TR(mx, "C'est la valeur maximale ; on demande quand elle est atteinte (axe horizontal)."), TR(y.indexOf(Math.min(...y)), "C'est le moment où la valeur est la plus petite.")] }); }),
       avecG((C, y, fig) => { const d = y.slice(1).map((v, i) => v - y[i]), up = d.filter((v) => v > 0).length, dn = d.filter((v) => v < 0).length, st = d.filter((v) => v === 0).length;
-        return QN("Le graphique représente " + C.nom + ". Pendant combien de " + C.ul + " en tout la valeur a-t-elle augmenté ?", up,
+        return QN("Le graphique représente " + C.nom + ". Pendant " + C.cb + " en tout la valeur a-t-elle augmenté ?", up,
           "Le graphique monte pendant " + duree(C, up) + " ; il descend pendant " + duree(C, dn) + " et reste horizontal pendant " + duree(C, st) + ".",
-          { ctx: "duree-hausse", fig, guide: [GR("Pendant combien de " + C.ul + " la valeur reste-t-elle constante (graphique horizontal) ?", st, duree(C, st) + "."), GR("Et pendant combien de " + C.ul + " augmente-t-elle (graphique qui monte) ?", up, duree(C, up) + ".")],
+          { ctx: "duree-hausse", fig, guide: [GR("Pendant " + C.cb + " la valeur reste-t-elle constante (graphique horizontal) ?", st, duree(C, st) + "."), GR("Et pendant " + C.cb + " augmente-t-elle (graphique qui monte) ?", up, duree(C, up) + ".")],
             traps: [TR(dn, "C'est la durée pendant laquelle la valeur diminue (le graphique descend)."), TR(up + st, "Quand le graphique est horizontal, la valeur ne change pas : elle n'augmente pas."), TR(Math.max(...y) - y[0], "On demande une durée (axe horizontal), pas une valeur.")] }); }),
     ],
     2: [
@@ -432,7 +436,7 @@
         const why = k === "P" ? "Le graphique est une droite qui passe par l'origine : c'est une situation de proportionnalité." : k === "A" ? "C'est une droite, mais elle ne passe pas par l'origine (elle coupe l'axe vertical en " + b + ") : affine, pas proportionnelle." : "Le graphique n'est pas une droite : ni proportionnel, ni affine.";
         const why9 = k === "P" ? why : k === "A" ? "La droite ne passe pas par l'origine (elle coupe l'axe vertical en " + b + ") : ce n'est pas proportionnel." : "Le graphique n'est pas une droite : ce n'est pas proportionnel.";
         return reco(k, "Le graphique représente une grandeur en fonction d'une autre.", why, why9, "reco-graphe", [GR("Le graphique est-il une droite ? Tape 1 pour oui, 0 pour non.", k === "N" ? 0 : 1, k === "N" ? "Non, c'est une courbe." : "Oui.")], fig); },
-      () => { const [u, pu, obj] = pk([["kg", [2.5, 3.5], "de pommes"], ["L", [1.8, 1.9, 2.1, 2.2], "d'essence"], ["kg", [1.5, 2.5], "de farine"]]), p = pk(pu), x = pk([2, 4]), yv = r6(p * x), c = R.int(3, 9);
+      () => { const [u, pu, obj] = pk([["kg", [2.5, 3.5], "des pommes"], ["L", [1.8, 1.9, 2.1, 2.2], "de l'essence"], ["kg", [1.5, 2.5], "de la farine"]]), p = pk(pu), x = pk([2, 4]), yv = r6(p * x), c = R.int(3, 9);
         if (c === x) return null; const v = r6(p * c);
         const fig = FIG.plot([{ f: (t) => p * t, from: 0, to: 5 }], [[x, yv, ""]], { xr: [-1, 5], yr: [-1, Math.ceil(p * 5) + 1], numbers: true, step: 2, squash: Math.min(1, 6 / (p * 5 + 1)), label: "prix en fonction de la quantité" });
         return QN("Le graphique donne le prix (en CHF) " + obj + " en fonction de la quantité (en " + u + ") : c'est une situation de proportionnalité. Le point marqué indique que " + M(x) + " " + u + " coûtent " + M(fT(yv)) + " CHF. Combien coûtent " + M(c) + " " + u + " (en CHF) ?", v,
@@ -447,8 +451,9 @@
     ],
   };
   const FLP = [
-    () => P("Un taxi facture 6 CHF de prise en charge, puis 2,50 CHF par kilomètre.", [["a) Prix d'une course de 4 km (CHF)", 16], ["b) Prix d'une course de 8 km (CHF)", 26], ["c) De combien le prix augmente-t-il quand on passe de 4 km à 8 km (CHF) ?", 10]],
-      ["Prix = 2,50 · km + 6.", "Si c'était proportionnel, doubler la distance doublerait le prix."], "a) " + M("2{,}5 \\cdot 4 + 6 = 16") + " ; b) " + M("2{,}5 \\cdot 8 + 6 = 26") + " ; c) " + M("26 - 16 = 10") + " CHF. Doubler la distance ne double pas le prix (" + M("26 \\ne 2 \\cdot 16") + ") : ce n'est pas proportionnel."),
+    () => { const pc = pk([5, 6, 7]), pu = pk([2.5, 3, 3.5]), d1 = pk([3, 4, 5]), d2 = 2 * d1, y1 = r6(pc + pu * d1), y2 = r6(pc + pu * d2), ch = (v) => (Number.isInteger(v) ? String(v) : v.toFixed(2).replace(".", ","));
+      return P("Un taxi facture " + pc + " CHF de prise en charge, puis " + ch(pu) + " CHF par kilomètre.", [["a) Prix d'une course de " + d1 + " km (CHF)", y1], ["b) Prix d'une course de " + d2 + " km (CHF)", y2], ["c) De combien le prix augmente-t-il quand on passe de " + d1 + " km à " + d2 + " km (CHF) ?", r6(y2 - y1)]],
+        ["Prix = " + ch(pu) + " · km + " + pc + ".", "Si c'était proportionnel, doubler la distance doublerait le prix."], "a) " + M(fT(pu) + " \\cdot " + d1 + " + " + pc + " = " + fT(y1)) + " ; b) " + M(fT(pu) + " \\cdot " + d2 + " + " + pc + " = " + fT(y2)) + " ; c) " + M(fT(y2) + " - " + fT(y1) + " = " + fT(r6(y2 - y1))) + " CHF. Doubler la distance ne double pas le prix (" + M(fT(y2) + " \\ne 2 \\cdot " + fT(y1)) + ") : ce n'est pas proportionnel."); },
   ];
 
   // ======================= litconv : conventions d'écriture, expressions équivalentes =======================
@@ -492,7 +497,7 @@
           ["2(a + b)", "2a + b", 2 * (a + b), 2 * a + b, "2(a + b) = 2a + 2b : le 2 multiplie aussi b."],
           ["(ab)^2", "ab^2", (a * b) ** 2, a * b * b, "(ab)² = a²b² : le carré porte sur a et sur b."],
         ]); if (a === b && t[0] === "(ab)^2") return null; const d = t[2] - t[3], w = pk(["Lina", "Noé", "Inès", "Yanis", "Mia", "Sam"]);
-        return QN(w + " affirme que " + M(t[0] + " = " + t[1]) + " pour toutes les valeurs de " + M("a") + " et " + M("b") + ". Teste avec " + M("a = " + a) + " et " + M("b = " + b) + " : calcule " + M(t[0]) + " moins " + M(t[1]) + ".", d,
+        return QN(w + " affirme que " + M(t[0] + " = " + t[1]) + " pour toutes les valeurs de " + M("a") + " et " + M("b") + ". Teste avec " + M("a = " + a) + " et " + M("b = " + b) + " : calcule " + M(t[0]) + " et " + M(t[1]) + ", puis tape la différence (la première valeur moins la deuxième).", d, /* 26.11 soir (vraisemblance) : « calcule (a + b)² moins a² + b² » se lisait (a + b)² − a² + b² */
           M(t[0]) + " vaut " + M(t[2]) + " et " + M(t[1]) + " vaut " + M(t[3]) + " : la différence est " + M(d) + ", pas 0. Une seule valeur suffit pour montrer que les expressions ne sont pas équivalentes. " + t[4],
           { ctx: "contre-exemple", guide: [GR("Valeur de " + M(t[0]) + " ?", t[2], M(t[2]) + "."), GR("Valeur de " + M(t[1]) + " ?", t[3], M(t[3]) + "."), GR("Différence ?", d, M(d) + ".")],
             traps: [TR(0, "Calcule vraiment les deux expressions avec a = " + a + " et b = " + b + " : elles ne donnent pas la même valeur."), TR(-d, "On calcule la première moins la deuxième.")] }); },
@@ -526,8 +531,9 @@
     ],
   };
   const LCP = [
-    () => P("On compare " + M("A = 3(x + 4) - x") + " et " + M("B = 2x + 12") + ".", [["a) Valeur de A pour x = 5", 22], ["b) Valeur de B pour x = 5", 22], ["c) Coefficient de x dans A réduite", 2]],
-      ["Remplace x par 5, parenthèse d'abord.", "A = 3x + 12 − x."], "a) " + M("3 \\cdot 9 - 5 = 22") + " ; b) " + M("10 + 12 = 22") + " ; c) " + M("A = 2x + 12 = B") + " : les expressions sont équivalentes."),
+    () => { const k = R.int(2, 5), m = R.int(2, 6), v = R.int(3, 7), A = k * (v + m) - v;
+      return P("On compare " + M("A = " + k + "(x + " + m + ") - x") + " et " + M("B = " + (k - 1 === 1 ? "" : k - 1) + "x + " + k * m) + ".", [["a) Valeur de A pour x = " + v, A], ["b) Valeur de B pour x = " + v, A], ["c) Coefficient de x dans A réduite", k - 1]],
+        ["Remplace x par " + v + ", parenthèse d'abord.", "A = " + k + "x + " + k * m + " − x."], "a) " + M(k + " \\cdot " + (v + m) + " - " + v + " = " + A) + " ; b) " + M((k - 1) * v + " + " + k * m + " = " + A) + " ; c) " + M("A = " + (k - 1 === 1 ? "" : k - 1) + "x + " + k * m + " = B") + " : les expressions sont équivalentes."); },
   ];
 
   // ======================= enregistrement des notions =======================
@@ -662,10 +668,10 @@
         const L = [["un cylindre", "un rectangle qui tourne autour d'un côté"], ["un cône", "un triangle rectangle qui tourne autour d'un côté de l'angle droit"], ["une boule", "un demi-disque qui tourne autour de son diamètre"]];
         const opts = [[L[c[1]][0], ""]].concat(L.filter((_, i) => i !== c[1]).map((x) => [x[0], "Ce solide est engendré par " + x[1] + "."])).concat([["une pyramide", "Un solide obtenu en faisant tourner une figure a une section circulaire : ce n'est pas une pyramide."]]);
         return QC("Quand " + c[0] + ", il engendre un solide de révolution. Lequel ?", opts, "Chaque point de la figure décrit un cercle autour de l'axe : " + c[0] + " donne " + L[c[1]][0] + ".", { ctx: "revolution", guide: [GR("Le côté qui touche l'axe forme-t-il une pointe (un seul point) ? Tape 1 pour oui, 0 pour non.", c[1] === 1 ? 1 : 0, c[1] === 1 ? "Oui : l'hypoténuse rejoint l'axe en un point, le sommet du cône." : "Non.")] }); },
-      () => { const r = R.int(2, 9), c = pk([["exactement", "de l'espace", "une sphère", 2], ["au plus", "de l'espace", "une boule", 3], ["exactement", "du plan", "un cercle", 0], ["au plus", "du plan", "un disque", 1]]);
+      () => { const r = R.int(2, 9), c = pk([["exactement", "de l'espace", "une sphère", 2], ["au plus", "de l'espace", "une boule", 3], ["exactement", "du plan", "un cercle", 0], ["au plus", "du plan", "un disque", 1]]), loin = (c[0] === "au plus" ? "à une distance d'au plus " : "à exactement ") + M(r) + " cm"; /* 26.11 soir : « situés à au plus 8 cm » */
         const N = ["un cercle", "un disque", "une sphère", "une boule"], E = ["l'ensemble des points du plan à exactement cette distance", "les points du plan à cette distance ou moins", "l'ensemble des points de l'espace à exactement cette distance (la surface d'un ballon)", "les points de l'espace à cette distance ou moins (le ballon plein)"];
         const opts = [[N[c[3]], ""]].concat([0, 1, 2, 3].filter((i) => i !== c[3]).map((i) => [N[i], "Ça, c'est " + E[i] + "."]));
-        return QC("Comment s'appelle l'ensemble des points " + c[1] + " situés à " + c[0] + " " + M(r) + " cm d'un point " + M("O") + " ?", opts, "Dans " + (c[1] === "du plan" ? "le plan" : "l'espace") + ", les points à " + c[0] + " " + r + " cm de " + M("O") + " forment " + c[2] + " de centre " + M("O") + " et de rayon " + M(r) + " cm.", { ctx: "sphere-boule", guide: [GR("Combien de dimensions : tape 2 pour le plan, 3 pour l'espace.", c[1] === "du plan" ? 2 : 3, c[1] === "du plan" ? "Le plan : 2 dimensions." : "L'espace : 3 dimensions.")] }); },
+        return QC("Comment s'appelle l'ensemble des points " + c[1] + " situés " + loin + " d'un point " + M("O") + " ?", opts, "Dans " + (c[1] === "du plan" ? "le plan" : "l'espace") + ", les points situés " + loin + " de " + M("O") + " forment " + c[2] + " de centre " + M("O") + " et de rayon " + M(r) + " cm.", { ctx: "sphere-boule", guide: [GR("Combien de dimensions : tape 2 pour le plan, 3 pour l'espace.", c[1] === "du plan" ? 2 : 3, c[1] === "du plan" ? "Le plan : 2 dimensions." : "L'espace : 3 dimensions.")] }); },
       () => { const a = R.int(2, 9), b = R.int(3, 12); if (2 * a === b || a === b) return null;
         return QN("Un triangle rectangle dont les côtés de l'angle droit mesurent " + M(a) + " cm et " + M(b) + " cm tourne autour du côté de " + M(b) + " cm. Il engendre un cône. Quel est le diamètre de la base de ce cône (en cm) ?", 2 * a,
           "Le côté de " + M(b) + " cm reste sur l'axe : c'est la hauteur. L'autre côté de l'angle droit balaie la base : rayon " + M(a) + " cm, diamètre " + M("2 \\cdot " + a + " = " + 2 * a) + " cm.",
@@ -678,12 +684,12 @@
           "La hauteur, le rayon et la génératrice forment un triangle rectangle : " + M("g = \\sqrt{" + h + "^2 + " + r + "^2} = \\sqrt{" + g * g + "} = " + g) + " cm.",
           { ctx: "generatrice", fig: FIG.cone("r = " + r, "h = " + h), guide: [GR(M("g^2 = h^2 + r^2") + " ?", g * g, M(h * h + " + " + r * r + " = " + g * g) + "."), GR(M("g") + " ?", g, M(g) + " cm.")],
             traps: [TR(h + r, "Pythagore : on additionne les carrés, puis on prend la racine."), TR(g * g, "C'est g² : prends la racine carrée."), TR(Math.sqrt(Math.abs(h * h - r * r)), "La génératrice est l'hypoténuse : on additionne les carrés.")] }); },
-      () => { const t = pk(TRI), [d, rho] = R.rand() < 0.5 ? [t[0], t[1]] : [t[1], t[0]], Rr = t[2], o = Rr <= 6 ? "une orange" : Rr <= 13 ? "un ballon" : "une boule de pétanque géante d'une sculpture";
+      () => { const t = pk(TRI), [d, rho] = R.rand() < 0.5 ? [t[0], t[1]] : [t[1], t[0]], Rr = t[2], o = Rr <= 6 ? "une orange" : Rr <= 13 ? "un ballon" : "une boule de polystyrène";
         return QN("On coupe " + o + " (une boule de rayon " + M(Rr) + " cm) par un plan situé à " + M(d) + " cm de son centre. La section est un disque. Quel est son rayon (en cm) ?", rho,
           "Le centre de la boule, le centre de la section et un point du bord forment un triangle rectangle d'hypoténuse " + M(Rr) + " cm : " + M("\\sqrt{" + Rr + "^2 - " + d + "^2} = \\sqrt{" + rho * rho + "} = " + rho) + " cm.",
           { ctx: "section-rayon", guide: [GR("Hypoténuse du triangle rectangle (le rayon de la boule) ?", Rr, M(Rr) + " cm."), GR("Rayon de la section au carré ?", rho * rho, M(Rr * Rr + " - " + d * d + " = " + rho * rho) + "."), GR("Rayon de la section ?", rho, M(rho) + " cm.")],
             traps: [TR(Rr - d, "Pythagore : on soustrait les carrés, pas les longueurs."), TR(Math.sqrt(Rr * Rr + d * d), "Le rayon de la boule est l'hypoténuse : on soustrait d² de R²."), TR(rho * rho, "C'est le carré du rayon : prends la racine.")] }); },
-      () => { const c = pk([["un cylindre de rayon 2 cm et de hauteur 9 cm, par un plan qui contient son axe", 1], ["un cône, par un plan qui contient son axe", 2], ["une boule, par un plan quelconque qui la traverse", 0], ["un cône, par un plan parallèle à sa base", 0], ["un cylindre, par un plan parallèle à ses bases", 0]]);
+      () => { const c = pk([["un cylindre de rayon 2 cm et de hauteur 9 cm par un plan qui contient son axe", 1], ["un cône par un plan qui contient son axe", 2], ["une boule par un plan qui la traverse", 0], ["un cône par un plan parallèle à sa base", 0], ["un cylindre par un plan parallèle à ses bases", 0]]);
         const N = ["un disque", "un rectangle", "un triangle isocèle", "un trapèze"], E = ["On obtient un disque en coupant une boule, ou un cône ou un cylindre parallèlement à la base.", "On obtient un rectangle en coupant un cylindre par un plan qui contient son axe.", "On obtient un triangle isocèle en coupant un cône par un plan qui contient son axe.", "Aucune de ces coupes ne donne un trapèze."];
         const opts = [[N[c[1]], ""]].concat([0, 1, 2, 3].filter((i) => i !== c[1]).map((i) => [N[i], E[i]]));
         return QC("On coupe " + c[0] + ". Quelle est la forme de la section ?", opts, E[c[1]], { ctx: "section-forme", guide: [GR("La section contient-elle l'axe du solide ? Tape 1 pour oui, 0 pour non.", /contient son axe/.test(c[0]) ? 1 : 0, /contient son axe/.test(c[0]) ? "Oui." : "Non.")] }); },

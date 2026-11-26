@@ -1046,10 +1046,10 @@ const DEFIS = (() => {
           [["a) Rapport d'agrandissement", k], ["b) Nouvelle longueur (cm)", k * l], ["c) Prix du tirage agrandi (CHF, au centime)", Pp * k * k, 0.01]],
           ["Rapport = nouvelle longueur ÷ ancienne longueur (même côté). Toutes les longueurs sont multipliées par ce rapport.",
            "Les aires sont multipliées par le CARRÉ du rapport : le prix aussi."],
-          "a) " + M(D(k * w) + " \\div " + w + " = " + D(k)) + ". b) " + M(D(k) + " \\cdot " + l + " = " + D(k * l)) + " cm. c) Aire " + M("\\times " + D(k * k)) + " : " + M(D(Pp) + " \\cdot " + D(k * k) + " = " + D(r2c(Pp * k * k))) + " CHF.");
+          "a) " + M(D(k * w) + " \\div " + w + " = " + D(k)) + ". b) " + M(D(k) + " \\cdot " + l + " = " + D(k * l)) + " cm. c) Aire multipliée par " + M(D(k * k)) + " : " + M(D(Pp) + " \\cdot " + D(k * k) + " = " + D(r2c(Pp * k * k))) + " CHF.");
       },
       () => { /* maquette à l'échelle 1 : n : longueur, aire, volume réels */
-        const n = pk([50, 100, 200, 250]), h = ri(8, 40), A = 2 * ri(10, 90), V = 50 * ri(4, 60);
+        const n = pk([50, 100, 200, 250]), h = ri(8, 40), A = 2 * ri(10, 90), V = Math.max(40, 40 * Math.round((A * h * pk([0.7, 0.8, 0.9, 1])) / 40)); /* 26.11 soir (vraisemblance) : volume tiré à part (aire au sol 146 cm², hauteur 40 cm, volume 1'800 cm³ : impossible pour un bâtiment) ; maintenant 70 à 100 % de aire × hauteur (toit) */
         return P("La maquette d'un bâtiment est à l'échelle " + M("1 : " + n) + ". Sur la maquette : hauteur " + M(h) + " cm, aire au sol " + M(A) + " cm², volume " + M(nb(V)) + " cm³.",
           [["a) Hauteur réelle (m)", (h * n) / 100], ["b) Aire au sol réelle (m²)", (A * n * n) / 10000], ["c) Volume réel (m³)", (V * n ** 3) / 1e6]],
           ["Les longueurs sont multipliées par " + n + ", les aires par " + n + "², les volumes par " + n + "³.",
@@ -1405,7 +1405,7 @@ const DEFIS = (() => {
           if (r * r !== dd) continue; const x = (4 * (a + b) - r) / 24; if (Number.isInteger(x) && x > 0 && 2 * x < b && (a + b) % 2 === 0) L.push([a, b, x]);
         }
         const [a, b, x] = pk(L), V = x * (a - 2 * x) * (b - 2 * x), c = (a + b) / 2, Vc = (2 * c ** 3) / 27;
-        return P("Dans une feuille de " + M(a + " \\text{ cm} \\times " + b + " \\text{ cm}") + ", on découpe un carré de côté " + M("x") + " à chaque coin et on replie pour faire une boîte sans couvercle.",
+        return P("Dans une feuille de " + M(a) + " cm sur " + M(b) + " cm, on découpe un carré de côté " + M("x") + " à chaque coin et on replie pour faire une boîte sans couvercle.",
           [["a) Valeur de " + M("x") + " qui rend le volume maximal (cm)", x], ["b) Volume maximal (cm³)", V], ["c) Avec une feuille CARRÉE de même périmètre, volume maximal (cm³, au dixième)", Vc, 0.1]],
           ["V(x) = x(" + a + " − 2x)(" + b + " − 2x), pour 0 < x < " + T(b / 2) + ". Développe, puis dérive.",
            "V'(x) = 12x² − " + 4 * (a + b) + "x + " + a * b + " ; résous V'(x) = 0 et garde la solution comprise entre 0 et " + T(b / 2) + ". Feuille carrée de côté " + T(c) + " : V(x) = x(" + T(c) + " − 2x)²."],

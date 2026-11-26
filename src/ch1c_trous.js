@@ -76,7 +76,7 @@
     2: [
       () => { const h = nz(-2, 2), k = R.int(-1, 2), r = pk([2, 3]), v = [h - r, h + r];
         const fig = FIG.plot([], [[h, k, "C"]], { numbers: true, xr: [-6, 6], yr: [-5, 5], circles: [[h, k, r]], maxH: 260, label: "cercle de centre C" });
-        return QSet("La figure montre le cercle de centre " + M("C(" + h + " \\,;\\, " + k + ")") + " et de rayon " + M(r) + ". Pour quelles abscisses " + M("a") + " la droite verticale " + M("x = a") + " touche-t-elle le cercle en un seul point ?", v,
+        return QSet("La figure montre le cercle de centre " + M("C(" + h + " \\,;\\, " + k + ")") + " et de rayon " + M(r) + ". Pour quelles valeurs de " + M("a") + " la droite verticale " + M("x = a") + " touche-t-elle le cercle en un seul point ?", v,
           "Une droite verticale coupe le cercle en deux points tant qu'elle passe entre les bords gauche et droit ; elle le touche en un seul point aux bords, à une distance " + M(r) + " du centre : " + M("a = " + h + " - " + r + " = " + (h - r)) + " et " + M("a = " + h + " + " + r + " = " + (h + r)) + ". Entre les deux, chaque " + M("x") + " a deux « images » : ce n'est pas le graphe d'une fonction.",
           { ctx: "cercle-verticales", fig,
             guide: [GR("Abscisse du centre ?", h, M(h) + "."), GR("Rayon ?", r, M(r) + "."), GSet("Abscisses cherchées ?", v, M((h - r) + " \\,;\\, " + (h + r)) + ".")],

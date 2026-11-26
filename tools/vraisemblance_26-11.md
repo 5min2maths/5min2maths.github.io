@@ -111,3 +111,51 @@ Thalès niveau 3, le plongeur (ch11_no2, rel), dec()/decmul (ch10_no), probeq «
 - Bouteilles semblables (ch_mp3) : hauteur et contenance cohérentes (0,4 L pour 20 cm, 1,5 L pour 30 cm…).
 - Défis arith : un seul contexte (bus ; corbeilles ; carrelage seul en 1re).
 - Contrôles ajoutés à tests/vrai_checks.js : surréservation, force (cheval, luge), vitesse d'un chariot, gradient d'altitude, prix du cinéma, bouteille, « (elle) » / « Un(e) ».
+
+## Soir (26.11, branche agent/vrais2) : notions ajoutées depuis le matin, profils séparés
+
+### Périmètre
+
+- Notions ajoutées ou très modifiées depuis l'audit du matin : isom, ensco, numer, fctlec, litconv (src/perco.js, 5 notions nouvelles : le catalogue passe de 321 à 326 notions), formes VARX ajoutées à simil (homothéties) et volcone (cône, sphère) ; graphefct, ineqgraph (ch1c_trous) ; geoesp, densite, approxnorm (ch4c_trous) ; cercle6, bissec6, filtre6, tabform5, hauteurs5 (fr_trous) ; symax, mediatrice, echelle6, proba6, empil, compdiff, posrelc, intmaj, suiteint (fr_fin) ; repere3d (ch11_rep3d) ; tradalg, contrex, demoalg, implication (ch1c_arg) et leurs leçons actives (ch1c_argact, relues à la main : rien à signaler).
+- 31 notions, 150 à 400 graines par niveau (défis compris), lecture humaine de 2 ou 3 tirages par forme d'énoncé (environ 600 formes).
+- Profils : tout le catalogue de chaque classe (CO 9e–11e, Collège 1re–4e, MP 1re–4e, France 6e–Tle), questions finales (Engine.make : formes réservées écartées, passe française appliquée), 3 graines dans la suite (29 000 questions) et 8 graines à la main (77 000 questions).
+
+### Outils
+
+- `tests/vraisemblance_soir.html` (dans la suite, environ 50 s) : notions du soir à 150 graines avec les contrôles de `tests/vrai_checks.js` et des contrôles propres (variable annoncée absente, accord « une allée … est représentée », colonne répétée dans un tableau de valeurs, congélateur sous −26 °C) ; séparation des profils (France : CHF, francs, lieux suisses, apprentis, PGDC, préimage, cathète, « mise en évidence », septante, produit « · » hors produit scalaire ; romand : € hors change, « × » entre deux nombres, PGCD, antécédent, brevet) ; rapport des défis figés (mineur). Options `#n=`, `#np=`, `#detail`.
+- `tests/vrai_checks.js` : élision devant un nom commun ou un pronom (« combien de heures », « que il », « de abricots ») ; surréservation aussi pour « billets pour un avion de … places ».
+
+### Corrections transversales
+
+- `elideTidy` (src/generators.js, dans `moneyTidy`, donc appliquée à tous les textes de question, défis et sujets riches) : « de entrées », « de élèves », « que il », « de huile » deviennent « d'entrées », « d'élèves », « qu'il », « d'huile » (liste fermée de mots, h aspiré exclu). Elle corrige aussi probeq-2 (« une liste de élèves ») sans toucher à son générateur, ainsi que ineq-1/3, ratio-2, probtot-3, implication-1, riche dec9 et volmp3.
+- Passe française (src/curriculum.js, profil France seulement) : « arrondie au franc supérieur (€) » (ordgr-4), « pas des francs » (pctvar-3), « chaque franc d'augmentation » (optim-4) passent à l'euro ; « apprentis » devient « élèves » (statfreq, quartiles : sondages de 5e posés à des apprentis) ; « sa préimage » devient « son antécédent » ; « on met (x + 4) en évidence » devient « on factorise par (x + 4) » (eq2-3) ; « La Brévine » devient « Mouthe » (rel-4) ; « trajet Genève–Berne » devient « Lyon–Grenoble » (utemps-3 : il donnait « Lyon–Berne »).
+
+### Corrections par notion (code de la question → correction)
+
+- **q-fctlec-1/2/3** (perco) : « Au bout de combien de heures » devient « combien d'heures » ; « le prix (en CHF) de farine » devient « de la farine » (« des pommes », « de l'essence ») ; la température « un matin de printemps » allait jusqu'à 14 h : « pendant une journée de printemps ».
+- **q-litconv-2** (perco) : « calcule (a + b)² moins a² + b² » se lisait (a + b)² − a² + b² : « calcule (a + b)² et a² + b², puis tape la différence ».
+- **q-volcone-1/2** (perco, formes cône et sphère) : « les points situés à au plus 8 cm » devient « à une distance d'au plus 8 cm » ; « On coupe un cône, par un plan… » (virgule) corrigé ; « une boule de pétanque géante d'une sculpture » devient « une boule de polystyrène ».
+- **q-ensco-4, q-fctlec-4, q-litconv-4** (perco, défis) : un seul énoncé, toujours le même (« Voici six nombres : −7 ; 12/4… », taxi à 6 CHF + 2,50 CHF/km, A = 3(x + 4) − x) : tirés au hasard (nombres, prix, coefficients).
+- **q-approxnorm-4** (ch4c_trous, défi) : « 625 billets pour un avion de 515 places, présence 0,8 » (110 billets de trop) contredisait la décision de l'enseignant du matin : 100 billets pour un vol de 94 places, présence 0,9 (μ = 90, σ = 3, Φ(1,5)).
+- **q-approxnorm-1/2/3** (ch4c_trous) : « Un QCM a 625 questions à 5 choix » devient « 625 élèves répondent au hasard à une même question à 5 choix ».
+- **q-densite-2/3** (ch4c_trous) : un vélo de location qui crève en moyenne tous les 2 à 20 km : distance en centaines de km.
+- **q-graphefct-2** (ch1c_trous) : « Pour quelles abscisses a la droite x = a… » devient « Pour quelles valeurs de a ».
+- **q-implication-1/2** (ch1c_arg) : « si x = 8, alors x² = 64 (x et y sont des réels) » : y n'apparaît pas, c'est maintenant « (x est un réel) » ; espace avant le point après les énoncés de géométrie (« » . ») supprimé.
+- **q-tabform5-1** (fr_trous) : tableau « n : 1, 4, 6, 8, 5, 6 » (colonnes en désordre et répétées : le pas était tiré pour chaque colonne) ; congélateur refroidi de 4 °C par heure jusqu'à −33 °C : 2 ou 3 °C par heure (−21 °C au plus froid).
+- **q-cercle6-3** (fr_trous) : « des cordes de 3 m et 3 m » devient « de 3 m chacune ».
+- **q-echelle6-2** (fr_fin) : « une allée de 2,5 m est représenté » : accord.
+- **q-proba6-2** (fr_fin) : « un paquet de 40 cartes, la probabilité d'une carte rouge vaut 0,3 » (un jeu de cartes est rouge pour moitié) : « une pochette de cartes à gratter, carte gagnante ».
+- **q-simil-4** (defis, maquette d'un bâtiment) : volume tiré sans lien avec l'aire au sol et la hauteur (146 cm², 40 cm, 1 800 cm³) : maintenant 70 à 100 % de aire × hauteur.
+- **q-croissexp-3** (ch_mp3) : « Après combien de ans » devient « combien d'années ».
+- Profil romand : « on cherche un antécédent / l'antécédent / son antécédent » (affine, tabval, translin) devient « préimage » (passe française inchangée en France) ; « une feuille de 30 cm × 14 cm » (optimderiv-4), la plaque de carton (riche col34), la photo (question curieuse « Le poster ») : « de 30 cm sur 14 cm » ; « Aire × 6,25 » (corrigé du défi simil) : « aire multipliée par 6,25 ».
+
+### Vérifié sans défaut
+
+isom (formes, axes, centres, compositions), numer (égyptien, romain, binaire, base 60 ; « 11…1 » est un affichage de l'outil de lecture), ensco, repere3d, tradalg, contrex, demoalg, ineqgraph, geoesp, bissec6, hauteurs5 (hauteurs compatibles avec les côtés), symax, mediatrice, empil, compdiff, posrelc, intmaj, suiteint (« I₀ = 2 » est un affichage de l'outil : la question porte ln 2), filtre6.
+
+### Reste (non traité)
+
+- Défis figés (un seul énoncé au niveau 4, rapportés en mineur par la page) : approxnorm, compdiff, echelle6, empil, intmaj, mediatrice, posrelc, proba6, suiteint, symax ; et deux énoncés fixes seulement pour isom et numer. À tirer au hasard comme ensco, fctlec et litconv.
+- Le signe « × » reste dans des aides en texte du profil romand (« longueur × largeur », « Longueurs × k », 91 notions-niveaux, src/generators.js HINTS et leçons) et pour les formats (« pavé 2 × 3 × 6 », « matrice 2 × 2 », produit vectoriel) : usage courant en Suisse aussi ; décision de l'enseignant à prendre (le contrôle de la page ne vise que « nombre × nombre = »).
+- La pyramide du Louvre (pythfig, profil romand) et le change CHF ↔ EUR sont gardés (références voulues).
+- Contrôle de densite-1 « position d'une panne sur un câble, loi uniforme sur [3 ; 7] (en m) » : vraisemblable mais peu parlant.
