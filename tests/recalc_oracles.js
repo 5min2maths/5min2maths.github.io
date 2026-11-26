@@ -1514,6 +1514,29 @@ const RECALC = (() => {
   DF("sysineq", /à la fois (\d+)x - (\d+) (>|≥) (-?\d+) et (\d+) - x ≥ (-?\d+)/, (g, lab) => { const a = nn(g[0]), b = nn(g[1]), st = g[2] === ">", c = nn(g[3]), d = nn(g[4]), e = nn(g[5]), L = (c + b) / a, Rr = d - e;
     let n = 0; for (let x = Math.ceil(L - 1); x <= Rr; x++) if ((st ? x > L : x >= L) && x <= Rr) n++;
     return lab.startsWith("a)") ? L : lab.startsWith("b)") ? Rr : lab.startsWith("c)") ? n : null; });
+  /* eqfrac (10e–11e, ch1c_eq) : travail à deux */
+  DF("eqfrac", /en (\d+) (?:h|min) ; .*?en (\d+) (?:h|min)\./, (g, lab) => { const [a, b] = g.map(nn); return lab.startsWith("a)") ? 1 / a : lab.startsWith("b)") ? 1 / a + 1 / b : lab.startsWith("c)") ? (a * b) / (a + b) : null; });
+  /* bicarre (1re Collège, ch1c_eq) : X = x² recalculé par le discriminant */
+  const bic = (b, c) => { const D = b * b - 4 * c; if (D < 0) return null; return [(-b - Math.sqrt(D)) / 2, (-b + Math.sqrt(D)) / 2]; };
+  DF("bicarre", /x\^4(?: ([+-]) (\d*)x\^2)? ([+-]) (\d+) = 0 et l'on pose X = x\^2/, (g, lab) => { const b = g[0] ? (g[0] === "-" ? -1 : 1) * (g[1] === "" ? 1 : nn(g[1])) : 0, c = (g[2] === "-" ? -1 : 1) * nn(g[3]), X = bic(b, c); if (!X) return NaN;
+    return lab.startsWith("a)") ? X[0] : lab.startsWith("b)") ? X[1] : lab.startsWith("c)") ? X.reduce((s, v) => s + (v > 1e-12 ? 2 : Math.abs(v) <= 1e-12 ? 1 : 0), 0) : null; });
+  DF("bicarre", /aire de (\d+) cm² et une diagonale de (\d+) cm/, (g, lab) => { const [A, d] = g.map(nn), X = bic(-d * d, A * A); if (!X) return NaN;
+    return lab.startsWith("a)") ? X[0] : lab.startsWith("b)") ? Math.sqrt(X[0]) : lab.startsWith("c)") ? A / Math.sqrt(X[0]) : null; });
+  DF("bicarre", /produit de deux nombres positifs vaut (\d+) et la somme de leurs carrés vaut (\d+)/, (g, lab) => { const [P0, S] = g.map(nn), X = bic(-S, P0 * P0); if (!X) return NaN;
+    return lab.startsWith("a)") ? X[1] : lab.startsWith("b)") ? Math.sqrt(X[1]) : lab.startsWith("c)") ? Math.sqrt(X[0]) : null; });
+  /* lectgraph (1re Collège–MP, defis.js) : parabole relue sur la figure (moindres carrés, figRead plus bas : fonction hissée) */
+  T("lectgraph", /Le graphique montre une parabole \(fonction f\) et une droite/, (txt, x) => { if (!/ ¶ /.test(txt) || !x || !x.fig) return null; const lab = txt.split(" ¶ ").slice(1).join(" ¶ "), F = figRead(x.fig); if (!F) return null; const q = quadFit(F.curve); if (!q) return null;
+    const [a, b, c] = q, h = -b / (2 * a), k = c - (b * b) / (4 * a), A = Math.round(a * 2) / 2, H = Math.round(h), K = Math.round(k), at = lm(lab, /f\((-?\d+)\)/);
+    if (Math.abs(A - a) > 0.05 || Math.abs(H - h) > 0.08 || Math.abs(K - k) > 0.08) return NaN;
+    return lab.startsWith("a)") ? A : lab.startsWith("b)") && at ? A * (at[0] - H) ** 2 + K : null; }, { text: true });
+  /* trigexact (1re Collège–MP, defis.js) */
+  DF("trigexact", /triangle équilatéral de (\d+) cm de côté/, (g, lab) => { const a = nn(g[0]), s3 = Math.sqrt(3); return lab.startsWith("a)") ? (a * s3) / 2 : lab.startsWith("b)") ? (a * a * s3) / 4 : lab.startsWith("c)") ? (a * s3) / 6 : null; });
+  DF("trigexact", /hexagone régulier de (\d+) cm de côté/, (g, lab) => { const a = nn(g[0]), s3 = Math.sqrt(3); return lab.startsWith("a)") ? (a * s3) / 2 : lab.startsWith("b)") ? (3 * a * a * s3) / 2 : lab.startsWith("c)") ? 2 * a : null; });
+  DF("trigexact", /chevron de toit de (\d+) m est incliné à (\d+)°/, (g, lab) => { const [L, t] = g.map(nn), h = L * Math.sin((t * Math.PI) / 180), w = L * Math.cos((t * Math.PI) / 180);
+    return lab.startsWith("a)") ? h : lab.startsWith("b)") ? w : lab.startsWith("c)") ? (h * w) / 2 : null; });
+  /* droitesrem (1re Collège–MP, defis.js) */
+  DF("droitesrem", /rectangle en C, (?:avec AC = (\d+) (?:cm|m) et BC = (\d+) (?:cm|m)|d'hypoténuse AB = (\d+) cm et de côté AC = (\d+) cm)/, (g, lab) => { let a, b, c; if (g[0]) { a = nn(g[0]); b = nn(g[1]); c = Math.hypot(a, b); } else { c = nn(g[2]); a = nn(g[3]); b = Math.sqrt(c * c - a * a); }
+    return lab.startsWith("a)") ? c / 2 : lab.startsWith("b)") ? c / 3 : lab.startsWith("c)") ? (a * b) / c : null; });
   /* ==== fin agent defis3 ==== */
 
   /* ---------- 26.11 (agent defis2) : notions encore sous 20 % (transf, trigcercle, trigfn, recip, lectures de graphique
@@ -1713,7 +1736,7 @@ const RECALC = (() => {
       if (r.o.not && r.o.not.test(x.raw)) continue; /* 26.11 : \overline disparaît du texte lisible */
       if (!r.f) continue;
       const m = r.re.exec(txt); if (!m) continue;
-      const res = r.o.text ? r.f(txt) : r.o.raw ? r.f(...m.slice(1)) : r.f(...m.slice(1).map(num));
+      const res = r.o.text ? r.f(txt, x) /* 26.11 soir (agent defis3) : l'item aussi, pour les défis lus sur une figure */ : r.o.raw ? r.f(...m.slice(1)) : r.f(...m.slice(1).map(num));
       if (res === null || res === undefined) continue;
       return [r.re.source.slice(0, 60), typeof res === "number" ? (r.o.exact ? { v: res, st: null } : { v: res }) : res];
     }

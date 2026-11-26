@@ -49,7 +49,7 @@
   /* exercices riches et défis (niveau 4) : parties reconnues */
   for (const x of PART === 2 ? [] : VRAI.items({ n: Math.min(N, 20), src: ["riche", "defi"], ids: P.get("ids") ? ids : null }).items) {
     nr++;
-    const it = { id: x.id, d: x.d, code: x.code, raw: x.raw, txt: x.txt, sol: x.sol, rawSol: "", spec: x.spec && x.spec.kind === "multi" ? null : x.spec, parts: x.parts };
+    const it = { id: x.id, d: x.d, code: x.code, raw: x.raw, fig: x.fig, txt: x.txt, sol: x.sol, rawSol: "", spec: x.spec && x.spec.kind === "multi" ? null : x.spec, parts: x.parts };
     for (const sp of [x.spec, ...x.parts.map((p) => p.spec)]) { const t = RECALC.truncSpec(sp); if (t) fails.push(x.code + " [valeur tronquée] " + t); }
     let r; try { r = RECALC.check(it); } catch (e) { exc.push(x.code + " (oracle) : " + e.message); continue; }
     if (r.length) { nrk++; if (DET) rk.push(x.code); }

@@ -252,14 +252,31 @@ const DEFIS = (() => {
           "a) " + M("0{,}" + String(h).padStart(2, "0") + " \\div 0{,}" + String(pc).padStart(2, "0") + " = " + D(Lh)) + " m. b) " + M("\\sqrt{" + D(Lh) + "^2 + " + D(h / 100) + "^2} \\approx " + D(r2c(Lr))) + " m. c) " + M("\\tan \\alpha = " + D(pc / 100)) + ", " + M("\\alpha \\approx " + D(r1(ang)) + "°") + ".");
       },
     ],
+    /* 26.11 soir (agent defis3) : + hexagone et chevron de toit (30°, 45°, 60°), 3 contextes. */
     trigexact: [
       () => { /* triangle équilatéral : hauteur, aire, cercle inscrit en valeurs exactes */
         const a = pk([6, 12, 18, 24, 30]), hq = a / 2, Aq = a * a / 4, rq = a / 6, s3 = Math.sqrt(3);
         const ex = (k) => (k === 1 ? "" : k) + "√3";
-        return P("Un panneau a la forme d'un triangle équilatéral de " + M(a) + " cm de côté. On y peint le plus grand disque possible (cercle inscrit, dont le centre est au tiers de la hauteur depuis la base).",
+        return Object.assign(P("Un panneau a la forme d'un triangle équilatéral de " + M(a) + " cm de côté. On y peint le plus grand disque possible (cercle inscrit, dont le centre est au tiers de la hauteur depuis la base).",
           [["a) Hauteur du triangle (cm, valeur exacte, ex. " + ex(hq) + ")", hq * s3], ["b) Aire du triangle (cm², valeur exacte)", Aq * s3], ["c) Rayon du disque (cm, valeur exacte)", rq * s3]],
           ["La hauteur coupe le côté en deux : triangle rectangle d'angle 60°, sin 60° = √3/2 (ou Pythagore).", "Hauteur = " + a + " · √3/2. Aire = base · hauteur ÷ 2. Rayon = hauteur ÷ 3."],
-          "a) " + M("h = " + a + " \\cdot \\frac{\\sqrt{3}}{2} = " + (hq === 1 ? "" : hq) + "\\sqrt{3}") + " cm. b) " + M("\\frac{" + a + " \\cdot " + hq + "\\sqrt{3}}{2} = " + Aq + "\\sqrt{3}") + " cm². c) " + M("r = \\frac{h}{3} = " + (rq === 1 ? "" : rq) + "\\sqrt{3}") + " cm.");
+          "a) " + M("h = " + a + " \\cdot \\frac{\\sqrt{3}}{2} = " + (hq === 1 ? "" : hq) + "\\sqrt{3}") + " cm. b) " + M("\\frac{" + a + " \\cdot " + hq + "\\sqrt{3}}{2} = " + Aq + "\\sqrt{3}") + " cm². c) " + M("r = \\frac{h}{3} = " + (rq === 1 ? "" : rq) + "\\sqrt{3}") + " cm."), { ctx: "panneau" });
+      },
+      () => { /* hexagone régulier : six triangles équilatéraux */
+        const a = pk([30, 40, 50, 60, 80]), s3 = Math.sqrt(3), ap = a / 2, A = (3 * a * a) / 2;
+        return Object.assign(P("Une table a la forme d'un hexagone régulier de " + M(a) + " cm de côté : elle est formée de six triangles équilatéraux qui se rejoignent au centre.",
+          [["a) Distance du centre au milieu d'un côté (apothème, cm, valeur exacte, ex. " + ap + "√3)", ap * s3], ["b) Aire de la table (cm², valeur exacte)", A * s3], ["c) Distance entre deux sommets opposés (cm)", 2 * a]],
+          ["L'apothème est la hauteur d'un des triangles équilatéraux : côté · sin 60° = côté · √3/2.", "Aire = 6 · (côté · apothème ÷ 2). Deux sommets opposés : deux côtés bout à bout en passant par le centre."],
+          "a) " + M(a + " \\cdot \\frac{\\sqrt{3}}{2} = " + ap + "\\sqrt{3}") + " cm. b) " + M("6 \\cdot \\frac{" + a + " \\cdot " + ap + "\\sqrt{3}}{2} = " + D(A) + "\\sqrt{3}") + " cm². c) " + M("2 \\cdot " + a + " = " + 2 * a) + " cm."), { ctx: "hexagone" });
+      },
+      () => { /* chevron de toit incliné à 30°, 45° ou 60° : hauteur et largeur en valeurs exactes */
+        const t = pk([30, 45, 60]), L = pk([4, 6, 8, 10]), r = (t * Math.PI) / 180, h = L * Math.sin(r), w = L * Math.cos(r), A = (h * w) / 2;
+        const ex = { 30: [L / 2 + "", L / 2 + "\\sqrt{3}", "\\frac{1}{2}", "\\frac{\\sqrt{3}}{2}"], 45: [L / 2 + "\\sqrt{2}", L / 2 + "\\sqrt{2}", "\\frac{\\sqrt{2}}{2}", "\\frac{\\sqrt{2}}{2}"], 60: [L / 2 + "\\sqrt{3}", L / 2 + "", "\\frac{\\sqrt{3}}{2}", "\\frac{1}{2}"] }[t];
+        const At = t === 45 ? D((L * L) / 4) : Number.isInteger((L * L) / 8) ? (L * L) / 8 + "\\sqrt{3}" : "\\frac{" + (L * L) / 4 + "\\sqrt{3}}{2}";
+        return Object.assign(P("Un chevron de toit de " + M(L) + " m est incliné à " + M(t + "°") + " par rapport à l'horizontale. Avec le plancher du grenier et un mur vertical, il forme un triangle rectangle.",
+          [["a) Hauteur du mur (m, valeur exacte)", h], ["b) Largeur au sol, de l'angle de " + t + "° au mur (m, valeur exacte)", w], ["c) Aire du triangle (m², valeur exacte)", A]],
+          ["Le chevron est l'hypoténuse : hauteur = " + L + " · sin " + t + "°, largeur = " + L + " · cos " + t + "°.", "sin " + t + "° et cos " + t + "° ont des valeurs exactes (√2/2, √3/2, 1/2). Aire = hauteur · largeur ÷ 2."],
+          "a) " + M(L + " \\cdot " + ex[2] + " = " + ex[0]) + " m. b) " + M(L + " \\cdot " + ex[3] + " = " + ex[1]) + " m. c) " + M("\\frac{" + ex[0] + " \\cdot " + ex[1] + "}{2} = " + At + (t === 45 ? "" : " \\approx " + D(r2c(A)))) + " m²."), { ctx: "toit" });
       },
     ],
     trigrel: [
@@ -501,20 +518,22 @@ const DEFIS = (() => {
           "a) " + M(poly([1, p, q - v]) + " = 0 \\iff (" + xm(h - e) + ")(" + xm(h + e) + ") = 0") + " : " + M(h - e) + " et " + M(h + e) + ". b) " + M("f(" + x0 + ") = " + fx0) + ", " + M("f(" + fx0 + ") = " + f(fx0)) + ". c) " + M("f(x) = (" + xm(h) + ")^2" + sg(k)) + " : le minimum " + M(k) + " n'est atteint qu'en " + M("x = " + h) + ". d) Entiers strictement entre " + M(h - e) + " et " + M(h + e) + " : " + M(2 * e - 1) + ".");
       },
     ],
+    /* 26.11 soir (agent defis3) : abscisse calculée hors du dessin et sens de l'inégalité tirés au hasard (avant : f(10) et f < g toujours). */
     lectgraph: [
-      () => { /* lire le sommet et un point → expression, calculer hors du dessin, résoudre f = g et f < g */
+      () => { /* lire le sommet et un point → expression, calculer hors du dessin, résoudre f = g et f < g (ou >, ≤, ≥) */
         let a, h, k, p, q, f, m, n0;
         do { a = pk([1, -1, 0.5, -0.5]); h = ri(-3, 3); k = ri(-4, 4); p = ri(-5, 3); q = ri(p + 2, 5);
           f = (x) => a * (x - h) ** 2 + k; m = (f(q) - f(p)) / (q - p); n0 = f(p) - m * p;
         } while (Math.abs(f(p)) > 5 || Math.abs(f(q)) > 5 || !Number.isInteger(f(p)) || !Number.isInteger(f(q)) || Math.abs(m) > 4 || (p === h && q === h) || a * k > 0 && Math.abs(k) > 3);
-        const xp = q !== h ? q : p, g = (x) => m * x + n0, f10 = f(10), ivs = a > 0 ? [[p, false, q, false]] : [[-Infinity, false, p, false], [q, false, Infinity, false]];
+        const [op, cx] = pk([["<", "inf"], [">", "sup"], ["\\le", "infeg"], ["\\ge", "supeg"]]), below = op === "<" || op === "\\le", cl = op.length > 1, x1 = pk([-9, -8, -7, 7, 8, 9, 10]);
+        const xp = q !== h ? q : p, g = (x) => m * x + n0, f10 = f(x1), ivs = (a > 0) === below ? [[p, cl, q, cl]] : [[-Infinity, false, p, cl], [q, cl, Infinity, false]];
         const fig = FIG.plot([{ f }, { f: g }], [], { numbers: true, xr: [-6, 6], yr: [-6, 6] });
-        return P("Le graphique montre une parabole (fonction " + M("f") + ") et une droite (fonction " + M("g") + "). Le sommet et les points d'intersection sont sur le quadrillage.",
-          [["a) " + M("f(x) = a(x - h)^2 + k") + " : que vaut " + M("a") + " ?", a], ["b) " + M("f(10)") + " (hors du dessin)", f10],
-           ["c) Solutions de " + M("f(x) = g(x)") + " (séparées par « ; »)", SET([p, q])], ["d) Solutions de " + M("f(x) < g(x)") + " (intervalle)", SOLS(ivs)]],
+        return Object.assign(P("Le graphique montre une parabole (fonction " + M("f") + ") et une droite (fonction " + M("g") + "). Le sommet et les points d'intersection sont sur le quadrillage.",
+          [["a) " + M("f(x) = a(x - h)^2 + k") + " : que vaut " + M("a") + " ?", a], ["b) " + M("f(" + x1 + ")") + " (hors du dessin)", f10],
+           ["c) Solutions de " + M("f(x) = g(x)") + " (séparées par « ; »)", SET([p, q])], ["d) Solutions de " + M("f(x) " + op + " g(x)") + " (intervalle" + (a > 0 === below ? "" : "s") + ")", SOLS(ivs)]],
           ["Lis le sommet S(h ; k), puis un autre point de la parabole sur le quadrillage (par exemple un point d'intersection) : remplace ses coordonnées dans f(x) = a(x − h)² + k pour trouver a.",
-           "b) Avec l'expression trouvée, calcule f(10). c) Lis les abscisses des points d'intersection. d) f(x) < g(x) là où la parabole est SOUS la droite (bornes exclues)."],
-          "Sommet " + M("S(" + h + " \\,;\\, " + k + ")") + ", point " + M("(" + xp + " \\,;\\, " + f(xp) + ")") + " : " + M(f(xp) + " = a \\cdot " + (xp - h) ** 2 + sg(k)) + ", a) " + M("a = " + D(a)) + ". b) " + M("f(10) = " + D(a) + " \\cdot " + (10 - h) ** 2 + sg(k) + " = " + D(f10)) + ". c) " + M(p) + " et " + M(q) + ". d) " + M(SolSet.show(ivs, true)) + ".", fig);
+           "b) Avec l'expression trouvée, calcule f(" + x1 + "). c) Lis les abscisses des points d'intersection. d) f(x) " + (below ? "<" : ">") + " g(x) là où la parabole est " + (below ? "SOUS" : "AU-DESSUS DE") + " la droite (bornes " + (cl ? "comprises" : "exclues") + ")."],
+          "Sommet " + M("S(" + h + " \\,;\\, " + k + ")") + ", point " + M("(" + xp + " \\,;\\, " + f(xp) + ")") + " : " + M(f(xp) + " = a \\cdot " + (xp - h) ** 2 + sg(k)) + ", a) " + M("a = " + D(a)) + ". b) " + M("f(" + x1 + ") = " + D(a) + " \\cdot " + (x1 - h) ** 2 + sg(k) + " = " + D(f10)) + ". c) " + M(p) + " et " + M(q) + ". d) " + M(SolSet.show(ivs, true)) + ".", fig), { ctx: cx });
       },
     ],
     interpar: [
@@ -1550,14 +1569,18 @@ const DEFIS = (() => {
       },
     ],
     /* ---------- 1re Collège : droites remarquables du triangle rectangle ---------- */
+    /* 26.11 soir (agent defis3) : 3 contextes (triangle, jardin et arroseur, équerre donnée par son hypoténuse). */
     droitesrem: [
       () => {
-        const [a, b, c] = pk([[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [20, 21, 29], [9, 12, 15], [6, 8, 10]]);
-        return P("Le triangle " + M("ABC") + " est rectangle en " + M("C") + ", avec " + M("AC = " + a + " \\text{ cm}") + " et " + M("BC = " + b + " \\text{ cm}") + ".",
-          [["a) Rayon du cercle circonscrit (cm)", c / 2], ["b) Distance de " + M("C") + " au centre de gravité (cm, fraction ou au centième)", c / 3, 0.01], ["c) Hauteur issue de " + M("C") + " (cm, au centième)", (a * b) / c, 0.01]],
-          ["Le centre du cercle circonscrit d'un triangle rectangle est le milieu de l'hypoténuse (cercle de Thalès). La médiane issue de C vaut donc la moitié de l'hypoténuse.",
+        const [cx, u] = pk([["triangle", "cm"], ["jardin", "m"], ["equerre", "cm"]]), T0 = pk([[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [20, 21, 29], [9, 12, 15], [6, 8, 10]].filter((t) => cx === "equerre" ? t[2] <= 17 : t[2] <= 30)), k = cx === "equerre" ? (T0[2] <= 10 ? 2 : 1) : 1, [a, b, c] = T0.map((v) => v * k);
+        const intro = cx === "jardin" ? "Un jardin a la forme d'un triangle " + M("ABC") + " rectangle en " + M("C") + ", avec " + M("AC = " + a + " \\text{ m}") + " et " + M("BC = " + b + " \\text{ m}") + ". On veut placer un arroseur à égale distance des trois coins."
+          : cx === "equerre" ? "Une équerre de dessin est un triangle " + M("ABC") + " rectangle en " + M("C") + ", d'hypoténuse " + M("AB = " + c + " \\text{ cm}") + " et de côté " + M("AC = " + a + " \\text{ cm}") + "."
+          : "Le triangle " + M("ABC") + " est rectangle en " + M("C") + ", avec " + M("AC = " + a + " \\text{ cm}") + " et " + M("BC = " + b + " \\text{ cm}") + ".";
+        return Object.assign(P(intro,
+          [[cx === "jardin" ? "a) Distance de l'arroseur à chaque coin (m)" : "a) Rayon du cercle circonscrit (" + u + ")", c / 2], ["b) Distance de " + M("C") + " au centre de gravité (" + u + ", fraction ou au centième)", c / 3, 0.01], ["c) Hauteur issue de " + M("C") + " (" + u + ", au centième)", (a * b) / c, 0.01]],
+          [(cx === "jardin" ? "Le point à égale distance des trois coins est le centre du cercle circonscrit. " : "") + "Le centre du cercle circonscrit d'un triangle rectangle est le milieu de l'hypoténuse (cercle de Thalès). La médiane issue de C vaut donc la moitié de l'hypoténuse.",
            "Le centre de gravité est aux 2/3 de chaque médiane depuis le sommet. Hauteur : l'aire vaut AC · BC ÷ 2 = AB · h ÷ 2."],
-          "Hypoténuse " + M("AB = \\sqrt{" + a * a + " + " + b * b + "} = " + c) + " cm. a) " + M(D(c / 2)) + " cm. b) Médiane issue de " + M("C") + " : " + M(D(c / 2)) + " cm ; " + M("\\frac{2}{3} \\cdot " + D(c / 2) + " = " + fx(c / 3)) + " cm. c) " + M("h = \\frac{" + a + " \\cdot " + b + "}{" + c + "} " + (Number.isInteger((a * b * 100) / c) ? "= " : "\\approx ") + D(r2c((a * b) / c))) + " cm.");
+          (cx === "equerre" ? "Côté " + M("BC = \\sqrt{" + c * c + " - " + a * a + "} = " + b) + " cm. " : "Hypoténuse " + M("AB = \\sqrt{" + a * a + " + " + b * b + "} = " + c) + " " + u + ". ") + "a) " + M(D(c / 2)) + " " + u + ". b) Médiane issue de " + M("C") + " : " + M(D(c / 2)) + " " + u + " ; " + M("\\frac{2}{3} \\cdot " + D(c / 2) + " = " + fx(c / 3)) + " " + u + ". c) " + M("h = \\frac{" + a + " \\cdot " + b + "}{" + c + "} " + (Number.isInteger((a * b * 100) / c) ? "= " : "\\approx ") + D(r2c((a * b) / c))) + " " + u + "."), { ctx: cx });
       },
     ],
     /* ---------- MP 2e : droites sécantes (deux factures) ---------- */
