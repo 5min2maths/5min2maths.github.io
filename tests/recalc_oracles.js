@@ -1861,6 +1861,30 @@ const RECALC = (() => {
   DF("simil", rs("photo de # cm sur # cm est agrandie : sa largeur passe à # cm\\. .*?l'original coûte # CHF"), (g, lab) => { const [w, l, W, p] = g.map(nn), k = W / w; return pick(lab, { a: k, b: k * l, c: p * k * k }); });
   DF("simil", rs("échelle 1 : #\\. Sur la maquette : hauteur # cm, aire au sol # cm², volume # cm³"), (g, lab) => { const [n, h, A, V] = g.map(nn); return pick(lab, { a: (h * n) / 100, b: (A * n * n) / 1e4, c: (V * n ** 3) / 1e6 }); });
   DF("simil", rs("petite pizza a un diamètre de # cm et coûte # CHF ; la grande a un diamètre de # cm"), (g, lab) => { const [d1, p, d2] = g.map(nn), k = d2 / d1, m = lm(lab, /garnie de (\d+) g/); return pick(lab, { a: k, b: p * k * k, c: m ? m[0] * k * k : null }); });
+  /* --- eq1, probeq, probeq2 (ch1c_eq), litelab, parenth (ch11_litt), fctlec (perco) --- */
+  const EQL = (A0, a, B0, b, lab, k) => { const t = (B0 - A0) / (a - b); return pick(lab, { a: A0 + k * a, b: t, c: A0 + a * t }); };
+  DF("eq1", rs("La bougie A mesure # cm et raccourcit de # cm par heure ; la bougie B mesure # cm et raccourcit de # cm par heure"), (g, lab) => { const [h1, a, h2, b] = g.map(nn); return EQL(h1, -a, h2, -b, lab, 2); });
+  DF("eq1", rs("La citerne A contient # L et perd # L par minute ; la citerne B contient # L et perd # L par minute"), (g, lab) => { const [h1, a, h2, b] = g.map(nn); return EQL(h1, -a, h2, -b, lab, 3); });
+  DF("eq1", rs("a # CHF dans sa tirelire et y ajoute # CHF chaque semaine\\. \\S+ a # CHF et y ajoute # CHF chaque semaine"), (g, lab) => { const [A0, a, B0, b] = g.map(nn); return EQL(A0, a, B0, b, lab, 4); });
+  const BRK = (F1, p1, F2, p2, lab, n) => { const x = (F2 - F1) / (p1 - p2); return pick(lab, { a: F1 + n * p1, b: x, c: F1 + p1 * x }); };
+  DF("probeq", rs("musée propose l'entrée à # CHF, ou un abonnement de # CHF qui fait payer l'entrée # CHF"), (g, lab) => { const [a, A, b] = g.map(nn); return BRK(0, a, A, b, lab, 10); });
+  DF("probeq", rs("l'agence A demande # CHF plus # CHF par km ; l'agence B demande # CHF plus # CHF par km"), (g, lab) => { const [F1, p1, F2, p2] = g.map(nn); return BRK(F1, p1, F2, p2, lab, 100); });
+  DF("probeq", rs("l'imprimerie A facture # CHF de frais fixes plus # CHF par affiche ; l'imprimerie B facture # CHF de frais fixes plus # CHF par affiche"), (g, lab) => { const [F1, p1, F2, p2] = g.map(nn); return BRK(F1, p1, F2, p2, lab, 50); });
+  const posR = (a, b, c) => (-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a);
+  DF("probeq2", rs("photo de # cm sur # cm est entourée d'un cadre de largeur x\\. L'ensemble mesure # cm²"), (g, lab) => { const [w, h, A] = g.map(nn); return pick(lab, { a: w * h, b: posR(4, 2 * (w + h), w * h - A), c: A - w * h }); });
+  DF("probeq2", rs("deux nombres entiers positifs consécutifs vaut #\\."), (g, lab) => { const n = posR(1, 1, -nn(g[0])); return pick(lab, { a: n, b: n + 1, c: n * n + (n + 1) ** 2 }); });
+  DF("probeq2", rs("carré de # cm de côté en allongeant chaque côté de x cm\\. Son aire augmente alors de # cm²"), (g, lab) => { const [c, D] = g.map(nn), x = posR(1, 2 * c, -D); return pick(lab, { a: c * c, b: x, c: 4 * (c + x) }); });
+  DF("litelab", /rectangle a une largeur x cm et une longueur x \+ (\d+) cm/, (g, lab) => { const k = nn(g[0]), x = lm(lab, /pour x = (\d+)/), P = lm(lab, /périmètre de (\d+) cm/);
+    return pick(lab, { a: x ? 4 * x[0] + 2 * k : null, b: x ? x[0] * (x[0] + k) : null, c: P ? (P[0] - 2 * k) / 4 : null }); });
+  DF("litelab", /triangle isocèle a une base de x cm, et ses deux autres côtés mesurent chacun x \+ (\d+) cm/, (g, lab) => { const k = nn(g[0]), x = lm(lab, /pour x = (\d+)/), P = lm(lab, /périmètre (?:de|vaut) (\d+) cm/);
+    return pick(lab, { a: x ? 3 * x[0] + 2 * k : null, b: P ? (P[0] - 2 * k) / 3 : null, c: P ? (P[0] - 2 * k) / 3 + k : null }); });
+  DF("litelab", /a x ans\. \S+ \S+ a (\d+) ans de plus qu(?:e \S+|'elle), et leur mère a le triple/, (g, lab) => { const k = nn(g[0]), x = lm(lab, /pour x = (\d+)/), S2 = lm(lab, /vaut (\d+) ans/); return pick(lab, { a: x ? 5 * x[0] + k : null, b: S2 ? (S2[0] - k) / 5 : null, c: S2 ? (3 * (S2[0] - k)) / 5 : null }); });
+  DF("parenth", /E = (\d+)x - \(2x - (\d+)\) - \(x \+ (\d+)\)/, (g, lab) => { const [a, b, c] = g.map(nn), k = a - 3, s = b - c, x = lm(lab, /x = (\d+)/); return pick(lab, { a: k, b: s, c: x ? k * x[0] + s : null }); });
+  DF("parenth", /E = (\d+)\(x \+ (\d+)\) - 2\(x - (\d+)\)/, (g, lab) => { const [a, b, c] = g.map(nn), k = a - 2, s = a * b + 2 * c, x = lm(lab, /x = (\d+)/); return pick(lab, { a: k, b: s, c: x ? k * x[0] + s : null }); });
+  const LIN = (b0, p, lab, re) => { const m = lm(lab, re), ds = lab.match(/de (\d+) \S+ à (\d+) /); if (L0(lab, "c") && ds) return p * (nn(ds[2]) - nn(ds[1])); return m ? b0 + p * m[0] : null; };
+  DF("fctlec", rs("taxi facture # CHF de prise en charge, puis # CHF par kilomètre"), (g, lab) => { const [b0, p] = g.map(nn); return LIN(b0, p, lab, /course de (\d+) km/); });
+  DF("fctlec", rs("location d'un kayak coûte # CHF de base, plus # CHF par heure"), (g, lab) => { const [b0, p] = g.map(nn); return LIN(b0, p, lab, /Prix pour (\d+) h/); });
+  DF("fctlec", rs("abonnement de # CHF, plus # CHF par kWh"), (g, lab) => { const [b0, p] = g.map(nn); return LIN(b0, p, lab, /Facture pour (\d+) kWh/); });
   /* ==== fin agent defisch ==== */
 
   /* ---------- 26.11 (agent defis2) : notions encore sous 20 % (transf, trigcercle, trigfn, recip, lectures de graphique
