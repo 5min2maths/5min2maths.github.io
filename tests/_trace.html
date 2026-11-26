@@ -124,6 +124,9 @@ window.confirm = () => true; window.print = () => {};
     if (spec && spec.kind === "value") return { a: valAns({ value: spec.value === 0 ? 3 : Math.round(spec.value * 10 + 10) / 10 }), typ: "erreur quelconque" };
     if (spec && spec.kind === "expr") return { a: "2*x+1", typ: "erreur quelconque" };
     if (spec && spec.kind === "pair") return { a: spec.values.map((v) => valAns({ value: -v || 1 })).join(" ; "), typ: "erreur quelconque (signes)" };
+    /* 26.11 (revue p6) : « 7 » n'est pas lisible comme ensemble de solutions ; la trace restait bloquée au positionnement (2nde FR). */
+    if (spec && spec.kind === "solset") return { a: "]-inf ; 0[", typ: "erreur quelconque (intervalle)" };
+    if (spec && spec.kind === "ineq") return { a: "x > 0", typ: "erreur quelconque (inéquation)" };
     return { a: "7", typ: "erreur quelconque" };
   }
   const specTxt = (s) => { if (!s) return "?"; const c = { ...s }; delete c.traps; return JSON.stringify(c).slice(0, 160); };
@@ -301,6 +304,9 @@ window.confirm = () => true; window.print = () => {};
   async function doProbleme() {
     await click(app.querySelector('[data-door="prob"]'), "case Problème");
     shot("PROBLÈME DE LA SEMAINE (porte)", { max: 800 });
+    /* 26.11 (revue p6) : d'où vient le problème ? notion choisie, classe de la notion, notions de l'année éligibles (statut). */
+    try { const wp = state.weeklyPick || {}, yr = new Set(Engine.catalog(state.profile).filter((c) => c.current).map((c) => c.id)), el = Engine.eligible(state);
+      log("    ⓘ problème : " + wp.id + "@" + ((placeOf(NOTIONS.find((n) => n.id === wp.id), state.profile) || [])[0]) + (yr.has(wp.id) ? " (année)" : " (HORS année)") + " · éligibles de l'année : " + el.filter((id) => yr.has(id)).map((id) => id + "=" + state.notions[id].status).join(", ")); } catch (e) { log("    ⓘ problème : " + e.message); }
     if ($("wp")) { await click($("wp")); await play("Problème de la semaine", 6); }
     await home();
   }
