@@ -24,7 +24,7 @@
     /* 26.11 soir (agent defisch) : 3 contextes (énigme, décomposition avec retenue, chronomètre) */
     const cx = pk(["enigme", "decomp", "chrono"]);
     if (cx === "decomp") {
-      let d, u, t, m; do { d = ri(2, 9); u = ri(2, 9); t = ri(2, 9); m = ri(11, 98); } while (m % 10 === 0 || u === d || Math.floor(m / 10) === t);
+      let d, u, t, m; do { d = ri(2, 9); u = ri(2, 9); t = ri(2, 9); m = ri(11, 98); } while (m % 10 === 0 || m < 20 || u === d || Math.floor(m / 10) === t);
       const n = r6(10 * d + u + t / 10 + m / 1000), ce = Math.floor(m / 10), r = Math.round(10 * d * 100 + u * 100 + t * 10 + m / 10) / 100;
       return CX(cx, PB("Un nombre est formé de " + X(d) + " dizaines, " + X(u) + " unités, " + X(t) + " dixièmes et " + X(m) + " millièmes.",
         [["a) Écris ce nombre.", n], ["b) Quel est son chiffre des centièmes ?", ce], ["c) Arrondis-le au centième.", r]],
@@ -33,7 +33,7 @@
     }
     if (cx === "chrono") {
       const [sp, lo, hi] = pk([["Au slalom", 48, 75], ["Au 100 m nage libre", 56, 85], ["Au 400 m", 55, 72]]), nm = who();
-      let T; do { T = ri(lo, hi) * 1000 + ri(101, 999); } while (T % 10 === 0 || Math.floor(T / 10) % 10 === 0);
+      let T; do { T = ri(lo, hi) * 1000 + ri(101, 999); } while (T % 10 < 2 || Math.floor(T / 10) % 10 < 2);
       const t = T / 1000, ce = Math.floor(T / 10) % 10, dx = Math.floor(T / 100), r = Math.round(T / 10) / 100;
       return CX(cx, PB(sp + ", le chronomètre électronique affiche pour " + nm + " : " + X(t) + " s.",
         [["a) Chiffre des centièmes de ce temps", ce], ["b) Combien de dixièmes de seconde entiers ce temps contient-il ?", dx], ["c) Temps arrondi au centième de seconde, en s", r]],

@@ -39,10 +39,10 @@
     const cx = pk(["notes", "basket", "temperatures"]);
     if (cx !== "notes") {
       const B = cx === "basket" ? { v: [6, 24], lo: 4, hi: 32, t: [12, 14, 15, 16, 18] } : { v: [-4, 9], lo: -6, hi: 12, t: [1, 2, 3, 4, 5] };
-      let n, xs, k, tgt; do { n = pk([5, 6]); xs = Array.from({ length: n - 1 }, () => ri(B.v[0], B.v[1])); tgt = pk(B.t); k = tgt * n - xs.reduce((s, x) => s + x, 0); } while (k < B.lo || k > B.hi || Number.isInteger(xs.reduce((s, x) => s + x, 0) / (n - 1)) || new Set(xs).size < n - 2);
+      let n, xs, k, tgt; do { n = pk([5, 6]); xs = Array.from({ length: n - 1 }, () => ri(B.v[0], B.v[1])); tgt = pk(B.t); k = tgt * n - xs.reduce((s, x) => s + x, 0); } while (k < B.lo || k > B.hi || k === 0 || k === 1 || Number.isInteger(xs.reduce((s, x) => s + x, 0) / (n - 1)) || new Set(xs).size < n - 2);
       const S = xs.reduce((s, x) => s + x, 0), m0 = S / (n - 1), mr = Math.round(+(m0 * 100).toPrecision(12)) / 100;
       const q = cx === "basket" ? "Lors de ses " + (n - 1) + " premiers matchs de basket, Yanis a marqué " + xs.map(X).join(" ; ") + " points. Il reste un match dans la saison."
-        : "À Sion, on a relevé la température à midi pendant " + (n - 1) + " jours de janvier : " + xs.map((x) => X(x) + " °C").join(" ; ") + ". On attend le relevé du jour suivant.";
+        : "En montagne, on a relevé la température à midi pendant " + (n - 1) + " jours de janvier : " + xs.map((x) => X(x) + " °C").join(" ; ") + ". On attend le relevé du jour suivant.";
       const [la, lb, lc, u] = cx === "basket" ? ["a) Moyenne actuelle de points par match (au centième)", "b) Total de ses points", "c) Combien de points doit-il marquer au dernier match pour finir avec exactement " + tgt + " points de moyenne ?", " points"]
         : ["a) Température moyenne actuelle, en °C (au centième)", "b) Somme des températures relevées", "c) Quelle température faudrait-il le jour suivant pour que la moyenne des " + n + " jours soit exactement " + tgt + " °C ?", " °C"];
       return CX(cx, PB(q, [[la, m0, 0.01], [lb, S], [lc, k]],
@@ -127,7 +127,7 @@
       L = r6(l * n); bott = Math.ceil(r6(L / pl) - 1e-9); cost = r6(bott * pu); bil = [20, 50, 100].find((b) => b > cost);
       q = "Pour un pique-nique de " + n + " personnes, on prévoit " + X(l) + " L de jus par personne. Le jus est vendu en bouteilles de " + X(pl) + " L à " + X(pu) + " CHF la bouteille. On paie avec un billet de " + bil + " CHF.";
       la = "a) Quantité de jus nécessaire, en L"; lb = "b) Nombre de bouteilles à acheter"; a1 = M(n + " \\cdot " + N(l) + " = " + N(L)) + " L"; }
-    if (!Number.isInteger(r6(L / pl))) break;
+    if (!Number.isInteger(r6(L / pl)) && bott >= 2) break;
     }
     return CX(cx, PB(q, [[la, L], [lb, bott], ["c) Monnaie rendue, en CHF", r6(bil - cost), 0.01]],
       ["b) On ne peut acheter qu'un nombre entier de " + (cx === "piquenique" ? "bouteilles" : cx === "peinture" ? "pots" : "sacs") + " : arrondis vers le haut.", "c) Prix total, puis soustrais du billet."],
@@ -157,12 +157,12 @@
   PX("relrep", [9, 10], () => {
     /* 26.11 soir (agent defisch) : droite graduée, ascenseur (étages et sous-sols), plongée (altitudes) */
     const cx = pk(["droite", "ascenseur", "plongee"]);
-    if (cx === "ascenseur") { let a, b, c; do { a = -ri(1, 4); b = ri(3, 12); c = -ri(1, 4); } while (a === c || (a + b) % 2 !== 0);
+    if (cx === "ascenseur") { let a, b, c; do { a = -ri(1, 4); b = ri(3, 12); c = -ri(1, 4); } while (a === c || (a + b) % 2 !== 0 || [0, 1].includes((a + b) / 2));
       return CX(cx, PB("Dans un immeuble, les sous-sols portent des numéros négatifs (−1, −2…) et le rez-de-chaussée le numéro 0. Léa prend l'ascenseur du niveau " + X(a) + " (parking) au niveau " + X(b) + ", puis redescend au niveau " + X(c) + " (cave).",
         [["a) De combien d'étages monte-t-elle d'abord ?", b - a], ["b) Quel niveau est exactement à mi-chemin entre le parking et le niveau " + b + " ?", (a + b) / 2], ["c) De combien d'étages descend-elle ensuite ?", b - c]],
         ["Nombre d'étages entre deux niveaux : le plus haut moins le plus bas.", "b) Milieu : moyenne des deux niveaux."],
         "a) " + M(b + " - (" + a + ") = " + (b - a)) + ". b) " + M("(" + a + " + " + b + ") \\div 2 = " + (a + b) / 2) + ". c) " + M(b + " - (" + c + ") = " + (b - c)) + ".")); }
-    if (cx === "plongee") { let a, b, c; do { a = -ri(6, 30); b = ri(4, 25); c = -ri(2, 18); } while (a === c || c <= a || (a + b) % 2 !== 0);
+    if (cx === "plongee") { let a, b, c; do { a = -ri(6, 30); b = ri(4, 25); c = -ri(2, 18); } while (a === c || c - a < 2 || (a + b) % 2 !== 0 || [0, 1].includes((a + b) / 2));
       return CX(cx, PB("Au bord d'un lac, une plongeuse est à l'altitude " + X(a) + " m par rapport à la surface, une truite nage à " + X(c) + " m et un goéland vole à " + X(b) + " m au-dessus de l'eau.",
         [["a) Distance verticale entre la plongeuse et le goéland, en m", b - a], ["b) Altitude du point situé à mi-hauteur entre la plongeuse et le goéland, en m", (a + b) / 2], ["c) De combien de mètres la plongeuse doit-elle remonter pour être à la hauteur de la truite ?", c - a]],
         ["Distance : la plus grande altitude moins la plus petite.", "b) Milieu : moyenne des deux altitudes."],
@@ -271,7 +271,7 @@
         [["a) Distance entre les deux côtés parallèles (hauteur), en m", h], ["b) Longueur d'un champ rectangulaire de " + w + " m de large et de même aire, en m", A / w], ["c) Le semis coûte " + p + " CHF par are (1 are = 100 m²). Prix du semis, en CHF", (A / 100) * p]],
         ["Aire du trapèze = (grande base + petite base) · hauteur ÷ 2 : isole la hauteur.", "c) Convertis l'aire en ares."],
         "a) " + M("h = 2 \\cdot " + N(A) + " \\div (" + b1 + " + " + b2 + ") = " + h) + " m. b) " + M(N(A) + " \\div " + w + " = " + N(A / w)) + " m. c) " + M(N(A) + " \\text{ m}^2 = " + N(A / 100) + " \\text{ a}") + " ; " + M(N(A / 100) + " \\cdot " + p + " = " + N((A / 100) * p)) + " CHF.")); }
-    if (cx === "canal") { const b1 = pk([1, 1.2, 1.5, 2]), b2 = r6(b1 + pk([0.8, 1, 1.2, 1.6])), h = pk([0.5, 0.6, 0.8, 1]), A = r6(((b1 + b2) * h) / 2), Lc = pk([50, 120, 250]);
+    if (cx === "canal") { const b1 = pk([1, 1.2, 1.5, 2]), b2 = r6(b1 + pk([0.8, 1, 1.2, 1.6])), h = pk([0.5, 0.6, 0.8, 0.9]), A = r6(((b1 + b2) * h) / 2), Lc = pk([50, 120, 250]);
       return CX(cx, PB("La section d'un canal d'irrigation est un trapèze : largeur " + X(b1) + " m au fond, " + X(b2) + " m en haut. L'aire de cette section vaut " + X(A) + " m² quand le canal est plein.",
         [["a) Profondeur du canal, en m", h], ["b) Volume d'eau dans " + Lc + " m de canal plein, en m³", r6(A * Lc)], ["c) Volume d'eau dans " + Lc + " m de canal plein, en litres", r6(A * Lc * 1000)]],
         ["Aire du trapèze = (grande base + petite base) · hauteur ÷ 2 : ici, la hauteur est la profondeur.", "b) Le canal est un prisme : volume = aire de la section · longueur."],
@@ -315,13 +315,13 @@
     /* 26.11 soir (agent defisch) : équation et nombres proposés, rectangle (largeur), nombre pensé */
     const cx = pk(["equation", "rectangle", "pense"]);
     const shuf = (L) => L.map((v) => [R.rand(), v]).sort((x, y) => x[0] - y[0]).map((x) => x[1]);
-    if (cx === "rectangle") { let r, d, c; do { r = ri(3, 9); d = ri(2, 7); c = shuf([r, R.rand() < 0.6 ? -(r + d) : -r, r + 1, d, r + d]); } while (new Set(c).size < 5);
+    if (cx === "rectangle") { let r, d, c; do { r = ri(3, 9); d = ri(2, 7); c = shuf([r, -(r + d), r + 1, d, r + d]); } while (new Set(c).size < 5);
       const A = r * (r + d), ok = c.filter((x) => x * (x + d) === A);
       return CX(cx, PB("Un rectangle a une largeur de " + M("x") + " cm et une longueur de " + M("x + " + d) + " cm. Son aire vaut " + X(A) + " cm². On propose pour " + M("x") + " les nombres " + c.map(X).join(" ; ") + ".",
         [["a) Combien de ces nombres sont solutions de l'équation " + M("x(x + " + d + ") = " + A) + " ?", ok.length], ["b) Lequel de ces nombres est la largeur du rectangle, en cm ?", r], ["c) Périmètre du rectangle, en cm", 2 * (2 * r + d)]],
         ["Remplace x par chaque nombre dans x(x + " + d + ") et compare à " + A + ".", "b) Une largeur est positive : parmi les solutions, garde celle qui a un sens."],
         c.map((x) => M("x = " + x) + " : " + M(N(x * (x + d)) + (x * (x + d) === A ? " = " : " \\neq ") + A)).join(" ; ") + ". a) " + ok.length + ". b) " + r + " cm (l'autre solution est négative). c) " + M("2 \\cdot (" + r + " + " + (r + d) + ") = " + 2 * (2 * r + d)) + " cm.")); }
-    if (cx === "pense") { let a, b, c, neg; do { a = ri(4, 9); b = ri(2, a - 1); neg = R.rand() < 0.5; c = shuf([a, b, -a, a - b, neg ? -b : a + b]); } while (new Set(c).size < 5 || a - b < 2);
+    if (cx === "pense") { let a, b, c; do { a = ri(4, 9); b = ri(2, a - 1); c = shuf([a, b, -a, a - b, -b]); } while (new Set(c).size < 5 || a - b < 2);
       const s = a - b, p = a * b, ok = c.filter((x) => x * x - p === s * x), z = pk([s + 1, s + 2, s + 3, s + 4, s + 5].filter((t) => t !== a)), k = z * z - s * z, nm = pk(["Lina", "Mia", "Zoé", "Nora"]);
       return CX(cx, PB(nm + " pense à un nombre entier. Le carré de ce nombre, diminué de " + p + ", est égal à " + s + " fois ce nombre. Elle propose à son frère les nombres " + c.map(X).join(" ; ") + ".",
         [["a) Combien de ces nombres vérifient " + M("x^2 - " + p + " = " + s + "x") + " ?", ok.length], ["b) " + nm + " précise que son nombre est positif. Lequel est-ce ?", a], ["c) Pour quelle valeur de " + M("k") + " le nombre " + z + " vérifie-t-il " + M("x^2 - k = " + s + "x") + " ?", k]],
