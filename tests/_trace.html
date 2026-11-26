@@ -7,7 +7,10 @@
    action choisie, retour obtenu, Mathélo, points de l'année, temps estimé (lecture + réflexion).
    Paramètres (#…, séparés par &) :
      eleve=lea|noah|ines|malik|chloe  scénario tout prêt (profil, niveau, stratégie, jours, extras)
-     profil=CH-9 | CH-11 | CH-12 (1re Coll.) | MP-13 | FR-8      niveau=faible|moyen|fort
+           26.11 soir : yanis (11e, scolaire) | sami (MP 2e) | lucie (3e Coll. MA1, faible) | max (4e Coll. MA2, fort) | jade (4e FR) | theo (2nde FR)
+     profil=CH-9 | CH-11 | CH-12 (1re Coll.) | CH-14 (3e) | CH-15 (4e) | MP-13 | FR-8 | FR-10 (2nde)      niveau=faible|moyen|fort
+     niv=N|R (3e–4e Collège : MA1 normal, MA2 renforcé)   chapitre=auto|<n>|<regex> (choisit « En ce moment en classe » le jour 1 ;
+     les questions du chapitre sont marquées 📚 et comptées dans le résumé)
      strategie=aide,guide,idk,lecon,figure,presse,facile           jours=4   premier=1 (accueil, choix de classe, positionnement, visite)
      extras=carnet,curieux,histoire,eval,probleme   jour0=2026-11-16   graine=7   ecran=1 (garder l'app visible pour une capture)
    Lancement : nice timeout 300 chromium --headless --disable-gpu --no-sandbox --virtual-time-budget=90000 --dump-dom "file://$PWD/tests/_trace.html#eleve=lea" */
@@ -21,6 +24,13 @@ const ELEVES = {
   ines: { nom: "Inès", profil: "CH-12", niveau: "fort", strategie: "facile,figure,lecon", wpm: 230, jours: 4, premier: 1, extras: "probleme,curieux,eval" },
   malik: { nom: "Malik", profil: "MP-13", niveau: "moyen", strategie: "guide", wpm: 200, jours: 4, premier: 1, extras: "eval,carnet,histoire" },
   chloe: { nom: "Chloé", profil: "FR-8", niveau: "moyen", strategie: "aide,figure", wpm: 220, jours: 4, premier: 1, extras: "curieux,carnet,eval" },
+  /* 26.11 soir (agent eleves2) : six profils de plus ; chapitre=auto|<n>|<regex> choisit « En ce moment en classe » le jour 1 */
+  yanis: { nom: "Yanis", profil: "CH-11", niveau: "moyen", strategie: "aide", wpm: 220, jours: 3, premier: 1, chapitre: "auto", extras: "carnet,curieux" },
+  sami: { nom: "Sami", profil: "MP-13", niveau: "moyen", strategie: "aide,lecon", wpm: 220, jours: 3, premier: 1, chapitre: "auto", extras: "probleme,carnet" },
+  lucie: { nom: "Lucie", profil: "CH-14", niv: "N", niveau: "faible", strategie: "aide,guide,idk", wpm: 240, jours: 3, premier: 1, chapitre: "auto", extras: "carnet,histoire" },
+  max: { nom: "Max", profil: "CH-15", niv: "R", niveau: "fort", strategie: "facile,figure", wpm: 260, jours: 3, premier: 1, chapitre: "auto", extras: "probleme,curieux" },
+  jade: { nom: "Jade", profil: "FR-8", niveau: "moyen", strategie: "aide,lecon", wpm: 220, jours: 3, premier: 1, chapitre: "auto", extras: "carnet,curieux" },
+  theo: { nom: "Théo", profil: "FR-10", niveau: "moyen", strategie: "guide", wpm: 230, jours: 3, premier: 1, chapitre: "auto", extras: "probleme,carnet" },
 };
 const CFG = Object.assign({ nom: "élève", profil: "CH-9", niveau: "moyen", strategie: "", wpm: 200, jours: 3, premier: 0, extras: "", jour0: "2026-11-16", graine: 7 }, ELEVES[HP.eleve] || {}, HP);
 CFG.jours = +CFG.jours; CFG.premier = +CFG.premier; CFG.wpm = +CFG.wpm;
@@ -111,13 +121,14 @@ window.confirm = () => true; window.print = () => {};
   const _sl = screenLesson; screenLesson = (id, ...a) => { lessonId = id; return _sl(id, ...a); };
   const thinkS = (q) => (q.parts ? 150 : q.d >= 4 ? 150 : q.d === 3 ? 50 : q.d === 2 ? 30 : 15) * (CFG.niveau === "faible" ? 1.4 : CFG.niveau === "fort" ? 0.7 : 1) * (ST.has("presse") ? 0.7 : 1);
   const qs = []; /* questions rencontrées */
+  const inNow = (q) => !!(state.now && state.now.ids && q && state.now.ids.includes(q.id)); /* 26.11 soir : question du chapitre « en classe » ? */
   /* ---------- une question ---------- */
   async function doQuestion() {
     const { q, o } = cap; cap.done = true;
-    const t = shot("QUESTION " + (q.code || "") + " · d" + q.d + (q.kind ? " · " + q.kind : ""));
+    const t = shot("QUESTION " + (q.code || "") + " · d" + q.d + (q.kind ? " · " + q.kind : "") + (inNow(q) ? " · 📚 chapitre en classe" : ""));
     const ra = q.parts ? q.parts.map((p) => rightAns(p.spec)).join(" | ") : rightAns(q.spec);
     log("    ⓘ attendu : " + ra + "   [spec " + (q.parts ? q.parts.map((p) => specTxt(p.spec)).join(" / ") : specTxt(q.spec)) + "]");
-    qs.push({ code: q.code, id: q.id, d: q.d, q: String(q.q).replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").slice(0, 300), ans: ra });
+    qs.push({ now: inNow(q), code: q.code, id: q.id, d: q.d, q: String(q.q).replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").slice(0, 300), ans: ra });
     add(readS(t.split("\n").slice(0, 12).join(" ")) + thinkS(q));
     if (q.parts) return doProblem(q);
     const inp = $("ans");
@@ -229,6 +240,7 @@ window.confirm = () => true; window.print = () => {};
     shot("ÉTAPE 1", { max: 1400 }); add(20);
     if (sys === "FR" || !app.querySelector("#gradeknown")) { const b = [...app.querySelectorAll("#grade button")].find((x) => +x.dataset.v === grade); await click(b, "classe " + (b && b.innerText)); }
     if (grade >= 12 && sys !== "FR") { const b = app.querySelector('#track button[data-v="' + (sys === "MP" ? "mp" : "college") + '"]'); await click(b, b && b.innerText); }
+    if (CFG.niv && app.querySelector("#niv")) { const b = app.querySelector('#niv button[data-v="' + CFG.niv + '"]'); await click(b, b && b.innerText); }
     await click($("next"), "Continuer");
     /* positionnement */
     for (let k = 0; k < 8 && cap && !cap.done; k++) { await doQuestion(); await wait(); }
@@ -238,7 +250,7 @@ window.confirm = () => true; window.print = () => {};
   }
   function seed() {
     const [sys, g] = CFG.profil.split("-"), grade = +g;
-    state = Engine.newState({ system: sys === "MP" ? "CH" : sys, grade, track: sys === "MP" ? "mp" : "college", minutes: 5 });
+    state = Engine.newState({ system: sys === "MP" ? "CH" : sys, grade, track: sys === "MP" ? "mp" : "college", minutes: 5, ...(CFG.niv ? { niv: CFG.niv } : {}) });
     ypSync(state); Engine.autoInit(state); state.placed = true; state.tourDone = true; state.firstDone = true; save();
     log("████ Profil créé sans positionnement · " + CFG.profil);
   }
@@ -275,6 +287,21 @@ window.confirm = () => true; window.print = () => {};
     shot("PROBLÈME DE LA SEMAINE (porte)", { max: 800 });
     if ($("wp")) { await click($("wp")); await play("Problème de la semaine", 6); }
     await home();
+  }
+  /* 26.11 soir : « En ce moment en classe » (mode scolaire) : liste des chapitres proposés, choix selon CFG.chapitre */
+  async function doChapitre() {
+    await click($("nowpick"), "Choisir mon chapitre");
+    const cards = [...app.querySelectorAll(".now-card-pick")];
+    const t = shot("EN CE MOMENT EN CLASSE (" + cards.length + " chapitres)", { max: 3000 }); add(readS(t) * 0.4 + 10);
+    if (!cards.length) { const bx = [...app.querySelectorAll(".check input")].slice(0, 3); bx.forEach((b) => (b.checked = true)); act("liste de notions : coche les 3 premières"); const sv = byText(/Enregistrer|Valider|OK/); if (sv) await click(sv); await home(); return; }
+    log("    ⓘ chapitres : " + nowChapters().map((ch) => ch.label + " [" + ch.ids.map((id) => id + "@" + (placeOf(NOTIONS.find((n) => n.id === id), state.profile) || [])[0]).join(" ") + "]").join(" ║ "));
+    let k = 0; const c = String(CFG.chapitre);
+    if (/^\d+$/.test(c)) k = Math.min(cards.length - 1, +c);
+    else if (c === "auto") { const chs = nowChapters(); const i = chs.findIndex((ch) => ch.ids.some((id) => (state.notions[id] || {}).status === "encours")); k = i >= 0 ? Math.min(cards.length - 1, i + 1) : Math.floor(cards.length / 2); }
+    else { const i = cards.findIndex((b) => new RegExp(c, "i").test(b.innerText)); k = i >= 0 ? i : 0; }
+    await click(cards[k], "chapitre : " + cards[k].querySelector("b").innerText);
+    log("    ⓘ notions du chapitre : " + (state.now && state.now.ids || []).map((id) => id + "=" + ((state.notions[id] || {}).status || "absente")).join(", "));
+    shot("ACCUEIL après choix du chapitre", { max: 1500 });
   }
   async function doEvalSetup() {
     await click(app.querySelector('[data-door="test"]'), "case Évaluation");
@@ -333,7 +360,7 @@ window.confirm = () => true; window.print = () => {};
     for (let j = 0; j < CFG.jours; j++) {
       if (j > 0) await nextDay(j === 2 && !CFG.consecutif ? 2 : 1);
       shot("ACCUEIL jour " + (j + 1), { max: 1500 });
-      if (j === 0 && !CFG.premier) { /* chapitre en classe */ }
+      if (j === 0 && CFG.chapitre) await doChapitre();
       /* 26.11 : évaluation active → sa tâche EST la séance du jour (un seul bouton à l'accueil), sauf le sujet de préparation (au choix) */
       let evalDay = false;
       if (Engine.prepActive(state) && j >= 1) { evalDay = prepKind() !== "mock"; await doEvalTask(); }
@@ -346,7 +373,7 @@ window.confirm = () => true; window.print = () => {};
       if (e === "carnet") await doCarnet(); else if (e === "curieux") await doCurieux(); else if (e === "histoire") await doHistoire(); else if (e === "probleme") await doProbleme(); else if (e === "eval" && !Engine.prepActive(state)) await doEvalSetup();
       if (EX.includes("eval") && j === 0 && e !== "eval") await doEvalSetup();
     }
-    log("\n████ RÉSUMÉ · durées des séances : " + durs.map(mmss).join(", ") + " · " + status());
+    log("\n████ RÉSUMÉ · durées des séances : " + durs.map(mmss).join(", ") + " · " + status() + (state.now && state.now.ids ? " · questions du chapitre en classe : " + qs.filter((x) => x.now).length + " sur " + qs.length : ""));
     log("QUESTIONS\n" + qs.map((x) => x.code + " | d" + x.d + " | " + x.q + " | attendu " + x.ans).join("\n"));
   } catch (e) { log(/^STOP/.test(e.message) ? e.message : "EXCEPTION " + e.message + "\n" + e.stack); }
   flush();
