@@ -422,15 +422,23 @@ const DEFIS = (() => {
           M("X^2 " + (s < 0 ? "+ " + -s : "- " + s) + "X " + (p < 0 ? "- " + -p : "+ " + p) + " = (X - " + X1 + ")(X " + (X2 < 0 ? "+ " + -X2 : "- " + X2) + ") = 0") + ". " + M("2^x = " + X1) + " donne " + M("x = " + a) + (X2 > 0 ? " ; " + M("2^x = " + X2) + " donne " + M("x = \\frac{\\log " + X2 + "}{\\log 2} \\approx " + D(r2c(Math.log2(X2)))) + " : 2 solutions." : " ; " + M("2^x = " + X2) + " est impossible (" + M("2^x > 0") + ") : une seule solution."));
       },
     ],
+    /* 26.11 soir (agent defis3) : base 2 ou 3, et une équation-quotient ; 3 contextes (avant : 10 énoncés en base 2). */
     eqlog: [
       () => {
-        let i, j; do { i = ri(2, 5); j = ri(1, i - 1); } while (false);
-        const n = i + j, r = 2 ** i, a = r - 2 ** j, rej = -(2 ** j);
-        return P("On résout " + M("\\log_2 x + \\log_2(x - " + a + ") = " + n) + ".",
-          [["a) Domaine : x doit être plus grand que", a], ["b) Solution retenue", r], ["c) Combien de solutions a l'équation " + M("\\log_2\\big(x(x - " + a + ")\\big) = " + n) + " ?", 2]],
-          ["Domaine : les deux logarithmes doivent exister. Puis log₂ u + log₂ v = log₂(uv), et log₂ w = " + n + " ⇔ w = 2^" + n + " = " + 2 ** n + ".",
-           "x(x − " + a + ") = " + 2 ** n + " ⇔ x² − " + a + "x − " + 2 ** n + " = 0. Vérifie chaque solution dans le domaine. c) Ici seul le produit doit être positif : le domaine est plus grand."],
-          "a) " + M("x > 0") + " et " + M("x > " + a) + ". b) " + M("x^2 - " + a + "x - " + 2 ** n + " = (x - " + r + ")(x + " + -rej + ") = 0") + " : " + M(r) + " convient, " + M(rej) + " est rejetée. c) " + M("x(x - " + a + ") > 0") + " aussi pour " + M("x = " + rej) + " : 2 solutions (les deux équations ne sont pas équivalentes).");
+        const B = pk([2, 2, 3]); let i, j; do { i = ri(2, B === 2 ? 5 : 3); j = ri(1, i - 1); } while (false);
+        const n = i + j, r = B ** i, a = r - B ** j, rej = -(B ** j);
+        return Object.assign(P("On résout " + M("\\log_" + B + " x + \\log_" + B + "(x - " + a + ") = " + n) + ".",
+          [["a) Domaine : x doit être plus grand que", a], ["b) Solution retenue", r], ["c) Combien de solutions a l'équation " + M("\\log_" + B + "\\big(x(x - " + a + ")\\big) = " + n) + " ?", 2]],
+          ["Domaine : les deux logarithmes doivent exister. Puis log_" + B + " u + log_" + B + " v = log_" + B + "(uv), et log_" + B + " w = " + n + " ⇔ w = " + B + "^" + n + " = " + B ** n + ".",
+           "x(x − " + a + ") = " + B ** n + " ⇔ x² − " + a + "x − " + B ** n + " = 0. Vérifie chaque solution dans le domaine. c) Ici seul le produit doit être positif : le domaine est plus grand."],
+          "a) " + M("x > 0") + " et " + M("x > " + a) + ". b) " + M("x^2 - " + a + "x - " + B ** n + " = (x - " + r + ")(x + " + -rej + ") = 0") + " : " + M(r) + " convient, " + M(rej) + " est rejetée. c) " + M("x(x - " + a + ") > 0") + " aussi pour " + M("x = " + rej) + " : 2 solutions (les deux équations ne sont pas équivalentes)."), { ctx: "base" + B });
+      },
+      () => { /* quotient : log_2(x + b) − log_2(x − a) = k */
+        let x0, a, b, k; do { k = ri(1, 3); a = ri(1, 6); x0 = a + ri(1, 4); b = 2 ** k * (x0 - a) - x0; } while (b <= 0 || b > 30);
+        return Object.assign(P("On résout " + M("\\log_2(x + " + b + ") - \\log_2(x - " + a + ") = " + k) + ".",
+          [["a) Domaine : x doit être plus grand que", a], ["b) Solution", x0], ["c) Valeur de " + M("\\frac{x + " + b + "}{x - " + a + "}") + " pour cette solution", 2 ** k]],
+          ["Domaine : x + " + b + " > 0 et x − " + a + " > 0. Puis log₂ u − log₂ v = log₂(u/v).", "(x + " + b + ") ÷ (x − " + a + ") = 2^" + k + " = " + 2 ** k + " : produit en croix."],
+          "a) " + M("x > " + a) + " (alors " + M("x + " + b + " > 0") + " aussi). b) " + M("x + " + b + " = " + 2 ** k + "(x - " + a + ") \\iff " + (2 ** k - 1 === 1 ? "" : 2 ** k - 1) + "x = " + (b + 2 ** k * a)) + ", " + M("x = " + x0) + " (dans le domaine). c) " + M("\\frac{" + (x0 + b) + "}{" + (x0 - a) + "} = " + 2 ** k) + "."), { ctx: "quotient" });
       },
     ],
     scalmp: [
@@ -938,15 +946,30 @@ const DEFIS = (() => {
           "a) " + M("b^{" + (x2 - x1) + "} = \\frac{" + D(y2) + "}{" + D(y1) + "} = " + D(b ** (x2 - x1))) + ", " + M("b = " + D(b)) + ". b) " + M("a = \\frac{" + D(y1) + "}{" + D(b) + "^{" + x1 + "}} = " + D(a)) + ". c) " + M(D(b) + "^x = \\frac{" + Y + "}{" + D(a) + "}") + ", " + M("x = \\frac{\\log(" + Y + " \\div " + D(a) + ")}{\\log " + D(b) + "} \\approx " + D(r2c(xY))) + ".");
       },
     ],
+    /* 26.11 soir (agent defis3) : + deux nombres (produit et somme des carrés), triangle rectangle (hypoténuse et aire) ; 3 contextes. */
     eqbic: [
       () => { /* rectangle : diagonale et aire donnent une équation bicarrée */
         const [p, q, r] = pk([[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [20, 21, 29], [9, 40, 41]]), k = r < 20 ? ri(1, 3) : 1;
         const dg = k * r, A = k * k * p * q;
-        return P("Un écran rectangulaire a une diagonale de " + M(dg) + " cm et une aire de " + M(nb(A)) + " cm². On note " + M("x") + " un de ses côtés (en cm).",
+        return Object.assign(P("Un écran rectangulaire a une diagonale de " + M(dg) + " cm et une aire de " + M(nb(A)) + " cm². On note " + M("x") + " un de ses côtés (en cm).",
           [["a) En posant " + M("X = x^2") + ", solutions de l'équation en " + M("X") + " (séparées par « ; »)", SET([(k * p) ** 2, (k * q) ** 2])], ["b) Longueur (le plus grand côté, cm)", k * q], ["c) Périmètre de l'écran (cm)", 2 * k * (p + q)]],
           ["L'autre côté vaut " + nbT(A) + " ÷ x. Pythagore : x² + (" + nbT(A) + " ÷ x)² = " + dg + "². Multiplie par x².",
            "x⁴ − " + nbT(dg * dg) + "x² + " + nbT(A * A) + " = 0 : équation bicarrée. Avec X = x², trouve X, puis x = √X (x > 0) : les deux valeurs sont les deux côtés."],
-          M("x^4 - " + nb(dg * dg) + "x^2 + " + nb(A * A) + " = 0") + ", a) " + M("X^2 - " + nb(dg * dg) + "X + " + nb(A * A) + " = 0") + " : " + M("X = " + nb((k * p) ** 2)) + " ou " + M("X = " + nb((k * q) ** 2)) + ". b) " + M("x = " + k * p) + " ou " + M(k * q) + " : les côtés mesurent " + M(k * p) + " et " + M(k * q) + " cm. c) " + M("2(" + k * p + " + " + k * q + ") = " + 2 * k * (p + q)) + " cm.");
+          M("x^4 - " + nb(dg * dg) + "x^2 + " + nb(A * A) + " = 0") + ", a) " + M("X^2 - " + nb(dg * dg) + "X + " + nb(A * A) + " = 0") + " : " + M("X = " + nb((k * p) ** 2)) + " ou " + M("X = " + nb((k * q) ** 2)) + ". b) " + M("x = " + k * p) + " ou " + M(k * q) + " : les côtés mesurent " + M(k * p) + " et " + M(k * q) + " cm. c) " + M("2(" + k * p + " + " + k * q + ") = " + 2 * k * (p + q)) + " cm."), { ctx: "ecran" });
+      },
+      () => { /* deux nombres : produit et somme des carrés */
+        let p, q; do { p = ri(2, 9); q = ri(3, 12); } while (p >= q);
+        return Object.assign(P("Deux nombres positifs ont pour produit " + M(p * q) + " et la somme de leurs carrés vaut " + M(p * p + q * q) + ". On note " + M("x") + " l'un d'eux.",
+          [["a) En posant " + M("X = x^2") + ", solutions de l'équation en " + M("X") + " (séparées par « ; »)", SET([p * p, q * q])], ["b) Le plus grand des deux nombres", q], ["c) Leur somme", p + q]],
+          ["L'autre nombre vaut " + p * q + " ÷ x : x² + (" + p * q + " ÷ x)² = " + (p * p + q * q) + ". Multiplie par x².", "x⁴ − " + (p * p + q * q) + "x² + " + p * p * q * q + " = 0 : pose X = x²."],
+          M("X^2 - " + (p * p + q * q) + "X + " + nb(p * p * q * q) + " = 0") + " : a) " + M("X = " + p * p) + " ou " + M("X = " + q * q) + ". b) " + M(q) + " (et l'autre vaut " + M(p) + "). c) " + M(p + " + " + q + " = " + (p + q)) + "."), { ctx: "nombres" });
+      },
+      () => { /* triangle rectangle : hypoténuse et aire */
+        const [p, q, r] = pk([[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 15, 17], [9, 12, 15], [12, 16, 20], [7, 24, 25]]), A = (p * q) / 2;
+        return Object.assign(P("Un triangle rectangle a une hypoténuse de " + M(r) + " cm et une aire de " + M(D(A)) + " cm². On note " + M("x") + " un des côtés de l'angle droit.",
+          [["a) En posant " + M("X = x^2") + ", solutions de l'équation en " + M("X") + " (séparées par « ; »)", SET([p * p, q * q])], ["b) Le plus long côté de l'angle droit (cm)", q], ["c) Périmètre du triangle (cm)", p + q + r]],
+          ["L'autre côté vaut " + 2 * A + " ÷ x (aire = produit des côtés ÷ 2). Pythagore : x² + (" + 2 * A + " ÷ x)² = " + r * r + ".", "x⁴ − " + r * r + "x² + " + nb(4 * A * A) + " = 0 : pose X = x²."],
+          M("X^2 - " + r * r + "X + " + nb(4 * A * A) + " = 0") + " : a) " + M("X = " + p * p) + " ou " + M("X = " + q * q) + ". b) " + M(q) + " cm (l'autre côté : " + M(p) + " cm). c) " + M(p + " + " + q + " + " + r + " = " + (p + q + r)) + " cm."), { ctx: "triangle" });
       },
     ],
     eqirrmp: [
@@ -1338,17 +1361,27 @@ const DEFIS = (() => {
       },
     ],
     /* ---------- MP 2e : cercle trigonométrique ---------- */
+    /* 26.11 soir (agent defis3) : + grande roue et arroseur (coordonnées exactes), 3 contextes. */
     trigcercle: [
       () => {
         const th = pk([120, 135, 150, 210, 225, 240, 300, 315, 330]), d = th % 45 === 0 ? 4 : 6, k = (th * d) / 180;
         const ref = th < 180 ? 180 - th : th < 270 ? th - 180 : 360 - th, cq = th > 90 && th < 270 ? -1 : 1;
         const cx = { 30: "\\frac{\\sqrt{3}}{2}", 45: "\\frac{\\sqrt{2}}{2}", 60: "\\frac{1}{2}" }[ref];
         const sameSin = (540 - th) % 360, sameCos = 360 - th;
-        return P("On considère l'angle " + M("\\theta = " + th + "°") + ".",
+        return Object.assign(P("On considère l'angle " + M("\\theta = " + th + "°") + ".",
           [["a) En radians, " + M("\\theta = \\frac{k\\pi}{" + d + "}") + " : que vaut " + M("k") + " ?", k], ["b) " + M("\\cos\\theta") + " (valeur exacte)", RAD(Math.cos(rad(th)))], ["c) L'autre angle de " + M("[0° ; 360°[") + " qui a le même sinus (°)", sameSin], ["d) L'autre angle de " + M("[0° ; 360°[") + " qui a le même cosinus (°)", sameCos]],
           ["180° = π rad. Repère le quadrant de θ et son angle de référence (l'écart avec l'axe horizontal), ici " + ref + "°.",
            "Même sinus : symétrique par rapport à l'axe vertical (180° − θ, ramené dans [0° ; 360°[). Même cosinus : symétrique par rapport à l'axe horizontal (360° − θ)."],
-          "a) " + M(th + "° = " + th + " \\cdot \\frac{\\pi}{180} = \\frac{" + k + "\\pi}{" + d + "}") + ". b) Angle de référence " + M(ref + "°") + ", cosinus " + (cq < 0 ? "négatif" : "positif") + " : " + M("\\cos\\theta = " + (cq < 0 ? "-" : "") + cx) + ". c) " + M("180° - " + th + "° = " + (180 - th) + "°") + (180 - th < 0 ? ", soit " + M(sameSin + "°") : "") + ". d) " + M("360° - " + th + "° = " + sameCos + "°") + ".");
+          "a) " + M(th + "° = " + th + " \\cdot \\frac{\\pi}{180} = \\frac{" + k + "\\pi}{" + d + "}") + ". b) Angle de référence " + M(ref + "°") + ", cosinus " + (cq < 0 ? "négatif" : "positif") + " : " + M("\\cos\\theta = " + (cq < 0 ? "-" : "") + cx) + ". c) " + M("180° - " + th + "° = " + (180 - th) + "°") + (180 - th < 0 ? ", soit " + M(sameSin + "°") : "") + ". d) " + M("360° - " + th + "° = " + sameCos + "°") + "."), { ctx: "angle" });
+      },
+      () => { /* grande roue ou arroseur : coordonnées exactes d'un point du cercle de rayon R */
+        const th = pk([30, 45, 60, 120, 135, 150, 210, 225, 240, 300, 315, 330]), d = th % 45 === 0 ? 4 : 6, k = (th * d) / 180, R0 = pk([10, 20, 30, 40]), c = R0 * Math.cos(rad(th)), sn = R0 * Math.sin(rad(th));
+        const ref = th < 90 ? th : th < 180 ? 180 - th : th < 270 ? th - 180 : 360 - th, ex = (f, sg) => { const v = { 30: [R0 / 2, ""], 60: [R0 / 2, "\\sqrt{3}"], 45: [R0 / 2, "\\sqrt{2}"] }[f === "cos" ? (ref === 30 ? 60 : ref === 60 ? 30 : 45) : ref]; return (sg < 0 ? "-" : "") + v[0] + v[1]; };
+        const [cx, txt, lx, ly] = pk([["roue", "Une grande roue a un rayon de " + R0 + " m. Une nacelle est repérée par l'angle " + M("\\theta = " + th + "°") + " (mesuré depuis l'horizontale, dans le sens inverse des aiguilles d'une montre, à partir du centre).", "Écart horizontal de la nacelle par rapport au centre (m, valeur exacte, négatif à gauche)", "Hauteur de la nacelle par rapport au centre (m, valeur exacte, négative en dessous)"],
+          ["arroseur", "Un arroseur rotatif a une portée de " + R0 + " m. Son jet fait l'angle " + M("\\theta = " + th + "°") + " avec la direction est (sens inverse des aiguilles d'une montre). On repère le point arrosé par ses coordonnées (est ; nord) en mètres.", "Coordonnée est du point arrosé (m, valeur exacte)", "Coordonnée nord du point arrosé (m, valeur exacte)"]]);
+        return Object.assign(P(txt, [["a) En radians, " + M("\\theta = \\frac{k\\pi}{" + d + "}") + " : que vaut " + M("k") + " ?", k], ["b) " + lx, RAD(c)], ["c) " + ly, RAD(sn)]],
+          ["Le point est " + M("(R\\cos\\theta \\,;\\, R\\sin\\theta)") + " avec R = " + R0 + ".", "Angle de référence " + ref + "° ; les signes dépendent du quadrant."],
+          "a) " + M(th + "° = \\frac{" + k + "\\pi}{" + d + "}") + ". b) " + M(R0 + "\\cos " + th + "° = " + ex("cos", Math.sign(Math.round(c * 1e9)))) + ". c) " + M(R0 + "\\sin " + th + "° = " + ex("sin", Math.sign(Math.round(sn * 1e9)))) + "."), { ctx: cx });
       },
     ],
     /* ---------- 4e Collège : matrices et systèmes (Cramer, puis paramètre) ---------- */
@@ -1418,6 +1451,7 @@ const DEFIS = (() => {
       },
     ],
     /* ---------- 3e Collège : optimisation par la dérivée ---------- */
+    /* 26.11 soir (agent defis3) : + potager le long d'un mur ; volumes de conserve plus variés ; 3 contextes. */
     optimderiv: [
       () => { /* boîte dans une feuille rectangulaire, comparée à la feuille carrée de même périmètre */
         const L = [];
@@ -1426,19 +1460,26 @@ const DEFIS = (() => {
           if (r * r !== dd) continue; const x = (4 * (a + b) - r) / 24; if (Number.isInteger(x) && x > 0 && 2 * x < b && (a + b) % 2 === 0) L.push([a, b, x]);
         }
         const [a, b, x] = pk(L), V = x * (a - 2 * x) * (b - 2 * x), c = (a + b) / 2, Vc = (2 * c ** 3) / 27;
-        return P("Dans une feuille de " + M(a) + " cm sur " + M(b) + " cm, on découpe un carré de côté " + M("x") + " à chaque coin et on replie pour faire une boîte sans couvercle.",
+        return Object.assign(P("Dans une feuille de " + M(a) + " cm sur " + M(b) + " cm, on découpe un carré de côté " + M("x") + " à chaque coin et on replie pour faire une boîte sans couvercle.",
           [["a) Valeur de " + M("x") + " qui rend le volume maximal (cm)", x], ["b) Volume maximal (cm³)", V], ["c) Avec une feuille CARRÉE de même périmètre, volume maximal (cm³, au dixième)", Vc, 0.1]],
           ["V(x) = x(" + a + " − 2x)(" + b + " − 2x), pour 0 < x < " + T(b / 2) + ". Développe, puis dérive.",
            "V'(x) = 12x² − " + 4 * (a + b) + "x + " + a * b + " ; résous V'(x) = 0 et garde la solution comprise entre 0 et " + T(b / 2) + ". Feuille carrée de côté " + T(c) + " : V(x) = x(" + T(c) + " − 2x)²."],
-          M("V(x) = " + poly([4, -2 * (a + b), a * b, 0]) + ", \\; V'(x) = " + poly([12, -4 * (a + b), a * b])) + ", zéros " + M(x) + " et " + M(fx((4 * (a + b)) / 12 - x)) + " (hors domaine). a) " + M("x = " + x) + " cm. b) " + M(x + " \\cdot " + (a - 2 * x) + " \\cdot " + (b - 2 * x) + " = " + nb(V)) + " cm³. c) Côté " + M(D(c)) + ", " + M("x = " + fx(c / 6)) + ", " + M("V = \\frac{2 \\cdot " + D(c) + "^3}{27} \\approx " + D(r1(Vc))) + " cm³" + (Vc > V ? " : la feuille carrée donne une boîte plus grande." : "."));
+          M("V(x) = " + poly([4, -2 * (a + b), a * b, 0]) + ", \\; V'(x) = " + poly([12, -4 * (a + b), a * b])) + ", zéros " + M(x) + " et " + M(fx((4 * (a + b)) / 12 - x)) + " (hors domaine). a) " + M("x = " + x) + " cm. b) " + M(x + " \\cdot " + (a - 2 * x) + " \\cdot " + (b - 2 * x) + " = " + nb(V)) + " cm³. c) Côté " + M(D(c)) + ", " + M("x = " + fx(c / 6)) + ", " + M("V = \\frac{2 \\cdot " + D(c) + "^3}{27} \\approx " + D(r1(Vc))) + " cm³" + (Vc > V ? " : la feuille carrée donne une boîte plus grande." : ".")), { ctx: "boite" });
       },
       () => { /* boîte de conserve de volume donné, surface minimale */
-        const V = pk([330, 400, 500, 750, 1000, 1500]), r = Math.cbrt(V / (2 * Math.PI)), h = V / (Math.PI * r * r), S = 2 * Math.PI * r * r + 2 * V / r;
-        return P("Une boîte de conserve cylindrique doit contenir " + M(nb(V) + " \\text{ cm}^3") + ". On veut utiliser le moins de métal possible (surface totale minimale).",
+        const V = pk([250, 330, 400, 500, 600, 750, 850, 1000, 1500, 2000]), r = Math.cbrt(V / (2 * Math.PI)), h = V / (Math.PI * r * r), S = 2 * Math.PI * r * r + 2 * V / r;
+        return Object.assign(P("Une boîte de conserve cylindrique doit contenir " + M(nb(V) + " \\text{ cm}^3") + ". On veut utiliser le moins de métal possible (surface totale minimale).",
           [["a) Rayon optimal (cm, au dixième)", r, 0.1], ["b) Hauteur correspondante (cm, au dixième)", h, 0.1], ["c) Surface minimale (cm², à l'unité)", S, 1]],
           ["h = " + nbT(V) + " ÷ (πr²), donc S(r) = 2πr² + 2πrh = 2πr² + " + 2 * V + "/r. Dérive S.",
            "S'(r) = 4πr − " + 2 * V + "/r² = 0 donne r³ = " + V + " ÷ (2π). Calcule h avec le r non arrondi : tu trouveras h = 2r."],
-          M("S(r) = 2\\pi r^2 + \\frac{" + 2 * V + "}{r}, \\; S'(r) = 4\\pi r - \\frac{" + 2 * V + "}{r^2} = 0 \\iff r = \\sqrt[3]{\\frac{" + V + "}{2\\pi}}") + ". a) " + M("r \\approx " + D(r1(r))) + " cm. b) " + M("h = \\frac{" + V + "}{\\pi r^2} = 2r \\approx " + D(r1(h))) + " cm. c) " + M("S \\approx " + nb(Math.round(S))) + " cm².");
+          M("S(r) = 2\\pi r^2 + \\frac{" + 2 * V + "}{r}, \\; S'(r) = 4\\pi r - \\frac{" + 2 * V + "}{r^2} = 0 \\iff r = \\sqrt[3]{\\frac{" + V + "}{2\\pi}}") + ". a) " + M("r \\approx " + D(r1(r))) + " cm. b) " + M("h = \\frac{" + V + "}{\\pi r^2} = 2r \\approx " + D(r1(h))) + " cm. c) " + M("S \\approx " + nb(Math.round(S))) + " cm²."), { ctx: "conserve" });
+      },
+      () => { /* potager rectangulaire le long d'un mur : clôture sur trois côtés */
+        const L = pk([24, 30, 36, 40, 48, 50, 60]), x = L / 4, A = (L * L) / 8, obj = pk(["un potager", "un enclos pour des poules", "une terrasse"]);
+        return Object.assign(P("Avec " + M(L) + " m de clôture, on délimite " + obj + " rectangulaire le long d'un mur : la clôture ne fait que trois côtés. On note " + M("x") + " la largeur (les deux côtés perpendiculaires au mur, en m).",
+          [["a) Valeur de " + M("x") + " qui rend l'aire maximale (m)", x], ["b) Longueur du côté parallèle au mur (m)", L - 2 * x], ["c) Aire maximale (m²)", A]],
+          ["A(x) = x(" + L + " − 2x) pour 0 < x < " + L / 2 + ".", "A'(x) = " + L + " − 4x : il s'annule en x = " + T(x) + " (+ puis −)."],
+          M("A(x) = " + L + "x - 2x^2, \; A'(x) = " + L + " - 4x = 0 \\iff x = " + D(x)) + ". a) " + M(D(x)) + " m. b) " + M(L + " - 2 \\cdot " + D(x) + " = " + D(L - 2 * x)) + " m. c) " + M(D(x) + " \\cdot " + D(L - 2 * x) + " = " + D(A)) + " m²."), { ctx: "potager" });
       },
     ],
     /* ---------- MP 4e : composition et réciproque ---------- */

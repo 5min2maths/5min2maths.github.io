@@ -1588,6 +1588,24 @@ const RECALC = (() => {
   DF("derivth", /f\(x\) = \|x ([+-]) (\d+)\| \+ \|x ([+-]) (\d+)\|/, (g, lab) => { const p = sgn(g[0], g[1]), q = sgn(g[2], g[3]), f = (x) => Math.abs(x - p) + Math.abs(x - q), hi = Math.max(p, q);
     return lab.startsWith("a)") ? hi : lab.startsWith("b)") ? (f(hi + 1e-3) - f(hi)) / 1e-3 : lab.startsWith("c)") ? f((p + q) / 2) : null; });
   DF("derivth", /f\(x\) = x\^3 sur \[0 ; (\d+)\]/, (g, lab) => { const b = nn(g[0]); return lab.startsWith("a)") ? b ** 3 / b : lab.startsWith("b)") ? Math.sqrt((b * b) / 3) : lab.startsWith("c)") ? 3 * b * b : null; });
+  /* trigcercle, optimderiv, eqlog, eqbic (defis.js, 2e–4e Collège et MP) */
+  DF("trigcercle", /On considère l'angle (?:θ )?= (\d+)°\./, (g, lab) => { const t = nn(g[0]), d = lm(lab, /\(kπ\)\/\((\d+)\)/);
+    if (lab.startsWith("a)") && d) return (t * d[0]) / 180; if (lab.startsWith("b)")) return { v: Math.cos((t * Math.PI) / 180), sol: false }; /* corrigé exact ±√3/2 : fraction imbriquée, illisible en texte simple */ if (/même sinus/.test(lab)) return (540 - t) % 360; if (/même cosinus/.test(lab)) return 360 - t; return null; });
+  DF("trigcercle", /(?:a un rayon de|a une portée de) (\d+) m\..*?l'angle (?:θ )?= (\d+)°/, (g, lab) => { const [R0, t] = g.map(nn), d = lm(lab, /\(kπ\)\/\((\d+)\)/), r = (t * Math.PI) / 180;
+    return lab.startsWith("a)") && d ? (t * d[0]) / 180 : lab.startsWith("b)") ? R0 * Math.cos(r) : lab.startsWith("c)") ? R0 * Math.sin(r) : null; });
+  DF("optimderiv", /Dans une feuille de (\d+) cm sur (\d+) cm, on découpe un carré/, (g, lab) => { const [a, b] = g.map(nn), V = (x) => x * (a - 2 * x) * (b - 2 * x), D2 = 16 * (a + b) ** 2 - 48 * a * b, x = (4 * (a + b) - Math.sqrt(D2)) / 24, c = (a + b) / 2;
+    return lab.startsWith("a)") ? x : lab.startsWith("b)") ? V(x) : lab.startsWith("c)") ? (2 * c ** 3) / 27 : null; });
+  DF("optimderiv", /cylindrique doit contenir ([\d']+) cm\^3/, (g, lab) => { const V = nn(g[0]), r = Math.cbrt(V / (2 * Math.PI)); return lab.startsWith("a)") ? r : lab.startsWith("b)") ? V / (Math.PI * r * r) : lab.startsWith("c)") ? { v: 2 * Math.PI * r * r + (2 * V) / r, st: 1, dir: 0 } : null; }); /* « surface minimale (à l'unité) » : arrondi au plus proche */
+  DF("optimderiv", /Avec (\d+) m de clôture, on délimite .+? le long d'un mur/, (g, lab) => { const L = nn(g[0]); let best = 0; for (let i = 1; i < 4000; i++) { const x = (i * L) / 8000; if (x * (L - 2 * x) > best * (L - 2 * best)) best = x; }
+    const x = L / 4; if (Math.abs(best - x) > L / 4000) return NaN; return lab.startsWith("a)") ? x : lab.startsWith("b)") ? L - 2 * x : lab.startsWith("c)") ? x * (L - 2 * x) : null; });
+  DF("eqlog", /On résout (?:log)?_(\d) x \+ (?:log)?_\d\(x - (\d+)\) = (\d+)\./, (g, lab) => { const [B, a, n] = g.map(nn), D = a * a + 4 * B ** n, r = (a + Math.sqrt(D)) / 2;
+    return lab.startsWith("a)") ? a : lab.startsWith("b)") ? r : lab.startsWith("c)") ? { v: 2, sol: false } : null; });
+  DF("eqlog", /On résout (?:log)?_2\(x \+ (\d+)\) - (?:log)?_2\(x - (\d+)\) = (\d+)\./, (g, lab) => { const [b, a, k] = g.map(nn), K = 2 ** k, x = (b + K * a) / (K - 1);
+    return lab.startsWith("a)") ? a : lab.startsWith("b)") ? x : lab.startsWith("c)") ? (x + b) / (x - a) : null; });
+  const bicXY = (S, P2) => { const D = S * S - 4 * P2; return D < 0 ? null : [(S - Math.sqrt(D)) / 2, (S + Math.sqrt(D)) / 2].map(Math.sqrt); };
+  DF("eqbic", /diagonale de (\d+) cm et une aire de ([\d']+) cm²/, (g, lab) => { const [d, A] = g.map(nn), s = bicXY(d * d, A * A); if (!s) return NaN; return lab.startsWith("b)") ? s[1] : lab.startsWith("c)") ? 2 * (s[0] + s[1]) : null; });
+  DF("eqbic", /ont pour produit (\d+) et la somme de leurs carrés vaut (\d+)/, (g, lab) => { const [P0, S] = g.map(nn), s = bicXY(S, P0 * P0); if (!s) return NaN; return lab.startsWith("b)") ? s[1] : lab.startsWith("c)") ? s[0] + s[1] : null; });
+  DF("eqbic", /hypoténuse de (\d+) cm et une aire de (\d+(?:,\d+)?) cm²/, (g, lab) => { const [r, A] = g.map(nn), s = bicXY(r * r, 4 * A * A); if (!s) return NaN; return lab.startsWith("b)") ? s[1] : lab.startsWith("c)") ? s[0] + s[1] + r : null; });
   /* ==== fin agent defis3 ==== */
 
   /* ---------- 26.11 (agent defis2) : notions encore sous 20 % (transf, trigcercle, trigfn, recip, lectures de graphique
