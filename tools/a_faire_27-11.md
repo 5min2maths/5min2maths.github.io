@@ -1,7 +1,7 @@
 # À faire le 27.11 (retours testeurs du 26.11 au soir, revues Claude externes)
 
 Ordre (solidité d'abord) :
-1. **Élèves faibles, simulation** (tests/_simulation_testeur.js, simulateClass) sur la version du 26.11 soir :
+1. **Élèves faibles : lancer /eleves-faibles** (agent créé le 26.11 au soir ; simulation (tests/_simulation_testeur.js, simulateClass) sur la version du 26.11 soir :
    Lucas 49 %, Sarah 46 %, Yanis 17 % au 1er essai, Mathélo −126 / −152 / −113. Chercher pourquoi le moteur ne
    ramène pas la réussite vers la cible (55–65 %) : niveaux servis, remobilisation, poids de l'échec avec aide.
    Une seule réussite au positionnement ne doit pas donner « maîtrisée » (seulement « vue », décision n° 4).
