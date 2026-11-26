@@ -110,10 +110,11 @@
       screenComps(); t = app.innerText;
       ok(!!app.querySelector(".rcomp") && /note de 1 à 6/.test(t) && !/maîtrise|positionn/.test(t), lab + " : référentiel du PER, notes 1–6");
     }
+    /* 26.11 (phase MP) : la MP a son référentiel (plan d'études MP, src/ref_mp.js ; détail : tests/ref_mp.js). */
     fresh({ system: "CH", grade: 13, track: "mp", minutes: 5 });
-    ok(Referentiel.of(state.profile) === null, "MP 2e : pas de référentiel officiel");
-    screenComps();
-    ok(!app.querySelector(".rcomp") && app.querySelectorAll(".ctest").length > 0, "MP 2e : compétences par notion (affichage actuel)");
+    ok(Referentiel.of(state.profile) === "MP", "MP 2e : référentiel MP");
+    screenComps(); t = app.innerText;
+    ok(!!app.querySelector(".rcomp") && /note de 1 à 6/.test(t) && !/maîtrise|positionn|Plan d'études romand/.test(t), "MP 2e : objectifs MP, notes 1–6");
   } catch (e) { bad.push("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }
   document.getElementById("out").textContent = (bad.length ? "ÉCHEC " + bad.join(" ; ") : "ok référentiel France : " + out.join(" · "));
 })();

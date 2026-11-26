@@ -100,12 +100,11 @@
     ok(!app.querySelector(".lopen") && app.querySelectorAll(".olds").length === 0, "Collège 1re : affichage inchangé");
     fresh({ system: "CH", grade: 15, track: "college", niv: "R", minutes: 5 }); screenComps();
     ok(app.querySelectorAll(".olds").length === 1 && Referentiel.list(state.profile, 1).every((r) => r.year === 1), "Collège 4e : années précédentes inchangées");
+    /* 26.11 (phase MP) : la MP a son référentiel (plan d'études MP, src/ref_mp.js ; détail : tests/ref_mp.js). */
     fresh({ system: "CH", grade: 13, track: "mp", minutes: 5 });
-    ok(Referentiel.of(state.profile) === null, "MP 2e : pas de référentiel officiel");
-    screenComps();
-    ok(!app.querySelector(".rcomp") && app.querySelectorAll(".ctest").length > 0, "MP 2e : compétences par notion");
-    fresh({ system: "CH", grade: 12, track: "mp", minutes: 5 });
-    ok(Referentiel.of(state.profile) === null, "MP 1re : pas de référentiel officiel");
+    ok(Referentiel.of(state.profile) === "MP", "MP 2e : référentiel MP");
+    screenComps(); t = app.innerText;
+    ok(!!app.querySelector(".rcomp") && /note de 1 à 6/.test(t) && !/maîtrise|positionn|Plan d'études romand/.test(t), "MP 2e : objectifs MP, notes 1–6");
     fresh({ system: "FR", grade: 9, track: "college", minutes: 5 });
     ok(Referentiel.of(state.profile) === "FR" && Referentiel.list(state.profile).length === 53, "France 3e : REF_FR, 53 items");
   } catch (e) { bad.push("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }
