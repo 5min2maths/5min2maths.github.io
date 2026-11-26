@@ -41,7 +41,8 @@ const RECALC = (() => {
       .replace(/\\(?:text|mathrm|textrm)\{\s*[a-zA-Zµ²³°%]*\s*(?:\^?\{?\d\}?)?\}/g, "")
       .replace(/\\(?:cdot|times)/g, "*").replace(/\\div/g, "/").replace(/\\pi\b/g, "π")
       .replace(/\\(?:d|t)frac/g, "\\frac").replace(/\\sqrt\s*\[3\]/g, "\\cbrt").replace(/\\(sin|cos|tan|ln|log|exp)\b/g, "$1")
-      .replace(/\\mathrm\{e\}/g, "e");
+      .replace(/\\mathrm\{e\}/g, "e").replace(/\\[lr]?vert|\\mid/g, "|");
+    for (let k = 0; k < 6 && /\|[^|]*\|/.test(s); k++) s = s.replace(/\|([^|]*)\|/, "sqrt(($1)^2)"); /* valeur absolue (26.11) */
     s = macro(s, "frac", 2, (a, b) => "((" + a + ")/(" + b + "))");
     s = macro(s, "cbrt", 1, (a) => "cbrt(" + a + ")");
     s = macro(s, "sqrt", 1, (a) => "sqrt(" + a + ")");
@@ -91,10 +92,12 @@ const RECALC = (() => {
 
   /* ---------- le corrigé contient-il la valeur finale ? ---------- */
   function solHas(sol, v, st, rawSol) {
-    const s = String(sol).replace(/(\d)'(?=\d{3})/g, "$1").replace(/(\d) (?=\d{3}\b)/g, "$1");
+    const s0 = String(sol).replace(/(\d)'(?=\d{3})/g, "$1"), s = s0.replace(/(\d) (?=\d{3}\b)/g, "$1");
     const C = [];
     let m;
     const RE = /(-|−)?\d+(?:,\d+)?(?:\s*·\s*10\^\(?(-?\d+)\)?)?/g;
+    /* 26.11 : « 21 : 133 » devient « 21 133 » en texte lisible ; on lit aussi les nombres sans fusionner les blocs de 3 chiffres */
+    for (const t of s0.match(/(?:^|[^\d,])(\d+(?:,\d+)?)(?![\d,])/g) || []) { const u = t.replace(/^[^\d]/, ""); C.push([num(u), (u.split(",")[1] || "").length, false]); }
     while ((m = RE.exec(s))) { const t = m[0].replace(/\s/g, ""); const [a, e] = t.split("·10^"); let c = num(a); if (e !== undefined) c *= 10 ** num(e.replace(/[()]/g, "")); C.push([c, (a.split(",")[1] || "").length, e !== undefined]); }
     const RF = /\((-?\d+)\)\/\((\d+)\)/g; while ((m = RF.exec(s))) C.push([num(m[1]) / num(m[2]), 12, true]);
     const RP = /(\d+(?:,\d+)?)?\s*π/g; while ((m = RP.exec(s))) C.push([(m[1] ? num(m[1]) : 1) * PI, 12, true]);
@@ -127,10 +130,34 @@ const RECALC = (() => {
       if (dir && ok(roundTo(res.v, st, -dir)) && Math.abs(roundTo(res.v, st, -dir) - r) > 1e-9) return "arrondi dans le mauvais sens aussi accepté : " + fmt(roundTo(res.v, st, -dir)) + " (attendu " + fmt(r) + ")";
       if (!dir && (ok(r + st) || ok(r - st))) return "tolérance trop large : " + fmt(r + st) + " ou " + fmt(r - st) + " accepté";
       if (res.sol !== false && !solHas(item.sol, r, st, item.rawSol) && !solHas(item.sol, res.v, st, item.rawSol)) return "corrigé sans la valeur finale " + fmt(r);
+      const z = saisie(sp, res.v, st, r, ask); if (z) return z;
     } else {
       if (sp.round ? !ok(res.v) : !Expr.sameValue(sp.value, res.v, 1e-7)) return "attendu " + fmt(sp.value) + (sp.round ? " (±" + sp.round / 2 + ")" : "") + ", recalcul " + fmt(res.v);
       if (res.sol !== false && !solHas(item.sol, res.v, sp.round, item.rawSol)) return "corrigé sans la valeur finale " + fmt(res.v);
+      const z = saisie(sp, res.v, sp.round, sp.round ? roundTo(res.v, sp.round, 0) : null, ask); if (z) return z;
     }
+    return null;
+  }
+  /* ---------- la saisie accepte-t-elle les écritures justes ? (26.11) ----------
+     Avec la réponse attendue complète (formes exigées : plain, radical, final, sci) : l'arrondi annoncé tapé avec la
+     virgule, la fraction irréductible (« fraction acceptée », ou décimal illimité), kπ, a√b quand la valeur en est un. */
+  const ratOf = (v, Q = 120) => { for (let q = 1; q <= Q; q++) { const p = Math.round(v * q); if (Math.abs(p / q - v) <= 1e-9 * Math.max(1, Math.abs(v))) return [p, q]; } return null; };
+  const termQ = (q) => { while (q % 2 === 0) q /= 2; while (q % 5 === 0) q /= 5; return q === 1; };
+  const fr = ([p, q]) => (q === 1 ? String(p) : p + "/" + q);
+  function saisie(sp, v, st, r, ask) {
+    if (!sp || sp.kind !== "value" || sp.sci) return null;
+    const tryIt = (inp) => { let c; try { c = checkAnswer(sp, inp); } catch (e) { c = { status: "exception " + e.message }; } return c.status === "correct" ? null : "saisie : « " + inp + " » refusée (" + c.status + (c.message ? " : " + c.message : "") + ")"; };
+    const exact = /valeur exacte|fraction|écris par exemple 3√|avec π|touche √/i.test(ask);
+    if (st) return exact ? null : tryIt(fmt(r).replace(".", ","));
+    const R = ratOf(v);
+    if (R) {
+      if (R[1] === 1 || termQ(R[1])) { const m = tryIt(fmt(v).replace(".", ",")); if (m && !(R[1] > 1 && /fraction/i.test(ask))) return m; }
+      if (R[1] > 1 && !termQ(R[1])) return sp.plain ? "réponse attendue " + fmt(v) + " (fraction " + fr(R) + ") mais la saisie n'accepte qu'un décimal (plain)" : tryIt(fr(R));
+      if (R[1] > 1 && /fraction/i.test(ask) && !sp.plain) return tryIt(fr(R));
+      return null;
+    }
+    const P = ratOf(v / PI, 24); if (P && P[0]) return tryIt((P[0] === 1 ? "" : P[0] === -1 ? "-" : P[0]) + "π" + (P[1] > 1 ? "/" + P[1] : ""));
+    for (const n of SQF) { const S = ratOf(v / Math.sqrt(n), 24); if (S && S[0]) return tryIt((Math.abs(S[0]) === 1 ? (S[0] < 0 ? "-" : "") : S[0]) + "√" + n + (S[1] > 1 ? "/" + S[1] : "")); }
     return null;
   }
   const sameSet = (a, b) => a.length === b.length && a.every((u) => b.some((w) => Math.abs(u - w) <= 1e-6 * Math.max(1, Math.abs(w)))) && b.every((w) => a.some((u) => Math.abs(u - w) <= 1e-6 * Math.max(1, Math.abs(w))));
@@ -154,7 +181,7 @@ const RECALC = (() => {
         for (let k = 0; k < 80; k++) { const m = (a + b) / 2, fm = D(m); if (!isFinite(fm)) break; if (fa * fm <= 0) b = m; else { a = m; fa = fm; } }
         const r = (a + b) / 2, [A, B] = f(r);
         if (isFinite(A) && isFinite(B) && Math.abs(A - B) <= 1e-6 * (1 + Math.abs(A) + Math.abs(B))) add(+r.toFixed(9)); /* sinon : pôle */
-      } else if (isFinite(yPrev) && isFinite(y0) && isFinite(y1) && Math.abs(y0) < Math.abs(yPrev) && Math.abs(y0) < Math.abs(y1)) {
+      } else if (isFinite(yPrev) && isFinite(y0) && isFinite(y1) && Math.abs(y0) < Math.abs(yPrev) && Math.abs(y0) <= Math.abs(y1)) { /* ≤ : racine double à mi-chemin de deux pas (26.11) */
         let a = x0 - h, b = x1;
         for (let k = 0; k < 100; k++) { const m1 = a + (b - a) / 3, m2 = b - (b - a) / 3; if (Math.abs(D(m1)) < Math.abs(D(m2))) b = m2; else a = m1; }
         const r = (a + b) / 2, yr = Math.abs(D(r)), ya = Math.abs(D(r - 0.05)), yb = Math.abs(D(r + 0.05));
@@ -330,6 +357,163 @@ const RECALC = (() => {
     const M = math(x.raw).filter((t) => !/=|\\mathbb/.test(t)); if (M.length !== 1) return null;
     let A; try { A = Expr.parse(tex2e(M[0])); } catch (e) { return null; }
     return { expr: A };
+  } });
+
+  /* « Lequel / Combien de ces nombres est (sont) solution(s) de … ? a ; b ; c » (eqverif, 26.11) : chaque proposition est
+     substituée ; « Lequel » exige exactement une solution parmi les propositions (sinon la question est ambiguë). */
+  G.push({ name: "vérification", f(x) {
+    const m = /^(Lequel|Combien) de ces nombres (?:est|sont) solutions? de (?:l'équation )?\\\(([\s\S]+?)\\\)\s*\?([\s\S]*)$/.exec(x.raw);
+    if (!m || x.spec.kind !== "value") return null;
+    let f; try { f = eqFun(m[2]); } catch (e) { return null; }
+    if (!f) return null;
+    let C = math(m[3]); if (!C.length) C = m[3].replace(/<[^>]*>/g, " ").trim().split(/[\s;]+/).filter(Boolean);
+    let vals; try { vals = C.map(ev); } catch (e) { return null; }
+    if (vals.length < 2 || vals.some((v) => !isFinite(v))) return null;
+    const isR = (v) => { const [a, b] = f(v); return isFinite(a) && isFinite(b) && Math.abs(a - b) <= 1e-9 * (1 + Math.abs(a) + Math.abs(b)); };
+    const S = vals.filter(isR);
+    if (m[1] === "Combien") return { v: S.length };
+    if (S.length !== 1) return { err: "propositions " + vals.map(fmt).join(" ; ") + " : " + S.length + " solution(s) au lieu d'une" };
+    return { v: S[0] };
+  } });
+  /* « Résous sin(2x) = … pour 0° ≤ x < 360° » (trigeq, 26.11) : toutes les solutions de l'intervalle, en degrés (ou en
+     radians sur [0 ; 2π[), cherchées numériquement (changements de signe, minima isolés pour sin x = ±1). */
+  G.push({ name: "équation trigonométrique", f(x) {
+    if (!x.spec || x.spec.kind !== "set" || !/^Résous/.test(x.raw)) return null;
+    const m = /^Résous\s*:?\s*\\\(([\s\S]+?)\\\),? (?:pour|sur|dans) \\\((?:0\s*°?\s*\\leq?\s*x\s*<\s*(360\s*°?|2\s*\\pi)|\[0\s*;\s*(360\s*°?|2\s*\\pi)\s*\[)\\\)/.exec(x.raw);
+    if (!m || !/\\(sin|cos|tan)/.test(m[1])) return null;
+    const deg = /360/.test(m[2] || m[3]), P = deg ? 360 : 2 * PI;
+    let t = m[1].replace(/\\(sin|cos|tan)\^\{?2\}?\s*(\([^()]*\)|[a-z])/g, "(\\$1($2))^2").replace(/\\(sin|cos|tan)\s*(?!\s*\()(\d*\s*[a-z])/g, "\\$1($2)");
+    const parts = tex2e(t).replace(/°/g, "*π/180").replace(/\^\s*\\circ|\\circ/g, "*π/180").split("=");
+    if (parts.length !== 2) return null;
+    let A, B; try { A = Expr.parse(parts[0]); B = Expr.parse(parts[1]); } catch (e) { return null; }
+    if ([...new Set([...Expr.vars(A), ...Expr.vars(B)])].some((v) => v !== "x")) return null;
+    const fa = compile(A), fb = compile(B), k = deg ? PI / 180 : 1, sc = P / 36.2; /* balayage de [−0,1 ; 1,005]·P en 3'620 pas */
+    const g = (X) => [fa({ x: X * k }), fb({ x: X * k })], gu = (u) => g(u * sc + P / 2);
+    const rs = roots(gu, 18.1);
+    if (!rs) return null;
+    const S = []; for (const ru of rs) { const r = +(ru * sc + P / 2).toFixed(7), v = Math.abs(r) < 1e-6 ? 0 : r; if (v >= 0 && v < P - 1e-6 && !S.some((u) => Math.abs(u - v) < 1e-5)) S.push(v); }
+    return { set: S.sort((a, b) => a - b), f: g };
+  } });
+
+  /* « Calcule : 4y · 9y » (monômes, 26.11) : réponse attendue de type expression égale à l'expression affichée ;
+     « Trouve le monôme M … tel que M^2 = … » / « M · a = b » ; « … écrit : « A = B ». Trouve l'erreur » : A */
+  G.push({ name: "monômes", f(x) {
+    if (!x.spec || x.spec.kind !== "expr") return null;
+    let m = /^Calcule\s*:\s*\\\(([^=]+?)\\\)\.?\s*$/.exec(x.raw);
+    if (m) { try { return { expr: Expr.parse(tex2e(m[1])) }; } catch (e) { return null; } }
+    m = /écrit : « \\\(([^=]+?)=[^)]*\\\) »\. Trouve l'erreur, puis donne le bon (?:produit|résultat)/.exec(x.raw);
+    if (m) { try { return { expr: Expr.parse(tex2e(m[1])) }; } catch (e) { return null; } }
+    m = /monôme M[^\\]*\\\(M\^2 = ([^)]+?)\\\)/.exec(x.raw);
+    if (m) { try { const R = Expr.parse(tex2e(m[1])), E = Expr.parse(x.spec.expr); return { err: Expr.equivalent(Expr.parse("(" + x.spec.expr + ")^2"), R) && /^\d/.test(x.spec.expr) ? null : "M = " + x.spec.expr + " : M² ≠ " + m[1], ok: true }; } catch (e) { return null; } }
+    m = /monôme M[^\\]*\\\(M \\cdot ([^=]+?) = ([^)]+?)\\\)/.exec(x.raw);
+    if (m) { try { const R = Expr.parse(tex2e(m[2])); return { err: Expr.equivalent(Expr.parse("(" + x.spec.expr + ")*(" + tex2e(m[1]) + ")"), R) ? null : "M = " + x.spec.expr + " : M · " + m[1] + " ≠ " + m[2] }; } catch (e) { return null; } }
+    return null;
+  } });
+
+  /* « Écris 0,2\overline{7} sous forme de fraction » (26.11) : valeur exacte du nombre périodique */
+  G.push({ name: "périodique", f(x) {
+    const m = /^Écris (?:le nombre )?(?:périodique )?\\\((-?\d+)\{,\}(\d*)\\overline\{(\d+)\}\\\)/.exec(x.raw);
+    if (!m || x.spec.kind !== "value") return null;
+    const [, e, pre, per] = m, p = pre.length, l = per.length;
+    const v = Math.abs(+e) + (+(pre + per) - +(pre || 0)) / ((10 ** l - 1) * 10 ** p);
+    return { v: +e < 0 || /^-/.test(e) ? -v : v, st: null };
+  } });
+
+  /* Domaine de définition (26.11) : appartenance point par point (f calculable), pôles et bords des racines vérifiés exactement */
+  G.push({ name: "domaine", f(x) {
+    if (!x.spec || x.spec.kind !== "solset") return null;
+    const m = /domaine de définition de \\\(f\(x\) = ([\s\S]+?)\\\)/.exec(x.raw); if (!m) return null;
+    let F; try { F = Expr.parse(tex2e(m[1])); } catch (e) { return null; }
+    if ([...Expr.vars(F)].some((v) => v !== "x")) return null;
+    const f = compile(F), ex = [];
+    const walk = (n) => { if (!n || typeof n !== "object") return; if (n.t === "div" || (n.t === "fn" && (n.f === "sqrt" || n.f === "ln" || n.f === "log"))) { const g = compile(n.t === "div" ? n.b : n.a), r = roots((t) => [g({ x: t }), 0], 100); if (r) ex.push(...r); } walk(n.a); walk(n.b); };
+    walk(F);
+    return { ineq: (t) => isFinite(f({ x: t })), pts: ex, exact: ex };
+  } });
+  /* Paraboles (f2, f2expr, f2trois, 26.11) : sommet, zéros, extremum, expression à partir des conditions de l'énoncé */
+  const quad = (F) => { const f = compile(F), c = f({ x: 0 }), p = f({ x: 1 }), q = f({ x: -1 }), a = (p + q) / 2 - c, b = (p - q) / 2; return Math.abs(f({ x: 2.5 }) - (a * 6.25 + b * 2.5 + c)) < 1e-9 * (1 + Math.abs(c)) && a ? [a, b, c] : null; };
+  const solve3 = (P) => { const [[x1, y1], [x2, y2], [x3, y3]] = P, D = (x1 - x2) * (x1 - x3) * (x2 - x3); if (!D) return null;
+    const a = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2)) / D, b = (x3 * x3 * (y1 - y2) + x2 * x2 * (y3 - y1) + x1 * x1 * (y2 - y3)) / D; return [a, b, y1 - a * x1 * x1 - b * x1]; };
+  const PT = String.raw`\(\s*([−-]?\d+(?:,\d+)?)\s*;\s*([−-]?\d+(?:,\d+)?)\s*\)`;
+  const pts = (t) => [...t.matchAll(new RegExp(PT, "g"))].map((m) => [num(m[1]), num(m[2])]);
+  const qexpr = ([a, b, c]) => ({ expr: Expr.parse(a + "*x^2+(" + b + ")*x+(" + c + ")") });
+  G.push({ name: "parabole", f(x) {
+    const t = x.txt, sp = x.spec; let m, Q = null;
+    const fm = /(?:parabole |zéros de |(?:minimale|maximale) de )\\\((?:f\(x\)|y) = ([\s\S]+?)\\\)/.exec(x.raw);
+    if (fm && !/a\(x|ax\^2/.test(fm[1])) { try { const F = Expr.parse(tex2e(fm[1])); if ([...Expr.vars(F)].every((v) => v === "x")) Q = quad(F); } catch (e) {} }
+    if (Q) {
+      const [a, b, c] = Q, h = -b / (2 * a), k = c - (b * b) / (4 * a);
+      if (/sommet/.test(t) && sp.kind === "pair") return { pair: [h, k] };
+      if (/valeur (?:minimale|maximale)/.test(t) && sp.kind === "value") return /minimale/.test(t) === a > 0 ? { v: k, st: null } : { err: "extremum demandé de la mauvaise nature (a = " + fmt(a) + ")" };
+      if (/ordonnée à l'origine/.test(t) && sp.kind === "value") return { v: c, st: null };
+      if (/zéros/.test(t) && sp.kind === "set") { const g = (u) => [a * u * u + b * u + c, 0], r = roots(g); return r ? { set: r, f: g } : null; }
+      return null;
+    }
+    if ((m = /Pour quelle valeur de c la parabole y = (-?\d*)x\^2 ([+-] \d+)x \+ c touche-t-elle l'axe des x en un seul point/.exec(t))) { const a = m[1] === "" ? 1 : m[1] === "-" ? -1 : +m[1], b = num(m[2].replace(/ /g, "")); return { v: (b * b) / (4 * a), st: null }; }
+    if ((m = new RegExp("sommet S" + PT + " et coefficient a = ([−-]?\\d+(?:,\\d+)?)\\. Quels sont ses zéros").exec(t)) && sp.kind === "set") { const h = num(m[1]), k = num(m[2]), a = num(m[3]), g = (u) => [a * (u - h) ** 2 + k, 0], r = roots(g); return r ? { set: r, f: g } : null; }
+    /* expression à partir des conditions */
+    if ((m = new RegExp("sommet S" + PT + " et pour coefficient dominant a = ([−-]?\\d+(?:,\\d+)?)").exec(t))) { const h = num(m[1]), k = num(m[2]), a = num(m[3]); Q = [a, -2 * a * h, a * h * h + k]; }
+    else if ((m = /pour zéros ([−-]?\d+(?:,\d+)?) et ([−-]?\d+(?:,\d+)?), et pour coefficient dominant ([−-]?\d+(?:,\d+)?)/.exec(t))) { const [p, q, a] = [m[1], m[2], m[3]].map(num); Q = [a, -a * (p + q), a * p * q]; }
+    else if ((m = new RegExp("sommet S" + PT + " et passe par P" + PT).exec(t))) { const [h, k, u, w] = [1, 2, 3, 4].map((i) => num(m[i])), a = (w - k) / (u - h) ** 2; Q = [a, -2 * a * h, a * h * h + k]; }
+    else if ((m = new RegExp("pour zéros ([−-]?\\d+(?:,\\d+)?) et ([−-]?\\d+(?:,\\d+)?) et passe par P" + PT).exec(t))) { const [p, q, u, w] = [1, 2, 3, 4].map((i) => num(m[i])), a = w / ((u - p) * (u - q)); Q = [a, -a * (p + q), a * p * q]; }
+    else if ((m = /pour zéros ([−-]?\d+(?:,\d+)?) et ([−-]?\d+(?:,\d+)?), et sa valeur (minimale|maximale) est ([−-]?\d+(?:,\d+)?)/.exec(t))) { const p = num(m[1]), q = num(m[2]), e = num(m[4]), h = (p + q) / 2, a = e / ((h - p) * (h - q)); if ((a > 0) !== (m[3] === "minimale")) return { err: "valeur " + m[3] + " impossible (a = " + fmt(a) + ")" }; Q = [a, -a * (p + q), a * p * q]; }
+    else if ((m = /coupe l'axe des x en ([−-]?\d+(?:,\d+)?) et ([−-]?\d+(?:,\d+)?), et l'axe des y en ([−-]?\d+(?:,\d+)?)/.exec(t))) { const [p, q, c] = [1, 2, 3].map((i) => num(m[i])), a = c / (p * q); Q = [a, -a * (p + q), c]; }
+    else if ((m = /axe de symétrie la droite x = ([−-]?\d+(?:,\d+)?), coupe l'axe des y en ([−-]?\d+(?:,\d+)?) et passe par \(\s*([−-]?\d+(?:,\d+)?)\s*;\s*([−-]?\d+(?:,\d+)?)\s*\)/.exec(t))) { const [s, c, u, w] = [1, 2, 3, 4].map((i) => num(m[i])), a = (w - c) / (u * u - 2 * s * u); Q = [a, -2 * a * s, c]; }
+    else if (/passe par \(/.test(t) && pts(t.split(/\.|Que vaut|Calcule|Quel/)[0] + ".").length === 3) Q = solve3(pts(t.split(/\.|Que vaut|Calcule|Quel/)[0] + "."));
+    else if ((m = /vaut ([\d,]+) au départ, ([\d,]+) après 1 s et ([\d,]+) après 2 s.*hauteur après ([\d,]+) s/.exec(t))) { const q = solve3([[0, num(m[1])], [1, num(m[2])], [2, num(m[3])]]); return q && { v: q[0] * num(m[4]) ** 2 + q[1] * num(m[4]) + q[2], st: null }; }
+    if (!Q || !Q.every(isFinite)) return null;
+    const [a, b, c] = Q;
+    if (sp.kind === "expr") return qexpr(Q);
+    if (sp.kind === "pair" && /sommet/.test(t)) return { pair: [-b / (2 * a), c - (b * b) / (4 * a)] };
+    if (sp.kind === "value" && (m = /Que vaut ([abc]) \?/.exec(t))) return { v: { a, b, c }[m[1]], st: null };
+    if (sp.kind === "value" && (m = /Calcule f\(([−-]?\d+)\)/.exec(t))) { const u = num(m[1]); return { v: a * u * u + b * u + c, st: null }; }
+    return null;
+  } });
+  /* « Détermine le zéro de f(x) = … » (affzero) */
+  G.push({ name: "zéro", f(x) {
+    if (x.spec.kind !== "value") return null;
+    const m = /^Détermine le zéro de \\\(f\(x\) = ([\s\S]+?)\\\)/.exec(x.raw); if (!m) return null;
+    let F; try { F = Expr.parse(tex2e(m[1])); } catch (e) { return null; }
+    if ([...Expr.vars(F)].some((v) => v !== "x")) return null;
+    const f = compile(F), g = (u) => [f({ x: u }), 0], r = roots(g); return r ? { set: r, f: g } : null;
+  } });
+
+  /* Inéquations du 1er degré à réponse « x > a » (spec ineq, affzero, 26.11) : ensemble comparé point par point */
+  G.push({ name: "inéquation x > a", f(x) {
+    if (!x.spec || x.spec.kind !== "ineq") return null;
+    const S = math(x.raw), fx = (n) => { const u = S.find((t) => new RegExp("^\\s*" + n + "\\(x\\) = ").test(t)); return u && u.split("=").slice(1).join("="); };
+    let L, R, op, m;
+    if ((m = /a-t-on \\\(f\(x\) (>|<|\\geq?|\\leq?) (0|g\(x\))\\\)/.exec(x.raw))) { L = fx("f"); R = m[2] === "0" ? "0" : fx("g"); op = m[1]; }
+    else if (/^Résous/.test(x.raw)) { const u = S.find((t) => /\\le|\\ge|<|>/.test(t)); if (!u) return null; const p = u.split(/(\\leq?|\\geq?|<|>)/); if (p.length !== 3) return null; [L, op, R] = p; }
+    if (!L || !R) return null;
+    let A, B; try { A = compile(Expr.parse(tex2e(L))); B = compile(Expr.parse(tex2e(R))); } catch (e) { return null; }
+    const o = op.replace(/\\leq?/, "≤").replace(/\\geq?/, "≥");
+    const cmp = (a, b, Lb) => { const e = Lb ? 1e-9 * (1 + Math.abs(a) + Math.abs(b)) : 0; return o === "<" ? a < b - e : o === ">" ? a > b + e : o === "≤" ? a <= b + e : a >= b - e; };
+    const r = roots((t) => [A({ x: t }), B({ x: t })], 100);
+    return { ineq: (t, Lb) => cmp(A({ x: t }), B({ x: t }), Lb), pts: r || [] };
+  } });
+
+  /* « Dans la formule … , exprime v en fonction des autres lettres » (formule, 26.11) : la réponse attendue, substituée
+     dans la formule, la vérifie pour des valeurs positives quelconques des autres lettres */
+  G.push({ name: "formule", f(x) {
+    if (!x.spec || x.spec.kind !== "expr") return null;
+    const m = /Dans la formule \\\(([^]*?)\\\),? (?:exprime \\\(([a-zA-Z])\\\)|exprime ([a-zA-Z]) |[A-ZÉ]\S+ isole \\\(([a-zA-Z])\\\)|[A-ZÉ]\S+ isole ([a-zA-Z]) )/.exec(x.raw);
+    if (!m || !/=/.test(m[1])) return null;
+    const v = (m[2] || m[3] || m[4] || m[5]).toLowerCase(), lets = m[1].replace(/\\[a-zA-Z]+/g, "").match(/[a-zA-Z]/g) || [];
+    if (new Set(lets).size !== new Set(lets.map((c) => c.toLowerCase())).size) return null; /* même lettre en majuscule et minuscule */
+    const [L, R] = tex2e(m[1]).split("=");
+    let A, B, E; try { A = Expr.parse(L); B = Expr.parse(R); E = Expr.parse(x.spec.expr); } catch (e) { return null; }
+    const vs = [...new Set([...Expr.vars(A), ...Expr.vars(B)])].filter((u) => u !== v);
+    if ([...Expr.vars(E)].includes(v)) return { err: "la réponse attendue " + x.spec.expr + " contient encore " + v };
+    let n = 0;
+    for (let i = 0; i < 6; i++) {
+      const env = {}; vs.forEach((u, j) => (env[u] = 1.3 + ((i * 7 + j * 3) % 11) * 0.41 + j * 0.13));
+      const val = Expr.evaluate(E, env); if (!isFinite(val)) continue;
+      env[v] = val; const a = Expr.evaluate(A, env), b = Expr.evaluate(B, env);
+      if (!isFinite(a) || !isFinite(b)) continue; n++;
+      if (Math.abs(a - b) > 1e-8 * (1 + Math.abs(a) + Math.abs(b))) return { err: v + " = " + x.spec.expr + " ne vérifie pas la formule " + m[1] };
+    }
+    return n >= 3 ? { err: null } : null;
   } });
 
   /* ---------- règles de texte ---------- */
@@ -701,15 +885,479 @@ const RECALC = (() => {
   T(null, /Un cadre rectangulaire doit mesurer ([\d,]+) cm sur ([\d,]+) cm\. [^.]*\. Quelle devrait être la diagonale/i, (a, b) => Math.hypot(a, b));
   T(null, /un triangle de côtés ([\d,]+) cm, ([\d,]+) cm et x cm soit rectangle, x étant le plus grand côté/i, (a, b) => Math.hypot(a, b));
 
+  /* ========== extension du 26.11 (agent/recalc2) : volumes composés et manquants, Pythagore en figure, conversions,
+     fractions (simplifier, comparer, périodiques, d'une quantité), périmètres et aires, grandeurs manquantes ========== */
+  /* Q`…` : gabarit en expression régulière brute ; # = un nombre, ~ = une unité de longueur facultative */
+  const RX = (src) => new RegExp(src.replace(/#/g, NUM).replace(/~/g, "(?: ?(?:km|hm|dam|m|dm|cm|mm))?"), "i");
+  const Q = (s, ...v) => RX(s.raw ? String.raw(s, ...v) : s[0]);
+  const FR = String.raw`\((\d+)\)\/\((\d+)\)`; /* fraction (a)/(b) du texte lisible */
+  const F = (s, ...v) => RX(String.raw(s, ...v).replace(/§F/g, FR));
+
+  /* --- volumes composés (volcomp, voldecomp) --- */
+  T(null, Q`formé d'un cube d'arête # ~, surmonté d'une pyramide de même base et de hauteur # ~`, (a, h) => a ** 3 + (a * a * h) / 3);
+  T(null, Q`formée? d'un pavé (?:droit )?de # ~ × # ~ × # ~, surmonté d'un toit en prisme dont la base est un triangle de base # ~ et de hauteur # ~ \(sur toute la longueur # ~\)`, (a, b, c, tb, th, l) => a * b * c + ((tb * th) / 2) * l);
+  T(null, Q`la forme d'un pavé droit de # ~ de long, # ~ de large et # ~ de haut, surmonté d'un toit en forme de prisme dont la base est un triangle de base # ~ et de hauteur # ~`, (L, l, h, tb, th) => L * l * h + ((tb * th) / 2) * L);
+  T(null, Q`formé d'un cylindre de rayon # ~ et de hauteur # ~, surmonté d'un cône de même base et de hauteur # ~`, (r, h, k) => PI * r * r * h + (PI * r * r * k) / 3);
+  T(null, Q`formé d'un cylindre de rayon # ~ et de hauteur # ~, surmonté d'une demi-boule de même rayon`, (r, h) => PI * r * r * h + (2 / 3) * PI * r ** 3);
+  T(null, Q`cylindre terminé par deux demi-boules\. Son diamètre est # ~ et sa longueur totale # ~`, (d, L) => (4 / 3) * PI * (d / 2) ** 3 + PI * (d / 2) ** 2 * (L - d));
+  T(null, Q`trou cylindrique de rayon # ~ de part en part dans un cube d'arête # ~`, (r, a) => a ** 3 - PI * r * r * a);
+  T(null, Q`dans un cube d'arête # ~ la plus grande pyramide possible[^?]*\. Quel volume de matière enlève-t-on`, (a) => (2 / 3) * a ** 3);
+  T(null, Q`face avant est un triangle isocèle de base # ~ et de côtés # ~ ; la tente est longue de # ~`, (b, c, l) => ((b * Math.sqrt(c * c - (b / 2) ** 2)) / 2) * l);
+  T(null, Q`un cône de rayon # ~ et de hauteur # ~, rempli et surmonté d'une demi-boule de glace de même rayon`, (r, h) => (PI * r * r * h) / 3 + (2 / 3) * PI * r ** 3);
+  T(null, Q`D'un pavé droit de # ~ × # ~ × # ~, on enlève un cube de # ~ d'arête`, (a, b, c, k) => a * b * c - k ** 3);
+  T(null, Q`deux pavés droits accolés : l'un de # ~ × # ~ × # ~, l'autre de # ~ × # ~ × # ~`, (a, b, c, d, e, f) => a * b * c + d * e * f);
+  T(null, /escalier de \d+ marches est formé de \d+ pavés de [\d,]+ dm de large, [\d,]+ dm de profondeur et de hauteurs [\d, cmet]+\. Quel est son volume \(en dm³\)/i, (t) => { const m = /pavés de ([\d,]+) dm de large, ([\d,]+) dm de profondeur et de hauteurs ([\d, cmet]+)\./.exec(t); return num(m[1]) * num(m[2]) * m[3].match(/\d+(?:,\d+)?/g).reduce((s, h) => s + num(h) / 10, 0); }, { text: true });
+  T(null, Q`deux bassins de # ~ de profondeur : l'un de # ~ sur # ~, l'autre de # ~ sur # ~`, (p, a, b, c, d) => (a * b + c * d) * p);
+  T(null, Q`bloc de béton de # cm × # cm × # cm est traversé de haut en bas par un trou carré de # cm de côté\. Quel est le volume de béton \(en dm³\)`, (a, b, c, t) => ((a * b - t * t) * c) / 1000);
+  T(null, Q`la forme d'un cube de # m d'arête\. Combien de litres`, (a) => a ** 3 * 1000);
+  T(null, Q`bassin rectangulaire de # m sur # m est rempli d'eau sur une hauteur de # m\. Combien de litres`, (a, b, h) => a * b * h * 1000);
+  T(null, F`aquarium de # cm × # cm × # cm est rempli aux §F\. Combien de litres`, (a, b, c, p, q) => (a * b * c * p) / q / 1000);
+
+  /* --- volumes : grandeur manquante (volmanq) --- */
+  T(null, Q`pavé droit a un volume de # cm³ et une base de # cm sur # cm\. Quelle est sa hauteur`, (V, a, b) => V / (a * b));
+  T(null, Q`cylindre de rayon # ~ a un volume de #π`, (r, V) => V / (r * r));
+  T(null, Q`prisme droit a pour base un triangle de base # ~ et de hauteur # ~\. Son volume est # cm³\. Quelle est sa longueur`, (b, h, V) => V / ((b * h) / 2));
+  T(null, Q`cône de hauteur # ~ a un volume de #π`, (h, V) => Math.sqrt((3 * V) / h));
+  T(null, Q`boule a un volume de #π`, (V) => Math.cbrt((3 * V) / 4));
+  T(null, Q`pyramide à base carrée de côté # ~ a un volume de # [a-z]m³\. Quelle est sa hauteur`, (c, V) => (3 * V) / (c * c));
+  T(null, Q`boîte cylindrique de rayon # cm doit contenir # (L|dL|cL|mL)\. Quelle doit être sa hauteur \(en cm`, (r, V, u) => (num(V) * { L: 1000, dL: 100, cL: 10, mL: 1 }[u]) / (PI * num(r) ** 2), { raw: true });
+  T(null, Q`entonnoir en forme de cône a un diamètre de # ~ et contient #π`, (d, V) => (3 * V) / (d / 2) ** 2);
+  T(null, Q`piscine rectangulaire de # m sur # m doit contenir # m³`, (a, b, V) => V / (a * b));
+
+  /* --- Pythagore dans les figures (pythfig) --- */
+  T(null, Q`diagonale d'un carré de côté # ~`, (c) => c * Math.SQRT2);
+  T(null, Q`diagonale d'un rectangle de # ~ sur # ~`, (a, b) => Math.hypot(a, b));
+  T(null, Q`triangle isocèle a deux côtés de # ~ et une base de # ~\. Calcule la hauteur relative à la base`, (a, b) => Math.sqrt(a * a - (b / 2) ** 2));
+  T(null, Q`rectangulaire mesure # ~ de large et # ~ de haut\. Calcule sa diagonale`, (a, b) => Math.hypot(a, b));
+  T(null, Q`rectangulaire de # ~ sur # ~ est renforcé par une barre en diagonale`, (a, b) => Math.hypot(a, b));
+  T(null, Q`hauteur d'un triangle équilatéral de côté # ~`, (c) => (c * Math.sqrt(3)) / 2);
+  T(null, Q`pavé droit mesure # ~ × # ~ × # ~\. Calcule la longueur de sa grande diagonale`, (a, b, c) => Math.hypot(a, b, c));
+  T(null, Q`grande diagonale d'un cube d'arête # ~`, (a) => a * Math.sqrt(3));
+  T(null, Q`pyramide régulière à base carrée a un côté de base de # ~ et des arêtes latérales de # ~\. Calcule sa hauteur`, (c, l) => Math.sqrt(l * l - (c * c) / 2));
+  T(null, Q`cône a une génératrice de # ~ et un rayon de # ~\. Calcule sa hauteur`, (g, r) => Math.sqrt(g * g - r * r));
+  T(null, Q`cône a un rayon de # ~ et une hauteur de # ~\. Calcule sa génératrice`, (r, h) => Math.hypot(r, h));
+  T(null, Q`pyramide régulière à base carrée de côté # ~ et de hauteur # ~\. Calcule son apothème`, (c, h) => Math.hypot(h, c / 2));
+  T(null, Q`pavé droit [A-H]{8} a pour dimensions # ~, # ~ et # ~\. Calcule la longueur de la diagonale`, (a, b, c) => Math.hypot(a, b, c));
+
+  /* --- conversions d'unités (ulong, uaire, uvol, umasse, ucomp…) --- */
+  const ULEN = { km: 1e3, hm: 1e2, dam: 10, m: 1, dm: 0.1, cm: 0.01, mm: 1e-3, "µm": 1e-6 };
+  const UMAS = { t: 1e6, q: 1e5, kg: 1e3, hg: 100, dag: 10, g: 1, dg: 0.1, cg: 0.01, mg: 1e-3 };
+  const UCAP = { hl: 100, dal: 10, l: 1, dl: 0.1, cl: 0.01, ml: 1e-3 };
+  const UTPS = { j: 86400, h: 3600, min: 60, s: 1, ms: 1e-3 };
+  const UNAMES = { mètres: "m", mètre: "m", centimètres: "cm", millimètres: "mm", kilomètres: "km", grammes: "g", kilogrammes: "kg", litres: "L", minutes: "min", secondes: "s", heures: "h" };
+  function unit1(u) { /* → [dimension, facteur SI] */
+    u = String(u).trim().replace(/²/g, "^2").replace(/³/g, "^3"); u = UNAMES[u] || u;
+    let m;
+    if ((m = /^([a-zµ]+)\^([23])$/.exec(u)) && ULEN[m[1]]) return [m[2] === "2" ? "A" : "V", ULEN[m[1]] ** +m[2]];
+    if (u === "a") return ["A", 100]; if (u === "ha") return ["A", 1e4]; if (u === "ca") return ["A", 1];
+    if (ULEN[u]) return ["L", ULEN[u]];
+    if (UMAS[u]) return ["M", UMAS[u]];
+    if (/^(h|da|d|c|m)?[lL]$/.test(u) && UCAP[u.toLowerCase()]) return ["V", UCAP[u.toLowerCase()] * 1e-3];
+    if (UTPS[u]) return ["T", UTPS[u]];
+    return null;
+  }
+  function unitF(u) { /* unités composées : km/h, m^3/h, g/cm^3 */
+    const p = String(u).split("/"); if (p.length > 2) return null;
+    const a = unit1(p[0]); if (!a) return null; if (p.length === 1) return a;
+    const b = unit1(p[1]); if (!b) return null; return [a[0] + "/" + b[0], a[1] / b[1]];
+  }
+  const conv = (v, u1, u2) => { const a = unitF(u1), b = unitF(u2); return a && b && a[0] === b[0] ? (num(v) * a[1]) / b[1] : null; };
+  const UN = String.raw`([a-zA-Zµ]+(?:\^[23]|[²³])?(?:\/[a-zA-Zµ]+(?:\^[23]|[²³])?)?)`;
+  T(null, Q([String.raw`^(?:Convertis|Exprime) (?:en [^:]+: )?# ${UN} en ${UN}\s*[.?]?\s*$`]), conv, { raw: true });
+  T(null, Q([String.raw`convertit # ${UN} en ${UN} : «[^»]*»\. Trouve l'erreur, puis donne la bonne mesure`]), conv, { raw: true });
+  T(null, Q([String.raw`à raison de # ${UN}\. Exprime ce débit en ${UN}\s*\.?$`]), conv, { raw: true });
+  T(null, Q`piste d'athlétisme(?: couverte)? mesure # m\. Combien de tours faut-il faire pour courir # km`, (m, k) => (k * 1000) / m);
+  T(null, Q`colis de # kg contient un objet de # g ; le reste est l'emballage\. Quelle est la masse de l'emballage, en grammes`, (k, g) => k * 1000 - g);
+  T(null, Q([String.raw`^Calcule en (\S+) : # ${UN} ([+−-]) # ${UN}\s*\.?$`]), (u, a, ua, s, b, ub) => { const x = conv(a, ua, UNAMES[u] || u), y = conv(b, ub, UNAMES[u] || u); return x === null || y === null ? null : s === "+" ? x + y : x - y; }, { raw: true });
+
+  /* --- durées (utemps) --- */
+  T(null, Q`# h # min[^.,]*,? puis (?:il y a |il faut )?# min[^.]*\. Quelle est la durée totale, en minutes`, (h, m, k) => h * 60 + m + k);
+  T(null, Q`# h # min # s\. Combien de secondes`, (h, m, s) => h * 3600 + m * 60 + s);
+  T(null, Q`# min # s\. Combien de secondes`, (m, s) => m * 60 + s);
+  T(null, Q`# h # min\. Combien de minutes`, (h, m) => h * 60 + m);
+  T(null, Q`« # h = # h # min »\. Trouve son erreur, puis donne la bonne durée en minutes`, (x) => x * 60);
+  T(null, Q`# h\. Combien de minutes cela fait-il`, (x) => x * 60);
+  T(null, Q`^Convertis # h en minutes`, (x) => x * 60);
+  T(null, Q`^Écris # min # s en minutes \(nombre décimal\)`, (m, s) => m + s / 60);
+  T(null, Q`dure # h # min\. Écris cette durée en heures`, (h, m) => h + m / 60);
+  T(null, Q`part à # h # et arrive à # h #\. Combien de minutes dure le voyage`, (a, b, c, d) => c * 60 + d - (a * 60 + b));
+  T(null, Q`^Écris # s en heures, minutes et secondes\. Combien de minutes restent après les heures entières`, (s) => Math.floor((s % 3600) / 60));
+
+  /* --- fractions : amplifier, simplifier (fracsimp) --- */
+  const irr = (a, b) => { const g = gcd(a, b); return [a / g, b / g]; };
+  T(null, F`Par quel nombre a-t-on amplifié §F pour obtenir §F`, (a, b, c, d) => (c / a === d / b ? c / a : NaN));
+  T(null, F`Complète : §F = \((\d+)\)\/\(\?\)`, (a, b, c) => (c * b) / a);
+  T(null, F`Complète : §F = \(\?\)\/\((\d+)\)`, (a, b, d) => (a * d) / b);
+  T(null, F`Par quel nombre faut-il simplifier §F pour la rendre irréductible`, (a, b) => gcd(a, b));
+  T(null, F`Rends la fraction §F irréductible\. Quel est le dénominateur`, (a, b) => irr(a, b)[1]);
+  T(null, F`Rends la fraction §F irréductible\. Quel est le numérateur`, (a, b) => irr(a, b)[0]);
+  const dec2f = (s) => { const [e, d = ""] = String(s).replace("−", "-").split(","); const q = 10 ** d.length; return irr(Math.round(num(s) * q), q); };
+  T(null, Q`^Écris # sous forme de fraction irréductible\. Quel est son dénominateur`, (s) => dec2f(s)[1], { raw: true, not: /\\overline/ });
+  T(null, Q`^Écris # sous forme de fraction irréductible\. Quel est son numérateur`, (s) => dec2f(s)[0], { raw: true, not: /\\overline/ });
+
+  /* --- fractions : comparer, encadrer (fracrep) --- */
+  T(null, F`On range dans l'ordre croissant §F, §F, §F\. Quelle fraction est au milieu`, (a, b, c, d, e, f) => [a / b, c / d, e / f].sort((u, w) => u - w)[1]);
+  T(null, F`Quelle est la plus grande de ces deux fractions : §F ou §F`, (a, b, c, d) => Math.max(a / b, c / d));
+  T(null, F`Quelle est la plus petite de ces deux fractions : §F ou §F`, (a, b, c, d) => Math.min(a / b, c / d));
+  T(null, F`Quelle fraction est la plus proche de 1 : §F ou §F`, (a, b, c, d) => (Math.abs(1 - a / b) < Math.abs(1 - c / d) ? a / b : Math.abs(1 - a / b) > Math.abs(1 - c / d) ? c / d : NaN));
+  T(null, F`Combien de nombres entiers sont strictement compris entre §F et §F`, (a, b, c, d) => { const lo = Math.min(a / b, c / d), hi = Math.max(a / b, c / d); let n = 0; for (let k = Math.floor(lo) - 1; k <= hi + 1; k++) if (k > lo && k < hi) n++; return n; });
+  T(null, F`La fraction §F est comprise entre deux entiers consécutifs\. Quel est le plus petit`, (a, b) => (a % b ? Math.floor(a / b) : NaN));
+  T(null, F`La fraction §F est comprise entre deux entiers consécutifs\. Quel est le plus grand`, (a, b) => (a % b ? Math.floor(a / b) + 1 : NaN));
+
+  /* --- écritures décimales périodiques (fracper) : division posée --- */
+  const decs = (a, b, n) => { let r = a % b; const out = []; for (let i = 0; i < n; i++) { r *= 10; out.push(Math.floor(r / b)); r %= b; } return out; };
+  const period = (a, b) => { /* [pré-période, période] de a/b */ const seen = new Map(); let r = a % b, i = 0; while (r && !seen.has(r)) { seen.set(r, i++); r = (r * 10) % b; } return r ? [seen.get(r), i - seen.get(r)] : [i, 0]; };
+  T(null, Q`Le nombre # répète le groupe (\d+)\. Quel est son (\d+)e chiffre après la virgule`, (x, g, n) => +g[(+n - 1) % g.length], { raw: true });
+  T(null, F`écriture décimale de §F, quel est le (\d+)e chiffre après la virgule`, (a, b, n) => decs(a, b, n)[n - 1]);
+  T(null, F`écriture décimale de §F, quel chiffre se répète`, (a, b) => { const [p, l] = period(a, b); return l === 1 ? decs(a, b, p + 1)[p] : NaN; });
+  T(null, F`Combien de chiffres contient la période de l'écriture décimale de §F`, (a, b) => period(a, b)[1]);
+  T(null, F`Calcule §F \+ §F et écris le résultat en nombre décimal\. Quel chiffre se répète`, (a, b, c, d) => { const n = a * d + c * b, m = b * d, [p, l] = period(n, m); return l === 1 ? decs(n, m, p + 1)[p] : NaN; });
+  T(null, F`L'écriture décimale de §F répète indéfiniment un groupe de deux chiffres\. Lequel`, (a, b) => { const [p, l] = period(a, b); return l === 2 ? +decs(a, b, p + 2).slice(p).join("") : NaN; });
+  const perVal = (s, hint) => { /* « 0,2777 (seul le 7 se répète) » : plus courte pré-période, puis plus courte période répétée ≥ 2 fois */
+    const [e, d] = String(s).split(","); if (!d) return NaN;
+    for (let p = 0; p < d.length; p++) for (let l = 1; l <= 3; l++) {
+      const t = d.slice(p); if (t.length < 2 * l) continue;
+      if (![...t].every((c, i) => c === t[i % l])) continue;
+      if (hint && t.slice(0, l) !== hint) continue;
+      const pre = d.slice(0, p), per = t.slice(0, l);
+      return +e + (+(pre + per) - +(pre || 0)) / ((10 ** l - 1) * 10 ** p);
+    }
+    return NaN;
+  };
+  T(null, Q`^Écris le nombre #(?: \(seul le (\d+) se répète\))? sous forme de fraction`, (s, h) => perVal(s, h), { raw: true });
+
+  /* --- fraction d'une quantité (fractout) --- */
+  T(null, F`^Calcule les §F de #`, (a, b, n) => (n * a) / b);
+  T(null, F`Combien de minutes y a-t-il dans les §F d'une heure`, (a, b) => (60 * a) / b);
+  T(null, F`Les §F d'un nombre valent #\. Quel est ce nombre`, (a, b, n) => (n * b) / a);
+  T(null, F`Après avoir dépensé les §F de son argent, \S+ a encore # CHF`, (a, b, n) => n / (1 - a / b));
+  T(null, F`rempli aux §F contient # L\. Quelle est sa capacité`, (a, b, n) => (n * b) / a);
+  T(null, F`(?:coupé en|de) # (?:parts|L|élèves)[^.]*\. [^.]*les §F[^.]*\. Combien (?:de parts|de litres) reste-t-il|(?:coupé en|de) # (?:parts|L|élèves)[^.]*, les §F sont des filles\. Combien y a-t-il de garçons`, (n, a, b, n2, a2, b2) => (n !== undefined && !isNaN(n) ? n * (1 - a / b) : n2 * (1 - a2 / b2)));
+  T(null, F`(?:mesure|fait|contient|a) # (?:km|CHF|pages|L)\. [^.]*les §F\.(?: \S+ calcule : «[^»]*»\. Trouve l'erreur, puis donne le bon nombre de (?:km|CHF|pages)[^.?]*| Combien de kilomètres a-t-on parcourus)`, (n, a, b) => (n * a) / b);
+
+  /* --- périmètres (perim) --- */
+  T(null, Q`périmètre d'un rectangle de # ~ sur # ~`, (a, b) => 2 * (a + b));
+  T(null, Q`périmètre d'un carré de côté # ~`, (c) => 4 * c);
+  T(null, Q`périmètre d'un triangle équilatéral de côté # ~`, (c) => 3 * c);
+  T(null, Q`Un triangle a des côtés de # ~, # ~ et # ~\. Quel est son périmètre`, (a, b, c) => a + b + c);
+  T(null, Q`triangle isocèle a un périmètre de # ~ et une base de # ~\. Combien mesure chacun des deux côtés égaux`, (p, b) => (p - b) / 2);
+  T(null, Q`rectangle a un périmètre de # ~ et une (?:largeur|longueur) de # ~\. Quelle est sa (?:longueur|largeur)`, (p, a) => p / 2 - a);
+  T(null, Q`rectangulaire de # ~ sur # ~, \S+ calcule la longueur de [^«]*«[^»]*»\. Trouve l'erreur, puis donne la bonne longueur`, (a, b) => 2 * (a + b));
+  T(null, Q`On colle (\d+) carrés de # ~ de côté, côte à côte, en ligne\. Quel est le périmètre`, (n, c) => 2 * (n * c + c));
+  T(null, Q`Au milieu d'un côté de # ~ d'un rectangle de # ~ sur # ~, on découpe une encoche carrée de # ~ de côté\. Quel est le périmètre`, (s, a, b, c) => 2 * (a + b) + 2 * c);
+  T(null, Q`Dans un coin d'un rectangle de # ~ sur # ~, on découpe un rectangle de # ~ sur # ~\. Quel est le périmètre`, (a, b) => 2 * (a + b));
+  T(null, Q`carré a un périmètre de # ~\. Quelle est son aire`, (p) => (p / 4) ** 2);
+
+  /* --- aires (aire1, aire2, aire3) et grandeur manquante (grandmanq) --- */
+  T(null, Q`aire d'un carré de côté # ~`, (c) => c * c);
+  T(null, Q`aire d'un rectangle de # ~ sur # ~`, (a, b) => a * b);
+  T(null, Q`rectangle a une aire de # [a-z]*m² et une (?:largeur|longueur) de # ~\. Quelle est sa (?:longueur|largeur)`, (A, a) => A / a);
+  T(null, Q`triangle a une aire de # [a-z]*m² et une base de # ~\. Quelle est (?:la|sa) hauteur`, (A, b) => (2 * A) / b);
+  T(null, Q`aire d'un triangle de base # ~ et de hauteur # ~`, (b, h) => (b * h) / 2);
+  T(null, Q`triangle est rectangle\. Les côtés de l'angle droit mesurent # ~ et # ~\. Quelle est son aire`, (a, b) => (a * b) / 2);
+  T(null, Q`La base d'une? (?:voile|fanion) triangulaire mesure # ~ et la hauteur correspondante # ~\. [^«]*«[^»]*»\. Trouve l'erreur, puis donne l'aire`, (b, h) => (b * h) / 2);
+  T(null, Q`chambre mesure # m sur # m\. Le parquet coûte # CHF le m²`, (a, b, p) => a * b * p);
+  T(null, Q`triangle rectangle a des côtés de l'angle droit de # (dm|cm|mm|m) et # (dm|cm|mm|m)\. Quelle est son aire, en (dm|cm|mm|m)²`, (a, ua, b, ub, u) => (conv(a, ua, u) * conv(b, ub, u)) / 2, { raw: true });
+  T(null, Q`aire d'un parallélogramme de base # ~ et de hauteur # ~`, (b, h) => b * h);
+  T(null, Q`parallélogramme a une aire de # [a-z]*m² et une base de # ~\. Quelle est sa hauteur`, (A, b) => A / b);
+  T(null, Q`parallélogramme a une aire de # [a-z]*m² et une hauteur de # ~\. Quelle est la base`, (A, h) => A / h);
+  T(null, Q`a des diagonales perpendiculaires de # ~ et # ~\. Quelle est son aire`, (a, b) => (a * b) / 2);
+  T(null, Q`aire d'un losange dont les diagonales mesurent # ~ et # ~`, (a, b) => (a * b) / 2);
+  T(null, Q`losange a une aire de # [a-z]*m²\.? (?:et une|L'une de ses) diagonales? (?:de|mesure) # ~\. Combien mesure l'autre`, (A, d) => (2 * A) / d);
+  T(null, Q`parallélogramme a une base de # ~, un côté oblique de # ~ et une hauteur \(relative à la base\) de # ~\. Quelle est son aire`, (b, c, h) => b * h);
+  T(null, Q`triangle a une base de # ~ et un autre côté de # ~ ; la hauteur relative à la base mesure # ~\. Quelle est son aire`, (b, c, h) => (b * h) / 2);
+  T(null, Q`parallélogramme a des côtés de # ~ et # ~\. La hauteur relative au côté de # ~ mesure # ~\. Combien mesure la hauteur relative au côté de # ~`, (a, b, c, h, d) => (c * h) / d);
+  T(null, Q`formée d'un rectangle de # ~ sur # ~ accolé à un rectangle de # ~ sur # ~\. Quelle est son aire`, (a, b, c, d) => a * b + c * d);
+  T(null, Q`formée d'un carré de # ~ de côté, surmonté d'un triangle de même base et de # ~ de hauteur\. Quelle est son aire`, (c, h) => c * c + (c * h) / 2);
+  T(null, Q`lettre T est formée d'une barre de # ~ sur # ~, posée sur un pied de # ~ sur # ~\. Quelle est son aire`, (a, b, c, d) => a * b + c * d);
+  T(null, Q`formée de (\d+) fanions triangulaires de # ~ de base et # ~ de hauteur\. Quelle est l'aire totale`, (n, b, h) => (n * b * h) / 2);
+  T(null, Q`la forme d'un rectangle de # ~ de large et # ~ de haut, surmonté d'un triangle de base # ~ et de hauteur # ~\. Quelle est son aire`, (a, b, c, h) => a * b + (c * h) / 2);
+  T(null, Q`trapèze rectangle a des bases de # ~ et # ~ et une hauteur de # ~\. On le découpe`, (a, b, h) => ((a + b) * h) / 2);
+  T(null, Q`cadre rectangulaire mesure # ~ sur # ~ à l'extérieur\. Sa bordure a partout # ~ de large\. Quelle est l'aire de la bordure`, (a, b, e) => a * b - (a - 2 * e) * (b - 2 * e));
+  T(null, Q`chemin de # ~ de large fait le tour, à l'extérieur, d'un jardin rectangulaire de # ~ sur # ~\. Quelle est l'aire du chemin`, (e, a, b) => (a + 2 * e) * (b + 2 * e) - a * b);
+  T(null, Q`pelouse rectangulaire de # ~ sur # ~ entoure un bassin carré de # ~ de côté\. Quelle est l'aire de la pelouse`, (a, b, c) => a * b - c * c);
+  T(null, Q`carré a une aire de # [a-z]*m²\. Combien mesure son côté`, (A) => Math.sqrt(A));
+  T(null, Q`rectangle a une longueur double de sa largeur et une aire de # [a-z]*m²\. Quelle est sa largeur`, (A) => Math.sqrt(A / 2));
+  T(null, Q`trapèze a des bases de # ~ et # ~ et une aire de # [a-z]*m²\. Quelle est sa hauteur`, (a, b, A) => (2 * A) / (a + b));
+  T(null, Q`parallélogramme de base # ~ a la même aire qu'un carré de # ~ de côté\. Quelle est sa hauteur`, (b, c) => (c * c) / b);
+  T(null, Q`triangle de base # ~ a la même aire qu'un rectangle de # ~ sur # ~\. Quelle est sa hauteur`, (b, x, y) => (2 * x * y) / b);
+
+  /* --- nombres décimaux, arrondis, divisibilité, premiers, proportionnalité, change, agrandissement, ordre de grandeur
+     (notions de 9e, 26.11) : réponses exactes (TE : pas d'arrondi relu dans l'énoncé, « au dixième » y est une donnée) --- */
+  const TE = (ids, p, f, o = {}) => T(ids, p, f, { ...o, exact: true });
+  const RW = { "au dixième": 0.1, "au centième": 0.01, "au millième": 0.001, "à l'unité": 1, "à la dizaine": 10, "à la centaine": 100, "au millier": 1000, "à la dizaine de milliers": 1e4 };
+  const RWS = "(au dixième|au centième|au millième|à l'unité|à la dizaine de milliers|à la dizaine|à la centaine|au millier)";
+  const rnd = (v, w) => roundTo(num(v), RW[w] || num(w), 0);
+  const LS = (s) => String(s).split(/\s*;\s*|\s+/).filter((t) => /\d/.test(t)).map(num);
+  const LST = String.raw`((?:[−-]?\d+(?:'\d{3})*(?:,\d+)?(?: ; |\s+))+[−-]?\d+(?:'\d{3})*(?:,\d+)?)`;
+  const R2 = (s) => RX(s.replace(/LST/g, LST).replace(/RWS/g, RWS));
+  const Z = (s, ...v) => R2(String.raw(s, ...v));
+  TE(null, Z`^Arrondis # RWS\.?$`, (v, w) => rnd(v, w), { raw: true });
+  TE(null, Z`plus grand nombre à deux chiffres après la virgule qui s'arrondit à # au dixième`, (a) => +(a + 0.04).toFixed(2));
+  TE(null, Z`plus petit nombre à deux chiffres après la virgule qui s'arrondit à # au dixième`, (a) => +(a - 0.05).toFixed(2));
+  TE(null, Z`On encadre # par deux nombres consécutifs à un chiffre après la virgule\. Quel est le plus grand`, (a) => (Number.isInteger(+(a * 10).toFixed(6)) ? NaN : Math.ceil(a * 10) / 10));
+  TE(null, Z`On encadre # par deux nombres consécutifs à un chiffre après la virgule\. Quel est le plus petit`, (a) => (Number.isInteger(+(a * 10).toFixed(6)) ? NaN : Math.floor(a * 10) / 10));
+  TE(null, Z`Quel est le plus petit de ces deux nombres : # ou #`, (a, b) => Math.min(a, b));
+  TE(null, Z`Quel est le plus grand de ces deux nombres : # ou #`, (a, b) => Math.max(a, b));
+  TE(null, Z`De combien le plus grand de ces deux nombres dépasse-t-il le plus petit : # ou #`, (a, b) => +Math.abs(a - b).toFixed(10));
+  TE(null, Z`On range dans l'ordre croissant : LST\. Quel nombre est en (\d+)e position`, (l, k) => LS(l).sort((u, w) => u - w)[+k - 1], { raw: true });
+  TE(null, Z`On range dans l'ordre décroissant : LST\. Quel nombre est en (\d+)e position`, (l, k) => LS(l).sort((u, w) => w - u)[+k - 1], { raw: true });
+  TE(null, Z`Quel est le plus petit de ces nombres \? LST\s*\.?$`, (l) => Math.min(...LS(l)), { raw: true });
+  TE(null, Z`Quel est le plus grand de ces nombres \? LST\s*\.?$`, (l) => Math.max(...LS(l)), { raw: true });
+  TE(null, Z`plus petit nombre à deux chiffres après la virgule strictement plus grand que #`, (a) => (Math.floor(+(a * 100).toFixed(6)) + 1) / 100);
+  TE(null, Z`plus grand nombre à deux chiffres après la virgule strictement plus petit que #`, (a) => (Math.ceil(+(a * 100).toFixed(6)) - 1) / 100);
+  TE(null, Z`Quel nombre est exactement au milieu entre # et #`, (a, b) => +((a + b) / 2).toFixed(10));
+  TE(null, Z`Combien y a-t-il de nombres à deux chiffres après la virgule strictement compris entre # et #`, (a, b) => Math.ceil(+(Math.max(a, b) * 100).toFixed(6)) - Math.floor(+(Math.min(a, b) * 100).toFixed(6)) - 1);
+  TE(null, Z`Combien y a-t-il de nombres à un chiffre après la virgule strictement compris entre # et #`, (a, b) => Math.ceil(+(Math.max(a, b) * 10).toFixed(6)) - Math.floor(+(Math.min(a, b) * 10).toFixed(6)) - 1);
+  /* problèmes avec des décimaux (decprob) */
+  T(null, Z`(?:pèse|coûte|contient|mesure) # (?:kg|CHF|L|m)\. Combien (?:pèsent|coûtent|mesurent) # `, (a, n) => a * n);
+  T(null, Z`contient # L\. Quelle quantité faut-il pour remplir # verres`, (a, n) => a * n);
+  T(null, Z`coûte # CHF de prise en charge, puis # CHF par kilomètre\. Combien coûte une course de # km`, (a, b, k) => a + b * k);
+  T(null, Z`Tu achètes # \S+ à # CHF et # \S+ à # CHF\. Tu paies avec un billet de # CHF\. Combien te rend-on`, (n1, p1, n2, p2, B) => B - n1 * p1 - n2 * p2);
+  T(null, Z`Tu as # CHF\. Tu achètes # [^.]*? à # CHF et (?:un|une) [^.]*? à # CHF\. Combien te reste-t-il`, (A, n, p, q) => A - n * p - q);
+  T(null, Z`D'une corde de # m, on retire d'abord # m abîmés, puis on coupe le reste en # morceaux égaux`, (L, a, n) => (L - a) / n);
+  T(null, Z`^# amis offrent un cadeau à # CHF et une carte à # CHF\. Ils partagent`, (n, a, b) => (a + b) / n);
+  T(null, Z`^# amis partagent équitablement une addition : # CHF de [^.]*? et # CHF de`, (n, a, b) => (a + b) / n);
+  /* divisibilité (divcrit), multiples et diviseurs (multdiv), nombres premiers (premiers) */
+  const dvs = (n) => { const o = []; for (let d = 1; d <= n; d++) if (n % d === 0) o.push(d); return o; };
+  const pf = (n) => { const o = []; for (let d = 2; d * d <= n; d++) while (n % d === 0) { o.push(d); n /= d; } if (n > 1) o.push(n); return o; };
+  const isP = (n) => n > 1 && pf(n).length === 1;
+  const divBy = (n, ks) => ks.every((k) => n % k === 0);
+  const ksOf = (s) => (s.match(/\d+/g) || []).map(Number);
+  const holes = (pat, ks) => { const o = []; for (let c = 0; c <= 9; c++) { const n = +pat.replace(/\s/g, "").replace("■", c); if (divBy(n, ks)) o.push(c); } return o; };
+  const one = (a) => (a.length === 1 ? a[0] : NaN);
+  TE(null, Z`Lequel de ces nombres est divisible par ([\d et par]+?) \? LST\s*\.?$`, (k, l) => one(LS(l).filter((n) => divBy(n, ksOf(k)))), { raw: true });
+  TE(null, Z`Combien de ces nombres sont divisibles par ([\d et par]+?) \? LST\s*\.?$`, (k, l) => LS(l).filter((n) => divBy(n, ksOf(k))).length, { raw: true });
+  TE(null, Z`Quel chiffre faut-il écrire à la place de ■ pour que ([\d ■]+) soit divisible par ([\d et par]+?)\s*\?`, (p, k) => one(holes(p, ksOf(k))), { raw: true });
+  TE(null, Z`Quel est le plus grand chiffre (?:à écrire à la place de )?■ pour que ([\d ■]+) soit divisible par ([\d et par]+?)\s*\?`, (p, k) => Math.max(...holes(p, ksOf(k))), { raw: true });
+  TE(null, Z`Quel est le plus petit chiffre (?:à écrire à la place de )?■ pour que ([\d ■]+) soit divisible par ([\d et par]+?)\s*\?`, (p, k) => Math.min(...holes(p, ksOf(k))), { raw: true });
+  TE(null, Z`Combien de chiffres ■ \(de 0 à 9\) rendent ([\d ■]+) divisible par ([\d et par]+?)\s*\?`, (p, k) => holes(p, ksOf(k)).length, { raw: true });
+  TE(null, Z`plus petit nombre strictement supérieur à # divisible (?:à la fois )?par ([\d et par]+?)\s*\?`, (a, k) => { let n = num(a) + 1; while (!divBy(n, ksOf(k))) n++; return n; }, { raw: true });
+  TE(null, Z`Combien de nombres entre # et # \(compris\) sont divisibles (?:à la fois )?par ([\d et par]+?)\s*\?`, (a, b, k) => { let c = 0; for (let n = num(a); n <= num(b); n++) if (divBy(n, ksOf(k))) c++; return c; }, { raw: true });
+  TE(null, Z`plus petit multiple de # strictement supérieur à #`, (k, a) => (Math.floor(a / k) + 1) * k);
+  TE(null, Z`plus grand multiple de # strictement inférieur à #`, (k, a) => (Math.ceil(a / k) - 1) * k);
+  TE(null, Z`Quel est le (\d+)e multiple de #`, (i, k) => i * k);
+  TE(null, Z`Combien de diviseurs le nombre # possède-t-il`, (n) => dvs(n).length);
+  TE(null, Z`plus petit diviseur de # autre que 1`, (n) => dvs(n)[1]);
+  TE(null, Z`plus grand diviseur de #, autre que # lui-même`, (n) => dvs(n).slice(-2)[0]);
+  TE(null, Z`Combien y a-t-il de multiples de # entre # et #`, (k, a, b) => Math.floor(b / k) - Math.ceil(a / k) + 1);
+  TE(null, Z`Combien de nombres entre # et # sont multiples à la fois de # et de #`, (a, b, k1, k2) => { const k = lcm(k1, k2); return Math.floor(b / k) - Math.ceil(a / k) + 1; });
+  TE(null, Z`Combien y a-t-il de nombres premiers entre # et #`, (a, b) => { let c = 0; for (let n = a; n <= b; n++) if (isP(n)) c++; return c; });
+  TE(null, Z`plus petit nombre premier strictement supérieur à #`, (a) => { let n = a + 1; while (!isP(n)) n++; return n; });
+  TE(null, Z`plus grand nombre premier strictement inférieur à #`, (a) => { let n = a - 1; while (!isP(n)) n--; return n; });
+  TE(null, Z`plus petit facteur premier de #`, (n) => pf(n)[0]);
+  TE(null, Z`plus grand facteur premier de #|Décompose # en produit de facteurs premiers\. Quel est son plus grand facteur premier`, (n, m) => Math.max(...pf(isNaN(n) ? m : n)));
+  TE(null, Z`On décompose # en produit de facteurs premiers\. Quel est l'exposant de #`, (n, p) => pf(n).filter((d) => d === p).length);
+  TE(null, Z`Combien de nombres premiers différents apparaissent dans la décomposition de #`, (n) => new Set(pf(n)).size);
+  TE(null, Z`On décompose # en produit de facteurs premiers\. Combien de facteurs le produit contient-il`, (n) => pf(n).length);
+  TE(null, Z`Quel nombre a pour décomposition en produit de facteurs premiers ([\d ·^]+?)\s*\?`, (e) => { let v; try { v = ev(e.replace(/·/g, "*")); } catch (er) { return null; } return v; }, { raw: true });
+  /* tableaux de proportionnalité (proptab), change, agrandissement (agrand) */
+  T(null, Z`# kg de [^.]* coûtent # CHF\. Quel est le coefficient de proportionnalité`, (m, p) => p / m);
+  T(null, Z`tableau de proportionnalité, # correspond à #(?: et # à #)?\. (?:Par quel nombre multiplie-t-on|Quel est le coefficient)`, (a, b, c, d) => (isNaN(c) || Math.abs(d / c - b / a) < 1e-9 ? b / a : NaN));
+  T(null, Z`recette demande # g de [^.]* pour # personnes\. Quelle quantité [^.?]* par personne`, (g, n) => g / n);
+  T(null, Z`proportionnalité : # # et # \?\. Quel nombre manque`, (a, b, c) => (c * b) / a);
+  T(null, Z`proportionnalité : # # et \? #\. Quel nombre manque`, (a, b, d) => (d * a) / b);
+  T(null, Z`proportionnalité : # # et # #\. Quel nombre correspond à #`, (a, b, c, d, k) => (Math.abs(d / c - b / a) < 1e-9 ? (k * b) / a : NaN));
+  T(null, Z`Pour 1 CHF, on obtient # EUR\. Combien d'euros obtient-on pour # CHF`, (t, a) => a * t);
+  T(null, Z`Pour 1 EUR, on obtient # CHF\. Combien de francs obtient-on pour # EUR`, (t, a) => a * t);
+  T(null, Z`coûte # EUR [^.]*\. Le taux est 1 EUR = # CHF\. Combien cela fait-il en francs`, (a, t) => a * t);
+  T(null, Z`1 EUR = # CHF\. Combien de francs obtient-on pour # EUR`, (t, a) => a * t);
+  T(null, Z`1 EUR = # CHF\. Combien d'euros obtient-on pour # CHF`, (t, a) => a / t);
+  T(null, Z`Tu as # CHF\. Combien d'euros reçois-tu au taux 1 EUR = # CHF`, (a, t) => a / t);
+  T(null, Z`Au taux 1 EUR = # CHF, [^.]* coûte # CHF\. Quel est son prix en euros`, (t, a) => a / t);
+  T(null, Z`coûte # EUR en France et # CHF en Suisse\. Le taux est 1 EUR = # CHF\. Quelle est la différence de prix`, (e, c, t) => +Math.abs(e * t - c).toFixed(10));
+  T(null, Z`coûte # EUR la nuit en France\. En Suisse, # nuits coûtent # CHF\. Le taux est 1 EUR = # CHF`, (e, n, c, t) => +Math.abs(n * e * t - c).toFixed(10));
+  T(null, Z`coûtent # EUR en ligne et # CHF en magasin\. Le taux est 1 EUR = # CHF\. De combien`, (e, c, t) => +Math.abs(e * t - c).toFixed(10));
+  T(null, Z`une longueur de # cm devient # cm\. Par quel nombre`, (a, b) => b / a);
+  T(null, Z`de # cm de large est réduite à # cm de large\. Par quelle fraction`, (a, b) => b / a);
+  T(null, Z`rectangle de # cm sur # cm est (?:agrandi|réduit) en un rectangle de # cm sur # cm\. Par quel nombre`, (a, b, c, d) => (Math.abs(c / a - d / b) < 1e-9 ? c / a : NaN));
+  T(null, Z`triangle de côtés # cm, # cm et # cm est (?:agrandi|réduit) d'un facteur #\. Combien mesure son plus long côté`, (a, b, c, k) => Math.max(a, b, c) * k);
+  T(null, Z`triangle de côtés # cm, # cm et # cm est (?:agrandi|réduit) d'un facteur #\. Combien mesure son plus petit côté`, (a, b, c, k) => Math.min(a, b, c) * k);
+  T(null, Z`On réduit de moitié les longueurs d'un rectangle de # cm sur # cm\. Quel est le périmètre`, (a, b) => a + b);
+  T(null, Z`photo de # cm sur # cm : sa largeur passe de # cm à # cm\. Quelle est sa nouvelle longueur`, (a, b, c, d) => (a === c ? (b * d) / c : NaN));
+  T(null, F`chaque longueur est multipliée par §F\. Que devient un segment de # cm`, (p, q, a) => (a * p) / q);
+  T(null, Z`un segment de # cm devient un segment de # cm\. Que devient un segment de # cm`, (a, b, c) => (c * b) / a);
+  T(null, Z`un côté de # cm est devenu # cm\. Que devient un autre côté de # cm`, (a, b, c) => (c * b) / a);
+  /* ordre de grandeur (ordgr) */
+  const OPS = { "+": (a, b) => a + b, "-": (a, b) => a - b, "−": (a, b) => a - b, "·": (a, b) => a * b, ":": (a, b) => a / b };
+  TE(null, Z`^Estime # ([+−·:-]) # en arrondissant chaque nombre RWS`, (a, o, b, w) => OPS[o](rnd(a, w), rnd(b, w)), { raw: true });
+  TE(null, Z`^Estime # ([+−·:-]) # en arrondissant le premier nombre RWS et le second RWS`, (a, o, b, w1, w2) => OPS[o](rnd(a, w1), rnd(b, w2)), { raw: true });
+  TE(null, Z`coûte # CHF et [^.]*? # CHF\. Estime le prix [^.]*? en arrondissant chaque prix RWS`, (a, b, w) => rnd(a, w) + rnd(b, w), { raw: true });
+  TE(null, Z`Pour vérifier, donne l'ordre de grandeur # · #`, (a, b) => a * b);
+  TE(null, Z`coûte # CHF le litre\. Estime le prix de # litres en arrondissant le prix RWS et le volume RWS`, (p, l, w1, w2) => rnd(p, w1) * rnd(l, w2), { raw: true });
+  TE(null, Z`Ordre de grandeur de # · # Arrondis # à # et # RWS\. Résultat`, (a, b, a2, ra, b2, w) => (num(a) === num(a2) && num(b) === num(b2) ? num(ra) * rnd(b, w) : NaN), { raw: true });
+  TE(null, Z`récolte # CHF, à partager entre # projets\. Estime la part de chacun en arrondissant la somme RWS`, (a, n, w) => rnd(a, w) / num(n), { raw: true });
+
+  /* --- relatifs sur la droite, décimaux (×10, additions, lecture), fraction ↔ décimal ↔ %, racines, cercle de Thalès,
+     dénombrement (26.11) --- */
+  TE(null, Z`il fait # °C ; l'après-midi, # °C\. De combien de degrés la température a-t-elle (?:monté|baissé)`, (a, b) => Math.abs(b - a));
+  TE(null, Z`distance entre les points d'abscisses # et #`, (a, b) => Math.abs(b - a));
+  TE(null, Z`Quel nombre est à égale distance de # et de # sur la droite graduée`, (a, b) => (a + b) / 2);
+  TE(null, Z`Le point A a pour abscisse #\. Le milieu de \[AB\] a pour abscisse #\. Quelle est l'abscisse de B`, (a, m) => 2 * m - a);
+  TE(null, Z`Par quel nombre faut-il multiplier # pour obtenir #`, (a, b) => +(b / a).toPrecision(12));
+  TE(null, Z`Par quel nombre faut-il diviser # pour obtenir #`, (a, b) => +(a / b).toPrecision(12));
+  TE(null, Z`^Complète : \? · # = #`, (k, b) => +(b / k).toPrecision(12));
+  TE(null, Z`^Complète : # · \? = #`, (k, b) => +(b / k).toPrecision(12));
+  TE(null, Z`^Complète : \? : # = #`, (k, b) => +(b * k).toPrecision(12));
+  TE(null, Z`^Complète : # \+ \? = #`, (a, b) => +(b - a).toPrecision(12));
+  TE(null, Z`^Complète : # - \? = #`, (a, b) => +(a - b).toPrecision(12));
+  TE(null, Z`^Complète : \? - # = #`, (a, b) => +(a + b).toPrecision(12));
+  TE(null, Z`Un paquet de # feuilles pèse # g\. Combien pèse une feuille`, (n, g) => +(g / n).toPrecision(12));
+  TE(null, Z`écrit : « # · # = # »\. Trouve l'erreur, puis donne le bon résultat`, (a, b) => +(a * b).toPrecision(12));
+  TE(null, Z`écrit : « # : # = # »\. Trouve l'erreur, puis donne le bon résultat`, (a, b) => +(a / b).toPrecision(12));
+  TE(null, Z`place de cinéma à # CHF et tu paies avec un billet de # CHF\. Combien te rend-on`, (p, b) => +(b - p).toFixed(10));
+  TE(null, Z`lance le poids à # m et \S+ # m\. Quel est l'écart`, (a, b) => +Math.abs(a - b).toFixed(10));
+  TE(null, Z`colis pèse # kg ; on en retire un objet de # kg\. Nouvelle masse`, (a, b) => +(a - b).toFixed(10));
+  TE(null, Z`On coupe # m d'un ruban de # m\. Quelle longueur reste-t-il`, (a, b) => +(b - a).toFixed(10));
+  TE(null, Z`Avec # CHF, \S+ achète un \S+ à # CHF, un \S+ à # CHF et un \S+ à # CHF\. Combien lui reste-t-il`, (A, a, b, c) => +(A - a - b - c).toFixed(10));
+  TE(null, Z`il fait # °C\. La température monte de # °C, puis baisse de # °C\. Quelle température`, (a, b, c) => +(a + b - c).toFixed(10));
+  TE(null, Z`il fait # °C\. La température baisse de # °C, puis monte de # °C\. Quelle température`, (a, b, c) => +(a - b + c).toFixed(10));
+  const PLACE = { "millièmes": -3, "centièmes": -2, "dixièmes": -1, "unités": 0, "dizaines": 1, "centaines": 2, "milliers": 3 };
+  TE(null, Z`Dans le nombre #, quel est le chiffre des (millièmes|centièmes|dixièmes|unités|dizaines|centaines|milliers)`, (n, p) => Math.floor(+(Math.abs(num(n)) / 10 ** PLACE[p]).toFixed(6)) % 10, { raw: true });
+  const DEC = { milliers: 1000, centaines: 100, dizaines: 10, dizaine: 10, centaine: 100, millier: 1000, unités: 1, unité: 1, dixièmes: 0.1, dixième: 0.1, centièmes: 0.01, centième: 0.01, millièmes: 0.001, millième: 0.001 };
+  TE(null, /^Écris en nombre décimal : ((?:\d+ [a-zéè]+(?:, | et )?)+)\.?$/i, (s) => +(s.match(/\d+ [a-zéè]+/g).reduce((t, x) => { const [n, w] = x.split(" "); return t + +n * DEC[w]; }, 0)).toFixed(10), { raw: true });
+  TE(null, Z`Quel nombre obtient-on en ajoutant # (dixièmes?|centièmes?|millièmes?|unités?|dizaines?) à #`, (k, w, a) => +(num(a) + num(k) * DEC[w]).toFixed(10), { raw: true });
+  TE(null, Z`Quel nombre obtient-on en retirant # (dixièmes?|centièmes?|millièmes?|unités?|dizaines?) à #`, (k, w, a) => +(num(a) - num(k) * DEC[w]).toFixed(10), { raw: true });
+  TE(null, Z`Combien y a-t-il de (dixièmes|centièmes|millièmes|dizaines|centaines) en tout dans #`, (w, a) => Math.round(+(num(a) / DEC[w]).toFixed(6)), { raw: true });
+  TE(null, Z`test de # questions, \S+ répond juste à # questions\. Quel est son pourcentage`, (n, k) => +((k / n) * 100).toFixed(10));
+  TE(null, Z`Dans une classe de # élèves, # font partie d'un club[^.]*\. Quel pourcentage`, (n, k) => +((k / n) * 100).toFixed(10));
+  TE(null, Z`^Écris # sous forme de fraction irréductible\.?$`, (s) => { const [a, b] = dec2f(s); return a / b; }, { raw: true, not: /\\overline/ });
+  TE(null, Z`^Écris # \(soit # \) sous forme de fraction irréductible`, (a, s) => perVal(s), { raw: true });
+  TE(null, Z`^Écris # % sous forme de fraction irréductible`, (p) => p / 100);
+  TE(null, F`^Écris §F en pourcentage`, (a, b) => +((a / b) * 100).toFixed(10));
+  TE(null, F`Quel est le plus grand de ces nombres : §F, # ou # % \? Donne sa valeur en nombre décimal`, (a, b, d, p) => Math.max(a / b, d, p / 100));
+  TE(null, F`Quel est le plus petit de ces nombres : §F, # ou # % \? Donne sa valeur en nombre décimal`, (a, b, d, p) => Math.min(a / b, d, p / 100));
+  TE(null, F`Un prix baisse d'abord de §F, puis le nouveau prix baisse de # %\. De quel pourcentage`, (a, b, p) => +((1 - (1 - a / b) * (1 - p / 100)) * 100).toFixed(10));
+  TE(null, F`Un prix augmente d'abord de §F, puis le nouveau prix augmente de # %\. De quel pourcentage`, (a, b, p) => +(((1 + a / b) * (1 + p / 100) - 1) * 100).toFixed(10));
+  TE(null, F`^Calcule # % de §F`, (p, a, b) => ((p / 100) * a) / b);
+  const SQ = String.raw`(\d*)√\((\d+)\)`, sq = (k, n) => (k ? +k : 1) * Math.sqrt(+n);
+  const Y = (s, ...v) => R2(String.raw(s, ...v).replace(/SQ/g, SQ));
+  TE(null, Y`Quel est l'entier le plus proche de SQ`, (k, n) => Math.round(sq(k, n)), { raw: true });
+  TE(null, Y`Le nombre SQ est compris entre deux entiers consécutifs\. Quel est le plus petit`, (k, n) => Math.floor(sq(k, n)), { raw: true });
+  TE(null, Y`Le nombre SQ est compris entre deux entiers consécutifs\. Quel est le plus grand`, (k, n) => Math.floor(sq(k, n)) + 1, { raw: true });
+  TE(null, Y`Quel est le plus petit de ces deux nombres : # ou SQ`, (a, k, n) => Math.min(num(a), sq(k, n)), { raw: true });
+  TE(null, Y`Quel est le plus grand de ces deux nombres : # ou SQ`, (a, k, n) => Math.max(num(a), sq(k, n)), { raw: true });
+  TE(null, Y`Quel est le plus grand : SQ ou SQ`, (k, n, l, m) => Math.max(sq(k, n), sq(l, m)), { raw: true });
+  TE(null, Y`Quel est le plus petit : SQ ou SQ`, (k, n, l, m) => Math.min(sq(k, n), sq(l, m)), { raw: true });
+  TE(null, Y`On range SQ, # et # dans l'ordre croissant\. Lequel est au milieu`, (k, n, a, b) => [sq(k, n), num(a), num(b)].sort((u, w) => u - w)[1], { raw: true });
+  TE(null, Y`Encadre SQ au dixième : quel est le nombre a`, (k, n) => Math.floor(sq(k, n) * 10 + 1e-9) / 10, { raw: true });
+  TE(null, Y`Combien y a-t-il de nombres entiers n tels que # < √\(n\) < #`, (a, b) => { let c = 0; for (let n = 0; n <= 1e4; n++) if (Math.sqrt(n) > num(a) && Math.sqrt(n) < num(b)) c++; return c; }, { raw: true });
+  TE(null, Y`Quel est le plus grand entier n tel que √\(n\) < #`, (a) => Math.ceil(num(a) ** 2 - 1e-9) - 1, { raw: true });
+  TE(null, Y`Combien de nombres entiers sont compris entre SQ et SQ`, (k, n, l, m) => { const lo = sq(k, n), hi = sq(l, m); let c = 0; for (let i = Math.floor(lo); i <= hi; i++) if (i > lo && i < hi) c++; return c; }, { raw: true });
+  /* cercle de Thalès, tangente (cercthales) */
+  TE(null, Z`\[AB\] est un diamètre d'un cercle et C un point du cercle\. ∠CAB = #°\. Combien mesure ∠CBA`, (a) => 90 - a);
+  TE(null, Z`\[AB\] est un diamètre d'un cercle et C un point du cercle\. ∠CBA = #°\. Combien mesure ∠CAB`, (a) => 90 - a);
+  T(null, Z`\[AB\] est un diamètre de # cm d'un cercle, et C un point du cercle tel que AC = # cm\. Calcule BC`, (d, a) => Math.sqrt(d * d - a * a));
+  T(null, Z`D'un point P à # cm du centre O d'un cercle de rayon # cm, on trace une tangente qui touche le cercle en T\. Calcule PT`, (d, r) => Math.sqrt(d * d - r * r));
+  TE(null, Z`tangente en T à un cercle de centre O\. ∠OPT = #°\. Combien mesure ∠POT`, (a) => 90 - a);
+  TE(null, Z`tangente en T à un cercle de centre O\. ∠POT = #°\. Combien mesure ∠OPT`, (a) => 90 - a);
+  T(null, Z`triangle ABC est rectangle en C, avec AC = # cm et BC = # cm\. Quel est le rayon de son cercle circonscrit`, (a, b) => Math.hypot(a, b) / 2);
+  T(null, Z`touche un cercle de centre O en T\. OP = # cm et PT = # cm\. Quel est le rayon`, (d, t) => Math.sqrt(d * d - t * t));
+  T(null, Z`\[AB\] est un diamètre de # cm et C un point du cercle tel que AC = # cm\. Calcule l'aire du triangle ABC`, (d, a) => (a * Math.sqrt(d * d - a * a)) / 2);
+  TE(null, Z`\[AB\] est un diamètre d'un cercle de centre O, et C un point du cercle\. ∠ACO = #°\. Combien mesure ∠BCO`, (a) => 90 - a);
+  T(null, Z`D'un point P à # cm du centre O d'un cercle de rayon # cm, on trace les deux tangentes[^.]*\. Quel est le périmètre du quadrilatère`, (d, r) => 2 * r + 2 * Math.sqrt(d * d - r * r));
+  /* dénombrement (denombr) */
+  const fact = (n) => (n <= 1 ? 1 : n * fact(n - 1)), arr = (n, k) => fact(n) / fact(n - k);
+  TE(null, /(?:tu as|propose|on choisit) ((?:(?:un \S+ parmi )?\d+ [^,.]+?(?:, | et |\. ))+)Combien de (?:tenues|pizzas|glaces|menus|repas)/i, (s) => { const n = s.match(/\d+/g) || []; return n.length >= 2 ? n.reduce((p, k) => p * +k, 1) : null; }, { raw: true });
+  TE(null, Z`code secret est formé de # symboles, chacun choisi parmi # \(on peut répéter\)`, (k, n) => n ** k);
+  TE(null, Z`cadenas a # molettes portant chacune les chiffres de # à #`, (k, a, b) => (b - a + 1) ** k);
+  TE(null, Z`de A à B, il y a # chemins ; de B à C, il y a # chemins`, (a, b) => a * b);
+  TE(null, Z`classe de # élèves élit un délégué et un suppléant`, (n) => n * (n - 1));
+  TE(null, Z`De combien de façons peut-on ranger # (?:amis|coureurs|livres|personnes)`, (n) => fact(n));
+  TE(null, Z`# coureurs participent à une course\. Combien de podiums`, (n) => arr(n, 3));
+  TE(null, Z`code de # chiffres utilise les chiffres de # à #, tous différents`, (k, a, b) => arr(b - a + 1, k));
+  TE(null, Z`Combien de diagonales a un polygone convexe à # côtés`, (n) => (n * (n - 3)) / 2);
+  TE(null, Z`tournoi réunit # équipes\. Chaque équipe rencontre chacune des autres une seule fois`, (n) => (n * (n - 1)) / 2);
+  TE(null, Z`Codes de # chiffres choisis parmi # \(répétition permise\)\. Combien de codes contiennent au moins deux chiffres identiques`, (k, n) => n ** k - arr(n, k));
+
+  T(null, Z`bougie mesure # mm et raccourcit de # mm par heure[^.?]*\. Après combien d'heures est-elle entièrement consumée`, (h, v) => h / v);
+
+  /* --- Euclide et hauteur (euclide), droites remarquables (droitesrem), relations trigonométriques (trigrel), 26.11 --- */
+  T(null, Z`rectangle en C, d'hypoténuse c = # cm\. La projection de la cathète a sur l'hypoténuse mesure # cm\. Calcule a`, (c, p) => Math.sqrt(p * c));
+  T(null, Z`triangle rectangle a une hypoténuse de # cm et une cathète a = # cm\. Calcule la projection p`, (c, a) => (a * a) / c);
+  T(null, Z`la hauteur issue de l'angle droit découpe l'hypoténuse en segments de # cm et # cm\. Calcule la hauteur`, (p, q) => Math.sqrt(p * q));
+  T(null, Z`une cathète mesure # cm et sa projection sur l'hypoténuse # cm\. Calcule l'hypoténuse`, (a, p) => (a * a) / p);
+  T(null, Z`triangle rectangle a des cathètes de # cm et # cm\. Calcule la hauteur relative à l'hypoténuse`, (a, b) => (a * b) / Math.hypot(a, b));
+  T(null, Z`la hauteur relative à l'hypoténuse mesure # cm et l'un des segments de l'hypoténuse # cm\. Calcule l'autre segment`, (h, p) => (h * h) / p);
+  T(null, Z`triangle rectangle a des cathètes de # cm et # cm\. La hauteur issue de l'angle droit coupe l'hypoténuse en deux segments\. De combien le plus long dépasse-t-il le plus court`, (a, b) => Math.abs(a * a - b * b) / Math.hypot(a, b));
+  T(null, Z`découpe l'hypoténuse en # cm et # cm\. Calcule l'aire du triangle`, (p, q) => ((p + q) * Math.sqrt(p * q)) / 2);
+  T(null, Z`la hauteur relative à l'hypoténuse découpe celle-ci en # cm et # cm\. Calcule le périmètre`, (p, q) => p + q + Math.sqrt(p * (p + q)) + Math.sqrt(q * (p + q)));
+  T(null, Z`triangle rectangle a des cathètes de # cm et # cm\. Quel est le rayon de son cercle circonscrit`, (a, b) => Math.hypot(a, b) / 2);
+  T(null, Z`La médiane \[AM\] d'un triangle mesure # cm\. Calcule la distance GM`, (m) => m / 3);
+  T(null, Z`la médiane \[CM\] mesure # cm\. G est le centre de gravité\. Calcule CG`, (m) => (2 * m) / 3);
+  T(null, Z`le centre de gravité G est à # cm du sommet B\. Quelle est la longueur de la médiane issue de B`, (g) => (3 * g) / 2);
+  TE(null, Z`∠B = #°\. On trace la hauteur issue de A, qui coupe \[BC\] en H\. Que mesure ∠BAH`, (b) => 90 - b);
+  TE(null, Z`∠A = #°\. I est le point d'intersection des bissectrices\. Que mesure ∠BIC`, (a) => 90 + a / 2);
+  T(null, Z`triangle rectangle a des côtés de #, # et # cm\. Le rayon de son cercle inscrit`, (a, b, c) => { const [u, v, w] = [a, b, c].sort((p, q) => p - q); return Math.abs(u * u + v * v - w * w) < 1e-9 ? (u + v - w) / 2 : NaN; });
+  T(null, Z`médiatrice du segment \[AB\], avec AB = # cm et PA = # cm\. Calcule la distance de P à la droite \(AB\)`, (ab, pa) => Math.sqrt(pa * pa - (ab / 2) ** 2));
+  TE(null, Z`tous ses angles aigus et ∠A = #°\. H est son orthocentre[^.]*\. Que mesure ∠BHC`, (a) => 180 - a);
+  TE(null, Z`∠A = #° et ∠B = #°\. I est le centre du cercle inscrit\. Que mesure ∠AIB`, (a, b) => 180 - a / 2 - b / 2);
+  T(null, Z`isocèle en A[^.]*AB = AC = # cm et BC = # cm\. G est son centre de gravité\. Calcule AG`, (a, b) => (2 / 3) * Math.sqrt(a * a - (b / 2) ** 2));
+  const TV = String.raw`(?:\((\d+)\)\/\((\d+)\)|(\d+(?:,\d+)?))`, tv = (p, q, d) => (d !== undefined ? num(d) : +p / +q);
+  const W = (s, ...v) => R2(String.raw(s, ...v).replace(/TV/g, TV));
+  const trig3 = (f, v) => { let s, c; if (f === "sin") { s = v; c = Math.sqrt(1 - v * v); } else if (f === "cos") { c = v; s = Math.sqrt(1 - v * v); } else { c = 1 / Math.sqrt(1 + v * v); s = v * c; } return { sin: s, cos: c, tan: s / c }; };
+  T(null, W`(?:Pour un angle aigu α,|L'angle α est aigu et) (sin|cos|tan)α = TV\.? Calcule (?:la valeur exacte de )?(sin|cos|tan)α`, (f, p, q, d, g) => trig3(f, tv(p, q, d))[g], { raw: true });
+  T(null, W`Pour un angle aigu α, sinα = TV et cosα = TV\. Calcule tanα`, (p, q, d, p2, q2, d2) => tv(p, q, d) / tv(p2, q2, d2), { raw: true });
+  T(null, W`L'angle α est aigu et (sin|cos|tan)α = TV\. Calcule sin\^2α \+ cos\^2α \+ tanα · cosα`, (f, p, q, d) => 1 + trig3(f, tv(p, q, d)).sin, { raw: true });
+  T(null, W`L'angle α est aigu et (sin|cos|tan)α = TV\. Calcule tan\(90° - α\)`, (f, p, q, d) => 1 / trig3(f, tv(p, q, d)).tan, { raw: true });
+  T(null, W`L'angle α est aigu et (sin|cos|tan)α = TV\. Calcule (sin|cos)\(90° - α\)`, (f, p, q, d, g) => trig3(f, tv(p, q, d))[g === "sin" ? "cos" : "sin"], { raw: true });
+
+  T(null, Z`triangle équilatéral a des côtés de # cm\. Calcule le rayon de son cercle circonscrit`, (c) => c / Math.sqrt(3));
+  T(null, Z`triangle équilatéral a des côtés de # cm\. Calcule le rayon de son cercle inscrit`, (c) => c / (2 * Math.sqrt(3)));
+
+  /* --- problèmes : mise en équation (probeq, probeq2) et systèmes (sysprob), 26.11 --- */
+  const qroots = (a, b, c) => { const D = b * b - 4 * a * c; if (D < -1e-12) return []; const s = Math.sqrt(Math.max(D, 0)); return [(-b - s) / (2 * a), (-b + s) / (2 * a)].sort((u, w) => u - w); };
+  const posRoot = (a, b, c) => { const r = qroots(a, b, c).filter((v) => v > 1e-9); return r.length === 1 || (r.length === 2 && Math.abs(r[0] - r[1]) < 1e-9) ? r[0] : NaN; };
+  const sys2 = (a1, b1, c1, a2, b2, c2) => { const D = a1 * b2 - a2 * b1; return D ? { pair: [(c1 * b2 - c2 * b1) / D, (a1 * c2 - a2 * c1) / D] } : null; };
+  const KM = { double: 2, triple: 3, quadruple: 4, quintuple: 5 };
+  T(null, Z`a le (double|triple|quadruple|quintuple) de l'âge de (?:sa|son) [^.]*\. Dans # ans, (?:ils|elles) auront à eux deux # ans\. Quel âge a (?:le|la) [^?]* aujourd'hui`, (k, n, S) => { const K = KM[k], x = (num(S) - 2 * num(n)) / (K + 1); return K * x; }, { raw: true });
+  T(null, Z`somme de # nombres entiers consécutifs vaut #\. Quel est le plus petit`, (n, S) => (S - (n * (n - 1)) / 2) / n);
+  T(null, Z`somme de # nombres entiers consécutifs vaut #\. Quel est le plus grand`, (n, S) => (S - (n * (n - 1)) / 2) / n + n - 1);
+  T(null, Z`le multiplie par #, puis (retire|ajoute) #\. \S+ le multiplie par #, puis (retire|ajoute) #\. Ils obtiennent le même résultat`, (a, o1, b, c, o2, d) => { const B = (o1 === "ajoute" ? 1 : -1) * num(b), D = (o2 === "ajoute" ? 1 : -1) * num(d); return (D - B) / (num(a) - num(c)); }, { raw: true });
+  T(null, F`§F sont [^,]*, §F sont [^,]*, et les # autres [^.]*\. Combien y en a-t-il en tout`, (a, b, c, d, n) => n / (1 - a / b - c / d));
+  T(null, Z`trapèze de petite base # m et de hauteur # m\. Quelle doit être la grande base \(en m\) pour que l'aire de la coupe soit # m²`, (b, h, A) => (2 * A) / h - b);
+  T(null, Z`en # jours : en tout # \S+\. Chaque jour, \S+ (?:range|lit|fait|parcourt) # \S+ de plus que la veille\. Combien le premier jour`, (n, T0, k) => (T0 - (k * n * (n - 1)) / 2) / n);
+  T(null, Z`part de \S+ à # km/h\. # h plus tard, une voiture part du même endroit, sur la même route, à # km/h\. Au bout de combien de temps`, (v1, d, v2) => (v1 * d) / (v2 - v1));
+  T(null, Z`Les # élèves d'une classe vont au restaurant\. Au moment de payer, # d'entre eux ont oublié[^.]*\. Les autres paient chacun # CHF de plus`, (N, k, a) => ((N - k) * a) / k);
+  T(null, Z`propose une (?:séance|entrée) à # CHF, ou un abonnement annuel à # CHF qui fait payer une (?:séance|entrée) # CHF\. Pour combien d'entrées`, (p, A, q) => A / (p - q));
+  T(null, Z`salaire horaire d'un employé est de # CHF pour les # premières heures[^.]*une fois et demie le tarif normal\. Cette semaine, il a gagné # CHF\. Combien d'heures supplémentaires`, (r, h, G) => (G - r * h) / (1.5 * r));
+  T(null, Z`entier positif n tel que son carré diminué de # soit égal à # fois le nombre suivant, augmenté de #`, (a, k, b) => posRoot(1, -k, -a - k - b));
+  T(null, Z`entier positif n tel que son carré augmenté de # soit égal à # fois le nombre suivant, augmenté de #`, (a, k, b) => posRoot(1, -k, a - k - b));
+  T(null, Z`produit de deux nombres entiers positifs consécutifs vaut #\. Quel est le plus petit`, (P) => posRoot(1, 1, -P));
+  T(null, Z`produit de deux nombres entiers positifs consécutifs vaut #\. Quel est le plus grand`, (P) => posRoot(1, 1, -P) + 1);
+  T(null, Z`Si l'on augmente de # cm le côté d'un carré, son aire augmente de # cm²`, (d, A) => (A - d * d) / (2 * d));
+  T(null, Z`Deux nombres positifs ont pour somme # et pour produit #\. Quel est le plus grand`, (S, P) => qroots(1, -S, P)[1]);
+  T(null, Z`Deux nombres positifs ont pour somme # et pour produit #\. Quel est le plus petit`, (S, P) => qroots(1, -S, P)[0]);
+  T(null, Z`l'hypoténuse mesure # cm et l'un des côtés de l'angle droit dépasse l'autre de # cm\. Combien mesure le plus petit côté`, (c, d) => posRoot(2, 2 * d, d * d - c * c));
+  T(null, /hauteur au-dessus de la mer est h\(t\) = ([^(]*?) \(en m[^.]*\. Au bout de combien de secondes touche-t-elle l'eau/i, (e) => { let F; try { F = Expr.parse(e.replace(/−/g, "-").replace(/,/g, ".").replace(/t/g, "x")); } catch (er) { return null; } const q = quad(F); return q ? posRoot(...q) : null; }, { raw: true });
+  T(null, Z`photo de # cm sur # cm est entourée d'un cadre de largeur constante x\. L'ensemble \(photo et cadre\) a une aire de # cm²`, (a, b, A) => posRoot(4, 2 * (a + b), a * b - A));
+  T(null, F`Un nombre positif augmenté de son inverse vaut §F\. Quel est ce nombre, s'il est plus grand que 1`, (p, q) => qroots(1, -p / q, 1)[1]);
+  T(null, F`Un nombre positif augmenté de son inverse vaut §F\. Quel est ce nombre, s'il est plus petit que 1`, (p, q) => qroots(1, -p / q, 1)[0]);
+  T(null, Z`jardin rectangulaire de # m sur # m est traversé par deux allées perpendiculaires de même largeur x[^.]*\. Le reste est du gazon\. Quelle largeur faut-il aux allées pour que les allées et le gazon aient la même aire`, (L, l) => qroots(1, -(L + l), (L * l) / 2)[0]);
+  T(null, Z`on découpe un carré de # cm de côté à chaque coin, puis on plie les bords pour faire une boîte sans couvercle de # cm³\. Quel est le côté de la plaque`, (c, V) => 2 * c + Math.sqrt(V / c));
+  T(null, Z`parcourt # km\. Si elle roulait # km/h plus vite, elle mettrait # h de moins\. Quelle est sa vitesse`, (D, k, t) => posRoot(t, t * k, -D * k));
+  /* systèmes (réponse en couple) */
+  T(null, Z`il y a # billets de # CHF et de # CHF, pour un total de # CHF`, (n, a, b, S) => sys2(1, 1, n, a, b, S));
+  T(null, Z`et (?:sa sœur|son frère) ont ensemble # ans\. (?:La sœur|Le frère) a # ans de plus`, (S, d) => ({ pair: [(S - d) / 2, (S + d) / 2] }));
+  T(null, Z`rectangle a un périmètre de # cm\. Sa longueur dépasse sa largeur de # cm`, (P, d) => ({ pair: [P / 4 + d / 2, P / 4 - d / 2] }));
+  T(null, Z`mélange un café à # CHF/kg et un café à # CHF/kg\. Il obtient # kg de mélange qui valent # CHF`, (a, b, n, S) => sys2(1, 1, n, a, b, S));
+  T(null, Z`parcourt # km en descendant une rivière en # h, et remonte la même distance en # h`, (D, t1, t2) => ({ pair: [(D / t1 + D / t2) / 2, (D / t1 - D / t2) / 2] }));
+  T(null, Z`achète # boissons : des \S+ à # CHF et des \S+ à # CHF\. Elle dépense exactement # CHF`, (n, a, b, S) => sys2(1, 1, n, a, b, S));
+  T(null, Z`solution de sirop à # % de sucre et une autre à # %, pour obtenir # L à # %`, (p, q, n, r) => sys2(1, 1, n, p / 100, q / 100, (n * r) / 100));
+  T(null, Z`deux villes distantes de # km, l'un vers l'autre, à # km/h et # km/h`, (D, v1, v2) => ({ pair: [D / (v1 + v2), (v1 * D) / (v1 + v2)] }));
+  TE(null, Z`nombre de deux chiffres a une somme des chiffres égale à #\. Si on permute ses chiffres, on obtient un nombre plus grand de #`, (s, k) => { const u = (s + k / 9) / 2, d = s - u; return Number.isInteger(u) && Number.isInteger(d) ? 10 * d + u : NaN; });
+  TE(null, Z`nombre de deux chiffres a une somme des chiffres égale à #\. Si on permute ses chiffres, on obtient un nombre plus petit de #`, (s, k) => { const d = (s + k / 9) / 2, u = s - d; return Number.isInteger(u) && Number.isInteger(d) ? 10 * d + u : NaN; });
+
   /* ---------- application ---------- */
   function ruleFor(x, txt) {
     for (const r of RULES) {
       if (r.ids && !r.ids.has(x.id)) continue;
+      if (r.o.not && r.o.not.test(x.raw)) continue; /* 26.11 : \overline disparaît du texte lisible */
       if (!r.f) continue;
       const m = r.re.exec(txt); if (!m) continue;
       const res = r.o.text ? r.f(txt) : r.o.raw ? r.f(...m.slice(1)) : r.f(...m.slice(1).map(num));
       if (res === null || res === undefined) continue;
-      return [r.re.source.slice(0, 60), typeof res === "number" ? { v: res } : res];
+      return [r.re.source.slice(0, 60), typeof res === "number" ? (r.o.exact ? { v: res, st: null } : { v: res }) : res];
     }
     return null;
   }
@@ -720,7 +1368,8 @@ const RECALC = (() => {
       let res; try { res = g.f(x); } catch (e) { res = null; }
       if (!res) continue;
       const sp = x.spec;
-      if ("v" in res) out.push({ rule: g.name, msg: cmpValue(x, sp, res, x.txt) });
+      if ("err" in res) out.push({ rule: g.name, msg: res.err });
+      else if ("v" in res) out.push({ rule: g.name, msg: cmpValue(x, sp, res, x.txt) });
       else if ("set" in res) {
         if (sp.kind === "set") {
           if (sp.all || res.all) out.push({ rule: g.name, msg: sp.all && res.all ? null : sp.all ? "« tous les nombres » attendu, racines trouvées : " + res.set.slice(0, 12).map(fmt).join(" ; ") : "équation vraie pour tout x, attendu {" + sp.values.map(fmt).join(" ; ") + "}" });
@@ -741,10 +1390,13 @@ const RECALC = (() => {
         if (!res.pair) continue;
         out.push({ rule: g.name, msg: res.pair.every((v, i) => sameSet([sp.values[i]], [v])) ? null : "attendu (" + sp.values.map(fmt).join(" ; ") + "), Cramer (" + res.pair.map(fmt).join(" ; ") + ")" });
       } else if ("ineq" in res) {
+        if (sp.kind === "ineq") { const v = sp.value, o = sp.op, w = (t) => (o === ">" ? t > v : o === "<" ? t < v : o === ">=" ? t >= v : t <= v), P = [-60, -7.3, -1.1, 0.4, 2.9, 13.7, 60, v - 1e-3, v + 1e-3, ...res.pts.flatMap((e) => [e - 1e-3, e + 1e-3])], bad = P.find((t) => res.ineq(t) !== w(t)) ?? (res.ineq(v, true) !== w(v) ? v : undefined);
+          out.push({ rule: g.name, msg: bad === undefined ? null : "« x " + o + " " + fmt(v) + " » faux en x = " + fmt(bad) }); break; }
         const want = (t) => sp.ivs.some(([a, ai, b, bi]) => { a = a === null || !isFinite(a) ? -Infinity : a; b = b === null || !isFinite(b) ? Infinity : b; return (t > a || (ai && Math.abs(t - a) < 1e-9)) && (t < b || (bi && Math.abs(t - b) < 1e-9)); });
         const T0 = [], TB = []; for (let t = -60; t <= 60; t += 0.37) T0.push(t);
         for (const [a, , b] of sp.ivs) for (const e of [a, b]) if (e !== null && isFinite(e)) { TB.push(e); T0.push(e - 1e-3, e + 1e-3); }
         for (const e of res.pts) T0.push(e - 1e-3, e + 1e-3); /* racines approchées : seulement de part et d'autre */
+        for (const e of res.exact || []) TB.push(e); /* domaine : pôles et bords exacts (26.11) */
         const bad = T0.find((t) => res.ineq(t) !== want(t)) ?? TB.find((t) => res.ineq(t, true) !== want(t));
         out.push({ rule: g.name, msg: bad === undefined ? null : "ensemble attendu " + JSON.stringify(sp.ivs) + " faux en x = " + fmt(bad) + " (inéquation " + (res.ineq(bad, true) ? "vraie" : "fausse") + ")" });
       } else if ("deriv" in res) {
@@ -760,13 +1412,17 @@ const RECALC = (() => {
     }
     if (!out.length && x.spec && x.spec.kind === "value") {
       const r = ruleFor(x, x.txt);
-      if (r) out.push({ rule: r[0], msg: cmpValue(x, x.spec, r[1], x.txt) });
+      if (r && !("pair" in r[1])) out.push({ rule: r[0], msg: cmpValue(x, x.spec, r[1], x.txt) });
+    }
+    if (!out.length && x.spec && x.spec.kind === "pair") { /* problèmes à deux inconnues (26.11) */
+      const r = ruleFor(x, x.txt);
+      if (r && r[1].pair) out.push({ rule: r[0], msg: r[1].pair.length === x.spec.values.length && r[1].pair.every((v, i) => sameSet([x.spec.values[i]], [v])) ? null : "attendu (" + x.spec.values.map(fmt).join(" ; ") + "), recalcul (" + r[1].pair.map(fmt).join(" ; ") + ")" });
     }
     for (const p of x.parts || []) if (p.spec && p.spec.kind === "value") {
       const r = ruleFor(x, x.txt + " ¶ " + p.label);
-      if (r) out.push({ rule: r[0], msg: cmpValue(x, p.spec, r[1], p.label) });
+      if (r && "v" in r[1]) out.push({ rule: r[0], msg: cmpValue(x, p.spec, r[1], p.label) });
     }
     return out;
   }
-  return { check, truncSpec, tex2e, roots, rounding, solHas, RULES, fmt };
+  return { check, truncSpec, tex2e, roots, rounding, solHas, RULES, fmt, saisie };
 })();
