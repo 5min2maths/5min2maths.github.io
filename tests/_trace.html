@@ -31,6 +31,10 @@ const ELEVES = {
   max: { nom: "Max", profil: "CH-15", niv: "R", niveau: "fort", strategie: "facile,figure", wpm: 260, jours: 3, premier: 1, chapitre: "auto", extras: "probleme,curieux" },
   jade: { nom: "Jade", profil: "FR-8", niveau: "moyen", strategie: "aide,lecon", wpm: 220, jours: 3, premier: 1, chapitre: "auto", extras: "carnet,curieux" },
   theo: { nom: "Théo", profil: "FR-10", niveau: "moyen", strategie: "guide", wpm: 230, jours: 3, premier: 1, chapitre: "auto", extras: "probleme,carnet" },
+  /* 26.11, 3e passage (agent eleves3) : 10e romand et 6e France ; evalj=N : évaluation enregistrée le jour 1 pour J+N
+     (evalj=2 : jour 1 = J−2 sujet de préparation, jour 2 = J−1 « Tes erreurs ») */
+  emma: { nom: "Emma", profil: "CH-10", niveau: "moyen", strategie: "aide,figure", wpm: 230, jours: 2, premier: 1, chapitre: "auto", extras: "carnet,curieux" },
+  hugo: { nom: "Hugo", profil: "FR-6", niveau: "faible", strategie: "aide,guide,lecon", wpm: 200, jours: 2, premier: 1, chapitre: "auto", extras: "carnet,histoire" },
 };
 const CFG = Object.assign({ nom: "élève", profil: "CH-9", niveau: "moyen", strategie: "", wpm: 200, jours: 3, premier: 0, extras: "", jour0: "2026-11-16", graine: 7 }, ELEVES[HP.eleve] || {}, HP);
 CFG.jours = +CFG.jours; CFG.premier = +CFG.premier; CFG.wpm = +CFG.wpm;
@@ -100,6 +104,8 @@ window.confirm = () => true; window.print = () => {};
     if (spec.kind === "set") return spec.all ? "tous" : !spec.values.length ? "∅" : spec.values.map((v) => valAns({ value: v })).join(" ; ");
     if (spec.kind === "pair") return spec.values.map((v) => valAns({ value: v })).join(" ; ");
     if (spec.kind === "ineq") return "x " + spec.op + " " + valAns({ value: spec.value });
+    /* 26.11 (3e passage) : ensembles de solutions en intervalles (sinon la trace restait bloquée au positionnement 1re Coll.) */
+    if (spec.kind === "solset") { if (!spec.ivs || !spec.ivs.length) return "∅"; return spec.ivs.map(([a, ai, b, bi]) => (a === null || !isFinite(a) ? "]-inf" : (ai ? "[" : "]") + valAns({ value: a })) + " ; " + (b === null || !isFinite(b) ? "inf[" : valAns({ value: b }) + (bi ? "]" : "["))).join(" ∪ "); }
     return null;
   }
   function wrongAns(q, spec) {
@@ -303,7 +309,7 @@ window.confirm = () => true; window.print = () => {};
     log("    ⓘ notions du chapitre : " + (state.now && state.now.ids || []).map((id) => id + "=" + ((state.notions[id] || {}).status || "absente")).join(", "));
     shot("ACCUEIL après choix du chapitre", { max: 1500 });
   }
-  async function doEvalSetup() {
+  async function doEvalSetup(nj = 4) {
     await click(app.querySelector('[data-door="test"]'), "case Évaluation");
     shot("ÉVALUATION (porte)", { max: 1200 });
     await click($("prep"), "Je prépare une évaluation");
@@ -311,7 +317,7 @@ window.confirm = () => true; window.print = () => {};
     const boxes = [...app.querySelectorAll(".check input")]; const ids = Engine.nowActive(state) ? state.now.ids : [];
     let pick = boxes.filter((b) => ids.includes(b.value)); if (!pick.length) pick = boxes.filter((b) => ["encours", "vu"].includes((state.notions[b.value] || {}).status)).slice(-3);
     pick.slice(0, 3).forEach((b) => (b.checked = true)); act("coche : " + pick.slice(0, 3).map((b) => nLab(b.value)).join(" · "));
-    $("pdate").value = addDays(day(), 4); act("date : dans 4 jours (" + addDays(day(), 4) + ")");
+    $("pdate").value = addDays(day(), nj); act("date : dans " + nj + " jours (" + addDays(day(), nj) + ")");
     await click($("save"), "Enregistrer mon évaluation");
     homeTab = "test"; screenHome(); await wait(); shot("MON ÉVALUATION (programme)", { max: 1800 });
     await home();
@@ -361,9 +367,10 @@ window.confirm = () => true; window.print = () => {};
       if (j > 0) await nextDay(j === 2 && !CFG.consecutif ? 2 : 1);
       shot("ACCUEIL jour " + (j + 1), { max: 1500 });
       if (j === 0 && CFG.chapitre) await doChapitre();
+      if (j === 0 && CFG.evalj) { await doEvalSetup(+CFG.evalj); shot("ACCUEIL avec évaluation", { max: 1500 }); }
       /* 26.11 : évaluation active → sa tâche EST la séance du jour (un seul bouton à l'accueil), sauf le sujet de préparation (au choix) */
       let evalDay = false;
-      if (Engine.prepActive(state) && j >= 1) { evalDay = prepKind() !== "mock"; await doEvalTask(); }
+      if (Engine.prepActive(state) && (j >= 1 || CFG.evalj)) { evalDay = prepKind() !== "mock"; await doEvalTask(); }
       if (evalDay) { await home(); shot("ACCUEIL après l'évaluation", { max: 600 }); log("  (pas de séance en plus : la tâche de l'évaluation était la séance du jour)"); }
       else { const go = $("go") || $("freego"); await click(go, go && go.innerText.trim());
       durs.push(await play("Séance jour " + (j + 1))); }
