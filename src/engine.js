@@ -900,8 +900,12 @@ const Engine = {
     const key = (id) => (now.includes(id) ? 0 : s(id).status === "encours" ? 1 : 2) * 1e5 + (s(id).status === "encours" || now.includes(id) ? this.rank(state.profile, id) : Math.round(s(id).m * 1000));
     return [...ids].sort((a, b) => key(a) - key(b))[0] || null;
   },
+  /* 26.11 soir (revue des élèves testeurs, n° 7 : positionnement 5:10 puis 6 automatismes en 6:05, 12 minutes le premier
+     jour) : série d'automatismes de 3 calculs le jour du positionnement, de 4 pour un élève sous le plancher, sinon 6. */
+  autoN(state) { return state.placedOn === day() ? 3 : this.underFloor(state) ? 4 : FORMATS.auto.slots.length; },
+  fmtText(state, f) { const n = f === "auto" ? this.autoN(state) : 0; return n && n < FORMATS.auto.slots.length ? n + " calculs rapides, enchaînés." : FORMATS[f].text; },
   planSession(state, format) {
-    const f = format || this.todayFormat(state), slots = FORMATS[f].slots;
+    const f = format || this.todayFormat(state), slots = f === "auto" ? FORMATS.auto.slots.slice(0, this.autoN(state)) : FORMATS[f].slots;
     const pend = this.eligible(state).filter((id) => this.lessonFirst(state, id));
     if (!pend.length) return this.planSlots(state, slots);
     const exclude = new Set(pend);
@@ -984,6 +988,9 @@ const Engine = {
         let levels = [1, 2, 3].filter((d) => d <= cap && (base !== "defi" || d >= 2) && (kind !== "drill" || d === 1)); /* 26.11 : automatisme = niveau 1 */
         if ((kind === "defi4" || kind === "defi") && hasProb(id)) levels.push(4);
         if (!recent) levels = this.oldLevels(state, id, levels, target);
+        /* 26.11 soir (revue des élèves testeurs, n° 9 : élève forte, Révision de 4 questions de niveau 1, +12 à +15 chacune) :
+           en Révision, un élève dont le Mathélo atteint le niveau 2 de la notion (et qui ne l'a pas ratée) n'a plus de niveau 1. */
+        if (kind === "rev" && levels.some((d) => d >= 2) && s.m >= 0.45 && !this.underFloor(state) && elo >= itemRating(state.profile, id, 2)) levels = levels.filter((d) => d >= 2);
         for (const d of levels) {
           let sc = Math.abs(itemRating(state.profile, id, d) - target) / 100;
           if (rappel) sc = (s.m < 0.45 ? -1 : 0) + Math.max(0, itemRating(state.profile, id, d) - target) / 200;

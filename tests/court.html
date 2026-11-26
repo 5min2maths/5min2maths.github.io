@@ -46,7 +46,8 @@ function play(label, start) {
     /* 26.11 (revue élèves) : la remédiation remplace la question suivante, le total ne change plus du tout */
     if (m) { total = total || +m[2]; ok(+m[2] === total, label + " : total qui change " + eb); total = +m[2]; remSeen = rem; }
     const id = q.id || session.plan[session.i].split("|")[0], kind = String(session.plan[session.i]).split("|")[2] || "";
-    if (/Révision/.test(eb)) ok(state.notions[id] && state.notions[id].seen > 0, label + " : « Révision » sur une notion jamais vue (" + id + ")");
+    /* 26.11 soir (revue des élèves testeurs, n° 3) : dans une séance Révision, « 🧠 Révision » nomme la séance (comme « ⚡ Série d'automatismes ») et reste affiché ; le contrôle vaut pour les autres formats */
+    if (/Révision/.test(eb) && session.fmt !== "revision") ok(state.notions[id] && state.notions[id].seen > 0, label + " : « Révision » sur une notion jamais vue (" + id + ")");
     if (afterLesson) { ok(typeof lessonEcho !== "function" || !lessonEcho(id, q), label + " : question après la leçon " + id + " avec les nombres de la leçon : " + String(q.q).replace(/<[^>]*>/g, "").slice(0, 80));
       /* 26.11 : « Nouvelle notion » réservé aux notions de l'année jamais travaillées (newNotion) ; après un rappel de cours d'une année précédente, libellé du format */
       ok(!newNotion(id) || /Nouvelle notion/.test(eb) || session.free || !session.fmt, label + " : question après la leçon libellée « " + eb + " »"); afterLesson = false; }

@@ -221,7 +221,7 @@ window.confirm = () => true; window.print = () => {};
     log("████ PREMIER LANCEMENT · " + CFG.nom + " · " + CFG.profil + " · " + day());
     const [sys, g] = CFG.profil.split("-"), grade = +g;
     shot("ACCUEIL (vu sans rien toucher)", { max: 1600 }); add(readS(screenText()) * 0.5);
-    if (sys !== "FR") { const lab = grade >= 12 ? "Sec. II" : grade + "e"; const b = [...app.querySelectorAll("#dgrade button")].find((x) => x.innerText.trim() === lab); await click(b, "Je suis en : " + lab); shot("ACCUEIL après choix de classe", { max: 900 }); }
+    if (sys !== "FR") { const lab = grade >= 12 ? "Sec. II" : grade + "e"; const b = [...app.querySelectorAll("#dgrade button")].find((x) => { const t = x.innerText.trim(); return t === lab || t.startsWith(lab + " ") || t.startsWith(lab + "\n"); }); /* 26.11 : libellé réel « Sec. II Collège, MP » */ await click(b, "Je suis en : " + lab); shot("ACCUEIL après choix de classe", { max: 900 }); }
     /* question d'essai */
     const dq = app.querySelector("#demo .qtext"); if (dq) { const inp = $("dans"); inp.value = "12"; act("essai : tape « 12 » (au hasard)"); $("dok").click(); await wait(); log("    ◂ " + screenText($("dfb")).replace(/\n/g, " ⏎ ").slice(0, 500)); add(30); }
     await click($("go"), "Commencer");
