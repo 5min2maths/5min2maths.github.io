@@ -826,6 +826,47 @@
       "Erreur : " + M(c[1]) + " est au dénominateur ; on ne peut pas simplement « faire passer » les lettres. On multiplie d'abord par le dénominateur, puis on divise : " + M(c[1] + " = " + c[3]) + ". Contrôle : en remplaçant dans " + M(c[0]) + ", on retrouve une égalité vraie.",
       { ctx: "erreur", guide: c[6].map(([ask, e, t]) => GX(ask, e, M(t) + ".")), traps: [TX(c[4], "C'est la formule de " + w + " : vérifie avec des nombres, elle ne redonne pas " + M(c[0]) + ".")] }); });
 
+  /* 26.11 soir (agent defisch) : eq1, probeq, probeq2 passés de 1 à 3 contextes (tag ctx, oracle par contexte dans
+     tests/recalc_oracles.js). Notions communes avec la France : aucun lieu suisse (CHF devient € par frLocal). */
+  {
+    const CXQ = (cx, q) => Object.assign(q, { ctx: cx }), W0 = (id, cx) => { const f = PROBS[id][0]; PROBS[id][0] = () => CXQ(cx, f()); };
+    W0("eq1", "bougies"); W0("probeq", "musee"); W0("probeq2", "cadre");
+    PROBS.eq1.push(
+      () => { let hA, a, b, t, hB; do { hA = pk([600, 750, 900]); a = pk([30, 40, 50]); b = pk([10, 15, 20]); t = R.int(5, 12); hB = hA - (a - b) * t; } while (hB <= 100 || hA - a * t < 60);
+        return CXQ("citernes", Pb("Deux citernes se vident en même temps. La citerne A contient " + M(hA) + " L et perd " + a + " L par minute ; la citerne B contient " + M(hB) + " L et perd " + b + " L par minute.",
+          [["a) Volume dans A après 3 minutes (L)", hA - 3 * a], ["b) Au bout de combien de minutes contiennent-elles le même volume ?", t], ["c) Quel est alors ce volume (L) ?", hA - a * t]],
+          ["Volume de A : " + hA + " − " + a + "t ; de B : " + hB + " − " + b + "t.", "Résous " + hA + " − " + a + "t = " + hB + " − " + b + "t."],
+          "a) " + M(hA + " - 3 \\cdot " + a + " = " + (hA - 3 * a)) + " L. b) " + M(hA + " - " + a + "t = " + hB + " - " + b + "t") + " donne " + M((a - b) + "t = " + (hA - hB)) + ", " + M("t = " + t) + " min. c) " + M(hA + " - " + a * t + " = " + (hA - a * t)) + " L.")); },
+      () => { let A0, a, b, t, B0; do { a = pk([15, 20, 25]); b = pk([5, 8, 10]); t = R.int(6, 15); A0 = 10 * R.int(2, 12); B0 = A0 + (a - b) * t; } while (B0 > 400);
+        const nm = pk([["Lina", "Tom"], ["Mia", "Noé"], ["Zoé", "Sam"]]);
+        return CXQ("economies", Pb(nm[0] + " a " + A0 + " CHF dans sa tirelire et y ajoute " + a + " CHF chaque semaine. " + nm[1] + " a " + B0 + " CHF et y ajoute " + b + " CHF chaque semaine.",
+          [["a) Somme de " + nm[0] + " après 4 semaines (CHF)", A0 + 4 * a], ["b) Au bout de combien de semaines ont-ils la même somme ?", t], ["c) Quelle est alors cette somme (CHF) ?", A0 + a * t]],
+          ["Somme de " + nm[0] + " : " + A0 + " + " + a + "t ; de " + nm[1] + " : " + B0 + " + " + b + "t.", "Résous " + A0 + " + " + a + "t = " + B0 + " + " + b + "t."],
+          "a) " + M(A0 + " + 4 \\cdot " + a + " = " + (A0 + 4 * a)) + " CHF. b) " + M(A0 + " + " + a + "t = " + B0 + " + " + b + "t") + " donne " + M((a - b) + "t = " + (B0 - A0)) + ", " + M("t = " + t) + " semaines. c) " + M(A0 + " + " + a * t + " = " + (A0 + a * t)) + " CHF.")); });
+    PROBS.probeq.push(
+      () => { let p1, p2, F1, x, F2; do { p1 = pk([0.45, 0.5, 0.6]); p2 = pk([0.25, 0.3]); F1 = pk([40, 50, 60]); x = pk([150, 200, 250, 300]); F2 = +(F1 + (p1 - p2) * x).toFixed(6); } while (!Number.isInteger(F2));
+        return CXQ("voiture", Pb("Pour louer une voiture une journée, l'agence A demande " + F1 + " CHF plus " + M(dec(p1)) + " CHF par km ; l'agence B demande " + F2 + " CHF plus " + M(dec(p2)) + " CHF par km.",
+          [["a) Prix chez A pour 100 km (CHF)", +(F1 + 100 * p1).toFixed(6)], ["b) Nombre de km pour lequel les deux agences coûtent autant", x], ["c) Prix payé alors (CHF)", +(F1 + p1 * x).toFixed(6)]],
+          ["Chez A : " + F1 + " + " + decTxt(p1) + "x ; chez B : " + F2 + " + " + decTxt(p2) + "x.", "Résous " + F1 + " + " + decTxt(p1) + "x = " + F2 + " + " + decTxt(p2) + "x."],
+          "a) " + M(F1 + " + 100 \\cdot " + dec(p1) + " = " + dec(+(F1 + 100 * p1).toFixed(6))) + " CHF. b) " + M(dec(+(p1 - p2).toFixed(6)) + "x = " + (F2 - F1)) + ", " + M("x = " + x) + " km. c) " + M(F1 + " + " + dec(p1) + " \\cdot " + x + " = " + dec(+(F1 + p1 * x).toFixed(6))) + " CHF : au-delà, l'agence B est plus avantageuse.")); },
+      () => { let f1, a, f2, b, x; do { a = pk([1.2, 1.3, 1.5]); b = pk([0.6, 0.7, 0.8]); f1 = pk([30, 40, 50]); x = pk([100, 150, 200, 250]); f2 = +(f1 + (a - b) * x).toFixed(6); } while (!Number.isInteger(f2));
+        return CXQ("imprimerie", Pb("Pour imprimer des affiches, l'imprimerie A facture " + f1 + " CHF de frais fixes plus " + M(dec(a)) + " CHF par affiche ; l'imprimerie B facture " + f2 + " CHF de frais fixes plus " + M(dec(b)) + " CHF par affiche.",
+          [["a) Prix chez A pour 50 affiches (CHF)", +(f1 + 50 * a).toFixed(6)], ["b) Nombre d'affiches pour lequel les deux imprimeries coûtent autant", x], ["c) Prix payé alors (CHF)", +(f1 + a * x).toFixed(6)]],
+          ["Chez A : " + f1 + " + " + decTxt(a) + "x ; chez B : " + f2 + " + " + decTxt(b) + "x.", "Résous " + f1 + " + " + decTxt(a) + "x = " + f2 + " + " + decTxt(b) + "x."],
+          "a) " + M(f1 + " + 50 \\cdot " + dec(a) + " = " + dec(+(f1 + 50 * a).toFixed(6))) + " CHF. b) " + M(dec(+(a - b).toFixed(6)) + "x = " + (f2 - f1)) + ", " + M("x = " + x) + ". c) " + M(f1 + " + " + dec(a) + " \\cdot " + x + " = " + dec(+(f1 + a * x).toFixed(6))) + " CHF.")); });
+    PROBS.probeq2.push(
+      () => { const n = R.int(8, 25);
+        return CXQ("consecutifs", Pb("Le produit de deux nombres entiers positifs consécutifs vaut " + M(n * (n + 1)) + ". On note " + M("x") + " le plus petit : " + M("x(x + 1) = " + n * (n + 1)) + ".",
+          [["a) Le plus petit des deux nombres", n], ["b) Le plus grand des deux nombres", n + 1], ["c) Somme de leurs carrés", n * n + (n + 1) * (n + 1)]],
+          ["x² + x − " + n * (n + 1) + " = 0 : cherche deux nombres de produit −" + n * (n + 1) + " et de somme 1.", "Garde la solution positive."],
+          M("x^2 + x - " + n * (n + 1) + " = (x - " + n + ")(x + " + (n + 1) + ") = 0") + " : " + M("x = " + n) + " (l'autre solution est négative). a) " + n + ". b) " + (n + 1) + ". c) " + M(n + "^2 + " + (n + 1) + "^2 = " + (n * n + (n + 1) * (n + 1))) + ".")); },
+      () => { const c = R.int(6, 20), x = R.int(2, 6), D = x * (2 * c + x);
+        return CXQ("carre", Pb("On agrandit un carré de " + c + " cm de côté en allongeant chaque côté de " + M("x") + " cm. Son aire augmente alors de " + D + " cm².",
+          [["a) Aire du carré de départ (cm²)", c * c], ["b) Allongement x (cm)", x], ["c) Périmètre du nouveau carré (cm)", 4 * (c + x)]],
+          ["(" + c + " + x)² − " + c * c + " = " + D + ".", "Développe : x² + " + 2 * c + "x − " + D + " = 0, puis garde la solution positive."],
+          "a) " + c * c + " cm². b) " + M("x^2 + " + 2 * c + "x - " + D + " = (x - " + x + ")(x + " + (2 * c + x) + ") = 0") + ", " + M("x = " + x) + " cm. c) " + M("4 \\cdot " + (c + x) + " = " + 4 * (c + x)) + " cm.")); });
+  }
+
   // ===================== Enregistrement =====================
   const ALL = { eq1: EQ1, eqfrac: EQF, eqspec: SPE, formule: FORMULE, probeq: PRQ, eq2fact: E2F, eq2: EPN, eq2disc: DIS, probeq2: PRQ2, eq3: EQ3, bicarre: BIC, eqirr: IRR };
   for (const [id, lv] of Object.entries(ALL)) {

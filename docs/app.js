@@ -7070,6 +7070,17 @@ const TRX = (function () {
       return P("Un taxi facture " + pc + " CHF de prise en charge, puis " + ch(pu) + " CHF par kilomètre.", [["a) Prix d'une course de " + d1 + " km (CHF)", y1], ["b) Prix d'une course de " + d2 + " km (CHF)", y2], ["c) De combien le prix augmente-t-il quand on passe de " + d1 + " km à " + d2 + " km (CHF) ?", r6(y2 - y1)]],
         ["Prix = " + ch(pu) + " · km + " + pc + ".", "Si c'était proportionnel, doubler la distance doublerait le prix."], "a) " + M(fT(pu) + " \\cdot " + d1 + " + " + pc + " = " + fT(y1)) + " ; b) " + M(fT(pu) + " \\cdot " + d2 + " + " + pc + " = " + fT(y2)) + " ; c) " + M(fT(y2) + " - " + fT(y1) + " = " + fT(r6(y2 - y1))) + " CHF. Doubler la distance ne double pas le prix (" + M(fT(y2) + " \\ne 2 \\cdot " + fT(y1)) + ") : ce n'est pas proportionnel."); },
   ];
+  /* 26.11 soir (agent defisch) : défi fctlec passé de 1 à 3 contextes (taxi, location de kayak, facture d'électricité) ;
+     oracle par contexte dans tests/recalc_oracles.js. */
+  { const f0 = FLP[0]; FLP[0] = () => Object.assign(f0(), { ctx: "taxi" }); }
+  FLP.push(
+    () => { const pc = pk([8, 10, 12]), pu = pk([12, 15, 18]), d1 = pk([2, 3]), d2 = 2 * d1, y1 = pc + pu * d1, y2 = pc + pu * d2;
+      return Object.assign(P("Au bord du lac, la location d'un kayak coûte " + pc + " CHF de base, plus " + pu + " CHF par heure.", [["a) Prix pour " + d1 + " h (CHF)", y1], ["b) Prix pour " + d2 + " h (CHF)", y2], ["c) De combien le prix augmente-t-il quand on passe de " + d1 + " h à " + d2 + " h (CHF) ?", y2 - y1]],
+        ["Prix = " + pu + " · heures + " + pc + ".", "Si c'était proportionnel, doubler la durée doublerait le prix."], "a) " + M(pu + " \\cdot " + d1 + " + " + pc + " = " + y1) + " ; b) " + M(pu + " \\cdot " + d2 + " + " + pc + " = " + y2) + " ; c) " + M(y2 + " - " + y1 + " = " + (y2 - y1)) + " CHF. Doubler la durée ne double pas le prix (" + M(y2 + " \\ne 2 \\cdot " + y1) + ") : ce n'est pas proportionnel."), { ctx: "kayak" }); },
+    () => { const ab = pk([18, 20, 24]), pu = pk([0.25, 0.3, 0.35]), d1 = pk([150, 200, 250]), d2 = 2 * d1, y1 = r6(ab + pu * d1), y2 = r6(ab + pu * d2);
+      return Object.assign(P("Une facture d'électricité mensuelle comprend un abonnement de " + ab + " CHF, plus " + M(fT(pu)) + " CHF par kWh consommé.", [["a) Facture pour " + d1 + " kWh (CHF)", y1], ["b) Facture pour " + d2 + " kWh (CHF)", y2], ["c) De combien la facture augmente-t-elle quand on passe de " + d1 + " kWh à " + d2 + " kWh (CHF) ?", r6(y2 - y1)]],
+        ["Facture = " + dS(pu) + " · kWh + " + ab + ".", "Si c'était proportionnel, doubler la consommation doublerait la facture."], "a) " + M(fT(pu) + " \\cdot " + d1 + " + " + ab + " = " + fT(y1)) + " ; b) " + M(fT(pu) + " \\cdot " + d2 + " + " + ab + " = " + fT(y2)) + " ; c) " + M(fT(y2) + " - " + fT(y1) + " = " + fT(r6(y2 - y1))) + " CHF : la facture n'est pas proportionnelle à la consommation (" + M(fT(y2) + " \\ne 2 \\cdot " + fT(y1)) + ")."), { ctx: "electricite" }); });
+
 
   // ======================= litconv : conventions d'écriture, expressions équivalentes =======================
   const LT = () => pk(["x", "a", "n", "y"]);
@@ -7374,7 +7385,7 @@ const DEFIS = (() => {
   const eqa = (x, r) => (Math.abs(x - r) < 1e-9 ? " = " : " \\approx ");
   const CHFT = (v) => (Number.isInteger(r2c(v)) ? T(r2c(v)) : grp(Math.trunc(r2c(v)), "'", ",") + "," + Math.abs(r2c(v)).toFixed(2).split(".")[1]);
 
-  return {
+  const OUT = { /* 26.11 soir (agent defisch) : objet nommé, complété plus bas (défis à 3 contextes) */
     // ---------- 11e : factorisation (identités, mise en évidence) ----------
     factor: [
       () => { /* identité sur un binôme, puis mise en évidence dans chaque facteur, puis produit nul et signe */
@@ -9502,6 +9513,298 @@ const DEFIS = (() => {
       },
     ],
   };
+  /* ==== 26.11 soir (agent defisch) : défis à un seul contexte passés à trois (tools/vraisemblance_26-11.md, liste « Restent
+     à 1 ou 2 contextes »). Le gabarit d'origine reçoit son ctx (CX0) ; deux gabarits ajoutés par notion, valeurs tirées,
+     corrigé calculé, oracle par contexte dans tests/recalc_oracles.js (section « agent defisch »). Notions communes avec la
+     France : aucun lieu suisse dans les énoncés (CHF devient € par frLocal). ==== */
+  const CXP = (cx, q) => Object.assign(q, { ctx: cx });
+  const ADD = (id, cx0, ...fns) => { const c = [].concat(cx0); OUT[id] = [...OUT[id].map((f, i) => (c[i] ? () => CXP(c[i], f()) : f)), ...fns]; };
+  const prn = (v) => (v < 0 ? "(" + v + ")" : String(v));
+  ADD("rel", "temperatures",
+    () => { /* golf : scores par rapport au par */
+      let a, b, c, s; do { a = -ri(2, 6); b = ri(1, 5); c = -ri(1, 7); s = a + b + c; } while (a === c || s % 3 === 0 || s >= 0);
+      const tg = s - ri(2, 5), nm = pk(["Mia", "Lina", "Zoé", "Nora"]);
+      return CXP("golf", P("Au golf, on compte les coups par rapport au « par » : −2 veut dire deux coups de moins que prévu. Lors d'un tournoi, " + nm + " termine ses trois premiers tours à " + M(a) + ", " + M("+" + b) + " et " + M(c) + ".",
+        [["a) Score total des trois tours", s], ["b) Écart entre son moins bon tour et son meilleur tour", b - Math.min(a, c)], ["c) Score moyen par tour (fraction)", s / 3], ["d) Quel score doit-elle faire au 4e tour pour terminer à " + T(tg) + " au total ?", tg - s]],
+        ["Additionne des relatifs : regroupe les négatifs, puis ajoute le positif.", "d) Score du 4e tour = total visé − total des trois tours."],
+        "a) " + M(a + " + " + b + " + " + prn(c) + " = " + s) + ". b) " + M(b + " - " + prn(Math.min(a, c)) + " = " + (b - Math.min(a, c))) + ". c) " + M("\\frac{" + s + "}{3}") + ". d) " + M(tg + " - " + prn(s) + " = " + (tg - s)) + "."));
+    },
+    () => { /* compte d'un club : solde négatif (découvert) */
+      let a, b, c; do { a = 10 * ri(12, 48); b = 10 * ri(20, 90); c = 10 * ri(15, 80); } while (b - a === 0 || b - a - c === 0 || Math.abs(b - a - c) < 30 || b <= a || b - a - c > 400);
+      const s1 = b - a, s2 = s1 - c;
+      return CXP("compte", P("Le compte du club de basket est à découvert : son solde vaut " + M("-" + a) + " CHF le 1er avril. Le club encaisse " + M(nb(b)) + " CHF de cotisations, puis paie une facture de " + M(c) + " CHF pour des ballons.",
+        [["a) Solde après les cotisations (CHF)", s1], ["b) Solde final (CHF, négatif si découvert)", s2], ["c) Variation du solde entre le 1er avril et la fin (CHF)", s2 + a], ["d) Combien le club doit-il encore encaisser pour avoir un solde de 500 CHF ?", 500 - s2]],
+        ["Solde = ancien solde + recettes − dépenses : attention au signe du départ.", "c) Variation = solde final − solde de départ."],
+        "a) " + M("-" + a + " + " + nb(b) + " = " + nb(s1)) + " CHF. b) " + M(nb(s1) + " - " + c + " = " + nb(s2)) + " CHF. c) " + M(nb(s2) + " - (-" + a + ") = " + nb(s2 + a)) + " CHF. d) " + M("500 - " + prn(s2) + " = " + nb(500 - s2)) + " CHF."));
+    });
+  ADD("reladd", "randonnee",
+    () => { /* plongée : profondeurs (altitudes négatives) */
+      let a, b, c, d; do { a = ri(12, 30); b = ri(4, 10); c = ri(5, 15); d = ri(3, 9); } while (a - b + c <= a || -a + b - c + d >= -2);
+      const z = [0, -a, -a + b, -a + b - c, -a + b - c + d];
+      return CXP("plongee", P("Une plongeuse part de la surface du lac (altitude 0 m). Elle descend de " + M(a + " \\text{ m}") + ", remonte de " + M(b + " \\text{ m}") + ", redescend de " + M(c + " \\text{ m}") + " puis remonte de " + M(d + " \\text{ m}") + ".",
+        [["a) Altitude la plus basse atteinte (m)", Math.min(...z)], ["b) Altitude finale (m)", z[4]], ["c) Total des descentes (m)", a + c], ["d) De combien de mètres doit-elle encore remonter pour revenir à la surface ?", -z[4]]],
+        ["Écris la suite des altitudes : chaque descente se soustrait, chaque remontée s'ajoute.", "d) Distance entre son altitude finale et 0."],
+        "Altitudes : " + z.join(" ; ") + " m. a) " + M(Math.min(...z)) + " m. b) " + M(z[4]) + " m. c) " + M(a + " + " + c + " = " + (a + c)) + " m. d) " + M("0 - " + prn(z[4]) + " = " + -z[4]) + " m."));
+    },
+    () => { /* températures d'une journée d'hiver */
+      let t0, u1, d1, u2, d2; do { t0 = -ri(3, 12); u1 = ri(5, 14); d1 = ri(2, 6); u2 = ri(1, 4); d2 = ri(6, 15); } while (t0 + u1 - d1 + u2 - d2 === t0 || t0 + u1 <= 0);
+      const z = [t0, t0 + u1, t0 + u1 - d1, t0 + u1 - d1 + u2, t0 + u1 - d1 + u2 - d2];
+      return CXP("temperatures", P("Un matin d'hiver en montagne, il fait " + M(t0 + " \\text{ °C}") + " à 7 h. La température monte de " + M(u1 + " \\text{ °C}") + " jusqu'à midi, baisse de " + M(d1 + " \\text{ °C}") + " avec un nuage, remonte de " + M(u2 + " \\text{ °C}") + ", puis baisse de " + M(d2 + " \\text{ °C}") + " jusqu'à la nuit.",
+        [["a) Température la plus haute de la journée (°C)", Math.max(...z)], ["b) Température à la nuit (°C)", z[4]], ["c) Total des hausses (°C)", u1 + u2], ["d) Variation entre 7 h et la nuit (°C, négative si plus froid)", z[4] - t0]],
+        ["Écris la suite des températures : chaque hausse s'ajoute, chaque baisse se soustrait.", "d) Variation = température finale − température de départ."],
+        "Températures : " + z.join(" ; ") + " °C. a) " + M(Math.max(...z)) + " °C. b) " + M(z[4]) + " °C. c) " + M(u1 + " + " + u2 + " = " + (u1 + u2)) + " °C. d) " + M(prn(z[4]) + " - " + prn(t0) + " = " + (z[4] - t0)) + " °C."));
+    });
+  ADD("decadd", "achats",
+    () => { /* relais 4 × 100 m : temps au centième */
+      let t; do { t = [0, 0, 0, 0].map(() => ri(1180, 1450) / 100); } while (new Set(t).size < 4 || t.some((x) => Math.round(x * 100) % 10 === 0) === false);
+      const S = r2c(t[0] + t[1] + t[2] + t[3]), rec = r2c(S - ri(80, 300) / 100), mx = Math.max(...t), mn = Math.min(...t);
+      return CXP("relais", P("Au relais 4 × 100 m, les quatre coureurs de la classe réalisent " + t.map((x) => M(D(x) + " \\text{ s}")).join(", ") + ". Le record de l'école est de " + M(D(rec) + " \\text{ s}") + ".",
+        [["a) Temps total de l'équipe (s)", S], ["b) Écart avec le record de l'école (s)", r2c(S - rec)], ["c) Avance du coureur le plus rapide sur le plus lent (s)", r2c(mx - mn)]],
+        ["Aligne les virgules ; complète par des 0 si besoin.", "b) et c) Une soustraction : le plus grand temps moins le plus petit."],
+        "a) " + M(t.map(D).join(" + ") + " = " + D(S)) + " s. b) " + M(D(S) + " - " + D(rec) + " = " + D(r2c(S - rec))) + " s. c) " + M(D(mx) + " - " + D(mn) + " = " + D(r2c(mx - mn))) + " s."));
+    },
+    () => { /* randonnée en étapes */
+      let L, e1, e2, e3; do { L = ri(25, 48) / 2; e1 = ri(300, 650) / 100; e2 = ri(30, 75) / 10; e3 = ri(20, 60) / 10; } while (e1 + e2 + e3 >= L - 0.5 || Math.round(e1 * 100) % 10 === 0);
+      const f = r2c(e1 + e2), r = r2c(L - f), r3 = r2c(r - e3);
+      return CXP("randonnee", P("Un sentier de randonnée mesure " + M(D(L) + " \\text{ km}") + ". Le matin, un groupe parcourt deux étapes de " + M(D(e1) + " \\text{ km}") + " et " + M(D(e2) + " \\text{ km}") + ".",
+        [["a) Distance parcourue le matin (km)", f], ["b) Distance qu'il reste à parcourir (km)", r], ["c) L'après-midi, le groupe fait encore " + T(e3) + " km. Distance restante pour finir le sentier (km)", r3]],
+        ["Aligne les virgules (" + T(e2) + " = " + T(e2) + "0).", "b) Longueur du sentier − distance parcourue."],
+        "a) " + M(D(e1) + " + " + D(e2) + " = " + D(f)) + " km. b) " + M(D(L) + " - " + D(f) + " = " + D(r)) + " km. c) " + M(D(r) + " - " + D(e3) + " = " + D(r3)) + " km."));
+    });
+  ADD("decdiv", "restaurant",
+    () => { /* marché : prix au kilo, puis masse pour un budget */
+      let m, u, B, kg; do { m = pk([1.5, 2.5, 3.5, 0.75]); u = pk([6.4, 7.2, 8.6, 9.8, 12.4]); B = pk([20, 25, 30, 40]); kg = B / u; } while (Math.abs(kg * 10 - Math.round(kg * 10) - 0.5) < 0.02 || Math.abs(r2c(m * u) * 20 - Math.round(r2c(m * u) * 20)) > 1e-6);
+      const P0 = r2c(m * u), fr = pk(["fraises", "abricots", "cerises", "framboises"]);
+      return CXP("marche", P("Au marché, " + M(D(m) + " \\text{ kg}") + " de " + fr + " coûtent " + M(CHF(P0)) + " CHF.",
+        [["a) Prix d'un kilo (CHF)", u], ["b) Combien de kilos peut-on acheter avec " + B + " CHF ? (au dixième de kg)", r1(kg), 0.1], ["c) Combien de barquettes de 0,25 kg remplit-on avec " + T(m) + " kg ?", m / 0.25]],
+        ["Prix d'un kilo = prix ÷ masse : multiplie les deux par 10 (ou 100) pour diviser par un entier.", "b) Budget ÷ prix d'un kilo, puis arrondis au dixième."],
+        "a) " + M(CHF(P0) + " \\div " + D(m) + " = " + CHF(u)) + " CHF. b) " + M(B + " \\div " + CHF(u) + " \\approx " + D(r2c(kg))) + ", soit environ " + M(D(r1(kg))) + " kg. c) " + M(D(m) + " \\div 0{,}25 = " + D(m / 0.25)) + " barquettes."));
+    },
+    () => { /* vélo : vitesse moyenne, puis durée */
+      let v, t, d2, tt; do { v = pk([14.4, 16.8, 18.6, 20.4, 22.8]); t = pk([1.5, 2.5, 0.75, 1.25]); d2 = pk([27, 33, 45, 51]); tt = d2 / v; } while (Math.abs(tt * 100 - Math.round(tt * 100) - 0.5) < 0.02);
+      const d = r2c(v * t), Lp = pk([1.2, 2.4, 3.6]), tours = Math.floor(d / Lp + 1e-9);
+      return CXP("velo", P("Une cycliste parcourt " + M(D(d) + " \\text{ km}") + " en " + M(D(t) + " \\text{ h}") + ", à vitesse constante.",
+        [["a) Sa vitesse moyenne (km/h)", v], ["b) Combien d'heures lui faut-il pour " + d2 + " km à cette vitesse ? (au centième)", r2c(tt), 0.01], ["c) Combien de tours complets d'une boucle de " + T(Lp) + " km fait-elle avec ses " + T(d) + " km ?", tours]],
+        ["Vitesse = distance ÷ durée : multiplie les deux par 10 ou 100 pour diviser par un entier.", "c) Distance ÷ longueur d'un tour, puis garde la partie entière."],
+        "a) " + M(D(d) + " \\div " + D(t) + " = " + D(v)) + " km/h. b) " + M(d2 + " \\div " + D(v) + " \\approx " + D(r2c(tt))) + " h. c) " + M(D(d) + " \\div " + D(Lp) + " \\approx " + D(r2c(d / Lp))) + " : " + tours + " tours."));
+    });
+  ADD("carres", "carrelage",
+    () => { /* chorale disposée en carré */
+      const n = ri(5, 14), k = ri(1, 3);
+      return CXP("chorale", P("Pour la photo de fin d'année, " + M(nb(n * n)) + " élèves se placent en carré plein : autant de rangées que d'élèves par rangée.",
+        [["a) Nombre d'élèves par rangée", n], ["b) Nombre d'élèves sur le bord du carré (pourtour)", 4 * n - 4], ["c) Pour former un carré avec " + k + " élève" + (k > 1 ? "s" : "") + " de plus par rangée, combien d'élèves faudrait-il en plus ?", (n + k) ** 2 - n * n]],
+        ["Le nombre d'élèves est un carré : n · n = " + nbT(n * n) + ".", "b) Quatre côtés de " + n + " élèves, mais les coins sont comptés deux fois."],
+        "a) " + M("\\sqrt{" + nb(n * n) + "} = " + n) + ". b) " + M("4 \\cdot " + n + " - 4 = " + (4 * n - 4)) + ". c) " + M((n + k) + "^2 - " + n + "^2 = " + (n + k) ** 2 + " - " + n * n + " = " + ((n + k) ** 2 - n * n)) + " élèves."));
+    },
+    () => { /* verger : arbres en carré */
+      const n = ri(8, 25), s = pk([4, 5, 6, 8]), k = ri(2, 4);
+      return CXP("verger", P("Un verger compte " + M(nb(n * n)) + " pommiers plantés en carré : autant de rangées que d'arbres par rangée, " + M(s + " \\text{ m}") + " entre deux arbres voisins.",
+        [["a) Nombre d'arbres par rangée", n], ["b) Distance entre le premier et le dernier arbre d'une rangée (m)", (n - 1) * s], ["c) On ajoute " + k + " arbres à chaque rangée et " + k + " rangées. Combien d'arbres plante-t-on en plus ?", (n + k) ** 2 - n * n]],
+        ["Le nombre d'arbres est un carré : n · n = " + nbT(n * n) + ".", "b) Entre " + n + " arbres alignés, il y a " + (n - 1) + " intervalles."],
+        "a) " + M("\\sqrt{" + nb(n * n) + "} = " + n) + ". b) " + M((n - 1) + " \\cdot " + s + " = " + (n - 1) * s) + " m. c) " + M((n + k) + "^2 - " + n + "^2 = " + nb((n + k) ** 2) + " - " + nb(n * n) + " = " + nb((n + k) ** 2 - n * n)) + " arbres."));
+    });
+  ADD("ordgr", "course",
+    () => { /* camp de ski */
+      let n, Cc, e; do { n = ri(17, 27); Cc = 10 * ri(180, 360); e = ri(42, 78); } while (n % 10 === 0 || e % 10 === 0 || Cc % 100 === 0 || (e % 10) === 5);
+      const n10 = Math.round(n / 10) * 10, e10 = Math.round(e / 10) * 10, C100 = Math.round(Cc / 100) * 100, tot = Cc + n * e, pe = Math.ceil(tot / n);
+      return CXP("camp", P("Une classe de " + M(n) + " élèves part en camp de ski. Le chalet coûte " + M(nb(Cc)) + " CHF pour la semaine et le forfait de ski " + M(e) + " CHF par élève.",
+        [["a) Estimation du prix des forfaits (" + n10 + " élèves à " + e10 + " CHF)", n10 * e10], ["b) Estimation du coût total (chalet arrondi à la centaine)", C100 + n10 * e10], ["c) Coût exact (CHF)", tot], ["d) Participation par élève, arrondie au franc supérieur (CHF)", pe]],
+        ["Arrondis chaque nombre à un nombre « rond » avant de calculer de tête ; puis compare l'estimation au calcul exact.", "d) Coût exact ÷ " + n + ", arrondi vers le haut pour que tout soit payé."],
+        "a) " + M(n10 + " \\cdot " + e10 + " = " + nb(n10 * e10)) + ". b) " + M(nb(C100) + " + " + nb(n10 * e10) + " = " + nb(C100 + n10 * e10)) + ". c) " + M(nb(Cc) + " + " + n + " \\cdot " + e + " = " + nb(tot)) + ". d) " + M(nb(tot) + " \\div " + n + " \\approx " + D(r2c(tot / n))) + " : " + M(pe) + " CHF."));
+    },
+    () => { /* tournoi de foot : location du terrain et maillots */
+      let n, Cc, e; do { n = ri(31, 69); Cc = 10 * ri(25, 75); e = ri(12, 38); } while (n % 10 === 0 || e % 10 === 0 || Cc % 100 === 0 || (e % 10) === 5 || (n % 10) === 5);
+      const n10 = Math.round(n / 10) * 10, e10 = Math.round(e / 10) * 10, C100 = Math.round(Cc / 100) * 100, tot = Cc + n * e, pe = Math.ceil(tot / n);
+      return CXP("tournoi", P("Pour un tournoi de football, " + M(n) + " joueurs s'inscrivent. La location du terrain coûte " + M(nb(Cc)) + " CHF et chaque joueur reçoit un maillot à " + M(e) + " CHF.",
+        [["a) Estimation du prix des maillots (" + n10 + " maillots à " + e10 + " CHF)", n10 * e10], ["b) Estimation du coût total (terrain arrondi à la centaine)", C100 + n10 * e10], ["c) Coût exact (CHF)", tot], ["d) Inscription par joueur, arrondie au franc supérieur (CHF)", pe]],
+        ["Arrondis chaque nombre à un nombre « rond » avant de calculer de tête ; puis compare l'estimation au calcul exact.", "d) Coût exact ÷ " + n + ", arrondi vers le haut pour que tout soit payé."],
+        "a) " + M(n10 + " \\cdot " + e10 + " = " + nb(n10 * e10)) + ". b) " + M(nb(C100) + " + " + nb(n10 * e10) + " = " + nb(C100 + n10 * e10)) + ". c) " + M(nb(Cc) + " + " + n + " \\cdot " + e + " = " + nb(tot)) + ". d) " + M(nb(tot) + " \\div " + n + " \\approx " + D(r2c(tot / n))) + " : " + M(pe) + " CHF."));
+    });
+  ADD("fracops", "priorites",
+    () => { /* division prioritaire */
+      const fxOk = (v) => { for (let q = 1; q <= 12; q++) if (Math.abs(v * q - Math.round(v * q)) < 1e-9) return true; return false; };
+      let a, b, c, d, e, f, A, B;
+      do { b = pk([2, 3, 4, 5, 6]); a = ri(1, b - 1); d = pk([2, 3, 4, 5, 6]); c = ri(1, d + 2); f = pk([2, 3, 4, 5]); e = ri(1, f + 2); A = a / b + (c / d) / (e / f); B = (a / b + c / d) / (e / f); }
+      while (gcd(a, b) !== 1 || gcd(c, d) !== 1 || gcd(e, f) !== 1 || e === f || c === d || b === d || Math.abs(A - B) < 1e-9 || !fxOk(A) || !fxOk(B) || !fxOk(A - B) || !fxOk((c * f) / (d * e)) || !fxOk(a / b + c / d));
+      const F = (n, m) => "\\frac{" + n + "}{" + m + "}";
+      return CXP("division", P("On pose " + M("A = " + F(a, b) + " + " + F(c, d) + " \\div " + F(e, f)) + " et " + M("B = \\left(" + F(a, b) + " + " + F(c, d) + "\\right) \\div " + F(e, f)) + " (fractions acceptées).",
+        [["a) " + M("A"), A], ["b) " + M("B"), B], ["c) " + M("B - A"), B - A]],
+        ["A : la division passe avant l'addition. Diviser par une fraction, c'est multiplier par son inverse.", "B : la parenthèse d'abord (dénominateur commun), puis la division."],
+        "a) " + M(F(c, d) + " \\div " + F(e, f) + " = " + F(c, d) + " \\cdot " + F(f, e) + " = " + fx((c * f) / (d * e))) + ", donc " + M("A = " + fx(A)) + ". b) " + M(F(a, b) + " + " + F(c, d) + " = " + fx(a / b + c / d)) + ", donc " + M("B = " + fx(B)) + ". c) " + M(fx(B) + " - " + (A < 0 ? "\\left(" + fx(A) + "\\right)" : fx(A)) + " = " + fx(B - A)) + "."));
+    },
+    () => { /* emploi du temps : fractions d'heure */
+      let a, b, c, d, e, f, p, T;
+      do { b = pk([2, 3, 4, 5, 6]); a = ri(1, b - 1); d = pk([2, 3, 4]); c = ri(1, d - 1); f = pk([3, 4, 6]); e = ri(1, f - 1); p = (a / b) * (c / d); T = a / b + p + e / f; }
+      while (gcd(a, b) !== 1 || gcd(c, d) !== 1 || gcd(e, f) !== 1 || !Number.isInteger(+(p * 60).toFixed(9)) || !Number.isInteger(+(T * 60).toFixed(9)) || T >= 3);
+      const F = (n, m) => "\\frac{" + n + "}{" + m + "}", nm = pk(["Lina", "Noé", "Mia", "Tom", "Zoé", "Sam"]);
+      return CXP("temps", P("Mercredi, " + nm + " fait ses devoirs pendant " + M(F(a, b)) + " h, puis joue du piano pendant les " + M(F(c, d)) + " de ce temps, et enfin s'entraîne au basket pendant " + M(F(e, f)) + " h.",
+        [["a) Durée du piano (h, fraction)", p], ["b) Durée totale des trois activités (h, fraction)", T], ["c) Durée totale en minutes", Math.round(T * 60)]],
+        ["« Les " + c + "/" + d + " de ce temps » : une multiplication de fractions.", "b) Dénominateur commun pour additionner. c) 1 h = 60 min."],
+        "a) " + M(F(c, d) + " \\cdot " + F(a, b) + " = " + fx(p)) + " h. b) " + M(F(a, b) + " + " + fx(p) + " + " + F(e, f) + " = " + fx(T)) + " h. c) " + M(fx(T) + " \\cdot 60 = " + Math.round(T * 60)) + " min."));
+    });
+  ADD("divcrit", "45-36",
+    () => { /* casiers à trois chiffres */
+      let a, b; do { a = ri(1, 9); b = ri(0, 9); } while ((a + b) % 3 === 0);
+      const L = Array.from({ length: 10 }, (_, y) => 100 * a + 10 * b + y), d3 = L.filter((N) => N % 3 === 0), d9 = L.filter((N) => N % 9 === 0), d6 = L.filter((N) => N % 6 === 0);
+      if (!d9.length) return OUT.divcrit[1]();
+      return CXP("casiers", P("Dans un vestiaire, les casiers portent des numéros de trois chiffres. Ceux d'une rangée commencent tous par " + M(a + "\\," + b + "\\,■") + " (le chiffre des unités varie de 0 à 9).",
+        [["a) Combien de numéros de cette rangée sont divisibles par 3 ?", d3.length], ["b) Le plus grand numéro de la rangée divisible par 9", Math.max(...d9)], ["c) Combien de numéros de la rangée sont divisibles par 6 ?", d6.length]],
+        ["Divisible par 3 : la somme des chiffres est un multiple de 3 ; par 9 : un multiple de 9.", "6 = 2 · 3 : le numéro doit être pair ET divisible par 3."],
+        "a) Somme " + (a + b) + " + unités multiple de 3 : " + d3.join(" ; ") + ", soit " + M(d3.length) + ". b) " + M(Math.max(...d9)) + ". c) Les pairs parmi eux : " + (d6.join(" ; ") || "aucun") + ", soit " + M(d6.length) + "."));
+    },
+    () => { /* quatre chiffres a ■ b ■ : par 15 et par 18 */
+      let a, b; do { a = ri(1, 9); b = ri(0, 9); } while ((a + b) % 3 === 0);
+      const ok15 = [], ok18 = [];
+      for (let x = 0; x <= 9; x++) for (let y = 0; y <= 9; y++) { const N = 1000 * a + 100 * x + 10 * b + y; if (N % 15 === 0) ok15.push(N); if (N % 18 === 0) ok18.push(N); }
+      return CXP("15-18", P("On cherche les nombres de quatre chiffres " + M(a + "\\,■\\," + b + "\\,■") + " (le chiffre des centaines et celui des unités sont à trouver).",
+        [["a) Combien de ces nombres sont divisibles par 15 ?", ok15.length], ["b) Le plus petit d'entre eux", Math.min(...ok15)], ["c) Combien sont divisibles par 18 ?", ok18.length]],
+        ["15 = 3 · 5 : le nombre finit par 0 ou 5 ET la somme de ses chiffres est un multiple de 3.", "18 = 2 · 9 : le nombre est pair ET la somme de ses chiffres est un multiple de 9."],
+        "a) " + ok15.map(nb).join(" ; ") + " : " + M(ok15.length) + " nombres. b) " + M(nb(Math.min(...ok15))) + ". c) " + ok18.map(nb).join(" ; ") + " : " + M(ok18.length) + " nombres."));
+    });
+  ADD("racenc", "racine",
+    () => { /* terrain carré : côté au dixième, clôture au mètre supérieur */
+      let A; do { A = ri(30, 400); } while (Number.isInteger(Math.sqrt(A)) || Math.abs(Math.sqrt(A) * 10 - Math.round(Math.sqrt(A) * 10) - 0.5) < 0.05 || Number.isInteger(4 * Math.sqrt(A)));
+      const k = Math.floor(Math.sqrt(A)), cl = Math.ceil(4 * Math.sqrt(A));
+      return CXP("terrain", P("Un jardin carré a une aire de " + M(A) + " m².",
+        [["a) Entier juste en dessous de la longueur du côté (m)", k], ["b) Longueur du côté au dixième de mètre", Math.sqrt(A), 0.1], ["c) Longueur de grillage pour en faire le tour, arrondie au mètre supérieur", cl]],
+        ["Côté = racine carrée de l'aire. " + k + "² = " + k * k + " et " + (k + 1) + "² = " + (k + 1) ** 2 + ".", "c) Quatre côtés ; on achète un nombre entier de mètres, sans en manquer."],
+        "a) " + M(k * k + " < " + A + " < " + (k + 1) ** 2) + " : " + M(k) + " m. b) " + M("\\sqrt{" + A + "} \\approx " + D(r1(Math.sqrt(A)))) + " m. c) " + M("4 \\cdot \\sqrt{" + A + "} \\approx " + D(r2c(4 * Math.sqrt(A)))) + " : " + M(cl) + " m."));
+    },
+    () => { /* chute libre : t = √(h/5) */
+      let h; do { h = ri(25, 300); } while (Number.isInteger(Math.sqrt(h / 5)) || Math.abs(Math.sqrt(h / 5) * 10 - Math.round(Math.sqrt(h / 5) * 10) - 0.5) < 0.05);
+      const t = Math.sqrt(h / 5), k = Math.floor(t), s = ri(3, 8);
+      return CXP("chute", P("Sans frottement de l'air, un caillou lâché d'une hauteur de " + M("h") + " mètres met environ " + M("t = \\sqrt{\\frac{h}{5}}") + " secondes pour tomber. On le lâche du haut d'une falaise de " + M(h + " \\text{ m}") + ".",
+        [["a) Entier juste en dessous de la durée de chute (s)", k], ["b) Durée de chute au dixième de seconde", t, 0.1], ["c) Hauteur d'une falaise (m) d'où la chute dure exactement " + s + " s", 5 * s * s]],
+        ["Calcule h ÷ 5, puis encadre sa racine entre deux entiers consécutifs.", "c) t = " + s + " : élève au carré, " + s + "² = h ÷ 5."],
+        "a) " + M("\\frac{" + h + "}{5} = " + D(h / 5)) + " et " + M(k + "^2 < " + D(h / 5) + " < " + (k + 1) + "^2") + " : " + M(k) + " s. b) " + M("t \\approx " + D(r1(t))) + " s. c) " + M("h = 5 \\cdot " + s + "^2 = " + 5 * s * s) + " m."));
+    });
+  ADD("tradexpr", "phrases",
+    () => { /* programme de calcul */
+      let x1, x2, a, b, V; do { x1 = ri(2, 9); x2 = -ri(2, 7); a = ri(2, 8); b = ri(2, 5); V = b * ri(a + 2, a + 12); } while (x1 === a || V / b - a === x1 || b * (x1 + a) - x1 * x1 === b * (x2 + a) - x2 * x2);
+      const f = (x) => b * (x + a) - x * x;
+      return CXP("programme", P("Programme de calcul : choisis un nombre, ajoute-lui " + a + ", multiplie le résultat par " + b + ", puis soustrais le carré du nombre choisi.",
+        [["a) Résultat avec le nombre " + x1, f(x1)], ["b) Résultat avec le nombre " + T(x2), f(x2)], ["c) Avant la soustraction (après « multiplie par " + b + " »), on lit " + V + ". Quel nombre avait-on choisi ?", V / b - a]],
+        ["Écris l'expression : " + b + " · (x + " + a + ") − x². Attention aux parenthèses avec un nombre négatif.", "c) Remonte le programme : divise par " + b + ", puis enlève " + a + "."],
+        "a) " + M(b + " \\cdot (" + x1 + " + " + a + ") - " + x1 + "^2 = " + b * (x1 + a) + " - " + x1 * x1 + " = " + f(x1)) + ". b) " + M(b + " \\cdot (" + x2 + " + " + a + ") - (" + x2 + ")^2 = " + b * (x2 + a) + " - " + x2 * x2 + " = " + f(x2)) + ". c) " + M(V + " \\div " + b + " - " + a + " = " + (V / b - a)) + "."));
+    },
+    () => { /* rectangle décrit par des phrases */
+      let x, a; do { x = ri(3, 12); a = ri(2, 9); } while (x === a);
+      return CXP("rectangle", P("Un rectangle a une largeur de " + M("x") + " cm. Sa longueur dépasse le double de sa largeur de " + M(a) + " cm. On prend " + M("x = " + x) + ".",
+        [["a) Longueur (cm)", 2 * x + a], ["b) Périmètre (cm)", 2 * (3 * x + a)], ["c) Aire (cm²)", x * (2 * x + a)]],
+        ["« Dépasse le double de la largeur de " + a + " » : longueur = 2x + " + a + ".", "Périmètre = 2 · (longueur + largeur) ; aire = longueur · largeur."],
+        "a) " + M("2 \\cdot " + x + " + " + a + " = " + (2 * x + a)) + " cm. b) " + M("2 \\cdot (" + (2 * x + a) + " + " + x + ") = " + 2 * (3 * x + a)) + " cm. c) " + M((2 * x + a) + " \\cdot " + x + " = " + x * (2 * x + a)) + " cm²."));
+    });
+  ADD("valnum", "freinage",
+    () => { /* chute libre : d = 5t² */
+      const t1 = pk([1.5, 2.5, 3.5, 1.2, 2.4]), m = pk([2, 3]), t3 = pk([2, 3, 4, 5, 6].filter((v) => Math.abs(v - t1 * m) > 1e-9)), d = (t) => 5 * t * t;
+      return CXP("chute", P("Un objet lâché sans vitesse tombe d'environ " + M("d = 5t^2") + " mètres en " + M("t") + " secondes (sans frottement de l'air).",
+        [["a) " + M("d") + " pour " + M("t = " + D(t1)) + " s (m)", +d(t1).toFixed(6)], ["b) Si la durée de chute est multipliée par " + m + ", la distance est multipliée par…", m * m], ["c) Durée (s) pour une chute de " + M(d(t3)) + " m", t3]],
+        ["Calcule d'abord le carré, puis multiplie par 5.", "b) (" + m + "t)² = " + m * m + "t². c) t² = " + d(t3) + " ÷ 5 : cherche le nombre dont le carré vaut ce résultat."],
+        "a) " + M("5 \\cdot " + D(t1) + "^2 = 5 \\cdot " + D(+(t1 * t1).toFixed(6)) + " = " + D(+d(t1).toFixed(6))) + " m. b) " + M("5(" + m + "t)^2 = " + m * m + " \\cdot 5t^2") + " : multipliée par " + M(m * m) + ". c) " + M("t^2 = " + d(t3) + " \\div 5 = " + t3 * t3) + ", " + M("t = " + t3) + " s."));
+    },
+    () => { /* degrés Fahrenheit : F = 1,8C + 32 */
+      const c1 = -ri(4, 25), c2 = 5 * ri(3, 8), k = pk([5, 15, 25, 35]), F = (c) => +(1.8 * c + 32).toFixed(6);
+      return CXP("fahrenheit", P("Aux États-Unis, on mesure la température en degrés Fahrenheit : " + M("F = 1{,}8 \\cdot C + 32") + ", où " + M("C") + " est la température en degrés Celsius.",
+        [["a) " + M("F") + " pour " + M("C = " + c1), F(c1)], ["b) Température en °C quand le thermomètre américain indique " + M(D(F(c2))) + " °F", c2], ["c) Une hausse de " + k + " °C correspond à une hausse de combien de °F ?", +(1.8 * k).toFixed(6)]],
+        ["Remplace C par sa valeur ; attention au signe.", "b) Résous " + T(F(c2)) + " = 1,8 · C + 32. c) Le 32 ne joue pas pour un écart."],
+        "a) " + M("1{,}8 \\cdot (" + c1 + ") + 32 = " + D(+(1.8 * c1).toFixed(6)) + " + 32 = " + D(F(c1))) + ". b) " + M("C = (" + D(F(c2)) + " - 32) \\div 1{,}8 = " + c2) + " °C. c) " + M("1{,}8 \\cdot " + k + " = " + D(+(1.8 * k).toFixed(6))) + " °F."));
+    });
+  ADD("pctvar", "velo",
+    () => { /* abonnés d'une chaîne */
+      let P0, h, b; do { P0 = 400 * ri(5, 40); h = pk([10, 15, 20, 25, 30]); b = pk([10, 20, 25, 30, 40]); } while (b <= h || (1 + h / 100) * (1 - b / 100) >= 1);
+      const P1 = Math.round(P0 * (1 + h / 100)), P2 = Math.round((P1 * (100 - b)) / 100), g = r2c((P2 / P0 - 1) * 100), back = (P0 / P2 - 1) * 100;
+      return CXP("abonnes", P("Une chaîne de vidéos compte " + M(nb(P0)) + " abonnés au 1er janvier. Leur nombre augmente de " + M(h + "\\,\\%") + " en janvier, puis baisse de " + M(b + "\\,\\%") + " en février.",
+        [["a) Nombre d'abonnés fin février", P2], ["b) Variation globale (%, négatif pour une baisse)", g, 0.01], ["c) De quel pourcentage doit-il augmenter en mars pour revenir à " + nbT(P0) + " abonnés ? (%, au dixième)", r1(back), 0.1]],
+        ["Hausse de " + h + " % : multiplier par " + T(1 + h / 100) + ". Baisse de " + b + " % : multiplier par " + T(1 - b / 100) + ".", "c) Le pourcentage se calcule sur le nombre de fin février."],
+        "a) " + M(nb(P0) + " \\cdot " + D(1 + h / 100) + " \\cdot " + D(1 - b / 100) + " = " + nb(P2)) + ". b) " + M(D(1 + h / 100) + " \\cdot " + D(1 - b / 100) + " = " + D(r2c((1 + h / 100) * (1 - b / 100) * 100) / 100)) + ", soit " + M(D(g) + "\\,\\%") + " (et non " + M((h - b) + "\\,\\%") + "). c) " + M("\\frac{" + nb(P0) + "}{" + nb(P2) + "} \\approx " + D(+(P0 / P2).toFixed(4))) + " : " + M("+" + D(r1(back)) + "\\,\\%") + "."));
+    },
+    () => { /* récolte d'un verger */
+      let P0, h, b; do { P0 = 400 * ri(4, 30); h = pk([10, 15, 20, 25, 30]); b = pk([20, 25, 30, 40]); } while (b <= h || (1 + h / 100) * (1 - b / 100) >= 1);
+      const P1 = Math.round(P0 * (1 + h / 100)), P2 = Math.round((P1 * (100 - b)) / 100), g = r2c((P2 / P0 - 1) * 100), back = (P0 / P2 - 1) * 100;
+      return CXP("recolte", P("Un verger a produit " + M(nb(P0) + " \\text{ kg}") + " de pommes. L'année suivante, la récolte augmente de " + M(h + "\\,\\%") + " ; l'année d'après, la grêle la fait baisser de " + M(b + "\\,\\%") + ".",
+        [["a) Récolte de la troisième année (kg)", P2], ["b) Variation globale sur les deux années (%, négatif pour une baisse)", g, 0.01], ["c) De quel pourcentage la récolte doit-elle augmenter ensuite pour revenir à " + nbT(P0) + " kg ? (%, au dixième)", r1(back), 0.1]],
+        ["Les pourcentages successifs se multiplient : on ne les additionne pas.", "c) Le pourcentage se calcule sur la dernière récolte."],
+        "a) " + M(nb(P0) + " \\cdot " + D(1 + h / 100) + " = " + nb(P1)) + " kg, puis " + M(nb(P1) + " \\cdot " + D(1 - b / 100) + " = " + nb(P2)) + " kg. b) " + M("\\frac{" + nb(P2) + "}{" + nb(P0) + "} = " + D(+(P2 / P0).toFixed(4))) + ", soit " + M(D(g) + "\\,\\%") + ". c) " + M("\\frac{" + nb(P0) + "}{" + nb(P2) + "} \\approx " + D(+(P0 / P2).toFixed(4))) + " : " + M("+" + D(r1(back)) + "\\,\\%") + "."));
+    });
+  ADD("affine", "taxi",
+    () => { /* location de vélo électrique */
+      let p, f, d1, d2, B, hmax; do { p = pk([4.5, 5.5, 6, 7.5, 8]); f = pk([10, 12, 15, 18]); d1 = ri(1, 3); d2 = d1 + ri(2, 5); B = 10 * ri(6, 12); hmax = (B - f) / p; } while (Number.isInteger(+hmax.toFixed(9)) || hmax < d2);
+      const c1 = r2c(f + p * d1), c2 = r2c(f + p * d2);
+      return CXP("velo", P("Une location de vélos électriques facture un forfait fixe plus un prix par heure. Une location de " + M(d1) + " h a coûté " + M(CHF(c1)) + " CHF, une location de " + M(d2) + " h " + M(CHF(c2)) + " CHF.",
+        [["a) Prix par heure (CHF)", p], ["b) Forfait (CHF)", f], ["c) Nombre maximal d'heures entières avec " + B + " CHF", Math.floor(hmax)]],
+        ["La différence de prix correspond à la différence d'heures.", "c) Résous forfait + (prix par heure) · x ≤ " + B + ", puis prends l'entier inférieur."],
+        "a) " + M("\\frac{" + CHF(c2) + " - " + CHF(c1) + "}{" + (d2 - d1) + "} = " + D(p)) + " CHF/h. b) " + M(CHF(c1) + " - " + d1 + " \\cdot " + D(p) + " = " + D(f)) + " CHF. c) " + M(D(f) + " + " + D(p) + "x \\leq " + B + " \\iff x \\leq " + D(r2c(hmax))) + " : " + M(Math.floor(hmax)) + " h."));
+    },
+    () => { /* plombier : déplacement + tarif horaire */
+      const p = pk([85, 95, 110, 120]), f = pk([40, 50, 65, 80]), [d1, d2] = pk([[1, 2.5], [1.5, 3], [2, 3.5], [1, 3]]), t3 = pk([0.5, 4, 4.5, 5].filter((t) => t !== d1 && t !== d2));
+      const c1 = f + p * d1, c2 = f + p * d2;
+      return CXP("plombier", P("Un plombier facture un déplacement fixe plus un tarif horaire. Une intervention de " + M(D(d1)) + " h a coûté " + M(CHF(c1)) + " CHF, une intervention de " + M(D(d2)) + " h " + M(CHF(c2)) + " CHF.",
+        [["a) Tarif horaire (CHF)", p], ["b) Prix du déplacement (CHF)", f], ["c) Prix d'une intervention de " + T(t3) + " h (CHF)", f + p * t3]],
+        ["La différence de prix correspond à la différence de durée.", "b) Prix − durée · tarif horaire."],
+        "a) " + M("\\frac{" + CHF(c2) + " - " + CHF(c1) + "}{" + D(d2 - d1) + "} = " + p) + " CHF/h. b) " + M(CHF(c1) + " - " + D(d1) + " \\cdot " + p + " = " + f) + " CHF. c) " + M(f + " + " + p + " \\cdot " + D(t3) + " = " + CHF(f + p * t3)) + " CHF."));
+    });
+  ADD("pyth", ["echelle", "parc"],
+    () => { /* cerf-volant */
+      const [p, q, r] = pk([[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25]]), k = pk([2, 3, 4, 5]), sw = R.rand() < 0.5, L = k * r, d = k * (sw ? p : q), h = k * (sw ? q : p);
+      if (L > 100) return OUT.pyth[2]();
+      return CXP("cerfvolant", P("Lina tient la ficelle tendue de son cerf-volant à 1,2 m du sol. La ficelle mesure " + M(L) + " m, et le cerf-volant est à la verticale d'un arbre situé à " + M(d) + " m d'elle (distance horizontale).",
+        [["a) Hauteur du cerf-volant au-dessus de sa main (m)", h], ["b) Hauteur du cerf-volant au-dessus du sol (m)", +(h + 1.2).toFixed(6)], ["c) Aire du triangle formé par la ficelle, l'horizontale et la verticale (m²)", (d * h) / 2]],
+        ["La ficelle est l'hypoténuse d'un triangle rectangle : hauteur² = " + L + "² − " + d + "².", "b) Ajoute la hauteur de la main. c) Triangle rectangle : côté · côté ÷ 2."],
+        "a) " + M("\\sqrt{" + L + "^2 - " + d + "^2} = \\sqrt{" + nb(L * L - d * d) + "} = " + h) + " m. b) " + M(h + " + 1{,}2 = " + D(+(h + 1.2).toFixed(6))) + " m. c) " + M(d + " \\cdot " + h + " \\div 2 = " + D((d * h) / 2)) + " m²."));
+    });
+  ADD("simil", ["photo", "maquette"],
+    () => { /* pizzas : prix proportionnel à l'aire */
+      const d1 = pk([24, 26, 28, 30, 32]), k = pk([1.25, 1.5]), d2 = d1 * k, Pp = pk([12, 14, 16, 18]), g = pk([80, 100, 120]);
+      return CXP("pizza", P("Une pizzeria fixe des prix proportionnels à l'aire des pizzas. La petite pizza a un diamètre de " + M(d1) + " cm et coûte " + M(CHF(Pp)) + " CHF ; la grande a un diamètre de " + M(D(d2)) + " cm.",
+        [["a) Rapport de similitude (grande ÷ petite)", k], ["b) Prix de la grande pizza (CHF, au centime)", r2c(Pp * k * k), 0.01], ["c) La petite est garnie de " + g + " g de fromage. Masse de fromage sur la grande, à la même épaisseur (g)", +(g * k * k).toFixed(6)]],
+        ["Rapport = diamètre de la grande ÷ diamètre de la petite.", "Les aires (donc le prix et le fromage) sont multipliées par le CARRÉ du rapport."],
+        "a) " + M(D(d2) + " \\div " + d1 + " = " + D(k)) + ". b) " + M(CHF(Pp) + " \\cdot " + D(k) + "^2 = " + CHF(Pp) + " \\cdot " + D(k * k) + eqa(Pp * k * k, r2c(Pp * k * k)) + CHF(r2c(Pp * k * k))) + " CHF. c) " + M(g + " \\cdot " + D(k * k) + " = " + D(+(g * k * k).toFixed(6))) + " g."));
+    });
+  ADD("monomes", "pave",
+    () => { /* cube */
+      const a = ri(2, 6), v = ri(2, 5), m = pk([2, 3]);
+      return CXP("cube", P("Un cube a des arêtes de " + M(a + "x") + " cm.",
+        [["a) Coefficient du volume écrit sous forme de monôme " + M("kx^3"), a ** 3], ["b) Coefficient de l'aire totale (6 faces) écrite " + M("kx^2"), 6 * a * a], ["c) Volume pour " + M("x = " + v) + " (cm³)", a ** 3 * v ** 3], ["d) Si " + M("x") + " est multiplié par " + m + ", l'aire totale est multipliée par…", m * m]],
+        ["(" + a + "x)³ = " + a + "³ · x³ : le coefficient aussi est élevé au cube.", "Une face : (" + a + "x)² ; six faces. d) (" + m + "x)² = " + m * m + "x²."],
+        "a) " + M("(" + a + "x)^3 = " + a ** 3 + "x^3") + ". b) " + M("6 \\cdot (" + a + "x)^2 = 6 \\cdot " + a * a + "x^2 = " + 6 * a * a + "x^2") + ". c) " + M(a ** 3 + " \\cdot " + v + "^3 = " + nb(a ** 3 * v ** 3)) + " cm³. d) " + M("(" + m + "x)^2 = " + m * m + "x^2") + " : multipliée par " + m * m + "."));
+    },
+    () => { /* terrain : rectangle et carré */
+      let a, b, c; do { a = ri(2, 6); b = ri(3, 9); c = ri(2, 5); } while (a === b);
+      const v = ri(2, 6);
+      return CXP("terrain", P("Un terrain de sport est formé d'un rectangle de " + M(a + "x") + " m sur " + M(b + "x") + " m, accolé à un carré de " + M(c + "x") + " m de côté.",
+        [["a) Coefficient de l'aire du rectangle écrite " + M("kx^2"), a * b], ["b) Coefficient de l'aire totale du terrain écrite " + M("kx^2"), a * b + c * c], ["c) Aire totale pour " + M("x = " + v) + " (m²)", (a * b + c * c) * v * v], ["d) Si " + M("x") + " est multiplié par 3, l'aire totale est multipliée par…", 9]],
+        ["Multiplie les coefficients entre eux et les x entre eux : x · x = x².", "b) Additionne deux monômes semblables (en x²)."],
+        "a) " + M(a + "x \\cdot " + b + "x = " + a * b + "x^2") + ". b) " + M(a * b + "x^2 + (" + c + "x)^2 = " + a * b + "x^2 + " + c * c + "x^2 = " + (a * b + c * c) + "x^2") + ". c) " + M((a * b + c * c) + " \\cdot " + v + "^2 = " + nb((a * b + c * c) * v * v)) + " m². d) " + M("(3x)^2 = 9x^2") + " : multipliée par 9."));
+    });
+  ADD("reduire", "triangle",
+    () => { /* rectangle : périmètre, puis carré */
+      let a1, b1, a2, b2, xi, xp; do { a1 = ri(1, 4); b1 = ri(1, 9); a2 = ri(2, 6); b2 = ri(1, 9); xi = (b1 + b2) / (a2 - a1); xp = ri(3, 9); } while (a2 <= a1 || !Number.isInteger(xi) || xi < 2 || xi > 12 || b1 === b2 || a2 * xp - b2 <= 0 || xp === xi);
+      const A = 2 * (a1 + a2), B = 2 * (b1 - b2), Pp = A * xp + B, cf = (k) => (k === 1 ? "" : k);
+      return CXP("rectangle", P("Un rectangle a des côtés de " + M(cf(a1) + "x + " + b1) + " et " + M(a2 + "x - " + b2) + " (en cm).",
+        [["a) Coefficient de " + M("x") + " dans le périmètre réduit", A], ["b) Terme constant du périmètre réduit", B], ["c) Valeur de " + M("x") + " pour un périmètre de " + M(Pp) + " cm", xp], ["d) Valeur de " + M("x") + " pour laquelle ce rectangle est un carré", xi]],
+        ["Périmètre = 2 · (longueur + largeur) : réduis la parenthèse, puis distribue le 2.", "d) Un carré : les deux côtés sont égaux. Résous " + cf(a1) + "x + " + b1 + " = " + a2 + "x − " + b2 + "."],
+        "a) et b) " + M("P = 2(" + (a1 + a2) + "x " + (b1 - b2 < 0 ? "- " + (b2 - b1) : "+ " + (b1 - b2)) + ") = " + poly([A, B])) + ". c) " + M(poly([A, B]) + " = " + Pp + " \\iff " + A + "x = " + (Pp - B) + " \\iff x = " + xp) + ". d) " + M(cf(a1) + "x + " + b1 + " = " + a2 + "x - " + b2 + " \\iff " + (b1 + b2) + " = " + cfD(a2 - a1) + "x \\iff x = " + xi) + "."));
+    },
+    () => { /* course d'orientation : trois étapes */
+      let a1, b1, a2, b2, a3, b3, xi, xp; do { a1 = ri(2, 5); b1 = 10 * ri(1, 9); a2 = ri(2, 6); b2 = 10 * ri(1, 9); a3 = ri(3, 8); b3 = 10 * ri(1, 9); xi = (b1 + b3) / (a3 - a1); xp = 10 * ri(5, 20); } while (a3 <= a1 || !Number.isInteger(xi) || xi < 20 || xi > 200 || b1 + b2 === b3 || a3 * xp - b3 <= 0 || xp === xi);
+      const A = a1 + a2 + a3, B = b1 + b2 - b3, Pp = A * xp + B;
+      return CXP("orientation", P("Une course d'orientation compte trois étapes de " + M(a1 + "x + " + b1) + " m, " + M(a2 + "x + " + b2) + " m et " + M(a3 + "x - " + b3) + " m.",
+        [["a) Coefficient de " + M("x") + " dans la longueur totale réduite", A], ["b) Terme constant de la longueur totale réduite", B], ["c) Valeur de " + M("x") + " pour une longueur totale de " + M(nb(Pp)) + " m", xp], ["d) Valeur de " + M("x") + " pour laquelle la première et la troisième étape ont la même longueur", xi]],
+        ["Additionne les trois étapes, puis regroupe les termes en x et les nombres (attention au « − " + b3 + " »).", "c) Résous " + A + "x " + (B < 0 ? "− " + -B : "+ " + B) + " = " + nbT(Pp) + "."],
+        "a) et b) " + M(poly([A, B])) + ". c) " + M(poly([A, B]) + " = " + nb(Pp) + " \\iff " + A + "x = " + nb(Pp - B) + " \\iff x = " + xp) + ". d) " + M(a1 + "x + " + b1 + " = " + a3 + "x - " + b3 + " \\iff " + (b1 + b3) + " = " + cfD(a3 - a1) + "x \\iff x = " + xi) + "."));
+    });
+  /* pct (PROB de generators.js) : vélo, puis abonnement de fitness et action en bourse */
+  if (typeof PROB !== "undefined" && PROB.pct && !OUT.pct) {
+    const pct0 = PROB.pct;
+    const PC = (cx, quoi, fin, intro, up, dn, P0) => { const p1 = P0 * (1 + up / 100), p2 = p1 * (1 - dn / 100), glob = (p2 / P0 - 1) * 100;
+      return CXP(cx, Object.assign(P(intro, [["a) " + quoi + " après la hausse (CHF)", +p1.toFixed(6)], ["b) " + quoi + " " + fin + " (CHF)", +p2.toFixed(6)], ["c) Variation globale en % (négative si baisse)", +glob.toFixed(6), 0.01]],
+        ["Les pourcentages successifs se multiplient : on ne les additionne pas.", "Multiplie par " + T(1 + up / 100) + " puis par " + T(1 - dn / 100) + " ; variation globale = (prix final / prix initial − 1) · 100."],
+        "a) " + M(nb(P0) + " \\cdot " + D(1 + up / 100) + " = " + CHF(p1)) + ". b) " + M(CHF(p1) + " \\cdot " + D(1 - dn / 100) + " = " + CHF(p2)) + ". c) " + M(D(+glob.toFixed(2)) + "\\,\\%") + " (et non " + (up - dn) + " %)."), { fig: FIG.percentBar(up, P0, " CHF") })); };
+    OUT.pct = [() => CXP("velo", pct0()),
+      () => { const P0 = 12 * ri(4, 9), up = pk([10, 20, 25]), dn = pk([15, 20, 30, 40]); return PC("fitness", "Prix mensuel", "final", "Un abonnement de fitness coûte " + M(P0) + " CHF par mois. Le prix augmente de " + M(up + "\\,\\%") + " ; puis, avec la carte d'étudiant, il baisse de " + M(dn + "\\,\\%") + ".", up, dn, P0); },
+      () => { const P0 = 20 * ri(3, 40), up = pk([10, 20, 25, 30, 50]), dn = pk([10, 20, 25, 40]); return PC("action", "Valeur", "finale", "Une action vaut " + M(nb(P0)) + " CHF. En une semaine, sa valeur monte de " + M(up + "\\,\\%") + ", puis la semaine suivante elle baisse de " + M(dn + "\\,\\%") + ".", up, dn, P0); }];
+  }
+  return OUT;
 })();
 // Texte simple : milliers avec ' (indices et étiquettes).
 function nbT(v) { return String(v).replace(/\B(?=(\d{3})+(?!\d))/g, "'"); }
