@@ -6,7 +6,7 @@ Ordre (solidité d'abord) :
    ramène pas la réussite vers la cible (55–65 %) : niveaux servis, remobilisation, poids de l'échec avec aide.
    Une seule réussite au positionnement ne doit pas donner « maîtrisée » (seulement « vue », décision n° 4).
    Proposer les réglages (finir sur une réussite, échauffement) à l'enseignant AVANT de toucher aux seuils.
-2. **Corrigé = valeur attendue** : test sur tout le catalogue.
+2. **Corrigé = valeur attendue** (lancé puis arrêté le 26.11 à 22 h, quota : à relancer après le reset de 8 h) : test sur tout le catalogue.
 3. **Zones tactiles ≥ 44 px** : 💬 (28 px), ⚙️ (34 px), « Choisir mon chapitre », En classe, Libre, ⓘ ; test à 360 px.
 4. **Série perdue** : l'en-tête affiche « 0 j » sans message après 4 jours d'absence → pas de « 0 j », message doux
    (la phrase « Ta série de … » n'apparaît que dans la carte de séance, le jour du retour).

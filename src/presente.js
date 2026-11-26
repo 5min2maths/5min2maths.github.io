@@ -154,7 +154,7 @@ function screenDecouvrir() {
       <div class="card flat"><b>🔍 Problème de la semaine</b><p class="small">Un vrai défi en plusieurs étapes, avec des indices si tu bloques.</p></div>
       <div class="card flat"><b>🎲 Questions curieuses</b><p class="small">Parie d'abord, calcule ensuite : les maths cachées dans la vie de tous les jours.</p></div>
       <div class="card flat"><b>📜 Histoires des maths</b><p class="small">Zénon, Kepler, Marie Curie, John Snow… et un défi expert pour les plus motivés.</p></div>
-      <div class="card flat"><b>🔥 Ta série</b><p class="small">Un jour, deux jours, dix jours d'affilée : 5 minutes suffisent pour la garder.</p></div>
+      <div class="card flat"><b>🔥 Ta série</b><p class="small">Un jour, deux jours, dix jours d'affilée : une courte séance suffit pour la garder.</p></div>
     </div>
   </section>
 
@@ -207,13 +207,13 @@ function screenParents() {
   <section class="pz-s pz-hero">
     <div class="eyebrow">👪 Je suis parent</div>
     <h1 class="pz-big">Accompagner son enfant en maths,<br><span class="mark">2 minutes</span> par semaine.</h1>
-    <p class="muted">Votre enfant s'entraîne 5 minutes par jour, à son niveau, sur le programme de sa classe. Vous, vous l'encouragez, et vous pouvez résoudre un problème avec lui, même sans être fort en maths.</p>
+    <p class="muted">Votre enfant s'entraîne environ 5 minutes par jour, à son niveau, sur le programme de sa classe. Vous, vous l'encouragez, et vous pouvez résoudre un problème avec lui, même sans être fort en maths.</p>
     <div class="pz-chips pz-anim"><span>🤝 accompagner, pas surveiller</span><span>🆓 gratuit, sans compte</span><span>📚 ${PZ.fr() ? "programmes officiels, de la 6e à la terminale" : "plan d'études genevois, 9e → 4e, Collège et MP"}</span></div>
     <button type="button" class="btn-primary pz-next">Voir comment ↓</button>
   </section>
 
   <section class="pz-s">
-    <div class="eyebrow">📱 Côté enfant</div><h2>5 minutes par jour, juste à son niveau</h2>
+    <div class="eyebrow">📱 Côté enfant</div><h2>Environ 5 minutes par jour, juste à son niveau</h2>
     <div class="pz-grid pz-anim">
       <div class="card flat"><b>🎯 Adapté</b><p class="small">Chaque question est choisie selon ses réussites : ni trop facile, ni décourageante.</p></div>
       <div class="card flat"><b>🏫 Relié à la classe</b><p class="small">Il indique le chapitre en cours et la date de sa prochaine évaluation : l'app le prépare jour après jour.</p></div>
@@ -340,7 +340,7 @@ function screenEnseignants() {
   <section class="pz-s pz-hero">
     <div class="eyebrow">👩‍🏫 ${PZ.fr() ? "Pour les enseignant·es · collège et lycée" : "Pour les enseignant·es · secondaire I et II"}</div>
     <h1 class="pz-big">Un entraînement quotidien,<br><span class="mark">aligné sur votre programme</span>,<br>que vos élèves font vraiment.</h1>
-    <p class="muted">5 minutes par jour sur le téléphone : des questions au niveau de chaque élève, une correction immédiate et une aide pas à pas. Pour vous, aucune préparation ni correction, et aucune donnée d'élève à gérer.</p>
+    <p class="muted">Environ 5 minutes par jour sur le téléphone : des questions au niveau de chaque élève, une correction immédiate et une aide pas à pas. Pour vous, aucune préparation ni correction, et aucune donnée d'élève à gérer.</p>
     <div class="pz-nums pz-anim"><div><span class="pz-num" id="pznn" data-to="${nNotions}">${nNotions}</span><small>notions</small></div><div><span class="pz-num" data-to="${nClasses}">${nClasses}</span><small>${PZ.fr() ? "classes, de la 6e à la terminale" : "classes, de la 9e à la 4e (CO, Collège, MP)"}</small></div><div><span class="pz-num" data-to="0">0</span><small>compte à créer</small></div></div>
     <button type="button" class="btn-primary pz-next">Découvrir ↓</button>
   </section>
