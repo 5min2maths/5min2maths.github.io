@@ -307,6 +307,42 @@
     ],
   };
 
+  /* 26.11 soir (agent defisfr) : défi lnfr tiré au hasard (avant : un seul énoncé figé), 4 contextes (tag ctx), corrigé
+     calculé ; recalcul indépendant : tests/recalc_oracles_fr.js. Seuil qⁿ ⩾ k : n ⩾ ln k / ln q (sens changé si q < 1). */
+  const T = (v) => N(v).replace(/\\,/g, " ").replace("{,}", ",").replace(/^-/, "−");
+  const PRL = (ctx, q, parts, hints, sol) => ({ ctx, q, hints, sol, parts: parts.map(([label, value]) => ({ label, spec: { kind: "value", value: rnd(value) } })) });
+  const seuil = (q, r) => Math.ceil(Math.log(r) / Math.log(q) - 1e-12); /* plus petit n tel que qⁿ ⩾ r (q > 1) ou qⁿ ⩽ r (q < 1) */
+  const loin = (q, r) => { const x = Math.log(r) / Math.log(q); return Math.abs(x - Math.round(x)) > 0.02; };
+  const LNP = [() => {
+    const cx = pk(["placement", "utilisateurs", "medicament", "vitres"]);
+    let q, r1, r2, txt, l1, l2, unit, hint;
+    if (cx === "placement" || cx === "utilisateurs") {
+      const pl = cx === "placement", t = pl ? pk([1.5, 2, 2.5, 3, 3.5, 4, 5]) : pk([3, 4, 5, 6, 8]), C0 = pl ? 500 * R.int(2, 12) : 100 * R.int(20, 90);
+      q = rnd(1 + t / 100); do r1 = pk([1.2, 1.25, 1.3, 1.5, 1.6, 1.8]); while (!loin(q, r1)); do r2 = pl ? pk([2, 2, 2, 3]) : pk([3, 4, 5, 10]); while (!loin(q, r2));
+      const S1 = rnd(C0 * r1);
+      txt = pl ? "Un capital de " + T(C0) + " € est placé à " + T(t) + " % par an (intérêts composés)." : "Une application de covoiturage créée à " + pk(["Bordeaux", "Nantes", "Lyon", "Toulouse"]) + " compte " + T(C0) + " utilisateurs ; leur nombre augmente de " + t + " % par mois.";
+      unit = pl ? "d'années" : "de mois";
+      l1 = pl ? "le capital dépasse " + T(S1) + " €" : "le nombre d'utilisateurs dépasse " + T(S1);
+      l2 = pl ? (r2 === 2 ? "le capital double" : "le capital soit multiplié par " + r2) : "le nombre d'utilisateurs soit multiplié par " + r2;
+      hint = T(C0) + " × " + T(q) + "ⁿ ⩾ " + T(S1) + " ⇔ n ⩾ ln(" + T(r1) + ") ÷ ln(" + T(q) + ")";
+    } else if (cx === "medicament") {
+      const D = pk([100, 200, 250, 400, 500]), p = pk([10, 15, 20, 25, 30]); q = rnd(1 - p / 100); r1 = 0.5; do r2 = pk([0.1, 0.05, 0.2, 0.02]); while (!loin(q, r2));
+      txt = "On injecte " + D + " mg d'un médicament. Chaque heure, la quantité présente dans le sang diminue de " + p + " %.";
+      unit = "d'heures"; l1 = "il reste moins de " + T(rnd(D * r1)) + " mg"; l2 = "il reste moins de " + T(rnd(D * r2)) + " mg";
+      hint = D + " × " + T(q) + "ⁿ < " + T(rnd(D * r1)) + " ⇔ n > ln(" + T(r1) + ") ÷ ln(" + T(q) + ") : ln(" + T(q) + ") < 0, le sens change";
+    } else {
+      const p = pk([8, 10, 12, 15, 20]); q = rnd(1 - p / 100); r1 = 0.5; do r2 = pk([0.1, 0.2, 0.25, 0.05]); while (!loin(q, r2));
+      txt = "Une plaque de verre teinté absorbe " + p + " % de la lumière qui la traverse. On superpose n plaques identiques.";
+      unit = "de plaques"; l1 = "l'intensité lumineuse transmise soit inférieure à 50 % de l'intensité de départ"; l2 = "elle soit inférieure à " + T(r2 * 100) + " %";
+      hint = T(q) + "ⁿ < 0,5 ⇔ n > ln 0,5 ÷ ln " + T(q) + " (ln " + T(q) + " < 0 : le sens change)";
+    }
+    const n1 = seuil(q, r1), n2 = seuil(q, r2), up = q > 1;
+    return PRL(cx, txt,
+      [["a) Coefficient multiplicateur " + (cx === "vitres" ? "de l'intensité par plaque" : cx === "medicament" ? "horaire" : cx === "placement" ? "annuel" : "mensuel"), q], ["b) Nombre minimal " + unit + " pour que " + l1, n1], ["c) Nombre minimal " + unit + " pour que " + l2, n2]],
+      [hint + ".", "On prend le premier entier qui convient (on arrondit au-dessus)."],
+      "a) " + M(N(q)) + " ; b) " + M("n " + (up ? "\\geqslant" : ">") + " \\frac{\\ln " + N(r1) + "}{\\ln " + N(q) + "} \\approx " + N(rnd(Math.log(r1) / Math.log(q), 2))) + ", donc " + M("n = " + n1) + " ; c) " + M("\\frac{\\ln " + N(r2) + "}{\\ln " + N(q) + "} \\approx " + N(rnd(Math.log(r2) / Math.log(q), 2))) + ", donc " + M("n = " + n2) + ".");
+  }];
+
   reg([
     { id: "lnfr", theme: "fa", label: "Logarithme népérien : propriétés, équations, seuils", ex: "\\ln(ab) = \\ln a + \\ln b", FR: [12, 3], g: LN,
       hint: "ln est la réciproque de exp : e^x = k ⇔ x = ln k (k > 0) ; ln x = a ⇔ x = e^a. ln(ab) = ln a + ln b, ln(a/b) = ln a − ln b, ln(aⁿ) = n ln a. Diviser par ln q < 0 (0 < q < 1) change le sens d'une inégalité.",
@@ -315,7 +351,7 @@
         "\\(\\ln 1 = 0\\), \\(\\ln e = 1\\). Pour \\(a, b > 0\\) : \\(\\ln(ab) = \\ln a + \\ln b\\), \\(\\ln\\frac{a}{b} = \\ln a - \\ln b\\), \\(\\ln(a^n) = n\\ln a\\). \\(\\ln\\) est strictement croissante sur \\(]0 \\,;\\, +\\infty[\\) : \\(\\ln a < \\ln b \\iff a < b\\). Seuil : \\(q^n \\geqslant k \\iff n\\ln q \\geqslant \\ln k\\) ; si \\(0 < q < 1\\), \\(\\ln q < 0\\) et le sens change en divisant.",
         ["\\(e^{2x} = 5 \\iff x = \\frac{\\ln 5}{2}\\).", "\\(1{,}05^n \\geqslant 2 \\iff n \\geqslant \\frac{\\ln 2}{\\ln 1{,}05} \\approx 14{,}2\\) : \\(n = 15\\)."],
         "\\(\\ln(a + b)\\) n'est pas \\(\\ln a + \\ln b\\) ; et on vérifie toujours le domaine (\\(\\ln\\) d'un nombre positif)."],
-      probs: [() => P("Un capital de 2 000 € est placé à 4 % par an (intérêts composés).", [["a) Coefficient multiplicateur annuel", 1.04], ["b) n minimal pour que le capital dépasse 3 000 €", 11], ["c) n minimal pour qu'il double", 18]], ["2000 × 1,04ⁿ ≥ 3000 ⇔ n ≥ ln 1,5 / ln 1,04.", "ln 2 / ln 1,04 ≈ 17,7."], "a) " + M("1{,}04") + " ; b) " + M("\\frac{\\ln 1{,}5}{\\ln 1{,}04} \\approx 10{,}3") + ", donc " + M("n = 11") + " ; c) " + M("\\frac{\\ln 2}{\\ln 1{,}04} \\approx 17{,}7") + ", donc " + M("n = 18") + ".")] },
+      probs: LNP },
     { id: "trigfr", theme: "fa", label: "Fonctions sinus et cosinus", ex: "(\\sin x)' = \\cos x", FR: [12, 4], g: TF,
       hint: "x en radians. (sin x)' = cos x ; (cos x)' = −sin x ; (sin(ax + b))' = a cos(ax + b). sin et cos sont 2π-périodiques ; cos est paire, sin impaire. Sur ]−π ; π], cos x = a donne ± la même valeur ; sin x = a donne x et π − x.",
       comps: ["Dériver sin et cos, sin x = a, valeurs remarquables", "Composées sin(ax + b), période, inéquations sur le cercle", "Étude d'une fonction, nombre de solutions, limite de sin(kx)/x"],

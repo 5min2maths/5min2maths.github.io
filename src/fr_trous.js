@@ -275,22 +275,156 @@
     ],
   };
 
+  /* 26.11 soir (agent defisfr) : les 5 défis tirés au hasard avec 3 ou 4 contextes chacun (tag ctx) ; avant : hauteurs5
+     (2 énoncés), tabform5 (4), cercle6, bissec6 et filtre6 (un seul contexte). Recalcul : tests/recalc_oracles_fr.js. */
+  const PR = (ctx, q, parts, hints, sol) => ({ ctx, q, hints, sol, parts: parts.map(([label, value, round]) => ({ label, spec: Object.assign({ kind: "value", value: rnd(value) }, round ? { round } : {}) })) });
+  const rdv = (v, s) => rnd(Math.round(rnd(v / s, 9)) * s, 9);
+  const nett = (v, s) => Math.abs((Math.abs(rnd(v / s, 9)) % 1) - 0.5) > 0.02;
+  const eqa = (v) => (Number.isInteger(rnd(v * 10, 6)) ? " = " + N(rnd(v, 4)) : " \\approx " + N(rdv(v, 0.1))); /* valeur exacte au dixième, ou arrondie */
+  const TRIP = [[3, 4, 5], [6, 8, 10], [5, 12, 13], [9, 12, 15], [8, 15, 17], [12, 16, 20], [7, 24, 25], [15, 20, 25], [10, 24, 26]];
   const PROBS = {
-    cercle6: [() => { const r = R.int(3, 6), d = R.int(r + 2, 2 * r - 1);
-      return P("Deux cercles de même rayon " + r + " cm ont pour centres A et B, avec AB = " + d + " cm. Ils se coupent en M et N.", [["a) Longueur AM (cm)", r], ["b) Périmètre du triangle AMB (cm)", d + 2 * r], ["c) Périmètre du quadrilatère AMBN (cm)", 4 * r]],
-        ["M est sur les deux cercles.", "AMBN a quatre côtés, tous des rayons."], "a) " + r + " ; b) " + M(d + " + " + r + " + " + r + " = " + (d + 2 * r)) + " ; c) " + M("4 \\times " + r + " = " + 4 * r) + " (c'est un losange)."); }],
-    bissec6: [() => { const a = 2 * R.int(20, 60), b = 2 * R.int(15, 40);
-      return P("Les angles xOy = " + a + "° et yOt = " + b + "° sont adjacents. [Ou) est la bissectrice de xOy, [Ov) celle de yOt.", [["a) Angle uOy (°)", a / 2], ["b) Angle yOv (°)", b / 2], ["c) Angle uOv (°)", (a + b) / 2]],
-        ["Chaque bissectrice partage son angle en deux.", "uOv = uOy + yOv."], "a) " + a / 2 + " ; b) " + b / 2 + " ; c) " + (a + b) / 2 + "."); }],
-    filtre6: [() => { const rows = table(), s = 20, L = rows.filter((r) => r.p <= s);
-      return P(INTRO + tabT(rows), [["a) Nombre de sorties à 20 € au plus", L.length], ["b) Meilleure note parmi elles", L.length ? Math.max(...L.map((r) => r.e)) : 0], ["c) Prix total de toutes les sorties (€)", rows.reduce((t, r) => t + r.p, 0)]],
-        ["Filtre d'abord par le prix.", "Additionne tous les prix pour c)."], "a) " + L.length + " ; b) " + (L.length ? Math.max(...L.map((r) => r.e)) : 0) + " ; c) " + rows.reduce((t, r) => t + r.p, 0) + " €."); }],
-    tabform5: [() => { const a = pk([3, 4]), b = pk([5, 8]);
-      return P("Un club facture " + M("\\text{prix} = " + a + " \\times n + " + b) + " (en €) pour " + M("n") + " séances.", [["a) Prix pour 5 séances (€)", 5 * a + b], ["b) Prix pour 10 séances (€)", 10 * a + b], ["c) Nombre de séances pour un prix de " + (12 * a + b) + " €", 12]],
-        ["Remplace n par 5, puis par 10.", "Retire " + b + ", puis divise par " + a + "."], "a) " + (5 * a + b) + " ; b) " + (10 * a + b) + " ; c) " + M("(" + (12 * a + b) + " - " + b + ") \\div " + a + " = 12") + "."); }],
-    hauteurs5: [() => { const [a, b, c] = pk([[6, 8, 10], [9, 12, 15]]);
-      return P("Le triangle ABC est rectangle en A, avec AB = " + a + " cm, AC = " + b + " cm et BC = " + c + " cm.", [["a) Aire (cm²)", (a * b) / 2], ["b) Hauteur issue de A (cm)", (a * b) / c], ["c) Hauteur issue de B (cm)", a]],
-        ["Les côtés de l'angle droit sont des hauteurs.", "Hauteur issue de A : 2 × aire ÷ BC."], "a) " + M(N((a * b) / 2)) + " ; b) " + M(N((a * b) / c)) + " ; c) AB = " + a + " (la hauteur issue de B est [BA])."); }],
+    cercle6: [() => {
+      const cx = pk(["deux-cercles", "chevre", "piste", "antenne"]);
+      if (cx === "deux-cercles") {
+        let r, s, d; do { r = R.int(3, 8); s = R.int(3, 8); d = R.int(Math.abs(r - s) + 1, r + s - 1); } while (d < 3);
+        const meme = r === s;
+        return PR(cx, "Le cercle de centre A a pour rayon " + r + " cm, le cercle de centre B a pour rayon " + s + " cm, et AB = " + d + " cm. Les deux cercles se coupent en M et N.",
+          [["a) Longueur AM (cm)", r], ["b) Périmètre du triangle AMB (cm)", d + r + s], ["c) Périmètre du quadrilatère AMBN (cm)", 2 * (r + s)]],
+          ["M est sur les deux cercles : AM est un rayon du premier, BM un rayon du second.", "AMBN a quatre côtés : AM, MB, BN et NA ([AB] est une diagonale)."],
+          "a) " + r + " cm (rayon) ; b) " + M(d + " + " + r + " + " + s + " = " + (d + r + s)) + " cm ; c) " + M(r + " + " + s + " + " + s + " + " + r + " = " + 2 * (r + s)) + " cm" + (meme ? " (c'est un losange)" : "") + ".");
+      }
+      if (cx === "chevre") {
+        const r = R.int(3, 9), dd = r + R.int(2, 8), x = R.int(1, 4), [animal, ferme] = pk([["chèvre", "Dans une ferme du Périgord"], ["chèvre", "Dans un pré des Vosges"], ["brebis", "Dans un alpage de Savoie"], ["chèvre", "Dans un jardin de Provence"]]);
+        return PR(cx, ferme + ", une " + animal + " est attachée à un piquet P par une corde de " + r + " m : elle peut brouter tous les points situés à " + r + " m ou moins de P (un disque). Un pommier est à " + dd + " m du piquet.",
+          [["a) Diamètre de la zone où elle peut brouter (m)", 2 * r], ["b) Distance entre le pommier et le bord de cette zone (m)", dd - r], ["c) On rallonge la corde de " + x + " m. Nouveau diamètre de la zone (m)", 2 * (r + x)]],
+          ["La zone broutée est un disque de centre P et de rayon " + r + " m.", "Le bord de la zone le plus proche du pommier est sur le segment [P pommier], à " + r + " m de P."],
+          "a) " + M("2 \\times " + r + " = " + 2 * r) + " m ; b) " + M(dd + " - " + r + " = " + (dd - r)) + " m ; c) rayon " + (r + x) + " m, diamètre " + M(2 * (r + x)) + " m.");
+      }
+      if (cx === "piste") {
+        let a, r1, r2; do { a = R.int(3, 15); r1 = R.int(2, 9); r2 = R.int(2, 9); } while (r1 === r2 || a <= r1);
+        const T0 = a + r1, b = T0 + r2, lieu = pk(["le long du canal du Midi", "au bord de la Loire", "sur l'ancienne voie ferrée du Morvan", "le long du lac d'Annecy"]);
+        return PR(cx, "Une piste cyclable rectiligne " + lieu + " est graduée en kilomètres. La borne A est au km " + a + " et la borne B au km " + b + ". Une fontaine est sur la piste, à " + r1 + " km de A et à " + r2 + " km de B.",
+          [["a) Distance AB (km)", b - a], ["b) Au kilomètre combien se trouve la fontaine ?", T0], ["c) Un autre point de la piste est aussi à " + r1 + " km de A : à quel kilomètre ?", a - r1]],
+          ["Sur une droite, deux points sont à " + r1 + " km de A : un de chaque côté.", "Cherche celui qui est aussi à " + r2 + " km de B."],
+          "a) " + M(b + " - " + a + " = " + (b - a)) + " km ; b) à " + r1 + " km de A : km " + (a - r1) + " ou km " + T0 + " ; à " + r2 + " km de B : km " + T0 + " ou km " + (b + r2) + ". La fontaine est au km " + T0 + " ; c) km " + M(a + " - " + r1 + " = " + (a - r1)) + ".");
+      }
+      const r = R.int(8, 20); let ds; do { ds = [r, ...Array.from({ length: 4 }, () => R.int(2 * r - 2 * r + 3, r + 9) + pk([0, 0.5]))]; } while (new Set(ds).size < 5 || ds.filter((x) => x <= r).length < 2 || ds.filter((x) => x <= r).length > 4);
+      ds = ds.sort(() => R.rand() - 0.5); const nom = ["Saint-Jean", "Lavaur", "Montfort", "Beaulieu", "Villeneuve"], cov = ds.filter((x) => x <= r).length, mx = Math.max(...ds);
+      return PR(cx, "Une antenne relais couvre tous les points situés à " + r + " km ou moins d'elle (un disque). Voici les distances de cinq villages à l'antenne : " + ds.map((x, i) => nom[i] + " " + D(x) + " km").join(", ") + ".",
+        [["a) Nombre de villages couverts", cov], ["b) De combien de km faut-il augmenter la portée pour couvrir les cinq villages ?", mx - r], ["c) Diamètre de la zone couverte (km)", 2 * r]],
+        ["Un village est couvert si sa distance à l'antenne est inférieure ou égale à " + r + " km.", "Un village à exactement " + r + " km est sur le cercle : il est couvert."],
+        "a) Villages à " + r + " km au plus : " + ds.filter((x) => x <= r).map(D).join(" ; ") + ", soit " + cov + " villages ; b) le plus loin est à " + D(mx) + " km : " + M(N(mx) + " - " + r + " = " + N(rnd(mx - r))) + " km ; c) " + M("2 \\times " + r + " = " + 2 * r) + " km.");
+    }],
+    bissec6: [() => {
+      const cx = pk(["adjacents", "plat", "triangle", "tarte"]);
+      if (cx === "adjacents") {
+        let a, b; do { a = 2 * R.int(15, 60); b = 2 * R.int(12, 45); } while (a === b || a + b >= 180);
+        return PR(cx, "Les angles xOy = " + a + "° et yOt = " + b + "° sont adjacents. [Ou) est la bissectrice de xOy et [Ov) celle de yOt.",
+          [["a) Angle uOy (°)", a / 2], ["b) Angle yOv (°)", b / 2], ["c) Angle uOv (°)", (a + b) / 2]],
+          ["Chaque bissectrice partage son angle en deux angles égaux.", "uOv = uOy + yOv."], "a) " + M(a + " \\div 2 = " + a / 2) + "° ; b) " + M(b + " \\div 2 = " + b / 2) + "° ; c) " + M(a / 2 + " + " + b / 2 + " = " + (a + b) / 2) + "°.");
+      }
+      if (cx === "plat") {
+        let a; do a = 2 * R.int(12, 78); while (a === 90);
+        return PR(cx, "Les angles xOy et yOz sont adjacents, et [Ox) et [Oz) sont dans le prolongement l'une de l'autre (angle plat xOz). xOy = " + a + "°. [Ou) est la bissectrice de xOy et [Ov) celle de yOz.",
+          [["a) Angle yOz (°)", 180 - a], ["b) Angle uOy (°)", a / 2], ["c) Angle uOv (°)", 90]],
+          ["Un angle plat mesure 180°.", "uOv = moitié de xOy + moitié de yOz = moitié de 180°."],
+          "a) " + M("180 - " + a + " = " + (180 - a)) + "° ; b) " + M(a + " \\div 2 = " + a / 2) + "° ; c) " + M(a / 2 + " + " + (180 - a) / 2 + " = 90") + "° : les deux bissectrices sont perpendiculaires.");
+      }
+      if (cx === "triangle") {
+        let A, B; do { A = 2 * R.int(15, 50); B = R.int(25, 85); } while (A + B >= 165);
+        return PR(cx, "Dans le triangle ABC, l'angle Â mesure " + A + "° et l'angle B̂ mesure " + B + "°. La bissectrice de l'angle Â coupe le côté [BC] en D.",
+          [["a) Angle Ĉ (°)", 180 - A - B], ["b) Angle BAD (°)", A / 2], ["c) Angle ADB (°)", 180 - B - A / 2]],
+          ["La somme des angles d'un triangle vaut 180°.", "Dans le triangle ABD : B̂, BAD et ADB."],
+          "a) " + M("180 - " + A + " - " + B + " = " + (180 - A - B)) + "° ; b) " + M(A + " \\div 2 = " + A / 2) + "° ; c) dans ABD : " + M("180 - " + B + " - " + A / 2 + " = " + (180 - B - A / 2)) + "°.");
+      }
+      const a = pk([40, 48, 60, 72, 80, 90, 96, 120]), qui = pk(["tarte aux pommes", "pizza", "galette des rois", "quiche lorraine"]);
+      return PR(cx, "Pour un goûter, on coupe dans une " + qui + " ronde une part dont l'angle au centre mesure " + a + "°. On partage cette part en deux selon la bissectrice de son angle, puis on partage encore chaque morceau en deux selon sa bissectrice.",
+        [["a) Angle au centre d'un morceau après le premier partage (°)", a / 2], ["b) Angle au centre d'un petit morceau à la fin (°)", a / 4], ["c) Combien de petits morceaux de cette taille faudrait-il pour faire toute la " + qui.split(" ")[0] + " ?", 1440 / a]],
+        ["La bissectrice partage un angle en deux angles égaux.", "Un tour complet mesure 360°."],
+        "a) " + M(a + " \\div 2 = " + N(a / 2)) + "° ; b) " + M(N(a / 2) + " \\div 2 = " + N(a / 4)) + "° ; c) " + M("360 \\div " + N(a / 4) + " = " + 1440 / a) + ".");
+    }],
+    filtre6: [() => {
+      const cx = pk(["sorties", "smartphones", "campings"]), sh = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(R.rand() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+      const tab = (H, rows) => M("\\begin{array}{l|c|c|c|c} " + H.map((h) => "\\text{" + h + "}").join(" & ") + " \\\\ \\hline " + rows.map((r) => "\\text{" + r[0] + "} & " + r.slice(1).map(N).join(" & ")).join(" \\\\ ") + " \\end{array}");
+      if (cx === "sorties") {
+        let rows, s, L; do { rows = sh(SORTIES.slice()).slice(0, 6).map((n) => [n, R.int(4, 30), pk([1, 1.5, 2, 2.5, 3, 3.5, 4]), R.int(5, 60), R.int(2, 5)]); s = pk([12, 15, 18, 20, 25]); L = rows.filter((r) => r[1] <= s); } while (L.length < 2 || L.length > 5);
+        const best = Math.max(...L.map((r) => r[4])), tot = rows.reduce((t, r) => t + r[1], 0);
+        return PR(cx, INTRO + tab(["Sortie", "Prix (€)", "Durée (h)", "Dist. (km)", "Note"], rows),
+          [["a) Nombre de sorties à " + s + " € au plus", L.length], ["b) Meilleure note parmi les sorties à " + s + " € au plus", best], ["c) Prix total de toutes les sorties du tableau (€)", tot]],
+          ["Filtre d'abord par le prix (« au plus " + s + " € » : le prix de " + s + " € est compris).", "Additionne tous les prix pour c)."], "a) " + L.map((r) => r[0] + " (" + r[1] + " €)").join(", ") + ", soit " + L.length + " ; b) " + best + " ; c) " + tot + " €.");
+      }
+      if (cx === "smartphones") {
+        const MOD = ["Alto", "Brio", "Cosmo", "Delta", "Éclat", "Furio", "Gamma", "Hélio"];
+        let rows, s, h, L; do { rows = sh(MOD.slice()).slice(0, 6).map((n) => [n, 10 * R.int(15, 80), R.int(14, 40), pk([64, 128, 256]), R.int(2, 5)]); s = 10 * R.int(35, 60); h = R.int(20, 30); L = rows.filter((r) => r[1] < s && r[2] >= h); } while (L.length < 1 || L.length > 4);
+        const four = rows.filter((r) => r[4] >= 4); if (!four.length) rows[0][4] = 4;
+        const F4 = rows.filter((r) => r[4] >= 4), cheap = Math.min(...F4.map((r) => r[1])), ec = Math.max(...rows.map((r) => r[1])) - Math.min(...rows.map((r) => r[1]));
+        return PR(cx, "Un site compare six smartphones (note des clients sur 5) :<br>" + tab(["Modèle", "Prix (€)", "Autonomie (h)", "Mémoire (Go)", "Note"], rows),
+          [["a) Nombre de modèles à moins de " + s + " € ET avec au moins " + h + " h d'autonomie", L.length], ["b) Prix du moins cher des modèles notés 4 ou plus (€)", cheap], ["c) Écart de prix entre le plus cher et le moins cher des six (€)", ec]],
+          ["Deux critères à la fois : un modèle doit vérifier les deux.", "« Moins de " + s + " € » : le prix de " + s + " € est exclu ; « au moins " + h + " h » : la durée de " + h + " h est comprise."], "a) " + (L.map((r) => r[0]).join(", ") || "aucun") + ", soit " + L.length + " ; b) notés 4 ou plus : " + F4.map((r) => r[0] + " (" + r[1] + " €)").join(", ") + ", donc " + cheap + " € ; c) " + ec + " €.");
+      }
+      const CAMP = ["Les Pins", "La Dune", "Le Phare", "Les Mouettes", "L'Estuaire", "La Pinède", "Les Oyats", "Le Moulin"], cote = pk(["en Vendée", "dans les Landes", "en Bretagne", "en Charente-Maritime"]);
+      let rows, d, L; do { rows = sh(CAMP.slice()).slice(0, 6).map((n) => [n, R.int(14, 45), pk([0.2, 0.5, 0.8, 1, 1.5, 2, 3, 4]), R.int(40, 250), R.int(2, 5)]); d = pk([0.5, 1, 1.5, 2]); L = rows.filter((r) => r[2] <= d); } while (L.length < 2 || L.length > 5);
+      const cheap = Math.min(...L.map((r) => r[1])), n = R.int(3, 7);
+      return PR(cx, "Une famille compare six campings " + cote + " (prix d'un emplacement pour une nuit, note des clients sur 5) :<br>" + tab(["Camping", "Prix (€)", "Plage (km)", "Places", "Note"], rows),
+        [["a) Nombre de campings à " + D(d) + " km de la plage au plus", L.length], ["b) Prix d'une nuit dans le moins cher des campings à " + D(d) + " km de la plage au plus (€)", cheap], ["c) Prix de " + n + " nuits dans ce camping, le moins cher à " + D(d) + " km de la plage au plus (€)", n * cheap]],
+        ["« Au plus " + D(d) + " km » : la distance de " + D(d) + " km est comprise.", "Parmi les campings retenus, cherche le plus petit prix."], "a) " + L.map((r) => r[0] + " (" + D(r[2]) + " km)").join(", ") + ", soit " + L.length + " ; b) " + cheap + " € ; c) " + M(n + " \\times " + cheap + " = " + n * cheap) + " €.");
+    }],
+    tabform5: [() => {
+      const cx = pk(["club", "location", "congelateur", "bougie"]);
+      if (cx === "club" || cx === "location") {
+        const club = cx === "club", a = club ? R.int(3, 9) : pk([1.5, 2, 2.5, 3, 3.5, 4]), b = club ? R.int(5, 25) : pk([2, 3, 4, 5, 6]), n1 = R.int(2, 6), n2 = R.int(8, 12), n3 = R.int(13, 24);
+        const [qui, var1, unit] = club ? pk([["Un club d'escalade de Grenoble facture ses séances", "séances", "n"], ["L'école de musique de Rouen facture ses cours", "cours", "n"], ["La piscine municipale de Nantes facture ses entrées avec une carte", "entrées", "n"]]) : pk([["Pour louer un vélo électrique à La Rochelle, on paie", "heures", "t"], ["Pour louer un kayak sur l'Ardèche, on paie", "heures", "t"], ["Pour louer un paddle sur le lac d'Annecy, on paie", "heures", "t"]]);
+        const E2 = (v) => (Number.isInteger(v) ? D(v) : v.toFixed(2).replace(".", ","));
+        const f = (n) => rnd(a * n + b);
+        return PR(cx, qui + " : " + M("\\text{prix} = " + N(a) + " \\times " + unit + " + " + b) + " (en €) pour " + M(unit) + " " + var1 + ".",
+          [["a) Prix pour " + n1 + " " + var1 + " (€)", f(n1)], ["b) Prix pour " + n2 + " " + var1 + " (€)", f(n2)], ["c) Nombre de " + var1 + " pour un prix de " + E2(f(n3)) + " €", n3]],
+          ["Remplace " + unit + " par " + n1 + ", puis par " + n2 + ".", "c) Retire " + b + ", puis divise par " + D(a) + "."],
+          "a) " + M(N(a) + " \\times " + n1 + " + " + b + " = " + N(f(n1))) + " ; b) " + M(N(a) + " \\times " + n2 + " + " + b + " = " + N(f(n2))) + " ; c) " + M("(" + N(f(n3)) + " - " + b + ") \\div " + N(a) + " = " + n3) + ".");
+      }
+      if (cx === "congelateur") {
+        const r = pk([2, 3]), T0 = pk([18, 20, 22]), t1 = R.int(2, 5), t2 = t1 + R.int(2, 4); let t3; do t3 = R.int(t2 + 1, Math.floor((T0 + 21) / r)); while (T0 - r * t3 > -6);
+        const f = (t) => T0 - r * t;
+        return PR(cx, "On met en marche un congélateur. " + M("t") + " heures après, la température à l'intérieur est " + M("T = " + T0 + " - " + r + " \\times t") + " (en °C), jusqu'à ce qu'il atteigne sa température de réglage.",
+          [["a) Température après " + t1 + " h (°C)", f(t1)], ["b) Température après " + t2 + " h (°C)", f(t2)], ["c) Au bout de combien d'heures la température est-elle de " + D(f(t3)).replace("-", "−") + " °C ?", t3]],
+          ["Remplace t par " + t1 + ".", "c) La température baisse de " + r + " °C par heure : de " + T0 + " °C à " + D(f(t3)).replace("-", "−") + " °C, elle baisse de " + (T0 - f(t3)) + " °C."],
+          "a) " + M(T0 + " - " + r + " \\times " + t1 + " = " + f(t1)) + " °C ; b) " + M(T0 + " - " + r + " \\times " + t2 + " = " + N(f(t2))) + " °C ; c) " + M("(" + T0 + " - (" + N(f(t3)) + ")) \\div " + r + " = " + t3) + " h.");
+      }
+      let h0, c; do { h0 = pk([12, 15, 18, 20, 24, 25, 30]); c = pk([0.5, 1, 1.5, 2, 2.5]); } while (!Number.isInteger(h0 / c) || h0 / c < 6 || h0 / c > 40);
+      const tot = h0 / c, t1 = R.int(1, Math.floor(tot / 3)), t2 = R.int(Math.ceil(tot / 3) + 1, tot - 1), f = (t) => rnd(h0 - c * t), obj = pk(["Une bougie", "Un cierge", "Une bougie parfumée"]);
+      return PR(cx, obj + " allumé" + (obj === "Un cierge" ? "" : "e") + " mesure " + M("h = " + h0 + " - " + N(c) + " \\times t") + " cm de haut, " + M("t") + " heures après avoir été allumé" + (obj === "Un cierge" ? "" : "e") + ".",
+        [["a) Hauteur après " + t1 + " h (cm)", f(t1)], ["b) Hauteur après " + t2 + " h (cm)", f(t2)], ["c) Au bout de combien d'heures est-" + (obj === "Un cierge" ? "il" : "elle") + " entièrement consumé" + (obj === "Un cierge" ? "" : "e") + " (h = 0) ?", tot]],
+        ["Remplace t par " + t1 + ", puis par " + t2 + ".", "c) Elle perd " + D(c) + " cm par heure : combien d'heures pour perdre " + h0 + " cm ?"],
+        "a) " + M(h0 + " - " + N(c) + " \\times " + t1 + " = " + N(f(t1))) + " cm ; b) " + M(h0 + " - " + N(c) + " \\times " + t2 + " = " + N(f(t2))) + " cm ; c) " + M(h0 + " \\div " + N(c) + " = " + tot) + " h.");
+    }],
+    hauteurs5: [() => {
+      const cx = pk(["rectangle", "terrain", "pignon", "voile"]);
+      if (cx === "rectangle" || cx === "voile") {
+        let a, b, c, k = 1; do { [a, b, c] = pk(TRIP); if (R.rand() < 0.5) [a, b] = [b, a]; k = cx === "voile" ? pk([0.5, 1]) : 1; } while ((!nett((a * b) / c, 0.1) && !Number.isInteger((a * b * 10) / c)) || c > 26 || (cx === "voile" && (c * k > 9 || Math.min(a, b) * k < 1.5)));
+        const Ar = (a * b) / 2, hA = (a * b) / c, fromB = R.rand() < 0.5, p = pk([12, 15, 18, 20, 25]);
+        if (cx === "rectangle") return PR(cx, "Le triangle ABC est rectangle en A, avec AB = " + a + " cm, AC = " + b + " cm et BC = " + c + " cm.",
+          [["a) Aire du triangle (cm²)", Ar], ["b) Longueur de la hauteur issue de A (cm, au dixième)", hA, 0.1], ["c) Longueur de la hauteur issue de " + (fromB ? "B" : "C") + " (cm)", fromB ? a : b]],
+          ["Les deux côtés de l'angle droit sont aussi des hauteurs : aire = AB × AC ÷ 2.", "Hauteur issue de A (relative à [BC]) = 2 × aire ÷ BC."],
+          "a) " + M(a + " \\times " + b + " \\div 2 = " + N(Ar)) + " cm² ; b) " + M("2 \\times " + N(Ar) + " \\div " + c + " = " + N(rnd(hA, 4)) + (Number.isInteger(hA * 10) ? "" : " \\approx " + N(rdv(hA, 0.1)))) + " cm ; c) la hauteur issue de " + (fromB ? "B est [BA] : " + a : "C est [CA] : " + b) + " cm.");
+        const [m, bo, hy] = [a * k, b * k, c * k], ARv = (m * bo) / 2, hv = (m * bo) / hy;
+        return PR(cx, "La voile d'un dériveur, sur le lac de Serre-Ponçon, a la forme d'un triangle ABC rectangle en A : le côté le long du mât, [AB], mesure " + D(m) + " m, le côté le long de la bôme, [AC], mesure " + D(bo) + " m, et [BC] mesure " + D(hy) + " m.",
+          [["a) Aire de la voile (m²)", ARv], ["b) Longueur de la hauteur issue de A (m, au dixième)", hv, 0.1], ["c) Prix de la toile à " + p + " € le m² (€)", ARv * p]],
+          ["Dans un triangle rectangle, les côtés de l'angle droit sont des hauteurs.", "Hauteur issue de A : 2 × aire ÷ BC."],
+          "a) " + M(N(m) + " \\times " + N(bo) + " \\div 2 = " + N(ARv)) + " m² ; b) " + M("2 \\times " + N(ARv) + " \\div " + N(hy) + eqa(hv)) + " m ; c) " + M(N(ARv) + " \\times " + p + " = " + N(rnd(ARv * p))) + " €.");
+      }
+      if (cx === "terrain") {
+        let bh, h, c, b; do { [bh, h, c] = pk(TRIP); if (R.rand() < 0.5) [bh, h] = [bh, h].reverse(); b = bh + R.int(2, 20); } while (c > 26 || b === c || !nett((b * h) / c, 0.1));
+        const Ar = (b * h) / 2, hC = (b * h) / c, p = pk([2, 3, 4, 5]), lieu = pk(["à Angers", "près de Toulouse", "en Normandie", "dans la Drôme"]);
+        return PR(cx, "Un terrain triangulaire ABC " + lieu + " a un côté [BC] de " + b + " m. La hauteur issue de A mesure " + h + " m et le côté [AB] mesure " + c + " m.",
+          [["a) Aire du terrain (m²)", Ar], ["b) Longueur de la hauteur issue de C, relative au côté [AB] (m, au dixième)", hC, 0.1], ["c) Prix du gazon pour tout le terrain, à " + p + " € le m² (€)", Ar * p]],
+          ["Aire = base × hauteur ÷ 2, avec la hauteur relative à cette base.", "L'aire ne change pas si on prend [AB] comme base : hauteur = 2 × aire ÷ AB."],
+          "a) " + M(b + " \\times " + h + " \\div 2 = " + N(Ar)) + " m² ; b) " + M("2 \\times " + N(Ar) + " \\div " + c + eqa(hC)) + " m ; c) " + M(N(Ar) + " \\times " + p + " = " + N(rnd(Ar * p))) + " €.");
+      }
+      const [hb, h, s] = pk([[3, 4, 5], [4, 3, 5], [6, 2.5, 6.5], [4.5, 6, 7.5], [6, 4.5, 7.5], [2.4, 3.2, 4], [3.2, 2.4, 4], [2.5, 6, 6.5]]), b = 2 * hb, Ar = (b * h) / 2, hB = (b * h) / s;
+      return PR(cx, "Le pignon d'une maison " + pk(["normande", "alsacienne", "savoyarde", "bretonne"]) + " est un triangle isocèle ABC : la base [BC] mesure " + D(b) + " m, AB = AC = " + D(s) + " m, et la hauteur issue de A mesure " + D(h) + " m.",
+        [["a) Aire du pignon (m²)", Ar], ["b) Longueur de la hauteur issue de B, relative au côté [AC] (m, au dixième)", hB, 0.1], ["c) Aire à peindre pour les deux pignons de la maison (m²)", 2 * Ar]],
+        ["Aire = base × hauteur ÷ 2.", "Avec [AC] comme base : hauteur issue de B = 2 × aire ÷ AC."],
+        "a) " + M(N(b) + " \\times " + N(h) + " \\div 2 = " + N(Ar)) + " m² ; b) " + M("2 \\times " + N(Ar) + " \\div " + N(s) + (Number.isInteger(hB * 10) ? " = " + N(rnd(hB, 4)) : " \\approx " + N(rdv(hB, 0.1)))) + " m ; c) " + M("2 \\times " + N(Ar) + " = " + N(2 * Ar)) + " m².");
+    }],
   };
 
   const DEFS = [

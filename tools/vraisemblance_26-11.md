@@ -268,3 +268,38 @@ figé ; hauteurs5 (2 énoncés) et tabform5 (4) dans fr_trous. Hors catalogue (a
 suitegeom, serie, pvect, intsubst.
 
 
+
+### Défis du profil France rendus variés (26.11 soir, branche agent/defisfr)
+
+Les défis (niveau 4) des fichiers `src/fr_*.js` qui avaient un énoncé figé ou un seul contexte sont maintenant tirés au
+hasard, avec 3 à 5 contextes français (tag `ctx` : euros, villes et régions françaises, Tour de France, brevet, TER,
+lycée…), un corrigé calculé à partir des valeurs et un recalcul indépendant par contexte. Programmes : 2026 (6e–1re),
+2019 (Tle). Arrondis demandés (« au dixième », « au centième », « à l'unité ») : tolérance de la moitié du pas, valeurs
+tirées loin d'un « 5 » final ; seuils (lnfr, algopy) jamais sur un entier exact.
+
+| Notion (classe, fichier) | Avant | Contextes (ctx) |
+|---|---|---|
+| proba2 (3e–2nde, fr_2nde) | figé | dé à n faces (S : « au moins k », « multiple de k ») ; tirage sans remise (billes, feutres, chocolats, bonbons) ; sondage au lycée (A ∩ B, A ∪ B, ni A ni B) ; QCM au hasard (2 ou 3 questions) |
+| tauxevol (2nde, fr_2nde) | figé | hausse puis baisse (forfait de ski, loyer, salle d'escalade, trottinette) ; population d'une commune ; abonnés d'une chaîne vidéo ; soldes (taux réciproque) ; décote d'une voiture, d'un camping-car |
+| vect3e (2nde, fr_2nde) | figé | parallélogramme (repère, jardin à la française, logiciel) ; alignement (course d'orientation à Fontainebleau, parc à Lille) ; déplacement u puis v (robot d'entrepôt, voilier à Quiberon, jeu vidéo, drone) |
+| probcond (2nde, fr_2nde) | figé | arbre au lycée (demi-pensionnaires) ; dépistage ; usine à deux chaînes ; tableau croisé d'un club sportif |
+| algopy (2nde, fr_2nde) | figé | somme par boucle for (range(1, n + 1) ou range(n)) ; livret et boucle while ; tarif par if/elif/else (musée, patinoire, piscine) |
+| expderiv (1re, fr_1re) | figé | concentration a·t·e^(−kt) ; bactéries N₀e^(kt) ; f(x) = (ax + b)eˣ ; boisson qui refroidit |
+| trigrad (1re, fr_1re) | figé | cos x ou sin x donné dans un quart de tour, angles associés ; nacelle d'une grande roue ; mesure principale de kπ/d |
+| autodnb (3e, fr_3e) | figé | partie 1 du brevet : fractions et identités ; puissances de 10, probabilité, pourcentage ; Pythagore, vitesse d'un TGV ou TER, aire en π ; équation, évolutions, image |
+| tabvar (2nde, fr_3e) | figé | tableau de f ; température d'un jour d'hiver ; profil d'étape du Tour de France ; bénéfice d'une petite entreprise |
+| lnfr (Tle, fr_tle) | figé | placement ; utilisateurs d'une application ; médicament ; plaques de verre teinté |
+| hauteurs5 (5e, fr_trous) | 2 énoncés | triangle rectangle ; voile de dériveur ; terrain ; pignon isocèle (triplets cohérents, pas de Pythagore demandé) |
+| tabform5 (5e, fr_trous) | 4 énoncés | club ou école (prix = a × n + b) ; location à l'heure ; congélateur (2 ou 3 °C par heure, −21 °C au plus froid) ; bougie |
+| cercle6, bissec6, filtre6 (6e, fr_trous) | 1 contexte | deux cercles, chèvre, piste graduée, antenne ; angles adjacents, angle plat, triangle, part de tarte ; sorties, smartphones, campings (deux critères) |
+| progcalc, ratio (5e–4e, fr_college) | 1 contexte | deux programmes, programme à remonter, (x + a)² − x² ; associées, pâtisserie, béton, tombola |
+
+Contrôles (dans la suite) : `tests/recalcul_fr.html` (oracles de `tests/recalc_oracles_fr.js`, placés en tête des règles
+et réservés à ces notions : 17 défis × 150 graines, 7 650 questions, toutes recalculées, une contre-épreuve par question) ;
+`tests/variete_fr.html` (les 26 défis des fichiers fr_*.js : au moins 10 énoncés différents et 3 contextes sur 60
+graines). Hors suite : `tests/_defisfr.html#ids=…&n=150&show=2` (lecture des tirages et désaccords).
+
+Défauts trouvés par les oracles avant publication (corrigés) : bénéfice « décroissant » qui remontait (tabvar) ;
+« concentration maximale (au centième) » lue comme un arrondi par défaut (devenu « la plus élevée ») ; nacelle à 5π/4
+où « tourner de π/2 » ne changeait pas la hauteur (π/4 et 5π/4 écartés) ; « 1 crayons bleus » (autodnb) ; la question
+« aire d'un disque de rayon r » reconnue par un oracle générique comme une aire décimale (formulation changée).

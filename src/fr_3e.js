@@ -5,7 +5,7 @@
 // 2nde : tabvar (tableaux de variations : extremums, sens de variation, nombre de solutions, 2nde.AN.08–09).
 // Outils communs : FRX (src/fr_1re.js). Notions sans CH ni MP : invisibles pour un élève suisse.
 (function () {
-  const { pk, nz, rnd, g2, N, NP, F, FS, sg, X, co, lin, linE, QN, QR, QX, QS, QSet, QP, GR, GX, GP, TR, TX, TS, P, reg } = FRX;
+  const { pk, nz, rnd, g2, den, N, NP, F, FS, sg, X, co, lin, linE, QN, QR, QX, QS, QSet, QP, GR, GX, GP, TR, TX, TS, P, reg } = FRX;
   const deg = (r) => (r * 180) / Math.PI, rad = (d) => (d * Math.PI) / 180;
   const cm = (v) => M(N(v) + "\\ \\text{cm}"), m_ = (v) => M(N(v) + "\\ \\text{m}");
   const EUR = (v) => M(N(v) + "\\ \\text{€}");
@@ -382,6 +382,73 @@
     ],
   };
 
+  /* 26.11 soir (agent defisfr) : défis autodnb et tabvar tirés au hasard (avant : un seul énoncé figé), 4 contextes
+     (tag ctx), corrigé calculé ; recalcul indépendant : tests/recalc_oracles_fr.js. */
+  const PR = (ctx, q, parts, hints, sol) => ({ ctx, q, hints, sol, parts: parts.map(([label, value, round]) => ({ label, spec: Object.assign({ kind: "value", value: rnd(value) }, round ? { round } : {}) })) });
+  const T = (v) => N(v).replace(/\\,/g, " ").replace("{,}", ",").replace(/^-/, "−"); /* nombre, texte simple */
+  const ADP = [() => {
+    const cx = pk(["calcul", "puissances", "mesures", "equation"]), parts = [], sol = [];
+    if (cx === "calcul") {
+      let a, b, c, d, e, f, v; do { b = pk([3, 4, 5, 6]); a = R.int(1, b - 1); c = R.int(1, 5); d = pk([2, 3, 4, 5]); e = R.int(1, 5); f = pk([2, 3, 4, 5, 6]); v = a / b - (c * e) / (d * f); } while (g2(a, b) !== 1 || g2(c, d) !== 1 || g2(e, f) !== 1 || c === d || e === f || Math.abs(v) < 1e-9 || den(v) > 36);
+      const P0 = pk([20, 40, 60, 80, 120]), t = pk([5, 10, 15, 20, 25, 30]), obj = pk(["Un pull", "Une place de concert", "Un abonnement de téléphone", "Un sac à dos"]), m = pk([20, 30, 40, 50, 60, 100]), k = R.int(1, 4);
+      parts.push(["a) " + a + "/" + b + " − " + c + "/" + d + " × " + e + "/" + f + " (fraction irréductible ou décimal)", v], ["b) " + obj + " à " + P0 + " € augmente de " + t + " %. Nouveau prix (€)", (P0 * (100 + t)) / 100], ["c) " + (m + k) + "² − " + (m - k) + "²", 4 * m * k]);
+      sol.push("a) La multiplication d'abord : " + M("\\frac{" + a + "}{" + b + "} - \\frac{" + c * e + "}{" + d * f + "} = " + F(v)), "b) " + M(P0 + " \\times " + N(rnd(1 + t / 100)) + " = " + N(rnd((P0 * (100 + t)) / 100))) + " €", "c) " + M("(" + (m + k) + " - " + (m - k) + ")(" + (m + k) + " + " + (m - k) + ") = " + 2 * k + " \\times " + 2 * m + " = " + 4 * m * k));
+    } else if (cx === "puissances") {
+      let p, q, r; do { p = R.int(-4, 9); q = R.int(-6, 6); r = R.int(-4, 8); } while (!p || !q || !r || p + q - r === 0);
+      const [cont, o1, o2, o3, un] = pk([["Un sac contient", "billes rouges", "billes vertes", "billes jaunes", "une"], ["Une urne contient", "boules bleues", "boules blanches", "boules noires", "une"], ["Une boîte contient", "crayons rouges", "crayons verts", "crayons bleus", "un"]]), ep = (v) => (v < 0 ? "(" + T(v) + ")" : T(v)), x = R.int(2, 7), y = R.int(2, 7), z = R.int(2, 6), tt = pk([5, 15, 25, 30, 75]), NN = 20 * R.int(2, 12);
+      parts.push(["a) 10^" + ep(p) + " × 10^" + ep(q) + " ÷ 10^" + ep(r) + " s'écrit 10ⁿ : valeur de n", p + q - r], ["b) " + cont + " " + x + " " + o1 + ", " + y + " " + o2 + " et " + z + " " + o3 + ". On en tire " + un + " au hasard. P(" + o2.split(" ")[0].replace(/s$/, "") + " " + o2.split(" ")[1].replace(/s$/, "") + ") (fraction acceptée)", y / (x + y + z)], ["c) " + tt + " % de " + NN, (tt * NN) / 100]);
+      sol.push("a) " + M("10^{" + p + " + " + NP(q) + " - " + NP(r) + "} = 10^{" + (p + q - r) + "}"), "b) " + M("\\frac{" + y + "}{" + (x + y + z) + "}" + (g2(y, x + y + z) > 1 ? " = " + F(y / (x + y + z)) : "")), "c) " + M(NN + " \\times " + N(tt / 100) + " = " + N((tt * NN) / 100)));
+    } else if (cx === "mesures") {
+      const [a0, b0, c0] = pk([[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 15, 17], [9, 12, 15], [12, 16, 20]]), [tr, vs] = pk([["Un TGV", [240, 270, 300, 320]], ["Un TER", [90, 120, 150]], ["Un Intercités", [120, 150, 180]]]), v = pk(vs), mn = pk([15, 20, 30, 40, 45]), dk = (v * mn) / 60, r = R.int(3, 12);
+      parts.push(["a) Un triangle est rectangle ; les côtés de l'angle droit mesurent " + a0 + " cm et " + b0 + " cm. Hypoténuse (cm)", c0], ["b) " + tr + " parcourt " + T(dk) + " km en " + mn + " min. Vitesse moyenne (km/h)", v], ["c) Un disque a pour rayon " + r + " cm ; son aire s'écrit k × π cm². Valeur de k", r * r]);
+      sol.push("a) " + M("\\sqrt{" + a0 + "^2 + " + b0 + "^2} = \\sqrt{" + c0 * c0 + "} = " + c0), "b) en 1 h = 60 min : " + M(N(dk) + " \\div " + mn + " \\times 60 = " + v) + " km/h", "c) " + M("\\pi \\times " + r + "^2 = " + r * r + "\\pi"));
+    } else {
+      let a, b, c, d, xs; do { a = R.int(2, 9); c = R.int(-5, 9); xs = R.int(-6, 8); b = R.int(-12, 12); d = (a - c) * xs + b; } while (a === c || !c || !b || !xs || Math.abs(d) > 30);
+      let t1, t2; do { t1 = pk([10, 20, 25, 30, 50]); t2 = pk([10, 20, 25, 30, 40]); } while ((100 + t1) * (100 - t2) === 10000);
+      const g = ((100 + t1) * (100 - t2) - 10000) / 100, ka = pk([2, 3, -2, 5]), kb = R.int(-9, 9), x0 = -R.int(2, 5), im = ka * x0 * x0 + kb;
+      const lin2 = (p, q) => (p === 1 ? "" : p === -1 ? "−" : T(p)) + "x" + (q ? (q < 0 ? " − " + T(-q) : " + " + T(q)) : "");
+      parts.push(["a) Solution de " + lin2(a, b) + " = " + lin2(c, d), xs], ["b) Un prix augmente de " + t1 + " %, puis baisse de " + t2 + " %. Taux d'évolution global (en %, négatif pour une baisse)", g], ["c) Image de " + T(x0) + " par la fonction f(x) = " + (ka === 1 ? "" : T(ka)) + "x²" + (kb ? (kb < 0 ? " − " + T(-kb) : " + " + T(kb)) : ""), im]);
+      sol.push("a) " + M(N(a - c) + "x = " + N(d - b)) + ", " + M("x = " + xs), "b) " + M(N(rnd(1 + t1 / 100)) + " \\times " + N(rnd(1 - t2 / 100)) + " = " + N(rnd(1 + g / 100))) + " : " + M(N(g) + "\\,\\%"), "c) " + M(N(ka) + " \\times " + NP(x0) + "^2" + sg(kb) + " = " + N(ka) + " \\times " + x0 * x0 + sg(kb) + " = " + N(im)) + " (le carré d'un négatif est positif)");
+    }
+    return PR(cx, "Partie 1 du brevet (automatismes), sans calculatrice.", parts, ["Priorités : puissances, puis × et ÷, puis + et −.", cx === "calcul" ? "a² − b² = (a − b)(a + b)." : cx === "puissances" ? "10ᵖ × 10^q = 10^(p + q) et 10ᵖ ÷ 10^q = 10^(p − q)." : cx === "mesures" ? "Pythagore : hypoténuse² = somme des carrés des deux autres côtés." : "Deux évolutions successives : on multiplie les coefficients."], sol.join(" ; ") + ".");
+  }];
+  /* tableau de variations décrit en texte : points (x ; f(x)) successifs, sens alterné */
+  const nbSol = (ys, k) => { let n = 0; for (let i = 0; i + 1 < ys.length; i++) if ((k - ys[i]) * (k - ys[i + 1]) < 0) n++; return n; };
+  const pickK = (ys, want) => { const lo = Math.min(...ys) - 3, hi = Math.max(...ys) + 3; const ks = []; for (let k = lo; k <= hi; k++) if (!ys.includes(k) && (want === undefined || nbSol(ys, k) === want)) ks.push(k); return ks.length ? pk(ks) : null; };
+  const TVP = [() => {
+    const cx = pk(["fonction", "temperature", "altitude", "benefice"]);
+    if (cx === "fonction") {
+      let xs, ys, k1, k2; do { const x0 = R.int(-6, -1), x1 = x0 + R.int(2, 6), x2 = x1 + R.int(2, 6), dn = R.rand() < 0.5, y1 = R.int(-8, 8); xs = [x0, x1, x2]; ys = dn ? [y1 + R.int(2, 9), y1, y1 + R.int(2, 9)] : [y1 - R.int(2, 9), y1, y1 - R.int(2, 9)]; k1 = pickK(ys, 2); k2 = pickK(ys, 1); } while (k1 === null || k2 === null || ys[0] === ys[2]);
+      const dn = ys[1] < ys[0], ext = dn ? Math.min(...ys) : Math.max(...ys), [p, q] = pk([[k1, k2], [k2, k1]]);
+      return PR(cx, "Tableau de variations de f sur [" + T(xs[0]) + " ; " + T(xs[2]) + "] : f(" + T(xs[0]) + ") = " + T(ys[0]) + ", f(" + T(xs[1]) + ") = " + T(ys[1]) + ", f(" + T(xs[2]) + ") = " + T(ys[2]) + " ; f est " + (dn ? "décroissante" : "croissante") + " sur [" + T(xs[0]) + " ; " + T(xs[1]) + "], puis " + (dn ? "croissante" : "décroissante") + " sur [" + T(xs[1]) + " ; " + T(xs[2]) + "].",
+        [["a) " + (dn ? "Minimum" : "Maximum") + " de f sur [" + T(xs[0]) + " ; " + T(xs[2]) + "]", ext], ["b) Nombre de solutions de f(x) = " + T(p), nbSol(ys, p)], ["c) Nombre de solutions de f(x) = " + T(q), nbSol(ys, q)]],
+        ["Une flèche va de " + T(ys[0]) + " à " + T(ys[1]) + ", l'autre de " + T(ys[1]) + " à " + T(ys[2]) + ".", "Sur une flèche, f prend une fois chaque valeur comprise entre ses deux extrémités."],
+        "a) " + M(N(ext)) + " en " + M("x = " + N(xs[1])) + " ; b) " + M(N(p)) + (nbSol(ys, p) === 2 ? " est sur les deux flèches : 2 solutions" : " n'est que sur une flèche : 1 solution") + " ; c) " + M(N(q)) + (nbSol(ys, q) === 2 ? " est sur les deux flèches : 2 solutions" : " n'est que sur une flèche : 1 solution") + ".");
+    }
+    if (cx === "temperature") {
+      let ys, h1, h2, k; do { const y0 = R.int(-3, 4), y1 = y0 - R.int(2, 6), y2 = y1 + R.int(5, 12), y3 = y2 - R.int(2, 7); ys = [y0, y1, y2, y3]; h1 = R.int(5, 8); h2 = R.int(13, 16); k = pickK(ys.slice(0, 4)); } while (k === null || nbSol(ys, k) === 0 || ys[3] === ys[1] || ys[0] === ys[2]);
+      const mn = Math.min(...ys), mx = Math.max(...ys), ville = pk(["Strasbourg", "Besançon", "Clermont-Ferrand", "Mouthe", "Nancy", "Lille", "Metz"]);
+      return PR(cx, "Un jour d'hiver à " + ville + ", la température (en °C) varie ainsi : de 0 h à " + h1 + " h, elle baisse de " + T(ys[0]) + " °C à " + T(ys[1]) + " °C ; de " + h1 + " h à " + h2 + " h, elle monte jusqu'à " + T(ys[2]) + " °C ; de " + h2 + " h à 24 h, elle baisse jusqu'à " + T(ys[3]) + " °C.",
+        [["a) Température minimale de la journée (°C)", mn], ["b) Nombre d'instants de la journée où la température vaut " + T(k) + " °C", nbSol(ys, k)], ["c) Écart entre la température maximale et la température minimale (°C)", mx - mn]],
+        ["Fais le tableau de variations : trois flèches.", "Une valeur est atteinte une fois sur chaque flèche qui la « traverse »."],
+        "Tableau : " + M(N(ys[0]) + " \\searrow " + N(ys[1]) + " \\nearrow " + N(ys[2]) + " \\searrow " + N(ys[3])) + ". a) " + M(N(mn)) + " °C ; b) " + M(N(k)) + " °C est atteinte sur " + nbSol(ys, k) + " flèche" + (nbSol(ys, k) > 1 ? "s" : "") + " : " + nbSol(ys, k) + " instant" + (nbSol(ys, k) > 1 ? "s" : "") + " ; c) " + M(N(mx) + " - " + NP(mn) + " = " + N(mx - mn)) + " °C.");
+    }
+    if (cx === "altitude") {
+      let ys, ds, k; do { ys = [10 * R.int(40, 90), 10 * R.int(150, 260), 10 * R.int(50, 120), 10 * R.int(120, 210)]; const d1 = R.int(20, 60), d2 = d1 + R.int(15, 35), d3 = d2 + R.int(10, 25); ds = [0, d1, d2, d3]; k = 100 * R.int(Math.ceil(Math.min(...ys) / 100), Math.floor(Math.max(...ys) / 100)); } while (ys[2] >= ys[0] + 200 || ys[3] <= ys[2] + 300 || ys.includes(k) || nbSol(ys, k) < 1);
+      const mass = pk(["des Alpes", "des Pyrénées", "du Massif central"]), dp = ys[1] - ys[0] + ys[3] - ys[2];
+      return PR(cx, "Profil d'une étape de montagne du Tour de France " + mass + " : départ à " + T(ys[0]) + " m d'altitude ; la route monte jusqu'à un col à " + T(ys[1]) + " m (km " + ds[1] + "), descend jusqu'à la vallée à " + T(ys[2]) + " m (km " + ds[2] + "), puis monte jusqu'à l'arrivée à " + T(ys[3]) + " m (km " + ds[3] + ").",
+        [["a) Altitude maximale de l'étape (m)", Math.max(...ys)], ["b) Nombre de fois où les coureurs passent à " + T(k) + " m d'altitude", nbSol(ys, k)], ["c) Dénivelé positif total : somme des montées (m)", dp]],
+        ["Tableau de variations de l'altitude en fonction de la distance : trois flèches.", "Dénivelé positif : on n'additionne que les montées."],
+        "Tableau : " + M(N(ys[0]) + " \\nearrow " + N(ys[1]) + " \\searrow " + N(ys[2]) + " \\nearrow " + N(ys[3])) + ". a) " + M(N(Math.max(...ys))) + " m ; b) " + M(N(k)) + " m est atteinte sur " + nbSol(ys, k) + " flèche" + (nbSol(ys, k) > 1 ? "s" : "") + " ; c) " + M("(" + N(ys[1]) + " - " + N(ys[0]) + ") + (" + N(ys[3]) + " - " + N(ys[2]) + ") = " + N(dp)) + " m.");
+  }
+    let ys, X, x1, k; do { X = pk([40, 50, 60, 80, 100]); x1 = Math.round(X * (0.35 + R.rand() * 0.3)); ys = [-100 * R.int(2, 8), 100 * R.int(4, 25), 100 * R.int(-6, 6)]; k = 100 * R.int(1, Math.floor(ys[1] / 100) - 1); } while (!ys[2] || ys[2] >= ys[1] || ys.includes(k) || ys.includes(0));
+    const [prod, reg2] = pk([["crêpières", "de Bretagne"], ["planches de surf", "des Landes"], ["paires de skis", "du Jura"], ["lampes de bureau", "de Normandie"], ["bicyclettes en bois", "de la Drôme"]]);
+    return PR(cx, "Une petite entreprise " + reg2 + " fabrique chaque mois entre 0 et " + X + " " + prod + ". Son bénéfice B(x) (en €) pour x objets est croissant sur [0 ; " + x1 + "] et décroissant sur [" + x1 + " ; " + X + "], avec B(0) = " + T(ys[0]) + ", B(" + x1 + ") = " + T(ys[1]) + " et B(" + X + ") = " + T(ys[2]) + ".",
+      [["a) Bénéfice maximal (€)", ys[1]], ["b) Nombre de quantités x pour lesquelles le bénéfice est nul", nbSol(ys, 0)], ["c) Nombre de quantités x pour lesquelles le bénéfice vaut " + T(k) + " €", nbSol(ys, k)]],
+      ["Une flèche monte de " + T(ys[0]) + " à " + T(ys[1]) + ", l'autre descend jusqu'à " + T(ys[2]) + ".", "Pour b), regarde si 0 est entre les extrémités de chaque flèche."],
+      "Tableau : " + M(N(ys[0]) + " \\nearrow " + N(ys[1]) + " \\searrow " + N(ys[2])) + ". a) " + M(N(ys[1])) + " € pour " + x1 + " objets ; b) 0 est atteint sur " + nbSol(ys, 0) + " flèche" + (nbSol(ys, 0) > 1 ? "s" : "") + " : " + nbSol(ys, 0) + " ; c) " + M(N(k)) + " € : " + nbSol(ys, k) + ".");
+  }];
+
   reg([
     { id: "linfn", theme: "fa", label: "Fonctions linéaires", ex: "f(x) = ax", FR: [9, 6], againFR: [10], g: LF,
       hint: "Une fonction linéaire s'écrit f(x) = ax : elle traduit une situation de proportionnalité (a = coefficient). a = f(x) ÷ x. Augmenter de t % : f(x) = (1 + t/100)x.",
@@ -411,7 +478,7 @@
         "Priorités : parenthèses, puissances, × et ÷, puis + et −. Fractions : même dénominateur pour additionner ; on multiplie numérateurs et dénominateurs entre eux ; résultat irréductible. \\(10^p \\times 10^q = 10^{p + q}\\). Évolution de \\(t\\,\\%\\) : on multiplie par \\(1 \\pm \\frac{t}{100}\\) ; deux évolutions : on multiplie les coefficients. \\((a + b)^2 = a^2 + 2ab + b^2\\), \\(a^2 - b^2 = (a - b)(a + b)\\).",
         ["\\(\\frac{2}{3} + \\frac{1}{6} \\times \\frac{3}{5} = \\frac{2}{3} + \\frac{1}{10} = \\frac{23}{30}\\).", "\\(102^2 - 98^2 = 4 \\times 200 = 800\\).", "\\(+20\\,\\%\\) puis \\(+10\\,\\%\\) : \\(1{,}2 \\times 1{,}1 = 1{,}32\\), soit \\(+32\\,\\%\\)."],
         "Deux évolutions successives ne s'additionnent pas : \\(+20\\,\\%\\) puis \\(-20\\,\\%\\) donne \\(-4\\,\\%\\)."],
-      probs: [() => P("Partie 1 du brevet, sans calculatrice.", [["a) 3/4 − 1/4 × 2/3 (en décimal ou fraction)", 7 / 12], ["b) Prix de 60 € après une hausse de 15 % (€)", 69], ["c) 51² − 49²", 200]], ["Priorités : la multiplication d'abord.", "a² − b² = (a − b)(a + b)."], "a) " + M("\\frac{3}{4} - \\frac{1}{6} = \\frac{9}{12} - \\frac{2}{12} = \\frac{7}{12}") + " ; b) " + M("60 \\times 1{,}15 = 69") + " ; c) " + M("2 \\times 100 = 200") + ".")] },
+      probs: ADP },
     { id: "vecgeo", theme: "es", label: "Translations et vecteurs", ex: "\\overrightarrow{AB} = \\overrightarrow{DC} \\iff ABCD \\text{ parallélogramme}", FR: [9, 9], againFR: [10], g: VG,
       hint: "La translation qui transforme A en B déplace chaque point du même déplacement : le vecteur AB. AB = DC ⇔ ABCD est un parallélogramme. Coordonnées de AB : (x_B − x_A ; y_B − y_A).",
       comps: ["Image par une translation, parallélogramme", "Somme de vecteurs, milieu, enchaîner deux translations", "Vecteurs égaux avec un paramètre, centre, règle du parallélogramme"],
@@ -426,6 +493,6 @@
         "\\(f\\) croissante sur \\(I\\) : si \\(a < b\\) dans \\(I\\), alors \\(f(a) \\leqslant f(b)\\) (l'ordre est conservé) ; décroissante : l'ordre est inversé. Le maximum (minimum) sur un intervalle se lit parmi les valeurs aux sommets des flèches et aux bornes. Sur une flèche, chaque valeur comprise entre les deux extrémités est atteinte exactement une fois (si la fonction est strictement monotone et continue).",
         ["Tableau \\(-3 \\nearrow 5 \\searrow -1\\) : maximum 5 ; l'équation \\(f(x) = 2\\) a deux solutions."],
         "La première ligne contient les \\(x\\), la seconde les valeurs de \\(f\\) : un intervalle de variation se lit sur les \\(x\\)."],
-      probs: [() => P("Tableau de variations de f sur [−4 ; 5] : f(−4) = 3, f(1) = −5, f(5) = 2 (décroissante puis croissante).", [["a) Minimum de f", -5], ["b) Nombre de solutions de f(x) = 0", 2], ["c) Nombre de solutions de f(x) = 2,5", 1]], ["Une flèche descend de 3 à −5, l'autre monte de −5 à 2.", "2,5 est entre −5 et 3, mais pas entre −5 et 2."], "a) " + M("-5") + " en " + M("x = 1") + " ; b) 0 est sur les deux flèches : 2 solutions ; c) 2,5 seulement sur la première flèche : 1 solution.")] },
+      probs: TVP },
   ]);
 })();

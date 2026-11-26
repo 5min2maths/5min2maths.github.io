@@ -61,7 +61,7 @@ const FRX = (function () {
 })();
 
 (function () {
-  const { pk, nz, rnd, N, NP, F, FS, sg, X, co, lin, QN, QR, QX, QSet, QP, GR, GX, GP, TR, TX, P, reg } = FRX;
+  const { pk, nz, rnd, g2, N, NP, F, FS, sg, X, co, lin, QN, QR, QX, QSet, QP, GR, GX, GP, TR, TX, P, reg } = FRX;
 
   // ======================= expderiv : exponentielle et dérivation (1re.AN.12–14) =======================
   const ED = {
@@ -270,6 +270,78 @@ const FRX = (function () {
     ],
   };
 
+  /* 26.11 soir (agent defisfr) : défis expderiv et trigrad tirés au hasard (avant : un seul énoncé figé), 3 ou 4 contextes
+     (tag ctx), corrigé calculé ; recalcul indépendant : tests/recalc_oracles_fr.js. */
+  const PR = (ctx, q, parts, hints, sol) => ({ ctx, q, hints, sol, parts: parts.map(([label, value, round]) => ({ label, spec: Object.assign({ kind: "value", value: rnd(value) }, round ? { round } : {}) })) });
+  const rdv = (v, s) => rnd(Math.round(rnd(v / s, 9)) * s, 9);
+  const nett = (v, s) => Math.abs((Math.abs(rnd(v / s, 9)) % 1) - 0.5) > 0.02; /* loin d'un « 5 » final : arrondi sans ambiguïté */
+  const cT = (a) => (a === 1 ? "" : a === -1 ? "−" : T(a)) + "x";
+  const T = (v) => N(v).replace(/\\,/g, " ").replace("{,}", ",").replace(/^-/, "−"); /* nombre, texte simple */
+  const ek = (k, v = "t") => "e^(−" + (k === 1 ? "" : T(k)) + v + ")"; /* e^(−kt), texte simple */
+  const EDP = [() => {
+    const cx = pk(["medicament", "bacteries", "fonction", "boisson"]);
+    if (cx === "medicament") {
+      const k = pk([0.5, 0.25, 0.2, 1]), a = R.int(6, 30), tm = 1 / k, Cm = a / (k * Math.E); let t1; do t1 = R.int(1, 10); while (t1 === tm || !nett(a * t1 * Math.exp(-k * t1), 0.01));
+      const C1 = a * t1 * Math.exp(-k * t1), prise = pk(["Après une injection", "Après la prise d'un comprimé", "Après la pose d'une perfusion courte"]);
+      return PR(cx, prise + ", la concentration d'un médicament dans le sang est C(t) = " + a + "t " + ek(k) + " (en mg/L, t en heures, t ⩾ 0).",
+        [["a) Instant t (en h) où C'(t) s'annule", tm], ["b) Concentration la plus élevée (mg/L, au centième)", Cm, 0.01], ["c) C(" + t1 + ") (mg/L, au centième)", C1, 0.01]],
+        ["(uv)' = u'v + uv' avec u(t) = " + a + "t et v(t) = " + ek(k) + ".", "C'(t) = (…) × " + ek(k) + " a le signe de la parenthèse, car l'exponentielle est positive."],
+        "a) " + M("C'(t) = " + a + "e^{-" + (k === 1 ? "" : N(k)) + "t} - " + N(rnd(a * k)) + "t\\,e^{-" + (k === 1 ? "" : N(k)) + "t} = (" + a + " - " + N(rnd(a * k)) + "t)\\,e^{-" + (k === 1 ? "" : N(k)) + "t}") + " s'annule en " + M("t = " + N(tm)) + " (positive avant, négative après) ; b) " + M("C(" + N(tm) + ") = " + N(rnd(a * tm)) + "e^{-1} \\approx " + N(rdv(Cm, 0.01))) + " mg/L ; c) " + M("C(" + t1 + ") = " + N(rnd(a * t1)) + "e^{-" + N(rnd(k * t1)) + "} \\approx " + N(rdv(C1, 0.01))) + " mg/L.");
+    }
+    if (cx === "bacteries") {
+      let N0, k, t1; do { N0 = pk([2, 3, 5, 8, 12]); k = pk([0.2, 0.3, 0.4, 0.5]); t1 = R.int(2, 6); } while (!nett(N0 * Math.exp(k * t1), 0.1) || !nett(k * N0 * Math.exp(k * t1), 0.1));
+      const Nt = N0 * Math.exp(k * t1), lieu = pk(["Dans un laboratoire de Lyon", "Dans un laboratoire d'analyses de Lille", "Pour un TP de SVT"]);
+      return PR(cx, lieu + ", on modélise une culture de bactéries par N(t) = " + N0 + " e^(" + T(k) + "t) (en milliers de bactéries, t en heures).",
+        [["a) N'(0), vitesse de croissance au départ (milliers par heure)", k * N0], ["b) N(" + t1 + ") (en milliers, au dixième)", Nt, 0.1], ["c) N'(" + t1 + ") (milliers par heure, au dixième)", k * Nt, 0.1]],
+        ["(e^(kt))' = k e^(kt).", "N'(t) = " + T(k) + " × N(t) : la vitesse de croissance est proportionnelle au nombre de bactéries."],
+        M("N'(t) = " + N0 + " \\times " + N(k) + "\\,e^{" + N(k) + "t} = " + N(rnd(k * N0)) + "e^{" + N(k) + "t}") + ". a) " + M("N'(0) = " + N(rnd(k * N0))) + " ; b) " + M("N(" + t1 + ") = " + N0 + "e^{" + N(rnd(k * t1)) + "} \\approx " + N(rdv(Nt, 0.1))) + " ; c) " + M("N'(" + t1 + ") = " + N(rnd(k * N0)) + "e^{" + N(rnd(k * t1)) + "} \\approx " + N(rdv(k * Nt, 0.1))) + ".");
+    }
+    if (cx === "fonction") {
+      let a, b, x0; do { a = pk([1, -1, 2, -2]); b = nz(-6, 6); x0 = -(a + b) / a; } while (a + b === 0 || Math.abs(x0) > 3 || !nett(-a * Math.exp(x0), 0.01));
+      const fx0 = -a * Math.exp(x0), kind = a > 0 ? "minimum" : "maximum";
+      return PR(cx, "Dans un repère, on étudie la fonction f définie sur ℝ par f(x) = (" + cT(a) + " " + (b < 0 ? "− " + T(-b) : "+ " + T(b)) + ")e^x.",
+        [["a) f'(0)", a + b], ["b) Abscisse x₀ de l'extremum de f (valeur exacte)", x0], ["c) Valeur de cet extremum f(x₀) (au centième)", fx0, 0.01]],
+        ["(u e^x)' = (u' + u)e^x.", "Comme e^x > 0, f'(x) a le signe de " + cT(a) + " " + (a + b < 0 ? "− " + T(-(a + b)) : "+ " + T(a + b)) + "."],
+        M("f'(x) = (" + N(a) + " + " + co(a) + sg(b) + ")e^x = (" + co(a) + sg(a + b) + ")e^x") + ". a) " + M("f'(0) = " + (a + b)) + " ; b) " + M(co(a) + sg(a + b) + " = 0 \\iff x = " + F(x0)) + " : " + kind + " ; c) " + M("f(" + F(x0) + ") = (" + N(a) + " \\times " + NP(x0) + sg(b) + ")e^{" + N(x0) + "} = " + N(-a) + "e^{" + N(x0) + "} \\approx " + N(rdv(fx0, 0.01))) + ".");
+    }
+    const [bo, T0s] = pk([["un café", [80, 85, 90]], ["un thé", [85, 90, 95]], ["un bol de soupe", [70, 75, 80]], ["un chocolat chaud", [65, 70, 75]]]);
+    let Ta, T0, k, t1; do { Ta = R.int(18, 22); T0 = pk(T0s); k = pk([0.05, 0.08, 0.1]); t1 = pk([5, 10, 15]); } while (!nett(Ta + (T0 - Ta) * Math.exp(-k * t1), 0.1) || !nett(-k * (T0 - Ta) * Math.exp(-k * t1), 0.01));
+    const D = T0 - Ta, Tt = Ta + D * Math.exp(-k * t1), dT = -k * D * Math.exp(-k * t1);
+    return PR(cx, "Dans une pièce à " + Ta + " °C, la température d'" + bo + " servi à " + T0 + " °C est T(t) = " + Ta + " + " + D + " " + ek(k) + " (en °C, t en minutes).",
+      [["a) T'(0), vitesse de variation au départ (°C par minute)", -k * D], ["b) T(" + t1 + ") (°C, au dixième)", Tt, 0.1], ["c) T'(" + t1 + ") (°C par minute, au centième)", dT, 0.01]],
+      ["(e^(−kt))' = −k e^(−kt) ; la constante " + Ta + " a une dérivée nulle.", "T'(t) < 0 : la boisson refroidit, de moins en moins vite."],
+      M("T'(t) = " + D + " \\times (-" + N(k) + ")e^{-" + N(k) + "t} = " + N(rnd(-k * D)) + "e^{-" + N(k) + "t}") + ". a) " + M("T'(0) = " + N(rnd(-k * D))) + " ; b) " + M("T(" + t1 + ") = " + Ta + " + " + D + "e^{-" + N(rnd(k * t1)) + "} \\approx " + N(rdv(Tt, 0.1))) + " °C ; c) " + M("T'(" + t1 + ") = " + N(rnd(-k * D)) + "e^{-" + N(rnd(k * t1)) + "} \\approx " + N(rdv(dT, 0.01))) + " °C/min.");
+  }];
+  const TGP = [() => {
+    const cx = pk(["cercle", "roue", "mesure"]);
+    if (cx === "cercle") {
+      const [c0, s0] = pk([[0.6, 0.8], [0.8, 0.6], [0.28, 0.96], [0.96, 0.28]]), qd = R.int(1, 4), sc = qd === 1 || qd === 4 ? 1 : -1, ss = qd <= 2 ? 1 : -1;
+      const c = sc * c0, s = ss * s0, x = Math.atan2(s, c), giveCos = R.rand() < 0.5, I = ["[0 ; π/2]", "[π/2 ; π]", "[−π ; −π/2]", "[−π/2 ; 0]"][qd - 1];
+      const [ex, exT, f] = pk([["cos(π − x) + sin(−x)", "\\cos(\\pi - x) + \\sin(-x)", () => -c - s], ["sin(π − x) − cos(−x)", "\\sin(\\pi - x) - \\cos(-x)", () => s - c], ["cos(π + x) + sin(π + x)", "\\cos(\\pi + x) + \\sin(\\pi + x)", () => -c - s], ["sin(π − x) + cos(π − x)", "\\sin(\\pi - x) + \\cos(\\pi - x)", () => s - c]]);
+      return PR(cx, "On sait que " + (giveCos ? "cos x = " + T(c) : "sin x = " + T(s)) + " et que x est dans " + I + ".",
+        [["a) " + (giveCos ? "sin² x" : "cos² x"), giveCos ? s * s : c * c], ["b) " + (giveCos ? "sin x" : "cos x"), giveCos ? s : c], ["c) " + ex, f()]],
+        ["cos² x + sin² x = 1.", "Le quadrant donne le signe : sur " + I + ", le " + (giveCos ? "sinus" : "cosinus") + " est " + ((giveCos ? ss : sc) > 0 ? "positif" : "négatif") + "."],
+        "a) " + M("1 - " + N(giveCos ? c * c : s * s) + " = " + N(rnd(giveCos ? s * s : c * c))) + " ; b) " + M((giveCos ? "\\sin x = " : "\\cos x = ") + N(giveCos ? s : c)) + " ; c) " + M(exT + " = " + N(rnd(f()))) + " (angles associés).");
+    }
+    if (cx === "roue") {
+      let R0, h0, kk, d; do { R0 = pk([15, 20, 25, 30]); h0 = R.int(2, 4); [kk, d] = pk([[1, 6], [5, 6], [7, 6], [11, 6], [3, 4], [7, 4], [1, 3], [2, 3], [4, 3], [5, 3]]) /* pas π/4 ni 5π/4 : sin θ = cos θ */; } while (![Math.sin, Math.cos].every((f) => nett(R0 * f((kk * Math.PI) / d), 0.01)));
+      const H = R0 + h0, th = (kk * Math.PI) / d;
+      const lieu = pk(["La grande roue d'une fête foraine de Lille", "La grande roue installée sur le Vieux-Port de Marseille", "La grande roue d'un marché de Noël à Strasbourg", "La grande roue d'un parc d'attractions près de Paris"]);
+      const h = H + R0 * Math.sin(th), xh = R0 * Math.cos(th), h2 = H + R0 * Math.cos(th);
+      return PR(cx, lieu + " a un rayon de " + R0 + " m et son centre est à " + H + " m du sol. On repère une nacelle par l'angle θ (en radians, sens direct) entre le rayon horizontal vers la droite et le rayon de la nacelle : ici θ = " + (kk === 1 ? "" : kk) + "π/" + d + ".",
+        [["a) Hauteur de la nacelle au-dessus du sol (m, au centième)", h, 0.01], ["b) Position horizontale de la nacelle par rapport au centre (m, positive à droite, au centième)", xh, 0.01], ["c) Hauteur de la nacelle quand la roue a encore tourné de π/2 (m, au centième)", h2, 0.01]],
+        ["Dans le repère centré sur le centre de la roue, la nacelle est en (" + R0 + " cos θ ; " + R0 + " sin θ).", "Hauteur = " + H + " + " + R0 + " sin θ ; et sin(θ + π/2) = cos θ."],
+        "a) " + M(H + " + " + R0 + "\\sin\\frac{" + (kk === 1 ? "" : kk) + "\\pi}{" + d + "} \\approx " + N(rdv(h, 0.01))) + " m ; b) " + M(R0 + "\\cos\\frac{" + (kk === 1 ? "" : kk) + "\\pi}{" + d + "} \\approx " + N(rdv(xh, 0.01))) + " m ; c) " + M(H + " + " + R0 + "\\sin\\left(\\theta + \\frac{\\pi}{2}\\right) = " + H + " + " + R0 + "\\cos\\theta \\approx " + N(rdv(h2, 0.01))) + " m.");
+    }
+    const d = pk([3, 4, 6]); let k; do k = pk([1, -1]) * R.int(2 * d + 1, 6 * d + 5); while (g2(Math.abs(k), d) !== 1);
+    let n = ((k % (2 * d)) + 2 * d) % (2 * d); if (n > d) n -= 2 * d;
+    const deg = (n * 180) / d, c2 = Math.cos((n * Math.PI) / d) ** 2, ctxt = pk(["Un point M du cercle trigonométrique est associé au réel", "Sur le cercle trigonométrique, on enroule la droite des réels ; le point M correspond au réel", "Un robot tourne sur un cercle de rayon 1 ; son angle de rotation total (en radians) est"]);
+    return PR(cx, ctxt + " x = " + (k < 0 ? "−" : "") + Math.abs(k) + "π/" + d + ".",
+      [["a) La mesure principale de x (dans ]−π ; π]) s'écrit nπ/" + d + " : valeur de n", n], ["b) cos² x (fraction acceptée)", rnd(c2)], ["c) Mesure principale de x en degrés", deg]],
+      ["Retire (ou ajoute) des multiples de 2π = " + 2 * d + "π/" + d + ".", "π rad = 180°."],
+      "a) " + M(N(k) + " = " + N(n) + " + " + 2 * d + " \\times " + NP((k - n) / (2 * d))) + ", donc " + M("x = \\frac{" + N(n) + "\\pi}{" + d + "} + " + NP((k - n) / (2 * d)) + " \\times 2\\pi") + " : " + M("n = " + N(n)) + " ; b) " + M("\\cos^2\\frac{" + N(n) + "\\pi}{" + d + "} = " + F(rnd(c2))) + " ; c) " + M("\\frac{" + N(n) + " \\times 180°}{" + d + "} = " + N(deg) + "°") + ".");
+  }];
+
   reg([
     { id: "expderiv", theme: "fa", label: "Exponentielle : dérivée, tangente, variations", ex: "(e^{ax})' = a\\,e^{ax}", FR: [11, 5], g: ED,
       hint: "(e^x)' = e^x et (e^(ax + b))' = a e^(ax + b). Produit : (uv)' = u'v + uv'. Comme e^x > 0, f'(x) = (…)e^x a le signe de la parenthèse.",
@@ -278,7 +350,7 @@ const FRX = (function () {
         "Pour tout réel \\(a\\) : \\((e^{ax + b})' = a\\,e^{ax + b}\\). Avec un produit : \\((u\\,e^x)' = u'e^x + u\\,e^x = (u' + u)\\,e^x\\). Comme \\(e^x > 0\\), le signe de \\(f'(x) = (\\dots)\\,e^x\\) est celui de la parenthèse : on en déduit les variations. Pour \\(k > 0\\), \\(t \\mapsto e^{kt}\\) est croissante (croissance exponentielle) et \\(t \\mapsto e^{-kt}\\) décroissante (décroissance exponentielle).",
         ["\\((5e^{-2x})' = -10\\,e^{-2x}\\).", "\\(f(x) = (x - 3)e^x\\) : \\(f'(x) = (x - 2)e^x\\), minimum en \\(x = 2\\).", "Tangente en 0 à \\(e^{3x}\\) : \\(y = 3x + 1\\)."],
         "\\((e^{3x})'\\) n'est pas \\(e^{3x}\\), ni \\(3x\\,e^{3x - 1}\\) : on multiplie par 3, l'exposant ne change pas."],
-      probs: [() => P("Un médicament injecté a une concentration C(t) = 12t e^(−0,5t) (mg/L, t en heures).", [["a) C'(t) = (12 − 6t)e^(−0,5t) s'annule pour t =", 2], ["b) Concentration maximale (au centième)", 8.83], ["c) C(4) (au centième)", 6.5]], ["(uv)' = u'v + uv' ; e^(−0,5t) > 0.", "Le maximum est en t = 2 : C(2) = 24 e^(−1)."], "a) " + M("C'(t) = 12e^{-0{,}5t} - 6t\\,e^{-0{,}5t} = (12 - 6t)e^{-0{,}5t}") + " s'annule en " + M("t = 2") + " (positive avant, négative après) ; b) " + M("C(2) = 24e^{-1} \\approx 8{,}83") + " mg/L ; c) " + M("C(4) = 48e^{-2} \\approx 6{,}50") + " mg/L.")] },
+      probs: EDP },
     { id: "trigrad", theme: "es", label: "Cercle trigonométrique en radians", ex: "\\cos\\left(\\frac{2\\pi}{3}\\right) = -\\frac{1}{2}", FR: [11, 5], g: TG,
       hint: "π rad = 180°. Cosinus = abscisse, sinus = ordonnée du point du cercle. Angles associés : −x (symétrie par rapport à l'axe des abscisses), π − x (axe des ordonnées), π + x (origine).",
       comps: ["Valeurs remarquables, conversions, angle d'un point", "Mesure principale, angles associés, cos² + sin² = 1", "Sommes exactes, lecture de cos x = a, quadrant donné"],
@@ -286,7 +358,7 @@ const FRX = (function () {
         "Un tour complet mesure \\(2\\pi\\) : \\(\\pi\\) rad \\(= 180°\\). Le point \\(M\\) associé à \\(x\\) a pour coordonnées \\((\\cos x \\,;\\, \\sin x)\\), et \\(\\cos^2 x + \\sin^2 x = 1\\). \\(x\\) et \\(x + 2k\\pi\\) donnent le même point ; la mesure principale est celle de \\(]-\\pi \\,;\\, \\pi]\\). Angles associés : \\(\\cos(-x) = \\cos x\\), \\(\\sin(-x) = -\\sin x\\), \\(\\cos(\\pi - x) = -\\cos x\\), \\(\\sin(\\pi - x) = \\sin x\\), \\(\\cos(\\pi + x) = -\\cos x\\), \\(\\sin(\\pi + x) = -\\sin x\\).",
         ["\\(\\cos\\frac{\\pi}{3} = \\frac{1}{2}\\), \\(\\sin\\frac{\\pi}{4} = \\frac{\\sqrt{2}}{2}\\), \\(\\cos\\frac{5\\pi}{6} = -\\frac{\\sqrt{3}}{2}\\).", "\\(\\frac{17\\pi}{6} = \\frac{5\\pi}{6} + 2\\pi\\) : mesure principale \\(\\frac{5\\pi}{6}\\)."],
         "Le cosinus se lit sur l'axe horizontal, le sinus sur l'axe vertical ; et le quadrant donne le signe."],
-      probs: [() => P("On sait que cos x = 0,6 et que x est dans [−π/2 ; 0].", [["a) sin² x", 0.64], ["b) sin x", -0.8], ["c) cos(π − x) + sin(−x)", 0.2]], ["cos² x + sin² x = 1.", "Sur [−π/2 ; 0], le sinus est négatif."], "a) " + M("1 - 0{,}36 = 0{,}64") + " ; b) " + M("-0{,}8") + " ; c) " + M("-0{,}6 + 0{,}8 = 0{,}2") + ".")] },
+      probs: TGP },
     { id: "droitenorm", theme: "es", label: "Vecteur normal, équation cartésienne, projeté orthogonal", ex: "\\vec{n}(a \\,;\\, b) \\perp d : ax + by + c = 0", FR: [11, 8], g: DN,
       hint: "La droite ax + by + c = 0 a pour vecteur normal (a ; b) et pour vecteur directeur (−b ; a). On trouve c avec un point de la droite. Projeté orthogonal de P : H = P + t·n, sur la droite.",
       comps: ["Vecteur normal, vecteur directeur, calculer c", "Perpendiculaire, médiatrice, tangente à un cercle", "Projeté orthogonal, hauteur d'un triangle"],

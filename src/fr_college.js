@@ -171,11 +171,30 @@ const FR_NEW = [
           traps: [TR(t, "Deux nombres ont pour carré " + t * t + ", à savoir " + t + " et −" + t + "."), TR(Math.sqrt(Rv), "Calcule d'abord le résultat en fonction de x : x² − " + a * a + ".")] }; },
     ],
   };
+  /* 26.11 soir (agent defisfr) : défis progcalc et ratio à 3 ou 4 contextes (tag ctx, avant : un seul), valeurs tirées,
+     corrigé calculé ; recalcul indépendant : tests/recalc_oracles_fr.js. */
   const PCPROB = [() => {
-    const a = R.int(2, 6), b = R.int(2, 4), c = R.int(1, 9), e = b + R.int(1, 3), xs = R.int(2, 9), d = (b - e) * xs + a * b - c, stA = [S.add(a), S.mul(b), S.sub(c)], stB = [S.mul(e), d >= 0 ? S.add(d) : S.sub(-d)], x0 = 3;
-    return Pb(prog(stA, "Programme A") + "<br>" + prog(stB, "Programme B"), [["a) Résultat de A avec 3", run(stA, x0)[2]], ["b) Résultat de B avec 3", run(stB, x0)[1]], ["c) Nombre de départ qui donne le même résultat avec A et B", xs]],
-      ["Avec x : A donne " + b + "(x + " + a + ") − " + c + " = " + pol(runP(stA)) + ".", "B donne " + pol(runP(stB)) + " ; résous l'égalité des deux expressions."],
-      "a) " + M("(3 + " + a + ") \\times " + b + " - " + c + " = " + run(stA, x0)[2]) + ". b) " + M("3 \\times " + e + (d >= 0 ? " + " + d : " - " + -d) + " = " + run(stB, x0)[1]) + ". c) " + M(pol(runP(stA)) + " = " + pol(runP(stB))) + " donne " + M("x = " + xs) + ".");
+    const mn = (v) => N(v).replace(/^-/, "−"); /* texte simple */
+    const cx = pk(["deux-programmes", "retrouver", "carre"]);
+    if (cx === "deux-programmes") {
+      let a, b, c, e, xs, d, x0; do { a = R.int(2, 6); b = R.int(2, 4); c = R.int(1, 9); e = b + R.int(1, 3); xs = R.int(2, 9); d = (b - e) * xs + a * b - c; x0 = R.int(2, 7); } while (!d || x0 === xs);
+      const stA = [S.add(a), S.mul(b), S.sub(c)], stB = [S.mul(e), d >= 0 ? S.add(d) : S.sub(-d)];
+      return Object.assign(Pb(prog(stA, "Programme A") + "<br>" + prog(stB, "Programme B"), [["a) Résultat du programme A avec " + x0, run(stA, x0)[2]], ["b) Résultat du programme B avec " + x0, run(stB, x0)[1]], ["c) Nombre de départ qui donne le même résultat avec A et B", xs]],
+        ["Avec x : A donne " + b + "(x + " + a + ") − " + c + ".", "Écris aussi B avec x, puis résous l'égalité des deux expressions."],
+        "a) " + M("(" + x0 + " + " + a + ") \\times " + b + " - " + c + " = " + run(stA, x0)[2]) + " ; b) " + M(x0 + " \\times " + e + (d >= 0 ? " + " + d : " - " + -d) + " = " + run(stB, x0)[1]) + " ; c) " + M(pol(runP(stA)) + " = " + pol(runP(stB))) + " donne " + M("x = " + xs) + "."), { ctx: cx });
+    }
+    if (cx === "retrouver") {
+      const b = R.int(2, 5), a = R.int(2, 9), c = R.int(2, 4), st = [S.mul(b), S.add(a), S.mul(c)], x1 = R.int(3, 9); let x2, x3; do { x2 = R.int(4, 15); x3 = -R.int(2, 8); } while (x2 === x1 || b * x3 + a === 0);
+      const f = (x) => run(st, x)[2], nom = pk(["Léa", "Hugo", "Chloé", "Nathan", "Manon", "Louis"]);
+      return Object.assign(Pb(nom + " propose un tour de magie : « Choisis un nombre et applique mon programme ; annonce-moi le résultat et je retrouve ton nombre. »<br>" + prog(st), [["a) Résultat avec " + x1, f(x1)], ["b) Un ami annonce " + mn(f(x2)) + ". Quel était son nombre ?", x2], ["c) Une amie annonce " + mn(f(x3)) + ". Quel était son nombre ?", x3]],
+        ["Pour remonter le programme, on fait les opérations inverses dans l'ordre inverse.", "Inverse de « multiplier par " + c + " » : diviser par " + c + " ; inverse de « ajouter " + a + " » : soustraire " + a + "."],
+        "a) " + M("(" + x1 + " \\times " + b + " + " + a + ") \\times " + c + " = " + f(x1)) + " ; b) " + M("(" + N(f(x2)) + " \\div " + c + " - " + a + ") \\div " + b + " = " + x2) + " ; c) " + M("(" + N(f(x3)) + " \\div " + c + " - " + a + ") \\div " + b + " = " + N(x3)) + "."), { ctx: cx });
+    }
+    const a = R.int(2, 7), st = [S.add(a), S.sq(), S.subX2()], x1 = R.int(2, 9), x2 = -R.int(2, 9); let x3; do x3 = R.int(3, 15); while (x3 === x1);
+    const f = (x) => run(st, x)[2];
+    return Object.assign(Pb(prog(st), [["a) Résultat avec " + x1, f(x1)], ["b) Résultat avec " + mn(x2), f(x2)], ["c) Le résultat est " + mn(f(x3)) + ". Quel était le nombre de départ ?", x3]],
+      ["Avec x : " + M("(x + " + a + ")^2 - x^2") + " ; développe.", M("(x + " + a + ")^2 = x^2 + " + 2 * a + "x + " + a * a) + "."],
+      "a) " + M("(" + x1 + " + " + a + ")^2 - " + x1 + "^2 = " + (x1 + a) ** 2 + " - " + x1 * x1 + " = " + f(x1)) + " ; b) " + M("(" + N(x2) + " + " + a + ")^2 - (" + N(x2) + ")^2 = " + (x2 + a) ** 2 + " - " + x2 * x2 + " = " + N(f(x2))) + " ; c) le résultat vaut " + M(2 * a + "x + " + a * a) + " : " + M(2 * a + "x + " + a * a + " = " + f(x3)) + " donne " + M("x = " + x3) + "."), { ctx: cx });
   }];
 
   // ===================== ratio : ratios et partage proportionnel =====================
@@ -238,11 +257,35 @@ const FR_NEW = [
             traps: [TR(J + B, "On ne peut pas tout utiliser : il faut respecter le ratio " + a + " ∶ " + b + "."), TR((a + b) * Math.max(uj, ub), "La couleur qui manque le plus limite la quantité.")] }); },
     ],
   };
-  const RATPROB = [() => { const t = pk([[2, 3, 5], [1, 2, 3], [3, 4, 5], [2, 3, 4]]), k = R.int(2, 6) * 1000, su = t[0] + t[1] + t[2], u = R.int(2, 9) * 50, B = su * u;
-    return Pb("Trois associées d'une entreprise de " + ville() + " ont apporté " + M(N(t[0] * k)) + " €, " + M(N(t[1] * k)) + " € et " + M(N(t[2] * k)) + " €. Elles partagent un bénéfice de " + M(N(B)) + " € proportionnellement à leurs apports.",
-      [["a) Part de la première (€)", t[0] * u], ["b) Part de la deuxième (€)", t[1] * u], ["c) Part de la troisième (€)", t[2] * u]],
-      ["Simplifie le ratio des apports : " + t.join(" ∶ ") + ".", "Une part vaut " + N(B).replace("\\,", " ") + " ÷ " + su + "."],
-      "Ratio " + RT(t[0], t[1], t[2]) + ", " + su + " parts de " + M(N(u)) + " € : " + M(N(t[0] * u)) + " €, " + M(N(t[1] * u)) + " € et " + M(N(t[2] * u)) + " €."); }];
+  const RATPROB = [() => {
+    const cx = pk(["associees", "patisserie", "beton", "cagnotte"]);
+    if (cx === "associees") {
+      const t = pk([[2, 3, 5], [1, 2, 3], [3, 4, 5], [2, 3, 4], [1, 3, 4], [2, 5, 6]]), k = R.int(2, 6) * 1000, su = t[0] + t[1] + t[2], u = R.int(2, 9) * 50, B = su * u;
+      return Object.assign(Pb("Trois associées d'une entreprise de " + ville() + " ont apporté " + M(N(t[0] * k)) + " €, " + M(N(t[1] * k)) + " € et " + M(N(t[2] * k)) + " €. Elles partagent un bénéfice de " + M(N(B)) + " € proportionnellement à leurs apports.",
+        [["a) Part de la première (€)", t[0] * u], ["b) Part de la deuxième (€)", t[1] * u], ["c) Part de la troisième (€)", t[2] * u]],
+        ["Simplifie le ratio des apports : " + t.join(" ∶ ") + ".", "Une part vaut " + N(B).replace("\\,", " ") + " ÷ " + su + "."],
+        "Ratio " + RT(t[0], t[1], t[2]) + ", " + su + " parts de " + M(N(u)) + " € : " + M(N(t[0] * u)) + " €, " + M(N(t[1] * u)) + " € et " + M(N(t[2] * u)) + " €."), { ctx: cx });
+    }
+    if (cx === "patisserie") {
+      const [pate, ing, t] = pk([["une pâte sablée", ["farine", "beurre", "sucre"], [4, 2, 1]], ["une pâte brisée", ["farine", "beurre", "eau"], [4, 2, 1]], ["un crumble", ["farine", "beurre", "sucre"], [3, 2, 2]], ["une pâte à cookies", ["farine", "beurre", "sucre"], [5, 3, 2]]]), su = t[0] + t[1] + t[2], u = 10 * R.int(6, 20), Tm = su * u;
+      return Object.assign(Pb("Pour " + pate + ", un pâtissier de " + ville() + " mélange " + ing.join(", ").replace(/, ([^,]*)$/, " et $1") + " au ratio " + RT(t[0], t[1], t[2]) + " (en masse). Il prépare " + M(N(Tm)) + " g de pâte.",
+        [["a) Masse de " + ing[0] + " (g)", t[0] * u], ["b) Masse de " + ing[1] + " (g)", t[1] * u], ["c) Masse de " + ing[2] + " (g)", t[2] * u]],
+        ["Le ratio " + t.join(" ∶ ") + " fait " + su + " parts en tout.", "Une part pèse " + Tm + " ÷ " + su + " g."],
+        su + " parts de " + M(N(Tm) + " \\div " + su + " = " + u) + " g : " + ing.map((x, i) => x + " " + M(t[i] + " \\times " + u + " = " + t[i] * u) + " g").join(", ") + "."), { ctx: cx });
+    }
+    if (cx === "beton") {
+      const t = pk([[1, 2, 3], [1, 2, 4], [1, 3, 5], [2, 3, 5]]), su = t[0] + t[1] + t[2], u = 10 * R.int(5, 40), Tm = su * u;
+      return Object.assign(Pb("Pour couler une dalle de terrasse, un maçon de " + ville() + " mélange ciment, sable et gravier au ratio " + RT(t[0], t[1], t[2]) + " (en masse). Il lui faut " + M(N(Tm)) + " kg de mélange sec.",
+        [["a) Masse de ciment (kg)", t[0] * u], ["b) Masse de sable (kg)", t[1] * u], ["c) Masse de gravier (kg)", t[2] * u]],
+        ["Additionne les nombres du ratio : " + su + " parts.", "Une part pèse " + Tm + " ÷ " + su + " kg."],
+        su + " parts de " + M(N(Tm) + " \\div " + su + " = " + u) + " kg : ciment " + M(N(t[0] * u)) + " kg, sable " + M(N(t[1] * u)) + " kg, gravier " + M(N(t[2] * u)) + " kg."), { ctx: cx });
+    }
+    const m = pk([[2, 3, 5], [1, 2, 2], [3, 3, 4], [2, 4, 6], [1, 4, 5]]), su = m[0] + m[1] + m[2], u = R.int(3, 40) * 10, G = su * u, noms = pk([["Inès", "Tom", "Lina"], ["Jules", "Maël", "Sarah"], ["Emma", "Noah", "Jade"]]);
+    return Object.assign(Pb(noms[0] + ", " + noms[1] + " et " + noms[2] + " ont acheté ensemble un ticket de tombola de la fête de leur village, en payant " + m[0] + " €, " + m[1] + " € et " + m[2] + " €. Le ticket gagne un bon d'achat de " + M(N(G)) + " €, partagé proportionnellement aux mises.",
+      [["a) Part de " + noms[0] + " (€)", m[0] * u], ["b) Part de " + noms[2] + " (€)", m[2] * u], ["c) Écart entre la plus grande et la plus petite part (€)", (Math.max(...m) - Math.min(...m)) * u]],
+      ["Ratio des mises : " + m.join(" ∶ ") + ", soit " + su + " parts.", "Une part vaut " + G + " ÷ " + su + " €."],
+      su + " parts de " + M(N(G) + " \\div " + su + " = " + u) + " € : " + noms[0] + " " + M(N(m[0] * u)) + " €, " + noms[1] + " " + M(N(m[1] * u)) + " €, " + noms[2] + " " + M(N(m[2] * u)) + " € ; écart " + M(N((Math.max(...m) - Math.min(...m)) * u)) + " €."), { ctx: cx });
+  }];
 
   // ===================== milieux : droite des milieux =====================
   // Figure : triangle (sommets nommés), milieux marqués par des codages, longueurs données seulement.

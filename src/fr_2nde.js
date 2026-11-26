@@ -567,13 +567,174 @@
   );
 
   // ===================== problèmes en plusieurs étapes (niveau 4) =====================
-  const PROBS = {
-    probcond: [() => P("Dans un lycée de Nantes, 60 % des élèves sont demi-pensionnaires. Parmi eux, 30 % prennent le bus ; parmi les externes, 70 % prennent le bus.", [["a) P(D ∩ B)", 0.18], ["b) P(B)", 0.46], ["c) P_B(D), arrondie au centième", 0.39]], ["Arbre : D (0,6), puis B (0,3).", "P(B) = 0,6 × 0,3 + 0,4 × 0,7."], "a) " + M("0{,}6 \\times 0{,}3 = 0{,}18") + " ; b) " + M("0{,}18 + 0{,}4 \\times 0{,}7 = 0{,}46") + " ; c) " + M("\\frac{0{,}18}{0{,}46} \\approx 0{,}39") + ".")],
-    tauxevol: [() => P("Le prix d'un forfait de ski à Chamonix augmente de 20 % en 2025, puis baisse de 10 % en 2026. Il valait 60 € au départ.", [["a) Prix après la hausse (€)", 72], ["b) Prix en 2026 (€)", 64.8], ["c) Taux d'évolution global (%)", 8]], ["Coefficient 1,2, puis 0,9.", "1,2 × 0,9 = 1,08."], "a) " + M("60 \\times 1{,}2 = 72") + " ; b) " + M("72 \\times 0{,}9 = 64{,}8") + " ; c) " + M("1{,}08") + " : " + M("+8\\,\\%") + ".")],
-    proba2: [() => P("On lance deux fois un dé équilibré à 6 faces.", [["a) P(deux 6)", 1 / 36], ["b) P(aucun 6)", 25 / 36], ["c) P(au moins un 6)", 11 / 36]], ["Arbre : 1/6 puis 1/6.", "« Au moins un 6 » est le contraire de « aucun 6 »."], "a) " + M("\\frac{1}{36}") + " ; b) " + M("\\frac{5}{6} \\times \\frac{5}{6} = \\frac{25}{36}") + " ; c) " + M("1 - \\frac{25}{36} = \\frac{11}{36}") + ".")],
-    algopy: [() => P("On considère la fonction Python ci-dessous." + PY(["def f(n):", "    s = 0", "    for i in range(1, n + 1):", "        s = s + i", "    return s"]), [["a) f(4)", 10], ["b) f(10)", 55], ["c) Plus petit n tel que f(n) > 100", 14]], ["f(n) = 1 + 2 + … + n.", "f(13) = 91, f(14) = 105."], "a) " + M("1 + 2 + 3 + 4 = 10") + " ; b) " + M("55") + " ; c) " + M("f(13) = 91") + ", " + M("f(14) = 105") + " : " + M("n = 14") + ".")],
-  };
-  PROBS.vect3e = [() => P("On donne A(1 ; 2), B(4 ; 3) et C(2 ; 6).", [["a) Abscisse de D tel que ABCD soit un parallélogramme", -1], ["b) Ordonnée de D", 5], ["c) Déterminant de AB et AC", 11]], ["AD = BC.", "AB(3 ; 1), AC(1 ; 4)."], "a), b) " + M("\\overrightarrow{BC}(-2 \\,;\\, 3)") + ", donc " + M("D(1 - 2 \\,;\\, 2 + 3) = (-1 \\,;\\, 5)") + " ; c) " + M("\\overrightarrow{AB}(3 \\,;\\, 1)") + ", " + M("\\overrightarrow{AC}(1 \\,;\\, 4)") + " : " + M("3 \\times 4 - 1 \\times 1 = 11") + ", non colinéaires.")];
+  /* 26.11 soir (agent defisfr) : les 5 défis de seconde n'avaient qu'un énoncé figé. Valeurs tirées, 3 à 5 contextes
+     (tag ctx), corrigé calculé à partir des valeurs ; recalcul indépendant : tests/recalc_oracles_fr.js. */
+  const PR = (ctx, q, parts, hints, sol) => ({ ctx, q, hints, sol, parts: parts.map(([label, value, round]) => ({ label, spec: Object.assign({ kind: "value", value: r9(value) }, round ? { round } : {}) })) });
+  const rdv = (v, s) => r9(Math.round(r9(v / s)) * s); /* arrondi décimal (au pas s) */
+  const nett = (v, s) => Math.abs((r9(v / s) % 1) - 0.5) > 0.02; /* loin d'un « 5 » final : arrondi sans ambiguïté */
+  const et = (v) => eu(v).replace(/\\,/g, " ").replace("{,}", ","); /* montant, texte simple */
+  const fx = (v) => { const d = den(v); return d > 1 && d <= 400 ? Math.round(v * d) + "/" + d : nt(v); }; /* fraction, texte simple */
+  const VL = ["Nantes", "Rennes", "Lille", "Bordeaux", "Toulouse", "Strasbourg", "Lyon", "Montpellier", "Dijon", "Clermont-Ferrand", "Orléans", "Amiens"];
+  const PROBA2P = [() => {
+    const cx = pk(["de", "urne", "sondage", "qcm"]);
+    if (cx === "de") {
+      const n = pk([6, 8, 10, 12, 20]), sup = R.rand() < 0.5; let k, f;
+      if (sup) { k = R.int(Math.ceil(n / 2) + 1, n - 1); f = n - k + 1; } else { k = pk([3, 4, 5].filter((m) => Math.floor(n / m) >= 2)); f = Math.floor(n / k); }
+      const p = f / n, a = p * p, b = (1 - p) * (1 - p), c = 1 - b, lab = sup ? "un nombre supérieur ou égal à " + k : "un multiple de " + k, jeu = pk(["Pour un jeu de société", "Pour un jeu de rôle", "Pendant une partie de jeu de plateau"]);
+      return PR(cx, jeu + ", on lance deux fois un dé équilibré à " + n + " faces numérotées de 1 à " + n + ". On note S l'évènement « obtenir " + lab + " » à un lancer.",
+        [["a) P(S aux deux lancers)" + FA, a], ["b) P(S à aucun des deux lancers)" + FA, b], ["c) P(S au moins une fois)" + FA, c]],
+        ["À un lancer : " + f + " issues favorables sur " + n + ".", "« Au moins une fois » est le contraire de « aucune fois »."],
+        "À un lancer, " + M("P(S) = " + FT(f, n)) + ". a) Les lancers sont indépendants : " + M(FT(f, n) + " \\times " + FT(f, n) + " = " + fT(a)) + " ; b) " + M(fT(1 - p) + " \\times " + fT(1 - p) + " = " + fT(b)) + " ; c) contraire de b) : " + M("1 - " + fT(b) + " = " + fT(c)) + ".");
+    }
+    if (cx === "urne") {
+      const [cont, sg1, pl, f1, f2, a1, a2, fem, sorte] = pk([["Un sac", "bille", "billes", "rouges", "bleues", "rouge", "bleue", true, "couleur"], ["Une trousse", "feutre", "feutres", "noirs", "verts", "noir", "vert", false, "couleur"], ["Une boîte", "chocolat", "chocolats", "noirs", "au lait", "noir", "au lait", false, "sorte"], ["Un bocal", "bonbon", "bonbons", "à la fraise", "à la menthe", "à la fraise", "à la menthe", false, "sorte"]]);
+      let r, v; do { r = R.int(3, 8); v = R.int(2, 7); } while (r + v > 12 || r === v);
+      const N = r + v, a = (r * (r - 1)) / (N * (N - 1)), b = (r * (r - 1) + v * (v - 1)) / (N * (N - 1)), c = 1 - a, un = fem ? "une" : "un";
+      return PR(cx, cont + " contient " + r + " " + pl + " " + f1 + " et " + v + " " + pl + " " + f2 + ". On tire au hasard " + un + " " + sg1 + ", on " + (fem ? "la" : "le") + " garde, puis on en tire " + un + " second" + (fem ? "e" : "") + " (tirage sans remise).",
+        [["a) P(deux " + pl + " " + f1 + ")" + FA, a], ["b) P(deux " + pl + " de la même " + sorte + ")" + FA, b], ["c) P(au moins " + un + " " + sg1 + " " + a2 + ")" + FA, c]],
+        ["Sans remise : au second tirage, il reste " + (N - 1) + " " + pl + ".", "« Au moins " + un + " " + a2 + " » est le contraire de « deux " + f1 + " »."],
+        "a) " + M("\\frac{" + r + "}{" + N + "} \\times \\frac{" + (r - 1) + "}{" + (N - 1) + "} = " + fT(a)) + " ; b) on ajoute « deux " + f2 + " » : " + M(fT(a) + " + \\frac{" + v + "}{" + N + "} \\times \\frac{" + (v - 1) + "}{" + (N - 1) + "} = " + fT(b)) + " ; c) " + M("1 - " + fT(a) + " = " + fT(c)) + ".");
+    }
+    if (cx === "sondage") {
+      const N = pk([200, 250, 400, 500]), [e1, e2] = pk([["pratique un sport en club", "joue d'un instrument de musique"], ["lit au moins un livre par mois", "va au cinéma au moins une fois par mois"], ["a un abonnement de bus ou de TER", "vient au lycée à vélo au moins une fois par semaine"], ["est inscrit à l'association sportive", "fait partie de la chorale"]]);
+      let a, b, c; do { a = R.int(Math.round(N * 0.2), Math.round(N * 0.55)); b = R.int(Math.round(N * 0.15), Math.round(N * 0.5)); c = R.int(Math.round(N * 0.05), Math.round(N * 0.15)); } while (c >= Math.min(a, b) || a + b - c >= N || a === b);
+      const u = a + b - c;
+      return PR(cx, "Dans un lycée de " + pk(VL) + ", on interroge " + N + " élèves. Soit A : « l'élève " + e1 + " » et B : « l'élève " + e2 + " ». " + a + " élèves sont dans A, " + b + " dans B, et " + c + " dans les deux. On choisit un de ces élèves au hasard.",
+        [["a) P(A ∩ B) (en décimal)", c / N], ["b) P(A ∪ B) (en décimal)", u / N], ["c) P(ni A ni B) (en décimal)", 1 - u / N]],
+        ["P(A ∪ B) = P(A) + P(B) − P(A ∩ B) : les élèves des deux groupes ne sont comptés qu'une fois.", "« Ni A ni B » est le contraire de « A ou B »."],
+        "a) " + M("\\frac{" + c + "}{" + N + "} = " + nf(c / N)) + " ; b) " + M(nf(a / N) + " + " + nf(b / N) + " - " + nf(c / N) + " = " + nf(u / N)) + " ; c) " + M("1 - " + nf(u / N) + " = " + nf(r9(1 - u / N))) + ".");
+    }
+    const k = pk([3, 4, 5]), n = pk([2, 3]), q = (k - 1) / k, a = Math.pow(1 / k, n), b = Math.pow(q, n), c = 1 - b, quiz = pk(["un QCM de SVT", "un quiz de culture générale", "un QCM d'histoire-géographie", "un jeu télévisé"]);
+    return PR(cx, "Dans " + quiz + ", chaque question propose " + k + " réponses dont une seule est juste. Sans réfléchir, " + pk(["Hugo", "Léa", "Nathan", "Manon", "Yanis", "Chloé"]) + " répond au hasard à " + n + " questions (réponses indépendantes).",
+      [["a) P(" + (n === 2 ? "les deux" : "les trois") + " réponses justes)" + FA, a], ["b) P(aucune réponse juste)" + FA, b], ["c) P(au moins une réponse juste)" + FA, c]],
+      ["Pour une question : P(juste) = 1/" + k + ", P(fausse) = " + (k - 1) + "/" + k + ".", "On multiplie le long d'une branche ; « au moins une » est le contraire de « aucune »."],
+      "a) " + M("\\left(\\frac{1}{" + k + "}\\right)^{" + n + "} = " + fT(a)) + " ; b) " + M("\\left(\\frac{" + (k - 1) + "}{" + k + "}\\right)^{" + n + "} = " + fT(b)) + " ; c) " + M("1 - " + fT(b) + " = " + fT(c)) + ".");
+  }];
+  const TAUXP = [() => {
+    const cx = pk(["prix", "commune", "abonnes", "soldes", "voiture"]);
+    if (cx === "prix") {
+      const [obj, P0] = pk([["Le prix d'un forfait journée de ski à " + pk(["Chamonix", "Val Thorens", "La Clusaz", "Font-Romeu", "Superbagnères", "Les Arcs"]), 20 * R.int(2, 3)], ["Le loyer mensuel d'un studio à " + pk(VL), 20 * R.int(20, 34)], ["Le prix d'un abonnement annuel à une salle d'escalade de " + pk(VL), 20 * R.int(15, 25)], ["Le prix d'une trottinette électrique", 20 * R.int(12, 24)]]);
+      let t1, t2; do { t1 = 5 * R.int(1, 6); t2 = 5 * R.int(1, 6); } while ((100 + t1) * (100 - t2) === 10000);
+      const p1 = r9((P0 * (100 + t1)) / 100), p2 = r9((p1 * (100 - t2)) / 100), g = r9(((100 + t1) * (100 - t2) - 10000) / 100);
+      return PR(cx, obj + " valait " + et(P0) + " € en 2024. Il augmente de " + t1 + " % en 2025, puis baisse de " + t2 + " % en 2026.",
+        [["a) Prix en 2025 (€)", p1], ["b) Prix en 2026 (€)", p2], ["c) Taux d'évolution global de 2024 à 2026 (en %, négatif pour une baisse)", g]],
+        ["Coefficients : " + nt(r9(1 + t1 / 100)) + " puis " + nt(r9(1 - t2 / 100)) + ".", "Le taux global se lit sur le produit des coefficients, pas sur la somme des taux."],
+        "a) " + M(eu(P0) + " \\times " + nf(r9(1 + t1 / 100)) + " = " + eu(p1)) + " € ; b) " + M(eu(p1) + " \\times " + nf(r9(1 - t2 / 100)) + " = " + eu(p2)) + " € ; c) " + M(nf(r9(1 + t1 / 100)) + " \\times " + nf(r9(1 - t2 / 100)) + " = " + nf(r9(1 + g / 100))) + ", soit " + M((g > 0 ? "+" : "") + nf(g) + "\\,\\%") + ".");
+    }
+    if (cx === "commune" || cx === "abonnes") {
+      const com = cx === "commune", t = com ? pk([1.5, 2, 2.5, 3, 4]) : pk([5, 6, 8, 10, 12]), q = 1 + t / 100;
+      let A; do A = com ? 200 * R.int(15, 120) : 100 * R.int(20, 300); while (!nett(A * q ** 3, 1) || !nett((q ** 3 - 1) * 100, 0.1));
+      const a1 = r9(A * q), a3 = A * q ** 3, g = (q ** 3 - 1) * 100;
+      const txt = com ? "La population d'une commune de la périphérie de " + pk(VL) + " augmente de " + nt(t) + " % par an depuis 2020 ; elle comptait " + nt(A) + " habitants en 2020."
+        : "Une chaîne vidéo de recettes de cuisine compte " + nt(A) + " abonnés au 1er janvier. Le nombre d'abonnés augmente de " + t + " % par mois.";
+      return PR(cx, txt,
+        [["a) " + (com ? "Population en 2021" : "Abonnés au 1er février"), a1], ["b) " + (com ? "Population en 2023 (arrondie à l'unité)" : "Abonnés au 1er avril (arrondi à l'unité)"), a3, 1], ["c) Taux d'évolution global sur ces trois " + (com ? "années" : "mois") + " (en %, au dixième)", g, 0.1]],
+        ["Augmenter de " + nt(t) + " %, c'est multiplier par " + nt(q) + ".", "Trois évolutions de " + nt(t) + " % : coefficient " + nt(q) + "³ (et non 3 × " + nt(t) + " %)."],
+        "a) " + M(nf(A) + " \\times " + nf(q) + " = " + nf(a1)) + " ; b) " + M(nf(A) + " \\times " + nf(q) + "^3 \\approx " + nf(rdv(a3, 1))) + " ; c) " + M(nf(q) + "^3 \\approx " + nf(rdv(q ** 3, 0.0001))) + ", soit environ " + M("+" + nf(rdv(g, 0.1)) + "\\,\\%") + ".");
+    }
+    if (cx === "soldes") {
+      const [obj, gen] = pk([["un manteau", "Il"], ["une paire de baskets", "Elle"], ["un vélo de ville", "Il"], ["une console de jeu", "Elle"], ["une tente de camping", "Elle"]]);
+      let I, t; do { I = 5 * R.int(8, 60); t = pk([10, 20, 25, 30, 40]); } while (!nett((100 / (100 - t) - 1) * 100, 0.1) && t !== 20 && t !== 25);
+      const Pn = r9((I * (100 - t)) / 100), q = r9(1 - t / 100), h = (100 / (100 - t) - 1) * 100;
+      return PR(cx, "Pendant les soldes d'hiver, le prix d'" + obj + " baisse de " + t + " %. " + gen + " coûte maintenant " + et(Pn) + " €.",
+        [["a) Coefficient multiplicateur de la baisse", q], ["b) Prix avant les soldes (€)", I], ["c) Taux de hausse qu'il faudrait pour revenir au prix d'avant (en %, au dixième)", h, 0.1]],
+        ["Prix après = prix avant × " + nt(q) + " : on divise pour remonter.", "Coefficient réciproque : 1 ÷ " + nt(q) + "."],
+        "a) " + M("1 - " + nf(t / 100) + " = " + nf(q)) + " ; b) " + M(eu(Pn) + " \\div " + nf(q) + " = " + eu(I)) + " € ; c) " + M("\\frac{1}{" + nf(q) + "} \\approx " + nf(rdv(1 / q, 0.0001))) + ", soit une hausse d'environ " + M(nf(rdv(h, 0.1)) + "\\,\\%") + " (et non " + t + " %).");
+    }
+    let P0, t; do { P0 = 500 * R.int(16, 40); t = pk([10, 12, 15, 18, 20]); } while (!nett(P0 * (1 - t / 100) ** 3, 1) || !nett((1 - (1 - t / 100) ** 3) * 100, 0.1));
+    const q = r9(1 - t / 100), v1 = r9(P0 * q), v3 = P0 * q ** 3, g = (1 - q ** 3) * 100, obj = pk(["Une voiture d'occasion", "Un camping-car", "Une moto"]);
+    return PR(cx, obj + " achetée " + et(P0) + " € perd " + t + " % de sa valeur chaque année.",
+      [["a) Valeur après 1 an (€)", v1], ["b) Valeur après 3 ans (€, arrondie à l'unité)", v3, 1], ["c) Perte de valeur en 3 ans (en % de la valeur d'achat, au dixième)", g, 0.1]],
+      ["Perdre " + t + " %, c'est multiplier par " + nt(q) + ".", "Sur 3 ans : coefficient " + nt(q) + "³ ; la perte n'est pas 3 × " + t + " %."],
+      "a) " + M(eu(P0) + " \\times " + nf(q) + " = " + eu(v1)) + " € ; b) " + M(eu(P0) + " \\times " + nf(q) + "^3 \\approx " + nf(rdv(v3, 1))) + " € ; c) " + M(nf(q) + "^3 = " + nf(r9(q ** 3))) + " : perte " + M("(1 - " + nf(r9(q ** 3)) + ") \\times 100 \\approx " + nf(rdv(g, 0.1)) + "\\,\\%") + ".");
+  }];
+  const VECTP = [() => {
+    const cx = pk(["parallelogramme", "alignement", "deplacement"]), pt = (n, x, y) => n + "(" + nt(x) + " ; " + nt(y) + ")";
+    if (cx === "parallelogramme") {
+      let A, B, C, d; do { A = [R.int(-4, 5), R.int(-4, 5)]; B = [R.int(-4, 7), R.int(-4, 7)]; C = [R.int(-4, 7), R.int(-4, 7)]; d = (B[0] - A[0]) * (C[1] - A[1]) - (B[1] - A[1]) * (C[0] - A[0]); } while (!d || A[0] === B[0] || B[1] === C[1]);
+      const D = [A[0] + C[0] - B[0], A[1] + C[1] - B[1]], u = [B[0] - A[0], B[1] - A[1]], w = [C[0] - A[0], C[1] - A[1]], bc = [C[0] - B[0], C[1] - B[1]];
+      const intro = pk(["Dans un repère, on donne ", "Sur le plan d'un jardin à la française (repère orthonormé, unité : 10 m), trois coins d'un bassin en forme de parallélogramme ABCD sont ", "Sur l'écran d'un logiciel de géométrie, on place "]);
+      return PR(cx, intro + pt("A", ...A) + ", " + pt("B", ...B) + " et " + pt("C", ...C) + ".",
+        [["a) Abscisse du point D tel que ABCD soit un parallélogramme", D[0]], ["b) Ordonnée de D", D[1]], ["c) Déterminant des vecteurs AB et AC", d]],
+        ["ABCD parallélogramme ⇔ vecteur AD = vecteur BC.", "det(u, v) = x_u × y_v − y_u × x_v."],
+        "a), b) " + M("\\overrightarrow{BC}(" + nf(bc[0]) + " \\,;\\, " + nf(bc[1]) + ")") + ", donc " + M("D(" + nf(A[0]) + sg(bc[0]) + " \\,;\\, " + nf(A[1]) + sg(bc[1]) + ") = (" + nf(D[0]) + " \\,;\\, " + nf(D[1]) + ")") + " ; c) " + M("\\overrightarrow{AB}(" + nf(u[0]) + " \\,;\\, " + nf(u[1]) + ")") + ", " + M("\\overrightarrow{AC}(" + nf(w[0]) + " \\,;\\, " + nf(w[1]) + ")") + " : " + M(par(u[0]) + " \\times " + par(w[1]) + " - " + par(u[1]) + " \\times " + par(w[0]) + " = " + nf(d)) + " (non nul : A, B, C ne sont pas alignés).");
+    }
+    if (cx === "alignement") {
+      let A, u, C, d, k, L; do { A = [R.int(-3, 4), R.int(-3, 4)]; u = [R.nz(-4, 4), R.nz(-4, 4)]; C = [R.int(-3, 8), R.int(-3, 8)]; d = u[0] * (C[1] - A[1]) - u[1] * (C[0] - A[0]); k = pk([2, 3, -1, -2]); L = Math.hypot(u[0], u[1]); } while (!d || !nett(L, 0.1) || Math.abs(u[0]) === Math.abs(u[1]));
+      const B = [A[0] + u[0], A[1] + u[1]], E = [A[0] + k * u[0], A[1] + k * u[1]], w = [C[0] - A[0], C[1] - A[1]];
+      const intro = pk([["Sur la carte d'une course d'orientation en forêt de Fontainebleau (repère orthonormé, unité : 100 m), les balises A et B ont pour coordonnées ", "le poste de secours"], ["Sur le plan d'un parc à Lille (repère orthonormé, unité : 10 m), deux lampadaires sont en ", "un banc"], ["Dans un repère orthonormé, on donne ", "le point"]]);
+      return PR(cx, intro[0] + pt("A", ...A) + " et " + pt("B", ...B) + " ; " + intro[1] + " C est en " + pt("C", ...C) + ".",
+        [["a) Déterminant des vecteurs AB et AC", d], ["b) Ordonnée du point E d'abscisse " + nt(E[0]) + " aligné avec A et B", E[1]], ["c) Longueur AB (en unités, au dixième)", L, 0.1]],
+        ["A, B, E alignés ⇔ det(AB, AE) = 0.", "AB = √((x_B − x_A)² + (y_B − y_A)²)."],
+        "a) " + M("\\overrightarrow{AB}(" + nf(u[0]) + " \\,;\\, " + nf(u[1]) + ")") + ", " + M("\\overrightarrow{AC}(" + nf(w[0]) + " \\,;\\, " + nf(w[1]) + ")") + " : " + M(par(u[0]) + " \\times " + par(w[1]) + " - " + par(u[1]) + " \\times " + par(w[0]) + " = " + nf(d)) + " (non alignés) ; b) " + M("\\overrightarrow{AE}(" + nf(E[0] - A[0]) + " \\,;\\, y - " + par(A[1]) + ")") + " colinéaire à " + M("\\overrightarrow{AB}") + " : " + M("y = " + nf(E[1])) + " ; c) " + M("\\sqrt{" + par(u[0]) + "^2 + " + par(u[1]) + "^2} = \\sqrt{" + (u[0] ** 2 + u[1] ** 2) + "} \\approx " + nf(rdv(L, 0.1))) + ".");
+    }
+    const [s0, s1] = pk([[3, 4], [4, 3], [6, 8], [8, 6], [5, 12], [12, 5], [8, 15], [9, 12]]), s = [s0 * pk([1, -1]), s1 * pk([1, -1])];
+    let u, v, A; do { u = [R.nz(-7, 7), R.nz(-7, 7)]; v = [s[0] - u[0], s[1] - u[1]]; A = [R.int(-5, 5), R.int(-5, 5)]; } while (!v[0] || !v[1] || u[0] * v[1] - u[1] * v[0] === 0);
+    const Z = [A[0] + s[0], A[1] + s[1]], n = Math.hypot(s0, s1), [who, unit] = pk([["Un robot d'un entrepôt de Saint-Priest, près de Lyon, part du point", "1 m"], ["Un voilier, sur une carte marine de la baie de Quiberon, part du point", "1 mille marin"], ["Le personnage d'un jeu vidéo part de la case", "1 case"], ["Un drone de livraison, au-dessus d'une zone d'activités de Toulouse, part du point", "10 m"]]);
+    return PR(cx, who + " " + pt("A", ...A) + " (repère orthonormé, unité : " + unit + "). Il se déplace selon le vecteur u(" + nt(u[0]) + " ; " + nt(u[1]) + "), puis selon le vecteur v(" + nt(v[0]) + " ; " + nt(v[1]) + ").",
+      [["a) Abscisse du point d'arrivée", Z[0]], ["b) Ordonnée du point d'arrivée", Z[1]], ["c) Distance entre le départ et l'arrivée (en unités)", n]],
+      ["Les deux déplacements s'enchaînent : vecteur u + v.", "Distance : norme de u + v."],
+      "a), b) " + M("\\vec{u} + \\vec{v} = (" + nf(s[0]) + " \\,;\\, " + nf(s[1]) + ")") + ", arrivée " + M("(" + nf(A[0]) + sg(s[0]) + " \\,;\\, " + nf(A[1]) + sg(s[1]) + ") = (" + nf(Z[0]) + " \\,;\\, " + nf(Z[1]) + ")") + " ; c) " + M("\\sqrt{" + par(s[0]) + "^2 + " + par(s[1]) + "^2} = \\sqrt{" + (s0 * s0 + s1 * s1) + "} = " + n) + ".");
+  }];
+  const PCONDP = [() => {
+    const cx = pk(["lycee", "depistage", "club", "usine"]);
+    if (cx === "club") {
+      const N = pk([80, 100, 125, 160, 200, 250]), sport = pk(["handball", "judo", "basket", "escalade", "rugby", "natation"]);
+      let F, fc, gc; do { F = R.int(Math.round(N * 0.3), Math.round(N * 0.6)); fc = R.int(5, F - 5); gc = R.int(5, N - F - 5); } while (!nett((100 * fc) / F, 1) || !nett((100 * fc) / (fc + gc), 1) || fc === gc);
+      const G = N - F, C = fc + gc;
+      return PR(cx, "Un club de " + sport + " de " + pk(VL) + " compte " + N + " licenciés : " + F + " filles et " + G + " garçons. " + fc + " filles et " + gc + " garçons jouent en compétition. On choisit un licencié au hasard ; F : « c'est une fille », C : « la personne joue en compétition ».",
+        [["a) P(C) (en décimal)", C / N], ["b) P_F(C) (au centième)", fc / F, 0.01], ["c) P_C(F) (au centième)", fc / C, 0.01]],
+        ["P_F(C) : on se limite aux " + F + " filles.", "P_C(F) : on se limite aux " + C + " licenciés en compétition."],
+        "a) " + M("\\frac{" + C + "}{" + N + "} = " + nf(C / N)) + " ; b) " + M("\\frac{" + fc + "}{" + F + "} \\approx " + nf(rdv(fc / F, 0.01))) + " ; c) " + M("\\frac{" + fc + "}{" + C + "} \\approx " + nf(rdv(fc / C, 0.01))) + ".");
+    }
+    let p, q1, q2, txt, A, B, Ab, ctr = 0;
+    do {
+      if (cx === "lycee") { p = 5 * R.int(8, 14); q1 = 10 * R.int(2, 8); q2 = 10 * R.int(2, 8); }
+      else if (cx === "depistage") { p = pk([1, 2, 4, 5, 8, 10]); q1 = pk([90, 95, 98]); q2 = pk([2, 3, 5, 10]); }
+      else { p = 5 * R.int(6, 14); q1 = pk([1, 2, 3, 4, 5]); q2 = pk([1, 2, 3, 4, 5, 6]); }
+      ctr++;
+    } while ((q1 === q2 || !nett((p * q1) / (p * q1 + (100 - p) * q2), 0.01)) && ctr < 200);
+    const a = (p * q1) / 10000, b = a + ((100 - p) * q2) / 10000, c = a / b;
+    if (cx === "lycee") { const [ev, lt] = pk([["prennent le bus", "B"], ["font du sport à l'association sportive", "S"], ["ont un abonnement à la médiathèque", "M"]]); A = "D"; B = lt; Ab = "D̄";
+      txt = "Dans un lycée de " + pk(VL) + ", " + p + " % des élèves sont demi-pensionnaires (évènement D). Parmi eux, " + q1 + " % " + ev + " (évènement " + lt + ") ; parmi les autres élèves, " + q2 + " % " + ev + "."; }
+    else if (cx === "depistage") { A = "M"; B = "T"; Ab = "M̄";
+      txt = "Une maladie touche " + p + " % de la population d'une région. Un test de dépistage est positif pour " + q1 + " % des malades et pour " + q2 + " % des personnes non malades. On teste une personne au hasard ; M : « la personne est malade », T : « le test est positif »."; }
+    else { const [obj, gen] = pk([["vélos électriques", "assemblés"], ["casques de vélo", "fabriqués"], ["smartphones reconditionnés", "préparés"]]); A = "A"; B = "D"; Ab = "Ā";
+      txt = "Une usine de " + pk(VL) + " a deux chaînes de production de " + obj + " : la chaîne A en produit " + p + " %, la chaîne B le reste. " + q1 + " % des " + obj + " " + gen + " sur A et " + q2 + " % de ceux " + gen + " sur B ont un défaut. On choisit un produit au hasard ; D : « il a un défaut »."; }
+    return PR(cx, txt,
+      [["a) P(" + A + " ∩ " + B + ") (en décimal)", a], ["b) P(" + B + ") (en décimal)", b], ["c) P_" + B + "(" + A + "), arrondie au centième", c, 0.01]],
+      ["Arbre : " + A + " (" + nt(p / 100) + "), puis " + B + " sachant " + A + " (" + nt(q1 / 100) + ").", "P(" + B + ") : on additionne les deux chemins qui mènent à " + B + " ; puis P_" + B + "(" + A + ") = P(" + A + " ∩ " + B + ") ÷ P(" + B + ")."],
+      "a) " + M(nf(p / 100) + " \\times " + nf(q1 / 100) + " = " + nf(a)) + " ; b) " + M(nf(a) + " + " + nf(r9(1 - p / 100)) + " \\times " + nf(q2 / 100) + " = " + nf(r9(b))) + " ; c) " + M("\\frac{" + nf(a) + "}{" + nf(r9(b)) + "} \\approx " + nf(rdv(c, 0.01))) + ".");
+  }];
+  const ALGOP = [() => {
+    const cx = pk(["somme", "epargne", "tarif"]);
+    if (cx === "somme") {
+      const a = pk([0, 1, 2, 3, 5, 10]), k = pk([1, 1, 2, 3]), full = R.rand() < 0.6, m1 = R.int(3, 6), m2 = R.int(8, 12), f = (n) => a + (k * (full ? n * (n + 1) : n * (n - 1))) / 2;
+      let S; do S = R.int(60, 300); while ([...Array(60).keys()].some((n) => f(n) === S));
+      let n0 = 0; while (f(n0) <= S) n0++;
+      return PR(cx, "On considère la fonction Python ci-dessous." + PY(["def f(n):", "    s = " + a, "    for i in range(" + (full ? "1, n + 1" : "n") + "):", "        s = s + " + (k === 1 ? "i" : k + " * i"), "    return s"]),
+        [["a) f(" + m1 + ")", f(m1)], ["b) f(" + m2 + ")", f(m2)], ["c) Plus petit entier n tel que f(n) > " + S, n0]],
+        [full ? "range(1, n + 1) donne i = 1, 2, …, n." : "range(n) donne i = 0, 1, …, n − 1 (n est exclu).", "c) Calcule f(n) pour des n de plus en plus grands, ou utilise la somme 1 + 2 + … + m = m(m + 1)/2."],
+        "f(n) = " + M(a + " + " + (k === 1 ? "" : k + " \\times ") + "(" + (full ? "1 + 2 + \\dots + n" : "0 + 1 + \\dots + (n - 1)") + ")") + ". a) " + M("f(" + m1 + ") = " + f(m1)) + " ; b) " + M("f(" + m2 + ") = " + f(m2)) + " ; c) " + M("f(" + (n0 - 1) + ") = " + f(n0 - 1) + " \\le " + S) + " et " + M("f(" + n0 + ") = " + f(n0) + " > " + S) + " : " + M("n = " + n0) + ".");
+    }
+    if (cx === "epargne") {
+      const who = pk(["Lucas", "Emma", "Yanis", "Léna", "Théo", "Zoé"]), t = pk([2, 3, 4, 5]), C = 100 * R.int(5, 30), q = 1 + t / 100;
+      const yrs = (s) => { let c = C, n = 0; while (c < s) { c *= q; n++; } return n; };
+      let S1, S2; do { S1 = 50 * Math.round((C * (1.1 + R.rand() * 0.25)) / 50); S2 = 50 * Math.round((C * (1.4 + R.rand() * 0.5)) / 50); } while ([S1, S2].some((s) => Math.abs(Math.log(s / C) / Math.log(q) - Math.round(Math.log(s / C) / Math.log(q))) < 1e-3) || yrs(S1) === yrs(S2) || yrs(S1) < 2);
+      return PR(cx, who + " place " + nt(C) + " € sur un livret à " + t + " % par an (intérêts composés). On considère la fonction Python ci-dessous." + PY(["def annees(seuil):", "    capital = " + C, "    n = 0", "    while capital < seuil:", "        capital = capital * " + q.toFixed(2), "        n = n + 1", "    return n"]),
+        [["a) Valeur de capital après le premier passage dans la boucle (€)", r9(C * q)], ["b) annees(" + S1 + ")", yrs(S1)], ["c) annees(" + S2 + ")", yrs(S2)]],
+        ["Chaque passage multiplie le capital par " + nt(q) + " et ajoute 1 à n.", "La boucle s'arrête dès que capital ≥ seuil ; n compte les années."],
+        "a) " + M(nf(C) + " \\times " + nf(q) + " = " + nf(r9(C * q))) + " € ; b) " + M(nf(C) + " \\times " + nf(q) + "^{" + (yrs(S1) - 1) + "} \\approx " + nf(rdv(C * q ** (yrs(S1) - 1), 0.01)) + " < " + nf(S1)) + " et " + M(nf(C) + " \\times " + nf(q) + "^{" + yrs(S1) + "} \\approx " + nf(rdv(C * q ** yrs(S1), 0.01)) + " \\ge " + nf(S1)) + " : " + yrs(S1) + " ; c) de même, " + M(nf(C) + " \\times " + nf(q) + "^{" + yrs(S2) + "} \\approx " + nf(rdv(C * q ** yrs(S2), 0.01))) + " : " + yrs(S2) + ".");
+  }
+    const [lieu, ag] = pk([["un musée de Bordeaux", [4, 18]], ["la patinoire de Grenoble", [6, 16]], ["un parc d'attractions près de Nantes", [3, 12]], ["la piscine municipale de Rennes", [5, 18]]]), p1 = R.int(3, 9), p2 = p1 + R.int(3, 8);
+    const prix = (x) => (x < ag[0] ? 0 : x < ag[1] ? p1 : p2), e1 = ag[1], e2 = R.int(ag[0], ag[1] - 1);
+    const fam = [R.int(35, 48), R.int(33, 46), R.int(1, ag[0] - 1), R.int(ag[0], ag[1] - 1), ag[1]], tot = fam.reduce((s, x) => s + prix(x), 0);
+    return PR(cx, "Le tarif d'entrée dans " + lieu + " est calculé par la fonction Python ci-dessous (âge en années, prix en euros)." + PY(["def prix(age):", "    if age < " + ag[0] + ":", "        return 0", "    elif age < " + ag[1] + ":", "        return " + p1, "    else:", "        return " + p2]),
+      [["a) prix(" + e2 + ")", prix(e2)], ["b) prix(" + e1 + ")", prix(e1)], ["c) Prix total pour une famille dont les âges sont " + fam.join(", ") + " (€)", tot]],
+      ["if … elif … else : la première condition vraie l'emporte.", "« age < " + ag[1] + " » est fausse pour " + ag[1] + " : on passe au else."],
+      "a) " + M(ag[0] + " \\le " + e2 + " < " + ag[1]) + " : " + p1 + " € ; b) " + M(e1 + " < " + ag[1]) + " est faux : " + p2 + " € ; c) " + fam.map(prix).join(" + ") + " = " + tot + " €.");
+  }];
+  const PROBS = { probcond: PCONDP, tauxevol: TAUXP, proba2: PROBA2P, algopy: ALGOP, vect3e: VECTP };
 
   // ===================== enregistrement =====================
   const NEW = [

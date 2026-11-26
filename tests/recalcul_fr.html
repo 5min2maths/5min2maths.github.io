@@ -1,0 +1,47 @@
+<!doctype html><meta charset="utf-8"><meta name="budget" content="90000">
+<main id="app"></main>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){};window.fetch=()=>Promise.resolve(new Response("{}"));</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/defis_9.js"></script><script src="../src/defis_910.js"></script><script src="../src/defis_2c.js"></script><script src="../src/defis_sec2.js"></script><script src="../src/competences.js"></script><script src="../src/referentiel.js"></script><script src="../src/trx.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch4c_trous.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/ch1c_trous.js"></script><script src="../src/ch11_rep3d.js"></script><script src="../src/perco.js"></script><script src="../src/fr_college.js"></script><script src="../src/fr_1re.js"></script><script src="../src/fr_3e.js"></script><script src="../src/fr_tle.js"></script><script src="../src/fr_fin.js"></script><script src="../src/fr_trous.js"></script><script src="../src/fr_couv.js"></script><script src="../src/ref_matu.js"></script><script src="../src/ref_fr.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_col34b.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/fr_act.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script>
+<script src="vrai_collecte.js"></script><script src="recalc_oracles.js"></script><script src="recalc_oracles_fr.js"></script>
+<!-- 26.11 soir (agent defisfr) : recalcul indépendant des défis (niveau 4) du profil France rendus variés (fichiers
+     src/fr_*.js), sur le modèle de recalcul.html, restreint à ces défis. Oracles : tests/recalc_oracles_fr.js (un par
+     contexte). Échec : désaccord (réponse attendue, arrondi demandé, corrigé), question non reconnue (toutes les parties
+     doivent être recalculées), valeur tronquée, exception, ou contre-épreuve non détectée (réponse attendue faussée sur
+     chaque énoncé : l'oracle doit protester). #n=150 (graines par défi) ; #ids=proba2,lnfr ; #detail. -->
+<pre id="out">en cours</pre>
+<script>
+(function () {
+  const P = new URLSearchParams(location.hash.slice(1)), N = +(P.get("n") || 150), DET = P.has("detail");
+  const ids = P.get("ids") ? P.get("ids").split(",") : RECALC_FR.IDS;
+  const mutate = (sp) => !sp || sp.kind !== "value" ? sp : { ...sp, value: Math.abs(sp.value * 0.2 + 0.7) < 1e-9 ? sp.value + 1 : sp.value * 1.2 + 0.7 };
+  const t0 = performance.now(), fails = [], exc = [], per = {};
+  let np = 0, nk = 0, nm = 0;
+  for (const id of ids) {
+    const { items, errs } = VRAI.items({ n: N, ids: [id], src: ["defi"] });
+    exc.push(...errs);
+    const st = (per[id] = { q: 0, p: 0, k: 0 });
+    for (const x of items) {
+      st.q++;
+      const it = { id: x.id, d: x.d, code: x.code, raw: x.raw, fig: x.fig, txt: x.txt, sol: x.sol, rawSol: "", spec: null, parts: x.parts };
+      const vp = x.parts.filter((p) => p.spec && p.spec.kind === "value"); st.p += vp.length; np += vp.length;
+      if (vp.length !== x.parts.length) fails.push(x.code + " : partie sans réponse numérique");
+      for (const p of x.parts) { const t = RECALC.truncSpec(p.spec); if (t) fails.push(x.code + " [valeur tronquée] " + t); }
+      let r; try { r = RECALC.check(it); } catch (e) { exc.push(x.code + " (oracle) : " + e.message); continue; }
+      st.k += r.length; nk += r.length;
+      if (r.length < vp.length) fails.push(x.code + " : question(s) non reconnue(s) par les oracles — " + VRAI.plain(x.txt).slice(0, 60) + " ¶ " + vp.map((p) => p.label).join(" | ").slice(0, 160));
+      for (const c of r) if (c.msg) fails.push(x.code + " [" + c.rule.slice(0, 40) + "] " + c.msg);
+      if (r.length && r.every((c) => !c.msg)) for (let i = 0; i < x.parts.length; i++) { /* contre-épreuve : une partie faussée à la fois */
+        nm++; let r2; try { r2 = RECALC.check({ ...it, parts: it.parts.map((p, j) => (j === i ? { ...p, spec: mutate(p.spec) } : p)) }); } catch (e) { r2 = []; }
+        if (!r2.some((c) => c.msg)) fails.push(x.code + " : contre-épreuve — réponse attendue de « " + x.parts[i].label.slice(0, 50) + " » faussée non détectée");
+      }
+    }
+    if (!st.q) fails.push(id + " : aucun défi tiré");
+  }
+  const uniq = [...new Set(fails)];
+  const out = [(uniq.length || exc.length ? "ÉCHEC " : "ok ") + ids.length + " défis France, " + np + " questions, " + nk + " recalculées, " + nm + " contre-épreuves, " + uniq.length + " désaccord(s), " + exc.length + " exception(s), " + Math.round(performance.now() - t0) + " ms"];
+  for (const f of uniq.slice(0, 120)) out.push("  " + f);
+  if (exc.length) out.push("EXC :\n  " + exc.slice(0, 30).join("\n  "));
+  if (DET) for (const id of ids) out.push("  " + id + " : " + per[id].q + " énoncés, " + per[id].k + "/" + per[id].p + " questions recalculées");
+  document.getElementById("out").textContent = out.join("\n");
+})();
+</script>
