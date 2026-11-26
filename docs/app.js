@@ -115,6 +115,7 @@ const SYSTEMS_HIDDEN = { FR: { label: "France", grades: [[6, "6e"], [7, "5e"], [
 // Produit : × en France (décision du 25.11, frTimes) ; laissé pour décision : « cercle de Thalès ».
 const FR_WORDS = [
   [/\ben (CHF|francs)\b/g, "en euros"], [/\bCHF\b/g, "€"], [/au franc près/g, "à l'euro près"], [/(\d|\\\)) francs\b/g, "$1 euros"], [/\bde francs\b/g, "d'euros"],
+  [/\bapprentis\b/g, "élèves"], /* 26.11 soir (revue des élèves joués, n° 13 : « Sondage auprès de 40 apprentis » en 4e FR, école professionnelle suisse) */
   /* 25.11 (couverture France) : équation réduite y = mx + p ; « côtés de l'angle droit » (cathètes : usage suisse) ;
      « ensemble de définition » (domaine de définition : usage suisse ; « l'aire du domaine » inchangé). */
   [/\bmx \+ h\b/g, "mx + p"], [/\b([Ll])es cathètes\b/g, "$1es côtés de l'angle droit"], [/\bcathètes\b/g, "côtés de l'angle droit"], [/\b([Ll])a cathète(?![a-zà-ÿ])/g, "$1e côté de l'angle droit"], [/\bcathète(?![a-zà-ÿ])/g, "côté de l'angle droit"],
@@ -710,7 +711,10 @@ function checkAnswer(spec, input) {
     if (!isFinite(v)) return { status: "invalid", message: "Ce calcul n'a pas de valeur (division par zéro ?)." };
     if (spec.round) {
       if (Math.abs(v - spec.value) <= spec.round / 2 + 1e-9) return { status: "correct" };
-      if (Math.abs(v - spec.value) <= spec.round * 5) return { status: "close", message: "Presque : vérifie l'arrondi (au " + (spec.round === 0.01 ? "centième" : spec.round === 0.1 ? "dixième" : "près") + ")." };
+      /* 26.11 soir (revue des élèves joués, n° 4 : « à 20 kg près », 150,975 au lieu de 237 traité comme un arrondi raté,
+         « (au près) ») : pour une graduation d'au moins 1, « presque » = à une graduation près ; libellé avec le pas. */
+      const r = spec.round, lab = r === 0.01 ? "au centième" : r === 0.1 ? "au dixième" : r === 0.001 ? "au millième" : r === 1 ? "à l'unité" : "à " + String(r).replace(".", ",") + " près";
+      if (Math.abs(v - spec.value) <= (r >= 1 ? r : r * 5)) return { status: "close", message: "Presque : vérifie l'arrondi (" + lab + ")." };
       return { status: "wrong" };
     }
     if (!spec.plain && !spec.radical && roundedFrac(tree, spec.value)) return { status: "form", message: ROUNDED_FRAC };
@@ -1511,7 +1515,7 @@ const colonBreak = (s) => {
     /* 26.11 (revue élèves, B10 : « Les x² ⏎ 3x² ; les x ⏎ 3x ») : entre deux formules, on ne coupe après « : » que si une
        vraie phrase (3 mots au moins) précède la formule ; sinon le « : » reste sur la ligne. */
     const phrase = i > 0 && (String(parts[i - 2] || "").split(/[.;!?]|<br>/).pop().match(/\p{L}{2,}/gu) || []).length >= 3;
-    if (i > 0) t = t.replace(/^\s*:\s+(?=\S)/, "<br>").replace(/^\s*:\s*$/, i + 1 < parts.length && phrase ? "<br>" : " :"); // juste après une formule
+    if (i > 0) t = t.replace(/^\s*:\s+(?=\S)/, "<br>").replace(/^\s*:\s*$/, i + 1 < parts.length && phrase ? "<br>" : " : "); /* juste après une formule (26.11 soir, n° 9 : espace après « : ») */
     t = t.replace(/(^|[.!?]\s+|<br>)([^.!?<:]*?=[^.!?<:]*?[0-9A-Za-zÀ-ÿ²³⁴)\]]) : (?=\S)/g, "$1$2<br>"); // « x = 3 : … »
     // « Divisibles par 9 : 117, 126 » se lit « 9 ÷ 117 » : on garde les deux-points et on passe à la ligne.
     t = t.replace(/([0-9)²³°]) : (?=[-−0-9(]|$)/g, "$1 :<br>");
@@ -4957,7 +4961,7 @@ V34("change",
   () => { const t = R.pick([0.9, 0.95]), e = R.int(4, 15) * 10, fr = r6(e * t), c = r6(fr + R.pick([-6, -4, 3, 5])), d = Math.abs(r6(fr - c)); return QV("Des baskets coûtent " + e + " EUR en ligne et " + dT(c) + " CHF en magasin. Le taux est 1 EUR = " + dT(t) + " CHF. De combien de francs les prix diffèrent-ils ?", d, "En ligne : " + M(e + " \\cdot " + dec(t) + " = " + dec(fr)) + " CHF. Écart : " + M(dec(d)) + " CHF.", { guide: [GS("Prix en ligne en francs : " + M(e + " \\cdot " + dec(t)) + " = ?", fr, M(dec(fr)) + " CHF."), GS("Écart avec " + dT(c) + " CHF ?", d, M(dec(d)) + " CHF.")], traps: [TRAP(Math.abs(r6(e - c)), "Convertis d'abord le prix en ligne en francs : " + e + " · " + dT(t) + "."), TRAP(Math.abs(r6(e / t - c)), "Euros vers francs : on multiplie par le taux.")] }); },
 );
 V("agrand", 1,
-  () => { const [k, a, b] = R.pick([[2.5, 4, 6], [1.5, 4, 8], [3, 5, 7], [2, 7, 9], [1.5, 6, 10]]); return QV("Un rectangle de " + a + " cm sur " + b + " cm est agrandi en un rectangle de " + dT(a * k) + " cm sur " + dT(b * k) + " cm. Par quel nombre a-t-on multiplié les longueurs ?", k, M(dec(r6(a * k)) + " : " + a + " = " + dec(k)) + ".", { guide: [GS("Facteur = nouvelle : ancienne = " + M(dec(r6(a * k)) + " : " + a) + " = ?", k, M(dec(k)) + " (vérifie avec l'autre côté : " + M(b + " \\cdot " + dec(k) + " = " + dec(r6(b * k))) + ").")], traps: [TRAP(r6(a * k - a), "On cherche un facteur, pas une différence."), TRAP(r6(1 / k), "Nouvelle longueur : ancienne, pas l'inverse.")] }); },
+  () => { const [k, a, b] = R.pick([[2.5, 4, 6], [1.5, 4, 8], [3, 5, 7], [2, 7, 9], [1.5, 6, 10]]); return QV("Un rectangle de " + a + " cm sur " + b + " cm est agrandi en un rectangle de " + dT(a * k) + " cm sur " + dT(b * k) + " cm. Par quel nombre a-t-on multiplié les longueurs ?", k, M(dec(r6(a * k)) + " : " + a + " = " + dec(k)) + ".", { guide: [GS("Facteur : nouvelle longueur divisée par l'ancienne, " + M(dec(r6(a * k)) + " : " + a) + " = ?" /* 26.11 soir (n° 10) */, k, M(dec(k)) + " (vérifie avec l'autre côté : " + M(b + " \\cdot " + dec(k) + " = " + dec(r6(b * k))) + ").")], traps: [TRAP(r6(a * k - a), "On cherche un facteur, pas une différence."), TRAP(r6(1 / k), "Nouvelle longueur : ancienne, pas l'inverse.")] }); },
   () => { const k = R.pick([3, 4, 5]), a = R.int(2, 6) * k; return QV("Une photo de " + a + " cm de large est réduite à " + a / k + " cm de large. Par quelle fraction a-t-on multiplié les longueurs ?", 1 / k, M(a / k + " : " + a + " = \\frac{1}{" + k + "}") + ".", { guide: [GS("Combien de fois " + a / k + " cm entre-t-il dans " + a + " cm ?", k, M(a + " : " + a / k + " = " + k) + "."), GS("La largeur est donc divisée par " + k + " : fraction ?", 1 / k, M("\\frac{1}{" + k + "}") + ".")], traps: [TRAP(k, "C'est une réduction : le facteur est plus petit que 1."), TRAP(a - a / k, "On cherche un facteur, pas une différence.")] }); },
 );
 V("agrand", 2,
@@ -5217,7 +5221,7 @@ V34("polyreg",
 );
 V("rotation", 1,
   () => { const a = R.int(1, 5), b = a + R.int(2, 6); return QV("La petite aiguille d'une horloge passe de " + a + " h à " + b + " h. De quel angle a-t-elle tourné (en degrés) ?", (b - a) * 30, M((b - a) + " \\cdot 30° = " + (b - a) * 30 + "°") + " (30° par heure).", { guide: [GS("La petite aiguille fait le tour (360°) en 12 h : degrés par heure ?", 30, "30° par heure."), GS("De " + a + " h à " + b + " h : " + M((b - a) + " \\cdot 30°") + " = ?", (b - a) * 30, M((b - a) * 30 + "°") + ".")], traps: [TRAP((b - a) * 6, "La petite aiguille avance de 30° par heure (6° par minute, c'est la grande)."), TRAP((b - a) * 15, "360° : 12 heures = 30° par heure.")] }); },
-  () => { const m = R.pick([10, 15, 20, 25, 40, 45]); return QV("En " + m + " minutes, de quel angle tourne la grande aiguille d'une horloge (en degrés) ?", m * 6, "6° par minute : " + M(m + " \\cdot 6° = " + m * 6 + "°") + ".", { guide: [GS("La grande aiguille fait 360° en 60 min : degrés par minute ?", 6, "6° par minute."), GS("En " + m + " min : " + M(m + " \\cdot 6°") + " = ?", m * 6, M(m * 6 + "°") + ".")], traps: [TRAP(m * 30, "30° correspond à 5 minutes ; par minute, 360° : 60 = 6°."), TRAP(m, "Par minute, la grande aiguille tourne de 6°.")] }); },
+  () => { const m = R.pick([10, 15, 20, 25, 40, 45]); return QV("En " + m + " minutes, de quel angle tourne la grande aiguille d'une horloge (en degrés) ?", m * 6, "6° par minute : " + M(m + " \\cdot 6° = " + m * 6 + "°") + ".", { guide: [GS("La grande aiguille fait 360° en 60 min : degrés par minute ?", 6, "6° par minute."), GS("En " + m + " min : " + M(m + " \\cdot 6°") + " = ?", m * 6, M(m * 6 + "°") + ".")], traps: [TRAP(m * 30, "30° correspond à 5 minutes ; par minute, " + M("360° : 60 = 6°") + ".") /* 26.11 soir (n° 10) : division dans la formule */, TRAP(m, "Par minute, la grande aiguille tourne de 6°.")] }); },
 );
 V("rotation", 2,
   () => { const n = R.pick([5, 6, 8, 9, 10]); return QV("Une étoile régulière à " + n + " branches tourne autour de son centre. Quel est le plus petit angle de rotation (non nul) qui la superpose à elle-même (en degrés) ?", 360 / n, M("360° : " + n + " = " + 360 / n + "°") + ".", { guide: [GS("Après " + n + " petites rotations, l'étoile a fait un tour : combien de degrés ?", 360, "360°."), GS("Plus petit angle : " + M("360 : " + n) + " = ?", 360 / n, M(360 / n + "°") + ".")], traps: [TRAP(180 / n, "Un tour complet mesure 360°."), TRAP(360 / (2 * n), "Une étoile à " + n + " branches revient sur elle-même après 360° : " + n + ".")] }); },
@@ -8006,9 +8010,11 @@ const DEFIS = (() => {
     ],
     tauxvar: [
       () => { /* vitesse moyenne, instant où la vitesse instantanée l'égale, vitesse moyenne depuis le départ */
-        let a, b, t1, t2, Tm; do { a = pk([0.5, 1, 1.5, 2, 2.5, 3]); b = ri(1, 9); t1 = ri(1, 5); t2 = t1 + ri(2, 7); Tm = ri(5, 15); } while (Tm === t2 || Tm === t1);
+        /* 26.11 soir (revue des élèves joués, n° 6 : « démarre » à 8 m/s, 73 m/s soit 263 km/h) : accélération réaliste
+           (a ≤ 1,5), vitesse moyenne visée en c) ≤ 20 m/s, vitesse instantanée ≤ 35 m/s (126 km/h) ; « accélère ». */
+        let a, b, t1, t2, Tm; do { a = pk([0.5, 1, 1.5]); b = ri(1, 9); t1 = ri(1, 5); t2 = t1 + ri(2, 7); Tm = ri(5, 15); } while (Tm === t2 || Tm === t1 || a * Tm + b > 20 || 2 * a * Math.max(t2, Tm) + b > 35);
         const vm = a * (t1 + t2) + b, V = a * Tm + b, d = (t) => a * t * t + b * t;
-        return P("Une voiture démarre ; elle a parcouru " + M("d(t) = " + poly([a, b, 0], "t")) + " mètres après " + M("t") + " secondes.",
+        return P("Une voiture accélère ; depuis l'instant " + M("t = 0") + ", elle a parcouru " + M("d(t) = " + poly([a, b, 0], "t")) + " mètres après " + M("t") + " secondes.",
           [["a) Vitesse moyenne entre " + M(t1) + " s et " + M(t2) + " s (m/s)", vm], ["b) À quel instant la vitesse instantanée est-elle égale à cette vitesse moyenne ? (s)", (t1 + t2) / 2],
            ["c) Après combien de secondes la vitesse moyenne depuis le départ atteint-elle " + M(D(V)) + " m/s ?", Tm]],
           ["Vitesse moyenne = (d(" + t2 + ") − d(" + t1 + ")) ÷ (" + t2 + " − " + t1 + "). Vitesse instantanée = d'(t).",
@@ -10431,8 +10437,8 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
     make() {
       const h = pk([2.5, 3, 3.5, 4, 5]), v = (h * 365) / 24;
       return { titre: "Le temps d'écran", q: "Tu passes environ " + M(N(h) + "\\ \\text{h}") + " par jour sur ton téléphone.",
-        bet: { q: "En une année, cela fait combien de jours entiers, 24 heures sur 24 ?", choices: ["environ 5 jours", "environ 15 jours", "plus d'un mois"], good: 2 },
-        calc: { label: "Nombre de jours entiers (au dixième)", value: Math.round(v * 10) / 10, range: [v * 0.95, v * 1.05] },
+        bet: { q: "En une année, cela fait combien de jours complets, 24 heures sur 24 ?", choices: ["environ 5 jours", "environ 15 jours", "plus d'un mois"], good: 2 },
+        calc: { label: "Nombre de jours de 24 h (au dixième)" /* 26.11 soir : « jours entiers » au dixième était contradictoire */, value: Math.round(v * 10) / 10, range: [v * 0.95, v * 1.05] },
         reveal: M(N(h) + " \\cdot 365 = " + N(h * 365)) + " h, et " + M(N(h * 365) + " \\div 24 \\approx " + N(v, 1)) + " jours : plus d'un mois sans dormir, ni manger, ni aller à l'école." };
     } });
   add({ key: "respire", fam: "fermi", uses: ["decmul"], outil: "la multiplication et les conversions de durées (minutes → jour).",
@@ -14018,9 +14024,9 @@ function screenMock() {
   const A = qs.filter((x) => x.part === "A"), B = qs.filter((x) => x.part === "B"), C = qs.filter((x) => x.part === "C");
   const exs = [...new Set(B.map((x) => x.ex))];
   h(`<div class="mock-head">${brand}<div class="eyebrow">Sujet de préparation · environ ${minutes} min</div>
-  <h2>Je m'entraîne pour mon test</h2><p class="small muted">${state.prep.ids.map(nLabel).join(" · ")} · niveau ${MOCK_LV[state.mock.level || "standard"].label.toLowerCase()}</p></div>
+  <h2>Je m'entraîne pour mon évaluation</h2><p class="small muted">${state.prep.ids.map(nLabel).join(" · ")} · niveau ${MOCK_LV[state.mock.level || "standard"].label.toLowerCase()}</p></div>
   <div class="seg no-print" id="mlv">${Object.entries(MOCK_LV).map(([k, v]) => `<button type="button" data-lv="${k}" aria-pressed="${(state.mock.level || "standard") === k}">${v.label}</button>`).join("")}</div>
-  <div class="card flat"><p class="small">Pour t'entraîner avant ton test. <b>Ce n'est pas une évaluation</b> : il n'y a pas de note, et personne d'autre que toi ne voit le résultat. Fais-le sur une feuille, sans regarder tes cours, puis corrige-toi avec le corrigé.</p></div>
+  <div class="card flat"><p class="small">Pour t'entraîner avant ton évaluation. <b>Rien n'est noté</b> : il n'y a pas de note, et personne d'autre que toi ne voit le résultat. Fais-le sur une feuille, sans regarder tes cours, puis corrige-toi avec le corrigé.</p></div>
   <section class="mock-part"><h3>A. Automatismes</h3>${A.map((x) => qHtml(x, "Question " + ++num)).join("")}</section>
   <section class="mock-part"><h3>B. Exercices</h3>${exs.map((e, k) => { const L = B.filter((x) => x.ex === e); num++; return `<div class="mock-ex"><h4>Exercice ${k + 1} · ${L[0].q.titre || nLabel(L[0].id)}</h4>${L.map((x, j) => qHtml(x, x.q.titre ? "" : String.fromCharCode(97 + j) + ")")).join("")}</div>`; }).join("")}</section>
   ${C.length ? `<section class="mock-part"><h3>C. Raisonnement</h3>${C.map((x) => qHtml(x, x.q.titre || (x.q.parts ? "Problème" : mockTitle(x)))).join("")}</section>` : ""}
@@ -14069,10 +14075,10 @@ function screenMockCorr() {
 // Pas de points (15.11) : un barème donnerait une fausse idée de l'importance des notions ; on compte les questions.
 function screenMockResult(cnt, n, ok, weak) {
   h(`${brand}<div class="eyebrow">Sujet de préparation · bilan</div><h2>Où tu en es</h2>
-  <div class="card stack"><p><b>${cnt.juste}</b> question${cnt.juste > 1 ? "s" : ""} juste${cnt.juste > 1 ? "s" : ""} sur ${n}${cnt.partie ? ` · <b>${cnt.partie}</b> en partie` : ""}${cnt.faux ? ` · <b>${cnt.faux}</b> à revoir` : ""}</p><p class="small muted">Ce n'est pas une note : c'est pour savoir quoi travailler d'ici ton test.</p></div>
+  <div class="card stack"><p><b>${cnt.juste}</b> question${cnt.juste > 1 ? "s" : ""} juste${cnt.juste > 1 ? "s" : ""} sur ${n}${cnt.partie ? ` · <b>${cnt.partie}</b> en partie` : ""}${cnt.faux ? ` · <b>${cnt.faux}</b> à revoir` : ""}</p><p class="small muted">Ce n'est pas une note : c'est pour savoir quoi travailler d'ici ton évaluation.</p></div>
   ${ok.length ? `<div class="card flat"><h3>✓ Acquis</h3><ul>${ok.map((id) => `<li>${nLabel(id)}</li>`).join("")}</ul></div>` : ""}
   ${weak.length ? `<div class="card flat stack"><h3>À retravailler</h3><ul>${weak.map((id) => `<li>${nLabel(id)}</li>`).join("")}</ul>
-    <button class="btn-primary" id="rev">Réviser ces notions maintenant</button></div>` : '<div class="card flat"><p>Tout est juste : bravo ! Une séance de révision par jour suffit jusqu\'au test.</p></div>'}
+    <button class="btn-primary" id="rev">Réviser ces notions maintenant</button></div>` : '<div class="card flat"><p>Tout est juste : bravo ! Une séance de révision par jour suffit jusqu\'à l\'évaluation.</p></div>'}
   <div class="row"><button class="btn-primary" id="again">Un autre sujet</button><button class="btn-ghost" id="home">Retour à l'accueil</button></div>`);
   if (cnt.juste >= 0.8 * n) burst();
   if (document.getElementById("rev")) document.getElementById("rev").onclick = () => {
@@ -14224,14 +14230,14 @@ function screenQcm() {
   const A = atState();
   if (A.rows.length < 2) {
     h(`${brand}<div class="eyebrow">Autoévaluation</div><h2>Pas de test rapide pour ces notions</h2>
-    <p class="muted">Les notions de ton test se prêtent mal aux questions à choix. Fais plutôt le sujet de préparation ou une révision ciblée.</p>
+    <p class="muted">Les notions de ton évaluation se prêtent mal aux questions à choix. Fais plutôt le sujet de préparation ou une révision ciblée.</p>
     <button class="btn-primary btn-big" id="back">Retour</button>`);
     document.getElementById("back").onclick = () => { homeTab = "test"; screenHome(); };
     return;
   }
   if (A.runs.length) return atGrid();
   const all = () => A.rows.every((r) => A.avant[r.cid] !== undefined);
-  h(`${brand}<div class="eyebrow">Je prépare mon test · étape 1 sur 2</div><h2>Autoévaluation</h2>
+  h(`${brand}<div class="eyebrow">Je prépare mon évaluation · étape 1 sur 2</div><h2>Autoévaluation</h2>
   <p class="small muted">Pour chaque ligne, sois honnête : ✓ je sais faire, ~ à peu près, ✗ pas encore. Ensuite, un test rapide (une question par ligne) te dira si tu avais raison.</p>
   <div class="card flat at-grid"><div class="at-row at-head"><span class="at-l">Je sais…</span><span class="at-c" style="width:auto">✓ oui · ~ à peu près · ✗ pas encore</span></div>${A.rows.map((r) => `<div class="at-row"><span class="at-l">${r.label}</span>
     <div class="seg at-seg" data-cid="${r.cid}">${[2, 1, 0].map((v) => `<button type="button" data-v="${v}" aria-pressed="${A.avant[r.cid] === v}" aria-label="${["pas encore", "à peu près", "je sais faire"][v]}">${AT_SYM[v]}</button>`).join("")}</div></div>`).join("")}</div>
@@ -14251,7 +14257,7 @@ function screenQcm() {
 // Test rapide : une question à choix par ligne de la grille.
 function atTest() {
   const A = atState(), items = A.rows.map((r) => ({ row: r, it: r.mode === "tape" ? null : qcmMake(r.id, r.lv) })), res = {};
-  const head = (i, lab = "") => `${A.runs.length ? "Test rapide · après" : "Je prépare mon test · étape 2 sur 2"} · ${i + 1} sur ${items.length}${lab ? " · " + esc(lab) : ""}<span class="pbar" aria-hidden="true"><i style="width:${Math.round((i / items.length) * 100)}%"></i></span>`;
+  const head = (i, lab = "") => `${A.runs.length ? "Test rapide · après" : "Je prépare mon évaluation · étape 2 sur 2"} · ${i + 1} sur ${items.length}${lab ? " · " + esc(lab) : ""}<span class="pbar" aria-hidden="true"><i style="width:${Math.round((i / items.length) * 100)}%"></i></span>`;
   const show = (i) => {
     if (i >= items.length) { A.runs.push({ date: day(), r: res }); A.runs = A.runs.slice(-6); if (typeof prepMark === "function") { prepMark("autoeval"); prepMark("apres"); } Badges.check(state); save(); return atGrid(true); }
     // Ligne sans question à choix : question à réponse tapée, un seul essai, correction affichée.
@@ -14264,7 +14270,7 @@ function atTest() {
         onNext: () => show(i + 1) });
     }
     const { row, it } = items[i], q = it.q, pct = Math.round((i / items.length) * 100);
-    h(`${brand}<div class="eyebrow">${A.runs.length ? "Test rapide · après" : "Je prépare mon test · étape 2 sur 2"} · ${i + 1} sur ${items.length}<span class="pbar" aria-hidden="true"><i style="width:${pct}%"></i></span></div>
+    h(`${brand}<div class="eyebrow">${A.runs.length ? "Test rapide · après" : "Je prépare mon évaluation · étape 2 sur 2"} · ${i + 1} sur ${items.length}<span class="pbar" aria-hidden="true"><i style="width:${pct}%"></i></span></div>
     <div class="card pop"><div class="qmeta"><span class="chip">${row.label}</span></div>
     <div class="qtext">${boldData(q.q)}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
     ${scratchHtml()}
@@ -14312,7 +14318,7 @@ function atGrid(fresh) {
   <div class="card flat at-grid at-res"><div class="at-row at-head"><span class="at-l">Je sais…</span><span class="at-c">Avant</span><span class="at-c">${last ? "1er test" : "Test"}</span>${last ? '<span class="at-c">Après</span>' : ""}</div>
   ${A.rows.map((r) => `<div class="at-row"><span class="at-l">${r.label}${msg(r)}</span><span class="at-c">${atCell(A.avant[r.cid])}</span><span class="at-c">${atCell(first.r[r.cid] === 1 ? 2 : first.r[r.cid] === 0 ? 0 : undefined)}</span>${last ? `<span class="at-c">${atCell(last.r[r.cid] === 1 ? 2 : last.r[r.cid] === 0 ? 0 : undefined)}</span>` : ""}</div>`).join("")}</div>
   <div class="card stack"><p><b>${ok}</b> juste${ok > 1 ? "s" : ""} sur ${n}${surprise ? ` · <b>${surprise}</b> surprise${surprise > 1 ? "s" : ""} (tu pensais savoir)` : ""}</p>
-  <p class="small muted">Ce n'est pas une note. ${last ? "Compare tes colonnes : c'est ton progrès depuis le " + first.date.slice(8, 10) + "." + first.date.slice(5, 7) + "." : (typeof prepLeft === "function" && Engine.prepActive(state) && prepLeft(state.prep.date) <= 1 ? "Ton test est tout proche : relis d'abord les compétences à revoir." : "Refais le test rapide dans quelques jours, juste avant le test : ta colonne « Après » se remplira.")}</p></div>
+  <p class="small muted">Ce n'est pas une note. ${last ? "Compare tes colonnes : c'est ton progrès depuis le " + first.date.slice(8, 10) + "." + first.date.slice(5, 7) + "." : (typeof prepLeft === "function" && Engine.prepActive(state) && prepLeft(state.prep.date) <= 1 ? "Ton évaluation est toute proche : relis d'abord les compétences à revoir." : "Refais le test rapide dans quelques jours, juste avant l'évaluation : ta colonne « Après » se remplira.")}</p></div>
   ${weak.length ? `<div class="card flat stack"><h3>À revoir${surprise ? " (en priorité les ⚠️)" : ""}</h3>${[...new Set(weak.map((r) => r.id))].map((id) => `<div class="spread"><span class="small">${nLabel(id)}</span>${LESSONS[id] ? `<button type="button" class="btn-ghost small atles" data-id="${id}">📖 Leçon</button>` : ""}</div>`).join("")}
     <button class="btn-primary" id="rev">Réviser ces compétences maintenant</button></div>` : ""}
   <div class="row"><button class="btn-primary" id="again">Refaire le test rapide</button><button class="btn-ghost" id="home">Retour</button></div>
@@ -15230,7 +15236,12 @@ const Engine = {
     return !!(s && typeof LESSONS !== "undefined" && LESSONS[id] && !s.lessonSeen && (s.status === "encours" || s.m < 0.4));
   },
   // Notion dont la leçon reste à voir et qu'on ne peut pas poser en question sans elle (encore jamais travaillée, ou en cours).
-  lessonFirst(state, id) { const s = state.notions[id]; return this.lessonDue(state, id) && (!s.seen || s.status === "encours"); },
+  /* 26.11 soir (revue des élèves joués, n° 1, grave : chapitre « en classe » de l'année jamais travaillé, ses notions étant
+     exclues de Révision, Défi et Automatismes tant que leur leçon n'était pas vue) : une notion du chapitre choisi « en
+     classe » a été vue en classe ; elle se pose sans sa leçon. Sa leçon (active si elle existe) reste prioritaire pour
+     l'unique leçon d'une séance qui en admet une (lessonPick), et le rappel de cours reste ouvrable dans chaque question. */
+  nowHas(state, id) { return this.nowActive(state) && state.now.ids.includes(id); },
+  lessonFirst(state, id) { const s = state.notions[id]; return this.lessonDue(state, id) && (!s.seen || s.status === "encours") && !this.nowHas(state, id); },
   lessonPick(state, ids) {
     const now = this.nowActive(state) ? state.now.ids : [], s = (id) => state.notions[id];
     const key = (id) => (now.includes(id) ? 0 : s(id).status === "encours" ? 1 : 2) * 1e5 + (s(id).status === "encours" || now.includes(id) ? this.rank(state.profile, id) : Math.round(s(id).m * 1000));
@@ -15242,14 +15253,18 @@ const Engine = {
   fmtText(state, f) { const n = f === "auto" ? this.autoN(state) : 0; return n && n < FORMATS.auto.slots.length ? n + " calculs rapides, enchaînés." : FORMATS[f].text; },
   planSession(state, format) {
     const f = format || this.todayFormat(state), slots = f === "auto" ? FORMATS.auto.slots.slice(0, this.autoN(state)) : FORMATS[f].slots;
-    const pend = this.eligible(state).filter((id) => this.lessonFirst(state, id));
-    if (!pend.length) return this.planSlots(state, slots);
+    const el = this.eligible(state), pend = el.filter((id) => this.lessonFirst(state, id));
+    /* 26.11 soir (n° 1) : notions du chapitre « en classe » dont la leçon reste à voir : posées sans leçon (lessonFirst),
+       mais candidates à la leçon de la séance. Révision, Défi, Automatismes : jamais de leçon (plan.noLesson). */
+    const nowLes = el.filter((id) => this.nowHas(state, id) && this.lessonDue(state, id));
+    const noLes = (p) => Object.assign(p, { noLesson: true });
+    if (!pend.length && !nowLes.length) return this.planSlots(state, slots);
     const exclude = new Set(pend);
-    if (f === "revision" || f === "defi") { const p = this.planSlots(state, slots, { exclude }); if (p.length) return p; }
+    if (f === "revision" || f === "defi") { const p = this.planSlots(state, slots, { exclude }); if (p.length) return noLes(p); }
     /* 26.11 (revue d'un testeur, jour 3) : jamais de leçon dans une série d'automatismes ; sans notion déjà travaillée,
        les questions viennent sans leçon (l'app ne montre pas de leçon dans ce format). */
     if (f === "auto") { const p = this.planSlots(state, slots, { exclude }); return p.length ? p : this.planSlots(state, slots); }
-    const keep = this.lessonPick(state, pend);
+    const keep = this.lessonPick(state, [...pend, ...nowLes]);
     exclude.add(keep);
     const rest = slots.length >= 3 ? slots.slice(1, -1) : slots.slice(1);
     const k0 = slots[0] === "defi4" ? "defi" : slots[0];
@@ -15310,12 +15325,16 @@ const Engine = {
     // « En ce moment en classe » : environ 2 créneaux sur 3 portent sur le chapitre choisi par l'élève.
     const nowIds = this.nowActive(state) ? state.now.ids.filter((id) => state.notions[id] && ["vu", "encours"].includes(state.notions[id].status)) : [];
     const nowK = nowIds.length ? (slots.length === 1 ? 1 : Math.round((slots.length * 2) / 3)) : 0;
-    const usedPair = new Set();
-    const choose = (kind, base, rappel, only, isNow) => {
+    const usedPair = new Set(), cnt = new Map();
+    /* 26.11 soir (revue des élèves joués, n° 2 : 5 × la même notion dans une série d'automatismes quand le chapitre en
+       classe n'en offre qu'une ou deux) : une notion au plus 2 fois par séance ; un créneau « chapitre » sans notion
+       possible redevient un créneau normal ; la limite ne se lève qu'à défaut de toute autre notion (free). */
+    const choose = (kind, base, rappel, only, isNow, free) => {
       let best = null, pool = only || this.pool(state, base);
       if (kind === "rev" && !only) { const due = pool.filter((id) => state.notions[id].due <= today || state.notions[id].m < 0.5); if (due.length) pool = due; }
       for (const id of pool) {
         if (ex.has(id)) continue;
+        if (!free && (cnt.get(id) || 0) >= 2) continue;
         const s = state.notions[id], recent = this.isRecent(state, id), target = elo + TARGET[kind] + (s.easy || 0) * 120;
         /* 26.11 (profondeur, tools/adaptivite_26-11.md) : une notion du chapitre « en classe » passe toujours par le créneau du
            chapitre, même reprise d'une année précédente (1re du Collège : Pythagore, angles…), à un niveau non trivial (oldLevels) */
@@ -15348,13 +15367,14 @@ const Engine = {
       const base = kind === "defi4" ? "defi" : kind;
       if (si < nowK && si !== rappelAt && si !== rappel2) {
         const b = choose(kind, base, false, nowIds, true);
-        if (b) { used.add(b.id); usedPair.add(b.id + "|" + b.d); nowPart.push(b.id + "|" + b.d + "|" + base); continue; }
+        if (b) { used.add(b.id); usedPair.add(b.id + "|" + b.d); cnt.set(b.id, (cnt.get(b.id) || 0) + 1); nowPart.push(b.id + "|" + b.d + "|" + base); continue; }
       }
       let best = (si === rappelAt || si === rappel2) && old < maxOld ? choose(kind, base, true, need) : null;
       if (best) old++; else best = choose(kind, base, false);
       if (!best) best = choose(kind, base, true); // aucune notion de l'année disponible
+      if (!best) best = choose(kind, base, false, null, false, true) || choose(kind, base, true, null, false, true);
       if (!best) continue;
-      used.add(best.id);
+      used.add(best.id); cnt.set(best.id, (cnt.get(best.id) || 0) + 1);
       plan.push(best.id + "|" + best.d + "|" + base);
     }
     // Le chapitre du moment d'abord, du plus simple au plus difficile.
