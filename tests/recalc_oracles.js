@@ -1573,6 +1573,11 @@ const RECALC = (() => {
   DF("etudelnexp", /Soit f\(x\) = (\d*)x·e\^\(−x\/(\d+)\) pour x ≥ 0/, (g, lab) => { const a = g[0] ? nn(g[0]) : 1, k = nn(g[1]); return lab.startsWith("a)") ? k : lab.startsWith("b)") ? (a * k) / Math.E : lab.startsWith("c)") ? 0 : null; });
   DF("etudelnexp", /Soit f\(x\) = (\d*)x²·e\^\(−x\/(\d+)\) pour x ≥ 0/, (g, lab) => { const a = g[0] ? nn(g[0]) : 1, k = nn(g[1]); return lab.startsWith("a)") ? 2 * k : lab.startsWith("b)") ? 4 * a * k * k * Math.exp(-2) : lab.startsWith("c)") ? 0 : null; });
   DF("etudelnexp", /Soit f\(x\) = (\d*)ln\(x\)\/x pour x > 0/, (g, lab) => { const a = g[0] ? nn(g[0]) : 1; return lab.startsWith("a)") ? Math.E : lab.startsWith("b)") ? a / Math.E : lab.startsWith("c)") ? 0 : null; });
+  /* geoesp, densite (4e Collège, ch4c_trous) */
+  DF("geoesp", new RegExp("pyramide régulière à base carrée de côté " + NR + " (?:m|cm) et de hauteur " + NR + " (?:m|cm)"), (g, lab) => { const [c, h] = g.map(nn);
+    return lab.startsWith("a)") ? Math.sqrt(h * h + (c * c) / 2) : lab.startsWith("b)") ? (Math.atan(h / (c / 2)) * 180) / Math.PI : lab.startsWith("c)") ? (c * c * h) / 3 : null; });
+  DF("densite", /f\(x\) = kx sur \[0 ; (\d+)\]/, (g, lab) => { const b = nn(g[0]), t = lm(lab, /P\(X ≤ (\d+(?:,\d+)?)\)/);
+    return lab.startsWith("a)") ? 2 / (b * b) : t ? (t[0] * t[0]) / (b * b) : lab.startsWith("c)") ? (2 * b) / 3 : null; });
   /* ==== fin agent defis3 ==== */
 
   /* ---------- 26.11 (agent defis2) : notions encore sous 20 % (transf, trigcercle, trigfn, recip, lectures de graphique
