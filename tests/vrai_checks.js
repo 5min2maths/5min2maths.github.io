@@ -107,7 +107,7 @@ const VRAI_CHECK = (() => {
     }
     /* langue : élision devant un prénom, « Un(e) … il ou elle », mot doublé, « 1 billes » */
     for (const t of [x.txt, ...x.parts.map((p) => p.label)]) {
-      if ((m = /(^|[^\p{L}])(de|que) [AEIOUYÉÈ][a-zàâçéèêëîïôûù]+/u.exec(t))) add("élision manquante", t.slice(Math.max(0, m.index - 20), m.index + 30));
+      if ((m = /(^|[^\p{L}])(de|que) (?:[AEIOUÉÈ]|Y(?=[^aeiouyéèêëîïôûù]))[a-zàâçéèêëîïôûù]+/u.exec(t) /* 26.11 (revue p6, n° 14) : « de Yanis » sans élision */)) add("élision manquante", t.slice(Math.max(0, m.index - 20), m.index + 30));
       /* 26.11 soir : élision devant un nom commun ou un pronom (« combien de heures », « que il ») ; h aspiré non listé (« de hauteur ») */
       if ((m = /(?<![\p{L}'’])(de|que|ne|se|je|me|te|jusque|lorsque|puisque|le|la) (?=(?:heures?|habitants?|années?|élèves?|enfants?|euros?|œufs?|arbres?|amis?|entrées?|ordinateurs?|abonnés?|images?|unités?|objets?|exercices?|issues?|angles?|arêtes?|étages?|essais?|oranges?|ampoules?|abricots?|avions?|ans|eau|il|ils|elle|elles|on|abord|autres?|essence|argent|huile|herbe|hiver|hôtel|été|automne|aire|axe|intervalle|ensemble|équation|expression|inconnue|entier)(?![\p{L}]))/iu.exec(t))) add("élision manquante", t.slice(Math.max(0, m.index - 20), m.index + 30));
       if ((m = /\bun\(e\)|\bil ou elle\b|\bde le\b|\bà le\b|\bde les\b|\bà les\b/i.exec(t)) || (m = /\((?:elle|il|e|es|elles)\)/.exec(t))) /* 26.11 : « économise-t-il (elle) », « Un(e) » (minuscules : P_N(E) n'est pas visé) */ add("formulation", t.slice(Math.max(0, m.index - 30), m.index + 30));

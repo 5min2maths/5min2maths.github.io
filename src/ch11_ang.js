@@ -28,6 +28,8 @@
   const rv = (a, r) => (r % 2 ? a : 180 - a); // mesure de la région r
 
   // ===================== angles =====================
+  /* 26.11 (revue p6, n° 13 : étiquette « (1x + 29)° ») : coefficient 1 omis */
+  const cq = (k) => (k === 1 ? "" : k);
   const ANG = {
     1: [
       () => { const a = R.int(12, 78), sup = R.rand() < 0.5;
@@ -76,13 +78,13 @@
     ],
     3: [
       () => { let x, p, q, s, t; do { p = R.int(3, 6); q = R.int(1, 4); x = R.int(8, 25); s = R.int(-20, 30); t = p * x + s - q * x; } while (p - q < 2 || p * x + s <= 10 || p * x + s >= 170 || t <= 0);
-        return Qv("Avec deux parallèles coupées par une sécante, deux angles alternes-internes mesurent " + M("(" + p + "x" + (s < 0 ? " - " + -s : " + " + s) + ")°") + " et " + M("(" + q + "x + " + t + ")°") + ". Que vaut " + M("x") + " ?", x,
-          "Alternes-internes donc égaux : " + M(p + "x" + (s < 0 ? " - " + -s : " + " + s) + " = " + q + "x + " + t) + ", " + M((p - q) + "x = " + (t - s)) + ", " + M("x = " + x) + ".",
-          { ctx: "equation", guide: [GS("Les deux angles sont égaux : " + M(p + "x" + (s < 0 ? " - " + -s : " + " + s) + " = " + q + "x + " + t) + ". Après regroupement, " + M((p - q) + "x = ?"), t - s, M((p - q) + "x = " + (t - s)) + "."), GS(M("x") + " = ?", x, M("x = " + x) + ".")],
+        return Qv("Avec deux parallèles coupées par une sécante, deux angles alternes-internes mesurent " + M("(" + p + "x" + (s < 0 ? " - " + -s : " + " + s) + ")°") + " et " + M("(" + cq(q) + "x + " + t + ")°") + ". Que vaut " + M("x") + " ?", x,
+          "Alternes-internes donc égaux : " + M(p + "x" + (s < 0 ? " - " + -s : " + " + s) + " = " + cq(q) + "x + " + t) + ", " + M((p - q) + "x = " + (t - s)) + ", " + M("x = " + x) + ".",
+          { ctx: "equation", guide: [GS("Les deux angles sont égaux : " + M(p + "x" + (s < 0 ? " - " + -s : " + " + s) + " = " + cq(q) + "x + " + t) + ". Après regroupement, " + M((p - q) + "x = ?"), t - s, M((p - q) + "x = " + (t - s)) + "."), GS(M("x") + " = ?", x, M("x = " + x) + ".")],
             traps: [TR((180 - s - t) / (p + q), "Alternes-internes : les angles sont égaux (on n'écrit pas une somme de 180°).")] }); },
       () => { let x, p, s, q, t; do { p = R.int(2, 4); q = R.int(1, 3); x = R.int(10, 30); s = R.int(-10, 30); t = 180 - p * x - s - q * x; } while (t < -30 || t > 60 || p * x + s <= 10 || q * x + t <= 10);
-        return Qv("Deux angles adjacents forment un angle plat. Ils mesurent " + M("(" + p + "x" + (s < 0 ? " - " + -s : " + " + s) + ")°") + " et " + M("(" + q + "x" + (t < 0 ? " - " + -t : " + " + t) + ")°") + ". Que vaut " + M("x") + " ?", x,
-          "Supplémentaires : " + M("(" + p + "x" + (s < 0 ? " - " + -s : " + " + s) + ") + (" + q + "x" + (t < 0 ? " - " + -t : " + " + t) + ") = 180") + ", " + M((p + q) + "x = " + (180 - s - t)) + ", " + M("x = " + x) + ".",
+        return Qv("Deux angles adjacents forment un angle plat. Ils mesurent " + M("(" + p + "x" + (s < 0 ? " - " + -s : " + " + s) + ")°") + " et " + M("(" + cq(q) + "x" + (t < 0 ? " - " + -t : " + " + t) + ")°") + ". Que vaut " + M("x") + " ?", x,
+          "Supplémentaires : " + M("(" + p + "x" + (s < 0 ? " - " + -s : " + " + s) + ") + (" + cq(q) + "x" + (t < 0 ? " - " + -t : " + " + t) + ") = 180") + ", " + M((p + q) + "x = " + (180 - s - t)) + ", " + M("x = " + x) + ".",
           { ctx: "plat", guide: [GS("La somme fait 180° : " + M((p + q) + "x + " + (s + t) + " = 180") + ". " + M((p + q) + "x = ?"), 180 - s - t, M((p + q) + "x = " + (180 - s - t)) + "."), GS(M("x") + " = ?", x, M("x = " + x) + ".")],
             traps: [TR((90 - s - t) / (p + q), "Un angle plat fait 180° (90°, c'est un angle droit).")] }); },
       () => { const c = 2 * R.int(20, 70);
@@ -95,11 +97,11 @@
   // Lot 26.11 (référentiel du Collège 1.GE.01a : opposés par le sommet, correspondants, alternes-internes ; repris en 1re) :
   // une forme de niveau 3 qui enchaîne deux propriétés (correspondants, puis opposés par le sommet) sur une équation.
   ANG[3].push(() => { let x, p, q, s, t, a; do { p = R.int(3, 6); q = R.int(1, p - 2); x = R.int(8, 22); s = R.int(-15, 20); a = p * x + s; t = a - q * x; } while (p - q < 2 || a < 35 || a > 75 || t <= 0 || s === 0);
-    const r = pk([1, 3]), r2 = r === 1 ? 3 : 1, E1 = "(" + p + "x" + (s < 0 ? " - " + -s : " + " + s) + ")°", E2 = "(" + q + "x + " + t + ")°";
+    const r = pk([1, 3]), r2 = r === 1 ? 3 : 1, E1 = "(" + p + "x" + (s < 0 ? " - " + -s : " + " + s) + ")°", E2 = "(" + cq(q) + "x + " + t + ")°";
     return Qv("Les droites " + M("d_1") + " et " + M("d_2") + " sont parallèles. Les deux angles marqués mesurent " + M(E1) + " et " + M(E2) + ". Que vaut " + M("x") + " ?", x,
-      "Sur " + M("d_2") + ", l'angle correspondant à " + M(E1) + " (même position) lui est égal ; l'angle marqué sur " + M("d_2") + " lui est opposé par le sommet, donc égal aussi. " + M(p + "x" + (s < 0 ? " - " + -s : " + " + s) + " = " + q + "x + " + t) + ", " + M((p - q) + "x = " + (t - s)) + ", " + M("x = " + x) + " (les deux angles mesurent " + deg(a) + ").",
+      "Sur " + M("d_2") + ", l'angle correspondant à " + M(E1) + " (même position) lui est égal ; l'angle marqué sur " + M("d_2") + " lui est opposé par le sommet, donc égal aussi. " + M(p + "x" + (s < 0 ? " - " + -s : " + " + s) + " = " + cq(q) + "x + " + t) + ", " + M((p - q) + "x = " + (t - s)) + ", " + M("x = " + x) + " (les deux angles mesurent " + deg(a) + ").",
       { ctx: "chaine-proprietes", fig: par(a, [[0, r, E1], [1, r2, E2]]),
-        guide: [GS("Correspondants, puis opposés par le sommet : les deux angles sont égaux. " + M(p + "x" + (s < 0 ? " - " + -s : " + " + s) + " = " + q + "x + " + t) + " : " + M((p - q) + "x") + " = ?", t - s, M((p - q) + "x = " + (t - s)) + "."), GS(M("x") + " = ?", x, M("x = " + x) + ".")],
+        guide: [GS("Correspondants, puis opposés par le sommet : les deux angles sont égaux. " + M(p + "x" + (s < 0 ? " - " + -s : " + " + s) + " = " + cq(q) + "x + " + t) + " : " + M((p - q) + "x") + " = ?", t - s, M((p - q) + "x = " + (t - s)) + "."), GS(M("x") + " = ?", x, M("x = " + x) + ".")],
         traps: [TR((180 - s - t) / (p + q), "Les deux angles sont égaux (correspondants, puis opposés par le sommet) : on n'écrit pas une somme de 180°."), TR((t + s) / (p - q), "En regroupant, " + M(s) + " passe de l'autre côté avec un signe moins.")] }); });
 
   // ===================== cercthales =====================

@@ -344,7 +344,8 @@ const DEFIS = (() => {
           xs = Array.from({ length: 5 }, () => ri(6, 11) / 2); Mg = pk([4.5, 5, 5.5]);
           need = ((7 * Mg) - xs.reduce((u, v) => u + v, 0)) / 2; } while (need < 3.5 || need > 6 || Math.abs(need * 10 - Math.round(need * 10)) > 1e-9);
         const sum = xs.reduce((u, v) => u + v, 0), so = [...xs].sort((u, v) => u - v);
-        return P("Les notes de Yanis : " + M(xs.map(D).join(" \\,;\\, ")) + ". Le prochain test compte double. Il veut finir avec une moyenne de " + M(D(Mg)) + ".",
+        const [nm, il] = pk([["Yanis", "Il"], ["Lina", "Elle"], ["Noé", "Il"], ["Maëlle", "Elle"], ["Sacha", "Il"]]); /* 26.11 (revue p6, n° 14) : pas toujours Yanis */
+        return P("Les notes de " + nm + " : " + M(xs.map(D).join(" \\,;\\, ")) + ". Le prochain test compte double. " + il + " veut finir avec une moyenne de " + M(D(Mg)) + ".",
           [["a) Moyenne actuelle (au centième)", sum / 5, 0.01], ["b) Médiane actuelle", so[2]], ["c) Note à obtenir au prochain test", need]],
           ["Un test qui compte double compte comme deux notes : il y aura 7 notes en tout.", "Somme visée = 7 · " + T(Mg) + " ; la note x vérifie " + T(sum) + " + 2x = " + T(7 * Mg) + "."],
           "a) " + M("\\frac{" + D(sum) + "}{5} \\approx " + D(r2c(sum / 5))) + ". b) Série triée : " + M(so.map(D).join(" \\,;\\, ")) + ", médiane " + M(D(so[2])) + ". c) " + M(D(sum) + " + 2x = 7 \\cdot " + D(Mg) + " = " + D(7 * Mg)) + ", " + M("x = " + D(need)) + ".");
@@ -791,11 +792,14 @@ const DEFIS = (() => {
       () => { /* freinage : durée, distance, décélération pour une distance donnée */
         let v0, a, a2, D2; do { v0 = ri(12, 30); a = pk([4, 5, 6, 8]); a2 = pk([3, 3.5, 4, 4.5, 5, 6, 6.5, 7, 7.5, 9]); D2 = (v0 * v0) / (2 * a2); } while (a2 === a || Math.abs(D2 * 100 - Math.round(D2 * 100)) > 1e-9);
         const tf = v0 / a, dist = (v0 * v0) / (2 * a);
+        /* 26.11 (revue p6, n° 11 : « au centième » pour 3 s et 18 m, attendu « 3,00 », corrigé « = 18 ≈ 18 m ») : valeur exacte
+           (au plus deux décimales) = sans arrondi ni « ≈ » */
+        const ex = (v) => Math.abs(v * 100 - Math.round(v * 100)) < 1e-9, PT = (lab, u, v) => ex(v) ? [lab + " (" + u + ")", v] : [lab + " (" + u + ", au centième)", v, 0.01];
         return P("Une voiture roule à " + M(v0) + " m/s et freine : sa vitesse vaut " + M("v(t) = " + v0 + " - " + a + "t") + " (m/s) jusqu'à l'arrêt.",
-          [["a) Durée du freinage (s, au centième)", tf, 0.01], ["b) Distance de freinage (m, au centième)", dist, 0.01], ["c) Quelle décélération (m/s²) faudrait-il pour s'arrêter en " + M(D(D2)) + " m ?", a2]],
+          [PT("a) Durée du freinage", "s", tf), PT("b) Distance de freinage", "m", dist), ["c) Quelle décélération (m/s²) faudrait-il pour s'arrêter en " + M(D(D2)) + " m ?", a2]],
           ["Arrêt : v(t) = 0. Distance = intégrale de la vitesse, de 0 jusqu'à l'arrêt.",
            "c) Avec v(t) = " + v0 + " − ct : arrêt en " + v0 + " ÷ c, distance " + v0 + "² ÷ (2c). Résous " + v0 * v0 + " ÷ (2c) = " + T(D2) + "."],
-          "a) " + M(v0 + " - " + a + "t = 0 \\iff t = " + fx(tf)) + " s. b) " + M("\\int_0^{" + fx(tf) + "} (" + v0 + " - " + a + "t)\\,dt = \\Big[" + v0 + "t - " + fx(a / 2) + "t^2\\Big]_0^{" + fx(tf) + "} = " + frac(v0 * v0, 2 * a) + " \\approx " + D(r2c(dist))) + " m. c) " + M("\\frac{" + v0 * v0 + "}{2c} = " + D(D2) + " \\iff c = " + D(a2)) + " m/s².");
+          "a) " + M(v0 + " - " + a + "t = 0 \\iff t = " + fx(tf)) + " s. b) " + M("\\int_0^{" + fx(tf) + "} (" + v0 + " - " + a + "t)\\,dt = \\Big[" + v0 + "t - " + fx(a / 2) + "t^2\\Big]_0^{" + fx(tf) + "} = " + (ex(dist) ? D(dist) : frac(v0 * v0, 2 * a) + " \\approx " + D(r2c(dist)))) + " m. c) " + M("\\frac{" + v0 * v0 + "}{2c} = " + D(D2) + " \\iff c = " + D(a2)) + " m/s².");
       },
     ],
     primitives: [
@@ -1646,7 +1650,7 @@ const DEFIS = (() => {
           [["a) Prix d'un Go (CHF)", m], ["b) " + M("f^{-1}(" + D(y0) + ")") + " : nombre de Go pour une facture de " + D(y0) + " CHF", (y0 - p) / m], ["c) Abscisse du point où les graphes de " + M("f") + " et de " + M("f^{-1}") + " se coupent", fix]],
           ["Pente = différence des prix ÷ différence des Go ; ordonnée à l'origine = prix − pente · Go. Puis f⁻¹(y) : résous f(x) = y.",
            "c) Les graphes de f et f⁻¹ sont symétriques par rapport à la droite y = x : ils se coupent sur cette droite, donc là où f(x) = x."],
-          "a) " + M("\\frac{" + D(f(x2)) + " - " + D(f(x1)) + "}{" + (x2 - x1) + "} = " + D(m)) + ", " + M("f(x) = " + D(m) + "x + " + p) + ". b) " + M(D(m) + "x + " + p + " = " + D(y0) + " \\iff x = " + D((y0 - p) / m)) + " Go. c) " + M(D(m) + "x + " + p + " = x \\iff " + D(r2c(1 - m)) + "x = " + -p + " \\iff x = " + fx(fix)) + ".");
+          "a) " + M("\\frac{" + D(f(x2)) + " - " + D(f(x1)) + "}{" + (x2 - x1) + "} = " + D(m)) + ", " + M("f(x) = " + D(m) + "x + " + p) + ". b) " + M(D(m) + "x + " + p + " = " + D(y0) + " \\iff x = " + D((y0 - p) / m)) + " Go. c) " + M(D(m) + "x + " + p + " = x \\iff " + D(r2c(1 - m)) + "x = " + p + " \\iff x = " + fx(fix)) + ".");
       },
     ],
     /* ---------- 4e Collège : probabilités conditionnelles (dépistage, deux tests) ---------- */
@@ -2080,7 +2084,7 @@ const DEFIS = (() => {
     /* ---------- MP 1re : fraction rationnelle à simplifier ---------- */
     fracrat: [
       () => {
-        let a, k, x1, xs; do { a = ri(2, 9); k = R.nz(-4, 4); x1 = R.nz(-6, 6); xs = a / (1 - k); } while (k === 1 || x1 === a || x1 === -a || !Number.isInteger(xs) || xs === 0 || xs === -a || xs === a);
+        let a, k, x1, xs; do { a = ri(2, 9); k = R.nz(-4, 4); x1 = R.nz(-6, 6); xs = a / (1 - k); } while (k === 1 || x1 === a || x1 === -a || !Number.isInteger(xs) || xs === 0 || xs === -a || xs === a || x1 === xs); /* 26.11 (revue p6, n° 8) : c) pas déjà répondue par b) */
         const F = (x) => (x - a) / x;
         return P("On étudie " + M("F(x) = \\frac{x^2 - " + a * a + "}{x^2 + " + a + "x}") + ".",
           [["a) Somme des valeurs interdites", -a], ["b) " + M("F(" + x1 + ")") + " (fraction)", F(x1)], ["c) Solution de " + M("F(x) = " + k), xs]],
@@ -2710,7 +2714,8 @@ const DEFIS = (() => {
     () => { let a, b, c, d; do { a = ri(6, 10); b = ri(12, 17); c = ri(a + 1, b - 2); d = ri(b + 1, 22); } while (false);
       return ENS("horaires", "Un magasin est ouvert de " + a + " h (compris) à " + b + " h (non compris) ; Léo est libre après " + c + " h (non compris) et jusqu'à " + d + " h (compris). On ne considère que les heures pile.", [a, b], [c, d], "d'heures entières", "où le magasin est ouvert", "où Léo est libre"); },
     () => { let a, b, c, d; do { a = ri(6, 12); b = ri(15, 20); c = ri(a + 1, b - 2); d = ri(b + 1, 30); } while (false);
-      return ENS("ages", "Un camp de vacances accepte les jeunes de " + a + " ans (compris) à " + b + " ans (non compris). Le tarif « jeune adulte » s'applique au-delà de " + c + " ans (non compris) et jusqu'à " + d + " ans (compris).", [a, b], [c, d], "d'âges entiers", "acceptés au camp", "au tarif « jeune adulte »"); });
+      /* 26.11 (revue p6, n° 5 : tarif « jeune adulte » du camp pour des âges que le camp refuse) : deux offres indépendantes */
+      return ENS("ages", "Un camp de vacances accepte les jeunes de " + a + " ans (compris) à " + b + " ans (non compris). Le club de voile de la commune, lui, accepte les jeunes de " + c + " ans (non compris) à " + d + " ans (compris).", [a, b], [c, d], "d'âges entiers", "acceptés au camp", "acceptés au club de voile"); });
   ADD("trinfact", "benefice",
     () => { /* jet d'eau d'une fontaine */
       let k, p, q; do { k = pk([0.5, 1, 2]); p = pk([1, 2]); q = ri(3, 9); } while (k * p * q > 3 || k * p * q < 1);
@@ -2940,7 +2945,7 @@ const DEFIS = (() => {
     },
     () => { /* sorties à vélo : distance à faire pour atteindre une moyenne */
       let xs, Mg, need; do { xs = Array.from({ length: 7 }, () => ri(25, 90)); Mg = ri(45, 75); need = 8 * Mg - sum(xs); } while (need < 30 || need > 110 || new Set(xs).size < 6 || xs.includes(need));
-      const m = sum(xs) / 7, so = [...xs].sort((a, b) => a - b), nm = pk(["Une cycliste", "Un cycliste", "Une traileuse", "Un coureur à ski de fond"]);
+      const m = sum(xs) / 7, so = [...xs].sort((a, b) => a - b), nm = pk(["Une cycliste", "Un cycliste", "Une cyclotouriste", "Un cycliste du club"]); /* 26.11 (revue p6, n° 9) : 25 à 90 km par sortie = vélo seulement */
       return CXP("velo", P(nm + " note les distances (km) parcourues lors de ses 7 sorties du mois : " + LST(xs) + ".",
         [["a) Distance moyenne d'une sortie (km, au dixième)", r1(m), 0.1], ["b) Distance médiane (km)", so[3]], ["c) Distance à parcourir lors de la 8e sortie pour une moyenne de " + M(Mg) + " km sur les 8 sorties (km)", need]],
         ["Moyenne = somme ÷ 7. Médiane : 4e valeur de la série triée.", "c) Les 8 sorties doivent totaliser 8 · " + Mg + " = " + 8 * Mg + " km."],
@@ -3002,8 +3007,8 @@ const DEFIS = (() => {
   /* ---------- 2e Collège, MP 2e : droites ---------- */
   ADD("droites", "perpendiculaire",
     () => { /* piquets alignés */
-      let p, q, A, k, xc, m, h; do { [p, q] = pk([[1, 2], [3, 2], [-1, 2], [-3, 2], [2, 3], [-2, 3], [1, 3], [-1, 3], [3, 4], [-3, 4], [2, 1], [-3, 1]]); A = [ri(-6, 4), ri(-5, 5)]; k = pk([1, 2]); xc = ri(-8, 9); m = p / q; h = A[1] - m * A[0]; } while (xc === A[0] || xc === A[0] + k * q || h === 0 || Math.abs(A[0] + k * q) > 9);
-      const B = [A[0] + k * q, A[1] + k * p], yc = m * xc + h;
+      let p, q, A, k, xc, m, h; do { [p, q] = pk([[1, 2], [3, 2], [-1, 2], [-3, 2], [2, 3], [-2, 3], [1, 3], [-1, 3], [3, 4], [-3, 4], [2, 1], [-3, 1]]); A = [ri(-6, 4), ri(-5, 5)]; k = pk([1, 2]); xc = ri(-8, 9); m = p / q; h = +(A[1] - m * A[0]).toFixed(10); /* 26.11 (agent p6, test.html : h = 4,4 · 10⁻¹⁶ au lieu de 0) */ } while (xc === A[0] || xc === A[0] + k * q || h === 0 || Math.abs(A[0] + k * q) > 9);
+      const B = [A[0] + k * q, A[1] + k * p], yc = +(m * xc + h).toFixed(10);
       return CXP("alignes", P("Un géomètre plante des piquets. Dans un repère (unité : 1 m), " + M("A" + PT(A)) + " et " + M("B" + PT(B)) + ". Un troisième piquet " + M("C") + " a pour abscisse " + M(xc) + ".",
         [["a) Pente de la droite " + M("(AB)") + " (fraction acceptée)", m], ["b) Ordonnée à l'origine de " + M("(AB)") + " (fraction acceptée)", h], ["c) Ordonnée de " + M("C") + " pour que " + M("A") + ", " + M("B") + " et " + M("C") + " soient alignés (fraction acceptée)", yc]],
         ["Pente = (y_B − y_A) ÷ (x_B − x_A).", "Ordonnée à l'origine : remplace les coordonnées de A dans y = mx + h. c) C est sur (AB) : y_C = m · " + tT(xc) + " + h."],
@@ -3273,11 +3278,16 @@ const DEFIS = (() => {
     });
   ADD("similmp", "verre",
     () => { /* maquette d'un bâtiment */
-      const k = pk([50, 100, 200]), A = ri(40, 400), V = 10 * ri(50, 900), B = ri(80, 600);
-      return CXP("maquette", P("La maquette d'un bâtiment est à l'échelle " + M("1\\,:\\," + k) + ". Sur la maquette, une façade a une aire de " + M(A + " \\text{ cm}^2") + " et le bâtiment un volume de " + M(nb(V) + " \\text{ cm}^3") + ".",
-        [["a) Aire réelle de la façade (m²)", (A * k * k) / 10000], ["b) Volume réel du bâtiment (m³)", (V * k ** 3) / 1e6], ["c) Le toit réel a une aire de " + M(B + " \\text{ m}^2") + " : aire du toit sur la maquette (cm², au dixième)", r1((B * 10000) / (k * k)), 0.1]],
+      /* 26.11 (revue p6, n° 4 : façade, volume et toit tirés indépendamment → bâtiment de 64 cm de haut au 1 : 50, façade de
+         6'720 m² au 1 : 200) : dimensions réelles plausibles (longueur L, largeur l, hauteur h, en m, entiers en cm sur la
+         maquette), puis façade = L · h, volume = L · l · h, toit plat = L · l. */
+      const k = pk([50, 100, 200]), st = k === 200 ? 2 : 1;
+      let L, l, h; do { L = st * ri(12 / st, 48 / st); l = st * ri(8 / st, 20 / st); h = st * ri(6 / st, 24 / st); } while (l >= L || h > L);
+      const c = (x) => (x * 100) / k, A = c(L) * c(h), V = c(L) * c(l) * c(h), B = L * l, Bm = c(L) * c(l);
+      return CXP("maquette", P("La maquette d'un bâtiment (un pavé droit à toit plat) est à l'échelle " + M("1\\,:\\," + k) + ". Sur la maquette, la grande façade a une aire de " + M(nb(A) + " \\text{ cm}^2") + " et le bâtiment un volume de " + M(nb(V) + " \\text{ cm}^3") + ".",
+        [["a) Aire réelle de la façade (m²)", L * h], ["b) Volume réel du bâtiment (m³)", L * l * h], ["c) Le toit réel a une aire de " + M(nb(B) + " \\text{ m}^2") + " : aire du toit sur la maquette (cm²)", Bm]],
         ["Les longueurs sont multipliées par " + k + " : les aires par " + k + "², les volumes par " + k + "³.", "1 m² = 10'000 cm² ; 1 m³ = 1'000'000 cm³."],
-        "a) " + M(A + " \\cdot " + k + "^2 = " + nb(A * k * k)) + " cm² " + M("= " + D((A * k * k) / 10000)) + " m². b) " + M(nb(V) + " \\cdot " + k + "^3 = " + nb(V * k ** 3)) + " cm³ " + M("= " + nb((V * k ** 3) / 1e6)) + " m³. c) " + M(nb(B * 10000) + " \\div " + k + "^2 " + eqa((B * 10000) / (k * k), r1((B * 10000) / (k * k))) + D(r1((B * 10000) / (k * k)))) + " cm²."));
+        "a) " + M(nb(A) + " \\cdot " + k + "^2 = " + nb(A * k * k)) + " cm² " + M("= " + nb(L * h)) + " m². b) " + M(nb(V) + " \\cdot " + k + "^3 = " + nb(V * k ** 3)) + " cm³ " + M("= " + nb(L * l * h)) + " m³. c) " + M(nb(B) + " \\text{ m}^2 = " + nb(B * 10000) + " \\text{ cm}^2") + ", " + M(nb(B * 10000) + " \\div " + k + "^2 = " + nb(Bm)) + " cm²."));
     },
     () => { /* ombres à la même heure */
       let h, s, S, H; do { h = ri(15, 30) / 10; s = ri(10, 40) / 10; S = ri(40, 250) / 10; H = ri(12, 45); } while (Math.abs(h - s) < 0.3);
@@ -3332,7 +3342,7 @@ const DEFIS = (() => {
         "a) " + M(F[0] + " \\cdot " + d[0] + " + " + pr(F[1]) + " \\cdot " + pr(d[1]) + " = " + W) + " J. b) " + M("\\cos\\alpha = \\frac{" + W + "}{\\sqrt{" + (F[0] ** 2 + F[1] ** 2) + "} \\cdot \\sqrt{" + (d[0] ** 2 + d[1] ** 2) + "}}") + ", " + M("\\alpha \\approx " + D(r1(ang)) + "°") + ". c) " + M("\\sqrt{" + (F[0] ** 2 + F[1] ** 2) + "} \\approx " + D(r1(nF))) + " N."));
     },
     () => { /* vecteurs orthogonaux avec un paramètre */
-      let a, b, c, w, k; do { a = R.nz(-6, 6); b = R.nz(-6, 6); c = R.nz(-6, 6); w = [R.nz(-5, 5), R.nz(-5, 5)]; k = (-a * b) / c; } while (!Number.isInteger(2 * k) || k === 0 || a * w[0] + k * w[1] === 0 || Math.abs(a) === Math.abs(b));
+      let a, b, c, w, k; do { a = R.nz(-6, 6); b = R.nz(-6, 6); c = R.nz(-6, 6); w = [R.nz(-5, 5), R.nz(-5, 5)]; k = (-a * b) / c; } while (!Number.isInteger(2 * k) || k === 0 || a * w[0] + k * w[1] === 0 || Math.abs(a) === Math.abs(b) || a * w[1] === k * w[0]); /* 26.11 (agent p6, test.html : u et w colinéaires, acos(−1 − ε) = NaN) */
       const u = [a, k], ps = a * w[0] + k * w[1], ang = deg(Math.acos(ps / (Math.hypot(...u) * Math.hypot(...w))));
       return CXP("orthogonal", P("On donne " + M("\\vec{u} = (" + a + " \\,;\\, k)") + ", " + M("\\vec{v} = " + PT([b, c])) + " et " + M("\\vec{w} = " + PT(w)) + ".",
         [["a) Valeur de " + M("k") + " pour que " + M("\\vec{u}") + " et " + M("\\vec{v}") + " soient orthogonaux (fraction acceptée)", k], ["b) Avec cette valeur, " + M("\\vec{u} \\cdot \\vec{w}") + " (fraction acceptée)", ps], ["c) Angle entre " + M("\\vec{u}") + " et " + M("\\vec{w}") + " (°, au dixième)", r1(ang), 0.1]],
@@ -3723,9 +3733,30 @@ const DEFIS = (() => {
       return CXP(cx, Object.assign(P(intro, [["a) " + quoi + " après la hausse (CHF)", +p1.toFixed(6)], ["b) " + quoi + " " + fin + " (CHF)", +p2.toFixed(6)], ["c) Variation globale en % (négative si baisse)", +glob.toFixed(6), 0.01]],
         ["Les pourcentages successifs se multiplient : on ne les additionne pas.", "Multiplie par " + T(1 + up / 100) + " puis par " + T(1 - dn / 100) + " ; variation globale = (prix final / prix initial − 1) · 100."],
         "a) " + M(nb(P0) + " \\cdot " + D(1 + up / 100) + " = " + CHF(p1)) + ". b) " + M(CHF(p1) + " \\cdot " + D(1 - dn / 100) + " = " + CHF(p2)) + ". c) " + M(D(+glob.toFixed(2)) + "\\,\\%") + " (et non " + (up - dn) + " %)."), { fig: FIG.percentBar(up, P0, " CHF") })); };
-    OUT.pct = [() => CXP("velo", pct0()),
-      () => { const P0 = 12 * ri(4, 9), up = pk([10, 20, 25]), dn = pk([15, 20, 30, 40]); return PC("fitness", "Prix mensuel", "final", "Un abonnement de fitness coûte " + M(P0) + " CHF par mois. Le prix augmente de " + M(up + "\\,\\%") + " ; puis, avec la carte d'étudiant, il baisse de " + M(dn + "\\,\\%") + ".", up, dn, P0); },
-      () => { const P0 = 20 * ri(3, 40), up = pk([10, 20, 25, 30, 50]), dn = pk([10, 20, 25, 40]); return PC("action", "Valeur", "finale", "Une action vaut " + M(nb(P0)) + " CHF. En une semaine, sa valeur monte de " + M(up + "\\,\\%") + ", puis la semaine suivante elle baisse de " + M(dn + "\\,\\%") + ".", up, dn, P0); }];
+    /* 26.11 (revue p6, n° 6 : 6e FR, défi « hausse de 20 % puis, avec la carte d'étudiant, baisse de 30 % ») : les trois formes
+       ci-dessous sont des pourcentages successifs (coefficient multiplicateur : 3e FR, 10e CO) ; ctx « succ-* », écartées en
+       France avant la 3e (HORS_FR) et en 9e CO (HORS_CO). Formes pour tous : remise puis prix payé, part d'un total. */
+    const remise = () => { const r = pk([10, 20, 25, 50]), [art, le, a2] = pk([["un ballon de basket", "le ballon", "un maillot"], ["un jeu de société", "le jeu", "un puzzle"], ["une paire de baskets", "les baskets", "un sac de sport"], ["un skateboard", "le skateboard", "un casque"]]);
+      let P0, Q0; do { P0 = 4 * ri(5, 30); Q0 = 4 * ri(3, 20); } while (Q0 === P0);
+      const rem = (P0 * r) / 100, pay = P0 - rem, tot = ((P0 + Q0) * (100 - r)) / 100;
+      return CXP("remise", P("Pendant les soldes, un magasin baisse tous ses prix de " + M(r + "\\,\\%") + ". Tu achètes " + art + " affiché à " + M(P0) + " CHF et " + a2 + " affiché à " + M(Q0) + " CHF.",
+        [["a) Montant de la remise sur " + le + " (CHF)", rem], ["b) Prix payé pour " + le + " (CHF)", pay], ["c) Prix total payé pour les deux articles (CHF)", tot]],
+        [r + " % de " + P0 + " CHF : " + P0 + " · " + r + " ÷ 100. Le prix payé est le prix affiché moins la remise.", "c) Même calcul pour le deuxième article (ou sur le total " + (P0 + Q0) + " CHF), puis additionne les prix payés."],
+        "a) " + M(P0 + " \\cdot \\frac{" + r + "}{100} = " + CHF(rem)) + " CHF. b) " + M(P0 + " - " + CHF(rem) + " = " + CHF(pay)) + " CHF. c) " + M("(" + P0 + " + " + Q0 + ") \\cdot \\frac{" + (100 - r) + "}{100} = " + (P0 + Q0) + " \\cdot \\frac{" + (100 - r) + "}{100} = " + CHF(tot)) + " CHF.")); };
+    const part = () => { let N, p, G, esc; do { N = 20 * ri(6, 20); p = pk([10, 20, 25, 30, 40, 60, 75]); esc = (N * p) / 100; G = pk([4, 5, 6, 8]); } while (!Number.isInteger(esc) || esc % G || esc / G < 3);
+      return CXP("part-total", P("Pour la journée sportive, les " + M(N) + " élèves d'une école choisissent une activité : " + M(p + "\\,\\%") + " d'entre eux font de l'escalade, les autres une randonnée.",
+        [["a) Nombre d'élèves qui font de l'escalade", esc], ["b) Nombre d'élèves qui font la randonnée", N - esc], ["c) Pour l'escalade, on forme des cordées de " + G + " élèves : nombre de cordées", esc / G]],
+        [p + " % de " + N + " : " + N + " · " + p + " ÷ 100.", "b) Le reste des élèves : " + N + " moins le résultat de a). c) Partage les élèves de a) en groupes de " + G + "."],
+        "a) " + M(N + " \\cdot \\frac{" + p + "}{100} = " + esc) + " élèves. b) " + M(N + " - " + esc + " = " + (N - esc)) + " élèves. c) " + M(esc + " \\div " + G + " = " + esc / G) + " cordées.")); };
+    const compo = () => { const [prod, m0, ps, por] = pk([["Un paquet de céréales", 500, [10, 20, 25, 30], 40], ["Une tablette de chocolat au lait", 200, [40, 50], 20], ["Un pot de pâte à tartiner", 400, [50, 60], 20]]);
+      let p, k; do { p = pk(ps); k = ri(2, 5); } while ((m0 * p) % 100 || (k * por * p) % 100);
+      return CXP("composition", P(prod + " de " + M(m0) + " g contient " + M(p + "\\,\\%") + " de sucre.",
+        [["a) Masse de sucre dans le paquet entier (g)", (m0 * p) / 100], ["b) Masse de tout le reste (g)", m0 - (m0 * p) / 100], ["c) Masse de sucre dans " + k + " portions de " + por + " g (g)", (k * por * p) / 100]],
+        [p + " % de " + m0 + " g : " + m0 + " · " + p + " ÷ 100.", "c) " + k + " portions de " + por + " g font " + k * por + " g ; prends-en " + p + " %."],
+        "a) " + M(m0 + " \\cdot \\frac{" + p + "}{100} = " + (m0 * p) / 100) + " g. b) " + M(m0 + " - " + (m0 * p) / 100 + " = " + (m0 - (m0 * p) / 100)) + " g. c) " + M(k + " \\cdot " + por + " = " + k * por) + " g, " + M(k * por + " \\cdot \\frac{" + p + "}{100} = " + (k * por * p) / 100) + " g.")); };
+    OUT.pct = [remise, part, compo, () => CXP("succ-velo", pct0()),
+      () => { const P0 = 12 * ri(4, 9), up = pk([10, 20, 25]), dn = pk([15, 20, 30, 40]); return PC("succ-fitness", "Prix mensuel", "final", "Un abonnement de fitness coûte " + M(P0) + " CHF par mois. Le prix augmente de " + M(up + "\\,\\%") + " ; puis, avec la carte d'étudiant, il baisse de " + M(dn + "\\,\\%") + ".", up, dn, P0); },
+      () => { const P0 = 20 * ri(3, 40), up = pk([10, 20, 25, 30, 50]), dn = pk([10, 20, 25, 40]); return PC("succ-action", "Valeur", "finale", "Une action vaut " + M(nb(P0)) + " CHF. En une semaine, sa valeur monte de " + M(up + "\\,\\%") + ", puis la semaine suivante elle baisse de " + M(dn + "\\,\\%") + ".", up, dn, P0); }];
   }
   return OUT;
 })();

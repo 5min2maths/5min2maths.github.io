@@ -384,7 +384,7 @@
           { ctx: "somme", guide: [G("Propriété : " + M("\\log a + \\log b = \\log(a \\cdot b)") + ". Que vaut " + M(N(a) + " \\cdot " + N(b)) + " ?", p, M(N(p)) + "."), G(M("\\log " + N(p)) + " = ?", k, M(k) + ".")],
             traps: [TR(l10(a + b), "log a + log b = log(a · b), pas log(a + b)."), TR(l10(a) * l10(b), "La somme des logarithmes est le logarithme du produit."), TR(p, "On demande le logarithme du produit.")] }); },
       () => { const b = pk([2, 3, 5]), m = pk([2, 3, 5, 6, 7]), k = R.int(2, 4); if (m === b || (b === 2 && m === 4) || b ** k * m > 1000) return null; const A = b ** k * m;
-        return QN("Calcule sans calculatrice " + M(lg(b, A) + " - " + lg(b, m)) + ".", k, M(lg(b, A) + " - " + lg(b, m) + " = " + lg(b, A + " \\div " + m) + " = " + lg(b, b ** k) + " = " + k) + ".",
+        return QN("Calcule sans calculatrice " + M(lg(b, A) + " - " + lg(b, m)) + ".", k, M(lg(b, A) + " - " + lg(b, m) + " = " + lg(b, "(" + A + " \\div " + m + ")") /* 26.11 (revue p6, n° 11) : parenthèses */ + " = " + lg(b, b ** k) + " = " + k) + ".",
           { ctx: "difference", guide: [G(M("\\log A - \\log B = \\log(A \\div B)") + ". Que vaut " + M(A + " \\div " + m) + " ?", b ** k, M(b ** k) + "."), G("Le logarithme vaut ?", k, M(lg(b, b ** k) + " = " + k) + ".")],
             traps: [TR(Math.log(A - m) / Math.log(b), "log A − log B = log(A ÷ B), pas log(A − B)."), TR(b ** k, "On demande le logarithme de " + b ** k + ".")] }); },
       () => { const [a, k, c, m] = pk([[5, 2, 4, 2], [2, 3, 125, 3], [5, 3, 8, 3], [2, 2, 25, 2], [20, 2, 25, 4], [2, 4, 625, 4], [4, 2, 625, 4], [5, 2, 40, 3]]);
@@ -394,7 +394,7 @@
     ],
     2: [
       () => { const [Nn, e2, e10] = pk([[8, 3, 0], [5, -1, 1], [20, 1, 1], [0.5, -1, 0], [16, 4, 0], [40, 2, 1], [2.5, -2, 1], [50, -1, 2], [0.2, 1, -1], [25, -2, 2], [32, 5, 0], [200, 1, 2], [0.25, -2, 0], [0.05, -1, -1]]), v = r6(e2 * L2 + e10);
-        return QN("Sachant que " + M("\\log 2 \\approx 0{,}301") + ", calcule sans calculatrice " + M("\\log " + N(Nn)) + " (au millième).", v, M(N(Nn) + " = 2^{" + e2 + "} \\cdot 10^{" + e10 + "}") + " : " + M("\\log " + N(Nn) + " \\approx " + e2 + " \\cdot 0{,}301 " + (e10 < 0 ? "- " + -e10 : "+ " + e10) + " = " + N(v)) + ".",
+        return QN("Sachant que " + M("\\log 2 \\approx 0{,}301") + ", calcule sans calculatrice " + M("\\log " + N(Nn)) + " (au millième).", v, M(N(Nn) + " = 2^{" + e2 + "}" + (e10 ? " \\cdot 10^{" + e10 + "}" : "")) + " : " + M("\\log " + N(Nn) + " \\approx " + e2 + " \\cdot 0{,}301 " + (e10 < 0 ? "- " + -e10 : e10 ? "+ " + e10 : "") + " = " + N(v)) /* 26.11 (revue p6, n° 11 : « 2⁵ · 10⁰ … + 0 ») */ + ".",
           { ctx: "log2-donne", round: 0.001, guide: [G("Écris " + M(N(Nn) + " = 2^{a} \\cdot 10^{b}") + " : " + M("a") + " = ?", e2, M("a = " + e2) + "."), G("Et " + M("b") + " = ?", e10, M("b = " + e10) + " (" + M("\\log 10 = 1") + ")."), G(M("\\log " + N(Nn)) + " (au millième) ?", v, M(N(v)) + ".", 0.001)],
             traps: [TR(r6(e2 * L2), "N'oublie pas la puissance de 10 (log 10 = 1)."), TR(r6(L2 * Nn / 2), "Le logarithme n'est pas proportionnel : log(2k) ≠ k · log 2.")] }); },
       () => { const p = nz(-4, 5), q = nz(-4, 5), m = pk([2, 3]), n = pk([1, 2]), quot = R.rand() < 0.5, v = m * p + (quot ? -1 : 1) * n * q; if ([0, 1, -1].includes(v) || p === q) return null; const yy = n === 1 ? "y" : "y^{" + n + "}";

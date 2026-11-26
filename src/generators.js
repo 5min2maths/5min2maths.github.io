@@ -49,8 +49,11 @@ const colonBreak = (s) => {
   }
   /* majuscule en début de ligne : après un retour créé ici (le « : » remplacé ouvre une nouvelle phrase) ou après une phrase
      finie (. ! ?) ; jamais au milieu d'une phrase (« Sachant que :<br>P(x) = …<br>est divisible », revue p5, n° 8). */
-  const up = (m, sp, c) => "<br>" + sp + c.toUpperCase();
-  return parts.join("").replace(/<br>\u2063(\s*)([a-zàâçéèêëîïôûù])/g, up).replace(/([.!?]\s*(?:<\/[a-z]+>)?\s*)<br>(\s*)([a-zàâçéèêëîïôûù])/g, (m, pre, sp, c) => pre + "<br>" + sp + c.toUpperCase()).replace(/\u2063/g, "");
+  /* 26.11 (revue p6, n° 7 : « 2k = 8⏎K = 4 », « k² = 36⏎K = 6 ») : pas de majuscule à une variable — lettre seule suivie
+     (éventuellement d'un exposant, d'un indice ou d'un argument) d'un signe de relation : « k = 4 », « k² = 36 », « f(x) = 3 ». */
+  const VAR = /^[a-zàâçéèêëîïôûù](?:[²³⁴]|\^\S+|_\S+|\([^)]*\))?\s*[=<>≤≥≠]/;
+  const up = (m, sp, c, o, all) => VAR.test(all.slice(o + m.length - 1)) ? m : "<br>" + sp + c.toUpperCase();
+  return parts.join("").replace(/<br>\u2063(\s*)([a-zàâçéèêëîïôûù])/g, up).replace(/([.!?]\s*(?:<\/[a-z]+>)?\s*)<br>(\s*)([a-zàâçéèêëîïôûù])/g, (m, pre, sp, c, o, all) => VAR.test(all.slice(o + m.length - 1)) ? m : pre + "<br>" + sp + c.toUpperCase()).replace(/\u2063/g, "");
 };
 /* 26.11 (audit de vraisemblance, tests/vraisemblance.html) : un montant s'écrit avec deux décimales (« 2,50 CHF », « 0,80 € »),
    jamais « 2,5 CHF » (37 générateurs le faisaient). Appliqué aux textes des questions (Engine.build, sujets) ; jamais aux réponses. */
@@ -61,7 +64,8 @@ const plurTidy = (s) => s.replace(/(^|[^\d,.])(\d+) (\p{L}+)\(s\)/gu, (m, b, n, 
    « que il touche ») ; liste fermée de mots (pas de h aspiré : « de hauteur » reste). */
 const ELIDE_W = "heures?|habitants?|années?|élèves?|enfants?|euros?|œufs?|arbres?|amis?|entrées?|ordinateurs?|abonnés?|images?|unités?|objets?|exercices?|issues?|angles?|arêtes?|étages?|essais?|oranges?|ampoules?|abricots?|avions?|eau|il|ils|elle|elles|on|abord|autres?|essence|argent|huile|herbe|hiver|hôtel|été|automne|aire|axe|intervalle|ensemble|équation|expression|inconnue|entier";
 const elideTidy = (s) => s.replace(new RegExp("(^|[^\\p{L}'’\\\\])([dD]e|[qQ]ue|[jJ]usque|[lL]orsque|[pP]uisque) (?=(?:" + ELIDE_W + ")(?![\\p{L}]))", "gu"), (m, b, w) => b + w.slice(0, -1) + "'");
-const moneyTidy = (s) => typeof s !== "string" ? s : elideTidy(plurTidy(s)).replace(/(^|[^\p{L}])([dD]e|[qQ]ue) (?=[AEIOUYÉÈÊÎ][a-zàâçéèêëîïôûù]+)/gu, (m, b, w) => b + w.slice(0, -1) + "'").replace(/(^|[^\p{L}])([dD]e|[àÀ]) Le (?=\p{Lu})/gu, (m, b, w) => b + (/^[dD]/.test(w) ? w[0] + "u" : w === "à" ? "au" : "Au") + " ").replace(/(^|[^\p{L}])([dD]e|[àÀ]) Les (?=\p{Lu})/gu, (m, b, w) => b + (/^[dD]/.test(w) ? w[0] + "es" : w === "à" ? "aux" : "Aux") + " ").replace(/(\d(?:\{,\}|,))(\d)(?![\d{]|\{,|,\d)((?:\\\))?(?:\s|\\[ ,;]|~|&nbsp;|\\text\{\s*|\\mathrm\{\s*)*(?:CHF|€|francs?(?![a-z])|euros?(?![a-z])))/g, (m, a, b, c) => a + b + "0" + c);
+/* 26.11 (revue p6, n° 14 : « Les notes d'Yanis ») : pas d'élision devant Y suivi d'une voyelle (Yanis, Yasmine) ; « d'Yves » reste. */
+const moneyTidy = (s) => typeof s !== "string" ? s : elideTidy(plurTidy(s)).replace(/(^|[^\p{L}])([dD]e|[qQ]ue) (?=(?:[AEIOUÉÈÊÎ]|Y(?=[^aeiouyéèêëîïôûù]))[a-zàâçéèêëîïôûù]+)/gu, (m, b, w) => b + w.slice(0, -1) + "'").replace(/(^|[^\p{L}])([dD]e|[àÀ]) Le (?=\p{Lu})/gu, (m, b, w) => b + (/^[dD]/.test(w) ? w[0] + "u" : w === "à" ? "au" : "Au") + " ").replace(/(^|[^\p{L}])([dD]e|[àÀ]) Les (?=\p{Lu})/gu, (m, b, w) => b + (/^[dD]/.test(w) ? w[0] + "es" : w === "à" ? "aux" : "Aux") + " ").replace(/(\d(?:\{,\}|,))(\d)(?![\d{]|\{,|,\d)((?:\\\))?(?:\s|\\[ ,;]|~|&nbsp;|\\text\{\s*|\\mathrm\{\s*)*(?:CHF|€|francs?(?![a-z])|euros?(?![a-z])))/g, (m, a, b, c) => a + b + "0" + c);
 /* 26.11 : accord après 1 (« 1 vertes », « 1 connexions réussies », « 1 lancers francs ») dans les textes tirés au hasard. */
 const ONE_N = "boules|billes|jetons|cartes|perles|bonbons|stylos|livres|pièces|bleues|vertes|rouges|blanches|noires|jaunes|connexions|lancers|élèves|personnes|filles|garçons|enfants|adultes|flèches|tirs|paniers|buts";
 const ONE_A = "réussies|réussis|francs|rouges|bleues|vertes|blanches|noires|jaunes|gagnants|gagnantes|défectueuses|ratés|manqués";
@@ -812,10 +816,10 @@ const PROB = {
   log() {
     const C = 1000 * R.int(2, 9), t = R.pick([2, 3, 4, 5]), n0 = R.int(3, 8);
     const v = C * Math.pow(1 + t / 100, n0), years = Math.ceil(Math.log(2) / Math.log(1 + t / 100));
-    return { fig: FIG.parabola((x) => Math.pow(1 + t / 100, x * 3) * 2 - 2), q: "On place " + M(C) + " CHF à " + M(t + "\\,\\%") + " d'intérêt composé par an.",
+    return { fig: FIG.parabola((x) => Math.pow(1 + t / 100, x * 3) * 2 - 2), q: "On place " + M(C / 1000 + "\\text{'}000") /* 26.11 (revue p6, n° 14 : « 5000 CHF ») */ + " CHF à " + M(t + "\\,\\%") + " d'intérêt composé par an.",
       parts: [{ label: "a) Capital après " + n0 + " ans (CHF, au centime)", spec: { kind: "value", value: v, round: 0.01 } }, { label: "b) Nombre d'années pour que le capital double (années entières)", spec: { kind: "value", value: years } }],
       hints: ["Chaque année, le capital est multiplié par " + dec(1 + t / 100) + ". Doubler : résoudre " + dec(1 + t / 100) + "ⁿ = 2.", "n = ln 2 / ln " + dec(1 + t / 100) + ", puis arrondir à l'année supérieure."],
-      sol: "a) " + M(C + " \\cdot " + dec(1 + t / 100) + "^{" + n0 + "} \\approx " + dec(r2(v))) + " CHF. b) " + M("n = \\frac{\\ln 2}{\\ln " + dec(1 + t / 100) + "} \\approx " + dec(r2(Math.log(2) / Math.log(1 + t / 100)))) + ", donc " + M(years) + " ans." };
+      sol: "a) " + M(C / 1000 + "\\text{'}000 \\cdot " + dec(1 + t / 100) + "^{" + n0 + "} \\approx " + dec(r2(v)).replace(/^(\d+)(\d{3})(?!\d)/, "$1\\text{'}$2")) + " CHF. b) " + M("n = \\frac{\\ln 2}{\\ln " + dec(1 + t / 100) + "} \\approx " + dec(r2(Math.log(2) / Math.log(1 + t / 100)))) + ", donc " + M(years) + " ans." };
   },
   eq2() {
     const x = R.int(3, 12), k = R.int(2, 8);

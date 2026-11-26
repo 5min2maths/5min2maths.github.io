@@ -1,4 +1,4 @@
-15 problème(s) dont 0 grave(s) — 7 moyens, 8 bas
+15 problème(s) dont 0 grave(s) — 7 moyens, 8 bas — tous corrigés (agent/p6, voir « Corrigé » sous chaque point)
 
 # Revue « élèves joués » — 26.11, 6e passage (branche agent/eleves6, master f5525af)
 
@@ -38,67 +38,82 @@ de Théo (graine 609) restait bloquée au positionnement de 2nde.
    `yearSet` de `Engine.weeklyProblem` (catalogue, `current`) contient aussi les reprises, et l'écart d'un an n'est pas pénalisé
    (`gap >= 2`). Reproduire : `#eleve=emma&jours=1&jour0=2027-02-02&graine=602&extras=probleme` (ligne « ⓘ problème »).
    Correction : d'abord les notions du chapitre en classe, puis celles dont `placeOf(...)[0] === grade` (comme `nowOwn`).
+   Corrigé (agent/p6) : `Engine.weeklyProblem` classe les notions par rang — 0 notion de l'année (placeOf = classe) du chapitre en classe, 1 autre notion de l'année, 2 reprise du chapitre, 3 reprise du catalogue, 4 autre — et ne garde que le meilleur rang qui donne un vrai problème ; écart d'année pénalisé dès 1 an ; choix v4 (nouveau tirage). Trace : Emma → vol@10, Théo → affzero@10 (2nde). Contrôle `tests/p6_26_11.html` (échoue sur l'ancien moteur : CH-10 → fracadd@9).
 
 2. **Moyenne** — Problème de la semaine sur une notion jamais travaillée : « NOUVELLE NOTION · ÉTAPE 1 SUR 2 » (une
    devinette) puis un problème de niveau 4. Hugo (6e, faible) : leçon « 0,5 × 0,5 » puis `q-decmul-4-gm` (job d'été,
    3 parties), 6:54, 2/3, +2 points ; Léa (9e) : leçon PGDC puis `q-arith-4-f3x`. Reproduire : traces de Hugo et Léa, case
    Problème du jour 1. Correction : `weeklyProblem` ne choisit qu'une notion déjà travaillée (`seen`, maîtrise > 0).
+   Corrigé : seulement une notion travaillée (seen > 0, maîtrise > 0) ou du chapitre en classe ; sinon pas de problème (« Pas encore de problème pour toi ») ; plus jamais de leçon avant le Problème (`app.js`, `due`).
 
 3. **Moyenne** (corrigé faux) — `recipaff`, contexte forfait, c) : « 0,5x + 10 = x ⟺ 0,5x = −10 ⟺ x = 20 ». Le
    corrigé écrit `(1 − m)x = −p` au lieu de `(1 − m)x = p` (`src/defis.js` l. 1650) ; la valeur attendue (20) est juste.
    Reproduire : `tests/_defis3.html#ids=recipaff&n=12&show=3` (ctx forfait, s4). Correction : `D(r2c(1 - m)) + "x = " + p`.
+   Corrigé : `(1 − m)x = p` (src/defis.js).
 
 4. **Moyenne** (vraisemblance) — `similmp`, contexte maquette : façade, volume et toit tirés indépendamment
    (`src/defis.js` l. 3276). « 1 : 50 … volume 1'890 cm³ » (236 m³) et « Le toit réel a une aire de 370 m² » : bâtiment de
    64 cm de haut ; au 1 : 200, façade de 6'720 m². Reproduire : `_defis3.html#ids=similmp&n=12&show=3` (s2, s6, s9).
    Correction : tirer L, l, h réels plausibles, puis façade = L · h, volume = L · l · h, toit = L · l.
+   Corrigé : bâtiment pavé droit à toit plat, L, l, h réels tirés (12–48, 8–20, 6–24 m, entiers en cm sur la maquette) ; façade = L·h, volume = L·l·h, toit = L·l ; réponses exactes.
 
 5. **Moyenne** (vraisemblance) — `q-ensembles-4-8un` (1re Coll., défi du jour) : « Un camp de vacances accepte les jeunes de
    6 ans (compris) à 19 ans (non compris). Le tarif « jeune adulte » s'applique au-delà de 16 ans … jusqu'à 23 ans », puis
    « c) âges acceptés au camp **ou** au tarif « jeune adulte » » : un tarif du camp pour des âges que le camp refuse.
    Correction : deux conditions indépendantes (camp A, assurance ou transport B), `src/defis.js` l. 2713.
+   Corrigé : camp [a ; b[ et club de voile ]c ; d], deux offres indépendantes. (L'oracle `tests/recalc_oracles.js` l. 2018 ne reconnaît plus ce texte : à mettre à jour par l'agent des oracles ; recalcul fait dans p6_26_11.)
 
 6. **Moyenne** (niveau) — 6e France, défi du jour `q-pct-4-z3j` : « Le prix augmente de 20 % ; puis, avec la carte
    d'étudiant, il baisse de 30 % … c) Variation globale en % ». Les évolutions successives (coefficient multiplicateur) sont
    au programme de 3e ; en 6e, appliquer un pourcentage seulement ; « carte d'étudiant » à 11 ans. Les trois contextes du
    défi `pct` (`src/defis.js` l. 3722–3729) sont des variations successives, servis aussi en 9e CO. Correction : en France
    avant la 3e (et en 9e), défi `pct` = remise puis prix payé, ou part d'un total ; variations successives réservées à `pctvar`.
+   Corrigé : défi `pct` = remise puis prix payé (2 articles), part d'un total (journée sportive), composition (sucre) pour tous ; les trois formes à pourcentages successifs (ctx `succ-*`) écartées en France avant la 3e (HORS_FR) et en 9e CO (HORS_CO). Placement vérifié : `pct` est en 10e CO (CH: [10], PER 33-PR2, MER 10e), pas en 9e ; 6e FR = appliquer un pourcentage (6e.NC.40–41). Texte « carte d'étudiant » gardé (forme réservée dès 3e FR / 10e CO, et l'oracle de l'autre agent le lit).
 
 7. **Moyenne** — `colonBreak` met une majuscule à une variable : piège « Le double produit vaut 2k = 8 ⏎ **K** = 4 »
    (`q-compdiff-2-95c`), « k² = 36 ⏎ **K** = 6 » (`q-compdiff-2-6v1`, positionnement de 2nde). Reproduire : trace de Théo,
    graine 611, question 5. Correction : pas de majuscule si la ligne commence par une lettre seule suivie de « = » (ou une formule).
+   Corrigé : `colonBreak` ne met plus de majuscule à une lettre seule suivie (exposant, indice, argument) d'un signe de relation (« k = 4 », « k² = 36 », « f(t) = 5 »).
 
 ## Bas
 
 8. **Basse** (trivialité) — `fracrat`, contexte evidence : b) « F(−3) = 3 », puis c) « Solution de F(x) = 3 » → −3,
    réponse déjà donnée par b) (x1 et xs tirés sans s'exclure, `src/defis.js` l. 2083). Correction : `x1 !== xs` dans le `while`.
+   Corrigé : `x1 !== xs`.
 
 9. **Basse** (vraisemblance) — `stats`, contexte velo : « Une traileuse » / « Un coureur à ski de fond » notent 7 sorties
    de 25 à 90 km par mois (« 82 ; 71 ; 88 … »). Plausible à vélo seulement. Correction : cyclistes seuls, ou 8–30 km pour la course.
+   Corrigé : cyclistes seuls (cycliste, cyclotouriste, cycliste du club).
 
 10. **Basse** — « Indice 1 · Partie b) · » suivi de l'indice général de la notion, sans rapport avec b) : périmètre →
     « Un produit est nul si… » (`q-eq2-4-teo`, Théo, graine 609), aire visible → « Découpe la figure en rectangles et en
     triangles » (`q-aire3-4-6bt`), salaire de 4 jours → règle des décimales (`q-decmul-4-gm`). Correction : sans indice
     propre à la partie, ne pas écrire « Partie b) ».
+    Corrigé : sans indice marqué pour la partie, l'indice de la notion est donné sans « Partie b) · ».
 
 11. **Basse** (corrigés) — `q-logprop-1-h05` « log₃ 54 ÷ 6 » sans parenthèses (lu (log₃ 54)/6) ; `q-logprop-2-h97`
     « 32 = 2⁵ · 10⁰ … + 0 » ; `q-integrale-4-p4z` « au centième » pour 3 s et 18 m (attendu « 3,00 », « 18,00 ») et
     « = 18 ≈ 18 m » ; `q-decread-1-d1f` (chiffre des dizaines de 78,641) : corrigé « À droite de la virgule : dixièmes… ».
     Correction : log₃(54 ÷ 6) ; « 32 = 2⁵ » ; pas d'arrondi pour une valeur exacte entière ; corrigé « à gauche de la virgule ».
+    Corrigé : log₃(54 ÷ 6) et « 32 = 2⁵ » sans « · 10⁰ » ni « + 0 » (src/ch_mp3.js, changement minimal, fichier de l'agent recalc34) ; freinage : « au centième » et « ≈ » seulement pour une valeur non exacte ; rangs : « À gauche de la virgule : dizaines, puis unités » pour dizaines et unités (src/gen3.js).
 
 12. **Basse** — « Me tester » : 9e, objectif « triangles, quadrilatères et cercles » = deux fois le même parallélogramme
     (« le triple », « le quadruple de son voisin », `q-quadri-2-2nz`, `-hzk`) et un trapèze sous le titre « Somme des angles
     d'un triangle » (`q-angtri-3-94a`) ; 10e, même objectif → « polygone régulier à 162° » (`q-angtri-3-sor`, objectif voisin
     « polygones réguliers »). Correction : une forme au plus 1 fois par test ; angtri « polygone » rattaché aux polygones.
+    Corrigé : « Me tester » : une forme au plus une fois par test (ctx, sinon l'énoncé sans nombres ni multiple « double/triple… ») ; objectif 31-FG1 : formes de angtri sans polygones réguliers (ils relèvent de 31-FG2, polyreg ; pas de lien angtri@3 → 31-FG2, la note se calcule par notion et niveau et mêlerait triangles et polygones). Le titre de la notion (« Somme des angles d'un triangle ») reste au-dessus du trapèze : l'objectif couvre les quadrilatères.
 
 13. **Basse** — Figure de `q-angles-3-ao6` : « (1x + 29)° » (l'énoncé dit (x + 29)°). Correction : coefficient 1 omis dans l'étiquette.
+    Corrigé : coefficient 1 omis dans les énoncés, corrigés et étiquettes des formes de niveau 3 (src/ch11_ang.js).
 
 14. **Basse** (libellés) — « Les notes d'Yanis » (élision devant Y ; prénom toujours Yanis dans `stats` notes6) ;
     « On place 5000 CHF » sans apostrophe (`log` capital ; « 6'500 CHF » ailleurs) ; « un trèfle ou un 6, un 7 ou un 8 »
     (`q-probaxiomes-2-kn6`, lire « un trèfle ou une carte 6, 7 ou 8 ») ; consigne en double sous `q-ensembles-2-swc`
     (« Pas de solution : touche ∅ … ou ∅ (« aucune ») s'il n'y a pas de solution »).
+    Corrigé : pas d'élision devant Y + voyelle (« de Yanis », « d'Yves » reste) ; prénom tiré (Yanis, Lina, Noé, Maëlle, Sacha) ; « 5'000 CHF » (PROB log, énoncé et corrigé) ; « un trèfle, ou bien un 6, un 7 ou un 8 » (src/ch3c_ana.js, changement minimal) ; consigne ∅ une seule fois pour les intervalles.
 
 15. **Basse** (durée, C4 encore) — Hugo (6e, faible) : jour 1, positionnement 6:52 (annoncé « environ 5 minutes ») puis
     défi du jour de niveau 4 en 3 parties (4:11) ; jour 2, « ⚡ Série d'automatismes · 6 calculs rapides » **6:37** (deux
     pas à pas, `q-prop-1-vy9`, `q-proptab-1-cmi`) ; « Me tester » 6:00. Correction : série de 4 pour un élève dont le Mathélo
     est sous la moyenne de la classe (pas seulement `struggling`) ; pas de défi le jour du positionnement.
+    Corrigé : pas de défi du jour le jour du positionnement (chooseFormat et format déjà tiré) ; série d'automatismes de 4 pour un élève sous la moyenne de la classe (`Engine.belowClass` : Mathélo sous la valeur de départ de sa classe, ou < 70 % du premier coup sur ses 5 dernières réponses). Reste : défi du jour de 4 parties au jour 2 (6:06) et « Me tester » 5:16 pour Hugo — à soumettre.
