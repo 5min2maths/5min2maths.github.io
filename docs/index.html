@@ -912,6 +912,20 @@ button.sess-info::after { content: ""; position: absolute; left: 50%; top: 50%; 
 .keypad.k-choix { grid-template-columns: repeat(5, minmax(0, 1fr)); width: 100%; max-width: 340px; margin-inline: auto; }
 .keypad.k-choix button { padding: 12px 0; font-size: 1.2rem; }
 
+/* 27.11 (robustesse) : nouvelle version prête (accueil, bilan), une ligne discrète. */
+.upd-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 8px; padding: 4px 10px; border-radius: 10px;
+  background: var(--blue-soft); color: var(--ink); font-size: .9rem; }
+.upd-line .btn-ghost { padding: 2px 8px; }
+/* 27.11 (accessibilité) : texte pour les lecteurs d'écran seulement. */
+.sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+/* 27.11 (accessibilité) : « réduire les animations » du système respecté partout (animations, transitions, défilements ;
+   les défilements « smooth » demandés en JavaScript sont ramenés à « auto » dans src/app.js, a11yMotion). */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; transition-duration: 0.01ms !important; transition-delay: 0s !important; }
+  .burst { display: none !important; }
+}
+
 /* ---------------- Espace parent (24.11, src/parents.js) ---------------- */
 .par-list { margin: 4px 0 8px; padding: 0; list-style: none; display: grid; gap: 4px; }
 .par-list li { overflow-wrap: anywhere; }
@@ -1017,12 +1031,12 @@ window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "glo
 </head>
 <body>
 <main id="app" aria-live="polite"></main>
-<script src="app.js?v=afafa81758"></script>
+<script src="app.js?v=6f739194eb"></script>
 <script>
 (function () {
   // Chargement par niveau (24.11). Paquets requis : le niveau de l'élève et les niveaux inférieurs de sa filière ;
   // France et liens de consultation (#q-, #l-, #auteur) : tout. Puis le reste en arrière-plan (hors ligne complet).
-  var V = "afafa81758", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
+  var V = "6f739194eb", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
   window.__packs = loaded; // pour les tests (tools/test_paquets.py)
   function need(p) {
     if (!p || p.system === "FR") return K.slice();

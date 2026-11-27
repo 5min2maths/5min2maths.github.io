@@ -723,7 +723,9 @@ function checkAnswer(spec, input) {
   if (spec.kind === "set" && (spec.all || ALL_RE.test(String(input)))) return { status: spec.all && ALL_RE.test(String(input)) && !none ? "correct" : "wrong" };
   if (spec.kind === "set" && (none || spec.values.length === 0)) return { status: none && spec.values.length === 0 ? "correct" : spec.values.length === 0 ? "wrong" : "wrong" };
   let tree;
-  try { tree = Expr.parse(spec.kind === "set" ? setInput(input) : String(input)); }
+  /* 27.11 (agent recalcfr : « (−5 ; −2) » refusé, « Parenthèse non fermée ») : coordonnées entre parenthèses ou crochets acceptées */
+  const pairIn = (t) => { const m = String(t).trim().match(/^[(\[]\s*([^()\[\]]*;[^()\[\]]*)\s*[)\]]$/); return m ? m[1] : String(t); };
+  try { tree = Expr.parse(spec.kind === "set" ? setInput(input) : spec.kind === "pair" ? pairIn(input) : String(input)); }
   catch (e) { return { status: "invalid", message: e.message }; }
   if (spec.kind === "value") {
     // final (14.11, retour testeur : « on peut taper le calcul ») : la réponse est le résultat, pas l'opération.
@@ -14870,9 +14872,9 @@ function activeLesson(id, L0, cont, review, opts = {}) {
   h(`${brand}<div class="eyebrow">${review ? "Leçon · à toi de jouer" : opts.eyebrow || "Nouvelle notion · à toi de jouer"}</div>
   <div class="card pop lesson-card stack"><h2>${L.titre}</h2>
     <div class="act-step"><div class="act-h"><span class="act-n">1</span> Devine</div><p>${P.q}</p>${P.fig ? `<div class="figwrap">${P.fig}</div>` : ""}
-      <div class="seg" id="pc">${predOrder(P.choices.length).map((i) => `<button type="button" data-i="${i}">${P.choices[i]}</button>`).join("")}</div><div id="pfb"></div></div>
+      <div class="seg" id="pc">${predOrder(P.choices.length).map((i) => `<button type="button" data-i="${i}">${P.choices[i]}</button>`).join("")}</div><div id="pfb" aria-live="polite"></div></div>
     <div class="act-step" id="s2" hidden><div class="act-h"><span class="act-n">${short ? "+" : 2}</span> ${X.titre}</div>
-      <ul class="act-done" id="adone"></ul><div id="gfb"></div><p class="act-goal" id="goal"></p><div id="play" class="stack"></div>
+      <ul class="act-done" id="adone"></ul><div id="gfb" aria-live="polite"></div><p class="act-goal" id="goal"></p><div id="play" class="stack"></div>
       <button type="button" class="btn-ghost small" id="skip">${X.mode === "guide" ? "Passer" : "Passer les défis"}</button></div>
     ${short ? `<button type="button" class="btn-ghost small act-opt" id="tryopt" hidden>🖐 ${optLab}</button>` : ""}
     <div class="act-step" id="s3" hidden><div class="act-h"><span class="act-n">${short ? 2 : 3}</span> Retiens</div>
@@ -16366,7 +16368,7 @@ function atTest() {
     ${scratchHtml()}
     <p class="small muted">Une seule réponse est juste. Calcule d'abord, puis choisis.</p>
     <div class="qcm-choices">${it.choices.map((c, k) => `<button type="button" class="qcm-c" data-k="${k}"><span class="qcm-l">${"ABCD"[k]}</span><span>\\(${c.f}\\)</span></button>`).join("")}</div>
-    <div id="fb"></div></div>`);
+    <div id="fb" aria-live="polite"></div></div>`);
     const S = typeof sigOpen === "function" ? sigOpen({ ev: "q", code: q.code, d: it.d, kind: "qcm", fmt: "autotest" }) : null;
     bindScratch(S);
     app.querySelectorAll(".qcm-c").forEach((b) => (b.onclick = () => {
@@ -16479,6 +16481,8 @@ const HINTS = {
 };
 if (typeof HINTS_EXTRA !== "undefined") Object.assign(HINTS, HINTS_EXTRA);
 
+/* 27.11 : version du format de l'état enregistré (state.v) ; 1 jusqu'au 27.11, 2 : champs de base contrôlés (Engine.upgrade). */
+const STATE_V = 2;
 const Store = {
   key: "5m2m.v1",
   load() { try { return JSON.parse(localStorage.getItem(this.key)) || null; } catch (e) { return null; } },
@@ -16827,7 +16831,7 @@ const Engine = {
   newState(profile) {
     const h = harmos(profile.system, profile.grade);
     const start = 700 + (h - 8) * 150 + 100;
-    return { v: 1, profile, notions: {}, streak: { count: 0, last: null }, history: [], created: day(), elo: { r: Math.round(start), n: 0, log: [] } };
+    return { v: STATE_V, profile, notions: {}, streak: { count: 0, last: null }, history: [], created: day(), elo: { r: Math.round(start), n: 0, log: [] } };
   },
 
   // Notions du programme jusqu'à l'année de l'élève. Années précédentes : vues. Année en cours : « à venir » ;
@@ -17005,6 +17009,40 @@ const Engine = {
     rec.r.push(score); rec.r = rec.r.slice(-8); rec.n++; rec.last = day();
     if (d >= 2 || +cid.split(":")[1] > 0) rec.hi = true; /* 26.11 (revue p5, n° 3) : réponse de niveau 2 ou plus (note 6 possible, compNote) */
     if (typeof Badges !== "undefined") Badges.onComp(state, cid, before, compNote(rec));
+  },
+
+  /* 27.11 (robustesse, migrations ; test : tests/migration.html) : champs de base d'un état enregistré par une version
+     ancienne (ou abîmé) remis en forme sans rien perdre : profil (voie, durée), notions (nombres, statut, échéance), série,
+     historique, Mathélo, carnet, savoir-faire ; numéro de version (state.v, STATE_V). Ne touche jamais à une valeur valable.
+     Renvoie vrai si l'état a changé. */
+  upgrade(state) {
+    let ch = false;
+    const set = (o, k, v) => { o[k] = v; ch = true; }, num = (x) => typeof x === "number" && isFinite(x);
+    const p = state.profile;
+    if (!num(p.grade)) set(p, "grade", +p.grade || 9);
+    if (p.system === "CH" && p.track !== "mp" && p.track !== "college") set(p, "track", "college");
+    if (!num(p.minutes)) set(p, "minutes", 5);
+    if (!state.notions || typeof state.notions !== "object" || Array.isArray(state.notions)) set(state, "notions", {});
+    const ST = ["vu", "encours", "avenir", "nonvu"];
+    for (const [id, n] of Object.entries(state.notions)) {
+      if (!n || typeof n !== "object") { state.notions[id] = this.newNotion("avenir"); ch = true; continue; }
+      if (!ST.includes(n.status)) set(n, "status", "vu");
+      for (const k of ["m", "box", "seen", "ok"]) if (!num(n[k])) set(n, k, k === "m" ? (n.status === "vu" ? 0.55 : 0) : 0);
+      if (typeof n.due !== "string") set(n, "due", day());
+    }
+    if (!state.streak || typeof state.streak !== "object") set(state, "streak", { count: 0, last: null });
+    else if (!num(state.streak.count)) set(state.streak, "count", 0);
+    if (!Array.isArray(state.history)) set(state, "history", []);
+    else if (state.history.some((x) => !x || typeof x.date !== "string" || !num(x.n))) set(state, "history", state.history.filter((x) => x && typeof x.date === "string" && num(x.n)));
+    if (!state.elo || !num(state.elo.r)) set(state, "elo", { ...(state.elo || {}), r: this.newState(p).elo.r });
+    if (!num(state.elo.n)) set(state.elo, "n", 0);
+    if (!Array.isArray(state.elo.log)) set(state.elo, "log", []);
+    if (typeof state.created !== "string") set(state, "created", (state.history[0] && state.history[0].date) || day());
+    if (state.carnet !== undefined && !Array.isArray(state.carnet)) set(state, "carnet", []);
+    if (Array.isArray(state.carnet) && state.carnet.some((x) => !x || !x.id || !x.d)) set(state, "carnet", state.carnet.filter((x) => x && x.id && x.d));
+    if (state.comps && typeof state.comps === "object") for (const [cid, r] of Object.entries(state.comps)) if (!r || !Array.isArray(r.r)) { delete state.comps[cid]; ch = true; }
+    if (state.v !== STATE_V) set(state, "v", STATE_V);
+    return ch;
   },
 
   // Catalogue modifié depuis la création du profil : ajoute les notions manquantes (anciennes = vues, année en cours = à cocher).

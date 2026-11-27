@@ -271,8 +271,8 @@
     ],
     3: [
       () => { const P0 = pk([12000, 15000, 8000, 20000, 25000]), t = pk([2, 3, 4, 5, 6]), T = rnd(P0 * pk([0.75, 0.7, 0.8, 0.6])), q = rnd(1 - t / 100); let n = 0, p = P0; while (p >= T) { p *= q; n++; }
-        const c = pk([["Une commune compte", "habitants ; sa population baisse de", "habitants", "commune"], ["Un glacier a une surface de", "m² ; elle diminue de", "m²", "glacier"], ["Un lac contient", "poissons ; leur nombre baisse de", "poissons", "lac"]]);
-        return QN(c[0] + " " + M(N(P0)) + " " + c[1] + " " + M(t + "\\,\\%") + " par an. Au bout de combien d'années passera-t-elle pour la première fois sous " + M(N(T)) + " " + c[2] + " ?", n,
+        const c = pk([["Une commune compte", "habitants ; sa population baisse de", "habitants", "commune", "elle"], ["Un glacier a une surface de", "m² ; elle diminue de", "m²", "glacier", "elle"], ["Un lac contient", "poissons ; leur nombre baisse de", "poissons", "lac", "il" /* 27.11 : « leur nombre … passera-t-elle » */]]);
+        return QN(c[0] + " " + M(N(P0)) + " " + c[1] + " " + M(t + "\\,\\%") + " par an. Au bout de combien d'années passera-t-" + c[4] + " pour la première fois sous " + M(N(T)) + " " + c[2] + " ?", n,
           M("u_n = " + N(P0) + X + N(q) + "^n") + ". À la calculatrice (ou avec une boucle) : " + M("u_{" + (n - 1) + "} \\approx " + N(rnd(P0 * q ** (n - 1), 0))) + " et " + M("u_{" + n + "} \\approx " + N(rnd(P0 * q ** n, 0))) + " : au bout de " + M(n) + " ans.",
           { ctx: c[3], guide: [GS("Raison ?", q, M(N(q)) + "."), GS("Plus petit " + M("n") + " tel que " + M("u_n < " + N(T)) + " ?", n, M(n) + ".")],
             traps: [TR(n - 1, "Au bout de " + (n - 1) + " ans, on est encore au-dessus de " + N(T).replace(/\\,/g, " ") + "."), TR(Math.ceil((1 - T / P0) / (t / 100)), "Les baisses se composent : il en faut un peu plus que si on retirait toujours " + t + " % de la valeur de départ.")] }); },
@@ -535,8 +535,11 @@
           "Probabilités totales (trois branches) : " + M(sh.map((s, i) => dP(s) + X + dP(df[i])).join(" + ") + " = " + dP(v)) + ".",
           { ctx: "trois-machines", guide: [GS("Branche A : " + M(dP(sh[0]) + X + dP(df[0])) + " = ?", parts[0], M(dP(parts[0])) + "."), GS("Branches B et C ensemble ?", rnd(parts[1] + parts[2]), M(dP(parts[1]) + " + " + dP(parts[2]) + " = " + dP(rnd(parts[1] + parts[2]))) + "."), GS("Probabilité totale ?", v, M(dP(v)) + ".")],
             traps: [TR(rnd(df[0] + df[1] + df[2]), "Chaque taux est pondéré par la part de la machine."), TR(rnd((df[0] + df[1] + df[2]) / 3), "Les machines ne produisent pas autant : pondère par leurs parts."), TR(parts[0], "Il y a trois branches à additionner.")] }); },
-      () => { const p = pk([0.1, 0.2, 0.3, 0.15, 0.25, 0.4]), n = R.int(2, 4), c = pk([["Un archer touche le centre de la cible avec la probabilité", "tirs", "il touche le centre au moins une fois", "archer"], ["Un code promo est gagnant avec la probabilité", "achats", "elle gagne au moins une fois", "promo"], ["Un panneau solaire tombe en panne dans l'année avec la probabilité", "panneaux indépendants", "au moins un panneau tombe en panne", "panneaux"]]), q = rnd(1 - p), v = 1 - q ** n;
-        return QR(c[0] + " " + M(dP(p)) + ". On considère " + M(n) + " " + c[1] + " (épreuves indépendantes). Probabilité que " + c[2] + " ? (au millième)", v, 0.001,
+      () => { const p = pk([0.1, 0.2, 0.3, 0.15, 0.25, 0.4]), n = R.int(2, 4), c = pk([["Un archer touche le centre de la cible avec la probabilité", "tirs", "qu'il touche le centre au moins une fois", "archer"], ["À chaque achat, le code promo imprimé sur le ticket est gagnant avec la probabilité", "achats", "d'obtenir au moins un code gagnant", "promo"], ["Un panneau solaire tombe en panne dans l'année avec la probabilité", "panneaux indépendants", "qu'au moins un panneau tombe en panne", "panneaux"]]), q = rnd(1 - p), v = 1 - q ** n;
+        /* 27.11 (recalcul, agent recalcfr) : « Probabilité que au moins un panneau », « qu'elle gagne » (code promo) ; valeur exacte
+           à mi-chemin de deux millièmes (1 − 0,85² = 0,2775) : 0,277 et 0,278 étaient tous deux acceptés → tirage refait. */
+        if (Math.abs(((v * 1000) % 1) - 0.5) < 1e-6) return null;
+        return QR(c[0] + " " + M(dP(p)) + ". On considère " + M(n) + " " + c[1] + " (épreuves indépendantes). Probabilité " + c[2] + " ? (au millième)", v, 0.001,
           "L'évènement contraire est « jamais » : " + M(dP(q) + "^{" + n + "}") + ". Donc " + M("P = 1 - " + dP(q) + "^{" + n + "} \\approx " + N(rnd(v, 3))) + ".",
           { ctx: c[3], guide: [GR("Probabilité de « jamais » (au millième) ?", q ** n, M(dP(q) + "^{" + n + "} \\approx " + N(rnd(q ** n, 3))) + ".", 0.001), GR("Probabilité cherchée ?", v, M("\\approx " + N(rnd(v, 3))) + ".", 0.001)],
             traps: [TR(rnd(n * p, 3), "On ne peut pas additionner : passe par l'évènement contraire."), TR(rnd(p ** n, 3), "p^" + n + " : succès à chaque fois. On veut au moins un succès."), TR(rnd(1 - p ** n, 3), "Le contraire de « au moins un succès » est « aucun succès » : " + dTxt(q) + "^" + n + ".")] }); },
@@ -606,7 +609,7 @@
   const SL = {
     1: [
       () => { const a = nz(-9, 9), b = nz(-8, 8), q = pk(QS0); if (Math.abs(a) < 2) return null;
-        return QN("Pour tout entier naturel " + M("n") + ", " + M("u_n = " + N(a) + (b < 0 ? " - " + N(-b) : " + " + N(b)) + X + "\\left(" + q[1] + "\\right)^n") + ". Quelle est la limite de " + M("(u_n)") + " ?", a,
+        return QN("Pour tout entier naturel " + M("n") + ", " + M("u_n = " + N(a) + (Math.abs(b) === 1 ? (b < 0 ? " - " : " + ") : (b < 0 ? " - " + N(-b) : " + " + N(b)) + X) + "\\left(" + q[1] + "\\right)^n") /* 27.11 : plus de « 1 × » */ + ". Quelle est la limite de " + M("(u_n)") + " ?", a,
           "Comme " + M("-1 < " + q[1] + " < 1") + ", " + M("\\lim \\left(" + q[1] + "\\right)^n = 0") + ". Donc " + M("\\lim u_n = " + N(a)) + ".",
           { ctx: "geo-limite", shownOk: true, guide: [GS(M("\\lim\\limits_{n \\to +\\infty} \\left(" + q[1] + "\\right)^n") + " = ?", 0, M(0) + " (raison entre −1 et 1)."), GS(M("\\lim u_n") + " = ?", a, M(N(a)) + ".")],
             traps: [TR(a + b, M("q^n") + " tend vers 0, pas vers 1."), TR(b, "Le terme constant " + a + " reste.")] }); },
@@ -666,6 +669,9 @@
     ["On contrôle", "smartphones d'une grande production ; chacun est défectueux avec la probabilité", "", "smartphones défectueux", "controle", [0.02, 0.05, 0.1, 0.15]],
     ["On plante", "graines ; chacune germe avec la probabilité", "", "graines qui germent", "graines", [0.6, 0.7, 0.8, 0.9]]];
   const bc = (c, n, p) => c[0] + " " + M(n) + " " + c[1] + " " + M(dP(p)) + (c[2] ? " " + c[2] : "") + ". " + M("X") + " compte le nombre de " + c[3] + " : " + M("X") + " suit la loi binomiale " + M("\\mathcal{B}(" + n + " \\,;\\, " + dP(p) + ")") + ". ";
+  /* 27.11 (recalcul, agent recalcfr) : probabilité demandée au millième : l'arrondi ne doit être ni 0 ni 1 (P(X ⩾ 1) = 0,99999
+     → « 1 », question sans objet) ni tomber pile entre deux millièmes (0,1875 : 0,187 et 0,188 acceptés) → tirage refait. */
+  const ok3 = (v) => { const k = v * 1000, r = Math.round(k); return r >= 1 && r <= 999 && Math.abs((k % 1) - 0.5) > 1e-6; };
   const BI = {
     1: [
       () => { const c = pk(BCTX), n = R.int(2, 4), p = pk(c[5]); let all = R.rand() < 0.5; if ((all ? p ** n : (1 - p) ** n) < 0.001) all = !all; /* 24.11 : jamais de probabilité minuscule (0,02⁴ = 1,6·10⁻⁷, test) */ const v = rnd(all ? p ** n : (1 - p) ** n);
@@ -684,12 +690,12 @@
           { ctx: c[4] + "-esperance", guide: [GS(M("E(X) = np") + " = ?", v, M(N(v)) + ".")], traps: [TR(rnd(n * (1 - p)), "C'est n × p, avec p la probabilité de succès."), TR(rnd(n * p * (1 - p)), "C'est la variance ; l'espérance vaut np.")] }); },
     ],
     2: [
-      () => { const c = pk(BCTX), n = R.int(5, 10), p = pk(c[5]), k = R.int(2, n - 2), v = C(n, k) * p ** k * (1 - p) ** (n - k);
+      () => { const c = pk(BCTX), n = R.int(5, 10), p = pk(c[5]), k = R.int(2, n - 2), v = C(n, k) * p ** k * (1 - p) ** (n - k); if (!ok3(v)) return null;
         return QR(bc(c, n, p) + "Calcule " + M("P(X = " + k + ")") + " (arrondi au millième).", v, 0.001,
           M("P(X = " + k + ") = \\binom{" + n + "}{" + k + "}" + X + dP(p) + "^{" + k + "}" + X + dP(1 - p) + "^{" + (n - k) + "} = " + C(n, k) + X + dP(p) + "^{" + k + "}" + X + dP(1 - p) + "^{" + (n - k) + "} \\approx " + N(rnd(v, 3))) + ".",
           { ctx: c[4] + "-pk", guide: [GS(M("\\binom{" + n + "}{" + k + "}") + " = ?", C(n, k), M(C(n, k)) + "."), GR(M("P(X = " + k + ")") + " au millième ?", v, M("\\approx " + N(rnd(v, 3))) + ".", 0.001)],
             traps: [TR(rnd(p ** k * (1 - p) ** (n - k), 3), "Il y a " + C(n, k) + " chemins avec " + k + " succès : multiplie par le coefficient binomial."), TR(rnd(C(n, k) * p ** k, 3), "N'oublie pas les " + (n - k) + " échecs."), TR(rnd(C(n, k) * p ** (n - k) * (1 - p) ** k, 3), "p est à la puissance du nombre de succès (" + k + ").")] }); },
-      () => { const c = pk(BCTX), n = R.int(3, 12), p = pk(c[5]), v = 1 - (1 - p) ** n;
+      () => { const c = pk(BCTX), n = R.int(3, 12), p = pk(c[5]), v = 1 - (1 - p) ** n; if (!ok3(v)) return null;
         return QR(bc(c, n, p) + "Calcule " + M("P(X \\geqslant 1)") + " (arrondi au millième).", v, 0.001,
           M("P(X \\geqslant 1) = 1 - P(X = 0) = 1 - " + dP(1 - p) + "^{" + n + "} \\approx " + N(rnd(v, 3))) + ".",
           { ctx: c[4] + "-aumoins", guide: [GR(M("P(X = 0)") + " au millième ?", (1 - p) ** n, M(dP(1 - p) + "^{" + n + "} \\approx " + N(rnd((1 - p) ** n, 3))) + ".", 0.001), GR(M("P(X \\geqslant 1)") + " ?", v, M("\\approx " + N(rnd(v, 3))) + ".", 0.001)],
@@ -706,7 +712,7 @@
           "On cherche le plus petit " + M("n") + " tel que " + M("1 - " + dP(1 - p) + "^n \\geqslant " + dP(s)) + ", soit " + M(dP(1 - p) + "^n \\leqslant " + dP(rnd(1 - s))) + ". À la calculatrice : " + M(dP(1 - p) + "^{" + (n - 1) + "} \\approx " + N(rnd((1 - p) ** (n - 1), 4))) + ", " + M(dP(1 - p) + "^{" + n + "} \\approx " + N(rnd((1 - p) ** n, 4))) + " : " + M("n = " + n) + ".",
           { ctx: c[3], guide: [GR("Avec " + M("n") + " essais, " + M("P = 1 - " + dP(1 - p) + "^n") + ". Que vaut-elle pour " + M("n = 10") + " (au millième) ?", 1 - (1 - p) ** 10, M("\\approx " + N(rnd(1 - (1 - p) ** 10, 3))) + ".", 0.001), GS("Plus petit " + M("n") + " ?", n, M(n) + ".")],
             traps: [TR(n - 1, "Avec " + (n - 1) + " essais, la probabilité est encore inférieure à " + dTxt(s) + "."), TR(Math.ceil(s / p), "Ce n'est pas proportionnel : passe par (1 − p)ⁿ.")] }); },
-      () => { const c = pk(BCTX), n = R.int(4, 10), p = pk(c[5]), p0 = (1 - p) ** n, p1 = n * p * (1 - p) ** (n - 1), v = p0 + p1;
+      () => { const c = pk(BCTX), n = R.int(4, 10), p = pk(c[5]), p0 = (1 - p) ** n, p1 = n * p * (1 - p) ** (n - 1), v = p0 + p1; if (!ok3(v)) return null;
         return QR(bc(c, n, p) + "Calcule " + M("P(X \\leqslant 1)") + " (arrondi au millième).", v, 0.001,
           M("P(X \\leqslant 1) = P(X = 0) + P(X = 1) = " + dP(1 - p) + "^{" + n + "} + " + n + X + dP(p) + X + dP(1 - p) + "^{" + (n - 1) + "} \\approx " + N(rnd(v, 3))) + ".",
           { ctx: c[4] + "-auplus", guide: [GR(M("P(X = 0)") + " ?", p0, M("\\approx " + N(rnd(p0, 3))) + ".", 0.001), GR(M("P(X = 1)") + " ?", p1, M("\\approx " + N(rnd(p1, 3))) + ".", 0.001), GR(M("P(X \\leqslant 1)") + " ?", v, M("\\approx " + N(rnd(v, 3))) + ".", 0.001)],
@@ -1063,7 +1069,7 @@
   const TAUX = {
     1: [
       () => { const t = pk(TX), cm = r9(1 + t / 100), inv = R.rand() < 0.5;
-        if (inv) return QN("Multiplier une quantité par " + M(nf(cm)) + " revient à l'" + (t > 0 ? "augmenter" : "diminuer") + " de combien de pour cent ? Donne le taux d'évolution (en %, négatif pour une baisse).", t, M(nf(cm) + " = 1 " + sg(t / 100).replace(" ", "")) + " : taux " + M(nf(t) + "\\,\\%") + ".",
+        if (inv) return QN("On multiplie une quantité par " + M(nf(cm)) + ". Quel est le taux d'évolution correspondant (en %, négatif pour une baisse) ?" /* 27.11 (recalcul) : « revient à l'diminuer de combien de pour cent », et −8 attendu pour « diminuer de combien » */, t, M(nf(cm) + " = 1 " + sg(t / 100).replace(" ", "")) + " : taux " + M(nf(t) + "\\,\\%") + ".",
           { ctx: "cm-vers-taux", guide: [GS("Écart entre le coefficient et 1 : " + M(nf(cm) + " - 1") + " = ?", r9(t / 100), M(nf(r9(t / 100))) + "."), GS("En pour cent ?", t, M(nf(t) + "\\,\\%") + ".")], traps: [TR(r9(cm * 100), "Le coefficient " + nt(cm) + " correspond à " + nt(cm * 100) + " % de la valeur de départ : l'évolution, c'est l'écart avec 100 %."), TR(-t, "Coefficient " + (cm > 1 ? "plus grand" : "plus petit") + " que 1 : c'est une " + (t > 0 ? "hausse" : "baisse") + ".")] });
         return QN((t > 0 ? "Augmenter" : "Diminuer") + " une quantité de " + PC(Math.abs(t)) + " revient à la multiplier par quel nombre (coefficient multiplicateur) ?", cm, M("1 " + (t > 0 ? "+" : "-") + " \\frac{" + Math.abs(t) + "}{100} = " + nf(cm)) + ".",
           { ctx: "taux-vers-cm", guide: [GS(M(Math.abs(t) + "\\,\\%") + " en écriture décimale ?", Math.abs(t) / 100, M(nf(Math.abs(t) / 100)) + "."), GS("Coefficient multiplicateur ?", cm, M("1 " + (t > 0 ? "+" : "-") + " " + nf(Math.abs(t) / 100) + " = " + nf(cm)) + ".")], traps: [TR(Math.abs(t) / 100, "Multiplier par " + nt(Math.abs(t) / 100) + " donne " + Math.abs(t) + " % de la quantité, pas la quantité " + (t > 0 ? "augmentée" : "diminuée") + "."), TR(r9(1 - t / 100), (t > 0 ? "Hausse" : "Baisse") + " : on " + (t > 0 ? "ajoute" : "retire") + " " + nt(Math.abs(t) / 100) + " à 1.")] }); },
@@ -2988,6 +2994,9 @@ const FRX = (function () {
           { ctx: "image-intervalle", guide: [GR("Minimum ?", iv[0][0], M(N(iv[0][0])) + "."), GR("Maximum ?", iv[0][2], M(N(iv[0][2])) + "."), { ask: "Intervalle des valeurs ?", spec: solsetSpec(iv), sol: M("[" + N(iv[0][0]) + " \\,;\\, " + N(iv[0][2]) + "]") + "." }],
             traps: [TS([[Math.min(ys[0], ys[3]), true, Math.max(ys[0], ys[3]), true]], "Les valeurs aux bornes ne suffisent pas : regarde aussi les sommets des flèches."), TS([[xs[0], true, xs[3], true]], "C'est l'intervalle des x ; on demande les valeurs de f.")] }); },
       () => { const { xs, ys } = mkTab(4); let k = R.rand() < 0.5 ? ys[1] + (ys[2] > ys[1] ? 1 : -1) * 0.5 : (ys[2] + ys[3]) / 2, n = 0; for (let i = 1; i < 3; i++) if ((ys[i] - k) * (ys[i + 1] - k) < 0) n++;
+        /* 27.11 (recalcul, agent recalcfr) : k = (ys[2] + ys[3]) / 2 pouvait valoir ys[1] (−7 atteint en x = −2, borne de l'intervalle) :
+           une solution de plus que les flèches comptées → tirage refait. */
+        if (ys.slice(1).includes(k)) return null;
         return QN(INTRO + tvTex(xs, ys) + " Combien de solutions l'équation " + M("f(x) = " + N(k)) + " a-t-elle sur " + M("[" + N(xs[1]) + " \\,;\\, " + N(xs[3]) + "]") + " ?", n,
           "On ne regarde que les flèches entre " + M(N(xs[1])) + " et " + M(N(xs[3])) + " : " + M(N(k)) + " est atteint une fois sur chaque flèche qui l'encadre, soit " + n + " solution" + (n > 1 ? "s" : "") + ".",
           { ctx: "nb-solutions-partiel", guide: [GR("Nombre de flèches (entre " + M(N(xs[1])) + " et " + M(N(xs[3])) + ") qui encadrent " + M(N(k)) + " ?", n, M(n) + ".")],
@@ -3172,7 +3181,7 @@ const FRX = (function () {
           "Il faut " + M("x > 1") + ". Alors " + M("\\ln((x - 1)(x + 1)) = \\ln " + k) + ", " + M("x^2 - 1 = " + k) + ", " + M("x^2 = " + r * r) + ", " + M("x = " + r) + " ou " + M("x = -" + r) + " ; seule " + M("x = " + r) + " vérifie " + M("x > 1") + ".",
           { ctx: "domaine-equation", guide: [GR("Équation sans ln : " + M("x^2 = \\dots") + " ?", r * r, M("x^2 = " + r * r) + "."), GR("Solution qui vérifie " + M("x > 1") + " ?", r, M(r) + ".")],
             traps: [TR(-r, "−" + r + " n'est pas dans le domaine (x − 1 > 0)."), TR((k + 1) / 2, "ln a + ln b = ln(ab), pas ln(a + b).")] }); },
-      () => { const u0 = pk([500, 800, 1000, 2000]), q = pk([0.9, 0.8, 0.95, 0.85]), s = pk([100, 200, 50]), n = Math.ceil(Math.log(s / u0) / Math.log(q) + 1e-12), c = pk([["Une voiture perd", "de sa valeur chaque année ; elle vaut", "€", "voiture"], ["Un lac perd", "de ses poissons chaque année ; il en compte", "poissons", "lac"], ["Un médicament s'élimine :", "de la dose disparaît chaque heure ; il en reste", "mg", "medicament"]]);
+      () => { const u0 = pk([500, 800, 1000, 2000]), q = pk([0.9, 0.8, 0.95, 0.85]), s = pk([100, 200, 50]), n = Math.ceil(Math.log(s / u0) / Math.log(q) + 1e-12), c = pk([["Une voiture perd", "de sa valeur chaque année ; elle vaut", "€", "voiture"], ["Un lac perd", "de ses poissons chaque année ; il abrite" /* 27.11 : « il en compte 800 poissons » */, "poissons", "lac"], ["Un médicament s'élimine :", "de la dose disparaît chaque heure ; il en reste", "mg", "medicament"]]);
         if (s >= u0) return null;
         return QN(c[0] + " " + M(N(rnd((1 - q) * 100)) + "\\,\\%") + " " + c[1] + " " + M(N(u0)) + " " + c[2] + " au départ. À partir de quel rang " + M("n") + " a-t-on " + M("u_n = " + N(u0) + X + N(q) + "^n < " + N(s)) + " ?", n,
           M(N(q) + "^n < " + F(s / u0) + " \\iff n\\ln " + N(q) + " < \\ln " + F(s / u0) + " \\iff n > \\frac{\\ln " + F(s / u0) + "}{\\ln " + N(q) + "} \\approx " + N(rnd(Math.log(s / u0) / Math.log(q), 2))) + " (on divise par " + M("\\ln " + N(q) + " < 0") + " : le sens change) : " + M("n = " + n) + ".",
@@ -3268,8 +3277,8 @@ const FRX = (function () {
             traps: [TR(fm < 0 ? lo : m, "On garde la moitié où f change de signe."), TR(hi, "C'est la borne droite.")] }); },
     ],
     2: [
-      () => { const c = pk([3, 5, 6, 10, 12, 15]), f = (x) => x ** 3 + x - c; let lo = 0; while (f(lo + 1) < 0) lo++; let x = lo; while (f(rnd(x + 0.1, 6)) < 0) x = rnd(x + 0.1, 6);
-        if (Math.abs(f(x)) < 1e-9) return null;
+      () => { const c = pk([3, 5, 6, 9, 12, 15]) /* 27.11 (recalcul) : 10 retiré, x³ + x = 10 a pour solution 2 (attendu 1,9, corrigé « f(2) ≈ 0 > 0 ») */, f = (x) => x ** 3 + x - c; let lo = 0; while (f(lo + 1) < 0) lo++; let x = lo; while (f(rnd(x + 0.1, 6)) < 0) x = rnd(x + 0.1, 6);
+        if (Math.abs(f(x)) < 1e-9 || Math.abs(f(rnd(x + 0.1, 6))) < 1e-9) return null;
         return QN("L'équation " + M("x^3 + x = " + c) + " a une unique solution " + M("\\alpha") + " (fonction continue strictement croissante). Donne la valeur approchée de " + M("\\alpha") + " par défaut au dixième (balayage avec la calculatrice).", x,
           "On tabule " + M("f(x) = x^3 + x - " + c) + " avec un pas de 0,1 : " + M("f(" + N(x) + ") \\approx " + N(rnd(f(x), 3)) + " < 0") + " et " + M("f(" + N(rnd(x + 0.1, 6)) + ") \\approx " + N(rnd(f(x + 0.1), 3)) + " > 0") + ", donc " + M(N(x) + " < \\alpha < " + N(rnd(x + 0.1, 6))) + ". Valeur par défaut : " + M(N(x)) + ".",
           { ctx: "balayage", guide: [GR("Entier " + M("n") + " tel que " + M("n < \\alpha < n + 1") + " ?", lo, M(lo) + "."), GR("Valeur par défaut au dixième ?", x, M(N(x)) + ".")],
@@ -4106,7 +4115,7 @@ const FRX = (function () {
           (n % 2 ? M("W_3 = \\frac{2}{3}W_1 = \\frac{2}{3}") + (n === 5 ? ", " + M("W_5 = \\frac{4}{5}W_3 = \\frac{8}{15}") : "") : M("W_2 = \\frac{1}{2}W_0 = \\frac{\\pi}{4}") + ", " + M("W_4 = \\frac{3}{4}W_2 = \\frac{3\\pi}{16}")) + " : " + M("W_{" + n + "} = " + ex + " \\approx " + N(rnd(v, 2))) + ".",
           { ctx: "wallis", guide: [GR(M("W_{" + (n - 2) + "}") + " (au centième) ?", rnd(I[n - 2], 9), M("\\approx " + N(rnd(I[n - 2], 2))) + ".", 0.01), GR(M("W_{" + n + "}") + " (au centième) ?", v, M(ex + " \\approx " + N(rnd(v, 2))) + ".", 0.01)],
             traps: [TR(rnd(((n - 1) / n) * I[n - 1], 9), "La relation relie W_(n+2) à W_n (deux rangs plus bas)."), TR(rnd((n / (n + 1)) * I[n - 2], 9), "W_(n+2) = (n + 1)/(n + 2) × W_n : pour W_" + n + ", le coefficient est " + (n - 1) + "/" + n + ".")] }); },
-      () => { const s = pk([0.1, 0.05, 0.04, 0.02, 0.2, 0.125]), n = Math.round(1 / s);
+      () => { const s = pk([0.1, 0.2, 0.125, 0.25]) /* 27.11 (recalcul) : 0,05, 0,04 et 0,02 retirés : J_50 = 0,02(1 − e⁻⁵⁰) s'affiche 0,02 à la calculatrice, l'élève qui vérifie conclut n = 51 */, n = Math.round(1 / s);
         return QN("Pour tout entier " + M("n \\geqslant 1") + ", " + M("J_n = \\int_0^{\\,1} e^{-nx}\\,dx = \\frac{1 - e^{-n}}{n}") + ". La suite est décroissante. Quel est le plus petit entier " + M("n") + " tel que " + M("J_n < " + N(s)) + " ?", n,
           M("J_n < \\frac{1}{n}") + " ; pour " + M("n = " + n) + " : " + M("J_{" + n + "} = " + N(s) + "(1 - e^{-" + n + "}) < " + N(s)) + ". Pour " + M("n = " + (n - 1)) + " : " + M("J_{" + (n - 1) + "} \\approx " + N(rnd((1 - Math.exp(-(n - 1))) / (n - 1), 4)) + " > " + N(s)) + ". Donc " + M("n = " + n) + ".",
           { ctx: "seuil-exp", guide: [GR(M("J_{" + (n - 1) + "}") + " (au millième) ?", rnd((1 - Math.exp(-(n - 1))) / (n - 1), 9), M("\\approx " + N(rnd((1 - Math.exp(-(n - 1))) / (n - 1), 3))) + " : encore trop grand.", 0.001), GR(M("n") + " ?", n, M(n) + ".")],
