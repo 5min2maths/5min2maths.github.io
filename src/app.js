@@ -239,7 +239,7 @@ const boldData = (html) => {
   }).join("");
 };
 
-const h = (html) => { const tr = document.getElementById("tour"); if (tr) tr.remove(); sigClose(); pageQ = null; if (typeof Upd !== "undefined" && Upd) Upd.scr = ""; app.classList.remove("has-tabs"); app.innerHTML = html; addTabs(); addFab(); const sh = document.getElementById("fabs"); if (sh) sh.hidden = true; placeFab(); typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
+const h = (html) => { const tr = document.getElementById("tour"); if (tr) tr.remove(); sigClose(); pageQ = null; if (typeof Upd !== "undefined" && Upd) Upd.scr = ""; app.classList.remove("has-tabs"); app.innerHTML = html; ecranSplit(); addTabs(); addFab(); const sh = document.getElementById("fabs"); if (sh) sh.hidden = true; placeFab(); typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 // Textes de l'app (indices, erreurs typiques) : échappés, sauf <b>, <i>, <br> (16.11 : les balises s'affichaient telles quelles).
 const escT = (s) => esc(s).replace(/&lt;(\/?)(b|i|br)&gt;/g, "<$1$2>");
@@ -964,6 +964,47 @@ const uiApply = () => {
   if (a.hc) r.dataset.hc = "1"; else delete r.dataset.hc;
 };
 uiApply();
+/* 27.11 (agent écrans, décision de l'enseignant du 25.11) : trois affichages choisis automatiquement selon l'écran, avec
+   un choix dans les Réglages (propre à l'appareil, UI.ecran : auto, tel, tab, ordi). Une classe sur <html> pilote le CSS
+   (style.css, « Affichages tablette et ordinateur ») : ecran-tel (aucune règle : le téléphone ne change pas), ecran-tablette,
+   ecran-ordi ; ecran-2col en plus quand la place permet l'écran de question en deux colonnes (énoncé et figure à gauche,
+   réponse à droite). Automatique : tactile (pointer: coarse) dès 700 px = tablette ; souris dès 1024 px = ordinateur ;
+   sinon téléphone (une fenêtre étroite sur ordinateur garde la colonne habituelle). */
+const ECRANS = [["auto", "Automatique"], ["tel", "Téléphone"], ["tab", "Tablette"], ["ordi", "Ordinateur"]];
+const ecranAuto = (w, coarse) => (w < 700 ? "tel" : coarse ? "tab" : w >= 1024 ? "ordi" : "tel");
+function ecranApply() {
+  const r = document.documentElement, w = window.innerWidth, hh = window.innerHeight;
+  const coarse = !!(window.matchMedia && matchMedia("(pointer: coarse)").matches);
+  const e = ECRANS.some((x) => x[0] === UI.ecran && x[0] !== "auto") ? UI.ecran : ecranAuto(w, coarse);
+  const two = (e === "ordi" && w >= 900) || (e === "tab" && w >= 1000 && w > hh);
+  const cls = ["ecran-" + (e === "tab" ? "tablette" : e)].concat(two ? ["ecran-2col"] : []);
+  for (const c of [...r.classList]) if (c.startsWith("ecran-") && !cls.includes(c)) r.classList.remove(c);
+  for (const c of cls) r.classList.add(c);
+}
+ecranApply();
+window.addEventListener("resize", ecranApply);
+/* Écran de question en deux colonnes (ecran-2col) : énoncé et figure dans .q-l, le reste (brouillon, rappel de cours,
+   réponse, pavé, barre d'action, correction) dans .q-r ; la barre d'action passe sous la réponse, avant la correction.
+   Seulement quand ecran-2col est là à l'affichage (le téléphone garde exactement le même document) ; si la fenêtre
+   rétrécit ensuite, les deux colonnes passent en display: contents (une seule colonne, comme avant). */
+function ecranSplit() {
+  if (!document.documentElement.classList.contains("ecran-2col")) return;
+  const card = app.querySelector(":scope > .card.pop"), bar = app.querySelector(":scope > .qbar");
+  if (!card || !bar || !card.querySelector(":scope > .qtext") || !card.querySelector(":scope > .answer")) return;
+  const L = document.createElement("div"), R = document.createElement("div");
+  L.className = "q-l"; R.className = "q-r";
+  for (const el of [...card.children]) (el.matches(".qmeta, .qtext, .exact-note, .figwrap") ? L : R).appendChild(el);
+  R.insertBefore(bar, R.querySelector(":scope > #fb"));
+  card.classList.add("q-2col"); card.append(L, R);
+}
+/* Bilan et Mes compétences (ecran-2col) : les cartes entre le titre et le bouton du bas, sur deux colonnes (.e-cols). */
+function ecranCols() {
+  if (!document.documentElement.classList.contains("ecran-2col")) return;
+  const kids = [...app.children], i = kids.findIndex((el) => el.matches(".card, details")), end = kids.map((el) => el.matches("button.btn-big")).lastIndexOf(true);
+  if (i < 0 || end <= i + 1) return;
+  const box = document.createElement("div"); box.className = "e-cols";
+  app.insertBefore(box, kids[i]); kids.slice(i, end).forEach((el) => box.appendChild(el));
+}
 // Vibration courte : une pour juste, deux pour faux (Android ; sans effet ailleurs).
 const buzz = (ok) => { if (UI.vib && navigator.vibrate) try { navigator.vibrate(ok ? 35 : [40, 70, 40]); } catch (e) {} };
 // ---- Installer l'app (21.11, faire revenir les élèves) ----
@@ -1028,13 +1069,17 @@ function bindIosStore() {
 }
 function screenSettings() {
   const A = a11yOf(state);
+  /* 27.11 (agent écrans) : choix de la mise en page, sur tablette et ordinateur (ou s'il a été changé) ; l'écran d'un
+     téléphone reste tel quel. */
+  const ecranOpt = window.innerWidth >= 700 || (UI.ecran && UI.ecran !== "auto");
   h(`${brand}${backTop()}<h2>Réglages</h2><div class="stack">
   <div class="card flat stack"><h3>Affichage</h3>
     <span class="small muted" id="fs-l">Taille du texte</span><div class="seg" id="fs" role="group" aria-labelledby="fs-l">${A11Y_FS.map(([v, l]) => `<button aria-pressed="${A.fs === v}" data-v="${v}">${l}</button>`).join("")}</div>
     <span class="small muted" id="font-l">Police</span><div class="seg" id="font" role="group" aria-labelledby="font-l"><button aria-pressed="${!A.font}" data-v="0">Habituelle</button><button aria-pressed="${!!A.font}" data-v="1">Plus lisible</button></div>
     <span class="small muted" id="hc-l">Contraste</span><div class="seg" id="hc" role="group" aria-labelledby="hc-l"><button aria-pressed="${!A.hc}" data-v="0">Normal</button><button aria-pressed="${!!A.hc}" data-v="1">Renforcé</button></div>
     <span class="small muted" id="st-l">Statistiques anonymes pour améliorer l'app</span><div class="seg" id="statsset" role="group" aria-labelledby="st-l"><button aria-pressed="${statsOk()}" data-v="1">J'aide</button><button aria-pressed="${!statsOk()}" data-v="0">Ne rien envoyer</button></div>
-    <span class="small muted">Vibrer à chaque réponse (téléphone)</span><div class="seg" id="vib"><button aria-pressed="${UI.vib}" data-v="1">Oui</button><button aria-pressed="${!UI.vib}" data-v="0">Non</button></div></div>
+    <span class="small muted">Vibrer à chaque réponse (téléphone)</span><div class="seg" id="vib"><button aria-pressed="${UI.vib}" data-v="1">Oui</button><button aria-pressed="${!UI.vib}" data-v="0">Non</button></div>${ecranOpt ? `
+    <span class="small muted" id="ecran-l">Mise en page (cet appareil)</span><div class="seg" id="ecran" role="group" aria-labelledby="ecran-l">${ECRANS.map(([v, l]) => `<button aria-pressed="${(UI.ecran || "auto") === v}" data-v="${v}">${l}</button>`).join("")}</div>` : ""}</div>
   ${installCard("")}
   <button class="btn-sec" id="backup">💾 Sauvegarder ou transférer ma progression</button><button class="btn-sec" id="level">Changer de classe ou d'école</button><button class="btn-sec" id="present" onclick="location.hash='#decouvrir'">📣 Présenter l'app (élèves)</button><button class="btn-sec" onclick="location.hash='#parents'">👪 Présenter l'app (parents)</button><button class="btn-sec" id="privacy">🔒 Ce que l'app envoie</button><button class="btn-ghost small" id="legal">Mentions légales et confidentialité</button>
   ${isAuthor() ? '<button class="btn-primary" id="stats">📊 Statistiques d\'usage (auteur)</button>' : ""}
@@ -1046,6 +1091,7 @@ function screenSettings() {
   app.querySelectorAll("#fs button").forEach((b) => (b.onclick = () => setA("fs", +b.dataset.v)));
   app.querySelectorAll("#font button").forEach((b) => (b.onclick = () => setA("font", +b.dataset.v)));
   app.querySelectorAll("#hc button").forEach((b) => (b.onclick = () => setA("hc", +b.dataset.v)));
+  app.querySelectorAll("#ecran button").forEach((b) => (b.onclick = () => { UI.ecran = b.dataset.v; uiSave(); ecranApply(); screenSettings(); const f = document.querySelector(`#ecran button[data-v="${b.dataset.v}"]`); if (f) f.focus(); }));
   app.querySelectorAll("#vib button").forEach((b) => (b.onclick = () => { UI.vib = b.dataset.v === "1"; uiSave(); if (UI.vib) buzz(true); screenSettings(); }));
   app.querySelectorAll("#statsset button").forEach((b) => (b.onclick = () => { statsSet(b.dataset.v === "1"); screenSettings(); }));
   document.getElementById("privacy").onclick = () => screenPrivacy(screenSettings);
@@ -1104,7 +1150,7 @@ function screenComps() {
   ${old.length ? `<details class="olds"><summary>Années précédentes (${compStats(old.map((c) => c.id)).tested} ${isFR() ? "positionnées" : "notées"})</summary>${block(old)}</details>` : ""}
   ${badgesSection()}
   <button class="btn-primary btn-big" id="back">Retour</button>`);
-  bindBadges(app);
+  ecranCols(); bindBadges(app);
   // « Me tester » (14.11, demande de l'utilisateur) : 3 questions de la compétence, au niveau de la compétence.
   app.querySelectorAll(".ctest").forEach((b) => (b.onclick = () => {
     const id = b.dataset.id, d = +b.dataset.d, cid = id + ":" + (d - 1);
@@ -1150,7 +1196,7 @@ function screenCompsRef() {
   ${olds.map(([lab, ys]) => `<details class="olds"><summary>${lab} (${ys.map((y) => Referentiel.stats(state, Referentiel.list(p, y)).tested).reduce((a, b) => a + b, 0)} ${W})</summary>${ys.map((y) => `<h3 class="ryear">${Referentiel.yearLabel(p, y)}</h3>${themes(Referentiel.list(p, y))}`).join("")}</details>`).join("")}
   ${badgesSection()}
   <button class="btn-primary btn-big" id="back">Retour</button>`);
-  bindBadges(app);
+  ecranCols(); bindBadges(app);
   app.querySelectorAll(".rtest").forEach((b) => (b.onclick = () => {
     const r = Referentiel.find(p, b.dataset.code), ps = Referentiel.plan(p, r);
     if (!ps.length) return;
@@ -2309,7 +2355,7 @@ function bindRecap() {
    défilement (champ, clavier de l'app, indice) pour que rien ne passe dessous. */
 const qbarHtml = (left, right, more) => `<div class="qbar" id="qbar"><div class="qbar-in"><div class="qbar-l">${more ? `<div class="qmore"><button type="button" class="btn-ghost qmore-b" id="qmore" aria-label="Autres choix : pas encore vu, trop facile" aria-haspopup="true" aria-expanded="false">⋯</button><div class="qmenu" id="qmenu" hidden>${more}</div></div>` : ""}${left}</div><div class="qbar-r">${right}</div></div></div>`;
 function qbarSet(left, right) { const b = document.getElementById("qbar"); if (!b) return; b.querySelector(".qbar-l").innerHTML = left; b.querySelector(".qbar-r").innerHTML = right; }
-const qbarH = () => { const b = document.getElementById("qbar"); return b && b.isConnected && b.getClientRects().length ? b.getBoundingClientRect().height : 0; };
+const qbarH = () => { const b = document.getElementById("qbar"); return b && b.isConnected && b.getClientRects().length && getComputedStyle(b).position !== "static" ? b.getBoundingClientRect().height : 0; }; /* 27.11 : sur ordinateur, collée au bas de la colonne de réponse (sticky) */
 const qmenuShow = (on) => { const m = document.getElementById("qmenu"), b = document.getElementById("qmore"); if (!m || !b) return; m.hidden = !on; b.setAttribute("aria-expanded", String(on)); };
 function bindQmore() { const b = document.getElementById("qmore"); if (b) b.onclick = (e) => { e.stopPropagation(); qmenuShow(document.getElementById("qmenu").hidden); }; }
 /* Plus rien dans le menu (les deux choix ne valent qu'avant le premier essai) : « ⋯ » disparaît. */
@@ -3115,7 +3161,7 @@ function screenSummary() {
   <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)", "app")}</div>
   ${n <= 2 && shortMsg && !session.weekly && !session.carnet && !session.prep ? `<div class="card flat stack"><p class="small">${shortMsg}</p><button class="btn-sec" id="again">➕ Encore une séance</button></div>` : ""}
   <button class="btn-primary btn-big" id="home">Retour à l'accueil</button>`);
-  bindComment(app, "app"); bindInstall(screenHome);
+  ecranCols(); bindComment(app, "app"); bindInstall(screenHome);
   /* 24.11 (retour testeur : « séance très courte, l'élève peut croire qu'il a fini trop vite ») */
   if (document.getElementById("again")) document.getElementById("again").onclick = () => { if (n === 1) Engine.otherFormat(state); session = null; save(); startSession(); };
   if (nb || newGrade) setTimeout(burst, 250);
