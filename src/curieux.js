@@ -710,8 +710,8 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
       const lw = N(w).replace("{,}", ",");
       const fig = `<svg viewBox="110 140 380 260" width="300" style="max-width:100%;height:auto" role="img" aria-label="La pépite du logo et un rectangle en pointillés de ${lw} mm sur ${h} mm">${inner}`
         + `<rect x="${F.x}" y="${F.y}" width="${F.w}" height="${F.h}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="9 7"/>`
-        + `<text x="${F.x + F.w / 2}" y="${F.y - 10}" text-anchor="middle" font-size="18" fill="currentColor">${lw} mm</text>`
-        + `<text x="${refl ? F.x - 8 : F.x + F.w + 10}" y="${F.y + F.h / 2 + 6}" text-anchor="${refl ? "end" : "start"}" font-size="18" fill="currentColor">${h} mm</text></svg>`;
+        + `<text x="${F.x + F.w / 2}" y="${F.y - 10}" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor" stroke="var(--card, #fff)" stroke-width="5" paint-order="stroke">${lw} mm</text>`
+        + `<text x="${refl ? F.x - 8 : F.x + F.w + 10}" y="${F.y + F.h / 2 + 6}" text-anchor="${refl ? "end" : "start"}" font-size="17" font-weight="700" fill="currentColor" stroke="var(--card, #fff)" stroke-width="5" paint-order="stroke">${h} mm</text></svg>`;
       return { titre: "Le secret du logo", q: "Le logo de " + APP_NAME + " cache un nombre célèbre. Sur " + obj + (refl ? ", le reflet brillant de la pépite (sa spirale) est tracé exactement dans le rectangle en pointillés : " : ", la pépite tient exactement dans le rectangle en pointillés : ") + T(w, 1) + " mm de large et " + T(h) + " mm de haut.",
         fig,
         bet: { q: "Quel nombre célèbre se cache dans ce rectangle ?", choices: ["π ≈ 3,14", "le nombre d'or ≈ 1,618", "√2 ≈ 1,414 (comme une feuille A4)"], good: 1 },

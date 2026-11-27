@@ -164,7 +164,7 @@ def nugget_real(tr="", detail=True, explain=False):
     return s + "</g>"
 
 
-# A-mix (27.11, « fais le mélange ») : matière d'A-réaliste (contour bosselé, relief) + éclat d'A3. Le relief éclairé
+# A-mix (27.11, « fais le mélange » ; retouche finale : nodules moins nombreux et plus gros, creux plus profonds) : matière d'A-réaliste (contour bosselé, relief) + éclat d'A3. Le relief éclairé
 # (gris) est recoloré par une table : brun-ambre #7A4E00 (creux) → ambre #C88A04 → or #F2B705 → jaune chaud #FFD84D
 # (crêtes) ; aucun gris. Reflets spéculaires nets #FFF7D6 sur les crêtes, contraste renforcé ; creux profonds ambre.
 MIX_DEFS = (
@@ -175,16 +175,16 @@ MIX_DEFS = (
     '<filter id="pgMix" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">'
     '<feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="11" result="n1"/>'
     '<feDisplacementMap in="SourceGraphic" in2="n1" scale="24" xChannelSelector="R" yChannelSelector="G" result="forme"/>'
-    '<feTurbulence type="fractalNoise" baseFrequency="0.024" numOctaves="3" seed="4" result="n2"/>'
-    '<feColorMatrix in="n2" type="luminanceToAlpha" result="relief"/>'
-    '<feDiffuseLighting in="relief" surfaceScale="14" diffuseConstant=".95" lighting-color="#fff" result="diff"><feDistantLight azimuth="225" elevation="38"/></feDiffuseLighting>'
+    '<feTurbulence type="fractalNoise" baseFrequency="0.013" numOctaves="2" seed="9" result="n2"/>'
+    '<feColorMatrix in="n2" type="luminanceToAlpha" result="relief0"/><feGaussianBlur in="relief0" stdDeviation="2.2" result="relief"/>'
+    '<feDiffuseLighting in="relief" surfaceScale="24" diffuseConstant=".95" lighting-color="#fff" result="diff"><feDistantLight azimuth="225" elevation="38"/></feDiffuseLighting>'
     '<feComponentTransfer in="diff" result="or"><feFuncR type="table" tableValues=".478 .784 .949 1 1"/>'
     '<feFuncG type="table" tableValues=".306 .541 .718 .847 .86"/><feFuncB type="table" tableValues="0 .016 .02 .1 .3"/></feComponentTransfer>'
     '<feComposite in="or" in2="forme" operator="in" result="orIn"/>'
-    '<feSpecularLighting in="relief" surfaceScale="14" specularConstant="1.15" specularExponent="40" lighting-color="#FFF7D6" result="spec"><feDistantLight azimuth="225" elevation="55"/></feSpecularLighting>'
+    '<feSpecularLighting in="relief" surfaceScale="24" specularConstant="1.2" specularExponent="30" lighting-color="#FFF7D6" result="spec"><feDistantLight azimuth="225" elevation="55"/></feSpecularLighting>'
     '<feComponentTransfer in="spec" result="specN"><feFuncA type="linear" slope="1.6" intercept="-.4"/></feComponentTransfer>'
     '<feComposite in="specN" in2="forme" operator="in" result="specIn"/>'
-    '<feColorMatrix in="n2" type="matrix" values="0 0 0 0 .478  0 0 0 0 .306  0 0 0 0 0  -10 0 0 0 3.9" result="creux"/>'
+    '<feColorMatrix in="n2" type="matrix" values="0 0 0 0 .478  0 0 0 0 .306  0 0 0 0 0  -8 0 0 0 3.9" result="creux"/>'
     '<feComposite in="creux" in2="forme" operator="in" result="creuxIn"/>'
     '<feMerge><feMergeNode in="orIn"/><feMergeNode in="creuxIn"/><feMergeNode in="specIn"/></feMerge></filter>'
     '<filter id="pgMixS" x="-20%" y="-20%" width="140%" height="140%">'
@@ -203,7 +203,7 @@ def nugget_mix(tr="", detail=True, explain=False):
         A = spiral_arcs(SPIRAL)
         op = [.12, .35, .6, .7, .6, .4, .22, .1]
         s += "".join(f'<path d="{a}" fill="none" stroke="#FFF7D6" stroke-width="1.8" stroke-linecap="round" opacity="{op[k]}"/>' for k, a in enumerate(A))
-        for x, y, r in ((220, 214, 8), (352, 226, 6), (300, 300, 5)):  # éclats étoilés discrets
+        for x, y, r in ((220, 214, 8), (352, 226, 6)):  # éclats étoilés discrets
             s += f'<path d="M{x} {y - r} L{x + r * .22} {y - r * .22} {x + r} {y} {x + r * .22} {y + r * .22} {x} {y + r} {x - r * .22} {y + r * .22} {x - r} {y} {x - r * .22} {y - r * .22}Z" fill="#fff" opacity=".95"/>'
     else:  # 48 px et favicon : silhouette bosselée jaune vif + 3 reflets
         s += f'<path d="{REAL_BLOB}" fill="url(#pgOrM)" filter="url(#pgMixS)"/>'

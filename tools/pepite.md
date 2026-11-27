@@ -22,9 +22,9 @@ l'app, les clés de stockage `m2m-*` et l'identifiant d'appareil ne changent pas
 `python3 tools/logo/gen_logos.py [A|B|C]` génère les 3 propositions (SVG), la planche `tools/logo/planche.png` et applique
 la variante choisie : icônes `src/pwa/icon-192/512.png` (any), `icon-maskable-192/512.png` (zone sûre à 80 %),
 `apple-touch-icon.png` (180), `favicon-32.png`, `favicon.svg`, et la ligne `const LOGO_MARK` de `src/curriculum.js`
-(pépite de l'en-tête, SVG en ligne). **Appliquée : A.**
+(icône miniature de l'en-tête). **Appliquée : A-mix (`AM`), validée par l'enseignant le 27.11.**
 
-- **A** (défaut) : vraie pépite d'or d'orpaillage, en or poli : silhouette d'un seul bloc ramassé de roche martelée
+- **A** (version lisse précédente) : vraie pépite d'or d'orpaillage, en or poli : silhouette d'un seul bloc ramassé de roche martelée
   (contour irrégulier, arêtes et pointes émoussées, un petit creux, inscrit dans le rectangle d'or), dégradé métallique à bandes claires et sombres (lumière en haut à gauche), plans
   sombres et clairs aux arêtes nettes, petits creux, liseré de contre-jour sur le bord bas, éclats presque blancs, ombre
   portée douce décalée en bas à droite ; ² en exposant sur un bout de papier quadrillé (idée de l'enseignant : la pépite = le côté brillant, le ² =
@@ -38,13 +38,14 @@ la variante choisie : icônes `src/pwa/icon-192/512.png` (any), `icon-maskable-1
 - En-tête : la pépite seule faisait « croissant » en petit → icône complète en miniature (`LOGO_MARK`) ; la figure de
   la question curieuse utilise la pépite seule (`LOGO_NUGGET`).
 
-**En attente du choix de l'enseignant (planche, 2e rangée)** — rien de tout ça n'est appliqué tant qu'il n'a pas choisi :
+**Propositions de la 2e rangée de la planche** (A-mix choisi et appliqué ; les autres restent disponibles) :
 - **A-mix** (`gen_logos.py AM`, demandé par l'enseignant : « fais le mélange ») : matière d'A-réaliste (contour bosselé,
   relief) et éclat d'A3 : le relief éclairé est recoloré par une table uniquement or (brun-ambre #7A4E00 dans les creux →
   ambre #C88A04 → or #F2B705 → jaune chaud #FFD84D sur les crêtes), reflets spéculaires nets #FFF7D6, éclats étoilés
   discrets, spirale d'or fondue dans le grand reflet, ombre portée ; 48 px / favicon : silhouette bosselée jaune vif +
-  3 reflets. En tête de la 2e rangée de la planche (512, 192, 48, favicon, en-tête 360 px). Sera appliqué partout s'il
-  est validé (`python3 tools/logo/gen_logos.py AM`, puis `python3 build.py`).
+  3 reflets. En tête de la 2e rangée de la planche (512, 192, 48, favicon, en-tête 360 px). Validé et appliqué partout
+  (icônes du manifeste any et maskable, apple-touch-icon, favicon, en-tête, écran d'entrée). Retouche finale : nodules
+  moins nombreux et plus gros (bruit plus grave, 2 octaves, relief adouci et plus haut), creux ambre plus profonds.
 - **A-réaliste** (`gen_logos.py AR`, d'après sa photo de référence, non commitée : `tools/logo/_ref/` ignoré) : filtres SVG
   (bruit fractal → `feDisplacementMap` pour le contour bosselé ; second bruit = relief → `feDiffuseLighting` et
   `feSpecularLighting`, lumière en haut à gauche, sur un dégradé or ; crevasses = bruit seuillé ; ombre vers le bas à
