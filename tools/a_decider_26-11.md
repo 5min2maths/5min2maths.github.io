@@ -55,3 +55,11 @@ Constat : le moteur sert déjà le plus facile possible aux faibles (plancher) ;
 positionnement au niveau 1, automatismes de fin de primaire pour les 9e en grande difficulté (le décision du 26.11
 « primaire = 2027 » est remplacée), bilan centré sur les réussites et message de retour, et sans chapitre « en classe »
 servir d'abord les notions de l'année.
+
+### Décisions de l'enseignant (27.11 midi) : « ok pour tout »
+- Leçon d'une notion du chapitre « en classe » : posée sans leçon en Révision / Défi / Automatismes (décision du 26.11 maintenue).
+- Rappels de primaire : seuil Mathélo 925, irréguliers de 9e compris (≈ 9 % de leurs séances).
+- Rechargement automatique à l'accueil / au bilan pour une nouvelle version : gardé.
+- Notion au nom de son chapitre : « Les bases : … » (pas de numérotation des chapitres MP).
+- Premier jour : 2 questions, niveau 2 au plus, pour tous.
+- Lecteur d'écran : retirer aria-live de <main id="app"> (build.py) — à faire après la fusion de agent/ordre (build.py).
