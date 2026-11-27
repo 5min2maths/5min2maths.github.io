@@ -1326,7 +1326,7 @@ function screenLegal(back) {
   ${sec("1. Qui est responsable ?", `<ul class="plain"><li>Éditeur de l'app et responsable du traitement des données : Jérôme Jaunait, enseignant de mathématiques, Genève.</li>
   <li>Adresse : Genève, Suisse (contact par e-mail, ci-dessous).</li>
   <li>Contact pour toute question ou demande sur les données : ${AC("adresse e-mail de contact dédiée (en cours de création)")}.</li>
-  <li>Cadre : projet personnel d'un enseignant, en phase de test avec l'une de ses classes.</li></ul>`)}
+  <li>Cadre : ${AC("projet personnel ou projet lié à un établissement scolaire")}.</li></ul>`)}
   ${sec("2. À quoi servent les données ?", `<p>Uniquement à améliorer l'app pendant sa phase de test : compter combien de personnes l'utilisent, repérer les questions mal posées, trop difficiles ou mal corrigées, ajuster la durée des séances, réparer les erreurs techniques, proposer les notions dans l'ordre où elles se font en classe.</p>
   <p class="small muted">Pas de publicité, pas de revente, pas d'évaluation des élèves : les données ne servent pas à noter ni à juger qui que ce soit.</p>`)}
   ${sec("3. Quelles données ?", `<p><b>Jamais demandé :</b> nom, prénom, adresse e-mail, numéro de téléphone, école, compte. Il n'y a pas d'inscription.</p>
@@ -1353,7 +1353,7 @@ function screenLegal(back) {
   <p>Identifiant de cet appareil : ${id ? `<code>${esc(id)}</code>` : "aucun pour l'instant (rien n'a encore été envoyé depuis cet appareil)"}</p>
   <p class="small muted">Notez cet identifiant <b>avant</b> d'utiliser « Tout effacer » : l'effacement supprime la progression et l'identifiant sur l'appareil, mais pas ce qui a déjà été envoyé. En cas de désaccord, vous pouvez vous adresser à au Préposé fédéral à la protection des données et à la transparence (PFPDT).</p>`)}
   ${sec("8. Élèves mineurs", `<p>L'app s'adresse à des élèves, en général mineurs. C'est pourquoi elle ne demande aucune donnée qui permette de les identifier, ne montre pas de publicité et ne contient pas de messagerie. Les parents peuvent exercer les droits décrits ci-dessus pour leur enfant.</p>
-  <p class="small muted">Pendant la phase de test, l'app est utilisée en classe avec l'accord de la direction de l'établissement, et les parents en sont informés. En dehors de la classe, son usage est libre et facultatif.</p>`)}
+  <p class="small muted">${AC("préciser si un accord des parents ou de l'établissement est demandé avant l'utilisation en classe")}</p>`)}
   ${sec("9. Cookies et stockage local", `<p>L'app n'utilise <b>aucun cookie</b> ni traceur publicitaire. Elle utilise le stockage local du navigateur pour garder la progression, les réglages et l'identifiant de l'appareil, ainsi qu'un cache hors ligne (pour fonctionner sans connexion). Ces informations restent sur l'appareil, sauf les envois décrits au point 3.</p>`)}
   ${sec("10. Hébergement et licences", `<ul class="plain"><li>Hébergement : GitHub Pages, GitHub Inc., San Francisco, États-Unis.</li>
   <li>Composants libres inclus : MathJax (licence Apache 2.0) ; polices Atkinson Hyperlegible, Bricolage Grotesque et JetBrains Mono (licence SIL Open Font License 1.1). <a href="vendor/LICENCES.txt" target="_blank" rel="noopener">Textes des licences</a>.</li></ul>`)}
