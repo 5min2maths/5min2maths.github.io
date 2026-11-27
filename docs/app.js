@@ -12547,11 +12547,11 @@ const Curieux = {
   const mayaW = (n) => { const b = Math.floor(n / 5), d = n % 5; return [b ? b + " barre" + (b > 1 ? "s" : "") : "", d ? d + " point" + (d > 1 ? "s" : "") : ""].filter(Boolean).join(" et "); };
 
   const HISTOIRE = [
-    { t: "Événement", titre: "Le signe « = » a été inventé en 1557", lien: "Équations",
+    { t: "Événement", titre: "Le signe « = » a été inventé en 1557", lien: "Équations", need: ["eq1"], /* 27.11 (revue, n° 5 : servi en 9e, « Résous 14x + 15 = 71 ») */
       txt: "Le Gallois Robert Recorde en avait assez d'écrire « est égal à » dans ses calculs. Dans son livre <i>The Whetstone of Witte</i> (1557), il propose deux traits parallèles de même longueur, « parce que deux choses ne peuvent être plus égales ». Son signe était beaucoup plus long que le nôtre. Sa toute première équation écrite avec ce signe : 14x + 15 = 71.",
       fig: () => svg(300, 120, `<rect x="40" y="38" width="220" height="10" rx="3" class="f-fill"/><rect x="40" y="70" width="220" height="10" rx="3" class="f-fill"/>${T(150, 108, "« is equalle to » → =", 'font-style="italic"')}${T(150, 24, "1557")}`, "le long signe égal de Recorde"),
       ex: () => ({ q: "Résous la toute première équation écrite avec le signe « = » : \\(14x + 15 = 71\\). Que vaut \\(x\\) ?", value: 4, sol: "\\(14x = 71 - 15 = 56\\), donc \\(x = 56 \\div 14 = 4\\)." }) },
-    { t: "Portrait", titre: "Al-Khwârizmî, qui a donné son nom à l'algorithme", lien: "Équations",
+    { t: "Portrait", titre: "Al-Khwârizmî, qui a donné son nom à l'algorithme", lien: "Équations", need: ["eq2fact", "eq2disc"], /* 27.11 : x² + 10x = 39 = 2e degré, pas avant */
       txt: "Savant de Bagdad au IX<sup>e</sup> siècle, al-Khwârizmî écrit un traité sur la résolution des équations, sans aucune lettre : tout est en phrases et en figures. Le mot « algèbre » vient du titre de ce livre (<i>al-jabr</i>) et le mot « algorithme » de son nom, déformé en latin. Pour résoudre « un carré et dix racines valent 39 », il complète un carré avec des rectangles.",
       fig: () => svg(300, 150, `<rect x="105" y="45" width="60" height="60" class="f-shape"/>${T(135, 80, "x²")}<rect x="105" y="20" width="60" height="25" class="f-fill2"/><rect x="105" y="105" width="60" height="25" class="f-fill2"/><rect x="80" y="45" width="25" height="60" class="f-fill2"/><rect x="165" y="45" width="25" height="60" class="f-fill2"/>${T(135, 37, "2,5x", 'font-size="11"')}${T(135, 122, "2,5x", 'font-size="11"')}${[[80, 20], [165, 20], [80, 105], [165, 105]].map(([x, y]) => `<rect x="${x}" y="${y}" width="25" height="25" class="f-soft" stroke-dasharray="3 2"/>`).join("")}${T(245, 70, "39 + 4 · 6,25", 'font-size="12"')}${T(245, 88, "= 64 = 8²", 'font-size="12"')}`, "carré complété d'al-Khwârizmî"),
       ex: () => ({ q: "Le problème d'al-Khwârizmî : \\(x^2 + 10x = 39\\), avec \\(x\\) positif. Que vaut \\(x\\) ? (Aide : le grand carré complété a une aire de 64.)", value: 3, sol: "Le grand carré a pour côté \\(\\sqrt{64} = 8 = x + 2{,}5 + 2{,}5\\), donc \\(x = 3\\). Vérification : \\(9 + 30 = 39\\)." }) },
@@ -13386,7 +13386,7 @@ const Backup = {
     for (const [id, x] of Object.entries(s.notions || {})) {
       const def = Engine.newNotion(x.status);
       if (!x.seen && !x.placed && !x.lessonSeen && !x.easy && !x.retry && x.m === def.m && x.box === def.box) { if (x.status !== defs[id]) n[id] = [this.ST[x.status]]; continue; }
-      n[id] = [this.ST[x.status] || "v", r2(x.m), x.box, off(x.due), x.seen, x.ok, (x.placed ? 1 : 0) | (x.lessonSeen ? 2 : 0), x.easy || 0, off(x.retry), x.fails ?? null];
+      n[id] = [this.ST[x.status] || "v", r2(x.m), x.box, off(x.due), x.seen, x.ok, (x.placed ? 1 : 0) | (x.lessonSeen ? 2 : 0), x.easy || 0, off(x.retry), x.fails ?? null].concat(x.last ? [off(x.last)] : []); /* 27.11 : dernier jour posé (variété entre les jours, facultatif) */
     }
     const ws = (Array.isArray(s.snaps) ? s.snaps : []).find((x) => x && x.d >= addDays(t, -6)), co = (Array.isArray(s.carnetOut) ? s.carnetOut : []).filter((d) => d >= addDays(t, -6));
     const c = {};
@@ -13441,6 +13441,7 @@ const Backup = {
       if (a[7]) x.easy = a[7];
       if (a[8] !== null && a[8] !== undefined) x.retry = on(a[8]);
       if (a[9] !== null && a[9] !== undefined) x.fails = a[9];
+      if (a[10] !== null && a[10] !== undefined) x.last = on(a[10]);
       s.notions[id] = x;
     }
     s.comps = Object.fromEntries(Object.entries(o.c || {}).map(([cid, [r, n, l]]) => [cid, { r: [...r].map((ch) => +ch / 4), n, last: on(l) }]));
@@ -17519,7 +17520,36 @@ const Engine = {
   },
   autoN(state) { return state.placedOn === day() ? this.firstDayN(state) : this.struggling(state) || this.belowClass(state) ? 4 : FORMATS.auto.slots.length; },
   fmtText(state, f) { const n = f === "auto" ? this.autoN(state) : 0; return n && n < FORMATS.auto.slots.length ? n + " calculs rapides, enchaînés." : FORMATS[f].text; },
-  planSession(state, format) { return this.firstDayCap(state, this.planSession0(state, format)); },
+  planSession(state, format) { return this.firstDayCap(state, this.ownYear(state, this.planSession0(state, format), format)); },
+  /* 27.11 (revue des élèves joués, n° 4 : Arthur, 10e moyen sans chapitre « en classe », 13 questions sur 13 sur des reprises
+     de 9e ; les notions propres à la 10e ouvertes attendaient leur leçon, une seule leçon par séance, aucune en Révision ni
+     en Automatismes) : sans chapitre choisi, au moins une notion PROPRE à l'année (placeOf = classe) par séance de 3
+     questions ou plus. Si le programme n'en a aucune, une question du milieu (sinon la dernière) qui n'est pas une reprise demandée par le parcours
+     (ratée : maîtrise < 0,45 ou deux échecs) devient une notion propre à l'année déjà ouverte, choisie comme les autres
+     (planSlots) ; si sa leçon reste à voir, au niveau 1 et sans leçon (comme une notion du chapitre en classe, n° 5 du
+     26.11), le rappel de cours restant ouvrable ; sa leçon vient à la séance qui en admet une. Élève en grande difficulté ou
+     Mathélo en forte baisse : rien ne change (règle levée, comme prevPenalty). */
+  ownYear(state, plan, format) {
+    if (!Array.isArray(plan) || plan.length < 3 || this.nowActive(state) || this.struggling(state) || this.eloDrop(state) || state.placedOn === day()) return plan;
+    const g = state.profile.grade, idOf = (e) => String(e).split("|")[0];
+    const own = (id) => { const n = NOTIONS.find((x) => x.id === id), pl = n && placeOf(n, state.profile); return !!pl && pl[0] === g && !n.prim; };
+    if (plan.some((e) => own(idOf(e)))) return plan;
+    const coince = (id) => { const s = state.notions[id]; return !!s && s.seen > 0 && (s.m < 0.45 || (s.fails || 0) >= 2); };
+    /* au milieu de la séance plutôt qu'à la fin (une notion moins travaillée en dernier faisait finir sur un échec) */
+    let at = -1;
+    for (const j of [...Array(plan.length).keys()].slice(1, -1).concat(plan.length - 1)) if (at < 0 && !String(plan[j]).startsWith("PROB:") && !coince(idOf(plan[j])) && !this.lessonDue(state, idOf(plan[j]))) at = j;
+    if (at < 0) return plan;
+    const kind = String(plan[at]).split("|")[2] || "app", inPlan = new Set(plan.map(idOf));
+    const ex = new Set(this.eligible(state).filter((id) => !own(id) || inPlan.has(id)));
+    const b = this.planSlots(state, [kind], { exclude: ex })[0];
+    if (!b) return plan;
+    const x = b.split("|"), les = this.lessonDue(state, x[0]);
+    /* séance qui montre une leçon : une notion dont la leçon reste à voir n'y entre pas (une seule leçon par séance) */
+    if (les && !plan.noLesson && format !== "auto" && (format || this.todayFormat(state)) !== "auto") return plan;
+    if (les) x[1] = "1";
+    plan[at] = x.join("|");
+    return plan;
+  },
   planSession0(state, format) {
     /* 26.11 (revue p4, n° 3) : le jour du positionnement, 3 questions au plus quel que soit le format (positionnement + séance ≈ 10 min) ; */
     const f = format || this.todayFormat(state), slots = f === "auto" ? FORMATS.auto.slots.slice(0, this.autoN(state)) : FORMATS[f].slots.slice(0, state.placedOn === day() ? this.firstDayN(state) : this.struggling(state) ? 3 : 9); /* et pour l'élève en grande difficulté (Kevin : Révision de 4 questions avec pas à pas, 8 à 9 min) */
@@ -17637,6 +17667,11 @@ const Engine = {
           if (usedPair.has(id + "|" + d)) sc += 1;
           if (d === 4) sc -= kind === "defi4" ? 3 : 0.3;
           if (prevPen && !rappel && !isNow && prevPen.has(id)) sc += PREV_PEN; /* 27.11 : l'année d'abord (n° 32) */
+          /* 27.11 (revue, n° 8 : Jade, l'échelle 4 fois en 15 questions sur 3 jours) : notion du chapitre « en classe » posée hier ou
+             avant-hier et réussie du premier coup la dernière fois (box ≥ 1) : elle cède la place à une autre notion du chapitre
+             si possible (hors chapitre : sans effet, l'élève très faible y perdait ses notions réussies, tests/_faibles.html) ; une notion ratée (box 0)
+             revient comme prévu. */
+          if (isNow && s.last && s.last < today && s.last >= addDays(today, -2) && (s.box || 0) >= 1) sc += s.last === addDays(today, -1) ? 0.8 : 0.4;
           sc += Math.random() * 0.5;
           if (!best || sc < best.sc) best = { id, d, sc };
         }
@@ -17696,6 +17731,7 @@ const Engine = {
     }
     const today = day();
     s.seen++;
+    s.last = today; /* 27.11 (revue, n° 8) : dernier jour où la notion a été posée (variété entre les jours, planSlots) */
     if (solved && tries === 1) {
       s.m = Math.min(1, s.m + (1 - s.m) * (0.18 + 0.06 * d));
       s.box = Math.min(5, s.box + 1);
@@ -17804,10 +17840,22 @@ const Engine = {
      même notion, d'autres nombres, un niveau en dessous (le niveau 1 reste 1). Elle remplace, elle ne s'ajoute pas : la
      séance garde sa durée. Une fois par séance (l'appelant le garde). Ni automatisme, ni problème (niveau 4), ni à la place
      d'une question qui porte la leçon du jour ou du problème de la semaine. Renvoie l'entrée à mettre en i + 1, ou null. */
-  replayNext(state, plan, i, id, d, kind) {
+  /* 27.11 (revue, n° 1, grave : Kevin, Révision sur le chapitre « en classe », « rejouer ? non … leçon due true » deux fois,
+     séance 0/3) : on ne refusait dès que la notion suivante avait une leçon à voir (lessonDue), or les notions du chapitre en
+     classe sont posées SANS leçon en Révision / Défi / Automatismes, et une seule leçon passe par séance. On décide sur ce
+     qui s'affichera vraiment : lessonShows (même règle que nextQuestion dans src/app.js). sess = { noLesson, lessonDone,
+     lessonAt } de la séance ; sans sess (appelant ancien), règle du plan seul (plan.noLesson). */
+  lessonShows(state, plan, j, sess) {
+    const nid = String(plan[j] || "").split("|")[0];
+    if (!nid || String(plan[j]).startsWith("PROB:") || !state.notions[nid] || !this.lessonDue(state, nid)) return false;
+    const S = sess || {};
+    if (S.noLesson || plan.noLesson || S.fmt === "auto") return false;
+    return !S.lessonDone && (S.lessonAt == null || S.lessonAt === j);
+  },
+  replayNext(state, plan, i, id, d, kind, sess) {
     if (!this.struggling(state) || i + 1 >= plan.length || kind === "drill" || !(d >= 1 && d < 4) || !GEN[id] || !state.notions[id]) return null;
     const nx = String(plan[i + 1]), nid = nx.split("|")[0];
-    if (nx.startsWith("PROB:") || (nid !== id && state.notions[nid] && this.lessonDue(state, nid))) return null;
+    if (nx.startsWith("PROB:") || (nid !== id && this.lessonShows(state, plan, i + 1, sess))) return null;
     return id + "|" + Math.max(1, d - 1) + "|" + (kind === "rem" || kind === "carnet" || !kind ? "app" : kind);
   },
   remediation(state, id) {
@@ -17920,8 +17968,9 @@ if (typeof ACTIVE !== "undefined") for (const A of Object.values(ACTIVE)) if (A 
 (function () {
   const plan0 = Engine.planSession, one0 = Engine.oneLesson, P = () => (typeof PRIM !== "undefined" ? PRIM : null);
   /* 27.11 : pas de rappel de primaire le jour du positionnement (séance de 2 questions, firstDayCap) */
-  Engine.planSession = function (state, format) { const p = plan0.call(this, state, format), X = P(); return X ? (state.placedOn === day() ? X.strip(p) : X.inject(state, X.strip(p))) : p; };
-  Engine.oneLesson = function (state, plan, n) { const X = P(); return X ? X.inject(state, one0.call(this, state, X.strip(plan), n)) : one0.call(this, state, plan, n); };
+  /* 27.11 (revue, n° 2 et 3) : PRIM.note (jours en grande difficulté), PRIM.vary (pas plus de 2 fois la même notion) */
+  Engine.planSession = function (state, format) { const p = plan0.call(this, state, format), X = P(); if (X) X.note(state); return X ? (state.placedOn === day() ? X.strip(p) : X.inject(state, X.vary(state, X.strip(p)))) : p; };
+  Engine.oneLesson = function (state, plan, n) { const X = P(); return X ? X.inject(state, X.vary(state, one0.call(this, state, X.strip(plan), n))) : one0.call(this, state, plan, n); };
 })();
 
 // Espace parent (24.11, vision de l'enseignant : tools/parents.md). Accompagner, pas surveiller.
