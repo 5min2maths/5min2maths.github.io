@@ -1127,7 +1127,7 @@
           { ctx: "triangle", guide: [GN("La 3e ligne donne " + M("z") + " = ?", v[2], M("z = " + v[2]) + "."), GN("La 2e donne " + M("y") + " = ?", v[1], M("y = " + v[1]) + "."), GN("La 1re donne " + M("x") + " = ?", v[0], M("x = " + v[0]) + "."), GT("Solution « x ; y ; z » ?", v, M("(" + v.join(" ; ") + ")") + ".")],
             traps: [TT([v[2], v[1], v[0]], "Dans l'ordre x, y, z.")] }); },
       () => { const v = [nz(-4, 6), nz(-4, 6), nz(-4, 6)];
-        return QT("Résous " + sys(row3([1, 1, 1], v), row3([1, -1, 0], v), row3([0, 1, -1], v)) + "." + TRI, v, "De la 2e, " + M("x = y + " + pT(v[0] - v[1])) + " ; de la 3e, " + M("z = y - " + pT(v[1] - v[2])) + " ; dans la 1re : " + M("3y = " + (v[0] + v[1] + v[2] - (v[0] - v[1]) + (v[1] - v[2]))) + ", " + M("y = " + v[1]) + ".",
+        return QT("Résous " + sys(row3([1, 1, 1], v), row3([1, -1, 0], v), row3([0, 1, -1], v)) + "." + TRI, v, "De la 2e, " + M("x = y + " + pT(v[0] - v[1])) + " ; de la 3e, " + M("z = y - " + pT(v[1] - v[2])) + " ; dans la 1re : " + M("3y = " + (v[0] + v[1] + v[2] - (v[0] - v[1]) + (v[1] - v[2]))) + ", " + M("y = " + v[1]) + ", puis " + M("x = " + v[0]) + " et " + M("z = " + v[2]) + ".",
           { ctx: "chaine", guide: [GN("Exprime " + M("x") + " et " + M("z") + " en fonction de " + M("y") + ", remplace dans la 1re : " + M("y") + " = ?", v[1], M("y = " + v[1]) + "."), GN(M("x") + " = ?", v[0], M("x = " + v[0]) + "."), GT("Solution « x ; y ; z » ?", v, M("(" + v.join(" ; ") + ")") + ".")],
             traps: [TT([v[1], v[0], v[2]], "Dans l'ordre x, y, z.")] }); },
       () => { const a = R.int(10, 16), b = a + R.int(1, 4), c = b + R.int(1, 4), w = [who(), who(), who()];
@@ -2396,7 +2396,7 @@
         return QX(FAC + M(P2([a, a * m, 0])) + ".", e, "product", "Mise en évidence de " + M(a + "x") + " : " + M(e) + ".",
           { ctx: "mise-en-evidence", guide: [GX("Facteur commun", a + "x", M(a + "x") + "."), GX("Factorisation", e, M(e) + ".")], traps: [TX("x(" + a + "x" + (a * m < 0 ? "-" + -a * m : "+" + a * m) + ")", "On peut encore sortir " + a + " : factorise au maximum."), TX(a + "(x^2" + (m < 0 ? "-" + -m : "+" + m) + ")", "x aussi est commun aux deux termes.")] }); },
       () => { const a = R.int(1, 6), k = R.int(1, 9), e = co(a) + "(x-" + k + ")(x+" + k + ")";
-        return QX(FAC + M(P2([a, 0, -a * k * k])) + ".", e, "product", (a > 1 ? "Mise en évidence de " + M(a) + ", puis " : "") + "différence de carrés " + M("x^2 - " + k * k + " = (x - " + k + ")(x + " + k + ")") + ".",
+        return QX(FAC + M(P2([a, 0, -a * k * k])) + ".", e, "product", (a > 1 ? "Mise en évidence de " + M(a) + ", puis " : "") + "différence de carrés " + M("x^2 - " + k * k + " = (x - " + k + ")(x + " + k + ")") + (a > 1 ? " : " + M(a + "(x - " + k + ")(x + " + k + ")") : "") + ".",
           { ctx: "diff-carres", guide: [GS("Quel nombre au carré donne " + M(k * k) + " ?", k, M(k) + "."), GX("Factorisation", e, M(e) + ".")], traps: [TX(co(a) + "(x-" + k + ")^2", "x² − " + k * k + " = (x − " + k + ")(x + " + k + ") : différence de carrés, pas un carré."), ...(a > 1 ? [TX("(" + a + "x-" + a * k + ")(x+" + k + ")", "Mets d'abord " + a + " en évidence pour factoriser au maximum.")] : [])] }); },
       () => { const k = nz(-8, 8), a = pk([1, 1, 2, 3]), e = co(a) + "(x" + (k < 0 ? "-" + -k : "+" + k) + ")^2";
         return QX(FAC + M(P2([a, 2 * a * k, a * k * k])) + ".", e, "product", (a > 1 ? "Mise en évidence de " + M(a) + ", puis " : "") + "identité " + M("A^2 + 2AB + B^2 = (A + B)^2") + " : " + M(co(a) + "(" + xm(-k) + ")^2") + ".",
@@ -2498,7 +2498,7 @@
         return QN("Pour quelle valeur de " + M("c") + " la parabole " + M("y = " + P2([1, b, 0]) + " + c") + " touche-t-elle l'axe des " + M("x") + " en un seul point ?", c, "Un seul zéro : " + M("\\Delta = " + b * b + " - 4c = 0") + ", donc " + M("c = " + c) + ".",
           { ctx: "tangent-axe", guide: [GS(M("\\Delta = b^2 - 4c") + " doit valoir… ?", 0, "0 (un seul zéro)."), GS(M("c") + " ?", c, M(b * b + " : 4 = " + c) + ".")], traps: [TR(b * b, "Δ = b² − 4c = 0 donne c = b² ÷ 4."), TR(b / 2, "Ça, c'est le zéro double (au signe près) ; on demande c.")] }); },
       () => { const a = pk([1, 2, -1]), h = nz(-4, 4), d = R.int(1, 4), k = -a * d * d;
-        return QSet("Une parabole a pour sommet " + M("S(" + h + " ; " + k + ")") + " et coefficient " + M("a = " + a) + ". Quels sont ses zéros ?", [h - d, h + d], M("f(x) = " + co(a) + "(" + xm(h) + ")^2" + sg(k) + " = 0 \\iff (" + xm(h) + ")^2 = " + d * d) + " : " + M("x = " + h + " \\pm " + d) + ".",
+        return QSet("Une parabole a pour sommet " + M("S(" + h + " ; " + k + ")") + " et coefficient " + M("a = " + a) + ". Quels sont ses zéros ?", [h - d, h + d], M("f(x) = " + co(a) + "(" + xm(h) + ")^2" + sg(k) + " = 0 \\iff (" + xm(h) + ")^2 = " + d * d) + " : " + M("x = " + h + " \\pm " + d) + ", donc " + M("x = " + (h - d)) + " ou " + M("x = " + (h + d)) + ".",
           { ctx: "zeros-sommet", guide: [GS(M("(" + xm(h) + ")^2") + " = ?", d * d, M(d * d) + "."), GSet("Zéros ?", [h - d, h + d], M(h - d) + " et " + M(h + d) + ".")], traps: [TSet([-d, d], "Les zéros sont symétriques autour de " + h + ", pas de 0."), TSet([h + d], "Il y a deux zéros, symétriques par rapport au sommet.")] }); },
     ],
   };
@@ -2535,7 +2535,7 @@
         return QSet("Quels sont les zéros de " + M("f(x) = " + co(a) + "(" + xm(h) + ")^2" + sg(k)) + " ?", [h - d, h + d], M("(" + xm(h) + ")^2 = " + d * d) + " : " + M(xm(h) + " = \\pm " + d) + ", donc " + M(h - d) + " et " + M(h + d) + ".",
           { ctx: "canon-zeros", guide: [GS(M("(" + xm(h) + ")^2") + " = ?", d * d, M(-k + " : " + par(a) + " = " + d * d) + "."), GSet("Zéros ?", [h - d, h + d], M(h - d) + " et " + M(h + d) + ".")], traps: [TSet([h + d], "Deux solutions : " + xm(h) + " = " + d + " ou −" + d + "."), TSet([-h - d, -h + d], "Attention au signe de h.")] }); },
       () => { const a = pk([2, -2, 3]), h = nz(-4, 4), k = nz(-9, 9), cs = [a, -2 * a * h, a * h * h + k];
-        return QP("Écris " + M(P2(cs)) + " sous forme canonique " + M("a(x - h)^2 + k") + " et donne le couple « h ; k ».", [h, k], M(P2(cs) + " = " + a + "(" + xm(h) + ")^2" + sg(k)) + ".",
+        return QP("Écris " + M(P2(cs)) + " sous forme canonique " + M("a(x - h)^2 + k") + " et donne le couple « h ; k ».", [h, k], M(P2(cs) + " = " + a + "(" + xm(h) + ")^2" + sg(k)) + " : " + M("h = " + h) + ", " + M("k = " + k) + ".",
           { ctx: "canon-couple", guide: [GS(M("h") + " ?", h, M(h) + "."), GS(M("k") + " ?", k, M(k) + "."), GP("Couple ?", [h, k], M("(" + h + " ; " + k + ")") + ".")], traps: [TP([-h, k], "h = −b ÷ (2a)."), TP([h, cs[2] - h * h], "k = f(h) = c − a·h².")] }); },
     ],
   };
@@ -2679,7 +2679,7 @@
     ],
     2: [
       () => { const h = nz(-3, 3), k = R.int(-4, 4), a = pk([1, -1, 2, -2]), x1 = h + pk([-2, -1, 1, 2]), y1 = a * (x1 - h) ** 2 + k, cs = [a, -2 * a * h, a * h * h + k]; if (Math.abs(y1) > 6) return null;
-        return QX("Une parabole a pour sommet " + M("S(" + h + " \\,;\\, " + k + ")") + " et passe par " + M("P(" + x1 + " \\,;\\, " + y1 + ")") + ". Donne l'expression de " + M("f(x)") + ".", EX(cs), M("f(x) = a(" + xm(h) + ")^2" + sg(k)) + " ; avec " + M("P") + " : " + M(y1 + " = a \\cdot " + (x1 - h) ** 2 + sg(k)) + ", " + M("a = " + a) + ".",
+        return QX("Une parabole a pour sommet " + M("S(" + h + " \\,;\\, " + k + ")") + " et passe par " + M("P(" + x1 + " \\,;\\, " + y1 + ")") + ". Donne l'expression de " + M("f(x)") + ".", EX(cs), M("f(x) = a(" + xm(h) + ")^2" + sg(k)) + " ; avec " + M("P") + " : " + M(y1 + " = a \\cdot " + (x1 - h) ** 2 + sg(k)) + ", " + M("a = " + a) + " : " + M("f(x) = " + P2(cs)) + ".",
           { ctx: "sommet-point", fig: PL([{ f: quad(cs) }], [[h, k, "S"], [x1, y1, "P"]]), guide: [GS("Valeur de " + M("a") + " ?", a, M("(" + y1 + " - " + par(k) + ") : " + (x1 - h) ** 2 + " = " + a) + "."), GX("Expression", EX(cs), M(P2(cs)) + ".")], traps: [TX(P2([1, -2 * h, h * h + k]), "Il faut calculer a avec le point P."), TX(P2([a, 2 * a * h, a * h * h + k]), "Sommet d'abscisse h ↔ (x − h)².")] }); },
       () => { const p = nz(-4, 2), q = p + R.int(2, 5), a = pk([1, -1, 2, -2]), x1 = pk([p - 1, q + 1, p + 1].filter((x) => x !== q && x !== 0)), y1 = a * (x1 - p) * (x1 - q), cs = [a, -a * (p + q), a * p * q];
         return QX("Une parabole a pour zéros " + M(p) + " et " + M(q) + " et passe par " + M("P(" + x1 + " \\,;\\, " + y1 + ")") + ". Donne l'expression développée de " + M("f(x)") + ".", EX(cs), M("f(x) = a(" + xm(p) + ")(" + xm(q) + ")") + " ; " + M(y1 + " = a \\cdot " + par(x1 - p) + " \\cdot " + par(x1 - q)) + " donne " + M("a = " + a) + " : " + M(P2(cs)) + ".",
@@ -2690,13 +2690,13 @@
     ],
     3: [
       () => { const a = nz(-2, 2), b = R.int(-4, 4), c = R.int(-4, 4), xs = [-1, 1, 2], cs = [a, b, c], ys = xs.map(quad(cs)); if (ys.some((y) => Math.abs(y) > 8)) return null;
-        return QX("Une parabole passe par " + xs.map((x, i) => M("(" + x + " \\,;\\, " + ys[i] + ")")).join(", ") + ". Donne l'expression " + M("f(x) = ax^2 + bx + c") + ".", EX(cs), "Système : " + M("a - b + c = " + ys[0]) + ", " + M("a + b + c = " + ys[1]) + ", " + M("4a + 2b + c = " + ys[2]) + " ; " + M("b = " + b) + ", " + M("a = " + a) + ", " + M("c = " + c) + ".",
+        return QX("Une parabole passe par " + xs.map((x, i) => M("(" + x + " \\,;\\, " + ys[i] + ")")).join(", ") + ". Donne l'expression " + M("f(x) = ax^2 + bx + c") + ".", EX(cs), "Système : " + M("a - b + c = " + ys[0]) + ", " + M("a + b + c = " + ys[1]) + ", " + M("4a + 2b + c = " + ys[2]) + " ; " + M("b = " + b) + ", " + M("a = " + a) + ", " + M("c = " + c) + " : " + M("f(x) = " + P2(cs)) + ".",
           { ctx: "trois-points", fig: PL([{ f: quad(cs) }], xs.map((x, i) => [x, ys[i], ""]), { yr: [-8, 8], squash: 0.75 }), guide: [GS(M("b") + " (soustrais les deux premières équations) ?", b, M("2b = " + (ys[1] - ys[0])) + "."), GS(M("a") + " ?", a, M(a) + "."), GX("Expression", EX(cs), M(P2(cs)) + ".")], traps: [TX(P2([a, -b, c]), "Vérifie le signe de b : (a + b + c) − (a − b + c) = 2b.")] }); },
       () => { const p = nz(-4, 1), d = pk([1, 2, 3]), q = p + 2 * d, Mx = pk([2, 4, 6, -2, -4]) * (d === 1 ? 1 : 1), a = -Mx / (d * d), cs = [a, -a * (p + q), a * p * q]; if (!Number.isInteger(a * (p + q)) || !Number.isInteger(a * p * q)) return null;
         return QX("Une parabole a pour zéros " + M(p) + " et " + M(q) + ", et sa valeur " + (Mx > 0 ? "maximale" : "minimale") + " est " + M(Mx) + ". Donne l'expression développée de " + M("f(x)") + ".", EX(cs), "Sommet au milieu des zéros : " + M("x_S = " + (p + q) / 2) + ". " + M("f(x_S) = a \\cdot " + par(d) + " \\cdot " + par(-d) + " = " + Mx) + " donne " + M("a = " + fT(a)) + " : " + M(P2(cs)) + ".",
           { ctx: "zeros-extremum", guide: [GS("Abscisse du sommet ?", (p + q) / 2, M((p + q) / 2) + "."), GS(M("a") + " (fraction acceptée) ?", a, M(fT(a)) + "."), GX("Expression", EX(cs), M(P2(cs)) + ".")], traps: [TX(P2([-a, a * (p + q), -a * p * q]), Mx > 0 ? "Un maximum : la parabole est tournée vers le bas (a < 0)." : "Un minimum : a > 0.")] }); },
       () => { const h = nz(-3, 3), a = pk([1, -1, 2]), c = R.int(-4, 4), b = -2 * a * h, x1 = pk([1, 2, -1].filter((x) => x !== h && x !== 2 * h)) /* 26.11 (recalcul) : le point (2h ; c), symétrique de (0 ; c), ne détermine pas a */, cs = [a, b, c], y1 = quad(cs)(x1);
-        return QX("Une parabole a pour axe de symétrie la droite " + M("x = " + h) + ", coupe l'axe des " + M("y") + " en " + M(c) + " et passe par " + M("(" + x1 + " \\,;\\, " + y1 + ")") + ". Donne son expression développée.", EX(cs), M("-\\frac{b}{2a} = " + h + " \\Rightarrow b = " + -2 * h + "a") + " ; " + M("c = " + c) + " ; avec le point : " + M("a = " + a) + ", " + M("b = " + b) + ".",
+        return QX("Une parabole a pour axe de symétrie la droite " + M("x = " + h) + ", coupe l'axe des " + M("y") + " en " + M(c) + " et passe par " + M("(" + x1 + " \\,;\\, " + y1 + ")") + ". Donne son expression développée.", EX(cs), M("-\\frac{b}{2a} = " + h + " \\Rightarrow b = " + -2 * h + "a") + " ; " + M("c = " + c) + " ; avec le point : " + M("a = " + a) + ", " + M("b = " + b) + " : " + M("f(x) = " + P2(cs)) + ".",
           { ctx: "axe-point", guide: [GX(M("b") + " en fonction de " + M("a"), -2 * h + "*a", M("b = " + -2 * h + "a") + "."), GS(M("a") + " ?", a, M(a) + "."), GX("Expression", EX(cs), M(P2(cs)) + ".")], traps: [TX(P2([a, -b, c]), "Axe x = h ↔ −b ÷ (2a) = h.")] }); },
     ],
   };
@@ -2706,7 +2706,7 @@
   const T3 = {
     1: [
       () => { const a = pk([1, 2, 3, -1, -2]), b = nz(-4, 4), c = nz(-5, 5), cs = [a, b, c], f = quad(cs);
-        return QX("Une parabole passe par " + pts3([0, 1, -1], cs) + ". Détermine l'expression développée de " + M("f(x)") + ".", EX(cs), M("c = f(0) = " + c) + " ; " + M("a + b = " + (f(1) - c)) + " et " + M("a - b = " + (f(-1) - c)) + " : " + M("a = " + a) + ", " + M("b = " + b) + ".",
+        return QX("Une parabole passe par " + pts3([0, 1, -1], cs) + ". Détermine l'expression développée de " + M("f(x)") + ".", EX(cs), M("c = f(0) = " + c) + " ; " + M("a + b = " + (f(1) - c)) + " et " + M("a - b = " + (f(-1) - c)) + " : " + M("a = " + a) + ", " + M("b = " + b) + " : " + M("f(x) = " + P2(cs)) + ".",
           { ctx: "expr-0-1", guide: [GS(M("c = f(0)") + " ?", c, M(c) + "."), GS(M("a + b = f(1) - c") + " ?", a + b, M(a + b) + "."), GS(M("a") + " (moyenne de " + M("a + b") + " et " + M("a - b") + ") ?", a, M(a) + "."), GX("Expression", EX(cs), M(P2(cs)) + ".")], traps: [TX(P2([a, -b, c]), "a + b = f(1) − c et a − b = f(−1) − c : attention au signe de b.")] }); },
       () => { const a = pk([2, 3, -2, -3]), b = nz(-4, 4), c = nz(-5, 5), cs = [a, b, c], f = quad(cs); /* 25.11 (robot) : a ≠ ±1 (réponse) */
         return QN("Une parabole " + M("f(x) = ax^2 + bx + c") + " passe par " + pts3([0, 1, -1], cs) + ". Que vaut " + M("a") + " ?", a, M("c = " + c) + " ; " + M("a + b = " + (a + b)) + ", " + M("a - b = " + (a - b)) + " ; en additionnant : " + M("2a = " + 2 * a) + ", donc " + M("a = " + a) + ".",
@@ -2717,7 +2717,7 @@
     ],
     2: [
       () => { const a = pk([1, 2, -1, -2]), b = nz(-4, 4), c = nz(-4, 4), cs = [a, b, c], f = quad(cs);
-        return QX("Une parabole passe par " + pts3([0, 1, 2], cs) + ". Détermine l'expression développée de " + M("f(x)") + ".", EX(cs), M("c = " + c) + " ; " + M("a + b = " + (a + b)) + " ; " + M("4a + 2b = " + (4 * a + 2 * b)) + " ; d'où " + M("2a = " + 2 * a) + ", " + M("a = " + a) + ", " + M("b = " + b) + ".",
+        return QX("Une parabole passe par " + pts3([0, 1, 2], cs) + ". Détermine l'expression développée de " + M("f(x)") + ".", EX(cs), M("c = " + c) + " ; " + M("a + b = " + (a + b)) + " ; " + M("4a + 2b = " + (4 * a + 2 * b)) + " ; d'où " + M("2a = " + 2 * a) + ", " + M("a = " + a) + ", " + M("b = " + b) + " : " + M("f(x) = " + P2(cs)) + ".",
           { ctx: "expr-0-2", guide: [GS(M("c") + " ?", c, M(c) + "."), GS(M("a") + " (soustrais 2 × (a + b) de 4a + 2b) ?", a, M(a) + "."), GX("Expression", EX(cs), M(P2(cs)) + ".")], traps: [TX(P2([b, a, c]), "a est le coefficient de x², b celui de x.")] }); },
       () => { const a = pk([1, 2, -1, 3]), b = pk([-4, -3, -2, 2, 3, 4]), c = nz(-4, 4), cs = [a, b, c]; /* 25.11 (robot) : b ≠ ±1 (réponse) */
         return QN("Une parabole " + M("f(x) = ax^2 + bx + c") + " passe par " + pts3([0, 1, 2], cs) + ". Que vaut " + M("b") + " ?", b, M("c = " + c) + ", " + M("a + b = " + (a + b)) + ", " + M("4a + 2b = " + (4 * a + 2 * b)) + " : " + M("a = " + a) + ", " + M("b = " + b) + ".",
@@ -2728,7 +2728,7 @@
     ],
     3: [
       () => { const a = pk([1, 2, -1, -2]), b = nz(-3, 3), c = R.int(-4, 4), cs = [a, b, c], f = quad(cs);
-        return QX("Une parabole passe par " + pts3([-1, 1, 2], cs) + ". Détermine l'expression développée de " + M("f(x)") + ".", EX(cs), "Système : " + M("a - b + c = " + f(-1)) + ", " + M("a + b + c = " + f(1)) + ", " + M("4a + 2b + c = " + f(2)) + " : " + M("b = " + b) + ", puis " + M("a = " + a) + ", " + M("c = " + c) + ".",
+        return QX("Une parabole passe par " + pts3([-1, 1, 2], cs) + ". Détermine l'expression développée de " + M("f(x)") + ".", EX(cs), "Système : " + M("a - b + c = " + f(-1)) + ", " + M("a + b + c = " + f(1)) + ", " + M("4a + 2b + c = " + f(2)) + " : " + M("b = " + b) + ", puis " + M("a = " + a) + ", " + M("c = " + c) + " : " + M("f(x) = " + P2(cs)) + ".",
           { ctx: "expr-sans-0", guide: [GS(M("b") + " (soustrais les deux premières) ?", b, M("2b = " + (f(1) - f(-1))) + "."), GS(M("a") + " ?", a, M(a) + "."), GX("Expression", EX(cs), M(P2(cs)) + ".")], traps: [TX(P2([a, -b, c]), "(a + b + c) − (a − b + c) = 2b.")] }); },
       () => { const a = pk([2, -2, 3, -3]), b = nz(-4, 4), c = R.int(-4, 4), cs = [a, b, c], f = quad(cs); // 24.11 : a ≠ ±1 (robot)
         return QN("Une parabole " + M("f(x) = ax^2 + bx + c") + " passe par " + pts3([1, 2, 3], cs) + ". Que vaut " + M("a") + " ?", a, M("f(2) - f(1) = 3a + b = " + (f(2) - f(1))) + " ; " + M("f(3) - f(2) = 5a + b = " + (f(3) - f(2))) + " ; donc " + M("2a = " + 2 * a) + ".",
@@ -2743,7 +2743,7 @@
   const IN = {
     1: [
       () => { const p = R.int(-3, 0), q = R.int(1, 4);
-        return QSet("Pour quelles valeurs de " + M("x") + " les graphes de " + M("f(x) = x^2") + " et " + M("g(x) = " + P2([p + q, -p * q])) + " se coupent-ils ?", [p, q], M("x^2 = " + P2([p + q, -p * q]) + " \\iff " + P2([1, -(p + q), p * q]) + " = 0 \\iff (" + xm(p) + ")(" + xm(q) + ") = 0") + ".",
+        return QSet("Pour quelles valeurs de " + M("x") + " les graphes de " + M("f(x) = x^2") + " et " + M("g(x) = " + P2([p + q, -p * q])) + " se coupent-ils ?", [p, q], M("x^2 = " + P2([p + q, -p * q]) + " \\iff " + P2([1, -(p + q), p * q]) + " = 0 \\iff (" + xm(p) + ")(" + xm(q) + ") = 0") + " : " + M("x = " + p) + " ou " + M("x = " + q) + ".",
           { ctx: "x2-droite", fig: FIG.plot([{ f: (x) => x * x }, { f: (x) => (p + q) * x - p * q }], [], { xr: [Math.min(p, -1) - 2, Math.max(q, 1) + 2], yr: [-2, Math.max(p * p, q * q, 1) + 2], grid: false, ticks: false, minH: 170, maxH: 260, label: "parabole et droite" }), guide: [GX("Ramène à « … = 0 »", P2([1, -(p + q), p * q]), M(P2([1, -(p + q), p * q]) + " = 0") + "."), GSet("Solutions ?", [p, q], M(p) + " et " + M(q) + ".")], traps: [TSet([-p, -q], "Attention aux signes en factorisant."), TSet([p * p, q * q], "On demande les abscisses x.")] }); },
       () => { const k = pk([-4, -1, 0, 1, 4, 9]), n = k > 0 ? 2 : k === 0 ? 1 : 0, c = R.int(-3, 3);
         return QN("Combien de points d'intersection ont la parabole " + M("y = x^2" + (c ? sg(c) : "")) + " et la droite horizontale " + M("y = " + (k + c)) + " ?", n, M("x^2" + (c ? sg(c) : "") + " = " + (k + c) + " \\iff x^2 = " + k) + " : " + (n === 2 ? "deux solutions." : n === 1 ? "une seule (x = 0)." : "aucune (un carré n'est jamais négatif)."),
@@ -2782,13 +2782,13 @@
   const IP = {
     1: [
       () => { const p = R.int(-4, 2), q = p + R.int(1, 4), b2 = R.int(-3, 3), c2 = R.int(-4, 6), b1 = b2 - 2 * (p + q), c1 = c2 + 2 * p * q;
-        return QSet("Détermine les abscisses des points d'intersection des paraboles " + M("f(x) = " + P2([1, b1, c1])) + " et " + M("g(x) = " + P2([-1, b2, c2])) + ".", [p, q], M("f(x) = g(x) \\iff " + P2([2, -2 * (p + q), 2 * p * q]) + " = 0 \\iff 2(" + xm(p) + ")(" + xm(q) + ") = 0") + ".",
+        return QSet("Détermine les abscisses des points d'intersection des paraboles " + M("f(x) = " + P2([1, b1, c1])) + " et " + M("g(x) = " + P2([-1, b2, c2])) + ".", [p, q], M("f(x) = g(x) \\iff " + P2([2, -2 * (p + q), 2 * p * q]) + " = 0 \\iff 2(" + xm(p) + ")(" + xm(q) + ") = 0") + " : " + M("x = " + p) + " ou " + M("x = " + q) + ".",
           { ctx: "opposees", guide: [GX(M("f(x) - g(x)"), P2([2, -2 * (p + q), 2 * p * q]), M(P2([2, -2 * (p + q), 2 * p * q])) + "."), GSet("Solutions ?", [p, q], M(p) + " et " + M(q) + ".")], traps: [TSet([-p, -q], "Attention aux signes."), TSet([2 * p, 2 * q], "Divise par 2.")] }); },
       () => { const p = R.int(-4, 2), q = p + R.int(1, 4), b2 = R.int(-3, 3), c2 = R.int(-4, 6), b1 = b2 - (p + q), c1 = c2 + p * q;
         return QSet("Détermine les abscisses des points d'intersection des paraboles " + M("f(x) = " + P2([2, b1, c1])) + " et " + M("g(x) = " + P2([1, b2, c2])) + ".", [p, q], M("f(x) = g(x) \\iff " + P2([1, -(p + q), p * q]) + " = 0") + " : " + M(p) + " et " + M(q) + ".",
           { ctx: "coef2", guide: [GX(M("f(x) - g(x)"), P2([1, -(p + q), p * q]), M(P2([1, -(p + q), p * q])) + "."), GSet("Solutions ?", [p, q], M(p) + " et " + M(q) + ".")], traps: [TSet([-p, -q], "Attention aux signes.")] }); },
       () => { const r = R.int(1, 4), a = R.int(1, 6), b = 2 * r * r - a;
-        return QSet("Pour quelles valeurs de " + M("x") + " les paraboles " + M("f(x) = x^2" + sg(-a)) + " et " + M("g(x) = -x^2" + sg(b)) + " se coupent-elles ?", [-r, r], M("x^2 - " + a + " = -x^2" + sg(b) + " \\iff 2x^2 = " + 2 * r * r + " \\iff x^2 = " + r * r) + ".",
+        return QSet("Pour quelles valeurs de " + M("x") + " les paraboles " + M("f(x) = x^2" + sg(-a)) + " et " + M("g(x) = -x^2" + sg(b)) + " se coupent-elles ?", [-r, r], M("x^2 - " + a + " = -x^2" + sg(b) + " \\iff 2x^2 = " + 2 * r * r + " \\iff x^2 = " + r * r) + " : " + M("x = -" + r) + " ou " + M("x = " + r) + ".",
           { ctx: "symetriques", guide: [GS(M("x^2") + " = ?", r * r, M(r * r) + "."), GSet("Solutions ?", [-r, r], M(-r) + " et " + M(r) + ".")], traps: [TSet([r], "x² = " + r * r + " a deux solutions."), TSet([-r * r, r * r], "On cherche x, pas x².")] }); },
     ],
     2: [
@@ -3523,7 +3523,7 @@
     ],
     3: [
       () => { const p = R.int(1, 4);
-        return QSet("Quelles sont les valeurs interdites de " + M("\\frac{1}{x^3 - " + p * p + "x}") + " ?", [0, -p, p], M("x(x^2 - " + p * p + ") = x(x - " + p + ")(x + " + p + ")") + ".", { ctx: "cube", guide: [GSet("Valeurs interdites ?", [0, -p, p], M("0, \\pm " + p) + ".")], traps: [TSet([-p, p], "N'oublie pas x = 0."), TSet([0], "x² − " + p * p + " s'annule aussi.")] }); },
+        return QSet("Quelles sont les valeurs interdites de " + M("\\frac{1}{x^3 - " + p * p + "x}") + " ?", [0, -p, p], M("x(x^2 - " + p * p + ") = x(x - " + p + ")(x + " + p + ")") + " : " + M("0") + ", " + M(-p) + " et " + M(p) + ".", { ctx: "cube", guide: [GSet("Valeurs interdites ?", [0, -p, p], M("0, \\pm " + p) + ".")], traps: [TSet([-p, p], "N'oublie pas x = 0."), TSet([0], "x² − " + p * p + " s'annule aussi.")] }); },
       () => { const b = R.int(-3, 3), c = R.int(Math.ceil((b * b) / 4) + 1, 9);
         return QN("Combien de valeurs interdites a " + M("\\frac{2}{" + poly([1, b, c]) + "}") + " ?", 0, M("\\Delta = " + (b * b - 4 * c)) + " < 0 : le dénominateur ne s'annule jamais.", { ctx: "delta", guide: [GS(M("\\Delta") + " ?", b * b - 4 * c, M(b * b - 4 * c) + "."), GS("Nombre de valeurs interdites ?", 0, "0.")], traps: [TR(2, "Δ < 0 : pas de zéro."), TR(1, "Calcule Δ.")] }); },
       () => { const a = nz(-4, 4), b = nz(-4, 4); if (a === b || a === -b) return null;
@@ -3834,7 +3834,7 @@
     ],
     3: [
       () => { const deg = pk([30, 45, 60, 120, 135, 150, 210, 225, 240, 300, 315, 330]), v = tanD(deg);
-        return QR("Donne la valeur exacte de " + M("\\tan " + deg + "°") + ".", v, M("\\tan = \\frac{\\sin}{\\cos}") + " ; angle de référence " + M(ref(deg) + "°") + ", " + M("\\tan " + ref(deg) + "° = " + { 30: "\\frac{\\sqrt{3}}{3}", 45: "1", 60: "\\sqrt{3}" }[ref(deg)]) + " ; signe : " + (v > 0 ? "positif" : "négatif") + " dans le quadrant " + quad(deg) + ".",
+        return QR("Donne la valeur exacte de " + M("\\tan " + deg + "°") + ".", v, M("\\tan = \\frac{\\sin}{\\cos}") + " ; angle de référence " + M(ref(deg) + "°") + ", " + M("\\tan " + ref(deg) + "° = " + { 30: "\\frac{\\sqrt{3}}{3}", 45: "1", 60: "\\sqrt{3}" }[ref(deg)]) + " ; signe : " + (v > 0 ? "positif" : "négatif") + " dans le quadrant " + quad(deg) + ", donc " + M("\\tan " + deg + "° = " + (v < 0 ? "-" : "") + { 30: "\\frac{\\sqrt{3}}{3}", 45: "1", 60: "\\sqrt{3}" }[ref(deg)]) + ".",
           { ctx: "tan-exact", canon: (v < 0 ? "-" : "") + { 30: "√3/3", 45: "1", 60: "√3" }[ref(deg)], guide: [G("Angle de référence ?", ref(deg), M(ref(deg) + "°") + "."), GR(M("\\tan") + " de l'angle de référence ?", Math.abs(v), M({ 30: "\\frac{\\sqrt{3}}{3}", 45: "1", 60: "\\sqrt{3}" }[ref(deg)]) + "."), GR("Avec le signe : " + M("\\tan " + deg + "°") + " = ?", v, M((v < 0 ? "-" : "") + { 30: "\\frac{\\sqrt{3}}{3}", 45: "1", 60: "\\sqrt{3}" }[ref(deg)]) + ".")],
             traps: [TR(-v, "Tangente positive dans les quadrants 1 et 3, négative dans 2 et 4."), TR(r6(1 / v), "tan = sin/cos, pas cos/sin.")] }); },
       () => { const deg = pk([150, 120, 135, 210, 240, 300, 330, 225, 315]), x = cosD(deg), y = sinD(deg);
@@ -3980,7 +3980,7 @@
         return QN("On sait que " + M("\\" + c[1] + " \\alpha = " + N(v)) + ". Que vaut " + M(c[0]) + " ?", res, c[3] + " " + M(c[0] + " = " + (c[2] < 0 ? "-" : "") + "\\" + c[1] + " \\alpha = " + N(res)) + ".",
           { ctx: "assoc-" + c[0].replace(/[^a-z0-9+-]/gi, ""), guide: [G("Même valeur (1) ou valeur opposée (−1) ?", c[2], c[3]), G(M(c[0]) + " = ?", res, M(N(res)) + ".")], traps: [TR(-res, "Dessine les deux angles sur le cercle : " + c[3]), TR(r6(Math.sqrt(1 - v * v)), "On reste avec la même fonction (" + c[1] + ").")] }); },
       () => { const deg = pk([150, 120, 135, 210, 225, 240, 300, 330, 315]), fn = pk(["sin", "cos"]), r = ref(deg), sgn = Math.sign(fn === "sin" ? sinD(deg) : cosD(deg));
-        return QN("On sait que " + M("\\" + fn + " " + r + "° " + (Math.abs((fn === "sin" ? sinD(r) : cosD(r)) * 2 - Math.round((fn === "sin" ? sinD(r) : cosD(r)) * 2)) < 1e-9 ? "=" : "\\approx") + " " + N(Math.round((fn === "sin" ? sinD(r) : cosD(r)) * 100) / 100)) + ". Sans calculatrice, que vaut " + M("\\" + fn + " " + deg + "°") + " (au centième) ?", r6(Math.round(sgn * (fn === "sin" ? sinD(r) : cosD(r)) * 100) / 100), M(deg + "°") + " a pour angle de référence " + M(r + "°") + " ; dans le quadrant " + quad(deg) + ", " + fn + " est " + (sgn > 0 ? "positif" : "négatif") + ".",
+        return QN("On sait que " + M("\\" + fn + " " + r + "° " + (Math.abs((fn === "sin" ? sinD(r) : cosD(r)) * 2 - Math.round((fn === "sin" ? sinD(r) : cosD(r)) * 2)) < 1e-9 ? "=" : "\\approx") + " " + N(Math.round((fn === "sin" ? sinD(r) : cosD(r)) * 100) / 100)) + ". Sans calculatrice, que vaut " + M("\\" + fn + " " + deg + "°") + " (au centième) ?", r6(Math.round(sgn * (fn === "sin" ? sinD(r) : cosD(r)) * 100) / 100), M(deg + "°") + " a pour angle de référence " + M(r + "°") + " ; dans le quadrant " + quad(deg) + ", " + fn + " est " + (sgn > 0 ? "positif" : "négatif") + " : " + M("\\" + fn + " " + deg + "° \\approx " + N(r6(Math.round(sgn * (fn === "sin" ? sinD(r) : cosD(r)) * 100) / 100))) + ".",
           { ctx: "reference", round: 0.01, guide: [G("Angle de référence de " + M(deg + "°") + " ?", r, M(r + "°") + "."), G("Signe de " + M("\\" + fn) + " dans le quadrant " + quad(deg) + " (1 ou −1) ?", sgn, sgn > 0 ? "Positif." : "Négatif."), Gd("Valeur ?", r6(sgn * (fn === "sin" ? sinD(r) : cosD(r))), "Signe × valeur de référence.", 0.01)],
             traps: [TR(r6(-Math.round(sgn * (fn === "sin" ? sinD(r) : cosD(r)) * 100) / 100), "Vérifie le signe dans ce quadrant.")] }); },
       () => { const s = pk([0.6, 0.8, 0.28, 0.96, 0.6]), c = r6(Math.sqrt(1 - s * s));
@@ -4581,7 +4581,7 @@
       /* carrés de pairs et d'impairs */
       () => { const v = pk([
           ["Si " + M("n") + " est impair, alors " + M("n^2") + " est impair", "n = 2k + 1", "(2k + 1)^2 = 2(\\ldots) + 1", "2*k^2+2*k", "(2k + 1)^2 = 4k^2 + 4k + 1 = 2(2k^2 + 2k) + 1", "4*k^2+4*k", "impair-carre"],
-          ["Si " + M("n") + " est pair, alors " + M("n^2") + " est un multiple de 4", "n = 2k", "(2k)^2 = 4(\\ldots)", "k^2", "(2k)^2 = 4k^2", "2*k^2", "pair-carre"],
+          ["Si " + M("n") + " est pair, alors " + M("n^2") + " est un multiple de 4", "n = 2k", "(2k)^2 = 4(\\ldots)", "k^2", "(2k)^2 = 4k^2 = 4(k^2)", "2*k^2", "pair-carre"],
           ["Le produit de deux impairs est impair", "2k + 1 \\text{ et } 2m + 1", "(2k + 1)(2m + 1) = 2(\\ldots) + 1", "2*k*m+k+m", "(2k + 1)(2m + 1) = 4km + 2k + 2m + 1 = 2(2km + k + m) + 1", "4*k*m+1", "produit-impairs"],
           ["Le produit de deux pairs consécutifs est un multiple de 4", "2k \\text{ et } 2k + 2", "2k(2k + 2) = 4(\\ldots)", "k^2+k", "2k(2k + 2) = 4k^2 + 4k = 4(k^2 + k)", "4*k^2+4*k", "produit-pairs"]]);
         return QX("Démonstration : « " + v[0] + " ». On écrit " + M(v[1]) + " (entiers). Complète : " + M(v[2]) + ". Que met-on dans la parenthèse ?", v[3],
@@ -4678,12 +4678,14 @@
     { c: "batterie", H: "la batterie du téléphone est vide", C: "le téléphone est éteint", nH: "la batterie n'est pas vide", nC: "le téléphone est allumé" },
     { c: "vitrine", H: "le magasin est ouvert", C: "la vitrine est éclairée", nH: "le magasin est fermé", nC: "la vitrine n'est pas éclairée" },
   ];
+  /* 27.11 (garde-fou corrige_valeur) : le corrigé finit sur la réponse à taper (numéros, ou « aucune ») */
+  const bilan = (ans) => " Réponse : " + (ans.length ? ans.join(" ; ") : "aucune") + ".";
   const IM = {
     1: [
       /* P ⇒ Q, Q ⇒ P : lesquelles sont vraies ? */
       () => { const s = swap(pk(PAIRS)()), ans = [s.pq ? 1 : 0, s.qp ? 2 : 0].filter((x) => x);
         return QSet("On considère les énoncés P : « " + s.P + " » et Q : « " + s.Q + " »" + ctxOf(s) + ". Lesquelles de ces implications sont vraies ?" + liste([M("P " + IMPL + " Q"), M("Q " + IMPL + " P")]) + "<br>" + ASK_NUM, ans,
-          "(1) " + (s.pq ? "vraie" : "fausse") + ", (2) " + (s.qp ? "vraie" : "fausse") + " : " + s.why + "." + (ans.length === 2 ? " On écrit " + M("P \\Leftrightarrow Q") + "." : ""),
+          "(1) " + (s.pq ? "vraie" : "fausse") + ", (2) " + (s.qp ? "vraie" : "fausse") + " : " + s.why + "." + (ans.length === 2 ? " On écrit " + M("P \\Leftrightarrow Q") + "." : "") + bilan(ans),
           { ctx: "sens-" + s.ctx, guide: [GSet("Pour chaque implication, cherche un contre-exemple (hypothèse vraie, conclusion fausse). Lesquelles sont vraies ?", ans, s.why + ".")],
             traps: [ans.length === 2 ? TSt([1], "La réciproque est vraie aussi : c'est une équivalence.") : TSt([1, 2], "Une des deux a un contre-exemple : " + s.why + "."), ans.length === 1 ? TSt([3 - ans[0]], "C'est l'autre sens qui est vrai.") : null, ans.length ? TNone("Teste avec un exemple : l'hypothèse vraie entraîne-t-elle la conclusion ?") : TSt([1], "Contre-exemple : " + s.why + ".")] }); },
       /* reconnaître la réciproque ou la contraposée */
@@ -4696,7 +4698,7 @@
       () => { const L = pk(LIFE), all = [["ok", "On constate que " + L.H + ". On en conclut que " + L.C + "."], ["contra", "On constate que " + L.nC + ". On en conclut que " + L.nH + "."], ["rec", "On constate que " + L.C + ". On en conclut que " + L.H + "."], ["inv", "On constate que " + L.nH + ". On en conclut que " + L.nC + "."]];
         let ch; do ch = sh(all).slice(0, 3); while (!ch.some((x) => x[0] === "ok" || x[0] === "contra") || !ch.some((x) => x[0] === "rec" || x[0] === "inv")); const ans = ch.map((x, i) => (x[0] === "ok" || x[0] === "contra" ? i + 1 : 0)).filter((x) => x);
         return QSet("On sait que l'implication « si " + L.H + ", alors " + L.C + " » est vraie. Quels raisonnements sont corrects (conclusion certaine) ?" + liste(ch.map((x) => x[1])) + "<br>" + ASK_NUM, ans,
-          ch.map((x, i) => "(" + (i + 1) + ") " + (x[0] === "ok" ? "correct (l'implication elle-même)" : x[0] === "contra" ? "correct (contraposée)" : x[0] === "rec" ? "incorrect (réciproque)" : "incorrect (on nie sans échanger)")).join(" ; ") + ".",
+          ch.map((x, i) => "(" + (i + 1) + ") " + (x[0] === "ok" ? "correct (l'implication elle-même)" : x[0] === "contra" ? "correct (contraposée)" : x[0] === "rec" ? "incorrect (réciproque)" : "incorrect (on nie sans échanger)")).join(" ; ") + "." + bilan(ans),
           { ctx: "vie-" + L.c, guide: [GSet("Une implication vraie a une contraposée vraie, mais sa réciproque peut être fausse. Raisonnements corrects ?", ans, ans.join(", ") + ".")],
             traps: [TSt(ch.map((x, i) => (x[0] === "rec" || x[0] === "inv" ? i + 1 : 0)).filter((x) => x), "Ce sont les raisonnements faux : réciproque ou négation sans échange."), TSt([1, 2, 3], "La réciproque d'une implication vraie n'est pas forcément vraie.")] }); },
     ],
@@ -4711,7 +4713,7 @@
       () => { const L = [2, 3, 4, 6, 8, 9, 12, 15, 18, 20]; const a = pk(L), b = pk(L.filter((x) => x !== a)), ans = [a % b === 0 ? 1 : 0, b % a === 0 ? 2 : 0].filter((x) => x);
         const ce1 = a % b ? a : null, ce2 = b % a ? b : null;
         return QSet("Soit " + M("n") + " un entier. P : « " + M("n") + " est un multiple de " + M(a) + " », Q : « " + M("n") + " est un multiple de " + M(b) + " ». Lesquelles sont vraies ?" + liste([M("P " + IMPL + " Q"), M("Q " + IMPL + " P")]) + "<br>" + ASK_NUM, ans,
-          "(1) " + (ce1 ? "fausse : " + M(a) + " est un multiple de " + M(a) + " mais pas de " + M(b) : "vraie : " + M(a + " = " + b + " \\cdot " + a / b) + ", donc tout multiple de " + M(a) + " est un multiple de " + M(b)) + " ; (2) " + (ce2 ? "fausse : " + M(b) + " n'est pas un multiple de " + M(a) : "vraie : " + M(b + " = " + a + " \\cdot " + b / a)) + ".",
+          "(1) " + (ce1 ? "fausse : " + M(a) + " est un multiple de " + M(a) + " mais pas de " + M(b) : "vraie : " + M(a + " = " + b + " \\cdot " + a / b) + ", donc tout multiple de " + M(a) + " est un multiple de " + M(b)) + " ; (2) " + (ce2 ? "fausse : " + M(b) + " n'est pas un multiple de " + M(a) : "vraie : " + M(b + " = " + a + " \\cdot " + b / a)) + "." + bilan(ans),
           { ctx: "multiples-ab", guide: [GSet("P ⇒ Q est vraie si " + M(b) + " divise " + M(a) + " ; Q ⇒ P si " + M(a) + " divise " + M(b) + ". Lesquelles ?", ans, nums(ans) + ".")],
             traps: [ans.length ? TNone("Un des deux nombres divise l'autre.") : TSt([1], a + " n'est pas un multiple de " + b + " : " + a + " lui-même est un contre-exemple."), ans.length === 1 ? TSt([3 - ans[0]], "C'est l'autre sens.") : null] }); },
       /* contre-exemple à la réciproque */
@@ -4731,7 +4733,7 @@
           { t: "x2cx", P: M("x^2 \\ge " + c + "x"), Q: M("x \\ge " + c), pq: false, qp: true, why: M("x = -1") + " vérifie " + M("x^2 \\ge " + c + "x") + " ; et si " + M("x \\ge " + c + " > 0") + ", alors " + M("x \\cdot x \\ge " + c + "x") },
           { t: "inv", P: M("\\frac{1}{x} < \\frac{1}{" + c + "}") + " (" + M("x \\neq 0") + ")", Q: M("x > " + c), pq: false, qp: true, why: M("x = -1") + " vérifie " + M("\\frac{1}{x} < \\frac{1}{" + c + "}") + " ; et " + M("x > " + c + " > 0") + " donne " + M("\\frac{1}{x} < \\frac{1}{" + c + "}") }]), s = swap(B), ans = [s.pq ? 1 : 0, s.qp ? 2 : 0].filter((x) => x);
         return QSet("Pour " + M("x") + " réel : P : « " + s.P + " », Q : « " + s.Q + " ». Lesquelles sont vraies ?" + liste([M("P " + IMPL + " Q"), M("Q " + IMPL + " P")]) + "<br>" + ASK_NUM, ans,
-          "(1) " + (s.pq ? "vraie" : "fausse") + ", (2) " + (s.qp ? "vraie" : "fausse") + " : " + s.why + ".",
+          "(1) " + (s.pq ? "vraie" : "fausse") + ", (2) " + (s.qp ? "vraie" : "fausse") + " : " + s.why + "." + bilan(ans),
           { ctx: "reels-" + s.t, guide: [GSet("Cherche un contre-exemple, en pensant aux nombres négatifs et à 0. Lesquelles sont vraies ?", ans, s.why + ".")],
             traps: [ans.length === 2 ? TSt([ans[0] === 1 ? 1 : 2], "Les deux sens sont vrais.") : TSt([1, 2], "Pense aux nombres négatifs : " + s.why + "."), ans.length === 1 ? TSt([3 - ans[0]], "C'est l'autre sens.") : null] }); },
       /* négation : compter les cas où un énoncé est faux */
@@ -4897,7 +4899,7 @@
         const ok = Ts.map((t, i) => (t[2] ? i + 1 : 0)).filter(Boolean), ko = Ts.map((t, i) => (t[2] ? 0 : i + 1)).filter(Boolean);
         const tabT = (t, i) => (i + 1) + ") " + M("\\begin{array}{c|cccc} x & " + t[0].join(" & ") + " \\\\ \\hline y & " + t[1].join(" & ") + " \\end{array}");
         return QSet("Chaque tableau donne quatre points " + M("(x \\,;\\, y)") + ". Lesquels peuvent faire partie du graphe d'une fonction ? Donne les numéros, séparés par « ; ».<br>" + Ts.map(tabT).join("<br>"), ok,
-          "Un graphe de fonction ne contient jamais deux points de même abscisse avec des ordonnées différentes. " + (ko.length ? "Tableau" + (ko.length > 1 ? "x " : " ") + ko.join(", ") + " : une même valeur de " + M("x") + " a deux valeurs de " + M("y") + "." : "") + " Deux " + M("x") + " différents peuvent avoir le même " + M("y") + ".",
+          "Un graphe de fonction ne contient jamais deux points de même abscisse avec des ordonnées différentes. " + (ko.length ? "Tableau" + (ko.length > 1 ? "x " : " ") + ko.join(", ") + " : une même valeur de " + M("x") + " a deux valeurs de " + M("y") + "." : "") + " Deux " + M("x") + " différents peuvent avoir le même " + M("y") + ". Conviennent : " + (ok.length > 1 ? "tableaux " : "tableau ") + ok.join(" ; ") + ".",
           { ctx: "couples", guide: [GR("Combien de tableaux ont une valeur de " + M("x") + " répétée avec deux " + M("y") + " différents ?", ko.length, M(ko.length) + "."), { ask: "Numéros des tableaux qui conviennent ?", spec: { kind: "set", values: ok }, sol: ok.join(" ; ") + "." }],
             traps: [TSt(ko, "Ce sont ceux qui ne conviennent pas : une abscisse y a deux images."), TSt(ok.filter((i) => new Set(Ts[i - 1][1]).size === 4), "Deux abscisses différentes peuvent avoir la même image : seul un x répété avec deux y différents pose problème.")] }); },
     ],

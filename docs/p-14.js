@@ -11,7 +11,8 @@
   const pk = (a) => a[Math.floor(R.rand() * a.length)];
   const nz = (a, b) => { let v; do v = R.int(a, b); while (v === 0); return v; };
   const r6 = (v) => +(+v).toFixed(9);
-  const den = (v) => { for (let d = 1; d <= 400; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return d; return 0; };
+  /* 27.11 (garde-fou corrige_valeur) : tolérance 1e-7 (avant 1e-9 : r6(20/6) = 3,333333333 n'était pas reconnu, corrigé « 3,333333π ») */
+  const den = (v) => { for (let d = 1; d <= 400; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-7) return d; return 0; };
   // nombre en TeX : entier, fraction, sinon décimal à virgule
   const fT = (v) => { v = r6(v); const d = den(v); if (d === 1 || !d || d > 60) return nb(v); const n = Math.round(v * d); return (n < 0 ? "-" : "") + "\\frac{" + Math.abs(n) + "}{" + d + "}"; };
   const co = (a) => (a === 1 ? "" : a === -1 ? "-" : fT(a)); // coefficient devant une lettre (TeX)
@@ -268,7 +269,7 @@
           { ctx: "parametre", guide: [GX(M("f'(x)") + " (avec la lettre " + M("k") + ") ?", "3x^2 + 2*k*x" + sgS(m), M("3x^2 + 2kx" + sg(m)) + "."), GS("Tangente horizontale : " + M("f'(" + x0 + ") = 0") + ". Valeur de " + M("k") + " ?", k, M("k = " + k) + ".")],
             traps: [TR(-k, "Vérifie le signe en résolvant f'(" + x0 + ") = 0."), TR(-(x0 ** 3 + m * x0) / (x0 * x0), "On veut f'(" + x0 + ") = 0 (pente nulle), pas f(" + x0 + ") = 0.")] }); },
       () => { let r1 = nz(-4, 3), r2 = r1 + pk([2, 4, 6]); const b = -3 * (r1 + r2) / 2, mm = nz(-6, 6), c = 3 * r1 * r2 + mm, d = R.int(-5, 5), cs = [1, b, c, d];
-        return QSet("En quelles abscisses la tangente au graphe de " + ftex(cs) + " a-t-elle une pente égale à " + M(mm) + " ? Sépare les réponses par « ; ».", [r1, r2], M("f'(x) = " + P2(dP(cs)) + " = " + mm) + " ⟺ " + M(P2([3, 2 * b, c - mm]) + " = 0 ⟺ 3(x" + sg(-r1) + ")(x" + sg(-r2) + ") = 0") + ".",
+        return QSet("En quelles abscisses la tangente au graphe de " + ftex(cs) + " a-t-elle une pente égale à " + M(mm) + " ? Sépare les réponses par « ; ».", [r1, r2], M("f'(x) = " + P2(dP(cs)) + " = " + mm) + " ⟺ " + M(P2([3, 2 * b, c - mm]) + " = 0 ⟺ 3(x" + sg(-r1) + ")(x" + sg(-r2) + ") = 0") + " : " + M("x = " + r1) + " ou " + M("x = " + r2) + ".",
           { ctx: "pente-donnee", guide: [GX(M("f'(x)") + " ?", tp(dP(cs)), M(P2(dP(cs))) + "."), GSet("Résous " + M("f'(x) = " + mm) + ".", [r1, r2], M(r1) + " et " + M(r2) + ".")],
             traps: [TSt([-r1, -r2], "Vérifie les signes : 3(x − r₁)(x − r₂) s'annule en r₁ et r₂."), TSt([r1], "Il y a deux solutions."), TSt([r2], "Il y a deux solutions.")] }); },
       () => { const k = R.int(2, 5), a = pk([1, 2]), b = 3 * a * k, o = pk(["Un drone de livraison", "Une montgolfière", "Une fusée à eau"]);
@@ -314,7 +315,7 @@
           { ctx: "quotient-degre2", guide: [GX("Numérateur " + M("u'v - uv'") + " développé ?", tp([1, 2 * b, -a]), M(P2([1, 2 * b, -a])) + "."), GX(M("f'(x)") + " ?", ans, M("\\frac{" + P2([1, 2 * b, -a]) + "}{(" + lin(1, b) + ")^2}") + ".")],
             traps: [TX("(" + tp([1, 2 * b, a]) + ")/(" + linS(1, b) + ")^2", "uv' se soustrait en entier : −(x² " + (a < 0 ? "− " + -a : "+ " + a) + ")."), TX("2x", "La dérivée d'un quotient n'est pas u'/v'."), TX("(" + tp([3, 2 * b, a]) + ")/(" + linS(1, b) + ")^2", "Au numérateur, u'v − uv' : un moins.")] }); },
       () => { const s = R.int(1, 5), k = s * s, c = pk([1, 2, 3]);
-        return QSet("En quelles abscisses la tangente au graphe de " + M("f(x) = \\frac{" + (c === 1 ? "" : c) + "x}{x^2 + " + k + "}") + " est-elle horizontale ?", [-s, s], M("f'(x) = \\frac{" + c + "(x^2 + " + k + ") - " + c + "x \\cdot 2x}{(x^2 + " + k + ")^2} = \\frac{" + c + "(" + k + " - x^2)}{(x^2 + " + k + ")^2}") + " ; nul pour " + M("x^2 = " + k) + ".",
+        return QSet("En quelles abscisses la tangente au graphe de " + M("f(x) = \\frac{" + (c === 1 ? "" : c) + "x}{x^2 + " + k + "}") + " est-elle horizontale ?", [-s, s], M("f'(x) = \\frac{" + c + "(x^2 + " + k + ") - " + c + "x \\cdot 2x}{(x^2 + " + k + ")^2} = \\frac{" + c + "(" + k + " - x^2)}{(x^2 + " + k + ")^2}") + " ; nul pour " + M("x^2 = " + k) + ", soit " + M("x = -" + s) + " ou " + M("x = " + s) + ".",
           { ctx: "tangentes-horizontales", guide: [GX("Numérateur de " + M("f'(x)") + " (développé) ?", tp([-c, 0, c * k]), M(P2([-c, 0, c * k])) + "."), GSet("Il s'annule pour ?", [-s, s], M("x = \\pm " + s) + ".")],
             traps: [TSt([0], "x = 0 annule f (le numérateur de f), pas f'."), TSt([s], "x² = " + k + " a deux solutions."), TSt([-k, k], "x² = " + k + " : prends la racine.")] }); },
       () => { const s = R.int(2, 6), b = s * s, a = pk([10, 12, 20, 30, 40]), ask = pk(["t", "C"]), Cm = r6(a / (2 * s));
@@ -1732,7 +1733,7 @@
       () => { const b = nz(-3, 3), c = pk([1, -1, 2, -2]), d = nz(-6, 6), n = [1, b, c], pts = [];
         for (let i = 0; i < 40 && pts.length < 3; i++) { const x = R.int(-4, 4), y = R.int(-3, 3), z = r6(-(x + b * y + d) / c); if (Number.isInteger(z) && Math.abs(z) <= 9 && !pts.some((q) => q[0] === x && q[1] === y)) pts.push([x, y, z]); }
         if (pts.length < 3 || isZ(cross(sub(pts[1], pts[0]), sub(pts[2], pts[0])))) return null; const [A, B, C] = pts;
-        return QP("Le plan passant par " + ptN("A", A) + ", " + ptN("B", B) + " et " + ptN("C", C) + " a une équation de la forme " + M("x + by + cz + d = 0") + ". Trouve " + M("b") + ", " + M("c") + " et " + M("d") + ". Réponds « b ; c ; d ».", [b, c, d], "Chaque point vérifie l'équation : trois équations en " + M("b, c, d") + ". Solution : " + M("\\pi : " + plT(n, d)) + ".",
+        return QP("Le plan passant par " + ptN("A", A) + ", " + ptN("B", B) + " et " + ptN("C", C) + " a une équation de la forme " + M("x + by + cz + d = 0") + ". Trouve " + M("b") + ", " + M("c") + " et " + M("d") + ". Réponds « b ; c ; d ».", [b, c, d], "Chaque point vérifie l'équation : trois équations en " + M("b, c, d") + ". Solution : " + M("\\pi : " + plT(n, d)) + ", donc " + M("b = " + b) + ", " + M("c = " + c) + ", " + M("d = " + d) + ".",
           { ctx: "trois-points", guide: [G(M("b") + " ?", b, M(b) + "."), G(M("c") + " ?", c, M(c) + "."), G(M("d") + " ?", d, M(d) + "."), GP("Réponse « b ; c ; d » ?", [b, c, d], M(b + " \\,;\\, " + c + " \\,;\\, " + d) + ".")],
             traps: [TP([-b, -c, -d], "Le coefficient de x vaut 1 : vérifie les signes avec le point A."), TP([c, b, d], "b est le coefficient de y, c celui de z.")] }); },
       () => { const u = rv(3), v = rv(3); let n = red(cross(u, v)); if (isZ(n) || !n[0] || n.some((x) => Math.abs(x) > 12)) return null; if (n[0] < 0) n = mul(-1, n); const A = rp(3), d = -dot(n, A);
