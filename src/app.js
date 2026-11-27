@@ -422,7 +422,7 @@ function startPlacement() {
     /* 26.11 (revue p4, n° 3 : 9e très faible, positionnement 7:19 puis séance 6:46 le premier jour) : 3 questions ratées ou
        « Je ne sais pas » suffisent à situer l'élève, le positionnement s'arrête là. */
     if (i >= plan.length || (state.placement.miss || 0) >= 3) { state.placeMiss = state.placement.miss || 0; state.placed = true; state.placedOn = day(); /* 26.11 soir : série d'automatismes courte ce jour-là (Engine.autoN) */ delete state.placement; Engine.snapPlaced(state); /* revue p5, n° 12 */ save(); return screenPlacementDone(); }
-    const id = plan[i], q = Engine.make(state, id, Math.min(2, difficultyCap(state.profile)));
+    const id = plan[i], q = Engine.make(state, id, Engine.placementLevel(state, i)); /* 27.11 (n° 29) : 1re question au niveau 1 */
     renderQuestion(q, {
       eyebrow: "Étape 2 sur 2 · question " + (i + 1) + " sur " + plan.length + (plan.length - i > 1 ? " · encore " + (plan.length - i - 1) + " après celle-ci · environ " + (plan.length - i) + " min" /* 26.11 : une minute par question (mesuré : 4 à 5 min pour 5) */ : " · la dernière !") + `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((i / plan.length) * 100)}%"></i></span>`, single: true, track: "positionnement",
       /* 26.11 (revue p4, n° 5) : les ratés du positionnement ne vont plus au carnet (l'écran de fin dit « ces questions
@@ -721,7 +721,7 @@ function screenHome() {
     prog: () => `${newBadgesCard()}${carnetCard(true)}${themeMapCard()}${compsCard()}`,
   };
   // 22.11 : accueil à cases (maquette design/maquette_accueil.html) ; chaque case ouvre une page « ← Accueil ».
-  panels.carnet = () => carnetCard(true) || `<div class="card flat stack"><div class="eyebrow">📕 Carnet d'erreurs</div><p class="small muted">Vide : bravo ! Chaque question ratée viendra s'y ranger, pour que tu puisses la réussir plus tard.</p></div>`;
+  panels.carnet = () => carnetCard(true) || `<div class="card flat stack"><div class="eyebrow">📕 Carnet d'erreurs</div><p class="small muted">Vide : bravo ! Chaque question ratée viendra s'y ranger, pour que tu puisses la réussir plus tard.</p>${carnetWeekN() ? `<p class="small carnet-week">${carnetWeekTxt()}</p>` : ""}</div>`;
   // 22.11 : « Ma fiche » (src/fiche.js) : une fiche par chapitre derrière Progrès. Retirée le 23.11 (branche archive/fiche) : inactif sans fiche.js.
   panels.prog = () => `${weekCard()}<div class="card flat stack grades-go"><button type="button" class="btn-sec" id="gradesgo">🏅 Mes grades et mon Mathélo</button><p class="small muted yp-explain">Mathélo = ton niveau · Points de l'année = ton travail, ils font monter ton grade.</p></div>${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}${typeof parentCard === "function" ? parentCard() : ""}`; /* 24.11 : espace parent (src/parents.js) */
   if (!panels[homeTab]) homeTab = "today";
@@ -748,7 +748,10 @@ function screenHome() {
     /* Série perdue (26.11, même revue) : une phrase dans la carte de séance, le jour du retour seulement. */
     const lostK = s.count >= 1 && !alive && s.last ? s.last : null; /* 26.11 soir (revue d'un testeur : « 0 j » sans un mot après une absence) : dès 1 jour */
     if (lostK && (!state.lostSeen || state.lostSeen.k !== lostK)) { state.lostSeen = { k: lostK, d: today }; save(); }
-    const lostLine = lostK && state.lostSeen && state.lostSeen.k === lostK && state.lostSeen.d === today ? `<p class="small streak-lost">Ta série de ${s.count} ${s.count > 1 ? "jours" : "jour"} s'est arrêtée. Fais une séance aujourd'hui : elle repart à 1.${Math.max(s.best || 0, s.count) > 1 ? " Ton record : " + Math.max(s.best || 0, s.count) + " jours." : ""}</p>` : "";
+    /* 27.11 (décision de l'enseignant, n° 31) : retour après une absence (3 jours ou plus) : « Content de te revoir ! » en tête
+       de la phrase de série perdue (court, sans compter les jours manqués ; la phrase du 26.11 reste telle quelle). */
+    const away = lostK && lostK <= addDays(today, -3), rec = Math.max(s.best || 0, s.count);
+    const lostLine = lostK && state.lostSeen && state.lostSeen.k === lostK && state.lostSeen.d === today ? `<p class="small streak-lost">${away ? "Content de te revoir ! " : ""}Ta série de ${s.count} ${s.count > 1 ? "jours" : "jour"} s'est arrêtée. Fais une séance aujourd'hui : elle repart à 1.${rec > 1 ? " Ton record : " + rec + " jours." : ""}</p>` : "";
     const nowLine = !Engine.nowActive(state) ? `<button type="button" class="btn-sec small" id="nowpick">📚 Choisir mon chapitre travaillé en classe</button>`
       : Engine.nowStale(state) ? `<div class="now-ask"><b>📚 Cette semaine en classe, tu travailles toujours :</b><span>${esc(state.now.ids.map(nLabel).join(" · "))} ?</span><div class="row now-ask-btns"><button type="button" class="btn-sec small" id="nowyes">Oui, toujours</button><button type="button" class="btn-sec small" id="nowpick">J'ai changé de chapitre</button></div></div>`
       : `<span class="small now-lab">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span><button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
@@ -1552,6 +1555,15 @@ const FREE_THEMES = { no: "Nombres et opérations", fa: "Fonctions et algèbre",
 // Chaque question ratée en séance entre dans le carnet (une entrée par notion et niveau). « Effacer mes erreurs » la
 // repose avec d'autres nombres ; elle sort après deux réussites de suite du premier coup, un échec remet le compteur à 0.
 const CARNET_MAX = 40, CARNET_OK = 2;
+/* 27.11 (décision de l'enseignant, n° 28 ; tools/eleves_faibles_26-11.md, proposition 2 : à 30 % de réussite, deux
+   réussites de suite = 9 % de chances par essai, un carnet qui ne fait que grossir) : carnet à la portée de l'élève en
+   grande difficulté (Engine.struggling) : une réussite du premier coup efface l'erreur, et une réussite du premier coup
+   sur la même notion (même niveau ou au-dessus) dans une séance ordinaire compte aussi. Autres élèves : règle inchangée. */
+const carnetNeed = () => (state && Engine.struggling(state) ? 1 : CARNET_OK);
+const carnetRule = () => (carnetNeed() === 1 ? "une réussite du premier coup, ici ou dans tes séances" : "2 réussites de suite, du premier coup");
+// Erreurs effacées ces 7 derniers jours (state.carnetOut : une date par erreur effacée).
+const carnetWeekN = () => (Array.isArray(state && state.carnetOut) ? state.carnetOut : []).filter((d) => d >= addDays(day(), -6)).length;
+const carnetWeekTxt = () => { const n = carnetWeekN(); return n ? `✓ ${n} effacée${n > 1 ? "s" : ""} cette semaine` : ""; };
 // 22.11 : m = erreur reconnue (diagnostic), a = réponse donnée : affichées dans « Ma fiche ».
 function carnetAdd(id, d, code, m, a) {
   if (!state || !id || !d || d > 3) return false;
@@ -1565,13 +1577,21 @@ function carnetResult(id, d, firstTry) {
   const c = state.carnet || [], e = c.find((x) => x.id === id && x.d === d);
   if (!e) return null;
   e.ok = firstTry ? e.ok + 1 : 0;
-  if (e.ok >= CARNET_OK) {
+  if (e.ok >= carnetNeed()) {
     state.carnet = c.filter((x) => x !== e);
     // 24.11 : dates des erreurs effacées (carte « Ma semaine »), 7 derniers jours seulement.
     state.carnetOut = [...(Array.isArray(state.carnetOut) ? state.carnetOut : []).filter((d) => d >= addDays(day(), -6)), day()];
     return "efface";
   }
   return firstTry ? "encore" : "rate";
+}
+/* 27.11 (n° 28) : élève en grande difficulté : une réussite du premier coup en séance ordinaire efface les erreurs de la
+   même notion rangées au même niveau ou en dessous. Renvoie le nombre d'erreurs effacées. */
+function carnetSessionOk(id, d) {
+  if (!state || carnetNeed() !== 1) return 0;
+  let k = 0;
+  for (const e of (state.carnet || []).filter((x) => x.id === id && x.d <= d)) if (carnetResult(e.id, e.d, true) === "efface") k++;
+  return k;
 }
 // Plan d'une séance « carnet » : d'abord celles à moitié effacées, puis les plus anciennes ; filtre optionnel de notions.
 function carnetPlan(n = 5, only) {
@@ -1583,21 +1603,21 @@ function startCarnet(only) {
   if (!plan.length) return screenHome();
   session = { carnet: true, plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set() };
   nextQuestion();
-  toast("📕 Pour effacer une erreur : 2 réussites de suite, du premier coup.", 4000); // 22.11 : règle expliquée au départ
+  toast("📕 Pour effacer une erreur : " + carnetRule() + ".", 4000); /* 22.11 : règle expliquée au départ ; 27.11 : selon l'élève (n° 28) */
 }
 const nLab = (id) => nLabel(id); /* 26.11 (revue p5, n° 7) : libellé du collège français (labelFR) aussi au bilan et au carnet */
 /* 26.11 soir (revue des élèves testeurs, n° 6 : « 3 à effacer » après une bonne séance, aucun progrès visible) : les
    erreurs à une réussite de la sortie sont dites « presque effacées ». */
 function carnetLeft(c) {
-  const near = c.filter((x) => x.ok >= CARNET_OK - 1 && x.ok > 0).length;
+  const near = c.filter((x) => x.ok >= carnetNeed() - 1 && x.ok > 0).length;
   return c.length + " à effacer" + (near ? (near === c.length ? (near > 1 ? ", toutes presque effacées" : ", presque effacée") : ", dont " + near + " presque effacée" + (near > 1 ? "s" : "")) + " (encore 1 réussite)" : "");
 }
 function carnetCard(full) {
   const c = state.carnet || [];
-  if (!c.length) return full ? `<div class="card flat stack"><div class="eyebrow">📕 Carnet d'erreurs</div><p class="small muted">Vide : bravo ! Chaque question ratée viendra s'y ranger, pour que tu puisses la réussir plus tard.</p></div>` : "";
-  const rows = full ? `<ul class="carnet-list">${c.slice().reverse().map((x) => `<li><span>${nLab(x.id)} <span class="dots small">${[1, 2, 3].map((k) => `<i class="${k <= x.d ? "on" : ""}"></i>`).join("")}</span></span><span class="small muted">${x.ok ? "✓ 1 sur 2" : "à refaire"}</span></li>`).join("")}</ul>` : "";
-  return `<div class="card stack carnet-card"><div class="eyebrow">📕 Carnet d'erreurs</div><h3>${c.length} erreur${c.length > 1 ? "s" : ""} à effacer</h3>${c.some((x) => x.ok > 0) ? `<p class="small">${esc(carnetLeft(c).replace(/^\d+ à effacer, (dont )?/, "").replace(/^./, (m) => m.toUpperCase()))}.</p>` : ""}
-    <p class="small muted">Refais-les avec d'autres nombres : deux réussites de suite du premier coup, et elle disparaît.</p>${rows}
+  if (!c.length) return full ? `<div class="card flat stack"><div class="eyebrow">📕 Carnet d'erreurs</div><p class="small muted">Vide : bravo ! Chaque question ratée viendra s'y ranger, pour que tu puisses la réussir plus tard.</p>${carnetWeekN() ? `<p class="small carnet-week">${carnetWeekTxt()}</p>` : ""}</div>` : "";
+  const rows = full ? `<ul class="carnet-list">${c.slice().reverse().map((x) => `<li><span>${nLab(x.id)} <span class="dots small">${[1, 2, 3].map((k) => `<i class="${k <= x.d ? "on" : ""}"></i>`).join("")}</span></span><span class="small muted">${x.ok && carnetNeed() > 1 ? "✓ 1 sur 2" : "à refaire"}</span></li>`).join("")}</ul>` : "";
+  return `<div class="card stack carnet-card"><div class="eyebrow">📕 Carnet d'erreurs</div><h3>${c.length} erreur${c.length > 1 ? "s" : ""} à effacer</h3>${carnetWeekN() ? `<p class="small carnet-week">${carnetWeekTxt()}</p>` : ""}${c.some((x) => x.ok > 0) && carnetNeed() > 1 ? `<p class="small">${esc(carnetLeft(c).replace(/^\d+ à effacer, (dont )?/, "").replace(/^./, (m) => m.toUpperCase()))}.</p>` : ""}
+    <p class="small muted">Refais-les avec d'autres nombres : ${carnetNeed() === 1 ? "une réussite du premier coup, ici ou dans tes séances, et elle disparaît" : "deux réussites de suite du premier coup, et elle disparaît"}.</p>${rows}
     <button class="btn-primary" id="carnetgo">Effacer mes erreurs (${Math.min(5, c.length)} question${Math.min(5, c.length) > 1 ? "s" : ""})</button></div>`;
 }
 
@@ -1880,6 +1900,12 @@ function nextQuestion(redo) {
     const R0 = W(redo.q), near = (x) => (x.ctx && x.ctx === redo.ctx ? 100 : 0) + [...W(x.q)].filter((w) => R0.has(w)).length;
     for (let k = 0, best = near(q); k < 9 && best < 100; k++) { const c = Engine.make(state, id, redo.d - 1); if (c && c.q !== redo.q && near(c) > best) { q = c; best = near(c); } }
   }
+  /* 27.11 (n° 27) : question rejouée (Engine.replayNext) : d'autres nombres que la question ratée, la forme la plus proche
+     (même contexte si possible) parmi 10 tirages. */
+  if (!redo && q && session.replayQ && session.replayAt === session.i) {
+    const R = session.replayQ, near = (x) => (x.q === R.q ? -1 : x.ctx && x.ctx === R.ctx ? 1 : 0);
+    for (let k = 0, best = near(q); k < 10 && best < 1; k++) { const c = Engine.make(state, id, level); if (c && near(c) > best) { q = c; best = near(c); } }
+  }
   if (redo) { for (let k = 0; k < 12 && q && q.q === redo.q; k++) q = Engine.make(state, id, redo.d === 4 ? 4 : Math.max(1, redo.d - 1));
     if (!q || q.q === redo.q) { toast("Pas d'autre version de ce problème pour l'instant : on continue."); session.i++; return nextQuestion(); } }
   /* 26.11 (revue d'un testeur, jour 3) : un créneau « automatisme » ne pose qu'un vrai automatisme (Engine.isDrill) ;
@@ -1920,7 +1946,7 @@ function nextQuestion(redo) {
     sub: session.ctest ? session.ctest.label : "", /* revue p5, n° 11 : intitulé de l'objectif en texte normal sous l'en-tête */
     /* 25.11 (revue) : compteur qui compte aussi l'étape leçon ; « Nouvelle notion » (et non « Révision ») pour la question
        qui suit la leçon ou pour une notion encore jamais travaillée. */
-    eyebrow: ((s) => s + (ST.total > 1 && !session.weekly ? `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((Math.min(ST.pos - 1, ST.total) / ST.total) * 100)}%"></i></span>` : ""))((session.carnet ? "Carnet d'erreurs · " + nTxt : session.free ? "Mon défi du jour · " + nTxt : session.weekly ? "🔍 Problème de la semaine" : session.ctest ? "Me tester · " + nTxt /* 26.11 (revue p5, n° 11 : intitulé en majuscules sur 4 lignes à 360 px) : intitulé en dessous (sub) */ : session.prep ? "Révision de l'évaluation · " + nTxt : ST.total === 1 ? (fmtLab || "Question du jour") : (fmtLab ? fmtLab + " · " : "") + nTxt) + (kind && KIND_LABEL[kind] && !(session.fmt && FORMATS[session.fmt] && FORMATS[session.fmt].slots.every((x) => x.replace(/\d+$/, "") === kind)) ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo ? " · nouvelles valeurs" : "")),
+    eyebrow: ((s) => s + (ST.total > 1 && !session.weekly ? `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((Math.min(ST.pos - 1, ST.total) / ST.total) * 100)}%"></i></span>` : ""))((session.carnet ? "Carnet d'erreurs · " + nTxt : session.free ? "Mon défi du jour · " + nTxt : session.weekly ? "🔍 Problème de la semaine" : session.ctest ? "Me tester · " + nTxt /* 26.11 (revue p5, n° 11 : intitulé en majuscules sur 4 lignes à 360 px) : intitulé en dessous (sub) */ : session.prep ? "Révision de l'évaluation · " + nTxt : ST.total === 1 ? (fmtLab || "Question du jour") : (fmtLab ? fmtLab + " · " : "") + nTxt) + (kind && KIND_LABEL[kind] && !(session.fmt && FORMATS[session.fmt] && FORMATS[session.fmt].slots.every((x) => x.replace(/\d+$/, "") === kind)) ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo || (session.replayQ && session.replayAt === session.i) ? " · nouvelles valeurs" : "")),
     /* 26.11 : pas à pas réussi jusqu'au bout (étapes toutes justes) : moitié de la perte de Mathélo rendue, +1 point de
        l'année (dans le plafond du jour), et le bilan le dit. Rien si une étape est fausse, ni en « Refaire ». */
     onGuided: (delta) => {
@@ -1932,10 +1958,18 @@ function nextQuestion(redo) {
     onDone: (res) => {
       const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
       // Carnet d'erreurs (20.11) : séance « carnet » → progression ; ailleurs, une question ratée y entre.
-      if ((session.carnet || kind === "carnet") && !redo) { const r = carnetResult(id, q.d, res.solved && res.tries === 1); if (r === "efface") { session.ypg = (session.ypg || 0) + ypAdd(state, YP.carnet); toast("📕 Effacée de ton carnet d'erreurs ✓"); } else if (r === "encore") toast("📕 1 réussite sur 2 : encore une, du premier coup, et elle sort du carnet.", 4000); else if (r === "rate") toast("📕 Elle reste dans ton carnet : il faut 2 réussites de suite, du premier coup.", 4000); }
+      if ((session.carnet || kind === "carnet") && !redo) { const r = carnetResult(id, q.d, res.solved && res.tries === 1); if (r === "efface") { session.fixedN = (session.fixedN || 0) + 1; session.ypg = (session.ypg || 0) + ypAdd(state, YP.carnet); toast("📕 Effacée de ton carnet d'erreurs ✓"); } else if (r === "encore") toast("📕 1 réussite sur 2 : encore une, du premier coup, et elle sort du carnet.", 4000); else if (r === "rate") toast("📕 Elle reste dans ton carnet : il faut " + carnetRule() + ".", 4000); }
       else if (!res.solved && !q.parts && !session.weekly && carnetAdd(id, q.d, q.code, res.diag, res.ans)) toast("📕 Rangée dans ton carnet d'erreurs : tu pourras la refaire.");
+      /* 27.11 (n° 28) : élève en grande difficulté : une réussite du premier coup en séance efface les erreurs de la notion */
+      else if (res.solved && res.tries === 1 && !q.parts && !session.weekly) { const k = carnetSessionOk(id, q.d); if (k) { session.fixedN = (session.fixedN || 0) + k; session.ypg = (session.ypg || 0) + ypAdd(state, YP.carnet * k); toast("📕 Réussie : " + (k > 1 ? k + " erreurs effacées" : "erreur effacée") + " de ton carnet ✓"); } }
+      /* 27.11 (décision de l'enseignant, n° 27) : rejouer au lieu d'ajouter (Engine.replayNext) : élève en grande difficulté,
+         question pas réussie du premier coup → la suivante prévue devient la même notion, d'autres nombres, un niveau en
+         dessous ; une fois par séance ; le total « n sur N » ne change pas. Elle passe avant la remédiation et l'allègement. */
+      const replay = !redo && !session.replayUsed && !session.weekly && !session.prep && !session.carnet && !session.ctest && session.fmt !== "auto" && !q.parts && !(res.solved && res.tries === 1)
+        && Engine.replayNext(state, session.plan, session.i, id, q.d, kind);
+      if (replay) { session.plan[session.i + 1] = replay; session.replayUsed = true; session.replayAt = session.i + 1; session.replayQ = { q: q.q, ctx: q.ctx }; }
       // Deux échecs de suite : on glisse juste après une question sur une notion de base (une fois par notion et par séance).
-      if (!session.weekly && !session.prep && !session.carnet && sc < 0.5) {
+      if (!replay && !session.weekly && !session.prep && !session.carnet && sc < 0.5) {
         session.remed = session.remed || new Set();
         /* 26.11 : la notion de base prend la place de la question suivante (le total « n sur N » ne change pas) */
         const p = !session.remed.has(id) && session.i + 1 < session.plan.length && Engine.remediation(state, id);
@@ -1945,14 +1979,14 @@ function nextQuestion(redo) {
          facile (Engine.easeNext), jamais plus dure ; le total « n sur N » ne change pas. Décision de l'enseignant (26.11,
          n° 2) : une question allégée par séance au plus (session.easeUsed). */
       if (!redo) session.failRun = res.solved && res.tries === 1 ? 0 : (session.failRun || 0) + 1;
-      if (!redo && !session.easeUsed && !session.weekly && !session.prep && !session.carnet && !session.ctest && session.failRun >= 2 && session.i + 1 < session.plan.length) { const e2 = Engine.easeNext(state, session.plan, session.i, id, q.d); if (e2) { session.plan[session.i + 1] = e2; session.easeUsed = true; } }
+      if (!redo && !replay && !session.easeUsed && !session.weekly && !session.prep && !session.carnet && !session.ctest && session.failRun >= 2 && session.i + 1 < session.plan.length) { const e2 = Engine.easeNext(state, session.plan, session.i, id, q.d); if (e2) { session.plan[session.i + 1] = e2; session.easeUsed = true; } }
       /* 25.11 soir (revue d'un testeur) : « Refaire » ne rapporte plus de Mathélo (on pouvait monter son score en répétant) ;
          « Je ne sais pas » compte à 40 % (−38 décourageait d'avouer qu'on ne sait pas, plus que le gain d'une bonne réponse). */
       const w = redo ? 0 : res.dontKnow ? 0.4 : 1; /* 40 % validé par l'enseignant le 25.11 */
       res.delta = w ? Engine.updateElo(state, id, q.d, sc, w) : 0;
       /* 25.11 : points de l'année (grades) ; rien en « Refaire » ; problème de la semaine réussi : bonus hors plafond. */
       session.ypg = (session.ypg || 0) + ypAdd(state, ypPoints(q.d, res, !!redo)) + (session.weekly && res.solved && !redo ? ypAdd(state, YP.weekly, "w") : 0);
-      session.score += sc; session.answered++; session.ids.add(id);
+      session.score += sc; session.answered++; session.ids.add(id); if (res.solved) session.solvedN = (session.solvedN || 0) + 1; /* 27.11 : bilan des réussites (n° 31) */
       if (res.parts) { session.parts = [(session.parts ? session.parts[0] : 0) + res.parts[0], (session.parts ? session.parts[1] : 0) + res.parts[1]]; session.nP = (session.nP || 0) + 1; } /* 26.11 soir : bilan d'un problème en parties */
       session.res = session.res || {}; const rr = (session.res[id] = session.res[id] || { n: 0, ok: 0 }); rr.n++; if (res.solved) rr.ok++;
       if (Engine.finishDay(state, 1, sc) === "joker") toast("🛡 Joker de série utilisé : ta série continue !"); save();
@@ -2884,6 +2918,16 @@ function scoreRow(n, sc) {
   if (P && (n === 1 || session.nP === n)) return `<div class="spread"><span>Parties justes</span><b>${P[0]} / ${P[1]}</b></div>`;
   return `<div class="spread"><span>Score</span><b>${String(Math.round(sc * 10) / 10).replace(".", ",")} / ${n}</b></div>`;
 }
+/* 27.11 (décision de l'enseignant, n° 31 ; tools/eleves_faibles_26-11.md, proposition 5 : « Séance faite : c'est en
+   pratiquant qu'on progresse. » 4 fois sur 4 chez l'élève très faible) : titre du bilan centré sur ce qui a été réussi. */
+function sumTitle(n, sc) {
+  if (sc >= n * 0.8) return "Excellente séance !";
+  const P = [session.solvedN ? plur(session.solvedN, "question réussie", "questions réussies") : "", session.rebuilt ? plur(session.rebuilt, "solution reconstruite", "solutions reconstruites") : "",
+    session.fixedN ? plur(session.fixedN, "erreur effacée du carnet", "erreurs effacées du carnet") : ""].filter(Boolean);
+  const txt = P.length > 1 ? P.slice(0, -1).join(", ") + " et " + P[P.length - 1] : P[0];
+  if (sc >= n * 0.5) return txt ? "Bonne séance : " + txt + "." : "Bonne séance.";
+  return txt ? "Aujourd'hui : " + txt + "." : plur(n, "question travaillée", "questions travaillées") + " : c'est en pratiquant qu'on progresse.";
+}
 function screenSummary() {
   if (state) { delete state.resume; if (session && session.answered) state.firstDone = true; save(); }
   if (session && session.answered && !session.counted) { session.counted = true; UI.sessN = (+UI.sessN || 0) + 1; uiSave(); storagePersist(); }
@@ -2906,7 +2950,7 @@ function screenSummary() {
   if (session.carnet && n <= 2) {
     const left = (state.carnet || []).length;
     h(`${brand}<h2>${sc >= n ? "📕 Bien joué !" : "📕 C'est noté."}</h2>
-    <div class="card flat stack">${ypRow}<div class="spread"><span>Carnet d'erreurs</span><b>${left ? carnetLeft(state.carnet) : "vide : bravo !"}</b></div></div>
+    <div class="card flat stack">${ypRow}<div class="spread"><span>Carnet d'erreurs</span><b>${left ? carnetLeft(state.carnet) : "vide : bravo !"}</b></div>${carnetWeekN() ? `<div class="small muted carnet-week">${carnetWeekTxt()}</div>` : ""}</div>
     ${newGrade}${nb}
     ${left ? '<button class="btn-primary btn-big" id="carnetagain">📕 Continuer à effacer</button>' : ""}
     <button class="${left ? "btn-sec" : "btn-primary btn-big"}" id="home">Retour à l'accueil</button>`);
@@ -2921,7 +2965,7 @@ function screenSummary() {
     /* 26.11 soir (n° 17 : « Séance courte » après 12:33) : « courte » selon la durée, plus selon le nombre de questions */
     : Date.now() - session.start < 4 * 6e4 ? "Séance courte aujourd'hui. Tu peux continuer autant que tu veux." : "";
   // 26.11 : Mathélo caché par défaut : titre selon le score seulement (22.11 : il suivait le Mathélo).
-  h(`${brand}<h2>${sc >= n * 0.8 ? "Excellente séance !" : sc >= n * 0.5 ? "Bonne séance." : "Séance faite : c'est en pratiquant qu'on progresse."}</h2>
+  h(`${brand}<h2>${esc(sumTitle(n, sc))}</h2>
   <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span>${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ta série passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${tomorrowLabel()}</b></div>${sumGoal(g1)}</div></div>
   ${summaryByNotion()}
   ${weekLine()}
@@ -2929,7 +2973,7 @@ function screenSummary() {
   ${ypRow}${session.rebuilt ? `<p class="small">🪜 Tu as reconstruit ${session.rebuilt > 1 ? session.rebuilt + " solutions" : "une solution"} pas à pas : ça compte aussi.</p>` : ""}</div>
   ${session.ctest ? (() => { const a = ctestNote(session.ctest), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? (isFR() ? "Le niveau apparaît après 3 réponses sur cette compétence." : "La note apparaît après 3 réponses sur cette compétence.") : b === null ? (isFR() ? "Premier positionnement pour cette compétence." : "Première note pour cette compétence.") : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". " + (isFR() ? "Il remontera" : "Elle remontera") + " avec la pratique." : isFR() ? "Niveau stable." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
   ${newGrade}${nb}
-  ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${carnetLeft(state.carnet)}</b></div><span class="small muted">Une erreur s'efface après 2 réussites de suite, du premier coup.</span><button class="btn-primary" id="carnetagain">${session.carnet ? "Continuer à effacer" : "📕 Effacer mes erreurs maintenant"}</button></div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
+  ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${carnetLeft(state.carnet)}</b></div><span class="small muted">${carnetWeekN() ? carnetWeekTxt() + " · " : ""}Pour effacer une erreur : ${carnetRule()}.</span><button class="btn-primary" id="carnetagain">${session.carnet ? "Continuer à effacer" : "📕 Effacer mes erreurs maintenant"}</button></div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
   ${returnCard()}
   ${typeof Curieux !== "undefined" && Curieux.available(state).length ? '<button class="btn-primary" id="curbonus">🤔 Bonus : une question curieuse</button>' : ""}
   <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)", "app")}</div>
