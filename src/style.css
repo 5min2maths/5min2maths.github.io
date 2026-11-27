@@ -874,12 +874,11 @@ details.lx { border-radius: 10px; }
 details.lx > summary { cursor: pointer; color: var(--blue); font-weight: 700; padding: 11px 0; min-height: 44px; box-sizing: border-box; }
 details.lx[open] > summary { padding-bottom: 6px; }
 /* Accueil : demi-ligne d'explication sous les cases, les premières fois. */
-.door small.door-hint { font-size: 0.74rem; }
+.door small.door-hint { font-size: 0.74rem; } /* courte : une ligne à la taille normale ; peut passer à la ligne avec une grande police (accessibilité) */
 /* 27.11 (portes d'entrée de l'app : « Trésors cachés », « Chercheurs d'or », « le grand problème de la semaine ») : à 360 px,
    nom et explication tiennent sur deux lignes au plus, coupées de façon équilibrée. */
 .door b { line-height: 1.15; text-wrap: balance; }
 .door small { text-wrap: balance; }
-.brand-n { font-style: normal; } /* 27.11 : nom affiché de l'en-tête (le nom dit est en sr-only) */ /* courte : une ligne à la taille normale ; peut passer à la ligne avec une grande police (accessibilité) */
 /* 26.11 (revue p5, n° 11 : « Mes compétences » MP à 360 px) : badges repliés après les compétences ; intitulé de l'objectif
    sur toute la largeur, boutons dessous ; intitulé de « Me tester » en texte normal sous l'en-tête. */
 details.bdg-fold > summary { cursor: pointer; list-style: none; }

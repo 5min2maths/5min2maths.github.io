@@ -249,8 +249,8 @@ const backTop = (id = "backtop") => `<button type="button" class="btn-ghost back
 const gradeName = (p) => ((SYSTEMS[p.system] || SYSTEMS_HIDDEN[p.system] || { grades: [] }).grades.find(([g]) => g === p.grade) || [0, ""])[1]; /* 25.11 : profil d'un système masqué (France) */
 /* 26.11 : nom centralisé (src/curriculum.js). 27.11 : logo (pépite) devant le nom ; variante C du logo (tools/logo/) : la
    pépite tient lieu de ² (le ² reste lu par les lecteurs d'écran). */
-/* 27.11 (décision de l'enseignant) : nom accessible APP_SPOKEN (nom dit) ; le nom affiché est masqué aux lecteurs d'écran (balises i : .brand span = slogan). */
-const brand = '<div class="brand"><b><i class="brand-n" aria-hidden="true">' + (LOGO_MARK.includes("logo-exp") ? APP_NAME.replace("²", "") + LOGO_MARK : LOGO_MARK + APP_NAME) + '</i><i class="sr-only">' + APP_SPOKEN + '</i></b><span>' + APP_TAGLINE + '</span></div>';
+/* 27.11 (décision de l'enseignant) : nom accessible APP_SPOKEN (nom dit) ; nom affiché + logo lus comme une image nommée (role img, pas d'élément sr-only : les tests de débordement le signaleraient). */
+const brand = '<div class="brand"><b role="img" aria-label="' + APP_SPOKEN + '">' + (LOGO_MARK.includes("logo-exp") ? APP_NAME.replace("²", "") + LOGO_MARK : LOGO_MARK + APP_NAME) + '</b><span>' + APP_TAGLINE + '</span></div>';
 const PRAISE = ["Juste !", "Bien vu !", "Exact !", "Parfait.", "C'est ça !", "Bravo !"];
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 

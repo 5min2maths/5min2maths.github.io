@@ -217,8 +217,7 @@ const sec6 = () => sec("6 accueil", () => {
   const labs = [...document.querySelectorAll(".door b")].map((b) => b.textContent).join(" | ");
   if (labs !== "La mine | Trésors cachés | Chercheurs d'or | Jour J | À polir | Mon trésor") fail("noms des cases : " + labs);
   const go = document.querySelector(".sess-go"); if (!go || !/Ma pépite du jour/.test(go.textContent)) fail("grand bouton : " + (go && go.textContent));
-  const sr = document.querySelector(".brand .sr-only"); if (!sr || sr.textContent !== APP_SPOKEN) fail("en-tête : nom accessible « " + APP_SPOKEN + " » absent");
-  if (!document.querySelector('.brand .brand-n[aria-hidden="true"]')) fail("en-tête : nom affiché non masqué aux lecteurs d'écran (lu deux fois)");
+  const bn = document.querySelector(".brand > b"); if (!bn || bn.getAttribute("role") !== "img" || bn.getAttribute("aria-label") !== APP_SPOKEN) fail("en-tête : nom accessible « " + APP_SPOKEN + " » absent");
   const st0 = state; state = null; screenWelcome(); const sp = document.querySelector(".app-spoken");
   if (!sp || !sp.textContent.includes("se dit " + APP_SPOKEN) || R_(sp).height > 24 || R_(sp).right > innerWidth) fail("écran d'entrée : ligne « se dit Pépite au carré » absente ou sur plus d'une ligne");
   state = st0; screenSettings(); if (!/se dit Pépite au carré/.test((document.querySelector(".about") || {}).textContent || "") || !document.getElementById("logoq")) fail("Réglages : « À propos » absent");

@@ -51,8 +51,9 @@ l'explication de La mine (2 lignes).
 
 - `src/curriculum.js` : `APP_SPOKEN = "Pépite au carré"` (centralisé ; `tools/test_nom.py` l'exige et vérifie l'en-tête,
   l'écran d'entrée et les Réglages).
-- En-tête (toutes les pages) : nom affiché masqué aux lecteurs d'écran (`.brand-n`, aria-hidden) + nom accessible
-  « Pépite au carré » (`sr-only`).
+- En-tête (toutes les pages, présentations et page parent comprises) : logo + nom lus comme une image nommée
+  (`role="img"`, `aria-label` = APP_SPOKEN « Pépite au carré » ; pas d'élément sr-only, que les tests de débordement
+  signaleraient).
 - Écran d'entrée : petite ligne discrète sous le grand titre « Pépite² se dit *Pépite au carré* » (une ligne à 360 px).
 - Réglages : nouvelle carte « À propos » : « Pépite² se dit *Pépite au carré* : une pépite… au carré ! » + bouton
   « 🔍 Le secret du logo » (ouvre la question curieuse du logo, retour aux Réglages).
@@ -68,7 +69,9 @@ tools/test_paquets.py (Chercheurs d'or), tools/test_nom.py (APP_SPOKEN).
 ## Captures (tests/_shots/pepite/accueil/, page tests/_pepite_cap.html#cap=…)
 
 360×640 et 1440×900 : `entree`, `accueil`, `mine` (problème disponible), `tresors`, `chercheurs`, `jourj`, `tresor`,
-`bilanmine`, `reglages` ; 360×1000 : `accueil` (les 6 cases), `reglages`.
+`bilanmine`, `reglages` ; 360×1000 : `accueil` (les 6 cases) ; 360×1700 : `reglages` (carte « À propos » en bas).
+
+Suite complète : 179 pages, aucun échec (après la dernière correction).
 
 ## À soumettre à l'enseignant
 
