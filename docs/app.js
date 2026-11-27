@@ -11877,7 +11877,7 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
         calc: { label: "Combien paies-tu en tout ? (en CHF)", value: tot },
         reveal: M(m + " \\cdot " + n + " = " + N(tot)) + " CHF, soit " + M(N(tot - P)) + " CHF de plus que le prix comptant : " + pc(plus, 1) + " de plus." };
     } });
-  add({ key: "tva", fam: "arnaque", uses: ["pct"], outil: "les pourcentages : retrouver le prix avant une hausse, c'est diviser par 1,081, pas enlever 8,1 %.",
+  add({ key: "tva", fam: "arnaque", sys: "CH", uses: ["pct"], outil: "les pourcentages : retrouver le prix avant une hausse, c'est diviser par 1,081, pas enlever 8,1 %.",
     make() {
       const HT = pk([200, 250, 400, 600, 1200]), TTC = r6(HT * 1.081), wrong = r6(TTC * 0.919);
       return { titre: "Le prix hors taxe", q: "En Suisse, la TVA est de " + pc(8.1) + " : le prix TTC est le prix hors taxe augmenté de 8,1 %. Un vendeur affiche " + chf(TTC) + " TTC et dit : « Pour le prix hors taxe, j'enlève 8,1 % : " + chf(wrong) + ". »",
@@ -12016,7 +12016,7 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
         calc: { label: "Longueur totale poussée en un jour (en m)", value: r6(v), range: [v * 0.95, v * 1.05] },
         reveal: M(N(n) + " \\cdot " + N(g) + " = " + N(n * g)) + " mm, soit " + M(N(v)) + " m par jour, à peu près la longueur d'une piscine !" };
     } });
-  add({ key: "leman", fam: "fermi", uses: ["decdiv"], outil: "la division et les conversions de longueurs (km → m).",
+  add({ key: "leman", fam: "fermi", sys: "CH", uses: ["decdiv"], outil: "la division et les conversions de longueurs (km → m).",
     make() {
       const f = pk([200, 250]), L = pk([12.5, 11]), rl = (f * L) / 100, v = 200000 / rl;
       return { titre: "Le tour du Léman en papier toilette", q: "La rive du Léman mesure environ " + M("200\\ \\text{km}") + ". Un rouleau de papier toilette a " + M(f) + " feuilles de " + M(N(L) + "\\ \\text{cm}") + ".",
@@ -12292,7 +12292,7 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
         calc: { label: "Nombre de matchs joués en tout", value: n - 1 },
         reveal: "Pas besoin de compter tour par tour : chaque match élimine une équipe, et il faut éliminer toutes les équipes sauf le vainqueur. " + M(n + " - 1 = " + (n - 1)) + " matchs." };
     } });
-  add({ key: "franchise", fam: "quotidien", uses: ["prop"], outil: "la comparaison de deux tarifs : coût fixe (primes) + coût variable (franchise).",
+  add({ key: "franchise", fam: "quotidien", sys: "CH", uses: ["prop"], outil: "la comparaison de deux tarifs : coût fixe (primes) + coût variable (franchise).",
     make() {
       const [pa, fa, pb, fb] = pk([[420, 300, 330, 2500], [380, 300, 300, 2500], [450, 500, 360, 2000]]), F = pk([200, 1500, 4000]);
       const A = 12 * pa + Math.min(F, fa), B = 12 * pb + Math.min(F, fb);
@@ -12334,6 +12334,158 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
         reveal: "Les quatre murs, déroulés, forment un rectangle : périmètre × hauteur = " + M(N(2 * (L + l)) + " \\cdot 2{,}5 = " + N(S)) + " m². Deux couches : " + M(N(2 * S)) + " m², donc " + M(N(lit)) + " litres, soit " + M(N(lit) + " \\div 2{,}5 = " + N(lit / 2.5)) + " → " + pots + " pots (on arrondit vers le haut)." };
     } });
 
+  // ===================== 3e série (26.11, « d'autres entrées ») =====================
+  // sys : question réservée à un système (« CH » : contexte romand, CHF ; « FR » : contexte français, €, ×) ; sans sys,
+  // contexte neutre (CHF devient € par frLocal en France). eur / NF : montants et nombres écrits à la française.
+  const NF = (v, k) => N(v, k).replace(/\\text\{'\}/g, "\\,");
+  const eur = (v) => M(NF(v, Number.isInteger(r6(v)) ? 0 : 2).replace(/\{,\}(\d)$/, "{,}$10") + "\\ \\text{€}");
+  const m2 = (v) => v.toFixed(2).replace(".", "{,}");
+  const PF = (v) => String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f");
+  add({ key: "pieces", fam: "arnaque", uses: ["prop"], outil: "la proportionnalité : comparer deux packs, c'est comparer le prix d'une même quantité (ici 1'000 pièces).",
+    make() {
+      const [n1, p1, n2, p2] = pk([[1000, 9.9, 2800, 24.9], [500, 4.9, 2000, 21.9], [1000, 8.9, 5000, 49.9], [600, 5.9, 2500, 22.9]]);
+      const u1 = (p1 / n1) * 1000, u2 = (p2 / n2) * 1000, cheap = u2 < u1 ? 1 : 0;
+      return { titre: "La « meilleure offre » du jeu", q: "Dans un jeu en ligne, on achète des pièces virtuelles. Petit pack : " + T(n1) + " pièces pour " + chf(p1) + ". Grand pack, marqué « Meilleure offre ! » : " + T(n2) + " pièces pour " + chf(p2) + ".",
+        bet: { q: "Lequel est le moins cher, pour la même quantité de pièces ?", choices: ["Le petit pack", "Le grand pack"], good: cheap },
+        calc: { label: "Prix de " + T(1000) + " pièces avec le grand pack (en CHF, au centime)", value: r6(u2), round: 0.01 },
+        reveal: "Grand pack : " + M(m2(p2) + " \\div " + N(n2) + " \\cdot 1\\text{'}000 \\approx " + m2(u2)) + " CHF les 1'000 pièces. Petit pack : " + M(m2(p1) + " \\div " + N(n1) + " \\cdot 1\\text{'}000 \\approx " + m2(u1)) + " CHF. " + (cheap ? "Le grand pack est bien moins cher." : "Le petit pack est moins cher : l'étiquette « Meilleure offre » ne prouve rien, il faut calculer.") };
+    } });
+  add({ key: "sucre", fam: "quotidien", uses: ["pct"], outil: "les pourcentages (enlever 30 %, c'est garder 70 % : on multiplie par 0,7) et la proportionnalité (grammes pour 100 mL).",
+    make() {
+      const s = pk([10, 10.6, 11]), r = pk([20, 25, 30]), [V, Vt] = pk([[330, "une canette de 33 cL"], [500, "une bouteille de 50 cL"]]), g = r6((s * (1 - r / 100) * V) / 100), cubes = g / 5;
+      return { titre: "« −" + r + " % de sucre »", q: "Une boisson gazeuse contenait " + M(N(s) + "\\ \\text{g}") + " de sucre pour " + M("100\\ \\text{mL}") + ". Sa nouvelle recette annonce « " + pc(r) + " de sucre en moins ». Tu bois " + Vt + ". Un morceau de sucre pèse environ " + M("5\\ \\text{g}") + ".",
+        bet: { q: "Avec la nouvelle recette, combien de morceaux de sucre y a-t-il dans " + Vt + " ?", choices: ["moins de 5", "entre 5 et 10", "plus de 10"], good: cubes < 5 ? 0 : cubes <= 10 ? 1 : 2 },
+        calc: { label: "Masse de sucre dans " + Vt + " avec la nouvelle recette (en g, au dixième)", value: g, round: 0.1 },
+        reveal: "Nouvelle recette : " + M(N(s) + " \\cdot " + N(1 - r / 100) + " = " + N(s * (1 - r / 100))) + " g pour 100 mL. Pour " + V + " mL : " + M(N(s * (1 - r / 100)) + " \\cdot " + N(V / 100) + " = " + N(g)) + " g, soit environ " + M(N(cubes, 1)) + " morceaux de sucre. « Moins sucré » ne veut pas dire « peu sucré »." };
+    } });
+  add({ key: "simpson", fam: "paradoxe", uses: ["pct"], outil: "les pourcentages : un pourcentage global dépend aussi de la répartition des essais (c'est le paradoxe de Simpson).",
+    make() {
+      let A, B;
+      for (let t = 0; t < 400; t++) {
+        const a2 = pk([20, 30, 40]), a3 = pk([60, 80, 100]), b2 = pk([80, 100, 120]), b3 = pk([10, 20]);
+        const pa2 = pk([56, 58, 60, 62]), pb2 = pa2 - pk([2, 4]), pa3 = pk([36, 38, 40]), pb3 = pa3 - pk([3, 5]);
+        A = { n2: a2, m2: Math.round((a2 * pa2) / 100), n3: a3, m3: Math.round((a3 * pa3) / 100) };
+        B = { n2: b2, m2: Math.round((b2 * pb2) / 100), n3: b3, m3: Math.round((b3 * pb3) / 100) };
+        if (A.m2 / A.n2 > B.m2 / B.n2 && A.m3 / A.n3 > B.m3 / B.n3 && (B.m2 + B.m3) / (B.n2 + B.n3) > (A.m2 + A.m3) / (A.n2 + A.n3) + 0.02) break;
+        A = { n2: 30, m2: 18, n3: 100, m3: 38 }; B = { n2: 100, m2: 56, n3: 20, m3: 7 };
+      }
+      const tA = (100 * (A.m2 + A.m3)) / (A.n2 + A.n3), tB = (100 * (B.m2 + B.m3)) / (B.n2 + B.n3), w = (P, x) => x + " réussit " + M(P.m2) + " tirs à 2 points sur " + M(P.n2) + " (" + pc((100 * P.m2) / P.n2, 1) + ") et " + M(P.m3) + " tirs à 3 points sur " + M(P.n3) + " (" + pc((100 * P.m3) / P.n3, 1) + ")";
+      return { titre: "Le meilleur tireur", q: "Bilan de la saison de basket. " + w(A, "Alex") + ". " + w(B, "Sam") + ". Alex est meilleur que Sam aux deux sortes de tirs.",
+        bet: { q: "Qui a le meilleur pourcentage de réussite sur l'ensemble de ses tirs ?", choices: ["Alex, forcément", "Sam", "Ils sont à égalité"], good: 1 },
+        calc: { label: "Pourcentage de réussite de Sam sur tous ses tirs (au dixième)", value: r6(tB), round: 0.1 },
+        reveal: "Sam : " + M("\\frac{" + (B.m2 + B.m3) + "}{" + (B.n2 + B.n3) + "} \\approx " + N(tB, 1) + "\\,\\%") + ". Alex : " + M("\\frac{" + (A.m2 + A.m3) + "}{" + (A.n2 + A.n3) + "} \\approx " + N(tA, 1) + "\\,\\%") + ". Alex tente surtout des tirs à 3 points, les plus difficiles ; Sam surtout des tirs à 2 points. Être meilleur dans chaque catégorie ne suffit pas : la répartition compte." };
+    } });
+  add({ key: "orange", fam: "paradoxe", uses: ["volcone"], outil: "le volume de la boule, V = 4/3 · π · r³ : quand le rayon est multiplié par k, le volume est multiplié par k³.",
+    make() {
+      const [f, D, e] = pk([["une orange", 7, 0.5], ["une orange", 8, 0.7], ["un pamplemousse", 12, 1], ["une mandarine", 6, 0.4]]), R0 = D / 2, ri = R0 - e, v = r6(100 * (1 - (ri / R0) ** 3));
+      return { titre: "L'orange épluchée", q: "Tu épluches " + f + " bien " + (f.startsWith("une") ? "ronde" : "rond") + " de " + M(N(D) + "\\ \\text{cm}") + " de diamètre. Sa peau a une épaisseur de " + M(N(e) + "\\ \\text{cm}") + ".",
+        bet: { q: "Quelle part du volume du fruit part avec la peau ?", choices: ["environ 10 %", "environ 20 %", "plus de 30 %"], good: v < 15 ? 0 : v < 30 ? 1 : 2 },
+        calc: { label: "Pourcentage du volume occupé par la peau (au dixième)", value: v, round: 0.1 },
+        reveal: "Fruit entier : rayon " + M(N(R0)) + " cm ; sans la peau : rayon " + M(N(ri)) + " cm. Les volumes sont dans le rapport " + M("\\left(\\frac{" + N(ri) + "}{" + N(R0) + "}\\right)^3 \\approx " + N((ri / R0) ** 3, 3)) + " : il reste environ " + pc(100 - v, 1) + " du volume, la peau en prend " + pc(v, 1) + ". Une couche fine, mais tout autour, sur la partie la plus large de la boule." };
+    } });
+  add({ key: "lumiere", fam: "fermi", uses: ["vitesse", "sci"], outil: "la vitesse : durée = distance ÷ vitesse, avec de très grands nombres (notation scientifique).",
+    make() {
+      const o = pk([{ n: "Le Soleil", d: 1.5e8, dt: "150 millions de km", ch: ["environ 8 secondes", "environ 8 minutes", "environ 8 heures"], g: 1, fin: "Tu vois le Soleil tel qu'il était il y a plus de 8 minutes." },
+        { n: "La Lune", d: 3.84e5, dt: "384'000 km", ch: ["environ 1 seconde", "environ 1 minute", "environ 1 heure"], g: 0, fin: "La lumière renvoyée par la Lune arrive en un peu plus d'une seconde." },
+        { n: "Mars, au plus près,", d: 5.6e7, dt: "56 millions de km", ch: ["environ 3 secondes", "environ 3 minutes", "environ 3 heures"], g: 1, fin: "Un robot sur Mars ne peut pas être piloté en direct : chaque ordre met plusieurs minutes à arriver." }]);
+      const v = o.d / 3e5;
+      return { titre: "La lumière en route", q: "La lumière va à environ " + M("300\\text{'}000\\ \\text{km/s}") + ". " + o.n + " est à environ " + o.dt + " de la Terre.",
+        bet: { q: "Combien de temps sa lumière met-elle pour arriver jusqu'à nous ?", choices: o.ch, good: o.g },
+        calc: { label: "Durée du trajet de la lumière (en secondes)", value: r6(v), range: [v * 0.95, v * 1.05] },
+        reveal: M("t = \\frac{d}{v} = \\frac{" + N(o.d / 10 ** Math.floor(Math.log10(o.d))) + " \\cdot 10^{" + Math.floor(Math.log10(o.d)) + "}}{3 \\cdot 10^5} \\approx " + N(v, v < 10 ? 2 : 0)) + " s. " + o.fin };
+    } });
+  add({ key: "photos", fam: "fermi", uses: ["decdiv"], outil: "la division et les conversions d'unités (1 Go = 1'000 Mo).",
+    make() {
+      const G = pk([64, 128, 256]), p = pk([2.5, 3, 4]), v = (G * 1000) / p;
+      return { titre: "Combien de photos ?", q: "Ton téléphone a encore " + M(G + "\\ \\text{Go}") + " de libres (" + M("1\\ \\text{Go} = 1\\text{'}000\\ \\text{Mo}") + "). Une photo pèse environ " + M(N(p) + "\\ \\text{Mo}") + ".",
+        bet: { q: "Combien de photos peux-tu encore prendre ?", choices: ["environ 400", "environ 4'000", "environ 40'000", "environ 400'000"], good: mag(v, [400, 4000, 40000, 400000]) },
+        calc: { label: "Nombre de photos (arrondi)", value: Math.round(v), range: [v * 0.95, v * 1.05] },
+        reveal: M(G + " \\cdot 1\\text{'}000 = " + N(G * 1000)) + " Mo, puis " + M(N(G * 1000) + " \\div " + N(p) + " \\approx " + N(Math.round(v))) + " photos. Une vidéo, elle, remplit la mémoire bien plus vite." };
+    } });
+  add({ key: "hirondelle", fam: "enigme", uses: ["vitesse"], outil: "la vitesse : inutile de suivre les allers-retours, il suffit de connaître la durée du vol (distance = vitesse · durée).",
+    make() {
+      const v = pk([12, 20]), D = pk([12, 18, 24, 30, 36]), [w, a] = pk([[50, "Une hirondelle"], [30, "Un petit drone"]]), t = D / (2 * v), d = r6(w * t);
+      return { titre: "L'hirondelle et les deux cyclistes", q: "Deux cyclistes sont à " + M(D + "\\ \\text{km}") + " l'un de l'autre et roulent l'un vers l'autre, chacun à " + M(v + "\\ \\text{km/h}") + ". " + a + " part du premier, vole à " + M(w + "\\ \\text{km/h}") + " jusqu'au second, fait demi-tour, et ainsi de suite jusqu'à ce que les cyclistes se croisent.",
+        bet: { q: "Quelle distance parcourt-" + (a.includes("drone") ? "il" : "elle") + " en tout ?", choices: ["moins de " + D + " km", "exactement " + D + " km", "plus de " + D + " km"], good: d < D ? 0 : d === D ? 1 : 2 },
+        calc: { label: "Distance parcourue en vol (en km)", value: d, round: 0.1 },
+        reveal: "Les cyclistes se rapprochent de " + M(2 * v + "\\ \\text{km/h}") + " : ils se croisent après " + M(D + " \\div " + 2 * v + " = " + N(t)) + " h. Pendant tout ce temps, on vole à " + w + " km/h : " + M(w + " \\cdot " + N(t) + " = " + N(d)) + " km. Pas besoin d'additionner une infinité d'allers-retours !" };
+    } });
+  add({ key: "traversee", fam: "enigme", uses: [], outil: "le raisonnement par étapes : repérer les paires interdites, et oser ramener un passager en arrière.",
+    make() {
+      const [L, C, X, xm] = pk([["un loup", "une chèvre", "un chou", "le chou"], ["un renard", "une poule", "un sac de grain", "le grain"]]), c = C.replace(/^une? /, "la "), l = L.replace(/^un /, "le "), x = X.replace(/^un /, "le ");
+      return { titre: "La traversée", q: "Un passeur doit faire traverser une rivière à " + L + ", " + C + " et " + X + ". Sa barque ne peut porter que lui et un seul passager. Sans lui, " + l + " mange " + c + ", et " + c + " mange " + xm + ".",
+        bet: { q: "Combien de traversées (aller ou retour) faut-il au minimum ?", choices: ["3", "5", "7", "C'est impossible"], good: 2 },
+        calc: { label: "Nombre minimal de traversées", value: 7 },
+        reveal: "1. " + c + " passe ; 2. retour à vide ; 3. " + l + " passe ; 4. on <b>ramène</b> " + c + " ; 5. " + x + " passe ; 6. retour à vide ; 7. " + c + " passe. Total : 7 traversées. Cette énigme figure déjà dans un recueil d'Alcuin, un savant de l'époque de Charlemagne, vers l'an 800." };
+    } });
+  add({ key: "cadenas", fam: "enigme", uses: ["puiss"], outil: "le dénombrement : 10 chiffres possibles sur chaque roue, donc 10 · 10 · 10 = 10³ codes pour 3 roues.",
+    make() {
+      const n = pk([3, 4]), s = pk([2, 3, 5]), codes = 10 ** n, m = r6((codes * s) / 60);
+      return { titre: "Le cadenas à code", q: "Tu as oublié le code de ton cadenas : " + M(n) + " roues, chacune avec les chiffres de 0 à 9. Tu essaies les codes un par un, un toutes les " + M(s) + " secondes.",
+        bet: { q: "Combien de temps te faut-il, au pire, pour tout essayer ?", choices: ["moins de 10 minutes", "entre 10 minutes et 1 heure", "plus d'une heure"], good: m < 10 ? 0 : m <= 60 ? 1 : 2 },
+        calc: { label: "Temps maximal pour essayer tous les codes (en minutes, à l'unité)", value: m, round: 1 },
+        reveal: M(n) + " roues : " + M("10^{" + n + "} = " + N(codes)) + " codes. " + M(N(codes) + " \\cdot " + s + " = " + N(codes * s)) + " s, soit " + M(N(codes * s) + " \\div 60 \\approx " + N(Math.round(m))) + " min. Une roue de plus, et c'est 10 fois plus long." };
+    } });
+  add({ key: "recharge", fam: "quotidien", sys: "CH", uses: ["decmul"], outil: "la multiplication et les conversions d'énergie (1 kWh = 1'000 Wh).",
+    make() {
+      const E = pk([15, 18, 20]), kwh = r6((E * 365) / 1000), c = r6(kwh * 0.28);
+      return { titre: "Recharger son téléphone", q: "Une recharge complète de ton téléphone consomme environ " + M(E + "\\ \\text{Wh}") + " (pertes du chargeur comprises). Tu le recharges une fois par jour. En Suisse, le kilowattheure (" + M("1\\ \\text{kWh} = 1\\text{'}000\\ \\text{Wh}") + ") coûte environ " + chf(0.28) + " à un ménage.",
+        bet: { q: "Combien coûte l'électricité pour une année de recharges ?", choices: ["moins de 5 CHF", "entre 5 et 50 CHF", "plus de 50 CHF"], good: c < 5 ? 0 : c <= 50 ? 1 : 2 },
+        calc: { label: "Coût sur une année (en CHF, au centime)", value: c, round: 0.01 },
+        reveal: M(E + " \\cdot 365 = " + N(E * 365)) + " Wh, soit " + M(N(kwh)) + " kWh. " + M(N(kwh) + " \\cdot 0{,}28 \\approx " + N(c, 2)) + " CHF par an : bien moins qu'un seul câble de rechange !" };
+    } });
+  add({ key: "rechargefr", fam: "quotidien", sys: "FR", uses: ["decmul"], outil: "la multiplication et les conversions d'énergie (1 kWh = 1 000 Wh).",
+    make() {
+      const E = pk([15, 18, 20]), kwh = r6((E * 365) / 1000), c = r6(kwh * 0.2);
+      return { titre: "Recharger son téléphone", q: "Une recharge complète de ton téléphone consomme environ " + M(E + "\\ \\text{Wh}") + " (pertes du chargeur comprises). Tu le recharges une fois par jour. En France, le kilowattheure (" + M("1\\ \\text{kWh} = 1\\,000\\ \\text{Wh}") + ") coûte environ " + eur(0.2) + " au tarif réglementé.",
+        bet: { q: "Combien coûte l'électricité pour une année de recharges ?", choices: ["moins de 5 €", "entre 5 et 50 €", "plus de 50 €"], good: c < 5 ? 0 : c <= 50 ? 1 : 2 },
+        calc: { label: "Coût sur une année (en €, au centime)", value: c, round: 0.01 },
+        reveal: M(E + " \\times 365 = " + NF(E * 365)) + " Wh, soit " + M(NF(kwh)) + " kWh. " + M(NF(kwh) + " \\times 0{,}20 \\approx " + NF(c, 2)) + " € par an : bien moins qu'un seul câble de rechange !" };
+    } });
+  add({ key: "tvafr", fam: "arnaque", sys: "FR", uses: ["pct"], outil: "les pourcentages : retrouver le prix avant une hausse, c'est diviser par 1,2, pas enlever 20 %.",
+    make() {
+      const HT = pk([150, 250, 400, 600, 1200]), TTC = r6(HT * 1.2), wrong = r6(TTC * 0.8);
+      return { titre: "Le prix hors taxe", q: "En France, le taux normal de TVA est de " + pc(20) + " : le prix TTC est le prix hors taxe augmenté de 20 %. Un vendeur affiche " + eur(TTC) + " TTC et dit : « Pour le prix hors taxe, j'enlève 20 % : " + eur(wrong) + ". »",
+        bet: { q: "A-t-il raison ?", choices: ["Oui, c'est le bon prix hors taxe", "Non, le vrai prix hors taxe est plus élevé", "Non, le vrai prix hors taxe est plus bas"], good: 1 },
+        calc: { label: "Quel est le vrai prix hors taxe ? (en €)", value: HT, round: 0.01 },
+        reveal: "TTC = HT × 1,2, donc HT = " + M(NF(TTC) + " \\div 1{,}2 = " + NF(HT)) + " €. Les 20 % se calculent sur le prix hors taxe, plus petit : enlever 20 % du prix TTC enlève trop (" + eur(r6(TTC - wrong)) + " au lieu de " + eur(r6(TTC - HT)) + ")." };
+    } });
+  add({ key: "fuseau", fam: "quotidien", uses: ["rel"], outil: "les nombres relatifs : le décalage horaire est la différence de deux écarts à l'heure universelle (UTC).",
+    make() {
+      const o = pk([{ c: "New York", z: -5, e: "un match de basket", H: [20, 21] }, { c: "Los Angeles", z: -8, e: "une cérémonie de remise de prix", H: [17, 18] },
+        { c: "Tokyo", z: 9, e: "un concert", H: [18, 19, 20] }, { c: "Rio de Janeiro", z: -3, e: "un match de football", H: [16, 18, 19] }]);
+      const H = pk(o.H), dz = 1 - o.z, raw = H + dz, v = ((raw % 24) + 24) % 24, j = raw >= 24 ? " le lendemain" : raw < 0 ? " la veille" : "";
+      const zt = (z) => "UTC " + (z < 0 ? "− " + -z : "+ " + z);
+      return { titre: "En direct de " + o.c, q: "En janvier, " + o.e + " commence à " + H + " h, heure de " + o.c + " (" + zt(o.z) + "). Chez toi, on est à l'heure " + zt(1) + ".",
+        bet: { q: "Peux-tu le regarder en direct sans te lever en pleine nuit ?", choices: ["Oui", "Non"], good: v >= 7 ? 0 : 1 },
+        calc: { label: "À quelle heure commence-t-il chez toi ? (heure de 0 à 23)", value: v },
+        reveal: "Décalage : " + M("(+1) - (" + (o.z < 0 ? "-" : "+") + Math.abs(o.z) + ") = " + (dz > 0 ? "+" : "") + dz) + " h. " + M(H + " " + (dz < 0 ? "-" : "+") + " " + Math.abs(dz) + " = " + raw) + (raw >= 24 ? ", et " + M(raw + " - 24 = " + v) : "") + " : il commence à " + v + " h" + j + ", chez toi." };
+    } });
+  add({ key: "jetdeau", fam: "fermi", sys: "CH", uses: ["decdiv"], outil: "la division et les conversions de longueurs (m → mm).",
+    make() {
+      const [nom, ep, val] = pk([["5 francs", 2.35, 5], ["2 francs", 2.15, 2], ["1 franc", 1.55, 1]]), v = 140000 / ep;
+      return { titre: "Le Jet d'eau en pièces de monnaie", q: "Le Jet d'eau de Genève monte à environ " + M("140\\ \\text{m}") + ". Une pièce de " + nom + " a une épaisseur de " + M(m2(ep) + "\\ \\text{mm}") + ". On imagine une pile de pièces aussi haute que le jet.",
+        bet: { q: "Combien de pièces faut-il empiler ?", choices: ["environ 600", "environ 6'000", "environ 60'000", "environ 600'000"], good: mag(v, [600, 6000, 60000, 600000]) },
+        calc: { label: "Nombre de pièces (arrondi)", value: Math.round(v), range: [v * 0.95, v * 1.05] },
+        reveal: M("140\\ \\text{m} = 140\\text{'}000\\ \\text{mm}") + ", puis " + M("140\\text{'}000 \\div " + m2(ep) + " \\approx " + N(Math.round(v))) + " pièces, soit environ " + P(v * val) + " francs." };
+    } });
+  add({ key: "eiffel", fam: "fermi", sys: "FR", uses: ["decdiv"], outil: "la division et les conversions de longueurs (m → mm).",
+    make() {
+      const [nom, ep, val] = pk([["2 €", 2.2, 2], ["1 €", 2.33, 1], ["50 centimes", 2.38, 0.5]]), v = 330000 / ep;
+      return { titre: "La tour Eiffel en pièces de monnaie", q: "La tour Eiffel mesure environ " + M("330\\ \\text{m}") + ". Une pièce de " + nom + " a une épaisseur de " + M(m2(ep) + "\\ \\text{mm}") + ". On imagine une pile de pièces aussi haute que la tour.",
+        bet: { q: "Combien de pièces faut-il empiler ?", choices: ["environ 1\u202f500", "environ 15\u202f000", "environ 150\u202f000", "environ 1\u202f500\u202f000"], good: mag(v, [1500, 15000, 150000, 1500000]) },
+        calc: { label: "Nombre de pièces (arrondi)", value: Math.round(v), range: [v * 0.95, v * 1.05] },
+        reveal: M("330\\ \\text{m} = 330\\,000\\ \\text{mm}") + ", puis " + M("330\\,000 \\div " + m2(ep) + " \\approx " + NF(Math.round(v))) + " pièces, soit environ " + PF(v * val) + " €." };
+    } });
+  add({ key: "doubler", fam: "quotidien", uses: ["log"], outil: "les logarithmes : (1 + t/100)ⁿ ≥ 2 donne n ≥ ln 2 ÷ ln(1 + t/100) ; la « règle de 72 » en donne une bonne estimation : environ 72 ÷ t années.",
+    make() {
+      const t = pk([2, 3, 4, 6]), f = 1 + t / 100, x = Math.log(2) / Math.log(f), n = Math.ceil(x), C = pk([1000, 2000, 5000]);
+      return { titre: "Doubler son argent", q: "Tu places " + chf(C) + " sur un placement qui rapporte " + pc(t) + " par an, intérêts composés (chaque année, les intérêts s'ajoutent au capital et rapportent à leur tour).",
+        bet: { q: "Au bout de combien d'années ton capital aura-t-il doublé ?", choices: ["environ " + Math.round(100 / t) + " ans (100 % ÷ " + t + " %)", "environ " + Math.round(72 / t) + " ans", "environ " + 2 * Math.round(100 / t) + " ans"], good: 1 },
+        calc: { label: "Nombre entier d'années pour atteindre au moins le double", value: n },
+        reveal: "Après " + M("n") + " années : " + M(N(C) + " \\cdot " + N(f) + "^n") + ". On veut " + M(N(f) + "^n \\geq 2") + ", donc " + M("n \\geq \\frac{\\ln 2}{\\ln " + N(f) + "} \\approx " + N(x, 2)) + " : il faut " + n + " ans, moins que les " + Math.round(100 / t) + " ans qu'on imagine. Les banquiers utilisent la « règle de 72 » : " + M("72 \\div " + t + " = " + N(72 / t)) + " ans environ." };
+    } });
+
   CURIEUX.forEach((c) => { const n = (id) => NOTIONS.find((x) => x.id === id); c.uses = c.uses.filter(n); });
 })();
 
@@ -12348,7 +12500,8 @@ const Curieux = {
   fromCode(code) { const m = /^cur-([a-z0-9]+)-([a-z0-9]+)$/.exec(code); return m ? this.build(m[1], parseInt(m[2], 36)) : null; },
   // Questions accessibles : toutes les notions utilisées sont déjà vues (ou en cours) ; sans profil, celles de 9e.
   available(state) {
-    return CURIEUX.filter((c) => c.uses.every((id) => {
+    const sys = (state && state.profile && state.profile.system) || "CH"; /* 26.11 : questions réservées à un système (c.sys) */
+    return CURIEUX.filter((c) => (!c.sys || c.sys === sys) && c.uses.every((id) => {
       if (state && state.notions && state.notions[id]) return ["vu", "encours"].includes(state.notions[id].status);
       const n = NOTIONS.find((x) => x.id === id), g = state && state.profile ? state.profile.grade : 9;
       return n && n.CH && n.CH[0] < g;
@@ -12381,6 +12534,7 @@ const Curieux = {
   const f1 = (v) => v.toFixed(1);
   const dec = (v, k = 2) => String(+v.toFixed(k)).replace(".", "{,}"); /* 24.11 : décimal en formule */
   const r2 = (v, k) => +v.toFixed(k);
+  const dm = (v, k = 2) => dec(v, k).replace(/^\d+/, (i) => tm(+i)); /* 26.11 : décimal en formule, avec milliers */
   /* Chiffre maya (1 à 19) dans une case de 100 × 58 : points au-dessus, barres en dessous ; mayaW : le même en mots. */
   const mayaG = (n, y) => {
     const b = Math.floor(n / 5), d = n % 5, H = 58; let yy = y + (H - ((d ? 13 : 0) + b * 11)) / 2, g = `<rect x="100" y="${y}" width="100" height="${H}" rx="6" class="f-soft"/>`;
@@ -12605,6 +12759,95 @@ const Curieux = {
       fig: () => svg(300, 140, `<rect x="20" y="10" width="260" height="120" class="f-soft"/><line x1="20" y1="70" x2="280" y2="70" class="f-line" stroke-width="6"/><line x1="150" y1="10" x2="150" y2="130" class="f-line" stroke-width="6"/>${[[130, 55], [140, 85], [165, 50], [170, 90], [125, 80], [160, 60], [175, 78], [135, 45], [185, 62], [115, 62], [145, 100], [190, 95]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.5" class="f-dot"/>`).join("")}<rect x="146" y="66" width="8" height="8" class="f-fill"/><line x1="157" y1="77" x2="196" y2="110" class="f-line" stroke-width="1"/>${T(212, 122, "pompe", 'font-size="12"')}`, "plan : décès regroupés autour d'une pompe"),
       ex: () => { const N = pk([520, 560, 600]), p = pk([60, 70, 75, 80, 85]); /* 26.11 (revue p3, n° 14) : « plus de 500 » morts, comme le récit */
         return { q: `Sur ${N} victimes de cette épidémie, ${p} % habitaient à moins de 250 m de la pompe. Combien de victimes cela représente-t-il ?`, value: N * p / 100, sol: `\\(${N} \\cdot ${dec(p / 100)} = ${N * p / 100}\\) victimes.` }; } },
+    /* ---- 3e série (26.11, « d'autres entrées ») : ids = notions liées ; need = au moins une de ces notions au programme
+       de la classe ou d'une classe antérieure (Histoire.ok) ; sys = récit réservé à un système (CH romand, FR). ---- */
+    { t: "Portrait", titre: "Évariste Galois, une vie de 20 ans", lien: "Équations du 2e degré", ids: ["eq2disc", "eq2"], need: ["eq2disc"],
+      txt: "Évariste Galois naît en 1811 à Bourg-la-Reine, près de Paris. Passionné de mathématiques, il échoue deux fois au concours de l'École polytechnique, en 1828 et en 1829. Il envoie ses travaux à l'Académie des sciences : un premier mémoire n'aboutit pas, un deuxième est perdu à la mort de Joseph Fourier, qui devait le lire, et un troisième est refusé en 1831 parce qu'on le juge trop peu clair. Le 30 mai 1832, il se bat en duel ; il meurt le lendemain, à 20 ans. La nuit d'avant, il écrit une longue lettre à son ami Auguste Chevalier pour résumer ses découvertes. En marge d'un manuscrit relu cette nuit-là, on lit : « je n'ai pas le temps ». La légende en a rajouté : ses idées dataient de plusieurs années. Sa question : une équation se résout-elle « avec une formule », comme celle du 2e degré avec la racine du discriminant ? Il existe des formules pour les degrés 3 et 4, mais aucune formule générale à partir du degré 5 (le Norvégien Niels Abel l'avait montré peu avant). Galois explique pourquoi, et comment savoir, équation par équation, si une telle formule existe. Ses travaux ne sont publiés qu'en 1846, par Joseph Liouville.",
+      fig: () => svg(300, 140, [["degré 2", "x = (−b ± √Δ) / 2a", "f-fill2"], ["degrés 3 et 4", "formules (XVIᵉ siècle)", "f-fill2"], ["degré 5", "pas de formule générale", "f-soft"]].map(([a, b, c], i) => `<rect x="10" y="${10 + i * 42}" width="280" height="34" rx="8" class="${c}"/>${T(60, 32 + i * 42, a, 'font-size="12"')}${T(190, 32 + i * 42, b, 'font-size="12"')}`).join(""), "formules de résolution selon le degré"),
+      ex: () => { let r1, r2; do { r1 = ri(-9, -2); r2 = ri(2, 9); } while (r1 + r2 === 0);
+        const b = -(r1 + r2), c = r1 * r2, D = b * b - 4 * c, s = r2 - r1, p = (v) => (v < 0 ? "(" + v + ")" : v);
+        const bx = (b > 0 ? " + " : " - ") + (Math.abs(b) === 1 ? "" : Math.abs(b)) + "x", cc = (c > 0 ? " + " : " - ") + Math.abs(c);
+        return { q: `Résous avec le discriminant : \\(x^2${bx}${cc} = 0\\). Quelle est la plus grande solution ?`, value: r2,
+          sol: `\\(\\Delta = ${p(b)}^2 - 4 \\cdot 1 \\cdot ${p(c)} = ${D} = ${s}^2\\), donc \\(x = \\dfrac{${-b} \\pm ${s}}{2}\\) : \\(x_1 = ${r1}\\) et \\(x_2 = ${r2}\\). La plus grande est \\(${r2}\\).` }; } },
+    { t: "Portrait", titre: "Hypatie d'Alexandrie", lien: "Mettre un problème en équation", ids: ["eq1", "probeq", "sys2"], need: ["eq1", "probeq"],
+      txt: "Hypatie vit à Alexandrie, en Égypte, vers l'an 400. Fille du mathématicien Théon, elle enseigne les mathématiques, l'astronomie et la philosophie ; des élèves viennent de loin pour l'écouter. Aucun de ses écrits ne nous est parvenu. Selon une encyclopédie byzantine, la Souda, elle a commenté l'<i>Arithmétique</i> de Diophante et les <i>Coniques</i> d'Apollonius. En 415, elle est tuée par une foule, pendant de violents conflits politiques et religieux dans la ville. C'est la plus ancienne mathématicienne dont la vie nous soit assez bien connue.",
+      fig: () => svg(300, 110, `<rect x="30" y="30" width="168" height="30" class="f-fill2"/><rect x="198" y="30" width="72" height="30" class="f-shape"/>${T(114, 50, "grande partie")}${T(234, 50, "petite", 'font-size="12"')}<path d="M30 72 L270 72" class="f-line"/>${T(150, 92, "somme connue, différence connue", 'font-size="12"')}`, "un nombre partagé en deux parties"),
+      ex: () => { const b = ri(12, 40), d = ri(6, 30), a = b + d, S = a + b;
+        return { q: `Le premier problème de l'<i>Arithmétique</i> de Diophante, qu'Hypatie a commentée : partager un nombre en deux parties dont on connaît la différence. Partage ${S} en deux parties dont la différence vaut ${d}. Quelle est la plus grande partie ?`, value: a,
+          sol: `Si la petite partie vaut \\(x\\), la grande vaut \\(x + ${d}\\) : \\(2x + ${d} = ${S}\\), donc \\(x = ${b}\\) et la grande partie vaut \\(${a}\\). Diophante, lui, partageait 100 avec une différence de 40 : 70 et 30.` }; } },
+    { t: "Événement", titre: "Les Neuf Chapitres et les baguettes à calculer", lien: "Systèmes d'équations", ids: ["sys2"], need: ["sys2"],
+      txt: "En Chine, <i>Les Neuf Chapitres sur l'art du calcul</i> rassemblent, il y a environ 2000 ans, 246 problèmes : partages, surfaces, impôts, systèmes d'équations… En 263, le savant Liu Hui en écrit un commentaire célèbre. Pour résoudre un système, on dispose des baguettes à calculer en tableau sur une planche, puis on combine les colonnes : une méthode très proche de celle qu'on enseigne aujourd'hui. Des baguettes rouges et noires distinguent les nombres positifs et les nombres négatifs.",
+      fig: () => svg(300, 120, `<rect x="40" y="10" width="220" height="100" rx="8" class="f-shape2"/>${[[70, 5], [110, 2], [190, 2], [230, 5]].map(([x, n]) => [...Array(n)].map((_, j) => `<rect x="${x - 12 + j * 6}" y="22" width="3" height="26" class="f-head"/>`).join("")).join("")}${[90, 210].map((x) => `<line x1="${x - 18}" y1="70" x2="${x + 18}" y2="70" class="f-accent" stroke-width="3"/><line x1="${x - 18}" y1="80" x2="${x + 18}" y2="80" class="f-accent" stroke-width="3"/>`).join("")}`, "baguettes à calculer disposées en colonnes"),
+      ex: () => { const c = ri(4, 9), m = ri(2, c - 1), A = 5 * c + 2 * m, B = 2 * c + 5 * m;
+        return { q: `À la manière des <i>Neuf Chapitres</i> : 5 buffles et 2 moutons valent ${A} pièces ; 2 buffles et 5 moutons valent ${B} pièces. Combien vaut un buffle, en pièces ?`, value: c,
+          sol: `En additionnant : 7 buffles et 7 moutons valent \\(${A + B}\\), donc un buffle et un mouton valent \\(${A + B} \\div 7 = ${c + m}\\). En soustrayant : 3 buffles valent 3 moutons plus \\(${A - B}\\), donc un buffle vaut un mouton plus \\(${A - B} \\div 3 = ${c - m}\\). Un buffle : \\((${c + m} + ${c - m}) \\div 2 = ${c}\\) pièces.` }; } },
+    { t: "Portrait", titre: "Émilie du Châtelet, traductrice de Newton", lien: "Puissances (le carré)", ids: ["puiss"],
+      txt: "Émilie du Châtelet (1706–1749) est une savante française. Elle traduit en français et commente le grand livre d'Isaac Newton, les <i>Principia</i> ; sa traduction, publiée après sa mort, est encore aujourd'hui la traduction française de référence. Elle défend aussi une idée alors très discutée : l'énergie d'un objet en mouvement est proportionnelle au carré de sa vitesse. Elle s'appuie sur une expérience du Néerlandais Willem 's Gravesande : des billes lâchées dans de l'argile molle s'enfoncent 4 fois plus profond quand leur vitesse double.",
+      fig: () => svg(300, 120, `<rect x="20" y="80" width="260" height="30" class="f-soft"/><circle cx="90" cy="70" r="10" class="f-head"/><path d="M78 80 Q90 92 102 80" class="f-line"/><circle cx="210" cy="82" r="10" class="f-head"/><path d="M198 80 L198 96 Q210 108 222 96 L222 80" class="f-line"/>${T(90, 30, "vitesse v")}${T(210, 30, "vitesse 2v")}${T(210, 50, "4 fois plus profond", 'font-size="11"')}`, "deux billes enfoncées dans l'argile"),
+      ex: () => { const d = ri(2, 6), k = ri(3, 5);
+        return { q: `Une bille s'enfonce de ${d} mm dans l'argile. Lâchée avec une vitesse ${k} fois plus grande, de combien de millimètres s'enfonce-t-elle ?`, value: d * k * k,
+          sol: `La profondeur est proportionnelle au carré de la vitesse : \\(${k}^2 = ${k * k}\\) fois plus, soit \\(${d} \\cdot ${k * k} = ${d * k * k}\\) mm.` }; } },
+    { t: "Événement", titre: "L'os d'Ishango, il y a 20'000 ans", lien: "Nombres premiers", ids: ["arith"],
+      txt: "En 1950, le géologue belge Jean de Heinzelin découvre à Ishango, au bord du lac Édouard (aujourd'hui en République démocratique du Congo), un os de babouin couvert d'entailles. Il a environ 20'000 ans. Les entailles sont groupées en trois rangées. Sur l'une d'elles, les groupes comptent 11, 13, 17 et 19 entailles : exactement les nombres premiers entre 10 et 20 ! Hasard ou calcul ? Les spécialistes ne sont pas d'accord, mais c'est l'un des plus anciens objets de comptage connus.",
+      fig: () => svg(300, 110, `<path d="M20 50 Q30 30 50 40 L250 40 Q270 30 280 50 Q270 70 250 60 L50 60 Q30 70 20 50 Z" class="f-shape2"/>${[11, 13, 17, 19].map((n, g) => [...Array(n)].map((_, j) => `<line x1="${58 + g * 50 + j * 2.4}" y1="42" x2="${58 + g * 50 + j * 2.4}" y2="58" class="f-line" stroke-width="1"/>`).join("")).join("")}${T(150, 92, "11 · 13 · 17 · 19", 'font-size="13"')}`, "os gravé de groupes d'entailles"),
+      ex: () => { const [a, b, L] = pk([[10, 20, [11, 13, 17, 19]], [20, 40, [23, 29, 31, 37]], [30, 50, [31, 37, 41, 43, 47]], [40, 60, [41, 43, 47, 53, 59]]]), v = L.reduce((x, y) => x + y, 0);
+        return { q: `Et si l'os portait tous les nombres premiers compris entre ${a} et ${b} ? Combien d'entailles cela ferait-il en tout ?`, value: v,
+          sol: `Les nombres premiers entre ${a} et ${b} : ${L.join(", ")}. Total : \\(${L.join(" + ")} = ${v}\\).` }; } },
+    { t: "Anecdote", titre: "Al-Kashi et les 16 décimales de π", lien: "Puissances et cercle", ids: ["puiss", "disque"],
+      txt: "En 1424, à Samarcande (dans l'actuel Ouzbékistan), l'astronome persan Jamshid al-Kashi calcule π avec 16 décimales justes. Ce record tiendra environ 170 ans. Sa méthode prolonge celle d'Archimède : il utilise un polygone régulier de 3 · 2<sup>28</sup> côtés, soit plus de 800 millions de côtés, si proche du cercle qu'on ne pourrait pas les distinguer.",
+      fig: () => { const pg = (n, r) => [...Array(n)].map((_, k) => f1(150 + r * Math.cos((2 * k * Math.PI) / n)) + "," + f1(62 + r * Math.sin((2 * k * Math.PI) / n))).join(" ");
+        return svg(300, 125, `<circle cx="150" cy="62" r="52" class="f-line"/><polygon points="${pg(6, 52)}" class="f-soft"/><polygon points="${pg(12, 52)}" class="f-fill2"/>${T(150, 122, "6 → 12 → 24 → … côtés", 'font-size="12"')}`, "polygones à 6 et 12 côtés inscrits dans un cercle"); },
+      ex: () => { const n = ri(5, 10);
+        return { q: `On part d'un triangle (3 côtés) et on double ${n} fois le nombre de côtés. Combien de côtés a le polygone obtenu ?`, value: 3 * 2 ** n,
+          sol: `Doubler ${n} fois, c'est multiplier par \\(2^{${n}} = ${tm(2 ** n)}\\) : \\(3 \\cdot 2^{${n}} = ${tm(3 * 2 ** n)}\\) côtés. Al-Kashi est allé jusqu'à \\(3 \\cdot 2^{28}\\).` }; } },
+    { t: "Événement", titre: "La carte Dufour, la Suisse en relief", lien: "Échelles", ids: ["echelle"], sys: "CH",
+      txt: "Le Genevois Guillaume-Henri Dufour, ingénieur et général, dirige la réalisation de la première carte précise de toute la Suisse. Elle paraît de 1845 à 1864, en 25 feuilles, à l'échelle 1:100'000. Les géomètres mesurent le pays par triangulation : un réseau de triangles dont on mesure les angles. Pour le relief, la carte utilise des hachures et un ombrage qui donnent l'impression de voir les montagnes en trois dimensions. Le plus haut sommet de Suisse, la pointe Dufour (4'634 m), porte son nom.",
+      fig: () => svg(300, 120, `<rect x="20" y="10" width="260" height="100" rx="6" class="f-shape2"/><path d="M40 95 L95 35 L130 70 L175 25 L240 95 Z" class="f-soft"/><polyline points="60,90 120,60 200,80 250,40" class="f-blue" stroke-width="1.6" fill="none"/>${[[60, 90], [120, 60], [200, 80], [250, 40]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4" class="f-dot"/>`).join("")}${T(225, 104, "1:100'000", 'font-size="11"')}`, "carte avec relief et points de triangulation"),
+      ex: () => { const d = ri(12, 80);
+        return { q: `Sur la carte Dufour (1:100'000), deux villages sont à ${d} mm l'un de l'autre. Quelle est la distance réelle, à vol d'oiseau, en mètres ?`, value: 100 * d,
+          sol: `1 mm sur la carte = \\(100\\text{'}000\\) mm = 100 m en réalité. \\(${d} \\cdot 100 = ${tm(100 * d)}\\) m.` }; } },
+    { t: "Événement", titre: "La carte de Cassini, la France mesurée", lien: "Échelles", ids: ["echelle"], sys: "FR",
+      txt: "Au XVIII<sup>e</sup> siècle, quatre générations de la famille Cassini travaillent à la carte de France. En 1747, César-François Cassini de Thury lance la première carte détaillée de tout le royaume, à l'échelle 1:86 400. Elle repose sur une triangulation : un immense réseau de triangles dont on mesure les angles depuis les clochers et les collines. Son fils, Jean-Dominique Cassini, poursuit le travail ; les dernières feuilles paraissent en 1815.",
+      fig: () => svg(300, 120, `<rect x="20" y="10" width="260" height="100" rx="6" class="f-shape2"/><path d="M60 90 L110 30 L170 80 L230 25 L250 95 Z M110 30 L250 95 M60 90 L170 80 L230 25" class="f-blue" stroke-width="1.4" fill="none"/>${[[60, 90], [110, 30], [170, 80], [230, 25], [250, 95]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4" class="f-dot"/>`).join("")}${T(80, 104, "1:86 400", 'font-size="11"')}`, "réseau de triangles sur une carte"),
+      ex: () => { const d = ri(3, 12), v = 864 * d;
+        return { q: `Sur la carte de Cassini (1:86 400), deux clochers sont à ${d} cm l'un de l'autre. Quelle est la distance réelle, en mètres ?`, value: v,
+          sol: `1 cm sur la carte = \\(86\\,400\\) cm = 864 m en réalité. \\(${d} \\times 864 = ${mil(v).replace(/'/g, "\\,")}\\) m.` }; } },
+    { t: "Anecdote", titre: "Le lotus de Bhāskara", lien: "Théorème de Pythagore", ids: ["pyth", "eq1"], need: ["pyth"],
+      txt: "En 1150, le mathématicien indien Bhāskara II écrit la <i>Līlāvatī</i>, un livre de problèmes en vers. Selon la tradition, il porterait le nom de sa fille. L'un de ses problèmes : une fleur de lotus dépasse d'une demi-coudée la surface d'un lac. Poussée par le vent, la tige se couche et la fleur touche l'eau à deux coudées de là. Quelle est la profondeur du lac ? La tige, le fond et la surface forment un triangle rectangle.",
+      fig: () => svg(300, 140, `<rect x="20" y="40" width="260" height="90" class="f-soft"/><line x1="100" y1="130" x2="100" y2="22" class="f-line" stroke-width="2"/><circle cx="100" cy="18" r="6" class="f-dot"/><line x1="100" y1="130" x2="220" y2="40" class="f-accent" stroke-width="2" stroke-dasharray="4 3"/><circle cx="220" cy="40" r="6" class="f-dot"/><line x1="100" y1="40" x2="220" y2="40" class="f-blue" stroke-width="2"/>${T(160, 34, "s", 'font-size="12"')}${T(86, 32, "h", 'font-size="12"')}${T(86, 90, "d", 'font-size="12"')}`, "lotus, tige couchée et profondeur du lac"),
+      ex: () => { const [h, s] = pk([[1, 3], [1, 5], [2, 4], [2, 6], [1, 7], [3, 9]]), d = (s * s - h * h) / (2 * h);
+        return { q: `Une fleur de lotus dépasse de ${h} dm la surface de l'eau. Couchée par le vent, elle touche l'eau à ${s} dm de l'endroit où sa tige sortait. Quelle est la profondeur du lac, en dm ?`, value: d,
+          sol: `La tige mesure \\(d + ${h}\\). Pythagore : \\((d + ${h})^2 = d^2 + ${s}^2\\), donc \\(${2 * h}d + ${h * h} = ${s * s}\\) et \\(d = ${s * s - h * h} \\div ${2 * h} = ${d}\\) dm.` }; } },
+    { t: "Anecdote", titre: "Héron et la racine de 720", lien: "Racines carrées", ids: ["rac"], need: ["rac"],
+      txt: "Héron d'Alexandrie (I<sup>er</sup> siècle) explique dans ses <i>Métriques</i> comment calculer une racine carrée à la main. Pour la racine de 720, il part de 27, car 27² = 729 est proche de 720. Il divise 720 par 27, puis il fait la moyenne de 27 et du quotient. Il trouve 26 + 5/6, soit environ 26,83 ; la vraie valeur est 26,8328… Et l'on peut recommencer avec ce nouveau nombre pour être encore plus précis.",
+      fig: () => svg(300, 110, `<rect x="40" y="20" width="80" height="70" class="f-fill2"/><rect x="170" y="27" width="70" height="63" class="f-shape"/>${T(80, 60, "27 × 26,7")}${T(205, 63, "carré ?", 'font-size="12"')}<path d="M126 55 l36 0" class="f-line"/><path d="M158 49 l8 6 l-8 6 z" class="f-head"/>${T(150, 106, "même aire : 720", 'font-size="12"')}`, "rectangle transformé en carré de même aire"),
+      ex: () => { const [n, a] = pk([[20, 5], [30, 6], [42, 7], [56, 8], [72, 9], [90, 10]]), v = (a + n / a) / 2;
+        return { q: `Fais comme Héron pour \\(\\sqrt{${n}}\\) : pars de ${a}, divise ${n} par ${a}, puis fais la moyenne de ${a} et du quotient. Quel nombre trouves-tu ?`, value: v,
+          sol: `\\(${n} \\div ${a} = ${n / a}\\), puis \\((${a} + ${n / a}) \\div 2 = ${dec(v)}\\). Vérification : \\(${dec(v)}^2 = ${dec(v * v)}\\), tout près de ${n}.` }; } },
+    { t: "Anecdote", titre: "Jacques Bernoulli et le nombre e", lien: "Exponentielles", ids: ["expo", "pct"], need: ["expo", "croissance", "modexp", "expfn", "lnexp", "croissexp", "explogfn"],
+      txt: "En 1683, Jacques Bernoulli se pose une question d'argent. Un capital placé à 100 % d'intérêt par an double en un an. Et si l'on versait les intérêts deux fois par an (50 % chaque fois), ou chaque mois, ou chaque jour ? Le capital grandit un peu plus à chaque fois, mais il ne dépasse jamais 2,718… fois le capital de départ. Euler appellera plus tard ce nombre e : c'est la base de la fonction exponentielle.",
+      fig: () => svg(300, 120, `${[[1, 2], [2, 2.25], [4, 2.441], [12, 2.613], [365, 2.715]].map(([n, v], i) => `<rect x="${25 + i * 52}" y="${100 - (v - 1.6) * 70}" width="40" height="${(v - 1.6) * 70}" class="f-fill2"/>${T(45 + i * 52, 114, n, 'font-size="11"')}${T(45 + i * 52, 92 - (v - 1.6) * 70, String(v).replace(".", ","), 'font-size="10"')}`).join("")}<line x1="20" y1="${100 - (Math.E - 1.6) * 70}" x2="285" y2="${100 - (Math.E - 1.6) * 70}" class="f-accent" stroke-dasharray="4 3"/>`, "capital après un an selon le nombre de versements"),
+      ex: () => { const [n, C] = pk([[2, 1000], [2, 4000], [4, 2560], [5, 1000], [5, 5000]]), v = r2(C * (1 + 1 / n) ** n, 6);
+        return { q: `On place ${mil(C)} CHF à 100 % par an, avec ${n} versements d'intérêts de ${100 / n} % chacun (chaque versement compte dans le suivant). Quel est le capital au bout d'un an, en CHF ?`, value: v,
+          sol: `\\(${tm(C)} \\cdot ${dec(1 + 1 / n)}^{${n}} = ${tm(C)} \\cdot ${dec((1 + 1 / n) ** n, 5)} = ${dm(v)}\\) CHF : plus que le double, mais moins de \\(${tm(C)} \\cdot e \\approx ${dm(C * Math.E, 0)}\\) CHF.` }; } },
+    { t: "Événement", titre: "Al-Bīrūnī mesure la Terre depuis une montagne", lien: "Pythagore et trigonométrie", ids: ["pyth", "trigo"], need: ["pyth"],
+      txt: "Vers 1020, le savant persan al-Bīrūnī mesure la Terre depuis une montagne, au nord-ouest de l'Inde (dans l'actuel Pakistan). Il mesure d'abord la hauteur de la montagne. Puis, depuis le sommet, il mesure le très petit angle entre l'horizontale et la ligne de l'horizon. Avec la trigonométrie, il en déduit le rayon de la Terre, à moins de 1 % de la valeur actuelle (6'371 km).",
+      fig: () => svg(300, 140, `<path d="M20 140 A170 170 0 0 1 280 140" class="f-shape2"/><polygon points="120,58 135,30 150,58" class="f-shape"/><line x1="135" y1="30" x2="240" y2="70" class="f-accent" stroke-dasharray="4 3"/><line x1="135" y1="30" x2="260" y2="30" class="f-line" stroke-dasharray="2 3"/><circle cx="240" cy="70" r="4" class="f-dot"/>${T(250, 90, "horizon", 'font-size="11"')}`, "ligne de visée de la montagne vers l'horizon"),
+      ex: () => { const h = pk([0.5, 1, 2, 3]), d = Math.sqrt((6371 + h) ** 2 - 6371 ** 2), v = Math.round(d);
+        return { q: `Depuis un sommet à ${String(h).replace(".", ",")} km d'altitude, à quelle distance se trouve l'horizon ? Le rayon de la Terre vaut 6'371 km et la ligne de visée touche la Terre à angle droit. Arrondis au km.`, value: v,
+          sol: `Triangle rectangle : hypoténuse \\(6\\text{'}371 + ${dec(h, 1)}\\), côté \\(6\\text{'}371\\). \\(d = \\sqrt{${dec(6371 + h, 1).replace(/^(\d)(\d{3})/, "$1\\text{'}$2")}^2 - 6\\text{'}371^2} \\approx ${v}\\) km.` }; } },
+    { t: "Événement", titre: "Newton, Leibniz et la querelle de la dérivée", lien: "Dérivées", ids: ["derivregles", "nbderive", "derivref"], need: ["derivregles", "nbderive", "derivref"],
+      txt: "Vers 1665, le jeune Isaac Newton invente en Angleterre une méthode pour calculer des vitesses qui changent sans cesse : ce que nous appelons la dérivée. Il ne la publie pas. En Allemagne, Gottfried Wilhelm Leibniz trouve la même idée de son côté et la publie le premier, en 1684, avec la notation dx que l'on utilise encore. Une longue querelle éclate. En 1712, un rapport de la Royal Society de Londres donne raison à Newton… mais Newton, président de cette société, l'avait en grande partie rédigé lui-même. On admet aujourd'hui que les deux ont fait la découverte indépendamment.",
+      fig: () => svg(300, 130, `<line x1="30" y1="115" x2="280" y2="115" class="f-line"/><line x1="40" y1="125" x2="40" y2="10" class="f-line"/><path d="M40 112 Q140 110 260 20" class="f-blue" stroke-width="2" fill="none"/><line x1="110" y1="128" x2="250" y2="40" class="f-accent" stroke-width="1.6"/><circle cx="180" cy="84" r="4" class="f-dot"/>${T(205, 110, "pente = f'(x)", 'font-size="11"')}`, "courbe et sa tangente"),
+      ex: () => { let a, b, k, v; do { a = ri(2, 5); b = R.nz(-6, 6); k = ri(1, 4); v = 2 * a * k + b; } while (v === 0 || v === 1);
+        return { q: `Avec \\(f(x) = ${a}x^2 ${b < 0 ? "-" : "+"} ${Math.abs(b) === 1 ? "" : Math.abs(b)}x\\), calcule le nombre dérivé \\(f'(${k})\\).`, value: v,
+          sol: `\\(f'(x) = ${2 * a}x ${b < 0 ? "-" : "+"} ${Math.abs(b)}\\), donc \\(f'(${k}) = ${2 * a} \\cdot ${k} ${b < 0 ? "-" : "+"} ${Math.abs(b)} = ${v}\\).` }; } },
+    { t: "Portrait", titre: "Maria Gaetana Agnesi et la « sorcière »", lien: "Fonctions", ids: ["fimg"], need: ["fimg"],
+      txt: "En 1748, l'Italienne Maria Gaetana Agnesi publie à Milan les <i>Instituzioni analitiche</i>, un grand manuel d'algèbre et d'analyse écrit pour les étudiants. C'est l'un des premiers livres de mathématiques importants écrits par une femme. Elle y étudie une courbe en forme de cloche, qu'on appelle aujourd'hui la « courbe d'Agnesi ». En anglais, on la surnomme « witch of Agnesi » (la sorcière d'Agnesi), à cause d'une erreur de traduction : le mot italien <i>versiera</i> (« qui tourne ») a été confondu avec <i>avversiera</i> (« diablesse »).",
+      fig: () => svg(300, 120, `<line x1="20" y1="100" x2="280" y2="100" class="f-line"/><line x1="150" y1="110" x2="150" y2="10" class="f-line"/><polyline points="${[...Array(41)].map((_, i) => { const x = -4 + i * 0.2; return f1(150 + x * 30) + "," + f1(100 - 70 / (1 + x * x)); }).join(" ")}" class="f-blue" stroke-width="2" fill="none"/>${T(225, 60, "y = a³ / (x² + a²)", 'font-size="12"')}`, "courbe d'Agnesi en forme de cloche"),
+      ex: () => { const a = pk([4, 6, 8, 10]);
+        return { q: `La courbe d'Agnesi : \\(f(x) = \\dfrac{${a ** 3}}{x^2 + ${a * a}}\\) (ici \\(a = ${a}\\)). Calcule \\(f(${a})\\).`, value: a / 2,
+          sol: `\\(f(${a}) = \\dfrac{${a ** 3}}{${a * a} + ${a * a}} = \\dfrac{${a ** 3}}{${2 * a * a}} = ${a / 2}\\).` }; } },
   ];
 
   // Notions de l'app liées à chaque récit (même ordre que HISTOIRE ; 22.11) : en mode scolaire, la carte propose d'abord
@@ -12616,7 +12859,7 @@ const Curieux = {
     ["vitesse", "gquot"], ["disque", "fracadd"], ["fracmul", "prop"], ["pct", "diagr", "stats"], ["echelle", "sci"], ["prio", "eq3"],
     ["puiss"], ["puiss", "sci"], ["puiss"],
     ["fracadd", "vitesse"], ["eq1", "valnum"], ["valnum", "eq2"], ["puiss", "sci"], ["pct", "expo"], ["pct", "stats"]];
-  HISTOIRE.forEach((H, i) => (H.ids = IDS[i] || []));
+  HISTOIRE.forEach((H, i) => (H.ids = H.ids || IDS[i] || [])); /* 26.11 : la 3e série déclare ses ids dans le récit */
 
   // ---------- Applications poussées (24.11, demande de l'auteur : « les applications restent très simples », surtout
   // pour les plus âgés ou avancés). plus : problème en 2–3 étapes (tous) ; expert : défi du sec. II (grade ≥ 12).
@@ -12912,16 +13155,29 @@ const Curieux = {
     // ou le prochain non lu. Renvoie { k, classe } (classe : lien avec le chapitre en cours).
     pick(state) {
       const seen = new Set((state && state.histSeen) || []), now = (state && state.now && state.now.ids) || [];
-      const liés = HISTOIRE.map((H, k) => k).filter((k) => HISTOIRE[k].ids.some((id) => now.includes(id) || now.some((n) => n.startsWith(id))));
+      const liés = HISTOIRE.map((H, k) => k).filter((k) => this.ok(HISTOIRE[k], state) && HISTOIRE[k].ids.some((id) => now.includes(id) || now.some((n) => n.startsWith(id))));
       const neuf = liés.filter((k) => !seen.has(HISTOIRE[k].titre));
       if (neuf.length) return { k: neuf[Math.floor(Date.now() / 864e5) % neuf.length], classe: true };
       let k = this.week();
-      for (let i = 0; i < HISTOIRE.length && seen.has(HISTOIRE[k].titre); i++) k = (k + 1) % HISTOIRE.length;
+      for (let i = 0; i < HISTOIRE.length && !this.ok(HISTOIRE[k], state); i++) k = (k + 1) % HISTOIRE.length;
+      for (let i = 0, k0 = k; i < HISTOIRE.length; i++) { const j = (k0 + i) % HISTOIRE.length; if (this.ok(HISTOIRE[j], state) && !seen.has(HISTOIRE[j].titre)) { k = j; break; } }
       return { k, classe: false };
     },
     // Récit lu : retenu (par son titre) pour ne pas le reproposer tant qu'il en reste d'autres.
     seen(state, k) { if (!state) return; state.histSeen = [...new Set([...(state.histSeen || []), HISTOIRE[k].titre])]; },
-    other(k) { let j; do { j = Math.floor(Math.random() * HISTOIRE.length); } while (j === k && HISTOIRE.length > 1); return j; },
+    other(k, st = typeof state !== "undefined" ? state : null) {
+      const L = HISTOIRE.map((H, j) => j).filter((j) => j !== k && this.ok(HISTOIRE[j], st));
+      return L.length ? L[Math.floor(Math.random() * L.length)] : k;
+    },
+    // 26.11 : récit permis pour ce profil. sys : réservé à un système (« CH » romand, « FR ») ; need : au moins une de ces
+    // notions au programme de la classe de l'élève ou d'une classe antérieure (filière MP comprise, placeOf). Sans profil :
+    // profil romand de 9e.
+    ok(H, st) {
+      const p = (st && st.profile) || { system: "CH", grade: 9, track: "college" };
+      if (H.sys && H.sys !== p.system) return false;
+      if (!H.need) return true;
+      return H.need.some((id) => { const n = NOTIONS.find((x) => x.id === id), pl = n && placeOf(n, p); return !!pl && pl[0] <= p.grade; });
+    },
     // Carte de l'onglet Exploration : illustration, titre, première phrase du récit.
     card(k, classe) {
       const H = HISTOIRE[k], debut = H.txt.replace(/<[^>]+>/g, "").split(/(?<=[.!?])\s/)[0];
@@ -17635,10 +17891,10 @@ const Parents = {
     const wk = Math.floor(new Date(t + "T12:00:00") / 6048e5);
     return Curieux.build(av[wk % av.length].key, (wk % 9000) + 1);
   },
-  story(t) {
+  story(t, s) { /* 26.11 : seulement les récits permis pour le profil de l'enfant (Histoire.ok : système, classe) */
     if (typeof HISTOIRE === "undefined" || !HISTOIRE.length) return null;
-    const k = Math.floor(new Date(t + "T12:00:00") / 6048e5) % HISTOIRE.length;
-    return HISTOIRE[k];
+    const L = typeof Histoire !== "undefined" ? HISTOIRE.filter((H) => Histoire.ok(H, s)) : HISTOIRE;
+    return L.length ? L[Math.floor(new Date(t + "T12:00:00") / 6048e5) % L.length] : null;
   },
 };
 
@@ -17743,7 +17999,7 @@ async function screenParentView(id, opt = {}) {
   const JR = ["D", "L", "M", "M", "J", "V", "S"];
   const reg = W.n >= 4 ? "Belle régularité !" : W.n ? "Un bon début : quelques minutes par jour suffisent." : "Pas de séance cette semaine-là. Proposez-lui le défi du jour ensemble ?";
   const pbs = (s.carnet || []).slice().reverse().map((x) => ({ x, q: Parents.problem(x.code) })).filter((p) => p.q).slice(0, 3);
-  const cur = Parents.curious(s, t), H = Parents.story(t);
+  const cur = Parents.curious(s, t), H = Parents.story(t, s);
   const tabs = !opt.preview && L.kids.length > 1 ? `<div class="row par-kids" role="tablist">${L.kids.map((k) => `<button type="button" class="${k.id === kid.id ? "btn-primary" : "btn-sec"} small" data-kid="${k.id}" aria-pressed="${k.id === kid.id}">${esc(k.nick)}</button>`).join("")}</div>` : "";
   const lessonOf = (qid) => {
     const Ls = typeof LESSONS !== "undefined" && LESSONS[qid];

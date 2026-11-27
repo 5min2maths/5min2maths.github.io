@@ -49,3 +49,9 @@ Rien ici n'est bloquant : l'app est publiée avec le choix indiqué.
 31. **Bilan centré sur les réussites** (au lieu de « Séance faite… ») et message de retour après une absence.
 32. **Sans chapitre « en classe »**, 78–83 % des questions d'un élève moyen de 10e–1re portent en novembre sur l'année précédente : voulu ?
 Constat : le moteur sert déjà le plus facile possible aux faibles (plancher) ; la simulation est trop pessimiste (modèle d'apprentissage) : ne plus régler le moteur sur elle, attendre les données de la 11LS.
+
+### Décision de l'enseignant (27.11 matin) : n° 27 à 32 validés, y compris le n° 30
+« ok pour tous même pour 4 — retravailler primaire si nécessaire » : rejouer au lieu d'ajouter, carnet à la portée,
+positionnement au niveau 1, automatismes de fin de primaire pour les 9e en grande difficulté (le décision du 26.11
+« primaire = 2027 » est remplacée), bilan centré sur les réussites et message de retour, et sans chapitre « en classe »
+servir d'abord les notions de l'année.
