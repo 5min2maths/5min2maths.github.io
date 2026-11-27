@@ -1,0 +1,93 @@
+<!doctype html><meta charset="utf-8"><meta name="budget" content="60000"><link rel="stylesheet" href="../src/style.css">
+<main id="app" style="width:360px"></main><pre id="out">en cours</pre>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){};window.ensurePacks=()=>Promise.resolve();window.fetch=()=>Promise.resolve(new Response("{}"));if(navigator.sendBeacon)navigator.sendBeacon=()=>true;Element.prototype.scrollIntoView=function(){};window.confirm=()=>true;window.alert=()=>{};</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/defis_9.js"></script><script src="../src/defis_910.js"></script><script src="../src/defis_2c.js"></script><script src="../src/defis_sec2.js"></script><script src="../src/competences.js"></script><script src="../src/referentiel.js"></script><script src="../src/trx.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch4c_trous.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/ch1c_trous.js"></script><script src="../src/ch1c_argact.js"></script><script src="../src/ch11_rep3d.js"></script><script src="../src/perco.js"></script><script src="../src/primaire.js"></script><script src="../src/fr_college.js"></script><script src="../src/fr_1re.js"></script><script src="../src/fr_3e.js"></script><script src="../src/fr_tle.js"></script><script src="../src/fr_fin.js"></script><script src="../src/fr_trous.js"></script><script src="../src/fr_couv.js"></script><script src="../src/ref_matu.js"></script><script src="../src/ref_fr.js"></script><script src="../src/ref_co.js"></script><script src="../src/ref_mp.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_col34b.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/fr_act.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/parents.js"></script><script src="../src/presente.js"></script><script src="../src/app.js"></script>
+<script>
+/* Décisions de l'enseignant du 27.11 (tools/a_decider_26-11.md n° 27–32, tools/eleves_faibles_26-11.md « Appliqué le 27.11 ») :
+   27 rejouer au lieu d'ajouter, 28 carnet à la portée, 29 positionnement (1re question au niveau 1), 31 bilan des réussites
+   et retour après une absence, 32 l'année d'abord sans chapitre « en classe ». Chaque contrôle échoue sans la règle. */
+const out = [], fail = [], ok = (c, m) => (c ? out : fail).push((c ? "ok " : "ÉCHEC ") + m);
+const fresh = (prof, o = {}) => { state = Engine.newState(prof); Engine.autoInit(state); state.placed = true; Object.assign(state, o); save(); return state; };
+const _rq = renderQuestion; renderQuestion = function (q, opt) { window.__q = q; window.__o = opt; return _rq(q, opt); };
+const P9 = { system: "CH", grade: 9, track: "college", minutes: 5 }, P10 = { system: "CH", grade: 10, track: "college", minutes: 5 };
+const weak = () => { state.placeMiss = 3; state.last1 = [0, 1]; }; /* grande difficulté pendant le calibrage (Engine.struggling) */
+const sess = (fmt, plan) => (session = { fmt, plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), pinged: true });
+const answer = (solved, tries = solved ? 1 : 2) => { __o.onDone({ solved, tries, dontKnow: false }); __o.onNext(); };
+try {
+  /* 27. Rejouer au lieu d'ajouter */
+  fresh(P9); Object.values(state.notions).forEach((n) => (n.lessonSeen = true)); weak();
+  const ids = Object.keys(state.notions).filter((id) => GEN[id] && ["vu", "encours"].includes(state.notions[id].status)).slice(0, 4);
+  ok(typeof Engine.replayNext === "function" && Engine.struggling(state), "27. Engine.replayNext existe ; élève reconnu en grande difficulté");
+  sess("mixte", ids.map((id) => id + "|2|app")); nextQuestion();
+  const q0 = __q; answer(false);
+  ok(session.plan.length === 4 && session.plan[1] === ids[0] + "|1|app", "27. raté → question suivante = même notion, un niveau en dessous, programme de même longueur (" + session.plan.join(" ") + ")");
+  ok(__q && __q.id === ids[0] && __q.q !== q0.q && /nouvelles valeurs/.test(app.querySelector(".eyebrow").textContent), "27. question rejouée : autres nombres, « nouvelles valeurs » (" + (__q && __q.code) + ")");
+  answer(false);
+  ok(session.plan[2] !== ids[0] + "|1|app" && session.plan.length === 4, "27. une fois par séance (2e raté : pas de 2e reprise ; " + session.plan[2] + ")");
+  /* « Refaire » choisi par l'élève : la question rejouée rend sa place (pas deux reprises du même raté) */
+  fresh(P9); Object.values(state.notions).forEach((n) => (n.lessonSeen = true)); state.placeMiss = 3;
+  sess("mixte", [ids[0] + "|2|app", ids[1] + "|1|app"]); nextQuestion(); __o.onDone({ solved: false, tries: 2 });
+  const rp1 = session.plan[1]; __o.onNext(true);
+  ok(rp1 === ids[0] + "|1|app" && session.plan[1] === ids[1] + "|1|app", "27. « Refaire » choisi : pas de 2e reprise du même raté (" + rp1 + " → " + session.plan[1] + ")");
+  fresh(P9); Object.values(state.notions).forEach((n) => (n.lessonSeen = true));
+  ok(!Engine.struggling(state) && Engine.replayNext && Engine.replayNext(state, ids.map((id) => id + "|2|app"), 0, ids[0], 2, "app") === null, "27. élève qui n'est pas en grande difficulté : rien ne change");
+  weak();
+  ok(Engine.replayNext && Engine.replayNext(state, [ids[0] + "|1|drill", ids[1] + "|1|drill"], 0, ids[0], 1, "drill") === null && Engine.replayNext(state, [ids[0] + "|4|defi", ids[1] + "|2|app"], 0, ids[0], 4, "defi") === null, "27. ni automatisme, ni problème");
+  ok(Engine.replayNext && Engine.replayNext(state, [ids[0] + "|1|app", ids[1] + "|2|app"], 0, ids[0], 1, "app") === ids[0] + "|1|app", "27. au niveau 1 : la même notion au niveau 1");
+
+  /* 28. Carnet à la portée */
+  fresh(P9); weak(); state.carnet = [{ id: ids[0], d: 1, code: "x", date: day(), ok: 0 }, { id: ids[1], d: 2, code: "y", date: day(), ok: 0 }];
+  ok(carnetResult(ids[0], 1, true) === "efface" && state.carnet.length === 1, "28. grande difficulté : une réussite du premier coup efface l'erreur");
+  fresh(P9); state.carnet = [{ id: ids[0], d: 1, code: "x", date: day(), ok: 0 }];
+  ok(carnetResult(ids[0], 1, true) === "encore" && state.carnet.length === 1, "28. autres élèves : règle inchangée (2 réussites de suite)");
+  fresh(P9); Object.values(state.notions).forEach((n) => (n.lessonSeen = true)); weak();
+  state.carnet = [{ id: ids[2], d: 1, code: "x", date: day(), ok: 0 }]; state.carnetOut = [];
+  sess("mixte", [ids[2] + "|1|app", ids[3] + "|1|app"]); nextQuestion(); answer(true);
+  ok(!state.carnet.length && session.fixedN === 1, "28. grande difficulté : réussite du premier coup en séance ordinaire = erreur de la notion effacée");
+  ok(/1 effacée cette semaine/.test(carnetCard(true)), "28. carnet : « 1 effacée cette semaine »");
+  state.carnet = [{ id: ids[3], d: 1, code: "z", date: day(), ok: 0 }]; state.carnetOut = [addDays(day(), -2), day()];
+  ok(/2 effacées cette semaine/.test(carnetCard(true)) && /2 effacées cette semaine/.test(carnetCard(false)), "28. accueil et carnet : « 2 effacées cette semaine »");
+
+  /* 28 bis. notions de fin de primaire (src/primaire.js) : jamais au carnet, ni sur la carte de progression, ni dans « Ma semaine » */
+  fresh(P9); PRIM.ensure(state, "p8tables"); Object.assign(state.notions.p8tables, { seen: 3, m: 0.9 }); state.carnet = [];
+  const pl8 = (NOTIONS.find((n) => n.id === "p8tables") || {}).label || "p8tables";
+  ok(carnetAdd("p8tables", 1, "x") === false && !state.carnet.length, "28 bis. erreur sur une notion de primaire : pas au carnet");
+  ok(!themeMapCard().includes(esc(pl8)) && !Engine.week(state).cons.includes("p8tables"), "28 bis. carte de progression et « Ma semaine » sans notion de primaire (" + pl8 + ")");
+  /* 29. Positionnement : première question au niveau 1 */
+  state = Engine.newState(P10); Engine.autoInit(state); save(); startPlacement();
+  const d0 = __q && __q.d; __o.onDone({ solved: true, tries: 1 }); __o.onNext();
+  ok(d0 === 1 && Engine.placementLevel(state, 1) === 2 && Engine.placementLevel(state, 4) === 2, "29. positionnement : 1re question au niveau 1, les suivantes au niveau 2 (" + d0 + ", " + (__q && __q.d) + ")");
+
+  /* 31. Bilan centré sur les réussites ; retour après une absence */
+  fresh(P9); Object.values(state.notions).forEach((n) => (n.lessonSeen = true)); weak();
+  sess("mixte", ids.slice(0, 3).map((id) => id + "|1|app")); nextQuestion();
+  answer(false); session.rebuilt = 1; answer(true, 2); answer(true, 2);
+  const h2 = (app.querySelector("h2") || {}).textContent || "";
+  ok(/2 questions réussies et 1 solution reconstruite/.test(h2) && !/Séance faite/.test(h2), "31. titre du bilan : « " + h2 + " »");
+  fresh(P9, { streak: { count: 3, last: addDays(day(), -4), best: 5 } }); screenHome();
+  const sc4 = (app.querySelector(".sess-card") || {}).textContent || "";
+  ok(/Content de te revoir !/.test(sc4) && /Ta série de 3 jours s'est arrêtée/.test(sc4), "31. retour après 4 jours : mot d'accueil + phrase de série");
+  fresh(P9, { streak: { count: 3, last: addDays(day(), -2), best: 5, jokerWk: Engine.weekOf(day()) } }); screenHome();
+  ok(!/Content de te revoir/.test((app.querySelector(".sess-card") || {}).textContent || ""), "31. absence d'un jour : pas de mot d'accueil");
+
+  /* 32. Sans chapitre « en classe » : l'année d'abord */
+  const share = (o = {}) => {
+    fresh(P10); Engine.unlock(state, new Date("2026-11-27T12:00:00"));
+    for (const id of Engine.eligible(state)) Object.assign(state.notions[id], { seen: 3, m: 0.65, lessonSeen: true, status: "vu", due: addDays(day(), 2), fails: 0 });
+    if (o.weak) weak(); if (o.now) Engine.setNow(state, o.now(state));
+    let prev = 0, n = 0;
+    const isPrev = (id) => { const nn = NOTIONS.find((x) => x.id === id), pl = placeOf(nn, state.profile); return pl && pl[0] === 9 && !(nn.again || []).includes(10); };
+    for (let k = 0; k < 40; k++) for (const e of Engine.planSlots(state, ["app", "app", "rev", "app"])) { n++; if (isPrev(e.split("|")[0])) prev++; }
+    return { r: prev / Math.max(1, n), year: Engine.eligible(state).filter((id) => !isPrev(id)).length };
+  };
+  const pp0 = Engine.prevPenalty, A = share(); Engine.prevPenalty = () => new Set(); const B = share(); Engine.prevPenalty = pp0;
+  ok(typeof pp0 === "function" && A.year >= 3 && A.r <= 0.5 * B.r, "32. 10e, novembre, sans chapitre : année précédente " + Math.round(A.r * 100) + " % des questions (sans la règle : " + Math.round(B.r * 100) + " %, " + A.year + " notions de l'année ouvertes)");
+  const W = share({ weak: true });
+  ok(W.r >= 0.8 * B.r, "32. élève en grande difficulté : règle levée (" + Math.round(W.r * 100) + " %)");
+  fresh(P10); Engine.unlock(state, new Date("2026-11-27T12:00:00"));
+  const pv = Engine.eligible(state).find((id) => { const nn = NOTIONS.find((x) => x.id === id), pl = placeOf(nn, state.profile); return pl && pl[0] === 9 && !(nn.again || []).includes(10); });
+  Object.assign(state.notions[pv], { seen: 2, m: 0.3, fails: 2 });
+  ok(pv && Engine.prevPenalty && !Engine.prevPenalty(state).has(pv), "32. notion de l'année précédente ratée : pas reléguée (" + pv + ")");
+} catch (e) { fail.push("EXC " + e.message + " " + (e.stack || "").split("\n").slice(0, 3).join(" ")); }
+document.getElementById("out").textContent = fail.concat(out).join("\n") + "\n" + (fail.length ? fail.length + " ÉCHEC(S)" : "tout ok");
+</script>

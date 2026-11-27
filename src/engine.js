@@ -76,6 +76,9 @@ const TARGET = { drill: -300, app: -100, defi: 80, defi4: 80, rev: -150 }; // é
    le plancher (tadj ≤ -150 et réussite encore sous 65 %) : 2 rappels de notions anciennes par séance au plus (règle de
    remobilisation inchangée), niveau 1 permis s'il n'est pas trivial pour l'élève (au plus 350 points sous son Mathélo). */
 const ADAPT = { win: 16, min: 8, low: 0.55, aim: 0.7, high: 0.85, down: 20, up: 10, lo: -300, hi: 120, floor: -150 };
+/* 27.11 (n° 32) : malus de choix d'une notion de l'année précédente non demandée par le parcours, sans chapitre « en classe »
+   (en centaines de points d'écart à la cible : 2 = 200 points). Réglé sur tests/_faibles.html (tools/eleves_faibles_26-11.md). */
+const PREV_PEN = 2;
 const KIND_LABEL = { drill: "⚡ Automatisme", app: "🧩 Application", defi: "🏔 Défi", rev: "🧠 Révision", rem: "🧱 Une base à consolider" };
 // Remédiation (13.11) : notions de base à reprendre quand une notion échoue deux fois de suite.
 const PREREQ = { eq1: ["rel", "valnum"], eq2: ["factor", "eq1"], eq2disc: ["eq2fact", "rel"], eq2fact: ["factor"], fracadd: ["fracsimp", "arith"], fracmul: ["fracsimp"],
@@ -563,7 +566,7 @@ const Engine = {
     }
     out.ups.sort((x, y) => y.a - y.b - (x.a - x.b) || y.a - x.a);
     const had = new Set(ref.k || []);
-    out.cons = Object.keys(state.notions || {}).filter((id) => { const s = state.notions[id]; return s && s.seen > 0 && s.m >= 0.7 && !had.has(id); });
+    out.cons = Object.keys(state.notions || {}).filter((id) => { const s = state.notions[id]; return s && s.status !== "prim" /* 27.11 : notions de primaire exclues */ && s.seen > 0 && s.m >= 0.7 && !had.has(id); });
     return out;
   },
   // Compétence : les 8 dernières réponses (1, 0,5 ou 0).
@@ -906,6 +909,9 @@ const Engine = {
     return plan;
   },
 
+  /* 27.11 (décision de l'enseignant, n° 29 ; tools/eleves_faibles_26-11.md, proposition 3) : niveau de la question i du
+     positionnement. La première au niveau 1 (première impression), les suivantes au niveau 2 (positionnement discriminant). */
+  placementLevel(state, i) { return i === 0 ? 1 : Math.min(2, difficultyCap(state.profile)); },
   // Résultat d'une question de positionnement : true, false ou null (« je ne sais pas »).
   placementResult(state, id, ok, d = 2) {
     this.updateElo(state, id, d, ok === true ? 1 : 0);
@@ -938,6 +944,17 @@ const Engine = {
     const n = NOTIONS.find((x) => x.id === id);
     if (n && n.prim) return false; /* 27.11 (agent primaire) : toujours « 🔙 Rappel », jamais dans les créneaux ordinaires */
     return pl && (pl[0] >= state.profile.grade - 1 || (state.profile.track !== "mp" && (n.again || []).includes(state.profile.grade)));
+  },
+  /* 27.11 (n° 32) : notions de l'année précédente (hors reprise du référentiel, « again ») que le parcours ne demande pas :
+     ni ratées (travaillées, maîtrise < 0,45 ou deux échecs), ni prérequis d'une notion de l'année qui coince. Ensemble des
+     notions à placer après celles de l'année (planSlots). */
+  prevPenalty(state) {
+    const g = state.profile.grade, el = this.eligible(state), out = new Set(), keep = new Set();
+    const coince = (s) => !!s && s.seen > 0 && (s.m < 0.45 || (s.fails || 0) >= 2);
+    const yearOf = (id) => { const n = NOTIONS.find((x) => x.id === id), pl = n && placeOf(n, state.profile); return !pl ? null : pl[0] === g || (state.profile.track !== "mp" && (n.again || []).includes(g)) ? 0 : pl[0] === g - 1 ? -1 : -2; };
+    for (const id of el) if (yearOf(id) === 0 && state.notions[id].seen >= 2 && coince(state.notions[id])) for (const p of PREREQ[id] || []) keep.add(p);
+    for (const id of el) if (yearOf(id) === -1 && !coince(state.notions[id]) && !keep.has(id)) out.add(id);
+    return out;
   },
   // Toutes les notions vues sont candidates ; les anciennes sont filtrées par niveau dans oldLevels.
   pool(state, kind) {
@@ -1106,6 +1123,11 @@ const Engine = {
     // « En ce moment en classe » : environ 2 créneaux sur 3 portent sur le chapitre choisi par l'élève.
     const nowIds = this.nowActive(state) ? state.now.ids.filter((id) => state.notions[id] && ["vu", "encours"].includes(state.notions[id].status)) : [];
     const nowK = nowIds.length ? (slots.length === 1 ? 1 : Math.round((slots.length * 2) / 3)) : 0;
+    /* 27.11 (décision de l'enseignant, n° 32 ; tools/eleves_faibles_26-11.md : sans chapitre « en classe », 78 à 83 % des
+       questions d'un élève moyen de 10e–1re portaient en novembre sur l'année précédente) : sans chapitre choisi, les
+       notions de l'année déjà ouvertes passent d'abord ; une notion de l'année précédente ne revient en tête que si le
+       parcours le demande (prevPenalty). Élève en grande difficulté ou Mathélo en forte baisse : règle levée. */
+    const prevPen = !this.nowActive(state) && !this.struggling(state) && !this.eloDrop(state) ? this.prevPenalty(state) : null;
     const usedPair = new Set(), cnt = new Map();
     /* 26.11 soir (revue des élèves joués, n° 2 : 5 × la même notion dans une série d'automatismes quand le chapitre en
        classe n'en offre qu'une ou deux) : une notion au plus 2 fois par séance ; un créneau « chapitre » sans notion
@@ -1140,6 +1162,7 @@ const Engine = {
           if (used.has(id)) sc += only ? 0.5 : 2;
           if (usedPair.has(id + "|" + d)) sc += 1;
           if (d === 4) sc -= kind === "defi4" ? 3 : 0.3;
+          if (prevPen && !rappel && !isNow && prevPen.has(id)) sc += PREV_PEN; /* 27.11 : l'année d'abord (n° 32) */
           sc += Math.random() * 0.5;
           if (!best || sc < best.sc) best = { id, d, sc };
         }
@@ -1301,6 +1324,17 @@ const Engine = {
     const best = this.eligible(state).filter((x) => x !== id && !inPlan.has(x) && this.isRecent(state, x) && state.notions[x].seen > 0 && ok(x, 1) && feel(x, 1) < bar - 50)
       .sort((a, b) => feel(a, 1) - feel(b, 1))[0];
     return best ? best + "|1|" + kind : null;
+  },
+  /* 27.11 (décision de l'enseignant, n° 27 ; tools/eleves_faibles_26-11.md, proposition 1) : rejouer au lieu d'ajouter.
+     Élève en grande difficulté (struggling), question pas réussie du premier coup : la question suivante prévue devient la
+     même notion, d'autres nombres, un niveau en dessous (le niveau 1 reste 1). Elle remplace, elle ne s'ajoute pas : la
+     séance garde sa durée. Une fois par séance (l'appelant le garde). Ni automatisme, ni problème (niveau 4), ni à la place
+     d'une question qui porte la leçon du jour ou du problème de la semaine. Renvoie l'entrée à mettre en i + 1, ou null. */
+  replayNext(state, plan, i, id, d, kind) {
+    if (!this.struggling(state) || i + 1 >= plan.length || kind === "drill" || !(d >= 1 && d < 4) || !GEN[id] || !state.notions[id]) return null;
+    const nx = String(plan[i + 1]), nid = nx.split("|")[0];
+    if (nx.startsWith("PROB:") || (nid !== id && state.notions[nid] && this.lessonDue(state, nid))) return null;
+    return id + "|" + Math.max(1, d - 1) + "|" + (kind === "rem" || kind === "carnet" || !kind ? "app" : kind);
   },
   remediation(state, id) {
     const s = state.notions[id];
