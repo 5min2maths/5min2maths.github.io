@@ -1453,6 +1453,7 @@ if (typeof ACTIVE !== "undefined") for (const A of Object.values(ACTIVE)) if (A 
    primaires que freePlan aurait tirées sont retirées (PRIM.strip), seul PRIM.inject en place. */
 (function () {
   const plan0 = Engine.planSession, one0 = Engine.oneLesson, P = () => (typeof PRIM !== "undefined" ? PRIM : null);
-  Engine.planSession = function (state, format) { const p = plan0.call(this, state, format), X = P(); return X ? X.inject(state, X.strip(p)) : p; };
+  /* 27.11 : pas de rappel de primaire le jour du positionnement (séance de 2 questions, firstDayCap) */
+  Engine.planSession = function (state, format) { const p = plan0.call(this, state, format), X = P(); return X ? (state.placedOn === day() ? X.strip(p) : X.inject(state, X.strip(p))) : p; };
   Engine.oneLesson = function (state, plan, n) { const X = P(); return X ? X.inject(state, one0.call(this, state, X.strip(plan), n)) : one0.call(this, state, plan, n); };
 })();
