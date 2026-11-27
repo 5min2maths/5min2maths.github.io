@@ -185,7 +185,7 @@ function atTest() {
     ${scratchHtml()}
     <p class="small muted">Une seule réponse est juste. Calcule d'abord, puis choisis.</p>
     <div class="qcm-choices">${it.choices.map((c, k) => `<button type="button" class="qcm-c" data-k="${k}"><span class="qcm-l">${"ABCD"[k]}</span><span>\\(${c.f}\\)</span></button>`).join("")}</div>
-    <div id="fb"></div></div>`);
+    <div id="fb" aria-live="polite"></div></div>`);
     const S = typeof sigOpen === "function" ? sigOpen({ ev: "q", code: q.code, d: it.d, kind: "qcm", fmt: "autotest" }) : null;
     bindScratch(S);
     app.querySelectorAll(".qcm-c").forEach((b) => (b.onclick = () => {

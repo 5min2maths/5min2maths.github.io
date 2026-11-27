@@ -64,16 +64,65 @@ function errReport(msg, src, ligne, col, stack, envoyer = errCanSend) {
     return rec;
   } catch (e) { return null; } // le rapporteur ne doit jamais provoquer d'erreur lui-même
 }
+/* 27.11 (robustesse, journal d'erreurs) : les 3 dernières erreurs restent sur l'appareil (clé m2m-errlog), même sans
+   accord et hors ligne : message court (100 car.), fichier (nom court), ligne, version de l'app, jour ; AUCUNE donnée de
+   l'élève (ni réponse, ni classe, ni écran). Rien de visible. Elles ne partent qu'avec un « Oui » aux statistiques
+   anonymes : chaque erreur part déjà au moment où elle survient (errReport) ; celles qui n'ont pas pu partir (pas encore
+   d'accord, hors ligne) partent avec la visite du jour (errFlush, appelée par ping("open")), marquées « journal ». */
+const ERRLOG_KEY = "m2m-errlog", ERRLOG_MAX = 3;
+function errLogGet() {
+  try { const a = JSON.parse(localStorage.getItem(ERRLOG_KEY) || "[]"); return Array.isArray(a) ? a.filter((x) => x && x.msg).slice(-ERRLOG_MAX) : []; }
+  catch (e) { return []; }
+}
+function errLogPut(a) { try { localStorage.setItem(ERRLOG_KEY, JSON.stringify(a.slice(-ERRLOG_MAX))); } catch (e) {} }
+function errLog(msg, src, ligne, stack) {
+  try {
+    msg = String(msg || "").replace(/\s+/g, " ").trim();
+    if (!msg || errExt(src) || errExt(stack) || /ResizeObserver loop/.test(msg) || (/^Script error\.?$/i.test(msg) && !src)) return null;
+    if (/^Promesse rejetée : (TypeError: )?(Failed to fetch|Load failed|NetworkError)/.test(msg)) return null;
+    let d = ""; try { d = day(); } catch (e) { d = new Date().toISOString().slice(0, 10); }
+    const rec = { msg: msg.slice(0, 100), src: errFile(src), ligne: +ligne || 0, v: BUILD, d, s: 0 }, a = errLogGet();
+    const same = a.find((x) => x.msg === rec.msg && x.src === rec.src && x.ligne === rec.ligne && x.v === rec.v);
+    if (same) { same.d = d; a.splice(a.indexOf(same), 1); a.push(same); } else a.push(rec);
+    errLogPut(a);
+    return a[a.length - 1];
+  } catch (e) { return null; }
+}
+const errLogSent = (rec) => { if (!rec) return; const a = errLogGet(), x = a.find((y) => y.msg === rec.msg && y.src === rec.src && y.ligne === rec.ligne && y.v === rec.v); if (x) { x.s = 1; errLogPut(a); } };
+// Envoie les erreurs du journal pas encore parties ; envoyer : remplaçable par les tests (tests/erreurs.html).
+function errFlush(envoyer = errCanSend, post = (rec) => fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", keepalive: true, body: JSON.stringify(rec) }).catch(() => {})) {
+  try {
+    if (!envoyer()) return [];
+    const a = errLogGet(), out = [];
+    let dev = ""; try { dev = deviceId(); } catch (e) {}
+    for (const x of a) if (!x.s) { const rec = { ev: "err", msg: x.msg, src: x.src, ligne: x.ligne, col: 0, pile: "", ecran: "journal", version: x.v, niveau: "", dev, date: x.d }; post(rec); out.push(rec); x.s = 1; }
+    if (out.length) errLogPut(a);
+    return out;
+  } catch (e) { return []; }
+}
 window.addEventListener("error", (e) => {
   if (!e || (e.target && e.target !== window)) return; // ressource qui ne charge pas (image, police) : pas une erreur JS
-  errReport(e.message, e.filename, e.lineno, e.colno, e.error && e.error.stack);
+  const j = errLog(e.message, e.filename, e.lineno, e.error && e.error.stack);
+  if (errReport(e.message, e.filename, e.lineno, e.colno, e.error && e.error.stack)) errLogSent(j);
 });
 window.addEventListener("unhandledrejection", (e) => {
   const r = e && e.reason, st = r && r.stack ? String(r.stack) : "";
   const at = /(?:https?|file):\/\/[^\s)]+?:(\d+):(\d+)/.exec(st) || [];
-  errReport("Promesse rejetée : " + ((r && r.message) || String(r)), at[0] ? at[0].replace(/:\d+:\d+$/, "") : "", at[1], at[2], st);
+  const msg = "Promesse rejetée : " + ((r && r.message) || String(r)), src = at[0] ? at[0].replace(/:\d+:\d+$/, "") : "";
+  const j = errLog(msg, src, at[1], st);
+  if (errReport(msg, src, at[1], at[2], st)) errLogSent(j);
 });
 
+/* 27.11 (accessibilité ; test : tests/a11y.html) : « réduire les animations » du système. Les défilements demandés en
+   JavaScript avec behavior: "smooth" (une trentaine d'appels) deviennent instantanés ; animations et transitions sont
+   coupées par la feuille de style (prefers-reduced-motion), les confettis ne partent pas (burst). */
+const reducedMotion = () => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) { return false; } };
+function a11yMotion() {
+  const calm = (a) => (a && typeof a === "object" && a.behavior === "smooth" && reducedMotion() ? { ...a, behavior: "auto" } : a);
+  const wrap = (o, k) => { const f = o && o[k]; if (typeof f !== "function" || f.__m2m) return; const g = function (a, ...r) { return f.call(this, calm(a), ...r); }; g.__m2m = 1; o[k] = g; };
+  wrap(Element.prototype, "scrollIntoView"); wrap(Element.prototype, "scrollTo"); wrap(Element.prototype, "scrollBy"); wrap(window, "scrollTo"); wrap(window, "scrollBy");
+}
+try { a11yMotion(); } catch (e) {}
 const app = document.getElementById("app");
 /* 25.11 (audit France, tools/france.md) : aperçu France pour l'enseignant, sans ouverture au public : …/#france ajoute
    « France » au choix de l'école sur cet appareil (…/#france-off pour annuler). Sans ce réglage, rien ne change. */
@@ -82,13 +131,31 @@ try {
   else if (location.hash === "#france-off") localStorage.removeItem("m2m-france");
   if (localStorage.getItem("m2m-france") === "1" && !SYSTEMS.FR) SYSTEMS.FR = SYSTEMS_HIDDEN.FR;
 } catch (e) {}
-let state = Store.load();
-if (state && state.profile && !SYSTEMS[state.profile.system]) state = null; // système masqué (France) : on repart de zéro
-// Voie MP gardée en revenant au CO (bug 14.11 : « 9e MP » sans critères de divisibilité, nombres premiers ni PGDC) : la voie n'existe qu'au sec. II.
-if (state && state.profile && state.profile.track === "mp" && state.profile.grade < 12) { state.profile.track = "college"; Store.save(state); }
-if (state && state.profile && state.notions && Object.keys(state.notions).length && Engine.migrate(state)) Store.save(state);
-// 24.11 (progression visible) : instantané du jour avant toute activité (ancien state : la semaine part d'aujourd'hui).
-if (state && state.placed && state.notions) { const k = (state.snaps || []).length; Engine.snap(state); if ((state.snaps || []).length !== k) Store.save(state); }
+/* 27.11 (robustesse, migrations) : remise à niveau d'un état enregistré par une version plus ancienne de l'app, en un seul
+   endroit (aussi appelée par tests/migration.html) : système masqué, voie MP au CO, champs de base manquants ou abîmés
+   (Engine.upgrade), notions du catalogue (Engine.migrate), instantané du jour. Renvoie l'état (null : on repart de zéro)
+   et l'enregistre s'il a changé. Une erreur pendant la migration ne bloque jamais le démarrage : l'état est gardé tel quel
+   (enregistré seulement s'il a été modifié sans erreur) et l'erreur part au journal (errLog). */
+function bootState(s, store = true) {
+  if (!s || typeof s !== "object" || !s.profile || typeof s.profile !== "object") return null;
+  if (!SYSTEMS[s.profile.system]) return null; /* système masqué (France) : on repart de zéro */
+  let changed = false, bak = null;
+  try { bak = JSON.stringify(s); } catch (e) {}
+  try {
+    /* Voie MP gardée en revenant au CO (bug 14.11 : « 9e MP » sans critères de divisibilité, nombres premiers ni PGDC) : la voie n'existe qu'au sec. II. */
+    if (s.profile.track === "mp" && s.profile.grade < 12) { s.profile.track = "college"; changed = true; }
+    if (Engine.upgrade(s)) changed = true;
+    if (Object.keys(s.notions).length && Engine.migrate(s)) changed = true;
+    /* 24.11 (progression visible) : instantané du jour avant toute activité (ancien state : la semaine part d'aujourd'hui). */
+    if (s.placed) { const k = (s.snaps || []).length; Engine.snap(s); if ((s.snaps || []).length !== k) changed = true; }
+  } catch (e) {
+    changed = false; errLog(e && e.message, "boot", 0, e && e.stack);
+    try { if (bak) s = JSON.parse(bak); } catch (e2) {}
+  }
+  if (changed && store) Store.save(s);
+  return s;
+}
+let state = bootState(Store.load());
 const save = () => Store.save(state);
 // Barre d'onglets du bas (19.11 : visible partout, même pendant une activité, pour pouvoir interrompre).
 const navTabs = (cur, dots = {}) => `<nav class="tabs" aria-label="Sections"><div class="tabs-inner" role="tablist">${HOME_TABS.map(([id, label, ic]) => `<button class="tab" role="tab" data-tab="${id}" aria-selected="${id === cur}"><span class="tab-ic"><svg viewBox="0 0 24 24">${ic}</svg>${dots[id] && id !== cur ? '<i class="tab-dot"></i>' : ""}</span>${label}</button>`).join("")}</div></nav>`;
@@ -172,7 +239,7 @@ const boldData = (html) => {
   }).join("");
 };
 
-const h = (html) => { const tr = document.getElementById("tour"); if (tr) tr.remove(); sigClose(); pageQ = null; app.classList.remove("has-tabs"); app.innerHTML = html; addTabs(); addFab(); const sh = document.getElementById("fabs"); if (sh) sh.hidden = true; placeFab(); typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
+const h = (html) => { const tr = document.getElementById("tour"); if (tr) tr.remove(); sigClose(); pageQ = null; if (typeof Upd !== "undefined" && Upd) Upd.scr = ""; app.classList.remove("has-tabs"); app.innerHTML = html; addTabs(); addFab(); const sh = document.getElementById("fabs"); if (sh) sh.hidden = true; placeFab(); typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 // Textes de l'app (indices, erreurs typiques) : échappés, sauf <b>, <i>, <br> (16.11 : les balises s'affichaient telles quelles).
 const escT = (s) => esc(s).replace(/&lt;(\/?)(b|i|br)&gt;/g, "<$1$2>");
@@ -317,7 +384,7 @@ function screenWelcome() {
   <div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
   <div class="answer"><input class="ans" id="dans" inputmode="${fine ? "text" : "none"}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Ta réponse">
   <div class="preview" id="dprev"></div>${keypadHtml(q.spec.kind === "value" && !q.spec.sci && (Math.abs(q.spec.value) >= 1e-3 || q.spec.value === 0) && Math.abs(q.spec.value) < 1e7 ? { ...q.spec, final: true } : q.spec)}<div class="actions"><button class="btn-primary" id="dok">Vérifier</button></div></div>
-  <div id="dfb"></div>
+  <div id="dfb" aria-live="polite"></div>
   <div class="spread"><span></span><button class="btn-ghost small" id="dskip">Pas encore vu ça ? Autre question</button></div>
   <p class="small muted">Un autre sujet à chaque visite. Tape ta réponse comme tu veux : fractions, racines, π… le calculateur comprend.</p></div>
   <button class="btn-primary btn-big" id="go">Commencer</button>
@@ -851,6 +918,7 @@ function screenHome() {
   if (typeof screenFiche === "function") { on("prepfiche", () => screenFiche({ test: true })); app.querySelectorAll("[data-fiche]").forEach((b) => (b.onclick = () => screenFiche({ chap: b.dataset.fiche }))); } // 22.11 : Ma fiche
   app.querySelectorAll(".pday").forEach((b) => (b.onclick = () => { app.querySelectorAll(".pday").forEach((x) => x.classList.toggle("sel", x === b)); const i = document.getElementById("pdayinfo"); if (i) i.innerHTML = b.dataset.info; }));
   on("carnetgo", () => startCarnet());
+  updBanner("home"); /* 27.11 : nouvelle version prête */
 }
 // Glisser à gauche / à droite sur l'accueil : cadre suivant / précédent (pas sur un curseur ou un champ).
 (() => {
@@ -981,7 +1049,7 @@ function screenSettings() {
   document.getElementById("level").onclick = () => { draft = { ...state.profile, keepSys: true }; screenLevel(); };
   document.getElementById("r1").onclick = () => {
     document.getElementById("reset").innerHTML = '<span class="small">Effacer ta progression et ton Mathélo ?</span><button id="r2">Oui, effacer</button><button class="btn-ghost" id="r3">Non</button>';
-    document.getElementById("r2").onclick = () => { Store.clear(); try { localStorage.removeItem("m2m-device"); localStorage.removeItem("m2m-ping"); } catch (e) {} state = null; uiApply(); screenWelcome(); };
+    document.getElementById("r2").onclick = () => { Store.clear(); try { localStorage.removeItem("m2m-device"); localStorage.removeItem("m2m-ping"); localStorage.removeItem(ERRLOG_KEY); } catch (e) {} state = null; uiApply(); screenWelcome(); };
     document.getElementById("r3").onclick = screenSettings;
   };
 }
@@ -1168,6 +1236,7 @@ function screenPrivacy(back) {
   <div class="card flat"><b>Ton choix :</b> ${statsAsked() ? (statsOk() ? "tu aides à améliorer l'app (statistiques anonymes envoyées)." : "rien n'est envoyé (sauf les commentaires 💬 que tu écris toi-même).") : "pas encore choisi : rien n'est envoyé tant que tu n'as pas dit oui."} Modifiable dans les Réglages.</div>
   <div class="card flat stack"><b>Ce qui reste sur ton appareil</b>
   <ul class="plain"><li>Ta progression : ${isFR() ? "tes niveaux de maîtrise" : "tes notes de compétences"}, tes badges, ton Mathélo, l'historique de tes réponses.</li>
+  <li>Un journal des 3 dernières erreurs techniques de l'app (message court, endroit dans le code, version, jour ; rien sur toi) : il ne part avec les statistiques que si tu as dit oui.</li>
   <li>Rien de tout cela n'est envoyé (sauf ce qui est décrit ci-dessous, question par question, sans rien qui te désigne). Le code de sauvegarde, lui aussi, n'est envoyé nulle part : c'est toi qui le gardes.</li></ul></div>
   <div class="card flat stack"><b>Ce qui est envoyé, de façon anonyme</b>
   <span class="small muted">Vers un tableau tenu par l'auteur de l'app (Google Sheets), pour l'améliorer pendant la phase de test :</span>
@@ -2062,7 +2131,10 @@ const SET_KEYS = ["7", "8", "9", "-", "+", "/", "⌫", "4", "5", "6", "[", "]", 
 const KEY_LABEL = { "*": "×", "ℝ \\ {|}": "ℝ∖{ }" };
 // 21.11 (amélioration UX 4) : « / » et « ⌨ » n'étaient pas compris ; petite légende sous ces touches, nom complet au survol et pour les lecteurs d'écran.
 const KEY_SUB = { "/": "fraction", "⌨": "clavier", "^": "puissance" };
-const KEY_NAME = { "/": "barre de fraction", "⌨": "afficher le clavier du téléphone", "^": "puissance", "⌫": "effacer", "√": "racine carrée", "*": "fois", ";": "séparer deux réponses", "∪": "union", "∞": "infini", "∅": "aucune solution" };
+const KEY_NAME = { "/": "barre de fraction", "⌨": "afficher le clavier du téléphone", "^": "puissance", "⌫": "effacer", "√": "racine carrée", "*": "fois", ";": "séparer deux réponses", "∪": "union", "∞": "infini", "∅": "aucune solution",
+  /* 27.11 (accessibilité) : nom lu par les lecteurs d'écran pour chaque touche-symbole (tests/a11y.html) */
+  "-": "moins", "+": "plus", "(": "parenthèse ouvrante", ")": "parenthèse fermante", "[": "crochet ouvrant", "]": "crochet fermant", "<": "plus petit que", ">": "plus grand que",
+  "≤": "plus petit ou égal", "≥": "plus grand ou égal", "≠": "différent de", "=": "égal", "π": "pi", "ℝ": "ensemble des réels", "ℝ \\ {|}": "réels privés de", ",": "virgule" };
 const keyIn = (k) => (KEY_LABEL[k] || k) + (KEY_SUB[k] ? `<small class="k-sub">${KEY_SUB[k]}</small>` : "");
 const keyAttr = (k) => (KEY_NAME[k] ? ` title="${KEY_NAME[k]}" aria-label="${KEY_NAME[k]}"` : "");
 const keyBtn = (k, narrowKb) => `<button type="button" class="${/^[\d,]$/.test(k) ? "" : "k-op"}${k === "0" || (k === "⌨" && !narrowKb) || k === "ℝ \\ {|}" ? " k-wide" : ""}" data-k="${esc(k)}"${keyAttr(k)}>${keyIn(k)}</button>`;
@@ -2246,7 +2318,7 @@ function renderProblem(q, opt) {
   ${q.parts.map((p, i) => `<div class="answer part" data-i="${i}"><label for="p${i}"><b>${p.label}</b>${exactNote(p.spec, p.label) ? ` <span class="small muted">${p.spec.kind === "set" ? "(« ; » entre les solutions, ∅ s'il n'y en a pas)" : "(valeur exacte)"}</span>` : ""} <span class="mk" id="mk${i}"></span></label>
     <input id="p${i}" class="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" enterkeyhint="${i < q.parts.length - 1 ? "next" : "done"}"><div class="preview" id="pv${i}"></div>${i < q.parts.length - 1 ? `<button type="button" class="btn-ghost small next-part" data-i="${i}">partie suivante ↓</button>` : ""}</div>`).join("")}
   ${keypadHtml(q.parts[0].spec)}
-  <div id="fb"></div></div>
+  <div id="fb" aria-live="polite"></div></div>
   ${qbarHtml('<button class="btn-sec" id="idk">Voir le corrigé</button>', '<button class="btn-primary" id="check">Vérifier</button>')}
   <button type="button" class="qrecap" id="qrecap" hidden aria-expanded="false"><span class="qr-tag">📌 Énoncé</span><span class="qr-txt">${boldData(q.q)}</span></button>`);
   bindRecap();
@@ -2374,7 +2446,7 @@ function renderQuestion(q, opt) {
   <div class="answer"><input id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="none" placeholder="Ta réponse…" aria-label="Ta réponse">
   <div class="preview" id="prev"></div>
   ${keypadHtml(q.choix > 1 && q.choix <= 9 && q.spec.kind === "value" ? { ...q.spec, choix: q.choix } : q.spec)}</div>
-  <div id="fb"></div></div>
+  <div id="fb" aria-live="polite"></div></div>
   ${qbarHtml('<button class="btn-sec" id="idk">Je ne sais pas</button>', '<button class="btn-primary" id="check">Vérifier</button>', opt.onNotYet || opt.onEasy ? (opt.onNotYet ? '<button type="button" class="btn-sec notyet" id="notyet">Pas encore vu en classe</button>' : "") + (opt.onEasy ? '<button type="button" class="btn-sec easy" id="easy" title="Passer cette question et monter d\'un cran">Trop facile ⏭</button>' : "") : "")}`);
   const S = opt.track ? sigOpen({ ev: "q", code, d: q.d, kind: q.kind || "", fmt: opt.track, redo: opt.redo ? 1 : 0 }) : null;
   sigWatchLesson(S); pageQ = code; bindScratch(S);
@@ -2564,7 +2636,7 @@ function runGuide(q, box, done) {
 // Petit message éphémère.
 function toast(msg, ms = 2200) {
   const t = document.createElement("div");
-  t.className = "toast pop"; t.textContent = msg;
+  t.className = "toast pop"; t.setAttribute("role", "status"); t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), ms);
 }
@@ -2597,7 +2669,7 @@ function deviceId() {
 function ping(ev, extra = {}) {
   try {
     if (!VOTE_ENDPOINT || location.protocol !== "https:" || /claude/.test(location.hostname) || isAuthor() || location.hash === "#auteur" || /^#parent/.test(location.hash) || !statsOk()) return; /* 24.11 : rien depuis l'espace parent */
-    if (ev === "open") { if (localStorage.getItem("m2m-ping") === day()) return; localStorage.setItem("m2m-ping", day()); }
+    if (ev === "open") { if (localStorage.getItem("m2m-ping") === day()) return; localStorage.setItem("m2m-ping", day()); errFlush(); /* 27.11 : journal d'erreurs */ }
     fetch(VOTE_ENDPOINT, { method: "POST", mode: "no-cors", body: JSON.stringify({ ev, dev: deviceId(), date: day(), ...extra }) }).catch(() => {});
   } catch (e) {}
 }
@@ -2731,11 +2803,11 @@ function screenCurious(q, back, from = "") {
   h(`${brand}${backTop("cback0")}<div class="eyebrow">${F.ic} Question curieuse · ${F.label}</div>
   <div class="card pop stack"><h2>${q.titre}</h2><div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
     <div class="act-step"><div class="act-h"><span class="act-n">1</span> Ton pari</div><p>${q.bet.q}</p>
-      <div class="seg" id="cbet">${q.bet.choices.map((c, i) => `<button type="button" data-i="${i}">${c}</button>`).join("")}</div><div id="cbfb"></div></div>
+      <div class="seg" id="cbet">${q.bet.choices.map((c, i) => `<button type="button" data-i="${i}">${c}</button>`).join("")}</div><div id="cbfb" aria-live="polite"></div></div>
     <div class="act-step" id="cs2" hidden><div class="act-h"><span class="act-n">2</span> On vérifie</div><p>${q.calc.label}</p>
       <div class="answer"><input class="ans" id="cans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Ta réponse">
       <div class="preview" id="cprev"></div>${keypadHtml(spec)}
-      <div class="actions"><button class="btn-primary" id="cok">Vérifier</button><button class="btn-sec" id="cidk">Voir la réponse</button></div></div><div id="cfb"></div></div>
+      <div class="actions"><button class="btn-primary" id="cok">Vérifier</button><button class="btn-sec" id="cidk">Voir la réponse</button></div></div><div id="cfb" aria-live="polite"></div></div>
     <div class="act-step" id="cs3" hidden><div class="act-h"><span class="act-n">3</span> Le fin mot</div><div class="sol">${q.reveal}</div>
       <div class="rule"><b>🧠 Ici, tu as utilisé</b> ${q.outil}</div><p class="small muted code cur-code">${q.code}</p></div>
   </div>
@@ -2802,7 +2874,7 @@ function screenHistory(k, back) {
     <div class="act-step"><div class="act-h"><span class="act-n">✍️</span> À toi</div><div class="qtext">${E.q}</div>
       <div class="answer"><input class="ans" id="hans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Ta réponse">
       <div class="preview" id="hprev"></div>${keypadHtml(spec)}
-      <div class="actions"><button class="btn-primary" id="hok">Vérifier</button><button class="btn-sec" id="hidk">Voir la réponse</button></div></div><div id="hfb"></div>
+      <div class="actions"><button class="btn-primary" id="hok">Vérifier</button><button class="btn-sec" id="hidk">Voir la réponse</button></div></div><div id="hfb" aria-live="polite"></div>
       ${scratchHtml() /* 27.11 (commentaire de l'auteur, hist-21 : « zone brouillon ici aussi ») */}</div><div id="hmore"></div>
     <p class="small muted">Lien avec : ${H.lien}</p></div>
   <button class="btn-primary btn-big" id="hnext">Une autre histoire</button>
@@ -2987,6 +3059,7 @@ function screenSummary() {
     ${left ? '<button class="btn-primary btn-big" id="carnetagain">📕 Continuer à effacer</button>' : ""}
     <button class="${left ? "btn-sec" : "btn-primary btn-big"}" id="home">Retour à l'accueil</button>`);
     if (nb || newGrade) setTimeout(burst, 250);
+    updBanner("bilan"); /* 27.11 : nouvelle version prête */
     document.getElementById("home").onclick = screenHome;
     if (document.getElementById("carnetagain")) document.getElementById("carnetagain").onclick = () => startCarnet();
     return;
@@ -3015,6 +3088,7 @@ function screenSummary() {
   /* 24.11 (retour testeur : « séance très courte, l'élève peut croire qu'il a fini trop vite ») */
   if (document.getElementById("again")) document.getElementById("again").onclick = () => { if (n === 1) Engine.otherFormat(state); session = null; save(); startSession(); };
   if (nb || newGrade) setTimeout(burst, 250);
+  updBanner("bilan");
   document.getElementById("home").onclick = screenHome;
   if (document.getElementById("curbonus")) document.getElementById("curbonus").onclick = () => screenCurious(Curieux.pick(state), screenHome, "bilan");
   if (document.getElementById("carnetagain")) document.getElementById("carnetagain").onclick = () => startCarnet();
@@ -3056,7 +3130,37 @@ function showCode() {
 window.addEventListener("hashchange", () => showCode() || restoreFromHash());
 
 // Application installable (hors claude.ai) : cache hors ligne.
-if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude/.test(location.hostname)) navigator.serviceWorker.register("sw.js").catch(() => {});
+/* 27.11 (robustesse, mises à jour ; test : tests/maj.html). Le service worker (src/pwa/sw.js) prend la main dès qu'une
+   nouvelle version est installée (skipWaiting, clients.claim), mais la page déjà ouverte garde l'ancien code : une app
+   installée sur un téléphone, jamais fermée, restait des jours sur l'ancienne version. Désormais :
+   - recherche d'une mise à jour au démarrage et à chaque retour dans l'app (30 min d'écart au moins) ;
+   - nouvelle version prête (le contrôleur change alors qu'il y en avait déjà un) : une ligne discrète « Nouvelle version
+     prête — Recharger », seulement à l'accueil ou au bilan, jamais pendant une question ;
+   - sans geste de l'élève : rechargement automatique au prochain retour dans l'app, si elle est sur l'accueil ou le bilan
+     sans activité en cours (sinon la ligne attend le prochain accueil). La progression est déjà enregistrée. */
+var Upd = {
+  ready: false, scr: "", lastCheck: 0, reg: null, gap: 30 * 60 * 1000,
+  reload: () => location.reload(),
+  safe() { return (Upd.scr === "home" || Upd.scr === "bilan") && !homeBusy() && !app.querySelector(".qtext, .lesson-card"); },
+  check(now = Date.now()) { if (!Upd.reg || now - Upd.lastCheck < Upd.gap) return false; Upd.lastCheck = now; try { Upd.reg.update().catch(() => {}); } catch (e) {} return true; },
+  found() { if (Upd.ready) return; Upd.ready = true; updBanner(Upd.scr); },
+  visible() { if (Upd.ready && Upd.safe()) { Upd.reload(); return true; } Upd.check(); return false; },
+};
+/* Ligne « Nouvelle version prête » (accueil, bilan) ; where : "home" ou "bilan". Ailleurs : rien, et l'écran est noté. */
+function updBanner(where) {
+  if (typeof Upd === "undefined" || !Upd) return;
+  Upd.scr = where || "";
+  if (!where || !Upd.ready || app.querySelector(".upd-line")) return;
+  app.insertAdjacentHTML("afterbegin", '<div class="upd-line" role="status"><span>Nouvelle version prête</span><button type="button" class="btn-ghost small" id="updgo">Recharger</button></div>');
+  document.getElementById("updgo").onclick = () => Upd.reload();
+}
+if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude/.test(location.hostname)) {
+  const sw = navigator.serviceWorker;
+  let had = !!sw.controller; /* première installation (pas encore de contrôleur) : pas une mise à jour */
+  sw.addEventListener("controllerchange", () => { if (had) Upd.found(); had = true; });
+  sw.register("sw.js").then((reg) => { Upd.reg = reg; Upd.lastCheck = Date.now(); }).catch(() => {});
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") Upd.visible(); });
+}
 
 // Démarrage
 ping("open");

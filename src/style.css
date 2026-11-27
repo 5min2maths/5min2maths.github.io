@@ -891,3 +891,17 @@ button.sess-info::after { content: ""; position: absolute; left: 50%; top: 50%; 
 /* 27.11 : question à choix numérotés : touches 1 à n et ⌫ (keysFor, spec.choix) */
 .keypad.k-choix { grid-template-columns: repeat(5, minmax(0, 1fr)); width: 100%; max-width: 340px; margin-inline: auto; }
 .keypad.k-choix button { padding: 12px 0; font-size: 1.2rem; }
+
+/* 27.11 (robustesse) : nouvelle version prête (accueil, bilan), une ligne discrète. */
+.upd-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 8px; padding: 4px 10px; border-radius: 10px;
+  background: var(--blue-soft); color: var(--ink); font-size: .9rem; }
+.upd-line .btn-ghost { padding: 2px 8px; }
+/* 27.11 (accessibilité) : texte pour les lecteurs d'écran seulement. */
+.sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+/* 27.11 (accessibilité) : « réduire les animations » du système respecté partout (animations, transitions, défilements ;
+   les défilements « smooth » demandés en JavaScript sont ramenés à « auto » dans src/app.js, a11yMotion). */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; transition-duration: 0.01ms !important; transition-delay: 0s !important; }
+  .burst { display: none !important; }
+}
