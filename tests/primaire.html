@@ -1,0 +1,209 @@
+<!doctype html><meta charset="utf-8"><meta name="budget" content="60000">
+<main id="app"></main>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){};window.fetch=()=>Promise.resolve(new Response("{}"));</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/defis_9.js"></script><script src="../src/defis_910.js"></script><script src="../src/defis_2c.js"></script><script src="../src/defis_sec2.js"></script><script src="../src/competences.js"></script><script src="../src/referentiel.js"></script><script src="../src/trx.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch4c_trous.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/ch1c_trous.js"></script><script src="../src/ch11_rep3d.js"></script><script src="../src/perco.js"></script><script src="../src/primaire.js"></script><script src="../src/fr_college.js"></script><script src="../src/fr_1re.js"></script><script src="../src/fr_3e.js"></script><script src="../src/fr_tle.js"></script><script src="../src/fr_fin.js"></script><script src="../src/fr_trous.js"></script><script src="../src/fr_couv.js"></script><script src="../src/ref_matu.js"></script><script src="../src/ref_fr.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_col34b.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/fr_act.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script>
+<script src="vrai_collecte.js"></script>
+<!-- Automatismes de fin de primaire en 9e (27.11, agent primaire ; src/primaire.js, tools/primaire_9e.md).
+     1. Contenu : 8 notions × 3 niveaux × 150 graines : question bien formée, pas à pas dont la dernière étape vaut la réponse,
+        ≥ 3 formes par niveau, aucune mention « primaire » / « 8P », nombres à la suisse (virgule, 10'000).
+     2. Oracle : chaque énoncé est relu (texte affiché ; figure pour la droite graduée) et recalculé par une autre voie ;
+        désaccord = échec ; contre-épreuve : une réponse faussée doit être signalée ; corrigé qui contient la réponse.
+     3. Service (PRIM.inject) : jamais pour un élève moyen ou fort, jamais hors 9e (10e, 11e, Collège, MP), jamais en France ;
+        9e en grande difficulté : 1 à 2 questions au plus, à la fin, « 🔙 Rappel » (Engine.isRecent faux), prérequis de la notion
+        ratée d'abord ; notion reprise (2 réussites du 1er coup) plus servie ; hors catalogue ; mode libre sans fuite. -->
+<pre id="out">en cours</pre>
+<script>
+(function () {
+  const out = [], fails = [], t0 = performance.now();
+  const bad = (m) => fails.push(m);
+  const pl = VRAI.plain;
+  const nn = (s) => +String(s).replace(/['’\s]/g, "").replace(",", ".");
+  const NB = "(\\d+(?:'\\d{3})*(?:,\\d+)?)";
+  const re = (s) => new RegExp(s.replace(/#/g, NB), "i");
+  const FR = { "la moitié": 2, "le tiers": 3, "le quart": 4, "le dixième": 10, "le cinquième": 5, "Le quart": 4, "Le tiers": 3, "Le cinquième": 5, "Le dixième": 10 };
+  const HM = { "trois quarts d'heure": 45, "une heure et quart": 75, "une heure et demie": 90, "deux heures et quart": 135, "deux heures et demie": 150, "trois heures moins le quart": 165, "une heure moins le quart": 45, "une demi-heure": 30, "un quart d'heure": 15 };
+  const UF = { "km>m": 1000, "m>cm": 100, "kg>g": 1000, "t>kg": 1000, "h>min": 60, "min>s": 60, "L>dL": 10, "cm>mm": 10 };
+  const conv = (a, b) => UF[a + ">" + b] || (UF[b + ">" + a] ? 1 / UF[b + ">" + a] : NaN);
+  /* évaluation d'un calcul affiché (· × , : ÷) */
+  const calc = (e) => { const s = e.replace(/'/g, "").replace(/,/g, ".").replace(/·/g, "*").replace(/\s:\s/g, "/"); if (!/^[\d+\-*/. ()]+$/.test(s)) return NaN; return Function("return (" + s + ")")(); };
+  const fracv = (s) => { const m = /^\((\d+)\)\/\((\d+)\)$/.exec(s.trim()); return m ? +m[1] / +m[2] : NaN; };
+  const ORA = [
+    [/^Calcule(?: de tête| astucieusement)? : ([\d'·:+\- ,]+?)\.?$/i, (m) => calc(m[1])],
+    [re("^Complète : # · \\? = #"), (m) => nn(m[2]) / nn(m[1])],
+    [re("^Complète : \\((\\d+)\\)/\\((\\d+)\\) = \\(\\?\\)/\\((\\d+)\\)"), (m) => nn(m[1]) * nn(m[3]) / nn(m[2])],
+    [re("^Pour un tournoi de foot, # joueurs forment des équipes de #"), (m) => nn(m[1]) / nn(m[2])],
+    [re("^Un photographe colle # photos dans un album, # par page"), (m) => nn(m[1]) / nn(m[2])],
+    [re("^Une playlist de # minutes contient des morceaux de # minutes"), (m) => nn(m[1]) / nn(m[2])],
+    [re("^Combien faut-il ajouter à # pour obtenir #"), (m) => nn(m[2]) - nn(m[1])],
+    [re("il faut # points pour passer au niveau suivant\\. Yanis en a #"), (m) => nn(m[1]) - nn(m[2])],
+    [re("^Tu paies .* à # CHF avec un billet de # CHF"), (m) => nn(m[2]) - nn(m[1])],
+    [re("^Tu as # CHF\\. Tu achètes .* à # CHF et .* à # CHF\\. Combien te reste"), (m) => nn(m[1]) - nn(m[2]) - nn(m[3])],
+    [re("^Combien y a-t-il de dizaines en tout dans le nombre #"), (m) => Math.floor(nn(m[1]) / 10)],
+    [re("^Combien y a-t-il de centaines en tout dans le nombre #"), (m) => Math.floor(nn(m[1]) / 100)],
+    [re("^Un festival vend # billets à # CHF"), (m) => nn(m[1]) * nn(m[2])],
+    [re("^Un club commande # maillots à # CHF"), (m) => nn(m[1]) * nn(m[2])],
+    [re("nageuse fait # longueurs d'un bassin de # m"), (m) => nn(m[1]) * nn(m[2])],
+    [re("^Quel est le quotient de la division euclidienne de # par #"), (m) => Math.floor(nn(m[1]) / nn(m[2]))],
+    [re("^Quel est le reste de la division euclidienne de # par #"), (m) => nn(m[1]) % nn(m[2])],
+    [re("^Tu ranges # cartes à collectionner en paquets de #"), (m) => Math.floor(nn(m[1]) / nn(m[2]))],
+    [re("^Le club range # balles de tennis dans des tubes de #"), (m) => Math.floor(nn(m[1]) / nn(m[2]))],
+    [re("^Tu imprimes # photos ; une planche en contient #"), (m) => Math.floor(nn(m[1]) / nn(m[2]))],
+    [re("^# élèves partent en course d'école dans des minibus de # places"), (m) => Math.ceil(nn(m[1]) / nn(m[2]))],
+    [re("^Au camp de ski, # élèves prennent des télécabines de # places"), (m) => Math.ceil(nn(m[1]) / nn(m[2]))],
+    [re("# joueurs et joueuses partent en voiture, # par voiture"), (m) => Math.ceil(nn(m[1]) / nn(m[2]))],
+    [re("# personnes voyagent dans des cars de # places"), (m) => Math.ceil(nn(m[1]) / nn(m[2]))],
+    [re("dur(?:e|é) # minutes\\. Cela fait combien d'heures complètes"), (m) => nn(m[1]) % 60],
+    [re("(?:dure|durent|depuis) # jours\\. Combien de semaines complètes"), (m) => nn(m[1]) % 7],
+    [re("une coiffure parmi # et une tenue parmi #"), (m) => nn(m[1]) * nn(m[2])],
+    [re("^Combien vaut (la moitié|le tiers|le quart|le dixième) de #"), (m) => nn(m[2]) / FR[m[1]]],
+    [/^Un (?:film|entraînement|trajet en bus) dure ([^.]+)\. Combien de minutes/i, (m) => HM[m[1]]],
+    [re("^Combien valent les (trois quarts|deux tiers) de #"), (m) => m[1] === "trois quarts" ? nn(m[2]) * 3 / 4 : nn(m[2]) * 2 / 3],
+    [re("(?:compte|Sur|fait) # (?:places|élèves interrogés|km)[ ;.,].*les \\((\\d+)\\)/\\((\\d+)\\)"), (m) => nn(m[1]) * nn(m[2]) / nn(m[3])],
+    [re("^Combien de (grammes|mètres|minutes|centimètres) y a-t-il dans les \\((\\d+)\\)/\\((\\d+)\\) d'un(?:e)? (kilogramme|kilomètre|heure|mètre)"), (m) => ({ kilogramme: 1000, "kilomètre": 1000, heure: 60, "mètre": 100 })[m[4]] * nn(m[2]) / nn(m[3])],
+    [re("(?:a|permet de rouler|compte) # (?:CHF|km|élèves)[.;] (?:Elle dépense|Tu as déjà utilisé) (la moitié|le tiers|le quart|le cinquième)"), (m) => nn(m[1]) - nn(m[1]) / FR[m[2]]],
+    [re("^Une classe compte # élèves ; (la moitié|le tiers|le quart|le cinquième) sont"), (m) => nn(m[1]) - nn(m[1]) / FR[m[2]]],
+    [re("^(Le quart|Le tiers|Le cinquième|Le dixième) d'un nombre vaut #"), (m) => nn(m[2]) * FR[m[1]]],
+    [re("^(Le quart|Le tiers|Le cinquième|Le dixième) des membres d'un club de basket, soit #"), (m) => nn(m[2]) * FR[m[1]]],
+    [/^Tu t'entraînes (.+?) le lundi et (.+?) le jeudi/i, (m) => HM[m[1]] + HM[m[2]]],
+    [re("^Convertis # (km|m|cm|mm|kg|g|t|h|min|s|L|dL) en (km|m|cm|mm|kg|g|t|h|min|s|L|dL)\\."), (m) => nn(m[1]) * conv(m[2], m[3])],
+    [re("^Écris # (km|m|kg|h|min) # (m|cm|g|min|s) en (m|cm|g|min|s)\\."), (m) => nn(m[1]) * conv(m[2], m[5]) + nn(m[3]) * (m[4] === m[5] ? 1 : conv(m[4], m[5]))],
+    [re("^Calcule en (m|g|dL) : # (km|kg|L) \\+ # (m|g|dL)"), (m) => nn(m[2]) * conv(m[3], m[1]) + nn(m[4])],
+    [re("piste d'athlétisme mesure # m\\. Tu en fais # tours\\. Combien de kilomètres"), (m) => nn(m[1]) * nn(m[2]) / 1000],
+    [re("tu nages # longueurs d'un bassin de # m\\. Combien de kilomètres"), (m) => nn(m[1]) * nn(m[2]) / 1000],
+    [re("tu remplis # fois ta gourde de # dL\\. Combien de litres"), (m) => nn(m[1]) * nn(m[2]) / 10],
+    [/(?:part|commence) à (\d+) h (\d+) et (?:arrive|se termine) à (\d+) h (\d+)/i, (m) => (+m[3] * 60 + +m[4]) - (+m[1] * 60 + +m[2])],
+    [re("coûte # CHF par mois\\. Combien coûte-t-il pour # mois"), (m) => nn(m[1]) * nn(m[2])],
+    [re("achète # ballons à # CHF pièce"), (m) => nn(m[1]) * nn(m[2])],
+    [re("prend le bus # fois par semaine ; chaque trajet dure # minutes"), (m) => nn(m[1]) * nn(m[2])],
+    [re("^# amis partagent l'addition de # CHF"), (m) => nn(m[2]) / nn(m[1])],
+    [re("terrain de foot coûte # CHF ; # joueurs"), (m) => nn(m[1]) / nn(m[2])],
+    [re("cadeau commun coûte # CHF\\. On est # à payer"), (m) => nn(m[1]) / nn(m[2])],
+    [re("# (?:spectateurs|personnes) .*\\. (?:Dimanche|Cette année), il y en a # de (plus|moins)"), (m) => m[3] === "plus" ? nn(m[1]) + nn(m[2]) : nn(m[1]) - nn(m[2])],
+    [re("a # fois plus d'abonnés que Tom, qui en a #"), (m) => nn(m[1]) * nn(m[2])],
+    [re("a rapporté # fois plus que l'an passé, où elle avait rapporté #"), (m) => nn(m[1]) * nn(m[2])],
+    [re("culmine à # m et .* à # m\\. De combien"), (m) => nn(m[1]) - nn(m[2])],
+    [re("parmi # et une boisson parmi #"), (m) => nn(m[1]) * nn(m[2])],
+    [re("a # maillots différents et # shorts"), (m) => nn(m[1]) * nn(m[2])],
+    [re("molette de # couleurs et une molette de # chiffres"), (m) => nn(m[1]) * nn(m[2])],
+    [re("(?:Après avoir dépensé|Après une sortie au bowling à) # CHF.*, il reste # CHF"), (m) => nn(m[1]) + nn(m[2])],
+    [re("carte de # trajets en bus coûte # CHF"), (m) => nn(m[2]) / nn(m[1])],
+    [re("abonnement de # entrées à la patinoire coûte # CHF"), (m) => nn(m[2]) / nn(m[1])],
+    [re("^Tu (?:achètes|loues) # (?:places de concert|paires de skis) à # CHF et tu paies avec # CHF"), (m) => nn(m[3]) - nn(m[1]) * nn(m[2])],
+  ];
+  /* droite graduée : valeurs des étiquettes et position du point A lues dans la figure */
+  const droiteV = (fig) => {
+    const labs = [...fig.matchAll(/<text x="([\d.]+)"[^>]*>([^<]+)<\/text>/g)].map((m) => [+m[1], m[2]]).filter((x) => /^[\d',]+$/.test(x[1])).map(([x, t]) => [x, nn(t)]);
+    const c = /<circle cx="([\d.]+)"/.exec(fig); if (labs.length < 2 || !c) return NaN;
+    const [a, b] = [labs[0], labs[labs.length - 1]]; return a[1] + ((+c[1] - a[0]) / (b[0] - a[0])) * (b[1] - a[1]);
+  };
+  const oracle = (q) => {
+    const t = pl(q.q);
+    if (/droite graduée/.test(t)) { const v = droiteV(String(q.fig || "")), labs = [...String(q.fig).matchAll(/<text[^>]*>([\d',]+)<\/text>/g)].map((m) => nn(m[1])); return { v, tol: Math.abs(labs[labs.length - 1] - labs[0]) * 0.004 }; }
+    for (const [r, f] of ORA) { const m = r.exec(t); if (m) return { v: f(m), tol: 1e-6 }; }
+    return null;
+  };
+  const fmt = (v) => { const [i, f] = String(+(+v).toFixed(6)).split("."); return (Math.abs(+i) >= 10000 ? i.replace(/\B(?=(\d{3})+(?!\d))/g, "'") : i) + (f ? "," + f : ""); };
+
+  /* ---------- 1 et 2 : contenu et oracle ---------- */
+  let nq = 0, nk = 0, nm = 0;
+  for (const id of PRIM_IDS) {
+    const n = NOTIONS.find((x) => x.id === id);
+    if (!n || !n.prim || n.CH[0] !== 8 || n.FR !== null || n.MP !== null) bad(id + " : notion mal déclarée");
+    if (!HINTS_EXTRA[id] || !LESSONS_EXTRA[id] || LESSONS_EXTRA[id].length < 5) bad(id + " : indice ou leçon manquant");
+    const words = [n.label, HINTS_EXTRA[id], JSON.stringify(LESSONS_EXTRA[id])].join(" ");
+    if (/primaire|\b8P\b|8e année|fin de cycle/i.test(words)) bad(id + " : le niveau primaire est nommé dans le libellé, l'indice ou la leçon");
+    for (const d of [1, 2, 3]) {
+      const forms = new Set();
+      for (let k = 1; k <= 150; k++) {
+        let q; try { q = Engine.build(id, d, k); } catch (e) { bad(id + "-" + d + "-" + k + " EXC " + e.message); continue; }
+        nq++;
+        const code = id + "-" + d + "-" + k;
+        if (!q || !q.q || !q.spec || q.spec.kind !== "value" || !isFinite(q.spec.value) || !q.sol) { bad(code + " : question mal formée"); continue; }
+        forms.add(q.ctx ? q.ctx + "|" + qForm(q).slice(0, 18) : qForm(q).replace(/#/g, "").slice(0, 30));
+        const t = pl(q.q), s = pl(q.sol), all = t + " " + s + " " + (q.guide || []).map((g) => pl(g.ask) + " " + pl(g.sol)).join(" ");
+        if (/primaire|\b8P\b/i.test(all)) bad(code + " : « primaire » ou « 8P » à l'écran");
+        if (/\d\.\d/.test(t.replace(/<[^>]*>/g, ""))) bad(code + " : point décimal : " + t);
+        if (/(?<![\d'])\d{5,}(?![\d'])/.test(all.replace(/\b\d+\/\d+\b/g, ""))) bad(code + " : nombre de 5 chiffres sans séparateur des milliers : " + all.slice(0, 160));
+        if (q.spec.value < 0) bad(code + " : réponse négative");
+        if (!q.guide || !q.guide.length) bad(code + " : pas de pas à pas");
+        else { const g = q.guide[q.guide.length - 1]; if (!g.spec || Math.abs(g.spec.value - q.spec.value) > 1e-6) bad(code + " : la dernière étape du pas à pas ne vaut pas la réponse (" + (g.spec && g.spec.value) + " ≠ " + q.spec.value + ")"); }
+        if (trivialQ(q, 2)) bad(code + " : triviale (" + trivialQ(q, 2) + ") : " + t);
+        const o = oracle(q);
+        if (!o) { bad(code + " : énoncé non reconnu par l'oracle : " + t); continue; }
+        nk++;
+        if (!(Math.abs(o.v - q.spec.value) <= o.tol)) bad(code + " : oracle " + o.v + " ≠ réponse " + q.spec.value + " : " + t);
+        if (k <= 5) { nm++; const o2 = Math.abs(o.v - (q.spec.value * 1.2 + 0.7)) <= o.tol; if (o2) bad(code + " : contre-épreuve non détectée"); }
+        const v = q.spec.value, fr = /fraction/.test(t) ? (() => { for (let dd = 2; dd <= 12; dd++) if (Math.abs(v * dd - Math.round(v * dd)) < 1e-9) return "(" + Math.round(v * dd) + ")/(" + dd + ")"; return ""; })() : "";
+        if (!s.includes(fr || fmt(v))) bad(code + " : le corrigé ne contient pas la réponse " + (fr || fmt(v)) + " : " + s);
+      }
+      if (forms.size < 3) bad(id + "-" + d + " : " + forms.size + " forme(s) seulement");
+    }
+  }
+  out.push("contenu : " + nq + " énoncés, " + nk + " recalculés par l'oracle, " + nm + " contre-épreuves");
+
+  /* ---------- 3 : service ---------- */
+  const today = day();
+  const mk = (profile, kind) => {
+    const st = Engine.newState(profile); Engine.autoInit(st);
+    st.placed = true; st.placedOn = addDays(today, -10); st.elo.n = 40;
+    const ids = Engine.eligible(st).filter((id) => GEN[id]).slice(0, 8);
+    for (const id of ids) Object.assign(st.notions[id], { seen: 3, status: "vu", lessonSeen: true });
+    if (kind === "tf") { st.last1 = [0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0]; st.tadj = -200; st.elo.r = 760; for (const id of ids.slice(0, 3)) Object.assign(st.notions[id], { m: 0.2, fails: 2 }); }
+    if (kind === "f") { st.last1 = [0, 1, 0, 0, 1, 0, 0, 0, 1, 0]; st.tadj = -60; st.elo.r = 850; Object.assign(st.notions[ids[0]], { m: 0.3, fails: 2 }); }
+    /* élève moyen en mauvaise passe : réussite récente basse, Mathélo d'élève moyen */
+    if (kind === "passe") { st.last1 = [0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0]; st.tadj = -200; st.elo.r = 960; for (const id of ids.slice(0, 3)) Object.assign(st.notions[id], { m: 0.3, fails: 2 }); }
+    if (kind === "moyen") { st.last1 = [1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1]; st.tadj = 0; for (const id of ids) st.notions[id].m = 0.65; }
+    if (kind === "fort") { st.last1 = [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1]; st.tadj = 40; for (const id of ids) st.notions[id].m = 0.85; }
+    return st;
+  };
+  const FMT = ["auto", "app", "mixte", "revision"];
+  const serve = (st, n = 40) => { const r = { prim: 0, sess: 0, max: 0, notLast: 0, recent: 0, drillFig: 0, ids: new Set() };
+    for (let i = 0; i < n; i++) {
+      for (const f of FMT) { let p; try { p = Engine.planSession(st, f); } catch (e) { bad("planSession " + f + " : " + e.message); continue; } r.sess++;
+        const k = p.filter((e) => PRIM.isPrim(e)); r.prim += k.length; r.max = Math.max(r.max, k.length);
+        p.forEach((e, j) => { if (!PRIM.isPrim(e)) return; const [id, , kind] = String(e).split("|"); r.ids.add(id); if (j < p.length - k.length) r.notLast++; if (Engine.isRecent(st, id)) r.recent++; if (kind === "drill" && !Engine.isDrill(Engine.make(st, id, 1))) r.drillFig++; }); }
+      let fp; try { fp = Engine.oneLesson(st, Engine.freePlan(st, "annee", 8), 5); } catch (e) { bad("mode libre : " + e.message); continue; }
+      r.sess++; const k = fp.filter((e) => PRIM.isPrim(e)); r.prim += k.length; r.max = Math.max(r.max, k.length); k.forEach((e) => r.ids.add(String(e).split("|")[0]));
+    }
+    return r; };
+  const P9 = { system: "CH", grade: 9, track: "college", minutes: 5 };
+  const CASES = [["9e moyen", P9, "moyen", 0], ["9e fort", P9, "fort", 0], ["9e moyen en mauvaise passe", P9, "passe", 0], ["10e très faible", { ...P9, grade: 10 }, "tf", 0], ["11e très faible", { ...P9, grade: 11 }, "tf", 0],
+    ["1re Collège très faible", { ...P9, grade: 12 }, "tf", 0], ["MP 1re très faible", { system: "CH", grade: 12, track: "mp", minutes: 5 }, "tf", 0],
+    ["France 6e très faible", { system: "FR", grade: 6, minutes: 5 }, "tf", 0], ["France 5e très faible", { system: "FR", grade: 7, minutes: 5 }, "tf", 0], ["9e très faible", P9, "tf", 1], ["9e faible", P9, "f", 1]];
+  for (const [name, prof, kind, want] of CASES) {
+    const st = mk(prof, kind);
+    if (Engine.catalog(prof).some((c) => NOTIONS.find((n) => n.id === c.id).prim)) bad(name + " : notion primaire au catalogue");
+    if (Object.keys(st.notions).some((id) => PRIM.isPrim(id))) bad(name + " : notion primaire créée à l'initialisation");
+    const strug = Engine.struggling(st), r = serve(st);
+    if (want && !strug) bad(name + " : le cas de test n'est pas en grande difficulté");
+    if (kind === "passe" && !strug) bad(name + " : le cas de test devrait être « struggling » (seuils de PRIM.applies seuls en jeu)");
+    if (!want && r.prim) bad(name + " : " + r.prim + " question(s) primaire(s) servie(s)");
+    if (want && !r.prim) bad(name + " : aucune question primaire servie");
+    if (r.max > 2) bad(name + " : " + r.max + " questions primaires dans une séance");
+    if (r.notLast) bad(name + " : question primaire ailleurs qu'en fin de séance");
+    if (r.recent) bad(name + " : question primaire non marquée « 🔙 Rappel » (isRecent)");
+    if (r.drillFig) bad(name + " : question primaire qui n'est pas un automatisme dans un créneau d'automatisme");
+    out.push(name + " : " + (strug ? "en difficulté" : "pas en difficulté") + ", " + r.prim + " question(s) primaire(s) sur " + r.sess + " séances (max " + r.max + " par séance) " + [...r.ids].join(" "));
+  }
+  /* au plus 1 sans underFloor ; prérequis d'abord ; reprise ; sortie de la grande difficulté ; pas de fuite */
+  { const st = mk(P9, "f"); if (Engine.underFloor(st)) bad("cas faible : sous le plancher (test mal construit)"); else { const r = serve(st, 10); if (r.max > 1) bad("9e faible hors plancher : " + r.max + " questions primaires dans une séance (1 au plus)"); } }
+  { const st = mk(P9, "tf"); for (const id of Object.keys(st.notions)) if (st.notions[id].seen) Object.assign(st.notions[id], { m: 0.6, fails: 0 });
+    if (serve(st, 3).prim) bad("9e très faible sans notion de 9e ratée : question primaire servie (prérequis d'une notion ratée seulement)");
+    if (!st.notions.decadd) bad("decadd absent du catalogue de 9e"); else { Object.assign(st.notions.decadd, { status: "vu", seen: 3, m: 0.15, fails: 3 });
+      const p = Engine.planSession(st, "app"), k = p.filter((e) => PRIM.isPrim(e)).map((e) => e.split("|")[0]); if (k[0] !== "p8calcadd") bad("prérequis de la notion ratée : attendu p8calcadd, obtenu " + k.join(", ")); } }
+  { const st = mk(P9, "tf"); for (const id of PRIM_IDS) { PRIM.ensure(st, id).box = 2; } const r = serve(st, 5); if (r.prim) bad("notions reprises (2 réussites du 1er coup) encore servies : " + r.prim);
+    /* élève sorti de la grande difficulté, notions primaires encore en mémoire : rien en séance ni en mode libre */
+    for (const id of PRIM_IDS) Object.assign(st.notions[id], { box: 0, m: 0.2, seen: 3, fails: 3 }); st.last1 = [1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1]; st.tadj = 0;
+    for (const id of Object.keys(st.notions)) if (!PRIM.isPrim(id)) st.notions[id].m = Math.max(st.notions[id].m, 0.6);
+    const r2 = serve(st, 10); if (r2.prim) bad("élève sorti de la grande difficulté : " + r2.prim + " question(s) primaire(s) servie(s)");
+    if (Engine.eligible(st).some((id) => PRIM.isPrim(id))) bad("notion primaire éligible aux créneaux ordinaires"); }
+  { /* reprise par le vrai enregistrement : 2 réussites du premier coup → plus servie */
+    const st = mk(P9, "tf"), id = "p8tables"; PRIM.ensure(st, id); Engine.record(st, id, 1, 1, true); Engine.record(st, id, 2, 1, true);
+    if (!PRIM.acquired(st, id)) bad("2 réussites du premier coup : notion non reprise (box " + st.notions[id].box + ")"); }
+  { const st = mk(P9, "tf"); PRIM.off = true; const r = serve(st, 3); PRIM.off = false; if (r.prim) bad("PRIM.off sans effet"); }
+  { /* clés de PRIM_PRE : notions de 9e */ for (const id of Object.keys(PRIM_PRE)) { const n = NOTIONS.find((x) => x.id === id); if (!n || !n.CH || n.CH[0] !== 9) bad("PRIM_PRE : " + id + " n'est pas une notion de 9e"); for (const p of PRIM_PRE[id]) if (!PRIM_IDS.includes(p)) bad("PRIM_PRE : " + p + " inconnue"); } }
+
+  const uniq = [...new Set(fails)];
+  document.getElementById("out").textContent = [(uniq.length ? "ÉCHEC " : "ok ") + PRIM_IDS.length + " notions, " + uniq.length + " problème(s), " + Math.round(performance.now() - t0) + " ms", ...out, ...uniq.slice(0, 80).map((f) => "  " + f)].join("\n");
+})();
+</script>
