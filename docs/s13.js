@@ -3330,6 +3330,9 @@ for (const d of DEFS) if (d.act) actReg({ [d.id]: d.act });
 
 
 const HORS_FR = {
+
+
+nbderive: [["definition-cube", 99], ["definition-racine", 99]],
 derivref: [["exposant-*", 99] , ["trigo-*", 12] ],
 tangente: [["newton", 12]],
 asymptotes: [["oblique", 99] ],
@@ -3511,7 +3514,7 @@ const CHAP = {
 "TIN": ["integrale", "aireint", "intmaj", "intparties", "suiteint"],
 "TDN": ["denombr", "combi", "binom", "binomiale", "sommeva"],
 "TES": ["vect3d", "colin", "droite3d", "plans", "posrel", "pscal3d", "distances"],
-"TAU": ["compo", "eq3"],
+"TAU": ["compo"] ,
 };
 ORDRE.FR = ORDRE.FR || {}; ORDRE_THEME.FR = ORDRE_THEME.FR || {}; THEME_LABEL.FR = THEME_LABEL.FR || {};
 

@@ -1309,13 +1309,16 @@ const forms = ((state.recentForm = state.recentForm || {})[id] = (state.recentFo
 
 const pKey = (x) => x && x.spec && x.spec.kind === "multi" ? "p:" + (x.ctx || String(x.q).replace(/\\\(.*?\\\)|<[^>]*>/g, " ").replace(/[^A-Za-zÀ-ÿ' ]/g, " ").trim().split(/\s+/).slice(0, 4).join(" ").toLowerCase()) : null;
 const cday = (state.ctxDay = state.ctxDay || {}), lim = addDays(day(), -6), stale = (x) => { const k = pKey(x); return !!(k && cday[k] && cday[k] >= lim) || sceneStale(state, sceneKey(x)); };
+
+
+const short4 = level === 4 && this.weak4(state), long4 = (x) => short4 && !!x && x.d === 4 && Array.isArray(x.parts) && x.parts.length > 3;
 let found = false, fresh1 = null, lastOk = null, lv = level;
 
 
 for (let k = 0, t = 0; k < 16 && !found && t < 60; t++) {
 if (t && t % 15 === 0 && !lastOk && lv > 1) lv -= 1;
 q = this.build(id, lv);
-if (horsCO(state, id, q)) continue;
+if (horsCO(state, id, q) || long4(q)) continue;
 k++; lastOk = q;
 const fresh = !rec.includes(key(q)) && !(q.ctx && ctxs.includes(q.ctx)) && !stale(q);
 if (fresh && !forms.includes(qForm(q))) found = true;
@@ -1556,6 +1559,14 @@ belowClass(state) {
 const h = harmos(state.profile.system, state.profile.grade), r0 = 700 + (h - 8) * 150 + 100, L = state.last1 || [];
 return state.elo.r + (state.tadj || 0) < r0 || (L.length >= 5 && L.reduce((a, b) => a + b, 0) / L.length < ADAPT.aim);
 },
+
+
+weak4(state) { return !!(state && state.profile && state.elo) && (this.struggling(state) || this.belowClass(state)); },
+shortProb(state, id) {
+const c = (this._short = this._short || {}), k = [state.profile.system, state.profile.grade, state.profile.track, state.profile.niv, id].join("|");
+if (!(k in c)) { c[k] = false; for (let s = 1; s <= 24 && !c[k]; s++) { try { const q = this.build(id, 4, s); if (q && q.d === 4 && Array.isArray(q.parts) && q.parts.length >= 2 && q.parts.length <= 3 && !horsCO(state, id, q)) c[k] = true; } catch (e) { break; } } }
+return c[k];
+},
 autoN(state) { return state.placedOn === day() ? this.firstDayN(state) : this.struggling(state) || this.belowClass(state) ? 4 : FORMATS.auto.slots.length; },
 fmtText(state, f) { const n = f === "auto" ? this.autoN(state) : 0; return n && n < FORMATS.auto.slots.length ? n + " calculs rapides, enchaînés." : FORMATS[f].text; },
 planSession(state, format) { return this.firstDayCap(state, this.ownYear(state, this.planSession0(state, format), format)); },
@@ -1578,7 +1589,10 @@ let at = -1;
 for (const j of [...Array(plan.length).keys()].slice(1, -1).concat(plan.length - 1)) if (at < 0 && !String(plan[j]).startsWith("PROB:") && !coince(idOf(plan[j])) && !this.lessonDue(state, idOf(plan[j]))) at = j;
 if (at < 0) return plan;
 const kind = String(plan[at]).split("|")[2] || "app", inPlan = new Set(plan.map(idOf));
-const ex = new Set(this.eligible(state).filter((id) => !own(id) || inPlan.has(id)));
+
+
+const vue = (id) => !!state.notions[id] && state.notions[id].seen > 0;
+const ex = new Set(this.eligible(state).filter((id) => !own(id) || inPlan.has(id) || !vue(id)));
 const b = this.planSlots(state, [kind], { exclude: ex })[0];
 if (!b) return plan;
 const x = b.split("|"), les = this.lessonDue(state, x[0]);
@@ -1674,7 +1688,7 @@ const nowK = nowIds.length ? (slots.length === 1 ? 1 : Math.round((slots.length 
 
 
 const prevPen = !this.nowActive(state) && !this.struggling(state) && !this.eloDrop(state) ? this.prevPenalty(state) : null;
-const usedPair = new Set(), cnt = new Map();
+const usedPair = new Set(), cnt = new Map(), weak4 = this.weak4(state);
 
 
 
@@ -1690,7 +1704,7 @@ const s = state.notions[id], recent = this.isRecent(state, id), target = elo + T
 if (!isNow && (rappel ? recent : !recent)) continue;
 if (kind === "drill" && !this.drillable(state, id)) continue;
 let levels = [1, 2, 3].filter((d) => d <= cap && (base !== "defi" || d >= 2) && (kind !== "drill" || d === 1));
-if ((kind === "defi4" || kind === "defi") && hasProb(id)) levels.push(4);
+if ((kind === "defi4" || kind === "defi") && hasProb(id) && (!weak4 || this.shortProb(state, id))) levels.push(4);
 if (!recent) levels = this.oldLevels(state, id, levels, target);
 
 
@@ -2065,10 +2079,14 @@ for (const [cid, r] of Object.entries(s.comps || {})) { const id = cid.split(":"
 const now = (s.now && Array.isArray(s.now.ids) ? s.now.ids : []).filter((id) => this.label(id));
 let fete = null;
 if (w.cons.length) fete = { ic: "🏅", txt: "Une notion maîtrisée : <b>" + esc(this.label(w.cons[0]) || "") + "</b>" + (w.cons.length > 1 ? " (et " + (w.cons.length - 1) + " autre" + (w.cons.length > 2 ? "s" : "") + ")" : "") + "." };
-else if (w.fixed) fete = { ic: "📕", txt: w.fixed + " erreur" + (w.fixed > 1 ? "s" : "") + " de son carnet " + (w.fixed > 1 ? "effacées" : "effacée") + " : réussie" + (w.fixed > 1 ? "s" : "") + " à nouveau du premier coup." };
+else if (w.fixed) fete = { ic: "✨", txt: w.fixed > 1 ? w.fixed + " pépites polies : des erreurs réussies à nouveau du premier coup." : "Une pépite polie : une erreur réussie à nouveau du premier coup." };
 else if (w.ups.length) fete = { ic: "📈", txt: "Un progrès en <b>" + esc(w.ups[0].label) + "</b>." };
 else if (w.days) fete = { ic: "💪", txt: w.days + " jour" + (w.days > 1 ? "s" : "") + " de pratique : c'est l'effort qui compte." };
-return { days, n: w.days, ids: ids.slice(0, 4), more: Math.max(0, ids.length - 4), now: now.slice(0, 3), fete };
+
+
+const cap = typeof YP !== "undefined" ? YP.cap : 40, ses = typeof YP !== "undefined" ? YP.session : 10;
+const gems = (s.history || []).filter((x) => x && x.n > 0 && x.date >= lim && x.date <= t).reduce((a, x) => a + Math.min(cap, Math.round(x.n + 3 * (x.score || 0)) + ses), 0);
+return { days, n: w.days, ids: ids.slice(0, 4), more: Math.max(0, ids.length - 4), now: now.slice(0, 3), fete, gems, polished: w.fixed || 0 };
 },
 
 curious(s, t) {
@@ -2104,10 +2122,10 @@ const nC = Math.min(3, (state.carnet || []).length);
 h(`${brand}<h2>Envoyer à <span class="mark">mes parents</span></h2>
   <p class="muted">Tes parents recevront un lien. Il s'ouvre sur leur téléphone, sans compte. Rien n'est gardé sur un serveur : tout est dans le lien.</p>
   <div class="card flat stack par-see"><b>👀 Ce qu'ils verront</b><ul class="plain par-list">
-    <li>✅ Combien de jours tu t'es entraîné·e cette semaine</li>
+    <li>✅ Combien de jours tu t'es entraîné·e cette semaine, et combien de pépites tu as trouvées et polies</li>
     <li>✅ Les notions que tu as travaillées (leur nom, pas tes résultats)</li>
     <li>✅ Une réussite à fêter</li>
-    <li>✅ ${nC ? (nC > 1 ? nC + " problèmes de ton carnet d'erreurs, pour les résoudre" : "1 problème de ton carnet d'erreurs, pour le résoudre") + " avec toi (avec des indices, pas la réponse d'abord)" : "Ton carnet d'erreurs est vide : pas de problème à résoudre ensemble"}</li>
+    <li>✅ ${nC ? (nC > 1 ? nC + " problèmes de tes pépites à polir, pour les résoudre" : "1 problème de tes pépites à polir, pour le résoudre") + " avec toi (avec des indices, pas la réponse d'abord)" : "Rien à polir : pas de problème à résoudre ensemble"}</li>
     <li>✅ Une question curieuse à faire en famille, et des conseils pour t'aider</li></ul>
     <b>🙈 Ce qu'ils ne verront pas</b><ul class="plain par-list">
     <li>✖ Ton Mathélo ni tes notes de compétences</li>
@@ -2206,7 +2224,7 @@ return `<details class="card flat stack par-pb" ${i === 0 ? "open" : ""}><summar
       ${trap}
       ${lessonOf(q.id)}
       <details class="par-fold par-sol"><summary>🔑 La solution complète (pour vous)</summary><div class="sol">${q.sol}</div></details>
-      <p class="small muted">Ensuite, ${N} refait ce problème dans l'app, avec d'autres nombres (Carnet d'erreurs) : deux réussites de suite l'effacent.</p></details>`;
+      <p class="small muted">Ensuite, ${N} refait ce problème dans l'app, avec d'autres nombres (rubrique « À polir ») : deux réussites de suite du premier coup, et cette pépite est polie.</p></details>`;
 };
 h(`${brand}<div class="eyebrow">👪 Espace parent${opt.preview ? " · aperçu" : ""}</div>${tabs}
   <h2>La semaine de <span class="mark">${N}</span></h2>
@@ -2216,13 +2234,14 @@ h(`${brand}<div class="eyebrow">👪 Espace parent${opt.preview ? " · aperçu" 
   <div class="card stack par-week"><div class="eyebrow">📅 Sa semaine</div>
     <div class="par-days" aria-label="${W.n} jours de pratique sur 7">${W.days.map((d) => `<span class="${d.on ? "on" : ""}" title="${Parents.fmt(d.d)}">${JR[new Date(d.d + "T12:00:00").getDay()]}</span>`).join("")}</div>
     <p><b>${W.n} jour${W.n > 1 ? "s" : ""} de pratique sur 7.</b> ${reg}</p>
+    ${W.gems ? `<p class="par-gems">🟡 Cette semaine, ${N} a trouvé <b>${W.gems} pépite${W.gems > 1 ? "s" : ""}</b>${W.polished ? ` et en a poli <b>${W.polished}</b>` : ""}.</p>` : ""}
     ${W.ids.length ? `<div><b>Ce qui a été travaillé</b><ul class="plain par-list small">${W.ids.map((x) => `<li>• ${esc(Parents.label(x))}</li>`).join("")}${W.more ? `<li class="muted">et ${W.more} autre${W.more > 1 ? "s" : ""}</li>` : ""}</ul></div>` : ""}
     ${W.now.length ? `<p class="small">📚 En classe en ce moment : ${W.now.map((x) => esc(Parents.label(x))).join(" · ")}</p>` : ""}
     ${W.fete ? `<div class="par-fete"><span>${W.fete.ic}</span><div><b>À fêter</b><div class="small">${W.fete.txt}</div></div></div>` : ""}
   </div>
   <div class="stack par-solve"><div class="eyebrow">🤝 Résoudre ensemble</div>
     ${pbs.length ? `<p class="small muted">${pbs.length > 1 ? "Des problèmes" : "Un problème"} qui ${pbs.length > 1 ? "ont" : "a"} résisté à ${N}. Pas besoin d'être fort en maths : posez des questions, laissez expliquer, les indices sont là.</p>${pbs.map(pbHtml).join("")}`
-: `<div class="card flat"><p class="small">Son carnet d'erreurs est vide : bravo ! Rien à résoudre ensemble cette semaine.</p></div>`}
+: `<div class="card flat"><p class="small">Rien à polir : bravo ! Rien à résoudre ensemble cette semaine.</p></div>`}
   </div>
   ${cur || H ? `<div class="card stack par-fun"><div class="eyebrow">🎲 À faire ensemble</div>
     ${cur ? `<h3>${cur.titre}</h3><div class="qtext">${cur.q}</div>${cur.fig ? `<div class="figwrap">${cur.fig}</div>` : ""}<p><b>Chacun parie :</b> ${cur.bet.q}</p><div class="par-bets">${cur.bet.choices.map((c) => `<span>${c}</span>`).join("")}</div>

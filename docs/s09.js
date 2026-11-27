@@ -161,6 +161,7 @@ const GN = (ask, value, sol) => ({ ask, spec: { kind: "value", value }, sol });
 
 
 const ptR = () => [R.int(-6, 6), R.int(-6, 6)];
+const sqX = (a) => (a ? "(x" + sg(-a) + ")^2" : "x^2");
 const CART = {
 2: [
 () => { const A = ptR(), B = ptR(), C = ptR(); const D = [A[0] + C[0] - B[0], A[1] + C[1] - B[1]];
@@ -190,7 +191,7 @@ M("\\vec{AB} = " + vcT(...u)) + ", " + M("\\vec{AC} = " + vcT(...v)) + " ; " + M
 traps: [TR(Math.abs(det), "Le déterminant donne l'aire du parallélogramme : divise par 2."), TR(Math.abs(u[0] * v[1] + u[1] * v[0]) / 2, "Déterminant : x₁y₂ − y₁x₂ (une soustraction)."), TR(Math.abs(u[0] * v[0] + u[1] * v[1]) / 2, "C'est le produit scalaire : l'aire utilise le déterminant.")] }); },
 () => { const A = ptR(), B = ptR(); if (A[0] === B[0]) return null; const x = (B[0] ** 2 + B[1] ** 2 - A[0] ** 2 - A[1] ** 2) / (2 * (B[0] - A[0])); if (den(x) > 2 || A[1] === 0 && B[1] === 0) return null;
 return QN("Sur l'axe des abscisses, quel point " + M("P(x \\,;\\, 0)") + " est à égale distance de " + M(pt("A", ...A)) + " et de " + M(pt("B", ...B)) + " ? Donne " + M("x") + ".", x,
-M("PA^2 = PB^2") + " : " + M("(x" + sg(-A[0]) + ")^2 + " + A[1] ** 2 + " = (x" + sg(-B[0]) + ")^2 + " + B[1] ** 2) + ", les " + M("x^2") + " s'éliminent : " + M("x = " + fT(x)) + ".",
+M("PA^2 = PB^2") + " : " + M(sqX(A[0]) + " + " + A[1] ** 2 + " = " + sqX(B[0]) + " + " + B[1] ** 2)  + ", les " + M("x^2") + " s'éliminent : " + M("x = " + fT(x)) + ".",
 { ctx: "equidistant", guide: [GN("Développe " + M("PA^2 = PB^2") + " : les termes en " + M("x^2") + " s'éliminent. Coefficient de " + M("x") + " dans " + M("PA^2 - PB^2") + " ?", 2 * (B[0] - A[0]), M("-2 \\cdot " + par(A[0]) + " + 2 \\cdot " + par(B[0]) + " = " + 2 * (B[0] - A[0])) + "."), GN(M("x") + " ?", x, M("x = " + fT(x)) + ".")],
 traps: [TR((A[0] + B[0]) / 2, "C'est l'abscisse du milieu de [AB] : il n'est pas sur l'axe des abscisses en général."), TR(-x, "Vérifie le signe en résolvant l'équation du 1er degré.")] }); },
 () => { const A = ptR(), p = pk([1, 2, -1, -2, 3]), q = nz(-5, 5), B = [A[0] + p, A[1] + q], c = R.int(-6, 6), t = c - A[1]; const s = -q * t / p; if (!Number.isInteger(s) || t === 0) return null; const k = A[0] + s, C = [k, c];

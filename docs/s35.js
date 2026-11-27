@@ -125,8 +125,8 @@ h(`<div class="pz" id="pz" data-noloc>
 
   <section class="pz-s pz-hero">
     <div class="eyebrow">${PZ.fr() ? "Pour les élèves · de la 6e à la terminale" : "Pour les élèves · 9e à 4e, Collège et MP"}</div>
-    <h1 class="pz-big">Chaque jour, <span class="mark">5 minutes</span> de maths.<br>Juste à ton niveau.</h1>
-    <p class="muted">Une question choisie pour toi, une correction tout de suite, et l'app t'aide étape par étape quand tu bloques.</p>
+    <h1 class="pz-big">${APP_TAGLINE_HTML}.</h1>
+    <p class="muted"><b>Environ 5 minutes par jour, juste à ton niveau.</b> Une question choisie pour toi, une correction tout de suite, et l'app t'aide étape par étape quand tu bloques.</p>
     <div class="pz-chips pz-anim"><span>📱 sur ton téléphone</span><span>🙈 sans compte, sans nom</span><span>🆓 gratuit, sans pub</span><span>📚 ${PZ.fr() ? "programmes officiels" : "plan d'études genevois"}</span></div>
     <button type="button" class="btn-primary pz-next">Essayer tout de suite ↓</button>
   </section>
@@ -143,7 +143,7 @@ h(`<div class="pz" id="pz" data-noloc>
     <div class="pz-grid pz-anim">
       <div class="card flat"><b>🎯 Question du jour</b><p class="small">Ni trop facile, ni impossible : ton <b>Mathélo</b> monte quand tu progresses, et les questions suivent.</p></div>
       <div class="card flat"><b>🪜 Pas à pas</b><p class="small">Une erreur ? L'app repère le piège (« tu as pris l'angle extérieur ? ») et te guide, une étape à la fois.</p></div>
-      <div class="card flat"><b>📕 Carnet d'erreurs</b><p class="small">Chaque question ratée y attend sa revanche : réussis-la du premier coup, elle s'efface (deux fois de suite si tu es à l'aise).</p></div>
+      <div class="card flat"><b>✨ À polir</b><p class="small">Chaque question ratée devient une pépite brute qui attend sa revanche : réussis-la du premier coup, elle est polie (deux fois de suite si tu es à l'aise).</p></div>
       <div class="card flat"><b>📝 Ton évaluation</b><p class="small">Donne la date et les notions : chaque jour, juste ce qu'il faut réviser, plus un sujet de préparation corrigé.</p></div>
     </div>
   </section>
@@ -154,7 +154,7 @@ h(`<div class="pz" id="pz" data-noloc>
       <div class="card flat"><b>🔍 Problème de la semaine</b><p class="small">Un vrai défi en plusieurs étapes, avec des indices si tu bloques.</p></div>
       <div class="card flat"><b>🎲 Questions curieuses</b><p class="small">Parie d'abord, calcule ensuite : les maths cachées dans la vie de tous les jours.</p></div>
       <div class="card flat"><b>📜 Histoires des maths</b><p class="small">Zénon, Kepler, Marie Curie, John Snow… et un défi expert pour les plus motivés.</p></div>
-      <div class="card flat"><b>🔥 Ta série</b><p class="small">Un jour, deux jours, dix jours d'affilée : une courte séance suffit pour la garder.</p></div>
+      <div class="card flat"><b>🔥 Ton filon</b><p class="small">Un jour, deux jours, dix jours d'affilée : une courte séance suffit pour rester sur un bon filon.</p></div>
     </div>
   </section>
 
@@ -218,7 +218,7 @@ h(`<div class="pz" id="pz" data-noloc>
       <div class="card flat"><b>🎯 Adapté</b><p class="small">Chaque question est choisie selon ses réussites : ni trop facile, ni décourageante.</p></div>
       <div class="card flat"><b>🏫 Relié à la classe</b><p class="small">Il indique le chapitre en cours et la date de sa prochaine évaluation : l'app le prépare jour après jour.</p></div>
       <div class="card flat"><b>🪜 Jamais seul face à l'erreur</b><p class="small">L'app repère l'erreur et le guide étape par étape, sans donner la réponse d'emblée.</p></div>
-      <div class="card flat"><b>📕 Il revient sur ses erreurs</b><p class="small">Un carnet garde ses questions ratées ; il les retente avec d'autres nombres jusqu'à les réussir.</p></div>
+      <div class="card flat"><b>✨ Il revient sur ses erreurs</b><p class="small">Ses questions ratées deviennent des pépites « à polir » : il les retente avec d'autres nombres jusqu'à les réussir.</p></div>
     </div>
   </section>
 
@@ -229,7 +229,7 @@ h(`<div class="pz" id="pz" data-noloc>
       <div class="par-days">${JR.map((d, i) => `<span class="${ON[i] ? "on" : ""}">${d}</span>`).join("")}</div>
       <p><b>4 jours de pratique sur 7.</b> Belle régularité !</p>
       <div><b>Ce qui a été travaillé</b><ul class="plain par-list small"><li>• Équations du 1er degré</li><li>• Théorème de Pythagore</li></ul></div>
-      <div class="par-fete"><span>🏅</span><div><b>À fêter</b><div class="small">Une erreur du carnet enfin réussie : effacée !</div></div></div></div>
+      <div class="par-fete"><span>🏅</span><div><b>À fêter</b><div class="small">Une erreur enfin réussie : une pépite polie !</div></div></div></div>
     <p class="small"><b>Ce que vous ne verrez pas</b> : ni notes, ni score, ni heures de connexion, ni liste de fautes. L'effort et les progrès, c'est tout.</p>
   </section>
 
@@ -308,13 +308,13 @@ return [l, nw, rep, ch, tot];
 }).filter(([, n, r]) => n + r > 0);
 }
 function pzLoop() {
-const N = [["🎯", "Question", "à son niveau"], ["✍️", "Réponse", "résultat, pas le calcul"], ["🔎", "Diagnostic", "le piège repéré"], ["🪜", "Pas à pas", "une étape à la fois"], ["📕", "Carnet", "revient plus tard"]];
+const N = [["🎯", "Question", "à son niveau"], ["✍️", "Réponse", "résultat, pas le calcul"], ["🔎", "Diagnostic", "le piège repéré"], ["🪜", "Pas à pas", "une étape à la fois"], ["✨", "À polir", "revient plus tard"]];
 const R = 112, cx = 170, cy = 150;
 const pos = N.map((_, i) => { const a = -Math.PI / 2 + (i * 2 * Math.PI) / N.length; return [cx + R * Math.cos(a), cy + R * Math.sin(a)]; });
 const arcs = pos.map(([x, y], i) => { const [x2, y2] = pos[(i + 1) % N.length], mx = (x + x2) / 2, my = (y + y2) / 2, k = 1.18; return `<path d="M${x.toFixed(0)} ${y.toFixed(0)} Q${(cx + (mx - cx) * k).toFixed(0)} ${(cy + (my - cy) * k).toFixed(0)} ${x2.toFixed(0)} ${y2.toFixed(0)}" class="pz-loop-arc"/>`; }).join("");
 const nodes = pos.map(([x, y], i) => `<g class="pz-loop-n" style="--d:${i * 0.15}s"><circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="33"/><text x="${x.toFixed(0)}" y="${(y - 6).toFixed(0)}" text-anchor="middle" font-size="18">${N[i][0]}</text><text x="${x.toFixed(0)}" y="${(y + 14).toFixed(0)}" text-anchor="middle" font-size="11" font-weight="700">${N[i][1]}</text></g>`).join("");
 const legend = N.map((n) => `<li><b>${n[0]} ${n[1]}</b> : ${n[2]}</li>`).join("");
-return `<div class="pz-loop pz-anim"><svg viewBox="0 0 340 300" role="img" aria-label="Boucle d'une séance : question, réponse, diagnostic, pas à pas, carnet d'erreurs">${arcs}${nodes}<text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="13" font-weight="800" class="pz-loop-c">5 minutes</text><text x="${cx}" y="${cy + 14}" text-anchor="middle" font-size="11" class="pz-loop-c">chaque jour</text></svg><ul class="plain small pz-loop-l">${legend}</ul></div>`;
+return `<div class="pz-loop pz-anim"><svg viewBox="0 0 340 300" role="img" aria-label="Boucle d'une séance : question, réponse, diagnostic, pas à pas, pépites à polir">${arcs}${nodes}<text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="13" font-weight="800" class="pz-loop-c">5 minutes</text><text x="${cx}" y="${cy + 14}" text-anchor="middle" font-size="11" class="pz-loop-c">chaque jour</text></svg><ul class="plain small pz-loop-l">${legend}</ul></div>`;
 }
 
 function pzCount(root) {

@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 
 
 
-const BUILD = "a7195b7edb";
+const BUILD = "7d8c31dd66";
 const ERR_MAX = 5;
 var errMem = null;
 
@@ -247,7 +247,9 @@ const escT = (s) => esc(s).replace(/&lt;(\/?)(b|i|br)&gt;/g, "<$1$2>");
 
 const backTop = (id = "backtop") => `<button type="button" class="btn-ghost back-home" id="${id}">← Retour</button>`;
 const gradeName = (p) => ((SYSTEMS[p.system] || SYSTEMS_HIDDEN[p.system] || { grades: [] }).grades.find(([g]) => g === p.grade) || [0, ""])[1];
-const brand = '<div class="brand"><b>' + APP_NAME + '</b><span>' + APP_TAGLINE + '</span></div>';
+
+
+const brand = '<div class="brand"><b>' + (LOGO_MARK.includes("logo-exp") ? APP_NAME.replace("²", "") + LOGO_MARK + '<i class="sr-only">²</i>' : LOGO_MARK + APP_NAME) + '</b><span>' + APP_TAGLINE + '</span></div>';
 const PRAISE = ["Juste !", "Bien vu !", "Exact !", "Parfait.", "C'est ça !", "Bravo !"];
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 
@@ -267,6 +269,7 @@ const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: (n) 
 const ns = []; while (w.nextNode()) ns.push(w.currentNode);
 
 for (const n of ns) { const v = n.nodeValue; let r = n.parentNode.closest && n.parentNode.closest(".eyebrow") ? frWords(v) : frLocal(v); if (state.profile.grade >= 10 && typeof frZero === "function") r = frZero(r);
+else if (state.profile.grade >= 8 && typeof frZeroCol === "function") r = frZeroCol(r);
 
 
 if (n.parentNode.closest && n.parentNode.closest(".act-inline, .lesson-card, .act-out")) {
@@ -376,8 +379,8 @@ return Engine.build("prio", 1, 7);
 function screenWelcome() {
 const q = demoQuestion(), n = NOTIONS.find((x) => x.id === q.id), fine = window.matchMedia("(pointer: fine)").matches;
 h(`${brand}
-  <div class="stack"><h1>Chaque jour, <span class="mark">5 minutes</span> de maths, à ton niveau.</h1>
-  <p class="muted">Une question du jour choisie pour toi, une figure, une correction immédiate. Ton grade monte avec ton travail. Pas de compte, pas de nom : ta progression reste sur ton téléphone ; rien n'est envoyé sans ton accord, seulement des statistiques anonymes si tu dis oui (<a href="#" id="envoie-lien">ce que l'app envoie</a>).</p></div>
+  <div class="stack"><h1>${APP_TAGLINE_HTML}.</h1>
+  <p class="muted"><b>Chaque jour, environ 5 minutes, à ton niveau.</b> Une question du jour choisie pour toi, une figure, une correction immédiate. Ton grade monte avec ton travail. Pas de compte, pas de nom : ta progression reste sur ton téléphone ; rien n'est envoyé sans ton accord, seulement des statistiques anonymes si tu dis oui (<a href="#" id="envoie-lien">ce que l'app envoie</a>).</p></div>
   <div class="row welcome-pz"><a class="btn-sec small" href="#decouvrir">▶ Découvrir l'app en 1 minute</a><a class="btn-ghost small" href="#parents">👪 Je suis parent</a></div> <!-- 25.11 soir (revue d'un testeur : présentations introuvables pour un nouveau visiteur) -->
   <div class="stack"><span class="small muted">Je suis en :</span><div class="seg" id="dgrade">${DEMO_GRADES[demoSys()].map(([g, l]) => `<button aria-pressed="${g === demoGrade}" data-v="${g}">${l}</button>`).join("")}</div></div>
   <div class="card tilt" id="demo"><div class="qmeta"><span class="chip">Essaie · ${n ? n.label : "exemple"}</span><span class="dots"><i class="on"></i><i></i><i></i></span></div>
@@ -641,7 +644,7 @@ document.body.insertAdjacentHTML("beforeend", `<div class="collector-bg" role="d
     ${G[0] ? `<div class="col-no">${n != null ? "#" + n : "# …"}</div>` : ""}
     ${G[0] && au ? `<div class="col-exp">le créateur de l'app</div>` : G[0] && n ? `<div class="col-exp">${n === 1 ? "1<sup>er</sup>" : n + "<sup>e</sup>"} utilisateur à obtenir ce grade</div>` : ""}
     <p class="small muted">${!G[0] ? "Le grade de départ : tout le monde commence ici à la rentrée." : au ? "Avant tous les utilisateurs : le numéro 0." : n ? `Ton numéro de collection : le rang auquel tu as atteint le grade ${name}, parmi tous les utilisateurs de l'app.` : "Le numéro (ton rang parmi les utilisateurs qui ont atteint ce grade) arrive dès que l'app est en ligne."}</p>
-    ${G[0] ? `<p class="small muted">Atteint à ${nbFmt(G[0])} points de l'année.</p>` : ""}
+    ${G[0] ? `<p class="small muted">Atteint à ${nbFmt(G[0])} pépites de l'année.</p>` : ""}
     <button type="button" class="btn-primary" id="colx">Fermer</button></div></div>`);
 const bg = document.querySelector(".collector-bg");
 bg.onclick = (e) => { if (e.target === bg || e.target.id === "colx") bg.remove(); };
@@ -659,11 +662,11 @@ if (!state.eloSeen) { state.eloSeen = true; save(); }
 const y = ypSync(), r = y.pts, g = gradeOf(r);
 const past = (y.past || []).map((x) => { const G = GRADES.filter(([at]) => x.p >= at).pop(); return `<li>${esc(x.c)} · ${yearLabel(+x.k.split("|")[0])} : ${G[1]} ${G[2]} atteint</li>`; }).reverse().join("");
 h(`${brand}${backTop()}<div class="eyebrow">Grades de l'année\u00a0· ${esc(y.c)}</div><h2>Mes grades</h2>
-  <div class="card stack grade-now"><div class="ic-row"><button type="button" class="ic grade-big grade-open" data-g="${g.name}" aria-label="Voir la carte du grade ${g.name}">${g.ic}</button><div><div class="eyebrow">Mon grade</div><h2>${esc(g.title)}</h2><div class="small muted">${nbFmt(r)} points cette année</div></div></div>
-    ${g.next ? `<div class="stack" style="gap:4px"><span class="pbar"><i style="width:${g.pct}%"></i></span><span class="small">Prochain grade : <b>${g.next.ic} ${g.next.name}</b>, encore ${nbFmt(g.next.at - r)} points.</span></div>` : '<p class="small">Le plus haut grade : bravo !</p>'}</div>
-  <div class="card flat stack yp-rules"><h3>Gagner des points</h3><p class="small">Question faite <b>+1</b>, réussie <b>+2</b>, du premier coup <b>+1</b>, difficile jusqu'à <b>+3</b> ; séance finie <b>+10</b> ; erreur effacée du carnet <b>+5</b> ; problème de la semaine réussi <b>+10</b>.</p>
-    <p class="small muted">Au plus ${YP.cap} points par jour (hors problème de la semaine) ; « Refaire » ne rapporte rien. Tout le monde repart 🌱 Pousse à la rentrée et au changement de classe.</p></div>
-  <div class="card">${eloBlock()}<p class="small muted yp-explain">Mathélo = ton niveau : il monte et descend selon tes réponses · Points de l'année = ton travail, ils font monter ton grade.</p></div>
+  <div class="card stack grade-now"><div class="ic-row"><button type="button" class="ic grade-big grade-open" data-g="${g.name}" aria-label="Voir la carte du grade ${g.name}">${g.ic}</button><div><div class="eyebrow">Mon grade</div><h2>${esc(g.title)}</h2><div class="small muted">🟡 ${nbFmt(r)} pépites cette année</div></div></div>
+    ${g.next ? `<div class="stack" style="gap:4px"><span class="pbar"><i style="width:${g.pct}%"></i></span><span class="small">Prochain grade : <b>${g.next.ic} ${g.next.name}</b>, encore ${nbFmt(g.next.at - r)} pépites.</span></div>` : '<p class="small">Le plus haut grade : bravo !</p>'}</div>
+  <div class="card flat stack yp-rules"><h3>Gagner des pépites</h3><p class="small">Question faite <b>+1</b>, réussie <b>+2</b>, du premier coup <b>+1</b>, difficile jusqu'à <b>+3</b> ; séance finie <b>+10</b> ; pépite polie <b>+5</b> ; problème de la semaine réussi <b>+10</b>.</p>
+    <p class="small muted">Au plus ${YP.cap} pépites par jour (hors problème de la semaine) ; « Refaire » ne rapporte rien. Tout le monde repart 🌱 Pousse à la rentrée et au changement de classe.</p></div>
+  <div class="card">${eloBlock()}<p class="small muted yp-explain">Mathélo = ton niveau : il monte et descend selon tes réponses · Pépites = ton travail de l'année, elles font monter ton grade.</p></div>
   <div class="card flat stack"><h3>L'échelle de l'année</h3><p class="small muted">Touche un grade atteint pour voir sa carte.</p>
     <ol class="grades">${GRADES.slice().reverse().map(([at, ic, name]) => { const st = r >= at ? (g.name === name ? "cur" : "ok") : "todo";
 const no = st !== "todo" && at && (isAuthor() ? "0" : (state.gradeNo || {})[name]);
@@ -682,9 +685,9 @@ window.scrollTo(0, 0);
 
 function eloBanner() {
 const r = ypPts(), g = gradeOf(r);
-return `<button type="button" class="elo-band elo-compact" id="eloband" aria-label="Grade ${g.title}, ${nbFmt(r)} points de l'année, voir mes grades">
-    <span class="eb-num"><span class="eyebrow">Points de l'année</span><b class="num">${nbFmt(r)}</b></span>
-    <span class="eb-grade"><b><span class="eb-gic" aria-hidden="true">${g.ic}</span> ${esc(g.title)}</b>${g.next ? `<span class="pbar"><i style="width:${g.pct}%"></i></span><span class="eb-next">${g.next.ic} ${g.next.name} dans ${nbFmt(g.next.at - r)} pts</span>` : ""}</span>
+return `<button type="button" class="elo-band elo-compact" id="eloband" aria-label="Grade ${g.title}, ${nbFmt(r)} pépites cette année, voir mes grades">
+    <span class="eb-num"><b class="num">${nbFmt(r)}</b><span class="eb-unit">${r > 1 ? "pépites" : "pépite"}</span></span> <!-- 27.11 : unité sous le nombre, visible à toutes les largeurs -->
+    <span class="eb-grade"><b><span class="eb-gic" aria-hidden="true">${g.ic}</span> ${esc(g.title)}</b>${g.next ? `<span class="pbar"><i style="width:${g.pct}%"></i></span><span class="eb-next">${g.next.ic} ${g.next.name} dans ${nbFmt(g.next.at - r)} 🟡</span>` : ""}</span>
     <span class="eb-chev" aria-hidden="true">›</span></button>`;
 }
 function themeBars(lv) {
@@ -706,9 +709,9 @@ const HOME_TABS = [
 
 function streakNudge() {
 const s = state.streak, today = day();
-if (s.count && s.last === addDays(today, -2) && Engine.jokerFree(state)) return `<div class="streak-nudge small"><span>🛡</span><span><b>Joker de série</b> : tu as manqué hier, mais ta série de ${s.count} jours continue si tu fais ta séance aujourd'hui (un joker par semaine).</span></div>`;
+if (s.count && s.last === addDays(today, -2) && Engine.jokerFree(state)) return `<div class="streak-nudge small"><span>🛡</span><span><b>Joker de filon</b> : tu as manqué hier, mais ton filon de ${s.count} jours continue si tu fais ta séance aujourd'hui (un joker par semaine).</span></div>`;
 if (!s.count || s.last === today || s.last !== addDays(today, -1)) return "";
-return `<div class="streak-nudge small"><span>🔥</span><span><b>${s.count} ${s.count > 1 ? "jours" : "jour"} d'affilée</b> · une séance aujourd'hui et tu passes à ${s.count + 1}${s.count + 1 > (s.best || 0) ? " (record !)" : ""}</span></div>`;
+return `<div class="streak-nudge small"><span>🔥</span><span><b>Ton filon : ${s.count} ${s.count > 1 ? "jours" : "jour"}</b> · une séance aujourd'hui et tu passes à ${s.count + 1}${s.count + 1 > (s.best || 0) ? " (record !)" : ""}</span></div>`;
 }
 
 
@@ -724,7 +727,7 @@ function eloHintCard() {
 return "";
 if (state.eloSeen || !state.tourDone) return "";
 const g = gradeOf(ypPts());
-return `<div class="card flat stack elo-hint"><p class="small"><b>📈 Mathélo</b> = ton score de maths. Ton <b>grade</b>, lui, monte avec les points de l'année (séances, réussites) : tu es ${g.ic} ${g.name}${g.next ? `, le prochain est ${g.next.ic} ${g.next.name}` : ""}.</p>
+return `<div class="card flat stack elo-hint"><p class="small"><b>📈 Mathélo</b> = ton score de maths. Ton <b>grade</b>, lui, monte avec tes pépites de l'année (séances, réussites) : tu es ${g.ic} ${g.name}${g.next ? `, le prochain est ${g.next.ic} ${g.next.name}` : ""}.</p>
     <div class="row"><button class="btn-ghost small" id="elohok">Compris</button><button class="btn-ghost small" id="elohmore">Voir tous les grades</button></div></div>`;
 }
 
@@ -746,8 +749,8 @@ return `<div class="card flat stack recap-card"><div class="eyebrow">📅 Ta sem
 
 const TOUR = [
 [".sess-card", "▶ Ta séance du jour", "En classe : au rythme de ton cours (choisis ton chapitre). Libre : tous les sujets, à ton rythme. Quelques minutes suffisent."],
-[".elo-band", "🏅 Ton grade de l'année", "Pousse, Apprenti… : ton grade monte avec tes points de l'année (séances, réussites). Touche-le pour voir l'échelle des grades."],
-[".doors", "🧭 Tes rubriques", "Le problème de la semaine, les questions curieuses, l'histoire des maths, ton évaluation (révision jusqu'au jour J), ton carnet d'erreurs et tes progrès."],
+[".elo-band", "🏅 Ton grade de l'année", "Pousse, Apprenti… : ton grade monte avec les pépites que tu trouves cette année (séances, réussites). Touche-le pour voir l'échelle des grades."],
+[".doors", "🧭 Tes rubriques", "Le problème de la semaine, les questions curieuses, l'histoire des maths, ton évaluation (révision jusqu'au jour J), tes pépites à polir (tes erreurs à retenter) et tes progrès."],
 ];
 let tourK = 0, doorHintCounted = false;
 function tourShow() {
@@ -801,13 +804,13 @@ test: () => (prep ? prepPanel(left)
 prog: () => `${newBadgesCard()}${carnetCard(true)}${themeMapCard()}${compsCard()}`,
 };
 
-panels.carnet = () => carnetCard(true) || `<div class="card flat stack"><div class="eyebrow">📕 Carnet d'erreurs</div><p class="small muted">Vide : bravo ! Chaque question ratée viendra s'y ranger, pour que tu puisses la réussir plus tard.</p>${carnetWeekN() ? `<p class="small carnet-week">${carnetWeekTxt()}</p>` : ""}</div>`;
+panels.carnet = () => carnetCard(true) || `<div class="card flat stack"><div class="eyebrow">✨ À polir</div><p class="small muted">Rien à polir : bravo ! Chaque question ratée devient une pépite brute, rangée ici : réussis-la plus tard et elle est polie.</p>${carnetWeekN() ? `<p class="small carnet-week">${carnetWeekTxt()}</p>` : ""}</div>`;
 
-panels.prog = () => `${weekCard()}<div class="card flat stack grades-go"><button type="button" class="btn-sec" id="gradesgo">🏅 Mes grades et mon Mathélo</button><p class="small muted yp-explain">Mathélo = ton niveau · Points de l'année = ton travail, ils font monter ton grade.</p></div>${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}${typeof parentCard === "function" ? parentCard() : ""}`;
+panels.prog = () => `${weekCard()}<div class="card flat stack grades-go"><button type="button" class="btn-sec" id="gradesgo">🏅 Mes grades et mon Mathélo</button><p class="small muted yp-explain">Mathélo = ton niveau · Pépites = ton travail de l'année, elles font monter ton grade.</p></div>${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}${typeof parentCard === "function" ? parentCard() : ""}`;
 if (!panels[homeTab]) homeTab = "today";
-const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="${alive && s.count ? "jours d'affilée" : "une séance aujourd'hui et ta série repart à 1"}${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥 <b>" + s.count + "</b> j" : "✏️" }</span><span class="small muted hh-cl" title="Ta classe"><span class="hh-w">Classe </span>${classTag(state.profile) }</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
+const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="${alive && s.count ? "Ton filon : jours d'affilée" : "une séance aujourd'hui et ton filon repart à 1"}${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥 <b>" + s.count + "</b> j" : "✏️" }</span><span class="small muted hh-cl" title="Ta classe"><span class="hh-w">Classe </span>${classTag(state.profile) }</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
 if (homeTab !== "today") {
-const T = { prob: "Problème de la semaine", test: "Mon évaluation", carnet: "Carnet d'erreurs", prog: "Progrès" };
+const T = { prob: "Problème de la semaine", test: "Mon évaluation", carnet: "À polir", prog: "Progrès" };
 h(`${head}<button type="button" class="btn-ghost back-home" id="hb">← Accueil</button><h2 class="sub-title">${T[homeTab]}</h2>
     <div class="home-panel" data-tab="${homeTab}">${panels[homeTab]()}</div>`);
 document.getElementById("hb").onclick = () => { homeTab = "today"; screenHome(); };
@@ -835,12 +838,12 @@ if (lostK && (!state.lostSeen || state.lostSeen.k !== lostK)) { state.lostSeen =
 
 
 const away = lostK && lostK <= addDays(today, -3), rec = Math.max(s.best || 0, s.count);
-const lostLine = lostK && state.lostSeen && state.lostSeen.k === lostK && state.lostSeen.d === today ? `<p class="small streak-lost">${away ? "Content de te revoir ! " : ""}Ta série de ${s.count} ${s.count > 1 ? "jours" : "jour"} s'est arrêtée. Fais une séance aujourd'hui : elle repart à 1.${rec > 1 ? " Ton record : " + rec + " jours." : ""}</p>` : "";
+const lostLine = lostK && state.lostSeen && state.lostSeen.k === lostK && state.lostSeen.d === today ? `<p class="small streak-lost">${away ? "Content de te revoir ! " : ""}Ton filon de ${s.count} ${s.count > 1 ? "jours" : "jour"} s'est arrêté. Fais une séance aujourd'hui : il repart à 1.${rec > 1 ? " Ton record : " + rec + " jours." : ""}</p>` : "";
 const nowLine = !Engine.nowActive(state) ? `<button type="button" class="btn-sec small" id="nowpick">📚 Choisir mon chapitre travaillé en classe</button>`
 : Engine.nowStale(state) ? `<div class="now-ask"><b>📚 Cette semaine en classe, tu travailles toujours :</b><span>${esc(state.now.ids.map(nLabel).join(" · "))} ?</span><div class="row now-ask-btns"><button type="button" class="btn-sec small" id="nowyes">Oui, toujours</button><button type="button" class="btn-sec small" id="nowpick">J'ai changé de chapitre</button></div></div>`
 : `<span class="small now-lab">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span><button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
 
-const DOOR_NAME = { prob: "Problème de la semaine", cur: "Questions curieuses", hist: "Histoires des maths", test: "Mon évaluation", carnet: "Carnet d'erreurs", prog: "Mes progrès" };
+const DOOR_NAME = { prob: "Problème de la semaine", cur: "Questions curieuses", hist: "Histoires des maths", test: "Mon évaluation", carnet: "À polir", prog: "Mes progrès" };
 
 
 if (!doorHintCounted) { doorHintCounted = true; state.doorHints = (state.doorHints || 0) + 1; save(); }
@@ -867,7 +870,7 @@ h(`<div class="hub">${head}
       ${door("cur", svgI('<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>'), "Curieux", "", "")}
       ${door("hist", svgI('<path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a3 3 0 0 1-3-3V6"/><path d="M4 6a2 2 0 1 0 4 0V4"/><path d="M9 9h7M9 13h7M9 17h4"/>'), "Histoire", "", "")}
       ${door("test", svgI(TI.test), "Évaluation", prep ? (left === 0 ? "aujourd'hui !" : left === 1 ? "demain" : "dans " + left + " j") : "", dots.test ? "!" : "")}
-      ${door("carnet", svgI('<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h10"/><path d="M9 8l4 4M13 8l-4 4"/>'), "Carnet", nC ? nC + " à effacer" : "", nC || "")}
+      ${door("carnet", svgI('<path d="M7 4h10l4 5-9 11L3 9z"/><path d="M3 9h18M10 4l2 16 2-16"/>'), "À polir", nC ? nC + " à polir" : "", nC || "")}
       ${door("prog", svgI(TI.prog), "Progrès", "", dots.prog ? "!" : "")}
     </div></div>`);
 
@@ -996,6 +999,15 @@ L.className = "q-l"; R.className = "q-r";
 for (const el of [...card.children]) (el.matches(".qmeta, .qtext, .exact-note, .figwrap") ? L : R).appendChild(el);
 R.insertBefore(bar, R.querySelector(":scope > #fb"));
 card.classList.add("q-2col"); card.append(L, R);
+
+const long = () => L.classList.toggle("q-long", L.scrollHeight > L.clientHeight + 8);
+long(); if (window.ResizeObserver) { const ro = new ResizeObserver(long); ro.observe(L); for (const el of L.children) ro.observe(el); }
+}
+
+
+function ecranBarApres() {
+const bar = app.querySelector(".q-r > .qbar"), fb = app.querySelector(".q-r > #fb");
+if (bar && fb) fb.after(bar);
 }
 
 function ecranCols() {
@@ -1322,7 +1334,7 @@ try { id = localStorage.getItem("m2m-device") || ""; } catch (e) {}
 const sec = (titre, corps) => `<div class="card flat stack"><h3>${titre}</h3>${corps}</div>`;
 h(`${brand}<h2>Mentions légales <span class="mark">et confidentialité</span></h2>
   <div class="card flat stack"><b>Projet — à faire valider</b><span class="small muted">Ce texte est une première version. Les parties marquées « À COMPLÉTER » doivent encore être remplies et le tout vérifié avant une diffusion large.</span></div>
-  <p class="muted">« ${APP_NAME} ${APP_TAGLINE} » est une application d'exercices de mathématiques, gratuite, sans compte et sans publicité. Cette page explique, pour les élèves et leurs parents, quelles données elle utilise, pourquoi, et comment exercer vos droits.</p>
+  <p class="muted">« ${APP_NAME} » (« ${APP_TAGLINE} ») est une application d'exercices de mathématiques, gratuite, sans compte et sans publicité. Cette page explique, pour les élèves et leurs parents, quelles données elle utilise, pourquoi, et comment exercer vos droits.</p>
   ${sec("1. Qui est responsable ?", `<ul class="plain"><li>Éditeur de l'app et responsable du traitement des données : ${AC("nom")}.</li>
   <li>Adresse : ${AC("adresse postale")}.</li>
   <li>Contact pour toute question ou demande sur les données : ${AC("adresse e-mail de contact")}.</li>
@@ -1700,7 +1712,7 @@ const carnetNeed = () => (state && Engine.struggling(state) ? 1 : CARNET_OK);
 const carnetRule = () => (carnetNeed() === 1 ? "une réussite du premier coup, ici ou dans tes séances" : "2 réussites de suite, du premier coup");
 
 const carnetWeekN = () => (Array.isArray(state && state.carnetOut) ? state.carnetOut : []).filter((d) => d >= addDays(day(), -6)).length;
-const carnetWeekTxt = () => { const n = carnetWeekN(); return n ? `✓ ${n} effacée${n > 1 ? "s" : ""} cette semaine` : ""; };
+const carnetWeekTxt = () => { const n = carnetWeekN(); return n ? `✨ ${n} polie${n > 1 ? "s" : ""} cette semaine` : ""; };
 
 
 
@@ -1747,22 +1759,22 @@ const plan = carnetPlan(carnetMax(), only);
 if (!plan.length) return screenHome();
 session = { carnet: true, plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set() };
 nextQuestion();
-toast("📕 Pour effacer une erreur : " + carnetRule() + ".", 4000);
+toast("✨ Pour polir une pépite : " + carnetRule() + ".", 4000);
 }
 const nLab = (id) => nLabel(id);
 
 
 function carnetLeft(c) {
 const near = c.filter((x) => x.ok >= carnetNeed() - 1 && x.ok > 0).length;
-return c.length + " à effacer" + (near ? (near === c.length ? (near > 1 ? ", toutes presque effacées" : ", presque effacée") : ", dont " + near + " presque effacée" + (near > 1 ? "s" : "")) + " (encore 1 réussite)" : "");
+return c.length + " à polir" + (near ? (near === c.length ? (near > 1 ? ", toutes presque polies" : ", presque polie") : ", dont " + near + " presque polie" + (near > 1 ? "s" : "")) + " (encore 1 réussite)" : "");
 }
 function carnetCard(full) {
 const c = state.carnet || [];
-if (!c.length) return full ? `<div class="card flat stack"><div class="eyebrow">📕 Carnet d'erreurs</div><p class="small muted">Vide : bravo ! Chaque question ratée viendra s'y ranger, pour que tu puisses la réussir plus tard.</p>${carnetWeekN() ? `<p class="small carnet-week">${carnetWeekTxt()}</p>` : ""}</div>` : "";
+if (!c.length) return full ? `<div class="card flat stack"><div class="eyebrow">✨ À polir</div><p class="small muted">Rien à polir : bravo ! Chaque question ratée devient une pépite brute, rangée ici : réussis-la plus tard et elle est polie.</p>${carnetWeekN() ? `<p class="small carnet-week">${carnetWeekTxt()}</p>` : ""}</div>` : "";
 const rows = full ? `<ul class="carnet-list">${c.slice().reverse().map((x) => `<li><span>${nLab(x.id)} <span class="dots small">${[1, 2, 3].map((k) => `<i class="${k <= x.d ? "on" : ""}"></i>`).join("")}</span></span><span class="small muted">${x.ok && carnetNeed() > 1 ? "✓ 1 sur 2" : "à refaire"}</span></li>`).join("")}</ul>` : "";
-return `<div class="card stack carnet-card"><div class="eyebrow">📕 Carnet d'erreurs</div><h3>${c.length} erreur${c.length > 1 ? "s" : ""} à effacer</h3>${carnetWeekN() ? `<p class="small carnet-week">${carnetWeekTxt()}</p>` : ""}${c.some((x) => x.ok > 0) && carnetNeed() > 1 ? `<p class="small">${esc(carnetLeft(c).replace(/^\d+ à effacer, (dont )?/, "").replace(/^./, (m) => m.toUpperCase()))}.</p>` : ""}
-    <p class="small muted">Refais-les avec d'autres nombres : ${carnetNeed() === 1 ? "une réussite du premier coup, ici ou dans tes séances, et elle disparaît" : "deux réussites de suite du premier coup, et elle disparaît"}.</p>${rows}
-    <button class="btn-primary" id="carnetgo">Effacer mes erreurs (${Math.min(carnetMax(), c.length)} question${Math.min(carnetMax(), c.length) > 1 ? "s" : ""})</button></div>`;
+return `<div class="card stack carnet-card"><div class="eyebrow">✨ À polir</div><h3>${c.length} pépite${c.length > 1 ? "s" : ""} à polir</h3>${carnetWeekN() ? `<p class="small carnet-week">${carnetWeekTxt()}</p>` : ""}${c.some((x) => x.ok > 0) && carnetNeed() > 1 ? `<p class="small">${esc(carnetLeft(c).replace(/^\d+ à polir, (dont )?/, "").replace(/^./, (m) => m.toUpperCase()))}.</p>` : ""}
+    <p class="small muted">Refais-les avec d'autres nombres : ${carnetNeed() === 1 ? "une réussite du premier coup, ici ou dans tes séances, et elle est polie" : "deux réussites de suite du premier coup, et elle est polie"}.</p>${rows}
+    <button class="btn-primary" id="carnetgo">✨ Polir mes pépites (${Math.min(carnetMax(), c.length)} question${Math.min(carnetMax(), c.length) > 1 ? "s" : ""})</button></div>`;
 }
 
 
@@ -1775,7 +1787,7 @@ autoeval: { ic: "📋", label: "Autoévaluation", text: "Où en es-tu ? Coche ce
 revision: { ic: "🎯", label: "Révision ciblée", text: "4 questions sur les notions où tu es le moins sûr·e." },
 mock: { ic: "📝", label: "Sujet de préparation", text: "Au choix, si tu as du temps : un sujet comme le vrai, sur une feuille, puis tu te corriges avec le corrigé." },
 apres: { ic: "📋", label: "Test rapide final", text: "Où en es-tu maintenant ? Refais le test rapide : ta grille compare avec le début. Puis révise ce qui coince encore." },
-tour: { ic: "📕", label: "Tes erreurs, une dernière fois", text: "4 questions : tes erreurs sur ces notions, puis ce qui reste à consolider, avec d'autres nombres." },
+tour: { ic: "✨", label: "Tes erreurs, une dernière fois", text: "4 questions : tes erreurs sur ces notions, puis ce qui reste à consolider, avec d'autres nombres." },
 jourj: { ic: "✏️", label: "Échauffement, puis l'évaluation", text: "3 questions pour te mettre en route. Tu es prêt·e : bonne chance !" },
 };
 
@@ -1922,7 +1934,7 @@ const etat = (s) => (!s.seen ? "pas encore essayée" : s.m >= 0.7 ? "maîtrisée
 const rows = keys.map((k) => { const L = by[k], done = L.filter(([, s]) => s.seen && s.m >= 0.7).length;
 return `<div style="margin:8px 0"><div class="spread small"><b>${esc(title(k))}</b><span class="muted">${done} / ${L.length} maîtrisées</span></div>
       <div class="pm-row">${L.map(([n, s]) => `<button type="button" class="pm-sq" title="${esc(n.label)}" aria-label="${esc(n.label)} : ${etat(s)}" data-i="${esc(n.label)} — ${etat(s)}" style="background:${col(s)}"></button>`).join("")}</div><div class="pm-info small" hidden></div></div>`; }).join("");
-return `<div class="card stack"><div class="eyebrow">Ma carte de progression</div>${rows}
+return `<div class="card stack pmap-card"><div class="eyebrow">Ma carte de progression</div>${rows}
     <p class="small muted">Vert : maîtrisé · orange : en route · rouge : à travailler · gris : pas encore essayé. Touche une case pour voir la notion.</p></div>`;
 }
 function startSession() {
@@ -2099,7 +2111,7 @@ noRedo: !!redo || session.fmt === "auto" || Engine.struggling(state),
 sub: session.ctest ? session.ctest.label : "",
 
 
-eyebrow: ((s) => s + (ST.total > 1 && !session.weekly ? `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((Math.min(ST.pos - 1, ST.total) / ST.total) * 100)}%"></i></span>` : ""))((session.carnet ? "Carnet d'erreurs · " + nTxt : session.free ? "Mon défi du jour · " + nTxt : session.weekly ? "🔍 Problème de la semaine" : session.ctest ? "Me tester · " + nTxt  : session.prep ? "Révision de l'évaluation · " + nTxt : ST.total === 1 ? (fmtLab || "Question du jour") : (fmtLab ? fmtLab + " · " : "") + nTxt) + (kind && KIND_LABEL[kind] && !(session.fmt && FORMATS[session.fmt] && FORMATS[session.fmt].slots.every((x) => x.replace(/\d+$/, "") === kind)) ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo || (session.replayQ && session.replayAt === session.i) ? " · nouvelles valeurs" : "")),
+eyebrow: ((s) => s + (ST.total > 1 && !session.weekly ? `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((Math.min(ST.pos - 1, ST.total) / ST.total) * 100)}%"></i></span>` : ""))((session.carnet ? "À polir · " + nTxt : session.free ? "Mon défi du jour · " + nTxt : session.weekly ? "🔍 Problème de la semaine" : session.ctest ? "Me tester · " + nTxt  : session.prep ? "Révision de l'évaluation · " + nTxt : ST.total === 1 ? (fmtLab || "Question du jour") : (fmtLab ? fmtLab + " · " : "") + nTxt) + (kind && KIND_LABEL[kind] && !(session.fmt && FORMATS[session.fmt] && FORMATS[session.fmt].slots.every((x) => x.replace(/\d+$/, "") === kind)) ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo || (session.replayQ && session.replayAt === session.i) ? " · nouvelles valeurs" : "")),
 
 
 onGuided: (delta) => {
@@ -2112,9 +2124,9 @@ onDone: (res) => {
 const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
 
 if ((session.carnet || kind === "carnet") && !redo) { const r = carnetResult(id, q.d, res.solved && res.tries === 1); if (r === "efface") { session.fixedN = (session.fixedN || 0) + 1; session.ypg = (session.ypg || 0) + ypAdd(state, YP.carnet); toast("📕 Effacée de ton carnet d'erreurs ✓"); } else if (r === "encore") toast("📕 1 réussite sur 2 : encore une, du premier coup, et elle sort du carnet.", 4000); else if (r === "rate") toast("📕 Elle reste dans ton carnet : il faut " + carnetRule() + ".", 4000); }
-else if (!res.solved && !q.parts && !session.weekly && carnetAdd(id, q.d, q.code, res.diag, res.ans)) toast("📕 Rangée dans ton carnet d'erreurs : tu pourras la refaire.");
+else if (!res.solved && !q.parts && !session.weekly && carnetAdd(id, q.d, q.code, res.diag, res.ans)) toast("✨ Pépite brute : rangée dans « À polir », tu pourras la refaire.");
 
-else if (res.solved && res.tries === 1 && !q.parts && !session.weekly) { const k = carnetSessionOk(id, q.d); if (k) { session.fixedN = (session.fixedN || 0) + k; session.ypg = (session.ypg || 0) + ypAdd(state, YP.carnet * k); toast("📕 Réussie : " + (k > 1 ? k + " erreurs effacées" : "erreur effacée") + " de ton carnet ✓"); } }
+else if (res.solved && res.tries === 1 && !q.parts && !session.weekly) { const k = carnetSessionOk(id, q.d); if (k) { session.fixedN = (session.fixedN || 0) + k; session.ypg = (session.ypg || 0) + ypAdd(state, YP.carnet * k); toast("✨ Polie ! " + (k > 1 ? k + " pépites polies" : "Une pépite de plus") + " ✓"); } }
 
 
 
@@ -2142,7 +2154,7 @@ session.ypg = (session.ypg || 0) + ypAdd(state, ypPoints(q.d, res, !!redo)) + (s
 session.score += sc; session.answered++; session.ids.add(id); if (res.solved) session.solvedN = (session.solvedN || 0) + 1;
 if (res.parts) { session.parts = [(session.parts ? session.parts[0] : 0) + res.parts[0], (session.parts ? session.parts[1] : 0) + res.parts[1]]; session.nP = (session.nP || 0) + 1; }
 session.res = session.res || {}; const rr = (session.res[id] = session.res[id] || { n: 0, ok: 0 }); rr.n++; if (res.solved) rr.ok++;
-if (Engine.finishDay(state, 1, sc) === "joker") toast("🛡 Joker de série utilisé : ta série continue !"); save();
+if (Engine.finishDay(state, 1, sc) === "joker") toast("🛡 Joker de filon utilisé : ton filon continue !"); save();
 return res.delta;
 },
 onNext: (wantRedo) => {
@@ -2558,6 +2570,7 @@ const delta = opt.onDone(res);
 if (opt.single) {
 fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><b>${solved ? "✓ Juste ! " + pick(PRAISE.filter((x) => x !== "Juste !")) : dontKnow ? "D'accord, on s'en occupera. Voici la solution :" : "✗ Pas tout à fait. Voici la solution :"}</b>${solved ? (q.sol ? '<details class="solfull"><summary>Voir la correction</summary><div class="sol">' + q.sol + "</div></details>" : "")  : '<span class="sol">' + q.sol + "</span>"}</div>`;
 qbarSet("", '<button class="btn-primary" id="nx">Suivant</button>');
+ecranBarApres();
 typeset(fb);
 { const t0 = performance.now(); document.getElementById("nx").onclick = (e) => { if (e && e.isTrusted && performance.now() - t0 < 400) return; opt.onNext(); }; }
 document.getElementById("nx").focus();
@@ -2574,6 +2587,7 @@ fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><div class="spread"
       ${avisHtml(code, "Cette question était…", "Bonne question", "Question à revoir")}`;
 
 qbarSet(solved || opt.noRedo ? "" : `<button id="redo" class="${!guided && !solSteps ? "btn-primary" : "btn-sec"}">${q.d > 1 && q.d < 4 ? "💪 Une plus facile pour repartir" : "Refaire avec d'autres valeurs"}</button>`, `<button class="${solved || opt.noRedo ? "btn-primary" : "btn-sec"}" id="nx">Continuer</button>`);
+ecranBarApres();
 typeset(fb);
 fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
 bindComment(fb, code);
@@ -3039,7 +3053,7 @@ function weekText(w) {
 const parts = [];
 if (w.ups.length) parts.push(plur(w.ups.length, "compétence a monté", "compétences ont monté"));
 if (w.cons.length) parts.push(plur(w.cons.length, "notion consolidée", "notions consolidées"));
-if (w.fixed) parts.push(plur(w.fixed, "erreur effacée du carnet", "erreurs effacées du carnet"));
+if (w.fixed) parts.push(plur(w.fixed, "pépite polie", "pépites polies"));
 if (!parts.length && w.first.length) parts.push(isFR() ? plur(w.first.length, "premier niveau de maîtrise", "premiers niveaux de maîtrise") : plur(w.first.length, "première note de compétence", "premières notes de compétences"));
 
 if (!parts.length && !w.n) return { main: "Une séance de quelques minutes suffit pour reprendre le fil.", sub: "" };
@@ -3060,7 +3074,7 @@ const more = (n) => (n > MAX ? `<li class="small muted">et ${n - MAX} autre${n -
 const ups = w.ups.length ? `<div><b>${plur(w.ups.length, "compétence en hausse", "compétences en hausse")}</b><ul class="week-list">${w.ups.slice(0, MAX).map((x) => `<li><span>${esc(x.label)}</span><span class="week-notes"><span class="note ${noteCls(x.b)}">${noteTxt(x.b)}</span>→<span class="note ${noteCls(x.a)}">${noteTxt(x.a)}</span></span></li>`).join("")}${more(w.ups.length)}</ul></div>` : "";
 const cons = w.cons.length ? `<div><b>${plur(w.cons.length, "notion consolidée", "notions consolidées")}</b><ul class="week-list">${w.cons.slice(0, MAX).map((id) => `<li><span>✅ ${esc(nLab(id))}</span></li>`).join("")}${more(w.cons.length)}</ul></div>` : "";
 const first = w.first.length ? `<div class="small">🆕 ${isFR() ? plur(w.first.length, "premier niveau de maîtrise", "premiers niveaux de maîtrise") : plur(w.first.length, "première note de compétence", "premières notes de compétences")}</div>` : "";
-const fixed = w.fixed ? `<div class="small">📕 ${plur(w.fixed, "erreur effacée", "erreurs effacées")} de ton carnet</div>` : "";
+const fixed = w.fixed ? `<div class="small">✨ ${plur(w.fixed, "pépite polie", "pépites polies")} (erreurs réussies à nouveau)</div>` : "";
 const calm = !ups && !cons && !first && !fixed ? `<p class="small muted">${w.days ? (isFR() ? "Pas encore de niveau de maîtrise en hausse : les niveaux bougent au fil des réponses, chaque séance compte." : "Pas encore de note en hausse : les notes bougent au fil des réponses, chaque séance compte.") : "Pas encore de séance ces 7 derniers jours : une séance de quelques minutes suffit pour reprendre."}</p>` : "";
 return `<div class="card stack week-card"><div class="spread"><span class="eyebrow">📈 Ma semaine</span><span class="small muted">7 derniers jours</span></div>
     <div class="week-days"><span>Jours actifs</span><b>${w.days} / 7</b></div>${ups}${cons}${first}${fixed}${calm}${w.since ? `<p class="small muted">Notes comparées depuis le ${ddmm(w.since)}, début du suivi.</p>` : ""}</div>`;
@@ -3080,7 +3094,7 @@ function sumGoal(g) {
 
 const r = session.res || {}, weak = [...(session.ids || [])].find((id) => r[id] && r[id].ok < r[id].n)
 || ((state.carnet || []).filter((x) => !x.ok).slice(-1)[0] || {}).id;
-const parts = [g && g.next ? `encore <b>${nbFmt(g.next.at - ypPts())} points</b> avant ${g.next.ic} ${g.next.name}` : "", weak ? `consolider <b>${esc(nLab(weak))}</b>` : ""].filter(Boolean);
+const parts = [g && g.next ? `encore <b>${nbFmt(g.next.at - ypPts())} pépites</b> avant ${g.next.ic} ${g.next.name}` : "", weak ? `consolider <b>${esc(nLab(weak))}</b>` : ""].filter(Boolean);
 return parts.length ? `<div class="small goal">🎯 Objectif pour demain : ${parts.join(" · ")}</div>` : "";
 }
 
@@ -3097,7 +3111,7 @@ return `<div class="spread"><span>Score</span><b>${String(Math.round(sc * 10) / 
 function sumTitle(n, sc) {
 if (sc >= n * 0.8) return "Excellente séance !";
 const P = [session.solvedN ? plur(session.solvedN, "question réussie", "questions réussies") : "", session.rebuilt ? plur(session.rebuilt, "solution reconstruite", "solutions reconstruites") : "",
-session.fixedN ? plur(session.fixedN, "erreur effacée du carnet", "erreurs effacées du carnet") : ""].filter(Boolean);
+session.fixedN ? plur(session.fixedN, "pépite polie", "pépites polies") : ""].filter(Boolean);
 const txt = P.length > 1 ? P.slice(0, -1).join(", ") + " et " + P[P.length - 1] : P[0];
 if (sc >= n * 0.5) return txt ? "Bonne séance : " + txt + "." : "Bonne séance.";
 return txt ? "Aujourd'hui : " + txt + "." : plur(n, "question travaillée", "questions travaillées") + " : c'est en pratiquant qu'on progresse.";
@@ -3120,7 +3134,7 @@ if (g1.i > g0.i) gradeNumbers();
 const newGrade = g1.i > g0.i ? `<div class="card stack grade-up"><div class="eyebrow">Nouveau grade !</div><div class="ic-row"><button type="button" class="ic grade-ic grade-open" data-g="${g1.name}" aria-label="Voir la carte du grade ${g1.name}">${g1.ic}</button><div><h3>Tu es maintenant ${esc(g1.title)}</h3><div class="small muted">${g1.next ? "Prochain grade : " + g1.next.ic + " " + g1.next.name + ", encore " + nbFmt(g1.next.at - ypt) + " points." : "Le plus haut grade : bravo !"}</div></div></div></div>` : "";
 
 const ypCapped = !yg && ((ypSync() || {}).dp || 0) >= YP.cap;
-const ypRow = ypCapped ? `<div class="spread yp-row"><span>Points de l'année</span><b class="small">plafond du jour atteint, reviens demain</b></div>` : `<div class="spread yp-row"><span>Points de l'année</span><b>+${yg}${g1.next ? ` <span class="small muted">\u00a0· encore ${nbFmt(g1.next.at - ypt)} avant ${g1.next.name}</span>` : ""}</b></div>`;
+const ypRow = ypCapped ? `<div class="spread yp-row"><span>🟡 Pépites</span><b class="small">plafond du jour atteint, reviens demain</b></div>` : `<div class="spread yp-row"><span>🟡 Pépites</span><b>+${yg} ${yg > 1 ? "pépites" : "pépite"}${g1.next ? ` <span class="small muted">\u00a0· encore ${nbFmt(g1.next.at - ypt)} avant ${g1.next.name}</span>` : ""}</b></div>`;
 
 
 
@@ -3128,12 +3142,12 @@ const ypRow = ypCapped ? `<div class="spread yp-row"><span>Points de l'année</s
 
 if (session.carnet) {
 const left = (state.carnet || []).length, fx = session.fixedN || 0, ok = session.solvedN || 0;
-const title = fx ? "📕 Bien joué : " + plur(fx, "erreur effacée", "erreurs effacées") + " !" : ok ? "📕 " + plur(ok, "question réussie", "questions réussies") + ", pas encore effacée" + (ok > 1 ? "s" : "") + "." : "📕 C'est noté.";
-const rule = left && fx < n ? `<div class="small muted">Pour effacer une erreur : ${carnetRule()}.</div>` : "";
+const title = fx ? "✨ " + (fx > 1 ? fx + " polies !" : "Polie !") : ok ? "✨ " + plur(ok, "question réussie", "questions réussies") + ", pas encore polie" + (ok > 1 ? "s" : "") + "." : "✨ C'est noté.";
+const rule = left && fx < n ? `<div class="small muted">Pour polir une pépite : ${carnetRule()}.</div>` : "";
 h(`${brand}<h2>${esc(title)}</h2>
-    <div class="card flat stack">${ypRow}<div class="spread"><span>Carnet d'erreurs</span><b>${left ? carnetLeft(state.carnet) : "vide : bravo !"}</b></div>${rule}</div>
+    <div class="card flat stack">${ypRow}<div class="spread"><span>À polir</span><b>${left ? carnetLeft(state.carnet) : "rien : bravo !"}</b></div>${rule}</div>
     ${newGrade}${nb}
-    ${left ? '<button class="btn-primary btn-big" id="carnetagain">📕 Continuer à effacer</button>' : ""}
+    ${left ? '<button class="btn-primary btn-big" id="carnetagain">✨ Continuer à polir</button>' : ""}
     <button class="${left ? "btn-sec" : "btn-primary btn-big"}" id="home">Retour à l'accueil</button>`);
 if (nb || newGrade) setTimeout(burst, 250);
 updBanner("bilan");
@@ -3148,14 +3162,14 @@ const shortMsg = session.stopped && session.i < session.plan.length ? "Séance i
 : Date.now() - session.start < 4 * 6e4 ? "Séance courte aujourd'hui. Tu peux continuer autant que tu veux." : "";
 
 h(`${brand}<h2>${esc(sumTitle(n, sc))}</h2>
-  <div class="card flat streak"><span class="flame">🔥</span><div><b>${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b> <span class="muted">d'affilée</span>${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ta série passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${tomorrowLabel()}</b></div>${sumGoal(g1)}</div></div>
+  <div class="card flat streak"><span class="flame">🔥</span><div><b>Ton filon : ${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b>${state.streak.count >= 3 ? ' <span class="muted">· tu es sur un bon filon !</span>' : ""}${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ton filon passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${tomorrowLabel()}</b></div>${sumGoal(g1)}</div></div>
   ${summaryByNotion()}
   ${weekLine()}
   <div class="card stack">${scoreRow(n, sc)}
   ${ypRow}${session.rebuilt ? `<p class="small">🪜 Tu as reconstruit ${session.rebuilt > 1 ? session.rebuilt + " solutions" : "une solution"} pas à pas : ça compte aussi.</p>` : ""}</div>
   ${session.ctest ? (() => { const a = ctestNote(session.ctest), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? (isFR() ? "Le niveau apparaît après 3 réponses sur cette compétence." : "La note apparaît après 3 réponses sur cette compétence.") : b === null ? (isFR() ? "Premier positionnement pour cette compétence." : "Première note pour cette compétence.") : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". " + (isFR() ? "Il remontera" : "Elle remontera") + " avec la pratique." : isFR() ? "Niveau stable." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
   ${newGrade}${nb}
-  ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${carnetLeft(state.carnet)}</b></div><span class="small muted">${carnetWeekN() ? carnetWeekTxt() + " · " : ""}Pour effacer une erreur : ${carnetRule()}.</span><button class="btn-primary" id="carnetagain">${session.carnet ? "Continuer à effacer" : "📕 Effacer mes erreurs maintenant"}</button></div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
+  ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>✨ À polir</span><b>${carnetLeft(state.carnet)}</b></div><span class="small muted">${carnetWeekN() ? carnetWeekTxt() + " · " : ""}Pour polir une pépite : ${carnetRule()}.</span><button class="btn-primary" id="carnetagain">${session.carnet ? "Continuer à polir" : "✨ Polir mes pépites maintenant"}</button></div>` : session.carnet ? '<div class="card flat"><p>✨ Rien à polir : bravo !</p></div>' : ""}
   ${returnCard()}
   ${xReady() ? curBonus() : '<span id="curslot" hidden></span>'}
   <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)", "app")}</div>
@@ -3238,7 +3252,7 @@ function updBanner(where) {
 if (typeof Upd === "undefined" || !Upd) return;
 Upd.scr = where || "";
 if (!where || !Upd.ready || app.querySelector(".upd-line")) return;
-app.insertAdjacentHTML("afterbegin", '<div class="upd-line" role="status"><span>Nouvelle version prête</span><button type="button" class="btn-ghost small" id="updgo">Recharger</button></div>');
+app.insertAdjacentHTML("afterbegin", '<div class="upd-line" role="status"><span>🎁 <b>Nouvelle version prête</b><br><small class="upd-sub">Rien n’est perdu : ta progression est gardée.</small></span><button type="button" class="upd-btn" id="updgo">Mettre à jour</button></div>');
 document.getElementById("updgo").onclick = () => Upd.reload();
 }
 if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude/.test(location.hostname)) {

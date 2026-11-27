@@ -1576,7 +1576,9 @@ const FR_2NDE = { ensembles: 1, formule: 3, ineq: 7, absval: 10, racinv: 11, aff
 for (const [id, k] of Object.entries(FR_2NDE)) { const n = NOTIONS.find((x) => x.id === id); if (n) n.FR = [10, k]; }
 
 for (const id of ["sys2", "sys3", "sysprob", "sysgraph"]) { const n = NOTIONS.find((x) => x.id === id); if (n) n.FR = null; }
-{ const n = NOTIONS.find((x) => x.id === "eq3"); if (n) n.FR = [12, 3]; }
+
+
+{ const n = NOTIONS.find((x) => x.id === "eq3"); if (n) n.FR = null; }
 
 
 
