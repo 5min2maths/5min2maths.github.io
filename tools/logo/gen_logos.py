@@ -219,7 +219,7 @@ def nugget_mix(tr="", detail=True, explain=False):
 _D = lambda P: "M" + " L".join(f"{x} {y}" for x, y in P) + "Z"
 
 
-def bez_path(K):
+def bez_path(K, f=lambda p: p):
     """Contour lissé : (point, tangente, poignée) ; petite poignée = angle / arête, grande = lobe arrondi."""
     d = ""
     for i in range(len(K)):
@@ -227,7 +227,7 @@ def bez_path(K):
         dd, n0, n3 = math.dist(p0, p3), math.hypot(*t0), math.hypot(*t3)
         p1 = (p0[0] + t0[0] / n0 * dd * k0, p0[1] + t0[1] / n0 * dd * k0)
         p2 = (p3[0] - t3[0] / n3 * dd * k3, p3[1] - t3[1] / n3 * dd * k3)
-        d += ("M%.1f %.1f" % p0 if not i else "") + " C%.1f %.1f %.1f %.1f %.1f %.1f" % (*p1, *p2, *p3)
+        d += ("M%.2f %.2f" % f(p0) if not i else "") + " C%.2f %.2f %.2f %.2f %.2f %.2f" % (*f(p1), *f(p2), *f(p3))
     return d + "Z"
 
 
@@ -245,8 +245,23 @@ GSHAPES = {
            ((394, 330), (-0.5, 1), .25), ((330, 364), (-1, 0), .35), ((258, 350), (-1, -0.2), .08), ((204, 360), (-1, 0.1), .3),
            ((166, 318), (-0.3, -1), .3)],
 }
+def _golden(K):
+    """27.11 (enseignant : retrouver φ dans G1) : contour normalisé sur le rectangle d'or RW × RH (boîte d'encombrement
+    mesurée sur les courbes ; une affinité envoie les courbes de Bézier sur des courbes de Bézier)."""
+    pts_ = []
+    for i in range(len(K)):
+        (p0, t0, k0), (p3, t3, k3) = K[i], K[(i + 1) % len(K)]
+        dd, n0, n3 = math.dist(p0, p3), math.hypot(*t0), math.hypot(*t3)
+        p1 = (p0[0] + t0[0] / n0 * dd * k0, p0[1] + t0[1] / n0 * dd * k0)
+        p2 = (p3[0] - t3[0] / n3 * dd * k3, p3[1] - t3[1] / n3 * dd * k3)
+        pts_ += [tuple((1 - t) ** 3 * p0[j] + 3 * (1 - t) ** 2 * t * p1[j] + 3 * (1 - t) * t * t * p2[j] + t ** 3 * p3[j] for j in (0, 1)) for t in [u / 300 for u in range(301)]]
+    x0, x1 = min(p[0] for p in pts_), max(p[0] for p in pts_)
+    y0, y1 = min(p[1] for p in pts_), max(p[1] for p in pts_)
+    return lambda p: (RX + (p[0] - x0) / (x1 - x0) * RW, RY + (p[1] - y0) / (y1 - y0) * RH)
+
+
 for _k, _v in GSHAPES.items():
-    SHAPES[_k] = bez_path(_v)
+    SHAPES[_k] = bez_path(_v, _golden(_v))
 
 
 def nugget(tr="", sparkle=True, outline="#5A3A00", explain=False, shape=None):
@@ -284,7 +299,11 @@ def nugget(tr="", sparkle=True, outline="#5A3A00", explain=False, shape=None):
     if sparkle:  # éclats : petits, presque blancs, nets
         for x, y, r in ((214, 222, 7), (350, 220, 6), (236, 300, 4), (388, 276, 4)):
             s += f'<path d="M{x} {y - r} L{x + r * .25} {y - r * .25} {x + r} {y} {x + r * .25} {y + r * .25} {x} {y + r} {x - r * .25} {y + r * .25} {x - r} {y} {x - r * .25} {y - r * .25}Z" fill="#fff" opacity=".95"/>'
-    if explain and shape:  # φ : le rectangle d'or du reflet
+    if explain and shape in GSHAPES:  # φ : la boîte de la pépite (rectangle d'or) et la spirale du reflet
+        s += (f'<rect x="{RX}" y="{RY}" width="{RW:.3f}" height="{RH}" fill="none" stroke="#fff" stroke-width="2.5" stroke-dasharray="9 7"/>'
+              + f'<path d="{SPIRAL}" fill="none" stroke="#fff" stroke-width="2.5" opacity=".9"/>'
+              + "".join(f'<rect x="{a:.2f}" y="{b:.2f}" width="{c:.2f}" height="{c:.2f}" fill="none" stroke="#1d2b4f" stroke-width="1.2" stroke-dasharray="4 3" opacity=".7"/>' for a, b, c in SQUARES[:5]))
+    elif explain and shape:  # φ : le rectangle d'or du reflet
         s += (f'<rect x="{SPX}" y="{SPY}" width="{SPW}" height="{SPW / PHI:.3f}" fill="none" stroke="#fff" stroke-width="2.5" stroke-dasharray="7 5"/>'
               + f'<path d="{SPIRAL}" fill="none" stroke="#fff" stroke-width="2.5" opacity=".9"/>'
               + "".join(f'<rect x="{a:.2f}" y="{b:.2f}" width="{c:.2f}" height="{c:.2f}" fill="none" stroke="#1d2b4f" stroke-width="1.2" stroke-dasharray="4 3" opacity=".7"/>' for a, b, c in SQUARES[:5]))
@@ -420,11 +439,11 @@ def main():
         phones += f'<div class="phone"><div class="wall">{"".join(cells)}</div><p>{k} · 48 px</p><div class="tiny"><span>{icon_any(content_A_fav if k == "A" else c)}</span><span>{icon_any(content_A_fav if k == "A" else c)}</span> favicon 32 / 16 px</div></div>'
     heads = ""
     for k, (n, c, t) in VARIANTS.items():
-        mark = (f'<span class="mk mkA">{icon_any(content_A_fav)}</span>' if k == "A" else f'<span class="mk">{svg(nugget(), bg=False).replace('viewBox="0 0 512 512"', 'viewBox="132 176 280 196"')}</span>' if k in "AB" else "")
+        mark = (f'<span class="mk mkA">{icon_any(content_A_fav)}</span>' if k == "A" else f'<span class="mk mkG">{svg(nugget(shape=G_DEFAUT, sparkle=False), bg=False).replace('viewBox="0 0 512 512"', 'viewBox="132 180 282 186"')}</span>' if k in "AB" else "")
         name = ("Pépite²" if k != "C" else
                 f'Pépite<span class="mk2">{svg(nugget("translate(256 268) scale(1.3) translate(-271 -270)", sparkle=False, outline="#6b4a00") + two(214, 186, 160, "#3a2a00", w=24), bg=False)}</span>')
         heads += (f'<div><div class="head"><div class="brand">{mark}<b>{name}</b></div><span class="chip">🔥 <b>5</b> j</span>'
-                  f'<span class="cl">11e</span><span>⚙️</span></div><p class="cap">{k} · en-tête à 360 px</p></div>')
+                  f'<span class="cl">11e</span><span>⚙️</span></div><p class="cap">{k} · en-tête à 360 px{" (pépite " + G_DEFAUT + ", choisi)" if k == "B" else ""}</p></div>')
     zoom = (f'<figure><div class="zoom">{icon_any(content_A)}</div><figcaption>A à 512 px : le reflet est une spirale d\'or</figcaption></figure>'
             f'<figure><div class="zoom">{svg(nugget("translate(232 314) scale(1.5) translate(-271 -270)", explain=True) + tile(376, 128, 116), rx=112)}</div>'
             f'<figcaption>Explication : rectangle d\'or {str(round(RW, 1)).replace(".", ",")} × {RH:.0f} (rapport φ ≈ 1,618) et carrés de la spirale</figcaption></figure>'
@@ -441,7 +460,7 @@ def main():
                f'<span class="cl">11e</span><span>⚙️</span></div>')
     sil = "".join(f'<figure><div class="big">{icon_any(cA(k))}</div><div class="m48">{icon_mask(cA(k))}<span class="fv">{icon_any(cAf(k))}</span></div>'
                   f'<figcaption><b>{k}</b>{" (par défaut)" if k == G_DEFAUT else ""}</figcaption></figure>' for k in GSHAPES)
-    sil += f'<figure><div class="big">{icon_any(cA(G_DEFAUT, True))}</div><figcaption>φ dans {G_DEFAUT} : rectangle d\'or du reflet</figcaption></figure>'
+    sil += f'<figure><div class="big">{icon_any(cA(G_DEFAUT, True))}</div><figcaption>φ dans {G_DEFAUT} : la pépite tient dans un rectangle d\'or ; spirale d\'or dans le reflet</figcaption></figure>'
     planche = f"""<style>
 body{{font-family:'Bricolage Grotesque',sans-serif;background:#fbfcfe;padding:24px;width:1452px;color:#1d2b4f}}
 h1{{margin:0 0 6px;font-size:34px}} h1 small{{font-size:18px;color:#5b6687;font-weight:700}}
@@ -456,7 +475,7 @@ figcaption{{margin-top:8px;font-size:20px}}
 .head{{width:360px;box-sizing:border-box;display:flex;align-items:center;gap:6px;padding:10px 12px;background:#fbfcfe;border:1px solid #dde3f0;border-radius:10px;
 background-image:linear-gradient(#e7ecf6 1px,transparent 1px),linear-gradient(90deg,#e7ecf6 1px,transparent 1px);background-size:22px 22px}}
 .brand{{display:flex;align-items:center;gap:4px;flex:1}} .brand b{{font-size:1.25rem;color:#2457d6;font-weight:800;white-space:nowrap;display:flex;align-items:center}}
-.mk svg{{width:26px;height:26px;display:block}} .mkA svg{{width:30px;height:30px}} .mk2 svg{{width:28px;height:28px;display:block;margin:-16px 0 0 0}}
+.mk svg{{width:26px;height:26px;display:block}} .mkA svg{{width:30px;height:30px}} .mkG svg{{width:34px;height:23px}} .mk2 svg{{width:28px;height:28px;display:block;margin:-16px 0 0 0}}
 .chip{{font:15px sans-serif;border:1px solid #dde3f0;border-radius:99px;padding:3px 8px;background:#fff}} .cl{{font:14px sans-serif;color:#5b6687}}
 .cap{{margin:0 0 10px;font-size:14px;color:#5b6687}}
 </style>
@@ -487,9 +506,12 @@ background-image:linear-gradient(#e7ecf6 1px,transparent 1px),linear-gradient(90
     # Marque de l'en-tête : pépite seule (A, B) ou pépite-exposant (C), SVG en ligne, décorative (aria-hidden).
     # 27.11 (enseignant : la pépite seule fait « croissant » en petit) : icône complète en miniature (version favicon).
     head = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">'
-    mark = icon_any(cf).replace(head, '<svg class="logo-mark" viewBox="0 0 512 512" aria-hidden="true" focusable="false">')
+    if choice in GSHAPES:  # 27.11 (choix de l'enseignant : en-tête « B avec le logo G1 ») : la pépite seule, sans fond ni ²
+        mark = svg(nugget(shape=choice, sparkle=False), bg=False).replace(head, '<svg class="logo-mark logo-nug" viewBox="132 180 282 186" aria-hidden="true" focusable="false">')
+    else:
+        mark = icon_any(cf).replace(head, '<svg class="logo-mark" viewBox="0 0 512 512" aria-hidden="true" focusable="false">')
     nug = svg(nugget_mix() if choice == "AM" else nugget_real() if choice == "AR" else nugget(shape=choice if choice in SHAPES else None), bg=False).replace(head, '<svg viewBox="0 0 512 512">')
-    phi = ('{ x: %s, y: %s, w: %s, h: %.3f, ou: "reflet" }' % (SPX, SPY, SPW, SPW / PHI) if (choice in SHAPES or choice in ("AR", "AM"))
+    phi = ('{ x: %s, y: %s, w: %s, h: %.3f, ou: "reflet" }' % (SPX, SPY, SPW, SPW / PHI) if ((choice in SHAPES and choice not in GSHAPES) or choice in ("AR", "AM"))
            else '{ x: %s, y: %s, w: %.3f, h: %s, ou: "pepite" }' % (RX, RY, RW, RH))  # pépite seule (figure de la question curieuse « logo »)
     cur = ROOT / "src/curriculum.js"
     t = cur.read_text()

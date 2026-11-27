@@ -22,9 +22,9 @@ l'app, les clés de stockage `m2m-*` et l'identifiant d'appareil ne changent pas
 `python3 tools/logo/gen_logos.py [A|B|C]` génère les 3 propositions (SVG), la planche `tools/logo/planche.png` et applique
 la variante choisie : icônes `src/pwa/icon-192/512.png` (any), `icon-maskable-192/512.png` (zone sûre à 80 %),
 `apple-touch-icon.png` (180), `favicon-32.png`, `favicon.svg`, et la ligne `const LOGO_MARK` de `src/curriculum.js`
-(icône miniature de l'en-tête). **Appliquée pour l'instant : A-mix (`AM`).** Puis changement de direction de l'enseignant (gamification : « juste enlever
-l'aspect patate ») : retour au style dessiné « objet de jeu » ; **3 silhouettes G1, G2, G3 proposées (planche, 2e rangée ;
-G1 par défaut), en attente de son choix** : `python3 tools/logo/gen_logos.py G1` (ou G2, G3) les applique partout.
+(icône miniature de l'en-tête). **Appliquée : G1 (validée par l'enseignant le 27.11)** — style « objet de jeu » ; icône d'app complète (fond bleu, pépite G1,
+² sur bout de cahier) pour le manifeste (any + maskable), apple-touch-icon et favicon (version simplifiée) ; dans l'en-tête,
+la pépite G1 seule à gauche de « Pépite² » (`LOGO_MARK`, classe `logo-nug`, choix « B avec le logo G1 »).
 
 - **A** (version lisse précédente) : vraie pépite d'or d'orpaillage, en or poli : silhouette d'un seul bloc ramassé de roche martelée
   (contour irrégulier, arêtes et pointes émoussées, un petit creux, inscrit dans le rectangle d'or), dégradé métallique à bandes claires et sombres (lumière en haut à gauche), plans
@@ -37,14 +37,16 @@ G1 par défaut), en attente de son choix** : `python3 tools/logo/gen_logos.py G1
 - **C** : typographique, grand P blanc, la pépite porte le ² (dans l'en-tête : « Pépite » + pépite-exposant).
 - Versions refusées par l'enseignant le 27.11 : pépite à facettes (« un diamant »), pépite ronde et lisse (« biscuit »,
   « nuage »), pépite à deux lobes (« pomme de terre ») ; retenue : métal poli, un seul bloc, plus grande, ² sur cahier.
-- En-tête : la pépite seule faisait « croissant » en petit → icône complète en miniature (`LOGO_MARK`) ; la figure de
-  la question curieuse utilise la pépite seule (`LOGO_NUGGET`).
+- En-tête : pépite seule (version lisse) jugée « croissant », puis icône miniature, puis choix final : pépite G1 seule
+  (≈ 32 × 21 px, lisible à 360 px). La figure de la question curieuse utilise la pépite seule (`LOGO_NUGGET`) avec son
+  rectangle d'or (`LOGO_PHI`, ou : "pepite").
 
 **Propositions** (G1–G3 sur la planche ; les autres restent générables pour mémoire) :
 - **G1, G2, G3** (style « objet de jeu » : or poli à facettes, contour foncé, reflets nets, éclats, spirale fondue dans le
   reflet) : silhouettes compactes (largeur / hauteur ≈ 1,2), 3 à 5 lobes inégaux, 1–2 arêtes nettes, une encoche, pas de
-  taille entre deux lobes ; 48 px et favicon simplifiés (pas d'éclats, ² sur carré blanc). G1 par défaut (la plus
-  « pépite » : lobes et encoche nets) ; φ = rectangle d'or du reflet.
+  taille entre deux lobes ; 48 px et favicon simplifiés (pas d'éclats, ² sur carré blanc). G1 retenue. φ : la pépite G1 est
+  inscrite exactement dans le rectangle d'or 258,885 × 160 (contour normalisé sur sa boîte, affinité appliquée aux points de
+  contrôle) et la spirale d'or est fondue dans le grand reflet ; vue « explication » sur la planche.
 - **A-mix** (`gen_logos.py AM`, demandé par l'enseignant : « fais le mélange ») : matière d'A-réaliste (contour bosselé,
   relief) et éclat d'A3 : le relief éclairé est recoloré par une table uniquement or (brun-ambre #7A4E00 dans les creux →
   ambre #C88A04 → or #F2B705 → jaune chaud #FFD84D sur les crêtes), reflets spéculaires nets #FFF7D6, éclats étoilés
@@ -99,9 +101,11 @@ ux_2111b, lot_26_11, progression, parents, grades_annee, hc_contenu (nouvelle cu
 
 ## 5. Vérifications
 
-Captures `tests/_shots/pepite/` (360×640 et 1440×900, page `tests/_pepite_cap.html#cap=…`) : entree, accueil, filon,
-polir, bilanfilon, reglages, parent, decouvrir, parents, curlogo. À 360 px : rien ne déborde, l'en-tête tient sur une
-ligne (logo + « Pépite² » + filon + classe + ⚙️), les nouveaux libellés tiennent (cases de l'accueil, bilan).
+Captures `tests/_shots/pepite/` (360×640 et 1440×900 ; page `tests/_pepite_cap.html#cap=…`, tirages et date fixes) :
+`entree` (écran d'entrée), `accueil`, `filon` (accueil avec filon en cours : pastille dorée), `curlogo` (question curieuse
+du logo), `figure` (question avec figure), `bilanfilon` (bilan : filon, pépites, pépite polie), `polir` (À polir),
+`progres`, `reglages`, `parent` (page parent), `decouvrir`, `parents`. À 360 px : rien ne déborde ; l'en-tête tient sur
+une ligne (pépite + « Pépite² » + 💬 + filon + ⚙️) ; les nouveaux libellés tiennent (cases de l'accueil, bilan).
 
 ## À soumettre à l'enseignant
 
