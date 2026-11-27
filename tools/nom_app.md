@@ -158,3 +158,15 @@ Avant le choix, comme au premier tour :
 - vérifier les identifiants Instagram et TikTok ;
 - réserver .ch et .com dès qu'un nom est retenu.
 - 27.11 : commentaire de l'auteur du 25.11 (« Mathélo », sous-titre « 5 minutes de maths par jour ») → décision : attendre (consolidation) ; attention, Mathélo est aussi le nom de la cote de niveau.
+- 27.11 : l'enseignant veut arrêter le nom avant la fin de 2026 (avant l'hébergement en Suisse et les domaines : un .ch + un nom neutre pour la France).
+
+## Choix de l'enseignant (27.11, fin d'après-midi) : « Pépite » — « Deviens une pépite en maths »
+- Recherche du 27.11 : « Quotimaths » jugé trop sérieux (« boring ») ; « DailyMath » pris (domaines .com/.app, plusieurs apps) ;
+  « 360 secondes de maths » écarté (360 s = 6 min, idée de chrono, proche de « 120 secondes ») ; candidats fun vérifiés :
+  Maths-en-cas, Pépite, Grain de maths, Pikmaths, Mathouille.
+- Domaines (DNS, 27.11) : pepite.ch / .com / .app pris (.fr libre) ; **pepitemaths .ch / .com / .app / .fr libres** ;
+  pepitesmaths libres ; deviensunepepite libres.
+- Antériorités trouvées : l'app « AMaths » (lycée) a une rubrique « Pépite du jour » (fonction, pas un nom d'app) ; le statut
+  étudiant-entrepreneur « PÉPITE » en France (autre domaine). Aucune app de maths nommée « Pépite » trouvée.
+- À faire : vérification complète (RDAP, App Store, Google Play) ; marques Swissreg et INPI par l'enseignant ; réserver les
+  domaines pepitemaths.ch + un neutre ; puis renommer (APP_NAME, présentations, PDF). Mathélo reste la cote de niveau.
