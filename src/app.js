@@ -249,7 +249,8 @@ const backTop = (id = "backtop") => `<button type="button" class="btn-ghost back
 const gradeName = (p) => ((SYSTEMS[p.system] || SYSTEMS_HIDDEN[p.system] || { grades: [] }).grades.find(([g]) => g === p.grade) || [0, ""])[1]; /* 25.11 : profil d'un système masqué (France) */
 /* 26.11 : nom centralisé (src/curriculum.js). 27.11 : logo (pépite) devant le nom ; variante C du logo (tools/logo/) : la
    pépite tient lieu de ² (le ² reste lu par les lecteurs d'écran). */
-const brand = '<div class="brand"><b>' + (LOGO_MARK.includes("logo-exp") ? APP_NAME.replace("²", "") + LOGO_MARK + '<i class="sr-only">²</i>' : LOGO_MARK + APP_NAME) + '</b><span>' + APP_TAGLINE + '</span></div>';
+/* 27.11 (décision de l'enseignant) : nom accessible APP_SPOKEN (nom dit) ; le nom affiché est masqué aux lecteurs d'écran (balises i : .brand span = slogan). */
+const brand = '<div class="brand"><b><i class="brand-n" aria-hidden="true">' + (LOGO_MARK.includes("logo-exp") ? APP_NAME.replace("²", "") + LOGO_MARK : LOGO_MARK + APP_NAME) + '</i><i class="sr-only">' + APP_SPOKEN + '</i></b><span>' + APP_TAGLINE + '</span></div>';
 const PRAISE = ["Juste !", "Bien vu !", "Exact !", "Parfait.", "C'est ça !", "Bravo !"];
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 
@@ -380,6 +381,7 @@ function screenWelcome() {
   const q = demoQuestion(), n = NOTIONS.find((x) => x.id === q.id), fine = window.matchMedia("(pointer: fine)").matches;
   h(`${brand}
   <div class="stack"><h1>${APP_TAGLINE_HTML}.</h1>
+  <p class="small muted app-spoken">${APP_NAME} se dit <i>${APP_SPOKEN}</i></p> <!-- 27.11 : nom dit, discret, au premier lancement -->
   <p class="muted"><b>Chaque jour, environ 5 minutes, à ton niveau.</b> Une question du jour choisie pour toi, une figure, une correction immédiate. Ton grade monte avec ton travail. Pas de compte, pas de nom : ta progression reste sur ton téléphone ; rien n'est envoyé sans ton accord, seulement des statistiques anonymes si tu dis oui (<a href="#" id="envoie-lien">ce que l'app envoie</a>).</p></div>
   <div class="row welcome-pz"><a class="btn-sec small" href="#decouvrir">▶ Découvrir l'app en 1 minute</a><a class="btn-ghost small" href="#parents">👪 Je suis parent</a></div> <!-- 25.11 soir (revue d'un testeur : présentations introuvables pour un nouveau visiteur) -->
   <div class="stack"><span class="small muted">Je suis en :</span><div class="seg" id="dgrade">${DEMO_GRADES[demoSys()].map(([g, l]) => `<button aria-pressed="${g === demoGrade}" data-v="${g}">${l}</button>`).join("")}</div></div>
@@ -702,9 +704,11 @@ const HOME_TABS = [
   // Calendrier avec le jour pointé (14.11 : l'ancien soleil à rayons rappelait, d'un coup d'œil, l'étoile de David).
   ["today", "Aujourd'hui", '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15.2" r="1.8" fill="currentColor" stroke="none"/>'],
   // Loupe avec « ? » (21.11 : l'étoile ne disait rien ; 🧩 🏔 🎯 💡 déjà pris ailleurs dans l'app).
-  ["prob", "Exploration", '<circle cx="10" cy="10" r="7.6"/><path d="M15.6 15.6L21.5 21.5" stroke-width="2.6"/><path d="M7.7 8.3a2.4 2.4 0 1 1 3.3 2.2c-.6.3-1 .8-1 1.4v.5" stroke-width="2.1"/><circle cx="10" cy="14.6" r="1.15" fill="currentColor" stroke="none"/>'],
-  ["test", "Test", '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>'],
-  ["prog", "Progrès", '<path d="M4 20V10M10 20V5M16 20v-7M22 20H2"/>'],
+  /* 27.11 (portes d'entrée de l'app, validées par l'enseignant) : « La mine » = une pioche (la loupe « ? » passe aux Trésors cachés). */
+  ["prob", "La mine", '<path d="M14.2 8.6L4.5 20.5" stroke-width="2.6"/><path d="M6.8 3.4Q16.6 1.6 21 12.6" stroke-width="2.4"/><path d="M12.4 5.6l3.6 3.2"/>'],
+  ["test", "Jour J", '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>'],
+  /* 27.11 : « Mon trésor » = une médaille à ruban (grades, badges) ; pas de coffre (univers : ni coffre ni butin, SKILL pepite). */
+  ["prog", "Mon trésor", '<path d="M8 3l2.6 6M16 3l-2.6 6M8 3h3M13 3h3"/><circle cx="12" cy="15" r="6"/><path d="M12 12l.9 1.9 2 .2-1.5 1.4.4 2-1.8-1-1.8 1 .4-2-1.5-1.4 2-.2z" fill="currentColor" stroke="none"/>'],
 ];
 // Série en jeu (21.11, amélioration UX 2 : 31 % des appareils reviennent un 2e jour) : rappel discret tant que la séance du jour n'est pas faite.
 function streakNudge() {
@@ -748,9 +752,9 @@ function weekRecapCard() {
 // Visite guidée (21.11) : au premier accueil, une bulle par onglet.
 // Visite guidée (21.11 ; 22.11 : adaptée à l'accueil à cases) : 3 bulles sur l'accueil, l'élément concerné surligné.
 const TOUR = [
-  [".sess-card", "▶ Ta séance du jour", "En classe : au rythme de ton cours (choisis ton chapitre). Libre : tous les sujets, à ton rythme. Quelques minutes suffisent."],
+  [".sess-card", "▶ Ta pépite du jour", /* 27.11 : portes d'entrée de l'app */ "En classe : au rythme de ton cours (choisis ton chapitre). Libre : tous les sujets, à ton rythme. Quelques minutes suffisent."],
   [".elo-band", "🏅 Ton grade de l'année", "Pousse, Apprenti… : ton grade monte avec les pépites que tu trouves cette année (séances, réussites). Touche-le pour voir l'échelle des grades."], /* 26.11 : Mathélo caché par défaut */
-  [".doors", "🧭 Tes rubriques", "Le problème de la semaine, les questions curieuses, l'histoire des maths, ton évaluation (révision jusqu'au jour J), tes pépites à polir (tes erreurs à retenter) et tes progrès."],
+  [".doors", "🧭 Tes rubriques", "La mine (le grand problème de la semaine), les trésors cachés (maths cachées), les chercheurs d'or (histoire des maths), Jour J (prépare ton évaluation), tes pépites à polir (tes erreurs à retenter) et Mon trésor (grades, badges, pépites)."],
 ];
 let tourK = 0, doorHintCounted = false;
 function tourShow() {
@@ -791,8 +795,8 @@ function screenHome() {
         <h3>${FORMATS[fmt].label}</h3><p class="small muted">${Engine.fmtText(state, fmt)}</p></div>
       <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>${nowCard()}</div>
       ${freeCard()}`,
-    prob: () => (!wp ? `<div class="card flat stack"><div class="eyebrow">🔍 Problème de la semaine</div><h3>Pas encore de problème pour toi</h3><p class="small muted">Les problèmes arrivent avec les notions que tu as déjà travaillées. Fais quelques séances !</p></div>`
-      : `<div class="card stack"><div class="eyebrow">🔍 Problème de la semaine${wpDone ? " · fait ✓" : ""}</div><h2>${nLabel(wp)}</h2>
+    prob: () => (!wp ? `<div class="card flat stack"><div class="eyebrow">⛏️ Problème de la semaine</div><h3>Pas encore de problème pour toi</h3><p class="small muted">Les problèmes arrivent avec les notions que tu as déjà travaillées. Fais quelques séances !</p></div>`
+      : `<div class="card stack"><div class="eyebrow">⛏️ Problème de la semaine${wpDone ? " · fait ✓" : ""}</div><h2>${nLabel(wp)}</h2>
         <p class="muted">Un problème en plusieurs étapes, avec des indices si tu bloques. Facultatif, et il rapporte gros.</p>
         <button class="btn-primary btn-big" id="wp">${wpDone ? "Le refaire" : "Relever le défi"}</button>
         <p class="small muted">${wpDone ? "Bravo ! Un nouveau problème arrive la semaine prochaine." : "Un nouveau problème chaque semaine."}</p></div>`),
@@ -810,7 +814,7 @@ function screenHome() {
   if (!panels[homeTab]) homeTab = "today";
   const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="${alive && s.count ? "Ton filon : jours d'affilée" : "une séance aujourd'hui et ton filon repart à 1"}${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥 <b>" + s.count + "</b> j" : "✏️" /* 27.11 (revue, n° 6) : série perdue : l'icône seule, plus de « 0 j » au-dessus de « Content de te revoir ! » */}</span><span class="small muted hh-cl" title="Ta classe"><span class="hh-w">Classe </span>${classTag(state.profile) /* 26.11 (revue élèves, B9 : « Classe 2e MP » et « MP 2e ») : même forme partout */}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
   if (homeTab !== "today") {
-    const T = { prob: "Problème de la semaine", test: "Mon évaluation", carnet: "À polir", prog: "Progrès" };
+    const T = { prob: "La mine", test: "Jour J", carnet: "À polir", prog: "Mon trésor" }; /* 27.11 : portes d'entrée de l'app */
     h(`${head}<button type="button" class="btn-ghost back-home" id="hb">← Accueil</button><h2 class="sub-title">${T[homeTab]}</h2>
     <div class="home-panel" data-tab="${homeTab}">${panels[homeTab]()}</div>`);
     document.getElementById("hb").onclick = () => { homeTab = "today"; screenHome(); };
@@ -843,11 +847,11 @@ function screenHome() {
       : Engine.nowStale(state) ? `<div class="now-ask"><b>📚 Cette semaine en classe, tu travailles toujours :</b><span>${esc(state.now.ids.map(nLabel).join(" · "))} ?</span><div class="row now-ask-btns"><button type="button" class="btn-sec small" id="nowyes">Oui, toujours</button><button type="button" class="btn-sec small" id="nowpick">J'ai changé de chapitre</button></div></div>`
       : `<span class="small now-lab">📚 ${esc(state.now.ids.map(nLabel).join(" · "))}</span><button type="button" class="btn-ghost small" id="nowpick">changer</button>`;
     /* 25.11 soir (revue d'un testeur) : nom accessible explicite pour chaque case (lecteurs d'écran). */
-    const DOOR_NAME = { prob: "Problème de la semaine", cur: "Questions curieuses", hist: "Histoires des maths", test: "Mon évaluation", carnet: "À polir", prog: "Mes progrès" };
+    const DOOR_NAME = { prob: "La mine", cur: "Trésors cachés", hist: "Chercheurs d'or", test: "Jour J", carnet: "À polir", prog: "Mon trésor" }; /* 27.11 : portes d'entrée de l'app (renommages seulement) */
     /* 26.11 (chantier « ergonomie », revue d'un testeur : « Problème, Curieux, Histoire : on ne sait pas ce que c'est ») :
        une demi-ligne sous chaque case sans indication, aux 3 premières ouvertures de l'app seulement (state.doorHints). */
     if (!doorHintCounted) { doorHintCounted = true; state.doorHints = (state.doorHints || 0) + 1; save(); }
-    const DOOR_HINT = { prob: "chaque semaine", cur: "maths cachées", hist: "découvertes", test: "prépare le jour J", carnet: "tes erreurs", prog: "grades, badges" };
+    const DOOR_HINT = { prob: "le grand problème de la semaine", cur: "maths cachées", hist: "histoire des maths", test: "prépare ton évaluation", carnet: "tes erreurs", prog: "grades, badges, pépites" }; /* 27.11 */
     const hintOn = (state.doorHints || 0) <= 3;
     const door = (id, ic, label, sub0, badge) => { const sub = sub0 || (hintOn ? DOOR_HINT[id] : ""), hint = !sub0 && !!sub; return `<button type="button" class="door" data-door="${id}" aria-label="${esc(DOOR_NAME[id] || label)}${sub ? " : " + esc(sub) : ""}${badge === "!" ? " (nouveau)" : ""}">${badge ? `<span class="door-badge">${badge}</span>` : ""}<span class="door-sq">${ic}</span><b>${label}</b>${sub ? `<small${hint ? ' class="door-hint"' : ""}>${sub}</small>` : ""}</button>`; };
     const svgI = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`, TI = Object.fromEntries(HOME_TABS.map(([k, , ic]) => [k, ic]));
@@ -858,7 +862,7 @@ function screenHome() {
     ${eloBanner()}
     ${banner}
     ${prepNow ? lostLine : `<div class="card stack sess-card sess-first">${lostLine} <!-- 24.11 : « Séance d'abord » (choix de l'enseignant) : le bouton en premier, le reste discret -->
-      <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${paused ? "Nouvelle séance" : done ? "Encore une séance" : mode === "classe" ? "Ma séance du jour" : "Mon défi du jour"}</button>
+      <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${paused ? "Nouvelle séance" : done ? "Encore une séance" : mode === "classe" ? "Ma pépite du jour" /* 27.11 */ : "Mon défi du jour"}</button>
       ${mode === "classe" ? `<div class="sess-fmt"><span class="sess-fmt-t">${evalDone ? `<b class="fmt-lab">Séance du jour faite ✓ (évaluation)</b><span class="small muted fmt-txt">Pour en refaire une : ${FORMATS[fmt].label}</span>` : `<b class="fmt-lab">${FORMATS[fmt].label}</b><span class="small muted fmt-txt">${Engine.fmtText(state, fmt)}${doneLab ? " · séance faite ✓" : ""}</span>`}</span><button type="button" class="btn-sec small" id="other" aria-label="Changer de format">🔁<span class="chg-t"> Changer</span></button></div>
         <div class="now-line">${nowLine}</div>` : ""}
       <div class="sess-modes"><div class="seg sess-seg" role="tablist"><button type="button" data-m="classe" aria-pressed="${mode === "classe"}">🎒 En classe</button><button type="button" data-m="libre" aria-pressed="${mode === "libre"}">🧭 Libre</button></div><button type="button" class="btn-ghost small sess-info" id="sessinfo" aria-label="En classe ou Libre : explication" aria-expanded="false">ⓘ</button></div>
@@ -866,12 +870,12 @@ function screenHome() {
     </div>`}
     ${below}${statsCard()}
     <div class="doors">
-      ${door("prob", svgI(TI.prob), "Problème", "", dots.prob ? "!" : "")}
-      ${door("cur", svgI('<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>'), "Curieux", "", "")}
-      ${door("hist", svgI('<path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a3 3 0 0 1-3-3V6"/><path d="M4 6a2 2 0 1 0 4 0V4"/><path d="M9 9h7M9 13h7M9 17h4"/>'), "Histoire", "", "")}
-      ${door("test", svgI(TI.test), "Évaluation", prep ? (left === 0 ? "aujourd'hui !" : left === 1 ? "demain" : "dans " + left + " j") : "", dots.test ? "!" : "")}
+      ${door("prob", svgI(TI.prob), "La mine", "", dots.prob ? "!" : "")}
+      ${door("cur", svgI('<circle cx="10" cy="10" r="7.6"/><path d="M15.6 15.6L21.5 21.5" stroke-width="2.6"/><path d="M7.7 8.3a2.4 2.4 0 1 1 3.3 2.2c-.6.3-1 .8-1 1.4v.5" stroke-width="2.1"/><circle cx="10" cy="14.6" r="1.15" fill="currentColor" stroke="none"/>'), "Trésors cachés", "", "") /* 27.11 : loupe « ? » (maths cachées à découvrir), ex-ampoule */}
+      ${door("hist", svgI('<path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a3 3 0 0 1-3-3V6"/><path d="M4 6a2 2 0 1 0 4 0V4"/><path d="M9 9h7M9 13h7M9 17h4"/>'), "Chercheurs d'or", "", "")}
+      ${door("test", svgI(TI.test), "Jour J", prep ? (left === 0 ? "aujourd'hui !" : left === 1 ? "demain" : "dans " + left + " j") : "", dots.test ? "!" : "")}
       ${door("carnet", svgI('<path d="M7 4h10l4 5-9 11L3 9z"/><path d="M3 9h18M10 4l2 16 2-16"/>'), "À polir", nC ? nC + " à polir" : "", nC || "")}
-      ${door("prog", svgI(TI.prog), "Progrès", "", dots.prog ? "!" : "")}
+      ${door("prog", svgI(TI.prog), "Mon trésor", "", dots.prog ? "!" : "")}
     </div></div>`);
     // 22.11 : 6 cases, un sujet chacune ; Curieux et Histoire ouvrent directement leur écran.
     const backHome = () => { homeTab = "today"; screenHome(); };
@@ -1095,6 +1099,7 @@ function screenSettings() {
   ${installCard("")}
   <button class="btn-sec" id="backup">💾 Sauvegarder ou transférer ma progression</button><button class="btn-sec" id="level">Changer de classe ou d'école</button><button class="btn-sec" id="present" onclick="location.hash='#decouvrir'">📣 Présenter l'app (élèves)</button><button class="btn-sec" onclick="location.hash='#parents'">👪 Présenter l'app (parents)</button><button class="btn-sec" id="privacy">🔒 Ce que l'app envoie</button><button class="btn-ghost small" id="legal">Mentions légales et confidentialité</button>
   ${isAuthor() ? '<button class="btn-primary" id="stats">📊 Statistiques d\'usage (auteur)</button>' : ""}
+  <div class="card flat stack about"><h3>À propos</h3><p class="small">${APP_NAME} se dit <i>${APP_SPOKEN}</i> : une pépite… au carré ! <button type="button" class="btn-ghost small" id="logoq">🔍 Le secret du logo</button></p></div> <!-- 27.11 -->
   <div class="confirm" id="reset"><button class="btn-ghost" id="r1">Tout effacer</button></div>
   <button class="btn-primary" id="back">Retour</button></div>`);
   document.getElementById("back").onclick = screenHome; document.getElementById("backtop").onclick = screenHome;
@@ -1109,6 +1114,7 @@ function screenSettings() {
   document.getElementById("privacy").onclick = () => screenPrivacy(screenSettings);
   document.getElementById("legal").onclick = () => screenLegal(screenSettings);
   if (document.getElementById("stats")) document.getElementById("stats").onclick = () => screenStats(screenSettings);
+  document.getElementById("logoq").onclick = () => screenCurious(typeof Curieux !== "undefined" ? Curieux.build("logo") : null, screenSettings, "reglages"); /* 27.11 : « Le secret du logo » */
   document.getElementById("backup").onclick = screenBackup;
   document.getElementById("level").onclick = () => { draft = { ...state.profile, keepSys: true }; screenLevel(); };
   document.getElementById("r1").onclick = () => {
@@ -1856,7 +1862,7 @@ function tourPlan() {
 function prepTodayCard() {
   if (!Engine.prepActive(state)) return "";
   const L = prepLeft(state.prep.date), kind = prepKind(), t = prepTask(kind), done = (state.prep.log || {})[day()];
-  return `<div class="card stack mode-test"><div class="eyebrow">📝 Mon évaluation · ${L === 0 ? "aujourd'hui" : L === 1 ? "demain" : "dans " + L + " jours"}${done ? " · étape du jour faite ✓" : ""}</div>
+  return `<div class="card stack mode-test"><div class="eyebrow">📝 Jour J · ${L === 0 ? "aujourd'hui" : L === 1 ? "demain" : "dans " + L + " jours"}${done ? " · étape du jour faite ✓" : ""}</div>
     <h2>${t.ic} ${t.label}</h2><p class="muted">${t.text}</p>
     <button class="${done ? "btn-ghost small" : kind === "mock" ? "btn-sec" : "btn-primary btn-big"}" id="preptask">${done ? "Refaire" : "C'est parti"}</button>
     <button class="btn-ghost small" id="preptab">Voir mon programme</button></div>`;
@@ -2111,7 +2117,7 @@ function nextQuestion(redo) {
     sub: session.ctest ? session.ctest.label : "", /* revue p5, n° 11 : intitulé de l'objectif en texte normal sous l'en-tête */
     /* 25.11 (revue) : compteur qui compte aussi l'étape leçon ; « Nouvelle notion » (et non « Révision ») pour la question
        qui suit la leçon ou pour une notion encore jamais travaillée. */
-    eyebrow: ((s) => s + (ST.total > 1 && !session.weekly ? `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((Math.min(ST.pos - 1, ST.total) / ST.total) * 100)}%"></i></span>` : ""))((session.carnet ? "À polir · " + nTxt : session.free ? "Mon défi du jour · " + nTxt : session.weekly ? "🔍 Problème de la semaine" : session.ctest ? "Me tester · " + nTxt /* 26.11 (revue p5, n° 11 : intitulé en majuscules sur 4 lignes à 360 px) : intitulé en dessous (sub) */ : session.prep ? "Révision de l'évaluation · " + nTxt : ST.total === 1 ? (fmtLab || "Question du jour") : (fmtLab ? fmtLab + " · " : "") + nTxt) + (kind && KIND_LABEL[kind] && !(session.fmt && FORMATS[session.fmt] && FORMATS[session.fmt].slots.every((x) => x.replace(/\d+$/, "") === kind)) ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo || (session.replayQ && session.replayAt === session.i) ? " · nouvelles valeurs" : "")),
+    eyebrow: ((s) => s + (ST.total > 1 && !session.weekly ? `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((Math.min(ST.pos - 1, ST.total) / ST.total) * 100)}%"></i></span>` : ""))((session.carnet ? "À polir · " + nTxt : session.free ? "Mon défi du jour · " + nTxt : session.weekly ? "⛏️ La mine · problème de la semaine" /* 27.11 */ : session.ctest ? "Me tester · " + nTxt /* 26.11 (revue p5, n° 11 : intitulé en majuscules sur 4 lignes à 360 px) : intitulé en dessous (sub) */ : session.prep ? "Révision de l'évaluation · " + nTxt : ST.total === 1 ? (fmtLab || "Question du jour") : (fmtLab ? fmtLab + " · " : "") + nTxt) + (kind && KIND_LABEL[kind] && !(session.fmt && FORMATS[session.fmt] && FORMATS[session.fmt].slots.every((x) => x.replace(/\d+$/, "") === kind)) ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo || (session.replayQ && session.replayAt === session.i) ? " · nouvelles valeurs" : "")),
     /* 26.11 : pas à pas réussi jusqu'au bout (étapes toutes justes) : moitié de la perte de Mathélo rendue, +1 point de
        l'année (dans le plafond du jour), et le bilan le dit. Rien si une étape est fausse, ni en « Refaire ». */
     onGuided: (delta) => {
@@ -2868,7 +2874,7 @@ function withX(f) {
   if (xReady()) return f();
   window.loadPack("x").then(f, () => toast("Pas de connexion : cette partie de l'app n'est pas encore sur cet appareil. Réessaie une fois connecté."));
 }
-const curBonus = () => (typeof Curieux !== "undefined" && Curieux.available(state).length ? '<button class="btn-primary" id="curbonus">🤔 Bonus : une question curieuse</button>' : "");
+const curBonus = () => (typeof Curieux !== "undefined" && Curieux.available(state).length ? '<button class="btn-primary" id="curbonus">🔍 Bonus : un trésor caché</button>' : "");
 // Carte de l'onglet « Problème » : la question curieuse (en tête, avant le problème de la semaine).
 function curiousCard() {
   if (typeof Curieux === "undefined" || !Curieux.available(state).length) return "";
@@ -2882,11 +2888,11 @@ function curiousCard() {
 // Signaux muets (21.11) : une ligne « q » par question curieuse, genre « curieux », code cur-… ; aide : P pari juste,
 // p pari faux, s réponse affichée ; issue ok1 / ok2 / faux / idk / quitte. Rien n'est envoyé en consultation par lien.
 function screenCurious(q, back, from = "") {
-  if (!q) { toast("Pas encore de question curieuse pour toi : elles arrivent avec les notions vues en classe."); return back(); }
+  if (!q) { toast("Pas encore de trésor caché pour toi : ils arrivent avec les notions vues en classe."); return back(); }
   if (state) { state.curSeen = [...(state.curSeen || []).filter((k) => k !== q.key), q.key].slice(-20); save(); }
   const F = CUR_FAM[q.fam] || { label: "Question curieuse", ic: "🤔" };
   const spec = { kind: "value", value: q.calc.value, ...(q.calc.round ? { round: q.calc.round } : {}) }; // calcul tapé accepté (commentaire du 21.11), même au CO
-  h(`${brand}${backTop("cback0")}<div class="eyebrow">${F.ic} Question curieuse · ${F.label}</div>
+  h(`${brand}${backTop("cback0")}<div class="eyebrow">${F.ic} Trésors cachés · ${F.label}</div>
   <div class="card pop stack"><h2>${q.titre}</h2><div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
     <div class="act-step"><div class="act-h"><span class="act-n">1</span> Ton pari</div><p>${q.bet.q}</p>
       <div class="seg" id="cbet">${q.bet.choices.map((c, i) => `<button type="button" data-i="${i}">${c}</button>`).join("")}</div><div id="cbfb" aria-live="polite"></div></div>
@@ -2897,7 +2903,7 @@ function screenCurious(q, back, from = "") {
     <div class="act-step" id="cs3" hidden><div class="act-h"><span class="act-n">3</span> Le fin mot</div><div class="sol">${q.reveal}</div>
       <div class="rule"><b>🧠 Ici, tu as utilisé</b> ${q.outil}</div><p class="small muted code cur-code">${q.code}</p></div>
   </div>
-  <button class="btn-primary btn-big" id="cnext" hidden>Une autre question curieuse</button>
+  <button class="btn-primary btn-big" id="cnext" hidden>Un autre trésor caché</button>
   <button class="btn-ghost" id="cback">Retour</button>`);
   pageQ = q.code;
   const S = from ? sigOpen({ ev: "q", code: q.code, d: 0, kind: "curieux", fmt: from }) : null;
@@ -2955,7 +2961,7 @@ function screenHistory(k, back) {
      « Défi expert » (histStep) : pavé de calcul (puissance, racine, π). */
   const H = HISTOIRE[k], E = H.ex(), spec = E.calc ? { kind: "value", value: E.value } : { kind: "value", value: E.value, final: true };
   Histoire.seen(state, k); save();
-  h(`${brand}${backTop("hback0")}<div class="eyebrow">📜 Histoire des maths · ${H.t}</div>
+  h(`${brand}${backTop("hback0")}<div class="eyebrow">📜 Chercheurs d'or · ${H.t}</div>
   <div class="card pop stack hist-story"><h2>${H.titre}</h2><div class="figwrap">${H.fig(E)}</div><p>${H.txt}</p>
     <div class="act-step"><div class="act-h"><span class="act-n">✍️</span> À toi</div><div class="qtext">${E.q}</div>
       <div class="answer"><input class="ans" id="hans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Ta réponse">
@@ -3161,7 +3167,7 @@ function screenSummary() {
     /* 26.11 soir (n° 17 : « Séance courte » après 12:33) : « courte » selon la durée, plus selon le nombre de questions */
     : Date.now() - session.start < 4 * 6e4 ? "Séance courte aujourd'hui. Tu peux continuer autant que tu veux." : "";
   // 26.11 : Mathélo caché par défaut : titre selon le score seulement (22.11 : il suivait le Mathélo).
-  h(`${brand}<h2>${esc(sumTitle(n, sc))}</h2>
+  h(`${brand}${session.weekly ? '<div class="eyebrow">⛏️ La mine · problème de la semaine</div>' /* 27.11 : bilan du problème = « La mine » */ : ""}<h2>${esc(sumTitle(n, sc))}</h2>
   <div class="card flat streak"><span class="flame">🔥</span><div><b>Ton filon : ${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b>${state.streak.count >= 3 ? ' <span class="muted">· tu es sur un bon filon !</span>' : ""}${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ton filon passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${tomorrowLabel()}</b></div>${sumGoal(g1)}</div></div>
   ${summaryByNotion()}
   ${weekLine()}

@@ -207,12 +207,26 @@ const sec6 = () => sec("6 accueil", () => {
     if (k <= 3) for (const d of ["prob", "cur", "hist"]) if (!document.querySelector('.door[data-door="' + d + '"] small')) fail("ouverture " + k + " : pas d'explication sous « " + d + " »");
     if (k === 4 && n) fail("4e ouverture : explications encore affichées");
     window.scrollTo(0, 0); const go = document.querySelector(".sess-go"); if (go && R_(go).bottom > 640) fail("ouverture " + k + " : bouton principal hors du premier écran");
-    document.querySelectorAll(".door small.door-hint").forEach((s) => { if (R_(s).height > 22) fail("explication sur plus d'une ligne : " + s.textContent); });
+    /* 27.11 (portes d'entrée Pépite², « le grand problème de la semaine ») : deux lignes au plus (était : une ligne) avec les
+       polices de l'app ; cette page ne les charge pas (police de secours plus large) : trois lignes tolérées ici. */
+    const maxL = document.fonts && document.fonts.size ? 2 : 3;
+    document.querySelectorAll(".door small.door-hint").forEach((s) => { const lh = parseFloat(getComputedStyle(s).lineHeight) || 15; if (R_(s).height > lh * maxL + 4) fail("explication sur plus de " + maxL + " lignes : " + s.textContent); });
+    document.querySelectorAll(".door b").forEach((s) => { if (R_(s).height > 40) fail("nom de case sur plus de deux lignes : " + s.textContent); });
   }
+  /* 27.11 : noms des portes d'entrée (renommages validés par l'enseignant) et nom dit « Pépite au carré » */
+  const labs = [...document.querySelectorAll(".door b")].map((b) => b.textContent).join(" | ");
+  if (labs !== "La mine | Trésors cachés | Chercheurs d'or | Jour J | À polir | Mon trésor") fail("noms des cases : " + labs);
+  const go = document.querySelector(".sess-go"); if (!go || !/Ma pépite du jour/.test(go.textContent)) fail("grand bouton : " + (go && go.textContent));
+  const sr = document.querySelector(".brand .sr-only"); if (!sr || sr.textContent !== APP_SPOKEN) fail("en-tête : nom accessible « " + APP_SPOKEN + " » absent");
+  if (!document.querySelector('.brand .brand-n[aria-hidden="true"]')) fail("en-tête : nom affiché non masqué aux lecteurs d'écran (lu deux fois)");
+  const st0 = state; state = null; screenWelcome(); const sp = document.querySelector(".app-spoken");
+  if (!sp || !sp.textContent.includes("se dit " + APP_SPOKEN) || R_(sp).height > 24 || R_(sp).right > innerWidth) fail("écran d'entrée : ligne « se dit Pépite au carré » absente ou sur plus d'une ligne");
+  state = st0; screenSettings(); if (!/se dit Pépite au carré/.test((document.querySelector(".about") || {}).textContent || "") || !document.getElementById("logoq")) fail("Réglages : « À propos » absent");
+  document.getElementById("logoq").click(); if (!/Le secret du logo/.test(app.textContent)) fail("Réglages : le lien n'ouvre pas « Le secret du logo »");
 });
 
 Promise.resolve().then(() => SEC3())
   .then(() => { sec4(); sec5(); sec6(); })
-  .then(() => { window.scrollTo(0, 0); parent.postMessage("ergo:" + (nbF ? "ÉCHEC (" + nbF + ")\n" + OUT.join("\n") : "OK ergonomie de la question (menu ⋯, clavier contextuel, barre fixe, 💬 unique, Retiens dépliable, cases de l'accueil)") + "\n" + INFO.join("\n"), "*"); });
+  .then(() => { window.scrollTo(0, 0); parent.postMessage("ergo:" + (nbF ? "ÉCHEC (" + nbF + ")\n" + OUT.join("\n") : "OK ergonomie de la question (menu ⋯, clavier contextuel, barre fixe, 💬 unique, Retiens dépliable, cases de l'accueil, portes d'entrée, « Pépite au carré »)") + "\n" + INFO.join("\n"), "*"); });
 });
 </script>

@@ -8,7 +8,7 @@ try{
 state=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.autoInit(state);statsSet(false);/* 24.11 : carte des statistiques déjà répondue, sinon elle prend la place des autres cartes */state.placed=true;
 for(const id in state.notions)state.notions[id].lessonSeen=true;
 // 2. visite guidée
-homeTab="today";screenHome();ok(!!document.getElementById("tour")&&/séance du jour/.test(document.getElementById("tour").textContent)&&app.querySelector(".sess-card.tour-hi"),"2 bulle 1 (accueil à cases, 22.11)");
+homeTab="today";screenHome();ok(!!document.getElementById("tour")&&/pépite du jour/.test(document.getElementById("tour").textContent) /* 27.11 : « Ta pépite du jour » */&&app.querySelector(".sess-card.tour-hi"),"2 bulle 1 (accueil à cases, 22.11)");
 document.getElementById("tournext").click();/* 26.11 (décision de l'enseignant : Mathélo caché par défaut) : la bulle 2 présente le grade de l'année */ ok(homeTab==="today"&&/grade/.test(document.getElementById("tour").textContent)&&app.querySelector(".elo-band.tour-hi"),"2 bulle 2 sur le grade");
 document.getElementById("tourskip").click();ok(state.tourDone&&!document.getElementById("tour")&&homeTab==="today","2 passer : fini");
 screenHome();ok(!document.getElementById("tour"),"2 plus de visite ensuite");

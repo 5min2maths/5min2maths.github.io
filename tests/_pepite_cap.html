@@ -63,7 +63,7 @@ if (!FRAME) {
     accueil: () => { newSt(); homeTab = "today"; screenHome(); },
     figure: () => { newSt(); renderQuestion(qWith((q) => q.fig && !q.parts && String(q.q).length > 60 && /<svg/.test(q.fig)), opt({ onNotYet: () => 0, onEasy: () => 0 })); },
     pave: () => { newSt(); renderQuestion(qWith((q) => !q.fig && !q.parts && q.spec && q.spec.kind === "value"), opt({ onNotYet: () => 0, onEasy: () => 0 })); },
-    probleme: () => { newSt(); session = { plan: ["x"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; let q = null; for (const n of NOTIONS) { if (!hasProb(n.id)) continue; try { q = Engine.make(state, n.id, 4); } catch (e) { q = null; } if (q && q.parts && q.parts.length >= 3 && String(q.q).length > 120) break; } renderQuestion(q, opt({ eyebrow: "🔍 Problème de la semaine" })); },
+    probleme: () => { newSt(); session = { plan: ["x"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; let q = null; for (const n of NOTIONS) { if (!hasProb(n.id)) continue; try { q = Engine.make(state, n.id, 4); } catch (e) { q = null; } if (q && q.parts && q.parts.length >= 3 && String(q.q).length > 120) break; } renderQuestion(q, opt({ eyebrow: "⛏️ La mine · problème de la semaine" /* 27.11 */ })); },
     lecon: () => { newSt(); screenLesson("fractout", () => {}); },
     bilan: () => { newSt(); session = { fmt: "revision", plan: ["eq1|1|rev", "eq1|1|rev", "eq1|1|rev", "eq1|1|rev"], i: 4, score: 3, answered: 4, start: Date.now() - 300000, elo0: state.elo.r - 12, ids: new Set(["eq1"]) }; screenSummary(); },
     progres: () => { newSt(); homeTab = "prog"; screenHome(); },
@@ -76,6 +76,14 @@ if (!FRAME) {
     filon: () => { newSt(); state.streak = { count: 5, last: addDays(day(), -1), best: 7 }; ypAdd(state, 37); save(); homeTab = "today"; screenHome(); },
     polir: () => { newSt(); errs(); homeTab = "carnet"; screenHome(); },
     bilanfilon: () => { newSt(); state.streak = { count: 4, last: day(), best: 4 }; session = { plan: ["eq1|1", "eq1|1", "eq1|1", "eq1|1", "eq1|1"], i: 5, score: 4, answered: 5, start: Date.now() - 300000, elo0: state.elo.r - 12, ids: new Set(["eq1"]), solvedN: 4, fixedN: 1, ypg: 31 }; screenSummary(); },
+    /* 27.11 (agent pepite-accueil) : portes d'entrée renommées (La mine, Trésors cachés, Chercheurs d'or, Jour J, Mon trésor) */
+    mine: () => { newSt(); const w = Engine.weeklyProblem; Engine.weeklyProblem = () => "eq1"; homeTab = "prob"; try { screenHome(); } finally { Engine.weeklyProblem = w; } },
+    minevide: () => { newSt(); homeTab = "prob"; screenHome(); },
+    tresors: () => { newSt(); screenCurious(Curieux.pick(state), () => 0, "onglet"); },
+    chercheurs: () => { newSt(); screenHistory(Histoire.pick(state).k, () => 0); },
+    jourj: () => { newSt(); homeTab = "test"; screenHome(); },
+    tresor: () => { newSt(); homeTab = "prog"; screenHome(); },
+    bilanmine: () => { newSt(); session = { plan: ["eq1|4"], i: 1, score: 1, answered: 1, start: Date.now() - 300000, elo0: state.elo.r - 8, ids: new Set(["eq1"]), weekly: true, ypg: 10 }; screenSummary(); },
     parent: () => { newSt(); errs(); state.streak = { count: 3, last: day(), best: 3 }; state.history = [0, 1, 3, 4].map((k) => ({ date: addDays(day(), -k), n: 5, score: 4 })); save(); Backup.encode(state).then((code) => screenParentView(null, { code, preview: true, back: () => 0 })); },
   };
   const show = (k) => { reseed(); session = null; document.querySelectorAll("#tour, .collector-bg").forEach((t) => t.remove()); SCR[k](); document.querySelectorAll("#tour, .collector-bg").forEach((t) => t.remove()); window.scrollTo(0, 0); };

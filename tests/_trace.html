@@ -412,7 +412,7 @@ window.confirm = () => true; window.print = () => {};
       if (evalDay) { await home(); shot("ACCUEIL après l'évaluation", { max: 600 }); log("  (pas de séance en plus : la tâche de l'évaluation était la séance du jour)"); }
       else { const go = $("go") || $("freego"); await click(go, go && go.innerText.trim());
       durs.push(await play("Séance jour " + (j + 1))); }
-      const sumT = screenText(); if (/Bonus : une question curieuse/.test(sumT)) log("    (le bilan propose une question curieuse en bonus)");
+      const sumT = screenText(); if (/Bonus : un trésor caché/.test(sumT) /* 27.11 */) log("    (le bilan propose une question curieuse en bonus)");
       await home();
       const e = EX[j % Math.max(1, EX.length)];
       if (e === "carnet") await doCarnet(); else if (e === "curieux") await doCurieux(); else if (e === "histoire") await doHistoire(); else if (e === "probleme") await doProbleme(); else if (e === "comp") await doComp(); else if (e === "eval" && !Engine.prepActive(state)) await doEvalSetup();

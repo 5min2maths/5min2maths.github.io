@@ -3,6 +3,7 @@
    la page et le manifeste (docs/). Contrôle : tools/test_nom.py (lancé par tools/run_tests.sh). APP_SHORT : nom sous l'icône
    du téléphone. APP_TITLE : titre de l'onglet. L'ADRESSE de l'app ne change pas (mêmes clés de stockage m2m-*). */
 const APP_NAME = "Pépite²";
+const APP_SPOKEN = "Pépite au carré"; /* 27.11 : nom dit (lecteurs d'écran, écran d'entrée, Réglages « À propos ») */
 const APP_TAGLINE = "Deviens une pépite en maths";
 const APP_SHORT = "Pépite²";
 const APP_TITLE = "Pépite² · Deviens une pépite en maths";

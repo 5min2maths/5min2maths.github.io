@@ -14,7 +14,7 @@ window.__packs = []; window.ensurePacks = (p) => { window.__packs.push(JSON.stri
 const fails = [], ok = (c, m) => { if (!c) fails.push(m); }, T = day(), D = (k) => addDays(T, k), log = [];
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 async function until(f, ms = 4000) { const t0 = Date.now(); while (Date.now() - t0 < ms) { try { const v = f(); if (v) return v; } catch (e) {} await wait(30); } return null; }
-const over = (root) => [...root.querySelectorAll("*")].filter((e) => e.scrollWidth > e.clientWidth + 1 && !["auto", "scroll"].includes(getComputedStyle(e).overflowX) && e.clientWidth > 0 && !e.closest("mjx-container, .figwrap, .fab-cmt")).map((e) => e.className || e.tagName);
+const over = (root) => [...root.querySelectorAll("*")].filter((e) => e.scrollWidth > e.clientWidth + 1 && !["auto", "scroll"].includes(getComputedStyle(e).overflowX) && e.clientWidth > 0 && !e.closest("mjx-container, .figwrap, .fab-cmt, .sr-only") /* 27.11 : nom dit de l'en-tête (sr-only, 1 px, masqué exprès) */).map((e) => e.className || e.tagName);
 const txt = () => app.textContent.replace(/\s+/g, " ");
 function child(grade, seed) {
   const s = Engine.newState({ system: "CH", grade, track: "college", minutes: 5 }); Engine.autoInit(s); s.placed = true;

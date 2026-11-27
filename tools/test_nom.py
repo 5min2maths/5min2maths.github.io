@@ -10,8 +10,8 @@ SRC = ROOT / "src"
 cur = (SRC / "curriculum.js").read_text()
 APP = dict(re.findall(r'^const (APP_[A-Z]+) = "([^"]*)";', cur, re.M))
 bad = []
-if not {"APP_NAME", "APP_TAGLINE", "APP_SHORT", "APP_TITLE"} <= set(APP):
-    bad.append("constantes APP_NAME, APP_TAGLINE, APP_SHORT, APP_TITLE absentes de src/curriculum.js")
+if not {"APP_NAME", "APP_SPOKEN", "APP_TAGLINE", "APP_SHORT", "APP_TITLE"} <= set(APP):  # 27.11 : APP_SPOKEN « Pépite au carré »
+    bad.append("constantes APP_NAME, APP_SPOKEN, APP_TAGLINE, APP_SHORT, APP_TITLE absentes de src/curriculum.js")
 # 27.11 : ancien nom (« 5 minutes de maths », « 5 min maths ») et nouveau nom / slogan (« Pépite² », « Deviens une pépite »)
 PAT = re.compile(r"5\s*min(?:utes)?\s*(?:de\s*|2\s*)?maths|Pépite²|Pépite au carré|Deviens une pépite", re.I)
 for f in sorted(SRC.rglob("*")):
@@ -29,6 +29,11 @@ if "APP_NAME" not in re.search(r"^const brand = .*$", app, re.M).group(0):
 b = (ROOT / "build.py").read_text()
 if 'APP["APP_TITLE"]' not in b or 'MAN["name"]' not in b:
     bad.append("build.py : titre ou manifeste sans les constantes APP_*")
+# 27.11 : nom dit (« Pépite au carré ») : nom accessible de l'en-tête, ligne de l'écran d'entrée, Réglages « À propos ».
+if "APP_SPOKEN" not in re.search(r"^const brand = .*$", app, re.M).group(0):
+    bad.append("src/app.js : l'en-tête (brand) n'a pas le nom accessible APP_SPOKEN")
+if app.count("se dit <i>${APP_SPOKEN}</i>") < 2:
+    bad.append("src/app.js : « se dit Pépite au carré » absent de l'écran d'entrée ou des Réglages")
 # 27.11 : logo dans l'en-tête, icônes et favicon publiés.
 if "LOGO_MARK" not in re.search(r"^const brand = .*$", app, re.M).group(0):
     bad.append("src/app.js : l'en-tête (brand) n'affiche pas le logo (LOGO_MARK)")
