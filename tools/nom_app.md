@@ -174,3 +174,12 @@ Avant le choix, comme au premier tour :
   avec « maths » trop scolaires. Proposition en cours : nom « Pépite » seul, slogan « Deviens une pépite en maths », adresse
   mapepite.ch / mapepite.app (libres ; pepite.* pris). Mots courts de l'or (Filon, Carat, Oro) pris. L'enseignant réfléchit ;
   idée : faire voter la 11LS en décembre. Marque « Pépite » (éducation / logiciels) à vérifier sur Swissreg et INPI.
+
+## ✅ NOM CHOISI (27.11, enseignant : « oui c'est ça le truc ! ») : **Pépite²** — dit « Pépite au carré »
+- Slogan : « Deviens une pépite en maths ». Triple sens : pépite, carré des maths (x²), « c'est carré » (maîtrisé).
+- Venu de « PépitoCarré » de l'enseignant ; « Pépito » écarté (marque de biscuits LU / Mondelez, marque renommée).
+- Domaines (DNS 27.11) : pepiteaucarre.ch / .com / .app / .fr libres ; pepitecarre.* libres.
+- Recherche web : aucune app ni marque « Pépite au carré » / « Pépite² » ; « Pépite » existe ailleurs (épicerie bio, bar à
+  cookies, duo musical, objet Pokémon) — autres catégories.
+- À faire : marques Swissreg + INPI (classes 9 logiciels, 41 éducation) ; réserver pepiteaucarre.ch + .app (+ .fr ?) avec
+  l'hébergement suisse ; puis renommage (APP_NAME, APP_TAGLINE, manifeste, présentations, PDF, icône avec le petit ²).
