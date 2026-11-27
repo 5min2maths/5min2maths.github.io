@@ -17,6 +17,9 @@
   --bad-soft: #fbe5e4;
   --fluo: #e9ff47;
   --fluo-ink: #1d2b4f;
+  /* 27.11 (nouveau nom) : accent doré, avec parcimonie (logo, pastille du filon, récompenses) ; jamais pour du texte courant.
+     --gold-ink sur --gold-soft : 9,9:1 (clair), 11:1 (sombre). */
+  --gold: #f2b705; --gold-deep: #e0a100; --gold-soft: #fff4cc; --gold-ink: #5a4000;
   --shadow: #1a3fa3;
   /* Texte posé sur un aplat bleu, rouge (marge) ou vert : blanc en clair, encre foncée en sombre (24.11, contrastes). */
   --on-blue: #fff; --on-margin: #fff; --on-ok: #fff;
@@ -29,14 +32,14 @@
   :root:not([data-theme="light"]) {
     --paper: #10162a; --grid: #1b2440; --ink: #e6ebf7; --ink-soft: #9aa6c6; --blue: #7ea2ff; --blue-soft: #1d2c57;
     --margin: #ff7a7f; --card: #161e36; --line: #2a3557; --ok: #4fd39a; --ok-soft: #12352a; --warn: #f0b75a; --warn-soft: #3a2c12;
-    --bad: #ff8a87; --bad-soft: #3d1a1d; --fluo: #d6f53a; --fluo-ink: #10162a; --shadow: #3c5fc4; color-scheme: dark;
+    --bad: #ff8a87; --bad-soft: #3d1a1d; --fluo: #d6f53a; --fluo-ink: #10162a; --shadow: #3c5fc4; color-scheme: dark; --gold-soft: #3a2f0a; --gold-ink: #ffd75e;
     --on-blue: #10162a; --on-margin: #10162a; --on-ok: #10162a;
   }
 }
 :root[data-theme="dark"] {
   --paper: #10162a; --grid: #1b2440; --ink: #e6ebf7; --ink-soft: #9aa6c6; --blue: #7ea2ff; --blue-soft: #1d2c57;
   --margin: #ff7a7f; --card: #161e36; --line: #2a3557; --ok: #4fd39a; --ok-soft: #12352a; --warn: #f0b75a; --warn-soft: #3a2c12;
-  --bad: #ff8a87; --bad-soft: #3d1a1d; --fluo: #d6f53a; --fluo-ink: #10162a; --shadow: #3c5fc4; color-scheme: dark;
+  --bad: #ff8a87; --bad-soft: #3d1a1d; --fluo: #d6f53a; --fluo-ink: #10162a; --shadow: #3c5fc4; color-scheme: dark; --gold-soft: #3a2f0a; --gold-ink: #ffd75e;
     --on-blue: #10162a; --on-margin: #10162a; --on-ok: #10162a;
 }
 
@@ -65,6 +68,12 @@ p { margin: 0; }
 .brand { display: flex; align-items: baseline; gap: 8px; }
 .brand b { font-family: var(--font-display); font-weight: 800; color: var(--blue); }
 .brand span { font-family: var(--font-mono); color: var(--margin); }
+/* 27.11 (nouveau nom) : l'icône de l'app en miniature devant le nom ; le slogan, long, ne s'affiche qu'au-dessus de 430 px (en-tête sur une ligne). */
+.logo-mark { display: inline-block; width: 1.5em; height: 1.5em; vertical-align: -0.36em; margin-right: 0.28em; } /* icône de l'app en miniature (≈ 30 px) */
+.logo-mark.logo-nug { width: 1.62em; height: 1.07em; vertical-align: -0.2em; margin-right: 0.22em; } /* 27.11 : pépite G1 seule (choix de l'enseignant) */
+.logo-mark.logo-exp { width: 0.85em; height: 0.85em; vertical-align: 0.45em; margin: 0 0 0 0.04em; }
+@media (max-width: 430px) { .brand > span { display: none; } }
+.brand { min-width: 0; flex-wrap: wrap; row-gap: 0; } .brand > span { min-width: 0; } /* slogan long : passe à la ligne dans un cadre étroit (jamais de débordement) */
 
 /* Carte : la feuille d'exercice, avec sa marge rouge */
 .card {
@@ -365,6 +374,7 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 .eb-r { display: grid; gap: 2px; min-width: 0; }
 .elo-band .spark { height: 32px; }
 .streak-chip { display: inline-flex; align-items: center; gap: 3px; padding: 3px 9px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); font-size: 0.9rem; }
+.streak-chip:has(b) { background: var(--gold-soft); border-color: var(--gold-deep); color: var(--gold-ink); } /* 27.11 : filon en cours, pastille dorée */
 .home-head { flex-wrap: nowrap; }
 .home-head .row { flex-wrap: nowrap; flex-shrink: 0; }
 @media (max-width: 430px) { .home-head .brand span { display: none; } }
@@ -643,6 +653,8 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: v
 .elo-compact { grid-template-columns: auto minmax(0, 1fr) auto; /* 24.11 : minmax(0, …) sinon le texte sur une ligne élargit la colonne (robot : +8 à +20 px à 360 px) */ gap: 12px; padding: 8px 12px; }
 .elo-compact .eb-num { display: grid; gap: 0; }
 .elo-compact .eb-num .eyebrow { font-size: 0.62rem; }
+.elo-compact .eb-num { justify-items: center; }
+.eb-unit { font-size: max(0.75rem, 12px); font-weight: 700; color: var(--gold-ink); line-height: 1.1; } /* 27.11 : « 37 pépites » */
 .elo-compact .num { font-size: 1.6rem; }
 .elo-compact .eb-grade { margin-top: 0; }
 .elo-compact .eb-grade .pbar { max-width: none; }
@@ -1023,3 +1035,7 @@ html.ecran-ordi { scrollbar-gutter: stable; }
 .ecran-2col .card.hist-story > * { grid-column: 1; margin: 0 0 14px; }
 .ecran-2col .card.hist-story > .act-step { grid-column: 2; grid-row: 1 / -1; border-top: 0; padding: 0 0 0 30px; border-left: 1px dashed var(--line); margin: 0; }
 .ecran-2col .card.hist-story > #hmore { grid-column: 2; grid-row: auto; }
+
+/* 27.11 (nouveau nom) : touches dorées discrètes : carte du filon au bilan, pépites trouvées (parents). */
+.card.streak { border-left: 4px solid var(--gold); }
+.par-gems b { color: var(--gold-ink); background: var(--gold-soft); padding: 0 4px; border-radius: 4px; }

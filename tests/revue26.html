@@ -54,8 +54,8 @@
 
     /* 6. Carnet : erreurs presque effacées */
     const c6 = carnetLeft([{ id: "a", d: 1, ok: 1 }, { id: "b", d: 1, ok: 1 }, { id: "c", d: 1, ok: 0 }]);
-    ok(c6 === "3 à effacer, dont 2 presque effacées (encore 1 réussite)", "carnet : « " + c6 + " »");
-    ok(carnetLeft([{ id: "a", d: 1, ok: 0 }]) === "1 à effacer", "carnet sans progrès : « 1 à effacer »");
+    ok(c6 === "3 à polir, dont 2 presque polies (encore 1 réussite)", "carnet : « " + c6 + " »");
+    ok(carnetLeft([{ id: "a", d: 1, ok: 0 }]) === "1 à polir", "À polir sans progrès : « 1 à polir »"); /* 27.11 (univers Pépite, libellés renommés : carnet → « À polir », série → filon, points → pépites) */
 
     /* 7. Série d'automatismes : 2 le jour du positionnement (27.11, revue n° 5 : était 3), 4 sous le plancher, sinon 6 */
     fresh({ system: "CH", grade: 9, track: "college", minutes: 5 });

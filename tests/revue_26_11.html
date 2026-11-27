@@ -117,7 +117,7 @@
     L9.forEach((id) => Object.assign(state.notions[id], { status: "encours", seen: 0, lessonSeen: false, m: 0.3 }));
     state.carnet = L9.map((id) => ({ id, d: 1, code: id + "-1-1", date: day(), ok: 0 }));
     homeTab = "carnet"; screenHome();
-    ok(/Effacer mes erreurs \(2 questions\)/.test(app.textContent), "carnet : bouton « (2 questions) »");
+    ok(/Polir mes pépites \(2 questions\)/.test(app.textContent), "À polir : bouton « (2 questions) »"); /* 27.11 (univers Pépite, libellés renommés : carnet → « À polir », série → filon, points → pépites) */
     startCarnet(); const seenEb = [];
     for (let k = 0; k < 6 && document.getElementById("idk"); k++) { seenEb.push(eb()); skipQ(); }
     ok(seenEb.length === 2 && /1 sur 2/.test(seenEb[0]) && /2 sur 2/.test(seenEb[1]) && !seenEb.some((x) => /leçon|Nouvelle notion|étape/i.test(x)), "carnet : 2 questions, « 1 sur 2 » puis « 2 sur 2 », sans leçon — " + seenEb.join(" | "));
@@ -170,7 +170,7 @@
     fresh({ system: "CH", grade: 11, track: "college", minutes: 5 }); const y = ypSync(state); y.d = day(); y.dp = YP.cap; y.ds = 2;
     session = { fmt: "mixte", plan: ["prio|1", "prio|1", "prio|1"], i: 3, score: 3, answered: 3, start: Date.now(), elo0: state.elo.r, ids: new Set(["prio"]), ypg: 0 };
     screenSummary();
-    ok(/plafond du jour atteint/.test(app.textContent) && !/Points de l'année\s*\+0/.test(app.textContent), "bilan : « plafond du jour atteint » au lieu de +0");
+    ok(/plafond du jour atteint/.test(app.textContent) && !/Pépites\s*\+0/.test(app.textContent) /* 27.11 : points → pépites */, "bilan : « plafond du jour atteint » au lieu de +0");
     /* 10. contexte de problème répété (« On carrelle… ») : pas deux fois dans la semaine en séance */
     fresh({ system: "CH", grade: 10, track: "college", minutes: 5 });
     const k1 = Engine.make(state, "decmul", 4, undefined, true), k2 = Engine.make(state, "decmul", 4, undefined, true);

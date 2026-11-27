@@ -12,12 +12,13 @@ APP = dict(re.findall(r'^const (APP_[A-Z]+) = "([^"]*)";', cur, re.M))
 bad = []
 if not {"APP_NAME", "APP_TAGLINE", "APP_SHORT", "APP_TITLE"} <= set(APP):
     bad.append("constantes APP_NAME, APP_TAGLINE, APP_SHORT, APP_TITLE absentes de src/curriculum.js")
-PAT = re.compile(r"5\s*min(?:utes)?\s*(?:de\s*|2\s*)?maths", re.I)
+# 27.11 : ancien nom (« 5 minutes de maths », « 5 min maths ») et nouveau nom / slogan (« Pépite² », « Deviens une pépite »)
+PAT = re.compile(r"5\s*min(?:utes)?\s*(?:de\s*|2\s*)?maths|Pépite²|Pépite au carré|Deviens une pépite", re.I)
 for f in sorted(SRC.rglob("*")):
     if f.suffix not in (".js", ".css", ".html"):
         continue
     for i, line in enumerate(f.read_text(errors="replace").splitlines(), 1):
-        if f.name == "curriculum.js" and re.match(r'^const APP_[A-Z]+ = "', line):
+        if f.name == "curriculum.js" and re.match(r'^(const APP_[A-Z]+ = "|/\* )', line):
             continue
         if PAT.search(line):
             bad.append(f"{f.relative_to(ROOT)}:{i} : {PAT.search(line).group(0)!r} écrit en dur")
@@ -28,5 +29,11 @@ if "APP_NAME" not in re.search(r"^const brand = .*$", app, re.M).group(0):
 b = (ROOT / "build.py").read_text()
 if 'APP["APP_TITLE"]' not in b or 'MAN["name"]' not in b:
     bad.append("build.py : titre ou manifeste sans les constantes APP_*")
+# 27.11 : logo dans l'en-tête, icônes et favicon publiés.
+if "LOGO_MARK" not in re.search(r"^const brand = .*$", app, re.M).group(0):
+    bad.append("src/app.js : l'en-tête (brand) n'affiche pas le logo (LOGO_MARK)")
+for f in ("icon-192.png", "icon-512.png", "icon-maskable-192.png", "icon-maskable-512.png", "apple-touch-icon.png", "favicon-32.png", "favicon.svg"):
+    if not (SRC / "pwa" / f).exists() or f not in b:
+        bad.append(f"src/pwa/{f} absent ou non copié par build.py")
 print(("ÉCHEC " + " | ".join(bad[:20])) if bad else "ok nom de l'app centralisé (" + APP.get("APP_NAME", "?") + ")")
 sys.exit(1 if bad else 0)

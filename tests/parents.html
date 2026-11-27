@@ -57,7 +57,7 @@ async function importAs(code, nick) {
       homeTab = "today"; screenHome(); ok(!app.querySelector("#parentgo"), "pas de case ni de bouton sur l'accueil");
       homeTab = "prog"; screenHome(); app.querySelector("#parentgo").click();
       await until(() => /Ce qu'ils verront/.test(app.textContent));
-      ok(/Ce qu'ils verront/.test(txt()) && /Ce qu'ils ne verront pas/.test(txt()) && /3 problèmes de ton carnet d.erreurs, pour les résoudre/.test(txt()), "écran de transparence : " + txt().slice(0, 200));
+      ok(/Ce qu'ils verront/.test(txt()) && /Ce qu'ils ne verront pas/.test(txt()) && /3 problèmes de tes pépites à polir, pour les résoudre/.test(txt()) /* 27.11 : carnet → À polir */, "écran de transparence : " + txt().slice(0, 200));
       ok(!over(app).length, "débordement écran enfant " + over(app));
       document.getElementById("ppreview").click(); await until(() => app.querySelector(".par-week"));
       ok(/aperçu/.test(txt()) && /La semaine de votre enfant/.test(txt()), "aperçu de la page parent");
@@ -120,7 +120,7 @@ async function importAs(code, nick) {
     const r5 = await importAs("0" + Backup.b64(new TextEncoder().encode(JSON.stringify(noPid))));
     ok(r5 === "choix" && app.querySelectorAll("[data-kid]").length === 0 || r5 === "choix", "code sans identifiant : question " + r5);
     document.getElementById("pnick").value = "Ancien"; document.getElementById("pnew").click(); await until(() => app.querySelector(".par-week"));
-    ok(Parents.load().kids.length === 4 && /carnet d'erreurs est vide/.test(txt()), "ancien code sans carnet : pas d'erreur");
+    ok(Parents.load().kids.length === 4 && /Rien à polir/.test(txt()) /* 27.11 : carnet → À polir */, "ancien code sans carnet : pas d'erreur");
     /* 8. Code abîmé */
     parentImport("1abc"); await until(() => /incomplet/.test(txt())); ok(/Ce lien est incomplet/.test(txt()), "code abîmé");
     /* 9. Route : #parent seul → dernier enfant vu ; rien n'est écrasé, rien n'est envoyé */

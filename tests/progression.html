@@ -30,9 +30,9 @@ ok(w.ups.length===2&&w.ups[0].cid==="fracadd:1"&&w.ups[0].b===2.5&&w.ups[0].a===
 ok(w.cons.length===2&&w.cons.includes("prio")&&w.cons.includes("puiss"),"1 notions consolidées "+w.cons);
 ok(w.fixed===2&&w.days===3&&w.n===15&&w.first.length===1&&w.since===null,"1 carnet/jours "+JSON.stringify({f:w.fixed,d:w.days,n:w.n,fi:w.first.length,s:w.since}));
 let t=show("cas 1");
-ok(t.includes("Cette semaine : 2 compétences ont monté, 2 notions consolidées et 2 erreurs effacées du carnet.")&&t.includes("Plus belle progression : "+COMPS.fracadd[1]+" (2,5 → 5)."),"1 phrase : "+t);
+ok(t.includes("Cette semaine : 2 compétences ont monté, 2 notions consolidées et 2 pépites polies.") /* 27.11 : erreurs effacées → pépites polies */&&t.includes("Plus belle progression : "+COMPS.fracadd[1]+" (2,5 → 5)."),"1 phrase : "+t);
 app.innerHTML=weekCard();const ct=app.textContent;
-ok(/Jours actifs\s*3 \/ 7/.test(ct)&&/2 compétences en hausse/.test(ct)&&/2,5→5/.test(ct.replace(/\s/g,""))&&/2 notions consolidées/.test(ct)&&/2 erreurs effacées/.test(ct)&&/1 première note/.test(ct),"1 carte : "+ct.replace(/\s+/g," "));
+ok(/Jours actifs\s*3 \/ 7/.test(ct)&&/2 compétences en hausse/.test(ct)&&/2,5→5/.test(ct.replace(/\s/g,""))&&/2 notions consolidées/.test(ct)&&/2 pépites polies/.test(ct)&&/1 première note/.test(ct),"1 carte : "+ct.replace(/\s+/g," "));
 // Carte en tête de Progrès
 homeTab="prog";screenHome();const panel=app.querySelector(".home-panel");ok(panel&&panel.firstElementChild&&panel.firstElementChild.classList.contains("week-card"),"1 carte en tête de Progrès");
 ok(!over(panel).length,"1 débordement Progrès "+over(panel).join());

@@ -44,9 +44,9 @@ try {
   state.carnet = [{ id: ids[2], d: 1, code: "x", date: day(), ok: 0 }]; state.carnetOut = [];
   sess("mixte", [ids[2] + "|1|app", ids[3] + "|1|app"]); nextQuestion(); answer(true);
   ok(!state.carnet.length && session.fixedN === 1, "28. grande difficulté : réussite du premier coup en séance ordinaire = erreur de la notion effacée");
-  ok(/1 effacée cette semaine/.test(carnetCard(true)), "28. carnet : « 1 effacée cette semaine »");
+  ok(/1 polie cette semaine/.test(carnetCard(true)), "28. À polir : « 1 polie cette semaine »"); /* 27.11 (univers Pépite, libellés renommés : carnet → « À polir », série → filon, points → pépites) */
   state.carnet = [{ id: ids[3], d: 1, code: "z", date: day(), ok: 0 }]; state.carnetOut = [addDays(day(), -2), day()];
-  ok(/2 effacées cette semaine/.test(carnetCard(true)) && /2 effacées cette semaine/.test(carnetCard(false)), "28. accueil et carnet : « 2 effacées cette semaine »");
+  ok(/2 polies cette semaine/.test(carnetCard(true)) && /2 polies cette semaine/.test(carnetCard(false)), "28. accueil et À polir : « 2 polies cette semaine »");
 
   /* 28 bis. notions de fin de primaire (src/primaire.js) : jamais au carnet, ni sur la carte de progression, ni dans « Ma semaine » */
   fresh(P9); PRIM.ensure(state, "p8tables"); Object.assign(state.notions.p8tables, { seen: 3, m: 0.9 }); state.carnet = [];
@@ -84,7 +84,7 @@ try {
   ok(/2 questions réussies et 1 solution reconstruite/.test(h2) && !/Séance faite/.test(h2), "31. titre du bilan : « " + h2 + " »");
   fresh(P9, { streak: { count: 3, last: addDays(day(), -4), best: 5 } }); screenHome();
   const sc4 = (app.querySelector(".sess-card") || {}).textContent || "";
-  ok(/Content de te revoir !/.test(sc4) && /Ta série de 3 jours s'est arrêtée/.test(sc4), "31. retour après 4 jours : mot d'accueil + phrase de série");
+  ok(/Content de te revoir !/.test(sc4) && /Ton filon de 3 jours s'est arrêté/.test(sc4), "31. retour après 4 jours : mot d'accueil + phrase du filon"); /* 27.11 (univers Pépite, libellés renommés : carnet → « À polir », série → filon, points → pépites) */
   fresh(P9, { streak: { count: 3, last: addDays(day(), -2), best: 5, jokerWk: Engine.weekOf(day()) } }); screenHome();
   ok(!/Content de te revoir/.test((app.querySelector(".sess-card") || {}).textContent || ""), "31. absence d'un jour : pas de mot d'accueil");
 

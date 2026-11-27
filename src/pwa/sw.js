@@ -5,7 +5,7 @@
 // 27.11 (agent ordre) : le code est publié en segments dans l'ordre des sources (docs/sNN.js, build.py) ; build.py les
 // ajoute tous à CORE (précache d'installation) : hors ligne complet, toute classe, et changement de classe hors ligne.
 const CACHE = "5m2m-__VERSION__";
-const CORE = ["./", "./index.html", "./start.js?v=__VERSION__", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
+const CORE = ["./", "./index.html", "./start.js?v=__VERSION__", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./icon-maskable-192.png", "./icon-maskable-512.png", "./favicon.svg",
   /* 24.11 : MathJax et polices hébergés avec l'app (docs/vendor/, plus de Cloudflare ni de Google Fonts) */
   "./vendor/mathjax/tex-svg.js", "./vendor/fonts/atkinson-400.woff2", "./vendor/fonts/atkinson-700.woff2",
   "./vendor/fonts/bricolage-var.woff2", "./vendor/fonts/jetbrainsmono-var.woff2"];

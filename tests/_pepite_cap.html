@@ -1,0 +1,179 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="budget" content="200000">
+<link rel="stylesheet" href="../src/style.css"><link rel="stylesheet" href="../src/parents.css"><link rel="stylesheet" href="../src/presente.css">
+<script>
+/* 27.11 (agent écrans) : affichages téléphone / tablette / ordinateur. Page de test ET de captures.
+   Sans paramètre : la page charge des cadres de 1440 × 900, 1280 × 800, 1024 × 768, 820 × 1180, 1180 × 820 et 360 × 640
+   (#cadre&w=…&h=…&ecran=…) et contrôle dans chacun, pour chaque écran (accueil, question avec figure, question avec pavé,
+   problème, leçon active, bilan, Progrès, Mes compétences, Réglages) : pas de débordement horizontal, classe d'écran
+   correcte, option des Réglages respectée et gardée, réponse et « Vérifier » visibles sans défiler sur ordinateur, et,
+   à 360 px, mise en page identique au pixel près à celle sans classe d'écran (= avant le 27.11).
+   Captures : #cap=<écran>&w=…&h=…[&ecran=…] (tools/ecrans_captures.sh). Tirages et date fixes dans les cadres. */
+const P = new URLSearchParams(location.hash.slice(1));
+window.FRAME = P.has("cadre");
+if (FRAME) {
+  let s = 20261127; window.reseed = () => { s = 20261127; }; Math.random = () => { s |= 0; s = (s + 0x6D2B79F5) | 0; let t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const D = Date, T0 = new D("2026-11-27T10:00:00").getTime(), t0 = D.now();
+  class FD extends D { constructor(...a) { if (a.length) super(...a); else super(T0 + (D.now() - t0)); } static now() { return T0 + (D.now() - t0); } }
+  window.Date = FD;
+  try { localStorage.clear(); } catch (e) {}
+  if (P.get("ecran")) try { localStorage.setItem("m2m-ui", JSON.stringify({ fs: 1, vib: true, ecran: P.get("ecran") })); } catch (e) {}
+  window.fetch = () => Promise.resolve(new Response("{}")); if (navigator.sendBeacon) navigator.sendBeacon = () => true;
+  window.confirm = () => true; window.alert = () => {}; window.ensurePacks = () => Promise.resolve();
+  if (P.has("cap")) {
+    window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "global" }, startup: { typeset: false } };
+    document.write('<link rel="stylesheet" href="../docs/vendor/fonts/fonts.css"><script src="../docs/vendor/mathjax/tex-svg.js"><\/script>');
+  } else { window.MathJax = { typesetPromise: () => Promise.resolve() }; Element.prototype.scrollIntoView = function () {}; }
+}
+</script>
+<main id="app"></main>
+<script>if (FRAME) document.head.insertAdjacentHTML("beforeend", "<style>*, *::before, *::after { animation: none !important; transition: none !important; }</style>");</script>
+<script>if (FRAME) document.write('<script src="../src/curriculum.js"><\/script><script src="../src/ordre.js"><\/script><script src="../src/expr.js"><\/script><script src="../src/figures.js"><\/script><script src="../src/geo.js"><\/script><script src="../src/generators.js"><\/script><script src="../src/gen2.js"><\/script><script src="../src/gen3.js"><\/script><script src="../src/variantes.js"><\/script><script src="../src/defis_9.js"><\/script><script src="../src/defis_910.js"><\/script><script src="../src/defis_2c.js"><\/script><script src="../src/defis_sec2.js"><\/script><script src="../src/competences.js"><\/script><script src="../src/referentiel.js"><\/script><script src="../src/trx.js"><\/script><script src="../src/ch11_prop.js"><\/script><script src="../src/ch11_litt.js"><\/script><script src="../src/ch1c_eq.js"><\/script><script src="../src/ch1c_sys.js"><\/script><script src="../src/ch11_no.js"><\/script><script src="../src/ch11_gm.js"><\/script><script src="../src/ch11_ang.js"><\/script><script src="../src/ch11_thales.js"><\/script><script src="../src/ch11_proba.js"><\/script><script src="../src/ch1c_no.js"><\/script><script src="../src/ch1c_fct.js"><\/script><script src="../src/ch1c_alg.js"><\/script><script src="../src/ch1c_f2b.js"><\/script><script src="../src/ch11_no2.js"><\/script><script src="../src/ch1c_geo.js"><\/script><script src="../src/ch1c_trig.js"><\/script><script src="../src/ch_mp1.js"><\/script><script src="../src/ch11_fct.js"><\/script><script src="../src/ch10_no.js"><\/script><script src="../src/ch_mp2.js"><\/script><script src="../src/ch_mp3.js"><\/script><script src="../src/ch_mp4.js"><\/script><script src="../src/fr_lycee.js"><\/script><script src="../src/fr_2nde.js"><\/script><script src="../src/ch3c_ana.js"><\/script><script src="../src/ch3c_geo.js"><\/script><script src="../src/ch4c_ana.js"><\/script><script src="../src/ch4c_trous.js"><\/script><script src="../src/ch2c.js"><\/script><script src="../src/ch1c_arg.js"><\/script><script src="../src/ch1c_trous.js"><\/script><script src="../src/ch1c_argact.js"><\/script><script src="../src/ch11_rep3d.js"><\/script><script src="../src/perco.js"><\/script><script src="../src/primaire.js"><\/script><script src="../src/fr_college.js"><\/script><script src="../src/fr_1re.js"><\/script><script src="../src/fr_3e.js"><\/script><script src="../src/fr_tle.js"><\/script><script src="../src/fr_fin.js"><\/script><script src="../src/fr_trous.js"><\/script><script src="../src/fr_couv.js"><\/script><script src="../src/ref_matu.js"><\/script><script src="../src/ref_fr.js"><\/script><script src="../src/ref_co.js"><\/script><script src="../src/ref_mp.js"><\/script><script src="../src/defis.js"><\/script><script src="../src/riche.js"><\/script><script src="../src/riche_11b.js"><\/script><script src="../src/riche_11c.js"><\/script><script src="../src/riche_1c.js"><\/script><script src="../src/riche_sys1c.js"><\/script><script src="../src/riche_9.js"><\/script><script src="../src/riche_10.js"><\/script><script src="../src/riche_mp2.js"><\/script><script src="../src/riche_mp1.js"><\/script><script src="../src/riche_2c.js"><\/script><script src="../src/riche_col34.js"><\/script><script src="../src/riche_mp34.js"><\/script><script src="../src/curieux.js"><\/script><script src="../src/histoire.js"><\/script><script src="../src/badges.js"><\/script><script src="../src/backup.js"><\/script><script src="../src/qr.js"><\/script><script src="../src/lessons.js"><\/script><script src="../src/lessons2.js"><\/script><script src="../src/dyn.js"><\/script><script src="../src/manip.js"><\/script><script src="../src/active.js"><\/script><script src="../src/act_prop11.js"><\/script><script src="../src/act_litt11.js"><\/script><script src="../src/act_eq1c.js"><\/script><script src="../src/act_sys1c.js"><\/script><script src="../src/act_ch11b.js"><\/script><script src="../src/act_ch11c.js"><\/script><script src="../src/act_9a.js"><\/script><script src="../src/act_9b.js"><\/script><script src="../src/act_10a.js"><\/script><script src="../src/act_10b.js"><\/script><script src="../src/act_11d.js"><\/script><script src="../src/act_1c.js"><\/script><script src="../src/act_mp2.js"><\/script><script src="../src/act_mp34.js"><\/script><script src="../src/act_2c.js"><\/script><script src="../src/act_col34.js"><\/script><script src="../src/act_col34b.js"><\/script><script src="../src/act_manip.js"><\/script><script src="../src/act_manip2.js"><\/script><script src="../src/fr_act.js"><\/script><script src="../src/sujet.js"><\/script><script src="../src/qcm.js"><\/script><script src="../src/engine.js"><\/script><script src="../src/parents.js"><\/script><script src="../src/presente.js"><\/script><script src="../src/app.js"><\/script>');</script>
+<script>
+const W_ = +P.get("w") || 1440, H_ = +P.get("h") || 900;
+let TAILLES = [[1440, 900, "auto", "ordi"], [1280, 800, "auto", "ordi"], [1024, 768, "auto", "ordi"], [820, 1180, "tab", "tablette"], [1180, 820, "tab", "tablette"], [360, 640, "auto", "tel"], [1440, 900, "tel", "tel"], [1280, 800, "tab", "tablette"]];
+if (!FRAME) {
+  document.body.style.cssText = "margin:0;padding:0;background:#777";
+  const pre = document.createElement("pre"); pre.id = "out"; pre.textContent = "en cours";
+  if (P.has("cap")) {
+    /* capture : un cadre à la taille exacte (Chromium sans interface impose une fenêtre d'au moins 500 px) */
+    document.body.innerHTML = '<iframe src="_pepite_cap.html#cadre&' + location.hash.slice(1) + '" style="width:' + W_ + 'px;height:' + H_ + 'px;border:0;display:block"></iframe>';
+  } else {
+    document.body.appendChild(pre);
+    const res = []; let k = 0;
+    if (P.get("only")) TAILLES.splice(0, TAILLES.length, ...TAILLES.filter((t) => t.slice(0, 3).join(",").startsWith(P.get("only"))));
+    const next = () => {
+      if (k >= TAILLES.length) { const bad = res.filter((l) => /ÉCHEC|EXC/.test(l)); pre.textContent = bad.concat(res.filter((l) => !/ÉCHEC|EXC/.test(l))).join("\n") + "\n" + (bad.length ? bad.length + " ÉCHEC(S)" : "tout ok"); return; }
+      const [w, h, e, cls] = TAILLES[k++], f = document.createElement("iframe");
+      f.style.cssText = "width:" + w + "px;height:" + h + "px;border:0;display:block";
+      f.src = "_pepite_cap.html#cadre&run&w=" + w + "&h=" + h + "&ecran=" + e + "&cls=" + cls;
+      const onm = (ev) => { if (ev.source !== f.contentWindow || typeof ev.data !== "string" || !ev.data.startsWith("ecr:")) return; removeEventListener("message", onm); res.push(...ev.data.slice(4).split("\n").filter(Boolean)); f.remove(); next(); };
+      addEventListener("message", onm); document.body.insertBefore(f, pre);
+    };
+    next();
+  }
+} else window.addEventListener("load", () => {
+  const W = innerWidth, H = innerHeight, tag = W + "×" + H + (P.get("ecran") !== "auto" ? " (" + P.get("ecran") + ")" : "") + " : ";
+  const out = [], fail = [];
+  const ok = (c, m) => (c ? out : fail).push((c ? "ok " : "ÉCHEC ") + tag + m);
+  const newSt = (g) => { g = g || 11; for (const k of Object.keys(UI)) if (!["fs", "vib", "ecran"].includes(k)) delete UI[k]; uiSave(); homeTab = "today"; state = Engine.newState({ system: "CH", grade: g, track: g >= 12 ? "college" : "co", minutes: 5 }); Engine.autoInit(state); state.tourDone = true; state.placed = true; state.homeVisits = 9; save(); };
+  const opt = (o) => Object.assign({ eyebrow: "Séance · question 2 sur 5", onDone: () => 3, onNext: () => 0, track: "" }, o || {});
+  const qWith = (pred) => { for (const n of NOTIONS) for (const d of [2, 1, 3]) { let q = null; try { q = Engine.build(n.id, d, 11); } catch (e) {} if (q && pred(q)) return Engine.finalize(state, n.id, q); } return null; };
+  const errs = () => { let k = 0; for (const n of NOTIONS) { if (k >= 3) break; let q = null; try { q = Engine.build(n.id, 1, 11); } catch (e) {} if (q && q.code && !q.parts && carnetAdd(n.id, 1, q.code, "", "")) k++; } save(); };
+  const SCR = {
+    accueil: () => { newSt(); homeTab = "today"; screenHome(); },
+    figure: () => { newSt(); renderQuestion(qWith((q) => q.fig && !q.parts && String(q.q).length > 60 && /<svg/.test(q.fig)), opt({ onNotYet: () => 0, onEasy: () => 0 })); },
+    pave: () => { newSt(); renderQuestion(qWith((q) => !q.fig && !q.parts && q.spec && q.spec.kind === "value"), opt({ onNotYet: () => 0, onEasy: () => 0 })); },
+    probleme: () => { newSt(); session = { plan: ["x"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; let q = null; for (const n of NOTIONS) { if (!hasProb(n.id)) continue; try { q = Engine.make(state, n.id, 4); } catch (e) { q = null; } if (q && q.parts && q.parts.length >= 3 && String(q.q).length > 120) break; } renderQuestion(q, opt({ eyebrow: "🔍 Problème de la semaine" })); },
+    lecon: () => { newSt(); screenLesson("fractout", () => {}); },
+    bilan: () => { newSt(); session = { fmt: "revision", plan: ["eq1|1|rev", "eq1|1|rev", "eq1|1|rev", "eq1|1|rev"], i: 4, score: 3, answered: 4, start: Date.now() - 300000, elo0: state.elo.r - 12, ids: new Set(["eq1"]) }; screenSummary(); },
+    progres: () => { newSt(); homeTab = "prog"; screenHome(); },
+    competences: () => { newSt(); screenComps(); },
+    reglages: () => { newSt(); screenSettings(); },
+    curlogo: () => { newSt(); screenCurious(Curieux.build("logo", 3), () => 0); },
+    entree: () => { newSt(); state = null; screenWelcome(); },
+    decouvrir: () => { newSt(); screenDecouvrir(); },
+    parents: () => { newSt(); screenParents(); },
+    filon: () => { newSt(); state.streak = { count: 5, last: addDays(day(), -1), best: 7 }; ypAdd(state, 37); save(); homeTab = "today"; screenHome(); },
+    polir: () => { newSt(); errs(); homeTab = "carnet"; screenHome(); },
+    bilanfilon: () => { newSt(); state.streak = { count: 4, last: day(), best: 4 }; session = { plan: ["eq1|1", "eq1|1", "eq1|1", "eq1|1", "eq1|1"], i: 5, score: 4, answered: 5, start: Date.now() - 300000, elo0: state.elo.r - 12, ids: new Set(["eq1"]), solvedN: 4, fixedN: 1, ypg: 31 }; screenSummary(); },
+    parent: () => { newSt(); errs(); state.streak = { count: 3, last: day(), best: 3 }; state.history = [0, 1, 3, 4].map((k) => ({ date: addDays(day(), -k), n: 5, score: 4 })); save(); Backup.encode(state).then((code) => screenParentView(null, { code, preview: true, back: () => 0 })); },
+  };
+  const show = (k) => { reseed(); session = null; document.querySelectorAll("#tour, .collector-bg").forEach((t) => t.remove()); SCR[k](); document.querySelectorAll("#tour, .collector-bg").forEach((t) => t.remove()); window.scrollTo(0, 0); };
+  if (P.has("cap")) { try { show(P.get("cap")); } catch (e) { document.body.insertAdjacentHTML("afterbegin", "<pre>EXC " + e.message + "</pre>"); } return; }
+  try {
+    const H5 = document.documentElement;
+    ok(H5.classList.contains("ecran-" + P.get("cls")), "classe ecran-" + P.get("cls") + " (" + H5.className + ")");
+    /* signature de mise en page : position et taille de chaque élément affiché */
+    const sig = () => { let x = 5381, n = 0; for (const el of document.body.querySelectorAll("*")) { const r = el.getBoundingClientRect(); if (!r.width && !r.height) continue; n++; for (const v of [r.left, r.top, r.width, r.height]) x = (Math.imul(x, 33) + Math.round(v * 2)) | 0; } return n + "/" + (x >>> 0).toString(36); };
+    const sigs = {};
+    for (const k of Object.keys(SCR)) {
+      show(k);
+      /* débordement horizontal : la page, et tout élément hors d'un conteneur à défilement */
+      const bad = [];
+      if (H5.scrollWidth > W + 1) bad.push("page " + H5.scrollWidth + " px");
+      for (const el of document.body.querySelectorAll("#app *, .qbar *")) {
+        const r = el.getBoundingClientRect(); if (!r.width || bad.length > 3) continue;
+        if (r.right <= W + 1 && r.left >= -1) continue;
+        let p = el.parentElement, clip = false; while (p && p !== document.body) { const o = getComputedStyle(p).overflowX; if (o !== "visible") { clip = true; break; } p = p.parentElement; }
+        const shut = el.closest("details:not([open])"); /* contenu d'un <details> fermé : pas affiché */
+        if (!clip && !el.closest(".sr-only") && !(shut && !el.closest("summary"))) bad.push((el.id || el.className || el.tagName) + " " + Math.round(r.left) + "→" + Math.round(r.right));
+      }
+      ok(!bad.length, k + " : rien ne déborde" + (bad.length ? " — " + bad.join(" | ") : ""));
+      if (P.get("cls") === "ordi" && /figure|pave|probleme/.test(k)) {
+        const a = document.querySelector("#ans, #p0"), c = document.getElementById("check"), ra = a.getBoundingClientRect(), rc = c.getBoundingClientRect();
+        ok(ra.top >= 0 && ra.bottom <= H && rc.top >= 0 && rc.bottom <= H, k + " : réponse et « Vérifier » visibles sans défiler (" + Math.round(ra.bottom) + ", " + Math.round(rc.bottom) + " / " + H + ")");
+        { const b = document.getElementById("qbar"), ans = document.querySelector(".q-r .answer"); ok(getComputedStyle(b).position !== "fixed" && !!b.closest(".q-r") && !!ans && b.getBoundingClientRect().top >= ans.getBoundingClientRect().top, k + " : barre d'action dans la colonne de réponse, sous la réponse, pas collée au bord de l'écran"); }
+      }
+      /* 27.11 soir (revue des écrans n° 1, 4, 6, 7) */
+      if (H5.classList.contains("ecran-2col") && /figure|pave|probleme/.test(k)) {
+        const L = document.querySelector(".q-l"), oy = L && getComputedStyle(L).overflowY;
+        ok(!!L && (L.scrollHeight > L.clientHeight + 8 || !/auto|scroll/.test(oy)), k + " : pas de barre de défilement dans l'énoncé quand il tient (" + (L ? L.scrollHeight + "/" + L.clientHeight + " " + oy : "pas de .q-l") + ")");
+      }
+      if (P.get("cls") === "ordi" && W === 1024 && /figure|pave/.test(k)) ok(H5.scrollHeight <= H, k + " : 1024 × 768, la question tient sans défiler (page " + H5.scrollHeight + " / " + H + ")");
+      if (P.get("cls") === "tablette" && /figure|pave/.test(k)) {
+        const ks = [...document.querySelectorAll("#kp button")].map((b) => Math.round(b.getBoundingClientRect().height)).filter((x) => x > 0);
+        ok(ks.length && Math.min(...ks) >= 52, k + " : tablette, touches du pavé ≥ 52 px (" + (ks.length ? Math.min(...ks) : "aucune") + ")");
+      }
+      if (P.get("cls") === "ordi" || P.get("cls") === "tablette") {
+        const tiny = [...document.querySelectorAll("#app *")].filter((el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) && el.getBoundingClientRect().width && !el.closest("details:not([open]), .sr-only") && parseFloat(getComputedStyle(el).fontSize) < 11.9);
+        ok(!tiny.length, k + " : aucun texte sous 12 px" + (tiny.length ? " — " + tiny.slice(0, 4).map((el) => Math.round(parseFloat(getComputedStyle(el).fontSize)) + " px « " + el.textContent.trim().slice(0, 16) + " »").join(" | ") : ""));
+      }
+      if (P.get("cls") === "tel") {
+        const s1 = sig(); sigs[k] = s1;
+        const cl = H5.className; H5.className = H5.className.replace(/\becran-\S+/g, "").trim(); show(k); const s0 = sig(); H5.className = cl;
+        ok(s1 === s0, k + " : mise en page au pixel près sans classe d'écran (" + s1 + (s1 === s0 ? "" : " ≠ " + s0) + ")");
+      }
+    }
+    /* 27.11 soir (revue des écrans n° 2, 3, 5, 8) : Histoire « À toi », retour après une erreur, pas à pas, Progrès, tablette */
+    if (P.get("cls") !== "tel") {
+      const two = H5.classList.contains("ecran-2col"), vis = (el) => { const r = el && el.getBoundingClientRect(); return !!r && r.width > 0 && r.top >= 0 && r.bottom <= H; };
+      newSt(); reseed(); screenHistory(0, () => {}); window.scrollTo(0, 0);
+      if (two) ok(vis(document.getElementById("hans")) && vis(document.getElementById("hok")), "Histoire « À toi » : réponse et « Vérifier » visibles sans défiler (" + Math.round(document.getElementById("hok").getBoundingClientRect().bottom) + " / " + H + ")");
+      if (P.get("cls") === "ordi") { const kb = document.querySelector("#kp button"); ok(kb && kb.getBoundingClientRect().height <= 46, "Histoire : pavé compact de l'ordinateur (" + (kb ? Math.round(kb.getBoundingClientRect().height) : "-") + " px)"); }
+      newSt(); reseed(); session = null;
+      const q = qWith((q) => q.guide && q.guide.length >= 2 && !q.parts && q.spec && q.spec.kind === "value");
+      renderQuestion(q, opt({ onNotYet: () => 0, onEasy: () => 0 }));
+      const inp = document.getElementById("ans"); inp.value = "123456"; inp.dispatchEvent(new Event("input")); document.getElementById("check").click();
+      inp.value = "654321"; inp.dispatchEvent(new Event("input")); document.getElementById("check").click();
+      const bar = document.getElementById("qbar"), fb = document.getElementById("fb");
+      if (two) ok(!!(fb && bar && fb.compareDocumentPosition(bar) & Node.DOCUMENT_POSITION_FOLLOWING), "retour après une erreur : barre d'action (« Continuer ») sous le retour");
+      const gb = document.getElementById("guide"); if (gb) gb.click(); window.scrollTo(0, 0);
+      const gok = document.querySelector("#gs0 .gok");
+      const hit = (el) => { if (!el) return false; const r = el.getBoundingClientRect(), t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return !!t && el.contains(t); };
+      if (two) ok(gb && vis(gok) && hit(gok), "pas à pas : « Vérifier l'étape » visible sans défiler et pas cachée par la barre (" + (gok ? Math.round(gok.getBoundingClientRect().bottom) : "-") + " / " + H + ")");
+      if (P.get("cls") === "tablette") { const ks = [...document.querySelectorAll("#gs0 .keypad button")].map((b) => b.getBoundingClientRect().height); ok(ks.length && Math.min(...ks) >= 52, "pas à pas, tablette : touches ≥ 52 px (" + Math.round(Math.min(...ks)) + ")"); }
+      newSt(); homeTab = "prog"; screenHome();
+      const map = document.querySelector(".pmap-card"), first = document.querySelector('.home-panel[data-tab="prog"] > :first-child');
+      if (two) ok(map && first && map.getBoundingClientRect().left > first.getBoundingClientRect().right, "Progrès : carte de progression dans la colonne de droite");
+      if (P.get("cls") === "tablette") {
+        const sq = document.querySelector(".pm-sq"), r = sq.getBoundingClientRect(), a = getComputedStyle(sq, "::after"), ins = parseFloat(a.top) || 0;
+        ok(r.height - 2 * ins >= 44 && a.content !== "none", "tablette : zone de toucher des cases de la carte ≥ 44 px (" + Math.round(r.height - 2 * ins) + ")");
+      }
+      if (P.get("cls") === "ordi") ok(getComputedStyle(H5).scrollbarGutter === "stable", "ordinateur : place de la barre de défilement réservée (en-tête sans décalage)");
+    }
+    /* mesures du 27.11 avant les affichages (master 2618068, mêmes tirages et même date) : info seulement, car tout
+       changement de contenu les modifie ; le contrôle qui compte est la comparaison « sans classe d'écran » ci-dessus. */
+    const AVANT = {"accueil":"79/gpx7s","figure":"87/a8v0ru","pave":"83/1dbjc1c","probleme":"102/ouodw0","lecon":"17/tswxgd","bilan":"37/2baz0o","progres":"164/1bevvct","competences":"804/hhl1i8","reglages":"50/p5edvz"};
+    if (P.get("cls") === "tel" && W === 360) { const d = Object.keys(sigs).filter((k) => sigs[k] !== AVANT[k]); out.push("info " + tag + (d.length ? "différent des mesures du 27.11 (contenu changé depuis ?) : " + d.join(", ") : "identique aux mesures du 27.11 avant les affichages (" + Object.keys(sigs).length + " écrans)")); }
+    /* option des Réglages : choix gardé (localStorage) et appliqué sans recharger */
+    if (W >= 1024) {
+      newSt(); screenSettings();
+      const bs = [...document.querySelectorAll("#ecran button")];
+      ok(bs.length === 4, "Réglages : 4 choix d'affichage (" + bs.length + ")");
+      for (const [v, cls] of [["tab", "tablette"], ["tel", "tel"], ["ordi", "ordi"], ["auto", W >= 1024 ? "ordi" : "tel"]]) {
+        const b = document.querySelector('#ecran button[data-v="' + v + '"]'); if (!b) continue; b.click();
+        let saved = ""; try { saved = JSON.parse(localStorage.getItem("m2m-ui")).ecran; } catch (e) {}
+        ok(H5.classList.contains("ecran-" + cls) && saved === v && document.querySelector('#ecran button[data-v="' + v + '"]').getAttribute("aria-pressed") === "true", "Réglages « " + v + " » → ecran-" + cls + ", gardé (" + saved + ")");
+      }
+      if (P.get("ecran") !== "auto") document.querySelector('#ecran button[data-v="' + P.get("ecran") + '"]').click();
+    }
+    /* détection automatique : largeur et pointeur (tactile = coarse) */
+    if (W === 1440 && P.get("ecran") === "auto") {
+      const C = [[360, true, "tel"], [412, true, "tel"], [699, true, "tel"], [768, true, "tab"], [820, true, "tab"], [1024, true, "tab"], [1180, true, "tab"], [1366, true, "tab"], [800, false, "tel"], [1023, false, "tel"], [1024, false, "ordi"], [1440, false, "ordi"]];
+      const badA = C.filter(([w, c, e]) => ecranAuto(w, c) !== e).map(([w, c, e]) => w + (c ? " tactile" : " souris") + " → " + ecranAuto(w, c) + " (attendu " + e + ")");
+      ok(!badA.length, "détection automatique : " + C.length + " cas" + (badA.length ? " — " + badA.join(" | ") : ""));
+    }
+  } catch (e) { fail.push("EXC " + tag + e.message + " " + (e.stack || "").split("\n")[1]); }
+  parent.postMessage("ecr:" + fail.concat(out).join("\n"), "*");
+});
+</script>

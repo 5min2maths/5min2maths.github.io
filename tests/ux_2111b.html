@@ -25,7 +25,7 @@ ok(/Demain : /.test(app.textContent)&&state.tomorrow&&state.tomorrow.date===addD
 const other=Object.keys(FORMATS).find(f=>f!==state.today.f);state.tomorrow={date:day(),f:other};delete state.today;ok(Engine.todayFormat(state)===other,"5 promesse tenue le lendemain");
 // 3. paliers
 /* 25.11 (grades de l'année, voulu) : le grade suit les points de l'année et non plus le Mathélo ; tests/grades_annee.html */
-ypSync();state.yp.pts=1700;homeTab="today";screenHome();ok(/Enquêteur\u00a0· 11e/.test(app.textContent)&&/Chercheur dans 100 pts/.test(app.textContent),"3 grade : "+(app.querySelector(".eb-grade")||{}).textContent);
+ypSync();state.yp.pts=1700;homeTab="today";screenHome();ok(/Enquêteur\u00a0· 11e/.test(app.textContent)&&/Chercheur dans 100 🟡/.test(app.textContent) /* 27.11 : pts → 🟡 (pépites) */,"3 grade : "+(app.querySelector(".eb-grade")||{}).textContent);
 ok(gradeOf(0).name==="Pousse"&&gradeOf(1100).name==="Explorateur"&&gradeOf(3000).name==="Expert"&&gradeOf(9000).next===null,"3 paliers en points de l'année");
 // 4. bilan de la semaine (simulé un lundi)
 const dd=new Date(day()+"T12:00:00"),dow=(dd.getDay()+6)%7,mon=addDays(day(),-dow);
@@ -38,7 +38,7 @@ ok(/<b>5<\/b> billets à <b>9<\/b> CHF/.test(boldData("Au cinéma, une famille p
 ok(!/<b>/.test(boldData('Une classe de 11e <span class="x" data-n="3">mesure</span> la cour avec une corde : quelle longueur obtient-elle au total ?').replace(/<span[^>]*>/,"")),"6 pas de gras dans 11e ni dans les attributs");
 // 7. joker de série
 state.streak={count:6,last:addDays(day(),-2),best:6};delete state.streak.jokerWk;homeTab="today";screenHome();
-ok(/Joker de série/.test(app.textContent),"7 rappel du joker");
+ok(/Joker de filon/.test(app.textContent),"7 rappel du joker"); /* 27.11 (univers Pépite, libellés renommés : carnet → « À polir », série → filon, points → pépites) */
 ok(Engine.finishDay(state,1,1)==="joker"&&state.streak.count===7,"7 joker utilisé "+JSON.stringify(state.streak));
 state.streak.last=addDays(day(),-2);state.streak.count=7;const r2=Engine.finishDay(state,1,1);
 if(Engine.weekOf(day())===Engine.weekOf(addDays(day(),-2))||true) ok(r2===""&&state.streak.count===1,"7 un seul joker par semaine "+JSON.stringify(state.streak));
