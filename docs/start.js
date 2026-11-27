@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 
 
 
-const BUILD = "90f4416a09";
+const BUILD = "6e01eb75c4";
 const ERR_MAX = 5;
 var errMem = null;
 

@@ -203,3 +203,96 @@ bruit), Emma 66 → 69 %, Hugo 63 → 66 %, Léa et Noah 81 → 81 % ; Δ Mathé
 Ce que la simulation ne mesure pas : l'effet « exemple résolu » de la question rejouée est une hypothèse (b = 0,3, comme
 le 26.11) ; sans lui, rejouer ne change presque rien à la réussite (mais garde la durée). Le bilan et le message de retour
 ne se mesurent pas en simulation : contrôlés par `tests/faibles27.html`.
+
+## Re-mesure du 27.11 après-midi (branche `agent/faibles3`)
+
+Après les lots du jour (faibles2, primaire, r27b : rejouer, carnet, positionnement, notions de l'année `ownYear`, rappels de
+primaire, leçon en tête…). Mêmes outils : `tests/_faibles.html`, **20 graines (1 à 20)**, 28 jours dès le 9.11, sans
+chapitre « en classe » ; testeur `#part=testeur` (20 graines, 14 jours). « Avant » = master du 27.11 13 h (2618068),
+« après » = cette branche.
+
+### Les leçons par séance du testeur : surtout un artefact de comptage
+
+Le script du testeur (`tests/_simulation_testeur.js`) compte une leçon dès qu'une question du programme a sa leçon due,
+**même en Automatismes et dans une séance sans leçon** (`plan.noLesson` : Révision, Défi, chapitre en classe), où l'app
+n'en montre jamais (`src/app.js`, `nextQuestion`). Depuis r27b, `Engine.ownYear` met dans ces séances une notion de
+l'année dont la leçon reste à voir (au niveau 1, sans leçon, comme prévu) : le testeur la compte comme une leçon.
+Mesure par version du compteur du testeur (leçons/séance, Lucas · Sarah · Yanis) : 26.11 soir 0,60 · 0,65 · 0,43 ;
+après faibles2 0,58 · 0,62 · 0,55 ; après r27b **0,69 · 0,72 · 0,73** ; master 0,71 · 0,71 · 0,78. Le saut vient de r27b
+(`ownYear`), seul. Compté comme l'app (nouvelle option `#part=testeur&fidele=1`) : **0,33 à 0,35 pour Lucas et Sarah
+dans toutes les versions** (0,07 à 0,15 pour Yanis), sans hausse. Le testeur ne s'est donc pas trompé sur un point :
+l'élève qui échoue reçoit plus de leçons que l'élève fort (0,35 contre 0,25 ; `_faibles` : 0,42 contre 0,28), parce que ses
+notions ratées (maîtrise < 0,4) gardent leur leçon due. C'est ce qui est corrigé.
+
+### Correction : pas de nouvelle leçon tant que la précédente n'est pas réussie (`Engine.lessonHold`)
+
+Élève en grande difficulté (`Engine.struggling`) seulement : tant que la notion de sa dernière leçon n'a pas été réussie
+une fois du premier coup depuis la leçon, la séance se fait sans leçon ni notion nouvelle (notions déjà travaillées,
+`plan.noLesson`, comme une Révision) ; l'attente s'arrête après 4 questions sur cette notion ou 7 jours (jamais bloqué),
+et si l'élève n'a pas encore deux notions travaillées, la règle ordinaire s'applique. Le mode libre suit la même règle
+(`Engine.oneLesson`). Jour de la leçon noté par `Engine.record` (première réponse après la leçon : `lessonDay`, `lessonOk0`,
+`lessonN0`). Au plus une leçon par séance : inchangé. Essayé aussi « pas de leçon le lendemain d'une leçon » : rien de
+plus chez les faibles, 0,03 à 0,05 leçon/séance de moins chez les moyens : non retenu. Test : `tests/faibles27.html`
+(5 contrôles « lessonHold »).
+
+**Tableau** (moyenne de 20 graines) : 26.11 · 27.11 matin (après faibles2) · 27.11 13 h (avant) → **après** ; leçons/séance :
+26.11 · avant → après ; carnet fin : 27.11 matin · avant → après.
+
+| Classe | Profil | 1er essai | Δ Mathélo | sans réussite | décourageantes | leçons/séance | carnet fin |
+|---|---|---|---|---|---|---|---|
+| 9e | fort | 77 % · 78 % · 77 % → 77 % | +349 · +347 · +331 → +331 | 3 % · 1 % · 0 % → 0 % | 4 % · 3 % · 2 % → 2 % | 0,28 · – · 0,28 → 0,28 | 3,5 · 3,1 → 3,1 |
+| 9e | moyen | 57 % · 56 % · 58 % → 59 % | +94 · +88 · +105 → +110 | 5 % · 7 % · 6 % → 5 % | 11 % · 11 % · 11 % → 10 % | 0,32 · – · 0,34 → 0,31 | 2,8 · 3,1 → 2,6 |
+| 9e | faible | 27 % · 31 % · 31 % → 33 % | −133 · −129 · −129 → −130 | 40 % · 34 % · 35 % → 30 % | 53 % · 46 % · 46 % → 40 % | 0,44 · – · 0,43 → 0,28 | 6,6 · 6,3 → 4,8 |
+| 9e | très faible | 11 % · 17 % · 16 % → 19 % | −255 · −254 · −255 → −236 | 70 % · 59 % · 59 % → 52 % | 78 % · 68 % · 67 % → 64 % | 0,42 · – · 0,42 → 0,24 | 8,7 · 8,7 → 6,3 |
+| 9e | irrégulier | 48 % · 53 % · 54 % → 54 % | +29 · +57 · +57 → +66 | 17 % · 9 % · 8 % → 9 % | 22 % · 16 % · 14 % → 15 % | 0,36 · – · 0,33 → 0,31 | 2,1 · 1,9 → 1,6 |
+| 10e | fort | 78 % · 78 % · 79 % → 79 % | +317 · +303 · +313 → +313 | 1 % · 2 % · 1 % → 1 % | 4 % · 4 % · 3 % → 3 % | 0,24 · – · 0,24 → 0,24 | 3,8 · 3,5 → 3,5 |
+| 10e | moyen | 67 % · 66 % · 63 % → 64 % | +92 · +67 · +59 → +63 | 4 % · 3 % · 3 % → 3 % | 7 % · 5 % · 6 % → 6 % | 0,28 · – · 0,28 → 0,24 | 6,3 · 6,0 → 6,0 |
+| 10e | faible | 39 % · 37 % · 39 % → 40 % | −180 · −184 · −174 → −187 | 26 % · 28 % · 23 % → 21 % | 37 % · 38 % · 34 % → 31 % | 0,41 · – · 0,41 → 0,21 | 11,7 · 11,5 → 9,3 |
+| 10e | très faible | 16 % · 17 % · 21 % → 21 % | −338 · −323 · −288 → −307 | 62 % · 61 % · 55 % → 52 % | 72 % · 71 % · 64 % → 61 % | 0,40 · – · 0,39 → 0,18 | 19,4 · 18,6 → 17,1 |
+| 10e | irrégulier | 59 % · 59 % · 58 % → 59 % | +3 · +3 · +15 → +15 | 7 % · 7 % · 8 % → 7 % | 11 % · 12 % · 12 % → 12 % | 0,24 · – · 0,22 → 0,17 | 4,5 · 4,8 → 4,5 |
+| 11e | fort | 80 % · 79 % · 79 % → 79 % | +323 · +316 · +312 → +311 | 1 % · 1 % · 1 % → 1 % | 2 % · 3 % · 2 % → 3 % | 0,26 · – · 0,25 → 0,25 | 3,3 · 3,7 → 3,7 |
+| 11e | moyen | 70 % · 72 % · 70 % → 70 % | +61 · +76 · +62 → +63 | 4 % · 4 % · 3 % → 3 % | 6 % · 6 % · 5 % → 4 % | 0,25 · – · 0,26 → 0,24 | 6,1 · 6,8 → 7,0 |
+| 11e | faible | 53 % · 52 % · 52 % → 54 % | −199 · −201 · −190 → −193 | 15 % · 17 % · 16 % → 12 % | 20 % · 20 % · 20 % → 18 % | 0,36 · – · 0,37 → 0,19 | 7,3 · 7,1 → 6,0 |
+| 11e | très faible | 28 % · 30 % · 32 % → 32 % | −381 · −363 · −336 → −364 | 42 % · 39 % · 36 % → 34 % | 55 % · 51 % · 46 % → 46 % | 0,41 · – · 0,41 → 0,18 | 12,3 · 10,7 → 9,2 |
+| 11e | irrégulier | 66 % · 66 % · 62 % → 63 % | −7 · −2 · −19 → −19 | 5 % · 2 % · 6 % → 5 % | 10 % · 5 % · 10 % → 10 % | 0,18 · – · 0,24 → 0,19 | 4,1 · 5,0 → 5,3 |
+| 1re | fort | 79 % · 78 % · 79 % → 79 % | +322 · +317 · +309 → +309 | 1 % · 2 % · 2 % → 2 % | 2 % · 3 % · 3 % → 3 % | 0,25 · – · 0,25 → 0,25 | 3,8 · 3,4 → 3,4 |
+| 1re | moyen | 70 % · 69 % · 69 % → 70 % | +51 · +53 · +43 → +47 | 4 % · 4 % · 4 % → 4 % | 7 % · 7 % · 7 % → 6 % | 0,25 · – · 0,27 → 0,23 | 7,0 · 7,5 → 8,0 |
+| 1re | faible | 57 % · 59 % · 57 % → 60 % | −208 · −164 · −177 → −167 | 9 % · 10 % · 12 % → 8 % | 14 % · 13 % · 15 % → 12 % | 0,33 · – · 0,33 → 0,19 | 8,3 · 7,5 → 7,3 |
+| 1re | très faible | 41 % · 39 % · 41 % → 44 % | −352 · −347 · −319 → −347 | 25 % · 28 % · 30 % → 23 % | 33 % · 35 % · 37 % → 29 % | 0,38 · – · 0,38 → 0,16 | 10,7 · 10,1 → 8,0 |
+| 1re | irrégulier | 68 % · 66 % · 65 % → 65 % | −7 · −19 · −6 → −11 | 5 % · 4 % · 4 % → 4 % | 6 % · 7 % · 8 % → 8 % | 0,19 · – · 0,20 → 0,19 | 4,8 · 4,7 → 4,8 |
+
+**Lecture.** Élèves faibles et très faibles : **leçons/séance 0,33–0,43 → 0,16–0,28** (moins que l'élève fort, 0,24–0,28),
+séances sans aucune réussite −2 à −7 points (9e très faible 59 → 52 %, 1re très faible 30 → 23 %), décourageantes −2 à
+−8 points, carnet en fin de mois plus court (9e très faible 8,7 → 6,3), réussite au 1er essai +0 à +3 points, durée des
+séances égale ou plus courte (−1 à −5 s). Δ Mathélo des très faibles de 10e–1re : −20 à −30 points (bruit des graines et
+questions plus proches de leur vrai niveau ; le Mathélo est caché). **Moyens et forts** : réussite, séances sans réussite
+et décourageantes inchangées (± 1 point) ; forts : leçons inchangées ; moyens : 0,02 à 0,04 leçon/séance de moins (les
+jours où un élève moyen passe sous 55 % de réussite, `struggling` vrai), leçon gardée tous les autres jours.
+
+**Testeur** (20 graines ; compte de l'app `fidele=1`, avant → après) : Lucas 0,35 → 0,16–0,17 leçon/séance (50 → 50–53 %),
+Sarah 0,35 → 0,15–0,17 (45 → 46–47 %), Yanis 0,15 → 0,07–0,13, Chloé 0,09 → 0,10–0,15 ; Léa, Noah, Emma, Hugo, Inès,
+Tom inchangés (0,16–0,26 ; Tom 0, trois séances par jour en Automatismes / Révision). Compteur du testeur : Lucas 0,72 → 0,53,
+Sarah 0,74 → 0,60, Yanis 0,78 → 0,67 (reste gonflé par l'artefact ci-dessus). 1er essai au testeur : Lucas 49–51 %,
+Sarah 44–47 %, Chloé 38–48 %, Yanis 26–34 % selon le tirage : la réussite ne bouge pas (plancher, voir plus haut).
+
+**À décider (n° 33)** : `ownYear` pose une notion de l'année **jamais vue, sans leçon** dans les séances sans leçon
+(0,1 à 0,6 par séance au testeur, surtout Chloé et Yanis, élèves faibles qui ne sont pas « en grande difficulté » au sens du
+moteur). Voulu (décision du 26.11 : chapitre en classe posé sans leçon), mais pour une notion jamais vue en classe, l'élève
+la découvre sans cours. Variante possible : `ownYear` ne choisit que des notions de l'année déjà travaillées, ou garde
+la notion à leçon pour une séance qui admet une leçon.
+
+### Petites corrections signalées par le testeur
+
+- **Corrigés non réduits** : FR 1re, tangente en 0 à `e^{ax} + b` : b = −1 donnait « y = 2x + 0 » (réponse refusée,
+  non réduite, et le piège « ax » devenait la bonne réponse) → b ≠ −1, corrigé par `lin`. Nouveau contrôle dans
+  `tests/corrige_valeur.js` (`CV.reduit`, clé « non réduit ») : ni « x + 0 » / « y − 0 » (terme nul après une lettre),
+  ni « 1x » / « 0x » ; il a trouvé 14 autres générateurs, tous corrigés : `ch2c.js` (rectangle en A « 1(k + 0) », droite
+  par un point « −4(x + 0) + 6 », réciproque « −(x + 0)^2 + 0 »), `defis.js` (intersection de droites « y = −x + 0 »,
+  « y = · (−2) + 4 »), `ch3c_geo.js` (coplanaires « (m − 0) »), `ch_mp4.js` (« 1(x + 0) »), `ch4c_ana.js` (« + 0n »),
+  `ch1c_sys.js` (substitution : **système dégénéré « 0x = 0 » présenté avec une solution unique**, écarté ; « 0a + b »,
+  « 1a »), `ch1c_arg.js` (« 10(3k + 0) »), `ch3c_ana.js` (« 3(x + 4)(x + 0) », « −2x + 0 » et « −2x + −2 »),
+  `fr_1re.js` (« (2x + 0)e^x », « + 0x »), `fr_2nde.js` (« y − 0 »).
+- **Carnet (présentation)** : « réussis-la deux fois de suite, elle s'efface » → « réussis-la du premier coup, elle
+  s'efface (deux fois de suite si tu es à l'aise). » ; côté parent : « Une erreur du carnet enfin réussie : effacée ! » ;
+  page parent (`src/parents.js`) : « … effacée : réussie à nouveau du premier coup. » (au lieu de « il faut la réussir deux
+  fois de suite »).

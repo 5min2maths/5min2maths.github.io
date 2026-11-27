@@ -11,6 +11,7 @@
   const fS = (v) => { const d = den(v); if (d === 1) return String(Math.round(v)); if (!d) return String(+v.toFixed(6)); const n = Math.round(v * d); return n + "/" + d; };
   const fT = (v) => { const d = den(v); if (d === 1) return String(Math.round(v)); if (!d) return String(+v.toFixed(4)).replace(".", "{,}"); const n = Math.round(v * d); return (n < 0 ? "-" : "") + "\\frac{" + Math.abs(n) + "}{" + d + "}"; };
   const pT = (v) => (v < 0 ? "(" + fT(v) + ")" : fT(v));
+  const caT = (v) => (v === 0 ? "" : v === 1 ? "a + " : v === -1 ? "-a + " : pT(v) + "a + "); /* 27.11 : ni « 0a + b », ni « 1a » */
   const N = (v) => { let [i, f] = String(+(+v).toFixed(6)).split("."); if (i.replace("-", "").length >= 4) i = i.replace(/\B(?=(\d{3})+(?!\d))/g, "\\text{'}"); return i + (f ? "{,}" + f : ""); };
   const term = (c, v, first) => (c === 0 ? "" : (first ? (c < 0 ? "-" : "") : c < 0 ? " - " : " + ") + (Math.abs(c) === 1 ? "" : fT(Math.abs(c))) + v);
   const lhs = (cs, vs = ["x", "y", "z"]) => { let s = "", f = true; cs.forEach((c, i) => { if (c) { s += term(c, vs[i], f); f = false; } }); return s || "0"; };
@@ -50,7 +51,7 @@
   const SYS2 = {
     1: [
       () => { const x = nz(-6, 7), y = nz(-6, 7), a = nz(-4, 4), b = y - a * x, c = nz(-4, 5), e = nz(-3, 4), r = c * x + e * y;
-        if (Math.abs(a) === 1 && b === 0) return null;
+        if ((Math.abs(a) === 1 && b === 0) || c + e * a === 0 || Math.abs(c + e * a) === 1) return null; /* 27.11 : « 0x = 0 » (système sans solution unique) ou « 1x » */
         return QP("Résous par substitution : " + sys("y = " + lin(a, b), lhs([c, e]) + " = " + r) + "." + PAIR, [x, y],
           "On remplace " + M("y") + " dans la 2e équation : " + M(lhs([c]) + (e < 0 ? " - " : " + ") + (Math.abs(e) === 1 ? "" : Math.abs(e)) + "(" + lin(a, b) + ") = " + r) + ", donc " + M((c + e * a) + "x = " + (r - e * b)) + ", " + M("x = " + x) + " ; puis " + M("y = " + y) + ".",
           { ctx: "subst", guide: [GN("On remplace " + M("y") + " par " + M(lin(a, b)) + " dans la 2e équation. On obtient une équation en " + M("x") + " : " + M((c + e * a) + "x = " + (r - e * b)) + ". Que vaut " + M("x") + " ?", x, M("x = " + x) + "."), GN("Puis " + M("y = " + lin(a, b)) + " avec " + M("x = " + x) + " : " + M("y") + " = ?", y, M("y = " + y) + "."), GP("La solution (« x ; y ») ?", [x, y], pairT([x, y]) + ".")],
@@ -95,8 +96,8 @@
       () => { let x1, y1, x2, y2; do { x1 = R.int(-4, 3); x2 = x1 + R.int(1, 5); const a = nz(-3, 3) * (R.rand() < 0.3 ? 0.5 : 1), b = R.int(-5, 5); y1 = a * x1 + b; y2 = a * x2 + b; } while (!Number.isInteger(y1) || !Number.isInteger(y2) || y1 === y2);
         const a = (y2 - y1) / (x2 - x1), b = y1 - a * x1;
         return QP("Trouve " + M("a") + " et " + M("b") + " pour que la droite " + M("y = ax + b") + " passe par " + M("A(" + x1 + " \\,;\\, " + y1 + ")") + " et " + M("B(" + x2 + " \\,;\\, " + y2 + ")") + ". Réponds « a ; b ».", [a, b],
-          "Système " + sys(pT(x1) + "a + b = " + y1, pT(x2) + "a + b = " + y2) + " ; on soustrait : " + M((x2 - x1) + "a = " + (y2 - y1)) + ", " + M("a = " + fT(a)) + ", puis " + M("b = " + fT(b)) + ".",
-          { ctx: "droite", guide: [GN("En remplaçant les deux points, on soustrait les équations : " + M((x2 - x1) + "a = " + (y2 - y1)) + ". " + M("a") + " = ?", a, M("a = " + fT(a)) + "."), GN("Puis " + M("b = " + y1 + " - " + pT(a) + " \\cdot " + pT(x1)) + " = ?", b, M("b = " + fT(b)) + "."), GP("Réponse « a ; b » ?", [a, b], M("y = " + lin(a, b)) + ".")],
+          "Système " + sys(caT(x1) + "b = " + y1, caT(x2) + "b = " + y2) + " ; on soustrait : " + M((x2 - x1 === 1 ? "" : x2 - x1) + "a = " + (y2 - y1)) + ", " + M("a = " + fT(a)) + ", puis " + M("b = " + fT(b)) + ".",
+          { ctx: "droite", guide: [GN("En remplaçant les deux points, on soustrait les équations : " + M((x2 - x1 === 1 ? "" : x2 - x1) + "a = " + (y2 - y1)) + ". " + M("a") + " = ?", a, M("a = " + fT(a)) + "."), GN("Puis " + M("b = " + y1 + " - " + pT(a) + " \\cdot " + pT(x1)) + " = ?", b, M("b = " + fT(b)) + "."), GP("Réponse « a ; b » ?", [a, b], M("y = " + lin(a, b)) + ".")],
             traps: [TP([b, a], "a (la pente) d'abord, puis b."), TP([(x2 - x1) / (y2 - y1), b], "La pente est (différence des y) ÷ (différence des x).")] }); },
       () => { const pf = pk([8, 9, 10, 12]), ab = pk([40, 50, 60, 80]), n1 = R.int(4, 9), n2 = n1 + R.int(3, 8);
         return QP("Un club de sport facture un abonnement fixe plus un prix par séance. " + who() + " a payé " + (ab + pf * n1) + " CHF pour " + n1 + " séances ; une amie a payé " + (ab + pf * n2) + " CHF pour " + n2 + " séances. Quel est le prix d'une séance, puis celui de l'abonnement ? Réponds « séance ; abonnement ».", [pf, ab],

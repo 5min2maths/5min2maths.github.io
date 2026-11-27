@@ -1514,6 +1514,19 @@ return !!(s && typeof LESSONS !== "undefined" && LESSONS[id] && !s.lessonSeen &&
 
 nowHas(state, id) { return this.nowActive(state) && state.now.ids.includes(id); },
 lessonFirst(state, id) { const s = state.notions[id]; return this.lessonDue(state, id) && (!s.seen || s.status === "encours") && !this.nowHas(state, id); },
+
+
+
+
+
+
+lessonHold(state) {
+if (!this.struggling(state)) return false;
+let last = null;
+for (const s of Object.values(state.notions)) if (s && s.lessonDay && (!last || s.lessonDay > last.lessonDay)) last = s;
+if (!last) return false;
+return (last.ok || 0) <= (last.lessonOk0 || 0) && (last.seen || 0) - (last.lessonN0 || 0) < 4 && last.lessonDay >= addDays(day(), -7);
+},
 lessonPick(state, ids) {
 const now = this.nowActive(state) ? state.now.ids : [], s = (id) => state.notions[id];
 const key = (id) => (now.includes(id) ? 0 : s(id).status === "encours" ? 1 : 2) * 1e5 + (s(id).status === "encours" || now.includes(id) ? this.rank(state.profile, id) : Math.round(s(id).m * 1000));
@@ -1585,6 +1598,8 @@ const nowLes = el.filter((id) => this.nowHas(state, id) && this.lessonDue(state,
 const noLes = (p) => Object.assign(p, { noLesson: true });
 if (!pend.length && !nowLes.length) return this.planSlots(state, slots);
 const exclude = new Set(pend);
+
+if (f !== "auto" && this.lessonHold(state)) { const p = this.planSlots(state, slots, { exclude }); if (new Set(p.map((e) => String(e).split("|")[0])).size >= Math.min(2, p.length) && p.length) return noLes(p); }
 if (f === "revision" || f === "defi") { const p = this.planSlots(state, slots, { exclude }); if (p.length) return noLes(p); }
 
 
@@ -1603,6 +1618,8 @@ return out;
 oneLesson(state, plan, n) {
 const idOf = (e) => String(e).split("|")[0], pend = plan.map(idOf).filter((id) => state.notions[id] && this.lessonDue(state, id));
 if (!pend.length) return plan.slice(0, n);
+
+if (this.lessonHold(state)) { const r = plan.filter((e) => !pend.includes(idOf(e))); if (r.length) return r.slice(0, n); }
 const keep = this.lessonPick(state, pend), e0 = plan.find((e) => idOf(e) === keep).split("|");
 const rest = plan.filter((e) => !pend.includes(idOf(e)));
 return [[keep, 1, ...e0.slice(2)].join("|"), ...rest].slice(0, Math.max(1, n - 1));
@@ -1755,6 +1772,8 @@ this.adapt(state, partial >= 0.99 && tries <= 1);
 return partial;
 }
 const today = day();
+
+if (s.lessonSeen && !s.lessonDay) { s.lessonDay = today; s.lessonOk0 = s.ok || 0; s.lessonN0 = s.seen || 0; }
 s.seen++;
 s.last = today;
 if (solved && tries === 1) {
@@ -2046,7 +2065,7 @@ for (const [cid, r] of Object.entries(s.comps || {})) { const id = cid.split(":"
 const now = (s.now && Array.isArray(s.now.ids) ? s.now.ids : []).filter((id) => this.label(id));
 let fete = null;
 if (w.cons.length) fete = { ic: "🏅", txt: "Une notion maîtrisée : <b>" + esc(this.label(w.cons[0]) || "") + "</b>" + (w.cons.length > 1 ? " (et " + (w.cons.length - 1) + " autre" + (w.cons.length > 2 ? "s" : "") + ")" : "") + "." };
-else if (w.fixed) fete = { ic: "📕", txt: w.fixed + " erreur" + (w.fixed > 1 ? "s" : "") + " de son carnet " + (w.fixed > 1 ? "effacées" : "effacée") + " : il faut la réussir deux fois de suite pour l'effacer." };
+else if (w.fixed) fete = { ic: "📕", txt: w.fixed + " erreur" + (w.fixed > 1 ? "s" : "") + " de son carnet " + (w.fixed > 1 ? "effacées" : "effacée") + " : réussie" + (w.fixed > 1 ? "s" : "") + " à nouveau du premier coup." };
 else if (w.ups.length) fete = { ic: "📈", txt: "Un progrès en <b>" + esc(w.ups[0].label) + "</b>." };
 else if (w.days) fete = { ic: "💪", txt: w.days + " jour" + (w.days > 1 ? "s" : "") + " de pratique : c'est l'effort qui compte." };
 return { days, n: w.days, ids: ids.slice(0, 4), more: Math.max(0, ids.length - 4), now: now.slice(0, 3), fete };

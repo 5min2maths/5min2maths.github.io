@@ -16,7 +16,23 @@ window.ensurePacks = () => Promise.resolve();
   const out = [SimFaibles.HEAD], t0 = _D.now();
   try {
     const seeds = opt("graines", "1,7,13,29,101").split(",").map(Number), v = opt("v", "").split(",").filter(Boolean), learn2 = opt("m", "") === "learn2", b = +opt("b", "0.3");
-    if (opt("part", "") === "testeur") { window.Date = _D; const R = await simulateClass({ seeds }); out.push(...R.table.map((x) => JSON.stringify(x)), "erreurs " + JSON.stringify(R.errors)); window.Date = FD; }
+    if (opt("part", "") === "testeur") {
+      /* 27.11 après-midi (#fidele=1) : le script du testeur compte une leçon dès qu'une question du programme a sa leçon due,
+         même en Automatismes ou dans une séance sans leçon (plan.noLesson), où l'app n'en montre pas (src/app.js nextQuestion).
+         fidele=1 : lessonDue rend faux pendant la séance dans ces deux cas (compte de l'app). Compte aussi, par élève,
+         les notions nouvelles posées sans leçon (« à froid ») et celles qu'ajoute Engine.ownYear. */
+      const fid = opt("fidele", "") === "1", E1 = { planSession: Engine.planSession, lessonDue: Engine.lessonDue, ownYear: Engine.ownYear, record: Engine.record, newState: Engine.newState };
+      let depth = 0, cur = null; const X = { cold: 0, own: 0, ownLes: 0, sess: 0 }, per = []; let who = -1;
+      Engine.newState = function (...a) { const r = E1.newState.apply(this, a); who++; per[who] = { cold: 0, own: 0, ownLes: 0, sess: 0 }; return r; };
+      Engine.planSession = function (st, f) { depth++; try { const p = E1.planSession.call(this, st, f); cur = { fmt: f || this.todayFormat(st), noLesson: !!p.noLesson }; per[who].sess++; return p; } finally { depth--; } };
+      Engine.ownYear = function (st, plan, f) { const b = Array.isArray(plan) ? plan.slice() : plan, r = E1.ownYear.call(this, st, plan, f); if (Array.isArray(b)) r.forEach((e, j) => { if (e !== b[j]) { per[who].own++; if (E1.lessonDue.call(this, st, String(e).split("|")[0])) per[who].ownLes++; } }); return r; };
+      if (fid) Engine.lessonDue = function (st, id) { if (!depth && cur && (cur.fmt === "auto" || cur.noLesson)) return false; return E1.lessonDue.call(this, st, id); };
+      Engine.record = function (st, id, ...a) { const ns = st.notions[id]; if (ns && !ns.seen && !ns.lessonSeen && LESSONS[id]) per[who].cold++; return E1.record.call(this, st, id, ...a); };
+      try { window.Date = _D; const R = await simulateClass({ seeds }); const k = R.table.length;
+        out.push(...R.table.map((x, i) => { const L = per.filter((_, j) => j % k === i), sm = (f) => L.reduce((s, r) => s + r[f], 0), S = sm("sess") || 1;
+          return JSON.stringify({ ...x, "à froid/séance": +(sm("cold") / S).toFixed(2), "ownYear/séance": +(sm("own") / S).toFixed(2), "ownYear à leçon due/séance": +(sm("ownLes") / S).toFixed(2) }); }), "erreurs " + JSON.stringify(R.errors)); }
+      finally { window.Date = FD; Object.assign(Engine, E1); }
+    }
     else for (const cl of opt("classes", "9e,10e,11e,1re").split(","))
       for (const p of opt("profils", "fort,moyen,faible,tresfaible,irregulier").split(","))
         out.push(SimFaibles.line(SimFaibles.avg(cl, p, { v, learn2, b, jours: +opt("jours", 28) }, seeds)));

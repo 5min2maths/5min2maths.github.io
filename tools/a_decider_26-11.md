@@ -50,6 +50,8 @@ Rien ici n'est bloquant : l'app est publiée avec le choix indiqué.
 32. **Sans chapitre « en classe »**, 78–83 % des questions d'un élève moyen de 10e–1re portent en novembre sur l'année précédente : voulu ?
 Constat : le moteur sert déjà le plus facile possible aux faibles (plancher) ; la simulation est trop pessimiste (modèle d'apprentissage) : ne plus régler le moteur sur elle, attendre les données de la 11LS.
 
+33. **(27.11 après-midi)** `ownYear` pose une notion de l'année **jamais vue, sans leçon**, dans les séances sans leçon (Révision, Défi, Automatismes) : 0,1 à 0,6 par séance au testeur, surtout chez des élèves faibles qui ne sont pas « en grande difficulté ». La garder, ou ne prendre que des notions de l'année déjà travaillées ? (rapport `eleves_faibles_26-11.md`, « Re-mesure du 27.11 après-midi »)
+
 ### Décision de l'enseignant (27.11 matin) : n° 27 à 32 validés, y compris le n° 30
 « ok pour tous même pour 4 — retravailler primaire si nécessaire » : rejouer au lieu d'ajouter, carnet à la portée,
 positionnement au niveau 1, automatismes de fin de primaire pour les 9e en grande difficulté (le décision du 26.11

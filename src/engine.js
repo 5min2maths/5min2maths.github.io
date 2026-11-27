@@ -1058,6 +1058,19 @@ const Engine = {
      l'unique leçon d'une séance qui en admet une (lessonPick), et le rappel de cours reste ouvrable dans chaque question. */
   nowHas(state, id) { return this.nowActive(state) && state.now.ids.includes(id); },
   lessonFirst(state, id) { const s = state.notions[id]; return this.lessonDue(state, id) && (!s.seen || s.status === "encours") && !this.nowHas(state, id); },
+  /* 27.11 après-midi (agent élèves faibles, re-mesure : un élève en grande difficulté recevait plus de leçons par séance
+     que l'élève fort, 0,42 contre 0,28, ses notions ratées gardant leur leçon due ; principe : moins de notions nouvelles
+     pour un élève qui échoue). Élève en grande difficulté (struggling) : pas de nouvelle leçon tant que la notion de la
+     dernière leçon n'a pas été réussie une fois du premier coup depuis (au plus 4 questions et 7 jours d'attente, pour ne
+     jamais bloquer) ; en attendant, séances sans leçon (notions déjà travaillées). Autres élèves : règle inchangée.
+     Essayé aussi « pas de leçon le lendemain d'une leçon » : rien de plus chez les faibles, moins de leçons chez les moyens. */
+  lessonHold(state) {
+    if (!this.struggling(state)) return false;
+    let last = null;
+    for (const s of Object.values(state.notions)) if (s && s.lessonDay && (!last || s.lessonDay > last.lessonDay)) last = s;
+    if (!last) return false;
+    return (last.ok || 0) <= (last.lessonOk0 || 0) && (last.seen || 0) - (last.lessonN0 || 0) < 4 && last.lessonDay >= addDays(day(), -7);
+  },
   lessonPick(state, ids) {
     const now = this.nowActive(state) ? state.now.ids : [], s = (id) => state.notions[id];
     const key = (id) => (now.includes(id) ? 0 : s(id).status === "encours" ? 1 : 2) * 1e5 + (s(id).status === "encours" || now.includes(id) ? this.rank(state.profile, id) : Math.round(s(id).m * 1000));
@@ -1129,6 +1142,8 @@ const Engine = {
     const noLes = (p) => Object.assign(p, { noLesson: true });
     if (!pend.length && !nowLes.length) return this.planSlots(state, slots);
     const exclude = new Set(pend);
+    /* 27.11 après-midi : élève en grande difficulté qui attend sa prochaine leçon (lessonHold) : séance sans leçon */
+    if (f !== "auto" && this.lessonHold(state)) { const p = this.planSlots(state, slots, { exclude }); if (new Set(p.map((e) => String(e).split("|")[0])).size >= Math.min(2, p.length) && p.length) return noLes(p); } /* au moins 2 notions déjà travaillées, sinon la règle ordinaire */
     if (f === "revision" || f === "defi") { const p = this.planSlots(state, slots, { exclude }); if (p.length) return noLes(p); }
     /* 26.11 (revue d'un testeur, jour 3) : jamais de leçon dans une série d'automatismes ; sans notion déjà travaillée,
        les questions viennent sans leçon (l'app ne montre pas de leçon dans ce format). */
@@ -1147,6 +1162,8 @@ const Engine = {
   oneLesson(state, plan, n) {
     const idOf = (e) => String(e).split("|")[0], pend = plan.map(idOf).filter((id) => state.notions[id] && this.lessonDue(state, id));
     if (!pend.length) return plan.slice(0, n);
+    /* 27.11 après-midi : élève en grande difficulté qui attend sa prochaine leçon (lessonHold) : les notions à leçon sortent */
+    if (this.lessonHold(state)) { const r = plan.filter((e) => !pend.includes(idOf(e))); if (r.length) return r.slice(0, n); }
     const keep = this.lessonPick(state, pend), e0 = plan.find((e) => idOf(e) === keep).split("|");
     const rest = plan.filter((e) => !pend.includes(idOf(e)));
     return [[keep, 1, ...e0.slice(2)].join("|"), ...rest].slice(0, Math.max(1, n - 1));
@@ -1299,6 +1316,8 @@ const Engine = {
       return partial;
     }
     const today = day();
+    /* 27.11 après-midi (lessonHold) : première réponse après la leçon : jour de la leçon, réussites et questions comptées depuis */
+    if (s.lessonSeen && !s.lessonDay) { s.lessonDay = today; s.lessonOk0 = s.ok || 0; s.lessonN0 = s.seen || 0; }
     s.seen++;
     s.last = today; /* 27.11 (revue, n° 8) : dernier jour où la notion a été posée (variété entre les jours, planSlots) */
     if (solved && tries === 1) {
