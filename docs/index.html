@@ -926,6 +926,87 @@ button.sess-info::after { content: ""; position: absolute; left: 50%; top: 50%; 
   .burst { display: none !important; }
 }
 
+/* ===== 27.11 (agent écrans) : affichages tablette et ordinateur =====
+   Classe posée sur <html> par ecranApply() (src/app.js) : ecran-tel (aucune règle ici : le téléphone ne change pas),
+   ecran-tablette, ecran-ordi ; ecran-2col quand la place permet deux colonnes (ordinateur ≥ 900 px, tablette en paysage
+   ≥ 1000 px). Lignes de texte jamais plus longues qu'au téléphone de beaucoup : colonne de lecture ≤ 720 px ; seuls les
+   écrans faits pour deux colonnes (question, accueil, bilan, Progrès, Mes compétences) prennent jusqu'à 1120 px. */
+
+/* --- Tablette : colonne plus large et plus aérée, figures et pavé plus grands, zones tactiles ≥ 44 px --- */
+.ecran-tablette body { font-size: calc(18px * var(--fs)); padding-block: 24px 48px; padding-left: max(28px, env(safe-area-inset-left, 0px)); padding-right: max(28px, env(safe-area-inset-right, 0px)); }
+.ecran-tablette #app { max-width: 720px; gap: 20px; }
+.ecran-tablette .card { padding: 22px 24px 22px 32px; gap: 16px; }
+.ecran-tablette .card::before { left: 17px; }
+.ecran-tablette .card.flat { padding: 20px; }
+.ecran-tablette .qtext { font-size: 1.2rem; }
+.ecran-tablette .fig { max-width: calc(460px * var(--fs)); }
+.ecran-tablette .fig.manip2 { max-width: 460px; }
+.ecran-tablette :is(.keypad.k-num, .keypad.k-choix) { max-width: 460px; }
+.ecran-tablette .keypad { gap: 8px; }
+.ecran-tablette .keypad button { min-height: 52px; font-size: 1.2rem; }
+.ecran-tablette :is(.seg button, .btn-ghost, .btn-sec, .ctest, .tab) { min-height: 44px; }
+.ecran-tablette .brand .fab-cmt { width: 44px; height: 44px; font-size: 1.05rem; }
+.ecran-tablette .qbar-in, .ecran-tablette .tabs-inner { max-width: 720px; }
+.ecran-tablette .qrecap { max-width: 720px; }
+.ecran-tablette .door-sq { width: 84px; height: 84px; border-radius: 22px; }
+.ecran-tablette .door-sq svg { width: 42px; height: 42px; }
+.ecran-tablette .door b { font-size: 1.05rem; }
+.ecran-tablette .door small { font-size: 0.85rem; }
+.ecran-tablette .door-badge { left: calc(50% + 28px); }
+
+/* --- Ordinateur : texte et figures confortables, pas de barre collée au bord --- */
+.ecran-ordi body { font-size: calc(18px * var(--fs)); padding-block: 28px 48px; padding-left: max(32px, env(safe-area-inset-left, 0px)); padding-right: max(32px, env(safe-area-inset-right, 0px)); }
+.ecran-ordi #app { max-width: 720px; gap: 18px; }
+.ecran-ordi .qtext { font-size: 1.2rem; }
+.ecran-ordi .fig { max-width: calc(440px * var(--fs)); }
+.ecran-ordi .tabs-inner, .ecran-ordi .qbar-in, .ecran-ordi .qrecap { max-width: 720px; }
+.ecran-ordi .keypad button { min-height: 44px; }
+.ecran-2col .q-r .keypad button { min-height: 42px; padding: 6px 0; }
+.ecran-ordi .door-sq { width: 80px; height: 80px; border-radius: 22px; }
+.ecran-ordi .door-sq svg { width: 40px; height: 40px; }
+.ecran-ordi .door b { font-size: 1.02rem; }
+.ecran-ordi .door small { font-size: 0.82rem; }
+.ecran-ordi .door-badge { left: calc(50% + 26px); }
+.ecran-ordi .door:hover .door-sq { background: var(--blue); color: var(--on-blue); }
+
+/* --- Deux colonnes (ordinateur, tablette en paysage) --- */
+.ecran-2col #app:has(> .card.q-2col, > .e-cols, > .hub, > .home-panel[data-tab="prog"]) { max-width: 1120px; }
+/* Question et problème : énoncé et figure à gauche (restent en vue), réponse et barre d'action à droite. */
+.ecran-2col .card.q-2col { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); gap: 0 36px; align-items: start; padding: 26px 30px 26px 40px; }
+.ecran-2col .card.q-2col::before { left: 20px; }
+.q-l, .q-r { display: contents; }
+.ecran-2col .q-l, .ecran-2col .q-r { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.ecran-2col .q-l { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; overflow-x: hidden; }
+.ecran-2col .q-r { border-left: 1px dashed var(--line); padding-left: 30px; }
+.ecran-2col .q-l .figwrap { justify-content: flex-start; }
+.ecran-2col .q-l .fig { max-width: min(100%, calc(480px * var(--fs))); }
+.ecran-2col .q-r .scratch-btn { align-self: flex-start; }
+.ecran-2col .q-r .keypad.k-num, .ecran-2col .q-r .keypad.k-choix { max-width: 360px; margin-inline: 0; align-self: flex-start; }
+/* barre d'action sous la réponse ; si la colonne de réponse est longue (problème), elle reste visible en bas de la colonne */
+.ecran-2col .qbar { position: sticky; bottom: 0; z-index: 5; padding: 10px 0 14px; background: var(--card); border: 0; box-shadow: 0 -10px 12px -10px rgba(20, 40, 100, .12); }
+.ecran-2col .qbar-in { max-width: none; margin: 0; height: 52px; }
+.ecran-2col #app:has(.qbar) { padding-bottom: 0; }
+.ecran-2col body:has(.qbar) .toast { bottom: 24px; }
+.ecran-2col .qrecap { display: none !important; }
+/* Bilan, Mes compétences : les cartes sur deux colonnes (sans couper une carte). */
+.ecran-2col .e-cols { columns: 2; column-gap: 20px; }
+.ecran-2col .e-cols > * { break-inside: avoid; margin: 0 0 18px; }
+.ecran-2col .e-cols > details.olds { break-inside: auto; column-span: all; }
+.ecran-2col .e-cols > .btn-primary, .ecran-2col .e-cols > .btn-sec { display: block; width: 100%; }
+.ecran-2col #app > .e-cols ~ .btn-big { max-width: 540px; align-self: center; }
+.e-cols { display: contents; }
+.ecran-2col .e-cols { display: block; }
+.ecran-2col #app:has(> .e-cols) > :is(h2, p.muted) { max-width: 720px; }
+/* Progrès : mêmes deux colonnes */
+.ecran-2col .home-panel[data-tab="prog"] { display: block; columns: 2; column-gap: 20px; }
+.ecran-2col .home-panel[data-tab="prog"] > * { break-inside: avoid; margin: 0 0 16px; }
+/* Accueil : séance à gauche, cases à droite (grille plus large) */
+.ecran-2col .hub { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); grid-template-rows: repeat(6, auto) 1fr; column-gap: 32px; row-gap: 0; }
+.ecran-2col .hub > * { grid-column: 1; margin-bottom: 14px; }
+.ecran-2col .hub > .home-head { grid-column: 1 / -1; margin-bottom: 18px; }
+.ecran-2col .hub > .doors { grid-column: 2; grid-row: 2 / -1; align-self: start; margin: 0; padding: 22px 16px; gap: 26px 12px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; }
+.ecran-2col .hub > .upd-line { grid-column: 1 / -1; }
+
 /* ---------------- Espace parent (24.11, src/parents.js) ---------------- */
 .par-list { margin: 4px 0 8px; padding: 0; list-style: none; display: grid; gap: 4px; }
 .par-list li { overflow-wrap: anywhere; }
@@ -1035,7 +1116,7 @@ window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "glo
 (function () {
   // Chargement dans l'ordre des sources (27.11, agent ordre ; build.py, tools/poids.md). S = segments (ordre de JS),
   // C = segments de chaque classe, X = paquet « x » (à la demande), U = code commun (nouvel élève).
-  var V = "90f4416a09", S = ["s00.js","s01.js","s02.js","s03.js","s04.js","s05.js","s06.js","s07.js","s08.js","s09.js","s10.js","s11.js","s12.js","s13.js","s14.js","s15.js","s16.js","s17.js","s18.js","s19.js","s20.js","s21.js","s22.js","s23.js","s24.js","s25.js","s26.js","s27.js","s28.js","s29.js","s30.js","s31.js","s32.js","s33.js","s34.js","s35.js"], C = {"9":[0,1,3,4,10,11,12,14,16,18,19,20,26,27,32,34],"10":[0,1,3,4,10,11,12,14,16,18,19,20,26,27,32,34],"11":[0,1,3,4,10,11,12,14,16,18,19,20,26,27,32,34],"12":[0,1,2,3,4,9,10,11,12,14,16,18,19,20,22,26,27,28,30,32,34],"13":[0,1,2,3,4,9,10,11,12,14,16,18,19,20,22,26,27,28,30,32,34],"14":[0,1,2,3,4,7,9,10,11,12,14,16,18,19,20,22,23,26,27,28,30,31,32,34],"15":[0,1,2,3,4,7,8,9,10,11,12,14,16,18,19,20,22,23,26,27,28,30,31,32,34],"12mp":[0,1,3,4,5,10,11,12,14,16,17,18,19,20,21,24,26,27,29,32,34],"13mp":[0,1,2,3,4,5,6,9,10,11,12,13,14,15,16,17,18,19,20,21,22,24,26,27,28,29,30,32,33,34],"14mp":[0,1,2,3,4,5,6,7,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,26,27,28,29,30,31,32,33,34],"15mp":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,26,27,28,29,30,31,32,33,34],"FR":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,26,27,28,29,30,31,32,33,34]}, X = [25,35], U = [0,3,11,18,20,26,32,34], T = [], done = [], mode = "";
+  var V = "25a250c24d", S = ["s00.js","s01.js","s02.js","s03.js","s04.js","s05.js","s06.js","s07.js","s08.js","s09.js","s10.js","s11.js","s12.js","s13.js","s14.js","s15.js","s16.js","s17.js","s18.js","s19.js","s20.js","s21.js","s22.js","s23.js","s24.js","s25.js","s26.js","s27.js","s28.js","s29.js","s30.js","s31.js","s32.js","s33.js","s34.js","s35.js"], C = {"9":[0,1,3,4,10,11,12,14,16,18,19,20,26,27,32,34],"10":[0,1,3,4,10,11,12,14,16,18,19,20,26,27,32,34],"11":[0,1,3,4,10,11,12,14,16,18,19,20,26,27,32,34],"12":[0,1,2,3,4,9,10,11,12,14,16,18,19,20,22,26,27,28,30,32,34],"13":[0,1,2,3,4,9,10,11,12,14,16,18,19,20,22,26,27,28,30,32,34],"14":[0,1,2,3,4,7,9,10,11,12,14,16,18,19,20,22,23,26,27,28,30,31,32,34],"15":[0,1,2,3,4,7,8,9,10,11,12,14,16,18,19,20,22,23,26,27,28,30,31,32,34],"12mp":[0,1,3,4,5,10,11,12,14,16,17,18,19,20,21,24,26,27,29,32,34],"13mp":[0,1,2,3,4,5,6,9,10,11,12,13,14,15,16,17,18,19,20,21,22,24,26,27,28,29,30,32,33,34],"14mp":[0,1,2,3,4,5,6,7,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,26,27,28,29,30,31,32,33,34],"15mp":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,26,27,28,29,30,31,32,33,34],"FR":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,26,27,28,29,30,31,32,33,34]}, X = [25,35], U = [0,3,11,18,20,26,32,34], T = [], done = [], mode = "";
   for (var i = 0; i < S.length; i++) T.push(i);
   window.__segs = done; window.__segNames = S; window.__ordre = { S: S, C: C, X: X, U: U }; // pour les tests
   function cle(p) {
