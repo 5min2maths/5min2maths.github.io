@@ -23,7 +23,7 @@
   const mayaW = (n) => { const b = Math.floor(n / 5), d = n % 5; return [b ? b + " barre" + (b > 1 ? "s" : "") : "", d ? d + " point" + (d > 1 ? "s" : "") : ""].filter(Boolean).join(" et "); };
 
   const HISTOIRE = [
-    { t: "Événement", titre: "Le signe « = » a été inventé en 1557", lien: "Équations",
+    { t: "Événement", titre: "Le signe « = » a été inventé en 1557", lien: "Équations", need: ["eq1"], /* 27.11 (revue, n° 5 : servi en 9e, « Résous 14x + 15 = 71 ») */
       txt: "Le Gallois Robert Recorde en avait assez d'écrire « est égal à » dans ses calculs. Dans son livre <i>The Whetstone of Witte</i> (1557), il propose deux traits parallèles de même longueur, « parce que deux choses ne peuvent être plus égales ». Son signe était beaucoup plus long que le nôtre. Sa toute première équation écrite avec ce signe : 14x + 15 = 71.",
       fig: () => svg(300, 120, `<rect x="40" y="38" width="220" height="10" rx="3" class="f-fill"/><rect x="40" y="70" width="220" height="10" rx="3" class="f-fill"/>${T(150, 108, "« is equalle to » → =", 'font-style="italic"')}${T(150, 24, "1557")}`, "le long signe égal de Recorde"),
       ex: () => ({ q: "Résous la toute première équation écrite avec le signe « = » : \\(14x + 15 = 71\\). Que vaut \\(x\\) ?", value: 4, sol: "\\(14x = 71 - 15 = 56\\), donc \\(x = 56 \\div 14 = 4\\)." }) },

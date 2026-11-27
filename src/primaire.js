@@ -467,14 +467,30 @@ const PRIM_PRE = {
    moyen de 9e). Niveau 1 seulement (le niveau 2 après une réussite faisait moins de réussites, sans gain). */
 const PRIM = {
   off: false, /* simulation avant / après (tests/_faibles.html, variante sansprim) */
-  RATE: 0.4, ELO: 875, ACQ: 2, /* notion reprise : 2 réussites du premier coup sans échec entre deux (box du moteur) */
+  RATE: 0.4, ELO: 875, ELO2: 925, ACQ: 2, /* ELO2 (27.11, revue n° 3) : plafond quand la condition de Mathélo est levée */ /* notion reprise : 2 réussites du premier coup sans échec entre deux (box du moteur) */
   isPrim(id) { return PRIM_IDS.includes(String(id).split("|")[0]); },
+  /* 27.11 (revue des élèves joués, n° 3 : Kevin, 9e très faible, « primaire : applique false » à chaque séance en 3 et en
+     6 jours ; Mathélo 880 à 899, au-dessus du seuil 875 ; réussite récente « null » tant qu'il n'y a pas 8 réponses, donc
+     jusqu'au jour 3) : (a) réussite lue dès 5 réponses ; avant, l'élève dont le positionnement s'est arrêté sur 3 ratés
+     (placeMiss) et qui ne réussit pas plus d'une fois sur deux depuis ; (b) seuil de Mathélo porté de 875 à 925 (ELO2) dans ce
+     cas (positionnement arrêté sur 3 ratés), sous le plancher (Engine.underFloor) ou en grande difficulté au départ de 2
+     jours de séance (PRIM.note, state.strugDays). L'élève moyen
+     en mauvaise passe reste écarté par la réussite ≤ 40 % ET (Mathélo ≤ 875 ou 2 jours en grande difficulté) :
+     tests/_faibles.html, colonne « séances avec prim. » des moyens, inchangée. */
   applies(state) {
     const p = state && state.profile;
     if (PRIM.off || !p || p.system !== "CH" || p.grade !== 9 || p.track === "mp" || !Engine.struggling(state)) return false;
-    const r = Engine.recentRate(state);
-    return r !== null && r <= PRIM.RATE && state.elo.r <= PRIM.ELO;
+    const L = state.last1 || [], r = L.length ? L.reduce((a, b) => a + b, 0) / L.length : null;
+    const early = L.length < 5 && (state.placeMiss || 0) >= 3, rateOk = early ? r === null || r <= 0.5 : L.length >= 5 && r <= PRIM.RATE;
+    return rateOk && (state.elo.r <= PRIM.ELO || (state.elo.r <= PRIM.ELO2 && (early || Engine.underFloor(state) || PRIM.strugLong(state))));
   },
+  /* jours (7 derniers) où l'élève était en grande difficulté au départ d'une séance ; 2 au moins = « depuis 2 séances » */
+  note(state) {
+    if (!state || !state.profile || state.profile.grade !== 9) return;
+    const t = day(), D = (Array.isArray(state.strugDays) ? state.strugDays : []).filter((x) => x !== t && x >= addDays(t, -7));
+    state.strugDays = Engine.struggling(state) ? [...D, t].slice(-3) : [];
+  },
+  strugLong(state) { return Array.isArray(state.strugDays) && state.strugDays.length >= 2; },
   acquired(state, id) { const s = state.notions[id]; return !!s && (s.box || 0) >= PRIM.ACQ; },
   ensure(state, id) {
     if (!state.notions[id]) state.notions[id] = Object.assign(Engine.newNotion("prim"), { m: 0.5, lessonSeen: true });
@@ -499,13 +515,38 @@ const PRIM = {
     for (let i = 0; i < want && cands.length; i++) {
       const pos = plan.length - 1 - i, old = String(plan[pos]).split("|"), kind = old[2];
       if (pos < 1 || PRIM.isPrim(old[0])) continue;
-      const c = cands.find((p) => !used.includes(p) && (kind !== "drill" || Engine.drillable(state, p)));
+      const c = cands.find((p) => !used.includes(p) && !plan.some((e) => String(e).split("|")[0] === p) && (kind !== "drill" || Engine.drillable(state, p)));
       if (!c) continue;
       PRIM.ensure(state, c);
       plan[pos] = c + "|1" + (kind ? "|" + (kind === "defi" || kind === "defi4" ? "app" : kind) : "");
       used.push(c);
     }
     if (used.length) { state.primLast = used; state.primN = (state.primN || 0) + used.length; }
+    return plan;
+  },
+  /* 27.11 (revue des élèves joués, n° 2, grave : Kevin, 9e très faible sans chapitre « en classe », 18 questions sur 27 sur
+     la même notion, série de 4 automatismes 4 fois decread : la limite de 2 par séance se levait faute d'autre notion, les
+     autres notions ouvertes de 9e attendant leur leçon). Avant de lever la limite : 3e occurrence et suivantes d'une même
+     notion remplacées par un automatisme de fin de primaire qui en est le prérequis (ou celui d'une notion ratée), au
+     niveau 1, même créneau. Élève visé par les rappels de primaire seulement (PRIM.applies) ; sinon plan inchangé. */
+  vary(state, plan) {
+    const p = state && state.profile;
+    if (!Array.isArray(plan) || plan.length < 3 || !PRIM.applies(state)) return plan;
+    const idOf = (e) => String(e).split("|")[0], cnt = {};
+    for (let i = 0; i < plan.length; i++) {
+      const e = String(plan[i]), id = idOf(e), kind = e.split("|")[2];
+      if (e.startsWith("PROB:") || PRIM.isPrim(id)) continue;
+      cnt[id] = (cnt[id] || 0) + 1;
+      if (cnt[id] <= 2) continue;
+      /* prérequis de la notion répétée, puis ceux des notions ratées, puis tout automatisme de fin de primaire pas encore repris ;
+         sans aucun : la question est retirée (séance plus courte plutôt qu'une 3e fois la même notion) */
+      const pool = [...(PRIM_PRE[id] || []), ...PRIM.candidates(state), ...PRIM_IDS].filter((x) => !PRIM.acquired(state, x));
+      const c = pool.find((x) => !plan.some((y) => idOf(y) === x) && (kind !== "drill" || Engine.drillable(state, x)));
+      if (!c) { plan.splice(i, 1); i--; continue; }
+      PRIM.ensure(state, c);
+      plan[i] = c + "|1" + (kind ? "|" + (kind === "defi" || kind === "defi4" ? "app" : kind) : "");
+      state.primN = (state.primN || 0) + 1;
+    }
     return plan;
   },
 };

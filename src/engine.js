@@ -1089,7 +1089,36 @@ const Engine = {
   },
   autoN(state) { return state.placedOn === day() ? this.firstDayN(state) : this.struggling(state) || this.belowClass(state) ? 4 : FORMATS.auto.slots.length; },
   fmtText(state, f) { const n = f === "auto" ? this.autoN(state) : 0; return n && n < FORMATS.auto.slots.length ? n + " calculs rapides, enchaînés." : FORMATS[f].text; },
-  planSession(state, format) { return this.firstDayCap(state, this.planSession0(state, format)); },
+  planSession(state, format) { return this.firstDayCap(state, this.ownYear(state, this.planSession0(state, format), format)); },
+  /* 27.11 (revue des élèves joués, n° 4 : Arthur, 10e moyen sans chapitre « en classe », 13 questions sur 13 sur des reprises
+     de 9e ; les notions propres à la 10e ouvertes attendaient leur leçon, une seule leçon par séance, aucune en Révision ni
+     en Automatismes) : sans chapitre choisi, au moins une notion PROPRE à l'année (placeOf = classe) par séance de 3
+     questions ou plus. Si le programme n'en a aucune, une question du milieu (sinon la dernière) qui n'est pas une reprise demandée par le parcours
+     (ratée : maîtrise < 0,45 ou deux échecs) devient une notion propre à l'année déjà ouverte, choisie comme les autres
+     (planSlots) ; si sa leçon reste à voir, au niveau 1 et sans leçon (comme une notion du chapitre en classe, n° 5 du
+     26.11), le rappel de cours restant ouvrable ; sa leçon vient à la séance qui en admet une. Élève en grande difficulté ou
+     Mathélo en forte baisse : rien ne change (règle levée, comme prevPenalty). */
+  ownYear(state, plan, format) {
+    if (!Array.isArray(plan) || plan.length < 3 || this.nowActive(state) || this.struggling(state) || this.eloDrop(state) || state.placedOn === day()) return plan;
+    const g = state.profile.grade, idOf = (e) => String(e).split("|")[0];
+    const own = (id) => { const n = NOTIONS.find((x) => x.id === id), pl = n && placeOf(n, state.profile); return !!pl && pl[0] === g && !n.prim; };
+    if (plan.some((e) => own(idOf(e)))) return plan;
+    const coince = (id) => { const s = state.notions[id]; return !!s && s.seen > 0 && (s.m < 0.45 || (s.fails || 0) >= 2); };
+    /* au milieu de la séance plutôt qu'à la fin (une notion moins travaillée en dernier faisait finir sur un échec) */
+    let at = -1;
+    for (const j of [...Array(plan.length).keys()].slice(1, -1).concat(plan.length - 1)) if (at < 0 && !String(plan[j]).startsWith("PROB:") && !coince(idOf(plan[j])) && !this.lessonDue(state, idOf(plan[j]))) at = j;
+    if (at < 0) return plan;
+    const kind = String(plan[at]).split("|")[2] || "app", inPlan = new Set(plan.map(idOf));
+    const ex = new Set(this.eligible(state).filter((id) => !own(id) || inPlan.has(id)));
+    const b = this.planSlots(state, [kind], { exclude: ex })[0];
+    if (!b) return plan;
+    const x = b.split("|"), les = this.lessonDue(state, x[0]);
+    /* séance qui montre une leçon : une notion dont la leçon reste à voir n'y entre pas (une seule leçon par séance) */
+    if (les && !plan.noLesson && format !== "auto" && (format || this.todayFormat(state)) !== "auto") return plan;
+    if (les) x[1] = "1";
+    plan[at] = x.join("|");
+    return plan;
+  },
   planSession0(state, format) {
     /* 26.11 (revue p4, n° 3) : le jour du positionnement, 3 questions au plus quel que soit le format (positionnement + séance ≈ 10 min) ; */
     const f = format || this.todayFormat(state), slots = f === "auto" ? FORMATS.auto.slots.slice(0, this.autoN(state)) : FORMATS[f].slots.slice(0, state.placedOn === day() ? this.firstDayN(state) : this.struggling(state) ? 3 : 9); /* et pour l'élève en grande difficulté (Kevin : Révision de 4 questions avec pas à pas, 8 à 9 min) */
@@ -1207,6 +1236,11 @@ const Engine = {
           if (usedPair.has(id + "|" + d)) sc += 1;
           if (d === 4) sc -= kind === "defi4" ? 3 : 0.3;
           if (prevPen && !rappel && !isNow && prevPen.has(id)) sc += PREV_PEN; /* 27.11 : l'année d'abord (n° 32) */
+          /* 27.11 (revue, n° 8 : Jade, l'échelle 4 fois en 15 questions sur 3 jours) : notion du chapitre « en classe » posée hier ou
+             avant-hier et réussie du premier coup la dernière fois (box ≥ 1) : elle cède la place à une autre notion du chapitre
+             si possible (hors chapitre : sans effet, l'élève très faible y perdait ses notions réussies, tests/_faibles.html) ; une notion ratée (box 0)
+             revient comme prévu. */
+          if (isNow && s.last && s.last < today && s.last >= addDays(today, -2) && (s.box || 0) >= 1) sc += s.last === addDays(today, -1) ? 0.8 : 0.4;
           sc += Math.random() * 0.5;
           if (!best || sc < best.sc) best = { id, d, sc };
         }
@@ -1266,6 +1300,7 @@ const Engine = {
     }
     const today = day();
     s.seen++;
+    s.last = today; /* 27.11 (revue, n° 8) : dernier jour où la notion a été posée (variété entre les jours, planSlots) */
     if (solved && tries === 1) {
       s.m = Math.min(1, s.m + (1 - s.m) * (0.18 + 0.06 * d));
       s.box = Math.min(5, s.box + 1);
@@ -1374,10 +1409,22 @@ const Engine = {
      même notion, d'autres nombres, un niveau en dessous (le niveau 1 reste 1). Elle remplace, elle ne s'ajoute pas : la
      séance garde sa durée. Une fois par séance (l'appelant le garde). Ni automatisme, ni problème (niveau 4), ni à la place
      d'une question qui porte la leçon du jour ou du problème de la semaine. Renvoie l'entrée à mettre en i + 1, ou null. */
-  replayNext(state, plan, i, id, d, kind) {
+  /* 27.11 (revue, n° 1, grave : Kevin, Révision sur le chapitre « en classe », « rejouer ? non … leçon due true » deux fois,
+     séance 0/3) : on ne refusait dès que la notion suivante avait une leçon à voir (lessonDue), or les notions du chapitre en
+     classe sont posées SANS leçon en Révision / Défi / Automatismes, et une seule leçon passe par séance. On décide sur ce
+     qui s'affichera vraiment : lessonShows (même règle que nextQuestion dans src/app.js). sess = { noLesson, lessonDone,
+     lessonAt } de la séance ; sans sess (appelant ancien), règle du plan seul (plan.noLesson). */
+  lessonShows(state, plan, j, sess) {
+    const nid = String(plan[j] || "").split("|")[0];
+    if (!nid || String(plan[j]).startsWith("PROB:") || !state.notions[nid] || !this.lessonDue(state, nid)) return false;
+    const S = sess || {};
+    if (S.noLesson || plan.noLesson || S.fmt === "auto") return false;
+    return !S.lessonDone && (S.lessonAt == null || S.lessonAt === j);
+  },
+  replayNext(state, plan, i, id, d, kind, sess) {
     if (!this.struggling(state) || i + 1 >= plan.length || kind === "drill" || !(d >= 1 && d < 4) || !GEN[id] || !state.notions[id]) return null;
     const nx = String(plan[i + 1]), nid = nx.split("|")[0];
-    if (nx.startsWith("PROB:") || (nid !== id && state.notions[nid] && this.lessonDue(state, nid))) return null;
+    if (nx.startsWith("PROB:") || (nid !== id && this.lessonShows(state, plan, i + 1, sess))) return null;
     return id + "|" + Math.max(1, d - 1) + "|" + (kind === "rem" || kind === "carnet" || !kind ? "app" : kind);
   },
   remediation(state, id) {
@@ -1490,6 +1537,7 @@ if (typeof ACTIVE !== "undefined") for (const A of Object.values(ACTIVE)) if (A 
 (function () {
   const plan0 = Engine.planSession, one0 = Engine.oneLesson, P = () => (typeof PRIM !== "undefined" ? PRIM : null);
   /* 27.11 : pas de rappel de primaire le jour du positionnement (séance de 2 questions, firstDayCap) */
-  Engine.planSession = function (state, format) { const p = plan0.call(this, state, format), X = P(); return X ? (state.placedOn === day() ? X.strip(p) : X.inject(state, X.strip(p))) : p; };
-  Engine.oneLesson = function (state, plan, n) { const X = P(); return X ? X.inject(state, one0.call(this, state, X.strip(plan), n)) : one0.call(this, state, plan, n); };
+  /* 27.11 (revue, n° 2 et 3) : PRIM.note (jours en grande difficulté), PRIM.vary (pas plus de 2 fois la même notion) */
+  Engine.planSession = function (state, format) { const p = plan0.call(this, state, format), X = P(); if (X) X.note(state); return X ? (state.placedOn === day() ? X.strip(p) : X.inject(state, X.vary(state, X.strip(p)))) : p; };
+  Engine.oneLesson = function (state, plan, n) { const X = P(); return X ? X.inject(state, X.vary(state, one0.call(this, state, X.strip(plan), n))) : one0.call(this, state, plan, n); };
 })();

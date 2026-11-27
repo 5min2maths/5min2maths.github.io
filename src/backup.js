@@ -8,7 +8,7 @@ const Backup = {
     for (const [id, x] of Object.entries(s.notions || {})) {
       const def = Engine.newNotion(x.status);
       if (!x.seen && !x.placed && !x.lessonSeen && !x.easy && !x.retry && x.m === def.m && x.box === def.box) { if (x.status !== defs[id]) n[id] = [this.ST[x.status]]; continue; }
-      n[id] = [this.ST[x.status] || "v", r2(x.m), x.box, off(x.due), x.seen, x.ok, (x.placed ? 1 : 0) | (x.lessonSeen ? 2 : 0), x.easy || 0, off(x.retry), x.fails ?? null];
+      n[id] = [this.ST[x.status] || "v", r2(x.m), x.box, off(x.due), x.seen, x.ok, (x.placed ? 1 : 0) | (x.lessonSeen ? 2 : 0), x.easy || 0, off(x.retry), x.fails ?? null].concat(x.last ? [off(x.last)] : []); /* 27.11 : dernier jour posé (variété entre les jours, facultatif) */
     }
     const ws = (Array.isArray(s.snaps) ? s.snaps : []).find((x) => x && x.d >= addDays(t, -6)), co = (Array.isArray(s.carnetOut) ? s.carnetOut : []).filter((d) => d >= addDays(t, -6));
     const c = {};
@@ -63,6 +63,7 @@ const Backup = {
       if (a[7]) x.easy = a[7];
       if (a[8] !== null && a[8] !== undefined) x.retry = on(a[8]);
       if (a[9] !== null && a[9] !== undefined) x.fails = a[9];
+      if (a[10] !== null && a[10] !== undefined) x.last = on(a[10]);
       s.notions[id] = x;
     }
     s.comps = Object.fromEntries(Object.entries(o.c || {}).map(([cid, [r, n, l]]) => [cid, { r: [...r].map((ch) => +ch / 4), n, last: on(l) }]));
