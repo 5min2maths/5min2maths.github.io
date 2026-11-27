@@ -62,7 +62,7 @@ if (!FRAME) {
     accueil: () => { newSt(); homeTab = "today"; screenHome(); },
     figure: () => { newSt(); renderQuestion(qWith((q) => q.fig && !q.parts && String(q.q).length > 60 && /<svg/.test(q.fig)), opt({ onNotYet: () => 0, onEasy: () => 0 })); },
     pave: () => { newSt(); renderQuestion(qWith((q) => !q.fig && !q.parts && q.spec && q.spec.kind === "value"), opt({ onNotYet: () => 0, onEasy: () => 0 })); },
-    probleme: () => { newSt(); session = { plan: ["x"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; let q = null; for (const n of NOTIONS) { if (!hasProb(n.id)) continue; try { q = Engine.make(state, n.id, 4); } catch (e) { q = null; } if (q && q.parts && q.parts.length >= 3 && String(q.q).length > 120) break; } renderQuestion(q, opt({ eyebrow: "🔍 Problème de la semaine" })); },
+    probleme: () => { newSt(); session = { plan: ["x"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; let q = null; for (const n of NOTIONS) { if (!hasProb(n.id)) continue; try { q = Engine.make(state, n.id, 4); } catch (e) { q = null; } if (q && q.parts && q.parts.length >= 3 && String(q.q).length > 120) break; } renderQuestion(q, opt({ eyebrow: "⛏️ La mine · problème de la semaine" /* 27.11 */ })); },
     lecon: () => { newSt(); screenLesson("fractout", () => {}); },
     bilan: () => { newSt(); session = { fmt: "revision", plan: ["eq1|1|rev", "eq1|1|rev", "eq1|1|rev", "eq1|1|rev"], i: 4, score: 3, answered: 4, start: Date.now() - 300000, elo0: state.elo.r - 12, ids: new Set(["eq1"]) }; screenSummary(); },
     progres: () => { newSt(); homeTab = "prog"; screenHome(); },

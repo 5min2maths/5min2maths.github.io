@@ -27,11 +27,11 @@ try{
  state=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.autoInit(state);state.tourDone=true;
  // 22.11 : 6 cases ; Histoire ouvre directement un récit
  homeTab="today";screenHome();ok(app.querySelectorAll(".door").length===6,"6 cases");
- app.querySelector('.door[data-door="hist"]').click();ok(/Histoire des maths/.test(app.textContent)&&!!document.getElementById("hans"),"case Histoire → récit");
+ app.querySelector('.door[data-door="hist"]').click();ok(/Chercheurs d'or/.test(app.textContent)&&!!document.getElementById("hans"),"case Chercheurs d'or → récit"); /* 27.11 : ex-Histoire */
  const t0=app.querySelector("h2").textContent;document.getElementById("hnext").click();
  ok(app.querySelector("h2").textContent!==t0,"une autre histoire");
  document.getElementById("hback").click();ok(!!app.querySelector(".hub"),"retour à l'accueil");
- app.querySelector('.door[data-door="prob"]').click();ok(/Problème de la semaine/.test(app.textContent),"case Problème");
+ app.querySelector('.door[data-door="prob"]').click();ok(/La mine/.test(app.textContent)&&/Problème de la semaine/.test(app.textContent),"case La mine"); /* 27.11 : ex-Problème */
  /* 25.11 (grades de l'année, voulu) : Penseur atteint avec les points de l'année, plus avec le Mathélo */ ypSync();state.yp.pts=2600;state.gradeNo={Penseur:243};screenGrades();
  ok(!/départ en/.test(app.textContent),"plus de repères de classe");ok(/#243/.test(app.textContent),"numéro affiché");
  document.querySelector(".grade-now h2").click(); // clic sur le cadre, pas sur l'image

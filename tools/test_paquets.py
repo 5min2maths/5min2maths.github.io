@@ -80,7 +80,7 @@ async def scenario(port, url):
         ok(a1 == D["C"]["11"], "élève de 11e : exactement les %d segments de la 11e, dans l'ordre, avant l'accueil" % len(a1))
         h1 = val(await ev("!!document.querySelector('#app .hub')"))
         ok(h1, "élève de 11e : l'accueil s'affiche")
-        hx = val(await ev("new Promise((ok) => { document.querySelector('[data-door=hist]').click(); const t0 = Date.now(); (function w() { const e = document.querySelector('#app .eyebrow'); if (e && /Histoire des maths/.test(e.textContent)) ok(1); else if (Date.now() - t0 > 8000) ok(0); else setTimeout(w, 50); })(); })"))
+        hx = val(await ev("new Promise((ok) => { document.querySelector('[data-door=hist]').click(); const t0 = Date.now(); (function w() { const e = document.querySelector('#app .eyebrow'); if (e && /Chercheurs d\'or/.test(e.textContent)) ok(1); else if (Date.now() - t0 > 8000) ok(0); else setTimeout(w, 50); })(); })"))
         ok(hx == 1 and not any(i in a1 for i in D["X"]), "élève de 11e : la case Histoire ouvre un récit (paquet x à la demande)")
         await ev("screenHome(), 1")
         cx = val(await ev("new Promise((ok) => { document.querySelector('[data-door=cur]').click(); const t0 = Date.now(); (function w() { const a = document.querySelector('#app'); if (a && /pari|Pari/.test(a.textContent)) ok(1); else if (Date.now() - t0 > 8000) ok(a ? a.textContent.slice(0, 80) : 0); else setTimeout(w, 50); })(); })"))
