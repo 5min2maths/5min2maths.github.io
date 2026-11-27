@@ -462,7 +462,9 @@ function checkAnswer(spec, input) {
   if (spec.kind === "set" && (spec.all || ALL_RE.test(String(input)))) return { status: spec.all && ALL_RE.test(String(input)) && !none ? "correct" : "wrong" };
   if (spec.kind === "set" && (none || spec.values.length === 0)) return { status: none && spec.values.length === 0 ? "correct" : spec.values.length === 0 ? "wrong" : "wrong" };
   let tree;
-  try { tree = Expr.parse(spec.kind === "set" ? setInput(input) : String(input)); }
+  /* 27.11 (agent recalcfr : « (−5 ; −2) » refusé, « Parenthèse non fermée ») : coordonnées entre parenthèses ou crochets acceptées */
+  const pairIn = (t) => { const m = String(t).trim().match(/^[(\[]\s*([^()\[\]]*;[^()\[\]]*)\s*[)\]]$/); return m ? m[1] : String(t); };
+  try { tree = Expr.parse(spec.kind === "set" ? setInput(input) : spec.kind === "pair" ? pairIn(input) : String(input)); }
   catch (e) { return { status: "invalid", message: e.message }; }
   if (spec.kind === "value") {
     // final (14.11, retour testeur : « on peut taper le calcul ») : la réponse est le résultat, pas l'opération.

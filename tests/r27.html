@@ -75,6 +75,9 @@ try {
   /* C. robot : cercle niveau 2, jamais de rayon 1 */
   let r1 = 0; for (let s = 1; s < 300; s++) { const q = Engine.build("cercle", 2, s); if (q && q.spec.value === 1) r1++; }
   ok(!r1, "C. cercle niveau 2 : jamais de rayon 1 (" + r1 + " sur 300)");
+  /* 27.11 : coordonnées entre parenthèses (agent recalcfr) */
+  { const sp = { kind: "pair", values: [-5, -2] };
+    ok(["(-5 ; -2)", "−5 ; −2", "[-5;-2]", "( -5 ; -2 )"].every((t) => checkAnswer(sp, t).status === "correct") && checkAnswer(sp, "(-2 ; -5)").status !== "correct", "E. coordonnées « (−5 ; −2) » acceptées, ordre contrôlé"); }
 } catch (e) { fail.push("EXC " + e.message + " " + (e.stack || "").split("\n").slice(0, 3).join(" ")); }
 document.getElementById("out").textContent = fail.concat(out).join("\n") + "\n" + (fail.length ? fail.length + " ÉCHEC(S)" : "tout ok");
 </script>
