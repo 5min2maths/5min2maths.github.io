@@ -72,4 +72,4 @@ servir d'abord les notions de l'année.
   n° 17 (nombre dérivé de x³ et √x « par la définition » retiré en France) ; n° 18 (« antécédent de 0 » au lieu de « zéro »
   en 4e–3e France) ; n° 22 (« Me tester » ciblé par forme pour tous les référentiels) ; n° 24 (élève faible : défi du jour
   limité, 2–3 parties au plus) ; n° 25 (« carte jeune ») ; n° 26 (polygones réguliers rattachés à l'objectif « polygones »).
-- Reste ouvert : n° 12 (plan MP : PEE 2026 pour toutes les années, ou ancien PEE pour MP2–MP4 en 2026-27).
+- n° 12 : garder le PEE 2026 pour toutes les années MP (décision du 27.11 après-midi).
