@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 
 
 
-const BUILD = "d719b401f2";
+const BUILD = "c74065ade8";
 const ERR_MAX = 5;
 var errMem = null;
 
@@ -996,6 +996,15 @@ L.className = "q-l"; R.className = "q-r";
 for (const el of [...card.children]) (el.matches(".qmeta, .qtext, .exact-note, .figwrap") ? L : R).appendChild(el);
 R.insertBefore(bar, R.querySelector(":scope > #fb"));
 card.classList.add("q-2col"); card.append(L, R);
+
+const long = () => L.classList.toggle("q-long", L.scrollHeight > L.clientHeight + 8);
+long(); if (window.ResizeObserver) { const ro = new ResizeObserver(long); ro.observe(L); for (const el of L.children) ro.observe(el); }
+}
+
+
+function ecranBarApres() {
+const bar = app.querySelector(".q-r > .qbar"), fb = app.querySelector(".q-r > #fb");
+if (bar && fb) fb.after(bar);
 }
 
 function ecranCols() {
@@ -1922,7 +1931,7 @@ const etat = (s) => (!s.seen ? "pas encore essayée" : s.m >= 0.7 ? "maîtrisée
 const rows = keys.map((k) => { const L = by[k], done = L.filter(([, s]) => s.seen && s.m >= 0.7).length;
 return `<div style="margin:8px 0"><div class="spread small"><b>${esc(title(k))}</b><span class="muted">${done} / ${L.length} maîtrisées</span></div>
       <div class="pm-row">${L.map(([n, s]) => `<button type="button" class="pm-sq" title="${esc(n.label)}" aria-label="${esc(n.label)} : ${etat(s)}" data-i="${esc(n.label)} — ${etat(s)}" style="background:${col(s)}"></button>`).join("")}</div><div class="pm-info small" hidden></div></div>`; }).join("");
-return `<div class="card stack"><div class="eyebrow">Ma carte de progression</div>${rows}
+return `<div class="card stack pmap-card"><div class="eyebrow">Ma carte de progression</div>${rows}
     <p class="small muted">Vert : maîtrisé · orange : en route · rouge : à travailler · gris : pas encore essayé. Touche une case pour voir la notion.</p></div>`;
 }
 function startSession() {
@@ -2558,6 +2567,7 @@ const delta = opt.onDone(res);
 if (opt.single) {
 fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><b>${solved ? "✓ Juste ! " + pick(PRAISE.filter((x) => x !== "Juste !")) : dontKnow ? "D'accord, on s'en occupera. Voici la solution :" : "✗ Pas tout à fait. Voici la solution :"}</b>${solved ? (q.sol ? '<details class="solfull"><summary>Voir la correction</summary><div class="sol">' + q.sol + "</div></details>" : "")  : '<span class="sol">' + q.sol + "</span>"}</div>`;
 qbarSet("", '<button class="btn-primary" id="nx">Suivant</button>');
+ecranBarApres();
 typeset(fb);
 { const t0 = performance.now(); document.getElementById("nx").onclick = (e) => { if (e && e.isTrusted && performance.now() - t0 < 400) return; opt.onNext(); }; }
 document.getElementById("nx").focus();
@@ -2574,6 +2584,7 @@ fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><div class="spread"
       ${avisHtml(code, "Cette question était…", "Bonne question", "Question à revoir")}`;
 
 qbarSet(solved || opt.noRedo ? "" : `<button id="redo" class="${!guided && !solSteps ? "btn-primary" : "btn-sec"}">${q.d > 1 && q.d < 4 ? "💪 Une plus facile pour repartir" : "Refaire avec d'autres valeurs"}</button>`, `<button class="${solved || opt.noRedo ? "btn-primary" : "btn-sec"}" id="nx">Continuer</button>`);
+ecranBarApres();
 typeset(fb);
 fb.querySelectorAll(".vote button").forEach((b) => (b.onclick = () => { vote(code, b.dataset.v); fb.querySelectorAll(".vote button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
 bindComment(fb, code);
