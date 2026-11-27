@@ -11,6 +11,7 @@
      eloaide  perte de Mathélo divisée par 2 sur un échec, élève en grande difficulté (Mathélo seulement)
      place1   positionnement au niveau 1 (au lieu du niveau 2)
      bas      élève en grande difficulté : notions des deux années précédentes admises dans les créneaux ordinaires
+     sansprim (27.11, agent primaire) automatismes de fin de primaire en 9e désactivés (PRIM.off) : mesure avant / après
      rejouer  élève en grande difficulté : après un raté (correction ou pas à pas vu), la question suivante prévue est
               remplacée par la même notion, autres nombres, un niveau en dessous (une fois par séance). Hypothèse
               d'exemple résolu : p devient p + (1 − p) × b (#b=0.3 ; b=0 : aucun effet propre)
@@ -50,6 +51,7 @@
     const pr = { ...PROFILS[pname] }, prof = CLASSES[cl], DAYS = o.jours || 28, V = new Set(o.v || []), learnX = o.learn2 ? 2 : 1;
     seed = (o.graine || 7) * 7919 + pname.length * 31 + cl.length; for (let k = 0; k < 5; k++) rnd();
     Math.random = rnd;
+    if (typeof PRIM !== "undefined") PRIM.off = V.has("sansprim");
     OFF = new _D(o.debut || "2026-11-09T16:30:00") - _D.now();
     /* variantes du moteur (copies restaurées en fin de simulation) */
     const E0 = { oldNeed: Engine.oldNeed, updateElo: Engine.updateElo, isRecent: Engine.isRecent }, B = o.b === undefined ? 0.3 : o.b;
@@ -61,7 +63,7 @@
       const elo0 = state.elo.r, A = elo0 + pr.gap, skill = {}, lastSeen = {};
       const sk = (id) => (skill[id] === undefined ? (skill[id] = A + (rnd() - 0.5) * 160) : skill[id]);
       const R = { q: 0, ok1: 0, lvSum: 0, pSum: 0, sessions: 0, lessons: 0, frustr: 0, decour: 0, endFail: 0, startFail: 0, abandons: 0, old: 0, secs: [], dElo: [],
-        eloNeg: 0, low: 0, prev: 0, fixed: 0, redo: 0, lastWk: [0, 0], err: [], placeQ: 0, placeSec: 0, placeElo: 0, eased: 0, remed: 0, maxDecourRun: 0 };
+        eloNeg: 0, low: 0, prev: 0, fixed: 0, redo: 0, prim: 0, primOk: 0, primSess: 0, lastWk: [0, 0], err: [], placeQ: 0, placeSec: 0, placeElo: 0, eased: 0, remed: 0, maxDecourRun: 0 };
       /* positionnement (jour 0) : 5 questions de niveau 2, arrêt après 3 ratés */
       { const plan = Engine.placementPlan(state); let miss = 0, okN = 0; const e0 = state.elo.r, pd0 = V.has("place1") ? 1 : Math.min(2, difficultyCap(state.profile));
         for (const [pi, id] of plan.entries()) { if (miss >= 3) break; const pd = Engine.placementLevel && !V.has("place2") && !V.has("place1") ? Engine.placementLevel(state, pi) : pd0; let q; try { q = Engine.make(state, id, pd); } catch (e) { R.err.push("place " + id); continue; }
@@ -133,6 +135,7 @@
           skill[id] = sk(id) + learnX * (solved ? pr.learn * (tries === 1 ? 1 : 0.7) : pr.learn * 0.4);
           R.q++; sessN++; R.lvSum += d; R.pSum += p1;
           if (!Engine.isRecent(state, id)) R.old++;
+          if (typeof PRIM !== "undefined" && PRIM.isPrim(id)) { R.prim++; if (ok1) R.primOk++; }
           { const nn = NOTIONS.find((n) => n.id === id), pl = placeOf(nn, state.profile); if (pl && pl[0] < state.profile.grade) { R.low++; if (!(nn.again || []).includes(state.profile.grade)) R.prev++; } }
           if (dd >= DAYS - 7) { R.lastWk[0]++; if (ok1) R.lastWk[1]++; }
           secs += d === 4 ? SEC.p4 : SEC[kind] || SEC.app; if (!ok1) secs += SEC.err;
@@ -144,6 +147,7 @@
         lessonPrev = S.lessonDone;
         const de = state.elo.r - eS; R.dElo.push(de); if (de < 0) R.eloNeg++;
         if (sessN >= 2 && sessOk === 0) R.frustr++;
+        if (typeof PRIM !== "undefined" && S.plan.some((e) => PRIM.isPrim(e))) R.primSess++;
         /* séance décourageante : moins d'un tiers juste du premier coup, ou plus de 6 minutes */
         const bad = (sessN >= 2 && sessOk / sessN < 1 / 3) || secs > 360; if (bad) { R.decour++; decourRun++; R.maxDecourRun = Math.max(R.maxDecourRun, decourRun); } else decourRun = 0;
         if (lastOk === false) R.endFail++; if (firstOk === false) R.startFail++;
@@ -152,7 +156,7 @@
       return { cl, pname, A: Math.round(A), elo0, elo: state.elo.r, q: R.q, sessions: R.sessions, ok1: R.q ? R.ok1 / R.q : 0, ok1last: R.lastWk[0] ? R.lastWk[1] / R.lastWk[0] : null,
         pAvg: R.q ? R.pSum / R.q : 0, lvAvg: R.q ? R.lvSum / R.q : 0, frustr: R.frustr, decour: R.decour, maxDecourRun: R.maxDecourRun, endFail: R.endFail, startFail: R.startFail,
         abandons: R.abandons, low: R.low, prev: R.prev, fixed: R.fixed, carnetFin: carnet.size, redo: R.redo, lessons: R.lessons, old: R.old, eased: R.eased, remed: R.remed, eloNeg: R.eloNeg, placeElo: R.placeElo, place1st: R.place1st || 0, placeOk: R.placeOk, placeQ: R.placeQ, placeSec: R.placeSec,
-        secAvg: R.secs.length ? R.secs.reduce((a, b) => a + b, 0) / R.secs.length : 0, secMax: Math.max(0, ...R.secs), streak: state.streak.best || 0, err: R.err.slice(0, 3) };
+        secAvg: R.secs.length ? R.secs.reduce((a, b) => a + b, 0) / R.secs.length : 0, secMax: Math.max(0, ...R.secs), prim: R.prim, primOk: R.primOk, primSess: R.primSess, streak: state.streak.best || 0, err: R.err.slice(0, 3) };
     } finally { Engine.oldNeed = E0.oldNeed; Engine.updateElo = E0.updateElo; Engine.isRecent = E0.isRecent; }
   }
   /* moyenne sur les graines */
@@ -162,11 +166,11 @@
     return { cl, pname, ok1: m("ok1"), ok1last: m("ok1last"), pAvg: m("pAvg"), lvAvg: m("lvAvg"), dElo: m("elo") - m("elo0"), placeElo: m("placeElo"), place1st: m("place1st"), placeOk: m("placeOk"), placeQ: m("placeQ"), gapVrai: m("A") - m("elo"),
       secAvg: m("secAvg"), secMax: Math.max(...rs.map((r) => r.secMax)), sessions: m("sessions"), q: m("q"), abandons: m("abandons") / S, frustr: m("frustr") / S, decour: m("decour") / S,
       endFail: m("endFail") / S, startFail: m("startFail") / S, lessons: m("lessons") / S, old: m("old") / Math.max(1, m("q")), eased: m("eased") / S, eloNeg: m("eloNeg") / S, low: m("low") / Math.max(1, m("q")), prev: m("prev") / Math.max(1, m("q")), fixed: m("fixed"), carnetFin: m("carnetFin"), redo: m("redo") / S, streak: m("streak"),
-      maxDecourRun: m("maxDecourRun"), err: rs.flatMap((r) => r.err).slice(0, 3) };
+      maxDecourRun: m("maxDecourRun"), prim: m("prim") / Math.max(1, m("q")), primOk: m("primOk") / Math.max(1e-9, m("prim")), primSess: m("primSess") / S, err: rs.flatMap((r) => r.err).slice(0, 3) };
   }
   const pc = (x) => (x === null || isNaN(x) ? "–" : Math.round(x * 100) + "%");
   const line = (a) => [a.cl, a.pname, pc(a.ok1), pc(a.ok1last), pc(a.pAvg), a.lvAvg.toFixed(2), Math.round(a.dElo), Math.round(a.placeElo), Math.round(a.gapVrai), Math.round(a.secAvg), a.secMax,
-    pc(a.abandons), pc(a.frustr), pc(a.decour), a.maxDecourRun.toFixed(1), pc(a.endFail), pc(a.startFail), a.lessons.toFixed(2), pc(a.old), pc(a.low), pc(a.prev), a.redo.toFixed(2), a.carnetFin.toFixed(1), a.fixed.toFixed(1), pc(a.eloNeg), pc(a.place1st), a.placeOk.toFixed(1) + "/" + a.placeQ.toFixed(1), a.streak.toFixed(1), a.sessions.toFixed(1)].join(" | ") + (a.err.length ? " ERR " + a.err.join(";") : "");
-  const HEAD = "classe | profil | 1er essai | dern. sem. | p prévu | niveau moy. | Δ Mathélo | Δ positionnement | vrai−Mathélo fin | s/séance | s max | abandons | sans réussite | décourageantes | pire suite décour. | fin sur échec | début sur échec | leçons/séance | anciennes | année inf. | hors année (sans reprise) | rejouées/séance | carnet fin | effacées en séance | séances Mathélo<0 | posit. 1re juste | posit. justes | série max | séances";
+    pc(a.abandons), pc(a.frustr), pc(a.decour), a.maxDecourRun.toFixed(1), pc(a.endFail), pc(a.startFail), a.lessons.toFixed(2), pc(a.old), pc(a.low), pc(a.prev), a.redo.toFixed(2), a.carnetFin.toFixed(1), a.fixed.toFixed(1), pc(a.eloNeg), pc(a.place1st), a.placeOk.toFixed(1) + "/" + a.placeQ.toFixed(1), a.streak.toFixed(1), a.sessions.toFixed(1), pc(a.prim), a.prim ? pc(a.primOk) : "–", pc(a.primSess)].join(" | ") + (a.err.length ? " ERR " + a.err.join(";") : "");
+  const HEAD = "classe | profil | 1er essai | dern. sem. | p prévu | niveau moy. | Δ Mathélo | Δ positionnement | vrai−Mathélo fin | s/séance | s max | abandons | sans réussite | décourageantes | pire suite décour. | fin sur échec | début sur échec | leçons/séance | anciennes | année inf. | hors année (sans reprise) | rejouées/séance | carnet fin | effacées en séance | séances Mathélo<0 | posit. 1re juste | posit. justes | série max | séances | part prim. | prim. 1er essai | séances avec prim.";
   window.SimFaibles = { simulate, avg, line, HEAD, PROFILS, CLASSES };
 })();

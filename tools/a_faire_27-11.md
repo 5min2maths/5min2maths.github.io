@@ -27,3 +27,12 @@ Page légale : pas avant une ouverture au-delà des testeurs (décision de l'ens
 ## Présentation PDF (retour de l'enseignant, 26.11 soir : « globalement top »)
 - Retirer « Loulou » (prénom fictif bizarre pour désigner l'enfant, vue parent) : prénom neutre ou « votre enfant ».
 - Faire une **version séparée Suisse romande seulement** (sans la partie France), en plus de la version actuelle.
+
+## Lot « revue du 27.11 + commentaires » (après la fusion de agent/faibles2, pour éviter les conflits dans app.js)
+- Revue suivi/revues/2026-11-27.md, points 1 à 6 (pas à pas fracadd-3 qui contredit le piège ; essai de l'accueil de 9e en Sec. II ;
+  chapitre et notion de même nom en MP 2e ; « Défi du jour · séance faite ✓ » après la révision d'évaluation ; 1er jour MP 2e 11 min ;
+  bandeau statistiques chaque jour) ; robot : 31 réponses justes refusées, 3 écrans figés, 1 valeur triviale.
+- Commentaires de l'auteur : leçon intégrale (une seule manipulation, consigne superposée illisible) ; histoires 21 et 25
+  (brouillon et touche puissance dans les « À toi ») ; nom « Mathélo » : ATTENDRE (décision du 27.11, garder « 5 minutes de
+  maths » pendant la consolidation ; idée notée dans tools/nom_app.md). Noter chaque commentaire traité dans
+  tools/commentaires_traites.txt (« horodatage | fait »), puis relancer tools/suivi.py.
