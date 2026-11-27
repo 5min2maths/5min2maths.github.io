@@ -58,6 +58,24 @@ try {
   const d0 = __q && __q.d; __o.onDone({ solved: true, tries: 1 }); __o.onNext();
   ok(d0 === 1 && Engine.placementLevel(state, 1) === 2 && Engine.placementLevel(state, 4) === 2, "29. positionnement : 1re question au niveau 1, les suivantes au niveau 2 (" + d0 + ", " + (__q && __q.d) + ")");
 
+  /* 27.11 après-midi (re-mesure élèves faibles) : grande difficulté, pas de nouvelle leçon tant que la notion de la dernière
+     leçon n'a pas été réussie une fois du premier coup (Engine.lessonHold), au plus 4 questions ou 7 jours d'attente */
+  fresh(P9); weak();
+  const hx = Object.keys(state.notions).find((id) => GEN[id] && typeof LESSONS !== "undefined" && LESSONS[id] && !Engine.lessonDue(state, id) && state.notions[id].status === "vu") || ids[0];
+  Object.assign(state.notions[hx], { lessonSeen: true, ok: 0, seen: 0 }); delete state.notions[hx].lessonDay;
+  Engine.record(state, hx, 1, 2, false);
+  ok(state.notions[hx].lessonDay === day() && state.notions[hx].lessonN0 === 0, "lessonHold : première réponse après la leçon, jour noté (" + hx + ")");
+  weak(); const hy = Engine.eligible(state).filter((id) => id !== hx && GEN[id] && !(PRIM.isPrim && PRIM.isPrim(id))).slice(0, 2);
+  hy.forEach((id) => Object.assign(state.notions[id], { status: "vu", seen: 2, m: 0.6, lessonSeen: true, due: day() }));
+  const hp = Engine.planSession(state, "mixte");
+  ok(Engine.lessonHold(state) && hp.noLesson && !hp.some((e) => Engine.lessonFirst(state, String(e).split("|")[0])), "lessonHold : leçon pas encore réussie → séance sans leçon ni notion nouvelle (" + hp.join(" ") + ")");
+  state.notions[hx].ok = 1;
+  ok(!Engine.lessonHold(state), "lessonHold : réussie une fois du premier coup → leçon permise");
+  state.notions[hx].ok = 0; state.notions[hx].seen = 4;
+  ok(!Engine.lessonHold(state), "lessonHold : 4 questions sans réussite → plus d'attente (jamais bloqué)");
+  state.notions[hx].seen = 1; state.last1 = [1, 1, 1, 1, 1, 1, 1, 1]; state.placeMiss = 0; state.tadj = 0;
+  ok(!Engine.struggling(state) && !Engine.lessonHold(state), "lessonHold : élève qui n'est pas en grande difficulté : rien ne change");
+
   /* 31. Bilan centré sur les réussites ; retour après une absence */
   fresh(P9); Object.values(state.notions).forEach((n) => (n.lessonSeen = true)); weak();
   sess("mixte", ids.slice(0, 3).map((id) => id + "|1|app")); nextQuestion();

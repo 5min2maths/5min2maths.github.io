@@ -22,6 +22,7 @@ const DEFIS = (() => {
      décimale (523,075 · 100 = 52307,4999… en flottant). */
   const r1 = (v) => Math.round(+(v * 10).toPrecision(12)) / 10, r2c = (v) => Math.round(+(v * 100).toPrecision(12)) / 100;
   const fx = (v) => { if (Number.isInteger(v)) return String(v); for (let d = 2; d <= 12; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return frac(Math.round(v * d), d); return D(v); };
+  const lnT = (m, h) => (m === 1 ? "" : m === -1 ? "-" : fx(m)) + "x" + (h ? (h < 0 ? " - " + fx(-h) : " + " + fx(h)) : ""); /* mx + h réduit (27.11) */
   const fxT = (v) => { if (Number.isInteger(v)) return String(v); for (let d = 2; d <= 12; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return (v < 0 ? "−" : "") + Math.abs(Math.round(v * d)) + "/" + d; return T(v); };
   const xm = (p) => (p === 0 ? "x" : p > 0 ? "x - " + p : "x + " + -p); /* (x − p) */
   const xmT = (p) => (p === 0 ? "x" : p > 0 ? "x − " + p : "x + " + -p);
@@ -3036,7 +3037,8 @@ const DEFIS = (() => {
       return CXP("repere", P("La droite " + M("d") + " passe par " + M("A" + PT(A)) + " et " + M("B" + PT(B)) + " ; la droite " + M("e") + " a pour équation " + M("y = " + cfD(m2) + "x " + (h2 < 0 ? "- " + -h2 : "+ " + h2)) + ".",
         [["a) Pente de " + M("d") + " (fraction acceptée)", m1], ["b) Abscisse du point d'intersection de " + M("d") + " et " + M("e"), xi], ["c) Ordonnée de ce point (fraction acceptée)", yi]],
         ["Pente de d = (y_B − y_A) ÷ (x_B − x_A) ; puis h avec A : y = mx + h.", "Point d'intersection : égale les deux expressions de y et résous en x."],
-        "a) " + M("m = " + fx(m1)) + ", " + M("d : y = " + fx(m1) + "x " + (h1 < 0 ? "- " + fx(-h1) : "+ " + fx(h1))) + ". b) " + M(fx(m1) + "x " + (h1 < 0 ? "- " + fx(-h1) : "+ " + fx(h1)) + " = " + cfD(m2) + "x " + (h2 < 0 ? "- " + -h2 : "+ " + h2)) + " : " + M("x = " + xi) + ". c) " + M("y = " + cfD(m2) + " \\cdot " + pr(xi) + " " + (h2 < 0 ? "- " + -h2 : "+ " + h2) + " = " + fx(yi)) + "."));
+        /* 27.11 après-midi (corrigés réduits) : ni « 1x », ni « + 0 », ni « y = · (−2) » quand une pente vaut ±1 ou h = 0 */
+        "a) " + M("m = " + fx(m1)) + ", " + M("d : y = " + lnT(m1, h1)) + ". b) " + M(lnT(m1, h1) + " = " + lnT(m2, h2)) + " : " + M("x = " + xi) + ". c) " + M("y = " + (m2 === 1 ? "" : m2 === -1 ? "-" : cfD(m2) + " \\cdot ") + pr(xi) + " " + (h2 < 0 ? "- " + -h2 : "+ " + h2) + " = " + fx(yi)) + "."));
     });
   /* ---------- MP 2e : fonction réciproque d'une fonction affine ---------- */
   ADD("recipaff", "forfait",

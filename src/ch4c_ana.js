@@ -1836,8 +1836,8 @@
     3: [
       () => { const u1 = R.int(2, 9), r = pk([2, 3, 4]), n = R.int(10, 30), S = (n * (2 * u1 + (n - 1) * r)) / 2;
         return QN("Suite arithmétique : " + M("u_1 = " + u1) + ", " + M("r = " + r) + ". Combien de termes faut-il additionner pour obtenir " + M("S_n = " + nb(S)) + " ?", n,
-          M("S_n = \\frac{n(2u_1 + (n - 1)r)}{2}") + " : " + M(r + "n^2 + " + (2 * u1 - r) + "n - " + 2 * S + " = 0") + " ; la solution positive est " + M("n = " + n) + ".",
-          { ctx: "nombre-termes", guide: [GS("Équation " + M(r + "n^2 + " + (2 * u1 - r) + "n - c = 0") + " : que vaut " + M("c = 2S_n") + " ?", 2 * S, M(nb(2 * S)) + "."), GS(M("n") + " (solution positive) ?", n, M(n) + ".")],
+          M("S_n = \\frac{n(2u_1 + (n - 1)r)}{2}") + " : " + M(r + "n^2" + (2 * u1 - r ? " + " + (2 * u1 - r) + "n" : "") + " - " + 2 * S + " = 0") /* 27.11 : 2u₁ = r sans « + 0n » */ + " ; la solution positive est " + M("n = " + n) + ".",
+          { ctx: "nombre-termes", guide: [GS("Équation " + M(r + "n^2" + (2 * u1 - r ? " + " + (2 * u1 - r) + "n" : "") + " - c = 0") + " : que vaut " + M("c = 2S_n") + " ?", 2 * S, M(nb(2 * S)) + "."), GS(M("n") + " (solution positive) ?", n, M(n) + ".")],
             traps: [TR(Math.round(S / u1), "Les termes augmentent : résous l'équation du second degré."), TR(Math.round(Math.sqrt(S)), "Résous r·n² + (2u₁ − r)·n − 2S = 0."), TR(n + 1, "Vérifie avec la formule de la somme.")] }); },
       () => { const D = pk([1000, 1200, 1500, 2000, 2400]), t = pk([0.01, 0.015, 0.02, 0.025]), n = R.int(5, 15), V = (D * ((1 + t) ** n - 1)) / t;
         return QR("Chaque 1er janvier, on verse " + M(nb(D)) + " CHF sur un compte rémunéré à " + M(dT(t * 100) + "\\,\\%") + " par an (intérêts composés). Combien vaut le compte juste après le " + n + "e versement (" + RND[0.01] + ") ?", V, 0.01,

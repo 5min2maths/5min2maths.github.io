@@ -701,6 +701,7 @@ return { pk, nz, rnd, g2, N, NP, den, F, FS, sg, X, co, lin, linE, mk, QN, QR, Q
 
 (function () {
 const { pk, nz, rnd, g2, N, NP, F, FS, sg, X, co, lin, QN, QR, QX, QSet, QP, GR, GX, GP, TR, TX, P, reg } = FRX;
+const tri = (B, C) => "x^2" + (B ? (B < 0 ? " - " : " + ") + co(Math.abs(B)) : "") + (C ? sg(C) : "");
 
 
 const ED = {
@@ -733,9 +734,9 @@ return QN("Soit " + M("f(x) = (x" + sg(-c) + ")e^{x}") + " sur " + M("\\mathbb{R
 M("f'(x) = e^x + (x" + sg(-c) + ")e^x = (x" + sg(1 - c) + ")e^x") + ". Comme " + M("e^x > 0") + ", " + M("f'") + " a le signe de " + M("x" + sg(1 - c)) + " : négative puis positive, " + M("f") + " est minimale en " + M("x = " + N(m)) + ".",
 { ctx: "minimum", guide: [GX(M("f'(x)") + " ? (sous la forme (…)e^x)", "(x" + (1 - c >= 0 ? "+" : "") + (1 - c) + ")*exp(x)", M("(x" + sg(1 - c) + ")e^x") + "."), GR("Pour quel " + M("x") + " a-t-on " + M("f'(x) = 0") + " ?", m, M("x = " + N(m)) + " (" + M("e^x") + " ne s'annule jamais).")],
 traps: [TR(c, "En " + c + ", f s'annule ; le minimum est là où f' s'annule."), TR(c + 1, "f'(x) = (x − " + (c - 1) + ")eˣ : attention au signe."), TR(0, "e^x ne s'annule pas, mais f'(x) = (x − " + (c - 1) + ")eˣ s'annule.")] }); },
-() => { const a = pk([2, 3, -2, -3, 4, -4]), b = nz(-5, 5), e = a + "*x+" + (1 + b);
+() => { const a = pk([2, 3, -2, -3, 4, -4]), b = pk([-5, -4, -3, -2, 2, 3, 4, 5]), e = a + "*x+" + (1 + b);
 return QX("Donne l'équation réduite de la tangente à la courbe de " + M("f(x) = e^{" + co(a) + "}" + sg(b)) + " au point d'abscisse " + M("0") + ". Réponds « y = … ».", e,
-M("f(0) = 1" + sg(b) + " = " + N(1 + b)) + ", " + M("f'(x) = " + N(a) + "e^{" + co(a) + "}") + ", " + M("f'(0) = " + N(a)) + " : " + M("y = " + N(a) + "x" + sg(1 + b)) + ".",
+M("f(0) = 1" + sg(b) + " = " + N(1 + b)) + ", " + M("f'(x) = " + N(a) + "e^{" + co(a) + "}") + ", " + M("f'(0) = " + N(a)) + " : " + M("y = " + lin(a, 1 + b)) + ".",
 { ctx: "tangente-0", guide: [GR(M("f(0)") + " ?", 1 + b, M("e^0" + sg(b) + " = " + N(1 + b)) + "."), GR(M("f'(0)") + " ?", a, M(N(a)) + "."), GX("Équation " + M("y = f'(0)\\,x + f(0)") + " ?", e, M("y = " + lin(a, 1 + b)) + ".")],
 traps: [TX(a + "*x+" + b, "e⁰ = 1 : f(0) = 1 + " + b + "."), TX("x+" + (1 + b), "f'(0) = " + a + " (dérivée de e^(ax) en 0)."), TX(a + "*x", "La tangente passe par (0 ; f(0)).")] }); },
 ],
@@ -749,8 +750,8 @@ traps: [TR(C0, "C'est C(0), pas C'(0)."), TR(-v, "La grandeur diminue : C'(0) es
 () => { const r1 = nz(-4, 3); let r2 = nz(-4, 4); if (r2 === r1) r2 = r1 + 2; const b = -(r1 + r2) - 2, c = r1 * r2 - b;
 const poly = "x^2" + (b ? sg(b) + "x" : "") + (c ? sg(c) : "");
 return QSet("Soit " + M("f(x) = (" + poly + ")e^{x}") + ". En quelles abscisses la tangente à la courbe de " + M("f") + " est-elle horizontale ? Sépare les valeurs par « ; ».", [r1, r2],
-M("f'(x) = (2x" + sg(b) + ")e^x + (" + poly + ")e^x = (x^2" + sg(b + 2) + "x" + sg(b + c) + ")e^x") + ". Comme " + M("e^x > 0") + ", on résout " + M("x^2" + sg(b + 2) + "x" + sg(b + c) + " = 0") + " : " + M("x = " + N(Math.min(r1, r2))) + " ou " + M("x = " + N(Math.max(r1, r2))) + ".",
-{ ctx: "extremums-trinome", guide: [GX(M("f'(x)") + " ? (forme (…)e^x)", "(x^2+" + (b + 2) + "*x+" + (b + c) + ")*exp(x)", M("(x^2" + sg(b + 2) + "x" + sg(b + c) + ")e^x") + "."), GSetLoc("Racines du trinôme ?", [r1, r2])],
+M("f'(x) = (" + lin(2, b) + ")e^x + (" + poly + ")e^x = (" + tri(b + 2, b + c) + ")e^x") + ". Comme " + M("e^x > 0") + ", on résout " + M(tri(b + 2, b + c) + " = 0") + " : " + M("x = " + N(Math.min(r1, r2))) + " ou " + M("x = " + N(Math.max(r1, r2))) + ".",
+{ ctx: "extremums-trinome", guide: [GX(M("f'(x)") + " ? (forme (…)e^x)", "(x^2+" + (b + 2) + "*x+" + (b + c) + ")*exp(x)", M("(" + tri(b + 2, b + c) + ")e^x") + "."), GSetLoc("Racines du trinôme ?", [r1, r2])],
 traps: [{ s: (() => { const d = b * b - 4 * c; return d >= 0 ? [(-b - Math.sqrt(d)) / 2, (-b + Math.sqrt(d)) / 2] : [NaN]; })(), m: "Ce sont les racines de f (ou du premier facteur) : il faut celles de f'." }, { s: [r1], m: "Il y a deux abscisses." }] }); },
 () => { const a = pk([2, 3, 4, 5, 6]), k = pk([1, 2, 3, 4]), vmax = a * k * Math.exp(-1);
 return pk([0, 1]) ? QN("Soit " + M("f(x) = " + N(a) + "x\\,e^{-x/" + k + "}") + " pour " + M("x \\geqslant 0") + (k === 1 ? "" : " (avec " + M("e^{-x/" + k + "}") + ")") + ". En quelle abscisse " + M("f") + " atteint-elle son maximum ?", k,

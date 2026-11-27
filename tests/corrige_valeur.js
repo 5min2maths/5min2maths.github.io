@@ -225,6 +225,12 @@ const CV = (() => {
     if (!want || !want.length) return null;
     return want.some((v) => same(c, v, sp)) ? null : "le corrigé se termine par « " + m[1] + " " + m[2] + " " + m[3].trim() + " » (réponse " + want.map(fmt).join(" ; ") + ")";
   }
+  /* 27.11 après-midi (testeur, FR 1re : corrigé « y = 2x + 0 » alors que l'app refuse « 2x+0 », non réduit) : le corrigé
+     n'écrit ni « + 0 » / « − 0 » (terme nul), ni « 1x » / « 0x » (coefficient 1 ou 0 écrit devant une lettre). */
+  function reduit(T) {
+    const m = /(?:^|[^A-Za-z_])((?:\d*[a-z]|[a-z][²³]|[a-z]\^\(?\d+\)?)\s*[+-]\s*0)(?![\d.,'])(?!\s*[·:/^(])/.exec(T) || /(?:^|[^\d.,'A-Za-z_])([01]·?[a-z])(?![A-Za-z(])/.exec(T);
+    return m ? m[1] : null;
+  }
   const CHECKED = new Set(["value", "set", "pair", "expr", "ineq", "solset"]);
   const kinds = {};
   /* q : question construite (Engine.build ou finalize). Rend [{ key, msg }]. */
@@ -238,6 +244,7 @@ const CV = (() => {
     };
     if (q.parts && q.parts.length) q.parts.forEach((p, i) => one(p.spec, "partie " + (i + 1) + " : ", i === q.parts.length - 1));
     else one(q.spec, "", true);
+    const nr = reduit(T); if (nr) res.push({ key: "non réduit", msg: "le corrigé écrit « " + nr + " » (l'app refuse une réponse non réduite)" });
     return res;
   }
   /* contre-épreuve : réponse faussée (signe inversé, ou valeur décalée) → doit être déclarée absente. Rend
@@ -256,7 +263,7 @@ const CV = (() => {
     }
     return [n, d];
   }
-  return { check, text, nums, kinds, sides, contre };
+  return { check, text, nums, kinds, sides, contre, reduit };
 })();
 /* Classes couvertes : notions du catalogue de chaque classe (Engine.catalog), toutes construites par GEN. */
 const CV_PROFILS = [[9, "CH", "9e", {}], [10, "CH", "10e", {}], [11, "CH", "11e", {}], [12, "CH", "1re Collège", { track: "college" }], [13, "CH", "2e Collège", { track: "college" }],

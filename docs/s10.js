@@ -61,7 +61,7 @@ traps: [TX(k + "*n", "Il reste un terme constant : les écarts à n s'additionne
 
 () => { const c = ri(2, 9), a = pk([3, 4, 6, 7, 8, 9]), u = (a * c) % 10; if (u <= 1) return null;
 return QN("Un entier " + M("n") + " se termine par " + M(c) + " : on peut l'écrire " + M("n = 10k + " + c) + " (avec " + M("k") + " entier naturel). Par quel chiffre se termine " + M(a + "n") + " ?", u,
-M(a + "n = " + a + "(10k + " + c + ") = " + 10 * a + "k + " + a * c + " = 10(" + a + "k + " + Math.floor((a * c) / 10) + ") + " + u) + " : " + M(a + "n") + " se termine par " + M(u) + ".",
+M(a + "n = " + a + "(10k + " + c + ") = " + 10 * a + "k + " + a * c + (a * c >= 10 ? " = 10(" + a + "k + " + Math.floor((a * c) / 10) + ") + " + u : ""))  + " : " + M(a + "n") + " se termine par " + M(u) + ".",
 { ctx: "unites", guide: [GS("Développe " + M(a + "(10k + " + c + ")") + " : quel est le terme constant ?", a * c, M(10 * a + "k + " + a * c) + "."), GS(M(10 * a + "k") + " se termine par 0. Chiffre des unités de " + M(a + "n") + " ?", u, M(a * c) + " se termine par " + M(u) + ".")],
 traps: [TR(c, "Le chiffre des unités change quand on multiplie : calcule " + a + " · " + c + "."), TR(a * c, "On demande un chiffre : le chiffre des unités de " + a * c + "."), TR((a + c) % 10, "On multiplie par " + a + ", on n'additionne pas.")] }); },
 

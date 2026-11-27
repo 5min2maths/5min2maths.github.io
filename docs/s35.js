@@ -143,7 +143,7 @@ h(`<div class="pz" id="pz" data-noloc>
     <div class="pz-grid pz-anim">
       <div class="card flat"><b>🎯 Question du jour</b><p class="small">Ni trop facile, ni impossible : ton <b>Mathélo</b> monte quand tu progresses, et les questions suivent.</p></div>
       <div class="card flat"><b>🪜 Pas à pas</b><p class="small">Une erreur ? L'app repère le piège (« tu as pris l'angle extérieur ? ») et te guide, une étape à la fois.</p></div>
-      <div class="card flat"><b>📕 Carnet d'erreurs</b><p class="small">Chaque question ratée y attend sa revanche : réussis-la deux fois de suite, elle s'efface.</p></div>
+      <div class="card flat"><b>📕 Carnet d'erreurs</b><p class="small">Chaque question ratée y attend sa revanche : réussis-la du premier coup, elle s'efface (deux fois de suite si tu es à l'aise).</p></div>
       <div class="card flat"><b>📝 Ton évaluation</b><p class="small">Donne la date et les notions : chaque jour, juste ce qu'il faut réviser, plus un sujet de préparation corrigé.</p></div>
     </div>
   </section>
@@ -229,7 +229,7 @@ h(`<div class="pz" id="pz" data-noloc>
       <div class="par-days">${JR.map((d, i) => `<span class="${ON[i] ? "on" : ""}">${d}</span>`).join("")}</div>
       <p><b>4 jours de pratique sur 7.</b> Belle régularité !</p>
       <div><b>Ce qui a été travaillé</b><ul class="plain par-list small"><li>• Équations du 1er degré</li><li>• Théorème de Pythagore</li></ul></div>
-      <div class="par-fete"><span>🏅</span><div><b>À fêter</b><div class="small">Une erreur du carnet réussie deux fois de suite : effacée !</div></div></div></div>
+      <div class="par-fete"><span>🏅</span><div><b>À fêter</b><div class="small">Une erreur du carnet enfin réussie : effacée !</div></div></div></div>
     <p class="small"><b>Ce que vous ne verrez pas</b> : ni notes, ni score, ni heures de connexion, ni liste de fautes. L'effort et les progrès, c'est tout.</p>
   </section>
 

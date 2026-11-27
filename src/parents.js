@@ -46,7 +46,7 @@ const Parents = {
     const now = (s.now && Array.isArray(s.now.ids) ? s.now.ids : []).filter((id) => this.label(id));
     let fete = null;
     if (w.cons.length) fete = { ic: "🏅", txt: "Une notion maîtrisée : <b>" + esc(this.label(w.cons[0]) || "") + "</b>" + (w.cons.length > 1 ? " (et " + (w.cons.length - 1) + " autre" + (w.cons.length > 2 ? "s" : "") + ")" : "") + "." };
-    else if (w.fixed) fete = { ic: "📕", txt: w.fixed + " erreur" + (w.fixed > 1 ? "s" : "") + " de son carnet " + (w.fixed > 1 ? "effacées" : "effacée") + " : il faut la réussir deux fois de suite pour l'effacer." };
+    else if (w.fixed) fete = { ic: "📕", txt: w.fixed + " erreur" + (w.fixed > 1 ? "s" : "") + " de son carnet " + (w.fixed > 1 ? "effacées" : "effacée") + " : réussie" + (w.fixed > 1 ? "s" : "") + " à nouveau du premier coup." };
     else if (w.ups.length) fete = { ic: "📈", txt: "Un progrès en <b>" + esc(w.ups[0].label) + "</b>." };
     else if (w.days) fete = { ic: "💪", txt: w.days + " jour" + (w.days > 1 ? "s" : "") + " de pratique : c'est l'effort qui compte." };
     return { days, n: w.days, ids: ids.slice(0, 4), more: Math.max(0, ids.length - 4), now: now.slice(0, 3), fete };

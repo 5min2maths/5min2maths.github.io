@@ -20,6 +20,8 @@
   const fT = (v) => { v = r6(v); const d = den(v); if (d === 1 || !d || d > 60) return nb(v); const n = Math.round(v * d); return (n < 0 ? "-" : "") + "\\frac{" + Math.abs(n) + "}{" + d + "}"; };
   const fS = (v) => { v = r6(v); const d = den(v); if (d === 1) return String(Math.round(v)); if (!d) return String(v); return Math.round(v * d) + "/" + d; };
   const sg = (v) => (v < 0 ? " - " + fT(-v) : " + " + fT(v));
+  /* 27.11 après-midi (corrigés réduits) : c(v − h) sans « 1( », « + 0 » ni « (x + 0) » */
+  const cfac = (c, v, h) => (c === 1 ? "" : c === -1 ? "-" : fT(c)) + (h ? "(" + v + sg(-h) + ")" : v);
   const P2 = (cs, x = "x") => poly(ptrim(cs), x);
   const tp = (cs, x = "x") => { cs = ptrim(cs); const d = cs.length - 1; let o = "";
     cs.forEach((c, i) => { const p = d - i; if (!c) return; const a = Math.abs(c), co = p === 0 ? fS(a) : a === 1 ? "" : Number.isInteger(r6(a)) ? fS(a) : "(" + fS(a) + ")";
@@ -193,7 +195,7 @@
             traps: [TR((A[0] + B[0]) / 2, "C'est l'abscisse du milieu de [AB] : il n'est pas sur l'axe des abscisses en général."), TR(-x, "Vérifie le signe en résolvant l'équation du 1er degré.")] }); },
       () => { const A = ptR(), p = pk([1, 2, -1, -2, 3]), q = nz(-5, 5), B = [A[0] + p, A[1] + q], c = R.int(-6, 6), t = c - A[1]; const s = -q * t / p; if (!Number.isInteger(s) || t === 0) return null; const k = A[0] + s, C = [k, c];
         return QN("Soit " + M(pt("A", ...A)) + ", " + M(pt("B", ...B)) + " et " + M("C(k \\,;\\, " + c + ")") + ". Pour quelle valeur de " + M("k") + " le triangle " + M("ABC") + " est-il rectangle en " + M("A") + " ?", k,
-          "Rectangle en " + M("A") + " ⟺ " + M("\\vec{AB} \\cdot \\vec{AC} = 0") + " : " + M(fT(p) + "(k" + sg(-A[0]) + ")" + sg(q) + " \\cdot " + par(t) + " = 0") + ", donc " + M("k = " + k) + ".",
+          "Rectangle en " + M("A") + " ⟺ " + M("\\vec{AB} \\cdot \\vec{AC} = 0") + " : " + M(cfac(p, "k", A[0]) + sg(q) + " \\cdot " + par(t) + " = 0") + ", donc " + M("k = " + k) + ".",
           { ctx: "angle-droit", guide: [GP("Composantes de " + M("\\vec{AB}") + " ?", [p, q], M(vcT(p, q)) + "."), GN(M("\\vec{AB} \\cdot \\vec{AC} = 0") + " : valeur de " + M("k") + " ?", k, M("k = " + k) + ".")],
             traps: [TR(A[0] - s, "Vérifie le signe : AB · AC = " + p + "(k − " + A[0] + ") + " + q + " · " + t + "."), TR(A[0] + p * t / q, "C'est la condition de colinéarité (déterminant nul) : pour un angle droit, le produit scalaire est nul.")] }); },
     ],
@@ -215,7 +217,7 @@
           traps: [TR(m, "C'est la pente de la droite donnée (parallèle)."), TR(-m, "Perpendiculaire : on prend l'inverse et on change le signe."), TR(1 / m, "N'oublie pas de changer le signe : m · m' = −1.")] }); },
     () => { const p = pk([1, 2, -2, 3, 4]), q = nz(-6, 6), x0 = R.int(-5, 5), y0 = R.int(-6, 6), m = q / p, h = y0 - m * x0; if (den(m) > 4 || q % p === 0 && Math.abs(q / p) === 1 && R.rand() < 0.5) return null;
       return QX("Donne l'équation de la droite qui passe par " + M(pt("P", x0, y0)) + " et de vecteur directeur " + M("\\vec{d} = " + vcT(p, q)) + ". Écris « y = … » (fractions acceptées).", tp([m, h]),
-        "Pente " + M("m = \\frac{" + q + "}{" + p + "} = " + fT(m)) + " ; " + M("y = " + fT(m) + "(x" + sg(-x0) + ")" + sg(y0) + " = " + P2([m, h])) + ".",
+        "Pente " + M("m = \\frac{" + q + "}{" + p + "} = " + fT(m)) + " ; " + M("y = " + cfac(m, "x", x0) + (y0 ? sg(y0) : "") + " = " + P2([m, h])) + ".",
         { ctx: "vecteur-directeur", guide: [GN("Pente " + M("m = \\frac{d_2}{d_1}") + " ?", m, M(fT(m)) + "."), GX("Équation ?", tp([m, h]), M("y = " + P2([m, h])) + ".")],
           traps: [TX(tp([p / q, y0 - p / q * x0]), "La pente est d₂/d₁ (vertical sur horizontal)."), TX(tp([m, y0]), "L'ordonnée à l'origine n'est pas y₀ : h = y₀ − m·x₀.")] }); },
   ];
@@ -289,8 +291,8 @@
           traps: [TR(h - m, "Cette solution n'est pas dans [" + h + " ; +∞[ : la réciproque prend ses valeurs dans l'ensemble de départ."), TR((h + v) ** 2 + k, "C'est f(" + v + ") ; on demande f⁻¹(" + v + ").")] }); },
     () => { const b = R.int(-3, 4), c = R.int(-4, 5), top = b * b + c, m = R.int(2, 5), v = top - m * m; if (Math.abs(b + m) <= 1) return null; /* 25.11 (robot) : réponse 0 ou ±1 écartée (recip-4-aab) */
       return QN("Soit " + M("f(x) = " + P2([-1, 2 * b, c])) + ". On la restreint à " + M("A = [" + b + " \\,;\\, +\\infty[") + " ; elle est alors une bijection de " + M("A") + " vers " + M("]-\\infty \\,;\\, " + top + "]") + ". Calcule " + M("f^{-1}(" + v + ")") + ".", b + m,
-        M("f(x) = -(x" + sg(-b) + ")^2 + " + top) + " ; " + M("f(x) = " + v + " \\iff (x" + sg(-b) + ")^2 = " + m * m) + ", et " + M("x \\ge " + b) + " donne " + M("x = " + (b + m)) + ".",
-        { ctx: "sommet-restreint", guide: [GN("Ordonnée du sommet (maximum de " + M("f") + ") ?", top, M(top) + "."), GN(M("(x" + sg(-b) + ")^2") + " vaut ?", m * m, M(top + " - (" + v + ") = " + m * m) + "."), GN(M("f^{-1}(" + v + ")") + " ?", b + m, M(b + m) + ".")],
+        M("f(x) = -" + facT(b) + "^2" + (top ? sg(top) : "")) + " ; " + M("f(x) = " + v + " \\iff " + facT(b) + "^2 = " + m * m) + ", et " /* 27.11 : b = 0 ou top = 0 sans « (x + 0) » ni « + 0 » */ + M("x \\ge " + b) + " donne " + M("x = " + (b + m)) + ".",
+        { ctx: "sommet-restreint", guide: [GN("Ordonnée du sommet (maximum de " + M("f") + ") ?", top, M(top) + "."), GN(M(facT(b) + "^2") + " vaut ?", m * m, M(top + " - (" + v + ") = " + m * m) + "."), GN(M("f^{-1}(" + v + ")") + " ?", b + m, M(b + m) + ".")],
           traps: [TR(b - m, "Cette solution est hors de A = [" + b + " ; +∞[."), TR(-(v * v) + 2 * b * v + c, "C'est f(" + v + ") ; on demande f⁻¹(" + v + ").")] }); },
     () => { const a = pk([2, 3, 4, -2]), bb = R.int(-6, 6), c = nz(-4, 4);
       const ex = "((x" + (c < 0 ? "+" + -c : "-" + c) + ")^2" + (bb ? (bb < 0 ? "+" + -bb : "-" + bb) : "") + ")/(" + a + ")";
