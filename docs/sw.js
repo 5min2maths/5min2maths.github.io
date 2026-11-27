@@ -2,9 +2,11 @@
 // le reste (code de l'app, MathJax, polices, icônes) depuis le cache, complété au fil de l'eau.
 // 23.11 (chantier F, chargement) : le code de l'app est un fichier à part (app.js?v=…, versionné à chaque construction),
 // mis en cache dès l'installation ; la page attend le réseau 3 s au plus quand une copie est en cache (réseau faible).
-const CACHE = "5m2m-d63f276f50";
-const CORE = ["./", "./index.html", "./app.js?v=d63f276f50", "./start.js?v=d63f276f50",
-  "./p-9.js?v=d63f276f50", "./p-10.js?v=d63f276f50", "./p-11.js?v=d63f276f50", "./p-12.js?v=d63f276f50", "./p-13.js?v=d63f276f50", "./p-14.js?v=d63f276f50", "./p-15.js?v=d63f276f50", "./p-mp.js?v=d63f276f50", "./p-fr.js?v=d63f276f50", "./p-x.js?v=d63f276f50", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
+// 27.11 (agent ordre) : le code est publié en segments dans l'ordre des sources (docs/sNN.js, build.py) ; build.py les
+// ajoute tous à CORE (précache d'installation) : hors ligne complet, toute classe, et changement de classe hors ligne.
+const CACHE = "5m2m-90f4416a09";
+const CORE = ["./", "./index.html", "./start.js?v=90f4416a09",
+  "./s00.js?v=90f4416a09", "./s01.js?v=90f4416a09", "./s02.js?v=90f4416a09", "./s03.js?v=90f4416a09", "./s04.js?v=90f4416a09", "./s05.js?v=90f4416a09", "./s06.js?v=90f4416a09", "./s07.js?v=90f4416a09", "./s08.js?v=90f4416a09", "./s09.js?v=90f4416a09", "./s10.js?v=90f4416a09", "./s11.js?v=90f4416a09", "./s12.js?v=90f4416a09", "./s13.js?v=90f4416a09", "./s14.js?v=90f4416a09", "./s15.js?v=90f4416a09", "./s16.js?v=90f4416a09", "./s17.js?v=90f4416a09", "./s18.js?v=90f4416a09", "./s19.js?v=90f4416a09", "./s20.js?v=90f4416a09", "./s21.js?v=90f4416a09", "./s22.js?v=90f4416a09", "./s23.js?v=90f4416a09", "./s24.js?v=90f4416a09", "./s25.js?v=90f4416a09", "./s26.js?v=90f4416a09", "./s27.js?v=90f4416a09", "./s28.js?v=90f4416a09", "./s29.js?v=90f4416a09", "./s30.js?v=90f4416a09", "./s31.js?v=90f4416a09", "./s32.js?v=90f4416a09", "./s33.js?v=90f4416a09", "./s34.js?v=90f4416a09", "./s35.js?v=90f4416a09", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
   /* 24.11 : MathJax et polices hébergés avec l'app (docs/vendor/, plus de Cloudflare ni de Google Fonts) */
   "./vendor/mathjax/tex-svg.js", "./vendor/fonts/atkinson-400.woff2", "./vendor/fonts/atkinson-700.woff2",
   "./vendor/fonts/bricolage-var.woff2", "./vendor/fonts/jetbrainsmono-var.woff2"];

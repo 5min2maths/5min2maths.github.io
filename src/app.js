@@ -429,6 +429,20 @@ function screenWelcome() {
   document.getElementById("restore").onclick = () => screenRestore();
 }
 
+/* Nouvelle classe (choix au premier écran ou changement dans les réglages) : nouvel état, compétences, réglages de lecture et
+   points de l'année gardés, puis positionnement. 27.11 (agent ordre) : fonction à part, aussi appelée au démarrage quand
+   la page a été rechargée pour exécuter le code de la nouvelle classe (window.__reprise, chargeur de docs/index.html). */
+function setProfile(prof) {
+  const keep = state && state.comps, keepA = state && state.a11y, keepY = state && ypSync(state), keepN = state && state.gradeNo;
+  state = Engine.newState(prof);
+  if (keepY) state.yp = keepY; /* 25.11 : points de l'année archivés par ypSync (autre classe → départ Pousse, retour → points rendus) */
+  ypSync(state); /* nouvel élève : départ à 0, avant les questions du positionnement */
+  if (keepN) state.gradeNo = keepN;
+  if (keep) state.comps = keep; /* changement de classe : les notes des compétences restent */
+  if (keepA) state.a11y = keepA; /* et les réglages de lecture */
+  Engine.autoInit(state);
+  save(); startPlacement();
+}
 function screenLevel() {
   /* 25.11 soir : profil France sur un appareil sans l'aperçu activé (SYSTEMS.FR masqué) : le système de l'élève reste disponible. */
   if (!SYSTEMS[draft.system] && typeof SYSTEMS_HIDDEN !== "undefined" && SYSTEMS_HIDDEN[draft.system]) SYSTEMS[draft.system] = SYSTEMS_HIDDEN[draft.system];
@@ -466,21 +480,13 @@ function screenLevel() {
     const needNiv = draft.system === "CH" && draft.grade >= 14 && draft.track === "college";
     if (needNiv && !draft.niv) { document.getElementById("niverr").textContent = "Choisis ton niveau : MA1 (normal) ou MA2 (renforcé)."; document.getElementById("niv").scrollIntoView({ block: "center" }); return; }
     const prof = { system: draft.system, grade: draft.grade, track: draft.system === "CH" && draft.grade >= 12 ? draft.track : "college", minutes: draft.minutes, ...(needNiv ? { niv: draft.niv } : {}) };
-    const go = () => {
-      const keep = state && state.comps, keepA = state && state.a11y, keepY = state && ypSync(state), keepN = state && state.gradeNo;
-      state = Engine.newState(prof);
-      if (keepY) state.yp = keepY; /* 25.11 : points de l'année archivés par ypSync (autre classe → départ Pousse, retour → points rendus) */
-      ypSync(state); /* nouvel élève : départ à 0, avant les questions du positionnement */
-      if (keepN) state.gradeNo = keepN;
-      if (keep) state.comps = keep; // changement de classe : les notes des compétences restent
-      if (keepA) state.a11y = keepA; // et les réglages de lecture
-      Engine.autoInit(state);
-      save(); startPlacement();
-    };
+    const go = () => setProfile(prof);
     // 24.11 (chargement par niveau) : les notions de la classe choisie sont chargées d'abord si besoin (docs/ seulement).
+    // 27.11 (agent ordre) : si le code exécuté n'est pas exactement celui de la classe, ensurePacks recharge la page avec
+    // le bon code, dans l'ordre des sources, et le choix reprend au démarrage (window.__reprise, plus bas).
     if (typeof ensurePacks !== "function") return go();
     const b = document.getElementById("next"); b.disabled = true; b.textContent = "Chargement…";
-    ensurePacks(prof).then(go, () => { b.disabled = false; b.textContent = "Réessayer"; toast("Pas de connexion : les notions de cette classe ne sont pas encore sur ton téléphone. Réessaie une fois connecté."); });
+    ensurePacks(prof, true).then(go, () => { b.disabled = false; b.textContent = "Réessayer"; toast("Pas de connexion : les notions de cette classe ne sont pas encore sur ton téléphone. Réessaie une fois connecté."); });
   };
 }
 
@@ -3137,10 +3143,11 @@ function showCode() {
     screenLevel(); toast("Aperçu France activé sur cet appareil (…/#france-off pour le retirer).", 4000);
     return true;
   }
-  /* 27.11 (agent poids) : présentations, espace parent (récit et question curieuse de la semaine) et liens #q-cur-… ont
-     besoin du paquet « x » : on l'attend, puis on rejoue l'adresse. */
-  if (!xReady() && /^#(decouvrir|parents|enseignants|parent\b|q-cur-)/.test(location.hash)) {
-    window.loadPack("x").then(() => showCode(), () => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); toast("Pas de connexion : cette page n'est pas encore sur cet appareil."); });
+  /* 27.11 (agent ordre) : liens vers une question ou une leçon, présentations, espace parent et mode auteur ont besoin de
+     tout le code (toutes classes, dans l'ordre des sources) : si la page ne l'a pas (adresse changée dans l'app ouverte),
+     ensurePacks la recharge avec tout le code (docs/ seulement ; dans dist/ et les pages de test, tout est déjà là). */
+  if (typeof window.__m2mMode === "function" && window.__m2mMode() !== "tout" && /^#(q-|l-|auteur|decouvrir|parents?\b|enseignants)/.test(location.hash)) {
+    window.ensurePacks(null).catch(() => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); toast("Pas de connexion : cette page n'est pas encore sur cet appareil."); });
     return true;
   }
   if (typeof presentRoute === "function" && presentRoute()) return true; /* 25.11 : présentations …/#decouvrir (élèves) et …/#parents (src/presente.js) */
@@ -3198,4 +3205,9 @@ if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude/.
 
 // Démarrage
 ping("open");
-if (!showCode() && !restoreFromHash()) { if (state && state.placed) screenHome(); else if (state && state.placement) { toast("On reprend ton positionnement là où tu l'avais laissé."); startPlacement(); } else { state = null; screenWelcome(); } }
+/* 27.11 (agent ordre) : la page a été rechargée pour exécuter le code de la classe choisie (ensurePacks, chargeur de
+   docs/index.html) : on termine le choix de classe. Garde : code exécuté différent de celui de la classe de l'élève
+   (ne devrait pas arriver) → rechargement avec tout le code, jamais une séance avec d'autres générateurs. */
+if (window.__reprise && typeof window.packsOk === "function" && window.packsOk(window.__reprise)) { const rp = window.__reprise; window.__reprise = null; setProfile(rp); }
+else if (state && state.profile && typeof window.packsOk === "function" && !window.packsOk(state.profile)) window.ensurePacks(null).catch(() => { app.innerHTML = '<section class="card"><h2>Pas de connexion</h2><p>Reconnecte-toi, puis rouvre l\'app.</p></section>'; });
+else if (!showCode() && !restoreFromHash()) { if (state && state.placed) screenHome(); else if (state && state.placement) { toast("On reprend ton positionnement là où tu l'avais laissé."); startPlacement(); } else { state = null; screenWelcome(); } }
