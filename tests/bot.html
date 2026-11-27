@@ -29,7 +29,11 @@ const issue = (type, code, detail) => { const k = type + "|" + code + "|" + CL; 
 const CAND = []; for (const k of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12]) for (const d of [1, 2, 3, 4, 5, 6, 8, 10, 12]) for (const n of [2, 3, 5, 6, 7, 10, 11, 13]) for (const sg of ["", "-"]) CAND.push(sg + (k === 1 ? "" : k) + "√" + n + (d === 1 ? "" : "/" + d));
 const exact = (s2) => { for (const c of CAND) { try { if (checkAnswer(s2, c).status === "correct") return c; } catch (e) {} } return null; };
 const frx = (v) => { if (Math.abs(v * 1e6 - Math.round(v * 1e6)) < 1e-6) return String(+v.toFixed(6)); for (let d = 2; d <= 400; d++) { const n = Math.round(v * d); if (Math.abs(n / d - v) < 1e-9) return n + "/" + d; } return String(+v.toPrecision(8)); };
+/* 27.11 : fraction demandée (spec.frac, « sous forme de fraction irréductible ») : le robot répond par la fraction, pas par
+   le décimal (31 « réponses justes refusées » du 27.11 : faux positifs, le décimal est refusé sans compter faux, à juste titre). */
+const frq = (v) => { for (let d = 2; d <= 1000; d++) { const n = Math.round(v * d); if (Math.abs(n / d - v) < 1e-9) return n + "/" + d; } return frx(v); };
 const answerOf = (q, sp) => { sp = sp || q.spec; if (q && q.canon && sp === q.spec) return String(q.canon);
+  if (sp.kind === "value" && sp.frac && !Number.isInteger(sp.value)) return frq(sp.value);
   if (sp.kind === "value" && !sp.round && Math.abs(sp.value * 400 - Math.round(sp.value * 400)) > 1e-6 && !/\//.test(frx(sp.value))) { const e = exact(sp); if (e) return e; }
   if (sp.kind === "value") return sp.radical ? exact(sp) || frx(sp.value) : sp.round ? String(+(+sp.value).toFixed(Math.max(0, -Math.floor(Math.log10(sp.round))))) : frx(sp.value);
   if (sp.kind === "set") return sp.all ? "tous" : sp.values.length ? sp.values.map(frx).join(";") : "aucune"; // 24.11 : « tous » (équation indéterminée)
@@ -135,6 +139,9 @@ const play = (mode, cs) => {
   if (q.parts) {
     q.parts.forEach((p, i) => { const inp = document.getElementById("p" + i), a = answerOf(null, p.spec); if (inp && a != null) inp.value = a; });
     click("check"); const bad = [...app.querySelectorAll("[id^=mk]")].filter((x) => x.textContent === "✗"); const pa = q.parts.map((p) => answerOf(null, p.spec)); if (bad.length && pa.some((x) => /\d\.\d{4,}/.test(String(x)))) STATS[CL].nonverif = (STATS[CL].nonverif || 0) + 1; else if (bad.length) issue("réponse juste refusée (problème)", code, pa.join(" | ")); // 24.11 : réponses approchées non vérifiables
+    /* 27.11 : réponse refusée sans compter faux (forme) ou partie fausse : l'élève a « Voir le corrigé » ; le robot aussi
+       (« écran figé » du 27.11, 2e : il recliquait sur « Vérifier » sans rien changer). */
+    if (!document.getElementById("nx")) click("idk");
     scan(code); return click("nx");
   }
   const inp = document.getElementById("ans"), a = answerOf(q); if (!inp) { issue("écran sans champ de réponse", code, ""); return false; }
@@ -147,6 +154,7 @@ const play = (mode, cs) => {
   if (approx && !fb) { STATS[CL].nonverif = (STATS[CL].nonverif || 0) + 1; }
   else if (!fb && mode !== "idk" && !app.querySelector(".fb.bad")) issue("réponse juste refusée", code, "tapé « " + a + " » : " + ((app.querySelector(".fb") || {}).textContent || "").slice(0, 100));
   else if (!fb && mode === "juste") issue("réponse juste refusée", code, "tapé « " + a + " » : " + ((app.querySelector(".fb") || {}).textContent || "").slice(0, 100));
+  if (!document.getElementById("nx")) click("idk"); /* 27.11 : réponse refusée (forme) : « Je ne sais pas », comme un élève, au lieu de rester sur l'écran */
   scan(code); return click("nx");
 };
 // Écran autre qu'une question : leçon, leçon active, rappel… on avance comme un élève

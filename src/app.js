@@ -288,7 +288,11 @@ function demoPoolFor(grade) {
   Engine.autoInit(st);
   const seen = Object.keys(st.notions).filter((id) => ["vu", "encours"].includes(st.notions[id].status) && GEN[id]);
   // Notions de l'année ouvertes : niveau 1 seulement ; années précédentes : niveau 1 ou 2.
-  return seen.map((id) => { const pl = placeOf(NOTIONS.find((n) => n.id === id), st.profile); return [id, pl && pl[0] < grade ? 2 : 1]; });
+  /* 27.11 (revue, n° 2 : « chiffre des dizaines de 82,596 », notion de 9e, proposée en Sec. II) : seulement les notions
+     de l'année et de l'année précédente (les autres seulement s'il n'y en a aucune). */
+  const all = seen.map((id) => { const pl = placeOf(NOTIONS.find((n) => n.id === id), st.profile); return [id, pl && pl[0] < grade ? 2 : 1, pl ? pl[0] : 0]; });
+  const near = all.filter((x) => x[2] >= grade - 1);
+  return (near.length ? near : all).map(([id, lv]) => [id, lv]);
 }
 function demoQuestion() {
   let pool = demoPoolFor(demoGrade).filter(([id]) => !demoSkip.includes(id));
@@ -336,9 +340,12 @@ function screenWelcome() {
     if (r.status === "correct") { done(true); return; }
     if (r.status === "invalid" || r.status === "form") { fb.innerHTML = `<div class="fb hint pop">${escT(r.message || "Écris un nombre.")}</div>`; typeset(fb); return; }
     const d = diagPlus(q, v); /* 25.11 : comme dans les séances, erreur typique nommée, sinon l'indice */
+    /* 27.11 (petit défaut noté : après une erreur, « Réessayer » et « On le fait ensemble » pas clairs) : toujours le même
+       ordre, Réessayer d'abord (le champ reste ouvert), puis On le fait ensemble, puis la solution. */
     fb.innerHTML = `<div class="fb hint pop">${d ? escT(d) : r.status === "close" ? escT(r.message || "Presque !") : "<b>Pas encore.</b>" + (q.hint ? " <b>Indice</b> · " + escT(q.hint) : "")}</div>
-      <div class="actions"><button class="btn-primary" id="dguide">On le fait ensemble</button><button class="btn-ghost" id="dsol">Voir la solution</button></div><div id="dgbox"></div>`;
+      <div class="actions"><button class="btn-sec" id="dretry">↺ Réessayer</button><button class="btn-primary" id="dguide">🪜 On le fait ensemble</button><button class="btn-ghost" id="dsol">Voir la solution</button></div><div id="dgbox"></div>`;
     typeset(fb);
+    document.getElementById("dretry").onclick = () => { fb.innerHTML = ""; inp.value = ""; show(); inp.focus({ preventScroll: true }); };
     document.getElementById("dsol").onclick = () => done(false, "Voici la solution :");
     document.getElementById("dguide").onclick = () => { inp.disabled = true; const kp = document.getElementById("kp"); if (kp) kp.remove(); document.getElementById("dok").remove(); prev.remove();
       fb.querySelector(".actions").remove(); runGuide(q, document.getElementById("dgbox"), () => {}); };
@@ -703,7 +710,7 @@ function screenHome() {
   const dots = { prob: !!wp && !wpDone, test: prep && left <= 3, prog: (state.badgesNew || []).length > 0 };
   save();
   const panels = {
-    today: () => `${statsCard()}${resumeCard()}${weekRecapCard()}${backupCard()}${streakNudge()}${prepTodayCard()}${carnetCard(false)}<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire · au rythme de ton cours en classe${done ? " · séance faite, tu peux en refaire une" : ""}</div>
+    today: () => `${resumeCard()}${weekRecapCard()}${backupCard()}${streakNudge()}${prepTodayCard()}${carnetCard(false)}<div class="card stack mode-school"><div class="eyebrow">🎒 Mode scolaire · au rythme de ton cours en classe${done ? " · séance faite, tu peux en refaire une" : ""}</div>
       <div class="fmt-box stack"><div class="spread"><span class="eyebrow">Aujourd'hui</span><button class="btn-ghost small" id="other">🔁 Changer de format</button></div>
         <h3>${FORMATS[fmt].label}</h3><p class="small muted">${Engine.fmtText(state, fmt)}</p></div>
       <button class="btn-primary btn-big" id="go">${done ? "Encore une séance" : "C'est parti"}</button>${nowCard()}</div>
@@ -735,7 +742,11 @@ function screenHome() {
     const mode = state.homeMode === "libre" ? "libre" : "classe", nC = (state.carnet || []).length;
     /* 24.11 (audit ergonomie) : séance interrompue à reprendre → le grand bouton n'annonce plus « Encore une séance »
        ni « séance faite ✓ » (la séance n'est pas finie ; « Reprendre ma séance » est juste au-dessus). */
-    const paused = !!resumeCard(), doneLab = done && !paused;
+    const paused = !!resumeCard();
+    /* 27.11 (revue, n° 4 : « Défi du jour · séance faite ✓ » après la révision de l'évaluation, défi pas fait) : « séance faite »
+       seulement si la séance du format a été faite ; sinon, séance du jour faite par la tâche de l'évaluation. */
+    const evalDone = done && !paused && state.fmtDone !== today && !!(state.prep && (state.prep.log || {})[today]);
+    const doneLab = done && !paused && !evalDone;
     // Une seule bannière ; le joker de série passe avant le bilan de la semaine (sinon la série est perdue le jour même).
     const nudge = streakNudge(), joker = /Joker/.test(nudge);
     /* 26.11 (revue d'un testeur, jours 4–5 : bannières empilées au-dessus du grand bouton, poussé sous le milieu de l'écran
@@ -772,7 +783,7 @@ function screenHome() {
     ${banner}
     ${prepNow ? lostLine : `<div class="card stack sess-card sess-first">${lostLine} <!-- 24.11 : « Séance d'abord » (choix de l'enseignant) : le bouton en premier, le reste discret -->
       <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${paused ? "Nouvelle séance" : done ? "Encore une séance" : mode === "classe" ? "Ma séance du jour" : "Mon défi du jour"}</button>
-      ${mode === "classe" ? `<div class="sess-fmt"><span class="sess-fmt-t"><b class="fmt-lab">${FORMATS[fmt].label}</b><span class="small muted fmt-txt">${Engine.fmtText(state, fmt)}${doneLab ? " · séance faite ✓" : ""}</span></span><button type="button" class="btn-sec small" id="other" aria-label="Changer de format">🔁<span class="chg-t"> Changer</span></button></div>
+      ${mode === "classe" ? `<div class="sess-fmt"><span class="sess-fmt-t">${evalDone ? `<b class="fmt-lab">Séance du jour faite ✓ (évaluation)</b><span class="small muted fmt-txt">Pour en refaire une : ${FORMATS[fmt].label}</span>` : `<b class="fmt-lab">${FORMATS[fmt].label}</b><span class="small muted fmt-txt">${Engine.fmtText(state, fmt)}${doneLab ? " · séance faite ✓" : ""}</span>`}</span><button type="button" class="btn-sec small" id="other" aria-label="Changer de format">🔁<span class="chg-t"> Changer</span></button></div>
         <div class="now-line">${nowLine}</div>` : ""}
       <div class="sess-modes"><div class="seg sess-seg" role="tablist"><button type="button" data-m="classe" aria-pressed="${mode === "classe"}">🎒 En classe</button><button type="button" data-m="libre" aria-pressed="${mode === "libre"}">🧭 Libre</button></div><button type="button" class="btn-ghost small sess-info" id="sessinfo" aria-label="En classe ou Libre : explication" aria-expanded="false">ⓘ</button></div>
       <div class="small muted sess-sub sess-subs" hidden id="sessexp"><span class="${mode === "classe" ? "on" : ""}">Suit le chapitre que tu travailles en classe, avec des révisions.</span><span class="${mode === "libre" ? "on" : ""}">Tous les sujets de ton année, à ton rythme.</span></div>
@@ -1140,8 +1151,10 @@ function startInlineAct(root) {
 const statsCard = () => {
   if (statsAsked() || !(state && (state.firstDone || (state.history || []).length >= 2))) return "";
   const t = day(), seen = UI.statsSeen || [];
-  if (UI.statsLater && addDays(UI.statsLater, 4) > t) return "";
-  if (!seen.includes(t)) { if (seen.length >= 3) return ""; UI.statsSeen = [...seen, t]; uiSave(); }
+  /* 27.11 (revue, n° 6 : carte affichée chaque jour) : 2 jours au plus, « Plus tard » = une semaine, « Non » = définitif ;
+     ensuite, seulement dans les Réglages. Toujours sous la séance. */
+  if (UI.statsLater && addDays(UI.statsLater, 7) > t) return "";
+  if (!seen.includes(t)) { if (seen.length >= 2) return ""; UI.statsSeen = [...seen, t]; uiSave(); }
   return `<div class="card flat stats-line" id="statscard"><span class="small">📊 Envoyer des statistiques <b>anonymes</b> pour améliorer l'app ?</span>
   <span class="row stats-btns"><button class="btn-primary small" id="statsoui">Oui</button><button class="btn-sec small" id="statsnon">Non</button><button class="btn-ghost small" id="statslater">Plus tard</button><button class="btn-ghost small" id="statsplus" aria-label="Le détail de ce qui est envoyé">?</button></span></div>`;
 };
@@ -1466,7 +1479,10 @@ function screenPrep() {
   { let best = null; G0.forEach(([th, l]) => { const d = lastD(l); if (d && (!best || d >= best[1])) best = [th, d]; });
     if (best) pinned.add(best[0]); else if (!pinned.size) { const e = G0.find(([, l]) => l.some((c) => state.notions[c.id].status === "encours")); if (e) pinned.add(e[0]); } }
   const recentG = (l) => G0.some(([th, l2]) => l2 === l && pinned.has(th));
-  const grp = ([th, list]) => `<div class="card flat"><h3>${Engine.themeLabel(th, state.profile)}</h3><div class="checks">${list.map((c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${c.label}</span></label>`).join("")}</div></div>`;
+  /* 27.11 (revue, n° 3 : MP 2e « Fonctions affines ⏎ Fonctions affines ⏎ Zéro et signe… ») : une notion qui porte le nom de son
+     chapitre est présentée par son contenu (« Les bases : f(x) = ax + b »). */
+  const prepLab = (c, thL) => { const bare = (s) => String(s).replace(/^.*·\s*/, "").replace(/^\d+\.\s*/, "").trim().toLowerCase(); return bare(c.label) === bare(thL) ? "Les bases" + (c.ex ? " : " + esc(c.ex) : " du chapitre") : c.label; };
+  const grp = ([th, list]) => { const thL = Engine.themeLabel(th, state.profile); return `<div class="card flat"><h3>${thL}</h3><div class="checks">${list.map((c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${prepLab(c, thL)}</span></label>`).join("")}</div></div>`; };
   h(`${brand}<h2>Je prépare <span class="mark">une évaluation</span></h2>
   <p class="muted">Choisis les notions de ton évaluation et sa date. Jusqu'à ce jour-là, tes séances porteront surtout sur elles.</p>
   <div class="card flat stack"><label for="pdate"><h3>Date de l'évaluation</h3></label><input type="date" id="pdate" value="${date}" min="${day()}" class="datein"></div>
@@ -1752,6 +1768,7 @@ function startFree() {
   let p4 = 0; plan = plan.map((e) => { const x = e.split("|"); if (+x[1] === 4 && (!yearSet.has(x[0]) || p4++)) x[1] = "3"; return x.join("|"); });
   const est = () => (lessonAtStart(plan) === 0 ? 60 : 0) + plan.reduce((t, e) => t + (+e.split("|")[1] === 4 ? 180 : 50), 0);
   while (plan.length > 2 && est() > 330) plan.splice(plan.length - 1 - (+plan[plan.length - 1].split("|")[1] === 4 ? 1 : 0), 1);
+  plan = Engine.firstDayCap(state, plan); /* 27.11 (revue, n° 5) : jour du positionnement, 2 questions de niveau 2 au plus */
   if (!plan.length) return startSession();
   if (state.freeRecent && state.freeRecent.length) state.freeRecent[state.freeRecent.length - 1] = plan.map((x) => x.split("|")[0]);
   session = { free: true, plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), lessonAt: lessonAtStart(plan) };
@@ -2065,11 +2082,13 @@ const keyLetters = (spec) => { let L = []; try { if (spec && spec.kind === "expr
    x, y, =, ; restent pour les expressions, les listes de solutions, les couples (et les intervalles). Test : tests/ergo.html. */
 const CALC_KEYS = ["7", "8", "9", "/", "(", ")", "4", "5", "6", "*", "^", "⌫", "1", "2", "3", "-", "√", "π", "0", ",", "+", "⌨"];
 const isCalcSpec = (spec) => !!spec && spec.kind === "value" && !spec.final;
-const keysFor = (spec) => (spec && spec.final ? numKeys(spec) : isSetSpec(spec) ? SET_KEYS.map((k) => keyBtn(k)).join("")
+/* 27.11 (petit défaut noté : pavé complet pour une question à choix numérotés) : touches 1 à n (q.choix) et ⌫ seulement. */
+const choixKeys = (n) => [...Array(n).keys()].map((i) => String(i + 1)).concat(["⌫"]).map((k) => `<button type="button" class="${k === "⌫" ? "k-op" : ""}" data-k="${k}"${keyAttr(k)}>${keyIn(k)}</button>`).join("");
+const keysFor = (spec) => (spec && spec.choix ? choixKeys(spec.choix) : spec && spec.final ? numKeys(spec) : isSetSpec(spec) ? SET_KEYS.map((k) => keyBtn(k)).join("")
   : isCalcSpec(spec) ? CALC_KEYS.map((k) => keyBtn(k)).join("")
   : spec && spec.kind === "set" ? keyLetters(spec).flatMap((k) => (k === "⌨" ? ["∅", k] : [k])).map((k) => keyBtn(k, true)).join("") : keyLetters(spec).map((k) => keyBtn(k)).join(""));
-const kpKind = (spec) => (spec && spec.final ? "k-num" : isSetSpec(spec) ? "k-set" : isCalcSpec(spec) ? "k-calc" : spec && spec.kind === "set" ? "k-list" : "");
-const kpKey = (spec) => { const kind = kpKind(spec); return kind + (kind === "k-num" && exactKeys(spec).length ? "r" : "") + (kind === "k-num" && spec.pow ? "p" : ""); };
+const kpKind = (spec) => (spec && spec.choix ? "k-choix" : spec && spec.final ? "k-num" : isSetSpec(spec) ? "k-set" : isCalcSpec(spec) ? "k-calc" : spec && spec.kind === "set" ? "k-list" : "");
+const kpKey = (spec) => { const kind = kpKind(spec); return kind + (spec && spec.choix ? spec.choix : "") + (kind === "k-num" && exactKeys(spec).length ? "r" : "") + (kind === "k-num" && spec.pow ? "p" : ""); };
 const keypadHtml = (spec) => { const kind = kpKind(spec); return `<div class="keypad${kind ? " " + kind : ""}" id="kp" data-kind="${kpKey(spec)}">${keysFor(spec)}</div>`; };
 // Insère une touche dans le champ (avec « | » : place du curseur), ou efface.
 function typeKey(inp, k) {
@@ -2241,7 +2260,7 @@ function renderProblem(q, opt) {
       active = inp;
       const kp = document.getElementById("kp"), kind = kpKind(p.spec);
       if ((kp.dataset.kind || "") !== kpKey(p.spec)) {
-        kp.classList.remove("k-set", "k-num", "k-list", "k-calc"); if (kind) kp.classList.add(kind);
+        kp.classList.remove("k-set", "k-num", "k-list", "k-calc", "k-choix"); if (kind) kp.classList.add(kind);
         kp.dataset.kind = kpKey(p.spec); kp.innerHTML = keysFor(p.spec); bindKp(); }
       placeKp(inp);
     };
@@ -2354,7 +2373,7 @@ function renderQuestion(q, opt) {
   ${opt.single ? "" : lessonDetails(q.id)}
   <div class="answer"><input id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="none" placeholder="Ta réponse…" aria-label="Ta réponse">
   <div class="preview" id="prev"></div>
-  ${keypadHtml(q.spec)}</div>
+  ${keypadHtml(q.choix > 1 && q.choix <= 9 && q.spec.kind === "value" ? { ...q.spec, choix: q.choix } : q.spec)}</div>
   <div id="fb"></div></div>
   ${qbarHtml('<button class="btn-sec" id="idk">Je ne sais pas</button>', '<button class="btn-primary" id="check">Vérifier</button>', opt.onNotYet || opt.onEasy ? (opt.onNotYet ? '<button type="button" class="btn-sec notyet" id="notyet">Pas encore vu en classe</button>' : "") + (opt.onEasy ? '<button type="button" class="btn-sec easy" id="easy" title="Passer cette question et monter d\'un cran">Trop facile ⏭</button>' : "") : "")}`);
   const S = opt.track ? sigOpen({ ev: "q", code, d: q.d, kind: q.kind || "", fmt: opt.track, redo: opt.redo ? 1 : 0 }) : null;
@@ -2773,19 +2792,23 @@ function screenCurious(q, back, from = "") {
 // ---------------- Histoire des maths (22.11) ----------------
 // Le récit, son illustration, puis « À toi » : une application directe, deux essais, puis la réponse expliquée.
 function screenHistory(k, back) {
-  const H = HISTOIRE[k], E = H.ex(), spec = { kind: "value", value: E.value, final: true };
+  /* 27.11 (commentaire de l'auteur, hist-25 : « 26 au cube … accès sur la calculatrice ») : pavé adapté. « À toi » : résultat
+     seul, sauf exercice marqué calc (puissances à calculer : le calcul n'y est pas la compétence) ; « Pour aller plus loin » et
+     « Défi expert » (histStep) : pavé de calcul (puissance, racine, π). */
+  const H = HISTOIRE[k], E = H.ex(), spec = E.calc ? { kind: "value", value: E.value } : { kind: "value", value: E.value, final: true };
   Histoire.seen(state, k); save();
   h(`${brand}${backTop("hback0")}<div class="eyebrow">📜 Histoire des maths · ${H.t}</div>
   <div class="card pop stack hist-story"><h2>${H.titre}</h2><div class="figwrap">${H.fig(E)}</div><p>${H.txt}</p>
     <div class="act-step"><div class="act-h"><span class="act-n">✍️</span> À toi</div><div class="qtext">${E.q}</div>
       <div class="answer"><input class="ans" id="hans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Ta réponse">
       <div class="preview" id="hprev"></div>${keypadHtml(spec)}
-      <div class="actions"><button class="btn-primary" id="hok">Vérifier</button><button class="btn-sec" id="hidk">Voir la réponse</button></div></div><div id="hfb"></div></div><div id="hmore"></div>
+      <div class="actions"><button class="btn-primary" id="hok">Vérifier</button><button class="btn-sec" id="hidk">Voir la réponse</button></div></div><div id="hfb"></div>
+      ${scratchHtml() /* 27.11 (commentaire de l'auteur, hist-21 : « zone brouillon ici aussi ») */}</div><div id="hmore"></div>
     <p class="small muted">Lien avec : ${H.lien}</p></div>
   <button class="btn-primary btn-big" id="hnext">Une autre histoire</button>
   <button class="btn-ghost" id="hback">Retour</button>`);
   pageQ = "hist-" + k;
-  typeset(app);
+  typeset(app); bindScratch(null);
   const $ = (x) => document.getElementById(x), inp = $("hans"), prev = $("hprev");
   let tries = 0;
   const finish = (ok) => {
@@ -2834,7 +2857,7 @@ function histMore(H, box) {
   }));
 }
 function histStep(holder, E, n, tot, done) {
-  const spec = E.round ? { kind: "value", value: E.value, round: E.round } : { kind: "value", value: E.value, final: true };
+  const spec = E.round ? { kind: "value", value: E.value, round: E.round } : { kind: "value", value: E.value }; /* 27.11 : pavé de calcul (26³ : touche ^), voir screenHistory */
   holder.innerHTML = `<div class="qtext"><b>${tot > 1 ? "Étape " + n + " sur " + tot + ". " : ""}</b>${E.q}</div>
     <div class="answer"><input class="ans" id="hsin" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" aria-label="Ta réponse">
     <div class="preview" id="hsprev"></div>${keypadHtml(spec)}
@@ -2940,6 +2963,8 @@ function screenSummary() {
   if (session && session.answered && !session.counted) { session.counted = true; UI.sessN = (+UI.sessN || 0) + 1; uiSave(); storagePersist(); }
   if (session && session.weekly && state) { state.weeklyDone = weekKey(); save(); }
   if (session && session.prepKind && session.answered) prepMark(session.prepKind);
+  /* 27.11 (revue, n° 4) : séance du format du jour faite (pas la tâche de l'évaluation, le problème ou le carnet) */
+  if (state && session && session.answered && !session.prep && !session.weekly && !session.carnet) { state.fmtDone = day(); save(); }
   ping("session", { ...sessionInfo(), n: session.answered, score: session.score, min: Math.max(1, Math.round((Date.now() - session.start) / 6e4)) });
   Badges.check(state); save();
   const nb = newBadgesCard();
