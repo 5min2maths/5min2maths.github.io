@@ -295,6 +295,68 @@ Couverture (taux d'énoncés recalculés aux niveaux 1 / 2 / 3, avant → après
 Restent non couverts : lectures de graphique (tauxvar 1, limites et continuité lues, asymptotes en pointillés, dérivée
 seconde lue, fratmp 3, sinusmp lus), quelques formes rares (d'Alembert hors fractions simples, Mac-Laurin autre que e^{ax}).
 
+### Lycée français, niveaux 1 à 3 (27.11, agent/recalcfr)
+
+Champ : les **30 notions propres au lycée français** (catalogue FR, classe 2nde à Tle, `CH: null` ; src/fr_2nde.js,
+fr_1re.js, fr_tle.js, fr_lycee.js, fr_fin.js, fr_3e.js pour tabvar, série `stats` de generators.js). Jusque-là, seuls
+les défis (niveau 4) étaient recalculés (`recalc_oracles_fr.js`) et quelques formes des niveaux 1 à 3 par les oracles
+communs. Nouveau fichier **`tests/recalc_oracles_frl.js`** (chargé après `recalc_oracles34.js`, dont il reprend les
+outils numériques) : un oracle par notion, en tête de `RECALC.G`, limité aux niveaux 1 à 3 (`RECALC.IDSFRL`). Il relit
+l'énoncé (TeX, ou texte « à plat » pour les contextes) **et la figure quand les données y sont** (nuage de points d'une
+suite lu par les graduations, arbre pondéré lu branche par branche, vecteur sur quadrillage, point de l'hyperbole), puis
+refait le calcul par une autre voie : itération des suites, dénombrement exhaustif (arbres à 3 épreuves), loi jointe
+p · q · r pour les arbres et les probabilités conditionnelles (données « P(A) = … » de l'énoncé, résolution pas à pas),
+tableau croisé dont les évènements sont rattachés aux en-têtes par les mots communs, mini-interpréteur Python (def,
+if / elif / else, while, for … in range, print), racines numériques, dérivées par différences, intégrales par Simpson,
+limites extrapolées, tableaux de variations relus nœud par nœud (flèches contrôlées).
+
+Page **`tests/recalcul_frl.html`** (dans la suite) : chaque question est construite puis **finalisée pour un profil
+français de sa classe** (`Engine.finalize` : €, consignes `exact`, `frac`, `final`, comme l'élève la voit) ; 100 graines
+par notion et niveau (9 000 énoncés) ; **toutes** les questions doivent être reconnues (une forme non lue = échec) ;
+contre-épreuve sur **chaque** énoncé reconnu. Saisie : la réponse recalculée est tapée dans `checkAnswer` — valeur à
+l'arrondi demandé, fraction quand l'énoncé dit « fraction » (dénominateur jusqu'à 5 000), écriture exacte avec π ou √
+(trigrad, trigfr, lnfr : « 5π/3 », « e^(3)+4 », « ln(7) »), ensembles « a ; b », couples « x ; y ». Options `#ids`, `#n`,
+`#detail`, `#miss` (+ `#flat` : texte lu par les oracles). Durée : 23 à 46 s (charge 4 à 6), bien sous la cible de 200 s.
+`recalcul.html` et `recalcul2.html` excluent ces notions (pages 1 à 4 : `recalc_oracles_frl.js` chargé, filtre `IDSFRL`).
+
+Couverture (énoncés recalculés aux niveaux 1 / 2 / 3, avant → après ; avant : oracles communs + défis FR, 15 tirages ;
+après : 100 tirages, finalisés FR) : **6 notions sur 30 couvertes avant** (≥ 20 % à un niveau, souvent une seule forme),
+**30 sur 30 à 100 % aux trois niveaux après** (9 000 / 9 000, 9 000 contre-épreuves détectées).
+
+| Notion | Avant | Après |
+|---|---|---|
+| `stats` | 100 %  100 %  100 % | 100 %  100 %  100 % |
+| `suitedef`, `suitesomme`, `suitelim` | 0 %  0 %  0 % | 100 %  100 %  100 % |
+| `suitearith` | 73 %  60 %  0 % | 100 %  100 %  100 % |
+| `suitegeo` | 80 %  0 %  0 % | 100 %  100 %  100 % |
+| `expfn` | 33 %  20 %  73 % | 100 %  100 %  100 % |
+| `lnfr` | 73 %  40 %  73 % | 100 %  100 %  100 % |
+| `expderiv` | 80 %  27 %  0 % | 100 %  100 %  100 % |
+| `trigfr` | 33 %  33 %  0 % | 100 %  100 %  100 % |
+| `fref` | 33 %  40 %  7 % | 100 %  100 %  100 % |
+| `tabsignes` | 0 %  100 %  100 % | 100 %  100 %  100 % |
+| `tauxevol` | 7 %  0 %  0 % | 100 %  100 %  100 % |
+| `pscal`, `probtot`, `vaesp`, `binom`, `vect3e`, `probcond`, `algopy`, `trigrad`, `droitenorm`, `tabvar`, `tvi`, `sommeva`, `recurrence`, `compdiff`, `posrelc`, `intmaj`, `suiteint` | 0 %  0 %  0 % | 100 %  100 %  100 % |
+
+Erreurs trouvées et corrigées :
+
+| Code | Notion (fichier) | Gravité | Avant | Après |
+|---|---|---|---|---|
+| `tabvar-3-11`, `tabvar-3-1a` (nb-solutions-partiel) | Tableaux de variations (fr_3e.js) | **grave** | « Combien de solutions de f(x) = −7 sur [−2 ; 6] ? » avec f(−2) = −7 : attendu 1 (flèches seulement), il y en a 2 (la borne compte) — k = (y₂ + y₃)/2 tombait sur y₁ | tirage refait quand k est une valeur du tableau |
+| `tvi-2-d`, `tvi-2-r`, `tvi-2-1s`, `tvi-2-1w`, `tvi-2-2e` (balayage) | TVI (fr_tle.js) | **grave** | x³ + x = 10 a pour solution 2 : attendu 1,9 « par défaut au dixième », corrigé « f(2) ≈ 0 > 0 » | 10 remplacé par 9 ; garde-fou si f(x + 0,1) = 0 |
+| `binom-2-1`, `binom-2-*` (aumoins), `binom-3-b`, `binom-3-*` (auplus) | Loi binomiale (fr_lycee.js) | moyenne | P(X ⩾ 1) = 0,99999 → « 1 » et P(X ⩽ 1) = 0,0004 → « 0 » au millième (environ une question sur huit) : question sans objet | tirage refait si l'arrondi vaut 0 ou 1 (`ok3`) |
+| `binom-2-1x`, `binom-2-2l`, `binom-3-a`, `binom-3-1b` | Loi binomiale (fr_lycee.js) | faible | valeur exacte pile entre deux millièmes (0,1875, 0,0625…) : les deux voisins acceptés | tirage refait (`ok3`) |
+| `probtot-3-q`, `probtot-3-15`, `probtot-3-1o` (au moins une fois) | Probabilités totales (fr_lycee.js) | faible | 1 − 0,85² = 0,2775 au millième : 0,277 et 0,278 acceptés ; « Probabilité que au moins un panneau », « qu'elle gagne » (code promo) | tirage refait à égalité ; « Probabilité qu'au moins un panneau… », « d'obtenir au moins un code gagnant » |
+| `suiteint-3-b`, `suiteint-3-10`… (seuil-exp) | Suites d'intégrales (fr_fin.js) | moyenne | J₅₀ = 0,02(1 − e⁻⁵⁰) < 0,02 : vrai, mais la calculatrice affiche 0,02 ; l'élève qui vérifie répond 51 | seuils 0,1 ; 0,2 ; 0,125 ; 0,25 seulement (e⁻ⁿ visible) |
+| `tauxevol-1-z` (cm-vers-taux) | Évolutions (fr_2nde.js) | énoncé | « revient à l'diminuer de combien de pour cent ? » et −8 attendu pour « diminuer de combien » | « On multiplie une quantité par 0,92. Quel est le taux d'évolution correspondant (en %, négatif pour une baisse) ? » |
+| `suitegeo-3-b` (lac), `lnfr-3-6` (seuil-lac) | Suites géométriques, ln (fr_lycee.js, fr_tle.js) | énoncé | « leur nombre baisse … passera-t-elle » ; « il en compte 800 poissons au départ » | « passera-t-il » ; « il abrite 800 poissons au départ » |
+| `suitelim-1-*` (geo-limite) | Limites de suites (fr_lycee.js) | style | « u_n = 9 + 1 × (1/3)ⁿ » | « u_n = 9 + (1/3)ⁿ » |
+
+Aucune autre réponse attendue fausse sur les 9 000 énoncés. Relevé hors périmètre (src/expr.js, non modifié) : pour une
+réponse en couple, « (−5 ; −2) » tapé avec parenthèses est refusé « Parenthèse non fermée » (seul « −5 ; −2 » passe, comme
+le demande la consigne) ; la lecture graphique de suitearith-1 (graphique) place parfois u₀ entre deux lignes du
+quadrillage (graduation de 2 pour une raison de 3).
+
 ## Notions couvertes (taux d'énoncés recalculés aux niveaux 1, 2, 3 ; 100 tirages par niveau ; état du 26.11 après extension)
 
 Avant l'extension (matin du 26.11) : **119 notions** couvertes (≥ 20 % à un niveau). Après : **172 notions** (+53, marquées « nouveau »), 38'173 énoncés recalculés sur 58'560 (avant : 28'827 sur 50'655), 1'176 contre-épreuves.
