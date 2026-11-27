@@ -627,7 +627,7 @@ const DEFIS = (() => {
            ["c) Les solutions " + M("x") + " en degrés (séparées par « ; »)", SET(xs)]],
           ["Deux fonctions différentes : remplace " + other + "² x par 1 − " + fn + "² x (car sin² x + cos² x = 1). Il ne reste que " + fn + " x.",
            "Pose X = " + fn + " x : 2X² " + (K > 0 ? "− " + K : "+ " + -K) + "X " + (2 + m > 0 ? "− " + (2 + m) : "+ " + -(2 + m)) + " = 0. Une des solutions en X peut être impossible (hors de [−1 ; 1])."],
-          M("2(1 - " + F + "^2 x)" + (K < 0 ? " - " : " + ") + (Math.abs(K) === 1 ? "" : Math.abs(K)) + F + " x" + (m ? sg(m) : "") + " = 0 \\iff " + poly([2, -K, -(2 + m)], "X") + " = 0") + " : " + M("X = " + fx(u1)) + " ou " + M("X = " + fx(u2)) + ". " + [u1, u2].map((u) => Math.abs(u) > 1 ? M(F + " x = " + fx(u)) + " est impossible" : M(F + " x = " + fx(u)) + " donne " + sol(u).map((x) => M(x + "°")).join(" et ")).join(" ; ") + ".");
+          M("2(1 - " + F + "^2 x)" + (K < 0 ? " - " : " + ") + (Math.abs(K) === 1 ? "" : Math.abs(K)) + F + " x" + (m ? sg(m) : "") + " = 0 \\iff " + poly([2, -K, -(2 + m)], "X") + " = 0") + " : " + M("X = " + fx(u1)) + " ou " + M("X = " + fx(u2)) + ". " + [u1, u2].map((u) => Math.abs(u) > 1 ? M(F + " x = " + fx(u)) + " est impossible" : M(F + " x = " + fx(u)) + " donne " + sol(u).map((x) => M(x + "°")).join(" et ")).join(" ; ") + ". b) " + M(xs.length) + " solution" + (xs.length > 1 ? "s" : "") + ".");
       },
     ],
     trigeq2: [
@@ -663,7 +663,7 @@ const DEFIS = (() => {
            ["b) Ordonnée à l'origine de la tangente au point d'abscisse " + M(a2), n2], ["c) Plus petite pente possible d'une tangente au graphe de " + M("f"), mn]],
           ["Deux droites parallèles ont la même pente : résous f'(x) = " + m + ", avec f'(x) = 3x² " + (2 * B < 0 ? "− " + -2 * B : "+ " + 2 * B) + "x " + (C < 0 ? "− " + -C : "+ " + C) + ".",
            "b) Tangente : y = f'(" + a2 + ")(x − " + tT(a2) + ") + f(" + a2 + "), puis x = 0. c) f'(x) est un trinôme tourné vers le haut : sa plus petite valeur est à son sommet."],
-          "a) " + M(poly([3, 2 * B, C]) + " = " + m + " \\iff " + poly([3, 2 * B, 3 * a1 * a2]) + " = 0 \\iff 3(" + xm(a1) + ")(" + xm(a2) + ") = 0") + ". b) " + M("f(" + a2 + ") = " + f(a2)) + ", " + M("y = " + m + "(" + xm(a2) + ")" + sg(f(a2)) + " = " + poly([m, n2])) + " : " + M(n2) + ". c) Sommet de " + M("f'") + " en " + M("x = " + D((a1 + a2) / 2)) + " : " + M("f'(" + D((a1 + a2) / 2) + ") = " + D(mn)) + ".");
+          "a) " + M(poly([3, 2 * B, C]) + " = " + m + " \\iff " + poly([3, 2 * B, 3 * a1 * a2]) + " = 0 \\iff 3(" + xm(a1) + ")(" + xm(a2) + ") = 0") + " : " + M("x = " + a1) + " et " + M("x = " + a2) + ". b) " + M("f(" + a2 + ") = " + f(a2)) + ", " + M("y = " + m + "(" + xm(a2) + ")" + sg(f(a2)) + " = " + poly([m, n2])) + " : " + M(n2) + ". c) Sommet de " + M("f'") + " en " + M("x = " + D((a1 + a2) / 2)) + " : " + M("f'(" + D((a1 + a2) / 2) + ") = " + D(mn)) + ".");
       },
     ],
     derivcomp: [
@@ -822,7 +822,7 @@ const DEFIS = (() => {
            ["c) Quel pourcentage de l'aire comprise entre la parabole et l'axe des abscisses cela représente-t-il ? (%, au dixième)", pc, 0.1]],
           ["f(x) = g(x) : ramène à un trinôme et factorise. Entre les deux abscisses, la parabole est au-dessus de la droite.",
            "b) Intègre f(x) − g(x) entre les deux abscisses. c) La parabole coupe l'axe en ±" + R0 + " : intègre f de −" + R0 + " à " + R0 + "."],
-          "a) " + M(poly([1, -(x1 + x2), x1 * x2]) + " = 0 \\iff (" + xm(x1) + ")(" + xm(x2) + ") = 0") + ". b) " + M("\\int_{" + x1 + "}^{" + x2 + "} \\big(" + poly([-1, x1 + x2, -x1 * x2]) + "\\big)\\,dx = " + fx(A)) + ". c) " + M("\\int_{-" + R0 + "}^{" + R0 + "} (" + R0 * R0 + " - x^2)\\,dx = " + frac(4 * R0 ** 3, 3)) + " ; " + M(fx(A) + " \\div " + frac(4 * R0 ** 3, 3) + " \\approx " + D(r1(pc)) + "\\,\\%") + ".");
+          "a) " + M(poly([1, -(x1 + x2), x1 * x2]) + " = 0 \\iff (" + xm(x1) + ")(" + xm(x2) + ") = 0") + " : " + M("x = " + x1) + " et " + M("x = " + x2) + ". b) " + M("\\int_{" + x1 + "}^{" + x2 + "} \\big(" + poly([-1, x1 + x2, -x1 * x2]) + "\\big)\\,dx = " + fx(A)) + ". c) " + M("\\int_{-" + R0 + "}^{" + R0 + "} (" + R0 * R0 + " - x^2)\\,dx = " + frac(4 * R0 ** 3, 3)) + " ; " + M(fx(A) + " \\div " + frac(4 * R0 ** 3, 3) + " \\approx " + D(r1(pc)) + "\\,\\%") + ".");
       },
     ],
     volrev: [
@@ -988,7 +988,7 @@ const DEFIS = (() => {
            ["c) Solution(s) de l'équation de départ", SET(okF)]],
           ["(1 + √u)² = 1 + 2√u + u. Isole la racine qui reste, puis élève à nouveau au carré.",
            "Élever au carré peut ajouter des solutions : remplace chaque solution dans l'équation de DÉPART (les deux racines doivent exister, et l'égalité doit être vraie)."],
-          M("2x" + sg(a) + " = 1 + 2\\sqrt{x" + sg(b) + "} + x" + sg(b)) + ", a) " + M(poly([1, c]) + " = 2\\sqrt{x" + sg(b) + "}") + ". b) " + M("(" + poly([1, c]) + ")^2 = 4(x" + sg(b) + ") \\iff " + poly([1, 2 * c - 4, c * c - 4 * b]) + " = 0") + " : " + M(Math.min(x0, x1)) + " et " + M(Math.max(x0, x1)) + ". c) " + [x0, x1].map((x) => M("x = " + x) + (chk(x) ? " convient" : " ne convient pas")).join(", ") + ".");
+          M("2x" + sg(a) + " = 1 + 2\\sqrt{x" + sg(b) + "} + x" + sg(b)) + ", a) " + M(poly([1, c]) + " = 2\\sqrt{x" + sg(b) + "}") + ", donc " + M("c = " + c) + ". b) " + M("(" + poly([1, c]) + ")^2 = 4(x" + sg(b) + ") \\iff " + poly([1, 2 * c - 4, c * c - 4 * b]) + " = 0") + " : " + M(Math.min(x0, x1)) + " et " + M(Math.max(x0, x1)) + ". c) " + [x0, x1].map((x) => M("x = " + x) + (chk(x) ? " convient" : " ne convient pas")).join(", ") + ".");
       },
     ],
     eqratmp: [
@@ -3405,7 +3405,7 @@ const DEFIS = (() => {
       return CXP("parasite", P("On résout " + M("\\sqrt{" + cfD(a) + "x " + (b < 0 ? "- " + -b : "+ " + b) + "} = x " + (c < 0 ? "+ " + -c : c === 0 ? "" : "- " + c)) + ".",
         [["a) Solutions de l'équation obtenue en élevant au carré (séparées par « ; »)", SET([x1, x2])], ["b) Solution(s) de l'équation de départ", SET([x1])], ["c) Valeur de la racine pour cette solution", x1 - c]],
         ["Élève les deux membres au carré : " + (a === 1 ? "" : a) + "x " + (b < 0 ? "− " + -b : "+ " + b) + " = (x " + (c < 0 ? "+ " + -c : "− " + c) + ")², puis résous l'équation du 2e degré.", "Vérifie chaque solution dans l'équation de départ : une racine carrée n'est jamais négative, il faut x " + (c < 0 ? "+ " + -c : "− " + c) + " ≥ 0."],
-        "a) " + M(poly([1, -(2 * c + a), c * c - b]) + " = 0 \\iff (" + xm(x1) + ")(" + xm(x2) + ") = 0") + ". b) " + M("x = " + x2) + " donne " + M("x " + (c < 0 ? "+ " + -c : "- " + c) + " = " + (x2 - c) + " < 0") + " : rejetée ; il reste " + M("x = " + x1) + ". c) " + M("\\sqrt{" + (a * x1 + b) + "} = " + (x1 - c)) + "."));
+        "a) " + M(poly([1, -(2 * c + a), c * c - b]) + " = 0 \\iff (" + xm(x1) + ")(" + xm(x2) + ") = 0") + " : " + M("x = " + x1) + " et " + M("x = " + x2) + ". b) " + M("x = " + x2) + " donne " + M("x " + (c < 0 ? "+ " + -c : "- " + c) + " = " + (x2 - c) + " < 0") + " : rejetée ; il reste " + M("x = " + x1) + ". c) " + M("\\sqrt{" + (a * x1 + b) + "} = " + (x1 - c)) + "."));
     },
     () => { /* pendule : T = 2π√(L / 9,81) */
       const L1 = ri(20, 250) / 100, T2 = ri(12, 35) / 10, dT = 0.1;

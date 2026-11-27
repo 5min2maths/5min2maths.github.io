@@ -251,7 +251,7 @@
         const fl = L.map((x) => { const s = R.int(0, 2), inn = x[1] <= s; return [M(x[0] + (inn ? " \\notin " : " \\in ") + SETN[s]), false]; });
         const pick = L.map((_, i) => (R.rand() < 0.5 ? st[i] : fl[i])), c = pick.filter((x) => x[1]).length; if (c < 2 || c > 4) return null;
         return QN("Combien de ces affirmations sont vraies ? " + pick.map((x) => x[0]).join(" ; ") + ".", c,
-          "Vraies : " + pick.filter((x) => x[1]).map((x) => x[0]).join(", ") + ". Rappel : " + M("\\mathbb{N} \\subset \\mathbb{Z} \\subset \\mathbb{Q}") + " ; un nombre de " + M("\\mathbb{N}") + " est aussi dans " + M("\\mathbb{Z}") + " et dans " + M("\\mathbb{Q}") + ".",
+          "Vraies : " + pick.filter((x) => x[1]).map((x) => x[0]).join(", ") + ", soit " + M(c) + " affirmations. Rappel : " + M("\\mathbb{N} \\subset \\mathbb{Z} \\subset \\mathbb{Q}") + " ; un nombre de " + M("\\mathbb{N}") + " est aussi dans " + M("\\mathbb{Z}") + " et dans " + M("\\mathbb{Q}") + ".",
           { ctx: "vrai-faux", guide: [GR("Combien d'affirmations vraies ?", c, M(c) + ".")], traps: [TR(5 - c, "Tu as compté les fausses."), TR(pick.filter((x) => /\\in/.test(x[0]) && !/notin/.test(x[0])).length, "« ∈ » veut dire « appartient à » : vérifie chaque affirmation, celles avec ∉ peuvent aussi être vraies.")] }); },
       () => { const dec = shuf([[3, 4], [7, 20], [9, 25], [5, 8], [3, 5], [11, 4], [7, 2]]).slice(0, 3), nd = pk([[2, 3], [5, 6], [4, 7], [1, 3], [7, 9], [5, 12]]);
         const opts = [["\\(\\frac{" + nd[0] + "}{" + nd[1] + "}\\)", ""]].concat(dec.map(([a, b]) => ["\\(\\frac{" + a + "}{" + b + "}\\)", M("\\frac{" + a + "}{" + b + "} = " + nb(a / b)) + " : c'est un nombre décimal (écriture décimale finie)."]));
@@ -274,7 +274,7 @@
       () => { const B = [["Tout entier naturel est aussi un entier relatif.", 1], ["Tout entier relatif est un entier naturel.", 0], ["Tout nombre décimal est un nombre rationnel.", 1], ["Tout nombre rationnel est un nombre décimal.", 0], ["0 est un entier naturel.", 1], ["Une fraction n'est jamais un entier.", 0], ["Un nombre négatif ne peut pas être rationnel.", 0], ["Tout entier relatif est un nombre rationnel.", 1]];
         const S = shuf(B).slice(0, 4), c = S.filter((x) => x[1]).length; if (c < 2 || c > 3) return null;
         return QN("Combien de ces affirmations sont vraies ? « " + S.map((x) => x[0]).join(" » ; « ") + " »", c,
-          "Vraies : « " + S.filter((x) => x[1]).map((x) => x[0]).join(" » ; « ") + " ». En effet " + M("\\mathbb{N} \\subset \\mathbb{Z} \\subset \\mathbb{Q}") + " ; un rationnel comme " + M("\\frac{1}{3}") + " n'est pas décimal, et " + M("\\frac{6}{3} = 2") + " est un entier.",
+          M(c) + " vraies : « " + S.filter((x) => x[1]).map((x) => x[0]).join(" » ; « ") + " ». En effet " + M("\\mathbb{N} \\subset \\mathbb{Z} \\subset \\mathbb{Q}") + " ; un rationnel comme " + M("\\frac{1}{3}") + " n'est pas décimal, et " + M("\\frac{6}{3} = 2") + " est un entier.",
           { ctx: "inclusions", guide: [GR("Combien d'affirmations vraies ?", c, M(c) + ".")], traps: [TR(4 - c, "Tu as compté les fausses."), TR(4, "Pas toutes : cherche un contre-exemple pour chacune (par exemple −3, 1/3 ou 6/3).")] }); },
       () => { let n; do n = R.int(2, 60); while (Number.isInteger(Math.sqrt(n))); const m = R.int(2, 9), p = pk([[22, 7], [314, 100], [355, 113]]);
         const opts = [["\\(\\sqrt{" + n + "}\\)", ""], ["\\(\\sqrt{" + m * m + "}\\)", M("\\sqrt{" + m * m + "} = " + m) + " : un entier, donc rationnel."], ["\\(\\frac{" + p[0] + "}{" + p[1] + "}\\)", "C'est un quotient d'entiers : il est rationnel (c'est seulement une valeur approchée de π)."], ["\\(0{,}\\overline{" + R.int(12, 98) + "}\\)", "Une écriture décimale périodique est celle d'un rationnel."]];
@@ -290,7 +290,7 @@
       const L = shuf([M(a), M("\\frac{" + f1[0] + "}{" + f1[1] + "}"), M(fT(dc)), M("0"), M("-\\frac{" + f2[0] + "}{" + f2[1] + "}"), M("\\frac{" + f3[0] + "}{" + f3[1] + "}")]);
       return P("Voici six nombres : " + L.join(" ; ") + ".", [["a) Combien sont dans ℕ ?", 2], ["b) Combien sont dans ℤ ?", 4], ["c) Combien sont dans ℚ ?", 6]],
         ["Simplifie d'abord les fractions : " + f1[0] + "/" + f1[1] + " = " + f1[0] / f1[1] + " et −" + f2[0] + "/" + f2[1] + " = −" + f2[0] / f2[1] + ".", "ℕ ⊂ ℤ ⊂ ℚ : un nombre de ℕ compte aussi dans ℤ et dans ℚ."],
-        "a) " + M("\\frac{" + f1[0] + "}{" + f1[1] + "} = " + f1[0] / f1[1]) + " et " + M("0") + " ; b) en plus " + M(a) + " et " + M("-" + f2[0] / f2[1]) + " ; c) tous (ce sont des quotients d'entiers : " + M(fT(dc)) + " aussi)."); },
+        "a) " + M("\\frac{" + f1[0] + "}{" + f1[1] + "} = " + f1[0] / f1[1]) + " et " + M("0") + ", soit " + M(2) + " ; b) en plus " + M(a) + " et " + M("-" + f2[0] / f2[1]) + ", soit " + M(4) + " ; c) tous (ce sont des quotients d'entiers : " + M(fT(dc)) + " aussi), soit " + M(6) + "."); },
   ];
 
   // ======================= numer : systèmes de numération =======================
@@ -547,7 +547,7 @@
         const ok = [mono(A, v) + " + " + B, B + " + " + mono(A, v), mono(k, v) + " + " + B + " - " + v, mono(A, v) + " + " + (B - 1) + " + 1"], ko = [mono(A, v) + " + " + m, mono(k, v) + " + " + m + " - " + v, mono(k + 1, v) + " + " + B, mono(A, v) + " - " + B];
         const nOk = R.int(2, 3), L = shuf(shuf(ok).slice(0, nOk).concat(shuf(ko).slice(0, 5 - nOk)));
         return QN("Combien de ces expressions sont égales à " + M(k + "(" + v + " + " + m + ") - " + v) + " pour toutes les valeurs de " + M(v) + " ? " + L.map((e) => M(e)).join(" ; "), nOk,
-          M(k + "(" + v + " + " + m + ") - " + v + " = " + mono(k, v) + " + " + B + " - " + v + " = " + mono(A, v) + " + " + B) + ". Les expressions équivalentes sont celles qui se réduisent à " + M(mono(A, v) + " + " + B) + " : " + L.filter((e) => ok.includes(e)).map((e) => M(e)).join(", ") + ".",
+          M(k + "(" + v + " + " + m + ") - " + v + " = " + mono(k, v) + " + " + B + " - " + v + " = " + mono(A, v) + " + " + B) + ". Les expressions équivalentes sont celles qui se réduisent à " + M(mono(A, v) + " + " + B) + " : " + L.filter((e) => ok.includes(e)).map((e) => M(e)).join(", ") + ", soit " + M(nOk) + " expressions.",
           { ctx: "compte-equiv", guide: [GR("Forme réduite de " + M(k + "(" + v + " + " + m + ") - " + v) + " : coefficient de " + M(v) + " ?", A, M(k + " - 1 = " + A) + "."), GR("Terme constant ?", B, M(k + " \\cdot " + m + " = " + B) + "."), GR("Combien d'expressions équivalentes ?", nOk, M(nOk) + ".")],
             traps: [TR(5 - nOk, "Tu as compté celles qui ne sont pas équivalentes."), TR(L.filter((e) => ok.includes(e) || e.includes(mono(A, v))).length, "Il faut aussi que le terme constant soit " + B + " (" + k + " multiplie " + m + ").")] }); },
       () => { const v = LT(), p = R.int(2, 6), q = nz(-5, 5), r = nz(-6, 9), x = nz(-5, 6); const s = p * x + p * q - r * x; if (r === p || !s) return null;

@@ -220,7 +220,7 @@
           { ctx: "triangle", guide: [GN("La 3e ligne donne " + M("z") + " = ?", v[2], M("z = " + v[2]) + "."), GN("La 2e donne " + M("y") + " = ?", v[1], M("y = " + v[1]) + "."), GN("La 1re donne " + M("x") + " = ?", v[0], M("x = " + v[0]) + "."), GT("Solution « x ; y ; z » ?", v, M("(" + v.join(" ; ") + ")") + ".")],
             traps: [TT([v[2], v[1], v[0]], "Dans l'ordre x, y, z.")] }); },
       () => { const v = [nz(-4, 6), nz(-4, 6), nz(-4, 6)];
-        return QT("Résous " + sys(row3([1, 1, 1], v), row3([1, -1, 0], v), row3([0, 1, -1], v)) + "." + TRI, v, "De la 2e, " + M("x = y + " + pT(v[0] - v[1])) + " ; de la 3e, " + M("z = y - " + pT(v[1] - v[2])) + " ; dans la 1re : " + M("3y = " + (v[0] + v[1] + v[2] - (v[0] - v[1]) + (v[1] - v[2]))) + ", " + M("y = " + v[1]) + ".",
+        return QT("Résous " + sys(row3([1, 1, 1], v), row3([1, -1, 0], v), row3([0, 1, -1], v)) + "." + TRI, v, "De la 2e, " + M("x = y + " + pT(v[0] - v[1])) + " ; de la 3e, " + M("z = y - " + pT(v[1] - v[2])) + " ; dans la 1re : " + M("3y = " + (v[0] + v[1] + v[2] - (v[0] - v[1]) + (v[1] - v[2]))) + ", " + M("y = " + v[1]) + ", puis " + M("x = " + v[0]) + " et " + M("z = " + v[2]) + ".",
           { ctx: "chaine", guide: [GN("Exprime " + M("x") + " et " + M("z") + " en fonction de " + M("y") + ", remplace dans la 1re : " + M("y") + " = ?", v[1], M("y = " + v[1]) + "."), GN(M("x") + " = ?", v[0], M("x = " + v[0]) + "."), GT("Solution « x ; y ; z » ?", v, M("(" + v.join(" ; ") + ")") + ".")],
             traps: [TT([v[1], v[0], v[2]], "Dans l'ordre x, y, z.")] }); },
       () => { const a = R.int(10, 16), b = a + R.int(1, 4), c = b + R.int(1, 4), w = [who(), who(), who()];

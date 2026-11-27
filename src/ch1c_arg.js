@@ -283,7 +283,7 @@
       /* carrés de pairs et d'impairs */
       () => { const v = pk([
           ["Si " + M("n") + " est impair, alors " + M("n^2") + " est impair", "n = 2k + 1", "(2k + 1)^2 = 2(\\ldots) + 1", "2*k^2+2*k", "(2k + 1)^2 = 4k^2 + 4k + 1 = 2(2k^2 + 2k) + 1", "4*k^2+4*k", "impair-carre"],
-          ["Si " + M("n") + " est pair, alors " + M("n^2") + " est un multiple de 4", "n = 2k", "(2k)^2 = 4(\\ldots)", "k^2", "(2k)^2 = 4k^2", "2*k^2", "pair-carre"],
+          ["Si " + M("n") + " est pair, alors " + M("n^2") + " est un multiple de 4", "n = 2k", "(2k)^2 = 4(\\ldots)", "k^2", "(2k)^2 = 4k^2 = 4(k^2)", "2*k^2", "pair-carre"],
           ["Le produit de deux impairs est impair", "2k + 1 \\text{ et } 2m + 1", "(2k + 1)(2m + 1) = 2(\\ldots) + 1", "2*k*m+k+m", "(2k + 1)(2m + 1) = 4km + 2k + 2m + 1 = 2(2km + k + m) + 1", "4*k*m+1", "produit-impairs"],
           ["Le produit de deux pairs consécutifs est un multiple de 4", "2k \\text{ et } 2k + 2", "2k(2k + 2) = 4(\\ldots)", "k^2+k", "2k(2k + 2) = 4k^2 + 4k = 4(k^2 + k)", "4*k^2+4*k", "produit-pairs"]]);
         return QX("Démonstration : « " + v[0] + " ». On écrit " + M(v[1]) + " (entiers). Complète : " + M(v[2]) + ". Que met-on dans la parenthèse ?", v[3],
@@ -380,12 +380,14 @@
     { c: "batterie", H: "la batterie du téléphone est vide", C: "le téléphone est éteint", nH: "la batterie n'est pas vide", nC: "le téléphone est allumé" },
     { c: "vitrine", H: "le magasin est ouvert", C: "la vitrine est éclairée", nH: "le magasin est fermé", nC: "la vitrine n'est pas éclairée" },
   ];
+  /* 27.11 (garde-fou corrige_valeur) : le corrigé finit sur la réponse à taper (numéros, ou « aucune ») */
+  const bilan = (ans) => " Réponse : " + (ans.length ? ans.join(" ; ") : "aucune") + ".";
   const IM = {
     1: [
       /* P ⇒ Q, Q ⇒ P : lesquelles sont vraies ? */
       () => { const s = swap(pk(PAIRS)()), ans = [s.pq ? 1 : 0, s.qp ? 2 : 0].filter((x) => x);
         return QSet("On considère les énoncés P : « " + s.P + " » et Q : « " + s.Q + " »" + ctxOf(s) + ". Lesquelles de ces implications sont vraies ?" + liste([M("P " + IMPL + " Q"), M("Q " + IMPL + " P")]) + "<br>" + ASK_NUM, ans,
-          "(1) " + (s.pq ? "vraie" : "fausse") + ", (2) " + (s.qp ? "vraie" : "fausse") + " : " + s.why + "." + (ans.length === 2 ? " On écrit " + M("P \\Leftrightarrow Q") + "." : ""),
+          "(1) " + (s.pq ? "vraie" : "fausse") + ", (2) " + (s.qp ? "vraie" : "fausse") + " : " + s.why + "." + (ans.length === 2 ? " On écrit " + M("P \\Leftrightarrow Q") + "." : "") + bilan(ans),
           { ctx: "sens-" + s.ctx, guide: [GSet("Pour chaque implication, cherche un contre-exemple (hypothèse vraie, conclusion fausse). Lesquelles sont vraies ?", ans, s.why + ".")],
             traps: [ans.length === 2 ? TSt([1], "La réciproque est vraie aussi : c'est une équivalence.") : TSt([1, 2], "Une des deux a un contre-exemple : " + s.why + "."), ans.length === 1 ? TSt([3 - ans[0]], "C'est l'autre sens qui est vrai.") : null, ans.length ? TNone("Teste avec un exemple : l'hypothèse vraie entraîne-t-elle la conclusion ?") : TSt([1], "Contre-exemple : " + s.why + ".")] }); },
       /* reconnaître la réciproque ou la contraposée */
@@ -398,7 +400,7 @@
       () => { const L = pk(LIFE), all = [["ok", "On constate que " + L.H + ". On en conclut que " + L.C + "."], ["contra", "On constate que " + L.nC + ". On en conclut que " + L.nH + "."], ["rec", "On constate que " + L.C + ". On en conclut que " + L.H + "."], ["inv", "On constate que " + L.nH + ". On en conclut que " + L.nC + "."]];
         let ch; do ch = sh(all).slice(0, 3); while (!ch.some((x) => x[0] === "ok" || x[0] === "contra") || !ch.some((x) => x[0] === "rec" || x[0] === "inv")); const ans = ch.map((x, i) => (x[0] === "ok" || x[0] === "contra" ? i + 1 : 0)).filter((x) => x);
         return QSet("On sait que l'implication « si " + L.H + ", alors " + L.C + " » est vraie. Quels raisonnements sont corrects (conclusion certaine) ?" + liste(ch.map((x) => x[1])) + "<br>" + ASK_NUM, ans,
-          ch.map((x, i) => "(" + (i + 1) + ") " + (x[0] === "ok" ? "correct (l'implication elle-même)" : x[0] === "contra" ? "correct (contraposée)" : x[0] === "rec" ? "incorrect (réciproque)" : "incorrect (on nie sans échanger)")).join(" ; ") + ".",
+          ch.map((x, i) => "(" + (i + 1) + ") " + (x[0] === "ok" ? "correct (l'implication elle-même)" : x[0] === "contra" ? "correct (contraposée)" : x[0] === "rec" ? "incorrect (réciproque)" : "incorrect (on nie sans échanger)")).join(" ; ") + "." + bilan(ans),
           { ctx: "vie-" + L.c, guide: [GSet("Une implication vraie a une contraposée vraie, mais sa réciproque peut être fausse. Raisonnements corrects ?", ans, ans.join(", ") + ".")],
             traps: [TSt(ch.map((x, i) => (x[0] === "rec" || x[0] === "inv" ? i + 1 : 0)).filter((x) => x), "Ce sont les raisonnements faux : réciproque ou négation sans échange."), TSt([1, 2, 3], "La réciproque d'une implication vraie n'est pas forcément vraie.")] }); },
     ],
@@ -413,7 +415,7 @@
       () => { const L = [2, 3, 4, 6, 8, 9, 12, 15, 18, 20]; const a = pk(L), b = pk(L.filter((x) => x !== a)), ans = [a % b === 0 ? 1 : 0, b % a === 0 ? 2 : 0].filter((x) => x);
         const ce1 = a % b ? a : null, ce2 = b % a ? b : null;
         return QSet("Soit " + M("n") + " un entier. P : « " + M("n") + " est un multiple de " + M(a) + " », Q : « " + M("n") + " est un multiple de " + M(b) + " ». Lesquelles sont vraies ?" + liste([M("P " + IMPL + " Q"), M("Q " + IMPL + " P")]) + "<br>" + ASK_NUM, ans,
-          "(1) " + (ce1 ? "fausse : " + M(a) + " est un multiple de " + M(a) + " mais pas de " + M(b) : "vraie : " + M(a + " = " + b + " \\cdot " + a / b) + ", donc tout multiple de " + M(a) + " est un multiple de " + M(b)) + " ; (2) " + (ce2 ? "fausse : " + M(b) + " n'est pas un multiple de " + M(a) : "vraie : " + M(b + " = " + a + " \\cdot " + b / a)) + ".",
+          "(1) " + (ce1 ? "fausse : " + M(a) + " est un multiple de " + M(a) + " mais pas de " + M(b) : "vraie : " + M(a + " = " + b + " \\cdot " + a / b) + ", donc tout multiple de " + M(a) + " est un multiple de " + M(b)) + " ; (2) " + (ce2 ? "fausse : " + M(b) + " n'est pas un multiple de " + M(a) : "vraie : " + M(b + " = " + a + " \\cdot " + b / a)) + "." + bilan(ans),
           { ctx: "multiples-ab", guide: [GSet("P ⇒ Q est vraie si " + M(b) + " divise " + M(a) + " ; Q ⇒ P si " + M(a) + " divise " + M(b) + ". Lesquelles ?", ans, nums(ans) + ".")],
             traps: [ans.length ? TNone("Un des deux nombres divise l'autre.") : TSt([1], a + " n'est pas un multiple de " + b + " : " + a + " lui-même est un contre-exemple."), ans.length === 1 ? TSt([3 - ans[0]], "C'est l'autre sens.") : null] }); },
       /* contre-exemple à la réciproque */
@@ -433,7 +435,7 @@
           { t: "x2cx", P: M("x^2 \\ge " + c + "x"), Q: M("x \\ge " + c), pq: false, qp: true, why: M("x = -1") + " vérifie " + M("x^2 \\ge " + c + "x") + " ; et si " + M("x \\ge " + c + " > 0") + ", alors " + M("x \\cdot x \\ge " + c + "x") },
           { t: "inv", P: M("\\frac{1}{x} < \\frac{1}{" + c + "}") + " (" + M("x \\neq 0") + ")", Q: M("x > " + c), pq: false, qp: true, why: M("x = -1") + " vérifie " + M("\\frac{1}{x} < \\frac{1}{" + c + "}") + " ; et " + M("x > " + c + " > 0") + " donne " + M("\\frac{1}{x} < \\frac{1}{" + c + "}") }]), s = swap(B), ans = [s.pq ? 1 : 0, s.qp ? 2 : 0].filter((x) => x);
         return QSet("Pour " + M("x") + " réel : P : « " + s.P + " », Q : « " + s.Q + " ». Lesquelles sont vraies ?" + liste([M("P " + IMPL + " Q"), M("Q " + IMPL + " P")]) + "<br>" + ASK_NUM, ans,
-          "(1) " + (s.pq ? "vraie" : "fausse") + ", (2) " + (s.qp ? "vraie" : "fausse") + " : " + s.why + ".",
+          "(1) " + (s.pq ? "vraie" : "fausse") + ", (2) " + (s.qp ? "vraie" : "fausse") + " : " + s.why + "." + bilan(ans),
           { ctx: "reels-" + s.t, guide: [GSet("Cherche un contre-exemple, en pensant aux nombres négatifs et à 0. Lesquelles sont vraies ?", ans, s.why + ".")],
             traps: [ans.length === 2 ? TSt([ans[0] === 1 ? 1 : 2], "Les deux sens sont vrais.") : TSt([1, 2], "Pense aux nombres négatifs : " + s.why + "."), ans.length === 1 ? TSt([3 - ans[0]], "C'est l'autre sens.") : null] }); },
       /* négation : compter les cas où un énoncé est faux */

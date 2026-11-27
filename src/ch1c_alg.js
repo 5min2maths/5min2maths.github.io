@@ -89,7 +89,7 @@
         return QX(FAC + M(P2([a, a * m, 0])) + ".", e, "product", "Mise en évidence de " + M(a + "x") + " : " + M(e) + ".",
           { ctx: "mise-en-evidence", guide: [GX("Facteur commun", a + "x", M(a + "x") + "."), GX("Factorisation", e, M(e) + ".")], traps: [TX("x(" + a + "x" + (a * m < 0 ? "-" + -a * m : "+" + a * m) + ")", "On peut encore sortir " + a + " : factorise au maximum."), TX(a + "(x^2" + (m < 0 ? "-" + -m : "+" + m) + ")", "x aussi est commun aux deux termes.")] }); },
       () => { const a = R.int(1, 6), k = R.int(1, 9), e = co(a) + "(x-" + k + ")(x+" + k + ")";
-        return QX(FAC + M(P2([a, 0, -a * k * k])) + ".", e, "product", (a > 1 ? "Mise en évidence de " + M(a) + ", puis " : "") + "différence de carrés " + M("x^2 - " + k * k + " = (x - " + k + ")(x + " + k + ")") + ".",
+        return QX(FAC + M(P2([a, 0, -a * k * k])) + ".", e, "product", (a > 1 ? "Mise en évidence de " + M(a) + ", puis " : "") + "différence de carrés " + M("x^2 - " + k * k + " = (x - " + k + ")(x + " + k + ")") + (a > 1 ? " : " + M(a + "(x - " + k + ")(x + " + k + ")") : "") + ".",
           { ctx: "diff-carres", guide: [GS("Quel nombre au carré donne " + M(k * k) + " ?", k, M(k) + "."), GX("Factorisation", e, M(e) + ".")], traps: [TX(co(a) + "(x-" + k + ")^2", "x² − " + k * k + " = (x − " + k + ")(x + " + k + ") : différence de carrés, pas un carré."), ...(a > 1 ? [TX("(" + a + "x-" + a * k + ")(x+" + k + ")", "Mets d'abord " + a + " en évidence pour factoriser au maximum.")] : [])] }); },
       () => { const k = nz(-8, 8), a = pk([1, 1, 2, 3]), e = co(a) + "(x" + (k < 0 ? "-" + -k : "+" + k) + ")^2";
         return QX(FAC + M(P2([a, 2 * a * k, a * k * k])) + ".", e, "product", (a > 1 ? "Mise en évidence de " + M(a) + ", puis " : "") + "identité " + M("A^2 + 2AB + B^2 = (A + B)^2") + " : " + M(co(a) + "(" + xm(-k) + ")^2") + ".",
@@ -191,7 +191,7 @@
         return QN("Pour quelle valeur de " + M("c") + " la parabole " + M("y = " + P2([1, b, 0]) + " + c") + " touche-t-elle l'axe des " + M("x") + " en un seul point ?", c, "Un seul zéro : " + M("\\Delta = " + b * b + " - 4c = 0") + ", donc " + M("c = " + c) + ".",
           { ctx: "tangent-axe", guide: [GS(M("\\Delta = b^2 - 4c") + " doit valoir… ?", 0, "0 (un seul zéro)."), GS(M("c") + " ?", c, M(b * b + " : 4 = " + c) + ".")], traps: [TR(b * b, "Δ = b² − 4c = 0 donne c = b² ÷ 4."), TR(b / 2, "Ça, c'est le zéro double (au signe près) ; on demande c.")] }); },
       () => { const a = pk([1, 2, -1]), h = nz(-4, 4), d = R.int(1, 4), k = -a * d * d;
-        return QSet("Une parabole a pour sommet " + M("S(" + h + " ; " + k + ")") + " et coefficient " + M("a = " + a) + ". Quels sont ses zéros ?", [h - d, h + d], M("f(x) = " + co(a) + "(" + xm(h) + ")^2" + sg(k) + " = 0 \\iff (" + xm(h) + ")^2 = " + d * d) + " : " + M("x = " + h + " \\pm " + d) + ".",
+        return QSet("Une parabole a pour sommet " + M("S(" + h + " ; " + k + ")") + " et coefficient " + M("a = " + a) + ". Quels sont ses zéros ?", [h - d, h + d], M("f(x) = " + co(a) + "(" + xm(h) + ")^2" + sg(k) + " = 0 \\iff (" + xm(h) + ")^2 = " + d * d) + " : " + M("x = " + h + " \\pm " + d) + ", donc " + M("x = " + (h - d)) + " ou " + M("x = " + (h + d)) + ".",
           { ctx: "zeros-sommet", guide: [GS(M("(" + xm(h) + ")^2") + " = ?", d * d, M(d * d) + "."), GSet("Zéros ?", [h - d, h + d], M(h - d) + " et " + M(h + d) + ".")], traps: [TSet([-d, d], "Les zéros sont symétriques autour de " + h + ", pas de 0."), TSet([h + d], "Il y a deux zéros, symétriques par rapport au sommet.")] }); },
     ],
   };
@@ -228,7 +228,7 @@
         return QSet("Quels sont les zéros de " + M("f(x) = " + co(a) + "(" + xm(h) + ")^2" + sg(k)) + " ?", [h - d, h + d], M("(" + xm(h) + ")^2 = " + d * d) + " : " + M(xm(h) + " = \\pm " + d) + ", donc " + M(h - d) + " et " + M(h + d) + ".",
           { ctx: "canon-zeros", guide: [GS(M("(" + xm(h) + ")^2") + " = ?", d * d, M(-k + " : " + par(a) + " = " + d * d) + "."), GSet("Zéros ?", [h - d, h + d], M(h - d) + " et " + M(h + d) + ".")], traps: [TSet([h + d], "Deux solutions : " + xm(h) + " = " + d + " ou −" + d + "."), TSet([-h - d, -h + d], "Attention au signe de h.")] }); },
       () => { const a = pk([2, -2, 3]), h = nz(-4, 4), k = nz(-9, 9), cs = [a, -2 * a * h, a * h * h + k];
-        return QP("Écris " + M(P2(cs)) + " sous forme canonique " + M("a(x - h)^2 + k") + " et donne le couple « h ; k ».", [h, k], M(P2(cs) + " = " + a + "(" + xm(h) + ")^2" + sg(k)) + ".",
+        return QP("Écris " + M(P2(cs)) + " sous forme canonique " + M("a(x - h)^2 + k") + " et donne le couple « h ; k ».", [h, k], M(P2(cs) + " = " + a + "(" + xm(h) + ")^2" + sg(k)) + " : " + M("h = " + h) + ", " + M("k = " + k) + ".",
           { ctx: "canon-couple", guide: [GS(M("h") + " ?", h, M(h) + "."), GS(M("k") + " ?", k, M(k) + "."), GP("Couple ?", [h, k], M("(" + h + " ; " + k + ")") + ".")], traps: [TP([-h, k], "h = −b ÷ (2a)."), TP([h, cs[2] - h * h], "k = f(h) = c − a·h².")] }); },
     ],
   };

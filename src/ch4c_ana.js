@@ -1249,7 +1249,7 @@
             traps: [TR(k / b, "y = " + b + " ÷ " + k + ", pas l'inverse."), TR(y0, "e^(−" + k + "x) → 0 : la condition initiale s'efface."), TR(-v, "Attention au signe : " + k + "y = " + b + ".")] }); },
       () => { const a = pk([0.5, 1, 2, -1, -0.5, 1.5]), y0 = pk([2, 3, 4, -3]), ax2 = mS(a, 2), ans = y0 + "*exp(" + ax2 + ")", c2 = 2 * a;
         return QX("Résous " + M("y' = " + (c2 === 1 ? "" : c2 === -1 ? "-" : fT(c2)) + "xy") + " avec " + M("y(0) = " + y0) + " (variables séparables).", ans,
-          "On sépare : " + M("\\frac{dy}{y} = " + (c2 === 1 ? "" : c2 === -1 ? "-" : fT(c2)) + "x\\,dx") + ", donc " + M("\\ln|y| = " + mT(a, 2) + " + C") + " et " + M("y = Ke^{" + mT(a, 2) + "}") + " ; " + M("y(0) = K = " + y0) + ".",
+          "On sépare : " + M("\\frac{dy}{y} = " + (c2 === 1 ? "" : c2 === -1 ? "-" : fT(c2)) + "x\\,dx") + ", donc " + M("\\ln|y| = " + mT(a, 2) + " + C") + " et " + M("y = Ke^{" + mT(a, 2) + "}") + " ; " + M("y(0) = K = " + y0) + ", donc " + M("y = " + y0 + "e^{" + mT(a, 2) + "}") + ".",
           { ctx: "separable-xy",
             guide: [GX("En intégrant " + M("\\frac{dy}{y} = " + (c2 === 1 ? "" : c2 === -1 ? "-" : fT(c2)) + "x\\,dx") + " : " + M("\\ln|y| = g(x) + C") + ". Que vaut " + M("g(x)") + " ?", ax2, M(mT(a, 2)) + "."), GX(M("y(x)") + " ?", ans, M(y0 + "e^{" + mT(a, 2) + "}") + ".")],
             traps: [TX(y0 + "*exp(" + mS(c2, 1) + ")", "On intègre " + fS(c2) + "x : la primitive est " + ax2 + "."), TX(y0 + "*exp(" + mS(c2, 2) + ")", "Primitive de " + fS(c2) + "x : " + fS(c2) + "x² ÷ 2."), TX("exp(" + ax2 + ")" + (y0 - 1 > 0 ? " + " + (y0 - 1) : " - " + (1 - y0)), "ln|y| = … + C donne y = K·e^(…) : la constante multiplie.")] }); },
@@ -1654,7 +1654,7 @@
             traps: [TZ([z[0] ** 3, z[1] ** 3], "(a + bi)³ ≠ a³ + b³i : développe (ou passe par le carré)."), TZ([z[0] ** 3 + 3 * z[0] * z[1] ** 2, 3 * z[0] ** 2 * z[1] + z[1] ** 3], "(bi)² = −b² et (bi)³ = −b³i : i² = −1."), TZ(s, "C'est le carré ; multiplie encore par " + zS(...z) + ".")] }); },
       () => { const p = R.int(1, 5), q = nz(-5, 5); if (p === Math.abs(q)) return null; const w = zm([p, q], [p, q]);
         return QZ("Trouve la racine carrée de " + M(zT(...w)) + " dont la partie réelle est positive : le nombre " + M("z = x + yi") + " tel que " + M("z^2 = " + zT(...w)) + " et " + M("x > 0") + ".", [p, q],
-          M("(x + yi)^2 = x^2 - y^2 + 2xyi") + " : " + M("x^2 - y^2 = " + w[0]) + " et " + M("2xy = " + w[1]) + " ; avec " + M("x^2 + y^2 = |z|^2 = " + (p * p + q * q)) + " : " + M("x^2 = " + p * p) + ", " + M("x = " + p) + ", " + M("y = " + q) + ".",
+          M("(x + yi)^2 = x^2 - y^2 + 2xyi") + " : " + M("x^2 - y^2 = " + w[0]) + " et " + M("2xy = " + w[1]) + " ; avec " + M("x^2 + y^2 = |z|^2 = " + (p * p + q * q)) + " : " + M("x^2 = " + p * p) + ", " + M("x = " + p) + ", " + M("y = " + q) + ", donc " + M("z = " + zT(p, q)) + ".",
           { ctx: "racine-carree", guide: [GS(M("x^2 + y^2 = |" + zT(...w) + "|") + " ?", p * p + q * q, M("\\sqrt{" + par(w[0]) + "^2 + " + par(w[1]) + "^2} = " + (p * p + q * q)) + "."), GS(M("x") + " (avec " + M("x^2 - y^2 = " + w[0]) + ") ?", p, M(p) + "."), GZ(M("z") + " ?", [p, q], M(zT(p, q)) + ".")],
             traps: [TZ([-p, -q], "C'est l'autre racine : on veut x > 0."), TZ([p, -q], "2xy = " + w[1] + " fixe le signe de y."), TZ([q, p], "Partie réelle x, partie imaginaire y : vérifie x² − y² = " + w[0] + ".")] }); },
     ],
@@ -1778,7 +1778,7 @@
       () => { const k = R.int(2, 5), t = pk(["i", "-i", "1", "-1"]), K = k ** 3;
         const rhs = t === "i" ? zT(0, K) : t === "-i" ? zT(0, -K) : t === "1" ? String(K) : String(-K), imag = t.includes("i"), ans = t === "i" ? [0, -k] : t === "-i" ? [0, k] : t === "1" ? [k, 0] : [-k, 0];
         return QZ("Résous " + M("z^3 = " + rhs) + " dans " + M("\\mathbb{C}") + ". Donne la solution " + (imag ? "imaginaire pure" : "réelle") + ".", ans,
-          "Module " + M("\\sqrt[3]{" + K + "} = " + k) + " ; " + (imag ? M("(" + zT(...ans) + ")^3 = " + fT(ans[1] ** 3) + "i^3 = " + rhs) + " (car " + M("i^3 = -i") + ")" : M("(" + ans[0] + ")^3 = " + rhs)) + ". Les deux autres solutions s'obtiennent en tournant de " + M("\\frac{2\\pi}{3}") + ".",
+          "Module " + M("\\sqrt[3]{" + K + "} = " + k) + " ; " + (imag ? M("(" + zT(...ans) + ")^3 = " + fT(ans[1] ** 3) + "i^3 = " + rhs) + " (car " + M("i^3 = -i") + ")" : M("(" + ans[0] + ")^3 = " + rhs)) + ", donc " + M("z = " + zT(...ans)) + ". Les deux autres solutions s'obtiennent en tournant de " + M("\\frac{2\\pi}{3}") + ".",
           { ctx: "racine-cubique", guide: [GS("Module des solutions ?", k, M(k) + "."), GZ("Solution " + (imag ? "imaginaire pure" : "réelle") + " ?", ans, M(zT(...ans)) + ".")],
             traps: [TZ(ans.map((x) => -x), imag ? "i³ = −i : vérifie le signe en calculant le cube." : "Le cube d'un négatif est négatif."), TZ(imag ? [k, 0] : [0, k], imag ? "On cherche la solution imaginaire pure." : "On cherche la solution réelle.")] }); },
       () => { const z1 = nz(-4, 4), z2 = [nz(-4, 4), nz(-4, 4)], S = [z1 + z2[0], z2[1]], Pp = [z1 * z2[0], z1 * z2[1]];
