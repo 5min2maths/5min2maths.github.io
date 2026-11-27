@@ -96,8 +96,18 @@
     const c = /<circle cx="([\d.]+)"/.exec(fig); if (labs.length < 2 || !c) return NaN;
     const [a, b] = [labs[0], labs[labs.length - 1]]; return a[1] + ((+c[1] - a[0]) / (b[0] - a[0])) * (b[1] - a[1]);
   };
+  /* 27.11 (agent variete) : formes sans figure ajoutées à p8droite et p8calcadd (src/variantes.js, ctx v27-…), lues avant la figure */
+  const ND = "(\\d+(?:'\\d{3})*(?:,\\d+)?)", rd = (s) => new RegExp(s.replace(/#/g, ND));
+  const V27 = [
+    [rd("on lit # sous un trait et # sous un autre trait\\. Entre les deux, il y a # intervalles égaux"), (m) => (nn(m[2]) - nn(m[1])) / nn(m[3])],
+    [rd("les graduations vont de # en #\\. Le point [AB] est # graduations (après|avant) (?:le nombre )?#\\."), (m) => nn(m[5]) + (m[4] === "après" ? 1 : -1) * nn(m[3]) * nn(m[1])],
+    [rd("l'intervalle de # à # est partagé en # parts égales\\. Quel nombre se trouve # graduations? après #"), (m) => nn(m[5]) + (nn(m[4]) * (nn(m[2]) - nn(m[1]))) / nn(m[3])],
+    [rd("^Dans un bus, il y a # passagers\\. À l'arrêt, # personnes montent et personne ne descend"), (m) => nn(m[1]) + nn(m[2])],
+    [rd("^Un livre compte # pages\\. Léa en a déjà lu #\\."), (m) => nn(m[1]) - nn(m[2])],
+  ];
   const oracle = (q) => {
     const t = pl(q.q);
+    for (const [r, f] of V27) { const m = r.exec(t); if (m) return { v: f(m), tol: 1e-6 }; }
     if (/droite graduée/.test(t)) { const v = droiteV(String(q.fig || "")), labs = [...String(q.fig).matchAll(/<text[^>]*>([\d',]+)<\/text>/g)].map((m) => nn(m[1])); return { v, tol: Math.abs(labs[labs.length - 1] - labs[0]) * 0.004 }; }
     for (const [r, f] of ORA) { const m = r.exec(t); if (m) return { v: f(m), tol: 1e-6 }; }
     return null;
