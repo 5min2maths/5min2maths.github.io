@@ -205,7 +205,7 @@ const sec6 = () => sec("6 accueil", () => {
     const n = hints();
     if (k <= 3 && n < 3) fail("ouverture " + k + " : " + n + " explication(s) sous les cases");
     if (k <= 3) for (const d of ["prob", "cur", "hist"]) if (!document.querySelector('.door[data-door="' + d + '"] small')) fail("ouverture " + k + " : pas d'explication sous « " + d + " »");
-    if (k === 4 && n) fail("4e ouverture : explications encore affichées");
+    if (k === 4 && n < 3) fail("4e ouverture : explications absentes (27.11, décision de l'enseignant : toujours affichées avec les noms imagés)");
     window.scrollTo(0, 0); const go = document.querySelector(".sess-go"); if (go && R_(go).bottom > 640) fail("ouverture " + k + " : bouton principal hors du premier écran");
     /* 27.11 (portes d'entrée Pépite², « le grand problème de la semaine ») : deux lignes au plus (était : une ligne) avec les
        polices de l'app ; cette page ne les charge pas (police de secours plus large) : trois lignes tolérées ici. */

@@ -15,5 +15,5 @@ for(const g of [11,12]){ state=Engine.newState({system:"CH",grade:g,track:"colle
     log.push(g+"e "+nom+" : défauts "+bad+", forces/faibles/neuves "+fam.f+"/"+fam.w+"/"+fam.n+", bases "+pre+", thèmes consécutifs identiques "+same+"/1000"); } }
   state.placed=true; homeTab="today"; screenHome(); log.push("accueil : défi "+(document.getElementById("freego")?"✓":"absent")+", boutons de périmètre "+document.querySelectorAll("[data-scope]").length);
   homeTab="prog"; screenHome(); log.push("progrès : carte "+(/Ma carte de progression/.test(document.body.innerHTML)?"✓":"absente"));
-  homeTab="today"; screenHome(); document.getElementById("freego").click(); log.push("séance : "+(document.body.innerHTML.match(/Mon défi du jour · 1 sur 6/)?"✓ démarre":"? "+document.body.innerText.slice(0,80)));
+  homeTab="today"; screenHome(); document.getElementById("freego").click(); log.push("séance : "+(document.body.innerHTML.match(/Ma pépite du jour · 1 sur 6/)?"✓ démarre":"? "+document.body.innerText.slice(0,80)));
 }catch(e){log.push("ERR "+e.stack)} document.getElementById("log").hidden=false; document.getElementById("log").textContent=log.join("\n");</script>

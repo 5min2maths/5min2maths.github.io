@@ -707,8 +707,8 @@ const HOME_TABS = [
   /* 27.11 (portes d'entrée de l'app, validées par l'enseignant) : « La mine » = une pioche (la loupe « ? » passe aux Trésors cachés). */
   ["prob", "La mine", '<path d="M14.2 8.6L4.5 20.5" stroke-width="2.6"/><path d="M6.8 3.4Q16.6 1.6 21 12.6" stroke-width="2.4"/><path d="M12.4 5.6l3.6 3.2"/>'],
   ["test", "Jour J", '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>'],
-  /* 27.11 : « Mon trésor » = une médaille à ruban (grades, badges) ; pas de coffre (univers : ni coffre ni butin, SKILL pepite). */
-  ["prog", "Mon trésor", '<path d="M8 3l2.6 6M16 3l-2.6 6M8 3h3M13 3h3"/><circle cx="12" cy="15" r="6"/><path d="M12 12l.9 1.9 2 .2-1.5 1.4.4 2-1.8-1-1.8 1 .4-2-1.5-1.4 2-.2z" fill="currentColor" stroke="none"/>'],
+  /* 27.11 (enseignant) : « Mon trésor » = un coffre, simple dessin (aucune mécanique de butin). */
+  ["prog", "Mon trésor", '<path d="M4 10a8 5 0 0 1 16 0"/><rect x="4" y="10" width="16" height="10" rx="1.5"/><path d="M4 13h16"/><rect x="10.5" y="11.5" width="3" height="4" rx=".8" fill="currentColor" stroke="none"/><path d="M8 7.5v2.5M16 7.5v2.5"/>'],
 ];
 // Série en jeu (21.11, amélioration UX 2 : 31 % des appareils reviennent un 2e jour) : rappel discret tant que la séance du jour n'est pas faite.
 function streakNudge() {
@@ -852,7 +852,7 @@ function screenHome() {
        une demi-ligne sous chaque case sans indication, aux 3 premières ouvertures de l'app seulement (state.doorHints). */
     if (!doorHintCounted) { doorHintCounted = true; state.doorHints = (state.doorHints || 0) + 1; save(); }
     const DOOR_HINT = { prob: "le grand problème de la semaine", cur: "maths cachées", hist: "histoire des maths", test: "prépare ton évaluation", carnet: "tes erreurs", prog: "grades, badges, pépites" }; /* 27.11 */
-    const hintOn = (state.doorHints || 0) <= 3;
+    const hintOn = true; /* 27.11 (enseignant) : noms imagés (La mine, Mon trésor…) → sous-titres toujours affichés */
     const door = (id, ic, label, sub0, badge) => { const sub = sub0 || (hintOn ? DOOR_HINT[id] : ""), hint = !sub0 && !!sub; return `<button type="button" class="door" data-door="${id}" aria-label="${esc(DOOR_NAME[id] || label)}${sub ? " : " + esc(sub) : ""}${badge === "!" ? " (nouveau)" : ""}">${badge ? `<span class="door-badge">${badge}</span>` : ""}<span class="door-sq">${ic}</span><b>${label}</b>${sub ? `<small${hint ? ' class="door-hint"' : ""}>${sub}</small>` : ""}</button>`; };
     const svgI = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`, TI = Object.fromEntries(HOME_TABS.map(([k, , ic]) => [k, ic]));
     /* 26.11 (revue élèves : deux grands boutons, évaluation et « Ma séance du jour », les élèves faisaient les deux, 15 à
@@ -862,7 +862,7 @@ function screenHome() {
     ${eloBanner()}
     ${banner}
     ${prepNow ? lostLine : `<div class="card stack sess-card sess-first">${lostLine} <!-- 24.11 : « Séance d'abord » (choix de l'enseignant) : le bouton en premier, le reste discret -->
-      <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${paused ? "Nouvelle séance" : done ? "Encore une séance" : mode === "classe" ? "Ma pépite du jour" /* 27.11 */ : "Mon défi du jour"}</button>
+      <button class="btn-primary btn-big sess-go" id="${mode === "classe" ? "go" : "freego"}">▶ ${paused ? "Nouvelle séance" : done ? "Encore une séance" : mode === "classe" ? "Ma pépite du jour" /* 27.11 */ : "Ma pépite du jour"}</button>
       ${mode === "classe" ? `<div class="sess-fmt"><span class="sess-fmt-t">${evalDone ? `<b class="fmt-lab">Séance du jour faite ✓ (évaluation)</b><span class="small muted fmt-txt">Pour en refaire une : ${FORMATS[fmt].label}</span>` : `<b class="fmt-lab">${FORMATS[fmt].label}</b><span class="small muted fmt-txt">${Engine.fmtText(state, fmt)}${doneLab ? " · séance faite ✓" : ""}</span>`}</span><button type="button" class="btn-sec small" id="other" aria-label="Changer de format">🔁<span class="chg-t"> Changer</span></button></div>
         <div class="now-line">${nowLine}</div>` : ""}
       <div class="sess-modes"><div class="seg sess-seg" role="tablist"><button type="button" data-m="classe" aria-pressed="${mode === "classe"}">🎒 En classe</button><button type="button" data-m="libre" aria-pressed="${mode === "libre"}">🧭 Libre</button></div><button type="button" class="btn-ghost small sess-info" id="sessinfo" aria-label="En classe ou Libre : explication" aria-expanded="false">ⓘ</button></div>
@@ -2117,7 +2117,7 @@ function nextQuestion(redo) {
     sub: session.ctest ? session.ctest.label : "", /* revue p5, n° 11 : intitulé de l'objectif en texte normal sous l'en-tête */
     /* 25.11 (revue) : compteur qui compte aussi l'étape leçon ; « Nouvelle notion » (et non « Révision ») pour la question
        qui suit la leçon ou pour une notion encore jamais travaillée. */
-    eyebrow: ((s) => s + (ST.total > 1 && !session.weekly ? `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((Math.min(ST.pos - 1, ST.total) / ST.total) * 100)}%"></i></span>` : ""))((session.carnet ? "À polir · " + nTxt : session.free ? "Mon défi du jour · " + nTxt : session.weekly ? "⛏️ La mine · problème de la semaine" /* 27.11 */ : session.ctest ? "Me tester · " + nTxt /* 26.11 (revue p5, n° 11 : intitulé en majuscules sur 4 lignes à 360 px) : intitulé en dessous (sub) */ : session.prep ? "Révision de l'évaluation · " + nTxt : ST.total === 1 ? (fmtLab || "Question du jour") : (fmtLab ? fmtLab + " · " : "") + nTxt) + (kind && KIND_LABEL[kind] && !(session.fmt && FORMATS[session.fmt] && FORMATS[session.fmt].slots.every((x) => x.replace(/\d+$/, "") === kind)) ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo || (session.replayQ && session.replayAt === session.i) ? " · nouvelles valeurs" : "")),
+    eyebrow: ((s) => s + (ST.total > 1 && !session.weekly ? `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((Math.min(ST.pos - 1, ST.total) / ST.total) * 100)}%"></i></span>` : ""))((session.carnet ? "À polir · " + nTxt : session.free ? "Ma pépite du jour · " + nTxt : session.weekly ? "⛏️ La mine · problème de la semaine" /* 27.11 */ : session.ctest ? "Me tester · " + nTxt /* 26.11 (revue p5, n° 11 : intitulé en majuscules sur 4 lignes à 360 px) : intitulé en dessous (sub) */ : session.prep ? "Révision de l'évaluation · " + nTxt : ST.total === 1 ? (fmtLab || "Question du jour") : (fmtLab ? fmtLab + " · " : "") + nTxt) + (kind && KIND_LABEL[kind] && !(session.fmt && FORMATS[session.fmt] && FORMATS[session.fmt].slots.every((x) => x.replace(/\d+$/, "") === kind)) ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo || (session.replayQ && session.replayAt === session.i) ? " · nouvelles valeurs" : "")),
     /* 26.11 : pas à pas réussi jusqu'au bout (étapes toutes justes) : moitié de la perte de Mathélo rendue, +1 point de
        l'année (dans le plafond du jour), et le bilan le dit. Rien si une étape est fausse, ni en « Refaire ». */
     onGuided: (delta) => {
