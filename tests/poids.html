@@ -15,7 +15,7 @@ window.fetch = () => Promise.resolve(new Response("{}")); if (navigator.sendBeac
       notion du catalogue a son générateur et donne des questions de chaque niveau sans erreur (une page fille par classe).
    Données : tests/_poids_data.js, écrit par build.py. Contrôle d'équivalence complet avec les sources (mêmes questions,
    leçons, registres de la classe) : python3 tools/poids.py ordre (lancé par tools/run_tests.sh). */
-const PLAFOND_KO = { nouveau: 720, 11: 1320, 12: 1400, "13mp": 1790, fr8: 2060 }; /* gzip ; mesures du 27.11 (agent ordre) : 696, 1290, 1369, 1741, 2011 */
+const PLAFOND_KO = { nouveau: 740, 11: 1320, 12: 1400, "13mp": 1790, fr8: 2060 }; /* gzip ; mesures du 27.11 (agent ordre) : 696, 1290, 1369, 1741, 2011 ; 27.11 soir : 722 avec le logo Pépite² de l en-tête, plafond 740 */
 const PROFILS = {
   9: { system: "CH", grade: 9, track: "college" }, 10: { system: "CH", grade: 10, track: "college" }, 11: { system: "CH", grade: 11, track: "college" },
   12: { system: "CH", grade: 12, track: "college" }, 13: { system: "CH", grade: 13, track: "college" }, 14: { system: "CH", grade: 14, track: "college" },
