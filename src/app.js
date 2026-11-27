@@ -267,6 +267,7 @@ function frDom(el) {
   const ns = []; while (w.nextNode()) ns.push(w.currentNode);
   /* 26.11 (revue élèves : « ÉTAPE 2 SUR 2 × 1 SUR 8 ») : dans un titre d'écran (.eyebrow), le « · » est un séparateur, jamais un produit. */
   for (const n of ns) { const v = n.nodeValue; let r = n.parentNode.closest && n.parentNode.closest(".eyebrow") ? frWords(v) : frLocal(v); if (state.profile.grade >= 10 && typeof frZero === "function") r = frZero(r); /* 26.11 : racines (lycée) */
+    else if (state.profile.grade >= 8 && typeof frZeroCol === "function") r = frZeroCol(r); /* 27.11, n° 18 : 4e–3e, « antécédent de 0 » */
     /* 26.11 (revue p3, n° 5 : « 4 · ? = 14 » dans la leçon proptab) : dans une leçon, un produit coupé par une balise
        (« 4 · » puis <b>?</b>, flèche « · 8 ») est aussi un produit. */
     if (n.parentNode.closest && n.parentNode.closest(".act-inline, .lesson-card, .act-out")) {

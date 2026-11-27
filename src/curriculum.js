@@ -156,6 +156,21 @@ const FR_ZERO = [
   [/\bzéros (?=\\\()/g, "racines "], [/\bzéro (?=\\\()/g, "racine "], [/\bracines sont (in|ex)clus\b/g, "racines sont $1cluses"], [/\bracines sont compris\b/g, "racines sont comprises"], [/\bQuels sont (les|ses|leurs) racines/g, "Quelles sont $1 racines"], [/(racines de [^,;.]{1,12}, pas) ceux\b/g, "$1 celles"], [/\bQuel est (sa|la) plus (petite|grande) racine/g, "Quelle est $1 plus $2 racine"],
 ];
 const frZero = (t) => FR_ZERO.reduce((a, [re, by]) => a.replace(re, by), t);
+/* 27.11 (décision de l'enseignant, n° 18) : en 4e et en 3e françaises, le « zéro » d'une fonction se dit « antécédent de 0 »
+   (le collège ne parle ni de zéro ni de racine d'une fonction). Formes du sens « fonction » seulement (lectgraph, fimg,
+   affine, leçons) ; le nombre zéro (« loin de zéro », « complète par des zéros », « autant que de zéros ») reste. Lycée :
+   « racine » (FR_ZERO) ; Suisse : inchangé. Lu par frIdTxt (questions) et frDom (leçons, écrans, src/app.js). */
+const FR_ZERO_COL = [
+  [/\bCombien de zéros (\\\(.*?\\\)) a-t-elle\s*\?/g, "Combien 0 a-t-il d'antécédents par $1 ?"],
+  [/\b([Ss]on|[Ll]e) plus (petit|grand) zéro\b/g, "$1 plus $2 antécédent de 0"], [/\b([Pp]lus) (petit|grand) zéro\b/g, "$1 $2 antécédent de 0"],
+  [/\bzéro (positif|négatif|entier)\b/g, "antécédent de 0 $1"], [/\(le zéro\)/g, "(l'antécédent de 0)"],
+  [/\b([Ll])e zéro d(?:e |')(?=\\\(|[a-z]\b|la fonction|une fonction)/g, "$1'antécédent de 0 par "],
+  [/\b([Ll]es|[Dd]es|[Ss]es) zéros d(?:e |')(?=\\\(|[a-z]\b|la fonction|une fonction|la parabole)/g, "$1 antécédents de 0 par "],
+  [/\b([Uu]n) zéro\b(?= \(| se lit)/g, "$1 antécédent de 0"],
+  [/\b([Ll]es|[Dd]es|[Ss]es) zéros\b(?= \\\(| \(f| sont (?:exclus|inclus|solutions|symétriques|les|\d|\\\()| sur (?:un|le) graphique| [-−\d])/g, "$1 antécédents de 0"],
+  [/\bZéros :/g, "Antécédents de 0 :"], [/\bzéros (?=\\\()/g, "antécédents de 0 "],
+];
+const frZeroCol = (t) => FR_ZERO_COL.reduce((a, [re, by]) => a.replace(re, by), t);
 function frThouPart(t, tex) {
   return tex ? frTimes(t.replace(/\\text\{['’]\}/g, "\\,").replace(/(\d)['’](?=\d{3}(?!\d))/g, "$1\\,"))
     : t.replace(/\\text\{['’]\}/g, "\u202f").replace(/(\d)['’](?=\d{3}(?!\d))/g, "$1\u202f").replace(/(\d|\)|\?)\s·\s(?=[\d(?]|[a-zA-Z](?![A-Za-zÀ-ÿ]))/g, "$1 × ").replace(/(^|[^A-Za-zÀ-ÿ0-9])([a-zA-Z])\s·\s(?=[\d(]|[a-zA-Z](?![A-Za-zÀ-ÿ]))/g, "$1$2 × "); /* 25.11 soir : produit seulement (nombres, lettres isolées, parenthèses), pas les séparateurs de l'interface (« Mathélo · provisoire ») */
@@ -179,7 +194,7 @@ const FR_QWORDS = [[/\bGenève–Berne\b/g, "Lyon–Grenoble"] /* 26.11 soir : �
 const FR_ORD_P = new Set(["droites", "droitesinter"]);
 function frIdTxt(id, s, grade) {
   if (typeof s !== "string" || !s) return s;
-  if (grade >= 10) s = frZero(s);
+  if (grade >= 10) s = frZero(s); else if (grade >= 8) s = frZeroCol(s); /* 27.11, n° 18 : 4e–3e, « antécédent de 0 » */
   if (FR_ORD_P.has(id)) s = s.replace(/(^|[^\\\w\/'’])h(?![\w'’])/g, "$1p");
   return s.replace(/(\S)[  ]?·[  ]?(?=\S)/g, (m, a, i, all) => {
     const L = all.slice(Math.max(0, i - 2), i + 1), R = all.slice(i + m.length, i + m.length + 3);

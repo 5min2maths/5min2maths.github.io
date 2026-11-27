@@ -50,7 +50,7 @@ ITEMS = [
      "Résolution de problèmes géométriques en lien avec les figures et les transformations étudiées"),
     ("31-FG1", 31, "Figures géométriques planes", "Reconnaître, décrire et construire triangles, quadrilatères et cercles (côtés, angles, diagonales, symétries)", 9, 10, ["quadri", "angtri"],
      "Reconnaissance, dénomination, description de figures planes selon leurs propriétés (symétrie-s interne-s, côtés, angles, somme des angles, diagonales) et construction de : triangles, quadrilatères, cercles"),
-    ("31-FG2", 31, "Figures géométriques planes", "Reconnaître, décrire et construire des polygones réguliers", 10, 11, ["polyreg"],
+    ("31-FG2", 31, "Figures géométriques planes", "Reconnaître, décrire et construire des polygones réguliers", 10, 11, ["polyreg", "angtri@3"],  # 27.11 (n° 26) : formes « polygone », « nb-cotes » (src/ref_formes.js)
      "… et construction de : polygones réguliers (Niv 1s-2-3)"),
     ("31-FG3", 31, "Figures géométriques planes", "Reconnaître et nommer les angles (aigu, obtus, droit, plat)", 9, 9, ["angtype"],
      "Reconnaissance et dénomination des angles (aigu, obtus, droit, plat)"),

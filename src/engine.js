@@ -853,13 +853,16 @@ const Engine = {
        autre, est évité ; s'il n'y en a pas d'autre, on pose une question de niveau 3. */
     const pKey = (x) => x && x.spec && x.spec.kind === "multi" ? "p:" + (x.ctx || String(x.q).replace(/\\\(.*?\\\)|<[^>]*>/g, " ").replace(/[^A-Za-zÀ-ÿ' ]/g, " ").trim().split(/\s+/).slice(0, 4).join(" ").toLowerCase()) : null;
     const cday = (state.ctxDay = state.ctxDay || {}), lim = addDays(day(), -6), stale = (x) => { const k = pKey(x); return !!(k && cday[k] && cday[k] >= lim) || sceneStale(state, sceneKey(x)); };
+    /* 27.11 (décision de l'enseignant, n° 24 : Hugo, 6e FR faible, défi du jour en 4 parties, 6 min) : élève sous la moyenne
+       de sa classe (belowClass, comme autoN) ou en grande difficulté : un problème de 2 ou 3 parties au plus (shortProb). */
+    const short4 = level === 4 && this.weak4(state), long4 = (x) => short4 && !!x && x.d === 4 && Array.isArray(x.parts) && x.parts.length > 3;
     let found = false, fresh1 = null, lastOk = null, lv = level;
     /* 25.11 : une forme hors programme de la classe (HORS_CO, 9e–10e) est refaite ; si le niveau n'a plus aucune forme
        du programme (défi d'une autre année), on descend d'un niveau. */
     for (let k = 0, t = 0; k < 16 && !found && t < 60; t++) {
       if (t && t % 15 === 0 && !lastOk && lv > 1) lv -= 1; /* 26.11 : on descend jusqu'au niveau 1 (quartiles en 4e FR : niveaux 2 et 3 hors programme) */
       q = this.build(id, lv);
-      if (horsCO(state, id, q)) continue;
+      if (horsCO(state, id, q) || long4(q)) continue;
       k++; lastOk = q;
       const fresh = !rec.includes(key(q)) && !(q.ctx && ctxs.includes(q.ctx)) && !stale(q);
       if (fresh && !forms.includes(qForm(q))) found = true;
@@ -1100,6 +1103,14 @@ const Engine = {
     const h = harmos(state.profile.system, state.profile.grade), r0 = 700 + (h - 8) * 150 + 100, L = state.last1 || [];
     return state.elo.r + (state.tadj || 0) < r0 || (L.length >= 5 && L.reduce((a, b) => a + b, 0) / L.length < ADAPT.aim);
   },
+  /* 27.11 (décision de l'enseignant, n° 24) : élève faible au sens de autoN (sous la moyenne de sa classe ou en grande
+     difficulté) : défi du jour limité à un problème de 2 ou 3 parties. shortProb : la notion a un tel problème pour ce profil. */
+  weak4(state) { return !!(state && state.profile && state.elo) && (this.struggling(state) || this.belowClass(state)); },
+  shortProb(state, id) {
+    const c = (this._short = this._short || {}), k = [state.profile.system, state.profile.grade, state.profile.track, state.profile.niv, id].join("|");
+    if (!(k in c)) { c[k] = false; for (let s = 1; s <= 24 && !c[k]; s++) { try { const q = this.build(id, 4, s); if (q && q.d === 4 && Array.isArray(q.parts) && q.parts.length >= 2 && q.parts.length <= 3 && !horsCO(state, id, q)) c[k] = true; } catch (e) { break; } } }
+    return c[k];
+  },
   autoN(state) { return state.placedOn === day() ? this.firstDayN(state) : this.struggling(state) || this.belowClass(state) ? 4 : FORMATS.auto.slots.length; },
   fmtText(state, f) { const n = f === "auto" ? this.autoN(state) : 0; return n && n < FORMATS.auto.slots.length ? n + " calculs rapides, enchaînés." : FORMATS[f].text; },
   planSession(state, format) { return this.firstDayCap(state, this.ownYear(state, this.planSession0(state, format), format)); },
@@ -1122,7 +1133,10 @@ const Engine = {
     for (const j of [...Array(plan.length).keys()].slice(1, -1).concat(plan.length - 1)) if (at < 0 && !String(plan[j]).startsWith("PROB:") && !coince(idOf(plan[j])) && !this.lessonDue(state, idOf(plan[j]))) at = j;
     if (at < 0) return plan;
     const kind = String(plan[at]).split("|")[2] || "app", inPlan = new Set(plan.map(idOf));
-    const ex = new Set(this.eligible(state).filter((id) => !own(id) || inPlan.has(id)));
+    /* 27.11 (décision de l'enseignant, n° 33 : ownYear posait une notion de l'année jamais vue, sans sa leçon, dans les
+       séances sans leçon, 0,1 à 0,6 par séance au testeur) : seulement une notion de l'année déjà travaillée (seen > 0). */
+    const vue = (id) => !!state.notions[id] && state.notions[id].seen > 0;
+    const ex = new Set(this.eligible(state).filter((id) => !own(id) || inPlan.has(id) || !vue(id)));
     const b = this.planSlots(state, [kind], { exclude: ex })[0];
     if (!b) return plan;
     const x = b.split("|"), les = this.lessonDue(state, x[0]);
@@ -1218,7 +1232,7 @@ const Engine = {
        notions de l'année déjà ouvertes passent d'abord ; une notion de l'année précédente ne revient en tête que si le
        parcours le demande (prevPenalty). Élève en grande difficulté ou Mathélo en forte baisse : règle levée. */
     const prevPen = !this.nowActive(state) && !this.struggling(state) && !this.eloDrop(state) ? this.prevPenalty(state) : null;
-    const usedPair = new Set(), cnt = new Map();
+    const usedPair = new Set(), cnt = new Map(), weak4 = this.weak4(state);
     /* 26.11 soir (revue des élèves joués, n° 2 : 5 × la même notion dans une série d'automatismes quand le chapitre en
        classe n'en offre qu'une ou deux) : une notion au plus 2 fois par séance ; un créneau « chapitre » sans notion
        possible redevient un créneau normal ; la limite ne se lève qu'à défaut de toute autre notion (free). */
@@ -1234,7 +1248,7 @@ const Engine = {
         if (!isNow && (rappel ? recent : !recent)) continue; /* les anciennes notions ne passent que par le créneau Rappel */
         if (kind === "drill" && !this.drillable(state, id)) continue; /* 26.11 : notion sans vrai automatisme au niveau 1 */
         let levels = [1, 2, 3].filter((d) => d <= cap && (base !== "defi" || d >= 2) && (kind !== "drill" || d === 1)); /* 26.11 : automatisme = niveau 1 */
-        if ((kind === "defi4" || kind === "defi") && hasProb(id)) levels.push(4);
+        if ((kind === "defi4" || kind === "defi") && hasProb(id) && (!weak4 || this.shortProb(state, id))) levels.push(4); /* 27.11, n° 24 */
         if (!recent) levels = this.oldLevels(state, id, levels, target);
         /* 26.11 soir (revue des élèves testeurs, n° 9 : élève forte, Révision de 4 questions de niveau 1, +12 à +15 chacune) :
            en Révision, un élève dont le Mathélo atteint le niveau 2 de la notion (et qui ne l'a pas ratée) n'a plus de niveau 1. */

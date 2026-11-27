@@ -1898,7 +1898,7 @@ const RECALC = (() => {
   DF("reduire", /trois étapes de (.+?) m, (.+?) m et (.+?) m\./, (g, lab) => { const t = g.map(TRM); if (t.some((x) => !x)) return null; return LINS(t, lab, [t[0], t[2]]); });
   const PCT = (P0, up, dn, lab) => { const p1 = P0 * (1 + up / 100), p2 = p1 * (1 - dn / 100); return pick(lab, { a: p1, b: p2, c: (p2 / P0 - 1) * 100 }); };
   DF("pct", rs("vélo coûte # CHF\\. Son prix augmente de # %, puis baisse de # %"), (g, lab) => PCT(...g.map(nn), lab));
-  DF("pct", rs("abonnement de fitness coûte # CHF par mois\\. Le prix augmente de # % ; puis, avec la carte d'étudiant, il baisse de # %"), (g, lab) => PCT(...g.map(nn), lab));
+  DF("pct", rs("abonnement de fitness coûte # CHF par mois\\. Le prix augmente de # % ; puis, avec la carte jeune, il baisse de # %"), (g, lab) => PCT(...g.map(nn), lab));
   DF("pct", rs("action vaut # CHF\\. En une semaine, sa valeur monte de # %, puis la semaine suivante elle baisse de # %"), (g, lab) => PCT(...g.map(nn), lab));
   DF("prio", rs("Le bus coûte # CHF pour tout le groupe\\. L'entrée coûte # CHF par élève, avec une réduction de # CHF par élève\\. Il y a # élèves"), (g, lab) => { const [B, p, r, n] = g.map(nn); return pick(lab, { a: p - r, b: (p - r) * n, c: B + (p - r) * n }); });
   DF("prio", rs("(\\d+) amis commandent # pizzas à # CHF et # boissons à # CHF\\. Ils ont un bon de réduction de # CHF"), (g, lab) => { const [m, n, p, k, b, r] = g.map(nn); return pick(lab, { a: n * p + k * b, b: n * p + k * b - r, c: (n * p + k * b - r) / m }); });

@@ -14,6 +14,9 @@
 /* Formes d'une notion partagée hors programme d'une classe française : [ctx (« préfixe* » permis) | RegExp | fonction,
    première classe FR où la forme est permise (99 = jamais en France)]. Lu par horsCO (src/engine.js). */
 const HORS_FR = {
+  /* 27.11 (décision de l'enseignant, n° 17) : nombre dérivé de x³ et de √x « par la définition » : hors programme 2026 (le calcul
+     algébrique du taux de variation se limite au second degré et à la fonction inverse) */
+  nbderive: [["definition-cube", 99], ["definition-racine", 99]],
   derivref: [["exposant-*", 99] /* x^(3/2), racine cubique : exposants rationnels, hors programme FR */, ["trigo-*", 12] /* dérivées de sin, cos : Tle */],
   tangente: [["newton", 12]],
   asymptotes: [["oblique", 99] /* programme FR : asymptotes parallèles aux axes seulement */],
@@ -195,7 +198,7 @@ const UPFR = {
     "TIN": ["integrale", "aireint", "intmaj", "intparties", "suiteint"],
     "TDN": ["denombr", "combi", "binom", "binomiale", "sommeva"],
     "TES": ["vect3d", "colin", "droite3d", "plans", "posrel", "pscal3d", "distances"],
-    "TAU": ["compo", "eq3"],
+    "TAU": ["compo"] /* 27.11, n° 15 : eq3 retiré du catalogue français */,
   };
   ORDRE.FR = ORDRE.FR || {}; ORDRE_THEME.FR = ORDRE_THEME.FR || {}; THEME_LABEL.FR = THEME_LABEL.FR || {}; /* pages de test sans fr_2nde.js */
   // Progression du collège (ORDRE.FR_COL, fr_college.js) et de 2nde (ORDRE.FR, fr_2nde.js) pour les notions créées le 25.11.

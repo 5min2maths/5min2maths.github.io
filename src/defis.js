@@ -3757,7 +3757,7 @@ const DEFIS = (() => {
         [p + " % de " + m0 + " g : " + m0 + " · " + p + " ÷ 100.", "c) " + k + " portions de " + por + " g font " + k * por + " g ; prends-en " + p + " %."],
         "a) " + M(m0 + " \\cdot \\frac{" + p + "}{100} = " + (m0 * p) / 100) + " g. b) " + M(m0 + " - " + (m0 * p) / 100 + " = " + (m0 - (m0 * p) / 100)) + " g. c) " + M(k + " \\cdot " + por + " = " + k * por) + " g, " + M(k * por + " \\cdot \\frac{" + p + "}{100} = " + (k * por * p) / 100) + " g.")); };
     OUT.pct = [remise, part, compo, () => CXP("succ-velo", pct0()),
-      () => { const P0 = 12 * ri(4, 9), up = pk([10, 20, 25]), dn = pk([15, 20, 30, 40]); return PC("succ-fitness", "Prix mensuel", "final", "Un abonnement de fitness coûte " + M(P0) + " CHF par mois. Le prix augmente de " + M(up + "\\,\\%") + " ; puis, avec la carte d'étudiant, il baisse de " + M(dn + "\\,\\%") + ".", up, dn, P0); },
+      () => { const P0 = 12 * ri(4, 9), up = pk([10, 20, 25]), dn = pk([15, 20, 30, 40]); return PC("succ-fitness", "Prix mensuel", "final", "Un abonnement de fitness coûte " + M(P0) + " CHF par mois. Le prix augmente de " + M(up + "\\,\\%") + " ; puis, avec la carte jeune, il baisse de " + M(dn + "\\,\\%") + ".", up, dn, P0); },
       () => { const P0 = 20 * ri(3, 40), up = pk([10, 20, 25, 30, 50]), dn = pk([10, 20, 25, 40]); return PC("succ-action", "Valeur", "finale", "Une action vaut " + M(nb(P0)) + " CHF. En une semaine, sa valeur monte de " + M(up + "\\,\\%") + ", puis la semaine suivante elle baisse de " + M(dn + "\\,\\%") + ".", up, dn, P0); }];
   }
   return OUT;
