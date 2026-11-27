@@ -157,3 +157,4 @@ Avant le choix, comme au premier tour :
 - consulter à la main Swissreg, EUIPO eSearch et l'INPI (classes 9, 41, 42) ;
 - vérifier les identifiants Instagram et TikTok ;
 - réserver .ch et .com dès qu'un nom est retenu.
+- 27.11 : commentaire de l'auteur du 25.11 (« Mathélo », sous-titre « 5 minutes de maths par jour ») → décision : attendre (consolidation) ; attention, Mathélo est aussi le nom de la cote de niveau.

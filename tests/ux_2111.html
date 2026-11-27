@@ -26,17 +26,17 @@ Engine.finishDay(state,1,1);ok(state.streak.count===5&&state.streak.best===5,"2 
 screenHome();ok(!app.querySelector(".streak-nudge"),"2 plus de rappel une fois la séance faite");
 // 3. bouton plus facile (niveau 2, échec, sans guide ni étapes)
 for(const id in state.notions)state.notions[id].lessonSeen=true;
-session={fmt:"",plan:["prio|2","fracadd|1"],i:0,score:0,answered:0,start:Date.now(),elo0:state.elo.r,ids:new Set(),pinged:true};nextQuestion();
+session={fmt:"",plan:["prio|2","rel|1"] /* 27.11 : rel au lieu de fracadd (problème à fractions que le test ne sait pas remplir) */,i:0,score:0,answered:0,start:Date.now(),elo0:state.elo.r,ids:new Set(),pinged:true};nextQuestion();
 const d0=window.__q.d;document.getElementById("idk").click();
 const rd=document.getElementById("redo");ok(!!rd,"3 bouton refaire");
 if(d0>1)ok(/plus facile/.test(rd.textContent),"3 libellé plus facile ("+rd.textContent+")");
 rd.click();ok(window.__q.d===Math.max(1,d0-1),"3 niveau baissé "+d0+"→"+window.__q.d);
 /* 27.11 (test instable : « Suivant » absent selon le tirage) : bouton principal de la barre si #nx manque */
 const nxt=()=>(document.getElementById("nx")||app.querySelector(".qbar .btn-primary")||{click(){}}).click();
-answer(true);nxt();
-answer(true);nxt();
+/* jusqu'au bilan (une question de remédiation peut s'ajouter selon le tirage), 6 au plus */
+for(let k=0;k<6&&!app.querySelector(".sum-notions");k++){if(document.querySelector(".qtext"))answer(true);nxt();}
 // 4. bilan par notion
-ok(!!app.querySelector(".sum-notions"),"4 bilan par notion");
+ok(!!app.querySelector(".sum-notions"),"4 bilan par notion ["+((app.querySelector(".eyebrow")||{}).textContent||"")+" | "+app.textContent.replace(/\s+/g," ").slice(0,160)+"]");
 ok(/Réussie|Réussies/.test(app.textContent)&&/En progrès|Reviendr/.test(app.textContent),"4 catégories : "+(app.querySelector(".sum-notions")||{}).textContent);
 ok(/record/.test(app.textContent)||/série passe à/.test(app.textContent),"4 série au bilan");
 // 5. clavier
