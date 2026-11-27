@@ -24,10 +24,19 @@ ordinateur d'abord. Seulement de la mise en page : aucune fonction nouvelle, té
     d'action sous la réponse (plus collée au bord de l'écran ; dans un problème long elle reste visible en bas de la
     colonne). Fait par `ecranSplit()` dans `h()`, seulement en deux colonnes. Le rappel d'énoncé fixe (problème) est
     masqué : l'énoncé reste à gauche.
+  - Énoncé (colonne de gauche) : défilement seulement s'il dépasse la hauteur de l'écran (classe `q-long`, posée par
+    `ecranSplit()`), sinon aucune barre parasite. Après la vérification, la barre (« Continuer »…) passe sous le retour
+    (`ecranBarApres()`).
+  - Histoire : le récit à gauche, « À toi » à droite (réponse et « Vérifier » visibles sans défiler).
+  - Pavé compact (touches de 42 px) partout sur ordinateur (question, pas à pas, Histoire, Curieux…), jamais sur tablette.
+  - Écran bas (≤ 800 px, 1024 × 768) : marges verticales réduites ; place de la barre de défilement réservée
+    (`scrollbar-gutter: stable`) ; aucun texte sous 12 px sur ordinateur et tablette.
   - Accueil : séance à gauche, les 6 cases à droite, plus grandes.
-  - Bilan, Mes compétences (`ecranCols()`), Progrès : cartes sur deux colonnes.
+  - Bilan, Mes compétences (`ecranCols()`) : cartes sur deux colonnes ; Progrès : la carte de progression seule à
+    droite, les autres cartes à gauche.
 - Tablette : colonne de 720 px, texte 18 px, cartes plus aérées, figures 460 px, pavé plus grand (touches ≥ 52 px),
-  boutons ≥ 44 px ; en paysage, mêmes deux colonnes que l'ordinateur.
+  boutons ≥ 44 px (aussi Oui / Non des statistiques ; cases de la carte de progression de 32 px avec une zone de
+  toucher de 44 px) ; en paysage, mêmes deux colonnes que l'ordinateur, pavé non compacté (touches ≥ 52 px).
 
 ## Vérifications
 
@@ -37,6 +46,10 @@ ordinateur d'abord. Seulement de la mise en page : aucune fonction nouvelle, té
   Mes compétences, Réglages) : pas de débordement horizontal, classe d'écran, réponse et « Vérifier » visibles sans
   défiler sur ordinateur, barre dans la colonne de réponse, choix des Réglages appliqué et gardé, détection
   automatique (12 cas), et à 360 px mise en page identique au pixel près à la même page sans classe d'écran.
+  Depuis le 27.11 soir (revue `tools/revue_ecrans_chargement_27-11.md`) : pas de barre de défilement dans l'énoncé
+  quand il tient, 1024 × 768 sans défilement, touches ≥ 52 px sur tablette (question et pas à pas), aucun texte sous
+  12 px, Histoire « À toi » visible, barre sous le retour après une erreur, « Vérifier l'étape » visible, carte de
+  progression à droite, cases de la carte ≥ 44 px (tablette), `scrollbar-gutter` (ordinateur).
 - 360 px avant / après : signatures de mise en page (position et taille de chaque élément, tirages et date fixes)
   identiques à celles de master 2618068 pour les 9 écrans ; captures 360×640 identiques au pixel près (la capture du
   problème varie d'une prise à l'autre de quelques pixels de défilement, minuterie du focus, aussi sur master).
