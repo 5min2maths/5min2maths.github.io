@@ -3238,7 +3238,7 @@ function updBanner(where) {
   if (typeof Upd === "undefined" || !Upd) return;
   Upd.scr = where || "";
   if (!where || !Upd.ready || app.querySelector(".upd-line")) return;
-  app.insertAdjacentHTML("afterbegin", '<div class="upd-line" role="status"><span>Nouvelle version prête</span><button type="button" class="btn-ghost small" id="updgo">Recharger</button></div>');
+  app.insertAdjacentHTML("afterbegin", '<div class="upd-line" role="status"><span>🎁 <b>Nouvelle version prête</b><br><small class="upd-sub">Rien n’est perdu : ta progression est gardée.</small></span><button type="button" class="upd-btn" id="updgo">Mettre à jour</button></div>');
   document.getElementById("updgo").onclick = () => Upd.reload();
 }
 if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude/.test(location.hostname)) {

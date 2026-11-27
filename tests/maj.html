@@ -24,7 +24,7 @@ try {
   Upd.found();
   const L = app.querySelector(".upd-line");
   ok(L && L.getAttribute("role") === "status" && /Nouvelle version prête/.test(L.textContent) && document.getElementById("updgo"), "ligne affichée à l'accueil");
-  ok(L && L.offsetHeight > 0 && L.offsetHeight < 60, "une ligne discrète (" + (L && L.offsetHeight) + " px)");
+  ok(L && L.offsetHeight > 0 && L.offsetHeight < 130 && getComputedStyle(L).backgroundColor !== getComputedStyle(document.body).backgroundColor, "bandeau bleu bien visible, titre et phrase rassurante (" + (L && L.offsetHeight) + " px) — 27.11 : décision de l'enseignant, bleu plein");
   ok(app.scrollWidth <= app.clientWidth + 1, "ligne sans débordement");
   document.getElementById("updgo").click(); ok(reloads === 1, "« Recharger » recharge");
   /* pendant une question : rien */

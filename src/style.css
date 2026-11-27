@@ -893,9 +893,11 @@ button.sess-info::after { content: ""; position: absolute; left: 50%; top: 50%; 
 .keypad.k-choix button { padding: 12px 0; font-size: 1.2rem; }
 
 /* 27.11 (robustesse) : nouvelle version prête (accueil, bilan), une ligne discrète. */
-.upd-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 8px; padding: 4px 10px; border-radius: 10px;
-  background: var(--blue-soft); color: var(--ink); font-size: .9rem; }
-.upd-line .btn-ghost { padding: 2px 8px; }
+/* 27.11 (enseignant : « le rendre encore plus visible », bleu plein choisi ; pas de rouge, réservé aux erreurs) */
+.upd-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 10px; padding: 10px 14px; border-radius: 12px;
+  background: var(--blue); color: var(--on-blue); font-size: 1rem; box-shadow: 0 3px 10px rgba(20, 40, 100, .25); }
+.upd-line .upd-sub { font-size: .82rem; opacity: .92; }
+.upd-line .upd-btn { flex: none; min-height: 44px; padding: 8px 16px; border-radius: 10px; border: 0; background: var(--on-blue, #fff); color: var(--blue); font-weight: 700; font-size: 1rem; }
 /* 27.11 (accessibilité) : texte pour les lecteurs d'écran seulement. */
 .sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 /* 27.11 (accessibilité) : « réduire les animations » du système respecté partout (animations, transitions, défilements ;
