@@ -685,7 +685,7 @@ function screenGrades() {
 function eloBanner() {
   const r = ypPts(), g = gradeOf(r);
   return `<button type="button" class="elo-band elo-compact" id="eloband" aria-label="Grade ${g.title}, ${nbFmt(r)} pépites cette année, voir mes grades">
-    <span class="eb-num"><span class="eyebrow">Pépites</span><b class="num">${nbFmt(r)}</b></span>
+    <span class="eb-num"><b class="num">${nbFmt(r)}</b><span class="eb-unit">${r > 1 ? "pépites" : "pépite"}</span></span> <!-- 27.11 : unité sous le nombre, visible à toutes les largeurs -->
     <span class="eb-grade"><b><span class="eb-gic" aria-hidden="true">${g.ic}</span> ${esc(g.title)}</b>${g.next ? `<span class="pbar"><i style="width:${g.pct}%"></i></span><span class="eb-next">${g.next.ic} ${g.next.name} dans ${nbFmt(g.next.at - r)} 🟡</span>` : ""}</span>
     <span class="eb-chev" aria-hidden="true">›</span></button>`;
 }

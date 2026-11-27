@@ -105,7 +105,7 @@ Captures `tests/_shots/pepite/` (360×640 et 1440×900 ; page `tests/_pepite_cap
 `entree` (écran d'entrée), `accueil`, `filon` (accueil avec filon en cours : pastille dorée), `curlogo` (question curieuse
 du logo), `figure` (question avec figure), `bilanfilon` (bilan : filon, pépites, pépite polie), `polir` (À polir),
 `progres`, `reglages`, `parent` (page parent), `decouvrir`, `parents`. À 360 px : rien ne déborde ; l'en-tête tient sur
-une ligne (pépite + « Pépite² » + 💬 + filon + ⚙️) ; les nouveaux libellés tiennent (cases de l'accueil, bilan).
+une ligne (pépite + « Pépite² » + 💬 + filon + ⚙️) ; les nouveaux libellés tiennent (cases de l'accueil, bilan, « 37 pépites » dans la carte du haut).
 
 ## À soumettre à l'enseignant
 

@@ -652,6 +652,8 @@ a.btn.btn-primary { background: var(--blue); border-color: var(--blue); color: v
 .elo-compact { grid-template-columns: auto minmax(0, 1fr) auto; /* 24.11 : minmax(0, …) sinon le texte sur une ligne élargit la colonne (robot : +8 à +20 px à 360 px) */ gap: 12px; padding: 8px 12px; }
 .elo-compact .eb-num { display: grid; gap: 0; }
 .elo-compact .eb-num .eyebrow { font-size: 0.62rem; }
+.elo-compact .eb-num { justify-items: center; }
+.eb-unit { font-size: max(0.75rem, 12px); font-weight: 700; color: var(--gold-ink); line-height: 1.1; } /* 27.11 : « 37 pépites » */
 .elo-compact .num { font-size: 1.6rem; }
 .elo-compact .eb-grade { margin-top: 0; }
 .elo-compact .eb-grade .pbar { max-width: none; }
