@@ -900,7 +900,7 @@ Object.assign(GEN, {
   },
 
   cercle(d) {
-    const a = R.int(-5, 5), b = R.int(-5, 5), r = R.int(1, 7);
+    const a = R.int(-5, 5), b = R.int(-5, 5), r = R.int(d === 2 ? 2 : 1, 7); /* 27.11 (robot : rayon 1 au niveau 2, réponse triviale) */
     const sq = (v, n) => (v === 0 ? n + "^2" : "(" + n + sg(-v) + ")^2");
     if (d === 1) return { fig: GEO().circle([0, 0], 1, "f-shape").pt("C", 0, 0, false).dot("C").text("C", "C(a ; b)", 0, 18).side("C", [0.8, 0.6], "r", { draw: true, cls: "f-accent", w: 2 }).svg("cercle de centre C et de rayon r"), guide: [GS("Forme " + M("(x - a)^2 + (y - b)^2 = r^2") + " : a = ? (attention au signe)", a, M("a = " + a) + "."), GS("b = ?", b, M("b = " + b) + "."), GS("r = la racine de " + r * r + " ?", r, M("r = " + r) + "."), { ask: "Réponds « a ; b ; r ».", spec: { kind: "pair", values: [a, b, r] }, sol: M("C(" + a + " ; " + b + ")") + ", " + M("r = " + r) + "." }], q: "Le cercle " + M(sq(a, "x") + " + " + sq(b, "y") + " = " + r * r) + " a pour centre " + M("C(a ; b)") + " et pour rayon " + M("r") + ". Réponds « a ; b ; r ».", spec: { kind: "pair", values: [a, b, r] }, sol: "Forme " + M("(x - a)^2 + (y - b)^2 = r^2") + " : " + M("C(" + a + " ; " + b + ")") + ", " + M("r = " + r) + "." };
     if (d === 2) {

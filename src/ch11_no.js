@@ -180,7 +180,7 @@
             traps: [TR(qv(qs(qa([a, b], [c, e]), [g, h])), "La première fraction est négative : son numérateur compte avec le signe « − »."), TR(-qv(res), "Vérifie le signe du résultat.")] }); },
       () => { const [b, e, h] = pk(TRIPLES), a = cop(1, b), c = cop(1, e), g = cop(1, h), inner = qs([c, e], [g, h]), res = qs([a, b], inner);
         if (inner[0] === 0) return null;
-        return Qv(FI + M(fT(a, b) + " - \\left(" + fT(c, e) + " - " + fT(g, h) + "\\right)"), qv(res), M(fT(a, b) + " - " + fP(...inner) + " = " + qT(res)) + ". Le « − » devant la parenthèse change le signe de " + M(fT(g, h)) + ".",
+        return Qv(FI + M(fT(a, b) + " - \\left(" + fT(c, e) + " - " + fT(g, h) + "\\right)"), qv(res), M(fT(a, b) + " - " + fP(...inner) + " = " + qT(res)) + ".", /* 27.11 (revue, n° 1) : phrase « change le signe de g/h » retirée (contredisait le piège) */
           { ctx: "parmoins", guide: [GS("D'abord la parenthèse : " + M(fT(c, e) + " - " + fT(g, h)) + " = ?", qv(inner), M(qT(inner)) + "."), GS("Puis " + M(fT(a, b) + " - " + fP(...inner)) + " = ?", qv(res), M(qT(res)) + ".")],
             traps: [TR(qv(qs(qs([a, b], [c, e]), [g, h])), "Le « − » devant la parenthèse change le signe de chaque terme : " + M("-\\left(" + fT(c, e) + " - " + fT(g, h) + "\\right) = -" + fT(c, e) + " + " + fT(g, h)) + ".")] }); },
       () => { let b, e, a, c; do { [b, e] = pk(PAIRS); if (R.rand() < 0.5) [b, e] = [e, b]; a = cop(1, b); c = cop(1, e); } while (a / b >= c / e);

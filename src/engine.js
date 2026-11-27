@@ -1036,7 +1036,14 @@ const Engine = {
     return this.underFloor(state) || (L.length >= 5 && r < ADAPT.low) || (L.length < 5 && state.elo.n < 20 && (state.placeMiss || 0) >= 3 && r < 0.75); },
   /* 26.11 (revue p5, n° 5 : Kevin, jour 1 = positionnement + série de 3 avec deux pas à pas, 13 min) : le jour du positionnement,
      élève en grande difficulté : 2 questions (jour 1 ≈ 10 minutes). */
-  firstDayN(state) { return this.struggling(state) || (state.placeMiss || 0) >= 3 ? 2 : 3; },
+  /* 27.11 (revue, n° 5 : MP 2e, positionnement 5:46 puis Révision de 3 questions de niveau 3, 11:07 le premier jour) :
+     le jour du positionnement, première séance de 2 questions, niveau 2 au plus (firstDayCap). */
+  firstDayN(state) { return 2; },
+  firstDayCap(state, plan) {
+    if (!plan || state.placedOn !== day()) return plan;
+    const out = plan.slice(0, this.firstDayN(state)).map((e) => { const x = String(e).split("|"); if (!/^PROB:/.test(x[0]) && +x[1] > 2) x[1] = "2"; return x.join("|"); });
+    return Object.assign(out, plan.noLesson ? { noLesson: true } : {});
+  },
   /* 26.11 (revue p6, n° 15 : Hugo, 6e faible, série de 6 automatismes en 6:37 avec deux pas à pas) : élève sous la moyenne
      de la classe : Mathélo sous la valeur de départ de sa classe (Engine.newState : élève moyen), ou
      moins de 70 % de réussites du premier coup sur ses 5 dernières réponses au moins. */
@@ -1046,7 +1053,8 @@ const Engine = {
   },
   autoN(state) { return state.placedOn === day() ? this.firstDayN(state) : this.struggling(state) || this.belowClass(state) ? 4 : FORMATS.auto.slots.length; },
   fmtText(state, f) { const n = f === "auto" ? this.autoN(state) : 0; return n && n < FORMATS.auto.slots.length ? n + " calculs rapides, enchaînés." : FORMATS[f].text; },
-  planSession(state, format) {
+  planSession(state, format) { return this.firstDayCap(state, this.planSession0(state, format)); },
+  planSession0(state, format) {
     /* 26.11 (revue p4, n° 3) : le jour du positionnement, 3 questions au plus quel que soit le format (positionnement + séance ≈ 10 min) ; */
     const f = format || this.todayFormat(state), slots = f === "auto" ? FORMATS.auto.slots.slice(0, this.autoN(state)) : FORMATS[f].slots.slice(0, state.placedOn === day() ? this.firstDayN(state) : this.struggling(state) ? 3 : 9); /* et pour l'élève en grande difficulté (Kevin : Révision de 4 questions avec pas à pas, 8 à 9 min) */
     const el = this.eligible(state), pend = el.filter((id) => this.lessonFirst(state, id));

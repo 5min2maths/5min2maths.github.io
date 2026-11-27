@@ -57,13 +57,13 @@
     ok(c6 === "3 à effacer, dont 2 presque effacées (encore 1 réussite)", "carnet : « " + c6 + " »");
     ok(carnetLeft([{ id: "a", d: 1, ok: 0 }]) === "1 à effacer", "carnet sans progrès : « 1 à effacer »");
 
-    /* 7. Série d'automatismes : 3 le jour du positionnement, 4 sous le plancher, sinon 6 */
+    /* 7. Série d'automatismes : 2 le jour du positionnement (27.11, revue n° 5 : était 3), 4 sous le plancher, sinon 6 */
     fresh({ system: "CH", grade: 9, track: "college", minutes: 5 });
     const n6 = Engine.planSession(state, "auto").length;
     state.placedOn = day(); const n3 = Engine.planSession(state, "auto").length, t3 = Engine.fmtText(state, "auto");
     state.placedOn = addDays(day(), -1); state.tadj = -200; state.last1 = [0, 0, 1, 0, 0, 1, 0, 0, 1, 0];
     const n4 = Engine.underFloor(state) ? Engine.planSession(state, "auto").length : -1;
-    ok(n6 === 6 && n3 === 3 && n4 === 4 && /^3 calculs/.test(t3), "automatismes : " + n6 + " / " + n3 + " (jour du positionnement, « " + t3 + " ») / " + n4 + " (sous le plancher)");
+    ok(n6 === 6 && n3 === 2 && n4 === 4 && /^2 calculs/.test(t3), "automatismes : " + n6 + " / " + n3 + " (jour du positionnement, « " + t3 + " ») / " + n4 + " (sous le plancher)");
 
     /* 8. « Je prépare une évaluation » en 1re du Collège après un positionnement : chapitre en classe + dernier travaillé */
     fresh({ system: "CH", grade: 12, track: "college", minutes: 5 });

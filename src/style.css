@@ -887,3 +887,7 @@ button.sess-info::after { content: ""; position: absolute; left: 50%; top: 50%; 
 .seg button, .sess-first .sess-modes .sess-seg button { min-height: 44px; }
 #nowpick, .btn-sec.small, .btn-primary.small, .sess-first .now-line #nowpick { min-height: 44px; }
 .sess-first .sess-info { min-width: 44px; min-height: 44px; }
+
+/* 27.11 : question à choix numérotés : touches 1 à n et ⌫ (keysFor, spec.choix) */
+.keypad.k-choix { grid-template-columns: repeat(5, minmax(0, 1fr)); width: 100%; max-width: 340px; margin-inline: auto; }
+.keypad.k-choix button { padding: 12px 0; font-size: 1.2rem; }
