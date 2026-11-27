@@ -164,6 +164,58 @@ def nugget_real(tr="", detail=True, explain=False):
     return s + "</g>"
 
 
+# A-mix (27.11, « fais le mélange ») : matière d'A-réaliste (contour bosselé, relief) + éclat d'A3. Le relief éclairé
+# (gris) est recoloré par une table : brun-ambre #7A4E00 (creux) → ambre #C88A04 → or #F2B705 → jaune chaud #FFD84D
+# (crêtes) ; aucun gris. Reflets spéculaires nets #FFF7D6 sur les crêtes, contraste renforcé ; creux profonds ambre.
+MIX_DEFS = (
+    '<defs><radialGradient id="pgOrM" cx=".36" cy=".3" r=".8"><stop offset="0" stop-color="#FFE580"/><stop offset=".45" stop-color="#F7C21C"/>'
+    '<stop offset="1" stop-color="#C88A04"/></radialGradient>'
+    '<radialGradient id="pgOmbreM" cx=".32" cy=".25" r=".95"><stop offset=".4" stop-color="#7A4E00" stop-opacity="0"/>'
+    '<stop offset=".85" stop-color="#7A4E00" stop-opacity=".45"/><stop offset="1" stop-color="#7A4E00" stop-opacity=".7"/></radialGradient>'
+    '<filter id="pgMix" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">'
+    '<feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="11" result="n1"/>'
+    '<feDisplacementMap in="SourceGraphic" in2="n1" scale="24" xChannelSelector="R" yChannelSelector="G" result="forme"/>'
+    '<feTurbulence type="fractalNoise" baseFrequency="0.024" numOctaves="3" seed="4" result="n2"/>'
+    '<feColorMatrix in="n2" type="luminanceToAlpha" result="relief"/>'
+    '<feDiffuseLighting in="relief" surfaceScale="14" diffuseConstant=".95" lighting-color="#fff" result="diff"><feDistantLight azimuth="225" elevation="38"/></feDiffuseLighting>'
+    '<feComponentTransfer in="diff" result="or"><feFuncR type="table" tableValues=".478 .784 .949 1 1"/>'
+    '<feFuncG type="table" tableValues=".306 .541 .718 .847 .86"/><feFuncB type="table" tableValues="0 .016 .02 .1 .3"/></feComponentTransfer>'
+    '<feComposite in="or" in2="forme" operator="in" result="orIn"/>'
+    '<feSpecularLighting in="relief" surfaceScale="14" specularConstant="1.15" specularExponent="40" lighting-color="#FFF7D6" result="spec"><feDistantLight azimuth="225" elevation="55"/></feSpecularLighting>'
+    '<feComponentTransfer in="spec" result="specN"><feFuncA type="linear" slope="1.6" intercept="-.4"/></feComponentTransfer>'
+    '<feComposite in="specN" in2="forme" operator="in" result="specIn"/>'
+    '<feColorMatrix in="n2" type="matrix" values="0 0 0 0 .478  0 0 0 0 .306  0 0 0 0 0  -10 0 0 0 3.9" result="creux"/>'
+    '<feComposite in="creux" in2="forme" operator="in" result="creuxIn"/>'
+    '<feMerge><feMergeNode in="orIn"/><feMergeNode in="creuxIn"/><feMergeNode in="specIn"/></feMerge></filter>'
+    '<filter id="pgMixS" x="-20%" y="-20%" width="140%" height="140%">'
+    '<feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="11" result="n1"/>'
+    '<feDisplacementMap in="SourceGraphic" in2="n1" scale="24" xChannelSelector="R" yChannelSelector="G"/></filter>'
+    '<filter id="pgFlouM" x="-50%" y="-80%" width="200%" height="260%"><feGaussianBlur stdDeviation="9"/></filter></defs>')
+
+
+def nugget_mix(tr="", detail=True, explain=False):
+    s = f'<g transform="{tr}">' + MIX_DEFS
+    s += '<ellipse cx="290" cy="372" rx="120" ry="16" fill="#061237" opacity=".5" filter="url(#pgFlouM)"/>'
+    if detail:
+        s += f'<path d="{REAL_BLOB}" fill="url(#pgOrM)" filter="url(#pgMix)"/>'
+        s += f'<path d="{REAL_BLOB}" fill="url(#pgOmbreM)" filter="url(#pgMixS)"/>'  # volume : ambre vers le bas à droite
+        s += f'<ellipse cx="{SPX + SPW * .45:.1f}" cy="{SPY + SPW / PHI * .5:.1f}" rx="{SPW * .5:.1f}" ry="{SPW / PHI * .42:.1f}" fill="#FFF7D6" opacity=".28" filter="url(#pgFlouM)"/>'
+        A = spiral_arcs(SPIRAL)
+        op = [.12, .35, .6, .7, .6, .4, .22, .1]
+        s += "".join(f'<path d="{a}" fill="none" stroke="#FFF7D6" stroke-width="1.8" stroke-linecap="round" opacity="{op[k]}"/>' for k, a in enumerate(A))
+        for x, y, r in ((220, 214, 8), (352, 226, 6), (300, 300, 5)):  # éclats étoilés discrets
+            s += f'<path d="M{x} {y - r} L{x + r * .22} {y - r * .22} {x + r} {y} {x + r * .22} {y + r * .22} {x} {y + r} {x - r * .22} {y + r * .22} {x - r} {y} {x - r * .22} {y - r * .22}Z" fill="#fff" opacity=".95"/>'
+    else:  # 48 px et favicon : silhouette bosselée jaune vif + 3 reflets
+        s += f'<path d="{REAL_BLOB}" fill="url(#pgOrM)" filter="url(#pgMixS)"/>'
+        s += f'<path d="{REAL_BLOB}" fill="url(#pgOmbreM)" filter="url(#pgMixS)"/>'
+        s += ('<ellipse cx="228" cy="226" rx="44" ry="24" fill="#FFF7D6" opacity=".85" filter="url(#pgFlouM)"/>'
+              '<ellipse cx="336" cy="234" rx="20" ry="10" fill="#FFF7D6" opacity=".8"/><ellipse cx="262" cy="322" rx="24" ry="8" fill="#FFF7D6" opacity=".5"/>')
+    if explain:
+        s += (f'<rect x="{SPX}" y="{SPY}" width="{SPW}" height="{SPW / PHI:.3f}" fill="none" stroke="#fff" stroke-width="2.5" stroke-dasharray="7 5"/>'
+              f'<path d="{SPIRAL}" fill="none" stroke="#fff" stroke-width="2.5"/>')
+    return s + "</g>"
+
+
 _D = lambda P: "M" + " L".join(f"{x} {y}" for x, y in P) + "Z"
 
 
@@ -351,13 +403,19 @@ def main():
     cR = lambda: nugget_real("translate(240 300) scale(1.42) translate(-271 -270)") + tile(380, 122, 116)
     cRs = lambda: nugget_real("translate(232 318) scale(1.36) translate(-271 -270)", detail=False) + tile(372, 138, 170, rot=6, grid=False)
     cRx = lambda: nugget_real("translate(240 300) scale(1.42) translate(-271 -270)", explain=True) + tile(380, 122, 116)
-    sil = (f'<figure><div class="big">{icon_any(cR)}</div><div class="m48">{icon_mask(cRs)}<span class="fv">{icon_any(cRs)}</span></div><figcaption><b>A-réaliste</b> (détaillé ; 48 px et favicon simplifiés)</figcaption></figure>'
-           f'<figure><div class="big">{icon_any(cRx)}</div><figcaption>A-réaliste : spirale d\'or discrète dans le grand reflet</figcaption></figure>'
+    cM = lambda: nugget_mix("translate(240 300) scale(1.42) translate(-271 -270)") + tile(380, 122, 116)
+    cMs = lambda: nugget_mix("translate(232 318) scale(1.36) translate(-271 -270)", detail=False) + tile(372, 138, 170, rot=6, grid=False)
+    mixhead = (f'<div class="head"><div class="brand"><span class="mk mkA">{icon_any(cMs)}</span><b>Pépite²</b></div><span class="chip">🔥 <b>5</b> j</span>'
+               f'<span class="cl">11e</span><span>⚙️</span></div>')
+    sil = (f'<figure><div class="big">{icon_any(cM)}</div><div class="m48"><span class="s96">{icon_mask(cM)}</span>{icon_mask(cMs)}<span class="fv">{icon_any(cMs)}</span></div>'
+           f'<div style="margin-top:8px">{mixhead}</div><figcaption><b>A-mix</b> : 512 · 192 (ici 96) · 48 · favicon · en-tête 360 px</figcaption></figure>'
+           f'<figure><div class="big">{icon_any(cR)}</div><div class="m48">{icon_mask(cRs)}<span class="fv">{icon_any(cRs)}</span></div><figcaption><b>A-réaliste</b> (détaillé ; 48 px et favicon simplifiés)</figcaption></figure>'
+           f'<figure><div class="big">{icon_any(cRx)}</div><figcaption>A-réaliste (matière)</figcaption></figure>'
            f'<figure><div class="big">{icon_any(cA(SIL_DEFAUT))}</div><div class="m48">{icon_mask(cA(SIL_DEFAUT))}</div><figcaption><b>{SIL_DEFAUT}</b> (meilleure des silhouettes cassées, pour comparer)</figcaption></figure>')
     planche = f"""<style>
 body{{font-family:'Bricolage Grotesque',sans-serif;background:#fbfcfe;padding:24px;width:1452px;color:#1d2b4f}}
 h1{{margin:0 0 6px;font-size:34px}} h1 small{{font-size:18px;color:#5b6687;font-weight:700}}
-.row{{display:flex;gap:28px;margin:18px 0}} figure{{margin:0;text-align:center}} .big svg{{width:300px;height:300px;filter:drop-shadow(0 6px 14px #0002)}} .zoom svg{{width:460px;height:460px}} .m48 svg{{width:48px;height:48px;border-radius:50%;margin-top:8px}} .fv svg{{width:32px;height:32px;border-radius:6px;margin-left:10px}} .zoom2 svg{{width:420px;height:420px}}
+.row{{display:flex;gap:28px;margin:18px 0}} figure{{margin:0;text-align:center}} .big svg{{width:300px;height:300px;filter:drop-shadow(0 6px 14px #0002)}} .zoom svg{{width:460px;height:460px}} .m48 svg{{width:48px;height:48px;border-radius:50%;margin-top:8px}} .fv svg{{width:32px;height:32px;border-radius:6px;margin-left:10px}} .s96 svg{{width:96px;height:96px;margin-right:10px}} .m48{{display:flex;align-items:center}} .zoom2 svg{{width:420px;height:420px}}
 figcaption{{margin-top:8px;font-size:20px}}
 .phone{{width:300px;border-radius:30px;background:linear-gradient(160deg,#1b3d8f,#5b2a86);padding:26px 18px 14px;color:#fff;text-align:center}}
 .wall{{display:grid;grid-template-columns:repeat(3,1fr);gap:18px 8px}} .app{{display:grid;justify-items:center;gap:4px;font:12px sans-serif}}
@@ -372,20 +430,22 @@ background-image:linear-gradient(#e7ecf6 1px,transparent 1px),linear-gradient(90
 .chip{{font:15px sans-serif;border:1px solid #dde3f0;border-radius:99px;padding:3px 8px;background:#fff}} .cl{{font:14px sans-serif;color:#5b6687}}
 .cap{{margin:0 0 10px;font-size:14px;color:#5b6687}}
 </style>
-<h1>Pépite² · propositions de logo <small>(appliquée : {choice} · python3 tools/logo/gen_logos.py A|AR|A1|A2|A3|B|C)</small></h1>
+<h1>Pépite² · propositions de logo <small>(appliquée : {choice} · python3 tools/logo/gen_logos.py A|AM|AR|A1|A2|A3|B|C)</small></h1>
 <div class="row">{big}</div><div class="row">{phones}</div><div class="heads">{heads}</div><h2 style="margin:26px 0 0">Direction « réaliste » (photo de référence) et comparaison</h2><div class="row">{sil}</div><div class="row">{zoom}</div>"""
     (HERE / "planche.html").write_text(f'<!doctype html><meta charset="utf-8">{planche}')
     shot(planche, 1500, 1880, HERE / "planche.png")
     # Icônes de l'app (variante choisie).
     if choice == "AR":  # A-réaliste (filtres SVG) ; favicon et 48 px simplifiés
         c, cfA = cR, cRs
+    elif choice == "AM":  # A-mix : matière d'AR + éclat d'A3
+        c, cfA = cM, cMs
     elif choice in SHAPES:  # A1, A2, A3 : silhouettes cassées (φ = rectangle d'or du reflet)
         c = cA(choice)
         cfA = lambda: nugget("translate(226 318) scale(1.36) translate(-271 -270)", sparkle=False, shape=choice) + tile(372, 138, 170, rot=6, grid=False)
     else:
         name, c, _ = VARIANTS[choice]
     pwa = ROOT / "src/pwa"
-    cf = content_A_fav if choice == "A" else cfA if (choice in SHAPES or choice == "AR") else c
+    cf = content_A_fav if choice == "A" else cfA if (choice in SHAPES or choice in ("AR", "AM")) else c
     render(icon_any(c), [(512, pwa / "icon-512.png"), (192, pwa / "icon-192.png")], "any")
     render(icon_any(cf), [(32, pwa / "favicon-32.png")], "fav")
     render(icon_mask(c), [(512, pwa / "icon-maskable-512.png"), (192, pwa / "icon-maskable-192.png"), (180, pwa / "apple-touch-icon.png")], "mask")
@@ -398,8 +458,8 @@ background-image:linear-gradient(#e7ecf6 1px,transparent 1px),linear-gradient(90
     # 27.11 (enseignant : la pépite seule fait « croissant » en petit) : icône complète en miniature (version favicon).
     head = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">'
     mark = icon_any(cf).replace(head, '<svg class="logo-mark" viewBox="0 0 512 512" aria-hidden="true" focusable="false">')
-    nug = svg(nugget_real() if choice == "AR" else nugget(shape=choice if choice in SHAPES else None), bg=False).replace(head, '<svg viewBox="0 0 512 512">')
-    phi = ('{ x: %s, y: %s, w: %s, h: %.3f, ou: "reflet" }' % (SPX, SPY, SPW, SPW / PHI) if (choice in SHAPES or choice == "AR")
+    nug = svg(nugget_mix() if choice == "AM" else nugget_real() if choice == "AR" else nugget(shape=choice if choice in SHAPES else None), bg=False).replace(head, '<svg viewBox="0 0 512 512">')
+    phi = ('{ x: %s, y: %s, w: %s, h: %.3f, ou: "reflet" }' % (SPX, SPY, SPW, SPW / PHI) if (choice in SHAPES or choice in ("AR", "AM"))
            else '{ x: %s, y: %s, w: %.3f, h: %s, ou: "pepite" }' % (RX, RY, RW, RH))  # pépite seule (figure de la question curieuse « logo »)
     cur = ROOT / "src/curriculum.js"
     t = cur.read_text()

@@ -39,6 +39,12 @@ la variante choisie : icônes `src/pwa/icon-192/512.png` (any), `icon-maskable-1
   la question curieuse utilise la pépite seule (`LOGO_NUGGET`).
 
 **En attente du choix de l'enseignant (planche, 2e rangée)** — rien de tout ça n'est appliqué tant qu'il n'a pas choisi :
+- **A-mix** (`gen_logos.py AM`, demandé par l'enseignant : « fais le mélange ») : matière d'A-réaliste (contour bosselé,
+  relief) et éclat d'A3 : le relief éclairé est recoloré par une table uniquement or (brun-ambre #7A4E00 dans les creux →
+  ambre #C88A04 → or #F2B705 → jaune chaud #FFD84D sur les crêtes), reflets spéculaires nets #FFF7D6, éclats étoilés
+  discrets, spirale d'or fondue dans le grand reflet, ombre portée ; 48 px / favicon : silhouette bosselée jaune vif +
+  3 reflets. En tête de la 2e rangée de la planche (512, 192, 48, favicon, en-tête 360 px). Sera appliqué partout s'il
+  est validé (`python3 tools/logo/gen_logos.py AM`, puis `python3 build.py`).
 - **A-réaliste** (`gen_logos.py AR`, d'après sa photo de référence, non commitée : `tools/logo/_ref/` ignoré) : filtres SVG
   (bruit fractal → `feDisplacementMap` pour le contour bosselé ; second bruit = relief → `feDiffuseLighting` et
   `feSpecularLighting`, lumière en haut à gauche, sur un dégradé or ; crevasses = bruit seuillé ; ombre vers le bas à
