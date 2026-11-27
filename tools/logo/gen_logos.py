@@ -219,8 +219,38 @@ def nugget_mix(tr="", detail=True, explain=False):
 _D = lambda P: "M" + " L".join(f"{x} {y}" for x, y in P) + "Z"
 
 
+def bez_path(K):
+    """Contour lissé : (point, tangente, poignée) ; petite poignée = angle / arête, grande = lobe arrondi."""
+    d = ""
+    for i in range(len(K)):
+        (p0, t0, k0), (p3, t3, k3) = K[i], K[(i + 1) % len(K)]
+        dd, n0, n3 = math.dist(p0, p3), math.hypot(*t0), math.hypot(*t3)
+        p1 = (p0[0] + t0[0] / n0 * dd * k0, p0[1] + t0[1] / n0 * dd * k0)
+        p2 = (p3[0] - t3[0] / n3 * dd * k3, p3[1] - t3[1] / n3 * dd * k3)
+        d += ("M%.1f %.1f" % p0 if not i else "") + " C%.1f %.1f %.1f %.1f %.1f %.1f" % (*p1, *p2, *p3)
+    return d + "Z"
+
+
+# Style « objet de jeu » (27.11, retour au dessiné, gamification) : silhouettes compactes (largeur / hauteur ≈ 1,2),
+# 3 à 5 lobes inégaux, 1–2 arêtes nettes, une encoche, pas de taille entre deux lobes.
+GSHAPES = {
+    "G1": [((162, 282), (0.2, -1), .35), ((188, 206), (1, -0.7), .35), ((250, 176), (1, 0), .3), ((300, 196), (1, 0.6), .15),
+           ((334, 186), (1, -0.1), .3), ((384, 224), (0.3, 1), .35), ((372, 266), (-0.6, 0.8), .08), ((390, 306), (0, 1), .35),
+           ((350, 358), (-1, 0.4), .35), ((270, 366), (-1, 0), .3), ((196, 350), (-1, -0.3), .05), ((170, 330), (-0.3, -1), .25)],
+    "G2": [((166, 270), (0.1, -1), .35), ((206, 196), (1, -0.6), .35), ((268, 178), (1, 0.1), .35), ((330, 182), (1, -0.3), .08),
+           ((372, 198), (0.5, 1), .1), ((392, 262), (0, 1), .35), ((372, 322), (-0.6, 1), .3), ((318, 360), (-1, 0.2), .3),
+           ((282, 348), (-1, -0.4), .08), ((236, 366), (-1, 0.1), .3), ((184, 340), (-0.6, -1), .35)],
+    "G3": [((160, 262), (0.3, -1), .3), ((194, 210), (1, -0.5), .3), ((232, 206), (1, 0.2), .08), ((262, 176), (1, -0.2), .3),
+           ((318, 186), (1, 0.4), .3), ((356, 200), (1, 0.2), .08), ((390, 240), (0.2, 1), .35), ((378, 296), (-0.3, 1), .1),
+           ((394, 330), (-0.5, 1), .25), ((330, 364), (-1, 0), .35), ((258, 350), (-1, -0.2), .08), ((204, 360), (-1, 0.1), .3),
+           ((166, 318), (-0.3, -1), .3)],
+}
+for _k, _v in GSHAPES.items():
+    SHAPES[_k] = bez_path(_v)
+
+
 def nugget(tr="", sparkle=True, outline="#5A3A00", explain=False, shape=None):
-    NUG = _D(SHAPES[shape]) if shape else globals()["NUG"]
+    NUG = (SHAPES[shape] if isinstance(SHAPES[shape], str) else _D(SHAPES[shape])) if shape else globals()["NUG"]
     cid = "pgClip" + (shape or "")
     s = f'<g transform="{tr}">' + DEFS + f'<defs><clipPath id="{cid}"><path d="{NUG}"/></clipPath></defs>'
     if shape:  # pointes émoussées : contour épais à joints ronds, puis le métal
@@ -367,6 +397,7 @@ def render(svgtext, sizes, prefix):
 
 
 SIL_DEFAUT = "A3"
+G_DEFAUT = "G1"
 
 
 def main():
@@ -400,6 +431,7 @@ def main():
             f'<figure><div class="zoom2">{icon_any(content_C)}</div><figcaption>C : la même pépite porte le ²</figcaption></figure>')
     def cA(k, explain=False):
         return lambda: nugget("translate(236 300) scale(1.45) translate(-271 -270)", shape=k, explain=explain) + tile(378, 126, 116)
+    cAf = lambda k: (lambda: nugget("translate(226 318) scale(1.36) translate(-271 -270)", sparkle=False, shape=k) + tile(372, 138, 170, rot=6, grid=False))
     cR = lambda: nugget_real("translate(240 300) scale(1.42) translate(-271 -270)") + tile(380, 122, 116)
     cRs = lambda: nugget_real("translate(232 318) scale(1.36) translate(-271 -270)", detail=False) + tile(372, 138, 170, rot=6, grid=False)
     cRx = lambda: nugget_real("translate(240 300) scale(1.42) translate(-271 -270)", explain=True) + tile(380, 122, 116)
@@ -407,11 +439,9 @@ def main():
     cMs = lambda: nugget_mix("translate(232 318) scale(1.36) translate(-271 -270)", detail=False) + tile(372, 138, 170, rot=6, grid=False)
     mixhead = (f'<div class="head"><div class="brand"><span class="mk mkA">{icon_any(cMs)}</span><b>Pépite²</b></div><span class="chip">🔥 <b>5</b> j</span>'
                f'<span class="cl">11e</span><span>⚙️</span></div>')
-    sil = (f'<figure><div class="big">{icon_any(cM)}</div><div class="m48"><span class="s96">{icon_mask(cM)}</span>{icon_mask(cMs)}<span class="fv">{icon_any(cMs)}</span></div>'
-           f'<div style="margin-top:8px">{mixhead}</div><figcaption><b>A-mix</b> : 512 · 192 (ici 96) · 48 · favicon · en-tête 360 px</figcaption></figure>'
-           f'<figure><div class="big">{icon_any(cR)}</div><div class="m48">{icon_mask(cRs)}<span class="fv">{icon_any(cRs)}</span></div><figcaption><b>A-réaliste</b> (détaillé ; 48 px et favicon simplifiés)</figcaption></figure>'
-           f'<figure><div class="big">{icon_any(cRx)}</div><figcaption>A-réaliste (matière)</figcaption></figure>'
-           f'<figure><div class="big">{icon_any(cA(SIL_DEFAUT))}</div><div class="m48">{icon_mask(cA(SIL_DEFAUT))}</div><figcaption><b>{SIL_DEFAUT}</b> (meilleure des silhouettes cassées, pour comparer)</figcaption></figure>')
+    sil = "".join(f'<figure><div class="big">{icon_any(cA(k))}</div><div class="m48">{icon_mask(cA(k))}<span class="fv">{icon_any(cAf(k))}</span></div>'
+                  f'<figcaption><b>{k}</b>{" (par défaut)" if k == G_DEFAUT else ""}</figcaption></figure>' for k in GSHAPES)
+    sil += f'<figure><div class="big">{icon_any(cA(G_DEFAUT, True))}</div><figcaption>φ dans {G_DEFAUT} : rectangle d\'or du reflet</figcaption></figure>'
     planche = f"""<style>
 body{{font-family:'Bricolage Grotesque',sans-serif;background:#fbfcfe;padding:24px;width:1452px;color:#1d2b4f}}
 h1{{margin:0 0 6px;font-size:34px}} h1 small{{font-size:18px;color:#5b6687;font-weight:700}}
@@ -430,8 +460,8 @@ background-image:linear-gradient(#e7ecf6 1px,transparent 1px),linear-gradient(90
 .chip{{font:15px sans-serif;border:1px solid #dde3f0;border-radius:99px;padding:3px 8px;background:#fff}} .cl{{font:14px sans-serif;color:#5b6687}}
 .cap{{margin:0 0 10px;font-size:14px;color:#5b6687}}
 </style>
-<h1>Pépite² · propositions de logo <small>(appliquée : {choice} · python3 tools/logo/gen_logos.py A|AM|AR|A1|A2|A3|B|C)</small></h1>
-<div class="row">{big}</div><div class="row">{phones}</div><div class="heads">{heads}</div><h2 style="margin:26px 0 0">Direction « réaliste » (photo de référence) et comparaison</h2><div class="row">{sil}</div><div class="row">{zoom}</div>"""
+<h1>Pépite² · propositions de logo <small>(appliquée : {choice} · python3 tools/logo/gen_logos.py A|G1|G2|G3|AM|AR|A1|A2|A3|B|C)</small></h1>
+<div class="row">{big}</div><div class="row">{phones}</div><div class="heads">{heads}</div><h2 style="margin:26px 0 0">Style « objet de jeu » : silhouettes G1, G2, G3 (512 px, 48 px, favicon)</h2><div class="row">{sil}</div><div class="row">{zoom}</div>"""
     (HERE / "planche.html").write_text(f'<!doctype html><meta charset="utf-8">{planche}')
     shot(planche, 1500, 1880, HERE / "planche.png")
     # Icônes de l'app (variante choisie).

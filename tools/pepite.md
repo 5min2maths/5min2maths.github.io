@@ -22,7 +22,9 @@ l'app, les clés de stockage `m2m-*` et l'identifiant d'appareil ne changent pas
 `python3 tools/logo/gen_logos.py [A|B|C]` génère les 3 propositions (SVG), la planche `tools/logo/planche.png` et applique
 la variante choisie : icônes `src/pwa/icon-192/512.png` (any), `icon-maskable-192/512.png` (zone sûre à 80 %),
 `apple-touch-icon.png` (180), `favicon-32.png`, `favicon.svg`, et la ligne `const LOGO_MARK` de `src/curriculum.js`
-(icône miniature de l'en-tête). **Appliquée : A-mix (`AM`), validée par l'enseignant le 27.11.**
+(icône miniature de l'en-tête). **Appliquée pour l'instant : A-mix (`AM`).** Puis changement de direction de l'enseignant (gamification : « juste enlever
+l'aspect patate ») : retour au style dessiné « objet de jeu » ; **3 silhouettes G1, G2, G3 proposées (planche, 2e rangée ;
+G1 par défaut), en attente de son choix** : `python3 tools/logo/gen_logos.py G1` (ou G2, G3) les applique partout.
 
 - **A** (version lisse précédente) : vraie pépite d'or d'orpaillage, en or poli : silhouette d'un seul bloc ramassé de roche martelée
   (contour irrégulier, arêtes et pointes émoussées, un petit creux, inscrit dans le rectangle d'or), dégradé métallique à bandes claires et sombres (lumière en haut à gauche), plans
@@ -38,7 +40,11 @@ la variante choisie : icônes `src/pwa/icon-192/512.png` (any), `icon-maskable-1
 - En-tête : la pépite seule faisait « croissant » en petit → icône complète en miniature (`LOGO_MARK`) ; la figure de
   la question curieuse utilise la pépite seule (`LOGO_NUGGET`).
 
-**Propositions de la 2e rangée de la planche** (A-mix choisi et appliqué ; les autres restent disponibles) :
+**Propositions** (G1–G3 sur la planche ; les autres restent générables pour mémoire) :
+- **G1, G2, G3** (style « objet de jeu » : or poli à facettes, contour foncé, reflets nets, éclats, spirale fondue dans le
+  reflet) : silhouettes compactes (largeur / hauteur ≈ 1,2), 3 à 5 lobes inégaux, 1–2 arêtes nettes, une encoche, pas de
+  taille entre deux lobes ; 48 px et favicon simplifiés (pas d'éclats, ² sur carré blanc). G1 par défaut (la plus
+  « pépite » : lobes et encoche nets) ; φ = rectangle d'or du reflet.
 - **A-mix** (`gen_logos.py AM`, demandé par l'enseignant : « fais le mélange ») : matière d'A-réaliste (contour bosselé,
   relief) et éclat d'A3 : le relief éclairé est recoloré par une table uniquement or (brun-ambre #7A4E00 dans les creux →
   ambre #C88A04 → or #F2B705 → jaune chaud #FFD84D sur les crêtes), reflets spéculaires nets #FFF7D6, éclats étoilés
