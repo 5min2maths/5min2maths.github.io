@@ -1,0 +1,47 @@
+# Niveau RAPIDE des tests (27.11, décision de l'enseignant : tests à deux niveaux ; doc tools/tests.md).
+# Lancé par tools/publier.sh avant chaque publication (tools/run_tests.sh --rapide). Cible : 2 à 4 minutes.
+# La suite COMPLÈTE (toutes les pages, tools/poids.py ordre complet) tourne chaque nuit à 5 h (tools/tests_nuit.sh)
+# et avant une publication lancée avec « tools/publier.sh --complet "message" » (gros changements : chargement, moteur).
+#
+# Format : une ligne par page de test, nom sans « tests/ » ni « .html », paramètres d'adresse permis après « # »
+# collé au nom (recalcul#n=4 = 4 tirages par notion au lieu de 100). Ligne commençant par « # » = commentaire.
+#   ORDRE N              → tools/poids.py ordre --rapide N : toutes les classes (18 + nouvel élève), premier écran,
+#                          ordre des segments, lancement de l'app, erreurs JS, empreinte sur une notion sur N
+#   src/fichier -> pages → si src/fichier a changé depuis la dernière publication, ajouter ces pages
+# Toujours ajoutés en plus (calculés par tools/tests_rapides.py) :
+#   - contrôle de syntaxe de tous les fichiers src (tests/_syntaxe.html) et tools/test_nom.py (comme la suite) ;
+#   - toute page tests/*.html modifiée ou ajoutée depuis la dernière publication (git diff origin/master, plus les
+#     fichiers non suivis) ;
+#   - pour chaque src/X.js modifié : tests/X.html, tests/X_*.html, tests/X2.html… s'ils existent (correspondance
+#     simple par le nom), et les pages des lignes « -> » ci-dessous ;
+#   - pour chaque fichier d'aide tests/X.js modifié (oracles, collecte…) : les pages qui le chargent ;
+#   - les pages en échec à la dernière suite de nuit (suivi/tests_nuit/dernier.txt).
+
+# Chargement et ordre d'exécution, toutes les classes
+ORDRE 6
+
+# Fumée : accueil, séance, bilan, À polir, Réglages, Progrès, parents, à 360 et 1440 px, sans erreur JS
+fumee
+
+# Garde-fous essentiels, échantillon (quelques tirages par notion)
+recalcul#n=3
+recalcul2#n=3
+recalcul_fr#n=3
+corrige_valeur#n=3
+corrige_valeur_fr#n=3
+separation
+entete_360
+maj
+migration
+
+# Correspondances src → pages (en plus de la règle du nom)
+src/style.css -> entete_360 ecrans
+src/parents.css -> parents
+src/presente.css -> presente
+src/parents.js -> parents
+src/presente.js -> presente
+src/engine.js -> adaptivite progression recalcul3#n=3 recalcul4#n=3
+src/backup.js -> stockage
+src/pwa/sw.js -> maj
+src/pwa/manifest.webmanifest -> maj
+build.py -> poids
