@@ -65,3 +65,11 @@ servir d'abord les notions de l'année.
 - Notion au nom de son chapitre : « Les bases : … » (pas de numérotation des chapitres MP).
 - Premier jour : 2 questions, niveau 2 au plus, pour tous.
 - Lecteur d'écran : retirer aria-live de <main id="app"> (build.py) — à faire après la fusion de agent/ordre (build.py).
+
+### Décisions de l'enseignant (27.11 après-midi) : « ok pour tes recommandations »
+- Tels qu'appliqués : n° 1, 3, 4, 6, 7, 9, 10, 11, 13 (à relire à son rythme), 14, 16, 19, 20, 21, 23.
+- À appliquer : n° 33 (ownYear : seulement des notions de l'année déjà travaillées) ; n° 15 (eq3 retiré du profil France) ;
+  n° 17 (nombre dérivé de x³ et √x « par la définition » retiré en France) ; n° 18 (« antécédent de 0 » au lieu de « zéro »
+  en 4e–3e France) ; n° 22 (« Me tester » ciblé par forme pour tous les référentiels) ; n° 24 (élève faible : défi du jour
+  limité, 2–3 parties au plus) ; n° 25 (« carte jeune ») ; n° 26 (polygones réguliers rattachés à l'objectif « polygones »).
+- Reste ouvert : n° 12 (plan MP : PEE 2026 pour toutes les années, ou ancien PEE pour MP2–MP4 en 2026-27).
