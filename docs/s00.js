@@ -3,6 +3,7 @@
 
 
 const APP_NAME = "Pépite²";
+const APP_SPOKEN = "Pépite au carré";
 const APP_TAGLINE = "Deviens une pépite en maths";
 const APP_SHORT = "Pépite²";
 const APP_TITLE = "Pépite² · Deviens une pépite en maths";

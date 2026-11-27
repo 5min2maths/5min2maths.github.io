@@ -144,16 +144,16 @@ h(`<div class="pz" id="pz" data-noloc>
       <div class="card flat"><b>🎯 Question du jour</b><p class="small">Ni trop facile, ni impossible : ton <b>Mathélo</b> monte quand tu progresses, et les questions suivent.</p></div>
       <div class="card flat"><b>🪜 Pas à pas</b><p class="small">Une erreur ? L'app repère le piège (« tu as pris l'angle extérieur ? ») et te guide, une étape à la fois.</p></div>
       <div class="card flat"><b>✨ À polir</b><p class="small">Chaque question ratée devient une pépite brute qui attend sa revanche : réussis-la du premier coup, elle est polie (deux fois de suite si tu es à l'aise).</p></div>
-      <div class="card flat"><b>📝 Ton évaluation</b><p class="small">Donne la date et les notions : chaque jour, juste ce qu'il faut réviser, plus un sujet de préparation corrigé.</p></div>
+      <div class="card flat"><b>📝 Jour J</b><p class="small">Prépare ton évaluation : donne la date et les notions : chaque jour, juste ce qu'il faut réviser, plus un sujet de préparation corrigé.</p></div>
     </div>
   </section>
 
   <section class="pz-s">
     <div class="eyebrow">🔥 Et pour aller plus loin</div><h2>Pas seulement des exercices</h2>
     <div class="pz-grid pz-anim">
-      <div class="card flat"><b>🔍 Problème de la semaine</b><p class="small">Un vrai défi en plusieurs étapes, avec des indices si tu bloques.</p></div>
-      <div class="card flat"><b>🎲 Questions curieuses</b><p class="small">Parie d'abord, calcule ensuite : les maths cachées dans la vie de tous les jours.</p></div>
-      <div class="card flat"><b>📜 Histoires des maths</b><p class="small">Zénon, Kepler, Marie Curie, John Snow… et un défi expert pour les plus motivés.</p></div>
+      <div class="card flat"><b>⛏️ La mine</b><p class="small">Le grand problème de la semaine : un vrai défi en plusieurs étapes, avec des indices si tu bloques.</p></div>
+      <div class="card flat"><b>🔍 Trésors cachés</b><p class="small">Parie d'abord, calcule ensuite : les maths cachées dans la vie de tous les jours.</p></div>
+      <div class="card flat"><b>📜 Chercheurs d'or</b><p class="small">L'histoire des maths : Zénon, Kepler, Marie Curie, John Snow… et un défi expert pour les plus motivés.</p></div>
       <div class="card flat"><b>🔥 Ton filon</b><p class="small">Un jour, deux jours, dix jours d'affilée : une courte séance suffit pour rester sur un bon filon.</p></div>
     </div>
   </section>
@@ -246,7 +246,7 @@ h(`<div class="pz" id="pz" data-noloc>
       <div class="card flat"><b>👏 Valoriser l'effort</b><p class="small">« Tu t'es entraîné 4 jours cette semaine, bravo » plutôt que « combien tu as eu ? ».</p></div>
       <div class="card flat"><b>🗣️ Le laisser expliquer</b><p class="small">C'est en expliquant qu'on comprend. Faites l'élève, il fait le prof.</p></div>
       <div class="card flat"><b>🤐 Ne pas donner la réponse</b><p class="small">Un indice, une question, puis on attend. La réponse trouvée seul vaut dix réponses données.</p></div>
-      <div class="card flat"><b>🎲 Un moment partagé</b><p class="small">Chaque semaine, une question curieuse à parier en famille et une histoire des maths à raconter.</p></div>
+      <div class="card flat"><b>🎲 Un moment partagé</b><p class="small">Chaque semaine, un trésor caché (une question curieuse) à parier en famille et une histoire des maths à raconter.</p></div>
     </div>
   </section>
 
@@ -254,7 +254,7 @@ h(`<div class="pz" id="pz" data-noloc>
     <div class="eyebrow">🚀 Mise en route</div><h2>Trois étapes, une seule fois</h2>
     <ol class="pz-list pz-anim"><li><b>Installez l'app sur son téléphone</b> (QR code ci-dessous).</li>
     <li><b>Choisissez ensemble</b> sa classe, le chapitre en cours et la date de la prochaine évaluation.</li>
-    <li><b>Chaque semaine</b>, il vous envoie son lien : dans l'app, Progrès → « 👪 Envoyer à mes parents ». Il voit exactement ce que vous verrez.</li></ol>
+    <li><b>Chaque semaine</b>, il vous envoie son lien : dans l'app, Mon trésor → « 👪 Envoyer à mes parents ». Il voit exactement ce que vous verrez.</li></ol>
     <p class="small muted">Plusieurs enfants ? Leurs liens se rangent côte à côte, sur votre téléphone seulement.</p>
   </section>
 
@@ -373,7 +373,7 @@ h(`<div class="pz" id="pz" data-noloc>
     <div class="pz-cov pz-anim" id="pzcov">${pzCovHtml(cov)}</div>
     <div class="pz-grid pz-anim">
       <div class="card flat"><b>🏫 « En ce moment en classe »</b><p class="small">L'élève reconnaît son chapitre à un exercice typique : environ 2 questions sur 3 portent alors dessus.</p></div>
-      <div class="card flat"><b>📝 « Mon évaluation »</b><p class="small">Il donne la date et les notions de votre évaluation : révision jour après jour, puis un sujet de préparation corrigé.</p></div>
+      <div class="card flat"><b>📝 « Jour J »</b><p class="small">Il donne la date et les notions de votre évaluation : révision jour après jour, puis un sujet de préparation corrigé.</p></div>
     </div>
   </section>
 
@@ -382,7 +382,7 @@ h(`<div class="pz" id="pz" data-noloc>
     <div class="pz-grid pz-anim">
       <div class="card flat"><b>📈 Quatre niveaux par notion</b><p class="small">De l'automatisme au défi. Le Mathélo de l'élève monte ou descend selon ses réponses, et les questions suivent.</p></div>
       <div class="card flat"><b>🧩 Élève en difficulté</b><p class="small">Le diagnostic, puis le pas à pas, le rappel de cours et une leçon active à manipuler. Il retente avec d'autres nombres.</p></div>
-      <div class="card flat"><b>🚀 Élève rapide</b><p class="small">Des défis de niveau 4, le problème de la semaine, des questions curieuses et des histoires des maths.</p></div>
+      <div class="card flat"><b>🚀 Élève rapide</b><p class="small">Des défis de niveau 4, le grand problème de la semaine (« La mine »), les maths cachées (« Trésors cachés ») et l'histoire des maths (« Chercheurs d'or »).</p></div>
       <div class="card flat"><b>🧮 Le résultat, pas le calcul</b><p class="small">Quand c'est le calcul qu'on évalue, l'élève tape le résultat sur un clavier sans opérations : la calculatrice ne fait pas le travail à sa place.</p></div>
     </div>
   </section>

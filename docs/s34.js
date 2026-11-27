@@ -2157,7 +2157,7 @@ async function parentImport(code) {
 h(`${brand}<div class="eyebrow">👪 Espace parent</div><p class="muted">Ouverture…</p>`);
 let o;
 try { o = await Parents.open(code); } catch (e) {
-h(`${brand}<div class="eyebrow">👪 Espace parent</div><div class="card flat stack"><h3>Ce lien est incomplet</h3><p class="small muted">Il a peut-être été coupé en le copiant. Demandez à votre enfant de vous le renvoyer depuis l'app : Progrès → « 👪 Envoyer à mes parents ».</p></div><button class="btn-primary btn-big" id="pxback">Retour</button>`);
+h(`${brand}<div class="eyebrow">👪 Espace parent</div><div class="card flat stack"><h3>Ce lien est incomplet</h3><p class="small muted">Il a peut-être été coupé en le copiant. Demandez à votre enfant de vous le renvoyer depuis l'app : Mon trésor → « 👪 Envoyer à mes parents ».</p></div><button class="btn-primary btn-big" id="pxback">Retour</button>`);
 document.getElementById("pxback").onclick = () => (Parents.load().kids.length ? (history.replaceState(null, "", "#parent"), screenParentView(null)) : parExit());
 return;
 }
@@ -2229,7 +2229,7 @@ return `<details class="card flat stack par-pb" ${i === 0 ? "open" : ""}><summar
 h(`${brand}<div class="eyebrow">👪 Espace parent${opt.preview ? " · aperçu" : ""}</div>${tabs}
   <h2>La semaine de <span class="mark">${N}</span></h2>
   <p class="small muted">Photo du ${Parents.fmt(t)}${s.profile && SYSTEMS[s.profile.system] ? " · " + esc(gradeName(s.profile)) : ""} · lecture seule</p>
-  ${age > Parents.OLD ? `<div class="card flat par-old"><b>⏳ Cette photo date de ${age} jours.</b><p class="small">Demandez à ${N} de vous renvoyer un lien : dans l'app, Progrès → « 👪 Envoyer à mes parents ».</p></div>` : ""}
+  ${age > Parents.OLD ? `<div class="card flat par-old"><b>⏳ Cette photo date de ${age} jours.</b><p class="small">Demandez à ${N} de vous renvoyer un lien : dans l'app, Mon trésor → « 👪 Envoyer à mes parents ».</p></div>` : ""}
   ${opt.preview ? `<div class="card flat par-old"><b>Aperçu</b><p class="small">Voici exactement ce que verront tes parents.</p></div>` : ""}
   <div class="card stack par-week"><div class="eyebrow">📅 Sa semaine</div>
     <div class="par-days" aria-label="${W.n} jours de pratique sur 7">${W.days.map((d) => `<span class="${d.on ? "on" : ""}" title="${Parents.fmt(d.d)}">${JR[new Date(d.d + "T12:00:00").getDay()]}</span>`).join("")}</div>
@@ -2253,7 +2253,7 @@ h(`${brand}<div class="eyebrow">👪 Espace parent${opt.preview ? " · aperçu" 
     <li><b>Laissez ${N} expliquer</b> : c'est en expliquant qu'on comprend.</li>
     <li><b>Ne donnez pas la réponse</b> : un indice, une question, puis on attend.</li></ul></div>
   ${opt.preview ? `<button class="btn-primary btn-big" id="pxback">Retour</button>` : `<div class="card flat stack par-manage"><b>Sur ce téléphone</b>
-    <span class="small muted">Rien n'est envoyé sur Internet : la page lit le lien reçu. Chaque semaine, ${N} peut vous renvoyer un nouveau lien depuis l'app (Progrès → « 👪 Envoyer à mes parents »).</span>
+    <span class="small muted">Rien n'est envoyé sur Internet : la page lit le lien reçu. Chaque semaine, ${N} peut vous renvoyer un nouveau lien depuis l'app (Mon trésor → « 👪 Envoyer à mes parents »).</span>
     <details class="par-fold"><summary>Coller un lien reçu</summary><textarea class="code-box" id="ppaste" rows="3" placeholder="https://…#parent=…"></textarea><button type="button" class="btn-sec small" id="ppgo">Ouvrir</button></details>
     <div class="row par-row"><button type="button" class="btn-ghost small" id="pren">Renommer</button><button type="button" class="btn-ghost small" id="pdel">Retirer ${N} de ce téléphone</button></div></div>
     <button class="btn-primary btn-big" id="pxback">Quitter l'espace parent</button>`}`);
@@ -2275,7 +2275,7 @@ $("pdel").onclick = () => { if (!confirm("Retirer " + nick + " de ce téléphone
 }
 function screenParentEmpty() {
 h(`${brand}<div class="eyebrow">👪 Espace parent</div><h2>Accompagner <span class="mark">sans surveiller</span></h2>
-  <div class="card flat stack"><p>Votre enfant vous envoie un lien depuis l'app : Progrès → « 👪 Envoyer à mes parents ». En l'ouvrant, vous voyez sa semaine, un problème à résoudre ensemble et une activité à faire en famille.</p>
+  <div class="card flat stack"><p>Votre enfant vous envoie un lien depuis l'app : Mon trésor → « 👪 Envoyer à mes parents ». En l'ouvrant, vous voyez sa semaine, un problème à résoudre ensemble et une activité à faire en famille.</p>
   <p class="small muted">Pas de compte, rien n'est envoyé sur Internet : tout est dans le lien, et reste sur ce téléphone.</p>
   <label for="ppaste"><b>Vous avez reçu un lien ?</b></label><textarea class="code-box" id="ppaste" rows="3" placeholder="https://…#parent=…"></textarea><button type="button" class="btn-primary" id="ppgo">Ouvrir</button></div>
   <button class="btn-ghost" id="pxback">Retour</button>`);
