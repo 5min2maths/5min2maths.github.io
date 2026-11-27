@@ -3373,7 +3373,7 @@ Object.assign(GEN, {
   },
 
   cercle(d) {
-    const a = R.int(-5, 5), b = R.int(-5, 5), r = R.int(1, 7);
+    const a = R.int(-5, 5), b = R.int(-5, 5), r = R.int(d === 2 ? 2 : 1, 7); /* 27.11 (robot : rayon 1 au niveau 2, réponse triviale) */
     const sq = (v, n) => (v === 0 ? n + "^2" : "(" + n + sg(-v) + ")^2");
     if (d === 1) return { fig: GEO().circle([0, 0], 1, "f-shape").pt("C", 0, 0, false).dot("C").text("C", "C(a ; b)", 0, 18).side("C", [0.8, 0.6], "r", { draw: true, cls: "f-accent", w: 2 }).svg("cercle de centre C et de rayon r"), guide: [GS("Forme " + M("(x - a)^2 + (y - b)^2 = r^2") + " : a = ? (attention au signe)", a, M("a = " + a) + "."), GS("b = ?", b, M("b = " + b) + "."), GS("r = la racine de " + r * r + " ?", r, M("r = " + r) + "."), { ask: "Réponds « a ; b ; r ».", spec: { kind: "pair", values: [a, b, r] }, sol: M("C(" + a + " ; " + b + ")") + ", " + M("r = " + r) + "." }], q: "Le cercle " + M(sq(a, "x") + " + " + sq(b, "y") + " = " + r * r) + " a pour centre " + M("C(a ; b)") + " et pour rayon " + M("r") + ". Réponds « a ; b ; r ».", spec: { kind: "pair", values: [a, b, r] }, sol: "Forme " + M("(x - a)^2 + (y - b)^2 = r^2") + " : " + M("C(" + a + " ; " + b + ")") + ", " + M("r = " + r) + "." };
     if (d === 2) {
@@ -12719,7 +12719,7 @@ const Curieux = {
       txt: "Selon une légende indienne, l'inventeur des échecs demanda comme récompense un grain de blé sur la première case de l'échiquier, 2 sur la deuxième, 4 sur la troisième, et ainsi de suite en doublant jusqu'à la 64<sup>e</sup> case. Le roi accepta en souriant… avant de découvrir que tout le blé du monde n'y suffirait pas.",
       fig: () => svg(300, 130, `${[...Array(4)].map((_, r) => [...Array(4)].map((_, c) => `<rect x="${90 + c * 30}" y="${5 + r * 30}" width="30" height="30" class="${(r + c) % 2 ? "f-shape2" : "f-soft"}"/>`).join("")).join("")}${[1, 2, 4, 8].map((v, c) => T(105 + c * 30, 115, v, 'font-size="12"')).join("")}`, "échiquier et grains qui doublent"),
       ex: () => { const n = ri(8, 16);
-        return { q: `Combien de grains sur la ${n}<sup>e</sup> case ?`, value: 2 ** (n - 1), sol: `Case \\(n\\) : \\(2^{n-1}\\) grains. \\(2^{${n - 1}} = ${tm(2 ** (n - 1))}\\).` }; } },
+        return { calc: true /* 27.11 : puissance de 2 à calculer, touche ^ */, q: `Combien de grains sur la ${n}<sup>e</sup> case ?`, value: 2 ** (n - 1), sol: `Case \\(n\\) : \\(2^{n-1}\\) grains. \\(2^{${n - 1}} = ${tm(2 ** (n - 1))}\\).` }; } },
     { t: "Anecdote", titre: "Les quipus des Incas", lien: "Numération",
       txt: "L'Empire inca n'utilisait pas d'écriture, mais ses fonctionnaires tenaient des comptes très précis avec des quipus : des cordelettes à nœuds. Sur chaque cordelette, les nœuds sont groupés par position, comme nos chiffres : un groupe pour les centaines, un pour les dizaines, un pour les unités. C'est une numération en base 10.",
       fig: () => svg(300, 130, `<line x1="30" y1="15" x2="270" y2="15" class="f-line" stroke-width="3"/>${[60, 120, 180, 240].map((x, i) => `<line x1="${x}" y1="15" x2="${x}" y2="120" class="f-blue" stroke-width="2"/>${[...Array([3, 2, 4, 1][i])].map((_, k) => `<circle cx="${x}" cy="${35 + k * 9}" r="4" class="f-head"/>`).join("")}${[...Array([1, 5, 0, 3][i])].map((_, k) => `<circle cx="${x}" cy="${80 + k * 8}" r="4" class="f-dot"/>`).join("")}`).join("")}`, "quipu à cordelettes et nœuds"),
@@ -12798,7 +12798,7 @@ const Curieux = {
       fig: () => { const pg = (n, r) => [...Array(n)].map((_, k) => f1(150 + r * Math.cos((2 * k * Math.PI) / n)) + "," + f1(62 + r * Math.sin((2 * k * Math.PI) / n))).join(" ");
         return svg(300, 125, `<circle cx="150" cy="62" r="52" class="f-line"/><polygon points="${pg(6, 52)}" class="f-soft"/><polygon points="${pg(12, 52)}" class="f-fill2"/>${T(150, 122, "6 → 12 → 24 → … côtés", 'font-size="12"')}`, "polygones à 6 et 12 côtés inscrits dans un cercle"); },
       ex: () => { const n = ri(5, 10);
-        return { q: `On part d'un triangle (3 côtés) et on double ${n} fois le nombre de côtés. Combien de côtés a le polygone obtenu ?`, value: 3 * 2 ** n,
+        return { calc: true /* 27.11 */, q: `On part d'un triangle (3 côtés) et on double ${n} fois le nombre de côtés. Combien de côtés a le polygone obtenu ?`, value: 3 * 2 ** n,
           sol: `Doubler ${n} fois, c'est multiplier par \\(2^{${n}} = ${tm(2 ** n)}\\) : \\(3 \\cdot 2^{${n}} = ${tm(3 * 2 ** n)}\\) côtés. Al-Kashi est allé jusqu'à \\(3 \\cdot 2^{28}\\).` }; } },
     { t: "Événement", titre: "La carte Dufour, la Suisse en relief", lien: "Échelles", ids: ["echelle"], sys: "CH",
       txt: "Le Genevois Guillaume-Henri Dufour, ingénieur et général, dirige la réalisation de la première carte précise de toute la Suisse. Elle paraît de 1845 à 1864, en 25 feuilles, à l'échelle 1:100'000. Les géomètres mesurent le pays par triangulation : un réseau de triangles dont on mesure les angles. Pour le relief, la carte utilise des hachures et un ombrage qui donnent l'impression de voir les montagnes en trois dimensions. Le plus haut sommet de Suisse, la pointe Dufour (4'634 m), porte son nom.",
@@ -17464,7 +17464,14 @@ const Engine = {
     return this.underFloor(state) || (L.length >= 5 && r < ADAPT.low) || (L.length < 5 && state.elo.n < 20 && (state.placeMiss || 0) >= 3 && r < 0.75); },
   /* 26.11 (revue p5, n° 5 : Kevin, jour 1 = positionnement + série de 3 avec deux pas à pas, 13 min) : le jour du positionnement,
      élève en grande difficulté : 2 questions (jour 1 ≈ 10 minutes). */
-  firstDayN(state) { return this.struggling(state) || (state.placeMiss || 0) >= 3 ? 2 : 3; },
+  /* 27.11 (revue, n° 5 : MP 2e, positionnement 5:46 puis Révision de 3 questions de niveau 3, 11:07 le premier jour) :
+     le jour du positionnement, première séance de 2 questions, niveau 2 au plus (firstDayCap). */
+  firstDayN(state) { return 2; },
+  firstDayCap(state, plan) {
+    if (!plan || state.placedOn !== day()) return plan;
+    const out = plan.slice(0, this.firstDayN(state)).map((e) => { const x = String(e).split("|"); if (!/^PROB:/.test(x[0]) && +x[1] > 2) x[1] = "2"; return x.join("|"); });
+    return Object.assign(out, plan.noLesson ? { noLesson: true } : {});
+  },
   /* 26.11 (revue p6, n° 15 : Hugo, 6e faible, série de 6 automatismes en 6:37 avec deux pas à pas) : élève sous la moyenne
      de la classe : Mathélo sous la valeur de départ de sa classe (Engine.newState : élève moyen), ou
      moins de 70 % de réussites du premier coup sur ses 5 dernières réponses au moins. */
@@ -17474,7 +17481,8 @@ const Engine = {
   },
   autoN(state) { return state.placedOn === day() ? this.firstDayN(state) : this.struggling(state) || this.belowClass(state) ? 4 : FORMATS.auto.slots.length; },
   fmtText(state, f) { const n = f === "auto" ? this.autoN(state) : 0; return n && n < FORMATS.auto.slots.length ? n + " calculs rapides, enchaînés." : FORMATS[f].text; },
-  planSession(state, format) {
+  planSession(state, format) { return this.firstDayCap(state, this.planSession0(state, format)); },
+  planSession0(state, format) {
     /* 26.11 (revue p4, n° 3) : le jour du positionnement, 3 questions au plus quel que soit le format (positionnement + séance ≈ 10 min) ; */
     const f = format || this.todayFormat(state), slots = f === "auto" ? FORMATS.auto.slots.slice(0, this.autoN(state)) : FORMATS[f].slots.slice(0, state.placedOn === day() ? this.firstDayN(state) : this.struggling(state) ? 3 : 9); /* et pour l'élève en grande difficulté (Kevin : Révision de 4 questions avec pas à pas, 8 à 9 min) */
     const el = this.eligible(state), pend = el.filter((id) => this.lessonFirst(state, id));
@@ -17873,7 +17881,8 @@ if (typeof ACTIVE !== "undefined") for (const A of Object.values(ACTIVE)) if (A 
    primaires que freePlan aurait tirées sont retirées (PRIM.strip), seul PRIM.inject en place. */
 (function () {
   const plan0 = Engine.planSession, one0 = Engine.oneLesson, P = () => (typeof PRIM !== "undefined" ? PRIM : null);
-  Engine.planSession = function (state, format) { const p = plan0.call(this, state, format), X = P(); return X ? X.inject(state, X.strip(p)) : p; };
+  /* 27.11 : pas de rappel de primaire le jour du positionnement (séance de 2 questions, firstDayCap) */
+  Engine.planSession = function (state, format) { const p = plan0.call(this, state, format), X = P(); return X ? (state.placedOn === day() ? X.strip(p) : X.inject(state, X.strip(p))) : p; };
   Engine.oneLesson = function (state, plan, n) { const X = P(); return X ? X.inject(state, one0.call(this, state, X.strip(plan), n)) : one0.call(this, state, plan, n); };
 })();
 

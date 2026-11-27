@@ -2791,14 +2791,16 @@
     },
     integrale: {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
-      retiens: { regle: "Théorème fondamental : \\(\\int_a^b f(x)\\,dx = F(b) - F(a)\\) où \\(F\\) est une primitive de \\(f\\). Si \\(f \\geq 0\\), c'est l'aire sous la courbe ; les parties sous l'axe comptent négativement. Valeur moyenne : \\(\\frac{1}{b - a}\\int_a^b f(x)\\,dx\\). Relation de Chasles : \\(\\int_a^b f + \\int_b^c f = \\int_a^c f\\) ; échanger les bornes change le signe ; \\(\\int_a^b k f = k\\int_a^b f\\).", exemple: ["\\(\\int_1^3 2x\\,dx = 3^2 - 1^2 = 8\\).", "\\(\\int_0^2 f = 3\\) et \\(\\int_2^5 f = 4\\) : \\(\\int_0^5 f = 7\\), \\(\\int_5^0 f = -7\\), \\(\\int_0^5 3f = 21\\)."] },
+      retiens: { regle: "Théorème fondamental : \\(\\int_a^b f(x)\\,dx = F(b) - F(a)\\) où \\(F\\) est une primitive de \\(f\\). Si \\(f \\geq 0\\), c'est l'aire sous la courbe. Relation de Chasles : \\(\\int_a^b f + \\int_b^c f = \\int_a^c f\\) ; échanger les bornes change le signe ; \\(\\int_a^b k f = k\\int_a^b f\\).", exemple: ["\\(\\int_1^3 2x\\,dx = 3^2 - 1^2 = 8\\).", "\\(\\int_0^2 f = 3\\) et \\(\\int_2^5 f = 4\\) : \\(\\int_0^5 f = 7\\), \\(\\int_5^0 f = -7\\), \\(\\int_0^5 3f = 21\\)."] },
       /* 24.11 : Chasles, bornes échangées et linéarité, en défis courts */
       plus: [{ d: "\\(\\int_0^2 f(x)\\,dx = 3\\) et \\(\\int_2^5 f(x)\\,dx = 4\\). Que vaut \\(\\int_0^5 f(x)\\,dx\\) ?", ans: 7, ok: "Relation de Chasles : on met bout à bout [0 ; 2] et [2 ; 5] : 3 + 4 = 7.", no: "L'intervalle [0 ; 5] est fait de [0 ; 2] et de [2 ; 5]." },
         { d: "Même \\(f\\) : que vaut \\(\\int_5^0 f(x)\\,dx\\) ?", ans: -7, ok: "Échanger les bornes change le signe : F(0) − F(5) = −(F(5) − F(0)) = −7.", no: "Les bornes sont dans l'autre ordre : F(0) − F(5)." },
         { d: "Même \\(f\\) : que vaut \\(\\int_0^5 3f(x)\\,dx\\) ?", ans: 21, ok: "Le facteur 3 sort de l'intégrale : 3 · 7 = 21 (linéarité).", no: "Une constante sort de l'intégrale." }],
       predict: { q: "Une primitive de 2x est x². Quelle est l'aire sous la droite y = 2x entre x = 1 et x = 3 ?", choices: ["8", "4", "9"], good: 0,
         why: "x² vaut 9 en 3 et 1 en 1 : 9 − 1 = 8 (borne du haut moins borne du bas). C'est le théorème fondamental : ∫ f = F(b) − F(a)." },
-      defis: ["Règle la borne b pour que \\(\\int_1^b 2x\\,dx = 8\\).", "Règle b pour que \\(\\int_0^b (x - 2)\\,dx = 0\\)."],
+      /* 27.11 (commentaire de l'auteur : « limiter à une seule manipulation », la 2e consigne venait sur la 1re figure) :
+         un seul défi à curseur ; le 2e (∫ (x − 2) = 0) et sa question (valeur moyenne) sont retirés. */
+      defis: ["Règle la borne b pour que \\(\\int_1^b 2x\\,dx = 8\\)."],
       play: slide({
         ctl: () => [{ k: "b", lab: "Borne b", min: 0.5, max: 5.5, step: 0.5 }],
         init: () => ({ b: 2 }),
@@ -2809,11 +2811,9 @@
           return graph({ xr: [-0.5, 6], yr: [-3, 4], fns: [{ f }], polys: P, lab: "y = x − 2 : partie sous l'axe (grise) et au-dessus (bleue)" }); },
         out: (st, s) => (s ? "∫₀ᵇ (x − 2) dx = [x²/2 − 2x] = " + nb(st.b * st.b / 2) + " − " + nb(2 * st.b) + " = <b>" + nb(st.b * st.b / 2 - 2 * st.b) + "</b><br><span class=\"small\">la partie sous l'axe compte négativement</span>"
           : st.b < 1 ? "b < 1 : ∫₁ᵇ = −∫ᵇ₁, on obtient " + nb(st.b * st.b - 1) : "∫₁ᵇ 2x dx = [x²]₁ᵇ = " + nb(st.b * st.b) + " − 1 = <b>" + nb(st.b * st.b - 1) + "</b>"),
-        goal: [(st) => (st.b === 3 ? "∫₁³ 2x dx = 3² − 1² = 8 : c'est l'aire du trapèze coloré, calculée avec la primitive x²." : ""),
-          (st) => (st.b === 4 ? "∫₀⁴ (x − 2) dx = 8 − 8 = 0 : la partie au-dessus de l'axe compense exactement celle du dessous." : "")],
+        goal: [(st) => (st.b === 3 ? "∫₁³ 2x dx = 3² − 1² = 8 : c'est l'aire du trapèze coloré, calculée avec la primitive x²." : "")],
         miss: (st, s) => ((s ? st.b * st.b / 2 - 2 * st.b < 0 : st.b * st.b - 1 < 8) ? "Pas assez : augmente b." : "Trop : diminue b."),
-        ask: [{ q: "Calcule \\(\\int_1^4 3x^2\\,dx\\).", ans: 63, ok: "Une primitive de 3x² est x³ : 4³ − 1³ = 64 − 1 = 63.", no: "Primitive de 3x² : x³. Puis F(4) − F(1)." },
-          { q: "Valeur moyenne de f(x) = x² sur [0 ; 3] ?", ans: 3, ok: "(1 ÷ 3) · ∫₀³ x² dx = (1 ÷ 3) · 9 = 3.", no: "Valeur moyenne : l'intégrale ∫₀³ x² dx = 9, divisée par la longueur de l'intervalle." }] }),
+        ask: [{ q: "Calcule \\(\\int_1^4 3x^2\\,dx\\).", ans: 63, ok: "Une primitive de 3x² est x³ : 4³ − 1³ = 64 − 1 = 63.", no: "Primitive de 3x² : x³. Puis F(4) − F(1)." }] }),
     },
     aireint: {
       predict: { q: "L'intégrale de x³ entre −1 et 1 vaut 0. L'aire entre la courbe y = x³ et l'axe des x, de −1 à 1, vaut-elle aussi 0 ?", choices: ["Non", "Oui"], good: 0,
