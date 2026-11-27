@@ -170,3 +170,7 @@ Avant le choix, comme au premier tour :
   étudiant-entrepreneur « PÉPITE » en France (autre domaine). Aucune app de maths nommée « Pépite » trouvée.
 - À faire : vérification complète (RDAP, App Store, Google Play) ; marques Swissreg et INPI par l'enseignant ; réserver les
   domaines pepitemaths.ch + un neutre ; puis renommer (APP_NAME, présentations, PDF). Mathélo reste la cote de niveau.
+- Suite (27.11) : « Pépitemaths » jugé collé ; Pépimaths, Pépitix, Mathépite proposés (libres) ; l'enseignant trouve les noms
+  avec « maths » trop scolaires. Proposition en cours : nom « Pépite » seul, slogan « Deviens une pépite en maths », adresse
+  mapepite.ch / mapepite.app (libres ; pepite.* pris). Mots courts de l'or (Filon, Carat, Oro) pris. L'enseignant réfléchit ;
+  idée : faire voter la 11LS en décembre. Marque « Pépite » (éducation / logiciels) à vérifier sur Swissreg et INPI.
