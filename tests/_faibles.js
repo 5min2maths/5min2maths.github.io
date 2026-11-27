@@ -123,7 +123,7 @@
           const ok1 = solved && tries === 1;
           S.failRun = ok1 ? 0 : S.failRun + 1;
           /* 27.11 : règle de l'app (Engine.replayNext, src/app.js onDone) si elle existe ; sinon la variante « rejouer » */
-          const rp = Engine.replayNext && !V.has("norejouer") && !redoUsed && fmt !== "auto" && !q.parts && !ok1 ? Engine.replayNext(state, S.plan, S.i, id, d, kind) : null;
+          const rp = Engine.replayNext && !V.has("norejouer") && !redoUsed && fmt !== "auto" && !q.parts && !ok1 ? Engine.replayNext(state, S.plan, S.i, id, d, kind, { noLesson: plan.noLesson, lessonDone: S.lessonDone, lessonAt: S.lessonAt, fmt }) : null;
           if (rp) { redoUsed = true; boostAt = S.i + 1; S.plan[S.i + 1] = rp; R.redo++; }
           /* carnet (27.11) : une entrée par notion et niveau ratés ; règle de l'app : élève en grande difficulté, réussite du
              premier coup en séance = erreurs de la notion (niveau ≤ d) effacées (carnetSessionOk) ; pas de séance « carnet » simulée */

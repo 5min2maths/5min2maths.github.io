@@ -140,7 +140,7 @@ window.confirm = () => true; window.print = () => {};
   if (typeof HISTOIRE !== "undefined") for (const k of Object.keys(HISTOIRE)) { const f = HISTOIRE[k].ex; HISTOIRE[k].ex = (...a) => (histE = f(...a)); }
   if (typeof qcmMake === "function") { const _qm = qcmMake; qcmMake = (...a) => { const r = _qm(...a); if (r) qcmList.push(r); return r; }; }
   /* 27.11 (eleves7) : décision « rejouer » (Engine.replayNext) et raison d'un refus */
-  { const _rn = Engine.replayNext; Engine.replayNext = function (st, plan, i, id, d, kind) { const r = _rn.call(this, st, plan, i, id, d, kind); const nx = String(plan[i + 1] || ""), nid = nx.split("|")[0]; log("    ⓘ rejouer ? " + (r || "non") + " (grande difficulté " + this.struggling(st) + ", type " + kind + ", d" + d + ", suivante " + nx + (st.notions[nid] ? ", leçon due " + this.lessonDue(st, nid) : "") + ")"); return r; }; }
+  { const _rn = Engine.replayNext; Engine.replayNext = function (st, plan, i, id, d, kind, sess) { const r = _rn.call(this, st, plan, i, id, d, kind, sess); const nx = String(plan[i + 1] || ""), nid = nx.split("|")[0]; log("    ⓘ rejouer ? " + (r || "non") + " (grande difficulté " + this.struggling(st) + ", type " + kind + ", d" + d + ", suivante " + nx + (st.notions[nid] ? ", leçon due " + this.lessonDue(st, nid) + (this.lessonShows ? ", leçon affichée " + this.lessonShows(st, plan, i + 1, sess) : "") : "") + ")"); return r; }; }
   const _sl = screenLesson; screenLesson = (id, ...a) => { lessonId = id; return _sl(id, ...a); };
   const thinkS = (q) => (q.parts ? 150 : q.d >= 4 ? 150 : q.d === 3 ? 50 : q.d === 2 ? 30 : 15) * (/faible/.test(CFG.niveau) ? 1.4 : CFG.niveau === "fort" ? 0.7 : 1) * (ST.has("presse") ? 0.7 : 1);
   const qs = []; /* questions rencontrées */
