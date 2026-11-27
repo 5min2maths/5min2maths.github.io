@@ -47,6 +47,23 @@ try {
 } catch (e) { fails.push("exception " + e.message + " " + e.stack); }
 setTimeout(() => {
   ok(posts.length === 6, "2 une erreur réelle hors https a été envoyée (" + posts.length + ")");
+  /* 10. journal local (27.11) : les 3 dernières erreurs, même sans accord, sans donnée de l'élève ; envoi seulement avec accord */
+  try {
+    const j = errLogGet();
+    ok(j.length === 3, "10 journal : 3 erreurs gardées (" + j.length + ")");
+    ok(j.some((x) => /undefinedFunctionXYZ/.test(x.msg)) && j.some((x) => /rejet de test/.test(x.msg)), "10 journal : erreur réelle et promesse rejetée " + JSON.stringify(j));
+    ok(j.every((x) => Object.keys(x).sort().join() === "d,ligne,msg,s,src,v" && x.msg.length <= 100 && x.v === BUILD && !x.s), "10 journal : champs " + JSON.stringify(j[0]));
+    for (let k = 0; k < 4; k++) errLog("Encore " + k + " " + "y".repeat(200), "https://a.b/app.js?v=1", k, "");
+    const j2 = errLogGet(); ok(j2.length === 3 && j2[2].msg.startsWith("Encore 3") && j2[2].msg.length === 100 && j2[2].src === "app.js", "10 journal : plafond 3, message court " + JSON.stringify(j2[2]));
+    errLog("Encore 3 " + "y".repeat(200), "https://a.b/app.js?v=1", 3, ""); ok(errLogGet().length === 3, "10 journal : doublon non répété");
+    const sent = [], n0 = posts.length;
+    ok(errFlush(() => false, (r) => sent.push(r)).length === 0 && !sent.length, "10 journal : rien sans accord");
+    ok(errFlush(undefined, (r) => sent.push(r)).length === 0 && !sent.length, "10 journal : rien hors https (accord par défaut)");
+    const f = errFlush(oui, (r) => sent.push(r));
+    ok(f.length === 3 && sent.length === 3 && sent.every((r) => r.ev === "err" && r.ecran === "journal" && r.niveau === "" && !r.pile && r.version === BUILD), "10 journal : envoi avec accord " + JSON.stringify(sent[0]));
+    ok(errFlush(oui, (r) => sent.push(r)).length === 0 && errLogGet().every((x) => x.s), "10 journal : pas renvoyé deux fois");
+    ok(posts.length === n0, "10 journal : aucun fetch direct");
+  } catch (e) { fails.push("exception 10 " + e.message); }
   document.getElementById("out").textContent = (fails.length ? "ÉCHEC\n" + fails.join("\n") : "OK " + posts.length + " envois simulés") + "\n" + JSON.stringify(posts[0]);
 }, 300);
 </script>

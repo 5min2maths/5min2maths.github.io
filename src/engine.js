@@ -51,6 +51,8 @@ const HINTS = {
 };
 if (typeof HINTS_EXTRA !== "undefined") Object.assign(HINTS, HINTS_EXTRA);
 
+/* 27.11 : version du format de l'état enregistré (state.v) ; 1 jusqu'au 27.11, 2 : champs de base contrôlés (Engine.upgrade). */
+const STATE_V = 2;
 const Store = {
   key: "5m2m.v1",
   load() { try { return JSON.parse(localStorage.getItem(this.key)) || null; } catch (e) { return null; } },
@@ -399,7 +401,7 @@ const Engine = {
   newState(profile) {
     const h = harmos(profile.system, profile.grade);
     const start = 700 + (h - 8) * 150 + 100;
-    return { v: 1, profile, notions: {}, streak: { count: 0, last: null }, history: [], created: day(), elo: { r: Math.round(start), n: 0, log: [] } };
+    return { v: STATE_V, profile, notions: {}, streak: { count: 0, last: null }, history: [], created: day(), elo: { r: Math.round(start), n: 0, log: [] } };
   },
 
   // Notions du programme jusqu'à l'année de l'élève. Années précédentes : vues. Année en cours : « à venir » ;
@@ -577,6 +579,40 @@ const Engine = {
     rec.r.push(score); rec.r = rec.r.slice(-8); rec.n++; rec.last = day();
     if (d >= 2 || +cid.split(":")[1] > 0) rec.hi = true; /* 26.11 (revue p5, n° 3) : réponse de niveau 2 ou plus (note 6 possible, compNote) */
     if (typeof Badges !== "undefined") Badges.onComp(state, cid, before, compNote(rec));
+  },
+
+  /* 27.11 (robustesse, migrations ; test : tests/migration.html) : champs de base d'un état enregistré par une version
+     ancienne (ou abîmé) remis en forme sans rien perdre : profil (voie, durée), notions (nombres, statut, échéance), série,
+     historique, Mathélo, carnet, savoir-faire ; numéro de version (state.v, STATE_V). Ne touche jamais à une valeur valable.
+     Renvoie vrai si l'état a changé. */
+  upgrade(state) {
+    let ch = false;
+    const set = (o, k, v) => { o[k] = v; ch = true; }, num = (x) => typeof x === "number" && isFinite(x);
+    const p = state.profile;
+    if (!num(p.grade)) set(p, "grade", +p.grade || 9);
+    if (p.system === "CH" && p.track !== "mp" && p.track !== "college") set(p, "track", "college");
+    if (!num(p.minutes)) set(p, "minutes", 5);
+    if (!state.notions || typeof state.notions !== "object" || Array.isArray(state.notions)) set(state, "notions", {});
+    const ST = ["vu", "encours", "avenir", "nonvu"];
+    for (const [id, n] of Object.entries(state.notions)) {
+      if (!n || typeof n !== "object") { state.notions[id] = this.newNotion("avenir"); ch = true; continue; }
+      if (!ST.includes(n.status)) set(n, "status", "vu");
+      for (const k of ["m", "box", "seen", "ok"]) if (!num(n[k])) set(n, k, k === "m" ? (n.status === "vu" ? 0.55 : 0) : 0);
+      if (typeof n.due !== "string") set(n, "due", day());
+    }
+    if (!state.streak || typeof state.streak !== "object") set(state, "streak", { count: 0, last: null });
+    else if (!num(state.streak.count)) set(state.streak, "count", 0);
+    if (!Array.isArray(state.history)) set(state, "history", []);
+    else if (state.history.some((x) => !x || typeof x.date !== "string" || !num(x.n))) set(state, "history", state.history.filter((x) => x && typeof x.date === "string" && num(x.n)));
+    if (!state.elo || !num(state.elo.r)) set(state, "elo", { ...(state.elo || {}), r: this.newState(p).elo.r });
+    if (!num(state.elo.n)) set(state.elo, "n", 0);
+    if (!Array.isArray(state.elo.log)) set(state.elo, "log", []);
+    if (typeof state.created !== "string") set(state, "created", (state.history[0] && state.history[0].date) || day());
+    if (state.carnet !== undefined && !Array.isArray(state.carnet)) set(state, "carnet", []);
+    if (Array.isArray(state.carnet) && state.carnet.some((x) => !x || !x.id || !x.d)) set(state, "carnet", state.carnet.filter((x) => x && x.id && x.d));
+    if (state.comps && typeof state.comps === "object") for (const [cid, r] of Object.entries(state.comps)) if (!r || !Array.isArray(r.r)) { delete state.comps[cid]; ch = true; }
+    if (state.v !== STATE_V) set(state, "v", STATE_V);
+    return ch;
   },
 
   // Catalogue modifié depuis la création du profil : ajoute les notions manquantes (anciennes = vues, année en cours = à cocher).

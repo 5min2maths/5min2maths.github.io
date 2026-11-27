@@ -369,9 +369,9 @@ function activeLesson(id, L0, cont, review, opts = {}) {
   h(`${brand}<div class="eyebrow">${review ? "Leçon · à toi de jouer" : opts.eyebrow || "Nouvelle notion · à toi de jouer"}</div>
   <div class="card pop lesson-card stack"><h2>${L.titre}</h2>
     <div class="act-step"><div class="act-h"><span class="act-n">1</span> Devine</div><p>${P.q}</p>${P.fig ? `<div class="figwrap">${P.fig}</div>` : ""}
-      <div class="seg" id="pc">${predOrder(P.choices.length).map((i) => `<button type="button" data-i="${i}">${P.choices[i]}</button>`).join("")}</div><div id="pfb"></div></div>
+      <div class="seg" id="pc">${predOrder(P.choices.length).map((i) => `<button type="button" data-i="${i}">${P.choices[i]}</button>`).join("")}</div><div id="pfb" aria-live="polite"></div></div>
     <div class="act-step" id="s2" hidden><div class="act-h"><span class="act-n">${short ? "+" : 2}</span> ${X.titre}</div>
-      <ul class="act-done" id="adone"></ul><div id="gfb"></div><p class="act-goal" id="goal"></p><div id="play" class="stack"></div>
+      <ul class="act-done" id="adone"></ul><div id="gfb" aria-live="polite"></div><p class="act-goal" id="goal"></p><div id="play" class="stack"></div>
       <button type="button" class="btn-ghost small" id="skip">${X.mode === "guide" ? "Passer" : "Passer les défis"}</button></div>
     ${short ? `<button type="button" class="btn-ghost small act-opt" id="tryopt" hidden>🖐 ${optLab}</button>` : ""}
     <div class="act-step" id="s3" hidden><div class="act-h"><span class="act-n">${short ? 2 : 3}</span> Retiens</div>
