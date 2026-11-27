@@ -91,7 +91,9 @@
       const r = Referentiel.list(state.profile).find((x) => Referentiel.hasQuestions(x));
       if (r) for (const c of Referentiel.cids(r)) state.comps[c] = { r: [1, 1, 1], n: 3, last: "2026-11-25" };
       card = compsCard().replace(/<[^>]+>/g, "");
-      ok(new RegExp("notée sur " + n + " cette année").test(card), g + "e : compsCard sur " + n + " (" + card.replace(/\s+/g, " ").slice(0, 120) + ")");
+      /* 27.11 (n° 26) : angtri@3 sert 31-FG1 et 31-FG2 : un item noté peut en noter un autre qui partage ses savoir-faire */
+      const nn = Referentiel.list(state.profile).filter((x) => Referentiel.note(state, x) !== null).length;
+      ok(new RegExp(nn + " compétences? notées? sur " + n + " cette année").test(card), g + "e : compsCard sur " + n + " (" + card.replace(/\s+/g, " ").slice(0, 120) + ")");
     }
     /* Profils inchangés : Collège = REF_MATU (98 en 1re), MP = compétences par notion, France = REF_FR (53 en 3e). */
     fresh({ system: "CH", grade: 12, track: "college", minutes: 5 });

@@ -57,7 +57,9 @@ try {
 
   /* 4. 10e moyen sans chapitre : au moins une notion propre à l'année par séance */
   const y10 = () => { fresh(P10); Engine.unlock(state, new Date("2026-11-27T12:00:00"));
-    for (const id of Engine.eligible(state)) if (yearOf(id) < 10) Object.assign(state.notions[id], { seen: 3, m: 0.65, lessonSeen: true, status: "vu", due: day(), fails: 0 }); };
+    for (const id of Engine.eligible(state)) if (yearOf(id) < 10) Object.assign(state.notions[id], { seen: 3, m: 0.65, lessonSeen: true, status: "vu", due: day(), fails: 0 });
+    /* 27.11 soir (décision n° 33) : ownYear ne pose qu'une notion de l'année déjà travaillée : les notions de 10e ouvertes l'ont été une fois */
+    for (const id of Engine.eligible(state)) if (yearOf(id) === 10) Object.assign(state.notions[id], { seen: 1, m: 0.5, lessonSeen: true }); };
   y10();
   const ownN = Engine.eligible(state).filter((id) => yearOf(id) === 10).length;
   let have = 0, tot = 0, ownLes = 0;
