@@ -68,6 +68,9 @@ pwa_head = ('<link rel="manifest" href="manifest.webmanifest">\n<meta name="them
 # niveau (docs/p-<niveau>.js) ; docs/start.js = app.js (démarrage). Le chargeur en ligne charge les paquets requis pour
 # le profil (son niveau et les niveaux inférieurs de sa filière), démarre l'app, puis charge les autres en arrière-plan.
 def paquet(f):
+    # 27.11 (agent poids, tools/poids.md) : histoires, questions curieuses et présentations = paquet « x », chargé en
+    # arrière-plan après le premier écran ou à l'ouverture de leur page (withX, src/app.js) ; jamais avant le premier écran.
+    if f in ("histoire.js", "curieux.js", "presente.js"): return "x"
     if f.startswith("fr_"): return "fr"
     if f in ("ch3c_ana.js", "act_col34.js", "act_col34b.js", "riche_col34.js"): return "14"  # 24.11 (25.11 : act_col34b.js, 2e série) : leçons actives et séries riches de 3e–4e Collège (paquet 14 : chargé en 3e et en 4e)
     if f == "ch3c_geo.js": return "14"  # 24.11 (agent c3geo) : géométrie vectorielle de l'espace, 3e Collège
@@ -89,7 +92,8 @@ def paquet(f):
     if f in ("riche_9.js", "act_9a.js", "act_9b.js", "defis_9.js", "defis_910.js"): return "9"  # 25.11 : defis_9.js = défis propres à la 9e (PROBX)
     if f in ("riche_10.js", "act_10a.js", "act_10b.js", "ch10_no.js"): return "10"
     return ""
-ORDRE_P = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"]
+ORDRE_N = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"]  # paquets de niveau
+ORDRE_P = ORDRE_N + ["x"]  # 27.11 : + paquet de fonctions (chargé en dernier en arrière-plan)
 PAQ = {k: [f for f in JS if paquet(f) == k] for k in ORDRE_P}
 app_js = (SRC / "app.js").read_text()
 assert 'const BUILD = "dev";' in app_js
@@ -98,10 +102,10 @@ loader = """<script src="app.js?v=%(v)s"></script>
 (function () {
   // Chargement par niveau (24.11). Paquets requis : le niveau de l'élève et les niveaux inférieurs de sa filière ;
   // France et liens de consultation (#q-, #l-, #auteur) : tout. Puis le reste en arrière-plan (hors ligne complet).
-  var V = "%(v)s", K = %(keys)s, loaded = {}, pending = {};
+  var V = "%(v)s", L = %(niv)s, K = L.concat(["x"]), loaded = {}, pending = {};
   window.__packs = loaded; // pour les tests (tools/test_paquets.py)
   function need(p) {
-    if (!p || p.system === "FR") return K.slice();
+    if (!p || p.system === "FR") return L.slice();
     var g = +p.grade || 9, r = [];
     ["9", "10", "11", "12", "13", "14", "15"].forEach(function (k) { if (+k <= g) r.push(k); });
     if (p.track === "mp") r.push("mp");
@@ -125,6 +129,7 @@ loader = """<script src="app.js?v=%(v)s"></script>
   window.ensurePacks = function (p) { return need(p).reduce(function (pr, k) { return pr.then(function () { return loadPack(k); }); }, Promise.resolve()); };
   var st = null; try { st = JSON.parse(localStorage.getItem("5m2m.v1")); } catch (e) {}
   var first = /^#(q-|l-|auteur)/.test(location.hash) ? K.slice() : st && st.profile ? need(st.profile) : [];
+  if (/^#(decouvrir|parents|enseignants|parent\b)/.test(location.hash)) first.push("x"); // 27.11 : pages du paquet « x » (src/app.js, withX)
   // MathJax (24.11) : chez un habitué il est en cache, on le charge tout de suite et l'app attend qu'il soit prêt
   // (pas de TeX brut à l'écran) ; pour une première visite, il vient après l'affichage (il ne prend pas la bande passante du code).
   function mathjax() { if (window.__mj) return; window.__mj = 1; var m = document.createElement("script"); m.src = "%(mj)s"; m.async = true; document.head.appendChild(m); }
@@ -143,7 +148,7 @@ loader = """<script src="app.js?v=%(v)s"></script>
 """
 head_docs = head_local.replace('<script src="' + MJ + '"></script>', "")
 assert head_docs != head_local, "balise MathJax introuvable dans head"
-docs_body = '<main id="app" aria-live="polite"></main>\n' + loader % {"v": version, "keys": str(ORDRE_P).replace("'", '"'), "mj": MJ}
+docs_body = '<main id="app" aria-live="polite"></main>\n' + loader % {"v": version, "niv": str(ORDRE_N).replace("'", '"'), "mj": MJ}
 (ROOT / "docs").mkdir(exist_ok=True)
 (ROOT / "docs" / "index.html").write_text(
     '<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n'
@@ -152,11 +157,30 @@ docs_body = '<main id="app" aria-live="polite"></main>\n' + loader % {"v": versi
 # Code de l'app = le script de body, BUILD compris (même contenu que dist/).
 PRE = '<main id="app" aria-live="polite"></main>\n<script>\n'
 assert body.startswith(PRE) and body.endswith("\n</script>\n")
-(ROOT / "docs" / "app.js").write_text("\n".join((SRC / f).read_text() for f in JS if not paquet(f) and f != "app.js") + "\n")
+# 27.11 (agent poids, tools/poids.md) : code publié minifié (tools/minijs.py : commentaires et indentation retirés,
+# sauts de ligne gardés, donc mêmes numéros de ligne dans les erreurs JS ; chaînes, gabarits et regex intacts).
+import sys as _sys
+_sys.path.insert(0, str(ROOT / "tools")); _sys.dont_write_bytecode = True
+from minijs import minify
+def ecrire_js(nom, t): (ROOT / "docs" / nom).write_text(minify(t))
+ecrire_js("app.js", "\n".join((SRC / f).read_text() for f in JS if not paquet(f) and f != "app.js") + "\n")
 for k, fs in PAQ.items():
-    (ROOT / "docs" / f"p-{k}.js").write_text("\n".join((SRC / f).read_text() for f in fs) + "\n")
-(ROOT / "docs" / "start.js").write_text(app_js.replace('const BUILD = "dev";', f'const BUILD = "{version}";', 1))
-(ROOT / "docs" / "sw.js").write_text((SRC / "pwa" / "sw.js").read_text().replace("__VERSION__", version))
+    ecrire_js(f"p-{k}.js", "\n".join((SRC / f).read_text() for f in fs) + "\n")
+ecrire_js("start.js", app_js.replace('const BUILD = "dev";', f'const BUILD = "{version}";', 1))
+# 27.11 (agent poids) : tous les paquets dans le précache du service worker (installation) : hors ligne complet même si
+# l'élève ferme l'app avant la fin du chargement en arrière-plan (première visite : les paquets du premier écran sont
+# chargés avant que le service worker ne contrôle la page).
+SW = (SRC / "pwa" / "sw.js").read_text()
+assert '"./start.js?v=__VERSION__",' in SW
+SW = SW.replace('"./start.js?v=__VERSION__",', '"./start.js?v=__VERSION__",\n  ' + ", ".join('"./p-%s.js?v=__VERSION__"' % k for k in ORDRE_P) + ",", 1)
+(ROOT / "docs" / "sw.js").write_text(SW.replace("__VERSION__", version))
+# 27.11 (agent poids) : données de tests/poids.html (tailles publiées brutes et gzip, fichiers de chaque paquet, fonction
+# need() du chargeur ci-dessus) ; fichier généré, hors git (une page de test ne peut pas lire docs/ elle-même).
+import gzip
+NEED = re.search(r"  function need\(p\) \{.*?\n  \}\n", loader, re.S).group(0)
+POIDS = {"files": {f.name: [len(b), len(gzip.compress(b, 9))] for f in sorted((ROOT / "docs").glob("*.js")) + [ROOT / "docs" / "index.html"] for b in [f.read_bytes()]},
+         "L": ORDRE_N, "K": ORDRE_P, "paq": {k: fs for k, fs in PAQ.items()}, "commun": [f for f in JS if not paquet(f) and f != "app.js"], "JS": JS}
+(ROOT / "tests" / "_poids_data.js").write_text("window.POIDS = " + _json.dumps(POIDS) + ";\nwindow.POIDS_NEED = function (L, K) {\n" + NEED + "  return need;\n};\n")
 for f in ("icon-192.png", "icon-512.png"):
     shutil.copy(SRC / "pwa" / f, ROOT / "docs" / f)
 MAN = _json.loads((SRC / "pwa" / "manifest.webmanifest").read_text())

@@ -868,8 +868,8 @@ function screenHome() {
     const backHome = () => { homeTab = "today"; screenHome(); };
     app.querySelectorAll(".door").forEach((b) => (b.onclick = () => {
       const d = b.dataset.door;
-      if (d === "cur") return screenCurious(typeof Curieux !== "undefined" ? Curieux.pick(state) : null, backHome, "onglet");
-      if (d === "hist") return screenHistory(Histoire.pick(state).k, backHome);
+      if (d === "cur") return withX(() => screenCurious(typeof Curieux !== "undefined" ? Curieux.pick(state) : null, backHome, "onglet"));
+      if (d === "hist") return withX(() => screenHistory(Histoire.pick(state).k, backHome));
       homeTab = d; screenHome();
     }));
     app.querySelectorAll(".sess-seg button").forEach((b) => (b.onclick = () => { state.homeMode = b.dataset.m; save(); screenHome(); }));
@@ -904,7 +904,7 @@ function screenHome() {
   on("recapok", () => { state.recapSeen = weekKey(); save(); screenHome(); });
   if (!state.tourDone) tourShow();
   on("wp", () => { session = { plan: [wp], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion(); });
-  on("curgo", () => screenCurious(Curieux.pick(state), () => { homeTab = "prob"; screenHome(); }, "onglet"));
+  on("curgo", () => withX(() => screenCurious(Curieux.pick(state), () => { homeTab = "prob"; screenHome(); }, "onglet")));
   if (typeof Histoire !== "undefined") Histoire.bind(app, (k) => screenHistory(k, () => { homeTab = "prob"; screenHome(); }));
   on("comps", screenComps);
   on("prep", screenPrep); on("prepedit", screenPrep);
@@ -2794,6 +2794,15 @@ function vote(code, v) {
 
 // Début et fin de séance (anonymes) : classe, format ; à la fin, nombre de questions, score, durée en minutes.
 const sessionInfo = () => ({ niveau: state ? gradeName(state.profile) + (state.profile.track === "mp" ? " MP" : "") : "", fmt: session.carnet ? "carnet" : session.ctest ? "competence" : session.prep ? (session.prepKind ? "test-" + session.prepKind : "test") : session.weekly ? "semaine" : session.fmt || "" });
+/* 27.11 (agent poids, tools/poids.md) : histoires (src/histoire.js), questions curieuses (src/curieux.js) et présentations
+   (src/presente.js) forment le paquet « x » de la version publiée (docs/p-x.js) : chargé en arrière-plan après le premier
+   écran, ou à la première ouverture d'une de ces pages. Dans dist/ et les pages de test, tout est déjà là (xReady). */
+const xReady = () => typeof Curieux !== "undefined" || typeof window.loadPack !== "function";
+function withX(f) {
+  if (xReady()) return f();
+  window.loadPack("x").then(f, () => toast("Pas de connexion : cette partie de l'app n'est pas encore sur cet appareil. Réessaie une fois connecté."));
+}
+const curBonus = () => (typeof Curieux !== "undefined" && Curieux.available(state).length ? '<button class="btn-primary" id="curbonus">🤔 Bonus : une question curieuse</button>' : "");
 // Carte de l'onglet « Problème » : la question curieuse (en tête, avant le problème de la semaine).
 function curiousCard() {
   if (typeof Curieux === "undefined" || !Curieux.available(state).length) return "";
@@ -3096,7 +3105,7 @@ function screenSummary() {
   ${newGrade}${nb}
   ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>📕 Carnet d'erreurs</span><b>${carnetLeft(state.carnet)}</b></div><span class="small muted">${carnetWeekN() ? carnetWeekTxt() + " · " : ""}Pour effacer une erreur : ${carnetRule()}.</span><button class="btn-primary" id="carnetagain">${session.carnet ? "Continuer à effacer" : "📕 Effacer mes erreurs maintenant"}</button></div>` : session.carnet ? '<div class="card flat"><p>📕 Carnet d\'erreurs vide : bravo !</p></div>' : ""}
   ${returnCard()}
-  ${typeof Curieux !== "undefined" && Curieux.available(state).length ? '<button class="btn-primary" id="curbonus">🤔 Bonus : une question curieuse</button>' : ""}
+  ${xReady() ? curBonus() : '<span id="curslot" hidden></span>'}
   <div class="card flat">${commentBox("Une remarque sur l'application ?", "Ce qui te plaît, ce qui te gêne, une idée… (n'écris pas ton nom)", "app")}</div>
   ${n <= 2 && shortMsg && !session.weekly && !session.carnet && !session.prep ? `<div class="card flat stack"><p class="small">${shortMsg}</p><button class="btn-sec" id="again">➕ Encore une séance</button></div>` : ""}
   <button class="btn-primary btn-big" id="home">Retour à l'accueil</button>`);
@@ -3106,7 +3115,10 @@ function screenSummary() {
   if (nb || newGrade) setTimeout(burst, 250);
   updBanner("bilan");
   document.getElementById("home").onclick = screenHome;
-  if (document.getElementById("curbonus")) document.getElementById("curbonus").onclick = () => screenCurious(Curieux.pick(state), screenHome, "bilan");
+  const bindCur = () => { if (document.getElementById("curbonus")) document.getElementById("curbonus").onclick = () => screenCurious(Curieux.pick(state), screenHome, "bilan"); };
+  bindCur();
+  /* 27.11 (agent poids) : paquet « x » pas encore arrivé (séance très rapide après l'ouverture) : le bouton apparaît à son arrivée */
+  if (!xReady()) window.loadPack("x").then(() => { const sl = document.getElementById("curslot"); if (sl) { sl.outerHTML = curBonus(); bindCur(); } }, () => {});
   if (document.getElementById("carnetagain")) document.getElementById("carnetagain").onclick = () => startCarnet();
   if (document.getElementById("backcomps")) document.getElementById("backcomps").onclick = screenComps;
 }
@@ -3123,6 +3135,12 @@ function showCode() {
     SYSTEMS.FR = SYSTEMS_HIDDEN.FR;
     if (typeof draft !== "undefined" && draft) draft.system = "FR";
     screenLevel(); toast("Aperçu France activé sur cet appareil (…/#france-off pour le retirer).", 4000);
+    return true;
+  }
+  /* 27.11 (agent poids) : présentations, espace parent (récit et question curieuse de la semaine) et liens #q-cur-… ont
+     besoin du paquet « x » : on l'attend, puis on rejoue l'adresse. */
+  if (!xReady() && /^#(decouvrir|parents|enseignants|parent\b|q-cur-)/.test(location.hash)) {
+    window.loadPack("x").then(() => showCode(), () => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); toast("Pas de connexion : cette page n'est pas encore sur cet appareil."); });
     return true;
   }
   if (typeof presentRoute === "function" && presentRoute()) return true; /* 25.11 : présentations …/#decouvrir (élèves) et …/#parents (src/presente.js) */

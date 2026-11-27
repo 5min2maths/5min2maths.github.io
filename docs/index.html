@@ -1031,15 +1031,15 @@ window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "glo
 </head>
 <body>
 <main id="app" aria-live="polite"></main>
-<script src="app.js?v=8e3ebdb28c"></script>
+<script src="app.js?v=d63f276f50"></script>
 <script>
 (function () {
   // Chargement par niveau (24.11). Paquets requis : le niveau de l'élève et les niveaux inférieurs de sa filière ;
   // France et liens de consultation (#q-, #l-, #auteur) : tout. Puis le reste en arrière-plan (hors ligne complet).
-  var V = "8e3ebdb28c", K = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], loaded = {}, pending = {};
+  var V = "d63f276f50", L = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"], K = L.concat(["x"]), loaded = {}, pending = {};
   window.__packs = loaded; // pour les tests (tools/test_paquets.py)
   function need(p) {
-    if (!p || p.system === "FR") return K.slice();
+    if (!p || p.system === "FR") return L.slice();
     var g = +p.grade || 9, r = [];
     ["9", "10", "11", "12", "13", "14", "15"].forEach(function (k) { if (+k <= g) r.push(k); });
     if (p.track === "mp") r.push("mp");
@@ -1063,6 +1063,7 @@ window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "glo
   window.ensurePacks = function (p) { return need(p).reduce(function (pr, k) { return pr.then(function () { return loadPack(k); }); }, Promise.resolve()); };
   var st = null; try { st = JSON.parse(localStorage.getItem("5m2m.v1")); } catch (e) {}
   var first = /^#(q-|l-|auteur)/.test(location.hash) ? K.slice() : st && st.profile ? need(st.profile) : [];
+  if (/^#(decouvrir|parents|enseignants|parent)/.test(location.hash)) first.push("x"); // 27.11 : pages du paquet « x » (src/app.js, withX)
   // MathJax (24.11) : chez un habitué il est en cache, on le charge tout de suite et l'app attend qu'il soit prêt
   // (pas de TeX brut à l'écran) ; pour une première visite, il vient après l'affichage (il ne prend pas la bande passante du code).
   function mathjax() { if (window.__mj) return; window.__mj = 1; var m = document.createElement("script"); m.src = "vendor/mathjax/tex-svg.js"; m.async = true; document.head.appendChild(m); }

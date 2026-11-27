@@ -49,10 +49,10 @@ async def scenario(port, url):
         tous = None
         for _ in range(100):
             tous = val(await ev("Object.keys(window.__packs).sort().join(',')"))
-            if tous and len(tous.split(",")) == 9:
+            if tous and len(tous.split(",")) == 10:
                 break
             await asyncio.sleep(0.2)
-        ok(tous and len(tous.split(",")) == 9, "nouvel élève : les 9 paquets chargés en arrière-plan (" + str(tous) + ")")  # 24.11 : paquet 15 (4e Collège)
+        ok(tous and len(tous.split(",")) == 10, "nouvel élève : les 10 paquets chargés en arrière-plan (" + str(tous) + ")")  # 24.11 : paquet 15 (4e Collège) ; 27.11 : paquet x (histoires, curieux, présentations)
 
         # 2. élève de 11e
         await ev(mc.ETAT_HABITUE)
@@ -62,6 +62,13 @@ async def scenario(port, url):
         ok(a1 == "10,11,9", "élève de 11e : paquets 9, 10, 11 avant l'accueil (" + str(a1) + ")")
         h1 = val(await ev("!!document.querySelector('#app .hub')"))
         ok(h1, "élève de 11e : l'accueil s'affiche")
+        # 27.11 (agent poids) : paquet « x » (histoires, curieux, présentations) : jamais avant l'accueil ; les cases l'ouvrent
+        hx = val(await ev("new Promise((ok) => { document.querySelector('[data-door=hist]').click(); const t0 = Date.now(); (function w() { const e = document.querySelector('#app .eyebrow'); if (e && /Histoire des maths/.test(e.textContent)) ok(1); else if (Date.now() - t0 > 8000) ok(0); else setTimeout(w, 50); })(); })"))
+        ok(hx == 1 and "x" not in (a1 or "").split(","), "élève de 11e : la case Histoire ouvre un récit (paquet x chargé à la demande)")
+        await ev("screenHome(), 1")
+        cx = val(await ev("new Promise((ok) => { document.querySelector('[data-door=cur]').click(); const t0 = Date.now(); (function w() { const a = document.querySelector('#app'); if (a && /pari|Pari/.test(a.textContent)) ok(1); else if (Date.now() - t0 > 8000) ok(a ? a.textContent.slice(0, 80) : 0); else setTimeout(w, 50); })(); })"))
+        ok(cx == 1, "élève de 11e : la case Curieux ouvre une question curieuse (" + str(cx) + ")")
+        await ev("screenHome(), 1")
 
         # 3. changement de classe (2e Collège)
         r = val(await ev("ensurePacks({ system: 'CH', grade: 13, track: 'college' }).then(() => { const ids = ['expo', 'eqrat', 'polydiv']; return ids.map((id) => { const q = Engine.build(id, 2, 5); return q && (q.q || q.parts) ? 1 : 0; }).join(''); })"))
@@ -80,6 +87,14 @@ async def scenario(port, url):
         await cdp.attendre("window.__packsAtStart && document.querySelector('#app') && document.querySelector('#app').textContent.length > 20 ? 1 : null")
         t = val(await ev("document.querySelector('#app').textContent.slice(0, 200)"))
         ok(t and "Code inconnu" not in t and "Résous" in t, "lien #q-expo-2-3 : la question s'affiche")
+
+        # 4 bis. présentation …/#decouvrir (paquet x requis au démarrage)
+        await cdp.call("Page.navigate", url="about:blank")
+        await asyncio.sleep(0.3)
+        await cdp.call("Page.navigate", url=url + "#decouvrir")
+        await cdp.attendre("window.__packsAtStart && document.querySelector('#app') && document.querySelector('#app').textContent.length > 20 ? 1 : null")
+        px = val(await ev("(window.__packsAtStart || []).join(',') + '|' + (typeof screenDecouvrir)"))
+        ok(px and px.split("|")[0].split(",").count("x") == 1 and px.endswith("function"), "…/#decouvrir : paquet x chargé avant l'écran (" + str(px) + ")")
 
         # 5. erreurs JavaScript
         e = val(await ev("JSON.stringify(window.__err || [])"))

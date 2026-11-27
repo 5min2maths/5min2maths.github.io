@@ -72,6 +72,9 @@ async def scenario(port, url):
         ok(bool(sw), "service worker actif")
         cache = val(await ev("caches.keys().then(ks => Promise.all(ks.map(k => caches.open(k).then(c => c.keys())))).then(rs => JSON.stringify(rs.flat().map(r => r.url.replace(location.origin, '')).filter(u => /vendor/.test(u))))"))
         ok(cache and "tex-svg.js" in cache and cache.count("woff2") >= 4, "MathJax et polices dans le cache hors ligne " + str(cache))
+        # 27.11 (agent poids) : tous les paquets (niveaux + « x ») précachés à l'installation du service worker
+        pq = val(await ev("caches.keys().then(ks => Promise.all(ks.map(k => caches.open(k).then(c => c.keys())))).then(rs => rs.flat().map(r => (/\\/p-([a-z0-9]+)\\.js/.exec(r.url) || [])[1]).filter(Boolean).sort().join(','))"))
+        ok(pq and len(pq.split(",")) == 10 and "x" in pq.split(","), "tous les paquets dans le cache hors ligne (" + str(pq) + ")")
         await cdp.call("Network.emulateNetworkConditions", offline=True, latency=0, downloadThroughput=-1, uploadThroughput=-1)
         await ev("window.__ancien = 1")
         await cdp.call("Page.reload")
