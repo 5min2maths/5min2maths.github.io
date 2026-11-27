@@ -68,8 +68,8 @@ p { margin: 0; }
 .brand { display: flex; align-items: baseline; gap: 8px; }
 .brand b { font-family: var(--font-display); font-weight: 800; color: var(--blue); }
 .brand span { font-family: var(--font-mono); color: var(--margin); }
-/* 27.11 (nouveau nom) : la pépite du logo devant le nom ; le slogan, long, ne s'affiche qu'au-dessus de 430 px (en-tête sur une ligne). */
-.logo-mark { display: inline-block; width: 1.2em; height: 1.12em; vertical-align: -0.2em; margin-right: 0.22em; }
+/* 27.11 (nouveau nom) : l'icône de l'app en miniature devant le nom ; le slogan, long, ne s'affiche qu'au-dessus de 430 px (en-tête sur une ligne). */
+.logo-mark { display: inline-block; width: 1.5em; height: 1.5em; vertical-align: -0.36em; margin-right: 0.28em; } /* icône de l'app en miniature (≈ 30 px) */
 .logo-mark.logo-exp { width: 0.85em; height: 0.85em; vertical-align: 0.45em; margin: 0 0 0 0.04em; }
 @media (max-width: 430px) { .brand > span { display: none; } }
 

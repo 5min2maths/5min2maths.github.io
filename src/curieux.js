@@ -705,12 +705,14 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
     make() {
       const PHI = (1 + Math.sqrt(5)) / 2, h = pk([30, 35, 40, 45, 50, 55, 60]), w = Math.round(h * PHI * 10) / 10;
       const obj = pk(["un autocollant", "la couverture d'un cahier", "un badge", "une affiche de classe"]);
-      const inner = typeof LOGO_MARK === "string" ? LOGO_MARK.replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "") : "";
-      const fig = `<svg viewBox="110 150 380 250" width="300" style="max-width:100%;height:auto" role="img" aria-label="La pépite du logo dans un rectangle en pointillés de ${N(w).replace("{,}", ",")} mm sur ${h} mm">${inner}`
-        + `<rect x="142" y="190" width="258.885" height="160" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="9 7"/>`
-        + `<text x="271" y="176" text-anchor="middle" font-size="20" fill="currentColor">${N(w).replace("{,}", ",")} mm</text>`
-        + `<text x="410" y="275" font-size="20" fill="currentColor">${h} mm</text></svg>`;
-      return { titre: "Le secret du logo", q: "Le logo de " + APP_NAME + " cache un nombre célèbre. Sur " + obj + ", la pépite tient exactement dans le rectangle en pointillés : " + T(w, 1) + " mm de large et " + T(h) + " mm de haut.",
+      const inner = typeof LOGO_NUGGET === "string" ? LOGO_NUGGET.replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "") : "";
+      const F = typeof LOGO_PHI === "object" && LOGO_PHI.w ? LOGO_PHI : { x: 142, y: 190, w: 258.885, h: 160, ou: "pepite" }, refl = F.ou === "reflet";
+      const lw = N(w).replace("{,}", ",");
+      const fig = `<svg viewBox="110 140 380 260" width="300" style="max-width:100%;height:auto" role="img" aria-label="La pépite du logo et un rectangle en pointillés de ${lw} mm sur ${h} mm">${inner}`
+        + `<rect x="${F.x}" y="${F.y}" width="${F.w}" height="${F.h}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="9 7"/>`
+        + `<text x="${F.x + F.w / 2}" y="${F.y - 10}" text-anchor="middle" font-size="18" fill="currentColor">${lw} mm</text>`
+        + `<text x="${refl ? F.x - 8 : F.x + F.w + 10}" y="${F.y + F.h / 2 + 6}" text-anchor="${refl ? "end" : "start"}" font-size="18" fill="currentColor">${h} mm</text></svg>`;
+      return { titre: "Le secret du logo", q: "Le logo de " + APP_NAME + " cache un nombre célèbre. Sur " + obj + (refl ? ", le reflet brillant de la pépite (sa spirale) est tracé exactement dans le rectangle en pointillés : " : ", la pépite tient exactement dans le rectangle en pointillés : ") + T(w, 1) + " mm de large et " + T(h) + " mm de haut.",
         fig,
         bet: { q: "Quel nombre célèbre se cache dans ce rectangle ?", choices: ["π ≈ 3,14", "le nombre d'or ≈ 1,618", "√2 ≈ 1,414 (comme une feuille A4)"], good: 1 },
         calc: { label: "Calcule le rapport largeur ÷ hauteur du rectangle (au centième)", value: Math.round((w / h) * 100) / 100, round: 0.01 },

@@ -8,7 +8,7 @@ l'app, les clés de stockage `m2m-*` et l'identifiant d'appareil ne changent pas
 
 - `src/curriculum.js` : `APP_NAME = APP_SHORT = "Pépite²"`, `APP_TAGLINE = "Deviens une pépite en maths"`,
   `APP_TITLE = "Pépite² · Deviens une pépite en maths"` (onglet), `APP_TAGLINE_HTML` (slogan avec « pépite » surligné).
-- En-tête (`brand`) : logo + « Pépite² » ; slogan à côté au-dessus de 430 px (caché en dessous : l'en-tête tient à 360 px).
+- En-tête (`brand`) : icône de l'app en miniature (≈ 30 px, version favicon : carré bleu, pépite, ² sur papier) + « Pépite² » ; slogan à côté au-dessus de 430 px (caché en dessous : l'en-tête tient à 360 px).
 - Accueil d'un nouveau visiteur et présentation #decouvrir : titre « Deviens une pépite en maths. », puis « Chaque jour,
   environ 5 minutes, à ton niveau » (la durée reste une information, plus le nom).
 - Manifeste : `name` / `short_name` « Pépite² », description = slogan ; `apple-mobile-web-app-title` « Pépite² » ;
@@ -24,8 +24,8 @@ la variante choisie : icônes `src/pwa/icon-192/512.png` (any), `icon-maskable-1
 `apple-touch-icon.png` (180), `favicon-32.png`, `favicon.svg`, et la ligne `const LOGO_MARK` de `src/curriculum.js`
 (pépite de l'en-tête, SVG en ligne). **Appliquée : A.**
 
-- **A** (défaut) : vraie pépite d'or d'orpaillage, en or poli : silhouette de roche martelée (contour irrégulier, plus
-  large que haut, angles et encoches), dégradé métallique à bandes claires et sombres (lumière en haut à gauche), plans
+- **A** (défaut) : vraie pépite d'or d'orpaillage, en or poli : silhouette d'un seul bloc ramassé de roche martelée
+  (contour irrégulier, arêtes et pointes émoussées, un petit creux, inscrit dans le rectangle d'or), dégradé métallique à bandes claires et sombres (lumière en haut à gauche), plans
   sombres et clairs aux arêtes nettes, petits creux, liseré de contre-jour sur le bord bas, éclats presque blancs, ombre
   portée douce décalée en bas à droite ; ² en exposant sur un bout de papier quadrillé (idée de l'enseignant : la pépite = le côté brillant, le ² =
   le côté scolaire ; carré crème incliné, petits carreaux bleu clair, marge rouge discrète, ² à l'encre bleue de l'app) ;
@@ -34,7 +34,21 @@ la variante choisie : icônes `src/pwa/icon-192/512.png` (any), `icon-maskable-1
 - **B** : la même pépite posée sur une carte de cahier en carré arrondi (« au carré »), ² doré.
 - **C** : typographique, grand P blanc, la pépite porte le ² (dans l'en-tête : « Pépite » + pépite-exposant).
 - Versions refusées par l'enseignant le 27.11 : pépite à facettes (« un diamant »), pépite ronde et lisse (« biscuit »,
-  « nuage ») ; 3e version retenue : métal, plus de relief, pépite 15 % plus grande.
+  « nuage »), pépite à deux lobes (« pomme de terre ») ; retenue : métal poli, un seul bloc, plus grande, ² sur cahier.
+- En-tête : la pépite seule faisait « croissant » en petit → icône complète en miniature (`LOGO_MARK`) ; la figure de
+  la question curieuse utilise la pépite seule (`LOGO_NUGGET`).
+
+**En attente du choix de l'enseignant (planche, 2e rangée)** — rien de tout ça n'est appliqué tant qu'il n'a pas choisi :
+- **A-réaliste** (`gen_logos.py AR`, d'après sa photo de référence, non commitée : `tools/logo/_ref/` ignoré) : filtres SVG
+  (bruit fractal → `feDisplacementMap` pour le contour bosselé ; second bruit = relief → `feDiffuseLighting` et
+  `feSpecularLighting`, lumière en haut à gauche, sur un dégradé or ; crevasses = bruit seuillé ; ombre vers le bas à
+  droite ; grand reflet doux). Deux niveaux de détail : complet pour 512 / 192 / 180 px, simplifié pour 48 px et le
+  favicon (contour bosselé + 3 zones de lumière). Rastérisés par Chromium (filtres vérifiés sur la planche et les PNG).
+- **A3** (`gen_logos.py A3`) : meilleure des 3 silhouettes cassées (polygone irrégulier, pointes émoussées, encoches),
+  gardée pour comparer ; A1 et A2 restent disponibles.
+- Pour AR et A1–A3, φ n'est plus la boîte de la pépite (silhouette ≈ 1,25 × plus large que haute) mais le **rectangle
+  d'or du reflet** (118 × 72,93, qui porte la spirale) ; `LOGO_PHI` (src/curriculum.js, généré) le dit, et la question
+  curieuse change d'elle-même son énoncé (« le reflet brillant de la pépite (sa spirale) est tracé dans le rectangle »).
 
 **Maths cachées** (demande de l'enseignant) : la pépite s'inscrit exactement dans un **rectangle d'or** 160·φ × 160
 (258,885 × 160, coin (142 ; 190) dans le cadre 512 ; contour normalisé sur ce rectangle) ; son reflet principal cache une
