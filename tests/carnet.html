@@ -30,9 +30,10 @@ for(const [L,kind] of [[5,"autoeval"],[2,"mock"],[1,"tour"],[0,"jourj"]]){state.
  ok(new RegExp(prepTask(kind).label).test(app.textContent),"4 tâche J-"+L+" = "+kind); /* 26.11 : prepTask — veille du test sans grille de départ = Autoévaluation (plus de « Test rapide final ») */
  homeTab="test";screenHome();ok(app.querySelectorAll(".pday").length>=L+1&&!!document.getElementById("prepgo"),"4 programme J-"+L);}
 // 5. dernier tour avec une erreur du carnet sur une notion du test, puis marquage fait
-state.carnet=[{id:"fracadd",d:1,code:"x",date:day(),ok:0}];state.prep={ids,date:addDays(day(),4),start:addDays(day(),-1)};startPrepTask("revision");
-ok(session.plan[0]==="fracadd|1|carnet","5 carnet en tête de la révision ciblée "+session.plan.join());
-answer(true);ok((state.carnet||[]).length===0&&Engine.struggling(state)||(state.carnet[0]&&state.carnet[0].ok===1),"5 réussite comptée pour le carnet"); /* 27.11 (décision n° 28) : élève en grande difficulté = une réussite efface l'erreur */
+/* 27.11 : prio (réponse numérique) au lieu de fracadd (problème à fractions que le test ne sait pas remplir) */
+state.carnet=[{id:"prio",d:1,code:"x",date:day(),ok:0}];state.prep={ids,date:addDays(day(),4),start:addDays(day(),-1)};startPrepTask("revision");
+ok(session.plan[0]==="prio|1|carnet","5 carnet en tête de la révision ciblée "+session.plan.join());
+answer(true);ok((state.carnet||[]).length===0&&Engine.struggling(state)||(state.carnet[0]&&state.carnet[0].ok===1),"5 réussite comptée pour le carnet "+JSON.stringify(state.carnet)+" struggling="+Engine.struggling(state)); /* 27.11 (décision n° 28) : élève en grande difficulté = une réussite efface l'erreur */
 for(let k=0;k<40&&!/Score/.test(app.textContent);k++){const b=document.getElementById("nx");if(b)b.click();else if(document.getElementById("idk"))document.getElementById("idk").click();}
 ok((state.prep.log||{})[day()]==="revision","5 tâche du jour marquée "+JSON.stringify(state.prep.log));
 // 6. test rapide « après » (onglet Test ; plus une tâche du programme depuis le 26.11) ; autoévaluation du 1er jour cochée dans la frise
