@@ -1,0 +1,67 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="budget" content="120000">
+<link rel="stylesheet" href="../src/style.css"><link rel="stylesheet" href="../src/parents.css"><link rel="stylesheet" href="../src/presente.css">
+<script>
+/* 27.11 (tests à deux niveaux, niveau rapide : tools/tests_rapides.txt) : page « fumée ». Dans un cadre de 360 × 640 puis
+   de 1440 × 900, ouvre les écrans principaux par les vraies fonctions de l'app (accueil, séance → première question,
+   bilan, À polir (carnet), Réglages, Progrès, présentation parents, espace parent vide, aperçu parent) pour une classe
+   suisse et une classe française, et vérifie : aucune erreur JS (window.onerror, promesses rejetées, exceptions),
+   écran non vide, pas de débordement horizontal. Volontairement large et peu profonde : la suite complète de la nuit
+   fait le reste. */
+const FRAME = location.hash.startsWith("#cadre");
+if (!FRAME) {
+  document.write('<pre id="out">en cours</pre>');
+  const T = [[360, 640], [1440, 900]], res = []; let k = 0;
+  const next = () => {
+    if (k >= T.length) { const bad = res.filter((l) => /ÉCHEC|EXC/.test(l)); document.getElementById("out").textContent = bad.concat(res.filter((l) => !/ÉCHEC|EXC/.test(l))).join("\n") + "\n" + (bad.length ? bad.length + " ÉCHEC(S)" : "tout ok"); return; }
+    const [w, hh] = T[k++], f = document.createElement("iframe");
+    f.style.cssText = "width:" + w + "px;height:" + hh + "px;border:0;display:block"; f.src = "fumee.html#cadre";
+    const onm = (ev) => { if (ev.source !== f.contentWindow || typeof ev.data !== "string" || !ev.data.startsWith("fum:")) return; removeEventListener("message", onm); res.push(...ev.data.slice(4).split("\n").filter(Boolean)); f.remove(); next(); };
+    addEventListener("message", onm); document.body.appendChild(f);
+  };
+  next();
+} else {
+  window.__errs = [];
+  addEventListener("error", (e) => window.__errs.push(String(e.message) + " " + String(e.filename || "").split("/").pop() + ":" + e.lineno));
+  addEventListener("unhandledrejection", (e) => window.__errs.push("promesse : " + String(e.reason && e.reason.message || e.reason)));
+  window.MathJax = { typesetPromise: () => Promise.resolve() }; Element.prototype.scrollIntoView = function () {};
+  try { localStorage.clear(); } catch (e) {}
+  window.fetch = () => Promise.resolve(new Response("{}")); if (navigator.sendBeacon) navigator.sendBeacon = () => true;
+  window.confirm = () => true; window.alert = () => {}; window.ensurePacks = () => Promise.resolve();
+  document.head.insertAdjacentHTML("beforeend", "<style>*, *::before, *::after { animation: none !important; transition: none !important; }</style>");
+}
+</script>
+<main id="app"></main>
+<script>if (FRAME) document.write('<script src="../src/curriculum.js"><\/script><script src="../src/ordre.js"><\/script><script src="../src/expr.js"><\/script><script src="../src/figures.js"><\/script><script src="../src/geo.js"><\/script><script src="../src/generators.js"><\/script><script src="../src/gen2.js"><\/script><script src="../src/gen3.js"><\/script><script src="../src/variantes.js"><\/script><script src="../src/defis_9.js"><\/script><script src="../src/defis_910.js"><\/script><script src="../src/defis_2c.js"><\/script><script src="../src/defis_sec2.js"><\/script><script src="../src/competences.js"><\/script><script src="../src/referentiel.js"><\/script><script src="../src/trx.js"><\/script><script src="../src/ch11_prop.js"><\/script><script src="../src/ch11_litt.js"><\/script><script src="../src/ch1c_eq.js"><\/script><script src="../src/ch1c_sys.js"><\/script><script src="../src/ch11_no.js"><\/script><script src="../src/ch11_gm.js"><\/script><script src="../src/ch11_ang.js"><\/script><script src="../src/ch11_thales.js"><\/script><script src="../src/ch11_proba.js"><\/script><script src="../src/ch1c_no.js"><\/script><script src="../src/ch1c_fct.js"><\/script><script src="../src/ch1c_alg.js"><\/script><script src="../src/ch1c_f2b.js"><\/script><script src="../src/ch11_no2.js"><\/script><script src="../src/ch1c_geo.js"><\/script><script src="../src/ch1c_trig.js"><\/script><script src="../src/ch_mp1.js"><\/script><script src="../src/ch11_fct.js"><\/script><script src="../src/ch10_no.js"><\/script><script src="../src/ch_mp2.js"><\/script><script src="../src/ch_mp3.js"><\/script><script src="../src/ch_mp4.js"><\/script><script src="../src/fr_lycee.js"><\/script><script src="../src/fr_2nde.js"><\/script><script src="../src/ch3c_ana.js"><\/script><script src="../src/ch3c_geo.js"><\/script><script src="../src/ch4c_ana.js"><\/script><script src="../src/ch4c_trous.js"><\/script><script src="../src/ch2c.js"><\/script><script src="../src/ch1c_arg.js"><\/script><script src="../src/ch1c_trous.js"><\/script><script src="../src/ch1c_argact.js"><\/script><script src="../src/ch11_rep3d.js"><\/script><script src="../src/perco.js"><\/script><script src="../src/primaire.js"><\/script><script src="../src/fr_college.js"><\/script><script src="../src/fr_1re.js"><\/script><script src="../src/fr_3e.js"><\/script><script src="../src/fr_tle.js"><\/script><script src="../src/fr_fin.js"><\/script><script src="../src/fr_trous.js"><\/script><script src="../src/fr_couv.js"><\/script><script src="../src/ref_matu.js"><\/script><script src="../src/ref_fr.js"><\/script><script src="../src/ref_co.js"><\/script><script src="../src/ref_mp.js"><\/script><script src="../src/ref_formes.js"><\/script><script src="../src/defis.js"><\/script><script src="../src/riche.js"><\/script><script src="../src/riche_11b.js"><\/script><script src="../src/riche_11c.js"><\/script><script src="../src/riche_1c.js"><\/script><script src="../src/riche_sys1c.js"><\/script><script src="../src/riche_9.js"><\/script><script src="../src/riche_10.js"><\/script><script src="../src/riche_mp2.js"><\/script><script src="../src/riche_mp1.js"><\/script><script src="../src/riche_2c.js"><\/script><script src="../src/riche_col34.js"><\/script><script src="../src/riche_mp34.js"><\/script><script src="../src/curieux.js"><\/script><script src="../src/histoire.js"><\/script><script src="../src/badges.js"><\/script><script src="../src/backup.js"><\/script><script src="../src/qr.js"><\/script><script src="../src/lessons.js"><\/script><script src="../src/lessons2.js"><\/script><script src="../src/dyn.js"><\/script><script src="../src/manip.js"><\/script><script src="../src/active.js"><\/script><script src="../src/act_prop11.js"><\/script><script src="../src/act_litt11.js"><\/script><script src="../src/act_eq1c.js"><\/script><script src="../src/act_sys1c.js"><\/script><script src="../src/act_ch11b.js"><\/script><script src="../src/act_ch11c.js"><\/script><script src="../src/act_9a.js"><\/script><script src="../src/act_9b.js"><\/script><script src="../src/act_10a.js"><\/script><script src="../src/act_10b.js"><\/script><script src="../src/act_11d.js"><\/script><script src="../src/act_1c.js"><\/script><script src="../src/act_mp2.js"><\/script><script src="../src/act_mp34.js"><\/script><script src="../src/act_2c.js"><\/script><script src="../src/act_col34.js"><\/script><script src="../src/act_col34b.js"><\/script><script src="../src/act_manip.js"><\/script><script src="../src/act_manip2.js"><\/script><script src="../src/fr_act.js"><\/script><script src="../src/sujet.js"><\/script><script src="../src/qcm.js"><\/script><script src="../src/engine.js"><\/script><script src="../src/parents.js"><\/script><script src="../src/presente.js"><\/script><script src="../src/app.js"><\/script>');</script>
+<script>
+if (FRAME) addEventListener("load", async () => {
+  const W = innerWidth, out = [], fail = [];
+  const ok = (c, m) => (c ? out : fail).push((c ? "ok " : "ÉCHEC ") + W + " px : " + m);
+  const pause = (ms) => new Promise((r) => setTimeout(r, ms));
+  const newSt = (p) => { homeTab = "today"; session = null; state = Engine.newState(Object.assign({ minutes: 5 }, p)); Engine.autoInit(state); state.tourDone = true; state.placed = true; state.homeVisits = 9; save(); };
+  const ids = () => Engine.catalog(state.profile).map((x) => x.id).filter((id) => GEN[id] && !isPrimId(id));
+  const PROFS = [["11e", { system: "CH", grade: 11, track: "college" }], ["4e France", { system: "FR", grade: 8, track: "college" }]];
+  const ECR = {
+    accueil: () => { homeTab = "today"; screenHome(); },
+    "séance (1re question)": () => { startSession(); if (!session || !app.querySelector("input, button.opt, .keypad, .lesson, [data-lesson], .choice, .opts button")) throw new Error("ni question ni leçon à l'écran"); },
+    bilan: () => { const id = ids()[0]; session = { fmt: "revision", plan: [id + "|1|rev", id + "|1|rev", id + "|1|rev"], i: 3, score: 2, answered: 3, start: Date.now() - 300000, elo0: state.elo.r - 10, ids: new Set([id]) }; screenSummary(); },
+    "À polir (carnet)": () => { const L = ids(); for (const id of L.slice(0, 3)) { const q = Engine.make(state, id, 2); carnetAdd(id, 2, q.code); } save(); homeTab = "carnet"; screenHome(); if (!app.querySelector(".carnet-card")) throw new Error("page À polir sans ses pépites"); startCarnet(); if (!session || !session.carnet) throw new Error("séance À polir non lancée"); },
+    Réglages: () => { screenSettings(); },
+    Progrès: () => { homeTab = "prog"; screenHome(); },
+    "présentation parents": () => { screenParents(); },
+    "espace parent vide": () => { screenParentEmpty(); },
+    "aperçu parent": async () => { await screenParentShare(); await pause(300); const b = document.getElementById("ppreview"); if (!b) throw new Error("bouton d'aperçu absent"); b.onclick(); await pause(600); },
+  };
+  for (const [tag, p] of PROFS) {
+    newSt(p);
+    for (const [k, f] of Object.entries(ECR)) {
+      const e0 = window.__errs.length;
+      try { document.querySelectorAll("#tour, .collector-bg").forEach((t) => t.remove()); await f(); await pause(30); }
+      catch (e) { fail.push("ÉCHEC " + W + " px : " + tag + ", " + k + " : EXC " + e.message); continue; }
+      const err = window.__errs.slice(e0), txt = app.textContent.trim(), D = document.documentElement;
+      ok(!err.length && txt.length > 20 && D.scrollWidth <= D.clientWidth + 1, tag + ", " + k + (err.length ? " : erreur JS " + err.slice(0, 2).join(" | ") : txt.length <= 20 ? " : écran vide" : D.scrollWidth > D.clientWidth + 1 ? " : débordement horizontal " + D.scrollWidth + " / " + D.clientWidth : ""));
+      session = null; window.scrollTo(0, 0);
+    }
+  }
+  parent.postMessage("fum:" + fail.concat(out).join("\n"), "*");
+});
+</script>

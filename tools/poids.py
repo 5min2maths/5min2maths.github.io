@@ -4,7 +4,9 @@
 Usage :
   python3 tools/poids.py taille [DOSSIER…]   → taille brute / gzip de chaque fichier de docs/ (ou des dossiers donnés)
                                                et de ce qu'un élève télécharge avant son premier écran, par classe
-  python3 tools/poids.py ordre [--profils 11,12mp,fr8] [--dossier DOCS]   (alias : empreinte)
+  python3 tools/poids.py ordre [--profils 11,12mp,fr8] [--dossier DOCS] [--rapide N]   (alias : empreinte)
+        --rapide N (27.11, niveau rapide de tools/publier.sh) : toutes les classes, premier écran seulement (ni « tout le
+          code », ni après le paquet x), empreinte des questions sur une notion sur N (catalogue et registres complets).
         → contrôle de la suite (tools/run_tests.sh) : pour chaque classe, la version publiée chargée par son vrai
           chargeur exécute exactement les segments de la classe, dans l'ordre des sources, tous avant le lancement de
           l'app et rien après (sauf le paquet « x » à la demande) ; empreinte (Engine.make à graines fixes, niveaux 1–4,
@@ -98,7 +100,7 @@ EMPREINTE_JS = r"""
 function H(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); }
 function G(n) { try { return (0, eval)("typeof " + n + " === 'undefined' ? undefined : " + n); } catch (e) { return undefined; } }
 function J(v) { try { return JSON.stringify(v, (k, x) => typeof x === "function" ? "fn" : x); } catch (e) { return "E:" + e.message; } }
-function empreinte(profil) {
+function empreinte(profil, pas) {
   const out = { reg: {}, q: {}, cat: null, err: [] };
   for (const n of ["NOTIONS", "LESSONS", "LESSONS_V2", "ACTIVE", "RICH", "VAR", "VARX", "PROBX", "HINTS", "COMPS", "PREREQ", "FINE", "HISTOIRE", "CURIEUX", "REF", "REFS"]) {
     const v = G(n); if (v === undefined) continue;
@@ -110,7 +112,9 @@ function empreinte(profil) {
   else ids = Object.keys(GENv).sort();
   const st = profil ? Engine.newState(profil) : null;
   if (st) for (const id of ids) st.notions[id] = Engine.newNotion("vu");
-  for (const id of ids) {
+  /* 27.11 (tests à deux niveaux) : niveau rapide = une notion sur `pas` (même échantillon des deux côtés) */
+  const qids = pas > 1 ? ids.filter((_, i) => i % pas === 0) : ids;
+  for (const id of qids) {
     if (!GENv[id]) { out.q[id] = "absent"; continue; }
     const h = [];
     for (const lv of [1, 2, 3, 4]) {
@@ -151,7 +155,7 @@ window.addEventListener("error", (e) => (window.__errs = window.__errs || []).pu
 </script>"""
 
 
-def page_docs(dossier, profil, tout=False, apres_x=False):
+def page_docs(dossier, profil, tout=False, apres_x=False, pas=1):
     """docs/ chargé par son vrai chargeur pour un élève de profil `profil` (ou tout le code : tout=True, comme un lien
     #q-…) ; empreinte au moment où l'app démarrerait, ou (apres_x) après le paquet « x » ajouté à la demande. Une
     empreinte par page : des générateurs gardent une mémoire (anti-répétition), une 2e empreinte dans la même page
@@ -164,21 +168,21 @@ def page_docs(dossier, profil, tout=False, apres_x=False):
               "sessionStorage.setItem('m2m-ordre', '{\"tout\":1}');" if tout else ""))
     return ('<!doctype html><meta charset="utf-8"><base href="file://%s/"><main id="app"></main>' % d + pre + BLOQUE + loader
             + "<pre id=out>en cours</pre><script>" + EMPREINTE_JS + """
-const __P = %s, __X = %s, __t0 = Date.now();
+const __P = %s, __X = %s, __PAS = %d, __t0 = Date.now();
 const __fin = (o) => { document.getElementById("out").textContent = JSON.stringify(o); };
 (function __attend() {
   if (!window.__startAt) { if (Date.now() - __t0 > 60000) return __fin({ echec: "le chargeur n'a pas lancé l'app : " + ((document.getElementById("app") || {}).textContent || "").slice(0, 80) }); return setTimeout(__attend, 20); }
   const startAt = window.__startAt;
   setTimeout(() => { /* rien d'autre ne s'exécute après le lancement de l'app (plus de paquets en arrière-plan) */
     const apres = window.__segs.slice();
-    (__X ? window.loadPack("x") : Promise.resolve()).then(() => { const o = empreinte(__P); o.startAt = startAt; o.apres = apres; o.mode = window.__m2mMode(); o.x = window.__segs.slice();
+    (__X ? window.loadPack("x") : Promise.resolve()).then(() => { const o = empreinte(__P, __PAS); o.startAt = startAt; o.apres = apres; o.mode = window.__m2mMode(); o.x = window.__segs.slice();
       o.err = window.__errs || []; __fin(o); }, (e) => __fin({ echec: "paquet x : " + e.message }));
   }, 3000);
 })();
-</script>""" % (json.dumps(profil), json.dumps(apres_x)))
+</script>""" % (json.dumps(profil), json.dumps(apres_x), pas))
 
 
-def page_src(profil):
+def page_src(profil, pas=1):
     """Sources dans l'ordre de build.py (= dist/ et pages de test) : empreinte du profil (None = tout), page neuve."""
     src = (ROOT / "build.py").read_text()
     js = json.loads("[" + re.search(r"^JS = \[(.*?)\]", src, re.M | re.S).group(1) + "]")
@@ -186,7 +190,7 @@ def page_src(profil):
     return ('<!doctype html><meta charset="utf-8"><main id="app"></main><script>try { localStorage.clear(); } catch (e) {}</script>' + BLOQUE
             + "".join('<script src="file://%s/src/%s"></script>' % (ROOT, f) for f in js)
             + "<pre id=out>en cours</pre><script>" + EMPREINTE_JS
-            + "const __o = empreinte(%s); __o.err = window.__errs || []; document.getElementById('out').textContent = JSON.stringify(__o);</script>" % json.dumps(profil))
+            + "const __o = empreinte(%s, %d); __o.err = window.__errs || []; document.getElementById('out').textContent = JSON.stringify(__o);</script>" % (json.dumps(profil), pas))
 
 
 def chromium(html, budget=120000):
@@ -232,7 +236,7 @@ def compare(a, b, registres=True):
     return diff
 
 
-def ordre(profils, dossier=DOCS):
+def ordre(profils, dossier=DOCS, pas=1):
     """Contrôle de la suite (27.11, agent ordre) : pour chaque classe, la version publiée (dossier) exécute exactement les
     segments de la classe, dans l'ordre des sources, tous avant le lancement de l'app, rien après (sauf le paquet x à la
     demande), et donne la même empreinte que les sources (questions, leçons, catalogue, registres de la classe), au
@@ -249,7 +253,9 @@ def ordre(profils, dossier=DOCS):
         note(False, "%s : pas de chargeur par segments (ancienne construction ?)" % dossier); return True
     S, C, X, U = ch["S"], ch["C"], ch["X"], ch["U"]
     sx = lambda L: [i for i in L if i not in X]
-    for k in profils + ["tout", "nouveau"]:
+    # 27.11 (tests à deux niveaux) : niveau rapide (pas > 1) = premier écran seulement, sans « tout le code »,
+    # empreinte sur une notion sur `pas` ; ordre des segments, lancement et erreurs JS contrôlés pour chaque classe.
+    for k in profils + (["nouveau"] if pas > 1 else ["tout", "nouveau"]):
         p = PROFILS.get(k)
         nom = "nouvel élève" if k == "nouveau" else "tout le code (#q-…)" if k == "tout" else k
         if k == "nouveau":
@@ -259,12 +265,12 @@ def ordre(profils, dossier=DOCS):
             note(o["startAt"] == U and sx(o["apres"]) == U and not o["err"],
                  "%s : code commun seul avant l'accueil (%d segments)%s" % (nom, len(U), "" if o["startAt"] == U else ", exécutés : %s" % o["startAt"]))
             continue
-        ref = chromium(page_src(p), 300000)
+        ref = chromium(page_src(p, pas), 300000)
         if "echec" in ref or ref.get("err"):
             note(False, "%s : sources : %s" % (nom, ref.get("echec") or ref.get("err"))); continue
         attendu = list(range(len(S))) if k == "tout" else C.get(cle(p))
-        for ax in (False, True):
-            o = chromium(page_docs(dossier, p, tout=(k == "tout"), apres_x=ax), 300000)
+        for ax in ((False,) if pas > 1 else (False, True)):
+            o = chromium(page_docs(dossier, p, tout=(k == "tout"), apres_x=ax, pas=pas), 300000)
             quand = "après le paquet x" if ax else "premier écran"
             if "echec" in o:
                 note(False, "%s (%s) : %s" % (nom, quand, o["echec"])); continue
@@ -285,7 +291,8 @@ def main():
     if a[0] in ("ordre", "empreinte"):
         prof = a[a.index("--profils") + 1].split(",") if "--profils" in a else [k for k in PROFILS if k != "nouveau"]
         d = Path(a[a.index("--dossier") + 1]) if "--dossier" in a else DOCS
-        sys.exit(1 if ordre(prof, d) else 0)
+        pas = int(a[a.index("--rapide") + 1]) if "--rapide" in a else 1
+        sys.exit(1 if ordre(prof, d, pas) else 0)
     print(__doc__)
 
 
