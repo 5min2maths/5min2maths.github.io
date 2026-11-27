@@ -183,3 +183,7 @@ Avant le choix, comme au premier tour :
   cookies, duo musical, objet Pokémon) — autres catégories.
 - À faire : marques Swissreg + INPI (classes 9 logiciels, 41 éducation) ; réserver pepiteaucarre.ch + .app (+ .fr ?) avec
   l'hébergement suisse ; puis renommage (APP_NAME, APP_TAGLINE, manifeste, présentations, PDF, icône avec le petit ²).
+
+## Portes d'entrée (validées le 27.11 soir)
+▶ Ma pépite du jour · La mine (le grand problème de la semaine) · Trésors cachés (maths cachées) · Chercheurs d'or (histoire
+des maths) · Jour J (prépare ton évaluation) · À polir · Mon trésor (grades, badges, pépites). Renommages seulement.
