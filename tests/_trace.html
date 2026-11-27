@@ -13,6 +13,7 @@
      les questions du chapitre sont marquées 📚 et comptées dans le résumé)
      strategie=aide,guide,idk,lecon,figure,presse,facile           jours=4   premier=1 (accueil, choix de classe, positionnement, visite)
      extras=carnet,curieux,histoire,eval,probleme,comp   jour0=2026-11-16   graine=7   ecran=1 (garder l'app visible pour une capture)
+     garde=1 (27.11, eleves8) : ne pas créer de profil, garder l'élève en place (robot injecté par tests/_charge_publiee.py dans docs/)
      absence=N (27.11) : le jour 3 vient N jours après le jour 2 ; les rappels de primaire sont marqués 🔙 PRIMAIRE
    Lancement : nice timeout 300 chromium --headless --disable-gpu --no-sandbox --virtual-time-budget=90000 --dump-dom "file://$PWD/tests/_trace.html#eleve=lea" */
 const _D = Date; let OFF = 0;
@@ -395,7 +396,8 @@ window.confirm = () => true; window.print = () => {};
   /* ---------- scénario ---------- */
   try {
     log("ÉLÈVE " + CFG.nom + " · profil " + CFG.profil + " · niveau " + CFG.niveau + " · stratégie " + [...ST].join(",") + " · " + CFG.jours + " jours · départ " + day());
-    if (CFG.premier) await firstLaunch(); else { seed(); await home(); }
+    /* 27.11 (eleves8) : garde=1 : garder l'élève déjà en place (robot injecté dans la version publiée, tests/_charge_publiee.py) */
+    if (CFG.premier) await firstLaunch(); else if (CFG.garde) await home(); else { seed(); await home(); }
     const durs = [];
     for (let j = 0; j < CFG.jours; j++) {
       /* 27.11 (eleves7) : absence=N : le jour 3 arrive N jours après le jour 2 (retour après une absence) */
