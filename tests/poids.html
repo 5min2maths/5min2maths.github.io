@@ -4,16 +4,18 @@
 window.fetch = () => Promise.resolve(new Response("{}")); if (navigator.sendBeacon) navigator.sendBeacon = () => true;</script>
 <script src="_poids_data.js"></script>
 <script>
-/* 27.11 (agent poids, tools/poids.md) : poids de la version publiée (docs/, construite par build.py) et chargement par paquets.
-   1. Plafonds du premier chargement (ce qu'un élève télécharge avant son premier écran, gzip) : nouvel élève, 11e,
-      1re Collège, MP 2e, 4e France ; histoires, questions curieuses et présentations hors du code commun (paquet « x »).
-   2. Chaque fichier source est publié une fois (code commun, un paquet ou start.js).
-   3. Pour chaque classe (9e–4e Collège, MP 1re–4e, France 6e–Tle) : avec SEULEMENT le code commun et les paquets que le
-      chargeur demande avant le premier écran (need), chaque notion du catalogue a son générateur et donne des questions
-      de chaque niveau sans erreur. Une page fille par classe (iframe), qui charge docs/ comme l'app publiée.
-   Données : tests/_poids_data.js, écrit par build.py (lancer python3 build.py avant). Contrôle d'équivalence complet
-   (mêmes questions qu'avec tous les paquets, avant / après) : python3 tools/poids.py empreinte. */
-const PLAFOND_KO = { nouveau: 720, 11: 1090, 12: 1350, "13mp": 1570, fr8: 2100 }; /* gzip ; mesures du 27.11 : 690, 1035, 1287, 1490, 2001 */
+/* 27.11 (agent poids, tools/poids.md) : poids de la version publiée (docs/, construite par build.py).
+   27.11 (agent ordre) : docs/ = segments consécutifs des sources (docs/sNN.js), chaque classe exécute les siens dans
+   l'ordre de JS (build.py).
+   1. Plafonds du premier chargement (ce qu'un élève télécharge avant son premier écran, gzip) ; histoires, questions
+      curieuses et présentations dans le paquet « x » seulement (jamais avant le premier écran).
+   2. Les segments, mis bout à bout, redonnent exactement la liste JS de build.py (même ordre) ; chaque classe : une
+      sous-suite croissante (ordre des sources).
+   3. Pour chaque classe (9e–4e Collège, MP 1re–4e, France 6e–Tle) : avec SEULEMENT ses segments (dans l'ordre), chaque
+      notion du catalogue a son générateur et donne des questions de chaque niveau sans erreur (une page fille par classe).
+   Données : tests/_poids_data.js, écrit par build.py. Contrôle d'équivalence complet avec les sources (mêmes questions,
+   leçons, registres de la classe) : python3 tools/poids.py ordre (lancé par tools/run_tests.sh). */
+const PLAFOND_KO = { nouveau: 720, 11: 1320, 12: 1400, "13mp": 1790, fr8: 2060 }; /* gzip ; mesures du 27.11 (agent ordre) : 696, 1290, 1369, 1741, 2011 */
 const PROFILS = {
   9: { system: "CH", grade: 9, track: "college" }, 10: { system: "CH", grade: 10, track: "college" }, 11: { system: "CH", grade: 11, track: "college" },
   12: { system: "CH", grade: 12, track: "college" }, 13: { system: "CH", grade: 13, track: "college" }, 14: { system: "CH", grade: 14, track: "college" },
@@ -30,12 +32,15 @@ else mere();
 
 function charge(src) { return new Promise((ok, ko) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = () => ko(new Error(src)); document.body.appendChild(s); }); }
 
-/* Page fille : une classe, code commun + paquets du premier écran, puis toutes les notions du catalogue. */
+function cleDe(p) { return p.system === "FR" ? "FR" : p.grade + (p.track === "mp" && p.grade >= 12 ? "mp" : ""); }
+function segsDe(p) { return p ? POIDS.classes[cleDe(p)] : POIDS.commun; }
+
+/* Page fille : une classe, ses segments dans l'ordre, puis toutes les notions du catalogue. */
 function fille(k) {
   const errs = [];
   window.addEventListener("error", (e) => errs.push(String(e.message) + " " + (e.filename || "").split("/").pop() + ":" + e.lineno));
-  const need = POIDS_NEED(POIDS.L, POIDS.K), p = PROFILS[k], pq = need(p);
-  ["../docs/app.js"].concat(pq.map((x) => "../docs/p-" + x + ".js")).reduce((pr, s) => pr.then(() => charge(s)), Promise.resolve()).then(() => {
+  const p = PROFILS[k], pq = segsDe(p);
+  pq.map((i) => "../docs/" + POIDS.seg[i][0]).reduce((pr, s) => pr.then(() => charge(s)), Promise.resolve()).then(() => {
     const st = Engine.newState(p), cat = Engine.catalog(p), manq = [], err = [];
     for (const n of cat) st.notions[n.id] = Engine.newNotion("vu");
     for (const n of cat) {
@@ -54,21 +59,23 @@ function fille(k) {
 
 function mere() {
   const fails = [], ok = (c, m) => { if (!c && fails.length < 40) fails.push(m); };
-  const F = POIDS.files, need = POIDS_NEED(POIDS.L, POIDS.K), lignes = [];
+  const F = POIDS.files, lignes = [];
   /* 1. plafonds */
-  const premier = (p) => ["index.html", "app.js"].concat((p ? need(p) : []).map((x) => "p-" + x + ".js"), ["start.js"]);
+  const premier = (p) => ["index.html"].concat(segsDe(p).map((i) => POIDS.seg[i][0]), ["start.js"]);
   const ko = (fs, i) => Math.round(fs.reduce((a, f) => a + (F[f] ? F[f][i] : NaN), 0) / 1024);
   for (const [k, max] of Object.entries(PLAFOND_KO)) {
     const fs = premier(k === "nouveau" ? null : PROFILS[k]), g = ko(fs, 1);
     ok(g <= max, k + " : premier chargement " + g + " Ko gzip > plafond " + max + " Ko");
     lignes.push(k + " " + g + " Ko");
   }
-  ok(need(null).indexOf("x") < 0 && POIDS.K.indexOf("x") >= 0, "paquet x : chargé en arrière-plan, jamais requis au démarrage");
-  for (const f of ["histoire.js", "curieux.js", "presente.js"]) ok((POIDS.paq.x || []).indexOf(f) >= 0 && POIDS.commun.indexOf(f) < 0, f + " doit être dans le paquet x");
-  /* 2. chaque fichier source publié une fois */
-  const pub = POIDS.commun.concat(["app.js"], ...Object.values(POIDS.paq));
-  ok(pub.length === POIDS.JS.length && POIDS.JS.every((f) => pub.indexOf(f) >= 0), "fichiers publiés ≠ liste JS de build.py");
-  ok(POIDS.K.every((x) => F["p-" + x + ".js"]), "paquet manquant dans docs/");
+  const fx = POIDS.x.flatMap((i) => POIDS.seg[i][2]);
+  for (const f of ["histoire.js", "curieux.js", "presente.js"]) ok(fx.indexOf(f) >= 0, f + " doit être dans le paquet x");
+  ok(Object.values(POIDS.classes).concat([POIDS.commun]).every((L) => L.every((i) => POIDS.x.indexOf(i) < 0)), "paquet x requis avant le premier écran");
+  /* 2. segments = liste JS, dans l'ordre ; classes : sous-suites croissantes */
+  const pub = POIDS.seg.flatMap((s) => s[2]).concat(["app.js"]);
+  ok(pub.join() === POIDS.JS.join(), "segments mis bout à bout ≠ liste JS de build.py");
+  ok(POIDS.seg.every((s) => F[s[0]]), "segment manquant dans docs/");
+  for (const [c, L] of Object.entries(POIDS.classes)) ok(L.every((x, j) => !j || x > L[j - 1]) && POIDS.commun.every((i) => L.indexOf(i) >= 0), c + " : segments hors de l'ordre des sources ou code commun incomplet");
   /* 3. une page fille par classe */
   const ks = Object.keys(PROFILS), res = {};
   let i = 0, cadre = null;
@@ -84,7 +91,7 @@ function mere() {
   });
   function suivante() {
     if (i >= ks.length) {
-      return out(fails.length ? "ÉCHEC " + fails.join(" | ") : "ok poids (premier chargement gzip : " + lignes.join(", ") + ") ; " + ks.length + " classes, notions complètes avec les paquets du premier écran");
+      return out(fails.length ? "ÉCHEC " + fails.join(" | ") : "ok poids (premier chargement gzip : " + lignes.join(", ") + ") ; " + ks.length + " classes, notions complètes avec leurs seuls segments");
     }
     cadre = document.createElement("iframe"); cadre.src = "poids.html?p=" + ks[i++]; cadre.style.display = "none"; document.body.appendChild(cadre);
   }

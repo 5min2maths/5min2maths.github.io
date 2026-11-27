@@ -72,9 +72,9 @@ async def scenario(port, url):
         ok(bool(sw), "service worker actif")
         cache = val(await ev("caches.keys().then(ks => Promise.all(ks.map(k => caches.open(k).then(c => c.keys())))).then(rs => JSON.stringify(rs.flat().map(r => r.url.replace(location.origin, '')).filter(u => /vendor/.test(u))))"))
         ok(cache and "tex-svg.js" in cache and cache.count("woff2") >= 4, "MathJax et polices dans le cache hors ligne " + str(cache))
-        # 27.11 (agent poids) : tous les paquets (niveaux + « x ») précachés à l'installation du service worker
-        pq = val(await ev("caches.keys().then(ks => Promise.all(ks.map(k => caches.open(k).then(c => c.keys())))).then(rs => rs.flat().map(r => (/\\/p-([a-z0-9]+)\\.js/.exec(r.url) || [])[1]).filter(Boolean).sort().join(','))"))
-        ok(pq and len(pq.split(",")) == 10 and "x" in pq.split(","), "tous les paquets dans le cache hors ligne (" + str(pq) + ")")
+        # 27.11 (agent poids ; agent ordre : segments docs/sNN.js) : tous les segments précachés à l'installation du service worker
+        pq = val(await ev("caches.keys().then(ks => Promise.all(ks.map(k => caches.open(k).then(c => c.keys())))).then(rs => { const s = new Set(rs.flat().map(r => (/\\/(s[0-9]+\\.js)\\?/.exec(r.url) || [])[1]).filter(Boolean)); return window.__segNames.filter(n => !s.has(n)).join(',') + '|' + s.size; })"))
+        ok(pq and pq.startswith("|") and int(pq[1:]) > 5, "tous les segments dans le cache hors ligne (manquants|en cache : " + str(pq) + ")")
         await cdp.call("Network.emulateNetworkConditions", offline=True, latency=0, downloadThroughput=-1, uploadThroughput=-1)
         await ev("window.__ancien = 1")
         await cdp.call("Page.reload")
@@ -83,6 +83,11 @@ async def scenario(port, url):
         f2 = val(await ev(r"""(async () => { const d = document.createElement('div'); d.innerHTML = '\\(x^2 + \\sqrt{2}\\)'; document.body.appendChild(d);
           await MathJax.typesetPromise([d]); const r = !!d.querySelector('svg'); d.remove(); return r; })()"""))
         ok(f2 is True, "hors ligne : formule composée")
+        # 27.11 (agent ordre) : hors ligne, changement de classe (rechargement avec le code de la 2e Collège, depuis le cache)
+        await ev("window.__ancien = 1, 1")
+        await ev("ensurePacks({ system: 'CH', grade: 13, track: 'college', minutes: 5 }, true), 1")
+        hc = await cdp.attendre("!window.__ancien && window.__packsAtStart && state && state.profile && state.profile.grade === 13 && state.placement ? JSON.stringify(window.__packsAtStart) : null", 40)
+        ok(bool(hc) and json.loads(hc) == val(await ev("window.__ordre.C['13']")), "hors ligne : changement de classe (2e Collège), code de la classe depuis le cache")
         await cdp.call("Network.emulateNetworkConditions", offline=False, latency=0, downloadThroughput=-1, uploadThroughput=-1)
 
         # Mentions légales : lien direct, Réglages, écran « Ce que l'app envoie »

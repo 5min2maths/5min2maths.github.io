@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 
 
 
-const BUILD = "d63f276f50";
+const BUILD = "90f4416a09";
 const ERR_MAX = 5;
 var errMem = null;
 
@@ -429,6 +429,20 @@ document.getElementById("legal-lien").onclick = (e) => { e.preventDefault(); scr
 document.getElementById("restore").onclick = () => screenRestore();
 }
 
+
+
+
+function setProfile(prof) {
+const keep = state && state.comps, keepA = state && state.a11y, keepY = state && ypSync(state), keepN = state && state.gradeNo;
+state = Engine.newState(prof);
+if (keepY) state.yp = keepY;
+ypSync(state);
+if (keepN) state.gradeNo = keepN;
+if (keep) state.comps = keep;
+if (keepA) state.a11y = keepA;
+Engine.autoInit(state);
+save(); startPlacement();
+}
 function screenLevel() {
 
 if (!SYSTEMS[draft.system] && typeof SYSTEMS_HIDDEN !== "undefined" && SYSTEMS_HIDDEN[draft.system]) SYSTEMS[draft.system] = SYSTEMS_HIDDEN[draft.system];
@@ -466,21 +480,13 @@ if (draft.system === "CH" && draft.grade >= 12 && !draft.track) { document.getEl
 const needNiv = draft.system === "CH" && draft.grade >= 14 && draft.track === "college";
 if (needNiv && !draft.niv) { document.getElementById("niverr").textContent = "Choisis ton niveau : MA1 (normal) ou MA2 (renforcé)."; document.getElementById("niv").scrollIntoView({ block: "center" }); return; }
 const prof = { system: draft.system, grade: draft.grade, track: draft.system === "CH" && draft.grade >= 12 ? draft.track : "college", minutes: draft.minutes, ...(needNiv ? { niv: draft.niv } : {}) };
-const go = () => {
-const keep = state && state.comps, keepA = state && state.a11y, keepY = state && ypSync(state), keepN = state && state.gradeNo;
-state = Engine.newState(prof);
-if (keepY) state.yp = keepY;
-ypSync(state);
-if (keepN) state.gradeNo = keepN;
-if (keep) state.comps = keep;
-if (keepA) state.a11y = keepA;
-Engine.autoInit(state);
-save(); startPlacement();
-};
+const go = () => setProfile(prof);
+
+
 
 if (typeof ensurePacks !== "function") return go();
 const b = document.getElementById("next"); b.disabled = true; b.textContent = "Chargement…";
-ensurePacks(prof).then(go, () => { b.disabled = false; b.textContent = "Réessayer"; toast("Pas de connexion : les notions de cette classe ne sont pas encore sur ton téléphone. Réessaie une fois connecté."); });
+ensurePacks(prof, true).then(go, () => { b.disabled = false; b.textContent = "Réessayer"; toast("Pas de connexion : les notions de cette classe ne sont pas encore sur ton téléphone. Réessaie une fois connecté."); });
 };
 }
 
@@ -3139,8 +3145,9 @@ return true;
 }
 
 
-if (!xReady() && /^#(decouvrir|parents|enseignants|parent\b|q-cur-)/.test(location.hash)) {
-window.loadPack("x").then(() => showCode(), () => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); toast("Pas de connexion : cette page n'est pas encore sur cet appareil."); });
+
+if (typeof window.__m2mMode === "function" && window.__m2mMode() !== "tout" && /^#(q-|l-|auteur|decouvrir|parents?\b|enseignants)/.test(location.hash)) {
+window.ensurePacks(null).catch(() => { history.replaceState(null, "", location.pathname); state && state.placed ? screenHome() : screenWelcome(); toast("Pas de connexion : cette page n'est pas encore sur cet appareil."); });
 return true;
 }
 if (typeof presentRoute === "function" && presentRoute()) return true;
@@ -3198,4 +3205,9 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
 
 
 ping("open");
-if (!showCode() && !restoreFromHash()) { if (state && state.placed) screenHome(); else if (state && state.placement) { toast("On reprend ton positionnement là où tu l'avais laissé."); startPlacement(); } else { state = null; screenWelcome(); } }
+
+
+
+if (window.__reprise && typeof window.packsOk === "function" && window.packsOk(window.__reprise)) { const rp = window.__reprise; window.__reprise = null; setProfile(rp); }
+else if (state && state.profile && typeof window.packsOk === "function" && !window.packsOk(state.profile)) window.ensurePacks(null).catch(() => { app.innerHTML = '<section class="card"><h2>Pas de connexion</h2><p>Reconnecte-toi, puis rouvre l\'app.</p></section>'; });
+else if (!showCode() && !restoreFromHash()) { if (state && state.placed) screenHome(); else if (state && state.placement) { toast("On reprend ton positionnement là où tu l'avais laissé."); startPlacement(); } else { state = null; screenWelcome(); } }

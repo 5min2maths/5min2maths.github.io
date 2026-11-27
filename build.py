@@ -27,7 +27,7 @@ window.MathJax = { tex: { inlineMath: [["\\\\(", "\\\\)"]] }, svg: { fontCache: 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
 """
-body = '<main id="app" aria-live="polite"></main>\n<script>\n' + "\n".join((SRC / f).read_text() for f in JS) + "\n</script>\n"
+body = '<main id="app"></main>\n<script>\n' + "\n".join((SRC / f).read_text() for f in JS) + "\n</script>\n"
 # Version (23.11, erreurs JS) : empreinte du contenu, la même que celle du cache hors ligne (sw.js), injectée dans
 # const BUILD de src/app.js ; calculée avant l'injection pour rester stable d'une construction à l'autre.
 import hashlib
@@ -92,70 +92,136 @@ def paquet(f):
     if f in ("riche_9.js", "act_9a.js", "act_9b.js", "defis_9.js", "defis_910.js"): return "9"  # 25.11 : defis_9.js = défis propres à la 9e (PROBX)
     if f in ("riche_10.js", "act_10a.js", "act_10b.js", "ch10_no.js"): return "10"
     return ""
-ORDRE_N = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"]  # paquets de niveau
-ORDRE_P = ORDRE_N + ["x"]  # 27.11 : + paquet de fonctions (chargé en dernier en arrière-plan)
-PAQ = {k: [f for f in JS if paquet(f) == k] for k in ORDRE_P}
+# 27.11 (agent ordre, tools/poids.md § « Ordre d'exécution ») : la version publiée exécute EXACTEMENT les sources dans
+# l'ordre de JS (celui des pages de test et de dist/). Avant : code commun d'abord, paquets ensuite, donc des fichiers
+# écrasés au lieu de remplacer (defis.js, act_manip2.js…) et, au premier écran, des générateurs provisoires.
+# Désormais : JS découpé en SEGMENTS consécutifs (docs/sNN.js) ; pour chaque classe, le chargeur exécute, dans l'ordre
+# des sources, le code commun et les segments des paquets de CLASSES[classe] (ci-dessous), tous AVANT l'app (start.js) ;
+# rien d'autre ne s'exécute ensuite (plus de paquets en arrière-plan ; le service worker précache tout). Changement de
+# classe (ou page qui a besoin de tout : liens #q-, #l-, présentations, espace parent, #auteur) : rechargement de la page
+# avec le bon jeu de segments (ensurePacks). Le paquet « x » (histoires, curieux, présentations), indépendant, peut
+# s'ajouter à la fin à la demande (withX). Contrôle : tools/poids.py ordre (dans la suite), tools/poids.py empreinte.
+# CLASSES[c] = paquets (étiquettes de paquet()) dont dépendent les questions de la classe c, choisis avec
+# tools/poids.py empreinte (questions, leçons, registres de la classe identiques à ceux des sources complètes).
+NIV = ["9", "10", "11", "12", "13", "14", "15", "mp", "fr"]
+CLASSES = {  # mesures du 27.11 (tools/poids.md) : paquets de la classe et des classes inférieures (chargeur du 24.11), plus
+    # ceux qui redéfinissent ses notions : 10, 11, 12 en 9e–11e (ch10_no, ch11_*, ch1c_*) ; 13 en 1re (ch2c.js : absval) ;
+    # fr en MP 2e–4e (fr_couv.js : quartiles). Vérifié par tools/poids.py ordre (suite de tests).
+    "9": ["9", "10", "11", "12"], "10": ["9", "10", "11", "12"], "11": ["9", "10", "11", "12"],
+    "12": ["9", "10", "11", "12", "13"], "13": ["9", "10", "11", "12", "13"],
+    "14": ["9", "10", "11", "12", "13", "14"], "15": ["9", "10", "11", "12", "13", "14", "15"],
+    "12mp": ["9", "10", "11", "12", "mp"], "13mp": ["9", "10", "11", "12", "13", "mp", "fr"],
+    "14mp": ["9", "10", "11", "12", "13", "14", "mp", "fr"], "15mp": NIV, "FR": NIV,
+}
+TOUS = list(CLASSES)
+assert all(set(v) <= set(NIV) for v in CLASSES.values())
+def groupe(f):
+    k = paquet(f)
+    if k in ("", "x"): return k
+    return ",".join(c for c in TOUS if k in CLASSES[c])  # paquets requis par les mêmes classes : un seul groupe
+    # (un paquet requis par toutes les classes reste hors du code commun : pas chargé pour l'écran d'entrée d'un nouvel élève)
+SEG = []  # [nom publié, groupe, fichiers]
+for f in JS:
+    if f == "app.js": continue  # = start.js
+    g = groupe(f)
+    if SEG and SEG[-1][1] == g: SEG[-1][2].append(f)
+    else: SEG.append([None, g, [f]])
+for i, s in enumerate(SEG): s[0] = "s%02d.js" % i
+SEGS_DE = {c: [i for i, s in enumerate(SEG) if s[1] == "" or (s[1] not in ("", "x") and c in s[1].split(","))] for c in TOUS}
+COMMUN = [i for i, s in enumerate(SEG) if s[1] == ""]
+XS = [i for i, s in enumerate(SEG) if s[1] == "x"]
+TOUT = list(range(len(SEG)))
+for c in TOUS:  # chaque classe : exactement les sources de ses paquets, dans l'ordre de JS
+    assert [f for i in SEGS_DE[c] for f in SEG[i][2]] == [f for f in JS if f != "app.js" and (paquet(f) == "" or paquet(f) in CLASSES[c])], c
+assert [f for s in SEG for f in s[2]] + ["app.js"] == JS
 app_js = (SRC / "app.js").read_text()
 assert 'const BUILD = "dev";' in app_js
-loader = """<script src="app.js?v=%(v)s"></script>
-<script>
+loader = """<script>
 (function () {
-  // Chargement par niveau (24.11). Paquets requis : le niveau de l'élève et les niveaux inférieurs de sa filière ;
-  // France et liens de consultation (#q-, #l-, #auteur) : tout. Puis le reste en arrière-plan (hors ligne complet).
-  var V = "%(v)s", L = %(niv)s, K = L.concat(["x"]), loaded = {}, pending = {};
-  window.__packs = loaded; // pour les tests (tools/test_paquets.py)
-  function need(p) {
-    if (!p || p.system === "FR") return L.slice();
-    var g = +p.grade || 9, r = [];
-    ["9", "10", "11", "12", "13", "14", "15"].forEach(function (k) { if (+k <= g) r.push(k); });
-    if (p.track === "mp") r.push("mp");
-    return r;
+  // Chargement dans l'ordre des sources (27.11, agent ordre ; build.py, tools/poids.md). S = segments (ordre de JS),
+  // C = segments de chaque classe, X = paquet « x » (à la demande), U = code commun (nouvel élève).
+  var V = "%(v)s", S = %(S)s, C = %(C)s, X = %(X)s, U = %(U)s, T = [], done = [], mode = "";
+  for (var i = 0; i < S.length; i++) T.push(i);
+  window.__segs = done; window.__segNames = S; window.__ordre = { S: S, C: C, X: X, U: U }; // pour les tests
+  function cle(p) {
+    if (!p || typeof p !== "object") return null;
+    if (p.system === "FR") return C.FR ? "FR" : null;
+    var g = +p.grade, k = g + (p.track === "mp" && g >= 12 ? "mp" : "");
+    return C[k] ? k : null;
   }
-  function sync() { // recopies faites au chargement par lessons.js et engine.js (rappels et indices des paquets)
-    try { if (typeof HINTS_EXTRA !== "undefined") Object.assign(HINTS, HINTS_EXTRA); } catch (e) {}
-    try { if (typeof LESSONS_EXTRA !== "undefined") Object.keys(LESSONS_EXTRA).forEach(function (k) { if (typeof LESSONS_V2 === "undefined" || !LESSONS_V2[k]) LESSONS[k] = L_.apply(null, LESSONS_EXTRA[k]); }); } catch (e) {}
-    try { window.dispatchEvent(new Event("m2m-pack")); } catch (e) {} // 24.11 : l'app met à jour une leçon ouverte trop tôt
+  function segs(p) { var k = cle(p); return k ? C[k] : T; } // classe inconnue : tout (= sources complètes)
+  function sansX(L) { return L.filter(function (i) { return X.indexOf(i) < 0; }); }
+  function url(i) { return S[i] + "?v=" + V; }
+  // Code exécuté identique à celui des sources pour cette classe (tout, ou exactement ses segments, dans l'ordre).
+  window.packsOk = function (p) { if (mode === "tout") return true; var a = sansX(done), b = sansX(segs(p)); return a.length === b.length && a.every(function (x, j) { return x === b[j]; }); };
+  window.__m2mMode = function () { return mode; };
+  // Segments exécutés dans l'ordre de la liste (téléchargés en parallèle, async = false) ; échec si l'un manque.
+  function charge(L) {
+    var err = null;
+    return Promise.all(L.filter(function (i) { return done.indexOf(i) < 0; }).map(function (i) {
+      return new Promise(function (ok) { var s = document.createElement("script"); s.src = url(i); s.async = false;
+        s.onload = function () { if (!err) done.push(i); ok(); }; s.onerror = function () { err = err || new Error(S[i]); ok(); }; document.body.appendChild(s); });
+    })).then(function () { if (err) throw err; });
   }
-  window.loadPack = function (k) {
-    if (loaded[k]) return Promise.resolve();
-    if (pending[k]) return pending[k];
-    return (pending[k] = new Promise(function (ok, ko) {
-      var s = document.createElement("script"); s.src = "p-" + k + ".js?v=" + V;
-      s.onload = function () { loaded[k] = 1; sync(); ok(); };
-      s.onerror = function () { delete pending[k]; ko(new Error("paquet " + k)); };
-      document.body.appendChild(s);
-    }));
+  // Classe (classe = true) ou page qui a besoin de tout : si le code exécuté n'est pas exactement le bon, on vérifie que
+  // les segments sont disponibles (cache hors ligne ou réseau), puis on recharge la page avec le bon jeu ; l'app reprend
+  // le choix de classe (window.__reprise). Sinon (déjà le bon code) : tout de suite.
+  window.ensurePacks = function (p, classe) {
+    if (classe ? window.packsOk(p) : mode === "tout") return Promise.resolve();
+    var L = classe ? segs(p) : T;
+    return Promise.all(L.map(function (i) { return fetch(url(i)).then(function (r) { if (!r.ok) throw new Error(S[i]); }); })).then(function () {
+      try { sessionStorage.setItem("m2m-ordre", JSON.stringify(classe ? { p: p } : { tout: 1 })); } catch (e) {}
+      location.reload();
+      return new Promise(function () {});
+    });
   };
-  window.ensurePacks = function (p) { return need(p).reduce(function (pr, k) { return pr.then(function () { return loadPack(k); }); }, Promise.resolve()); };
-  var st = null; try { st = JSON.parse(localStorage.getItem("5m2m.v1")); } catch (e) {}
-  var first = /^#(q-|l-|auteur)/.test(location.hash) ? K.slice() : st && st.profile ? need(st.profile) : [];
-  if (/^#(decouvrir|parents|enseignants|parent\b)/.test(location.hash)) first.push("x"); // 27.11 : pages du paquet « x » (src/app.js, withX)
+  // Paquet « x » à la demande, ajouté à la fin (indépendant du reste : rien ne le redéfinit, il ne redéfinit rien).
+  var px = null;
+  window.loadPack = function (k) {
+    if (k !== "x") return Promise.reject(new Error("paquet " + k));
+    if (!px) px = charge(X).then(function () { try { window.dispatchEvent(new Event("m2m-pack")); } catch (e) {} }, function (e) { px = null; throw e; });
+    return px;
+  };
+  var st = null, o = null;
+  try { st = JSON.parse(localStorage.getItem("5m2m.v1")); } catch (e) {}
+  try { o = JSON.parse(sessionStorage.getItem("m2m-ordre")); sessionStorage.removeItem("m2m-ordre"); } catch (e) {}
+  var first;
+  if ((o && o.tout) || /^#(q-|l-|auteur|decouvrir|parents?\\b|enseignants)/.test(location.hash)) first = T;
+  else if (o && o.p && cle(o.p)) { window.__reprise = o.p; first = segs(o.p); }
+  else first = st && st.profile ? segs(st.profile) : U;
+  if (first === T) mode = "tout";
   // MathJax (24.11) : chez un habitué il est en cache, on le charge tout de suite et l'app attend qu'il soit prêt
   // (pas de TeX brut à l'écran) ; pour une première visite, il vient après l'affichage (il ne prend pas la bande passante du code).
   function mathjax() { if (window.__mj) return; window.__mj = 1; var m = document.createElement("script"); m.src = "%(mj)s"; m.async = true; document.head.appendChild(m); }
   function mjReady(cb) { var t0 = Date.now(); (function w() { if ((window.MathJax && MathJax.typesetPromise) || Date.now() - t0 > 1500) cb(); else setTimeout(w, 30); })(); }
   if (st && st.profile) mathjax();
   function start() {
-    window.__packsAtStart = Object.keys(loaded);
+    window.__packsAtStart = done.slice();
     var s = document.createElement("script"); s.src = "start.js?v=" + V;
-    s.onload = function () { var rest = function () { K.reduce(function (pr, k) { return pr.then(function () { return loadPack(k).catch(function () {}); }); }, Promise.resolve()); };
-      if ("requestIdleCallback" in window) requestIdleCallback(rest, { timeout: 3000 }); else setTimeout(rest, 1500); };
+    s.onload = function () { var x = function () { window.loadPack("x").catch(function () {}); };
+      if ("requestIdleCallback" in window) requestIdleCallback(x, { timeout: 3000 }); else setTimeout(x, 1500); };
     if (st && st.profile) mjReady(function () { document.body.appendChild(s); }); else { document.body.appendChild(s); setTimeout(mathjax, 0); }
   }
-  first.reduce(function (pr, k) { return pr.then(function () { return loadPack(k); }); }, Promise.resolve()).then(start, start);
+  // Un segment manquant (hors ligne, jamais mis en cache) : pas d'app à moitié chargée (elle servirait d'autres questions).
+  function echec() {
+    var a = document.getElementById("app");
+    if (a) a.innerHTML = '<section class="card" style="margin:24px 16px"><h2>Pas de connexion</h2><p>L\\'app n\\'est pas encore entièrement sur cet appareil. Reconnecte-toi, puis réessaie.</p><button type="button" class="btn-primary" onclick="location.reload()">Réessayer</button></section>';
+  }
+  charge(first).then(start, echec);
 })();
 </script>
 """
 head_docs = head_local.replace('<script src="' + MJ + '"></script>', "")
 assert head_docs != head_local, "balise MathJax introuvable dans head"
-docs_body = '<main id="app" aria-live="polite"></main>\n' + loader % {"v": version, "niv": str(ORDRE_N).replace("'", '"'), "mj": MJ}
+J_ = lambda v: _json.dumps(v, separators=(",", ":"))
+docs_body = '<main id="app"></main>\n' + loader % {"v": version, "S": J_([s[0] for s in SEG]), "C": J_(SEGS_DE), "X": J_(XS), "U": J_(COMMUN), "mj": MJ}
 (ROOT / "docs").mkdir(exist_ok=True)
 (ROOT / "docs" / "index.html").write_text(
     '<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n'
     '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
     + pwa_head + head_docs + "</head>\n<body>\n" + docs_body + "</body>\n</html>\n")
 # Code de l'app = le script de body, BUILD compris (même contenu que dist/).
-PRE = '<main id="app" aria-live="polite"></main>\n<script>\n'
+PRE = '<main id="app"></main>\n<script>\n'
 assert body.startswith(PRE) and body.endswith("\n</script>\n")
 # 27.11 (agent poids, tools/poids.md) : code publié minifié (tools/minijs.py : commentaires et indentation retirés,
 # sauts de ligne gardés, donc mêmes numéros de ligne dans les erreurs JS ; chaînes, gabarits et regex intacts).
@@ -163,24 +229,22 @@ import sys as _sys
 _sys.path.insert(0, str(ROOT / "tools")); _sys.dont_write_bytecode = True
 from minijs import minify
 def ecrire_js(nom, t): (ROOT / "docs" / nom).write_text(minify(t))
-ecrire_js("app.js", "\n".join((SRC / f).read_text() for f in JS if not paquet(f) and f != "app.js") + "\n")
-for k, fs in PAQ.items():
-    ecrire_js(f"p-{k}.js", "\n".join((SRC / f).read_text() for f in fs) + "\n")
+for vieux in list((ROOT / "docs").glob("p-*.js")) + list((ROOT / "docs").glob("s[0-9][0-9].js")) + [ROOT / "docs" / "app.js"]:
+    vieux.unlink(missing_ok=True)  # anciens paquets (avant le 27.11) et segments d'une construction précédente
+for nom, g, fs in SEG:
+    ecrire_js(nom, "\n".join((SRC / f).read_text() for f in fs) + "\n")
 ecrire_js("start.js", app_js.replace('const BUILD = "dev";', f'const BUILD = "{version}";', 1))
-# 27.11 (agent poids) : tous les paquets dans le précache du service worker (installation) : hors ligne complet même si
-# l'élève ferme l'app avant la fin du chargement en arrière-plan (première visite : les paquets du premier écran sont
-# chargés avant que le service worker ne contrôle la page).
+# Service worker : tous les segments dans le précache d'installation (hors ligne complet, toute classe, dès la 1re visite).
 SW = (SRC / "pwa" / "sw.js").read_text()
 assert '"./start.js?v=__VERSION__",' in SW
-SW = SW.replace('"./start.js?v=__VERSION__",', '"./start.js?v=__VERSION__",\n  ' + ", ".join('"./p-%s.js?v=__VERSION__"' % k for k in ORDRE_P) + ",", 1)
+SW = SW.replace('"./start.js?v=__VERSION__",', '"./start.js?v=__VERSION__",\n  ' + ", ".join('"./%s?v=__VERSION__"' % s[0] for s in SEG) + ",", 1)
 (ROOT / "docs" / "sw.js").write_text(SW.replace("__VERSION__", version))
-# 27.11 (agent poids) : données de tests/poids.html (tailles publiées brutes et gzip, fichiers de chaque paquet, fonction
-# need() du chargeur ci-dessus) ; fichier généré, hors git (une page de test ne peut pas lire docs/ elle-même).
+# Données de tests/poids.html et de tools/poids.py (fichier généré, hors git) : tailles publiées brutes et gzip,
+# segments (fichiers, groupe), segments de chaque classe.
 import gzip
-NEED = re.search(r"  function need\(p\) \{.*?\n  \}\n", loader, re.S).group(0)
 POIDS = {"files": {f.name: [len(b), len(gzip.compress(b, 9))] for f in sorted((ROOT / "docs").glob("*.js")) + [ROOT / "docs" / "index.html"] for b in [f.read_bytes()]},
-         "L": ORDRE_N, "K": ORDRE_P, "paq": {k: fs for k, fs in PAQ.items()}, "commun": [f for f in JS if not paquet(f) and f != "app.js"], "JS": JS}
-(ROOT / "tests" / "_poids_data.js").write_text("window.POIDS = " + _json.dumps(POIDS) + ";\nwindow.POIDS_NEED = function (L, K) {\n" + NEED + "  return need;\n};\n")
+         "seg": SEG, "classes": SEGS_DE, "paquets": CLASSES, "x": XS, "commun": COMMUN, "JS": JS}
+(ROOT / "tests" / "_poids_data.js").write_text("window.POIDS = " + _json.dumps(POIDS) + ";\n")
 for f in ("icon-192.png", "icon-512.png"):
     shutil.copy(SRC / "pwa" / f, ROOT / "docs" / f)
 MAN = _json.loads((SRC / "pwa" / "manifest.webmanifest").read_text())

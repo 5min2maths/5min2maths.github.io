@@ -1,8 +1,12 @@
 # Poids du code publié (27.11, agent poids)
 
+> 27.11 (agent ordre) : `docs/app.js` et les paquets `docs/p-*.js` décrits ci-dessous sont remplacés par des segments
+> exécutés dans l'ordre des sources (`docs/sNN.js`) : voir § « Ordre d'exécution ». Les mesures « Après » ci-dessous
+> sont celles de l'agent poids, avant ce changement.
+
 Constat d'un testeur : `docs/app.js` pesait 2,7 Mo (8 Mo pour tous les `docs/*.js`). Objectif : moins de code
 téléchargé et exécuté **avant le premier écran**, sans changer le comportement.
-Outils : `python3 tools/poids.py taille [DOSSIER…]`, `python3 tools/poids.py empreinte --avant DOSSIER`,
+Outils : `python3 tools/poids.py taille [DOSSIER…]`, `python3 tools/poids.py ordre` (27.11, agent ordre),
 page `tests/poids.html` (plafonds), `tools/test_paquets.py`, `tools/test_hors_ligne.py`.
 
 ## Avant / après : ce qu'un élève télécharge avant son premier écran
@@ -60,32 +64,101 @@ Chez un habitué, le code est déjà en cache (compilé) : le gain porte surtout
 - `tools/test_hors_ligne.py` : + les 10 paquets dans le cache hors ligne ; hors ligne, accueil et MathJax.
 - `tests/maj.html` (« Nouvelle version prête ») et suite complète `tools/run_tests.sh`.
 
-## Écart préexistant découvert (pas corrigé : il changerait le comportement)
+## Ordre d'exécution (27.11, agent ordre) : la version publiée = la version testée
 
-L'outil d'empreinte montre deux écarts **déjà présents avant ce chantier** :
+### Problème (trouvé ci-dessus)
 
-1. **Premier écran ≠ après l'arrière-plan.** Des paquets supérieurs remplacent les générateurs de notions de classes
-   inférieures. Tant qu'ils ne sont pas chargés (quelques secondes après l'accueil), l'élève reçoit d'autres questions :
-   - 9e : 14 notions (ch10_no → decadd, decmul… ; ch11_no → fracadd, prio ; ch11_litt → litelab ; ch1c_no → divcrit) ;
-   - 10e : 33 notions (ch11_*, act_ch11b/c, ch1c_eq/sys/no/geo) ;
-   - 11e : 21 notions (**ch1c_eq.js** : eq1, eq2, eq2disc, eq2fact… ; **ch1c_sys.js** : affine, sys2, tabval… ; ch1c_no.js) ;
-   - 1re Collège : absval (ch2c.js) ; MP 2e–4e : quartiles (fr_couv.js).
-   Une séance lancée tout de suite après l'ouverture peut donc servir l'ancienne version de eq1 à un élève de 11e.
-2. **Version publiée ≠ version testée.** Les pages de test chargent les sources dans l'ordre de build.py ; la version
-   publiée exécute le code commun AVANT les paquets. Résultat (mesure du 27.11, 334 notions) : 159 notions ont
-   d'autres questions publiées que testées, et 147 autres une leçon différente. Exemples : `defis.js` (« remplace les problèmes de niveau 4 des chapitres ») s'exécute avant les
-   chapitres, qui le remplacent à leur tour ; `act_manip2.js` (manipulations) passe avant les leçons actives des
-   paquets, qui l'écrasent. Mesure : `python3 tools/poids.py empreinte --src`.
+1. **Version publiée ≠ version testée.** Le chargeur du 24.11 exécutait tout le code commun (`app.js`) AVANT les
+   paquets, alors que les sources (pages de test, `dist/`) s'exécutent dans l'ordre de la liste `JS` de build.py, où
+   code commun et fichiers de paquets s'entrelacent. Les fichiers qui « remplacent » (defis.js, act_manip2.js, riche.js…)
+   étaient donc écrasés par les fichiers de chapitre au lieu de les remplacer.
+2. **Générateurs provisoires au premier écran.** Le chargeur ne chargeait avant l'accueil que les paquets de la classe et
+   des classes inférieures ; or des paquets supérieurs redéfinissent des notions inférieures (ch1c_eq.js → eq1 en 11e…).
+   Les autres paquets arrivaient quelques secondes après, en arrière-plan, et changeaient les questions en cours de route.
 
-Piste (chantier à décider) : publier pour chaque classe **un seul fichier dans l'ordre des sources** (commun + ses
-fichiers, ordre de build.py), et choisir les fichiers de chaque classe avec `tools/poids.py empreinte` (mêmes
-questions que la version testée). Le chargement par paquets en arrière-plan deviendrait inutile ; le précache garde
-la classe de l'élève hors ligne. Conséquence : 9e–11e devront charger les fichiers ch11_* / ch1c_* qui redéfinissent
-leurs notions (plus lourd qu'aujourd'hui, mais exact).
+### Solution
+
+- **Segments dans l'ordre des sources** (build.py) : la liste `JS` est découpée en segments consécutifs (`docs/sNN.js`,
+  36 au 27.11), chacun formé de fichiers du même groupe (code commun, paquet x, ou paquets requis par les mêmes classes).
+  Mis bout à bout, les segments redonnent exactement `JS`.
+- **Chaque classe exécute, dans l'ordre des sources, le code commun et les segments de ses paquets** (`CLASSES` de
+  build.py), tous AVANT l'app (`start.js`) : scripts insérés d'un coup avec `async = false` (téléchargement en
+  parallèle, exécution dans l'ordre). Plus aucun paquet en arrière-plan ; seul le paquet « x » (histoires, curieux,
+  présentations, indépendant du reste) s'ajoute à la fin, à la demande.
+- `CLASSES` = paquets de la classe et des classes inférieures (comme avant) **plus ceux qui redéfinissent ses notions** :
+  10, 11, 12 en 9e–11e ; 13 en 1re Collège (ch2c.js : absval) ; fr en MP 2e–4e (fr_couv.js : quartiles). Mesuré page par
+  page (une page neuve par classe et par paquet retiré : des générateurs gardent une mémoire anti-répétition, deux
+  empreintes dans la même page diffèrent).
+- **Changement de classe** (`ensurePacks(p, true)`) : si le code exécuté n'est pas exactement celui de la nouvelle classe,
+  on vérifie que ses segments sont disponibles (cache hors ligne ou réseau ; sinon « Pas de connexion », comme avant),
+  puis la page se recharge avec le bon code et le choix reprend (`window.__reprise` → `setProfile`, src/app.js).
+- **Pages qui ont besoin de tout** (liens `#q-`, `#l-`, `#auteur`, présentations `#decouvrir` `#parents`
+  `#enseignants`, espace parent `#parent=`) : tout le code, dans l'ordre (= les sources) ; adresse changée dans l'app
+  ouverte → rechargement (showCode).
+- **Garde** : au démarrage, code exécuté différent de celui de la classe de l'élève → rechargement avec tout le code ;
+  segment manquant au chargement (hors ligne, jamais mis en cache) → message « Pas de connexion » et « Réessayer », jamais
+  une app à moitié chargée.
+- Service worker : tous les segments précachés à l'installation (changement de classe possible hors ligne).
+
+### Empreintes avant / après (questions Engine.make, graines 1, 2, 7, niveaux 1–4, leçon, leçon active ; catalogue)
+
+Notions de la classe dont l'empreinte publiée diffère des sources (= de ce que vérifient les tests) :
+
+| Classe | Notions | Avant, premier écran | Avant, après l'arrière-plan | Après |
+|---|---|---|---|---|
+| 9e | 49 | 46 | 45 | 0 |
+| 10e | 83 | 77 | 75 | 0 |
+| 11e | 109 | 101 | 100 | 0 |
+| 1re Collège | 152 | 143 | 143 | 0 |
+| 2e Collège | 186 | 169 | 169 | 0 |
+| 3e Collège | 211 | 194 | 194 | 0 |
+| 4e Collège | 230 | 213 | 213 | 0 |
+| MP 1re | 124 | 114 | 114 | 0 |
+| MP 2e | 145 | 135 | 135 | 0 |
+| MP 3e | 157 | 147 | 147 | 0 |
+| MP 4e | 170 | 160 | 160 | 0 |
+| France 6e–Tle | 36–201 | 32–184 | 32–184 | 0 |
+
+(Avant : surtout les défis de niveau 4 et les leçons, que defis.js, riche.js et act_manip2.js n'arrivaient plus à
+remplacer.) Après : identique aux sources pour les 18 classes, au premier écran et après le paquet x, ainsi que les
+registres restreints à la classe (NOTIONS sans les champs FR/againFR/labelFR pour une classe suisse, LESSONS, ACTIVE,
+RICH, VAR, VARX, PROBX, HINTS, PREREQ) ; tout le code (liens) : identique, registres complets compris.
+
+### Coût en poids (gzip, avant le premier écran)
+
+| Profil | Avant (27.11, agent poids) | Après | Écart |
+|---|---|---|---|
+| Nouvel élève (écran d'entrée) | 690 Ko | 696 Ko | +1 % |
+| 9e, 10e, 11e | 11e : 1'035 Ko | 1'290 Ko | +25 % (11e) |
+| 1re Collège | 1'287 Ko | 1'369 Ko | +6 % |
+| 4e Collège | — | 1'638 Ko | |
+| MP 1re | — | 1'420 Ko | |
+| MP 2e | 1'490 Ko | 1'741 Ko | +17 % |
+| MP 4e, France | 2'001 Ko | 2'011 Ko | +0,5 % |
+
+Le prix de l'exactitude : 9e–11e chargent les chapitres de 1re (ch1c_*) qui redéfinissent leurs notions, MP 2e–4e les
+fichiers France (fr_couv.js). Mais l'élève ne télécharge plus le reste en arrière-plan (avant : tout, 2 Mo gzip, juste
+après l'accueil) ; le service worker le précache une fois à l'installation. Total `docs/*.js` inchangé (7,5 Mo brut,
+2,1 Mo gzip). Un nouvel élève recharge la page une fois après le choix de sa classe.
+
+### Contrôles
+
+- `tools/poids.py ordre` (**dans la suite**, tools/run_tests.sh, série complète) : pour chaque classe, docs/ chargé par son
+  vrai chargeur ; ÉCHEC si un segment s'exécute hors de l'ordre des sources, si l'app démarre avant tous les segments de
+  la classe, si un segment s'exécute après le lancement (sauf x), ou si l'empreinte diffère des sources (docs/ non
+  reconstruit après une modification des sources compris). ≈ 5 min.
+- `tests/poids.html` : plafonds (nouvel élève 720, 11e 1'320, 1re 1'400, MP 2e 1'790, 4e FR 2'060 Ko gzip), segments =
+  liste JS dans l'ordre, chaque classe complète avec ses seuls segments.
+- `tools/test_paquets.py` : nouvel élève, 11e (rien après l'accueil), changements de classe (2e, 4e, MP 3e : rechargement,
+  positionnement), choix de classe au bouton, liens #q- (au démarrage et depuis l'app ouverte), #decouvrir.
+- `tools/test_hors_ligne.py` : + tous les segments en cache, changement de classe hors ligne.
+- Ajouter un fichier source : l'ajouter à `JS` et à `paquet()` de build.py ; s'il redéfinit des notions d'autres
+  classes, `tools/poids.py ordre` le signale (empreinte différente) : ajouter son paquet à `CLASSES`.
+- `tools/mesure_chargement.py` (profils par fichier, `par_fichier`, `profil`) suppose encore un `app.js` unique : à adapter
+  si on en a besoin.
 
 ## Pistes non retenues (pour l'instant)
 
-- `defis.js` (501 Ko, le plus gros fichier commun) : dépend de l'ordre d'exécution (voir ci-dessus), à traiter avec
-  le chantier « ordre ».
+- `defis.js` (501 Ko, le plus gros fichier commun) : s'exécute désormais à sa place (chantier « ordre » ci-dessus).
 - France : charge tout (`need` FR) ; seulement en aperçu (`#france`).
 - MathJax (2,1 Mo, déjà minifié) : inchangé.

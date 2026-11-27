@@ -2,8 +2,10 @@
 // le reste (code de l'app, MathJax, polices, icônes) depuis le cache, complété au fil de l'eau.
 // 23.11 (chantier F, chargement) : le code de l'app est un fichier à part (app.js?v=…, versionné à chaque construction),
 // mis en cache dès l'installation ; la page attend le réseau 3 s au plus quand une copie est en cache (réseau faible).
+// 27.11 (agent ordre) : le code est publié en segments dans l'ordre des sources (docs/sNN.js, build.py) ; build.py les
+// ajoute tous à CORE (précache d'installation) : hors ligne complet, toute classe, et changement de classe hors ligne.
 const CACHE = "5m2m-__VERSION__";
-const CORE = ["./", "./index.html", "./app.js?v=__VERSION__", "./start.js?v=__VERSION__", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
+const CORE = ["./", "./index.html", "./start.js?v=__VERSION__", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
   /* 24.11 : MathJax et polices hébergés avec l'app (docs/vendor/, plus de Cloudflare ni de Google Fonts) */
   "./vendor/mathjax/tex-svg.js", "./vendor/fonts/atkinson-400.woff2", "./vendor/fonts/atkinson-700.woff2",
   "./vendor/fonts/bricolage-var.woff2", "./vendor/fonts/jetbrainsmono-var.woff2"];

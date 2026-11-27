@@ -57,6 +57,16 @@ for f in $(echo "$R" | grep "ÉCHEC" | cut -d: -f1 | grep "^tests/"); do
 done
 # 26.11 : nom de l'app centralisé (constantes APP_* de src/curriculum.js), contrôle sur les sources.
 R=$(printf '%s\ntools/test_nom.py: %s' "$R" "$(python3 tools/test_nom.py)")
+# 27.11 (agent ordre) : la version publiée (docs/) doit exécuter exactement les sources, dans l'ordre de build.py, pour
+# chaque classe, avant que l'app démarre (empreinte des questions, leçons et registres de la classe identique aux
+# sources ; aucun segment exécuté après le lancement). Échoue aussi si docs/ n'a pas été reconstruit après une
+# modification des sources. Le verrou est déjà tenu par cette série (M2M_VERROU_TENU). Série complète seulement.
+if [ $# -eq 0 ]; then
+ORD=$(M2M_VERROU_TENU=1 python3 tools/poids.py ordre 2>&1 9>&-)
+if echo "$ORD" | grep -q "^ok " && ! echo "$ORD" | grep -qv "^ok "; then ORD="ok $(echo "$ORD" | grep -c "^ok ") contrôles (classes, tout le code, nouvel élève) : docs/ = sources, dans l'ordre"
+else ORD="ÉCHEC $(echo "$ORD" | grep -v "^ok " | tr '\n' ' ' | cut -c1-600)"; fi
+R=$(printf '%s\ntools/poids.py ordre: %s' "$R" "$ORD")
+fi
 [ -n "$SYN" ] && R=$(printf '%s\n%s' "$R" "$(echo "$SYN" | sed 's/^/syntaxe : ÉCHEC /')")
 echo "$R" | grep -c "" | xargs echo "pages testées :"
 echo "$R" | grep "ÉCHEC" || echo "aucun échec"

@@ -227,7 +227,7 @@ def par_fichier(cpu):
             (tmp / "app.js").write_text(js)
         else:
             debut, fin = page.index('<main id="app"'), page.rindex("</script>")
-            page = page[:debut] + '<main id="app" aria-live="polite"></main>\n<script>\n' + js + "\n" + page[fin:]
+            page = page[:debut] + '<main id="app"></main>\n<script>\n' + js + "\n" + page[fin:]
         (tmp / "pf.html").write_text(page)
         async def cb(cdp):
             await cdp.call("Network.setCacheDisabled", cacheDisabled=True)
