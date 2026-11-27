@@ -32,6 +32,10 @@ Liste explicite : `tools/tests_rapides.txt` (format documenté en tête du fichi
   pour un fichier d'aide `tests/X.js`, les pages qui le chargent ; et les correspondances `src/… -> pages` du fichier ;
 - **échecs de la nuit** : les pages en échec dans `suivi/tests_nuit/dernier.txt`.
 
+Mesure du 27.11 (machine au repos, sans changement de contenu en attente) : **2 min 29 s** pour 10 pages + syntaxe +
+`test_nom.py` + `poids.py ordre --rapide 6` (19 profils). Chaque page de contenu modifiée ajoute son propre temps.
+Essai : `M2M_BASE=HEAD tools/run_tests.sh --rapide` (autre référence que `origin/master`).
+
 Les paramètres d'adresse sont permis (`recalcul#n=3`) : `tools/run_tests.sh recalcul#n=3 fumee` marche aussi à la
 main. Les pages lancées une à une gardent leurs seuils (aucune page de la suite n'est modifiée).
 

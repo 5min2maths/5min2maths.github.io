@@ -43,7 +43,7 @@ export -f un
 # bot.html = élève-robot complet (tools/bot_eleve.py) : trop lourd pour la batterie, lancé à part chaque nuit (23.11).
 RAPIDE=; ORDRE_PAS=
 if [ "${1:-}" = "--rapide" ]; then
-  RAPIDE=1; LR=$(python3 tools/tests_rapides.py)
+  RAPIDE=1; LR=$(python3 tools/tests_rapides.py ${M2M_BASE:+--base $M2M_BASE})   # M2M_BASE : autre référence que origin/master (essais)
   ORDRE_PAS=$(echo "$LR" | sed -n 's/^ORDRE //p'); set -- $(echo "$LR" | grep -v '^ORDRE ')
 fi
 if [ $# -gt 0 ]; then L=$(for t in "$@"; do case $t in *'#'*) echo "tests/${t%%#*}.html#${t#*#}";; *) echo "tests/$t.html";; esac; done); else L=$(ls tests/*.html | grep -v "/_" | grep -v "/bot.html" | grep -v "/eleves.html"); fi
