@@ -16833,7 +16833,8 @@ const Engine = {
     /* 25.11 soir (décision de l'enseignant : « distinguer normal et renforcé en 3e–4e ») : au Collège de Genève, 3e et 4e,
        les notions niv: "R" (MA2, niveau renforcé) ne sont proposées qu'aux élèves de MA2. Sans choix : MA1. */
     const ma1 = profile.system === "CH" && profile.track !== "mp" && profile.grade >= 14 && profile.niv !== "R";
-    return NOTIONS.filter((n) => { const pl = placeOf(n, profile); return pl && pl[0] <= profile.grade && !(ma1 && n.niv === "R"); }).map((n) => {
+    /* 27.11 (agent primaire) : automatismes de fin de primaire (n.prim, src/primaire.js) jamais au catalogue : servis par PRIM.inject seulement */
+    return NOTIONS.filter((n) => { const pl = placeOf(n, profile); return pl && pl[0] <= profile.grade && !(ma1 && n.niv === "R") && !n.prim; }).map((n) => {
       const [g] = placeOf(n, profile);
       // Matu : une notion est « de l'année » si son chapitre Sésamath est celui de l'année (Ma1 = 1re, Ma2 = 2e).
       /* 25.11 (audit France) : chapitres Sésamath du Collège de Genève pour les profils suisses seulement (une Tle française, grade 12,
@@ -17363,6 +17364,7 @@ const Engine = {
   isRecent(state, id) {
     const pl = placeOf(NOTIONS.find((n) => n.id === id), state.profile);
     const n = NOTIONS.find((x) => x.id === id);
+    if (n && n.prim) return false; /* 27.11 (agent primaire) : toujours « 🔙 Rappel », jamais dans les créneaux ordinaires */
     return pl && (pl[0] >= state.profile.grade - 1 || (state.profile.track !== "mp" && (n.again || []).includes(state.profile.grade)));
   },
   // Toutes les notions vues sont candidates ; les anciennes sont filtrées par niveau dans oldLevels.
@@ -17830,6 +17832,16 @@ const Engine = {
 // Deux-points lisibles (16.11) : rappels de cours et « Devine » des leçons actives, une fois tout chargé.
 if (typeof LESSONS !== "undefined") for (const L of Object.values(LESSONS)) if (L && typeof L === "object") { for (const k of ["intro", "regle", "piege"]) if (typeof L[k] === "string") L[k] = colonBreak(L[k]); if (Array.isArray(L.exemple)) L.exemple = L.exemple.map(colonBreak); }
 if (typeof ACTIVE !== "undefined") for (const A of Object.values(ACTIVE)) if (A && A.predict) A.predict.why = colonBreak(A.predict.why);
+
+/* 27.11 (agent primaire, tools/primaire_9e.md) : relais des automatismes de fin de primaire (src/primaire.js, paquet 9).
+   PRIM.inject n'agit que pour un élève de 9e (CO, hors MP) en grande difficulté (Engine.struggling) : 1 à 2 questions à la
+   place des dernières prévues. Sans src/primaire.js chargé (autres classes, France) : aucun effet. Mode libre : les notions
+   primaires que freePlan aurait tirées sont retirées (PRIM.strip), seul PRIM.inject en place. */
+(function () {
+  const plan0 = Engine.planSession, one0 = Engine.oneLesson, P = () => (typeof PRIM !== "undefined" ? PRIM : null);
+  Engine.planSession = function (state, format) { const p = plan0.call(this, state, format), X = P(); return X ? X.inject(state, X.strip(p)) : p; };
+  Engine.oneLesson = function (state, plan, n) { const X = P(); return X ? X.inject(state, one0.call(this, state, X.strip(plan), n)) : one0.call(this, state, plan, n); };
+})();
 
 // Espace parent (24.11, vision de l'enseignant : tools/parents.md). Accompagner, pas surveiller.
 // Côté enfant : dans Progrès, « 👪 Envoyer à mes parents » : le code de sauvegarde (src/backup.js) part dans un lien
