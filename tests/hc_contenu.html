@@ -63,6 +63,7 @@ try{
   fuseau:{u:["rel"],f:(q)=>{const c=clean(q.q),H=+c.match(/commence à (\d+) h/)[1],m=c.match(/\(UTC ([−+]) (\d+)\)/),z=(m[1]==="+"?1:-1)*m[2];return((H+1-z)%24+24)%24}},
   jetdeau:{u:["decdiv"],f:(q)=>140000/+clean(q.q).match(/épaisseur de \\\(([\d.]+)/)[1],sys:"CH"},
   eiffel:{u:["decdiv"],f:(q)=>330000/+clean(q.q).match(/épaisseur de \\\(([\d.]+)/)[1],sys:"FR"},
+  logo:{u:["decdiv","rac"],f:(q)=>{const n=nums(q.q);ok(Math.abs(n[0]/n[1]-(1+Math.sqrt(5))/2)<0.005,"logo : rectangle d'or "+n);return Math.round(n[0]/n[1]*100)/100}}, /* 27.11 : logo Pépite² (rectangle d'or) */
   doubler:{u:["log"],f:(q)=>{const t=+clean(q.q).match(/rapporte \\\((\d+)/)[1];return Math.ceil(Math.log(2)/Math.log(1+t/100))}},
  };
  for(const [k,o] of Object.entries(CU)){const c=CURIEUX.find(x=>x.key===k);ok(c,"curieuse absente "+k);if(!c)continue;

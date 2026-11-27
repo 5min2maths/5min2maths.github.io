@@ -16,7 +16,7 @@ APP = dict(_re.findall(r'^const (APP_[A-Z]+) = "([^"]*)";', (SRC / "curriculum.j
 assert {"APP_NAME", "APP_TAGLINE", "APP_SHORT", "APP_TITLE"} <= set(APP), "constantes APP_* introuvables dans src/curriculum.js"
 head = """<title>""" + APP["APP_TITLE"] + """</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Chaque jour, quelques minutes de maths, à ton niveau.">
+<meta name="description" content=\"""" + APP["APP_TAGLINE"] + """ : chaque jour, quelques minutes de maths, à ton niveau.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
@@ -63,7 +63,9 @@ shutil.copytree(VENDOR, ROOT / "dist" / "vendor", dirs_exist_ok=True)
 # Polices : @font-face en ligne (docs/vendor/fonts, font-display: swap), police du texte préchargée ; MathJax :
 # docs/vendor/mathjax, chargé par le chargeur ci-dessous (24.11) ; voir tools/chargement.md.
 pwa_head = ('<link rel="manifest" href="manifest.webmanifest">\n<meta name="theme-color" content="#2457d6">\n'
-            '<link rel="apple-touch-icon" href="icon-192.png">\n<meta name="apple-mobile-web-app-capable" content="yes">\n')
+            '<link rel="icon" href="favicon.svg" type="image/svg+xml">\n<link rel="icon" href="favicon-32.png" sizes="32x32">\n'
+            '<link rel="apple-touch-icon" href="apple-touch-icon.png">\n<meta name="apple-mobile-web-app-capable" content="yes">\n'
+            '<meta name="apple-mobile-web-app-title" content="' + APP["APP_SHORT"] + '">\n')
 # 24.11 (chantier F2, chargement par niveau ; plan : tools/chargement.md) : docs/app.js = code commun ; un paquet par
 # niveau (docs/p-<niveau>.js) ; docs/start.js = app.js (démarrage). Le chargeur en ligne charge les paquets requis pour
 # le profil (son niveau et les niveaux inférieurs de sa filière), démarre l'app, puis charge les autres en arrière-plan.
@@ -245,10 +247,11 @@ import gzip
 POIDS = {"files": {f.name: [len(b), len(gzip.compress(b, 9))] for f in sorted((ROOT / "docs").glob("*.js")) + [ROOT / "docs" / "index.html"] for b in [f.read_bytes()]},
          "seg": SEG, "classes": SEGS_DE, "paquets": CLASSES, "x": XS, "commun": COMMUN, "JS": JS}
 (ROOT / "tests" / "_poids_data.js").write_text("window.POIDS = " + _json.dumps(POIDS) + ";\n")
-for f in ("icon-192.png", "icon-512.png"):
+for f in ("icon-192.png", "icon-512.png", "icon-maskable-192.png", "icon-maskable-512.png", "apple-touch-icon.png", "favicon-32.png", "favicon.svg"):  # 27.11 : logo Pépite² (tools/logo/gen_logos.py)
     shutil.copy(SRC / "pwa" / f, ROOT / "docs" / f)
 MAN = _json.loads((SRC / "pwa" / "manifest.webmanifest").read_text())
-MAN["name"], MAN["short_name"] = APP["APP_NAME"] + " " + APP["APP_TAGLINE"], APP["APP_SHORT"]
+MAN["name"], MAN["short_name"] = APP["APP_NAME"], APP["APP_SHORT"]
+MAN["description"] = APP["APP_TAGLINE"] + " : chaque jour, quelques minutes de maths, à ton niveau."
 (ROOT / "docs" / "manifest.webmanifest").write_text(_json.dumps(MAN, ensure_ascii=False, indent=2) + "\n")
 (ROOT / "docs" / ".nojekyll").write_text("")
 print("dist/5min2maths.html, dist/index.html et docs/index.html (GitHub Pages) :", round(len(head + body) / 1024), "Ko")

@@ -1,0 +1,322 @@
+#!/usr/bin/env python3
+"""Logos Pépite² (27.11, agent pepite) : 3 propositions en SVG, planche de comparaison, icônes de l'app.
+Usage : python3 tools/logo/gen_logos.py [A|B|C]   (variante appliquée à l'app ; défaut : A)
+Sorties :
+  tools/logo/logo_A_pepite.svg, logo_B_carre.svg, logo_C_typo.svg (icônes 512) + logo_C_wordmark.svg ;
+  tools/logo/planche.html → planche.png (Chromium sans interface) ;
+  src/pwa/icon-192.png, icon-512.png (any), icon-maskable-192.png, icon-maskable-512.png (zone sûre), apple-touch-icon.png
+  (180), favicon-32.png, favicon.svg, et la ligne const LOGO_MARK de src/curriculum.js (pépite de l'en-tête, en ligne).
+Le « 2 » de l'exposant est un tracé (pas une police) : même rendu partout, favicon compris."""
+import subprocess, sys, tempfile
+from pathlib import Path
+from PIL import Image
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent.parent
+BLUE, GOLD, GOLD_D = "#2457d6", "#F2B705", "#E0A100"
+
+# Pépite (27.11, 2e version après le retour de l'enseignant : « A ressemble à un diamant ») : bloc d'or organique,
+# contour irrégulier en courbes (bosses et creux), dégradé or chaud, reflets doux, grains, ombre portée.
+# Maths cachées (demande de l'enseignant) :
+#  - la pépite s'inscrit EXACTEMENT dans un rectangle d'or : 160·φ × 160 (258,885 × 160), coin (142 ; 190) dans le cadre
+#    512 ; le contour est normalisé sur ce rectangle (boîte englobante mesurée sur les courbes de Bézier) ;
+#  - son reflet principal est une spirale d'or (quarts de cercle dans des carrés retirés d'un rectangle d'or, 8 carrés),
+#    tracée dans un petit rectangle d'or 120 × 120/φ posé sur le haut de la pépite.
+import math
+PHI = (1 + 5 ** 0.5) / 2
+RX, RY, RH = 142.0, 190.0, 160.0
+RW = RH * PHI
+# Points du contour (sens horaire) et direction de la tangente ; poignées = 0,36 × la corde.
+# 3e version (27.11, « pas encore la vraie pépite ») : silhouette de roche martelée, arêtes et creux nets (poignées
+# courtes = angles) ; troisième valeur = longueur des poignées (fraction de la corde).
+_K = [((142, 288), (0, -1), .3), ((158, 236), (0.5, -1), .15), ((198, 214), (1, -0.2), .3), ((222, 192), (1, -0.6), .15),
+      ((270, 190), (1, 0), .3), ((296, 206), (1, 0.5), .1), ((326, 196), (1, -0.2), .2), ((372, 206), (1, 0.6), .3),
+      ((401, 258), (0, 1), .3), ((392, 298), (-0.3, 1), .12), ((370, 312), (-1, 0.6), .12), ((348, 344), (-1, 0.4), .3),
+      ((296, 350), (-1, 0), .3), ((262, 334), (-1, -0.5), .1), ((214, 348), (-1, 0.1), .3), ((166, 330), (-1, -0.9), .2)]
+
+
+def _bez():
+    segs = []
+    for i in range(len(_K)):
+        (p0, t0, k0), (p3, t3, k3) = _K[i], _K[(i + 1) % len(_K)]
+        dd = math.dist(p0, p3)
+        n0, n3 = math.hypot(*t0), math.hypot(*t3)
+        p1 = (p0[0] + t0[0] / n0 * dd * k0, p0[1] + t0[1] / n0 * dd * k0)
+        p2 = (p3[0] - t3[0] / n3 * dd * k3, p3[1] - t3[1] / n3 * dd * k3)
+        segs.append((p0, p1, p2, p3))
+    pts_ = [tuple((1 - t) ** 3 * a[k] + 3 * (1 - t) ** 2 * t * b[k] + 3 * (1 - t) * t * t * c[k] + t ** 3 * e[k] for k in (0, 1))
+            for a, b, c, e in segs for t in [i / 400 for i in range(401)]]
+    x0, x1 = min(p[0] for p in pts_), max(p[0] for p in pts_)
+    y0, y1 = min(p[1] for p in pts_), max(p[1] for p in pts_)
+    f = lambda p: (RX + (p[0] - x0) / (x1 - x0) * RW, RY + (p[1] - y0) / (y1 - y0) * RH)  # normalisation sur le rectangle d'or
+    d = "M%.2f %.2f" % f(segs[0][0])
+    for a, b, c, e in segs:
+        d += " C%.2f %.2f %.2f %.2f %.2f %.2f" % (*f(b), *f(c), *f(e))
+    return d + "Z"
+
+
+NUG = _bez()
+
+
+def spiral(x, y, w, n=8):
+    """Spirale d'or (quarts de cercle) dans le rectangle d'or (x, y, w, w/φ) : carré retiré à gauche, en haut, à droite, en bas…"""
+    h = w / PHI
+    d, sq, arcs = f"M{x:.2f} {y + h:.2f}", [], []
+    for k in range(n):
+        if k % 4 == 0:
+            s_ = h; sq.append((x, y, s_)); d += f" A{s_:.2f} {s_:.2f} 0 0 1 {x + s_:.2f} {y:.2f}"; x, w = x + s_, w - s_
+        elif k % 4 == 1:
+            s_ = w; sq.append((x, y, s_)); d += f" A{s_:.2f} {s_:.2f} 0 0 1 {x + s_:.2f} {y + s_:.2f}"; y, h = y + s_, h - s_
+        elif k % 4 == 2:
+            s_ = h; sq.append((x + w - s_, y, s_)); d += f" A{s_:.2f} {s_:.2f} 0 0 1 {x + w - s_:.2f} {y + s_:.2f}"; w = w - s_
+        else:
+            s_ = w; sq.append((x, y + h - s_, s_)); d += f" A{s_:.2f} {s_:.2f} 0 0 1 {x:.2f} {y + h - s_:.2f}"; h = h - s_
+    return d, sq
+
+
+def spiral_arcs(d):
+    """Arcs séparés (pour une opacité qui varie le long de la spirale) : [« M x y A … », …]."""
+    head, *parts = d.split(" A")
+    cur, out = head[1:], []
+    for a in parts:
+        out.append(f"M{cur} A{a}")
+        cur = " ".join(a.split()[-2:])
+    return out
+
+
+SPX, SPY, SPW = 186.0, 208.0, 118.0  # petit rectangle d'or du reflet : 118 × 72,93
+SPIRAL, SQUARES = spiral(SPX, SPY, SPW)
+DEFS = ('<defs>'
+        # or poli (3e version) : bandes claires et sombres francches, lumière en haut à gauche
+        '<linearGradient id="pgOr" x1="0" y1="0" x2=".75" y2="1">'
+        '<stop offset="0" stop-color="#FFF1A8"/><stop offset=".14" stop-color="#FFD23F"/><stop offset=".3" stop-color="#C98E00"/>'
+        '<stop offset=".42" stop-color="#FFE071"/><stop offset=".55" stop-color="#E8A800"/><stop offset=".68" stop-color="#9A6400"/>'
+        '<stop offset=".8" stop-color="#E9AE12"/><stop offset=".92" stop-color="#8A5600"/><stop offset="1" stop-color="#5E3A00"/></linearGradient>'
+        f'<clipPath id="pgClip"><path d="{NUG}"/></clipPath>'
+        '<filter id="pgFlou" x="-30%" y="-80%" width="160%" height="260%"><feGaussianBlur stdDeviation="8"/></filter>'
+        '<filter id="pgFlou3" x="-50%" y="-80%" width="200%" height="260%"><feGaussianBlur stdDeviation="6"/></filter></defs>')
+
+# Plans (facettes) sombres et clairs, arêtes, creux nets, éclats : dans le cadre 512 (coupés au contour de la pépite).
+_DARK = [((300, 352), (334, 300), (404, 296), (404, 360)), ((140, 302), (196, 326), (244, 354), (140, 354)),
+         ((262, 334), (298, 302), (334, 300), (300, 352)), ((370, 312), (404, 262), (404, 296), (334, 300))]
+_LIGHT = [((156, 240), (222, 204), (262, 238), (198, 272)), ((298, 208), (372, 206), (352, 248), (312, 240)),
+          ((198, 272), (262, 238), (298, 302), (238, 300))]
+_RIDGES = [((198, 272), (262, 238)), ((262, 238), (312, 240)), ((298, 302), (334, 300)), ((334, 300), (370, 312))]
+_DENTS = [((314, 264), (338, 257), (328, 273)), ((224, 314), (246, 307), (236, 320)), ((372, 248), (386, 242), (379, 259)),
+          ((282, 222), (298, 226), (288, 232))]
+_P = lambda P: " ".join(f"{x},{y}" for x, y in P)
+
+
+def nugget(tr="", sparkle=True, outline="#5A3A00", explain=False):
+    s = f'<g transform="{tr}">' + DEFS
+    s += '<ellipse cx="292" cy="364" rx="124" ry="16" fill="#061237" opacity=".5" filter="url(#pgFlou)"/>'  # ombre portée en bas à droite
+    s += f'<path d="{NUG}" fill="url(#pgOr)"/>'
+    s += '<g clip-path="url(#pgClip)">'
+    s += "".join(f'<polygon points="{_P(q)}" fill="#4A2C00" opacity=".38"/>' for q in _DARK)
+    s += "".join(f'<polygon points="{_P(q)}" fill="#FFF3B8" opacity=".32"/>' for q in _LIGHT)
+    s += "".join(f'<line x1="{a[0]}" y1="{a[1]}" x2="{b[0]}" y2="{b[1]}" stroke="#FFF6CC" stroke-width="2.2" opacity=".75"/>' for a, b in _RIDGES)
+    for q in _DENTS:
+        s += f'<polygon points="{_P(q)}" fill="#3E2400" opacity=".6"/><line x1="{q[-1][0]}" y1="{q[-1][1]}" x2="{q[-2][0]}" y2="{q[-2][1]}" stroke="#FFE68A" stroke-width="2" opacity=".8"/>'
+    s += f'<path d="{NUG}" transform="translate(-4 -6)" fill="none" stroke="#FFE08A" stroke-width="3.5" opacity=".6"/>'  # contre-jour, bord bas
+    # reflet spéculaire principal (tache claire floue) où se fond la spirale d'or
+    s += f'<ellipse cx="{SPX + SPW * .45:.1f}" cy="{SPY + SPW / PHI * .5:.1f}" rx="{SPW * .5:.1f}" ry="{SPW / PHI * .42:.1f}" fill="#FFFBE6" opacity=".55" filter="url(#pgFlou3)"/>'
+    s += "</g>"
+    s += f'<path d="{NUG}" fill="none" stroke="{outline}" stroke-width="5" stroke-linejoin="round"/>'
+    # spirale d'or : fine, opacité qui monte puis redescend le long du tracé (on la devine dans le reflet)
+    A = spiral_arcs(SPIRAL)
+    op = [.12, .4, .7, .85, .75, .55, .35, .15]
+    s += "".join(f'<path d="{a}" fill="none" stroke="#FFF8D8" stroke-width="1.9" stroke-linecap="round" opacity="{op[k % len(op)]}"/>' for k, a in enumerate(A))
+    if sparkle:  # éclats : petits, presque blancs, nets
+        for x, y, r in ((214, 222, 7), (350, 220, 6), (236, 300, 4), (388, 276, 4)):
+            s += f'<path d="M{x} {y - r} L{x + r * .25} {y - r * .25} {x + r} {y} {x + r * .25} {y + r * .25} {x} {y + r} {x - r * .25} {y + r * .25} {x - r} {y} {x - r * .25} {y - r * .25}Z" fill="#fff" opacity=".95"/>'
+    if explain:
+        s += (f'<rect x="{RX}" y="{RY}" width="{RW:.3f}" height="{RH}" fill="none" stroke="#fff" stroke-width="2.5" stroke-dasharray="9 7"/>'
+              + f'<path d="{SPIRAL}" fill="none" stroke="#fff" stroke-width="2.5" opacity=".9"/>'
+              + "".join(f'<rect x="{a:.2f}" y="{b:.2f}" width="{c:.2f}" height="{c:.2f}" fill="none" stroke="#1d2b4f" stroke-width="1.2" stroke-dasharray="4 3" opacity=".7"/>' for a, b, c in SQUARES[:5]))
+    return s + "</g>"
+
+
+def two(x, y, h, color, w=None):
+    """« 2 » tracé, coin supérieur gauche (x, y), hauteur h."""
+    k = h / 90
+    w = w or 16 * k * 1.15
+    return (f'<path transform="translate({x} {y}) scale({k})" d="M6 24 C6 4 54 4 54 26 C54 44 22 58 5 86 L58 86" '
+            f'fill="none" stroke="{color}" stroke-width="{w / k}" stroke-linecap="round" stroke-linejoin="round"/>')
+
+
+def grid(color="#fff", op=".12", step=42.67):
+    return (f'<defs><pattern id="g" width="{step}" height="{step}" patternUnits="userSpaceOnUse"><path d="M{step} 0H0V{step}" '
+            f'fill="none" stroke="{color}" stroke-opacity="{op}" stroke-width="2"/></pattern></defs>')
+
+
+def svg(inner, bg=True, rx=0):
+    b = (f'{grid()}<rect width="512" height="512" rx="{rx}" fill="{BLUE}"/><rect width="512" height="512" rx="{rx}" fill="url(#g)"/>'
+         if bg else "")
+    return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">{b}{inner}</svg>'
+
+
+# Contenu de chaque variante (sans fond), dans le cadre 512, centré pour tenir dans la zone sûre une fois réduit.
+def tile(cx, cy, size, rot=8, grid=True):
+    """² sur un bout de papier quadrillé (idée de l'enseignant, 27.11) : la pépite = le côté brillant, le ² = le côté
+    scolaire. Carré arrondi crème, petits carreaux bleu clair, marge rouge discrète, ² à l'encre bleue de l'app."""
+    x, y, c = cx - size / 2, cy - size / 2, size / 6
+    g = "".join(f'<line x1="{x + i * c:.1f}" y1="{y:.1f}" x2="{x + i * c:.1f}" y2="{y + size:.1f}"/>' for i in range(1, 6))
+    g += "".join(f'<line x1="{x:.1f}" y1="{y + i * c:.1f}" x2="{x + size:.1f}" y2="{y + i * c:.1f}"/>' for i in range(1, 6))
+    return (f'<g transform="rotate({rot} {cx} {cy})"><rect x="{x + 4:.1f}" y="{y + 7:.1f}" width="{size}" height="{size}" rx="{size * .16:.1f}" fill="#061237" opacity=".3"/>'
+            f'<rect x="{x:.1f}" y="{y:.1f}" width="{size}" height="{size}" rx="{size * .16:.1f}" fill="#FFFDF5"/>'
+            + (f'<g stroke="#B5C9F3" stroke-width="1.6">{g}</g>' if grid else "")
+            + (f'<line x1="{x + c * 1.1:.1f}" y1="{y:.1f}" x2="{x + c * 1.1:.1f}" y2="{y + size:.1f}" stroke="#E0565B" stroke-width="2" opacity=".7"/>' if grid else "")
+            + two(cx - size * .21, cy - size * .34, size * .64, BLUE, w=size * .16) + "</g>")
+
+
+def content_A():
+    return nugget("translate(232 300) scale(1.38) translate(-271 -270)") + tile(374, 140, 116)
+
+
+def content_A_fav():
+    """Favicon (16–32 px) : carré blanc sans quadrillage, plus grand, ² bien lisible."""
+    return nugget("translate(222 318) scale(1.3) translate(-271 -270)", sparkle=False) + tile(372, 138, 170, rot=6, grid=False)
+
+
+def content_B():
+    card = ('<g transform="rotate(-6 256 268)"><rect x="106" y="118" width="300" height="300" rx="56" fill="#fff"/>'
+            '<g stroke="#2457d6" stroke-opacity=".16" stroke-width="3">'
+            + "".join(f'<line x1="{x}" y1="130" x2="{x}" y2="406"/>' for x in (166, 226, 286, 346))
+            + "".join(f'<line x1="118" y1="{y}" x2="394" y2="{y}"/>' for y in (178, 238, 298, 358)) + "</g>"
+            + nugget("translate(256 268) scale(.78) translate(-271 -270)") + "</g>")
+    return card + two(396, 70, 86, GOLD)
+
+
+def content_C():
+    return ('<text x="96" y="410" font-family="Bricolage Grotesque" font-weight="800" font-size="380" fill="#fff">P</text>'
+            + nugget("translate(372 158) scale(.5) translate(-271 -270)", sparkle=False, outline="#6b4a00")
+            + two(352, 124, 62, "#3a2a00", w=13))
+
+
+VARIANTS = {"A": ("logo_A_pepite", content_A, "Pépite d'or + ² en exposant"),
+            "B": ("logo_B_carre", content_B, "Pépite dans un carré arrondi (« au carré »)"),
+            "C": ("logo_C_typo", content_C, "Typographique : P + ² en pépite")}
+
+WORDMARK_C = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 160" width="560" height="160">'
+              '<text x="8" y="128" font-family="Bricolage Grotesque" font-weight="800" font-size="128" fill="#2457d6">Pépite</text>'
+              + nugget("translate(486 52) scale(.3) translate(-271 -270)", sparkle=False, outline="#6b4a00")
+              + two(474, 34, 34, "#3a2a00", w=7) + "</svg>")
+
+
+def icon_any(c):
+    return svg(c(), rx=112)
+
+
+def icon_mask(c):
+    return svg(f'<g transform="translate(256 256) scale(.8) translate(-256 -256)">{c()}</g>')
+
+
+FONT = (ROOT / "docs/vendor/fonts/bricolage-var.woff2").as_uri()
+CSS = f"@font-face{{font-family:'Bricolage Grotesque';font-weight:700 800;src:url({FONT}) format('woff2')}}"
+
+
+def shot(html, w, h, out):
+    d = HERE / "_tmp"; d.mkdir(exist_ok=True)  # Chromium (snap) ne voit pas /tmp
+    if True:
+        p = d / "p.html"
+        p.write_text(f'<!doctype html><meta charset="utf-8"><style>{CSS}html,body{{margin:0;background:transparent}}svg{{display:block}}</style>{html}')
+        subprocess.run(["nice", "timeout", "-k", "5", "60", "chromium", "--headless", "--disable-gpu", "--no-sandbox",
+                        "--allow-file-access-from-files", "--hide-scrollbars", "--default-background-color=00000000",
+                        "--virtual-time-budget=3000", f"--window-size={max(w, 500)},{h}", f"--screenshot={out}", p.as_uri()],
+                       check=True, capture_output=True)
+    if w < 500:
+        Image.open(out).crop((0, 0, w, h)).save(out)
+
+
+def render(svgtext, sizes, prefix):
+    """SVG rendu à 1024 px puis réduit (antialiasing propre aux petites tailles)."""
+    big = HERE / "_tmp" / "big.png"; big.parent.mkdir(exist_ok=True)
+    shot(svgtext.replace('width="512" height="512"', 'width="1024" height="1024"'), 1024, 1024, big)
+    im = Image.open(big).convert("RGBA")
+    for s, out in sizes:
+        im.resize((s, s), Image.LANCZOS).save(out)
+
+
+def main():
+    choice = (sys.argv[1] if len(sys.argv) > 1 else "A").upper()
+    for k, (name, c, _) in VARIANTS.items():
+        (HERE / f"{name}.svg").write_text(icon_any(c) + "\n")
+        (HERE / f"{name}_maskable.svg").write_text(icon_mask(c) + "\n")
+    (HERE / "logo_C_wordmark.svg").write_text(WORDMARK_C + "\n")
+    # Planche : en grand, en icônes 48 px sur un faux écran d'accueil (masque rond d'Android), en-tête de l'app à 360 px.
+    big = "".join(f'<figure><div class="big">{icon_any(c)}</div><figcaption><b>{k}</b> · {t}</figcaption></figure>'
+                  for k, (n, c, t) in VARIANTS.items())
+    apps = ['<i style="background:#e0565b"></i>', '<i style="background:#34a853"></i>', '<i style="background:#fbbc04"></i>',
+            '<i style="background:#7e57c2"></i>', '<i style="background:#00897b"></i>']
+    phones = ""
+    for k, (n, c, t) in VARIANTS.items():
+        ico = f'<span class="ic">{icon_mask(c)}</span>'
+        cells = [f'<div class="app">{a}<small>App</small></div>' for a in apps[:3]]
+        cells.insert(1, f'<div class="app">{ico}<small>Pépite²</small></div>')
+        cells += [f'<div class="app">{a}<small>App</small></div>' for a in apps[3:]]
+        phones += f'<div class="phone"><div class="wall">{"".join(cells)}</div><p>{k} · 48 px</p><div class="tiny"><span>{icon_any(content_A_fav if k == "A" else c)}</span><span>{icon_any(content_A_fav if k == "A" else c)}</span> favicon 32 / 16 px</div></div>'
+    heads = ""
+    for k, (n, c, t) in VARIANTS.items():
+        mark = (f'<span class="mk">{svg(nugget(), bg=False).replace('viewBox="0 0 512 512"', 'viewBox="132 176 280 196"')}</span>' if k in "AB" else "")
+        name = ("Pépite²" if k != "C" else
+                f'Pépite<span class="mk2">{svg(nugget("translate(256 268) scale(1.3) translate(-271 -270)", sparkle=False, outline="#6b4a00") + two(214, 186, 160, "#3a2a00", w=24), bg=False)}</span>')
+        heads += (f'<div><div class="head"><div class="brand">{mark}<b>{name}</b></div><span class="chip">🔥 <b>5</b> j</span>'
+                  f'<span class="cl">11e</span><span>⚙️</span></div><p class="cap">{k} · en-tête à 360 px</p></div>')
+    zoom = (f'<figure><div class="zoom">{icon_any(content_A)}</div><figcaption>A à 512 px : le reflet est une spirale d\'or</figcaption></figure>'
+            f'<figure><div class="zoom">{svg(nugget("translate(232 300) scale(1.38) translate(-271 -270)", explain=True) + tile(374, 140, 116), rx=112)}</div>'
+            f'<figcaption>Explication : rectangle d\'or {str(round(RW, 1)).replace(".", ",")} × {RH:.0f} (rapport φ ≈ 1,618) et carrés de la spirale</figcaption></figure>'
+            f'<figure><div class="zoom2">{icon_any(content_C)}</div><figcaption>C : la même pépite porte le ²</figcaption></figure>')
+    planche = f"""<style>
+body{{font-family:'Bricolage Grotesque',sans-serif;background:#fbfcfe;padding:24px;width:1452px;color:#1d2b4f}}
+h1{{margin:0 0 6px;font-size:34px}} h1 small{{font-size:18px;color:#5b6687;font-weight:700}}
+.row{{display:flex;gap:28px;margin:18px 0}} figure{{margin:0;text-align:center}} .big svg{{width:300px;height:300px;filter:drop-shadow(0 6px 14px #0002)}} .zoom svg{{width:460px;height:460px}} .zoom2 svg{{width:420px;height:420px}}
+figcaption{{margin-top:8px;font-size:20px}}
+.phone{{width:300px;border-radius:30px;background:linear-gradient(160deg,#1b3d8f,#5b2a86);padding:26px 18px 14px;color:#fff;text-align:center}}
+.wall{{display:grid;grid-template-columns:repeat(3,1fr);gap:18px 8px}} .app{{display:grid;justify-items:center;gap:4px;font:12px sans-serif}}
+.app i,.ic{{display:block;width:48px;height:48px;border-radius:50%;overflow:hidden}} .ic svg{{width:48px;height:48px}}
+.phone p{{margin:12px 0 6px;font-size:16px}} .tiny{{display:flex;gap:8px;align-items:center;justify-content:center;font:12px sans-serif;background:#fff;color:#333;border-radius:8px;padding:6px}}
+.tiny span:first-child svg{{width:32px;height:32px}} .tiny span:nth-child(2) svg{{width:16px;height:16px}}
+.heads{{display:grid;grid-template-columns:repeat(3,360px);gap:8px 28px}}
+.head{{width:360px;box-sizing:border-box;display:flex;align-items:center;gap:6px;padding:10px 12px;background:#fbfcfe;border:1px solid #dde3f0;border-radius:10px;
+background-image:linear-gradient(#e7ecf6 1px,transparent 1px),linear-gradient(90deg,#e7ecf6 1px,transparent 1px);background-size:22px 22px}}
+.brand{{display:flex;align-items:center;gap:4px;flex:1}} .brand b{{font-size:1.25rem;color:#2457d6;font-weight:800;white-space:nowrap;display:flex;align-items:center}}
+.mk svg{{width:26px;height:26px;display:block}} .mk2 svg{{width:28px;height:28px;display:block;margin:-16px 0 0 0}}
+.chip{{font:15px sans-serif;border:1px solid #dde3f0;border-radius:99px;padding:3px 8px;background:#fff}} .cl{{font:14px sans-serif;color:#5b6687}}
+.cap{{margin:0 0 10px;font-size:14px;color:#5b6687}}
+</style>
+<h1>Pépite² · propositions de logo <small>(appliquée : {choice} · python3 tools/logo/gen_logos.py A|B|C)</small></h1>
+<div class="row">{big}</div><div class="row">{phones}</div><div class="heads">{heads}</div><div class="row">{zoom}</div>"""
+    (HERE / "planche.html").write_text(f'<!doctype html><meta charset="utf-8">{planche}')
+    shot(planche, 1500, 1400, HERE / "planche.png")
+    # Icônes de l'app (variante choisie).
+    name, c, _ = VARIANTS[choice]
+    pwa = ROOT / "src/pwa"
+    cf = content_A_fav if choice == "A" else c
+    render(icon_any(c), [(512, pwa / "icon-512.png"), (192, pwa / "icon-192.png")], "any")
+    render(icon_any(cf), [(32, pwa / "favicon-32.png")], "fav")
+    render(icon_mask(c), [(512, pwa / "icon-maskable-512.png"), (192, pwa / "icon-maskable-192.png"), (180, pwa / "apple-touch-icon.png")], "mask")
+    fav = icon_any(cf)
+    if choice == "C":  # pas de police dans un favicon : le P de la variante C devient un tracé simple
+        fav = fav.replace('<text x="96" y="410" font-family="Bricolage Grotesque" font-weight="800" font-size="380" fill="#fff">P</text>',
+                          '<path d="M140 410V130h110a85 85 0 0 1 0 170h-60" fill="none" stroke="#fff" stroke-width="62" stroke-linejoin="round"/>')
+    (pwa / "favicon.svg").write_text(fav + "\n")
+    # Marque de l'en-tête : pépite seule (A, B) ou pépite-exposant (C), SVG en ligne, décorative (aria-hidden).
+    if choice == "C":
+        mark = svg(nugget("translate(256 268) scale(1.3) translate(-271 -270)", sparkle=False, outline="#6b4a00") + two(214, 186, 160, "#3a2a00", w=24), bg=False)
+    else:
+        mark = svg(nugget(), bg=False)
+    mark = mark.replace('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">',
+                        '<svg class="logo-mark" viewBox="132 176 280 196" aria-hidden="true" focusable="false">' if choice != "C"
+                        else '<svg class="logo-mark logo-exp" viewBox="0 0 512 512" aria-hidden="true" focusable="false">')
+    cur = ROOT / "src/curriculum.js"
+    t = cur.read_text()
+    import re
+    t = re.sub(r"^/\* Logo \(27\.11\).*$", "/* Logo (27.11) : pépite de l'en-tête, SVG en ligne, décoratif. Ligne générée par tools/logo/gen_logos.py (variante " + choice + "). */", t, count=1, flags=re.M)
+    t, n = re.subn(r"^const LOGO_MARK = '.*';$", lambda m: "const LOGO_MARK = '" + mark + "';", t, count=1, flags=re.M)
+    assert n == 1, "const LOGO_MARK introuvable dans src/curriculum.js"
+    cur.write_text(t)
+    print("ok logos ; appliquée :", choice)
+
+
+if __name__ == "__main__":
+    main()

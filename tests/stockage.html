@@ -130,7 +130,7 @@ await sec("code", async () => {
 await sec("nom", () => {
   if (typeof APP_NAME !== "string" || !APP_NAME) fail("APP_NAME absent");
   if (!brand.includes(APP_NAME) || !brand.includes(APP_TAGLINE)) fail("en-tête sans APP_NAME / APP_TAGLINE");
-  fresh(); screenLegal(() => {}); if (!app.textContent.includes("« " + APP_NAME + " " + APP_TAGLINE + " »")) fail("mentions légales : nom absent");
+  fresh(); screenLegal(() => {}); if (!app.textContent.includes("« " + APP_NAME + " » (« " + APP_TAGLINE + " »)") /* 27.11 : nom et slogan séparés */) fail("mentions légales : nom absent");
   /* Fonctions globales : aucun nom écrit en dur (le contrôle complet des sources est tools/test_nom.py). */
   for (const k of Object.keys(window)) { let f; try { f = window[k]; } catch (e) { continue; } if (typeof f === "function" && /5 minutes de maths/.test(Function.prototype.toString.call(f))) fail("nom en dur dans " + k + "()"); }
 });

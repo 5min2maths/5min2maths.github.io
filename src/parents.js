@@ -46,10 +46,14 @@ const Parents = {
     const now = (s.now && Array.isArray(s.now.ids) ? s.now.ids : []).filter((id) => this.label(id));
     let fete = null;
     if (w.cons.length) fete = { ic: "🏅", txt: "Une notion maîtrisée : <b>" + esc(this.label(w.cons[0]) || "") + "</b>" + (w.cons.length > 1 ? " (et " + (w.cons.length - 1) + " autre" + (w.cons.length > 2 ? "s" : "") + ")" : "") + "." };
-    else if (w.fixed) fete = { ic: "📕", txt: w.fixed + " erreur" + (w.fixed > 1 ? "s" : "") + " de son carnet " + (w.fixed > 1 ? "effacées" : "effacée") + " : réussie" + (w.fixed > 1 ? "s" : "") + " à nouveau du premier coup." };
+    else if (w.fixed) fete = { ic: "✨", txt: w.fixed > 1 ? w.fixed + " pépites polies : des erreurs réussies à nouveau du premier coup." : "Une pépite polie : une erreur réussie à nouveau du premier coup." };
     else if (w.ups.length) fete = { ic: "📈", txt: "Un progrès en <b>" + esc(w.ups[0].label) + "</b>." };
     else if (w.days) fete = { ic: "💪", txt: w.days + " jour" + (w.days > 1 ? "s" : "") + " de pratique : c'est l'effort qui compte." };
-    return { days, n: w.days, ids: ids.slice(0, 4), more: Math.max(0, ids.length - 4), now: now.slice(0, 3), fete };
+    /* 27.11 (nouveau nom de l app, univers des pépites) : pépites trouvées dans la semaine, estimées depuis l'historique avec le barème des pépites
+       de l'année (questions + 3 × score + 10 par jour de séance, plafond du jour) : la photo ne garde pas le détail par jour. */
+    const cap = typeof YP !== "undefined" ? YP.cap : 40, ses = typeof YP !== "undefined" ? YP.session : 10;
+    const gems = (s.history || []).filter((x) => x && x.n > 0 && x.date >= lim && x.date <= t).reduce((a, x) => a + Math.min(cap, Math.round(x.n + 3 * (x.score || 0)) + ses), 0);
+    return { days, n: w.days, ids: ids.slice(0, 4), more: Math.max(0, ids.length - 4), now: now.slice(0, 3), fete, gems, polished: w.fixed || 0 };
   },
   /* Activité de la semaine : une question curieuse accessible à l'enfant (la même toute la semaine de la photo). */
   curious(s, t) {
@@ -85,10 +89,10 @@ async function screenParentShare() {
   h(`${brand}<h2>Envoyer à <span class="mark">mes parents</span></h2>
   <p class="muted">Tes parents recevront un lien. Il s'ouvre sur leur téléphone, sans compte. Rien n'est gardé sur un serveur : tout est dans le lien.</p>
   <div class="card flat stack par-see"><b>👀 Ce qu'ils verront</b><ul class="plain par-list">
-    <li>✅ Combien de jours tu t'es entraîné·e cette semaine</li>
+    <li>✅ Combien de jours tu t'es entraîné·e cette semaine, et combien de pépites tu as trouvées et polies</li>
     <li>✅ Les notions que tu as travaillées (leur nom, pas tes résultats)</li>
     <li>✅ Une réussite à fêter</li>
-    <li>✅ ${nC ? (nC > 1 ? nC + " problèmes de ton carnet d'erreurs, pour les résoudre" : "1 problème de ton carnet d'erreurs, pour le résoudre") + " avec toi (avec des indices, pas la réponse d'abord)" : "Ton carnet d'erreurs est vide : pas de problème à résoudre ensemble"}</li>
+    <li>✅ ${nC ? (nC > 1 ? nC + " problèmes de tes pépites à polir, pour les résoudre" : "1 problème de tes pépites à polir, pour le résoudre") + " avec toi (avec des indices, pas la réponse d'abord)" : "Rien à polir : pas de problème à résoudre ensemble"}</li>
     <li>✅ Une question curieuse à faire en famille, et des conseils pour t'aider</li></ul>
     <b>🙈 Ce qu'ils ne verront pas</b><ul class="plain par-list">
     <li>✖ Ton Mathélo ni tes notes de compétences</li>
@@ -187,7 +191,7 @@ async function screenParentView(id, opt = {}) {
       ${trap}
       ${lessonOf(q.id)}
       <details class="par-fold par-sol"><summary>🔑 La solution complète (pour vous)</summary><div class="sol">${q.sol}</div></details>
-      <p class="small muted">Ensuite, ${N} refait ce problème dans l'app, avec d'autres nombres (Carnet d'erreurs) : deux réussites de suite l'effacent.</p></details>`;
+      <p class="small muted">Ensuite, ${N} refait ce problème dans l'app, avec d'autres nombres (rubrique « À polir ») : deux réussites de suite du premier coup, et cette pépite est polie.</p></details>`;
   };
   h(`${brand}<div class="eyebrow">👪 Espace parent${opt.preview ? " · aperçu" : ""}</div>${tabs}
   <h2>La semaine de <span class="mark">${N}</span></h2>
@@ -197,13 +201,14 @@ async function screenParentView(id, opt = {}) {
   <div class="card stack par-week"><div class="eyebrow">📅 Sa semaine</div>
     <div class="par-days" aria-label="${W.n} jours de pratique sur 7">${W.days.map((d) => `<span class="${d.on ? "on" : ""}" title="${Parents.fmt(d.d)}">${JR[new Date(d.d + "T12:00:00").getDay()]}</span>`).join("")}</div>
     <p><b>${W.n} jour${W.n > 1 ? "s" : ""} de pratique sur 7.</b> ${reg}</p>
+    ${W.gems ? `<p class="par-gems">🟡 Cette semaine, ${N} a trouvé <b>${W.gems} pépite${W.gems > 1 ? "s" : ""}</b>${W.polished ? ` et en a poli <b>${W.polished}</b>` : ""}.</p>` : ""}
     ${W.ids.length ? `<div><b>Ce qui a été travaillé</b><ul class="plain par-list small">${W.ids.map((x) => `<li>• ${esc(Parents.label(x))}</li>`).join("")}${W.more ? `<li class="muted">et ${W.more} autre${W.more > 1 ? "s" : ""}</li>` : ""}</ul></div>` : ""}
     ${W.now.length ? `<p class="small">📚 En classe en ce moment : ${W.now.map((x) => esc(Parents.label(x))).join(" · ")}</p>` : ""}
     ${W.fete ? `<div class="par-fete"><span>${W.fete.ic}</span><div><b>À fêter</b><div class="small">${W.fete.txt}</div></div></div>` : ""}
   </div>
   <div class="stack par-solve"><div class="eyebrow">🤝 Résoudre ensemble</div>
     ${pbs.length ? `<p class="small muted">${pbs.length > 1 ? "Des problèmes" : "Un problème"} qui ${pbs.length > 1 ? "ont" : "a"} résisté à ${N}. Pas besoin d'être fort en maths : posez des questions, laissez expliquer, les indices sont là.</p>${pbs.map(pbHtml).join("")}`
-      : `<div class="card flat"><p class="small">Son carnet d'erreurs est vide : bravo ! Rien à résoudre ensemble cette semaine.</p></div>`}
+      : `<div class="card flat"><p class="small">Rien à polir : bravo ! Rien à résoudre ensemble cette semaine.</p></div>`}
   </div>
   ${cur || H ? `<div class="card stack par-fun"><div class="eyebrow">🎲 À faire ensemble</div>
     ${cur ? `<h3>${cur.titre}</h3><div class="qtext">${cur.q}</div>${cur.fig ? `<div class="figwrap">${cur.fig}</div>` : ""}<p><b>Chacun parie :</b> ${cur.bet.q}</p><div class="par-bets">${cur.bet.choices.map((c) => `<span>${c}</span>`).join("")}</div>

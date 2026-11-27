@@ -699,6 +699,23 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
         reveal: "Après " + M("n") + " années : " + M(N(C) + " \\cdot " + N(f) + "^n") + ". On veut " + M(N(f) + "^n \\geq 2") + ", donc " + M("n \\geq \\frac{\\ln 2}{\\ln " + N(f) + "} \\approx " + N(x, 2)) + " : il faut " + n + " ans, moins que les " + Math.round(100 / t) + " ans qu'on imagine. Les banquiers utilisent la « règle de 72 » : " + M("72 \\div " + t + " = " + N(72 / t)) + " ans environ." };
     } });
 
+  /* 27.11 (logo de l'app, demande de l'enseignant) : la pépite du logo tient dans un rectangle d'or (160·φ × 160) et son
+     reflet est une spirale d'or (tools/logo/gen_logos.py). Le rectangle est mesuré au dixième de mm sur un autocollant. */
+  add({ key: "logo", fam: "enigme", uses: ["decdiv", "rac"], outil: "le rapport de deux longueurs (une division) et le nombre d'or φ = (1 + √5) ÷ 2 ≈ 1,618, la solution positive de φ² = φ + 1.",
+    make() {
+      const PHI = (1 + Math.sqrt(5)) / 2, h = pk([30, 35, 40, 45, 50, 55, 60]), w = Math.round(h * PHI * 10) / 10;
+      const obj = pk(["un autocollant", "la couverture d'un cahier", "un badge", "une affiche de classe"]);
+      const inner = typeof LOGO_MARK === "string" ? LOGO_MARK.replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "") : "";
+      const fig = `<svg viewBox="110 150 380 250" width="300" style="max-width:100%;height:auto" role="img" aria-label="La pépite du logo dans un rectangle en pointillés de ${N(w).replace("{,}", ",")} mm sur ${h} mm">${inner}`
+        + `<rect x="142" y="190" width="258.885" height="160" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="9 7"/>`
+        + `<text x="271" y="176" text-anchor="middle" font-size="20" fill="currentColor">${N(w).replace("{,}", ",")} mm</text>`
+        + `<text x="410" y="275" font-size="20" fill="currentColor">${h} mm</text></svg>`;
+      return { titre: "Le secret du logo", q: "Le logo de " + APP_NAME + " cache un nombre célèbre. Sur " + obj + ", la pépite tient exactement dans le rectangle en pointillés : " + T(w, 1) + " mm de large et " + T(h) + " mm de haut.",
+        fig,
+        bet: { q: "Quel nombre célèbre se cache dans ce rectangle ?", choices: ["π ≈ 3,14", "le nombre d'or ≈ 1,618", "√2 ≈ 1,414 (comme une feuille A4)"], good: 1 },
+        calc: { label: "Calcule le rapport largeur ÷ hauteur du rectangle (au centième)", value: Math.round((w / h) * 100) / 100, round: 0.01 },
+        reveal: M(N(w, 1) + " \\div " + h + " \\approx " + N(w / h, 3)) + " : c'est le <b>nombre d'or</b> " + M("\\varphi = \\frac{1 + \\sqrt{5}}{2} \\approx 1{,}618") + ". Un rectangle dont la largeur vaut " + M("\\varphi") + " fois la hauteur est un <b>rectangle d'or</b> : si on en retire un carré, il reste un rectangle d'or plus petit. En recommençant, et en traçant un quart de cercle dans chaque carré, on obtient la <b>spirale d'or</b>… regarde bien le reflet de la pépite !" };
+    } });
   CURIEUX.forEach((c) => { const n = (id) => NOTIONS.find((x) => x.id === id); c.uses = c.uses.filter(n); });
 })();
 

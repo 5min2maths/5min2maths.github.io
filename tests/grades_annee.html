@@ -93,7 +93,7 @@ try {
   const rd = document.getElementById("redo"); ok(!!rd, "bouton Refaire");
   if (rd) { rd.click(); document.getElementById("idk").click(); ok(ypPts() === p1, "Refaire : aucun point " + ypPts()); document.getElementById("nx").click(); }
   while (session && session.i < session.plan.length && document.getElementById("idk")) { document.getElementById("idk").click(); document.getElementById("nx").click(); }
-  ok(/Points de l'année/.test(app.textContent) && ypPts() === 3 + YP.session && /\+13/.test(app.querySelector(".yp-row").textContent) && /avant Apprenti/.test(app.textContent), "fin de séance : +N points · encore X avant… " + (app.querySelector(".yp-row") || {}).textContent);
+  ok(/Pépites/.test(app.textContent) /* 27.11 : points → pépites */ && ypPts() === 3 + YP.session && /\+13/.test(app.querySelector(".yp-row").textContent) && /avant Apprenti/.test(app.textContent), "fin de séance : +N points · encore X avant… " + (app.querySelector(".yp-row") || {}).textContent);
   // 6) Migration d'un état existant
   const old = mk({ system: "CH", grade: 11 }); delete old.yp; old.gradeNo = { Stratège: 41 }; old.elo.r = 1340; old.elo.n = 200;
   old.history = [{ date: "2026-06-20", n: 9, score: 7 }, { date: "2026-09-02", n: 5, score: 3 }, { date: "2026-09-03", n: 12, score: 11 }, { date: "2026-11-25", n: 4, score: 2 }];
@@ -123,11 +123,11 @@ try {
     homeTab = "today"; screenHome(); const b = app.querySelector(".eb-grade"); ok(b && b.textContent.includes("Virtuose\u00a0· " + tag), "bandeau : titre avec la classe " + (b && b.textContent)); scan("accueil " + tag);
     screenGrades(); scan("Mes grades " + tag);
     ok(app.querySelector(".grade-now h2").textContent === "Virtuose\u00a0· " + tag && /Souvenirs/.test(app.textContent) && /1re Coll\. · 2025-26 : 🌟 Légende atteint/.test(app.textContent) && /10e · 2024-25 : 🥇 Expert atteint/.test(app.textContent), "Mes grades : titre, souvenirs " + tag);
-    ok(/1'100/.test(app.textContent) && /encore 650 points/.test(app.textContent), "milliers et prochain palier");
+    ok(/1'100/.test(app.textContent) && /encore 650 pépites/.test(app.textContent), "milliers et prochain palier"); /* 27.11 : points → pépites */
     session = { fmt: "auto", plan: ["prio|1", "fracadd|1", "puiss|1"], i: 3, score: 2, answered: 3, start: Date.now(), elo0: state.elo.r, ids: new Set(["prio"]), pinged: true, ypg: 30 }; screenSummary(); scan("fin de séance " + tag);
   }
   state = mk({ system: "FR", grade: 8 }); state.placed = true; ypSync(state); state.yp.pts = 120; screenGrades(); scan("Mes grades France");
-  ok(/Pousse\u00a0· 4e/.test(app.textContent) && !/Coll\.|MP | × /.test(app.textContent) && /encore 30 points/.test(app.textContent), "France : titre 4e " + app.textContent.slice(0, 300));
+  ok(/Pousse\u00a0· 4e/.test(app.textContent) && !/Coll\.|MP | × /.test(app.textContent) && /encore 30 pépites/.test(app.textContent), "France : titre 4e " + app.textContent.slice(0, 300));
   // nouveau grade en fin de séance
   state = mk({ system: "CH", grade: 11 }); Engine.autoInit(state); state.placed = true; ypSync(state); state.yp.pts = 140; state.yp.d = day(); state.yp.dp = 0;
   session = { fmt: "auto", plan: ["prio|1", "fracadd|1", "puiss|1"], i: 3, score: 3, answered: 3, start: Date.now(), elo0: state.elo.r, ids: new Set(["prio"]), pinged: true, ypg: 6 }; screenSummary();

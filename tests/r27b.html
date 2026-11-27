@@ -80,7 +80,7 @@ try {
 
   /* 7. Carnet : 3 questions en grande difficulté ; bilan juste */
   fresh(P9); weak(); state.carnet = el.slice(0, 5).map((id, i) => ({ id, d: 1, code: "c" + i, date: day(), ok: 0 }));
-  ok(/\(3 questions\)/.test(carnetCard(true)), "7. grande difficulté : « Effacer mes erreurs (3 questions) »");
+  ok(/\(3 questions\)/.test(carnetCard(true)), "7. grande difficulté : « Polir mes pépites (3 questions) »");
   Object.values(state.notions).forEach((n) => (n.lessonSeen = true)); startCarnet();
   ok(session.plan.length === 3, "7. séance du Carnet : 3 questions (" + session.plan.length + ")");
   fresh(P9); state.carnet = el.slice(0, 5).map((id, i) => ({ id, d: 1, code: "c" + i, date: day(), ok: 0 }));
@@ -89,7 +89,7 @@ try {
   state.carnet = el.slice(0, 3).map((id, i) => ({ id, d: 1, code: "c" + i, date: day(), ok: 0 }));
   startCarnet(); answer(true, 2); answer(false); answer(false);
   const h7 = (app.querySelector("h2") || {}).textContent || "", body7 = app.textContent;
-  ok(/1 question réussie, pas encore effacée/.test(h7) && !/cette semaine/i.test(body7), "7. bilan du Carnet : « " + h7 + " », sans ligne « cette semaine »");
+  ok(/1 question réussie, pas encore polie/.test(h7) /* 27.11 : effacée → polie */ && !/cette semaine/i.test(body7), "7. bilan du Carnet : « " + h7 + " », sans ligne « cette semaine »");
 
   /* 8. Leçon d'abord ; variété entre les jours */
   fresh(P9); Object.values(state.notions).forEach((n) => (n.lessonSeen = true));
