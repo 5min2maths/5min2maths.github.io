@@ -95,11 +95,52 @@ if (!FRAME) {
         ok(ra.top >= 0 && ra.bottom <= H && rc.top >= 0 && rc.bottom <= H, k + " : réponse et « Vérifier » visibles sans défiler (" + Math.round(ra.bottom) + ", " + Math.round(rc.bottom) + " / " + H + ")");
         { const b = document.getElementById("qbar"), ans = document.querySelector(".q-r .answer"); ok(getComputedStyle(b).position !== "fixed" && !!b.closest(".q-r") && !!ans && b.getBoundingClientRect().top >= ans.getBoundingClientRect().top, k + " : barre d'action dans la colonne de réponse, sous la réponse, pas collée au bord de l'écran"); }
       }
+      /* 27.11 soir (revue des écrans n° 1, 4, 6, 7) */
+      if (H5.classList.contains("ecran-2col") && /figure|pave|probleme/.test(k)) {
+        const L = document.querySelector(".q-l"), oy = L && getComputedStyle(L).overflowY;
+        ok(!!L && (L.scrollHeight > L.clientHeight + 8 || !/auto|scroll/.test(oy)), k + " : pas de barre de défilement dans l'énoncé quand il tient (" + (L ? L.scrollHeight + "/" + L.clientHeight + " " + oy : "pas de .q-l") + ")");
+      }
+      if (P.get("cls") === "ordi" && W === 1024 && /figure|pave/.test(k)) ok(H5.scrollHeight <= H, k + " : 1024 × 768, la question tient sans défiler (page " + H5.scrollHeight + " / " + H + ")");
+      if (P.get("cls") === "tablette" && /figure|pave/.test(k)) {
+        const ks = [...document.querySelectorAll("#kp button")].map((b) => Math.round(b.getBoundingClientRect().height)).filter((x) => x > 0);
+        ok(ks.length && Math.min(...ks) >= 52, k + " : tablette, touches du pavé ≥ 52 px (" + (ks.length ? Math.min(...ks) : "aucune") + ")");
+      }
+      if (P.get("cls") === "ordi" || P.get("cls") === "tablette") {
+        const tiny = [...document.querySelectorAll("#app *")].filter((el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) && el.getBoundingClientRect().width && !el.closest("details:not([open]), .sr-only") && parseFloat(getComputedStyle(el).fontSize) < 11.9);
+        ok(!tiny.length, k + " : aucun texte sous 12 px" + (tiny.length ? " — " + tiny.slice(0, 4).map((el) => Math.round(parseFloat(getComputedStyle(el).fontSize)) + " px « " + el.textContent.trim().slice(0, 16) + " »").join(" | ") : ""));
+      }
       if (P.get("cls") === "tel") {
         const s1 = sig(); sigs[k] = s1;
         const cl = H5.className; H5.className = H5.className.replace(/\becran-\S+/g, "").trim(); show(k); const s0 = sig(); H5.className = cl;
         ok(s1 === s0, k + " : mise en page au pixel près sans classe d'écran (" + s1 + (s1 === s0 ? "" : " ≠ " + s0) + ")");
       }
+    }
+    /* 27.11 soir (revue des écrans n° 2, 3, 5, 8) : Histoire « À toi », retour après une erreur, pas à pas, Progrès, tablette */
+    if (P.get("cls") !== "tel") {
+      const two = H5.classList.contains("ecran-2col"), vis = (el) => { const r = el && el.getBoundingClientRect(); return !!r && r.width > 0 && r.top >= 0 && r.bottom <= H; };
+      newSt(); reseed(); screenHistory(0, () => {}); window.scrollTo(0, 0);
+      if (two) ok(vis(document.getElementById("hans")) && vis(document.getElementById("hok")), "Histoire « À toi » : réponse et « Vérifier » visibles sans défiler (" + Math.round(document.getElementById("hok").getBoundingClientRect().bottom) + " / " + H + ")");
+      if (P.get("cls") === "ordi") { const kb = document.querySelector("#kp button"); ok(kb && kb.getBoundingClientRect().height <= 46, "Histoire : pavé compact de l'ordinateur (" + (kb ? Math.round(kb.getBoundingClientRect().height) : "-") + " px)"); }
+      newSt(); reseed(); session = null;
+      const q = qWith((q) => q.guide && q.guide.length >= 2 && !q.parts && q.spec && q.spec.kind === "value");
+      renderQuestion(q, opt({ onNotYet: () => 0, onEasy: () => 0 }));
+      const inp = document.getElementById("ans"); inp.value = "123456"; inp.dispatchEvent(new Event("input")); document.getElementById("check").click();
+      inp.value = "654321"; inp.dispatchEvent(new Event("input")); document.getElementById("check").click();
+      const bar = document.getElementById("qbar"), fb = document.getElementById("fb");
+      if (two) ok(!!(fb && bar && fb.compareDocumentPosition(bar) & Node.DOCUMENT_POSITION_FOLLOWING), "retour après une erreur : barre d'action (« Continuer ») sous le retour");
+      const gb = document.getElementById("guide"); if (gb) gb.click(); window.scrollTo(0, 0);
+      const gok = document.querySelector("#gs0 .gok");
+      const hit = (el) => { if (!el) return false; const r = el.getBoundingClientRect(), t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return !!t && el.contains(t); };
+      if (two) ok(gb && vis(gok) && hit(gok), "pas à pas : « Vérifier l'étape » visible sans défiler et pas cachée par la barre (" + (gok ? Math.round(gok.getBoundingClientRect().bottom) : "-") + " / " + H + ")");
+      if (P.get("cls") === "tablette") { const ks = [...document.querySelectorAll("#gs0 .keypad button")].map((b) => b.getBoundingClientRect().height); ok(ks.length && Math.min(...ks) >= 52, "pas à pas, tablette : touches ≥ 52 px (" + Math.round(Math.min(...ks)) + ")"); }
+      newSt(); homeTab = "prog"; screenHome();
+      const map = document.querySelector(".pmap-card"), first = document.querySelector('.home-panel[data-tab="prog"] > :first-child');
+      if (two) ok(map && first && map.getBoundingClientRect().left > first.getBoundingClientRect().right, "Progrès : carte de progression dans la colonne de droite");
+      if (P.get("cls") === "tablette") {
+        const sq = document.querySelector(".pm-sq"), r = sq.getBoundingClientRect(), a = getComputedStyle(sq, "::after"), ins = parseFloat(a.top) || 0;
+        ok(r.height - 2 * ins >= 44 && a.content !== "none", "tablette : zone de toucher des cases de la carte ≥ 44 px (" + Math.round(r.height - 2 * ins) + ")");
+      }
+      if (P.get("cls") === "ordi") ok(getComputedStyle(H5).scrollbarGutter === "stable", "ordinateur : place de la barre de défilement réservée (en-tête sans décalage)");
     }
     /* mesures du 27.11 avant les affichages (master 2618068, mêmes tirages et même date) : info seulement, car tout
        changement de contenu les modifie ; le contrôle qui compte est la comparaison « sans classe d'écran » ci-dessus. */

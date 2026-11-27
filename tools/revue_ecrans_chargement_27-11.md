@@ -40,6 +40,7 @@ Inchangé : 13 écrans sur 16 identiques au pixel près à la version d'avant le
    `tests/_shots/pub/1024x768_probleme.png`, `tests/_shots/pub/1180x820_pave.png`.
    Correction : `padding-bottom: 6px` sur `.ecran-2col .q-l`, ou n'activer `overflow-y: auto` que si le contenu dépasse
    vraiment la hauteur maximale (classe posée par `ecranSplit()`).
+   **Corrigé** (27.11 soir, agent ecrans2) : `.q-l` en `overflow: hidden` + `padding-bottom: 6px` ; `overflow-y: auto` seulement avec la classe `q-long`, posée par `ecranSplit()` (ResizeObserver) quand l'énoncé dépasse vraiment la hauteur maximale. Contrôle dans tests/ecrans.html.
 
 2. **Moyen** · Histoire, « À toi » · ordinateur (toutes tailles) et tablette paysage.
    Écran en une colonne, pavé grand format (touches de 55 px, 340×258) sous un vide de 70 px : « Vérifier » à 1'096 px,
@@ -47,6 +48,7 @@ Inchangé : 13 écrans sur 16 identiques au pixel près à la version d'avant le
    `tests/_shots/pub/1024x768_histoire.png`, `tests/_shots/pub/1180x820_histoire.png`.
    Correction : appliquer le pavé compact de l'ordinateur à tous les `.keypad` (pas seulement dans les questions), ou
    le masquer sur ordinateur tant que le clavier physique est utilisé.
+   **Corrigé** : pavé compact (touches de 42 px, 360 px de large) sur tous les `.keypad` de l'ordinateur ; en deux colonnes, l'Histoire met le récit à gauche et « À toi » à droite : réponse et « Vérifier » visibles sans défiler (ordinateur et tablette paysage). Contrôles dans tests/ecrans.html.
 
 3. **Moyen** · retour après une erreur et pas à pas (« On le fait ensemble ») · ordinateur et tablette paysage.
    Dans la colonne de droite, la barre (« Une plus facile pour repartir » / « Continuer ») reste entre la réponse et le
@@ -55,26 +57,31 @@ Inchangé : 13 écrans sur 16 identiques au pixel près à la version d'avant le
    `tests/_shots/pub_retour/1024x768_guide.png`, `tests/_shots/pub_retour/1180x820_guide.png`.
    Correction : après la vérification, placer la barre sous `#fb` (ou le retour dans la colonne de gauche) et utiliser
    le pavé compact dans le pas à pas.
+   **Corrigé** : `ecranBarApres()` place la barre sous `#fb` après la vérification (deux colonnes seulement) ; pas à pas avec le pavé compact sur ordinateur ; « Vérifier l'étape » visible à 1024×768 et 1180×820. Contrôles dans tests/ecrans.html.
 
 4. **Mineur** · question avec figure / avec pavé · 1024×768.
    La page fait 787 px : barre de défilement de la page et 19 px à défiler à chaque question. Capture :
    `tests/_shots/pub/1024x768_pave.png`.
    Correction : réduire les marges verticales (en-tête, carte) quand la hauteur est ≤ 800 px.
+   **Corrigé** : hauteur ≤ 800 px : marges du corps, écart entre blocs et marges de la carte réduits ; la page tient à 1024×768. Contrôle dans tests/ecrans.html.
 
 5. **Mineur** · Progrès · ordinateur et tablette paysage.
    Colonnes déséquilibrées : à gauche Ma semaine, Mes grades et la carte de progression (≈ 1'000 px), à droite deux
    cartes courtes (≈ 560 px). Capture : `tests/_shots/pub/1440x900_progres.png`.
    Correction : mettre « Ma carte de progression » dans la colonne de droite (ou sur toute la largeur en dessous).
+   **Corrigé** : Progrès en grille : carte de progression seule à droite, autres cartes à gauche dans leur ordre.
 
 6. **Mineur** · accueil, pavé · ordinateur et tablette.
    Textes très petits à côté d'un texte de base de 18 px : « POINTS DE L'ANNÉE » 10 px, « Apprenti dans 150 pts » 11 px,
    « fraction » / « clavier » sous les touches 10 px. Capture : `tests/_shots/pub/1440x900_accueil.png`.
    Correction : 12 px au moins dans `.ecran-ordi` et `.ecran-tablette`.
+   **Corrigé** : 12 px au moins sur ordinateur et tablette (nom du grade, « POINTS DE L'ANNÉE », sous-titres des touches, badges, puces…). Contrôle « aucun texte sous 12 px » dans tests/ecrans.html.
 
 7. **Mineur** · pavé · tablette paysage (1180×820).
    Les deux colonnes reprennent le pavé compact de l'ordinateur : touches de 43 px, alors que la tablette promet
    ≥ 52 px (portrait : 55 px). Capture : `tests/_shots/pub/1180x820_pave.png`.
    Correction : ne compacter le pavé que dans `.ecran-ordi`, pas dans `.ecran-tablette.ecran-2col`.
+   **Corrigé** : pavé compact réservé à `.ecran-ordi` ; tablette paysage : touches ≥ 52 px (question et pas à pas). Contrôle dans tests/ecrans.html.
 
 8. **Mineur** · accueil, Progrès · tablette (820×1180) ; en-tête · ordinateur.
    Cibles tactiles sous 44 px : « Oui » / « Non » des statistiques (36 px), cases de la carte de progression (18 px).
@@ -82,6 +89,7 @@ Inchangé : 13 écrans sur 16 identiques au pixel près à la version d'avant le
    Captures : `tests/_shots/pub/820x1180_accueil.png`, `tests/_shots/pub/820x1180_progres.png`,
    `tests/_shots/pub/1440x900_competences.png`.
    Correction : `min-height: 44px` sur ces boutons en tablette ; `scrollbar-gutter: stable` sur `html` hors téléphone.
+   **Corrigé** : tablette : boutons des statistiques ≥ 44 px ; cases de la carte de 32 px avec une zone de toucher de 44 px (pseudo-élément, écart de 12 px, sans chevauchement) ; ordinateur : `scrollbar-gutter: stable` sur `html`.
 
 ## Vu et correct
 
