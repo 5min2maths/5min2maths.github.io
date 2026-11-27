@@ -1565,8 +1565,12 @@ const carnetRule = () => (carnetNeed() === 1 ? "une réussite du premier coup, i
 const carnetWeekN = () => (Array.isArray(state && state.carnetOut) ? state.carnetOut : []).filter((d) => d >= addDays(day(), -6)).length;
 const carnetWeekTxt = () => { const n = carnetWeekN(); return n ? `✓ ${n} effacée${n > 1 ? "s" : ""} cette semaine` : ""; };
 // 22.11 : m = erreur reconnue (diagnostic), a = réponse donnée : affichées dans « Ma fiche ».
+/* 27.11 (coordination avec les automatismes de fin de primaire, src/primaire.js) : une erreur sur une notion de primaire
+   n'entre pas au carnet (elle resterait visible une fois l'élève revenu au niveau de sa classe, où ces notions ne sont plus
+   servies) ; la notion revient d'elle-même tant que l'élève en a besoin (PRIM.inject). */
+const isPrimId = (id) => typeof PRIM !== "undefined" && PRIM.isPrim(id);
 function carnetAdd(id, d, code, m, a) {
-  if (!state || !id || !d || d > 3) return false;
+  if (!state || !id || !d || d > 3 || isPrimId(id)) return false;
   const c = (state.carnet = state.carnet || []), e = c.find((x) => x.id === id && x.d === d);
   if (e) { e.ok = 0; e.code = code; e.date = day(); } else c.push({ id, d, code, date: day(), ok: 0 });
   { const x = c.find((y) => y.id === id && y.d === d); if (m) { x.m = String(m).slice(0, 300); x.a = a ? String(a).slice(0, 60) : undefined; } else { delete x.m; delete x.a; } } // 22.11
@@ -1764,7 +1768,7 @@ function themeMapCard() {
   const p = state.profile, co = p.system === "CH" && p.grade <= 11, cat = Engine.catalog(p), cur = new Set(cat.filter((c) => c.current).map((c) => c.id));
   const by = {}, order = [];
   for (const [id, s] of Object.entries(state.notions)) {
-    const n = NOTIONS.find((x) => x.id === id); if (!n || !GEN[id]) continue;
+    const n = NOTIONS.find((x) => x.id === id); if (!n || !GEN[id] || isPrimId(id)) continue; /* 27.11 : pas de notion de primaire sur la carte */
     const k = co ? n.theme : cur.has(id) ? Engine.themeKey(p, id) : "_old";
     if (!by[k]) { by[k] = []; order.push(k); }
     by[k].push([n, s]);
@@ -1967,7 +1971,7 @@ function nextQuestion(redo) {
          dessous ; une fois par séance ; le total « n sur N » ne change pas. Elle passe avant la remédiation et l'allègement. */
       const replay = !redo && !session.replayUsed && !session.weekly && !session.prep && !session.carnet && !session.ctest && session.fmt !== "auto" && !q.parts && !(res.solved && res.tries === 1)
         && Engine.replayNext(state, session.plan, session.i, id, q.d, kind);
-      if (replay) { session.plan[session.i + 1] = replay; session.replayUsed = true; session.replayAt = session.i + 1; session.replayQ = { q: q.q, ctx: q.ctx }; }
+      if (replay) { session.replayWas = session.plan[session.i + 1]; session.plan[session.i + 1] = replay; session.replayUsed = true; session.replayAt = session.i + 1; session.replayQ = { q: q.q, ctx: q.ctx }; }
       // Deux échecs de suite : on glisse juste après une question sur une notion de base (une fois par notion et par séance).
       if (!replay && !session.weekly && !session.prep && !session.carnet && sc < 0.5) {
         session.remed = session.remed || new Set();
@@ -1992,7 +1996,10 @@ function nextQuestion(redo) {
       if (Engine.finishDay(state, 1, sc) === "joker") toast("🛡 Joker de série utilisé : ta série continue !"); save();
       return res.delta;
     },
-    onNext: (wantRedo) => { if (wantRedo) return nextQuestion(q); session.i++; nextQuestion(); },
+    onNext: (wantRedo) => {
+      /* 27.11 (n° 27) : l'élève a choisi « Refaire » : c'est sa reprise ; la question rejouée prévue rend sa place (pas deux reprises du même raté) */
+      if (wantRedo && !redo && session.replayQ && session.replayAt === session.i + 1) { session.plan[session.i + 1] = session.replayWas; session.replayQ = null; }
+      if (wantRedo) return nextQuestion(q); session.i++; nextQuestion(); },
     // « Pas encore vu en classe » : pas en préparation de test (l'élève a choisi ses notions) ni pour le problème de la semaine.
     onNotYet: session.weekly || session.prep || session.carnet ? null : () => { Engine.notYet(state, id); save(); toast("Noté : cette notion reviendra dans quelques semaines."); session.i++; nextQuestion(); },
     // « Trop facile » : au plus 3 par séance, pas en préparation de test ni pour le problème de la semaine.

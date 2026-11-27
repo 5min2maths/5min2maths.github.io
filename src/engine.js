@@ -566,7 +566,7 @@ const Engine = {
     }
     out.ups.sort((x, y) => y.a - y.b - (x.a - x.b) || y.a - x.a);
     const had = new Set(ref.k || []);
-    out.cons = Object.keys(state.notions || {}).filter((id) => { const s = state.notions[id]; return s && s.seen > 0 && s.m >= 0.7 && !had.has(id); });
+    out.cons = Object.keys(state.notions || {}).filter((id) => { const s = state.notions[id]; return s && s.status !== "prim" /* 27.11 : notions de primaire exclues */ && s.seen > 0 && s.m >= 0.7 && !had.has(id); });
     return out;
   },
   // Compétence : les 8 dernières réponses (1, 0,5 ou 0).

@@ -112,3 +112,94 @@ ouvertes à cette date). Voulu ou non ?
 
 Correctifs : aucun bug avéré trouvé dans `src/`. Hors suite : la liste de scripts de `tests/_adapt_mesure.html` est en
 retard sur `build.py` (manquent `referentiel.js`, `trx.js`, `ref_*.js`…) ; `_faibles.html` est générée depuis `build.py`.
+
+## Appliqué le 27.11 (branche `agent/faibles2`, décision de l'enseignant n° 27–32)
+
+Mesures : `tests/_faibles.html`, **20 graines (1 à 20)**, 28 jours dès le 9.11, chapitre « en classe » non choisi ;
+« avant » = master du 27.11 (automatismes de primaire compris), « après » = cette branche, même page de simulation.
+La page suit désormais les règles de l'app (`Engine.replayNext`, `Engine.placementLevel`) et compte le carnet
+(nouvelles colonnes : « hors année (sans reprise) », « rejouées/séance », « carnet fin », « effacées en séance »).
+Test qui fixe chaque règle : `tests/faibles27.html` (dans la suite). Suite complète : 164 pages, un échec (`ux_2111` :
+reprise « Refaire » + question rejouée sur le même raté, corrigé : voir 1.), repassé ensuite avec les pages voisines.
+
+**Ce qui a été fait**
+1. **Rejouer au lieu d'ajouter** (`Engine.replayNext`, app : `onDone`) : élève en grande difficulté (`Engine.struggling`),
+   question pas réussie du premier coup → la question suivante prévue devient la même notion, d'autres nombres (forme la
+   plus proche, même contexte si possible), un niveau en dessous (le niveau 1 reste 1), étiquette « nouvelles valeurs ».
+   Une fois par séance, à la place d'une question (programme de même longueur). Ni automatisme, ni problème, ni carnet,
+   « Me tester », évaluation, problème de la semaine ; jamais à la place d'une question qui porte la leçon. Elle passe avant
+   la remédiation et l'allègement (pas deux remplacements pour le même raté) ; si l'élève choisit lui-même « Refaire »,
+   la question rejouée rend sa place (pas deux reprises du même raté).
+2. **Carnet à la portée** : élève en grande difficulté seulement : une réussite du premier coup efface l'erreur (séance
+   « Carnet »), et une réussite du premier coup dans une séance ordinaire efface les erreurs de la même notion rangées au
+   même niveau ou en dessous. **Autres élèves : règle inchangée** (2 réussites de suite) : le rapport ne recommandait la
+   règle que pour la grande difficulté, et un carnet trop vite vidé ne sert plus à rien à un élève qui réussit. Règle
+   affichée selon l'élève ; « ✓ N effacée(s) cette semaine » sur la carte du carnet, sa page et le bilan.
+   Notions de fin de primaire (`src/primaire.js`) : **elles n'entrent jamais au carnet** (solution la plus simple : rien à
+   effacer quand l'élève revient au niveau de sa classe) et ne figurent ni sur la carte de progression ni dans « Ma semaine ».
+3. **Positionnement** (`Engine.placementLevel`) : **la 1re question au niveau 1, les 4 suivantes au niveau 2**. Tout au
+   niveau 1 (variante `place1`) donne la même première impression mais un positionnement moins discriminant (élèves
+   moyens et irréguliers surévalués de 25 à 35 points de plus, 4,5 à 4,8 justes sur 5) : non retenu.
+5. **Bilan centré sur les réussites** : « Aujourd'hui : 2 questions réussies et 1 solution reconstruite. » (erreurs effacées
+   aussi) au lieu de « Séance faite… » ; « Bonne séance : … » entre 50 et 80 % ; « Excellente séance ! » inchangé ; sans
+   aucune réussite : « 3 questions travaillées : c'est en pratiquant qu'on progresse. ». **Retour après une absence**
+   (3 jours ou plus) : « Content de te revoir ! » en tête de la phrase de série perdue du 26.11 (gardée telle quelle).
+6. **L'année d'abord** (`Engine.prevPenalty`, `PREV_PEN = 2` dans `planSlots`) : sans chapitre « en classe », une notion
+   de l'année précédente passe après celles de l'année (malus de 200 points d'écart), sauf si le parcours la demande :
+   ratée (maîtrise < 0,45 ou deux échecs), prérequis d'une notion de l'année qui coince, Mathélo en forte baisse, ou élève
+   en grande difficulté (plancher : le plus facile possible). Les **reprises du référentiel** (`again` : priorités,
+   relatifs, fractions… reprises en 10e–11e) comptent comme notions de l'année.
+
+**Mesures avant → après** (1er essai · Δ Mathélo · séances sans réussite · décourageantes ; « = » : écart < 3 points, bruit)
+
+| Classe | Profil | 1er essai | Δ Mathélo | sans réussite | décourageantes | carnet fin (effacées en séance) | 1re question du positionnement juste |
+|---|---|---|---|---|---|---|---|
+| 9e | fort | 77 → 78 % | +341 → +347 | 2 → 1 % | 4 → 3 % | 4,0 → 3,5 (0,4) | 65 → 75 % |
+| 9e | moyen | 57 → 56 % | +90 → +88 | 8 → 7 % | 12 → 11 % | 7,2 → 2,8 (7,5) | 40 → 65 % |
+| 9e | faible | 29 → 31 % | −148 → −129 | **39 → 34 %** | **50 → 46 %** | **12,0 → 6,6** (11,6) | 5 → 10 % |
+| 9e | très faible | 13 → 17 % | −287 → −254 | **64 → 59 %** | **75 → 68 %** | **12,2 → 8,7** (7,0) | 0 → 0 % |
+| 9e | irrégulier | 49 → 53 % | +32 → +57 | 14 → 9 % | 21 → 16 % | 4,5 → 2,1 | 25 → 35 % |
+| 10e | fort | 78 → 78 % | +327 → +303 | 2 → 2 % | 4 → 4 % | 4,3 → 3,8 | 80 → 90 % |
+| 10e | moyen | 67 → 66 % | +83 → +67 | 4 → 3 % | 6 → 5 % | 9,2 → 6,3 | 50 → 60 % |
+| 10e | faible | 38 → 37 % | −181 → −184 | 29 → 28 % | 36 → 38 % | **19,9 → 11,7** (9,3) | 15 → 20 % |
+| 10e | très faible | 16 → 17 % | −335 → −323 | 59 → 61 % | 71 → 71 % | **25,9 → 19,4** (4,5) | 5 → 10 % |
+| 10e | irrégulier | 60 → 59 % | +9 → +3 | 7 → 7 % | 9 → 12 % | 6,8 → 4,5 | 30 → 55 % |
+| 11e | fort | 79 → 79 % | +320 → +316 | 1 → 1 % | 3 → 3 % | 3,1 → 3,3 | 80 → 90 % |
+| 11e | moyen | 70 → 72 % | +48 → +76 | 3 → 4 % | 6 → 6 % | 8,3 → 6,1 | 50 → 60 % |
+| 11e | faible | 54 → 52 % | −183 → −201 | 15 → 17 % | 20 → 20 % | 12,6 → 7,3 (9,5) | 15 → 20 % |
+| 11e | très faible | 29 → 30 % | −373 → −363 | 42 → 39 % | 53 → 51 % | 16,5 → 12,3 (9,9) | 5 → 10 % |
+| 11e | irrégulier | 64 → 66 % | −9 → −2 | 4 → 2 % | 9 → 5 % | 6,1 → 4,1 | 30 → 55 % |
+| 1re | fort | 79 → 78 % | +328 → +317 | 1 → 2 % | 2 → 3 % | 4,2 → 3,8 | 80 → 90 % |
+| 1re | moyen | 71 → 69 % | +60 → +53 | 4 → 4 % | 6 → 7 % | 8,3 → 7,0 | 50 → 60 % |
+| 1re | faible | 58 → 59 % | −197 → −164 | 10 → 10 % | 15 → 13 % | 12,8 → 8,3 (6,5) | 15 → 20 % |
+| 1re | très faible | 39 → 39 % | −365 → −347 | 29 → 28 % | 37 → 35 % | 16,4 → 10,7 (10,4) | 5 → 10 % |
+| 1re | irrégulier | 68 → 66 % | 0 → −19 | 4 → 4 % | 6 → 7 % | 6,2 → 4,8 | 30 → 55 % |
+
+Durée des séances inchangée (s/séance identiques à ± 3 s, max inchangé) ; rejouées : 0,4 par séance en 9e faible / très
+faible, 0,1 à 0,3 en 10e–1re faibles, 0 à 0,05 chez les moyens et forts (struggling rarement vrai). Carnet : pas de séance
+« Carnet » simulée, donc « avant » il ne fait que grossir ; « après », l'élève en grande difficulté efface 5 à 12 erreurs en
+4 semaines rien qu'en réussissant ses séances. **Aucune régression mesurable chez les moyens et forts** (1er essai à ± 2
+points, sans réussite et décourageantes à ± 3 points ; écarts de Δ Mathélo de ±25 points = bruit des graines : 9e moyen
++90 → +88, 11e moyen +48 → +76, 10e fort +327 → +303).
+
+**Année précédente, sans chapitre « en classe »** (part des questions, élève moyen) :
+
+| Classe | année antérieure, reprises comprises | dont hors reprise du référentiel | variante `reprise` (reprises aussi après) |
+|---|---|---|---|
+| 10e | 81 → 81 % | **30 → 10 %** | 63 % (hors reprise 23 %), 1er essai 66 → 63 % |
+| 11e | 83 → 81 % | **14 → 2 %** | 65 % (8 %), 72 → 68 % |
+| 1re | 81 → 78 % | **28 → 7 %** | 57 % (15 %), 69 → 68 % |
+
+Constat : les 78–83 % du rapport du 26.11 étaient surtout des **reprises du référentiel** (notions d'une année antérieure
+que le programme de l'année reprend, `again`), donc des notions de l'année au sens du référentiel ; les vraies notions de
+l'année précédente tombent à 2–10 %. Il reste peu de notions propres à l'année ouvertes en novembre : les faire passer
+aussi avant les reprises (variante `reprise`, essayée, non appliquée) ne descend qu'à 57–65 % et coûte 1 à 4 points de
+réussite aux moyens. **À trancher par l'enseignant** si l'on veut aller plus loin (n° 32 bis). Élèves faibles et très
+faibles : inchangé (85–90 %), voulu (grande difficulté = règle levée).
+
+**Simulation du testeur** (`#part=testeur`, 20 graines) : Lucas 48 → 48 %, Sarah 46 → 46 %, Yanis 30 → 27 % (3 jours,
+bruit), Emma 66 → 69 %, Hugo 63 → 66 %, Léa et Noah 81 → 81 % ; Δ Mathélo et minutes par séance inchangés (± 0,1 min).
+
+Ce que la simulation ne mesure pas : l'effet « exemple résolu » de la question rejouée est une hypothèse (b = 0,3, comme
+le 26.11) ; sans lui, rejouer ne change presque rien à la réussite (mais garde la durée). Le bilan et le message de retour
+ne se mesurent pas en simulation : contrôlés par `tests/faibles27.html`.

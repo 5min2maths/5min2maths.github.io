@@ -16,6 +16,7 @@
               remplacée par la même notion, autres nombres, un niveau en dessous (une fois par séance). Hypothèse
               d'exemple résolu : p devient p + (1 − p) × b (#b=0.3 ; b=0 : aucun effet propre)
    27.11 (règles appliquées dans src/) : la page suit Engine.replayNext et Engine.placementLevel quand ils existent ;
+     reprise    les reprises du référentiel (again) aussi après les notions propres à l'année (n° 32, essai)
      norejouer  sans la règle « rejouer » de l'app ; place2  positionnement tout au niveau 2 (règle d'avant le 27.11)
    Colonnes du 27.11 : « hors année » = année antérieure sans reprise du référentiel (again) ; carnet fin = erreurs dans le
      carnet au bout des 28 jours (pas de séance « Carnet » simulée) ; effacées en séance = règle du 27.11 (grande difficulté).
@@ -54,9 +55,11 @@
     if (typeof PRIM !== "undefined") PRIM.off = V.has("sansprim");
     OFF = new _D(o.debut || "2026-11-09T16:30:00") - _D.now();
     /* variantes du moteur (copies restaurées en fin de simulation) */
-    const E0 = { oldNeed: Engine.oldNeed, updateElo: Engine.updateElo, isRecent: Engine.isRecent }, B = o.b === undefined ? 0.3 : o.b;
+    const E0 = { oldNeed: Engine.oldNeed, updateElo: Engine.updateElo, isRecent: Engine.isRecent, prevPenalty: Engine.prevPenalty }, B = o.b === undefined ? 0.3 : o.b;
     if (V.has("bas")) Engine.isRecent = function (s, id) { if (E0.isRecent.call(this, s, id)) return true; if (!this.struggling(s)) return false; const pl = placeOf(NOTIONS.find((n) => n.id === id), s.profile); return !!pl && pl[0] >= s.profile.grade - 2; };
     if (V.has("prereq")) Engine.oldNeed = function (s) { const need = E0.oldNeed.call(this, s); if (this.struggling(s)) { const el = this.eligible(s); for (const id of el) if (this.isRecent(s, id) && s.notions[id].seen > 0) for (const p of PREREQ[id] || []) if (el.includes(p) && !this.isRecent(s, p)) need.add(p); } return need; };
+    /* 27.11 : variante « reprise » : les reprises du référentiel (again) passent aussi après les notions propres à l'année */
+    if (V.has("reprise") && E0.prevPenalty) Engine.prevPenalty = function (s) { const out = E0.prevPenalty.call(this, s), g = s.profile.grade; for (const id of this.eligible(s)) { const n = NOTIONS.find((x) => x.id === id), pl = placeOf(n, s.profile), st = s.notions[id]; if (pl && pl[0] < g && (n.again || []).includes(g) && !(st.seen > 0 && (st.m < 0.45 || (st.fails || 0) >= 2))) out.add(id); } return out; };
     if (V.has("eloaide")) Engine.updateElo = function (s, id, d, score, w = 1) { return E0.updateElo.call(this, s, id, d, score, score < 0.5 && this.struggling(s) ? w * 0.5 : w); };
     try {
       state = Engine.newState({ ...prof, minutes: 5 }); Engine.autoInit(state);
@@ -157,7 +160,7 @@
         pAvg: R.q ? R.pSum / R.q : 0, lvAvg: R.q ? R.lvSum / R.q : 0, frustr: R.frustr, decour: R.decour, maxDecourRun: R.maxDecourRun, endFail: R.endFail, startFail: R.startFail,
         abandons: R.abandons, low: R.low, prev: R.prev, fixed: R.fixed, carnetFin: carnet.size, redo: R.redo, lessons: R.lessons, old: R.old, eased: R.eased, remed: R.remed, eloNeg: R.eloNeg, placeElo: R.placeElo, place1st: R.place1st || 0, placeOk: R.placeOk, placeQ: R.placeQ, placeSec: R.placeSec,
         secAvg: R.secs.length ? R.secs.reduce((a, b) => a + b, 0) / R.secs.length : 0, secMax: Math.max(0, ...R.secs), prim: R.prim, primOk: R.primOk, primSess: R.primSess, streak: state.streak.best || 0, err: R.err.slice(0, 3) };
-    } finally { Engine.oldNeed = E0.oldNeed; Engine.updateElo = E0.updateElo; Engine.isRecent = E0.isRecent; }
+    } finally { Engine.oldNeed = E0.oldNeed; Engine.updateElo = E0.updateElo; Engine.isRecent = E0.isRecent; if (E0.prevPenalty) Engine.prevPenalty = E0.prevPenalty; }
   }
   /* moyenne sur les graines */
   function avg(cl, pname, o, seeds) {
