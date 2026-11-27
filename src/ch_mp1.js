@@ -138,7 +138,7 @@
     ],
     3: [
       () => { const p = R.int(1, 4);
-        return QSet("Quelles sont les valeurs interdites de " + M("\\frac{1}{x^3 - " + p * p + "x}") + " ?", [0, -p, p], M("x(x^2 - " + p * p + ") = x(x - " + p + ")(x + " + p + ")") + ".", { ctx: "cube", guide: [GSet("Valeurs interdites ?", [0, -p, p], M("0, \\pm " + p) + ".")], traps: [TSet([-p, p], "N'oublie pas x = 0."), TSet([0], "x² − " + p * p + " s'annule aussi.")] }); },
+        return QSet("Quelles sont les valeurs interdites de " + M("\\frac{1}{x^3 - " + p * p + "x}") + " ?", [0, -p, p], M("x(x^2 - " + p * p + ") = x(x - " + p + ")(x + " + p + ")") + " : " + M("0") + ", " + M(-p) + " et " + M(p) + ".", { ctx: "cube", guide: [GSet("Valeurs interdites ?", [0, -p, p], M("0, \\pm " + p) + ".")], traps: [TSet([-p, p], "N'oublie pas x = 0."), TSet([0], "x² − " + p * p + " s'annule aussi.")] }); },
       () => { const b = R.int(-3, 3), c = R.int(Math.ceil((b * b) / 4) + 1, 9);
         return QN("Combien de valeurs interdites a " + M("\\frac{2}{" + poly([1, b, c]) + "}") + " ?", 0, M("\\Delta = " + (b * b - 4 * c)) + " < 0 : le dénominateur ne s'annule jamais.", { ctx: "delta", guide: [GS(M("\\Delta") + " ?", b * b - 4 * c, M(b * b - 4 * c) + "."), GS("Nombre de valeurs interdites ?", 0, "0.")], traps: [TR(2, "Δ < 0 : pas de zéro."), TR(1, "Calcule Δ.")] }); },
       () => { const a = nz(-4, 4), b = nz(-4, 4); if (a === b || a === -b) return null;

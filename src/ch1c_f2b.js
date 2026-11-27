@@ -56,7 +56,7 @@
     ],
     2: [
       () => { const h = nz(-3, 3), k = R.int(-4, 4), a = pk([1, -1, 2, -2]), x1 = h + pk([-2, -1, 1, 2]), y1 = a * (x1 - h) ** 2 + k, cs = [a, -2 * a * h, a * h * h + k]; if (Math.abs(y1) > 6) return null;
-        return QX("Une parabole a pour sommet " + M("S(" + h + " \\,;\\, " + k + ")") + " et passe par " + M("P(" + x1 + " \\,;\\, " + y1 + ")") + ". Donne l'expression de " + M("f(x)") + ".", EX(cs), M("f(x) = a(" + xm(h) + ")^2" + sg(k)) + " ; avec " + M("P") + " : " + M(y1 + " = a \\cdot " + (x1 - h) ** 2 + sg(k)) + ", " + M("a = " + a) + ".",
+        return QX("Une parabole a pour sommet " + M("S(" + h + " \\,;\\, " + k + ")") + " et passe par " + M("P(" + x1 + " \\,;\\, " + y1 + ")") + ". Donne l'expression de " + M("f(x)") + ".", EX(cs), M("f(x) = a(" + xm(h) + ")^2" + sg(k)) + " ; avec " + M("P") + " : " + M(y1 + " = a \\cdot " + (x1 - h) ** 2 + sg(k)) + ", " + M("a = " + a) + " : " + M("f(x) = " + P2(cs)) + ".",
           { ctx: "sommet-point", fig: PL([{ f: quad(cs) }], [[h, k, "S"], [x1, y1, "P"]]), guide: [GS("Valeur de " + M("a") + " ?", a, M("(" + y1 + " - " + par(k) + ") : " + (x1 - h) ** 2 + " = " + a) + "."), GX("Expression", EX(cs), M(P2(cs)) + ".")], traps: [TX(P2([1, -2 * h, h * h + k]), "Il faut calculer a avec le point P."), TX(P2([a, 2 * a * h, a * h * h + k]), "Sommet d'abscisse h ↔ (x − h)².")] }); },
       () => { const p = nz(-4, 2), q = p + R.int(2, 5), a = pk([1, -1, 2, -2]), x1 = pk([p - 1, q + 1, p + 1].filter((x) => x !== q && x !== 0)), y1 = a * (x1 - p) * (x1 - q), cs = [a, -a * (p + q), a * p * q];
         return QX("Une parabole a pour zéros " + M(p) + " et " + M(q) + " et passe par " + M("P(" + x1 + " \\,;\\, " + y1 + ")") + ". Donne l'expression développée de " + M("f(x)") + ".", EX(cs), M("f(x) = a(" + xm(p) + ")(" + xm(q) + ")") + " ; " + M(y1 + " = a \\cdot " + par(x1 - p) + " \\cdot " + par(x1 - q)) + " donne " + M("a = " + a) + " : " + M(P2(cs)) + ".",
@@ -67,13 +67,13 @@
     ],
     3: [
       () => { const a = nz(-2, 2), b = R.int(-4, 4), c = R.int(-4, 4), xs = [-1, 1, 2], cs = [a, b, c], ys = xs.map(quad(cs)); if (ys.some((y) => Math.abs(y) > 8)) return null;
-        return QX("Une parabole passe par " + xs.map((x, i) => M("(" + x + " \\,;\\, " + ys[i] + ")")).join(", ") + ". Donne l'expression " + M("f(x) = ax^2 + bx + c") + ".", EX(cs), "Système : " + M("a - b + c = " + ys[0]) + ", " + M("a + b + c = " + ys[1]) + ", " + M("4a + 2b + c = " + ys[2]) + " ; " + M("b = " + b) + ", " + M("a = " + a) + ", " + M("c = " + c) + ".",
+        return QX("Une parabole passe par " + xs.map((x, i) => M("(" + x + " \\,;\\, " + ys[i] + ")")).join(", ") + ". Donne l'expression " + M("f(x) = ax^2 + bx + c") + ".", EX(cs), "Système : " + M("a - b + c = " + ys[0]) + ", " + M("a + b + c = " + ys[1]) + ", " + M("4a + 2b + c = " + ys[2]) + " ; " + M("b = " + b) + ", " + M("a = " + a) + ", " + M("c = " + c) + " : " + M("f(x) = " + P2(cs)) + ".",
           { ctx: "trois-points", fig: PL([{ f: quad(cs) }], xs.map((x, i) => [x, ys[i], ""]), { yr: [-8, 8], squash: 0.75 }), guide: [GS(M("b") + " (soustrais les deux premières équations) ?", b, M("2b = " + (ys[1] - ys[0])) + "."), GS(M("a") + " ?", a, M(a) + "."), GX("Expression", EX(cs), M(P2(cs)) + ".")], traps: [TX(P2([a, -b, c]), "Vérifie le signe de b : (a + b + c) − (a − b + c) = 2b.")] }); },
       () => { const p = nz(-4, 1), d = pk([1, 2, 3]), q = p + 2 * d, Mx = pk([2, 4, 6, -2, -4]) * (d === 1 ? 1 : 1), a = -Mx / (d * d), cs = [a, -a * (p + q), a * p * q]; if (!Number.isInteger(a * (p + q)) || !Number.isInteger(a * p * q)) return null;
         return QX("Une parabole a pour zéros " + M(p) + " et " + M(q) + ", et sa valeur " + (Mx > 0 ? "maximale" : "minimale") + " est " + M(Mx) + ". Donne l'expression développée de " + M("f(x)") + ".", EX(cs), "Sommet au milieu des zéros : " + M("x_S = " + (p + q) / 2) + ". " + M("f(x_S) = a \\cdot " + par(d) + " \\cdot " + par(-d) + " = " + Mx) + " donne " + M("a = " + fT(a)) + " : " + M(P2(cs)) + ".",
           { ctx: "zeros-extremum", guide: [GS("Abscisse du sommet ?", (p + q) / 2, M((p + q) / 2) + "."), GS(M("a") + " (fraction acceptée) ?", a, M(fT(a)) + "."), GX("Expression", EX(cs), M(P2(cs)) + ".")], traps: [TX(P2([-a, a * (p + q), -a * p * q]), Mx > 0 ? "Un maximum : la parabole est tournée vers le bas (a < 0)." : "Un minimum : a > 0.")] }); },
       () => { const h = nz(-3, 3), a = pk([1, -1, 2]), c = R.int(-4, 4), b = -2 * a * h, x1 = pk([1, 2, -1].filter((x) => x !== h && x !== 2 * h)) /* 26.11 (recalcul) : le point (2h ; c), symétrique de (0 ; c), ne détermine pas a */, cs = [a, b, c], y1 = quad(cs)(x1);
-        return QX("Une parabole a pour axe de symétrie la droite " + M("x = " + h) + ", coupe l'axe des " + M("y") + " en " + M(c) + " et passe par " + M("(" + x1 + " \\,;\\, " + y1 + ")") + ". Donne son expression développée.", EX(cs), M("-\\frac{b}{2a} = " + h + " \\Rightarrow b = " + -2 * h + "a") + " ; " + M("c = " + c) + " ; avec le point : " + M("a = " + a) + ", " + M("b = " + b) + ".",
+        return QX("Une parabole a pour axe de symétrie la droite " + M("x = " + h) + ", coupe l'axe des " + M("y") + " en " + M(c) + " et passe par " + M("(" + x1 + " \\,;\\, " + y1 + ")") + ". Donne son expression développée.", EX(cs), M("-\\frac{b}{2a} = " + h + " \\Rightarrow b = " + -2 * h + "a") + " ; " + M("c = " + c) + " ; avec le point : " + M("a = " + a) + ", " + M("b = " + b) + " : " + M("f(x) = " + P2(cs)) + ".",
           { ctx: "axe-point", guide: [GX(M("b") + " en fonction de " + M("a"), -2 * h + "*a", M("b = " + -2 * h + "a") + "."), GS(M("a") + " ?", a, M(a) + "."), GX("Expression", EX(cs), M(P2(cs)) + ".")], traps: [TX(P2([a, -b, c]), "Axe x = h ↔ −b ÷ (2a) = h.")] }); },
     ],
   };
@@ -83,7 +83,7 @@
   const T3 = {
     1: [
       () => { const a = pk([1, 2, 3, -1, -2]), b = nz(-4, 4), c = nz(-5, 5), cs = [a, b, c], f = quad(cs);
-        return QX("Une parabole passe par " + pts3([0, 1, -1], cs) + ". Détermine l'expression développée de " + M("f(x)") + ".", EX(cs), M("c = f(0) = " + c) + " ; " + M("a + b = " + (f(1) - c)) + " et " + M("a - b = " + (f(-1) - c)) + " : " + M("a = " + a) + ", " + M("b = " + b) + ".",
+        return QX("Une parabole passe par " + pts3([0, 1, -1], cs) + ". Détermine l'expression développée de " + M("f(x)") + ".", EX(cs), M("c = f(0) = " + c) + " ; " + M("a + b = " + (f(1) - c)) + " et " + M("a - b = " + (f(-1) - c)) + " : " + M("a = " + a) + ", " + M("b = " + b) + " : " + M("f(x) = " + P2(cs)) + ".",
           { ctx: "expr-0-1", guide: [GS(M("c = f(0)") + " ?", c, M(c) + "."), GS(M("a + b = f(1) - c") + " ?", a + b, M(a + b) + "."), GS(M("a") + " (moyenne de " + M("a + b") + " et " + M("a - b") + ") ?", a, M(a) + "."), GX("Expression", EX(cs), M(P2(cs)) + ".")], traps: [TX(P2([a, -b, c]), "a + b = f(1) − c et a − b = f(−1) − c : attention au signe de b.")] }); },
       () => { const a = pk([2, 3, -2, -3]), b = nz(-4, 4), c = nz(-5, 5), cs = [a, b, c], f = quad(cs); /* 25.11 (robot) : a ≠ ±1 (réponse) */
         return QN("Une parabole " + M("f(x) = ax^2 + bx + c") + " passe par " + pts3([0, 1, -1], cs) + ". Que vaut " + M("a") + " ?", a, M("c = " + c) + " ; " + M("a + b = " + (a + b)) + ", " + M("a - b = " + (a - b)) + " ; en additionnant : " + M("2a = " + 2 * a) + ", donc " + M("a = " + a) + ".",
@@ -94,7 +94,7 @@
     ],
     2: [
       () => { const a = pk([1, 2, -1, -2]), b = nz(-4, 4), c = nz(-4, 4), cs = [a, b, c], f = quad(cs);
-        return QX("Une parabole passe par " + pts3([0, 1, 2], cs) + ". Détermine l'expression développée de " + M("f(x)") + ".", EX(cs), M("c = " + c) + " ; " + M("a + b = " + (a + b)) + " ; " + M("4a + 2b = " + (4 * a + 2 * b)) + " ; d'où " + M("2a = " + 2 * a) + ", " + M("a = " + a) + ", " + M("b = " + b) + ".",
+        return QX("Une parabole passe par " + pts3([0, 1, 2], cs) + ". Détermine l'expression développée de " + M("f(x)") + ".", EX(cs), M("c = " + c) + " ; " + M("a + b = " + (a + b)) + " ; " + M("4a + 2b = " + (4 * a + 2 * b)) + " ; d'où " + M("2a = " + 2 * a) + ", " + M("a = " + a) + ", " + M("b = " + b) + " : " + M("f(x) = " + P2(cs)) + ".",
           { ctx: "expr-0-2", guide: [GS(M("c") + " ?", c, M(c) + "."), GS(M("a") + " (soustrais 2 × (a + b) de 4a + 2b) ?", a, M(a) + "."), GX("Expression", EX(cs), M(P2(cs)) + ".")], traps: [TX(P2([b, a, c]), "a est le coefficient de x², b celui de x.")] }); },
       () => { const a = pk([1, 2, -1, 3]), b = pk([-4, -3, -2, 2, 3, 4]), c = nz(-4, 4), cs = [a, b, c]; /* 25.11 (robot) : b ≠ ±1 (réponse) */
         return QN("Une parabole " + M("f(x) = ax^2 + bx + c") + " passe par " + pts3([0, 1, 2], cs) + ". Que vaut " + M("b") + " ?", b, M("c = " + c) + ", " + M("a + b = " + (a + b)) + ", " + M("4a + 2b = " + (4 * a + 2 * b)) + " : " + M("a = " + a) + ", " + M("b = " + b) + ".",
@@ -105,7 +105,7 @@
     ],
     3: [
       () => { const a = pk([1, 2, -1, -2]), b = nz(-3, 3), c = R.int(-4, 4), cs = [a, b, c], f = quad(cs);
-        return QX("Une parabole passe par " + pts3([-1, 1, 2], cs) + ". Détermine l'expression développée de " + M("f(x)") + ".", EX(cs), "Système : " + M("a - b + c = " + f(-1)) + ", " + M("a + b + c = " + f(1)) + ", " + M("4a + 2b + c = " + f(2)) + " : " + M("b = " + b) + ", puis " + M("a = " + a) + ", " + M("c = " + c) + ".",
+        return QX("Une parabole passe par " + pts3([-1, 1, 2], cs) + ". Détermine l'expression développée de " + M("f(x)") + ".", EX(cs), "Système : " + M("a - b + c = " + f(-1)) + ", " + M("a + b + c = " + f(1)) + ", " + M("4a + 2b + c = " + f(2)) + " : " + M("b = " + b) + ", puis " + M("a = " + a) + ", " + M("c = " + c) + " : " + M("f(x) = " + P2(cs)) + ".",
           { ctx: "expr-sans-0", guide: [GS(M("b") + " (soustrais les deux premières) ?", b, M("2b = " + (f(1) - f(-1))) + "."), GS(M("a") + " ?", a, M(a) + "."), GX("Expression", EX(cs), M(P2(cs)) + ".")], traps: [TX(P2([a, -b, c]), "(a + b + c) − (a − b + c) = 2b.")] }); },
       () => { const a = pk([2, -2, 3, -3]), b = nz(-4, 4), c = R.int(-4, 4), cs = [a, b, c], f = quad(cs); // 24.11 : a ≠ ±1 (robot)
         return QN("Une parabole " + M("f(x) = ax^2 + bx + c") + " passe par " + pts3([1, 2, 3], cs) + ". Que vaut " + M("a") + " ?", a, M("f(2) - f(1) = 3a + b = " + (f(2) - f(1))) + " ; " + M("f(3) - f(2) = 5a + b = " + (f(3) - f(2))) + " ; donc " + M("2a = " + 2 * a) + ".",
@@ -120,7 +120,7 @@
   const IN = {
     1: [
       () => { const p = R.int(-3, 0), q = R.int(1, 4);
-        return QSet("Pour quelles valeurs de " + M("x") + " les graphes de " + M("f(x) = x^2") + " et " + M("g(x) = " + P2([p + q, -p * q])) + " se coupent-ils ?", [p, q], M("x^2 = " + P2([p + q, -p * q]) + " \\iff " + P2([1, -(p + q), p * q]) + " = 0 \\iff (" + xm(p) + ")(" + xm(q) + ") = 0") + ".",
+        return QSet("Pour quelles valeurs de " + M("x") + " les graphes de " + M("f(x) = x^2") + " et " + M("g(x) = " + P2([p + q, -p * q])) + " se coupent-ils ?", [p, q], M("x^2 = " + P2([p + q, -p * q]) + " \\iff " + P2([1, -(p + q), p * q]) + " = 0 \\iff (" + xm(p) + ")(" + xm(q) + ") = 0") + " : " + M("x = " + p) + " ou " + M("x = " + q) + ".",
           { ctx: "x2-droite", fig: FIG.plot([{ f: (x) => x * x }, { f: (x) => (p + q) * x - p * q }], [], { xr: [Math.min(p, -1) - 2, Math.max(q, 1) + 2], yr: [-2, Math.max(p * p, q * q, 1) + 2], grid: false, ticks: false, minH: 170, maxH: 260, label: "parabole et droite" }), guide: [GX("Ramène à « … = 0 »", P2([1, -(p + q), p * q]), M(P2([1, -(p + q), p * q]) + " = 0") + "."), GSet("Solutions ?", [p, q], M(p) + " et " + M(q) + ".")], traps: [TSet([-p, -q], "Attention aux signes en factorisant."), TSet([p * p, q * q], "On demande les abscisses x.")] }); },
       () => { const k = pk([-4, -1, 0, 1, 4, 9]), n = k > 0 ? 2 : k === 0 ? 1 : 0, c = R.int(-3, 3);
         return QN("Combien de points d'intersection ont la parabole " + M("y = x^2" + (c ? sg(c) : "")) + " et la droite horizontale " + M("y = " + (k + c)) + " ?", n, M("x^2" + (c ? sg(c) : "") + " = " + (k + c) + " \\iff x^2 = " + k) + " : " + (n === 2 ? "deux solutions." : n === 1 ? "une seule (x = 0)." : "aucune (un carré n'est jamais négatif)."),
@@ -159,13 +159,13 @@
   const IP = {
     1: [
       () => { const p = R.int(-4, 2), q = p + R.int(1, 4), b2 = R.int(-3, 3), c2 = R.int(-4, 6), b1 = b2 - 2 * (p + q), c1 = c2 + 2 * p * q;
-        return QSet("Détermine les abscisses des points d'intersection des paraboles " + M("f(x) = " + P2([1, b1, c1])) + " et " + M("g(x) = " + P2([-1, b2, c2])) + ".", [p, q], M("f(x) = g(x) \\iff " + P2([2, -2 * (p + q), 2 * p * q]) + " = 0 \\iff 2(" + xm(p) + ")(" + xm(q) + ") = 0") + ".",
+        return QSet("Détermine les abscisses des points d'intersection des paraboles " + M("f(x) = " + P2([1, b1, c1])) + " et " + M("g(x) = " + P2([-1, b2, c2])) + ".", [p, q], M("f(x) = g(x) \\iff " + P2([2, -2 * (p + q), 2 * p * q]) + " = 0 \\iff 2(" + xm(p) + ")(" + xm(q) + ") = 0") + " : " + M("x = " + p) + " ou " + M("x = " + q) + ".",
           { ctx: "opposees", guide: [GX(M("f(x) - g(x)"), P2([2, -2 * (p + q), 2 * p * q]), M(P2([2, -2 * (p + q), 2 * p * q])) + "."), GSet("Solutions ?", [p, q], M(p) + " et " + M(q) + ".")], traps: [TSet([-p, -q], "Attention aux signes."), TSet([2 * p, 2 * q], "Divise par 2.")] }); },
       () => { const p = R.int(-4, 2), q = p + R.int(1, 4), b2 = R.int(-3, 3), c2 = R.int(-4, 6), b1 = b2 - (p + q), c1 = c2 + p * q;
         return QSet("Détermine les abscisses des points d'intersection des paraboles " + M("f(x) = " + P2([2, b1, c1])) + " et " + M("g(x) = " + P2([1, b2, c2])) + ".", [p, q], M("f(x) = g(x) \\iff " + P2([1, -(p + q), p * q]) + " = 0") + " : " + M(p) + " et " + M(q) + ".",
           { ctx: "coef2", guide: [GX(M("f(x) - g(x)"), P2([1, -(p + q), p * q]), M(P2([1, -(p + q), p * q])) + "."), GSet("Solutions ?", [p, q], M(p) + " et " + M(q) + ".")], traps: [TSet([-p, -q], "Attention aux signes.")] }); },
       () => { const r = R.int(1, 4), a = R.int(1, 6), b = 2 * r * r - a;
-        return QSet("Pour quelles valeurs de " + M("x") + " les paraboles " + M("f(x) = x^2" + sg(-a)) + " et " + M("g(x) = -x^2" + sg(b)) + " se coupent-elles ?", [-r, r], M("x^2 - " + a + " = -x^2" + sg(b) + " \\iff 2x^2 = " + 2 * r * r + " \\iff x^2 = " + r * r) + ".",
+        return QSet("Pour quelles valeurs de " + M("x") + " les paraboles " + M("f(x) = x^2" + sg(-a)) + " et " + M("g(x) = -x^2" + sg(b)) + " se coupent-elles ?", [-r, r], M("x^2 - " + a + " = -x^2" + sg(b) + " \\iff 2x^2 = " + 2 * r * r + " \\iff x^2 = " + r * r) + " : " + M("x = -" + r) + " ou " + M("x = " + r) + ".",
           { ctx: "symetriques", guide: [GS(M("x^2") + " = ?", r * r, M(r * r) + "."), GSet("Solutions ?", [-r, r], M(-r) + " et " + M(r) + ".")], traps: [TSet([r], "x² = " + r * r + " a deux solutions."), TSet([-r * r, r * r], "On cherche x, pas x².")] }); },
     ],
     2: [
