@@ -38,7 +38,7 @@ try {
     }
     const s9 = Engine.newState({ system: "CH", grade: 9, track: "college", minutes: 5 }), s11 = Engine.newState({ system: "CH", grade: 11, track: "college", minutes: 5 });
     const g0 = PROBX[id].map((f) => f()).find((p) => p.co && p.co[0] <= 11).co[0], sG = Engine.newState({ system: "CH", grade: g0, track: "college", minutes: 5 }), q9 = Engine.make(sG, id, 4), q11 = Engine.make(s11, id, 4);
-    ok(q9.co && q9.co.includes(g0), id + " : en " + g0 + "e, le niveau 4 est un défi propre");
+    ok(q9.co ? q9.co.includes(g0) : probList(id).length > 0, id + " : en " + g0 + "e, le niveau 4 est un défi propre (ou un défi commun quand la notion en a)"); /* 28.11 : formule a des défis communs (énergie, IMC, horizon) + le défi « taxi » propre à la 11e (grand problème de la semaine) : un tirage commun est voulu */
     const s12 = Engine.newState({ system: "CH", grade: 12, track: "college", minutes: 5 }), q12 = Engine.make(s12, id, 4); ok(!(q12.co && !q12.co.includes(12)), id + " : pas de défi du Cycle au Collège"); /* 27.11 : un défi réservé à [9, 12] (agent defisch2) est permis en 1re */
   }
   log.push(ids.length + " notions × 40 tirages");
