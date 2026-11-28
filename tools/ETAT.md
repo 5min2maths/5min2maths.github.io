@@ -53,7 +53,6 @@ puis grand problème de la semaine (`/contenu`, puis `/app mine`) ; puis deux d�
 6. `tools/publier.sh` : il teste l'arbre de travail puis fait `git add -A src …` À LA FIN → des modifications faites pendant
    les tests partent sans avoir été testées (28.11, écran d'ouverture publié avant son recadrage). Figer l'état (commit ou
    copie) AVANT les tests. (`/entretien`)
-6. Présentation PDF : faire une version Suisse romande seule (retour du 26.11) ; c'est peut-être fait par l'agent présentations, à vérifier.
 
 ## Décisions de l'enseignant
 
@@ -89,6 +88,9 @@ déménagement.
 
 ## Fait le 28.11 (à publier)
 
+- Présentations (`/app présentations`, branche `agent/app`, `archive/app_presentations_28-11.md`) : #decouvrir, #parents,
+  #enseignants alignés sur « pépites = seul score, niveau en mots dans Mon trésor » ; PDF complet (36 p.) et suisse
+  (33 p., version Suisse romande seule faite) : captures de l'app actuelle, page « Pépites et niveau », bonus +30.
 - Commentaires : figures pour polyreg 2 (somme des angles, découpage en triangles) et racprop 4 (cube : diagonales d et D) ;
   la batte et la balle à des prix réalistes ; la douche « débite … litres d'eau par minute » ; problème de la semaine
   +10 → +30 pépites (règle affichée dans Mes progrès) ; formules de « Les bases : … » composées dans « Je prépare une évaluation ».

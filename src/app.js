@@ -3313,7 +3313,7 @@ if (window.__reprise && typeof window.packsOk === "function" && window.packsOk(w
 else if (state && state.profile && typeof window.packsOk === "function" && !window.packsOk(state.profile)) window.ensurePacks(null).catch(() => { app.innerHTML = '<section class="card"><h2>Pas de connexion</h2><p>Reconnecte-toi, puis rouvre l\'app.</p></section>'; });
 else if (!showCode() && !restoreFromHash()) { if (state && state.placed) screenHome(); else if (state && state.placement) { toast("On reprend ton positionnement là où tu l'avais laissé."); startPlacement(); } else { state = null; screenWelcome(); } }
 /* 28.11 (commentaires de l'auteur : « au lancement, l'icône de pépite en gros, comme pour les grades, encerclée et pas dans un
-   carré bleu, avec en dessous Deviens une pépite en maths ») : écran d'ouverture, app installée seulement (lancement depuis
+   carré bleu, avec en dessous le slogan » [APP_TAGLINE]) : écran d'ouverture, app installée seulement (lancement depuis
    l'écran d'accueil du téléphone), 1,2 s au plus, un appui le ferme ; décoratif (aria-hidden), jamais pendant une séance. */
 (() => {
   const standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone;
