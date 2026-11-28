@@ -25,6 +25,12 @@ fusionné et validé ; dans la journée on fusionne et on teste sans pousser. Ex
   `tools/archive/app_mine_28-11.md`) : captures `~/Projets/5min2maths-wt/app3/tests/_shots/app/mine/voir_mine.html`.
   Questions : (1) titre des lignes = début de l'énoncé ou chapitre seul ? (2) garder « ⛏️ Encore un ? » au bilan ?
   Fusionner après validation → publication du lendemain.
+- **Grands problèmes 11e et 1re Collège** (`/contenu`, branche `agent/contenu6`, rapport
+  `archive/contenu_grands_problemes_28-11.md`) : formes de grands problèmes 11e 15 → 33 (9 → 23 notions), 1re Collège
+  11 → 26 (5 → 18 notions) ; année simulée de 35 semaines : 33 et 26 formes distinctes (avant 15 et 11). Une 4e partie
+  ajoutée à 30 problèmes riches existants (même contexte), 3 nouveaux (voiture électrique, allée autour d'un bassin
+  pour factor, tour par deux visées) ; `co: [11]` / `[12]` seulement, la version à 3 parties reste pour le défi du jour des faibles.
+  À relire par l'enseignant (énoncés), puis fusion. Reste pour 35 sans reprise : 1C +9, 11e +2.
 
 ## En cours
 
