@@ -64,11 +64,10 @@ fusionné et validé ; dans la journée on fusionne et on teste sans pousser. Ex
 
 ## À faire
 
-Ordre (28.11, 2 agents au plus ; en cours : `/entretien tests`, `/contenu` élagage des figures superficielles) :
+Ordre (28.11, 2 agents au plus) : fait : figures, élagage, tests regroupés, grand problème (moteur) ;
 puis `/app animations` (en cours) et `/contenu curieux et histoire` (grand problème de la semaine : moteur fusionné le 28.11) ; puis `/app mine` (API digMore) ;
 puis `/contenu niveau 10e` (audit, 9 notions sur ≈ 34) et le « nickel » 9e et 10e chapitre par chapitre (comme le chantier 11e) ;
 puis deux dépôts GitHub (+ domaine pepite-carre.ch, avant l'ouverture à la 11LS).
-(+ domaine pepite-carre.ch, avant l'ouverture à la 11LS).
 - **`/entretien` vitesse des tests** (après le regroupement, mesurer d'abord) : un seul navigateur qui enchaîne les pages
   (au lieu d'un Chromium par page, 1–3 s perdues chacune) ; puis 2 pages en parallèle quand aucun agent ne tourne (PC :
   2 navigateurs au plus) ; tirages réduits le jour, complets la nuit. Cible : suite rapide 1–2 min avant publication
