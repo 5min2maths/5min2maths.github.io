@@ -38,6 +38,12 @@ fusionné et validé ; dans la journée on fusionne et on teste sans pousser. Ex
 1. **Factorisation 11e** (testée par l'enseignant : il n'a vu que de la mise en évidence) : niveaux = difficulté, pas type
    de technique ; chaque niveau mélange mise en évidence, identités (x² − 16, carrés parfaits), puis au maximum / trinômes
    / « trouve l'erreur » ; question « quelle méthode ? » ; même vérification pour toutes les notions de 11e.
+   Liste Jour J actuelle de « 5. Calcul littéral » (11e, relevée par l'enseignant) : Identités remarquables, Factoriser,
+   Supprimer des parenthèses, Substituer, Écrire une expression littérale, Réduire, Développer, Écriture algébrique et
+   expressions équivalentes → (a) la PREUVE manque (objectif de Calcul littéral 2 ; demoalg n'existe qu'en 1re Collège :
+   l'ouvrir à la 11e à son niveau) ; (b) deux sous-groupes « Calcul littéral 1 » (test 18.12) et « Calcul littéral 2 »
+   (test 22.01), chacun avec « Tout cocher » ; (c) ordre du cours (écrire, substituer, réduire, parenthèses, développer,
+   identités, factoriser, prouver).
 2. **Couverture du Jour J = plan d'études** (règle générale) : pour chaque chapitre, le parcours Jour J (séances de
    préparation, test rapide, sujet, grille « Je sais… ») touche CHAQUE objectif du plan d'études ; contrôle automatique
    objectifs ↔ formes servies ; 11e d'abord (tests 7 et 8 : Calcul littéral 1 et 2), puis 1re Collège.
