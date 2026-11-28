@@ -719,6 +719,182 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
         calc: { label: "Calcule le rapport largeur ÷ hauteur du rectangle (au centième)", value: Math.round((w / h) * 100) / 100, round: 0.01 },
         reveal: M(N(w, 1) + " \\div " + h + " \\approx " + N(w / h, 3)) + " : c'est le <b>nombre d'or</b> " + M("\\varphi = \\frac{1 + \\sqrt{5}}{2} \\approx 1{,}618") + ". Un rectangle dont la largeur vaut " + M("\\varphi") + " fois la hauteur est un <b>rectangle d'or</b> : si on en retire un carré, il reste un rectangle d'or plus petit. En recommençant, et en traçant un quart de cercle dans chaque carré, on obtient la <b>spirale d'or</b>… regarde bien le reflet de la pépite !" };
     } });
+  // ===================== 4e série (28.11, programme de l'année : 11e, 1re et 2e Collège) =====================
+  // Inventaire du 28.11 (archive/inventaire_curieux_histoire_28-11.md) : rien n'était lié au programme de l'année en
+  // 11e (fonctions et algèbre, espace), en 1re et en 2e Collège. Contextes neutres (CHF → € par frLocal en France).
+  // --- 11e ---
+  add({ key: "carre50", fam: "enigme", uses: ["idrem"], outil: "les identités remarquables : (a − b)² = a² − 2ab + b² et (a + b)² = a² + 2ab + b², avec un a « rond ».",
+    make() {
+      const a = pk([30, 50, 70, 100]), d = pk([1, 2, 3]), s = pk([-1, 1]), n = a + s * d, v = n * n;
+      const sg = s < 0 ? "-" : "+";
+      return { titre: "Plus vite que la calculatrice", q: "Ton voisin parie qu'il calcule " + M(n + "^2") + " de tête avant que tu aies sorti ta calculatrice. Son secret : " + M(n + " = " + a + " " + sg + " " + d) + ".",
+        bet: { q: "Quelle astuce utilise-t-il ?", choices: [M("(" + a + " " + sg + " " + d + ")^2 = " + a + "^2 " + sg + " " + 2 * d + " \\cdot " + a + " + " + d * d), M("(" + a + " " + sg + " " + d + ")^2 = " + a + "^2 " + sg + " " + d * d), "Il connaît par cœur tous les carrés jusqu'à " + (a + 10)], good: 0 },
+        calc: { label: "À toi : calcule " + M(n + "^2") + " avec son astuce", value: v },
+        reveal: M("(" + a + " " + sg + " " + d + ")^2 = " + N(a * a) + " " + sg + " " + N(2 * d * a) + " + " + d * d + " = " + N(v)) + ". Le piège : oublier le double produit " + M("2 \\cdot " + a + " \\cdot " + d) + " et écrire " + M(N(a * a) + " " + sg + " " + d * d + " = " + N(a * a + s * d * d)) + "." };
+    } });
+  add({ key: "ballon", fam: "quotidien", uses: ["eq2"], outil: "l'équation produit nul : h = t(v − 5t) = 0 donne t = 0 (le départ) ou t = v ÷ 5 (le retour au sol).",
+    make() {
+      const v = pk([10, 15, 20, 25]), t = v / 5, H = (v * v) / 20, [what, pr] = pk([["un ballon", "le"], ["une balle de tennis", "la"], ["une balle de jonglage", "la"]]);
+      return { titre: "Combien de temps en l'air ?", q: "Tu lances " + what + " verticalement vers le haut, à " + M(v + "\\ \\text{m/s}") + ". Sans le frottement de l'air, sa hauteur (en m) au-dessus de ta main après " + M("t") + " secondes vaut " + M("h = " + v + "t - 5t^2") + ".",
+        bet: { q: "Si tu " + pr + " lançais deux fois plus vite, " + (pr === "le" ? "il" : "elle") + " resterait en l'air…", choices: ["deux fois plus longtemps", "quatre fois plus longtemps", "à peine plus longtemps"], good: 0 },
+        calc: { label: "Au bout de combien de secondes revient-" + (pr === "le" ? "il" : "elle") + " à la hauteur de ta main ?", value: t },
+        reveal: M(v + "t - 5t^2 = t(" + v + " - 5t) = 0") + " : produit nul, donc " + M("t = 0") + " (le départ) ou " + M(v + " - 5t = 0") + ", soit " + M("t = " + N(t)) + " s. Deux fois plus vite : " + M("t = " + N(2 * t)) + " s, deux fois plus longtemps. Mais " + (pr === "le" ? "il" : "elle") + " monte <b>quatre</b> fois plus haut (" + M(N(H)) + " m, puis " + M(N(4 * H)) + " m) : la hauteur dépend du carré de la vitesse." };
+    } });
+  add({ key: "pattes", fam: "enigme", uses: ["sys2"], outil: "les systèmes de deux équations : une équation pour les têtes (ou les objets), une pour les pattes (ou les roues).",
+    make() {
+      const w = pk([{ a: "poules", b: "lapins", ka: 2, kb: 4, u: "têtes", p: "pattes", lieu: "Dans la cour d'une ferme" }, { a: "motos", b: "voitures", ka: 2, kb: 4, u: "véhicules", p: "roues", lieu: "Sur un parking" },
+        { a: "tabourets à 3 pieds", b: "chaises à 4 pieds", ka: 3, kb: 4, u: "sièges", p: "pieds", lieu: "Dans une salle de spectacle" }]);
+      let A, B; do { A = R.int(8, 30); B = R.int(5, 25); } while (A === B || Math.abs(A - B) < 3);
+      const H = A + B, P = w.ka * A + w.kb * B;
+      return { titre: "Têtes et pattes", q: w.lieu + ", il y a des " + w.a + " et des " + w.b + ". On compte " + M(H) + " " + w.u + " et " + M(P) + " " + w.p + ".",
+        bet: { q: "Y a-t-il plus de " + w.a + " ou de " + w.b + " ?", choices: ["Plus de " + w.a, "Plus de " + w.b, "Autant des deux"], good: A > B ? 0 : 1 },
+        calc: { label: "Combien y a-t-il de " + w.b + " ?", value: B },
+        reveal: "Avec " + M("x") + " " + w.a + " et " + M("y") + " " + w.b + " : " + M("x + y = " + H) + " et " + M(w.ka + "x + " + w.kb + "y = " + P) + ". On multiplie la première par " + w.ka + " et on soustrait : " + M((w.kb - w.ka === 1 ? "" : w.kb - w.ka) + "y = " + P + " - " + w.ka * H + " = " + (P - w.ka * H)) + (w.kb - w.ka === 1 ? "" : ", donc " + M("y = " + B)) + " et " + M("x = " + A) + ". L'astuce cachée : si tous étaient des " + w.a + ", il n'y aurait que " + M(w.ka * H) + " " + w.p + " ; chaque " + w.b.split(" ")[0].replace(/s$/, "") + " en ajoute " + (w.kb - w.ka) + "." };
+    } });
+  add({ key: "geant", fam: "paradoxe", uses: ["simil"], outil: "les similitudes : quand les longueurs sont multipliées par k, les aires le sont par k² et les volumes (donc les masses) par k³.",
+    make() {
+      const k = pk([2, 3, 4, 5]), m = pk([50, 55, 60, 65]), t = pk([1.6, 1.65, 1.7]), Mg = m * k ** 3;
+      return { titre: "Pourquoi les géants n'existent pas", q: "Imagine un géant " + M(k) + " fois plus grand que toi, exactement avec tes proportions : toutes ses longueurs sont multipliées par " + M(k) + " (il mesure " + M(N(t * k) + "\\ \\text{m}") + "). Tu pèses " + M(m + "\\ \\text{kg}") + ".",
+        bet: { q: "Sa masse est…", choices: [M(k) + " fois la tienne", M(k * k) + " fois la tienne", M(k ** 3) + " fois la tienne"], good: 2 },
+        calc: { label: "Quelle est la masse du géant (en kg) ?", value: Mg },
+        reveal: "Le volume est multiplié par " + M(k + "^3 = " + k ** 3) + " : " + M(m + " \\cdot " + k ** 3 + " = " + N(Mg)) + " kg. Mais la section de ses os n'est multipliée que par " + M(k + "^2 = " + k * k) + " : chaque cm² d'os porte " + M(k) + " fois plus de poids que chez toi, et ses jambes se briseraient. Galilée l'a expliqué en 1638 : c'est pour cela que les grands animaux ont des os bien plus épais, en proportion." };
+    } });
+  add({ key: "equerre", fam: "enigme", uses: ["cercthales"], outil: "le cercle de Thalès : si C est sur le cercle de diamètre [AB], l'angle en C est droit ; puis Pythagore dans le triangle ABC.",
+    make() {
+      const [d, a, b] = pk([[10, 6, 8], [13, 5, 12], [25, 7, 24], [17, 8, 15], [15, 9, 12], [26, 10, 24], [20, 12, 16]]), [x, y] = R.int(0, 1) ? [a, b] : [b, a];
+      const ctx = pk(["Sur ta feuille, tu traces", "Dans la cour, avec une corde et un piquet, tu traces", "Sur une planche, tu traces"]), u = ctx.includes("cour") ? "m" : "cm";
+      return { titre: "Un angle droit sans équerre", q: ctx + " un cercle de diamètre " + M("AB = " + d + "\\ \\text{" + u + "}") + ", puis tu choisis un point " + M("C") + " sur le cercle, à " + M(x + "\\ \\text{" + u + "}") + " de " + M("A") + ".",
+        bet: { q: "L'angle " + M("\\widehat{ACB}") + " mesure…", choices: ["cela dépend de l'endroit où l'on met C", "toujours 90°", "toujours 60°"], good: 1 },
+        calc: { label: "Longueur " + M("BC") + " (en " + u + ")", value: y },
+        reveal: "C est sur le cercle de diamètre [AB] : le triangle ABC est rectangle en C (cercle de Thalès), où que soit C. Pythagore : " + M("BC^2 = " + d + "^2 - " + x + "^2 = " + (d * d - x * x)) + ", donc " + M("BC = " + y) + " " + u + ". Un cercle, un diamètre et un point suffisent à faire un angle droit parfait." };
+    } });
+  add({ key: "mouche", fam: "enigme", uses: ["repere3d"], outil: "les coordonnées dans l'espace : la distance de O(0 ; 0 ; 0) à P(x ; y ; z) vaut √(x² + y² + z²) (Pythagore deux fois).",
+    make() {
+      let L, l, h, d; do { L = pk([4, 4.5, 5, 5.5, 6]); l = pk([3, 3.5, 4]); h = pk([2.4, 2.5, 2.6]); d = Math.sqrt(L * L + l * l + h * h); } while (Math.abs(d - 6) < 0.08 || Math.abs(d - 7) < 0.08);
+      return { titre: "La mouche dans la chambre", q: "Une chambre en forme de pavé mesure " + M(N(L) + "\\ \\text{m}") + " sur " + M(N(l) + "\\ \\text{m}") + ", avec " + M(N(h) + "\\ \\text{m}") + " de hauteur. On place un repère dans un coin du sol : O(0 ; 0 ; 0). Une mouche part de O et vole en ligne droite jusqu'au coin opposé du plafond, " + M("P(" + N(L) + "\\,;\\," + N(l) + "\\,;\\," + N(h) + ")") + ".",
+        bet: { q: "Quelle distance parcourt-elle ?", choices: ["moins de 6 m", "entre 6 et 7 m", "plus de 7 m"], good: d < 6 ? 0 : d < 7 ? 1 : 2 },
+        calc: { label: "Distance OP (en m, au centième)", value: Math.round(d * 100) / 100, round: 0.01 },
+        reveal: "Au sol, la diagonale vaut " + M("\\sqrt{" + N(L) + "^2 + " + N(l) + "^2}") + " ; avec la hauteur, Pythagore une deuxième fois : " + M("OP = \\sqrt{" + N(L) + "^2 + " + N(l) + "^2 + " + N(h) + "^2} = \\sqrt{" + N(L * L + l * l + h * h) + "} \\approx " + N(d, 2)) + " m. C'est la plus longue ligne droite qui tienne dans la pièce." };
+    } });
+  add({ key: "magie", fam: "enigme", uses: ["idrem", "parenth"], outil: "le calcul littéral : avec x à la place du nombre choisi, (x + a)² − x(x + 2a) se réduit à a² : x disparaît.",
+    make() {
+      const a = pk([3, 4, 5, 6, 7, 8]), x = R.int(12, 39);
+      return { titre: "Le tour de magie", q: "« Pense à un nombre. Ajoute " + a + ", puis élève le résultat au carré. Ensuite, calcule ton nombre multiplié par (ton nombre + " + 2 * a + "), et soustrais-le du carré. Je devine ton résultat ! »",
+        bet: { q: "Comment le magicien peut-il deviner ?", choices: ["Il ne peut pas : chacun trouve un résultat différent", "Tout le monde trouve le même résultat", "Il devine seulement si le nombre est pair"], good: 1 },
+        calc: { label: "Fais le tour avec le nombre " + x + " : quel résultat trouves-tu ?", value: a * a },
+        reveal: M("(" + x + " + " + a + ")^2 - " + x + " \\cdot " + (x + 2 * a) + " = " + N((x + a) ** 2) + " - " + N(x * (x + 2 * a)) + " = " + a * a) + ". Avec " + M("x") + " : " + M("(x + " + a + ")^2 - x(x + " + 2 * a + ") = x^2 + " + 2 * a + "x + " + a * a + " - x^2 - " + 2 * a + "x = " + a * a) + ". Le nombre choisi disparaît : le résultat est toujours " + a * a + "." };
+    } });
+  add({ key: "cadre", fam: "paradoxe", uses: ["probeq2"], outil: "un problème du 2e degré : (L + 2x)(l + 2x) = 2 · L · l, puis la formule (ou la factorisation).",
+    make() {
+      const [l, L] = pk([[12, 18], [16, 24], [20, 30], [24, 36], [28, 42]]), x = l / 4, b = (L + l) / 2, c = (L * l) / 4;
+      return { titre: "Le cadre aussi grand que la photo", q: "Tu encadres une photo de " + M(l + "\\ \\text{cm}") + " sur " + M(L + "\\ \\text{cm}") + " avec un cadre de même largeur " + M("x") + " tout autour. Tu veux que le cadre seul ait la même aire que la photo.",
+        bet: { q: "Quelle largeur faut-il ?", choices: ["à peu près la moitié du petit côté", "le quart du petit côté", "un dixième du petit côté"], good: 1 },
+        calc: { label: "Largeur " + M("x") + " du cadre (en cm)", value: x },
+        reveal: "Photo et cadre ensemble : " + M("(" + L + " + 2x)(" + l + " + 2x) = 2 \\cdot " + L * l) + ". En développant : " + M("4x^2 + " + 2 * (L + l) + "x - " + L * l + " = 0") + ", soit " + M("x^2 + " + b + "x - " + c + " = 0") + ", donc " + M("(x - " + N(x) + ")(x + " + N(b + x) + ") = 0") + " : " + M("x = " + N(x)) + " cm (l'autre solution est négative). Un cadre étroit suffit, car il fait tout le tour." };
+    } });
+  add({ key: "cornet", fam: "paradoxe", uses: ["volcone", "simil"], outil: "le volume du cône, V = π · r² · h ÷ 3, et les similitudes : à mi-hauteur, le petit cône est une réduction de rapport 1/2, donc de volume (1/2)³ = 1/8.",
+    make() {
+      const [r, h] = pk([[3, 9], [4, 12], [4, 10], [5, 12], [3, 10]]), V = (Math.PI * r * r * h) / 3, v = V / 8, what = pk(["Un verre à cocktail", "Un gobelet conique en papier", "Une flûte conique"]);
+      return { titre: "À moitié plein ?", q: what + " a la forme d'un cône pointe en bas : rayon " + M(r + "\\ \\text{cm}") + " en haut, profondeur " + M(h + "\\ \\text{cm}") + ". On le remplit jusqu'à la moitié de sa profondeur.",
+        bet: { q: "Quelle part du volume est remplie ?", choices: ["la moitié", "un quart", "un huitième"], good: 2 },
+        calc: { label: "Volume rempli (en cm³, au dixième)", value: Math.round(v * 10) / 10, round: 0.1 },
+        reveal: "Le liquide forme un petit cône de rayon " + M(N(r / 2)) + " cm et de hauteur " + M(N(h / 2)) + " cm : " + M("\\frac{\\pi \\cdot " + N(r / 2) + "^2 \\cdot " + N(h / 2) + "}{3} \\approx " + N(v, 1)) + " cm³, sur " + M(N(V, 1)) + " cm³ en tout : un huitième ! Toutes les longueurs sont divisées par 2, le volume par " + M("2^3 = 8") + ". Rempli « à mi-hauteur », un verre conique est presque vide." };
+    } });
+  // --- 1re Collège ---
+  add({ key: "billet", fam: "quotidien", uses: ["optim"], outil: "l'optimisation : la recette R(x) = (p + x)(N − kx) est une fonction du 2e degré ; son maximum est au sommet de la parabole.",
+    make() {
+      const p = pk([12, 15, 18, 20]), k = pk([8, 10, 15, 20]), x = R.int(3, 8), Nn = k * (p + 2 * x), what = pk(["un concert de l'école", "une pièce de théâtre", "un festival de cinéma en plein air"]);
+      return { titre: "Le prix qui rapporte le plus", q: "Pour " + what + ", le billet coûte " + chf(p) + " et " + M(N(Nn)) + " spectateurs viennent. Une enquête montre que chaque hausse de " + chf(1) + " fait perdre " + M(k) + " spectateurs.",
+        bet: { q: "Augmenter le prix…", choices: ["fait toujours perdre de l'argent", "rapporte plus, mais seulement jusqu'à un certain prix", "rapporte toujours plus"], good: 1 },
+        calc: { label: "Quel prix du billet rapporte la plus grande recette ? (en CHF)", value: p + x },
+        reveal: "Avec une hausse de " + M("x") + " CHF : " + M("R(x) = (" + p + " + x)(" + Nn + " - " + k + "x)") + ". Ses zéros sont " + M("x = -" + p) + " et " + M("x = " + (p + 2 * x)) + " ; le sommet est au milieu : " + M("x = " + x) + ". Billet à " + chf(p + x) + " : recette " + chf((p + x) * (Nn - k * x)) + ", contre " + chf(p * Nn) + " au départ." };
+    } });
+  add({ key: "euler41", fam: "paradoxe", uses: ["contrex"], outil: "le contre-exemple : beaucoup d'exemples ne prouvent rien ; un seul contre-exemple suffit à réfuter une affirmation.",
+    make() {
+      const [e, n0, s] = pk([["n^2 + n + 41", 40, "+"], ["n^2 - n + 41", 41, "-"]]), k = R.int(2, 9), vk = k * k + (s === "+" ? k : -k) + 41;
+      return { titre: "La formule à nombres premiers", q: "Euler a signalé en 1772 que " + M(e) + " donne un nombre premier pour " + M("n = 1, 2, 3") + "… Par exemple, pour " + M("n = " + k) + ", on obtient " + M(vk) + ", qui est premier. On l'a vérifié pour les 30 premières valeurs de " + M("n") + ".",
+        bet: { q: "Cette formule donne-t-elle toujours un nombre premier ?", choices: ["Oui, 30 exemples le prouvent", "Non, il existe un n pour lequel elle échoue", "On ne pourra jamais le savoir"], good: 1 },
+        calc: { label: "Calcule la valeur pour " + M("n = " + n0), value: 1681 },
+        reveal: "Pour " + M("n = " + n0) + " : " + M(n0 + "^2 " + s + " " + n0 + " + 41 = 1\\text{'}681 = 41^2") + ", qui n'est pas premier. La formule marche pour 40 valeurs de suite, puis échoue : des dizaines d'exemples ne remplacent pas une démonstration." };
+    } });
+  add({ key: "consecutifs", fam: "enigme", uses: ["demoalg"], outil: "la démonstration algébrique : n + (n + 1) + (n + 2) = 3(n + 1), toujours un multiple de 3, et le nombre du milieu vaut la somme ÷ 3.",
+    make() {
+      const m = R.int(24, 95), S = 3 * m;
+      return { titre: "Le calcul de tête de Léa", q: "Léa propose : « Donne-moi la somme de trois nombres entiers consécutifs, je te dis tout de suite les trois nombres. » Tom annonce " + M(S) + ".",
+        bet: { q: "Peut-on obtenir n'importe quelle somme avec trois entiers consécutifs ?", choices: ["Oui, n'importe quel entier", "Non, seulement des multiples de 3", "Non, seulement des nombres pairs"], good: 1 },
+        calc: { label: "Quel est le plus petit des trois nombres de Tom ?", value: m - 1 },
+        reveal: M("n + (n + 1) + (n + 2) = 3n + 3 = 3(n + 1)") + " : la somme est toujours un multiple de 3, et " + M("n + 1") + ", le nombre du milieu, vaut la somme divisée par 3. Ici " + M(S + " \\div 3 = " + m) + " : les nombres sont " + (m - 1) + ", " + m + " et " + (m + 1) + ". Si Tom annonce " + (S + 1) + ", Léa sait qu'il triche." };
+    } });
+  add({ key: "rdv", fam: "enigme", uses: ["absval"], outil: "la valeur absolue : la distance entre x et a vaut |x − a| ; la somme des distances est la plus petite à la médiane des positions.",
+    make() {
+      let p, mean; do { p = [...new Set([...Array(5)].map(() => R.int(0, 24)))].sort((a, b) => a - b); mean = p.length === 5 ? p.reduce((s, v) => s + v, 0) / 5 : 0; } while (p.length < 5 || Math.abs(mean - p[2]) < 1.5 || Math.abs((p[0] + p[4]) / 2 - p[2]) < 1.5);
+      const tot = p[4] - p[0] + p[3] - p[1], noms = ["Ana", "Ben", "Chloé", "Dario", "Emma"];
+      return { titre: "Le point de rendez-vous", q: "Cinq amis habitent le long d'une même route. Leurs maisons sont aux bornes " + p.map((v, i) => noms[i] + " " + M(v)).join(", ") + " (en km). Ils veulent se retrouver en un point de la route en marchant le moins possible au total.",
+        bet: { q: "Où se retrouver ?", choices: ["au milieu, entre les deux maisons extrêmes", "à la moyenne des cinq positions", "chez " + noms[2] + ", la maison du milieu"], good: 2 },
+        calc: { label: "Distance totale parcourue par les cinq, au meilleur point (en km)", value: tot },
+        reveal: "En un point " + M("x") + ", la marche totale vaut " + M(p.map((v) => "|x - " + v + "|").join(" + ")) + ". Si l'on s'éloigne de la maison du milieu, on se rapproche de deux amis mais on s'éloigne de trois : le minimum est en " + M("x = " + p[2]) + " (la <b>médiane</b>). Total : " + M((p[4] - p[0]) + " + " + (p[3] - p[1]) + " + 0 = " + tot) + " km. À la moyenne (" + M(N(mean, 1)) + "), on marcherait " + M(N(p.reduce((s, v) => s + Math.abs(mean - v), 0), 1)) + " km." };
+    } });
+  add({ key: "colline", fam: "quotidien", uses: ["inter"], outil: "l'intersection de deux graphes : on égalise les deux expressions, bx − cx² = mx, et on résout.",
+    make() {
+      const [b, c, m] = pk([[1, 0.05, 0.25], [1, 0.05, 0.2], [1, 0.05, 0.4], [1, 0.04, 0.2], [1, 0.04, 0.4], [0.8, 0.04, 0.2]]), x = Math.round(((b - m) / c) * 1e6) / 1e6, xf = Math.round((b / c) * 1e6) / 1e6;
+      const who = pk(["Un footballeur", "Une joueuse de rugby", "Un gardien de but"]);
+      return { titre: "Le ballon et la colline", q: who + " tape dans le ballon au pied d'une colline. Sa trajectoire : " + M("y = " + (b === 1 ? "" : N(b)) + "x - " + N(c) + "x^2") + " ; la pente de la colline : " + M("y = " + N(m) + "x") + " (" + M("x") + " et " + M("y") + " en mètres).",
+        bet: { q: "Par rapport à un terrain plat, le ballon retombe…", choices: ["plus près", "au même endroit", "plus loin"], good: 0 },
+        calc: { label: "À quelle distance horizontale " + M("x") + " (en m) touche-t-il la colline ?", value: x },
+        reveal: M((b === 1 ? "" : N(b)) + "x - " + N(c) + "x^2 = " + N(m) + "x") + " donne " + M("x(" + N(r6(b - m)) + " - " + N(c) + "x) = 0") + " : " + M("x = 0") + " (le départ) ou " + M("x = " + N(r6(b - m)) + " \\div " + N(c) + " = " + N(x)) + " m. Sur terrain plat (" + M("y = 0") + "), il irait jusqu'à " + M(N(xf)) + " m : la colline l'arrête plus tôt." };
+    } });
+  add({ key: "nuages", fam: "fermi", uses: ["trigo"], outil: "la trigonométrie du triangle rectangle : hauteur = distance · tan(angle).",
+    make() {
+      const d = pk([300, 400, 500, 600]), a = pk([55, 60, 65, 70]), h = d * Math.tan((a * Math.PI) / 180);
+      return { titre: "La hauteur des nuages", q: "Avant les appareils laser, on mesurait la nuit la base des nuages sur les aérodromes avec un projecteur : il éclaire verticalement, et la tache de lumière se voit sur les nuages. Un observateur, à " + M(d + "\\ \\text{m}") + " du projecteur, voit la tache sous un angle de " + M(a + "°") + " au-dessus de l'horizontale.",
+        bet: { q: "La base des nuages est…", choices: ["à moins de 500 m", "entre 500 m et 2 km", "à plus de 2 km"], good: h < 500 ? 0 : h <= 2000 ? 1 : 2 },
+        calc: { label: "Hauteur de la base des nuages (en m)", value: Math.round(h), range: [h * 0.97, h * 1.03] },
+        reveal: "Projecteur, observateur et tache forment un triangle rectangle : " + M("\\tan " + a + "° = \\frac{h}{" + d + "}") + ", donc " + M("h = " + d + " \\cdot \\tan " + a + "° \\approx " + N(Math.round(h))) + " m. Une seule distance et un seul angle suffisent." };
+    } });
+  add({ key: "taxis", fam: "quotidien", uses: ["modaff"], outil: "la modélisation par des fonctions du premier degré : prix = prise en charge + prix au km · distance ; les deux droites se coupent au prix égal.",
+    make() {
+      const [A0, pA, B0, pB] = pk([[10, 3, 4, 3.5], [9, 3.2, 5, 3.7], [13, 2.8, 6, 3.3], [8, 3, 5, 3.5], [11, 2.9, 5, 3.5]]), d = r6((A0 - B0) / (pB - pA));
+      let D; do D = R.int(3, 20); while (Math.abs(D - d) < 2);
+      return { titre: "Deux taxis", q: "Taxi Éclair : " + chf(A0) + " de prise en charge, puis " + chf(pA) + " par km. Taxi Express : " + chf(B0) + " de prise en charge, puis " + chf(pB) + " par km. Tu dois faire " + M(D + "\\ \\text{km}") + ".",
+        bet: { q: "Lequel choisir pour ce trajet ?", choices: ["Éclair", "Express", "C'est le même prix"], good: D > d ? 0 : 1 },
+        calc: { label: "À partir de quelle distance (en km) les deux taxis coûtent-ils le même prix ?", value: d },
+        reveal: "Éclair : " + M("f(x) = " + N(A0) + " + " + N(pA) + "x") + " ; Express : " + M("g(x) = " + N(B0) + " + " + N(pB) + "x") + ". Égalité : " + M(N(A0 - B0) + " = " + N(r6(pB - pA)) + "x") + ", donc " + M("x = " + N(d)) + " km. En dessous, Express (prise en charge plus basse) gagne ; au-dessus, Éclair (km moins cher). Pour " + D + " km : Éclair " + chf(r6(A0 + pA * D)) + ", Express " + chf(r6(B0 + pB * D)) + "." };
+    } });
+  add({ key: "periode", fam: "enigme", uses: ["ensembles"], outil: "les nombres rationnels : un développement décimal périodique est une fraction ; avec x = 0,abab…, 100x − x = ab.",
+    make() {
+      const ab = pk([18, 27, 36, 45, 54, 63, 72, 12, 15, 21, 24, 42, 51, 57]), g = gcd(ab, 99), den = 99 / g, s = String(ab).padStart(2, "0");
+      return { titre: "Le nombre qui se répète", q: "En divisant deux entiers, tu obtiens " + M("0{,}" + s + s + s + s + "\\ldots") + " : les chiffres " + s + " se répètent sans fin.",
+        bet: { q: "Ce nombre est-il une fraction (un quotient de deux entiers) ?", choices: ["Non : il a une infinité de décimales", "Oui, c'est une fraction", "Seulement si on l'arrondit"], good: 1 },
+        calc: { label: "Écris-le comme une fraction irréductible : quel est son dénominateur ?", value: den },
+        reveal: "Avec " + M("x = 0{,}" + s + s + "\\ldots") + " : " + M("100x = " + ab + "{,}" + s + s + "\\ldots") + ". En soustrayant, les décimales s'annulent : " + M("99x = " + ab) + ", donc " + M("x = \\frac{" + ab + "}{99} = \\frac{" + ab / g + "}{" + den + "}") + ". Tout nombre décimal périodique est rationnel. La même astuce montre que " + M("0{,}999\\ldots = 1") + " !" };
+    } });
+  // --- 2e Collège ---
+  add({ key: "chiffres2", fam: "enigme", uses: ["log"], outil: "le logarithme décimal : un entier N a ⌊log N⌋ + 1 chiffres, et log 2ⁿ = n · log 2 ≈ n · 0,30103.",
+    make() {
+      const [n, ctx] = pk([[64, "le nombre de clés possibles d'un code secret de 64 bits"], [128, "le nombre d'adresses IPv6 possibles sur Internet"], [256, "le nombre de clés d'un chiffrement AES-256"], [100, "le nombre de façons de répondre à un QCM de 100 questions vrai-faux"]]), L = n * Math.log10(2), dg = Math.floor(L) + 1;
+      return { titre: "Combien de chiffres ?", q: M("2^{" + n + "}") + " : c'est " + ctx + ". Aucune calculatrice ordinaire ne l'affiche en entier.",
+        bet: { q: "Écrit en entier, ce nombre a environ…", choices: [Math.round(n / 10) + " chiffres", Math.round(n / 3) + " chiffres", Math.round(n / 2) + " chiffres"], good: 1 },
+        calc: { label: "Combien de chiffres a exactement " + M("2^{" + n + "}") + " ?", value: dg },
+        reveal: M("\\log 2^{" + n + "} = " + n + " \\cdot \\log 2 \\approx " + n + " \\cdot 0{,}30103 \\approx " + N(L, 2)) + ". Donc " + M("10^{" + Math.floor(L) + "} \\leq 2^{" + n + "} < 10^{" + (Math.floor(L) + 1) + "}") + " : " + dg + " chiffres. Chaque doublement ajoute environ 0,3 chiffre : 10 doublements ajoutent 3 chiffres (" + M("2^{10} = 1\\text{'}024") + ")." };
+    } });
+  add({ key: "gps", fam: "quotidien", uses: ["cercle"], outil: "les équations de cercles : soustraire les équations de deux cercles fait disparaître x² et y², et il reste une équation du premier degré.",
+    make() {
+      let P, d, r2; for (let t = 0; t < 200; t++) { P = pk([[3, 4], [4, 3], [6, 8], [8, 6], [5, 12], [12, 5], [9, 12], [12, 9], [8, 15], [15, 8]]); d = R.int(5, 30); const q = (d - P[0]) ** 2 + P[1] ** 2, s = Math.round(Math.sqrt(q)); if (s * s === q && d !== P[0]) { r2 = s; break; } }
+      if (!r2) { P = [6, 8]; d = 12; r2 = 10; }
+      const r1 = Math.hypot(...P);
+      return { titre: "Se situer comme un GPS", q: "Deux antennes sont placées en A(0 ; 0) et B(" + d + " ; 0) (en km). Ton téléphone mesure qu'il est à " + M(r1 + "\\ \\text{km}") + " de A et à " + M(r2 + "\\ \\text{km}") + " de B. Tu es au nord de la route AB (y > 0).",
+        bet: { q: "Avec deux distances seulement, sans « au nord », combien de positions seraient possibles ?", choices: ["une seule", "deux", "une infinité"], good: 1 },
+        calc: { label: "Abscisse " + M("x") + " de ta position (en km)", value: P[0] },
+        reveal: "Cercles : " + M("x^2 + y^2 = " + r1 * r1) + " et " + M("(x - " + d + ")^2 + y^2 = " + r2 * r2) + ". En soustrayant : " + M(2 * d + "x - " + d * d + " = " + (r1 * r1 - r2 * r2)) + ", donc " + M("x = " + P[0]) + ", puis " + M("y^2 = " + (r1 * r1 - P[0] * P[0])) + " et " + M("y = " + P[1]) + ". Deux cercles se coupent en deux points : il faut une troisième information. Le GPS fait de même avec des sphères autour des satellites (et un satellite de plus pour corriger l'horloge du récepteur)." };
+    } });
+  add({ key: "cafeine", fam: "quotidien", uses: ["expo"], outil: "la décroissance exponentielle : avec une demi-vie de 5 h, la quantité restante vaut m₀ · (1/2)^(t/5).",
+    make() {
+      const [D, what] = pk([[80, "un expresso"], [80, "une canette de boisson énergisante (25 cL)"], [160, "deux expressos"], [90, "une grande tasse de café filtre"]]), H = pk([15, 16, 17]), t = 22 - H, m = D * 0.5 ** (t / 5);
+      return { titre: "Le café de l'après-midi", q: "À " + H + " h, un adulte boit " + what + ", soit environ " + M(D + "\\ \\text{mg}") + " de caféine. Le corps en élimine la moitié en 5 heures environ (la demi-vie varie de 3 à 7 heures selon les personnes). Il se couche à 22 h.",
+        bet: { q: "Au coucher, il lui reste…", choices: ["presque rien (moins de 10 %)", "entre un tiers et la moitié", "presque tout"], good: 1 },
+        calc: { label: "Quantité de caféine restante à 22 h (en mg, à l'unité)", value: Math.round(m), round: 1 },
+        reveal: M("t = " + t) + " h : " + M(D + " \\cdot \\left(\\frac{1}{2}\\right)^{" + t + "/5} \\approx " + D + " \\cdot " + N(0.5 ** (t / 5), 3) + " \\approx " + Math.round(m)) + " mg, soit " + pc(100 * 0.5 ** (t / 5), 0) + " de la dose. Il faut environ 5 demi-vies (25 h) pour en éliminer 97 % : le café de 16 h est encore là à minuit." };
+    } });
   CURIEUX.forEach((c) => { const n = (id) => NOTIONS.find((x) => x.id === id); c.uses = c.uses.filter(n); });
 })();
 

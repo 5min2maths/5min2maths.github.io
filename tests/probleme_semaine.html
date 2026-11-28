@@ -1,0 +1,125 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css">
+<main id="app"></main><pre id="out">en cours</pre>
+<script>window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}
+window.fetch = () => Promise.resolve(new Response("{}")); if (navigator.sendBeacon) navigator.sendBeacon = () => true; window.ensurePacks = () => Promise.resolve();
+{ let seed = 5; Math.random = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; }; }
+</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/defis_9.js"></script><script src="../src/defis_910.js"></script><script src="../src/defis_2c.js"></script><script src="../src/defis_sec2.js"></script><script src="../src/competences.js"></script><script src="../src/referentiel.js"></script><script src="../src/trx.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch4c_trous.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/ch1c_trous.js"></script><script src="../src/ch1c_argact.js"></script><script src="../src/ch11_rep3d.js"></script><script src="../src/perco.js"></script><script src="../src/fr_college.js"></script><script src="../src/fr_1re.js"></script><script src="../src/fr_3e.js"></script><script src="../src/fr_tle.js"></script><script src="../src/fr_fin.js"></script><script src="../src/fr_trous.js"></script><script src="../src/fr_couv.js"></script><script src="../src/ref_matu.js"></script><script src="../src/ref_fr.js"></script><script src="../src/ref_co.js"></script><script src="../src/ref_mp.js"></script><script src="../src/ref_formes.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_col34b.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/fr_act.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/parents.js"></script><script src="../src/presente.js"></script><script src="../src/app.js"></script>
+<script>
+/* Problème de la semaine et « Creuser encore » (page de thème, 28.11, décision de l'enseignant ; tools/ETAT.md) :
+   1 : un grand problème (≥ 4 parties, en situation, au programme de la classe) dès que la classe en a pour les notions
+       travaillées ; code fixe de la semaine. 2 : élève faible = même problème, avec aide (pas raccourci). 3 : repli explicite
+       (weeklyPick.g). 4 : historique des semaines (state.weeklyHist), migration douce d'un état d'avant. 5 : digMore /
+       digQuestion / digNote. 6 : rendu de l'aide (renderProblem). Reprend aussi les règles du 26.11 (p6_26_11). */
+const fresh = (pr, r) => { state = Engine.newState({ ...pr, minutes: 5 }); Engine.autoInit(state); state.placed = true; if (r) state.elo.r = r; return state; };
+const setAll = (st, f) => { for (const c of Engine.catalog(st.profile)) { const s = st.notions[c.id]; if (s) Object.assign(s, f(c.id)); } };
+const RD = Date; let off = 0;
+class FD extends RD { constructor(...a) { if (a.length === 0) super(RD.now() + off); else super(...a); } static now() { return RD.now() + off; } }
+const setWeek = (k) => { off = k * 7 * 864e5; };
+window.Date = FD;
+try {
+const fails = [], ok = (c, m) => { if (!c) fails.push(m); }, log = [];
+const yrOf = (id) => (placeOf(NOTIONS.find((n) => n.id === id), state.profile) || [])[0];
+const C11 = { system: "CH", grade: 11, track: "college" }, C1 = { system: "CH", grade: 12, track: "college" }, C10 = { system: "CH", grade: 10, track: "college" }, MP1 = { system: "CH", grade: 12, track: "mp" }, C9 = { system: "CH", grade: 9, track: "college" };
+const W = { status: "vu", seen: 3, m: 0.8 };
+
+/* ---- 1. grand problème quand la classe en a ---- */
+let n1 = 0;
+for (const pr of [C11, C1, C10, MP1, C9]) for (const r of [800, 1100, 1400, 1700]) {
+  fresh(pr, r); setAll(state, () => W); delete state.weeklyPick;
+  const id = Engine.weeklyProblem(state), q = Engine.weeklyQuestion(state), q2 = Engine.weeklyQuestion(state); n1++;
+  const tag = pr.system + "-" + pr.grade + (pr.track === "mp" ? "MP" : "") + " r" + r;
+  ok(id && q && q.id === id, "1 : " + tag + " : pas de problème (" + id + ")");
+  if (!q) continue;
+  ok(state.weeklyPick.g === "grand", "1 : " + tag + " : sorte " + state.weeklyPick.g + " (" + id + ")");
+  ok(Engine.isGrand(state, id, q) && q.parts.length >= 4, "1 : " + tag + " : pas un grand problème (" + q.code + ", " + q.parts.length + " parties)");
+  ok(yrOf(id) === pr.grade, "1 : " + tag + " : notion d'une autre année (" + id + "@" + yrOf(id) + ")");
+  ok(q2.code === q.code && q.code === state.weeklyPick.code, "1 : " + tag + " : code non fixe (" + q.code + " / " + q2.code + ")");
+  const mn = Engine.probMinutes(q); ok(mn >= 9 && mn <= 16, "1 : " + tag + " : durée estimée " + mn + " min (" + q.code + ")");
+}
+log.push("1 : " + n1 + " profils");
+
+/* ---- 2. élève faible : même problème, avec aide ; élève moyen : sans aide ---- */
+let n2 = 0;
+for (const pr of [C11, C1, C10]) {
+  fresh(pr, 1400); setAll(state, () => W); delete state.weeklyPick; Engine.weeklyProblem(state);
+  const pick = { ...state.weeklyPick }, strong = Engine.weeklyQuestion(state);
+  ok(strong && !strong.aid && !strong.maxTries, "2 : " + pr.grade + " : aide donnée à un élève fort");
+  state.elo.r = 300; state.last1 = [0, 0, 0, 0, 0, 0]; ok(Engine.weak4(state), "2 : profil faible non reconnu");
+  state.weeklyPick = pick; const weak = Engine.weeklyQuestion(state); n2++;
+  ok(weak && weak.code === strong.code && weak.parts.length === strong.parts.length && weak.parts.length >= 4, "2 : " + pr.grade + " : faible, problème raccourci ou autre (" + (weak && weak.code) + " / " + strong.code + ")");
+  ok(weak && weak.aid && weak.aid.plan && weak.aid.parts.length === weak.parts.length && weak.aid.parts.some(Boolean) && weak.maxTries === 4, "2 : " + pr.grade + " : faible sans aide");
+  /* jamais la réponse dans un coup de pouce */
+  if (weak && weak.aid) weak.parts.forEach((p, i) => { const t = weak.aid.parts[i]; if (!t || !p.spec || p.spec.kind !== "value" || !isFinite(p.spec.value)) return; const v = String(+(+p.spec.value).toPrecision(10)).replace(".", ","); if (v.length < 3) return;
+    ok(!new RegExp("=\\s*" + v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?![\\d,])").test(t), "2 : " + weak.code + " : coup de pouce " + String.fromCharCode(97 + i) + ") donne la réponse " + v + " : " + t); });
+}
+/* défi du jour (règle n° 24 du 26.11) : toujours court pour un élève faible */
+fresh(C11, 300); setAll(state, () => W); state.last1 = [0, 0, 0, 0, 0, 0];
+{ let long = 0, n = 0; for (const id of ["thales", "thalesrec", "pythrec", "sysprob"]) for (let k = 0; k < 6; k++) { const q = Engine.make(state, id, 4); if (q && q.d === 4 && q.parts) { n++; if (q.parts.length > 3) long++; } } ok(n > 5 && long === 0, "2 : défi du jour d'un faible : " + long + " problèmes longs sur " + n); }
+log.push("2 : " + n2 + " classes");
+
+/* ---- 3. repli explicite ---- */
+fresh(C11, 1100); setAll(state, () => ({ status: "encours", seen: 0, m: 0.4 }));
+{ const id0 = Engine.catalog(state.profile).map((c) => c.id).find((id) => hasProb(id) && yrOf(id) === 11 && !Engine.probCodes(state, id, "grand").length && Engine.probCodes(state, id, "riche").length);
+  ok(id0, "3 : 11e sans notion à problème riche sans grand"); if (id0) { Object.assign(state.notions[id0], W); delete state.weeklyPick;
+  const id = Engine.weeklyProblem(state), q = Engine.weeklyQuestion(state);
+  ok(id === id0 && state.weeklyPick.g === "riche" && q && q.parts.length >= 3, "3 : repli « riche » attendu (" + id0 + ") : " + id + " " + state.weeklyPick.g); } }
+fresh(C11, 1100); setAll(state, () => ({ status: "encours", seen: 0, m: 0.4 })); delete state.weeklyPick;
+ok(Engine.weeklyProblem(state) === null && Engine.weeklyQuestion(state) === null, "3 : rien de travaillé, pas de problème");
+
+/* ---- 4. historique des semaines, migration douce ---- */
+fresh(C11, 1300); setAll(state, () => W);
+const codes = [];
+for (let k = 0; k < 4; k++) { setWeek(k); const q = Engine.weeklyQuestion(state); codes.push(q.code); if (k !== 2) state.weeklyDone = Engine.weekId(); }
+setWeek(4); Engine.weeklyProblem(state);
+ok(state.weeklyHist.length === 5, "4 : historique de " + state.weeklyHist.length + " semaines (5 attendues)");
+ok(new Set(codes).size === 4, "4 : un problème déjà donné revient : " + codes.join(" "));
+ok(state.weeklyHist.filter((e) => e.done).length === 3 && !state.weeklyHist[2].done, "4 : semaines faites mal notées " + JSON.stringify(state.weeklyHist.map((e) => e.done)));
+/* état d'avant le 28.11 : weeklyPick v4 fait cette semaine, pas d'historique */
+setWeek(0); fresh(C11, 1300); setAll(state, () => W);
+state.weeklyPick = { week: Engine.weekId(), id: "thales", v: 4, now: "" }; state.weeklyDone = Engine.weekId(); delete state.weeklyHist;
+ok(Engine.weeklyProblem(state) === "thales" && state.weeklyHist.length === 1 && state.weeklyHist[0].done, "4 : migration d'un état v4 : " + JSON.stringify(state.weeklyHist));
+ok(Engine.weeklyQuestion(state) && Engine.weeklyQuestion(state).d === 4, "4 : état v4 : pas de question de niveau 4");
+/* sauvegarde : l'historique n'est pas une nouvelle clé de stockage (il vit dans l'état) */
+ok(!Object.keys(localStorage).some((k) => /weekly|dig/i.test(k)), "4 : nouvelle clé de stockage");
+
+/* ---- 5. Creuser encore ---- */
+setWeek(0); fresh(C11, 1300); setAll(state, () => W);
+for (let k = 0; k < 3; k++) { setWeek(k); Engine.weeklyQuestion(state); if (k === 0) state.weeklyDone = Engine.weekId(); }
+setWeek(3); const cur = Engine.weeklyQuestion(state);
+ok(!Engine.digOpen(state) && Engine.digMore(state).length === 0, "5 : la mine est ouverte avant le problème de la semaine");
+state.weeklyDone = Engine.weekId();
+const dm = Engine.digMore(state, 8);
+ok(dm.length >= 4, "5 : seulement " + dm.length + " problèmes à creuser");
+ok(!dm.some((x) => x.code === cur.code), "5 : le problème de la semaine est dans « Creuser encore »");
+ok(dm[0] && dm[0].kind === "semaine" && !dm[0].done, "5 : un problème d'une semaine passée non fait n'est pas en tête : " + JSON.stringify(dm[0]));
+ok(dm.filter((x) => x.kind === "semaine").length === 2, "5 : semaines passées non faites : " + dm.filter((x) => x.kind === "semaine").length + " (2 attendues)");
+{ const all = Engine.digMore(state, 40), sem = all.filter((x) => x.kind === "semaine"); ok(sem.length === 3 && all[all.length - 1].kind === "semaine" && all[all.length - 1].done, "5 : semaine passée faite absente ou pas en dernier : " + JSON.stringify(sem)); }
+ok(dm.some((x) => x.kind === "chapitre"), "5 : aucun problème des chapitres récents");
+ok(new Set(dm.map((x) => x.code)).size === dm.length, "5 : doublons");
+for (const x of dm) { const q = Engine.digQuestion(state, x.code); ok(q && q.dig && q.d === 4 && q.parts.length === x.parts && yrOf(q.id) === 11, "5 : digQuestion " + x.code);
+  ok(x.label && x.minutes >= 5, "5 : libellé ou durée manquants " + JSON.stringify(x)); if (x.kind === "chapitre") ok(x.parts >= 4, "5 : problème de chapitre pas grand " + x.code); }
+Engine.digNote(state, dm[0].code); ok(!Engine.digMore(state, 8).some((x) => x.code === dm[0].code), "5 : problème creusé aujourd'hui reproposé");
+ok(Engine.digQuestion(state, "nimporte-4-zz") === null && Engine.digQuestion(state, "thales-2-5") === null, "5 : code invalide accepté");
+state.elo.r = 300; state.last1 = [0, 0, 0, 0, 0]; { const q = Engine.digQuestion(state, dm[1].code); ok(q && q.aid && q.maxTries === 4, "5 : creuser, élève faible sans aide"); }
+log.push("5 : " + dm.length + " à creuser (" + dm.map((x) => x.kind[0] + ":" + x.id).join(" ") + ")");
+
+/* ---- 7. une année (35 semaines) : jamais deux fois le même problème ; part de grands (journal) ---- */
+for (const [nm, pr] of [["11e", C11], ["1re Coll.", C1]]) {
+  setWeek(0); fresh(pr, 1200); setAll(state, () => W); const cs = [], gs = {}, fm = new Set();
+  for (let k = 0; k < 35; k++) { setWeek(k); const q = Engine.weeklyQuestion(state); if (!q) continue; cs.push(q.code); gs[state.weeklyPick.g] = (gs[state.weeklyPick.g] || 0) + 1; fm.add(q.id + ":" + (q.ctx || qForm(q).slice(0, 60))); state.weeklyDone = Engine.weekId(); }
+  ok(new Set(cs).size === cs.length, "7 : " + nm + " : un problème revient à l'identique dans l'année");
+  ok(cs.length === 35, "7 : " + nm + " : " + cs.length + " semaines avec un problème sur 35");
+  log.push("7 : " + nm + " " + JSON.stringify(gs) + ", " + fm.size + " formes");
+}
+setWeek(0);
+
+/* ---- 6. rendu de l'aide ---- */
+{ setWeek(0); fresh(C11, 300); setAll(state, () => W); state.last1 = [0, 0, 0, 0, 0, 0]; const q = Engine.weeklyQuestion(state);
+  renderProblem(q, { eyebrow: "test", onDone: () => 0, onNext: () => 0 });
+  ok(document.querySelector(".aid-plan") && document.querySelectorAll("details.aid").length === q.aid.parts.filter(Boolean).length, "6 : aide non affichée"); }
+
+document.getElementById("out").textContent = (fails.length ? "ÉCHEC " + fails.length + "\n" + fails.slice(0, 30).join("\n") : "ok problème de la semaine : " + log.join(" ; "));
+} catch (e) { document.getElementById("out").textContent = "EXC " + e.stack; }
+finally { window.Date = RD; }
+</script>

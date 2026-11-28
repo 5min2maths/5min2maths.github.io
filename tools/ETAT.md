@@ -14,6 +14,11 @@ présentations / PDF, commentaires d'interface), **/entretien** (tests, ménage,
 2 agents au plus en même temps. Routines cron : robot 3 h 30, tests de nuit 5 h, miroir Dropbox 6 h 10, revue élèves
 Claude 6 h 40, gardien Chromium toutes les 5 min (tableau dans la commande /entretien).
 
+## Publication
+
+**Règle générale (enseignant, 28.11) : une seule publication par jour**, en fin de journée, avec tout ce qui est
+fusionné et validé ; dans la journée on fusionne et on teste sans pousser. Exception : bug bloquant, avec son accord.
+
 ## En cours
 
 - **Univers Pépite²** : accueil fait (27.11, `pepite_accueil.md`) ; écrans et présentations / PDF en cours (agents du
@@ -40,26 +45,46 @@ Claude 6 h 40, gardien Chromium toutes les 5 min (tableau dans la commande /entr
   l'arbre ; pas à pas réécrit), polyreg 2 (`FIG.polyTri` supprimé), fref « x² ≤ 9 » ; gardés : carré aire → côté,
   cercle trigo des valeurs exactes, tableau de signes, repère de sys3, plongeuse, figures des leçons.
 
+- **Grand problème de la semaine** (décision du 28.11, `/contenu`, rapport `archive/contenu_probleme_28-11.md`, branche
+  `agent/contenu3`, à fusionner) : le problème est un code fixe tiré parmi les **grands** (≥ 4 parties, en situation,
+  au programme : `Engine.probKind`) ; repli explicite `weeklyPick.g` : chapitre en classe (grand → riche 3 p. → court),
+  puis reste de l'année (idem), puis reprises (grand → court) ; jamais deux fois le même problème (forme déjà donnée = autres
+  nombres). Élève faible : même problème + aide (`Engine.weeklyAid` : plan, « Coup de pouce » par partie, 4 essais) ;
+  simulation : parties justes 73–80 % (avant 58–62 %), mais 18–21 min (avant 12). 4 grands problèmes de 11e ajoutés
+  (silo, piscine, bonbons, taxi). **Inventaire : aucune classe n'a 35 grands problèmes de l'année** (11e 15, 1re
+  Collège 11, MP 1re 22, 2e Collège 33 ; MP 3e–4e 0, 4e Collège / 1re FR / Tle 1, 3e Collège 2) : contenu à écrire.
+  **API « Creuser encore » pour `/app mine`** : `Engine.digOpen(state)`, `Engine.digMore(state, n)` →
+  `[{ code, id, kind: "semaine"|"chapitre", week?, done?, label, parts, minutes }]`, `Engine.digQuestion(state, code)`,
+  `Engine.digNote(state, code)` ; pépites ordinaires, jamais `YP.weekly` ; historique `state.weeklyHist` (sauvegarde :
+  champ `wh`). `src/app.js` : séance weekly = `Engine.weeklyQuestion`, `renderProblem` affiche `q.aid` et respecte
+  `q.maxTries` (styles `.aid`, `.aid-plan` à faire par /app ; « Refaire » après le problème de la semaine à revoir).
+  Nouvelle page de thème `tests/probleme_semaine.html` (à intégrer au regroupement de `/entretien tests`).
+  À décider : 4 ou 3 essais pour les faibles (durée) ; chapitre en classe sans grand → riche du chapitre
+  (choix actuel) ou grand d'un autre chapitre ; ordre d'écriture des grands problèmes manquants.
+
 ## À faire
 
-Ordre (28.11, 2 agents au plus ; en cours : `/entretien tests`, `/contenu` élagage des figures superficielles) :
-puis `/app animations` et `/contenu curieux et histoire` (le grand problème de la semaine est en cours) ; puis `/app mine` ; puis deux dépôts GitHub
-(+ domaine pepite-carre.ch, avant l'ouverture à la 11LS).
+Ordre (28.11, 2 agents au plus) : fait : figures, élagage, tests regroupés, grand problème (moteur) ;
+puis `/app animations` (en cours) et `/contenu curieux et histoire` (fait, `agent/contenu4` à fusionner) ; puis `/app mine` (API digMore) ;
+puis `/contenu niveau 10e` (audit, 9 notions sur ≈ 34) et le « nickel » 9e et 10e chapitre par chapitre (comme le chantier 11e) ;
+puis deux dépôts GitHub (+ domaine pepite-carre.ch, avant l'ouverture à la 11LS).
 - **`/entretien` vitesse des tests** (après le regroupement, mesurer d'abord) : un seul navigateur qui enchaîne les pages
   (au lieu d'un Chromium par page, 1–3 s perdues chacune) ; puis 2 pages en parallèle quand aucun agent ne tourne (PC :
   2 navigateurs au plus) ; tirages réduits le jour, complets la nuit. Cible : suite rapide 1–2 min avant publication
   (la suite complète tourne la nuit, sa durée gêne peu).
-- **`/contenu curieux et histoire`** (validé 28.11) : +20 questions curieuses (78 aujourd'hui, 5 familles) et +15 histoires
-  (55 : événements, anecdotes, portraits), là où il en manque : inventaire par classe et chapitre (notions `uses` / `need`),
-  11e et 1re Collège d'abord, puis France ; vraisemblance, « À toi » au niveau de la classe, faits historiques exacts et
-  vérifiables, séparation France / romand, familles variées.
+- **`/contenu curieux et histoire`** (fait 28.11, branche `agent/contenu4`, à fusionner ; rapport
+  `archive/contenu_curieux_histoire_28-11.md`) : +20 questions curieuses (78 → 98 : 9 en 11e, 8 en 1re Collège, 3 en
+  2e Collège) et +15 histoires (55 → 70 : 6 en 11e, 6 en 1C, 3 en 2C), sources par récit dans le rapport : **relecture de
+  l'exactitude des faits par l'enseignant**. MP en suspens : les sujets MP 2e remplacés par des sujets 11e / 1C.
+  Liés au programme de l'année : curieux 11e 6 → 16, 1C 0 → 8, 2C 1 → 4 ; histoires 11e 19 → 25, 1C 6 → 14, 2C 4 → 7
+  (sonde corrigée : elle comptait toutes les histoires comme pour un 9e). Reste : 1C grandeurs (`exactes`), 3e–4e Collège.
 - **`/app animations`** (validé 28.11, n° 1 à 5) : FAIT sur `agent/app2`, **GIF à valider** par l'enseignant
   (`tests/_shots/app/animations/*.gif`, régénérer : `tests/_gif_animations.py`), puis fusion. Pépite « +N » qui s'envole
   de la réponse (0,45 s), pépites qui défilent au bilan (0,6 s), éclat doré sur « Polie » (0,45 s), flamme du filon qui
   grossit (bilan + en-tête, 0,45 s), barre de séance qui glisse (0,45 s) ; rien en mouvement réduit, rien ne bloque.
   Avec : emoji 🟡 remplacé partout par une mini-pépite dessinée (`NUG_IC`, src/curriculum.js ; captures
-  `icone_avant_apres_*.png`). Question ouverte : garder la gerbe de symboles (burst) à chaque bonne réponse en plus de
-  la pépite ? Rapport :
+  `icone_avant_apres_*.png`). GIF validés (28.11) ; puis gerbe de symboles (burst) remplacée par des étincelles dorées ✦,
+  réservées aux grands moments (nouveau grade, badge, niveau qui monte), plus aucune à chaque bonne réponse. Rapport :
   `tools/archive/app_animations_28-11.md`.
 
 0. **GitHub : deux dépôts** (décision du 28.11, APRÈS la fusion des branches Pépite²) : dépôt privé `5min2maths-dev`
@@ -79,6 +104,13 @@ puis `/app animations` et `/contenu curieux et histoire` (le grand problème de 
    `rotation`, `optim` n. 1, `eqverif`).
 
 ## Décisions de l'enseignant
+
+- **28.11 : +20 questions curieuses et +15 histoires validées** par l'enseignant (relecture des histoires faite).
+
+- **28.11 : MP en suspens** (« pas public cible ») : plus de travail ciblé MP (contenu, grands problèmes, curieux,
+  histoires, audits) ; l'existant reste. Grand problème : 4 essais pour les faibles (gardé) ; chapitre en classe sans grand
+  problème → problème riche du chapitre (gardé) ; grands problèmes à écrire : 11e et 1re Collège d'abord (4e partie
+  ajoutée aux problèmes riches existants), puis 10e, 9e, 2e–4e Collège.
 
 - **28.11 : figures** — lot de /contenu figures validé (105 formes, 17 notions). Pas de figure là où elle ferait le travail
   de l'élève (mise en équation eq2 4 / idrem 4, réciproque de Pythagore pythrec 1–2, paraboles) : « parfois c'est à l'élève de la faire » ; piste : indice ou étape « Fais un croquis à main levée ».

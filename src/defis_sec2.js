@@ -75,3 +75,63 @@
       "a) " + M("\\sqrt{" + A + "} = \\sqrt{" + p * p + " \\cdot " + m + "} = " + p + "\\sqrt{" + m + "}") + ". b) " + M("(2\\sqrt{" + m + "})^2 - (\\sqrt{" + nn + "})^2 = " + 4 * m + " - " + nn + " = " + prod) + ". c) " + M("(\\sqrt{" + bb[0] + "} - \\sqrt{" + bb[1] + "})(\\sqrt{" + bb[0] + "} + \\sqrt{" + bb[1] + "}) = " + bb[0] + " - " + bb[1] + " = " + (bb[0] - bb[1])) + ".");
   });
 })();
+// ===================== 28.11 : grands problèmes de 11e (problème de la semaine) =====================
+// Décision de l'enseignant (28.11) : le problème de la semaine est tiré parmi les grands problèmes (au moins 4 parties, en
+// situation, Engine.probKind). Inventaire du 28.11 (tools/archive/contenu_probleme_28-11.md) : la 11e (classe testeuse)
+// n'en avait que sur 5 notions (thales, thalesrec, pythrec, idrem, sysprob). Ajouts sur 4 chapitres de l'année
+// (volumes, masse volumique et débit, probabilités, formules), réservés à la 11e (co: [11]) ; indices marqués par partie
+// (le coup de pouce des élèves faibles, Engine.weeklyAid, en est tiré).
+(() => {
+  if (typeof PROBX === "undefined") return;
+  const ri = R.int, pk = R.pick, r6 = (v) => Math.round(v * 1e6) / 1e6;
+  const N = (v) => { const s = String(r6(v)), neg = s[0] === "-", [i, f] = (neg ? s.slice(1) : s).split("."); return (neg ? "-" : "") + (+i >= 1000 ? i.replace(/\B(?=(\d{3})+(?!\d))/g, "\\text{'}") : i) + (f ? "{,}" + f : ""); };
+  const T = (v) => { const s = String(r6(v)), [i, f] = s.split("."); return (Math.abs(+i) >= 1000 ? i.replace(/\B(?=(\d{3})+(?!\d))/g, "'") : i) + (f ? "," + f : ""); };
+  const CH = (v) => Number.isInteger(r6(v)) ? N(v) : N(Math.trunc(r6(v))) + "{,}" + Math.abs(r6(v)).toFixed(2).split(".")[1], CHT = (v) => CH(v).replace("{,}", ",").replace(/\\text\{'\}/g, "'");
+  const X = (v) => M(N(v)), r1 = (v) => Math.round(+(v * 10).toPrecision(12)) / 10;
+  const C11 = { co: [11] };
+  const PX = (id, ctx, f) => { (PROBX[id] = PROBX[id] || []).push(() => Object.assign(f(), C11, { ctx })); };
+  const PB = (q, parts, hints, sol) => ({ q, hints, sol, parts: parts.map(([label, v, rd]) => ({ label, spec: Object.assign({ kind: "value", value: Math.abs(v - r6(v)) < 1e-9 ? r6(v) : v /* fractions (proba) : valeur exacte */ }, rd ? { round: rd } : {}) })) });
+  const gcd = (a, b) => (b ? gcd(b, a % b) : a), fr = (a, b) => { const g = gcd(a, b); return "\\frac{" + a / g + "}{" + b / g + "}"; };
+
+  /* volcone : silo à grains (cylindre surmonté d'un cône), puis masse du grain (masse volumique) */
+  PX("volcone", "silo", () => {
+    const r = pk([2, 2.5, 3, 3.5]), H = pk([6, 7, 8, 10]), h = pk([1.5, 2, 2.5]), rho = pk([0.75, 0.8]), grain = rho === 0.75 ? "blé" : "maïs";
+    const Vcy = Math.PI * r * r * H, Vco = (Math.PI * r * r * h) / 3, Vt = Vcy + Vco, m = rho * Vt;
+    return PB("Un silo à grains est formé d'un cylindre de " + X(r) + " m de rayon et " + X(H) + " m de hauteur, surmonté d'un toit en forme de cône de même rayon et de " + X(h) + " m de hauteur. On le remplit entièrement de " + grain + " ; " + M("1 \\text{ m}^3") + " de " + grain + " pèse " + X(rho) + " tonne.",
+      [["a) Volume de la partie cylindrique (m³, au dixième)", Vcy, 0.1], ["b) Volume du cône (m³, au dixième)", Vco, 0.1], ["c) Volume total du silo (m³, au dixième)", Vt, 0.1], ["d) Masse de " + grain + " stockée (t, au dixième)", m, 0.1]],
+      ["a) Cylindre : aire du disque de base × hauteur, π · r² · H.", "b) Cône : le tiers du cylindre de même base et même hauteur, π · r² · h ÷ 3.", "c) Additionne les deux volumes non arrondis.", "d) Chaque m³ pèse " + T(rho) + " t : multiplie le volume total par " + T(rho) + "."],
+      "a) " + M("\\pi \\cdot " + N(r) + "^2 \\cdot " + N(H) + " \\approx " + N(r1(Vcy))) + " m³. b) " + M("\\frac{\\pi \\cdot " + N(r) + "^2 \\cdot " + N(h) + "}{3} \\approx " + N(r1(Vco))) + " m³. c) " + M("V \\approx " + N(r1(Vt))) + " m³. d) " + M(N(rho) + " \\cdot " + N(r1(Vt)) + " \\approx " + N(r1(m))) + " t.");
+  });
+
+  /* gquot : remplir et filtrer une piscine (volume, débit, conversions) */
+  PX("gquot", "piscine", () => {
+    const L = pk([8, 10, 12]), l = pk([4, 5, 6]), p = pk([1.2, 1.5]), D = pk([40, 50, 60]), Th = pk([4, 5, 6]);
+    const V = L * l * p, t = (V * 1000) / D / 60, Q = V / Th, Qm = (Q * 1000) / 60;
+    return PB("Une piscine en forme de pavé mesure " + X(L) + " m de long, " + X(l) + " m de large et " + X(p) + " m de profondeur. On la remplit au robinet, qui débite " + X(D) + " litres par minute. Ensuite, la pompe de filtration doit faire passer toute l'eau de la piscine en " + Th + " heures.",
+      [["a) Volume d'eau de la piscine pleine (m³)", V], ["b) Durée du remplissage (h, au dixième)", t, 0.1], ["c) Débit de la pompe de filtration (m³/h, au dixième)", Q, 0.1], ["d) Ce même débit en litres par minute (L/min, à l'unité)", Qm, 1]],
+      ["a) Volume d'un pavé : longueur · largeur · profondeur.", "b) 1 m³ = 1'000 L : convertis, divise par le débit pour obtenir des minutes, puis passe en heures (÷ 60).", "c) Débit = volume ÷ durée.", "d) 1 m³ = 1'000 L et 1 h = 60 min : multiplie par 1'000, puis divise par 60."],
+      "a) " + M(N(L) + " \\cdot " + N(l) + " \\cdot " + N(p) + " = " + N(V)) + " m³. b) " + M(N(V * 1000) + " \\text{ L} \\div " + D + " = " + N(r6(V * 1000 / D)) + " \\text{ min}" + (r6(t) === r1(t) ? " = " : " \\approx ") + N(r1(t)) + " \\text{ h}") + ". c) " + M(N(V) + " \\div " + Th + " = " + N(r6(Q)) + (r6(Q) === r1(Q) ? "" : " \\approx " + N(r1(Q)))) + " m³/h. d) " + M(N(r6(Q)) + " \\cdot 1\\text{'}000 \\div 60" + (r6(Qm) === Math.round(Qm) ? " = " : " \\approx ") + Math.round(Qm)) + " L/min.");
+  });
+
+  /* proba : bonbons tirés sans remise, trois parfums */
+  PX("proba", "bonbons", () => {
+    let f, c, m; do { f = ri(3, 7); c = ri(2, 6); m = ri(2, 5); } while (f === c || c === m || f === m);
+    const n = f + c + m, d = n * (n - 1), pff = (f * (f - 1)) / d, same = (f * (f - 1) + c * (c - 1) + m * (m - 1)) / d, noM = ((n - m) * (n - m - 1)) / d;
+    const who = pk(["Léa", "Noé", "Inès", "Yanis"]);
+    return PB("Une boîte contient " + M(f) + " bonbons à la fraise, " + M(c) + " au citron et " + M(m) + " à la menthe, tous emballés de la même façon. " + who + " en prend un au hasard, le mange, puis en prend un deuxième au hasard. (fractions acceptées)",
+      [["a) Probabilité que le premier bonbon soit à la fraise", f / n], ["b) Probabilité que les deux bonbons soient à la fraise", pff], ["c) Probabilité que les deux bonbons aient le même parfum", same], ["d) Probabilité d'avoir au moins un bonbon à la menthe", 1 - noM]],
+      ["a) Cas favorables sur cas possibles : il y a " + n + " bonbons en tout.", "b) Arbre à deux étages : après le premier bonbon, il en reste " + (n - 1) + ", et un de moins du parfum mangé ; multiplie les probabilités le long d'une branche.", "c) Même parfum : deux fraises OU deux citrons OU deux menthes, additionne les trois branches.", "d) Le contraire de « au moins une menthe » est « aucune menthe » : calcule-le, puis fais 1 moins ce résultat."],
+      "a) " + M("\\frac{" + f + "}{" + n + "}" + (gcd(f, n) > 1 ? " = " + fr(f, n) : "")) + ". b) " + M("\\frac{" + f + "}{" + n + "} \\cdot \\frac{" + (f - 1) + "}{" + (n - 1) + "} = " + fr(f * (f - 1), d)) + ". c) " + M("\\frac{" + f * (f - 1) + " + " + c * (c - 1) + " + " + m * (m - 1) + "}{" + d + "} = " + fr(f * (f - 1) + c * (c - 1) + m * (m - 1), d)) + ". d) Aucune menthe : " + M("\\frac{" + (n - m) + "}{" + n + "} \\cdot \\frac{" + (n - m - 1) + "}{" + (n - 1) + "} = " + fr((n - m) * (n - m - 1), d)) + ", donc " + M("1 - " + fr((n - m) * (n - m - 1), d) + " = " + fr(d - (n - m) * (n - m - 1), d)) + ".");
+  });
+
+  /* formule : deux tarifs de taxi (utiliser, transformer une formule, comparer) */
+  PX("formule", "taxi", () => {
+    let a, b, a2, b2, d1, P2, de; do { a = pk([5, 6, 6.5, 7]); b = pk([2.5, 3, 3.2, 3.5]); a2 = a + pk([4, 5, 6, 8]); b2 = b - pk([0.5, 0.8, 1]); d1 = ri(6, 15); de = (a2 - a) / (b - b2); P2 = a + b * ri(9, 25); }
+      while (!Number.isInteger(de * 2) || de < 3 || de > 30 || r6(b2) <= 0);
+    const dP = (P2 - a) / b;
+    return PB("Le taxi A calcule son prix avec la formule " + M("P = " + N(a) + " + " + N(b) + "d") + " (" + M("P") + " en CHF, " + M("d") + " en km). Le taxi B, plus cher au départ, applique " + M("P = " + N(a2) + " + " + N(r6(b2)) + "d") + ". Maëlle doit choisir son taxi pour rentrer chez elle.",
+      [["a) Prix d'une course de " + d1 + " km avec le taxi A (CHF)", a + b * d1, 0.01], ["b) Distance parcourue avec le taxi A pour " + CHT(P2) + " CHF (km)", dP, 0.01], ["c) Distance pour laquelle les deux taxis coûtent le même prix (km)", de, 0.01], ["d) Prix de cette course, le même avec les deux taxis (CHF)", a + b * de, 0.01]],
+      ["a) Remplace d par " + d1 + " dans la formule du taxi A.", "b) Transforme la formule pour isoler d : d = (P − " + T(a) + ") ÷ " + T(b) + ".", "c) Écris que les deux prix sont égaux : " + T(a) + " + " + T(b) + "d = " + T(a2) + " + " + T(r6(b2)) + "d, puis résous en d.", "d) Remplace d par la distance trouvée juste avant, dans l'une des deux formules."],
+      "a) " + M("P = " + N(a) + " + " + N(b) + " \\cdot " + d1 + " = " + CH(a + b * d1)) + " CHF. b) " + M("d = \\frac{P - " + N(a) + "}{" + N(b) + "} = \\frac{" + CH(P2) + " - " + N(a) + "}{" + N(b) + "} = " + N(r6(dP))) + " km. c) " + M(N(a) + " + " + N(b) + "d = " + N(a2) + " + " + N(r6(b2)) + "d" + (r6(b - b2) === 1 ? "" : " \\iff " + N(r6(b - b2)) + "d = " + N(r6(a2 - a))) + " \\iff d = " + N(de)) + " km. d) " + M("P = " + N(a) + " + " + N(b) + " \\cdot " + N(de) + " = " + CH(a + b * de)) + " CHF.");
+  });
+})();
