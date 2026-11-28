@@ -1,6 +1,6 @@
 # Automatismes de fin de primaire pour la 9e en grande difficulté (27.11)
 
-Décision de l'enseignant du 27.11 (« retravailler primaire si nécessaire ») ; contexte : `tools/eleves_faibles_26-11.md`
+Décision de l'enseignant du 27.11 (« retravailler primaire si nécessaire ») ; contexte : `tools/archive/eleves_faibles_26-11.md`
 (plancher de la 9e). Branche `agent/primaire`. Code : `src/primaire.js` (paquet 9), relais en fin de `src/engine.js`.
 
 ## Notions choisies (8, « niveau primaire », CH: [8], `prim: true`)

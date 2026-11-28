@@ -93,7 +93,7 @@ def garde(niveaux):
 """ + "".join('<script src="../src/%s"></script>' % f for f in JS) + """
 <script src="vrai_collecte.js"></script><script src="recalc_oracles.js"></script><script src="recalc_oracles34.js"></script><script src="recalc_oracles_frl.js"></script><script src="recalc_oracles_var.js"></script><script src="variete_formes.js"></script>
 <script>
-/* Garde-fou de variété (27.11, règle de l'enseignant : au moins 3 FORMES de question par niveau ; tools/variete_27-11.md).
+/* Garde-fou de variété (27.11, règle de l'enseignant : au moins 3 FORMES de question par niveau ; tools/archive/variete_27-11.md).
    NIV = niveaux protégés (« notion|niveau ») : ceux complétés le 27.11 et les plus fréquents des séances simulées.
    Échoue si l'un d'eux a moins de 3 formes sur 200 tirages (tests/variete_formes.js), ou si une forme v27 n'est pas
    reconnue par son oracle (tests/recalc_oracles_var.js, ou l'oracle générique « Résous ») ou est contredite par lui. */

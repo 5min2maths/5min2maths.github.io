@@ -1,4 +1,4 @@
-/* 27.11 (décision de l'enseignant, n° 22 de tools/a_decider_26-11.md) : « Me tester » ciblé par FORME pour tous les
+/* 27.11 (décision de l'enseignant, n° 22 de tools/archive/a_decider_26-11.md) : « Me tester » ciblé par FORME pour tous les
    référentiels, comme pour les objectifs MP (table FORMES de tools/ref_mp.py). Quand une notion sert plusieurs objectifs,
    chaque objectif ne tire que les formes de question (ctx du générateur) qui le concernent ; un objectif absent de la
    table, ou une notion absente de son entrée, garde toutes les formes. Une liste vide retire la notion du test de
@@ -7,7 +7,7 @@
    Données séparées par référentiel (Collège REF_MATU, France REF_FR, CO REF_CO) ; ajoutées aux tables générées
    (src/ref_matu.js, ref_fr.js, ref_co.js), qui ne les contiennent pas : une régénération par tools/ref_*.py ne les efface pas.
    Traité le 27.11 : les objectifs de 1re Collège, de 4e et 3e françaises et du CO (9e–11e) qui partagent une notion à
-   formes étiquetées. Le reste (autres années, notions sans ctx) : liste dans tools/a_decider_26-11.md, n° 22. */
+   formes étiquetées. Le reste (autres années, notions sans ctx) : liste dans tools/archive/a_decider_26-11.md, n° 22. */
 const REF_FORMES = {
   /* ---------- Collège de Genève, 1re (REF_MATU) ---------- */
   MATU: {

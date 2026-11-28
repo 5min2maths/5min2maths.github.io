@@ -417,7 +417,7 @@
     PROB_EXTRA[id] = PROBS[id];
   }
   Object.assign(HINTS_EXTRA, {
-    rel: "Addition : même signe → on additionne les distances ; signes contraires → on soustrait. Soustraire, c'est ajouter l'opposé. Produit : même signe → +.",
+    rel: "Addition : même signe → on additionne les distances ; signes contraires → on soustrait. Soustraire, c'est ajouter l'opposé. Produit et quotient : même signe → +, signes contraires → −.",
     fracops: "Signe d'abord, puis priorités : × et : avant + et −. Diviser, c'est multiplier par l'inverse. Simplifie à la fin (ou avant de multiplier).",
     rac: "La racine carrée de a est le nombre positif dont le carré vaut a : √49 = 7. Pour l'encadrer, cherche les carrés parfaits voisins : 7² = 49 < 55 < 64 = 8². La racine cubique de a est le nombre dont le cube vaut a : ∛125 = 5.",
     racprop: "√(a · b) = √a · √b et √(a ÷ b) = √a ÷ √b ; sors les carrés parfaits : √72 = √(36 · 2) = 6√2. On additionne seulement des racines semblables : 2√3 + 5√3 = 7√3. Mais √(a + b) ≠ √a + √b. Racine cubique : ∛(−8) = −2, ∛1080 = ∛(216 · 5) = 6∛5.",

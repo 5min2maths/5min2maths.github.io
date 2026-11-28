@@ -1,5 +1,5 @@
 /* Élèves simulés (25.11, demande de l'auteur : « un robot très bon élève, un moyen, un en difficulté ; les robots
-   arrivent-ils à ce niveau de finesse ? »). Remis en état le 26.11 (adaptivité, tools/adaptivite_26-11.md) : déroulé
+   arrivent-ils à ce niveau de finesse ? »). Remis en état le 26.11 (adaptivité, tools/archive/adaptivite_26-11.md) : déroulé
    actuel des séances (une leçon au plus, en tête ; pas de leçon en automatismes ; automatismes = vrais automatismes),
    profils du testeur (faible régulier, lent qui dit « je ne sais pas », moyen régulier, irrégulier), chapitre « en
    classe » fixé ou non, abandons, durée estimée, points de l'année.

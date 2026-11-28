@@ -21,7 +21,7 @@ python3 build.py >/dev/null 2>&1
 E=(lea noah ines malik chloe); N=$(( 10#$(date +%j) ))
 A=${E[$(( N % 5 ))]}; B=${E[$(( (N + 2) % 5 ))]}
 PREV=$(ls -1 "$R"/suivi/revues/20*.md 2>/dev/null | tail -3 | tr '\n' ' ')
-PROMPT="Tu es testeur de l'app 5min2maths (dossier courant : une copie jetable). Joue deux élèves aujourd'hui : « $A » puis « $B » (profils décrits dans tools/revue_eleves_claude_26-11.md), chacun sur 2 séances, avec l'outil tests/_trace.html :
+PROMPT="Tu es testeur de l'app 5min2maths (dossier courant : une copie jetable). Joue deux élèves aujourd'hui : « $A » puis « $B » (profils décrits dans tools/archive/revue_eleves_claude_26-11.md), chacun sur 2 séances, avec l'outil tests/_trace.html :
 nice timeout 300 chromium --headless --disable-gpu --no-sandbox --virtual-time-budget=120000 --dump-dom \"file://$W/tests/_trace.html#eleve=$A\"
 (fais varier le jour ou la graine si l'outil le permet, pour voir d'autres questions que les jours précédents). Lis chaque écran comme l'élève, refais chaque calcul, juge : erreurs de contenu, énoncés invraisemblables (règle : un énoncé absurde fait décrocher un élève), arrondis, indices, corrigés, durée réelle (promesse : 5 minutes), libellés, séparation France / romand, motivation.
 Lis d'abord les revues récentes ($PREV) et ne signale que les problèmes NOUVEAUX ou encore présents (dis lesquels persistent).

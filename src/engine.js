@@ -72,14 +72,14 @@ function frDomain(id) {
   return { no: "NC", fa: "NC", gm: "GM", es: "EG" }[n.theme] || "NC";
 }
 const TARGET = { drill: -300, app: -100, defi: 80, defi4: 80, rev: -150 }; // écart visé au Mathélo (≈ 85 %, 65 %, 40 % de réussite)
-/* 26.11 (adaptivité, tools/adaptivite_26-11.md ; simulation d'un testeur : élèves faibles à 39–45 % au premier essai).
+/* 26.11 (adaptivité, tools/archive/adaptivite_26-11.md ; simulation d'un testeur : élèves faibles à 39–45 % au premier essai).
    Cible de réussite propre à chaque élève : réussite au 1er essai sur ses 16 dernières réponses (8 au moins) ; sous 55 %,
    la cible baisse (tadj, en points de Mathélo) jusqu'à revenir vers 70 % ; au-dessus de 85 %, elle monte un peu. Sous
    le plancher (tadj ≤ -150 et réussite encore sous 65 %) : 2 rappels de notions anciennes par séance au plus (règle de
    remobilisation inchangée), niveau 1 permis s'il n'est pas trivial pour l'élève (au plus 350 points sous son Mathélo). */
 const ADAPT = { win: 16, min: 8, low: 0.55, aim: 0.7, high: 0.85, down: 20, up: 10, lo: -300, hi: 120, floor: -150 };
 /* 27.11 (n° 32) : malus de choix d'une notion de l'année précédente non demandée par le parcours, sans chapitre « en classe »
-   (en centaines de points d'écart à la cible : 2 = 200 points). Réglé sur tests/_faibles.html (tools/eleves_faibles_26-11.md). */
+   (en centaines de points d'écart à la cible : 2 = 200 points). Réglé sur tests/_faibles.html (tools/archive/eleves_faibles_26-11.md). */
 const PREV_PEN = 2;
 const KIND_LABEL = { drill: "⚡ Automatisme", app: "🧩 Application", defi: "🏔 Défi", rev: "🧠 Révision", rem: "🧱 Une base à consolider" };
 // Remédiation (13.11) : notions de base à reprendre quand une notion échoue deux fois de suite.
@@ -948,7 +948,7 @@ const Engine = {
     return plan;
   },
 
-  /* 27.11 (décision de l'enseignant, n° 29 ; tools/eleves_faibles_26-11.md, proposition 3) : niveau de la question i du
+  /* 27.11 (décision de l'enseignant, n° 29 ; tools/archive/eleves_faibles_26-11.md, proposition 3) : niveau de la question i du
      positionnement. La première au niveau 1 (première impression), les suivantes au niveau 2 (positionnement discriminant). */
   placementLevel(state, i) { return i === 0 ? 1 : Math.min(2, difficultyCap(state.profile)); },
   // Résultat d'une question de positionnement : true, false ou null (« je ne sais pas »).
@@ -1227,7 +1227,7 @@ const Engine = {
     // « En ce moment en classe » : environ 2 créneaux sur 3 portent sur le chapitre choisi par l'élève.
     const nowIds = this.nowActive(state) ? state.now.ids.filter((id) => state.notions[id] && ["vu", "encours"].includes(state.notions[id].status)) : [];
     const nowK = nowIds.length ? (slots.length === 1 ? 1 : Math.round((slots.length * 2) / 3)) : 0;
-    /* 27.11 (décision de l'enseignant, n° 32 ; tools/eleves_faibles_26-11.md : sans chapitre « en classe », 78 à 83 % des
+    /* 27.11 (décision de l'enseignant, n° 32 ; tools/archive/eleves_faibles_26-11.md : sans chapitre « en classe », 78 à 83 % des
        questions d'un élève moyen de 10e–1re portaient en novembre sur l'année précédente) : sans chapitre choisi, les
        notions de l'année déjà ouvertes passent d'abord ; une notion de l'année précédente ne revient en tête que si le
        parcours le demande (prevPenalty). Élève en grande difficulté ou Mathélo en forte baisse : règle levée. */
@@ -1243,7 +1243,7 @@ const Engine = {
         if (ex.has(id)) continue;
         if (!free && (cnt.get(id) || 0) >= 2) continue;
         const s = state.notions[id], recent = this.isRecent(state, id), target = elo + TARGET[kind] + (s.easy || 0) * 120;
-        /* 26.11 (profondeur, tools/adaptivite_26-11.md) : une notion du chapitre « en classe » passe toujours par le créneau du
+        /* 26.11 (profondeur, tools/archive/adaptivite_26-11.md) : une notion du chapitre « en classe » passe toujours par le créneau du
            chapitre, même reprise d'une année précédente (1re du Collège : Pythagore, angles…), à un niveau non trivial (oldLevels) */
         if (!isNow && (rappel ? recent : !recent)) continue; /* les anciennes notions ne passent que par le créneau Rappel */
         if (kind === "drill" && !this.drillable(state, id)) continue; /* 26.11 : notion sans vrai automatisme au niveau 1 */
@@ -1437,7 +1437,7 @@ const Engine = {
       .sort((a, b) => feel(a, 1) - feel(b, 1))[0];
     return best ? best + "|1|" + kind : null;
   },
-  /* 27.11 (décision de l'enseignant, n° 27 ; tools/eleves_faibles_26-11.md, proposition 1) : rejouer au lieu d'ajouter.
+  /* 27.11 (décision de l'enseignant, n° 27 ; tools/archive/eleves_faibles_26-11.md, proposition 1) : rejouer au lieu d'ajouter.
      Élève en grande difficulté (struggling), question pas réussie du premier coup : la question suivante prévue devient la
      même notion, d'autres nombres, un niveau en dessous (le niveau 1 reste 1). Elle remplace, elle ne s'ajoute pas : la
      séance garde sa durée. Une fois par séance (l'appelant le garde). Ni automatisme, ni problème (niveau 4), ni à la place

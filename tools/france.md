@@ -32,7 +32,7 @@ adaptations d'usage, le cadre légal, la diffusion et un plan chiffré. Sources 
   l'enseignant pour fabriquer des fiches.
 
 - **Audit du lycée (26.11, branche agent/frlycee)** : placement, formes hors programme, vocabulaire et niveau de la 2nde,
-  de la 1re et de la Tle contrôlés contre les textes en vigueur : `tools/audit_fr_lycee_26-11.md` (test `tests/frplace.html`).
+  de la 1re et de la Tle contrôlés contre les textes en vigueur : `tools/archive/audit_fr_lycee_26-11.md` (test `tests/frplace.html`).
 
 ## 1. Programmes et examens en vigueur (2026-2027)
 

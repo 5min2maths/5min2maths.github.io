@@ -147,8 +147,9 @@
           { ctx: "perimetre", guide: [GS("Le périmètre est une longueur : multiplié par " + M("k") + " ou " + M("k^2") + " ? Tape le facteur.", k, M(N(k)) + "."), GS("Nouveau périmètre ?", r6(p * k), M(N(p * k)) + " cm.")], traps: [TR(r6(p * k * k), "k², c'est pour les aires ; le périmètre est une longueur.")] }); },
     ],
     3: [
-      () => { const e = pk([10, 20, 50]), V = R.int(2, 12);
-        return Qv("Une maquette est à l'échelle " + M("1\\,:\\," + e) + ". Son volume est de " + M(V) + " cm³. Quel est le volume réel, en litres ?", (V * e ** 3) / 1000, "Les volumes sont multipliés par " + M(e + "^3 = " + N(e ** 3)) + " : " + M(V + " \\cdot " + N(e ** 3) + " = " + N(V * e ** 3)) + " cm³ " + M("= " + N((V * e ** 3) / 1000)) + " L.",
+      () => { /* 28.11 (revue quotidienne : maquette de 2 cm³ au 1 : 20 pour un objet de 16 L, invraisemblable) : objet nommé, grandeurs réalistes */
+        const [e, V, obj] = pk([[50, R.int(2, 12), "d'une citerne"], [20, R.int(10, 40), "d'un aquarium"], [50, R.int(4, 16), "d'une cuve à vin"]]);
+        return Qv("La maquette " + obj + " est à l'échelle " + M("1\\,:\\," + e) + ". Son volume est de " + M(V) + " cm³. Quel est le volume réel, en litres ?", (V * e ** 3) / 1000, "Les volumes sont multipliés par " + M(e + "^3 = " + N(e ** 3)) + " : " + M(V + " \\cdot " + N(e ** 3) + " = " + N(V * e ** 3)) + " cm³ " + M("= " + N((V * e ** 3) / 1000)) + " L.",
           { ctx: "maquette", guide: [GS("Facteur des volumes " + M(e + "^3") + " ?", e ** 3, M(N(e ** 3)) + "."), GS("Volume réel en cm³ ?", V * e ** 3, M(N(V * e ** 3)) + " cm³."), GS("En litres (÷ 1000) ?", (V * e ** 3) / 1000, M(N((V * e ** 3) / 1000)) + " L.")], traps: [TR((V * e * e) / 1000, "Les volumes sont multipliés par k³."), TR(V * e ** 3, "Convertis en litres (1 L = 1000 cm³).")] }); },
       () => { const k = pk([2, 3, 4]), A = R.int(2, 12), p = A + R.int(5, 9);
         return Qv("Deux figures semblables ont pour aires " + M(A) + " cm² et " + M(A * k * k) + " cm². Le périmètre de la petite est " + M(p) + " cm. Quel est le périmètre de la grande (en cm) ?", p * k,

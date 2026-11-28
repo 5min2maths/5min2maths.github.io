@@ -640,7 +640,7 @@ V("polyreg", 1,
   () => { const n = R.pick([5, 6, 8, 9, 10, 12]); return QV("Une roue a " + n + " rayons régulièrement espacés. Quel angle forment deux rayons voisins (en degrés) ?", 360 / n, M("360° : " + n + " = " + 360 / n + "°") + ".", { guide: [GS("Combien d'angles égaux entre les " + n + " rayons sur un tour complet ?", n, M(n) + " (on revient au premier rayon)."), GS("Un angle : " + M("360 : " + n) + " = ?", 360 / n, M(360 / n + "°") + ".")], traps: [TRAP(180 / n, "Le tour complet mesure 360°."), TRAP(360 / (n - 1), "Il y a " + n + " angles entre " + n + " rayons (on revient au premier).")] }); },
 );
 V("polyreg", 2,
-  () => { const n = R.int(5, 12); return QV("Quelle est la somme des angles intérieurs d'un polygone à " + n + " côtés (en degrés) ?", (n - 2) * 180, M("(" + n + " - 2) \\cdot 180° = " + (n - 2) * 180 + "°") + ".", { guide: [GS("Depuis un sommet, en combien de triangles se découpe le polygone ? (n − 2)", n - 2, M(n - 2) + " triangles."), GS("Somme : " + M((n - 2) + " \\cdot 180") + " = ?", (n - 2) * 180, M((n - 2) * 180 + "°") + ".")], traps: [TRAP(n * 180, "Un polygone à " + n + " côtés se découpe en " + (n - 2) + " triangles, pas " + n + "."), TRAP(360, "360° est la somme pour un quadrilatère seulement.")] }); },
+  () => { const n = R.int(5, 12); return QV("Quelle est la somme des angles intérieurs d'un polygone à " + n + " côtés (en degrés) ?", (n - 2) * 180, M("(" + n + " - 2) \\cdot 180° = " + (n - 2) * 180 + "°") + ".", { guide: [GS("Depuis un sommet, en combien de triangles se découpe le polygone ? (n − 2)", n - 2, M(n - 2) + " triangles."), GS("Somme : " + M((n - 2) + " \\cdot 180") + " = ?", (n - 2) * 180, M((n - 2) * 180 + "°") + ".")], traps: [TRAP(n * 180, "Un polygone à " + n + " côtés se découpe en " + (n - 2) + " triangles, pas " + n + "."), TRAP(360, "360° est la somme pour un quadrilatère seulement.")], fig: FIG.polyTri(n) /* 28.11, commentaire de l'auteur */ }); },
   () => { const [n, nom] = R.pick([[5, "pentagone"], [6, "hexagone"], [8, "octogone"], [10, "décagone"]]); return QV("Quelle est la mesure d'un angle intérieur d'un " + nom + " régulier, c'est-à-dire l'angle entre deux côtés voisins (marqué sur la figure), en degrés ?", 180 - 360 / n, "Angle au centre " + M("\\frac{360°}{" + n + "} = " + 360 / n + "°") + " ; angle intérieur " + M("180° - " + 360 / n + "° = " + (180 - 360 / n) + "°") + ".", { guide: [GS("Angle au centre d'un " + nom + " : " + M("360 : " + n) + " = ?", 360 / n, M(360 / n + "°") + "."), GS("Angle intérieur = 180° − angle au centre = ?", 180 - 360 / n, M((180 - 360 / n) + "°") + ".")], traps: [TRAP(360 / n, "C'est l'angle au centre ; l'angle intérieur vaut 180° − " + 360 / n + "°."), TRAP(180 / n, "Angle intérieur = 180° − angle au centre.")], fig: FIG.regPoly(n, "?", true) }); },
 );
 V34("polyreg",
@@ -1436,7 +1436,7 @@ const PROBX = {}; /* défis (niveau 4) ajoutés, lus en plus de PROB et PROB_EXT
   );
 })();
 
-// ======================= 27.11 : variété (agent variete, tools/variete_27-11.md) =======================
+// ======================= 27.11 : variété (agent variete, tools/archive/variete_27-11.md) =======================
 /* Règle de l'enseignant : au moins 3 FORMES de question par niveau (une autre façon de poser la question, un autre
    contexte, une autre représentation), pas seulement d'autres nombres. Mesure : tools/variete.py (formes sur 200 tirages,
    fréquence dans les séances d'élèves simulés) ; garde-fou : tests/variete_niveaux.html (échoue si un niveau traité

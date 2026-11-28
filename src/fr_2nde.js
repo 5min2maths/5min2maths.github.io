@@ -763,9 +763,9 @@
   // Retirés du programme de seconde 2026 : systèmes (masqués en France) ; degré 3 en terminale ; produit scalaire en 1re.
   for (const id of ["sys2", "sys3", "sysprob", "sysgraph"]) { const n = NOTIONS.find((x) => x.id === id); if (n) n.FR = null; }
   /* 27.11 (décision de l'enseignant, n° 15) : eq3 (degré 3 par factorisation) retiré du catalogue français : ni au programme
-     de Tle 2019, ni attendu en 1re 2026 (tools/audit_fr_lycee_26-11.md). */
+     de Tle 2019, ni attendu en 1re 2026 (tools/archive/audit_fr_lycee_26-11.md). */
   { const n = NOTIONS.find((x) => x.id === "eq3"); if (n) n.FR = null; }
-  /* 26.11 (audit lycée, tools/audit_fr_lycee_26-11.md) : les vecteurs de 2nde sont servis par vect3e (coordonnées, somme,
+  /* 26.11 (audit lycée, tools/archive/audit_fr_lycee_26-11.md) : les vecteurs de 2nde sont servis par vect3e (coordonnées, somme,
      colinéarité, norme), cart (distance, milieu) et vecgeo ; la notion suisse « vecteurs » (composantes, produit scalaire)
      reste hors du catalogue français (fr_couv.js). optim et inter (second degré : sommet, discriminant) : 1re (fr_couv.js). */
   { const n = NOTIONS.find((x) => x.id === "vecteurs"); if (n) n.FR = null; }

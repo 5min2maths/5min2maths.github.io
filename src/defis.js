@@ -2168,7 +2168,7 @@ const DEFIS = (() => {
       },
     ],
   };
-  /* ==== 26.11 soir (agent defisch) : défis à un seul contexte passés à trois (tools/vraisemblance_26-11.md, liste « Restent
+  /* ==== 26.11 soir (agent defisch) : défis à un seul contexte passés à trois (tools/archive/vraisemblance_26-11.md, liste « Restent
      à 1 ou 2 contextes »). Le gabarit d'origine reçoit son ctx (CX0) ; deux gabarits ajoutés par notion, valeurs tirées,
      corrigé calculé, oracle par contexte dans tests/recalc_oracles.js (section « agent defisch »). Notions communes avec la
      France : aucun lieu suisse dans les énoncés (CHF devient € par frLocal). ==== */
@@ -2578,7 +2578,8 @@ const DEFIS = (() => {
         [["a) Diagonale d'une face (cm)", RAD(e * Math.SQRT2)], ["b) Diagonale du cube (cm)", RAD(e * Math.sqrt(3))], ["c) Aire totale des six faces (cm²)", 6 * a * a * k]],
         ["Diagonale d'une face : Pythagore dans un carré, d = arête · √2. Simplifie √" + 2 * k + " si possible.",
          "Diagonale du cube : Pythagore dans le triangle formé d'une arête et d'une diagonale de face, D = arête · √3. Aire d'une face : (" + a + "√" + k + ")² = " + a * a + " · " + k + "."],
-        "a) " + M(a + "\\sqrt{" + k + "} \\cdot \\sqrt{2} = " + a + "\\sqrt{" + 2 * k + "}" + (RSIMP(a, 2 * k) !== a + "\\sqrt{" + 2 * k + "}" ? " = " + RSIMP(a, 2 * k) : "")) + " cm. b) " + M(a + "\\sqrt{" + k + "} \\cdot \\sqrt{3} = " + a + "\\sqrt{" + 3 * k + "}" + (RSIMP(a, 3 * k) !== a + "\\sqrt{" + 3 * k + "}" ? " = " + RSIMP(a, 3 * k) : "")) + " cm. c) " + M("6 \\cdot (" + a + "\\sqrt{" + k + "})^2 = 6 \\cdot " + a * a * k + " = " + 6 * a * a * k) + " cm²."));
+        "a) " + M(a + "\\sqrt{" + k + "} \\cdot \\sqrt{2} = " + a + "\\sqrt{" + 2 * k + "}" + (RSIMP(a, 2 * k) !== a + "\\sqrt{" + 2 * k + "}" ? " = " + RSIMP(a, 2 * k) : "")) + " cm. b) " + M(a + "\\sqrt{" + k + "} \\cdot \\sqrt{3} = " + a + "\\sqrt{" + 3 * k + "}" + (RSIMP(a, 3 * k) !== a + "\\sqrt{" + 3 * k + "}" ? " = " + RSIMP(a, 3 * k) : "")) + " cm. c) " + M("6 \\cdot (" + a + "\\sqrt{" + k + "})^2 = 6 \\cdot " + a * a * k + " = " + 6 * a * a * k) + " cm².",
+        FIG.cube(a + "√" + k + " cm", "diag") /* 28.11, commentaire de l'auteur */));
     });
   /* distrib, echelle, litconv : défis hors de cet objet (PROB, PROB_EXTRA, PROBX des fichiers de chapitre) */
   if (typeof PROB_EXTRA !== "undefined") {

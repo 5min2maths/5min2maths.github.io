@@ -672,7 +672,7 @@ saisissable (construction, démonstration, programmation). « avant » = catalog
   complet (formes partagées avec la 4e MA2 du Collège).
 - Contrôle : `tests/trous.html` (générateurs, classes, séparation des systèmes), `tests/act_trous.html` (leçons actives).
 
-## Ce qui a été fait (26.11, branche agent/frlycee : audit du lycée, `tools/audit_fr_lycee_26-11.md`)
+## Ce qui a été fait (26.11, branche agent/frlycee : audit du lycée, `tools/archive/audit_fr_lycee_26-11.md`)
 
 - **Placement** : `optim` (sommet d'un trinôme) et `inter` (intersection parabole–droite, discriminant) passent de 2nde en
   1re (chapitre « Second degré ») ; `vecteurs` (notion suisse : composantes, produit scalaire) reste hors du catalogue

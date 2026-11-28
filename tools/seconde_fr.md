@@ -179,5 +179,5 @@ Légende : ✅ couvert ; 🟡 couvert avec écart (vocabulaire, notation, niveau
    Fonctions, Statistiques et probabilités, Algorithmique) ajoutés ; `Engine.refOf` rend « FR » pour un profil français.
 
 
-26.11 (audit lycée, `tools/audit_fr_lycee_26-11.md`) : `optim` et `inter` passent en 1re ; `vecteurs` hors catalogue français
+26.11 (audit lycée, `tools/archive/audit_fr_lycee_26-11.md`) : `optim` et `inter` passent en 1re ; `vecteurs` hors catalogue français
 (la ligne qui le plaçait en 1re était écrasée par `fr_couv.js`) ; forme « norme » ajoutée à `vect3e`.

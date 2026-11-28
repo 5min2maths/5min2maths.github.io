@@ -33,7 +33,7 @@ const HORS_FR = {
   /* 26.11 (revue élèves : « Étendue, médiane, quartiles » proposé en 4e) : au collège, médiane et étendue seulement
      (4e.DP.02, 3e.DP.02) ; quartiles et écart interquartile en 2nde. Libellé du collège : labelFR (Engine.catalog). */
   quartiles: [[/quartile|Q_1|Q_3|moustache/i, 10]],
-  /* 26.11 (audit lycée, tools/audit_fr_lycee_26-11.md) : 2nde 2026 = produit nul, x² = a, forme factorisée donnée ; la
+  /* 26.11 (audit lycée, tools/archive/audit_fr_lycee_26-11.md) : 2nde 2026 = produit nul, x² = a, forme factorisée donnée ; la
      factorisation d'un trinôme (racines par somme et produit, discriminant) et la forme canonique sont de 1re (1re.AL). */
   eq2fact: [["ramener-zero", 11], ["trinome", 11], ["erreur", 11], ["facteur-num", 11]],
   fimg: [["zeros-calcul", 11], ["preimage-tri", 11], ["axes-triangle", 11]],

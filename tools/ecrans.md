@@ -46,7 +46,7 @@ ordinateur d'abord. Seulement de la mise en page : aucune fonction nouvelle, té
   Mes compétences, Réglages) : pas de débordement horizontal, classe d'écran, réponse et « Vérifier » visibles sans
   défiler sur ordinateur, barre dans la colonne de réponse, choix des Réglages appliqué et gardé, détection
   automatique (12 cas), et à 360 px mise en page identique au pixel près à la même page sans classe d'écran.
-  Depuis le 27.11 soir (revue `tools/revue_ecrans_chargement_27-11.md`) : pas de barre de défilement dans l'énoncé
+  Depuis le 27.11 soir (revue `tools/archive/revue_ecrans_chargement_27-11.md`) : pas de barre de défilement dans l'énoncé
   quand il tient, 1024 × 768 sans défilement, touches ≥ 52 px sur tablette (question et pas à pas), aucun texte sous
   12 px, Histoire « À toi » visible, barre sous le retour après une erreur, « Vérifier l'étape » visible, carte de
   progression à droite, cases de la carte ≥ 44 px (tablette), `scrollbar-gutter` (ordinateur).

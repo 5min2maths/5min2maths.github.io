@@ -265,7 +265,7 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
   add({ key: "douche", fam: "fermi", uses: ["decmul"], outil: "la multiplication et la comparaison de volumes (litres).",
     make() {
       const deb = pk([8, 10, 12]), m = pk([5, 8, 10]), v = deb * m * 365, bain = 150;
-      return { titre: "L'eau de la douche", q: "Une douche coule environ " + M(deb + "\\ \\text{L}") + " par minute. Tu prends chaque jour une douche de " + M(m + "\\ \\text{min}") + ".",
+      return { titre: "L'eau de la douche", q: "Une douche débite environ " + M(deb) + " litres d'eau par minute. Tu prends chaque jour une douche de " + M(m + "\\ \\text{min}") + ".",
         bet: { q: "En une année, cela fait combien de baignoires pleines (" + bain + " L) ?", choices: ["moins de 10", "entre 10 et 50", "entre 50 et 500", "plus de 500"], good: v / bain < 10 ? 0 : v / bain < 50 ? 1 : v / bain < 500 ? 2 : 3 },
         calc: { label: "Litres d'eau en une année", value: v, range: [v * 0.97, v * 1.03] },
         reveal: M(deb + " \\cdot " + m + " \\cdot 365 = " + N(v)) + " litres, soit environ " + P(v / bain) + " baignoires (" + M(N(v) + " \\div " + bain) + ")." };
@@ -316,7 +316,8 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
     } });
   add({ key: "batte", fam: "enigme", uses: [], outil: "la mise en équation : si l'objet le moins cher coûte x, l'autre coûte x + la différence.",
     make() {
-      const [T, d] = pk([[1.1, 1], [2.2, 2], [1.3, 1], [3.4, 3], [5.5, 5]]), v = r6((T - d) / 2), it = pk([["une batte", "une balle"], ["une raquette", "un volant"], ["un stylo", "une gomme"]]);
+      /* 28.11 (commentaire de l'auteur : « prix pas réalistes ») : prix vraisemblables, le piège reste (réponse naïve = total − différence). */
+      const [T, d, it] = pk([[110, 100, ["une batte de baseball", "une balle"]], [43, 40, ["une raquette de badminton", "un volant"]], [83, 80, ["une raquette de tennis", "une balle"]], [13, 12, ["un stylo-plume", "une cartouche d'encre"]], [128, 120, ["une trottinette", "une sonnette"]]]), v = r6((T - d) / 2);
       return { titre: "Le piège du prix", q: it[0].charAt(0).toUpperCase() + it[0].slice(1) + " et " + it[1] + " coûtent ensemble " + chf(T) + ". " + it[0].charAt(0).toUpperCase() + it[0].slice(1) + " coûte " + chf(d) + " de plus " + (/^une? /.test(it[1]) ? "qu'" : "que ") + it[1] + ".",
         bet: { q: "Combien coûte " + it[1] + " ?", choices: [(T - d).toFixed(2).replace(".", ",") + " CHF", v.toFixed(2).replace(".", ",") + " CHF", "Impossible à savoir"], good: 1 },
         calc: { label: "Prix " + (/^une? /.test(it[1]) ? "d'" : "de ") + it[1] + " (en CHF)", value: v, round: 0.01 },

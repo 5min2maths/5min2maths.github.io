@@ -571,7 +571,7 @@ const GRADES = [[0, "🌱", "Pousse"], [150, "✏️", "Apprenti"], [350, "📏"
 // Barème : question faite +1 ; réussie +2, du premier coup +1, niveau 2 à 4 : +1 à +3 ; partiellement juste +1 ;
 // « Refaire avec d'autres valeurs » : 0 ; séance finie (3 questions au moins) +10, deux par jour au plus ; erreur effacée
 // du carnet +5 ; plafond de 40 points par jour pour tout cela. Problème de la semaine réussi : +10, hors plafond, une fois par semaine.
-const YP = { cap: 40, session: 10, carnet: 5, weekly: 10, start: "08-15" };
+const YP = { cap: 40, session: 10, carnet: 5, weekly: 30, /* 28.11 (commentaires de l'auteur : le problème rapportait moins qu'une séance) : 10 → 30 */ start: "08-15" };
 const schoolYear = (d = day()) => +d.slice(0, 4) - (d.slice(5) >= YP.start ? 0 : 1);
 const yearLabel = (y) => y + "-" + String(y + 1).slice(2);
 // Classe dans le système de l'élève : « 11e », « 2e Coll. », « MP 1re », et pour un profil France « 4e », « 2nde », « Tle ».
@@ -666,7 +666,7 @@ function screenGrades() {
   h(`${brand}${backTop()}<div class="eyebrow">Grades de l'année\u00a0· ${esc(y.c)}</div><h2>Mes grades</h2>
   <div class="card stack grade-now"><div class="ic-row"><button type="button" class="ic grade-big grade-open" data-g="${g.name}" aria-label="Voir la carte du grade ${g.name}">${g.ic}</button><div><div class="eyebrow">Mon grade</div><h2>${esc(g.title)}</h2><div class="small muted">🟡 ${nbFmt(r)} pépites cette année</div></div></div>
     ${g.next ? `<div class="stack" style="gap:4px"><span class="pbar"><i style="width:${g.pct}%"></i></span><span class="small">Prochain grade : <b>${g.next.ic} ${g.next.name}</b>, encore ${nbFmt(g.next.at - r)} pépites.</span></div>` : '<p class="small">Le plus haut grade : bravo !</p>'}</div>
-  <div class="card flat stack yp-rules"><h3>Gagner des pépites</h3><p class="small">Question faite <b>+1</b>, réussie <b>+2</b>, du premier coup <b>+1</b>, difficile jusqu'à <b>+3</b> ; séance finie <b>+10</b> ; pépite polie <b>+5</b> ; problème de la semaine réussi <b>+10</b>.</p>
+  <div class="card flat stack yp-rules"><h3>Gagner des pépites</h3><p class="small">Question faite <b>+1</b>, réussie <b>+2</b>, du premier coup <b>+1</b>, difficile jusqu'à <b>+3</b> ; séance finie <b>+10</b> ; pépite polie <b>+5</b> ; problème de la semaine réussi <b>+${YP.weekly}</b>.</p>
     <p class="small muted">Au plus ${YP.cap} pépites par jour (hors problème de la semaine) ; « Refaire » ne rapporte rien. Tout le monde repart 🌱 Pousse à la rentrée et au changement de classe.</p></div>
   <div class="card">${eloBlock()}<p class="small muted yp-explain">Mathélo = ton niveau : il monte et descend selon tes réponses · Pépites = ton travail de l'année, elles font monter ton grade.</p></div>
   <div class="card flat stack"><h3>L'échelle de l'année</h3><p class="small muted">Touche un grade atteint pour voir sa carte.</p>
@@ -1620,7 +1620,8 @@ function screenPrep() {
   const recentG = (l) => G0.some(([th, l2]) => l2 === l && pinned.has(th));
   /* 27.11 (revue, n° 3 : MP 2e « Fonctions affines ⏎ Fonctions affines ⏎ Zéro et signe… ») : une notion qui porte le nom de son
      chapitre est présentée par son contenu (« Les bases : f(x) = ax + b »). */
-  const prepLab = (c, thL) => { const bare = (s) => String(s).replace(/^.*·\s*/, "").replace(/^\d+\.\s*/, "").trim().toLowerCase(); return bare(c.label) === bare(thL) ? "Les bases" + (c.ex ? " : " + esc(c.ex) : " du chapitre") : c.label; };
+  /* 28.11 (commentaires de l'auteur, Thalès et trigonométrie) : la formule est composée par \( … \), elle s'affichait en TeX brut. */
+  const prepLab = (c, thL) => { const bare = (s) => String(s).replace(/^.*·\s*/, "").replace(/^\d+\.\s*/, "").trim().toLowerCase(); return bare(c.label) === bare(thL) ? "Les bases" + (c.ex ? " : \\(" + esc(c.ex) + "\\)" : " du chapitre") : c.label; };
   const grp = ([th, list]) => { const thL = Engine.themeLabel(th, state.profile); return `<div class="card flat"><h3>${thL}</h3><div class="checks">${list.map((c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${prepLab(c, thL)}</span></label>`).join("")}</div></div>`; };
   h(`${brand}<h2>Je prépare <span class="mark">une évaluation</span></h2>
   <p class="muted">Choisis les notions de ton évaluation et sa date. Jusqu'à ce jour-là, tes séances porteront surtout sur elles.</p>
@@ -1710,7 +1711,7 @@ const FREE_THEMES = { no: "Nombres et opérations", fa: "Fonctions et algèbre",
 // Chaque question ratée en séance entre dans le carnet (une entrée par notion et niveau). « Effacer mes erreurs » la
 // repose avec d'autres nombres ; elle sort après deux réussites de suite du premier coup, un échec remet le compteur à 0.
 const CARNET_MAX = 40, CARNET_OK = 2;
-/* 27.11 (décision de l'enseignant, n° 28 ; tools/eleves_faibles_26-11.md, proposition 2 : à 30 % de réussite, deux
+/* 27.11 (décision de l'enseignant, n° 28 ; tools/archive/eleves_faibles_26-11.md, proposition 2 : à 30 % de réussite, deux
    réussites de suite = 9 % de chances par essai, un carnet qui ne fait que grossir) : carnet à la portée de l'élève en
    grande difficulté (Engine.struggling) : une réussite du premier coup efface l'erreur, et une réussite du premier coup
    sur la même notion (même niveau ou au-dessus) dans une séance ordinaire compte aussi. Autres élèves : règle inchangée. */
@@ -2146,7 +2147,7 @@ function nextQuestion(redo) {
         const p = !session.remed.has(id) && session.i + 1 < session.plan.length && Engine.remediation(state, id);
         if (p) { session.remed.add(id); session.plan[session.i + 1] = p + "|1|rem"; }
       }
-      /* 26.11 (adaptivité, tools/adaptivite_26-11.md) : deux échecs de suite dans la séance → la question suivante est plus
+      /* 26.11 (adaptivité, tools/archive/adaptivite_26-11.md) : deux échecs de suite dans la séance → la question suivante est plus
          facile (Engine.easeNext), jamais plus dure ; le total « n sur N » ne change pas. Décision de l'enseignant (26.11,
          n° 2) : une question allégée par séance au plus (session.easeUsed). */
       if (!redo) session.failRun = res.solved && res.tries === 1 ? 0 : (session.failRun || 0) + 1;
@@ -3112,7 +3113,7 @@ function scoreRow(n, sc) {
   if (P && (n === 1 || session.nP === n)) return `<div class="spread"><span>Parties justes</span><b>${P[0]} / ${P[1]}</b></div>`;
   return `<div class="spread"><span>Score</span><b>${String(Math.round(sc * 10) / 10).replace(".", ",")} / ${n}</b></div>`;
 }
-/* 27.11 (décision de l'enseignant, n° 31 ; tools/eleves_faibles_26-11.md, proposition 5 : « Séance faite : c'est en
+/* 27.11 (décision de l'enseignant, n° 31 ; tools/archive/eleves_faibles_26-11.md, proposition 5 : « Séance faite : c'est en
    pratiquant qu'on progresse. » 4 fois sur 4 chez l'élève très faible) : titre du bilan centré sur ce qui a été réussi. */
 function sumTitle(n, sc) {
   if (sc >= n * 0.8) return "Excellente séance !";

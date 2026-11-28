@@ -142,7 +142,7 @@ const FR_WORDS = [
   [/\b([Mm])ise en évidence d(?:e |')/g, (m, a) => (a === "M" ? "F" : "f") + "actorisation par "],
   [/\b([Mm])ise en évidence\b/g, (m, a) => (a === "M" ? "F" : "f") + "acteur commun"], [/\b([Mm])ets en évidence\b/g, (m, a) => (a === "M" ? "F" : "f") + "actorise"],
   [/\b([Aa])près ((?:(?!en évidence)[^.;!?]){1,40}?) en évidence\b/g, "$1près factorisation par $2"], [/\b([Mm])ettre en évidence\b/g, (m, a) => (a === "M" ? "F" : "f") + "actoriser"], [/\b([Mm])et(s|tre|) ((?:(?!en évidence)[^.;!?]){1,40}?) en évidence\b/g, (m, a, t, x) => (a === "M" ? "F" : "f") + "actorise" + (t === "tre" ? "r" : "") + " par " + x] /* 26.11 soir : aussi « on met (x + 4) en évidence » */, [/\bmettant en évidence\b/g, "factorisant"], [/\bmis en évidence\b/g, "mis en facteur"],
-  /* 26.11 (audit lycée, tools/audit_fr_lycee_26-11.md) : « graphe » → courbe (représentative), « axe horizontal / vertical »
+  /* 26.11 (audit lycée, tools/archive/audit_fr_lycee_26-11.md) : « graphe » → courbe (représentative), « axe horizontal / vertical »
      → axe des abscisses / des ordonnées, « composantes » d'un vecteur → coordonnées, « zéro(s) » d'une fonction → racine(s)
      (au lycée seulement : FR_ZERO ci-dessous). */
   [/\b([Ll])e graphe\b/g, "$1a courbe"], [/\bau graphe\b/g, "à la courbe"], [/\bdu graphe\b/g, "de la courbe"], [/\b([Ll])es graphes\b/g, "$1es courbes"],
