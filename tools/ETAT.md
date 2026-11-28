@@ -37,10 +37,27 @@ Claude 6 h 40, gardien Chromium toutes les 5 min (tableau dans la commande /entr
   l'arbre ; pas à pas réécrit), polyreg 2 (`FIG.polyTri` supprimé), fref « x² ≤ 9 » ; gardés : carré aire → côté,
   cercle trigo des valeurs exactes, tableau de signes, repère de sys3, plongeuse, figures des leçons.
 
+- **Grand problème de la semaine** (décision du 28.11, `/contenu`, rapport `archive/contenu_probleme_28-11.md`, branche
+  `agent/contenu3`, à fusionner) : le problème est un code fixe tiré parmi les **grands** (≥ 4 parties, en situation,
+  au programme : `Engine.probKind`) ; repli explicite `weeklyPick.g` : chapitre en classe (grand → riche 3 p. → court),
+  puis reste de l'année (idem), puis reprises (grand → court) ; jamais deux fois le même problème (forme déjà donnée = autres
+  nombres). Élève faible : même problème + aide (`Engine.weeklyAid` : plan, « Coup de pouce » par partie, 4 essais) ;
+  simulation : parties justes 73–80 % (avant 58–62 %), mais 18–21 min (avant 12). 4 grands problèmes de 11e ajoutés
+  (silo, piscine, bonbons, taxi). **Inventaire : aucune classe n'a 35 grands problèmes de l'année** (11e 15, 1re
+  Collège 11, MP 1re 22, 2e Collège 33 ; MP 3e–4e 0, 4e Collège / 1re FR / Tle 1, 3e Collège 2) : contenu à écrire.
+  **API « Creuser encore » pour `/app mine`** : `Engine.digOpen(state)`, `Engine.digMore(state, n)` →
+  `[{ code, id, kind: "semaine"|"chapitre", week?, done?, label, parts, minutes }]`, `Engine.digQuestion(state, code)`,
+  `Engine.digNote(state, code)` ; pépites ordinaires, jamais `YP.weekly` ; historique `state.weeklyHist` (sauvegarde :
+  champ `wh`). `src/app.js` : séance weekly = `Engine.weeklyQuestion`, `renderProblem` affiche `q.aid` et respecte
+  `q.maxTries` (styles `.aid`, `.aid-plan` à faire par /app ; « Refaire » après le problème de la semaine à revoir).
+  Nouvelle page de thème `tests/probleme_semaine.html` (à intégrer au regroupement de `/entretien tests`).
+  À décider : 4 ou 3 essais pour les faibles (durée) ; chapitre en classe sans grand → riche du chapitre
+  (choix actuel) ou grand d'un autre chapitre ; ordre d'écriture des grands problèmes manquants.
+
 ## À faire
 
 Ordre (28.11, 2 agents au plus ; en cours : `/entretien tests`, `/contenu` élagage des figures superficielles) :
-puis grand problème de la semaine (`/contenu`) et `/app animations` ; puis `/app mine` ; puis deux dépôts GitHub
+puis `/app animations` (grand problème de la semaine : moteur fait, branche `agent/contenu3`) ; puis `/app mine` (API digMore) ; puis deux dépôts GitHub
 (+ domaine pepite-carre.ch, avant l'ouverture à la 11LS).
 - **`/entretien` vitesse des tests** (après le regroupement, mesurer d'abord) : un seul navigateur qui enchaîne les pages
   (au lieu d'un Chromium par page, 1–3 s perdues chacune) ; puis 2 pages en parallèle quand aucun agent ne tourne (PC :
