@@ -3319,8 +3319,11 @@ else if (!showCode() && !restoreFromHash()) { if (state && state.placed) screenH
   const standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone;
   if (!standalone || typeof LOGO_NUGGET !== "string" || location.hash.length > 1) return;
   const d = document.createElement("div"); d.className = "splash"; d.setAttribute("aria-hidden", "true");
-  d.innerHTML = `<div class="splash-ring">${LOGO_NUGGET.replace('viewBox="0 0 512 512"', 'viewBox="122 150 296 250"')}</div><div class="splash-name">${APP_NAME}</div><div class="splash-tag">${APP_TAGLINE_FUN}</div>`;
+  /* 28.11 (enseignant : « une animation plutôt qu'une image fixe ») : cercle qui se trace, pépite qui rebondit, reflet,
+     étincelles, puis « Pépite » et le « ² » en dernier, slogan en fondu (style.css, .splash ; image fixe si mouvement réduit). */
+  const nm = APP_NAME.endsWith("²") ? APP_NAME.slice(0, -1) + '<span class="splash-sq">²</span>' : APP_NAME;
+  d.innerHTML = `<div class="splash-ring"><svg class="splash-circle" viewBox="0 0 172 172"><circle cx="86" cy="86" r="82"/></svg><div class="splash-nug">${LOGO_NUGGET.replace('viewBox="0 0 512 512"', 'viewBox="122 150 296 250"')}<i class="splash-glint"></i></div><b class="spk s1">✦</b><b class="spk s2">✦</b><b class="spk s3">✦</b></div><div class="splash-name">${nm}</div><div class="splash-tag">${APP_TAGLINE_FUN}</div>`;
   document.body.appendChild(d);
   const bye = () => { d.classList.add("out"); setTimeout(() => d.remove(), 350); };
-  d.onclick = bye; setTimeout(bye, matchMedia("(prefers-reduced-motion: reduce)").matches ? 1600 : 2000); /* 28.11 (enseignant) : assez longtemps pour lire le slogan */
+  d.onclick = bye; setTimeout(bye, matchMedia("(prefers-reduced-motion: reduce)").matches ? 1600 : 2300); /* 28.11 (enseignant) : assez longtemps pour voir l'animation (≈ 1,5 s) et lire le slogan */
 })();
